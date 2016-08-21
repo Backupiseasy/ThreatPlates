@@ -1,4 +1,5 @@
 *.svn*
+*.git*
 *.DS_Store*
 exclude.lst
 *.db
