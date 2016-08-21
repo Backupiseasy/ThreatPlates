@@ -1,0 +1,40 @@
+------------------------------------------------------
+8.004-Alpha (works with  TidyPlates 6.18.Beta20)
+------------------------------------------------------
+  * Implemented a new alpha feature (see About dialog): Headline View (Text-Only) as known from TidyPlates - TidyPlatesHub must be enabled for this to work; configure it via TidyPlatesHub profiles
+	* Added four missing PVP totems (no totems should be missing now) and switched to  different colors for totem types (e.g.  PvP, Talents, ...)
+	* Added transparent class icon for Demonhunter and special icons (red glowing border) for totem icons
+  * Added an option to disable the cooldown spiral on auras (requires reload UI)
+  * Castbar border can now be set to Default or Thin (like healthbar border)
+  * Known issues:
+		- Localization not updated except en and de, although no errors should occur
+    - Configuring specs could be done completely in TidyPlates - dialog in ThreadPlates in no longer necessary
+    - Reload UI necessary for certain options in the options
+
+------------------------------------------------------
+8.003-Alpha (works with  TidyPlates 6.18.Beta11)
+------------------------------------------------------
+	* Fixed error with reload UI and AuraWidget
+	* Fixed problem with TidyPlatesHub overwritting AuraWidget settings of ThreatPlates
+	* Known issues:
+		- Changing aura style needs a reload UI to work (was so before)
+		- Localization not updated except en and de
+		- Styles for icons (special/transparent) are not working (no graphics guru :})
+
+
+------------------------------------------------------
+8.002-Alpha
+------------------------------------------------------
+	* Added demonhunter class  (icons, tank tag)
+	* Updated shaman totem list (icons and IDs) and rogue spell Anticipation
+	* Fixed HP bar colouring with NPCs (probably still buggy)
+	* Adjusted dual spec to new model in Legion
+	* Changed spec option dialog to show actual  spec names for configuration
+	* Known issues:
+		- Localization not updated except en and de
+		- Styles for icons (special/transparent) are not working (no graphics guru :})
+
+In Progress
+------------------------------------------------------
+* Optimize code for thema change (by TidyPlates)
+* Changing aura style should not need reload UI to work (unchanged, was always that way)

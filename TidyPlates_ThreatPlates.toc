@@ -1,0 +1,23 @@
+﻿## Interface: 70300
+## Title: Tidy Plates: |cff89F559Threat Plates|r
+## Notes: Revolutionary |cff89F559threat reactive nameplates|r by |cff3079ffSuicidal Katt|r.
+## Notes-zhTW:創新的|cff89F559仇恨響應姓名板|r by|cff3079ffSuicidal Katt|r 漢化by|cff3079ffSamonyoge@狂熱之刃|r。
+## Notes-zhCN:创新的|cff89F559仇恨响应姓名板|r by|cff3079ffSuicidal Katt|r 汉化by|cff3079ff我的航海日志@耐奥祖|r。
+## Author: Suicidal Katt
+## RequiredDeps: TidyPlates,TidyPlatesWidgets
+## SavedVariables: ThreatPlatesDB
+## Version: 8.004-Alpha
+## OptionalDeps: Ace3, LibSharedMedia-3.0
+
+Libs\Libs.xml
+Locales\Locales.xml
+
+Init.lua
+Media.lua
+Core.lua
+Commands.lua
+Options.lua
+
+Functions\Functions.xml
+Widgets\Widgets.xml
+Styles\Styles.xml

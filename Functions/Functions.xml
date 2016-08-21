@@ -1,0 +1,13 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\FrameXML\UI.xsd">
+<Script file="alpha.lua"/>
+<Script file="castbarcolor.lua"/>
+<Script file="healthbarcolor.lua"/>
+<Script file="healthtext.lua"/>
+<Script file="nametext.lua"/>
+<Script file="nametextcolor.lua"/>
+<Script file="scale.lua"/>
+<Script file="shapeshifts.lua"/>
+<Script file="threatcolor.lua"/>
+</Ui>
