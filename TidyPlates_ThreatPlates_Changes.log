@@ -7,7 +7,7 @@
   * Added an option to disable the cooldown spiral on auras (requires reload UI)
   * Castbar border can now be set to Default or Thin (like healthbar border)
   * Known issues:
-		- Localization not updated except en and de, although no errors should occur
+    - Localization not updated except en and de, although no errors should occur
     - Configuring specs could be done completely in TidyPlates - dialog in ThreadPlates in no longer necessary
     - Reload UI necessary for certain options in the options
 

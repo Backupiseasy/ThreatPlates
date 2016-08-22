@@ -10,6 +10,9 @@ local AuraType_Index = {
 	["Debuff"] = 6,
 }
 
+local OldUseSquareDebuffIcon = nil
+local OldUseWideDebuffIcon = nil
+
 ------------------------------------------------------------------------------
 -- Local Variable
 ------------------------------------------------------------------------------
@@ -69,7 +72,40 @@ end
 
 ThreatPlatesWidgets.AuraFilter = AuraFilter
 
+local function ThreatPlatesUseSquareDebuffIcon()
+	local ProfDB = TidyPlatesThreat.db.profile
+	-- Overwrite default behaviour if ThreatPlates is actually the active theme
+	if (TidyPlatesOptions.ActiveTheme == "Threat Plates") and (ProfDB.debuffWidget.style == "wide") then
+		OldUseWideDebuffIcon()
+	else
+		OldUseSquareDebuffIcon()
+	end
+end
+ThreatPlatesWidgets.UseSquareDebuffIcon = ThreatPlatesUseSquareDebuffIcon
+
+local function ThreatPlatesUseWideDebuffIcon()
+	local ProfDB = TidyPlatesThreat.db.profile
+	-- Overwrite default behaviour if ThreatPlates is actually the active theme
+	if (TidyPlatesOptions.ActiveTheme == "Threat Plates") and (ProfDB.debuffWidget.style == "square") then
+		OldUseSquareDebuffIcon()
+	else
+		OldUseWideDebuffIcon()
+	end
+end
+ThreatPlatesWidgets.UseWideDebuffIcon = ThreatPlatesUseWideDebuffIcon
+
 do
+	-- work around TidyPlateHubs overwriting debuff size of non-Hub-compatible themes
+	if not OldUseSquareDebuffIcon then
+		-- Backup original fuctions for setting debuff size
+		OldUseSquareDebuffIcon = TidyPlatesWidgets.UseSquareDebuffIcon
+		OldUseWideDebuffIcon = TidyPlatesWidgets.UseWideDebuffIcon
+
+		-- And replace them with new functions which respect ThreatPlates settings
+		TidyPlatesWidgets.UseSquareDebuffIcon = ThreatPlatesWidgets.UseSquareDebuffIcon
+		TidyPlatesWidgets.UseWideDebuffIcon = ThreatPlatesWidgets.UseWideDebuffIcon
+	end
+
 	local isAuraEnabled
 	local function AuraEnable()
 		if TidyPlatesThreat.db.profile.debuffWidget.ON then
