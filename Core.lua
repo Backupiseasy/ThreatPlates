@@ -173,6 +173,7 @@ function TidyPlatesThreat:OnInitialize()
 			friendlyClass = false,
 			friendlyClassIcon = false,
 			cacheClass = false,
+			alphaFeatureHeadlineView = false;
 			castbarColor = {
 				toggle = true,
 				r = 1,
