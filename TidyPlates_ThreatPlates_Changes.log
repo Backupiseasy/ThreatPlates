@@ -1,4 +1,10 @@
 ------------------------------------------------------
+8.005-Beta (works with  TidyPlates 6.18.Beta20)
+------------------------------------------------------
+
+
+
+------------------------------------------------------
 8.004-Alpha (works with  TidyPlates 6.18.Beta20)
 ------------------------------------------------------
   * Implemented a new alpha feature (see About dialog): Headline View (Text-Only) as known from TidyPlates - TidyPlatesHub must be enabled for this to work; configure it via TidyPlatesHub profiles
