@@ -194,7 +194,7 @@ local function GetOptions()
 
 	if not options then
 		options = {
-			name = GetAddOnMetadata("TidyPlates_ThreatPlates", "title").." v"..GetAddOnMetadata("TidyPlates_ThreatPlates", "version"),
+			name = GetAddOnMetadata("TidyPlates_ThreatPlates", "title"),
 			handler = TidyPlatesThreat,
 			type = "group",
 			childGroups = "tab",
@@ -3924,7 +3924,7 @@ local function GetOptions()
 							type = "description",
 							order = 2,
 							width = "full",
-							name = L["Clear and easy to use nameplate theme for use with TidyPlates.\n\nFeel free to email me at |cff00ff00Shamtasticle@gmail.com|r\n\n--Suicidal Katt"],
+							name = L["Clear and easy to use nameplate theme for use with TidyPlates.\n\nCurrent version: "]..GetAddOnMetadata("TidyPlates_ThreatPlates", "version")..L["\n\nFeel free to email me at |cff00ff00threatplates@gmail.com|r\n\n--\n\nBlacksalsify\n\n(Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)"],
 						},
 						Header1 = {
 							order = 3,

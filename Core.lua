@@ -78,26 +78,6 @@ end
 
 ---------------------------------------------------------------------------------------------------
 
-local changelog = {
-	"Made necessary changes for totem updates with patch 7.0.3.",
-	"Added demonhunter class",
-	"Fixed HP bar colouring with NPCs (probably still buggy)",
-	"Adjusted dual spec to new model in Legion",
-	"Known issues: Localization not updated except en and de, Styles for icons not working",
-}
-
-StaticPopupDialogs["TPTP_ChangeLog"] = {
-	preferredIndex = STATICPOPUP_NUMDIALOGS,
-	text = t.Meta("title").." "..t.Meta("version").." Change Log:\n"..t.TTS(changelog),
-	button1 = "Thanks for the info!",
-	timeout = 0,
-	whileDead = 1,
-	hideOnEscape = 1,
-	OnAccept = function()
-		t.Print("Type '/tptp' to review the options!")
-	end,
-}
-
 StaticPopupDialogs["SetToThreatPlates"] = {
 	preferredIndex = STATICPOPUP_NUMDIALOGS,
 	text = t.Meta("title")..L[":\n----------\nWould you like to \nset your theme to |cff89F559Threat Plates|r?\n\nClicking '|cff00ff00Yes|r' will set you to Threat Plates & reload UI. \n Clicking '|cffff0000No|r' will open the Tidy Plates options."],
@@ -1597,9 +1577,6 @@ function TidyPlatesThreat:StartUp()
 		local GlobDB = self.db.global
 		if GlobDB.version ~= tostring(t.Meta("version")) then
 			GlobDB.version = tostring(t.Meta("version"))
-			if self.db.profile.verbose then
-				StaticPopup_Show("TPTP_ChangeLog")
-			end
 		end
 	end
 
