@@ -1,7 +1,7 @@
 ------------------------------------------------------
 8.005-Beta (works with  TidyPlates 6.18.Beta20)
 ------------------------------------------------------
-  * Spec roles - use TidyPlates options for that or determine it automatically (alpha feature)
+  * Implemented a new feature to enable automatic role detection based on the currently active spec (see options, Threat System, Spec Roles)
 
 ------------------------------------------------------
 8.004-Alpha (works with  TidyPlates 6.18.Beta20)
