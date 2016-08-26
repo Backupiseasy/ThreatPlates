@@ -20,7 +20,7 @@ t.Meta = function(value)
 	else
 		meta = GetAddOnMetadata("TidyPlates_ThreatPlates",value)
 	end
-	return meta or ""	
+	return meta or ""
 end
 t.Class = function()
 	local _,class = UnitClass("Player")
@@ -30,29 +30,7 @@ t.Active = function()
 	local val = GetSpecialization()
 	return val
 end
-t.IsTank = function(index)
-	local tanks = {
-		DEATHKNIGHT = 1,
-		DRUID = 3,
-		MONK = 1,
-		PALADIN = 2,
-		WARRIOR = 3,
-		DEMONHUNTER = 2,
-	}
-	if index then
-		if tanks[t.Class()] and index == tanks[t.Class()] then
-			return true
-		else
-			return false
-		end	
-	else
-		if tanks[t.Class()] and t.Active() == tanks[t.Class()] then
-			return true
-		else
-			return false
-		end
-	end
-end
+
 do
 	t.HCC = {}
 	for i=1,#CLASS_SORT_ORDER do
@@ -67,8 +45,8 @@ t.STT = function(...)
 	local i, l
 	for i = 1, select("#", ...) do
 		l = select(i, ...)
-		if l ~= "" then 
-			s[l] = true 
+		if l ~= "" then
+			s[l] = true
 		end
 	end
 	return s
@@ -82,7 +60,7 @@ t.TTS = function(s)
 			local nL = s[i]
 			if nL ~= "" then
 				list = list..tostring(nL).."\n"
-			else 
+			else
 				list = list..tostring(nL)
 			end
 		end
