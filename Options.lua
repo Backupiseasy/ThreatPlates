@@ -3305,6 +3305,7 @@ local function GetOptions()
 											width = "full",
 											set = function(info,val)
 												SetValue(info,val)
+												TidyPlates:ForceUpdate()
 											end,
 											arg = {"debuffWidget","cooldownSpiral"},
 										}

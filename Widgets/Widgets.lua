@@ -17,6 +17,9 @@ local OldUseWideDebuffIcon = nil
 -- Local Variable
 ------------------------------------------------------------------------------
 
+-- save a local version to detect a change efficiently (and not cycle through all auras for nothing)
+local enable_cooldown_spiral
+
 local function AuraFilter(aura)
 	local DB = TidyPlatesThreat.db.profile.debuffWidget
 	local isType, isShown
@@ -94,6 +97,19 @@ local function ThreatPlatesUseWideDebuffIcon()
 end
 ThreatPlatesWidgets.UseWideDebuffIcon = ThreatPlatesUseWideDebuffIcon
 
+-- enable/disable spiral cooldown an aura icons
+local function SetCooldownSpiral(frame)
+ 	if (enable_cooldown_spiral ~= TidyPlatesThreat.db.profile.debuffWidget.cooldownSpiral) then
+		enable_cooldown_spiral = TidyPlatesThreat.db.profile.debuffWidget.cooldownSpiral
+
+		local AuraIconFrames = frame.AuraIconFrames
+		for index = 1, #AuraIconFrames do
+				AuraIconFrames[index].Cooldown:SetDrawEdge(enable_cooldown_spiral)
+				AuraIconFrames[index].Cooldown:SetDrawSwipe(enable_cooldown_spiral)
+		end
+	end
+end
+
 do
 	-- work around TidyPlateHubs overwriting debuff size of non-Hub-compatible themes
 	if not OldUseSquareDebuffIcon then
@@ -137,27 +153,21 @@ do
 		end
 		frame:SetScale(TidyPlatesThreat.db.profile.debuffWidget.scale)
 		frame:SetPoint(TidyPlatesThreat.db.profile.debuffWidget.anchor, frame:GetParent(), TidyPlatesThreat.db.profile.debuffWidget.x, TidyPlatesThreat.db.profile.debuffWidget.y)
+		SetCooldownSpiral(frame)
 		frame:Show()
 	end
 
 	local function CreateAuraWidget(plate)
-		local frame
+		local frame = TidyPlatesWidgets.CreateAuraWidget(plate)
 
-		frame = TidyPlatesWidgets.CreateAuraWidget(plate)
 		frame.OldUpdate = frame.Update
 		frame.Update = CustomAuraUpdate
 		frame.UpdateContext = CustomAuraUpdate
 		-- this method of defining the filter function will be deprecated in 6.9
 		frame.Filter = AuraFilter
-
 		-- disable spiral cooldown an aura icons
-		if not TidyPlatesThreat.db.profile.debuffWidget.cooldownSpiral then
-			local AuraIconFrames = frame.AuraIconFrames
-			for index = 1, #AuraIconFrames do
-					AuraIconFrames[index].Cooldown:SetDrawEdge(false)
-					AuraIconFrames[index].Cooldown:SetDrawSwipe(false)
-			end
-		end
+		enable_cooldown_spiral = nil
+		SetCooldownSpiral(frame)
 
 		return frame
 	end
