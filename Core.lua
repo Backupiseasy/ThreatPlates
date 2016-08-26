@@ -7,6 +7,10 @@ local Theme = {}
 
 TidyPlatesThreat = LibStub("AceAddon-3.0"):NewAddon("TidyPlatesThreat", "AceConsole-3.0", "AceEvent-3.0")
 
+---------------------------------------------------------------------------------------------------
+-- Global configs and funtions
+---------------------------------------------------------------------------------------------------
+
 t.Print = function(val,override)
 	local db = TidyPlatesThreat.db.profile
 	if override or db.verbose then
@@ -14,8 +18,65 @@ t.Print = function(val,override)
 	end
 end
 
+local SPEC_ROLES = {
+	DEATHKNIGHT = { true, false, false },
+	DEMONHUNTER = { false, true },
+	DRUID 			= { false, false, true, false },
+	HUNTER			= { false, false, false },
+	MAGE				= { false, false, false },
+	MONK 				= { true, false, false },
+	PALADIN 		= { false, true, false },
+	PRIEST			= { false, false, false },
+	ROGUE				= { false, false, false },
+	SHAMAN			= { false, false, false },
+	WARLOCK			= { false, false, false },
+	WARRIOR			= { false, false, true },
+}
+
+-- Returns if the currently active spec is tank (true) or dps/heal (false)
+function TidyPlatesThreat:GetSpecRole()
+	local active_role
+
+	if (self.db.profile.optionRoleDetectionAutomatic) then
+		active_role = SPEC_ROLES[t.Class()][t.Active()]
+		if not active_role then active_role = false end
+	else
+		active_role = self.db.char.spec[t.Active()]
+	end
+
+	return active_role
+end
+
+-- Sets the role of the index spec or the active spec to tank (value = true) or dps/healing
+function TidyPlatesThreat:SetRole(value,index)
+	if index then
+		self.db.char.spec[index] = value
+	else
+		self.db.char.spec[t.Active()] = value
+	end
+end
+
 local tankRole = L["|cff00ff00tanking|r"]
 local dpsRole = L["|cffff0000dpsing / healing|r"]
+
+function TidyPlatesThreat:RoleText()
+	if TidyPlatesThreat:GetSpecRole() then
+		return tankRole
+	else
+		return dpsRole
+	end
+end
+
+function TidyPlatesThreat:SpecName()
+	local _,name,_,_,_,role = GetSpecializationInfo(GetSpecialization(false,false,1),nil,false)
+	if name then
+		return name
+	else
+		return L["Undetermined"]
+	end
+end
+
+---------------------------------------------------------------------------------------------------
 
 local changelog = {
 	"Made necessary changes for totem updates with patch 7.0.3.",
@@ -47,9 +108,7 @@ StaticPopupDialogs["SetToThreatPlates"] = {
 	whileDead = 1,
 	hideOnEscape = 1,
 	OnAccept = function()
-		TidyPlatesOptions.primary = "Threat Plates"
-		TidyPlatesOptions.secondary = "Threat Plates"
-		TidyPlates:ActivateTheme("Threat Plates")
+		TidyPlates:SetTheme("Threat Plates")
 		TidyPlatesThreat:StartUp()
 		t.Update()
 	end,
@@ -71,33 +130,6 @@ function TidyPlatesThreat:ProfChange()
 	self:ConfigRefresh();
 	self:StartUp();
 	TidyPlates:ForceUpdate();
-end
-
--- Dual Spec Functions
-local currentSpec = {}
-function TidyPlatesThreat:SetRole(value,index)
-	if index then
-		self.db.char.spec[index] = value
-	else
-		self.db.char.spec[t.Active()] = value
-	end
-end
-
-function TidyPlatesThreat:RoleText()
-	if TidyPlatesThreat.db.char.spec[t.Active()] then
-		return tankRole
-	else
-		return dpsRole
-	end
-end
-
-function TidyPlatesThreat:SpecName()
-	local _,name,_,_,_,role = GetSpecializationInfo(GetSpecialization(false,false,1),nil,false)
-	if name then
-		return name
-	else
-		return L["Undetermined"]
-	end
 end
 
 --[[Options and Default Settings]]--
@@ -174,6 +206,7 @@ function TidyPlatesThreat:OnInitialize()
 			friendlyClassIcon = false,
 			cacheClass = false,
 			alphaFeatureHeadlineView = false;
+			optionRoleDetectionAutomatic = false;
 			castbarColor = {
 				toggle = true,
 				r = 1,
@@ -1548,18 +1581,16 @@ function TidyPlatesThreat:StartUp()
 	if not self.db.char.welcome then
 		self.db.char.welcome = true
 		local Welcome = L["|cff89f559Welcome to |rTidy Plates: |cff89f559Threat Plates!\nThis is your first time using Threat Plates and you are a(n):\n|r|cff"]..t.HCC[class]..self:SpecName().." "..UnitClass("player").."|r|cff89F559.|r\n"
-		if class == "SHAMAN" or class == "MAGE" or class == "HUNTER" or class == "ROGUE" or class == "PRIEST" or class == "WARLOCK" then
-			-- Set current spec to dpsing / healing
-			self:SetRole(false,t.Active())
-			local NotTank = Welcome..L["|cff89f559Your spec's have been set to |r"]..self:RoleText().."|cff89f559.|r"
-			t.Print(NotTank)
-		else
-			self:SetRole(t.IsTank(t.Active()), t.Active())
-			local Currently = Welcome..L["|cff89f559You are currently in your "]..self:RoleText()..L["|cff89f559 role.|r"]
-			t.Print(Currently)
+
+		-- initialize roles for all available specs (level > 10) or set to default (dps/healing)
+		for index=1, GetNumSpecializations() do
+			local id, spec_name, description, icon, background, role = GetSpecializationInfo(index)
+			self:SetRole(SPEC_ROLES[t.Class()][index], index)
 		end
+
+		t.Print(Welcome..L["|cff89f559You are currently in your "]..self:RoleText()..L["|cff89f559 role.|r"])
 		t.Print(L["|cff89f559Additional options can be found by typing |r'/tptp'|cff89F559.|r"])
-		if (TidyPlatesOptions.PrimaryTheme ~= "Threat Plates") then
+		if (TidyPlatesOptions.ActiveTheme ~= "Threat Plates") then
 			StaticPopup_Show("SetToThreatPlates")
 		end
 	else
@@ -1637,7 +1668,7 @@ end
 
 function TidyPlatesThreat:PLAYER_LOGIN(...)
 	self.db.profile.cache = {}
-	if self.db.char.welcome and ((TidyPlatesOptions.primary == "Threat Plates") or (TidyPlatesOptions.secondary == "Threat Plates")) then
+	if self.db.char.welcome and (TidyPlatesOptions.ActiveTheme == "Threat Plates") then
 		t.Print(L["|cff89f559Threat Plates:|r Welcome back |cff"]..t.HCC[class]..UnitName("player").."|r!!")
 	end
 	-- if class == "WARRIOR" or class == "DRUID" or class == "DEATHKNIGHT" or class == "PALADIN" then
@@ -1673,7 +1704,7 @@ end
 -- Fires when the player switches to another specialication or everytime the player changes a talent
 -- Completely handled by TidyPlates
 -- function TidyPlatesThreat:ACTIVE_TALENT_GROUP_CHANGED()
--- 	if (TidyPlatesOptions.PrimaryTheme == "Threat Plates") and self.db.profile.verbose then
+-- 	if (TidyPlatesOptions.ActiveTheme == "Threat Plates") and self.db.profile.verbose then
 -- 		t.Print(L["|cff89F559Threat Plates|r: Player spec change detected: |cff"]..t.HCC[class]..self:SpecName()..L["|r, you are now in your "]..self:RoleText()..L[" role."])
 -- 	end
 -- end

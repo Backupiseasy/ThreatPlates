@@ -32,7 +32,7 @@ local function GetThreatAlpha(unit)
 		if unit.isMarked and db.marked.alpha then
 			return GetGeneralAlpha(unit)
 		else
-			if TidyPlatesThreat.db.char.spec[t.Active()] then
+			if TidyPlatesThreat:GetSpecRole() then
 				return db["tank"].alpha[unit.threatSituation]
 			else
 				return db["dps"].alpha[unit.threatSituation]

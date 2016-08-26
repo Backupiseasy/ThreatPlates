@@ -30,10 +30,15 @@ SLASH_TPTPTANK1 = "/tptptank"
 SlashCmdList["TPTPTANK"] = toggleTANK
 
 local function TPTPTOGGLE()
-	if TidyPlatesThreat.db.char.spec[t.Active()] then
-		toggleDPS()
+	if (TidyPlatesThreat.db.profile.optionRoleDetectionAutomatic and TidyPlatesThreat.db.profile.verbose) then
+		-- TODO: localize this
+		t.Print("L[|cff89F559Threat Plates|r: Role toggle not supported because automatic role detection is enabled."])
 	else
-		toggleTANK()
+		if TidyPlatesThreat:GetSpecRole() then
+			toggleDPS()
+		else
+			toggleTANK()
+		end
 	end
 end
 

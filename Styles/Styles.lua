@@ -89,14 +89,14 @@ local function SetStyle(unit)
 						if db.threat.nonCombat  then
 							-- db.thread.nonCombat not nessessary in following if statement?!?
 							if (unit.isInCombat or (unit.health < unit.healthmax)) and db.threat.nonCombat then
-								if TidyPlatesThreat.db.char.spec[t.Active()] then
+								if TidyPlatesThreat:GetSpecRole() then
 									style = "tank"
 								else
 									style = "dps"
 								end
 							end
 						else
-							if TidyPlatesThreat.db.char.spec[t.Active()]	then
+							if TidyPlatesThreat:GetSpecRole()	then
 								style = "tank"
 							else
 								style = "dps"

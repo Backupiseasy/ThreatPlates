@@ -14,9 +14,8 @@ end
 -- Threat Widget
 local function UpdateThreatWidget(frame, unit)
 	if not InCombatLockdown() then frame:Hide() end;
-	local Char = TidyPlatesThreat.db.char.spec
-	local threatLevel 
-	if Char[t.Active()] then -- Tanking uses regular textures / swapped for dps / healing
+	local threatLevel
+	if TidyPlatesThreat:GetSpecRole() then -- Tanking uses regular textures / swapped for dps / healing
 		threatLevel = unit.threatSituation
 	else
 		if unit.threatSituation == "HIGH" then

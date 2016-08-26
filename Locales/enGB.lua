@@ -10,6 +10,7 @@ L["|cff89F559Threat Plates|r: DPS switch detected, you are now in your |cffff000
 
 L["-->>|cff00ff00Tank Plates Enabled|r<<--"] = "-->>|cff00ff00Tank Plates Enabled|r<<--"
 L["|cff89F559Threat Plates|r: Tank switch detected, you are now in your |cff00ff00tanking|r role."] = "|cff89F559Threat Plates|r: Tank switch detected, you are now in your |cff00ff00tanking|r role."
+L["|cff89F559Threat Plates|r: Role toggle not supported because automatic role detection is enabled."] = "|cff89F559Threat Plates|r: Role toggle not supported because automatic role detection is enabled."
 
 L["-->>Nameplate Overlapping is now |cff00ff00ON!|r<<--"] = "-->>Nameplate Overlapping is now |cff00ff00ON!|r<<--"
 L["-->>Nameplate Overlapping is now |cffff0000OFF!|r<<--"] = "-->>Nameplate Overlapping is now |cffff0000OFF!|r<<--"
@@ -305,6 +306,8 @@ L["Enable Alpha Threat"] = "Enable Alpha Threat"
 L["Enable nameplates to change alpha depending on the levels you set below."] = "Enable nameplates to change alpha depending on the levels you set below."
 L["|cff00ff00Tank|r"] = "|cff00ff00Tank|r"
 L["|cffff0000DPS/Healing|r"] = "|cffff0000DPS/Healing|r"
+L["Tank"] = "Tank"
+L["DPS/Healing"] = "DPS/Healing"
 ----
 L["Marked Targets"] = "Marked Targets"
 L["Ignore Marked Targets"] = "Ignore Marked Targets"
@@ -333,6 +336,7 @@ L["Set the roles your specs represent."] = "Set the roles your specs represent."
 L["Sets your spec "] = "Sets your spec "
 L[" to DPS."] = " to DPS."
 L[" to tanking."] = " to tanking."
+L["Determine your role (tank/dps/healing) automatically based on current spec."] = "Determine your role (tank/dps/healing) automatically based on current spec."
 
 ----
 L["Set threat textures and their coloring options here."] = "Set threat textures and their coloring options here."

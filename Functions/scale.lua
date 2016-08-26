@@ -32,7 +32,7 @@ local function GetThreatScale(unit)
 		if unit.isMarked and db.marked.scale then
 			return GetGeneralScale(unit)
 		else
-			if TidyPlatesThreat.db.char.spec[t.Active()] then
+			if TidyPlatesThreat:GetSpecRole() then
 				return db["tank"].scale[unit.threatSituation]
 			else
 				return db["dps"].scale[unit.threatSituation]

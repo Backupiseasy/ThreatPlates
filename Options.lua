@@ -146,17 +146,34 @@ end
 local options = nil;
 local function GetOptions()
 	-- Create a list of specs for the player's class
-	local dialog_specs  = {}
+	local dialog_specs  = {
+		Automatic_Spec_Detection = {
+			name = L["Determine your role (tank/dps/healing) automatically based on current spec."],
+			type = "toggle",
+			width = "full",
+			order = 1,
+			arg = {"optionRoleDetectionAutomatic"}
+		},
+		SpecGroup = {
+			name = " ",
+			type = "group",
+			inline = true,
+			order = 3,
+		  args = {}
+		}
+	}
+
 	for index=1, GetNumSpecializations() do
 		local id, spec_name, description, icon, background, role = GetSpecializationInfo(index)
-		dialog_specs[spec_name] = {
+		dialog_specs["SpecGroup"]["args"][spec_name] = {
 			name = spec_name,
 			type = "group",
 			inline = true,
-			order = index,
+			order = index + 2,
+			disabled = function() return TidyPlatesThreat.db.profile.optionRoleDetectionAutomatic end,
 			args = {
 				Tank = {
-					name = L["|cff00ff00Tank|r"],
+					name = L["Tank"],
 					type = "toggle",
 					order = 1,
 					desc = L["Sets your spec "]..spec_name..L[" to tanking."],
@@ -164,7 +181,7 @@ local function GetOptions()
 					set = function() TidyPlatesThreat.db.char.spec[index] = true; t.Update() end,
 				},
 				DPS = {
-					name = L["|cffff0000DPS/Healing|r"],
+					name = L["DPS/Healing"],
 					type = "toggle",
 					order = 2,
 					desc = L["Sets your spec "]..spec_name..L[" to DPS."],
@@ -3755,7 +3772,7 @@ local function GetOptions()
 									type = "group",
 									inline = true,
 									order = 10,
-									disabled = function() if TidyPlatesThreat.db.char.spec[t.Active()] then return false else return true end end,
+									disabled = function() if TidyPlatesThreat:GetSpecRole() then return false else return true end end,
 									args = {
 										Toggle = {
 											name = L["Enable"],
@@ -3773,7 +3790,7 @@ local function GetOptions()
 									type = "group",
 									inline = true,
 									order = 20,
-									disabled = function() if not db.tankedWidget.ON or not TidyPlatesThreat.db.char.spec[t.Active()] then return true else return false end end,
+									disabled = function() if not db.tankedWidget.ON or not TidyPlatesThreat:GetSpecRole() then return true else return false end end,
 									args = {
 										ScaleSlider = {
 											name = "",
@@ -3787,7 +3804,7 @@ local function GetOptions()
 									type = "group",
 									inline = true,
 									order = 30,
-									disabled = function() if not db.tankedWidget.ON or not TidyPlatesThreat.db.char.spec[t.Active()] then return true else return false end end,
+									disabled = function() if not db.tankedWidget.ON or not TidyPlatesThreat:GetSpecRole() then return true else return false end end,
 									args = {
 										X = {
 											name = L["X"],

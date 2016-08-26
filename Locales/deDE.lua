@@ -10,6 +10,7 @@ L["|cff89F559Threat Plates|r: DPS switch detected, you are now in your |cffff000
 
 L["-->>|cff00ff00Tank Plates Enabled|r<<--"] = "-->>|cff00ff00Tank-Plates eingeschaltet|r<<--"
 L["|cff89F559Threat Plates|r: Tank switch detected, you are now in your |cff00ff00tanking|r role."] = "|cff89F559Threat Plates|r: Wechsel auf Tank festgestellt, du bist jetzt in Deiner |cff00ff00Tank|r -Rolle."
+L["|cff89F559Threat Plates|r: Role toggle not supported because automatic role detection is enabled."] = "|cff89F559Threat Plates|r: Rollenwechsel nicht möglich, da die automatische Rollenermittlung eingeschaltet ist."
 
 L["-->>Nameplate Overlapping is now |cff00ff00ON!|r<<--"] = "-->>Namensplaketten-Überlappung ist nun |cff00ff00ON!|r<<--"
 L["-->>Nameplate Overlapping is now |cffff0000OFF!|r<<--"] = "-->>Namensplaketten-Überlappung ist nun |cffff0000OFF!|r<<--"
@@ -305,6 +306,8 @@ L["Enable Alpha Threat"] = "Enable Alpha Threat"
 L["Enable nameplates to change alpha depending on the levels you set below."] = "Ermöglicht es, dass der Alphawert der Plaketten sich basierend auf den nachfolgenden Einstellungen verändert."
 L["|cff00ff00Tank|r"] = "|cff00ff00Tank|r"
 L["|cffff0000DPS/Healing|r"] = "|cffff0000DPS/Heiler|r"
+L["Tank"] = "Tank"
+L["DPS/Healing"] = "DPS/Heiler"
 ----
 L["Marked Targets"] = "Markierte Ziele"
 L["Ignore Marked Targets"] = "Markierte Ziele ignorieren"
@@ -333,6 +336,7 @@ L["Set the roles your specs represent."] = "Stellt die Rollen der Spezialisierun
 L["Sets your spec "] = "Legt die Spezialisierung "
 L[" to DPS."] = " auf Schadensausteiler fest."
 L[" to tanking."] = " auf Tank fest."
+L["Determine your role (tank/dps/healing) automatically based on current spec."] = "Ermittelt deine Rolle (Tank/DPS/Heiler) automatisch basierend auf deiner Spezialisierung fest."
 
 ----
 L["Set threat textures and their coloring options here."] = "Bedrohungs-Texturen und ihre Farboptionen können hier eingestellt werden."

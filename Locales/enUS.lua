@@ -10,6 +10,7 @@ L["|cff89F559Threat Plates|r: DPS switch detected, you are now in your |cffff000
 
 L["-->>|cff00ff00Tank Plates Enabled|r<<--"] = true
 L["|cff89F559Threat Plates|r: Tank switch detected, you are now in your |cff00ff00tanking|r role."] = true
+L["|cff89F559Threat Plates|r: Role toggle not supported because automatic role detection is enabled."] = true
 
 L["-->>Nameplate Overlapping is now |cff00ff00ON!|r<<--"] = true
 L["-->>Nameplate Overlapping is now |cffff0000OFF!|r<<--"] = true
@@ -305,6 +306,8 @@ L["Enable Alpha Threat"] = true
 L["Enable nameplates to change alpha depending on the levels you set below."] = true
 L["|cff00ff00Tank|r"] = true
 L["|cffff0000DPS/Healing|r"] = true
+L["Tank"] = true
+L["DPS/Healing"] = true
 ----
 L["Marked Targets"] = true
 L["Ignore Marked Targets"] = true
@@ -333,7 +336,7 @@ L["Set the roles your specs represent."] = true
 L["Sets your spec "] = true
 L[" to DPS."] = true
 L[" to tanking."] = true
-
+L["Determine your role (tank/dps/healing) automatically based on current spec."] = true
 
 ----
 L["Set threat textures and their coloring options here."] = true
