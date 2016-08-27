@@ -3973,14 +3973,37 @@ local function GetOptions()
 							width = "full",
 							name = L["This will enable all alpha features currently available in ThreatPlates. Be aware that most of the features are not fully implemented and may contain several bugs."],
 						},
-						AlphaFeature_ToggleNameOnly = {
-							name = L["Enable"],
-							type = "toggle",
-							order = 14,
-							desc = L["This will enable Headline View (Text-only) for nameplates. TidyPlatesHub must be enabled for it to work. Use the TidyPlatesHub dialog for configuration."],
-							descStyle = "inline",
-							width = "full",
-							arg = {"alphaFeatureHeadlineView"},
+						AlphaFeature_HeadlineView = {
+							-- TODO: localize
+							name = "Headline View (Text-Only)",
+							type = "group",
+							inline = true,
+							order = 15,
+							args = {
+								Enable = {
+									name = L["Enable"],
+									type = "toggle",
+									order = 1,
+									-- TODO: typo, Text-Only, not Text-only
+									desc = L["This will enable Headline View (Text-only) for nameplates. TidyPlatesHub must be enabled for it to work. Use the TidyPlatesHub dialog for configuration."],
+									descStyle = "inline",
+									width = "full",
+									arg = {"alphaFeatureHeadlineView"},
+								},
+								HeadlineViewFade = {
+									-- TODO: localize
+									name = "Headline-View Alpha",
+									type = "range",
+									order = 2,
+									width = "full",
+									disabled = function() return not TidyPlatesThreat.db.profile.alphaFeatureHeadlineView end,
+									min = 0,
+									max = 1,
+									step = 0.01,
+									isPercent = true,
+									arg = {"headlineView","alpha"},
+								},
+							},
 						},
 					},
 				},

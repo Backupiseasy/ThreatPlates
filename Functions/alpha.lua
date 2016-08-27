@@ -48,9 +48,11 @@ local function SetAlpha(unit)
 	local style = TidyPlatesThreat.SetStyle(unit)
 	local alpha = 0
 	local nonTargetAlpha = 0
+
 	if db.blizzFadeA.toggle and not unit.isTarget and UnitExists("Target") then
 		nonTargetAlpha = db.blizzFadeA.amount
 	end
+
 	if style == "unique" then
 		for k,v in pairs(db.uniqueSettings.list) do
 			if v == unit.name then
@@ -66,6 +68,13 @@ local function SetAlpha(unit)
 	else
 		alpha = GetThreatAlpha(unit)
 	end
+
+	-- overwrite any alpha for headline view (text-only)
+	if 	db.alphaFeatureHeadlineView and TidyPlatesHubFunctions and (style == "NameOnly") then
+		alpha = db.headlineView.alpha
+		nonTargetAlpha = 0
+	end
+
 	if not alpha then
 		alpha = 0
 	end

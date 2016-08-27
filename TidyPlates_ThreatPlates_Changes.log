@@ -2,6 +2,7 @@
 8.006-Alpha (works with  TidyPlates 6.18.Beta20)
 ------------------------------------------------------
   * Fixed a bug where certain nameplate widgets were not updated after changes in the options dialog (TidyPlates removed ReloadTheme() function)
+  * Added a config option to set the alpha level of headline view nameplates (see About pane in the options dialog)
 
 ------------------------------------------------------
 8.005-Alpha (works with  TidyPlates 6.18.Beta20)

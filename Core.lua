@@ -174,6 +174,10 @@ function TidyPlatesThreat:OnInitialize()
 			friendlyClassIcon = false,
 			cacheClass = false,
 			alphaFeatureHeadlineView = false;
+			headlineView = {
+				-- TODO: move alphaFeatureHeadlineView in this table as enabled
+				alpha = 1,
+			},
 			castbarColor = {
 				toggle = true,
 				r = 1,
