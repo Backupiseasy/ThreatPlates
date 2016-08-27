@@ -10,8 +10,10 @@ local L = t.L
 
 -- General Functions
 t.Update = function()
-	TidyPlates:ReloadTheme()
-	TidyPlates:ForceUpdate()
+	TidyPlates:SetTheme("Threat Plates")
+	-- reload theme is deprecated and empty, ForceUpdate() is called in SetTheme()
+	--TidyPlates:ReloadTheme()
+	--TidyPlates:ForceUpdate()
 end
 t.Meta = function(value)
 	local meta
@@ -20,7 +22,7 @@ t.Meta = function(value)
 	else
 		meta = GetAddOnMetadata("TidyPlates_ThreatPlates",value)
 	end
-	return meta or ""	
+	return meta or ""
 end
 t.Class = function()
 	local _,class = UnitClass("Player")
@@ -44,7 +46,7 @@ t.IsTank = function(index)
 			return true
 		else
 			return false
-		end	
+		end
 	else
 		if tanks[t.Class()] and t.Active() == tanks[t.Class()] then
 			return true
@@ -67,8 +69,8 @@ t.STT = function(...)
 	local i, l
 	for i = 1, select("#", ...) do
 		l = select(i, ...)
-		if l ~= "" then 
-			s[l] = true 
+		if l ~= "" then
+			s[l] = true
 		end
 	end
 	return s
@@ -82,7 +84,7 @@ t.TTS = function(s)
 			local nL = s[i]
 			if nL ~= "" then
 				list = list..tostring(nL).."\n"
-			else 
+			else
 				list = list..tostring(nL)
 			end
 		end

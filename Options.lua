@@ -139,8 +139,9 @@ end
 local function SetThemeValue(info, val)
 	SetValue(info,val)
 	t.SetThemes(TidyPlatesThreat)
-	t.Update()
+	TidyPlates:SetTheme("Threat Plates")
 end
+
 
 -- Return the Options table
 local options = nil;
