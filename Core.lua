@@ -1487,9 +1487,11 @@ function ActivateTheme()
 	TidyPlatesWidgets.SetAuraFilter(AuraFilter)
 end
 
-local function OnChangeProfile(profileName)
+local function OnChangeProfile(theme, profile)
 	if (TidyPlatesThreat.db.profile.alphaFeatureHeadlineView and TidyPlatesHubFunctions) then
-		TidyPlatesHubFunctions.UseVariables(profileName)
+		if profile then
+			TidyPlatesHubFunctions.UseVariables(profile)
+		end
 	end
 end
 TidyPlatesThreat.OnChangeProfile = OnChangeProfile
@@ -1498,6 +1500,12 @@ local function OnApplyThemeCustomization()
 	ActivateTheme()
 end
 TidyPlatesThreat.OnApplyThemeCustomization = OnApplyThemeCustomization
+
+-- called by TidyPlatesHub when changes in the options panel were made (CallForStyleUpdate)
+local function ApplyProfileSettings(theme, ...)
+	TidyPlates:ForceUpdate()
+end
+TidyPlatesThreat.ApplyProfileSettings = ApplyProfileSettings
 
 ------------------
 -- ADDON LOADED --
@@ -1518,8 +1526,10 @@ local function ApplyHubFunctions(theme)
 	theme.ShowConfigPanel = TidyPlatesThreat.ShowConfigPanel
 
 	theme.OnActivateTheme = TidyPlatesThreat.OnActivateTheme -- called by Tidy Plates Core, Theme Loader
-	theme.OnApplyThemeCustomization = TidyPlatesThreat.OnApplyThemeCustomization -- only for TidyPlatesHub, used to get updates for theme/config changes
 	theme.OnChangeProfile = TidyPlatesThreat.OnChangeProfile -- used by TidyPlates when a specialication change occurs or the profile is changed
+	-- for TidyPlatesHub integration
+	theme.OnApplyThemeCustomization = TidyPlatesThreat.OnApplyThemeCustomization -- only for TidyPlatesHub, used to get updates for theme/config changes
+	theme.ApplyProfileSettings = TidyPlatesThreat.ApplyProfileSettings
 
 	return theme
 end
