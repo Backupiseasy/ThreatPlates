@@ -230,8 +230,6 @@ do
 		end
 		frame:SetScale(TidyPlatesThreat.db.profile.healerTracker.scale)
 		frame:SetPoint(TidyPlatesThreat.db.profile.healerTracker.anchor, frame:GetParent(), TidyPlatesThreat.db.profile.healerTracker.x, TidyPlatesThreat.db.profile.healerTracker.y)
-		SetCooldownSpiral(frame)
-		
 		frame:Show()
 	end
 
@@ -241,7 +239,6 @@ do
 		frame.OldUpdate = frame.Update
 		frame.Update = CustomHealerTrackerUpdate
 		--frame.Filter = AuraFilter
-		SetCooldownSpiral(frame)
 		return frame
 	end
 
