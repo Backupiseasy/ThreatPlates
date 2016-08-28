@@ -220,22 +220,6 @@ do
 		end
 		frame:SetScale(TidyPlatesThreat.db.profile.healerTracker.scale)
 		frame:SetPoint(TidyPlatesThreat.db.profile.healerTracker.anchor, frame:GetParent(), TidyPlatesThreat.db.profile.healerTracker.x, TidyPlatesThreat.db.profile.healerTracker.y)
-
-		-- TODO: remove when TidyPlates layering was reworked (probably Beta21) - set frame level higher to make auras apear on top
-		if (unit.isTarget) then
-				frame:SetFrameStrata("MEDIUM")
-				local AuraIconFrames = frame.AuraIconFrames
-			  for index = 1, #AuraIconFrames do
-					AuraIconFrames[index]:SetFrameStrata("MEDIUM")
-				end
-		else
-		 	frame:SetFrameStrata("BACKGROUND")
-		 	local AuraIconFrames = frame.AuraIconFrames
-			 for index = 1, #AuraIconFrames do
-				 AuraIconFrames[index]:SetFrameStrata("BACKGROUND")
-			 end
-		end
-
 		frame:Show()
 	end
 
