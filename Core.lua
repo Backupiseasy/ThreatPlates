@@ -1588,6 +1588,9 @@ function TidyPlatesThreat:StartUp()
 			StaticPopup_Show("SetToThreatPlates")
 		end
 	else
+		-- remove (and convert) any old DB entries
+		t.CleanupDatabase()
+
 		local GlobDB = self.db.global
 		if GlobDB.version ~= tostring(t.Meta("version")) then
 			GlobDB.version = tostring(t.Meta("version"))
