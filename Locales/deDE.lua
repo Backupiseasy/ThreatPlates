@@ -454,7 +454,7 @@ L["Click to Donate!"] = "Hier klicken, um eine Spende abzugeben!"
 L["Clear and easy to use nameplate theme for use with TidyPlates.\n\nCurrent version: "] = "Sauberes und leicht zu verwendendes Plakettendesign zur Benutzung mit TidyPlates..\n\nAktuelle Version: "
 L["\n\nFeel free to email me at |cff00ff00threatplates@gmail.com|r\n\n--\n\nBlacksalsify\n\n(Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)"] = "\n\nDu kannst mich gerne per E-Mail erreichen unter |cff00ff00threatplates@gmail.com|r\n\n--\n\nBlacksalsify\n\n(Ursprünglicher Autor: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)"
 L["This will enable all alpha features currently available in ThreatPlates. Be aware that most of the features are not fully implemented and may contain several bugs."] = "Hiermit werden alle aktuell in ThreadPlates verfügbaren Alpha-Features eingeschaltet. Bitte sei dir bewußt, dass die meisten Features noch nicht vollständig implementiert sind und Fehler beinhalten können."
-L["This will enable Headline View (Text-only) for nameplates. TidyPlatesHub must be enabled for it to work. Use the TidyPlatesHub dialog for configuration."] = "Hier mit wird der Headline View (Text-only) für Plaketten eingeschaltet. Dafür muss TidyPlatesHub aktiviert sein. Bitte verwende den TidyPlatesHub-Dialog zur Konfiguration."
+L["This will enable Headline View (Text-only) for nameplates. TidyPlatesHub must be enabled for it to work. Use the TidyPlatesHub dialog for configuration."] = "Hiermit wird der Headline View (Text-only) für Plaketten eingeschaltet. Dafür muss TidyPlatesHub aktiviert sein. Bitte verwende den TidyPlatesHub-Dialog zur Konfiguration."
 
 --------------------------------
 -- Default Game Options Frame --

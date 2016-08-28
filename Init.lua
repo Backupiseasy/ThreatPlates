@@ -10,8 +10,10 @@ local L = t.L
 
 -- General Functions
 t.Update = function()
-	TidyPlates:ReloadTheme()
-	TidyPlates:ForceUpdate()
+	TidyPlates:SetTheme("Threat Plates")
+	-- reload theme is deprecated and empty, ForceUpdate() is called in SetTheme()
+	--TidyPlates:ReloadTheme()
+	--TidyPlates:ForceUpdate()
 end
 t.Meta = function(value)
 	local meta
