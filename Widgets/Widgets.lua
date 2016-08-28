@@ -25,8 +25,6 @@ local function AuraFilter(aura)
 	local DB = TidyPlatesThreat.db.profile.debuffWidget
 	local isType, isShown
 
-	print ("AURA_TARGET_HOSTILE = ", AURA_TARGET_HOSTILE)
-
 	if aura.reaction == AURA_TARGET_HOSTILE and DB.showEnemy then
 		isShown = true
 	elseif aura.reaction == AURA_TARGET_FRIENDLY and DB.showFriendly then
