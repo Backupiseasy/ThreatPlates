@@ -1,14 +1,23 @@
 ------------------------------------------------------
 8.006-Alpha (works with  TidyPlates 6.18.Beta20)
 ------------------------------------------------------
+  * Implemented a new feature to enable automatic role detection based on the currently active spec (see options, Threat System, Spec Roles)
   * Fixed a bug where certain nameplate widgets were not updated after changes in the options dialog (TidyPlates removed ReloadTheme() function)
-  * Added a config option to set the alpha level of headline view nameplates (see About pane in the options dialog)
   * Fixed a nil error with healer tracker widget because of missing auras (introduced with 8.005-Alpha)
+  * Removed no longer supported localizations (translation support is welcome!)
+  * Added a config option to set the alpha level of headline view nameplates (see About pane in the options dialog)
+  * Known issues:
+    - Configuring specs could be done completely in TidyPlates - dialog in ThreadPlates in no longer necessary
+    - Reload UI necessary for certain options in the options
 
 ------------------------------------------------------
 8.005-Alpha (works with  TidyPlates 6.18.Beta20)
 ------------------------------------------------------
   * Fixed a bug with the target aura widgets's strata (was sometimes shown behind other nameplates/auras) - rather a nasty fix for the time being (as TidyPlates layering is reworked currently)
+  * Known issues:
+    - Localization not updated except en and de, although no errors should occur
+    - Configuring specs could be done completely in TidyPlates - dialog in ThreadPlates in no longer necessary
+    - Reload UI necessary for certain options in the options
 
 ------------------------------------------------------
 8.004-Alpha (works with  TidyPlates 6.18.Beta20)
