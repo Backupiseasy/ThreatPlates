@@ -78,7 +78,7 @@ ThreatPlatesWidgets.AuraFilter = AuraFilter
 local function ThreatPlatesUseSquareDebuffIcon()
 	local ProfDB = TidyPlatesThreat.db.profile
 	-- Overwrite default behaviour if ThreatPlates is actually the active theme
-	if (TidyPlatesOptions.ActiveTheme == "Threat Plates") and (ProfDB.debuffWidget.style == "wide") then
+	if (TidyPlatesOptions.ActiveTheme == THREAD_PLATES_NAME) and (ProfDB.debuffWidget.style == "wide") then
 		OldUseWideDebuffIcon()
 	else
 		OldUseSquareDebuffIcon()
@@ -89,7 +89,7 @@ ThreatPlatesWidgets.UseSquareDebuffIcon = ThreatPlatesUseSquareDebuffIcon
 local function ThreatPlatesUseWideDebuffIcon()
 	local ProfDB = TidyPlatesThreat.db.profile
 	-- Overwrite default behaviour if ThreatPlates is actually the active theme
-	if (TidyPlatesOptions.ActiveTheme == "Threat Plates") and (ProfDB.debuffWidget.style == "square") then
+	if (TidyPlatesOptions.ActiveTheme == THREAD_PLATES_NAME) and (ProfDB.debuffWidget.style == "square") then
 		OldUseSquareDebuffIcon()
 	else
 		OldUseWideDebuffIcon()

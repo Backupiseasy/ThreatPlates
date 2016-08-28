@@ -1,16 +1,30 @@
-local _, ns = ...
-ns.ThreatPlates = {}
-local t = ns.ThreatPlates
+local ADDON_NAME, NAMESPACE = ...
+
+NAMESPACE.ThreatPlates = {}
+local t = NAMESPACE.ThreatPlates
+
+---------------------------------------------------------------------------------------------------
 -- Libraries
+---------------------------------------------------------------------------------------------------
+
 local LS = LibStub
 t.L = LS("AceLocale-3.0"):GetLocale("TidyPlatesThreat")
 t.Media = LS("LibSharedMedia-3.0")
 t.MediaWidgets = Media and LS("AceGUISharedMediaWidgets-1.0", false)
 local L = t.L
 
+---------------------------------------------------------------------------------------------------
+-- Global constants
+---------------------------------------------------------------------------------------------------
+
+THREAD_PLATES_NAME = "Threat Plates"
+
+---------------------------------------------------------------------------------------------------
 -- General Functions
+---------------------------------------------------------------------------------------------------
+
 t.Update = function()
-	TidyPlates:SetTheme("Threat Plates")
+	TidyPlates:SetTheme(THREAD_PLATES_NAME)
 	-- reload theme is deprecated and empty, ForceUpdate() is called in SetTheme()
 	--TidyPlates:ReloadTheme()
 	--TidyPlates:ForceUpdate()

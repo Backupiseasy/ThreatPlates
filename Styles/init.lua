@@ -1,8 +1,8 @@
 ﻿local _, ns = ...
 local t = ns.ThreatPlates
 
-if not TidyPlatesThemeList["Threat Plates"] then
-	TidyPlatesThemeList["Threat Plates"] = {}
+if not TidyPlatesThemeList[THREAD_PLATES_NAME] then
+	TidyPlatesThemeList[THREAD_PLATES_NAME] = {}
 end
 
 local ThemeTable = {}
@@ -20,7 +20,7 @@ end
 
 local function SetThemes(self)
 	for k, v in pairs(ThemeTable) do
-		TidyPlatesThemeList["Threat Plates"][v.name] = v.create(self,v.name)
+		TidyPlatesThemeList[THREAD_PLATES_NAME][v.name] = v.create(self,v.name)
 	end
 end
 

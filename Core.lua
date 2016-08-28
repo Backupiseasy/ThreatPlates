@@ -88,7 +88,7 @@ StaticPopupDialogs["SetToThreatPlates"] = {
 	whileDead = 1,
 	hideOnEscape = 1,
 	OnAccept = function()
-		TidyPlates:SetTheme("Threat Plates")
+		TidyPlates:SetTheme(THREAD_PLATES_NAME)
 		TidyPlatesThreat:StartUp()
 		t.Update()
 	end,
@@ -190,7 +190,7 @@ function TidyPlatesThreat:OnInitialize()
 			headlineView = {
 				-- TODO: move alphaFeatureHeadlineView in this table as enabled
 				alpha = 1,
-			},			
+			},
 			castbarColor = {
 				toggle = true,
 				r = 1,
@@ -1550,7 +1550,7 @@ end
 function TidyPlatesThreat:OnEnable()
 	local ProfDB = self.db.profile
 
-	TidyPlatesThemeList["Threat Plates"] = Theme
+	TidyPlatesThemeList[THREAD_PLATES_NAME] = Theme
 	ApplyHubFunctions(Theme)
 	ActivateTheme()
 
@@ -1584,7 +1584,7 @@ function TidyPlatesThreat:StartUp()
 
 		t.Print(Welcome..L["|cff89f559You are currently in your "]..self:RoleText()..L["|cff89f559 role.|r"])
 		t.Print(L["|cff89f559Additional options can be found by typing |r'/tptp'|cff89F559.|r"])
-		if (TidyPlatesOptions.ActiveTheme ~= "Threat Plates") then
+		if (TidyPlatesOptions.ActiveTheme ~= THREAD_PLATES_NAME) then
 			StaticPopup_Show("SetToThreatPlates")
 		end
 	else
@@ -1659,7 +1659,7 @@ end
 
 function TidyPlatesThreat:PLAYER_LOGIN(...)
 	self.db.profile.cache = {}
-	if self.db.char.welcome and (TidyPlatesOptions.ActiveTheme == "Threat Plates") then
+	if self.db.char.welcome and (TidyPlatesOptions.ActiveTheme == THREAD_PLATES_NAME) then
 		t.Print(L["|cff89f559Threat Plates:|r Welcome back |cff"]..t.HCC[class]..UnitName("player").."|r!!")
 	end
 	-- if class == "WARRIOR" or class == "DRUID" or class == "DEATHKNIGHT" or class == "PALADIN" then
@@ -1695,7 +1695,7 @@ end
 -- Fires when the player switches to another specialication or everytime the player changes a talent
 -- Completely handled by TidyPlates
 -- function TidyPlatesThreat:ACTIVE_TALENT_GROUP_CHANGED()
--- 	if (TidyPlatesOptions.ActiveTheme == "Threat Plates") and self.db.profile.verbose then
+-- 	if (TidyPlatesOptions.ActiveTheme == THREAD_PLATES_NAME) and self.db.profile.verbose then
 -- 		t.Print(L["|cff89F559Threat Plates|r: Player spec change detected: |cff"]..t.HCC[class]..self:SpecName()..L["|r, you are now in your "]..self:RoleText()..L[" role."])
 -- 	end
 -- end
