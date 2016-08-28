@@ -10,8 +10,9 @@ local AuraType_Index = {
 	["Debuff"] = 6,
 }
 
-local OldUseSquareDebuffIcon = nil
-local OldUseWideDebuffIcon = nil
+-- two constants from TidyPlates AuraWidget
+local AURA_TARGET_HOSTILE = 1
+local AURA_TARGET_FRIENDLY = 2
 
 ------------------------------------------------------------------------------
 -- Local Variable
@@ -24,19 +25,13 @@ local function AuraFilter(aura)
 	local DB = TidyPlatesThreat.db.profile.debuffWidget
 	local isType, isShown
 
-	-- if aura.reaction == 1 and DB.showEnemy then
-	-- 	isShown = true
-	-- elseif aura.reaction == 2 and DB.showFriendly then
-	-- 	isShown = true
-	-- end
-	-- aura.reaction seems no longer to be available in auras
-	-- This is a dirty hack, I think
-	local reaction = UnitReaction("player", aura.unit)
-	if reaction < 5 and DB.showEnemy then
+	print ("AURA_TARGET_HOSTILE = ", AURA_TARGET_HOSTILE)
+
+	if aura.reaction == AURA_TARGET_HOSTILE and DB.showEnemy then
 		isShown = true
-	elseif reaction >= 5 and DB.showFriendly then
+	elseif aura.reaction == AURA_TARGET_FRIENDLY and DB.showFriendly then
 		isShown = true
-	 end
+	end
 
 	-- auras now always seem to be debuffs, so only Disease, Curse, ... is relevant
 	-- don't know how to show buffs
@@ -75,28 +70,6 @@ end
 
 ThreatPlatesWidgets.AuraFilter = AuraFilter
 
-local function ThreatPlatesUseSquareDebuffIcon()
-	local ProfDB = TidyPlatesThreat.db.profile
-	-- Overwrite default behaviour if ThreatPlates is actually the active theme
-	if (TidyPlatesOptions.ActiveTheme == THREAD_PLATES_NAME) and (ProfDB.debuffWidget.style == "wide") then
-		OldUseWideDebuffIcon()
-	else
-		OldUseSquareDebuffIcon()
-	end
-end
-ThreatPlatesWidgets.UseSquareDebuffIcon = ThreatPlatesUseSquareDebuffIcon
-
-local function ThreatPlatesUseWideDebuffIcon()
-	local ProfDB = TidyPlatesThreat.db.profile
-	-- Overwrite default behaviour if ThreatPlates is actually the active theme
-	if (TidyPlatesOptions.ActiveTheme == THREAD_PLATES_NAME) and (ProfDB.debuffWidget.style == "square") then
-		OldUseSquareDebuffIcon()
-	else
-		OldUseWideDebuffIcon()
-	end
-end
-ThreatPlatesWidgets.UseWideDebuffIcon = ThreatPlatesUseWideDebuffIcon
-
 -- enable/disable spiral cooldown an aura icons
 local function SetCooldownSpiral(frame)
  	if (enable_cooldown_spiral ~= TidyPlatesThreat.db.profile.debuffWidget.cooldownSpiral) then
@@ -111,17 +84,6 @@ local function SetCooldownSpiral(frame)
 end
 
 do
-	-- work around TidyPlateHubs overwriting debuff size of non-Hub-compatible themes
-	if not OldUseSquareDebuffIcon then
-		-- Backup original fuctions for setting debuff size
-		OldUseSquareDebuffIcon = TidyPlatesWidgets.UseSquareDebuffIcon
-		OldUseWideDebuffIcon = TidyPlatesWidgets.UseWideDebuffIcon
-
-		-- And replace them with new functions which respect ThreatPlates settings
-		TidyPlatesWidgets.UseSquareDebuffIcon = ThreatPlatesWidgets.UseSquareDebuffIcon
-		TidyPlatesWidgets.UseWideDebuffIcon = ThreatPlatesWidgets.UseWideDebuffIcon
-	end
-
 	local isAuraEnabled
 	local function AuraEnable()
 		if TidyPlatesThreat.db.profile.debuffWidget.ON then
