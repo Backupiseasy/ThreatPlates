@@ -454,7 +454,9 @@ L["Click to Donate!"] = "Click to Donate!"
 L["Clear and easy to use nameplate theme for use with TidyPlates.\n\nCurrent version: "] = "Clear and easy to use nameplate theme for use with TidyPlates.\n\nCurrent version: "
 L["\n\nFeel free to email me at |cff00ff00threatplates@gmail.com|r\n\n--\n\nBlacksalsify\n\n(Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)"] = "\n\nFeel free to email me at |cff00ff00threatplates@gmail.com|r\n\n--\n\nBlacksalsify\n\n(Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)"
 L["This will enable all alpha features currently available in ThreatPlates. Be aware that most of the features are not fully implemented and may contain several bugs."] = "This will enable all alpha features currently available in ThreatPlates. Be aware that most of the features are not fully implemented and may contain several bugs."
-L["This will enable Headline View (Text-only) for nameplates. TidyPlatesHub must be enabled for it to work. Use the TidyPlatesHub dialog for configuration."] = "This will enable Headline View (Text-only) for nameplates. TidyPlatesHub must be enabled for it to work. Use the TidyPlatesHub dialog for configuration."
+L["This will enable Headline View (Text-Only) for nameplates. TidyPlatesHub must be enabled for it to work. Use the TidyPlatesHub dialog for configuration."] = "This will enable Headline View (Text-only) for nameplates. TidyPlatesHub must be enabled for it to work. Use the TidyPlatesHub dialog for configuration."
+L["Headline View (Text-Only)"] = "Headline View (Text-Only)"
+L["Headline-View Alpha"] = "Headline-View Alpha"
 
 --------------------------------
 -- Default Game Options Frame --

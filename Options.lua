@@ -3936,7 +3936,7 @@ local function GetOptions()
 							type = "description",
 							order = 4,
 							width = "full",
-							name = "deDE: Aideen@Perenolde/EU"
+							name = "deDE: Blacksalsify (origial  author: Aideen@Perenolde/EU)"
 						},
 						Translators2 = {
 							type = "description",
@@ -3972,13 +3972,13 @@ local function GetOptions()
 							type = "description",
 							order = 10,
 							width = "full",
-							name = "zhCN: Samonyoge@TW-狂熱之刃"
+							name = "zhCN: Need Translator!!"
 						},
 						Translators8 = {
 							type = "description",
 							order = 11,
 							width = "full",
-							name = "zhTW: Samonyoge@TW-狂熱之刃"
+							name = "zhTW: Need Translator!!"
 						},
 						Header2 = {
 							order = 12,
@@ -3992,8 +3992,7 @@ local function GetOptions()
 							name = L["This will enable all alpha features currently available in ThreatPlates. Be aware that most of the features are not fully implemented and may contain several bugs."],
 						},
 						AlphaFeature_HeadlineView = {
-							-- TODO: localize
-							name = "Headline View (Text-Only)",
+							name = L["Headline View (Text-Only)"],
 							type = "group",
 							inline = true,
 							order = 15,
@@ -4002,15 +4001,13 @@ local function GetOptions()
 									name = L["Enable"],
 									type = "toggle",
 									order = 1,
-									-- TODO: typo, Text-Only, not Text-only
-									desc = L["This will enable Headline View (Text-only) for nameplates. TidyPlatesHub must be enabled for it to work. Use the TidyPlatesHub dialog for configuration."],
+									desc = L["This will enable Headline View (Text-Only) for nameplates. TidyPlatesHub must be enabled for it to work. Use the TidyPlatesHub dialog for configuration."],
 									descStyle = "inline",
 									width = "full",
 									arg = {"alphaFeatureHeadlineView"},
 								},
 								HeadlineViewFade = {
-									-- TODO: localize
-									name = "Headline-View Alpha",
+									name = L["Headline-View Alpha"],
 									type = "range",
 									order = 2,
 									width = "full",
