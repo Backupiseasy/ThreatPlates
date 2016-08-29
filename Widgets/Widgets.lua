@@ -105,6 +105,12 @@ do
 			return
 		end
 
+		-- disable auras in headline-view mode
+		if t.AlphaFeatureHeadlineView() and (TidyPlatesThreat.SetStyle(unit) == "NameOnly") then 
+			frame:Hide()
+			return
+		end
+
 		-- CustomAuraUpdate substitues AuraWidget.Update and AuraWidget.UpdateContext
 		--   AuraWidget.Update is sometimes (first call after reload UI) called with unit.unitid = nil
 		--   AuraWidget.UpdateContext is called with no unit (unit = nil)
