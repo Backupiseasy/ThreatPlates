@@ -70,7 +70,7 @@ local function SetAlpha(unit)
 	end
 
 	-- overwrite any alpha for headline view (text-only)
-	if 	db.alphaFeatureHeadlineView and TidyPlatesHubFunctions and (style == "NameOnly") then
+	if 	t.AlphaFeatureHeadlineView() and (style == "NameOnly") then
 		alpha = db.headlineView.alpha
 		nonTargetAlpha = 0
 	end

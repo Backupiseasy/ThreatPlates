@@ -23,7 +23,7 @@ local function UpdateClassIconWidget(frame, unit)
 	local class
 	--print ("unit.reation = ", unit.reaction, "  -- unit.type = ", unit.type)
 
-	-- if unit.class and (unit.class ~= "UNKNOWN") and (unit.type ~= "NPC")then
+	-- if unit.class and (unit.class ~= "UNKNOWN") then
 	-- 	class = unit.class
 	-- elseif db.friendlyClassIcon then
 	-- 	if unit.guid then

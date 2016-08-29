@@ -4011,6 +4011,7 @@ local function GetOptions()
 									type = "range",
 									order = 2,
 									width = "full",
+									-- maybe use t.AlphaFeatureHeadlineView() to also check for TidyPlatesHub enabled?
 									disabled = function() return not TidyPlatesThreat.db.profile.alphaFeatureHeadlineView end,
 									min = 0,
 									max = 1,

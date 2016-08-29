@@ -11,6 +11,11 @@ TidyPlatesThreat = LibStub("AceAddon-3.0"):NewAddon("TidyPlatesThreat", "AceCons
 -- Global configs and funtions
 ---------------------------------------------------------------------------------------------------
 
+local function AlphaFeatureHeadlineView()
+	return TidyPlatesThreat.db.profile.alphaFeatureHeadlineView and TidyPlatesHubFunctions
+end
+t.AlphaFeatureHeadlineView = AlphaFeatureHeadlineView
+
 t.Print = function(val,override)
 	local db = TidyPlatesThreat.db.profile
 	if override or db.verbose then
@@ -1501,7 +1506,7 @@ function ActivateTheme()
 end
 
 local function OnChangeProfile(theme, profile)
-	if (TidyPlatesThreat.db.profile.alphaFeatureHeadlineView and TidyPlatesHubFunctions) then
+	if t.AlphaFeatureHeadlineView() then
 		if profile then
 			TidyPlatesHubFunctions.UseVariables(profile)
 		end

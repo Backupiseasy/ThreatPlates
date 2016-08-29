@@ -53,7 +53,7 @@ local function SetStyle(unit)
 	local style
 
 	-- just for alpha feature alphaFeatureHeadlineView
-	if (db.alphaFeatureHeadlineView and TidyPlatesHubFunctions) then
+	if t.AlphaFeatureHeadlineView() then
 		local hub_style = TidyPlatesHubFunctions.SetStyleNamed(unit)
 		if (hub_style == "NameOnly") then
 			return "NameOnly"
