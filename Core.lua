@@ -118,6 +118,8 @@ function TidyPlatesThreat:ProfChange()
 end
 
 --[[Options and Default Settings]]--
+
+-- AceAddon function: do init tasks here, like loading the Saved Variables, or setting up slash commands.
 function TidyPlatesThreat:OnInitialize()
 	local defaults 	= {
 		global = {
@@ -1552,6 +1554,8 @@ local function ApplyHubFunctions(theme)
 	return theme
 end
 
+-- AceAddon function: Do more initialization here, that really enables the use of your addon.
+-- Register Events, Hook functions, Create Frames, Get information from the game that wasn't available in OnInitialize
 function TidyPlatesThreat:OnEnable()
 	local ProfDB = self.db.profile
 
