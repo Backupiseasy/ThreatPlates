@@ -3,6 +3,7 @@
 -----------------------
 local path = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ClassIconWidget\\"
 local Masque = LibStub("Masque", true)
+local group
 
 local function enabled()
 	local db = TidyPlatesThreat.db.profile.classWidget
@@ -78,7 +79,7 @@ local function CreateClassIconWidget(parent)
 	local db = TidyPlatesThreat.db.profile.classWidget
 	local frame
 	if Masque then
-		frame = CreateFrame("Button", "mybutton", parent, "ActionButtonTemplate")
+		frame = CreateFrame("Button", "Button_ClassIcon", parent, "ActionButtonTemplate")
 		frame:EnableMouse(false)
 	else
 		frame = CreateFrame("Frame", nil, parent)
@@ -92,7 +93,9 @@ local function CreateClassIconWidget(parent)
 	frame.Update = UpdateClassIconWidget
 
 	if Masque then
-		group = Masque:Group("TidyPlatesThreat")
+		if not group then
+	 		group = Masque:Group("TidyPlatesThreat")
+		end
 		--Masque:Register("TidyPlatesThreat", Reskin)
 		group:AddButton(frame)
 	end

@@ -1,3 +1,6 @@
+local Masque = LibStub("Masque", true)
+local group
+
 ---------------------
 -- Widget Handling --
 ---------------------
@@ -37,7 +40,28 @@ local function CreateWidgets(plate)
 				w[k] = nil
 			end
 		end
-	end		
+	end
+
+	--  Substsitute spell icon to be able to skin it using Masque
+	-- if Masque then
+	-- 	local frame = CreateFrame("Button", "Button_Spellicon", parent, "ActionButtonTemplate")
+	-- 	frame:EnableMouse(false)
+	-- 	frame.Icon = plate.visual.spellicon
+	-- 	frame.Icon:SetAllPoints(frame)
+	-- 	plate.visual.spellicon = frame
+	--
+	-- 	frame.SetTexCoord = function (left, right, top, bottom)
+	-- 		frame.Icon:SetTexCoord(left, right, top, bottom)
+	-- 	end
+	-- 	frame.SetTexture = function (texture)
+	-- 		frame.Icon:SetTexture(texture)
+	-- 	end
+	--
+	-- 	if not group then
+	--  		group = Masque:Group("TidyPlatesThreat")
+	-- 	end
+	-- 	group:AddButton(frame)
+	-- end
 end
 
 local function UpdatePlate(plate, unit)
@@ -50,7 +74,28 @@ local function UpdatePlate(plate, unit)
 				w[k]:UpdateContext(unit)
 			end
 		end
-	end	
+	end
+
+	-- if Masque then
+	-- 	local frame = CreateFrame("Button", "Button_Spellicon", parent, "ActionButtonTemplate")
+	-- 	frame:EnableMouse(false)
+	-- 	frame.Icon = plate.visual.spellicon
+	-- 	frame.Icon:SetAllPoints(frame)
+	-- 	plate.visual.spellicon = frame
+	--
+	-- 	frame.SetTexCoord = function (left, right, top, bottom)
+	-- 		frame.Icon:SetTexCoord(left, right, top, bottom)
+	-- 	end
+	-- 	frame.SetTexture = function (texture)
+	-- 		frame.Icon:SetTexture(texture)
+	-- 	end
+	--
+	-- 	if not group then
+	--  		group = Masque:Group("TidyPlatesThreat")
+	-- 	end
+	-- 	group:AddButton(frame)
+	-- end
+
 end
 ThreatPlatesWidgets.RegisterWidget = RegisterWidget
 ThreatPlatesWidgets.UnregisterWidget = UnregisterWidget

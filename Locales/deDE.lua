@@ -248,8 +248,8 @@ L["Deficit Text"] = "Defizit-Text"
 L["This will format text to show hp as a value the target is missing."] = "Hierdurch werden die fehlenden Lebenspunkte als Wert angezeigt."
 
 ----
-L["Spell Text"] = "Zauber-Text"
-L["Enable Spell Text"] = "Zauber-Text einschalten"
+L["Spell Text"] = "Zaubertext"
+L["Enable Spell Text"] = "Zaubertext einschalten"
 
 ----
 L["Level Text"] = "Stufen-Text"
