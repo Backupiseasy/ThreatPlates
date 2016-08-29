@@ -139,7 +139,7 @@ end
 local function SetThemeValue(info, val)
 	SetValue(info,val)
 	t.SetThemes(TidyPlatesThreat)
-	TidyPlates:SetTheme(THREAD_PLATES_NAME)
+	TidyPlates:SetTheme(THREAT_PLATES_NAME)
 end
 
 

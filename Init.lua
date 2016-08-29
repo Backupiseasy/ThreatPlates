@@ -17,14 +17,15 @@ local L = t.L
 -- Global constants
 ---------------------------------------------------------------------------------------------------
 
-THREAD_PLATES_NAME = "Threat Plates"
+THREAT_PLATES_NAME = "Threat Plates"
+ADDON_NAME = "TidyPlatesThreat"
 
 ---------------------------------------------------------------------------------------------------
 -- General Functions
 ---------------------------------------------------------------------------------------------------
 
 t.Update = function()
-	TidyPlates:SetTheme(THREAD_PLATES_NAME)
+	TidyPlates:SetTheme(THREAT_PLATES_NAME)
 	-- reload theme is deprecated and empty, ForceUpdate() is called in SetTheme()
 	--TidyPlates:ReloadTheme()
 	--TidyPlates:ForceUpdate()
