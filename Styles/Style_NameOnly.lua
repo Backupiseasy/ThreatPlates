@@ -4,6 +4,10 @@ local ART_PATH = NAMESPACE.ThreatPlates.Art
 local MEDIA_PATH = NAMESPACE.ThreatPlates.Media
 local EMPTY_TEXTURE = EMPTY_TEXTURE
 
+-------------------------------------------------------------------------------------
+-- Style: Name-Only for Headline-View
+-------------------------------------------------------------------------------------
+
 local function Create(self,name)
   local db = self.db.profile.settings
   local theme = {}
