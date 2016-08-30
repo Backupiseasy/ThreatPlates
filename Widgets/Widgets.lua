@@ -106,7 +106,7 @@ do
 		end
 
 		-- disable auras in headline-view mode
-		if t.AlphaFeatureHeadlineView() and (TidyPlatesThreat.SetStyle(unit) == "NameOnly") then 
+		if t.AlphaFeatureHeadlineView() and (TidyPlatesThreat.SetStyle(unit) == "NameOnly") then
 			frame:Hide()
 			return
 		end
@@ -119,7 +119,7 @@ do
 		end
 		frame:SetScale(TidyPlatesThreat.db.profile.debuffWidget.scale)
 		frame:SetPoint(TidyPlatesThreat.db.profile.debuffWidget.anchor, frame:GetParent(), TidyPlatesThreat.db.profile.debuffWidget.x, TidyPlatesThreat.db.profile.debuffWidget.y)
-		SetCooldownSpiral(frame)
+		--SetCooldownSpiral(frame)
 
 		-- TODO: remove when TidyPlates layering was reworked (probably Beta21) - set frame level higher to make auras apear on top
 		if (unit.isTarget) then
@@ -149,7 +149,7 @@ do
 		frame.Filter = AuraFilter
 		-- disable spiral cooldown an aura icons
 		enable_cooldown_spiral = nil
-		SetCooldownSpiral(frame)
+		--SetCooldownSpiral(frame)
 
 		return frame
 	end

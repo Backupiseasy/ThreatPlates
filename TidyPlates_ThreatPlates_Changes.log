@@ -1,12 +1,14 @@
 ------------------------------------------------------
+8.008-Beta (works with TidyPlates 6.18.2)
+------------------------------------------------------
+* Updated Threat Plates for TidyPlates 6.18.2 (disabled cooldown spiral option)
+
+------------------------------------------------------
 8.007-Beta (works with TidyPlates 6.18.Beta21)
 ------------------------------------------------------
 * This is the first beta version for 8.100 - no new features will be implemented until this release, just bug fixes
 * Implemented a new feature to enable automatic role detection based on the currently active spec (see options, Threat System, Spec Roles)
 * Removed no longer supported localizations (translation support is welcome!)
-* Known issues:
-  - Configuring specs could be done completely in TidyPlates - dialog in ThreadPlates in no longer necessary
-  - Reload UI necessary for certain options in the options
 
 ------------------------------------------------------
 8.006-Alpha (works with TidyPlates 6.18.Beta20)
