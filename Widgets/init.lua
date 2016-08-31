@@ -1,3 +1,6 @@
+local ADDON_NAME, NAMESPACE = ...
+local ThreatPlates = NAMESPACE.ThreatPlates
+
 ---------------------
 -- Widget Handling --
 ---------------------
@@ -23,6 +26,7 @@ local function UnregisterWidget(name)
 end
 
 local function CreateWidgets(plate)
+	ThreatPlates.DEBUG("TidyPlatesGlobal_OnInitialize")
 	local w = plate.widgets
 	for k,v in pairs(ThreatPlatesWidgets.list) do
 		if v.enabled() then
@@ -37,7 +41,7 @@ local function CreateWidgets(plate)
 				w[k] = nil
 			end
 		end
-	end		
+	end
 end
 
 local function UpdatePlate(plate, unit)
@@ -50,7 +54,7 @@ local function UpdatePlate(plate, unit)
 				w[k]:UpdateContext(unit)
 			end
 		end
-	end	
+	end
 end
 ThreatPlatesWidgets.RegisterWidget = RegisterWidget
 ThreatPlatesWidgets.UnregisterWidget = UnregisterWidget

@@ -23,8 +23,14 @@ THREAD_PLATES_NAME = "Threat Plates"
 -- General Functions
 ---------------------------------------------------------------------------------------------------
 
+t.DEBUG = function(...)
+	--print ("DEBUG: ", ...)
+end
+
 t.Update = function()
-	TidyPlates:SetTheme(THREAD_PLATES_NAME)
+	if (TidyPlates:GetTheme() == THREAD_PLATES_NAME) then
+		TidyPlates:SetTheme(THREAD_PLATES_NAME)
+	end
 	-- reload theme is deprecated and empty, ForceUpdate() is called in SetTheme()
 	--TidyPlates:ReloadTheme()
 	--TidyPlates:ForceUpdate()

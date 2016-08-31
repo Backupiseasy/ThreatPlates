@@ -31,8 +31,7 @@ local function AuraFilter(aura)
 		isShown = true
 	end
 
-	-- auras now always seem to be debuffs, so only Disease, Curse, ... is relevant
-	-- don't know how to show buffs
+	-- only show aura types configured in the options
 	if aura.type and DB.displays[aura.type] then
 		isType = true
 	else
@@ -101,16 +100,19 @@ do
 	end
 
 	local function CustomAuraUpdate(frame, unit)
+		t.DEBUG("TidyPlatesGlobal_OnUpdate/TidyPlatesGlobal_OnContextUpdate")
+
 		if TidyPlatesThreat.db.profile.debuffWidget.targetOnly and not unit.isTarget then
 			frame:Hide()
 			return
 		end
-
 		-- disable auras in headline-view mode
 		if t.AlphaFeatureHeadlineView() and (TidyPlatesThreat.SetStyle(unit) == "NameOnly") then
 			frame:Hide()
 			return
 		end
+
+		TidyPlatesWidgets.SetAuraFilter(AuraFilter)
 
 		-- CustomAuraUpdate substitues AuraWidget.Update and AuraWidget.UpdateContext
 		--   AuraWidget.Update is sometimes (first call after reload UI) called with unit.unitid = nil
@@ -123,19 +125,19 @@ do
 		--SetCooldownSpiral(frame)
 
 		-- TODO: remove when TidyPlates layering was reworked (probably Beta21) - set frame level higher to make auras apear on top
-		if (unit.isTarget) then
-				frame:SetFrameStrata("MEDIUM")
-				local AuraIconFrames = frame.AuraIconFrames
-			  for index = 1, #AuraIconFrames do
-					AuraIconFrames[index]:SetFrameStrata("MEDIUM")
-				end
-		else
-		 	frame:SetFrameStrata("BACKGROUND")
-		 	local AuraIconFrames = frame.AuraIconFrames
-			 for index = 1, #AuraIconFrames do
-				 AuraIconFrames[index]:SetFrameStrata("BACKGROUND")
-			 end
-		end
+		-- if (unit.isTarget) then
+		-- 		frame:SetFrameStrata("MEDIUM")
+		-- 		local AuraIconFrames = frame.AuraIconFrames
+		-- 	  for index = 1, #AuraIconFrames do
+		-- 			AuraIconFrames[index]:SetFrameStrata("MEDIUM")
+		-- 		end
+		-- else
+		--  	frame:SetFrameStrata("BACKGROUND")
+		--  	local AuraIconFrames = frame.AuraIconFrames
+		-- 	 for index = 1, #AuraIconFrames do
+		-- 		 AuraIconFrames[index]:SetFrameStrata("BACKGROUND")
+		-- 	 end
+		-- end
 
 		frame:Show()
 	end
@@ -146,8 +148,9 @@ do
 		frame.OldUpdate = frame.Update
 		frame.Update = CustomAuraUpdate
 		frame.UpdateContext = CustomAuraUpdate
-		-- this method of defining the filter function will be deprecated in 6.9
-		frame.Filter = AuraFilter
+
+		TidyPlatesWidgets.SetAuraFilter(AuraFilter)
+
 		-- disable spiral cooldown an aura icons
 		--enable_cooldown_spiral = nil
 		--SetCooldownSpiral(frame)
