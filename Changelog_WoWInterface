@@ -1,0 +1,61 @@
+[b]---------------------------------------------------------------------------------------------------[/b]
+[b]  8.008-Beta (works with [url="https://mods.curse.com/addons/wow/tidy-plates"]TidyPlates 6.18.2[/url])[/b]
+[b]---------------------------------------------------------------------------------------------------[/b]
+[LIST]
+[*] Disabled cooldown spiral option (enable/disable) as the feature was removed from TidyPlates in 6.18.2
+[/LIST]
+
+[b]---------------------------------------------------------------------------------------------------[/b]
+[b]  8.007-Beta (works with [url="https://mods.curse.com/addons/wow/tidy-plates"]TidyPlates 6.18.Beta21[/url])[/b]
+[b]---------------------------------------------------------------------------------------------------[/b]
+[LIST]
+[*] This is the first beta version for 8.100 - no new features will be implemented until this release, just bug fixes
+[*] Implemented a new feature to enable automatic role detection based on the currently active spec (see options, Threat System, Spec Roles)
+[*] Removed no longer supported localizations (translation support is welcome!)
+[/LIST]
+
+[b]---------------------------------------------------------------------------------------------------[/b]
+[b]  8.006-Alpha (works with [url="https://mods.curse.com/addons/wow/tidy-plates"]TidyPlates 6.18.Beta20[/url])[/b]
+[b]---------------------------------------------------------------------------------------------------[/b]
+[LIST]
+[*] Added a config option to set the alpha level of headline view nameplates (see About pane in the options dialog)
+[*] Fixed a bug where certain nameplate widgets were not updated after changes in the options dialog (TidyPlates removed ReloadTheme() function)
+[*] Fixed a nil error with healer tracker widget because of missing auras (introduced with 8.005-Alpha)
+[/LIST]
+
+[b]---------------------------------------------------------------------------------------------------[/b]
+[b]  8.005-Alpha (works with  [url="https://mods.curse.com/addons/wow/tidy-plates"]TidyPlates 6.18.Beta20[/url])[/b]
+[b]---------------------------------------------------------------------------------------------------[/b]
+[LIST]
+[*] Fixed a bug with the target aura widgets's strata (was sometimes shown behind other nameplates/auras) - rather a nasty fix for the time being (as TidyPlates layering is reworked currently)
+[/LIST]
+
+[b]---------------------------------------------------------------------------------------------------[/b]
+[b]  8.004-Alpha (works with  [url="https://mods.curse.com/addons/wow/tidy-plates"]TidyPlates 6.18.Beta20[/url])[/b]
+[b]---------------------------------------------------------------------------------------------------[/b]
+[LIST]
+[*] Implemented a new alpha feature (see About dialog): Headline View (Text-Only) as known from TidyPlates - TidyPlatesHub must be enabled for this to work; configure it via TidyPlatesHub profiles
+[*] Added four missing PVP totems (no totems should be missing now) and switched to  different colors for totem types (e.g.  PvP, Talents, ...)
+[*] Added transparent class icon for Demonhunter and special icons (red glowing border) for totem icons
+[*] Added an option to disable the cooldown spiral on auras (requires reload UI)
+[*] Castbar border can now be set to Default or Thin (like healthbar border)
+[/LIST]
+
+[b]---------------------------------------------------------------------------------------------------[/b]
+[b]  8.003-Alpha (works with  [url="https://mods.curse.com/addons/wow/tidy-plates"]TidyPlates 6.18.Beta11[/url])[/b]
+[b]---------------------------------------------------------------------------------------------------[/b]
+[LIST]
+[*] Fixed error with reload UI and AuraWidget
+[*] Fixed problem with TidyPlatesHub overwritting AuraWidget settings of ThreatPlates
+[/LIST]
+
+[b]---------------------------------------------------------------------------------------------------[/b]
+[b]  8.002-Alpha
+[b]---------------------------------------------------------------------------------------------------[/b]
+[LIST]
+[*] Added demonhunter class  (icons, tank tag)
+[*] Updated shaman totem list (icons and IDs) and rogue spell Anticipation
+[*] Fixed HP bar colouring with NPCs (probably still buggy)
+[*] Adjusted dual spec to new model in Legion
+[*] Changed spec option dialog to show actual  spec names for configuration
+[/LIST]

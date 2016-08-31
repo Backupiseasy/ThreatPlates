@@ -1,21 +1,21 @@
 ------------------------------------------------------
 8.008-Beta (works with TidyPlates 6.18.2)
 ------------------------------------------------------
-* Updated Threat Plates for TidyPlates 6.18.2 (disabled cooldown spiral option)
+  * Disabled cooldown spiral option (enable/disable) as the feature was removed from TidyPlates in 6.18.2
 
 ------------------------------------------------------
 8.007-Beta (works with TidyPlates 6.18.Beta21)
 ------------------------------------------------------
-* This is the first beta version for 8.100 - no new features will be implemented until this release, just bug fixes
-* Implemented a new feature to enable automatic role detection based on the currently active spec (see options, Threat System, Spec Roles)
-* Removed no longer supported localizations (translation support is welcome!)
+  * This is the first beta version for 8.100 - no new features will be implemented until this release, just bug fixes
+  * Implemented a new feature to enable automatic role detection based on the currently active spec (see options, Threat System, Spec Roles)
+  * Removed no longer supported localizations (translation support is welcome!)
 
 ------------------------------------------------------
 8.006-Alpha (works with TidyPlates 6.18.Beta20)
 ------------------------------------------------------
+  * Added a config option to set the alpha level of headline view nameplates (see About pane in the options dialog)
   * Fixed a bug where certain nameplate widgets were not updated after changes in the options dialog (TidyPlates removed ReloadTheme() function)
   * Fixed a nil error with healer tracker widget because of missing auras (introduced with 8.005-Alpha)
-  * Added a config option to set the alpha level of headline view nameplates (see About pane in the options dialog)
 
 ------------------------------------------------------
 8.005-Alpha (works with TidyPlates 6.18.Beta20)

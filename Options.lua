@@ -3297,19 +3297,20 @@ local function GetOptions()
 											end,
 											arg = {"debuffWidget","targetOnly"},
 										},
-										CooldownSpiral = {
-											name = L["Cooldown Spiral"],
-											type = "toggle",
-											order = 3,
-											desc = L["This will toggle the aura widget to show the cooldown spiral on auras. (Reloading UI is needed)"],
-											descStyle = "inline",
-											width = "full",
-											set = function(info,val)
-												SetValue(info,val)
-												TidyPlates:ForceUpdate()
-											end,
-											arg = {"debuffWidget","cooldownSpiral"},
-										}
+										-- TODO: currently disabled because no longer available in TidyPlates (since 6.18.2)
+										-- CooldownSpiral = {
+										-- 	name = L["Cooldown Spiral"],
+										-- 	type = "toggle",
+										-- 	order = 3,
+										-- 	desc = L["This will toggle the aura widget to show the cooldown spiral on auras. (Reloading UI is needed)"],
+										-- 	descStyle = "inline",
+										-- 	width = "full",
+										-- 	set = function(info,val)
+										-- 		SetValue(info,val)
+										-- 		TidyPlates:ForceUpdate()
+										-- 	end,
+										-- 	arg = {"debuffWidget","cooldownSpiral"},
+										-- }
 									},
 								},
 								Sizing = {

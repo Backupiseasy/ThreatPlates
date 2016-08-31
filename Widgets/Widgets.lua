@@ -19,7 +19,7 @@ local AURA_TARGET_FRIENDLY = 2
 ------------------------------------------------------------------------------
 
 -- save a local version to detect a change efficiently (and not cycle through all auras for nothing)
-local enable_cooldown_spiral
+-- local enable_cooldown_spiral
 
 local function AuraFilter(aura)
 	local DB = TidyPlatesThreat.db.profile.debuffWidget
@@ -69,17 +69,18 @@ end
 ThreatPlatesWidgets.AuraFilter = AuraFilter
 
 -- enable/disable spiral cooldown an aura icons
-local function SetCooldownSpiral(frame)
- 	if (enable_cooldown_spiral ~= TidyPlatesThreat.db.profile.debuffWidget.cooldownSpiral) then
-		enable_cooldown_spiral = TidyPlatesThreat.db.profile.debuffWidget.cooldownSpiral
-
-		local AuraIconFrames = frame.AuraIconFrames
-		for index = 1, #AuraIconFrames do
-				AuraIconFrames[index].Cooldown:SetDrawEdge(enable_cooldown_spiral)
-				AuraIconFrames[index].Cooldown:SetDrawSwipe(enable_cooldown_spiral)
-		end
-	end
-end
+-- TODO: currently disabled because no longer available in TidyPlates (since 6.18.2)
+-- local function SetCooldownSpiral(frame)
+--  	if (enable_cooldown_spiral ~= TidyPlatesThreat.db.profile.debuffWidget.cooldownSpiral) then
+-- 		enable_cooldown_spiral = TidyPlatesThreat.db.profile.debuffWidget.cooldownSpiral
+--
+-- 		local AuraIconFrames = frame.AuraIconFrames
+-- 		for index = 1, #AuraIconFrames do
+-- 				AuraIconFrames[index].Cooldown:SetDrawEdge(enable_cooldown_spiral)
+-- 				AuraIconFrames[index].Cooldown:SetDrawSwipe(enable_cooldown_spiral)
+-- 		end
+-- 	end
+-- end
 
 do
 	local isAuraEnabled
@@ -148,7 +149,7 @@ do
 		-- this method of defining the filter function will be deprecated in 6.9
 		frame.Filter = AuraFilter
 		-- disable spiral cooldown an aura icons
-		enable_cooldown_spiral = nil
+		--enable_cooldown_spiral = nil
 		--SetCooldownSpiral(frame)
 
 		return frame
