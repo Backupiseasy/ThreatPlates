@@ -44,12 +44,14 @@ local function GetValue(info)
 end
 
 local function SetValue(info, value)
+	-- info: table with path to setting in options dialog, that was changed
+	-- info.arg: table with parameter arg from options definition
 	local DB = TidyPlatesThreat.db.profile
 	local keys = info.arg
 	for index = 1, #keys - 1 do
-        DB = DB[keys[index]]
-    end
-    DB[keys[#keys]] = value
+    DB = DB[keys[index]]
+  end
+  DB[keys[#keys]] = value
 	t.Update()
 end
 
@@ -140,7 +142,7 @@ local function SetThemeValue(info, val)
 	SetValue(info,val)
 	t.SetThemes(TidyPlatesThreat)
 	-- TODO: should not be necessary here
-	if (TidyPlates:GetTheme() == THREAD_PLATES_NAME) then
+	if (TidyPlatesOptions.ActiveTheme == THREAD_PLATES_NAME) then
 		TidyPlates:SetTheme(THREAD_PLATES_NAME)
 	end
 end
@@ -3166,6 +3168,9 @@ local function GetOptions()
 											softMin = 0.6,
 											softMax = 1.3,
 											isPercent = true,
+											set = function(info,val)
+												SetThemeValue(info,val)
+											end,
 											arg = {"comboWidget","scale"}
 										},
 									},
@@ -3184,6 +3189,9 @@ local function GetOptions()
 											min = -120,
 											max = 120,
 											step = 1,
+											set = function(info,val)
+												SetThemeValue(info,val)
+											end,
 											arg = {"comboWidget", "x"},
 										},
 										Y = {
@@ -3193,6 +3201,9 @@ local function GetOptions()
 											min = -120,
 											max = 120,
 											step = 1,
+										  set = function(info,val)
+												SetThemeValue(info,val)
+											end,
 											arg = {"comboWidget", "y"},
 										},
 									},

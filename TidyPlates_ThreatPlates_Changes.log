@@ -1,4 +1,10 @@
 ------------------------------------------------------
+8.009-Beta (works with TidyPlates 6.18.2)
+------------------------------------------------------
+  * Improverd layering of Threat Plates widgets (not all though) and target name plate (which is often overlapped by other plates)
+  * In Headline-View mode, all Threat Plate widgets are now disabled (auras, combo points, ...)
+
+------------------------------------------------------
 8.008-Beta (works with TidyPlates 6.18.2)
 ------------------------------------------------------
   * Disabled cooldown spiral option (enable/disable) as the feature was removed from TidyPlates in 6.18.2

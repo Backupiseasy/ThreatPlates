@@ -100,8 +100,6 @@ do
 	end
 
 	local function CustomAuraUpdate(frame, unit)
-		t.DEBUG("TidyPlatesGlobal_OnUpdate/TidyPlatesGlobal_OnContextUpdate")
-
 		if TidyPlatesThreat.db.profile.debuffWidget.targetOnly and not unit.isTarget then
 			frame:Hide()
 			return
@@ -124,26 +122,48 @@ do
 		frame:SetPoint(TidyPlatesThreat.db.profile.debuffWidget.anchor, frame:GetParent(), TidyPlatesThreat.db.profile.debuffWidget.x, TidyPlatesThreat.db.profile.debuffWidget.y)
 		--SetCooldownSpiral(frame)
 
-		-- TODO: remove when TidyPlates layering was reworked (probably Beta21) - set frame level higher to make auras apear on top
-		-- if (unit.isTarget) then
-		-- 		frame:SetFrameStrata("MEDIUM")
-		-- 		local AuraIconFrames = frame.AuraIconFrames
-		-- 	  for index = 1, #AuraIconFrames do
-		-- 			AuraIconFrames[index]:SetFrameStrata("MEDIUM")
-		-- 		end
-		-- else
-		--  	frame:SetFrameStrata("BACKGROUND")
-		--  	local AuraIconFrames = frame.AuraIconFrames
-		-- 	 for index = 1, #AuraIconFrames do
-		-- 		 AuraIconFrames[index]:SetFrameStrata("BACKGROUND")
-		-- 	 end
-		-- end
+		-- target nameplates are often overlapped by other nameplates, this fixes it:
+		-- set frame level higher to make auras apear on top
+		if (unit.isTarget) then
+				frame:SetFrameStrata("LOW")
+				local AuraIconFrames = frame.AuraIconFrames
+			  for index = 1, #AuraIconFrames do
+					AuraIconFrames[index]:SetFrameStrata("LOW")
+				end
+		else
+		 	frame:SetFrameStrata("BACKGROUND")
+		 	local AuraIconFrames = frame.AuraIconFrames
+			 for index = 1, #AuraIconFrames do
+				 AuraIconFrames[index]:SetFrameStrata("BACKGROUND")
+			 end
+		end
 
 		frame:Show()
 	end
 
+-- TidyPlates Code: Do we reset Debuff Widget?
+	-- local function AddDebuffWidget(plate, enable, config)
+	-- 	if enable and config then
+	-- 		if not plate.widgets.DebuffWidget then
+	-- 			local widget
+	-- 			widget =  CreateAuraWidget(plate)
+	-- 			widget:SetPoint(config.anchor or "TOP", plate, config.x or 0, config.y or 0) --15, 20)
+	-- 			widget:SetFrameLevel(plate:GetFrameLevel()+1)
+	-- 			--widget.Filter = DebuffFilter		-- this method of defining the filter function will be deprecated in 6.9
+	-- 			plate.widgets.DebuffWidget = widget
+	-- 		end
+	-- 	elseif plate.widgets.DebuffWidget then
+	-- 		plate.widgets.DebuffWidget:Hide()
+	-- 		plate.widgets.DebuffWidget = nil
+	-- 	 end
+	-- end
+
 	local function CreateAuraWidget(plate)
+		-- TODO: do get better layering, all widgets must be updated in the same order, I guess? Right now, they are in a table with a random order?
 		local frame = TidyPlatesWidgets.CreateAuraWidget(plate)
+		--frame:SetPoint(config.anchor or "TOP", plate, config.x or 0, config.y or 0)
+		frame:SetPoint(TidyPlatesThreat.db.profile.debuffWidget.anchor, plate, TidyPlatesThreat.db.profile.debuffWidget.x, TidyPlatesThreat.db.profile.debuffWidget.y)
+		frame:SetFrameLevel(plate:GetFrameLevel()+1)
 
 		frame.OldUpdate = frame.Update
 		frame.Update = CustomAuraUpdate

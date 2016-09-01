@@ -5,6 +5,17 @@ local ThreatPlates = NAMESPACE.ThreatPlates
 -- Widget Handling --
 ---------------------
 
+-- Information about widget layering, from highest to lowest
+--    +2: combo points
+-- 		+1: auras
+--  widgets: frame level + 3
+--  highest frame: cast bar -> spell icon, spell text
+--  middle frame: raid icon, elite icon, skull icon, target
+--    customtext, name, level
+--  lower frame: healthbar -> health border, threat border, highlight (like healborder)
+-- Current state:
+--   name text is layered above combo point widget
+
 ThreatPlatesWidgets = {}
 ThreatPlatesWidgets.list = {}
 
@@ -26,7 +37,6 @@ local function UnregisterWidget(name)
 end
 
 local function CreateWidgets(plate)
-	ThreatPlates.DEBUG("TidyPlatesGlobal_OnInitialize")
 	local w = plate.widgets
 	for k,v in pairs(ThreatPlatesWidgets.list) do
 		if v.enabled() then
@@ -45,13 +55,20 @@ local function CreateWidgets(plate)
 end
 
 local function UpdatePlate(plate, unit)
+	local style = TidyPlatesThreat.SetStyle(unit)
+
 	local w = plate.widgets
 	for k,v in pairs(ThreatPlatesWidgets.list) do
+		-- Diable all widgets in headline view mode
 		if v.enabled() then
-			if not w[k] then CreateWidgets(plate) end
-			w[k]:Update(unit)
-			if v.isContext then
-				w[k]:UpdateContext(unit)
+			if 	ThreatPlates.AlphaFeatureHeadlineView() and (style == "NameOnly") then
+					w[k]:Hide()
+			else
+				if not w[k] then CreateWidgets(plate) end
+				w[k]:Update(unit)
+				if v.isContext then
+					w[k]:UpdateContext(unit)
+				end
 			end
 		end
 	end
