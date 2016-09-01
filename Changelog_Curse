@@ -1,43 +1,30 @@
-=== Change Log
-
 ----
-**  8.009-Beta (works with [[WoW/tidy-plates:Main]] 6.18.2)**
-----
+**  8.009-Beta (works with [[https://mods.curse.com/addons/wow/tidy-plates|Tidy Plates 6.18.2]])**
 * Improverd layering of Threat Plates widgets (not all though) and target name plate (which is often overlapped by other plates)
 * In Headline-View mode, all Threat Plate widgets are now disabled (auras, combo points, ...) - doesn't seem to make much sense enabling them in this mode
 
 ----
-**  8.008-Beta (works with [[WoW/tidy-plates:Main]] 6.18.2)**
-----
-
+**  8.008-Beta (works with [[https://mods.curse.com/addons/wow/tidy-plates|Tidy Plates 6.18.2]])**
 * Disabled cooldown spiral option (enable/disable) as the feature was removed from TidyPlates in 6.18.2
 
 ----
-**  8.007-Beta (works with [[WoW/tidy-plates:Main]]  6.18.Beta21)**
-----
-
+**  8.007-Beta (works with [[https://mods.curse.com/addons/wow/tidy-plates|Tidy Plates 6.18.Beta21]])**
 * This is the first beta version for 8.100 - no new features will be implemented until this release, just bug fixes
 * Implemented a new feature to enable automatic role detection based on the currently active spec (see options, Threat System, Spec Roles)
 * Removed no longer supported localizations (translation support is welcome!)
 
 ----
-**  8.006-Alpha (works with [[WoW/tidy-plates:Main]] TidyPlates 6.18.Beta20)**
-----
-
+**  8.006-Alpha (works with [[https://mods.curse.com/addons/wow/tidy-plates|Tidy Plates 6.18.Beta20]])**
 * ++Added a config option to set the alpha level of headline view nameplates (see About pane in the options dialog)++
 * Fixed a bug where certain nameplate widgets were not updated after changes in the options dialog (TidyPlates removed ReloadTheme() function)
 * Fixed a nil error with healer tracker widget because of missing auras (introduced with 8.005-Alpha)
 
 ----
-**  8.005-Alpha (works with [[WoW/tidy-plates:Main]] TidyPlates 6.18.Beta20)**
-----
-
+**  8.005-Alpha (works with [[https://mods.curse.com/addons/wow/tidy-plates|Tidy Plates 6.18.Beta20]])**
 * Fixed a bug with the target aura widgets's strata (was sometimes shown behind other nameplates/auras) - rather a nasty fix for the time being (as TidyPlates layering is reworked currently)
 
 ----
-**  8.004-Alpha (works with [[WoW/tidy-plates:Main]]  6.18.Beta20)**
-----
-
+**  8.004-Alpha (works with [[https://mods.curse.com/addons/wow/tidy-plates|Tidy Plates 6.18.Beta20]])**
 * Implemented a new alpha feature (see About dialog): Headline View (Text-Only) as known from TidyPlates - TidyPlatesHub must be enabled for this to work; configure it via TidyPlatesHub profiles
 * ++Added four missing PVP totems (no totems should be missing now) and switched to  different colors for totem types (e.g.  PvP, Talents, ...)++
 * ++Added transparent class icon for Demonhunter and special icons (red glowing border) for totem icons++
@@ -45,16 +32,12 @@
 * Castbar border can now be set to Default or Thin (like healthbar border)
 
 ----
-**  8.003-Alpha (works with [[WoW/tidy-plates:Main]]  6.18.Beta11)**
-----
-
+**  8.003-Alpha (works with [[https://mods.curse.com/addons/wow/tidy-plates|Tidy Plates 6.18.Beta11]])**
 * Fixed error with reload UI and AuraWidget
 * Fixed problem with TidyPlatesHub overwritting AuraWidget settings of ThreatPlates
 
 ----
 **  8.002-Alpha
-----
-
 * ++Added demonhunter class  (icons, tank tag)++
 * Updated shaman totem list (icons and IDs) and rogue spell Anticipation
 * Fixed HP bar colouring with NPCs (probably still buggy)
