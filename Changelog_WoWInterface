@@ -1,4 +1,12 @@
 [b]---------------------------------------------------------------------------------------------------[/b]
+[b]  8.009-Beta (works with [url="https://mods.curse.com/addons/wow/tidy-plates"]TidyPlates 6.18.2[/url])[/b]
+[b]---------------------------------------------------------------------------------------------------[/b]
+[LIST]
+[*]Improverd layering of Threat Plates widgets (not all though) and target name plate (which is often overlapped by other plates)
+[*]In Headline-View mode, all Threat Plate widgets are now disabled (auras, combo points, ...) - doesn't seem to make much sense enabling them in this mode
+[/LIST]
+
+[b]---------------------------------------------------------------------------------------------------[/b]
 [b]  8.008-Beta (works with [url="https://mods.curse.com/addons/wow/tidy-plates"]TidyPlates 6.18.2[/url])[/b]
 [b]---------------------------------------------------------------------------------------------------[/b]
 [LIST]
