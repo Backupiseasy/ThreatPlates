@@ -24,5 +24,9 @@ local function SetThemes(self)
 	end
 end
 
+local function GetTheme(name)
+	return ThemeTable[name]
+end
+
 t.RegisterTheme = RegisterTheme
 t.SetThemes = SetThemes

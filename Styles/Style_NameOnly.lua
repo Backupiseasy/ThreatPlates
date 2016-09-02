@@ -10,6 +10,7 @@ local EMPTY_TEXTURE = EMPTY_TEXTURE
 
 local function Create(self,name)
   local db = self.db.profile.settings
+  local dbprofile = self.db.profile
   local theme = {}
 
   theme = {
@@ -31,19 +32,20 @@ local function Create(self,name)
     highlight = {
       texture = ART_PATH.."Highlight",
       width = 128,
-      height = 64,
-      x = 0,
-      y = 0,
-      anchor = "CENTER",
+      height = 64 * ( dbprofile.headlineView.name.size + dbprofile.headlineView.name.size - 2) / 18, -- no effect
+      x = 0, -- not used in headline view, determined from ?
+      y = 0, -- not used in headline view, determined from ?
+      anchor = "CENTER", --no effect
 			show = true,
     },
 
 		target = {
       texture = ART_PATH.."Target",
       width = 128,
-      height = 64,
-      x = 0,
-      y = 0 - 21, -- or: db.name.y, to use offset from options
+      height = 32 * ( dbprofile.headlineView.name.size + dbprofile.headlineView.name.size - 2) / 18,
+      x = dbprofile.headlineView.name.x,
+      -- 10 is default size
+      y = dbprofile.headlineView.name.y - 5 - ((dbprofile.headlineView.name.size - 10) / 2),
       anchor = "CENTER",
       show = true,
     },
@@ -55,7 +57,7 @@ local function Create(self,name)
       width = 128,
       height = 64,
       x = 0,
-      y = 0 - 21, -- also used for highlight position, or: db.name.y, to use offset from options,
+      y = -21 + ((dbprofile.headlineView.name.size - 10) / 2), -- ( dbprofile.headlineView.name.size + dbprofile.headlineView.name.size - 2), -- also used for highlight position, or: db.name.y, to use offset from options,
       anchor = "CENTER",
     },
 
@@ -111,14 +113,14 @@ local function Create(self,name)
 
     name = {
       typeface = MEDIA_PATH:Fetch('font', db.name.typeface),
-      size = db.name.size + 2,
-      width = db.name.width,
-      height = db.name.height,
-      x = db.name.x,
-      y = 4, -- or: db.name.y, to use offset from options
-      align = db.name.align,
+      size = dbprofile.headlineView.name.size,
+      width = dbprofile.headlineView.name.width,
+      height = dbprofile.headlineView.name.height,
+      x = dbprofile.headlineView.name.x,
+      y = dbprofile.headlineView.name.y,
+      align = dbprofile.headlineView.name.align,
       anchor = "CENTER",
-      vertical = db.name.vertical,
+      vertical = dbprofile.headlineView.name.vertical,
       shadow = db.name.shadow, -- or: true,
       flags = db.name.flags, -- or: true
       show = true,
@@ -139,16 +141,17 @@ local function Create(self,name)
     },
 
     customtext = {
-      typeface = MEDIA_PATH:Fetch('font', db.customtext.typeface),
-      size = db.name.size-2,
-      width = db.customtext.width,
-      height = db.customtext.height,
-      x = db.customtext.x,
-      y = 5 - (db.name.size + 2),
-      align = db.customtext.align,
+      typeface = MEDIA_PATH:Fetch('font', db.name.typeface),
+      size = dbprofile.headlineView.name.size - 2,
+      width = dbprofile.headlineView.name.width,
+      height = dbprofile.headlineView.name.height,
+      x = dbprofile.headlineView.name.x,
+      y = dbprofile.headlineView.name.y - dbprofile.headlineView.name.size,
+      align = dbprofile.headlineView.name.align,
       anchor = "CENTER",
-      vertical = db.customtext.vertical,
-      shadow = db.customtext.shadow,
+      vertical = dbprofile.headlineView.name.vertical,
+      shadow = db.name.shadow,
+      flags = db.name.flags,
       show = true, -- for style NameOnly, type of content is configured in TidyPlatesHub
     },
 

@@ -56,7 +56,6 @@ end
 
 local function UpdatePlate(plate, unit)
 	local style = TidyPlatesThreat.SetStyle(unit)
-
 	local w = plate.widgets
 	for k,v in pairs(ThreatPlatesWidgets.list) do
 		-- Diable all widgets in headline view mode

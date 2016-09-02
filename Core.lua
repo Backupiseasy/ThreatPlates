@@ -196,7 +196,9 @@ function TidyPlatesThreat:OnInitialize()
 			alphaFeatureHeadlineView = false,
 			headlineView = {
 				-- TODO: move alphaFeatureHeadlineView in this table as enabled
+				nonTargetAlpha = true,
 				alpha = 1,
+				name = { size = 10, width = 116, height = 14, x = 0, y = 4, align = "CENTER", vertical = "CENTER", }
 			},
 			castbarColor = {
 				toggle = true,

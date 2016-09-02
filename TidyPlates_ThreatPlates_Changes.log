@@ -2,7 +2,8 @@
 8.009-Beta (works with TidyPlates 6.18.2)
 ------------------------------------------------------
   * Improverd layering of Threat Plates widgets (not all though) and target name plate (which is often overlapped by other plates)
-  * In Headline-View mode, all Threat Plate widgets are now disabled (auras, combo points, ...) - doesn't seem to make much sense enabling them in this mode
+  * In Headline-View mode, all Threat Plate widgets are now disabled (auras, combo points, ...) - doesn't make much sense enabling them in this mode
+  * Added basic configuration options for Headline View (Name-Only), see Nameplate Settings - Headline View (subtext settings are derived from nametext settings)
 
 ------------------------------------------------------
 8.008-Beta (works with TidyPlates 6.18.2)

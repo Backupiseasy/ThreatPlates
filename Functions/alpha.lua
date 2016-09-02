@@ -70,9 +70,9 @@ local function SetAlpha(unit)
 	end
 
 	-- overwrite any alpha for headline view (text-only)
-	if 	t.AlphaFeatureHeadlineView() and (style == "NameOnly") then
-		alpha = db.headlineView.alpha
-		nonTargetAlpha = 0
+	if 	t.AlphaFeatureHeadlineView() and (style == "NameOnly") and db.headlineView.nonTargetAlpha then
+		alpha = 1
+		nonTargetAlpha = db.headlineView.alpha
 	end
 
 	if not alpha then
