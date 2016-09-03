@@ -279,6 +279,12 @@ L["Raid Marks"] = "Raid Marks"
 L["Enable Raid Mark Icon"] = "Enable Raid Mark Icon"
 L["Enables the showing of the raid mark icon on nameplates."] = "Enables the showing of the raid mark icon on nameplates."
 
+-----
+L["Headline View"] = "Headline View"
+L["Enable Headline View (Name-Only)"] = "Enable Headline View (Name-Only)"
+L["This will enable headline view (name-only) for nameplates. TidyPlatesHub must be enabled for this to work. Use the TidyPlatesHub options for configuration."] = "This will enable headline view (name-only) for nameplates. TidyPlatesHub must be enabled for this to work. Use the TidyPlatesHub options for configuration."
+L["Enabling this will allow you to set the alpha adjustment for non-target names in headline view."] = "Enabling this will allow you to set the alpha adjustment for non-target names in headline view."
+
 -------------------
 -- Threat System --
 -------------------
@@ -454,9 +460,6 @@ L["Click to Donate!"] = "Click to Donate!"
 L["Clear and easy to use nameplate theme for use with TidyPlates.\n\nCurrent version: "] = "Clear and easy to use nameplate theme for use with TidyPlates.\n\nCurrent version: "
 L["\n\nFeel free to email me at |cff00ff00threatplates@gmail.com|r\n\n--\n\nBlacksalsify\n\n(Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)"] = "\n\nFeel free to email me at |cff00ff00threatplates@gmail.com|r\n\n--\n\nBlacksalsify\n\n(Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)"
 L["This will enable all alpha features currently available in ThreatPlates. Be aware that most of the features are not fully implemented and may contain several bugs."] = "This will enable all alpha features currently available in ThreatPlates. Be aware that most of the features are not fully implemented and may contain several bugs."
-L["This will enable Headline View (Text-Only) for nameplates. TidyPlatesHub must be enabled for it to work. Use the TidyPlatesHub dialog for configuration."] = "This will enable Headline View (Text-only) for nameplates. TidyPlatesHub must be enabled for it to work. Use the TidyPlatesHub dialog for configuration."
-L["Headline View (Text-Only)"] = "Headline View (Text-Only)"
-L["Headline-View Alpha"] = "Headline-View Alpha"
 
 --------------------------------
 -- Default Game Options Frame --

@@ -1,4 +1,9 @@
 ------------------------------------------------------
+8.011-Beta (works with TidyPlates 6.18.2)
+------------------------------------------------------
+  * Updated localizations (en, de)
+
+------------------------------------------------------
 8.010-Beta (works with TidyPlates 6.18.2)
 ------------------------------------------------------
   * Added basic configuration options for Headline View (Name-Only), see Nameplate Settings - Headline View (subtext settings are derived from nametext settings)

@@ -279,6 +279,12 @@ L["Raid Marks"] = true
 L["Enable Raid Mark Icon"] = true
 L["Enables the showing of the raid mark icon on nameplates."] = true
 
+----
+L["Headline View"] = true
+L["Enable Headline View (Name-Only)"] = true
+L["This will enable headline view (name-only) for nameplates. TidyPlatesHub must be enabled for this to work. Use the TidyPlatesHub options for configuration."] = true
+L["Enabling this will allow you to set the alpha adjustment for non-target names in headline view."] = true
+
 -------------------
 -- Threat System --
 -------------------
@@ -454,9 +460,6 @@ L["Click to Donate!"] = true
 L["Clear and easy to use nameplate theme for use with TidyPlates.\n\nCurrent version: "] = true
 L["\n\nFeel free to email me at |cff00ff00threatplates@gmail.com|r\n\n--\n\nBlacksalsify\n\n(Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)"] = true
 L["This will enable all alpha features currently available in ThreatPlates. Be aware that most of the features are not fully implemented and may contain several bugs."] = true
-L["This will enable Headline View (Text-Only) for nameplates. TidyPlatesHub must be enabled for it to work. Use the TidyPlatesHub dialog for configuration."] = true
-L["Headline View (Text-Only)"] = true
-L["Headline-View Alpha"] = true
 
 --------------------------------
 -- Default Game Options Frame --

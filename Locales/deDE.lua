@@ -279,6 +279,12 @@ L["Raid Marks"] = "Raidmarkierungen"
 L["Enable Raid Mark Icon"] = "Raidmarkierungssymbole"
 L["Enables the showing of the raid mark icon on nameplates."] = "Ermöglicht die Anzeige von Raidmarkierungssymbolen an Plaketten."
 
+-----
+L["Headline View"] = "Headline-View"
+L["Enable Headline View (Name-Only)"] = "Headline-View (Name-Only) einschalten"
+L["This will enable headline view (name-only) for nameplates. TidyPlatesHub must be enabled for this to work. Use the TidyPlatesHub options for configuration."] = "Hiermit wird der Headline-View (Name-Only) für Plaketten eingeschaltet. Dafür muss TidyPlatesHub aktiviert sein. Bitte verwende den TidyPlatesHub-Dialog zur Konfiguration."
+L["Enabling this will allow you to set the alpha adjustment for non-target names in headline view."] = "Bei Einschalten dieser Funktion kann der Alpha-Wert für Nicht-Ziel-Einheiten im Headline-View eingestellt werden."
+
 -------------------
 -- Threat System --
 -------------------
@@ -454,9 +460,6 @@ L["Click to Donate!"] = "Hier klicken, um eine Spende abzugeben!"
 L["Clear and easy to use nameplate theme for use with TidyPlates.\n\nCurrent version: "] = "Sauberes und leicht zu verwendendes Plakettendesign zur Benutzung mit TidyPlates..\n\nAktuelle Version: "
 L["\n\nFeel free to email me at |cff00ff00threatplates@gmail.com|r\n\n--\n\nBlacksalsify\n\n(Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)"] = "\n\nDu kannst mich gerne per E-Mail erreichen unter |cff00ff00threatplates@gmail.com|r\n\n--\n\nBlacksalsify\n\n(Ursprünglicher Autor: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)"
 L["This will enable all alpha features currently available in ThreatPlates. Be aware that most of the features are not fully implemented and may contain several bugs."] = "Hiermit werden alle aktuell in ThreadPlates verfügbaren Alpha-Features eingeschaltet. Bitte sei dir bewußt, dass die meisten Features noch nicht vollständig implementiert sind und Fehler beinhalten können."
-L["This will enable Headline View (Text-Only) for nameplates. TidyPlatesHub must be enabled for it to work. Use the TidyPlatesHub dialog for configuration."] = "Hiermit wird der Headline View (Text-Only) für Plaketten eingeschaltet. Dafür muss TidyPlatesHub aktiviert sein. Bitte verwende den TidyPlatesHub-Dialog zur Konfiguration."
-L["Headline View (Text-Only)"] = "Headline View (Text-Only)"
-L["Headline-View Alpha"] = "Headline-View Alpha"
 
 --------------------------------
 -- Default Game Options Frame --

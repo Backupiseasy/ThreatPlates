@@ -2412,8 +2412,7 @@ local function GetOptions()
 							},
 						},
 						HeadlineViewSettings = {
-							-- TODO: localize
-							name = "Headline View",
+							name = L["Headline View"],
 							type = "group",
 							inline = false,
 							order = 140,
@@ -2425,11 +2424,10 @@ local function GetOptions()
 									order = 1,
 									args = {
 										Enable = {
-											-- TODO: localize
-											name = "Enable Headline View (Name-Only)",
+											name = L["Enable Headline View (Name-Only)"],
 											type = "toggle",
 											order = 1,
-											desc = L["This will enable Headline View (Text-Only) for nameplates. TidyPlatesHub must be enabled for it to work. Use the TidyPlatesHub dialog for configuration."],
+											desc = L["This will enable headline view (name-only) for nameplates. TidyPlatesHub must be enabled for this to work. Use the TidyPlatesHub options for configuration."],
 											descStyle = "inline",
 											width = "full",
 											arg = {"alphaFeatureHeadlineView"},
@@ -2446,8 +2444,7 @@ local function GetOptions()
 										Enable = {
 											name = L["Enable Blizzard 'On-Target' Fading"],
 											type = "toggle",
-											-- TODO: localize
-											desc = "Enabling this will allow you to set the alpha adjustment for non-target names in headline view.",
+											desc = L["Enabling this will allow you to set the alpha adjustment for non-target names in headline view."],
 											descStyle = "inline",
 											order = 1,
 											width = "full",
