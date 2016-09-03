@@ -1,7 +1,5 @@
-﻿local L = LibStub("AceLocale-3.0"):NewLocale("TidyPlatesThreat", "deDE", false, true)
+﻿local L = LibStub("AceLocale-3.0"):NewLocale("TidyPlatesThreat", "deDE", false)
 if not L then return end
--- don't issue warnings if a local isn't found
-
 
 ----------------------
 --[[ commands.lua ]]--
