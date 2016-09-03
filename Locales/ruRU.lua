@@ -31,7 +31,6 @@ L["Undetermined"] = "Undetermined"
 
 L["|cff89f559Welcome to |rTidy Plates: |cff89f559Threat Plates!\nThis is your first time using Threat Plates and you are a(n):\n|r|cff"] = "|cff89f559Welcome to |rTidy Plates: |cff89f559Threat Plates!\nThis is your first time using Threat Plates and you are a(n):\n|r|cff"
 
-L["|cff89f559Your dual spec's have been set to |r"] = "|cff89f559Your dual spec's have been set to |r"
 L["|cff89f559You are currently in your "] = "|cff89f559You are currently in your "
 L["|cff89f559 role.|r"] = "|cff89f559 role.|r"
 L["|cff89f559Your role can not be determined.\nPlease set your dual spec preferences in the |rThreat Plates|cff89f559 options.|r"] = "|cff89f559Your role can not be determined.\nPlease set your dual spec preferences in the |rThreat Plates|cff89f559 options.|r"
@@ -278,6 +277,12 @@ L["Raid Marks"] = "Raid Marks"
 L["Enable Raid Mark Icon"] = "Enable Raid Mark Icon"
 L["Enables the showing of the raid mark icon on nameplates."] = "Enables the showing of the raid mark icon on nameplates."
 
+----
+L["Headline View"] = true
+L["Enable Headline View (Name-Only)"] = true
+L["This will enable headline view (name-only) for nameplates. TidyPlatesHub must be enabled for this to work. Use the TidyPlatesHub options for configuration."] = true
+L["Enabling this will allow you to set the alpha adjustment for non-target names in headline view."] = true
+
 -------------------
 -- Threat System --
 -------------------
@@ -447,9 +452,9 @@ L["Set Icon"] = "Set Icon"
 
 L["\n\nThank you for supporting my work!\n"] = "\n\nThank you for supporting my work!\n"
 L["Click to Donate!"] = "Click to Donate!"
-L["Clear and easy to use nameplate theme for use with TidyPlates.\n\nFeel free to email me at |cff00ff00Shamtasticle@gmail.com|r\n\n--Suicidal Katt"] = "Clear and easy to use nameplate theme for use with TidyPlates.\n\nFeel free to email me at |cff00ff00Shamtasticle@gmail.com|r\n\n--Suicidal Katt"
-L["This will enable all alpha features currently available in ThreatPlates. Be aware that most of the features are not fully implemented and may contain several bugs."] = "This will enable all alpha features currently available in ThreatPlates. Be aware that most of the features are not fully implemented and may contain several bugs."
-L["This will enable Headline View (Text-only) for nameplates. TidyPlatesHub must be enabled for it to work. Use the TidyPlatesHub dialog for configuration."] = "This will enable Headline View (Text-only) for nameplates. TidyPlatesHub must be enabled for it to work. Use the TidyPlatesHub dialog for configuration."
+L["Clear and easy to use nameplate theme for use with TidyPlates.\n\nCurrent version: "] = true
+L["\n\nFeel free to email me at |cff00ff00threatplates@gmail.com|r\n\n--\n\nBlacksalsify\n\n(Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)"] = true
+L["This will enable all alpha features currently available in ThreatPlates. Be aware that most of the features are not fully implemented and may contain several bugs."] = true
 
 --------------------------------
 -- Default Game Options Frame --

@@ -2,7 +2,8 @@
 xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 ..\FrameXML\UI.xsd">
 <Script file="enUS.lua"/>
-<Script file="enGB.lua"/>
+<!-- <Script file="enGB.lua"/> -->
+  <!-- The european english client is enGB, but AceLocale automatically loads the enUS entries for enGB -->
 <!-- <Script file="esES.lua"/>
 <Script file="esMX.lua"/> -->
 <Script file="deDE.lua"/>

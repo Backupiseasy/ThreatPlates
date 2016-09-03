@@ -1,4 +1,4 @@
-﻿local L = LibStub("AceLocale-3.0"):NewLocale("TidyPlatesThreat", "enUS", true)
+﻿local L = LibStub("AceLocale-3.0"):NewLocale("TidyPlatesThreat", "enUS", true, false)
 if not L then return end
 
 ----------------------

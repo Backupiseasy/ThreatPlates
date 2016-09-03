@@ -1,5 +1,7 @@
-﻿local L = LibStub("AceLocale-3.0"):NewLocale("TidyPlatesThreat", "deDE", false)
+﻿local L = LibStub("AceLocale-3.0"):NewLocale("TidyPlatesThreat", "deDE", false, true)
 if not L then return end
+-- don't issue warnings if a local isn't found
+
 
 ----------------------
 --[[ commands.lua ]]--
@@ -47,7 +49,7 @@ L["-->>|cffff0000Activate Threat Plates from the Tidy Plates options!|r<<--"] = 
 L["|cff89f559Threat Plates:|r Welcome back |cff"] = "|cff89f559Threat Plates:|r Willkommen zurück |cff"
 
 L["|cff89F559Threat Plates|r: Player spec change detected: |cff"] = "|cff89F559Threat Plates|r: Talentwechsel festgestellt: |cff"
-L["|r, you are now in your "] = "|r, du bist jetzt in Deiner "
+L["|r, you are now in your |cff89F559"] = "|r, du bist jetzt in Deiner "
 L[" role."] = " -Rolle."
 
 -- Custom Nameplates
