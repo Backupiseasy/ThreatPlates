@@ -155,14 +155,16 @@ L["Anchor"] = true
 ----
 L["Coloring"] = true
 L["Enable Coloring"] = true
+----
+L["HP Coloring"] = true
 L["Color HP by amount"] = true
 L["Changes the HP color depending on the amount of HP the nameplate shows."] = true
-----
 L["Class Coloring"] = true
 L["Enemy Class Colors"] = true
 L["Enable Enemy Class colors"] = true
 L["Friendly Class Colors"] = true
 L["Enable Friendly Class Colors"] = true
+L["Enable the showing of hostile player class color on hp bars."] = true
 L["Enable the showing of friendly player class color on hp bars."] = true
 L["Friendly Caching"] = true
 L["This allows you to save friendly player class information between play sessions or nameplates going off the screen.|cffff0000(Uses more memory)"] = true

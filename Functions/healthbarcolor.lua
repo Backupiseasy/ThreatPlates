@@ -18,7 +18,7 @@ local function GetMarkedColor(unit,a,var)
 		c = a
 	else
 		c = db.settings.raidicon.hpMarked[unit.raidIcon]
-	end	
+	end
 	if c then
 		return c
 	end
@@ -26,8 +26,11 @@ end
 
 local function GetClassColor(unit)
 	local db = TidyPlatesThreat.db.profile
+
 	local c, class
-	if unit.class and (unit.class ~= "UNKNOWN") and (unit.type ~= "NPC") then
+	-- if unit.class and (unit.class ~= "UNKNOWN") and (unit.type ~= "NPC") then
+	-- (unit.class == nil) if the unit is an NPC (not a player)
+	if unit.class and unit.class ~= "" then
 		class = unit.class
 	elseif db.friendlyClass then
 		if unit.guid then
@@ -69,7 +72,7 @@ function CS:GetSmudgeColorRGB(colorA, colorB, perc)
 				h3 = h3-360
 			end
         end
-    end  
+    end
     local s3 = s1-(s1-s2)*perc
     local v3 = v1-(v1-v2)*perc
     self:SetColorHSV(h3, s3, v3)
@@ -94,13 +97,20 @@ local function GetThreatColor(unit,style)
 		else
 			c = db.tHPbarColor
 		end
-	else
+	else -- this branch should not be nesssary as
 		c = GetClassColor(unit)
 	end
 	return c
 end
 
 local function SetHealthbarColor(unit)
+	-- if unit.isTarget then
+	-- 	t.DEBUG("unit.name = ", unit.name)
+	-- 	t.DEBUG("unit.type = ", unit.type)
+	-- 	t.DEBUG("unit.class = ", unit.class)
+	-- 	t.DEBUG("unit.reaction = ", unit.reaction)
+	-- end
+
 	local db = TidyPlatesThreat.db.profile
 	local style = TidyPlatesThreat.SetStyle(unit)
 	local c, allowMarked
@@ -122,28 +132,39 @@ local function SetHealthbarColor(unit)
 			end
 		end
 	else
-		if db.healthColorChange then
+		if db.healthColorChange then  -- Prio 2: coloring by HP (prio 1 is raid marks)
 			local pct = unit.health / unit.healthmax
-			local r,g,b = CS:GetSmudgeColorRGB(db.aHPbarColor,db.bHPbarColor,pct)			
+			local r,g,b = CS:GetSmudgeColorRGB(db.aHPbarColor,db.bHPbarColor,pct)
 			c = {r = r,g = g, b = b}
-		elseif db.customColor then
-			if (db.threat.ON and db.threat.useHPColor and InCombatLockdown() and (style == "dps" or style == "tank")) then -- Need a better way to impliment this.
-				c = GetThreatColor(unit,style)						
-			else
-				c = db[reference[unit.reaction]]
-			end
 		else
-			c = GetThreatColor(unit,style)
+			if db.customColor then  -- Prio 4: coloring by custom color
+				if (db.threat.ON and db.threat.useHPColor and InCombatLockdown() and (style == "dps" or style == "tank")) then -- Need a better way to impliment this.
+					c = GetThreatColor(unit,style)
+				else
+					c = db[reference[unit.reaction]]
+				end
+			end
+
+			-- player healthbars may be colored by class overwriting any customColor, but not healthColorChange
+			if unit.type == "PLAYER" then -- Prio 3: coloring by class
+				if unit.reaction == "HOSTILE" and db.allowClass then
+					c = GetClassColor(unit)
+				elseif unit.reaction == "FRIENDLY" and db.friendlyClass then
+					c = GetClassColor(unit)
+				end
+			end
 		end
 	end
-	if unit.isMarked then
+
+	if unit.isMarked then -- Prio 1 - raid marks always take top priority
 		c = GetMarkedColor(unit,c,allowMarked) -- c will set itself back to c if marked color is disabled
 	end
+
 	if c then
 		return c.r, c.g, c.b
 	else
-		return unit.red, unit.green, unit.blue
-	end	
+		return unit.red, unit.green, unit.blue -- should return Blizzard default oclors (based on GetSelectionColor)
+	end
 end
 
 TidyPlatesThreat.SetHealthbarColor = SetHealthbarColor

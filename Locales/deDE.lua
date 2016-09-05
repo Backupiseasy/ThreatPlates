@@ -155,14 +155,16 @@ L["Anchor"] = "Verankerung"
 ----
 L["Coloring"] = "Farben"
 L["Enable Coloring"] = "Farbcodierung einschalten"
+----
+L["HP Coloring"] = "Farbcodierung nach Lebenspunkten"
 L["Color HP by amount"] = "Lebenspunkte basierend auf Menge einfärben"
 L["Changes the HP color depending on the amount of HP the nameplate shows."] = "Verändert die Farbe der HP-Leiste basierend auf der Menge an Lebenspunkten, die die Plakette anzeigt."
-----
 L["Class Coloring"] = "Farbcodierung nach Klassen"
 L["Enemy Class Colors"] = "Feindliche Klassenfarben"
 L["Enable Enemy Class colors"] = "Feindliche Klassenfarben anzeigen"
 L["Friendly Class Colors"] = "Freundliche Klassenfarben"
 L["Enable Friendly Class Colors"] = "Freundliche Klassenfarben anzeigen"
+L["Enable the showing of hostile player class color on hp bars."] = "Ermöglicht die Anzeige der Klassenfarbe feindlicher Spieler im HP-Balken."
 L["Enable the showing of friendly player class color on hp bars."] = "Ermöglicht die Anzeige der Klassenfarbe freundlicher Spieler im HP-Balken."
 L["Friendly Caching"] = "Caching freundlicher Einheiten"
 L["This allows you to save friendly player class information between play sessions or nameplates going off the screen.|cffff0000(Uses more memory)"] = "Dies ermöglicht es, Informationen über freundliche Klassen während der Spielsitzung oder wenn sie den Spielbildschirm verlassen zu speichern.|cffff0000(Benötigt mehr Speicher)"
