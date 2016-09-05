@@ -5,7 +5,7 @@ local MEDIA_PATH = NAMESPACE.ThreatPlates.Media
 local EMPTY_TEXTURE = EMPTY_TEXTURE
 
 -------------------------------------------------------------------------------------
--- Style: Name-Only for Headline-View
+-- Style: Text-Only for Headline-View
 -------------------------------------------------------------------------------------
 
 local function Create(self,name)

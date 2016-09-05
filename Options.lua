@@ -2424,10 +2424,10 @@ local function GetOptions()
 									order = 1,
 									args = {
 										Enable = {
-											name = L["Enable Headline View (Name-Only)"],
+											name = L["Enable Headline View (Text-Only)"],
 											type = "toggle",
 											order = 1,
-											desc = L["This will enable headline view (name-only) for nameplates. TidyPlatesHub must be enabled for this to work. Use the TidyPlatesHub options for configuration."],
+											desc = L["This will enable headline view (Text-Only) for nameplates. TidyPlatesHub must be enabled for this to work. Use the TidyPlatesHub options for configuration."],
 											descStyle = "inline",
 											width = "full",
 											arg = {"alphaFeatureHeadlineView"},

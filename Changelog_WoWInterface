@@ -3,7 +3,7 @@
 [b]---------------------------------------------------------------------------------------------------[/b]
 [LIST]
 [*]Updated addon for Legion (7.0.3): added the demonhunter class, updated several spells (e.g., shaman totems), updated dual spec options, and lots of bug fixes
-[*]Added a new feature: Headline View (Name-Only) as known from TidyPlates
+[*]Added a new feature: Headline View (Text-Only) as known from TidyPlates
 [LIST]
 [*]TidyPlatesHub must be enabled for this to work; configure it via TidyPlatesHub profiles
 [*]Basic configuration options are available, see Nameplate Settings - Headline View (subtext settings are derived from nametext settings)

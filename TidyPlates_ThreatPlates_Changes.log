@@ -2,7 +2,7 @@
 8.1 (works with TidyPlates 6.18.3)
 ------------------------------------------------------
 * Updated addon for Legion (7.0.3): added the demonhunter class, updated several spells (e.g., shaman totems), updated dual spec options, and lots of bug fixes
-* Added a new feature: Headline View (Name-Only) as known from TidyPlates
+* Added a new feature: Headline View (Text-Only) as known from TidyPlates
   - TidyPlatesHub must be enabled for this to work; configure it via TidyPlatesHub profiles
   - Basic configuration options are available, see Nameplate Settings - Headline View (subtext settings are derived from nametext settings)
   - All Threat Plate widgets are disabled (auras, combo points, ...) - doesn't make much sense enabling them in this mode

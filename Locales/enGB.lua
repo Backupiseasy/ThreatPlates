@@ -281,8 +281,8 @@ L["Enables the showing of the raid mark icon on nameplates."] = "Enables the sho
 
 -----
 L["Headline View"] = "Headline View"
-L["Enable Headline View (Name-Only)"] = "Enable Headline View (Name-Only)"
-L["This will enable headline view (name-only) for nameplates. TidyPlatesHub must be enabled for this to work. Use the TidyPlatesHub options for configuration."] = "This will enable headline view (name-only) for nameplates. TidyPlatesHub must be enabled for this to work. Use the TidyPlatesHub options for configuration."
+L["Enable Headline View (Text-Only)"] = "Enable Headline View (Text-Only)"
+L["This will enable headline view (Text-Only) for nameplates. TidyPlatesHub must be enabled for this to work. Use the TidyPlatesHub options for configuration."] = "This will enable headline view (Text-Only) for nameplates. TidyPlatesHub must be enabled for this to work. Use the TidyPlatesHub options for configuration."
 L["Enabling this will allow you to set the alpha adjustment for non-target names in headline view."] = "Enabling this will allow you to set the alpha adjustment for non-target names in headline view."
 
 -------------------
