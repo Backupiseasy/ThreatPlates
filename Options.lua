@@ -2425,7 +2425,7 @@ local function GetOptions()
 											desc = L["This will enable headline view (Text-Only) for nameplates. TidyPlatesHub must be enabled for this to work. Use the TidyPlatesHub options for configuration."],
 											descStyle = "inline",
 											width = "full",
-											arg = {"alphaFeatureHeadlineView"},
+											arg = {"headlineView", "enabled"},
 										},
 									},
 								},

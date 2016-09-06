@@ -12,7 +12,7 @@ TidyPlatesThreat = LibStub("AceAddon-3.0"):NewAddon("TidyPlatesThreat", "AceCons
 ---------------------------------------------------------------------------------------------------
 
 local function AlphaFeatureHeadlineView()
-	return TidyPlatesThreat.db.profile.alphaFeatureHeadlineView and TidyPlatesHubFunctions
+	return TidyPlatesThreat.db.profile.headlineView.enabled and TidyPlatesHubFunctions
 end
 t.AlphaFeatureHeadlineView = AlphaFeatureHeadlineView
 
@@ -193,9 +193,8 @@ function TidyPlatesThreat:OnInitialize()
 			friendlyClassIcon = false,
 			cacheClass = false,
 			optionRoleDetectionAutomatic = false,
-			alphaFeatureHeadlineView = false,
 			headlineView = {
-				-- TODO: move alphaFeatureHeadlineView in this table as enabled
+				enabled = false,
 				nonTargetAlpha = true,
 				alpha = 1,
 				name = { size = 10, width = 116, height = 14, x = 0, y = 4, align = "CENTER", vertical = "CENTER", }
