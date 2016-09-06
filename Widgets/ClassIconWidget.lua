@@ -2,6 +2,8 @@
 -- Class Icon Widget --
 -----------------------
 local path = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ClassIconWidget\\"
+local Masque = LibStub("Masque", true)
+local group
 
 local function enabled()
 	local db = TidyPlatesThreat.db.profile.classWidget
@@ -13,13 +15,18 @@ local function UpdateSettings(frame)
 	frame:SetHeight(db.scale)
 	frame:SetWidth(db.scale)
 	frame:SetPoint((db.anchor), frame:GetParent(), (db.x), (db.y))
+
+	if Masque then
+		group = Masque:Group("TidyPlatesThreat")
+		group:ReSkin(frame)
+	end
 end
 
 local function UpdateClassIconWidget(frame, unit)
+	local db = TidyPlatesThreat.db.profile
 	local S = TidyPlatesThreat.SetStyle(unit)
 	if (not enabled()) or S == "NameOnly" then frame:Hide(); return end
 
-	local db = TidyPlatesThreat.db.profile
 	local class
 	--print ("unit.reation = ", unit.reaction, "  -- unit.type = ", unit.type)
 
@@ -64,14 +71,35 @@ local function UpdateClassIconWidget(frame, unit)
 	end
 end
 
+-- local function Reskin()
+-- 	print ("Masque: Reskin")
+-- end
+
 local function CreateClassIconWidget(parent)
-	local frame = CreateFrame("Frame", nil, parent)
-	frame:SetHeight(64)
-	frame:SetWidth(64)
+	local db = TidyPlatesThreat.db.profile.classWidget
+	local frame
+	if Masque then
+		frame = CreateFrame("Button", "Button_ClassIcon", parent, "ActionButtonTemplate")
+		frame:EnableMouse(false)
+	else
+		frame = CreateFrame("Frame", nil, parent)
+	end
+
+	frame:SetHeight(db.scale)
+	frame:SetWidth(db.scale)
 	frame.Icon = frame:CreateTexture(nil, "OVERLAY")
 	frame.Icon:SetAllPoints(frame)
 	frame:Hide()
 	frame.Update = UpdateClassIconWidget
+
+	if Masque then
+		if not group then
+	 		group = Masque:Group("TidyPlatesThreat")
+		end
+		--Masque:Register("TidyPlatesThreat", Reskin)
+		group:AddButton(frame)
+	end
+
 	return frame
 end
 

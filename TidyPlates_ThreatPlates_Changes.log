@@ -1,5 +1,11 @@
 ------------------------------------------------------
-8.1.1 (works with TidyPlates 6.18.3)
+8.200-Alpha (works with TidyPlates 6.18.Beta21)
+------------------------------------------------------
+* Deprecated entries are now removed from the SavedVariables database or converted
+* Added several configuration options to Headline-View (Text-Only)
+* Masque support for class icons and spellbar icons
+
+------------------------------------------------------
 ------------------------------------------------------
 * Reworked the settings for coloring the HP bar to according to the priority in which they are applied, also: fixed some bugs in the process 
 

@@ -17,7 +17,8 @@ local L = t.L
 -- Global constants
 ---------------------------------------------------------------------------------------------------
 
-THREAD_PLATES_NAME = "Threat Plates"
+THREAT_PLATES_NAME = "Threat Plates"
+ADDON_NAME = "TidyPlatesThreat"
 
 ---------------------------------------------------------------------------------------------------
 -- General Functions

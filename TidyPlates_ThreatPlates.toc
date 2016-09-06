@@ -13,6 +13,7 @@ Locales\Locales.xml
 
 Init.lua
 Media.lua
+Config.lua
 Core.lua
 Commands.lua
 Options.lua
