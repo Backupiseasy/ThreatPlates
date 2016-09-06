@@ -137,13 +137,13 @@ local function SetHealthbarColor(unit)
 			local r,g,b = CS:GetSmudgeColorRGB(db.aHPbarColor,db.bHPbarColor,pct)
 			c = {r = r,g = g, b = b}
 		else
-			if db.customColor then  -- Prio 4: coloring by custom color
+			if db.customColor then  -- Prio 5: coloring by custom color
 				if (db.threat.ON and db.threat.useHPColor and InCombatLockdown() and (style == "dps" or style == "tank")) then -- Need a better way to impliment this.
 					c = GetThreatColor(unit,style)
 				else
 					c = db[reference[unit.reaction]]
 				end
-			else -- Prio 5: coloring by threat, color by HP amount and custom colors overwrite this, as well as class colors
+			else -- Prio 4: coloring by threat, color by HP amount and class colors overwrite this
 				c = GetThreatColor (unit, style)
 			end
 
