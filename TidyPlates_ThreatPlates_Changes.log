@@ -1,4 +1,9 @@
 ------------------------------------------------------
+8.1.1 (works with TidyPlates 6.18.3)
+------------------------------------------------------
+* Reworked the settings for coloring the HP bar to according to the priority in which they are applied, also: fixed some bugs in the process 
+
+------------------------------------------------------
 8.1 (works with TidyPlates 6.18.3)
 ------------------------------------------------------
 * Updated addon for Legion (7.0.3): added the demonhunter class, updated several spells (e.g., shaman totems), updated dual spec options, and lots of bug fixes

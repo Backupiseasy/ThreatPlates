@@ -143,6 +143,8 @@ local function SetHealthbarColor(unit)
 				else
 					c = db[reference[unit.reaction]]
 				end
+			else -- Prio 5: coloring by threat, color by HP amount and custom colors overwrite this, as well as class colors
+				c = GetThreatColor (unit, style)
 			end
 
 			-- player healthbars may be colored by class overwriting any customColor, but not healthColorChange
