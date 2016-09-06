@@ -1378,13 +1378,15 @@ function TidyPlatesThreat:OnInitialize()
 				scaleType = {
 					["Normal"] = -0.2,
 					["Elite"] = 0,
-					["Boss"] = 0.2
+					["Boss"] = 0.2,
+					["Mini"] = -0.2,
 				},
 				toggle = {
 					["Boss"]	= true,
 					["Elite"]	= true,
 					["Normal"]	= true,
 					["Neutral"]	= true,
+					["Mini"] 	= true,
 					["Tapped"] 	= true
 				},
 				dps = {
@@ -1423,6 +1425,7 @@ function TidyPlatesThreat:OnInitialize()
 					["Elite"]	= true,
 					["Normal"]	= true,
 					["Neutral"]	= true,
+					["Mini"]	= true,
 					["Tapped"] 	= true,
 					["TargetA"]  = false, -- Custom Target Alpha
 					["NoTargetA"]  = false, -- Custom Target Alpha
@@ -1439,6 +1442,7 @@ function TidyPlatesThreat:OnInitialize()
 					["Elite"]		= 1.04,
 					["Normal"]		= 1,
 					["Neutral"]		= 0.9,
+					["Mini"]	= 0.7,
 					["Tapped"] 		= 0.9,
 					["Marked"] 		= 1
 				},
@@ -1450,6 +1454,7 @@ function TidyPlatesThreat:OnInitialize()
 					["Elite"]		= 1,
 					["Normal"]		= 1,
 					["Neutral"]		= 1,
+					["Mini"]	= 1,
 					["Tapped"]		= 1,
 					["Marked"] 		= 1
 				},

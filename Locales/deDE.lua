@@ -120,6 +120,7 @@ L["Show Neutral"] = "Neutrale Gegner anzeigen"
 L["Show Normal"] = "Normale Gegner anzeigen"
 L["Show Elite"] = "Elite-Gegner anzeigen"
 L["Show Boss"] = "Bosse anzeigen"
+L["Show Minor"] = "Triviale Gegner anzeigen"
 
 L["Blizzard Settings"] = "Blizzard-Einstellungen"
 L["Open Blizzard Settings"] = "Blizzard-Einstellungen öffnen"
@@ -211,6 +212,7 @@ L["Alpha Settings"] = "Alpha-Einstellungen"
 ----
 L["Scale"] = "Skalierung"
 L["Scale Settings"] = "Skalierungs-Einstellungen"
+L["Minor"] = "Trivial"
 
 ----
 L["Name Text"] = "Namenstext"
@@ -307,6 +309,8 @@ L["Show Elite Threat"] = "Elite-Bedrohung anzeigen"
 L["Disables threat feedback from elite mobs."] = "Schaltet Bedrohungs-Feedback von Elite-Gegnern aus."
 L["Show Boss Threat"] = "Boss-Bedrohung anzeigen"
 L["Disables threat feedback from boss level mobs."] = "Schaltet Bedrohungs-Feedback von Boss-Gegnern aus."
+L["Show Minor Threat"] = "Triviale Bedrohung anzeigen"
+L["Disables threat feedback from minor mobs."] = "Schaltet Bedrohungs-Feedback von trivialen Gegnern aus."
 
 ----
 L["Set alpha settings for different threat reaction types."] = "Alpha-Einstellungen für verschiedene Bedrohungs-Reaktionsarten einstellen."

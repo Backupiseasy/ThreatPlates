@@ -1,17 +1,24 @@
 local _, ns = ...
 local t = ns.ThreatPlates
 
+-- TODO: rework, TidyPlates has several new attributes to make this easier, e.g., isBoss
 local function GetGeneral(unit)
-	local r, d, e = unit.reaction, unit.isDangerous, unit.isElite
+	local r, d, e, m = unit.reaction, unit.isDangerous, unit.isElite, unit.isMini
 	if r == "TAPPED" then
 		return "Tapped"
 	elseif r == "NEUTRAL" then
-		return "Neutral"
+		if m then
+			return "Mini"
+		else
+			return "Neutral"
+		end
 	elseif r ~= "NEUTRAL" and r~= "TAPPED" then
 		if d and e then
 			return "Boss"
 		elseif not d and e then
 			return "Elite"
+		elseif m then
+			return "Mini"
 		elseif not d and not e then
 			return "Normal"
 		end

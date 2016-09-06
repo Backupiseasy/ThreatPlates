@@ -120,6 +120,7 @@ L["Show Neutral"] = true
 L["Show Normal"] = true
 L["Show Elite"] = true
 L["Show Boss"] = true
+L["Show Minor"] = true
 
 L["Blizzard Settings"] = true
 L["Open Blizzard Settings"] = true
@@ -211,6 +212,7 @@ L["Alpha Settings"] = true
 ----
 L["Scale"] = true
 L["Scale Settings"] = true
+L["Minor"] = true
 
 ----
 L["Name Text"] = true
@@ -307,6 +309,8 @@ L["Show Elite Threat"] = true
 L["Disables threat feedback from elite mobs."] = true
 L["Show Boss Threat"] = true
 L["Disables threat feedback from boss level mobs."] = true
+L["Show Minor Threat"] = true
+L["Disables threat feedback from minor mobs."] = true
 
 ----
 L["Set alpha settings for different threat reaction types."] = true

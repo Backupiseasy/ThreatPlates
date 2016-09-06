@@ -1,9 +1,10 @@
 ------------------------------------------------------
 8.2-Alpha-01 (works with TidyPlates 6.18.3)
 ------------------------------------------------------
+* Added minor mobs as unit type to various settings (e.g., enabling nameplates, alpha, scaling)
 * Deprecated entries are now removed from the SavedVariables database or converted
 * Added several configuration options to Headline-View (Text-Only)
-NOT: 
+NOT:
 * Masque support for class icons and spellbar icons
 
 ------------------------------------------------------
