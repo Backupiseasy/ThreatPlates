@@ -1,3 +1,5 @@
+-- TODO: remove masque support for the time being
+
 local ADDON_NAME, NAMESPACE = ...
 local ThreatPlates = NAMESPACE.ThreatPlates
 

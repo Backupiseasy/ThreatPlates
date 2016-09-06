@@ -67,7 +67,6 @@ end
 
 ThreatPlatesWidgets.AuraFilter = AuraFilter
 
-	if (TidyPlatesOptions.ActiveTheme == THREAT_PLATES_NAME) and (ProfDB.debuffWidget.style == "wide") then
 -- enable/disable spiral cooldown an aura icons
 -- TODO: currently disabled because no longer available in TidyPlates (since 6.18.2)
 -- local function SetCooldownSpiral(frame)

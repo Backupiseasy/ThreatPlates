@@ -1,9 +1,11 @@
+-- TODO: remove masque support for the time being
+
 -----------------------
 -- Class Icon Widget --
 -----------------------
 local path = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ClassIconWidget\\"
-local Masque = LibStub("Masque", true)
-local group
+-- local Masque = LibStub("Masque", true)
+-- local group
 
 local function enabled()
 	local db = TidyPlatesThreat.db.profile.classWidget
@@ -16,10 +18,10 @@ local function UpdateSettings(frame)
 	frame:SetWidth(db.scale)
 	frame:SetPoint((db.anchor), frame:GetParent(), (db.x), (db.y))
 
-	if Masque then
-		group = Masque:Group("TidyPlatesThreat")
-		group:ReSkin(frame)
-	end
+	-- if Masque then
+	-- 	group = Masque:Group("TidyPlatesThreat")
+	-- 	group:ReSkin(frame)
+	-- end
 end
 
 local function UpdateClassIconWidget(frame, unit)
@@ -78,12 +80,12 @@ end
 local function CreateClassIconWidget(parent)
 	local db = TidyPlatesThreat.db.profile.classWidget
 	local frame
-	if Masque then
-		frame = CreateFrame("Button", "Button_ClassIcon", parent, "ActionButtonTemplate")
-		frame:EnableMouse(false)
-	else
-		frame = CreateFrame("Frame", nil, parent)
-	end
+	-- if Masque then
+	-- 	frame = CreateFrame("Button", "Button_ClassIcon", parent, "ActionButtonTemplate")
+	-- 	frame:EnableMouse(false)
+	-- else
+	frame = CreateFrame("Frame", nil, parent)
+	-- end
 
 	frame:SetHeight(db.scale)
 	frame:SetWidth(db.scale)
@@ -92,13 +94,13 @@ local function CreateClassIconWidget(parent)
 	frame:Hide()
 	frame.Update = UpdateClassIconWidget
 
-	if Masque then
-		if not group then
-	 		group = Masque:Group("TidyPlatesThreat")
-		end
-		--Masque:Register("TidyPlatesThreat", Reskin)
-		group:AddButton(frame)
-	end
+	-- if Masque then
+	-- 	if not group then
+	--  		group = Masque:Group("TidyPlatesThreat")
+	-- 	end
+	-- 	--Masque:Register("TidyPlatesThreat", Reskin)
+	-- 	group:AddButton(frame)
+	-- end
 
 	return frame
 end

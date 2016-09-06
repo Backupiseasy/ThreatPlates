@@ -104,12 +104,13 @@ local function GetThreatColor(unit,style)
 end
 
 local function SetHealthbarColor(unit)
-	-- if unit.isTarget then
-	-- 	t.DEBUG("unit.name = ", unit.name)
-	-- 	t.DEBUG("unit.type = ", unit.type)
-	-- 	t.DEBUG("unit.class = ", unit.class)
-	-- 	t.DEBUG("unit.reaction = ", unit.reaction)
-	-- end
+	if unit.isTarget then
+		t.DEBUG("unit.name = ", unit.name)
+		t.DEBUG("unit.type = ", unit.type)
+		t.DEBUG("unit.class = ", unit.class)
+		t.DEBUG("unit.reaction = ", unit.reaction)
+		t.DEBUG("unit.isMini = ", unit.isMini)
+	end
 
 	local db = TidyPlatesThreat.db.profile
 	local style = TidyPlatesThreat.SetStyle(unit)
