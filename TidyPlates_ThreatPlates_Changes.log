@@ -1,7 +1,8 @@
 ------------------------------------------------------
 8.1.1 (works with TidyPlates 6.18.3)
 ------------------------------------------------------
-* Reworked the settings for coloring the HP bar to according to the priority in which they are applied, also: fixed some bugs in the process 
+* Reworked the settings for coloring the HP bar to according to the priority in which they are applied, also: fixed some bugs in the process
+* Small updated of the German localization
 
 ------------------------------------------------------
 8.1 (works with TidyPlates 6.18.3)
