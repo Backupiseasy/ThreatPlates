@@ -6,10 +6,14 @@ local function GetGeneralScale(unit)
 	local unitType = TidyPlatesThreat.GetType(unit)
 	local db = TidyPlatesThreat.db.profile.nameplate
 	local scale = 0
-	if unitType and unitType ~="empty" then
+
+	if unit.isTapped then
+		scale = db.scale["Tapped"] or 1 --scale = db.scale["Tapped"]
+	elseif unitType and unitType ~="empty" then
 		scale = db.scale[unitType] or 1 -- This should also return for totems.
 	end
-	-- Do checks for target settings, must be spelled out to avoid issues
+
+	-- -- Do checks for target settings, must be spelled out to avoid issues
 	if (UnitExists("target") and unit.isTarget) and db.toggle.TargetS then
 		scale = db.scale.Target
 	elseif not UnitExists("target") and db.toggle.NoTargetS then

@@ -3,7 +3,7 @@ local t = ns.ThreatPlates
 
 local function GetGeneral(unit)
 	local r, d, e = unit.reaction, unit.isDangerous, unit.isElite
-	if r == "TAPPED" then
+	if unit.isTapped then
 		return "Tapped"
 	elseif r == "NEUTRAL" then
 		return "Neutral"
@@ -110,6 +110,18 @@ local function SetStyle(unit)
 			end
 		end
 	end
+
+	-- if unit.isTarget then
+	-- 	t.DEBUG("unit.name = ", unit.name)
+	-- 	t.DEBUG("unit.type = ", unit.type)
+	-- 	t.DEBUG("unit.class = ", unit.class)
+	-- 	t.DEBUG("unit.reaction = ", unit.reaction)
+	-- 	t.DEBUG("unit.isMini = ", unit.isMini)
+	-- 	t.DEBUG("unit.isTapped = ", unit.isTapped)
+	-- 	t.DEBUG("unit SetStyle = ", style)
+	-- 	t.DEBUG("unit GetType = ", TidyPlatesThreat.GetType(unit))
+	-- end
+
 	if style then
 	  return style
 	else

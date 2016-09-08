@@ -6,9 +6,13 @@ local function GetGeneralAlpha(unit)
 	local unitType = TidyPlatesThreat.GetType(unit)
 	local db = TidyPlatesThreat.db.profile.nameplate
 	local alpha = 0
-	if unitType and unitType ~="empty" then
-		alpha = db.alpha[unitType] or 1 -- This should also return for totems.
+
+	if unit.isTapped then
+		alpha = db.alpha["Tapped"] or 1 --alpha = db.alpha["Tapped"]
+	elseif unitType and unitType ~="empty" then
+	 	alpha = db.alpha[unitType] or 1 -- This should also return for totems.
 	end
+
 	-- Do checks for target settings, must be spelled out to avoid issues
 	if (UnitExists("target") and unit.isTarget) and db.toggle.TargetA then
 		alpha = db.alpha.Target
