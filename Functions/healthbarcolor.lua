@@ -104,15 +104,20 @@ local function GetThreatColor(unit,style)
 end
 
 local function SetHealthbarColor(unit)
+	local db = TidyPlatesThreat.db.profile
+	local style = TidyPlatesThreat.SetStyle(unit)
+
 	-- if unit.isTarget then
 	-- 	t.DEBUG("unit.name = ", unit.name)
 	-- 	t.DEBUG("unit.type = ", unit.type)
 	-- 	t.DEBUG("unit.class = ", unit.class)
 	-- 	t.DEBUG("unit.reaction = ", unit.reaction)
-	-- end
+	-- 	t.DEBUG("unit.isMini = ", unit.isMini)
+	-- 	t.DEBUG("unit.isTapped = ", unit.isTapped)
+	-- 	t.DEBUG("unit SetStyle = ", style)
+	-- 	t.DEBUG("unit GetType = ", TidyPlatesThreat.GetType(unit))
+-- end
 
-	local db = TidyPlatesThreat.db.profile
-	local style = TidyPlatesThreat.SetStyle(unit)
 	local c, allowMarked
 	if style == "totem" then
 		local tS = db.totemSettings[ThreatPlates_Totems[unit.name]]
@@ -141,7 +146,11 @@ local function SetHealthbarColor(unit)
 				if (db.threat.ON and db.threat.useHPColor and InCombatLockdown() and (style == "dps" or style == "tank")) then -- Need a better way to impliment this.
 					c = GetThreatColor(unit,style)
 				else
-					c = db[reference[unit.reaction]]
+					if unit.isTapped then
+						c = db[reference["TAPPED"]]
+					else
+						c = db[reference[unit.reaction]]
+					end
 				end
 			else -- Prio 4: coloring by threat, color by HP amount and class colors overwrite this
 				c = GetThreatColor (unit, style)

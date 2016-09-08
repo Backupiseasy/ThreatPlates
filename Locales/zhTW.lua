@@ -114,7 +114,7 @@ L["About"] = "關於"
 ------------------------
 L["General Settings"] = "一般設置"
 L["Hiding"] = "隱藏"
-L["Show Tagged"] = "Show Tagged"
+L["Show Tapped"] = "Show Tapped"
 L["Show Neutral"] = "顯示中立單位"
 L["Show Normal"] = "顯示普通單位"
 L["Show Elite"] = "顯示精英單位"
@@ -169,7 +169,7 @@ L["This allows you to save friendly player class information between play sessio
 L["Custom HP Color"] = "自定義血量顏色"
 L["Enable Custom HP colors"] = "啟用自定義血量顏色"
 L["Friendly Color"] = "友方單位顏色"
-L["Tagged Color"] = "Tagged Color"
+L["Tapped Color"] = "Tapped Color"
 L["Neutral Color"] = "中立單位顏色"
 L["Enemy Color"] = "敵方單位顏色"
 ----

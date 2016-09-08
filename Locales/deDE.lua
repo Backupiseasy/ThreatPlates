@@ -115,7 +115,7 @@ L["About"] = "Über"
 ------------------------
 L["General Settings"] = "Allgemeine Einstellungen"
 L["Hiding"] = "Versteckt"
-L["Show Tagged"] = "Show Tagged"
+L["Show Tapped"] = "Getappte Gegner anzeigen"
 L["Show Neutral"] = "Neutrale Gegner anzeigen"
 L["Show Normal"] = "Normale Gegner anzeigen"
 L["Show Elite"] = "Elite-Gegner anzeigen"
@@ -172,7 +172,7 @@ L["This allows you to save friendly player class information between play sessio
 L["Custom HP Color"] = "Benutzerdefinierte Farben des HP-Balkens"
 L["Enable Custom HP colors"] = "Benutzerdefinierte HP-Balkenfarben anzeigen"
 L["Friendly Color"] = "Farbe für freundliche Einheiten"
-L["Tagged Color"] = "Tagged Color"
+L["Tapped Color"] = "Farbe für getappte Einheiten"
 L["Neutral Color"] = "Farbe für neutrale Einheiten"
 L["Enemy Color"] = "Farbe für gegnerische Einheiten"
 ----

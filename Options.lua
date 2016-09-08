@@ -258,7 +258,7 @@ local function GetOptions()
 										ShowTapped = {
 											type = "toggle",
 											order = 2,
-											name = "Show Tapped",
+											name = L["Show Tapped"],
 											arg = {"nameplate","toggle","Tapped"},
 										},
 										ShowNormal = {
@@ -605,7 +605,7 @@ local function GetOptions()
 															arg = {"nHPbarColor"},
 														},
 														TappedColor = {
-															name = "Tapped Color",
+															name = L["Tapped Color"],
 															type = "color",
 															arg = {"tapHPbarColor"},
 														},
