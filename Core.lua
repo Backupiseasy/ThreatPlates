@@ -1483,6 +1483,7 @@ end
 TidyPlatesThreat.OnActivateTheme = OnActivateTheme
 
 function ActivateTheme()
+
 	-- 	Set aura widget style
 	local ProfDB = TidyPlatesThreat.db.profile
 	if ProfDB.debuffWidget.style == "square" then
@@ -1576,6 +1577,7 @@ function TidyPlatesThreat:OnEnable()
 		--"PLAYER_REGEN_DISABLED",
 		"PLAYER_REGEN_ENABLED",
 		--"PLAYER_TALENT_UPDATE"
+		"UNIT_FACTION",
 	}
 	for i=1,#events do
 		self:RegisterEvent(events[i])
@@ -1693,6 +1695,12 @@ end
 function TidyPlatesThreat:PLAYER_REGEN_ENABLED()
 	self:SetGlows()
 	self:SetCvars()
+end
+
+ -- nameplate color can change when factions change (e.g., with disguises)
+ -- Legion example: Suramar city and Masquerade
+function TidyPlatesThreat:UNIT_FACTION(event,unitid)
+	TidyPlatesThreat.ApplyProfileSettings()
 end
 
 -- function TidyPlatesThreat:PLAYER_TALENT_UPDATE()
