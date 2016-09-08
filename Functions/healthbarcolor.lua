@@ -113,6 +113,7 @@ local function SetHealthbarColor(unit)
 	-- 	t.DEBUG("unit.class = ", unit.class)
 	-- 	t.DEBUG("unit.reaction = ", unit.reaction)
 	-- 	t.DEBUG("unit.isMini = ", unit.isMini)
+	-- 	t.DEBUG("unit.isTapped = ", unit.isTapped)
 	-- 	t.DEBUG("unit SetStyle = ", style)
 	-- 	t.DEBUG("unit GetType = ", TidyPlatesThreat.GetType(unit))
 	-- end
@@ -145,7 +146,11 @@ local function SetHealthbarColor(unit)
 				if (db.threat.ON and db.threat.useHPColor and InCombatLockdown() and (style == "dps" or style == "tank")) then -- Need a better way to impliment this.
 					c = GetThreatColor(unit,style)
 				else
-					c = db[reference[unit.reaction]]
+					if unit.isTapped then
+						c = db[reference["TAPPED"]]
+					else
+						c = db[reference[unit.reaction]]
+					end
 				end
 			else -- Prio 4: coloring by threat, color by HP amount and class colors overwrite this
 				c = GetThreatColor (unit, style)

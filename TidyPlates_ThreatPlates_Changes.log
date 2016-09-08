@@ -3,7 +3,9 @@
 ------------------------------------------------------
 * Added minor mobs as unit type to various settings (e.g., enabling nameplates, alpha, scaling)
 * Deprecated entries are now removed from the SavedVariables database or converted
+* Fixed a bug with healthbars not correctly colored for tapped units (when coloring based on custom colors is used)
 * Added several configuration options to Headline-View (Text-Only)
+*
 NOT:
 * Masque support for class icons and spellbar icons
 
