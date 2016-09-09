@@ -104,21 +104,11 @@ local function GetThreatColor(unit,style)
 end
 
 local function SetHealthbarColor(unit)
+
 	local db = TidyPlatesThreat.db.profile
 	local style = TidyPlatesThreat.SetStyle(unit)
 
-	-- if unit.isTarget then
-	-- 	t.DEBUG("unit.name = ", unit.name)
-	-- 	t.DEBUG("unit.type = ", unit.type)
-	-- 	t.DEBUG("unit.class = ", unit.class)
-	-- 	t.DEBUG("unit.reaction = ", unit.reaction)
-	-- 	t.DEBUG("unit.isMini = ", unit.isMini)
-	-- 	t.DEBUG("unit.isTapped = ", unit.isTapped)
-	-- 	t.DEBUG("unit SetStyle = ", style)
-	-- 	t.DEBUG("unit GetType = ", TidyPlatesThreat.GetType(unit))
-	-- end
-
-	local c, allowMarked
+  local c, allowMarked
 	if style == "totem" then
 		local tS = db.totemSettings[ThreatPlates_Totems[unit.name]]
 		if tS[2] then

@@ -120,6 +120,7 @@ do
 		end
 		frame:SetScale(TidyPlatesThreat.db.profile.debuffWidget.scale)
 		frame:SetPoint(TidyPlatesThreat.db.profile.debuffWidget.anchor, frame:GetParent(), TidyPlatesThreat.db.profile.debuffWidget.x, TidyPlatesThreat.db.profile.debuffWidget.y)
+		--frame:SetPoint(TidyPlatesThreat.db.profile.debuffWidget.anchor, frame:GetParent(), "CENTER", TidyPlatesThreat.db.profile.debuffWidget.x, TidyPlatesThreat.db.profile.debuffWidget.y)
 		--SetCooldownSpiral(frame)
 
 		-- target nameplates are often overlapped by other nameplates, this fixes it:
@@ -162,6 +163,7 @@ do
 		-- TODO: do get better layering, all widgets must be updated in the same order, I guess? Right now, they are in a table with a random order?
 		local frame = TidyPlatesWidgets.CreateAuraWidget(plate)
 		--frame:SetPoint(config.anchor or "TOP", plate, config.x or 0, config.y or 0)
+
 		frame:SetPoint(TidyPlatesThreat.db.profile.debuffWidget.anchor, plate, TidyPlatesThreat.db.profile.debuffWidget.x, TidyPlatesThreat.db.profile.debuffWidget.y)
 		frame:SetFrameLevel(plate:GetFrameLevel()+1)
 

@@ -4,7 +4,7 @@ local t = ns.ThreatPlates
 -- TODO: rework, TidyPlates has several new attributes to make this easier, e.g., isBoss
 local function GetGeneral(unit)
 	local r, d, e, m = unit.reaction, unit.isDangerous, unit.isElite, unit.isMini
-	if r == "TAPPED" then
+	if unit.isTapped then
 		return "Tapped"
 	elseif r == "NEUTRAL" then
 		if m then
@@ -117,6 +117,18 @@ local function SetStyle(unit)
 			end
 		end
 	end
+
+	-- if unit.isTarget then
+	-- 	t.DEBUG("unit.name = ", unit.name)
+	-- 	t.DEBUG("unit.type = ", unit.type)
+	-- 	t.DEBUG("unit.class = ", unit.class)
+	-- 	t.DEBUG("unit.reaction = ", unit.reaction)
+	-- 	t.DEBUG("unit.isMini = ", unit.isMini)
+	-- 	t.DEBUG("unit.isTapped = ", unit.isTapped)
+	-- 	t.DEBUG("unit SetStyle = ", style)
+	-- 	t.DEBUG("unit GetType = ", TidyPlatesThreat.GetType(unit))
+	-- end
+
 	if style then
 	  return style
 	else

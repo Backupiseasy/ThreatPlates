@@ -115,7 +115,7 @@ L["About"] = true
 ------------------------
 L["General Settings"] = true
 L["Hiding"] = true
-L["Show Tagged"] = true
+L["Show Tapped"] = true
 L["Show Neutral"] = true
 L["Show Normal"] = true
 L["Show Elite"] = true
@@ -173,7 +173,7 @@ L["This allows you to save friendly player class information between play sessio
 L["Custom HP Color"] = true
 L["Enable Custom HP colors"] = true
 L["Friendly Color"] = true
-L["Tagged Color"] = true
+L["Tappped Color"] = true
 L["Neutral Color"] = true
 L["Enemy Color"] = true
 ----

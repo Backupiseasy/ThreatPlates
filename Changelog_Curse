@@ -1,4 +1,13 @@
 ----
+**  8.1.1 (works with [[https://mods.curse.com/addons/wow/tidy-plates|Tidy Plates 6.18.3]])**
+
+ * Reworked the settings for coloring the healthbar according to the priority in which the settings are applied, also: fixed some bugs
+ * Fixed several bugs regarding tapped units (coloring, scaling, alpha, etc.)
+ * Fixed a bug with nameplate coloring when units change factions (e.g., in Suramar)
+ * Fixed several bugs with headline view (alpha, apply changes without reload UI)
+ * Localization fixes (consistant naming of tapped units, deDE)
+
+----
 **  8.1 (works with [[https://mods.curse.com/addons/wow/tidy-plates|Tidy Plates 6.18.3]])**
 
   * Updated addon for Legion (7.0.3): added the demonhunter class, updated several spells (e.g., shaman totems), updated dual spec options, and lots of bug fixes
