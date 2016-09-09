@@ -173,7 +173,7 @@ L["This allows you to save friendly player class information between play sessio
 L["Custom HP Color"] = true
 L["Enable Custom HP colors"] = true
 L["Friendly Color"] = true
-L["Tappped Color"] = true
+L["Tapped Color"] = true
 L["Neutral Color"] = true
 L["Enemy Color"] = true
 ----

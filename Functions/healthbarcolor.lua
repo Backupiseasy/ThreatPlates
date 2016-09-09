@@ -26,10 +26,13 @@ end
 
 local function GetClassColor(unit)
 	local db = TidyPlatesThreat.db.profile
-
 	local c, class
-	-- if unit.class and (unit.class ~= "UNKNOWN") and (unit.type ~= "NPC") then
-	-- (unit.class == nil) if the unit is an NPC (not a player)
+
+	-- return nil if class coloring is disabled
+	-- if (unit.reaction == "HOSTILE" and not db.allowClass) or (unit.reaction == "FRIENDLY" and not db.friendlyClass) then
+	-- 	return nil
+	-- end
+
 	if unit.class and unit.class ~= "" then
 		class = unit.class
 	elseif db.friendlyClass then
@@ -83,22 +86,22 @@ end
 local function GetThreatColor(unit,style)
 	local db = TidyPlatesThreat.db.profile
 	local c
+	-- style is normal for PLAYERS, only NPCs get tank/dps
 	if (db.threat.ON and db.threat.useHPColor and InCombatLockdown() and (style == "dps" or style == "tank")) then
 		if not isTanked then -- This value is going to be determined in the SetStyles function.
 			if db.threat.nonCombat then
 				if (unit.isInCombat or (unit.health < unit.healthmax)) then
 					c = db.settings[style].threatcolor[unit.threatSituation]
-				else
+				else -- not sure, wenn this branch is used
 					c = GetClassColor(unit)
 				end
 			else
 				c = db.settings[style].threatcolor[unit.threatSituation]
 			end
 		else
+			-- should be color for second tank - not active currently
 			c = db.tHPbarColor
 		end
-	else -- this branch should not be nesssary as
-		c = GetClassColor(unit)
 	end
 	return c
 end

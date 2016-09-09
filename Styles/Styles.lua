@@ -91,7 +91,8 @@ local function SetStyle(unit)
 			end
 		else
 			if db.nameplate.toggle[T] then
-				if InCombatLockdown() and (unit.class == "UNKNOWN" or unit.type == "NPC") and db.threat.ON then
+				-- style tank/dps only used for NPCs/non-player units, old: unit.class == "UNKNOWN"
+				if InCombatLockdown() and unit.type == "NPC" and db.threat.ON then
 					if db.threat.toggle[T] then
 						if db.threat.nonCombat  then
 							-- db.thread.nonCombat not nessessary in following if statement?!?
