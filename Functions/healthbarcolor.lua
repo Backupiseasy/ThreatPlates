@@ -4,11 +4,13 @@ local t = ns.ThreatPlates
 
 local isTanked
 local reference = {
-	["FRIENDLY"] = "fHPbarColor",
-	["NEUTRAL"] = "nHPbarColor",
-	["TAPPED"] = "tapHPbarColor",
-	["HOSTILE"] = "HPbarColor",
-	["UNKNOWN"] = "HPbarColor"
+	["FRIENDLY_NPC"] = "fHPbarColor",
+	["FRIENDLY_PLAYER"] = "fHPbarColor",
+	["HOSTILE_NPC"] = "HPbarColor",
+	["HOSTILE_PLAYER"] = "HPbarColor",
+	["NEUTRAL_UNIT"] = "nHPbarColor",
+	["TAPPED_UNIT"] = "tapHPbarColor",
+	["GUILD_MEMBER"] = "HPbarColor",
 }
 
 local function GetMarkedColor(unit,a,var)

@@ -29,9 +29,12 @@ t.DEBUG = function(...)
 end
 
 t.Update = function()
+	-- TODO: check if all of it here is necessary
 	if (TidyPlatesOptions.ActiveTheme == THREAD_PLATES_NAME) then
 		TidyPlates:SetTheme(THREAD_PLATES_NAME)
 	end
+	TidyPlatesThreat.ApplyProfileSettings()
+
 	-- reload theme is deprecated and empty, ForceUpdate() is called in SetTheme()
 	--TidyPlates:ReloadTheme()
 	--TidyPlates:ForceUpdate()

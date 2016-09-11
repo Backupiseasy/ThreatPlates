@@ -50,6 +50,60 @@ local function GetType(unit)
 	return unitRank
 end
 
+local function ShowUnit(unit)
+	local db = TidyPlatesThreat.db.profile
+	local T = GetType(unit)
+
+	local faction = ""
+	local unit_type = "NPC"
+	local show = false
+	local headline_view = false
+
+	if unit.reaction == "FRIENDLY" then
+		faction = "Friendly"
+		if unit.type == "PLAYER" then
+			unit_type = "Player"
+		elseif unit.type == "NPC" then
+			unit_type = "NPC"
+		elseif T == "Totem" then
+			unit_type = "Totem"
+		end
+		-- missing: Guardina, Creature & Properties
+	elseif unit.reaction == "HOSTILE" then
+		faction = "Hostile"
+		if unit.type == "PLAYER" then
+			unit_type = "Player"
+		elseif unit.type == "NPC" then
+			unit_type = "NPC"
+		elseif T == "Totem" then
+			unit_type = "Totem"
+		elseif unit.isMini then
+			unit_type = "Minor"
+		end
+		-- missing: Guardina, Creature & Properties
+	elseif unit.reaction == "NEUTRAL" then
+		faction = "Neutral"
+		if unit.type == "NPC" then
+			unit_type = "NPC"
+		elseif unit.isMini then
+			unit_type = "Minor"
+		end
+		-- missing: Guardian
+	end
+
+	show = db.visibility["show"..faction..unit_type]
+	headline_view = db.visibility["show"..faction..unit_type.."HeadlineView"]
+
+	if (unit.isElite and db.visibility.hideElite) or (unit.isBoss and db.visibility.hideBoss) or
+		(unit.isTapped and db.visibility.hideTapped) then
+		show = false
+	elseif db.visibility.hideNormal and not (unit.isElite or unit.isBoss or unit.isDangerous) then
+		show = false
+	end
+
+	return show, headline_view
+end
+
 local function IsUnitActive(unit)
 	return (unit.health < unit.healthmax) or (unit.threatValue > 1) or unit.isMarked	-- or unit.isInCombat
 end
@@ -119,16 +173,24 @@ local function SetStyle(unit)
 		end
 	end
 
-	-- if unit.isTarget then
-	-- 	t.DEBUG("unit.name = ", unit.name)
-	-- 	t.DEBUG("unit.type = ", unit.type)
-	-- 	t.DEBUG("unit.class = ", unit.class)
-	-- 	t.DEBUG("unit.reaction = ", unit.reaction)
-	-- 	t.DEBUG("unit.isMini = ", unit.isMini)
-	-- 	t.DEBUG("unit.isTapped = ", unit.isTapped)
-	-- 	t.DEBUG("unit SetStyle = ", style)
-	-- 	t.DEBUG("unit GetType = ", TidyPlatesThreat.GetType(unit))
-	-- end
+	local  show, headline_view = ShowUnit(unit)
+
+	if unit.isTarget then
+		-- TODO: Guardian, Creature & Pet, Boss, Elite, Tapped
+	-- -- 	t.DEBUG("unit.name = ", unit.name)
+	-- -- 	t.DEBUG("unit.type = ", unit.type)
+	-- -- 	t.DEBUG("unit.class = ", unit.class)
+	-- -- 	t.DEBUG("unit.reaction = ", unit.reaction)
+	-- -- 	t.DEBUG("unit.isMini = ", unit.isMini)
+	-- -- 	t.DEBUG("unit.isTapped = ", unit.isTapped)
+	-- -- 	t.DEBUG("unit SetStyle = ", style)
+	-- -- 	t.DEBUG("unit GetType = ", TidyPlatesThreat.GetType(unit))
+	t.DEBUG("ShowUnit: ", unit.reaction, " ",  unit.type, " -> show = ", show, " + headline view = ", headline_view)
+	end
+
+	if not show then
+		style = "empty"
+	end
 
 	if style then
 	  return style

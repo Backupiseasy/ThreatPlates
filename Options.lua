@@ -147,6 +147,64 @@ local function SetThemeValue(info, val)
 	end
 end
 
+---------------------------------------------------------------------------------------------------
+-- Functions for building the options table
+---------------------------------------------------------------------------------------------------
+
+local function CreateUnitVisibility(args, pos, unit_type, faction)
+	local unit_config = unit_type:gsub("%s+", "")
+	if not faction then faction = "" end
+
+	args["UnitType"..unit_config] = {
+		name = L[unit_type], type = "toggle", order = pos, arg = {"visibility", "show"..faction..unit_config},
+	}
+
+	args["UnitTypeHeadlineView"..unit_config] = {
+		name = L["Headline View"], type = "toggle", order = pos + 2, arg = {"visibility", "show"..faction..unit_config.."HeadlineView"},
+		disabled = function() return not db.visibility["show"..faction..unit_config] end,
+	}
+
+	args["Spacer"..unit_config] = { type = "description", name = "", order = pos + 9 }
+
+	-- args["UnitType"..unit_type.."Description"] = {
+	-- 	type = "description", name = description, order = pos + 3, width = "double",
+	-- }
+end
+
+local function CreateFriendlyUnitVisiblilty()
+	local args = {}
+
+	CreateUnitVisibility(args, 0, "NPC", "Friendly")
+	CreateUnitVisibility(args, 10, "Player", "Friendly")
+	CreateUnitVisibility(args, 20, "Totem", "Friendly")
+	CreateUnitVisibility(args, 30, "Guardian", "Friendly")
+	CreateUnitVisibility(args, 50, "Creature and Pet", "Friendly")
+
+	return args
+end
+
+local function CreateHostileUnitVisiblilty()
+	local args = {}
+
+	CreateUnitVisibility(args, 0, "NPC", "Hostile")
+	CreateUnitVisibility(args, 10, "Player", "Hostile")
+	CreateUnitVisibility(args, 20, "Totem", "Hostile")
+	CreateUnitVisibility(args, 30, "Guardian", "Hostile")
+	CreateUnitVisibility(args, 40, "Minor", "Hostile")
+	CreateUnitVisibility(args, 50, "Creature and Pet", "Hostile")
+
+	return args
+end
+
+local function CreateNeutralUnitVisiblilty()
+	local args = {}
+
+	CreateUnitVisibility(args, 0, "NSC", "Neutral")
+	CreateUnitVisibility(args, 10, "Guardians", "Neutral")
+	CreateUnitVisibility(args, 20, "Minor", "Neutral")
+
+	return args
+end
 
 -- Return the Options table
 local options = nil;
@@ -214,14 +272,14 @@ local function GetOptions()
 					order = 10,
 					args = {
 						GeneralSettings = {
-							name = L["General Settings"],
+							name = L["Visibility"],
 							type = "group",
 							order = 10,
 							args = {
 								TidyPlates = {
 									name = "Tidy Plates Fading",
 									type = "group",
-									order = 0,
+									order = 10,
 									inline = true,
 									args = {
 										Enable = {
@@ -243,136 +301,41 @@ local function GetOptions()
 										},
 									},
 								},
-								Hiding = {
-									name = L["Hiding"],
-									type = "group",
-									order = 1,
-									inline = true,
+								FriendlyUnits = {
+									name = L["Show Friendly Units"], type = "group", order = 20,	inline = true,
+									args = CreateFriendlyUnitVisiblilty(),
+								},
+								HostileUnits = {
+									name = L["Show Hostile Units"], type = "group", order = 30,	inline = true,
+									args = CreateHostileUnitVisiblilty(),
+								},
+								NeutralUnits = {
+									name = L["Show Neutral Units"], type = "group", order = 40,	inline = true, width = "full",
+									args = CreateNeutralUnitVisiblilty(),
+								},
+								-- TidyPlatesHub calls this Unit Filter
+								SpecialUnits = {
+									name = L["Hide Special Units"], type = "group", order = 50,	inline = true, width = "full",
 									args = {
-										ShowNeutral = {
-											type = "toggle",
-											order = 1,
-											name = L["Show Neutral"],
-											arg = {"nameplate","toggle","Neutral"},
-										},
-										ShowTapped = {
-											type = "toggle",
-											order = 2,
-											name = L["Show Tapped"],
-											arg = {"nameplate","toggle","Tapped"},
-										},
-										ShowNormal = {
-											type = "toggle",
-											order = 3,
-											name = L["Show Normal"],
-											arg = {"nameplate","toggle","Normal"},
-										},
-										ShowElite = {
-											type = "toggle",
-											order = 4,
-											name = L["Show Elite"],
-											arg = {"nameplate","toggle","Elite"},
-										},
-										ShowBoss = {
-											type = "toggle",
-											order = 5,
-											name = L["Show Boss"],
-											arg = {"nameplate","toggle","Boss"},
-										},
-										ShowMini = {
-											type = "toggle",
-											order = 6,
-											name = L["Show Minor"],
-											arg = {"nameplate","toggle","Mini"},
-										},
+										HideNormal = { name = L["Normal"], order = 1,	type = "toggle", arg = {"visibility","hideNormal"}, },
+										HideBoss = { name = L["Boss"], order = 2,	type = "toggle", arg = {"visibility","hideBoss"}, },
+										HideElite = { name = L["Elite"], order = 2,	type = "toggle", arg = {"visibility","hideElite"}, },
+										HideTapped = { name = L["Tapped"], order = 3,	type = "toggle", arg = {"visibility","hideTapped"}, },
 									},
 								},
-								BlizzSettings = {
-									name = L["Blizzard Settings"],
-									type = "group",
-									order = 2,
-									inline = true,
-									get = GetCvar,
-									set = SetCvar,
-									args = {
-										OpenBlizzardSettings = {
-											name = L["Open Blizzard Settings"],
-											type = "execute",
-											order = 1,
-											func = function()
-												InterfaceOptionsFrame_OpenToCategory(_G["InterfaceOptionsNamesPanel"])
-												LibStub("AceConfigDialog-3.0"):Close("Tidy Plates: Threat Plates");
-											end,
-										},
-										Friendly = {
-											type = "group",
-											name = L["Friendly"],
-											order = 2,
-											inline = true,
-											args = {
-												nameplateShowFriends = {
-													name = L["Show Friends"],
-													type = "toggle",
-													order = 1,
-													arg = "nameplateShowFriends",
-												},
-												nameplateShowFriendlyTotems = {
-													name = L["Show Friendly Totems"],
-													type = "toggle",
-													order = 2,
-													arg = "nameplateShowFriendlyTotems",
-												},
-												nameplateShowFriendlyPets = {
-													name = L["Show Friendly Pets"],
-													type = "toggle",
-													order = 3,
-													arg = "nameplateShowFriendlyPets",
-												},
-												nameplateShowFriendlyGuardians = {
-													name = L["Show Friendly Guardians"],
-													type = "toggle",
-													order = 4,
-													arg = "nameplateShowFriendlyGuardians",
-												},
-											},
-										},
-										Enemy = {
-											type = "group",
-											name = L["Enemy"],
-											order = 3,
-											inline = true,
-											args = {
-												nameplateShowEnemies = {
-													name = L["Show Enemies"],
-													type = "toggle",
-													order = 1,
-													arg = "nameplateShowEnemies",
-												},
-												nameplateShowEnemyTotems = {
-													name = L["Show Enemy Totems"],
-													type = "toggle",
-													order = 2,
-													arg = "nameplateShowEnemyTotems",
-												},
-												nameplateShowEnemyPets = {
-													name = L["Show Enemy Pets"],
-													type = "toggle",
-													order = 3,
-													arg = "nameplateShowEnemyPets",
-												},
-												nameplateShowEnemyGuardians = {
-													name = L["Show Enemy Guardians"],
-													type = "toggle",
-													order = 4,
-													arg = "nameplateShowEnemyGuardians",
-												},
-											},
-										},
-									},
-								},
+								-- TODO: not really necessary, is it?
+								-- OpenBlizzardSettings = {
+								-- 	name = L["Open Blizzard Settings"],
+								-- 	type = "execute",
+								-- 	order = 90,
+								-- 	func = function()
+								-- 		InterfaceOptionsFrame_OpenToCategory(_G["InterfaceOptionsNamesPanel"])
+								-- 		LibStub("AceConfigDialog-3.0"):Close("Tidy Plates: Threat Plates");
+								-- 	end,
+								-- },
 							},
 						},
-						HealthBarTexture = {
+						HealthBarView = {
 							name = L["Health Bar View"],
 							type = "group",
 							inline = false,
@@ -382,7 +345,7 @@ local function GetOptions()
 									name = L["Textures"],
 									type = "group",
 									inline = true,
-									order = 10,
+									order = 1,
 									args = {
 										HealthBarTexture = {
 											name = L["Healthbar"],
@@ -457,7 +420,7 @@ local function GetOptions()
 									name = L["Placement"],
 									type = "group",
 									inline = true,
-									order = 20,
+									order = 2,
 									args = {
 										Warning = {
 											type = "description",
@@ -487,109 +450,189 @@ local function GetOptions()
 									},
 								},
 								ColorSettings = {
-									name = L["Coloring"],
-									type = "group",
-									inline = true,
-									order = 30,
+									name = L["Coloring"], type = "group", inline = true,
+									order = 3,
 									args = {
 										ColorByHPLevel = {
-											name = L["Color HP by amount"],
+											name = L["Color by Health"],
+											order = 1,
 											type = "toggle",
-											desc = L["Changes the HP color depending on the amount of HP the nameplate shows."],
+											desc = L["Changes the color depending on the amount of health points the nameplate shows."],
 											descStyle = "inline",
 											width = "full",
-											order = 0,
 											arg = {"healthColorChange"},
+											get = function() return TidyPlatesThreat.db.profile.healthColorChange end,
+											set = function() TidyPlatesThreat.db.profile.healthColorChange = true; t.Update() end,
 										},
-										ClassColors = {
-											name = L["Color text by class"],
+										HPAmount = {
+											name = L["Health Colors"],
 											order = 2,
 											type = "group",
-											disabled = function() return db.healthColorChange end,
 											inline = true,
 											args = {
-												Enable = {
-													name = L["Enable Enemy Class Colors"],
+												ColorLow = {
+													name = "Low Color",
 													order = 1,
-													type = "toggle",
-													desc = L["Enable the showing of hostile player class color on hp bars."],
+													type = "color",
+													desc = "",
 													descStyle = "inline",
-													width = "full",
-													arg = {"allowClass"}
+													get = GetColor,
+													set = SetColor,
+													arg = {"aHPbarColor"},
 												},
-												FriendlyClass = {
-													name = L["Enable Friendly Class Colors"],
+												ColorHigh = {
+													name = "High Color",
 													order = 2,
-													type = "toggle",
-													desc = L["Enable the showing of friendly player class color on hp bars."],
+													type = "color",
+													desc = "",
 													descStyle = "inline",
-													width = "full",
-													arg = {"friendlyClass"},
-												},
-												FriendlyCaching = {
-													name = L["Friendly Caching"],
-													order = 3,
-													type = "toggle",
-													desc = L["This allows you to save friendly player class information between play sessions or nameplates going off the screen.|cffff0000(Uses more memory)"],
-													descStyle = "inline",
-													width = "full",
-													arg = {"cacheClass"},
+													get = GetColor,
+													set = SetColor,
+													arg = {"bHPbarColor"},
 												},
 											},
 										},
-										Enable = {
-											name = L["Enable raid marked text colors"],
+										ColorByReaction = {
+											name = L["Color by Reaction"],
+											type = "toggle",
+											desc = L["Changes the color depending on the reaction of the unit (friendly, hostile, neutral)."],
+											descStyle = "inline",
+											width = "full",
+											order = 3,
+											arg = {"healthColorChange"},
+											get = function() return not TidyPlatesThreat.db.profile.healthColorChange end,
+											set = function() TidyPlatesThreat.db.profile.healthColorChange = false; t.Update() end,
+										},
+										Reaction = {
+											-- TODO: Button, um auf Blizzard-Default zurückzusetzen?
+											order = 4,
+											name = L["Reaction Colors"], type = "group",	inline = true,
+											get = GetColor, set = SetColor,
+											args = {
+												FriendlyColorNPC = { name = L["Friendly NPC"], order = 1,	type = "color",	arg = { "ColorByReaction", "Friendly_NPC", }, },
+												FriendlyColorPlayer = { name = L["Friendly Player"], order = 2, type = "color", arg = { "ColorByReaction", "Friendly_Player"}, },
+												EnemyColorNPC = { name = L["Hostile NPC"], order = 3, type = "color", arg = { "ColorByReaction", "Hostile_NPC"}, },
+												EnemyColorPlayer = { name = L["Hostile Player"], order = 4, type = "color", arg = { "ColorByReaction", "Hostile_Player"}, },
+												NeutralColor = { name = L["Neutral Unit"], order = 5, type = "color", arg = { "ColorByReaction", "Neutral_Unit"}, },
+												TappedColor = { name = L["Tapped Unit"], order = 6, type = "color", arg = { "ColorByReaction", "Tapped_Unit"}, },
+												-- TODO: auch Friends?
+												GuildMemberColor = { name = L["Guild Member"], order = 7, type = "color", arg = { "ColorByReaction", "Guild_Member"}, },
+											},
+										},
+										Header = { order = 4.5, type = "header", name = L["Additional Options"], },
+										HostileClass = {
+											name = L["Enable Enemy Class colors"],
+											order = 5,
+											type = "toggle",
+											desc = L["Additionnally changes the color of hostile players depending on their class (not for NPCs)."],
+											descStyle = "inline",
+											width = "full",
+											arg = {"allowClass"}
+										},
+										FriendlyClass = {
+											name = L["Enable Friendly Class Colors"],
+											order = 6,
+											type = "toggle",
+											desc = L["Additionnally changes the color of friendly players depending on their class (not for NPCs)."],
+											descStyle = "inline",
+											width = "full",
+											arg = {"friendlyClass"},
+										},
+										FriendlyCaching = {
+											name = L["Friendly Caching"],
+											order = 7,
+											type = "toggle",
+											desc = L["This allows you to save friendly player class information between play sessions or nameplates going off the screen.|cffff0000 (Uses more memory)"],
+											descStyle = "inline",
+											width = "full",
+											arg = {"cacheClass"},
+										},
+										EnableRaidMarks = {
+											name = L["Color by Raid Marks"],
+											order = 8,
 											type = "toggle",
 											width = "full",
+											desc = L["Additionnally changes the color depending on the amount of health points the nameplate shows."],
+											descStyle = "inline",
 											set = SetValue,
-											order = 3,
 											arg = {"settings","raidicon","hpColor"},
 										},
-										ThreatColors = {
-											name = L["Threat Colors"],
-											order = 5,
+										RaidMark = {
+											name = L["Raid Mark Colors"],
+											order = 9,
 											type = "group",
-											get = GetColorAlpha,
-											set = SetColorAlpha,
 											inline = true,
+											get = GetColor,
+											set = SetColor,
 											args = {
-												ThreatGlow = {
-													type = "toggle",
-													width = "double",
+												STAR = {
+													type = "color",
 													order = 1,
-													name = L["Show Threat Glow"],
-													get = GetValue,
-													set = SetThemeValue,
-													arg = {"settings","threatborder","show"},
+													name = RAID_TARGET_1,
+													arg = {"settings","raidicon","hpMarked","STAR"},
 												},
-												Header = {
-													name = "Colors",
-													type = "header",
+												CIRCLE = {
+													type = "color",
 													order = 2,
+													name = RAID_TARGET_2,
+													arg = {"settings","raidicon","hpMarked","CIRCLE"},
 												},
-												Low = {
-													name = L["|cff00ff00Low threat|r"],
+												DIAMOND = {
 													type = "color",
 													order = 3,
-													arg = {"settings", "normal", "threatcolor", "LOW"},
-													hasAlpha = true,
+													name = RAID_TARGET_3,
+													arg = {"settings","raidicon","hpMarked","DIAMOND"},
 												},
-												Med = {
-													name = L["|cffffff00Medium threat|r"],
+												TRIANGLE = {
 													type = "color",
 													order = 4,
-													arg = {"settings", "normal", "threatcolor", "MEDIUM"},
-													hasAlpha = true,
+													name = RAID_TARGET_4,
+													arg = {"settings","raidicon","hpMarked","TRIANGLE"},
 												},
-												High = {
-													name = L["|cffff0000High threat|r"],
+												MOON = {
 													type = "color",
 													order = 5,
-													arg = {"settings", "normal", "threatcolor", "HIGH"},
-													hasAlpha = true,
+													name = RAID_TARGET_5,
+													arg = {"settings","raidicon","hpMarked","MOON"},
+												},
+												SQUARE = {
+													type = "color",
+													order = 6,
+													name = RAID_TARGET_6,
+													arg = {"settings","raidicon","hpMarked","SQUARE"},
+												},
+												CROSS = {
+													type = "color",
+													order = 7,
+													name = RAID_TARGET_7,
+													arg = {"settings","raidicon","hpMarked","CROSS"},
+												},
+												SKULL = {
+													type = "color",
+													order = 8,
+													name = RAID_TARGET_8,
+													arg = {"settings","raidicon","hpMarked","SKULL"},
 												},
 											},
 										},
+									},
+								},
+								ThreatGlow = {
+									name = L["Threat Glow"], order = 8, type = "group", inline = true,	get = GetColorAlpha, set = SetColorAlpha,
+									args = {
+										Toggle = {
+											name = L["Enable Threat Glow"],
+											order = 1,
+											type = "toggle", width = "full",
+										  desc = L["Show a translucent glow around health bars for different threat levels."],
+											descStyle = "inline",
+											get = GetValue, set = SetThemeValue, arg = {"settings","threatborder","show"},
+										},
+										Low = { name = L["|cff00ff00Low Threat|r"], type = "color", order = 3,
+														arg = {"settings", "normal", "threatcolor", "LOW"}, hasAlpha = true, },
+										Med = { name = L["|cffffff00Medium Threat|r"], type = "color", order = 4,
+													arg = {"settings", "normal", "threatcolor", "MEDIUM"}, hasAlpha = true, },
+										High = { name = L["|cffff0000High Threat|r"], type = "color", order = 5, arg = {"settings", "normal", "threatcolor", "HIGH"},hasAlpha = true, },
 									},
 								},
 							},
@@ -600,11 +643,11 @@ local function GetOptions()
 							inline = false,
 							order = 25,
 							args = {
-								HeadlineView = {
+								Enable = {
 									name = L["Enable"],
+									order = 1,
 									type = "group",
 									inline = true,
-									order = 1,
 									args = {
 										Enable = {
 											name = L["Enable Headline View (Text-Only)"],
@@ -614,30 +657,40 @@ local function GetOptions()
 											descStyle = "inline",
 											width = "full",
 											set = SetThemeValue,
-											arg = {"alphaFeatureHeadlineView"},
+											arg = {"headlineView", "enabled"},
 										},
 									},
 								},
-								BlizzFadeEnable = {
-									name = L["Blizzard Target Fading"],
+								Alpha = {
+									name = L["Alpha"],
 									order = 2,
 									disabled = function() return not t.AlphaFeatureHeadlineView() end,
 									type = "group",
 									inline = true,
 									args = {
+										Alpha = {
+											name = L["Use alpha settings of health bar view for also headline view."],
+											type = "toggle",
+											order = 1,
+											-- desc = L["This will enable "],
+											-- descStyle = "inline",
+											width = "full",
+											set = SetThemeValue,
+											arg = {"headlineView", "useAlpha"},
+										},
 										Enable = {
 											name = L["Enable Blizzard 'On-Target' Fading"],
 											type = "toggle",
 											desc = L["Enabling this will allow you to set the alpha adjustment for non-target names in headline view."],
 											descStyle = "inline",
-											order = 1,
+											order = 2,
 											width = "full",
-											arg = {"headlineView", "nonTargetAlpha"},
+											arg = {"headlineView", "blizzFading"},
 										},
 										blizzFade = {
 											name = L["Non-Target Alpha"],
 											type = "range",
-											order = 2,
+											order = 4,
 											width = "full",
 											disabled = function() return not db.headlineView.nonTargetAlpha end,
 											min = -1,
@@ -645,7 +698,26 @@ local function GetOptions()
 											step = 0.01,
 											isPercent = true,
 											--set = SetThemeValue,
-											arg = {"headlineView","alpha"},
+											arg = {"headlineView","blizzFadingAlpha"},
+										},
+									},
+								},
+								Scaline = {
+									name = L["Scaling"],
+									order = 2.5,
+									disabled = function() return not t.AlphaFeatureHeadlineView() end,
+									type = "group",
+									inline = true,
+									args = {
+										Scaling = {
+											name = L["Use scaling settings of health bar view also for headline view."],
+											type = "toggle",
+											order = 1,
+											-- desc = L["This will enable headline view "],
+											-- descStyle = "inline",
+											width = "full",
+											set = SetThemeValue,
+											arg = {"headlineView","useScaling"},
 										},
 									},
 								},
@@ -685,198 +757,65 @@ local function GetOptions()
 									},
 								},
 								ColorSettings = {
-									name = L["Coloring"],
-									type = "group",
-									inline = true,
+									name = L["Coloring"], type = "group", inline = true,
 									order = 5,
 									args = {
-										ColorByHPLevel = {
-											name = L["Color by Health"],
+										HostileClass = {
+											name = L["Enable Enemy Class colors"],
+											order = 4,
 											type = "toggle",
-											desc = L["Changes the color depending on the amount of health points the nameplate shows."],
+											desc = L["Additionnally changes the color of hostile players depending on their class (not for NPCs)."],
 											descStyle = "inline",
 											width = "full",
-											order = 1,
-											arg = {"healthColorChange"},
+											arg = {"headlineView","useHostileClassColoring"}
 										},
-										ColorByReaction = {
-											name = L["Color by Reaction"],
+										FriendlyClass = {
+											name = L["Enable Friendly Class Colors"],
+											order = 5,
 											type = "toggle",
-											desc = L["Changes the color depending on the reaction of the unit (friendly, hostile, neutral)."],
+											desc = L["Additionnally changes the color of friendly players depending on their class (not for NPCs)."],
 											descStyle = "inline",
 											width = "full",
-											order = 2,
-											arg = {"healthColorChange"},
+											arg = {"headlineView","useFriendlyClassColoring"},
 										},
-										ClassColors = {
-											name = L["Color by Class"],
-											order = 3,
-											type = "group",
-											desc = L["Changes the color of player units depending on class (not for NPCs)."],
+										FriendlyCaching = {
+											name = L["Friendly Caching"],
+											order = 6,
+											type = "toggle",
+											desc = L["This allows you to save friendly player class information between play sessions or nameplates going off the screen.|cffff0000 (Uses more memory)"],
 											descStyle = "inline",
-											disabled = function() return db.healthColorChange end,
-											inline = true,
-											args = {
-												Enable = {
-													name = L["Enable Enemy Class colors"],
-													order = 1,
-													type = "toggle",
-													desc = L["Enable the showing of hostile player class color on hp bars."],
-													descStyle = "inline",
-													width = "full",
-													arg = {"allowClass"}
-												},
-												FriendlyClass = {
-													name = L["Enable Friendly Class Colors"],
-													order = 2,
-													type = "toggle",
-													desc = L["Enable the showing of friendly player class color on hp bars."],
-													descStyle = "inline",
-													width = "full",
-													arg = {"friendlyClass"},
-												},
-												FriendlyCaching = {
-													name = L["Friendly Caching"],
-													order = 3,
-													type = "toggle",
-													desc = L["This allows you to save friendly player class information between play sessions or nameplates going off the screen.|cffff0000 (Uses more memory)"],
-													descStyle = "inline",
-													width = "full",
-													arg = {"cacheClass"},
-												},
-											},
+											width = "full",
+											arg = {"cacheClass"},
 										},
 										EnableRaidMarks = {
 											name = L["Color by Raid Marks"],
-											order = 4,
+											order = 7,
 											type = "toggle",
 											width = "full",
-											desc = L["Changes the color depending on the amount of health points the nameplate shows."],
+											desc = L["Additionnally changes the color depending on the amount of health points the nameplate shows."],
 											descStyle = "inline",
 											set = SetValue,
-											arg = {"settings","raidicon","hpColor"},
+											arg = {"headlineView","useRaidMarkColoring"},
 										},
 									},
 								},
 							},
 						},
-						ColorSettings = {
-							name = L["Color"], type = "group", inline = false,
-							order = 28,
-							args = {
-								Standard = {
-									order = 1,
-									name = L["Text Color"], type = "group",	inline = true,
-									get = GetColor, set = SetColor,
-									args = {
-										Color = {	name = L["General color for text"], order = 1,	type = "color",	width = "full",	get = GetColor,	set = SetColor,
-										arg = {"settings", "name", "color"}, hasAlpha = false, },
-									},
-								},
-								Reaction = {
-									-- TODO: Button, um auf Blizzard-Default zurückzusetzen?
-									order = 2,
-									name = L["Colors based on Reaction of Units"], type = "group",	inline = true,
-									get = GetColor, set = SetColor,
-									args = {
-										FriendlyColorNPC = { name = L["Friendly NPC"], order = 1,	type = "color",	arg = { "ColorByReaction", "Friendly_NPC", }, },
-										FriendlyColorPlayer = { name = L["Friendly Player"], order = 2, type = "color", arg = { "ColorByReaction", "Friendly_Player"}, },
-										EnemyColorNPC = { name = L["Hostile NPC"], order = 3, type = "color", arg = { "ColorByReaction", "Hostile_NPC"}, },
-										EnemyColorPlayer = { name = L["Hostile Player"], order = 4, type = "color", arg = { "ColorByReaction", "Hostile_Player"}, },
-										NeutralColor = { name = L["Neutral Unit"], order = 5, type = "color", arg = { "ColorByReaction", "Neutral_Unit"}, },
-										TappedColor = { name = L["Tapped Unit"], order = 6, type = "color", arg = { "ColorByReaction", "Tapped_Unit"}, },
-										-- TODO: auch Friends?
-										GuildMemberColor = { name = L["Guild Member"], order = 7, type = "color", arg = { "ColorByReaction", "Guild_Member"}, },
-									},
-								},
-								HPAmount = {
-									name = L["Colors based on Health Point Amount"],
-									order = 3,
-									type = "group",
-									inline = true,
-									args = {
-										ColorLow = {
-											name = "Low Color",
-											type = "color",
-											desc = "",
-											descStyle = "inline",
-											order = 1,
-											get = GetColor,
-											set = SetColor,
-											arg = {"aHPbarColor"},
-										},
-										ColorHigh = {
-											name = "High Color",
-											type = "color",
-											desc = "",
-											descStyle = "inline",
-											order = 2,
-											get = GetColor,
-											set = SetColor,
-											arg = {"bHPbarColor"},
-										},
-									},
-								},
-								RaidMark = {
-									name = L["Colors based on Raid Marks"],
-									order = 4,
-									type = "group",
-									inline = true,
-									get = GetColor,
-									set = SetColor,
-									args = {
-										STAR = {
-											type = "color",
-											order = 1,
-											name = RAID_TARGET_1,
-											arg = {"settings","raidicon","hpMarked","STAR"},
-										},
-										CIRCLE = {
-											type = "color",
-											order = 2,
-											name = RAID_TARGET_2,
-											arg = {"settings","raidicon","hpMarked","CIRCLE"},
-										},
-										DIAMOND = {
-											type = "color",
-											order = 3,
-											name = RAID_TARGET_3,
-											arg = {"settings","raidicon","hpMarked","DIAMOND"},
-										},
-										TRIANGLE = {
-											type = "color",
-											order = 4,
-											name = RAID_TARGET_4,
-											arg = {"settings","raidicon","hpMarked","TRIANGLE"},
-										},
-										MOON = {
-											type = "color",
-											order = 5,
-											name = RAID_TARGET_5,
-											arg = {"settings","raidicon","hpMarked","MOON"},
-										},
-										SQUARE = {
-											type = "color",
-											order = 6,
-											name = RAID_TARGET_6,
-											arg = {"settings","raidicon","hpMarked","SQUARE"},
-										},
-										CROSS = {
-											type = "color",
-											order = 7,
-											name = RAID_TARGET_7,
-											arg = {"settings","raidicon","hpMarked","CROSS"},
-										},
-										SKULL = {
-											type = "color",
-											order = 8,
-											name = RAID_TARGET_8,
-											arg = {"settings","raidicon","hpMarked","SKULL"},
-										},
-									},
-								},
-							},
-						},
+						-- ColorSettings = {
+						-- 	name = L["Color"], type = "group", inline = false,
+						-- 	order = 28,
+						-- 	args = {
+						-- 		Standard = {
+						-- 			order = 1,
+						-- 			name = L["Text Color"], type = "group",	inline = true,
+						-- 			get = GetColor, set = SetColor,
+						-- 			args = {
+						-- 				Color = {	name = L["General Color for Text"], order = 1,	type = "color",	width = "full",	get = GetColor,	set = SetColor,
+						-- 				arg = {"settings", "name", "color"}, hasAlpha = false, },
+						-- 			},
+						-- 		},
+						-- 	},
+						-- },
 						CastBarSettings = {
 							name = L["Castbar"],
 							type = "group",
@@ -4189,36 +4128,6 @@ local function GetOptions()
 							width = "full",
 							name = L["This will enable all alpha features currently available in ThreatPlates. Be aware that most of the features are not fully implemented and may contain several bugs."],
 						},
-						-- AlphaFeature_HeadlineView = {
-						-- 	name = L["Headline View (Text-Only)"],
-						-- 	type = "group",
-						-- 	inline = true,
-						-- 	order = 15,
-						-- 	args = {
-						-- 		Enable = {
-						-- 			name = L["Enable"],
-						-- 			type = "toggle",
-						-- 			order = 1,
-						-- 			desc = L["This will enable Headline View (Text-Only) for nameplates. TidyPlatesHub must be enabled for it to work. Use the TidyPlatesHub dialog for configuration."],
-						-- 			descStyle = "inline",
-						-- 			width = "full",
-						-- 			arg = {"alphaFeatureHeadlineView"},
-						-- 		},
-						-- 		HeadlineViewFade = {
-						-- 			name = L["Headline-View Alpha"],
-						-- 			type = "range",
-						-- 			order = 2,
-						-- 			width = "full",
-						-- 			-- maybe use t.AlphaFeatureHeadlineView() to also check for TidyPlatesHub enabled?
-						-- 			disabled = function() return not TidyPlatesThreat.db.profile.alphaFeatureHeadlineView end,
-						-- 			min = 0,
-						-- 			max = 1,
-						-- 			step = 0.01,
-						-- 			isPercent = true,
-						-- 			arg = {"headlineView","alpha"},
-						-- 		},
-						-- 	},
-						-- },
 					},
 				},
 			},
