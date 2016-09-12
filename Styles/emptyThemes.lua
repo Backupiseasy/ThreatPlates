@@ -5,10 +5,7 @@ local function Create(self,name)
 	local db = self.db.profile.settings
 	local theme = {}
 	theme = {
-		hitbox = {
-			width = 124,
-			height = 30,
-		},
+		hitbox = { width = 124,	height = 30,	},
 		frame = {
 			emptyTexture =					t.Art.."Empty",
 			width = 124,
@@ -154,6 +151,10 @@ local function Create(self,name)
 			anchor = (db.raidicon.anchor),
 			show = false,
 		},
+		eliteicon = {
+      texture = t.Art.."Empty",
+      show = false,
+    },
 		threatcolor = {
 			LOW = { r = 0, g = 0, b = 0, a = 0 },
 			MEDIUM = { r = 0, g = 0, b = 0, a = 0 },

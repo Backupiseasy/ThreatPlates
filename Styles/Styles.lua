@@ -3,7 +3,7 @@ local t = ns.ThreatPlates
 
 -- TODO: rework, TidyPlates has several new attributes to make this easier, e.g., isBoss
 local function GetGeneral(unit)
-	local r, d, e, m = unit.reaction, unit.isDangerous, unit.isElite, unit.isMini
+	local r, d, e = unit.reaction, unit.isDangerous, unit.isElite
 	if unit.isTapped then
 		return "Tapped"
 	elseif r == "NEUTRAL" then
@@ -17,7 +17,7 @@ local function GetGeneral(unit)
 			return "Boss"
 		elseif not d and e then
 			return "Elite"
-		elseif m then
+		elseif unit.isMini then
 			return "Mini"
 		elseif not d and not e then
 			return "Normal"
@@ -50,70 +50,85 @@ local function GetType(unit)
 	return unitRank
 end
 
+local function GetUniqueType(unit)
+	local db = TidyPlatesThreat.db.profile
+	local unitRank
+
+	local totem = ThreatPlates_Totems[unit.name]
+	local unique = tContains(db.uniqueSettings.list, unit.name)
+
+	if totem then
+		unitRank = "Totem"
+	elseif unique then
+		for k_c,k_v in pairs(db.uniqueSettings.list) do
+			if k_v == unit.name then
+				if db.uniqueSettings[k_c].useStyle then
+					unitRank = "Unique"
+				end
+			end
+		end
+	end
+
+	return unitRank
+end
+
 local function ShowUnit(unit)
 	local db = TidyPlatesThreat.db.profile
-	local T = GetType(unit)
-
 	local faction = ""
 	local unit_type = "NPC"
 	local show = false
 	local headline_view = false
 
-	if unit.reaction == "FRIENDLY" then
-		faction = "Friendly"
-		if unit.type == "PLAYER" then
-			unit_type = "Player"
-		elseif T == "Totem" then
-			unit_type = "Totem"
-		elseif UnitPlayerControlled(unit.unitid) then
-			unit_type = "Guardian"
-		elseif UnitIsOtherPlayersPet(unit.unitid) then
-			unit_type =  "Pet"
-		else --if unit.type == "NPC" then
-			unit_type = "NPC"
-		end
-		-- missing: Guardina, Creature & Properties
-	elseif unit.reaction == "HOSTILE" then
-		faction = "Hostile"
-		if unit.isMini then
-			unit_type = "Minor"
-		elseif unit.type == "PLAYER" then
-			unit_type = "Player"
-		elseif T == "Totem" then
-			unit_type = "Totem"
-		elseif UnitPlayerControlled(unit.unitid) then
-			unit_type = "Guardian"
-		elseif UnitIsOtherPlayersPet(unit.unitid) then
-			unit_type =  "Pet"
-		else  --if unit.type == "NPC" then
-			unit_type = "NPC"
+	local unit_type = GetUniqueType(unit)
+	if unit_type == "Unique" then
+		show = true
+	else
+		if unit.reaction == "NEUTRAL" then
+			faction = "Neutral"
+			if unit.isMini then
+				unit_type = "Minor"
+			elseif UnitPlayerControlled(unit.unitid) then
+				unit_type = "Guardian"
+			else  --if unit.type == "NPC" then
+				unit_type = "NPC"
+			end
+		else
+			if unit.reaction == "FRIENDLY" then
+				faction = "Friendly"
+			elseif unit.reaction == "HOSTILE" then
+				faction = "Hostile"
+			end
+
+			if unit.reaction == "HOSTILE" and unit.isMini then -- no minor mobs for friendly, as far as I know
+				unit_type = "Minor"
+			elseif unit.type == "PLAYER" then
+				unit_type = "Player"
+			elseif T == "Totem" then
+				unit_type = "Totem"
+			elseif UnitIsOtherPlayersPet(unit.unitid) then -- player pets are also considered guardians, so this check has priority
+				unit_type =  "Pet"
+			elseif UnitPlayerControlled(unit.unitid) then
+				unit_type = "Guardian"
+			else --if unit.type == "NPC" then
+				unit_type = "NPC"
+			end
 		end
 
-		-- missing: Guardina, Creature & Properties
-	elseif unit.reaction == "NEUTRAL" then
-		faction = "Neutral"
-		if unit.isMini then
-			unit_type = "Minor"
-		else  --if unit.type == "NPC" then
-			unit_type = "NPC"
+		show = db.visibility["show"..faction..unit_type]
+		headline_view = db.visibility["show"..faction..unit_type.."HeadlineView"]
+
+		if (unit.isElite and db.visibility.hideElite) or (unit.isBoss and db.visibility.hideBoss) or
+			(unit.isTapped and db.visibility.hideTapped) then
+			show = false
+		elseif db.visibility.hideNormal and not (unit.isElite or unit.isBoss or unit.isDangerous) then
+			show = false
+		elseif unit.unitid and UnitIsBattlePet(unit.unitid) then
+			-- TODO: add configuration option for enable/disable
+			show = false
 		end
-		-- missing: Guardian
 	end
 
-	show = db.visibility["show"..faction..unit_type]
-	headline_view = db.visibility["show"..faction..unit_type.."HeadlineView"]
-
-	if (unit.isElite and db.visibility.hideElite) or (unit.isBoss and db.visibility.hideBoss) or
-		(unit.isTapped and db.visibility.hideTapped) then
-		show = false
-	elseif db.visibility.hideNormal and not (unit.isElite or unit.isBoss or unit.isDangerous) then
-		show = false
-	-- TODO: add configuration option for enable/disable
-	elseif UnitIsBattlePet(unit.unitid) then
-		show = false
-	end
-
-	return show, headline_view
+	return show, unit_type, headline_view
 end
 
 local function IsUnitActive(unit)
@@ -122,41 +137,38 @@ end
 
 local function SetStyle(unit)
 	local db = TidyPlatesThreat.db.profile
-	local T = GetType(unit)
 	local style
 
-	-- just for alpha feature alphaFeatureHeadlineView
-	if t.AlphaFeatureHeadlineView() then
-		local hub_style = TidyPlatesHubFunctions.SetStyleNamed(unit)
-		if (hub_style == "NameOnly") then
-			return "NameOnly"
-		end
-	end
+	local  show, unit_type, headline_view = ShowUnit(unit)
 
-	if T == "Totem" then
-		local tS = db.totemSettings[ThreatPlates_Totems[unit.name]]
-		if tS[1] then
-			if db.totemSettings.hideHealthbar then
-				style = "etotem"
-			else
-				style = "totem"
-			end
-		end
-	elseif T == "Unique" then
-		for k_c,k_v in pairs(db.uniqueSettings.list) do
-			if k_v == unit.name then
-				if db.uniqueSettings[k_c].showNameplate then
-					style = "unique"
+	if not show then
+		style = "empty"
+	elseif show and headline_view and t.AlphaFeatureHeadlineView() then
+		TidyPlatesHubFunctions.SetStyleNamed(unit)
+		style = "NameOnly"
+	else
+		if unit_type == "Totem" then
+			local tS = db.totemSettings[ThreatPlates_Totems[unit.name]]
+			if tS[1] then
+				if db.totemSettings.hideHealthbar then
+					style = "etotem"
+				else
+					style = "totem"
 				end
 			end
-		end
-	elseif T then
-		if unit.reaction == "FRIENDLY" then
-			if db.nameplate.toggle[T] then
-				style = "normal"
+		elseif unit_type == "Unique" then
+			for k_c,k_v in pairs(db.uniqueSettings.list) do
+				if k_v == unit.name then
+					if db.uniqueSettings[k_c].showNameplate then
+						style = "unique"
+					end
+				end
 			end
-		else
-			if db.nameplate.toggle[T] then
+		elseif unit_type then
+			if unit.reaction == "FRIENDLY" then
+				style = "normal"
+			else
+				local T = GetGeneral(unit)
 				-- style tank/dps only used for NPCs/non-player units, old: unit.class == "UNKNOWN"
 				if InCombatLockdown() and unit.type == "NPC" and db.threat.ON then
 					if db.threat.toggle[T] then
@@ -185,45 +197,15 @@ local function SetStyle(unit)
 		end
 	end
 
-	local  show, headline_view = ShowUnit(unit)
-
-	if unit.isTarget then
-		-- TODO: Guardian, Creature & Pet, Boss, Elite, Tapped
-		-- t.DEBUG("unit.name = ", unit.name)
-		-- 	t.DEBUG("unit.type = ", unit.type)
-		-- 	t.DEBUG("unit.class = ", unit.class)
-		-- t.DEBUG("unit.reaction = ", unit.reaction)
-		-- 	t.DEBUG("unit.isMini = ", unit.isMini)
-		-- 	t.DEBUG("unit.isTapped = ", unit.isTapped)
-		-- 	t.DEBUG("unit SetStyle = ", style)
-		-- 	t.DEBUG("unit GetType = ", TidyPlatesThreat.GetType(unit))
-		-- t.DEBUG("ShowUnit: ", unit.reaction, " ",  unit.type, " -> show = ", show, " + headline view = ", headline_view)
-
-		-- local enemy_totems = GetCVar("nameplateShowEnemyTotems")
-		-- local enemy_guardians = GetCVar("nameplateShowEnemyGuardians")
-		-- local enemy_pets = GetCVar("nameplateShowEnemyPets")
-		-- local enemy_minus = GetCVar("nameplateShowEnemyMinus")
-		-- print ("CVars Enemy: totems = ", enemy_totems, " / guardians = ", enemy_guardians, " / pets = ", enemy_pets, " / minus = ", enemy_minus)
-		--
-		-- local friendly_totems = GetCVar("nameplateShowFriendlyTotems")
-		-- local friendly_guardians = GetCVar("nameplateShowFriendlyGuardians")
-		-- local friendly_pets = GetCVar("nameplateShowFriendlyPets")
-		-- print ("CVars Friendly: totems = ", friendly_totems, " / guardians = ", friendly_guardians, " / pets = ", friendly_pets)
-		-- t.DEBUG("unit.isPet = ", UnitIsOtherPlayersPet(unit))
-		-- t.DEBUG("unit.isControlled = ", UnitPlayerControlled(unit.unitid))
-		-- t.DEBUG("unit.isBattlePet = ", UnitIsBattlePet(unit.unitid))
-	end
-
-	if not show then
-		style = "empty"
-	end
+	-- t.PrintTargetInfo(unit)
 
 	if style then
-	  return style
+		return style
 	else
-		return "etotem"
+		return "empty"
 	end
 end
+
 TidyPlatesThreat.GetGeneral = GetGeneral
 TidyPlatesThreat.GetType = GetType
 TidyPlatesThreat.SetStyle = SetStyle

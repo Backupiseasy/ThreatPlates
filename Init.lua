@@ -28,6 +28,36 @@ t.DEBUG = function(...)
 	print ("DEBUG: ", ...)
 end
 
+t.PrintTargetInfo = function(unit)
+	if unit.isTarget then
+		t.DEBUG("unit.name = ", unit.name)
+		t.DEBUG("unit.unitID = ", unit.unitID)
+		t.DEBUG("unit.type = ", unit.type)
+		t.DEBUG("unit.class = ", unit.class)
+		t.DEBUG("unit.reaction = ", unit.reaction)
+		t.DEBUG("unit.isMini = ", unit.isMini)
+		t.DEBUG("unit.isTapped = ", unit.isTapped)
+		t.DEBUG("unit.isElite = ", unit.isBoss)
+		t.DEBUG("unit.isBoss = ", unit.isElite)
+		t.DEBUG("unit SetStyle = ", style)
+		t.DEBUG("unit GetType = ", TidyPlatesThreat.GetType(unit))
+		t.DEBUG("unit.isPet = ", UnitIsOtherPlayersPet(unit))
+		t.DEBUG("unit.isControlled = ", UnitPlayerControlled(unit.unitid))
+		t.DEBUG("unit.isBattlePet = ", UnitIsBattlePet(unit.unitid))
+
+	-- local enemy_totems = GetCVar("nameplateShowEnemyTotems")
+	-- local enemy_guardians = GetCVar("nameplateShowEnemyGuardians")
+	-- local enemy_pets = GetCVar("nameplateShowEnemyPets")
+	-- local enemy_minus = GetCVar("nameplateShowEnemyMinus")
+	-- print ("CVars Enemy: totems = ", enemy_totems, " / guardians = ", enemy_guardians, " / pets = ", enemy_pets, " / minus = ", enemy_minus)
+	--
+	-- local friendly_totems = GetCVar("nameplateShowFriendlyTotems")
+	-- local friendly_guardians = GetCVar("nameplateShowFriendlyGuardians")
+	-- local friendly_pets = GetCVar("nameplateShowFriendlyPets")
+	-- print ("CVars Friendly: totems = ", friendly_totems, " / guardians = ", friendly_guardians, " / pets = ", friendly_pets)
+	end
+end
+
 t.Update = function()
 	-- TODO: check if all of it here is necessary
 	if (TidyPlatesOptions.ActiveTheme == THREAD_PLATES_NAME) then
@@ -39,6 +69,7 @@ t.Update = function()
 	--TidyPlates:ReloadTheme()
 	--TidyPlates:ForceUpdate()
 end
+
 t.Meta = function(value)
 	local meta
 	if strlower(value) == "title" then
