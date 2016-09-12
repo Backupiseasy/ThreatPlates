@@ -151,57 +151,184 @@ end
 -- Functions for building the options table
 ---------------------------------------------------------------------------------------------------
 
-local function CreateUnitVisibility(args, pos, unit_type, faction)
-	local unit_config = unit_type:gsub("%s+", "")
-	if not faction then faction = "" end
+local CVAR_SYNC = {
+	showHostileTotem = "nameplateShowEnemyTotems",
+	showHostilePet = "nameplateShowEnemyPets",
+	showHostileGuardian = "nameplateShowEnemyGuardians",
+	showHostileMinor = "nameplateShowEnemyMinus",
+	showFriendlyTotem = "nameplateShowFriendlyTotems",
+	showFriendlyPet = "nameplateShowFriendlyPets",
+	showFriendlyGuardian = "nameplateShowFriendlyGuardians",
+	showHostileUnits = "nameplateShowEnemies",
+	showFriendlyUnits = "nameplateShowFriends",
+	showNameplates = "nameplateShowAll",
+}
 
-	args["UnitType"..unit_config] = {
-		name = L[unit_type], type = "toggle", order = pos, arg = {"visibility", "show"..faction..unit_config},
-	}
+local function GetCVarSettingSync(info)
+	local toggle = info.arg[2]
+	local cvar = CVAR_SYNC[toggle]
 
-	args["UnitTypeHeadlineView"..unit_config] = {
-		name = L["Headline View"], type = "toggle", order = pos + 2, arg = {"visibility", "show"..faction..unit_config.."HeadlineView"},
-		disabled = function() return not db.visibility["show"..faction..unit_config] end,
-	}
+	if cvar then
+		db.visibility[toggle] = (GetCVar(cvar) == "1")
+	end
 
-	args["Spacer"..unit_config] = { type = "description", name = "", order = pos + 9 }
-
-	-- args["UnitType"..unit_type.."Description"] = {
-	-- 	type = "description", name = description, order = pos + 3, width = "double",
-	-- }
+	return db.visibility[toggle]
 end
 
-local function CreateFriendlyUnitVisiblilty()
-	local args = {}
+local function SetCVarSettingSync(info, value)
+	local toggle = info.arg[2]
 
-	CreateUnitVisibility(args, 0, "NPC", "Friendly")
-	CreateUnitVisibility(args, 10, "Player", "Friendly")
-	CreateUnitVisibility(args, 20, "Totem", "Friendly")
-	CreateUnitVisibility(args, 30, "Guardian", "Friendly")
-	CreateUnitVisibility(args, 50, "Creature and Pet", "Friendly")
+	local cvar = CVAR_SYNC[toggle]
+	if cvar then
+		SetCVar(cvar, (value and "1") or "0")
+	end
+
+	db.visibility[toggle] = value
+	t.Update()
+end
+
+-------------------------------------------------------------------------------------------------------------
+
+local UNIT_TYPES = {
+	{
+		Faction = "Friendly",
+		Settings = { "showFriendlyUnits" },
+		UnitTypes = { "Player", "NPC", "Totem", "Guardian", "Pet", },
+	},
+	{
+		Faction = "Hostile",
+		Settings = { "showHostileUnits" },
+		UnitTypes = { "Player", "NPC", "Totem", "Guardian", "Pet", "Minor",	},
+	},
+	{
+		Faction = "Neutral",
+		Settings = { "showHostileUnits" },
+		UnitTypes = { "NPC", "Guardian", "Minor",	},
+	},
+}
+
+local function CreateUnitGroupsVisibility(args, pos)
+	for i, value in ipairs(UNIT_TYPES) do
+		faction = value.Faction
+		args[faction.."Units"] = {
+			name = L["Show "..faction.." Units"], type = "group", order = pos,	inline = true,
+			disabled = function() return not (db.visibility.showNameplates and db.visibility[value.Settings[1]]) end,
+			args = {},
+		}
+
+		for i, unit_type in ipairs(value.UnitTypes) do
+			args[faction.."Units"].args["UnitType"..faction..unit_type] = {
+				name = L[unit_type], type = "toggle", order = pos + i, arg = {"visibility", "show"..faction..unit_type},
+				get = GetCVarSettingSync, set = SetCVarSettingSync,
+			}
+		end
+
+		pos = pos + 10
+	end
+end
+
+local function CreateUnitGroupsHeadlineView()
+	args = {}
+	pos = 0
+
+	for i, value in ipairs(UNIT_TYPES) do
+		faction = value.Faction
+		args[faction.."Units"] = {
+			name = L[faction.." Units"], type = "group", order = pos,	inline = true,
+			disabled = function() return not (db.visibility.showNameplates and t.AlphaFeatureHeadlineView()) end,
+			args = {},
+		}
+
+		for i, unit_type in ipairs(value.UnitTypes) do
+			args[faction.."Units"].args["UnitType"..faction..unit_type] = {
+				name = L[unit_type], type = "toggle", order = pos + i, arg = {"visibility", "show"..faction..unit_type.."HeadlineView"},
+			}
+		end
+
+		pos = pos + 10
+	end
 
 	return args
 end
 
-local function CreateHostileUnitVisiblilty()
-	local args = {}
+local function CreateTabGeneralSettings()
+	local args = {
+		name = L["Visibility"],
+		type = "group",
+		order = 10,
+		args = {
+			TidyPlates = {
+				name = "Tidy Plates Fading", type = "group", order = 10, inline = true,
+				args = {
+					Enable = {
+						type = "toggle",
+						order = 1,
+						name = "Enable",
+						desc = "This allows you to disable or enable the nameplates fading in or out when displayed or hidden.",
+						descStyle = "inline",
+						width = "full",
+						set = function(info,val)
+								SetValue(info,val)
+								if db.tidyplatesFade then	TidyPlates:EnableFadeIn()	else TidyPlates:DisableFadeIn()	end
+							end,
+						arg = {"tidyplatesFade"},
+					},
+				},
+			},
+			GeneralUnits = {
+				name = L["General Nameplate Settings"], type = "group", order = 20,	inline = true, width = "full",
+				args = {
+					AllUnits = {
+						name = L["Enable Nameplates"], type = "toggle", order = 10, arg = {"visibility", "showNameplates"},
+						get = GetCVarSettingSync, set = SetCVarSettingSync,
+					},
+					AllUnitsDesc = {
+						name = L["Show all name plates (CTRL-V)."], type = "description", order = 15, width = "double",
+					},
+					Spacer1 = {	type = "description", name = "", order = 19, },
+					AllFriendly = {
+						name = L["Enable Friendly"], type = "toggle", order = 20, arg = {"visibility", "showFriendlyUnits"},
+						get = GetCVarSettingSync, set = SetCVarSettingSync,
+						disabled = function() return not db.visibility.showNameplates end,
+					},
+					AllFriendlyDesc = {
+						name = L["Show friendly name plates (SHIFT-V)."], type = "description", order = 25, width = "double",
+					},
+					Spacer2 = {	type = "description", name = "", order = 29, },
+					AllHostile = {
+						name = L["Enable Enemy"], type = "toggle", order = 30, arg = {"visibility", "showHostileUnits"},
+						get = GetCVarSettingSync, set = SetCVarSettingSync,
+						disabled = function() return not db.visibility.showNameplates end,
+					},
+					AllHostileDesc = {
+						name = L["Show enemy name plates (ALT-V)."],	type = "description", order = 35, width = "double",
+					},
+				},
+			},
+			-- TidyPlatesHub calls this Unit Filter
+			SpecialUnits = {
+				name = L["Hide Special Units"], type = "group", order = 90,	inline = true, width = "full",
+				args = {
+					HideNormal = { name = L["Normal"], order = 1,	type = "toggle", arg = {"visibility","hideNormal"}, },
+					HideBoss = { name = L["Boss"], order = 2,	type = "toggle", arg = {"visibility","hideBoss"}, },
+					HideElite = { name = L["Elite"], order = 2,	type = "toggle", arg = {"visibility","hideElite"}, },
+					HideTapped = { name = L["Tapped"], order = 3,	type = "toggle", arg = {"visibility","hideTapped"}, },
+				},
+			},
+			-- TODO: not really necessary, is it?
+			-- OpenBlizzardSettings = {
+			-- 	name = L["Open Blizzard Settings"],
+			-- 	type = "execute",
+			-- 	order = 90,
+			-- 	func = function()
+			-- 		InterfaceOptionsFrame_OpenToCategory(_G["InterfaceOptionsNamesPanel"])
+			-- 		LibStub("AceConfigDialog-3.0"):Close("Tidy Plates: Threat Plates");
+			-- 	end,
+			-- },
+		},
+	}
 
-	CreateUnitVisibility(args, 0, "NPC", "Hostile")
-	CreateUnitVisibility(args, 10, "Player", "Hostile")
-	CreateUnitVisibility(args, 20, "Totem", "Hostile")
-	CreateUnitVisibility(args, 30, "Guardian", "Hostile")
-	CreateUnitVisibility(args, 40, "Minor", "Hostile")
-	CreateUnitVisibility(args, 50, "Creature and Pet", "Hostile")
-
-	return args
-end
-
-local function CreateNeutralUnitVisiblilty()
-	local args = {}
-
-	CreateUnitVisibility(args, 0, "NSC", "Neutral")
-	CreateUnitVisibility(args, 10, "Guardians", "Neutral")
-	CreateUnitVisibility(args, 20, "Minor", "Neutral")
+	CreateUnitGroupsVisibility(args.args, 30)
 
 	return args
 end
@@ -271,70 +398,7 @@ local function GetOptions()
 					type = "group",
 					order = 10,
 					args = {
-						GeneralSettings = {
-							name = L["Visibility"],
-							type = "group",
-							order = 10,
-							args = {
-								TidyPlates = {
-									name = "Tidy Plates Fading",
-									type = "group",
-									order = 10,
-									inline = true,
-									args = {
-										Enable = {
-											type = "toggle",
-											order = 1,
-											name = "Enable",
-											desc = "This allows you to disable or enable the nameplates fading in or out when displayed or hidden.",
-											descStyle = "inline",
-											width = "full",
-											set = function(info,val)
-													SetValue(info,val)
-													if db.tidyplatesFade then
-														TidyPlates:EnableFadeIn()
-													else
-														TidyPlates:DisableFadeIn()
-													end
-												end,
-											arg = {"tidyplatesFade"},
-										},
-									},
-								},
-								FriendlyUnits = {
-									name = L["Show Friendly Units"], type = "group", order = 20,	inline = true,
-									args = CreateFriendlyUnitVisiblilty(),
-								},
-								HostileUnits = {
-									name = L["Show Hostile Units"], type = "group", order = 30,	inline = true,
-									args = CreateHostileUnitVisiblilty(),
-								},
-								NeutralUnits = {
-									name = L["Show Neutral Units"], type = "group", order = 40,	inline = true, width = "full",
-									args = CreateNeutralUnitVisiblilty(),
-								},
-								-- TidyPlatesHub calls this Unit Filter
-								SpecialUnits = {
-									name = L["Hide Special Units"], type = "group", order = 50,	inline = true, width = "full",
-									args = {
-										HideNormal = { name = L["Normal"], order = 1,	type = "toggle", arg = {"visibility","hideNormal"}, },
-										HideBoss = { name = L["Boss"], order = 2,	type = "toggle", arg = {"visibility","hideBoss"}, },
-										HideElite = { name = L["Elite"], order = 2,	type = "toggle", arg = {"visibility","hideElite"}, },
-										HideTapped = { name = L["Tapped"], order = 3,	type = "toggle", arg = {"visibility","hideTapped"}, },
-									},
-								},
-								-- TODO: not really necessary, is it?
-								-- OpenBlizzardSettings = {
-								-- 	name = L["Open Blizzard Settings"],
-								-- 	type = "execute",
-								-- 	order = 90,
-								-- 	func = function()
-								-- 		InterfaceOptionsFrame_OpenToCategory(_G["InterfaceOptionsNamesPanel"])
-								-- 		LibStub("AceConfigDialog-3.0"):Close("Tidy Plates: Threat Plates");
-								-- 	end,
-								-- },
-							},
-						},
+						GeneralSettings = CreateTabGeneralSettings(),
 						HealthBarView = {
 							name = L["Health Bar View"],
 							type = "group",
@@ -645,7 +709,7 @@ local function GetOptions()
 							args = {
 								Enable = {
 									name = L["Enable"],
-									order = 1,
+									order = 10,
 									type = "group",
 									inline = true,
 									args = {
@@ -661,9 +725,17 @@ local function GetOptions()
 										},
 									},
 								},
+								Usage = {
+									name = L["Enable Headline View (Text-Only) for Unit Types"],
+									order = 20,
+									disabled = function() return not t.AlphaFeatureHeadlineView() end,
+									type = "group",
+									inline = true,
+									args = CreateUnitGroupsHeadlineView(),
+								},
 								Alpha = {
 									name = L["Alpha"],
-									order = 2,
+									order = 30,
 									disabled = function() return not t.AlphaFeatureHeadlineView() end,
 									type = "group",
 									inline = true,
@@ -704,7 +776,7 @@ local function GetOptions()
 								},
 								Scaline = {
 									name = L["Scaling"],
-									order = 2.5,
+									order = 40,
 									disabled = function() return not t.AlphaFeatureHeadlineView() end,
 									type = "group",
 									inline = true,
@@ -723,7 +795,7 @@ local function GetOptions()
 								},
 								FontSize = {
 									name = L["Text Bounds and Sizing"],
-									order = 3,
+									order = 50,
 									disabled = function() return not t.AlphaFeatureHeadlineView() end,
 									type = "group",
 									inline = true,
@@ -745,7 +817,7 @@ local function GetOptions()
 								},
 								Placement = {
 									name = L["Placement"],
-									order = 4,
+									order = 60,
 									disabled = function() return not t.AlphaFeatureHeadlineView() end,
 									type = "group",
 									inline = true,
@@ -758,7 +830,7 @@ local function GetOptions()
 								},
 								ColorSettings = {
 									name = L["Coloring"], type = "group", inline = true,
-									order = 5,
+									order = 70,
 									args = {
 										HostileClass = {
 											name = L["Enable Enemy Class colors"],

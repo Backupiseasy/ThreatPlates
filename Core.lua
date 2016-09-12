@@ -205,14 +205,17 @@ function TidyPlatesThreat:OnInitialize()
 				useRaidMarkColoring = false,
 			},
 			visibility = {
+				showNameplates = true,
+				showHostileUnits = true,
+				showFriendlyUnits = false,
 				showNormal = true,
 				showNormalHeadlineView = false,
 				showBoss = true,
 				showBossHeadlineView = false,
 				showElite = true,
 				showEliteHeadlineView = false,
-				showFriendlyCreatureandPet = true,
-				showFriendlyCreatureandPetHeadlineView = false,
+				showFriendlyPet = true,
+				showFriendlyPetHeadlineView = false,
 				showFriendlyGuardian = true,
 				showFriendlyGuardianHeadlineView = false,
 				showFriendlyNPC = true,
@@ -221,8 +224,8 @@ function TidyPlatesThreat:OnInitialize()
 				showFriendlyPlayerHeadlineView = false,
 				showFriendlyTotem = true,
 				showFriendlyTotemHeadlineView = false,
-				showHostileCreatureandPet = true,
-				showHostileCreatureandPetHeadlineView = false,
+				showHostilePet = true,
+				showHostilePetHeadlineView = false,
 				showHostileGuardian = true,
 				showHostileGuardianHeadlineView = false,
 				showHostileMinor = true,
@@ -235,10 +238,10 @@ function TidyPlatesThreat:OnInitialize()
 				showHostileTotemHeadlineView = false,
 				showNeutralGuardians = true,
 				showNeutralGuardiansHeadlineView = false,
-				showNeutralNSC = true,
-				showNeutralNSCHeadlineView = false,
+				showNeutralNPC = true,
+				showNeutralNPCHeadlineView = false,
 				showNeutralMinor = true,
-				showNeutralMinorHeadlineView = false,				
+				showNeutralMinorHeadlineView = false,
 				showTapped = true,
 				showTappedHeadlineView = false,
 			},
@@ -1677,6 +1680,7 @@ end
 
 local set = false
 function TidyPlatesThreat:SetCvars()
+
 	if not set then
 		SetCVar("ShowClassColorInNameplate", 1)
 		local ProfDB = self.db.profile

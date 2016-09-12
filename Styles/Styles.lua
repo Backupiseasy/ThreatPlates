@@ -63,30 +63,39 @@ local function ShowUnit(unit)
 		faction = "Friendly"
 		if unit.type == "PLAYER" then
 			unit_type = "Player"
-		elseif unit.type == "NPC" then
-			unit_type = "NPC"
 		elseif T == "Totem" then
 			unit_type = "Totem"
+		elseif UnitPlayerControlled(unit.unitid) then
+			unit_type = "Guardian"
+		elseif UnitIsOtherPlayersPet(unit.unitid) then
+			unit_type =  "Pet"
+		else --if unit.type == "NPC" then
+			unit_type = "NPC"
 		end
 		-- missing: Guardina, Creature & Properties
 	elseif unit.reaction == "HOSTILE" then
 		faction = "Hostile"
-		if unit.type == "PLAYER" then
+		if unit.isMini then
+			unit_type = "Minor"
+		elseif unit.type == "PLAYER" then
 			unit_type = "Player"
-		elseif unit.type == "NPC" then
-			unit_type = "NPC"
 		elseif T == "Totem" then
 			unit_type = "Totem"
-		elseif unit.isMini then
-			unit_type = "Minor"
+		elseif UnitPlayerControlled(unit.unitid) then
+			unit_type = "Guardian"
+		elseif UnitIsOtherPlayersPet(unit.unitid) then
+			unit_type =  "Pet"
+		else  --if unit.type == "NPC" then
+			unit_type = "NPC"
 		end
+
 		-- missing: Guardina, Creature & Properties
 	elseif unit.reaction == "NEUTRAL" then
 		faction = "Neutral"
-		if unit.type == "NPC" then
-			unit_type = "NPC"
-		elseif unit.isMini then
+		if unit.isMini then
 			unit_type = "Minor"
+		else  --if unit.type == "NPC" then
+			unit_type = "NPC"
 		end
 		-- missing: Guardian
 	end
@@ -98,6 +107,9 @@ local function ShowUnit(unit)
 		(unit.isTapped and db.visibility.hideTapped) then
 		show = false
 	elseif db.visibility.hideNormal and not (unit.isElite or unit.isBoss or unit.isDangerous) then
+		show = false
+	-- TODO: add configuration option for enable/disable
+	elseif UnitIsBattlePet(unit.unitid) then
 		show = false
 	end
 
@@ -177,15 +189,29 @@ local function SetStyle(unit)
 
 	if unit.isTarget then
 		-- TODO: Guardian, Creature & Pet, Boss, Elite, Tapped
-	-- -- 	t.DEBUG("unit.name = ", unit.name)
-	-- -- 	t.DEBUG("unit.type = ", unit.type)
-	-- -- 	t.DEBUG("unit.class = ", unit.class)
-	-- -- 	t.DEBUG("unit.reaction = ", unit.reaction)
-	-- -- 	t.DEBUG("unit.isMini = ", unit.isMini)
-	-- -- 	t.DEBUG("unit.isTapped = ", unit.isTapped)
-	-- -- 	t.DEBUG("unit SetStyle = ", style)
-	-- -- 	t.DEBUG("unit GetType = ", TidyPlatesThreat.GetType(unit))
-	t.DEBUG("ShowUnit: ", unit.reaction, " ",  unit.type, " -> show = ", show, " + headline view = ", headline_view)
+		-- t.DEBUG("unit.name = ", unit.name)
+		-- 	t.DEBUG("unit.type = ", unit.type)
+		-- 	t.DEBUG("unit.class = ", unit.class)
+		-- t.DEBUG("unit.reaction = ", unit.reaction)
+		-- 	t.DEBUG("unit.isMini = ", unit.isMini)
+		-- 	t.DEBUG("unit.isTapped = ", unit.isTapped)
+		-- 	t.DEBUG("unit SetStyle = ", style)
+		-- 	t.DEBUG("unit GetType = ", TidyPlatesThreat.GetType(unit))
+		-- t.DEBUG("ShowUnit: ", unit.reaction, " ",  unit.type, " -> show = ", show, " + headline view = ", headline_view)
+
+		-- local enemy_totems = GetCVar("nameplateShowEnemyTotems")
+		-- local enemy_guardians = GetCVar("nameplateShowEnemyGuardians")
+		-- local enemy_pets = GetCVar("nameplateShowEnemyPets")
+		-- local enemy_minus = GetCVar("nameplateShowEnemyMinus")
+		-- print ("CVars Enemy: totems = ", enemy_totems, " / guardians = ", enemy_guardians, " / pets = ", enemy_pets, " / minus = ", enemy_minus)
+		--
+		-- local friendly_totems = GetCVar("nameplateShowFriendlyTotems")
+		-- local friendly_guardians = GetCVar("nameplateShowFriendlyGuardians")
+		-- local friendly_pets = GetCVar("nameplateShowFriendlyPets")
+		-- print ("CVars Friendly: totems = ", friendly_totems, " / guardians = ", friendly_guardians, " / pets = ", friendly_pets)
+		-- t.DEBUG("unit.isPet = ", UnitIsOtherPlayersPet(unit))
+		-- t.DEBUG("unit.isControlled = ", UnitPlayerControlled(unit.unitid))
+		-- t.DEBUG("unit.isBattlePet = ", UnitIsBattlePet(unit.unitid))
 	end
 
 	if not show then
