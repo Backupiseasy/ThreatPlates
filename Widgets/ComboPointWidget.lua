@@ -112,7 +112,6 @@ end
 local function CreateWidgetFrame(parent)
 	-- Required Widget Code
 
-	print ("Creating Combo Point Widget")
 	local frame = CreateFrame("Frame", nil, parent)
 	frame:Hide()
 
