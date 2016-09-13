@@ -17,7 +17,7 @@ end
 
 local function UpdateClassIconWidget(frame, unit)
 	local S = TidyPlatesThreat.SetStyle(unit)
-	if (not enabled()) or S == "NameOnly" then frame:Hide(); return end
+	if (not enabled()) or S == "NameOnly" or S == "etotem" or S == "empty" then frame:Hide(); return end
 
 	local db = TidyPlatesThreat.db.profile
 	local class

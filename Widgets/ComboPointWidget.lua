@@ -5,7 +5,37 @@ local path = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ComboPointWid
 
 local WidgetList = {}
 
-local Anticipation =  GetSpellInfo(114015)
+---------------------------------------------------------------------------------------------------
+-- Class specific combo point functions
+---------------------------------------------------------------------------------------------------
+
+local function GetGenericComboPoints()
+	return GetComboPoints("player", "target")
+end
+
+-- Monk: maximum capacity of 5 Chi (6, with Ascension talent)
+local function GetMonkChi()		-- 0 to 5
+	--local max_chi = UnitPowerMax("player", SPELL_POWER_CHI)
+	return UnitPower("player", SPELL_POWER_CHI)
+end
+
+local function GetPaladinHolyPowner()
+	return UnitPower("player", SPELL_POWER_HOLY_POWER)
+end
+
+-- Set uo correct combo point function - thanks to TidyPlates!
+local GetComboPoints
+local PlayerClass = select(2,UnitClassBase("player"))
+
+if PlayerClass == "ROGUE" or PlayerClass == "DRUID" then
+	GetComboPoints = GetGenericComboPoints
+elseif PlayerClass == "MONK" then
+	GetComboPoints = GetMonkChi
+elseif PlayerClass == "PALADIN" then
+	GetComboPoints = GetPaladinHolyPowner
+end
+
+---------------------------------------------------------------------------------------------------
 
 local function enabled()
 	local db = TidyPlatesThreat.db.profile.comboWidget
@@ -15,17 +45,11 @@ end
 -- Update Graphics
 local function UpdateWidgetFrame(frame)
 	local points
-	if UnitExists("target") then
-		points = GetComboPoints("player", "target")
+	if UnitExists("target") and GetComboPoints then
+		points = GetComboPoints()
 	end
-	if points and points > 0 and enabled() then
-		if points > 4 then
-			local name, _, _, count = UnitAura("player", Anticipation)
 
-			if name and count > 0 then
-				points = points + count
-			end
-		end
+	if points and points > 0 and enabled() then
 		local db = TidyPlatesThreat.db.profile.comboWidget
 		--frame:SetFrameLevel(frame:GetParent().bars.healthbar:GetFrameLevel()+2)
 		frame.Icon:SetTexture(path..points)
@@ -87,6 +111,8 @@ end
 -- Widget Creation
 local function CreateWidgetFrame(parent)
 	-- Required Widget Code
+
+	print ("Creating Combo Point Widget")
 	local frame = CreateFrame("Frame", nil, parent)
 	frame:Hide()
 

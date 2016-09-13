@@ -1,4 +1,10 @@
 ------------------------------------------------------
+8.1.4 (works with TidyPlates 6.18.3)
+------------------------------------------------------
+* Fixed a bug with the class icon being displayed despite unit being hidden (e.g. normal or boss units)
+* Fixed a bug with monk chi and paladin holy power not displayed as combo points
+
+------------------------------------------------------
 8.1.3 (works with TidyPlates 6.18.3)
 ------------------------------------------------------
 * Fixed a bug with class coloring for players used although not enabled
