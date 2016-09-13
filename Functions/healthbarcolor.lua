@@ -4,13 +4,9 @@ local t = ns.ThreatPlates
 
 local isTanked
 local reference = {
-	["FRIENDLY_NPC"] = "fHPbarColor",
-	["FRIENDLY_PLAYER"] = "fHPbarColor",
-	["HOSTILE_NPC"] = "HPbarColor",
-	["HOSTILE_PLAYER"] = "HPbarColor",
-	["NEUTRAL_UNIT"] = "nHPbarColor",
-	["TAPPED_UNIT"] = "tapHPbarColor",
-	["GUILD_MEMBER"] = "HPbarColor",
+	FRIENDLY = { NPC = "FriendlyNPC", PLAYER = "FriendlyPlayer", },
+	HOSTILE = {	NPC = "HostileNPC", PLAYER = "HostilePlayer", },
+	NEUTRAL = { NPC = "NeutralUnit", PLAYER = "NeutralUnit",	},
 }
 
 local function GetMarkedColor(unit,a,var)
@@ -142,9 +138,11 @@ local function SetHealthbarColor(unit)
 					c = GetThreatColor(unit,style)
 				else
 					if unit.isTapped then
-						c = db[reference["TAPPED"]]
+						c = db.ColorByReaction.Tapped_Unit
+					elseif TidyPlatesUtility.IsFriend(unit.name) or TidyPlatesUtility.IsGuildmate(unit.name) then
+						c = db.ColorByReaction.GuildMember
 					else
-						c = db[reference[unit.reaction]]
+						c = db.ColorByReaction[reference[unit.reaction][unit.type]]
 					end
 				end
 			else -- Prio 4: coloring by threat, color by HP amount and class colors overwrite this

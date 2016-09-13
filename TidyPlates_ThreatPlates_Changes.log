@@ -5,9 +5,12 @@
 * Deprecated entries are now removed from the SavedVariables database or converted
 * Fixed a bug with healthbars not correctly colored for tapped units (when coloring based on custom colors is used)
 * Added several configuration options to Headline-View (Text-Only)
+* Completely reworked how to configurat visibility for different unit types
+* Updated coloring options for unit types based on reaction (friendly NPC, hostile player, ..k.)
 *
 NOT:
 * Masque support for class icons and spellbar icons
+* Guild/Friend coloring not working right now as still broken in Tiday Plates
 
 ------------------------------------------------------
 8.1.3 (works with TidyPlates 6.18.3)

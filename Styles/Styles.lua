@@ -103,13 +103,13 @@ local function ShowUnit(unit)
 				unit_type = "Minor"
 			elseif unit.type == "PLAYER" then
 				unit_type = "Player"
-			elseif T == "Totem" then
-				unit_type = "Totem"
+			-- elseif unit_type == "Totem" then
+			-- 	unit_type = "Totem"
 			elseif UnitIsOtherPlayersPet(unit.unitid) then -- player pets are also considered guardians, so this check has priority
 				unit_type =  "Pet"
 			elseif UnitPlayerControlled(unit.unitid) then
 				unit_type = "Guardian"
-			else --if unit.type == "NPC" then
+			elseif unit_type ~= "Totem" then --if unit.type == "NPC" then
 				unit_type = "NPC"
 			end
 		end
@@ -127,6 +127,8 @@ local function ShowUnit(unit)
 			show = false
 		end
 	end
+
+	--t.PrintTargetInfo(unit)
 
 	return show, unit_type, headline_view
 end

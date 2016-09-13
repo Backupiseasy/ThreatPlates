@@ -259,54 +259,22 @@ function TidyPlatesThreat:OnInitialize()
 				b = 0,
 				a = 1
 			},
-			aHPbarColor = {
-				r = 0,
-				g = 1,
-				b = 0
-			},
-			bHPbarColor = {
-				r = 1,
-				g = 1,
-				b = 0
-			},
-			cHPbarColor = {
-				r = 1,
-				g = 0,
-				b = 0
-			},
-			fHPbarColor = {
-				r = 1,
-				g = 1,
-				b = 1
-			},
-			nHPbarColor = {
-				r = 1,
-				g = 1,
-				b = 1
-			},
-			tapHPbarColor = {
-				r = 1,
-				g = 1,
-				b = 1
-			},
-			HPbarColor = {
-				r = 1,
-				g = 1,
-				b = 1
-			},
-			tHPbarColor = {
-				r = 0,
-				g = 0.5,
-				b = 1,
-			},
+			aHPbarColor = {	r = 0, g = 1, b = 0},
+			bHPbarColor = {r = 1,g = 1,b = 0},
+			cHPbarColor = {r = 1,g = 0,b = 0},
+			fHPbarColor = {r = 1,g = 1,b = 1},
+			nHPbarColor = {r = 1,g = 1,b = 1},
+			tapHPbarColor = {r = 1,g = 1,b = 1},
+			HPbarColor = {r = 1,g = 1,b = 1},
+			tHPbarColor = {r = 0,g = 0.5,b = 1,},
 			ColorByReaction = {
-				Friendly_Player = { r = 0, g = 0, b = 1, },		-- blue
-				Friendly_NPC = { r = 0, g = 1, b = 0, },			-- green
-				Hostile_NPC = { r = 1, g = 0, b = 0, },				-- red
-				Hostile_Player = { r = 1, g = 0, b = 0, },		-- red
-				Neutral_Unit = { r = 1, g = 1, b = 0, },			-- yellow
-				Tapped_Unit = { r = 110/255, g = 110/255, b = 110/255, },	-- grey
-				Guild_Member = { r = 60/255, g = 168/255, b = 255/255, }, -- light blue
+				FriendlyPlayer = { r = 0, g = 0, b = 1, },		-- blue
+				FriendlyNPC = { r = 0, g = 1, b = 0, },			-- green
+				HostileNPC = { r = 1, g = 0, b = 0, },				-- red
+				HostilePlayer = { r = 1, g = 0, b = 0, },		-- red
+				NeutralUnit = { r = 1, g = 1, b = 0, },			-- yellow
+				TappedUnit = { r = 110/255, g = 110/255, b = 110/255, },	-- grey
+				GuildMember = { r = 60/255, g = 168/255, b = 255/255, }, -- light blue
 			},
 			text = {
 				amount = true,

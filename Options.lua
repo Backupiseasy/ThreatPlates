@@ -151,6 +151,14 @@ end
 -- Functions for building the options table
 ---------------------------------------------------------------------------------------------------
 
+local function CreateDescription(text)
+	return { name = text, order = 0, type = "description", width = "full", }
+end
+
+local function CreateSpacer(pos)
+	return { name = "",	order = pos, type = "description", width = "full", }
+end
+
 local CVAR_SYNC = {
 	showHostileTotem = "nameplateShowEnemyTotems",
 	showHostilePet = "nameplateShowEnemyPets",
@@ -215,6 +223,8 @@ local function CreateUnitGroupsVisibility(args, pos)
 			disabled = function() return not (db.visibility.showNameplates and db.visibility[value.Settings[1]]) end,
 			args = {},
 		}
+		args[faction.."Units"].args["Desc"] = CreateDescription(L["Diese Einstellungen ermöglichen euch zu bestimmen, welche Namen im Spielfeld sichtbar sind, während ihr spielt"])
+		args[faction.."Units"].args["Spacer"] = CreateSpacer(1)
 
 		for i, unit_type in ipairs(value.UnitTypes) do
 			args[faction.."Units"].args["UnitType"..faction..unit_type] = {
@@ -278,6 +288,8 @@ local function CreateTabGeneralSettings()
 			GeneralUnits = {
 				name = L["General Nameplate Settings"], type = "group", order = 20,	inline = true, width = "full",
 				args = {
+					Description = CreateDescription(L["Diese Einstellungen ermöglichen euch zu bestimmen, welche Namen im Spielgeld sichtbar sind, während ihr spielt"]),
+					Spacer0 = CreateSpacer(1),
 					AllUnits = {
 						name = L["Enable Nameplates"], type = "toggle", order = 10, arg = {"visibility", "showNameplates"},
 						get = GetCVarSettingSync, set = SetCVarSettingSync,
@@ -573,14 +585,14 @@ local function GetOptions()
 											name = L["Reaction Colors"], type = "group",	inline = true,
 											get = GetColor, set = SetColor,
 											args = {
-												FriendlyColorNPC = { name = L["Friendly NPC"], order = 1,	type = "color",	arg = { "ColorByReaction", "Friendly_NPC", }, },
-												FriendlyColorPlayer = { name = L["Friendly Player"], order = 2, type = "color", arg = { "ColorByReaction", "Friendly_Player"}, },
-												EnemyColorNPC = { name = L["Hostile NPC"], order = 3, type = "color", arg = { "ColorByReaction", "Hostile_NPC"}, },
-												EnemyColorPlayer = { name = L["Hostile Player"], order = 4, type = "color", arg = { "ColorByReaction", "Hostile_Player"}, },
-												NeutralColor = { name = L["Neutral Unit"], order = 5, type = "color", arg = { "ColorByReaction", "Neutral_Unit"}, },
-												TappedColor = { name = L["Tapped Unit"], order = 6, type = "color", arg = { "ColorByReaction", "Tapped_Unit"}, },
+												FriendlyColorNPC = { name = L["Friendly NPC"], order = 1,	type = "color",	arg = { "ColorByReaction", "FriendlyNPC", }, },
+												FriendlyColorPlayer = { name = L["Friendly Player"], order = 2, type = "color", arg = { "ColorByReaction", "FriendlyPlayer"}, },
+												EnemyColorNPC = { name = L["Hostile NPC"], order = 3, type = "color", arg = { "ColorByReaction", "HostileNPC"}, },
+												EnemyColorPlayer = { name = L["Hostile Player"], order = 4, type = "color", arg = { "ColorByReaction", "HostilePlayer"}, },
+												NeutralColor = { name = L["Neutral Unit"], order = 5, type = "color", arg = { "ColorByReaction", "NeutralUnit"}, },
+												TappedColor = { name = L["Tapped Unit"], order = 6, type = "color", arg = { "ColorByReaction", "TappedUnit"}, },
 												-- TODO: auch Friends?
-												GuildMemberColor = { name = L["Guild Member"], order = 7, type = "color", arg = { "ColorByReaction", "Guild_Member"}, },
+												GuildMemberColor = { name = L["Guild Member"], order = 7, type = "color", arg = { "ColorByReaction", "GuildMember"}, },
 											},
 										},
 										Header = { order = 4.5, type = "header", name = L["Additional Options"], },
@@ -5065,5 +5077,5 @@ function TidyPlatesThreat:SetUpOptions()
 	options.args.profiles.order = 10000;
 
 	LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable("Tidy Plates: Threat Plates", options);
-	LibStub("AceConfigDialog-3.0"):SetDefaultSize("Tidy Plates: Threat Plates", 750, 600)
+	LibStub("AceConfigDialog-3.0"):SetDefaultSize("Tidy Plates: Threat Plates", 800, 600)
 end

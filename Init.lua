@@ -44,6 +44,10 @@ t.PrintTargetInfo = function(unit)
 		t.DEBUG("unit.isPet = ", UnitIsOtherPlayersPet(unit))
 		t.DEBUG("unit.isControlled = ", UnitPlayerControlled(unit.unitid))
 		t.DEBUG("unit.isBattlePet = ", UnitIsBattlePet(unit.unitid))
+		t.DEBUG("unit.canAttack = ", UnitCanAttack("player", unit.unitid))
+
+		t.DEBUG("unit.isFriend = ", TidyPlatesUtility.IsFriend(unit.name))
+		t.DEBUG("unit.isGuildmate = ", TidyPlatesUtility.IsGuildmate(unit.name))
 
 	-- local enemy_totems = GetCVar("nameplateShowEnemyTotems")
 	-- local enemy_guardians = GetCVar("nameplateShowEnemyGuardians")
