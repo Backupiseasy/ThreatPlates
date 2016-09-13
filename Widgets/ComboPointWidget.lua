@@ -14,13 +14,22 @@ local function GetGenericComboPoints()
 end
 
 -- Monk: maximum capacity of 5 Chi (6, with Ascension talent)
-local function GetMonkChi()		-- 0 to 5
-	--local max_chi = UnitPowerMax("player", SPELL_POWER_CHI)
-	return UnitPower("player", SPELL_POWER_CHI)
+local function GetMonkChi()
+	local points
+	if GetSpecialization() == 3 then
+		-- Windwalker Monk
+		points = UnitPower("player", SPELL_POWER_CHI)
+	end
+	return points
 end
 
 local function GetPaladinHolyPowner()
-	return UnitPower("player", SPELL_POWER_HOLY_POWER)
+	local points
+	if GetSpecialization() == 3 then
+		-- Retribution Paladin
+		points = UnitPower("player", SPELL_POWER_HOLY_POWER)
+	end
+	return points
 end
 
 -- Set uo correct combo point function - thanks to TidyPlates!
@@ -28,10 +37,12 @@ local GetComboPoints
 local PlayerClass = select(2,UnitClassBase("player"))
 
 if PlayerClass == "ROGUE" or PlayerClass == "DRUID" then
+	-- Rogue oder Druid
 	GetComboPoints = GetGenericComboPoints
 elseif PlayerClass == "MONK" then
 	GetComboPoints = GetMonkChi
 elseif PlayerClass == "PALADIN" then
+
 	GetComboPoints = GetPaladinHolyPowner
 end
 
