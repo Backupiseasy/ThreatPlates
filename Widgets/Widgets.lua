@@ -14,6 +14,9 @@ local AuraType_Index = {
 local AURA_TARGET_HOSTILE = 1
 local AURA_TARGET_FRIENDLY = 2
 
+local OldUseSquareDebuffIcon = nil
+local OldUseWideDebuffIcon = nil
+
 ------------------------------------------------------------------------------
 -- Local Variable
 ------------------------------------------------------------------------------
@@ -81,7 +84,40 @@ ThreatPlatesWidgets.AuraFilter = AuraFilter
 -- 	end
 -- end
 
+-- local function ThreatPlatesUseSquareDebuffIcon()
+-- 	local ProfDB = TidyPlatesThreat.db.profile
+-- 	-- Overwrite default behaviour if ThreatPlates is actually the active theme
+-- 	if (TidyPlatesOptions.ActiveTheme == THREAD_PLATES_NAME) and (ProfDB.debuffWidget.style == "wide") then
+-- 		OldUseWideDebuffIcon()
+-- 	else
+-- 		OldUseSquareDebuffIcon()
+-- 	end
+-- end
+-- ThreatPlatesWidgets.UseSquareDebuffIcon = ThreatPlatesUseSquareDebuffIcon
+--
+-- local function ThreatPlatesUseWideDebuffIcon()
+-- 	local ProfDB = TidyPlatesThreat.db.profile
+-- 	-- Overwrite default behaviour if ThreatPlates is actually the active theme
+-- 	if (TidyPlatesOptions.ActiveTheme == THREAD_PLATES_NAME) and (ProfDB.debuffWidget.style == "square") then
+-- 		OldUseSquareDebuffIcon()
+-- 	else
+-- 		OldUseWideDebuffIcon()
+-- 	end
+-- end
+-- ThreatPlatesWidgets.UseWideDebuffIcon = ThreatPlatesUseWideDebuffIcon
+
 do
+	-- work around TidyPlateHubs overwriting debuff size of non-Hub-compatible themes
+	-- if not OldUseSquareDebuffIcon then
+	-- 	-- Backup original fuctions for setting debuff size
+	-- 	OldUseSquareDebuffIcon = TidyPlatesWidgets.UseSquareDebuffIcon
+	-- 	OldUseWideDebuffIcon = TidyPlatesWidgets.UseWideDebuffIcon
+	--
+	-- 	-- And replace them with new functions which respect ThreatPlates settings
+	-- 	TidyPlatesWidgets.UseSquareDebuffIcon = ThreatPlatesWidgets.UseSquareDebuffIcon
+	-- 	TidyPlatesWidgets.UseWideDebuffIcon = ThreatPlatesWidgets.UseWideDebuffIcon
+	-- end
+
 	local isAuraEnabled
 	local function AuraEnable()
 		if TidyPlatesThreat.db.profile.debuffWidget.ON then
@@ -118,6 +154,8 @@ do
 		if (unit and unit.unitid) then
 			frame.OldUpdate(frame,unit)
 		end
+		frame.UpdateConfig(frame)
+
 		frame:SetScale(TidyPlatesThreat.db.profile.debuffWidget.scale)
 		frame:SetPoint(TidyPlatesThreat.db.profile.debuffWidget.anchor, frame:GetParent(), TidyPlatesThreat.db.profile.debuffWidget.x, TidyPlatesThreat.db.profile.debuffWidget.y)
 		--frame:SetPoint(TidyPlatesThreat.db.profile.debuffWidget.anchor, frame:GetParent(), "CENTER", TidyPlatesThreat.db.profile.debuffWidget.x, TidyPlatesThreat.db.profile.debuffWidget.y)
@@ -125,7 +163,7 @@ do
 
 		-- target nameplates are often overlapped by other nameplates, this fixes it:
 		-- set frame level higher to make auras apear on top
-		if (unit.isTarget) then
+		if (unit and unit.isTarget) then
 				frame:SetFrameStrata("LOW")
 				local AuraIconFrames = frame.AuraIconFrames
 			  for index = 1, #AuraIconFrames do
@@ -170,8 +208,11 @@ do
 		frame.OldUpdate = frame.Update
 		frame.Update = CustomAuraUpdate
 		frame.UpdateContext = CustomAuraUpdate
+		-- frame.OldUpdateConfig = frame.UpdateConfig
+		-- frame.UpdateConfig = CustemUpdateConfig
 
 		TidyPlatesWidgets.SetAuraFilter(AuraFilter)
+
 
 		-- disable spiral cooldown an aura icons
 		--enable_cooldown_spiral = nil

@@ -27,6 +27,8 @@ t.DEBUG = function(...)
 	print ("DEBUG: ", ...)
 end
 
+-- Function from: https://coronalabs.com/blog/2014/09/02/tutorial-printing-table-contents/
+-- TODO: remove
 t.PRINTTABLE = function( t )
     local print_r_cache={}
     local function sub_print_r(t,indent)
@@ -66,8 +68,6 @@ t.Update = function()
 		TidyPlates:SetTheme(THREAD_PLATES_NAME)
 	end
 	-- reload theme is deprecated and empty, ForceUpdate() is called in SetTheme()
-	--TidyPlates:ReloadTheme()
-	--TidyPlates:ForceUpdate()
 end
 
 t.Meta = function(value)

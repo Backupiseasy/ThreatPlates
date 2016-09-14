@@ -1474,13 +1474,9 @@ local function ShowConfigPanel()
 end
 TidyPlatesThreat.ShowConfigPanel = ShowConfigPanel
 
-local function OnActivateTheme(themeTable)
-	-- Sends a reset notification to all available themes, ie. themeTable == nil
-	if not themeTable then return end
-
-	ActivateTheme()
-end
-TidyPlatesThreat.OnActivateTheme = OnActivateTheme
+---------------------------------------------------------------------------------------------------
+-- Functions called by TidyPlates
+---------------------------------------------------------------------------------------------------
 
 function ActivateTheme()
 
@@ -1509,6 +1505,16 @@ function ActivateTheme()
 
 	TidyPlatesWidgets.SetAuraFilter(AuraFilter)
 end
+
+local function OnActivateTheme(themeTable)
+	-- Sends a reset notification to all available themes, ie. themeTable == nil
+	if not themeTable then
+		ThreatPlatesWidgets.DisableWidgets()
+	else
+		ActivateTheme()
+	end
+end
+TidyPlatesThreat.OnActivateTheme = OnActivateTheme
 
 local function OnChangeProfile(theme, profile)
 	if t.AlphaFeatureHeadlineView() then

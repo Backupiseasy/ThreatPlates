@@ -1,4 +1,12 @@
 ------------------------------------------------------
+8.1.5 (works with TidyPlates 6.18.6)
+------------------------------------------------------
+* Threat Plates should now be compatible with TidyPlates 6.18.6, though the performance is probably not optimal
+* Fixed a bug with class icon widget showing friendly class icons although not enabled
+* Known issues:
+  * If auras must be displayed in more than one row, the layout is incorrect - that's a bug in TidyPlates 
+
+------------------------------------------------------
 8.1.4 (works with TidyPlates 6.18.6)
 ------------------------------------------------------
 * Basic compatibility with TidyPlates 6.18.6 - some things may still be broken (probably changing options without reload UI)
