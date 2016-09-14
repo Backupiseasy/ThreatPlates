@@ -21,26 +21,10 @@ local function UpdateClassIconWidget(frame, unit)
 
 	local db = TidyPlatesThreat.db.profile
 	local class
-	--print ("unit.reation = ", unit.reaction, "  -- unit.type = ", unit.type)
 
-	-- if unit.class and (unit.class ~= "UNKNOWN") then
-	-- 	class = unit.class
-	-- elseif db.friendlyClassIcon then
-	-- 	if unit.guid then
-	-- 		local _, Class = GetPlayerInfoByGUID(unit.guid)
-	-- 		if not db.cache[unit.name] then
-	-- 			if db.cacheClass then
-	-- 				db.cache[unit.name] = Class
-	-- 			end
-	-- 			class = Class
-	-- 		else
-	-- 			class = db.cache[unit.name]
-	-- 		end
-	-- 	end
-	-- end
-
-	if db.friendlyClassIcon and unit.reaction == "FRIENDLY" and unit.type == "PLAYER" then
-			if unit.guid then
+	if unit.class and unit.type == "PLAYER" then
+		if unit.reaction == "FRIENDLY" and db.friendlyClassIcon then
+			if db.cacheClass and unit.guid then
 				local _, Class = GetPlayerInfoByGUID(unit.guid)
 				if not db.cache[unit.name] then
 					if db.cacheClass then
@@ -50,9 +34,12 @@ local function UpdateClassIconWidget(frame, unit)
 				else
 					class = db.cache[unit.name]
 				end
+			else
+ 				class = unit.class
 			end
-	elseif unit.type == "PLAYER" then
-			class = unit.class
+		elseif unit.reation == "HOSTILE" then -- hostile player, always show icon if enabled at all
+ 			class = unit.class
+		end
 	end
 
 	if class then -- Value shouldn't need to change

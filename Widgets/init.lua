@@ -36,19 +36,22 @@ local function UnregisterWidget(name)
 	end
 end
 
-local function CreateWidgets(plate)
-	local w = plate.widgets
-	for k,v in pairs(ThreatPlatesWidgets.list) do
-		if v.enabled() then
-			if not w[k] then
-				local widget
-				widget = v.create(plate)
-				w[k] = widget
-			end
-		else
-			if w[k] then
-				w[k]:Hide()
-				w[k] = nil
+-- activetheme is the table, not just the name
+local function CreateWidgets(plate, activetheme)
+	if activetheme then
+		local w = plate.widgets
+		for k,v in pairs(ThreatPlatesWidgets.list) do
+			if v.enabled() then
+				if not w[k] then
+					local widget
+					widget = v.create(plate)
+					w[k] = widget
+				end
+			else
+				if w[k] then
+					w[k]:Hide()
+					w[k] = nil
+				end
 			end
 		end
 	end
@@ -64,10 +67,13 @@ local function UpdatePlate(plate, unit)
 					w[k]:Hide()
 			else
 				if not w[k] then CreateWidgets(plate) end
+					-- TODO: unit sometimes seems to be nil, no idea why
+				if unit then
 					w[k]:Update(unit)
 					if v.isContext then
 						w[k]:UpdateContext(unit)
 					end
+				end
 			end
 		end
 	end

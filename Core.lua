@@ -3,7 +3,7 @@ local t = ns.ThreatPlates
 local L = t.L
 local class = t.Class()
 
-local Theme = {}
+t.Theme = {}
 
 TidyPlatesThreat = LibStub("AceAddon-3.0"):NewAddon("TidyPlatesThreat", "AceConsole-3.0", "AceEvent-3.0")
 
@@ -1557,8 +1557,8 @@ end
 function TidyPlatesThreat:OnEnable()
 	local ProfDB = self.db.profile
 
-	TidyPlatesThemeList[THREAD_PLATES_NAME] = Theme
-	ApplyHubFunctions(Theme)
+	TidyPlatesThemeList[THREAD_PLATES_NAME] = t.Theme
+	ApplyHubFunctions(t.Theme)
 	ActivateTheme()
 
 	self:StartUp()
