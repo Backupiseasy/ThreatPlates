@@ -2,7 +2,7 @@
 [b]  8.1.4 (works with [url="https://mods.curse.com/addons/wow/tidy-plates"]TidyPlates 6.18.6[/url])[/b]
 [b]---------------------------------------------------------------------------------------------------[/b]
 [LIST]
-[*]Basic compatibility with TidyPlates 6.18.4 - some things may still be broken (probably changing options without reload UI)
+[*]Basic compatibility with TidyPlates 6.18.6 - some things may still be broken (probably changing options without reload UI)
 [*]Added holy power as combo points for retribution paladins
 [*]Fixed a bug with the class icon being displayed despite unit being hidden (e.g. normal or boss units)
 [/LIST]
