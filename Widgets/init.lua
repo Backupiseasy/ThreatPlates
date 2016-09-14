@@ -64,10 +64,10 @@ local function UpdatePlate(plate, unit)
 					w[k]:Hide()
 			else
 				if not w[k] then CreateWidgets(plate) end
-				w[k]:Update(unit)
-				if v.isContext then
-					w[k]:UpdateContext(unit)
-				end
+					w[k]:Update(unit)
+					if v.isContext then
+						w[k]:UpdateContext(unit)
+					end
 			end
 		end
 	end

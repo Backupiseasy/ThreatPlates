@@ -1474,8 +1474,8 @@ local function ShowConfigPanel()
 end
 TidyPlatesThreat.ShowConfigPanel = ShowConfigPanel
 
-local function OnActivateTheme(themeTable, profileName)
-	-- OnActivateThema is called with (nil, nil) by TidyPlatesPanel.LoadTheme to send a reset notification to all available themes
+local function OnActivateTheme(themeTable)
+	-- Sends a reset notification to all available themes, ie. themeTable == nil
 	if not themeTable then return end
 
 	ActivateTheme()
@@ -1492,20 +1492,20 @@ function ActivateTheme()
 		TidyPlatesWidgets.UseWideDebuffIcon()
 	end
 
-	-- Not sure, if ThreatPlates needs this functions, but TPHubs calls them:
-	TidyPlatesUtility:EnableGroupWatcher()
+	-- TODO: check with what this  was replaces
+	--TidyPlatesUtility:EnableGroupWatcher()
 	-- TPHUub: if LocalVars.AdvancedEnableUnitCache then TidyPlatesUtility:EnableUnitCache() else TidyPlatesUtility:DisableUnitCache() end
 	-- TPHUub: TidyPlatesUtility:EnableHealerTrack()
-	if TidyPlatesThreat.db.profile.healerTracker.ON then
-		if not healerTrackerEnabled then
-			TidyPlatesUtility.EnableHealerTrack()
-		end
-	else
-		if healerTrackerEnabled then
-			TidyPlatesUtility.DisableHealerTrack()
-		end
-	end
-	TidyPlatesWidgets:EnableTankWatch()
+	-- if TidyPlatesThreat.db.profile.healerTracker.ON then
+	-- 	if not healerTrackerEnabled then
+	-- 		TidyPlatesUtility.EnableHealerTrack()
+	-- 	end
+	-- else
+	-- 	if healerTrackerEnabled then
+	-- 		TidyPlatesUtility.DisableHealerTrack()
+	-- 	end
+	-- end
+	-- TidyPlatesWidgets:EnableTankWatch()
 
 	TidyPlatesWidgets.SetAuraFilter(AuraFilter)
 end
@@ -1518,11 +1518,6 @@ local function OnChangeProfile(theme, profile)
 	end
 end
 TidyPlatesThreat.OnChangeProfile = OnChangeProfile
-
-local function OnApplyThemeCustomization()
-	ActivateTheme()
-end
-TidyPlatesThreat.OnApplyThemeCustomization = OnApplyThemeCustomization
 
 -- called by TidyPlatesHub when changes in the options panel were made (CallForStyleUpdate)
 local function ApplyProfileSettings(theme, ...)
@@ -1543,16 +1538,16 @@ local function ApplyHubFunctions(theme)
 	theme.SetThreatColor = TidyPlatesThreat.SetThreatColor
 	theme.SetCastbarColor = TidyPlatesThreat.SetCastbarColor
 	theme.SetHealthbarColor = TidyPlatesThreat.SetHealthbarColor
-	theme.OnInitialize = ThreatPlatesWidgets.CreateWidgets
+
+	theme.OnInitialize = ThreatPlatesWidgets.CreateWidgets -- Need to provide widget positions
 	theme.OnUpdate = ThreatPlatesWidgets.UpdatePlate
 	theme.OnContextUpdate = ThreatPlatesWidgets.UpdatePlate
-	theme.ShowConfigPanel = TidyPlatesThreat.ShowConfigPanel
 
 	theme.OnActivateTheme = TidyPlatesThreat.OnActivateTheme -- called by Tidy Plates Core, Theme Loader
 	theme.OnChangeProfile = TidyPlatesThreat.OnChangeProfile -- used by TidyPlates when a specialication change occurs or the profile is changed
-	-- for TidyPlatesHub integration
-	theme.OnApplyThemeCustomization = TidyPlatesThreat.OnApplyThemeCustomization -- only for TidyPlatesHub, used to get updates for theme/config changes
 	theme.ApplyProfileSettings = TidyPlatesThreat.ApplyProfileSettings
+
+	theme.ShowConfigPanel = TidyPlatesThreat.ShowConfigPanel
 
 	return theme
 end
