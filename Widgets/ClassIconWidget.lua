@@ -37,7 +37,7 @@ local function UpdateClassIconWidget(frame, unit)
 			else
  				class = unit.class
 			end
-		elseif unit.reation == "HOSTILE" then -- hostile player, always show icon if enabled at all
+		elseif unit.reaction == "HOSTILE" then -- hostile player, always show icon if enabled at all
  			class = unit.class
 		end
 	end
