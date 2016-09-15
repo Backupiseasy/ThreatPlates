@@ -1,8 +1,25 @@
+local ADDON_NAME, NAMESPACE = ...
+ThreatPlates = NAMESPACE.ThreatPlates
+
 --------------------
 -- Arena Icon Widget
 --------------------
+
 local path = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ArenaWidget\\"
 local ArenaID = {}
+local WidgetList = {}
+
+---------------------------------------------------------------------------------------------------
+-- Threat Plates functions
+---------------------------------------------------------------------------------------------------
+
+-- hides/destroys all widgets of this type created by Threat Plates
+local function ClearAllWidgets()
+	for _, widget in pairs(WidgetList) do
+		widget:Hide()
+	end
+end
+ThreatPlatesWidgets.ClearAllAreanaWidgets = ClearAllWidgets
 
 local function BuildTable() -- ArenaId[unit name] = ArenaID #
 	for i = 1, GetNumArenaOpponents() do
@@ -17,6 +34,10 @@ local function BuildTable() -- ArenaId[unit name] = ArenaID #
 	end
 end
 
+---------------------------------------------------------------------------------------------------
+-- TidyPlates ComboPointWidget functions
+---------------------------------------------------------------------------------------------------
+
 local WatcherFrame = CreateFrame("frame")
 local isEnabled = false
 local function EnableWatcherFrame(arg)
@@ -24,8 +45,8 @@ local function EnableWatcherFrame(arg)
 	if arg then
 		WatcherFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
 	else
-		WatcherFrame:UnregisterAllEvents()		
-		wipe(ArenaID)		
+		WatcherFrame:UnregisterAllEvents()
+		wipe(ArenaID)
 	end
 end
 
@@ -33,7 +54,7 @@ WatcherFrame:SetScript("OnEvent",function(self,event,...)
 	if IsActiveBattlefieldArena() and GetNumArenaOpponents() >= 1 then -- If we're in arena
 		BuildTable()
 	else
-		wipe(ArenaID) -- Clear the table when we leave		
+		wipe(ArenaID) -- Clear the table when we leave
 	end
 	TidyPlates:ForceUpdate()
 end)
@@ -41,7 +62,7 @@ end)
 local function enabled()
 	local db = TidyPlatesThreat.db.profile.arenaWidget
 	if db.ON then
-		if not isEnabled then 
+		if not isEnabled then
 			EnableWatcherFrame(true)
 		end
 	else
@@ -80,7 +101,7 @@ local UpdateArenaWidget = function(frame, unit)
 	else
 		frame:Hide()
 	end
-end	
+end
 
 local function CreateArenaWidget(parent)
 	local frame = CreateFrame("Frame", nil, parent)

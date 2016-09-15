@@ -72,6 +72,18 @@ local function DisableWidgets()
 			end
 		end
 	end
+
+	-- for all widgets types of Threat Plates, call ClearAllWidgets
+	-- ThreatPlatesWidgets.ClearAllComboPointWidgets() 				- done
+	-- ThreatPlatesWidgets.ClearAllArenaWidgets()
+	-- ThreatPlatesWidgets.ClearAllClassIconWidgets()					- done
+	-- ThreatPlatesWidgets.ClearAllEliteArtOverlayWidgets()
+	-- ThreatPlatesWidgets.ClearAllSocialWidgets()
+	-- ThreatPlatesWidgets.ClearAllTargetArtWidgets()
+	-- ThreatPlatesWidgets.ClearAllThreatWidgets()
+	-- ThreatPlatesWidgets.ClearAllTotemIconWidgets()
+	-- ThreatPlatesWidgets.ClearAllUniqueIconWidgets()
+	-- ThreatPlatesWidgets.ClearAllAuraWidgets()
 end
 
 local function UpdatePlate(plate, unit)
@@ -93,6 +105,8 @@ local function UpdatePlate(plate, unit)
 				if not w[k] or not w[k].isThreatPlatesWidget then CreateWidgets(plate, ThreatPlates.Theme()) end
 				-- TODO: unit sometimes seems to be nil, no idea why
 				if unit then
+					-- TODO: UpdateContext always calls Update, so here we call the same function two times, at least if the
+					-- widgets is based on TidyPlates WidgetTemplate - optimize!
 					w[k]:Update(unit)
 					if v.isContext then
 						w[k]:UpdateContext(unit)

@@ -5,7 +5,6 @@ ThreatPlates = NAMESPACE.ThreatPlates
 -- Combo Point Widget --
 ------------------------
 local path = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ComboPointWidget\\"
-
 local WidgetList = {}
 
 ---------------------------------------------------------------------------------------------------
@@ -16,6 +15,14 @@ local function enabled()
 	local db = TidyPlatesThreat.db.profile.comboWidget
 	return db.ON
 end
+
+-- hides/destroys all widgets of this type created by Threat Plates
+local function ClearAllWidgets()
+	for _, widget in pairs(WidgetList) do
+		widget:Hide()
+	end
+end
+ThreatPlatesWidgets.ClearAllComboPointWidgets = ClearAllWidgets
 
 ---------------------------------------------------------------------------------------------------
 -- TidyPlates ComboPointWidget functions
@@ -71,8 +78,12 @@ else
 	GetResourceOnTarget = function() end
 end
 
+---------------------------------------------------------------------------------------------------
+-- Widget Functions for TidyPlates
+---------------------------------------------------------------------------------------------------
+
 -- Update Graphics - overwritten
-local function UpdateWidgetFrame(frame)
+local function UpdateWidgetFrame(frame, unit)
 	local points, maxPoints = GetResourceOnTarget()
 
 	if points and points > 0 and enabled() then
@@ -103,7 +114,7 @@ local function UpdateWidgetContext(frame, unit)
 
 	-- Update Widget
 	if UnitGUID("target") == guid then
-		UpdateWidgetFrame(frame)
+		UpdateWidgetFrame(frame, unit)
 	else
 		frame:_Hide()
 	end
@@ -164,9 +175,9 @@ local function CreateWidgetFrame(parent)
 	frame.Update = UpdateWidgetFrame
 	frame._Hide = frame.Hide
 	frame.Hide = function() ClearWidgetContext(frame); frame:_Hide() end
+
 	if not isEnabled then EnableWatcherFrame(true) end
 	return frame
-
 end
 
 ThreatPlatesWidgets.RegisterWidget("ComboPointWidget", CreateWidgetFrame, true, enabled)
