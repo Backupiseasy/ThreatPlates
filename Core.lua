@@ -1545,6 +1545,9 @@ local function ApplyHubFunctions(theme)
 	theme.SetCastbarColor = TidyPlatesThreat.SetCastbarColor
 	theme.SetHealthbarColor = TidyPlatesThreat.SetHealthbarColor
 
+	-- TidyPlatesGlobal_OnInitialize() is called when a nameplate is created or re-shown
+	-- TidyPlatesGlobal_OnContextUpdate() is called when a unit is targeted or moused-over.  (Any time the unitid or GUID changes)
+	-- TidyPlatesGlobal_OnUpdate() is called when other data about the unit changes, or is requested by an external controller.
 	theme.OnInitialize = ThreatPlatesWidgets.CreateWidgets -- Need to provide widget positions
 	theme.OnUpdate = ThreatPlatesWidgets.UpdatePlate
 	theme.OnContextUpdate = ThreatPlatesWidgets.UpdatePlate
