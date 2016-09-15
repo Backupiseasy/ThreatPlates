@@ -16,6 +16,14 @@ local WidgetList = {}
 -- Threat Plates functions
 ---------------------------------------------------------------------------------------------------
 
+-- hides/destroys all widgets of this type created by Threat Plates
+local function ClearAllWidgets()
+	for _, widget in pairs(WidgetList) do
+		widget:Hide()
+	end
+end
+ThreatPlatesWidgets.ClearAllSocialWidgets = ClearAllWidgets
+
 ListTable = {
 	g = {},
 	b = {},

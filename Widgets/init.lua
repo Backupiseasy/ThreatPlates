@@ -66,22 +66,21 @@ end
 -- Hide all ThreatPlates widgets as another theme was selected in TidyPlates
 local function DisableWidgets()
 	-- for all widgets types of Threat Plates, call ClearAllWidgets
-	-- ThreatPlatesWidgets.ClearAllArenaWidgets()							- not yet tested
-	-- ThreatPlatesWidgets.ClearAllClassIconWidgets()					- done
-	-- ThreatPlatesWidgets.ClearAllComboPointWidgets() 				- done
-	-- ThreatPlatesWidgets.ClearAllEliteArtOverlayWidgets()		- done
-	-- ThreatPlatesWidgets.ClearAllSocialWidgets()						- done
-	-- ThreatPlatesWidgets.ClearAllTargetArtWidgets()					- done
-	-- ThreatPlatesWidgets.ClearAllThreatWidgets()						- done
-	-- ThreatPlatesWidgets.ClearAllTotemIconWidgets()					- done
-	-- ThreatPlatesWidgets.ClearAllUniqueIconWidgets()				- done
-	-- ThreatPlatesWidgets.ClearAllAuraWidgets()							- done
-	-- ThreatPlatesWidgets.ClearAllHealerTrackerWidgets()			- disabled
+	-- ThreatPlatesWidgets.ClearAllArenaWidgets()							-- done
+	-- ThreatPlatesWidgets.ClearAllClassIconWidgets()					-- done
+	-- ThreatPlatesWidgets.ClearAllComboPointWidgets() 				-- done
+	-- ThreatPlatesWidgets.ClearAllEliteArtOverlayWidgets()		-- done
+	-- ThreatPlatesWidgets.ClearAllSocialWidgets()							-- done
+	-- ThreatPlatesWidgets.ClearAllTargetArtWidgets()					-- done
+	-- ThreatPlatesWidgets.ClearAllThreatWidgets()							-- done
+	-- ThreatPlatesWidgets.ClearAllTotemIconWidgets()					-- done
+	-- ThreatPlatesWidgets.ClearAllUniqueIconWidgets()					-- done
+	-- ThreatPlatesWidgets.ClearAllAuraWidgets()								-- done
+	-- ThreatPlatesWidgets.ClearAllHealerTrackerWidgets()			-- disabled
 
-	-- no delete all widgets which now completly new, but overwritten TidyPlates widgets as there is currently
-	-- no efficient way to access there internal WidgetList
+	-- delete all remaining widget, currently: AuraWidget
 	for plate, _ in pairs(PlatesVisible) do
-		for widgetname, widget in pairs(plate.widgets) do
+		for _, widget in pairs(plate.widgets) do
 			if widget.isThreatPlatesWidget then
 				widget:Hide()
 			end

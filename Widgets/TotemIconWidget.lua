@@ -16,6 +16,14 @@ local function enabled()
 	return db.ON
 end
 
+-- hides/destroys all widgets of this type created by Threat Plates
+local function ClearAllWidgets()
+	for _, widget in pairs(WidgetList) do
+		widget:Hide()
+	end
+end
+ThreatPlatesWidgets.ClearAllTotemIconWidgets = ClearAllWidgets
+
 function tL(number)
 	local name = GetSpellInfo(number)
 	if not name then

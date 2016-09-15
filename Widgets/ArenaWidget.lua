@@ -19,7 +19,7 @@ local function ClearAllWidgets()
 		widget:Hide()
 	end
 end
-ThreatPlatesWidgets.ClearAllAreanaWidgets = ClearAllWidgets
+ThreatPlatesWidgets.ClearAllArenaWidgets = ClearAllWidgets
 
 local function BuildTable() -- ArenaId[unit name] = ArenaID #
 	for i = 1, GetNumArenaOpponents() do
