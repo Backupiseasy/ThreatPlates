@@ -32,13 +32,13 @@ end
 ThreatPlatesWidgets.ClearAllClassIconWidgets = ClearAllWidgets
 
 ---------------------------------------------------------------------------------------------------
--- -Widget Functions for TidyPlates
+-- Widget Functions for TidyPlates
 ---------------------------------------------------------------------------------------------------
 
 -- Update Graphics
 local function UpdateWidgetFrame(frame, unit)
 	local S = TidyPlatesThreat.SetStyle(unit)
-	if (not enabled()) or S == "NameOnly" or S == "etotem" or S == "empty" then frame:Hide(); return end
+	if (not enabled()) or S == "NameOnly" or S == "etotem" or S == "empty" then frame:_Hide(); return end
 
 	local db = TidyPlatesThreat.db.profile
 	local class
@@ -112,7 +112,6 @@ local function CreateWidgetFrame(parent)
 	frame:SetWidth(64)
 	frame.Icon = frame:CreateTexture(nil, "OVERLAY")
 	frame.Icon:SetAllPoints(frame)
-
 	--------------------------------------
 	-- End Custom Code
 

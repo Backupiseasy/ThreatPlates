@@ -1,3 +1,6 @@
+local ADDON_NAME, NAMESPACE = ...
+ThreatPlates = NAMESPACE.ThreatPlates
+
 ------------------------
 -- Social Icon Widget --
 ------------------------
@@ -7,6 +10,11 @@
 -- Change the 'guildicon' to use the emblem and border method used by blizzard frames.
 
 local path = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\SocialWidget\\"
+local WidgetList = {}
+
+---------------------------------------------------------------------------------------------------
+-- Threat Plates functions
+---------------------------------------------------------------------------------------------------
 
 ListTable = {
 	g = {},
@@ -53,10 +61,23 @@ local function UpdateBnetList()
 	end
 end
 
-local WatcherFrame = CreateFrame("frame")
+-- Watcher Frame
+local WatcherFrame = CreateFrame("Frame", nil, WorldFrame)
 local isEnabled = false
+
+local function WatcherFrameHandler(frame, event,...)
+	if event == "GUILD_ROSTER_UPDATE" then
+		UpdateGlist()
+	elseif event == "FRIENDLIST_UPDATE" then
+		UpdateFlist()
+	elseif event == "BN_FRIEND_LIST_SIZE_CHANGED" or event == "BN_CONNECTED" or event == "BN_FRIEND_ACCOUNT_ONLINE" or
+				 event == "BN_FRIEND_ACCOUNT_OFFLINE" then
+		UpdateBnetList()
+	end
+	--TidyPlates:ForceUpdate()
+end
+
 local function EnableWatcherFrame(arg)
-	isEnabled = arg
 	if arg then
 		UpdateGlist()
 		UpdateFlist()
@@ -67,35 +88,28 @@ local function EnableWatcherFrame(arg)
 		WatcherFrame:RegisterEvent("BN_FRIEND_ACCOUNT_ONLINE")
 		WatcherFrame:RegisterEvent("BN_FRIEND_ACCOUNT_OFFLINE")
 		WatcherFrame:RegisterEvent("BN_FRIEND_LIST_SIZE_CHANGED")
+		WatcherFrame:SetScript("OnEvent", WatcherFrameHandler)
+		isEnabled = true
 	else
 		WatcherFrame:UnregisterAllEvents()
+		WatcherFrame:SetScript("OnEvent", nil)
+		isEnabled = false
 	end
 end
-
-WatcherFrame:SetScript("OnEvent",function(self,event,...)
-	if event == "GUILD_ROSTER_UPDATE" then
-		UpdateGlist()
-	elseif event == "FRIENDLIST_UPDATE" then
-		UpdateFlist()
-	elseif event == "BN_FRIEND_LIST_SIZE_CHANGED" or event == "BN_CONNECTED" or event == "BN_FRIEND_ACCOUNT_ONLINE" or event == "BN_FRIEND_ACCOUNT_OFFLINE" then
-		UpdateBnetList()
-	end
-	TidyPlates:ForceUpdate()
-end)
 
 local function enabled()
 	local db = TidyPlatesThreat.db.profile.socialWidget
 	if db.ON then
-		if not isEnabled then 
-			EnableWatcherFrame(true)
-		end
+		if not isEnabled then	EnableWatcherFrame(true) end
 	else
-		if isEnabled then
-			EnableWatcherFrame(false)
-		end
+		if isEnabled then	EnableWatcherFrame(false)	end
 	end
 	return db.ON
 end
+
+---------------------------------------------------------------------------------------------------
+-- Widget Functions for TidyPlates
+---------------------------------------------------------------------------------------------------
 
 local function UpdateSettings(frame)
 	local db = TidyPlatesThreat.db.profile.socialWidget
@@ -104,8 +118,8 @@ local function UpdateSettings(frame)
 	frame:SetPoint("CENTER",frame:GetParent(),db.anchor, db.x, db.y)
 end
 
-local UpdateSocialWidget = function(frame, unit)
-	if enabled() then 
+local function UpdateWidgetFrame(frame, unit)
+	if enabled() then
 		-- I will probably expand this to a table with 'friend = true','guild = true', and 'bnet = true' and have 3 textuers show.
 		local texture
 		if tContains(ListTable.f, unit.name) then
@@ -120,22 +134,64 @@ local UpdateSocialWidget = function(frame, unit)
 			frame.Icon:SetTexture(texture)
 			frame:Show()
 		else
-			frame:Hide()
-		end		
-	else		
-		frame:Hide()
+			frame:_Hide()
+		end
+	else
+		frame:_Hide()
 	end
-end	
+end
 
-local function CreateSocialWidget(parent)
+-- Context
+local function UpdateWidgetContext(frame, unit)
+	local guid = unit.guid
+	frame.guid = guid
+
+	-- Add to Widget List
+	if guid then
+		WidgetList[guid] = frame
+	end
+
+	-- Custom Code II
+	--------------------------------------
+	-- if UnitGUID("target") == guid then
+	-- 	UpdateWidgetFrame(frame, unit)
+	-- else
+	-- 	frame:_Hide()
+	-- end
+	--------------------------------------
+	-- End Custom Code
+end
+
+local function ClearWidgetContext(frame)
+	local guid = frame.guid
+	if guid then
+		WidgetList[guid] = nil
+		frame.guid = nil
+	end
+end
+
+local function CreateWidgetFrame(parent)
+	-- Required Widget Code
 	local frame = CreateFrame("Frame", nil, parent)
+	frame:Hide()
+
+	-- Custom Code III
+	--------------------------------------
 	frame:SetHeight(32)
 	frame:SetWidth(32)
 	frame.Icon = frame:CreateTexture(nil, "OVERLAY")
 	frame.Icon:SetAllPoints(frame)
-	frame:Hide()
-	frame.Update = UpdateSocialWidget
+	--------------------------------------
+	-- End Custom Code
+
+	-- Required Widget Code
+	frame.UpdateContext = UpdateWidgetContext
+	frame.Update = UpdateWidgetFrame
+	frame._Hide = frame.Hide
+	frame.Hide = function() ClearWidgetContext(frame); frame:_Hide() end
+
+	--if not isEnabled then EnableWatcherFrame(true) end
 	return frame
 end
 
-ThreatPlatesWidgets.RegisterWidget("SocialWidget",CreateSocialWidget,false,enabled)
+ThreatPlatesWidgets.RegisterWidget("SocialWidget", CreateWidgetFrame, false, enabled)

@@ -3737,75 +3737,76 @@ local function GetOptions()
 								},
 							},
 						},
-						HealerTrackerWidget = {
-							name = "Healer Tracker",
-							type = "group",
-							order = 40,
-							args = {
-								Enable = {
-									name = L["Enable"],
-									type = "group",
-									inline = true,
-									order = 10,
-									args = {
-										Toggle = {
-											name = L["Enable"],
-											type = "toggle",
-											desc = L["Enables the showing if indicator icons for friends, guildmates, and BNET Friends"],
-											descStyle = "inline",
-											width = "full",
-											order = 1,
-											arg = {"healerTracker", "ON"},
-										},
-									},
-								},
-								Sizing = {
-									name = L["Scale"],
-									type = "group",
-									inline = true,
-									order = 20,
-									disabled = function() if db.healerTracker.ON then return false else return true end end,
-									args = {
-										ScaleSlider = {
-											name = "",
-											type = "range",
-											step = 0.05,
-											softMin = 0.6,
-											softMax = 1.3,
-											isPercent = true,
-											arg = {"healerTracker","scale"}
-										},
-									},
-								},
-								Placement = {
-									name = L["Placement"],
-									type = "group",
-									inline = true,
-									order = 30,
-									disabled = function() if db.healerTracker.ON then return false else return true end end,
-									args = {
-										X = {
-											name = L["X"],
-											type = "range",
-											order = 1,
-											min = -120,
-											max = 120,
-											step = 1,
-											arg = {"healerTracker", "x"},
-										},
-										Y = {
-											name = L["Y"],
-											type = "range",
-											order = 1,
-											min = -120,
-											max = 120,
-											step = 1,
-											arg = {"healerTracker", "y"},
-										},
-									},
-								},
-							},
-						},--[[
+						-- HealerTrackerWidget = {
+						-- 	name = "Healer Tracker",
+						-- 	type = "group",
+						-- 	order = 40,
+						-- 	args = {
+						-- 		Enable = {
+						-- 			name = L["Enable"],
+						-- 			type = "group",
+						-- 			inline = true,
+						-- 			order = 10,
+						-- 			args = {
+						-- 				Toggle = {
+						-- 					name = L["Enable"],
+						-- 					type = "toggle",
+						-- 					desc = L["Enables the showing if indicator icons for friends, guildmates, and BNET Friends"],
+						-- 					descStyle = "inline",
+						-- 					width = "full",
+						-- 					order = 1,
+						-- 					arg = {"healerTracker", "ON"},
+						-- 				},
+						-- 			},
+						-- 		},
+						-- 		Sizing = {
+						-- 			name = L["Scale"],
+						-- 			type = "group",
+						-- 			inline = true,
+						-- 			order = 20,
+						-- 			disabled = function() if db.healerTracker.ON then return false else return true end end,
+						-- 			args = {
+						-- 				ScaleSlider = {
+						-- 					name = "",
+						-- 					type = "range",
+						-- 					step = 0.05,
+						-- 					softMin = 0.6,
+						-- 					softMax = 1.3,
+						-- 					isPercent = true,
+						-- 					arg = {"healerTracker","scale"}
+						-- 				},
+						-- 			},
+						-- 		},
+						-- 		Placement = {
+						-- 			name = L["Placement"],
+						-- 			type = "group",
+						-- 			inline = true,
+						-- 			order = 30,
+						-- 			disabled = function() if db.healerTracker.ON then return false else return true end end,
+						-- 			args = {
+						-- 				X = {
+						-- 					name = L["X"],
+						-- 					type = "range",
+						-- 					order = 1,
+						-- 					min = -120,
+						-- 					max = 120,
+						-- 					step = 1,
+						-- 					arg = {"healerTracker", "x"},
+						-- 				},
+						-- 				Y = {
+						-- 					name = L["Y"],
+						-- 					type = "range",
+						-- 					order = 1,
+						-- 					min = -120,
+						-- 					max = 120,
+						-- 					step = 1,
+						-- 					arg = {"healerTracker", "y"},
+						-- 				},
+						-- 			},
+						-- 		},
+						-- 	},
+						-- },
+						--[[
 						ThreatLineWidget = {
 							name = L["Threat Line"],
 							type = "group",
@@ -4424,7 +4425,7 @@ local CustomOpts = {
 								name = L["Placement"],
 							},
 							X = {
-								name = L["Y"],
+								name = L["X"],
 								type = "range",
 								order = 2,
 								min = -120,

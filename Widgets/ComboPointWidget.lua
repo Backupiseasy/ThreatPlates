@@ -25,41 +25,32 @@ end
 ThreatPlatesWidgets.ClearAllComboPointWidgets = ClearAllWidgets
 
 ---------------------------------------------------------------------------------------------------
--- TidyPlates ComboPointWidget functions
+-- Widget Functions for TidyPlates
 ---------------------------------------------------------------------------------------------------
 
 local function GetComboPointTarget()
-	if UnitCanAttack("player", "target") then
-		local points = GetComboPoints("player", "target")
-		local maxPoints = UnitPowerMax("player", 4)
+	local points = GetComboPoints("player", "target")
+	local maxPoints = UnitPowerMax("player", 4)
 
-		return points, maxPoints
-	end
+	return points, maxPoints
 end
 
 local function GetChiTarget()
-	if UnitCanAttack("player", "target") then
+	if GetSpecialization() ~= SPEC_MONK_WINDWALKER then return end
 
-		if GetSpecialization() ~= SPEC_MONK_WINDWALKER then return end
+	local points = UnitPower("player", SPELL_POWER_CHI)
+	local maxPoints = UnitPowerMax("player", SPELL_POWER_CHI)
 
-		local points = UnitPower("player", SPELL_POWER_CHI)
-		local maxPoints = UnitPowerMax("player", SPELL_POWER_CHI)
-
-		return points, maxPoints
-
-	end
+	return points, maxPoints
 end
 
 local function GetPaladinHolyPowner()
-	if UnitCanAttack("player", "target") then
+	if GetSpecialization() ~= SPEC_PALADIN_RETRIBUTION then return end
 
-		if GetSpecialization() ~= SPEC_PALADIN_RETRIBUTION then return end
+	local points = UnitPower("player", SPELL_POWER_HOLY_POWER)
+	local maxPoints = UnitPowerMax("player", SPELL_POWER_HOLY_POWER)
 
-		local points = UnitPower("player", SPELL_POWER_HOLY_POWER)
-		local maxPoints = UnitPowerMax("player", SPELL_POWER_HOLY_POWER)
-
-		return points, maxPoints
-	end
+	return points, maxPoints
 end
 
 local GetResourceOnTarget
@@ -84,15 +75,18 @@ end
 
 -- Update Graphics - overwritten
 local function UpdateWidgetFrame(frame, unit)
-	local points, maxPoints = GetResourceOnTarget()
+	local points, maxPoints
 
-	if points and points > 0 and enabled() then
+	if enabled() and UnitCanAttack("player", "target") then
+		points, maxPoints = GetResourceOnTarget()
+	end
+
+	if points and points > 0 then
 		local db = TidyPlatesThreat.db.profile.comboWidget
 
 		frame.Icon:SetTexture(path..points)
 		frame:SetScale(db.scale)
 		frame:SetPoint("CENTER", frame:GetParent(), "CENTER", db.x, db.y)
-		frame:Show()
 
 		frame:Show()
 	else
@@ -103,20 +97,18 @@ end
 -- Context
 local function UpdateWidgetContext(frame, unit)
 	local guid = unit.guid
+	frame.guid = guid
 
 	-- Add to Widget List
 	if guid then
-
-		if frame.guid then WidgetList[frame.guid] = nil end
-		frame.guid = guid
 		WidgetList[guid] = frame
 	end
 
-	-- Update Widget
-	if UnitGUID("target") == guid then
-		UpdateWidgetFrame(frame, unit)
-	else
-		frame:_Hide()
+	-- -- Update Widget
+	 if UnitGUID("target") ~= guid then
+	--  	UpdateWidgetFrame(frame, unit)
+	--  else
+	 	frame:_Hide()
 	end
 end
 
