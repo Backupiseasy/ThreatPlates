@@ -82,4 +82,4 @@ local function CreateWidgetFrame(plate)
 	return frame
 end
 
-ThreatPlatesWidgets.RegisterWidget("HealerTrackerWidget", CreateWidgetFrame, true, enabled)
+ThreatPlatesWidgets.RegisterWidget("HealerTrackerWidget", CreateWidgetFrame, false, enabled)

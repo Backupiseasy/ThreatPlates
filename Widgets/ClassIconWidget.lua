@@ -28,6 +28,7 @@ local function ClearAllWidgets()
 	for _, widget in pairs(WidgetList) do
 		widget:Hide()
 	end
+	WidgetList = {} -- should not be necessary, as Hide() does that, just to be sure
 end
 ThreatPlatesWidgets.ClearAllClassIconWidgets = ClearAllWidgets
 
@@ -84,11 +85,11 @@ local function UpdateWidgetContext(frame, unit)
 
 	-- Custom Code II
 	--------------------------------------
-	-- if UnitGUID("target") == guid then
-	-- 	UpdateWidgetFrame(frame, unit)
-	-- else
-	-- 	frame:_Hide()
-	-- end
+	if UnitGUID("target") == guid then
+		UpdateWidgetFrame(frame, unit)
+	else
+		frame:_Hide()
+	end
 	--------------------------------------
 	-- End Custom Code
 end
@@ -124,4 +125,4 @@ local function CreateWidgetFrame(parent)
 	return frame
 end
 
-ThreatPlatesWidgets.RegisterWidget("ClassIconWidget", CreateWidgetFrame, true, enabled)
+ThreatPlatesWidgets.RegisterWidget("ClassIconWidget", CreateWidgetFrame, false, enabled)

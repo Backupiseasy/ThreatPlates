@@ -7,6 +7,7 @@ ThreatPlates = NAMESPACE.ThreatPlates
 
 local isAuraEnabled
 local OldUpdate
+local OldUpdateConfig
 
 -- two constants from TidyPlates AuraWidget
 local AURA_TARGET_HOSTILE = 1
@@ -26,7 +27,7 @@ local function enabled()
 	if TidyPlatesThreat.db.profile.debuffWidget.ON then
 		if not isAuraEnabled then
 			TidyPlatesWidgets.EnableAuraWatcher()
-			TidyPlatesWidgets.SetAuraFilter(AuraFilter)
+			--TidyPlatesWidgets.SetAuraFilter(AuraFilter)
 			isAuraEnabled = true
 		end
 	else
@@ -43,6 +44,7 @@ local function ClearAllWidgets()
 	-- for _, widget in pairs(WidgetList) do
 	-- 	widget:Hide()
 	-- end
+	-- WidgetList = {}
 end
 ThreatPlatesWidgets.ClearAllAuraWidgets = ClearAllWidgets
 
@@ -172,14 +174,14 @@ local function CustomUpdateWidgetFrame(frame, unit)
 		return
 	end
 
-	TidyPlatesWidgets.SetAuraFilter(AuraFilter)
+	--TidyPlatesWidgets.SetAuraFilter(AuraFilter)
 
 	-- CustomAuraUpdate substitues AuraWidget.Update and AuraWidget.UpdateContext
 	--   AuraWidget.Update is sometimes (first call after reload UI) called with unit.unitid = nil
 	if (unit and unit.unitid) then
 		frame.OldUpdate(frame, unit)
 	end
-	frame.UpdateConfig(frame)
+	--frame.UpdateConfig(frame)
 
 	frame:SetScale(TidyPlatesThreat.db.profile.debuffWidget.scale)
 	frame:SetPoint(TidyPlatesThreat.db.profile.debuffWidget.anchor, frame:GetParent(), TidyPlatesThreat.db.profile.debuffWidget.x, TidyPlatesThreat.db.profile.debuffWidget.y)
@@ -220,9 +222,10 @@ local function CreateAuraWidget(plate)
 
 	TidyPlatesWidgets.SetAuraFilter(AuraFilter)
 	frame.OldUpdate = frame.Update
+	frame.OldUpdateConfig = frame.UpdateConfig
 	frame.Update = CustomUpdateWidgetFrame
 	frame.UpdateContext = CustomUpdateWidgetFrame
-	-- frame.UpdateConfig = UpdateWidgetConfig - used by TidyPlatesHub
+	frame.UpdateConfig = CustomUpdateConfig
 	-- frame.UpdateTarget = UpdateWidgetTarget - not yet used, I think
 
 	-- disable spiral cooldown an aura icons
@@ -235,10 +238,13 @@ local function CreateAuraWidget(plate)
 	-- frame.Update = UpdateWidgetFrame
 	-- frame._Hide = frame.Hide
 	-- frame.Hide = function() ClearWidgetContext(frame); frame:_Hide() end
+	frame._Show = frame.Show
+	frame.Show = function() if (TidyPlatesOptions.ActiveTheme ~= THREAD_PLATES_NAME) then	frame:_Hide()	else frame:_Show() end end
+
 	return frame
 end
 
-ThreatPlatesWidgets.RegisterWidget("AuraWidget", CreateAuraWidget, true, enabled)
+ThreatPlatesWidgets.RegisterWidget("ThreatPlatesAuraWidget", CreateAuraWidget, false, enabled)
 
 ------------------------
 -- Threat Line Widget --

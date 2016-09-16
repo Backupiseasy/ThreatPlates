@@ -1509,7 +1509,7 @@ end
 local function OnActivateTheme(themeTable)
 	-- Sends a reset notification to all available themes, ie. themeTable == nil
 	if not themeTable then
-		ThreatPlatesWidgets.DisableWidgets()
+		ThreatPlatesWidgets.DeleteWidgets()
 	else
 		ActivateTheme()
 	end
@@ -1546,11 +1546,11 @@ local function ApplyHubFunctions(theme)
 	theme.SetHealthbarColor = TidyPlatesThreat.SetHealthbarColor
 
 	-- TidyPlatesGlobal_OnInitialize() is called when a nameplate is created or re-shown
-	-- TidyPlatesGlobal_OnContextUpdate() is called when a unit is targeted or moused-over.  (Any time the unitid or GUID changes)
 	-- TidyPlatesGlobal_OnUpdate() is called when other data about the unit changes, or is requested by an external controller.
-	theme.OnInitialize = ThreatPlatesWidgets.CreateWidgets -- Need to provide widget positions
-	theme.OnUpdate = ThreatPlatesWidgets.UpdatePlate
-	theme.OnContextUpdate = ThreatPlatesWidgets.UpdatePlate
+	-- TidyPlatesGlobal_OnContextUpdate() is called when a unit is targeted or moused-over.  (Any time the unitid or GUID changes)
+	theme.OnInitialize = ThreatPlatesWidgets.OnInitialize -- Need to provide widget positions
+	theme.OnUpdate = ThreatPlatesWidgets.OnUpdate
+	theme.OnContextUpdate = ThreatPlatesWidgets.OnContextUpdate
 
 	theme.OnActivateTheme = TidyPlatesThreat.OnActivateTheme -- called by Tidy Plates Core, Theme Loader
 	theme.OnChangeProfile = TidyPlatesThreat.OnChangeProfile -- used by TidyPlates when a specialication change occurs or the profile is changed

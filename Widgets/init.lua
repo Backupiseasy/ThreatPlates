@@ -33,38 +33,39 @@ local function RegisterWidget(name,create,isContext,enabled)
 end
 
 local function UnregisterWidget(name)
-	if ThreatPlatesWidgets.list[name] then
-		ThreatPlatesWidgets.list[name] = nil
-	end
+	ThreatPlatesWidgets.list[name] = nil
 end
 
+-- TidyPlatesGlobal_OnInitialize() is called when a nameplate is created or re-shown
 -- activetheme is the table, not just the name
-local function CreateWidgets(plate, activetheme)
-	if activetheme then
+local function OnInitialize(plate, theme)
+	--ThreatPlates.DEBUG("OnInitialize: plate = ", plate, " - ", theme)
+	if theme then
+		PlatesVisible[plate] = 1 -- save all plates with widgets to be able to disable them when another theme is selected in TidyPlates
+
 		local w = plate.widgets
+		-- disable all non Threat Plates widgets - unless they do it themeselves
+		for _, widget in pairs(plate.widgets) do
+			if not widget.TP_Widget then widget:Hide() end
+		end
+
 		for k,v in pairs(ThreatPlatesWidgets.list) do
-
-			PlatesVisible[plate] = 1 -- save all plates with widgets to be able to disable them when another theme is selected in TidyPlates
-
-			if v.enabled() then
-				if not w[k] or not w[k].isThreatPlatesWidget then
-					local widget
-					widget = v.create(plate)
-					widget.isThreatPlatesWidget = true -- mark ThreatPlates widgets
-					w[k] = widget
-				end
-			else
-				if w[k] then
-					w[k]:Hide()
-					w[k] = nil
-				end
+			if (not w[k]) or (not w[k].TP_Widget) then
+				local widget = v.create(plate)
+				widget.TP_Widget = true -- mark ThreatPlates widgets
+				w[k] = widget
+			end
+			if not v.enabled() then
+				w[k]:Hide()
+				--w[k] = nil -- deleted the disabled widget, is that what we want? no re-using it later ...
 			end
 		end
 	end
 end
 
 -- Hide all ThreatPlates widgets as another theme was selected in TidyPlates
-local function DisableWidgets()
+local function DeleteWidgets()
+	-- ThreatPlates.DEBUG("DeleteWidgets")
 	-- for all widgets types of Threat Plates, call ClearAllWidgets
 	-- ThreatPlatesWidgets.ClearAllArenaWidgets()							-- done
 	-- ThreatPlatesWidgets.ClearAllClassIconWidgets()					-- done
@@ -78,50 +79,69 @@ local function DisableWidgets()
 	-- ThreatPlatesWidgets.ClearAllAuraWidgets()								-- done
 	-- ThreatPlatesWidgets.ClearAllHealerTrackerWidgets()			-- disabled
 
-	-- delete all remaining widget, currently: AuraWidget
+	-- hide and remove all references to all widgets of ThreatPlates
 	for plate, _ in pairs(PlatesVisible) do
-		for _, widget in pairs(plate.widgets) do
-			if widget.isThreatPlatesWidget then
+		for widgetname, widget in pairs(plate.widgets) do
+			if widget.TP_Widget then
 				widget:Hide()
+				plate.widgets[widgetname] = nil -- should be optional, for efficiency reasons
+				--if widgetname == "ThreatPlatesAuraWidget" then TidyPlatesWidgets.SetAuraFilter(TidyPlatesHubFunctions._WidgetDebuffFilter) end
 			end
-			-- if widgetname == "HealerTrackerWidget" then ...
 		end
 	end
+	-- wipe(PlatesVisible)
+	PlatesVisible = {}
 end
 
-local function UpdatePlate(plate, unit)
+-- TidyPlatesGlobal_OnUpdate() is called when other data about the unit changes, or is requested by an external controller.
+local function OnUpdate(plate, unit)
+	--ThreatPlates.DEBUG("OnUpdate: plate = ", plate, " - unit = ", unit, " - unit.name =", ((unit and unit.name) or "nil"))
 	local style = TidyPlatesThreat.SetStyle(unit)
 	local w = plate.widgets
 
-	-- disable all non Threat Plates widgets - unless they do it themeselves
-	for widgetname, widget in pairs(plate.widgets) do
-		if not widget.isThreatPlatesWidget then	widget:Hide()	end
-	end
-
 	for k,v in pairs(ThreatPlatesWidgets.list) do
 		-- Diable all widgets in headline view mode
-		if v.enabled() then
+		-- TODO: optimize, e.g. move to enabled()
+		if w[k] then -- should never be nil here, if OnInitialize was called correctly
 			if ThreatPlates.AlphaFeatureHeadlineView() and (style == "NameOnly") then
 				w[k]:Hide()
-			else
-				-- overwrite all non ThreatPlates widgets
-				if not w[k] or not w[k].isThreatPlatesWidget then CreateWidgets(plate, ThreatPlates.Theme()) end
+			elseif v.enabled() then
 				-- TODO: unit sometimes seems to be nil, no idea why
-				if unit then
-					-- TODO: UpdateContext always calls Update, so here we call the same function two times, at least if the
-					-- widgets is based on TidyPlates WidgetTemplate - optimize!
+				-- context means that widget is only relevant for target (or mouse-over)
+				if unit and not v.isContext then
 					w[k]:Update(unit)
-					if v.isContext then
-						w[k]:UpdateContext(unit)
-					end
 				end
+			else
+				w[k]:Hide()
 			end
 		end
 	end
 end
 
-ThreatPlatesWidgets.RegisterWidget = RegisterWidget
-ThreatPlatesWidgets.UnregisterWidget = UnregisterWidget
-ThreatPlatesWidgets.CreateWidgets = CreateWidgets
-ThreatPlatesWidgets.DisableWidgets = DisableWidgets
-ThreatPlatesWidgets.UpdatePlate = UpdatePlate
+-- TidyPlatesGlobal_OnContextUpdate() is called when a unit is targeted or moused-over.  (Any time the unitid or GUID changes)
+-- OnContextUpdate must only do something when there is something unit-dependent to display?
+local function OnContextUpdate(plate, unit)
+	--ThreatPlates.DEBUG("OnContextUpdate: plate = ", plate, " - unit = ", unit, " - unit.name =", ((unit and unit.name) or "nil"))
+	local w = plate.widgets
+	for k,v in pairs(ThreatPlatesWidgets.list) do
+		if w[k] then -- should never be nil here, if OnInitialize was called correctly
+			if ThreatPlates.AlphaFeatureHeadlineView() and (style == "NameOnly") then
+				w[k]:Hide()
+			elseif v.enabled() then
+				if unit then
+					w[k]:UpdateContext(unit)
+				end
+			else
+				w[k]:Hide()
+			end
+		end
+	end
+end
+
+ThreatPlatesWidgets.RegisterWidget = RegisterWidget				-- used internally by ThreatPlates widgets
+ThreatPlatesWidgets.UnregisterWidget = UnregisterWidget		-- used internally by ThreatPlates widgets
+
+ThreatPlatesWidgets.OnInitialize = OnInitialize
+ThreatPlatesWidgets.OnUpdate = OnUpdate
+ThreatPlatesWidgets.OnContextUpdate = OnContextUpdate
+ThreatPlatesWidgets.DeleteWidgets = DeleteWidgets

@@ -21,6 +21,7 @@ local function ClearAllWidgets()
 	for _, widget in pairs(WidgetList) do
 		widget:Hide()
 	end
+	WidgetList = {}		
 end
 ThreatPlatesWidgets.ClearAllSocialWidgets = ClearAllWidgets
 
@@ -161,11 +162,11 @@ local function UpdateWidgetContext(frame, unit)
 
 	-- Custom Code II
 	--------------------------------------
-	-- if UnitGUID("target") == guid then
-	-- 	UpdateWidgetFrame(frame, unit)
-	-- else
-	-- 	frame:_Hide()
-	-- end
+	if UnitGUID("target") == guid then
+		UpdateWidgetFrame(frame, unit)
+	else
+		frame:_Hide()
+	end
 	--------------------------------------
 	-- End Custom Code
 end

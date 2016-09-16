@@ -21,6 +21,7 @@ local function ClearAllWidgets()
 	for _, widget in pairs(WidgetList) do
 		widget:Hide()
 	end
+	WidgetList = {}
 end
 ThreatPlatesWidgets.ClearAllComboPointWidgets = ClearAllWidgets
 
@@ -97,17 +98,18 @@ end
 -- Context
 local function UpdateWidgetContext(frame, unit)
 	local guid = unit.guid
-	frame.guid = guid
 
 	-- Add to Widget List
 	if guid then
+		if frame.guid then WidgetList[frame.guid] = nil end
+		frame.guid = guid
 		WidgetList[guid] = frame
 	end
 
 	-- -- Update Widget
-	 if UnitGUID("target") ~= guid then
-	--  	UpdateWidgetFrame(frame, unit)
-	--  else
+	 if UnitGUID("target") == guid then
+	 	UpdateWidgetFrame(frame, unit)
+	 else
 	 	frame:_Hide()
 	end
 end
@@ -139,8 +141,12 @@ end
 
 local function EnableWatcherFrame(arg)
 	if arg then
-		WatcherFrame:SetScript("OnEvent", WatcherFrameHandler); isEnabled = true
-	else WatcherFrame:SetScript("OnEvent", nil); isEnabled = false end
+		WatcherFrame:SetScript("OnEvent", WatcherFrameHandler)
+		isEnabled = true
+	else
+		WatcherFrame:SetScript("OnEvent", nil)
+		isEnabled = false
+	end
 end
 
 -- Widget Creation

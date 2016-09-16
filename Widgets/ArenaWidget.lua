@@ -18,6 +18,7 @@ local function ClearAllWidgets()
 	for _, widget in pairs(WidgetList) do
 		widget:Hide()
 	end
+	WidgetList = {}	
 end
 ThreatPlatesWidgets.ClearAllArenaWidgets = ClearAllWidgets
 
@@ -44,27 +45,6 @@ local function UpdateSettings(frame)
 	frame:SetSize(db.scale,db.scale)
 	frame.Overlay:SetSize(db.scale,db.scale)
 	frame:SetPoint("CENTER",frame:GetParent(),db.anchor, db.x, db.y)
-end
-
--- Context
-local function UpdateWidgetContext(frame, unit)
-	local guid = unit.guid
-	frame.guid = guid
-
-	-- Add to Widget List
-	if guid then
-		WidgetList[guid] = frame
-	end
-
-	-- Custom Code II
-	--------------------------------------
-	-- if UnitGUID("target") == guid then
-	-- 	UpdateWidgetFrame(frame, unit)
-	-- else
-	-- 	frame:_Hide()
-	-- end
-	--------------------------------------
-	-- End Custom Code
 end
 
 local function ClearWidgetContext(frame)
@@ -133,6 +113,27 @@ local function UpdateWidgetFrame(frame, unit)
 	end
 end
 
+-- Context
+local function UpdateWidgetContext(frame, unit)
+	local guid = unit.guid
+	frame.guid = guid
+
+	-- Add to Widget List
+	if guid then
+		WidgetList[guid] = frame
+	end
+
+	-- Custom Code II
+	--------------------------------------
+	if UnitGUID("target") == guid then
+		UpdateWidgetFrame(frame, unit)
+	else
+		frame:_Hide()
+	end
+	--------------------------------------
+	-- End Custom Code
+end
+
 local function CreateArenaWidget(parent)
 	-- Required Widget Code
 	local frame = CreateFrame("Frame", nil, parent)
@@ -165,4 +166,4 @@ local function CreateArenaWidget(parent)
 	return frame
 end
 
-ThreatPlatesWidgets.RegisterWidget("ArenaWidget", CreateArenaWidget, true, enabled)
+ThreatPlatesWidgets.RegisterWidget("ArenaWidget", CreateArenaWidget, false, enabled)

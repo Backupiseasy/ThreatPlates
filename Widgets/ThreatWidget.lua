@@ -71,11 +71,11 @@ local function UpdateWidgetContext(frame, unit)
 
 	-- Custom Code II
 	--------------------------------------
-	-- if UnitGUID("target") == guid then
-	-- 	UpdateWidgetFrame(frame, unit)
-	-- else
-	-- 	frame:_Hide()
-	-- end
+	if UnitGUID("target") == guid then
+		UpdateWidgetFrame(frame, unit)
+	else
+		frame:_Hide()
+	end
 	--------------------------------------
 	-- End Custom Code
 end
@@ -114,4 +114,4 @@ local function CreateWidgetFrame(parent)
 	return frame
 end
 
-ThreatPlatesWidgets.RegisterWidget("ThreatArtWidget", CreateWidgetFrame, true, enabled)
+ThreatPlatesWidgets.RegisterWidget("ThreatArtWidget", CreateWidgetFrame, false, enabled)
