@@ -1520,6 +1520,7 @@ local function OnChangeProfile(theme, profile)
 	if t.AlphaFeatureHeadlineView() then
 		if profile then
 			TidyPlatesHubFunctions.UseVariables(profile)
+			TidyPlates:ForceUpdate()
 		end
 	end
 end

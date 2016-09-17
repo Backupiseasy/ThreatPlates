@@ -24,7 +24,7 @@ THREAD_PLATES_NAME = "Threat Plates"
 ---------------------------------------------------------------------------------------------------
 
 t.DEBUG = function(...)
-	print ("DEBUG: ", ...)
+	--print ("DEBUG: ", ...)
 end
 
 -- Function from: https://coronalabs.com/blog/2014/09/02/tutorial-printing-table-contents/

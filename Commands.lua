@@ -85,3 +85,15 @@ end
 
 SLASH_TPTPVERBOSE1 = "/tptpverbose"
 SlashCmdList["TPTPVERBOSE"] = TPTPVERBOSE
+
+local function TPTPPERF()
+	if TidyPlatesThreat.db.profile.verbose then
+		UpdateAddOnMemoryUsage()
+		local mem = GetAddOnMemoryUsage("TidyPlates_ThreatPlates")
+		t.Print("-->>Threat Plates memory usage: "..tostring(mem))
+	end
+
+end
+
+SLASH_TPTPPERF1 = "/tptpperformance"
+SlashCmdList["TPTPPERF"] = TPTPPERF

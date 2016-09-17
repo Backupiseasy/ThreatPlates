@@ -4512,7 +4512,6 @@ for k_c,v_c in ipairs(db.uniqueSettings) do
 						func = function()
 							if UnitExists("Target") then
 								local target = UnitName("Target")
-								print(target)
 								db.uniqueSettings[k_c].name = target
 								options.args.Custom.args["#"..k_c].name = "#"..k_c..". "..target
 								options.args.Custom.args["#"..k_c].args.Header.name = target
@@ -4944,7 +4943,7 @@ function TidyPlatesThreat:AddOptions(class)
 	}
 	local addorder = 20
 	for k_c,k_v in pairs(AddOptionsTable[class].names) do
-		print(k_c.. " "..k_v)
+		-- t.DEBUG(k_c.. " "..k_v)
 		AdditionalOptions.args.Options.args[index..k_c] = {
 			type = "group",
 			name = k_v,

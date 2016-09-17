@@ -108,7 +108,7 @@ local function OnUpdate(plate, unit)
 			elseif v.enabled() then
 				-- TODO: unit sometimes seems to be nil, no idea why
 				-- context means that widget is only relevant for target (or mouse-over)
-				if unit and not v.isContext then
+				if not v.isContext then
 					w[k]:Update(unit)
 				end
 			else
@@ -128,9 +128,7 @@ local function OnContextUpdate(plate, unit)
 			if ThreatPlates.AlphaFeatureHeadlineView() and (style == "NameOnly") then
 				w[k]:Hide()
 			elseif v.enabled() then
-				if unit then
-					w[k]:UpdateContext(unit)
-				end
+				w[k]:UpdateContext(unit)
 			else
 				w[k]:Hide()
 			end

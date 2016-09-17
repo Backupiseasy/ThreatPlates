@@ -27,7 +27,7 @@ ThreatPlatesWidgets.ClearAllTotemIconWidgets = ClearAllWidgets
 function tL(number)
 	local name = GetSpellInfo(number)
 	if not name then
-		print(number)
+		--ThreatPlates.DEBUG(number)
 		return ""
 	end
 	return name

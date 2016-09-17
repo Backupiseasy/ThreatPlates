@@ -1,4 +1,13 @@
 ----
+**  8.2.0.Beta1 (works with [[https://mods.curse.com/addons/wow/tidy-plates|Tidy Plates 6.18.5]])**
+
+* Widget handling was heavily rewritten because of changes in TidyPlates, still not perfect, so I flag this as a beta release to get more feedback on bugs
+* Fixed a bug with class icon widget showing friendly class icons although not enabled
+* Fixed a typo in the configuration dialog
+* Fixed a bug in auras widget that prevented filtering based on aura type
+* Disabled Healer Tracker widget as it's currently not working at all
+
+----
 **  8.1.4 (works with [[https://mods.curse.com/addons/wow/tidy-plates|Tidy Plates 6.18.6]])**
 
 * Basic compatibility with TidyPlates 6.18.6 - some things may still be broken (probably changing options without reload UI)

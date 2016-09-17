@@ -12,6 +12,7 @@ local OldUpdateConfig
 -- two constants from TidyPlates AuraWidget
 local AURA_TARGET_HOSTILE = 1
 local AURA_TARGET_FRIENDLY = 2
+local AURA_TYPE = { Buff = 1, Curse = 2, Disease = 3, Magic = 4, Poison = 5, Debuff = 6, }
 
 -- local OldUseSquareDebuffIcon = nil
 -- local OldUseWideDebuffIcon = nil
@@ -48,6 +49,7 @@ local function ClearAllWidgets()
 end
 ThreatPlatesWidgets.ClearAllAuraWidgets = ClearAllWidgets
 
+-- return value: show, priority, r, g, b (color for ?)
 local function AuraFilter(aura)
 	local DB = TidyPlatesThreat.db.profile.debuffWidget
 	local isType, isShown
@@ -58,18 +60,23 @@ local function AuraFilter(aura)
 		isShown = true
 	end
 
-	-- only show aura types configured in the options
-	if aura.type and DB.displays[aura.type] then
+
+	if aura.effect == "HELPFUL" and DB.displays[AURA_TYPE.Buff] then
 		isType = true
-	else
-		isType =  true
+	elseif aura.effect == "HARMFUL" and DB.displays[AURA_TYPE.Debuff] then
+		-- only show aura types configured in the options
+		if aura.type then
+			isType = DB.displays[AURA_TYPE[aura.type]]
+		else
+			isType = true
+		end
 	end
 
 	if isShown and isType then
 		local mode = DB.mode
 		local spellfound = tContains(DB.filter, aura.name)
 		if spellfound then spellfound = true end
-		local isMine = (aura.caster == "player")
+		local isMine = (aura.caster == "player") --or aura.caster == "pet"?
 		if mode == "whitelist" then
 			return spellfound
 		elseif mode == "whitelistMine" then
