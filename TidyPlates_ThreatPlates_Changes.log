@@ -1,5 +1,5 @@
 ------------------------------------------------------
-8.2.0-Beta1 (works with TidyPlates 6.18.5)
+8.2.0.Beta1 (works with TidyPlates 6.18.5)
 ------------------------------------------------------
 * Widget handling was heavily rewritten because of changes in TidyPlates, still not perfect, so I flag this as a beta release to get more feedback on bugs
 * Fixed a bug with class icon widget showing friendly class icons although not enabled
