@@ -41,13 +41,13 @@ local function enabled()
 end
 
 -- hides/destroys all widgets of this type created by Threat Plates
-local function ClearAllWidgets()
+-- local function ClearAllWidgets()
 	-- for _, widget in pairs(WidgetList) do
 	-- 	widget:Hide()
 	-- end
 	-- WidgetList = {}
-end
-ThreatPlatesWidgets.ClearAllAuraWidgets = ClearAllWidgets
+-- end
+-- ThreatPlatesWidgets.ClearAllAuraWidgets = ClearAllWidgets
 
 -- return value: show, priority, r, g, b (color for ?)
 local function AuraFilter(aura)

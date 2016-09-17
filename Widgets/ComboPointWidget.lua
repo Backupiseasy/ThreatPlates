@@ -17,13 +17,13 @@ local function enabled()
 end
 
 -- hides/destroys all widgets of this type created by Threat Plates
-local function ClearAllWidgets()
-	for _, widget in pairs(WidgetList) do
-		widget:Hide()
-	end
-	WidgetList = {}
-end
-ThreatPlatesWidgets.ClearAllComboPointWidgets = ClearAllWidgets
+-- local function ClearAllWidgets()
+-- 	for _, widget in pairs(WidgetList) do
+-- 		widget:Hide()
+-- 	end
+-- 	WidgetList = {}
+-- end
+-- ThreatPlatesWidgets.ClearAllComboPointWidgets = ClearAllWidgets
 
 ---------------------------------------------------------------------------------------------------
 -- Widget Functions for TidyPlates
@@ -132,11 +132,12 @@ WatcherFrame:RegisterEvent("UNIT_AURA")
 WatcherFrame:RegisterEvent("UNIT_FLAGS")
 
 local function WatcherFrameHandler(frame, event, unitid)
-		local guid = UnitGUID("target")
-		if UnitExists("target") then
-			local widget = WidgetList[guid]
-			if widget then UpdateWidgetFrame(widget) end				-- To update all, use: for guid, widget in pairs(WidgetList) do UpdateWidgetFrame(widget) end
-		end
+	--if UnitExists("target") then
+	local guid = UnitGUID("target")
+	if guid then
+		local widget = WidgetList[guid]
+		if widget then UpdateWidgetFrame(widget) end				-- To update all, use: for guid, widget in pairs(WidgetList) do UpdateWidgetFrame(widget) end
+	end
 end
 
 local function EnableWatcherFrame(arg)

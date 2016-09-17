@@ -7,20 +7,19 @@ ThreatPlates = NAMESPACE.ThreatPlates
 
 local path = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ArenaWidget\\"
 local ArenaID = {}
-local WidgetList = {}
 
 ---------------------------------------------------------------------------------------------------
 -- Threat Plates functions
 ---------------------------------------------------------------------------------------------------
 
 -- hides/destroys all widgets of this type created by Threat Plates
-local function ClearAllWidgets()
-	for _, widget in pairs(WidgetList) do
-		widget:Hide()
-	end
-	WidgetList = {}	
-end
-ThreatPlatesWidgets.ClearAllArenaWidgets = ClearAllWidgets
+-- local function ClearAllWidgets()
+-- 	for _, widget in pairs(WidgetList) do
+-- 		widget:Hide()
+-- 	end
+-- 	WidgetList = {}
+-- end
+-- ThreatPlatesWidgets.ClearAllArenaWidgets = ClearAllWidgets
 
 local function BuildTable() -- ArenaId[unit name] = ArenaID #
 	for i = 1, GetNumArenaOpponents() do
@@ -50,7 +49,7 @@ end
 local function ClearWidgetContext(frame)
 	local guid = frame.guid
 	if guid then
-		WidgetList[guid] = nil
+		ArenaID[guid] = nil
 		frame.guid = nil
 	end
 end
@@ -118,10 +117,10 @@ local function UpdateWidgetContext(frame, unit)
 	local guid = unit.guid
 	frame.guid = guid
 
-	-- Add to Widget List
-	if guid then
-		WidgetList[guid] = frame
-	end
+	-- Add to Widget List - done in EventWatcher, only necessary for arena opponents
+	-- if guid then
+	-- 	WidgetList[guid] = frame
+	-- end
 
 	-- Custom Code II
 	--------------------------------------

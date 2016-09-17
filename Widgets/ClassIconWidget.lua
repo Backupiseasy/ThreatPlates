@@ -5,32 +5,35 @@ ThreatPlates = NAMESPACE.ThreatPlates
 -- Class Icon Widget --
 -----------------------
 local path = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ClassIconWidget\\"
-local WidgetList = {}
+-- local WidgetList = {}
 
 ---------------------------------------------------------------------------------------------------
 -- Threat Plates functions
 ---------------------------------------------------------------------------------------------------
 
 local function enabled()
-	local db = TidyPlatesThreat.db.profile.classWidget
-	return db.ON
+	return TidyPlatesThreat.db.profile.classWidget.ON
 end
 
-local function UpdateSettings(frame)
+local function UpdateWidgetConfig(frame, class)
 	local db = TidyPlatesThreat.db.profile.classWidget
 	frame:SetHeight(db.scale)
 	frame:SetWidth(db.scale)
-	frame:SetPoint((db.anchor), frame:GetParent(), (db.x), (db.y))
+	frame:SetPoint(db.anchor, frame:GetParent(), db.x, db.y)
+
+	if class then
+		frame.Icon:SetTexture(path..db.theme.."\\"..class)
+	end
 end
 
 -- hides/destroys all widgets of this type created by Threat Plates
-local function ClearAllWidgets()
-	for _, widget in pairs(WidgetList) do
-		widget:Hide()
-	end
-	WidgetList = {} -- should not be necessary, as Hide() does that, just to be sure
-end
-ThreatPlatesWidgets.ClearAllClassIconWidgets = ClearAllWidgets
+-- local function ClearAllWidgets()
+-- 	for _, widget in pairs(WidgetList) do
+-- 		widget:Hide()
+-- 	end
+-- 	WidgetList = {} -- should not be necessary, as Hide() does that, just to be sure
+-- end
+-- ThreatPlatesWidgets.ClearAllClassIconWidgets = ClearAllWidgets
 
 ---------------------------------------------------------------------------------------------------
 -- Widget Functions for TidyPlates
@@ -39,49 +42,47 @@ ThreatPlatesWidgets.ClearAllClassIconWidgets = ClearAllWidgets
 -- Update Graphics
 local function UpdateWidgetFrame(frame, unit)
 	local S = TidyPlatesThreat.SetStyle(unit)
-	if (not enabled()) or S == "NameOnly" or S == "etotem" or S == "empty" then frame:_Hide(); return end
+	--if (not enabled()) or S == "NameOnly" or S == "etotem" or S == "empty" then frame:_Hide(); return end
+	if S == "NameOnly" or S == "etotem" or S == "empty" then frame:_Hide(); return end
 
+	-- TODO: optimization - is it necessary to determine the class everytime this function is called on only if the guid changes?
 	local db = TidyPlatesThreat.db.profile
 	local class
-
-	if unit.class and unit.type == "PLAYER" then
- 		if unit.reaction == "FRIENDLY" and db.friendlyClassIcon then
-			if db.cacheClass and unit.guid then
-				local _, Class = GetPlayerInfoByGUID(unit.guid)
-				if not db.cache[unit.name] then
-					if db.cacheClass then
-						db.cache[unit.name] = Class
-					end
-					class = Class
-				else
-					class = db.cache[unit.name]
-				end
-			else
+	if unit.type == "PLAYER" then
+		if unit.reaction == "HOSTILE" then
+			class = unit.class
+		elseif unit.reaction == "FRIENDLY" and db.friendlyClassIcon then
+			-- if db.cacheClass and unit.guid then
+			-- 	-- local _, Class = GetPlayerInfoByGUID(unit.guid)
+			-- 	if not db.cache[unit.name] then
+			-- 		db.cache[unit.name] = unit.class
+			-- 		class = unit.class
+			-- 	else
+			-- 		class = db.cache[unit.name]
+			-- 	end
+			-- else
  				class = unit.class
-			end
-		elseif unit.reaction == "HOSTILE" then -- hostile player, always show icon if enabled at all
- 			class = unit.class
+			-- end
 		end
 	end
 
 	if class then -- Value shouldn't need to change
-		UpdateSettings(frame)
-		frame.Icon:SetTexture(path..db.classWidget.theme.."\\"..class)
+		UpdateWidgetConfig(frame, class)
 		frame:Show()
 	else
 		frame:_Hide()
 	end
 end
 
--- Context
+-- Context - GUID or unitid should only change here, i.e., class changes should be determined here
 local function UpdateWidgetContext(frame, unit)
 	local guid = unit.guid
 	frame.guid = guid
 
 	-- Add to Widget List
-	if guid then
-		WidgetList[guid] = frame
-	end
+	-- if guid then
+	-- 	WidgetList[guid] = frame
+	-- end
 
 	-- Custom Code II
 	--------------------------------------
@@ -97,7 +98,7 @@ end
 local function ClearWidgetContext(frame)
 	local guid = frame.guid
 	if guid then
-		WidgetList[guid] = nil
+		-- WidgetList[guid] = nil
 		frame.guid = nil
 	end
 end
@@ -113,6 +114,8 @@ local function CreateWidgetFrame(parent)
 	frame:SetWidth(64)
 	frame.Icon = frame:CreateTexture(nil, "OVERLAY")
 	frame.Icon:SetAllPoints(frame)
+
+	frame.UpdateConfig = UpdateWidgetConfig
 	--------------------------------------
 	-- End Custom Code
 

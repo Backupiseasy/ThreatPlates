@@ -4,7 +4,7 @@ ThreatPlates = NAMESPACE.ThreatPlates
 ---------------
 -- Unique Icon Widget
 ---------------
-local WidgetList = {}
+-- local WidgetList = {}
 
 ---------------------------------------------------------------------------------------------------
 -- Threat Plates functions
@@ -23,13 +23,13 @@ local function UpdateSettings(frame)
 end
 
 -- hides/destroys all widgets of this type created by Threat Plates
-local function ClearAllWidgets()
-	for _, widget in pairs(WidgetList) do
-		widget:Hide()
-	end
-	WidgetList = {}		
-end
-ThreatPlatesWidgets.ClearAllUniqueIconWidgets = ClearAllWidgets
+-- local function ClearAllWidgets()
+-- 	for _, widget in pairs(WidgetList) do
+-- 		widget:Hide()
+-- 	end
+-- 	WidgetList = {}
+-- end
+-- ThreatPlatesWidgets.ClearAllUniqueIconWidgets = ClearAllWidgets
 
 ---------------------------------------------------------------------------------------------------
 -- Widget Functions for TidyPlates
@@ -67,9 +67,9 @@ local function UpdateWidgetContext(frame, unit)
 	frame.guid = guid
 
 	-- Add to Widget List
-	if guid then
-		WidgetList[guid] = frame
-	end
+	-- if guid then
+	-- 	WidgetList[guid] = frame
+	-- end
 
 	-- Custom Code II
 	--------------------------------------
@@ -85,7 +85,7 @@ end
 local function ClearWidgetContext(frame)
 	local guid = frame.guid
 	if guid then
-		WidgetList[guid] = nil
+		-- WidgetList[guid] = nil
 		frame.guid = nil
 	end
 end

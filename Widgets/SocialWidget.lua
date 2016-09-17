@@ -10,20 +10,20 @@ ThreatPlates = NAMESPACE.ThreatPlates
 -- Change the 'guildicon' to use the emblem and border method used by blizzard frames.
 
 local path = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\SocialWidget\\"
-local WidgetList = {}
+-- local WidgetList = {}
 
 ---------------------------------------------------------------------------------------------------
 -- Threat Plates functions
 ---------------------------------------------------------------------------------------------------
 
 -- hides/destroys all widgets of this type created by Threat Plates
-local function ClearAllWidgets()
-	for _, widget in pairs(WidgetList) do
-		widget:Hide()
-	end
-	WidgetList = {}		
-end
-ThreatPlatesWidgets.ClearAllSocialWidgets = ClearAllWidgets
+-- local function ClearAllWidgets()
+-- 	for _, widget in pairs(WidgetList) do
+-- 		widget:Hide()
+-- 	end
+-- 	WidgetList = {}
+-- end
+-- ThreatPlatesWidgets.ClearAllSocialWidgets = ClearAllWidgets
 
 ListTable = {
 	g = {},
@@ -128,23 +128,20 @@ local function UpdateSettings(frame)
 end
 
 local function UpdateWidgetFrame(frame, unit)
-	if enabled() then
-		-- I will probably expand this to a table with 'friend = true','guild = true', and 'bnet = true' and have 3 textuers show.
-		local texture
-		if tContains(ListTable.f, unit.name) then
-			texture = path.."friendicon"
-		elseif tContains(ListTable.b, unit.name) then
-			texture = "Interface\\FriendsFrame\\PlusManz-BattleNet"
-		elseif tContains(ListTable.g, unit.name) then
-			texture = path.."guildicon"
-		end
-		if texture then
-			UpdateSettings(frame)
-			frame.Icon:SetTexture(texture)
-			frame:Show()
-		else
-			frame:_Hide()
-		end
+	-- I will probably expand this to a table with 'friend = true','guild = true', and 'bnet = true' and have 3 textuers show.
+	local texture
+	if tContains(ListTable.f, unit.name) then
+		texture = path.."friendicon"
+	elseif tContains(ListTable.b, unit.name) then
+		texture = "Interface\\FriendsFrame\\PlusManz-BattleNet"
+	elseif tContains(ListTable.g, unit.name) then
+		texture = path.."guildicon"
+	end
+
+	if texture then
+		UpdateSettings(frame)
+		frame.Icon:SetTexture(texture)
+		frame:Show()
 	else
 		frame:_Hide()
 	end
@@ -156,9 +153,9 @@ local function UpdateWidgetContext(frame, unit)
 	frame.guid = guid
 
 	-- Add to Widget List
-	if guid then
-		WidgetList[guid] = frame
-	end
+	-- if guid then
+	-- 	WidgetList[guid] = frame
+	-- end
 
 	-- Custom Code II
 	--------------------------------------
@@ -174,7 +171,7 @@ end
 local function ClearWidgetContext(frame)
 	local guid = frame.guid
 	if guid then
-		WidgetList[guid] = nil
+		-- WidgetList[guid] = nil
 		frame.guid = nil
 	end
 end

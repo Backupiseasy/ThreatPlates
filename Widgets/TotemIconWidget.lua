@@ -5,7 +5,7 @@ ThreatPlates = NAMESPACE.ThreatPlates
 -- Totem Icon Widget
 -------------------------------------------------------------------------------
 local path = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\TotemIconWidget\\"
-local WidgetList = {}
+-- local WidgetList = {}
 
 ---------------------------------------------------------------------------------------------------
 -- Threat Plates functions
@@ -17,12 +17,12 @@ local function enabled()
 end
 
 -- hides/destroys all widgets of this type created by Threat Plates
-local function ClearAllWidgets()
-	for _, widget in pairs(WidgetList) do
-		widget:Hide()
-	end
-end
-ThreatPlatesWidgets.ClearAllTotemIconWidgets = ClearAllWidgets
+-- local function ClearAllWidgets()
+-- 	for _, widget in pairs(WidgetList) do
+-- 		widget:Hide()
+-- 	end
+-- end
+-- ThreatPlatesWidgets.ClearAllTotemIconWidgets = ClearAllWidgets
 
 function tL(number)
 	local name = GetSpellInfo(number)
@@ -131,9 +131,9 @@ local function UpdateWidgetContext(frame, unit)
 	frame.guid = guid
 
 	-- Add to Widget List
-	if guid then
-		WidgetList[guid] = frame
-	end
+	-- if guid then
+	-- 	WidgetList[guid] = frame
+	-- end
 
 	-- Custom Code II
 	--------------------------------------
@@ -149,7 +149,7 @@ end
 local function ClearWidgetContext(frame)
 	local guid = frame.guid
 	if guid then
-		WidgetList[guid] = nil
+		-- WidgetList[guid] = nil
 		frame.guid = nil
 	end
 end
