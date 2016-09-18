@@ -28,7 +28,7 @@ end
 -- Widget Functions for TidyPlates
 ---------------------------------------------------------------------------------------------------
 
-local function UpdateWidgetFrame(frame, unit)
+local function UpdateWidgetFrame(frame, unit, style)
 	if not InCombatLockdown() or not enabled() then frame:_Hide() end;
 
 	local threatLevel
@@ -48,7 +48,8 @@ local function UpdateWidgetFrame(frame, unit)
 	if unit.isMarked and prof.marked.art then
 		frame:_Hide()
 	else
-		local style = TidyPlatesThreat.SetStyle(unit)
+		--local style = TidyPlatesThreat.SetStyle(unit)
+		if not style then style = TidyPlatesThreat.SetStyle(unit) end
 		if ((style == "dps") or (style == "tank") or (style == "unique")) and
 		  (InCombatLockdown() and unit.reaction ~= "FRIENDLY" and unit.type == "NPC") then
 			frame.Icon:SetTexture(path..prof.art.theme.."\\"..threatLevel)
@@ -60,7 +61,7 @@ local function UpdateWidgetFrame(frame, unit)
 end
 
 -- Context
-local function UpdateWidgetContext(frame, unit)
+local function UpdateWidgetContext(frame, unit, style)
 	local guid = unit.guid
 	frame.guid = guid
 
@@ -72,7 +73,7 @@ local function UpdateWidgetContext(frame, unit)
 	-- Custom Code II
 	--------------------------------------
 	if UnitGUID("target") == guid then
-		UpdateWidgetFrame(frame, unit)
+		UpdateWidgetFrame(frame, unit, style)
 	else
 		frame:_Hide()
 	end

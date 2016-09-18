@@ -42,7 +42,7 @@ local function ParseRealm(input)
 end
 
 local function UpdateGlist()
-	wipe(ListTable.g)
+	ListTable.g = {}
 	for i=1,GetNumGuildMembers() do
 		local name = select(1,GetGuildRosterInfo(i))
 		tinsert(ListTable.g, ParseRealm(name))
@@ -50,7 +50,7 @@ local function UpdateGlist()
 end
 
 local function UpdateFlist()
-	wipe(ListTable.f)
+	ListTable.f = {}
 	local friendsTotal, friendsOnline = GetNumFriends()
 	for i=1,friendsOnline do
 		local name, level, class, area, connected, status, note = GetFriendInfo(i)
@@ -59,7 +59,7 @@ local function UpdateFlist()
 end
 
 local function UpdateBnetList()
-	wipe(ListTable.b)
+	ListTable.b = {}
 	local BnetTotal, BnetOnline = BNGetNumFriends()
 	for i=1, BnetOnline do
 		local presenceID, givenName, surname, toonName, toonID, client, isOnline, lastOnline, isAFK, isDND, broadcastText, noteText, isFriend, broadcastTime  = BNGetFriendInfo(i)

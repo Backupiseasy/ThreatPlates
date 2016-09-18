@@ -29,20 +29,22 @@ end
 -- Widget Functions for TidyPlates
 ---------------------------------------------------------------------------------------------------
 
-local function UpdateWidgetFrame(frame, unit)
-	local S = TidyPlatesThreat.SetStyle(unit)
-	if unit.isTarget and S ~= "etotem" and S ~= "empty" and S ~= "NameOnly" then
+local function UpdateWidgetFrame(frame, unit, style)
+	--local S = TidyPlatesThreat.SetStyle(unit)
+	if not style then style = TidyPlatesThreat.SetStyle(unit) end
+
+	if style == "NameOnly" or style == "etotem" or style == "empty" then
+		frame:_Hide();
+	else
 	 	local db = TidyPlatesThreat.db.profile.targetWidget
 		frame.Icon:SetTexture(path..db.theme)
 		frame.Icon:SetVertexColor(db.r,db.g,db.b,db.a)
 		frame:Show()
-	else
-		frame:_Hide()
 	end
 end
 
 -- Context
-local function UpdateWidgetContext(frame, unit)
+local function UpdateWidgetContext(frame, unit, style)
 	local guid = unit.guid
 	frame.guid = guid
 
@@ -54,7 +56,7 @@ local function UpdateWidgetContext(frame, unit)
 	-- Custom Code II
 	--------------------------------------
 	if UnitGUID("target") == guid then
-		UpdateWidgetFrame(frame, unit)
+		UpdateWidgetFrame(frame, unit, style)
 	else
 		frame:_Hide()
 	end

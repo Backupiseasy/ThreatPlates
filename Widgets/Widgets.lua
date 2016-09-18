@@ -60,7 +60,6 @@ local function AuraFilter(aura)
 		isShown = true
 	end
 
-
 	if aura.effect == "HELPFUL" and DB.displays[AURA_TYPE.Buff] then
 		isType = true
 	elseif aura.effect == "HARMFUL" and DB.displays[AURA_TYPE.Debuff] then
@@ -76,7 +75,7 @@ local function AuraFilter(aura)
 		local mode = DB.mode
 		local spellfound = tContains(DB.filter, aura.name)
 		if spellfound then spellfound = true end
-		local isMine = (aura.caster == "player") --or aura.caster == "pet"?
+		local isMine = (aura.caster == "player") or (aura.caster == "pet")
 		if mode == "whitelist" then
 			return spellfound
 		elseif mode == "whitelistMine" then
@@ -175,11 +174,6 @@ local function CustomUpdateWidgetFrame(frame, unit)
 		frame:_Hide()
 		return
 	end
-	-- disable auras in headline-view mode
-	if ThreatPlates.AlphaFeatureHeadlineView() and (TidyPlatesThreat.SetStyle(unit) == "NameOnly") then
-		frame:_Hide()
-		return
-	end
 
 	--TidyPlatesWidgets.SetAuraFilter(AuraFilter)
 
@@ -222,6 +216,7 @@ local function CreateAuraWidget(plate)
 	-- Custom Code III
 	--------------------------------------
 	local frame = TidyPlatesWidgets.CreateAuraWidget(plate)
+	frame:Hide()
 
 	--frame:SetPoint(config.anchor or "TOP", plate, config.x or 0, config.y or 0)
 	frame:SetPoint(TidyPlatesThreat.db.profile.debuffWidget.anchor, plate, TidyPlatesThreat.db.profile.debuffWidget.x, TidyPlatesThreat.db.profile.debuffWidget.y)

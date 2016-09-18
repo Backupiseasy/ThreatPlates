@@ -62,7 +62,7 @@ local function WatcherFrameHandler(frame, event,...)
 	if IsActiveBattlefieldArena() and GetNumArenaOpponents() >= 1 then -- If we're in arena
 		BuildTable()
 	else
-		wipe(ArenaID) -- Clear the table when we leave
+		ArenaID = {} -- Clear the table when we leave
 	end
 	--TidyPlates:ForceUpdate()
 end
@@ -75,7 +75,7 @@ local function EnableWatcherFrame(arg)
 	else
 		WatcherFrame:UnregisterAllEvents()
 		WatcherFrame:SetScript("OnEvent", nil);
-		wipe(ArenaID)
+		ArenaID = {}
 	end
 end
 

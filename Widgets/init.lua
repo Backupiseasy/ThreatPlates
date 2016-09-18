@@ -21,6 +21,8 @@ ThreatPlatesWidgets.list = {}
 
 local PlatesVisible = {}
 
+---------------------------------------------------------------------------------------------------
+
 local function RegisterWidget(name,create,isContext,enabled)
 	if not ThreatPlatesWidgets.list[name] then
 		ThreatPlatesWidgets.list[name] = {
@@ -43,6 +45,8 @@ local function OnInitialize(plate, theme)
 	if theme then
 		PlatesVisible[plate] = 1 -- save all plates with widgets to be able to disable them when another theme is selected in TidyPlates
 
+		-- plate.unit
+
 		local w = plate.widgets
 		-- disable all non Threat Plates widgets - unless they do it themeselves
 		for _, widget in pairs(plate.widgets) do
@@ -55,7 +59,7 @@ local function OnInitialize(plate, theme)
 				widget.TP_Widget = true -- mark ThreatPlates widgets
 				w[k] = widget
 			end
-			if not v.enabled() then
+			if not v.enabled() then -- widgets create hidden in there create function, so not necessary?
 				w[k]:Hide()
 				--w[k] = nil -- deleted the disabled widget, is that what we want? no re-using it later ...
 			end
@@ -89,7 +93,6 @@ local function DeleteWidgets()
 			end
 		end
 	end
-	-- wipe(PlatesVisible)
 	PlatesVisible = {}
 end
 
@@ -103,13 +106,13 @@ local function OnUpdate(plate, unit)
 		-- Diable all widgets in headline view mode
 		-- TODO: optimize, e.g. move to enabled()
 		if w[k] then -- should never be nil here, if OnInitialize was called correctly
-			if ThreatPlates.AlphaFeatureHeadlineView() and (style == "NameOnly") then
+			if style == "NameOnly" then
 				w[k]:Hide()
 			elseif v.enabled() then
 				-- TODO: unit sometimes seems to be nil, no idea why
 				-- context means that widget is only relevant for target (or mouse-over)
 				if not v.isContext then
-					w[k]:Update(unit)
+					w[k]:Update(unit, style)
 				end
 			else
 				w[k]:Hide()
@@ -122,13 +125,15 @@ end
 -- OnContextUpdate must only do something when there is something unit-dependent to display?
 local function OnContextUpdate(plate, unit)
 	--ThreatPlates.DEBUG("OnContextUpdate: plate = ", plate, " - unit = ", unit, " - unit.name =", ((unit and unit.name) or "nil"))
+	local style = TidyPlatesThreat.SetStyle(unit)
 	local w = plate.widgets
+
 	for k,v in pairs(ThreatPlatesWidgets.list) do
 		if w[k] then -- should never be nil here, if OnInitialize was called correctly
-			if ThreatPlates.AlphaFeatureHeadlineView() and (style == "NameOnly") then
+			if style == "NameOnly" then
 				w[k]:Hide()
 			elseif v.enabled() then
-				w[k]:UpdateContext(unit)
+				w[k]:UpdateContext(unit, style)
 			else
 				w[k]:Hide()
 			end

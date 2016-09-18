@@ -32,10 +32,14 @@ end
 -- Widget Functions for TidyPlates
 ---------------------------------------------------------------------------------------------------
 
-local function UpdateWidgetFrame(frame, unit)
+local function UpdateWidgetFrame(frame, unit, style)
 	local db = TidyPlatesThreat.db.profile.settings.elitehealthborder
-	local S = TidyPlatesThreat.SetStyle(unit)
-	if unit.isElite and S ~= "empty" and S~= "etotem" and S~= "NameOnly" then
+	--local S = TidyPlatesThreat.SetStyle(unit)
+	if not style then style = TidyPlatesThreat.SetStyle(unit) end
+
+	if style == "NameOnly" or style == "etotem" or style == "empty" then frame:_Hide(); return end
+
+	if unit.isElite then
 		frame.Border:SetTexture(ThreatPlates.Art..db.texture)
 		frame:Show()
 	else
@@ -44,7 +48,7 @@ local function UpdateWidgetFrame(frame, unit)
 end
 
 -- Context
-local function UpdateWidgetContext(frame, unit)
+local function UpdateWidgetContext(frame, unit, style)
 	local guid = unit.guid
 	frame.guid = guid
 
@@ -56,7 +60,7 @@ local function UpdateWidgetContext(frame, unit)
 	-- Custom Code II
 	--------------------------------------
 	if UnitGUID("target") == guid then
-		UpdateWidgetFrame(frame, unit)
+		UpdateWidgetFrame(frame, unit, style)
 	else
 		frame:_Hide()
 	end
