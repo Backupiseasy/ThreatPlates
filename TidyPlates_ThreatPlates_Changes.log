@@ -1,6 +1,7 @@
 ------------------------------------------------------
 8.2.0-Beta2 (works with TidyPlates 6.18.5)
 ------------------------------------------------------
+* Further optimizations of widget creation and updateing
 * AuraWidget now also shows pet buffs and debuffs
 
 ------------------------------------------------------

@@ -1,4 +1,10 @@
 ----
+**  8.2.0-Beta2 (works with [[https://mods.curse.com/addons/wow/tidy-plates|Tidy Plates 6.18.5]])**
+
+* Further optimizations of widget creation and updateing
+* AuraWidget now also shows pet buffs and debuffs
+
+----
 **  8.2.0-Beta1 (works with [[https://mods.curse.com/addons/wow/tidy-plates|Tidy Plates 6.18.5]])**
 
 * Widget handling was heavily rewritten because of changes in TidyPlates, still not perfect, so I flag this as a beta release to get more feedback on bugs
