@@ -1,4 +1,4 @@
-﻿local L = LibStub("AceLocale-3.0"):NewLocale("TidyPlatesThreat", "enUS", true)
+﻿local L = LibStub("AceLocale-3.0"):NewLocale("TidyPlatesThreat", "enUS", true, true)
 if not L then return end
 
 ----------------------
@@ -370,7 +370,7 @@ L["This widget will display combo points on your target nameplate."] = true
 ----
 L["Aura Widget"] = true
 L["This widget will display auras that match your filtering on your target nameplate and others you recently moused over."] = true
-L["This lets you select the layout style of the aura widget. (Reloading UI is needed)"] = true
+L["This lets you select the layout style of the aura widget. (requires /reload)"] = true
 L["Wide"] = true
 L["Square"] = true
 L["Target Only"] = true

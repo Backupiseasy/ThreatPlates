@@ -1,53 +1,15 @@
 [b]---------------------------------------------------------------------------------------------------[/b]
-[b]  8.1.4 (works with [url="https://mods.curse.com/addons/wow/tidy-plates"]TidyPlates 6.18.6[/url])[/b]
+[b]  8.2.0 (works with [url="https://mods.curse.com/addons/wow/tidy-plates"]TidyPlates 6.18.8[/url])[/b]
 [b]---------------------------------------------------------------------------------------------------[/b]
 [LIST]
-[*]Basic compatibility with TidyPlates 6.18.6 - some things may still be broken (probably changing options without reload UI)
-[*]Added holy power as combo points for retribution paladins
-[*]Fixed a bug with the class icon being displayed despite unit being hidden (e.g. normal or boss units)
+[*]Widget handling was heavily rewritten because of changes in TidyPlates
+[*]AuraWidget now also shows pet buffs and debuffs
+[*]Fixed a bug with class icon widget showing friendly class icons although not enabled
+[*]Fixed a typo in the configuration dialog
+[*]Fixed a bug in auras widget that prevented filtering based on aura type
+[*]Disabled Healer Tracker widget as it's currently not working at all
+[*]Known issues:
+[LIST]
+[*]Switching between ThreatPlates and other themes may require /reload for the new theme to work correctly
 [/LIST]
-
-[b]---------------------------------------------------------------------------------------------------[/b]
-[b]  8.1.3 (works with [url="https://mods.curse.com/addons/wow/tidy-plates"]TidyPlates 6.18.3[/url])[/b]
-[b]---------------------------------------------------------------------------------------------------[/b]
-[LIST]
-[*] Fixed a bug with class coloring for players used although not enabled
-[/LIST]
-
-[b]---------------------------------------------------------------------------------------------------[/b]
-[b]  8.1.2 (works with [url="https://mods.curse.com/addons/wow/tidy-plates"]TidyPlates 6.18.3[/url])[/b]
-[b]---------------------------------------------------------------------------------------------------[/b]
-[LIST]
-[*] Fixed a typo in enUS localization
-[/LIST]
-
-[b]---------------------------------------------------------------------------------------------------[/b]
-[b]  8.1.1 (works with [url="https://mods.curse.com/addons/wow/tidy-plates"]TidyPlates 6.18.3[/url])[/b]
-[b]---------------------------------------------------------------------------------------------------[/b]
-[LIST]
-[*]Reworked the settings for coloring the healthbar according to the priority in which the settings are applied, also: fixed some bugs
-[*]Fixed several bugs regarding tapped units (coloring, scaling, alpha, etc.)
-[*]Fixed a bug with nameplate coloring when units change factions (e.g., in Suramar)
-[*]Fixed several bugs with headline view (alpha, apply changes without reload UI)
-[*]Localization fixes (consistant naming of tapped units, deDE)
-[/LIST]
-
-[b]---------------------------------------------------------------------------------------------------[/b]
-[b]  8.1 (works with [url="https://mods.curse.com/addons/wow/tidy-plates"]TidyPlates 6.18.3[/url])[/b]
-[b]---------------------------------------------------------------------------------------------------[/b]
-[LIST]
-[*]Updated addon for Legion (7.0.3): added the demonhunter class, updated several spells (e.g., shaman totems), updated dual spec options, and lots of bug fixes
-[*]Added a new feature: Headline View (Text-Only) as known from TidyPlates
-[LIST]
-[*]TidyPlatesHub must be enabled for this to work; configure it via TidyPlatesHub profiles
-[*]Basic configuration options are available, see Nameplate Settings - Headline View (subtext settings are derived from nametext settings)
-[*]All Threat Plate widgets are disabled (auras, combo points, ...) - doesn't make much sense enabling them in this mode
-[/LIST]
-[*]Added a new feature to enable automatic role detection based on the currently active spec (see options, Threat System, Spec Roles)
-[*]Castbar border can now be set to Default or Thin (like healthbar border)
-[*]Improverd layering of Threat Plates widgets and target name plate (which is often overlapped by other plates)
-[*]Removed no longer supported localizations (translation support is welcome!)
-[*]Fixed a bug where certain nameplate widgets were not updated after changes in the options dialog
-[*]Fixed error with reload UI and AuraWidget
-[*]Fixed HP bar colouring with NPCs
 [/LIST]

@@ -1,6 +1,8 @@
 local _, ns = ...
 local t = ns.ThreatPlates
 
+---------------------------------------------------------------------------------------------------
+
 local function GetGeneral(unit)
 	local r, d, e = unit.reaction, unit.isDangerous, unit.isElite
 	if unit.isTapped then
@@ -123,12 +125,12 @@ local function SetStyle(unit)
 	-- 	t.DEBUG("unit GetType = ", TidyPlatesThreat.GetType(unit))
 	-- end
 
-	if style then
-	  return style
-	else
-		return "etotem"
-	end
+	if not style then style = "etotem" end
+
+	return style
 end
+
 TidyPlatesThreat.GetGeneral = GetGeneral
 TidyPlatesThreat.GetType = GetType
 TidyPlatesThreat.SetStyle = SetStyle
+TidyPlatesThreat.GetStyle = GetStyle
