@@ -86,13 +86,13 @@ local isAuraEnabled
 local function enabled()
 	if TidyPlatesThreat.db.profile.debuffWidget.ON then
 		if not isAuraEnabled then
-			ThreatPlatesWidgets.EnableAuraWatcher()
+			self.Enable()
 			--TidyPlatesWidgets.SetAuraFilter(AuraFilter)
 			isAuraEnabled = true
 		end
 	else
 		if isAuraEnabled then
-			ThreatPlatesWidgets.DisableAuraWatcher()
+			self.Disable()
 			isAuraEnabled = false
 		end
 	end
@@ -656,8 +656,8 @@ ThreatPlatesWidgets.SetAuraFilter = SetAuraFilter
 
 --TidyPlatesWidgets.CreateAuraWidget = CreateAuraWidget
 
-ThreatPlatesWidgets.EnableAuraWatcher = Enable
-ThreatPlatesWidgets.DisableAuraWatcher = Disable
+-- TidyPlatesWidgets.EnableAuraWatcher = Enable
+-- TidyPlatesWidgets.DisableAuraWatcher = Disable
 
 -----------------------------------------------------
 -- Soon to be deprecated
