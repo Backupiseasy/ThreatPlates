@@ -18,7 +18,7 @@ local AURA_TYPE = { Buff = 1, Curse = 2, Disease = 3, Magic = 4, Poison = 5, Deb
 -- local OldUseWideDebuffIcon = nil
 
 -- save a local version to detect a change efficiently (and not cycle through all auras for nothing)
--- local enable_cooldown_spiral
+local enable_cooldown_spiral
 
 ---------------------------------------------------------------------------------------------------
 -- Threat Plates functions
@@ -101,18 +101,19 @@ end
 ThreatPlatesWidgets.AuraFilter = AuraFilter
 
 -- enable/disable spiral cooldown an aura icons
--- TODO: currently disabled because no longer available in TidyPlates (since 6.18.2)
--- local function SetCooldownSpiral(frame)
---  	if (enable_cooldown_spiral ~= TidyPlatesThreat.db.profile.debuffWidget.cooldownSpiral) then
--- 		enable_cooldown_spiral = TidyPlatesThreat.db.profile.debuffWidget.cooldownSpiral
---
--- 		local AuraIconFrames = frame.AuraIconFrames
--- 		for index = 1, #AuraIconFrames do
--- 				AuraIconFrames[index].Cooldown:SetDrawEdge(enable_cooldown_spiral)
--- 				AuraIconFrames[index].Cooldown:SetDrawSwipe(enable_cooldown_spiral)
--- 		end
--- 	end
--- end
+local function SetCooldownSpiral(frame)
+	local db = TidyPlatesThreat.db.profile.debuffWidget
+
+ 	if (enable_cooldown_spiral ~= db.cooldownSpiral) then
+		enable_cooldown_spiral = db.cooldownSpiral
+
+		local AuraIconFrames = frame.AuraIconFrames
+		for index = 1, #AuraIconFrames do
+				AuraIconFrames[index].Cooldown:SetDrawEdge(enable_cooldown_spiral)
+				AuraIconFrames[index].Cooldown:SetDrawSwipe(enable_cooldown_spiral)
+		end
+	end
+end
 
 -- local function ThreatPlatesUseSquareDebuffIcon()
 -- 	local ProfDB = TidyPlatesThreat.db.profile
@@ -187,7 +188,7 @@ local function CustomUpdateWidgetFrame(frame, unit)
 	frame:SetScale(TidyPlatesThreat.db.profile.debuffWidget.scale)
 	frame:SetPoint(TidyPlatesThreat.db.profile.debuffWidget.anchor, frame:GetParent(), TidyPlatesThreat.db.profile.debuffWidget.x, TidyPlatesThreat.db.profile.debuffWidget.y)
 	--frame:SetPoint(TidyPlatesThreat.db.profile.debuffWidget.anchor, frame:GetParent(), "CENTER", TidyPlatesThreat.db.profile.debuffWidget.x, TidyPlatesThreat.db.profile.debuffWidget.y)
-	--SetCooldownSpiral(frame)
+	SetCooldownSpiral(frame)
 
 	-- target nameplates are often overlapped by other nameplates, this fixes it:
 	-- set frame level higher to make auras apear on top
@@ -231,8 +232,8 @@ local function CreateAuraWidget(plate)
 	-- frame.UpdateTarget = UpdateWidgetTarget - not yet used, I think
 
 	-- disable spiral cooldown an aura icons
-	--enable_cooldown_spiral = nil
-	--SetCooldownSpiral(frame)
+	enable_cooldown_spiral = nil
+	SetCooldownSpiral(frame)
 	--------------------------------------
 	-- End Custom Code
 	-- frame.UpdateContext = UpdateWidgetContext
@@ -246,7 +247,7 @@ local function CreateAuraWidget(plate)
 	return frame
 end
 
-ThreatPlatesWidgets.RegisterWidget("ThreatPlatesAuraWidget", CreateAuraWidget, false, enabled)
+ThreatPlatesWidgets.RegisterWidget("AuraWidgetThreatPlates", CreateAuraWidget, false, enabled)
 
 ------------------------
 -- Threat Line Widget --

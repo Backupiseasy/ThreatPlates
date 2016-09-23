@@ -41,7 +41,6 @@ end
 -- TidyPlatesGlobal_OnInitialize() is called when a nameplate is created or re-shown
 -- activetheme is the table, not just the name
 local function OnInitialize(plate, theme)
-	--ThreatPlates.DEBUG("OnInitialize: plate = ", plate, " - ", theme)
 	if theme then
 		PlatesVisible[plate] = 1 -- save all plates with widgets to be able to disable them when another theme is selected in TidyPlates
 
@@ -49,7 +48,7 @@ local function OnInitialize(plate, theme)
 
 		local w = plate.widgets
 		-- disable all non Threat Plates widgets - unless they do it themeselves
-		for _, widget in pairs(plate.widgets) do
+		for widgetname, widget in pairs(plate.widgets) do
 			if not widget.TP_Widget then widget:Hide() end
 		end
 
@@ -69,7 +68,6 @@ end
 
 -- Hide all ThreatPlates widgets as another theme was selected in TidyPlates
 local function DeleteWidgets()
-	-- ThreatPlates.DEBUG("DeleteWidgets")
 	-- for all widgets types of Threat Plates, call ClearAllWidgets
 	-- ThreatPlatesWidgets.ClearAllArenaWidgets()							-- done
 	-- ThreatPlatesWidgets.ClearAllClassIconWidgets()					-- done
@@ -98,7 +96,6 @@ end
 
 -- TidyPlatesGlobal_OnUpdate() is called when other data about the unit changes, or is requested by an external controller.
 local function OnUpdate(plate, unit)
-	--ThreatPlates.DEBUG("OnUpdate: plate = ", plate, " - unit = ", unit, " - unit.name =", ((unit and unit.name) or "nil"))
 	local style = TidyPlatesThreat.SetStyle(unit)
 	local w = plate.widgets
 
@@ -124,7 +121,6 @@ end
 -- TidyPlatesGlobal_OnContextUpdate() is called when a unit is targeted or moused-over.  (Any time the unitid or GUID changes)
 -- OnContextUpdate must only do something when there is something unit-dependent to display?
 local function OnContextUpdate(plate, unit)
-	--ThreatPlates.DEBUG("OnContextUpdate: plate = ", plate, " - unit = ", unit, " - unit.name =", ((unit and unit.name) or "nil"))
 	local style = TidyPlatesThreat.SetStyle(unit)
 	local w = plate.widgets
 

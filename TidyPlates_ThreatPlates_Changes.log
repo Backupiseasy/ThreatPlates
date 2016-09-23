@@ -1,17 +1,14 @@
 ------------------------------------------------------
-8.2.0-Beta2 (works with TidyPlates 6.18.5)
+8.2.0 (works with TidyPlates 6.18.8)
 ------------------------------------------------------
-* Further optimizations of widget creation and updateing
+* Widget handling was heavily rewritten because of changes in TidyPlates
 * AuraWidget now also shows pet buffs and debuffs
-
-------------------------------------------------------
-8.2.0-Beta1 (works with TidyPlates 6.18.5)
-------------------------------------------------------
-* Widget handling was heavily rewritten because of changes in TidyPlates, still not perfect, so I flag this as a beta release to get more feedback on bugs
 * Fixed a bug with class icon widget showing friendly class icons although not enabled
 * Fixed a typo in the configuration dialog
 * Fixed a bug in auras widget that prevented filtering based on aura type
 * Disabled Healer Tracker widget as it's currently not working at all
+* Known issues:
+  * Switching between ThreatPlates and other themes may require /reload for the new theme to work correctly
 
 ------------------------------------------------------
 8.1.4 (works with TidyPlates 6.18.6)
