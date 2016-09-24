@@ -106,7 +106,7 @@ local function OnUpdate(plate, unit)
 			-- if style == "NameOnly" or style == "etotem" or style == "empty" then frame:_Hide(); return end
 			if not v.enabled() then
 				w[k]:Hide()
-			elseif  style == "NameOnly" or style == "etotem" or style == "empty" then
+			elseif style == "NameOnly" or style == "etotem" or style == "empty" then
 				w[k]:_Hide()
 			else
 				-- context means that widget is only relevant for target (or mouse-over)
@@ -128,7 +128,7 @@ local function OnContextUpdate(plate, unit)
 		if w[k] then -- should never be nil here, if OnInitialize was called correctly
 			if not v.enabled() then
 				w[k]:Hide()
-			elseif  style == "NameOnly" or style == "etotem" or style == "empty" then
+			elseif style == "NameOnly" or style == "etotem" or style == "empty" then
 				w[k]:_Hide()
 			else
 				w[k]:UpdateContext(unit, style)

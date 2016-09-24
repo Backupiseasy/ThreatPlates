@@ -105,6 +105,23 @@ StaticPopupDialogs["SetToThreatPlates"] = {
 	end,
 }
 
+local TIDYPLATES_MIN_VERSION = "6.18.8"
+local TIDYPLATES_INSTALLED_VERSION = GetAddOnMetadata("TidyPlates", "version")
+StaticPopupDialogs["TidyPlatesVersionCheck"] = {
+	preferredIndex = STATICPOPUP_NUMDIALOGS,
+	--text = t.Meta("title")..L[":\n----------\nWould you like to \nset your theme to |cff89F559Threat Plates|r?\n\nClicking '|cff00ff00Yes|r' will set you to Threat Plates & reload UI. \n Clicking '|cffff0000No|r' will open the Tidy Plates options."],
+	text = "Tidy Plates: |cff89F559Threat Plates|r v"..	tostring(t.Meta("version"))..L["\n---------------------------------------\nThe current version of ThreatPlates requires at least version " .. TIDYPLATES_MIN_VERSION .. " of TidyPlates. You have installed TidyPlates " .. TIDYPLATES_INSTALLED_VERSION .. ". Please update TidyPlates, otherwise ThreatPlates will not work properly.\n\nShould I disable ThreatPlates?"],
+	button1 = L["Yes"],
+	button2 = L["No"],
+	timeout = 0,
+	whileDead = 1,
+	hideOnEscape = 1,
+	OnAccept = function()
+		TidyPlates:SetTheme("Neon")
+		t.Update()
+	end,
+	OnCancel = function()	end,
+}
 
 -- Callback Functions
 function TidyPlatesThreat:ProfChange()
@@ -1609,6 +1626,13 @@ function TidyPlatesThreat:StartUp()
 		local GlobDB = self.db.global
 		if GlobDB.version ~= tostring(t.Meta("version")) then
 			GlobDB.version = tostring(t.Meta("version"))
+
+			-- check if the correct TidyPlates version is installed
+			local min_version, _ = string.gsub(TIDYPLATES_MIN_VERSION, "%.", "")
+			local installed_version, _ = string.gsub(TIDYPLATES_INSTALLED_VERSION, "%.", "")
+			if tonumber(installed_version) <= tonumber(min_version) then
+				StaticPopup_Show("TidyPlatesVersionCheck")
+			end
 		end
 	end
 

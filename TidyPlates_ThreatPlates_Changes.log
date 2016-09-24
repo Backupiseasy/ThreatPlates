@@ -1,4 +1,9 @@
 ------------------------------------------------------
+8.2.1 (works with TidyPlates 6.18.8)
+------------------------------------------------------
+* Added a check if ThreatPlates is compatible with the installed version of TidyPlates
+
+------------------------------------------------------
 8.2.0 (works with TidyPlates 6.18.8)
 ------------------------------------------------------
 * Widget handling was heavily rewritten because of changes in TidyPlates

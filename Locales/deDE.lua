@@ -37,7 +37,7 @@ L["|cff89f559You are currently in your "] = "|cff89f559Du bist derzeit in Deiner
 L["|cff89f559 role.|r"] = "|cff89f559 Rolle.|r"
 L["|cff89f559Your role can not be determined.\nPlease set your dual spec preferences in the |rThreat Plates|cff89f559 options.|r"] = "|cff89f559Deine Rolle konnte nicht festgestellt werden.\nBitte stelle Deine Dualskillung in den |rThreat Plates|cff89f559-Optionen ein.|r"
 L["|cff89f559Additional options can be found by typing |r'/tptp'|cff89F559.|r"] = "|cff89f559Weitere Optionen können durch die Eingabe von |r'/tptp'|cff89F559 aufgerufen werden.|r"
-L[":\n----------\nWould you like to \nset your theme to |cff89F559Threat Plates|r?\n\nClicking '|cff00ff00Yes|r' will set you to Threat Plates & reload UI. \n Clicking '|cffff0000No|r' will open the Tidy Plates options."] = ":\n----------\nMöchtest Du Deine \nAnzeige auf |cff89F559Threat Plates|rumschalten?\n\nEin Klick auf '|cff00ff00Ja|r' wird Threat Plates voreinstellen und das UI neuladen. \n Durch Klick auf '|cffff0000Nein|r' öffnen sich die Tidy Plates-Optionen."
+L[":\n----------\nWould you like to \nset your theme to |cff89F559Threat Plates|r?\n\nClicking '|cff00ff00Yes|r' will set you to Threat Plates & reload UI. \n Clicking '|cffff0000No|r' will open the Tidy Plates options."] = ":\n----------\nMöchtest Du Deine \nAnzeige auf |cff89F559Threat Plates|r umschalten?\n\nEin Klick auf '|cff00ff00Ja|r' wird Threat Plates voreinstellen und das UI neuladen. \n Durch Klick auf '|cffff0000Nein|r' öffnen sich die Tidy Plates-Optionen."
 
 L["Yes"] = "Ja"
 L["Cancel"] = "Abbruch"
