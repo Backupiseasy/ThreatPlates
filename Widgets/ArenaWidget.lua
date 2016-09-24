@@ -80,34 +80,33 @@ local function EnableWatcherFrame(arg)
 end
 
 local function enabled()
-	local db = TidyPlatesThreat.db.profile.arenaWidget
-	if db.ON then
+	local active = TidyPlatesThreat.db.profile.arenaWidget.ON
+
+	if active then
 		if not isEnabled then	EnableWatcherFrame(true) end
 	else
 		if isEnabled then	EnableWatcherFrame(false)	end
 	end
-	return db.ON
+
+	return active
 end
 
 -- Update Graphics
 local function UpdateWidgetFrame(frame, unit)
-	if enabled() then
-		BuildTable()
-		UpdateSettings(frame)
-		if unit.guid and ArenaID[unit.guid] then
-			local c = TidyPlatesThreat.db.profile.arenaWidget.colors[ArenaID[unit.guid]]
-			local c2 = TidyPlatesThreat.db.profile.arenaWidget.numColors[ArenaID[unit.guid]]
-			frame.Icon:SetTexture(path.."BG")
-			frame.Icon:SetVertexColor(c.r,c.g,c.b,c.a)
-			frame.Overlay.Num:SetTexture(path..ArenaID[unit.guid])
-			frame.Overlay.Num:SetVertexColor(c2.r,c2.g,c2.b,c2.a)
-			frame:Show()
-		else
-			frame.Icon:SetTexture(nil)
-			frame.Overlay.Num:SetTexture(nil)
-			frame:_Hide()
-		end
+	BuildTable()
+	UpdateSettings(frame)
+
+	if unit.guid and ArenaID[unit.guid] then
+		local c = TidyPlatesThreat.db.profile.arenaWidget.colors[ArenaID[unit.guid]]
+		local c2 = TidyPlatesThreat.db.profile.arenaWidget.numColors[ArenaID[unit.guid]]
+		frame.Icon:SetTexture(path.."BG")
+		frame.Icon:SetVertexColor(c.r,c.g,c.b,c.a)
+		frame.Overlay.Num:SetTexture(path..ArenaID[unit.guid])
+		frame.Overlay.Num:SetVertexColor(c2.r,c2.g,c2.b,c2.a)
+		frame:Show()
 	else
+		frame.Icon:SetTexture(nil)
+		frame.Overlay.Num:SetTexture(nil)
 		frame:_Hide()
 	end
 end

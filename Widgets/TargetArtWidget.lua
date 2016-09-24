@@ -12,8 +12,7 @@ local path = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\TargetArtWidg
 ---------------------------------------------------------------------------------------------------
 
 local function enabled()
-	local db = TidyPlatesThreat.db.profile.targetWidget
-	return db.ON
+	return TidyPlatesThreat.db.profile.targetWidget.ON
 end
 
 -- hides/destroys all widgets of this type created by Threat Plates
@@ -29,22 +28,15 @@ end
 -- Widget Functions for TidyPlates
 ---------------------------------------------------------------------------------------------------
 
-local function UpdateWidgetFrame(frame, unit, style)
-	--local S = TidyPlatesThreat.SetStyle(unit)
-	if not style then style = TidyPlatesThreat.SetStyle(unit) end
-
-	if style == "NameOnly" or style == "etotem" or style == "empty" then
-		frame:_Hide();
-	else
-	 	local db = TidyPlatesThreat.db.profile.targetWidget
-		frame.Icon:SetTexture(path..db.theme)
-		frame.Icon:SetVertexColor(db.r,db.g,db.b,db.a)
-		frame:Show()
-	end
+local function UpdateWidgetFrame(frame, unit)
+ 	local db = TidyPlatesThreat.db.profile.targetWidget
+	frame.Icon:SetTexture(path..db.theme)
+	frame.Icon:SetVertexColor(db.r,db.g,db.b,db.a)
+	frame:Show()
 end
 
 -- Context
-local function UpdateWidgetContext(frame, unit, style)
+local function UpdateWidgetContext(frame, unit)
 	local guid = unit.guid
 	frame.guid = guid
 
@@ -56,7 +48,7 @@ local function UpdateWidgetContext(frame, unit, style)
 	-- Custom Code II
 	--------------------------------------
 	if UnitGUID("target") == guid then
-		UpdateWidgetFrame(frame, unit, style)
+		UpdateWidgetFrame(frame, unit)
 	else
 		frame:_Hide()
 	end

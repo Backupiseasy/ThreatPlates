@@ -103,16 +103,16 @@ local function OnUpdate(plate, unit)
 		-- Diable all widgets in headline view mode
 		-- TODO: optimize, e.g. move to enabled()
 		if w[k] then -- should never be nil here, if OnInitialize was called correctly
-			if style == "NameOnly" then
+			-- if style == "NameOnly" or style == "etotem" or style == "empty" then frame:_Hide(); return end
+			if not v.enabled() then
 				w[k]:Hide()
-			elseif v.enabled() then
-				-- TODO: unit sometimes seems to be nil, no idea why
+			elseif  style == "NameOnly" or style == "etotem" or style == "empty" then
+				w[k]:_Hide()
+			else
 				-- context means that widget is only relevant for target (or mouse-over)
 				if not v.isContext then
 					w[k]:Update(unit, style)
 				end
-			else
-				w[k]:Hide()
 			end
 		end
 	end
@@ -126,12 +126,12 @@ local function OnContextUpdate(plate, unit)
 
 	for k,v in pairs(ThreatPlatesWidgets.list) do
 		if w[k] then -- should never be nil here, if OnInitialize was called correctly
-			if style == "NameOnly" then
+			if not v.enabled() then
 				w[k]:Hide()
-			elseif v.enabled() then
-				w[k]:UpdateContext(unit, style)
+			elseif  style == "NameOnly" or style == "etotem" or style == "empty" then
+				w[k]:_Hide()
 			else
-				w[k]:Hide()
+				w[k]:UpdateContext(unit, style)
 			end
 		end
 	end

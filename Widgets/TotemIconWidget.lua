@@ -12,8 +12,7 @@ local path = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\TotemIconWidg
 ---------------------------------------------------------------------------------------------------
 
 local function enabled()
-	local db = TidyPlatesThreat.db.profile.totemWidget
-	return db.ON
+	return TidyPlatesThreat.db.profile.totemWidget.ON
 end
 
 -- hides/destroys all widgets of this type created by Threat Plates

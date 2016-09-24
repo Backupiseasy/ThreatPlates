@@ -25,7 +25,9 @@ local enable_cooldown_spiral
 ---------------------------------------------------------------------------------------------------
 
 local function enabled()
-	if TidyPlatesThreat.db.profile.debuffWidget.ON then
+	local active = TidyPlatesThreat.db.profile.debuffWidget.ON
+
+	if active then
 		if not isAuraEnabled then
 			TidyPlatesWidgets.EnableAuraWatcher()
 			--TidyPlatesWidgets.SetAuraFilter(AuraFilter)
@@ -37,7 +39,8 @@ local function enabled()
 			isAuraEnabled = false
 		end
 	end
-	return TidyPlatesThreat.db.profile.debuffWidget.ON
+
+	return active
 end
 
 -- hides/destroys all widgets of this type created by Threat Plates
@@ -171,10 +174,7 @@ end
 ---------------------------------------------------------------------------------------------------
 
 local function CustomUpdateWidgetFrame(frame, unit)
-	if TidyPlatesThreat.db.profile.debuffWidget.targetOnly and not unit.isTarget then
-		frame:_Hide()
-		return
-	end
+	if TidyPlatesThreat.db.profile.debuffWidget.targetOnly and not unit.isTarget then	frame:_Hide(); return	end
 
 	--TidyPlatesWidgets.SetAuraFilter(AuraFilter)
 

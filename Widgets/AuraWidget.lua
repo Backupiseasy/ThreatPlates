@@ -84,19 +84,21 @@ local AURA_TYPE = { Buff = 1, Curse = 2, Disease = 3, Magic = 4, Poison = 5, Deb
 local isAuraEnabled
 
 local function enabled()
-	if TidyPlatesThreat.db.profile.debuffWidget.ON then
+	local active = TidyPlatesThreat.db.profile.debuffWidget.ON
+
+	if active then
 		if not isAuraEnabled then
-			self.Enable()
-			--TidyPlatesWidgets.SetAuraFilter(AuraFilter)
+			Enable()
 			isAuraEnabled = true
 		end
 	else
 		if isAuraEnabled then
-			self.Disable()
+			Disable()
 			isAuraEnabled = false
 		end
 	end
-	return TidyPlatesThreat.db.profile.debuffWidget.ON
+
+	return active
 end
 
 -- hides/destroys all widgets of this type created by Threat Plates
@@ -156,8 +158,6 @@ local function AuraFilter(aura)
 		end
 	end
 end
-
-ThreatPlatesWidgets.AuraFilter = AuraFilter
 
 -----------------------------------------------------
 -- Default Filter
@@ -580,6 +580,13 @@ local function UpdateIconConfig(frame)
 end
 
 local function UpdateWidgetConfig(frame)
+	local db = TidyPlatesThreat.db.profile.debuffWidget
+	if db.style == "square" then
+		frame.UseSquareDebuffIcon()
+	elseif db.style == "wide" then
+		frame.UseWideDebuffIcon()
+	end
+
 	UpdateIconConfig(frame)
 end
 
@@ -613,7 +620,7 @@ local function CreateAuraWidget(parent, style)
 	-- Required Widget Code
 	frame.UpdateContext = UpdateWidgetContext
 	frame.Update = UpdateWidgetContext
-	-- frame.UpdateConfig = UpdateWidgetConfig
+	frame.UpdateConfig = UpdateWidgetConfig
 	-- frame.UpdateTarget = UpdateWidgetTarget
 	frame._Hide = frame.Hide
 	frame.Hide = function() ClearWidgetContext(frame); frame:_Hide() end
@@ -647,14 +654,14 @@ end
 -- External
 -----------------------------------------------------
 -- TidyPlatesWidgets.GetAuraWidgetByGUID = GetAuraWidgetByGUID
---TidyPlatesWidgets.IsAuraShown = IsAuraShown
+-- TidyPlatesWidgets.IsAuraShown = IsAuraShown
 
-ThreatPlatesWidgets.UseSquareDebuffIcon = UseSquareDebuffIcon
-ThreatPlatesWidgets.UseWideDebuffIcon = UseWideDebuffIcon
+-- TidyPlatesWidgets.UseSquareDebuffIcon = UseSquareDebuffIcon
+-- TidyPlatesWidgets.UseWideDebuffIcon = UseWideDebuffIcon
 
-ThreatPlatesWidgets.SetAuraFilter = SetAuraFilter
+-- TidyPlatesWidgets.SetAuraFilter = SetAuraFilter
 
---TidyPlatesWidgets.CreateAuraWidget = CreateAuraWidget
+-- TidyPlatesWidgets.CreateAuraWidget = CreateAuraWidget
 
 -- TidyPlatesWidgets.EnableAuraWatcher = Enable
 -- TidyPlatesWidgets.DisableAuraWatcher = Disable

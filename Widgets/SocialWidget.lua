@@ -107,13 +107,15 @@ local function EnableWatcherFrame(arg)
 end
 
 local function enabled()
-	local db = TidyPlatesThreat.db.profile.socialWidget
-	if db.ON then
+	local active = TidyPlatesThreat.db.profile.socialWidget.ON
+
+	if active then
 		if not isEnabled then	EnableWatcherFrame(true) end
 	else
 		if isEnabled then	EnableWatcherFrame(false)	end
 	end
-	return db.ON
+
+	return active
 end
 
 ---------------------------------------------------------------------------------------------------

@@ -12,8 +12,7 @@ local path = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ThreatWidget\
 ---------------------------------------------------------------------------------------------------
 
 local function enabled()
-	local db = TidyPlatesThreat.db.profile.threat.art
-	return db.ON
+	return TidyPlatesThreat.db.profile.threat.art.ON
 end
 
 -- hides/destroys all widgets of this type created by Threat Plates
@@ -29,8 +28,6 @@ end
 ---------------------------------------------------------------------------------------------------
 
 local function UpdateWidgetFrame(frame, unit, style)
-	if not InCombatLockdown() or not enabled() then frame:_Hide() end;
-
 	local threatLevel
 	if TidyPlatesThreat:GetSpecRole() then -- Tanking uses regular textures / swapped for dps / healing
 		threatLevel = unit.threatSituation

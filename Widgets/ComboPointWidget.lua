@@ -12,8 +12,7 @@ local WidgetList = {}
 ---------------------------------------------------------------------------------------------------
 
 local function enabled()
-	local db = TidyPlatesThreat.db.profile.comboWidget
-	return db.ON
+	return TidyPlatesThreat.db.profile.comboWidget.ON
 end
 
 -- hides/destroys all widgets of this type created by Threat Plates
@@ -75,10 +74,11 @@ end
 ---------------------------------------------------------------------------------------------------
 
 -- Update Graphics - overwritten
+-- unit can be null because called from WatcherFrame
 local function UpdateWidgetFrame(frame, unit)
 	local points, maxPoints
 
-	if enabled() and UnitCanAttack("player", "target") then
+	if UnitCanAttack("player", "target") then
 		points, maxPoints = GetResourceOnTarget()
 	end
 

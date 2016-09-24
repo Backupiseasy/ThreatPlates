@@ -11,8 +11,7 @@ ThreatPlates = NAMESPACE.ThreatPlates
 ---------------------------------------------------------------------------------------------------
 
 local function enabled()
-	local db = TidyPlatesThreat.db.profile.uniqueWidget
-	return db.ON
+	return TidyPlatesThreat.db.profile.uniqueWidget.ON
 end
 
 local function UpdateSettings(frame)
@@ -38,21 +37,20 @@ end
 local function UpdateWidgetFrame(frame, unit)
 	local db = TidyPlatesThreat.db.profile.uniqueSettings
 	local isShown = false
-	if enabled() then
-		if tContains(db.list, unit.name) then
-			local s
-			for k,v in pairs(db.list) do
-				if v == unit.name then
-					s = db[k]
-					break
-				end
-			end
-			if s and s.showIcon then
-				frame.Icon:SetTexture(s.icon)
-				isShown = true
+	if tContains(db.list, unit.name) then
+		local s
+		for k,v in pairs(db.list) do
+			if v == unit.name then
+				s = db[k]
+				break
 			end
 		end
+		if s and s.showIcon then
+			frame.Icon:SetTexture(s.icon)
+			isShown = true
+		end
 	end
+
 	if isShown then
 		UpdateSettings(frame)
 		frame:Show()
