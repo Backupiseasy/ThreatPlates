@@ -24,7 +24,7 @@ THREAD_PLATES_NAME = "Threat Plates"
 ---------------------------------------------------------------------------------------------------
 
 t.DEBUG = function(...)
-	--print ("DEBUG: ", ...)
+	print ("DEBUG: ", ...)
 end
 
 t.Update = function()
@@ -36,7 +36,7 @@ end
 
 t.Meta = function(value)
 	local meta
-	if strlower(value) == "title" then
+	if strlower(value) == "titleshort" then
 		meta = "TP|cff89F559TP|r"
 	else
 		meta = GetAddOnMetadata("TidyPlates_ThreatPlates",value)

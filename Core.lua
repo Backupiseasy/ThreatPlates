@@ -11,6 +11,25 @@ TidyPlatesThreat = LibStub("AceAddon-3.0"):NewAddon("TidyPlatesThreat", "AceCons
 -- Global configs and funtions
 ---------------------------------------------------------------------------------------------------
 
+local TIDYPLATES_MIN_VERSION = "6.18.8"
+local TIDYPLATES_MIN_VERSION_NO = 6188
+local TIDYPLATES_INSTALLED_VERSION = GetAddOnMetadata("TidyPlates", "version") or ""
+
+-- check if the correct TidyPlates version is installed
+function CheckTidyPlatesVersion()
+	local GlobDB = TidyPlatesThreat.db.global
+	if not GlobDB.versioncheck then
+		local installed_version, _ = string.gsub(TIDYPLATES_INSTALLED_VERSION, "%.", "")
+		installed_version, _ = string.gsub(installed_version, "Beta", "")
+		installed_version = tonumber(installed_version) or 0
+
+		if installed_version <= TIDYPLATES_MIN_VERSION_NO then
+			StaticPopup_Show("TidyPlatesVersionCheck")
+		end
+		GlobDB.versioncheck = true
+	end
+end
+
 local function AlphaFeatureHeadlineView()
 	return TidyPlatesThreat.db.profile.alphaFeatureHeadlineView and TidyPlatesHubFunctions
 end
@@ -19,7 +38,7 @@ t.AlphaFeatureHeadlineView = AlphaFeatureHeadlineView
 t.Print = function(val,override)
 	local db = TidyPlatesThreat.db.profile
 	if override or db.verbose then
-		print(t.Meta("title")..": "..val)
+		print(t.Meta("titleshort")..": "..val)
 	end
 end
 
@@ -105,21 +124,14 @@ StaticPopupDialogs["SetToThreatPlates"] = {
 	end,
 }
 
-local TIDYPLATES_MIN_VERSION = "6.18.8"
-local TIDYPLATES_INSTALLED_VERSION = GetAddOnMetadata("TidyPlates", "version")
 StaticPopupDialogs["TidyPlatesVersionCheck"] = {
 	preferredIndex = STATICPOPUP_NUMDIALOGS,
-	--text = t.Meta("title")..L[":\n----------\nWould you like to \nset your theme to |cff89F559Threat Plates|r?\n\nClicking '|cff00ff00Yes|r' will set you to Threat Plates & reload UI. \n Clicking '|cffff0000No|r' will open the Tidy Plates options."],
-	text = "Tidy Plates: |cff89F559Threat Plates|r v"..	tostring(t.Meta("version"))..L["\n---------------------------------------\nThe current version of ThreatPlates requires at least version " .. TIDYPLATES_MIN_VERSION .. " of TidyPlates. You have installed TidyPlates " .. TIDYPLATES_INSTALLED_VERSION .. ". Please update TidyPlates, otherwise ThreatPlates will not work properly.\n\nShould I disable ThreatPlates?"],
-	button1 = L["Yes"],
-	button2 = L["No"],
+	text = t.Meta("title").." "..tostring(t.Meta("version"))..L["\n---------------------------------------\nThe current version of ThreatPlates requires at least TidyPlates "] .. TIDYPLATES_MIN_VERSION .. L[". You have installed an older or incompatible version of TidyPlates: "] .. TIDYPLATES_INSTALLED_VERSION .. L[". Please update TidyPlates, otherwise ThreatPlates will not work properly."],
+	button1 = L["Ok"],
 	timeout = 0,
 	whileDead = 1,
 	hideOnEscape = 1,
-	OnAccept = function()
-		TidyPlates:SetTheme("Neon")
-		t.Update()
-	end,
+	OnAccept = function()	end,
 	OnCancel = function()	end,
 }
 
@@ -141,6 +153,7 @@ function TidyPlatesThreat:OnInitialize()
 	local defaults 	= {
 		global = {
 			version = "",
+			versioncheck = false,
 		},
 		char = {
 			welcome = false,
@@ -1528,6 +1541,7 @@ local function OnActivateTheme(themeTable)
 	if not themeTable then
 		ThreatPlatesWidgets.DeleteWidgets()
 	else
+		CheckTidyPlatesVersion()
 		ActivateTheme()
 	end
 end
@@ -1624,16 +1638,13 @@ function TidyPlatesThreat:StartUp()
 		end
 	else
 		local GlobDB = self.db.global
+		-- TODO: why not just overwrite the old version entry?
 		if GlobDB.version ~= tostring(t.Meta("version")) then
 			GlobDB.version = tostring(t.Meta("version"))
-
-			-- check if the correct TidyPlates version is installed
-			local min_version, _ = string.gsub(TIDYPLATES_MIN_VERSION, "%.", "")
-			local installed_version, _ = string.gsub(TIDYPLATES_INSTALLED_VERSION, "%.", "")
-			if tonumber(installed_version) <= tonumber(min_version) then
-				StaticPopup_Show("TidyPlatesVersionCheck")
-			end
+			GlobDB.versioncheck = false
 		end
+
+		CheckTidyPlatesVersion()
 	end
 
 	t.SetThemes(self)

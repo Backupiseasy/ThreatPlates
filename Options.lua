@@ -4824,7 +4824,7 @@ local function GetIntOptions()
 			args = {
 				note = {
 					type = "description",
-					name = L["You can access the "]..t.Meta("title").." v"..t.Meta("version")..L[" options by typing: /tptp"],
+					name = L["You can access the "]..t.Meta("titleshort")..L[" options by typing: /tptp"],
 					order = 10,
 				},
 				openoptions = {
