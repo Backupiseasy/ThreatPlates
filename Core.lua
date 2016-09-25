@@ -12,18 +12,20 @@ TidyPlatesThreat = LibStub("AceAddon-3.0"):NewAddon("TidyPlatesThreat", "AceCons
 ---------------------------------------------------------------------------------------------------
 
 local TIDYPLATES_MIN_VERSION = "6.18.8"
-local TIDYPLATES_MIN_VERSION_NO = 6188
+local TIDYPLATES_MIN_VERSION_NO = 6018008
 local TIDYPLATES_INSTALLED_VERSION = GetAddOnMetadata("TidyPlates", "version") or ""
 
 -- check if the correct TidyPlates version is installed
 function CheckTidyPlatesVersion()
 	local GlobDB = TidyPlatesThreat.db.global
 	if not GlobDB.versioncheck then
-		local installed_version, _ = string.gsub(TIDYPLATES_INSTALLED_VERSION, "%.", "")
-		installed_version, _ = string.gsub(installed_version, "Beta", "")
-		installed_version = tonumber(installed_version) or 0
+		local version_no = 0
+		local version = string.gsub(TIDYPLATES_INSTALLED_VERSION, "Beta", "")
+		for w in string.gmatch(version, "[1-9]+") do
+			version_no = version_no * 1000 + (tonumber(w) or 0)
+		end
 
-		if installed_version <= TIDYPLATES_MIN_VERSION_NO then
+		if version_no < TIDYPLATES_MIN_VERSION_NO then
 			StaticPopup_Show("TidyPlatesVersionCheck")
 		end
 		GlobDB.versioncheck = true

@@ -11,6 +11,7 @@ ThreatPlates = NAMESPACE.ThreatPlates
 
 local path = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\SocialWidget\\"
 -- local WidgetList = {}
+local watcherIsEnabled = false
 
 ---------------------------------------------------------------------------------------------------
 -- Threat Plates functions
@@ -72,7 +73,6 @@ end
 
 -- Watcher Frame
 local WatcherFrame = CreateFrame("Frame", nil, WorldFrame)
-local isEnabled = false
 
 local function WatcherFrameHandler(frame, event,...)
 	if event == "GUILD_ROSTER_UPDATE" then
@@ -86,33 +86,33 @@ local function WatcherFrameHandler(frame, event,...)
 	--TidyPlates:ForceUpdate()
 end
 
-local function EnableWatcherFrame(arg)
-	if arg then
-		UpdateGlist()
-		UpdateFlist()
-		UpdateBnetList()
-		WatcherFrame:RegisterEvent("FRIENDLIST_UPDATE")
-		WatcherFrame:RegisterEvent("GUILD_ROSTER_UPDATE")
-		WatcherFrame:RegisterEvent("BN_CONNECTED")
-		WatcherFrame:RegisterEvent("BN_FRIEND_ACCOUNT_ONLINE")
-		WatcherFrame:RegisterEvent("BN_FRIEND_ACCOUNT_OFFLINE")
-		WatcherFrame:RegisterEvent("BN_FRIEND_LIST_SIZE_CHANGED")
-		WatcherFrame:SetScript("OnEvent", WatcherFrameHandler)
-		isEnabled = true
-	else
-		WatcherFrame:UnregisterAllEvents()
-		WatcherFrame:SetScript("OnEvent", nil)
-		isEnabled = false
-	end
+local function EnableWatcher()
+	UpdateGlist()
+	UpdateFlist()
+	UpdateBnetList()
+	WatcherFrame:SetScript("OnEvent", WatcherFrameHandler)
+	WatcherFrame:RegisterEvent("FRIENDLIST_UPDATE")
+	WatcherFrame:RegisterEvent("GUILD_ROSTER_UPDATE")
+	WatcherFrame:RegisterEvent("BN_CONNECTED")
+	WatcherFrame:RegisterEvent("BN_FRIEND_ACCOUNT_ONLINE")
+	WatcherFrame:RegisterEvent("BN_FRIEND_ACCOUNT_OFFLINE")
+	WatcherFrame:RegisterEvent("BN_FRIEND_LIST_SIZE_CHANGED")
+	watcherIsEnabled = true
+end
+
+local function DisableWatcher()
+	WatcherFrame:UnregisterAllEvents()
+	WatcherFrame:SetScript("OnEvent", nil)
+	watcherIsEnabled = false
 end
 
 local function enabled()
 	local active = TidyPlatesThreat.db.profile.socialWidget.ON
 
 	if active then
-		if not isEnabled then	EnableWatcherFrame(true) end
+		if not watcherIsEnabled then	EnableWatcher() end
 	else
-		if isEnabled then	EnableWatcherFrame(false)	end
+		if watcherIsEnabled then	DisableWatcher()	end
 	end
 
 	return active
@@ -203,3 +203,4 @@ local function CreateWidgetFrame(parent)
 end
 
 ThreatPlatesWidgets.RegisterWidget("SocialWidget", CreateWidgetFrame, false, enabled)
+ThreatPlatesWidgets.SocialWidgetDisableWatcher = DisableWatcher

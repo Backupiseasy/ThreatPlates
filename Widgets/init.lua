@@ -58,7 +58,9 @@ local function OnInitialize(plate, theme)
 				widget.TP_Widget = true -- mark ThreatPlates widgets
 				w[k] = widget
 			end
-			if not v.enabled() then -- widgets create hidden in there create function, so not necessary?
+			-- widgets create hidden in there create function, so not necessary?
+			-- right now still necessary to enable event watchers in enabled()
+			if not v.enabled() then
 				w[k]:Hide()
 				--w[k] = nil -- deleted the disabled widget, is that what we want? no re-using it later ...
 			end
@@ -92,6 +94,12 @@ local function DeleteWidgets()
 		end
 	end
 	PlatesVisible = {}
+
+	-- disable all event watchers
+	ThreatPlatesWidgets.ComboPointWidgetDisableWatcher()
+	ThreatPlatesWidgets.ArenaWidgetDisableWatcher()
+	ThreatPlatesWidgets.SocialWidgetDisableWatcher()
+	--ThreatPlatesWidgets.AuraWidgetDisableWatcher() -- right now, watcher still necessary for TidyPlates as well
 end
 
 -- TidyPlatesGlobal_OnUpdate() is called when other data about the unit changes, or is requested by an external controller.

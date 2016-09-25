@@ -6,6 +6,7 @@ ThreatPlates = NAMESPACE.ThreatPlates
 --------------------
 
 local path = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ArenaWidget\\"
+local watcherIsEnabled = false
 local ArenaID = {}
 
 ---------------------------------------------------------------------------------------------------
@@ -55,8 +56,7 @@ local function ClearWidgetContext(frame)
 end
 
 -- Watcher Frame
-local WatcherFrame = CreateFrame("Frame", nil, WorldFrame )
-local isEnabled = false
+local WatcherFrame = CreateFrame("Frame", nil, WorldFrame)
 
 local function WatcherFrameHandler(frame, event,...)
 	if IsActiveBattlefieldArena() and GetNumArenaOpponents() >= 1 then -- If we're in arena
@@ -67,25 +67,26 @@ local function WatcherFrameHandler(frame, event,...)
 	--TidyPlates:ForceUpdate()
 end
 
-local function EnableWatcherFrame(arg)
-	isEnabled = arg
-	if arg then
-		WatcherFrame:SetScript("OnEvent", WatcherFrameHandler)
-		WatcherFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
-	else
-		WatcherFrame:UnregisterAllEvents()
-		WatcherFrame:SetScript("OnEvent", nil);
-		ArenaID = {}
-	end
+local function EnableWatcher()
+	WatcherFrame:SetScript("OnEvent", WatcherFrameHandler)
+	WatcherFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
+	watcherIsEnabled = true
+end
+
+local function DisableWatcher()
+	WatcherFrame:UnregisterAllEvents()
+	WatcherFrame:SetScript("OnEvent", nil);
+	watcherIsEnabled = false
+	ArenaID = {}
 end
 
 local function enabled()
 	local active = TidyPlatesThreat.db.profile.arenaWidget.ON
 
 	if active then
-		if not isEnabled then	EnableWatcherFrame(true) end
+		if not watcherIsEnabled then	EnableWatcher() end
 	else
-		if isEnabled then	EnableWatcherFrame(false)	end
+		if watcherIsEnabled then	DisableWatcher()	end
 	end
 
 	return active
@@ -165,3 +166,4 @@ local function CreateArenaWidget(parent)
 end
 
 ThreatPlatesWidgets.RegisterWidget("ArenaWidget", CreateArenaWidget, false, enabled)
+ThreatPlatesWidgets.ArenaWidgetDisableWatcher = DisableWatcher

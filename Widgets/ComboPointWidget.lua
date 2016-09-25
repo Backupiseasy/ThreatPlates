@@ -6,13 +6,22 @@ ThreatPlates = NAMESPACE.ThreatPlates
 ------------------------
 local path = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ComboPointWidget\\"
 local WidgetList = {}
+local watcherIsEnabled = false
 
 ---------------------------------------------------------------------------------------------------
 -- Threat Plates functions
 ---------------------------------------------------------------------------------------------------
 
 local function enabled()
-	return TidyPlatesThreat.db.profile.comboWidget.ON
+	local active = TidyPlatesThreat.db.profile.comboWidget.ON
+
+	if active then
+		if not watcherIsEnabled then EnableWatcher() end
+	else
+		if watcherIsEnabled then DisableWatcher()	end
+	end
+
+	return active
 end
 
 -- hides/destroys all widgets of this type created by Threat Plates
@@ -124,12 +133,6 @@ end
 
 -- Watcher Frame
 local WatcherFrame = CreateFrame("Frame", nil, WorldFrame )
-local isEnabled = false
-WatcherFrame:RegisterEvent("UNIT_COMBO_POINTS")
-WatcherFrame:RegisterEvent("UNIT_POWER")
-WatcherFrame:RegisterEvent("UNIT_DISPLAYPOWER")
-WatcherFrame:RegisterEvent("UNIT_AURA")
-WatcherFrame:RegisterEvent("UNIT_FLAGS")
 
 local function WatcherFrameHandler(frame, event, unitid)
 	--if UnitExists("target") then
@@ -140,14 +143,20 @@ local function WatcherFrameHandler(frame, event, unitid)
 	end
 end
 
-local function EnableWatcherFrame(arg)
-	if arg then
-		WatcherFrame:SetScript("OnEvent", WatcherFrameHandler)
-		isEnabled = true
-	else
-		WatcherFrame:SetScript("OnEvent", nil)
-		isEnabled = false
-	end
+local function EnableWatcher()
+	WatcherFrame:SetScript("OnEvent", WatcherFrameHandler)
+	WatcherFrame:RegisterEvent("UNIT_COMBO_POINTS")
+	WatcherFrame:RegisterEvent("UNIT_POWER")
+	WatcherFrame:RegisterEvent("UNIT_DISPLAYPOWER")
+	WatcherFrame:RegisterEvent("UNIT_AURA")
+	WatcherFrame:RegisterEvent("UNIT_FLAGS")
+	watcherIsEnabled = true
+end
+
+local function DisableWatcher()
+	WatcherFrame:UnregisterAllEvents()
+	WatcherFrame:SetScript("OnEvent", nil)
+	watcherIsEnabled = false
 end
 
 -- Widget Creation
@@ -175,8 +184,9 @@ local function CreateWidgetFrame(parent)
 	frame._Hide = frame.Hide
 	frame.Hide = function() ClearWidgetContext(frame); frame:_Hide() end
 
-	if not isEnabled then EnableWatcherFrame(true) end
+	if not watcherIsEnabled then EnableWatcher() end
 	return frame
 end
 
 ThreatPlatesWidgets.RegisterWidget("ComboPointWidget", CreateWidgetFrame, true, enabled)
+ThreatPlatesWidgets.ComboPointWidgetDisableWatcher = DisableWatcher

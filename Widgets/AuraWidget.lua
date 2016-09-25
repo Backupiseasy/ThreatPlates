@@ -447,7 +447,6 @@ local function Enable()
 
 	--TidyPlatesUtility:EnableGroupWatcher()
 	WatcherIsEnabled = true
-
 end
 
 local function Disable()
