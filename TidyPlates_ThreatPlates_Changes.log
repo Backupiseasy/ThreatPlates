@@ -1,4 +1,12 @@
 ------------------------------------------------------
+8.2.2 (works with TidyPlates 6.18.9)
+------------------------------------------------------
+* Fixed a LUA error in combo point widget
+* Disabled version check for TidyPlates version until working properly
+* Known issues:
+  * Switching between ThreatPlates and other themes may require /reload for the new theme to work correctly
+
+------------------------------------------------------
 8.2.1 (works with TidyPlates 6.18.9)
 ------------------------------------------------------
 * Added a check if ThreatPlates is compatible with the installed version of TidyPlates

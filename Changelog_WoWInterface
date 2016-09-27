@@ -1,4 +1,16 @@
 [b]---------------------------------------------------------------------------------------------------[/b]
+[b]  8.2.2 (works with [url="https://mods.curse.com/addons/wow/tidy-plates"]TidyPlates 6.18.9[/url])[/b]
+[b]---------------------------------------------------------------------------------------------------[/b]
+[LIST]
+[*]Fixed a LUA error in combo point widget
+[*]Disabled version check for TidyPlates version until working properly
+[*]Known issues:
+[LIST]
+[*]Switching between ThreatPlates and other themes may require /reload for the new theme to work correctly
+[/LIST]
+[/LIST]
+
+[b]---------------------------------------------------------------------------------------------------[/b]
 [b]  8.2.1 (works with [url="https://mods.curse.com/addons/wow/tidy-plates"]TidyPlates 6.18.9[/url])[/b]
 [b]---------------------------------------------------------------------------------------------------[/b]
 [LIST]
