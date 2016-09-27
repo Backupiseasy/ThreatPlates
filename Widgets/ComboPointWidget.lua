@@ -12,18 +12,6 @@ local watcherIsEnabled = false
 -- Threat Plates functions
 ---------------------------------------------------------------------------------------------------
 
-local function enabled()
-	local active = TidyPlatesThreat.db.profile.comboWidget.ON
-
-	if active then
-		if not watcherIsEnabled then EnableWatcher() end
-	else
-		if watcherIsEnabled then DisableWatcher()	end
-	end
-
-	return active
-end
-
 -- hides/destroys all widgets of this type created by Threat Plates
 -- local function ClearAllWidgets()
 -- 	for _, widget in pairs(WidgetList) do
@@ -157,6 +145,18 @@ local function DisableWatcher()
 	WatcherFrame:UnregisterAllEvents()
 	WatcherFrame:SetScript("OnEvent", nil)
 	watcherIsEnabled = false
+end
+
+local function enabled()
+	local active = TidyPlatesThreat.db.profile.comboWidget.ON
+
+	if active then
+		if not watcherIsEnabled then EnableWatcher() end
+	else
+		if watcherIsEnabled then DisableWatcher()	end
+	end
+
+	return active
 end
 
 -- Widget Creation
