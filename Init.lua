@@ -24,7 +24,7 @@ THREAD_PLATES_NAME = "Threat Plates"
 ---------------------------------------------------------------------------------------------------
 
 t.DEBUG = function(...)
-	print ("DEBUG: ", ...)
+	--print ("DEBUG: ", ...)
 end
 
 t.Update = function()

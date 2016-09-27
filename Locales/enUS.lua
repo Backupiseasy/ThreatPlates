@@ -1,4 +1,4 @@
-﻿local L = LibStub("AceLocale-3.0"):NewLocale("TidyPlatesThreat", "enUS", true, true)
+﻿local L = LibStub("AceLocale-3.0"):NewLocale("TidyPlatesThreat", "enUS", true, false)
 if not L then return end
 
 ----------------------
@@ -41,7 +41,7 @@ L[":\n----------\nWould you like to \nset your theme to |cff89F559Threat Plates|
 L["\n---------------------------------------\nThe current version of ThreatPlates requires at least TidyPlates "] = true
 L[". You have installed an older or incompatible version of TidyPlates: "] = true
 L[". Please update TidyPlates, otherwise ThreatPlates will not work properly."] = true
-
+L["Ok"] = true
 L["Yes"] = true
 L["Cancel"] = true
 L["No"] = true

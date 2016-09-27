@@ -41,7 +41,7 @@ L[":\n----------\nWould you like to \nset your theme to |cff89F559Threat Plates|
 L["\n---------------------------------------\nThe current version of ThreatPlates requires at least TidyPlates "] = "\n---------------------------------------\nDie aktuelle Version von ThreatPlates benötigt mindestens TidyPlates "
 L[". You have installed an older or incompatible version of TidyPlates: "] = ". Du hast eine ältere oder inkompatibele Version von TidyPlates installiert: "
 L[". Please update TidyPlates, otherwise ThreatPlates will not work properly."] = ". Bitte aktualisiere TidyPlates, andernfalls wird ThreatPlates nicht ordnungsgemäß funktionieren."
-
+L["Ok"] = "Ok"
 L["Yes"] = "Ja"
 L["Cancel"] = "Abbruch"
 L["No"] = "Nein"

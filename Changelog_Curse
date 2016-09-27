@@ -1,4 +1,12 @@
 ----
+**  8.2.1 (works with [[https://mods.curse.com/addons/wow/tidy-plates|Tidy Plates 6.18.9]])**
+
+* ++Added a check if ThreatPlates is compatible with the installed version of TidyPlates++
+* Optimized widget handling
+* Known issues:
+** Switching between ThreatPlates and other themes may require /reload for the new theme to work correctly
+
+----
 **  8.2.0 (works with [[https://mods.curse.com/addons/wow/tidy-plates|Tidy Plates 6.18.8]])**
 
 * Widget handling was heavily rewritten because of changes in TidyPlates

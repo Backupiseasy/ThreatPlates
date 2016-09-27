@@ -11,8 +11,8 @@ TidyPlatesThreat = LibStub("AceAddon-3.0"):NewAddon("TidyPlatesThreat", "AceCons
 -- Global configs and funtions
 ---------------------------------------------------------------------------------------------------
 
-local TIDYPLATES_MIN_VERSION = "6.18.8"
-local TIDYPLATES_MIN_VERSION_NO = 6018008
+local TIDYPLATES_MIN_VERSION = "6.18.9"
+local TIDYPLATES_MIN_VERSION_NO = 6018009
 local TIDYPLATES_INSTALLED_VERSION = GetAddOnMetadata("TidyPlates", "version") or ""
 
 -- check if the correct TidyPlates version is installed
