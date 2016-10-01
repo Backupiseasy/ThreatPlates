@@ -192,19 +192,19 @@ local function CustomUpdateWidgetFrame(frame, unit)
 
 	-- target nameplates are often overlapped by other nameplates, this fixes it:
 	-- set frame level higher to make auras apear on top
-	if (unit and unit.isTarget) then
-			frame:SetFrameStrata("LOW")
-			local AuraIconFrames = frame.AuraIconFrames
-		  for index = 1, #AuraIconFrames do
-				AuraIconFrames[index]:SetFrameStrata("LOW")
-			end
-	else
-	 	frame:SetFrameStrata("BACKGROUND")
-	 	local AuraIconFrames = frame.AuraIconFrames
-		 for index = 1, #AuraIconFrames do
-			 AuraIconFrames[index]:SetFrameStrata("BACKGROUND")
-		 end
-	end
+	-- if (unit and unit.isTarget) then
+	-- 		frame:SetFrameStrata("LOW")
+	-- 		local AuraIconFrames = frame.AuraIconFrames
+	-- 	  for index = 1, #AuraIconFrames do
+	-- 			AuraIconFrames[index]:SetFrameStrata("LOW")
+	-- 		end
+	-- else
+	--  	frame:SetFrameStrata("BACKGROUND")
+	--  	local AuraIconFrames = frame.AuraIconFrames
+	-- 	 for index = 1, #AuraIconFrames do
+	-- 		 AuraIconFrames[index]:SetFrameStrata("BACKGROUND")
+	-- 	 end
+	-- end
 
 	frame:Show()
 end

@@ -120,6 +120,7 @@ local function OnUpdate(plate, unit)
 				-- context means that widget is only relevant for target (or mouse-over)
 				if not v.isContext then
 					w[k]:Update(unit, style)
+					if unit.isTarget then	plate:SetFrameStrata("LOW") else plate:SetFrameStrata("BACKGROUND")	end
 				end
 			end
 		end
@@ -140,6 +141,7 @@ local function OnContextUpdate(plate, unit)
 				w[k]:_Hide()
 			else
 				w[k]:UpdateContext(unit, style)
+				if unit.isTarget then	plate:SetFrameStrata("LOW") else plate:SetFrameStrata("BACKGROUND")	end									
 			end
 		end
 	end
