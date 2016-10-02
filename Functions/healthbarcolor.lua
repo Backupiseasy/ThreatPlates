@@ -1,7 +1,6 @@
 local _,ns = ...
 local t = ns.ThreatPlates
 
-
 local isTanked
 local reference = {
 	["FRIENDLY"] = "fHPbarColor",
@@ -157,6 +156,10 @@ local function SetHealthbarColor(unit)
 				end
 			end
 		end
+	end
+
+	if db.questWidget.ON and db.questWidget.ModeHPBar and TidyPlatesThreat.IsQuestUnit(unit) then
+		c = db.questWidget.HPBarColor
 	end
 
 	if unit.isMarked then -- Prio 1 - raid marks always take top priority

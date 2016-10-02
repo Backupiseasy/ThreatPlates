@@ -7,6 +7,10 @@ t.Theme = {}
 
 TidyPlatesThreat = LibStub("AceAddon-3.0"):NewAddon("TidyPlatesThreat", "AceConsole-3.0", "AceEvent-3.0")
 
+local RBG = function(red, green, blue)
+	return { r = red/255, g = green/255, b = blue/255 }
+end
+
 ---------------------------------------------------------------------------------------------------
 -- Global configs and funtions
 ---------------------------------------------------------------------------------------------------
@@ -460,6 +464,18 @@ function TidyPlatesThreat:OnInitialize()
 				x = 65,
 				y = 6,
 				anchor = "CENTER",
+			},
+			questWidget = {
+				ON = false,
+				ModeHPBar = true,
+				ModeIcon = false,
+				scale = 32,
+				x = 0,
+				y = 30,
+				anchor = "CENTER",
+				HPBarColor = RBG(255, 140, 0),
+				HideInCombat = true,
+				HideInInstance = true,
 			},
 			totemSettings = ThreatPlatesWidgets.TOTEM_SETTINGS,
 			uniqueSettings = {

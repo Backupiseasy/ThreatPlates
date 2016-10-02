@@ -141,7 +141,7 @@ local function OnContextUpdate(plate, unit)
 				w[k]:_Hide()
 			else
 				w[k]:UpdateContext(unit, style)
-				if unit.isTarget then	plate:SetFrameStrata("LOW") else plate:SetFrameStrata("BACKGROUND")	end									
+				if unit.isTarget then	plate:SetFrameStrata("LOW") else plate:SetFrameStrata("BACKGROUND")	end
 			end
 		end
 	end
