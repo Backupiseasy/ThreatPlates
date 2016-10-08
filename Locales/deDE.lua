@@ -371,7 +371,7 @@ L["Combo Points"] = "Combo-Punkte"
 L["This widget will display combo points on your target nameplate."] = "Ermöglicht die Anzeige von Combo-Punkten an der Plakette des Ziels."
 
 ----
-L["Aura Widget"] = "Auras"
+L["Aura"] = "Auras"
 L["This widget will display auras that match your filtering on your target nameplate and others you recently moused over."] = "Hiermit werden Auras gemäß des eingestellten Filters auf der Plakette des Ziels sowie auf Zielen, über die kurz zuvor mit der Maus gegangen wurde, angezeigt."
 L["This lets you select the layout style of the aura widget. (requires /reload)"] = "Hier wird die Art des Layouts für Auren ausgewählt (erfordert /reload)."
 L["Wide"] = "Wide"
@@ -386,8 +386,8 @@ L["Mode"] = "Modus"
 L["Filtered Auras"] = "Gefilterte Auras"
 
 ----
-L["Social Widget"] = "Soziale Widgets"
-L["Enables the showing if indicator icons for friends, guildmates, and BNET Friends"] = "Ermöglicht eine Anzeige von Icons für Freunde, Gildenmitgliedern und Battlenet-Freunden"
+L["Social"] = "Soziale Widgets"
+L["Enables the showing of indicator icons for friends, guildmates, and BNET Friends"] = "Ermöglicht eine Anzeige von Icons für Freunde, Gildenmitgliedern und Battlenet-Freunden"
 
 ----
 L["Threat Line"] = "Bedrohungslinie"
@@ -400,6 +400,23 @@ L["This widget will display a small shield or dagger that will indicate if the n
 ----
 L["Target Highlight"] = "Ziel-Highlight"
 L["Enables the showing of a texture on your target nameplate"] = "Ermöglicht die Anzeige einer Textur an der Plakette des Ziels"
+
+---- Quest Widget
+L["Quest"] = "Quest"
+L["Enable Quest Widget"] = "Quest-Widget aktivieren"
+L["Enables highlighting of nameplates of mobs involved with any of your current quests."] = "Aktiviert das Hervorheben von Plaketten von Mobs, die Ziel deiner aktuellen Quest sind."
+L["Health Bar Mode"] = "Modus Health-Bar"
+L["Icon Mode"] = "Modus Icon"
+L["Visibility"] = "Sichtbarkeit"
+L["Use a custom color for the health bar of quest mobs."] = "Benutzerdefinierte Farbe für die Healthbar von Quest-Mobs verwenden"
+L["Show an indicator icon at the nameplate for quest mobs."] = "Zeige ein Hinweissymbol an den Plaketten von Quest-Mobs an"
+L["Hide in Combat"] = "Im Kampf verstecken"
+L["Hide in Instance"] = "In Instanzen verstecken"
+
+---- Stealth Widgets
+L["Stealth"] = "Stealth"
+L["Enable Stealth Widget (Feature not yet fully implemented!)"] = "Stealth-Widget aktiviern (Feature noch nicht vollständig implementiert!)"
+L["Shows a stealth icon above the nameplate of units that can detect you while stealthed."] = "Zeigt ein Stealth-Icon über den Plaketten von Einheiten an, die dich in Verstohlenheit entdecken können"
 
 ----------------------
 -- Totem Nameplates --

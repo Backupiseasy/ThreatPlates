@@ -15,8 +15,7 @@ end
 -- Global configs and funtions
 ---------------------------------------------------------------------------------------------------
 
-local TIDYPLATES_MIN_VERSION = "6.18.10"
-local TIDYPLATES_MIN_VERSION_NO = 6018010
+local TIDYPLATES_VERSIONS = { "6.18.10" }
 local TIDYPLATES_INSTALLED_VERSION = GetAddOnMetadata("TidyPlates", "version") or ""
 
 -- check if the correct TidyPlates version is installed
@@ -30,7 +29,7 @@ function CheckTidyPlatesVersion()
 	-- 	end
 	--
 	-- 	if version_no < TIDYPLATES_MIN_VERSION_NO then
-	-- 		StaticPopup_Show("TidyPlatesVersionCheck")
+	-- 		t.Print("\n---------------------------------------\nThe current version of ThreatPlates requires at least TidyPlates "] .. TIDYPLATES_MIN_VERSION .. L[". You have installed an older or incompatible version of TidyPlates: "] .. TIDYPLATES_INSTALLED_VERSION .. L[". Please update TidyPlates, otherwise ThreatPlates will not work properly.")
 	-- 	end
 	-- 	GlobDB.versioncheck = true
 	-- end
@@ -128,17 +127,6 @@ StaticPopupDialogs["SetToThreatPlates"] = {
 	OnCancel = function()
 		t.Print(L["-->>|cffff0000Activate Threat Plates from the Tidy Plates options!|r<<--"])
 	end,
-}
-
-StaticPopupDialogs["TidyPlatesVersionCheck"] = {
-	preferredIndex = STATICPOPUP_NUMDIALOGS,
-	text = t.Meta("title").." "..tostring(t.Meta("version"))..L["\n---------------------------------------\nThe current version of ThreatPlates requires at least TidyPlates "] .. TIDYPLATES_MIN_VERSION .. L[". You have installed an older or incompatible version of TidyPlates: "] .. TIDYPLATES_INSTALLED_VERSION .. L[". Please update TidyPlates, otherwise ThreatPlates will not work properly."],
-	button1 = L["Ok"],
-	timeout = 0,
-	whileDead = 1,
-	hideOnEscape = 1,
-	OnAccept = function()	end,
-	OnCancel = function()	end,
 }
 
 -- Callback Functions
@@ -465,18 +453,14 @@ function TidyPlatesThreat:OnInitialize()
 				y = 6,
 				anchor = "CENTER",
 			},
-			questWidget = {
-				ON = false,
+			questWidget = {	ON = false,	scale = 26,	x = 0, y = 30, alpha = 1, anchor = "CENTER",
 				ModeHPBar = true,
-				ModeIcon = false,
-				scale = 32,
-				x = 0,
-				y = 30,
-				anchor = "CENTER",
+				ModeIcon = true,
 				HPBarColor = RBG(255, 140, 0),
 				HideInCombat = true,
 				HideInInstance = true,
 			},
+			stealthWidget = {	ON = false, scale = 28, x = 0, y = 0,	alpha = 1, anchor = "CENTER", },
 			totemSettings = ThreatPlatesWidgets.TOTEM_SETTINGS,
 			uniqueSettings = {
 				list = {},
@@ -1559,7 +1543,7 @@ local function OnActivateTheme(themeTable)
 	if not themeTable then
 		ThreatPlatesWidgets.DeleteWidgets()
 	else
-		CheckTidyPlatesVersion()
+		--CheckTidyPlatesVersion()
 		ActivateTheme()
 	end
 end
@@ -1662,7 +1646,7 @@ function TidyPlatesThreat:StartUp()
 			GlobDB.versioncheck = false
 		end
 
-		CheckTidyPlatesVersion()
+		--CheckTidyPlatesVersion()
 	end
 
 	t.SetThemes(self)

@@ -149,12 +149,91 @@ end
 
 local function GetEnableToggle(header, description, setting)
 	local enable = {
-		type = "group", name = L["Enable"],	order = 0, inline = true,
+		type = "group", name = L["Enable"],	order = 5, inline = true,
 		args = {
 			Toggle = { type = "toggle",	name = header, desc = description, arg = setting, order = 0, descStyle = "inline", width = "full", },
 		},
 	}
 	return enable
+end
+
+local function AddLayoutOptions(args, pos, setting, func_disabled)
+	args.Sizing = {
+		type = "group",	order = pos,	name = L["Scale"], inline = true,
+		disabled = func_disabled,
+		args = {
+			ScaleSlider = {	type = "range", order = 0,  name = "", width = "full", arg = {setting,"scale"} },
+		},
+	}
+	args.Placement = {
+		type = "group",	order = pos + 10,	name = L["Placement"], inline = true,
+		disabled = func_disabled,
+		args = {
+			X = {	type = "range",	order = 1, name = L["X"],	min = -120,	max = 120, step = 1, arg = {setting, "x"}, },
+			Y = { type = "range",	order = 2, name = L["Y"],	min = -120,	max = 120, step = 1, arg = {setting, "y"}, },
+		},
+	}
+	args.Alpha = {
+		type = "group",	order = pos + 20,	name = L["Alpha"], inline = true,
+		disabled = func_disabled,
+		args = {
+			Alpha = {	type = "range",	order = 1, name = "", step = 0.05, min = 0,	max = 1, isPercent = true,
+			arg = {setting, "alpha"}, width = "full", },
+		},
+	}
+end
+
+local function QuestWidgetOptions()
+	local options =  { type = "group", order = 90,	name = L["Quest"],
+		args = {
+			Enable = GetEnableToggle(L["Enable Quest Widget"], L["Enables highlighting of nameplates of mobs involved with any of your current quests."], {"questWidget", "ON"}),
+			Visibility = { type = "group",	order = 10,	name = L["Visibility"], inline = true,
+				disabled = function() return not db.questWidget.ModeIcon end,
+				args = {
+					InCombat = { type = "toggle", order = 10, name = L["Hide in Combat"],	arg = {"questWidget", "HideInCombat"}, },
+					InInstance = { type = "toggle", order = 20, name = L["Hide in Instance"],	arg = {"questWidget", "HideInInstance"}, },
+				},
+			},
+			ModeHealthBar = {
+				type = "group",
+				name = L["Health Bar Mode"],
+				inline = true,
+				disabled = function() return not db.questWidget.ON end,
+				args = {
+					Help = { type = "description", order = 0,	width = "full",	name = L["Use a custom color for the health bar of quest mobs."],	},
+					Enable = { type = "toggle", order = 10, name = L["Enable"],	arg = {"questWidget", "ModeHPBar"}, },
+					Color = {
+						name = L["Color"], type = "color", desc = "", descStyle = "inline", width = "half",
+						get = GetColor, set = SetColor, arg = {"questWidget", "HPBarColor"},
+						order = 20,
+						disabled = function() return not db.questWidget.ModeHPBar end,
+					},
+				},
+			},
+			ModeIcon = {
+				name = L["Icon Mode"],
+				type = "group",
+				inline = true,
+				disabled = function() return not db.questWidget.ON end,
+				args = {
+					Help = { type = "description", order = 0,	width = "full",	name = L["Show an indicator icon at the nameplate for quest mobs."],	},
+					Enable = { type = "toggle", order = 10, name = L["Enable"],	width = "full", arg = {"questWidget", "ModeIcon"}, },
+				},
+			},
+		},
+	}
+	AddLayoutOptions(options.args.ModeIcon.args, 80, "questWidget", function() return not db.questWidget.ModeIcon end)
+	return options
+end
+
+local function StealthWidgetOptions()
+	local options =  { type = "group", order = 60,	name = L["Stealth"],
+		args = {
+			Enable = GetEnableToggle(L["Enable Stealth Widget (Feature not yet fully implemented!)"], L["Shows a stealth icon above the nameplate of units that can detect you while stealthed."], {"stealthWidget", "ON"}),
+		},
+	}
+	AddLayoutOptions(options.args, 80, "stealthWidget", function() return not db.stealthWidget.ON end)
+	return options
 end
 
 -- Return the Options table
@@ -675,7 +754,7 @@ local function GetOptions()
 															name = RAID_TARGET_5,
 															arg = {"settings","raidicon","hpMarked","MOON"},
 														},
-														SQUARE = {
+														SquestwidgetUARE = {
 															type = "color",
 															order = 6,
 															name = RAID_TARGET_6,
@@ -3132,7 +3211,7 @@ local function GetOptions()
 						ClassIconWidget = {
 							name = L["Class Icons"],
 							type = "group",
-							order = 0,
+							order = 30,
 							args = {
 								Enable = {
 									name = L["Enable"],
@@ -3231,7 +3310,7 @@ local function GetOptions()
 						ComboPointWidget = {
 							name = L["Combo Points"],
 							type = "group",
-							order = 10,
+							order = 40,
 							args = {
 								Enable = {
 									name = L["Enable"],
@@ -3307,7 +3386,7 @@ local function GetOptions()
 							},
 						},
 						AuraWidget = {
-							name = L["Aura Widget"],
+							name = L["Aura"],
 							type = "group",
 							order = 20,
 							args = {
@@ -3508,9 +3587,9 @@ local function GetOptions()
 							},
 						},
 						ArenaWidget = {
-							name = "Arena Widget",
+							name = "Arena",
 							type = "group",
-							order = 25,
+							order = 10,
 							args = {
 								Enable = {
 									name = L["Enable"],
@@ -3521,7 +3600,7 @@ local function GetOptions()
 										Toggle = {
 											name = L["Enable"],
 											type = "toggle",
-											desc = L["Enables the showing if indicator icons for friends, guildmates, and BNET Friends"],
+											desc = L["Enables the showing of indicator icons for friends, guildmates, and BNET Friends"],
 											descStyle = "inline",
 											width = "full",
 											order = 1,
@@ -3681,9 +3760,9 @@ local function GetOptions()
 							},
 						},
 						SocialWidget = {
-							name = L["Social Widget"],
+							name = L["Social"],
 							type = "group",
-							order = 30,
+							order = 50,
 							args = {
 								Enable = {
 									name = L["Enable"],
@@ -3694,7 +3773,7 @@ local function GetOptions()
 										Toggle = {
 											name = L["Enable"],
 											type = "toggle",
-											desc = L["Enables the showing if indicator icons for friends, guildmates, and BNET Friends"],
+											desc = L["Enables the showing of indicator icons for friends, guildmates, and BNET Friends"],
 											descStyle = "inline",
 											width = "full",
 											order = 1,
@@ -3759,7 +3838,7 @@ local function GetOptions()
 						-- 				Toggle = {
 						-- 					name = L["Enable"],
 						-- 					type = "toggle",
-						-- 					desc = L["Enables the showing if indicator icons for friends, guildmates, and BNET Friends"],
+						-- 					desc = L["Enables the showing of indicator icons for friends, guildmates, and BNET Friends"],
 						-- 					descStyle = "inline",
 						-- 					width = "full",
 						-- 					order = 1,
@@ -3951,7 +4030,7 @@ local function GetOptions()
 						TargetArtWidget = {
 							name = L["Target Highlight"],
 							type = "group",
-							order = 60,
+							order = 70,
 							args = {
 								Enable = {
 									name = L["Enable"],
@@ -4011,70 +4090,8 @@ local function GetOptions()
 								},
 							},
 						},
-						QuestWidget = {
-							name = L["Quest"],
-							type = "group",
-							order = 70,
-							args = {
-								Enable = GetEnableToggle(L["Enable Quest Widget"], L["Enables highlighting of nameplates of mobs involved with any of your current quests."], {"questWidget", "ON"}),
-								ModeHealthBar = {
-									type = "group",
-									name = L["Health Bar Mode"],
-									inline = true,
-									disabled = function() return not db.questWidget.ON end,
-									args = {
-										Help = { type = "description", order = 0,	width = "full",	name = L["Use a custom color for the health bar of quest mobs."],	},
-										Enable = { type = "toggle", order = 10, name = L["Enable"],	arg = {"questWidget", "ModeHPBar"}, },
-										Color = {
-											name = "Color", type = "color", desc = "", descStyle = "inline", width = "half",
-											get = GetColor, set = SetColor, arg = {"questWidget", "HPBarColor"},
-											order = 20,
-											disabled = function() return not db.questWidget.ModeHPBar end,
-										},
-									},
-								},
-								ModeIcon = {
-									name = L["Icon Mode"],
-									type = "group",
-									inline = true,
-									disabled = function() return not db.questWidget.ON end,
-									args = {
-										Help = { type = "description", order = 0,	width = "full",	name = L["Show an indicator icon at the nameplate for quest mobs."],	},
-										Enable = { type = "toggle", order = 10, name = L["Enable"],	width = "full", arg = {"questWidget", "ModeIcon"}, },
-										--Header = { type = "header",	order = 15,	name = L["Visibility"], },
-										Visibility = { type = "group",	order = 20,	name = L["Visibility"], inline = true,
-											disabled = function() return not db.questWidget.ModeIcon end,
-											args = {
-												InCombat = { type = "toggle", order = 20, name = L["Hide in Combat"],	arg = {"questWidget", "HideInCombat"}, },
-												InInstance = { type = "toggle", order = 30, name = L["Hide in Instance"],	arg = {"questWidget", "HideInInstance"}, },
-											},
-										},
-										Sizing = {
-											type = "group",	order = 80,	name = L["Scale"], inline = true,
-											disabled = function() return not db.questWidget.ModeIcon end,
-											args = {
-												ScaleSlider = {
-													type = "range", order = 0,  name = "", width = "full",
-													set = function(info,val) SetThemeValue(info,val) end,	arg = {"questWidget","scale"}
-												},
-											},
-										},
-										Placement = {
-											type = "group",	order = 90,	name = L["Placement"], inline = true,
-											disabled = function() return not db.questWidget.ModeIcon end,
-											args = {
-												X = {	type = "range",	order = 1, name = L["X"],	min = -120,	max = 120, step = 1,
-													set = function(info,val) SetThemeValue(info,val) end,	arg = {"questWidget", "x"},
-												},
-												Y = { type = "range",	order = 2, name = L["Y"],	min = -120,	max = 120, step = 1,
-													set = function(info,val) SetThemeValue(info,val) end,	arg = {"questWidget", "y"},
-												},
-											},
-										},
-									},
-								},
-							},
-						},
+						QuestWidget = QuestWidgetOptions(),
+						StealthWidget = StealthWidgetOptions(),
 					},
 				},
 				Totems = {

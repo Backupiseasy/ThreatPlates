@@ -11,5 +11,6 @@ exclude.lst
 *.psd
 *.bmp
 *.bat
+*.xcf
 Changelog_Curse
 Changelog_WowInterface

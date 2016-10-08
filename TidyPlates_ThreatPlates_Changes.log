@@ -1,6 +1,11 @@
 ------------------------------------------------------
 8.2.3 (works with TidyPlates 6.18.10)
 ------------------------------------------------------
+* Added quest widget for highlighting of nameplates of mobs involved with any of your current quests
+* Added stealth widget to show a stealth icon above nameplate of units that can detect you while stealthed (not yet fully implemented)
+* Fixed a bug with target nameplate not always being show on top
+* Known issues:
+  * Switching between ThreatPlates and other themes may require /reload for the new theme to work correctly
 
 ------------------------------------------------------
 8.2.2 (works with TidyPlates 6.18.9)

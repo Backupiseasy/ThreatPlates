@@ -2,60 +2,37 @@ local ADDON_NAME, NAMESPACE = ...
 ThreatPlates = NAMESPACE.ThreatPlates
 
 -----------------------
--- Quest Widget --
+-- Stealth Widget --
 -----------------------
-local path = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\QuestWidget\\"
+local path = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\StealthWidget\\"
 -- local WidgetList = {}
-local tooltip_frame = CreateFrame("GameTooltip", "ThreatPlates_Tooltip", nil, "GameTooltipTemplate")
-local player_name = UnitName("player")
+
+local DETECTION_AURAS = {
+  [203761] = true, -- Detector
+  [213486] = true, -- Demonic Vision
+  [203149] = true, -- Animal Instincts
+  [169902] = true, -- All-Seeing Eye
+  [70465] = true, -- Invisibility and Stealth Detection - not really sure if necessary as aura is hidden
+  [155183] = true, -- Invisibility and Stealth Detection - not really sure if necessary as aura is hidden
+  [148500] = true, -- Invisibility and Stealth Detection - not really sure if necessary as aura is hidden
+  [18950] = true, -- Invisibility and Stealth Detection - not really sure if necessary as aura is hidden
+  [41634] = true, -- Invisibility and Stealth Detection - not really sure if necessary as aura is hidden
+  [67236] = true, -- Invisibility and Stealth Detection - not really sure if necessary as aura is hidden
+  [93105] = true, -- Invisibility and Stealth Detection - not really sure if necessary as aura is hidden
+  [127907] = true, -- Phosphorescence
+  [127913] = true, -- Phosphorescence
+  [202568] = true, -- Piercing Vision
+  [34709] = true, -- Shadow Sight
+  [225649] = true, -- Shadow Sight
+  [79140] = true, -- Vendetta
+}
 
 ---------------------------------------------------------------------------------------------------
 -- Threat Plates functions
 ---------------------------------------------------------------------------------------------------
 
-local function IsQuestUnit(unit)
-  local unitid = unit.unitid
-	local questObjective = false
-	local questNoObjective = false
-
-	-- Read quest information from tooltip. Thanks to Kib: QuestMobs AddOn by Tosaido.
-	if unitid then
-		tooltip_frame:SetOwner(WorldFrame, "ANCHOR_NONE")
-		tooltip_frame:SetUnit(unitid)
-		for i = 3, tooltip_frame:NumLines() do
-		  local line = _G["ThreatPlates_TooltipTextLeft" .. i]
-		  local text = line:GetText()
-		  local text_r, text_g, text_b = line:GetTextColor()
-
-		  if text_r > 0.99 and text_g > 0.82 and text_b == 0 then
-		    questNoObjective = true
-		  else
-		    local unit_name, progress = string.match(text, "^ ([^ ]-) ?%- (.+)$")
-
-		    if unit_name and (unit_name == "" or unit_name == player_name) then
-		      if progress then
-		        local current, goal = string.match(progress, "(%d+)/(%d+)")
-
-		        if current and goal and current ~= goal then
-		          questObjective = true
-		        end
-		      end
-		    end
-		  end
-		end
-	end
-
-	return questObjective or questNoObjective
-end
-
-local function ShowQuestUnit()
-	local db = TidyPlatesThreat.db.profile.questWidget
-	return db.ON and not (InCombatLockdown() and db.HideInCombat) and not (IsInInstance() and db.HideInInstance)
-end
-
 local function enabled()
-	local db = TidyPlatesThreat.db.profile.questWidget
-	return db.ON and db.ModeIcon
+	return TidyPlatesThreat.db.profile.stealthWidget.ON
 end
 
 -- hides/destroys all widgets of this type created by Threat Plates
@@ -76,17 +53,35 @@ end
 
 -- Update Graphics
 local function UpdateWidgetFrame(frame, unit)
-	if ShowQuestUnit() and IsQuestUnit(unit) then
-		local db = TidyPlatesThreat.db.profile.questWidget
+  if not unit.unitid then return end
+
+  -- local name, _, icon, stacks, auraType, duration, expiration, caster, _, _, spell_id = UnitAura(unit.unitid, "Invisibility and Stealth Detection")
+  -- print ("Spell detection: ", name)
+
+  local i = 1
+  local found = false
+  -- or check for (?=: Invisibility and Stealth Detection)
+  repeat
+    local name, _, icon, stacks, auraType, duration, expiration, caster, _, _, spell_id = UnitAura(unit.unitid, i)
+    --print ("Aura: ", name, spell_id)
+    if DETECTION_AURAS[spell_id] then
+      found = true
+    else
+      i = i + 1
+    end
+  until found or not name
+
+  if found then
+		local db = TidyPlatesThreat.db.profile.stealthWidget
 		frame:SetHeight(db.scale)
 		frame:SetWidth(db.scale)
 		frame:SetPoint(db.anchor, frame:GetParent(), db.x, db.y)
 		frame:SetAlpha(db.alpha)
-		frame.Icon:SetTexture(path.."questicon_wide")
+    frame.Icon:SetTexture(path.."stealthicon")
 		frame:Show()
-	else
-		frame:_Hide()
-	end
+  else
+    frame:_Hide()
+  end
 end
 
 -- Context - GUID or unitid should only change here, i.e., class changes should be determined here
@@ -143,7 +138,4 @@ local function CreateWidgetFrame(parent)
 	return frame
 end
 
-TidyPlatesThreat.IsQuestUnit = IsQuestUnit
-TidyPlatesThreat.ShowQuestUnit = ShowQuestUnit
-
-ThreatPlatesWidgets.RegisterWidget("QuestWidget", CreateWidgetFrame, false, enabled)
+ThreatPlatesWidgets.RegisterWidget("StealthWidget", CreateWidgetFrame, false, enabled)

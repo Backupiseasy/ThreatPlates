@@ -158,7 +158,7 @@ local function SetHealthbarColor(unit)
 		end
 	end
 
-	if db.questWidget.ON and db.questWidget.ModeHPBar and TidyPlatesThreat.IsQuestUnit(unit) then
+	if db.questWidget.ModeHPBar and TidyPlatesThreat.ShowQuestUnit() and TidyPlatesThreat.IsQuestUnit(unit) then
 		c = db.questWidget.HPBarColor
 	end
 

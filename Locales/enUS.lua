@@ -371,7 +371,7 @@ L["Combo Points"] = true
 L["This widget will display combo points on your target nameplate."] = true
 
 ----
-L["Aura Widget"] = true
+L["Aura"] = true
 L["This widget will display auras that match your filtering on your target nameplate and others you recently moused over."] = true
 L["This lets you select the layout style of the aura widget. (requires /reload)"] = true
 L["Wide"] = true
@@ -386,8 +386,8 @@ L["Mode"] = true
 L["Filtered Auras"] = true
 
 ----
-L["Social Widget"] = true
-L["Enables the showing if indicator icons for friends, guildmates, and BNET Friends"] = true
+L["Social"] = true
+L["Enables the showing of indicator icons for friends, guildmates, and BNET Friends"] = true
 
 ----
 L["Threat Line"] = true
@@ -400,6 +400,23 @@ L["This widget will display a small shield or dagger that will indicate if the n
 ----
 L["Target Highlight"] = true
 L["Enables the showing of a texture on your target nameplate"] = true
+
+---- Quest Widget
+L["Quest"] = true
+L["Enable Quest Widget"] = true
+L["Enables highlighting of nameplates of mobs involved with any of your current quests."] = true
+L["Health Bar Mode"] = true
+L["Icon Mode"] = true
+L["Visibility"] = true
+L["Use a custom color for the health bar of quest mobs."] = true
+L["Show an indicator icon at the nameplate for quest mobs."] = true
+L["Hide in Combat"] = true
+L["Hide in Instance"] = true
+
+---- Stealth Widgets
+L["Stealth"] = true
+L["Enable Stealth Widget (Feature not yet fully implemented!)"] = true
+L["Shows a stealth icon above the nameplate of units that can detect you while stealthed."] = true
 
 ----------------------
 -- Totem Nameplates --
