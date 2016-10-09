@@ -3580,6 +3580,7 @@ local function GetOptions()
 											set = function(info, v)
 												local table = {strsplit("\n", v)};
 												db.debuffWidget.filter = table
+												ThreatPlatesWidgets.PrepareFilter()
 											end,
 										},
 									},

@@ -110,6 +110,10 @@ end
 -- end
 -- ThreatPlatesWidgets.ClearAllAuraWidgets = ClearAllWidgets
 
+-- Information from Widget:
+-- aura.spellid, aura.name, aura.expiration, aura.stacks,
+-- aura.caster, aura.duration, aura.texture,
+-- aura.type, aura.reaction
 -- return value: show, priority, r, g, b (color for ?)
 local function AuraFilter(aura)
 	local DB = TidyPlatesThreat.db.profile.debuffWidget
@@ -134,7 +138,9 @@ local function AuraFilter(aura)
 
 	if isShown and isType then
 		local mode = DB.mode
-		local spellfound = tContains(DB.filter, aura.name)
+		-- local spellfound = tContains(DB.filter, aura.name)
+		print ("Zauber: ", aura.spellname, aura.spellid)
+		local spellfound = tContains(DB.filter, aura.name) or tContains(DB.filter, aura.spellid)
 		if spellfound then spellfound = true end
 		local isMine = (aura.caster == "player") or (aura.caster == "pet")
 		if mode == "whitelist" then
@@ -689,4 +695,4 @@ end
 
 --TidyPlatesWidgets.CanPlayerDispel = CanPlayerDispel
 
-ThreatPlatesWidgets.RegisterWidget("TPAuraWidget", CreateAuraWidget, false, enabled)
+ThreatPlatesWidgets.RegisterWidget("AuraWidget-2.0", CreateAuraWidget, false, enabled)

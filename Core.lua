@@ -1652,6 +1652,8 @@ function TidyPlatesThreat:StartUp()
 	t.SetThemes(self)
 	--t.SetTidyPlatesWidgets(self)
 	t.Update()
+	-- initialize widgets
+	ThreatPlatesWidgets.PrepareFilter()
 end
 
 -----------------------------------------------------------------------------------

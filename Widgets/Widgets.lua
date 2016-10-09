@@ -14,6 +14,8 @@ local AURA_TARGET_HOSTILE = 1
 local AURA_TARGET_FRIENDLY = 2
 local AURA_TYPE = { Buff = 1, Curse = 2, Disease = 3, Magic = 4, Poison = 5, Debuff = 6, }
 
+local Filter_ByAuraList
+
 -- local OldUseSquareDebuffIcon = nil
 -- local OldUseWideDebuffIcon = nil
 
@@ -76,7 +78,10 @@ local function AuraFilter(aura)
 
 	if isShown and isType then
 		local mode = DB.mode
-		local spellfound = tContains(DB.filter, aura.name)
+		--local spellfound = tContains(DB.filter, aura.name)
+		-- print ("Zauber: ", aura.name, aura.spellid)
+		-- print ("Filter: ", Filter_ByAuraList[aura.name], Filter_ByAuraList[aura.spellid])
+		local spellfound = Filter_ByAuraList[aura.name] or Filter_ByAuraList[aura.spellid]
 		if spellfound then spellfound = true end
 		local isMine = (aura.caster == "player") or (aura.caster == "pet")
 		if mode == "whitelist" then
@@ -101,7 +106,22 @@ local function AuraFilter(aura)
 	end
 end
 
-ThreatPlatesWidgets.AuraFilter = AuraFilter
+local function PrepareFilter()
+	local filter = TidyPlatesThreat.db.profile.debuffWidget.filter
+	Filter_ByAuraList = {}
+
+	-- separete filter by name and ID for more efficient aura filtering
+	for key, value in pairs(filter) do
+		local value_no = tonumber(value)
+		if value_no then
+			Filter_ByAuraList[value_no] = true
+			--print ("Filter_ByAuraList: ", value_no)
+		elseif value ~= '' then
+			Filter_ByAuraList[value] = true
+			--print ("Filter_ByAuraList: ", value)
+		end
+	end
+end
 
 -- enable/disable spiral cooldown an aura icons
 local function SetCooldownSpiral(frame)
@@ -248,6 +268,8 @@ local function CreateAuraWidget(plate)
 end
 
 ThreatPlatesWidgets.RegisterWidget("AuraWidgetThreatPlates", CreateAuraWidget, false, enabled)
+ThreatPlatesWidgets.AuraFilter = AuraFilter
+ThreatPlatesWidgets.PrepareFilter = PrepareFilter
 
 ------------------------
 -- Threat Line Widget --
