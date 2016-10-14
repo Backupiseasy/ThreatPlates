@@ -1,6 +1,8 @@
 local _, ns = ...
 local t = ns.ThreatPlates
 
+---------------------------------------------------------------------------------------------------
+
 -- TODO: rework, TidyPlates has several new attributes to make this easier, e.g., isBoss
 local function GetGeneral(unit)
 	local r, d, e = unit.reaction, unit.isDangerous, unit.isElite
@@ -201,13 +203,12 @@ local function SetStyle(unit)
 
 	-- t.PrintTargetInfo(unit)
 
-	if style then
-		return style
-	else
-		return "empty"
-	end
+	if not style then style = "etotem" end
+
+	return style
 end
 
 TidyPlatesThreat.GetGeneral = GetGeneral
 TidyPlatesThreat.GetType = GetType
 TidyPlatesThreat.SetStyle = SetStyle
+TidyPlatesThreat.GetStyle = GetStyle

@@ -3,13 +3,37 @@ local t = ns.ThreatPlates
 local L = t.L
 local class = t.Class()
 
-local Theme = {}
+t.Theme = {}
 
 TidyPlatesThreat = LibStub("AceAddon-3.0"):NewAddon("TidyPlatesThreat", "AceConsole-3.0", "AceEvent-3.0")
+
+local RBG = function(red, green, blue)
+	return { r = red/255, g = green/255, b = blue/255 }
+end
 
 ---------------------------------------------------------------------------------------------------
 -- Global configs and funtions
 ---------------------------------------------------------------------------------------------------
+
+local TIDYPLATES_VERSIONS = { "6.18.10" }
+local TIDYPLATES_INSTALLED_VERSION = GetAddOnMetadata("TidyPlates", "version") or ""
+
+-- check if the correct TidyPlates version is installed
+function CheckTidyPlatesVersion()
+	-- local GlobDB = TidyPlatesThreat.db.global
+	-- if not GlobDB.versioncheck then
+	-- 	local version_no = 0
+	-- 	local version = string.gsub(TIDYPLATES_INSTALLED_VERSION, "Beta", "")
+	-- 	for w in string.gmatch(version, "[0-9]+") do
+	-- 		version_no = version_no * 1000 + (tonumber(w) or 0)
+	-- 	end
+	--
+	-- 	if version_no < TIDYPLATES_MIN_VERSION_NO then
+	-- 		t.Print("\n---------------------------------------\nThe current version of ThreatPlates requires at least TidyPlates "] .. TIDYPLATES_MIN_VERSION .. L[". You have installed an older or incompatible version of TidyPlates: "] .. TIDYPLATES_INSTALLED_VERSION .. L[". Please update TidyPlates, otherwise ThreatPlates will not work properly.")
+	-- 	end
+	-- 	GlobDB.versioncheck = true
+	-- end
+end
 
 local function AlphaFeatureHeadlineView()
 	return TidyPlatesThreat.db.profile.headlineView.enabled and TidyPlatesHubFunctions
@@ -19,7 +43,7 @@ t.AlphaFeatureHeadlineView = AlphaFeatureHeadlineView
 t.Print = function(val,override)
 	local db = TidyPlatesThreat.db.profile
 	if override or db.verbose then
-		print(t.Meta("title")..": "..val)
+		print(t.Meta("titleshort")..": "..val)
 	end
 end
 
@@ -105,7 +129,6 @@ StaticPopupDialogs["SetToThreatPlates"] = {
 	end,
 }
 
-
 -- Callback Functions
 function TidyPlatesThreat:ProfChange()
 	t.SetThemes(self)
@@ -124,6 +147,7 @@ function TidyPlatesThreat:OnInitialize()
 	local defaults 	= {
 		global = {
 			version = "",
+			versioncheck = false,
 		},
 		char = {
 			welcome = false,
@@ -451,6 +475,14 @@ function TidyPlatesThreat:OnInitialize()
 				y = 6,
 				anchor = "CENTER",
 			},
+			questWidget = {	ON = false,	scale = 26,	x = 0, y = 30, alpha = 1, anchor = "CENTER",
+				ModeHPBar = true,
+				ModeIcon = true,
+				HPBarColor = RBG(255, 140, 0),
+				HideInCombat = true,
+				HideInInstance = true,
+			},
+			stealthWidget = {	ON = false, scale = 28, x = 0, y = 0,	alpha = 1, anchor = "CENTER", },
 			totemSettings = ThreatPlatesWidgets.TOTEM_SETTINGS,
 			uniqueSettings = {
 				list = {},
@@ -1501,13 +1533,9 @@ local function ShowConfigPanel()
 end
 TidyPlatesThreat.ShowConfigPanel = ShowConfigPanel
 
-local function OnActivateTheme(themeTable, profileName)
-	-- OnActivateThema is called with (nil, nil) by TidyPlatesPanel.LoadTheme to send a reset notification to all available themes
-	if not themeTable then return end
-
-	ActivateTheme()
-end
-TidyPlatesThreat.OnActivateTheme = OnActivateTheme
+---------------------------------------------------------------------------------------------------
+-- Functions called by TidyPlates
+---------------------------------------------------------------------------------------------------
 
 function ActivateTheme()
 
@@ -1519,37 +1547,44 @@ function ActivateTheme()
 		TidyPlatesWidgets.UseWideDebuffIcon()
 	end
 
-	-- Not sure, if ThreatPlates needs this functions, but TPHubs calls them:
-	TidyPlatesUtility:EnableGroupWatcher()
+	-- TODO: check with what this  was replaces
+	--TidyPlatesUtility:EnableGroupWatcher()
 	-- TPHUub: if LocalVars.AdvancedEnableUnitCache then TidyPlatesUtility:EnableUnitCache() else TidyPlatesUtility:DisableUnitCache() end
 	-- TPHUub: TidyPlatesUtility:EnableHealerTrack()
-	if TidyPlatesThreat.db.profile.healerTracker.ON then
-		if not healerTrackerEnabled then
-			TidyPlatesUtility.EnableHealerTrack()
-		end
-	else
-		if healerTrackerEnabled then
-			TidyPlatesUtility.DisableHealerTrack()
-		end
-	end
-	TidyPlatesWidgets:EnableTankWatch()
+	-- if TidyPlatesThreat.db.profile.healerTracker.ON then
+	-- 	if not healerTrackerEnabled then
+	-- 		TidyPlatesUtility.EnableHealerTrack()
+	-- 	end
+	-- else
+	-- 	if healerTrackerEnabled then
+	-- 		TidyPlatesUtility.DisableHealerTrack()
+	-- 	end
+	-- end
+	-- TidyPlatesWidgets:EnableTankWatch()
 
 	TidyPlatesWidgets.SetAuraFilter(AuraFilter)
 end
+
+local function OnActivateTheme(themeTable)
+	-- Sends a reset notification to all available themes, ie. themeTable == nil
+	if not themeTable then
+		ThreatPlatesWidgets.DeleteWidgets()
+	else
+		--CheckTidyPlatesVersion()
+		ActivateTheme()
+	end
+end
+TidyPlatesThreat.OnActivateTheme = OnActivateTheme
 
 local function OnChangeProfile(theme, profile)
 	if t.AlphaFeatureHeadlineView() then
 		if profile then
 			TidyPlatesHubFunctions.UseVariables(profile)
+			TidyPlates:ForceUpdate()
 		end
 	end
 end
 TidyPlatesThreat.OnChangeProfile = OnChangeProfile
-
-local function OnApplyThemeCustomization()
-	ActivateTheme()
-end
-TidyPlatesThreat.OnApplyThemeCustomization = OnApplyThemeCustomization
 
 -- called by TidyPlatesHub when changes in the options panel were made (CallForStyleUpdate)
 local function ApplyProfileSettings(theme, ...)
@@ -1570,16 +1605,19 @@ local function ApplyHubFunctions(theme)
 	theme.SetThreatColor = TidyPlatesThreat.SetThreatColor
 	theme.SetCastbarColor = TidyPlatesThreat.SetCastbarColor
 	theme.SetHealthbarColor = TidyPlatesThreat.SetHealthbarColor
-	theme.OnInitialize = ThreatPlatesWidgets.CreateWidgets
-	theme.OnUpdate = ThreatPlatesWidgets.UpdatePlate
-	theme.OnContextUpdate = ThreatPlatesWidgets.UpdatePlate
-	theme.ShowConfigPanel = TidyPlatesThreat.ShowConfigPanel
+
+	-- TidyPlatesGlobal_OnInitialize() is called when a nameplate is created or re-shown
+	-- TidyPlatesGlobal_OnUpdate() is called when other data about the unit changes, or is requested by an external controller.
+	-- TidyPlatesGlobal_OnContextUpdate() is called when a unit is targeted or moused-over.  (Any time the unitid or GUID changes)
+	theme.OnInitialize = ThreatPlatesWidgets.OnInitialize -- Need to provide widget positions
+	theme.OnUpdate = ThreatPlatesWidgets.OnUpdate
+	theme.OnContextUpdate = ThreatPlatesWidgets.OnContextUpdate
 
 	theme.OnActivateTheme = TidyPlatesThreat.OnActivateTheme -- called by Tidy Plates Core, Theme Loader
 	theme.OnChangeProfile = TidyPlatesThreat.OnChangeProfile -- used by TidyPlates when a specialication change occurs or the profile is changed
-	-- for TidyPlatesHub integration
-	theme.OnApplyThemeCustomization = TidyPlatesThreat.OnApplyThemeCustomization -- only for TidyPlatesHub, used to get updates for theme/config changes
 	theme.ApplyProfileSettings = TidyPlatesThreat.ApplyProfileSettings
+
+	theme.ShowConfigPanel = TidyPlatesThreat.ShowConfigPanel
 
 	return theme
 end
@@ -1589,8 +1627,8 @@ end
 function TidyPlatesThreat:OnEnable()
 	local ProfDB = self.db.profile
 
-	TidyPlatesThemeList[THREAT_PLATES_NAME] = Theme
-	ApplyHubFunctions(Theme)
+	TidyPlatesThemeList[THREAD_PLATES_NAME] = t.Theme
+	ApplyHubFunctions(t.Theme)
 	ActivateTheme()
 
 	self:StartUp()
@@ -1632,14 +1670,20 @@ function TidyPlatesThreat:StartUp()
 		t.CleanupDatabase()
 
 		local GlobDB = self.db.global
+		-- TODO: why not just overwrite the old version entry?
 		if GlobDB.version ~= tostring(t.Meta("version")) then
 			GlobDB.version = tostring(t.Meta("version"))
+			GlobDB.versioncheck = false
 		end
+
+		--CheckTidyPlatesVersion()
 	end
 
 	t.SetThemes(self)
 	--t.SetTidyPlatesWidgets(self)
 	t.Update()
+	-- initialize widgets
+	ThreatPlatesWidgets.PrepareFilter()
 end
 
 -----------------------------------------------------------------------------------

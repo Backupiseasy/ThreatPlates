@@ -25,7 +25,7 @@ ADDON_NAME = "TidyPlatesThreat"
 ---------------------------------------------------------------------------------------------------
 
 t.DEBUG = function(...)
-	print ("DEBUG: ", ...)
+	--print ("DEBUG: ", ...)
 end
 
 t.PrintTargetInfo = function(unit)
@@ -70,13 +70,11 @@ t.Update = function()
 	TidyPlatesThreat.ApplyProfileSettings()
 
 	-- reload theme is deprecated and empty, ForceUpdate() is called in SetTheme()
-	--TidyPlates:ReloadTheme()
-	--TidyPlates:ForceUpdate()
 end
 
 t.Meta = function(value)
 	local meta
-	if strlower(value) == "title" then
+	if strlower(value) == "titleshort" then
 		meta = "TP|cff89F559TP|r"
 	else
 		meta = GetAddOnMetadata("TidyPlates_ThreatPlates",value)

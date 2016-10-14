@@ -215,26 +215,94 @@ local UNIT_TYPES = {
 	},
 }
 
-local function CreateUnitGroupsVisibility(args, pos)
-	for i, value in ipairs(UNIT_TYPES) do
-		faction = value.Faction
-		args[faction.."Units"] = {
-			name = L["Show "..faction.." Units"], type = "group", order = pos,	inline = true,
-			disabled = function() return not (db.visibility.showNameplates and db.visibility[value.Settings[1]]) end,
-			args = {},
-		}
-		args[faction.."Units"].args["Desc"] = CreateDescription(L["Diese Einstellungen ermöglichen euch zu bestimmen, welche Namen im Spielfeld sichtbar sind, während ihr spielt"])
-		args[faction.."Units"].args["Spacer"] = CreateSpacer(1)
+local function GetEnableToggle(header, description, setting)
+	local enable = {
+		type = "group", name = L["Enable"],	order = 5, inline = true,
+		args = {
+			Toggle = { type = "toggle",	name = header, desc = description, arg = setting, order = 0, descStyle = "inline", width = "full", },
+		},
+	}
+	return enable
+end
 
-		for i, unit_type in ipairs(value.UnitTypes) do
-			args[faction.."Units"].args["UnitType"..faction..unit_type] = {
-				name = L[unit_type], type = "toggle", order = pos + i, arg = {"visibility", "show"..faction..unit_type},
-				get = GetCVarSettingSync, set = SetCVarSettingSync,
-			}
-		end
+local function AddLayoutOptions(args, pos, setting, func_disabled)
+	args.Sizing = {
+		type = "group",	order = pos,	name = L["Scale"], inline = true,
+		disabled = func_disabled,
+		args = {
+			ScaleSlider = {	type = "range", order = 0,  name = "", width = "full", arg = {setting,"scale"} },
+		},
+	}
+	args.Placement = {
+		type = "group",	order = pos + 10,	name = L["Placement"], inline = true,
+		disabled = func_disabled,
+		args = {
+			X = {	type = "range",	order = 1, name = L["X"],	min = -120,	max = 120, step = 1, arg = {setting, "x"}, },
+			Y = { type = "range",	order = 2, name = L["Y"],	min = -120,	max = 120, step = 1, arg = {setting, "y"}, },
+		},
+	}
+	args.Alpha = {
+		type = "group",	order = pos + 20,	name = L["Alpha"], inline = true,
+		disabled = func_disabled,
+		args = {
+			Alpha = {	type = "range",	order = 1, name = "", step = 0.05, min = 0,	max = 1, isPercent = true,
+			arg = {setting, "alpha"}, width = "full", },
+		},
+	}
+end
 
-		pos = pos + 10
-	end
+local function QuestWidgetOptions()
+	local options =  { type = "group", order = 90,	name = L["Quest"],
+		args = {
+			Enable = GetEnableToggle(L["Enable Quest Widget"], L["Enables highlighting of nameplates of mobs involved with any of your current quests."], {"questWidget", "ON"}),
+			Visibility = { type = "group",	order = 10,	name = L["Visibility"], inline = true,
+				disabled = function() return not db.questWidget.ModeIcon end,
+				args = {
+					InCombat = { type = "toggle", order = 10, name = L["Hide in Combat"],	arg = {"questWidget", "HideInCombat"}, },
+					InInstance = { type = "toggle", order = 20, name = L["Hide in Instance"],	arg = {"questWidget", "HideInInstance"}, },
+				},
+			},
+			ModeHealthBar = {
+				type = "group",
+				name = L["Health Bar Mode"],
+				inline = true,
+				disabled = function() return not db.questWidget.ON end,
+				args = {
+					Help = { type = "description", order = 0,	width = "full",	name = L["Use a custom color for the health bar of quest mobs."],	},
+					Enable = { type = "toggle", order = 10, name = L["Enable"],	arg = {"questWidget", "ModeHPBar"}, },
+					Color = {
+						name = L["Color"], type = "color", desc = "", descStyle = "inline", width = "half",
+						get = GetColor, set = SetColor, arg = {"questWidget", "HPBarColor"},
+						order = 20,
+						disabled = function() return not db.questWidget.ModeHPBar end,
+					},
+				},
+			},
+			ModeIcon = {
+				name = L["Icon Mode"],
+				type = "group",
+				inline = true,
+				disabled = function() return not db.questWidget.ON end,
+				args = {
+					Help = { type = "description", order = 0,	width = "full",	name = L["Show an indicator icon at the nameplate for quest mobs."],	},
+					Enable = { type = "toggle", order = 10, name = L["Enable"],	width = "full", arg = {"questWidget", "ModeIcon"}, },
+				},
+			},
+		},
+	}
+	AddLayoutOptions(options.args.ModeIcon.args, 80, "questWidget", function() return not db.questWidget.ModeIcon end)
+	return options
+end
+
+local function StealthWidgetOptions()
+	local options =  { type = "group", order = 60,	name = L["Stealth"],
+		args = {
+			Enable = GetEnableToggle(L["Enable Stealth Widget (Feature not yet fully implemented!)"], L["Shows a stealth icon above the nameplate of units that can detect you while stealthed."], {"stealthWidget", "ON"}),
+		},
+	}
+	AddLayoutOptions(options.args, 80, "stealthWidget", function() return not db.stealthWidget.ON end)
+	return options
+end
 end
 
 local function CreateUnitGroupsHeadlineView()
@@ -3242,7 +3310,7 @@ local function GetOptions()
 						ClassIconWidget = {
 							name = L["Class Icons"],
 							type = "group",
-							order = 0,
+							order = 30,
 							args = {
 								Enable = {
 									name = L["Enable"],
@@ -3341,7 +3409,7 @@ local function GetOptions()
 						ComboPointWidget = {
 							name = L["Combo Points"],
 							type = "group",
-							order = 10,
+							order = 40,
 							args = {
 								Enable = {
 									name = L["Enable"],
@@ -3417,7 +3485,7 @@ local function GetOptions()
 							},
 						},
 						AuraWidget = {
-							name = L["Aura Widget"],
+							name = L["Aura"],
 							type = "group",
 							order = 20,
 							args = {
@@ -3491,7 +3559,7 @@ local function GetOptions()
 											name = L["Style"],
 											type = "select",
 											order = 2,
-											desc = L["This lets you select the layout style of the aura widget. (Reloading UI is needed)"],
+											desc = L["This lets you select the layout style of the aura widget. (requires /reload)"],
 											descStyle = "inline",
 											width = "full",
 											values = {wide = L["Wide"],square = L["Square"]},
@@ -3517,20 +3585,19 @@ local function GetOptions()
 											end,
 											arg = {"debuffWidget","targetOnly"},
 										},
-										-- TODO: currently disabled because no longer available in TidyPlates (since 6.18.2)
-										-- CooldownSpiral = {
-										-- 	name = L["Cooldown Spiral"],
-										-- 	type = "toggle",
-										-- 	order = 3,
-										-- 	desc = L["This will toggle the aura widget to show the cooldown spiral on auras. (Reloading UI is needed)"],
-										-- 	descStyle = "inline",
-										-- 	width = "full",
-										-- 	set = function(info,val)
-										-- 		SetValue(info,val)
-										-- 		TidyPlates:ForceUpdate()
-										-- 	end,
-										-- 	arg = {"debuffWidget","cooldownSpiral"},
-										-- }
+										CooldownSpiral = {
+											name = L["Cooldown Spiral"],
+											type = "toggle",
+											order = 3,
+											desc = L["This will toggle the aura widget to show the cooldown spiral on auras. (requires /reload)"],
+											descStyle = "inline",
+											width = "full",
+											set = function(info,val)
+												SetValue(info,val)
+												TidyPlates:ForceUpdate()
+											end,
+											arg = {"debuffWidget","cooldownSpiral"},
+										}
 									},
 								},
 								Sizing = {
@@ -3612,6 +3679,7 @@ local function GetOptions()
 											set = function(info, v)
 												local table = {strsplit("\n", v)};
 												db.debuffWidget.filter = table
+												ThreatPlatesWidgets.PrepareFilter()
 											end,
 										},
 									},
@@ -3619,9 +3687,9 @@ local function GetOptions()
 							},
 						},
 						ArenaWidget = {
-							name = "Arena Widget",
+							name = "Arena",
 							type = "group",
-							order = 25,
+							order = 10,
 							args = {
 								Enable = {
 									name = L["Enable"],
@@ -3632,7 +3700,7 @@ local function GetOptions()
 										Toggle = {
 											name = L["Enable"],
 											type = "toggle",
-											desc = L["Enables the showing if indicator icons for friends, guildmates, and BNET Friends"],
+											desc = L["Enables the showing of indicator icons for friends, guildmates, and BNET Friends"],
 											descStyle = "inline",
 											width = "full",
 											order = 1,
@@ -3792,9 +3860,9 @@ local function GetOptions()
 							},
 						},
 						SocialWidget = {
-							name = L["Social Widget"],
+							name = L["Social"],
 							type = "group",
-							order = 30,
+							order = 50,
 							args = {
 								Enable = {
 									name = L["Enable"],
@@ -3805,7 +3873,7 @@ local function GetOptions()
 										Toggle = {
 											name = L["Enable"],
 											type = "toggle",
-											desc = L["Enables the showing if indicator icons for friends, guildmates, and BNET Friends"],
+											desc = L["Enables the showing of indicator icons for friends, guildmates, and BNET Friends"],
 											descStyle = "inline",
 											width = "full",
 											order = 1,
@@ -3856,75 +3924,76 @@ local function GetOptions()
 								},
 							},
 						},
-						HealerTrackerWidget = {
-							name = "Healer Tracker",
-							type = "group",
-							order = 40,
-							args = {
-								Enable = {
-									name = L["Enable"],
-									type = "group",
-									inline = true,
-									order = 10,
-									args = {
-										Toggle = {
-											name = L["Enable"],
-											type = "toggle",
-											desc = L["Enables the showing if indicator icons for friends, guildmates, and BNET Friends"],
-											descStyle = "inline",
-											width = "full",
-											order = 1,
-											arg = {"healerTracker", "ON"},
-										},
-									},
-								},
-								Sizing = {
-									name = L["Scale"],
-									type = "group",
-									inline = true,
-									order = 20,
-									disabled = function() if db.healerTracker.ON then return false else return true end end,
-									args = {
-										ScaleSlider = {
-											name = "",
-											type = "range",
-											step = 0.05,
-											softMin = 0.6,
-											softMax = 1.3,
-											isPercent = true,
-											arg = {"healerTracker","scale"}
-										},
-									},
-								},
-								Placement = {
-									name = L["Placement"],
-									type = "group",
-									inline = true,
-									order = 30,
-									disabled = function() if db.healerTracker.ON then return false else return true end end,
-									args = {
-										X = {
-											name = L["X"],
-											type = "range",
-											order = 1,
-											min = -120,
-											max = 120,
-											step = 1,
-											arg = {"healerTracker", "x"},
-										},
-										Y = {
-											name = L["Y"],
-											type = "range",
-											order = 1,
-											min = -120,
-											max = 120,
-											step = 1,
-											arg = {"healerTracker", "y"},
-										},
-									},
-								},
-							},
-						},--[[
+						-- HealerTrackerWidget = {
+						-- 	name = "Healer Tracker",
+						-- 	type = "group",
+						-- 	order = 40,
+						-- 	args = {
+						-- 		Enable = {
+						-- 			name = L["Enable"],
+						-- 			type = "group",
+						-- 			inline = true,
+						-- 			order = 10,
+						-- 			args = {
+						-- 				Toggle = {
+						-- 					name = L["Enable"],
+						-- 					type = "toggle",
+						-- 					desc = L["Enables the showing of indicator icons for friends, guildmates, and BNET Friends"],
+						-- 					descStyle = "inline",
+						-- 					width = "full",
+						-- 					order = 1,
+						-- 					arg = {"healerTracker", "ON"},
+						-- 				},
+						-- 			},
+						-- 		},
+						-- 		Sizing = {
+						-- 			name = L["Scale"],
+						-- 			type = "group",
+						-- 			inline = true,
+						-- 			order = 20,
+						-- 			disabled = function() if db.healerTracker.ON then return false else return true end end,
+						-- 			args = {
+						-- 				ScaleSlider = {
+						-- 					name = "",
+						-- 					type = "range",
+						-- 					step = 0.05,
+						-- 					softMin = 0.6,
+						-- 					softMax = 1.3,
+						-- 					isPercent = true,
+						-- 					arg = {"healerTracker","scale"}
+						-- 				},
+						-- 			},
+						-- 		},
+						-- 		Placement = {
+						-- 			name = L["Placement"],
+						-- 			type = "group",
+						-- 			inline = true,
+						-- 			order = 30,
+						-- 			disabled = function() if db.healerTracker.ON then return false else return true end end,
+						-- 			args = {
+						-- 				X = {
+						-- 					name = L["X"],
+						-- 					type = "range",
+						-- 					order = 1,
+						-- 					min = -120,
+						-- 					max = 120,
+						-- 					step = 1,
+						-- 					arg = {"healerTracker", "x"},
+						-- 				},
+						-- 				Y = {
+						-- 					name = L["Y"],
+						-- 					type = "range",
+						-- 					order = 1,
+						-- 					min = -120,
+						-- 					max = 120,
+						-- 					step = 1,
+						-- 					arg = {"healerTracker", "y"},
+						-- 				},
+						-- 			},
+						-- 		},
+						-- 	},
+						-- },
+						--[[
 						ThreatLineWidget = {
 							name = L["Threat Line"],
 							type = "group",
@@ -4061,7 +4130,7 @@ local function GetOptions()
 						TargetArtWidget = {
 							name = L["Target Highlight"],
 							type = "group",
-							order = 60,
+							order = 70,
 							args = {
 								Enable = {
 									name = L["Enable"],
@@ -4121,6 +4190,8 @@ local function GetOptions()
 								},
 							},
 						},
+						QuestWidget = QuestWidgetOptions(),
+						StealthWidget = StealthWidgetOptions(),
 					},
 				},
 				Totems = {
@@ -4513,7 +4584,7 @@ local CustomOpts = {
 								name = L["Placement"],
 							},
 							X = {
-								name = L["Y"],
+								name = L["X"],
 								type = "range",
 								order = 2,
 								min = -120,
@@ -4600,7 +4671,6 @@ for k_c,v_c in ipairs(db.uniqueSettings) do
 						func = function()
 							if UnitExists("Target") then
 								local target = UnitName("Target")
-								print(target)
 								db.uniqueSettings[k_c].name = target
 								options.args.Custom.args["#"..k_c].name = "#"..k_c..". "..target
 								options.args.Custom.args["#"..k_c].args.Header.name = target
@@ -4914,7 +4984,7 @@ local function GetIntOptions()
 			args = {
 				note = {
 					type = "description",
-					name = L["You can access the "]..t.Meta("title").." v"..t.Meta("version")..L[" options by typing: /tptp"],
+					name = L["You can access the "]..t.Meta("titleshort")..L[" options by typing: /tptp"],
 					order = 10,
 				},
 				openoptions = {
@@ -5032,7 +5102,7 @@ function TidyPlatesThreat:AddOptions(class)
 	}
 	local addorder = 20
 	for k_c,k_v in pairs(AddOptionsTable[class].names) do
-		print(k_c.. " "..k_v)
+		-- t.DEBUG(k_c.. " "..k_v)
 		AdditionalOptions.args.Options.args[index..k_c] = {
 			type = "group",
 			name = k_v,

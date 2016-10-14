@@ -1,22 +1,33 @@
+local ADDON_NAME, NAMESPACE = ...
+ThreatPlates = NAMESPACE.ThreatPlates
+
 -- TODO: remove masque support for the time being
 
 -----------------------
 -- Class Icon Widget --
 -----------------------
 local path = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ClassIconWidget\\"
+-- local WidgetList = {}
 -- local Masque = LibStub("Masque", true)
 -- local group
 
+---------------------------------------------------------------------------------------------------
+-- Threat Plates functions
+---------------------------------------------------------------------------------------------------
+
 local function enabled()
-	local db = TidyPlatesThreat.db.profile.classWidget
-	return db.ON
+	return TidyPlatesThreat.db.profile.classWidget.ON
 end
 
-local function UpdateSettings(frame)
+local function UpdateWidgetConfig(frame, class)
 	local db = TidyPlatesThreat.db.profile.classWidget
 	frame:SetHeight(db.scale)
 	frame:SetWidth(db.scale)
-	frame:SetPoint((db.anchor), frame:GetParent(), (db.x), (db.y))
+	frame:SetPoint(db.anchor, frame:GetParent(), db.x, db.y)
+
+	if class then
+		frame.Icon:SetTexture(path..db.theme.."\\"..class)
+	end
 
 	-- if Masque then
 	-- 	group = Masque:Group("TidyPlatesThreat")
@@ -24,52 +35,75 @@ local function UpdateSettings(frame)
 	-- end
 end
 
-local function UpdateClassIconWidget(frame, unit)
-	local db = TidyPlatesThreat.db.profile
-	local S = TidyPlatesThreat.SetStyle(unit)
-	if (not enabled()) or S == "NameOnly" then frame:Hide(); return end
+-- hides/destroys all widgets of this type created by Threat Plates
+-- local function ClearAllWidgets()
+-- 	for _, widget in pairs(WidgetList) do
+-- 		widget:Hide()
+-- 	end
+-- 	WidgetList = {} -- should not be necessary, as Hide() does that, just to be sure
+-- end
+-- ThreatPlatesWidgets.ClearAllClassIconWidgets = ClearAllWidgets
 
+---------------------------------------------------------------------------------------------------
+-- Widget Functions for TidyPlates
+---------------------------------------------------------------------------------------------------
+
+-- Update Graphics
+local function UpdateWidgetFrame(frame, unit)
+	-- TODO: optimization - is it necessary to determine the class everytime this function is called on only if the guid changes?
 	local class
-	--print ("unit.reation = ", unit.reaction, "  -- unit.type = ", unit.type)
-
-	-- if unit.class and (unit.class ~= "UNKNOWN") then
-	-- 	class = unit.class
-	-- elseif db.friendlyClassIcon then
-	-- 	if unit.guid then
-	-- 		local _, Class = GetPlayerInfoByGUID(unit.guid)
-	-- 		if not db.cache[unit.name] then
-	-- 			if db.cacheClass then
-	-- 				db.cache[unit.name] = Class
-	-- 			end
-	-- 			class = Class
-	-- 		else
-	-- 			class = db.cache[unit.name]
-	-- 		end
-	-- 	end
-	-- end
-
-	if db.friendlyClassIcon and unit.reaction == "FRIENDLY" and unit.type == "PLAYER" then
-			if unit.guid then
-				local _, Class = GetPlayerInfoByGUID(unit.guid)
-				if not db.cache[unit.name] then
-					if db.cacheClass then
-						db.cache[unit.name] = Class
-					end
-					class = Class
-				else
-					class = db.cache[unit.name]
-				end
-			end
-	elseif unit.type == "PLAYER" then
+	if unit.type == "PLAYER" then
+		if unit.reaction == "HOSTILE" then
 			class = unit.class
+		elseif unit.reaction == "FRIENDLY" and db.friendlyClassIcon then
+			-- if db.cacheClass and unit.guid then
+			-- 	-- local _, Class = GetPlayerInfoByGUID(unit.guid)
+			-- 	if not db.cache[unit.name] then
+			-- 		db.cache[unit.name] = unit.class
+			-- 		class = unit.class
+			-- 	else
+			-- 		class = db.cache[unit.name]
+			-- 	end
+			-- else
+ 				class = unit.class
+			-- end
+		end
 	end
 
 	if class then -- Value shouldn't need to change
-		UpdateSettings(frame)
-		frame.Icon:SetTexture(path..db.classWidget.theme.."\\"..class)
+		UpdateWidgetConfig(frame, class)
 		frame:Show()
 	else
-		frame:Hide()
+		frame:_Hide()
+	end
+end
+
+-- Context - GUID or unitid should only change here, i.e., class changes should be determined here
+local function UpdateWidgetContext(frame, unit)
+	local guid = unit.guid
+	frame.guid = guid
+
+	-- Add to Widget List
+	-- if guid then
+	-- 	WidgetList[guid] = frame
+	-- end
+
+	-- Custom Code II
+	--------------------------------------
+	if UnitGUID("target") == guid then
+		UpdateWidgetFrame(frame, unit)
+	else
+		frame:_Hide()
+	end
+	--------------------------------------
+	-- End Custom Code
+end
+
+local function ClearWidgetContext(frame)
+	local guid = frame.guid
+	if guid then
+		-- WidgetList[guid] = nil
+		frame.guid = nil
 	end
 end
 
@@ -77,22 +111,16 @@ end
 -- 	print ("Masque: Reskin")
 -- end
 
-local function CreateClassIconWidget(parent)
-	local db = TidyPlatesThreat.db.profile.classWidget
-	local frame
-	-- if Masque then
-	-- 	frame = CreateFrame("Button", "Button_ClassIcon", parent, "ActionButtonTemplate")
-	-- 	frame:EnableMouse(false)
-	-- else
-	frame = CreateFrame("Frame", nil, parent)
-	-- end
+local function CreateWidgetFrame(parent)
+	-- Required Widget Code
+	frame:Hide()
 
-	frame:SetHeight(db.scale)
-	frame:SetWidth(db.scale)
+	-- Custom Code III
+	--------------------------------------
 	frame.Icon = frame:CreateTexture(nil, "OVERLAY")
 	frame.Icon:SetAllPoints(frame)
-	frame:Hide()
-	frame.Update = UpdateClassIconWidget
+
+	frame.UpdateConfig = UpdateWidgetConfig
 
 	-- if Masque then
 	-- 	if not group then
@@ -101,10 +129,17 @@ local function CreateClassIconWidget(parent)
 	-- 	--Masque:Register("TidyPlatesThreat", Reskin)
 	-- 	group:AddButton(frame)
 	-- end
+	
+	--------------------------------------
+	-- End Custom Code
+
+	-- Required Widget Code
+	frame.UpdateContext = UpdateWidgetContext
+	frame.Update = UpdateWidgetFrame
+	frame._Hide = frame.Hide
+	frame.Hide = function() ClearWidgetContext(frame); frame:_Hide() end
 
 	return frame
 end
 
-ThreatPlatesWidgets.RegisterWidget("ClassIconWidget",CreateClassIconWidget,false,enabled)
-
-ThreatPlatesWidgets.CreateClassIconWidget = CreateClassIconWidget
+ThreatPlatesWidgets.RegisterWidget("ClassIconWidget", CreateWidgetFrame, false, enabled)

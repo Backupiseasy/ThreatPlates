@@ -38,7 +38,10 @@ L["|cff89f559 role.|r"] = true
 L["|cff89f559Your role can not be determined.\nPlease set your dual spec preferences in the |rThreat Plates|cff89f559 options.|r"] = true
 L["|cff89f559Additional options can be found by typing |r'/tptp'|cff89F559.|r"] = true
 L[":\n----------\nWould you like to \nset your theme to |cff89F559Threat Plates|r?\n\nClicking '|cff00ff00Yes|r' will set you to Threat Plates & reload UI. \n Clicking '|cffff0000No|r' will open the Tidy Plates options."] = true
-
+L["\n---------------------------------------\nThe current version of ThreatPlates requires at least TidyPlates "] = true
+L[". You have installed an older or incompatible version of TidyPlates: "] = true
+L[". Please update TidyPlates, otherwise ThreatPlates will not work properly."] = true
+L["Ok"] = true
 L["Yes"] = true
 L["Cancel"] = true
 L["No"] = true
@@ -372,23 +375,23 @@ L["Combo Points"] = true
 L["This widget will display combo points on your target nameplate."] = true
 
 ----
-L["Aura Widget"] = true
+L["Aura"] = true
 L["This widget will display auras that match your filtering on your target nameplate and others you recently moused over."] = true
-L["This lets you select the layout style of the aura widget. (Reloading UI is needed)"] = true
+L["This lets you select the layout style of the aura widget. (requires /reload)"] = true
 L["Wide"] = true
 L["Square"] = true
 L["Target Only"] = true
 L["This will toggle the aura widget to only show for your current target."] = true
 L["Sizing"] = true
 L["Cooldown Spiral"] = true
-L["This will toggle the aura widget to show the cooldown spiral on auras. (Reloading UI is needed)"] = true
+L["This will toggle the aura widget to show the cooldown spiral on auras. (requires /reload)"] = true
 L["Filtering"] = true
 L["Mode"] = true
 L["Filtered Auras"] = true
 
 ----
-L["Social Widget"] = true
-L["Enables the showing if indicator icons for friends, guildmates, and BNET Friends"] = true
+L["Social"] = true
+L["Enables the showing of indicator icons for friends, guildmates, and BNET Friends"] = true
 
 ----
 L["Threat Line"] = true
@@ -401,6 +404,23 @@ L["This widget will display a small shield or dagger that will indicate if the n
 ----
 L["Target Highlight"] = true
 L["Enables the showing of a texture on your target nameplate"] = true
+
+---- Quest Widget
+L["Quest"] = true
+L["Enable Quest Widget"] = true
+L["Enables highlighting of nameplates of mobs involved with any of your current quests."] = true
+L["Health Bar Mode"] = true
+L["Icon Mode"] = true
+L["Visibility"] = true
+L["Use a custom color for the health bar of quest mobs."] = true
+L["Show an indicator icon at the nameplate for quest mobs."] = true
+L["Hide in Combat"] = true
+L["Hide in Instance"] = true
+
+---- Stealth Widgets
+L["Stealth"] = true
+L["Enable Stealth Widget (Feature not yet fully implemented!)"] = true
+L["Shows a stealth icon above the nameplate of units that can detect you while stealthed."] = true
 
 ----------------------
 -- Totem Nameplates --

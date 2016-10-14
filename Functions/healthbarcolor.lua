@@ -1,7 +1,6 @@
 local _,ns = ...
 local t = ns.ThreatPlates
 
-
 local isTanked
 local reference = {
 	FRIENDLY = { NPC = "FriendlyNPC", PLAYER = "FriendlyPlayer", },
@@ -31,7 +30,7 @@ local function GetClassColor(unit)
 	-- 	return nil
 	-- end
 
-	if unit.class and unit.class ~= "" then
+  if unit.class and unit.class ~= "" then
 		class = unit.class
 	elseif db.friendlyClass then
 		if unit.guid then
@@ -109,6 +108,10 @@ local function SetHealthbarColor(unit)
 	local db = TidyPlatesThreat.db.profile
 	local style = TidyPlatesThreat.SetStyle(unit)
 
+	if unit.isTapped then
+		print("Unit ", unit.name, " - isTapped: ", unit.isTapped)
+	end
+
   local c, allowMarked
 	if style == "totem" then
 		local tS = db.totemSettings[ThreatPlates_Totems[unit.name]]
@@ -158,6 +161,10 @@ local function SetHealthbarColor(unit)
 				end
 			end
 		end
+	end
+
+	if db.questWidget.ModeHPBar and TidyPlatesThreat.ShowQuestUnit() and TidyPlatesThreat.IsQuestUnit(unit) then
+		c = db.questWidget.HPBarColor
 	end
 
 	if unit.isMarked then -- Prio 1 - raid marks always take top priority
