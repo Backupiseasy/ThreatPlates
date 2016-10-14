@@ -32,7 +32,7 @@ local function GetClassColor(unit)
 	-- 	return nil
 	-- end
 
-	if unit.class and unit.class ~= "" then
+  if unit.class and unit.class ~= "" then
 		class = unit.class
 	elseif db.friendlyClass then
 		if unit.guid then
@@ -108,6 +108,10 @@ end
 local function SetHealthbarColor(unit)
 	local db = TidyPlatesThreat.db.profile
 	local style = TidyPlatesThreat.SetStyle(unit)
+
+	if unit.isTapped then
+		print("Unit ", unit.name, " - isTapped: ", unit.isTapped)
+	end
 
   local c, allowMarked
 	if style == "totem" then
