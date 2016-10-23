@@ -1,15 +1,17 @@
 ﻿local _, ns = ...
 local t = ns.ThreatPlates
+
+---------------------------------------------------------------------------------------------------
+-- Imported functions and constants
+---------------------------------------------------------------------------------------------------
+local RGB = t.RGB
 local L = t.L
 local class = t.Class()
+
 
 t.Theme = {}
 
 TidyPlatesThreat = LibStub("AceAddon-3.0"):NewAddon("TidyPlatesThreat", "AceConsole-3.0", "AceEvent-3.0")
-
-local RBG = function(red, green, blue)
-	return { r = red/255, g = green/255, b = blue/255 }
-end
 
 ---------------------------------------------------------------------------------------------------
 -- Global configs and funtions
@@ -253,26 +255,10 @@ function TidyPlatesThreat:OnInitialize()
 				g = 0,
 				b = 0
 			},
-			fHPbarColor = {
-				r = 1,
-				g = 1,
-				b = 1
-			},
-			nHPbarColor = {
-				r = 1,
-				g = 1,
-				b = 1
-			},
-			tapHPbarColor = {
-				r = 1,
-				g = 1,
-				b = 1
-			},
-			HPbarColor = {
-				r = 1,
-				g = 1,
-				b = 1
-			},
+			fHPbarColor = RGB(0, 255, 0),
+			nHPbarColor = RGB(255, 255, 0),
+			tapHPbarColor = RGB(100, 100, 100),
+			HPbarColor = RGB(255, 0, 0),
 			tHPbarColor = {
 				r = 0,
 				g = 0.5,
@@ -456,7 +442,7 @@ function TidyPlatesThreat:OnInitialize()
 			questWidget = {	ON = false,	scale = 26,	x = 0, y = 30, alpha = 1, anchor = "CENTER",
 				ModeHPBar = true,
 				ModeIcon = true,
-				HPBarColor = RBG(255, 140, 0),
+				HPBarColor = RGB(255, 140, 0),
 				HideInCombat = true,
 				HideInInstance = true,
 			},

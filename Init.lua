@@ -13,15 +13,13 @@ t.Media = LS("LibSharedMedia-3.0")
 t.MediaWidgets = Media and LS("AceGUISharedMediaWidgets-1.0", false)
 local L = t.L
 
----------------------------------------------------------------------------------------------------
--- Global constants
----------------------------------------------------------------------------------------------------
-
-THREAD_PLATES_NAME = "Threat Plates"
-
----------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------
 -- General Functions
 ---------------------------------------------------------------------------------------------------
+
+local RGB = function(red, green, blue)
+	return { r = red/255, g = green/255, b = blue/255 }
+end
 
 t.DEBUG = function(...)
 	--print ("DEBUG: ", ...)
@@ -99,7 +97,13 @@ t.CopyTable = function(input)
 	end
 	return output
 end
--- Constants
+
+---------------------------------------------------------------------------------------------------
+-- Global constants
+---------------------------------------------------------------------------------------------------
+
+THREAD_PLATES_NAME = "Threat Plates"
+
 t.Art = "Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\"
 t.Widgets = "Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\Widgets\\"
 t.FullAlign = {TOPLEFT = "TOPLEFT",TOP = "TOP",TOPRIGHT = "TOPRIGHT",LEFT = "LEFT",CENTER = "CENTER",RIGHT = "RIGHT",BOTTOMLEFT = "BOTTOMLEFT",BOTTOM = "BOTTOM",BOTTOMRIGHT = "BOTTOMRIGHT"}
@@ -121,3 +125,10 @@ t.DebuffMode = {
 	["all"] = L["All Auras"],
 	["allMine"] = L["All Auras (Mine)"]
 }
+
+
+---------------------------------------------------------------------------------------------------
+-- Expoerted local functions
+---------------------------------------------------------------------------------------------------
+
+t.RGB = RGB

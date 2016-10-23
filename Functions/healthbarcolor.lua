@@ -1,6 +1,16 @@
 local _,ns = ...
 local t = ns.ThreatPlates
 
+---------------------------------------------------------------------------------------------------
+-- Imported functions and constants
+---------------------------------------------------------------------------------------------------
+local RGB = t.RGB
+
+local COLOR_DC = RGB(128, 128, 128)
+local COLOR_TAPPED = RGB(100, 100, 100)
+--local COLOR_TAPPED = RGB(229, 229, 229)
+--local COLOR_FRIENDLY_PLAYER = RGB(170, 170, 255)
+
 local isTanked
 local reference = {
 	["FRIENDLY"] = "fHPbarColor",
@@ -9,6 +19,11 @@ local reference = {
 	["HOSTILE"] = "HPbarColor",
 	["UNKNOWN"] = "HPbarColor"
 }
+
+function ThreatPlates_IsTapDenied(unitid)
+	--return frame.optionTable.greyOutWhenTapDenied and not UnitPlayerControlled(frame.unit) and UnitIsTapDenied(frame.unit);
+	return not UnitPlayerControlled(unitid) and UnitIsTapDenied(unitid)
+end
 
 local function GetMarkedColor(unit,a,var)
 	local db = TidyPlatesThreat.db.profile
@@ -109,12 +124,16 @@ local function SetHealthbarColor(unit)
 	local db = TidyPlatesThreat.db.profile
 	local style = TidyPlatesThreat.SetStyle(unit)
 
-	if unit.isTapped then
-		print("Unit ", unit.name, " - isTapped: ", unit.isTapped)
+  local c, allowMarked
+
+	if not unit.unitid then
+		print ("Invalid unit:", unit.name)
 	end
 
-  local c, allowMarked
-	if style == "totem" then
+	if unit.unitid and not UnitIsConnected(unit.unitid) then
+		-- disconnected unit: gray
+		c = COLOR_DC
+	elseif style == "totem" then
 		local tS = db.totemSettings[ThreatPlates_Totems[unit.name]]
 		if tS[2] then
 			c = tS.color
@@ -148,7 +167,13 @@ local function SetHealthbarColor(unit)
 					end
 				end
 			else -- Prio 4: coloring by threat, color by HP amount and class colors overwrite this
+				-- TODO: rework all of this to match Blizzard default behaviour
 				c = GetThreatColor (unit, style)
+
+				if unit.unitid and ThreatPlates_IsTapDenied(unit.unitid) then
+					-- tapped unit: grey if not a player and can't get tap on unit
+					c = COLOR_TAPPED
+				end
 			end
 
 			-- player healthbars may be colored by class overwriting any customColor, but not healthColorChange

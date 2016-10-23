@@ -1,4 +1,12 @@
 ------------------------------------------------------
+8.2.4 (works with TidyPlates 6.18.10)
+------------------------------------------------------
+* Fixed coloring of tapped units without custom colors enabled
+* Changed default colors for health bar custom colors from white to Blizzard defaults
+* Known issues:
+  * Switching between ThreatPlates and other themes may require /reload for the new theme to work correctly
+
+------------------------------------------------------
 8.2.3 (works with TidyPlates 6.18.10)
 ------------------------------------------------------
 * Added quest widget for highlighting of nameplates of mobs involved with any of your current quests
