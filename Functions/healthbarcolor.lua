@@ -126,10 +126,6 @@ local function SetHealthbarColor(unit)
 
   local c, allowMarked
 
-	if not unit.unitid then
-		print ("Invalid unit:", unit.name)
-	end
-
 	if unit.unitid and not UnitIsConnected(unit.unitid) then
 		-- disconnected unit: gray
 		c = COLOR_DC

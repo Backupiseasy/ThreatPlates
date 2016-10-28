@@ -82,24 +82,7 @@ end
 
 local AURA_TYPE = { Buff = 1, Curse = 2, Disease = 3, Magic = 4, Poison = 5, Debuff = 6, }
 local isAuraEnabled
-
-local function enabled()
-	local active = TidyPlatesThreat.db.profile.debuffWidget.ON
-
-	if active then
-		if not isAuraEnabled then
-			Enable()
-			isAuraEnabled = true
-		end
-	else
-		if isAuraEnabled then
-			Disable()
-			isAuraEnabled = false
-		end
-	end
-
-	return active
-end
+local Filter_ByAuraList
 
 -- hides/destroys all widgets of this type created by Threat Plates
 -- local function ClearAllWidgets()
@@ -139,7 +122,6 @@ local function AuraFilter(aura)
 	if isShown and isType then
 		local mode = DB.mode
 		-- local spellfound = tContains(DB.filter, aura.name)
-		print ("Zauber: ", aura.spellname, aura.spellid)
 		local spellfound = tContains(DB.filter, aura.name) or tContains(DB.filter, aura.spellid)
 		if spellfound then spellfound = true end
 		local isMine = (aura.caster == "player") or (aura.caster == "pet")
@@ -165,6 +147,23 @@ local function AuraFilter(aura)
 	end
 end
 
+local function PrepareFilter()
+	local filter = TidyPlatesThreat.db.profile.debuffWidget.filter
+	Filter_ByAuraList = {}
+
+	-- separete filter by name and ID for more efficient aura filtering
+	for key, value in pairs(filter) do
+		local value_no = tonumber(value)
+		if value_no then
+			Filter_ByAuraList[value_no] = true
+			--print ("Filter_ByAuraList: ", value_no)
+		elseif value ~= '' then
+			Filter_ByAuraList[value] = true
+			--print ("Filter_ByAuraList: ", value)
+		end
+	end
+end
+
 -----------------------------------------------------
 -- Default Filter
 -----------------------------------------------------
@@ -185,6 +184,7 @@ local function EventUnitAura(unitid)
 
 	if unitid then frame = WidgetList[unitid] end
 
+	--print ("EventUnitAura: ", frame, unitid)
 	if frame then UpdateWidget(frame) end
 
 end
@@ -370,38 +370,21 @@ local function UpdateIconGrid(frame, unitid)
 
 		-- Clear Extra Slots
 		for AuraSlotEmpty = AuraSlotCount, DebuffLimit do UpdateIcon(AuraIconFrames[AuraSlotEmpty]) end
-
 end
 
 function UpdateWidget(frame)
 		local unitid = frame.unitid
 
-		if TidyPlatesThreat.db.profile.debuffWidget.targetOnly and not unit.isTarget then
-			frame:_Hide()
-			return
-		end
+		-- if TidyPlatesThreat.db.profile.debuffWidget.targetOnly and not unit.isTarget then
+		-- 	frame:_Hide()
+		-- 	return
+		-- end
 
 		UpdateIconGrid(frame, unitid)
 
 		frame:SetScale(TidyPlatesThreat.db.profile.debuffWidget.scale)
 		frame:SetPoint(TidyPlatesThreat.db.profile.debuffWidget.anchor, frame:GetParent(), TidyPlatesThreat.db.profile.debuffWidget.x, TidyPlatesThreat.db.profile.debuffWidget.y)
 		--frame:SetPoint(TidyPlatesThreat.db.profile.debuffWidget.anchor, frame:GetParent(), "CENTER", TidyPlatesThreat.db.profile.debuffWidget.x, TidyPlatesThreat.db.profile.debuffWidget.y)
-
-		-- target nameplates are often overlapped by other nameplates, this fixes it:
-		-- set frame level higher to make auras apear on top
-		if (unit and unit.isTarget) then
-				frame:SetFrameStrata("LOW")
-				local AuraIconFrames = frame.AuraIconFrames
-			  for index = 1, #AuraIconFrames do
-					AuraIconFrames[index]:SetFrameStrata("LOW")
-				end
-		else
-		 	frame:SetFrameStrata("BACKGROUND")
-		 	local AuraIconFrames = frame.AuraIconFrames
-			 for index = 1, #AuraIconFrames do
-				 AuraIconFrames[index]:SetFrameStrata("BACKGROUND")
-			 end
-		end
 
 		frame:Show()
 end
@@ -412,17 +395,18 @@ local function UpdateWidgetContext(frame, unit)
 	frame.unitid = unitid
 
 	-- Add to Widget List
-	if guid then
-		WidgetList[guid] = frame
-	end
+	-- if guid then
+	-- 	WidgetList[guid] = frame
+	-- end
+	WidgetList[unitid] = frame
 
 	-- Custom Code II
 	--------------------------------------
-	if UnitGUID("target") == guid then
-		UpdateWidget(frame)
-	else
-		frame:_Hide()
-	end
+	-- if UnitGUID("target") == guid then
+	UpdateWidget(frame)
+	-- else
+	-- 	frame:_Hide()
+	-- end
 	--------------------------------------
 	-- End Custom Code
 end
@@ -461,6 +445,23 @@ local function Disable()
 	WatcherIsEnabled = false
 end
 
+local function enabled()
+	local active = TidyPlatesThreat.db.profile.debuffWidget.ON
+
+	if active then
+		if not isAuraEnabled then
+			Enable()
+			isAuraEnabled = true
+		end
+	else
+		if isAuraEnabled then
+			Disable()
+			isAuraEnabled = false
+		end
+	end
+
+	return active
+end
 
 local function TransformWideAura(frame)
 	frame:SetWidth(26.5)
@@ -600,7 +601,8 @@ end
 local function CreateAuraWidget(parent, style)
 	-- Required Widget Code
 	local frame = CreateFrame("Frame", nil, parent)
-	frame:Hide()
+	--frame:Hide()
+	frame:Show()
 
 	-- Custom Code III
 	--------------------------------------
@@ -643,7 +645,7 @@ end
 
 local function UseWideDebuffIcon()
 	useWideIcons = true
-	DebuffColumns = 3
+	DebuffColumns = 5
 	DebuffLimit = DebuffColumns * 2
 	TidyPlates:ForceUpdate()
 end
@@ -659,7 +661,7 @@ end
 -- External
 -----------------------------------------------------
 -- TidyPlatesWidgets.GetAuraWidgetByGUID = GetAuraWidgetByGUID
--- TidyPlatesWidgets.IsAuraShown = IsAuraShown
+TidyPlatesWidgets.IsAuraShown = IsAuraShown
 
 -- TidyPlatesWidgets.UseSquareDebuffIcon = UseSquareDebuffIcon
 -- TidyPlatesWidgets.UseWideDebuffIcon = UseWideDebuffIcon
@@ -696,3 +698,5 @@ end
 --TidyPlatesWidgets.CanPlayerDispel = CanPlayerDispel
 
 ThreatPlatesWidgets.RegisterWidget("AuraWidget-2.0", CreateAuraWidget, false, enabled)
+ThreatPlatesWidgets.AuraFilter = AuraFilter
+ThreatPlatesWidgets.PrepareFilter = PrepareFilter
