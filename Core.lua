@@ -220,6 +220,7 @@ function TidyPlatesThreat:OnInitialize()
 			cacheClass = false,
 			optionRoleDetectionAutomatic = false,
 			alphaFeatureHeadlineView = false,
+			alphaFeatureAuraWidget2 = false,
 			headlineView = {
 				-- TODO: move alphaFeatureHeadlineView in this table as enabled
 				nonTargetAlpha = true,
@@ -380,6 +381,9 @@ function TidyPlatesThreat:OnInitialize()
 				scale = 1,
 				anchor = "CENTER",
 				filter = {}
+			},
+			AuraWidget = {
+
 			},
 			uniqueWidget = {
 				ON = true,

@@ -482,6 +482,8 @@ L["Click to Donate!"] = true
 L["Clear and easy to use nameplate theme for use with TidyPlates.\n\nCurrent version: "] = true
 L["\n\nFeel free to email me at |cff00ff00threatplates@gmail.com|r\n\n--\n\nBlacksalsify\n\n(Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)"] = true
 L["This will enable all alpha features currently available in ThreatPlates. Be aware that most of the features are not fully implemented and may contain several bugs."] = true
+L["Aura Widget 2.0"] = true
+L["This will enable the new Aura Widget 2.0. Configure it in Widgets - Aura 2.0. But be aware, it's still work in progress."] = true
 
 --------------------------------
 -- Default Game Options Frame --

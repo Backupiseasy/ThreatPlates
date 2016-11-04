@@ -1,4 +1,17 @@
 ------------------------------------------------------
+8.2.5 (works with TidyPlates 6.18.11)
+------------------------------------------------------
+* Added another detection spell to Stealth Widget
+* Aura filters can now contain comments - everything after "--" until the end of the line is considered a comment
+
+* Fixed aura widget - no time buffs
+* new aura widget
+
+
+* Known issues:
+  * Switching between ThreatPlates and other themes may require /reload for the new theme to work correctly
+
+------------------------------------------------------
 8.2.4 (works with TidyPlates 6.18.10)
 ------------------------------------------------------
 * Fixed coloring of tapped units without custom colors enabled

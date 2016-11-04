@@ -3587,6 +3587,201 @@ local function GetOptions()
 								},
 							},
 						},
+						AlphaFeature_AuraWidget2 = {
+							name = L["Auras 2.0"],
+							type = "group",
+							order = 25,
+							disabled = function() return not db.alphaFeatureAuraWidget2 end,
+							args = {
+								Enable = GetEnableToggle(L["Enable Aura Widget 2.0"], L["This widget will display auras that match your filtering on your target nameplate and others you recently moused over."], {"questWidget", "ON"}),
+								Filtering = {
+									name = L["Filtering"],
+									type = "group",
+									inline = true,
+									order = 10,
+									args = {
+										Show = {
+											name = "Display Locations",
+											type = "group",
+											order = 2,
+											inline = true,
+											disabled = function() return not db.debuffWidget.ON end,
+											args = {
+												ShowFriendly = {
+													name = "Show Friendly",
+													order = 1,
+													type = "toggle",
+													arg = {"debuffWidget","showFriendly"},
+												},
+												ShowEnemy = {
+													name = "Show Enemy",
+													order = 2,
+													type = "toggle",
+													arg = {"debuffWidget","showEnemy"}
+												}
+											},
+										},
+										Display = {
+											name = "Show Aura Type",
+											type = "multiselect",
+											order = 3,
+											disabled = function() return not db.debuffWidget.ON end,
+											values = {
+												[1] = "Buff",
+												[2] = "Curse",
+												[3] = "Disease",
+												[4] = "Magic",
+												[5] = "Poison",
+												[6] = "Debuff"
+											},
+											get = function(info,k)
+												return db.debuffWidget.displays[k]
+											end,
+											set = function(info,k,v)
+												db.debuffWidget.displays[k] = v
+												TidyPlates:ForceUpdate()
+											end,
+										},
+										Filtering = {
+											name = L["Filtering"],
+											order = 30,
+											type = "group",
+											inline = true,
+											disabled = function() return not db.debuffWidget.ON end,
+											args = {
+												Mode = {
+													name = L["Mode"],
+													type = "select",
+													order = 1,
+													width = "double",
+													values = t.DebuffMode,
+													arg = {"debuffWidget","mode"},
+												},
+												DebuffList = {
+													name = L["Filtered Auras"],
+													type = "input",
+													order = 2,
+													dialogControl = "MultiLineEditBox",
+													width = "full",
+													get = function(info) return t.TTS(db.debuffWidget.filter) end,
+													set = function(info, v)
+														local table = {strsplit("\n", v)};
+														db.debuffWidget.filter = table
+														ThreatPlatesWidgets.PrepareFilter()
+													end,
+												},
+											},
+										},
+									},
+								},
+								Style = {
+									name = L["Style"],
+									type = "group",
+									inline = true,
+									disabled = function() return not db.debuffWidget.ON end,
+									order = 13,
+									args = {
+										Style = {
+											name = L["Style"],
+											type = "select",
+											order = 2,
+											desc = L["This lets you select the layout style of the aura widget. (requires /reload)"],
+											descStyle = "inline",
+											width = "full",
+											values = {wide = L["Wide"],square = L["Square"]},
+											set = function(info,val)
+												SetValue(info,val)
+												if db.debuffWidget.style == "square" then
+													TidyPlatesWidgets.UseSquareDebuffIcon()
+												elseif db.debuffWidget.style == "wide" then
+													TidyPlatesWidgets.UseWideDebuffIcon()
+												end
+											end,
+											arg = {"debuffWidget", "style"},
+										},
+										TargetOnly = {
+											name = L["Target Only"],
+											type = "toggle",
+											order = 1,
+											desc = L["This will toggle the aura widget to only show for your current target."],
+											descStyle = "inline",
+											width = "full",
+											set = function(info,val)
+												SetValue(info,val)
+											end,
+											arg = {"debuffWidget","targetOnly"},
+										},
+										CooldownSpiral = {
+											name = L["Cooldown Spiral"],
+											type = "toggle",
+											order = 3,
+											desc = L["This will toggle the aura widget to show the cooldown spiral on auras. (requires /reload)"],
+											descStyle = "inline",
+											width = "full",
+											set = function(info,val)
+												SetValue(info,val)
+												TidyPlates:ForceUpdate()
+											end,
+											arg = {"debuffWidget","cooldownSpiral"},
+										}
+									},
+								},
+								Sizing = {
+									name = L["Sizing"],
+									type = "group",
+									order = 15,
+									inline = true,
+									disabled = function() return not db.debuffWidget.ON end,
+									args = {
+										Scale = {
+											name = L["Scale"],
+											type = "range",
+											order = 1,
+											width = "full",
+											step = 0.05,
+											softMin = 0.6,
+											softMax = 1.3,
+											isPercent = true,
+											arg = {"debuffWidget","scale",}
+										},
+									},
+								},
+								Placement = {
+									name = L["Placement"],
+									type = "group",
+									inline = true,
+									order = 20,
+									disabled = function() return not db.debuffWidget.ON end,
+									args = {
+										X = {
+											name = L["X"],
+											type = "range",
+											order = 1,
+											min = -120,
+											max = 120,
+											step = 1,
+											arg = {"debuffWidget", "x"},
+										},
+										Y = {
+											name = L["Y"],
+											type = "range",
+											order = 2,
+											min = -120,
+											max = 120,
+											step = 1,
+											arg = {"debuffWidget", "y"},
+										},
+										Anchor = {
+											name = L["Anchor"],
+											type = "select",
+											order = 3,
+											values = t.FullAlign,
+											arg = {"debuffWidget","anchor"}
+										},
+									},
+								},
+							},
+						},
 						ArenaWidget = {
 							name = "Arena",
 							type = "group",
@@ -4184,36 +4379,23 @@ local function GetOptions()
 							width = "full",
 							name = L["This will enable all alpha features currently available in ThreatPlates. Be aware that most of the features are not fully implemented and may contain several bugs."],
 						},
-						-- AlphaFeature_HeadlineView = {
-						-- 	name = L["Headline View (Text-Only)"],
-						-- 	type = "group",
-						-- 	inline = true,
-						-- 	order = 15,
-						-- 	args = {
-						-- 		Enable = {
-						-- 			name = L["Enable"],
-						-- 			type = "toggle",
-						-- 			order = 1,
-						-- 			desc = L["This will enable Headline View (Text-Only) for nameplates. TidyPlatesHub must be enabled for it to work. Use the TidyPlatesHub dialog for configuration."],
-						-- 			descStyle = "inline",
-						-- 			width = "full",
-						-- 			arg = {"alphaFeatureHeadlineView"},
-						-- 		},
-						-- 		HeadlineViewFade = {
-						-- 			name = L["Headline-View Alpha"],
-						-- 			type = "range",
-						-- 			order = 2,
-						-- 			width = "full",
-						-- 			-- maybe use t.AlphaFeatureHeadlineView() to also check for TidyPlatesHub enabled?
-						-- 			disabled = function() return not TidyPlatesThreat.db.profile.alphaFeatureHeadlineView end,
-						-- 			min = 0,
-						-- 			max = 1,
-						-- 			step = 0.01,
-						-- 			isPercent = true,
-						-- 			arg = {"headlineView","alpha"},
-						-- 		},
-						-- 	},
-						-- },
+						AlphaFeature_AuraWidget2 = {
+							name = L["Aura Widget 2.0"],
+							type = "group",
+							inline = true,
+							order = 15,
+							args = {
+								Enable = {
+									name = L["Enable"],
+									type = "toggle",
+									order = 1,
+									desc = L["This will enable the new Aura Widget 2.0. Configure it in Widgets - Aura 2.0. But be aware, it's still work in progress."],
+									descStyle = "inline",
+									width = "full",
+									arg = {"alphaFeatureAuraWidget2"},
+								},
+							},
+						},
 					},
 				},
 			},

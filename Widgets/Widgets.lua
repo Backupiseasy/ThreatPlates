@@ -110,15 +110,18 @@ local function PrepareFilter()
 	local filter = TidyPlatesThreat.db.profile.debuffWidget.filter
 	Filter_ByAuraList = {}
 
-	-- separete filter by name and ID for more efficient aura filtering
 	for key, value in pairs(filter) do
+		-- remove comments and whitespaces from the filter (string)
+		local pos = value:find("%-%-")
+		if pos then value = value:sub(1, pos - 1) end
+		value = value:match("^%s*(.-)%s*$")
+
+		-- separete filter by name and ID for more efficient aura filtering
 		local value_no = tonumber(value)
 		if value_no then
 			Filter_ByAuraList[value_no] = true
-			--print ("Filter_ByAuraList: ", value_no)
 		elseif value ~= '' then
 			Filter_ByAuraList[value] = true
-			--print ("Filter_ByAuraList: ", value)
 		end
 	end
 end
@@ -268,7 +271,6 @@ local function CreateAuraWidget(plate)
 end
 
 ThreatPlatesWidgets.RegisterWidget("AuraWidgetThreatPlates", CreateAuraWidget, false, enabled)
-ThreatPlatesWidgets.AuraFilter = AuraFilter
 ThreatPlatesWidgets.PrepareFilter = PrepareFilter
 
 ------------------------
