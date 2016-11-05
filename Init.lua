@@ -17,8 +17,10 @@ local L = t.L
 -- General Functions
 ---------------------------------------------------------------------------------------------------
 
-local RGB = function(red, green, blue)
-	return { r = red/255, g = green/255, b = blue/255 }
+local RGB = function(red, green, blue, alpha)
+	local color = { r = red/255, g = green/255, b = blue/255 }
+	if alpha then color.a = alpha end
+	return color
 end
 
 t.DEBUG = function(...)

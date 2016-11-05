@@ -383,7 +383,24 @@ function TidyPlatesThreat:OnInitialize()
 				filter = {}
 			},
 			AuraWidget = {
-
+				ModeIcon = {
+					Enabled = true,
+					DebuffColumns = 3,
+					DebuffRows = 3,
+					ColumnSpacing = 5,
+					RowSpacing = 8,
+				},
+				ModeBar = {
+					Enabled = false,
+					Texture = "Smooth",
+					BackgroundTexture = "Smoth",
+					BackgroundColor = RGB(0, 0, 0, 0.3),
+					BarHeight = 10,
+					BarWidget = 100,
+					BarSpacing = 2,
+					ShowIcons = false,
+					IconSpacing = 10,
+				},
 			},
 			uniqueWidget = {
 				ON = true,

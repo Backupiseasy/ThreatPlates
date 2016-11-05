@@ -129,6 +129,7 @@ L["Open Blizzard Settings"] = true
 
 L["Friendly"] = true
 L["Show Friends"] = true
+L["Show Friendly NPCs"] = true
 L["Show Friendly Totems"] = true
 L["Show Friendly Pets"] = true
 L["Show Friendly Guardians"] = true

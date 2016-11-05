@@ -398,6 +398,12 @@ local function GetOptions()
 													order = 1,
 													arg = "nameplateShowFriends",
 												},
+												nameplateShowFriendlyNPCs = {
+													name = L["Show Friendly NPCs"],
+													type = "toggle",
+													order = 1.5,
+													arg = "nameplateShowFriendlyNPCs",
+												},
 												nameplateShowFriendlyTotems = {
 													name = L["Show Friendly Totems"],
 													type = "toggle",

@@ -1,9 +1,9 @@
 local ADDON_NAME, NAMESPACE = ...
 ThreatPlates = NAMESPACE.ThreatPlates
 
------------------------
--- Auras Widget --
------------------------
+---------------------------------------------------------------------------------------------------
+-- Aura Widget 2.0
+---------------------------------------------------------------------------------------------------
 
 	--Spinning Cooldown Frame
 	--[[
@@ -17,7 +17,6 @@ ThreatPlates = NAMESPACE.ThreatPlates
 TidyPlatesWidgets.DebuffWidgetBuild = 2
 
 local PlayerGUID = UnitGUID("player")
-local PolledHideIn = TidyPlatesWidgets.PolledHideIn
 local FilterFunction = function() return 1 end
 local AuraMonitor = CreateFrame("Frame")
 local WatcherIsEnabled = false
@@ -27,6 +26,7 @@ local UpdateWidget
 
 local TargetOfGroupMembers = {}
 local DebuffColumns = 3
+local DebuffRows = 2
 local DebuffLimit = 6
 local inArena = false
 local useWideIcons = true
@@ -77,12 +77,69 @@ local function IsAuraShown(widget, aura)
 end
 
 ---------------------------------------------------------------------------------------------------
+-- PolledHideIn() - Registers a callback, which polls the frame until it expires, then hides the frame and removes the callback
+---------------------------------------------------------------------------------------------------
+
+local updateInterval = .5
+local PolledHideIn
+local Framelist = {}			-- Key = Frame, Value = Expiration Time
+local Watcherframe = CreateFrame("Frame")
+local WatcherframeActive = false
+local select = select
+local timeToUpdate = 0
+
+local function CheckFramelist(self)
+	local curTime = GetTime()
+	if curTime < timeToUpdate then return end
+	local framecount = 0
+	timeToUpdate = curTime + updateInterval
+	-- Cycle through the watchlist, hiding frames which are timed-out
+	for frame, expiration in pairs(Framelist) do
+		-- If expired...
+		if expiration < curTime then
+			if frame.Expire then frame:Expire() end
+
+			frame:Hide()
+			Framelist[frame] = nil
+			--TidyPlates:RequestDelegateUpdate()		-- Request an Update on Delegate functions, so we can catch when auras fall off
+		-- If still active...
+		else
+			-- Update the frame
+			if frame.Poll then frame:Poll(expiration) end
+			framecount = framecount + 1
+		end
+	end
+	-- If no more frames to watch, unregister the OnUpdate script
+	if framecount == 0 then Watcherframe:SetScript("OnUpdate", nil); WatcherframeActive = false end
+end
+
+local function PolledHideIn(frame, expiration)
+
+	if expiration == 0 then
+
+		frame:Hide()
+		Framelist[frame] = nil
+	else
+		--print("Hiding in", expiration - GetTime())
+		Framelist[frame] = expiration
+		frame:Show()
+
+		if not WatcherframeActive then
+			Watcherframe:SetScript("OnUpdate", CheckFramelist)
+			WatcherframeActive = true
+		end
+	end
+end
+
+---------------------------------------------------------------------------------------------------
 -- Threat Plates functions
 ---------------------------------------------------------------------------------------------------
 
 local AURA_TYPE = { Buff = 1, Curse = 2, Disease = 3, Magic = 4, Poison = 5, Debuff = 6, }
 local isAuraEnabled
 local Filter_ByAuraList
+
+local UpdateModeConfig
 
 -- hides/destroys all widgets of this type created by Threat Plates
 -- local function ClearAllWidgets()
@@ -248,11 +305,8 @@ local function UpdateIcon(frame, texture, duration, expiration, stacks, r, g, b)
 		else frame.BorderHighlight:Hide(); frame.Border:Show()	end
 
 		-- [[ Cooldown
-		if db.cooldownSpiral then
-			if duration and duration > 0 and expiration and expiration > 0 then
-				SetCooldown(frame.Cooldown, expiration-duration, duration+.25)
-				--frame.Cooldown:SetCooldown(expiration-duration, duration+.25)
-			end
+		if duration and duration > 0 and expiration and expiration > 0 then
+			SetCooldown(frame.Cooldown, expiration-duration, duration+.25)
 		end
 		--]]
 
@@ -358,8 +412,11 @@ local function UpdateIconGrid(frame, unitid)
 				local aura = storedAuras[index]
 				if aura.spellid and aura.expiration then
 
+				  local frame = AuraIconFrames[AuraSlotCount]
+					frame.AuraInfo.Duration = aura.duration
+
 					-- Call function to display the aura
-					UpdateIcon(AuraIconFrames[AuraSlotCount], aura.texture, aura.duration, aura.expiration, aura.stacks, aura.r, aura.g, aura.b)
+					UpdateIcon(frame, aura.texture, aura.duration, aura.expiration, aura.stacks, aura.r, aura.g, aura.b)
 
 					AuraSlotCount = AuraSlotCount + 1
 					frame.currentAuraCount = index
@@ -398,7 +455,9 @@ local function UpdateWidgetContext(frame, unit)
 	-- if guid then
 	-- 	WidgetList[guid] = frame
 	-- end
-	WidgetList[unitid] = frame
+	if unitid then
+		WidgetList[unitid] = frame
+	end
 
 	-- Custom Code II
 	--------------------------------------
@@ -446,7 +505,7 @@ local function Disable()
 end
 
 local function enabled()
-	local active = TidyPlatesThreat.db.profile.debuffWidget.ON
+	local active = TidyPlatesThreat.db.profile.debuffWidget.ON and TidyPlatesThreat.db.profile.alphaFeatureAuraWidget2
 
 	if active then
 		if not isAuraEnabled then
@@ -484,6 +543,7 @@ local function TransformWideAura(frame)
 	frame.TimeLeft:SetWidth(26)
 	frame.TimeLeft:SetHeight(16)
 	frame.TimeLeft:SetJustifyH("RIGHT")
+	frame.TimeLeft:SetText("Test")
 	--  Stacks
 	frame.Stacks:SetFont(AuraFont,10, "OUTLINE")
 	frame.Stacks:SetShadowOffset(1, -1)
@@ -539,7 +599,14 @@ local function CreateAuraIcon(parent)
 	frame.Cooldown:SetAllPoints(frame)
 	frame.Cooldown:SetReverse(true)
 	frame.Cooldown:SetHideCountdownNumbers(true)
-	frame.Cooldown:SetDrawEdge(true)
+
+	if TidyPlatesThreat.db.profile.debuffWidget.cooldownSpiral then
+		frame.Cooldown:SetDrawEdge(true)
+		frame.Cooldown:SetDrawEdge(true)
+	else
+		frame.Cooldown:SetDrawEdge(false)
+		frame.Cooldown:SetDrawSwipe(false)
+	end
 
 	-- Text
 	--frame.TimeLeft = frame:CreateFontString(nil, "OVERLAY")
@@ -553,6 +620,7 @@ local function CreateAuraIcon(parent)
 		Icon = "",
 		Stacks = 0,
 		Expiration = 0,
+		Duration = 0,
 		Type = "",
 	}
 
@@ -563,7 +631,12 @@ local function CreateAuraIcon(parent)
 	return frame
 end
 
+---------------------------------------------------------------------------------------------------
+-- Functions for icon mode
+---------------------------------------------------------------------------------------------------
+
 local function UpdateIconConfig(frame)
+	local db = TidyPlatesThreat.db.profile.AuraWidget.ModeIcon
 	local iconTable = frame.AuraIconFrames
 
 	if iconTable then
@@ -572,30 +645,59 @@ local function UpdateIconConfig(frame)
 			local icon = iconTable[index] or CreateAuraIcon(frame)
 			iconTable[index] = icon
 			-- Apply Style
+
 			if useWideIcons then TransformWideAura(icon) else TransformSquareAura(icon) end
 		end
 
 		-- Set Anchors
-		iconTable[1]:ClearAllPoints()
-		iconTable[1]:SetPoint("LEFT", frame)
-		for index = 2, DebuffColumns do iconTable[index]:SetPoint("LEFT", iconTable[index-1], "RIGHT", 5, 0) end
-		iconTable[DebuffColumns+1]:ClearAllPoints()
-		iconTable[DebuffColumns+1]:SetPoint("BOTTOMLEFT", iconTable[1], "TOPLEFT", 0, 8)
-		for index = (DebuffColumns+2), DebuffLimit do iconTable[index]:SetPoint("LEFT", iconTable[index-1], "RIGHT", 5, 0) end
+		for y = 1, DebuffRows do
+			for x = 1, DebuffColumns do
+				local i = (y - 1) * DebuffColumns + x
+				iconTable[i]:ClearAllPoints()
+				if i == 1 then
+					iconTable[i]:SetPoint("LEFT", frame)
+				elseif x == 1 then
+					iconTable[i]:SetPoint("BOTTOMLEFT", iconTable[i - DebuffColumns], "TOPLEFT", 0, db.RowSpacing)
+				else
+					iconTable[i]:SetPoint("LEFT", iconTable[i - 1], "RIGHT", db.ColumnSpacing, 0)
+				end
+			end
+		end
 	end
 end
+
+---------------------------------------------------------------------------------------------------
+-- Functions for bar mode
+---------------------------------------------------------------------------------------------------
+
+local function UpdateBarConfig(frame)
+end
+
+---------------------------------------------------------------------------------------------------
+-- Creation and update functions
+---------------------------------------------------------------------------------------------------
 
 local function UpdateWidgetConfig(frame)
 	local db = TidyPlatesThreat.db.profile.debuffWidget
 	if db.style == "square" then
-		frame.UseSquareDebuffIcon()
+		useWideIcons = false
 	elseif db.style == "wide" then
-		frame.UseWideDebuffIcon()
+		useWideIcons = true
 	end
 
-	UpdateIconConfig(frame)
-end
+	local db2 = TidyPlatesThreat.db.profile.AuraWidget
+	DebuffColumns = db2.ModeIcon.DebuffColumns
+	DebuffRows = db2.ModeIcon.DebuffRows
+	DebuffLimit = DebuffColumns * DebuffRows
 
+	if db2.ModeIcon.Enabled then
+		UpdateModeConfig = UpdateIconConfig
+	else
+		UpdateModeConfig = UpdateBarConfig
+	end
+
+	UpdateModeConfig(frame)
+end
 
 -- Create the Main Widget Body and Icon Array
 local function CreateAuraWidget(parent, style)
@@ -606,21 +708,30 @@ local function CreateAuraWidget(parent, style)
 
 	-- Custom Code III
 	--------------------------------------
+	local db = TidyPlatesThreat.db.profile.debuffWidget
+	local db2 = TidyPlatesThreat.db.profile.AuraWidget
+
 	-- Create Base frame
-	frame:SetWidth(128);
+	frame:SetWidth(128)
 	frame:SetHeight(32)
-	--frame.PollFunction = UpdateWidgetTime
+	frame:SetPoint(db.anchor, plate, db.x, db.y)
+	frame:SetFrameLevel(parent:GetFrameLevel() + 1)
 
 	-- Create Icon Grid
 	frame.AuraIconFrames = {}
-	UpdateIconConfig(frame)
+
+	if db2.ModeIcon.Enabled then
+		UpdateModeConfig = UpdateIconConfig
+	else
+		UpdateModeConfig = UpdateBarConfig
+	end
+
+	UpdateWidgetConfig(frame)
+	--pdateModeConfig(frame)
+
 	frame.Filter = nil
 	AuraFilterFunction = AuraFilter
 
-	local db = TidyPlatesThreat.db.profile.debuffWidget
-	--frame:SetPoint(config.anchor or "TOP", plate, config.x or 0, config.y or 0)
-	frame:SetPoint(db.anchor, plate, db.x, db.y)
-	frame:SetFrameLevel(parent:GetFrameLevel() + 1)
 	--------------------------------------
 	-- End Custom Code
 
@@ -638,15 +749,15 @@ end
 
 local function UseSquareDebuffIcon()
 	useWideIcons = false
-	DebuffColumns = 5
-	DebuffLimit = DebuffColumns * 2
+	--DebuffColumns = 5
+	--DebuffLimit = DebuffColumns * 2
 	TidyPlates:ForceUpdate()
 end
 
 local function UseWideDebuffIcon()
 	useWideIcons = true
-	DebuffColumns = 5
-	DebuffLimit = DebuffColumns * 2
+	--DebuffColumns = 5
+	--DebuffLimit = DebuffColumns * 2
 	TidyPlates:ForceUpdate()
 end
 

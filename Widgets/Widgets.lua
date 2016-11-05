@@ -27,7 +27,7 @@ local enable_cooldown_spiral
 ---------------------------------------------------------------------------------------------------
 
 local function enabled()
-	local active = TidyPlatesThreat.db.profile.debuffWidget.ON
+	local active = TidyPlatesThreat.db.profile.debuffWidget.ON and not TidyPlatesThreat.db.profile.alphaFeatureAuraWidget2
 
 	if active then
 		if not isAuraEnabled then

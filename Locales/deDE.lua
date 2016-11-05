@@ -129,6 +129,7 @@ L["Open Blizzard Settings"] = "Blizzard-Einstellungen öffnen"
 
 L["Friendly"] = "Freundlich"
 L["Show Friends"] = "Freundliche Einheiten anzeigen"
+L["Show Friendly NPCs"] = "Freundliche NPCs anzeigen"
 L["Show Friendly Totems"] = "Freundliche Totems anzeigen"
 L["Show Friendly Pets"] = "Freundliche Begleiter anzeigen"
 L["Show Friendly Guardians"] = "Freundliche Wachen anzeigen"
