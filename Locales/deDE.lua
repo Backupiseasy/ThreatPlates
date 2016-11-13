@@ -484,7 +484,7 @@ L["Clear and easy to use nameplate theme for use with TidyPlates.\n\nCurrent ver
 L["\n\nFeel free to email me at |cff00ff00threatplates@gmail.com|r\n\n--\n\nBlacksalsify\n\n(Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)"] = "\n\nDu kannst mich gerne per E-Mail erreichen unter |cff00ff00threatplates@gmail.com|r\n\n--\n\nBlacksalsify\n\n(Ursprünglicher Autor: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)"
 L["This will enable all alpha features currently available in ThreatPlates. Be aware that most of the features are not fully implemented and may contain several bugs."] = "Hiermit werden alle aktuell in ThreadPlates verfügbaren Alpha-Features eingeschaltet. Bitte sei dir bewußt, dass die meisten Features noch nicht vollständig implementiert sind und Fehler beinhalten können."
 L["Aura Widget 2.0"] = "Aura Widget 2.0"
-L["This will enable the new Aura Widget 2.0. Configure it in Widgets - Aura 2.0. But be aware, it's still work in progress."] = "This will enable the new Aura Widget 2.0. Configure it in Widgets - Aura 2.0. But be aware, it's still work in progress."
+L["This will enable the new Aura Widget 2.0. Configure it in Widgets - Aura 2.0. But be aware, it's still work in progress. (requires /reload)"] = "This will enable the new Aura Widget 2.0. Configure it in Widgets - Aura 2.0. But be aware, it's still work in progress. (requires /reload)"
 
 --------------------------------
 -- Default Game Options Frame --

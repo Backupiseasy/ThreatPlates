@@ -147,6 +147,10 @@ local function SetThemeValue(info, val)
 	end
 end
 
+local function CreateSpacer(pos)
+	return { name = "",	order = pos, type = "description", width = "full", }
+end
+
 local function GetEnableToggle(header, description, setting)
 	local enable = {
 		type = "group", name = L["Enable"],	order = 5, inline = true,
@@ -195,9 +199,7 @@ local function QuestWidgetOptions()
 				},
 			},
 			ModeHealthBar = {
-				type = "group",
-				name = L["Health Bar Mode"],
-				inline = true,
+				name = L["Health Bar Mode"], order = 10, type = "group", inline = true,
 				disabled = function() return not db.questWidget.ON end,
 				args = {
 					Help = { type = "description", order = 0,	width = "full",	name = L["Use a custom color for the health bar of quest mobs."],	},
@@ -211,9 +213,7 @@ local function QuestWidgetOptions()
 				},
 			},
 			ModeIcon = {
-				name = L["Icon Mode"],
-				type = "group",
-				inline = true,
+				name = L["Icon Mode"], order = 20, type = "group", inline = true,
 				disabled = function() return not db.questWidget.ON end,
 				args = {
 					Help = { type = "description", order = 0,	width = "full",	name = L["Show an indicator icon at the nameplate for quest mobs."],	},
@@ -3593,13 +3593,13 @@ local function GetOptions()
 								},
 							},
 						},
-						AlphaFeature_AuraWidget2 = {
+						AuraWidget2 = {
 							name = L["Auras 2.0"],
 							type = "group",
 							order = 25,
-							disabled = function() return not db.alphaFeatureAuraWidget2 end,
+							disabled = function() return not db.AuraWidget.Enabled end,
 							args = {
-								Enable = GetEnableToggle(L["Enable Aura Widget 2.0"], L["This widget will display auras that match your filtering on your target nameplate and others you recently moused over."], {"questWidget", "ON"}),
+								Enable = GetEnableToggle(L["Enable Aura Widget 2.0"], L["This widget will display auras that match your filtering on your target nameplate and others you recently moused over."], {"AuraWidget", "Enabled"}),
 								Filtering = {
 									name = L["Filtering"],
 									type = "group",
@@ -3673,7 +3673,7 @@ local function GetOptions()
 													set = function(info, v)
 														local table = {strsplit("\n", v)};
 														db.debuffWidget.filter = table
-														ThreatPlatesWidgets.PrepareFilter()
+														if ThreatPlatesWidgets.PrepareFilterAuraWidget then ThreatPlatesWidgets.PrepareFilterAuraWidget() end
 													end,
 												},
 											},
@@ -3783,6 +3783,63 @@ local function GetOptions()
 											order = 3,
 											values = t.FullAlign,
 											arg = {"debuffWidget","anchor"}
+										},
+									},
+								},
+								Appearance = {
+									name = L["Appearance"],
+									type = "group",
+									inline = true,
+									order = 30,
+									disabled = function() return not db.AuraWidget.Enabled end,
+									args = {
+										ModeIcon = {
+											name = L["Icon Mode"], order = 10, type = "group", inline = true,
+											disabled = function() return db.AuraWidget.ModeBar.Enabled end,
+											args = {
+												Help = { type = "description", order = 0,	width = "full",	name = L["Show auras as icons in a grid configuration."],	},
+												Enable = { type = "toggle", order = 10, name = L["Enable"],	width = "full", arg = {"AuraWidget", "ModeBar", "Enabled"}, disabled = function() return not db.AuraWidget.Enabled end,
+													set = function() db.AuraWidget.ModeBar.Enabled = false end, get = function() return not db.AuraWidget.ModeBar.Enabled end, },
+												Columns = {	name = L["Column Limit"], order = 20, type = "range", min = 1,	max = 8, step = 1, arg = {"AuraWidget", "ModeIcon", "Columns"},	},
+												Rows = {	name = L["Row Limit"], order = 30, type = "range", min = 1,	max = 10, step = 1, arg = {"AuraWidget", "ModeIcon", "Rows"},	},
+												ColumnSpacing = {	name = L["Horizontal Spacing"], order = 40, type = "range", min = 0,	max = 100, step = 1, arg = {"AuraWidget", "ModeIcon", "ColumnSpacing"},	},
+												RowSpacing = {	name = L["Vertical Spacing"], order = 50, type = "range", min = 0,	max = 100, step = 1, arg = {"AuraWidget", "ModeIcon", "RowSpacing"},	},
+											},
+										},
+										ModeBar = {
+											name = L["Bar Mode"], order = 20,	type = "group",	inline = true,
+											disabled = function() return not db.AuraWidget.ModeBar.Enabled end,
+											args = {
+												Help = { type = "description", order = 0,	width = "full",	name = L["Show auras as bars (with optional icons)."],	},
+												Enable = { type = "toggle", order = 10, name = L["Enable"],	width = "full", arg = {"AuraWidget", "ModeBar", "Enabled"}, disabled = function() return not db.AuraWidget.Enabled end, },
+												MaxBars = {	name = L["Bar Limit"], order = 20, type = "range", min = 1,	max = 20, step = 1, arg = {"AuraWidget", "ModeBar", "MaxBars"},	},
+												BarWidth = {	name = L["Bar Width"], order = 30, type = "range", min = 1,	max = 500, step = 1, arg = {"AuraWidget", "ModeBar", "BarWidth"},	},
+												BarHeight = {	name = L["Bar Height"], order = 40, type = "range", min = 1,	max = 500, step = 1, arg = {"AuraWidget", "ModeBar", "BarHeight"},	},
+												BarSpacing = {	name = L["Vertical Spacing"], order = 50, type = "range", min = 0,	max = 100, step = 1, arg = {"AuraWidget", "ModeBar", "BarSpacing"},	},
+												Spacer1 = CreateSpacer(55),
+												BarTexture = { name = L["Foreground Texture"],	order = 60,	type = "select", dialogControl = "LSM30_Statusbar",	values = AceGUIWidgetLSMlists.statusbar, arg = {"AuraWidget","ModeBar", "Texture"},	},
+												BarColor = {	name = L["Foreground Color"], type = "color",	order = 70,	get = GetColor,	set = SetColor,	arg = {"AuraWidget","ModeBar", "BarColor"},	hasAlpha = false, },
+												Spacer2 = CreateSpacer(75),
+												BackgroundTexture = { name = L["Background Texture"],	order = 80,	type = "select", dialogControl = "LSM30_Statusbar",	values = AceGUIWidgetLSMlists.statusbar, arg = {"AuraWidget","ModeBar", "BackgroundTexture"},	},
+												BackgroundColor = {	name = L["Background Color"], type = "color",	order = 90,	get = GetColor,	set = SetColor,	arg = {"AuraWidget","ModeBar", "BackgroundColor"},	hasAlpha = false, },
+												FontConfig = { name = L["Font"],	order = 100, type = "group", inline = true,
+													args = {
+														Font = { name = L["Typeface"], type = "select",	order = 10,	dialogControl = "LSM30_Font",	values = AceGUIWidgetLSMlists.font,	set = SetThemeValue, arg = {"AuraWidget","ModeBar", "Font"}, },
+														FontSize = {	name = L["Size"], order = 20, type = "range", min = 1,	max = 36, step = 1, arg = {"AuraWidget", "ModeBar", "FontSize"},	},
+														FontColor = {	name = L["Color"], type = "color",	order = 30,	get = GetColor,	set = SetColor,	arg = {"AuraWidget","ModeBar", "FontColor"},	hasAlpha = false, },
+														Spacer1 = CreateSpacer(35),
+														IndentLabel = {	name = L["Label Text Offset"], order = 40, type = "range", min = -16,	max = 16, step = 1, arg = {"AuraWidget", "ModeBar", "LabelTextIndent"},	},
+														IndentTime = {	name = L["Time Text Offset"], order = 50, type = "range", min = -16,	max = 16, step = 1, arg = {"AuraWidget", "ModeBar", "TimeTextIndent"},	},
+													},
+												},
+												IconConfig = { name = L["Icon"],	order = 110, type = "group", inline = true,
+													args = {
+														EnableIcon = { name = L["Enable"], order = 10, type = "toggle", arg = {"AuraWidget", "ModeBar", "ShowIcon"}, },
+														IconAlign = { name = L["Show Icon to the Left"], order = 20, type = "toggle", arg = {"AuraWidget", "ModeBar", "IconAlignmentLeft"}, },
+														IconOffset = {	name = L["Offset"], order = 30, type = "range", min = -100,	max = 100, step = 1, arg = {"AuraWidget", "ModeBar", "IconSpacing", }, },
+													},
+												},
+											},
 										},
 									},
 								},
@@ -4395,10 +4452,14 @@ local function GetOptions()
 									name = L["Enable"],
 									type = "toggle",
 									order = 1,
-									desc = L["This will enable the new Aura Widget 2.0. Configure it in Widgets - Aura 2.0. But be aware, it's still work in progress."],
+									desc = L["This will enable the new Aura Widget 2.0. Configure it in Widgets - Aura 2.0. But be aware, it's still work in progress. (requires /reload)"],
 									descStyle = "inline",
 									width = "full",
-									arg = {"alphaFeatureAuraWidget2"},
+									set = function(info,val)
+										SetValue(info,val)
+										ReloadUI()
+									end,
+									arg = {"AuraWidget", "Enabled"},
 								},
 							},
 						},

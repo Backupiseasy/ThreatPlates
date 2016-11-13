@@ -180,8 +180,7 @@ local function AuraFilter(aura)
 
 	if isShown and isType then
 		local mode = DB.mode
-		-- local spellfound = tContains(DB.filter, aura.name)
-		local spellfound = tContains(DB.filter, aura.name) or tContains(DB.filter, aura.spellid)
+		local spellfound = Filter_ByAuraList[aura.name] or Filter_ByAuraList[aura.spellid]
 		if spellfound then spellfound = true end
 		local isMine = (aura.caster == "player") or (aura.caster == "pet")
 		if mode == "whitelist" then
@@ -207,18 +206,23 @@ local function AuraFilter(aura)
 end
 
 local function PrepareFilter()
+	if not (TidyPlatesThreat.db.profile.debuffWidget.ON and TidyPlatesThreat.db.profile.AuraWidget.Enabled) then return end
+
 	local filter = TidyPlatesThreat.db.profile.debuffWidget.filter
 	Filter_ByAuraList = {}
 
-	-- separete filter by name and ID for more efficient aura filtering
 	for key, value in pairs(filter) do
+		-- remove comments and whitespaces from the filter (string)
+		local pos = value:find("%-%-")
+		if pos then value = value:sub(1, pos - 1) end
+		value = value:match("^%s*(.-)%s*$")
+
+		-- separete filter by name and ID for more efficient aura filtering
 		local value_no = tonumber(value)
 		if value_no then
 			Filter_ByAuraList[value_no] = true
-			--print ("Filter_ByAuraList: ", value_no)
 		elseif value ~= '' then
 			Filter_ByAuraList[value] = true
-			--print ("Filter_ByAuraList: ", value)
 		end
 	end
 end
@@ -231,7 +235,6 @@ local function DefaultFilterFunction(debuff)
 		return true
 	end
 end
-
 
 -----------------------------------------------------
 -- General Events
@@ -479,11 +482,11 @@ function UpdateWidget(frame)
 
 		UpdateIconGrid(frame, unitid)
 
-		if TidyPlatesThreat.db.profile.AuraWidget.ModeIcon.Enabled then
+		if TidyPlatesThreat.db.profile.AuraWidget.ModeBar.Enabled then
+			frame:SetPoint("CENTER", frame:GetParent(), 0, TidyPlatesThreat.db.profile.debuffWidget.y)
+		else
 			frame:SetScale(TidyPlatesThreat.db.profile.debuffWidget.scale)
 			frame:SetPoint(TidyPlatesThreat.db.profile.debuffWidget.anchor, frame:GetParent(), TidyPlatesThreat.db.profile.debuffWidget.x, TidyPlatesThreat.db.profile.debuffWidget.y)
-		else
-			frame:SetPoint("CENTER", frame:GetParent(), 0, TidyPlatesThreat.db.profile.debuffWidget.y)
 		end
 
 		frame:Show()
@@ -548,7 +551,7 @@ local function Disable()
 end
 
 local function enabled()
-	local active = TidyPlatesThreat.db.profile.debuffWidget.ON and TidyPlatesThreat.db.profile.alphaFeatureAuraWidget2
+	local active = TidyPlatesThreat.db.profile.debuffWidget.ON and TidyPlatesThreat.db.profile.AuraWidget.Enabled
 
 	if active then
 		if not isAuraEnabled then
@@ -717,6 +720,21 @@ local function UpdateBarConfig(frame)
 	local bar_table = frame.AuraIconFrames
 
 	if bar_table then
+		-- local backdrop = {
+		-- 	-- path to the background texture
+		-- 	bgFile = ThreatPlates.Media:Fetch('statusbar', db.BackgroundTexture),
+		-- 	-- path to the border texture
+		-- 	edgeFile = ThreatPlates.Media:Fetch('border', db.BackgroundBorder),
+		-- 	-- true to repeat the background texture to fill the frame, false to scale it
+		-- 	tile = false,
+		-- 	-- size (width or height) of the square repeating background tiles (in pixels)
+		-- 	tileSize = db.BackgroundBorderEdgeSize,
+		-- 	-- thickness of edge segments and square size of edge corners (in pixels)
+		-- 	edgeSize = db.BackgroundBorderEdgeSize,
+		-- 	-- distance from the edges of the frame to those of the background texture (in pixels)
+		-- 	insets = { left = db.BackgroundBorderInset, right = db.BackgroundBorderInset, top = db.BackgroundBorderInset, bottom = db.BackgroundBorderInset }
+		-- }
+
 		for index = 1, db.MaxBars do
 			local bar = bar_table[index]
 			if not bar then -- create a new bar
@@ -732,14 +750,23 @@ local function UpdateBarConfig(frame)
 				bar:GetStatusBarTexture():SetVertTile(false)
 
 				bar:SetMinMaxValues(0, 100)
-				bar:SetStatusBarColor(0, 0.65, 0)
+				bar:SetStatusBarColor(db.BarColor.r, db.BarColor.g, db.BarColor.b, db.BarColor.a)
 
 				bar.Background = bar:CreateTexture(nil, "BACKGROUND")
 				bar.Background:SetTexture(ThreatPlates.Media:Fetch('statusbar', db.BackgroundTexture))
 				bar.Background:SetAllPoints(true)
 				bar.Background:SetVertexColor(db.BackgroundColor.r, db.BackgroundColor.g, db.BackgroundColor.b, db.BackgroundColor.a)
 
-				-- TODO: border
+				-- bar.Border = CreateFrame("Frame", nil, bar)
+				-- --bar.Border:SetPoint("TOPLEFT", bar, "TOPLEFT", -2, 2)
+				-- --bar.Border:SetPoint("BOTTOMRIGHT", bar, "BOTTOMRIGHT", 2, -2)
+				-- bar.Border:SetAllPoints(true)
+				-- bar.Border:SetBackdrop(backdrop)
+				-- bar.Border:SetFrameLevel(bar:GetFrameLevel())
+				-- --bar:SetBackdropColor(db.BackgroundColor.r, db.BackgroundColor.g, db.BackgroundColor.b, db.BackgroundColor.a)
+				-- bar:SetBackdropColor(1, 1, 1, 0)
+				-- bar:SetBackdropBorderColor(db.BackgroundBorderColor.r, db.BackgroundBorderColor.g, db.BackgroundBorderColor.b, db.BackgroundBorderColor.a)
+				-- --bar:SetBackdrop(backdrop)
 
 				bar.LabelText = bar:CreateFontString(nil, "OVERLAY")
 				bar.LabelText:SetPoint("LEFT", bar, "LEFT", db.LabelTextIndent, 0)
@@ -776,10 +803,14 @@ local function UpdateBarConfig(frame)
 			-- Set Anchors
 			bar:ClearAllPoints()
 			if index == 1 then
-				if db.IconAlignmentLeft then
-					bar:SetPoint("CENTER", frame, (db.BarHeight + db.IconSpacing) / 2, 0)
+				if db.ShowIcon then
+					if db.IconAlignmentLeft then
+						bar:SetPoint("CENTER", frame, (db.BarHeight + db.IconSpacing) / 2, 0)
+					else
+						bar:SetPoint("CENTER", frame, - (db.BarHeight + db.IconSpacing) / 2, 0)
+					end
 				else
-					bar:SetPoint("CENTER", frame, - (db.BarHeight + db.IconSpacing) / 2, 0)
+					bar:SetPoint("CENTER", frame)
 				end
 			else
 				bar:SetPoint("BOTTOMLEFT", bar_table[index - 1], "TOPLEFT", 0, db.BarSpacing)
@@ -801,17 +832,17 @@ local function UpdateWidgetConfig(frame)
 	end
 
 	local db2 = TidyPlatesThreat.db.profile.AuraWidget
-	DebuffColumns = db2.ModeIcon.DebuffColumns
-	DebuffRows = db2.ModeIcon.DebuffRows
+	DebuffColumns = db2.ModeIcon.Columns
+	DebuffRows = db2.ModeIcon.Rows
 
-	if db2.ModeIcon.Enabled then
-		DebuffLimit = DebuffColumns * DebuffRows
-		UpdateModeConfig = UpdateIconConfig
-		UpdateAuraFrame = UpdateIcon
-	else
+	if db2.ModeBar.Enabled then
 		DebuffLimit = db2.ModeBar.MaxBars
 		UpdateModeConfig = UpdateBarConfig
 		UpdateAuraFrame = UpdateBar
+	else
+		DebuffLimit = DebuffColumns * DebuffRows
+		UpdateModeConfig = UpdateIconConfig
+		UpdateAuraFrame = UpdateIcon
 	end
 
 	UpdateModeConfig(frame)
@@ -920,5 +951,4 @@ end
 --TidyPlatesWidgets.CanPlayerDispel = CanPlayerDispel
 
 ThreatPlatesWidgets.RegisterWidget("AuraWidget-2.0", CreateAuraWidget, false, enabled)
-ThreatPlatesWidgets.AuraFilter = AuraFilter
-ThreatPlatesWidgets.PrepareFilter = PrepareFilter
+ThreatPlatesWidgets.PrepareFilterAuraWidget = PrepareFilter

@@ -220,7 +220,6 @@ function TidyPlatesThreat:OnInitialize()
 			cacheClass = false,
 			optionRoleDetectionAutomatic = false,
 			alphaFeatureHeadlineView = false,
-			alphaFeatureAuraWidget2 = false,
 			headlineView = {
 				-- TODO: move alphaFeatureHeadlineView in this table as enabled
 				nonTargetAlpha = true,
@@ -383,30 +382,37 @@ function TidyPlatesThreat:OnInitialize()
 				filter = {}
 			},
 			AuraWidget = {
+				Enabled = false,
+				FilterMode = "blacklistMine",
+
 				ModeIcon = {
-					Enabled = false,
-					DebuffColumns = 3,
-					DebuffRows = 3,
+					Columns = 3,
+					Rows = 3,
 					ColumnSpacing = 5,
 					RowSpacing = 8,
 				},
 				ModeBar = {
 					Enabled = false,
-					BarHeight = 12,
+					BarHeight = 14,
 					BarWidth = 100,
 					BarSpacing = 2,
 					MaxBars = 10,
 					Texture = "Smooth",
+					BarColor = RGB(0, 166, 0, 1.0),
 					Font = "Arial Narrow",
 					FontSize = 10,
 					FontColor = RGB(255, 255, 255),
 					LabelTextIndent = 4,
 					TimeTextIndent = 4,
-					BackgroundTexture = "Smoth",
+					BackgroundTexture = "Smooth",
 					BackgroundColor = RGB(0, 0, 0, 0.3),
+					BackgroundBorder = "Plain White", --"Blizzard Tooltip",
+					BackgroundBorderEdgeSize = 2,
+					BackgroundBorderInset = -4,
+					BackgroundBorderColor = RGB(0, 0, 0, 0.3),
 					ShowIcon = true,
 					IconSpacing = 2,
-					IconAlignmentLeft = false,
+					IconAlignmentLeft = true,
 				},
 			},
 			uniqueWidget = {
@@ -1668,6 +1674,7 @@ function TidyPlatesThreat:StartUp()
 	t.Update()
 	-- initialize widgets
 	ThreatPlatesWidgets.PrepareFilter()
+	if ThreatPlatesWidgets.PrepareFilterAuraWidget then ThreatPlatesWidgets.PrepareFilterAuraWidget() end
 end
 
 -----------------------------------------------------------------------------------
