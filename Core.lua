@@ -383,8 +383,25 @@ function TidyPlatesThreat:OnInitialize()
 			},
 			AuraWidget = {
 				Enabled = false,
+				x = 18,
+				y = 32,
+				scale = 1,
+				anchor = "CENTER",
 				FilterMode = "blacklistMine",
-
+				ShowEnemy = true,
+				ShowFriendly = true,
+				ShowTargetOnly = false,
+				ShowCooldownSpiral = true,
+				Style = "square",
+				FilterByType = {
+					[1] = true,
+					[2] = true,
+					[3] = true,
+					[4] = true,
+					[5] = true,
+					[6] = true
+				},
+				FilterBySpell = {},
 				ModeIcon = {
 					Columns = 3,
 					Rows = 3,

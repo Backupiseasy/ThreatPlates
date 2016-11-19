@@ -1,10 +1,10 @@
 ------------------------------------------------------
-8.2.5 (works with TidyPlates 6.18.11)
+8.2.5-Beta1 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
 * Added another detection spell to Stealth Widget
 * Aura filters can now contain comments - everything after "--" until the end of the line is considered a comment
 * Added an option to show show friendly NPCs, see Nampelate Settings - General Settings - Blizzard Settings (CVAR nameplateShowFriendlyNPCs was introduced with 7.1 and is disabled by default)
-
+* Changed default filter mode for auras widget from "Whitelist" to "Blacklist (Mine)"
 * Fixed aura widget - no time buffs
 * new aura widget
 

@@ -25,9 +25,7 @@ local WidgetList, WidgetGUID = {}, {}
 local UpdateWidget
 
 local TargetOfGroupMembers = {}
-local DebuffColumns = 3
-local DebuffRows = 2
-local DebuffLimit = 6
+local AuraLimit
 local inArena = false
 local useWideIcons = true
 
@@ -158,28 +156,29 @@ local UpdateAuraFrame
 -- return value: show, priority, r, g, b (color for ?)
 
 local function AuraFilter(aura)
-	local DB = TidyPlatesThreat.db.profile.debuffWidget
+	local DB = TidyPlatesThreat.db.profile.AuraWidget
 	local isType, isShown
 
-	if aura.reaction == AURA_TARGET_HOSTILE and DB.showEnemy then
+	-- if DB then return true end
+	if aura.reaction == AURA_TARGET_HOSTILE and DB.ShowEnemy then
 		isShown = true
-	elseif aura.reaction == AURA_TARGET_FRIENDLY and DB.showFriendly then
+	elseif aura.reaction == AURA_TARGET_FRIENDLY and DB.ShowFriendly then
 		isShown = true
 	end
 
-	if aura.effect == "HELPFUL" and DB.displays[AURA_TYPE.Buff] then
+	if aura.effect == "HELPFUL" and DB.FilterByType[AURA_TYPE.Buff] then
 		isType = true
-	elseif aura.effect == "HARMFUL" and DB.displays[AURA_TYPE.Debuff] then
+	elseif aura.effect == "HARMFUL" and DB.FilterByType[AURA_TYPE.Debuff] then
 		-- only show aura types configured in the options
 		if aura.type then
-			isType = DB.displays[AURA_TYPE[aura.type]]
+			isType = DB.FilterByType[AURA_TYPE[aura.type]]
 		else
 			isType = true
 		end
 	end
 
 	if isShown and isType then
-		local mode = DB.mode
+		local mode = DB.FilterMode
 		local spellfound = Filter_ByAuraList[aura.name] or Filter_ByAuraList[aura.spellid]
 		if spellfound then spellfound = true end
 		local isMine = (aura.caster == "player") or (aura.caster == "pet")
@@ -206,9 +205,9 @@ local function AuraFilter(aura)
 end
 
 local function PrepareFilter()
-	if not (TidyPlatesThreat.db.profile.debuffWidget.ON and TidyPlatesThreat.db.profile.AuraWidget.Enabled) then return end
+	if TidyPlatesThreat.db.profile.debuffWidget.ON or (not TidyPlatesThreat.db.profile.AuraWidget.Enabled) then return end
 
-	local filter = TidyPlatesThreat.db.profile.debuffWidget.filter
+	local filter = TidyPlatesThreat.db.profile.AuraWidget.FilterBySpell
 	Filter_ByAuraList = {}
 
 	for key, value in pairs(filter) do
@@ -292,9 +291,7 @@ end
 
 
 local function UpdateIcon(frame, texture, duration, expiration, stacks, r, g, b)
-	if frame and texture and expiration then
-		local db = TidyPlatesThreat.db.profile.debuffWidget
-
+	if frame and texture and expiration and frame:GetName() == "Icon" then
 		-- Icon
 		frame.Icon:SetTexture(texture)
 		-- Stacks
@@ -316,7 +313,7 @@ local function UpdateIcon(frame, texture, duration, expiration, stacks, r, g, b)
 
 		-- Expiration
 		UpdateWidgetTime(frame, expiration)
-		frame:Show()
+		--frame:Show()
 		PolledHideIn(frame, expiration)
 	elseif frame then
 		PolledHideIn(frame)
@@ -336,12 +333,12 @@ local function UpdateWidgetTimeBar(frame, expiration)
 		else
 			frame.TimeText:SetText(floor(timeleft))
 		end
-		frame:SetValue(floor(timeleft * 100 / frame.AuraInfo.Duration))
+		frame:SetValue(timeleft * 100 / frame.AuraInfo.Duration)
 	end
 end
 
 local function UpdateBar(frame, texture, duration, expiration, stacks, r, g, b)
-	if frame and texture and expiration then
+	if frame and texture and expiration and frame:GetName() == "Bar" then
 		local db = TidyPlatesThreat.db.profile.AuraWidget.ModeBar
 
 		-- Icon
@@ -356,7 +353,7 @@ local function UpdateBar(frame, texture, duration, expiration, stacks, r, g, b)
 
 		-- Expiration
 		UpdateWidgetTimeBar(frame, expiration)
-		frame:Show()
+		--frame:Show()
 		PolledHideIn(frame, expiration)
 	elseif frame then
 		PolledHideIn(frame)
@@ -376,7 +373,7 @@ local function UpdateIconGrid(frame, unitid)
 		if UnitIsFriend("player", unitid) then unitReaction = AURA_TARGET_FRIENDLY
 		else unitReaction = AURA_TARGET_HOSTILE end
 
-		local AuraIconFrames = frame.AuraIconFrames
+		local AuraFrames = frame.AuraFrames
 		local storedAuras = {}
 		local storedAuraCount = 0
 
@@ -446,15 +443,15 @@ local function UpdateIconGrid(frame, unitid)
 		------------------------------------------------------------------------------------------------------
 		local AuraSlotCount = 1
 		if storedAuraCount > 0 then
-			frame:Show()
+			--frame:Show()
 			sort(storedAuras, AuraSortFunction)
 
-			for index = 1,  storedAuraCount do
-				if AuraSlotCount > DebuffLimit then break end
+			for index = 1, storedAuraCount do
+				if AuraSlotCount > AuraLimit then break end
 				local aura = storedAuras[index]
 				if aura.spellid and aura.expiration then
 
-				  local aura_frame = AuraIconFrames[AuraSlotCount]
+				  local aura_frame = AuraFrames[AuraSlotCount]
 					aura_frame.AuraInfo.Duration = aura.duration
 					aura_frame.AuraInfo.Name = aura.name
 
@@ -469,32 +466,26 @@ local function UpdateIconGrid(frame, unitid)
 		end
 
 		-- Clear Extra Slots
-		for AuraSlotEmpty = AuraSlotCount, DebuffLimit do UpdateIcon(AuraIconFrames[AuraSlotEmpty]) end
+		for index = AuraSlotCount, AuraLimit do UpdateAuraFrame(AuraFrames[index]) end
 end
 
 function UpdateWidget(frame)
-		local unitid = frame.unitid
+	local db = TidyPlatesThreat.db.profile.AuraWidget
 
-		-- if TidyPlatesThreat.db.profile.debuffWidget.targetOnly and not unit.isTarget then
-		-- 	frame:_Hide()
-		-- 	return
-		-- end
+	UpdateIconGrid(frame, frame.unitid)
 
-		UpdateIconGrid(frame, unitid)
-
-		if TidyPlatesThreat.db.profile.AuraWidget.ModeBar.Enabled then
-			frame:SetPoint("CENTER", frame:GetParent(), 0, TidyPlatesThreat.db.profile.debuffWidget.y)
-		else
-			frame:SetScale(TidyPlatesThreat.db.profile.debuffWidget.scale)
-			frame:SetPoint(TidyPlatesThreat.db.profile.debuffWidget.anchor, frame:GetParent(), TidyPlatesThreat.db.profile.debuffWidget.x, TidyPlatesThreat.db.profile.debuffWidget.y)
-		end
-
-		frame:Show()
+	if db.ModeBar.Enabled then
+		frame:SetPoint("CENTER", frame:GetParent(), 0, db.y)
+	else
+		frame:SetScale(db.scale)
+		frame:SetPoint(db.anchor, frame:GetParent(), db.x, db.y)
+	end
 end
 
 -- Context Update (mouseover, target change)
 local function UpdateWidgetContext(frame, unit)
 	local unitid = unit.unitid
+	frame.unit = unit
 	frame.unitid = unitid
 
 	-- Add to Widget List
@@ -507,11 +498,12 @@ local function UpdateWidgetContext(frame, unit)
 
 	-- Custom Code II
 	--------------------------------------
-	-- if UnitGUID("target") == guid then
-	UpdateWidget(frame)
-	-- else
-	-- 	frame:_Hide()
-	-- end
+	if TidyPlatesThreat.db.profile.AuraWidget.ShowTargetOnly and not unit.isTarget then
+		frame:_Hide()
+	else
+		UpdateWidget(frame)
+		frame:Show()
+	end
 	--------------------------------------
 	-- End Custom Code
 end
@@ -523,6 +515,7 @@ local function ClearWidgetContext(frame)
 end
 
 local function ExpireFunction(icon)
+	-- local frame = icon.Parent
 	UpdateWidget(icon.Parent)
 end
 
@@ -551,7 +544,7 @@ local function Disable()
 end
 
 local function enabled()
-	local active = TidyPlatesThreat.db.profile.debuffWidget.ON and TidyPlatesThreat.db.profile.AuraWidget.Enabled
+	local active = (not TidyPlatesThreat.db.profile.debuffWidget.ON) and TidyPlatesThreat.db.profile.AuraWidget.Enabled
 
 	if active then
 		if not isAuraEnabled then
@@ -592,7 +585,6 @@ local function TransformWideAura(frame)
 	frame.TimeLeft:SetWidth(26)
 	frame.TimeLeft:SetHeight(16)
 	frame.TimeLeft:SetJustifyH("RIGHT")
-	frame.TimeLeft:SetText("Test")
 	--  Stacks
 	frame.Stacks:SetFont(AuraFont,10, "OUTLINE")
 	frame.Stacks:SetShadowOffset(1, -1)
@@ -636,7 +628,7 @@ end
 
 -- Create a Wide Aura Icon
 local function CreateAuraIcon(parent)
-	local frame = CreateFrame("Frame", nil, parent)
+	local frame = CreateFrame("Frame", "Icon", parent)
 	frame.unit = nil
 	frame.Parent = parent
 
@@ -648,14 +640,6 @@ local function CreateAuraIcon(parent)
 	frame.Cooldown:SetAllPoints(frame)
 	frame.Cooldown:SetReverse(true)
 	frame.Cooldown:SetHideCountdownNumbers(true)
-
-	if TidyPlatesThreat.db.profile.debuffWidget.cooldownSpiral then
-		frame.Cooldown:SetDrawEdge(true)
-		frame.Cooldown:SetDrawEdge(true)
-	else
-		frame.Cooldown:SetDrawEdge(false)
-		frame.Cooldown:SetDrawSwipe(false)
-	end
 
 	-- Text
 	--frame.TimeLeft = frame:CreateFontString(nil, "OVERLAY")
@@ -680,32 +664,49 @@ local function CreateAuraIcon(parent)
 	return frame
 end
 
+
 local function UpdateIconConfig(frame)
 	local db = TidyPlatesThreat.db.profile.AuraWidget.ModeIcon
-	local iconTable = frame.AuraIconFrames
+	local iconTable = frame.AuraFrames
 
-	if iconTable then
-		-- Create Icons
-		for index = 1, DebuffLimit do
-			local icon = iconTable[index] or CreateAuraIcon(frame)
-			iconTable[index] = icon
-			-- Apply Style
+	-- Create Icons
+	for index = 1, AuraLimit do
+		local icon = iconTable[index]
 
-			if useWideIcons then TransformWideAura(icon) else TransformSquareAura(icon) end
+		if not icon then
+			icon = CreateAuraIcon(frame)
+		elseif icon:GetName() == "Bar" then
+			-- change in mode: delete old bar aura, create new icon aura
+			PolledHideIn(icon)
+			icon = CreateAuraIcon(frame)
 		end
 
-		-- Set Anchors
-		for y = 1, DebuffRows do
-			for x = 1, DebuffColumns do
-				local i = (y - 1) * DebuffColumns + x
-				iconTable[i]:ClearAllPoints()
-				if i == 1 then
-					iconTable[i]:SetPoint("LEFT", frame)
-				elseif x == 1 then
-					iconTable[i]:SetPoint("BOTTOMLEFT", iconTable[i - DebuffColumns], "TOPLEFT", 0, db.RowSpacing)
-				else
-					iconTable[i]:SetPoint("LEFT", iconTable[i - 1], "RIGHT", db.ColumnSpacing, 0)
-				end
+		iconTable[index] = icon
+
+		-- Apply Style
+		if useWideIcons then TransformWideAura(icon) else TransformSquareAura(icon) end
+
+		if TidyPlatesThreat.db.profile.AuraWidget.ShowCooldownSpiral then
+			icon.Cooldown:SetDrawEdge(true)
+			icon.Cooldown:SetDrawEdge(true)
+		else
+			icon.Cooldown:SetDrawEdge(false)
+			icon.Cooldown:SetDrawSwipe(false)
+		end
+	end
+
+	-- Set Anchors
+	local columns = db.Columns
+	for y = 1, db.Rows do
+		for x = 1, columns do
+			local i = (y - 1) * columns + x
+			iconTable[i]:ClearAllPoints()
+			if i == 1 then
+				iconTable[i]:SetPoint("LEFT", frame)
+			elseif x == 1 then
+				iconTable[i]:SetPoint("BOTTOMLEFT", iconTable[i - columns], "TOPLEFT", 0, db.RowSpacing)
+			else
+				iconTable[i]:SetPoint("LEFT", iconTable[i - 1], "RIGHT", db.ColumnSpacing, 0)
 			end
 		end
 	end
@@ -715,136 +716,230 @@ end
 -- Functions for bar mode
 ---------------------------------------------------------------------------------------------------
 
-local function UpdateBarConfig(frame)
+local function CreateAuraBar(parent)
+	-- local backdrop = {
+	-- 	-- path to the background texture
+	-- 	bgFile = ThreatPlates.Media:Fetch('statusbar', db.BackgroundTexture),
+	-- 	-- path to the border texture
+	-- 	edgeFile = ThreatPlates.Media:Fetch('border', db.BackgroundBorder),
+	-- 	-- true to repeat the background texture to fill the frame, false to scale it
+	-- 	tile = false,
+	-- 	-- size (width or height) of the square repeating background tiles (in pixels)
+	-- 	tileSize = db.BackgroundBorderEdgeSize,
+	-- 	-- thickness of edge segments and square size of edge corners (in pixels)
+	-- 	edgeSize = db.BackgroundBorderEdgeSize,
+	-- 	-- distance from the edges of the frame to those of the background texture (in pixels)
+	-- 	insets = { left = db.BackgroundBorderInset, right = db.BackgroundBorderInset, top = db.BackgroundBorderInset, bottom = db.BackgroundBorderInset }
+	-- }
+
 	local db = TidyPlatesThreat.db.profile.AuraWidget.ModeBar
-	local bar_table = frame.AuraIconFrames
 
-	if bar_table then
-		-- local backdrop = {
-		-- 	-- path to the background texture
-		-- 	bgFile = ThreatPlates.Media:Fetch('statusbar', db.BackgroundTexture),
-		-- 	-- path to the border texture
-		-- 	edgeFile = ThreatPlates.Media:Fetch('border', db.BackgroundBorder),
-		-- 	-- true to repeat the background texture to fill the frame, false to scale it
-		-- 	tile = false,
-		-- 	-- size (width or height) of the square repeating background tiles (in pixels)
-		-- 	tileSize = db.BackgroundBorderEdgeSize,
-		-- 	-- thickness of edge segments and square size of edge corners (in pixels)
-		-- 	edgeSize = db.BackgroundBorderEdgeSize,
-		-- 	-- distance from the edges of the frame to those of the background texture (in pixels)
-		-- 	insets = { left = db.BackgroundBorderInset, right = db.BackgroundBorderInset, top = db.BackgroundBorderInset, bottom = db.BackgroundBorderInset }
-		-- }
+	local frame = CreateFrame("StatusBar", "Bar", parent)
 
-		for index = 1, db.MaxBars do
-			local bar = bar_table[index]
-			if not bar then -- create a new bar
-				bar = CreateFrame("StatusBar", nil, frame)
-				bar_table[index] = bar
-				bar:Show()
+	frame:SetWidth(db.BarWidth)
+	frame:SetHeight(db.BarHeight)
 
-				bar:SetWidth(db.BarWidth)
-				bar:SetHeight(db.BarHeight)
+	frame:SetStatusBarTexture(ThreatPlates.Media:Fetch('statusbar', db.Texture))
+	frame:GetStatusBarTexture():SetHorizTile(false)
+	frame:GetStatusBarTexture():SetVertTile(false)
 
-				bar:SetStatusBarTexture(ThreatPlates.Media:Fetch('statusbar', db.Texture))
-				bar:GetStatusBarTexture():SetHorizTile(false)
-				bar:GetStatusBarTexture():SetVertTile(false)
+	frame:SetMinMaxValues(0, 100)
+	frame:SetStatusBarColor(db.BarColor.r, db.BarColor.g, db.BarColor.b, db.BarColor.a)
 
-				bar:SetMinMaxValues(0, 100)
-				bar:SetStatusBarColor(db.BarColor.r, db.BarColor.g, db.BarColor.b, db.BarColor.a)
+	frame.Background = frame:CreateTexture(nil, "BACKGROUND")
+	frame.Background:SetTexture(ThreatPlates.Media:Fetch('statusbar', db.BackgroundTexture))
+	frame.Background:SetAllPoints(true)
+	frame.Background:SetVertexColor(db.BackgroundColor.r, db.BackgroundColor.g, db.BackgroundColor.b, db.BackgroundColor.a)
 
-				bar.Background = bar:CreateTexture(nil, "BACKGROUND")
-				bar.Background:SetTexture(ThreatPlates.Media:Fetch('statusbar', db.BackgroundTexture))
-				bar.Background:SetAllPoints(true)
-				bar.Background:SetVertexColor(db.BackgroundColor.r, db.BackgroundColor.g, db.BackgroundColor.b, db.BackgroundColor.a)
+	-- bar.Border = CreateFrame("Frame", nil, bar)
+	-- --bar.Border:SetPoint("TOPLEFT", bar, "TOPLEFT", -2, 2)
+	-- --bar.Border:SetPoint("BOTTOMRIGHT", bar, "BOTTOMRIGHT", 2, -2)
+	-- bar.Border:SetAllPoints(true)
+	-- bar.Border:SetBackdrop(backdrop)
+	-- bar.Border:SetFrameLevel(bar:GetFrameLevel())
+	-- --bar:SetBackdropColor(db.BackgroundColor.r, db.BackgroundColor.g, db.BackgroundColor.b, db.BackgroundColor.a)
+	-- bar:SetBackdropColor(1, 1, 1, 0)
+	-- bar:SetBackdropBorderColor(db.BackgroundBorderColor.r, db.BackgroundBorderColor.g, db.BackgroundBorderColor.b, db.BackgroundBorderColor.a)
+	-- --bar:SetBackdrop(backdrop)
 
-				-- bar.Border = CreateFrame("Frame", nil, bar)
-				-- --bar.Border:SetPoint("TOPLEFT", bar, "TOPLEFT", -2, 2)
-				-- --bar.Border:SetPoint("BOTTOMRIGHT", bar, "BOTTOMRIGHT", 2, -2)
-				-- bar.Border:SetAllPoints(true)
-				-- bar.Border:SetBackdrop(backdrop)
-				-- bar.Border:SetFrameLevel(bar:GetFrameLevel())
-				-- --bar:SetBackdropColor(db.BackgroundColor.r, db.BackgroundColor.g, db.BackgroundColor.b, db.BackgroundColor.a)
-				-- bar:SetBackdropColor(1, 1, 1, 0)
-				-- bar:SetBackdropBorderColor(db.BackgroundBorderColor.r, db.BackgroundBorderColor.g, db.BackgroundBorderColor.b, db.BackgroundBorderColor.a)
-				-- --bar:SetBackdrop(backdrop)
+	frame.LabelText = frame:CreateFontString(nil, "OVERLAY")
+	frame.LabelText:SetPoint("LEFT", frame, "LEFT", db.LabelTextIndent, 0)
+	frame.LabelText:SetFont(ThreatPlates.Media:Fetch('font', db.Font), db.FontSize)
+	frame.LabelText:SetJustifyH("LEFT")
+	frame.LabelText:SetShadowOffset(1, -1)
+	frame.LabelText:SetTextColor(db.FontColor.r, db.FontColor.g, db.FontColor.b)
 
-				bar.LabelText = bar:CreateFontString(nil, "OVERLAY")
-				bar.LabelText:SetPoint("LEFT", bar, "LEFT", db.LabelTextIndent, 0)
-				bar.LabelText:SetFont(ThreatPlates.Media:Fetch('font', db.Font), db.FontSize)
-				bar.LabelText:SetJustifyH("LEFT")
-				bar.LabelText:SetShadowOffset(1, -1)
-				bar.LabelText:SetTextColor(db.FontColor.r, db.FontColor.g, db.FontColor.b)
+	frame.TimeText = frame:CreateFontString(nil, "OVERLAY")
+	frame.TimeText:SetPoint("RIGHT", frame, "RIGHT", - db.TimeTextIndent, 0)
+	frame.TimeText:SetFont(ThreatPlates.Media:Fetch('font', db.Font), db.FontSize)
+	frame.TimeText:SetJustifyH("RIGHT")
+	frame.TimeText:SetShadowOffset(1, -1)
+	frame.TimeText:SetTextColor(db.FontColor.r, db.FontColor.g, db.FontColor.b)
 
-				bar.TimeText = bar:CreateFontString(nil, "OVERLAY")
-				bar.TimeText:SetPoint("RIGHT", bar, "RIGHT", - db.TimeTextIndent, 0)
-				bar.TimeText:SetFont(ThreatPlates.Media:Fetch('font', db.Font), db.FontSize)
-				bar.TimeText:SetJustifyH("RIGHT")
-				bar.TimeText:SetShadowOffset(1, -1)
-				bar.TimeText:SetTextColor(db.FontColor.r, db.FontColor.g, db.FontColor.b)
+	frame.Icon = frame:CreateTexture(nil, "BACKGROUND")
+	frame.Icon:SetWidth(db.BarHeight)
+	frame.Icon:SetHeight(db.BarHeight)
+	if db.IconAlignmentLeft then
+		frame.Icon:SetPoint("BOTTOMRIGHT", frame, "BOTTOMLEFT", - db.IconSpacing, 0)
+	else
+		frame.Icon:SetPoint("BOTTOMLEFT", frame, "BOTTOMRIGHT", db.IconSpacing, 0)
+	end
 
-				if db.ShowIcon then
-					bar.Icon = bar:CreateTexture(nil, "BACKGROUND")
-					bar.Icon:SetWidth(db.BarHeight)
-					bar.Icon:SetHeight(db.BarHeight)
-					if db.IconAlignmentLeft then
-						bar.Icon:SetPoint("BOTTOMRIGHT", bar, "BOTTOMLEFT", - db.IconSpacing, 0)
-					else
-						bar.Icon:SetPoint("BOTTOMLEFT", bar, "BOTTOMRIGHT", db.IconSpacing, 0)
-					end
-				end
+	if db.ShowIcon then
+		frame.Icon:Show()
+	else
+		frame.Icon:Hide()
+	end
 
-				-- Information about the currently displayed aura
-				bar.AuraInfo = {
-					Name = "",
-					Duration = 0,
-				}
-			end
+	-- Information about the currently displayed aura
+	frame.AuraInfo = {
+		Name = "",
+		Duration = 0,
+	}
 
-			-- Set Anchors
-			bar:ClearAllPoints()
-			if index == 1 then
-				if db.ShowIcon then
-					if db.IconAlignmentLeft then
-						bar:SetPoint("CENTER", frame, (db.BarHeight + db.IconSpacing) / 2, 0)
-					else
-						bar:SetPoint("CENTER", frame, - (db.BarHeight + db.IconSpacing) / 2, 0)
-					end
+	-- frame.Expire = ExpireFunction
+	-- frame.Poll = UpdateWidgetTimeBar()
+	frame:Hide()
+
+	return frame
+end
+
+local function UpdateAuraBar(frame)
+	-- local backdrop = {
+	-- 	-- path to the background texture
+	-- 	bgFile = ThreatPlates.Media:Fetch('statusbar', db.BackgroundTexture),
+	-- 	-- path to the border texture
+	-- 	edgeFile = ThreatPlates.Media:Fetch('border', db.BackgroundBorder),
+	-- 	-- true to repeat the background texture to fill the frame, false to scale it
+	-- 	tile = false,
+	-- 	-- size (width or height) of the square repeating background tiles (in pixels)
+	-- 	tileSize = db.BackgroundBorderEdgeSize,
+	-- 	-- thickness of edge segments and square size of edge corners (in pixels)
+	-- 	edgeSize = db.BackgroundBorderEdgeSize,
+	-- 	-- distance from the edges of the frame to those of the background texture (in pixels)
+	-- 	insets = { left = db.BackgroundBorderInset, right = db.BackgroundBorderInset, top = db.BackgroundBorderInset, bottom = db.BackgroundBorderInset }
+	-- }
+
+	local db = TidyPlatesThreat.db.profile.AuraWidget.ModeBar
+
+	frame:SetWidth(db.BarWidth)
+	frame:SetHeight(db.BarHeight)
+
+	frame:SetStatusBarTexture(ThreatPlates.Media:Fetch('statusbar', db.Texture))
+	frame:SetStatusBarColor(db.BarColor.r, db.BarColor.g, db.BarColor.b, db.BarColor.a)
+
+	frame.Background:SetTexture(ThreatPlates.Media:Fetch('statusbar', db.BackgroundTexture))
+	frame.Background:SetVertexColor(db.BackgroundColor.r, db.BackgroundColor.g, db.BackgroundColor.b, db.BackgroundColor.a)
+
+	-- bar.Border = CreateFrame("Frame", nil, bar)
+	-- --bar.Border:SetPoint("TOPLEFT", bar, "TOPLEFT", -2, 2)
+	-- --bar.Border:SetPoint("BOTTOMRIGHT", bar, "BOTTOMRIGHT", 2, -2)
+	-- bar.Border:SetAllPoints(true)
+	-- bar.Border:SetBackdrop(backdrop)
+	-- bar.Border:SetFrameLevel(bar:GetFrameLevel())
+	-- --bar:SetBackdropColor(db.BackgroundColor.r, db.BackgroundColor.g, db.BackgroundColor.b, db.BackgroundColor.a)
+	-- bar:SetBackdropColor(1, 1, 1, 0)
+	-- bar:SetBackdropBorderColor(db.BackgroundBorderColor.r, db.BackgroundBorderColor.g, db.BackgroundBorderColor.b, db.BackgroundBorderColor.a)
+	-- --bar:SetBackdrop(backdrop)
+
+	frame.LabelText:SetPoint("LEFT", frame, "LEFT", db.LabelTextIndent, 0)
+	frame.LabelText:SetFont(ThreatPlates.Media:Fetch('font', db.Font), db.FontSize)
+	frame.LabelText:SetTextColor(db.FontColor.r, db.FontColor.g, db.FontColor.b)
+
+	frame.TimeText:SetPoint("RIGHT", frame, "RIGHT", - db.TimeTextIndent, 0)
+	frame.TimeText:SetFont(ThreatPlates.Media:Fetch('font', db.Font), db.FontSize)
+	frame.TimeText:SetTextColor(db.FontColor.r, db.FontColor.g, db.FontColor.b)
+
+	if db.ShowIcon then
+		frame.Icon:SetWidth(db.BarHeight)
+		frame.Icon:SetHeight(db.BarHeight)
+		frame.Icon:ClearAllPoints()
+		if db.IconAlignmentLeft then
+			frame.Icon:SetPoint("BOTTOMRIGHT", frame, "BOTTOMLEFT", - db.IconSpacing, 0)
+		else
+			frame.Icon:SetPoint("BOTTOMLEFT", frame, "BOTTOMRIGHT", db.IconSpacing, 0)
+		end
+		frame.Icon:Show()
+	else
+		frame.Icon:Hide()
+	end
+end
+
+local function UpdateBarConfig(nameplate_frame)
+	local db = TidyPlatesThreat.db.profile.AuraWidget.ModeBar
+
+	local aura_frame_list = nameplate_frame.AuraFrames
+	for index = 1, AuraLimit do
+		local frame = aura_frame_list[index]
+
+		if not frame then
+			frame = CreateAuraBar(nameplate_frame)
+		elseif frame:GetName() == "Icon" then
+			-- change in mode: delete old icon aura, create new bar aura
+			PolledHideIn(frame)
+			frame = CreateAuraBar(nameplate_frame)
+		end
+		UpdateAuraBar(frame)
+
+		aura_frame_list[index] = frame
+
+		-- Set Anchors
+		frame:ClearAllPoints()
+		if index == 1 then
+			if db.ShowIcon then
+				if db.IconAlignmentLeft then
+					frame:SetPoint("CENTER", nameplate_frame, (db.BarHeight + db.IconSpacing) / 2, 0)
 				else
-					bar:SetPoint("CENTER", frame)
+					frame:SetPoint("CENTER", nameplate_frame, - (db.BarHeight + db.IconSpacing) / 2, 0)
 				end
 			else
-				bar:SetPoint("BOTTOMLEFT", bar_table[index - 1], "TOPLEFT", 0, db.BarSpacing)
+				frame:SetPoint("CENTER", nameplate_frame)
 			end
+		else
+			frame:SetPoint("BOTTOMLEFT", aura_frame_list[index - 1], "TOPLEFT", 0, db.BarSpacing)
 		end
 	end
+
+	-- if MaxBars was decreased, remove any overflow aura frames
+	for index = db.MaxBars + 1, #aura_frame_list do
+		local frame = aura_frame_list[index]
+
+		aura_frame_list[index] = nil
+		PolledHideIn(frame)
+	end
+
 end
 
 ---------------------------------------------------------------------------------------------------
 -- Creation and update functions
 ---------------------------------------------------------------------------------------------------
 
-local function UpdateWidgetConfig(frame)
-	local db = TidyPlatesThreat.db.profile.debuffWidget
-	if db.style == "square" then
+local function UpdateFromProfile()
+	local db = TidyPlatesThreat.db.profile.AuraWidget
+
+	if db.Style == "square" then
 		useWideIcons = false
-	elseif db.style == "wide" then
+	elseif db.Style == "wide" then
 		useWideIcons = true
 	end
 
-	local db2 = TidyPlatesThreat.db.profile.AuraWidget
-	DebuffColumns = db2.ModeIcon.Columns
-	DebuffRows = db2.ModeIcon.Rows
+	if db.ModeBar.Enabled then
+		AuraLimit = db.ModeBar.MaxBars
+ 	else
+		AuraLimit = db.ModeIcon.Rows * db.ModeIcon.Columns
+	end
 
-	if db2.ModeBar.Enabled then
-		DebuffLimit = db2.ModeBar.MaxBars
+	if db.ModeBar.Enabled and UpdateModeConfig ~= UpdateBarConfig then
 		UpdateModeConfig = UpdateBarConfig
 		UpdateAuraFrame = UpdateBar
-	else
-		DebuffLimit = DebuffColumns * DebuffRows
+	elseif not db.ModeBar.Enabled and UpdateModeConfig ~= UpdateIconConfig then
 		UpdateModeConfig = UpdateIconConfig
 		UpdateAuraFrame = UpdateIcon
 	end
+end
 
+local function UpdateWidgetConfig(frame)
+	UpdateFromProfile()
 	UpdateModeConfig(frame)
 end
 
@@ -857,23 +952,19 @@ local function CreateAuraWidget(parent, style)
 
 	-- Custom Code III
 	--------------------------------------
-	local db = TidyPlatesThreat.db.profile.debuffWidget
-	local db2 = TidyPlatesThreat.db.profile.AuraWidget
+	local db = TidyPlatesThreat.db.profile.AuraWidget
 
 	-- Create Base frame
 	frame:SetWidth(128)
 	frame:SetHeight(32)
-	frame:SetPoint(db.anchor, plate, db.x, db.y)
+	frame:SetPoint(db.anchor, parent, db.x, db.y)
 	frame:SetFrameLevel(parent:GetFrameLevel() + 1)
 
-	-- Create Icon Grid
-	frame.AuraIconFrames = {}
-	UpdateWidgetConfig(frame)
-	--pdateModeConfig(frame)
-
+	frame.AuraFrames = {}
 	frame.Filter = nil
 	AuraFilterFunction = AuraFilter
-
+	-- Create Icon Grid
+	UpdateWidgetConfig(frame)
 	--------------------------------------
 	-- End Custom Code
 
@@ -888,21 +979,34 @@ local function CreateAuraWidget(parent, style)
 	return frame
 end
 
+local function UpdateAuraWidgetMode()
+	--UpdateFromProfile()
 
-local function UseSquareDebuffIcon()
-	useWideIcons = false
-	--DebuffColumns = 5
-	--DebuffLimit = DebuffColumns * 2
+	-- Update all widgets
+	for unitid, widget in pairs(WidgetList) do
+		-- for k, v in pairs(widget.AuraFrames) do
+		-- 	PolledHideIn(v)
+		-- end
+		--widget.AuraFrames = {}
+		UpdateWidgetConfig(widget)
+	end
+
 	TidyPlates:ForceUpdate()
 end
 
-local function UseWideDebuffIcon()
-	useWideIcons = true
-	--DebuffColumns = 5
-	--DebuffLimit = DebuffColumns * 2
-	TidyPlates:ForceUpdate()
-end
+-- local function UseSquareDebuffIcon()
+-- 	useWideIcons = false
+-- 	--DebuffColumns = 5
+-- 	--AuraLimit = DebuffColumns * 2
+-- 	TidyPlates:ForceUpdate()
+-- end
 
+-- local function UseWideDebuffIcon()
+-- 	useWideIcons = true
+-- 	--DebuffColumns = 5
+-- 	--AuraLimit = DebuffColumns * 2
+-- 	TidyPlates:ForceUpdate()
+-- end
 
 local function SetAuraFilter(func)
 	if func and type(func) == 'function' then
@@ -918,6 +1022,7 @@ end
 
 -- TidyPlatesWidgets.UseSquareDebuffIcon = UseSquareDebuffIcon
 -- TidyPlatesWidgets.UseWideDebuffIcon = UseWideDebuffIcon
+ThreatPlatesWidgets.UpdateAuraWidgetMode = UpdateAuraWidgetMode
 
 -- TidyPlatesWidgets.SetAuraFilter = SetAuraFilter
 
