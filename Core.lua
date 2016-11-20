@@ -495,6 +495,7 @@ function TidyPlatesThreat:OnInitialize()
 				ModeIcon = true,
 				HPBarColor = RGB(255, 140, 0),
 				HideInCombat = true,
+				HideInCombatAttacked = true,				
 				HideInInstance = true,
 			},
 			stealthWidget = {	ON = false, scale = 28, x = 0, y = 0,	alpha = 1, anchor = "CENTER", },

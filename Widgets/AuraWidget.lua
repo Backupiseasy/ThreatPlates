@@ -25,9 +25,15 @@ local WidgetList, WidgetGUID = {}, {}
 local UpdateWidget
 
 local TargetOfGroupMembers = {}
-local AuraLimit
 local inArena = false
-local useWideIcons = true
+
+local AuraLimit
+local useWideIcons = false
+local config_bar_mode = false
+local config_grid_rows = 3
+local config_grid_columns = 3
+local config_grid_row_spacing = 5
+local config_grid_column_spacing = 8
 
 local function DummyFunction() end
 
@@ -137,9 +143,6 @@ local AURA_TYPE = { Buff = 1, Curse = 2, Disease = 3, Magic = 4, Poison = 5, Deb
 local isAuraEnabled
 local Filter_ByAuraList
 
-local UpdateModeConfig
-local UpdateAuraFrame
-
 -- hides/destroys all widgets of this type created by Threat Plates
 -- local function ClearAllWidgets()
 	-- for _, widget in pairs(WidgetList) do
@@ -239,7 +242,6 @@ end
 -- General Events
 -----------------------------------------------------
 
-
 local function EventUnitAura(unitid)
 	local frame
 
@@ -249,8 +251,6 @@ local function EventUnitAura(unitid)
 	if frame then UpdateWidget(frame) end
 
 end
-
-
 
 -----------------------------------------------------
 -- Function Reference Lists
@@ -275,11 +275,11 @@ end
 -- Widget Object Functions
 -------------------------------------------------------------
 
-local function UpdateWidgetTime(frame, expiration)
+local function UpdateWidgetTimeIcon(frame, expiration)
 	if expiration == 0 then
 		frame.TimeLeft:SetText("")
 	else
-		local timeleft = expiration-GetTime()
+		local timeleft = expiration - GetTime()
 		if timeleft > 60 then
 			frame.TimeLeft:SetText(floor(timeleft/60).."m")
 		else
@@ -289,70 +289,70 @@ local function UpdateWidgetTime(frame, expiration)
 	end
 end
 
-
-local function UpdateIcon(frame, texture, duration, expiration, stacks, r, g, b)
-	if frame and texture and expiration and frame:GetName() == "Icon" then
-		-- Icon
-		frame.Icon:SetTexture(texture)
-		-- Stacks
-		if stacks and stacks > 1 then frame.Stacks:SetText(stacks)
-		else frame.Stacks:SetText("") end
-
-		-- Highlight Coloring
-		if r then
-			frame.BorderHighlight:SetVertexColor(r, g or 1, b or 1)
-			frame.BorderHighlight:Show()
-			frame.Border:Hide()
-		else frame.BorderHighlight:Hide(); frame.Border:Show()	end
-
-		-- [[ Cooldown
-		if duration and duration > 0 and expiration and expiration > 0 then
-			SetCooldown(frame.Cooldown, expiration-duration, duration+.25)
-		end
-		--]]
-
-		-- Expiration
-		UpdateWidgetTime(frame, expiration)
-		--frame:Show()
-		PolledHideIn(frame, expiration)
-	elseif frame then
-		PolledHideIn(frame)
-	end
-end
-
 local function UpdateWidgetTimeBar(frame, expiration)
 	if expiration == 0 then
 		frame.TimeText:SetText("")
-		frame:SetValue(0)
+		frame.Statusbar:SetValue(0)
 	else
-
 		local timeleft = expiration - GetTime()
-
 		if timeleft > 60 then
 			frame.TimeText:SetText(floor(timeleft/60).."m")
 		else
 			frame.TimeText:SetText(floor(timeleft))
 		end
-		frame:SetValue(timeleft * 100 / frame.AuraInfo.Duration)
+		frame.Statusbar:SetValue(timeleft * 100 / frame.AuraInfo.Duration)
 	end
 end
 
-local function UpdateBar(frame, texture, duration, expiration, stacks, r, g, b)
-	if frame and texture and expiration and frame:GetName() == "Bar" then
+local function UpdateWidgetTime(frame, expiration)
+	if config_bar_mode then
+		UpdateWidgetTimeBar(frame, expiration)
+	else
+		UpdateWidgetTimeIcon(frame, expiration)
+	end
+end
+
+local function UpdateAuraFrame(frame, texture, duration, expiration, stacks, r, g, b)
+	if frame and texture and expiration then
 		local db = TidyPlatesThreat.db.profile.AuraWidget.ModeBar
 
-		-- Icon
-		if db.ShowIcon then
-			frame.Icon:SetTexture(texture)
-		end
-		-- TODO: Stacks
-		-- if stacks and stacks > 1 then frame.Stacks:SetText(stacks)
-		-- else frame.Stacks:SetText("") end
+		if config_bar_mode then
+			-- Icon
+			if db.ShowIcon then
+				frame.Icon:SetTexture(texture)
+			end
 
-		frame.LabelText:SetText(frame.AuraInfo.Name)
+			if stacks and stacks > 1 then
+				frame.LabelText:SetText(frame.AuraInfo.Name .. " [" .. stacks .. "]")
+			else
+				frame.LabelText:SetText(frame.AuraInfo.Name)
+			end
+		else
+			frame.Icon:SetTexture(texture)
+
+			if stacks and stacks > 1 then
+				frame.Stacks:SetText(stacks)
+			else
+				frame.Stacks:SetText("")
+			end
+
+			-- Highlight Coloring
+			if r then
+				frame.BorderHighlight:SetVertexColor(r, g or 1, b or 1)
+				frame.BorderHighlight:Show()
+				frame.Border:Hide()
+			else frame.BorderHighlight:Hide(); frame.Border:Show()	end
+
+			-- [[ Cooldown
+			if duration and duration > 0 and expiration and expiration > 0 then
+				SetCooldown(frame.Cooldown, expiration-duration, duration+.25)
+			end
+			--]]
+		end
 
 		-- Expiration
-		UpdateWidgetTimeBar(frame, expiration)
+		UpdateWidgetTime(frame, expiration)
+
 		--frame:Show()
 		PolledHideIn(frame, expiration)
 	elseif frame then
@@ -363,7 +363,6 @@ end
 local function AuraSortFunction(a,b)
 	return a.priority < b.priority
 end
-
 
 local function UpdateIconGrid(frame, unitid)
 
@@ -516,7 +515,7 @@ end
 
 local function ExpireFunction(icon)
 	-- local frame = icon.Parent
-	UpdateWidget(icon.Parent)
+	UpdateWidget(icon:GetParent())
 end
 
 -------------------------------------------------------------
@@ -626,45 +625,6 @@ local function TransformSquareAura(frame)
 	frame.Stacks:SetJustifyH("RIGHT")
 end
 
--- Create a Wide Aura Icon
-local function CreateAuraIcon(parent)
-	local frame = CreateFrame("Frame", "Icon", parent)
-	frame.unit = nil
-	frame.Parent = parent
-
-	frame.Icon = frame:CreateTexture(nil, "BACKGROUND")
-	frame.Border = frame:CreateTexture(nil, "ARTWORK")
-	frame.BorderHighlight = frame:CreateTexture(nil, "ARTWORK")
-	frame.Cooldown = CreateFrame("Cooldown", nil, frame, "TidyPlatesAuraWidgetCooldown")
-
-	frame.Cooldown:SetAllPoints(frame)
-	frame.Cooldown:SetReverse(true)
-	frame.Cooldown:SetHideCountdownNumbers(true)
-
-	-- Text
-	--frame.TimeLeft = frame:CreateFontString(nil, "OVERLAY")
-	frame.TimeLeft = frame.Cooldown:CreateFontString(nil, "OVERLAY")
-	--frame.Stacks = frame:CreateFontString(nil, "OVERLAY")
-	frame.Stacks = frame.Cooldown:CreateFontString(nil, "OVERLAY")
-
-	-- Information about the currently displayed aura
-	frame.AuraInfo = {
-		Name = "",
-		Icon = "",
-		Stacks = 0,
-		Expiration = 0,
-		Duration = 0,
-		Type = "",
-	}
-
-	frame.Expire = ExpireFunction
-	frame.Poll = UpdateWidgetTime
-	frame:Hide()
-
-	return frame
-end
-
-
 local function UpdateIconConfig(frame)
 	local db = TidyPlatesThreat.db.profile.AuraWidget.ModeIcon
 	local iconTable = frame.AuraFrames
@@ -716,95 +676,60 @@ end
 -- Functions for bar mode
 ---------------------------------------------------------------------------------------------------
 
-local function CreateAuraBar(parent)
-	-- local backdrop = {
-	-- 	-- path to the background texture
-	-- 	bgFile = ThreatPlates.Media:Fetch('statusbar', db.BackgroundTexture),
-	-- 	-- path to the border texture
-	-- 	edgeFile = ThreatPlates.Media:Fetch('border', db.BackgroundBorder),
-	-- 	-- true to repeat the background texture to fill the frame, false to scale it
-	-- 	tile = false,
-	-- 	-- size (width or height) of the square repeating background tiles (in pixels)
-	-- 	tileSize = db.BackgroundBorderEdgeSize,
-	-- 	-- thickness of edge segments and square size of edge corners (in pixels)
-	-- 	edgeSize = db.BackgroundBorderEdgeSize,
-	-- 	-- distance from the edges of the frame to those of the background texture (in pixels)
-	-- 	insets = { left = db.BackgroundBorderInset, right = db.BackgroundBorderInset, top = db.BackgroundBorderInset, bottom = db.BackgroundBorderInset }
-	-- }
-
+local function CreateAuraFrame(parent)
 	local db = TidyPlatesThreat.db.profile.AuraWidget.ModeBar
 
-	local frame = CreateFrame("StatusBar", "Bar", parent)
+	local frame = CreateFrame("Frame", nil, parent)
 
-	frame:SetWidth(db.BarWidth)
-	frame:SetHeight(db.BarHeight)
-
-	frame:SetStatusBarTexture(ThreatPlates.Media:Fetch('statusbar', db.Texture))
-	frame:GetStatusBarTexture():SetHorizTile(false)
-	frame:GetStatusBarTexture():SetVertTile(false)
-
-	frame:SetMinMaxValues(0, 100)
-	frame:SetStatusBarColor(db.BarColor.r, db.BarColor.g, db.BarColor.b, db.BarColor.a)
-
-	frame.Background = frame:CreateTexture(nil, "BACKGROUND")
-	frame.Background:SetTexture(ThreatPlates.Media:Fetch('statusbar', db.BackgroundTexture))
-	frame.Background:SetAllPoints(true)
-	frame.Background:SetVertexColor(db.BackgroundColor.r, db.BackgroundColor.g, db.BackgroundColor.b, db.BackgroundColor.a)
-
-	-- bar.Border = CreateFrame("Frame", nil, bar)
-	-- --bar.Border:SetPoint("TOPLEFT", bar, "TOPLEFT", -2, 2)
-	-- --bar.Border:SetPoint("BOTTOMRIGHT", bar, "BOTTOMRIGHT", 2, -2)
-	-- bar.Border:SetAllPoints(true)
-	-- bar.Border:SetBackdrop(backdrop)
-	-- bar.Border:SetFrameLevel(bar:GetFrameLevel())
-	-- --bar:SetBackdropColor(db.BackgroundColor.r, db.BackgroundColor.g, db.BackgroundColor.b, db.BackgroundColor.a)
-	-- bar:SetBackdropColor(1, 1, 1, 0)
-	-- bar:SetBackdropBorderColor(db.BackgroundBorderColor.r, db.BackgroundBorderColor.g, db.BackgroundBorderColor.b, db.BackgroundBorderColor.a)
-	-- --bar:SetBackdrop(backdrop)
-
-	frame.LabelText = frame:CreateFontString(nil, "OVERLAY")
-	frame.LabelText:SetPoint("LEFT", frame, "LEFT", db.LabelTextIndent, 0)
-	frame.LabelText:SetFont(ThreatPlates.Media:Fetch('font', db.Font), db.FontSize)
-	frame.LabelText:SetJustifyH("LEFT")
-	frame.LabelText:SetShadowOffset(1, -1)
-	frame.LabelText:SetTextColor(db.FontColor.r, db.FontColor.g, db.FontColor.b)
-
-	frame.TimeText = frame:CreateFontString(nil, "OVERLAY")
-	frame.TimeText:SetPoint("RIGHT", frame, "RIGHT", - db.TimeTextIndent, 0)
-	frame.TimeText:SetFont(ThreatPlates.Media:Fetch('font', db.Font), db.FontSize)
-	frame.TimeText:SetJustifyH("RIGHT")
-	frame.TimeText:SetShadowOffset(1, -1)
-	frame.TimeText:SetTextColor(db.FontColor.r, db.FontColor.g, db.FontColor.b)
+	frame.unit = nil
 
 	frame.Icon = frame:CreateTexture(nil, "BACKGROUND")
-	frame.Icon:SetWidth(db.BarHeight)
-	frame.Icon:SetHeight(db.BarHeight)
-	if db.IconAlignmentLeft then
-		frame.Icon:SetPoint("BOTTOMRIGHT", frame, "BOTTOMLEFT", - db.IconSpacing, 0)
-	else
-		frame.Icon:SetPoint("BOTTOMLEFT", frame, "BOTTOMRIGHT", db.IconSpacing, 0)
-	end
 
-	if db.ShowIcon then
-		frame.Icon:Show()
-	else
-		frame.Icon:Hide()
-	end
+	frame.Border = frame:CreateTexture(nil, "ARTWORK")
+	frame.BorderHighlight = frame:CreateTexture(nil, "ARTWORK")
+
+	frame.Cooldown = CreateFrame("Cooldown", nil, frame, "TidyPlatesAuraWidgetCooldown")
+	frame.Cooldown:SetAllPoints(frame.Icon)
+	frame.Cooldown:SetReverse(true)
+	frame.Cooldown:SetHideCountdownNumbers(true)
+	-- Text
+	--frame.TimeLeft = frame.Cooldown:CreateFontString(nil, "OVERLAY")
+	--frame.Stacks = frame.Cooldown:CreateFontString(nil, "OVERLAY")
+	frame.TimeLeft = frame:CreateFontString(nil, "OVERLAY")
+	frame.Stacks = frame:CreateFontString(nil, "OVERLAY")
+
+	frame.Statusbar = CreateFrame("StatusBar", nil, frame)
+	frame.Statusbar:SetMinMaxValues(0, 100)
+
+	frame.Background = frame.Statusbar:CreateTexture(nil, "BACKGROUND")
+	frame.Background:SetAllPoints()
+
+	frame.LabelText = frame.Statusbar:CreateFontString(nil, "OVERLAY")
+	frame.LabelText:SetJustifyH("LEFT")
+	frame.LabelText:SetShadowOffset(1, -1)
+
+	frame.TimeText = frame.Statusbar:CreateFontString(nil, "OVERLAY")
+	frame.TimeText:SetJustifyH("RIGHT")
+	frame.TimeText:SetShadowOffset(1, -1)
 
 	-- Information about the currently displayed aura
 	frame.AuraInfo = {
 		Name = "",
 		Duration = 0,
+		-- Icon = "",
+		-- Stacks = 0,
+		-- Expiration = 0,
+		-- Type = "",
 	}
 
-	-- frame.Expire = ExpireFunction
-	-- frame.Poll = UpdateWidgetTimeBar()
+	frame.Expire = ExpireFunction
+	frame.Poll = UpdateWidgetTime
 	frame:Hide()
 
 	return frame
 end
 
-local function UpdateAuraBar(frame)
+local function UpdateAuraFrame(frame)
 	-- local backdrop = {
 	-- 	-- path to the background texture
 	-- 	bgFile = ThreatPlates.Media:Fetch('statusbar', db.BackgroundTexture),
@@ -819,18 +744,6 @@ local function UpdateAuraBar(frame)
 	-- 	-- distance from the edges of the frame to those of the background texture (in pixels)
 	-- 	insets = { left = db.BackgroundBorderInset, right = db.BackgroundBorderInset, top = db.BackgroundBorderInset, bottom = db.BackgroundBorderInset }
 	-- }
-
-	local db = TidyPlatesThreat.db.profile.AuraWidget.ModeBar
-
-	frame:SetWidth(db.BarWidth)
-	frame:SetHeight(db.BarHeight)
-
-	frame:SetStatusBarTexture(ThreatPlates.Media:Fetch('statusbar', db.Texture))
-	frame:SetStatusBarColor(db.BarColor.r, db.BarColor.g, db.BarColor.b, db.BarColor.a)
-
-	frame.Background:SetTexture(ThreatPlates.Media:Fetch('statusbar', db.BackgroundTexture))
-	frame.Background:SetVertexColor(db.BackgroundColor.r, db.BackgroundColor.g, db.BackgroundColor.b, db.BackgroundColor.a)
-
 	-- bar.Border = CreateFrame("Frame", nil, bar)
 	-- --bar.Border:SetPoint("TOPLEFT", bar, "TOPLEFT", -2, 2)
 	-- --bar.Border:SetPoint("BOTTOMRIGHT", bar, "BOTTOMRIGHT", 2, -2)
@@ -842,77 +755,145 @@ local function UpdateAuraBar(frame)
 	-- bar:SetBackdropBorderColor(db.BackgroundBorderColor.r, db.BackgroundBorderColor.g, db.BackgroundBorderColor.b, db.BackgroundBorderColor.a)
 	-- --bar:SetBackdrop(backdrop)
 
-	frame.LabelText:SetPoint("LEFT", frame, "LEFT", db.LabelTextIndent, 0)
-	frame.LabelText:SetFont(ThreatPlates.Media:Fetch('font', db.Font), db.FontSize)
-	frame.LabelText:SetTextColor(db.FontColor.r, db.FontColor.g, db.FontColor.b)
-
-	frame.TimeText:SetPoint("RIGHT", frame, "RIGHT", - db.TimeTextIndent, 0)
-	frame.TimeText:SetFont(ThreatPlates.Media:Fetch('font', db.Font), db.FontSize)
-	frame.TimeText:SetTextColor(db.FontColor.r, db.FontColor.g, db.FontColor.b)
-
-	if db.ShowIcon then
-		frame.Icon:SetWidth(db.BarHeight)
-		frame.Icon:SetHeight(db.BarHeight)
-		frame.Icon:ClearAllPoints()
-		if db.IconAlignmentLeft then
-			frame.Icon:SetPoint("BOTTOMRIGHT", frame, "BOTTOMLEFT", - db.IconSpacing, 0)
-		else
-			frame.Icon:SetPoint("BOTTOMLEFT", frame, "BOTTOMRIGHT", db.IconSpacing, 0)
-		end
-		frame.Icon:Show()
-	else
-		frame.Icon:Hide()
-	end
-end
-
-local function UpdateBarConfig(nameplate_frame)
 	local db = TidyPlatesThreat.db.profile.AuraWidget.ModeBar
 
-	local aura_frame_list = nameplate_frame.AuraFrames
-	for index = 1, AuraLimit do
-		local frame = aura_frame_list[index]
+	if config_bar_mode then
+		frame.Statusbar:SetWidth(db.BarWidth)
+		frame.Statusbar:SetHeight(db.BarHeight)
+		frame.Statusbar:SetStatusBarTexture(ThreatPlates.Media:Fetch('statusbar', db.Texture))
+		frame.Statusbar:GetStatusBarTexture():SetHorizTile(false)
+		frame.Statusbar:GetStatusBarTexture():SetVertTile(false)
+		frame.Statusbar:SetStatusBarColor(db.BarColor.r, db.BarColor.g, db.BarColor.b, db.BarColor.a)
 
-		if not frame then
-			frame = CreateAuraBar(nameplate_frame)
-		elseif frame:GetName() == "Icon" then
-			-- change in mode: delete old icon aura, create new bar aura
-			PolledHideIn(frame)
-			frame = CreateAuraBar(nameplate_frame)
+		frame.Background:SetTexture(ThreatPlates.Media:Fetch('statusbar', db.BackgroundTexture))
+		frame.Background:SetVertexColor(db.BackgroundColor.r, db.BackgroundColor.g, db.BackgroundColor.b, db.BackgroundColor.a)
+
+		frame.LabelText:SetPoint("LEFT", frame.Statusbar, "LEFT", db.LabelTextIndent, 0)
+		frame.LabelText:SetFont(ThreatPlates.Media:Fetch('font', db.Font), db.FontSize)
+		frame.LabelText:SetTextColor(db.FontColor.r, db.FontColor.g, db.FontColor.b)
+
+		frame.TimeText:SetPoint("RIGHT", frame.Statusbar, "RIGHT", - db.TimeTextIndent, 0)
+		frame.TimeText:SetFont(ThreatPlates.Media:Fetch('font', db.Font), db.FontSize)
+		frame.TimeText:SetTextColor(db.FontColor.r, db.FontColor.g, db.FontColor.b)
+
+		frame.Icon:SetWidth(db.BarHeight)
+		frame.Icon:SetHeight(db.BarHeight)
+
+		-- width and position calculations
+		local frame_width = db.BarWidth
+		if db.ShowIcon then
+			frame_width = frame_width + db.BarHeight + db.IconSpacing
 		end
-		UpdateAuraBar(frame)
+		frame:SetWidth(frame_width)
+		frame:SetHeight(db.BarHeight)
 
-		aura_frame_list[index] = frame
-
-		-- Set Anchors
-		frame:ClearAllPoints()
-		if index == 1 then
-			if db.ShowIcon then
-				if db.IconAlignmentLeft then
-					frame:SetPoint("CENTER", nameplate_frame, (db.BarHeight + db.IconSpacing) / 2, 0)
-				else
-					frame:SetPoint("CENTER", nameplate_frame, - (db.BarHeight + db.IconSpacing) / 2, 0)
-				end
+		if db.ShowIcon then
+			frame.Icon:ClearAllPoints()
+			--frame.Statusbar:ClearAllPoints()
+			if db.IconAlignmentLeft then
+				frame.Icon:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 0, 0)
+				frame.Statusbar:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", db.BarHeight + db.IconSpacing, 0)
 			else
-				frame:SetPoint("CENTER", nameplate_frame)
+				frame.Statusbar:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 0, 0)
+				frame.Icon:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", db.BarWidth + db.IconSpacing, 0)
 			end
 		else
-			frame:SetPoint("BOTTOMLEFT", aura_frame_list[index - 1], "TOPLEFT", 0, db.BarSpacing)
+			--frame.Statusbar:ClearAllPoints()
+			frame.Statusbar:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 0, 0)
 		end
+
+		frame.Statusbar:Show()
+		if db.ShowIcon then
+			frame.Icon:Show()
+		else
+			frame.Icon:Hide()
+		end
+
+		frame.Border:Hide()
+		frame.BorderHighlight:Hide()
+		frame.Cooldown:Hide()
+		frame.TimeLeft:Hide()
+		frame.Stacks:Hide()
+	else
+		-- Apply Style
+		if useWideIcons then TransformWideAura(frame) else TransformSquareAura(frame) end
+
+		if TidyPlatesThreat.db.profile.AuraWidget.ShowCooldownSpiral then
+			frame.Cooldown:SetDrawEdge(true)
+			frame.Cooldown:SetDrawEdge(true)
+		else
+			frame.Cooldown:SetDrawEdge(false)
+			frame.Cooldown:SetDrawSwipe(false)
+		end
+
+		--  Time Text
+		frame.TimeLeft:SetFont(AuraFont ,9, "OUTLINE")
+		frame.TimeLeft:SetShadowOffset(1, -1)
+		frame.TimeLeft:SetShadowColor(0,0,0,1)
+		frame.TimeLeft:SetPoint("RIGHT", 0, 8)
+		frame.TimeLeft:SetWidth(26)
+		frame.TimeLeft:SetHeight(16)
+		frame.TimeLeft:SetJustifyH("RIGHT")
+		--  Stacks
+		frame.Stacks:SetFont(AuraFont,10, "OUTLINE")
+		frame.Stacks:SetShadowOffset(1, -1)
+		frame.Stacks:SetShadowColor(0,0,0,1)
+		frame.Stacks:SetPoint("RIGHT", 0, -6)
+		frame.Stacks:SetWidth(26)
+		frame.Stacks:SetHeight(16)
+		frame.Stacks:SetJustifyH("RIGHT")
+
+		frame.Statusbar:Hide()
+		-- frame.Background:Hide()
+		-- frame.LabelText:Hide()
+		-- frame.LabelTime:Hide()
+
+		frame.Icon:Show()
+		frame.Border:Show()
+		frame.BorderHighlight:Show()
+		frame.TimeLeft:Show()
+		frame.Stacks:Show()
 	end
-
-	-- if MaxBars was decreased, remove any overflow aura frames
-	for index = db.MaxBars + 1, #aura_frame_list do
-		local frame = aura_frame_list[index]
-
-		aura_frame_list[index] = nil
-		PolledHideIn(frame)
-	end
-
 end
 
 ---------------------------------------------------------------------------------------------------
 -- Creation and update functions
 ---------------------------------------------------------------------------------------------------
+
+local function UpdateWidgetConfig(nameplate_frame)
+	local db = TidyPlatesThreat.db.profile.AuraWidget.ModeBar
+
+	local frame_width = db.BarWidth
+	if db.ShowIcon then
+		frame_width = frame_width + db.BarHeight + db.IconSpacing
+	end
+
+	local aura_frame_list = nameplate_frame.AuraFrames
+	for index = 1, AuraLimit do
+		local frame = aura_frame_list[index] or CreateAuraFrame(nameplate_frame)
+
+		aura_frame_list[index] = frame
+
+		UpdateAuraFrame(frame)
+
+		-- anchor the frame
+		frame:ClearAllPoints()
+		if index == 1 then
+			frame:SetPoint("LEFT", nameplate_frame)
+		elseif ((index - 1) % config_grid_columns) == 0 then
+			frame:SetPoint("BOTTOMLEFT", aura_frame_list[index - config_grid_columns], "TOPLEFT", 0, config_grid_row_spacing)
+		else
+			frame:SetPoint("LEFT", aura_frame_list[index - 1], "RIGHT", config_grid_column_spacing, 0)
+		end
+	end
+
+	-- if MaxBars was decreased, remove any overflow aura frames
+	for index = AuraLimit + 1, #aura_frame_list do
+		local frame = aura_frame_list[index]
+		aura_frame_list[index] = nil
+		PolledHideIn(frame)
+	end
+end
 
 local function UpdateFromProfile()
 	local db = TidyPlatesThreat.db.profile.AuraWidget
@@ -924,23 +905,19 @@ local function UpdateFromProfile()
 	end
 
 	if db.ModeBar.Enabled then
-		AuraLimit = db.ModeBar.MaxBars
- 	else
-		AuraLimit = db.ModeIcon.Rows * db.ModeIcon.Columns
+		config_bar_mode = true
+		config_grid_rows = db.ModeBar.MaxBars
+		config_grid_columns = 1
+		config_grid_row_spacing = db.ModeBar.BarSpacing
+		config_grid_column_spacing = 0
+	else
+		config_bar_mode = false
+		config_grid_rows = db.ModeIcon.Rows
+		config_grid_columns = db.ModeIcon.Columns
+		config_grid_row_spacing = db.ModeIcon.RowSpacing
+		config_grid_column_spacing = db.ModeIcon.ColumnSpacing
 	end
-
-	if db.ModeBar.Enabled and UpdateModeConfig ~= UpdateBarConfig then
-		UpdateModeConfig = UpdateBarConfig
-		UpdateAuraFrame = UpdateBar
-	elseif not db.ModeBar.Enabled and UpdateModeConfig ~= UpdateIconConfig then
-		UpdateModeConfig = UpdateIconConfig
-		UpdateAuraFrame = UpdateIcon
-	end
-end
-
-local function UpdateWidgetConfig(frame)
-	UpdateFromProfile()
-	UpdateModeConfig(frame)
+	AuraLimit = config_grid_rows * config_grid_columns
 end
 
 -- Create the Main Widget Body and Icon Array
@@ -964,6 +941,7 @@ local function CreateAuraWidget(parent, style)
 	frame.Filter = nil
 	AuraFilterFunction = AuraFilter
 	-- Create Icon Grid
+	if not AuraLimit then UpdateFromProfile() end
 	UpdateWidgetConfig(frame)
 	--------------------------------------
 	-- End Custom Code
@@ -972,41 +950,22 @@ local function CreateAuraWidget(parent, style)
 	frame.UpdateContext = UpdateWidgetContext
 	frame.Update = UpdateWidgetContext
 	frame.UpdateConfig = UpdateWidgetConfig
-	-- frame.UpdateTarget = UpdateWidgetTarget
 	frame._Hide = frame.Hide
 	frame.Hide = function() ClearWidgetContext(frame); frame:_Hide() end
 
 	return frame
 end
 
-local function UpdateAuraWidgetMode()
-	--UpdateFromProfile()
+local function UpdateAuraWidgetSettings()
+	UpdateFromProfile()
 
 	-- Update all widgets
 	for unitid, widget in pairs(WidgetList) do
-		-- for k, v in pairs(widget.AuraFrames) do
-		-- 	PolledHideIn(v)
-		-- end
-		--widget.AuraFrames = {}
 		UpdateWidgetConfig(widget)
 	end
 
 	TidyPlates:ForceUpdate()
 end
-
--- local function UseSquareDebuffIcon()
--- 	useWideIcons = false
--- 	--DebuffColumns = 5
--- 	--AuraLimit = DebuffColumns * 2
--- 	TidyPlates:ForceUpdate()
--- end
-
--- local function UseWideDebuffIcon()
--- 	useWideIcons = true
--- 	--DebuffColumns = 5
--- 	--AuraLimit = DebuffColumns * 2
--- 	TidyPlates:ForceUpdate()
--- end
 
 local function SetAuraFilter(func)
 	if func and type(func) == 'function' then
@@ -1017,19 +976,8 @@ end
 -----------------------------------------------------
 -- External
 -----------------------------------------------------
--- TidyPlatesWidgets.GetAuraWidgetByGUID = GetAuraWidgetByGUID
--- TidyPlatesWidgets.IsAuraShown = IsAuraShown
 
--- TidyPlatesWidgets.UseSquareDebuffIcon = UseSquareDebuffIcon
--- TidyPlatesWidgets.UseWideDebuffIcon = UseWideDebuffIcon
-ThreatPlatesWidgets.UpdateAuraWidgetMode = UpdateAuraWidgetMode
-
--- TidyPlatesWidgets.SetAuraFilter = SetAuraFilter
-
--- TidyPlatesWidgets.CreateAuraWidget = CreateAuraWidget
-
--- TidyPlatesWidgets.EnableAuraWatcher = Enable
--- TidyPlatesWidgets.DisableAuraWatcher = Disable
+ThreatPlatesWidgets.UpdateAuraWidgetSettings = UpdateAuraWidgetSettings
 
 -----------------------------------------------------
 -- Soon to be deprecated

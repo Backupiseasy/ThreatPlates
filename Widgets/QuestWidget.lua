@@ -48,9 +48,24 @@ local function IsQuestUnit(unit)
 	return questObjective or questNoObjective
 end
 
-local function ShowQuestUnit()
+local function ShowQuestUnit(unit)
 	local db = TidyPlatesThreat.db.profile.questWidget
-	return db.ON and not (InCombatLockdown() and db.HideInCombat) and not (IsInInstance() and db.HideInInstance)
+  local show_quest_mark = db.ON
+
+  if InCombatLockdown() then
+    if db.HideInCombat then
+      show_quest_mark = false
+    elseif db.HideInCombatAttacked then
+      local _, threatStatus = UnitDetailedThreatSituation("player", unit.unitid);
+  	  show_quest_mark = (threatStatus == nil)
+    end
+  end
+
+  if IsInInstance() and db.HideInInstance then
+    show_quest_mark = false
+  end
+
+  return  show_quest_mark
 end
 
 local function enabled()
@@ -76,7 +91,7 @@ end
 
 -- Update Graphics
 local function UpdateWidgetFrame(frame, unit)
-	if ShowQuestUnit() and IsQuestUnit(unit) then
+	if ShowQuestUnit(unit) and IsQuestUnit(unit) then
 		local db = TidyPlatesThreat.db.profile.questWidget
 		frame:SetHeight(db.scale)
 		frame:SetWidth(db.scale)

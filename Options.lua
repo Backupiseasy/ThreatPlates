@@ -212,14 +212,15 @@ local function QuestWidgetOptions()
 		args = {
 			Enable = GetEnableToggle(L["Enable Quest Widget"], L["Enables highlighting of nameplates of mobs involved with any of your current quests."], {"questWidget", "ON"}),
 			Visibility = { type = "group",	order = 10,	name = L["Visibility"], inline = true,
-				disabled = function() return not db.questWidget.ModeIcon end,
+				disabled = function() return not db.questWidget.ON end,
 				args = {
-					InCombat = { type = "toggle", order = 10, name = L["Hide in Combat"],	arg = {"questWidget", "HideInCombat"}, },
-					InInstance = { type = "toggle", order = 20, name = L["Hide in Instance"],	arg = {"questWidget", "HideInInstance"}, },
+					InCombatAll = { type = "toggle", order = 10, name = L["Hide in Combat"],	arg = {"questWidget", "HideInCombat"}, },
+					InCombatAttacked = { type = "toggle", order = 20, name = L["Hide on Attacked Units"],	arg = {"questWidget", "HideInCombatAttacked"}, },
+					InInstance = { type = "toggle", order = 30, name = L["Hide in Instance"],	arg = {"questWidget", "HideInInstance"}, },
 				},
 			},
 			ModeHealthBar = {
-				name = L["Health Bar Mode"], order = 10, type = "group", inline = true,
+				name = L["Health Bar Mode"], order = 20, type = "group", inline = true,
 				disabled = function() return not db.questWidget.ON end,
 				args = {
 					Help = { type = "description", order = 0,	width = "full",	name = L["Use a custom color for the health bar of quest mobs."],	},
@@ -233,7 +234,7 @@ local function QuestWidgetOptions()
 				},
 			},
 			ModeIcon = {
-				name = L["Icon Mode"], order = 20, type = "group", inline = true,
+				name = L["Icon Mode"], order = 301, type = "group", inline = true,
 				disabled = function() return not db.questWidget.ON end,
 				args = {
 					Help = { type = "description", order = 0,	width = "full",	name = L["Show an indicator icon at the nameplate for quest mobs."],	},
@@ -3703,21 +3704,6 @@ local function GetOptions()
 									name = L["Appearance"], order = 13,	type = "group",	inline = true,
 									disabled = function() return not db.AuraWidget.Enabled end,
 									args = {
-										Style = {
-											name = L["Style"],
-											type = "select",
-											order = 2,
-											desc = L["This lets you select the layout style of the aura widget."],
-											descStyle = "inline",
-											width = "full",
-											values = {wide = L["Wide"],square = L["Square"]},
-											set = function(info,val)
-												-- SetValue(info,val)
-												db.AuraWidget.Style = val
-												ThreatPlatesWidgets.UpdateAuraWidgetMode()
-											end,
-											arg = {"AuraWidget", "Style"},
-										},
 										TargetOnly = {
 											name = L["Target Only"],
 											type = "toggle",
@@ -3728,7 +3714,7 @@ local function GetOptions()
 											-- set = function(info,val)
 											-- 	-- SetValue(info,val)
 											-- 	db.AuraWidget.ShowTargetOnly = val
-											-- 	ThreatPlatesWidgets.UpdateAuraWidgetMode()
+											-- 	ThreatPlatesWidgets.UpdateAuraWidgetSettings()
 											-- end,
 											arg = {"AuraWidget","ShowTargetOnly"},
 										},
@@ -3742,7 +3728,7 @@ local function GetOptions()
 											set = function(info,val)
 												-- SetValue(info,val)
 												db.AuraWidget.ShowCooldownSpiral = val
-												ThreatPlatesWidgets.UpdateAuraWidgetMode()
+												ThreatPlatesWidgets.UpdateAuraWidgetSettings()
 											end,
 											arg = {"AuraWidget","ShowCooldownSpiral"},
 										}
@@ -3811,12 +3797,25 @@ local function GetOptions()
 								ModeIcon = {
 									name = L["Icon Mode"], order = 30, type = "group", inline = true,
 									disabled = function() return db.AuraWidget.ModeBar.Enabled end,
-									set =	function(info,val) SetValueWOCreate(info, val); ThreatPlatesWidgets.UpdateAuraWidgetMode() end,
+									set =	function(info,val) SetValueWOCreate(info, val); ThreatPlatesWidgets.UpdateAuraWidgetSettings() end,
 									args = {
 										Help = { type = "description", order = 0,	width = "full",	name = L["Show auras as icons in a grid configuration."],	},
 										Enable = { type = "toggle", order = 10, name = L["Enable"],	width = "full", arg = {"AuraWidget", "ModeBar", "Enabled"}, disabled = function() return not db.AuraWidget.Enabled end,
-											set = function(info,val) db.AuraWidget.ModeBar.Enabled = not val; ThreatPlatesWidgets.UpdateAuraWidgetMode() end, get = function(info) return not db.AuraWidget.ModeBar.Enabled end, },
-										Layout = { name = L["Icon Layout"],	order = 20, type = "group", inline = true,
+											set = function(info,val) db.AuraWidget.ModeBar.Enabled = false; ThreatPlatesWidgets.UpdateAuraWidgetSettings() end, get = function(info) return not db.AuraWidget.ModeBar.Enabled end, },
+										Appearance = { name = L["Appearance"],	order = 30, type = "group", inline = true,
+											args = {
+												Style = {	name = L["Icon Style"], order = 10, type = "select", desc = L["This lets you select the layout style of the aura widget."], descStyle = "inline",
+													values = {wide = L["Wide"],square = L["Square"]},
+													set = function(info,val)
+														-- SetValue(info,val)
+														db.AuraWidget.Style = val
+														ThreatPlatesWidgets.UpdateAuraWidgetSettings()
+													end,
+													arg = {"AuraWidget", "Style"},
+												},
+											},
+										},
+										Layout = { name = L["Icon Layout"],	order = 40, type = "group", inline = true,
 											args = {
 												Columns = {	name = L["Column Limit"], order = 20, type = "range", min = 1,	max = 8, step = 1, arg = {"AuraWidget", "ModeIcon", "Columns"},	},
 												Rows = {	name = L["Row Limit"], order = 30, type = "range", min = 1,	max = 10, step = 1, arg = {"AuraWidget", "ModeIcon", "Rows"},	},
@@ -3829,11 +3828,11 @@ local function GetOptions()
 								ModeBar = {
 									name = L["Bar Mode"], order = 40,	type = "group",	inline = true,
 									disabled = function() return not db.AuraWidget.ModeBar.Enabled end,
-									set =	function(info,val) SetValueWOCreate(info, val); ThreatPlatesWidgets.UpdateAuraWidgetMode() end,
+									set =	function(info,val) SetValueWOCreate(info, val); ThreatPlatesWidgets.UpdateAuraWidgetSettings() end,
 									args = {
 										Help = { type = "description", order = 0,	width = "full",	name = L["Show auras as bars (with optional icons)."],	},
 										Enable = { type = "toggle", order = 10, name = L["Enable"],	width = "full", arg = {"AuraWidget", "ModeBar", "Enabled"}, disabled = function() return not db.AuraWidget.Enabled end,
-											set = function(info,val) db.AuraWidget.ModeBar.Enabled = val; ThreatPlatesWidgets.UpdateAuraWidgetMode() end, get = function(info) return db.AuraWidget.ModeBar.Enabled end, },
+											set = function(info,val) db.AuraWidget.ModeBar.Enabled = true; ThreatPlatesWidgets.UpdateAuraWidgetSettings() end, get = function(info) return db.AuraWidget.ModeBar.Enabled end, },
 										Layout = { name = L["Bar Layout"],	order = 20, type = "group", inline = true,
 											args = {
 												MaxBars = {	name = L["Bar Limit"], order = 20, type = "range", min = 1,	max = 20, step = 1, arg = {"AuraWidget", "ModeBar", "MaxBars"},	},
@@ -3846,13 +3845,13 @@ local function GetOptions()
 											args = {
 												BarTexture = { name = L["Foreground Texture"],	order = 60,	type = "select", dialogControl = "LSM30_Statusbar",	values = AceGUIWidgetLSMlists.statusbar, arg = {"AuraWidget","ModeBar", "Texture"},	},
 												BarColor = {	name = L["Foreground Color"], type = "color",	order = 70,	get = GetColorAlpha,
-													set = function(info, r, g, b, a) SetColorAlphaWOCreate(info, r, g, b, a); ThreatPlatesWidgets.UpdateAuraWidgetMode() end,
+													set = function(info, r, g, b, a) SetColorAlphaWOCreate(info, r, g, b, a); ThreatPlatesWidgets.UpdateAuraWidgetSettings() end,
 													arg = {"AuraWidget","ModeBar", "BarColor"},	hasAlpha = true,
 											 	},
 												Spacer2 = CreateSpacer(75),
 												BackgroundTexture = { name = L["Background Texture"],	order = 80,	type = "select", dialogControl = "LSM30_Statusbar",	values = AceGUIWidgetLSMlists.statusbar, arg = {"AuraWidget","ModeBar", "BackgroundTexture"},	},
 												BackgroundColor = {	name = L["Background Color"], type = "color",	order = 90,	get = GetColorAlpha,
-													set = function(info, r, g, b, a) SetColorAlphaWOCreate(info, r, g, b, a); ThreatPlatesWidgets.UpdateAuraWidgetMode() end,
+													set = function(info, r, g, b, a) SetColorAlphaWOCreate(info, r, g, b, a); ThreatPlatesWidgets.UpdateAuraWidgetSettings() end,
 													arg = {"AuraWidget","ModeBar", "BackgroundColor"},	hasAlpha = true,
 												},
 											},

@@ -5,6 +5,9 @@
 * Aura filters can now contain comments - everything after "--" until the end of the line is considered a comment
 * Added an option to show show friendly NPCs, see Nampelate Settings - General Settings - Blizzard Settings (CVAR nameplateShowFriendlyNPCs was introduced with 7.1 and is disabled by default)
 * Changed default filter mode for auras widget from "Whitelist" to "Blacklist (Mine)"
+* Quest widget: Visibility can now be configured for icon and healthbar mode.
+* Quest widget: Added an option to disable it only on attacked mobs.
+
 * Fixed aura widget - no time buffs
 * new aura widget
 
