@@ -32,7 +32,6 @@ local function enabled()
 	if active then
 		if not isAuraEnabled then
 			TidyPlatesWidgets.EnableAuraWatcher()
-			--TidyPlatesWidgets.SetAuraFilter(AuraFilter)
 			isAuraEnabled = true
 		end
 	else
@@ -107,8 +106,6 @@ local function AuraFilter(aura)
 end
 
 local function PrepareFilter()
-	if not TidyPlatesThreat.db.profile.debuffWidget.ON then return end
-
 	local filter = TidyPlatesThreat.db.profile.debuffWidget.filter
 	Filter_ByAuraList = {}
 

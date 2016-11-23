@@ -55,7 +55,7 @@ local function ShowQuestUnit(unit)
   if InCombatLockdown() then
     if db.HideInCombat then
       show_quest_mark = false
-    elseif db.HideInCombatAttacked then
+    elseif db.HideInCombatAttacked and unit.unitid then
       local _, threatStatus = UnitDetailedThreatSituation("player", unit.unitid);
   	  show_quest_mark = (threatStatus == nil)
     end
