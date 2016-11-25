@@ -412,6 +412,7 @@ L["Visibility"] = true
 L["Use a custom color for the health bar of quest mobs."] = true
 L["Show an indicator icon at the nameplate for quest mobs."] = true
 L["Hide in Combat"] = true
+L["Hide on Attacked Units"] = true
 L["Hide in Instance"] = true
 
 ---- Stealth Widgets

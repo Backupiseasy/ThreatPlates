@@ -4463,11 +4463,6 @@ local function GetOptions()
 							width = "full",
 							name = "zhTW: Need Translator!!"
 						},
-						Header2 = {
-							order = 12,
-							type = "header",
-							name = "Alpha Features",
-						},
 					},
 				},
 			},

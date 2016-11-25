@@ -363,7 +363,7 @@ function TidyPlatesThreat:OnInitialize()
 				ON = true,
 				x = 18,
 				y = 32,
-				mode = "whitelist",
+				mode = "blacklistMine",
 				style = "square",
 				displays = {
 					[1] = true,

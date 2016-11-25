@@ -413,6 +413,7 @@ L["Use a custom color for the health bar of quest mobs."] = "Benutzerdefinierte 
 L["Show an indicator icon at the nameplate for quest mobs."] = "Zeige ein Hinweissymbol an den Plaketten von Quest-Mobs an"
 L["Hide in Combat"] = "Im Kampf verstecken"
 L["Hide in Instance"] = "In Instanzen verstecken"
+L["Hide on Attacked Units"] = "Bei angegriffenen Gegnern verstecken"
 
 ---- Stealth Widgets
 L["Stealth"] = "Stealth"

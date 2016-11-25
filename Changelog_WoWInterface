@@ -1,3 +1,19 @@
+[b]  8.2.5 (works with [url="https://mods.curse.com/addons/wow/tidy-plates"]TidyPlates 6.18.11[/url])[/b]
+[b]---------------------------------------------------------------------------------------------------[/b]
+[b]---------------------------------------------------------------------------------------------------[/b]
+[LIST]
+[*]Added an option to show show friendly NPCs, see Nampelate Settings - General Settings - Blizzard Settings (CVAR nameplateShowFriendlyNPCs was introduced with 7.1 and is disabled by default)
+[*]Aura filters now can contain comments. Everything after "--" until end of line is considered a comment
+[*]Changed default filter mode for aura widget from "Whitelist" to "Blacklist (Mine)"
+[*]Visibility of quest widget can now be configured for icon and healthbar mode.
+[*]Added an option to disable quest widget only on attacked mobs.
+[*]Added another detection spell to stealth widget.
+[*]Known issues:
+[LIST]
+[*]Switching between ThreatPlates and other themes may require /reload for the new theme to work correctly
+[/LIST]
+[/LIST]
+
 [b]  8.2.4 (works with [url="https://mods.curse.com/addons/wow/tidy-plates"]TidyPlates 6.18.10[/url])[/b]
 [b]---------------------------------------------------------------------------------------------------[/b]
 [b]---------------------------------------------------------------------------------------------------[/b]
