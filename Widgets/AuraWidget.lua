@@ -2,6 +2,11 @@ local ADDON_NAME, NAMESPACE = ...
 ThreatPlates = NAMESPACE.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------
+-- Imported functions and constants
+---------------------------------------------------------------------------------------------------
+local RGB = ThreatPlates.RGB
+
+---------------------------------------------------------------------------------------------------
 -- Aura Widget 2.0
 ---------------------------------------------------------------------------------------------------
 
@@ -139,9 +144,7 @@ end
 -- Threat Plates functions
 ---------------------------------------------------------------------------------------------------
 
-local AURA_TYPE = { Buff = 1, Curse = 2, Disease = 3, Magic = 4, Poison = 5, Debuff = 6, }
 local isAuraEnabled
-local Filter_ByAuraList
 
 -- hides/destroys all widgets of this type created by Threat Plates
 -- local function ClearAllWidgets()
@@ -152,64 +155,113 @@ local Filter_ByAuraList
 -- end
 -- ThreatPlatesWidgets.ClearAllAuraWidgets = ClearAllWidgets
 
+
+
+---------------------------------------------------------------------------------------------------
+-- Filtering and sorting functions
+---------------------------------------------------------------------------------------------------
+
 -- Information from Widget:
 -- aura.spellid, aura.name, aura.expiration, aura.stacks,
 -- aura.caster, aura.duration, aura.texture,
 -- aura.type, aura.reaction
 -- return value: show, priority, r, g, b (color for ?)
 
+-- Debuffs are color coded, with poison debuffs having a green border, magic debuffs a blue border, diseases a brown border,
+-- urses a purple border, and physical debuffs a red border
+local AURA_TYPE = { Buff = 1, Curse = 2, Disease = 3, Magic = 4, Poison = 5, Debuff = 6, }
+
+local AURA_TYPE_COLORS = {
+		Curse = RGB(255, 0, 255),
+		Disease = RGB(128, 51, 0),
+		Magic = RGB(0, 102, 255),
+		Poison = RGB(0, 255, 0),
+	}
+
+local Filter_ByAuraList
+
+local function GetColorForAura(aura)
+	local db = TidyPlatesThreat.db.profile.AuraWidget
+
+	local color
+	if aura.effect == "HARMFUL" then
+		color = db.DefaultDebuffColor
+	else
+		color = db.DefaultBuffColor
+	end
+
+	if db.ShowAuraType then
+		color = AURA_TYPE_COLORS[aura.type] or color
+	end
+
+	return color
+end
+
 local function AuraFilter(aura)
-	local DB = TidyPlatesThreat.db.profile.AuraWidget
+	local db = TidyPlatesThreat.db.profile.AuraWidget
 	local isType, isShown
 
-	-- if DB then return true end
-	if aura.reaction == AURA_TARGET_HOSTILE and DB.ShowEnemy then
+	if aura.reaction == AURA_TARGET_HOSTILE and db.ShowEnemy then
 		isShown = true
-	elseif aura.reaction == AURA_TARGET_FRIENDLY and DB.ShowFriendly then
+	elseif aura.reaction == AURA_TARGET_FRIENDLY and db.ShowFriendly then
 		isShown = true
 	end
 
-	if aura.effect == "HELPFUL" and DB.FilterByType[AURA_TYPE.Buff] then
+	if aura.effect == "HELPFUL" and db.FilterByType[AURA_TYPE.Buff] then
 		isType = true
-	elseif aura.effect == "HARMFUL" and DB.FilterByType[AURA_TYPE.Debuff] then
+	elseif aura.effect == "HARMFUL" and db.FilterByType[AURA_TYPE.Debuff] then
 		-- only show aura types configured in the options
 		if aura.type then
-			isType = DB.FilterByType[AURA_TYPE[aura.type]]
+			isType = db.FilterByType[AURA_TYPE[aura.type]]
 		else
 			isType = true
 		end
 	end
 
+	local show_aura = false
 	if isShown and isType then
-		local mode = DB.FilterMode
+		local mode = db.FilterMode
 		local spellfound = Filter_ByAuraList[aura.name] or Filter_ByAuraList[aura.spellid]
 		if spellfound then spellfound = true end
 		local isMine = (aura.caster == "player") or (aura.caster == "pet")
+
 		if mode == "whitelist" then
-			return spellfound
+			show_aura = spellfound
 		elseif mode == "whitelistMine" then
 			if isMine then
-				return spellfound
+				show_aura = spellfound
 			end
 		elseif mode == "all" then
-			return true
+			show_aura = true
 		elseif mode == "allMine" then
 			if isMine then
-				return true
+				show_aura = true
 			end
 		elseif mode == "blacklist" then
-			return not spellfound
+			show_aura = not spellfound
 		elseif mode == "blacklistMine" then
 			if isMine then
-				return not spellfound
+				show_aura = not spellfound
 			end
 		end
 	end
+
+	local color = GetColorForAura(aura)
+
+	local priority = aura.expiration - aura.duration
+
+	if db.SortOrder == "AtoZ" then
+		priority = aura.name
+	elseif db.SortOrder == "TimeLeft" then
+		priority = aura.expiration - GetTime()
+	elseif db.SortOrder == "Duration" then
+		priority = aura.duration
+	end
+
+ 	return show_aura, priority, color
 end
 
 local function PrepareFilter()
-	if TidyPlatesThreat.db.profile.debuffWidget.ON or (not TidyPlatesThreat.db.profile.AuraWidget.Enabled) then return end
-
 	local filter = TidyPlatesThreat.db.profile.AuraWidget.FilterBySpell
 	Filter_ByAuraList = {}
 
@@ -290,7 +342,10 @@ local function UpdateWidgetTimeIcon(frame, expiration)
 end
 
 local function UpdateWidgetTimeBar(frame, expiration)
-	if expiration == 0 then
+	if frame.AuraInfo.Duration == 0 then
+		frame.TimeText:SetText("")
+		frame.Statusbar:SetValue(100)
+	elseif expiration == 0 then
 		frame.TimeText:SetText("")
 		frame.Statusbar:SetValue(0)
 	else
@@ -312,7 +367,7 @@ local function UpdateWidgetTime(frame, expiration)
 	end
 end
 
-local function UpdateAuraFrame(frame, texture, duration, expiration, stacks, r, g, b)
+local function UpdateAuraFrame(frame, texture, duration, expiration, stacks, color)
 	if frame and texture and expiration then
 		local db = TidyPlatesThreat.db.profile.AuraWidget.ModeBar
 
@@ -327,6 +382,9 @@ local function UpdateAuraFrame(frame, texture, duration, expiration, stacks, r, 
 			else
 				frame.LabelText:SetText(frame.AuraInfo.Name)
 			end
+
+			-- Highlight Coloring
+			frame.Statusbar:SetStatusBarColor(color.r, color.g, color.b, color.a or 1)
 		else
 			frame.Icon:SetTexture(texture)
 
@@ -337,11 +395,14 @@ local function UpdateAuraFrame(frame, texture, duration, expiration, stacks, r, 
 			end
 
 			-- Highlight Coloring
-			if r then
-				frame.BorderHighlight:SetVertexColor(r, g or 1, b or 1)
+			if TidyPlatesThreat.db.profile.AuraWidget.ShowAuraType then
+				frame.BorderHighlight:SetVertexColor(color.r, color.g, color.b)
 				frame.BorderHighlight:Show()
 				frame.Border:Hide()
-			else frame.BorderHighlight:Hide(); frame.Border:Show()	end
+			else
+				frame.BorderHighlight:Hide()
+				frame.Border:Show()
+			end
 
 			-- [[ Cooldown
 			if duration and duration > 0 and expiration and expiration > 0 then
@@ -361,7 +422,12 @@ local function UpdateAuraFrame(frame, texture, duration, expiration, stacks, r, 
 end
 
 local function AuraSortFunction(a,b)
-	return a.priority < b.priority
+	local db = TidyPlatesThreat.db.profile.AuraWidget
+	if db.SortReverse then
+		return a.priority > b.priority
+	else
+		return a.priority < b.priority
+	end
 end
 
 local function UpdateIconGrid(frame, unitid)
@@ -413,14 +479,11 @@ local function UpdateIconGrid(frame, unitid)
 			-- Auras are evaluated by an external function
 			-- Pre-filtering before the icon grid is populated
 			if aura.name then
-				local show, priority, r, g, b = AuraFilterFunction(aura)
-				--print(aura.name, show, priority)
-				--show = true
+				local show, priority, color = AuraFilterFunction(aura)
 				-- Store Order/Priority
 				if show then
-
 					aura.priority = priority or 10
-					aura.r, aura.g, aura.b = r, g, b
+					aura.color = color
 
 					storedAuraCount = storedAuraCount + 1
 					storedAuras[storedAuraCount] = aura
@@ -436,7 +499,6 @@ local function UpdateIconGrid(frame, unitid)
 			end
 
 		until (searchedDebuffs and searchedBuffs)
-
 
 		-- Display Auras
 		------------------------------------------------------------------------------------------------------
@@ -455,7 +517,7 @@ local function UpdateIconGrid(frame, unitid)
 					aura_frame.AuraInfo.Name = aura.name
 
 					-- Call function to display the aura
-					UpdateAuraFrame(aura_frame, aura.texture, aura.duration, aura.expiration, aura.stacks, aura.r, aura.g, aura.b)
+					UpdateAuraFrame(aura_frame, aura.texture, aura.duration, aura.expiration, aura.stacks, aura.color)
 
 					AuraSlotCount = AuraSlotCount + 1
 					frame.currentAuraCount = index
@@ -473,10 +535,16 @@ function UpdateWidget(frame)
 
 	UpdateIconGrid(frame, frame.unitid)
 
+	frame:SetScale(db.scale)
+	-- if not frame.Background then
+	-- 	frame.Background = frame:CreateTexture(nil, "BACKGROUND")
+	-- 	frame.Background:SetAllPoints()
+	-- 	frame.Background:SetTexture(ThreatPlates.Media:Fetch('statusbar', db.BackgroundTexture))
+	-- 	frame.Background:SetVertexColor(0,0,0,1)
+	-- end
 	if db.ModeBar.Enabled then
 		frame:SetPoint("CENTER", frame:GetParent(), 0, db.y)
 	else
-		frame:SetScale(db.scale)
 		frame:SetPoint(db.anchor, frame:GetParent(), db.x, db.y)
 	end
 end
@@ -524,7 +592,7 @@ end
 local WideArt = "Interface\\AddOns\\TidyPlatesWidgets\\Aura\\AuraFrameWide"
 local SquareArt = "Interface\\AddOns\\TidyPlatesWidgets\\Aura\\AuraFrameSquare"
 local WideHighlightArt = "Interface\\AddOns\\TidyPlatesWidgets\\Aura\\AuraFrameHighlightWide"
-local SquareHighlightArt = "Interface\\AddOns\\TidyPlatesWidgets\\Aura\\AuraFrameHighlightSquare"
+local SquareHighlightArt = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\AuraWidget\\AuraFrameHighlightSquare"
 local AuraFont = "FONTS\\ARIALN.TTF"
 
 local function Enable()
@@ -570,11 +638,16 @@ local function TransformWideAura(frame)
 	frame.Icon:SetAllPoints(frame)
 	frame.Icon:SetTexCoord(.07, 1-.07, .23, 1-.23)  -- obj:SetTexCoord(left,right,top,bottom)
 	-- Border
-	frame.Border:SetWidth(32); frame.Border:SetHeight(32)
+	frame.Border:SetWidth(32);
+	frame.Border:SetHeight(32)
 	frame.Border:SetPoint("CENTER", 1, -2)
 	frame.Border:SetTexture(WideArt)
 	-- Highlight
-	frame.BorderHighlight:SetAllPoints(frame.Border)
+	--frame.BorderHighlight:SetAllPoints(frame.Border)
+	-- frame.BorderHighlight:SetTexture(WideHighlightArt)
+	frame.BorderHighlight:SetWidth(32);
+	frame.BorderHighlight:SetHeight(32)
+	frame.BorderHighlight:SetPoint("CENTER", 1, -2)
 	frame.BorderHighlight:SetTexture(WideHighlightArt)
 	--  Time Text
 	frame.TimeLeft:SetFont(AuraFont ,9, "OUTLINE")
@@ -601,11 +674,16 @@ local function TransformSquareAura(frame)
 	frame.Icon:SetAllPoints(frame)
 	frame.Icon:SetTexCoord(.10, 1-.07, .12, 1-.12)  -- obj:SetTexCoord(left,right,top,bottom)
 	-- Border
-	frame.Border:SetWidth(32); frame.Border:SetHeight(32)
+	frame.Border:SetWidth(32);
+	frame.Border:SetHeight(32)
 	frame.Border:SetPoint("CENTER", 0, -2)
 	frame.Border:SetTexture(SquareArt)
 	-- Highlight
-	frame.BorderHighlight:SetAllPoints(frame.Border)
+	-- frame.BorderHighlight:SetAllPoints(frame.Border)
+	-- frame.BorderHighlight:SetTexture(SquareHighlightArt)
+	frame.BorderHighlight:SetWidth(32);
+	frame.BorderHighlight:SetHeight(32)
+	frame.BorderHighlight:SetPoint("CENTER", 0, -2)
 	frame.BorderHighlight:SetTexture(SquareHighlightArt)
 	--  Time Text
 	frame.TimeLeft:SetFont(AuraFont ,9, "OUTLINE")
@@ -623,53 +701,6 @@ local function TransformSquareAura(frame)
 	frame.Stacks:SetWidth(26)
 	frame.Stacks:SetHeight(16)
 	frame.Stacks:SetJustifyH("RIGHT")
-end
-
-local function UpdateIconConfig(frame)
-	local db = TidyPlatesThreat.db.profile.AuraWidget.ModeIcon
-	local iconTable = frame.AuraFrames
-
-	-- Create Icons
-	for index = 1, AuraLimit do
-		local icon = iconTable[index]
-
-		if not icon then
-			icon = CreateAuraIcon(frame)
-		elseif icon:GetName() == "Bar" then
-			-- change in mode: delete old bar aura, create new icon aura
-			PolledHideIn(icon)
-			icon = CreateAuraIcon(frame)
-		end
-
-		iconTable[index] = icon
-
-		-- Apply Style
-		if useWideIcons then TransformWideAura(icon) else TransformSquareAura(icon) end
-
-		if TidyPlatesThreat.db.profile.AuraWidget.ShowCooldownSpiral then
-			icon.Cooldown:SetDrawEdge(true)
-			icon.Cooldown:SetDrawEdge(true)
-		else
-			icon.Cooldown:SetDrawEdge(false)
-			icon.Cooldown:SetDrawSwipe(false)
-		end
-	end
-
-	-- Set Anchors
-	local columns = db.Columns
-	for y = 1, db.Rows do
-		for x = 1, columns do
-			local i = (y - 1) * columns + x
-			iconTable[i]:ClearAllPoints()
-			if i == 1 then
-				iconTable[i]:SetPoint("LEFT", frame)
-			elseif x == 1 then
-				iconTable[i]:SetPoint("BOTTOMLEFT", iconTable[i - columns], "TOPLEFT", 0, db.RowSpacing)
-			else
-				iconTable[i]:SetPoint("LEFT", iconTable[i - 1], "RIGHT", db.ColumnSpacing, 0)
-			end
-		end
-	end
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -696,7 +727,9 @@ local function CreateAuraFrame(parent)
 	--frame.TimeLeft = frame.Cooldown:CreateFontString(nil, "OVERLAY")
 	--frame.Stacks = frame.Cooldown:CreateFontString(nil, "OVERLAY")
 	frame.TimeLeft = frame:CreateFontString(nil, "OVERLAY")
+	frame.TimeLeft:SetFont(AuraFont ,9, "OUTLINE")
 	frame.Stacks = frame:CreateFontString(nil, "OVERLAY")
+	frame.Stacks:SetFont(AuraFont,10, "OUTLINE")
 
 	frame.Statusbar = CreateFrame("StatusBar", nil, frame)
 	frame.Statusbar:SetMinMaxValues(0, 100)
@@ -705,10 +738,12 @@ local function CreateAuraFrame(parent)
 	frame.Background:SetAllPoints()
 
 	frame.LabelText = frame.Statusbar:CreateFontString(nil, "OVERLAY")
+	frame.LabelText:SetFont(ThreatPlates.Media:Fetch('font', db.Font), db.FontSize)
 	frame.LabelText:SetJustifyH("LEFT")
 	frame.LabelText:SetShadowOffset(1, -1)
 
 	frame.TimeText = frame.Statusbar:CreateFontString(nil, "OVERLAY")
+	frame.TimeText:SetFont(ThreatPlates.Media:Fetch('font', db.Font), db.FontSize)
 	frame.TimeText:SetJustifyH("RIGHT")
 	frame.TimeText:SetShadowOffset(1, -1)
 
@@ -763,7 +798,6 @@ local function UpdateAuraFrame(frame)
 		frame.Statusbar:SetStatusBarTexture(ThreatPlates.Media:Fetch('statusbar', db.Texture))
 		frame.Statusbar:GetStatusBarTexture():SetHorizTile(false)
 		frame.Statusbar:GetStatusBarTexture():SetVertTile(false)
-		frame.Statusbar:SetStatusBarColor(db.BarColor.r, db.BarColor.g, db.BarColor.b, db.BarColor.a)
 
 		frame.Background:SetTexture(ThreatPlates.Media:Fetch('statusbar', db.BackgroundTexture))
 		frame.Background:SetVertexColor(db.BackgroundColor.r, db.BackgroundColor.g, db.BackgroundColor.b, db.BackgroundColor.a)
@@ -778,6 +812,7 @@ local function UpdateAuraFrame(frame)
 
 		frame.Icon:SetWidth(db.BarHeight)
 		frame.Icon:SetHeight(db.BarHeight)
+		frame.Icon:SetAllPoints(frame)		
 
 		-- width and position calculations
 		local frame_width = db.BarWidth
@@ -826,23 +861,6 @@ local function UpdateAuraFrame(frame)
 			frame.Cooldown:SetDrawSwipe(false)
 		end
 
-		--  Time Text
-		frame.TimeLeft:SetFont(AuraFont ,9, "OUTLINE")
-		frame.TimeLeft:SetShadowOffset(1, -1)
-		frame.TimeLeft:SetShadowColor(0,0,0,1)
-		frame.TimeLeft:SetPoint("RIGHT", 0, 8)
-		frame.TimeLeft:SetWidth(26)
-		frame.TimeLeft:SetHeight(16)
-		frame.TimeLeft:SetJustifyH("RIGHT")
-		--  Stacks
-		frame.Stacks:SetFont(AuraFont,10, "OUTLINE")
-		frame.Stacks:SetShadowOffset(1, -1)
-		frame.Stacks:SetShadowColor(0,0,0,1)
-		frame.Stacks:SetPoint("RIGHT", 0, -6)
-		frame.Stacks:SetWidth(26)
-		frame.Stacks:SetHeight(16)
-		frame.Stacks:SetJustifyH("RIGHT")
-
 		frame.Statusbar:Hide()
 		-- frame.Background:Hide()
 		-- frame.LabelText:Hide()
@@ -860,17 +878,10 @@ end
 -- Creation and update functions
 ---------------------------------------------------------------------------------------------------
 
-local function UpdateWidgetConfig(nameplate_frame)
-	local db = TidyPlatesThreat.db.profile.AuraWidget.ModeBar
-
-	local frame_width = db.BarWidth
-	if db.ShowIcon then
-		frame_width = frame_width + db.BarHeight + db.IconSpacing
-	end
-
-	local aura_frame_list = nameplate_frame.AuraFrames
+local function UpdateWidgetConfig(aura_widget_frame)
+	local aura_frame_list = aura_widget_frame.AuraFrames
 	for index = 1, AuraLimit do
-		local frame = aura_frame_list[index] or CreateAuraFrame(nameplate_frame)
+		local frame = aura_frame_list[index] or CreateAuraFrame(aura_widget_frame)
 
 		aura_frame_list[index] = frame
 
@@ -879,7 +890,20 @@ local function UpdateWidgetConfig(nameplate_frame)
 		-- anchor the frame
 		frame:ClearAllPoints()
 		if index == 1 then
-			frame:SetPoint("LEFT", nameplate_frame)
+			local frame_width = 0
+
+			local db = TidyPlatesThreat.db.profile.AuraWidget.ModeBar
+			if db.Enabled then
+				frame_width = db.BarWidth
+				if db.ShowIcon then
+					frame_width = frame_width + db.BarHeight + db.IconSpacing
+				end
+			else
+				frame_width = 16.5
+				if useWideIcons then frame_width = 26.5 end
+				frame_width = frame_width * config_grid_columns + (config_grid_column_spacing - 1) * config_grid_columns
+			end
+			frame:SetPoint("LEFT", aura_widget_frame, (aura_widget_frame:GetWidth() - frame_width) / 2, 0)
 		elseif ((index - 1) % config_grid_columns) == 0 then
 			frame:SetPoint("BOTTOMLEFT", aura_frame_list[index - config_grid_columns], "TOPLEFT", 0, config_grid_row_spacing)
 		else
@@ -898,9 +922,9 @@ end
 local function UpdateFromProfile()
 	local db = TidyPlatesThreat.db.profile.AuraWidget
 
-	if db.Style == "square" then
+	if db.ModeIcon.Style == "square" then
 		useWideIcons = false
-	elseif db.Style == "wide" then
+	else
 		useWideIcons = true
 	end
 
@@ -934,7 +958,7 @@ local function CreateAuraWidget(parent, style)
 	-- Create Base frame
 	frame:SetWidth(128)
 	frame:SetHeight(32)
-	frame:SetPoint(db.anchor, parent, db.x, db.y)
+	--frame:SetPoint(db.anchor, parent, db.x, db.y)
 	frame:SetFrameLevel(parent:GetFrameLevel() + 1)
 
 	frame.AuraFrames = {}
@@ -967,11 +991,7 @@ local function UpdateAuraWidgetSettings()
 	TidyPlates:ForceUpdate()
 end
 
-local function SetAuraFilter(func)
-	if func and type(func) == 'function' then
-		AuraFilterFunction = func
-	end
-end
+
 
 -----------------------------------------------------
 -- External

@@ -1,4 +1,10 @@
 ------------------------------------------------------
+8.2.6-Alpha1 (works with TidyPlates 6.18.11)
+------------------------------------------------------
+* Added new aura widget 2.0 with icon and bar more and a lot more customization options. To use it, disable the current aura widget first.
+* Changed default for healthbar color for quest widget.
+
+  ------------------------------------------------------
 8.2.5 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
 * Added an option to show show friendly NPCs, see Nampelate Settings - General Settings - Blizzard Settings (CVAR nameplateShowFriendlyNPCs was introduced with 7.1 and is disabled by default)

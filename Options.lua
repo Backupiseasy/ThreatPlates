@@ -3614,269 +3614,322 @@ local function GetOptions()
 								},
 							},
 						},
-						-- AuraWidget2 = {
-						-- 	name = L["Aura 2.0"],
-						-- 	type = "group",
-						-- 	order = 25,
-						-- 	disabled = function() return db.debuffWidget.ON end,
-						-- 	set = SetValueWOCreate,
-						-- 	args = {
-						-- 		Enable = GetEnableToggle(L["Enable Aura Widget 2.0"], L["This widget will display auras that match your filtering on your target nameplate and others you recently moused over. The old aura widget (Aura) must be disabpled first."], {"AuraWidget", "Enabled"}),
-						-- 		Filtering = {
-						-- 			name = L["Filtering"],
-						-- 			type = "group",
-						-- 			inline = true,
-						-- 			order = 10,
-						-- 			disabled = function() return not db.AuraWidget.Enabled end,
-						-- 			args = {
-						-- 				Show = {
-						-- 					name = "Display Locations",
-						-- 					type = "group",
-						-- 					order = 2,
-						-- 					inline = true,
-						-- 					args = {
-						-- 						ShowFriendly = {
-						-- 							name = "Show Friendly",
-						-- 							order = 1,
-						-- 							type = "toggle",
-						-- 							arg = {"AuraWidget","ShowFriendly"},
-						-- 						},
-						-- 						ShowEnemy = {
-						-- 							name = "Show Enemy",
-						-- 							order = 2,
-						-- 							type = "toggle",
-						-- 							arg = {"AuraWidget","ShowEnemy"}
-						-- 						}
-						-- 					},
-						-- 				},
-						-- 				Display = {
-						-- 					name = "Show Aura Type",
-						-- 					type = "multiselect",
-						-- 					order = 3,
-						-- 					values = {
-						-- 						[1] = "Buff",
-						-- 						[2] = "Curse",
-						-- 						[3] = "Disease",
-						-- 						[4] = "Magic",
-						-- 						[5] = "Poison",
-						-- 						[6] = "Debuff"
-						-- 					},
-						-- 					get = function(info,k)
-						-- 						return db.AuraWidget.FilterByType[k]
-						-- 					end,
-						-- 					set = function(info,k,v)
-						-- 						db.AuraWidget.FilterByType[k] = v
-						-- 						TidyPlates:ForceUpdate()
-						-- 					end,
-						-- 				},
-						-- 				Filtering = {
-						-- 					name = L["Filter by Spell"],
-						-- 					order = 30,
-						-- 					type = "group",
-						-- 					inline = true,
-						-- 					args = {
-						-- 						Mode = {
-						-- 							name = L["Mode"],
-						-- 							type = "select",
-						-- 							order = 1,
-						-- 							width = "double",
-						-- 							values = t.DebuffMode,
-						-- 							arg = {"AuraWidget","FilterMode"},
-						-- 						},
-						-- 						DebuffList = {
-						-- 							name = L["Filtered Auras"],
-						-- 							type = "input",
-						-- 							order = 2,
-						-- 							dialogControl = "MultiLineEditBox",
-						-- 							width = "full",
-						-- 							get = function(info) return t.TTS(db.AuraWidget.FilterBySpell) end,
-						-- 							set = function(info, v)
-						-- 								local table = {strsplit("\n", v)};
-						-- 								db.AuraWidget.FilterBySpell = table
-						-- 								if ThreatPlatesWidgets.PrepareFilterAuraWidget then ThreatPlatesWidgets.PrepareFilterAuraWidget() end
-						-- 							end,
-						-- 						},
-						-- 					},
-						-- 				},
-						-- 			},
-						-- 		},
-						-- 		Style = {
-						-- 			name = L["Appearance"], order = 13,	type = "group",	inline = true,
-						-- 			disabled = function() return not db.AuraWidget.Enabled end,
-						-- 			args = {
-						-- 				TargetOnly = {
-						-- 					name = L["Target Only"],
-						-- 					type = "toggle",
-						-- 					order = 1,
-						-- 					desc = L["This will toggle the aura widget to only show for your current target."],
-						-- 					descStyle = "inline",
-						-- 					width = "full",
-						-- 					-- set = function(info,val)
-						-- 					-- 	-- SetValue(info,val)
-						-- 					-- 	db.AuraWidget.ShowTargetOnly = val
-						-- 					-- 	ThreatPlatesWidgets.UpdateAuraWidgetSettings()
-						-- 					-- end,
-						-- 					arg = {"AuraWidget","ShowTargetOnly"},
-						-- 				},
-						-- 				CooldownSpiral = {
-						-- 					name = L["Cooldown Spiral"],
-						-- 					type = "toggle",
-						-- 					order = 3,
-						-- 					desc = L["This will toggle the aura widget to show the cooldown spiral on auras. (requires /reload)"],
-						-- 					descStyle = "inline",
-						-- 					width = "full",
-						-- 					set = function(info,val)
-						-- 						-- SetValue(info,val)
-						-- 						db.AuraWidget.ShowCooldownSpiral = val
-						-- 						ThreatPlatesWidgets.UpdateAuraWidgetSettings()
-						-- 					end,
-						-- 					arg = {"AuraWidget","ShowCooldownSpiral"},
-						-- 				}
-						-- 			},
-						-- 		},
-						-- 		Layout = {
-						-- 			name = L["Layout"], order = 20, type = "group", inline = true,
-						-- 			disabled = function() return not db.AuraWidget.Enabled end,
-						-- 			args = {
-						-- 				Sizing = {
-						-- 					name = L["Sizing"],
-						-- 					type = "group",
-						-- 					order = 15,
-						-- 					inline = true,
-						-- 					disabled = function() return not db.AuraWidget.Enabled end,
-						-- 					args = {
-						-- 						Scale = {
-						-- 							name = L["Scale"],
-						-- 							type = "range",
-						-- 							order = 1,
-						-- 							width = "full",
-						-- 							step = 0.05,
-						-- 							softMin = 0.6,
-						-- 							softMax = 1.3,
-						-- 							isPercent = true,
-						-- 							arg = {"AuraWidget","scale",}
-						-- 						},
-						-- 					},
-						-- 				},
-						-- 				Placement = {
-						-- 					name = L["Placement"],
-						-- 					type = "group",
-						-- 					inline = true,
-						-- 					order = 20,
-						-- 					disabled = function() return not db.AuraWidget.Enabled end,
-						-- 					args = {
-						-- 						X = {
-						-- 							name = L["X"],
-						-- 							type = "range",
-						-- 							order = 1,
-						-- 							min = -120,
-						-- 							max = 120,
-						-- 							step = 1,
-						-- 							arg = {"AuraWidget", "x"},
-						-- 						},
-						-- 						Y = {
-						-- 							name = L["Y"],
-						-- 							type = "range",
-						-- 							order = 2,
-						-- 							min = -120,
-						-- 							max = 120,
-						-- 							step = 1,
-						-- 							arg = {"AuraWidget", "y"},
-						-- 						},
-						-- 						Anchor = {
-						-- 							name = L["Anchor"],
-						-- 							type = "select",
-						-- 							order = 3,
-						-- 							values = t.FullAlign,
-						-- 							arg = {"AuraWidget","anchor"}
-						-- 						},
-						-- 					},
-						-- 				},
-						-- 			},
-						-- 		},
-						-- 		ModeIcon = {
-						-- 			name = L["Icon Mode"], order = 30, type = "group", inline = true,
-						-- 			disabled = function() return db.AuraWidget.ModeBar.Enabled end,
-						-- 			set =	function(info,val) SetValueWOCreate(info, val); ThreatPlatesWidgets.UpdateAuraWidgetSettings() end,
-						-- 			args = {
-						-- 				Help = { type = "description", order = 0,	width = "full",	name = L["Show auras as icons in a grid configuration."],	},
-						-- 				Enable = { type = "toggle", order = 10, name = L["Enable"],	width = "full", arg = {"AuraWidget", "ModeBar", "Enabled"}, disabled = function() return not db.AuraWidget.Enabled end,
-						-- 					set = function(info,val) db.AuraWidget.ModeBar.Enabled = false; ThreatPlatesWidgets.UpdateAuraWidgetSettings() end, get = function(info) return not db.AuraWidget.ModeBar.Enabled end, },
-						-- 				Appearance = { name = L["Appearance"],	order = 30, type = "group", inline = true,
-						-- 					args = {
-						-- 						Style = {	name = L["Icon Style"], order = 10, type = "select", desc = L["This lets you select the layout style of the aura widget."], descStyle = "inline",
-						-- 							values = {wide = L["Wide"],square = L["Square"]},
-						-- 							set = function(info,val)
-						-- 								-- SetValue(info,val)
-						-- 								db.AuraWidget.Style = val
-						-- 								ThreatPlatesWidgets.UpdateAuraWidgetSettings()
-						-- 							end,
-						-- 							arg = {"AuraWidget", "Style"},
-						-- 						},
-						-- 					},
-						-- 				},
-						-- 				Layout = { name = L["Icon Layout"],	order = 40, type = "group", inline = true,
-						-- 					args = {
-						-- 						Columns = {	name = L["Column Limit"], order = 20, type = "range", min = 1,	max = 8, step = 1, arg = {"AuraWidget", "ModeIcon", "Columns"},	},
-						-- 						Rows = {	name = L["Row Limit"], order = 30, type = "range", min = 1,	max = 10, step = 1, arg = {"AuraWidget", "ModeIcon", "Rows"},	},
-						-- 						ColumnSpacing = {	name = L["Horizontal Spacing"], order = 40, type = "range", min = 0,	max = 100, step = 1, arg = {"AuraWidget", "ModeIcon", "ColumnSpacing"},	},
-						-- 						RowSpacing = {	name = L["Vertical Spacing"], order = 50, type = "range", min = 0,	max = 100, step = 1, arg = {"AuraWidget", "ModeIcon", "RowSpacing"},	},
-						-- 					},
-						-- 				},
-						-- 			},
-						-- 		},
-						-- 		ModeBar = {
-						-- 			name = L["Bar Mode"], order = 40,	type = "group",	inline = true,
-						-- 			disabled = function() return not db.AuraWidget.ModeBar.Enabled end,
-						-- 			set =	function(info,val) SetValueWOCreate(info, val); ThreatPlatesWidgets.UpdateAuraWidgetSettings() end,
-						-- 			args = {
-						-- 				Help = { type = "description", order = 0,	width = "full",	name = L["Show auras as bars (with optional icons)."],	},
-						-- 				Enable = { type = "toggle", order = 10, name = L["Enable"],	width = "full", arg = {"AuraWidget", "ModeBar", "Enabled"}, disabled = function() return not db.AuraWidget.Enabled end,
-						-- 					set = function(info,val) db.AuraWidget.ModeBar.Enabled = true; ThreatPlatesWidgets.UpdateAuraWidgetSettings() end, get = function(info) return db.AuraWidget.ModeBar.Enabled end, },
-						-- 				Layout = { name = L["Bar Layout"],	order = 20, type = "group", inline = true,
-						-- 					args = {
-						-- 						MaxBars = {	name = L["Bar Limit"], order = 20, type = "range", min = 1,	max = 20, step = 1, arg = {"AuraWidget", "ModeBar", "MaxBars"},	},
-						-- 						BarWidth = {	name = L["Bar Width"], order = 30, type = "range", min = 1,	max = 500, step = 1, arg = {"AuraWidget", "ModeBar", "BarWidth"},	},
-						-- 						BarHeight = {	name = L["Bar Height"], order = 40, type = "range", min = 1,	max = 500, step = 1, arg = {"AuraWidget", "ModeBar", "BarHeight"},	},
-						-- 						BarSpacing = {	name = L["Vertical Spacing"], order = 50, type = "range", min = 0,	max = 100, step = 1, arg = {"AuraWidget", "ModeBar", "BarSpacing"},	},
-						-- 					},
-						-- 				},
-						-- 				TextureConfig = { name = L["Bar Textures"],	order = 30, type = "group", inline = true,
-						-- 					args = {
-						-- 						BarTexture = { name = L["Foreground Texture"],	order = 60,	type = "select", dialogControl = "LSM30_Statusbar",	values = AceGUIWidgetLSMlists.statusbar, arg = {"AuraWidget","ModeBar", "Texture"},	},
-						-- 						BarColor = {	name = L["Foreground Color"], type = "color",	order = 70,	get = GetColorAlpha,
-						-- 							set = function(info, r, g, b, a) SetColorAlphaWOCreate(info, r, g, b, a); ThreatPlatesWidgets.UpdateAuraWidgetSettings() end,
-						-- 							arg = {"AuraWidget","ModeBar", "BarColor"},	hasAlpha = true,
-						-- 					 	},
-						-- 						Spacer2 = CreateSpacer(75),
-						-- 						BackgroundTexture = { name = L["Background Texture"],	order = 80,	type = "select", dialogControl = "LSM30_Statusbar",	values = AceGUIWidgetLSMlists.statusbar, arg = {"AuraWidget","ModeBar", "BackgroundTexture"},	},
-						-- 						BackgroundColor = {	name = L["Background Color"], type = "color",	order = 90,	get = GetColorAlpha,
-						-- 							set = function(info, r, g, b, a) SetColorAlphaWOCreate(info, r, g, b, a); ThreatPlatesWidgets.UpdateAuraWidgetSettings() end,
-						-- 							arg = {"AuraWidget","ModeBar", "BackgroundColor"},	hasAlpha = true,
-						-- 						},
-						-- 					},
-						-- 				},
-						-- 				FontConfig = { name = L["Font"],	order = 40, type = "group", inline = true,
-						-- 					args = {
-						-- 						Font = { name = L["Typeface"], type = "select",	order = 10,	dialogControl = "LSM30_Font",	values = AceGUIWidgetLSMlists.font,	arg = {"AuraWidget","ModeBar", "Font"}, },
-						-- 						FontSize = {	name = L["Size"], order = 20, type = "range", min = 1,	max = 36, step = 1, arg = {"AuraWidget", "ModeBar", "FontSize"},	},
-						-- 						FontColor = {	name = L["Color"], type = "color",	order = 30,	get = GetColor,	set = SetColor,	arg = {"AuraWidget","ModeBar", "FontColor"},	hasAlpha = false, },
-						-- 						Spacer1 = CreateSpacer(35),
-						-- 						IndentLabel = {	name = L["Label Text Offset"], order = 40, type = "range", min = -16,	max = 16, step = 1, arg = {"AuraWidget", "ModeBar", "LabelTextIndent"},	},
-						-- 						IndentTime = {	name = L["Time Text Offset"], order = 50, type = "range", min = -16,	max = 16, step = 1, arg = {"AuraWidget", "ModeBar", "TimeTextIndent"},	},
-						-- 					},
-						-- 				},
-						-- 				IconConfig = { name = L["Icon"],	order = 50, type = "group", inline = true,
-						-- 					args = {
-						-- 						EnableIcon = { name = L["Enable"], order = 10, type = "toggle", arg = {"AuraWidget", "ModeBar", "ShowIcon"}, },
-						-- 						IconAlign = { name = L["Show Icon to the Left"], order = 20, type = "toggle", arg = {"AuraWidget", "ModeBar", "IconAlignmentLeft"}, },
-						-- 						IconOffset = {	name = L["Offset"], order = 30, type = "range", min = -100,	max = 100, step = 1, arg = {"AuraWidget", "ModeBar", "IconSpacing", }, },
-						-- 					},
-						-- 				},
-						-- 			},
-						-- 		},
-						-- 	},
-						-- },
+						AuraWidget2 = {
+							name = L["Aura 2.0"],
+							type = "group",
+							order = 25,
+							disabled = function() return db.debuffWidget.ON end,
+							set = SetValueWOCreate,
+							args = {
+								Enable = GetEnableToggle(L["Enable Aura Widget 2.0"], L["This widget will display auras that match your filtering on your target nameplate and others you recently moused over. The old aura widget (Aura) must be disabpled first."], {"AuraWidget", "Enabled"}),
+								Filtering = {
+									name = L["Filtering"],
+									type = "group",
+									inline = true,
+									order = 10,
+									disabled = function() return not db.AuraWidget.Enabled end,
+									args = {
+										Show = {
+											name = "Filter by Unit Reaction",
+											type = "group",
+											order = 2,
+											inline = true,
+											args = {
+												ShowFriendly = {
+													name = "Show Friendly",
+													order = 1,
+													type = "toggle",
+													arg = {"AuraWidget","ShowFriendly"},
+												},
+												ShowEnemy = {
+													name = "Show Enemy",
+													order = 2,
+													type = "toggle",
+													arg = {"AuraWidget","ShowEnemy"}
+												}
+											},
+										},
+										Display = {
+											name = "Filter by Aura Type",
+											type = "multiselect",
+											order = 3,
+											values = {
+												[1] = "Buff",
+												[2] = "Curse",
+												[3] = "Disease",
+												[4] = "Magic",
+												[5] = "Poison",
+												[6] = "Debuff"
+											},
+											get = function(info,k)
+												return db.AuraWidget.FilterByType[k]
+											end,
+											set = function(info,k,v)
+												db.AuraWidget.FilterByType[k] = v
+												TidyPlates:ForceUpdate()
+											end,
+										},
+										Filtering = {
+											name = L["Filter by Spell"],
+											order = 30,
+											type = "group",
+											inline = true,
+											args = {
+												Mode = {
+													name = L["Mode"],
+													type = "select",
+													order = 1,
+													width = "double",
+													values = t.DebuffMode,
+													arg = {"AuraWidget","FilterMode"},
+												},
+												DebuffList = {
+													name = L["Filtered Auras"],
+													type = "input",
+													order = 2,
+													dialogControl = "MultiLineEditBox",
+													width = "full",
+													get = function(info) return t.TTS(db.AuraWidget.FilterBySpell) end,
+													set = function(info, v)
+														local table = {strsplit("\n", v)};
+														db.AuraWidget.FilterBySpell = table
+														if ThreatPlatesWidgets.PrepareFilterAuraWidget then ThreatPlatesWidgets.PrepareFilterAuraWidget() end
+													end,
+												},
+											},
+										},
+									},
+								},
+								Style = {
+									name = L["Appearance"], order = 13,	type = "group",	inline = true,
+									disabled = function() return not db.AuraWidget.Enabled end,
+									args = {
+										TargetOnly = {
+											name = L["Target Only"],
+											type = "toggle",
+											order = 10,
+											desc = L["This will toggle the aura widget to only show for your current target."],
+											descStyle = "inline",
+											width = "full",
+											-- set = function(info,val)
+											-- 	-- SetValue(info,val)
+											-- 	db.AuraWidget.ShowTargetOnly = val
+											-- 	ThreatPlatesWidgets.UpdateAuraWidgetSettings()
+											-- end,
+											arg = {"AuraWidget","ShowTargetOnly"},
+										},
+										CooldownSpiral = {
+											name = L["Cooldown Spiral"],
+											type = "toggle",
+											order = 20,
+											desc = L["This will toggle the aura widget to show the cooldown spiral on auras."],
+											descStyle = "inline",
+											width = "full",
+											set = function(info,val)
+												-- SetValue(info,val)
+												db.AuraWidget.ShowCooldownSpiral = val
+												ThreatPlatesWidgets.UpdateAuraWidgetSettings()
+											end,
+											arg = {"AuraWidget","ShowCooldownSpiral"},
+										},
+										AuraTypeColors = {
+											name = L["Color by Aura Type"],
+											type = "toggle",
+											order = 30,
+											desc = L["This will color the aura based on its type (poison, disease, magic, curse) - for Icon Mode the icon border is colored, for Bar Mode the bar itself."],
+											descStyle = "inline",
+											width = "full",
+											arg = {"AuraWidget","ShowAuraType"},
+										},
+										DefaultBuffColor = {
+											name = L["Default Buff Color"], type = "color",	order = 40,	get = GetColorAlpha,
+											set = function(info, r, g, b, a) SetColorAlphaWOCreate(info, r, g, b, a); ThreatPlatesWidgets.UpdateAuraWidgetSettings() end,
+											arg = {"AuraWidget", "DefaultBuffColor"},	hasAlpha = true,
+										},
+										DefaultDebuffColor = {
+											name = L["Default Debuff Color"], type = "color",	order = 50,	get = GetColorAlpha,
+											set = function(info, r, g, b, a) SetColorAlphaWOCreate(info, r, g, b, a); ThreatPlatesWidgets.UpdateAuraWidgetSettings() end,
+											arg = {"AuraWidget","DefaultDebuffColor"},	hasAlpha = true,
+										},
+									},
+								},
+								SortOrder = {
+									name = L["Sort Order"], order = 15,	type = "group",	inline = true, disabled = function() return not db.AuraWidget.Enabled end,
+									args = {
+										AtoZ = {
+											name = L["A to Z"], type = "toggle",	order = 10, width = "half",
+											desc = L["Sort in ascending alphabetical order."],
+											get = function(info) return db.AuraWidget.SortOrder == "AtoZ" end,
+											set = function(info, value) SetValue(info, "AtoZ") end,
+											arg = {"AuraWidget","SortOrder"},
+										},
+										TimeLeft = {
+											name = L["Time Left"], type = "toggle",	order = 20,	 width = "half",
+											desc = L["Sort by time left in ascending order."],
+											get = function(info) return db.AuraWidget.SortOrder == "TimeLeft" end,
+											set = function(info, value) SetValue(info, "TimeLeft") end,
+											arg = {"AuraWidget","SortOrder"},
+										},
+										Duration = {
+											name = L["Duration"], type = "toggle",	order = 30,	 width = "half",
+											desc = L["Sort by overall duration in ascending order."],
+											get = function(info) return db.AuraWidget.SortOrder == "Duration" end,
+											set = function(info, value) SetValue(info, "Duration") end,
+											arg = {"AuraWidget","SortOrder"},
+										},
+										Creation = {
+											name = L["Creation"], type = "toggle",	order = 40,	 width = "half",
+											desc = L["Show bars in order created with oldest aura first."],
+											get = function(info) return db.AuraWidget.SortOrder == "Creation" end,
+											set = function(info, value) SetValue(info, "Creation") end,
+											arg = {"AuraWidget","SortOrder"},
+										},
+										ReverseOrder = {
+											name = L["Reverse Order"], type = "toggle",	order = 50,
+											desc = L['Reverse the sort order (e.g., "A to Z" becomes "Z to A")..'],
+											arg = { "AuraWidget", "SortReverse" },
+										},
+									},
+								},
+								Layout = {
+									name = L["Layout"], order = 20, type = "group", inline = true,
+									disabled = function() return not db.AuraWidget.Enabled end,
+									args = {
+										Sizing = {
+											name = L["Sizing"],
+											type = "group",
+											order = 15,
+											inline = true,
+											disabled = function() return not db.AuraWidget.Enabled end,
+											args = {
+												Scale = {
+													name = L["Scale"],
+													type = "range",
+													order = 1,
+													width = "full",
+													step = 0.05,
+													softMin = 0.6,
+													softMax = 1.3,
+													isPercent = true,
+													arg = {"AuraWidget","scale",}
+												},
+											},
+										},
+										Placement = {
+											name = L["Placement"],
+											type = "group",
+											inline = true,
+											order = 20,
+											disabled = function() return not db.AuraWidget.Enabled end,
+											args = {
+												X = {
+													name = L["X"],
+													type = "range",
+													order = 1,
+													min = -120,
+													max = 120,
+													step = 1,
+													arg = {"AuraWidget", "x"},
+												},
+												Y = {
+													name = L["Y"],
+													type = "range",
+													order = 2,
+													min = -120,
+													max = 120,
+													step = 1,
+													arg = {"AuraWidget", "y"},
+												},
+												Anchor = {
+													name = L["Anchor"],
+													type = "select",
+													order = 3,
+													values = t.FullAlign,
+													arg = {"AuraWidget","anchor"}
+												},
+											},
+										},
+									},
+								},
+								ModeIcon = {
+									name = L["Icon Mode"], order = 30, type = "group", inline = true,
+									disabled = function() return db.AuraWidget.ModeBar.Enabled end,
+									set =	function(info,val) SetValueWOCreate(info, val); ThreatPlatesWidgets.UpdateAuraWidgetSettings() end,
+									args = {
+										Help = { type = "description", order = 0,	width = "full",	name = L["Show auras as icons in a grid configuration."],	},
+										Enable = { type = "toggle", order = 10, name = L["Enable"],	width = "full", arg = {"AuraWidget", "ModeBar", "Enabled"}, disabled = function() return not db.AuraWidget.Enabled end,
+											set = function(info,val) db.AuraWidget.ModeBar.Enabled = false; ThreatPlatesWidgets.UpdateAuraWidgetSettings() end, get = function(info) return not db.AuraWidget.ModeBar.Enabled end, },
+										Appearance = { name = L["Appearance"],	order = 30, type = "group", inline = true,
+											args = {
+												Style = {	name = L["Icon Style"], order = 10, type = "select", desc = L["This lets you select the layout style of the aura widget."], descStyle = "inline",
+													values = {wide = L["Wide"],square = L["Square"]},
+													set = function(info,val)
+														-- SetValue(info,val)
+														db.AuraWidget.ModeIcon.Style = val
+														ThreatPlatesWidgets.UpdateAuraWidgetSettings()
+													end,
+													arg = {"AuraWidget", "ModeIcon", "Style"},
+												},
+											},
+										},
+										Layout = { name = L["Icon Layout"],	order = 40, type = "group", inline = true,
+											args = {
+												Columns = {	name = L["Column Limit"], order = 20, type = "range", min = 1,	max = 8, step = 1, arg = {"AuraWidget", "ModeIcon", "Columns"},	},
+												Rows = {	name = L["Row Limit"], order = 30, type = "range", min = 1,	max = 10, step = 1, arg = {"AuraWidget", "ModeIcon", "Rows"},	},
+												ColumnSpacing = {	name = L["Horizontal Spacing"], order = 40, type = "range", min = 0,	max = 100, step = 1, arg = {"AuraWidget", "ModeIcon", "ColumnSpacing"},	},
+												RowSpacing = {	name = L["Vertical Spacing"], order = 50, type = "range", min = 0,	max = 100, step = 1, arg = {"AuraWidget", "ModeIcon", "RowSpacing"},	},
+											},
+										},
+									},
+								},
+								ModeBar = {
+									name = L["Bar Mode"], order = 40,	type = "group",	inline = true,
+									disabled = function() return not db.AuraWidget.ModeBar.Enabled end,
+									set =	function(info,val) SetValueWOCreate(info, val); ThreatPlatesWidgets.UpdateAuraWidgetSettings() end,
+									args = {
+										Help = { type = "description", order = 0,	width = "full",	name = L["Show auras as bars (with optional icons)."],	},
+										Enable = { type = "toggle", order = 10, name = L["Enable"],	width = "full", arg = {"AuraWidget", "ModeBar", "Enabled"}, disabled = function() return not db.AuraWidget.Enabled end,
+											set = function(info,val) db.AuraWidget.ModeBar.Enabled = true; ThreatPlatesWidgets.UpdateAuraWidgetSettings() end, get = function(info) return db.AuraWidget.ModeBar.Enabled end, },
+										Layout = { name = L["Bar Layout"],	order = 20, type = "group", inline = true,
+											args = {
+												MaxBars = {	name = L["Bar Limit"], order = 20, type = "range", min = 1,	max = 20, step = 1, arg = {"AuraWidget", "ModeBar", "MaxBars"},	},
+												BarWidth = {	name = L["Bar Width"], order = 30, type = "range", min = 1,	max = 500, step = 1, arg = {"AuraWidget", "ModeBar", "BarWidth"},	},
+												BarHeight = {	name = L["Bar Height"], order = 40, type = "range", min = 1,	max = 500, step = 1, arg = {"AuraWidget", "ModeBar", "BarHeight"},	},
+												BarSpacing = {	name = L["Vertical Spacing"], order = 50, type = "range", min = 0,	max = 100, step = 1, arg = {"AuraWidget", "ModeBar", "BarSpacing"},	},
+											},
+										},
+										TextureConfig = { name = L["Bar Textures"],	order = 30, type = "group", inline = true,
+											args = {
+												BarTexture = { name = L["Foreground Texture"],	order = 60,	type = "select", dialogControl = "LSM30_Statusbar",	values = AceGUIWidgetLSMlists.statusbar, arg = {"AuraWidget","ModeBar", "Texture"},	},
+												Spacer2 = CreateSpacer(75),
+												BackgroundTexture = { name = L["Background Texture"],	order = 80,	type = "select", dialogControl = "LSM30_Statusbar",	values = AceGUIWidgetLSMlists.statusbar, arg = {"AuraWidget","ModeBar", "BackgroundTexture"},	},
+												BackgroundColor = {	name = L["Background Color"], type = "color",	order = 90,	get = GetColorAlpha,
+													set = function(info, r, g, b, a) SetColorAlphaWOCreate(info, r, g, b, a); ThreatPlatesWidgets.UpdateAuraWidgetSettings() end,
+													arg = {"AuraWidget","ModeBar", "BackgroundColor"},	hasAlpha = true,
+												},
+											},
+										},
+										FontConfig = { name = L["Font"],	order = 40, type = "group", inline = true,
+											args = {
+												Font = { name = L["Typeface"], type = "select",	order = 10,	dialogControl = "LSM30_Font",	values = AceGUIWidgetLSMlists.font,	arg = {"AuraWidget","ModeBar", "Font"}, },
+												FontSize = {	name = L["Size"], order = 20, type = "range", min = 1,	max = 36, step = 1, arg = {"AuraWidget", "ModeBar", "FontSize"},	},
+												FontColor = {	name = L["Color"], type = "color",	order = 30,	get = GetColor,	set = SetColor,	arg = {"AuraWidget","ModeBar", "FontColor"},	hasAlpha = false, },
+												Spacer1 = CreateSpacer(35),
+												IndentLabel = {	name = L["Label Text Offset"], order = 40, type = "range", min = -16,	max = 16, step = 1, arg = {"AuraWidget", "ModeBar", "LabelTextIndent"},	},
+												IndentTime = {	name = L["Time Text Offset"], order = 50, type = "range", min = -16,	max = 16, step = 1, arg = {"AuraWidget", "ModeBar", "TimeTextIndent"},	},
+											},
+										},
+										IconConfig = { name = L["Icon"],	order = 50, type = "group", inline = true,
+											args = {
+												EnableIcon = { name = L["Enable"], order = 10, type = "toggle", arg = {"AuraWidget", "ModeBar", "ShowIcon"}, },
+												IconAlign = { name = L["Show Icon to the Left"], order = 20, type = "toggle", arg = {"AuraWidget", "ModeBar", "IconAlignmentLeft"}, },
+												IconOffset = {	name = L["Offset"], order = 30, type = "range", min = -100,	max = 100, step = 1, arg = {"AuraWidget", "ModeBar", "IconSpacing", }, },
+											},
+										},
+									},
+								},
+							},
+						},
 						ArenaWidget = {
 							name = "Arena",
 							type = "group",
@@ -4462,6 +4515,11 @@ local function GetOptions()
 							order = 11,
 							width = "full",
 							name = "zhTW: Need Translator!!"
+						},
+						Header2 = {
+							order = 12,
+							type = "header",
+							name = "Alpha Features",
 						},
 					},
 				},
