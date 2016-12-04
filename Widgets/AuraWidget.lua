@@ -39,6 +39,7 @@ local config_grid_rows = 3
 local config_grid_columns = 3
 local config_grid_row_spacing = 5
 local config_grid_column_spacing = 8
+local config_max_label_text_length = 0
 
 local function DummyFunction() end
 
@@ -58,7 +59,7 @@ local AURA_TYPE_DEBUFF = 6
 local CooldownNative = CreateFrame("Cooldown", nil, WorldFrame)
 local SetCooldown = CooldownNative.SetCooldown
 
-local _
+local font_frame = CreateFrame("Frame", nil, WorldFrame)
 
 local AuraType_Index = {
 	["Buff"] = 1,
@@ -371,12 +372,18 @@ local function UpdateAuraFrame(frame, texture, duration, expiration, stacks, col
 	if frame and texture and expiration then
 		local db = TidyPlatesThreat.db.profile.AuraWidget.ModeBar
 
+		-- Expiration
+		UpdateWidgetTime(frame, expiration)
+
 		if config_bar_mode then
+			frame.Statusbar:SetWidth(db.BarWidth)
+
 			-- Icon
 			if db.ShowIcon then
 				frame.Icon:SetTexture(texture)
 			end
 
+			frame.LabelText:SetWidth(config_max_label_text_length - frame.TimeText:GetStringWidth())
 			if stacks and stacks > 1 then
 				frame.LabelText:SetText(frame.AuraInfo.Name .. " [" .. stacks .. "]")
 			else
@@ -410,9 +417,6 @@ local function UpdateAuraFrame(frame, texture, duration, expiration, stacks, col
 			end
 			--]]
 		end
-
-		-- Expiration
-		UpdateWidgetTime(frame, expiration)
 
 		--frame:Show()
 		PolledHideIn(frame, expiration)
@@ -547,32 +551,6 @@ function UpdateWidget(frame)
 	else
 		frame:SetPoint(db.anchor, frame:GetParent(), db.x, db.y)
 	end
-end
-
--- Context Update (mouseover, target change)
-local function UpdateWidgetContext(frame, unit)
-	local unitid = unit.unitid
-	frame.unit = unit
-	frame.unitid = unitid
-
-	-- Add to Widget List
-	-- if guid then
-	-- 	WidgetList[guid] = frame
-	-- end
-	if unitid then
-		WidgetList[unitid] = frame
-	end
-
-	-- Custom Code II
-	--------------------------------------
-	if TidyPlatesThreat.db.profile.AuraWidget.ShowTargetOnly and not unit.isTarget then
-		frame:_Hide()
-	else
-		UpdateWidget(frame)
-		frame:Show()
-	end
-	--------------------------------------
-	-- End Custom Code
 end
 
 local function ClearWidgetContext(frame)
@@ -741,6 +719,7 @@ local function CreateAuraFrame(parent)
 	frame.LabelText:SetFont(ThreatPlates.Media:Fetch('font', db.Font), db.FontSize)
 	frame.LabelText:SetJustifyH("LEFT")
 	frame.LabelText:SetShadowOffset(1, -1)
+	frame.LabelText:SetMaxLines(1)
 
 	frame.TimeText = frame.Statusbar:CreateFontString(nil, "OVERLAY")
 	frame.TimeText:SetFont(ThreatPlates.Media:Fetch('font', db.Font), db.FontSize)
@@ -812,7 +791,7 @@ local function UpdateAuraFrame(frame)
 
 		frame.Icon:SetWidth(db.BarHeight)
 		frame.Icon:SetHeight(db.BarHeight)
-		frame.Icon:SetAllPoints(frame)		
+		frame.Icon:SetAllPoints(frame)
 
 		-- width and position calculations
 		local frame_width = db.BarWidth
@@ -882,9 +861,7 @@ local function UpdateWidgetConfig(aura_widget_frame)
 	local aura_frame_list = aura_widget_frame.AuraFrames
 	for index = 1, AuraLimit do
 		local frame = aura_frame_list[index] or CreateAuraFrame(aura_widget_frame)
-
 		aura_frame_list[index] = frame
-
 		UpdateAuraFrame(frame)
 
 		-- anchor the frame
@@ -919,6 +896,37 @@ local function UpdateWidgetConfig(aura_widget_frame)
 	end
 end
 
+-- Context Update (mouseover, target change)
+local function UpdateWidgetContext(frame, unit)
+	local unitid = unit.unitid
+	frame.unit = unit
+	frame.unitid = unitid
+
+	-- Add to Widget List
+	-- if guid then
+	-- 	WidgetList[guid] = frame
+	-- end
+	if unitid then
+		local old_frame = WidgetList[unitid] = frame
+		if old_frame ~= frame then
+			UpdateWidgetConfig(frame, unit)
+		end
+	end
+
+
+	-- Custom Code II
+	--------------------------------------
+	if TidyPlatesThreat.db.profile.AuraWidget.ShowTargetOnly and not unit.isTarget then
+		frame:_Hide()
+	else
+		-- UpdateWidgetConfig(frame, unit)
+		UpdateWidget(frame)
+		frame:Show()
+	end
+	--------------------------------------
+	-- End Custom Code
+end
+
 local function UpdateFromProfile()
 	local db = TidyPlatesThreat.db.profile.AuraWidget
 
@@ -934,6 +942,7 @@ local function UpdateFromProfile()
 		config_grid_columns = 1
 		config_grid_row_spacing = db.ModeBar.BarSpacing
 		config_grid_column_spacing = 0
+		config_max_label_text_length = db.ModeBar.BarWidth - db.ModeBar.LabelTextIndent - db.ModeBar.TimeTextIndent - (db.ModeBar.FontSize / 5)
 	else
 		config_bar_mode = false
 		config_grid_rows = db.ModeIcon.Rows

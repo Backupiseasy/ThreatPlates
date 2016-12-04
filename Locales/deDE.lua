@@ -186,6 +186,8 @@ L["Colors"] = "Farben"
 ----
 L["Threat Colors"] = "Bedrohungsfarben"
 L["Show Threat Glow"] = "Zeige Glühen bei Bedrohung"
+L["Only on Attacked Units"] = "Nur bei angegriffenen Einheiten"
+L["Show threat glow only on units in combat with the player."] = "Glühen bei Bedrohung nur bei Einheiten anzeigen, mit denen der Spieler im Kampf ist."
 L["|cff00ff00Low threat|r"] = "|cff00ff00Niedrige Bedrohung|r"
 L["|cffffff00Medium threat|r"] = "|cffffff00Mittlere Bedrohung|r"
 L["|cffff0000High threat|r"] = "|cffff0000Hohe Bedrohung|r"

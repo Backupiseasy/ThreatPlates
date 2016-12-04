@@ -2,12 +2,15 @@
 8.2.6-Alpha1 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
 * Added new aura widget 2.0 with icon and bar more and a lot more customization options. To use it, disable the current aura widget first.
+
+* Fixed a bug in quest widget where the quest highlight was still shown although the quest was completed.
 * Changed default for healthbar color for quest widget.
+* Added an option to show threat glow only on units the player is in combat with.
 
   ------------------------------------------------------
 8.2.5 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
-* Added an option to show show friendly NPCs, see Nampelate Settings - General Settings - Blizzard Settings (CVAR nameplateShowFriendlyNPCs was introduced with 7.1 and is disabled by default)
+* Added an option to show show friendly NPCs, see Nameplate Settings - General Settings - Blizzard Settings (CVAR nameplateShowFriendlyNPCs was introduced with 7.1 and is disabled by default)
 * Aura filters now can contain comments. Everything after "--" until end of line is considered a comment
 * Changed default filter mode for aura widget from "Whitelist" to "Blacklist (Mine)"
 * Visibility of quest widget can now be configured for icon and healthbar mode.

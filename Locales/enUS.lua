@@ -186,6 +186,8 @@ L["Colors"] = true
 ----
 L["Threat Colors"] = true
 L["Show Threat Glow"] = true
+L["Only on Attacked Units"] = true
+L["Show threat glow only on units in combat with the player."] = true
 L["|cff00ff00Low threat|r"] = true
 L["|cffffff00Medium threat|r"] = true
 L["|cffff0000High threat|r"] = true

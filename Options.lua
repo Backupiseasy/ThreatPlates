@@ -813,12 +813,20 @@ local function GetOptions()
 											args = {
 												ThreatGlow = {
 													type = "toggle",
-													width = "double",
 													order = 1,
 													name = L["Show Threat Glow"],
 													get = GetValue,
 													set = SetThemeValue,
 													arg = {"settings","threatborder","show"},
+												},
+												OnlyAttackedUnits = {
+													type = "toggle",
+													order = 1.5,
+													name = L["Only on Attacked Units"],
+													desc = L["Show threat glow only on units in combat with the player."],
+													get = GetValue,
+													set = SetThemeValue,
+													arg = {"ShowThreatGlowOnAttackedUnitsOnly"},
 												},
 												Header = {
 													name = "Colors",

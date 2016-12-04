@@ -15,29 +15,30 @@ local player_name = UnitName("player")
 
 local function IsQuestUnit(unit)
   local unitid = unit.unitid
-	local questObjective = false
-	local questNoObjective = false
+	local quest_not_complete = false
+	local quest_area = false
 
 	-- Read quest information from tooltip. Thanks to Kib: QuestMobs AddOn by Tosaido.
 	if unitid then
 		tooltip_frame:SetOwner(WorldFrame, "ANCHOR_NONE")
-		tooltip_frame:SetUnit(unitid)
+		--tooltip_frame:SetUnit(unitid)
+    tooltip_frame:SetHyperlink("unit:" .. unit.guid)
+
 		for i = 3, tooltip_frame:NumLines() do
 		  local line = _G["ThreatPlates_TooltipTextLeft" .. i]
 		  local text = line:GetText()
-		  local text_r, text_g, text_b = line:GetTextColor()
+      local text_r, text_g, text_b = line:GetTextColor()
 
 		  if text_r > 0.99 and text_g > 0.82 and text_b == 0 then
-		    questNoObjective = true
+		    quest_area = true
 		  else
 		    local unit_name, progress = string.match(text, "^ ([^ ]-) ?%- (.+)$")
-
-		    if unit_name and (unit_name == "" or unit_name == player_name) then
-		      if progress then
-		        local current, goal = string.match(progress, "(%d+)/(%d+)")
-
+        if progress then
+          quest_area = nil
+          if unit_name and (unit_name == "" or unit_name == player_name) then
+            local current, goal = string.match(progress, "(%d+)/(%d+)")
 		        if current and goal and current ~= goal then
-		          questObjective = true
+		          quest_not_complete = true
 		        end
 		      end
 		    end
@@ -45,7 +46,7 @@ local function IsQuestUnit(unit)
 		end
 	end
 
-	return questObjective or questNoObjective
+	return quest_not_complete or quest_area
 end
 
 local function ShowQuestUnit(unit)

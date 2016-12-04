@@ -220,6 +220,7 @@ function TidyPlatesThreat:OnInitialize()
 			cacheClass = false,
 			optionRoleDetectionAutomatic = false,
 			alphaFeatureHeadlineView = false,
+			ShowThreatGlowOnAttackedUnitsOnly = false,
 			headlineView = {
 				-- TODO: move alphaFeatureHeadlineView in this table as enabled
 				nonTargetAlpha = true,
@@ -1658,6 +1659,7 @@ function TidyPlatesThreat:OnEnable()
 		"PLAYER_REGEN_ENABLED",
 		--"PLAYER_TALENT_UPDATE"
 		"UNIT_FACTION",
+		"QUEST_WATCH_UPDATE"
 	}
 	for i=1,#events do
 		self:RegisterEvent(events[i])
@@ -1784,10 +1786,17 @@ function TidyPlatesThreat:PLAYER_REGEN_ENABLED()
 	self:SetCvars()
 end
 
- -- nameplate color can change when factions change (e.g., with disguises)
- -- Legion example: Suramar city and Masquerade
-function TidyPlatesThreat:UNIT_FACTION(event,unitid)
+-- QuestWidget needs to update all nameplates when a quest was completed
+function TidyPlatesThreat:UNIT_FACTION(event, unitid)
 	TidyPlatesThreat.ApplyProfileSettings()
+end
+
+-- nameplate color can change when factions change (e.g., with disguises)
+-- Legion example: Suramar city and Masquerade
+function TidyPlatesThreat:QUEST_WATCH_UPDATE(event, quest_index)
+	if TidyPlatesThreat.db.profile.questWidget.ON then
+		TidyPlatesThreat.ApplyProfileSettings()
+	end
 end
 
 -- function TidyPlatesThreat:PLAYER_TALENT_UPDATE()
