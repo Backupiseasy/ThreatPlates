@@ -19,8 +19,6 @@ local ThreatPlates = NAMESPACE.ThreatPlates
 ThreatPlatesWidgets = {}
 ThreatPlatesWidgets.list = {}
 
-local PlatesVisible = {}
-
 ---------------------------------------------------------------------------------------------------
 
 local function RegisterWidget(name,create,isContext,enabled)
@@ -38,33 +36,52 @@ local function UnregisterWidget(name)
 	ThreatPlatesWidgets.list[name] = nil
 end
 
+local function CreateWidget(plate, widget_name, widget_data)
+  local w = plate.widgets
+
+  if not w[widget_name] then
+    local widget = widget_data.create(plate)
+    widget.TP_Widget = true -- mark ThreatPlates widgets
+    w[widget_name] = widget
+  end
+end
+
 -- TidyPlatesGlobal_OnInitialize() is called when a nameplate is created or re-shown
 -- activetheme is the table, not just the name
 local function OnInitialize(plate, theme)
 	if theme then
-		PlatesVisible[plate] = 1 -- save all plates with widgets to be able to disable them when another theme is selected in TidyPlates
-
-		-- plate.unit
-
 		local w = plate.widgets
+
 		-- disable all non Threat Plates widgets - unless they do it themeselves
-		for widgetname, widget in pairs(plate.widgets) do
+    for widgetname, widget in pairs(plate.widgets) do
 			if not widget.TP_Widget then widget:Hide() end
 		end
 
+--		for k,v in pairs(ThreatPlatesWidgets.list) do
+--			if (not w[k]) or (not w[k].TP_Widget) then
+--				local widget = v.create(plate)
+--				widget.TP_Widget = true -- mark ThreatPlates widgets
+--				w[k] = widget
+--			end
+--			-- widgets create hidden in there create function, so not necessary?
+--			-- right now still necessary to enable event watchers in enabled()
+--			if not v.enabled() then
+--				w[k]:Hide()
+--				w[k] = nil -- deleted the disabled widget, is that what we want? no re-using it later ...
+--			end
+--		end
+
 		for k,v in pairs(ThreatPlatesWidgets.list) do
-			if (not w[k]) or (not w[k].TP_Widget) then
-				local widget = v.create(plate)
-				widget.TP_Widget = true -- mark ThreatPlates widgets
-				w[k] = widget
-			end
-			-- widgets create hidden in there create function, so not necessary?
-			-- right now still necessary to enable event watchers in enabled()
-			if not v.enabled() then
-				w[k]:Hide()
-				--w[k] = nil -- deleted the disabled widget, is that what we want? no re-using it later ...
+			if v.enabled() then
+        CreateWidget(plate, k, v)
+			else
+				if w[k] then
+					w[k]:Hide()
+					w[k] = nil -- deleted the disabled widget, is that what we want? no re-using it later ...
+				end
 			end
 		end
+
 	end
 end
 
@@ -83,18 +100,6 @@ local function DeleteWidgets()
 	-- ThreatPlatesWidgets.ClearAllAuraWidgets()								-- done
 	-- ThreatPlatesWidgets.ClearAllHealerTrackerWidgets()			-- disabled
 
-	-- hide and remove all references to all widgets of ThreatPlates
-	for plate, _ in pairs(PlatesVisible) do
-		for widgetname, widget in pairs(plate.widgets) do
-			if widget.TP_Widget then
-				widget:Hide()
-				plate.widgets[widgetname] = nil -- should be optional, for efficiency reasons
-				--if widgetname == "ThreatPlatesAuraWidget" then TidyPlatesWidgets.SetAuraFilter(TidyPlatesHubFunctions._WidgetDebuffFilter) end
-			end
-		end
-	end
-	PlatesVisible = {}
-
 	-- disable all event watchers
 	ThreatPlatesWidgets.ComboPointWidgetDisableWatcher()
 	ThreatPlatesWidgets.ArenaWidgetDisableWatcher()
@@ -108,22 +113,26 @@ local function OnUpdate(plate, unit)
 	local w = plate.widgets
 
 	for k,v in pairs(ThreatPlatesWidgets.list) do
-		-- Diable all widgets in headline view mode
-		-- TODO: optimize, e.g. move to enabled()
-		if w[k] then -- should never be nil here, if OnInitialize was called correctly
-			-- if style == "NameOnly" or style == "etotem" or style == "empty" then frame:_Hide(); return end
-			if not v.enabled() then
-				w[k]:Hide()
-			elseif style == "NameOnly" or style == "etotem" or style == "empty" then
-				w[k]:_Hide()
-			else
-				-- context means that widget is only relevant for target (or mouse-over)
-				if not v.isContext then
-					w[k]:Update(unit, style)
-					if unit.isTarget then	plate:SetFrameStrata("LOW") else plate:SetFrameStrata("BACKGROUND")	end
-				end
-			end
-		end
+
+    if v.enabled() then
+      CreateWidget(plate, k, v)
+
+      -- Diable all widgets in headline view mode
+      if style == "NameOnly" or style == "etotem" or style == "empty" then
+        w[k]:_Hide()
+      else
+        -- context means that widget is only relevant for target (or mouse-over)
+        if not v.isContext then
+          w[k]:Update(unit, style)
+          if unit.isTarget then	plate:SetFrameStrata("LOW") else plate:SetFrameStrata("BACKGROUND")	end
+        end
+      end
+    else
+      if w[k] then
+        w[k]:Hide()
+        w[k] = nil -- deleted the disabled widget, is that what we want? no re-using it later ...
+      end
+    end
 	end
 end
 
@@ -134,16 +143,21 @@ local function OnContextUpdate(plate, unit)
 	local w = plate.widgets
 
 	for k,v in pairs(ThreatPlatesWidgets.list) do
-		if w[k] then -- should never be nil here, if OnInitialize was called correctly
-			if not v.enabled() then
-				w[k]:Hide()
-			elseif style == "NameOnly" or style == "etotem" or style == "empty" then
-				w[k]:_Hide()
-			else
-				w[k]:UpdateContext(unit, style)
-				if unit.isTarget then	plate:SetFrameStrata("LOW") else plate:SetFrameStrata("BACKGROUND")	end
-			end
-		end
+    if v.enabled() then
+      CreateWidget(plate, k, v)
+
+      if style == "NameOnly" or style == "etotem" or style == "empty" then
+        w[k]:_Hide()
+      else
+        w[k]:UpdateContext(unit, style)
+        if unit.isTarget then	plate:SetFrameStrata("LOW") else plate:SetFrameStrata("BACKGROUND") end
+      end
+    else
+      if w[k] then
+        w[k]:Hide()
+        w[k] = nil -- deleted the disabled widget, is that what we want? no re-using it later ...
+      end
+    end
 	end
 end
 

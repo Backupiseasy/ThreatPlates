@@ -5,6 +5,8 @@ ThreatPlates = NAMESPACE.ThreatPlates
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
 local RGB = ThreatPlates.RGB
+local DEBUG = ThreatPlates.DEBUG
+
 
 ---------------------------------------------------------------------------------------------------
 -- Aura Widget 2.0
@@ -589,7 +591,7 @@ local function Disable()
 end
 
 local function enabled()
-	local active = (not TidyPlatesThreat.db.profile.debuffWidget.ON) and TidyPlatesThreat.db.profile.AuraWidget.Enabled
+	local active = (not TidyPlatesThreat.db.profile.debuffWidget.ON) and TidyPlatesThreat.db.profile.AuraWidget.ON
 
 	if active then
 		if not isAuraEnabled then
@@ -907,8 +909,10 @@ local function UpdateWidgetContext(frame, unit)
 	-- 	WidgetList[guid] = frame
 	-- end
 	if unitid then
-		local old_frame = WidgetList[unitid] = frame
+		local old_frame = WidgetList[unitid]
+		WidgetList[unitid] = frame
 		if old_frame ~= frame then
+			--DEBUG("Updateing new frame")
 			UpdateWidgetConfig(frame, unit)
 		end
 	end

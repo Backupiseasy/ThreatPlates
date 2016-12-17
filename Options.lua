@@ -292,7 +292,14 @@ local function GetOptions()
 					type = "toggle",
 					order = 1,
 					desc = L["Sets your spec "]..spec_name..L[" to tanking."],
-					get = function() return TidyPlatesThreat.db.char.spec[index] end,
+					get =	function()
+						local spec = TidyPlatesThreat.db.char.spec[index]
+						if spec == nil then
+							return t.SPEC_ROLES[t.Class()][index]
+						else
+							return spec
+						end
+					end,
 					set = function() TidyPlatesThreat.db.char.spec[index] = true; t.Update() end,
 				},
 				DPS = {
@@ -300,7 +307,14 @@ local function GetOptions()
 					type = "toggle",
 					order = 2,
 					desc = L["Sets your spec "]..spec_name..L[" to DPS."],
-					get = function() return not TidyPlatesThreat.db.char.spec[index] end,
+					get = function()
+						local spec = TidyPlatesThreat.db.char.spec[index]
+						if spec == nil then
+							return not t.SPEC_ROLES[t.Class()][index]
+						else
+							return not spec
+						end
+					end,
 					set = function() TidyPlatesThreat.db.char.spec[index] = false; t.Update() end,
 				},
 			},
@@ -3629,13 +3643,13 @@ local function GetOptions()
 							disabled = function() return db.debuffWidget.ON end,
 							set = SetValueWOCreate,
 							args = {
-								Enable = GetEnableToggle(L["Enable Aura Widget 2.0"], L["This widget will display auras that match your filtering on your target nameplate and others you recently moused over. The old aura widget (Aura) must be disabpled first."], {"AuraWidget", "Enabled"}),
+								Enable = GetEnableToggle(L["Enable Aura Widget 2.0"], L["This widget will display auras that match your filtering on your target nameplate and others you recently moused over. The old aura widget (Aura) must be disabled first."], {"AuraWidget", "ON"}),
 								Filtering = {
 									name = L["Filtering"],
 									type = "group",
 									inline = true,
 									order = 10,
-									disabled = function() return not db.AuraWidget.Enabled end,
+									disabled = function() return not db.AuraWidget.ON end,
 									args = {
 										Show = {
 											name = "Filter by Unit Reaction",
@@ -3710,7 +3724,7 @@ local function GetOptions()
 								},
 								Style = {
 									name = L["Appearance"], order = 13,	type = "group",	inline = true,
-									disabled = function() return not db.AuraWidget.Enabled end,
+									disabled = function() return not db.AuraWidget.ON end,
 									args = {
 										TargetOnly = {
 											name = L["Target Only"],
@@ -3762,7 +3776,7 @@ local function GetOptions()
 									},
 								},
 								SortOrder = {
-									name = L["Sort Order"], order = 15,	type = "group",	inline = true, disabled = function() return not db.AuraWidget.Enabled end,
+									name = L["Sort Order"], order = 15,	type = "group",	inline = true, disabled = function() return not db.AuraWidget.ON end,
 									args = {
 										AtoZ = {
 											name = L["A to Z"], type = "toggle",	order = 10, width = "half",
@@ -3801,14 +3815,14 @@ local function GetOptions()
 								},
 								Layout = {
 									name = L["Layout"], order = 20, type = "group", inline = true,
-									disabled = function() return not db.AuraWidget.Enabled end,
+									disabled = function() return not db.AuraWidget.ON end,
 									args = {
 										Sizing = {
 											name = L["Sizing"],
 											type = "group",
 											order = 15,
 											inline = true,
-											disabled = function() return not db.AuraWidget.Enabled end,
+											disabled = function() return not db.AuraWidget.ON end,
 											args = {
 												Scale = {
 													name = L["Scale"],
@@ -3828,7 +3842,7 @@ local function GetOptions()
 											type = "group",
 											inline = true,
 											order = 20,
-											disabled = function() return not db.AuraWidget.Enabled end,
+											disabled = function() return not db.AuraWidget.ON end,
 											args = {
 												X = {
 													name = L["X"],
@@ -3861,11 +3875,11 @@ local function GetOptions()
 								},
 								ModeIcon = {
 									name = L["Icon Mode"], order = 30, type = "group", inline = true,
-									disabled = function() return db.AuraWidget.ModeBar.Enabled end,
+									disabled = function() return not db.AuraWidget.ON or db.AuraWidget.ModeBar.Enabled end,
 									set =	function(info,val) SetValueWOCreate(info, val); ThreatPlatesWidgets.UpdateAuraWidgetSettings() end,
 									args = {
 										Help = { type = "description", order = 0,	width = "full",	name = L["Show auras as icons in a grid configuration."],	},
-										Enable = { type = "toggle", order = 10, name = L["Enable"],	width = "full", arg = {"AuraWidget", "ModeBar", "Enabled"}, disabled = function() return not db.AuraWidget.Enabled end,
+										Enable = { type = "toggle", order = 10, name = L["Enable"],	width = "full", arg = {"AuraWidget", "ModeBar", "Enabled"}, disabled = function() return not db.AuraWidget.ON end,
 											set = function(info,val) db.AuraWidget.ModeBar.Enabled = false; ThreatPlatesWidgets.UpdateAuraWidgetSettings() end, get = function(info) return not db.AuraWidget.ModeBar.Enabled end, },
 										Appearance = { name = L["Appearance"],	order = 30, type = "group", inline = true,
 											args = {
@@ -3892,11 +3906,11 @@ local function GetOptions()
 								},
 								ModeBar = {
 									name = L["Bar Mode"], order = 40,	type = "group",	inline = true,
-									disabled = function() return not db.AuraWidget.ModeBar.Enabled end,
+									disabled = function() return not db.AuraWidget.ON or not db.AuraWidget.ModeBar.Enabled end,
 									set =	function(info,val) SetValueWOCreate(info, val); ThreatPlatesWidgets.UpdateAuraWidgetSettings() end,
 									args = {
 										Help = { type = "description", order = 0,	width = "full",	name = L["Show auras as bars (with optional icons)."],	},
-										Enable = { type = "toggle", order = 10, name = L["Enable"],	width = "full", arg = {"AuraWidget", "ModeBar", "Enabled"}, disabled = function() return not db.AuraWidget.Enabled end,
+										Enable = { type = "toggle", order = 10, name = L["Enable"],	width = "full", arg = {"AuraWidget", "ModeBar", "Enabled"}, disabled = function() return not db.AuraWidget.ON end,
 											set = function(info,val) db.AuraWidget.ModeBar.Enabled = true; ThreatPlatesWidgets.UpdateAuraWidgetSettings() end, get = function(info) return db.AuraWidget.ModeBar.Enabled end, },
 										Layout = { name = L["Bar Layout"],	order = 20, type = "group", inline = true,
 											args = {

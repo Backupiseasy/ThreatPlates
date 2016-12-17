@@ -49,27 +49,12 @@ t.Print = function(val,override)
 	end
 end
 
-local SPEC_ROLES = {
-	DEATHKNIGHT = { true, false, false },
-	DEMONHUNTER = { false, true },
-	DRUID 			= { false, false, true, false },
-	HUNTER			= { false, false, false },
-	MAGE				= { false, false, false },
-	MONK 				= { true, false, false },
-	PALADIN 		= { false, true, false },
-	PRIEST			= { false, false, false },
-	ROGUE				= { false, false, false },
-	SHAMAN			= { false, false, false },
-	WARLOCK			= { false, false, false },
-	WARRIOR			= { false, false, true },
-}
-
 -- Returns if the currently active spec is tank (true) or dps/heal (false)
 function TidyPlatesThreat:GetSpecRole()
 	local active_role
 
 	if (self.db.profile.optionRoleDetectionAutomatic) then
-		active_role = SPEC_ROLES[t.Class()][t.Active()]
+		active_role = t.SPEC_ROLES[t.Class()][t.Active()]
 		if not active_role then active_role = false end
 	else
 		active_role = self.db.char.spec[t.Active()]
@@ -383,11 +368,7 @@ function TidyPlatesThreat:OnInitialize()
 				filter = {}
 			},
 			AuraWidget = {
-				Enabled = false,
-				x = 0,
-				y = 32,
-				scale = 1,
-				anchor = "CENTER",
+				ON = false,	x = 0, y = 32, scale = 1,	anchor = "CENTER",
 				ShowEnemy = true,
 				ShowFriendly = true,
 				FilterMode = "blacklistMine",
@@ -408,7 +389,7 @@ function TidyPlatesThreat:OnInitialize()
 				SortOrder = "TimeLeft",
 				SortReverse = false,
 				ModeIcon = {
-					Columns = 3,
+					Columns = 5,
 					Rows = 3,
 					ColumnSpacing = 5,
 					RowSpacing = 8,
@@ -499,7 +480,7 @@ function TidyPlatesThreat:OnInitialize()
 				ModeHPBar = true,
 				ModeIcon = true,
 				HPBarColor = RGB(218, 165, 32), -- Golden rod
-				HideInCombat = true,
+				HideInCombat = false,
 				HideInCombatAttacked = true,
 				HideInInstance = true,
 			},
@@ -1612,6 +1593,64 @@ TidyPlatesThreat.ApplyProfileSettings = ApplyProfileSettings
 -- ADDON LOADED --
 ------------------
 
+local function UpdateSettingValue(old_setting, key, new_setting, new_key)
+	if not new_key then
+		new_key = key
+	end
+
+	local value = old_setting[key]
+	if value then
+		if type(value) == "table" then
+			new_setting[new_key] = t.CopyTable(value)
+		else
+			new_setting[new_key] = value
+		end
+	end
+end
+
+local function ConvertAuraWidget1(profile_name, profile)
+	t.Print ("Profile " .. profile_name .. ": Converting current aura widget settings to aura widget 2.0 settings ...")
+	-- convert current aura widget settings to aura widget 2.0
+	local old_setting = profile.debuffWidget
+	if old_setting then
+		local new_setting = profile.AuraWidget
+
+		if not new_setting then new_setting = {} end
+		if not new_setting.ModeIcon then new_setting.ModeIcon = {} end
+
+		new_setting.y = old_setting.y
+		new_setting.scale = old_setting.scale
+		new_setting.anchor = old_setting.anchor
+		new_setting.FilterMode = old_setting.style
+		new_setting.FilterMode = old_setting.mode
+		new_setting.ModeIcon.Style = old_setting.style
+		new_setting.ShowTargetOnly = old_setting.targetOnly
+		new_setting.ShowCooldownSpiral = old_setting.cooldownSpiral
+		new_setting.ShowFriendly = old_setting.showFriendly
+		new_setting.ShowEnemy = old_setting.showEnemy
+
+		if old_setting.filter then new_setting.FilterBySpell = t.CopyTable(old_setting.filter) end
+		if old_setting.displays then new_setting.FilterByType = t.CopyTable(old_setting.displays) end
+	end
+end
+
+-- Update the configuration file:
+--  - convert deprecated settings to their new counterpart
+-- Called whenever the addon is loaded and a new version number is detected
+local function UpdateConfiguration()
+	-- determine current addon version and compare it with the DB version
+	local db_global = TidyPlatesThreat.db.global
+
+	--  -- addon version is newer that the db version => check for old entries
+	--	if db_global.version ~= tostring(ThreatPlates.Meta("version")) then
+	-- iterate over all profiles
+	for name, profile in pairs(TidyPlatesThreat.db.profiles) do
+		ConvertAuraWidget1(name, profile)
+	end
+	--	end
+end
+t.UpdateConfiguration = UpdateConfiguration
+
 local function ApplyHubFunctions(theme)
 	theme.SetStyle = TidyPlatesThreat.SetStyle
 	theme.SetScale = TidyPlatesThreat.SetScale
@@ -1674,7 +1713,7 @@ function TidyPlatesThreat:StartUp()
 		-- initialize roles for all available specs (level > 10) or set to default (dps/healing)
 		for index=1, GetNumSpecializations() do
 			local id, spec_name, description, icon, background, role = GetSpecializationInfo(index)
-			self:SetRole(SPEC_ROLES[t.Class()][index], index)
+			self:SetRole(t.SPEC_ROLES[t.Class()][index], index)
 		end
 
 		t.Print(Welcome..L["|cff89f559You are currently in your "]..self:RoleText()..L["|cff89f559 role.|r"])

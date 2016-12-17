@@ -23,14 +23,11 @@ local RGB = function(red, green, blue, alpha)
 	return color
 end
 
-t.DEBUG = function(...)
-	--print ("DEBUG: ", ...)
-end
-
 t.Update = function()
 	if (TidyPlatesOptions.ActiveTheme == THREAD_PLATES_NAME) then
 		TidyPlates:SetTheme(THREAD_PLATES_NAME)
 	end
+	-- TidyPlates:ForceUpdate()
 	-- reload theme is deprecated and empty, ForceUpdate() is called in SetTheme()
 end
 
@@ -128,6 +125,65 @@ t.DebuffMode = {
 	["allMine"] = L["All Auras (Mine)"]
 }
 
+t.SPEC_ROLES = {
+	DEATHKNIGHT = { true, false, false },
+	DEMONHUNTER = { false, true },
+	DRUID 			= { false, false, true, false },
+	HUNTER			= { false, false, false },
+	MAGE				= { false, false, false },
+	MONK 				= { true, false, false },
+	PALADIN 		= { false, true, false },
+	PRIEST			= { false, false, false },
+	ROGUE				= { false, false, false },
+	SHAMAN			= { false, false, false },
+	WARLOCK			= { false, false, false },
+	WARRIOR			= { false, false, true },
+}
+
+
+--------------------------------------------------------------------------------------------------
+-- Debug Functions
+---------------------------------------------------------------------------------------------------
+
+t.DEBUG = function(...)
+	print ("DEBUG: ", ...)
+end
+
+-- Function from: https://coronalabs.com/blog/2014/09/02/tutorial-printing-table-contents/
+-- TODO: remove
+t.DEBUG_PRINT_TABLE = function( t )
+	local print_r_cache={}
+	local function sub_print_r(t,indent)
+		if (print_r_cache[tostring(t)]) then
+			t.DEBUG(indent.."*"..tostring(t))
+		else
+			print_r_cache[tostring(t)]=true
+			if (type(t)=="table") then
+				for pos,val in pairs(t) do
+					if (type(val)=="table") then
+						t.DEBUG(indent.."["..pos.."] => "..tostring(t).." {")
+						sub_print_r(val,indent..string.rep(" ",string.len(pos)+8))
+						t.DEBUG(indent..string.rep(" ",string.len(pos)+6).."}")
+					elseif (type(val)=="string") then
+						t.DEBUG(indent.."["..pos..'] => "'..val..'"')
+					else
+						t.DEBUG(indent.."["..pos.."] => "..tostring(val))
+					end
+				end
+			else
+				t.DEBUG(indent..tostring(t))
+			end
+		end
+	end
+	if (type(t)=="table") then
+		t.DEBUG(tostring(t).." {")
+		sub_print_r(t,"  ")
+		t.DEBUG("}")
+	else
+		sub_print_r(t,"  ")
+	end
+	t.DEBUG()
+end
 
 ---------------------------------------------------------------------------------------------------
 -- Expoerted local functions

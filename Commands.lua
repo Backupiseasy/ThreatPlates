@@ -90,10 +90,19 @@ local function TPTPPERF()
 	if TidyPlatesThreat.db.profile.verbose then
 		UpdateAddOnMemoryUsage()
 		local mem = GetAddOnMemoryUsage("TidyPlates_ThreatPlates")
-		t.Print("-->>Threat Plates memory usage: "..tostring(mem))
+		t.Print("-->> Threat Plates memory usage: "..tostring(mem))
 	end
-
 end
 
 SLASH_TPTPPERF1 = "/tptpperformance"
 SlashCmdList["TPTPPERF"] = TPTPPERF
+
+local function TPTPUPDATE()
+	if TidyPlatesThreat.db.profile.verbose then
+		t.Print("Updating settings ...")
+	end
+	t.UpdateConfiguration()
+end
+
+SLASH_TPTPUPDATE1 = "/tptpupdate"
+SlashCmdList["TPTPUPDATE"] = TPTPUPDATE
