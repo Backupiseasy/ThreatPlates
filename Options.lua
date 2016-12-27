@@ -3785,13 +3785,6 @@ local function GetOptions()
 											type = "toggle",
 											order = 10,
 											desc = L["This will toggle the aura widget to only show for your current target."],
-											descStyle = "inline",
-											width = "full",
-											-- set = function(info,val)
-											-- 	-- SetValue(info,val)
-											-- 	db.AuraWidget.ShowTargetOnly = val
-											-- 	ThreatPlatesWidgets.UpdateAuraWidgetSettings()
-											-- end,
 											arg = {"AuraWidget","ShowTargetOnly"},
 										},
 										CooldownSpiral = {
@@ -3799,8 +3792,6 @@ local function GetOptions()
 											type = "toggle",
 											order = 20,
 											desc = L["This will toggle the aura widget to show the cooldown spiral on auras."],
-											descStyle = "inline",
-											width = "full",
 											set = function(info,val)
 												-- SetValue(info,val)
 												db.AuraWidget.ShowCooldownSpiral = val
@@ -3808,22 +3799,28 @@ local function GetOptions()
 											end,
 											arg = {"AuraWidget","ShowCooldownSpiral"},
 										},
+										Stacks = {
+											name = L["Stack Count"],
+											type = "toggle",
+											order = 30,
+											desc = L["Show stack count in parantheses after spell name or as overlay on aura icon (depending on mode)."],
+											arg = {"AuraWidget","ShowStackCount"},
+										},
 										AuraTypeColors = {
 											name = L["Color by Aura Type"],
 											type = "toggle",
-											order = 30,
+											order = 50,
 											desc = L["This will color the aura based on its type (poison, disease, magic, curse) - for Icon Mode the icon border is colored, for Bar Mode the bar itself."],
-											descStyle = "inline",
 											width = "full",
 											arg = {"AuraWidget","ShowAuraType"},
 										},
 										DefaultBuffColor = {
-											name = L["Default Buff Color"], type = "color",	order = 40,	get = GetColorAlpha,
+											name = L["Default Buff Color"], type = "color",	order = 54,	get = GetColorAlpha,
 											set = function(info, r, g, b, a) SetColorAlphaWOCreate(info, r, g, b, a); ThreatPlatesWidgets.UpdateAuraWidgetSettings() end,
 											arg = {"AuraWidget", "DefaultBuffColor"},	hasAlpha = true,
 										},
 										DefaultDebuffColor = {
-											name = L["Default Debuff Color"], type = "color",	order = 50,	get = GetColorAlpha,
+											name = L["Default Debuff Color"], type = "color",	order = 56,	get = GetColorAlpha,
 											set = function(info, r, g, b, a) SetColorAlphaWOCreate(info, r, g, b, a); ThreatPlatesWidgets.UpdateAuraWidgetSettings() end,
 											arg = {"AuraWidget","DefaultDebuffColor"},	hasAlpha = true,
 										},
@@ -5461,5 +5458,5 @@ function TidyPlatesThreat:SetUpOptions()
 	options.args.profiles.order = 10000;
 
 	LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable("Tidy Plates: Threat Plates", options);
-	LibStub("AceConfigDialog-3.0"):SetDefaultSize("Tidy Plates: Threat Plates", 750, 600)
+	LibStub("AceConfigDialog-3.0"):SetDefaultSize("Tidy Plates: Threat Plates", 860, 600)
 end

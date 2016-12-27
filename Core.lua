@@ -383,6 +383,7 @@ function TidyPlatesThreat:OnInitialize()
 				FilterBySpell = {},
 				ShowTargetOnly = false,
 				ShowCooldownSpiral = false,
+				ShowStackCount = true,
 				ShowAuraType = true,
 				DefaultBuffColor = RGB(102, 0, 51, 1),
 				DefaultDebuffColor = 	RGB(255, 0, 0, 1),

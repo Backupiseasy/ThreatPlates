@@ -386,7 +386,7 @@ local function UpdateAuraFrame(frame, texture, duration, expiration, stacks, col
 			end
 
 			frame.LabelText:SetWidth(config_max_label_text_length - frame.TimeText:GetStringWidth())
-			if stacks and stacks > 1 then
+			if TidyPlatesThreat.db.profile.AuraWidget.ShowStackCount and stacks and stacks > 1 then
 				frame.LabelText:SetText(frame.AuraInfo.Name .. " [" .. stacks .. "]")
 			else
 				frame.LabelText:SetText(frame.AuraInfo.Name)
@@ -397,7 +397,7 @@ local function UpdateAuraFrame(frame, texture, duration, expiration, stacks, col
 		else
 			frame.Icon:SetTexture(texture)
 
-			if stacks and stacks > 1 then
+			if TidyPlatesThreat.db.profile.AuraWidget.ShowStackCount and stacks and stacks > 1 then
 				frame.Stacks:SetText(stacks)
 			else
 				frame.Stacks:SetText("")
