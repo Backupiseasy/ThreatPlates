@@ -73,6 +73,7 @@ local function Create(self,name)
     },
     healthbar = {
       texture = t.Media:Fetch('statusbar', db.healthbar.texture),
+      backdrop = t.Media:Fetch('statusbar', db.healthbar.backdrop, true),
       width = 120,
       height = 10,
       x = 0,

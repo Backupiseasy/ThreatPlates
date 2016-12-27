@@ -133,7 +133,7 @@ local function OnUpdate(plate, unit)
         w[k] = nil -- deleted the disabled widget, is that what we want? no re-using it later ...
       end
     end
-	end
+  end
 end
 
 -- TidyPlatesGlobal_OnContextUpdate() is called when a unit is targeted or moused-over.  (Any time the unitid or GUID changes)

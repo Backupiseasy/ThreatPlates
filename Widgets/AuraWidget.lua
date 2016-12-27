@@ -7,7 +7,6 @@ ThreatPlates = NAMESPACE.ThreatPlates
 local RGB = ThreatPlates.RGB
 local DEBUG = ThreatPlates.DEBUG
 
-
 ---------------------------------------------------------------------------------------------------
 -- Aura Widget 2.0
 ---------------------------------------------------------------------------------------------------
@@ -19,7 +18,6 @@ local DEBUG = ThreatPlates.DEBUG
 	frame.Cooldown:SetReverse(true)
 	frame.Cooldown:SetHideCountdownNumbers(true)
 	--]]
-
 
 TidyPlatesWidgets.DebuffWidgetBuild = 2
 
@@ -36,6 +34,8 @@ local inArena = false
 
 local AuraLimit
 local useWideIcons = false
+
+local config_last_update
 local config_bar_mode = false
 local config_grid_rows = 3
 local config_grid_columns = 3
@@ -526,7 +526,6 @@ local function UpdateIconGrid(frame, unitid)
 					UpdateAuraFrame(aura_frame, aura.texture, aura.duration, aura.expiration, aura.stacks, aura.color)
 
 					AuraSlotCount = AuraSlotCount + 1
-					frame.currentAuraCount = index
 				end
 			end
 
@@ -995,16 +994,15 @@ end
 
 local function UpdateAuraWidgetSettings()
 	UpdateFromProfile()
+  config_last_update = GetTime()
 
-	-- Update all widgets
-	for unitid, widget in pairs(WidgetList) do
-		UpdateWidgetConfig(widget)
-	end
+  -- Update all widgets
+  for unitid, widget in pairs(WidgetList) do
+    UpdateWidgetConfig(widget)
+  end
 
-	TidyPlates:ForceUpdate()
+  TidyPlates:ForceUpdate()
 end
-
-
 
 -----------------------------------------------------
 -- External

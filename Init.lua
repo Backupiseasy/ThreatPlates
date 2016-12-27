@@ -85,6 +85,7 @@ t.TTS = function(s)
 	end
 	return list
 end
+
 t.CopyTable = function(input)
 	local output = {}
 	for k,v in pairs(input) do

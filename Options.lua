@@ -508,7 +508,7 @@ local function GetOptions()
 									order = 10,
 									args = {
 										HealthBarTexture = {
-											name = L["Healthbar"],
+											name = L["Foreground Texture"],
 											type = "select",
 											order = 1,
 											dialogControl = "LSM30_Statusbar",
@@ -516,15 +516,69 @@ local function GetOptions()
 											set = SetThemeValue,
 											arg = {"settings","healthbar", "texture"},
 										},
+										BGTexture = {
+											name = L["Background Texture"],
+											type = "select",
+											order = 10,
+											dialogControl = "LSM30_Statusbar",
+											values = AceGUIWidgetLSMlists.statusbar,
+											set = SetThemeValue,
+											arg = {"settings","healthbar", "backdrop"},
+										},
+                    Spacer1 = CreateSpacer(14),
+                    BGColorText = {
+                      type = "description",
+                      order = 15,
+                      width = "single",
+                      name = L["Background Color:"],
+                    },
+                    BGColorForegroundToggle = {
+                      name = L["Same as Foreground"],
+                      order = 20,
+                      type = "toggle",
+                      desc = L["Use the healthbar's foreground color also for the background."],
+                      set = SetThemeValue,
+                      arg = {"settings","healthbar","BackgroundUseForegroundColor"},
+                    },
+                    BGColorCustomToggle = {
+                      name = L["Custom"],
+                      order = 30,
+                      type = "toggle",
+                      width = "half",
+                      desc = L["Use the healthbar's foreground color also for the background."],
+                      set = function (info, val)
+                        SetThemeValue(info, not val)
+                      end,
+                      get = function (info, val)
+                        return not GetValue(info, val)
+                      end,
+                      arg = {"settings","healthbar","BackgroundUseForegroundColor"},
+                    },
+                    BGColorCustom = {
+                      name = L["Color"], type = "color",	order = 35,	get = GetColor, set = SetColor, arg = {"settings", "healthbar", "BackgroundColor"},
+                      width = "half",
+                      desc = L["Use a custom color for the healtbar's background."],
+                      disabled = function() return db.settings.healthbar.BackgroundUseForegroundColor end,
+                    },
+                    BackgroundOpacity = {
+                      name = "Background Opacity",
+                      order = 40,
+                      type = "range",
+                      min = 0,
+                      max = 1,
+                      step = 0.01,
+                      isPercent = true,
+                      arg = {"settings","healthbar","BackgroundOpacity"},
+                    },
 										Header1 = {
 											type = "header",
-											order = 1.5,
+											order = 50,
 											name = "",
 										},
 										HealthBorderToggle = {
 											type = "toggle",
 											width = "double",
-											order = 2,
+											order = 60,
 											name = L["Show Border"],
 											set = SetThemeValue,
 											arg = {"settings","healthborder","show"},
@@ -532,7 +586,7 @@ local function GetOptions()
 										HealthBorder = {
 											type = "select",
 											width = "double",
-											order = 3,
+											order = 70,
 											name = L["Normal Border"],
 											set = SetThemeValue,
 											disabled = function() if db.settings.healthborder.show then return false else return true end end,
@@ -541,20 +595,20 @@ local function GetOptions()
 										},
 										Header2 = {
 											type = "header",
-											order = 3.5,
+											order = 75,
 											name = "",
 										},
 										EliteHealthBorderToggle = {
 											type = "toggle",
 											width = "double",
-											order = 4,
+											order = 80,
 											name = L["Show Elite Border"],
 											arg = {"settings","elitehealthborder","show"},
 										},
 										EliteBorder = {
 											type = "select",
 											width = "double",
-											order = 5,
+											order = 90,
 											name = L["Elite Border"],
 											disabled = function() if db.settings.elitehealthborder.show then return false else return true end end,
 											values = {TP_HealthBarEliteOverlay = "Default",TP_HealthBarEliteOverlayThin = "Thin"},
@@ -562,13 +616,13 @@ local function GetOptions()
 										},
 										Header3 = {
 											type = "header",
-											order = 5.5,
+											order = 95,
 											name = "",
 										},
 										Mouseover = {
 											type = "select",
 											width = "double",
-											order = 6,
+											order = 100,
 											name = L["Mouseover"],
 											set = SetThemeValue,
 											values = {TP_HealthBarHighlight = "Default",Empty = "None"},
@@ -4449,7 +4503,7 @@ local function GetOptions()
 												SetValue(info,val)
 												options.args.Widgets.args.TargetArtWidget.args.Texture.args.Preview.image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\TargetArtWidget\\"..db.targetWidget.theme;
 											end,
-											values = { default = "Default", arrows = "Arrows", crescent = "Crescent", bubble = "Bubble"},
+											values = { default = "Default", squarethin = "Thin Square", arrows = "Arrows", crescent = "Crescent", bubble = "Bubble"},
 											arg = {"targetWidget","theme"},
 										},
 									},

@@ -383,10 +383,12 @@ L["Target Only"] = "Target Only"
 L["This will toggle the aura widget to only show for your current target."] = "This will toggle the aura widget to only show for your current target."
 L["Sizing"] = "Größe"
 L["Cooldown Spiral"] = "Cooldown-Spirale"
-L["This will toggle the aura widget to show the cooldown spiral on auras. (requires /reload)"] = "Hiermit wird die Cooldown-Spirale auf Auren eingeschaltet (erfordert /reload)."
+L["This will toggle the aura widget to show the cooldown spiral on auras."] = "Hiermit wird die Cooldown-Spirale auf Auren eingeschaltet."
 L["Filtering"] = "Filter"
 L["Mode"] = "Modus"
 L["Filtered Auras"] = "Gefilterte Auras"
+L["This widget will display auras that match your filtering on your target nameplate and others you recently moused over. The old aura widget (Aura) must be disabled first."] = "Hiermit werden Auras gemäß des eingestellten Filters auf der Plakette des Ziels sowie auf Zielen, über die kurz zuvor mit der Maus gegangen wurde, angezeigt. Das alte Aura-Widget (Aura) muss zuerst ausgeschaltet werden."
+L["Enable Aura Widget 2.0"] = "Aura-Widget 2.0 einschalten"
 
 ----
 L["Social"] = "Soziale Widgets"

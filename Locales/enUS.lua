@@ -383,10 +383,22 @@ L["Target Only"] = true
 L["This will toggle the aura widget to only show for your current target."] = true
 L["Sizing"] = true
 L["Cooldown Spiral"] = true
-L["This will toggle the aura widget to show the cooldown spiral on auras. (requires /reload)"] = true
+L["This will toggle the aura widget to show the cooldown spiral on auras."] = true
 L["Filtering"] = true
 L["Mode"] = true
 L["Filtered Auras"] = true
+L["This widget will display auras that match your filtering on your target nameplate and others you recently moused over. The old aura widget (Aura) must be disabled first."] = true
+L["Enable Aura Widget 2.0"] = true
+L["Filter by Spell"] = true
+L["Appearance"] = true
+L["Color by Aura Type"] = true
+L["Aura 2.0"] = true
+L["This will color the aura based on its type (poison, disease, magic, curse) - for Icon Mode the icon border is colored, for Bar Mode the bar itself."] = true
+L["Default Buff Color"] = true
+L["Default Debuff Color"] = true
+L["Sort Order"] = true
+L["A to Z"] = true
+L["Sort in ascending alphabetical order."] = true
 
 ----
 L["Social"] = true

@@ -1,11 +1,17 @@
 ------------------------------------------------------
-8.3.0-Alpha1 (works with TidyPlates 6.18.11)
+8.3.0-Beta1 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
-* Added new aura widget 2.0 with icon and bar more and a lot more customization options. To use it, disable the current aura widget first. Use /tptpupdate to copy over your current aura widget settings to the new aura widget 2.0.
+* Added new aura widget 2.0 with icon and bar more and a lot more customization options. To use it, disable the current aura widget first. Use "/threatplates update-profiles" to copy over your current aura widget settings to the new aura widget 2.0.
+* Added an option to show threat glow only on units the player is in combat with (Nameplate Settings - Healthbar - Threat Colors).
+* Added a new default settings for the default profile. Use "/threatplates new-default-profile" to activate them and update the default profile.
+* Added the option to set a background texture for the nameplate healthbar (Nameplate Settings - Healthbar - Textures).
+* Changed default color for healthbar for quest widget.
 * Fixed a bug in quest widget where the quest highlight was still shown although the quest was completed.
 * Fixed a bug in the options dialog where default settings for spec roles where incorrect for newly created profiles.
-* Changed default for healthbar color for quest widget.
-* Added an option to show threat glow only on units the player is in combat with.
+* Fixed a memory leak which reduced frame rate heavily after changing certain options.
+* Known issues:
+  * Changing certain settings in the option dialog may require a /reload for the settings to fully take effect.
+  * Switching between ThreatPlates and other themes may require /reload for the new theme to work correctly
 
 ------------------------------------------------------
 8.2.5 (works with TidyPlates 6.18.11)

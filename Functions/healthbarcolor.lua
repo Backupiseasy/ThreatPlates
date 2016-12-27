@@ -191,11 +191,23 @@ local function SetHealthbarColor(unit)
 		c = GetMarkedColor(unit,c,allowMarked) -- c will set itself back to c if marked color is disabled
 	end
 
-	if c then
-		return c.r, c.g, c.b
-	else
-		return unit.red, unit.green, unit.blue -- should return Blizzard default oclors (based on GetSelectionColor)
-	end
+  if not c then
+    c = {r = unit.red, g = unit.green, b = unit.blue }  -- should return Blizzard default oclors (based on GetSelectionColor)
+  end
+
+  -- set background color for healthbar
+  local bc = c
+  if not db.settings.healthbar.BackgroundUseForegroundColor then
+    bc = db.settings.healthbar.BackgroundColor
+  end
+
+  return c.r, c.g, c.b, nil, bc.r, bc.g, bc.b, db.settings.healthbar.BackgroundOpacity
+
+  --	if c then
+  --	else
+  --		return c.r, c.g, c.b, nil, bc.r, bc.g, bc.b, db.settings.healthbar.BackgroundOpacity
+  --		return unit.red, unit.green, unit.blue, nil, bc.r, bc.g, bc.b, db.settings.healthbar.BackgroundOpacity -- should return Blizzard default oclors (based on GetSelectionColor)
+  --	end
 end
 
 TidyPlatesThreat.SetHealthbarColor = SetHealthbarColor

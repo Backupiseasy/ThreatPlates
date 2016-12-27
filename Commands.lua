@@ -86,23 +86,32 @@ end
 SLASH_TPTPVERBOSE1 = "/tptpverbose"
 SlashCmdList["TPTPVERBOSE"] = TPTPVERBOSE
 
-local function TPTPPERF()
-	if TidyPlatesThreat.db.profile.verbose then
-		UpdateAddOnMemoryUsage()
-		local mem = GetAddOnMemoryUsage("TidyPlates_ThreatPlates")
-		t.Print("-->> Threat Plates memory usage: "..tostring(mem))
-	end
+local function PrintHelp()
+	t.Print(L["Usage: /threatplates [options]"], true)
+	t.Print(L["  options:"], true)
+	t.Print(L["    update-profiles      Migrates deprecated settings in your configuration"], true)
+	t.Print(L["    new-default-profile  Updates the default profile with new default settings"], true)
+	t.Print(L["    help                 Prints this help message"], true)
 end
 
-SLASH_TPTPPERF1 = "/tptpperformance"
-SlashCmdList["TPTPPERF"] = TPTPPERF
-
-local function TPTPUPDATE()
-	if TidyPlatesThreat.db.profile.verbose then
-		t.Print("Updating settings ...")
+-- /threatplates
+local function THREATPLATES(message, editbox)
+	-- split commands by space
+	--for word in message:gmatch("%S+") do
+	if message == "update-profiles" then
+		t.Print(L["Migrating deprecated settings in configuration ..."])
+		t.UpdateConfiguration()
+	elseif message == "new-default-profile" then
+		t.Print(L["Updating default profile with new default settings ..."])
+		t.UpdateDefaultProfile()
+	elseif message == "help" then
+		PrintHelp()
+	else
+		t.Print(L["Unknown option: "] .. message, true)
+		PrintHelp()
 	end
-	t.UpdateConfiguration()
+	--end
 end
 
-SLASH_TPTPUPDATE1 = "/tptpupdate"
-SlashCmdList["TPTPUPDATE"] = TPTPUPDATE
+SLASH_THREATPLATES1 = "/threatplates"
+SlashCmdList["THREATPLATES"] = THREATPLATES
