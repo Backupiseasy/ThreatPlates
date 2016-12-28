@@ -4,8 +4,10 @@ ThreatPlates = NAMESPACE.ThreatPlates
 -----------------------
 -- Class Icon Widget --
 -----------------------
-local path = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ClassIconWidget\\"
+local PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ClassIconWidget\\"
+local PATH_THEME
 -- local WidgetList = {}
+
 
 ---------------------------------------------------------------------------------------------------
 -- Threat Plates functions
@@ -15,15 +17,13 @@ local function enabled()
 	return TidyPlatesThreat.db.profile.classWidget.ON
 end
 
-local function UpdateWidgetConfig(frame, class)
+local function UpdateWidgetConfig(frame)
 	local db = TidyPlatesThreat.db.profile.classWidget
-	frame:SetHeight(db.scale)
-	frame:SetWidth(db.scale)
-	frame:SetPoint(db.anchor, frame:GetParent(), db.x, db.y)
 
-	if class then
-		frame.Icon:SetTexture(path..db.theme.."\\"..class)
-	end
+	frame:SetPoint(db.anchor, frame:GetParent(), db.x, db.y)
+	frame:SetSize(db.scale, db.scale)
+
+  PATH_THEME = PATH .. db.theme .."\\"
 end
 
 -- hides/destroys all widgets of this type created by Threat Plates
@@ -43,6 +43,7 @@ end
 local function UpdateWidgetFrame(frame, unit)
 	-- TODO: optimization - is it necessary to determine the class everytime this function is called on only if the guid changes?
 	local db = TidyPlatesThreat.db.profile
+
 	local class
 	if unit.type == "PLAYER" then
 		if unit.reaction == "HOSTILE" then
@@ -57,13 +58,14 @@ local function UpdateWidgetFrame(frame, unit)
 			-- 		class = db.cache[unit.name]
 			-- 	end
 			-- else
- 				class = unit.class
+			class = unit.class
 			-- end
 		end
 	end
 
 	if class then -- Value shouldn't need to change
-		UpdateWidgetConfig(frame, class)
+    UpdateWidgetConfig(frame)
+    frame.Icon:SetTexture(PATH_THEME .. class)
 		frame:Show()
 	else
 		frame:_Hide()
@@ -99,19 +101,16 @@ local function ClearWidgetContext(frame)
 	end
 end
 
-local function CreateWidgetFrame(parent)
+local function CreateWidgetFrame(plate)
 	-- Required Widget Code
-	local frame = CreateFrame("Frame", nil, parent)
+	local frame = CreateFrame("Frame", nil, plate)
 	frame:Hide()
 
 	-- Custom Code III
 	--------------------------------------
-	frame:SetHeight(64)
-	frame:SetWidth(64)
 	frame.Icon = frame:CreateTexture(nil, "OVERLAY")
-	frame.Icon:SetAllPoints(frame)
-
-	frame.UpdateConfig = UpdateWidgetConfig
+  frame.Icon:SetAllPoints(frame)
+	--frame.UpdateConfig = UpdateWidgetConfig
 	--------------------------------------
 	-- End Custom Code
 
