@@ -7,7 +7,7 @@ ThreatPlates = NAMESPACE.ThreatPlates
 
 local isAuraEnabled
 local OldUpdate
-local OldUpdateConfig
+--local OldUpdateConfig
 
 -- two constants from TidyPlates AuraWidget
 local AURA_TARGET_HOSTILE = 1
@@ -247,10 +247,10 @@ local function CreateAuraWidget(plate)
 
 	TidyPlatesWidgets.SetAuraFilter(AuraFilter)
 	frame.OldUpdate = frame.Update
-	frame.OldUpdateConfig = frame.UpdateConfig
+--	frame.OldUpdateConfig = frame.UpdateConfig
 	frame.Update = CustomUpdateWidgetFrame
 	frame.UpdateContext = CustomUpdateWidgetFrame
-	frame.UpdateConfig = CustomUpdateConfig
+--	frame.UpdateConfig = CustomUpdateConfig
 	-- frame.UpdateTarget = UpdateWidgetTarget - not yet used, I think
 
 	-- disable spiral cooldown an aura icons
