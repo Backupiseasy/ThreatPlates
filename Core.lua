@@ -402,7 +402,7 @@ function TidyPlatesThreat:OnInitialize()
 					BarWidth = 100,
 					BarSpacing = 2,
 					MaxBars = 10,
-					Texture = "Blizzard",
+					Texture = "Aluminium",
 					Font = "Arial Narrow",
 					FontSize = 10,
 					FontColor = RGB(255, 255, 255),
