@@ -269,7 +269,7 @@ local function CreateAuraWidget(plate)
 	return frame
 end
 
-ThreatPlatesWidgets.RegisterWidget("AuraWidgetThreatPlates", CreateAuraWidget, false, enabled)
+ThreatPlatesWidgets.RegisterWidget("AuraWidgetTPTP", CreateAuraWidget, false, enabled)
 ThreatPlatesWidgets.PrepareFilter = PrepareFilter
 
 ------------------------

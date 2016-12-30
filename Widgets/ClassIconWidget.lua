@@ -123,4 +123,4 @@ local function CreateWidgetFrame(plate)
 	return frame
 end
 
-ThreatPlatesWidgets.RegisterWidget("ClassIconWidget", CreateWidgetFrame, false, enabled)
+ThreatPlatesWidgets.RegisterWidget("ClassIconWidgetTPTP", CreateWidgetFrame, false, enabled)

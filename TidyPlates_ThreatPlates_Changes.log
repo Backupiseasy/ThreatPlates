@@ -1,12 +1,15 @@
 ------------------------------------------------------
 8.3.0-Beta2 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
+* Fixed inefficient memory allocation in aura widget.
 * Added an option to show or hide stack count on auras (for aura widget 2.0).
+* Several changes to the options dialog to improve consistency in naming and layout.
+* Use /tptp <command> to update to new default profile oder to migration settings instead of /threatplates. Use ""/tptp help" for command line usage help.
 
 ------------------------------------------------------
 8.3.0-Beta1 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
-* Added new aura widget 2.0 with icon and bar more and a lot more customization options. To use it, disable the current aura widget first. Use "atom/threatplates update-profiles" to copy over your current aura widget settings to the new aura widget 2.0.
+* Added new aura widget 2.0 with icon and bar more and a lot more customization options. To use it, disable the current aura widget first. Use "/threatplates update-profiles" to copy over your current aura widget settings to the new aura widget 2.0.
 * Added an option to show threat glow only on units the player is in combat with (Nameplate Settings - Healthbar - Threat Colors).
 * Added a new default settings for the default profile. Use "/threatplates new-default-profile" to activate them and update the default profile.
 * Added the option to set a background texture for the nameplate healthbar (Nameplate Settings - Healthbar - Textures).

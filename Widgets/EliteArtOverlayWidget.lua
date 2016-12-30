@@ -97,4 +97,4 @@ local function CreateWidgetFrame(parent)
 	return frame
 end
 
-ThreatPlatesWidgets.RegisterWidget("EliteBorder", CreateWidgetFrame, false, enabled)
+ThreatPlatesWidgets.RegisterWidget("EliteBorderTPTP", CreateWidgetFrame, false, enabled)

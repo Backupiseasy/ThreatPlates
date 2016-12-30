@@ -24,11 +24,11 @@ local RGB = function(red, green, blue, alpha)
 end
 
 t.Update = function()
+	-- ForceUpdate() is called in SetTheme()
 	if (TidyPlatesOptions.ActiveTheme == THREAD_PLATES_NAME) then
 		TidyPlates:SetTheme(THREAD_PLATES_NAME)
 	end
 	-- TidyPlates:ForceUpdate()
-	-- reload theme is deprecated and empty, ForceUpdate() is called in SetTheme()
 end
 
 t.Meta = function(value)
@@ -150,37 +150,46 @@ t.DEBUG = function(...)
 	print ("DEBUG: ", ...)
 end
 
+t.DEBUG_SIZE = function(msg, data)
+  if type(data) == "table" then
+    local no = 0
+    for k, v in pairs(data) do no = no + 1 end
+    t.DEBUG(msg, no)
+  else
+    t.DEBUG(msg, "<no table>")
+  end
+end
 -- Function from: https://coronalabs.com/blog/2014/09/02/tutorial-printing-table-contents/
-t.DEBUG_PRINT_TABLE = function( t )
+t.DEBUG_PRINT_TABLE = function(data)
 	local print_r_cache={}
-	local function sub_print_r(t,indent)
-		if (print_r_cache[tostring(t)]) then
-			print (indent.."*"..tostring(t))
+	local function sub_print_r(data,indent)
+		if (print_r_cache[tostring(data)]) then
+      t.DEBUG (indent.."*"..tostring(data))
 		else
-			print_r_cache[tostring(t)]=true
-			if (type(t)=="table") then
-				for pos,val in pairs(t) do
+			print_r_cache[tostring(data)]=true
+			if (type(data)=="table") then
+				for pos,val in pairs(data) do
 					if (type(val)=="table") then
-						print (indent.."["..pos.."] => "..tostring(t).." {")
+            t.DEBUG (indent.."["..pos.."] => "..tostring(data).." {")
 						sub_print_r(val,indent..string.rep(" ",string.len(pos)+8))
-						print (indent..string.rep(" ",string.len(pos)+6).."}")
+            t.DEBUG (indent..string.rep(" ",string.len(pos)+6).."}")
 					elseif (type(val)=="string") then
-						print (indent.."["..pos..'] => "'..val..'"')
+            t.DEBUG (indent.."["..pos..'] => "'..val..'"')
 					else
-						print (indent.."["..pos.."] => "..tostring(val))
+            t.DEBUG (indent.."["..pos.."] => "..tostring(val))
 					end
 				end
 			else
-				print (indent..tostring(t))
+        t.DEBUG (indent..tostring(data))
 			end
 		end
 	end
-	if (type(t)=="table") then
-		print (tostring(t).." {")
-		sub_print_r(t,"  ")
-		print ("}")
+	if (type(data)=="table") then
+    t.DEBUG (tostring(data).." {")
+		sub_print_r(data,"  ")
+    t.DEBUG ("}")
 	else
-		sub_print_r(t,"  ")
+		sub_print_r(data,"  ")
 	end
 end
 

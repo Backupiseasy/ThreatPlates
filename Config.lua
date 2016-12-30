@@ -68,9 +68,9 @@ local function ConvertAuraWidget1(profile_name, profile)
   local old_setting = profile.debuffWidget
   if old_setting then
     ThreatPlates.Print (L["Profile "] .. profile_name .. L[": Converting settings from aura widget to aura widget 2.0 ..."])
-    local new_setting = profile.AuraWidget
 
-    if not new_setting then new_setting = {} end
+    if not profile.AuraWidget then profile.AuraWidget = {} end
+    local new_setting = profile.AuraWidget
     if not new_setting.ModeIcon then new_setting.ModeIcon = {} end
 
     new_setting.y = old_setting.y

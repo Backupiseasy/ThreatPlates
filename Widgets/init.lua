@@ -5,6 +5,11 @@ local ThreatPlates = NAMESPACE.ThreatPlates
 -- Widget Handling --
 ---------------------
 
+---------------------------------------------------------------------------------------------------
+-- Imported functions and constants
+---------------------------------------------------------------------------------------------------
+local DEBUG = ThreatPlates.DEBUG
+
 -- Information about widget layering, from highest to lowest
 --    +2: combo points
 -- 		+1: auras
@@ -36,13 +41,11 @@ local function UnregisterWidget(name)
 	ThreatPlatesWidgets.list[name] = nil
 end
 
-local function CreateWidget(plate, widget_name, widget_data)
-  local w = plate.widgets
-
-  if not w[widget_name] then
-    local widget = widget_data.create(plate)
-    widget.TP_Widget = true -- mark ThreatPlates widgets
-    w[widget_name] = widget
+local function HideWidget(widget_list, widget_name)
+  local widget = widget_list[widget_name]
+  if widget then
+    widget:Hide()
+    widget_list[widget_name] = nil -- deleted the disabled widget, is that what we want? no re-using it later ...
   end
 end
 
@@ -50,12 +53,15 @@ end
 -- activetheme is the table, not just the name
 local function OnInitialize(plate, theme)
 	if theme then
-		local w = plate.widgets
+		local widget_list = plate.widgets
 
-		-- disable all non Threat Plates widgets - unless they do it themeselves
-    for widgetname, widget in pairs(plate.widgets) do
-			if not widget.TP_Widget then widget:Hide() end
-		end
+		-- disable all non Threat Plates widgets - unless they do it themeselves, better is  to use /reload after a theme switch
+--    for widgetname, widget in pairs(plate.widgets) do
+--			if not widget.TP_Widget then
+--        widget:Hide()
+--        DEBUG("Hiding widget: ", widgetname)
+--      end
+--		end
 
 --		for k,v in pairs(ThreatPlatesWidgets.list) do
 --			if (not w[k]) or (not w[k].TP_Widget) then
@@ -71,14 +77,19 @@ local function OnInitialize(plate, theme)
 --			end
 --		end
 
-		for k,v in pairs(ThreatPlatesWidgets.list) do
+		for name,v in pairs(ThreatPlatesWidgets.list) do
 			if v.enabled() then
-        CreateWidget(plate, k, v)
-			else
-				if w[k] then
-					w[k]:Hide()
-					w[k] = nil -- deleted the disabled widget, is that what we want? no re-using it later ...
-				end
+        local widget = widget_list[name]
+
+        if not widget then
+          widget = v.create(plate) -- UpdateConfig should/must be called in create()
+--          widget.TP_Widget = true -- mark ThreatPlates widgets
+          widget_list[name] = widget
+        else
+          if widget.UpdateConfig then widget:UpdateConfig() end
+        end
+      else
+        HideWidget(widget_list, name)
 			end
 		end
 
@@ -110,28 +121,30 @@ end
 -- TidyPlatesGlobal_OnUpdate() is called when other data about the unit changes, or is requested by an external controller.
 local function OnUpdate(plate, unit)
 	local style = TidyPlatesThreat.SetStyle(unit)
-	local w = plate.widgets
+	local widget_list = plate.widgets
 
-	for k,v in pairs(ThreatPlatesWidgets.list) do
-
+	for name,v in pairs(ThreatPlatesWidgets.list) do
     if v.enabled() then
-      CreateWidget(plate, k, v)
+      local widget = widget_list[name]
+
+      -- Because widgets can be disabled anytime, it is not guaranteed that it exists after OnInitialize
+      if not widget then
+        widget = v.create(plate)
+        widget_list[name] = widget
+      end
 
       -- Diable all widgets in headline view mode
       if style == "NameOnly" or style == "etotem" or style == "empty" then
-        w[k]:_Hide()
+        widget_list[name]:_Hide()
       else
         -- context means that widget is only relevant for target (or mouse-over)
         if not v.isContext then
-          w[k]:Update(unit, style)
+          widget_list[name]:Update(unit, style)
           if unit.isTarget then	plate:SetFrameStrata("LOW") else plate:SetFrameStrata("BACKGROUND")	end
         end
       end
     else
-      if w[k] then
-        w[k]:Hide()
-        w[k] = nil -- deleted the disabled widget, is that what we want? no re-using it later ...
-      end
+      HideWidget(widget_list, name)
     end
   end
 end
@@ -140,23 +153,27 @@ end
 -- OnContextUpdate must only do something when there is something unit-dependent to display?
 local function OnContextUpdate(plate, unit)
 	local style = TidyPlatesThreat.SetStyle(unit)
-	local w = plate.widgets
+	local widget_list = plate.widgets
 
-	for k,v in pairs(ThreatPlatesWidgets.list) do
+	for name,v in pairs(ThreatPlatesWidgets.list) do
     if v.enabled() then
-      CreateWidget(plate, k, v)
+      local widget = widget_list[name]
 
+      -- Because widgets can be disabled anytime, it is not guaranteed that it exists after OnInitialize
+      if not widget then
+        widget = v.create(plate)
+        widget_list[name] = widget
+      end
+
+      -- Diable all widgets in headline view mode
       if style == "NameOnly" or style == "etotem" or style == "empty" then
-        w[k]:_Hide()
+        widget_list[name]:_Hide()
       else
-        w[k]:UpdateContext(unit, style)
+        widget_list[name]:UpdateContext(unit, style)
         if unit.isTarget then	plate:SetFrameStrata("LOW") else plate:SetFrameStrata("BACKGROUND") end
       end
     else
-      if w[k] then
-        w[k]:Hide()
-        w[k] = nil -- deleted the disabled widget, is that what we want? no re-using it later ...
-      end
+      HideWidget(widget_list, name)
     end
 	end
 end

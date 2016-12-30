@@ -162,4 +162,4 @@ end
 TidyPlatesThreat.IsQuestUnit = IsQuestUnit
 TidyPlatesThreat.ShowQuestUnit = ShowQuestUnit
 
-ThreatPlatesWidgets.RegisterWidget("QuestWidget", CreateWidgetFrame, false, enabled)
+ThreatPlatesWidgets.RegisterWidget("QuestWidgetTPTP", CreateWidgetFrame, false, enabled)
