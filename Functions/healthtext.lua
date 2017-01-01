@@ -49,10 +49,16 @@ local function SetCustomText(unit)
 	end
 
 	if db.percent then
+		-- Blizzard calculation:
+		-- local perc = math.ceil(100 * (UnitHealth(frame.displayedUnit)/UnitHealthMax(frame.displayedUnit)));
+
+		local perc = math.ceil(100 * (unit.health / unit.healthmax))
+		-- old: floor(100*(unit.health / unit.healthmax))
+
 		if HpMax ~= "" or HpAmt ~= "" then
-			HpPct = " - "..floor(100*(unit.health / unit.healthmax)).."%"
+			HpPct = " - "..perc.."%"
 		else
-			HpPct = floor(100*(unit.health / unit.healthmax)).."%"
+			HpPct = perc.."%"
 		end
 	end
 

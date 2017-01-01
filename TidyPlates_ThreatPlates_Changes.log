@@ -3,6 +3,8 @@
 ------------------------------------------------------
 * Fixed inefficient memory allocation in aura widget.
 * Added an option to show or hide stack count on auras (for aura widget 2.0).
+* Adjusted health percentage calculation to Blizzard default calculation (using ceil instead of floor).
+* Implemented smooth update for statusbar for Aura Widget 2.0 in bar mode.
 * Several changes to the options dialog to improve consistency in naming and layout.
 * Use /tptp <command> to update to new default profile oder to migration settings instead of /threatplates. Use ""/tptp help" for command line usage help.
 

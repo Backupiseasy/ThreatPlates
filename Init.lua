@@ -17,6 +17,7 @@ local L = t.L
 -- General Functions
 ---------------------------------------------------------------------------------------------------
 
+-- Create a percentage-based WoW color based on integer values from 0 to 255 with optional alpha value
 local RGB = function(red, green, blue, alpha)
 	local color = { r = red/255, g = green/255, b = blue/255 }
 	if alpha then color.a = alpha end
@@ -147,7 +148,7 @@ t.SPEC_ROLES = {
 ---------------------------------------------------------------------------------------------------
 
 t.DEBUG = function(...)
-	print ("DEBUG: ", ...)
+	--print ("DEBUG: ", ...)
 end
 
 t.DEBUG_SIZE = function(msg, data)

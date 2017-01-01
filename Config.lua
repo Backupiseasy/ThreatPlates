@@ -35,6 +35,7 @@ local function UpdateDefaultProfile()
   db.profile.settings.spelltext.typeface = "Friz Quadrata TT"
   db.profile.settings.spelltext.size = 8
   db.profile.settings.spelltext.y = -15
+  db.profile.settings.eliteicon.show = false
   db.profile.threat.useScale = false
   db.profile.threat.art.ON = false
   db.profile.questWidget.ON = true

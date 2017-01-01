@@ -630,7 +630,7 @@ local function GetOptions()
                       disabled = function() return db.settings.healthbar.BackgroundUseForegroundColor end,
                     },
                     BackgroundOpacity = {
-                      name = "Background Opacity",
+                      name = L["Background Opacity"],
                       order = 40,
                       type = "range",
                       min = 0,
@@ -3487,13 +3487,13 @@ local function GetOptions()
 											disabled = function() return not db.debuffWidget.ON end,
 											args = {
 												ShowFriendly = {
-													name = "Show Friendly",
+													name = L["Show Friendly"],
 													order = 1,
 													type = "toggle",
 													arg = {"debuffWidget","showFriendly"},
 												},
 												ShowEnemy = {
-													name = "Show Enemy",
+													name = L["Show Enemy"],
 													order = 2,
 													type = "toggle",
 													arg = {"debuffWidget","showEnemy"}
@@ -3677,19 +3677,19 @@ local function GetOptions()
 									disabled = function() return not db.AuraWidget.ON end,
 									args = {
 										Show = {
-											name = "Filter by Unit Reaction",
+											name = L["Filter by Unit Reaction"],
 											type = "group",
 											order = 2,
 											inline = true,
 											args = {
 												ShowFriendly = {
-													name = "Show Friendly",
+													name = L["Show Friendly"],
 													order = 1,
 													type = "toggle",
 													arg = {"AuraWidget","ShowFriendly"},
 												},
 												ShowEnemy = {
-													name = "Show Enemy",
+													name = L["Show Enemy"],
 													order = 2,
 													type = "toggle",
 													arg = {"AuraWidget","ShowEnemy"}
@@ -3697,7 +3697,7 @@ local function GetOptions()
 											},
 										},
 										Display = {
-											name = "Filter by Aura Type",
+											name = L["Filter by Dispel Type"],
 											type = "multiselect",
 											order = 3,
 											values = {
@@ -3769,11 +3769,11 @@ local function GetOptions()
 											name = L["Stack Count"],
 											type = "toggle",
 											order = 30,
-											desc = L["Show stack count in parantheses after spell name or as overlay on aura icon (depending on mode)."],
+											desc = L["Show stack count as overlay on aura icon."],
 											arg = {"AuraWidget","ShowStackCount"},
 										},
 										AuraTypeColors = {
-											name = L["Color by Aura Type"],
+											name = L["Color by Dispel Type"],
 											type = "toggle",
 											order = 50,
 											desc = L["This will color the aura based on its type (poison, disease, magic, curse) - for Icon Mode the icon border is colored, for Bar Mode the bar itself."],
@@ -3816,13 +3816,13 @@ local function GetOptions()
 										},
 										Creation = {
 											name = L["Creation"], type = "toggle",	order = 40,	 width = "half",
-											desc = L["Show bars in order created with oldest aura first."],
+											desc = L["Show auras in order created with oldest aura first."],
 											get = function(info) return db.AuraWidget.SortOrder == "Creation" end,
 											set = function(info, value) SetValuePlain(info, "Creation") end,
 											arg = {"AuraWidget","SortOrder"},
 										},
 										ReverseOrder = {
-											name = L["Reverse Order"], type = "toggle",	order = 50,	desc = L['Reverse the sort order (e.g., "A to Z" becomes "Z to A")..'],	arg = { "AuraWidget", "SortReverse" },
+											name = L["Reverse Order"], type = "toggle",	order = 50,	desc = L['Reverse the sort order (e.g., "A to Z" becomes "Z to A").'],	arg = { "AuraWidget", "SortReverse" },
                       set = SetValuePlain,
 										},
 									},
@@ -4499,7 +4499,7 @@ local function GetOptions()
 							type = "description",
 							order = 4,
 							width = "full",
-							name = "deDE: Blacksalsify (origial  author: Aideen@Perenolde/EU)"
+							name = "deDE: Blacksalsify (original  author: Aideen@Perenolde/EU)"
 						},
 						Translators2 = {
 							type = "description",
@@ -4542,11 +4542,6 @@ local function GetOptions()
 							order = 11,
 							width = "full",
 							name = "zhTW: Need Translator!!"
-						},
-						Header2 = {
-							order = 12,
-							type = "header",
-							name = "Alpha Features",
 						},
 					},
 				},

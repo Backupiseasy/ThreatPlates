@@ -1,5 +1,4 @@
 local ADDON_NAME, NAMESPACE = ...
-local ADDON_NAME, NAMESPACE = ...
 ThreatPlates = NAMESPACE.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------
@@ -62,37 +61,41 @@ local AuraType_Index = {
 -- PolledHideIn() - Registers a callback, which polls the frame until it expires, then hides the frame and removes the callback
 ---------------------------------------------------------------------------------------------------
 
-local Watcherframe = CreateFrame("Frame")
-local WatcherframeActive = false
+local watcher_frame = CreateFrame("Frame")
+local watcher_frame_active = false
 
-local Framelist = {}			-- Key = Frame, Value = Expiration Time
-local updateInterval = .5
+local UPDATE_INTERVAL = 0.5 -- Default for icon mode is 0.5, for bar mode "1 / GetFramerate()" is used for smooth updates -- GetFramerate() in frames/second
+local time_to_update = 0
+local framelist = {}			-- Key = Frame, Value = Expiration Time
+
 local PolledHideIn
-local timeToUpdate = 0
 
 local function CheckFramelist(self)
-	local curTime = GetTime()
-	if curTime < timeToUpdate then return end
+  -- update only every UpdateInterval seconds
+  local cur_time = GetTime()
+  if cur_time < time_to_update then return end
+  time_to_update = cur_time + UPDATE_INTERVAL
 
-	local framecount = 0
-	timeToUpdate = curTime + updateInterval
-
+  local framecount = 0
 	-- Cycle through the watchlist, hiding frames which are timed-out
-	for frame, expiration in pairs(Framelist) do
+	for frame, expiration in pairs(framelist) do
     -- frame here is a single aura frame, not the aura widget frame
 		-- If expired...
-		if expiration < curTime and frame.AuraInfo.Duration > 0 then
-      DEBUG ("Expire Aura: ", frame:GetParent().unitid, frame.AuraInfo.Name)
+    local duration = frame.AuraInfo.duration
+
+		if expiration < cur_time and duration > 0 then
+      --DEBUG ("Expire Aura: ", frame:GetParent().unitid, frame.AuraInfo.name)
+      --DEBUG ("Expire Aura: ", frame.AuraInfo.name)
 			if frame.Expire and frame:GetParent():IsShown() then
         frame:Expire()
       end
 
 			frame:Hide()
-			Framelist[frame] = nil
+			framelist[frame] = nil
 		else
       -- If still shown ... update the frame
 			if frame.Poll and frame:GetParent():IsShown() then
-        frame:Poll(expiration)
+        frame:Poll(expiration, duration)
       end
       framecount = framecount + 1
     end
@@ -100,24 +103,22 @@ local function CheckFramelist(self)
 
 	-- If no more frames to watch, unregister the OnUpdate script
 	if framecount == 0 then
-    Watcherframe:SetScript("OnUpdate", nil)
-    WatcherframeActive = false
+    watcher_frame:SetScript("OnUpdate", nil)
+    watcher_frame_active = false
   end
 end
 
-local function PolledHideIn(frame, expiration)
-
-	--frame.AuraInfo.Duration == 0
-	if not expiration then
+local function PolledHideIn(frame, expiration, duration)
+  if not expiration then
 		frame:Hide()
-		Framelist[frame] = nil
-	else
-		Framelist[frame] = expiration
+		framelist[frame] = nil
+  else
+		framelist[frame] = expiration
 		frame:Show()
 
-    if not WatcherframeActive then
-			Watcherframe:SetScript("OnUpdate", CheckFramelist)
-			WatcherframeActive = true
+    if not watcher_frame_active then
+			watcher_frame:SetScript("OnUpdate", CheckFramelist)
+			watcher_frame_active = true
 		end
 	end
 end
@@ -149,25 +150,18 @@ end
 -- urses a purple border, and physical debuffs a red border
 local AURA_TYPE = { Buff = 1, Curse = 2, Disease = 3, Magic = 4, Poison = 5, Debuff = 6, }
 
-local AURA_TYPE_COLORS = {
-		Curse = RGB(255, 0, 255),
-		Disease = RGB(128, 51, 0),
-		Magic = RGB(0, 102, 255),
-		Poison = RGB(0, 255, 0),
-	}
-
 local function GetColorForAura(aura)
 	local db = TidyPlatesThreat.db.profile.AuraWidget
 
 	local color
 	if aura.effect == "HARMFUL" then
-		color = db.DefaultDebuffColor
-	else
-		color = db.DefaultBuffColor
+    color = db.DefaultDebuffColor
+  else
+    color = db.DefaultBuffColor
 	end
 
-	if db.ShowAuraType then
-		color = AURA_TYPE_COLORS[aura.type] or color
+	if aura.type and db.ShowAuraType then
+    color = DebuffTypeColor[aura.type]
 	end
 
 	return color
@@ -300,7 +294,7 @@ end
 -- Widget Object Functions
 -------------------------------------------------------------
 
-local function UpdateWidgetTimeIcon(frame, expiration)
+local function UpdateWidgetTimeIcon(frame, expiration, duration)
 	if expiration == 0 then
 		frame.TimeLeft:SetText("")
 	else
@@ -315,8 +309,8 @@ local function UpdateWidgetTimeIcon(frame, expiration)
 	end
 end
 
-local function UpdateWidgetTimeBar(frame, expiration)
-	if frame.AuraInfo.Duration == 0 then
+local function UpdateWidgetTimeBar(frame, expiration, duration)
+	if duration == 0 then
 		frame.TimeText:SetText("")
 		frame.Statusbar:SetValue(100)
 	elseif expiration == 0 then
@@ -330,74 +324,77 @@ local function UpdateWidgetTimeBar(frame, expiration)
 		else
 			frame.TimeText:SetText(floor(timeleft))
 		end
-		frame.Statusbar:SetValue(timeleft * 100 / frame.AuraInfo.Duration)
+		frame.Statusbar:SetValue(timeleft * 100 / duration)
 	end
 end
 
-local function UpdateWidgetTime(frame, expiration)
+local function UpdateWidgetTime(frame, expiration, duration)
 	if CONFIG_MODE_BAR then
-		UpdateWidgetTimeBar(frame, expiration)
+		UpdateWidgetTimeBar(frame, expiration, duration)
 	else
-		UpdateWidgetTimeIcon(frame, expiration)
+		UpdateWidgetTimeIcon(frame, expiration, duration)
 	end
 end
 
-local function UpdateAuraFrame(frame, texture, duration, expiration, stacks, color)
-	if frame and texture and expiration then
-		local db = TidyPlatesThreat.db.profile.AuraWidget.ModeBar
+local function UpdateAuraFrame(frame) -- texture, duration, expiration, stacks, color, name)
+  local db = TidyPlatesThreat.db.profile.AuraWidget
 
-		-- Expiration
-		UpdateWidgetTime(frame, expiration)
+  local aura_info = frame.AuraInfo
+  local name = aura_info.name
+  local duration = aura_info.duration
+  local texture = aura_info.texture
+  local expiration = aura_info.expiration
+  local stacks = aura_info.stacks
+  local color = aura_info.color
 
-    if TidyPlatesThreat.db.profile.AuraWidget.ShowStackCount and stacks and stacks > 1 then
-      frame.Stacks:SetText(stacks)
-    else
-      frame.Stacks:SetText("")
-    end
+  -- Expiration
+  UpdateWidgetTime(frame, expiration, duration)
 
-		if CONFIG_MODE_BAR then
+  if db.ShowStackCount and stacks and stacks > 1 then
+    frame.Stacks:SetText(stacks)
+  else
+    frame.Stacks:SetText("")
+  end
+
+  if CONFIG_MODE_BAR then
 --      frame.Statusbar:SetWidth(db.BarWidth)
 
-			-- Icon
-			if db.ShowIcon then
-				frame.Icon:SetTexture(texture)
-			end
+    -- Icon
+    if db.ModeBar.ShowIcon then
+      frame.Icon:SetTexture(texture)
+    end
 
-			frame.LabelText:SetWidth(CONFIG_LABEL_LENGTH - frame.TimeText:GetStringWidth())
-      frame.LabelText:SetText(frame.AuraInfo.Name)
-      --			if TidyPlatesThreat.db.profile.AuraWidget.ShowStackCount and stacks and stacks > 1 then
-      --				frame.LabelText:SetText(frame.AuraInfo.Name .. " [" .. stacks .. "]")
-      --			else
-      --				frame.LabelText:SetText(frame.AuraInfo.Name)
-      --			end
+    frame.LabelText:SetWidth(CONFIG_LABEL_LENGTH - frame.TimeText:GetStringWidth())
+    frame.LabelText:SetText(name)
+    --			if TidyPlatesThreat.db.profile.AuraWidget.ShowStackCount and stacks and stacks > 1 then
+    --				frame.LabelText:SetText(frame.AuraInfo.Name .. " [" .. stacks .. "]")
+    --			else
+    --				frame.LabelText:SetText(frame.AuraInfo.Name)
+    --			end
 
-			-- Highlight Coloring
-			frame.Statusbar:SetStatusBarColor(color.r, color.g, color.b, color.a or 1)
-		else
-			frame.Icon:SetTexture(texture)
+    -- Highlight Coloring
+    frame.Statusbar:SetStatusBarColor(color.r, color.g, color.b, color.a or 1)
+  else
+    frame.Icon:SetTexture(texture)
 
-			-- Highlight Coloring
-			if TidyPlatesThreat.db.profile.AuraWidget.ShowAuraType then
-				frame.BorderHighlight:SetVertexColor(color.r, color.g, color.b)
-				frame.BorderHighlight:Show()
-				frame.Border:Hide()
-			else
-				frame.BorderHighlight:Hide()
-				frame.Border:Show()
-			end
+    -- Highlight Coloring
+    if db.ShowAuraType then
+      frame.BorderHighlight:SetVertexColor(color.r, color.g, color.b)
+      frame.BorderHighlight:Show()
+      frame.Border:Hide()
+    else
+      frame.BorderHighlight:Hide()
+      frame.Border:Show()
+    end
 
-			-- [[ Cooldown
-			if duration and duration > 0 and expiration and expiration > 0 then
-				SetCooldown(frame.Cooldown, expiration-duration, duration+.25)
-			end
-			--]]
-		end
+    -- [[ Cooldown
+    if duration and duration > 0 and expiration and expiration > 0 then
+      SetCooldown(frame.Cooldown, expiration-duration, duration+.25)
+    end
+    --]]
+  end
 
-		--frame:Show()
-		PolledHideIn(frame, expiration)
-	elseif frame then
-		PolledHideIn(frame)
-	end
+  PolledHideIn(frame, expiration, duration)
 end
 
 local function UpdateIconGrid(frame, unitid)
@@ -410,7 +407,6 @@ local function UpdateIconGrid(frame, unitid)
     unitReaction = AURA_TARGET_HOSTILE
   end
 
-  local aura_frames = frame.AuraFrames
   local aura_count = 1
 
   -- Cache displayable auras
@@ -474,6 +470,7 @@ local function UpdateIconGrid(frame, unitid)
 
   -- Display Auras
   ------------------------------------------------------------------------------------------------------
+  local aura_frame_list = frame.AuraFrames
   local max_auras_no = min(aura_count, CONFIG_AURA_LIMIT)
 
   if aura_count > 0 then
@@ -483,45 +480,52 @@ local function UpdateIconGrid(frame, unitid)
       sort(UnitAuraList, AuraSortFunctionNum)
     end
 
-    -- UpdateAuraFrameGrid(aura_frames, max_auras_no, UnitAuraList)
+    --local aura_info_list = frame.AuraInfos
     for index = 1, max_auras_no do
       local aura = UnitAuraList[index]
 
       if aura.spellid and aura.expiration then
-        local aura_frame = aura_frames[index]
+        local aura_frame = aura_frame_list[index]
+        --aura_info_list[index] = aura_info_list[index] or {}
+        --local aura_info = aura_info_list[index]
 
-        aura_frame.AuraInfo.Duration = aura.duration
-        aura_frame.AuraInfo.Name = aura.name
+        local aura_info = aura_frame.AuraInfo
+        aura_info.name = aura.name
+        aura_info.duration = aura.duration
+        aura_info.texture = aura.texture
+        aura_info.expiration = aura.expiration
+        aura_info.stacks = aura.stacks
+        aura_info.color = aura.color
 
         -- Call function to display the aura
-        UpdateAuraFrame(aura_frame, aura.texture, aura.duration, aura.expiration, aura.stacks, aura.color)
+        UpdateAuraFrame(aura_frame) -- aura.texture, aura.duration, aura.expiration, aura.stacks, aura.color, aura.name)
       end
     end
 
   end
 
-  -- Clear Extra Slots
-  for index = max_auras_no + 1, CONFIG_AURA_LIMIT do UpdateAuraFrame(aura_frames[index]) end
+  -- Clear extra slots
+  for index = max_auras_no + 1, CONFIG_AURA_LIMIT do
+    --UpdateAuraFrame(aura_frame_list[index])
+    PolledHideIn(aura_frame_list[index])
+  end
 end
 
 -- (Re)Draw grid with aura frames
-local function UpdateAuraFrameGrid(frame, aura_no, aura_list)
-  local aura_frames = frame.AuraFrames
+local function UpdateAuraFrameGrid(frame)
+  local aura_frame_list = frame.AuraFrames
+  --local aura_info_list = frame.AuraInfos
 
---  for index = 1, aura_no do
---    local aura = UnitAuraList[index]
---
---    if aura.spellid and aura.expiration then
---      local aura_frame = aura_frames[index]
---
---      aura_frame.AuraInfo.Duration = aura.duration
---      aura_frame.AuraInfo.Name = aura.name
+  --  for index = 1, aura_no do
+  --    local aura = UnitAuraList[index]
+  --
 
   for index = 1, CONFIG_AURA_LIMIT do
-    local aura_frame = aura_frames[index]
+    local aura_frame = aura_frame_list[index]
+
     if aura_frame:IsShown() then
     -- Call function to display the aura
-      UpdateAuraFrame(aura_frame, aura.texture, aura.duration, aura.expiration, aura.stacks, aura.color)
+      UpdateAuraFrame(aura_frame) --, aura_info.texture, aura_info.duration, aura_info.expiration, aura_info.stacks, aura_info.color, aura_info.name)
     else
       break
     end
@@ -561,8 +565,7 @@ local AuraEvents = {
 }
 
 local function AuraEventHandler(frame, event, ...)
-  local unitid = ...
-
+  --local unitid = ...
   if event then
     local eventFunction = AuraEvents[event]
     eventFunction(...)
@@ -689,6 +692,15 @@ local function CreateAuraFrame(parent)
 	frame.TimeText:SetFont(ThreatPlates.Media:Fetch('font', db.Font), db.FontSize)
 	frame.TimeText:SetJustifyH("RIGHT")
 	frame.TimeText:SetShadowOffset(1, -1)
+
+  frame.AuraInfo = {
+		name = "",
+		duration = 0,
+    texture = "",
+    expiration = 0,
+    stacks = 0,
+    color = 0
+  }
 
 	frame.Expire = ExpireFunction
 	frame.Poll = UpdateWidgetTime
@@ -866,7 +878,7 @@ local function UpdateWidgetConfig(widget_frame)
   end
 
   --UpdateAuraFrameGrid(widget_frame)
-  --UpdateWidget(widget_frame)
+  -- UpdateWidget(widget_frame)
   UpdateIconGrid(widget_frame, widget_frame.unitid)
 
   db = TidyPlatesThreat.db.profile.AuraWidget
@@ -882,7 +894,7 @@ end
 function UpdateWidget(frame)
 	if CONFIG_LAST_UPDATE > frame.last_update then
 		--ThreatPlates.DEBUG_PRINT_TABLE(frame)
-		ThreatPlates.DEBUG("Update Delay: ", frame.unit.name, frame.unitid)
+		-- ThreatPlates.DEBUG("Update Delay: ", frame.unit.name, frame.unitid)
     --ThreatPlates.DEBUG_PRINT_TABLE(frame.unit)
 		UpdateWidgetConfig(frame)
 	end
@@ -908,6 +920,10 @@ local function UpdateWidgetContext(frame, unit)
 	-- end
 
 	if unitid then
+    local old_frame = WidgetList[unitid]
+    if not old_frame then
+      UpdateWidget(frame)
+    end
     WidgetList[unitid] = frame
     --ThreatPlates.DEBUG_SIZE("#WidgetList: ", WidgetList)
 	end
@@ -918,16 +934,9 @@ local function UpdateWidgetContext(frame, unit)
   if db.ShowTargetOnly and not unit.isTarget then
     frame:_Hide()
   else
---    frame:ClearAllPoints()
---      if db.ModeBar.Enabled then
---        frame:SetPoint("CENTER", frame:GetParent(), 0, db.y)
---      else
---        frame:SetPoint("CENTER", frame:GetParent(), db.anchor, db.x, db.y)
---      end
---    frame:SetScale(db.scale)
-
-		--UpdateWidget(frame)
-    --UpdateAuraFrameGrid(frame)
+--    if not frame:IsShown() then
+--      UpdateWidget(frame)
+--    end
 		frame:Show()
 	end
 	--------------------------------------
@@ -948,12 +957,14 @@ local function ConfigAuraWidget()
 		CONFIG_GRID_SPACING_ROWS = db.ModeBar.BarSpacing
 		CONFIG_GRID_SPACING_COLS = 0
 		CONFIG_LABEL_LENGTH = db.ModeBar.BarWidth - db.ModeBar.LabelTextIndent - db.ModeBar.TimeTextIndent - (db.ModeBar.FontSize / 5)
+    UPDATE_INTERVAL = 1 / GetFramerate()
 	else
 		CONFIG_MODE_BAR = false
 		CONFIG_GRID_NO_ROWS = db.ModeIcon.Rows
 		CONFIG_GRID_NO_COLS = db.ModeIcon.Columns
 		CONFIG_GRID_SPACING_ROWS = db.ModeIcon.RowSpacing
 		CONFIG_GRID_SPACING_COLS = db.ModeIcon.ColumnSpacing
+    UPDATE_INTERVAL = 0.5
 	end
 	CONFIG_AURA_LIMIT = CONFIG_GRID_NO_ROWS * CONFIG_GRID_NO_COLS
 
@@ -967,7 +978,10 @@ local function ClearWidgetContext(frame)
   local unitid = frame.unitid
   if unitid then
     WidgetList[unitid] = nil
+    -- updates keep rolling in even after hiding a aura widget frame, if unit or unitid
+    -- is needed to process these updates, uncomment the following two lines
     frame.unitid = nil
+    frame.unit = nil
   end
 end
 
@@ -975,15 +989,15 @@ end
 local function CreateAuraWidget(plate)
 	-- Required Widget Code
 	local frame = CreateFrame("Frame", nil, plate)
-	--frame:Hide()
-	frame:Show()
+	frame:Hide()
+	--frame:Show()
 
 	-- Custom Code III
 	--------------------------------------
 	frame:SetSize(128, 32)
 	frame:SetFrameLevel(plate:GetFrameLevel() + 1)
 	frame.AuraFrames = {}
-	frame.AuraInfos = {}
+	--frame.AuraInfos = {}
   UpdateWidgetConfig(frame)
 	--------------------------------------
 	-- End Custom Code

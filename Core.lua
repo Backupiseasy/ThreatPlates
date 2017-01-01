@@ -21,7 +21,7 @@ local TIDYPLATES_VERSIONS = { "6.18.10" }
 local TIDYPLATES_INSTALLED_VERSION = GetAddOnMetadata("TidyPlates", "version") or ""
 
 -- check if the correct TidyPlates version is installed
-function CheckTidyPlatesVersion()
+--function CheckTidyPlatesVersion()
 	-- local GlobDB = TidyPlatesThreat.db.global
 	-- if not GlobDB.versioncheck then
 	-- 	local version_no = 0
@@ -35,7 +35,7 @@ function CheckTidyPlatesVersion()
 	-- 	end
 	-- 	GlobDB.versioncheck = true
 	-- end
-end
+--end
 
 local function AlphaFeatureHeadlineView()
 	return TidyPlatesThreat.db.profile.alphaFeatureHeadlineView and TidyPlatesHubFunctions
@@ -386,7 +386,7 @@ function TidyPlatesThreat:OnInitialize()
 				ShowStackCount = true,
 				ShowAuraType = true,
 				DefaultBuffColor = RGB(102, 0, 51, 1),
-				DefaultDebuffColor = 	RGB(255, 0, 0, 1),
+				DefaultDebuffColor = 	RGB(204, 0, 0, 1), --RGB(255, 0, 0, 1), -- DebuffTypeColor["none"]	= { r = 0.80, g = 0, b = 0 };
 				SortOrder = "TimeLeft",
 				SortReverse = false,
 				ModeIcon = {
@@ -1574,7 +1574,6 @@ local function OnActivateTheme(themeTable)
 	if not themeTable then
 		ThreatPlatesWidgets.DeleteWidgets()
 	else
-		--CheckTidyPlatesVersion()
 		ActivateTheme()
 	end
 end
@@ -1677,8 +1676,6 @@ function TidyPlatesThreat:StartUp()
 			GlobDB.version = tostring(t.Meta("version"))
 			GlobDB.versioncheck = false
 		end
-
-		--CheckTidyPlatesVersion()
 	end
 
 	t.SetThemes(self)
