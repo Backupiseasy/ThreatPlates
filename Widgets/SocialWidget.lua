@@ -202,5 +202,5 @@ local function CreateWidgetFrame(parent)
 	return frame
 end
 
-ThreatPlatesWidgets.RegisterWidget("SocialWidget", CreateWidgetFrame, false, enabled)
+ThreatPlatesWidgets.RegisterWidget("SocialWidgetTPTP", CreateWidgetFrame, false, enabled)
 ThreatPlatesWidgets.SocialWidgetDisableWatcher = DisableWatcher

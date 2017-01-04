@@ -14,3 +14,7 @@ exclude.lst
 *.xcf
 Changelog_Curse
 Changelog_WowInterface
+UsedColors
+.idea
+TidyPlates_ThreatPlates.iml
+ThreatPlatesTesting.lua

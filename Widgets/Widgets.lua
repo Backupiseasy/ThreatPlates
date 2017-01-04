@@ -7,7 +7,7 @@ ThreatPlates = NAMESPACE.ThreatPlates
 
 local isAuraEnabled
 local OldUpdate
-local OldUpdateConfig
+--local OldUpdateConfig
 
 -- two constants from TidyPlates AuraWidget
 local AURA_TARGET_HOSTILE = 1
@@ -32,7 +32,6 @@ local function enabled()
 	if active then
 		if not isAuraEnabled then
 			TidyPlatesWidgets.EnableAuraWatcher()
-			--TidyPlatesWidgets.SetAuraFilter(AuraFilter)
 			isAuraEnabled = true
 		end
 	else
@@ -110,15 +109,18 @@ local function PrepareFilter()
 	local filter = TidyPlatesThreat.db.profile.debuffWidget.filter
 	Filter_ByAuraList = {}
 
-	-- separete filter by name and ID for more efficient aura filtering
 	for key, value in pairs(filter) do
+		-- remove comments and whitespaces from the filter (string)
+		local pos = value:find("%-%-")
+		if pos then value = value:sub(1, pos - 1) end
+		value = value:match("^%s*(.-)%s*$")
+
+		-- separete filter by name and ID for more efficient aura filtering
 		local value_no = tonumber(value)
 		if value_no then
 			Filter_ByAuraList[value_no] = true
-			--print ("Filter_ByAuraList: ", value_no)
 		elseif value ~= '' then
 			Filter_ByAuraList[value] = true
-			--print ("Filter_ByAuraList: ", value)
 		end
 	end
 end
@@ -245,10 +247,10 @@ local function CreateAuraWidget(plate)
 
 	TidyPlatesWidgets.SetAuraFilter(AuraFilter)
 	frame.OldUpdate = frame.Update
-	frame.OldUpdateConfig = frame.UpdateConfig
+--	frame.OldUpdateConfig = frame.UpdateConfig
 	frame.Update = CustomUpdateWidgetFrame
 	frame.UpdateContext = CustomUpdateWidgetFrame
-	frame.UpdateConfig = CustomUpdateConfig
+--	frame.UpdateConfig = CustomUpdateConfig
 	-- frame.UpdateTarget = UpdateWidgetTarget - not yet used, I think
 
 	-- disable spiral cooldown an aura icons
@@ -267,8 +269,7 @@ local function CreateAuraWidget(plate)
 	return frame
 end
 
-ThreatPlatesWidgets.RegisterWidget("AuraWidgetThreatPlates", CreateAuraWidget, false, enabled)
-ThreatPlatesWidgets.AuraFilter = AuraFilter
+ThreatPlatesWidgets.RegisterWidget("AuraWidgetTPTP", CreateAuraWidget, false, enabled)
 ThreatPlatesWidgets.PrepareFilter = PrepareFilter
 
 ------------------------

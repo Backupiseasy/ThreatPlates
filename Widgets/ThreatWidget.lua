@@ -112,4 +112,4 @@ local function CreateWidgetFrame(parent)
 	return frame
 end
 
-ThreatPlatesWidgets.RegisterWidget("ThreatArtWidget", CreateWidgetFrame, false, enabled)
+ThreatPlatesWidgets.RegisterWidget("ThreatArtWidgetTPTP", CreateWidgetFrame, false, enabled)

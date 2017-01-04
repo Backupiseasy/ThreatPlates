@@ -18,6 +18,20 @@ L["-->>Nameplate Overlapping is now |cffff0000OFF!|r<<--"] = true
 L["-->>Threat Plates verbose is now |cff00ff00ON!|r<<--"] = true
 L["-->>Threat Plates verbose is now |cffff0000OFF!|r<<-- shhh!!"] = true
 
+L["Usage: /tptp [options]"] = true
+L["  options:"] = true
+L["    update-profiles      Migrates deprecated settings in your configuration"] = true
+L["    new-default-profile  Updates the default profile with new default settings"] = true
+L["    help                 Prints this help message"] = true
+L["    <no option>          Displays options dialog"] = true
+
+L["Migrating deprecated settings in configuration ..."] = true
+L["Updating default profile with new settings ..."] = true
+L["Unknown option: "] = true
+
+L["Profile "] = true
+L[": Converting settings from aura widget to aura widget 2.0 ..."] = true
+
 ------------------------------
 --[[ TidyPlatesThreat.lua ]]--
 ------------------------------
@@ -25,23 +39,16 @@ L["-->>Threat Plates verbose is now |cffff0000OFF!|r<<-- shhh!!"] = true
 L["|cff00ff00tanking|r"] = true
 L["|cffff0000dpsing / healing|r"] = true
 
-L["primary"] = true
-L["secondary"] = true
-L["unknown"] = true
 L["Undetermined"] = true
 
 L["|cff89f559Welcome to |rTidy Plates: |cff89f559Threat Plates!\nThis is your first time using Threat Plates and you are a(n):\n|r|cff"] = true
-
-L["|cff89f559Your spec's have been set to |r"] = true
 L["|cff89f559You are currently in your "] = true
 L["|cff89f559 role.|r"] = true
-L["|cff89f559Your role can not be determined.\nPlease set your dual spec preferences in the |rThreat Plates|cff89f559 options.|r"] = true
 L["|cff89f559Additional options can be found by typing |r'/tptp'|cff89F559.|r"] = true
 L[":\n----------\nWould you like to \nset your theme to |cff89F559Threat Plates|r?\n\nClicking '|cff00ff00Yes|r' will set you to Threat Plates & reload UI. \n Clicking '|cffff0000No|r' will open the Tidy Plates options."] = true
 L["\n---------------------------------------\nThe current version of ThreatPlates requires at least TidyPlates "] = true
 L[". You have installed an older or incompatible version of TidyPlates: "] = true
 L[". Please update TidyPlates, otherwise ThreatPlates will not work properly."] = true
-L["Ok"] = true
 L["Yes"] = true
 L["Cancel"] = true
 L["No"] = true
@@ -50,7 +57,6 @@ L["-->>|cffff0000Activate Threat Plates from the Tidy Plates options!|r<<--"] = 
 L["|cff89f559Threat Plates:|r Welcome back |cff"] = true
 
 L["|cff89F559Threat Plates|r: Player spec change detected: |cff"] = true
-L["|r, you are now in your |cff89F559"] = true
 L[" role."] = true
 
 -- Custom Nameplates
@@ -130,6 +136,7 @@ L["Open Blizzard Settings"] = true
 
 L["Friendly"] = true
 L["Show Friends"] = true
+L["Show Friendly NPCs"] = true
 L["Show Friendly Totems"] = true
 L["Show Friendly Pets"] = true
 L["Show Friendly Guardians"] = true
@@ -148,6 +155,13 @@ L["Normal Border"] = true
 L["Show Elite Border"] = true
 L["Elite Border"] = true
 L["Mouseover"] = true
+L["Use a custom color for the healtbar's background."] = true
+L["Custom"] = true
+L["Use the healthbar's foreground color also for the background."] = true
+L["Same as Foreground"] = true
+L["Background Color:"] = true
+L["Background Opacity"] = true
+
 ----
 L["Placement"] = true
 L["Changing these settings will alter the placement of the nameplates, however the mouseover area does not follow. |cffff0000Use with caution!|r"] = true
@@ -164,9 +178,7 @@ L["HP Coloring"] = true
 L["Color HP by amount"] = true
 L["Changes the HP color depending on the amount of HP the nameplate shows."] = true
 L["Class Coloring"] = true
-L["Enemy Class Colors"] = true
 L["Enable Enemy Class colors"] = true
-L["Friendly Class Colors"] = true
 L["Enable Friendly Class Colors"] = true
 L["Enable the showing of hostile player class color on hp bars."] = true
 L["Enable the showing of friendly player class color on hp bars."] = true
@@ -186,6 +198,8 @@ L["Colors"] = true
 ----
 L["Threat Colors"] = true
 L["Show Threat Glow"] = true
+L["Only on Attacked Units"] = true
+L["Show threat glow only on units in combat with the player."] = true
 L["|cff00ff00Low threat|r"] = true
 L["|cffffff00Medium threat|r"] = true
 L["|cffff0000High threat|r"] = true
@@ -198,8 +212,6 @@ L["High Threat"] = true
 ----
 L["Castbar"] = true
 L["Enable"] = true
-L["Non-Target Castbars"] = true
-L["This allows the castbar to attempt to create a castbar on nameplates of players or creatures you have recently moused over."] = true
 L["Interruptable Casts"] = true
 L["Shielded Coloring"] = true
 L["Uninterruptable Casts"] = true
@@ -366,6 +378,7 @@ L["This will allow you to disabled threat art on marked targets."] = true
 -------------
 
 L["Class Icons"] = true
+L["Enable Class Icons Widget"] = true
 L["This widget will display class icons on nameplate with the settings you set below."] = true
 L["Enable Friendly Icons"] = true
 L["Enable the showing of friendly player class icons."] = true
@@ -388,6 +401,57 @@ L["This will toggle the aura widget to show the cooldown spiral on auras. (requi
 L["Filtering"] = true
 L["Mode"] = true
 L["Filtered Auras"] = true
+L["This widget will display auras that match your filtering on your target nameplate and others you recently moused over. The old aura widget (Aura) must be disabled first."] = true
+L["Enable Aura Widget 2.0"] = true
+L["Filter by Spell"] = true
+L["Filter by Unit Reaction"] = true
+L["Filter by Dispel Type"] = true
+L["Appearance"] = true
+L["Color by Dispel Type"] = true
+L["Aura 2.0"] = true
+L["This will toggle the aura widget to show the cooldown spiral on auras."] = true
+L["This will color the aura based on its type (poison, disease, magic, curse) - for Icon Mode the icon border is colored, for Bar Mode the bar itself."] = true
+L["Default Buff Color"] = true
+L["Default Debuff Color"] = true
+L["Sort Order"] = true
+L["A to Z"] = true
+L["Sort in ascending alphabetical order."] = true
+L["Time Left"] = true
+L["Sort by time left in ascending order."] = true
+L["Duration"] = true
+L["Sort by overall duration in ascending order."] = true
+L["Creation"] = true
+L["Show auras in order created with oldest aura first."] = true
+L["Reverse Order"] = true
+L['Reverse the sort order (e.g., "A to Z" becomes "Z to A").'] = true
+L["Stack Count"] = true
+L["Show stack count as overlay on aura icon."] = true
+L["Show auras as icons in a grid configuration."] = true
+L["Icon Style"] = true
+L["This lets you select the layout style of the aura widget."] = true
+L["Icon Layout"] = true
+L["Column Limit"] = true
+L["Row Limit"] = true
+L["Horizontal Spacing"] = true
+L["Vertical Spacing"] = true
+L["Bar Mode"] = true
+L["Show auras as bars (with optional icons)."] = true
+L["Bar Layout"] = true
+L["Bar Limit"] = true
+L["Bar Width"] = true
+L["Bar Height"] = true
+L["Bar Textures"] = true
+L["Foreground Texture"] = true
+L["Background Texture"] = true
+L["Background Color"] = true
+L["Typeface"] = true
+L["Label Text Offset"] = true
+L["Time Text Offset"] = true
+L["Show Icon to the Left"] = true
+L["Offset"] = true
+L["Layout"] = true
+L["Show Friendly"] = true
+L["Show Enemy"] = true
 
 ----
 L["Social"] = true
@@ -415,6 +479,7 @@ L["Visibility"] = true
 L["Use a custom color for the health bar of quest mobs."] = true
 L["Show an indicator icon at the nameplate for quest mobs."] = true
 L["Hide in Combat"] = true
+L["Hide on Attacked Units"] = true
 L["Hide in Instance"] = true
 
 ---- Stealth Widgets
@@ -470,7 +535,7 @@ L["Disables the custom scale setting for this nameplate and instead uses your no
 L["Custom Scale"] = true
 ----
 L["Allow Marked HP Coloring"] = true
-L["Allow raid marked hp color settings instead of a custom hp setting if the nameplate has a raid mark."] =  true
+L["Allow raid marked hp color settings instead of a custom hp setting if the nameplate has a raid mark."] = true
 
 ----
 L["Enable the showing of the custom nameplate icon for this nameplate."] = true
@@ -481,11 +546,8 @@ L["Set Icon"] = true
 -- About --
 -----------
 
-L["\n\nThank you for supporting my work!\n"] = true
-L["Click to Donate!"] = true
 L["Clear and easy to use nameplate theme for use with TidyPlates.\n\nCurrent version: "] = true
 L["\n\nFeel free to email me at |cff00ff00threatplates@gmail.com|r\n\n--\n\nBlacksalsify\n\n(Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)"] = true
-L["This will enable all alpha features currently available in ThreatPlates. Be aware that most of the features are not fully implemented and may contain several bugs."] = true
 
 --------------------------------
 -- Default Game Options Frame --

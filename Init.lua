@@ -13,19 +13,16 @@ t.Media = LS("LibSharedMedia-3.0")
 t.MediaWidgets = Media and LS("AceGUISharedMediaWidgets-1.0", false)
 local L = t.L
 
----------------------------------------------------------------------------------------------------
--- Global constants
----------------------------------------------------------------------------------------------------
-
-THREAT_PLATES_NAME = "Threat Plates"
+--------------------------------------------------------------------------------------------------
 ADDON_NAME = "TidyPlatesThreat"
-
----------------------------------------------------------------------------------------------------
 -- General Functions
 ---------------------------------------------------------------------------------------------------
 
-t.DEBUG = function(...)
-	--print ("DEBUG: ", ...)
+-- Create a percentage-based WoW color based on integer values from 0 to 255 with optional alpha value
+local RGB = function(red, green, blue, alpha)
+	local color = { r = red/255, g = green/255, b = blue/255 }
+	if alpha then color.a = alpha end
+	return color
 end
 
 t.PrintTargetInfo = function(unit)
@@ -63,13 +60,12 @@ t.PrintTargetInfo = function(unit)
 end
 
 t.Update = function()
-	-- TODO: check if all of it here is necessary
+	-- ForceUpdate() is called in SetTheme()
 	if (TidyPlatesOptions.ActiveTheme == THREAD_PLATES_NAME) then
 		TidyPlates:SetTheme(THREAD_PLATES_NAME)
 	end
-	TidyPlatesThreat.ApplyProfileSettings()
+	-- TidyPlates:ForceUpdate()
 
-	-- reload theme is deprecated and empty, ForceUpdate() is called in SetTheme()
 end
 
 t.Meta = function(value)
@@ -126,6 +122,7 @@ t.TTS = function(s)
 	end
 	return list
 end
+
 t.CopyTable = function(input)
 	local output = {}
 	for k,v in pairs(input) do
@@ -137,7 +134,13 @@ t.CopyTable = function(input)
 	end
 	return output
 end
--- Constants
+
+---------------------------------------------------------------------------------------------------
+-- Global constants
+---------------------------------------------------------------------------------------------------
+
+THREAD_PLATES_NAME = "Threat Plates"
+
 t.Art = "Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\"
 t.Widgets = "Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\Widgets\\"
 t.FullAlign = {TOPLEFT = "TOPLEFT",TOP = "TOP",TOPRIGHT = "TOPRIGHT",LEFT = "LEFT",CENTER = "CENTER",RIGHT = "RIGHT",BOTTOMLEFT = "BOTTOMLEFT",BOTTOM = "BOTTOM",BOTTOMRIGHT = "BOTTOMRIGHT"}
@@ -159,3 +162,76 @@ t.DebuffMode = {
 	["all"] = L["All Auras"],
 	["allMine"] = L["All Auras (Mine)"]
 }
+
+t.SPEC_ROLES = {
+	DEATHKNIGHT = { true, false, false },
+	DEMONHUNTER = { false, true },
+	DRUID 			= { false, false, true, false },
+	HUNTER			= { false, false, false },
+	MAGE				= { false, false, false },
+	MONK 				= { true, false, false },
+	PALADIN 		= { false, true, false },
+	PRIEST			= { false, false, false },
+	ROGUE				= { false, false, false },
+	SHAMAN			= { false, false, false },
+	WARLOCK			= { false, false, false },
+	WARRIOR			= { false, false, true },
+}
+
+
+--------------------------------------------------------------------------------------------------
+-- Debug Functions
+---------------------------------------------------------------------------------------------------
+
+t.DEBUG = function(...)
+	print ("DEBUG: ", ...)
+end
+
+t.DEBUG_SIZE = function(msg, data)
+  if type(data) == "table" then
+    local no = 0
+    for k, v in pairs(data) do no = no + 1 end
+    t.DEBUG(msg, no)
+  else
+    t.DEBUG(msg, "<no table>")
+  end
+end
+-- Function from: https://coronalabs.com/blog/2014/09/02/tutorial-printing-table-contents/
+t.DEBUG_PRINT_TABLE = function(data)
+	local print_r_cache={}
+	local function sub_print_r(data,indent)
+		if (print_r_cache[tostring(data)]) then
+      t.DEBUG (indent.."*"..tostring(data))
+		else
+			print_r_cache[tostring(data)]=true
+			if (type(data)=="table") then
+				for pos,val in pairs(data) do
+					if (type(val)=="table") then
+            t.DEBUG (indent.."["..pos.."] => "..tostring(data).." {")
+						sub_print_r(val,indent..string.rep(" ",string.len(pos)+8))
+            t.DEBUG (indent..string.rep(" ",string.len(pos)+6).."}")
+					elseif (type(val)=="string") then
+            t.DEBUG (indent.."["..pos..'] => "'..val..'"')
+					else
+            t.DEBUG (indent.."["..pos.."] => "..tostring(val))
+					end
+				end
+			else
+        t.DEBUG (indent..tostring(data))
+			end
+		end
+	end
+	if (type(data)=="table") then
+    t.DEBUG (tostring(data).." {")
+		sub_print_r(data,"  ")
+    t.DEBUG ("}")
+	else
+		sub_print_r(data,"  ")
+	end
+end
+
+---------------------------------------------------------------------------------------------------
+-- Expoerted local functions
+---------------------------------------------------------------------------------------------------
+
+t.RGB = RGB

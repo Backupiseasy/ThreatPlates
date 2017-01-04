@@ -1,11 +1,11 @@
-﻿## Interface: 70300
+﻿## Interface: 70100
 ## Title: Tidy Plates: |cff89F559Threat Plates|r
 ## Notes: Revolutionary |cff89F559threat reactive nameplates|r by |cff3079ffSuicidal Katt|r.
 ## Notes-deDE: Revolutionäre |cff89F559threat reaktive Namensplaketten|r by |cff3079ffSuicidal Katt|r.
 ## Author: Suicidal Katt, Blacksalsify
 ## RequiredDeps: TidyPlates,TidyPlatesWidgets
 ## SavedVariables: ThreatPlatesDB
-## Version: 8.2-Alpha-01
+## Version: 8.3.0-Beta3
 ## OptionalDeps: Ace3, LibSharedMedia-3.0
 
 Libs\Libs.xml
