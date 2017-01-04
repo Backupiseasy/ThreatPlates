@@ -1,13 +1,129 @@
 ------------------------------------------------------
-8.2-Alpha-01 (works with TidyPlates 6.18.3)
+8.3.0-Beta3 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
-* Added minor mobs as unit type to various settings (e.g., enabling nameplates, alpha, scaling)
-* Deprecated entries are now removed from the SavedVariables database or converted
-* Fixed a bug with healthbars not correctly colored for tapped units (when coloring based on custom colors is used)
-* Added several configuration options to Headline-View (Text-Only)
-* Completely reworked how to configurat visibility for different unit types
-* Updated coloring options for unit types based on reaction (friendly NPC, hostile player, ..k.)
-*
-NOT:
-* Masque support for class icons and spellbar icons
-* Guild/Friend coloring not working right now as still broken in Tiday Plates
+* Reworked and optimized placement of aura widget 2.0 (anchor point and aura alignment).
+
+------------------------------------------------------
+8.3.0-Beta2 (works with TidyPlates 6.18.11)
+------------------------------------------------------
+* Fixed inefficient memory allocation in aura widget.
+* Added an option to show or hide stack count on auras (for aura widget 2.0).
+* Adjusted health percentage calculation to Blizzard default calculation (using ceil instead of floor).
+* Implemented smooth update for statusbar for Aura Widget 2.0 in bar mode.
+* Several changes to the options dialog to improve consistency in naming and layout.
+* Use /tptp <option> to update to new default profile oder to migration settings instead of /threatplates. Use ""/tptp help" for command line usage help.
+
+------------------------------------------------------
+8.3.0-Beta1 (works with TidyPlates 6.18.11)
+------------------------------------------------------
+* Added new aura widget 2.0 with icon and bar more and a lot more customization options. To use it, disable the current aura widget first. Use "/threatplates update-profiles" to copy over your current aura widget settings to the new aura widget 2.0.
+* Added an option to show threat glow only on units the player is in combat with (Nameplate Settings - Healthbar - Threat Colors).
+* Added a new default settings for the default profile. Use "/threatplates new-default-profile" to activate them and update the default profile.
+* Added the option to set a background texture for the nameplate healthbar (Nameplate Settings - Healthbar - Textures).
+* Changed default color for healthbar for quest widget.
+* Fixed a bug in quest widget where the quest highlight was still shown although the quest was completed.
+* Fixed a bug in the options dialog where default settings for spec roles where incorrect for newly created profiles.
+* Fixed a memory leak which reduced frame rate heavily after changing certain options.
+* Known issues:
+  * Changing certain settings in the option dialog may require a /reload for the settings to fully take effect.
+  * Switching between ThreatPlates and other themes may require /reload for the new theme to work correctly
+
+------------------------------------------------------
+8.2.5 (works with TidyPlates 6.18.11)
+------------------------------------------------------
+* Added an option to show show friendly NPCs, see Nameplate Settings - General Settings - Blizzard Settings (CVAR nameplateShowFriendlyNPCs was introduced with 7.1 and is disabled by default)
+* Aura filters now can contain comments. Everything after "--" until end of line is considered a comment
+* Changed default filter mode for aura widget from "Whitelist" to "Blacklist (Mine)"
+* Visibility of quest widget can now be configured for icon and healthbar mode.
+* Added an option to disable quest widget only on attacked mobs.
+* Added another detection spell to stealth widget.
+* Known issues:
+  * Switching between ThreatPlates and other themes may require /reload for the new theme to work correctly
+
+------------------------------------------------------
+8.2.4 (works with TidyPlates 6.18.10)
+------------------------------------------------------
+* Fixed coloring of tapped units without custom colors enabled
+* Changed default colors for health bar custom colors from white to Blizzard defaults
+* Known issues:
+  * Switching between ThreatPlates and other themes may require /reload for the new theme to work correctly
+
+------------------------------------------------------
+8.2.3 (works with TidyPlates 6.18.10)
+------------------------------------------------------
+* Added quest widget for highlighting of nameplates of mobs involved with any of your current quests
+* Added stealth widget for showing a stealth icon above the nameplate of units that can detect you while stealthed (not yet fully implemented)
+* Aura filtering now also possible by aura ID (add aura ID as you would add a spell name)
+* Fixed a bug with target nameplate not always being show on top
+* Known issues:
+  * Switching between ThreatPlates and other themes may require /reload for the new theme to work correctly
+
+------------------------------------------------------
+8.2.2 (works with TidyPlates 6.18.9)
+------------------------------------------------------
+* Fixed a LUA error in combo point widget
+* Disabled version check for TidyPlates version until working properly
+* Known issues:
+  * Switching between ThreatPlates and other themes may require /reload for the new theme to work correctly
+
+------------------------------------------------------
+8.2.1 (works with TidyPlates 6.18.9)
+------------------------------------------------------
+* Added a check if ThreatPlates is compatible with the installed version of TidyPlates
+* Optimized widget handling
+* Known issues:
+  * Switching between ThreatPlates and other themes may require /reload for the new theme to work correctly
+
+------------------------------------------------------
+8.2.0 (works with TidyPlates 6.18.8)
+------------------------------------------------------
+* Widget handling was heavily rewritten because of changes in TidyPlates
+* AuraWidget now also shows pet buffs and debuffs
+* Fixed a bug with class icon widget showing friendly class icons although not enabled
+* Fixed a typo in the configuration dialog
+* Fixed a bug in auras widget that prevented filtering based on aura type
+* Disabled Healer Tracker widget as it's currently not working at all
+* Known issues:
+  * Switching between ThreatPlates and other themes may require /reload for the new theme to work correctly
+
+------------------------------------------------------
+8.1.4 (works with TidyPlates 6.18.6)
+------------------------------------------------------
+* Basic compatibility with TidyPlates 6.18.6 - some things may still be broken (probably changing options without reload UI)
+* Added holy power as combo points for retribution paladins
+* Fixed a bug with the class icon being displayed despite unit being hidden (e.g. normal or boss units)
+
+------------------------------------------------------
+8.1.3 (works with TidyPlates 6.18.3)
+------------------------------------------------------
+* Fixed a bug with class coloring for players used although not enabled
+
+------------------------------------------------------
+8.1.2 (works with TidyPlates 6.18.3)
+------------------------------------------------------
+* Fixed a typo in enUS localization
+
+------------------------------------------------------
+8.1.1 (works with TidyPlates 6.18.3)
+------------------------------------------------------
+* Reworked the settings for coloring the healthbar according to the priority in which the settings are applied, also: fixed some bugs
+* Fixed several bugs regarding tapped units (coloring, scaling, alpha, etc.)
+* Fixed a bug with nameplate coloring when units change factions (e.g., in Suramar)
+* Fixed several bugs with headline view (alpha, apply changes without reload UI)
+* Localization fixes (consistant naming of tapped units, deDE)
+
+------------------------------------------------------
+8.1 (works with TidyPlates 6.18.3)
+------------------------------------------------------
+* Updated addon for Legion (7.0.3): added the demonhunter class, updated several spells (e.g., shaman totems), updated dual spec options, and lots of bug fixes
+* Added a new feature: Headline View (Text-Only) as known from TidyPlates
+  - TidyPlatesHub must be enabled for this to work; configure it via TidyPlatesHub profiles
+  - Basic configuration options are available, see Nameplate Settings - Headline View (subtext settings are derived from nametext settings)
+  - All Threat Plate widgets are disabled (auras, combo points, ...) - doesn't make much sense enabling them in this mode
+* Added a new feature to enable automatic role detection based on the currently active spec (see options, Threat System, Spec Roles)
+* Castbar border can now be set to Default or Thin (like healthbar border)
+* Improverd layering of Threat Plates widgets and target name plate (which is often overlapped by other plates)
+* Removed no longer supported localizations (translation support is welcome!)
+* Fixed a bug where certain nameplate widgets were not updated after changes in the options dialog
+* Fixed error with reload UI and AuraWidget
+* Fixed HP bar colouring with NPCs

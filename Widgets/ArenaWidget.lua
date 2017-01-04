@@ -165,5 +165,5 @@ local function CreateArenaWidget(parent)
 	return frame
 end
 
-ThreatPlatesWidgets.RegisterWidget("ArenaWidget", CreateArenaWidget, false, enabled)
+ThreatPlatesWidgets.RegisterWidget("ArenaWidgetTPTP", CreateArenaWidget, false, enabled)
 ThreatPlatesWidgets.ArenaWidgetDisableWatcher = DisableWatcher

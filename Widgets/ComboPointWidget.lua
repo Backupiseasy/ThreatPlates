@@ -188,5 +188,5 @@ local function CreateWidgetFrame(parent)
 	return frame
 end
 
-ThreatPlatesWidgets.RegisterWidget("ComboPointWidget", CreateWidgetFrame, true, enabled)
+ThreatPlatesWidgets.RegisterWidget("ComboPointWidgetTPTP", CreateWidgetFrame, true, enabled)
 ThreatPlatesWidgets.ComboPointWidgetDisableWatcher = DisableWatcher
