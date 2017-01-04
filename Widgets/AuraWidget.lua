@@ -22,12 +22,14 @@ local UnitAuraList = {}
 local CONFIG_LAST_UPDATE
 local CONFIG_WIDE_ICONS = false
 local CONFIG_MODE_BAR = false
-local CONFIG_GRID_NO_ROWS = 3
 local CONFIG_GRID_NO_COLS = 3
 local CONFIG_GRID_SPACING_ROWS = 5
 local CONFIG_GRID_SPACING_COLS = 8
 local CONFIG_LABEL_LENGTH = 0
-local CONFIG_AURA_LIMIT = CONFIG_GRID_NO_ROWS * CONFIG_GRID_NO_COLS
+local CONFIG_AURA_LIMIT
+local CONFIG_AURA_FRAME_HEIGHT
+local CONFIG_AURA_FRAME_WIDTH
+local CONFIG_AURA_FRAME_OFFSET
 local Filter_ByAuraList
 
 local AURA_TARGET_HOSTILE = 1
@@ -55,6 +57,17 @@ local AuraType_Index = {
 	["Magic"] = 4,
 	["Poison"] = 5,
 	["Debuff"] = 6,
+}
+
+local GRID_LAYOUT = {
+  LEFT = {
+    BOTTOM =  {"BOTTOMLEFT", "BOTTOMLEFT" , "TOPLEFT", "LEFT", "RIGHT" , 1, 1},
+    TOP =     {"TOPLEFT", "TOPLEFT", "BOTTOMLEFT", "LEFT", "RIGHT", 1, -1}
+  },
+  RIGHT = {
+    BOTTOM =  {"BOTTOMRIGHT", "BOTTOMRIGHT", "TOPRIGHT", "RIGHT", "LEFT", -1, 1 },
+    TOP =     {"TOPRIGHT", "TOPRIGHT", "BOTTOMRIGHT", "RIGHT", "LEFT", -1 , -1}
+  }
 }
 
 ---------------------------------------------------------------------------------------------------
@@ -828,7 +841,7 @@ local function UpdateAuraLayout(frame)
 		frame.Border:Show()
 		frame.BorderHighlight:Show()
 		frame.TimeLeft:Show()
-	end
+  end
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -838,33 +851,22 @@ end
 local function UpdateWidgetConfig(widget_frame)
 	widget_frame.last_update = GetTime()
 
-  local db = TidyPlatesThreat.db.profile.AuraWidget.ModeBar
+  local db = TidyPlatesThreat.db.profile.AuraWidget
 
-  local frame_width = 0
-  if db.Enabled then
-    frame_width = db.BarWidth
-    if db.ShowIcon then
-      frame_width = frame_width + db.BarHeight + db.IconSpacing
-    end
-  else
-    frame_width = 16.5
-    if CONFIG_WIDE_ICONS then frame_width = 26.5 end
-    frame_width = frame_width * CONFIG_GRID_NO_COLS + (CONFIG_GRID_SPACING_COLS - 1) * CONFIG_GRID_NO_COLS
-  end
+  local align_layout = GRID_LAYOUT[db.AlignmentH][db.AlignmentV]
+  local aura_frame_list = widget_frame.AuraFrames
+  for index = 1, CONFIG_AURA_LIMIT do
+    local frame = aura_frame_list[index] or CreateAuraFrame(widget_frame)
+    aura_frame_list[index] = frame
 
-	local aura_frame_list = widget_frame.AuraFrames
-	for index = 1, CONFIG_AURA_LIMIT do
-		local frame = aura_frame_list[index] or CreateAuraFrame(widget_frame)
-		aura_frame_list[index] = frame
-
-		-- anchor the frame
+    -- anchor the frame
 		frame:ClearAllPoints()
-		if index == 1 then
-			frame:SetPoint("LEFT", widget_frame, (widget_frame:GetWidth() - frame_width) / 2, 0)
+    if index == 1 then
+      frame:SetPoint(align_layout[1], widget_frame, align_layout[6] * CONFIG_AURA_FRAME_OFFSET, align_layout[7] * CONFIG_AURA_FRAME_OFFSET)
 		elseif ((index - 1) % CONFIG_GRID_NO_COLS) == 0 then
-			frame:SetPoint("BOTTOMLEFT", aura_frame_list[index - CONFIG_GRID_NO_COLS], "TOPLEFT", 0, CONFIG_GRID_SPACING_ROWS)
-		else
-			frame:SetPoint("LEFT", aura_frame_list[index - 1], "RIGHT", CONFIG_GRID_SPACING_COLS, 0)
+      frame:SetPoint(align_layout[2], aura_frame_list[index - CONFIG_GRID_NO_COLS], align_layout[3], 0, align_layout[7] * CONFIG_GRID_SPACING_ROWS)
+    else
+      frame:SetPoint(align_layout[4], aura_frame_list[index - 1], align_layout[5], align_layout[6] * CONFIG_GRID_SPACING_COLS, 0)
 		end
 
     UpdateAuraLayout(frame)
@@ -881,13 +883,9 @@ local function UpdateWidgetConfig(widget_frame)
   -- UpdateWidget(widget_frame)
   UpdateIconGrid(widget_frame, widget_frame.unitid)
 
-  db = TidyPlatesThreat.db.profile.AuraWidget
   widget_frame:ClearAllPoints()
-  if db.ModeBar.Enabled then
-    widget_frame:SetPoint("CENTER", widget_frame:GetParent(), 0, db.y)
-  else
-    widget_frame:SetPoint("CENTER", widget_frame:GetParent(), db.anchor, db.x, db.y)
-  end
+  widget_frame:SetPoint(ThreatPlates.ANCHOR_POINT_SETPOINT[db.anchor][2], widget_frame:GetParent(), ThreatPlates.ANCHOR_POINT_SETPOINT[db.anchor][1], db.x, db.y)
+  widget_frame:SetSize(CONFIG_AURA_FRAME_WIDTH, CONFIG_AURA_FRAME_HEIGHT)
   widget_frame:SetScale(db.scale)
 end
 
@@ -900,12 +898,12 @@ function UpdateWidget(frame)
 	end
 
 	UpdateIconGrid(frame, frame.unitid)
-	--	if not frame.Background then
-	--		frame.Background = frame:CreateTexture(nil, "BACKGROUND")
-	--		frame.Background:SetAllPoints()
-	--		frame.Background:SetTexture(ThreatPlates.Media:Fetch('statusbar', db.BackgroundTexture))
-	--		frame.Background:SetVertexColor(0,0,0,1)
-	--	end
+--  if not frame.Background then
+--    frame.Background = frame:CreateTexture(nil, "BACKGROUND")
+--    frame.Background:SetAllPoints()
+--    frame.Background:SetTexture(ThreatPlates.Media:Fetch('statusbar', TidyPlatesThreat.db.profile.AuraWidget.BackgroundTexture))
+--    frame.Background:SetVertexColor(0,0,0,1)
+--  end
 end
 
 -- Context Update (mouseover, target change)
@@ -948,25 +946,56 @@ end
 local function ConfigAuraWidget()
 	local db = TidyPlatesThreat.db.profile.AuraWidget
 
-  CONFIG_WIDE_ICONS = (db.ModeIcon.Style == "wide")
+  local use_wide_icons = (db.ModeIcon.Style == "wide")
 
-	if db.ModeBar.Enabled then
-		CONFIG_MODE_BAR = true
-		CONFIG_GRID_NO_ROWS = db.ModeBar.MaxBars
-		CONFIG_GRID_NO_COLS = 1
-		CONFIG_GRID_SPACING_ROWS = db.ModeBar.BarSpacing
-		CONFIG_GRID_SPACING_COLS = 0
-		CONFIG_LABEL_LENGTH = db.ModeBar.BarWidth - db.ModeBar.LabelTextIndent - db.ModeBar.TimeTextIndent - (db.ModeBar.FontSize / 5)
+  local frame_width = 0
+  local frame_height = 14.5
+  local frame_offset = 0
+  local grid_no_rows
+  local grid_no_cols
+  local grid_spacing_rows
+  local grid_spacing_cols
+
+  local modebar = db.ModeBar.Enabled
+
+  if modebar then
+    local db_mode = db.ModeBar
+    grid_no_rows = db_mode.MaxBars
+    grid_no_cols = 1
+    grid_spacing_rows = db_mode.BarSpacing
+    grid_spacing_cols = 0
+		CONFIG_LABEL_LENGTH = db_mode.BarWidth - db_mode.LabelTextIndent - db_mode.TimeTextIndent - (db_mode.FontSize / 5)
     UPDATE_INTERVAL = 1 / GetFramerate()
+
+    frame_height = db_mode.BarHeight
+    frame_width = db_mode.BarWidth
+    if db_mode.ShowIcon then
+      frame_width = frame_width + db_mode.BarHeight + db_mode.IconSpacing
+    end
 	else
-		CONFIG_MODE_BAR = false
-		CONFIG_GRID_NO_ROWS = db.ModeIcon.Rows
-		CONFIG_GRID_NO_COLS = db.ModeIcon.Columns
-		CONFIG_GRID_SPACING_ROWS = db.ModeIcon.RowSpacing
-		CONFIG_GRID_SPACING_COLS = db.ModeIcon.ColumnSpacing
+    local db_mode = db.ModeIcon
+    grid_no_rows = db_mode.Rows
+    grid_no_cols = db_mode.Columns
+    grid_spacing_rows = db_mode.RowSpacing
+    grid_spacing_cols = db_mode.ColumnSpacing
     UPDATE_INTERVAL = 0.5
+
+    frame_offset = (db.ShowAuraType and 2) or 1
+    frame_width = (use_wide_icons and 26.5) or 16.5
+    -- Optimized calculation based on: CONFIG_AURA_FRAME_WIDTH = (CONFIG_AURA_FRAME_WIDTH + (CONFIG_AURA_FRAME_OFFSET * 2)) * CONFIG_GRID_NO_COLS + ((CONFIG_GRID_SPACING_COLS - (CONFIG_AURA_FRAME_OFFSET * 2)) * (CONFIG_GRID_NO_COLS - 1))
+    frame_width = (frame_width * grid_no_cols) + (grid_spacing_cols * grid_no_cols) - grid_spacing_cols + (frame_offset * 2)
 	end
-	CONFIG_AURA_LIMIT = CONFIG_GRID_NO_ROWS * CONFIG_GRID_NO_COLS
+  frame_height = (frame_height * grid_no_rows) + (grid_spacing_rows * grid_no_rows) - grid_spacing_rows + (frame_offset * 2)
+
+  CONFIG_AURA_FRAME_WIDTH = frame_width
+  CONFIG_AURA_FRAME_HEIGHT = frame_height
+  CONFIG_AURA_FRAME_OFFSET = frame_offset
+  CONFIG_GRID_NO_COLS = grid_no_cols
+  CONFIG_AURA_LIMIT = grid_no_rows * grid_no_cols
+  CONFIG_GRID_SPACING_ROWS = grid_spacing_rows
+  CONFIG_GRID_SPACING_COLS = grid_spacing_cols
+  CONFIG_WIDE_ICONS = use_wide_icons
+  CONFIG_MODE_BAR = modebar
 
 	CONFIG_LAST_UPDATE = GetTime()
 end

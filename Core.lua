@@ -389,6 +389,8 @@ function TidyPlatesThreat:OnInitialize()
 				DefaultDebuffColor = 	RGB(204, 0, 0, 1), --RGB(255, 0, 0, 1), -- DebuffTypeColor["none"]	= { r = 0.80, g = 0, b = 0 };
 				SortOrder = "TimeLeft",
 				SortReverse = false,
+				AlignmentH = "LEFT",
+				AlignmentV = "BOTTOM",
 				ModeIcon = {
 					Columns = 5,
 					Rows = 3,

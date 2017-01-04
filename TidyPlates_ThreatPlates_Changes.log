@@ -1,4 +1,9 @@
 ------------------------------------------------------
+8.3.0-Beta3 (works with TidyPlates 6.18.11)
+------------------------------------------------------
+* Reworked and optimized placement of aura widget 2.0 (anchor point and aura alignment).
+
+------------------------------------------------------
 8.3.0-Beta2 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
 * Fixed inefficient memory allocation in aura widget.
@@ -6,7 +11,7 @@
 * Adjusted health percentage calculation to Blizzard default calculation (using ceil instead of floor).
 * Implemented smooth update for statusbar for Aura Widget 2.0 in bar mode.
 * Several changes to the options dialog to improve consistency in naming and layout.
-* Use /tptp <command> to update to new default profile oder to migration settings instead of /threatplates. Use ""/tptp help" for command line usage help.
+* Use /tptp <option> to update to new default profile oder to migration settings instead of /threatplates. Use ""/tptp help" for command line usage help.
 
 ------------------------------------------------------
 8.3.0-Beta1 (works with TidyPlates 6.18.11)

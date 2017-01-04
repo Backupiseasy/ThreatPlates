@@ -110,12 +110,7 @@ local function ParseCommandLine(message)
 	elseif message == "help" then
 		PrintHelp()
 	elseif message == "internal" then
-		SendChatMessage("ThreatPlates - Locales", "CHANNEL", nil, "5")
-		for k,v in pairs(L) do
-			--output:write(k .. ", " .. v)
-			--SendChatMessage("text" [, "chatType" [, languageIndex [, "channel"]]])
-			SendChatMessage('"' .. k .. '", "' .. v .. '"', "CHANNEL", nil, "5")
-		end
+		print ("CVar: ", GetCVar("SetNamePlateEnemySize"))
 	else
 		t.Print(L["Unknown option: "] .. message, true)
 		PrintHelp()

@@ -3858,31 +3858,12 @@ local function GetOptions()
 											order = 20,
 											disabled = function() return not db.AuraWidget.ON end,
 											args = {
-												X = {
-													name = L["X"],
-													type = "range",
-													order = 1,
-													min = -120,
-													max = 120,
-													step = 1,
-													arg = {"AuraWidget", "x"},
-												},
-												Y = {
-													name = L["Y"],
-													type = "range",
-													order = 2,
-													min = -120,
-													max = 120,
-													step = 1,
-													arg = {"AuraWidget", "y"},
-												},
-												Anchor = {
-													name = L["Anchor"],
-													type = "select",
-													order = 3,
-													values = t.FullAlign,
-													arg = {"AuraWidget","anchor"}
-												},
+												Anchor = { name = L["Anchor Point"], order = 1,	type = "select", values = t.ANCHOR_POINT, arg = {"AuraWidget","anchor"} },
+												X = {	name = L["Offset X"],	order = 2, type = "range", min = -120, max = 120, step = 1, arg = {"AuraWidget", "x"}, },
+												Y = { name = L["Offset Y"], order = 3, type = "range", min = -120, max = 120, step = 1, arg = {"AuraWidget", "y"}, },
+												Spacer = CreateSpacer(5),
+												AlignmentH = {name = L["Horizontal Alignment"], order = 6,	type = "select", values = {LEFT = L["Left-to-right"], RIGHT = L["Right-to-left"] }, arg = {"AuraWidget", "AlignmentH"} },
+												AlignmentV = {name = L["Vertical Alignment"], order = 7,	type = "select", values = {BOTTOM = L["Bottom-to-top"], TOP = L["Top-to-bottom"]}, arg = {"AuraWidget", "AlignmentV"} }
 											},
 										},
 									},

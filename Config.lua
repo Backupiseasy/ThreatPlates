@@ -5,7 +5,25 @@ local ThreatPlates = NAMESPACE.ThreatPlates
 -- Stuff for handling the configuration of Threat Plates - ThreatPlatesDB
 ---------------------------------------------------------------------------------------------------
 
+
 local L = ThreatPlates.L
+
+---------------------------------------------------------------------------------------------------
+-- Global contstants for options
+---------------------------------------------------------------------------------------------------
+
+ThreatPlates.ANCHOR_POINT = { TOPLEFT = "Top Left", TOP = "Top", TOPRIGHT = "Top Right", LEFT = "Left", CENTER = "Center", RIGHT = "Right", BOTTOMLEFT = "Bottom Left", BOTTOM = "Bottom ", BOTTOMRIGHT = "Bottom Right" }
+ThreatPlates.ANCHOR_POINT_SETPOINT = {
+  TOPLEFT = {"TOPLEFT", "BOTTOMLEFT"},
+  TOP = {"TOP", "BOTTOM"},
+  TOPRIGHT = {"TOPRIGHT", "BOTTOMRIGHT"},
+  LEFT = {"LEFT", "RIGHT"},
+  CENTER = {"CENTER", "CENTER"},
+  RIGHT = {"RIGHT", "LEFT"},
+  BOTTOMLEFT = {"BOTTOMLEFT", "TOPLEFT"},
+  BOTTOM = {"BOTTOM", "TOP"},
+  BOTTOMRIGHT = {"BOTTOMRIGHT", "TOPRIGHT"}
+}
 
 local function UpdateDefaultProfile()
   local db = TidyPlatesThreat.db
@@ -27,8 +45,9 @@ local function UpdateDefaultProfile()
   db.profile.settings.level.typeface = "Friz Quadrata TT"
   db.profile.settings.level.size = 9
   db.profile.settings.level.width = 22
-  db.profile.settings.level.x = 49
-  db.profile.settings.level.y = -2
+  db.profile.settings.level.x = 48
+  db.profile.settings.level.y = 0
+  db.profile.settings.level.vertical = "CENTER"
   db.profile.settings.customtext.typeface = "Friz Quadrata TT"
   db.profile.settings.customtext.size = 9
   db.profile.settings.customtext.y = 0
