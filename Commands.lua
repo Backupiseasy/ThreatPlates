@@ -86,39 +86,14 @@ end
 SLASH_TPTPVERBOSE1 = "/tptpverbose"
 SlashCmdList["TPTPVERBOSE"] = TPTPVERBOSE
 
-local function PrintHelp()
-	t.Print(L["Usage: /tptp [options]"], true)
-	t.Print(L["  options:"], true)
-	t.Print(L["    update-profiles      Migrates deprecated settings in your configuration"], true)
-	t.Print(L["    new-default-profile  Updates the default profile with new default settings"], true)
-	t.Print(L["    help                 Prints this help message"], true)
-	t.Print(L["    <no option>          Displays options dialog"], true)
-end
-
--- /tptp
-local function ParseCommandLine(message)
-	-- split commands by space
-	--for word in message:gmatch("%S+") do
-	if message == "" then
-		TidyPlatesThreat:OpenOptions()
-	elseif message == "update-profiles" then
-		t.Print(L["Migrating deprecated settings in configuration ..."])
-		t.UpdateConfiguration()
-	elseif message == "new-default-profile" then
-		t.Print(L["Updating default profile with new settings ..."])
-		t.UpdateDefaultProfile()
-	elseif message == "help" then
-		PrintHelp()
-	elseif message == "internal" then
-		print ("CVar: ", GetCVar("SetNamePlateEnemySize"))
-	else
-		t.Print(L["Unknown option: "] .. message, true)
-		PrintHelp()
+local function TPTPPERF()
+	if TidyPlatesThreat.db.profile.verbose then
+		UpdateAddOnMemoryUsage()
+		local mem = GetAddOnMemoryUsage("TidyPlates_ThreatPlates")
+		t.Print("-->>Threat Plates memory usage: "..tostring(mem))
 	end
+
 end
 
------------------------------------------------------
--- External
------------------------------------------------------
-
-TidyPlatesThreat.ParseCommandLine = ParseCommandLine
+SLASH_TPTPPERF1 = "/tptpperformance"
+SlashCmdList["TPTPPERF"] = TPTPPERF

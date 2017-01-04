@@ -8,24 +8,23 @@ local path = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\StealthWidget
 -- local WidgetList = {}
 
 local DETECTION_AURAS = {
+  [203761] = true, -- Detector
+  [213486] = true, -- Demonic Vision
+  [203149] = true, -- Animal Instincts
+  [169902] = true, -- All-Seeing Eye
+  [70465] = true, -- Invisibility and Stealth Detection - not really sure if necessary as aura is hidden
+  [155183] = true, -- Invisibility and Stealth Detection - not really sure if necessary as aura is hidden
+  [148500] = true, -- Invisibility and Stealth Detection - not really sure if necessary as aura is hidden
   [18950] = true, -- Invisibility and Stealth Detection - not really sure if necessary as aura is hidden
-  [34709] = true, -- Shadow Sight
   [41634] = true, -- Invisibility and Stealth Detection - not really sure if necessary as aura is hidden
   [67236] = true, -- Invisibility and Stealth Detection - not really sure if necessary as aura is hidden
-  [70465] = true, -- Invisibility and Stealth Detection - not really sure if necessary as aura is hidden
-  [79140] = true, -- Vendetta
   [93105] = true, -- Invisibility and Stealth Detection - not really sure if necessary as aura is hidden
   [127907] = true, -- Phosphorescence
   [127913] = true, -- Phosphorescence
-  [148500] = true, -- Invisibility and Stealth Detection - not really sure if necessary as aura is hidden
-  [155183] = true, -- Invisibility and Stealth Detection - not really sure if necessary as aura is hidden
-  [169902] = true, -- All-Seeing Eye
-  [201626] = true, -- Sight Beyond Sight
   [202568] = true, -- Piercing Vision
-  [203149] = true, -- Animal Instincts
-  [203761] = true, -- Detector
-  [213486] = true, -- Demonic Vision
+  [34709] = true, -- Shadow Sight
   [225649] = true, -- Shadow Sight
+  [79140] = true, -- Vendetta
 }
 
 ---------------------------------------------------------------------------------------------------
@@ -139,4 +138,4 @@ local function CreateWidgetFrame(parent)
 	return frame
 end
 
-ThreatPlatesWidgets.RegisterWidget("StealthWidgetTPTP", CreateWidgetFrame, false, enabled)
+ThreatPlatesWidgets.RegisterWidget("StealthWidget", CreateWidgetFrame, false, enabled)

@@ -43,17 +43,6 @@ local function GetValue(info)
 	return value
 end
 
-local function SetValuePlain(info, value)
-	-- info: table with path to setting in options dialog, that was changed
-	-- info.arg: table with parameter arg from options definition
-	local DB = TidyPlatesThreat.db.profile
-	local keys = info.arg
-	for index = 1, #keys - 1 do
-		DB = DB[keys[index]]
-	end
-	DB[keys[#keys]] = value
-end
-
 local function SetValue(info, value)
 	-- info: table with path to setting in options dialog, that was changed
 	-- info.arg: table with parameter arg from options definition
@@ -64,11 +53,6 @@ local function SetValue(info, value)
   end
   DB[keys[#keys]] = value
 	t.Update()
-end
-
-local function SetValueForceUpdate(info, value)
-	SetValuePlan(info, val)
-	TidyPlates:ForceUpdate()
 end
 
 local function GetValueChar(info)
@@ -152,16 +136,6 @@ local function SetColorAlpha(info, r, g, b, a)
 	t.Update()
 end
 
-local function SetColorAlphaForceUpdate(info, r, g, b, a)
-	local DB = TidyPlatesThreat.db.profile
-	local keys = info.arg
-	for index = 1, #keys - 1 do
-    DB = DB[keys[index]]
-  end
-  DB[keys[#keys]].r, DB[keys[#keys]].g, DB[keys[#keys]].b, DB[keys[#keys]].a = r,g,b,a
-	TidyPlates:ForceUpdate()
-end
-
 -- Set Theme Values
 
 local function SetThemeValue(info, val)
@@ -171,14 +145,6 @@ local function SetThemeValue(info, val)
 	if (TidyPlatesOptions.ActiveTheme == THREAD_PLATES_NAME) then
 		TidyPlates:SetTheme(THREAD_PLATES_NAME)
 	end
-end
-
--- Set widget values
-
-local function SetValueAuraWidget(info, val)
-	SetValuePlain(info, val)
-	ThreatPlatesWidgets.ConfigAuraWidget()
-	TidyPlates:ForceUpdate()
 end
 
 local function CreateSpacer(pos)
@@ -243,7 +209,7 @@ local UNIT_TYPES = {
 
 local function GetEnableToggle(header, description, setting)
 	local enable = {
-		type = "group", name = L["Enable"],	order = 5, inline = true, disabled = false,
+		type = "group", name = L["Enable"],	order = 5, inline = true,
 		args = {
 			Toggle = { type = "toggle",	name = header, desc = description, arg = setting, order = 0, descStyle = "inline", width = "full", },
 		},
@@ -251,30 +217,22 @@ local function GetEnableToggle(header, description, setting)
 	return enable
 end
 
-local function GetSizeEntry(pos, setting, func_disabled)
-  local entry = {
-    name = L["Size"], order = pos, type = "group", inline = true, disabled = func_disabled,
-    args = {
-      ScaleSlider = {	name = "", order = 0, type = "range", step = 1, width = "full", arg = {setting, "scale"} }
-    }
-  }
-  return entry
-end
-
-local function GetPlacementEntry(pos, setting, func_disabled)
-  local entry = {
-    name = L["Placement"], order = pos,	type = "group", inline = true, disabled = func_disabled,
-    args = {
-      X = {	type = "range",	order = 1, name = L["X"],	min = -120,	max = 120, step = 1, arg = {setting, "x"} },
-      Y = { type = "range",	order = 2, name = L["Y"],	min = -120,	max = 120, step = 1, arg = {setting, "y"} }
-    }
-  }
-  return entry
-end
-
 local function AddLayoutOptions(args, pos, setting, func_disabled)
-	args.Sizing = GetSizeEntry(pos, setting, func_disabled)
-	args.Placement = GetPlacementEntry(pos + 10, setting, func_disabled)
+	args.Sizing = {
+		type = "group",	order = pos,	name = L["Scale"], inline = true,
+		disabled = func_disabled,
+		args = {
+			ScaleSlider = {	type = "range", order = 0,  name = "", width = "full", arg = {setting,"scale"} },
+		},
+	}
+	args.Placement = {
+		type = "group",	order = pos + 10,	name = L["Placement"], inline = true,
+		disabled = func_disabled,
+		args = {
+			X = {	type = "range",	order = 1, name = L["X"],	min = -120,	max = 120, step = 1, arg = {setting, "x"}, },
+			Y = { type = "range",	order = 2, name = L["Y"],	min = -120,	max = 120, step = 1, arg = {setting, "y"}, },
+		},
+	}
 	args.Alpha = {
 		type = "group",	order = pos + 20,	name = L["Alpha"], inline = true,
 		disabled = func_disabled,
@@ -285,65 +243,21 @@ local function AddLayoutOptions(args, pos, setting, func_disabled)
 	}
 end
 
-local function ClassIconsWidgetOptions()
-  local options = { name = L["Class Icons"], order = 30, type = "group",
-    args = {
-      Enable = GetEnableToggle(L["Enable Class Icons Widget"], L["This widget will display class icons on nameplate with the settings you set below."], {"classWidget", "ON"}),
-      Options = {
-        name = L["Options"],
-        type = "group",
-        inline = true,
-        order = 20,
-        disabled = function() return not db.classWidget.ON end,
-        args = {
-          FriendlyClass = {
-            name = L["Enable Friendly Icons"],
-            type = "toggle",
-            desc = L["Enable the showing of friendly player class icons."],
-            descStyle = "inline",
-            width = "full",
-            arg = {"friendlyClassIcon"},
-          },
-          FriendlyCaching = {
-            name = L["Friendly Caching"],
-            type = "toggle",
-            desc = L["This allows you to save friendly player class information between play sessions or nameplates going off the screen.|cffff0000(Uses more memory)"],
-            descStyle = "inline",
-            width = "full",
-            disabled = function() if not db.friendlyClassIcon or not db.classWidget.ON then return true else return false end end,
-            arg = {"cacheClass"}
-          },
-        },
-      },
-      Textures = {
-        name = L["Textures"],
-        type = "group",
-        inline = true,
-        order = 30,
-        disabled = function() return not db.classWidget.ON end,
-        args = {},
-      },
-      Sizing = GetSizeEntry(40, "classWidget", function() return not db.classWidget.ON end),
-      Placement = GetPlacementEntry(50, "classWidget", function() return not db.classWidget.ON end),
-    }
-  }
-  return options
-end
-
 local function QuestWidgetOptions()
 	local options =  { type = "group", order = 90,	name = L["Quest"],
 		args = {
 			Enable = GetEnableToggle(L["Enable Quest Widget"], L["Enables highlighting of nameplates of mobs involved with any of your current quests."], {"questWidget", "ON"}),
 			Visibility = { type = "group",	order = 10,	name = L["Visibility"], inline = true,
-				disabled = function() return not db.questWidget.ON end,
+				disabled = function() return not db.questWidget.ModeIcon end,
 				args = {
-					InCombatAll = { type = "toggle", order = 10, name = L["Hide in Combat"],	arg = {"questWidget", "HideInCombat"}, },
-					InCombatAttacked = { type = "toggle", order = 20, name = L["Hide on Attacked Units"],	arg = {"questWidget", "HideInCombatAttacked"}, },
-					InInstance = { type = "toggle", order = 30, name = L["Hide in Instance"],	arg = {"questWidget", "HideInInstance"}, },
+					InCombat = { type = "toggle", order = 10, name = L["Hide in Combat"],	arg = {"questWidget", "HideInCombat"}, },
+					InInstance = { type = "toggle", order = 20, name = L["Hide in Instance"],	arg = {"questWidget", "HideInInstance"}, },
 				},
 			},
 			ModeHealthBar = {
-				name = L["Health Bar Mode"], order = 20, type = "group", inline = true,
+				type = "group",
+				name = L["Health Bar Mode"],
+				inline = true,
 				disabled = function() return not db.questWidget.ON end,
 				args = {
 					Help = { type = "description", order = 0,	width = "full",	name = L["Use a custom color for the health bar of quest mobs."],	},
@@ -357,7 +271,9 @@ local function QuestWidgetOptions()
 				},
 			},
 			ModeIcon = {
-				name = L["Icon Mode"], order = 301, type = "group", inline = true,
+				name = L["Icon Mode"],
+				type = "group",
+				inline = true,
 				disabled = function() return not db.questWidget.ON end,
 				args = {
 					Help = { type = "description", order = 0,	width = "full",	name = L["Show an indicator icon at the nameplate for quest mobs."],	},
@@ -524,14 +440,7 @@ local function GetOptions()
 					type = "toggle",
 					order = 1,
 					desc = L["Sets your spec "]..spec_name..L[" to tanking."],
-					get =	function()
-						local spec = TidyPlatesThreat.db.char.spec[index]
-						if spec == nil then
-							return t.SPEC_ROLES[t.Class()][index]
-						else
-							return spec
-						end
-					end,
+					get = function() return TidyPlatesThreat.db.char.spec[index] end,
 					set = function() TidyPlatesThreat.db.char.spec[index] = true; t.Update() end,
 				},
 				DPS = {
@@ -539,14 +448,7 @@ local function GetOptions()
 					type = "toggle",
 					order = 2,
 					desc = L["Sets your spec "]..spec_name..L[" to DPS."],
-					get = function()
-						local spec = TidyPlatesThreat.db.char.spec[index]
-						if spec == nil then
-							return not t.SPEC_ROLES[t.Class()][index]
-						else
-							return not spec
-						end
-					end,
+					get = function() return not TidyPlatesThreat.db.char.spec[index] end,
 					set = function() TidyPlatesThreat.db.char.spec[index] = false; t.Update() end,
 				},
 			},
@@ -571,12 +473,6 @@ local function GetOptions()
 						GeneralSettings = CreateTabGeneralSettings(),
 						HealthBarView = {
 							name = L["Health Bar View"],
-												nameplateShowFriendlyNPCs = {
-													name = L["Show Friendly NPCs"],
-													type = "toggle",
-													order = 1.5,
-													arg = "nameplateShowFriendlyNPCs",
-												},
 							type = "group",
 							inline = false,
 							order = 20,
@@ -588,7 +484,7 @@ local function GetOptions()
 									order = 1,
 									args = {
 										HealthBarTexture = {
-											name = L["Foreground Texture"],
+											name = L["Healthbar"],
 											type = "select",
 											order = 1,
 											dialogControl = "LSM30_Statusbar",
@@ -596,69 +492,15 @@ local function GetOptions()
 											set = SetThemeValue,
 											arg = {"settings","healthbar", "texture"},
 										},
-										BGTexture = {
-											name = L["Background Texture"],
-											type = "select",
-											order = 10,
-											dialogControl = "LSM30_Statusbar",
-											values = AceGUIWidgetLSMlists.statusbar,
-											set = SetThemeValue,
-											arg = {"settings","healthbar", "backdrop"},
-										},
-                    Spacer1 = CreateSpacer(14),
-                    BGColorText = {
-                      type = "description",
-                      order = 15,
-                      width = "single",
-                      name = L["Background Color:"],
-                    },
-                    BGColorForegroundToggle = {
-                      name = L["Same as Foreground"],
-                      order = 20,
-                      type = "toggle",
-                      desc = L["Use the healthbar's foreground color also for the background."],
-                      set = SetThemeValue,
-                      arg = {"settings","healthbar","BackgroundUseForegroundColor"},
-                    },
-                    BGColorCustomToggle = {
-                      name = L["Custom"],
-                      order = 30,
-                      type = "toggle",
-                      width = "half",
-                      desc = L["Use the healthbar's foreground color also for the background."],
-                      set = function (info, val)
-                        SetThemeValue(info, not val)
-                      end,
-                      get = function (info, val)
-                        return not GetValue(info, val)
-                      end,
-                      arg = {"settings","healthbar","BackgroundUseForegroundColor"},
-                    },
-                    BGColorCustom = {
-                      name = L["Color"], type = "color",	order = 35,	get = GetColor, set = SetColor, arg = {"settings", "healthbar", "BackgroundColor"},
-                      width = "half",
-                      desc = L["Use a custom color for the healtbar's background."],
-                      disabled = function() return db.settings.healthbar.BackgroundUseForegroundColor end,
-                    },
-                    BackgroundOpacity = {
-                      name = L["Background Opacity"],
-                      order = 40,
-                      type = "range",
-                      min = 0,
-                      max = 1,
-                      step = 0.01,
-                      isPercent = true,
-                      arg = {"settings","healthbar","BackgroundOpacity"},
-                    },
 										Header1 = {
 											type = "header",
-											order = 50,
+											order = 1.5,
 											name = "",
 										},
 										HealthBorderToggle = {
 											type = "toggle",
 											width = "double",
-											order = 60,
+											order = 2,
 											name = L["Show Border"],
 											set = SetThemeValue,
 											arg = {"settings","healthborder","show"},
@@ -666,7 +508,7 @@ local function GetOptions()
 										HealthBorder = {
 											type = "select",
 											width = "double",
-											order = 70,
+											order = 3,
 											name = L["Normal Border"],
 											set = SetThemeValue,
 											disabled = function() if db.settings.healthborder.show then return false else return true end end,
@@ -675,20 +517,20 @@ local function GetOptions()
 										},
 										Header2 = {
 											type = "header",
-											order = 75,
+											order = 3.5,
 											name = "",
 										},
 										EliteHealthBorderToggle = {
 											type = "toggle",
 											width = "double",
-											order = 80,
+											order = 4,
 											name = L["Show Elite Border"],
 											arg = {"settings","elitehealthborder","show"},
 										},
 										EliteBorder = {
 											type = "select",
 											width = "double",
-											order = 90,
+											order = 5,
 											name = L["Elite Border"],
 											disabled = function() if db.settings.elitehealthborder.show then return false else return true end end,
 											values = {TP_HealthBarEliteOverlay = "Default",TP_HealthBarEliteOverlayThin = "Thin"},
@@ -696,13 +538,13 @@ local function GetOptions()
 										},
 										Header3 = {
 											type = "header",
-											order = 95,
+											order = 5.5,
 											name = "",
 										},
 										Mouseover = {
 											type = "select",
 											width = "double",
-											order = 100,
+											order = 6,
 											name = L["Mouseover"],
 											set = SetThemeValue,
 											values = {TP_HealthBarHighlight = "Default",Empty = "None"},
@@ -3457,7 +3299,105 @@ local function GetOptions()
 					type = "group",
 					order = 40,
 					args = {
-						ClassIconWidget = ClassIconsWidgetOptions(),
+						ClassIconWidget = {
+							name = L["Class Icons"],
+							type = "group",
+							order = 30,
+							args = {
+								Enable = {
+									name = L["Enable"],
+									type = "group",
+									inline = true,
+									order = 10,
+									args = {
+										Toggle = {
+											name = L["Enable"],
+											type = "toggle",
+											order = 1,
+											desc = L["This widget will display class icons on nameplate with the settings you set below."],
+											descStyle = "inline",
+											width = "full",
+											arg = {"classWidget", "ON"},
+										},
+									},
+								},
+								Options = {
+									name = L["Options"],
+									type = "group",
+									inline = true,
+									order = 20,
+									disabled = function() return not db.classWidget.ON end,
+									args = {
+										FriendlyClass = {
+											name = L["Enable Friendly Icons"],
+											type = "toggle",
+											desc = L["Enable the showing of friendly player class icons."],
+											descStyle = "inline",
+											width = "full",
+											arg = {"friendlyClassIcon"},
+										},
+										FriendlyCaching = {
+											name = L["Friendly Caching"],
+											type = "toggle",
+											desc = L["This allows you to save friendly player class information between play sessions or nameplates going off the screen.|cffff0000(Uses more memory)"],
+											descStyle = "inline",
+											width = "full",
+											disabled = function() if not db.friendlyClassIcon or not db.classWidget.ON then return true else return false end end,
+											arg = {"cacheClass"}
+										},
+									},
+								},
+								Textures = {
+									name = L["Textures"],
+									type = "group",
+									inline = true,
+									order = 30,
+									disabled = function() return not db.classWidget.ON end,
+									args = {},
+								},
+								Sizing = {
+									name = L["Scale"],
+									type = "group",
+									inline = true,
+									order = 40,
+									disabled = function() return not db.classWidget.ON end,
+									args = {
+										ScaleSlider = {
+											name = "",
+											type = "range",
+											arg = {"classWidget","scale"}
+										},
+									},
+								},
+								Placement = {
+									name = L["Placement"],
+									type = "group",
+									inline = true,
+									order = 50,
+									disabled = function() return not db.classWidget.ON end,
+									args = {
+										X = {
+											name = L["X"],
+											type = "range",
+											order = 1,
+											min = -120,
+											max = 120,
+											step = 1,
+											arg = {"classWidget", "x"},
+										},
+										Y = {
+											name = L["Y"],
+											type = "range",
+											order = 1,
+											min = -120,
+											max = 120,
+											step = 1,
+											arg = {"classWidget", "y"},
+										},
+									},
+								},
+							},
+						},
 						ComboPointWidget = {
 							name = L["Combo Points"],
 							type = "group",
@@ -3564,13 +3504,13 @@ local function GetOptions()
 											disabled = function() return not db.debuffWidget.ON end,
 											args = {
 												ShowFriendly = {
-													name = L["Show Friendly"],
+													name = "Show Friendly",
 													order = 1,
 													type = "toggle",
 													arg = {"debuffWidget","showFriendly"},
 												},
 												ShowEnemy = {
-													name = L["Show Enemy"],
+													name = "Show Enemy",
 													order = 2,
 													type = "toggle",
 													arg = {"debuffWidget","showEnemy"}
@@ -3733,283 +3673,6 @@ local function GetOptions()
 												db.debuffWidget.filter = table
 												ThreatPlatesWidgets.PrepareFilter()
 											end,
-										},
-									},
-								},
-							},
-						},
-						AuraWidget2 = {
-							name = L["Aura 2.0"],
-							type = "group",
-							order = 25,
-							disabled = function() return db.debuffWidget.ON end,
-							set = SetValueAuraWidget,
-							args = {
-								Enable = GetEnableToggle(L["Enable Aura Widget 2.0"], L["This widget will display auras that match your filtering on your target nameplate and others you recently moused over. The old aura widget (Aura) must be disabled first."], {"AuraWidget", "ON"}),
-								Filtering = {
-									name = L["Filtering"],
-									type = "group",
-									inline = true,
-									order = 10,
-									disabled = function() return not db.AuraWidget.ON end,
-									args = {
-										Show = {
-											name = L["Filter by Unit Reaction"],
-											type = "group",
-											order = 2,
-											inline = true,
-											args = {
-												ShowFriendly = {
-													name = L["Show Friendly"],
-													order = 1,
-													type = "toggle",
-													arg = {"AuraWidget","ShowFriendly"},
-												},
-												ShowEnemy = {
-													name = L["Show Enemy"],
-													order = 2,
-													type = "toggle",
-													arg = {"AuraWidget","ShowEnemy"}
-												}
-											},
-										},
-										Display = {
-											name = L["Filter by Dispel Type"],
-											type = "multiselect",
-											order = 3,
-											values = {
-												[1] = "Buff",
-												[2] = "Curse",
-												[3] = "Disease",
-												[4] = "Magic",
-												[5] = "Poison",
-												[6] = "Debuff"
-											},
-											get = function(info,k)
-												return db.AuraWidget.FilterByType[k]
-											end,
-											set = function(info,k,v)
-												db.AuraWidget.FilterByType[k] = v
-                        TidyPlates:ForceUpdate()
-											end,
-										},
-										Filtering = {
-											name = L["Filter by Spell"],
-											order = 30,
-											type = "group",
-											inline = true,
-											args = {
-												Mode = {
-													name = L["Mode"],
-													type = "select",
-													order = 1,
-													width = "double",
-													values = t.DebuffMode,
-													arg = {"AuraWidget","FilterMode"},
-												},
-												DebuffList = {
-													name = L["Filtered Auras"],
-													type = "input",
-													order = 2,
-													dialogControl = "MultiLineEditBox",
-													width = "full",
-													get = function(info) return t.TTS(db.AuraWidget.FilterBySpell) end,
-													set = function(info, v)
-														local table = {strsplit("\n", v)};
-														db.AuraWidget.FilterBySpell = table
-														ThreatPlatesWidgets.PrepareFilterAuraWidget()
-													end,
-												},
-											},
-										},
-									},
-								},
-								Style = {
-									name = L["Appearance"], order = 13,	type = "group",	inline = true,
-									disabled = function() return not db.AuraWidget.ON end,
-									args = {
-										TargetOnly = {
-											name = L["Target Only"],
-											type = "toggle",
-											order = 10,
-											desc = L["This will toggle the aura widget to only show for your current target."],
-											arg = {"AuraWidget","ShowTargetOnly"},
-										},
-										CooldownSpiral = {
-											name = L["Cooldown Spiral"],
-											type = "toggle",
-											order = 20,
-											desc = L["This will toggle the aura widget to show the cooldown spiral on auras."],
-											arg = {"AuraWidget","ShowCooldownSpiral"},
-										},
-										Stacks = {
-											name = L["Stack Count"],
-											type = "toggle",
-											order = 30,
-											desc = L["Show stack count as overlay on aura icon."],
-											arg = {"AuraWidget","ShowStackCount"},
-										},
-										AuraTypeColors = {
-											name = L["Color by Dispel Type"],
-											type = "toggle",
-											order = 50,
-											desc = L["This will color the aura based on its type (poison, disease, magic, curse) - for Icon Mode the icon border is colored, for Bar Mode the bar itself."],
-											width = "full",
-											arg = {"AuraWidget","ShowAuraType"},
-										},
-										DefaultBuffColor = {
-											name = L["Default Buff Color"], type = "color",	order = 54,	arg = {"AuraWidget", "DefaultBuffColor"},	hasAlpha = true,
-                      get = GetColorAlpha, set = SetColorAlphaForceUpdate,
-										},
-										DefaultDebuffColor = {
-											name = L["Default Debuff Color"], type = "color",	order = 56, arg = {"AuraWidget","DefaultDebuffColor"},	hasAlpha = true,
-                      get = GetColorAlpha, set = SetColorAlphaForceUpdate,
-										},
-									},
-								},
-								SortOrder = {
-									name = L["Sort Order"], order = 15,	type = "group",	inline = true, disabled = function() return not db.AuraWidget.ON end,
-									args = {
-										AtoZ = {
-											name = L["A to Z"], type = "toggle",	order = 10, width = "half",
-											desc = L["Sort in ascending alphabetical order."],
-											get = function(info) return db.AuraWidget.SortOrder == "AtoZ" end,
-											set = function(info, value) SetValuePlain(info, "AtoZ") end,
-											arg = {"AuraWidget","SortOrder"},
-										},
-										TimeLeft = {
-											name = L["Time Left"], type = "toggle",	order = 20,	 width = "half",
-											desc = L["Sort by time left in ascending order."],
-											get = function(info) return db.AuraWidget.SortOrder == "TimeLeft" end,
-											set = function(info, value) SetValuePlain(info, "TimeLeft") end,
-											arg = {"AuraWidget","SortOrder"},
-										},
-										Duration = {
-											name = L["Duration"], type = "toggle",	order = 30,	 width = "half",
-											desc = L["Sort by overall duration in ascending order."],
-											get = function(info) return db.AuraWidget.SortOrder == "Duration" end,
-											set = function(info, value) SetValuePlain(info, "Duration") end,
-											arg = {"AuraWidget","SortOrder"},
-										},
-										Creation = {
-											name = L["Creation"], type = "toggle",	order = 40,	 width = "half",
-											desc = L["Show auras in order created with oldest aura first."],
-											get = function(info) return db.AuraWidget.SortOrder == "Creation" end,
-											set = function(info, value) SetValuePlain(info, "Creation") end,
-											arg = {"AuraWidget","SortOrder"},
-										},
-										ReverseOrder = {
-											name = L["Reverse Order"], type = "toggle",	order = 50,	desc = L['Reverse the sort order (e.g., "A to Z" becomes "Z to A").'],	arg = { "AuraWidget", "SortReverse" },
-                      set = SetValuePlain,
-										},
-									},
-								},
-								Layout = {
-									name = L["Layout"], order = 20, type = "group", inline = true,
-									disabled = function() return not db.AuraWidget.ON end,
-									args = {
-										Sizing = {
-											name = L["Sizing"],
-											type = "group",
-											order = 15,
-											inline = true,
-											disabled = function() return not db.AuraWidget.ON end,
-											args = {
-												Scale = {
-													name = L["Scale"],
-													type = "range",
-													order = 1,
-													width = "full",
-													step = 0.05,
-													softMin = 0.6,
-													softMax = 1.3,
-													isPercent = true,
-													arg = {"AuraWidget","scale",}
-												},
-											},
-										},
-										Placement = {
-											name = L["Placement"],
-											type = "group",
-											inline = true,
-											order = 20,
-											disabled = function() return not db.AuraWidget.ON end,
-											args = {
-												Anchor = { name = L["Anchor Point"], order = 1,	type = "select", values = t.ANCHOR_POINT, arg = {"AuraWidget","anchor"} },
-												X = {	name = L["Offset X"],	order = 2, type = "range", min = -120, max = 120, step = 1, arg = {"AuraWidget", "x"}, },
-												Y = { name = L["Offset Y"], order = 3, type = "range", min = -120, max = 120, step = 1, arg = {"AuraWidget", "y"}, },
-												Spacer = CreateSpacer(5),
-												AlignmentH = {name = L["Horizontal Alignment"], order = 6,	type = "select", values = {LEFT = L["Left-to-right"], RIGHT = L["Right-to-left"] }, arg = {"AuraWidget", "AlignmentH"} },
-												AlignmentV = {name = L["Vertical Alignment"], order = 7,	type = "select", values = {BOTTOM = L["Bottom-to-top"], TOP = L["Top-to-bottom"]}, arg = {"AuraWidget", "AlignmentV"} }
-											},
-										},
-									},
-								},
-								ModeIcon = {
-									name = L["Icon Mode"], order = 30, type = "group", inline = true,
-									disabled = function() return not db.AuraWidget.ON or db.AuraWidget.ModeBar.Enabled end,
-									args = {
-										Help = { type = "description", order = 0,	width = "full",	name = L["Show auras as icons in a grid configuration."],	},
-										Enable = { type = "toggle", order = 10, name = L["Enable"],	width = "full", arg = {"AuraWidget", "ModeBar", "Enabled"}, disabled = function() return not db.AuraWidget.ON end,
-                      set = function(info,val) SetValueAuraWidget(info, false) end, get = function(info) return not GetValue(info, val) end, },
-										Appearance = { name = L["Appearance"],	order = 30, type = "group", inline = true,
-											args = {
-												Style = {	name = L["Icon Style"], order = 10, type = "select", desc = L["This lets you select the layout style of the aura widget."], descStyle = "inline",
-													values = {wide = L["Wide"],square = L["Square"]},
-													arg = {"AuraWidget", "ModeIcon", "Style"},
-												},
-											},
-										},
-										Layout = { name = L["Icon Layout"],	order = 40, type = "group", inline = true,
-											args = {
-												Columns = {	name = L["Column Limit"], order = 20, type = "range", min = 1,	max = 8, step = 1, arg = {"AuraWidget", "ModeIcon", "Columns"},	},
-												Rows = {	name = L["Row Limit"], order = 30, type = "range", min = 1,	max = 10, step = 1, arg = {"AuraWidget", "ModeIcon", "Rows"},	},
-												ColumnSpacing = {	name = L["Horizontal Spacing"], order = 40, type = "range", min = 0,	max = 100, step = 1, arg = {"AuraWidget", "ModeIcon", "ColumnSpacing"},	},
-												RowSpacing = {	name = L["Vertical Spacing"], order = 50, type = "range", min = 0,	max = 100, step = 1, arg = {"AuraWidget", "ModeIcon", "RowSpacing"},	},
-											},
-										},
-									},
-								},
-								ModeBar = {
-									name = L["Bar Mode"], order = 40,	type = "group",	inline = true,
-									disabled = function() return not db.AuraWidget.ON or not db.AuraWidget.ModeBar.Enabled end,
-									args = {
-										Help = { type = "description", order = 0,	width = "full",	name = L["Show auras as bars (with optional icons)."],	},
-										Enable = { type = "toggle", order = 10, name = L["Enable"],	width = "full", arg = {"AuraWidget", "ModeBar", "Enabled"}, disabled = function() return not db.AuraWidget.ON end, },
-										Layout = { name = L["Bar Layout"],	order = 20, type = "group", inline = true,
-											args = {
-												MaxBars = {	name = L["Bar Limit"], order = 20, type = "range", min = 1,	max = 20, step = 1, arg = {"AuraWidget", "ModeBar", "MaxBars"},	},
-												BarWidth = {	name = L["Bar Width"], order = 30, type = "range", min = 1,	max = 500, step = 1, arg = {"AuraWidget", "ModeBar", "BarWidth"},	},
-												BarHeight = {	name = L["Bar Height"], order = 40, type = "range", min = 1,	max = 500, step = 1, arg = {"AuraWidget", "ModeBar", "BarHeight"},	},
-												BarSpacing = {	name = L["Vertical Spacing"], order = 50, type = "range", min = 0,	max = 100, step = 1, arg = {"AuraWidget", "ModeBar", "BarSpacing"},	},
-											},
-										},
-										TextureConfig = { name = L["Bar Textures"],	order = 30, type = "group", inline = true,
-											args = {
-												BarTexture = { name = L["Foreground Texture"],	order = 60,	type = "select", dialogControl = "LSM30_Statusbar",	values = AceGUIWidgetLSMlists.statusbar, arg = {"AuraWidget","ModeBar", "Texture"},	},
-												Spacer2 = CreateSpacer(75),
-												BackgroundTexture = { name = L["Background Texture"],	order = 80,	type = "select", dialogControl = "LSM30_Statusbar",	values = AceGUIWidgetLSMlists.statusbar, arg = {"AuraWidget","ModeBar", "BackgroundTexture"},	},
-												BackgroundColor = {	name = L["Background Color"], type = "color",	order = 90, arg = {"AuraWidget","ModeBar", "BackgroundColor"},	hasAlpha = true,
-                          get = GetColorAlpha, set = SetColorAlphaForceUpdate,
-												},
-											},
-										},
-										FontConfig = { name = L["Font"],	order = 40, type = "group", inline = true,
-											args = {
-												Font = { name = L["Typeface"], type = "select",	order = 10,	dialogControl = "LSM30_Font",	values = AceGUIWidgetLSMlists.font,	arg = {"AuraWidget","ModeBar", "Font"}, },
-												FontSize = {	name = L["Size"], order = 20, type = "range", min = 1,	max = 36, step = 1, arg = {"AuraWidget", "ModeBar", "FontSize"},	},
-												FontColor = {	name = L["Color"], type = "color",	order = 30,	get = GetColor,	set = SetColor,	arg = {"AuraWidget","ModeBar", "FontColor"},	hasAlpha = false, },
-												Spacer1 = CreateSpacer(35),
-												IndentLabel = {	name = L["Label Text Offset"], order = 40, type = "range", min = -16,	max = 16, step = 1, arg = {"AuraWidget", "ModeBar", "LabelTextIndent"},	},
-												IndentTime = {	name = L["Time Text Offset"], order = 50, type = "range", min = -16,	max = 16, step = 1, arg = {"AuraWidget", "ModeBar", "TimeTextIndent"},	},
-											},
-										},
-										IconConfig = { name = L["Icon"],	order = 50, type = "group", inline = true,
-											args = {
-												EnableIcon = { name = L["Enable"], order = 10, type = "toggle", arg = {"AuraWidget", "ModeBar", "ShowIcon"}, },
-												IconAlign = { name = L["Show Icon to the Left"], order = 20, type = "toggle", arg = {"AuraWidget", "ModeBar", "IconAlignmentLeft"}, },
-												IconOffset = {	name = L["Offset"], order = 30, type = "range", min = -100,	max = 100, step = 1, arg = {"AuraWidget", "ModeBar", "IconSpacing", }, },
-											},
 										},
 									},
 								},
@@ -4512,7 +4175,7 @@ local function GetOptions()
 												SetValue(info,val)
 												options.args.Widgets.args.TargetArtWidget.args.Texture.args.Preview.image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\TargetArtWidget\\"..db.targetWidget.theme;
 											end,
-											values = { default = "Default", squarethin = "Thin Square", arrows = "Arrows", crescent = "Crescent", bubble = "Bubble"},
+											values = { default = "Default", arrows = "Arrows", crescent = "Crescent", bubble = "Bubble"},
 											arg = {"targetWidget","theme"},
 										},
 									},
@@ -4557,7 +4220,7 @@ local function GetOptions()
 							type = "description",
 							order = 4,
 							width = "full",
-							name = "deDE: Blacksalsify (original  author: Aideen@Perenolde/EU)"
+							name = "deDE: Blacksalsify (origial  author: Aideen@Perenolde/EU)"
 						},
 						Translators2 = {
 							type = "description",
@@ -5331,7 +4994,7 @@ function TidyPlatesThreat:OpenOptions()
 end
 
 function TidyPlatesThreat:ChatCommand(input)
-  TidyPlatesThreat.ParseCommandLine(input)
+	TidyPlatesThreat:OpenOptions();
 end
 
 function TidyPlatesThreat:ConfigRefresh()
@@ -5465,5 +5128,4 @@ function TidyPlatesThreat:SetUpOptions()
 	options.args.profiles.order = 10000;
 
 	LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable("Tidy Plates: Threat Plates", options);
-	LibStub("AceConfigDialog-3.0"):SetDefaultSize("Tidy Plates: Threat Plates", 860, 600)
 end

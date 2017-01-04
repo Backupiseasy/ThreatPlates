@@ -129,7 +129,6 @@ L["Show Neutral"] = "Neutrale Gegner anzeigen"
 L["Show Normal"] = "Normale Gegner anzeigen"
 L["Show Elite"] = "Elite-Gegner anzeigen"
 L["Show Boss"] = "Bosse anzeigen"
-L["Show Minor"] = "Triviale Gegner anzeigen"
 
 L["Blizzard Settings"] = "Blizzard-Einstellungen"
 L["Open Blizzard Settings"] = "Blizzard-Einstellungen öffnen"
@@ -226,7 +225,6 @@ L["Alpha Settings"] = "Alpha-Einstellungen"
 ----
 L["Scale"] = "Skalierung"
 L["Scale Settings"] = "Skalierungs-Einstellungen"
-L["Minor"] = "Trivial"
 
 ----
 L["Name Text"] = "Namenstext"
@@ -266,8 +264,8 @@ L["Deficit Text"] = "Defizit-Text"
 L["This will format text to show hp as a value the target is missing."] = "Hierdurch werden die fehlenden Lebenspunkte als Wert angezeigt."
 
 ----
-L["Spell Text"] = "Zaubertext"
-L["Enable Spell Text"] = "Zaubertext einschalten"
+L["Spell Text"] = "Zauber-Text"
+L["Enable Spell Text"] = "Zauber-Text einschalten"
 
 ----
 L["Level Text"] = "Stufen-Text"
@@ -323,8 +321,6 @@ L["Show Elite Threat"] = "Elite-Bedrohung anzeigen"
 L["Disables threat feedback from elite mobs."] = "Schaltet Bedrohungs-Feedback von Elite-Gegnern aus."
 L["Show Boss Threat"] = "Boss-Bedrohung anzeigen"
 L["Disables threat feedback from boss level mobs."] = "Schaltet Bedrohungs-Feedback von Boss-Gegnern aus."
-L["Show Minor Threat"] = "Triviale Bedrohung anzeigen"
-L["Disables threat feedback from minor mobs."] = "Schaltet Bedrohungs-Feedback von trivialen Gegnern aus."
 
 ----
 L["Set alpha settings for different threat reaction types."] = "Alpha-Einstellungen für verschiedene Bedrohungs-Reaktionsarten einstellen."

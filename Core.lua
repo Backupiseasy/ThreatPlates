@@ -1,17 +1,15 @@
 ﻿local _, ns = ...
 local t = ns.ThreatPlates
-
----------------------------------------------------------------------------------------------------
--- Imported functions and constants
----------------------------------------------------------------------------------------------------
-local RGB = t.RGB
 local L = t.L
 local class = t.Class()
-
 
 t.Theme = {}
 
 TidyPlatesThreat = LibStub("AceAddon-3.0"):NewAddon("TidyPlatesThreat", "AceConsole-3.0", "AceEvent-3.0")
+
+local RBG = function(red, green, blue)
+	return { r = red/255, g = green/255, b = blue/255 }
+end
 
 ---------------------------------------------------------------------------------------------------
 -- Global configs and funtions
@@ -21,7 +19,7 @@ local TIDYPLATES_VERSIONS = { "6.18.10" }
 local TIDYPLATES_INSTALLED_VERSION = GetAddOnMetadata("TidyPlates", "version") or ""
 
 -- check if the correct TidyPlates version is installed
---function CheckTidyPlatesVersion()
+function CheckTidyPlatesVersion()
 	-- local GlobDB = TidyPlatesThreat.db.global
 	-- if not GlobDB.versioncheck then
 	-- 	local version_no = 0
@@ -35,7 +33,7 @@ local TIDYPLATES_INSTALLED_VERSION = GetAddOnMetadata("TidyPlates", "version") o
 	-- 	end
 	-- 	GlobDB.versioncheck = true
 	-- end
---end
+end
 
 local function AlphaFeatureHeadlineView()
 	return TidyPlatesThreat.db.profile.headlineView.enabled and TidyPlatesHubFunctions
@@ -49,12 +47,27 @@ t.Print = function(val,override)
 	end
 end
 
+local SPEC_ROLES = {
+	DEATHKNIGHT = { true, false, false },
+	DEMONHUNTER = { false, true },
+	DRUID 			= { false, false, true, false },
+	HUNTER			= { false, false, false },
+	MAGE				= { false, false, false },
+	MONK 				= { true, false, false },
+	PALADIN 		= { false, true, false },
+	PRIEST			= { false, false, false },
+	ROGUE				= { false, false, false },
+	SHAMAN			= { false, false, false },
+	WARLOCK			= { false, false, false },
+	WARRIOR			= { false, false, true },
+}
+
 -- Returns if the currently active spec is tank (true) or dps/heal (false)
 function TidyPlatesThreat:GetSpecRole()
 	local active_role
 
 	if (self.db.profile.optionRoleDetectionAutomatic) then
-		active_role = t.SPEC_ROLES[t.Class()][t.Active()]
+		active_role = SPEC_ROLES[t.Class()][t.Active()]
 		if not active_role then active_role = false end
 	else
 		active_role = self.db.char.spec[t.Active()]
@@ -204,7 +217,6 @@ function TidyPlatesThreat:OnInitialize()
 			friendlyClassIcon = false,
 			cacheClass = false,
 			optionRoleDetectionAutomatic = false,
-			ShowThreatGlowOnAttackedUnitsOnly = false,
 			headlineView = {
 				enabled = false,
 				useAlpha = false,
@@ -387,7 +399,7 @@ function TidyPlatesThreat:OnInitialize()
 				ON = true,
 				x = 18,
 				y = 32,
-				mode = "blacklistMine",
+				mode = "whitelist",
 				style = "square",
 				displays = {
 					[1] = true,
@@ -404,60 +416,6 @@ function TidyPlatesThreat:OnInitialize()
 				scale = 1,
 				anchor = "CENTER",
 				filter = {}
-			},
-			AuraWidget = {
-				ON = false,	x = 0, y = 32, scale = 1,	anchor = "CENTER",
-				ShowEnemy = true,
-				ShowFriendly = true,
-				FilterMode = "blacklistMine",
-				FilterByType = {
-					[1] = true,
-					[2] = true,
-					[3] = true,
-					[4] = true,
-					[5] = true,
-					[6] = true
-				},
-				FilterBySpell = {},
-				ShowTargetOnly = false,
-				ShowCooldownSpiral = false,
-				ShowStackCount = true,
-				ShowAuraType = true,
-				DefaultBuffColor = RGB(102, 0, 51, 1),
-				DefaultDebuffColor = 	RGB(204, 0, 0, 1), --RGB(255, 0, 0, 1), -- DebuffTypeColor["none"]	= { r = 0.80, g = 0, b = 0 };
-				SortOrder = "TimeLeft",
-				SortReverse = false,
-				AlignmentH = "LEFT",
-				AlignmentV = "BOTTOM",
-				ModeIcon = {
-					Columns = 5,
-					Rows = 3,
-					ColumnSpacing = 5,
-					RowSpacing = 8,
-					Style = "square",
-				},
-				ModeBar = {
-					Enabled = false,
-					BarHeight = 14,
-					BarWidth = 100,
-					BarSpacing = 2,
-					MaxBars = 10,
-					Texture = "Aluminium",
-					Font = "Arial Narrow",
-					FontSize = 10,
-					FontColor = RGB(255, 255, 255),
-					LabelTextIndent = 4,
-					TimeTextIndent = 4,
-					BackgroundTexture = "Blizzard",
-					BackgroundColor = RGB(0, 0, 0, 0.3),
-					BackgroundBorder = "Plain White", --"Blizzard Tooltip",
-					BackgroundBorderEdgeSize = 2,
-					BackgroundBorderInset = -4,
-					BackgroundBorderColor = RGB(0, 0, 0, 0.3),
-					ShowIcon = true,
-					IconSpacing = 2,
-					IconAlignmentLeft = true,
-				},
 			},
 			uniqueWidget = {
 				ON = true,
@@ -520,9 +478,8 @@ function TidyPlatesThreat:OnInitialize()
 			questWidget = {	ON = false,	scale = 26,	x = 0, y = 30, alpha = 1, anchor = "CENTER",
 				ModeHPBar = true,
 				ModeIcon = true,
-				HPBarColor = RGB(218, 165, 32), -- Golden rod
-				HideInCombat = false,
-				HideInCombatAttacked = true,
+				HPBarColor = RBG(255, 140, 0),
+				HideInCombat = true,
 				HideInInstance = true,
 			},
 			stealthWidget = {	ON = false, scale = 28, x = 0, y = 0,	alpha = 1, anchor = "CENTER", },
@@ -1193,11 +1150,6 @@ function TidyPlatesThreat:OnInitialize()
 				},
 				healthbar = {
 					texture = "ThreatPlatesBar",
-          --backdrop = nil,
-          backdrop = "ThreatPlatesEmpty",
-          BackgroundUseForegroundColor = false,
-          BackgroundOpacity = 1,
-          BackgroundColor = RGB(0, 0, 0),
 				},
 				castnostop = {
 					texture = "TP_CastBarLock",
@@ -1563,12 +1515,11 @@ function TidyPlatesThreat:OnInitialize()
 				},
 			},
 		}
-  }
+    }
+	local db = LibStub('AceDB-3.0'):New('ThreatPlatesDB', defaults, 'Default')
+	self.db = db
 
-  local db = LibStub('AceDB-3.0'):New('ThreatPlatesDB', defaults, 'Default')
-  self.db = db
-
-  local RegisterCallback = db.RegisterCallback
+	local RegisterCallback = db.RegisterCallback
 
 	RegisterCallback(self, 'OnProfileChanged', 'ProfChange')
 	RegisterCallback(self, 'OnProfileCopied', 'ProfChange')
@@ -1619,6 +1570,7 @@ local function OnActivateTheme(themeTable)
 	if not themeTable then
 		ThreatPlatesWidgets.DeleteWidgets()
 	else
+		--CheckTidyPlatesVersion()
 		ActivateTheme()
 	end
 end
@@ -1691,7 +1643,6 @@ function TidyPlatesThreat:OnEnable()
 		"PLAYER_REGEN_ENABLED",
 		--"PLAYER_TALENT_UPDATE"
 		"UNIT_FACTION",
-		"QUEST_WATCH_UPDATE"
 	}
 	for i=1,#events do
 		self:RegisterEvent(events[i])
@@ -1706,7 +1657,7 @@ function TidyPlatesThreat:StartUp()
 		-- initialize roles for all available specs (level > 10) or set to default (dps/healing)
 		for index=1, GetNumSpecializations() do
 			local id, spec_name, description, icon, background, role = GetSpecializationInfo(index)
-			self:SetRole(t.SPEC_ROLES[t.Class()][index], index)
+			self:SetRole(SPEC_ROLES[t.Class()][index], index)
 		end
 
 		t.Print(Welcome..L["|cff89f559You are currently in your "]..self:RoleText()..L["|cff89f559 role.|r"])
@@ -1724,6 +1675,8 @@ function TidyPlatesThreat:StartUp()
 			GlobDB.version = tostring(t.Meta("version"))
 			GlobDB.versioncheck = false
 		end
+
+		--CheckTidyPlatesVersion()
 	end
 
 	t.SetThemes(self)
@@ -1731,8 +1684,6 @@ function TidyPlatesThreat:StartUp()
 	t.Update()
 	-- initialize widgets
 	ThreatPlatesWidgets.PrepareFilter()
-	ThreatPlatesWidgets.PrepareFilterAuraWidget()
-  ThreatPlatesWidgets.ConfigAuraWidget()
 end
 
 -----------------------------------------------------------------------------------
@@ -1821,17 +1772,10 @@ function TidyPlatesThreat:PLAYER_REGEN_ENABLED()
 	self:SetCvars()
 end
 
--- QuestWidget needs to update all nameplates when a quest was completed
-function TidyPlatesThreat:UNIT_FACTION(event, unitid)
+ -- nameplate color can change when factions change (e.g., with disguises)
+ -- Legion example: Suramar city and Masquerade
+function TidyPlatesThreat:UNIT_FACTION(event,unitid)
 	TidyPlatesThreat.ApplyProfileSettings()
-end
-
--- nameplate color can change when factions change (e.g., with disguises)
--- Legion example: Suramar city and Masquerade
-function TidyPlatesThreat:QUEST_WATCH_UPDATE(event, quest_index)
-	if TidyPlatesThreat.db.profile.questWidget.ON then
-		TidyPlatesThreat.ApplyProfileSettings()
-	end
 end
 
 -- function TidyPlatesThreat:PLAYER_TALENT_UPDATE()

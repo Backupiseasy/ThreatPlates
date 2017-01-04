@@ -1,27 +1,12 @@
 local _,ns = ...
 local t = ns.ThreatPlates
 
----------------------------------------------------------------------------------------------------
--- Imported functions and constants
----------------------------------------------------------------------------------------------------
-local RGB = t.RGB
-
-local COLOR_DC = RGB(128, 128, 128)
-local COLOR_TAPPED = RGB(100, 100, 100)
---local COLOR_TAPPED = RGB(229, 229, 229)
---local COLOR_FRIENDLY_PLAYER = RGB(170, 170, 255)
-
 local isTanked
 local reference = {
 	FRIENDLY = { NPC = "FriendlyNPC", PLAYER = "FriendlyPlayer", },
 	HOSTILE = {	NPC = "HostileNPC", PLAYER = "HostilePlayer", },
 	NEUTRAL = { NPC = "NeutralUnit", PLAYER = "NeutralUnit",	},
 }
-
-function ThreatPlates_IsTapDenied(unitid)
-	--return frame.optionTable.greyOutWhenTapDenied and not UnitPlayerControlled(frame.unit) and UnitIsTapDenied(frame.unit);
-	return not UnitPlayerControlled(unitid) and UnitIsTapDenied(unitid)
-end
 
 local function GetMarkedColor(unit,a,var)
 	local db = TidyPlatesThreat.db.profile
@@ -123,12 +108,12 @@ local function SetHealthbarColor(unit)
 	local db = TidyPlatesThreat.db.profile
 	local style = TidyPlatesThreat.SetStyle(unit)
 
-  local c, allowMarked
+	if unit.isTapped then
+		print("Unit ", unit.name, " - isTapped: ", unit.isTapped)
+	end
 
-	if unit.unitid and not UnitIsConnected(unit.unitid) then
-		-- disconnected unit: gray
-		c = COLOR_DC
-	elseif style == "totem" then
+  local c, allowMarked
+	if style == "totem" then
 		local tS = db.totemSettings[ThreatPlates_Totems[unit.name]]
 		if tS[2] then
 			c = tS.color
@@ -164,13 +149,7 @@ local function SetHealthbarColor(unit)
 					end
 				end
 			else -- Prio 4: coloring by threat, color by HP amount and class colors overwrite this
-				-- TODO: rework all of this to match Blizzard default behaviour
 				c = GetThreatColor (unit, style)
-
-				if unit.unitid and ThreatPlates_IsTapDenied(unit.unitid) then
-					-- tapped unit: grey if not a player and can't get tap on unit
-					c = COLOR_TAPPED
-				end
 			end
 
 			-- player healthbars may be colored by class overwriting any customColor, but not healthColorChange
@@ -184,7 +163,7 @@ local function SetHealthbarColor(unit)
 		end
 	end
 
-	if db.questWidget.ModeHPBar and TidyPlatesThreat.ShowQuestUnit(unit) and TidyPlatesThreat.IsQuestUnit(unit) then
+	if db.questWidget.ModeHPBar and TidyPlatesThreat.ShowQuestUnit() and TidyPlatesThreat.IsQuestUnit(unit) then
 		c = db.questWidget.HPBarColor
 	end
 
@@ -192,23 +171,11 @@ local function SetHealthbarColor(unit)
 		c = GetMarkedColor(unit,c,allowMarked) -- c will set itself back to c if marked color is disabled
 	end
 
-  if not c then
-    c = {r = unit.red, g = unit.green, b = unit.blue }  -- should return Blizzard default oclors (based on GetSelectionColor)
-  end
-
-  -- set background color for healthbar
-  local bc = c
-  if not db.settings.healthbar.BackgroundUseForegroundColor then
-    bc = db.settings.healthbar.BackgroundColor
-  end
-
-  return c.r, c.g, c.b, nil, bc.r, bc.g, bc.b, db.settings.healthbar.BackgroundOpacity
-
-  --	if c then
-  --	else
-  --		return c.r, c.g, c.b, nil, bc.r, bc.g, bc.b, db.settings.healthbar.BackgroundOpacity
-  --		return unit.red, unit.green, unit.blue, nil, bc.r, bc.g, bc.b, db.settings.healthbar.BackgroundOpacity -- should return Blizzard default oclors (based on GetSelectionColor)
-  --	end
+	if c then
+		return c.r, c.g, c.b
+	else
+		return unit.red, unit.green, unit.blue -- should return Blizzard default oclors (based on GetSelectionColor)
+	end
 end
 
 TidyPlatesThreat.SetHealthbarColor = SetHealthbarColor

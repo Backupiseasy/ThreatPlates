@@ -6,12 +6,10 @@ ThreatPlates = NAMESPACE.ThreatPlates
 -----------------------
 -- Class Icon Widget --
 -----------------------
-local PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ClassIconWidget\\"
-local PATH_THEME
+local path = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ClassIconWidget\\"
 -- local WidgetList = {}
 -- local Masque = LibStub("Masque", true)
 -- local group
-
 
 ---------------------------------------------------------------------------------------------------
 -- Threat Plates functions
@@ -21,11 +19,11 @@ local function enabled()
 	return TidyPlatesThreat.db.profile.classWidget.ON
 end
 
-local function UpdateWidgetConfig(frame)
+local function UpdateWidgetConfig(frame, class)
 	local db = TidyPlatesThreat.db.profile.classWidget
-
+	frame:SetHeight(db.scale)
+	frame:SetWidth(db.scale)
 	frame:SetPoint(db.anchor, frame:GetParent(), db.x, db.y)
-	frame:SetSize(db.scale, db.scale)
 
   PATH_THEME = PATH .. db.theme .."\\"
 
@@ -51,7 +49,6 @@ end
 -- Update Graphics
 local function UpdateWidgetFrame(frame, unit)
 	-- TODO: optimization - is it necessary to determine the class everytime this function is called on only if the guid changes?
-
 	local class
 	if unit.type == "PLAYER" then
 		if unit.reaction == "HOSTILE" then
@@ -66,14 +63,13 @@ local function UpdateWidgetFrame(frame, unit)
 			-- 		class = db.cache[unit.name]
 			-- 	end
 			-- else
-			class = unit.class
+ 				class = unit.class
 			-- end
 		end
 	end
 
 	if class then -- Value shouldn't need to change
-    UpdateWidgetConfig(frame)
-    frame.Icon:SetTexture(PATH_THEME .. class)
+		UpdateWidgetConfig(frame, class)
 		frame:Show()
 	else
 		frame:_Hide()
@@ -115,7 +111,6 @@ end
 
 local function CreateWidgetFrame(parent)
 	-- Required Widget Code
-	local frame = CreateFrame("Frame", nil, plate)
 	frame:Hide()
 
 	-- Custom Code III
@@ -144,4 +139,4 @@ local function CreateWidgetFrame(parent)
 	return frame
 end
 
-ThreatPlatesWidgets.RegisterWidget("ClassIconWidgetTPTP", CreateWidgetFrame, false, enabled)
+ThreatPlatesWidgets.RegisterWidget("ClassIconWidget", CreateWidgetFrame, false, enabled)

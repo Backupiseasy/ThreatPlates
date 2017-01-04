@@ -8,8 +8,8 @@
 -- :IterateOptionsTables() (and :GetOptionsTable() if only given one argument) return a function reference that the requesting config handling addon must call with valid "uiType", "uiName".
 -- @class file
 -- @name AceConfigRegistry-3.0
--- @release $Id: AceConfigRegistry-3.0.lua 1139 2016-07-03 07:43:51Z nevcairiel $
-local MAJOR, MINOR = "AceConfigRegistry-3.0", 16
+-- @release $Id: AceConfigRegistry-3.0.lua 1105 2013-12-08 22:11:58Z nevcairiel $
+local MAJOR, MINOR = "AceConfigRegistry-3.0", 15
 local AceConfigRegistry = LibStub:NewLibrary(MAJOR, MINOR)
 
 if not AceConfigRegistry then return end
@@ -57,7 +57,6 @@ local istable={["table"]=true,   _="table"}
 local ismethodtable={["table"]=true,["string"]=true,["function"]=true,   _="methodname, funcref or table"}
 local optstring={["nil"]=true,["string"]=true, _="string"}
 local optstringfunc={["nil"]=true,["string"]=true,["function"]=true, _="string or funcref"}
-local optstringnumberfunc={["nil"]=true,["string"]=true,["number"]=true,["function"]=true, _="string, number or funcref"}
 local optnumber={["nil"]=true,["number"]=true, _="number"}
 local optmethod={["nil"]=true,["string"]=true,["function"]=true, _="methodname or funcref"}
 local optmethodfalse={["nil"]=true,["string"]=true,["function"]=true,["boolean"]={[false]=true},  _="methodname, funcref or false"}
@@ -83,7 +82,7 @@ local basekeys={
 		dialogHidden=optmethodbool,
 		dropdownHidden=optmethodbool,
 	cmdHidden=optmethodbool,
-	icon=optstringnumberfunc,
+	icon=optstringfunc,
 	iconCoords=optmethodtable,
 	handler=opttable,
 	get=optmethodfalse,
@@ -96,7 +95,7 @@ local basekeys={
 local typedkeys={
 	header={},
 	description={
-		image=optstringnumberfunc,
+		image=optstringfunc,
 		imageCoords=optmethodtable,
 		imageHeight=optnumber,
 		imageWidth=optnumber,
@@ -113,7 +112,7 @@ local typedkeys={
 		childGroups=optstring,
 	},
 	execute={
-		image=optstringnumberfunc,
+		image=optstringfunc,
 		imageCoords=optmethodtable,
 		imageHeight=optnumber,
 		imageWidth=optnumber,
@@ -128,7 +127,7 @@ local typedkeys={
 	},
 	toggle={
 		tristate=optbool,
-		image=optstringnumberfunc,
+		image=optstringfunc,
 		imageCoords=optmethodtable,
 	},
 	tristate={

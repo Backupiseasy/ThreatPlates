@@ -1,8 +1,6 @@
---[[ $Id: AceGUIWidget-DropDown-Items.lua 1137 2016-05-15 10:57:36Z nevcairiel $ ]]--
+--[[ $Id: AceGUIWidget-DropDown-Items.lua 996 2010-12-01 18:34:17Z nevcairiel $ ]]--
 
 local AceGUI = LibStub("AceGUI-3.0")
-
-local IsLegion = select(4, GetBuildInfo()) >= 70000
 
 -- Lua APIs
 local select, assert = select, assert
@@ -442,7 +440,7 @@ end
 -- A single line to separate items
 do
 	local widgetType = "Dropdown-Item-Separator"
-	local widgetVersion = 2
+	local widgetVersion = 1
 	
 	-- exported, override
 	local function SetDisabled(self, disabled)
@@ -457,11 +455,7 @@ do
 		
 		local line = self.frame:CreateTexture(nil, "OVERLAY")
 		line:SetHeight(1)
-		if IsLegion then
-			line:SetColorTexture(.5, .5, .5)
-		else
-			line:SetTexture(.5, .5, .5)
-		end
+		line:SetTexture(.5, .5, .5)
 		line:SetPoint("LEFT", self.frame, "LEFT", 10, 0)
 		line:SetPoint("RIGHT", self.frame, "RIGHT", -10, 0)
 		

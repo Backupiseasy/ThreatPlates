@@ -15,30 +15,29 @@ local player_name = UnitName("player")
 
 local function IsQuestUnit(unit)
   local unitid = unit.unitid
-	local quest_not_complete = false
-	local quest_area = false
+	local questObjective = false
+	local questNoObjective = false
 
 	-- Read quest information from tooltip. Thanks to Kib: QuestMobs AddOn by Tosaido.
 	if unitid then
 		tooltip_frame:SetOwner(WorldFrame, "ANCHOR_NONE")
-		--tooltip_frame:SetUnit(unitid)
-    tooltip_frame:SetHyperlink("unit:" .. unit.guid)
-
+		tooltip_frame:SetUnit(unitid)
 		for i = 3, tooltip_frame:NumLines() do
 		  local line = _G["ThreatPlates_TooltipTextLeft" .. i]
 		  local text = line:GetText()
-      local text_r, text_g, text_b = line:GetTextColor()
+		  local text_r, text_g, text_b = line:GetTextColor()
 
 		  if text_r > 0.99 and text_g > 0.82 and text_b == 0 then
-		    quest_area = true
+		    questNoObjective = true
 		  else
 		    local unit_name, progress = string.match(text, "^ ([^ ]-) ?%- (.+)$")
-        if progress then
-          quest_area = nil
-          if unit_name and (unit_name == "" or unit_name == player_name) then
-            local current, goal = string.match(progress, "(%d+)/(%d+)")
+
+		    if unit_name and (unit_name == "" or unit_name == player_name) then
+		      if progress then
+		        local current, goal = string.match(progress, "(%d+)/(%d+)")
+
 		        if current and goal and current ~= goal then
-		          quest_not_complete = true
+		          questObjective = true
 		        end
 		      end
 		    end
@@ -46,27 +45,12 @@ local function IsQuestUnit(unit)
 		end
 	end
 
-	return quest_not_complete or quest_area
+	return questObjective or questNoObjective
 end
 
-local function ShowQuestUnit(unit)
+local function ShowQuestUnit()
 	local db = TidyPlatesThreat.db.profile.questWidget
-  local show_quest_mark = db.ON
-
-  if InCombatLockdown() then
-    if db.HideInCombat then
-      show_quest_mark = false
-    elseif db.HideInCombatAttacked and unit.unitid then
-      local _, threatStatus = UnitDetailedThreatSituation("player", unit.unitid);
-  	  show_quest_mark = (threatStatus == nil)
-    end
-  end
-
-  if IsInInstance() and db.HideInInstance then
-    show_quest_mark = false
-  end
-
-  return  show_quest_mark
+	return db.ON and not (InCombatLockdown() and db.HideInCombat) and not (IsInInstance() and db.HideInInstance)
 end
 
 local function enabled()
@@ -92,7 +76,7 @@ end
 
 -- Update Graphics
 local function UpdateWidgetFrame(frame, unit)
-	if ShowQuestUnit(unit) and IsQuestUnit(unit) then
+	if ShowQuestUnit() and IsQuestUnit(unit) then
 		local db = TidyPlatesThreat.db.profile.questWidget
 		frame:SetHeight(db.scale)
 		frame:SetWidth(db.scale)
@@ -162,4 +146,4 @@ end
 TidyPlatesThreat.IsQuestUnit = IsQuestUnit
 TidyPlatesThreat.ShowQuestUnit = ShowQuestUnit
 
-ThreatPlatesWidgets.RegisterWidget("QuestWidgetTPTP", CreateWidgetFrame, false, enabled)
+ThreatPlatesWidgets.RegisterWidget("QuestWidget", CreateWidgetFrame, false, enabled)
