@@ -1,4 +1,13 @@
 ------------------------------------------------------
+8.4.0-Beta1 (works with TidyPlates 6.18.11)
+------------------------------------------------------
+* Upgrade to LibSharedMedia-3.0 v7.0.1
+* Name-only mode
+* Mini-Mobs
+* Bessere Konfigurierbarkeit von Mob-Klassen (Healthbar-Farbe, Skalierung, Transparenz, …)
+* Anpassungen an Cvar + bessere Synchronisierung
+
+------------------------------------------------------
 8.3.0-Beta3 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
 * Reworked and optimized placement of aura widget 2.0 (anchor point and aura alignment).
