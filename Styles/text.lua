@@ -169,8 +169,8 @@ config.threatcolor = {
 	MEDIUM = { r = 0, g = 0, b = 0, a = 0 },
 	HIGH = { r = 0, g = 0, b = 0, a = 0 },
 }
-TidyPlatesThemeList[THREAD_PLATES_NAME]["text"] = {}
-TidyPlatesThemeList[THREAD_PLATES_NAME]["text"] = config
+TidyPlatesThemeList[t.THEME_NAME]["text"] = {}
+TidyPlatesThemeList[t.THEME_NAME]["text"] = config
 	end
 end
 f:RegisterEvent("ADDON_LOADED")

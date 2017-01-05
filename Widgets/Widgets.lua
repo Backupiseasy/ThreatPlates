@@ -141,7 +141,7 @@ end
 -- local function ThreatPlatesUseSquareDebuffIcon()
 -- 	local ProfDB = TidyPlatesThreat.db.profile
 -- 	-- Overwrite default behaviour if ThreatPlates is actually the active theme
--- 	if (TidyPlatesOptions.ActiveTheme == THREAD_PLATES_NAME) and (ProfDB.debuffWidget.style == "wide") then
+-- 	if (TidyPlatesOptions.ActiveTheme == t.THEME_NAME) and (ProfDB.debuffWidget.style == "wide") then
 -- 		OldUseWideDebuffIcon()
 -- 	else
 -- 		OldUseSquareDebuffIcon()
@@ -152,7 +152,7 @@ end
 -- local function ThreatPlatesUseWideDebuffIcon()
 -- 	local ProfDB = TidyPlatesThreat.db.profile
 -- 	-- Overwrite default behaviour if ThreatPlates is actually the active theme
--- 	if (TidyPlatesOptions.ActiveTheme == THREAD_PLATES_NAME) and (ProfDB.debuffWidget.style == "square") then
+-- 	if (TidyPlatesOptions.ActiveTheme == t.THEME_NAME) and (ProfDB.debuffWidget.style == "square") then
 -- 		OldUseSquareDebuffIcon()
 -- 	else
 -- 		OldUseWideDebuffIcon()
@@ -262,7 +262,7 @@ local function CreateAuraWidget(plate)
 	-- frame._Hide = frame.Hide
 	-- frame.Hide = function() ClearWidgetContext(frame); frame:_Hide() end
 	frame._Show = frame.Show
-	frame.Show = function() if (TidyPlatesOptions.ActiveTheme ~= THREAD_PLATES_NAME) then	frame:_Hide()	else frame:_Show() end end
+	frame.Show = function() if (TidyPlatesOptions.ActiveTheme ~= ThreatPlates.THEME_NAME) then	frame:_Hide()	else frame:_Show() end end
 
 	return frame
 end

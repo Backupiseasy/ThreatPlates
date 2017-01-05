@@ -13,48 +13,23 @@ t.Media = LS("LibSharedMedia-3.0")
 t.MediaWidgets = Media and LS("AceGUISharedMediaWidgets-1.0", false)
 local L = t.L
 
+--------------------------------------------------------------------------------------------------
 -- General Functions
 ---------------------------------------------------------------------------------------------------
 
-t.DEBUG = function(...)
-	--print ("DEBUG: ", ...)
-end
-
-t.PrintTargetInfo = function(unit)
-	if unit.isTarget then
-		t.DEBUG("unit.name = ", unit.name)
-		t.DEBUG("unit.unitID = ", unit.unitID)
-		t.DEBUG("unit.type = ", unit.type)
-		t.DEBUG("unit.class = ", unit.class)
-		t.DEBUG("unit.reaction = ", unit.reaction)
-		t.DEBUG("unit.isMini = ", unit.isMini)
-		t.DEBUG("unit.isTapped = ", unit.isTapped)
-		t.DEBUG("unit.isElite = ", unit.isBoss)
-		t.DEBUG("unit.isBoss = ", unit.isElite)
-		t.DEBUG("unit SetStyle = ", style)
-		t.DEBUG("unit GetType = ", TidyPlatesThreat.GetType(unit))
-		t.DEBUG("unit.isPet = ", UnitIsOtherPlayersPet(unit))
-		t.DEBUG("unit.isControlled = ", UnitPlayerControlled(unit.unitid))
-		t.DEBUG("unit.isBattlePet = ", UnitIsBattlePet(unit.unitid))
-		t.DEBUG("unit.canAttack = ", UnitCanAttack("player", unit.unitid))
-
-		t.DEBUG("unit.isFriend = ", TidyPlatesUtility.IsFriend(unit.name))
-		t.DEBUG("unit.isGuildmate = ", TidyPlatesUtility.IsGuildmate(unit.name))
-
-	-- local enemy_totems = GetCVar("nameplateShowEnemyTotems")
-	-- local enemy_guardians = GetCVar("nameplateShowEnemyGuardians")
-	-- local enemy_pets = GetCVar("nameplateShowEnemyPets")
-	-- local enemy_minus = GetCVar("nameplateShowEnemyMinus")
-	-- print ("CVars Enemy: totems = ", enemy_totems, " / guardians = ", enemy_guardians, " / pets = ", enemy_pets, " / minus = ", enemy_minus)
-	--
-	-- local friendly_totems = GetCVar("nameplateShowFriendlyTotems")
-	-- local friendly_guardians = GetCVar("nameplateShowFriendlyGuardians")
-	-- local friendly_pets = GetCVar("nameplateShowFriendlyPets")
-	-- print ("CVars Friendly: totems = ", friendly_totems, " / guardians = ", friendly_guardians, " / pets = ", friendly_pets)
-	end
+-- Create a percentage-based WoW color based on integer values from 0 to 255 with optional alpha value
+local RGB = function(red, green, blue, alpha)
+	local color = { r = red/255, g = green/255, b = blue/255 }
+	if alpha then color.a = alpha end
+	return color
 end
 
 t.Update = function()
+	-- ForceUpdate() is called in SetTheme()
+	if (TidyPlatesOptions.ActiveTheme == t.THEME_NAME) then
+		TidyPlates:SetTheme(t.THEME_NAME)
+	end
+	-- TidyPlates:ForceUpdate()
 end
 
 t.Meta = function(value)
@@ -111,6 +86,7 @@ t.TTS = function(s)
 	end
 	return list
 end
+
 t.CopyTable = function(input)
 	local output = {}
 	for k,v in pairs(input) do
@@ -122,7 +98,13 @@ t.CopyTable = function(input)
 	end
 	return output
 end
--- Constants
+
+---------------------------------------------------------------------------------------------------
+-- Global constants
+---------------------------------------------------------------------------------------------------
+
+t.THEME_NAME = "Threat Plates"
+
 t.Art = "Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\"
 t.Widgets = "Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\Widgets\\"
 t.FullAlign = {TOPLEFT = "TOPLEFT",TOP = "TOP",TOPRIGHT = "TOPRIGHT",LEFT = "LEFT",CENTER = "CENTER",RIGHT = "RIGHT",BOTTOMLEFT = "BOTTOMLEFT",BOTTOM = "BOTTOM",BOTTOMRIGHT = "BOTTOMRIGHT"}
@@ -144,3 +126,109 @@ t.DebuffMode = {
 	["all"] = L["All Auras"],
 	["allMine"] = L["All Auras (Mine)"]
 }
+
+t.SPEC_ROLES = {
+	DEATHKNIGHT = { true, false, false },
+	DEMONHUNTER = { false, true },
+	DRUID 			= { false, false, true, false },
+	HUNTER			= { false, false, false },
+	MAGE				= { false, false, false },
+	MONK 				= { true, false, false },
+	PALADIN 		= { false, true, false },
+	PRIEST			= { false, false, false },
+	ROGUE				= { false, false, false },
+	SHAMAN			= { false, false, false },
+	WARLOCK			= { false, false, false },
+	WARRIOR			= { false, false, true },
+}
+
+--------------------------------------------------------------------------------------------------
+-- Debug Functions
+---------------------------------------------------------------------------------------------------
+
+t.PrintTargetInfo = function(unit)
+	if unit.isTarget then
+		t.DEBUG("unit.name = ", unit.name)
+		t.DEBUG("unit.unitID = ", unit.unitID)
+		t.DEBUG("unit.type = ", unit.type)
+		t.DEBUG("unit.class = ", unit.class)
+		t.DEBUG("unit.reaction = ", unit.reaction)
+		t.DEBUG("unit.isMini = ", unit.isMini)
+		t.DEBUG("unit.isTapped = ", unit.isTapped)
+		t.DEBUG("unit.isElite = ", unit.isBoss)
+		t.DEBUG("unit.isBoss = ", unit.isElite)
+		t.DEBUG("unit SetStyle = ", style)
+		t.DEBUG("unit GetType = ", TidyPlatesThreat.GetType(unit))
+		t.DEBUG("unit.isPet = ", UnitIsOtherPlayersPet(unit))
+		t.DEBUG("unit.isControlled = ", UnitPlayerControlled(unit.unitid))
+		t.DEBUG("unit.isBattlePet = ", UnitIsBattlePet(unit.unitid))
+		t.DEBUG("unit.canAttack = ", UnitCanAttack("player", unit.unitid))
+
+		t.DEBUG("unit.isFriend = ", TidyPlatesUtility.IsFriend(unit.name))
+		t.DEBUG("unit.isGuildmate = ", TidyPlatesUtility.IsGuildmate(unit.name))
+
+		-- local enemy_totems = GetCVar("nameplateShowEnemyTotems")
+		-- local enemy_guardians = GetCVar("nameplateShowEnemyGuardians")
+		-- local enemy_pets = GetCVar("nameplateShowEnemyPets")
+		-- local enemy_minus = GetCVar("nameplateShowEnemyMinus")
+		-- print ("CVars Enemy: totems = ", enemy_totems, " / guardians = ", enemy_guardians, " / pets = ", enemy_pets, " / minus = ", enemy_minus)
+		--
+		-- local friendly_totems = GetCVar("nameplateShowFriendlyTotems")
+		-- local friendly_guardians = GetCVar("nameplateShowFriendlyGuardians")
+		-- local friendly_pets = GetCVar("nameplateShowFriendlyPets")
+		-- print ("CVars Friendly: totems = ", friendly_totems, " / guardians = ", friendly_guardians, " / pets = ", friendly_pets)
+	end
+end
+
+t.DEBUG = function(...)
+	print ("DEBUG: ", ...)
+end
+
+t.DEBUG_SIZE = function(msg, data)
+	if type(data) == "table" then
+		local no = 0
+		for k, v in pairs(data) do no = no + 1 end
+		t.DEBUG(msg, no)
+	else
+		t.DEBUG(msg, "<no table>")
+	end
+end
+-- Function from: https://coronalabs.com/blog/2014/09/02/tutorial-printing-table-contents/
+t.DEBUG_PRINT_TABLE = function(data)
+	local print_r_cache={}
+	local function sub_print_r(data,indent)
+		if (print_r_cache[tostring(data)]) then
+			t.DEBUG (indent.."*"..tostring(data))
+		else
+			print_r_cache[tostring(data)]=true
+			if (type(data)=="table") then
+				for pos,val in pairs(data) do
+					if (type(val)=="table") then
+						t.DEBUG (indent.."["..pos.."] => "..tostring(data).." {")
+						sub_print_r(val,indent..string.rep(" ",string.len(pos)+8))
+						t.DEBUG (indent..string.rep(" ",string.len(pos)+6).."}")
+					elseif (type(val)=="string") then
+						t.DEBUG (indent.."["..pos..'] => "'..val..'"')
+					else
+						t.DEBUG (indent.."["..pos.."] => "..tostring(val))
+					end
+				end
+			else
+				t.DEBUG (indent..tostring(data))
+			end
+		end
+	end
+	if (type(data)=="table") then
+		t.DEBUG (tostring(data).." {")
+		sub_print_r(data,"  ")
+		t.DEBUG ("}")
+	else
+		sub_print_r(data,"  ")
+	end
+end
+
+---------------------------------------------------------------------------------------------------
+-- Expoerted local functions
+---------------------------------------------------------------------------------------------------
+
+t.RGB = RGB

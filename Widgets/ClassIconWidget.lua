@@ -1,15 +1,15 @@
 local ADDON_NAME, NAMESPACE = ...
 ThreatPlates = NAMESPACE.ThreatPlates
 
--- TODO: remove masque support for the time being
-
 -----------------------
 -- Class Icon Widget --
 -----------------------
-local path = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ClassIconWidget\\"
+local PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ClassIconWidget\\"
+local PATH_THEME
 -- local WidgetList = {}
 -- local Masque = LibStub("Masque", true)
 -- local group
+
 
 ---------------------------------------------------------------------------------------------------
 -- Threat Plates functions
@@ -19,18 +19,13 @@ local function enabled()
 	return TidyPlatesThreat.db.profile.classWidget.ON
 end
 
-local function UpdateWidgetConfig(frame, class)
+local function UpdateWidgetConfig(frame)
 	local db = TidyPlatesThreat.db.profile.classWidget
-	frame:SetHeight(db.scale)
-	frame:SetWidth(db.scale)
+
 	frame:SetPoint(db.anchor, frame:GetParent(), db.x, db.y)
+	frame:SetSize(db.scale, db.scale)
 
-  PATH_THEME = PATH .. db.theme .."\\"
-
-	-- if Masque then
-	-- 	group = Masque:Group("TidyPlatesThreat")
-	-- 	group:ReSkin(frame)
-	-- end
+	PATH_THEME = PATH .. db.theme .."\\"
 end
 
 -- hides/destroys all widgets of this type created by Threat Plates
@@ -49,6 +44,8 @@ end
 -- Update Graphics
 local function UpdateWidgetFrame(frame, unit)
 	-- TODO: optimization - is it necessary to determine the class everytime this function is called on only if the guid changes?
+	local db = TidyPlatesThreat.db.profile
+
 	local class
 	if unit.type == "PLAYER" then
 		if unit.reaction == "HOSTILE" then
@@ -63,13 +60,20 @@ local function UpdateWidgetFrame(frame, unit)
 			-- 		class = db.cache[unit.name]
 			-- 	end
 			-- else
- 				class = unit.class
+			class = unit.class
 			-- end
 		end
 	end
 
 	if class then -- Value shouldn't need to change
-		UpdateWidgetConfig(frame, class)
+		UpdateWidgetConfig(frame)
+		frame.Icon:SetTexture(PATH_THEME .. class)
+
+		-- if Masque then
+		-- 	group = Masque:Group("TidyPlatesThreat")
+		-- 	group:ReSkin(frame)
+		-- end
+
 		frame:Show()
 	else
 		frame:_Hide()
@@ -109,16 +113,16 @@ end
 -- 	print ("Masque: Reskin")
 -- end
 
-local function CreateWidgetFrame(parent)
+local function CreateWidgetFrame(plate)
 	-- Required Widget Code
+	local frame = CreateFrame("Frame", nil, plate)
 	frame:Hide()
 
 	-- Custom Code III
 	--------------------------------------
 	frame.Icon = frame:CreateTexture(nil, "OVERLAY")
-  frame.Icon:SetAllPoints(frame)
+	frame.Icon:SetAllPoints(frame)
 	--frame.UpdateConfig = UpdateWidgetConfig
-
 	-- if Masque then
 	-- 	if not group then
 	--  		group = Masque:Group("TidyPlatesThreat")
@@ -126,7 +130,6 @@ local function CreateWidgetFrame(parent)
 	-- 	--Masque:Register("TidyPlatesThreat", Reskin)
 	-- 	group:AddButton(frame)
 	-- end
-	
 	--------------------------------------
 	-- End Custom Code
 
@@ -139,4 +142,4 @@ local function CreateWidgetFrame(parent)
 	return frame
 end
 
-ThreatPlatesWidgets.RegisterWidget("ClassIconWidget", CreateWidgetFrame, false, enabled)
+ThreatPlatesWidgets.RegisterWidget("ClassIconWidgetTPTP", CreateWidgetFrame, false, enabled)
