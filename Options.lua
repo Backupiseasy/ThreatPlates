@@ -209,6 +209,7 @@ local CVAR_SYNC = {
   showFriendlyGuardian = "nameplateShowFriendlyGuardians",
   showHostileUnits = "nameplateShowEnemies",
   showFriendlyUnits = "nameplateShowFriends",
+  nameplateShowFriendlyNPCs = "nameplateShowFriendlyNPCs",
   showNameplates = "nameplateShowAll",
 }
 
@@ -519,6 +520,8 @@ local function CreateTabGeneralSettings()
         order = 20,
         inline = true,
         width = "full",
+        get = GetCVarSettingSync,
+        set = SetCVarSettingSync,
         args = {
           Description = CreateDescription(L["This allows to configure which nameplates should be shown while you are playing."]),
           Spacer0 = CreateSpacer(1),
@@ -527,8 +530,6 @@ local function CreateTabGeneralSettings()
             type = "toggle",
             order = 10,
             arg = { "visibility", "showNameplates" },
-            get = GetCVarSettingSync,
-            set = SetCVarSettingSync,
           },
           AllUnitsDesc = {
             name = L["Show all name plates (CTRL-V)."],
@@ -542,8 +543,6 @@ local function CreateTabGeneralSettings()
             type = "toggle",
             order = 20,
             arg = { "visibility", "showFriendlyUnits" },
-            get = GetCVarSettingSync,
-            set = SetCVarSettingSync,
             disabled = function() return not db.visibility.showNameplates end,
           },
           AllFriendlyDesc = {
@@ -558,8 +557,6 @@ local function CreateTabGeneralSettings()
             type = "toggle",
             order = 30,
             arg = { "visibility", "showHostileUnits" },
-            get = GetCVarSettingSync,
-            set = SetCVarSettingSync,
             disabled = function() return not db.visibility.showNameplates end,
           },
           AllHostileDesc = {
@@ -598,169 +595,9 @@ local function CreateTabGeneralSettings()
   }
 
   CreateUnitGroupsVisibility(args.args, 30)
+
   return args
 end
-
---GeneralSettings = {
---	name = L["General Settings"],
---	type = "group",
---	order = 10,
---	args = {
---		TidyPlates = {
---			name = "Tidy Plates Fading",
---			type = "group",
---			order = 0,
---			inline = true,
---			args = {
---				Enable = {
---					type = "toggle",
---					order = 1,
---					name = "Enable",
---					desc = "This allows you to disable or enable the nameplates fading in or out when displayed or hidden.",
---					descStyle = "inline",
---					width = "full",
---					set = function(info,val)
---						SetValue(info,val)
---						if db.tidyplatesFade then
---							TidyPlates:EnableFadeIn()
---						else
---							TidyPlates:DisableFadeIn()
---						end
---					end,
---					arg = {"tidyplatesFade"},
---				},
---			},
---		},
---		Hiding = {
---			name = L["Hiding"],
---			type = "group",
---			order = 1,
---			inline = true,
---			args = {
---				ShowNeutral = {
---					type = "toggle",
---					order = 1,
---					name = L["Show Neutral"],
---					arg = {"nameplate","toggle","Neutral"},
---				},
---				ShowTapped = {
---					type = "toggle",
---					order = 2,
---					name = L["Show Tapped"],
---					arg = {"nameplate","toggle","Tapped"},
---				},
---				ShowNormal = {
---					type = "toggle",
---					order = 3,
---					name = L["Show Normal"],
---					arg = {"nameplate","toggle","Normal"},
---				},
---				ShowElite = {
---					type = "toggle",
---					order = 4,
---					name = L["Show Elite"],
---					arg = {"nameplate","toggle","Elite"},
---				},
---				ShowBoss = {
---					type = "toggle",
---					order = 5,
---					name = L["Show Boss"],
---					arg = {"nameplate","toggle","Boss"},
---				},
---			},
---		},
---		BlizzSettings = {
---			name = L["Blizzard Settings"],
---			type = "group",
---			order = 2,
---			inline = true,
---			get = GetCvar,
---			set = SetCvar,
---			args = {
---				OpenBlizzardSettings = {
---					name = L["Open Blizzard Settings"],
---					type = "execute",
---					order = 1,
---					func = function()
---						InterfaceOptionsFrame_OpenToCategory(_G["InterfaceOptionsNamesPanel"])
---						LibStub("AceConfigDialog-3.0"):Close("Tidy Plates: Threat Plates");
---					end,
---				},
---				Friendly = {
---					type = "group",
---					name = L["Friendly"],
---					order = 2,
---					inline = true,
---					args = {
---						nameplateShowFriends = {
---							name = L["Show Friends"],
---							type = "toggle",
---							order = 1,
---							arg = "nameplateShowFriends",
---						},
---						nameplateShowFriendlyNPCs = {
---							name = L["Show Friendly NPCs"],
---							type = "toggle",
---							order = 1.5,
---							arg = "nameplateShowFriendlyNPCs",
---						},
---						nameplateShowFriendlyTotems = {
---							name = L["Show Friendly Totems"],
---							type = "toggle",
---							order = 2,
---							arg = "nameplateShowFriendlyTotems",
---						},
---						nameplateShowFriendlyPets = {
---							name = L["Show Friendly Pets"],
---							type = "toggle",
---							order = 3,
---							arg = "nameplateShowFriendlyPets",
---						},
---						nameplateShowFriendlyGuardians = {
---							name = L["Show Friendly Guardians"],
---							type = "toggle",
---							order = 4,
---							arg = "nameplateShowFriendlyGuardians",
---						},
---					},
---				},
---				Enemy = {
---					type = "group",
---					name = L["Enemy"],
---					order = 3,
---					inline = true,
---					args = {
---						nameplateShowEnemies = {
---							name = L["Show Enemies"],
---							type = "toggle",
---							order = 1,
---							arg = "nameplateShowEnemies",
---						},
---						nameplateShowEnemyTotems = {
---							name = L["Show Enemy Totems"],
---							type = "toggle",
---							order = 2,
---							arg = "nameplateShowEnemyTotems",
---						},
---						nameplateShowEnemyPets = {
---							name = L["Show Enemy Pets"],
---							type = "toggle",
---							order = 3,
---							arg = "nameplateShowEnemyPets",
---						},
---						nameplateShowEnemyGuardians = {
---							name = L["Show Enemy Guardians"],
---							type = "toggle",
---							order = 4,
---							arg = "nameplateShowEnemyGuardians",
---						},
---					},
---				},
---			},
---		},
---	},
---},
-
 
 -- Return the Options table
 local options = nil;
@@ -3113,97 +2950,6 @@ local function GetOptions()
                 },
               },
             },
-            --						HeadlineViewSettings = {
-            --							name = L["Headline View"],
-            --							type = "group",
-            --							inline = false,
-            --							order = 140,
-            --							args = {
-            --								AlphaFeature_HeadlineView = {
-            --									name = L["Enable"],
-            --									type = "group",
-            --									inline = true,
-            --									order = 1,
-            --									args = {
-            --										Enable = {
-            --											name = L["Enable Headline View (Text-Only)"],
-            --											type = "toggle",
-            --											order = 1,
-            --											desc = L["This will enable headline view (Text-Only) for nameplates. TidyPlatesHub must be enabled for this to work. Use the TidyPlatesHub options for configuration."],
-            --											descStyle = "inline",
-            --											width = "full",
-            --											set = SetThemeValue,
-            --											arg = {"alphaFeatureHeadlineView"},
-            --										},
-            --									},
-            --								},
-            --								BlizzFadeEnable = {
-            --									name = L["Blizzard Target Fading"],
-            --									order = 2,
-            --									disabled = function() return not t.AlphaFeatureHeadlineView() end,
-            --									type = "group",
-            --									inline = true,
-            --									args = {
-            --										Enable = {
-            --											name = L["Enable Blizzard 'On-Target' Fading"],
-            --											type = "toggle",
-            --											desc = L["Enabling this will allow you to set the alpha adjustment for non-target names in headline view."],
-            --											descStyle = "inline",
-            --											order = 1,
-            --											width = "full",
-            --											arg = {"headlineView", "nonTargetAlpha"},
-            --										},
-            --										blizzFade = {
-            --											name = L["Non-Target Alpha"],
-            --											type = "range",
-            --											order = 2,
-            --											width = "full",
-            --											disabled = function() return not db.headlineView.nonTargetAlpha end,
-            --											min = -1,
-            --											max = 0,
-            --											step = 0.01,
-            --											isPercent = true,
-            --											--set = SetThemeValue,
-            --											arg = {"headlineView","alpha"},
-            --										},
-            --									},
-            --								},
-            --								FontSize = {
-            --									name = L["Text Bounds and Sizing"],
-            --									order = 3,
-            --									disabled = function() return not t.AlphaFeatureHeadlineView() end,
-            --									type = "group",
-            --									inline = true,
-            --									args = {
-            --										FontSize = { name = L["Font Size"], type = "range", width = "full", order = 1, set = SetThemeValue, arg = {"headlineView","name","size"}, max = 36, min = 6, step = 1, isPercent = false, },
-            --										TextBounds = { name = L["Text Boundaries"], type = "group", order = 2,
-            --											args = {
-            --												Description = {
-            --													type = "description",
-            --													order = 1,
-            --													name = L["These settings will define the space that text can be placed on the nameplate.\nHaving too large a font and not enough height will cause the text to be not visible."],
-            --													width = "full",
-            --												},
-            --												Width = { type = "range", width = "full", order = 2, name = L["Text Width"], set = SetThemeValue, arg = {"headlineView","name","width"}, max = 250, min = 20, step = 1, isPercent = false, },
-            --												Height = { type = "range", width = "full", order = 3, name = L["Text Height"], set = SetThemeValue, arg = {"headlineView","name","height"}, max = 40, min = 8, step = 1, isPercent = false, },
-            --											},
-            --										},
-            --									},
-            --								},
-            --								Placement = {
-            --									name = L["Placement"],
-            --									order = 4,
-            --									disabled = function() return not t.AlphaFeatureHeadlineView() end,
-            --									type = "group",
-            --									inline = true,
-            --									args = {
-            --										X = {	name = L["X"], type = "range", width = "full", order = 1,	set = SetThemeValue, arg = {"headlineView","name","x"},	max = 120, min = -120, step = 1, isPercent = false,	},
-            --										Y = {	name = L["Y"], type = "range", width = "full", order = 2, set = SetThemeValue, arg = {"headlineView","name","y"}, max = 120, min = -120, step = 1, isPercent = false, },
-            --										AlignH = { name = L["Horizontal Align"], type = "select", width = "full", order = 3, values = t.AlignH, set = SetThemeValue, arg = {"headlineView","name","align"}, },
-            --										AlignV = {name = L["Vertical Align"], type = "select", width = "full", order = 4, values = t.AlignV, set = SetThemeValue, arg = {"headlineView","name","vertical"},	},
-            --									},
-            --								},
-            --							},
           },
         },
         ThreatOptions = {

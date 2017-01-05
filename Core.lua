@@ -1732,7 +1732,7 @@ function TidyPlatesThreat:StartUp()
 		end
 	else
 		-- remove (and convert) any old DB entries
-		--		t.CleanupDatabase()
+		-- t.CleanupDatabase()
 
 		local GlobDB = self.db.global
 		-- TODO: why not just overwrite the old version entry?
