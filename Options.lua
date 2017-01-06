@@ -168,8 +168,8 @@ local function SetThemeValue(info, val)
 	SetValue(info,val)
 	t.SetThemes(TidyPlatesThreat)
 	-- TODO: should not be necessary here
-	if (TidyPlatesOptions.ActiveTheme == THREAD_PLATES_NAME) then
-		TidyPlates:SetTheme(THREAD_PLATES_NAME)
+	if (TidyPlatesOptions.ActiveTheme == t.THEME_NAME) then
+		TidyPlates:SetTheme(t.THEME_NAME)
 	end
 end
 

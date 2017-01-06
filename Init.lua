@@ -26,8 +26,8 @@ end
 
 t.Update = function()
 	-- ForceUpdate() is called in SetTheme()
-	if (TidyPlatesOptions.ActiveTheme == THREAD_PLATES_NAME) then
-		TidyPlates:SetTheme(THREAD_PLATES_NAME)
+	if (TidyPlatesOptions.ActiveTheme == t.THEME_NAME) then
+		TidyPlates:SetTheme(t.THEME_NAME)
 	end
 	-- TidyPlates:ForceUpdate()
 end
@@ -103,7 +103,7 @@ end
 -- Global constants
 ---------------------------------------------------------------------------------------------------
 
-THREAD_PLATES_NAME = "Threat Plates"
+t.THEME_NAME = "Threat Plates"
 
 t.Art = "Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\"
 t.Widgets = "Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\Widgets\\"
@@ -141,7 +141,6 @@ t.SPEC_ROLES = {
 	WARLOCK			= { false, false, false },
 	WARRIOR			= { false, false, true },
 }
-
 
 --------------------------------------------------------------------------------------------------
 -- Debug Functions

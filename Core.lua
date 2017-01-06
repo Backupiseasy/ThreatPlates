@@ -104,7 +104,7 @@ StaticPopupDialogs["SetToThreatPlates"] = {
 	whileDead = 1,
 	hideOnEscape = 1,
 	OnAccept = function()
-		TidyPlates:SetTheme(THREAD_PLATES_NAME)
+		TidyPlates:SetTheme(t.THEME_NAME)
 		TidyPlatesThreat:StartUp()
 		t.Update()
 	end,
@@ -368,7 +368,7 @@ function TidyPlatesThreat:OnInitialize()
 				filter = {}
 			},
 			AuraWidget = {
-				ON = false,	x = 0, y = 32, scale = 1,	anchor = "CENTER",
+				ON = false,	x = 0, y = y, scale = 1,	anchor = "TOP",
 				ShowEnemy = true,
 				ShowFriendly = true,
 				FilterMode = "blacklistMine",
@@ -1632,7 +1632,7 @@ end
 function TidyPlatesThreat:OnEnable()
 	local ProfDB = self.db.profile
 
-	TidyPlatesThemeList[THREAD_PLATES_NAME] = t.Theme
+	TidyPlatesThemeList[t.THEME_NAME] = t.Theme
 	ApplyHubFunctions(t.Theme)
 	ActivateTheme()
 
@@ -1668,7 +1668,7 @@ function TidyPlatesThreat:StartUp()
 
 		t.Print(Welcome..L["|cff89f559You are currently in your "]..self:RoleText()..L["|cff89f559 role.|r"])
 		t.Print(L["|cff89f559Additional options can be found by typing |r'/tptp'|cff89F559.|r"])
-		if (TidyPlatesOptions.ActiveTheme ~= THREAD_PLATES_NAME) then
+		if (TidyPlatesOptions.ActiveTheme ~= t.THEME_NAME) then
 			StaticPopup_Show("SetToThreatPlates")
 		end
 	else
@@ -1749,7 +1749,7 @@ end
 
 function TidyPlatesThreat:PLAYER_LOGIN(...)
 	self.db.profile.cache = {}
-	if self.db.char.welcome and (TidyPlatesOptions.ActiveTheme == THREAD_PLATES_NAME) then
+	if self.db.char.welcome and (TidyPlatesOptions.ActiveTheme == t.THEME_NAME) then
 		t.Print(L["|cff89f559Threat Plates:|r Welcome back |cff"]..t.HCC[class]..UnitName("player").."|r!!")
 	end
 	-- if class == "WARRIOR" or class == "DRUID" or class == "DEATHKNIGHT" or class == "PALADIN" then
@@ -1798,7 +1798,7 @@ end
 -- Fires when the player switches to another specialication or everytime the player changes a talent
 -- Completely handled by TidyPlates
 -- function TidyPlatesThreat:ACTIVE_TALENT_GROUP_CHANGED()
--- 	if (TidyPlatesOptions.ActiveTheme == THREAD_PLATES_NAME) and self.db.profile.verbose then
+-- 	if (TidyPlatesOptions.ActiveTheme == t.THEME_NAME) and self.db.profile.verbose then
 -- 		t.Print(L["|cff89F559Threat Plates|r: Player spec change detected: |cff"]..t.HCC[class]..self:SpecName()..L["|r, you are now in your "]..self:RoleText()..L[" role."])
 -- 	end
 -- end
