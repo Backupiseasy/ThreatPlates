@@ -5123,7 +5123,6 @@ for k_c,v_c in ipairs(db.uniqueSettings) do
 										name = L["Enable Custom Colors"],
 										type = "toggle",
 										order = 2,
-										width = "full",
 										arg = {"uniqueSettings",k_c,"useColor"},
 									},
 									Color = {
@@ -5135,6 +5134,21 @@ for k_c,v_c in ipairs(db.uniqueSettings) do
 										disabled = function() if not db.uniqueSettings[k_c].useColor or not db.uniqueSettings[k_c].useStyle or not db.uniqueSettings[k_c].showNameplate then return true else return false end end,
 										arg = {"uniqueSettings",k_c,"color"},
 									},
+									Spacer = CreateSpacer(4),
+									ThreatColor = {
+										name = L["Use Threat Colors"],
+										order = 5,
+										type = "toggle",
+										desc = L["Use coloring based an threat level (configured in Threat System) in combat (custom color is only used out of combat)."],
+										arg = {"uniqueSettings", k_c, "UseThreatColor"},
+									},
+									ThreatGlow = {
+										name = L["Use Threat Glow"],
+										order = 5,
+										type = "toggle",
+										desc = L["Show a glow based on threat level around the nameplate's healthbar (in combat)."],
+										arg = {"uniqueSettings", k_c, "UseThreatGlow"},
+									}
 								},
 							},
 						},

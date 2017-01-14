@@ -116,13 +116,15 @@ local function GetThreatColor(unit,style)
 			-- should be color for second tank - not active currently
 			c = db.tHPbarColor
 		end
+	else
+		c = GetClassColor(unit)
 	end
 	return c
 end
 
 local function SetHealthbarColor(unit)
 	local db = TidyPlatesThreat.db.profile
-	local style = TidyPlatesThreat.SetStyle(unit)
+	local style, unique_style = TidyPlatesThreat.SetStyle(unit)
 
   local c, allowMarked
 
@@ -135,16 +137,14 @@ local function SetHealthbarColor(unit)
 			c = tS.color
 		end
 	elseif style == "unique" then
-		for k_c,k_v in pairs(db.uniqueSettings.list) do
-			if k_v == unit.name then
-				local u = db.uniqueSettings[k_c]
-				allowMarked = u.allowMarked
-				if u.useColor then
-					c = u.color
-				else
-					c = GetThreatColor(unit,style)
-				end
-			end
+		allowMarked = unique_style.allowMarked
+		if unique_style.UseThreatColor and InCombatLockdown() then
+			c = GetThreatColor(unit, TidyPlatesThreat.GetThreatStyle(unit))
+		elseif unique_style.useColor then
+			c = unique_style.color
+		else
+			-- use default color for this type of unit
+			c = GetThreatColor(unit, style)
 		end
 	else
 		if db.healthColorChange then  -- Prio 2: coloring by HP (prio 1 is raid marks)

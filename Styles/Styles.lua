@@ -49,10 +49,43 @@ local function IsUnitActive(unit)
 	return (unit.health < unit.healthmax) or (unit.threatValue > 1) or unit.isMarked	-- or unit.isInCombat
 end
 
+-- Returns style based on threat (currently checks for in combat, should not do hat)
+local function GetThreatStyle(unit)
+	local db = TidyPlatesThreat.db.profile
+	local style
+
+	-- style tank/dps only used for NPCs/non-player units
+	if InCombatLockdown() and unit.type == "NPC" and db.threat.ON then
+		--		if db.threat.toggle[T] then
+			if db.threat.nonCombat  then
+				-- db.thread.nonCombat not nessessary in following if statement?!?
+				if (unit.isInCombat or (unit.health < unit.healthmax)) and db.threat.nonCombat then
+					if TidyPlatesThreat:GetSpecRole() then
+						style = "tank"
+					else
+						style = "dps"
+					end
+				end
+			else
+				if TidyPlatesThreat:GetSpecRole()	then
+					style = "tank"
+				else
+					style = "dps"
+				end
+			end
+--		end
+	end
+	if not style then
+		style = "normal"
+	end
+
+	return style
+end
+
 local function SetStyle(unit)
 	local db = TidyPlatesThreat.db.profile
 	local T = GetType(unit)
-	local style
+	local style, unique_setting
 
 	-- just for alpha feature alphaFeatureHeadlineView
 	if t.AlphaFeatureHeadlineView() then
@@ -74,7 +107,8 @@ local function SetStyle(unit)
 	elseif T == "Unique" then
 		for k_c,k_v in pairs(db.uniqueSettings.list) do
 			if k_v == unit.name then
-				if db.uniqueSettings[k_c].showNameplate then
+				unique_setting = db.uniqueSettings[k_c]
+				if unique_setting.showNameplate then
 					style = "unique"
 				end
 			end
@@ -114,23 +148,13 @@ local function SetStyle(unit)
 		end
 	end
 
-	-- if unit.isTarget then
-	-- 	t.DEBUG("unit.name = ", unit.name)
-	-- 	t.DEBUG("unit.type = ", unit.type)
-	-- 	t.DEBUG("unit.class = ", unit.class)
-	-- 	t.DEBUG("unit.reaction = ", unit.reaction)
-	-- 	t.DEBUG("unit.isMini = ", unit.isMini)
-	-- 	t.DEBUG("unit.isTapped = ", unit.isTapped)
-	-- 	t.DEBUG("unit SetStyle = ", style)
-	-- 	t.DEBUG("unit GetType = ", TidyPlatesThreat.GetType(unit))
-	-- end
-
 	if not style then style = "etotem" end
 
-	return style
+	return style, unique_setting
 end
 
 TidyPlatesThreat.GetGeneral = GetGeneral
 TidyPlatesThreat.GetType = GetType
 TidyPlatesThreat.SetStyle = SetStyle
 TidyPlatesThreat.GetStyle = GetStyle
+TidyPlatesThreat.GetThreatStyle = GetThreatStyle
