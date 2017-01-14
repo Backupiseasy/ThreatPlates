@@ -1,11 +1,11 @@
 ------------------------------------------------------
 8.4.0-Beta1 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
-* Upgrade to LibSharedMedia-3.0 v7.0.1
-* Name-only mode
-* Mini-Mobs
-* Bessere Konfigurierbarkeit von Mob-Klassen (Healthbar-Farbe, Skalierung, Transparenz, …)
-* Anpassungen an Cvar + bessere Synchronisierung
+* Upgrade integrated libraries to LibSharedMedia-3.0 7.0.1, Ace3 Release-r1151, AceGUI-3.0-SharedMediaWidgets r57-release
+* Added option to show or hide mini mobs (...)
+* Reworked headline view (name-only) - added additional configuration options and removed dependency to TidyPlatesHub
+* Reworked configuration for coloring (healthbar), scaling and transparency (alpha) for various unit types (NPC, ...)
+* Visiblity of unit types now configured in more details and synchronized with corresponding CVars
 
 ------------------------------------------------------
 8.3.0-Beta3 (works with TidyPlates 6.18.11)

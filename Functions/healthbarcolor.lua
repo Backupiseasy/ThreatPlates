@@ -139,6 +139,7 @@ local function SetHealthbarColor(unit)
         if u.useColor then
           c = u.color
         else
+          -- does not make much sense here, as threat color unly returns something useful it style == dps or stype == tank
           c = GetThreatColor(unit,style)
         end
       end
