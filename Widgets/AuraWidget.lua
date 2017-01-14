@@ -98,7 +98,6 @@ local function CheckFramelist(self)
 
 		if expiration < cur_time and duration > 0 then
       --DEBUG ("Expire Aura: ", frame:GetParent().unitid, frame.AuraInfo.name)
-      --DEBUG ("Expire Aura: ", frame.AuraInfo.name)
 			if frame.Expire and frame:GetParent():IsShown() then
         frame:Expire()
       end
@@ -560,8 +559,6 @@ end
 -------------------------------------------------------------
 
 local function EventUnitAura(unitid)
-  --DEBUG ("UNIT_AURA: ", unitid)
-
   if unitid then
     -- WidgetList contains the units that are tracked, i.e. for which currently nameplates are shown
     local frame = WidgetList[unitid]
@@ -891,9 +888,7 @@ end
 
 function UpdateWidget(frame)
 	if CONFIG_LAST_UPDATE > frame.last_update then
-		--ThreatPlates.DEBUG_PRINT_TABLE(frame)
 		-- ThreatPlates.DEBUG("Update Delay: ", frame.unit.name, frame.unitid)
-    --ThreatPlates.DEBUG_PRINT_TABLE(frame.unit)
 		UpdateWidgetConfig(frame)
 	end
 
@@ -923,7 +918,6 @@ local function UpdateWidgetContext(frame, unit)
       UpdateWidget(frame)
     end
     WidgetList[unitid] = frame
-    --ThreatPlates.DEBUG_SIZE("#WidgetList: ", WidgetList)
 	end
 
 	-- Custom Code II

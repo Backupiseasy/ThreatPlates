@@ -59,7 +59,6 @@ local function OnInitialize(plate, theme)
 --    for widgetname, widget in pairs(plate.widgets) do
 --			if not widget.TP_Widget then
 --        widget:Hide()
---        DEBUG("Hiding widget: ", widgetname)
 --      end
 --		end
 
