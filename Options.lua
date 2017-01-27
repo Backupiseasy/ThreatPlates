@@ -5143,7 +5143,7 @@ for k_c,v_c in ipairs(db.uniqueSettings) do
 										arg = {"uniqueSettings", k_c, "UseThreatColor"},
 									},
 									ThreatGlow = {
-										name = L["Use Threat Glow"],
+										name = L["Show Threat Glow"],
 										order = 5,
 										type = "toggle",
 										desc = L["Show a glow based on threat level around the nameplate's healthbar (in combat)."],

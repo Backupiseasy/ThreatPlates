@@ -109,8 +109,8 @@ local function ParseCommandLine(message)
 		t.UpdateDefaultProfile()
 	elseif message == "help" then
 		PrintHelp()
-	elseif message == "internal" then
-		print ("CVar: ", GetCVar("SetNamePlateEnemySize"))
+--	elseif message == "internal" then
+--		print ("CVar: ", GetCVar("SetNamePlateEnemySize"))
 	else
 		t.Print(L["Unknown option: "] .. message, true)
 		PrintHelp()

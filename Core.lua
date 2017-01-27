@@ -368,7 +368,7 @@ function TidyPlatesThreat:OnInitialize()
 				filter = {}
 			},
 			AuraWidget = {
-				ON = false,	x = 0, y = y, scale = 1,	anchor = "TOP",
+				ON = false,	x = 0, y = 5, scale = 1,	anchor = "TOP",
 				ShowEnemy = true,
 				ShowFriendly = true,
 				FilterMode = "blacklistMine",

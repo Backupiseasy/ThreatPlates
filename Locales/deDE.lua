@@ -447,6 +447,13 @@ L["Offset"] = "Versatz"
 L["Layout"] = "Layout"
 L["Show Friendly"] = "Freundlich anzeigen"
 L["Show Enemy"] = "Feindlich anzeigen"
+L["Anchor Point"] = "Ankerpunkt"
+L["Right-to-left"] = "Rechts nach links"
+L["Left-to-right"] = "Links nach rechts"
+L["Bottom-to-top"] = "Unten nach oben"
+L["Top-to-bottom"] = "Oben nach unten"
+L["Vertical Alignment"] = "Vertikale Ausrichtung"
+L["Horizontal Alignment"] = "Horizontale Ausrichtung"
 
 ----
 L["Social"] = "Soziale Widgets"
@@ -536,6 +543,10 @@ L["Allow raid marked hp color settings instead of a custom hp setting if the nam
 L["Enable the showing of the custom nameplate icon for this nameplate."] = "Ermöglicht die Anzeige eines benutzerdefinierten Icons für diese Plakette."
 L["Type direct icon texture path using '\\' to separate directory folders, or use a spellid."] = "Gib den direkten Dateipfad zur Textur ein. Benutze '\\' zur Separierung von Ordnerstrukturen oder eine Zauber-ID."
 L["Set Icon"] = "Icon festlegen"
+
+L["Use Threat Colors"] = "Threat-Farben verwenden"
+L["Use coloring based an threat level (configured in Threat System) in combat (custom color is only used out of combat)."] = "Verwende im Kampf eine Einfärbung der Gesundheitsleite basierend auf dem Bedrohungsgrad (konfiguriert unter Bedrohungs-System). Die eigene Farbe wird dann nur außerhalb des Kampfes verwendet)."
+L["Show a glow based on threat level around the nameplate's healthbar (in combat)."] = "Zeigt ein Glühen an der Gesundheitsleiste der Namensplaketten an, basierend auf dem Bedrohungsgrad (im Kampf)."
 
 -----------
 -- About --

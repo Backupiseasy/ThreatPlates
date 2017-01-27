@@ -42,6 +42,7 @@ local function UpdateDefaultProfile()
   db.profile.settings.castbar.texture = "Aluminium"
   db.profile.settings.name.typeface = "Friz Quadrata TT"
   db.profile.settings.name.size = 10
+  db.profile.settings.name.y = 14
   db.profile.settings.level.typeface = "Friz Quadrata TT"
   db.profile.settings.level.size = 9
   db.profile.settings.level.width = 22

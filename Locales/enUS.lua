@@ -448,6 +448,13 @@ L["Offset"] = true
 L["Layout"] = true
 L["Show Friendly"] = true
 L["Show Enemy"] = true
+L["Anchor Point"] = true
+L["Right-to-left"] = true
+L["Left-to-right"] = true
+L["Bottom-to-top"] = true
+L["Top-to-bottom"] = true
+L["Vertical Alignment"] = true
+L["Horizontal Alignment"] = true
 
 ----
 L["Social"] = true
@@ -537,6 +544,10 @@ L["Allow raid marked hp color settings instead of a custom hp setting if the nam
 L["Enable the showing of the custom nameplate icon for this nameplate."] = true
 L["Type direct icon texture path using '\\' to separate directory folders, or use a spellid."] = true
 L["Set Icon"] = true
+
+L["Use Threat Colors"] = true
+L["Use coloring based an threat level (configured in Threat System) in combat (custom color is only used out of combat)."] = true
+L["Show a glow based on threat level around the nameplate's healthbar (in combat)."] = true
 
 -----------
 -- About --
