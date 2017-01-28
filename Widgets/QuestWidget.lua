@@ -51,20 +51,23 @@ end
 
 local function ShowQuestUnit(unit)
 	local db = TidyPlatesThreat.db.profile.questWidget
-  local show_quest_mark = db.ON
 
-  if InCombatLockdown() then
-    if db.HideInCombat then
-      show_quest_mark = false
-    elseif db.HideInCombatAttacked and unit.unitid then
-      local _, threatStatus = UnitDetailedThreatSituation("player", unit.unitid);
-  	  show_quest_mark = (threatStatus == nil)
-    end
-  end
+	local show_quest_mark = db.ON
 
-  if IsInInstance() and db.HideInInstance then
-    show_quest_mark = false
-  end
+	if show_quest_mark then
+		if InCombatLockdown() then
+			if db.HideInCombat then
+				show_quest_mark = false
+			elseif db.HideInCombatAttacked and unit.unitid then
+				local _, threatStatus = UnitDetailedThreatSituation("player", unit.unitid);
+				show_quest_mark = (threatStatus == nil)
+			end
+		end
+
+		if IsInInstance() and db.HideInInstance then
+			show_quest_mark = false
+		end
+	end
 
   return  show_quest_mark
 end

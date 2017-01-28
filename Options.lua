@@ -3797,33 +3797,32 @@ local function GetOptions()
 											name = L["A to Z"], type = "toggle",	order = 10, width = "half",
 											desc = L["Sort in ascending alphabetical order."],
 											get = function(info) return db.AuraWidget.SortOrder == "AtoZ" end,
-											set = function(info, value) SetValuePlain(info, "AtoZ") end,
+											set = function(info, value) SetValueAuraWidget(info, "AtoZ") end,
 											arg = {"AuraWidget","SortOrder"},
 										},
 										TimeLeft = {
 											name = L["Time Left"], type = "toggle",	order = 20,	 width = "half",
 											desc = L["Sort by time left in ascending order."],
 											get = function(info) return db.AuraWidget.SortOrder == "TimeLeft" end,
-											set = function(info, value) SetValuePlain(info, "TimeLeft") end,
+											set = function(info, value) SetValueAuraWidget(info, "TimeLeft") end,
 											arg = {"AuraWidget","SortOrder"},
 										},
 										Duration = {
 											name = L["Duration"], type = "toggle",	order = 30,	 width = "half",
 											desc = L["Sort by overall duration in ascending order."],
 											get = function(info) return db.AuraWidget.SortOrder == "Duration" end,
-											set = function(info, value) SetValuePlain(info, "Duration") end,
+											set = function(info, value) SetValueAuraWidget(info, "Duration") end,
 											arg = {"AuraWidget","SortOrder"},
 										},
 										Creation = {
 											name = L["Creation"], type = "toggle",	order = 40,	 width = "half",
 											desc = L["Show auras in order created with oldest aura first."],
 											get = function(info) return db.AuraWidget.SortOrder == "Creation" end,
-											set = function(info, value) SetValuePlain(info, "Creation") end,
+											set = function(info, value) SetValueAuraWidget(info, "Creation") end,
 											arg = {"AuraWidget","SortOrder"},
 										},
 										ReverseOrder = {
-											name = L["Reverse Order"], type = "toggle",	order = 50,	desc = L['Reverse the sort order (e.g., "A to Z" becomes "Z to A").'],	arg = { "AuraWidget", "SortReverse" },
-                      set = SetValuePlain,
+											name = L["Reverse Order"], type = "toggle",	order = 50,	desc = L['Reverse the sort order (e.g., "A to Z" becomes "Z to A").'],	arg = { "AuraWidget", "SortReverse" }
 										},
 									},
 								},
@@ -4482,48 +4481,48 @@ local function GetOptions()
 							width = "full",
 							name = "deDE: Blacksalsify (original  author: Aideen@Perenolde/EU)"
 						},
-						Translators2 = {
-							type = "description",
-							order = 5,
-							width = "full",
-							name = "esES: Need Translator!!"
-						},
-						Translators3 = {
-							type = "description",
-							order = 6,
-							width = "full",
-							name = "esMX: Need Translator!!"
-						},
-						Translators4 = {
-							type = "description",
-							order = 7,
-							width = "full",
-							name = "frFR: Need Translator!!"
-						},
+--						Translators2 = {
+--							type = "description",
+--							order = 5,
+--							width = "full",
+--							name = "esES: Need Translator!!"
+--						},
+--						Translators3 = {
+--							type = "description",
+--							order = 6,
+--							width = "full",
+--							name = "esMX: Need Translator!!"
+--						},
+--						Translators4 = {
+--							type = "description",
+--							order = 7,
+--							width = "full",
+--							name = "frFR: Need Translator!!"
+--						},
 						Translators5 = {
 							type = "description",
 							order = 8,
 							width = "full",
-							name = "koKR: Need Translator!!"
+							name = "koKR: yuk6196 (CurseForge)"
 						},
-						Translators6 = {
-							type = "description",
-							order = 9,
-							width = "full",
-							name = "ruRU: Need Translator!!"
-						},
+--						Translators6 = {
+--							type = "description",
+--							order = 9,
+--							width = "full",
+--							name = "ruRU: Need Translator!!"
+--						},
 						Translators7 = {
 							type = "description",
 							order = 10,
 							width = "full",
-							name = "zhCN: Need Translator!!"
+							name = "zhCN: y123ao6 (CurseForge)"
 						},
-						Translators8 = {
-							type = "description",
-							order = 11,
-							width = "full",
-							name = "zhTW: Need Translator!!"
-						},
+--						Translators8 = {
+--							type = "description",
+--							order = 11,
+--							width = "full",
+--							name = "zhTW: Need Translator!!"
+--						},
 					},
 				},
 			},

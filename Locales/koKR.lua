@@ -1,468 +1,382 @@
-local L = LibStub("AceLocale-3.0"):NewLocale("TidyPlatesThreat", "koKR", false)
+local L = LibStub("AceLocale-3.0"):NewLocale("TidyPlatesThreat", "koKR", false, true)
 if not L then return end
 
-----------------------
---[[ commands.lua ]]--
-----------------------
+L[" options by typing: /tptp"] = "옵션 열기 명령어: /tptp"
+L[" role."] = "역할입니다."
+L[" to DPS."] = "|1을;를; DPS로 설정합니다."
+L[" to tanking."] = "|1을;를; 방어 전담으로 설정합니다."
+L[ [=[
 
-L["-->>|cffff0000DPS Plates Enabled|r<<--"] = "-->>|cffff0000DPS Plates Enabled|r<<--"
-L["|cff89F559Threat Plates|r: DPS switch detected, you are now in your |cffff0000dpsing / healing|r role."] = "|cff89F559Threat Plates|r: DPS switch detected, you are now in your |cffff0000dpsing / healing|r role."
+Feel free to email me at |cff00ff00threatplates@gmail.com|r
 
-L["-->>|cff00ff00Tank Plates Enabled|r<<--"] = "-->>|cff00ff00Tank Plates Enabled|r<<--"
-L["|cff89F559Threat Plates|r: Tank switch detected, you are now in your |cff00ff00tanking|r role."] = "|cff89F559Threat Plates|r: Tank switch detected, you are now in your |cff00ff00tanking|r role."
+--
 
-L["-->>Nameplate Overlapping is now |cff00ff00ON!|r<<--"] = "-->>Nameplate Overlapping is now |cff00ff00ON!|r<<--"
-L["-->>Nameplate Overlapping is now |cffff0000OFF!|r<<--"] = "-->>Nameplate Overlapping is now |cffff0000OFF!|r<<--"
+Blacksalsify
 
-L["-->>Threat Plates verbose is now |cff00ff00ON!|r<<--"] = "-->>Threat Plates verbose is now |cff00ff00ON!|r<<--"
-L["-->>Threat Plates verbose is now |cffff0000OFF!|r<<-- shhh!!"] = "-->>Threat Plates verbose is now |cffff0000OFF!|r<<-- shhh!!"
+(Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=] ] = [=[
+|cff00ff00threatplates@gmail.com|r으로 자유롭게 이메일을 보내주세요
 
-------------------------------
---[[ TidyPlatesThreat.lua ]]--
-------------------------------
+--
 
-L["|cff00ff00tanking|r"] = "|cff00ff00tanking|r"
-L["|cffff0000dpsing / healing|r"] = "|cffff0000dpsing / healing|r"
+Blacksalsify
 
-L["primary"] = "primary"
-L["secondary"] = "secondary"
-L["unknown"] = "unknown"
-L["Undetermined"] = "Undetermined"
+(원 제작자: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=]
+L[ [=[
 
-L["|cff89f559Welcome to |rTidy Plates: |cff89f559Threat Plates!\nThis is your first time using Threat Plates and you are a(n):\n|r|cff"] = "|cff89f559Welcome to |rTidy Plates: |cff89f559Threat Plates!\nThis is your first time using Threat Plates and you are a(n):\n|r|cff"
+Thank you for supporting my work!
+]=] ] = [=[
+작업 지원에 감사드립니다!]=]
+L[ [=[:
+----------
+Would you like to
+set your theme to |cff89F559Threat Plates|r?
 
-L["|cff89f559Your spec's have been set to |r"] = "|cff89f559Your dual spec's have been set to |r"
-L["|cff89f559You are currently in your "] = "|cff89f559You are currently in your "
-L["|cff89f559 role.|r"] = "|cff89f559 role.|r"
-L["|cff89f559Your role can not be determined.\nPlease set your dual spec preferences in the |rThreat Plates|cff89f559 options.|r"] = "|cff89f559Your role can not be determined.\nPlease set your dual spec preferences in the |rThreat Plates|cff89f559 options.|r"
-L["|cff89f559Additional options can be found by typing |r'/tptp'|cff89F559.|r"] = "|cff89f559Additional options can be found by typing |r'/tptp'|cff89F559.|r"
-L[":\n----------\nWould you like to \nset your theme to |cff89F559Threat Plates|r?\n\nClicking '|cff00ff00Yes|r' will set you to Threat Plates & reload UI. \n Clicking '|cffff0000No|r' will open the Tidy Plates options."] = ":\n----------\nWould you like to \nset your theme to |cff89F559Threat Plates|r?\n\nClicking '|cff00ff00Yes|r' will set you to Threat Plates & reload UI. \n Clicking '|cffff0000No|r' will open the Tidy Plates options."
+Clicking '|cff00ff00Yes|r' will set you to Threat Plates & reload UI.
+ Clicking '|cffff0000No|r' will open the Tidy Plates options.]=] ] = [=[:
+----------
+당신의 테마를
+|cff89F559Threat Plates|r로 설정할까요?
 
-L["Yes"] = "Yes"
-L["Cancel"] = "Cancel"
-L["No"] = "No"
+'|cff00ff00네|r'를 클릭하면 Threat Plates로 설정 후 UI를 다시 불러옵니다.
+'|cffff0000아니오|r'를 클릭하면 Tidy Plates 옵션 창을 엽니다.]=]
+L["|cff00ff00High threat|r"] = "|cff00ff00높은 위협 수준|r"
+L["|cff00ff00Low threat|r"] = "|cff00ff00낮은 위협 수준|r"
+L["|cff00ff00Tank|r"] = "|cff00ff00방어 전담|r"
+L["|cff00ff00tanking|r"] = "|cff00ff00방어 전담|r"
+L["|cff89f559 role.|r"] = "|cff89f559 역할입니다.|r"
+L["|cff89f559Additional options can be found by typing |r'/tptp'|cff89F559.|r"] = "|cff89f559추가 옵션은|r '/tptp'|cff89f559를 입력하면 찾을 수 있습니다|r|cff89F559.|r"
+L["|cff89f559Threat Plates:|r Welcome back |cff"] = "|cff89f559Threat Plates:|r 돌아온 걸 환영해요 |cff"
+L["|cff89F559Threat Plates|r: DPS switch detected, you are now in your |cffff0000dpsing / healing|r role."] = "|cff89F559Threat Plates|r: 공격 전담 전환 감지, 당신은 현재 |cffff0000공격 전담 / 치유 전담|r 역할입니다."
+L["|cff89F559Threat Plates|r: Player spec change detected: |cff"] = "|cff89F559Threat Plates|r: 플레이어 전문화 변경 감지: |cff"
+L["|cff89F559Threat Plates|r: Role toggle not supported because automatic role detection is enabled."] = "|cff89F559Threat Plates|r: 자동 역할 감지가 사용 중이어서 역할 전환이 지원되지 않습니다."
+L["|cff89F559Threat Plates|r: Tank switch detected, you are now in your |cff00ff00tanking|r role."] = "|cff89F559Threat Plates|r: 방어 전담 전환 감지, 당신은 현재 |cff00ff00방어 전담|r 역할입니다."
+L[ [=[|cff89f559Welcome to |rTidy Plates: |cff89f559Threat Plates!
+This is your first time using Threat Plates and you are a(n):
+|r|cff]=] ] = [=[Tidy Plates: |cff89f559Threat Plates|r|cff89f559에 오신 걸 환영합니다!|r
+|cff89f559Threat Plates를 처음 사용하며 당신은:|r|cff]=]
+L["|cff89f559You are currently in your "] = "|cff89f559당신은 현재 "
+L[ [=[|cff89f559Your role can not be determined.
+Please set your dual spec preferences in the |rThreat Plates|cff89f559 options.|r]=] ] = [=[|cff89f559당신의 역할을 판단할 수 없습니다.|r
+Threat Plates|cff89f559 옵션에서 당신의 이중 특성 우선권을 설정해주세요.|r]=]
+L["|cff89f559Your spec's have been set to |r"] = "|cff89f559당신의 전문화가 다음으로 설정되었습니다: |r"
+L["|cffff0000DPS/Healing|r"] = "|cffff0000공격 전담/치유 전담|r"
+L["|cffff0000dpsing / healing|r"] = "|cffff0000공격 전담 / 치유 전담|r"
+L["|cffff0000High threat|r"] = "|cffff0000높은 위협 수준|r"
+L["|cffff0000Low threat|r"] = "|cffff0000낮은 위협 수준|r"
+L["|cffffff00Medium threat|r"] = "|cffffff00중간 위협 수준|r"
+L["|cffffffffGeneral Settings|r"] = "|cffffffff일반 설정|r"
+L["|cffffffffTotem Settings|r"] = "|cffffffff토템 설정|r"
+L["|r, you are now in your |cff89F559"] = "|r, 당신은 현재 |cff89F559"
+L["-->>|cff00ff00Tank Plates Enabled|r<<--"] = "-->>|cff00ff00방어 전담 이름표 활성화|r<<--"
+L["-->>|cffff0000Activate Threat Plates from the Tidy Plates options!|r<<--"] = "-->>|cffff0000Tidy Plates 옵션에서 Threat Plates를 활성화하세요!|r<<--"
+L["-->>|cffff0000DPS Plates Enabled|r<<--"] = "-->>|cffff0000공격 전담 이름표 활성화|r<<--"
+L["-->>Nameplate Overlapping is now |cff00ff00ON!|r<<--"] = "-->>이름표 겹치기가 |cff00ff00켜졌습니다!|r<<--"
+L["-->>Nameplate Overlapping is now |cffff0000OFF!|r<<--"] = "-->>이름표 겹치기가 |cffff0000꺼졌습니다!|r<<--"
+L["-->>Threat Plates verbose is now |cff00ff00ON!|r<<--"] = "-->>Threat Plates 문자 알림이 |cff00ff00켜졌습니다!|r<<--"
+L["-->>Threat Plates verbose is now |cffff0000OFF!|r<<-- shhh!!"] = "-->>Threat Plates 문자 알림이 |cffff0000꺼졌습니다!|r<<-- 쉿!!"
+L["About"] = "정보"
+L["Additional Adjustments"] = "추가 조정"
+L["Additional Toggles"] = "추가 전환"
+L["All Auras"] = "모든 효과"
+L["All Auras (Mine)"] = "모든 효과 (내 것)"
+L["Allow Marked HP Coloring"] = "징표 지정된 HP 색상화 허용"
+L["Allow raid marked hp color settings instead of a custom hp setting if the nameplate has a raid mark."] = "이름표가 공격대 징표를 가지고 있다면 사용자 설정 HP 설정 대신 공격대 징표 지정 HP 색상 설정을 허용합니다."
+L["Alpha"] = "투명도"
+L["Alpha Settings"] = "투명도 설정"
+L["Amount Text"] = "수치 문자"
+L["Amount Text Formatting"] = "수치 문자 형식화"
+L["Anchor"] = "고정"
+L["Army of the Dead Ghoul"] = "사자의 군대"
+L["Art Options"] = "미술 옵션"
+L["Aura Widget"] = "효과 표시 장치"
+L["Black List"] = "차단 목록"
+L["Black List (Mine)"] = "차단 목록 (내 것)"
+L["Blizzard Settings"] = "블리자드 설정"
+L["Blizzard Target Fading"] = "블리자드 대상 흐려짐"
+L["Bone Spike"] = "뼈 가시"
+L["Canal Crab"] = "대운하 게"
+L["Cancel"] = "취소"
+L["Castbar"] = "시전바"
+L["Changes the HP color depending on the amount of HP the nameplate shows."] = "HP의 수치에 따라 이름표에 표시되는 HP의 색상을 변경합니다."
+L["Changing these settings will alter the placement of the nameplates, however the mouseover area does not follow. |cffff0000Use with caution!|r"] = "이 설정을 변경하면 이름표의 배치가 변경됩니다, 하지만 마우스오버 영역은 변경되지 않습니다. |cffff0000주의해서 사용하세요!|r"
+L["Class Coloring"] = "직업 색상화"
+L["Class Icons"] = "직업 아이콘"
+L["Clear"] = "초기화"
+L[ [=[Clear and easy to use nameplate theme for use with TidyPlates.
 
-L["-->>|cffff0000Activate Threat Plates from the Tidy Plates options!|r<<--"] = "-->>|cffff0000Activate Threat Plates from the Tidy Plates options!|r<<--"
-L["|cff89f559Threat Plates:|r Welcome back |cff"] = "|cff89f559Threat Plates:|r Welcome back |cff"
+Current version: ]=] ] = [=[TidyPlates와 사용할 수 있는 깔끔하고 쉬운 이름표 테마입니다.
 
-L["|cff89F559Threat Plates|r: Player spec change detected: |cff"] = "|cff89F559Threat Plates|r: Player spec change detected: |cff"
-L["|r, you are now in your |cff89F559"] = "|r, you are now in your |cff89F559"
-L[" role."] = " role."
-
--- Custom Nameplates
-L["Shadow Fiend"] = "Shadow Fiend"
-L["Spirit Wolf"] = "Spirit Wolf"
-L["Ebon Gargoyle"] = "Ebon Gargoyle"
-L["Water Elemental"] = "Water Elemental"
-L["Treant"] = "Treant"
-L["Viper"] = "Viper"
-L["Venomous Snake"] = "Venomous Snake"
-L["Army of the Dead Ghoul"] = "Army of the Dead Ghoul"
-L["Shadowy Apparition"] = "Shadowy Apparition"
-L["Shambling Horror"] = "Shambling Horror"
-L["Web Wrap"] = "Web Wrap"
-L["Immortal Guardian"] = "Immortal Guardian"
-L["Marked Immortal Guardian"] = "Marked Immortal Guardian"
-L["Empowered Adherent"] = "Empowered Adherent"
-L["Deformed Fanatic"] = "Deformed Fanatic"
-L["Reanimated Adherent"] = "Reanimated Adherent"
-L["Reanimated Fanatic"] = "Reanimated Fanatic"
-L["Bone Spike"] = "Bone Spike"
-L["Onyxian Whelp"] = "Onyxian Whelp"
-L["Gas Cloud"] = "Gas Cloud"
-L["Volatile Ooze"] = "Volatile Ooze"
-L["Darnavan"] = ""
-L["Val'kyr Shadowguard"] = "Val'kyr Shadowguard"
-L["Kinetic Bomb"] = "Kinetic Bomb"
-L["Lich King"] = "Lich King"
-L["Raging Spirit"] = "Raging Spirit"
-L["Drudge Ghoul"] = "Drudge Ghoul"
-L["Living Inferno"] = "Living Inferno"
-L["Living Ember"] = "Living Ember"
-L["Fanged Pit Viper"] = "Fanged Pit Viper"
-L["Canal Crab"] = "Canal Crab"
-L["Muddy Crawfish"] = "Muddy Crawfish"
-
----------------------
---[[ options.lua ]]--
----------------------
-
-L["None"] = "None"
-L["Outline"] = "Outline"
-L["Thick Outline"] = "Thick Outline"
-L["No Outline, Monochrome"] = "No Outline, Monochrome"
-L["Outline, Monochrome"] = "Outline, Monochrome"
-L["Thick Outline, Monochrome"] = "Thick Outline, Monochrome"
-
-L["White List"] = "White List"
-L["Black List"] = "Black List"
-L["White List (Mine)"] = "White List (Mine)"
-L["Black List (Mine)"] = "Black List (Mine)"
-L["All Auras"] = "All Auras"
-L["All Auras (Mine)"] = "All Auras (Mine)"
-
--- Tab Titles
-L["Nameplate Settings"] = "Nameplate Settings"
-L["Threat System"] = "Threat System"
-L["Widgets"] = "Widgets"
-L["Totem Nameplates"] = "Totem Nameplates"
-L["Custom Nameplates"] = "Custom Nameplates"
-L["About"] = "About"
-
-------------------------
--- Nameplate Settings --
-------------------------
-L["General Settings"] = "General Settings"
-L["Hiding"] = "Hiding"
-L["Show Tapped"] = "Show Tapped"
-L["Show Neutral"] = "Show Neutral"
-L["Show Normal"] = "Show Normal"
-L["Show Elite"] = "Show Elite"
-L["Show Boss"] = "Show Boss"
-
-L["Blizzard Settings"] = "Blizzard Settings"
-L["Open Blizzard Settings"] = "Open Blizzard Settings"
-
-L["Friendly"] = "Friendly"
-L["Show Friends"] = "Show Friends"
-L["Show Friendly Totems"] = "Show Friendly Totems"
-L["Show Friendly Pets"] = "Show Friendly Pets"
-L["Show Friendly Guardians"] = "Show Friendly Guardians"
-
-L["Enemy"] = "Enemy"
-L["Show Enemies"] = "Show Enemies"
-L["Show Enemy Totems"] = "Show Enemy Totems"
-L["Show Enemy Pets"] = "Show Enemy Pets"
-L["Show Enemy Guardians"] = "Show Enemy Guardians"
-
-----
-L["Healthbar"] = "Healthbar"
-L["Textures"] = "Textures"
-L["Show Border"] = "Show Border"
-L["Normal Border"] = "Normal Border"
-L["Show Elite Border"] = "Show Elite Border"
-L["Elite Border"] = "Elite Border"
-L["Mouseover"] = "Mouseover"
-----
-L["Placement"] = "Placement"
-L["Changing these settings will alter the placement of the nameplates, however the mouseover area does not follow. |cffff0000Use with caution!|r"] = "Changing these settings will alter the placement of the nameplates, however the mouseover area does not follow. |cffff0000Use with caution!|r"
-L["Offset X"] = "Offset X"
-L["Offset Y"] = "Offset Y"
+현재 버전: ]=]
+L["Click to Donate!"] = "기부하려면 클릭하세요!"
+L["Color"] = "색상"
+L["Color HP by amount"] = "수치에 따라 HP 색상화"
+L["Color HP by Threat"] = "위협 수준에 따라 HP 색상화"
+L["Coloring"] = "색상화"
+L["Colors"] = "색상"
+L["Combo Points"] = "연계 점수"
+L["Cooldown Spiral"] = "재사용 대기시간 나선"
+L["Copied!"] = "복사되었습니다!"
+L["Copy"] = "복사"
+L["Custom Alpha"] = "사용자 설정 투명도"
+L["Custom HP Color"] = "사용자 설정 HP 색상"
+L["Custom Nameplates"] = "사용자 설정 이름표"
+L["Custom Scale"] = "사용자 설정 크기 비율"
+L["Custom Settings"] = "사용자 설정"
+L["Darnavan"] = "다르나반"
+L["Deficit Text"] = "손실 문자"
+L["Deformed Fanatic"] = "변형된 광신자"
+L["Determine your role (tank/dps/healing) automatically based on current spec."] = "현재 전문화에 따라 자동으로 당신의 역할 (방어 전담/공격 전담/치유 전담)을 판단합니다."
+L["Disable Custom Alpha"] = "사용자 설정 투명도 비활성"
+L["Disable Custom Scale"] = "사용자 설정 크기 비율 비활성"
+L["Disables the custom alpha setting for this nameplate and instead uses your normal alpha settings."] = "이 이름표에 사용자 설정 투명도를 비활성하고 일반 투명도 설정을 사용합니다."
+L["Disables the custom scale setting for this nameplate and instead uses your normal scale settings."] = "이 이름표에 사용자 설정 크기 비율을 비활성하고 일반 크기 비율 설정을 사용합니다."
+L["Disables threat feedback from boss level mobs."] = "우두머리 등급 몹의 위협 수준 피드백을 비활성합니다."
+L["Disables threat feedback from elite mobs."] = "정예 등급 몹의 위협 수준 피드백을 비활성합니다."
+L["Disables threat feedback from mobs you're currently not in combat with."] = "당신과 전투 중이지 않은 몹의 위협 수준 피드백을 비활성합니다."
+L["Disables threat feedback from neutral mobs regardless of boss or elite levels."] = "우두머리 또는 정예 등급에 상관없이 중립 몹의 위협 수준 피드백을 비활성합니다."
+L["Disables threat feedback from normal mobs."] = "일반 몹의 위협 수준 피드백을 비활성합니다."
+L["Disables threat feedback from tapped mobs regardless of boss or elite levels."] = "우두머리 또는 정예 등급에 상관없이 선점된 몹의 위협 수준 피드백을 비활성합니다."
+L["Disabling this will turn off any all icons without harming custom settings per nameplate."] = "비활성하면 이름표 별 사용자 설정에 영향을 주지 않고 모든 아이콘을 끕니다."
+L["Display health amount text."] = "생명력 수치를 문자로 표시합니다."
+L["Display health percentage text."] = "생명력 백분율 문자를 표시합니다."
+L["Display health text on targets with full HP."] = "가득 찬 HP의 대상에 생명력 문자를 표시합니다."
+L["Display Settings"] = "표시 설정"
+L["DPS/Healing"] = "공격 전담/치유 전담"
+L["Drudge Ghoul"] = "노역꾼 구울"
+L["Ebon Gargoyle"] = "칠흑의 가고일"
+L["Elite Border"] = "정예 테두리"
+L["Elite Icon"] = "정예 아이콘"
+L["Elite Icon Style"] = "정예 아이콘 스타일"
+L["Empowered Adherent"] = "강화된 신봉자"
+L["Enable"] = "사용"
+L["Enable Adjustments"] = "조정 사용"
+L["Enable Alpha Threat"] = "위협 수준 투명도 사용"
+L["Enable Blizzard 'On-Target' Fading"] = "블리자드 '지정 대상' 흐려짐 사용"
+L["Enable Coloring"] = "색상화 사용"
+L["Enable Custom Colors"] = "사용자 설정 색상 사용"
+L["Enable Custom HP colors"] = "사용자 설정 HP 색상 사용"
+L["Enable Elite Icon"] = "정예 아이콘 사용"
+L["Enable Enemy Class colors"] = "적대적 직업 색상 사용"
+L["Enable Friendly Class Colors"] = "아군 직업 색상 사용"
+L["Enable Friendly Icons"] = "아군 아이콘 사용"
+L["Enable Headline View (Name-Only)"] = "헤드라인 보기 사용 (이름만)"
+L["Enable Health Text"] = "생명력 문자 사용"
+L["Enable Level Text"] = "레벨 문자 사용"
+L["Enable Name Text"] = "이름 문자 사용"
+L["Enable nameplates to change alpha depending on the levels you set below."] = "아래에 지정한 등급에 따라 이름표의 투명도를 변경합니다."
+L["Enable nameplates to change scale depending on the levels you set below."] = "아래에 지정한 등급에 따라 이름표의 크기 비율을 변경합니다."
+L["Enable Raid Mark Icon"] = "공격대 징표 아이콘 사용"
+L["Enable Raid Marked HP colors"] = "공격대 징표 HP 색상 사용"
+L["Enable Scale Threat"] = "위협 수준 크기 비율 사용"
+L["Enable Shadow"] = "그림자 사용"
+L["Enable Skull Icon"] = "해골 아이콘 사용"
+L["Enable Spell Icon"] = "주문 아이콘 사용"
+L["Enable Spell Text"] = "주문 문자 사용"
+L["Enable the showing of friendly player class color on hp bars."] = "생명력 바에 아군 플레이어의 직업 색상을 표시합니다."
+L["Enable the showing of friendly player class icons."] = "아군 플레이어 직업 아이콘 표시를 사용합니다."
+L["Enable the showing of the custom nameplate icon for this nameplate."] = "이 이름표에 사용자 설정 이름표 아이콘 표시를 사용합니다."
+L["Enable Threat System"] = "위협 수준 체제 사용"
+L["Enables the showing if indicator icons for friends, guildmates, and BNET Friends"] = "친구, 길드원, 그리고 BNET 친구에 아이콘 지시기 표시를 사용합니다."
+L["Enables the showing of a texture on your target nameplate"] = "당신의 대상의 이름표에 무늬 표시를 사용합니다."
+L["Enables the showing of text on nameplates."] = "이름표에 문자 표시를 사용합니다."
+L["Enables the showing of the elite icon on nameplates."] = "이름표에 정예 아이콘 표시를 사용합니다."
+L["Enables the showing of the raid mark icon on nameplates."] = "이름표에 공격대 징표 아이콘 표시를 사용합니다."
+L["Enables the showing of the skull icon on nameplates."] = "이름표에 해골 아이콘 표시를 사용합니다."
+L["Enables the showing of the spell icon on nameplates."] = "이름표에 주문 아이콘 표시를 사용합니다."
+L["Enabling this will allow you to set the alpha adjustment for non-target nameplates."] = "사용하면 대상이 아닌 이름표에 투명도 조정 설정을 허용합니다."
+L["Enabling this will allow you to set the alpha adjustment for non-target names in headline view."] = "사용하면 대상이 아닌 헤드라인 이름에 투명도 조정 설정을 허용합니다."
+L["Enemy"] = "적"
+L["Enemy Class Colors"] = "적대적 직업 색상"
+L["Enemy Color"] = "적대적 색상"
+L["Fanged Pit Viper"] = "송곳니 구덩이독사"
+L["Filtered Auras"] = "필터링할 효과"
+L["Filtering"] = "필터링"
+L["Font"] = "글꼴"
+L["Font Size"] = "글꼴 크기"
+L["Font Style"] = "글꼴 스타일"
+L["Friendly"] = "아군"
+L["Friendly Caching"] = "아군 캐시"
+L["Friendly Class Colors"] = "아군 직업 색상"
+L["Friendly Color"] = "아군 색상"
+L["Gas Cloud"] = "가스 구름"
+L["General Settings"] = "일반 설정"
+L["Headline View"] = "헤드라인 보기"
+L["Health Coloring"] = "생명력 색상화"
+L["Health Text"] = "생명력 문자"
+L["Healthbar"] = "생명력바"
+L["Hide Healthbars"] = "생명력바 숨기기"
+L["Hiding"] = "숨기기"
+L["High Threat"] = "높은 위협 수준"
+L["Horizontal Align"] = "수평 조절"
+L["Icon"] = "아이콘"
+L["Icon Size"] = "아이콘 크기"
+L["Ignore Marked Targets"] = "징표 대상 무시"
+L["Ignore Non-Combat Threat"] = "비 전투 위협 수준 무시"
+L["Ignored Alpha"] = "투명도 무시"
+L["Ignored Scaling"] = "크기 비율 무시"
+L["Immortal Guardian"] = "불멸의 수호병"
+L["Interruptable Casts"] = "방해 가능 한 시전"
+L["Kinetic Bomb"] = "요동치는 폭탄"
+L["Level Text"] = "레벨 문자"
+L["Lich King"] = "리치 왕"
+L["Living Ember"] = "살아있는 불씨"
+L["Living Inferno"] = "살아있는 지옥불"
+L["Low Threat"] = "낮은 위협 수준"
+L["Marked Immortal Guardian"] = "표시된 불멸의 수호병"
+L["Marked Targets"] = "징표 대상"
+L["Max HP Text"] = "가득 찬 HP 문자"
+L["Medium Threat"] = "중간 위협 수준"
+L["Mode"] = "모드"
+L["Mouseover"] = "마우스오버"
+L["Muddy Crawfish"] = "진흙투성이 가재"
+L["Name Text"] = "이름 문자"
+L["Nameplate Settings"] = "이름표 설정"
+L["Neutral Color"] = "중립 색상"
+L["No"] = "아니오"
+L["No Outline, Monochrome"] = "외곽선 없음, 단색화"
+L["No target found."] = "대상을 찾을 수 없습니다."
+L["None"] = "없음"
+L["Non-Target Alpha"] = "비-대상 투명도"
+L["Non-Target Castbars"] = "비-대상 시전바"
+L["Normal Border"] = "일반 테두리"
+L["Nothing to paste!"] = "붙여넣기 할게 없습니다!"
+L["Offset X"] = "X 좌표"
+L["Offset Y"] = "Y 좌표"
+L["Onyxian Whelp"] = "오닉시아 새끼용"
+L["Open Blizzard Settings"] = "블리자드 설정 열기"
+L["Open Config"] = "설정 열기"
+L["Options"] = "옵션"
+L["Outline"] = "외곽선"
+L["Outline, Monochrome"] = "외곽선, 단색화"
+L["Paste"] = "붙여넣기"
+L["Pasted!"] = "붙여넣었습니다!"
+L["Percent Text"] = "백분율 문자"
+L["Placement"] = "배치"
+L["Presences"] = "형상"
+L["Preview"] = "미리보기"
+L["primary"] = "주"
+L["Raging Spirit"] = "노여워하는 영혼"
+L["Raid Mark HP Color"] = "공격대 징표 HP 색상"
+L["Raid Marks"] = "공격대 징표"
+L["Reanimated Adherent"] = "되살아난 신봉자"
+L["Reanimated Fanatic"] = "되살아난 광신자"
+L["Restore Defaults"] = "기본값 복구"
+L["Scale"] = "크기 비율"
+L["Scale Settings"] = "크기 비율 설정"
+L["Seals"] = "문장"
+L["secondary"] = "부"
+L["Set alpha settings for different threat reaction types."] = "위협 수준 반응에 따라 투명도를 설정합니다."
+L["Set Icon"] = "아이콘 설정"
+L["Set Name"] = "이름 설정"
+L["Set scale settings for different threat reaction types."] = "위협 수준 반응에 따라 크기 비율을 설정합니다."
+L["Set the outlining style of the text."] = "문자의 외곽선 스타일을 설정합니다."
+L["Set the roles your specs represent."] = "전문화에 맞는 역할을 설정합니다."
+L["Set threat textures and their coloring options here."] = "여기서 위협 수준 무늬와 색상화 옵션을 설정합니다."
+L["Sets your spec "] = "당신의 전문화 "
+L["Shadow Fiend"] = "어둠의 마귀"
+L["Shadowy Apparition"] = "그림자 원혼"
+L["Shambling Horror"] = "휘청거리는 괴물"
+L["Shapeshifts"] = "변신"
+L["Shielded Coloring"] = "방해 불가 색상화"
+L["Show Border"] = "테두리 표시"
+L["Show Boss"] = "우두머리 표시"
+L["Show Boss Threat"] = "우두머리 위협 수준 표시"
+L["Show Elite"] = "정예 표시"
+L["Show Elite Border"] = "정예 테두리 표시"
+L["Show Elite Threat"] = "정예 위협 수준 표시"
+L["Show Enemies"] = "적 표시"
+L["Show Enemy Guardians"] = "적대적 경비병 표시"
+L["Show Enemy Pets"] = "적대적 소환수 표시"
+L["Show Enemy Totems"] = "적대적 토템 표시"
+L["Show Friendly Guardians"] = "우호적 경비병 표시"
+L["Show Friendly Pets"] = "우호적 소환수 표시"
+L["Show Friendly Totems"] = "우호적 토템 표시"
+L["Show Friends"] = "아군 표시"
+L["Show Nameplate"] = "이름표 표시"
+L["Show Neutral"] = "중립 표시"
+L["Show Neutral Threat"] = "중립 위협 수준 표시"
+L["Show Normal"] = "일반 표시"
+L["Show Normal Threat"] = "일반 위협 수준 표시"
+L["Show Tagged"] = "선점 표시"
+L["Show Tapped Threat"] = "선점 위협 수준 표시"
+L["Show Threat Glow"] = "위협 수준 반짝임 표시"
+L["Size"] = "크기"
+L["Sizing"] = "크기 조절"
+L["Skull Icon"] = "해골 아이콘"
+L["Social Widget"] = "소셜 장치"
+L["Spec Roles"] = "전문화 역할"
+L["Spell Icon"] = "주문 아이콘"
+L["Spell Text"] = "주문 문자"
+L["Spirit Wolf"] = "늑대 정령"
+L["Square"] = "정사각형"
+L["Stances"] = "태세"
+L["Style"] = "스타일"
+L["Tagged Color"] = "선점된 색상"
+L["Tank"] = "방어 전담"
+L["Tanked Targets"] = "방어 중인 대상"
+L["Target Highlight"] = "대상 강조"
+L["Target Only"] = "대상만"
+L["Text at Full HP"] = "가득 찬 HP 문자"
+L["Text Boundaries"] = "문자 경계"
+L["Text Bounds and Sizing"] = "문자 범위와 크기 조절"
+L["Text Height"] = "문자 높이"
+L["Text Width"] = "문자 너비"
+L["Texture"] = "무늬"
+L["Textures"] = "무늬"
+L["These options are for the textures shown on nameplates at various threat levels."] = "여러 위협 수준 등급에서 이름표에 표시되는 무늬를 설정하는 옵션입니다."
+L[ [=[These settings will define the space that text can be placed on the nameplate.
+Having too large a font and not enough height will cause the text to be not visible.]=] ] = [=[이름표에서 문자가 위치할 수 있는 공간을 정의하는 설정입니다.
+글꼴이 너무 크거나 충분한 높이가 없으면 문자가 보여지지 않습니다.]=]
+L["Thick Outline"] = "두꺼운 외곽선"
+L["Thick Outline, Monochrome"] = "두꺼운 외곽선, 단색화"
+L["This allows HP color to be the same as the threat colors you set below."] = "아래에서 설정한 위협 수준 색상으로 HP 바의 색상을 바꿉니다."
+L["This allows the castbar to attempt to create a castbar on nameplates of players or creatures you have recently moused over."] = "최근에 마우스를 올렸던 플레이어나 생명체의 이름표에 시전바를 생성하도록 시도합니다."
+L["This allows you to save friendly player class information between play sessions or nameplates going off the screen.|cffff0000(Uses more memory)"] = "플레이 세션 간 또는 이름표가 화면에서 나간 후에 우호적 플레이어 직업 정보를 저장하도록 허용합니다.|cffff0000(메모리를 더 사용합니다)"
+L["This lets you select the layout style of the aura widget. (Reloading UI is needed)"] = "효과 장치의 배치 스타일을 선택합니다. (UI 다시 불러오기 필요)"
+L["This widget will display a small bar that will display your current threat relative to other players on your target nameplate or recently mousedover namplates."] = "이 장치는 현재 대상의 이름표나 최근에 마우스를 올렸던 이름표에 다른 플레이어와 비교해 자신의 현재 위협 수준을 표시해주는 작은 바를 표시합니다."
+L["This widget will display a small shield or dagger that will indicate if the nameplate is currently being tanked.|cffff00ffRequires tanking role.|r"] = "이 장치는 현재 방어 중인 이름표인지 나타내주는 작은 방패나 단검을 표시합니다."
+L["This widget will display auras that match your filtering on your target nameplate and others you recently moused over."] = "이 장치는 현재 대상의 이름표나 최근에 마우스를 올렸던 이름표에 자신의 필터링과 일치하는 효과를 표시합니다."
+L["This widget will display class icons on nameplate with the settings you set below."] = "이 장치는 아래에 설정한 직업 아이콘을 이름표에 표시합니다."
+L["This widget will display combo points on your target nameplate."] = "이 장치는 현재 대상의 이름표에 연계 점수를 표시합니다."
+L["This will allow you to add additional scaling changes to specific mob types."] = "특정 몹 유형에 맞게 추가 크기 비율 변경을 추가하도록 허용합니다."
+L["This will allow you to disabled threat alpha changes on marked targets."] = "징표 대상에 위협 수준 투명도 변경을 비활성하도록 허용합니다."
+L["This will allow you to disabled threat art on marked targets."] = "징표 대상에 위협 수준 미술을 비활성하도록 허용합니다."
+L["This will allow you to disabled threat scale changes on marked targets."] = "징표 대상에 위협 수준 크기 비율 변경을 비활성하도록 허용합니다."
+L["This will enable all alpha features currently available in ThreatPlates. Be aware that most of the features are not fully implemented and may contain several bugs."] = "현재 ThreatPlates에서 사용 가능한 모든 투명도 기능을 활성화합니다. 대부분의 기능이 완전히 구현되지 않았으며 몇몇 버그를 포함하고 있을 수 있습니다."
+L["This will enable headline view (name-only) for nameplates. TidyPlatesHub must be enabled for this to work. Use the TidyPlatesHub options for configuration."] = "이름표에 헤드라인 보기 (이름만) 기능을 활성화합니다. 작동하려면 TidyPlatesHub가 반드시 활성화되어야 합니다. 설정에 TidyPlatesHub 옵션을 사용합니다."
+L["This will format text to a simpler format using M or K for millions and thousands. Disabling this will show exact HP amounts."] = "백만 단위와 천 단위에 M 이나 K를 사용하여 문자 형식을 더 간단하게 바꿉니다. 비활성하면 정확한 HP 수치를 표시합니다."
+L["This will format text to show both the maximum hp and current hp."] = "최대 HP와 현재 HP 둘다 표시합니다."
+L["This will format text to show hp as a value the target is missing."] = "대상의 손실 생명력 수치를 표시합니다."
+L["This will toggle the aura widget to only show for your current target."] = "효과 장치가 현재 대상만 표시하게 할지 전환합니다."
+L["This will toggle the aura widget to show the cooldown spiral on auras. (Reloading UI is needed)"] = "효과에 재사용 대기시간 나선 표시를 전환합니다. (UI 다시 불러오기 필요)"
+L["Threat Colors"] = "위협 수준 색상"
+L["Threat Line"] = "위협 수준 줄"
+L["Threat System"] = "위협 수준 체제"
+L["Toggles"] = "전환"
+L["Toggling"] = "전환"
+L["Totem Alpha"] = "토템 투명도"
+L["Totem Nameplates"] = "토템 이름표"
+L["Totem Scale"] = "토템 크기 비율"
+L["Treant"] = "나무정령"
+L["Truncate Text"] = "축약 문자"
+L["Type direct icon texture path using '\\' to separate directory folders, or use a spellid."] = "'\\'로 디렉토리 폴더를 분리하여 아이콘 무늬 경로를 직접 입력하거나, 주문ID를 사용하세요."
+L["Undetermined"] = "분명하지 않음"
+L["Uninterruptable Casts"] = "방해할 수 없는 시전"
+L["unknown"] = "알 수 없음"
+L["Use Custom Settings"] = "사용자 설정 사용"
+L["Use Target's Name"] = "대상의 이름 사용"
+L["Val'kyr Shadowguard"] = "발키르 어둠수호병"
+L["Venomous Snake"] = "독사"
+L["Vertical Align"] = "수직 정렬"
+L["Viper"] = "살무사"
+L["Volatile Ooze"] = "일촉즉발 수액괴물"
+L["Water Elemental"] = "물 정령"
+L["Web Wrap"] = "거미줄 올가미"
+L["White List"] = "허용 목록"
+L["White List (Mine)"] = "허용 목록 (내 것)"
+L["Wide"] = "넓게"
+L["Widgets"] = "장치"
 L["X"] = "X"
 L["Y"] = "Y"
-L["Anchor"] = "Anchor"
-----
-L["Coloring"] = "Coloring"
-L["Enable Coloring"] = "Enable Coloring"
-L["Color HP by amount"] = "Color HP by amount"
-L["Changes the HP color depending on the amount of HP the nameplate shows."] = "Changes the HP color depending on the amount of HP the nameplate shows."
-----
-L["Class Coloring"] = "Class Coloring"
-L["Enemy Class Colors"] = "Enemy Class Colors"
-L["Enable Enemy Class colors"] = "Enable Enemy Class colors"
-L["Friendly Class Colors"] = "Friendly Class Colors"
-L["Enable Friendly Class Colors"] = "Enable Friendly Class Colors"
-L["Enable the showing of friendly player class color on hp bars."] = "Enable the showing of friendly player class color on hp bars."
-L["Friendly Caching"] = "Friendly Caching"
-L["This allows you to save friendly player class information between play sessions or nameplates going off the screen.|cffff0000(Uses more memory)"] = "This allows you to save friendly player class information between play sessions or nameplates going off the screen.|cffff0000(Uses more memory)"
-----
-L["Custom HP Color"] = "Custom HP Color"
-L["Enable Custom HP colors"] = "Enable Custom HP colors"
-L["Friendly Color"] = "Friendly Color"
-L["Tapped Color"] = "Tapped Color"
-L["Neutral Color"] = "Neutral Color"
-L["Enemy Color"] = "Enemy Color"
-----
-L["Raid Mark HP Color"] = "Raid Mark HP Color"
-L["Enable Raid Marked HP colors"] = "Enable Raid Marked HP colors"
-L["Colors"] = "Colors"
-----
-L["Threat Colors"] = "Threat Colors"
-L["Show Threat Glow"] = "Show Threat Glow"
-L["|cff00ff00Low threat|r"] = "|cff00ff00Low threat|r"
-L["|cffffff00Medium threat|r"] = "|cffffff00Medium threat|r"
-L["|cffff0000High threat|r"] = "|cffff0000High threat|r"
-L["|cffff0000Low threat|r"] = "|cffff0000Low threat|r"
-L["|cff00ff00High threat|r"] = "|cff00ff00High threat|r"
-L["Low Threat"] = "Low Threat"
-L["Medium Threat"] = "Medium Threat"
-L["High Threat"] = "High Threat"
-
-----
-L["Castbar"] = "Castbar"
-L["Enable"] = "Enable"
-L["Non-Target Castbars"] = "Non-Target Castbars"
-L["This allows the castbar to attempt to create a castbar on nameplates of players or creatures you have recently moused over."] = "This allows the castbar to attempt to create a castbar on nameplates of players or creatures you have recently moused over."
-L["Interruptable Casts"] = "Interruptable Casts"
-L["Shielded Coloring"] = "Shielded Coloring"
-L["Uninterruptable Casts"] = "Uninterruptable Casts"
-
-----
-L["Alpha"] = "Alpha"
-L["Blizzard Target Fading"] = "Blizzard Target Fading"
-L["Enable Blizzard 'On-Target' Fading"] = "Enable Blizzard 'On-Target' Fading"
-L["Enabling this will allow you to set the alpha adjustment for non-target nameplates."] = "Enabling this will allow you to set the alpha adjustment for non-target nameplates."
-L["Non-Target Alpha"] = "Non-Target Alpha"
-L["Alpha Settings"] = "Alpha Settings"
-
-----
-L["Scale"] = "Scale"
-L["Scale Settings"] = "Scale Settings"
-
-----
-L["Name Text"] = "Name Text"
-L["Enable Name Text"] = "Enable Name Text"
-L["Enables the showing of text on nameplates."] = "Enables the showing of text on nameplates."
-L["Options"] = "Options"
-L["Font"] = "Font"
-L["Font Style"] = "Font Style"
-L["Set the outlining style of the text."] = "Set the outlining style of the text."
-L["Enable Shadow"] = "Enable Shadow"
-L["Color"] = "Color"
-L["Text Bounds and Sizing"] = "Text Bounds and Sizing"
-L["Font Size"] = "Font Size"
-L["Text Boundaries"] = "Text Boundaries"
-L["These settings will define the space that text can be placed on the nameplate.\nHaving too large a font and not enough height will cause the text to be not visible."] = "These settings will define the space that text can be placed on the nameplate.\nHaving too large a font and not enough height will cause the text to be not visible."
-L["Text Width"] = "Text Width"
-L["Text Height"] = "Text Height"
-L["Horizontal Align"] = "Horizontal Align"
-L["Vertical Align"] = "Vertical Align"
-
-----
-L["Health Text"] = "Health Text"
-L["Enable Health Text"] = "Enable Health Text"
-L["Display Settings"] = "Display Settings"
-L["Text at Full HP"] = "Text at Full HP"
-L["Display health text on targets with full HP."] = "Display health text on targets with full HP."
-L["Percent Text"] = "Percent Text"
-L["Display health percentage text."] = "Display health percentage text."
-L["Amount Text"] = "Amount Text"
-L["Display health amount text."] = "Display health amount text."
-L["Amount Text Formatting"] = "Amount Text Formatting"
-L["Truncate Text"] = "Truncate Text"
-L["This will format text to a simpler format using M or K for millions and thousands. Disabling this will show exact HP amounts."] = "This will format text to a simpler format using M or K for millions and thousands. Disabling this will show exact HP amounts."
-L["Max HP Text"] = "Max HP Text"
-L["This will format text to show both the maximum hp and current hp."] = "This will format text to show both the maximum hp and current hp."
-L["Deficit Text"] = "Deficit Text"
-L["This will format text to show hp as a value the target is missing."] = "This will format text to show hp as a value the target is missing."
-
-----
-L["Spell Text"] = "Spell Text"
-L["Enable Spell Text"] = "Enable Spell Text"
-
-----
-L["Level Text"] = "Level Text"
-L["Enable Level Text"] = "Enable Level Text"
-
-----
-L["Elite Icon"] = "Elite Icon"
-L["Enable Elite Icon"] = "Enable Elite Icon"
-L["Enables the showing of the elite icon on nameplates."] = "Enables the showing of the elite icon on nameplates."
-L["Texture"] = "Texture"
-L["Preview"] = "Preview"
-L["Elite Icon Style"] = "Elite Icon Style"
-L["Size"] = "Size"
-
-----
-L["Skull Icon"] = "Skull Icon"
-L["Enable Skull Icon"] = "Enable Skull Icon"
-L["Enables the showing of the skull icon on nameplates."] = "Enables the showing of the skull icon on nameplates."
-
-----
-L["Spell Icon"] = "Spell Icon"
-L["Enable Spell Icon"] = "Enable Spell Icon"
-L["Enables the showing of the spell icon on nameplates."] = "Enables the showing of the spell icon on nameplates."
-
-----
-L["Raid Marks"] = "Raid Marks"
-L["Enable Raid Mark Icon"] = "Enable Raid Mark Icon"
-L["Enables the showing of the raid mark icon on nameplates."] = "Enables the showing of the raid mark icon on nameplates."
-
--------------------
--- Threat System --
--------------------
-
-L["Enable Threat System"] = "Enable Threat System"
-
-----
-L["Additional Toggles"] = "Additional Toggles"
-L["Ignore Non-Combat Threat"] = "Ignore Non-Combat Threat"
-L["Disables threat feedback from mobs you're currently not in combat with."] = "Disables threat feedback from mobs you're currently not in combat with."
-L["Show Tapped Threat"] = "Show Tapped Threat"
-L["Disables threat feedback from tapped mobs regardless of boss or elite levels."] = "Disables threat feedback from tapped mobs regardless of boss or elite levels."
-L["Show Neutral Threat"] = "Show Neutral Threat"
-L["Disables threat feedback from neutral mobs regardless of boss or elite levels."] = "Disables threat feedback from neutral mobs regardless of boss or elite levels."
-L["Show Normal Threat"] = "Show Normal Threat"
-L["Disables threat feedback from normal mobs."] = "Disables threat feedback from normal mobs."
-L["Show Elite Threat"] = "Show Elite Threat"
-L["Disables threat feedback from elite mobs."] = "Disables threat feedback from elite mobs."
-L["Show Boss Threat"] = "Show Boss Threat"
-L["Disables threat feedback from boss level mobs."] = "Disables threat feedback from boss level mobs."
-
-----
-L["Set alpha settings for different threat reaction types."] = "Set alpha settings for different threat reaction types."
-L["Enable Alpha Threat"] = "Enable Alpha Threat"
-L["Enable nameplates to change alpha depending on the levels you set below."] = "Enable nameplates to change alpha depending on the levels you set below."
-L["|cff00ff00Tank|r"] = "|cff00ff00Tank|r"
-L["|cffff0000DPS/Healing|r"] = "|cffff0000DPS/Healing|r"
-----
-L["Marked Targets"] = "Marked Targets"
-L["Ignore Marked Targets"] = "Ignore Marked Targets"
-L["This will allow you to disabled threat alpha changes on marked targets."] = "This will allow you to disabled threat alpha changes on marked targets."
-L["Ignored Alpha"] = "Ignored Alpha"
-
-----
-L["Set scale settings for different threat reaction types."] = "Set scale settings for different threat reaction types."
-L["Enable Scale Threat"] = "Enable Scale Threat"
-L["Enable nameplates to change scale depending on the levels you set below."] = "Enable nameplates to change scale depending on the levels you set below."
-L["This will allow you to disabled threat scale changes on marked targets."] = "This will allow you to disabled threat scale changes on marked targets."
-L["Ignored Scaling"] = "Ignored Scaling"
-----
-L["Additional Adjustments"] = "Additional Adjustments"
-L["Enable Adjustments"] = "Enable Adjustments"
-L["This will allow you to add additional scaling changes to specific mob types."] = "This will allow you to add additional scaling changes to specific mob types."
-
-----
-L["Toggles"] = "Toggles"
-L["Color HP by Threat"] = "Color HP by Threat"
-L["This allows HP color to be the same as the threat colors you set below."] = "This allows HP color to be the same as the threat colors you set below."
-
-----
-L["Spec Roles"] = "Spec Roles"
-L["Set the roles your specs represent."] = "Set the roles your specs represent."
-L["Sets your spec "] = "Sets your spec "
-L[" to DPS."] = " to DPS."
-L[" to tanking."] = " to tanking."
-
-----
-L["Set threat textures and their coloring options here."] = "Set threat textures and their coloring options here."
-L["These options are for the textures shown on nameplates at various threat levels."] = "These options are for the textures shown on nameplates at various threat levels."
-----
-L["Art Options"] = "Art Options"
-L["Style"] = "Style"
-L["This will allow you to disabled threat art on marked targets."] = "This will allow you to disabled threat art on marked targets."
-
--------------
--- Widgets --
--------------
-
-L["Class Icons"] = "Class Icons"
-L["This widget will display class icons on nameplate with the settings you set below."] = "This widget will display class icons on nameplate with the settings you set below."
-L["Enable Friendly Icons"] = "Enable Friendly Icons"
-L["Enable the showing of friendly player class icons."] = "Enable the showing of friendly player class icons."
-
-----
-L["Combo Points"] = "Combo Points"
-L["This widget will display combo points on your target nameplate."] = "This widget will display combo points on your target nameplate."
-
-----
-L["Aura Widget"] = "Aura Widget"
-L["This widget will display auras that match your filtering on your target nameplate and others you recently moused over."] = "This widget will display auras that match your filtering on your target nameplate and others you recently moused over."
-L["This lets you select the layout style of the aura widget. (Reloading UI is needed)"] = "This lets you select the layout style of the aura widget."
-L["Wide"] = "Wide"
-L["Square"] = "Square"
-L["Target Only"] = "Target Only"
-L["This will toggle the aura widget to only show for your current target."] = "This will toggle the aura widget to only show for your current target."
-L["Sizing"] = "Sizing"
-L["Cooldown Spiral"] = "Cooldown Spiral"
-L["This will toggle the aura widget to show the cooldown spiral on auras. (Reloading UI is needed)"] = "This will toggle the aura widget to show the cooldown spiral on auras. (Reloading UI is needed)"
-L["Filtering"] = "Filtering"
-L["Mode"] = "Mode"
-L["Filtered Auras"] = "Filtered Auras"
-
-----
-L["Social Widget"] = "Social Widget"
-L["Enables the showing if indicator icons for friends, guildmates, and BNET Friends"] = "Enables the showing if indicator icons for friends, guildmates, and BNET Friends"
-
-----
-L["Threat Line"] = "Threat Line"
-L["This widget will display a small bar that will display your current threat relative to other players on your target nameplate or recently mousedover namplates."] = "This widget will display a small bar that will display your current threat relative to other players on your target nameplate or recently mousedover namplates."
-
-----
-L["Tanked Targets"] = "Tanked Targets"
-L["This widget will display a small shield or dagger that will indicate if the nameplate is currently being tanked.|cffff00ffRequires tanking role.|r"] = "This widget will display a small shield or dagger that will indicate if the nameplate is currently being tanked.|cffff00ffRequires tanking role.|r"
-
-----
-L["Target Highlight"] = "Target Highlight"
-L["Enables the showing of a texture on your target nameplate"] = "Enables the showing of a texture on your target nameplate"
-
-----------------------
--- Totem Nameplates --
-----------------------
-
-L["|cffffffffTotem Settings|r"] = "|cffffffffTotem Settings|r"
-L["Toggling"] = "Toggling"
-L["Hide Healthbars"] = "Hide Healthbars"
-----
-L["Icon"] = "Icon"
-L["Icon Size"] = "Icon Size"
-L["Totem Alpha"] = "Totem Alpha"
-L["Totem Scale"] = "Totem Scale"
-----
-L["Show Nameplate"] = "Show Nameplate"
-----
-L["Health Coloring"] = "Health Coloring"
-L["Enable Custom Colors"] = "Enable Custom Colors"
-
------------------------
--- Custom Nameplates --
------------------------
-
-L["|cffffffffGeneral Settings|r"] = "|cffffffffGeneral Settings|r"
-L["Disabling this will turn off any all icons without harming custom settings per nameplate."] = "Disabling this will turn off any all icons without harming custom settings per nameplate."
-----
-L["Set Name"] = "Set Name"
-L["Use Target's Name"] = "Use Target's Name"
-L["No target found."] = "No target found."
-L["Clear"] = "Clear"
-L["Copy"] = "Copy"
-L["Copied!"] = "Copied!"
-L["Paste"] = "Paste"
-L["Pasted!"] = "Pasted!"
-L["Nothing to paste!"] = "Nothing to paste!"
-L["Restore Defaults"] = "Restore Defaults"
-----
-L["Use Custom Settings"] = "Use Custom Settings"
-L["Custom Settings"] = "Custom Settings"
-----
-L["Disable Custom Alpha"] = "Disable Custom Alpha"
-L["Disables the custom alpha setting for this nameplate and instead uses your normal alpha settings."] = "Disables the custom alpha setting for this nameplate and instead uses your normal alpha settings."
-L["Custom Alpha"] = "Custom Alpha"
-----
-L["Disable Custom Scale"] = "Disable Custom Scale"
-L["Disables the custom scale setting for this nameplate and instead uses your normal scale settings."] = "Disables the custom scale setting for this nameplate and instead uses your normal scale settings."
-L["Custom Scale"] = "Custom Scale"
-----
-L["Allow Marked HP Coloring"] = "Allow Marked HP Coloring"
-L["Allow raid marked hp color settings instead of a custom hp setting if the nameplate has a raid mark."] = "Allow raid marked hp color settings instead of a custom hp setting if the nameplate has a raid mark."
-
-----
-L["Enable the showing of the custom nameplate icon for this nameplate."] = "Enable the showing of the custom nameplate icon for this nameplate."
-L["Type direct icon texture path using '\\' to separate directory folders, or use a spellid."] = "Type direct icon texture path using '\\' to separate directory folders, or use a spellid."
-L["Set Icon"] = "Set Icon"
-
------------
--- About --
------------
-
-L["\n\nThank you for supporting my work!\n"] = "\n\nThank you for supporting my work!\n"
-L["Click to Donate!"] = "Click to Donate!"
-L["Clear and easy to use nameplate theme for use with TidyPlates.\n\nFeel free to email me at |cff00ff00Shamtasticle@gmail.com|r\n\n--Suicidal Katt"] = "Clear and easy to use nameplate theme for use with TidyPlates.\n\nFeel free to email me at |cff00ff00Shamtasticle@gmail.com|r\n\n--Suicidal Katt"
-L["This will enable all alpha features currently available in ThreatPlates. Be aware that most of the features are not fully implemented and may contain several bugs."] = "This will enable all alpha features currently available in ThreatPlates. Be aware that most of the features are not fully implemented and may contain several bugs."
-L["This will enable Headline View (Text-only) for nameplates. TidyPlatesHub must be enabled for it to work. Use the TidyPlatesHub dialog for configuration."] = "This will enable Headline View (Text-only) for nameplates. TidyPlatesHub must be enabled for it to work. Use the TidyPlatesHub dialog for configuration."
-
---------------------------------
--- Default Game Options Frame --
---------------------------------
-
-L["You can access the "] = "You can access the "
-L[" options by typing: /tptp"] = " options by typing: /tptp"
-L["Open Config"] = "Open Config"
-
-------------------------
--- Additional Stances --
-------------------------
-L["Presences"] = "Presences"
-L["Shapeshifts"] = "Shapeshifts"
-L["Seals"] = "Seals"
-L["Stances"] = "Stances"
+L["Yes"] = "네"
+L["You can access the "] = "접근 가능: "

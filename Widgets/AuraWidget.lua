@@ -264,42 +264,73 @@ local function PrepareFilter()
 end
 
 local function AuraSortFunctionNum(a, b)
-  local sort_order = TidyPlatesThreat.db.profile.AuraWidget.SortReverse
+  local order
 
   -- handling invalid entries in the aura array (necessary to avoid memory extensive array creation)
-  if not a.priority then
-    return sort_order
-  elseif not b.priority then
-    return not sort_order
+  if a == nil and b == nil then
+    order = false
+  elseif a == nil then
+    order = false
+  elseif b == nil then
+    order = true
   end
 
-  if sort_order then
-    if a.duration == 0 then
-      return true
-    elseif b.duration == 0 then
-      return false
-    else
-      return a.priority > b.priority
-    end
-  else
-    if a.duration == 0 then
-      return false
-    elseif b.duration == 0 then
-      return true
-    else
-      return a.priority < b.priority
-    end
+  if not a.priority and not b.priority then
+    order = false
+  elseif not a.priority then
+    order = false
+  elseif not b.priority then
+    order = true
   end
+
+  if order ~= nil then return order end
+
+  if a.duration == 0 then
+    order = false
+  elseif b.duration == 0 then
+    order = true
+  else
+    order = a.priority < b.priority
+  end
+
+  local sort_reverse = TidyPlatesThreat.db.profile.AuraWidget.SortReverse
+  if sort_reverse then
+    order = not order
+  end
+
+  return order
 end
 
 local function AuraSortFunctionAtoZ(a, b)
-  local db = TidyPlatesThreat.db.profile.AuraWidget
+  local order
 
-  if db.SortReverse then
-    return a.priority > b.priority
-  else
-    return a.priority < b.priority
+  -- handling invalid entries in the aura array (necessary to avoid memory extensive array creation)
+  if a == nil and b == nil then
+    order = false
+  elseif a == nil then
+    order = false
+  elseif b == nil then
+    order = true
   end
+
+  if not a.priority and not b.priority then
+    order = false
+  elseif not a.priority then
+    order = false
+  elseif not b.priority then
+    order = true
+  end
+
+  if order ~= nil then return order end
+
+  order = a.priority > b.priority
+
+  local sort_reverse = TidyPlatesThreat.db.profile.AuraWidget.SortReverse
+  if sort_reverse then
+    order = not order
+  end
+
+  return order
 end
 
 -------------------------------------------------------------
@@ -456,7 +487,7 @@ local function UpdateIconGrid(frame, unitid)
       local show, priority, color = AuraFilterFunction(aura)
       -- Store Order/Priority
       if show then
-        aura.priority = priority or 10
+        aura.priority = priority
         aura.color = color
 
         aura_count = aura_count + 1
@@ -486,6 +517,7 @@ local function UpdateIconGrid(frame, unitid)
   local max_auras_no = min(aura_count, CONFIG_AURA_LIMIT)
 
   if aura_count > 0 then
+    --ThreatPlates.DEBUG_AURA_LIST(UnitAuraList)
     if TidyPlatesThreat.db.profile.AuraWidget.SortOrder == "AtoZ" then
       sort(UnitAuraList, AuraSortFunctionAtoZ)
     else

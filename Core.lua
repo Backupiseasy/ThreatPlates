@@ -187,7 +187,7 @@ function TidyPlatesThreat:OnInitialize()
 		profile = {
 			cache = {},
 			OldSetting = true,
-			verbose = true,
+			verbose = false,
 			blizzFadeA = {
 				toggle  = true,
 				amount = -0.3

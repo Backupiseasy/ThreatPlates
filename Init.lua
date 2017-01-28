@@ -193,6 +193,24 @@ t.DEBUG_PRINT_TABLE = function(data)
 	end
 end
 
+t.DEBUG_AURA_LIST = function(data)
+	local res = ""
+	for pos,val in pairs(data) do
+		local a = data[pos]
+		if not a then
+			res = res .. " nil"
+		elseif not a.priority then
+			res = res .. " nil(" .. a.name .. ")"
+		else
+			res = res .. a.name
+		end
+		if pos ~= #data then
+			res = res .. " - "
+		end
+	end
+	t.DEBUG("Aura List = [ " .. res .. " ]")
+end
+
 ---------------------------------------------------------------------------------------------------
 -- Expoerted local functions
 ---------------------------------------------------------------------------------------------------

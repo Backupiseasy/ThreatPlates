@@ -1,4 +1,20 @@
 [b]---------------------------------------------------------------------------------------------------[/b]
+[b]  8.3.1 (works with [url="https://mods.curse.com/addons/wow/tidy-plates"]TidyPlates 6.18.11[/url])[/b]
+[b]---------------------------------------------------------------------------------------------------[/b]
+[LIST]
+[*]Fixed a bug in the options for aura widget 2.0 where changes to the sort order where not applied immediately.
+[*]Fixed several lua errors in aura widget 2.0 aura sorting (mostly, when "A to Z" sort order was selected).
+[*]Fixed a bug in quest widget where units were marked as quest units (e.g. colored orange) even if quest widget was disabled.
+[*]Enabled localizations for koKR (Korean) and zhCN (Simplified Chinese) - big thanks to yuk6196 and y123ao6 for their translations.
+[*]Changed default for verbose mode to disabled.
+[*]Known issues:
+[LIST]
+  * Changing certain settings in the option dialog may require a /reload for the settings to fully take effect.
+  * Switching between ThreatPlates and other themes may require /reload for the new theme to work correctly
+[/LIST]
+[/LIST]
+
+[b]---------------------------------------------------------------------------------------------------[/b]
 [b]  8.3.0 (works with [url="https://mods.curse.com/addons/wow/tidy-plates"]TidyPlates 6.18.11[/url])[/b]
 [b]---------------------------------------------------------------------------------------------------[/b]
 [LIST]
