@@ -8,34 +8,35 @@
 * Visiblity of unit types now configured in more details and synchronized with corresponding CVars
 
 ------------------------------------------------------
-8.3.0-Beta3 (works with TidyPlates 6.18.11)
+8.3.1 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
-* Reworked and optimized placement of aura widget 2.0 (anchor point and aura alignment).
+* Fixed a bug in the options for aura widget 2.0 where changes to the sort order where not applied immediately.
+* Fixed several lua errors in aura widget 2.0 aura sorting (mostly, when "A to Z" sort order was selected).
+* Fixed a bug in quest widget where units were marked as quest units (e.g. colored orange) even if quest widget was disabled.
+* Enabled localizations for koKR (Korean) and zhCN (Simplified Chinese) - big thanks to yuk6196 and y123ao6 for their translations.
+* Changed default for verbose mode to disabled.
+* Known issues:
+  * Switching between ThreatPlates and other themes may require /reload for the new theme to work correctly
+  * Changing certain settings in the option dialog may require a /reload for the settings to fully take effect.
 
 ------------------------------------------------------
-8.3.0-Beta2 (works with TidyPlates 6.18.11)
+8.3.0 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
-* Fixed inefficient memory allocation in aura widget.
-* Added an option to show or hide stack count on auras (for aura widget 2.0).
-* Adjusted health percentage calculation to Blizzard default calculation (using ceil instead of floor).
-* Implemented smooth update for statusbar for Aura Widget 2.0 in bar mode.
-* Several changes to the options dialog to improve consistency in naming and layout.
-* Use /tptp <option> to update to new default profile oder to migration settings instead of /threatplates. Use ""/tptp help" for command line usage help.
-
-------------------------------------------------------
-8.3.0-Beta1 (works with TidyPlates 6.18.11)
-------------------------------------------------------
-* Added new aura widget 2.0 with icon and bar more and a lot more customization options. To use it, disable the current aura widget first. Use "/threatplates update-profiles" to copy over your current aura widget settings to the new aura widget 2.0.
-* Added an option to show threat glow only on units the player is in combat with (Nameplate Settings - Healthbar - Threat Colors).
-* Added a new default settings for the default profile. Use "/threatplates new-default-profile" to activate them and update the default profile.
+* Added new aura widget 2.0 with icon and bar more and a lot new customization options. To use it, disable the current aura widget first. Use "/tptp update-profiles" to copy over your current aura widget settings to the new aura widget 2.0.
 * Added the option to set a background texture for the nameplate healthbar (Nameplate Settings - Healthbar - Textures).
-* Changed default color for healthbar for quest widget.
+* Added an option to show threat glow only on units the player is in combat with (Nameplate Settings - Healthbar - Threat Colors).
+* Added options to enable threat glow and threat-based coloring of healthbar for custom nameplates.
+* Added a new default setting for the default profile. Use "/tptp new-default-profile" to activate it and update the default profile. Use "/tptp help" for command line usage help.
+* Several changes to the options dialog to improve consistency in naming and layout.
+* Changed default healthbar color for quest widget.
+* Adjusted health percentage calculation to Blizzard default calculation (using ceil instead of floor).
+* Fixed inefficient memory allocation for threatplates widgets.
 * Fixed a bug in quest widget where the quest highlight was still shown although the quest was completed.
 * Fixed a bug in the options dialog where default settings for spec roles where incorrect for newly created profiles.
 * Fixed a memory leak which reduced frame rate heavily after changing certain options.
 * Known issues:
-  * Changing certain settings in the option dialog may require a /reload for the settings to fully take effect.
   * Switching between ThreatPlates and other themes may require /reload for the new theme to work correctly
+  * Changing certain settings in the option dialog may require a /reload for the settings to fully take effect.
 
 ------------------------------------------------------
 8.2.5 (works with TidyPlates 6.18.11)

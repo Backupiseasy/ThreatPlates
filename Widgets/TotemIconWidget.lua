@@ -26,7 +26,6 @@ end
 function tL(number)
 	local name = GetSpellInfo(number)
 	if not name then
-		--ThreatPlates.DEBUG(number)
 		return ""
 	end
 	return name

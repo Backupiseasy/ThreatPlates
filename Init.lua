@@ -194,8 +194,25 @@ t.DEBUG_PRINT_TABLE = function(data)
   end
 end
 
-
-t.PrintTargetInfo = function(unit)
+t.DEBUG_AURA_LIST = function(data)
+	local res = ""
+	for pos,val in pairs(data) do
+		local a = data[pos]
+		if not a then
+			res = res .. " nil"
+		elseif not a.priority then
+			res = res .. " nil(" .. a.name .. ")"
+		else
+			res = res .. a.name
+		end
+		if pos ~= #data then
+			res = res .. " - "
+		end
+	end
+	t.DEBUG("Aura List = [ " .. res .. " ]")
+end
+	
+t.DEBUG_PRINT_TARGET = function(unit)
   if unit.isTarget then
     t.DEBUG("unit.name = ", unit.name)
     t.DEBUG("unit.unitID = ", unit.unitID)

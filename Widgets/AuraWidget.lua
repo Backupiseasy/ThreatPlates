@@ -98,7 +98,6 @@ local function CheckFramelist(self)
 
 		if expiration < cur_time and duration > 0 then
       --DEBUG ("Expire Aura: ", frame:GetParent().unitid, frame.AuraInfo.name)
-      --DEBUG ("Expire Aura: ", frame.AuraInfo.name)
 			if frame.Expire and frame:GetParent():IsShown() then
         frame:Expire()
       end
@@ -264,43 +263,38 @@ local function PrepareFilter()
 	end
 end
 
-local function AuraSortFunctionNum(a, b)
-  local sort_order = TidyPlatesThreat.db.profile.AuraWidget.SortReverse
+local function AuraSortFunction(a, b)
+  local order
 
   -- handling invalid entries in the aura array (necessary to avoid memory extensive array creation)
-  if not a.priority then
-    return sort_order
-  elseif not b.priority then
-    return not sort_order
+  if a == nil or (a.priority == nil) then
+    order = false
+  elseif b == nil or (b.priority == nil) then
+    order = true
   end
 
-  if sort_order then
-    if a.duration == 0 then
-      return true
-    elseif b.duration == 0 then
-      return false
-    else
-      return a.priority > b.priority
-    end
-  else
-    if a.duration == 0 then
-      return false
-    elseif b.duration == 0 then
-      return true
-    else
-      return a.priority < b.priority
-    end
-  end
-end
+  if order ~= nil then return order end
 
-local function AuraSortFunctionAtoZ(a, b)
   local db = TidyPlatesThreat.db.profile.AuraWidget
+  if db.SortOrder == "AtoZ" then
+    order = a.priority < b.priority
+  else
+    --  if a.duration == 0 and b.duration == 0 then
+    --    order = false
+    if a.duration == 0 then
+      order = false
+    elseif b.duration == 0 then
+      order = true
+    else
+      order = a.priority < b.priority
+    end
+  end
 
   if db.SortReverse then
-    return a.priority > b.priority
-  else
-    return a.priority < b.priority
+    order = not order
   end
+
+  return order
 end
 
 -------------------------------------------------------------
@@ -457,7 +451,7 @@ local function UpdateIconGrid(frame, unitid)
       local show, priority, color = AuraFilterFunction(aura)
       -- Store Order/Priority
       if show then
-        aura.priority = priority or 10
+        aura.priority = priority
         aura.color = color
 
         aura_count = aura_count + 1
@@ -487,11 +481,8 @@ local function UpdateIconGrid(frame, unitid)
   local max_auras_no = min(aura_count, CONFIG_AURA_LIMIT)
 
   if aura_count > 0 then
-    if TidyPlatesThreat.db.profile.AuraWidget.SortOrder == "AtoZ" then
-      sort(UnitAuraList, AuraSortFunctionAtoZ)
-    else
-      sort(UnitAuraList, AuraSortFunctionNum)
-    end
+    --ThreatPlates.DEBUG_AURA_LIST(UnitAuraList)
+    sort(UnitAuraList, AuraSortFunction)
 
     --local aura_info_list = frame.AuraInfos
     for index = 1, max_auras_no do
@@ -560,8 +551,6 @@ end
 -------------------------------------------------------------
 
 local function EventUnitAura(unitid)
-  --DEBUG ("UNIT_AURA: ", unitid)
-
   if unitid then
     -- WidgetList contains the units that are tracked, i.e. for which currently nameplates are shown
     local frame = WidgetList[unitid]
@@ -891,9 +880,7 @@ end
 
 function UpdateWidget(frame)
 	if CONFIG_LAST_UPDATE > frame.last_update then
-		--ThreatPlates.DEBUG_PRINT_TABLE(frame)
 		-- ThreatPlates.DEBUG("Update Delay: ", frame.unit.name, frame.unitid)
-    --ThreatPlates.DEBUG_PRINT_TABLE(frame.unit)
 		UpdateWidgetConfig(frame)
 	end
 
@@ -918,13 +905,13 @@ local function UpdateWidgetContext(frame, unit)
 	-- end
 
 	if unitid then
-    local old_frame = WidgetList[unitid]
-    if not old_frame then
-      UpdateWidget(frame)
-    end
+--    local old_frame = WidgetList[unitid]
+--    if not old_frame then
+--      UpdateWidget(frame)
+--    end
     WidgetList[unitid] = frame
-    --ThreatPlates.DEBUG_SIZE("#WidgetList: ", WidgetList)
-	end
+    UpdateWidget(frame)
+  end
 
 	-- Custom Code II
 	--------------------------------------

@@ -182,8 +182,8 @@ local function SetThemeValue(info, val)
   SetValue(info, val)
   t.SetThemes(TidyPlatesThreat)
   -- TODO: should not be necessary here
-  if (TidyPlatesOptions.ActiveTheme == t.THEME_NAME) then
-    TidyPlates:SetTheme(t.THEME_NAME)
+	if (TidyPlatesOptions.ActiveTheme == t.THEME_NAME) then
+		TidyPlates:SetTheme(t.THEME_NAME)
   end
 end
 
@@ -249,26 +249,18 @@ local function CreateSpacer(pos)
 end
 
 local function GetEnableToggle(header, description, setting)
-  local enable = {
-    type = "group",
-    name = L["Enable"],
-    order = 5,
-    inline = true,
-    disabled = false,
-    args = {
-      Toggle = { type = "toggle", name = header, desc = description, arg = setting, order = 0, descStyle = "inline", width = "full", },
-    },
-  }
-  return enable
+	local enable = {
+		type = "group", name = L["Enable"],	order = 5, inline = true, disabled = false,
+		args = {
+			Toggle = { type = "toggle",	name = header, desc = description, arg = setting, order = 0, descStyle = "inline", width = "full", },
+		},
+	}
+	return enable
 end
 
 local function GetSizeEntry(pos, setting, func_disabled)
   local entry = {
-    name = L["Size"],
-    order = pos,
-    type = "group",
-    inline = true,
-    disabled = func_disabled,
+    name = L["Size"], order = pos, type = "group", inline = true, disabled = func_disabled,
     args = {
       ScaleSlider = { name = "", order = 0, type = "range", step = 1, width = "full", arg = { setting, "scale" } }
     }
@@ -278,11 +270,7 @@ end
 
 local function GetPlacementEntry(pos, setting, func_disabled)
   local entry = {
-    name = L["Placement"],
-    order = pos,
-    type = "group",
-    inline = true,
-    disabled = func_disabled,
+    name = L["Placement"], order = pos,	type = "group", inline = true, disabled = func_disabled,
     args = {
       X = { type = "range", order = 1, name = L["X"], min = -120, max = 120, step = 1, arg = { setting, "x" } },
       Y = { type = "range", order = 2, name = L["Y"], min = -120, max = 120, step = 1, arg = { setting, "y" } }
@@ -292,35 +280,20 @@ local function GetPlacementEntry(pos, setting, func_disabled)
 end
 
 local function AddLayoutOptions(args, pos, setting, func_disabled)
-  args.Sizing = GetSizeEntry(pos, setting, func_disabled)
-  args.Placement = GetPlacementEntry(pos + 10, setting, func_disabled)
-  args.Alpha = {
-    type = "group",
-    order = pos + 20,
-    name = L["Alpha"],
-    inline = true,
-    disabled = func_disabled,
-    args = {
-      Alpha = {
-        type = "range",
-        order = 1,
-        name = "",
-        step = 0.05,
-        min = 0,
-        max = 1,
-        isPercent = true,
-        arg = { setting, "alpha" },
-        width = "full",
-      },
-    },
-  }
+	args.Sizing = GetSizeEntry(pos, setting, func_disabled)
+	args.Placement = GetPlacementEntry(pos + 10, setting, func_disabled)
+	args.Alpha = {
+		type = "group",	order = pos + 20,	name = L["Alpha"], inline = true,
+		disabled = func_disabled,
+		args = {
+			Alpha = {	type = "range",	order = 1, name = "", step = 0.05, min = 0,	max = 1, isPercent = true,
+			arg = {setting, "alpha"}, width = "full", },
+		},
+	}
 end
 
 local function ClassIconsWidgetOptions()
-  local options = {
-    name = L["Class Icons"],
-    order = 30,
-    type = "group",
+  local options = { name = L["Class Icons"], order = 30, type = "group",
     args = {
       Enable = GetEnableToggle(L["Enable Class Icons Widget"], L["This widget will display class icons on nameplate with the settings you set below."], { "classWidget", "ON" }),
       Options = {
@@ -365,75 +338,53 @@ local function ClassIconsWidgetOptions()
 end
 
 local function QuestWidgetOptions()
-  local options = {
-    type = "group",
-    order = 90,
-    name = L["Quest"],
-    args = {
-      Enable = GetEnableToggle(L["Enable Quest Widget"], L["Enables highlighting of nameplates of mobs involved with any of your current quests."], { "questWidget", "ON" }),
-      Visibility = {
-        type = "group",
-        order = 10,
-        name = L["Visibility"],
-        inline = true,
-        disabled = function() return not db.questWidget.ON end,
-        args = {
-          InCombatAll = { type = "toggle", order = 10, name = L["Hide in Combat"], arg = { "questWidget", "HideInCombat" }, },
-          InCombatAttacked = { type = "toggle", order = 20, name = L["Hide on Attacked Units"], arg = { "questWidget", "HideInCombatAttacked" }, },
-          InInstance = { type = "toggle", order = 30, name = L["Hide in Instance"], arg = { "questWidget", "HideInInstance" }, },
-        },
-      },
-      ModeHealthBar = {
-        name = L["Health Bar Mode"],
-        order = 20,
-        type = "group",
-        inline = true,
-        disabled = function() return not db.questWidget.ON end,
-        args = {
-          Help = { type = "description", order = 0, width = "full", name = L["Use a custom color for the health bar of quest mobs."], },
-          Enable = { type = "toggle", order = 10, name = L["Enable"], arg = { "questWidget", "ModeHPBar" }, },
-          Color = {
-            name = L["Color"],
-            type = "color",
-            desc = "",
-            descStyle = "inline",
-            width = "half",
-            get = GetColor,
-            set = SetColor,
-            arg = { "questWidget", "HPBarColor" },
-            order = 20,
-            disabled = function() return not db.questWidget.ModeHPBar end,
-          },
-        },
-      },
-      ModeIcon = {
-        name = L["Icon Mode"],
-        order = 301,
-        type = "group",
-        inline = true,
-        disabled = function() return not db.questWidget.ON end,
-        args = {
-          Help = { type = "description", order = 0, width = "full", name = L["Show an indicator icon at the nameplate for quest mobs."], },
-          Enable = { type = "toggle", order = 10, name = L["Enable"], width = "full", arg = { "questWidget", "ModeIcon" }, },
-        },
-      },
-    },
-  }
-  AddLayoutOptions(options.args.ModeIcon.args, 80, "questWidget", function() return not db.questWidget.ModeIcon end)
-  return options
+	local options =  { type = "group", order = 90,	name = L["Quest"],
+		args = {
+			Enable = GetEnableToggle(L["Enable Quest Widget"], L["Enables highlighting of nameplates of mobs involved with any of your current quests."], {"questWidget", "ON"}),
+			Visibility = { type = "group",	order = 10,	name = L["Visibility"], inline = true,
+				disabled = function() return not db.questWidget.ON end,
+				args = {
+					InCombatAll = { type = "toggle", order = 10, name = L["Hide in Combat"],	arg = {"questWidget", "HideInCombat"}, },
+					InCombatAttacked = { type = "toggle", order = 20, name = L["Hide on Attacked Units"],	arg = {"questWidget", "HideInCombatAttacked"}, },
+					InInstance = { type = "toggle", order = 30, name = L["Hide in Instance"],	arg = {"questWidget", "HideInInstance"}, },
+				},
+			},
+			ModeHealthBar = {
+				name = L["Health Bar Mode"], order = 20, type = "group", inline = true,
+				disabled = function() return not db.questWidget.ON end,
+				args = {
+					Help = { type = "description", order = 0,	width = "full",	name = L["Use a custom color for the health bar of quest mobs."],	},
+					Enable = { type = "toggle", order = 10, name = L["Enable"],	arg = {"questWidget", "ModeHPBar"}, },
+					Color = {
+						name = L["Color"], type = "color", desc = "", descStyle = "inline", width = "half",
+						get = GetColor, set = SetColor, arg = {"questWidget", "HPBarColor"},
+						order = 20,
+						disabled = function() return not db.questWidget.ModeHPBar end,
+					},
+				},
+			},
+			ModeIcon = {
+				name = L["Icon Mode"], order = 301, type = "group", inline = true,
+				disabled = function() return not db.questWidget.ON end,
+				args = {
+					Help = { type = "description", order = 0,	width = "full",	name = L["Show an indicator icon at the nameplate for quest mobs."],	},
+					Enable = { type = "toggle", order = 10, name = L["Enable"],	width = "full", arg = {"questWidget", "ModeIcon"}, },
+				},
+			},
+		},
+	}
+	AddLayoutOptions(options.args.ModeIcon.args, 80, "questWidget", function() return not db.questWidget.ModeIcon end)
+	return options
 end
 
 local function StealthWidgetOptions()
-  local options = {
-    type = "group",
-    order = 60,
-    name = L["Stealth"],
-    args = {
-      Enable = GetEnableToggle(L["Enable Stealth Widget (Feature not yet fully implemented!)"], L["Shows a stealth icon above the nameplate of units that can detect you while stealthed."], { "stealthWidget", "ON" }),
-    },
-  }
-  AddLayoutOptions(options.args, 80, "stealthWidget", function() return not db.stealthWidget.ON end)
-  return options
+	local options =  { type = "group", order = 60,	name = L["Stealth"],
+		args = {
+			Enable = GetEnableToggle(L["Enable Stealth Widget (Feature not yet fully implemented!)"], L["Shows a stealth icon above the nameplate of units that can detect you while stealthed."], {"stealthWidget", "ON"}),
+		},
+	}
+	AddLayoutOptions(options.args, 80, "stealthWidget", function() return not db.stealthWidget.ON end)
+	return options
 end
 
 local function CreateUnitGroupsHeadlineView()
@@ -739,12 +690,7 @@ local function GetOptions()
                       arg = { "settings", "healthbar", "BackgroundUseForegroundColor" },
                     },
                     BGColorCustom = {
-                      name = L["Color"],
-                      type = "color",
-                      order = 35,
-                      get = GetColor,
-                      set = SetColor,
-                      arg = { "settings", "healthbar", "BackgroundColor" },
+                      name = L["Color"], type = "color",	order = 35,	get = GetColor, set = SetColor, arg = {"settings", "healthbar", "BackgroundColor"},
                       width = "half",
                       desc = L["Use a custom color for the healtbar's background."],
                       disabled = function() return db.settings.healthbar.BackgroundUseForegroundColor end,
@@ -4029,7 +3975,7 @@ local function GetOptions()
                       width = "half",
                       desc = L["Sort in ascending alphabetical order."],
                       get = function(info) return db.AuraWidget.SortOrder == "AtoZ" end,
-                      set = function(info, value) SetValuePlain(info, "AtoZ") end,
+											set = function(info, value) SetValueAuraWidget(info, "AtoZ") end,
                       arg = { "AuraWidget", "SortOrder" },
                     },
                     TimeLeft = {
@@ -4039,7 +3985,7 @@ local function GetOptions()
                       width = "half",
                       desc = L["Sort by time left in ascending order."],
                       get = function(info) return db.AuraWidget.SortOrder == "TimeLeft" end,
-                      set = function(info, value) SetValuePlain(info, "TimeLeft") end,
+											set = function(info, value) SetValueAuraWidget(info, "TimeLeft") end,
                       arg = { "AuraWidget", "SortOrder" },
                     },
                     Duration = {
@@ -4049,7 +3995,7 @@ local function GetOptions()
                       width = "half",
                       desc = L["Sort by overall duration in ascending order."],
                       get = function(info) return db.AuraWidget.SortOrder == "Duration" end,
-                      set = function(info, value) SetValuePlain(info, "Duration") end,
+											set = function(info, value) SetValueAuraWidget(info, "Duration") end,
                       arg = { "AuraWidget", "SortOrder" },
                     },
                     Creation = {
@@ -4059,16 +4005,15 @@ local function GetOptions()
                       width = "half",
                       desc = L["Show auras in order created with oldest aura first."],
                       get = function(info) return db.AuraWidget.SortOrder == "Creation" end,
-                      set = function(info, value) SetValuePlain(info, "Creation") end,
+											set = function(info, value) SetValueAuraWidget(info, "Creation") end,
                       arg = { "AuraWidget", "SortOrder" },
                     },
                     ReverseOrder = {
-                      name = L["Reverse Order"],
+											name = L["Reverse Order"], type = "toggle",	order = 50,	desc = L['Reverse the sort order (e.g., "A to Z" becomes "Z to A").'],	arg = { "AuraWidget", "SortReverse" }
                       type = "toggle",
                       order = 50,
                       desc = L['Reverse the sort order (e.g., "A to Z" becomes "Z to A").'],
                       arg = { "AuraWidget", "SortReverse" },
-                      set = SetValuePlain,
                     },
                   },
                 },
@@ -4779,48 +4724,48 @@ local function GetOptions()
               width = "full",
               name = "deDE: Blacksalsify (original  author: Aideen@Perenolde/EU)"
             },
-            Translators2 = {
-              type = "description",
-              order = 5,
-              width = "full",
-              name = "esES: Need Translator!!"
-            },
-            Translators3 = {
-              type = "description",
-              order = 6,
-              width = "full",
-              name = "esMX: Need Translator!!"
-            },
-            Translators4 = {
-              type = "description",
-              order = 7,
-              width = "full",
-              name = "frFR: Need Translator!!"
-            },
+--						Translators2 = {
+--							type = "description",
+--							order = 5,
+--							width = "full",
+--							name = "esES: Need Translator!!"
+--						},
+--						Translators3 = {
+--							type = "description",
+--							order = 6,
+--							width = "full",
+--							name = "esMX: Need Translator!!"
+--						},
+--						Translators4 = {
+--							type = "description",
+--							order = 7,
+--							width = "full",
+--							name = "frFR: Need Translator!!"
+--						},
             Translators5 = {
               type = "description",
               order = 8,
               width = "full",
-              name = "koKR: Need Translator!!"
+							name = "koKR: yuk6196 (CurseForge)"
             },
-            Translators6 = {
-              type = "description",
-              order = 9,
-              width = "full",
-              name = "ruRU: Need Translator!!"
-            },
+--						Translators6 = {
+--							type = "description",
+--							order = 9,
+--							width = "full",
+--							name = "ruRU: Need Translator!!"
+--						},
             Translators7 = {
               type = "description",
               order = 10,
               width = "full",
-              name = "zhCN: Need Translator!!"
+							name = "zhCN: y123ao6 (CurseForge)"
             },
-            Translators8 = {
-              type = "description",
-              order = 11,
-              width = "full",
-              name = "zhTW: Need Translator!!"
-            },
+--						Translators8 = {
+--							type = "description",
+--							order = 11,
+--							width = "full",
+--							name = "zhTW: Need Translator!!"
+--						},
           },
         },
       },
@@ -5419,7 +5364,6 @@ local function GetOptions()
                       name = L["Enable Custom Colors"],
                       type = "toggle",
                       order = 2,
-                      width = "full",
                       arg = { "uniqueSettings", k_c, "useColor" },
                     },
                     Color = {
@@ -5431,6 +5375,21 @@ local function GetOptions()
                       disabled = function() if not db.uniqueSettings[k_c].useColor or not db.uniqueSettings[k_c].useStyle or not db.uniqueSettings[k_c].showNameplate then return true else return false end end,
                       arg = { "uniqueSettings", k_c, "color" },
                     },
+									Spacer = CreateSpacer(4),
+									ThreatColor = {
+										name = L["Use Threat Colors"],
+										order = 5,
+										type = "toggle",
+										desc = L["Use coloring based an threat level (configured in Threat System) in combat (custom color is only used out of combat)."],
+										arg = {"uniqueSettings", k_c, "UseThreatColor"},
+									},
+									ThreatGlow = {
+										name = L["Show Threat Glow"],
+										order = 5,
+										type = "toggle",
+										desc = L["Show a glow based on threat level around the nameplate's healthbar (in combat)."],
+										arg = {"uniqueSettings", k_c, "UseThreatGlow"},
+									}
                   },
                 },
               },

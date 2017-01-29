@@ -1,4 +1,10 @@
 -- Lua implementation of PHP scandir function
+local TPTP_DIRECTORY = [[D:\Games\World of Warcraft - Test\Interface\AddOns\TidyPlates_ThreatPlates]]
+local IGNORE_LIST = {
+  TPTP_DIRECTORY .. [[\Libs]],
+  TPTP_DIRECTORY ..[[\Locales]]
+}
+
 function string.ends(String,End)
   return End=='' or string.sub(String,-string.len(End))==End
 end
@@ -38,12 +44,11 @@ function GetAllFiles(directory)
 end
 
 do
-  local file_list = GetAllFiles([[C:\Games\World of Warcraft\Interface\AddOns\TidyPlates_ThreatPlates]])
+  local file_list = GetAllFiles(TPTP_DIRECTORY)
 
   for i=1, #file_list do
     if string.ends(file_list[i], ".lua") and
-       not string.starts(file_list[i], [[C:\Games\World of Warcraft\Interface\AddOns\TidyPlates_ThreatPlates\Libs]]) and
-       not string.starts(file_list[i], [[C:\Games\World of Warcraft\Interface\AddOns\TidyPlates_ThreatPlates\Locales]]) then
+       not string.starts(file_list[i], IGNORE_LIST[1]) and not string.starts(file_list[i], IGNORE_LIST[2]) then
 
       local lines_in_file = lines_from(file_list[i])
       for line=1, #lines_in_file do
