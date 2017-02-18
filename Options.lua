@@ -3793,6 +3793,13 @@ local function GetOptions()
 								SortOrder = {
 									name = L["Sort Order"], order = 15,	type = "group",	inline = true, disabled = function() return not db.AuraWidget.ON end,
 									args = {
+										NoSorting = {
+											name = L["None"], type = "toggle",	order = 0,	 width = "half",
+											desc = L["Do not sort auras."],
+											get = function(info) return db.AuraWidget.SortOrder == "None" end,
+											set = function(info, value) SetValueAuraWidget(info, "None") end,
+											arg = {"AuraWidget","SortOrder"},
+										},
 										AtoZ = {
 											name = L["A to Z"], type = "toggle",	order = 10, width = "half",
 											desc = L["Sort in ascending alphabetical order."],

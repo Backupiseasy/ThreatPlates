@@ -230,15 +230,18 @@ local function AuraFilterFunction(aura)
 
 	local color = GetColorForAura(aura)
 
-	local priority = aura.expiration - aura.duration
+	local priority
 
-	if db.SortOrder == "AtoZ" then
+  local sort_order = db.SortOrder
+  if sort_order == "AtoZ" then
 		priority = aura.name
-	elseif db.SortOrder == "TimeLeft" then
+	elseif sort_order == "TimeLeft" then
 	  priority = aura.expiration - GetTime()
-	elseif db.SortOrder == "Duration" then
+	elseif sort_order == "Duration" then
  		priority = aura.duration
-	end
+  elseif sort_order == "Creation" then
+    priority = aura.expiration - aura.duration
+  end
 
  	return show_aura, priority, color
 end
@@ -518,10 +521,13 @@ local function UpdateIconGrid(frame, unitid)
 
   if aura_count > 0 then
     --ThreatPlates.DEBUG_AURA_LIST(UnitAuraList)
-    if TidyPlatesThreat.db.profile.AuraWidget.SortOrder == "AtoZ" then
-      sort(UnitAuraList, AuraSortFunctionAtoZ)
-    else
-      sort(UnitAuraList, AuraSortFunctionNum)
+    local sort_order = TidyPlatesThreat.db.profile.AuraWidget.SortOrder
+    if sort_order ~= "None" then
+      if sort_order == "AtoZ" then
+        sort(UnitAuraList, AuraSortFunctionAtoZ)
+      else
+        sort(UnitAuraList, AuraSortFunctionNum)
+      end
     end
 
     --local aura_info_list = frame.AuraInfos
