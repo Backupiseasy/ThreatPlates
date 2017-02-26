@@ -67,8 +67,14 @@ local function SetValue(info, value)
 end
 
 local function SetValueForceUpdate(info, value)
-	SetValuePlan(info, val)
+	SetValuePlain(info, value)
+	--TidyPlates:ResetWidgets()
 	TidyPlates:ForceUpdate()
+end
+
+local function SetValueResetWidgets(info, value)
+	SetValuePlain(info, value)
+	TidyPlates:ResetWidgets()
 end
 
 local function GetValueChar(info)
@@ -101,13 +107,13 @@ local function GetCvar(info)
 end
 
 local function SetCvar(info)
-	if InCombatLockdown() then
-		t.Print("We're unable to change this while in combat")
-	else
+--	if InCombatLockdown() then
+--		t.Print("We're unable to change this while in combat")
+--	else
 		local value = abs(GetCVar(info.arg) - 1)
 		SetCVar(info.arg,value)
 		t.Update()
-	end
+--	end
 end
 
 -- Colors
@@ -152,13 +158,25 @@ local function SetColorAlpha(info, r, g, b, a)
 	t.Update()
 end
 
-local function SetColorAlphaForceUpdate(info, r, g, b, a)
+local function SetColorAlphaAuraWidget(info, r, g, b, a)
 	local DB = TidyPlatesThreat.db.profile
 	local keys = info.arg
 	for index = 1, #keys - 1 do
     DB = DB[keys[index]]
   end
   DB[keys[#keys]].r, DB[keys[#keys]].g, DB[keys[#keys]].b, DB[keys[#keys]].a = r,g,b,a
+	ThreatPlatesWidgets.ForceAurasUpdate()
+	TidyPlates:ForceUpdate()
+end
+
+local function SetColorAuraWidget(info, r, g, b)
+	local DB = TidyPlatesThreat.db.profile
+	local keys = info.arg
+	for index = 1, #keys - 1 do
+		DB = DB[keys[index]]
+	end
+	DB[keys[#keys]].r, DB[keys[#keys]].g, DB[keys[#keys]].b = r,g,b
+	ThreatPlatesWidgets.ForceAurasUpdate()
 	TidyPlates:ForceUpdate()
 end
 
@@ -1013,7 +1031,7 @@ local function GetOptions()
 											type = "toggle",
 											order = 1,
 											get = GetCvar,
-											set = SetCvar,
+											set = function(info, val) SetCvar(info, val); if val then TidyPlates:EnableCastBars() else TidyPlates:DisableCastBars() end end,
 											arg = "ShowVKeyCastbar",
 										},
 									},
@@ -3654,7 +3672,8 @@ local function GetOptions()
 											set = function(info, v)
 												local table = {strsplit("\n", v)};
 												db.debuffWidget.filter = table
-												ThreatPlatesWidgets.PrepareFilter()
+												ThreatPlatesWidgets.ConfigAuraWidgetFilter()
+												TidyPlates:ForceUpdate()
 											end,
 										},
 									},
@@ -3713,6 +3732,7 @@ local function GetOptions()
 											end,
 											set = function(info,k,v)
 												db.AuraWidget.FilterByType[k] = v
+												ThreatPlatesWidgets.ForceAurasUpdate()
                         TidyPlates:ForceUpdate()
 											end,
 										},
@@ -3740,7 +3760,8 @@ local function GetOptions()
 													set = function(info, v)
 														local table = {strsplit("\n", v)};
 														db.AuraWidget.FilterBySpell = table
-														ThreatPlatesWidgets.PrepareFilterAuraWidget()
+														ThreatPlatesWidgets.ConfigAuraWidgetFilter()
+														TidyPlates:ForceUpdate()
 													end,
 												},
 											},
@@ -3782,11 +3803,11 @@ local function GetOptions()
 										},
 										DefaultBuffColor = {
 											name = L["Default Buff Color"], type = "color",	order = 54,	arg = {"AuraWidget", "DefaultBuffColor"},	hasAlpha = true,
-                      get = GetColorAlpha, set = SetColorAlphaForceUpdate,
+                      get = GetColorAlpha, set = SetColorAlphaAuraWidget,
 										},
 										DefaultDebuffColor = {
 											name = L["Default Debuff Color"], type = "color",	order = 56, arg = {"AuraWidget","DefaultDebuffColor"},	hasAlpha = true,
-                      get = GetColorAlpha, set = SetColorAlphaForceUpdate,
+                      get = GetColorAlpha, set = SetColorAlphaAuraWidget,
 										},
 									},
 								},
@@ -3919,7 +3940,7 @@ local function GetOptions()
 												Spacer2 = CreateSpacer(75),
 												BackgroundTexture = { name = L["Background Texture"],	order = 80,	type = "select", dialogControl = "LSM30_Statusbar",	values = AceGUIWidgetLSMlists.statusbar, arg = {"AuraWidget","ModeBar", "BackgroundTexture"},	},
 												BackgroundColor = {	name = L["Background Color"], type = "color",	order = 90, arg = {"AuraWidget","ModeBar", "BackgroundColor"},	hasAlpha = true,
-                          get = GetColorAlpha, set = SetColorAlphaForceUpdate,
+                          get = GetColorAlpha, set = SetColorAlphaAuraWidget,
 												},
 											},
 										},
@@ -3927,7 +3948,7 @@ local function GetOptions()
 											args = {
 												Font = { name = L["Typeface"], type = "select",	order = 10,	dialogControl = "LSM30_Font",	values = AceGUIWidgetLSMlists.font,	arg = {"AuraWidget","ModeBar", "Font"}, },
 												FontSize = {	name = L["Size"], order = 20, type = "range", min = 1,	max = 36, step = 1, arg = {"AuraWidget", "ModeBar", "FontSize"},	},
-												FontColor = {	name = L["Color"], type = "color",	order = 30,	get = GetColor,	set = SetColor,	arg = {"AuraWidget","ModeBar", "FontColor"},	hasAlpha = false, },
+												FontColor = {	name = L["Color"], type = "color",	order = 30,	get = GetColor,	set = SetColorAuraWidget,	arg = {"AuraWidget","ModeBar", "FontColor"},	hasAlpha = false, },
 												Spacer1 = CreateSpacer(35),
 												IndentLabel = {	name = L["Label Text Offset"], order = 40, type = "range", min = -16,	max = 16, step = 1, arg = {"AuraWidget", "ModeBar", "LabelTextIndent"},	},
 												IndentTime = {	name = L["Time Text Offset"], order = 50, type = "range", min = -16,	max = 16, step = 1, arg = {"AuraWidget", "ModeBar", "TimeTextIndent"},	},

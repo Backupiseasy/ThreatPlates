@@ -1751,7 +1751,7 @@ function TidyPlatesThreat:StartUp()
 	t.Update()
 	-- initialize widgets
 	ThreatPlatesWidgets.PrepareFilter()
-	ThreatPlatesWidgets.PrepareFilterAuraWidget()
+	ThreatPlatesWidgets.ConfigAuraWidgetFilter()
   ThreatPlatesWidgets.ConfigAuraWidget()
 end
 

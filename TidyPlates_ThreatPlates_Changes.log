@@ -1,4 +1,10 @@
 ------------------------------------------------------
+8.3.3 (works with TidyPlates 6.18.11)
+------------------------------------------------------
+* Improved performance for aura widget 2 in raid situations (with lots of mobs).
+* Fixed a bug with castbar being show although disabled.
+
+------------------------------------------------------
 8.3.2 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
 * Added an option for aura widget 2.0 to disable aura sorting (reduces CPU usage).

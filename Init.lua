@@ -147,7 +147,7 @@ t.SPEC_ROLES = {
 ---------------------------------------------------------------------------------------------------
 
 t.DEBUG = function(...)
-	--print ("DEBUG: ", ...)
+	print ("DEBUG: ", ...)
 end
 
 t.DEBUG_SIZE = function(msg, data)
