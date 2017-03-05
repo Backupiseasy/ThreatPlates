@@ -114,8 +114,8 @@ local function GetThreatColor(unit,style)
       -- should be color for second tank - not active currently
       c = db.tHPbarColor
     end
-	else
-		c = GetClassColor(unit)
+--	else
+--		c = GetClassColor(unit)
   end
   return c
 end
@@ -140,9 +140,16 @@ local function SetHealthbarColor(unit)
 			c = GetThreatColor(unit, TidyPlatesThreat.GetThreatStyle(unit))
 		elseif unique_style.useColor then
 			c = unique_style.color
-		else
-			-- use default color for this type of unit
-			c = GetThreatColor(unit, style)
+		end
+		if not c then
+			-- player healthbars may be colored by class overwriting any customColor, but not healthColorChange
+			if unit.type == "PLAYER" then -- Prio 3: coloring by class
+				if unit.reaction == "HOSTILE" and db.allowClass then
+					c = GetClassColor(unit)
+				elseif unit.reaction == "FRIENDLY" and db.friendlyClass then
+					c = GetClassColor(unit)
+				end
+			end
 		end
   else
     if db.healthColorChange then  -- Prio 2: coloring by HP (prio 1 is raid marks)

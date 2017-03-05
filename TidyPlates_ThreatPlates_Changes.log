@@ -8,6 +8,22 @@
 * Visiblity of unit types now configured in more details and synchronized with corresponding CVars
 
 ------------------------------------------------------
+8.3.3-Beta1 (works with TidyPlates 6.18.11)
+------------------------------------------------------
+* Improved performance for aura widget 2 in raid situations (with lots of mobs).
+* Fixed a bug with castbar being show although disabled.
+
+------------------------------------------------------
+8.3.2 (works with TidyPlates 6.18.11)
+------------------------------------------------------
+* Added an option for aura widget 2.0 to disable aura sorting (reduces CPU usage).
+* Fixed a bug with in healthbar coloring of nameplates where class colors were used even if disabled in the options.
+* Added updated localizations for koKR (Korean) and zhCN (Simplified Chinese).
+* Known issues:
+  * Switching between ThreatPlates and other themes may require /reload for the new theme to work correctly
+  * Changing certain settings in the option dialog may require a /reload for the settings to fully take effect.
+
+------------------------------------------------------
 8.3.1 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
 * Fixed a bug in the options for aura widget 2.0 where changes to the sort order where not applied immediately.

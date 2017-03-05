@@ -410,6 +410,7 @@ L["This will color the aura based on its type (poison, disease, magic, curse) - 
 L["Default Buff Color"] = true
 L["Default Debuff Color"] = true
 L["Sort Order"] = true
+L["None"] = true
 L["A to Z"] = true
 L["Sort in ascending alphabetical order."] = true
 L["Time Left"] = true
