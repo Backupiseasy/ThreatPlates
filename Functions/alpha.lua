@@ -77,8 +77,8 @@ local function SetAlpha(unit)
 	if 	t.AlphaFeatureHeadlineView() and (style == "NameOnly") then
 		alpha = 1 -- ignore all alpha settings for healthbar view
 
-		if db.headlineView.nonTargetAlpha and not unit.isTarget and UnitExists("Target") then
-			nonTargetAlpha = db.headlineView.alpha
+		if db.HeadlineView.nonTargetAlpha and not unit.isTarget and UnitExists("Target") then
+			nonTargetAlpha = db.HeadlineView.alpha
 		else
 			nonTargetAlpha = 1
 		end

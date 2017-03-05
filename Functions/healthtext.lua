@@ -1,6 +1,11 @@
 local ADDON_NAME, NAMESPACE = ...
 local ThreatPlates = NAMESPACE.ThreatPlates
 
+---------------------------------------------------------------------------------------------------
+-- Imported functions and constants
+---------------------------------------------------------------------------------------------------
+local RGB = ThreatPlates.RGB
+
 local function Truncate(value)
 	if TidyPlatesThreat.db.profile.text.truncate then
 		if value >= 1e6 then
@@ -16,14 +21,22 @@ local function Truncate(value)
 end
 
 local function SetCustomText(unit)
-	local db = TidyPlatesThreat.db.profile.text
 	local S = TidyPlatesThreat.SetStyle(unit)
+	local color_r, color_g, color_b, color_a
 
 	-- Headline View (alpha feature) uses TidyPlatesHub config and functionality
-	if ThreatPlates.AlphaFeatureHeadlineView() and (S == "NameOnly") then
-		return TidyPlatesHubFunctions.SetCustomTextBinary(unit)
+	local db = TidyPlatesThreat.db.profile.HeadlineView
+	if db.Enabled and (S == "NameOnly") then
+		if db.SubtextColorUseHeadline then
+			color_r, color_g, color_b, color_a = TidyPlatesThreat.SetNameColor(unit)
+		else
+			local color = db.SubtextColor
+			color_r, color_g, color_b, color_a = color.a, color.g, color.b, color.a
+		end
+		return TidyPlatesHubFunctions.SetCustomTextBinary(unit), color_r, color_g, color_b, color_a
 	end
 
+	db = TidyPlatesThreat.db.profile.text
 	if (not db.full and unit.health == unit.healthmax) then
 		return ""
 	end
@@ -62,7 +75,7 @@ local function SetCustomText(unit)
 		end
 	end
 
-	return HpAmt..HpMax..HpPct
+	return HpAmt..HpMax..HpPct, color_r, color_g, color_b, color_a
 end
 
 TidyPlatesThreat.SetCustomText = SetCustomText

@@ -24,6 +24,28 @@ ThreatPlates.ANCHOR_POINT_SETPOINT = {
   BOTTOMRIGHT = {"BOTTOMRIGHT", "TOPRIGHT"}
 }
 
+ThreatPlates.ENEMY_TEXT_COLOR = {"By Custom Color", "By Class", "By Reaction" }
+  --{"By Reaction", "Custom Color", "By Threat", "By Health", "By Level Color", "By Normal/Elite/Boss"}
+ThreatPlates.FRIENDLY_TEXT_COLOR = {"By Custom Color", "By Class", "By Reaction" }
+
+---------------------------------------------------------------------------------------------------
+-- Global functions for accessing the configuration
+---------------------------------------------------------------------------------------------------
+
+local function GetUnitVisibility(unit_type)
+  local unit_visibility = TidyPlatesThreat.db.profile.Visibility[unit_type]
+
+  local show = unit_visibility.Show
+  if type(show) ~= "boolean" then
+    show = (GetCVar(show) == "1")
+  end
+
+  return show, unit_visibility.UseHeadlineView
+end
+
+---------------------------------------------------------------------------------------------------
+-- Functions for configuration migration
+---------------------------------------------------------------------------------------------------
 local function UpdateDefaultProfile()
   local db = TidyPlatesThreat.db
 
@@ -180,4 +202,7 @@ end
 
 ThreatPlates.UpdateDefaultProfile = UpdateDefaultProfile
 ThreatPlates.UpdateConfiguration = UpdateConfiguration
+
+ThreatPlates.GetUnitVisibility = GetUnitVisibility
+
 --ThreatPlates.CleanupDatabase = CleanupDatabase
