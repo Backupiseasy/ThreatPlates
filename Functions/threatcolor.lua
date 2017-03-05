@@ -5,13 +5,19 @@ ThreatPlates = NAMESPACE.ThreatPlates
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
 local RGB = ThreatPlates.RGB
-local TRANSPARENT_COLOR = RGB(0, 0, 0, 0)
+local COLOR_TRANSPARENT = RGB(0, 0, 0, 0)
+--local COLOR_TAPPED = RGB(100, 100, 100)
 
 local function SetThreatColor(unit)
   local db = TidyPlatesThreat.db.profile
   local style, unique_setting = TidyPlatesThreat.SetStyle(unit)
 
-  local c = TRANSPARENT_COLOR
+  local c = COLOR_TRANSPARENT
+
+--  if unit.unitid and ThreatPlates_IsTapDenied(unit.unitid) then
+--    -- tapped unit: grey if not a player and can't get tap on unit
+--    c = COLOR_TAPPED
+--  end
 
   if style == "unique" and unique_setting.UseThreatGlow then
     -- set style to tank/dps or normal

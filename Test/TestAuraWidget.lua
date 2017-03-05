@@ -810,8 +810,36 @@ local function GetUnitAuras(UnitAuraList, unitReaction, unitid, filter)
   until false
 end
 
+local function AuraSortFunctionAtoZ_Baseline(a, b)
+  local db = TidyPlatesThreat.db.profile.AuraWidget
 
-local function UpdateIconGrid_Testing(frame, unitid)
+  if db.SortReverse then
+    return a.priority > b.priority
+  else
+    return a.priority < b.priority
+  end
+end
+
+local function AuraSortFunctionNum_Baseline(a, b)
+  local order
+
+  if a.duration == 0 then
+    order = false
+  elseif b.duration == 0 then
+    order = true
+  else
+    order = a.priority < b.priority
+  end
+
+  local db = TidyPlatesThreat.db.profile.AuraWidget
+  if db.SortReverse then
+    order = not order
+  end
+
+  return order
+end
+
+local function UpdateIconGrid_Baseline(frame, unitid)
   if not unitid then return end
 
   local unitReaction
@@ -837,18 +865,18 @@ local function UpdateIconGrid_Testing(frame, unitid)
   end
 
   local aura_count = 1
-  local auraIndex = 0
+  local index = 0
   repeat
-    auraIndex = auraIndex + 1
+    index = index + 1
     -- Example: Gnaw , false, icon, 0 stacks, nil type, duration 1, expiration 8850.436, caster pet, false, false, 91800
-    local name, _, icon, stacks, auraType, duration, expiration, caster, _, _, spellid = UnitAura(unitid, auraIndex, auraFilter)		-- UnitaAura
+    local name, _, icon, stacks, auraType, duration, expiration, caster, _, _, spellid = UnitAura(unitid, index, auraFilter)		-- UnitaAura
 
     -- Auras are evaluated by an external function
     -- Pre-filtering before the icon grid is populated
     if name then
       UnitAuraList[aura_count] = UnitAuraList[aura_count] or {}
       aura = UnitAuraList[aura_count]
---      local aura = {}
+      --      local aura = {}
 
       aura.name = name
       aura.texture = icon
@@ -875,44 +903,204 @@ local function UpdateIconGrid_Testing(frame, unitid)
       if auraFilter == "HARMFUL" then
         searchedDebuffs = true
         auraFilter = "HELPFUL"
-        auraIndex = 0
+        index = 0
       else
         searchedBuffs = true
       end
     end
 
   until (searchedDebuffs and searchedBuffs)
-  aura_count = aura_count - 1
 
   if sort_order == "None" then
     -- invalidate all entries after storedAuraCount
-    for i = aura_count + 1, #UnitAuraList do
+    for i = aura_count, #UnitAuraList do
       UnitAuraList[i].priority = nil
     end
   else
-    for i = aura_count + 1, #UnitAuraList do
-      UnitAuraList[i] = nil
-    end
-    --UnitAuraList[#UnitAuraList] = nil
+    UnitAuraList[aura_count] = nil
+    --    for i = aura_count + 1, #UnitAuraList do
+    --      UnitAuraList[i] = nil
+    --    end
   end
 
+  aura_count = aura_count - 1
+
   -- Display Auras
-  ------------------------------------------------------------------------------------------------------
   local aura_frame_list = frame.AuraFrames
   local max_auras_no = min(aura_count, CONFIG_AURA_LIMIT)
 
   if aura_count > 0 then
     if sort_order ~= "None" then
+      --ThreatPlates.DEBUG_AURA_LIST(UnitAuraList)
       if sort_order == "AtoZ" then
-        --DEBUG_AURA_LIST(UnitAuraList)
-        sort(UnitAuraList, AuraSortFunctionSimpleAtoZ)
+        sort(UnitAuraList, AuraSortFunctionAtoZ_Baseline)
       else
-        sort(UnitAuraList, AuraSortFunctionSimpleNum)
+        sort(UnitAuraList, AuraSortFunctionNum_Baseline)
       end
     end
 
     --local aura_info_list = frame.AuraInfos
     for index = 1, max_auras_no do
+      local aura = UnitAuraList[index]
+
+      if aura.spellid and aura.expiration then
+        local aura_frame = aura_frame_list[index]
+        --aura_info_list[index] = aura_info_list[index] or {}
+        --local aura_info = aura_info_list[index]
+
+        local aura_info = aura_frame.AuraInfo
+        aura_info.name = aura.name
+        aura_info.duration = aura.duration
+        aura_info.texture = aura.texture
+        aura_info.expiration = aura.expiration
+        aura_info.stacks = aura.stacks
+        aura_info.color = aura.color
+
+        -- Call function to display the aura
+        UpdateAuraFrame(aura_frame) -- aura.texture, aura.duration, aura.expiration, aura.stacks, aura.color, aura.name)
+      end
+    end
+
+  end
+
+  -- Clear extra slots
+  for index = max_auras_no + 1, CONFIG_AURA_LIMIT do
+    --UpdateAuraFrame(aura_frame_list[index])
+    PolledHideIn(aura_frame_list[index])
+  end
+end
+
+local function AuraSortFunctionAtoZ_Testing(a, b)
+  return a.priority < b.priority
+end
+
+local function AuraSortFunctionNum_Testing(a, b)
+  local order
+
+  if a.duration == 0 then
+    order = false
+  elseif b.duration == 0 then
+    order = true
+  else
+    order = a.priority < b.priority
+  end
+
+  return order
+end
+local function UpdateIconGrid_Testing(frame, unitid)
+  if not unitid then return end
+
+  local unitReaction
+  if UnitIsFriend("player", unitid) then
+    unitReaction = AURA_TARGET_FRIENDLY
+  else
+    unitReaction = AURA_TARGET_HOSTILE
+  end
+
+  -- Cache displayable auras
+  ------------------------------------------------------------------------------------------------------
+  -- This block will go through the auras on the unit and make a list of those that should
+  -- be displayed, listed by priority.
+  local searchedDebuffs, searchedBuffs = false, false
+  local auraFilter = "HARMFUL"
+
+  --  GetUnitAuras(UnitAuraList2, unitReaction, unitid, "HARMFUL")
+  --  GetUnitAuras(UnitAuraList2, unitReaction, unitid, "HELPFUL")
+
+  local sort_order = TidyPlatesThreat.db.profile.AuraWidget.SortOrder
+  if sort_order ~= "None" then
+    UnitAuraList = {}
+  end
+
+  local aura
+  local aura_count = 1
+  local index = 0
+  repeat
+    index = index + 1
+    -- Example: Gnaw , false, icon, 0 stacks, nil type, duration 1, expiration 8850.436, caster pet, false, false, 91800
+    local name, _, icon, stacks, auraType, duration, expiration, caster, _, _, spellid = UnitAura(unitid, index, auraFilter)		-- UnitaAura
+
+    -- Auras are evaluated by an external function
+    -- Pre-filtering before the icon grid is populated
+    if name then
+      UnitAuraList[aura_count] = UnitAuraList[aura_count] or {}
+      aura = UnitAuraList[aura_count]
+      --      local aura = {}
+
+      aura.name = name
+      aura.texture = icon
+      aura.stacks = stacks
+      aura.type = auraType
+      aura.effect = auraFilter
+      aura.duration = duration
+      aura.reaction = unitReaction
+      aura.expiration = expiration
+      aura.caster = caster
+      aura.spellid = spellid
+      aura.unit = unitid 		-- unitid of the plate
+
+      local show, priority, color = AuraFilterFunction(aura)
+      -- Store Order/Priority
+      if show then
+        aura.priority = priority
+        aura.color = color
+
+        aura_count = aura_count + 1
+        --UnitAuraList[aura_count] = aura
+      end
+    else
+      if auraFilter == "HARMFUL" then
+        searchedDebuffs = true
+        auraFilter = "HELPFUL"
+        index = 0
+      else
+        searchedBuffs = true
+      end
+    end
+
+  until (searchedDebuffs and searchedBuffs)
+
+  if sort_order == "None" then
+    -- invalidate all entries after storedAuraCount
+    -- if number of auras to show was decreased, remove any overflow aura frames
+    local i = aura_count
+    aura = UnitAuraList[i]
+    while aura do
+      aura.priority = nil
+      i = i + 1
+      aura = UnitAuraList[i]
+    end
+  else
+    UnitAuraList[aura_count] = nil
+  end
+
+  aura_count = aura_count - 1
+
+  -- Display Auras
+  local aura_frame_list = frame.AuraFrames
+  local max_auras_no = min(aura_count, CONFIG_AURA_LIMIT)
+
+  if aura_count > 0 then
+    if sort_order ~= "None" then
+      --ThreatPlates.DEBUG_AURA_LIST(UnitAuraList)
+      if sort_order == "AtoZ" then
+        sort(UnitAuraList, AuraSortFunctionAtoZ_Testing)
+        --sort(UnitAuraList, AuraSortFunctionAtoZ_Baseline)
+      else
+        sort(UnitAuraList, AuraSortFunctionNum_Testing)
+        --sort(UnitAuraList, AuraSortFunctionNum_Baseline)
+      end
+    end
+
+    --local aura_info_list = frame.AuraInfos
+    local index_start, index_end, index_step
+    if TidyPlatesThreat.db.profile.AuraWidget.SortReverse then
+      index_start, index_end, index_step = max_auras_no, 1, -1
+    else
+      index_start, index_end, index_step = 1, max_auras_no, 1
+    end
+
+    for index = index_start, index_end, index_step do
       local aura = UnitAuraList[index]
 
       if aura.spellid and aura.expiration then
@@ -955,15 +1143,16 @@ end
 ---------------------------------------------------------------------------------------------------
 -- Measure the runtime of different implementations
 ---------------------------------------------------------------------------------------------------
-local AURA_WIDGET_TEST_DATA = "AuraWidget.data"
+local AURA_WIDGET_TEST_DATA = "AuraWidget-Skorpyron.data"
 local TEST_FUNCTIONS = {
-  { UpdateIconGrid_NoSorting , "UpdateIconGrid_NoSorting", },
-  { UpdateIconGrid_831 , "UpdateIconGrid_831", },
-  { UpdateIconGrid_NoArrayCreation_WithSort , "UpdateIconGrid_NoArrayCreation_WithSort", },
+--  { UpdateIconGrid_NoSorting , "UpdateIconGrid_NoSorting", },
+--  { UpdateIconGrid_831 , "UpdateIconGrid_831", },
+--  { UpdateIconGrid_NoArrayCreation_WithSort , "UpdateIconGrid_NoArrayCreation_WithSort", },
+  { UpdateIconGrid_Baseline , "UpdateIconGrid_Baseline", },
   { UpdateIconGrid_Testing , "UpdateIconGrid_Testing", },
 }
 local TEST_FILTERS = { "allMine", } -- ,"allMine", } --"whitelist" }
-local TEST_SORTING = { "AtoZ", } -- , "AtoZ", "None" } --, "Duration", "None"}
+local TEST_SORTING = { "None", "AtoZ" } -- , "AtoZ", "None" } --, "Duration", "None"}
 local UPDATE_INTERVAL = 100
 local NO_ITERATIONS = 10
 
@@ -1120,11 +1309,11 @@ end
 io.write("Average\n")
 
 for func = 1, #TEST_FUNCTIONS do
-  local measure_sum = 0
 
   for filter_mode = 1, #TEST_FILTERS do
 
     for sort_mode = 1, #TEST_SORTING do
+      local measure_sum = 0
       io.write(TEST_FUNCTIONS[func][2].." ("..TEST_FILTERS[filter_mode].." / "..TEST_SORTING[sort_mode]..")"..";")
       io.write(TEST_FILTERS[filter_mode]..";"..TEST_SORTING[sort_mode]..";")
 

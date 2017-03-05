@@ -202,17 +202,34 @@ end
 -- Functions to create the options dialog
 
 local function CreateSpacer(pos)
-	return { name = "",	order = pos, type = "description", width = "full", }
+  local entry = {
+    name = "",
+    order = pos,
+    type = "description",
+    width = "full",
+  }
+  return entry
 end
 
 local function GetEnableToggle(header, description, setting)
-	local enable = {
-		type = "group", name = L["Enable"],	order = 5, inline = true, disabled = false,
+	local entry = {
+    name = L["Enable"],
+    order = 5,
+    type = "group",
+    inline = true,
 		args = {
-			Toggle = { type = "toggle",	name = header, desc = description, arg = setting, order = 0, descStyle = "inline", width = "full", },
+			Toggle = {
+        name = header,
+        type = "toggle",
+        order = 0,
+        desc = description,
+        arg = setting,
+        descStyle = "inline",
+        width = "full",
+      },
 		},
 	}
-	return enable
+	return entry
 end
 
 local function GetSizeEntry(pos, setting, func_disabled)

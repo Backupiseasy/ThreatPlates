@@ -25,7 +25,7 @@ end
 ---------------------------------------------------------------------------------------------------
 
 local COMBAT_LOG_FILE = arg[1]
-local AURA_WIDGET_TEST_DATA = "AuraWidget.data"
+local AURA_WIDGET_TEST_DATA = arg[2]
 
 local file = io.open (AURA_WIDGET_TEST_DATA, "w+")
 io.output(file)

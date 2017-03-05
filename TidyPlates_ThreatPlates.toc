@@ -5,7 +5,7 @@
 ## Author: Suicidal Katt, Blacksalsify
 ## RequiredDeps: TidyPlates,TidyPlatesWidgets
 ## SavedVariables: ThreatPlatesDB
-## Version: 8.3.2
+## Version: 8.3.3-Beta1
 ## OptionalDeps: Ace3, LibSharedMedia-3.0
 
 Libs\Libs.xml
