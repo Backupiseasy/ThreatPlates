@@ -1,5 +1,5 @@
 ------------------------------------------------------
-8.3.3-Beta1 (works with TidyPlates 6.18.11)
+8.3.3 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
 * Improved performance for aura widget 2 in raid situations (with lots of mobs).
 * Fixed a bug with castbar being show although disabled.

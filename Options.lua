@@ -213,23 +213,23 @@ end
 
 local function GetEnableToggle(header, description, setting)
 	local entry = {
-    name = L["Enable"],
-    order = 5,
-    type = "group",
-    inline = true,
-		args = {
-			Toggle = {
-        name = header,
-        type = "toggle",
-        order = 0,
-        desc = description,
-        arg = setting,
-        descStyle = "inline",
-        width = "full",
-      },
+	name = L["Enable"],
+	order = 5,
+	type = "group",
+	inline = true,
+	args = {
+		Toggle = {
+			name = header,
+			type = "toggle",
+			order = 0,
+			desc = description,
+			arg = setting,
+			descStyle = "inline",
+			width = "full",
 		},
-	}
-	return entry
+	},
+}
+return entry
 end
 
 local function GetSizeEntry(pos, setting, func_disabled)
