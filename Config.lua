@@ -24,9 +24,14 @@ ThreatPlates.ANCHOR_POINT_SETPOINT = {
   BOTTOMRIGHT = {"BOTTOMRIGHT", "TOPRIGHT"}
 }
 
-ThreatPlates.ENEMY_TEXT_COLOR = {"By Custom Color", "By Class", "By Reaction" }
+ThreatPlates.ENEMY_TEXT_COLOR = {"By Custom Color", "By Class", "By Reaction" } -- "By Threat", "By Health"
   --{"By Reaction", "Custom Color", "By Threat", "By Health", "By Level Color", "By Normal/Elite/Boss"}
 ThreatPlates.FRIENDLY_TEXT_COLOR = {"By Custom Color", "By Class", "By Reaction" }
+ThreatPlates.ENEMY_SUBTEXT = {
+  "None", "Percent Health",
+  "NPC Role, Guild, or Level", "NPC Role, Guild, or Quest", "NPC Role, Guild", "NPC Role",
+  "Level", "Quest", "Everything"}
+ThreatPlates.FRIENDLY_SUBTEXT = {"By Custom Color", "By Class", "By Reaction" }
 
 ---------------------------------------------------------------------------------------------------
 -- Global functions for accessing the configuration

@@ -290,56 +290,75 @@ end
 -- Functions to create the options dialog
 ---------------------------------------------------------------------------------------------------
 
-local function GetDescription(text)
-  local entry = {
+local function GetDescriptionEntry(text)
+  return {
+    name = text,
+    order = 0,
+    type = "description",
+    width = "full",
+  }
+end
+
+local function GetSpacerEntry(pos)
+  return {
     name = "",
     order = pos,
     type = "description",
-  return { name = text, order = 0, type = "description", width = "full", }
-end
-
-local function GetSpacer(pos)
     width = "full",
-  return { name = "", order = pos, type = "description", width = "full", }
   }
-  return entry
 end
 
-local function GetColorOption(pos, setting, disabled_func)
-	local entry = {
-    name = L["Enable"],
-    order = 5,
-    type = "group",
-    inline = true,
-end
-
-local function GetColorAlphaOption(pos, setting, disabled_func)
-  local option = {
-    name = L["Color"], order = pos, type = "color", width = "half", arg = setting,
-    get = GetColorAlpha, set = SetColorAlpha, hasAlpha = true,
+local function GetColorEntry(pos, setting, disabled_func)
+  return {
+    name = L["Color"],
+    order = pos,
+    type = "color",
+    width = "half",
+    arg = setting,
+    get = GetColor,
+    set = SetColor,
+    hasAlpha = false,
     disabled = disabled_func
   }
 end
 
-local function GetEnableOption(header, description, setting)
-  local enable = {
-    type = "group", name = L["Enable"],	order = 5, inline = true, disabled = false,
+local function GetColorAlphaEntry(pos, setting, disabled_func)
+  return {
+    name = L["Color"],
+    order = pos,
+    type = "color",
+    width = "half",
+    arg = setting,
+    get = GetColorAlpha, set = SetColorAlpha,
+    hasAlpha = true,
+    disabled = disabled_func
+  }
+end
+
+local function GetEnableEntry(header, description, setting)
+  local entry = {
+    name = L["Enable"],
+    order = 5,
+    type = "group",
+    inline = true,
     args = {
-      Toggle = { type = "toggle",	name = header, desc = description, arg = setting, order = 0, descStyle = "inline", width = "full", },
+      Toggle = {
         name = header,
         type = "toggle",
         order = 0,
         desc = description,
-        arg = setting,
-        descStyle = "inline",
         width = "full",
+        get = GetValue,
+        set = SetValue,
+        descStyle = "inline",
+        arg = setting,
       },
     },
   }
-  return enable
+  return entry
 end
 
-local function GetSizeOption(pos, setting, func_disabled)
+local function GetSizeEntry(pos, setting, func_disabled)
   local entry = {
     name = L["Size"], order = pos, type = "group", inline = true, disabled = func_disabled,
     args = {
@@ -349,7 +368,7 @@ local function GetSizeOption(pos, setting, func_disabled)
   return entry
 end
 
-local function GetPlacementOption(pos, setting, func_disabled)
+local function GetPlacementEntry(pos, setting, func_disabled)
   local entry = {
     name = L["Placement"], order = pos,	type = "group", inline = true, disabled = func_disabled,
     args = {
@@ -361,8 +380,8 @@ local function GetPlacementOption(pos, setting, func_disabled)
 end
 
 local function AddLayoutOptions(args, pos, setting, func_disabled)
-  args.Sizing = GetSizeOption(pos, setting, func_disabled)
-  args.Placement = GetPlacementOption(pos + 10, setting, func_disabled)
+  args.Sizing = GetSizeEntry(pos, setting, func_disabled)
+  args.Placement = GetPlacementEntry(pos + 10, setting, func_disabled)
   args.Alpha = {
     type = "group",	order = pos + 20,	name = L["Alpha"], inline = true,
     disabled = func_disabled,
@@ -376,7 +395,7 @@ end
 local function ClassIconsWidgetOptions()
   local options = { name = L["Class Icons"], order = 30, type = "group",
     args = {
-      Enable = GetEnableOption(L["Enable Class Icons Widget"], L["This widget will display class icons on nameplate with the settings you set below."], { "classWidget", "ON" }),
+      Enable = GetEnableEntry(L["Enable Class Icons Widget"], L["This widget will display class icons on nameplate with the settings you set below."], { "classWidget", "ON" }),
       Options = {
         name = L["Options"],
         type = "group",
@@ -411,8 +430,8 @@ local function ClassIconsWidgetOptions()
         disabled = function() return not db.classWidget.ON end,
         args = {},
       },
-      Sizing = GetSizeOption(40, "classWidget", function() return not db.classWidget.ON end),
-      Placement = GetPlacementOption(50, "classWidget", function() return not db.classWidget.ON end),
+      Sizing = GetSizeEntry(40, "classWidget", function() return not db.classWidget.ON end),
+      Placement = GetPlacementEntry(50, "classWidget", function() return not db.classWidget.ON end),
     }
   }
   return options
@@ -421,7 +440,7 @@ end
 local function QuestWidgetOptions()
   local options =  { type = "group", order = 90,	name = L["Quest"],
     args = {
-      Enable = GetEnableOption(L["Enable Quest Widget"], L["Enables highlighting of nameplates of mobs involved with any of your current quests."], {"questWidget", "ON"}),
+      Enable = GetEnableEntry(L["Enable Quest Widget"], L["Enables highlighting of nameplates of mobs involved with any of your current quests."], {"questWidget", "ON"}),
       Visibility = { type = "group",	order = 10,	name = L["Visibility"], inline = true,
         disabled = function() return not db.questWidget.ON end,
         args = {
@@ -461,7 +480,7 @@ end
 local function StealthWidgetOptions()
   local options =  { type = "group", order = 60,	name = L["Stealth"],
     args = {
-      Enable = GetEnableOption(L["Enable Stealth Widget (Feature not yet fully implemented!)"], L["Shows a stealth icon above the nameplate of units that can detect you while stealthed."], {"stealthWidget", "ON"}),
+      Enable = GetEnableEntry(L["Enable Stealth Widget (Feature not yet fully implemented!)"], L["Shows a stealth icon above the nameplate of units that can detect you while stealthed."], {"stealthWidget", "ON"}),
     },
   }
   AddLayoutOptions(options.args, 80, "stealthWidget", function() return not db.stealthWidget.ON end)
@@ -469,11 +488,11 @@ local function StealthWidgetOptions()
 end
 
 local function CreateUnitGroupsHeadlineView()
-  args = {}
-  pos = 0
+  local args = {}
+  local pos = 0
 
   for i, value in ipairs(UNIT_TYPES) do
-    faction = value.Faction
+    local faction = value.Faction
     args[faction .. "Units"] = {
       name = L[faction .. " Units"], order = pos, type = "group", inline = true,
       disabled = function() return not (GetWoWCVar("nameplateShowAll") and TidyPlatesThreat.db.profile.HeadlineView.Enabled) end,
@@ -495,7 +514,7 @@ end
 
 local function CreateUnitGroupsVisibility(args, pos)
   for i, value in ipairs(UNIT_TYPES) do
-    faction = value.Faction
+    local faction = value.Faction
     args[faction.."Units"] = {
       name = L["Show "..faction.." Units"], type = "group", order = pos,	inline = true,
       disabled = function() return not (GetWoWCVar("nameplateShowAll") and GetWoWCVar(value.Disabled)) end,
@@ -552,8 +571,8 @@ local function CreateTabGeneralSettings()
         get = GetCvar,
         set = SetCvar,
         args = {
-          Description = GetDescription(L["This allows to configure which nameplates should be shown while you are playing."]),
-          Spacer0 = GetSpacer(1),
+          Description = GetDescriptionEntry(L["This allows to configure which nameplates should be shown while you are playing."]),
+          Spacer0 = GetSpacerEntry(1),
           AllUnits = { name = L["Enable Nameplates"], order = 10, type = "toggle", arg = "nameplateShowAll" },
           AllUnitsDesc = { name = L["Show all name plates (CTRL-V)."], order = 15, type = "description", width = "double", },
           Spacer1 = { type = "description", name = "", order = 19, },
@@ -704,7 +723,7 @@ local function GetOptions()
                       set = SetThemeValue,
                       arg = { "settings", "healthbar", "backdrop" },
                     },
-                    Spacer1 = GetSpacer(14),
+                    Spacer1 = GetSpacerEntry(14),
                     BGColorText = {
                       type = "description",
                       order = 15,
@@ -1121,8 +1140,8 @@ local function GetOptions()
                       values = ThreatPlates.ENEMY_TEXT_COLOR,
                       arg = { "HeadlineView", "EnemyTextColorMode" }
                     },
-                    EnemyColorCustom = GetColorAlphaOption(11, { "HeadlineView", "EnemyTextColor" }),
-                    Spacer1 = GetSpacer(15),
+                    EnemyColorCustom = GetColorAlphaEntry(11, { "HeadlineView", "EnemyTextColor" }),
+                    Spacer1 = GetSpacerEntry(15),
                     FriendlyColor = {
                       name = L["Friendly Headline Color"],
                       order = 20,
@@ -1130,7 +1149,7 @@ local function GetOptions()
                       values = ThreatPlates.FRIENDLY_TEXT_COLOR,
                       arg = { "HeadlineView", "FriendlyTextColorMode" }
                     },
-                    FriendlyColorCustom = GetColorAlphaOption(11, { "HeadlineView", "FriendlyTextColor" }),
+                    FriendlyColorCustom = GetColorAlphaEntry(25, { "HeadlineView", "FriendlyTextColor" }),
                     EnableRaidMarks = {
                       name = L["Color by Raid Marks"],
                       order = 70,
@@ -1157,10 +1176,30 @@ local function GetOptions()
                       get = function(info) return not GetValue(info) end,
                       arg = { "HeadlineView", "SubtextColorUseHeadline" },
                     },
-                    SubtextColorCustomColor = GetColorAlphaOption(105, { "HeadlineView", "SubtextColor" }, function() return TidyPlatesThreat.db.profile.HeadlineView.SubtextColorUseHeadline end),
-                    },
+                    SubtextColorCustomColor = GetColorAlphaEntry(105, { "HeadlineView", "SubtextColor" }, function() return TidyPlatesThreat.db.profile.HeadlineView.SubtextColorUseHeadline end),
                   },
-                },
+                  ColorSettings = {
+                    name = L["Subtext"],
+                    order = 30,
+                    type = "group",
+                    inline = true,
+                    disabled = function() return not TidyPlatesThreat.db.profile.HeadlineView.Enabled end,
+                    args = {
+                      FriendlySubtext = {
+                        name = L["Friendly Subtext"],
+                        order = 20,
+                        type = "select",
+                        values = ThreatPlates.FRIENDLY_SUBTEXT,
+                        arg = { "HeadlineView", "FriendlySubtext" }
+                      },
+                      EnemySubtext = {
+                        name = L["Enemy Subtext"],
+                        order = 20,
+                        type = "select",
+                        values = ThreatPlates.ENEMY_SUBTEXT,
+                        arg = { "HeadlineView", "EnemySubtext" }
+                      },
+                    },
                 --                SubtextSettings = {
                 --                  name = L["Subtext"],
                 --                  order = 70,
@@ -1187,6 +1226,7 @@ local function GetOptions()
                 --                    FriendlyColorCustom = { name = L["Color"], order = 21, type = "color", arg = { "HeadlineView", "FriendlyTextColorCustom" }, get = GetColor, set = SetColor, hasAlpha = false, },
                 --                  },
                 --                },
+                },
                 Alpha = {
                   name = L["Alpha"],
                   order = 30,
@@ -3906,7 +3946,7 @@ local function GetOptions()
               disabled = function() return db.debuffWidget.ON end,
               set = SetValueAuraWidget,
               args = {
-                Enable = GetEnableOption(L["Enable Aura Widget 2.0"], L["This widget will display auras that match your filtering on your target nameplate and others you recently moused over. The old aura widget (Aura) must be disabled first."], { "AuraWidget", "ON" }),
+                Enable = GetEnableEntry(L["Enable Aura Widget 2.0"], L["This widget will display auras that match your filtering on your target nameplate and others you recently moused over. The old aura widget (Aura) must be disabled first."], { "AuraWidget", "ON" }),
                 Filtering = {
                   name = L["Filtering"],
                   type = "group",
@@ -4024,22 +4064,12 @@ local function GetOptions()
                       arg = { "AuraWidget", "ShowAuraType" },
                     },
                     DefaultBuffColor = {
-                      name = L["Default Buff Color"],
+                      name = L["Default Buff Color"], type = "color",	order = 54,	arg = {"AuraWidget", "DefaultBuffColor"},	hasAlpha = true,
                       get = GetColorAlpha, set = SetColorAlphaAuraWidget,
-                      order = 54,
-                      arg = { "AuraWidget", "DefaultBuffColor" },
-                      hasAlpha = true,
-                      get = GetColorAlpha,
-                      set = SetColorAlphaForceUpdate,
                     },
                     DefaultDebuffColor = {
-                      name = L["Default Debuff Color"],
+                      name = L["Default Debuff Color"], type = "color",	order = 56, arg = {"AuraWidget","DefaultDebuffColor"},	hasAlpha = true,
                       get = GetColorAlpha, set = SetColorAlphaAuraWidget,
-                      order = 56,
-                      arg = { "AuraWidget", "DefaultDebuffColor" },
-                      hasAlpha = true,
-                      get = GetColorAlpha,
-                      set = SetColorAlphaForceUpdate,
                     },
                   },
                 },
@@ -4123,7 +4153,7 @@ local function GetOptions()
                         Anchor = { name = L["Anchor Point"], order = 1, type = "select", values = t.ANCHOR_POINT, arg = { "AuraWidget", "anchor" } },
                         X = { name = L["Offset X"], order = 2, type = "range", min = -120, max = 120, step = 1, arg = { "AuraWidget", "x" }, },
                         Y = { name = L["Offset Y"], order = 3, type = "range", min = -120, max = 120, step = 1, arg = { "AuraWidget", "y" }, },
-                        Spacer = GetSpacer(5),
+                        Spacer = GetSpacerEntry(5),
                         AlignmentH = { name = L["Horizontal Alignment"], order = 6, type = "select", values = { LEFT = L["Left-to-right"], RIGHT = L["Right-to-left"] }, arg = { "AuraWidget", "AlignmentH" } },
                         AlignmentV = { name = L["Vertical Alignment"], order = 7, type = "select", values = { BOTTOM = L["Bottom-to-top"], TOP = L["Top-to-bottom"] }, arg = { "AuraWidget", "AlignmentV" } }
                       },
@@ -4207,16 +4237,10 @@ local function GetOptions()
                       inline = true,
                       args = {
                         BarTexture = { name = L["Foreground Texture"], order = 60, type = "select", dialogControl = "LSM30_Statusbar", values = AceGUIWidgetLSMlists.statusbar, arg = { "AuraWidget", "ModeBar", "Texture" }, },
-                        Spacer2 = GetSpacer(75),
+                        Spacer2 = GetSpacerEntry(75),
                         BackgroundTexture = { name = L["Background Texture"], order = 80, type = "select", dialogControl = "LSM30_Statusbar", values = AceGUIWidgetLSMlists.statusbar, arg = { "AuraWidget", "ModeBar", "BackgroundTexture" }, },
-                        BackgroundColor = {
+                        BackgroundColor = {	name = L["Background Color"], type = "color",	order = 90, arg = {"AuraWidget","ModeBar", "BackgroundColor"},	hasAlpha = true,
                           get = GetColorAlpha, set = SetColorAlphaAuraWidget,
-                          type = "color",
-                          order = 90,
-                          arg = { "AuraWidget", "ModeBar", "BackgroundColor" },
-                          hasAlpha = true,
-                          get = GetColorAlpha,
-                          set = SetColorAlphaForceUpdate,
                         },
                       },
                     },
@@ -4229,7 +4253,7 @@ local function GetOptions()
                         Font = { name = L["Typeface"], type = "select", order = 10, dialogControl = "LSM30_Font", values = AceGUIWidgetLSMlists.font, arg = { "AuraWidget", "ModeBar", "Font" }, },
                         FontSize = { name = L["Size"], order = 20, type = "range", min = 1, max = 36, step = 1, arg = { "AuraWidget", "ModeBar", "FontSize" }, },
 												FontColor = {	name = L["Color"], type = "color",	order = 30,	get = GetColor,	set = SetColorAuraWidget,	arg = {"AuraWidget","ModeBar", "FontColor"},	hasAlpha = false, },
-                        Spacer1 = GetSpacer(35),
+                        Spacer1 = GetSpacerEntry(35),
                         IndentLabel = { name = L["Label Text Offset"], order = 40, type = "range", min = -16, max = 16, step = 1, arg = { "AuraWidget", "ModeBar", "LabelTextIndent" }, },
                         IndentTime = { name = L["Time Text Offset"], order = 50, type = "range", min = -16, max = 16, step = 1, arg = { "AuraWidget", "ModeBar", "TimeTextIndent" }, },
                       },
@@ -5444,7 +5468,7 @@ local function GetOptions()
                       disabled = function() if not db.uniqueSettings[k_c].useColor or not db.uniqueSettings[k_c].useStyle or not db.uniqueSettings[k_c].showNameplate then return true else return false end end,
                       arg = { "uniqueSettings", k_c, "color" },
                     },
-                  Spacer = GetSpacer(4),
+                  Spacer = GetSpacerEntry(4),
                   ThreatColor = {
                     name = L["Use Threat Colors"],
                     order = 5,
