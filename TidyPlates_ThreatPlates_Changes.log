@@ -1,8 +1,19 @@
 ------------------------------------------------------
+8.3.4 (works with TidyPlates 6.18.11)
+------------------------------------------------------
+* Updated addon metadata to be compatible with patch 7.2.
+* Known issues:
+  * Switching between ThreatPlates and other themes may require /reload for the new theme to work correctly
+  * Changing certain settings in the option dialog may require a /reload for the settings to fully take effect.
+
+------------------------------------------------------
 8.3.3 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
 * Improved performance for aura widget 2 in raid situations (with lots of mobs).
 * Fixed a bug with castbar being show although disabled.
+* Known issues:
+  * Switching between ThreatPlates and other themes may require /reload for the new theme to work correctly
+  * Changing certain settings in the option dialog may require a /reload for the settings to fully take effect.
 
 ------------------------------------------------------
 8.3.2 (works with TidyPlates 6.18.11)
