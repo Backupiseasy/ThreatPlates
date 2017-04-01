@@ -202,7 +202,7 @@ end
 -- This function calls OnRelease on the widget and places it back in the widget pool.
 -- Any data on the widget is being erased, and the widget will be hidden.\\
 -- If this widget is a Container-Widget, all of its Child-Widgets will be releases as well.
--- @param widget The widget to release
+-- @param widget_info The widget to release
 function AceGUI:Release(widget)
 	safecall(widget.PauseLayout, widget)
 	widget:Fire("OnRelease")
@@ -243,7 +243,7 @@ end
 
 --- Called when a widget has taken focus.
 -- e.g. Dropdowns opening, Editboxes gaining kb focus
--- @param widget The widget that should be focused
+-- @param widget_info The widget that should be focused
 function AceGUI:SetFocus(widget)
 	if self.FocusedWidget and self.FocusedWidget ~= widget then
 		safecall(self.FocusedWidget.ClearFocus, self.FocusedWidget)
@@ -517,7 +517,7 @@ do
 	--One of these function should be called on each Widget Instance as part of its creation process
 	
 	--- Register a widget-class as a container for newly created widgets.
-	-- @param widget The widget class
+	-- @param widget_info The widget class
 	function AceGUI:RegisterAsContainer(widget)
 		widget.children = {}
 		widget.userdata = {}
@@ -533,7 +533,7 @@ do
 	end
 	
 	--- Register a widget-class as a widget.
-	-- @param widget The widget class
+	-- @param widget_info The widget class
 	function AceGUI:RegisterAsWidget(widget)
 		widget.userdata = {}
 		widget.events = {}

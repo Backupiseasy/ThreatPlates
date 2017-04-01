@@ -26,13 +26,16 @@ ThreatPlatesWidgets.list = {}
 
 ---------------------------------------------------------------------------------------------------
 
-local function RegisterWidget(name,create,isContext,enabled)
+local function DummyFalse() return false end
+
+local function RegisterWidget(name,create,isContext,enabled, enabled_hv)
   if not ThreatPlatesWidgets.list[name] then
     ThreatPlatesWidgets.list[name] = {
       name = name,
       create = create,
       isContext = isContext,
-      enabled = enabled
+      enabled = enabled,
+      EnabledInHeadlineView = enabled_hv or DummyFalse
     }
   end
 end
@@ -133,8 +136,10 @@ local function OnUpdate(plate, unit)
       end
 
       -- Diable all widgets in headline view mode
-      if style == "NameOnly" or style == "etotem" or style == "empty" then
-        widget_list[name]:_Hide()
+      if style == "NameOnly" and not v.EnabledInHeadlineView() then
+        widget_list[name]:Hide()
+      elseif style == "etotem" or style == "empty" then
+        widget_list[name]:Hide()
       else
         -- context means that widget is only relevant for target (or mouse-over)
         if not v.isContext then
@@ -165,8 +170,10 @@ local function OnContextUpdate(plate, unit)
       end
 
       -- Diable all widgets in headline view mode
-      if style == "NameOnly" or style == "etotem" or style == "empty" then
-        widget_list[name]:_Hide()
+      if style == "NameOnly" and not v.EnabledInHeadlineView() then
+        widget_list[name]:Hide()
+      elseif style == "etotem" or style == "empty" then
+        widget_list[name]:Hide()
       else
         widget_list[name]:UpdateContext(unit, style)
         if unit.isTarget then	plate:SetFrameStrata("LOW") else plate:SetFrameStrata("BACKGROUND") end

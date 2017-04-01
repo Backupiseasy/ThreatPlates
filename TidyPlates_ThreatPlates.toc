@@ -1,7 +1,7 @@
-﻿## Interface: 71500
+﻿## Interface: 72000
 ## Title: Tidy Plates: |cff89F559Threat Plates|r
-## Notes: Revolutionary |cff89F559threat reactive nameplates|r by |cff3079ffSuicidal Katt|r.
-## Notes-deDE: Revolutionäre |cff89F559threat reaktive Namensplaketten|r by |cff3079ffSuicidal Katt|r.
+## Notes: Tidy Plates theme for threat reactive nameplates.
+## Notes-deDE: Tidy-Plates-Design für bedrohungsreaktive Namensplaketten.
 ## Author: Suicidal Katt, Blacksalsify
 ## RequiredDeps: TidyPlates,TidyPlatesWidgets
 ## SavedVariables: ThreatPlatesDB

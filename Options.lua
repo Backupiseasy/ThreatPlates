@@ -1,5 +1,9 @@
 local _, ns = ...
 local t = ns.ThreatPlates
+
+---------------------------------------------------------------------------------------------------
+-- Imported functions and constants
+---------------------------------------------------------------------------------------------------
 local L = t.L
 local class = t.Class()
 local path = t.Art
@@ -23,13 +27,6 @@ local UNIT_TYPES = {
 }
 
 -- Functions
-
--- return the first integer index holding the value
-function ArrayIndexOf(t,val)
-  for k,v in ipairs(t) do
-    if v == val then return k end
-  end
-end
 
 local function GetSpellName(number)
   local n = GetSpellInfo(number)
@@ -94,6 +91,17 @@ local function SetValueResetWidgets(info, value)
 	TidyPlates:ResetWidgets()
 end
 
+local function SetSelectValue(info, value)
+  local select = info.values
+  SetValue(info, select[value])
+end
+
+local function GetSelectValue(info)
+  local value = GetValue(info)
+  local select = info.values
+  return select[value]
+end
+
 local function GetValueChar(info)
   local DB = TidyPlatesThreat.db.char
   local value = DB
@@ -124,13 +132,13 @@ local function GetCvar(info)
 end
 
 local function SetCvar(info)
---	if InCombatLockdown() then
---		t.Print("We're unable to change this while in combat")
---	else
+	if InCombatLockdown() then
+		t.Print("We're unable to change this while in combat", true)
+	else
     local value = abs(GetCVar(info.arg) - 1)
     SetCVar(info.arg, value)
     t.Update()
---	end
+	end
 end
 
 local function GetWoWCVar(cvar)
@@ -139,7 +147,7 @@ end
 
 local function SetWoWCVar(cvar, value)
   if InCombatLockdown() then
-    t.Print("We're unable to change this while in combat")
+    t.Print("We're unable to change this while in combat", true)
   else
     SetCVar(cvar, (value and 1) or 0)
     t.Update()
@@ -233,40 +241,6 @@ local function SetUnitVisibilitySetting(info, value)
   TidyPlates:ForceUpdate()
 end
 
---local function GetUnitVisibilitySetting(info)
---  local unit_type = info.arg
---  local unit_visibility = TidyPlatesThreat.db.profile.Visibility.Show
---
---  local show = unit_visibility[1]
---  if not (type(show) == "boolean") then
---    show = (GetCVar(show) == "1")
---  end
---
---  return show
---end
---
---local function SetUnitVisibilitySetting(info, value)
---  local unit_type = info.arg
---  local unit_visibility = TidyPlatesThreat.db.profile.Visibility.Show
---
---  local show = unit_visibility[1]
---  if type(show) == "boolean" then
---    unit_visibility[1] = value
---  else
---    SetWoWCVar(show, value)
---  end
---  TidyPlates:ForceUpdate()
---end
-
---local function GetUnitVisibilityHeadlineView(info)
---  return TidyPlatesThreat.db.profile.visibility[info.arg][2]
---end
---
---local function SetUnitVisibilityHeadlineView(info, value)
---  TidyPlatesThreat.db.profile.visibility[info.arg][2] = value
---  TidyPlates:ForceUpdate()
---end
---
 -- Set Theme Values
 
 local function SetThemeValue(info, val)
@@ -285,6 +259,16 @@ local function SetValueAuraWidget(info, val)
   ThreatPlatesWidgets.ConfigAuraWidget()
   TidyPlates:ForceUpdate()
 end
+
+---- Validate functions for AceConfig
+--local function ValidatePercentage(info, val)
+----  if string:match(val, "^%d+%%") then
+----    return true
+----  else
+--  print ("lksjdflsjlfjslkfj")
+--    return "ERROR - Input must be a percentage (number + '%')"
+----  end
+--end
 
 ---------------------------------------------------------------------------------------------------
 -- Functions to create the options dialog
@@ -329,35 +313,87 @@ local function GetColorAlphaEntry(pos, setting, disabled_func)
     type = "color",
     width = "half",
     arg = setting,
-    get = GetColorAlpha, set = SetColorAlpha,
+    get = GetColorAlpha,
+    set = SetColorAlpha,
     hasAlpha = true,
     disabled = disabled_func
   }
 end
 
-local function GetEnableEntry(header, description, setting)
+local function GetEnableEntry(entry_name, description, widget_info, enable_hv)
   local entry = {
-	name = L["Enable"],
-	order = 5,
-	type = "group",
-	inline = true,
-	args = {
-		Toggle = {
-			name = header,
-			type = "toggle",
-			order = 0,
-			desc = description,
-			arg = setting,
-			descStyle = "inline",
-			width = "full",
-        get = GetValue,
-        set = SetValue,
+    name = L["Enable"],
+    order = 5,
+    type = "group",
+    inline = true,
+    args = {
+      Enable = {
+        name = entry_name,
+        order = 1,
+        type = "toggle",
+        desc = description,
         descStyle = "inline",
-        arg = setting,
-		},
-	},
-}
-return entry
+        width = "full",
+        arg = { widget_info, "ON" },
+      },
+    },
+  }
+
+  if enable_hv then
+    entry.args.EnableHV = {
+      name = L["Enable in Headline View"],
+      order = 2,
+      type = "toggle",
+      descStyle = "inline",
+      width = "full",
+      disabled = function() return not db[widget_info].ON end,
+      arg = { widget_info, "ShowInHeadlineView" },
+    }
+  end
+
+  return entry
+end
+
+local function GetThemeEnableEntry(entry_name, description, widget_info, enable_hv)
+  local entry = {
+    name = L["Enable "] .. entry_name,
+    order = 5,
+    type = "group",
+    inline = true,
+    desc = description,
+    descStyle = "inline",
+    args = {
+      Enable = {
+        name = L["Show in Healthbar View"],
+        order = 1,
+        type = "toggle",
+        width = "double",
+        set = SetThemeValue,
+        arg = { "settings", widget_info, "show" },
+      },
+    },
+  }
+
+  if enable_hv then
+    entry.args.EnableHV = {
+      name = L["Show in Headline View"],
+      order = 2,
+      type = "toggle",
+      descStyle = "inline",
+      width = "double",
+      set = SetThemeValue,
+      arg = {"settings", widget_info, "ShowInHeadlineView" },
+    }
+  else
+    entry.args.EoL = {
+      name = "",
+      order = 2,
+      type = "description",
+      width = "full",
+    }
+  end
+
+  return entry
 end
 
 local function GetSizeEntry(pos, setting, func_disabled)
@@ -381,23 +417,338 @@ local function GetPlacementEntry(pos, setting, func_disabled)
   return entry
 end
 
-local function AddLayoutOptions(args, pos, setting, func_disabled)
-  args.Sizing = GetSizeEntry(pos, setting, func_disabled)
-  args.Placement = GetPlacementEntry(pos + 10, setting, func_disabled)
+local function GetUnitScaleEntry(entry_name, pos, setting)
+  local entry = {
+    name = entry_name,
+    order = pos,
+    type = "range",
+    --width = "full",
+    arg = setting,
+    step = 0.05,
+    softMin = 0.6,
+    softMax = 1.3,
+    isPercent = true,
+  }
+  return entry
+end
+
+local function GetUnitAlphaEntry(entry_name, pos, setting)
+  local entry = {
+    name = entry_name,
+    order = pos,
+    type = "range",
+    --width = "full",
+    arg = setting,
+    step = 0.05,
+    min = 0,
+    max = 1,
+    isPercent = true,
+  }
+  return entry
+end
+
+local function GetWidgetPlacementEntry(pos, widget_info)
+  local func_healthbar = function() return not db[widget_info].ON end
+  local func_headlineview = function() return not (db[widget_info].ON and db[widget_info].ShowInHeadlineView) end
+
+  local entry = {
+    name = L["Placement"],
+    order = pos,
+    type = "group",
+    inline = true,
+    args = {
+      HealthbarX = { type = "range", order = 1, name = L["Healthbar X"], min = -120, max = 120, step = 1, arg = { widget_info, "x" }, disabled = func_healthbar },
+      HealthbarY = { type = "range", order = 2, name = L["Healthbar Y"], min = -120, max = 120, step = 1, arg = { widget_info, "y" }, disabled = func_healthbar },
+      HeadlineViewX = { type = "range", order = 3, name = L["Headline View X"], min = -120, max = 120, step = 1, arg = { widget_info, "x_hv" }, disabled = func_headlineview  },
+      HeadlineViewY = { type = "range", order = 4, name = L["Headline View Y"], min = -120, max = 120, step = 1, arg = { widget_info, "y_hv" }, disabled = func_headlineview  }
+    }
+  }
+  return entry
+end
+
+--local function getThemePlacementEntry(pos, widget_info)
+--  local func_healthbar = function() return not db[widget_info].ON end
+--  local func_headlineview = function() return not (db[widget_info].ON and db[widget_info].ShowInHeadlineView) end
+--
+--  local entry = {
+--    name = L["Placement"],
+--    order = pos,
+--    type = "group",
+--    inline = true,
+--    disabled = function() if GetCVar("ShowVKeyCastbar") == "1" then return false else return true end end,
+--    args = {
+--      PlacementX = {
+--        name = L["X"],
+--        type = "range",
+--        min = -60,
+--        max = 60,
+--        step = 1,
+--        order = 2,
+--        set = function(info, val)
+--          local b1 = {}; b1.arg = { "settings", "castborder", "x" };
+--          local b2 = {}; b2.arg = { "settings", "castnostop", "x" };
+--          SetThemeValue(b1, val)
+--          SetThemeValue(b2, val)
+--          SetThemeValue(info, val)
+--        end,
+--        arg = { "settings", "castbar", "x" },
+--      },
+--      PlacementY = {
+--        name = L["Y"],
+--        type = "range",
+--        min = -60,
+--        max = 60,
+--        step = 1,
+--        order = 3,
+--        set = function(info, val)
+--          local b1 = {}; b1.arg = { "settings", "castborder", "y" };
+--          local b2 = {}; b2.arg = { "settings", "castnostop", "y" };
+--          SetThemeValue(b1, val)
+--          SetThemeValue(b2, val)
+--          SetThemeValue(info, val)
+--        end,
+--        arg = { "settings", "castbar", "y" },
+--      },
+--    },
+--  },
+--
+--end
+
+local function AddLayoutOptions(args, pos, widget_info, func_disabled)
+  args.Sizing = GetSizeEntry(pos, widget_info, func_disabled)
+  --args.Placement = GetPlacementEntry(pos + 10, setting, func_disabled)
+  args.Placement = GetWidgetPlacementEntry(30, widget_info)
   args.Alpha = {
     type = "group",	order = pos + 20,	name = L["Alpha"], inline = true,
     disabled = func_disabled,
     args = {
       Alpha = {	type = "range",	order = 1, name = "", step = 0.05, min = 0,	max = 1, isPercent = true,
-      arg = {setting, "alpha"}, width = "full", },
+      arg = { widget_info, "alpha"}, width = "full", },
     },
   }
+end
+
+local function RaidMarksOptions()
+  local options =  {
+    name = L["Raid Marks"],
+    type = "group",
+    order = 130,
+      args = {
+        Enable = {
+          name = L["Enable"],
+          order = 5,
+          type = "group",
+          inline = true,
+          args = {
+            Header = {
+              name = "",
+              order = 1,
+              type = "description",
+              desc = L["Enables the showing of the raid mark icon on nameplates."],
+              width = "full",
+            },
+            Enable = {
+              name = L["Show Raid Mark Icon in Healthbar View"],
+              order = 2,
+              type = "toggle",
+              width = "double",
+              set = SetThemeValue,
+              arg = { "settings", "raidicon", "show" },
+            },
+            EnableHV = {
+              name = L["Show Raid Mark Icon in Headline View"],
+              order = 3,
+              type = "toggle",
+              descStyle = "inline",
+              width = "double",
+              set = SetThemeValue,
+              arg = {"settings", "raidicon", "ShowInHeadlineView" },
+            },
+            EnableHealthbarView = {
+              name = L["Color Healthbar by Raid Marks in Healthbar View"],
+              order = 4,
+              type = "toggle",
+              width = "double",
+              set = SetValue,
+              get = GetValue,
+              arg = { "settings", "raidicon", "hpColor" },
+            },
+            EnableHeadlineView = {
+              name = L["Color Name Text by Raid Marks in Headline View"],
+              order = 5,
+              type = "toggle",
+              width = "double",
+              set = SetValue,
+              get = GetValue,
+              arg = { "HeadlineView", "UseRaidMarkColoring" },
+            },
+          },
+        },
+        Layout = {
+          name = L["Icon Layout"],
+          order = 10,
+          type = "group",
+          inline = true,
+          args = {
+            Size = {
+              name = L["Size"],
+              type = "group",
+              inline = true,
+              order = 30,
+              disabled = function() return not (db.settings.raidicon.show or db.settings.raidicon.ShowInHeadlineView) end,
+              args = {
+                Size = {
+                  name = "",
+                  type = "range",
+                  width = "full",
+                  order = 4,
+                  set = SetThemeValue,
+                  arg = { "settings", "raidicon", "scale" },
+                  max = 64,
+                  min = 6,
+                  step = 1,
+                  isPercent = false,
+                },
+              },
+            },
+            Placement = {
+              name = L["Placement"],
+              order = 40,
+              type = "group",
+              inline = true,
+              args = {
+                X = {
+                  name = L["Healthbar X"],
+                  order = 1,
+                  type = "range",
+                  set = SetThemeValue,
+                  arg = { "settings", "raidicon", "x" },
+                  max = 120,
+                  min = -120,
+                  step = 1,
+                  isPercent = false,
+                  disabled = function() return not db.settings.raidicon.show end,
+                },
+                Y = {
+                  name = L["Healthbar Y"],
+                  order = 2,
+                  type = "range",
+                  set = SetThemeValue,
+                  arg = { "settings", "raidicon", "y" },
+                  max = 120,
+                  min = -120,
+                  step = 1,
+                  isPercent = false,
+                  disabled = function() return not db.settings.raidicon.show end,
+                },
+                HeadlineViewX = {
+                  name = L["Headline View X"],
+                  order = 3,
+                  type = "range",
+                  set = SetThemeValue,
+                  arg = { "settings", "raidicon", "x_hv" },
+                  max = 120,
+                  min = -120,
+                  step = 1,
+                  isPercent = false,
+                  disabled = function() return not db.settings.raidicon.ShowInHeadlineView end,
+                },
+                HeadlineViewY = {
+                  name = L["Headline View Y"],
+                  order = 4,
+                  type = "range",
+                  set = SetThemeValue,
+                  arg = { "settings", "raidicon", "y_hv" },
+                  max = 120,
+                  min = -120,
+                  step = 1,
+                  isPercent = false,
+                  disabled = function() return not db.settings.raidicon.ShowInHeadlineView end,
+                },
+                Spacer = GetSpacerEntry(5),
+                Anchor = {
+                  name = L["Anchor"],
+                  type = "select",
+                  width = "full",
+                  order = 10,
+                  values = t.FullAlign,
+                  set = SetThemeValue,
+                  arg = { "settings", "raidicon", "anchor" },
+                  disabled = function() return not db.settings.raidicon.show end,
+                },
+              },
+            },
+          },
+        },
+        Coloring = {
+          name = L["Colors"],
+          order = 20,
+          type = "group",
+          inline = true,
+          get = GetColor,
+          set = SetColor,
+          disabled = function() return not (db.settings.raidicon.hpColor or db.HeadlineView.UseRaidMarkColoring) end,
+          args = {
+            STAR = {
+              type = "color",
+              order = 30,
+              name = RAID_TARGET_1,
+              arg = { "settings", "raidicon", "hpMarked", "STAR" },
+            },
+            CIRCLE = {
+              type = "color",
+              order = 31,
+              name = RAID_TARGET_2,
+              arg = { "settings", "raidicon", "hpMarked", "CIRCLE" },
+            },
+            DIAMOND = {
+              type = "color",
+              order = 32,
+              name = RAID_TARGET_3,
+              arg = { "settings", "raidicon", "hpMarked", "DIAMOND" },
+            },
+            TRIANGLE = {
+              type = "color",
+              order = 33,
+              name = RAID_TARGET_4,
+              arg = { "settings", "raidicon", "hpMarked", "TRIANGLE" },
+            },
+            MOON = {
+              type = "color",
+              order = 34,
+              name = RAID_TARGET_5,
+              arg = { "settings", "raidicon", "hpMarked", "MOON" },
+            },
+            SquestwidgetUARE = {
+              type = "color",
+              order = 35,
+              name = RAID_TARGET_6,
+              arg = { "settings", "raidicon", "hpMarked", "SQUARE" },
+            },
+            CROSS = {
+              type = "color",
+              order = 36,
+              name = RAID_TARGET_7,
+              arg = { "settings", "raidicon", "hpMarked", "CROSS" },
+            },
+            SKULL = {
+              type = "color",
+              order = 37,
+              name = RAID_TARGET_8,
+              arg = { "settings", "raidicon", "hpMarked", "SKULL" },
+            },
+          },
+        },
+      },
+    }
+
+  return options
 end
 
 local function ClassIconsWidgetOptions()
   local options = { name = L["Class Icons"], order = 30, type = "group",
     args = {
-      Enable = GetEnableEntry(L["Enable Class Icons Widget"], L["This widget will display class icons on nameplate with the settings you set below."], { "classWidget", "ON" }),
+      Enable = GetEnableEntry(L["Enable Class Icons Widget"], L["This widget will display class icons on nameplate with the settings you set below."], "classWidget", true),
       Options = {
         name = L["Options"],
         type = "group",
@@ -433,7 +784,8 @@ local function ClassIconsWidgetOptions()
         args = {},
       },
       Sizing = GetSizeEntry(40, "classWidget", function() return not db.classWidget.ON end),
-      Placement = GetPlacementEntry(50, "classWidget", function() return not db.classWidget.ON end),
+      --Placement = GetPlacementEntry(50, "classWidget", function() return not db.classWidget.ON end),
+      Placement = GetWidgetPlacementEntry(60, "classWidget"),
     }
   }
   return options
@@ -442,7 +794,7 @@ end
 local function QuestWidgetOptions()
   local options =  { type = "group", order = 90,	name = L["Quest"],
     args = {
-      Enable = GetEnableEntry(L["Enable Quest Widget"], L["Enables highlighting of nameplates of mobs involved with any of your current quests."], {"questWidget", "ON"}),
+      Enable = GetEnableEntry(L["Enable Quest Widget"], L["Enables highlighting of nameplates of mobs involved with any of your current quests."], "questWidget", true),
       Visibility = { type = "group",	order = 10,	name = L["Visibility"], inline = true,
         disabled = function() return not db.questWidget.ON end,
         args = {
@@ -452,10 +804,10 @@ local function QuestWidgetOptions()
         },
       },
       ModeHealthBar = {
-        name = L["Health Bar Mode"], order = 20, type = "group", inline = true,
+        name = L["Healthbar View"], order = 20, type = "group", inline = true,
         disabled = function() return not db.questWidget.ON end,
         args = {
-          Help = { type = "description", order = 0,	width = "full",	name = L["Use a custom color for the health bar of quest mobs."],	},
+          Help = { type = "description", order = 0,	width = "full",	name = L["Use a custom color for the healthbar of quest mobs."],	},
           Enable = { type = "toggle", order = 10, name = L["Enable"],	arg = {"questWidget", "ModeHPBar"}, },
           Color = {
             name = L["Color"], type = "color", desc = "", descStyle = "inline", width = "half",
@@ -482,29 +834,34 @@ end
 local function StealthWidgetOptions()
   local options =  { type = "group", order = 60,	name = L["Stealth"],
     args = {
-      Enable = GetEnableEntry(L["Enable Stealth Widget (Feature not yet fully implemented!)"], L["Shows a stealth icon above the nameplate of units that can detect you while stealthed."], {"stealthWidget", "ON"}),
+      Enable = GetEnableEntry(L["Enable Stealth Widget (Feature not yet fully implemented!)"], L["Shows a stealth icon above the nameplate of units that can detect you while stealthed."], "stealthWidget", true),
     },
   }
   AddLayoutOptions(options.args, 80, "stealthWidget", function() return not db.stealthWidget.ON end)
   return options
 end
 
-local function CreateUnitGroupsHeadlineView()
+local function CreateHeadlineViewShowEntry()
   local args = {}
   local pos = 0
 
   for i, value in ipairs(UNIT_TYPES) do
     local faction = value.Faction
     args[faction .. "Units"] = {
-      name = L[faction .. " Units"], order = pos, type = "group", inline = true,
-      disabled = function() return not (GetWoWCVar("nameplateShowAll") and TidyPlatesThreat.db.profile.HeadlineView.Enabled) end,
+      name = L[faction .. " Units"],
+      order = pos,
+      type = "group",
+      inline = true,
+      disabled = function() return not (GetWoWCVar("nameplateShowAll") and TidyPlatesThreat.db.profile.HeadlineView.ON) end,
       args = {},
     }
 
     for i, unit_type in ipairs(value.UnitTypes) do
       args[faction .. "Units"].args["UnitType" .. faction .. unit_type] = {
-        name = L[unit_type], type = "toggle", order = pos + i, arg = { "Visibility", faction..unit_type, "UseHeadlineView" }
-        --get = GetUnitVisibilityHeadlineView, set = SetUnitVisibilityHeadlineView,
+        name = L[unit_type],
+        order = pos + i,
+        type = "toggle",
+        arg = { "Visibility", faction..unit_type, "UseHeadlineView" }
       }
     end
 
@@ -518,15 +875,22 @@ local function CreateUnitGroupsVisibility(args, pos)
   for i, value in ipairs(UNIT_TYPES) do
     local faction = value.Faction
     args[faction.."Units"] = {
-      name = L["Show "..faction.." Units"], type = "group", order = pos,	inline = true,
+      name = L["Show "..faction.." Units"],
+      order = pos,
+      type = "group",
+      inline = true,
       disabled = function() return not (GetWoWCVar("nameplateShowAll") and GetWoWCVar(value.Disabled)) end,
       args = {},
     }
 
     for i, unit_type in ipairs(value.UnitTypes) do
       args[faction.."Units"].args["UnitType"..faction..unit_type] = {
-        name = L[unit_type.."s"], type = "toggle", order = pos + i, arg = faction..unit_type,
-        get = GetUnitVisibilitySetting, set = SetUnitVisibilitySetting,
+        name = L[unit_type.."s"],
+        order = pos + i,
+        type = "toggle",
+        arg = faction..unit_type,
+        get = GetUnitVisibilitySetting,
+        set = SetUnitVisibilitySetting,
       }
     end
 
@@ -594,19 +958,47 @@ local function CreateTabGeneralSettings()
         width = "full",
         disabled = function() return not GetWoWCVar("nameplateShowAll") end,
         args = {
-          HideNormal = { name = L["Normal"], order = 1, type = "toggle", arg = { "visibility", "HideNormal" }, },
-          HideBoss = { name = L["Boss"], order = 2, type = "toggle", arg = { "visibility", "HideBoss" }, },
-          HideElite = { name = L["Elite"], order = 3, type = "toggle", arg = { "visibility", "HideElite" }, },
-          HideTapped = { name = L["Tapped"], order = 4, type = "toggle", arg = { "visibility", "HideTapped" }, },
+          HideNormal = { name = L["Normal"], order = 1, type = "toggle", arg = { "Visibility", "HideNormal" }, },
+          HideBoss = { name = L["Boss"], order = 2, type = "toggle", arg = { "Visibility", "HideBoss" }, },
+          HideElite = { name = L["Elite"], order = 3, type = "toggle", arg = { "Visibility", "HideElite" }, },
+          HideTapped = { name = L["Tapped"], order = 4, type = "toggle", arg = { "Visibility", "HideTapped" }, },
         },
       },
-     OpenBlizzardSettings = {
-      name = L["Open Blizzard Settings"], order = 90, type = "execute",
-      func = function()
-        InterfaceOptionsFrame_OpenToCategory(_G["InterfaceOptionsNamesPanel"])
-        LibStub("AceConfigDialog-3.0"):Close("Tidy Plates: Threat Plates");
-      end,
-     },
+      Clickthrough = {
+        name = L["Nameplate Clickthrough"],
+        type = "group",
+        order = 100,
+        inline = true,
+        width = "full",
+        disabled = function() return not GetWoWCVar("nameplateShowAll") end,
+        args = {
+          ClickthroughFriendly = {
+            name = L["Enable for Friendly Nameplates"],
+            order = 1,
+            type = "toggle",
+            width = "double",
+            set = function(info, val) C_NamePlate.SetNamePlateFriendlyClickThrough(val) end,
+            get = function(info) return C_NamePlate.GetNamePlateFriendlyClickThrough() end,
+          },
+          ClickthroughEnemy = {
+            name = L["Enable for Enemy Nameplates"],
+            order = 2,
+            type = "toggle",
+            width = "double",
+            set = function(info, val) C_NamePlate.SetNamePlateEnemyClickThrough(val) end,
+            get = function(info) return C_NamePlate.GetNamePlateEnemyClickThrough() end,
+          },
+        },
+      },
+--      OpenBlizzardSettings = {
+--        name = L["Open Blizzard Settings"],
+--        order = 90,
+--        type = "execute",
+--        func = function()
+--          InterfaceOptionsFrame_OpenToCategory(_G["InterfaceOptionsNamesPanel"])
+--          LibStub("AceConfigDialog-3.0"):Close("Tidy Plates: Threat Plates");
+--        end,
+--      },
     },
   }
 
@@ -696,7 +1088,7 @@ local function GetOptions()
           args = {
             GeneralSettings = CreateTabGeneralSettings(),
             HealthBarView = {
-              name = L["Health Bar View"],
+              name = L["Healthbar View"],
               type = "group",
               inline = false,
               order = 20,
@@ -867,26 +1259,25 @@ local function GetOptions()
                   name = L["Coloring"],
                   type = "group",
                   inline = true,
-                  order = 30,
+                  order = 10,
                   args = {
-                    ColorByHPLevel = {
-                      name = L["Color by Health"],
-                      order = 1,
-                      type = "toggle",
-                      desc = L["Changes the color depending on the amount of health points the nameplate shows."],
-                      descStyle = "inline",
-                      width = "full",
-                      arg = { "healthColorChange" },
-                    },
                     HPAmount = {
-                      name = L["Health Colors"],
+                      name = L["Color by Health"],
                       order = 2,
                       type = "group",
                       inline = true,
                       args = {
+                        ColorByHPLevel = {
+                          name = L["Change the color depending on the amount of health points the nameplate shows."],
+                          order = 10,
+                          type = "toggle",
+                          width = "full",
+                          arg = { "healthColorChange" },
+                        },
+                        Header = { name = "Colors", type = "header", order = 20, },
                         ColorLow = {
                           name = "Low Color",
-                          order = 1,
+                          order = 30,
                           type = "color",
                           desc = "",
                           descStyle = "inline",
@@ -896,7 +1287,7 @@ local function GetOptions()
                         },
                         ColorHigh = {
                           name = "High Color",
-                          order = 2,
+                          order = 40,
                           type = "color",
                           desc = "",
                           descStyle = "inline",
@@ -906,44 +1297,15 @@ local function GetOptions()
                         },
                       },
                     },
-                    ColorByReaction = {
-                      name = L["Color by Reaction"],
-                      type = "toggle",
-                      desc = L["Changes the color depending on the reaction of the unit (friendly, hostile, neutral)."],
-                      descStyle = "inline",
-                      width = "full",
-                      order = 3,
-                      arg = { "healthColorChange" },
-                      get = function(info) return not GetValue(info) end,
-                      set = function(info, val) SetValue(info, not val) end,
-                    },
-                    Reaction = {
-                      order = 4,
-                      name = L["Reaction Colors"],
-                      type = "group",
-                      inline = true,
-                      get = GetColor,
-                      set = SetColor,
-                      args = {
-                        FriendlyColorNPC = { name = L["Friendly NPC"], order = 1, type = "color", arg = { "ColorByReaction", "FriendlyNPC", }, },
-                        FriendlyColorPlayer = { name = L["Friendly Player"], order = 2, type = "color", arg = { "ColorByReaction", "FriendlyPlayer" }, },
-                        EnemyColorNPC = { name = L["Hostile NPC"], order = 3, type = "color", arg = { "ColorByReaction", "HostileNPC" }, },
-                        EnemyColorPlayer = { name = L["Hostile Player"], order = 4, type = "color", arg = { "ColorByReaction", "HostilePlayer" }, },
-                        NeutralColor = { name = L["Neutral Unit"], order = 5, type = "color", arg = { "ColorByReaction", "NeutralUnit" }, },
-                        TappedColor = { name = L["Tapped Unit"], order = 6, type = "color", arg = { "ColorByReaction", "TappedUnit" }, },
-                        -- TODO: friends too?
-                        GuildMemberColor = { name = L["Guild Member"], order = 7, type = "color", arg = { "ColorByReaction", "GuildMember" }, },
-                      },
-                    },
                     ClassColors = {
-                      name = L["Class Coloring"],
-                      order = 2,
+                      name = L["Color By Class"],
+                      order = 20,
                       type = "group",
                       disabled = function() return db.healthColorChange end,
                       inline = true,
                       args = {
                         Enable = {
-                          name = L["Enable Enemy Class colors"],
+                          name = L["Enable Enemy Class Colors"],
                           order = 1,
                           type = "toggle",
                           desc = L["Enable the showing of hostile player class color on hp bars."],
@@ -964,84 +1326,112 @@ local function GetOptions()
                           name = L["Friendly Caching"],
                           order = 3,
                           type = "toggle",
-                          desc = L["This allows you to save friendly player class information between play sessions or nameplates going off the screen.|cffff0000(Uses more memory)"],
+                          desc = L["This allows you to save friendly player class information between play sessions or nameplates going off the screen. |cffff0000(Uses more memory)"],
                           descStyle = "inline",
                           width = "full",
                           arg = { "cacheClass" },
                         },
                       },
                     },
-                    EnableRaidMarks = {
-                      name = L["Color by Raid Marks"],
-                      order = 8,
-                      type = "toggle",
-                      width = "full",
-                      desc = L["Additionnally changes the color depending on the amount of health points the nameplate shows."],
-                      descStyle = "inline",
-                      set = SetValue,
-                      arg = { "settings", "raidicon", "hpColor" },
-                    },
-                    RaidMark = {
-                      name = L["Raid Mark Colors"],
-                      order = 9,
+                    Reaction = {
+                      order = 30,
+                      name = L["Color by Reaction"],
                       type = "group",
                       inline = true,
                       get = GetColor,
                       set = SetColor,
                       args = {
+                        ColorByReaction = {
+                          name = L["Change the color depending on the reaction of the unit (friendly, hostile, neutral)."],
+                          type = "toggle",
+                          width = "full",
+                          order = 1,
+                          arg = { "healthColorChange" },
+                          get = function(info) return not GetValue(info) end,
+                          set = function(info, val) SetValue(info, not val) end,
+                        },
+                        Header = { name = "Colors", type = "header", order = 10, },
+                        FriendlyColorNPC = { name = L["Friendly NPC"], order = 20, type = "color", arg = { "ColorByReaction", "FriendlyNPC", }, },
+                        FriendlyColorPlayer = { name = L["Friendly Player"], order = 30, type = "color", arg = { "ColorByReaction", "FriendlyPlayer" }, },
+                        EnemyColorNPC = { name = L["Hostile NPC"], order = 40, type = "color", arg = { "ColorByReaction", "HostileNPC" }, },
+                        EnemyColorPlayer = { name = L["Hostile Player"], order = 50, type = "color", arg = { "ColorByReaction", "HostilePlayer" }, },
+                        NeutralColor = { name = L["Neutral Unit"], order = 60, type = "color", arg = { "ColorByReaction", "NeutralUnit" }, },
+                        TappedColor = { name = L["Tapped Unit"], order = 70, type = "color", arg = { "ColorByReaction", "TappedUnit" }, },
+                        -- TODO: friends too?
+                        GuildMemberColor = { name = L["Guild Member"], order = 80, type = "color", arg = { "ColorByReaction", "GuildMember" }, },
+                      },
+                    },
+                    RaidMark = {
+                      name = L["Color by Raid Mark"],
+                      order = 40,
+                      type = "group",
+                      inline = true,
+                      get = GetColor,
+                      set = SetColor,
+                      args = {
+                        EnableRaidMarks = {
+                          name = L["Additionally color the healthbar based on the raid mark if the nameplate is marked."],
+                          order = 1,
+                          type = "toggle",
+                          width = "full",
+                          set = SetValue,
+                          get = GetValue,
+                          arg = { "settings", "raidicon", "hpColor" },
+                        },
+                        Header = { name = "Colors", type = "header", order = 20, },
                         STAR = {
                           type = "color",
-                          order = 1,
+                          order = 30,
                           name = RAID_TARGET_1,
                           arg = { "settings", "raidicon", "hpMarked", "STAR" },
                         },
                         CIRCLE = {
                           type = "color",
-                          order = 2,
+                          order = 31,
                           name = RAID_TARGET_2,
                           arg = { "settings", "raidicon", "hpMarked", "CIRCLE" },
                         },
                         DIAMOND = {
                           type = "color",
-                          order = 3,
+                          order = 32,
                           name = RAID_TARGET_3,
                           arg = { "settings", "raidicon", "hpMarked", "DIAMOND" },
                         },
                         TRIANGLE = {
                           type = "color",
-                          order = 4,
+                          order = 33,
                           name = RAID_TARGET_4,
                           arg = { "settings", "raidicon", "hpMarked", "TRIANGLE" },
                         },
                         MOON = {
                           type = "color",
-                          order = 5,
+                          order = 34,
                           name = RAID_TARGET_5,
                           arg = { "settings", "raidicon", "hpMarked", "MOON" },
                         },
                         SquestwidgetUARE = {
                           type = "color",
-                          order = 6,
+                          order = 35,
                           name = RAID_TARGET_6,
                           arg = { "settings", "raidicon", "hpMarked", "SQUARE" },
                         },
                         CROSS = {
                           type = "color",
-                          order = 7,
+                          order = 36,
                           name = RAID_TARGET_7,
                           arg = { "settings", "raidicon", "hpMarked", "CROSS" },
                         },
                         SKULL = {
                           type = "color",
-                          order = 8,
+                          order = 37,
                           name = RAID_TARGET_8,
                           arg = { "settings", "raidicon", "hpMarked", "SKULL" },
                         },
                       },
                     },
                     ThreatColors = {
-                      name = L["Threat Colors"],
-                      order = 5,
+                      name = L["Threat Coloring"],
+                      order = 50,
                       type = "group",
                       get = GetColorAlpha,
                       set = SetColorAlpha,
@@ -1057,39 +1447,52 @@ local function GetOptions()
                         },
                         OnlyAttackedUnits = {
                           type = "toggle",
-                          order = 1.5,
+                          order = 2,
                           name = L["Only on Attacked Units"],
                           desc = L["Show threat glow only on units in combat with the player."],
                           get = GetValue,
-                          set = SetThemeValue,
+                          set = SetValue,
                           arg = { "ShowThreatGlowOnAttackedUnitsOnly" },
                         },
-                        Header = {
-                          name = "Colors",
-                          type = "header",
-                          order = 2,
-                        },
-                        Low = {
-                          name = L["|cff00ff00Low threat|r"],
-                          type = "color",
+                        OffTankToggle = {
+                          type = "toggle",
                           order = 3,
+                          name = L["Show Off-Tank"],
+                          desc = L["Show threat glow in different color for mobs on off-tanks (only if in tank spec)."],
+                          get = GetValue,
+                          set = SetValue,
+                          arg = { "ShowThreatGlowOffTank" },
+                        },
+                        Header = { name = "Colors", type = "header", order = 10, },
+                        Low = {
+                          name = L["|cff00ff00Low Threat|r"],
+                          type = "color",
+                          order = 20,
                           arg = { "settings", "normal", "threatcolor", "LOW" },
                           hasAlpha = true,
                         },
                         Med = {
-                          name = L["|cffffff00Medium threat|r"],
+                          name = L["|cffffff00Medium Threat|r"],
                           type = "color",
-                          order = 4,
+                          order = 30,
                           arg = { "settings", "normal", "threatcolor", "MEDIUM" },
                           hasAlpha = true,
                         },
                         High = {
-                          name = L["|cffff0000High threat|r"],
+                          name = L["|cffff0000High Threat|r"],
                           type = "color",
-                          order = 5,
+                          order = 40,
                           arg = { "settings", "normal", "threatcolor", "HIGH" },
                           hasAlpha = true,
                         },
+                        OffTank = {
+                          name = L["|cff0faac8Off-Tank|r"],
+                          type = "color",
+                          order = 50,
+                          arg = { "settings", "normal", "threatcolor", "OFFTANK" },
+                          hasAlpha = true,
+                        },
+
                       },
                     },
                   },
@@ -1102,214 +1505,239 @@ local function GetOptions()
               inline = false,
               order = 25,
               args = {
-                Enable = {
-                  name = L["Enable"],
-                  order = 0,
-                  type = "group",
-                  inline = true,
-                  args = {
-                    Enable = {
-                      name = L["Enable Headline View (Text-Only)"],
-                      type = "toggle",
-                      order = 1,
-                      desc = L["This will enable headline view (Text-Only) for nameplates. TidyPlatesHub must be enabled for this to work. Use the TidyPlatesHub options for configuration."],
-                      descStyle = "inline",
-                      width = "full",
-                      set = SetThemeValue,
-                      arg = { "HeadlineView", "Enabled" },
-                    },
-                  },
-                },
-                Usage = {
-                  name = L["Enable Headline View (Text-Only) for Unit Types"],
+                Enable = GetEnableEntry(L["Enable Headline View (Text-Only)"], L["This will enable headline view (text-only) for nameplates."], "HeadlineView"),
+                ShowByUnitType = {
+                  name = L["Show By Unit Type"],
                   order = 10,
                   type = "group",
                   inline = true,
-                  disabled = function() return not TidyPlatesThreat.db.profile.HeadlineView.Enabled  end,
-                  args = CreateUnitGroupsHeadlineView(),
+                  disabled = function() return not TidyPlatesThreat.db.profile.HeadlineView.ON  end,
+                  args = CreateHeadlineViewShowEntry(),
                 },
-                ColorSettings = {
-                  name = L["Coloring"],
+                ShowByStatus = {
+                  name = L["Show By Status"],
+                  order = 15,
+                  type = "group",
+                  inline = true,
+                  disabled = function() return not TidyPlatesThreat.db.profile.HeadlineView.ON  end,
+                  args = {
+                    ModeOnTarget = {
+                    name = L["Force Healthbars on Target"],
+                    order = 1,
+                    type = "toggle",
+                    width = "double",
+                    arg = { "HeadlineView", "ForceHealthbarOnTarget" }
+                    },
+                    ModeOoC = {
+                      name = L["Force Headline View while Out-of-Combat"],
+                      order = 2,
+                      type = "toggle",
+                      width = "double",
+                      arg = { "HeadlineView", "ForceOutOfCombat" }
+                    }
+                  }
+                },
+                Appearance = {
+                  name = L["Appearance"],
+                  type = "group",
+                  inline = true,
                   order = 20,
-                  type = "group",
-                  inline = true,
-                  disabled = function() return not TidyPlatesThreat.db.profile.HeadlineView.Enabled end,
                   args = {
-                    EnemyColor = {
-                      name = L["Enemy Headline Color"],
+                    ColorSettings = {
+                      name = L["Colors"],
                       order = 10,
-                      type = "select",
-                      values = ThreatPlates.ENEMY_TEXT_COLOR,
-                      arg = { "HeadlineView", "EnemyTextColorMode" }
-                    },
-                    EnemyColorCustom = GetColorAlphaEntry(11, { "HeadlineView", "EnemyTextColor" }),
-                    Spacer1 = GetSpacerEntry(15),
-                    FriendlyColor = {
-                      name = L["Friendly Headline Color"],
-                      order = 20,
-                      type = "select",
-                      values = ThreatPlates.FRIENDLY_TEXT_COLOR,
-                      arg = { "HeadlineView", "FriendlyTextColorMode" }
-                    },
-                    FriendlyColorCustom = GetColorAlphaEntry(25, { "HeadlineView", "FriendlyTextColor" }),
-                    EnableRaidMarks = {
-                      name = L["Color by Raid Marks"],
-                      order = 70,
-                      type = "toggle",
-                      width = "full",
-                      desc = L["Additionnally changes the color depending on the amount of health points the nameplate shows."],
-                      descStyle = "inline",
-                      set = SetValue,
-                      arg = { "HeadlineView", "UseRaidMarkColoring" },
-                    },
-                    SubtextColor = { name = L["Subtext:"], order = 80, type = "description", width = "half"},
-                    SubtextColorHeadline = {
-                      name = L["Same as Headline"],
-                      order = 90,
-                      type = "toggle",
-                      arg = { "HeadlineView", "SubtextColorUseHeadline" },
-                    },
-                    SubtextColorCustom = {
-                      name = L["Custom"],
-                      order = 100,
-                      type = "toggle",
-                      width = "half",
-                      set = function(info, val) SetValue(info, not val) end,
-                      get = function(info) return not GetValue(info) end,
-                      arg = { "HeadlineView", "SubtextColorUseHeadline" },
-                    },
-                    SubtextColorCustomColor = GetColorAlphaEntry(105, { "HeadlineView", "SubtextColor" }, function() return TidyPlatesThreat.db.profile.HeadlineView.SubtextColorUseHeadline end),
-                  },
-                  ColorSettings = {
-                    name = L["Subtext"],
-                    order = 30,
-                    type = "group",
-                    inline = true,
-                    disabled = function() return not TidyPlatesThreat.db.profile.HeadlineView.Enabled end,
-                    args = {
-                      FriendlySubtext = {
-                        name = L["Friendly Subtext"],
-                        order = 20,
-                        type = "select",
-                        values = ThreatPlates.FRIENDLY_SUBTEXT,
-                        arg = { "HeadlineView", "FriendlySubtext" }
-                      },
-                      EnemySubtext = {
-                        name = L["Enemy Subtext"],
-                        order = 20,
-                        type = "select",
-                        values = ThreatPlates.ENEMY_SUBTEXT,
-                        arg = { "HeadlineView", "EnemySubtext" }
-                      },
-                    },
-                --                SubtextSettings = {
-                --                  name = L["Subtext"],
-                --                  order = 70,
-                --                  type = "group",
-                --                  inline = true,
-                --                  disabled = function() return not TidyPlatesThreat.db.profile.HeadlineView.Enabled  end,
-                --                  args = {
-                --                    EnemyColor = {
-                --                      name = L["Enemy Headline Color"],
-                --                      order = 10,
-                --                      type = "select",
-                --                      values = ThreatPlates.ENEMY_TEXT_COLOR,
-                --                      arg = { "HeadlineView", "EnemyTextColor" }
-                --                    },
-                --                    EnemyColorCustom = { name = L["Color"], order = 11, type = "color", arg = { "HeadlineView", "EnemyTextColorCustom" }, get = GetColor, set = SetColor, hasAlpha = false, },
-                --                    Spacer1 = CreateSpacer(15),
-                --                    FriendlyColor = {
-                --                      name = L["Friendly Headline Color"],
-                --                      order = 20,
-                --                      type = "select",
-                --                      values = ThreatPlates.FRIENDLY_TEXT_COLOR,
-                --                      arg = { "HeadlineView", "FriendlyTextColor" }
-                --                    },
-                --                    FriendlyColorCustom = { name = L["Color"], order = 21, type = "color", arg = { "HeadlineView", "FriendlyTextColorCustom" }, get = GetColor, set = SetColor, hasAlpha = false, },
-                --                  },
-                --                },
-                },
-                Alpha = {
-                  name = L["Alpha"],
-                  order = 30,
-                  type = "group",
-                  inline = true,
-                  disabled = function() return not TidyPlatesThreat.db.profile.HeadlineView.Enabled  end,
-                  args = {
-                    Alpha = {
-                      name = L["Use alpha settings of health bar view for also headline view."],
-                      type = "toggle",
-                      order = 1,
-                      -- desc = L["This will enable "],
-                      -- descStyle = "inline",
-                      width = "full",
-                      set = SetThemeValue,
-                      arg = { "HeadlineView", "useAlpha" },
-                    },
-                    Enable = {
-                      name = L["Enable Blizzard 'On-Target' Fading"],
-                      type = "toggle",
-                      desc = L["Enabling this will allow you to set the alpha adjustment for non-target names in headline view."],
-                      descStyle = "inline",
-                      order = 2,
-                      width = "full",
-                      arg = { "HeadlineView", "blizzFading" },
-                    },
-                    blizzFade = {
-                      name = L["Non-Target Alpha"],
-                      type = "range",
-                      order = 4,
-                      width = "full",
-
-                      min = -1,
-                      max = 0,
-                      step = 0.01,
-                      isPercent = true,
-                      --set = SetThemeValue,
-                      arg = { "HeadlineView", "blizzFadingAlpha" },
-                    },
-                  },
-                },
-                Scaline = {
-                  name = L["Scaling"],
-                  order = 40,
-                  type = "group",
-                  inline = true,
-                  disabled = function() return not TidyPlatesThreat.db.profile.HeadlineView.Enabled  end,
-                  args = {
-                    Scaling = {
-                      name = L["Use scaling settings of health bar view also for headline view."],
-                      type = "toggle",
-                      order = 1,
-                      -- desc = L["This will enable headline view "],
-                      -- descStyle = "inline",
-                      width = "full",
-                      set = SetThemeValue,
-                      arg = { "HeadlineView", "useScaling" },
-                    },
-                  },
-                },
-                FontSize = {
-                  name = L["Text Bounds and Sizing"],
-                  order = 50,
-                  type = "group",
-                  inline = true,
-                  disabled = function() return not TidyPlatesThreat.db.profile.HeadlineView.Enabled  end,
-                  args = {
-                    FontSize = { name = L["Font Size"], type = "range", width = "full", order = 1, set = SetThemeValue, arg = { "HeadlineView", "name", "size" }, max = 36, min = 6, step = 1, isPercent = false, },
-                    TextBounds = {
-                      name = L["Text Boundaries"],
                       type = "group",
-                      order = 2,
+                      inline = true,
+                      disabled = function() return not TidyPlatesThreat.db.profile.HeadlineView.ON end,
                       args = {
-                        Description = {
-                          type = "description",
-                          order = 1,
-                          name = L["These settings will define the space that text can be placed on the nameplate.\nHaving too large a font and not enough height will cause the text to be not visible."],
-                          width = "full",
+                        FriendlyColor = {
+                          name = L["Friendly Headline Color"],
+                          order = 10,
+                          type = "select",
+                          values = ThreatPlates.FRIENDLY_TEXT_COLOR,
+                          arg = { "HeadlineView", "FriendlyTextColorMode" }
                         },
-                        Width = { type = "range", width = "full", order = 2, name = L["Text Width"], set = SetThemeValue, arg = { "HeadlineView", "name", "width" }, max = 250, min = 20, step = 1, isPercent = false, },
-                        Height = { type = "range", width = "full", order = 3, name = L["Text Height"], set = SetThemeValue, arg = { "HeadlineView", "name", "height" }, max = 40, min = 8, step = 1, isPercent = false, },
+                        FriendlyColorCustom = GetColorAlphaEntry(15, { "HeadlineView", "FriendlyTextColor" }),
+                        EnemyColor = {
+                          name = L["Enemy Headline Color"],
+                          order = 20,
+                          type = "select",
+                          values = ThreatPlates.ENEMY_TEXT_COLOR,
+                          arg = { "HeadlineView", "EnemyTextColorMode" }
+                        },
+                        EnemyColorCustom = GetColorAlphaEntry(25, { "HeadlineView", "EnemyTextColor" }),
+                        Spacer1 = GetSpacerEntry(30),
+                        EnableRaidMarks = {
+                          name = L["Color by Raid Marks"],
+                          order = 70,
+                          type = "toggle",
+                          width = "full",
+                          desc = L["Additionally color the name text based on the raid mark if the nameplate is marked."],
+                          descStyle = "inline",
+                          set = SetValue,
+                          arg = { "HeadlineView", "UseRaidMarkColoring" },
+                        },
+                      },
+                    },
+                    SubtextSettings = {
+                      name = L["Subtext"],
+                      order = 20,
+                      type = "group",
+                      inline = true,
+                      disabled = function()return not TidyPlatesThreat.db.profile.HeadlineView.ON end,
+                      args = {
+                        FriendlySubtext = {
+                          name = L["FriendlySubtext"],
+                          order = 10,
+                          type = "select",
+                          values = ThreatPlates.FRIENDLY_SUBTEXT,
+                          arg = {"HeadlineView", "FriendlySubtext"}
+                        },
+                        Spacer1 = { name = "", order = 15, type = "description", width = "half", },
+                        EnemySubtext = {
+                          name = L["EnemySubtext"],
+                          order = 20,
+                          type = "select",
+                          values = ThreatPlates.ENEMY_SUBTEXT,
+                          arg = {"HeadlineView", "EnemySubtext"}
+                        },
+                        Spacer2 = GetSpacerEntry(25),
+                        SubtextColor = {
+                          name = L["Color"],
+                          order = 40,
+                          type = "group",
+                          inline = true,
+                          args = {
+                            SubtextColorHeadline = {
+                              name = L["Same as Headline"],
+                              order = 10,
+                              type = "toggle",
+                              arg = { "HeadlineView", "SubtextColorUseHeadline" },
+                              set = function(info, val)
+                                TidyPlatesThreat.db.profile.HeadlineView.SubtextColorUseSpecific = false
+                                SetValue(info, true)
+                              end,
+                            },
+                            SubtextColorSpecific = {
+                              name = L["Subtext-specific"],
+                              order = 20,
+                              type = "toggle",
+                              arg = { "HeadlineView", "SubtextColorUseSpecific" },
+                              set = function(info, val)
+                                TidyPlatesThreat.db.profile.HeadlineView.SubtextColorUseHeadline = false
+                                SetValue(info, true)
+                              end,
+                            },
+                            SubtextColorCustom = {
+                              name = L["Custom"],
+                              order = 30,
+                              type = "toggle",
+                              width = "half",
+                              set = function(info, val)
+                                TidyPlatesThreat.db.profile.HeadlineView.SubtextColorUseHeadline = false
+                                TidyPlatesThreat.db.profile.HeadlineView.SubtextColorUseSpecific = false
+                                TidyPlates:ForceUpdate()
+                              end,
+                              get = function(info) return not (TidyPlatesThreat.db.profile.HeadlineView.SubtextColorUseHeadline or TidyPlatesThreat.db.profile.HeadlineView.SubtextColorUseSpecific) end,
+                            },
+                            SubtextColorCustomColor = GetColorAlphaEntry(35, { "HeadlineView", "SubtextColor" },
+                              function() return (TidyPlatesThreat.db.profile.HeadlineView.SubtextColorUseHeadline or TidyPlatesThreat.db.profile.HeadlineView.SubtextColorUseSpecific) end ),
+                          },
+                        },
+                      },
+                    },
+                    TextureSettings = {
+                      name = L["Highlight Texture"],
+                      order = 30,
+                      type = "group",
+                      inline = true,
+                      disabled = function()return not TidyPlatesThreat.db.profile.HeadlineView.ON end,
+                      args = {
+                        TargetHighlight = {
+                          name = L["Show Target"],
+                          order = 10,
+                          type = "toggle",
+                          arg = { "HeadlineView", "ShowTargetHighlight" },
+                          set = SetThemeValue,
+                        },
+                        TargetMouseoverHighlight = {
+                          name = L["Show Mouseover"],
+                          order = 20,
+                          type = "toggle",
+                          desc = L["Show the mouseover highlight on all units."],
+                          arg = { "HeadlineView", "ShowMouseoverHighlight" },
+                          set = SetThemeValue,
+                        },
+                      },
+                    },
+                    Alpha = {
+                      name = L["Alpha & Scaling"],
+                      order = 40,
+                      type = "group",
+                      inline = true,
+                      disabled = function() return not TidyPlatesThreat.db.profile.HeadlineView.ON  end,
+                      args = {
+                        Alpha = {
+                          name = L["Apply alpha settings of healthbar view also to headline view."],
+                          type = "toggle",
+                          order = 1,
+                          width = "full",
+                          arg = { "HeadlineView", "useAlpha" },
+                        },
+                        Enable = {
+                          name = L["Enable Blizzard 'On-Target' Fading"],
+                          type = "toggle",
+                          desc = L["Enabling this will allow you to set the alpha adjustment for non-target names in headline view."],
+                          descStyle = "inline",
+                          order = 2,
+                          width = "double",
+                          arg = { "HeadlineView", "blizzFading" },
+                          disabled = function() return db.HeadlineView.useAlpha end
+                        },
+                        blizzFade = {
+                          name = L["Non-Target Alpha"],
+                          type = "range",
+                          order = 3,
+                          min = -1,
+                          max = 0,
+                          step = 0.01,
+                          isPercent = true,
+                          arg = { "HeadlineView", "blizzFadingAlpha" },
+                          disabled = function() return db.HeadlineView.useAlpha end
+                        },
+                        Spacer = GetSpacerEntry(5),
+                        Scaling = {
+                          name = L["Apply scaling settings of healthbar view also to headline view."],
+                          type = "toggle",
+                          order = 10,
+                          width = "full",
+                          arg = { "HeadlineView", "useScaling" },
+                        },
+                      },
+                    },
+                    FontSize = {
+                      name = L["Text Bounds and Sizing"],
+                      order = 50,
+                      type = "group",
+                      inline = true,
+                      disabled = function() return not TidyPlatesThreat.db.profile.HeadlineView.ON  end,
+                      args = {
+                        FontSize = { name = L["Font Size"], type = "range", width = "full", order = 1, set = SetThemeValue, arg = { "HeadlineView", "name", "size" }, max = 36, min = 6, step = 1, isPercent = false, },
+                        TextBounds = {
+                          name = L["Text Boundaries"],
+                          type = "group",
+                          order = 2,
+                          args = {
+                            Description = {
+                              type = "description",
+                              order = 1,
+                              name = L["These settings will define the space that text can be placed on the nameplate.\nHaving too large a font and not enough height will cause the text to be not visible."],
+                              width = "full",
+                            },
+                            Width = { type = "range", width = "full", order = 2, name = L["Text Width"], set = SetThemeValue, arg = { "HeadlineView", "name", "width" }, max = 250, min = 20, step = 1, isPercent = false, },
+                            Height = { type = "range", width = "full", order = 3, name = L["Text Height"], set = SetThemeValue, arg = { "HeadlineView", "name", "height" }, max = 40, min = 8, step = 1, isPercent = false, },
+                          },
+                        },
                       },
                     },
                   },
@@ -1319,12 +1747,12 @@ local function GetOptions()
                   order = 60,
                   type = "group",
                   inline = true,
-                  disabled = function() return not TidyPlatesThreat.db.profile.HeadlineView.Enabled  end,
+                  disabled = function() return not TidyPlatesThreat.db.profile.HeadlineView.ON  end,
                   args = {
-                    X = { name = L["X"], type = "range", width = "full", order = 1, set = SetThemeValue, arg = { "HeadlineView", "name", "x" }, max = 120, min = -120, step = 1, isPercent = false, },
-                    Y = { name = L["Y"], type = "range", width = "full", order = 2, set = SetThemeValue, arg = { "HeadlineView", "name", "y" }, max = 120, min = -120, step = 1, isPercent = false, },
-                    AlignH = { name = L["Horizontal Align"], type = "select", width = "full", order = 3, values = t.AlignH, set = SetThemeValue, arg = { "HeadlineView", "name", "align" }, },
-                    AlignV = { name = L["Vertical Align"], type = "select", width = "full", order = 4, values = t.AlignV, set = SetThemeValue, arg = { "HeadlineView", "name", "vertical" }, },
+                    X = { name = L["X"], type = "range", order = 1, set = SetThemeValue, arg = { "HeadlineView", "name", "x" }, max = 120, min = -120, step = 1, isPercent = false, },
+                    Y = { name = L["Y"], type = "range", order = 2, set = SetThemeValue, arg = { "HeadlineView", "name", "y" }, max = 120, min = -120, step = 1, isPercent = false, },
+                    AlignH = { name = L["Horizontal Align"], type = "select", order = 4, values = t.AlignH, set = SetThemeValue, arg = { "HeadlineView", "name", "align" }, },
+                    AlignV = { name = L["Vertical Align"], type = "select", order = 5, values = t.AlignV, set = SetThemeValue, arg = { "HeadlineView", "name", "vertical" }, },
                   },
                 },
               },
@@ -1340,14 +1768,27 @@ local function GetOptions()
                   inline = true,
                   order = 1,
                   args = {
-                    CastbarToggle = {
-                      name = L["Enable"],
-                      type = "toggle",
+                    Enable = {
+                      name = L["Enable Castbar"],
                       order = 1,
+                      type = "toggle",
+                      desc = L["Enables the showing of the castbar on nameplates."],
+                      descStyle = "inline",
+                      width = "full",
                       get = GetCvar,
 											set = function(info, val) SetCvar(info, val); if val then TidyPlates:EnableCastBars() else TidyPlates:DisableCastBars() end end,
                       arg = "ShowVKeyCastbar",
                     },
+                    EnableHV = {
+                      name = L["Enable in Headline View"],
+                      order = 2,
+                      type = "toggle",
+                      descStyle = "inline",
+                      width = "full",
+                      disabled = function() return GetCVar("ShowVKeyCastbar") == "0" end,
+                      set = SetThemeValue,
+                      arg = {"settings", "castbar", "ShowInHeadlineView" },
+                    }
                   },
                 },
                 Textures = {
@@ -1399,12 +1840,12 @@ local function GetOptions()
                   disabled = function() if GetCVar("ShowVKeyCastbar") == "1" then return false else return true end end,
                   args = {
                     PlacementX = {
-                      name = L["X"],
+                      name = L["Healthbar X"],
+                      order = 1,
                       type = "range",
                       min = -60,
                       max = 60,
                       step = 1,
-                      order = 2,
                       set = function(info, val)
                         local b1 = {}; b1.arg = { "settings", "castborder", "x" };
                         local b2 = {}; b2.arg = { "settings", "castnostop", "x" };
@@ -1415,12 +1856,12 @@ local function GetOptions()
                       arg = { "settings", "castbar", "x" },
                     },
                     PlacementY = {
-                      name = L["Y"],
+                      name = L["Healthbar Y"],
+                      order = 2,
                       type = "range",
                       min = -60,
                       max = 60,
                       step = 1,
-                      order = 3,
                       set = function(info, val)
                         local b1 = {}; b1.arg = { "settings", "castborder", "y" };
                         local b2 = {}; b2.arg = { "settings", "castnostop", "y" };
@@ -1430,6 +1871,28 @@ local function GetOptions()
                       end,
                       arg = { "settings", "castbar", "y" },
                     },
+                    HeadlineViewX = {
+                      name = L["Headline View X"],
+                      type = "range",
+                      order = 3,
+                      min = -60,
+                      max = 60,
+                      step = 1,
+                      arg = { "settings", "castbar", "x_hv" },
+                      set = SetThemeValue,
+                      disabled = function() return not db.settings.castbar.ShowInHeadlineView end
+                    },
+                    HeadlineViewY = {
+                      name = L["Headline View Y"],
+                      order = 4,
+                      type = "range",
+                      min = -60,
+                      max = 60,
+                      step = 1,
+                      arg = { "settings", "castbar", "y_hv" },
+                      set = SetThemeValue,
+                      disabled = function() return not db.settings.castbar.ShowInHeadlineView end
+                    }
                   },
                 },
                 Coloring = {
@@ -1598,72 +2061,13 @@ local function GetOptions()
                   order = 4,
                   inline = true,
                   args = {
-                    Tapped = {
-                      type = "range",
-                      width = "full",
-                      order = 1,
-                      name = "Tapped",
-                      arg = { "nameplate", "alpha", "Tapped" },
-                      step = 0.05,
-                      min = 0,
-                      max = 1,
-                      isPercent = true,
-                    },
-                    Neutral = {
-                      type = "range",
-                      width = "full",
-                      order = 2,
-                      name = COMBATLOG_FILTER_STRING_NEUTRAL_UNITS,
-                      arg = { "nameplate", "alpha", "Neutral" },
-                      step = 0.05,
-                      min = 0,
-                      max = 1,
-                      isPercent = true,
-                    },
-                    Normal = {
-                      type = "range",
-                      width = "full",
-                      order = 3,
-                      name = PLAYER_DIFFICULTY1,
-                      arg = { "nameplate", "alpha", "Normal" },
-                      step = 0.05,
-                      min = 0,
-                      max = 1,
-                      isPercent = true,
-                    },
-                    Elite = {
-                      type = "range",
-                      width = "full",
-                      order = 4,
-                      name = ELITE,
-                      arg = { "nameplate", "alpha", "Elite" },
-                      step = 0.05,
-                      min = 0,
-                      max = 1,
-                      isPercent = true,
-                    },
-                    Boss = {
-                      type = "range",
-                      width = "full",
-                      order = 5,
-                      name = BOSS,
-                      arg = { "nameplate", "alpha", "Boss" },
-                      step = 0.05,
-                      min = 0,
-                      max = 1,
-                      isPercent = true,
-                    },
-                    Mini = {
-                      type = "range",
-                      width = "full",
-                      order = 6,
-                      name = L["Minor"],
-                      arg = { "nameplate", "alpha", "Mini" },
-                      step = 0.05,
-                      min = 0,
-                      max = 1,
-                      isPercent = true,
-                    },
+                    Minus = GetUnitScaleEntry(L["Minor"], 1, { "nameplate", "alpha", "Minus" }),
+                    Normal = GetUnitScaleEntry(PLAYER_DIFFICULTY1, 2, { "nameplate", "alpha", "Normal" }),
+                    Elite = GetUnitScaleEntry(L["Rare & Elite"], 4, { "nameplate", "alpha", "Elite" }),
+                    Boss = GetUnitScaleEntry(BOSS, 5, { "nameplate", "alpha", "Boss" }),
+                    Header1 = { type = "header", order = 10, name = "", },
+                    Tapped =  GetUnitScaleEntry(L["Tapped"], 11, { "nameplate", "alpha", "Tapped" }),
+                    Neutral = GetUnitScaleEntry(COMBATLOG_FILTER_STRING_NEUTRAL_UNITS, 12, { "nameplate", "alpha", "Neutral" }),
                   },
                 },
               },
@@ -1758,266 +2162,207 @@ local function GetOptions()
                   order = 3,
                   inline = true,
                   args = {
-                    Tapped = {
-                      type = "range",
-                      width = "full",
-                      order = 1,
-                      name = "Tapped",
-                      arg = { "nameplate", "scale", "Tapped" },
-                      step = 0.05,
-                      softMin = 0.6,
-                      softMax = 1.3,
-                      isPercent = true,
-                    },
-                    Neutral = {
-                      type = "range",
-                      width = "full",
-                      order = 2,
-                      name = COMBATLOG_FILTER_STRING_NEUTRAL_UNITS,
-                      arg = { "nameplate", "scale", "Neutral" },
-                      step = 0.05,
-                      softMin = 0.6,
-                      softMax = 1.3,
-                      isPercent = true,
-                    },
-                    Normal = {
-                      type = "range",
-                      width = "full",
-                      order = 3,
-                      name = PLAYER_DIFFICULTY1,
-                      arg = { "nameplate", "scale", "Normal" },
-                      step = 0.05,
-                      softMin = 0.6,
-                      softMax = 1.3,
-                      isPercent = true,
-                    },
-                    Elite = {
-                      type = "range",
-                      width = "full",
-                      order = 4,
-                      name = ELITE,
-                      arg = { "nameplate", "scale", "Elite" },
-                      step = 0.05,
-                      softMin = 0.6,
-                      softMax = 1.3,
-                      isPercent = true,
-                    },
-                    Boss = {
-                      type = "range",
-                      width = "full",
-                      order = 5,
-                      name = BOSS,
-                      arg = { "nameplate", "scale", "Boss" },
-                      step = 0.05,
-                      softMin = 0.6,
-                      softMax = 1.3,
-                      isPercent = true,
-                    },
-                    Mini = {
-                      type = "range",
-                      width = "full",
-                      order = 6,
-                      name = L["Minor"],
-                      arg = { "nameplate", "scale", "Mini" },
-                      step = 0.05,
-                      softMin = 0.6,
-                      softMax = 1.3,
-                      isPercent = true,
-                    },
+                    Minus = GetUnitScaleEntry(L["Minor"], 1, { "nameplate", "scale", "Minus" }),
+                    Normal = GetUnitScaleEntry(PLAYER_DIFFICULTY1, 2, { "nameplate", "scale", "Normal" }),
+                    Elite = GetUnitScaleEntry(L["Rare & Elite"], 4, { "nameplate", "scale", "Elite" }),
+                    Boss = GetUnitScaleEntry(BOSS, 5, { "nameplate", "scale", "Boss" }),
+                    Header1 = { type = "header", order = 10, name = "", },
+                    Tapped =  GetUnitScaleEntry(L["Tapped"], 11, { "nameplate", "scale", "Tapped" }),
+                    Neutral = GetUnitScaleEntry(COMBATLOG_FILTER_STRING_NEUTRAL_UNITS, 12, { "nameplate", "scale", "Neutral" }),
                   },
                 },
               },
             },
             Nametext = {
-              name = L["Name Text"],
-              type = "group",
-              order = 60,
-              args = {
-                Enable = {
-                  name = L["Enable"],
-                  type = "group",
-                  order = 1,
-                  inline = true,
-                  args = {
-                    Enable = {
-                      name = L["Enable Name Text"],
-                      type = "toggle",
-                      desc = L["Enables the showing of text on nameplates."],
-                      descStyle = "inline",
-                      width = "full",
-                      order = 1,
-                      set = SetThemeValue,
-                      arg = { "settings", "name", "show" },
-                    },
-                  },
-                },
-                Options = {
-                  name = L["Options"],
-                  type = "group",
-                  order = 2,
-                  inline = true,
-                  disabled = function() return not db.settings.name.show end,
-                  args = {
-                    FontLooks = {
-                      name = L["Font"],
-                      type = "group",
-                      inline = true,
-                      order = 1,
-                      args = {
-                        Font = {
-                          name = L["Font"],
-                          type = "select",
-                          order = 1,
-                          dialogControl = "LSM30_Font",
-                          values = AceGUIWidgetLSMlists.font,
-                          set = SetThemeValue,
-                          arg = { "settings", "name", "typeface" },
-                        },
-                        FontStyle = {
-                          type = "select",
-                          order = 2,
-                          name = L["Font Style"],
-                          desc = L["Set the outlining style of the text."],
-                          values = t.FontStyle,
-                          set = SetThemeValue,
-                          arg = { "settings", "name", "flags" },
-                        },
-                        Shadow = {
-                          name = L["Enable Shadow"],
-                          order = 4,
-                          type = "toggle",
-                          width = "full",
-                          set = SetThemeValue,
-                          arg = { "settings", "name", "shadow" },
-                        },
-                        Header1 = {
-                          type = "header",
-                          order = 3,
-                          name = "",
-                        },
-                        Color = {
-                          type = "color",
-                          order = 3,
-                          name = L["Color"],
-                          width = "full",
-                          get = GetColor,
-                          set = SetColor,
-                          arg = { "settings", "name", "color" },
-                          hasAlpha = false,
-                        },
+                name = L["Name Text"],
+                type = "group",
+                order = 60,
+                args = {
+                  Enable = {
+                    name = L["Enable"],
+                    type = "group",
+                    order = 1,
+                    inline = true,
+                    args = {
+                      Enable = {
+                        name = L["Enable Name Text"],
+                        type = "toggle",
+                        desc = L["Enables the showing of text on nameplates."],
+                        descStyle = "inline",
+                        width = "full",
+                        order = 1,
+                        set = SetThemeValue,
+                        arg = { "settings", "name", "show" },
                       },
                     },
-                    FontSize = {
-                      name = L["Text Bounds and Sizing"],
-                      type = "group",
-                      order = 2,
-                      inline = true,
-                      args = {
-                        FontSize = {
-                          name = L["Font Size"],
-                          type = "range",
-                          width = "full",
-                          order = 1,
-                          set = SetThemeValue,
-                          arg = { "settings", "name", "size" },
-                          max = 36,
-                          min = 6,
-                          step = 1,
-                          isPercent = false,
+                  },
+                  Options = {
+                    name = L["Options"],
+                    type = "group",
+                    order = 2,
+                    inline = true,
+                    disabled = function() return not db.settings.name.show end,
+                    args = {
+                      FontLooks = {
+                        name = L["Font"],
+                        type = "group",
+                        inline = true,
+                        order = 1,
+                        args = {
+                          Font = {
+                            name = L["Font"],
+                            type = "select",
+                            order = 1,
+                            dialogControl = "LSM30_Font",
+                            values = AceGUIWidgetLSMlists.font,
+                            set = SetThemeValue,
+                            arg = { "settings", "name", "typeface" },
+                          },
+                          FontStyle = {
+                            type = "select",
+                            order = 2,
+                            name = L["Font Style"],
+                            desc = L["Set the outlining style of the text."],
+                            values = t.FontStyle,
+                            set = SetThemeValue,
+                            arg = { "settings", "name", "flags" },
+                          },
+                          Shadow = {
+                            name = L["Enable Shadow"],
+                            order = 4,
+                            type = "toggle",
+                            width = "full",
+                            set = SetThemeValue,
+                            arg = { "settings", "name", "shadow" },
+                          },
+                          Header1 = {
+                            type = "header",
+                            order = 3,
+                            name = "",
+                          },
+                          Color = {
+                            type = "color",
+                            order = 3,
+                            name = L["Color"],
+                            width = "full",
+                            get = GetColor,
+                            set = SetColor,
+                            arg = { "settings", "name", "color" },
+                            hasAlpha = false,
+                          },
                         },
-                        TextBounds = {
-                          name = L["Text Boundaries"],
-                          type = "group",
-                          order = 2,
-                          args = {
-                            Description = {
-                              type = "description",
-                              order = 1,
-                              name = L["These settings will define the space that text can be placed on the nameplate.\nHaving too large a font and not enough height will cause the text to be not visible."],
-                              width = "full",
-                            },
-                            Width = {
-                              type = "range",
-                              width = "full",
-                              order = 2,
-                              name = L["Text Width"],
-                              set = SetThemeValue,
-                              arg = { "settings", "name", "width" },
-                              max = 250,
-                              min = 20,
-                              step = 1,
-                              isPercent = false,
-                            },
-                            Height = {
-                              type = "range",
-                              width = "full",
-                              order = 3,
-                              name = L["Text Height"],
-                              set = SetThemeValue,
-                              arg = { "settings", "name", "height" },
-                              max = 40,
-                              min = 8,
-                              step = 1,
-                              isPercent = false,
+                      },
+                      FontSize = {
+                        name = L["Text Bounds and Sizing"],
+                        type = "group",
+                        order = 2,
+                        inline = true,
+                        args = {
+                          FontSize = {
+                            name = L["Font Size"],
+                            type = "range",
+                            width = "full",
+                            order = 1,
+                            set = SetThemeValue,
+                            arg = { "settings", "name", "size" },
+                            max = 36,
+                            min = 6,
+                            step = 1,
+                            isPercent = false,
+                          },
+                          TextBounds = {
+                            name = L["Text Boundaries"],
+                            type = "group",
+                            order = 2,
+                            args = {
+                              Description = {
+                                type = "description",
+                                order = 1,
+                                name = L["These settings will define the space that text can be placed on the nameplate.\nHaving too large a font and not enough height will cause the text to be not visible."],
+                                width = "full",
+                              },
+                              Width = {
+                                type = "range",
+                                width = "full",
+                                order = 2,
+                                name = L["Text Width"],
+                                set = SetThemeValue,
+                                arg = { "settings", "name", "width" },
+                                max = 250,
+                                min = 20,
+                                step = 1,
+                                isPercent = false,
+                              },
+                              Height = {
+                                type = "range",
+                                width = "full",
+                                order = 3,
+                                name = L["Text Height"],
+                                set = SetThemeValue,
+                                arg = { "settings", "name", "height" },
+                                max = 40,
+                                min = 8,
+                                step = 1,
+                                isPercent = false,
+                              },
                             },
                           },
                         },
                       },
-                    },
-                    Placement = {
-                      name = L["Placement"],
-                      order = 3,
-                      type = "group",
-                      inline = true,
-                      args = {
-                        X = {
-                          name = L["X"],
-                          type = "range",
-                          width = "full",
-                          order = 1,
-                          set = SetThemeValue,
-                          arg = { "settings", "name", "x" },
-                          max = 120,
-                          min = -120,
-                          step = 1,
-                          isPercent = false,
-                        },
-                        Y = {
-                          name = L["Y"],
-                          type = "range",
-                          width = "full",
-                          order = 2,
-                          set = SetThemeValue,
-                          arg = { "settings", "name", "y" },
-                          max = 120,
-                          min = -120,
-                          step = 1,
-                          isPercent = false,
-                        },
-                        AlignH = {
-                          name = L["Horizontal Align"],
-                          type = "select",
-                          width = "full",
-                          order = 3,
-                          values = t.AlignH,
-                          set = SetThemeValue,
-                          arg = { "settings", "name", "align" },
-                        },
-                        AlignV = {
-                          name = L["Vertical Align"],
-                          type = "select",
-                          width = "full",
-                          order = 4,
-                          values = t.AlignV,
-                          set = SetThemeValue,
-                          arg = { "settings", "name", "vertical" },
+                      Placement = {
+                        name = L["Placement"],
+                        order = 3,
+                        type = "group",
+                        inline = true,
+                        args = {
+                          X = {
+                            name = L["X"],
+                            type = "range",
+                            width = "full",
+                            order = 1,
+                            set = SetThemeValue,
+                            arg = { "settings", "name", "x" },
+                            max = 120,
+                            min = -120,
+                            step = 1,
+                            isPercent = false,
+                          },
+                          Y = {
+                            name = L["Y"],
+                            type = "range",
+                            width = "full",
+                            order = 2,
+                            set = SetThemeValue,
+                            arg = { "settings", "name", "y" },
+                            max = 120,
+                            min = -120,
+                            step = 1,
+                            isPercent = false,
+                          },
+                          AlignH = {
+                            name = L["Horizontal Align"],
+                            type = "select",
+                            width = "full",
+                            order = 3,
+                            values = t.AlignH,
+                            set = SetThemeValue,
+                            arg = { "settings", "name", "align" },
+                          },
+                          AlignV = {
+                            name = L["Vertical Align"],
+                            type = "select",
+                            width = "full",
+                            order = 4,
+                            values = t.AlignV,
+                            set = SetThemeValue,
+                            arg = { "settings", "name", "vertical" },
+                          },
                         },
                       },
                     },
                   },
                 },
               },
-            },
             Healthtext = {
               name = L["Health Text"],
               type = "group",
@@ -2392,10 +2737,9 @@ local function GetOptions()
                       inline = true,
                       args = {
                         X = {
-                          name = L["X"],
-                          type = "range",
-                          width = "full",
+                          name = L["Healthbar X"],
                           order = 1,
+                          type = "range",
                           set = SetThemeValue,
                           arg = { "settings", "spelltext", "x" },
                           max = 120,
@@ -2404,10 +2748,9 @@ local function GetOptions()
                           isPercent = false,
                         },
                         Y = {
-                          name = L["Y"],
-                          type = "range",
-                          width = "full",
+                          name = L["Healthbar Y"],
                           order = 2,
+                          type = "range",
                           set = SetThemeValue,
                           arg = { "settings", "spelltext", "y" },
                           max = 120,
@@ -2415,11 +2758,34 @@ local function GetOptions()
                           step = 1,
                           isPercent = false,
                         },
+                        HeadlineViewX = {
+                          name = L["Headline View X"],
+                          order = 3,
+                          type = "range",
+                          min = -120,
+                          max = 120,
+                          step = 1,
+                          arg = { "settings", "spelltext", "x_hv" },
+                          set = SetThemeValue,
+                          disabled = function() return not db.settings.castbar.ShowInHeadlineView end
+                        },
+                        HeadlineViewY = {
+                          name = L["Headline View Y"],
+                          order = 4,
+                          type = "range",
+                          min = -120,
+                          max = 120,
+                          step = 1,
+                          arg = { "settings", "spelltext", "y_hv" },
+                          set = SetThemeValue,
+                          disabled = function() return not db.settings.castbar.ShowInHeadlineView end
+                        },
+                        Spacer = GetSpacerEntry(5),
                         AlignH = {
                           name = L["Horizontal Align"],
                           type = "select",
-                          width = "full",
-                          order = 3,
+                          width = "double",
+                          order = 6,
                           values = t.AlignH,
                           set = SetThemeValue,
                           arg = { "settings", "spelltext", "align" },
@@ -2427,8 +2793,8 @@ local function GetOptions()
                         AlignV = {
                           name = L["Vertical Align"],
                           type = "select",
-                          width = "full",
-                          order = 4,
+                          width = "double",
+                          order = 7,
                           values = t.AlignV,
                           set = SetThemeValue,
                           arg = { "settings", "spelltext", "vertical" },
@@ -2569,8 +2935,8 @@ local function GetOptions()
                         X = {
                           name = L["X"],
                           type = "range",
-                          width = "full",
                           order = 1,
+                          width = "full",
                           set = SetThemeValue,
                           arg = { "settings", "level", "x" },
                           max = 120,
@@ -2581,8 +2947,8 @@ local function GetOptions()
                         Y = {
                           name = L["Y"],
                           type = "range",
-                          width = "full",
                           order = 2,
+                          width = "full",
                           set = SetThemeValue,
                           arg = { "settings", "level", "y" },
                           max = 120,
@@ -2884,10 +3250,9 @@ local function GetOptions()
                       inline = true,
                       args = {
                         X = {
-                          name = L["X"],
-                          type = "range",
-                          width = "full",
+                          name = L["Healthbar X"],
                           order = 1,
+                          type = "range",
                           set = SetThemeValue,
                           arg = { "settings", "spellicon", "x" },
                           max = 120,
@@ -2896,10 +3261,9 @@ local function GetOptions()
                           isPercent = false,
                         },
                         Y = {
-                          name = L["Y"],
-                          type = "range",
-                          width = "full",
+                          name = L["Healthbar Y"],
                           order = 2,
+                          type = "range",
                           set = SetThemeValue,
                           arg = { "settings", "spellicon", "y" },
                           max = 120,
@@ -2907,11 +3271,34 @@ local function GetOptions()
                           step = 1,
                           isPercent = false,
                         },
+                        HeadlineViewX = {
+                          name = L["Headline View X"],
+                          order = 3,
+                          type = "range",
+                          set = SetThemeValue,
+                          arg = { "settings", "spellicon", "x_hv" },
+                          max = 120,
+                          min = -120,
+                          step = 1,
+                          isPercent = false,
+                        },
+                        HeadlineViewY = {
+                          name = L["Headline View Y"],
+                          order = 4,
+                          type = "range",
+                          set = SetThemeValue,
+                          arg = { "settings", "spellicon", "y_hv" },
+                          max = 120,
+                          min = -120,
+                          step = 1,
+                          isPercent = false,
+                        },
+                        Spacer = GetSpacerEntry(5),
                         Anchor = {
                           name = L["Anchor"],
                           type = "select",
                           width = "full",
-                          order = 3,
+                          order = 10,
                           values = t.FullAlign,
                           set = SetThemeValue,
                           arg = { "settings", "spellicon", "anchor" },
@@ -2922,101 +3309,7 @@ local function GetOptions()
                 },
               },
             },
-            Raidmarks = {
-              name = L["Raid Marks"],
-              type = "group",
-              order = 130,
-              args = {
-                Enable = {
-                  name = L["Enable"],
-                  type = "group",
-                  order = 1,
-                  inline = true,
-                  args = {
-                    Enable = {
-                      name = L["Enable Raid Mark Icon"],
-                      type = "toggle",
-                      desc = L["Enables the showing of the raid mark icon on nameplates."],
-                      descStyle = "inline",
-                      width = "full",
-                      order = 1,
-                      set = SetThemeValue,
-                      arg = { "settings", "raidicon", "show" },
-                    },
-                  },
-                },
-                Options = {
-                  name = L["Options"],
-                  type = "group",
-                  order = 2,
-                  inline = true,
-                  disabled = function() if db.settings.raidicon.show then return false else return true end end,
-                  args = {
-                    Texture = {
-                      name = L["Texture"],
-                      type = "group",
-                      inline = true,
-                      order = 1,
-                      args = {
-                        Size = {
-                          name = L["Size"],
-                          type = "range",
-                          width = "full",
-                          order = 4,
-                          set = SetThemeValue,
-                          arg = { "settings", "raidicon", "scale" },
-                          max = 64,
-                          min = 6,
-                          step = 1,
-                          isPercent = false,
-                        },
-                      },
-                    },
-                    Placement = {
-                      name = L["Placement"],
-                      order = 3,
-                      type = "group",
-                      inline = true,
-                      args = {
-                        X = {
-                          name = L["X"],
-                          type = "range",
-                          width = "full",
-                          order = 1,
-                          set = SetThemeValue,
-                          arg = { "settings", "raidicon", "x" },
-                          max = 120,
-                          min = -120,
-                          step = 1,
-                          isPercent = false,
-                        },
-                        Y = {
-                          name = L["Y"],
-                          type = "range",
-                          width = "full",
-                          order = 2,
-                          set = SetThemeValue,
-                          arg = { "settings", "raidicon", "y" },
-                          max = 120,
-                          min = -120,
-                          step = 1,
-                          isPercent = false,
-                        },
-                        Anchor = {
-                          name = L["Anchor"],
-                          type = "select",
-                          width = "full",
-                          order = 3,
-                          values = t.FullAlign,
-                          set = SetThemeValue,
-                          arg = { "settings", "raidicon", "anchor" },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
+            RaidMarks = RaidMarksOptions(),
           },
         },
         ThreatOptions = {
@@ -3058,10 +3351,55 @@ local function GetOptions()
                       descStyle = "inline",
                       arg = { "threat", "nonCombat" },
                     },
+                    OffTank = {
+                      type = "toggle",
+                      name = L["Highlight Mobs on Off-Tanks"],
+                      order = 2,
+                      width = "full",
+                      desc = L["Disables threat feedback from mobs attacking another tank."],
+                      descStyle = "inline",
+                      arg = { "threat", "toggle", "OffTank" },
+                    },
+                    Mini = {
+                      type = "toggle",
+                      name = L["Show Minor Threat"],
+                      order = 3,
+                      width = "full",
+                      desc = L["Disables threat feedback from minor mobs."],
+                      descStyle = "inline",
+                      arg = { "threat", "toggle", "Minus" },
+                    },
+                    Normal = {
+                      type = "toggle",
+                      name = L["Show Normal Threat"],
+                      order = 4,
+                      width = "full",
+                      desc = L["Disables threat feedback from normal mobs."],
+                      descStyle = "inline",
+                      arg = { "threat", "toggle", "Normal" },
+                    },
+                    Elite = {
+                      type = "toggle",
+                      name = L["Show Elite and Rare Threat"],
+                      order = 5,
+                      width = "full",
+                      desc = L["Disables threat feedback from elite and rare mobs."],
+                      descStyle = "inline",
+                      arg = { "threat", "toggle", "Elite" },
+                    },
+                    Boss = {
+                      type = "toggle",
+                      name = L["Show Boss Threat"],
+                      order = 6,
+                      width = "full",
+                      desc = L["Disables threat feedback from boss level mobs."],
+                      descStyle = "inline",
+                      arg = { "threat", "toggle", "Boss" },
+                    },
                     Tapped = {
                       type = "toggle",
                       name = L["Show Tapped Threat"],
-                      order = 2,
+                      order = 7,
                       width = "full",
                       desc = L["Disables threat feedback from tapped mobs regardless of boss or elite levels."],
                       descStyle = "inline",
@@ -3070,47 +3408,11 @@ local function GetOptions()
                     Neutral = {
                       type = "toggle",
                       name = L["Show Neutral Threat"],
-                      order = 2,
+                      order = 8,
                       width = "full",
                       desc = L["Disables threat feedback from neutral mobs regardless of boss or elite levels."],
                       descStyle = "inline",
                       arg = { "threat", "toggle", "Neutral" },
-                    },
-                    Normal = {
-                      type = "toggle",
-                      name = L["Show Normal Threat"],
-                      order = 3,
-                      width = "full",
-                      desc = L["Disables threat feedback from normal mobs."],
-                      descStyle = "inline",
-                      arg = { "threat", "toggle", "Normal" },
-                    },
-                    Elite = {
-                      type = "toggle",
-                      name = L["Show Elite Threat"],
-                      order = 4,
-                      width = "full",
-                      desc = L["Disables threat feedback from elite mobs."],
-                      descStyle = "inline",
-                      arg = { "threat", "toggle", "Elite" },
-                    },
-                    Boss = {
-                      type = "toggle",
-                      name = L["Show Boss Threat"],
-                      order = 5,
-                      width = "full",
-                      desc = L["Disables threat feedback from boss level mobs."],
-                      descStyle = "inline",
-                      arg = { "threat", "toggle", "Boss" },
-                    },
-                    Mini = {
-                      type = "toggle",
-                      name = L["Show Minor Threat"],
-                      order = 6,
-                      width = "full",
-                      desc = L["Disables threat feedback from minor mobs."],
-                      descStyle = "inline",
-                      arg = { "threat", "toggle", "Mini" },
                     },
                   },
                 },
@@ -3148,7 +3450,7 @@ local function GetOptions()
                   disabled = function() if db.threat.useAlpha then return false else return true end end,
                   args = {
                     Low = {
-                      name = L["|cffff0000Low threat|r"],
+                      name = L["|cffff0000Low Threat|r"],
                       type = "range",
                       order = 1,
                       arg = { "threat", "tank", "alpha", "LOW" },
@@ -3158,7 +3460,7 @@ local function GetOptions()
                       isPercent = true,
                     },
                     Med = {
-                      name = L["|cffffff00Medium threat|r"],
+                      name = L["|cffffff00Medium Threat|r"],
                       type = "range",
                       order = 2,
                       arg = { "threat", "tank", "alpha", "MEDIUM" },
@@ -3168,7 +3470,7 @@ local function GetOptions()
                       isPercent = true,
                     },
                     High = {
-                      name = L["|cff00ff00High threat|r"],
+                      name = L["|cff00ff00High Threat|r"],
                       type = "range",
                       order = 3,
                       arg = { "threat", "tank", "alpha", "HIGH" },
@@ -3176,6 +3478,17 @@ local function GetOptions()
                       max = 1,
                       step = 0.01,
                       isPercent = true,
+                    },
+                    OffTank = {
+                      name = L["|cff0faac8Off-Tank|r"],
+                      type = "range",
+                      order = 4,
+                      arg = { "threat", "tank", "alpha", "OFFTANK" },
+                      min = 0.01,
+                      max = 1,
+                      step = 0.01,
+                      isPercent = true,
+                      disabled = function() return not db.threat.toggle.OffTank end
                     },
                   },
                 },
@@ -3187,7 +3500,7 @@ local function GetOptions()
                   disabled = function() if db.threat.useAlpha then return false else return true end end,
                   args = {
                     Low = {
-                      name = L["|cff00ff00Low threat|r"],
+                      name = L["|cff00ff00Low Threat|r"],
                       type = "range",
                       order = 1,
                       arg = { "threat", "dps", "alpha", "LOW" },
@@ -3197,7 +3510,7 @@ local function GetOptions()
                       isPercent = true,
                     },
                     Med = {
-                      name = L["|cffffff00Medium threat|r"],
+                      name = L["|cffffff00Medium Threat|r"],
                       type = "range",
                       order = 2,
                       arg = { "threat", "dps", "alpha", "MEDIUM" },
@@ -3207,7 +3520,7 @@ local function GetOptions()
                       isPercent = true,
                     },
                     High = {
-                      name = L["|cffff0000High threat|r"],
+                      name = L["|cffff0000High Threat|r"],
                       type = "range",
                       order = 3,
                       arg = { "threat", "dps", "alpha", "HIGH" },
@@ -3281,7 +3594,7 @@ local function GetOptions()
                   disabled = function() if db.threat.useScale then return false else return true end end,
                   args = {
                     Low = {
-                      name = L["|cffff0000Low threat|r"],
+                      name = L["|cffff0000Low Threat|r"],
                       type = "range",
                       order = 1,
                       arg = { "threat", "tank", "scale", "LOW" },
@@ -3291,7 +3604,7 @@ local function GetOptions()
                       isPercent = true,
                     },
                     Med = {
-                      name = L["|cffffff00Medium threat|r"],
+                      name = L["|cffffff00Medium Threat|r"],
                       type = "range",
                       order = 2,
                       arg = { "threat", "tank", "scale", "MEDIUM" },
@@ -3301,7 +3614,7 @@ local function GetOptions()
                       isPercent = true,
                     },
                     High = {
-                      name = L["|cff00ff00High threat|r"],
+                      name = L["|cff00ff00High Threat|r"],
                       type = "range",
                       order = 3,
                       arg = { "threat", "tank", "scale", "HIGH" },
@@ -3309,6 +3622,17 @@ local function GetOptions()
                       max = 2,
                       step = 0.01,
                       isPercent = true,
+                    },
+                    OffTank = {
+                      name = L["|cff0faac8Off-Tank|r"],
+                      type = "range",
+                      order = 4,
+                      arg = { "threat", "tank", "scale", "OFFTANK" },
+                      min = 0.01,
+                      max = 2,
+                      step = 0.01,
+                      isPercent = true,
+                      disabled = function() return not db.threat.toggle.OffTank end
                     },
                   },
                 },
@@ -3320,7 +3644,7 @@ local function GetOptions()
                   disabled = function() if db.threat.useScale then return false else return true end end,
                   args = {
                     Low = {
-                      name = L["|cff00ff00Low threat|r"],
+                      name = L["|cff00ff00Low Threat|r"],
                       type = "range",
                       order = 1,
                       arg = { "threat", "dps", "scale", "LOW" },
@@ -3330,7 +3654,7 @@ local function GetOptions()
                       isPercent = true,
                     },
                     Med = {
-                      name = L["|cffffff00Medium threat|r"],
+                      name = L["|cffffff00Medium Threat|r"],
                       type = "range",
                       order = 2,
                       arg = { "threat", "dps", "scale", "MEDIUM" },
@@ -3340,7 +3664,7 @@ local function GetOptions()
                       isPercent = true,
                     },
                     High = {
-                      name = L["|cffff0000High threat|r"],
+                      name = L["|cffff0000High Threat|r"],
                       type = "range",
                       order = 3,
                       arg = { "threat", "dps", "scale", "HIGH" },
@@ -3408,7 +3732,7 @@ local function GetOptions()
                           order = 0.5,
                           type = "range",
                           width = "double",
-                          arg = { "threat", "scaleType", "Mini" },
+                          arg = { "threat", "scaleType", "Minus" },
                           min = -0.5,
                           max = 0.5,
                           step = 0.01,
@@ -3488,25 +3812,33 @@ local function GetOptions()
                   --disabled = function() if db.threat.useHPColor then return false else return true end end,
                   args = {
                     Low = {
-                      name = L["|cffff0000Low threat|r"],
+                      name = L["|cffff0000Low Threat|r"],
                       type = "color",
                       order = 1,
                       arg = { "settings", "tank", "threatcolor", "LOW" },
                       hasAlpha = true,
                     },
                     Med = {
-                      name = L["|cffffff00Medium threat|r"],
+                      name = L["|cffffff00Medium Threat|r"],
                       type = "color",
                       order = 2,
                       arg = { "settings", "tank", "threatcolor", "MEDIUM" },
                       hasAlpha = true,
                     },
                     High = {
-                      name = L["|cff00ff00High threat|r"],
+                      name = L["|cff00ff00High Threat|r"],
                       type = "color",
                       order = 3,
                       arg = { "settings", "tank", "threatcolor", "HIGH" },
                       hasAlpha = true,
+                    },
+                    OffTank = {
+                      name = L["|cff0faac8Off-Tank|r"],
+                      type = "color",
+                      order = 5,
+                      arg = { "settings", "tank", "threatcolor", "OFFTANK" },
+                      hasAlpha = true,
+                      disabled = function() return not db.threat.toggle.OffTank end
                     },
                   },
                 },
@@ -3518,21 +3850,21 @@ local function GetOptions()
                   --disabled = function() if db.threat.useHPColor then return false else return true end end,
                   args = {
                     Low = {
-                      name = L["|cff00ff00Low threat|r"],
+                      name = L["|cff00ff00Low Threat|r"],
                       type = "color",
                       order = 1,
                       arg = { "settings", "dps", "threatcolor", "LOW" },
                       hasAlpha = true,
                     },
                     Med = {
-                      name = L["|cffffff00Medium threat|r"],
+                      name = L["|cffffff00Medium Threat|r"],
                       type = "color",
                       order = 2,
                       arg = { "settings", "dps", "threatcolor", "MEDIUM" },
                       hasAlpha = true,
                     },
                     High = {
-                      name = L["|cffff0000High threat|r"],
+                      name = L["|cffff0000High Threat|r"],
                       type = "color",
                       order = 3,
                       arg = { "settings", "dps", "threatcolor", "HIGH" },
@@ -3567,7 +3899,7 @@ local function GetOptions()
                       name = L["Enable"],
                       type = "toggle",
                       order = 1,
-                      desc = L["These options are for the textures shown on nameplates at various threat levels."],
+                      desc = L["These options are for the textures shown on nameplates at various threat levels. Dps/healing uses regular textures, for tanking textures are swapped."],
                       descStyle = "inline",
                       width = "full",
                       arg = { "threat", "art", "ON" },
@@ -3581,10 +3913,20 @@ local function GetOptions()
                   inline = true,
                   disabled = function() return not db.threat.art.ON end,
                   args = {
+                    PrevOffTank = {
+                      name = L["Off-Tank"],
+                      type = "execute",
+                      order = 1,
+                      width = "full",
+                      image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ThreatWidget\\" .. db.threat.art.theme .. "\\" .. "OFFTANK",
+                      imageWidth = 256,
+                      imageHeight = 64,
+                      disabled = function() return not db.threat.toggle.OffTank end
+                    },
                     PrevLow = {
                       name = L["Low Threat"],
                       type = "execute",
-                      order = 1,
+                      order = 2,
                       width = "full",
                       image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ThreatWidget\\" .. db.threat.art.theme .. "\\" .. "HIGH",
                       imageWidth = 256,
@@ -3593,7 +3935,7 @@ local function GetOptions()
                     PrevMed = {
                       name = L["Medium Threat"],
                       type = "execute",
-                      order = 2,
+                      order = 3,
                       width = "full",
                       image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ThreatWidget\\" .. db.threat.art.theme .. "\\" .. "MEDIUM",
                       imageWidth = 256,
@@ -3602,7 +3944,7 @@ local function GetOptions()
                     PrevHigh = {
                       name = L["High Threat"],
                       type = "execute",
-                      order = 3,
+                      order = 4,
                       width = "full",
                       image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ThreatWidget\\" .. db.threat.art.theme .. "\\" .. "LOW",
                       imageWidth = 256,
@@ -3611,7 +3953,7 @@ local function GetOptions()
                     Style = {
                       name = L["Style"],
                       type = "group",
-                      order = 4,
+                      order = 10,
                       inline = true,
                       args = {
                         Dropdown = {
@@ -3622,6 +3964,7 @@ local function GetOptions()
                             SetValue(info, val)
                             local i = options.args.ThreatOptions.args.Textures.args.Options.args
                             local p = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ThreatWidget\\"
+                            i.PrevOffTank.image = p .. db.threat.art.theme .. "\\" .. "OFFTANK"
                             i.PrevLow.image = p .. db.threat.art.theme .. "\\" .. "HIGH"
                             i.PrevMed.image = p .. db.threat.art.theme .. "\\" .. "MEDIUM"
                             i.PrevHigh.image = p .. db.threat.art.theme .. "\\" .. "LOW"
@@ -3635,7 +3978,7 @@ local function GetOptions()
                       name = L["Marked Targets"],
                       type = "group",
                       inline = true,
-                      order = 4,
+                      order = 20,
                       args = {
                         Toggle = {
                           name = L["Ignore Marked Targets"],
@@ -3665,23 +4008,7 @@ local function GetOptions()
               type = "group",
               order = 40,
               args = {
-                Enable = {
-                  name = L["Enable"],
-                  type = "group",
-                  inline = true,
-                  order = 10,
-                  args = {
-                    Toggle = {
-                      name = L["Enable"],
-                      type = "toggle",
-                      order = 1,
-                      desc = L["This widget will display combo points on your target nameplate."],
-                      descStyle = "inline",
-                      width = "full",
-                      arg = { "comboWidget", "ON" },
-                    },
-                  },
-                },
+                Enable = GetEnableEntry(L["Enable Combo Points Widget"], L["This widget will display combo points on your target nameplate."], "comboWidget", true),
                 Sizing = {
                   name = L["Scale"],
                   type = "group",
@@ -3703,39 +4030,40 @@ local function GetOptions()
                     },
                   },
                 },
-                Placement = {
-                  name = L["Placement"],
-                  type = "group",
-                  inline = true,
-                  order = 30,
-                  disabled = function() return not db.comboWidget.ON end,
-                  args = {
-                    X = {
-                      name = L["X"],
-                      type = "range",
-                      order = 1,
-                      min = -120,
-                      max = 120,
-                      step = 1,
-                      set = function(info, val)
-                        SetThemeValue(info, val)
-                      end,
-                      arg = { "comboWidget", "x" },
-                    },
-                    Y = {
-                      name = L["Y"],
-                      type = "range",
-                      order = 1,
-                      min = -120,
-                      max = 120,
-                      step = 1,
-                      set = function(info, val)
-                        SetThemeValue(info, val)
-                      end,
-                      arg = { "comboWidget", "y" },
-                    },
-                  },
-                },
+                Placement = GetWidgetPlacementEntry(30, "comboWidget"),
+--                Placement = {
+--                  name = L["Placement"],
+--                  type = "group",
+--                  inline = true,
+--                  order = 30,
+--                  disabled = function() return not db.comboWidget.ON end,
+--                  args = {
+--                    X = {
+--                      name = L["X"],
+--                      type = "range",
+--                      order = 1,
+--                      min = -120,
+--                      max = 120,
+--                      step = 1,
+--                      set = function(info, val)
+--                        SetThemeValue(info, val)
+--                      end,
+--                      arg = { "comboWidget", "x" },
+--                    },
+--                    Y = {
+--                      name = L["Y"],
+--                      type = "range",
+--                      order = 1,
+--                      min = -120,
+--                      max = 120,
+--                      step = 1,
+--                      set = function(info, val)
+--                        SetThemeValue(info, val)
+--                      end,
+--                      arg = { "comboWidget", "y" },
+--                    },
+--                  },
+--                },
               },
             },
             AuraWidget = {
@@ -3945,10 +4273,9 @@ local function GetOptions()
               name = L["Aura 2.0"],
               type = "group",
               order = 25,
-              disabled = function() return db.debuffWidget.ON end,
               set = SetValueAuraWidget,
               args = {
-                Enable = GetEnableEntry(L["Enable Aura Widget 2.0"], L["This widget will display auras that match your filtering on your target nameplate and others you recently moused over. The old aura widget (Aura) must be disabled first."], { "AuraWidget", "ON" }),
+                Enable = GetEnableEntry(L["Enable Aura Widget 2.0"], L["This widget will display auras that match your filtering on your target nameplate and others you recently moused over. The old aura widget (Aura) must be disabled first."], "AuraWidget", true),
                 Filtering = {
                   name = L["Filtering"],
                   type = "group",
@@ -4280,23 +4607,7 @@ local function GetOptions()
               type = "group",
               order = 10,
               args = {
-                Enable = {
-                  name = L["Enable"],
-                  type = "group",
-                  inline = true,
-                  order = 10,
-                  args = {
-                    Toggle = {
-                      name = L["Enable"],
-                      type = "toggle",
-                      desc = L["Enables the showing of indicator icons for friends, guildmates, and BNET Friends"],
-                      descStyle = "inline",
-                      width = "full",
-                      order = 1,
-                      arg = { "arenaWidget", "ON" },
-                    },
-                  },
-                },
+                Enable = GetEnableEntry(L["Enable Arena Widget"], L["Enables the showing of indicators (orbs and numbers) for arena opponents."], "arenaWidget"),
                 Sizing = {
                   name = L["Scale"],
                   type = "group",
@@ -4453,23 +4764,7 @@ local function GetOptions()
               type = "group",
               order = 50,
               args = {
-                Enable = {
-                  name = L["Enable"],
-                  type = "group",
-                  inline = true,
-                  order = 10,
-                  args = {
-                    Toggle = {
-                      name = L["Enable"],
-                      type = "toggle",
-                      desc = L["Enables the showing of indicator icons for friends, guildmates, and BNET Friends"],
-                      descStyle = "inline",
-                      width = "full",
-                      order = 1,
-                      arg = { "socialWidget", "ON" },
-                    },
-                  },
-                },
+                Enable = GetEnableEntry(L["Enable Social Widget"], L["Enables the showing of indicator icons for friends, guildmates, and BNET Friends"], "socialWidget", true),
                 Sizing = {
                   name = L["Scale"],
                   type = "group",
@@ -4484,33 +4779,7 @@ local function GetOptions()
                     },
                   },
                 },
-                Placement = {
-                  name = L["Placement"],
-                  type = "group",
-                  inline = true,
-                  order = 30,
-                  disabled = function() return not db.socialWidget.ON end,
-                  args = {
-                    X = {
-                      name = L["X"],
-                      type = "range",
-                      order = 1,
-                      min = -120,
-                      max = 120,
-                      step = 1,
-                      arg = { "socialWidget", "x" },
-                    },
-                    Y = {
-                      name = L["Y"],
-                      type = "range",
-                      order = 1,
-                      min = -120,
-                      max = 120,
-                      step = 1,
-                      arg = { "socialWidget", "y" },
-                    },
-                  },
-                },
+                Placement = GetWidgetPlacementEntry(30, "socialWidget"),
               },
             },
             -- HealerTrackerWidget = {
@@ -4721,23 +4990,7 @@ local function GetOptions()
               type = "group",
               order = 70,
               args = {
-                Enable = {
-                  name = L["Enable"],
-                  type = "group",
-                  inline = true,
-                  order = 10,
-                  args = {
-                    Toggle = {
-                      name = L["Enable"],
-                      type = "toggle",
-                      desc = L["Enables the showing of a texture on your target nameplate"],
-                      descStyle = "inline",
-                      width = "full",
-                      order = 1,
-                      arg = { "targetWidget", "ON" },
-                    },
-                  },
-                },
+                Enable = GetEnableEntry(L["Enable Target Highlight Widget"], L["Enables the showing of a texture on your target nameplate"], "targetWidget"),
                 Texture = {
                   name = L["Texture"],
                   type = "group",
@@ -5447,9 +5700,9 @@ local function GetOptions()
                   inline = true,
                   args = {
                     UseRaidMarked = {
-                      name = L["Allow Marked HP Coloring"],
+                      name = L["Color by Raid Marks"],
                       type = "toggle",
-                      desc = L["Allow raid marked hp color settings instead of a custom hp setting if the nameplate has a raid mark."],
+                      desc = L["Additionally color the healthbar based on the raid mark if the nameplate is marked."],
                       descStyle = "inline",
                       width = "full",
                       order = 1,
@@ -5737,5 +5990,5 @@ function TidyPlatesThreat:SetUpOptions()
   options.args.profiles.order = 10000;
 
   LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable("Tidy Plates: Threat Plates", options);
-  LibStub("AceConfigDialog-3.0"):SetDefaultSize("Tidy Plates: Threat Plates", 860, 600)
+  LibStub("AceConfigDialog-3.0"):SetDefaultSize("Tidy Plates: Threat Plates", 1000, 640)
 end

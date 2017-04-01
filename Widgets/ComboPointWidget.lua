@@ -72,7 +72,7 @@ end
 
 -- Update Graphics - overwritten
 -- unit can be null because called from WatcherFrame
-local function UpdateWidgetFrame(frame, unit)
+local function UpdateWidgetFrame(frame, unit, style)
 	local points, maxPoints
 
 	if UnitCanAttack("player", "target") then
@@ -84,7 +84,12 @@ local function UpdateWidgetFrame(frame, unit)
 
 		frame.Icon:SetTexture(path..points)
 		frame:SetScale(db.scale)
-		frame:SetPoint("CENTER", frame:GetParent(), "CENTER", db.x, db.y)
+
+		if style == "NameOnly" and db.ShowInHeadlineView then
+			frame:SetPoint("CENTER", frame:GetParent(), "CENTER", db.x_hv, db.y_hv)
+		elseif style then
+			frame:SetPoint("CENTER", frame:GetParent(), "CENTER", db.x, db.y)
+		end
 
 		frame:Show()
 	else
@@ -93,7 +98,7 @@ local function UpdateWidgetFrame(frame, unit)
 end
 
 -- Context
-local function UpdateWidgetContext(frame, unit)
+local function UpdateWidgetContext(frame, unit, style)
 	local guid = unit.guid
 
 	-- Add to Widget List
@@ -105,7 +110,7 @@ local function UpdateWidgetContext(frame, unit)
 
 	-- -- Update Widget
 	 if UnitGUID("target") == guid then
-	 	UpdateWidgetFrame(frame, unit)
+	 	UpdateWidgetFrame(frame, unit, style)
 	 else
 	 	frame:_Hide()
 	end
@@ -159,6 +164,10 @@ local function enabled()
 	return active
 end
 
+local function EnabledInHeadlineView()
+	return TidyPlatesThreat.db.profile.comboWidget.ShowInHeadlineView
+end
+
 -- Widget Creation
 local function CreateWidgetFrame(parent)
 	-- Required Widget Code
@@ -188,5 +197,5 @@ local function CreateWidgetFrame(parent)
 	return frame
 end
 
-ThreatPlatesWidgets.RegisterWidget("ComboPointWidgetTPTP", CreateWidgetFrame, true, enabled)
+ThreatPlatesWidgets.RegisterWidget("ComboPointWidgetTPTP", CreateWidgetFrame, true, enabled, EnabledInHeadlineView)
 ThreatPlatesWidgets.ComboPointWidgetDisableWatcher = DisableWatcher

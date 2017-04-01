@@ -1,8 +1,9 @@
 local ADDON_NAME, NAMESPACE = ...
+local ThreatPlates = NAMESPACE.ThreatPlates
 
-local ART_PATH = NAMESPACE.ThreatPlates.Art
-local MEDIA_PATH = NAMESPACE.ThreatPlates.Media
-local EMPTY_TEXTURE = EMPTY_TEXTURE
+local ART_PATH = ThreatPlates.Art
+local MEDIA_PATH = ThreatPlates.Media
+local EMPTY_TEXTURE = ART_PATH.."Empty"
 
 -------------------------------------------------------------------------------------
 -- Style: Text-Only for Headline-View
@@ -30,13 +31,13 @@ local function Create(self,name)
     },
 
     highlight = {
-      texture = ART_PATH.."Highlight",
+      texture = (dbprofile.HeadlineView.ShowMouseoverHighlight and ART_PATH.."Highlight") or EMPTY_TEXTURE,
       width = 128,
       height = 64 * ( dbprofile.HeadlineView.name.size + dbprofile.HeadlineView.name.size - 2) / 18, -- no effect
       x = 0, -- not used in headline view, determined from ?
       y = 0, -- not used in headline view, determined from ?
       anchor = "CENTER", --no effect
-			show = true,
+			-- show = false -- show not working for highlight
     },
 
 		target = {
@@ -47,7 +48,7 @@ local function Create(self,name)
       -- 10 is default size
       y = dbprofile.HeadlineView.name.y - 5 - ((dbprofile.HeadlineView.name.size - 10) / 2),
       anchor = "CENTER",
-      show = true,
+      show = dbprofile.HeadlineView.ShowTargetHighlight,
     },
 
 		healthborder = {
@@ -63,8 +64,9 @@ local function Create(self,name)
 
     healthbar = {
       texture = EMPTY_TEXTURE,
-      width = 120,
-      height = 10,
+      backdrop = EMPTY_TEXTURE,
+      height = 0,
+      width = 0,
       x = 0,
       y = 0,
       anchor = "CENTER",
@@ -81,34 +83,34 @@ local function Create(self,name)
     },
 
     castborder = {
-      texture = EMPTY_TEXTURE,
+      texture = ((db.castbar.ShowInHeadlineView and db.castborder.show) and ThreatPlates.Art..db.castborder.texture) or EMPTY_TEXTURE,
       width = 256,
       height = 64,
-      x = db.castborder.x,
-      y = db.castborder.y,
+      x = db.castbar.x_hv,
+      y = db.castbar.y_hv,
       anchor = "CENTER",
-      show = false,
+      show = db.castbar.ShowInHeadlineView and db.castborder.show,
     },
 
     castnostop = {
-      texture = EMPTY_TEXTURE,
+      texture = ((db.castbar.ShowInHeadlineView and db.castnostop.show) and ThreatPlates.Art.."TP_CastBarLock") or EMPTY_TEXTURE,
       width = 256,
       height = 64,
-      x = db.castnostop.x,
-      y = db.castnostop.y,
+      x = db.castbar.x_hv,
+      y = db.castbar.y_hv,
       anchor = "CENTER",
-      show = false,
+      show = db.castbar.ShowInHeadlineView and db.castnostop.show,
     },
 
     castbar = {
-      texture = EMPTY_TEXTURE,
+      texture = (db.castbar.ShowInHeadlineView and ThreatPlates.Media:Fetch('statusbar', db.castbar.texture)) or EMPTY_TEXTURE,
+      backdrop = EMPTY_TEXTURE,
       width = 120,
       height = 10,
-      x = db.castbar.x,
-      y = db.castbar.y,
+      x = db.castbar.x_hv,
+      y = db.castbar.y_hv,
       anchor = "CENTER",
       orientation = "HORIZONTAL",
-			show = false,
     },
 
     name = {
@@ -156,17 +158,18 @@ local function Create(self,name)
     },
 
     spelltext = {
-      typeface = MEDIA_PATH:Fetch('font', db.spelltext.typeface),
+      typeface = ThreatPlates.Media:Fetch('font', db.spelltext.typeface),
       size = db.spelltext.size,
       width = db.spelltext.width,
       height = db.spelltext.height,
-      x = db.spelltext.x,
-      y = db.spelltext.y,
+      x = db.spelltext.x_hv,
+      y = db.spelltext.y_hv,
       align = db.spelltext.align,
       anchor = "CENTER",
       vertical = db.spelltext.vertical,
-      shadow = true,
-      show = false,
+      shadow = db.spelltext.shadow,
+      flags = db.spelltext.flags,
+      show = db.spelltext.show and db.castbar.ShowInHeadlineView,
     },
 
     skullicon = {
@@ -188,21 +191,21 @@ local function Create(self,name)
     },
 
     spellicon = {
-      -- width = (db.spellicon.scale),
-      -- height = (db.spellicon.scale),
-      -- x = (db.spellicon.x),
-      -- y = (db.spellicon.y),
-      -- anchor = (db.spellicon.anchor),
-      show = false,
+      width = db.spellicon.scale,
+      height = db.spellicon.scale,
+      x = db.spellicon.x_hv,
+      y = db.spellicon.y_hv,
+      anchor = db.spellicon.anchor,
+      show = db.castbar.ShowInHeadlineView and db.spellicon.show,
     },
 
     raidicon = {
-      -- width = (db.raidicon.scale),
-      -- height = (db.raidicon.scale),
-      -- x = (db.raidicon.x),
-      -- y = (db.raidicon.y),
-      -- anchor = (db.raidicon.anchor),
-      show = false,
+      width = db.raidicon.scale,
+      height = db.raidicon.scale,
+      x = db.raidicon.x_hv,
+      y = db.raidicon.y_hv,
+      anchor = db.raidicon.anchor,
+      show = db.raidicon.ShowInHeadlineView,
     },
 
     customart = { -- Depreciated?

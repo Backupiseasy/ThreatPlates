@@ -24,6 +24,14 @@ local RGB = function(red, green, blue, alpha)
 	return color
 end
 
+local RGB_P = function(red, green, blue, alpha)
+	return { r = red, g = green, b = blue, a = alpha}
+end
+
+local RGB_UNPACK = function(color)
+	return color.r, color.g, color.b, color.a or 1
+end
+
 t.Update = function()
 	-- ForceUpdate() is called in SetTheme()
 	if (TidyPlatesOptions.ActiveTheme == t.THEME_NAME) then
@@ -147,7 +155,7 @@ t.SPEC_ROLES = {
 ---------------------------------------------------------------------------------------------------
 
 t.DEBUG = function(...)
-  print ("DEBUG: ", ...)
+  --print ("DEBUG: ", ...)
 end
 
 t.DEBUG_SIZE = function(msg, data)
@@ -251,3 +259,5 @@ end
 ---------------------------------------------------------------------------------------------------
 
 t.RGB = RGB
+t.RGB_P = RGB_P
+t.RGB_UNPACK = RGB_UNPACK

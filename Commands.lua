@@ -110,7 +110,6 @@ local function ParseCommandLine(message)
 	elseif message == "help" then
 		PrintHelp()
 --	elseif message == "internal" then
---		print ("CVar: ", GetCVar("SetNamePlateEnemySize"))
 	else
 		t.Print(L["Unknown option: "] .. message, true)
 		PrintHelp()

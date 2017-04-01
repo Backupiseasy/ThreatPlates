@@ -24,14 +24,39 @@ ThreatPlates.ANCHOR_POINT_SETPOINT = {
   BOTTOMRIGHT = {"BOTTOMRIGHT", "TOPRIGHT"}
 }
 
-ThreatPlates.ENEMY_TEXT_COLOR = {"By Custom Color", "By Class", "By Reaction" } -- "By Threat", "By Health"
-  --{"By Reaction", "Custom Color", "By Threat", "By Health", "By Level Color", "By Normal/Elite/Boss"}
-ThreatPlates.FRIENDLY_TEXT_COLOR = {"By Custom Color", "By Class", "By Reaction" }
+ThreatPlates.ENEMY_TEXT_COLOR = {
+  CLASS = "By Class",
+  CUSTOM = "By Custom Color",
+  REACTION = "By Reaction",
+  HEALTH = "By Health",
+}
+-- "By Threat", "By Level Color", "By Normal/Elite/Boss"
+ThreatPlates.FRIENDLY_TEXT_COLOR = {
+  CLASS = "By Class",
+  CUSTOM = "By Custom Color",
+  REACTION = "By Reaction",
+  HEALTH = "By Health",
+}
 ThreatPlates.ENEMY_SUBTEXT = {
-  "None", "Percent Health",
-  "NPC Role, Guild, or Level", "NPC Role, Guild, or Quest", "NPC Role, Guild", "NPC Role",
-  "Level", "Quest", "Everything"}
-ThreatPlates.FRIENDLY_SUBTEXT = {"By Custom Color", "By Class", "By Reaction" }
+  NONE = "None",
+  HEALTH = "Percent Health",
+  ROLE = "NPC Role",
+  ROLE_GUILD = "NPC Role, Guild",
+  ROLE_GUILD_LEVEL = "NPC Role, Guild, or Level",
+  LEVEL = "Level",
+  ALL = "Everything"
+}
+-- NPC Role, Guild, or Quest", "Quest",
+ThreatPlates.FRIENDLY_SUBTEXT = {
+  NONE = "None",
+  HEALTH = "Percent Health",
+  ROLE = "NPC Role",
+  ROLE_GUILD = "NPC Role, Guild",
+  ROLE_GUILD_LEVEL = "NPC Role, Guild, or Level",
+  LEVEL = "Level",
+  ALL = "Everything"
+}
+-- "NPC Role, Guild, or Quest", "Quest"
 
 ---------------------------------------------------------------------------------------------------
 -- Global functions for accessing the configuration
@@ -112,13 +137,11 @@ end
 
 --local function ConvertHeadlineView(profile)
 --  -- convert old entry and save it
---  local old_value = profile.alphaFeatureHeadlineView
 --  if not profile.headlineView then
 --    profile.headlineView = {}
 --  end
 --  profile.headlineView.enabled = old_value
 --  -- delete old entry
---  profile.alphaFeatureHeadlineView = nil
 --end
 --
 ---- Entries in the config db that should be migrated and deleted
@@ -155,35 +178,51 @@ end
 --  end
 --end
 
---local function CleanupDatabase()
---  DeleteDeprecatedEntries()
+-- convert current aura widget settings to aura widget 2.0
+--local function ConvertAuraWidget1(profile_name, profile)
+--  local old_setting = profile.debuffWidget
+--  ThreatPlates.Print (L["xxxxProfile "] .. profile_name .. L[": Converting settings from aura widget to aura widget 2.0 ..."])
+--  if old_setting and not profile.AuraWidget then
+--    ThreatPlates.Print (L["Profile "] .. profile_name .. L[": Converting settings from aura widget to aura widget 2.0 ..."])
+--    profile.AuraWidget = {}
+--    local new_setting = profile.AuraWidget
+--    if not new_setting.ModeIcon then
+--      new_setting.ModeIcon = {}
+--    end
+--
+--    new_setting.scale = old_setting.scale
+--    new_setting.FilterMode = old_setting.style
+--    new_setting.FilterMode = old_setting.mode
+--    new_setting.ModeIcon.Style = old_setting.style
+--    new_setting.ShowTargetOnly = old_setting.targetOnly
+--    new_setting.ShowCooldownSpiral = old_setting.cooldownSpiral
+--    new_setting.ShowFriendly = old_setting.showFriendly
+--    new_setting.ShowEnemy = old_setting.showEnemy
+--
+--    if old_setting.filter then
+--      new_setting.FilterBySpell = ThreatPlates.CopyTable(old_setting.filter)
+--    end
+--    if old_setting.displays then
+--      new_setting.FilterByType = ThreatPlates.CopyTable(old_setting.displays)
+--    end
+--    old_setting.ON = false
+--    print ("debuffWidget: ", profile.debuffWidget.ON)
+--  end
 --end
 
--- convert current aura widget settings to aura widget 2.0
-local function ConvertAuraWidget1(profile_name, profile)
-  local old_setting = profile.debuffWidget
-  if old_setting then
-    ThreatPlates.Print (L["Profile "] .. profile_name .. L[": Converting settings from aura widget to aura widget 2.0 ..."])
-
-    if not profile.AuraWidget then profile.AuraWidget = {} end
-    local new_setting = profile.AuraWidget
-    if not new_setting.ModeIcon then new_setting.ModeIcon = {} end
-
-    new_setting.y = old_setting.y
-    new_setting.scale = old_setting.scale
-    new_setting.anchor = old_setting.anchor
-    new_setting.FilterMode = old_setting.style
-    new_setting.FilterMode = old_setting.mode
-    new_setting.ModeIcon.Style = old_setting.style
-    new_setting.ShowTargetOnly = old_setting.targetOnly
-    new_setting.ShowCooldownSpiral = old_setting.cooldownSpiral
-    new_setting.ShowFriendly = old_setting.showFriendly
-    new_setting.ShowEnemy = old_setting.showEnemy
-
-    if old_setting.filter then new_setting.FilterBySpell = ThreatPlates.CopyTable(old_setting.filter) end
-    if old_setting.displays then new_setting.FilterByType = ThreatPlates.CopyTable(old_setting.displays) end
-  end
-end
+--local function MigrateDatabase()
+--  -- determine current addon version and compare it with the DB version
+--  local db_global = TidyPlatesThreat.db.global
+--
+--  --  -- addon version is newer that the db version => check for old entries
+--  --	if db_global.version ~= tostring(ThreatPlates.Meta("version")) then
+--  -- iterate over all profiles
+--  local db
+--  for name, profile in pairs(TidyPlatesThreat.db.profiles) do
+--    ConvertAuraWidget1(name, profile)
+--  end
+--  --	end
+--end
 
 -- Update the configuration file:
 --  - convert deprecated settings to their new counterpart
@@ -196,7 +235,7 @@ local function UpdateConfiguration()
   --	if db_global.version ~= tostring(ThreatPlates.Meta("version")) then
   -- iterate over all profiles
   for name, profile in pairs(TidyPlatesThreat.db.profiles) do
-    ConvertAuraWidget1(name, profile)
+    -- ConvertAuraWidget1(name, profile)
   end
   --	end
 end
@@ -207,7 +246,7 @@ end
 
 ThreatPlates.UpdateDefaultProfile = UpdateDefaultProfile
 ThreatPlates.UpdateConfiguration = UpdateConfiguration
+--ThreatPlates.MigrateDatabase = MigrateDatabase
 
 ThreatPlates.GetUnitVisibility = GetUnitVisibility
 
---ThreatPlates.CleanupDatabase = CleanupDatabase

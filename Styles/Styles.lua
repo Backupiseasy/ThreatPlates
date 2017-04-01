@@ -3,30 +3,54 @@ local t = ns.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------
 
--- TODO: rework, TidyPlates has several new attributes to make this easier, e.g., isBoss
+--local function GetGeneral(unit)
+--	local r, d, e, m = unit.reaction, unit.isDangerous, unit.isElite, unit.isMini
+--  if unit.isTapped then
+--    return "Tapped"
+--  elseif r == "NEUTRAL" then
+--    if m then
+--      return "Mini"
+--    else
+--      return "Neutral"
+--    end
+--  elseif r ~= "NEUTRAL" and r~= "TAPPED" then
+--    if d and e then
+--      return "Boss"
+--    elseif not d and e then
+--      return "Elite"
+--    elseif m then
+--      return "Mini"
+--    elseif not d and not e then
+--      return "Normal"
+--    end
+--  else
+--    return "empty"
+--  end
+--end
+
 local function GetGeneral(unit)
-	local r, d, e, m = unit.reaction, unit.isDangerous, unit.isElite, unit.isMini
-  if unit.isTapped then
+  -- guild/friend/...?
+
+  -- missing from UnitClassification:
+  --   trivial:  for low-level targets that would not reward experience or honor (UnitIsTrivial() would return '1')
+
+  local t = unit.isTapped
+  local o, b, r, e, m = unit.reaction, unit.isBoss, unit.isRare, unit.isElite, unit.isMini
+
+  if t then
     return "Tapped"
-  elseif r == "NEUTRAL" then
-    if m then
-      return "Mini"
-    else
-      return "Neutral"
-    end
-  elseif r ~= "NEUTRAL" and r~= "TAPPED" then
-    if d and e then
-      return "Boss"
-    elseif not d and e then
-      return "Elite"
-    elseif unit.isMini then
-      return "Mini"
-    elseif not d and not e then
-      return "Normal"
-    end
+  elseif o == "NEUTRAL" then
+    return  "Neutral"
+  elseif m then
+    return "Minus"
+  elseif b then
+    return "Boss"
+  elseif r or e then
+    return "Elite"
   else
-    return "empty"
+    return "Normal"
   end
+
 end
 
 local function GetType(unit)
@@ -118,10 +142,18 @@ local function ShowUnit(unit)
 
     show, headline_view = ThreatPlates.GetUnitVisibility(faction..unit_type)
 
-    if (unit.isElite and db.visibility.HideElite) or (unit.isBoss and db.visibility.HideBoss) or
-      (unit.isTapped and db.visibility.HideTapped) then
+    if not db.HeadlineView.ON then
+      headline_view = false
+    elseif db.HeadlineView.ForceHealthbarOnTarget and unit.isTarget then
+      headline_view = false
+    elseif db.HeadlineView.ForceOutOfCombat and not InCombatLockdown() then
+      headline_view = true
+    end
+
+    if (unit.isElite and db.Visibility.HideElite) or (unit.isBoss and db.Visibility.HideBoss) or
+      (unit.isTapped and db.Visibility.HideTapped) then
       show = false
-    elseif db.visibility.HideNormal and not (unit.isElite or unit.isBoss or unit.isDangerous) then
+    elseif db.Visibility.HideNormal and not (unit.isElite or unit.isBoss or unit.isDangerous) then
       show = false
     elseif unit.unitid and UnitIsBattlePet(unit.unitid) then
       -- TODO: add configuration option for enable/disable
@@ -179,8 +211,7 @@ local function SetStyle(unit)
 
   if not show then
     style = "empty"
-  elseif show and headline_view and t.AlphaFeatureHeadlineView() then
-    TidyPlatesHubFunctions.SetStyleNamed(unit)
+  elseif show and headline_view then
     style = "NameOnly"
   else
     if unit_type == "Totem" then
@@ -243,5 +274,4 @@ end
 TidyPlatesThreat.GetGeneral = GetGeneral
 TidyPlatesThreat.GetType = GetType
 TidyPlatesThreat.SetStyle = SetStyle
-TidyPlatesThreat.GetStyle = GetStyle
 TidyPlatesThreat.GetThreatStyle = GetThreatStyle

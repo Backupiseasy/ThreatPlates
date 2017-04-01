@@ -561,7 +561,7 @@ local function Disable()
 end
 
 local function enabled()
-	local active = (not TidyPlatesThreat.db.profile.debuffWidget.ON) and TidyPlatesThreat.db.profile.AuraWidget.ON
+	local active = TidyPlatesThreat.db.profile.AuraWidget.ON
 
 	if active then
 		if not isAuraEnabled then
@@ -576,6 +576,10 @@ local function enabled()
 	end
 
 	return active
+end
+
+local function EnabledInHeadlineView()
+  return TidyPlatesThreat.db.profile.AuraWidget.ShowInHeadlineView
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -1101,4 +1105,4 @@ ThreatPlatesWidgets.ForceAurasUpdate = ForceAurasUpdate
 -- Register widget
 -----------------------------------------------------
 
-ThreatPlatesWidgets.RegisterWidget("AuraWidget2TPTP", CreateAuraWidget, false, enabled)
+ThreatPlatesWidgets.RegisterWidget("AuraWidget2TPTP", CreateAuraWidget, false, enabled, EnabledInHeadlineView)

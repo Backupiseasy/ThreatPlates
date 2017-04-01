@@ -36,6 +36,10 @@ local function enabled()
 	return TidyPlatesThreat.db.profile.stealthWidget.ON
 end
 
+local function EnabledInHeadlineView()
+	return TidyPlatesThreat.db.profile.stealthWidget.ShowInHeadlineView
+end
+
 -- hides/destroys all widgets of this type created by Threat Plates
 -- local function ClearAllWidgets()
 -- 	for _, widget in pairs(WidgetList) do
@@ -139,4 +143,4 @@ local function CreateWidgetFrame(parent)
 	return frame
 end
 
-ThreatPlatesWidgets.RegisterWidget("StealthWidgetTPTP", CreateWidgetFrame, false, enabled)
+ThreatPlatesWidgets.RegisterWidget("StealthWidgetTPTP", CreateWidgetFrame, false, enabled, EnabledInHeadlineView)

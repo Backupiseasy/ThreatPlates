@@ -77,6 +77,10 @@ local function enabled()
 	return db.ON and db.ModeIcon
 end
 
+local function EnabledInHeadlineView()
+	return TidyPlatesThreat.db.profile.questWidget.ShowInHeadlineView
+end
+
 -- hides/destroys all widgets of this type created by Threat Plates
 -- local function ClearAllWidgets()
 -- 	for _, widget in pairs(WidgetList) do
@@ -94,14 +98,18 @@ end
 -- end
 
 -- Update Graphics
-local function UpdateWidgetFrame(frame, unit)
+local function UpdateWidgetFrame(frame, unit, style)
 	if ShowQuestUnit(unit) and IsQuestUnit(unit) then
 		local db = TidyPlatesThreat.db.profile.questWidget
-		frame:SetHeight(db.scale)
-		frame:SetWidth(db.scale)
-		frame:SetPoint(db.anchor, frame:GetParent(), db.x, db.y)
+
+		if style == "NameOnly" and db.ShowInHeadlineView then
+			frame:SetPoint(db.anchor, frame:GetParent(), db.x_hv, db.y_hv)
+		else
+			frame:SetPoint(db.anchor, frame:GetParent(), db.x, db.y)
+		end
+
+		frame:SetSize(db.scale, db.scale)
 		frame:SetAlpha(db.alpha)
-		frame.Icon:SetTexture(path.."questicon_wide")
 		frame:Show()
 	else
 		frame:_Hide()
@@ -109,7 +117,7 @@ local function UpdateWidgetFrame(frame, unit)
 end
 
 -- Context - GUID or unitid should only change here, i.e., class changes should be determined here
-local function UpdateWidgetContext(frame, unit)
+local function UpdateWidgetContext(frame, unit, style)
 	local guid = unit.guid
 	frame.guid = guid
 
@@ -121,7 +129,7 @@ local function UpdateWidgetContext(frame, unit)
 	-- Custom Code II
 	--------------------------------------
 	if UnitGUID("target") == guid then
-		UpdateWidgetFrame(frame, unit)
+		UpdateWidgetFrame(frame, unit, style)
 	else
 		frame:_Hide()
 	end
@@ -147,6 +155,7 @@ local function CreateWidgetFrame(parent)
 	frame:SetHeight(64)
 	frame:SetWidth(64)
 	frame.Icon = frame:CreateTexture(nil, "OVERLAY")
+	frame.Icon:SetTexture(path.."questicon_wide")
 	frame.Icon:SetAllPoints(frame)
 
 	--frame.UpdateConfig = UpdateWidgetConfig
@@ -165,4 +174,4 @@ end
 TidyPlatesThreat.IsQuestUnit = IsQuestUnit
 TidyPlatesThreat.ShowQuestUnit = ShowQuestUnit
 
-ThreatPlatesWidgets.RegisterWidget("QuestWidgetTPTP", CreateWidgetFrame, false, enabled)
+ThreatPlatesWidgets.RegisterWidget("QuestWidgetTPTP", CreateWidgetFrame, false, enabled, EnabledInHeadlineView)

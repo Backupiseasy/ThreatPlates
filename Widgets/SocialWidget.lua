@@ -118,18 +118,29 @@ local function enabled()
 	return active
 end
 
+local function EnabledInHeadlineView()
+	return TidyPlatesThreat.db.profile.socialWidget.ShowInHeadlineView
+end
+
 ---------------------------------------------------------------------------------------------------
 -- Widget Functions for TidyPlates
 ---------------------------------------------------------------------------------------------------
 
-local function UpdateSettings(frame)
+local function UpdateSettings(frame, style)
 	local db = TidyPlatesThreat.db.profile.socialWidget
 	frame:SetFrameLevel(frame:GetParent():GetFrameLevel()+2)
-	frame:SetSize(db.scale,db.scale)
 	frame:SetPoint("CENTER",frame:GetParent(),db.anchor, db.x, db.y)
+
+	if style == "NameOnly" and db.ShowInHeadlineView then
+		frame:SetPoint(db.anchor, frame:GetParent(), db.x_hv, db.y_hv)
+	else
+		frame:SetPoint(db.anchor, frame:GetParent(), db.x, db.y)
+	end
+
+	frame:SetSize(db.scale,db.scale)
 end
 
-local function UpdateWidgetFrame(frame, unit)
+local function UpdateWidgetFrame(frame, unit, style)
 	-- I will probably expand this to a table with 'friend = true','guild = true', and 'bnet = true' and have 3 textuers show.
 	local texture
 	if tContains(ListTable.f, unit.name) then
@@ -141,7 +152,7 @@ local function UpdateWidgetFrame(frame, unit)
 	end
 
 	if texture then
-		UpdateSettings(frame)
+		UpdateSettings(frame, style)
 		frame.Icon:SetTexture(texture)
 		frame:Show()
 	else
@@ -150,7 +161,7 @@ local function UpdateWidgetFrame(frame, unit)
 end
 
 -- Context
-local function UpdateWidgetContext(frame, unit)
+local function UpdateWidgetContext(frame, unit, style)
 	local guid = unit.guid
 	frame.guid = guid
 
@@ -162,7 +173,7 @@ local function UpdateWidgetContext(frame, unit)
 	-- Custom Code II
 	--------------------------------------
 	if UnitGUID("target") == guid then
-		UpdateWidgetFrame(frame, unit)
+		UpdateWidgetFrame(frame, unit, style)
 	else
 		frame:_Hide()
 	end
@@ -202,5 +213,5 @@ local function CreateWidgetFrame(parent)
 	return frame
 end
 
-ThreatPlatesWidgets.RegisterWidget("SocialWidgetTPTP", CreateWidgetFrame, false, enabled)
+ThreatPlatesWidgets.RegisterWidget("SocialWidgetTPTP", CreateWidgetFrame, false, enabled, EnabledInHeadlineView)
 ThreatPlatesWidgets.SocialWidgetDisableWatcher = DisableWatcher

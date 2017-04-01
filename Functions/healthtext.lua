@@ -5,76 +5,172 @@ local ThreatPlates = NAMESPACE.ThreatPlates
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
 local RGB = ThreatPlates.RGB
+local RGB_P = ThreatPlates.RGB_P
+local GetColorByHealthDeficit = TidyPlatesThreat.GetColorByHealthDeficit
 
 ---------------------------------------------------------------------------------------------------
 -- Functions for subtext from TidyPlates
 ---------------------------------------------------------------------------------------------------
 
--- None
-local function HealthFunctionNone() return "" end
+local COLOR_ROLE = RGB(255, 255, 255, .7)
+local COLOR_GUILD = RGB(178, 178, 229, .7)
 
--- Percent
-local function TextHealthPercentColored(unit)
-	local color = ColorFunctionByHealth(unit)
-	return ceil(100*(unit.health/unit.healthmax)).."%", color.r, color.g, color.b, .7
+local UnitSubtitles = {}
+local ScannerName = "ThreatPlates_Tooltip_Subtext"
+local TooltipScanner = CreateFrame( "GameTooltip", ScannerName , nil, "GameTooltipTemplate" ); -- Tooltip name cannot be nil
+TooltipScanner:SetOwner( WorldFrame, "ANCHOR_NONE" );
+
+local function GetUnitSubtitle(unit)
+	local unitid = unit.unitid
+
+	-- Bypass caching while in an instance
+	--if inInstance or (not UnitExists(unitid)) then return end
+	if ( UnitIsPlayer(unitid) or UnitPlayerControlled(unitid) or (not UnitExists(unitid))) then return end
+
+	--local guid = UnitGUID(unitid)
+	local name = unit.name
+	local subTitle = UnitSubtitles[name]
+
+	if not subTitle then
+		TooltipScanner:ClearLines()
+		TooltipScanner:SetUnit(unitid)
+
+		local TooltipTextLeft1 = _G[ScannerName.."TextLeft1"]
+		local TooltipTextLeft2 = _G[ScannerName.."TextLeft2"]
+		local TooltipTextLeft3 = _G[ScannerName.."TextLeft3"]
+		local TooltipTextLeft4 = _G[ScannerName.."TextLeft4"]
+
+		name = TooltipTextLeft1:GetText()
+
+		if name then name = gsub( gsub( (name), "|c........", "" ), "|r", "" ) else return end	-- Strip color escape sequences: "|c"
+		if name ~= UnitName(unitid) then return end	-- Avoid caching information for the wrong unit
+
+
+		-- Tooltip Format Priority:  Faction, Description, Level
+		local toolTipText = TooltipTextLeft2:GetText() or "UNKNOWN"
+
+		if string.match(toolTipText, UNIT_LEVEL_TEMPLATE) then
+			subTitle = ""
+		else
+			subTitle = toolTipText
+		end
+
+		UnitSubtitles[name] = subTitle
+	end
+
+	-- Maintaining a cache allows us to avoid the hit
+	if subTitle == "" then
+		return nil
+	else
+		return subTitle
+	end
 end
 
-local function HealthFunctionPercent(unit)
+local function GetLevelDescription(unit)
+	local classification = UnitClassification(unit.unitid)
+	local description
+
+	if classification == "worldboss" then
+		description = "World Boss"
+	else
+		if unit.level > 0 then
+      description = "Level " .. unit.level
+    else
+      description = "Level ??"
+    end
+
+		if unit.isRare then
+			if unit.isElite then
+				description = description .. " (Rare Elite)"
+			else
+				description = description .. " (Rare)"
+			end
+		elseif unit.isElite then
+			description = description .. " (Elite)"
+		end
+	end
+
+	return description, RGB_P(unit.levelcolorRed, unit.levelcolorGreen, unit.levelcolorBlue, .70)
+end
+
+local function DummyFunction() return nil, COLOR_ROLE end
+
+local function TextHealthPercentColored(unit)
+	return ceil(100 * (unit.health / unit.healthmax)) .. "%", GetColorByHealthDeficit(unit)
+end
+
+-- Role, Guild or Level
+local function TextRoleGuildLevel(unit)
+  local color = COLOR_ROLE
+  local description
+
+	if unit.type == "NPC" then
+		description = GetUnitSubtitle(unit)
+
+		if not description then --  and unit.reaction ~= "FRIENDLY" then
+			description, color =  GetLevelDescription(unit)
+      -- color = COLOR_ROLE
+      -- color = RGB_P(unit.levelcolorRed, unit.levelcolorGreen, unit.levelcolorBlue, .70)
+		end
+
+	elseif unit.type == "PLAYER" then
+		description = GetGuildInfo(unit.unitid)
+    color = COLOR_GUILD
+	end
+
+	return description, color
+end
+
+local function TextRoleGuild(unit)
+	local color = COLOR_ROLE
+	local description
+
+	if unit.type == "NPC" then
+		description = GetUnitSubtitle(unit)
+	elseif unit.type == "PLAYER" then
+		description = GetGuildInfo(unit.unitid)
+    color = COLOR_GUILD
+	end
+
+	return description, color
+end
+
+-- NPC Role
+local function TextNPCRole(unit)
+  local color = COLOR_ROLE
+  local description
+
+	if unit.type == "NPC" then
+    description = GetUnitSubtitle(unit)
+  end
+
+  return description, color
+end
+
+-- Level
+local function TextLevelColored(unit)
+	return GetLevelDescription(unit)
+end
+
+-- Guild, Role, Level, Health
+local function TextAll(unit)
 	if unit.health < unit.healthmax then
 		return TextHealthPercentColored(unit)
-	else return "" end
-end
-
--- Actual
-local function HealthFunctionExact(unit)
-	return SepThousands(GetHealth(unit))
-end
--- Approximate
-local function HealthFunctionApprox(unit)
-	return ShortenNumber(GetHealth(unit))
-end
--- Approximate
-local function HealthFunctionApproxAndPercent(unit)
-	local color = ColorFunctionByHealth(unit)
-	return HealthFunctionApprox(unit).."  ("..ceil(100*(unit.health/unit.healthmax)).."%)", color.r, color.g, color.b, .7
-end
---Deficit
-local function HealthFunctionDeficit(unit)
-	local health, healthmax = GetHealth(unit), GetHealthMax(unit)
-	if health and healthmax and (health ~= healthmax) then return "-"..SepThousands(healthmax - health) end
-end
--- Total and Percent
-local function HealthFunctionTotal(unit)
-	local color = ColorFunctionByHealth(unit)
-	--local color = White
-	local health, healthmax = GetHealth(unit), GetHealthMax(unit)
-	return ShortenNumber(health).."|cffffffff ("..ceil(100*(unit.health/unit.healthmax)).."%)", color.r, color.g, color.b
-end
--- TargetOf
-local function HealthFunctionTargetOf(unit)
-	if unit.reaction ~= "FRIENDLY" and unit.isInCombat then
-		return UnitName(unitid.."target")
+	else
+		return TextRoleGuildLevel(unit)
 	end
-	--[[
-	if (unit.isTarget or (LocalVars.FocusAsTarget and unit.isFocus)) then return UnitName("targettarget")
-	elseif unit.isMouseover then return UnitName("mouseovertarget")
-	else return "" end
-	--]]
-end
--- Level
-local function HealthFunctionLevel(unit)
-	local level = unit.level
-	if unit.isElite then level = level.." (Elite)" end
-	return level, unit.levelcolorRed, unit.levelcolorGreen, unit.levelcolorBlue, .9
 end
 
--- Level and Health
-local function HealthFunctionLevelHealth(unit)
-	local level = unit.level
-	if unit.isElite then level = level.."E" end
-	return "("..level..") |cffffffff"..HealthFunctionApprox(unit), unit.levelcolorRed, unit.levelcolorGreen, unit.levelcolorBlue, .9
-	--return "|cffffffff"..HealthFunctionApprox(unit).."  |r"..level, unit.levelcolorRed, unit.levelcolorGreen, unit.levelcolorBlue, .9
-end
+local SUBTEXT_FUNCTIONS =
+{
+	NONE = DummyFunction,
+	HEALTH = TextHealthPercentColored,
+	ROLE = TextNPCRole,
+	ROLE_GUILD = TextRoleGuild,
+	ROLE_GUILD_LEVEL = TextRoleGuildLevel,
+	LEVEL = TextLevelColored,
+	ALL = TextAll,
+}
 
 ---------------------------------------------------------------------------------------------------
 --
@@ -96,18 +192,26 @@ end
 
 local function SetCustomText(unit)
 	local S = TidyPlatesThreat.SetStyle(unit)
-	local color_r, color_g, color_b, color_a
 
 	-- Headline View (alpha feature) uses TidyPlatesHub config and functionality
 	local db = TidyPlatesThreat.db.profile.HeadlineView
-	if db.Enabled and (S == "NameOnly") then
-		if db.SubtextColorUseHeadline then
-			color_r, color_g, color_b, color_a = TidyPlatesThreat.SetNameColor(unit)
+	if db.ON and (S == "NameOnly") then
+		local func
+		if unit.reaction == "FRIENDLY" then
+			func = SUBTEXT_FUNCTIONS[db.FriendlySubtext]
 		else
-			local color = db.SubtextColor
-			color_r, color_g, color_b, color_a = color.r, color.g, color.b, color.a
+			func = SUBTEXT_FUNCTIONS[db.EnemySubtext]
 		end
-		return TidyPlatesHubFunctions.SetCustomTextBinary(unit), color_r, color_g, color_b, color_a
+
+		local subtext, color = func(unit)
+
+		if db.SubtextColorUseHeadline then
+			color = RGB_P(TidyPlatesThreat.SetNameColor(unit))
+		elseif not db.SubtextColorUseSpecific then
+			color = db.SubtextColor
+		end
+
+		return subtext, color.r, color.g, color.b, color.a
 	end
 
 	db = TidyPlatesThreat.db.profile.text
@@ -139,7 +243,7 @@ local function SetCustomText(unit)
 		-- Blizzard calculation:
 		-- local perc = math.ceil(100 * (UnitHealth(frame.displayedUnit)/UnitHealthMax(frame.displayedUnit)));
 
-		local perc = math.ceil(100 * (unit.health / unit.healthmax))
+		local perc = ceil(100 * (unit.health / unit.healthmax))
 		-- old: floor(100*(unit.health / unit.healthmax))
 
 		if HpMax ~= "" or HpAmt ~= "" then

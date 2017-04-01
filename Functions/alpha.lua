@@ -1,6 +1,9 @@
 local _, ns = ...
-local t = ns.ThreatPlates
 
+---------------------------------------------------------------------------------------------------
+-- Imported functions and constants
+---------------------------------------------------------------------------------------------------
+local UnitIsOffTanked = TidyPlatesThreat.UnitIsOffTanked
 
 local function GetGeneralAlpha(unit)
 	local unitType = TidyPlatesThreat.GetType(unit)
@@ -36,10 +39,14 @@ local function GetThreatAlpha(unit)
 		if unit.isMarked and db.marked.alpha then
 			return GetGeneralAlpha(unit)
 		else
+			local threatSituation = unit.threatSituation
 			if TidyPlatesThreat:GetSpecRole() then
-				return db["tank"].alpha[unit.threatSituation]
+				if db.toggle.OffTank and UnitIsOffTanked(unit) then
+					threatSituation = "OFFTANK"
+				end
+				return db["tank"].alpha[threatSituation]
 			else
-				return db["dps"].alpha[unit.threatSituation]
+				return db["dps"].alpha[threatSituation]
 			end
 		end
 	else
@@ -49,7 +56,7 @@ end
 
 local function SetAlpha(unit)
 	local db = TidyPlatesThreat.db.profile
-	local style = TidyPlatesThreat.SetStyle(unit)
+
 	local alpha = 0
 	local nonTargetAlpha = 0
 
@@ -69,19 +76,19 @@ local function SetAlpha(unit)
 		end
 	elseif style == "empty" then -- etotem alpha will still be at totem level
 		alpha = 0
+	elseif style == "NameOnly" then
+		if db.HeadlineView.useAlpha then
+			alpha = GetThreatAlpha(unit)
+		else
+			alpha = 1 -- ignore all alpha settings for healthbar view
+			if db.HeadlineView.blizzFading and not unit.isTarget and UnitExists("Target") then
+				nonTargetAlpha = db.HeadlineView.blizzFadingAlpha
+			else
+				nonTargetAlpha = 1
+			end
+		end
 	else
 		alpha = GetThreatAlpha(unit)
-	end
-
-	-- overwrite any alpha for headline view (text-only)
-	if 	t.AlphaFeatureHeadlineView() and (style == "NameOnly") then
-		alpha = 1 -- ignore all alpha settings for healthbar view
-
-		if db.HeadlineView.nonTargetAlpha and not unit.isTarget and UnitExists("Target") then
-			nonTargetAlpha = db.HeadlineView.alpha
-		else
-			nonTargetAlpha = 1
-		end
 	end
 
 	if not alpha then

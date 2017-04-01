@@ -4,8 +4,14 @@ ThreatPlates = NAMESPACE.ThreatPlates
 -------------------
 -- Threat Widget --
 -------------------
-local path = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ThreatWidget\\"
+local PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ThreatWidget\\"
 -- local WidgetList = {}
+
+---------------------------------------------------------------------------------------------------
+-- Imported functions and constants
+---------------------------------------------------------------------------------------------------
+local UnitIsOffTanked = TidyPlatesThreat.UnitIsOffTanked
+local SetStyle = TidyPlatesThreat.SetStyle
 
 ---------------------------------------------------------------------------------------------------
 -- Threat Plates functions
@@ -28,28 +34,34 @@ end
 ---------------------------------------------------------------------------------------------------
 
 local function UpdateWidgetFrame(frame, unit, style)
-	local threatLevel
-	if TidyPlatesThreat:GetSpecRole() then -- Tanking uses regular textures / swapped for dps / healing
-		threatLevel = unit.threatSituation
-	else
-		if unit.threatSituation == "HIGH" then
-			threatLevel = "LOW"
-		elseif unit.threatSituation == "LOW" then
-			threatLevel = "HIGH"
-		elseif unit.threatSituation == "MEDIUM" then
-			threatLevel = "MEDIUM"
-		end
-	end
+	local db = TidyPlatesThreat.db.profile.threat
 
-	local prof = TidyPlatesThreat.db.profile.threat
-	if unit.isMarked and prof.marked.art then
+	if unit.isMarked and db.marked.art then
 		frame:_Hide()
 	else
-		--local style = TidyPlatesThreat.SetStyle(unit)
-		if not style then style = TidyPlatesThreat.SetStyle(unit) end
+		if not style then style = SetStyle(unit) end
+
 		if ((style == "dps") or (style == "tank") or (style == "unique")) and
 		  (InCombatLockdown() and unit.reaction ~= "FRIENDLY" and unit.type == "NPC") then
-			frame.Icon:SetTexture(path..prof.art.theme.."\\"..threatLevel)
+
+			local threatLevel
+			if style == "tank" then -- Tanking uses regular textures / swapped for dps / healing
+				if db.toggle.OffTank and UnitIsOffTanked(unit) then
+					threatLevel = "OFFTANK"
+				else
+					threatLevel = unit.threatSituation
+				end
+			else
+				if unit.threatSituation == "HIGH" then
+					threatLevel = "LOW"
+				elseif unit.threatSituation == "LOW" then
+					threatLevel = "HIGH"
+				elseif unit.threatSituation == "MEDIUM" then
+					threatLevel = "MEDIUM"
+				end
+			end
+
+			frame.Icon:SetTexture(PATH .. db.art.theme.."\\"..threatLevel)
 			frame:Show()
 		else
 			frame:_Hide()
@@ -94,9 +106,8 @@ local function CreateWidgetFrame(parent)
 	-- Custom Code III
 	--------------------------------------
 	frame:SetFrameLevel(parent.bars.healthbar:GetFrameLevel() + 2)
-	frame:SetWidth(256)
-	frame:SetHeight(64)
-	frame:SetPoint("CENTER",parent,"CENTER")
+	frame:SetSize(265, 64)
+	frame:SetPoint("CENTER", parent, "CENTER")
 	frame.Icon = frame:CreateTexture(nil, "OVERLAY")
 	frame.Icon:SetAllPoints(frame)
 

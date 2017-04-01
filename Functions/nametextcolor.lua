@@ -5,6 +5,7 @@ local ThreatPlates = NAMESPACE.ThreatPlates
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
 local RGB = ThreatPlates.RGB
+local GetColorByHealthDeficit = TidyPlatesThreat.GetColorByHealthDeficit
 
 local reference = {
 	FRIENDLY = { NPC = "FriendlyNPC", PLAYER = "FriendlyPlayer", },
@@ -18,19 +19,23 @@ local function SetNameColor(unit)
 
 	-- Headline View (alpha feature) uses TidyPlatesHub config and functionality
 	local db = TidyPlatesThreat.db.profile.HeadlineView
-	if db.Enabled and (S == "NameOnly") then
+	if db.ON and (S == "NameOnly") then
 
 		if unit.reaction == "FRIENDLY" then
-			if db.FriendlyTextColorMode == 1 then -- By Custom Color
+			if db.FriendlyTextColorMode == "CUSTOM" then -- By Custom Color
 				color = db.FriendlyTextColor
-			elseif db.FriendlyTextColorMode == 2 and unit.type == "PLAYER" then -- By Class
-					color = RAID_CLASS_COLORS[unit.class]
+			elseif db.FriendlyTextColorMode == "CLASS" and unit.type == "PLAYER" then -- By Class
+				color = RAID_CLASS_COLORS[unit.class]
+			elseif db.FriendlyTextColorMode == "HEALTH" then
+				color = GetColorByHealthDeficit(unit)
 			end
 		else
-			if db.EnemyTextColorMode == 1 then -- By Custom Color
+			if db.EnemyTextColorMode == "CUSTOM" then -- By Custom Color
 				color = db.EnemyTextColor
-			elseif db.EnemyTextColorMode == 2 and unit.type == "PLAYER" then -- By Class
+			elseif db.EnemyTextColorMode == "CLASS" and unit.type == "PLAYER" then -- By Class
 				color = RAID_CLASS_COLORS[unit.class]
+			elseif db.EnemyTextColorMode == "HEALTH" then
+				color = GetColorByHealthDeficit(unit)
 			end
 		end
 
@@ -52,9 +57,10 @@ local function SetNameColor(unit)
 		color = TidyPlatesThreat.db.profile.settings.name.color
 	end
 
---	if not color then
---		color = RGB(0, 255, 0)
---	end
+	if not color then
+		--ThreatPlates.DEBUG_PRINT_TABLE(unit)
+		color = RGB(0, 255, 0)
+	end
 
 	return color.r, color.g, color.b, 1
 end

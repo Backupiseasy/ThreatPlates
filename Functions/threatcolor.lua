@@ -5,6 +5,8 @@ ThreatPlates = NAMESPACE.ThreatPlates
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
 local RGB = ThreatPlates.RGB
+local UnitIsOffTanked = TidyPlatesThreat.UnitIsOffTanked
+
 local COLOR_TRANSPARENT = RGB(0, 0, 0, 0)
 --local COLOR_TAPPED = RGB(100, 100, 100)
 
@@ -26,13 +28,23 @@ local function SetThreatColor(unit)
 
   -- problem with this is if threat system is enabled, it does not work for unique - which it should in this case!
   if style == "dps" or style == "tank" or (style == "normal" and InCombatLockdown()) then
+    local show_offtank = db.threat.toggle.OffTank
+
     if db.ShowThreatGlowOnAttackedUnitsOnly and unit.unitid then
       local _, threatStatus = UnitDetailedThreatSituation("player", unit.unitid);
       if (threatStatus ~= nil) then
-        c = db.settings[style]["threatcolor"][unit.threatSituation]
+        local threatSituation = unit.threatSituation
+        if style == "tank" and show_offtank and UnitIsOffTanked(unit) then
+          threatSituation = "OFFTANK"
+        end
+        c = db.settings[style]["threatcolor"][threatSituation]
       end
     else
-      c = db.settings[style]["threatcolor"][unit.threatSituation]
+      local threatSituation = unit.threatSituation
+      if style == "tank" and show_offtank and UnitIsOffTanked(unit) then
+        threatSituation = "OFFTANK"
+      end
+      c = db.settings[style]["threatcolor"][threatSituation]
     end
   end
 

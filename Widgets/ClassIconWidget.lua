@@ -10,7 +10,6 @@ local PATH_THEME
 -- local Masque = LibStub("Masque", true)
 -- local group
 
-
 ---------------------------------------------------------------------------------------------------
 -- Threat Plates functions
 ---------------------------------------------------------------------------------------------------
@@ -19,10 +18,19 @@ local function enabled()
 	return TidyPlatesThreat.db.profile.classWidget.ON
 end
 
-local function UpdateWidgetConfig(frame)
+local function EnabledInHeadlineView()
+	return TidyPlatesThreat.db.profile.classWidget.ShowInHeadlineView
+end
+
+local function UpdateSettings(frame, style)
 	local db = TidyPlatesThreat.db.profile.classWidget
 
-	frame:SetPoint(db.anchor, frame:GetParent(), db.x, db.y)
+	if style == "NameOnly" and db.ShowInHeadlineView then
+		frame:SetPoint(db.anchor, frame:GetParent(), db.x_hv, db.y_hv)
+	else
+		frame:SetPoint(db.anchor, frame:GetParent(), db.x, db.y)
+	end
+
 	frame:SetSize(db.scale, db.scale)
 
 	PATH_THEME = PATH .. db.theme .."\\"
@@ -42,7 +50,7 @@ end
 ---------------------------------------------------------------------------------------------------
 
 -- Update Graphics
-local function UpdateWidgetFrame(frame, unit)
+local function UpdateWidgetFrame(frame, unit, style)
 	-- TODO: optimization - is it necessary to determine the class everytime this function is called on only if the guid changes?
 	local db = TidyPlatesThreat.db.profile
 
@@ -66,7 +74,7 @@ local function UpdateWidgetFrame(frame, unit)
 	end
 
 	if class then -- Value shouldn't need to change
-		UpdateWidgetConfig(frame)
+		UpdateSettings(frame, style)
 		frame.Icon:SetTexture(PATH_THEME .. class)
 
 		-- if Masque then
@@ -142,4 +150,4 @@ local function CreateWidgetFrame(plate)
 	return frame
 end
 
-ThreatPlatesWidgets.RegisterWidget("ClassIconWidgetTPTP", CreateWidgetFrame, false, enabled)
+ThreatPlatesWidgets.RegisterWidget("ClassIconWidgetTPTP", CreateWidgetFrame, false, enabled, EnabledInHeadlineView)

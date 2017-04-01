@@ -5,13 +5,13 @@ local t = ns.ThreatPlates
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
 local RGB = t.RGB
+local RGB_P = t.RGB_P
 
 local COLOR_DC = RGB(128, 128, 128)
 local COLOR_TAPPED = RGB(100, 100, 100)
 --local COLOR_TAPPED = RGB(229, 229, 229)
 --local COLOR_FRIENDLY_PLAYER = RGB(170, 170, 255)
 
-local isTanked
 local reference = {
   FRIENDLY = { NPC = "FriendlyNPC", PLAYER = "FriendlyPlayer", },
   HOSTILE = {	NPC = "HostileNPC", PLAYER = "HostilePlayer", },
@@ -95,24 +95,52 @@ function CS:GetSmudgeColorRGB(colorA, colorB, perc)
     return r,g,b
 end
 
+
+local function GetColorByHealthDeficit(unit)
+  local db = TidyPlatesThreat.db.profile
+  local pct = unit.health / unit.healthmax
+  local r, g, b = CS:GetSmudgeColorRGB(db.aHPbarColor, db.bHPbarColor, pct)
+  return RGB_P(r, g, b, 1)
+end
+
+local function UnitIsOffTanked(unit)
+  local unitid = unit.unitid
+
+  if unitid then
+    local targetOf = unitid.."target"
+    local targetIsTank = UnitIsUnit(targetOf, "pet") or ("TANK" == UnitGroupRolesAssigned(targetOf))
+
+    if targetIsTank and unit.threatValue < 2 then
+      return true
+    end
+  end
+
+  return false
+end
+
 local function GetThreatColor(unit,style)
   local db = TidyPlatesThreat.db.profile
   local c
   -- style is normal for PLAYERS, only NPCs get tank/dps
   if (db.threat.ON and db.threat.useHPColor and InCombatLockdown() and (style == "dps" or style == "tank")) then
-    if not isTanked then -- This value is going to be determined in the SetStyles function.
-      if db.threat.nonCombat then
-        if (unit.isInCombat or (unit.health < unit.healthmax)) then
-          c = db.settings[style].threatcolor[unit.threatSituation]
-        else -- not sure, wenn this branch is used
-          c = GetClassColor(unit)
+
+    local show_offtank = db.threat.toggle.OffTank
+    if db.threat.nonCombat then
+      if (unit.isInCombat or (unit.health < unit.healthmax)) then
+        local threatSituation = unit.threatSituation
+        if style == "tank" and show_offtank and UnitIsOffTanked(unit) then
+          threatSituation = "OFFTANK"
         end
-      else
-        c = db.settings[style].threatcolor[unit.threatSituation]
+        c = db.settings[style].threatcolor[threatSituation]
+      else -- not sure, wenn this branch is used
+        c = GetClassColor(unit)
       end
     else
-      -- should be color for second tank - not active currently
-      c = db.tHPbarColor
+      local threatSituation = unit.threatSituation
+      if style == "tank" and show_offtank and UnitIsOffTanked(unit) then
+        threatSituation = "OFFTANK"
+      end
+      c = db.settings[style].threatcolor[threatSituation]
     end
 --	else
 --		c = GetClassColor(unit)
@@ -217,4 +245,6 @@ local function SetHealthbarColor(unit)
   --	end
 end
 
+TidyPlatesThreat.GetColorByHealthDeficit = GetColorByHealthDeficit
 TidyPlatesThreat.SetHealthbarColor = SetHealthbarColor
+TidyPlatesThreat.UnitIsOffTanked = UnitIsOffTanked

@@ -5,6 +5,7 @@ local t = ns.ThreatPlates
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
 local RGB = t.RGB
+local RGB_P = t.RGB_P
 local L = t.L
 local class = t.Class()
 
@@ -35,11 +36,6 @@ local TIDYPLATES_INSTALLED_VERSION = GetAddOnMetadata("TidyPlates", "version") o
   -- 	GlobDB.versioncheck = true
   -- end
 --end
-
-local function AlphaFeatureHeadlineView()
-  return TidyPlatesThreat.db.profile.HeadlineView.Enabled and TidyPlatesHubFunctions
-end
-t.AlphaFeatureHeadlineView = AlphaFeatureHeadlineView
 
 t.Print = function(val,override)
   local db = TidyPlatesThreat.db.profile
@@ -203,26 +199,31 @@ function TidyPlatesThreat:OnInitialize()
       friendlyClassIcon = false,
       cacheClass = false,
       optionRoleDetectionAutomatic = false,
-      alphaFeatureHeadlineView = false,
       ShowThreatGlowOnAttackedUnitsOnly = false,
+      ShowThreatGlowOffTank = true,
       HeadlineView = {
-        Enabled = false,
+        ON = false,
         name = { size = 10, width = 116, height = 14, x = 0, y = 4, align = "CENTER", vertical = "CENTER", },
         useAlpha = false,
         blizzFading = true,
         blizzFadingAlpha = 1,
         useScaling = false,
+        ShowTargetHighlight = true,
+        ShowMouseoverHighlight = true,
+        ForceHealthbarOnTarget = false,
+        ForceOutOfCombat = false,
         --
-        EnemyTextColorMode = 1,
+        EnemyTextColorMode = "CLASS",
         EnemyTextColor = RGB(0, 255, 0),
-        FriendlyTextColorMode = 1,
+        FriendlyTextColorMode = "CLASS",
         FriendlyTextColor = RGB(0, 255, 0),
         UseRaidMarkColoring = false,
-        SubtextColorUseHeadline = true,
+        SubtextColorUseHeadline = false,
+        SubtextColorUseSpecific = true,
         SubtextColor =  RGB(255, 255, 255, 1),
         --
-        EnemySubtext = "",
-        FriendlySubtext = "",
+        EnemySubtext = "ROLE_GUILD_LEVEL",
+        FriendlySubtext = "ROLE_GUILD",
       },
       Visibility = {
 --				showNameplates = true,
@@ -391,7 +392,7 @@ function TidyPlatesThreat:OnInitialize()
         anchor = "CENTER"
       },
       debuffWidget = {
-        ON = true,
+        ON = false,
         x = 18,
         y = 32,
         mode = "blacklistMine",
@@ -413,7 +414,14 @@ function TidyPlatesThreat:OnInitialize()
         filter = {}
       },
       AuraWidget = {
-        ON = false,	x = 0, y = 5, scale = 1,	anchor = "TOP",
+        ON = true,
+        x = 0,
+        y = 5,
+        x_hv = 0,
+        y_hv = 5,
+        scale = 1,
+        anchor = "TOP",
+        ShowInHeadlineView = false,
         ShowEnemy = true,
         ShowFriendly = true,
         FilterMode = "blacklistMine",
@@ -479,8 +487,11 @@ function TidyPlatesThreat:OnInitialize()
         scale = 22,
         x = -74,
         y = -7,
+        x_hv = -74,
+        y_hv = -7,
         theme = "default",
         anchor = "CENTER",
+        ShowInHeadlineView = false,
       },
       targetWidget = {
         ON = true,
@@ -508,6 +519,9 @@ function TidyPlatesThreat:OnInitialize()
         scale = 1,
         x = 0,
         y = -8,
+        x_hv = 0,
+        y_hv = -8,
+        ShowInHeadlineView = false,
       },
       eliteWidget = {
         ON = true,
@@ -522,17 +536,37 @@ function TidyPlatesThreat:OnInitialize()
         scale = 16,
         x = 65,
         y = 6,
+        x_hv = 65,
+        y_hv = 6,
         anchor = "CENTER",
+        ShowInHeadlineView = false,
       },
-      questWidget = {	ON = false,	scale = 26,	x = 0, y = 30, alpha = 1, anchor = "CENTER",
+      questWidget = {
+        ON = false,
+        scale = 26,
+        x = 0,
+        y = 30,
+        x_hv = 0,
+        y_hv = 30,
+        alpha = 1,
+        anchor = "CENTER",
         ModeHPBar = true,
         ModeIcon = true,
         HPBarColor = RGB(218, 165, 32), -- Golden rod
         HideInCombat = false,
         HideInCombatAttacked = true,
         HideInInstance = true,
+        ShowInHeadlineView = false,
       },
-      stealthWidget = {	ON = false, scale = 28, x = 0, y = 0,	alpha = 1, anchor = "CENTER", },
+      stealthWidget = {
+        ON = false,
+        scale = 28,
+        x = 0,
+        y = 0,
+        alpha = 1,
+        anchor = "CENTER",
+        ShowInHeadlineView = false,
+      },
       totemSettings = ThreatPlatesWidgets.TOTEM_SETTINGS,
       uniqueSettings = {
         list = {},
@@ -1288,7 +1322,10 @@ function TidyPlatesThreat:OnInitialize()
           texture = "ThreatPlatesBar",
           x = 0,
           y = -15,
+          x_hv = 0,
+          y_hv = -15,
           show = true,
+          ShowInHeadlineView = false,
         },
         name = {
           typeface = "Accidental Presidency",
@@ -1350,6 +1387,8 @@ function TidyPlatesThreat:OnInitialize()
           height = 14,
           x = 0,
           y = -13,
+          x_hv = 0,
+          y_hv = -13,
           align = "CENTER",
           vertical = "CENTER",
           shadow = true,
@@ -1360,56 +1399,29 @@ function TidyPlatesThreat:OnInitialize()
           scale = 20,
           x = 0,
           y = 27,
+          x_hv = 0,
+          y_hv = 27,
           anchor = "CENTER",
           hpColor = true,
           show = true,
+          ShowInHeadlineView = false,
           hpMarked = {
-            ["STAR"] = {
-              r = 0.85,
-              g = 0.81,
-              b = 0.27
-            },
-            ["MOON"] = {
-              r = 0.60,
-              g = 0.75,
-              b = 0.85
-            },
-            ["CIRCLE"] = {
-              r = 0.93,
-              g = 0.51,
-              b = 0.06
-            },
-            ["SQUARE"] = {
-              r = 0,
-              g = 0.64,
-              b = 1
-            },
-            ["DIAMOND"] = {
-              r = 0.7,
-              g = 0.06,
-              b = 0.84
-            },
-            ["CROSS"] = {
-              r = 0.82,
-              g = 0.18,
-              b = 0.18
-            },
-            ["TRIANGLE"] = {
-              r = 0.14,
-              g = 0.66,
-              b = 0.14
-            },
-            ["SKULL"] = {
-              r = 0.89,
-              g = 0.83,
-              b = 0.74
-            },
+            ["STAR"] = RGB_P(0.85, 0.81, 0.27),
+            ["MOON"] = RGB_P(0.60, 0.75, 0.85),
+            ["CIRCLE"] = RGB_P(0.93, 0.51,0.06),
+            ["SQUARE"] = RGB_P(0, 0.64, 1),
+            ["DIAMOND"] = RGB_P(0.7, 0.06, 0.84),
+            ["CROSS"] = RGB_P(0.82, 0.18, 0.18),
+            ["TRIANGLE"] = RGB_P(0.14, 0.66, 0.14),
+            ["SKULL"] = RGB_P(0.89, 0.83, 0.74),
           },
         },
         spellicon = {
           scale = 20,
           x = 75,
           y = -7,
+          x_hv = 75,
+          y_hv = -7,
           anchor = "CENTER",
           show = true,
         },
@@ -1473,24 +1485,10 @@ function TidyPlatesThreat:OnInitialize()
         },
         normal = {
           threatcolor = {
-            LOW = {
-              r = 1,
-              g = 1,
-              b = 1,
-              a = 1
-            },
-            MEDIUM = {
-              r = 1,
-              g = 1,
-              b = 0,
-              a = 1
-            },
-            HIGH = {
-              r = 1,
-              g = 0,
-              b = 0,
-              a = 1
-            },
+            LOW = RGB_P(1, 1, 1, 1),
+            MEDIUM = RGB_P(1, 1, 0, 1),
+            HIGH = RGB_P(1, 0, 0, 1),
+            OFFTANK = RGB(15, 170, 200, 1),
           },
         },
         dps = {
@@ -1517,24 +1515,10 @@ function TidyPlatesThreat:OnInitialize()
         },
         tank = {
           threatcolor = {
-            LOW = {
-              r = 1,
-              g = 0,
-              b = 0,
-              a = 1
-            },
-            MEDIUM = {
-              r = 1,
-              g = 1,
-              b = 0,
-              a = 1
-            },
-            HIGH = {
-              r = 0,
-              g = 1,
-              b = 0,
-              a = 1
-            },
+            LOW = RGB_P(1, 0, 0, 1),
+            MEDIUM = RGB_P(1, 1, 0, 1),
+            HIGH = RGB_P(0, 1, 0, 1),
+            OFFTANK = RGB(15, 170, 200, 1),
           },
         },
       },
@@ -1555,15 +1539,16 @@ function TidyPlatesThreat:OnInitialize()
           ["Normal"] = -0.2,
           ["Elite"] = 0,
           ["Boss"] = 0.2,
-          ["Mini"] = -0.2,
+          ["Minus"] = -0.2,
         },
         toggle = {
           ["Boss"]	= true,
           ["Elite"]	= true,
           ["Normal"]	= true,
           ["Neutral"]	= true,
-          ["Mini"] 	= true,
-          ["Tapped"] 	= true
+          ["Minus"] 	= true,
+          ["Tapped"] 	= true,
+          ["OffTank"] = true,
         },
         dps = {
           scale = {
@@ -1581,12 +1566,14 @@ function TidyPlatesThreat:OnInitialize()
           scale = {
             LOW 		= 1.25,
             MEDIUM		= 0.9,
-            HIGH 		= 0.8
+            HIGH 		= 0.8,
+            OFFTANK = 0.8
           },
           alpha = {
             LOW 		= 1,
             MEDIUM		= 0.85,
-            HIGH 		= 0.75
+            HIGH 		= 0.75,
+            OFFTANK = 0.75
           },
         },
         marked = {
@@ -1601,7 +1588,7 @@ function TidyPlatesThreat:OnInitialize()
           ["Elite"]	= true,
           ["Normal"]	= true,
           ["Neutral"]	= true,
-          ["Mini"]	= true,
+          ["Minus"]	= true,
           ["Tapped"] 	= true,
           ["TargetA"]  = false, -- Custom Target Alpha
           ["NoTargetA"]  = false, -- Custom Target Alpha
@@ -1614,13 +1601,13 @@ function TidyPlatesThreat:OnInitialize()
           ["Target"]		= 1,
           ["NoTarget"]	= 1,
           ["Totem"]		= 0.75,
-          ["Boss"]		= 1.1,
-          ["Elite"]		= 1.04,
+          ["Marked"] 		= 1,
+          ["Minus"]	= 0.7,
           ["Normal"]		= 1,
-          ["Neutral"]		= 0.9,
-          ["Mini"]	= 0.7,
+          ["Elite"]		= 1.04,
+          ["Boss"]		= 1.1,
           ["Tapped"] 		= 0.9,
-          ["Marked"] 		= 1
+          ["Neutral"]		= 0.9,
         },
         alpha = {
           ["Target"]		= 1,
@@ -1630,7 +1617,7 @@ function TidyPlatesThreat:OnInitialize()
           ["Elite"]		= 1,
           ["Normal"]		= 1,
           ["Neutral"]		= 1,
-          ["Mini"]	= 1,
+          ["Minus"]	= 1,
           ["Tapped"]		= 1,
           ["Marked"] 		= 1
         },
@@ -1697,21 +1684,15 @@ local function OnActivateTheme(themeTable)
 end
 TidyPlatesThreat.OnActivateTheme = OnActivateTheme
 
-local function OnChangeProfile(theme, profile)
-  if t.AlphaFeatureHeadlineView() then
-    if profile then
-      TidyPlatesHubFunctions.UseVariables(profile)
-      TidyPlates:ForceUpdate()
-    end
-  end
-end
-TidyPlatesThreat.OnChangeProfile = OnChangeProfile
+--local function OnChangeProfile(theme, profile)
+--end
+--TidyPlatesThreat.OnChangeProfile = OnChangeProfile
 
 -- called by TidyPlatesHub when changes in the options panel were made (CallForStyleUpdate)
-local function ApplyProfileSettings(theme, ...)
-  TidyPlates:ForceUpdate()
-end
-TidyPlatesThreat.ApplyProfileSettings = ApplyProfileSettings
+--local function ApplyProfileSettings(theme, ...)
+--  TidyPlates:ForceUpdate()
+--end
+--TidyPlatesThreat.ApplyProfileSettings = ApplyProfileSettings
 
 ------------------
 -- ADDON LOADED --
@@ -1736,7 +1717,7 @@ local function ApplyHubFunctions(theme)
 
   theme.OnActivateTheme = TidyPlatesThreat.OnActivateTheme -- called by Tidy Plates Core, Theme Loader
   theme.OnChangeProfile = TidyPlatesThreat.OnChangeProfile -- used by TidyPlates when a specialication change occurs or the profile is changed
-  theme.ApplyProfileSettings = TidyPlatesThreat.ApplyProfileSettings
+--  theme.ApplyProfileSettings = TidyPlatesThreat.ApplyProfileSettings
 
   theme.ShowConfigPanel = TidyPlatesThreat.ShowConfigPanel
 
@@ -1788,8 +1769,8 @@ function TidyPlatesThreat:StartUp()
       StaticPopup_Show("SetToThreatPlates")
     end
   else
-    -- remove (and convert) any old DB entries
-    -- t.CleanupDatabase()
+    -- remove (and migrate) any old DB entries
+--    ThreatPlates.MigrateDatabase()
 
     local GlobDB = self.db.global
     -- TODO: why not just overwrite the old version entry?
@@ -1895,14 +1876,16 @@ end
 
 -- QuestWidget needs to update all nameplates when a quest was completed
 function TidyPlatesThreat:UNIT_FACTION(event, unitid)
-  TidyPlatesThreat.ApplyProfileSettings()
+  TidyPlates:ForceUpdate()
+  --TidyPlatesThreat.ApplyProfileSettings()
 end
 
 -- nameplate color can change when factions change (e.g., with disguises)
 -- Legion example: Suramar city and Masquerade
 function TidyPlatesThreat:QUEST_WATCH_UPDATE(event, quest_index)
   if TidyPlatesThreat.db.profile.questWidget.ON then
-    TidyPlatesThreat.ApplyProfileSettings()
+    TidyPlates:ForceUpdate()
+    --TidyPlatesThreat.ApplyProfileSettings()
   end
 end
 

@@ -1,11 +1,22 @@
 ------------------------------------------------------
 8.4.0-Beta1 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
-* Upgrade integrated libraries to LibSharedMedia-3.0 7.0.1, Ace3 Release-r1151, AceGUI-3.0-SharedMediaWidgets r57-release
-* Added option to show or hide mini mobs (...)
-* Reworked headline view (name-only) - added additional configuration options and removed dependency to TidyPlatesHub
-* Reworked configuration for coloring (healthbar), scaling and transparency (alpha) for various unit types (NPC, ...)
-* Visiblity of unit types now configured in more details and synchronized with corresponding CVars
+* Added fully customizable headline view (name-only) (added configuration options and removed dependency to TidyPlatesHub) [Ticket #34, #119, Comment #345].
+* Target and mouseover glow in headline view can be disabled now [Comment #360].
+* Widgets (like class icon, raid icon, or auras) can now be  enabled in headline view [Comment #338].
+* Added off-tank mode to threat system (with own color, scale, and opacity for mobs tanked by off-tank) [Ticket #9,Comment #339].
+* Added option to show or hide mini (minor) mobs  (with own scale and opacity).
+* Visibility of unit types can be configured in more details now.
+* Added an option to enable clickthrough for friendly and enemy nameplates [Comment #370, #375].
+* Upgrade integrated libraries to LibSharedMedia-3.0 7.0.1, Ace3 Release-r1151, AceGUI-3.0-SharedMediaWidgets r57-release.
+
+------------------------------------------------------
+8.3.4 (works with TidyPlates 6.18.11)
+------------------------------------------------------
+* Updated addon metadata to be compatible with patch 7.2.
+* Known issues:
+  * Switching between ThreatPlates and other themes may require /reload for the new theme to work correctly
+  * Changing certain settings in the option dialog may require a /reload for the settings to fully take effect.
 
 ------------------------------------------------------
 8.3.3 (works with TidyPlates 6.18.11)

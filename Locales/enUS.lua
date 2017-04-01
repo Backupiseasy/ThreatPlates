@@ -123,6 +123,7 @@ L["About"] = true
 -- Nameplate Settings --
 ------------------------
 L["General Settings"] = true
+L["This allows to configure which nameplates should be shown while you are playing."] = true
 L["Hiding"] = true
 L["Show Tapped"] = true
 L["Show Neutral"] = true

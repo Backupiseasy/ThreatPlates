@@ -123,6 +123,7 @@ L["About"] = "Über"
 -- Nameplate Settings --
 ------------------------
 L["General Settings"] = "Allgemeine Einstellungen"
+L["This allows to configure which nameplates should be shown while you are playing."] = "Diese Einstellungen ermöglichen euch zu bestimmen, welche Namen im Spielgeld sichtbar sind, während ihr spielt."
 L["Hiding"] = "Versteckt"
 L["Show Tapped"] = "Getappte Gegner anzeigen"
 L["Show Neutral"] = "Neutrale Gegner anzeigen"
