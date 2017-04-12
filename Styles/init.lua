@@ -20,7 +20,7 @@ end
 
 local function SetThemes(self)
 	for k, v in pairs(ThemeTable) do
-		TidyPlatesThemeList[t.THEME_NAME][v.name] = v.create(self,v.name)
+		TidyPlatesThemeList[t.THEME_NAME][v.name] = v.create(self, v.name)
 	end
 end
 

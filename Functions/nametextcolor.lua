@@ -49,7 +49,7 @@ local function SetNameColor(unit)
 		end
 
 		if unit.isTapped then
-			color = db.ColorByReaction.Tapped_Unit
+			color = db.ColorByReaction.TappedUnit
 		elseif db.HeadlineView.UseRaidMarkColoring and unit.isMarked then
 			color = db.settings.raidicon.hpMarked[unit.raidIcon]
 		end

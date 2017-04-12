@@ -1,10 +1,15 @@
-local ADDON_NAME, NAMESPACE = ...
-ThreatPlates = NAMESPACE.ThreatPlates
-
 -----------------------
 -- Quest Widget --
 -----------------------
-local path = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\QuestWidget\\"
+local ADDON_NAME, NAMESPACE = ...
+local ThreatPlates = NAMESPACE.ThreatPlates
+
+---------------------------------------------------------------------------------------------------
+-- Imported functions and constants
+---------------------------------------------------------------------------------------------------
+
+local ICON_PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\QuestWidget\\questicon_wide"
+
 -- local WidgetList = {}
 local tooltip_frame = CreateFrame("GameTooltip", "ThreatPlates_Tooltip", nil, "GameTooltipTemplate")
 local player_name = UnitName("player")
@@ -78,7 +83,8 @@ local function enabled()
 end
 
 local function EnabledInHeadlineView()
-	return TidyPlatesThreat.db.profile.questWidget.ShowInHeadlineView
+	local db = TidyPlatesThreat.db.profile.questWidget
+	return db.ShowInHeadlineView and db.ModeIcon
 end
 
 -- hides/destroys all widgets of this type created by Threat Plates
@@ -94,22 +100,25 @@ end
 -- Widget Functions for TidyPlates
 ---------------------------------------------------------------------------------------------------
 
--- local function UpdateWidgetConfig(frame)
--- end
+local function UpdateSettings(frame)
+	local db = TidyPlatesThreat.db.profile.questWidget
+	local size = db.scale
+	frame:SetSize(size, size)
+	frame:SetAlpha(db.alpha)
+end
 
 -- Update Graphics
-local function UpdateWidgetFrame(frame, unit, style)
+local function UpdateWidgetFrame(frame, unit)
 	if ShowQuestUnit(unit) and IsQuestUnit(unit) then
 		local db = TidyPlatesThreat.db.profile.questWidget
 
-		if style == "NameOnly" and db.ShowInHeadlineView then
-			frame:SetPoint(db.anchor, frame:GetParent(), db.x_hv, db.y_hv)
+		local style = unit.TP_Style
+		if style == "NameOnly" then
+			frame:SetPoint("CENTER", frame:GetParent(), db.x_hv, db.y_hv)
 		else
-			frame:SetPoint(db.anchor, frame:GetParent(), db.x, db.y)
+			frame:SetPoint("CENTER", frame:GetParent(), db.x, db.y)
 		end
 
-		frame:SetSize(db.scale, db.scale)
-		frame:SetAlpha(db.alpha)
 		frame:Show()
 	else
 		frame:_Hide()
@@ -117,7 +126,7 @@ local function UpdateWidgetFrame(frame, unit, style)
 end
 
 -- Context - GUID or unitid should only change here, i.e., class changes should be determined here
-local function UpdateWidgetContext(frame, unit, style)
+local function UpdateWidgetContext(frame, unit)
 	local guid = unit.guid
 	frame.guid = guid
 
@@ -129,7 +138,7 @@ local function UpdateWidgetContext(frame, unit, style)
 	-- Custom Code II
 	--------------------------------------
 	if UnitGUID("target") == guid then
-		UpdateWidgetFrame(frame, unit, style)
+		UpdateWidgetFrame(frame, unit)
 	else
 		frame:_Hide()
 	end
@@ -152,13 +161,12 @@ local function CreateWidgetFrame(parent)
 
 	-- Custom Code III
 	--------------------------------------
-	frame:SetHeight(64)
-	frame:SetWidth(64)
 	frame.Icon = frame:CreateTexture(nil, "OVERLAY")
-	frame.Icon:SetTexture(path.."questicon_wide")
-	frame.Icon:SetAllPoints(frame)
+	frame.Icon:SetTexture(ICON_PATH)
+	frame.Icon:SetAllPoints()
 
-	--frame.UpdateConfig = UpdateWidgetConfig
+	UpdateSettings(frame)
+	frame.UpdateConfig = UpdateSettings
 	--------------------------------------
 	-- End Custom Code
 

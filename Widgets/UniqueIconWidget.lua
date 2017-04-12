@@ -1,9 +1,14 @@
-local ADDON_NAME, NAMESPACE = ...
-ThreatPlates = NAMESPACE.ThreatPlates
-
 ---------------
 -- Unique Icon Widget
 ---------------
+
+local ADDON_NAME, NAMESPACE = ...
+local ThreatPlates = NAMESPACE.ThreatPlates
+
+---------------------------------------------------------------------------------------------------
+-- Imported functions and constants
+---------------------------------------------------------------------------------------------------
+
 -- local WidgetList = {}
 
 ---------------------------------------------------------------------------------------------------
@@ -12,13 +17,6 @@ ThreatPlates = NAMESPACE.ThreatPlates
 
 local function enabled()
 	return TidyPlatesThreat.db.profile.uniqueWidget.ON
-end
-
-local function UpdateSettings(frame)
-	local db = TidyPlatesThreat.db.profile.uniqueWidget
-	frame:SetHeight(db.scale)
-	frame:SetWidth(db.scale)
-	frame:SetPoint(db.anchor, frame:GetParent(), db.x, db.y)
 end
 
 -- hides/destroys all widgets of this type created by Threat Plates
@@ -33,6 +31,15 @@ end
 ---------------------------------------------------------------------------------------------------
 -- Widget Functions for TidyPlates
 ---------------------------------------------------------------------------------------------------
+
+local function UpdateSettings(frame)
+  local db = TidyPlatesThreat.db.profile.uniqueWidget
+  frame:ClearAllPoints()
+  frame:SetPoint("CENTER", frame:GetParent(), db.x, db.y)
+
+  local size = db.scale
+  frame:SetSize(size, size)
+end
 
 local function UpdateWidgetFrame(frame, unit)
 	local db = TidyPlatesThreat.db.profile.uniqueSettings
@@ -52,7 +59,6 @@ local function UpdateWidgetFrame(frame, unit)
 	end
 
 	if isShown then
-		UpdateSettings(frame)
 		frame:Show()
 	else
 		frame:_Hide()
@@ -95,11 +101,13 @@ local function CreateWidgetFrame(parent)
 
 	-- Custom Code III
 	--------------------------------------
-	frame:SetWidth(64)
-	frame:SetHeight(64)
+	frame:SetSize(64, 64)
+
 	frame.Icon = frame:CreateTexture(nil, "OVERLAY")
-	frame.Icon:SetPoint("CENTER",frame)
 	frame.Icon:SetAllPoints(frame)
+
+  UpdateSettings(frame)
+  frame.UpdateConfig = UpdateSettings
 	--------------------------------------
 	-- End Custom Code
 

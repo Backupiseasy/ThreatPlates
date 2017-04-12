@@ -5,7 +5,21 @@ local ThreatPlates = NAMESPACE.ThreatPlates
 -- Stuff for handling the configuration of Threat Plates - ThreatPlatesDB
 ---------------------------------------------------------------------------------------------------
 
+---------------------------------------------------------------------------------------------------
+-- Imported functions and constants
+---------------------------------------------------------------------------------------------------
 local L = ThreatPlates.L
+local RGB = ThreatPlates.RGB
+
+---------------------------------------------------------------------------------------------------
+-- Color definitions
+---------------------------------------------------------------------------------------------------
+
+ThreatPlates.COLOR_TAPPED = RGB(110, 110, 110, 1)	-- grey
+ThreatPlates.COLOR_TRANSPARENT = RGB(0, 0, 0, 0, 0) -- opaque
+ThreatPlates.COLOR_DC = RGB(128, 128, 128, 1) -- dray, darker than tapped color
+ThreatPlates.COLOR_FRIEND = RGB(29, 39, 61) -- Blizzard friend dark blue
+ThreatPlates.COLOR_GUILD = RGB(60, 168, 255) -- light blue
 
 ---------------------------------------------------------------------------------------------------
 -- Global contstants for options
@@ -240,6 +254,14 @@ local function UpdateConfiguration()
   --	end
 end
 
+local function TotemNameBySpellID(number)
+  local name = GetSpellInfo(number)
+  if not name then
+    return ""
+  end
+  return name
+end
+
 -----------------------------------------------------
 -- External
 -----------------------------------------------------
@@ -247,6 +269,7 @@ end
 ThreatPlates.UpdateDefaultProfile = UpdateDefaultProfile
 ThreatPlates.UpdateConfiguration = UpdateConfiguration
 --ThreatPlates.MigrateDatabase = MigrateDatabase
+ThreatPlates.TotemNameBySpellID = TotemNameBySpellID
 
 ThreatPlates.GetUnitVisibility = GetUnitVisibility
 

@@ -1,9 +1,15 @@
-local ADDON_NAME, NAMESPACE = ...
-ThreatPlates = NAMESPACE.ThreatPlates
-
 -----------------------
 -- Stealth Widget --
 -----------------------
+local ADDON_NAME, NAMESPACE = ...
+local ThreatPlates = NAMESPACE.ThreatPlates
+
+---------------------------------------------------------------------------------------------------
+-- Imported functions and constants
+---------------------------------------------------------------------------------------------------
+local UnitGUID = UnitGUID
+local UnitAura = UnitAura
+
 local path = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\StealthWidget\\"
 -- local WidgetList = {}
 
@@ -53,8 +59,15 @@ end
 -- Widget Functions for TidyPlates
 ---------------------------------------------------------------------------------------------------
 
--- local function UpdateWidgetConfig(frame)
--- end
+local function UpdateSettings(frame)
+  local db = TidyPlatesThreat.db.profile.stealthWidget
+
+  local size = db.scale
+  frame:SetSize(size, size)
+  frame:SetPoint("CENTER", frame:GetParent(), db.x, db.y)
+  frame:SetAlpha(db.alpha)
+  frame.Icon:SetTexture(path.."stealthicon")
+end
 
 -- Update Graphics
 local function UpdateWidgetFrame(frame, unit)
@@ -77,12 +90,6 @@ local function UpdateWidgetFrame(frame, unit)
   until found or not name
 
   if found then
-		local db = TidyPlatesThreat.db.profile.stealthWidget
-		frame:SetHeight(db.scale)
-		frame:SetWidth(db.scale)
-		frame:SetPoint(db.anchor, frame:GetParent(), db.x, db.y)
-		frame:SetAlpha(db.alpha)
-    frame.Icon:SetTexture(path.."stealthicon")
 		frame:Show()
   else
     frame:_Hide()
@@ -125,12 +132,12 @@ local function CreateWidgetFrame(parent)
 
 	-- Custom Code III
 	--------------------------------------
-	frame:SetHeight(64)
-	frame:SetWidth(64)
+	frame:SetSize(64, 64)
 	frame.Icon = frame:CreateTexture(nil, "OVERLAY")
 	frame.Icon:SetAllPoints(frame)
 
-	--frame.UpdateConfig = UpdateWidgetConfig
+  UpdateSettings(frame)
+  frame.UpdateConfig = UpdateSettings
 	--------------------------------------
 	-- End Custom Code
 

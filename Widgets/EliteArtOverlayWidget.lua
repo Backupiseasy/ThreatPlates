@@ -1,12 +1,13 @@
-local ADDON_NAME, NAMESPACE = ...
-ThreatPlates = NAMESPACE.ThreatPlates
-
 ------------------------------
 -- Elite Art Overlay Widget --
 ------------------------------
--- Notes:
--- * This is not a 'standard' widget. It's more a work around to display a more elegant elite border on the healthbar.
--- * Some would consider this a performance hit.
+local ADDON_NAME, NAMESPACE = ...
+local ThreatPlates = NAMESPACE.ThreatPlates
+
+---------------------------------------------------------------------------------------------------
+-- Imported functions and constants
+---------------------------------------------------------------------------------------------------
+local UnitGUID = UnitGUID
 
 -- local WidgetList = {}
 
@@ -32,9 +33,9 @@ end
 ---------------------------------------------------------------------------------------------------
 
 local function UpdateWidgetFrame(frame, unit)
-	local db = TidyPlatesThreat.db.profile.settings.elitehealthborder
 
 	if unit.isElite then
+		local db = TidyPlatesThreat.db.profile.settings.elitehealthborder
 		frame.Border:SetTexture(ThreatPlates.Art..db.texture)
 		frame:Show()
 	else
@@ -79,8 +80,7 @@ local function CreateWidgetFrame(parent)
 	-- Custom Code III
 	--------------------------------------
 	frame:SetFrameLevel(parent.bars.healthbar:GetFrameLevel())
-	frame:SetWidth(256)
-	frame:SetHeight(64)
+	frame:SetSize(256, 64)
 	frame:SetPoint("CENTER",parent,"CENTER")
 	frame.Border = frame:CreateTexture(nil, "OVERLAY")
 	frame.Border:SetAllPoints(frame)

@@ -4,17 +4,14 @@ local _, ns = ...
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
 local UnitIsOffTanked = TidyPlatesThreat.UnitIsOffTanked
+local SetStyle = TidyPlatesThreat.SetStyle
+local GetDetailedUnitType = TidyPlatesThreat.GetDetailedUnitType
 
 local function GetGeneralAlpha(unit)
-	local unitType = TidyPlatesThreat.GetType(unit)
 	local db = TidyPlatesThreat.db.profile.nameplate
-	local alpha = 0
 
-	if unit.isTapped then
-		alpha = db.alpha["Tapped"] or 1 --alpha = db.alpha["Tapped"]
-	elseif unitType and unitType ~="empty" then
-	 	alpha = db.alpha[unitType] or 1 -- This should also return for totems.
-	end
+	local unit_type = GetDetailedUnitType(unit)
+	local alpha = db.alpha[unit_type] or 1 -- This should also return for totems.
 
 	-- Do checks for target settings, must be spelled out to avoid issues
 	if (UnitExists("target") and unit.isTarget) and db.toggle.TargetA then
@@ -25,9 +22,13 @@ local function GetGeneralAlpha(unit)
 		else
 			alpha = db.alpha.NoTarget
 		end
-	else -- Marked units will always be set to this alpha
-		if unit.isMarked and db.toggle.MarkedA then
+	else -- units will always be set to this alpha
+		if unit.isCasting and db.toggle.CastingUnitAlpha then
+			alpha = db.alpha.CastingUnit
+		elseif unit.isMarked and db.toggle.MarkedA then
 			alpha = db.alpha.Marked
+		elseif unit.isMouseover and db.toggle.MouseoverUnitAlpha then
+			alpha = db.alpha.MouseoverUnit
 		end
 	end
 	return alpha
@@ -56,6 +57,7 @@ end
 
 local function SetAlpha(unit)
 	local db = TidyPlatesThreat.db.profile
+	local style, unique_style = SetStyle(unit)
 
 	local alpha = 0
 	local nonTargetAlpha = 0
@@ -65,14 +67,10 @@ local function SetAlpha(unit)
 	end
 
 	if style == "unique" then
-		for k,v in pairs(db.uniqueSettings.list) do
-			if v == unit.name then
-				if not db.uniqueSettings[k].overrideAlpha then
-					alpha = db.uniqueSettings[k].alpha
-				else
-					alpha = GetThreatAlpha(unit)
-				end
-			end
+		if not unique_style.overrideAlpha then
+			alpha = unique_style.alpha
+		else
+			alpha = GetThreatAlpha(unit)
 		end
 	elseif style == "empty" then -- etotem alpha will still be at totem level
 		alpha = 0

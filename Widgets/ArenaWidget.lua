@@ -1,5 +1,5 @@
 local ADDON_NAME, NAMESPACE = ...
-ThreatPlates = NAMESPACE.ThreatPlates
+local ThreatPlates = NAMESPACE.ThreatPlates
 
 --------------------
 -- Arena Icon Widget
@@ -41,10 +41,13 @@ end
 
 local function UpdateSettings(frame)
 	local db = TidyPlatesThreat.db.profile.arenaWidget
-	frame:SetFrameLevel(frame:GetParent():GetFrameLevel()+2)
-	frame:SetSize(db.scale,db.scale)
-	frame.Overlay:SetSize(db.scale,db.scale)
-	frame:SetPoint("CENTER",frame:GetParent(),db.anchor, db.x, db.y)
+
+	frame:ClearAllPoints()
+	frame:SetPoint("CENTER",frame:GetParent(), db.x, db.y)
+
+	local size = db.scale
+	frame:SetSize(size,size)
+	frame.Overlay:SetSize(size,size)
 end
 
 local function ClearWidgetContext(frame)
@@ -95,15 +98,18 @@ end
 -- Update Graphics
 local function UpdateWidgetFrame(frame, unit)
 	BuildTable()
-	UpdateSettings(frame)
 
+	local db = TidyPlatesThreat.db.profile.arenaWidget
 	if unit.guid and ArenaID[unit.guid] then
-		local c = TidyPlatesThreat.db.profile.arenaWidget.colors[ArenaID[unit.guid]]
-		local c2 = TidyPlatesThreat.db.profile.arenaWidget.numColors[ArenaID[unit.guid]]
+		local c = db.colors[ArenaID[unit.guid]]
+		local c2 = db.numColors[ArenaID[unit.guid]]
+
 		frame.Icon:SetTexture(path.."BG")
-		frame.Icon:SetVertexColor(c.r,c.g,c.b,c.a)
+		frame.Icon:SetVertexColor(c.r, c.g, c.b, c.a)
+
 		frame.Overlay.Num:SetTexture(path..ArenaID[unit.guid])
 		frame.Overlay.Num:SetVertexColor(c2.r,c2.g,c2.b,c2.a)
+
 		frame:Show()
 	else
 		frame.Icon:SetTexture(nil)
@@ -140,19 +146,22 @@ local function CreateArenaWidget(parent)
 
 	-- Custom Code III
 	--------------------------------------
-	frame:SetHeight(32)
-	frame:SetWidth(32)
+	frame:SetSize(32, 32)
+	frame:SetFrameLevel(frame:GetParent():GetFrameLevel()+2)
+
 	frame.Icon = frame:CreateTexture(nil, "OVERLAY")
 	frame.Icon:SetAllPoints(frame)
+
 	frame.Overlay = CreateFrame("frame",nil, frame)
-	frame.Overlay:SetHeight(32)
-	frame.Overlay:SetWidth(32)
-	frame.Overlay:SetPoint("CENTER",frame,"CENTER")
+	frame.Overlay:SetPoint("CENTER", frame, "CENTER")
 	frame.Overlay:SetFrameStrata(frame:GetFrameStrata())
-	frame.Overlay:SetFrameLevel(frame:GetFrameLevel()+1)
+	frame.Overlay:SetFrameLevel(frame:GetFrameLevel() + 1)
+
 	frame.Overlay.Num = frame.Overlay:CreateTexture(nil,"OVERLAY")
 	frame.Overlay.Num:SetAllPoints(frame.Overlay)
 
+	UpdateSettings(frame)
+	frame.UpdateConfig = UpdateSettings
 	--------------------------------------
 	-- End Custom Code
 

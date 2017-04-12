@@ -1,16 +1,12 @@
-local _,ns = ...
-local t = ns.ThreatPlates
+local ADDON_NAME, NAMESPACE = ...
+local ThreatPlates = NAMESPACE.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
-local RGB = t.RGB
-local RGB_P = t.RGB_P
-
-local COLOR_DC = RGB(128, 128, 128)
-local COLOR_TAPPED = RGB(100, 100, 100)
---local COLOR_TAPPED = RGB(229, 229, 229)
---local COLOR_FRIENDLY_PLAYER = RGB(170, 170, 255)
+local RGB = ThreatPlates.RGB
+local RGB_P = ThreatPlates.RGB_P
+local COLOR_DC = ThreatPlates.COLOR_DC
 
 local reference = {
   FRIENDLY = { NPC = "FriendlyNPC", PLAYER = "FriendlyPlayer", },
@@ -126,7 +122,8 @@ local function GetThreatColor(unit,style)
 
     local show_offtank = db.threat.toggle.OffTank
     if db.threat.nonCombat then
-      if (unit.isInCombat or (unit.health < unit.healthmax)) then
+      --if (unit.isInCombat or (unit.health < unit.healthmax)) then
+      if unit.threatValue > 0 then -- new
         local threatSituation = unit.threatSituation
         if style == "tank" and show_offtank and UnitIsOffTanked(unit) then
           threatSituation = "OFFTANK"
@@ -180,48 +177,50 @@ local function SetHealthbarColor(unit)
 			end
 		end
   else
-    if db.healthColorChange then  -- Prio 2: coloring by HP (prio 1 is raid marks)
+    if db.healthColorChange then  -- Prio 2: coloring by HP (prio 1 is raid marks) - no other stuff applies
       local pct = unit.health / unit.healthmax
       local r,g,b = CS:GetSmudgeColorRGB(db.aHPbarColor,db.bHPbarColor,pct)
       c = {r = r,g = g, b = b}
     else
-      if db.customColor then  -- Prio 5: coloring by custom color
-        if (db.threat.ON and db.threat.useHPColor and InCombatLockdown() and (style == "dps" or style == "tank")) then -- Need a better way to impliment this.
-          c = GetThreatColor(unit,style)
-        else
-          if unit.isTapped then
-            c = db.ColorByReaction.Tapped_Unit
-          elseif TidyPlatesUtility.IsFriend(unit.name) or TidyPlatesUtility.IsGuildmate(unit.name) then
-            c = db.ColorByReaction.GuildMember
+      if unit.isTapped then --and (not db.threat.nonCombat or unit.threatValue > 0) then
+        c = db.ColorByReaction.TappedUnit
+      elseif (db.threat.ON and db.threat.useHPColor and InCombatLockdown() and (style == "dps" or style == "tank")) then -- Need a better way to impliment this.
+        c = GetThreatColor(unit,style)
+
+        if not c then -- currently here because nonCombat = false may result in an nil color which defaults (later) to standard WoW Colors, not ColorByReaction, as it should
+          c = db.ColorByReaction[reference[unit.reaction][unit.type]]
+        end
+      else
+        -- player healthbars may be colored by class overwriting any customColor, but not healthColorChange
+        if unit.type == "PLAYER" then -- Prio 3: coloring bym class
+          if unit.reaction == "HOSTILE" and db.allowClass then
+            c = GetClassColor(unit)
+          elseif unit.reaction == "FRIENDLY" then
+            if db.socialWidget.ShowFriendColor and TidyPlatesThreat.IsFriend(unit) then
+              c = db.socialWidget.FriendColor
+            elseif db.socialWidget.ShowGuildmateColor and TidyPlatesThreat.IsGuildmate(unit) then
+              c = db.socialWidget.GuildmateColor
+            elseif db.friendlyClass then
+              c = GetClassColor(unit)
+            else
+              c = db.ColorByReaction[reference[unit.reaction][unit.type]]
+            end
           else
             c = db.ColorByReaction[reference[unit.reaction][unit.type]]
           end
-        end
-      else -- Prio 4: coloring by threat, color by HP amount and class colors overwrite this
-        -- TODO: rework all of this to match Blizzard default behaviour
-        c = GetThreatColor (unit, style)
-
-        if unit.unitid and ThreatPlates_IsTapDenied(unit.unitid) then
-          -- tapped unit: grey if not a player and can't get tap on unit
-          c = COLOR_TAPPED
-        end
-      end
-
-      -- player healthbars may be colored by class overwriting any customColor, but not healthColorChange
-      if unit.type == "PLAYER" then -- Prio 3: coloring by class
-        if unit.reaction == "HOSTILE" and db.allowClass then
-          c = GetClassColor(unit)
-        elseif unit.reaction == "FRIENDLY" and db.friendlyClass then
-          c = GetClassColor(unit)
+        else
+          c = db.ColorByReaction[reference[unit.reaction][unit.type]]
         end
       end
     end
   end
 
+  -- quest widget color overwrites everything (Color by Health, Color by Reaction, totem, unique)
   if db.questWidget.ModeHPBar and TidyPlatesThreat.ShowQuestUnit(unit) and TidyPlatesThreat.IsQuestUnit(unit) then
     c = db.questWidget.HPBarColor
   end
 
+  -- raid mark color overwrites everything (Color by Health, Color by Reaction, also quest widget color)
   if unit.isMarked then -- Prio 1 - raid marks always take top priority
     c = GetMarkedColor(unit,c,allowMarked) -- c will set itself back to c if marked color is disabled
   end
@@ -231,12 +230,13 @@ local function SetHealthbarColor(unit)
   end
 
   -- set background color for healthbar
+  local db_healthbar = db.settings.healthbar
   local bc = c
-  if not db.settings.healthbar.BackgroundUseForegroundColor then
-    bc = db.settings.healthbar.BackgroundColor
+  if not db_healthbar.BackgroundUseForegroundColor then
+    bc = db_healthbar.BackgroundColor
   end
 
-  return c.r, c.g, c.b, nil, bc.r, bc.g, bc.b, db.settings.healthbar.BackgroundOpacity
+  return c.r, c.g, c.b, nil, bc.r, bc.g, bc.b, db_healthbar.BackgroundOpacity
 
   --	if c then
   --	else

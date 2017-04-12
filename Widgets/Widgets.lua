@@ -1,5 +1,5 @@
 local ADDON_NAME, NAMESPACE = ...
-ThreatPlates = NAMESPACE.ThreatPlates
+local ThreatPlates = NAMESPACE.ThreatPlates
 
 -----------------------
 -- Auras Widget --

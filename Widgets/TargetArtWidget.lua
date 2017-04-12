@@ -1,9 +1,14 @@
-local ADDON_NAME, NAMESPACE = ...
-ThreatPlates = NAMESPACE.ThreatPlates
-
 -----------------------
 -- Target Art Widget --
 -----------------------
+local ADDON_NAME, NAMESPACE = ...
+local ThreatPlates = NAMESPACE.ThreatPlates
+
+---------------------------------------------------------------------------------------------------
+-- Imported functions and constants
+---------------------------------------------------------------------------------------------------
+local UnitGUID = UnitGUID
+
 local path = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\TargetArtWidget\\"
 -- local WidgetList = {}
 
@@ -28,11 +33,20 @@ end
 -- Widget Functions for TidyPlates
 ---------------------------------------------------------------------------------------------------
 
+local function UpdateSettings(frame)
+  local db = TidyPlatesThreat.db.profile.targetWidget
+
+  if db.ON then
+    frame.Icon:SetTexture(path..db.theme)
+    frame.Icon:SetVertexColor(db.r, db.g, db.b, db.a)
+    frame:Show()
+  else
+    frame:_Hide()
+  end
+end
+
 local function UpdateWidgetFrame(frame, unit)
- 	local db = TidyPlatesThreat.db.profile.targetWidget
-	frame.Icon:SetTexture(path..db.theme)
-	frame.Icon:SetVertexColor(db.r,db.g,db.b,db.a)
-	frame:Show()
+  frame:Show()
 end
 
 -- Context
@@ -72,12 +86,13 @@ local function CreateWidgetFrame(parent)
 	-- Custom Code III
 	--------------------------------------
 	frame:SetFrameLevel(parent.bars.healthbar:GetFrameLevel())
-	frame:SetWidth(256)
-	frame:SetHeight(64)
-	frame:SetPoint("CENTER",parent,"CENTER")
+	frame:SetSize(256, 64)
+	frame:SetPoint("CENTER", parent, "CENTER")
 	frame.Icon = frame:CreateTexture(nil, "OVERLAY")
 	frame.Icon:SetAllPoints(frame)
 
+  UpdateSettings(frame)
+  frame.UpdateConfig = UpdateSettings
 	--------------------------------------
 	-- End Custom Code
 

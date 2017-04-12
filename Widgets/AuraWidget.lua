@@ -1,5 +1,5 @@
 local ADDON_NAME, NAMESPACE = ...
-ThreatPlates = NAMESPACE.ThreatPlates
+local ThreatPlates = NAMESPACE.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -172,6 +172,78 @@ local function GetColorForAura(aura)
 	return color
 end
 
+local function FilterWhitelist(spellfound, isMine)
+  local show_aura = false
+
+  if spellfound == "All" or spellfound == true then
+    show_aura = true
+  elseif spellfound == "My" then
+    show_aura = isMine
+  end
+
+  return show_aura
+end
+
+local function FilterWhitelistMine(spellfound, isMine)
+  local show_aura = false
+
+  if spellfound == "All" then
+    show_aura = true
+  elseif spellfound == "My" or spellfound == true then
+    show_aura = isMine
+  end
+
+  return show_aura
+end
+
+local function FilterAll(spellfound, isMine)
+  return true
+end
+
+local function FilterAllMine(spellfound, isMine)
+  return isMine
+end
+
+local function FilterBlacklist(spellfound, isMine)
+  local show_aura = true
+
+  if spellfound == "All" or spellbound == true then
+    show_aura = false
+  elseif spellfound == "My" then
+    show_aura = not isMine
+  end
+
+  return show_aura
+end
+
+local function FilterBlacklistMine(spellfound, isMine)
+  local show_aura = isMine
+
+  if spellfound == "All" then
+    show_aura = false
+  elseif spellfound == "My" or spellfound == true then
+    show_aura = not isMine
+  end
+
+  return show_aura
+end
+
+local FILTER_FUNCTIONS = {
+  whitelist = FilterWhitelist,
+  whitelistMine = FilterWhitelistMine,
+  all = FilterAll,
+  allMine = FilterAllMine,
+  blacklist = FilterBlacklist,
+  blacklistMine = FilterBlacklistMine,
+}
+
+local PRIORITY_FUNCTIONS ={
+  AtoZ = function(aura) return aura.name end,
+  TimeLeft = function(aura) return aura.expiration - GetTime() end,
+  Duration = function(aura) return aura.duration end,
+  Creation = function(aura) return aura.expiration - aura.duration end,
+}
+
 local function AuraFilterFunction(aura)
   local db = TidyPlatesThreat.db.profile.AuraWidget
 
@@ -200,46 +272,24 @@ local function AuraFilterFunction(aura)
 
   local mode = db.FilterMode
   local spellfound = Filter_ByAuraList[aura.name] or Filter_ByAuraList[aura.spellid]
-  if spellfound then spellfound = true end
-
   local isMine = (aura.caster == "player") or (aura.caster == "pet")
 
-  local show_aura = false
-  if mode == "whitelist" then
-    show_aura = spellfound
-  elseif mode == "whitelistMine" then
-    if isMine then
-      show_aura = spellfound
-    end
-  elseif mode == "all" then
-    show_aura = true
-  elseif mode == "allMine" then
-    if isMine then
-      show_aura = true
-    end
-  elseif mode == "blacklist" then
-    show_aura = not spellfound
-  elseif mode == "blacklistMine" then
-    if isMine then
-      show_aura = not spellfound
-    end
-  end
-
+  local show_aura = FILTER_FUNCTIONS[mode](spellfound, isMine)
   if not show_aura then return show_aura, nil, nil end
 
-  local priority
   local color = GetColorForAura(aura)
 
   local sort_order = db.SortOrder
-  if sort_order == "AtoZ" then
-    priority = aura.name
-  elseif sort_order == "TimeLeft" then
-    priority = aura.expiration - GetTime()
-  elseif sort_order == "Duration" then
-    priority = aura.duration
-  elseif sort_order == "Creation" then
-    priority = aura.expiration - aura.duration
-  end
+  local priority = PRIORITY_FUNCTIONS[sort_order](aura)
+  --  if sort_order == "AtoZ" then
+--    priority = aura.name
+--  elseif sort_order == "TimeLeft" then
+--    priority = aura.expiration - GetTime()
+--  elseif sort_order == "Duration" then
+--    priority = aura.duration
+--  elseif sort_order == "Creation" then
+--    priority = aura.expiration - aura.duration
+--  end
 
   return show_aura, priority, color
 end
@@ -561,7 +611,7 @@ local function Disable()
 end
 
 local function enabled()
-	local active = TidyPlatesThreat.db.profile.AuraWidget.ON
+  local active = TidyPlatesThreat.db.profile.AuraWidget.ON
 
 	if active then
 		if not isAuraEnabled then
@@ -980,21 +1030,41 @@ local function PrepareFilter()
   local filter = TidyPlatesThreat.db.profile.AuraWidget.FilterBySpell
   Filter_ByAuraList = {}
 
+  local modifier, spell
   for key, value in pairs(filter) do
     -- remove comments and whitespaces from the filter (string)
     local pos = value:find("%-%-")
     if pos then value = value:sub(1, pos - 1) end
-    value = value:match("^%s*(.-)%s*$")
+    value = value:match("^%s*(.-)%s*$")  -- remove any leading/trailing whitespaces from the line
+
+    -- value:match("^%s*(%w+)%s*(.-)%s*$")  -- remove any leading/trailing whitespaces from the line
+    if value:sub(1, 4) == "All " then
+      modifier = "All"
+      spell = value:match("^All%s*(.-)$")
+    elseif value:sub(1, 3) == "My " then
+      modifier = "My"
+      spell = value:match("^My%s*(.-)$")
+--    elseif value:sub(1, 4) == "Not " then
+--      modifier = "Not"
+--      spell = value:match("^Not%s*(.-)$")
+    else
+      modifier = true
+      spell = value
+    end
 
     -- separete filter by name and ID for more efficient aura filtering
-    local value_no = tonumber(value)
-    if value_no then
-      Filter_ByAuraList[value_no] = true
-    elseif value ~= '' then
-      Filter_ByAuraList[value] = true
+    local spell_no = tonumber(spell)
+    if spell_no then
+      Filter_ByAuraList[spell_no] = modifier
+    elseif spell ~= '' then
+      Filter_ByAuraList[spell] = modifier
     end
   end
 
+--  print ("Filter_ByAuraList:")
+--  for key, value in pairs(Filter_ByAuraList) do
+--    print (key,":", value)
+--  end
   ConfigLastUpdate = GetTime()
 end
 

@@ -1,10 +1,15 @@
-local ADDON_NAME, NAMESPACE = ...
-ThreatPlates = NAMESPACE.ThreatPlates
-
 ------------------------
 -- Combo Point Widget --
 ------------------------
-local path = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ComboPointWidget\\"
+local ADDON_NAME, NAMESPACE = ...
+local ThreatPlates = NAMESPACE.ThreatPlates
+
+---------------------------------------------------------------------------------------------------
+-- Imported functions and constants
+---------------------------------------------------------------------------------------------------
+local UnitCanAttack = UnitCanAttack
+
+local PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ComboPointWidget\\"
 local WidgetList = {}
 local watcherIsEnabled = false
 
@@ -70,9 +75,17 @@ end
 -- Widget Functions for TidyPlates
 ---------------------------------------------------------------------------------------------------
 
+local function UpdateSettings(frame)
+  local db = TidyPlatesThreat.db.profile.comboWidget
+
+  frame:SetPoint("CENTER", frame:GetParent(), "CENTER", db.x, db.y)
+  frame:SetScale(db.scale)
+  frame.Icon:SetAllPoints(frame)
+end
+
 -- Update Graphics - overwritten
 -- unit can be null because called from WatcherFrame
-local function UpdateWidgetFrame(frame, unit, style)
+local function UpdateWidgetFrame(frame, unit)
 	local points, maxPoints
 
 	if UnitCanAttack("player", "target") then
@@ -82,36 +95,38 @@ local function UpdateWidgetFrame(frame, unit, style)
 	if points and points > 0 then
 		local db = TidyPlatesThreat.db.profile.comboWidget
 
-		frame.Icon:SetTexture(path..points)
-		frame:SetScale(db.scale)
-
-		if style == "NameOnly" and db.ShowInHeadlineView then
+    local style = unit.TP_Style
+		if style == "NameOnly" then
 			frame:SetPoint("CENTER", frame:GetParent(), "CENTER", db.x_hv, db.y_hv)
-		elseif style then
+		else
 			frame:SetPoint("CENTER", frame:GetParent(), "CENTER", db.x, db.y)
 		end
 
-		frame:Show()
+    frame.Icon:SetTexture(PATH ..points)
+    --frame:SetScale(db.scale)
+
+    frame:Show()
 	else
 		frame:_Hide()
 	end
 end
 
 -- Context
-local function UpdateWidgetContext(frame, unit, style)
+local function UpdateWidgetContext(frame, unit)
 	local guid = unit.guid
+  frame.guid = guid
 
-	-- Add to Widget List
-	if guid then
-		if frame.guid then WidgetList[frame.guid] = nil end
-		frame.guid = guid
+  -- Add to Widget List
+  if guid then
+    if guid then WidgetList[guid] = nil end
 		WidgetList[guid] = frame
 	end
 
 	-- -- Update Widget
-	 if UnitGUID("target") == guid then
-	 	UpdateWidgetFrame(frame, unit, style)
-	 else
+  if UnitGUID("target") == guid then
+    frame.unit = unit
+    UpdateWidgetFrame(frame, unit)
+	else
 	 	frame:_Hide()
 	end
 end
@@ -132,7 +147,9 @@ local function WatcherFrameHandler(frame, event, unitid)
 	local guid = UnitGUID("target")
 	if guid then
 		local widget = WidgetList[guid]
-		if widget then UpdateWidgetFrame(widget) end				-- To update all, use: for guid, widget in pairs(WidgetList) do UpdateWidgetFrame(widget) end
+		if widget then
+      UpdateWidgetFrame(widget, widget.unit)
+    end				-- To update all, use: for guid, widget in pairs(WidgetList) do UpdateWidgetFrame(widget) end
 	end
 end
 
@@ -153,9 +170,9 @@ local function DisableWatcher()
 end
 
 local function enabled()
-	local active = TidyPlatesThreat.db.profile.comboWidget.ON
+  local active = TidyPlatesThreat.db.profile.comboWidget.ON
 
-	if active then
+  if active then
 		if not watcherIsEnabled then EnableWatcher() end
 	else
 		if watcherIsEnabled then DisableWatcher()	end
@@ -175,16 +192,13 @@ local function CreateWidgetFrame(parent)
 	frame:Hide()
 
 	-- Custom Code
-	frame:SetHeight(64)
-	frame:SetWidth(64)
+	frame:SetSize(64, 64)
+  frame:SetFrameLevel(parent:GetFrameLevel() + 2)
 
-	frame.Icon = frame:CreateTexture(nil, "OVERLAY")
+  frame.Icon = frame:CreateTexture(nil, "OVERLAY")
 
-	frame:SetFrameLevel(parent:GetFrameLevel() + 2)
-	local db = TidyPlatesThreat.db.profile.comboWidget
-	frame:SetPoint("CENTER", parent, "CENTER", db.x, db.y)
-	frame:SetScale(db.scale)
-	frame.Icon:SetAllPoints(frame)
+  UpdateSettings(frame)
+  frame.UpdateConfig = UpdateSettings
 	-- End Custom Code
 
 	-- Required Widget Code

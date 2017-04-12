@@ -1,5 +1,8 @@
-﻿local _, ns = ...
-local t = ns.ThreatPlates
+﻿local ADDON_NAME, NAMESPACE = ...
+local ThreatPlates = NAMESPACE.ThreatPlates
+
+local ART_PATH = ThreatPlates.Art
+local EMPTY_TEXTURE = ART_PATH.."Empty"
 
 local function Create(self,name)
   local db = self.db.profile.settings
@@ -10,7 +13,7 @@ local function Create(self,name)
       height = 24,
     },
     frame = {
-      emptyTexture = t.Art.."Empty",
+      emptyTexture = ThreatPlates.Art.."Empty",
       width = 124,
       height = 30,
       x = db.frame.x,
@@ -18,7 +21,7 @@ local function Create(self,name)
       anchor = "CENTER",
     },
     threatborder = {
-      texture = t.Art.."TP_Threat",
+      texture = ThreatPlates.Art.."TP_Threat",
       width = 256,
       height = 64,
       x = 0,
@@ -27,7 +30,7 @@ local function Create(self,name)
       show = db.threatborder.show,
     },
     highlight = {
-      texture = t.Art..db.highlight.texture,
+      texture = ThreatPlates.Art..db.highlight.texture,
       width = 256,
       height = 64,
       x = 0,
@@ -35,8 +38,8 @@ local function Create(self,name)
       anchor = "CENTER",
     },
     healthborder = {
-      texture = t.Art..db.healthborder.texture,
-      backdrop = t.Art..db.healthborder.backdrop,
+      texture = ThreatPlates.Art..db.healthborder.texture,
+      backdrop = ThreatPlates.Art..db.healthborder.backdrop,
       width = 256,
       height = 64,
       x = 0,
@@ -50,30 +53,33 @@ local function Create(self,name)
       height = db.eliteicon.scale,
       x = db.eliteicon.x,
       y = db.eliteicon.y,
-      anchor = db.eliteicon.anchor,
+      anchor = "CENTER",  --db.eliteicon.anchor,
       show = db.eliteicon.show,
     },
+
     castborder = {
-      texture = t.Art..db.castborder.texture,
+      texture = (db.castborder.show and ThreatPlates.Art..db.castborder.texture) or EMPTY_TEXTURE,
       width = 256,
       height = 64,
       x = db.castborder.x,
       y = db.castborder.y,
       anchor = "CENTER",
-      show = db.castborder.show,
+      show = db.castborder.show, -- only checked by TidyPlades after a /reload
     },
+
     castnostop = {
-      texture = t.Art.."TP_CastBarLock",
+      texture =  (db.castborder.show and ((db.castnostop.ShowOverlay and ThreatPlates.Art.."TP_CastBarLock") or ThreatPlates.Art..db.castborder.texture)) or EMPTY_TEXTURE,
       width = 256,
       height = 64,
       x = db.castnostop.x,
       y = db.castnostop.y,
       anchor = "CENTER",
-      show = db.castnostop.show,
+      show = db.castborder.show, -- only checked by TidyPlades after a /reload
     },
+
     healthbar = {
-      texture = t.Media:Fetch('statusbar', db.healthbar.texture),
-      backdrop = t.Media:Fetch('statusbar', db.healthbar.backdrop, true),
+      texture = ThreatPlates.Media:Fetch('statusbar', db.healthbar.texture),
+      backdrop = ThreatPlates.Media:Fetch('statusbar', db.healthbar.backdrop, true),
       width = 120,
       height = 10,
       x = 0,
@@ -91,7 +97,7 @@ local function Create(self,name)
       show = false,
     },
     castbar = {
-      texture = t.Media:Fetch('statusbar', db.castbar.texture),
+      texture = ThreatPlates.Media:Fetch('statusbar', db.castbar.texture),
       width = 120,
       height = 10,
       x = db.castbar.x,
@@ -100,7 +106,7 @@ local function Create(self,name)
       orientation = "HORIZONTAL",
     },
     name = {
-      typeface = t.Media:Fetch('font', db.name.typeface),
+      typeface = ThreatPlates.Media:Fetch('font', db.name.typeface),
       size = db.name.size,
       width = db.name.width,
       height = db.name.height,
@@ -114,7 +120,7 @@ local function Create(self,name)
       show = db.name.show,
     },
     level = {
-      typeface = t.Media:Fetch('font', db.level.typeface),
+      typeface = ThreatPlates.Media:Fetch('font', db.level.typeface),
       size = db.level.size,
       width = db.level.width,
       height = db.level.height,
@@ -128,7 +134,7 @@ local function Create(self,name)
       show = db.level.show,
     },
     customtext = {
-      typeface = t.Media:Fetch('font', db.customtext.typeface),
+      typeface = ThreatPlates.Media:Fetch('font', db.customtext.typeface),
       size = db.customtext.size,
       width = db.customtext.width,
       height = db.customtext.height,
@@ -142,7 +148,7 @@ local function Create(self,name)
       show = db.customtext.show,
     },
     spelltext = {
-      typeface = t.Media:Fetch('font', db.spelltext.typeface),
+      typeface = ThreatPlates.Media:Fetch('font', db.spelltext.typeface),
       size = db.spelltext.size,
       width = db.spelltext.width,
       height = db.spelltext.height,
@@ -160,7 +166,7 @@ local function Create(self,name)
       height = (db.skullicon.scale),
       x = (db.skullicon.x),
       y = (db.skullicon.y),
-      anchor = (db.skullicon.anchor),
+      anchor = "CENTER", --(db.skullicon.anchor),
       show = db.skullicon.show,
     },
     customart = { -- Depreciated?
@@ -176,7 +182,7 @@ local function Create(self,name)
       height = (db.spellicon.scale),
       x = (db.spellicon.x),
       y = (db.spellicon.y),
-      anchor = (db.spellicon.anchor),
+      anchor = "CENTER", --(db.spellicon.anchor),
       show = db.spellicon.show,
     },
     raidicon = {
@@ -184,7 +190,7 @@ local function Create(self,name)
       height = (db.raidicon.scale),
       x = (db.raidicon.x),
       y = (db.raidicon.y),
-      anchor = (db.raidicon.anchor),
+      anchor = "CENTER", --(db.raidicon.anchor),
       show = db.raidicon.show,
     }
   }
@@ -222,6 +228,6 @@ local themeList = {
 
 do
   for i=1,#themeList do
-    t.RegisterTheme(themeList[i],Create)
+    ThreatPlates.RegisterTheme(themeList[i],Create)
   end
 end

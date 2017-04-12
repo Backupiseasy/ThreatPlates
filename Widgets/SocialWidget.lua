@@ -1,6 +1,3 @@
-local ADDON_NAME, NAMESPACE = ...
-ThreatPlates = NAMESPACE.ThreatPlates
-
 ------------------------
 -- Social Icon Widget --
 ------------------------
@@ -9,7 +6,23 @@ ThreatPlates = NAMESPACE.ThreatPlates
 -- Possibly change the method to show 3 icons.
 -- Change the 'guildicon' to use the emblem and border method used by blizzard frames.
 
-local path = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\SocialWidget\\"
+local ADDON_NAME, NAMESPACE = ...
+local ThreatPlates = NAMESPACE.ThreatPlates
+
+---------------------------------------------------------------------------------------------------
+-- Imported functions and constants
+---------------------------------------------------------------------------------------------------
+local UnitFactionGroup = UnitFactionGroup
+
+local PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\SocialWidget\\"
+local ICON_FRIEND = PATH .."friendicon"
+local ICON_GUILDMATE = PATH .."guildicon"
+local ICON_BNET_FRIEND = "Interface\\FriendsFrame\\PlusManz-BattleNet"
+local ICON_FACTION = {
+  Horde = "Interface\\ICONS\\inv_bannerpvp_01",
+  Alliance = "Interface\\ICONS\\inv_bannerpvp_02",
+}
+
 -- local WidgetList = {}
 local watcherIsEnabled = false
 
@@ -107,7 +120,7 @@ local function DisableWatcher()
 end
 
 local function enabled()
-	local active = TidyPlatesThreat.db.profile.socialWidget.ON
+  local active = TidyPlatesThreat.db.profile.socialWidget.ON
 
 	if active then
 		if not watcherIsEnabled then	EnableWatcher() end
@@ -126,34 +139,80 @@ end
 -- Widget Functions for TidyPlates
 ---------------------------------------------------------------------------------------------------
 
-local function UpdateSettings(frame, style)
-	local db = TidyPlatesThreat.db.profile.socialWidget
-	frame:SetFrameLevel(frame:GetParent():GetFrameLevel()+2)
-	frame:SetPoint("CENTER",frame:GetParent(),db.anchor, db.x, db.y)
+-- Update all non-unit or style dependent settings
+local function UpdateSettings(frame)
+  local db = TidyPlatesThreat.db.profile.socialWidget
+  local size = db.scale
+  --local anchor = db.anchor
+  --friend_icon_anchor, friend_icon_anchor_relative = ANCHOR_POINT[anchor][2], ANCHOR_POINT[anchor][1]
+  local icon = frame.Icon
+  icon:SetSize(size, size)
 
-	if style == "NameOnly" and db.ShowInHeadlineView then
-		frame:SetPoint(db.anchor, frame:GetParent(), db.x_hv, db.y_hv)
-	else
-		frame:SetPoint(db.anchor, frame:GetParent(), db.x, db.y)
-	end
-
-	frame:SetSize(db.scale,db.scale)
+  db = TidyPlatesThreat.db.profile.FactionWidget
+  size = db.scale
+  --anchor = db.anchor
+  --faction_icon_anchor, faction_icon_anchor_relative = ANCHOR_POINT[anchor][2], ANCHOR_POINT[anchor][1]
+  icon = frame.FactionIcon
+  icon:SetSize(size, size)
 end
 
-local function UpdateWidgetFrame(frame, unit, style)
+local function UpdateWidgetFrame(frame, unit)
 	-- I will probably expand this to a table with 'friend = true','guild = true', and 'bnet = true' and have 3 textuers show.
-	local texture
+	local friend_texture
 	if tContains(ListTable.f, unit.name) then
-		texture = path.."friendicon"
+    friend_texture = ICON_FRIEND
 	elseif tContains(ListTable.b, unit.name) then
-		texture = "Interface\\FriendsFrame\\PlusManz-BattleNet"
+    friend_texture = ICON_BNET_FRIEND
 	elseif tContains(ListTable.g, unit.name) then
-		texture = path.."guildicon"
+    friend_texture = ICON_GUILDMATE
 	end
 
-	if texture then
-		UpdateSettings(frame, style)
-		frame.Icon:SetTexture(texture)
+	local faction_texture
+	local db = TidyPlatesThreat.db.profile.socialWidget
+  --local unitid = unit.unitid
+  if db.ShowFactionIcon and unit.type == "PLAYER" then --and unitid then
+    local faction = UnitFactionGroup(unitid)
+    faction_texture = ICON_FACTION[faction]
+	end
+
+	if friend_texture or faction_texture then
+    local db = TidyPlatesThreat.db.profile.socialWidget
+    local show_in_hv = db.ShowInHeadlineView
+    local x, y
+
+    local style = unit.TP_Style
+    local icon = frame.Icon
+    if friend_texture then
+      if style == "NameOnly" and show_in_hv then
+        x, y = db.x_hv, db.y_hv
+      else
+        x, y = db.x, db.y
+      end
+      --icon:ClearAllPoints()
+      --icon:SetPoint(friend_icon_anchor, frame:GetParent(), friend_icon_anchor_relative, x, y)
+      icon:SetPoint("CENTER", frame:GetParent(), x, y)
+      icon:SetTexture(friend_texture)
+    else
+      icon:Hide()
+    end
+
+    icon = frame.FactionIcon
+    if faction_texture then
+      -- apply settings to faction icon
+      db = TidyPlatesThreat.db.profile.FactionWidget
+      if style == "NameOnly" and show_in_hv then
+        x, y = db.x_hv, db.y_hv
+      else
+        x, y = db.x, db.y
+      end
+      --icon:ClearAllPoints()
+      --icon:SetPoint(faction_icon_anchor, frame:GetParent().visual.healthbar, faction_icon_anchor_relative, x, y)
+      icon:SetPoint("CENTER", frame:GetParent(), x, y)
+      icon:SetTexture(faction_texture)
+    else
+      icon:Hide()
+    end
+
 		frame:Show()
 	else
 		frame:_Hide()
@@ -161,7 +220,7 @@ local function UpdateWidgetFrame(frame, unit, style)
 end
 
 -- Context
-local function UpdateWidgetContext(frame, unit, style)
+local function UpdateWidgetContext(frame, unit)
 	local guid = unit.guid
 	frame.guid = guid
 
@@ -173,7 +232,7 @@ local function UpdateWidgetContext(frame, unit, style)
 	-- Custom Code II
 	--------------------------------------
 	if UnitGUID("target") == guid then
-		UpdateWidgetFrame(frame, unit, style)
+		UpdateWidgetFrame(frame, unit)
 	else
 		frame:_Hide()
 	end
@@ -196,22 +255,37 @@ local function CreateWidgetFrame(parent)
 
 	-- Custom Code III
 	--------------------------------------
-	frame:SetHeight(32)
-	frame:SetWidth(32)
+  frame:SetFrameLevel(frame:GetParent():GetFrameLevel() + 2)
+  frame:SetSize(32, 32)
 	frame.Icon = frame:CreateTexture(nil, "OVERLAY")
-	frame.Icon:SetAllPoints(frame)
+	frame.FactionIcon = frame:CreateTexture(nil, "OVERLAY")
+
+  UpdateSettings(frame)
+  frame.UpdateConfig = UpdateSettings
 	--------------------------------------
 	-- End Custom Code
 
 	-- Required Widget Code
 	frame.UpdateContext = UpdateWidgetContext
 	frame.Update = UpdateWidgetFrame
-	frame._Hide = frame.Hide
+  frame._Hide = frame.Hide
 	frame.Hide = function() ClearWidgetContext(frame); frame:_Hide() end
 
 	--if not isEnabled then EnableWatcherFrame(true) end
 	return frame
 end
+
+local function IsFriend(unit)
+  return enabled() and (tContains(ListTable.f, unit.name) or tContains(ListTable.b, unit.name))
+end
+
+local function IsGuildmate(unit)
+  return enabled() and tContains(ListTable.g, unit.name)
+end
+
+
+TidyPlatesThreat.IsFriend = IsFriend
+TidyPlatesThreat.IsGuildmate = IsGuildmate
 
 ThreatPlatesWidgets.RegisterWidget("SocialWidgetTPTP", CreateWidgetFrame, false, enabled, EnabledInHeadlineView)
 ThreatPlatesWidgets.SocialWidgetDisableWatcher = DisableWatcher

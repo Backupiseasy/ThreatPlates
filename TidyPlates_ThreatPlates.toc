@@ -5,7 +5,7 @@
 ## Author: Suicidal Katt, Blacksalsify
 ## RequiredDeps: TidyPlates,TidyPlatesWidgets
 ## SavedVariables: ThreatPlatesDB
-## Version: 8.4.0-Beta1
+## Version: 8.4.0-Beta2
 ## OptionalDeps: Ace3, LibSharedMedia-3.0
 
 Libs\Libs.xml
@@ -18,6 +18,6 @@ Core.lua
 Commands.lua
 Options.lua
 
+Styles\Styles.xml
 Functions\Functions.xml
 Widgets\Widgets.xml
-Styles\Styles.xml

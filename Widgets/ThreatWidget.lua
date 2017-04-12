@@ -1,17 +1,16 @@
-local ADDON_NAME, NAMESPACE = ...
-ThreatPlates = NAMESPACE.ThreatPlates
-
 -------------------
 -- Threat Widget --
 -------------------
-local PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ThreatWidget\\"
--- local WidgetList = {}
+local ADDON_NAME, NAMESPACE = ...
+local ThreatPlates = NAMESPACE.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
 local UnitIsOffTanked = TidyPlatesThreat.UnitIsOffTanked
-local SetStyle = TidyPlatesThreat.SetStyle
+
+local PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ThreatWidget\\"
+-- local WidgetList = {}
 
 ---------------------------------------------------------------------------------------------------
 -- Threat Plates functions
@@ -33,14 +32,13 @@ end
 -- Widget Functions for TidyPlates
 ---------------------------------------------------------------------------------------------------
 
-local function UpdateWidgetFrame(frame, unit, style)
+local function UpdateWidgetFrame(frame, unit)
 	local db = TidyPlatesThreat.db.profile.threat
 
 	if unit.isMarked and db.marked.art then
 		frame:_Hide()
 	else
-		if not style then style = SetStyle(unit) end
-
+		local style = unit.TP_Style
 		if ((style == "dps") or (style == "tank") or (style == "unique")) and
 		  (InCombatLockdown() and unit.reaction ~= "FRIENDLY" and unit.type == "NPC") then
 
@@ -70,7 +68,7 @@ local function UpdateWidgetFrame(frame, unit, style)
 end
 
 -- Context
-local function UpdateWidgetContext(frame, unit, style)
+local function UpdateWidgetContext(frame, unit)
 	local guid = unit.guid
 	frame.guid = guid
 
@@ -82,7 +80,7 @@ local function UpdateWidgetContext(frame, unit, style)
 	-- Custom Code II
 	--------------------------------------
 	if UnitGUID("target") == guid then
-		UpdateWidgetFrame(frame, unit, style)
+		UpdateWidgetFrame(frame, unit)
 	else
 		frame:_Hide()
 	end
@@ -110,7 +108,6 @@ local function CreateWidgetFrame(parent)
 	frame:SetPoint("CENTER", parent, "CENTER")
 	frame.Icon = frame:CreateTexture(nil, "OVERLAY")
 	frame.Icon:SetAllPoints(frame)
-
 	--------------------------------------
 	-- End Custom Code
 

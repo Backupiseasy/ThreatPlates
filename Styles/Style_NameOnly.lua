@@ -83,27 +83,27 @@ local function Create(self,name)
     },
 
     castborder = {
-      texture = ((db.castbar.ShowInHeadlineView and db.castborder.show) and ThreatPlates.Art..db.castborder.texture) or EMPTY_TEXTURE,
+      texture = (db.castborder.show and db.castbar.ShowInHeadlineView and ThreatPlates.Art..db.castborder.texture) or EMPTY_TEXTURE,
       width = 256,
       height = 64,
       x = db.castbar.x_hv,
       y = db.castbar.y_hv,
       anchor = "CENTER",
-      show = db.castbar.ShowInHeadlineView and db.castborder.show,
+      show = db.castbar.ShowInHeadlineView and db.castborder.show, -- only checked by TidyPlades after a /reload
     },
 
     castnostop = {
-      texture = ((db.castbar.ShowInHeadlineView and db.castnostop.show) and ThreatPlates.Art.."TP_CastBarLock") or EMPTY_TEXTURE,
+      texture = (db.castborder.show and db.castbar.ShowInHeadlineView and ((db.castnostop.ShowOverlay and ThreatPlates.Art.."TP_CastBarLock") or ThreatPlates.Art..db.castborder.texture)) or EMPTY_TEXTURE,
       width = 256,
       height = 64,
       x = db.castbar.x_hv,
       y = db.castbar.y_hv,
       anchor = "CENTER",
-      show = db.castbar.ShowInHeadlineView and db.castnostop.show,
+      show = db.castbar.ShowInHeadlineView and db.castborder.show, -- only checked by TidyPlades after a /reload
     },
 
     castbar = {
-      texture = (db.castbar.ShowInHeadlineView and ThreatPlates.Media:Fetch('statusbar', db.castbar.texture)) or EMPTY_TEXTURE,
+      texture = (db.castbar.ShowInHeadlineView and ThreatPlates.Art..db.castbar.texture) or EMPTY_TEXTURE,
       backdrop = EMPTY_TEXTURE,
       width = 120,
       height = 10,
@@ -195,7 +195,7 @@ local function Create(self,name)
       height = db.spellicon.scale,
       x = db.spellicon.x_hv,
       y = db.spellicon.y_hv,
-      anchor = db.spellicon.anchor,
+      anchor = "CENTER", --db.spellicon.anchor,
       show = db.castbar.ShowInHeadlineView and db.spellicon.show,
     },
 
@@ -204,7 +204,7 @@ local function Create(self,name)
       height = db.raidicon.scale,
       x = db.raidicon.x_hv,
       y = db.raidicon.y_hv,
-      anchor = db.raidicon.anchor,
+      anchor = "CENTER", --db.raidicon.anchor,
       show = db.raidicon.ShowInHeadlineView,
     },
 
@@ -227,4 +227,4 @@ local function Create(self,name)
 end
 
 -- Register style in ThreatPlates
-NAMESPACE.ThreatPlates.RegisterTheme("NameOnly",Create)
+ThreatPlates.RegisterTheme("NameOnly",Create)

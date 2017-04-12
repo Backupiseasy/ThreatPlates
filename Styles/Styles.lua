@@ -1,32 +1,10 @@
-local _, ns = ...
-local t = ns.ThreatPlates
+local ADDON_NAME, NAMESPACE = ...
+local ThreatPlates = NAMESPACE.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------
-
---local function GetGeneral(unit)
---	local r, d, e, m = unit.reaction, unit.isDangerous, unit.isElite, unit.isMini
---  if unit.isTapped then
---    return "Tapped"
---  elseif r == "NEUTRAL" then
---    if m then
---      return "Mini"
---    else
---      return "Neutral"
---    end
---  elseif r ~= "NEUTRAL" and r~= "TAPPED" then
---    if d and e then
---      return "Boss"
---    elseif not d and e then
---      return "Elite"
---    elseif m then
---      return "Mini"
---    elseif not d and not e then
---      return "Normal"
---    end
---  else
---    return "empty"
---  end
---end
+-- Imported functions and constants
+---------------------------------------------------------------------------------------------------
+local GetUnitVisibility = ThreatPlates.GetUnitVisibility
 
 local function GetGeneral(unit)
   -- guild/friend/...?
@@ -53,11 +31,55 @@ local function GetGeneral(unit)
 
 end
 
+local function GetDetailedUnitType(unit)
+  local t, m = unit.isTapped, unit.isMini
+  local totem = ThreatPlates_Totems[unit.name]
+
+  if t then
+    return "Tapped"
+  elseif totem then
+    return "Totem"
+  elseif UnitIsOtherPlayersPet(unit.unitid) then -- player pets are also considered guardians, so this check has priority
+    return "Pet"
+  elseif m then
+    return "Minus"
+  else
+    local o, y = unit.reaction, unit.type
+    if o == "FRIENDLY" then
+      if y == "PLAYER" then
+        return "FriendlyPlayer"
+      elseif UnitPlayerControlled(unit.unitid) then
+        return "Guardian"
+      else
+        return "FriendlyNPC"
+      end
+    elseif o == "HOSTILE" then
+      local b, r, e = unit.isBoss, unit.isRare, unit.isElite
+      if b then
+        return "Boss"
+      elseif r or e then
+        return "Elite"
+      elseif y == "PLAYER" then
+        return "EnemyPlayer"
+      elseif UnitPlayerControlled(unit.unitid) then
+        return "Guardian"
+      else
+        return "EnemyNPC"
+      end
+    else -- o == "NEUTRAL"
+      return  "Neutral"
+    end
+  end
+end
+
 local function GetType(unit)
   local db = TidyPlatesThreat.db.profile
   local unitRank
+
   local totem = ThreatPlates_Totems[unit.name]
   local unique = tContains(db.uniqueSettings.list, unit.name)
+  local general_type = GetGeneral(unit)
+
   if totem then
     unitRank = "Totem"
   elseif unique then
@@ -66,14 +88,15 @@ local function GetType(unit)
         if db.uniqueSettings[k_c].useStyle then
           unitRank = "Unique"
         else
-          unitRank = GetGeneral(unit)
+          unitRank = general_type
         end
       end
     end
   else
-    unitRank = GetGeneral(unit)
+    unitRank = general_type
   end
-  return unitRank
+
+  return unitRank, general_type
 end
 
 local function GetUniqueType(unit)
@@ -106,7 +129,10 @@ local function ShowUnit(unit)
   local headline_view = false
 
   local unit_type = GetUniqueType(unit)
-  if unit_type == "Unique" then
+
+  -- if unit_type then => unique type (totem or unique) - totems shown/hidden by Blizzard CVars, so no extra check necessary
+  -- headline view, tapped not working for unique, totem because of this if here
+  if unit_type then
     show = true
   else
     if unit.reaction == "NEUTRAL" then
@@ -129,18 +155,16 @@ local function ShowUnit(unit)
         unit_type = "Minor"
       elseif unit.type == "PLAYER" then
         unit_type = "Player"
---      elseif unit_type == "Totem" then
---       	unit_type = "Totems"
       elseif UnitIsOtherPlayersPet(unit.unitid) then -- player pets are also considered guardians, so this check has priority
         unit_type =  "Pet"
       elseif UnitPlayerControlled(unit.unitid) then
         unit_type = "Guardian"
-      elseif unit_type ~= "Totem" then --if unit.type == "NPC" then
+      else --if unit.type == "NPC" then
         unit_type = "NPC"
       end
     end
 
-    show, headline_view = ThreatPlates.GetUnitVisibility(faction..unit_type)
+    show, headline_view = GetUnitVisibility(faction..unit_type)
 
     if not db.HeadlineView.ON then
       headline_view = false
@@ -150,18 +174,18 @@ local function ShowUnit(unit)
       headline_view = true
     end
 
-    if (unit.isElite and db.Visibility.HideElite) or (unit.isBoss and db.Visibility.HideBoss) or
-      (unit.isTapped and db.Visibility.HideTapped) then
+    local e, b, t = (unit.isElite or unit.isRare), unit.isBoss, unit.isTapped
+    local visibility = db.Visibility
+    local hide_n, hide_e, hide_b, hide_t = visibility.HideNormal , visibility.HideElite, visibility.HideBoss, visibility.HideTapped
+    if (e and hide_e) or (b and hide_b) or (t and hide_t) then
       show = false
-    elseif db.Visibility.HideNormal and not (unit.isElite or unit.isBoss or unit.isDangerous) then
+    elseif hide_n and not (e or b) then
       show = false
     elseif unit.unitid and UnitIsBattlePet(unit.unitid) then
       -- TODO: add configuration option for enable/disable
       show = false
     end
   end
-
-  --t.PrintTargetInfo(unit)
 
   return show, unit_type, headline_view
 end
@@ -211,27 +235,27 @@ local function SetStyle(unit)
 
   if not show then
     style = "empty"
-  elseif show and headline_view then
-    style = "NameOnly"
-  else
-    if unit_type == "Totem" then
-      local tS = db.totemSettings[ThreatPlates_Totems[unit.name]]
-      if tS[1] then
-        if db.totemSettings.hideHealthbar then
-          style = "etotem"
-        else
-          style = "totem"
-        end
+  elseif unit_type == "Totem" then
+    local tS = db.totemSettings[ThreatPlates_Totems[unit.name]]
+    if tS[1] then
+      if db.totemSettings.hideHealthbar then
+        style = "etotem"
+      else
+        style = "totem"
       end
-    elseif unit_type == "Unique" then
-      for k_c,k_v in pairs(db.uniqueSettings.list) do
-        if k_v == unit.name then
+    end
+  elseif unit_type == "Unique" then
+    for k_c,k_v in pairs(db.uniqueSettings.list) do
+      if k_v == unit.name then
         unique_setting = db.uniqueSettings[k_c]
         if unique_setting.showNameplate then
-            style = "unique"
-          end
+          style = "unique"
         end
       end
+    end
+  else
+    if headline_view then
+      style = "NameOnly"
     elseif unit_type then
       if unit.reaction == "FRIENDLY" then
         style = "normal"
@@ -273,5 +297,6 @@ end
 
 TidyPlatesThreat.GetGeneral = GetGeneral
 TidyPlatesThreat.GetType = GetType
+TidyPlatesThreat.GetDetailedUnitType = GetDetailedUnitType
 TidyPlatesThreat.SetStyle = SetStyle
 TidyPlatesThreat.GetThreatStyle = GetThreatStyle

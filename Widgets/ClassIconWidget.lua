@@ -1,9 +1,13 @@
-local ADDON_NAME, NAMESPACE = ...
-ThreatPlates = NAMESPACE.ThreatPlates
-
 -----------------------
 -- Class Icon Widget --
 -----------------------
+local ADDON_NAME, NAMESPACE = ...
+local ThreatPlates = NAMESPACE.ThreatPlates
+
+---------------------------------------------------------------------------------------------------
+-- Imported functions and constants
+---------------------------------------------------------------------------------------------------
+
 local PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ClassIconWidget\\"
 local PATH_THEME
 -- local WidgetList = {}
@@ -22,17 +26,10 @@ local function EnabledInHeadlineView()
 	return TidyPlatesThreat.db.profile.classWidget.ShowInHeadlineView
 end
 
-local function UpdateSettings(frame, style)
+local function UpdateSettings(frame)
 	local db = TidyPlatesThreat.db.profile.classWidget
-
-	if style == "NameOnly" and db.ShowInHeadlineView then
-		frame:SetPoint(db.anchor, frame:GetParent(), db.x_hv, db.y_hv)
-	else
-		frame:SetPoint(db.anchor, frame:GetParent(), db.x, db.y)
-	end
-
-	frame:SetSize(db.scale, db.scale)
-
+	local size = db.scale
+	frame:SetSize(size, size)
 	PATH_THEME = PATH .. db.theme .."\\"
 end
 
@@ -50,8 +47,7 @@ end
 ---------------------------------------------------------------------------------------------------
 
 -- Update Graphics
-local function UpdateWidgetFrame(frame, unit, style)
-	-- TODO: optimization - is it necessary to determine the class everytime this function is called on only if the guid changes?
+local function UpdateWidgetFrame(frame, unit)
 	local db = TidyPlatesThreat.db.profile
 
 	local class
@@ -74,7 +70,14 @@ local function UpdateWidgetFrame(frame, unit, style)
 	end
 
 	if class then -- Value shouldn't need to change
-		UpdateSettings(frame, style)
+		db = TidyPlatesThreat.db.profile.classWidget
+		local style = unit.TP_Style
+		if style == "NameOnly" then
+			frame:SetPoint("CENTER", frame:GetParent(), db.x_hv, db.y_hv)
+		else
+			frame:SetPoint("CENTER", frame:GetParent(), db.x, db.y)
+		end
+
 		frame.Icon:SetTexture(PATH_THEME .. class)
 
 		-- if Masque then
@@ -130,7 +133,7 @@ local function CreateWidgetFrame(plate)
 	--------------------------------------
 	frame.Icon = frame:CreateTexture(nil, "OVERLAY")
 	frame.Icon:SetAllPoints(frame)
-	--frame.UpdateConfig = UpdateWidgetConfig
+
 	-- if Masque then
 	-- 	if not group then
 	--  		group = Masque:Group("TidyPlatesThreat")
@@ -138,6 +141,9 @@ local function CreateWidgetFrame(plate)
 	-- 	--Masque:Register("TidyPlatesThreat", Reskin)
 	-- 	group:AddButton(frame)
 	-- end
+
+	UpdateSettings(frame)
+	frame.UpdateConfig = UpdateSettings
 	--------------------------------------
 	-- End Custom Code
 

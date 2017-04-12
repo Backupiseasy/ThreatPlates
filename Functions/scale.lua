@@ -5,19 +5,16 @@ local t = ns.ThreatPlates
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
 local UnitIsOffTanked = TidyPlatesThreat.UnitIsOffTanked
+local SetStyle = TidyPlatesThreat.SetStyle
+local GetDetailedUnitType = TidyPlatesThreat.GetDetailedUnitType
 
 local function GetGeneralScale(unit)
-	local unitType = TidyPlatesThreat.GetType(unit)
 	local db = TidyPlatesThreat.db.profile.nameplate
-	local scale = 0
 
-	if unit.isTapped then
-		scale = db.scale["Tapped"] or 1 --scale = db.scale["Tapped"]
-	elseif unitType and unitType ~="empty" then
-		scale = db.scale[unitType] or 1 -- This should also return for totems.
-	end
+	local unit_type = GetDetailedUnitType(unit)
+  local scale = db.scale[unit_type] or 1 -- This should also return for totems.
 
-	-- -- Do checks for target settings, must be spelled out to avoid issues
+	-- Do checks for target settings, must be spelled out to avoid issues
 	if (UnitExists("target") and unit.isTarget) and db.toggle.TargetS then
 		scale = db.scale.Target
 	elseif not UnitExists("target") and db.toggle.NoTargetS then
@@ -26,11 +23,15 @@ local function GetGeneralScale(unit)
 		else
 			scale = db.scale.NoTarget
 		end
-	else -- Marked units will always be set to this scale
-		if unit.isMarked and db.toggle.MarkedS then
+	else -- units will always be set to this scale
+		if unit.isCasting and db.toggle.CastingUnitScale then
+			scale = db.scale.CastingUnit
+		elseif unit.isMarked and db.toggle.MarkedS then
 			scale = db.scale.Marked
-		end
-	end
+    elseif unit.isMouseover and db.toggle.MouseoverUnitScale then
+      scale = db.scale.MouseoverUnit
+    end
+  end
 	return scale
 end
 
@@ -40,11 +41,6 @@ local function GetThreatScale(unit, style)
 		if unit.isMarked and db.marked.scale then
 			return GetGeneralScale(unit)
 		else
---			local threatSituation = unit.threatSituation
---			if style == "tank" and show_offtank and UnitIsOffTanked(unit) then
---				threatSituation = "OFFTANK"
---			end
---			return db[style].scale[threatSituation]
 			local threatSituation = unit.threatSituation
 			if TidyPlatesThreat:GetSpecRole() then
 				if db.toggle.OffTank and UnitIsOffTanked(unit) then
@@ -62,6 +58,7 @@ end
 
 local function SetScale(unit)
 	local db = TidyPlatesThreat.db.profile
+	local style, unique_style = SetStyle(unit)
 
 	local scale = 0
 	local nonTargetScale = 0
@@ -70,15 +67,11 @@ local function SetScale(unit)
 	--end
 
 	if style == "unique" then
-		for k,v in pairs(db.uniqueSettings.list) do
-			if v == unit.name then
-				if not db.uniqueSettings[k].overrideScale then
-					scale = db.uniqueSettings[k].scale
-				else
-					scale = GetThreatScale(unit)
-				end
-			end
-		end
+    if not unique_style.overrideScale then
+			scale = unique_style.scale
+    else
+      scale = GetThreatScale(unit)
+    end
 	elseif style == "empty" then -- etotem scale will still be at totem level
 		scale = 0
 	elseif style == "NameOnly" then

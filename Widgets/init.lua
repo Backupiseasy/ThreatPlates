@@ -1,14 +1,14 @@
-local ADDON_NAME, NAMESPACE = ...
-local ThreatPlates = NAMESPACE.ThreatPlates
-
 ---------------------
 -- Widget Handling --
 ---------------------
+local ADDON_NAME, NAMESPACE = ...
+local ThreatPlates = NAMESPACE.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
 local DEBUG = ThreatPlates.DEBUG
+local SetStyle = TidyPlatesThreat.SetStyle
 
 -- Information about widget layering, from highest to lowest
 --    +2: combo points
@@ -117,16 +117,23 @@ local function DeleteWidgets()
   ThreatPlatesWidgets.ComboPointWidgetDisableWatcher()
   ThreatPlatesWidgets.ArenaWidgetDisableWatcher()
   ThreatPlatesWidgets.SocialWidgetDisableWatcher()
+  ThreatPlatesWidgets.ResourceWidgetDisableWatcher()
   --ThreatPlatesWidgets.AuraWidgetDisableWatcher() -- right now, watcher still necessary for TidyPlates as well
 end
 
 -- TidyPlatesGlobal_OnUpdate() is called when other data about the unit changes, or is requested by an external controller.
 local function OnUpdate(plate, unit)
-  local style = TidyPlatesThreat.SetStyle(unit)
   local widget_list = plate.widgets
 
+--  if unit.isTarget then
+--    ThreatPlates.DEBUG_PRINT_TABLE(plate)
+--  end
+
   for name,v in pairs(ThreatPlatesWidgets.list) do
-    if v.enabled() then
+    local show_healthbar_view = v.enabled()
+    local show_headline_view = v.EnabledInHeadlineView()
+
+    if show_healthbar_view or show_headline_view then
       local widget = widget_list[name]
 
       -- Because widgets can be disabled anytime, it is not guaranteed that it exists after OnInitialize
@@ -135,17 +142,28 @@ local function OnUpdate(plate, unit)
         widget_list[name] = widget
       end
 
-      -- Diable all widgets in headline view mode
-      if style == "NameOnly" and not v.EnabledInHeadlineView() then
-        widget_list[name]:Hide()
+      local style = SetStyle(unit)
+      if style == "NameOnly" then
+        if show_headline_view then
+          if not v.isContext then
+            unit.TP_Style = style
+            widget:Update(unit)
+            if unit.isTarget then	plate:SetFrameStrata("LOW") else plate:SetFrameStrata("BACKGROUND")	end
+          end
+        else
+          widget:Hide()
+        end
       elseif style == "etotem" or style == "empty" then
-        widget_list[name]:Hide()
-      else
+        widget:Hide()
+      elseif show_healthbar_view then -- any other style
         -- context means that widget is only relevant for target (or mouse-over)
         if not v.isContext then
-          widget_list[name]:Update(unit, style)
-          if unit.isTarget then	plate:SetFrameStrata("LOW") else plate:SetFrameStrata("BACKGROUND")	end
+          unit.TP_Style = style
+          widget:Update(unit)
+          if unit.isTarget then	plate:SetFrameStrata("LOW") else plate:SetFrameStrata("BACKGROUND") end
         end
+      else
+        widget:Hide()
       end
     else
       HideWidget(widget_list, name)
@@ -156,11 +174,13 @@ end
 -- TidyPlatesGlobal_OnContextUpdate() is called when a unit is targeted or moused-over.  (Any time the unitid or GUID changes)
 -- OnContextUpdate must only do something when there is something unit-dependent to display?
 local function OnContextUpdate(plate, unit)
-  local style = TidyPlatesThreat.SetStyle(unit)
   local widget_list = plate.widgets
 
   for name,v in pairs(ThreatPlatesWidgets.list) do
-    if v.enabled() then
+    local show_healthbar_view = v.enabled()
+    local show_headline_view = v.EnabledInHeadlineView()
+
+    if show_healthbar_view or show_headline_view then
       local widget = widget_list[name]
 
       -- Because widgets can be disabled anytime, it is not guaranteed that it exists after OnInitialize
@@ -169,14 +189,23 @@ local function OnContextUpdate(plate, unit)
         widget_list[name] = widget
       end
 
-      -- Diable all widgets in headline view mode
-      if style == "NameOnly" and not v.EnabledInHeadlineView() then
-        widget_list[name]:Hide()
+      local style = SetStyle(unit)
+      if style == "NameOnly" then
+        if show_headline_view then
+          unit.TP_Style = style
+          widget:UpdateContext(unit)
+          if unit.isTarget then	plate:SetFrameStrata("LOW") else plate:SetFrameStrata("BACKGROUND") end
+        else
+          widget:Hide()
+        end
       elseif style == "etotem" or style == "empty" then
-        widget_list[name]:Hide()
-      else
-        widget_list[name]:UpdateContext(unit, style)
+        widget:Hide()
+      elseif show_healthbar_view then -- any other style
+        unit.TP_Style = style
+        widget:UpdateContext(unit)
         if unit.isTarget then	plate:SetFrameStrata("LOW") else plate:SetFrameStrata("BACKGROUND") end
+      else
+        widget:Hide()
       end
     else
       HideWidget(widget_list, name)

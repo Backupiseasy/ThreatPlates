@@ -201,6 +201,8 @@ function TidyPlatesThreat:OnInitialize()
       optionRoleDetectionAutomatic = false,
       ShowThreatGlowOnAttackedUnitsOnly = false,
       ShowThreatGlowOffTank = true,
+      NamePlateEnemyClickThrough = false,
+      NamePlateFriendlyClickThrough = false,
       HeadlineView = {
         ON = false,
         name = { size = 10, width = 116, height = 14, x = 0, y = 4, align = "CENTER", vertical = "CENTER", },
@@ -293,8 +295,7 @@ function TidyPlatesThreat:OnInitialize()
         HostileNPC = { r = 1, g = 0, b = 0, },				-- red
         HostilePlayer = { r = 1, g = 0, b = 0, },		-- red
         NeutralUnit = { r = 1, g = 1, b = 0, },			-- yellow
-        TappedUnit = { r = 110/255, g = 110/255, b = 110/255, },	-- grey
-        GuildMember = { r = 60/255, g = 168/255, b = 255/255, }, -- light blue
+        TappedUnit = t.COLOR_TAPPED,
       },
       text = {
         amount = true,
@@ -538,8 +539,23 @@ function TidyPlatesThreat:OnInitialize()
         y = 6,
         x_hv = 65,
         y_hv = 6,
-        anchor = "CENTER",
+        --anchor = "Top",
         ShowInHeadlineView = false,
+        ShowFriendIcon = true,
+        ShowFactionIcon = false,
+        ShowFriendColor = false,
+        FriendColor = t.COLOR_FRIEND,
+        ShowGuildmateColor = false,
+        GuildmateColor = t.COLOR_GUILD,
+      },
+      FactionWidget = {
+        --ON = false,
+        scale = 16,
+        x = 0,
+        y = 6,
+        x_hv = 0,
+        y_hv = -4,
+        --anchor = "Top",
       },
       questWidget = {
         ON = false,
@@ -566,6 +582,35 @@ function TidyPlatesThreat:OnInitialize()
         alpha = 1,
         anchor = "CENTER",
         ShowInHeadlineView = false,
+      },
+      ResourceWidget = {
+        ON = true,
+        --ShowInHeadlineView = false,
+        --scale = 28,
+        x = 0,
+        y = -18,
+        ShowFriendly = false,
+        ShowEnemyPlayer = false,
+        ShowEnemyNPC = false,
+        ShowEnemyBoss = true,
+        ShowBar = true,
+        BarHeight = 12,
+        BarWidth = 80,
+        BarTexture = "Aluminium",
+        BackgroundUseForegroundColor = false,
+        BackgroundColor = RGB(0, 0, 0, 0.3),
+        BorderTexture = "roth",
+        BorderEdgeSize = 16,
+        BorderOffset = 4,
+        BorderUseForegroundColor = false,
+        BorderUseBackgroundColor = false,
+        BorderColor = RGB(255, 255, 255, 1),
+        --BorderInset = 4,
+        --BorderTileSize = 16,
+        ShowText = true,
+        Font = "Arial Narrow",
+        FontSize = 10,
+        FontColor = RGB(255, 255, 255),
       },
       totemSettings = ThreatPlatesWidgets.TOTEM_SETTINGS,
       uniqueSettings = {
@@ -1311,6 +1356,7 @@ function TidyPlatesThreat:OnInitialize()
           x = 0,
           y = -15,
           show = true,
+          ShowOverlay = true,
         },
         castborder = {
           texture = "TP_CastBarOverlay",
@@ -1595,31 +1641,51 @@ function TidyPlatesThreat:OnInitialize()
           ["TargetS"]  = false, -- Custom Target Scale
           ["NoTargetS"]  = false, -- Custom Target Alpha
           ["MarkedA"] = false,
-          ["MarkedS"] = false
+          ["MarkedS"] = false,
+          ["CastingUnitAlpha"] = false,
+          ["CastingUnitScale"] = false,
+          ["MouseoverUnitAlpha"] = false,
+          ["MouseoverUnitScale"] = false,
         },
         scale = {
-          ["Target"]		= 1,
-          ["NoTarget"]	= 1,
-          ["Totem"]		= 0.75,
-          ["Marked"] 		= 1,
-          ["Minus"]	= 0.7,
-          ["Normal"]		= 1,
-          ["Elite"]		= 1.04,
-          ["Boss"]		= 1.1,
-          ["Tapped"] 		= 0.9,
-          ["Neutral"]		= 0.9,
+          ["Target"]	  	    = 1,
+          ["NoTarget"]	      = 1,
+          ["Totem"]		        = 0.75,
+          ["Marked"] 		      = 1.3,
+          --["Normal"]		    = 1,
+          ["CastingUnit"]     = 1.3,
+          ["MouseoverUnit"]   = 1.3,
+          ["FriendlyPlayer"]  = 1,
+          ["FriendlyNPC"]     = 1,
+          ["Neutral"]		      = 0.9,
+          ["EnemyPlayer"]     = 1,
+          ["EnemyNPC"]        = 1,
+          ["Elite"]		        = 1.04,
+          ["Boss"]		        = 1.1,
+          ["Guardian"]       = 0.75,
+          ["Pet"]            = 0.75,
+          ["Minus"]	          = 0.6,
+          ["Tapped"] 		      = 0.9,
         },
         alpha = {
-          ["Target"]		= 1,
-          ["NoTarget"]	= 1,
-          ["Totem"]		= 1,
-          ["Boss"]		= 1,
-          ["Elite"]		= 1,
-          ["Normal"]		= 1,
-          ["Neutral"]		= 1,
-          ["Minus"]	= 1,
-          ["Tapped"]		= 1,
-          ["Marked"] 		= 1
+          ["Target"]		      = 1,
+          ["NoTarget"]	      = 1,
+          ["Totem"]		        = 1,
+          ["Marked"] 		      = 1,
+          --["Normal"]		    = 1,
+          ["CastingUnit"]	    = 1,
+          ["MouseoverUnit"]	  = 1,
+          ["FriendlyPlayer"]  = 1,
+          ["FriendlyNPC"]     = 1,
+          ["Neutral"]		      = 1,
+          ["EnemyPlayer"]     = 1,
+          ["EnemyNPC"]        = 1,
+          ["Elite"]		        = 1,
+          ["Boss"]		        = 1,
+          ["Guardian"]        = 0.8,
+          ["Pet"]             = 0.8,
+          ["Minus"]	          = 0.8,
+          ["Tapped"]		      = 1,
         },
       },
     }
@@ -1736,16 +1802,17 @@ function TidyPlatesThreat:OnEnable()
   self:StartUp()
 
   local events = {
-    "PLAYER_ALIVE",
+    -- "PLAYER_ALIVE",
     "PLAYER_ENTERING_WORLD",
-    "PLAYER_LEAVING_WORLD",
+    --"PLAYER_LEAVING_WORLD",
     "PLAYER_LOGIN",
     "PLAYER_LOGOUT",
     --"PLAYER_REGEN_DISABLED",
     "PLAYER_REGEN_ENABLED",
     --"PLAYER_TALENT_UPDATE"
     "UNIT_FACTION",
-    "QUEST_WATCH_UPDATE"
+    "QUEST_WATCH_UPDATE",
+    "NAME_PLATE_CREATED",
   }
   for i=1,#events do
     self:RegisterEvent(events[i])
@@ -1783,10 +1850,12 @@ function TidyPlatesThreat:StartUp()
   t.SetThemes(self)
   --t.SetTidyPlatesWidgets(self)
   t.Update()
-  -- initialize widgets
+  -- initialize widgets and other Threat Plates stuff
   ThreatPlatesWidgets.PrepareFilter()
 	ThreatPlatesWidgets.ConfigAuraWidgetFilter()
   ThreatPlatesWidgets.ConfigAuraWidget()
+  C_NamePlate.SetNamePlateFriendlyClickThrough(self.db.profile.NamePlateFriendlyClickThrough)
+  C_NamePlate.SetNamePlateEnemyClickThrough(self.db.profile.NamePlateEnemyClickThrough)
 end
 
 -----------------------------------------------------------------------------------
@@ -1824,9 +1893,8 @@ function TidyPlatesThreat:SetGlows()
   end
 end
 
-function TidyPlatesThreat:PLAYER_ALIVE()
-
-end
+--function TidyPlatesThreat:PLAYER_ALIVE()
+--end
 
 function TidyPlatesThreat:PLAYER_ENTERING_WORLD()
   local _,type = IsInInstance()
@@ -1843,9 +1911,8 @@ function TidyPlatesThreat:PLAYER_ENTERING_WORLD()
   --self:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
 end
 
-function TidyPlatesThreat:PLAYER_LEAVING_WORLD()
-
-end
+--function TidyPlatesThreat:PLAYER_LEAVING_WORLD()
+--end
 
 function TidyPlatesThreat:PLAYER_LOGIN(...)
   self.db.profile.cache = {}
@@ -1904,3 +1971,29 @@ end
 -- 		t.Print(L["|cff89F559Threat Plates|r: Player spec change detected: |cff"]..t.HCC[class]..self:SpecName()..L["|r, you are now in your "]..self:RoleText()..L[" role."])
 -- 	end
 -- end
+
+local function FrameOnShow(self)
+  if not self.carrier then
+    -- hide blizzard's nameplate
+    self:Hide()
+  end
+end
+
+--local function FrameOnUpdate(self)
+--  self.carrier:SetFrameLevel(self:GetFrameLevel())
+--end
+
+--local function FrameOnHide(self)
+--  --print ("Hook OnHide: ")
+--end
+
+-- Preventing WoW from re-showing Blizzard nameplates in certain situations
+-- e.g., press ESC, got to Interface, Names, press ESC and voila!
+-- Thanks to Kesava (KuiNameplates) for this solution
+function TidyPlatesThreat:NAME_PLATE_CREATED(event, plate)
+  if plate.UnitFrame then
+    plate.UnitFrame:HookScript('OnShow',FrameOnShow)
+  end
+--  plate:HookScript('OnHide',FrameOnHide)
+--  plate:HookScript('OnUpdate',FrameOnUpdate)
+end
