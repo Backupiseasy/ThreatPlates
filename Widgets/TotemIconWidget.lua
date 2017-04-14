@@ -32,7 +32,7 @@ end
 -- Totem data - define it one time for the whole addon
 -------------------------------------------------------------------------------
 
-TOTEM_DATA = {
+local TOTEM_DATA = {
 	-- Totems from Totem Mastery
 	[1]  = {202188, "M1",  "b8d1ff"}, 	-- Resonance Totem
 	[2]  = {210651, "M2",	 "b8d1ff"},		-- Storm Totem
@@ -65,12 +65,9 @@ TOTEM_DATA = {
 	[21] = {204336, "P4",  "2b76ff"},	-- Grounding Totem
 }
 
--- Totems data as needed by the options dialog
-ThreatPlatesWidgets.TOTEM_DATA = TOTEM_DATA
-
 -- Totems data as in this file
-ThreatPlates_Totems_Config = { hideHealthbar = false, }
-ThreatPlates_Totems = {}
+local ThreatPlates_Totems_Config = { hideHealthbar = false, }
+local ThreatPlates_Totems = {}
 do
 	for i=1,#TOTEM_DATA do
 		ThreatPlates_Totems[TotemNameBySpellID(TOTEM_DATA[i][1])] = TOTEM_DATA[i][2]
@@ -92,9 +89,6 @@ do
 
 	end
 end
-
--- Totems data as needed for initial/default config
-ThreatPlatesWidgets.TOTEM_SETTINGS = ThreatPlates_Totems_Config
 
 -------------------------------------------------------------------------------
 
@@ -186,3 +180,10 @@ local function CreateWidgetFrame(parent)
 end
 
 ThreatPlatesWidgets.RegisterWidget("TotemIconWidgetTPTP", CreateWidgetFrame, false, enabled)
+
+-- Totems data as needed by the options dialog
+TidyPlatesThreat.TOTEM_DATA = TOTEM_DATA
+-- Totems data as needed for initial/default config
+TidyPlatesThreat.TOTEM_SETTINGS = ThreatPlates_Totems_Config
+TidyPlatesThreat.ThreatPlates_Totems = ThreatPlates_Totems
+

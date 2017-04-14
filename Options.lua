@@ -4837,7 +4837,7 @@ local function GetOptions()
                       width = "half",
                       desc = L["Shows a faction icon next to the nameplate of players."],
                       arg = { "socialWidget", "ShowFactionIcon" },
-                      disabled = function() return not (db.socialWidget.ON or db.socialWidget.ShowInHeadlineView) end,
+--                      disabled = function() return not (db.socialWidget.ON or db.socialWidget.ShowInHeadlineView) end,
                     },
                     Size = GetSizeEntry(10, "FactionWidget"),
                     Offset = GetPlacementEntryWidget(30, "FactionWidget", true),
@@ -5108,7 +5108,7 @@ local function GetOptions()
     },
   };
 
-  local totemID = ThreatPlatesWidgets.TOTEM_DATA
+  local totemID = TidyPlatesThreat.TOTEM_DATA
   table.sort(totemID, function(a, b) return (string.sub(a[2], 1, 1)..TotemNameBySpellID(a[1])) < (string.sub(b[2], 1, 1)..TotemNameBySpellID(b[1])) end)
   for k_c, v_c in ipairs(totemID) do
     TotemOpts[GetSpellName(totemID[k_c][1])] = {

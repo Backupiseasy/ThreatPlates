@@ -4,6 +4,15 @@ local ThreatPlates = NAMESPACE.ThreatPlates
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
+local UnitIsConnected = UnitIsConnected
+local UnitIsUnit = UnitIsUnit
+local UnitGroupRolesAssigned = UnitGroupRolesAssigned
+local InCombatLockdown = InCombatLockdown
+local RAID_CLASS_COLORS = RAID_CLASS_COLORS
+local floor = floor
+local abs = abs
+
+local OnThreatTable = TidyPlatesThreat.OnThreatTable
 local RGB = ThreatPlates.RGB
 local RGB_P = ThreatPlates.RGB_P
 local COLOR_DC = ThreatPlates.COLOR_DC
@@ -13,54 +22,6 @@ local reference = {
   HOSTILE = {	NPC = "HostileNPC", PLAYER = "HostilePlayer", },
   NEUTRAL = { NPC = "NeutralUnit", PLAYER = "NeutralUnit",	},
 }
-
-function ThreatPlates_IsTapDenied(unitid)
-  --return frame.optionTable.greyOutWhenTapDenied and not UnitPlayerControlled(frame.unit) and UnitIsTapDenied(frame.unit);
-  return not UnitPlayerControlled(unitid) and UnitIsTapDenied(unitid)
-end
-
-local function GetMarkedColor(unit,a,var)
-  local db = TidyPlatesThreat.db.profile
-  local c
-  if ((var ~= nil and var == false) or (not db.settings.raidicon.hpColor)) then
-    c = a
-  else
-    c = db.settings.raidicon.hpMarked[unit.raidIcon]
-  end
-  if c then
-    return c
-  end
-end
-
-local function GetClassColor(unit)
-  local db = TidyPlatesThreat.db.profile
-  local c, class
-
-  -- return nil if class coloring is disabled
-  -- if (unit.reaction == "HOSTILE" and not db.allowClass) or (unit.reaction == "FRIENDLY" and not db.friendlyClass) then
-  -- 	return nil
-  -- end
-
-  if unit.class and unit.class ~= "" then
-    class = unit.class
-  elseif db.friendlyClass then
-    if unit.guid then
-      local _, Class = GetPlayerInfoByGUID(unit.guid)
-      if not db.cache[unit.name] then
-        if db.cacheClass then
-          db.cache[unit.name] = Class
-        end
-        class = Class
-      else
-        class = db.cache[unit.name]
-      end
-    end
-  end
-  if class then
-    c = RAID_CLASS_COLORS[class]
-  end
-  return c
-end
 
 local CS = CreateFrame("ColorSelect")
 
@@ -92,13 +53,6 @@ function CS:GetSmudgeColorRGB(colorA, colorB, perc)
 end
 
 
-local function GetColorByHealthDeficit(unit)
-  local db = TidyPlatesThreat.db.profile
-  local pct = unit.health / unit.healthmax
-  local r, g, b = CS:GetSmudgeColorRGB(db.aHPbarColor, db.bHPbarColor, pct)
-  return RGB_P(r, g, b, 1)
-end
-
 local function UnitIsOffTanked(unit)
   local unitid = unit.unitid
 
@@ -114,23 +68,21 @@ local function UnitIsOffTanked(unit)
   return false
 end
 
-local function GetThreatColor(unit,style)
+-- Threat System is OP, player is in combat, style is tank or dps
+local function GetThreatColor(unit, style)
   local db = TidyPlatesThreat.db.profile
   local c
-  -- style is normal for PLAYERS, only NPCs get tank/dps
-  if (db.threat.ON and db.threat.useHPColor and InCombatLockdown() and (style == "dps" or style == "tank")) then
 
+  if (db.threat.ON and db.threat.useHPColor and (style == "dps" or style == "tank")) then
     local show_offtank = db.threat.toggle.OffTank
+
     if db.threat.nonCombat then
-      --if (unit.isInCombat or (unit.health < unit.healthmax)) then
-      if unit.threatValue > 0 then -- new
+      if OnThreatTable(unit) then
         local threatSituation = unit.threatSituation
         if style == "tank" and show_offtank and UnitIsOffTanked(unit) then
           threatSituation = "OFFTANK"
         end
         c = db.settings[style].threatcolor[threatSituation]
-      else -- not sure, wenn this branch is used
-        c = GetClassColor(unit)
       end
     else
       local threatSituation = unit.threatSituation
@@ -139,110 +91,158 @@ local function GetThreatColor(unit,style)
       end
       c = db.settings[style].threatcolor[threatSituation]
     end
---	else
---		c = GetClassColor(unit)
   end
+
   return c
 end
 
-local function SetHealthbarColor(unit)
+local function GetColorByHealthDeficit(unit)
+  local db = TidyPlatesThreat.db.profile
+  local pct = unit.health / unit.healthmax
+  local r, g, b = CS:GetSmudgeColorRGB(db.aHPbarColor, db.bHPbarColor, pct)
+  return RGB_P(r, g, b, 1)
+end
+
+local function GetColorByClass(unit)
+  local IsFriend = TidyPlatesThreat.IsFriend
+  local IsGuildmate = TidyPlatesThreat.IsGuildmate
+
+  local unit_type = unit.type
+  local unit_reaction = unit.reaction
+  local unit_class = unit.class
 
   local db = TidyPlatesThreat.db.profile
-	local style, unique_style = TidyPlatesThreat.SetStyle(unit)
-
-  local c, allowMarked
-  if unit.unitid and not UnitIsConnected(unit.unitid) then
-    -- disconnected unit: gray
-    c = COLOR_DC
-  elseif style == "totem" then
-    local tS = db.totemSettings[ThreatPlates_Totems[unit.name]]
-    if tS[2] then
-      c = tS.color
-    end
-  elseif style == "unique" then
-		allowMarked = unique_style.allowMarked
-		if unique_style.UseThreatColor and InCombatLockdown() then
-			c = GetThreatColor(unit, TidyPlatesThreat.GetThreatStyle(unit))
-		elseif unique_style.useColor then
-			c = unique_style.color
-		end
-		if not c then
-			-- player healthbars may be colored by class overwriting any customColor, but not healthColorChange
-			if unit.type == "PLAYER" then -- Prio 3: coloring by class
-				if unit.reaction == "HOSTILE" and db.allowClass then
-					c = GetClassColor(unit)
-				elseif unit.reaction == "FRIENDLY" and db.friendlyClass then
-					c = GetClassColor(unit)
-				end
-			end
-		end
-  else
-    if db.healthColorChange then  -- Prio 2: coloring by HP (prio 1 is raid marks) - no other stuff applies
-      local pct = unit.health / unit.healthmax
-      local r,g,b = CS:GetSmudgeColorRGB(db.aHPbarColor,db.bHPbarColor,pct)
-      c = {r = r,g = g, b = b}
-    else
-      if unit.isTapped then --and (not db.threat.nonCombat or unit.threatValue > 0) then
-        c = db.ColorByReaction.TappedUnit
-      elseif (db.threat.ON and db.threat.useHPColor and InCombatLockdown() and (style == "dps" or style == "tank")) then -- Need a better way to impliment this.
-        c = GetThreatColor(unit,style)
-
-        if not c then -- currently here because nonCombat = false may result in an nil color which defaults (later) to standard WoW Colors, not ColorByReaction, as it should
-          c = db.ColorByReaction[reference[unit.reaction][unit.type]]
-        end
-      else
-        -- player healthbars may be colored by class overwriting any customColor, but not healthColorChange
-        if unit.type == "PLAYER" then -- Prio 3: coloring bym class
-          if unit.reaction == "HOSTILE" and db.allowClass then
-            c = GetClassColor(unit)
-          elseif unit.reaction == "FRIENDLY" then
-            if db.socialWidget.ShowFriendColor and TidyPlatesThreat.IsFriend(unit) then
-              c = db.socialWidget.FriendColor
-            elseif db.socialWidget.ShowGuildmateColor and TidyPlatesThreat.IsGuildmate(unit) then
-              c = db.socialWidget.GuildmateColor
-            elseif db.friendlyClass then
-              c = GetClassColor(unit)
-            else
-              c = db.ColorByReaction[reference[unit.reaction][unit.type]]
-            end
-          else
-            c = db.ColorByReaction[reference[unit.reaction][unit.type]]
-          end
-        else
-          c = db.ColorByReaction[reference[unit.reaction][unit.type]]
-        end
+  local c
+  if unit_type == "PLAYER" then
+    if unit_reaction == "HOSTILE" and db.allowClass then
+      c = RAID_CLASS_COLORS[unit_class]
+    elseif unit_reaction == "FRIENDLY" then
+      local db_social = db.socialWidget
+      if db_social.ShowFriendColor and IsFriend(unit) then
+        c = db_social.FriendColor
+      elseif db_social.ShowGuildmateColor and IsGuildmate(unit) then
+        c = db_social.GuildmateColor
+      elseif db.friendlyClass then
+        c = RAID_CLASS_COLORS[unit_class]
       end
     end
   end
 
-  -- quest widget color overwrites everything (Color by Health, Color by Reaction, totem, unique)
-  if db.questWidget.ModeHPBar and TidyPlatesThreat.ShowQuestUnit(unit) and TidyPlatesThreat.IsQuestUnit(unit) then
-    c = db.questWidget.HPBarColor
+  return c
+end
+
+local function GetColorByReaction(unit)
+  local unit_type = unit.type
+  local unit_reaction = unit.reaction
+
+  local db = TidyPlatesThreat.db.profile
+  return db.ColorByReaction[reference[unit_reaction][unit_type]]
+end
+
+--local HEALTHBAR_COLOR_FUNCTIONS = {
+--  --  NameOnly = nil,
+--  --  empty = nil,
+--  --  etotem = nil,
+--  unique = UniqueHealthbarColor,
+--  totem = TotemHealthbarColor,
+--  normal = DefaultHealthbarColor,
+--  tank = ThreatHealthbarColor,
+--  dps = ThreatHealthbarColor,
+--}
+
+local function SetHealthbarColor(unit)
+  local style, unique_style = TidyPlatesThreat.SetStyle(unit)
+  if style == "NameOnly" or style == "empty" or style == "etotem" then return end
+
+  local ShowQuestUnit = TidyPlatesThreat.ShowQuestUnit
+  local IsQuestUnit = TidyPlatesThreat.IsQuestUnit
+  local GetThreatStyle = TidyPlatesThreat.GetThreatStyle
+
+  local db = TidyPlatesThreat.db.profile
+  local c
+  if unit.unitid and not UnitIsConnected(unit.unitid) then
+    -- Unit is disconnected
+    c = COLOR_DC
+  elseif style == "unique" then
+    -- Custom nameplate style defined for unit (does not work for totems right now)
+    if unit.isMarked and unique_style.allowMarked then
+      -- Unit is marked
+      local db_raidicon = db.settings.raidicon
+      c = db_raidicon.hpMarked[unit.raidIcon]
+    elseif db.questWidget.ModeHPBar and ShowQuestUnit(unit) and IsQuestUnit(unit) then
+      -- Unit is quest target
+      c = db.questWidget.HPBarColor
+    else
+      if unique_style.UseThreatColor then
+        -- Threat System is should also be used for custom nameplate (in combat with thread system on)
+        c = GetThreatColor(unit, GetThreatStyle(unit))
+      end
+
+      if not c and unique_style.useColor then
+        c = unique_style.color
+      end
+      -- otherwise color defaults to class or reaction color (or WoW defaults, at the end)
+      if not c then
+        c = GetColorByClass(unit)
+      end
+      if not c then
+        c = GetColorByReaction(unit)
+      end
+    end
+  elseif style == "totem" then
+    -- currently, no raid marked color (or quest color) for totems, also no custom nameplates
+    local tS = db.totemSettings[TidyPlatesThreat.ThreatPlates_Totems[unit.name]]
+    local allow_hp_color = tS[2]
+    if allow_hp_color then
+      c = tS.color
+    end
+    -- otherwise color defaults to WoW defaults
+  else
+    -- branch for standard coloring (ByHealth or ByClass, ByReaction, ByThreat), style = normal, tank, dps
+    -- (healthbar disabled for empty, etotem, NameOnly)
+    local db_raidicon = db.settings.raidicon
+    if unit.isMarked and db_raidicon.hpColor then
+      c = db_raidicon.hpMarked[unit.raidIcon]
+    elseif db.questWidget.ModeHPBar and ShowQuestUnit(unit) and IsQuestUnit(unit) then
+      c = db.questWidget.HPBarColor
+    elseif db.healthColorChange then
+      c = GetColorByHealthDeficit(unit)
+    else
+      -- order is ThreatSystem, ByClass, ByReaction, WoW Default
+      if unit.isTapped then --and (not db.threat.nonCombat or unit.threatValue > 0) then
+        c = db.ColorByReaction.TappedUnit
+      else
+        c = GetThreatColor(unit, style)
+        if not c then
+          c = GetColorByClass(unit)
+        end
+        if not c then
+          c = GetColorByReaction(unit)
+        end
+        -- ? c = GetThreatColor_New(unit, style) or GetColorByClass(unit) or GetColorByReaction(unit)
+      end
+    end
   end
 
-  -- raid mark color overwrites everything (Color by Health, Color by Reaction, also quest widget color)
-  if unit.isMarked then -- Prio 1 - raid marks always take top priority
-    c = GetMarkedColor(unit,c,allowMarked) -- c will set itself back to c if marked color is disabled
-  end
-
-  if not c then
-    c = {r = unit.red, g = unit.green, b = unit.blue }  -- should return Blizzard default oclors (based on GetSelectionColor)
+  -- if no color was found, default back to WoW default colors (based on GetSelectionColor)
+  local color_r, color_g, color_b
+  if c then
+    color_r, color_g, color_b = c.r, c.g, c.b
+  else
+    color_r, color_g, color_b = unit.red, unit.green, unit.blue
   end
 
   -- set background color for healthbar
   local db_healthbar = db.settings.healthbar
-  local bc = c
-  if not db_healthbar.BackgroundUseForegroundColor then
-    bc = db_healthbar.BackgroundColor
+  local color_bg_r, color_bg_g, color_bg_b, bg_alpha
+  if db_healthbar.BackgroundUseForegroundColor then
+    color_bg_r, color_bg_g, color_bg_b, bg_alpha = color_r, color_g, color_b, db_healthbar.BackgroundOpacity
+  else
+    local color = db_healthbar.BackgroundColor
+    color_bg_r, color_bg_g, color_bg_b, bg_alpha = color.r, color.g, color.b, db_healthbar.BackgroundOpacity
   end
 
-  return c.r, c.g, c.b, nil, bc.r, bc.g, bc.b, db_healthbar.BackgroundOpacity
-
-  --	if c then
-  --	else
-  --		return c.r, c.g, c.b, nil, bc.r, bc.g, bc.b, db.settings.healthbar.BackgroundOpacity
-  --		return unit.red, unit.green, unit.blue, nil, bc.r, bc.g, bc.b, db.settings.healthbar.BackgroundOpacity -- should return Blizzard default oclors (based on GetSelectionColor)
-  --	end
+  return color_r, color_g, color_b, nil, color_bg_r, color_bg_g, color_bg_b, bg_alpha
 end
 
 TidyPlatesThreat.GetColorByHealthDeficit = GetColorByHealthDeficit

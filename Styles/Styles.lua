@@ -4,7 +4,21 @@ local ThreatPlates = NAMESPACE.ThreatPlates
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
+local UnitThreatSituation = UnitThreatSituation
 local GetUnitVisibility = ThreatPlates.GetUnitVisibility
+
+
+---------------------------------------------------------------------------------------------------
+-- Helper functions for styles and functions
+---------------------------------------------------------------------------------------------------
+local function OnThreatTable(unit)
+  -- "is unit inactive" from TidyPlates - fast, but doesn't meant that player is on threat table
+  -- return  (unit.health < unit.healthmax) or (unit.isInCombat or unit.threatValue > 0) or (unit.isCasting == true) then
+
+  -- nil means player is not on unit's threat table - more acurate, but slower reaction time than the above solution
+  return UnitThreatSituation("player", unit.unitid)
+end
+
 
 local function GetGeneral(unit)
   -- guild/friend/...?
@@ -33,7 +47,7 @@ end
 
 local function GetDetailedUnitType(unit)
   local t, m = unit.isTapped, unit.isMini
-  local totem = ThreatPlates_Totems[unit.name]
+  local totem =  TidyPlatesThreat.ThreatPlates_Totems[unit.name]
 
   if t then
     return "Tapped"
@@ -76,7 +90,7 @@ local function GetType(unit)
   local db = TidyPlatesThreat.db.profile
   local unitRank
 
-  local totem = ThreatPlates_Totems[unit.name]
+  local totem =  TidyPlatesThreat.ThreatPlates_Totems[unit.name]
   local unique = tContains(db.uniqueSettings.list, unit.name)
   local general_type = GetGeneral(unit)
 
@@ -103,7 +117,7 @@ local function GetUniqueType(unit)
   local db = TidyPlatesThreat.db.profile
   local unitRank
 
-  local totem = ThreatPlates_Totems[unit.name]
+  local totem = TidyPlatesThreat.ThreatPlates_Totems[unit.name]
   local unique = tContains(db.uniqueSettings.list, unit.name)
 
   if totem then
@@ -236,7 +250,7 @@ local function SetStyle(unit)
   if not show then
     style = "empty"
   elseif unit_type == "Totem" then
-    local tS = db.totemSettings[ThreatPlates_Totems[unit.name]]
+    local tS = db.totemSettings[TidyPlatesThreat.ThreatPlates_Totems[unit.name]]
     if tS[1] then
       if db.totemSettings.hideHealthbar then
         style = "etotem"
@@ -300,3 +314,4 @@ TidyPlatesThreat.GetType = GetType
 TidyPlatesThreat.GetDetailedUnitType = GetDetailedUnitType
 TidyPlatesThreat.SetStyle = SetStyle
 TidyPlatesThreat.GetThreatStyle = GetThreatStyle
+TidyPlatesThreat.OnThreatTable = OnThreatTable

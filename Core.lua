@@ -199,7 +199,7 @@ function TidyPlatesThreat:OnInitialize()
       friendlyClassIcon = false,
       cacheClass = false,
       optionRoleDetectionAutomatic = false,
-      ShowThreatGlowOnAttackedUnitsOnly = false,
+      ShowThreatGlowOnAttackedUnitsOnly = true,
       ShowThreatGlowOffTank = true,
       NamePlateEnemyClickThrough = false,
       NamePlateFriendlyClickThrough = false,
@@ -542,7 +542,7 @@ function TidyPlatesThreat:OnInitialize()
         --anchor = "Top",
         ShowInHeadlineView = false,
         ShowFriendIcon = true,
-        ShowFactionIcon = false,
+        ShowFactionIcon = true,
         ShowFriendColor = false,
         FriendColor = t.COLOR_FRIEND,
         ShowGuildmateColor = false,
@@ -584,7 +584,7 @@ function TidyPlatesThreat:OnInitialize()
         ShowInHeadlineView = false,
       },
       ResourceWidget = {
-        ON = true,
+        ON = false,
         --ShowInHeadlineView = false,
         --scale = 28,
         x = 0,
@@ -612,7 +612,7 @@ function TidyPlatesThreat:OnInitialize()
         FontSize = 10,
         FontColor = RGB(255, 255, 255),
       },
-      totemSettings = ThreatPlatesWidgets.TOTEM_SETTINGS,
+      totemSettings = TidyPlatesThreat.TOTEM_SETTINGS,
       uniqueSettings = {
         list = {},
         ["**"] = {
