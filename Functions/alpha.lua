@@ -66,11 +66,18 @@ local function SetAlpha(unit)
 		nonTargetAlpha = db.blizzFadeA.amount
 	end
 
-	if style == "unique" then
+	if style == "unique" or style == "NameOnly-Unique" then
 		if not unique_style.overrideAlpha then
 			alpha = unique_style.alpha
-		else
+		elseif db.HeadlineView.useAlpha then
 			alpha = GetThreatAlpha(unit)
+		else
+			alpha = 1
+			if db.HeadlineView.blizzFading and not unit.isTarget and UnitExists("Target") then
+				nonTargetAlpha = db.HeadlineView.blizzFadingAlpha
+			else
+				nonTargetAlpha = 1
+			end
 		end
 	elseif style == "empty" then -- etotem alpha will still be at totem level
 		alpha = 0

@@ -228,3 +228,4 @@ end
 
 -- Register style in ThreatPlates
 ThreatPlates.RegisterTheme("NameOnly",Create)
+ThreatPlates.RegisterTheme("NameOnly-Unique",Create)

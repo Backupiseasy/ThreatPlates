@@ -143,7 +143,7 @@ local function OnUpdate(plate, unit)
       end
 
       local style = SetStyle(unit)
-      if style == "NameOnly" then
+      if style == "NameOnly" or style == "NameOnly-Unique" then
         if show_headline_view then
           if not v.isContext then
             unit.TP_Style = style
@@ -190,7 +190,7 @@ local function OnContextUpdate(plate, unit)
       end
 
       local style = SetStyle(unit)
-      if style == "NameOnly" then
+      if style == "NameOnly" or style == "NameOnly-Unique" then
         if show_headline_view then
           unit.TP_Style = style
           widget:UpdateContext(unit)

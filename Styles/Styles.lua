@@ -252,6 +252,8 @@ local function SetStyle(unit)
   elseif unit_type == "Totem" then
     local tS = db.totemSettings[TidyPlatesThreat.ThreatPlates_Totems[unit.name]]
     if tS[1] then
+      -- show healthbar, show headline or show nothing
+      -- if db.totemSetting.ShowHeadlineView then
       if db.totemSettings.hideHealthbar then
         style = "etotem"
       else
@@ -264,6 +266,8 @@ local function SetStyle(unit)
         unique_setting = db.uniqueSettings[k_c]
         if unique_setting.showNameplate then
           style = "unique"
+        elseif unique_setting.ShowHeadlineView then
+          style = "NameOnly-Unique"
         end
       end
     end
@@ -304,7 +308,9 @@ local function SetStyle(unit)
   end
 
   -- t.PrintTargetInfo(unit)
-  if not style then style = "etotem" end
+  if not style then
+    style = "etotem"
+  end
 
   return style, unique_setting
 end

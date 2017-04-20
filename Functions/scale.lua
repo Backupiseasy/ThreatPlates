@@ -66,12 +66,14 @@ local function SetScale(unit)
 		--nonTargetScale = db.blizzFadeS.amount
 	--end
 
-	if style == "unique" then
+	if style == "unique" or style == "NameOnly-Unique" then
     if not unique_style.overrideScale then
 			scale = unique_style.scale
-    else
-      scale = GetThreatScale(unit)
-    end
+		elseif db.HeadlineView.useScaling then
+			scale = GetThreatScale(unit)
+		else
+			scale = 1
+		end
 	elseif style == "empty" then -- etotem scale will still be at totem level
 		scale = 0
 	elseif style == "NameOnly" then

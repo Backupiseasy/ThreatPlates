@@ -13,6 +13,8 @@ t.Theme = {}
 
 TidyPlatesThreat = LibStub("AceAddon-3.0"):NewAddon("TidyPlatesThreat", "AceConsole-3.0", "AceEvent-3.0")
 
+local DEFAULT_FONT = "Cabin"
+
 ---------------------------------------------------------------------------------------------------
 -- Global configs and funtions
 ---------------------------------------------------------------------------------------------------
@@ -194,18 +196,26 @@ function TidyPlatesThreat:OnInitialize()
       tidyplatesFade = false,
       healthColorChange = false,
       customColor =  false,
-      allowClass = false,
-      friendlyClass = false,
+      allowClass = true, -- old default: false,
+      friendlyClass = true, -- old default: false,
       friendlyClassIcon = false,
       cacheClass = false,
-      optionRoleDetectionAutomatic = false,
+      optionRoleDetectionAutomatic = true, -- old default: false,
       ShowThreatGlowOnAttackedUnitsOnly = true,
       ShowThreatGlowOffTank = true,
       NamePlateEnemyClickThrough = false,
       NamePlateFriendlyClickThrough = false,
       HeadlineView = {
         ON = false,
-        name = { size = 10, width = 116, height = 14, x = 0, y = 4, align = "CENTER", vertical = "CENTER", },
+        name = {
+          size = 10,
+          width = 140, -- old default: 116,
+          height = 14,
+          x = 0,
+          y = 4,
+          align = "CENTER",
+          vertical = "CENTER",
+        },
         useAlpha = false,
         blizzFading = true,
         blizzFadingAlpha = 1,
@@ -298,7 +308,7 @@ function TidyPlatesThreat:OnInitialize()
         TappedUnit = t.COLOR_TAPPED,
       },
       text = {
-        amount = true,
+        amount = false, -- old default: true,
         percent = true,
         full = false,
         max = false,
@@ -314,7 +324,7 @@ function TidyPlatesThreat:OnInitialize()
         anchor = "CENTER"
       },
       arenaWidget = {
-        ON = true,
+        ON = false, --old default: true,
         scale = 16,
         x = 36,
         y = -6,
@@ -458,15 +468,15 @@ function TidyPlatesThreat:OnInitialize()
           BarWidth = 100,
           BarSpacing = 2,
           MaxBars = 10,
-          Texture = "Aluminium",
+          Texture = "Smooth", -- old default: "Aluminium",
           Font = "Arial Narrow",
           FontSize = 10,
           FontColor = RGB(255, 255, 255),
           LabelTextIndent = 4,
           TimeTextIndent = 4,
-          BackgroundTexture = "Blizzard",
+          BackgroundTexture = "Smooth",
           BackgroundColor = RGB(0, 0, 0, 0.3),
-          BackgroundBorder = "Plain White", --"Blizzard Tooltip",
+          BackgroundBorder = "squareline",
           BackgroundBorderEdgeSize = 2,
           BackgroundBorderInset = -4,
           BackgroundBorderColor = RGB(0, 0, 0, 0.3),
@@ -477,9 +487,11 @@ function TidyPlatesThreat:OnInitialize()
       },
       uniqueWidget = {
         ON = true,
-        scale = 35,
+        scale = 22, -- old default: 35,
         x = 0,
-        y = 35,
+        y = 24,
+        x_hv = 0,
+        y_hv = 35,
         level = 1,
         anchor = "CENTER"
       },
@@ -552,13 +564,13 @@ function TidyPlatesThreat:OnInitialize()
         --ON = false,
         scale = 16,
         x = 0,
-        y = 6,
+        y = 28,
         x_hv = 0,
-        y_hv = -4,
+        y_hv = 20,
         --anchor = "Top",
       },
       questWidget = {
-        ON = false,
+        ON = true, -- old default: false
         scale = 26,
         x = 0,
         y = 30,
@@ -566,7 +578,7 @@ function TidyPlatesThreat:OnInitialize()
         y_hv = 30,
         alpha = 1,
         anchor = "CENTER",
-        ModeHPBar = true,
+        ModeHPBar = false, -- old default: true
         ModeIcon = true,
         HPBarColor = RGB(218, 165, 32), -- Golden rod
         HideInCombat = false,
@@ -583,7 +595,7 @@ function TidyPlatesThreat:OnInitialize()
         anchor = "CENTER",
         ShowInHeadlineView = false,
       },
-      ResourceWidget = {
+      ResourceWidget  = {
         ON = false,
         --ShowInHeadlineView = false,
         --scale = 28,
@@ -593,22 +605,23 @@ function TidyPlatesThreat:OnInitialize()
         ShowEnemyPlayer = false,
         ShowEnemyNPC = false,
         ShowEnemyBoss = true,
+        ShowOnlyAltPower = true,
         ShowBar = true,
         BarHeight = 12,
         BarWidth = 80,
-        BarTexture = "Aluminium",
+        BarTexture = "Smooth", -- old default: "Aluminium",
         BackgroundUseForegroundColor = false,
         BackgroundColor = RGB(0, 0, 0, 0.3),
-        BorderTexture = "roth",
-        BorderEdgeSize = 16,
-        BorderOffset = 4,
+        BorderTexture = "squareline",
+        BorderEdgeSize = 8,
+        BorderOffset = 2,
         BorderUseForegroundColor = false,
         BorderUseBackgroundColor = false,
         BorderColor = RGB(255, 255, 255, 1),
         --BorderInset = 4,
         --BorderTileSize = 16,
         ShowText = true,
-        Font = "Arial Narrow",
+        Font = DEFAULT_FONT,
         FontSize = 10,
         FontColor = RGB(255, 255, 255),
       },
@@ -618,6 +631,7 @@ function TidyPlatesThreat:OnInitialize()
         ["**"] = {
           name = "",
           showNameplate = true,
+          ShowHeadlineView = false,
           showIcon = true,
           useStyle = true,
           useColor = true,
@@ -638,6 +652,7 @@ function TidyPlatesThreat:OnInitialize()
         [1] = {
           name = L["Shadow Fiend"],
           showNameplate = true,
+          ShowHeadlineView = false,
           showIcon = true,
           useStyle = true,
           useColor = true,
@@ -658,6 +673,7 @@ function TidyPlatesThreat:OnInitialize()
         [2] = {
           name = L["Spirit Wolf"],
           showNameplate = true,
+          ShowHeadlineView = false,
           showIcon = true,
           useStyle = true,
           useColor = true,
@@ -678,6 +694,7 @@ function TidyPlatesThreat:OnInitialize()
         [3] = {
           name = L["Ebon Gargoyle"],
           showNameplate = true,
+          ShowHeadlineView = false,
           showIcon = true,
           useStyle = true,
           useColor = true,
@@ -698,6 +715,7 @@ function TidyPlatesThreat:OnInitialize()
         [4] = {
           name = L["Water Elemental"],
           showNameplate = true,
+          ShowHeadlineView = false,
           showIcon = true,
           useStyle = true,
           useColor = true,
@@ -718,6 +736,7 @@ function TidyPlatesThreat:OnInitialize()
         [5] = {
           name = L["Treant"],
           showNameplate = true,
+          ShowHeadlineView = false,
           showIcon = true,
           useStyle = true,
           useColor = true,
@@ -738,6 +757,7 @@ function TidyPlatesThreat:OnInitialize()
         [6] = {
           name = L["Viper"],
           showNameplate = true,
+          ShowHeadlineView = false,
           showIcon = true,
           useStyle = true,
           useColor = true,
@@ -758,6 +778,7 @@ function TidyPlatesThreat:OnInitialize()
         [7] = {
           name = L["Venomous Snake"],
           showNameplate = true,
+          ShowHeadlineView = false,
           showIcon = true,
           useStyle = true,
           useColor = true,
@@ -778,6 +799,7 @@ function TidyPlatesThreat:OnInitialize()
         [8] = {
           name = L["Army of the Dead Ghoul"],
           showNameplate = true,
+          ShowHeadlineView = false,
           showIcon = true,
           useStyle = true,
           useColor = true,
@@ -798,6 +820,7 @@ function TidyPlatesThreat:OnInitialize()
         [9] = {
           name = L["Shadowy Apparition"],
           showNameplate = true,
+          ShowHeadlineView = false,
           showIcon = true,
           useStyle = true,
           useColor = true,
@@ -818,6 +841,7 @@ function TidyPlatesThreat:OnInitialize()
         [10] = {
           name = L["Shambling Horror"],
           showNameplate = true,
+          ShowHeadlineView = false,
           showIcon = true,
           useStyle = true,
           useColor = true,
@@ -838,6 +862,7 @@ function TidyPlatesThreat:OnInitialize()
         [11] = {
           name = L["Web Wrap"],
           showNameplate = true,
+          ShowHeadlineView = false,
           showIcon = true,
           useStyle = true,
           useColor = true,
@@ -858,6 +883,7 @@ function TidyPlatesThreat:OnInitialize()
         [12] = {
           name = L["Immortal Guardian"],
           showNameplate = true,
+          ShowHeadlineView = false,
           showIcon = true,
           useStyle = true,
           useColor = true,
@@ -878,6 +904,7 @@ function TidyPlatesThreat:OnInitialize()
         [13] = {
           name = L["Marked Immortal Guardian"],
           showNameplate = true,
+          ShowHeadlineView = false,
           showIcon = true,
           useStyle = true,
           useColor = true,
@@ -898,6 +925,7 @@ function TidyPlatesThreat:OnInitialize()
         [14] = {
           name = L["Empowered Adherent"],
           showNameplate = true,
+          ShowHeadlineView = false,
           showIcon = true,
           useStyle = true,
           useColor = true,
@@ -918,6 +946,7 @@ function TidyPlatesThreat:OnInitialize()
         [15] = {
           name = L["Deformed Fanatic"],
           showNameplate = true,
+          ShowHeadlineView = false,
           showIcon = true,
           useStyle = true,
           useColor = true,
@@ -938,6 +967,7 @@ function TidyPlatesThreat:OnInitialize()
         [16] = {
           name = L["Reanimated Adherent"],
           showNameplate = true,
+          ShowHeadlineView = false,
           showIcon = true,
           useStyle = true,
           useColor = true,
@@ -958,6 +988,7 @@ function TidyPlatesThreat:OnInitialize()
         [17] = {
           name = L["Reanimated Fanatic"],
           showNameplate = true,
+          ShowHeadlineView = false,
           showIcon = true,
           useStyle = true,
           useColor = true,
@@ -978,6 +1009,7 @@ function TidyPlatesThreat:OnInitialize()
         [18] = {
           name = L["Bone Spike"],
           showNameplate = true,
+          ShowHeadlineView = false,
           showIcon = true,
           useStyle = true,
           useColor = true,
@@ -998,6 +1030,8 @@ function TidyPlatesThreat:OnInitialize()
         [19] = {
           name = L["Onyxian Whelp"],
           showNameplate = false,
+          ShowHealthbarView = true,
+          ShowHeadlineView = false,
           showIcon = true,
           useStyle = true,
           useColor = true,
@@ -1018,6 +1052,7 @@ function TidyPlatesThreat:OnInitialize()
         [20] = {
           name = L["Gas Cloud"],
           showNameplate = true,
+          ShowHeadlineView = false,
           showIcon = true,
           useStyle = true,
           useColor = true,
@@ -1038,6 +1073,7 @@ function TidyPlatesThreat:OnInitialize()
         [21] = {
           name = L["Volatile Ooze"],
           showNameplate = true,
+          ShowHeadlineView = false,
           showIcon = true,
           useStyle = true,
           useColor = true,
@@ -1058,6 +1094,7 @@ function TidyPlatesThreat:OnInitialize()
         [22] = {
           name = L["Darnavan"],
           showNameplate = true,
+          ShowHeadlineView = false,
           showIcon = true,
           useStyle = true,
           useColor = true,
@@ -1078,6 +1115,7 @@ function TidyPlatesThreat:OnInitialize()
         [23] = {
           name = L["Val'kyr Shadowguard"],
           showNameplate = true,
+          ShowHeadlineView = false,
           showIcon = true,
           useStyle = true,
           useColor = true,
@@ -1098,6 +1136,7 @@ function TidyPlatesThreat:OnInitialize()
         [24] = {
           name = L["Kinetic Bomb"],
           showNameplate = true,
+          ShowHeadlineView = false,
           showIcon = true,
           useStyle = true,
           useColor = true,
@@ -1118,6 +1157,7 @@ function TidyPlatesThreat:OnInitialize()
         [25] = {
           name = L["Lich King"],
           showNameplate = true,
+          ShowHeadlineView = false,
           showIcon = true,
           useStyle = true,
           useColor = true,
@@ -1138,6 +1178,7 @@ function TidyPlatesThreat:OnInitialize()
         [26] = {
           name = L["Raging Spirit"],
           showNameplate = true,
+          ShowHeadlineView = false,
           showIcon = true,
           useStyle = true,
           useColor = true,
@@ -1158,6 +1199,7 @@ function TidyPlatesThreat:OnInitialize()
         [27] = {
           name = L["Drudge Ghoul"],
           showNameplate = true,
+          ShowHeadlineView = false,
           showIcon = false,
           useStyle = true,
           useColor = true,
@@ -1178,6 +1220,7 @@ function TidyPlatesThreat:OnInitialize()
         [28] = {
           name = L["Living Inferno"],
           showNameplate = true,
+          ShowHeadlineView = false,
           showIcon = true,
           useStyle = true,
           useColor = true,
@@ -1198,6 +1241,7 @@ function TidyPlatesThreat:OnInitialize()
         [29] = {
           name = L["Living Ember"],
           showNameplate = true,
+          ShowHeadlineView = false,
           showIcon = false,
           useStyle = true,
           useColor = true,
@@ -1218,6 +1262,8 @@ function TidyPlatesThreat:OnInitialize()
         [30] = {
           name = L["Fanged Pit Viper"],
           showNameplate = false,
+          ShowHealthbarView = true,
+          ShowHeadlineView = false,
           showIcon = false,
           useStyle = true,
           useColor = true,
@@ -1238,6 +1284,7 @@ function TidyPlatesThreat:OnInitialize()
         [31] = {
           name = L["Canal Crab"],
           showNameplate = true,
+          ShowHeadlineView = false,
           showIcon = true,
           useStyle = true,
           useColor = true,
@@ -1258,6 +1305,7 @@ function TidyPlatesThreat:OnInitialize()
         [32] = {
           name = L["Muddy Crawfish"],
           showNameplate = true,
+          ShowHeadlineView = false,
           showIcon = true,
           useStyle = true,
           useColor = true,
@@ -1336,7 +1384,7 @@ function TidyPlatesThreat:OnInitialize()
           show = true,
         },
         healthborder = {
-          texture = "TP_HealthBarOverlay",
+          texture = "TP_HealthBarOverlayThin", -- old default: "TP_HealthBarOverlay",
           backdrop = "",
           show = true,
         },
@@ -1344,11 +1392,11 @@ function TidyPlatesThreat:OnInitialize()
           show = true,
         },
         healthbar = {
-          texture = "ThreatPlatesBar",
+          texture = "Smooth", -- old default: "ThreatPlatesBar",
           --backdrop = nil,
-          backdrop = "ThreatPlatesEmpty",
+          backdrop = "Smooth", -- old default: "ThreatPlatesEmpty",
           BackgroundUseForegroundColor = false,
-          BackgroundOpacity = 1,
+          BackgroundOpacity = 0.3, -- old default: 1,
           BackgroundColor = RGB(0, 0, 0),
         },
         castnostop = {
@@ -1359,13 +1407,13 @@ function TidyPlatesThreat:OnInitialize()
           ShowOverlay = true,
         },
         castborder = {
-          texture = "TP_CastBarOverlay",
+          texture = "TP_CastBarOverlayThin", -- old default: "TP_CastBarOverlay",
           x = 0,
           y = -15,
           show = true,
         },
         castbar = {
-          texture = "ThreatPlatesBar",
+          texture = "Smooth", -- old default: "ThreatPlatesBar",
           x = 0,
           y = -15,
           x_hv = 0,
@@ -1374,10 +1422,10 @@ function TidyPlatesThreat:OnInitialize()
           ShowInHeadlineView = false,
         },
         name = {
-          typeface = "Accidental Presidency",
-          width = 116,
+          typeface = DEFAULT_FONT, -- old default: "Accidental Presidency",
+          width = 140, -- old default: 116,
           height = 14,
-          size = 14,
+          size = 10, -- old default: 14
           x = 0,
           y = 13,
           align = "CENTER",
@@ -1392,14 +1440,14 @@ function TidyPlatesThreat:OnInitialize()
           show = true,
         },
         level = {
-          typeface = "Accidental Presidency",
-          size = 12,
+          typeface = DEFAULT_FONT, -- old default: "Accidental Presidency",
+          size = 9, -- old default: 12,
           width = 20,
-          height = 14,
-          x = 50,
+          height = 10, -- old default: 10,
+          x = 49, -- old default: 50,
           y = 0,
           align = "RIGHT",
-          vertical = "TOP",
+          vertical = "CENTER", -- old default: "TOP",
           shadow = true,
           flags = "NONE",
           show = true,
@@ -1414,12 +1462,12 @@ function TidyPlatesThreat:OnInitialize()
           anchor = "CENTER"
         },
         customtext = {
-          typeface = "Accidental Presidency",
-          size = 12,
+          typeface = DEFAULT_FONT, -- old default: "Accidental Presidency",
+          size = 9, -- old default: 12,
           width = 110,
           height = 14,
           x = 0,
-          y = 1,
+          y = 0, -- old default: 1,
           align = "CENTER",
           vertical = "CENTER",
           shadow = true,
@@ -1427,14 +1475,14 @@ function TidyPlatesThreat:OnInitialize()
           show = true,
         },
         spelltext = {
-          typeface = "Accidental Presidency",
-          size = 12,
+          typeface = DEFAULT_FONT, -- old default: "Accidental Presidency",
+          size = 8,  -- old default: 12
           width = 110,
           height = 14,
           x = 0,
-          y = -13,
+          y = -14,  -- old default: 13
           x_hv = 0,
-          y_hv = -13,
+          y_hv = -14,  -- old default: 13
           align = "CENTER",
           vertical = "CENTER",
           shadow = true,
@@ -1600,7 +1648,7 @@ function TidyPlatesThreat:OnInitialize()
           scale = {
             LOW 		= 0.8,
             MEDIUM		= 0.9,
-            HIGH 		= 1.25
+            HIGH 		= 1.0, -- old default: 1.25,
           },
           alpha = {
             LOW 		= 1,
@@ -1610,7 +1658,7 @@ function TidyPlatesThreat:OnInitialize()
         },
         tank = {
           scale = {
-            LOW 		= 1.25,
+            LOW 		= 1.0, -- old default: 1.25,
             MEDIUM		= 0.9,
             HIGH 		= 0.8,
             OFFTANK = 0.8

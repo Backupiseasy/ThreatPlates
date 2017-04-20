@@ -11,7 +11,7 @@ local RGB = ThreatPlates.RGB
 local format = format
 local ceil = ceil
 -- WoW functions
-local IsInInstance = IsInInstance
+--local IsInInstance = IsInInstance
 local UnitPowerMax = UnitPowerMax
 local UnitPower = UnitPower
 local UnitPowerType = UnitPowerType
@@ -170,12 +170,12 @@ local function UpdateWidgetFrame(frame, unit)
       if t == "PLAYER" then
         show = db.ShowEnemyPlayer
       elseif t == "NPC" then
-        local b, r, e = unit.isBoss, unit.isRare, unit.isElite
+        local b, r = unit.isBoss, unit.isRare
         if b or r then
           show = db.ShowEnemyBoss
-        elseif e then
-          local in_instance, _ = IsInInstance()
-          show = (not in_instance and db.ShowEnemyBoss) or (in_instance and db.ShowEnemyNPC)
+--        elseif e then
+--          local in_instance, _ = IsInInstance()
+--          show = (not in_instance and db.ShowEnemyBoss) or (in_instance and db.ShowEnemyNPC)
         else
           show = db.ShowEnemyNPC
         end
@@ -191,7 +191,7 @@ local function UpdateWidgetFrame(frame, unit)
   local power_func = POWER_FUNCTIONS[powerToken]
 --  print ("Power Type: ", powerType, powerToken)
 --  print (UnitPower("target"), UnitPowerMax("target"))
-  if UnitPowerMax("target") == 0 then
+  if UnitPowerMax("target") == 0 or (db.ShowOnlyAltPower and power_func) then
     frame:_Hide()
     return
   elseif not power_func then

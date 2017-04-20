@@ -59,6 +59,14 @@ local function UpdateWidgetFrame(frame, unit)
 	end
 
 	if isShown then
+		db = TidyPlatesThreat.db.profile.uniqueWidget
+		local style = unit.TP_Style
+		if style == "NameOnly-Unique" then
+			frame:SetPoint("CENTER", frame:GetParent(), db.x_hv, db.y_hv)
+		else
+			frame:SetPoint("CENTER", frame:GetParent(), db.x, db.y)
+		end
+
 		frame:Show()
 	else
 		frame:_Hide()
@@ -120,4 +128,4 @@ local function CreateWidgetFrame(parent)
 	return frame
 end
 
-ThreatPlatesWidgets.RegisterWidget("UniqueIconWidgetTPTP", CreateWidgetFrame, false, enabled)
+ThreatPlatesWidgets.RegisterWidget("UniqueIconWidgetTPTP", CreateWidgetFrame, false, enabled, enabled)

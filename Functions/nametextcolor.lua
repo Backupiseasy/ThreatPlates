@@ -15,51 +15,78 @@ local reference = {
 
 local function SetNameColor(unit)
 	local color
-	local S = TidyPlatesThreat.SetStyle(unit)
 
-	-- Headline View (alpha feature) uses TidyPlatesHub config and functionality
-	local db = TidyPlatesThreat.db.profile.HeadlineView
-	if db.ON and (S == "NameOnly") then
+	local db = TidyPlatesThreat.db.profile
+	local db_hv = db.HeadlineView
 
-		if unit.reaction == "FRIENDLY" then
-			if db.FriendlyTextColorMode == "CUSTOM" then -- By Custom Color
-				color = db.FriendlyTextColor
-			elseif db.FriendlyTextColorMode == "CLASS" and unit.type == "PLAYER" then -- By Class
-				color = RAID_CLASS_COLORS[unit.class]
-			elseif db.FriendlyTextColorMode == "HEALTH" then
-				color = GetColorByHealthDeficit(unit)
-			end
-		else
-			if db.EnemyTextColorMode == "CUSTOM" then -- By Custom Color
-				color = db.EnemyTextColor
-			elseif db.EnemyTextColorMode == "CLASS" and unit.type == "PLAYER" then -- By Class
-				color = RAID_CLASS_COLORS[unit.class]
-			elseif db.EnemyTextColorMode == "HEALTH" then
-				color = GetColorByHealthDeficit(unit)
-			end
-		end
-
-		db = TidyPlatesThreat.db.profile
-		if not color then -- Default: By Reaction
-			if TidyPlatesUtility.IsFriend(unit.name) or TidyPlatesUtility.IsGuildmate(unit.name) then
-				color = db.ColorByReaction.GuildMember
-			else
-				color = db.ColorByReaction[reference[unit.reaction][unit.type]]
-			end
-		end
-
+	local style, unique_style = TidyPlatesThreat.SetStyle(unit)
+	if db_hv.ON and (style == "NameOnly" or style == "NameOnly-Unique") then
 		if unit.isTapped then
 			color = db.ColorByReaction.TappedUnit
-		elseif db.HeadlineView.UseRaidMarkColoring and unit.isMarked then
-			color = db.settings.raidicon.hpMarked[unit.raidIcon]
+		elseif style == "NameOnly-Unique" then
+			if unit.isMarked and unique_style.allowMarked then
+				color = db.settings.raidicon.hpMarked[unit.raidIcon]
+			elseif unique_style.useColor then
+				color = unique_style.color
+			end
+		elseif style == "NameOnly" then
+			if unit.isMarked and db_hv.UseRaidMarkColoring then
+				color = db.settings.raidicon.hpMarked[unit.raidIcon]
+			end
+		end
+
+		local IsFriend = TidyPlatesThreat.IsFriend
+		local IsGuildmate = TidyPlatesThreat.IsGuildmate
+		local unit_reaction = unit.reaction
+
+		if not color then
+			if unit_reaction == "FRIENDLY" then
+				if db_hv.FriendlyTextColorMode == "CUSTOM" then -- By Custom Color
+					color = db_hv.FriendlyTextColor
+				elseif db_hv.FriendlyTextColorMode == "CLASS" and unit.type == "PLAYER" then -- By Class
+					local db_social = db.socialWidget
+					if db_social.ShowFriendColor and IsFriend(unit) then
+						color = db_social.FriendColor
+					elseif db_social.ShowGuildmateColor and IsGuildmate(unit) then
+						color = db_social.GuildmateColor
+					else
+						color = RAID_CLASS_COLORS[unit.class]
+					end
+				elseif db_hv.FriendlyTextColorMode == "HEALTH" then
+					color = GetColorByHealthDeficit(unit)
+				end
+			else
+				if db_hv.EnemyTextColorMode == "CUSTOM" then -- By Custom Color
+					color = db_hv.EnemyTextColor
+				elseif db_hv.EnemyTextColorMode == "CLASS" and unit.type == "PLAYER" then -- By Class
+					color = RAID_CLASS_COLORS[unit.class]
+				elseif db_hv.EnemyTextColorMode == "HEALTH" then
+					color = GetColorByHealthDeficit(unit)
+				end
+			end
+		end
+
+		if not color then -- Default: By Reaction
+			if unit_reaction == "FRIENDLY" then
+				local db_social = db.socialWidget
+				if db_social.ShowFriendColor and IsFriend(unit) then
+					color = db_social.FriendColor
+				elseif db_social.ShowGuildmateColor and IsGuildmate(unit) then
+					color = db_social.GuildmateColor
+				else
+					color = db.ColorByReaction[reference[unit_reaction][unit.type]]
+				end
+			else
+				color = db.ColorByReaction[reference[unit_reaction][unit.type]]
+			end
+		end
+
+		-- if no color was found, default back to WoW default colors (based on GetSelectionColor)
+		if not color then
+			color = { r = unit.red, g = unit.green, b = unit.blue}
 		end
 	else
-		color = TidyPlatesThreat.db.profile.settings.name.color
-	end
-
-	if not color then
-		--ThreatPlates.DEBUG_PRINT_TABLE(unit)
-		color = RGB(0, 255, 0)
+		color = db.settings.name.color
 	end
 
 	return color.r, color.g, color.b, 1
