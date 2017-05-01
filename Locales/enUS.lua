@@ -147,6 +147,8 @@ L["Show Enemy Totems"] = true
 L["Show Enemy Pets"] = true
 L["Show Enemy Guardians"] = true
 
+L["Minuss"] = "Minors"
+
 ----
 L["Healthbar"] = true
 L["Textures"] = true

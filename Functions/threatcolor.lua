@@ -4,34 +4,40 @@ local ThreatPlates = NAMESPACE.ThreatPlates
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
---local UnitThreatSituation = UnitThreatSituation
 local InCombatLockdown = InCombatLockdown
-local UnitThreatSituation = UnitThreatSituation
+local UnitIsConnected = UnitIsConnected
 
 local UnitIsOffTanked = TidyPlatesThreat.UnitIsOffTanked
 local OnThreatTable = TidyPlatesThreat.OnThreatTable
+local SetStyle = TidyPlatesThreat.SetStyle
+local GetUniqueNameplateSetting = TidyPlatesThreat.GetUniqueNameplateSetting
 local COLOR_TRANSPARENT = ThreatPlates.COLOR_TRANSPARENT
 
 local function SetThreatColor(unit)
+  local db = TidyPlatesThreat.db.profile
+
   local c = COLOR_TRANSPARENT
+  if InCombatLockdown() and unit.type == "NPC" and unit.reaction ~= "FRIENDLY" then
+    local style = unit.TP_Style or SetStyle(unit)
+    --    local style, unique_setting = TidyPlatesThreat.SetStyle(unit)
 
-  if InCombatLockdown() and unit.reaction ~= "FRIENDLY" and unit.type == "NPC" then
-    local db = TidyPlatesThreat.db.profile
-    local style, unique_setting = TidyPlatesThreat.SetStyle(unit)
-
-    if style == "unique" and unique_setting.UseThreatGlow then
-      -- set style to tank/dps or normal
-      style = TidyPlatesThreat.GetThreatStyle(unit)
+    if style == "unique" then
+      local unique_setting = GetUniqueNameplateSetting(unit)
+      if unique_setting.UseThreatGlow then
+        -- set style to tank/dps or normal
+        style = TidyPlatesThreat.GetThreatStyle(unit)
+      end
     end
 
-    if unit.isTapped then
-      local tapped_color = db.ColorByReaction.TappedUnit
+    if unit.unitid and not UnitIsConnected(unit.unitid) then
+      c = db.ColorByReaction.DisconnectedUnit
+    elseif unit.isTapped then
       if db.ShowThreatGlowOnAttackedUnitsOnly then
         if OnThreatTable(unit) then
-          c = tapped_color
+          c = db.ColorByReaction.TappedUnit
         end
       else
-        c = tapped_color
+        c = db.ColorByReaction.TappedUnit
       end
     --  elseif style == "tank" then
     --    local show_offtank = db.threat.toggle.OffTank

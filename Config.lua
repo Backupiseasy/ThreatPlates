@@ -2,7 +2,7 @@ local ADDON_NAME, NAMESPACE = ...
 local ThreatPlates = NAMESPACE.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------
--- Stuff for handling the configuration of Threat Plates - ThreatPlatesDB
+-- Stuff fo7r handling the configuration of Threat Plates - ThreatPlatesDB
 ---------------------------------------------------------------------------------------------------
 
 ---------------------------------------------------------------------------------------------------
@@ -87,51 +87,221 @@ local function GetUnitVisibility(unit_type)
   return show, unit_visibility.UseHeadlineView
 end
 
+local function SetNamePlateClickThrough(val_friendly, val_enemy)
+  if InCombatLockdown() then
+    ThreatPlates.Print("We're unable to change nameplate clickthrough while in combat", true)
+  else
+    local db = TidyPlatesThreat.db.profile
+
+    if val_friendly ~= nil then
+      db.NamePlateFriendlyClickThrough = val_friendly
+      db.NamePlateEnemyClickThrough = val_enemy
+    end
+
+    C_NamePlate.SetNamePlateFriendlyClickThrough(db.NamePlateFriendlyClickThrough)
+    C_NamePlate.SetNamePlateEnemyClickThrough(db.NamePlateEnemyClickThrough)
+  end
+end
+
 ---------------------------------------------------------------------------------------------------
 -- Functions for configuration migration
 ---------------------------------------------------------------------------------------------------
-local function UpdateDefaultProfile()
-  local db = TidyPlatesThreat.db
+local Defaults_V1 = {
+  allowClass = false,
+  friendlyClass = false,
+  optionRoleDetectionAutomatic = false,
+  HeadlineView = {
+    width = 116,
+  },
+  text = {
+    amount = true,
+  },
+  AuraWidget = {
+    ModeBar = {
+      Texture = "Smooth",
+    },
+  },
+  uniqueWidget = {
+    scale = 35,
+    y = 24,
+  },
+  questWidget = {
+    ON = false,
+    ModeHPBar = true,
+  },
+  ResourceWidget  = {
+    BarTexture = "Smooth"
+  },
+  settings = {
+    elitehealthborder = {
+      show = true,
+    },
+    healthborder = {
+      texture = "TP_HealthBarOverlay",
+    },
+    healthbar = {
+      texture = "ThreatPlatesBar",
+      backdrop = "ThreatPlatesEmpty",
+      BackgroundOpacity = 1,
+    },
+    castborder = {
+      texture = "ThreatPlatesBar",
+    },
+    castbar = {
+      texture = "ThreatPlatesBar",
+    },
+    name = {
+      typeface = "Accidental Presidency",
+      width = 116,
+      size = 14,
+    },
+    level = {
+      typeface = "Accidental Presidency",
+      size = 12,
+      height  = 14,
+      x = 50,
+      vertical  = "TOP"
+    },
+    customtext = {
+      typeface = "Accidental Presidency",
+      size = 12,
+      y = 1,
+    },
+    spelltext = {
+      typeface = "Accidental Presidency",
+      size = 12,
+      y = -13,
+      y_hv  = -13,
+    },
+    eliteicon = {
+      x = 64,
+      y = 9,
+    },
+    skullicon = {
+      x = 55,
+    },
+    raidicon = {
+      y = 27,
+      y_hv = 27,
+    },
+  },
+  threat = {
+    dps = {
+      HIGH = 1.25,
+    },
+    tank = {
+      LOW = 1.25,
+    },
+  },
+}
 
-  -- change the settings of the default profile
-  local current_profile = db:GetCurrentProfile()
-  db:SetProfile("Default")
+local Defaults_V2 = {
+  allowClass = true,
+  friendlyClass = true,
+  optionRoleDetectionAutomatic = true,
+  HeadlineView = {
+    width = 140,
+  },
+  text = {
+    amount = false,
+  },
+  AuraWidget = {
+    ModeBar = {
+      Texture = "Aluminium",
+    },
+  },
+  uniqueWidget = {
+    scale = 22,
+    y = 30,
+  },
+  questWidget = {
+    ON = true,
+    ModeHPBar = false,
+  },
+  ResourceWidget  = {
+    BarTexture = "Aluminium"
+  },
+  settings = {
+    elitehealthborder = {
+      show = false,
+    },
+    healthborder = {
+      texture = "TP_HealthBarOverlayThin",
+    },
+    healthbar = {
+      texture = "Smooth",
+      backdrop = "Smooth",
+      BackgroundOpacity = 0.3,
+    },
+    castborder = {
+      texture = "Smooth",
+    },
+    castbar = {
+      texture = "Smooth",
+    },
+    name = {
+      typeface = "Cabin",
+      width = 140,
+      size = 10,
+    },
+    level = {
+      typeface = "Cabin",
+      size = 9,
+      height  = 10,
+      x  = 49,
+      vertical  = "CENTER"
+    },
+    customtext = {
+      typeface = "Cabin",
+      size = 9,
+      y = 0,
+    },
+    spelltext = {
+      typeface = "Cabin",
+      size = 8,
+      y = -14,
+      y_hv  = -14,
+    },
+    eliteicon = {
+      x = 61,
+      y = 7,
+    },
+    skullicon = {
+      x = 51,
+    },
+    raidicon = {
+      y = 30,
+      y_hv = 25,
+    },
+  },
+  threat = {
+    dps = {
+      HIGH = 1.0,
+    },
+    tank = {
+      LOW = 1.0,
+    },
+  },
+}
 
-  db.profile.optionRoleDetectionAutomatic = true
-  db.profile.debuffWidget.ON = false
-  db.profile.ShowThreatGlowOnAttackedUnitsOnly = true
-  db.profile.AuraWidget.ON = true
-  db.profile.text.amount = false
-  db.profile.settings.healthborder.texture = "TP_HealthBarOverlayThin"
-  db.profile.settings.healthbar.texture = "Aluminium"
-  db.profile.settings.castbar.texture = "Aluminium"
-  db.profile.settings.name.typeface = "Friz Quadrata TT"
-  db.profile.settings.name.size = 10
-  db.profile.settings.name.y = 14
-  db.profile.settings.level.typeface = "Friz Quadrata TT"
-  db.profile.settings.level.size = 9
-  db.profile.settings.level.width = 22
-  db.profile.settings.level.x = 48
-  db.profile.settings.level.y = 0
-  db.profile.settings.level.vertical = "CENTER"
-  db.profile.settings.customtext.typeface = "Friz Quadrata TT"
-  db.profile.settings.customtext.size = 9
-  db.profile.settings.customtext.y = 0
-  db.profile.settings.spelltext.typeface = "Friz Quadrata TT"
-  db.profile.settings.spelltext.size = 8
-  db.profile.settings.spelltext.y = -15
-  db.profile.settings.eliteicon.show = false
-  db.profile.threat.useScale = false
-  db.profile.threat.art.ON = false
-  db.profile.questWidget.ON = true
-  db.profile.questWidget.ModeHPBar = false
-
-  db:SetProfile(current_profile)
-
-  if current_profile == "Default" then
-    ThreatPlates.SetThemes(TidyPlatesThreat)
-    TidyPlates:ForceUpdate()
+local function SetDB(db, old_settings, new_settings)
+  for key, old_value in pairs(old_settings) do
+    if type(old_value) == "table" then
+      SetDB(db[key], old_settings[key], new_settings[key])
+    else
+      if db[key] == new_settings[key] then -- value not changed, on new default
+        db[key] = old_settings[key]
+      end
+    end
   end
+end
+
+local function DefaultSettingsV1()
+  SetDB(TidyPlatesThreat.db.profile, Defaults_V1, Defaults_V2)
+end
+
+local function DefaultSettingsV2()
+  SetDB(TidyPlatesThreat.db.profile, Defaults_V2, Defaults_V1)
 end
 
 --local function UpdateSettingValue(old_setting, key, new_setting, new_key)
@@ -241,35 +411,27 @@ end
 -- Update the configuration file:
 --  - convert deprecated settings to their new counterpart
 -- Called whenever the addon is loaded and a new version number is detected
-local function UpdateConfiguration()
-  -- determine current addon version and compare it with the DB version
-  local db_global = TidyPlatesThreat.db.global
-
-  --  -- addon version is newer that the db version => check for old entries
-  --	if db_global.version ~= tostring(ThreatPlates.Meta("version")) then
-  -- iterate over all profiles
-  for name, profile in pairs(TidyPlatesThreat.db.profiles) do
-    -- ConvertAuraWidget1(name, profile)
-  end
-  --	end
-end
-
-local function TotemNameBySpellID(number)
-  local name = GetSpellInfo(number)
-  if not name then
-    return ""
-  end
-  return name
-end
+--local function UpdateConfiguration()
+--  -- determine current addon version and compare it with the DB version
+--  local db_global = TidyPlatesThreat.db.global
+--
+--  --  -- addon version is newer that the db version => check for old entries
+--  --	if db_global.version ~= tostring(ThreatPlates.Meta("version")) then
+--  -- iterate over all profiles
+--  for name, profile in pairs(TidyPlatesThreat.db.profiles) do
+--    -- ConvertAuraWidget1(name, profile)
+--  end
+--  --	end
+--end
 
 -----------------------------------------------------
 -- External
 -----------------------------------------------------
 
-ThreatPlates.UpdateDefaultProfile = UpdateDefaultProfile
-ThreatPlates.UpdateConfiguration = UpdateConfiguration
+ThreatPlates.DefaultSettingsV1 = DefaultSettingsV1
+ThreatPlates.DefaultSettingsV2 = DefaultSettingsV2
+
+--ThreatPlates.UpdateConfiguration = UpdateConfiguration
 --ThreatPlates.MigrateDatabase = MigrateDatabase
-ThreatPlates.TotemNameBySpellID = TotemNameBySpellID
-
 ThreatPlates.GetUnitVisibility = GetUnitVisibility
-
+ThreatPlates.SetNamePlateClickThrough = SetNamePlateClickThrough

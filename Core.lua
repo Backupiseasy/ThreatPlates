@@ -131,7 +131,8 @@ function TidyPlatesThreat:OnInitialize()
   local defaults 	= {
     global = {
       version = "",
-      versioncheck = false,
+      -- versioncheck = false,
+      DefaultsVersion = 2,
     },
     char = {
       welcome = false,
@@ -251,10 +252,10 @@ function TidyPlatesThreat:OnInitialize()
         EnemyTotem = { Show = "nameplateShowEnemyTotems", UseHeadlineView = false },
         EnemyGuardian = { Show = "nameplateShowEnemyGuardians", UseHeadlineView = false },
         EnemyPet = { Show = "nameplateShowEnemyPets", UseHeadlineView = false },
-        EnemyMinor = { Show = "nameplateShowEnemyMinus", UseHeadlineView = false },
+        EnemyMinus = { Show = "nameplateShowEnemyMinus", UseHeadlineView = false },
         NeutralNPC = { Show = true, UseHeadlineView = false },
         NeutralGuardian = { Show = true, UseHeadlineView = false },
-        NeutralMinor = { Show = true, UseHeadlineView = false },
+        NeutralMinus = { Show = true, UseHeadlineView = false },
         -- special units
         HideNormal = false,
         HideBoss = false,
@@ -306,6 +307,7 @@ function TidyPlatesThreat:OnInitialize()
         HostilePlayer = { r = 1, g = 0, b = 0, },		-- red
         NeutralUnit = { r = 1, g = 1, b = 0, },			-- yellow
         TappedUnit = t.COLOR_TAPPED,
+        DisconnectedUnit = t.COLOR_DC,
       },
       text = {
         amount = false, -- old default: true,
@@ -489,9 +491,9 @@ function TidyPlatesThreat:OnInitialize()
         ON = true,
         scale = 22, -- old default: 35,
         x = 0,
-        y = 24,
+        y = 30, -- old default:  24,
         x_hv = 0,
-        y_hv = 35,
+        y_hv = 22,
         level = 1,
         anchor = "CENTER"
       },
@@ -536,14 +538,14 @@ function TidyPlatesThreat:OnInitialize()
         y_hv = -8,
         ShowInHeadlineView = false,
       },
-      eliteWidget = {
-        ON = true,
-        theme = "default",
-        scale = 15,
-        x = 64,
-        y = 9,
-        anchor = "CENTER"
-      },
+--      eliteWidget = {
+--        ON = true,
+--        theme = "default",
+--        scale = 15,
+--        x = 64,
+--        y = 9,
+--        anchor = "CENTER"
+--      },
       socialWidget = {
         ON = false,
         scale = 16,
@@ -1381,7 +1383,7 @@ function TidyPlatesThreat:OnInitialize()
         },
         elitehealthborder = {
           texture = "TP_HealthBarEliteOverlay",
-          show = true,
+          show = false,
         },
         healthborder = {
           texture = "TP_HealthBarOverlayThin", -- old default: "TP_HealthBarOverlay",
@@ -1443,7 +1445,7 @@ function TidyPlatesThreat:OnInitialize()
           typeface = DEFAULT_FONT, -- old default: "Accidental Presidency",
           size = 9, -- old default: 12,
           width = 20,
-          height = 10, -- old default: 10,
+          height = 10, -- old default: 14,
           x = 49, -- old default: 50,
           y = 0,
           align = "RIGHT",
@@ -1456,8 +1458,8 @@ function TidyPlatesThreat:OnInitialize()
           show = true,
           theme = "default",
           scale = 15,
-          x = 64,
-          y = 9,
+          x = 61,
+          y = 7,
           level = 22,
           anchor = "CENTER"
         },
@@ -1480,9 +1482,9 @@ function TidyPlatesThreat:OnInitialize()
           width = 110,
           height = 14,
           x = 0,
-          y = -14,  -- old default: 13
+          y = -14,  -- old default: -13
           x_hv = 0,
-          y_hv = -14,  -- old default: 13
+          y_hv = -14,  -- old default: -13
           align = "CENTER",
           vertical = "CENTER",
           shadow = true,
@@ -1492,9 +1494,9 @@ function TidyPlatesThreat:OnInitialize()
         raidicon = {
           scale = 20,
           x = 0,
-          y = 27,
+          y = 30,
           x_hv = 0,
-          y_hv = 27,
+          y_hv = 25,
           anchor = "CENTER",
           hpColor = true,
           show = true,
@@ -1528,7 +1530,7 @@ function TidyPlatesThreat:OnInitialize()
         },
         skullicon = {
           scale = 16,
-          x = 55,
+          x = 51,
           y = 0,
           anchor = "CENTER",
           show = true,
@@ -1629,12 +1631,12 @@ function TidyPlatesThreat:OnInitialize()
           ON = true,
           theme = "default",
         },
-        scaleType = {
-          ["Normal"] = -0.2,
-          ["Elite"] = 0,
-          ["Boss"] = 0.2,
-          ["Minus"] = -0.2,
-        },
+--        scaleType = {
+--          ["Normal"] = -0.2,
+--          ["Elite"] = 0,
+--          ["Boss"] = 0.2,
+--          ["Minus"] = -0.2,
+--        },
         toggle = {
           ["Boss"]	= true,
           ["Elite"]	= true,
@@ -1885,13 +1887,19 @@ function TidyPlatesThreat:StartUp()
     end
   else
     -- remove (and migrate) any old DB entries
---    ThreatPlates.MigrateDatabase()
+    --    ThreatPlates.MigrateDatabase()
+
 
     local GlobDB = self.db.global
     -- TODO: why not just overwrite the old version entry?
     if GlobDB.version ~= tostring(t.Meta("version")) then
       GlobDB.version = tostring(t.Meta("version"))
-      GlobDB.versioncheck = false
+--      GlobDB.versioncheck = false
+    end
+
+    -- change back defaults old settings if wanted
+    if GlobDB.DefaultsVersion == 1 then
+      t.DefaultSettingsV1()
     end
   end
 
@@ -1904,6 +1912,7 @@ function TidyPlatesThreat:StartUp()
   ThreatPlatesWidgets.ConfigAuraWidget()
   C_NamePlate.SetNamePlateFriendlyClickThrough(self.db.profile.NamePlateFriendlyClickThrough)
   C_NamePlate.SetNamePlateEnemyClickThrough(self.db.profile.NamePlateEnemyClickThrough)
+  --t.SetNamePlateClickThrough()
 end
 
 -----------------------------------------------------------------------------------

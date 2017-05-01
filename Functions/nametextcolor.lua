@@ -4,6 +4,8 @@ local ThreatPlates = NAMESPACE.ThreatPlates
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
+local UnitIsConnected = UnitIsConnected
+
 local RGB = ThreatPlates.RGB
 local GetColorByHealthDeficit = TidyPlatesThreat.GetColorByHealthDeficit
 
@@ -21,7 +23,9 @@ local function SetNameColor(unit)
 
 	local style, unique_style = TidyPlatesThreat.SetStyle(unit)
 	if db_hv.ON and (style == "NameOnly" or style == "NameOnly-Unique") then
-		if unit.isTapped then
+		if unit.unitid and not UnitIsConnected(unit.unitid) then
+			color = db.ColorByReaction.DisconnectedUnit
+		elseif unit.isTapped then
 			color = db.ColorByReaction.TappedUnit
 		elseif style == "NameOnly-Unique" then
 			if unit.isMarked and unique_style.allowMarked then

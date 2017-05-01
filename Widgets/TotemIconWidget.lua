@@ -69,14 +69,15 @@ local TOTEM_DATA = {
 local ThreatPlates_Totems_Config = { hideHealthbar = false, }
 local ThreatPlates_Totems = {}
 do
-	for i=1,#TOTEM_DATA do
-		ThreatPlates_Totems[TotemNameBySpellID(TOTEM_DATA[i][1])] = TOTEM_DATA[i][2]
-		local color = TOTEM_DATA[i][3]
+	for i = 1, #TOTEM_DATA do
+    local totem_data = TOTEM_DATA[i]
+		ThreatPlates_Totems[TotemNameBySpellID(totem_data[1])] = totem_data[2]
+		local color = totem_data[3]
 		local color_r = tonumber("0x"..color:sub(1,2))/255
 		local color_g = tonumber("0x"..color:sub(3,4))/255
 		local color_b = tonumber("0x"..color:sub(5,6))/255
 		--	["Reference"] = {allow totem nameplate, allow hp color, r, g, b, show icon, style}
-		ThreatPlates_Totems_Config[TOTEM_DATA[i][2]] = {
+		ThreatPlates_Totems_Config[totem_data[2]] = {
 			true, -- allow totem nameplate
 			true, -- allow hp color
 			true, -- show icon

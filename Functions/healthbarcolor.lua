@@ -7,7 +7,6 @@ local ThreatPlates = NAMESPACE.ThreatPlates
 local UnitIsConnected = UnitIsConnected
 local UnitIsUnit = UnitIsUnit
 local UnitGroupRolesAssigned = UnitGroupRolesAssigned
-local InCombatLockdown = InCombatLockdown
 local RAID_CLASS_COLORS = RAID_CLASS_COLORS
 local floor = floor
 local abs = abs
@@ -15,7 +14,6 @@ local abs = abs
 local OnThreatTable = TidyPlatesThreat.OnThreatTable
 local RGB = ThreatPlates.RGB
 local RGB_P = ThreatPlates.RGB_P
-local COLOR_DC = ThreatPlates.COLOR_DC
 
 local reference = {
   FRIENDLY = { NPC = "FriendlyNPC", PLAYER = "FriendlyPlayer", },
@@ -161,8 +159,9 @@ local function SetHealthbarColor(unit)
   local db = TidyPlatesThreat.db.profile
   local c
   if unit.unitid and not UnitIsConnected(unit.unitid) then
-    -- Unit is disconnected
-    c = COLOR_DC
+    c = db.ColorByReaction.DisconnectedUnit
+  elseif unit.isTapped then
+    c = db.ColorByReaction.TappedUnit
   elseif style == "unique" then
     -- Custom nameplate style defined for unit (does not work for totems right now)
     if unit.isMarked and unique_style.allowMarked then
@@ -204,23 +203,20 @@ local function SetHealthbarColor(unit)
     if unit.isMarked and db_raidicon.hpColor then
       c = db_raidicon.hpMarked[unit.raidIcon]
     elseif db.questWidget.ModeHPBar and ShowQuestUnit(unit) and IsQuestUnit(unit) then
+      -- small bug here: tapped targets should not be quest marked!
       c = db.questWidget.HPBarColor
     elseif db.healthColorChange then
       c = GetColorByHealthDeficit(unit)
     else
       -- order is ThreatSystem, ByClass, ByReaction, WoW Default
-      if unit.isTapped then --and (not db.threat.nonCombat or unit.threatValue > 0) then
-        c = db.ColorByReaction.TappedUnit
-      else
-        c = GetThreatColor(unit, style)
-        if not c then
-          c = GetColorByClass(unit)
-        end
-        if not c then
-          c = GetColorByReaction(unit)
-        end
-        -- ? c = GetThreatColor_New(unit, style) or GetColorByClass(unit) or GetColorByReaction(unit)
+      c = GetThreatColor(unit, style)
+      if not c then
+        c = GetColorByClass(unit)
       end
+      if not c then
+        c = GetColorByReaction(unit)
+      end
+      -- ? c = GetThreatColor_New(unit, style) or GetColorByClass(unit) or GetColorByReaction(unit)
     end
   end
 

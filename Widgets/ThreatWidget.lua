@@ -7,7 +7,12 @@ local ThreatPlates = NAMESPACE.ThreatPlates
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
+local InCombatLockdown = InCombatLockdown
+
 local UnitIsOffTanked = TidyPlatesThreat.UnitIsOffTanked
+local OnThreatTable = TidyPlatesThreat.OnThreatTable
+local GetSimpleUnitType = TidyPlatesThreat.GetSimpleUnitType
+local ShowThreatFeedback = TidyPlatesThreat.ShowThreatFeedback
 
 local PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ThreatWidget\\"
 -- local WidgetList = {}
@@ -35,36 +40,44 @@ end
 local function UpdateWidgetFrame(frame, unit)
 	local db = TidyPlatesThreat.db.profile.threat
 
-	if unit.isMarked and db.marked.art then
-		frame:_Hide()
-	else
-		local style = unit.TP_Style
-		if ((style == "dps") or (style == "tank") or (style == "unique")) and
-		  (InCombatLockdown() and unit.reaction ~= "FRIENDLY" and unit.type == "NPC") then
+  if unit.isMarked and db.marked.art then
+    frame:_Hide()
+  else
+    local style = unit.TP_Style
 
-			local threatLevel
-			if style == "tank" then -- Tanking uses regular textures / swapped for dps / healing
-				if db.toggle.OffTank and UnitIsOffTanked(unit) then
-					threatLevel = "OFFTANK"
-				else
-					threatLevel = unit.threatSituation
-				end
-			else
-				if unit.threatSituation == "HIGH" then
-					threatLevel = "LOW"
-				elseif unit.threatSituation == "LOW" then
-					threatLevel = "HIGH"
-				elseif unit.threatSituation == "MEDIUM" then
-					threatLevel = "MEDIUM"
-				end
-			end
+    -- Check for InCombatLockdown() and unit.type == "NPC" and unit.reaction ~= "FRIENDLY" not necessary
+    -- for dps/tank as these styles automatically require that
+    local show
+    if style == "unique" then
+      show = InCombatLockdown() and unit.type == "NPC" and unit.reaction ~= "FRIENDLY"
+    else
+      show = (style == "dps" or style == "tank")
+    end
 
-			frame.Icon:SetTexture(PATH .. db.art.theme.."\\"..threatLevel)
-			frame:Show()
-		else
-			frame:_Hide()
-		end
-	end
+    if show and ShowThreatFeedback(unit) then
+      local threatLevel
+      if style == "tank" then -- Tanking uses regular textures / swapped for dps / healing
+        if db.toggle.OffTank and UnitIsOffTanked(unit) then
+          threatLevel = "OFFTANK"
+        else
+          threatLevel = unit.threatSituation
+        end
+      else -- dps or normal
+        if unit.threatSituation == "HIGH" then
+          threatLevel = "LOW"
+        elseif unit.threatSituation == "LOW" then
+          threatLevel = "HIGH"
+        elseif unit.threatSituation == "MEDIUM" then
+          threatLevel = "MEDIUM"
+        end
+      end
+
+      frame.Icon:SetTexture(PATH .. db.art.theme.."\\"..threatLevel)
+      frame:Show()
+    else
+      frame:_Hide()
+    end
+  end
 end
 
 -- Context

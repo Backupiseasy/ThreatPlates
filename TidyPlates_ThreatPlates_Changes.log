@@ -3,6 +3,7 @@
 ------------------------------------------------------
 * Changed default settings for several options in Threat Plates for a new look and feel.
 * Added Headline View (Text-Only) as an option to custom nameplates.
+* Improved consistency for coloring, scaling and opacity between healthbar and headline view, totems and custom nameplates.
 
 ------------------------------------------------------
 8.4.0-Beta2 (works with TidyPlates 6.18.11)
@@ -10,7 +11,7 @@
 * Added an option to hide the hatched overlay on the castbar for uninterruptable casts [Ticket #122, Comment #381].
 * Added an option to social widget to color the healthbar of friends' and guildmates' nameplates in a custom color.
 * Added an option to social widget to show a faction icon for players and NPCs [Ticket #115].
-* Scaling and opacity can not be defined based on unit type (friendly, hostile, player, NPCs, and so on).
+* Scaling and opacity can not be defined based on unit type (friendly, hostile, player, NPCs, and so on) [Ticket #118].
 * Added an option to change scaling and opacity (alpha) for casting, mouseover and target units [Comment #363].
 * Added a new widget for showing the resource or power of target units (mana, rage, or alternate power for bosses) [Request from WowInterface].
 * Added new filter options to aura widget 2.0 for whitelist and blacklist mode: use All and My before a spell name or ID to whitelist or blacklist a spell based on the caster [Comment #385, email request].

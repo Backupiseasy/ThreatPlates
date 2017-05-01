@@ -58,6 +58,14 @@ t.Active = function()
 	return val
 end
 
+local function TotemNameBySpellID(number)
+	local name = GetSpellInfo(number)
+	if not name then
+		return ""
+	end
+	return name
+end
+
 do
 	t.HCC = {}
 	for i=1,#CLASS_SORT_ORDER do
@@ -222,24 +230,22 @@ end
 	
 t.DEBUG_PRINT_TARGET = function(unit)
   if unit.isTarget then
-    t.DEBUG("unit.name = ", unit.name)
-    t.DEBUG("unit.unitID = ", unit.unitID)
-    t.DEBUG("unit.type = ", unit.type)
-    t.DEBUG("unit.class = ", unit.class)
-    t.DEBUG("unit.reaction = ", unit.reaction)
-    t.DEBUG("unit.isMini = ", unit.isMini)
-    t.DEBUG("unit.isTapped = ", unit.isTapped)
-    t.DEBUG("unit.isElite = ", unit.isBoss)
-    t.DEBUG("unit.isBoss = ", unit.isElite)
-    t.DEBUG("unit SetStyle = ", style)
-    t.DEBUG("unit GetType = ", TidyPlatesThreat.GetType(unit))
-    t.DEBUG("unit.isPet = ", UnitIsOtherPlayersPet(unit))
-    t.DEBUG("unit.isControlled = ", UnitPlayerControlled(unit.unitid))
-    t.DEBUG("unit.isBattlePet = ", UnitIsBattlePet(unit.unitid))
-    t.DEBUG("unit.canAttack = ", UnitCanAttack("player", unit.unitid))
-
-    t.DEBUG("unit.isFriend = ", TidyPlatesUtility.IsFriend(unit.name))
-    t.DEBUG("unit.isGuildmate = ", TidyPlatesUtility.IsGuildmate(unit.name))
+    t.DEBUG("Unit:", unit.name)
+    t.DEBUG("  unitID = ", unit.unitID)
+    t.DEBUG("  type = ", unit.type)
+    t.DEBUG("  class = ", unit.class)
+    t.DEBUG("  reaction = ", unit.reaction)
+    t.DEBUG("  isMini = ", unit.isMini)
+    t.DEBUG("  isTapped = ", unit.isTapped)
+    t.DEBUG("  isElite = ", unit.isBoss)
+    t.DEBUG("  isBoss = ", unit.isElite)
+    t.DEBUG("  isPet = ", UnitIsOtherPlayersPet(unit))
+		t.DEBUG("  isControlled = ", UnitPlayerControlled(unit.unitid))
+		t.DEBUG("  isBattlePet = ", UnitIsBattlePet(unit.unitid))
+		t.DEBUG("  canAttack = ", UnitCanAttack("player", unit.unitid))
+		t.DEBUG("  isFriend = ", TidyPlatesUtility.IsFriend(unit.name))
+		t.DEBUG("  isGuildmate = ", TidyPlatesUtility.IsGuildmate(unit.name))
+		t.DEBUG("  ---------------------------------")
 
     -- local enemy_totems = GetCVar("nameplateShowEnemyTotems")
     -- local enemy_guardians = GetCVar("nameplateShowEnemyGuardians")
@@ -261,3 +267,4 @@ end
 t.RGB = RGB
 t.RGB_P = RGB_P
 t.RGB_UNPACK = RGB_UNPACK
+t.TotemNameBySpellID = TotemNameBySpellID
