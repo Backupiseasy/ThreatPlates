@@ -1,577 +1,539 @@
-﻿local L = LibStub("AceLocale-3.0"):NewLocale("TidyPlatesThreat", "enUS", true, true)
+﻿--local L = LibStub("AceLocale-3.0"):NewLocale("TidyPlatesThreat", "enUS", true, true)
+local L = LibStub("AceLocale-3.0"):NewLocale("TidyPlatesThreat", "enUS", true, false)
 if not L then return end
 
-----------------------
---[[ commands.lua ]]--
-----------------------
+---------------------------------------------------------------------------------------------------
+-- Strings which are created dynamically in the addon
+---------------------------------------------------------------------------------------------------
+L["Show Friendly Units"] = true
+L["Players"] = true
+L["NPCs"] = true
+L["Totems"] = true
+L["Guardians"] = true
+L["Pets"] = true
 
-L["-->>|cffff0000DPS Plates Enabled|r<<--"] = true
-L["|cff89F559Threat Plates|r: DPS switch detected, you are now in your |cffff0000dpsing / healing|r role."] = true
-
-L["-->>|cff00ff00Tank Plates Enabled|r<<--"] = true
-L["|cff89F559Threat Plates|r: Tank switch detected, you are now in your |cff00ff00tanking|r role."] = true
-L["|cff89F559Threat Plates|r: Role toggle not supported because automatic role detection is enabled."] = true
-
-L["-->>Nameplate Overlapping is now |cff00ff00ON!|r<<--"] = true
-L["-->>Nameplate Overlapping is now |cffff0000OFF!|r<<--"] = true
-
-L["-->>Threat Plates verbose is now |cff00ff00ON!|r<<--"] = true
-L["-->>Threat Plates verbose is now |cffff0000OFF!|r<<-- shhh!!"] = true
-
-L["Usage: /tptp [options]"] = true
-L["  options:"] = true
-L["    update-profiles      Migrates deprecated settings in your configuration"] = true
-L["    new-default-profile  Updates the default profile with new default settings"] = true
-L["    help                 Prints this help message"] = true
-L["    <no option>          Displays options dialog"] = true
-
-L["Migrating deprecated settings in configuration ..."] = true
-L["Updating default profile with new settings ..."] = true
-L["Unknown option: "] = true
-
-L["Profile "] = true
-L[": Converting settings from aura widget to aura widget 2.0 ..."] = true
-
-------------------------------
---[[ TidyPlatesThreat.lua ]]--
-------------------------------
-
-L["|cff00ff00tanking|r"] = true
-L["|cffff0000dpsing / healing|r"] = true
-
-L["Undetermined"] = true
-
-L["|cff89f559Welcome to |rTidy Plates: |cff89f559Threat Plates!\nThis is your first time using Threat Plates and you are a(n):\n|r|cff"] = true
-L["|cff89f559You are currently in your "] = true
-L["|cff89f559 role.|r"] = true
-L["|cff89f559Additional options can be found by typing |r'/tptp'|cff89F559.|r"] = true
-L[":\n----------\nWould you like to \nset your theme to |cff89F559Threat Plates|r?\n\nClicking '|cff00ff00Yes|r' will set you to Threat Plates & reload UI. \n Clicking '|cffff0000No|r' will open the Tidy Plates options."] = true
-L["\n---------------------------------------\nThe current version of ThreatPlates requires at least TidyPlates "] = true
-L[". You have installed an older or incompatible version of TidyPlates: "] = true
-L[". Please update TidyPlates, otherwise ThreatPlates will not work properly."] = true
-L["Yes"] = true
-L["Cancel"] = true
-L["No"] = true
-
-L["-->>|cffff0000Activate Threat Plates from the Tidy Plates options!|r<<--"] = true
-L["|cff89f559Threat Plates:|r Welcome back |cff"] = true
-
-L["|cff89F559Threat Plates|r: Player spec change detected: |cff"] = true
-L[" role."] = true
-
--- Custom Nameplates
-L["Shadow Fiend"] = true
-L["Spirit Wolf"] = true
-L["Ebon Gargoyle"] = true
-L["Water Elemental"] = true
-L["Treant"] = true
-L["Viper"] = true
-L["Venomous Snake"] = true
-L["Army of the Dead Ghoul"] = true
-L["Shadowy Apparition"] = true
-L["Shambling Horror"] = true
-L["Web Wrap"] = true
-L["Immortal Guardian"] = true
-L["Marked Immortal Guardian"] = true
-L["Empowered Adherent"] = true
-L["Deformed Fanatic"] = true
-L["Reanimated Adherent"] = true
-L["Reanimated Fanatic"] = true
-L["Bone Spike"] = true
-L["Onyxian Whelp"] = true
-L["Gas Cloud"] = true
-L["Volatile Ooze"] = true
-L["Darnavan"] = true
-L["Val'kyr Shadowguard"] = true
-L["Kinetic Bomb"] = true
-L["Lich King"] = true
-L["Raging Spirit"] = true
-L["Drudge Ghoul"] = true
-L["Living Inferno"] = true
-L["Living Ember"] = true
-L["Fanged Pit Viper"] = true
-L["Canal Crab"] = true
-L["Muddy Crawfish"] = true
-
----------------------
---[[ options.lua ]]--
----------------------
-
-L["None"] = true
-L["Outline"] = true
-L["Thick Outline"] = true
-L["No Outline, Monochrome"] = true
-L["Outline, Monochrome"] = true
-L["Thick Outline, Monochrome"] = true
-
-L["White List"] = true
-L["Black List"] = true
-L["White List (Mine)"] = true
-L["Black List (Mine)"] = true
-L["All Auras"] = true
-L["All Auras (Mine)"] = true
-
--- Tab Titles
-L["Nameplate Settings"] = true
-L["Threat System"] = true
-L["Widgets"] = true
-L["Totem Nameplates"] = true
-L["Custom Nameplates"] = true
-L["About"] = true
-
-------------------------
--- Nameplate Settings --
-------------------------
-L["General Settings"] = true
-L["This allows to configure which nameplates should be shown while you are playing."] = true
-L["Hiding"] = true
-L["Show Tapped"] = true
-L["Show Neutral"] = true
-L["Show Normal"] = true
-L["Show Elite"] = true
-L["Show Boss"] = true
-
-L["Blizzard Settings"] = true
-L["Open Blizzard Settings"] = true
-
-L["Friendly"] = true
-L["Show Friends"] = true
-L["Show Friendly NPCs"] = true
-L["Show Friendly Totems"] = true
-L["Show Friendly Pets"] = true
-L["Show Friendly Guardians"] = true
-
-L["Enemy"] = true
-L["Show Enemies"] = true
-L["Show Enemy Totems"] = true
-L["Show Enemy Pets"] = true
-L["Show Enemy Guardians"] = true
-
+L["Show Enemy Units"] = true
 L["Minuss"] = "Minors"
 
-----
-L["Healthbar"] = true
-L["Textures"] = true
-L["Show Border"] = true
-L["Normal Border"] = true
-L["Show Elite Border"] = true
-L["Elite Border"] = true
-L["Mouseover"] = true
-L["Use a custom color for the healtbar's background."] = true
-L["Custom"] = true
-L["Use the healthbar's foreground color also for the background."] = true
-L["Same as Foreground"] = true
-L["Background Color:"] = true
-L["Background Opacity"] = true
+L["Show Neutral Units"] = true
 
-----
-L["Placement"] = true
-L["Changing these settings will alter the placement of the nameplates, however the mouseover area does not follow. |cffff0000Use with caution!|r"] = true
-L["Offset X"] = true
-L["Offset Y"] = true
-L["X"] = true
-L["Y"] = true
-L["Anchor"] = true
-----
-L["Coloring"] = true
-L["Enable Coloring"] = true
-----
-L["HP Coloring"] = true
-L["Color HP by amount"] = true
-L["Changes the HP color depending on the amount of HP the nameplate shows."] = true
-L["Class Coloring"] = true
-L["Enable Enemy Class colors"] = true
-L["Enable Friendly Class Colors"] = true
-L["Enable the showing of hostile player class color on hp bars."] = true
-L["Enable the showing of friendly player class color on hp bars."] = true
-L["Friendly Caching"] = true
-L["This allows you to save friendly player class information between play sessions or nameplates going off the screen.|cffff0000(Uses more memory)"] = true
-----
-L["Custom HP Color"] = true
-L["Enable Custom HP colors"] = true
-L["Friendly Color"] = true
-L["Tapped Color"] = true
-L["Neutral Color"] = true
-L["Enemy Color"] = true
-----
-L["Raid Mark HP Color"] = true
-L["Enable Raid Marked HP colors"] = true
-L["Colors"] = true
-----
-L["Threat Colors"] = true
-L["Show Threat Glow"] = true
-L["Only on Attacked Units"] = true
-L["Show threat glow only on units in combat with the player."] = true
-L["|cff00ff00Low threat|r"] = true
-L["|cffffff00Medium threat|r"] = true
-L["|cffff0000High threat|r"] = true
-L["|cffff0000Low threat|r"] = true
-L["|cff00ff00High threat|r"] = true
-L["Low Threat"] = true
-L["Medium Threat"] = true
-L["High Threat"] = true
-
-----
-L["Castbar"] = true
-L["Enable"] = true
-L["Interruptable Casts"] = true
-L["Shielded Coloring"] = true
-L["Uninterruptable Casts"] = true
-
-----
-L["Alpha"] = true
-L["Blizzard Target Fading"] = true
-L["Enable Blizzard 'On-Target' Fading"] = true
-L["Enabling this will allow you to set the alpha adjustment for non-target nameplates."] = true
-L["Non-Target Alpha"] = true
-L["Alpha Settings"] = true
-
-----
-L["Scale"] = true
-L["Scale Settings"] = true
-
-----
-L["Name Text"] = true
-L["Enable Name Text"] = true
-L["Enables the showing of text on nameplates."] = true
-L["Options"] = true
-L["Font"] = true
-L["Font Style"] = true
-L["Set the outlining style of the text."] = true
-L["Enable Shadow"] = true
-L["Color"] = true
-L["Text Bounds and Sizing"] = true
-L["Font Size"] = true
-L["Text Boundaries"] = true
-L["These settings will define the space that text can be placed on the nameplate.\nHaving too large a font and not enough height will cause the text to be not visible."] = true
-L["Text Width"] = true
-L["Text Height"] = true
-L["Horizontal Align"] = true
-L["Vertical Align"] = true
-
-----
-L["Health Text"] = true
-L["Enable Health Text"] = true
-L["Display Settings"] = true
-L["Text at Full HP"] = true
-L["Display health text on targets with full HP."] = true
-L["Percent Text"] = true
-L["Display health percentage text."] = true
-L["Amount Text"] = true
-L["Display health amount text."] = true
-L["Amount Text Formatting"] = true
-L["Truncate Text"] = true
-L["This will format text to a simpler format using M or K for millions and thousands. Disabling this will show exact HP amounts."] = true
-L["Max HP Text"] = true
-L["This will format text to show both the maximum hp and current hp."] = true
-L["Deficit Text"] = true
-L["This will format text to show hp as a value the target is missing."] = true
-
-----
-L["Spell Text"] = true
-L["Enable Spell Text"] = true
-
-----
-L["Level Text"] = true
-L["Enable Level Text"] = true
-
-----
-L["Elite Icon"] = true
-L["Enable Elite Icon"] = true
-L["Enables the showing of the elite icon on nameplates."] = true
-L["Texture"] = true
-L["Preview"] = true
-L["Elite Icon Style"] = true
-L["Size"] = true
-
-----
-L["Skull Icon"] = true
-L["Enable Skull Icon"] = true
-L["Enables the showing of the skull icon on nameplates."] = true
-
-----
-L["Spell Icon"] = true
-L["Enable Spell Icon"] = true
-L["Enables the showing of the spell icon on nameplates."] = true
-
-----
-L["Raid Marks"] = true
-L["Enable Raid Mark Icon"] = true
-L["Enables the showing of the raid mark icon on nameplates."] = true
-
-----
-L["Headline View"] = true
-L["Enable Headline View (Text-Only)"] = true
-L["This will enable headline view (Text-Only) for nameplates. TidyPlatesHub must be enabled for this to work. Use the TidyPlatesHub options for configuration."] = true
-L["Enabling this will allow you to set the alpha adjustment for non-target names in headline view."] = true
-
--------------------
--- Threat System --
--------------------
-
-L["Enable Threat System"] = true
-
-----
-L["Additional Toggles"] = true
-L["Ignore Non-Combat Threat"] = true
-L["Disables threat feedback from mobs you're currently not in combat with."] = true
-L["Show Tapped Threat"] = true
-L["Disables threat feedback from tapped mobs regardless of boss or elite levels."] = true
-L["Show Neutral Threat"] = true
-L["Disables threat feedback from neutral mobs regardless of boss or elite levels."] = true
-L["Show Normal Threat"] = true
-L["Disables threat feedback from normal mobs."] = true
-L["Show Elite Threat"] = true
-L["Disables threat feedback from elite mobs."] = true
-L["Show Boss Threat"] = true
-L["Disables threat feedback from boss level mobs."] = true
-
-----
-L["Set alpha settings for different threat reaction types."] = true
-L["Enable Alpha Threat"] = true
-L["Enable nameplates to change alpha depending on the levels you set below."] = true
-L["|cff00ff00Tank|r"] = true
-L["|cffff0000DPS/Healing|r"] = true
-L["Tank"] = true
-L["DPS/Healing"] = true
-----
-L["Marked Targets"] = true
-L["Ignore Marked Targets"] = true
-L["This will allow you to disabled threat alpha changes on marked targets."] = true
-L["Ignored Alpha"] = true
-
-----
-L["Set scale settings for different threat reaction types."] = true
-L["Enable Scale Threat"] = true
-L["Enable nameplates to change scale depending on the levels you set below."] = true
-L["This will allow you to disabled threat scale changes on marked targets."] = true
-L["Ignored Scaling"] = true
-----
-L["Additional Adjustments"] = true
-L["Enable Adjustments"] = true
-L["This will allow you to add additional scaling changes to specific mob types."] = true
-
-----
-L["Toggles"] = true
-L["Color HP by Threat"] = true
-L["This allows HP color to be the same as the threat colors you set below."] = true
-
-----
-L["Spec Roles"] = true
-L["Set the roles your specs represent."] = true
-L["Sets your spec "] = true
+---------------------------------------------------------------------------------------------------
+-- String constants in the game
+---------------------------------------------------------------------------------------------------
+L["  <no option>        Displays options dialog"] = true
+L["  help               Prints this help message"] = true
+L["  new-defaults       Changes default settings to new look and feel (introduced with 8.4)"] = true
+L["  old-defaults       Reverts default settings back to look and feel before 8.4"] = true
+L["  update-profiles    Migrates deprecated settings in your configuration"] = true
+L[" options by typing: /tptp"] = true
+L[" role."] = true
 L[" to DPS."] = true
 L[" to tanking."] = true
-L["Determine your role (tank/dps/healing) automatically based on current spec."] = true
-
-----
-L["Set threat textures and their coloring options here."] = true
-L["These options are for the textures shown on nameplates at various threat levels."] = true
-----
-L["Art Options"] = true
-L["Style"] = true
-L["This will allow you to disabled threat art on marked targets."] = true
-
--------------
--- Widgets --
--------------
-
-L["Class Icons"] = true
-L["Enable Class Icons Widget"] = true
-L["This widget will display class icons on nameplate with the settings you set below."] = true
-L["Enable Friendly Icons"] = true
-L["Enable the showing of friendly player class icons."] = true
-
-----
-L["Combo Points"] = true
-L["This widget will display combo points on your target nameplate."] = true
-
-----
-L["Aura"] = true
-L["This widget will display auras that match your filtering on your target nameplate and others you recently moused over."] = true
-L["This lets you select the layout style of the aura widget. (requires /reload)"] = true
-L["Wide"] = true
-L["Square"] = true
-L["Target Only"] = true
-L["This will toggle the aura widget to only show for your current target."] = true
-L["Sizing"] = true
-L["Cooldown Spiral"] = true
-L["This will toggle the aura widget to show the cooldown spiral on auras. (requires /reload)"] = true
-L["Filtering"] = true
-L["Mode"] = true
-L["Filtered Auras"] = true
-L["This widget will display auras that match your filtering on your target nameplate and others you recently moused over. The old aura widget (Aura) must be disabled first."] = true
-L["Enable Aura Widget 2.0"] = true
-L["Filter by Spell"] = true
-L["Filter by Unit Reaction"] = true
-L["Filter by Dispel Type"] = true
+L["-->>Nameplate Overlapping is now |cff00ff00ON!|r<<--"] = true
+L["-->>Nameplate Overlapping is now |cffff0000OFF!|r<<--"] = true
+L["-->>Threat Plates verbose is now |cff00ff00ON!|r<<--"] = true
+L["-->>Threat Plates verbose is now |cffff0000OFF!|r<<-- shhh!!"] = true
+L["-->>|cff00ff00Tank Plates Enabled|r<<--"] = true
+L["-->>|cffff0000Activate Threat Plates from the Tidy Plates options!|r<<--"] = true
+L["-->>|cffff0000DPS Plates Enabled|r<<--"] = true
+L[". You have installed an older or incompatible version of TidyPlates: "] = true
+L[":\n----------\nWould you like to \nset your theme to |cff89F559Threat Plates|r?\n\nClicking '|cff00ff00Yes|r' will set you to Threat Plates & reload UI. \n Clicking '|cffff0000No|r' will open the Tidy Plates options."] = true
+L["A to Z"] = true
+L["About"] = true
+L["Additional Adjustments"] = true
+L["Additionally color the healthbar based on the target mark if the unit is marked."] = true
+L["Additionally color the name based on the target mark if the unit is marked."] = true
+L["Additionally color the nameplate's healthbar or name based on the target mark if the unit is marked."] = true
+L["Adjust Alpha for"] = true
+L["Adjust Scale for"] = true
+L["All Auras (Mine)"] = true
+L["All Auras"] = true
+L["Alpha & Scaling"] = true
+L["Alpha"] = true
+L["Amount Text Formatting"] = true
+L["Amount Text"] = true
+L["Anchor Point"] = true
+L["Anchor"] = true
 L["Appearance"] = true
-L["Color by Dispel Type"] = true
+L["Arena 1"] = true
+L["Arena 2"] = true
+L["Arena 3"] = true
+L["Arena 4"] = true
+L["Arena 5"] = true
+L["Arena Number Colors"] = true
+L["Arena Orb Colors"] = true
+L["Arena"] = true
+L["Army of the Dead Ghoul"] = true
+L["Art Options"] = true
 L["Aura 2.0"] = true
-L["This will toggle the aura widget to show the cooldown spiral on auras."] = true
-L["This will color the aura based on its type (poison, disease, magic, curse) - for Icon Mode the icon border is colored, for Bar Mode the bar itself."] = true
+L["Aura"] = true
+L["Background Color"] = true
+L["Background Color:"] = true
+L["Background Opacity"] = true
+L["Background Texture"] = true
+L["Bar Border"] = true
+L["Bar Height"] = true
+L["Bar Limit"] = true
+L["Bar Mode"] = true
+L["Bar Width"] = true
+L["Base Alpha by Unit"] = true
+L["Base Scale by Unit"] = true
+L["Black List (Mine)"] = true
+L["Black List"] = true
+L["Blizzard Target Fading"] = true
+L["Bone Spike"] = true
+L["Border Color:"] = true
+L["Border Texture"] = true
+L["Bosses"] = true
+L["Bottom-to-top"] = true
+L["Canal Crab"] = true
+L["Cancel"] = true
+L["Castbar"] = true
+L["Casting Units"] = true
+L["Change the color depending on the amount of health points the nameplate shows."] = true
+L["Change the color depending on the reaction of the unit (friendly, hostile, neutral)."] = true
+L["Changing default settings to new look and feel (introduced with 8.4) ..."] = true
+L["Changing these settings will alter the placement of the nameplates, however the mouseover area does not follow. |cffff0000Use with caution!|r"] = true
+L["Class Icons"] = true
+L["Clear and easy to use nameplate theme for use with TidyPlates.\n\nCurrent version: "] = true
+L["Clear"] = true
+L["Color By Class"] = true
+L["Color Healthbar By Enemy Class"] = true
+L["Color Healthbar By Friendly Class"] = true
+L["Color Healthbar by Target Marks in Healthbar View"] = true
+L["Color Name by Target Marks in Headline View"] = true
+L["Color by Dispel Type"] = true
+L["Color by Health"] = true
+L["Color by Reaction"] = true
+L["Color by Target Mark"] = true
+L["Color"] = true
+L["Coloring"] = true
+L["Colors"] = true
+L["Column Limit"] = true
+L["Combo Points"] = true
+L["Cooldown Spiral"] = true
+L["Copied!"] = true
+L["Copy"] = true
+L["Creation"] = true
+L["Custom Alpha"] = true
+L["Custom Nameplates"] = true
+L["Custom No-Target Alpha"] = true
+L["Custom No-Target Scale"] = true
+L["Custom Scale"] = true
+L["Custom Target Alpha"] = true
+L["Custom Target Scale"] = true
+L["Custom Text"] = true
+L["Custom"] = true
+L["Custom-Text-specific"] = true
+L["DPS/Healing"] = true
+L["Darnavan"] = true
 L["Default Buff Color"] = true
 L["Default Debuff Color"] = true
-L["Sort Order"] = true
-L["None"] = true
-L["A to Z"] = true
-L["Sort in ascending alphabetical order."] = true
-L["Time Left"] = true
-L["Sort by time left in ascending order."] = true
+L["Deficit Text"] = true
+L["Define base alpha settings for various unit types. Only one of these settings is applied to a unit at the same time, i.e., they are mutually exclusive."] = true
+L["Define base scale settings for various unit types. Only one of these settings is applied to a unit at the same time, i.e., they are mutually exclusive."] = true
+L["Define if threat feedback should be shown for various units based on their type or status."] = true
+L["Deformed Fanatic"] = true
+L["Determine your role (tank/dps/healing) automatically based on current spec."] = true
+L["Disable Custom Alpha"] = true
+L["Disable Custom Scale"] = true
+L["Disables nameplates (healthbar and name) for the units of this type and only shows an icon (if enabled)."] = true
+L["Disables the custom alpha setting for this nameplate and instead uses your normal alpha settings."] = true
+L["Disables the custom scale setting for this nameplate and instead uses your normal scale settings."] = true
+L["Disabling this will turn off all icons for custom nameplates without harming other custom settings per nameplate."] = true
+L["Disconnected Units"] = true
+L["Display Settings"] = true
+L["Display health amount text."] = true
+L["Display health percentage text."] = true
+L["Display health text on targets with full HP."] = true
+L["Do not sort auras."] = true
+L["Drudge Ghoul"] = true
 L["Duration"] = true
-L["Sort by overall duration in ascending order."] = true
-L["Creation"] = true
-L["Show auras in order created with oldest aura first."] = true
-L["Reverse Order"] = true
-L['Reverse the sort order (e.g., "A to Z" becomes "Z to A").'] = true
-L["Stack Count"] = true
-L["Show stack count as overlay on aura icon."] = true
-L["Show auras as icons in a grid configuration."] = true
-L["Icon Style"] = true
-L["This lets you select the layout style of the aura widget."] = true
-L["Icon Layout"] = true
-L["Column Limit"] = true
-L["Row Limit"] = true
-L["Horizontal Spacing"] = true
-L["Vertical Spacing"] = true
-L["Bar Mode"] = true
-L["Show auras as bars (with optional icons)."] = true
-L["Bar Layout"] = true
-L["Bar Limit"] = true
-L["Bar Width"] = true
-L["Bar Height"] = true
-L["Bar Textures"] = true
-L["Foreground Texture"] = true
-L["Background Texture"] = true
-L["Background Color"] = true
-L["Typeface"] = true
-L["Label Text Offset"] = true
-L["Time Text Offset"] = true
-L["Show Icon to the Left"] = true
-L["Offset"] = true
-L["Layout"] = true
-L["Show Friendly"] = true
-L["Show Enemy"] = true
-L["Anchor Point"] = true
-L["Right-to-left"] = true
-L["Left-to-right"] = true
-L["Bottom-to-top"] = true
-L["Top-to-bottom"] = true
-L["Vertical Alignment"] = true
-L["Horizontal Alignment"] = true
-
-----
-L["Social"] = true
-L["Enables the showing of indicator icons for friends, guildmates, and BNET Friends"] = true
-
-----
-L["Threat Line"] = true
-L["This widget will display a small bar that will display your current threat relative to other players on your target nameplate or recently mousedover namplates."] = true
-
-----
-L["Tanked Targets"] = true
-L["This widget will display a small shield or dagger that will indicate if the nameplate is currently being tanked.|cffff00ffRequires tanking role.|r"] = true
-
-----
-L["Target Highlight"] = true
-L["Enables the showing of a texture on your target nameplate"] = true
-
----- Quest Widget
-L["Quest"] = true
-L["Enable Quest Widget"] = true
-L["Enables highlighting of nameplates of mobs involved with any of your current quests."] = true
-L["Health Bar Mode"] = true
-L["Icon Mode"] = true
-L["Visibility"] = true
-L["Use a custom color for the health bar of quest mobs."] = true
-L["Show an indicator icon at the nameplate for quest mobs."] = true
-L["Hide in Combat"] = true
-L["Hide on Attacked Units"] = true
-L["Hide in Instance"] = true
-
----- Stealth Widgets
-L["Stealth"] = true
-L["Enable Stealth Widget (Feature not yet fully implemented!)"] = true
-L["Shows a stealth icon above the nameplate of units that can detect you while stealthed."] = true
-
-----------------------
--- Totem Nameplates --
-----------------------
-
-L["|cffffffffTotem Settings|r"] = true
-L["Toggling"] = true
-L["Hide Healthbars"] = true
-----
-L["Icon"] = true
-L["Icon Size"] = true
-L["Totem Alpha"] = true
-L["Totem Scale"] = true
-----
-L["Show Nameplate"] = true
-----
-L["Health Coloring"] = true
+L["Ebon Gargoyle"] = true
+L["Edge Size"] = true
+L["Elite Border"] = true
+L["Elite Icon Style"] = true
+L["Elite Icon"] = true
+L["Empowered Adherent"] = true
+L["Enable Adjustments"] = true
+L["Enable Alpha Threat"] = true
+L["Enable Arena Widget"] = true
+L["Enable Aura Widget 2.0"] = true
+L["Enable Blizzard 'On-Target' Fading"] = true
+L["Enable Class Icons Widget"] = true
+L["Enable Coloring"] = true
+L["Enable Combo Points Widget"] = true
 L["Enable Custom Colors"] = true
-
------------------------
--- Custom Nameplates --
------------------------
-
-L["|cffffffffGeneral Settings|r"] = true
-L["Disabling this will turn off any all icons without harming custom settings per nameplate."] = true
-----
-L["Set Name"] = true
-L["Use Target's Name"] = true
+L["Enable Enemy"] = true
+L["Enable Friendly"] = true
+L["Enable Friends"] = true
+L["Enable Guild Members"] = true
+L["Enable Headline View (Text-Only)"] = true
+L["Enable Nameplates"] = true
+L["Enable Quest Widget"] = true
+L["Enable Resource Widget"] = true
+L["Enable Scale Threat"] = true
+L["Enable Shadow"] = true
+L["Enable Social Widget"] = true
+L["Enable Stealth Widget (Feature not yet fully implemented!)"] = true
+L["Enable Target Highlight Widget"] = true
+L["Enable Threat Coloring of Healthbar"] = true
+L["Enable Threat System"] = true
+L["Enable Threat Textures"] = true
+L["Enable nameplate clickthrough for enemy units."] = true
+L["Enable nameplate clickthrough for friendly units."] = true
+L["Enable"] = true
+L["Enabling this will allow you to set the alpha adjustment for non-target nameplates."] = true
+L["Enabling this will allow you to set the alpha adjustment for non-target names in headline view."] = true
+L["Enemy Custom Text"] = true
+L["Enemy Headline Color"] = true
+L["Enemy NPCs"] = true
+L["Enemy Players"] = true
+L["Enemy Units"] = true
+L["Faction Icon"] = true
+L["Fanged Pit Viper"] = true
+L["Filter by Dispel Type"] = true
+L["Filter by Spell"] = true
+L["Filter by Unit Reaction"] = true
+L["Filtered Auras"] = true
+L["Filtering"] = true
+L["Font Size"] = true
+L["Font Style"] = true
+L["Font"] = true
+L["Force Headline View while Out-of-Combat"] = true
+L["Force Healthbar on Target"] = true
+L["Foreground Texture"] = true
+L["Friend"] = true
+L["Friendly Caching"] = true
+L["Friendly Custom Text"] = true
+L["Friendly Headline Color"] = true
+L["Friendly NPCs"] = true
+L["Friendly Players"] = true
+L["Friendly Units"] = true
+L["Friends & Guild Members"] = true
+L["Gas Cloud"] = true
+L["General Colors"] = true
+L["General Nameplate Settings"] = true
+L["General Settings"] = true
+L["Guardians"] = true
+L["Guild Member"] = true
+L["Headline View X"] = true
+L["Headline View Y"] = true
+L["Headline View"] = true
+L["Health Coloring"] = true
+L["Health Text"] = true
+L["Healthbar Mode"] = true
+L["Healthbar View"] = true
+L["Healthbar X"] = true
+L["Healthbar Y"] = true
+L["Hide Healthbars"] = true
+L["Hide Nameplate"] = true
+L["Hide Special Units"] = true
+L["Hide in Combat"] = true
+L["Hide in Instance"] = true
+L["Hide on Attacked Units"] = true
+L["High Threat"] = true
+L["Highlight Mobs on Off-Tanks"] = true
+L["Highlight Texture"] = true
+L["Horizontal Align"] = true
+L["Horizontal Alignment"] = true
+L["Horizontal Spacing"] = true
+L["Hostile NPCs"] = true
+L["Hostile Players"] = true
+L["Icon Mode"] = true
+L["Icon Style"] = true
+L["Icon"] = true
+L["If checked, nameplates of mobs attacking another tank can be shown with different color, scale, and opacity."] = true
+L["If checked, threat feedback from boss level mobs will be shown."] = true
+L["If checked, threat feedback from elite and rare mobs will be shown."] = true
+L["If checked, threat feedback from minor mobs will be shown."] = true
+L["If checked, threat feedback from mobs you're currently not in combat with will be shown."] = true
+L["If checked, threat feedback from neutral mobs will be shown."] = true
+L["If checked, threat feedback from normal mobs will be shown."] = true
+L["If checked, threat feedback from tapped mobs will be shown regardless of unit type."] = true
+L["If enabled your nameplates alpha will always be the setting below when you have no target."] = true
+L["If enabled your nameplates scale will always be the setting below when you have no target."] = true
+L["If enabled your target's alpha will always be the setting below."] = true
+L["If enabled your target's scale will always be the setting below."] = true
+L["Ignore Marked Units"] = true
+L["Ignored Alpha"] = true
+L["Ignored Scaling"] = true
+L["Immortal Guardian"] = true
+L["Interruptable Casts"] = true
+L["Kinetic Bomb"] = true
+L["Label Text Offset"] = true
+L["Layout"] = true
+L["Left-to-right"] = true
+L["Level Text"] = true
+L["Lich King"] = true
+L["Living Ember"] = true
+L["Living Inferno"] = true
+L["Low Threat"] = true
+L["Marked Immortal Guardian"] = true
+L["Max HP Text"] = true
+L["Medium Threat"] = true
+L["Migrating deprecated settings in configuration ..."] = true
+L["Minor"] = true
+L["Mode"] = true
+L["Mouseover Units"] = true
+L["Mouseover"] = true
+L["Muddy Crawfish"] = true
+L["Name Text"] = true
+L["Nameplate Clickthrough"] = true
+L["Nameplate Settings"] = true
+L["Nameplate Style"] = true
+L["Nameplate clickthrough cannot be changed while in combat."] = true
+L["Neutral NPCs"] = true
+L["Neutral Units"] = true
+L["No Outline, Monochrome"] = true
 L["No target found."] = true
-L["Clear"] = true
-L["Copy"] = true
-L["Copied!"] = true
+L["No"] = true
+L["Non-Attacked Units"] = true
+L["Non-Target Alpha"] = true
+L["None"] = true
+L["Normal Border"] = true
+L["Normal Units"] = true
+L["Nothing to paste!"] = true
+L["Off-Tank"] = true
+L["Offset X"] = true
+L["Offset Y"] = true
+L["Offset"] = true
+L["Only Alternate Power"] = true
+L["Only on Attacked Units"] = true
+L["Onyxian Whelp"] = true
+L["Open Blizzard Settings"] = true
+L["Open Config"] = true
+L["Options"] = true
+L["Outline"] = true
+L["Outline, Monochrome"] = true
 L["Paste"] = true
 L["Pasted!"] = true
-L["Nothing to paste!"] = true
-L["Restore Defaults"] = true
-----
-L["Use Custom Settings"] = true
-L["Custom Settings"] = true
-----
-L["Disable Custom Alpha"] = true
-L["Disables the custom alpha setting for this nameplate and instead uses your normal alpha settings."] = true
-L["Custom Alpha"] = true
-----
-L["Disable Custom Scale"] = true
-L["Disables the custom scale setting for this nameplate and instead uses your normal scale settings."] = true
-L["Custom Scale"] = true
-----
-L["Allow Marked HP Coloring"] = true
-L["Allow raid marked hp color settings instead of a custom hp setting if the nameplate has a raid mark."] = true
-
-----
-L["Enable the showing of the custom nameplate icon for this nameplate."] = true
-L["Type direct icon texture path using '\\' to separate directory folders, or use a spellid."] = true
-L["Set Icon"] = true
-
-L["Use Threat Colors"] = true
-L["Use coloring based an threat level (configured in Threat System) in combat (custom color is only used out of combat)."] = true
-L["Show a glow based on threat level around the nameplate's healthbar (in combat)."] = true
-
------------
--- About --
------------
-
-L["Clear and easy to use nameplate theme for use with TidyPlates.\n\nCurrent version: "] = true
-L["\n\nFeel free to email me at |cff00ff00threatplates@gmail.com|r\n\n--\n\nBlacksalsify\n\n(Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)"] = true
-
---------------------------------
--- Default Game Options Frame --
---------------------------------
-
-L["You can access the "] = true
-L[" options by typing: /tptp"] = true
-L["Open Config"] = true
-
-------------------------
--- Additional Stances --
-------------------------
+L["Percent Text"] = true
+L["Pets"] = true
+L["Placement"] = true
 L["Presences"] = true
-L["Shapeshifts"] = true
+L["Preview"] = true
+L["Quest"] = true
+L["Raging Spirit"] = true
+L["Rares & Bosses"] = true
+L["Rares & Elites"] = true
+L["Reanimated Adherent"] = true
+L["Reanimated Fanatic"] = true
+L["Resource Bar"] = true
+L["Resource Text"] = true
+L["Resource"] = true
+L["Restore Defaults"] = true
+L["Reverse Order"] = true
+L["Reverting default settings back to look and feel before 8.4 ..."] = true
+L["Right-to-left"] = true
+L["Row Limit"] = true
+L["Same as Background"] = true
+L["Same as Foreground"] = true
+L["Same as Headline"] = true
+L["Scale"] = true
 L["Seals"] = true
+L["Set Icon"] = true
+L["Set Name"] = true
+L["Set alpha settings for different threat levels."] = true
+L["Set scale settings for different threat levels."] = true
+L["Set the outlining style of the text."] = true
+L["Set the roles your specs represent."] = true
+L["Set threat textures and their coloring options here."] = true
+L["Sets your spec "] = true
+L["Shadow Fiend"] = true
+L["Shadowy Apparition"] = true
+L["Shambling Horror"] = true
+L["Shapeshifts"] = true
+L["Shielded Coloring"] = true
+L["Show Border"] = true
+L["Show By Status"] = true
+L["Show By Unit Type"] = true
+L["Show Castbar in Headline View"] = true
+L["Show Castbar"] = true
+L["Show Elite Border"] = true
+L["Show Elite Icon"] = true
+L["Show Enemy"] = true
+L["Show For"] = true
+L["Show Friendly Class Icons"] = true
+L["Show Friendly"] = true
+L["Show Health Text"] = true
+L["Show Icon to the Left"] = true
+L["Show Level Text"] = true
+L["Show Mouseover"] = true
+L["Show Name Text"] = true
+L["Show Nameplate"] = true
+L["Show Overlay for Uninterruptable Casts"] = true
+L["Show Skull Icon"] = true
+L["Show Spell Icon"] = true
+L["Show Spell Text"] = true
+L["Show Target Mark Icon in Headline View"] = true
+L["Show Target Mark Icon in Healthbar View"] = true
+L["Show Target"] = true
+L["Show Threat Feedback From"] = true
+L["Show Threat Glow"] = true
+L["Show a glow based on threat level around the nameplate's healthbar (in combat)."] = true
+L["Show all nameplates (CTRL-V)."] = true
+L["Show an quest icon at the nameplate for quest mobs."] = true
+L["Show auras as bars (with optional icons)."] = true
+L["Show auras as icons in a grid configuration."] = true
+L["Show auras in order created with oldest aura first."] = true
+L["Show enemy nameplates (ALT-V)."] = true
+L["Show friendly nameplates (SHIFT-V)."] = true
+L["Show in Headline View"] = true
+L["Show in Healthbar View"] = true
+L["Show stack count as overlay on aura icon."] = true
+L["Show the mouseover highlight on all units."] = true
+L["Show threat glow only on units in combat with the player."] = true
+L["Shows a border around the castbar of nameplates (requires /reload)."] = true
+L["Shows a faction icon next to the nameplate of players."] = true
+L["Shows an icon for friends and guild members next to the nameplate of players."] = true
+L["Shows resource information for bosses and rares."] = true
+L["Shows resource information only for alternatve power (of bosses or rares, mostly)."] = true
+L["Size"] = true
+L["Sizing"] = true
+L["Skull Icon"] = true
+L["Social"] = true
+L["Sort Order"] = true
+L["Sort by overall duration in ascending order."] = true
+L["Sort by time left in ascending order."] = true
+L["Sort in ascending alphabetical order."] = true
+L["Spec Roles"] = true
+L["Special Effects"] = true
+L["Spell Icon"] = true
+L["Spell Text"] = true
+L["Spirit Wolf"] = true
+L["Square"] = true
+L["Stack Count"] = true
 L["Stances"] = true
+L["Stealth"] = true
+L["Style"] = true
+L["Tank"] = true
+L["Tapped Units"] = true
+L["Target Highlight"] = true
+L["Target Marked Units"] = true
+L["Target Markers"] = true
+L["Target Only"] = true
+L["Text Boundaries"] = true
+L["Text Bounds and Sizing"] = true
+L["Text Height"] = true
+L["Text Width"] = true
+L["Text at Full HP"] = true
+L["Texture"] = true
+L["Textures"] = true
+L["These options allow you to control whether target marker icons are hidden or shown on nameplates and whether a nameplate's healthbar (in healthbar view) or name (in headline view) are colored based on target markers."] = true
+L["These options allow you to control whether the castbar is hidden or shown on nameplates."] = true
+L["These options allow you to control which nameplates are visible within the game field while you play."] = true
+L["These settings will define the space that text can be placed on the nameplate.\nHaving too large a font and not enough height will cause the text to be not visible."] = true
+L["Thick Outline"] = true
+L["Thick Outline, Monochrome"] = true
+L["This allows you to save friendly player class information between play sessions or nameplates going off the screen. |cffff0000(Uses more memory)"] = true
+L["This lets you select the layout style of the aura widget. (requires /reload)"] = true
+L["This lets you select the layout style of the aura widget."] = true
+L["This option allows you to control whether a spell's icon is hidden or shown on castbars."] = true
+L["This option allows you to control whether a spell's name is hidden or shown on castbars."] = true
+L["This option allows you to control whether a unit's health is hidden or shown on nameplates."] = true
+L["This option allows you to control whether a unit's level is hidden or shown on nameplates."] = true
+L["This option allows you to control whether a unit's name is hidden or shown on nameplates."] = true
+L["This option allows you to control whether headline view (text-only) is enabled for nameplates."] = true
+L["This option allows you to control whether nameplates should fade in or out when displayed or hidden."] = true
+L["This option allows you to control whether textures are hidden or shown on nameplates for different threat levels. Dps/healing uses regular textures, for tanking textures are swapped."] = true
+L["This option allows you to control whether the custom icon is hidden or shown on this nameplate."] = true
+L["This option allows you to control whether the elite icon for elite units is hidden or shown on nameplates."] = true
+L["This option allows you to control whether the skull icon for rare units is hidden or shown on nameplates."] = true
+L["This option allows you to control whether threat affects the alpha of nameplates."] = true
+L["This option allows you to control whether threat affects the healthbar color of nameplates."] = true
+L["This option allows you to control whether threat affects the scale of nameplates."] = true
+L["This widget shows a highlight border around your target nameplate."] = true
+L["This widget shows a quest icon above unit nameplates or colors the nameplate healthbar of units that are involved with any of your current quests."] = true
+L["This widget shows a stealth icon on nameplates of units that can detect stealth."] = true
+L["This widget shows a unit's auras (buffs and debuffs) on its nameplate."] = true
+L["This widget shows class icons on nameplates of players."] = true
+L["This widget shows icons for friends, guild members, and faction on nameplates."] = true
+L["This widget shows information about your target's resource on your target nameplate. The resource bar's color is derived from the type of resource automatically."] = true
+L["This widget shows various icons (orbs and numbers) on enemy nameplates in arenas for easier differentiation."] = true
+L["This widget shows your combo points on your target nameplate."] = true
+L["This widget will display auras that match your filtering on your target nameplate and others you recently moused over."] = true
+L["This will allow you to add additional scaling changes to specific mob types."] = true
+L["This will allow you to disable threat art on target marked units."] = true
+L["This will allow you to disable threat scale changes on target marked units."] = true
+L["This will allow you to disabled threat alpha changes on target marked units."] = true
+L["This will color the aura based on its type (poison, disease, magic, curse) - for Icon Mode the icon border is colored, for Bar Mode the bar itself."] = true
+L["This will format text to a simpler format using M or K for millions and thousands. Disabling this will show exact HP amounts."] = true
+L["This will format text to show both the maximum hp and current hp."] = true
+L["This will format text to show hp as a value the target is missing."] = true
+L["This will toggle the aura widget to only show for your current target."] = true
+L["This will toggle the aura widget to show the cooldown spiral on auras. (requires /reload)"] = true
+L["This will toggle the aura widget to show the cooldown spiral on auras."] = true
+L["Threat System"] = true
+L["Tidy Plates Fading"] = true
+L["Time Left"] = true
+L["Time Text Offset"] = true
+L["Toggling"] = true
+L["Top-to-bottom"] = true
+L["Totem Alpha"] = true
+L["Totem Nameplates"] = true
+L["Totem Scale"] = true
+L["Treant"] = true
+L["Truncate Text"] = true
+L["Type direct icon texture path using '\\' to separate directory folders, or use a spellid."] = true
+L["Typeface"] = true
+L["Undetermined"] = true
+L["Uninterruptable Casts"] = true
+L["Unknown option: "] = true
+L["Usage: /tptp [options]"] = true
+L["Use Custom Settings"] = true
+L["Use Target's Name"] = true
+L["Use Threat Colors"] = true
+L["Use a custom color for healthbar (in healthbar view) or name (in headline view) of friends and/or guild members."] = true
+L["Use a custom color for the healtbar's background."] = true
+L["Use a custom color for the healtbar's border."] = true
+L["Use a custom color for the healthbar of quest mobs."] = true
+L["Use alpha settings of healthbar view also to headline view."] = true
+L["Use coloring based an threat level (configured in Threat System) in combat (custom color is only used out of combat)."] = true
+L["Use scaling settings of healthbar view also to headline view."] = true
+L["Use the healthbar's background color also for the border."] = true
+L["Use the healthbar's foreground color also for the background."] = true
+L["Use the healthbar's foreground color also for the border."] = true
+L["Val'kyr Shadowguard"] = true
+L["Venomous Snake"] = true
+L["Vertical Align"] = true
+L["Vertical Alignment"] = true
+L["Vertical Spacing"] = true
+L["Viper"] = true
+L["Visibility"] = true
+L["Volatile Ooze"] = true
+L["Warning Glow for Threat"] = true
+L["Water Elemental"] = true
+L["We're unable to change this while in combat"] = true
+L["Web Wrap"] = true
+L["White List (Mine)"] = true
+L["White List"] = true
+L["Wide"] = true
+L["Widgets"] = true
+L["X"] = true
+L["Y"] = true
+L["Yes"] = true
+L["You can access the "] = true
+L["\n\nFeel free to email me at |cff00ff00threatplates@gmail.com|r\n\n--\n\nBlacksalsify\n\n(Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)"] = true
+L["options:"] = true
+L["|cff00ff00High Threat|r"] = true
+L["|cff00ff00Low Threat|r"] = true
+L["|cff00ff00Tank|r"] = true
+L["|cff00ff00tanking|r"] = true
+L["|cff0faac8Off-Tank|r"] = true
+L["|cff89F559Threat Plates|r: DPS switch detected, you are now in your |cffff0000dpsing / healing|r role."] = true
+L["|cff89F559Threat Plates|r: Role toggle not supported because automatic role detection is enabled."] = true
+L["|cff89F559Threat Plates|r: Tank switch detected, you are now in your |cff00ff00tanking|r role."] = true
+L["|cff89f559 role.|r"] = true
+L["|cff89f559Additional options can be found by typing |r'/tptp'|cff89F559.|r"] = true
+L["|cff89f559Threat Plates:|r Welcome back |cff"] = true
+L["|cff89f559Welcome to |rTidy Plates: |cff89f559Threat Plates!\nThis is your first time using Threat Plates and you are a(n):\n|r|cff"] = true
+L["|cff89f559You are currently in your "] = true
+L["|cffff0000DPS/Healing|r"] = true
+L["|cffff0000High Threat|r"] = true
+L["|cffff0000Low Threat|r"] = true
+L["|cffff0000dpsing / healing|r"] = true
+L["|cffffff00Medium Threat|r"] = true
+L["|cffffffffGeneral Settings|r"] = true
+L["|cffffffffTotem Settings|r"] = true
+L['Reverse the sort order (e.g., "A to Z" becomes "Z to A").'] = true

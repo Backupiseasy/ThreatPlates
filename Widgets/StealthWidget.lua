@@ -8,7 +8,7 @@ local ThreatPlates = NAMESPACE.ThreatPlates
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
 local UnitGUID = UnitGUID
-local UnitAura = UnitAura
+local UnitBuff = UnitBuff
 
 local path = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\StealthWidget\\"
 -- local WidgetList = {}
@@ -32,6 +32,7 @@ local DETECTION_AURAS = {
   [203761] = true, -- Detector
   [213486] = true, -- Demonic Vision
   [225649] = true, -- Shadow Sight
+  [232234] = true, -- On High Alert
 }
 
 ---------------------------------------------------------------------------------------------------
@@ -73,14 +74,14 @@ end
 local function UpdateWidgetFrame(frame, unit)
   if not unit.unitid then return end
 
-  -- local name, _, icon, stacks, auraType, duration, expiration, caster, _, _, spell_id = UnitAura(unit.unitid, "Invisibility and Stealth Detection")
-  -- print ("Spell detection: ", name)
+  -- name, rank, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable,
+  -- nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, nameplateShowAll, timeMod, value1, value2, value3 = UnitBuff("unit", index or "name"[, "rank"[, "filter"]])
 
   local i = 1
   local found = false
   -- or check for (?=: Invisibility and Stealth Detection)
   repeat
-    local name, _, icon, stacks, auraType, duration, expiration, caster, _, _, spell_id = UnitAura(unit.unitid, i)
+    local name, _, _, _, _, _, _, _, _, _, spell_id = UnitBuff(unit.unitid, i)
     --print ("Aura: ", name, spell_id)
     if DETECTION_AURAS[spell_id] then
       found = true
@@ -130,11 +131,12 @@ local function CreateWidgetFrame(parent)
 	local frame = CreateFrame("Frame", nil, parent)
 	frame:Hide()
 
-	-- Custom Code III
-	--------------------------------------
-	frame:SetSize(64, 64)
-	frame.Icon = frame:CreateTexture(nil, "OVERLAY")
-	frame.Icon:SetAllPoints(frame)
+  -- Custom Code III
+  --------------------------------------
+  frame:SetSize(64, 64)
+  frame.Icon = frame:CreateTexture(nil, "OVERLAY")
+  frame.Icon:SetAllPoints(frame)
+  frame:SetFrameLevel(parent:GetFrameLevel() + 2)
 
   UpdateSettings(frame)
   frame.UpdateConfig = UpdateSettings

@@ -1,4 +1,4 @@
-﻿local L = LibStub("AceLocale-3.0"):NewLocale("TidyPlatesThreat", "zhCN", false, true)
+﻿local L = LibStub("AceLocale-3.0"):NewLocale("TidyPlatesThreat", "zhCN", false)
 if not L then return end
 
 L["    <no option>          Displays options dialog"] = "    <无设置>          显示设置对话框"

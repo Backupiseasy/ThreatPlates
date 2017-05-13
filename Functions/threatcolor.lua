@@ -13,10 +13,26 @@ local SetStyle = TidyPlatesThreat.SetStyle
 local GetUniqueNameplateSetting = TidyPlatesThreat.GetUniqueNameplateSetting
 local COLOR_TRANSPARENT = ThreatPlates.COLOR_TRANSPARENT
 
+local function ShowThreatGlow(unit)
+  local db = TidyPlatesThreat.db.profile
+
+  if db.ShowThreatGlowOnAttackedUnitsOnly then
+    return OnThreatTable(unit)
+  else
+    return true
+  end
+end
+
 local function SetThreatColor(unit)
   local db = TidyPlatesThreat.db.profile
 
   local c = COLOR_TRANSPARENT
+
+  local unitid = unit.unitid
+  if unitid == nil then
+    return c.r, c.g, c.b, c.a
+  end
+
   if InCombatLockdown() and unit.type == "NPC" and unit.reaction ~= "FRIENDLY" then
     local style = unit.TP_Style or SetStyle(unit)
     --    local style, unique_setting = TidyPlatesThreat.SetStyle(unit)
@@ -29,57 +45,17 @@ local function SetThreatColor(unit)
       end
     end
 
-    if unit.unitid and not UnitIsConnected(unit.unitid) then
-      c = db.ColorByReaction.DisconnectedUnit
+    if not UnitIsConnected(unitid) then
+      if ShowThreatGlow(unit) then
+        c = db.ColorByReaction.DisconnectedUnit
+      end
     elseif unit.isTapped then
-      if db.ShowThreatGlowOnAttackedUnitsOnly then
-        if OnThreatTable(unit) then
-          c = db.ColorByReaction.TappedUnit
-        end
-      else
+      if ShowThreatGlow(unit) then
         c = db.ColorByReaction.TappedUnit
       end
-    --  elseif style == "tank" then
-    --    local show_offtank = db.threat.toggle.OffTank
-    --    if db.ShowThreatGlowOnAttackedUnitsOnly then
-    --      if OnThreatTable(unit) then
-    --        local threatSituation = unit.threatSituation
-    --        if show_offtank and UnitIsOffTanked(unit) then
-    --          threatSituation = "OFFTANK"
-    --        end
-    --        c = db.settings[style]["threatcolor"][threatSituation]
-    --      end
-    --    else
-    --      local threatSituation = unit.threatSituation
-    --      if show_offtank and UnitIsOffTanked(unit) then
-    --        threatSituation = "OFFTANK"
-    --      end
-    --      c = db.settings[style]["threatcolor"][threatSituation]
-    --    end
-    --  elseif style == "dps" or (style == "normal" and unit.isInCombat) then
-    --    -- problem with this is if threat system is enabled, it does not work for unique - which it should in this case!
-    --    if db.ShowThreatGlowOnAttackedUnitsOnly then
-    --      if OnThreatTable(unit) then
-    --        local threatSituation = unit.threatSituation
-    --        c = db.settings[style]["threatcolor"][threatSituation]
-    --      end
-    --    else
-    --      local threatSituation = unit.threatSituation
-    --      c = db.settings[style]["threatcolor"][threatSituation]
-    --    end
     elseif style == "dps" or style == "tank" or (style == "normal" and unit.isInCombat) then
-      -- problem with this is if threat system is enabled, it does not work for unique - which it should in this case!
-      local show_offtank = db.threat.toggle.OffTank
-
-      if db.ShowThreatGlowOnAttackedUnitsOnly then
-        if OnThreatTable(unit) then
-          local threatSituation = unit.threatSituation
-          if style == "tank" and show_offtank and UnitIsOffTanked(unit) then
-            threatSituation = "OFFTANK"
-          end
-          c = db.settings[style]["threatcolor"][threatSituation]
-        end
-      else
+      if ShowThreatGlow(unit) then
+        local show_offtank = db.threat.toggle.OffTank
         local threatSituation = unit.threatSituation
         if style == "tank" and show_offtank and UnitIsOffTanked(unit) then
           threatSituation = "OFFTANK"
@@ -93,3 +69,32 @@ local function SetThreatColor(unit)
 end
 
 TidyPlatesThreat.SetThreatColor = SetThreatColor
+
+--  elseif style == "tank" then
+--    local show_offtank = db.threat.toggle.OffTank
+--    if db.ShowThreatGlowOnAttackedUnitsOnly then
+--      if OnThreatTable(unit) then
+--        local threatSituation = unit.threatSituation
+--        if show_offtank and UnitIsOffTanked(unit) then
+--          threatSituation = "OFFTANK"
+--        end
+--        c = db.settings[style]["threatcolor"][threatSituation]
+--      end
+--    else
+--      local threatSituation = unit.threatSituation
+--      if show_offtank and UnitIsOffTanked(unit) then
+--        threatSituation = "OFFTANK"
+--      end
+--      c = db.settings[style]["threatcolor"][threatSituation]
+--    end
+--  elseif style == "dps" or (style == "normal" and unit.isInCombat) then
+--    -- problem with this is if threat system is enabled, it does not work for unique - which it should in this case!
+--    if db.ShowThreatGlowOnAttackedUnitsOnly then
+--      if OnThreatTable(unit) then
+--        local threatSituation = unit.threatSituation
+--        c = db.settings[style]["threatcolor"][threatSituation]
+--      end
+--    else
+--      local threatSituation = unit.threatSituation
+--      c = db.settings[style]["threatcolor"][threatSituation]
+--    end

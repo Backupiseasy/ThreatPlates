@@ -2,7 +2,7 @@ local ADDON_NAME, NAMESPACE = ...
 local ThreatPlates = NAMESPACE.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------
--- Stuff fo7r handling the configuration of Threat Plates - ThreatPlatesDB
+-- Stuff for handling the configuration of Threat Plates - ThreatPlatesDB
 ---------------------------------------------------------------------------------------------------
 
 ---------------------------------------------------------------------------------------------------
@@ -10,6 +10,8 @@ local ThreatPlates = NAMESPACE.ThreatPlates
 ---------------------------------------------------------------------------------------------------
 local L = ThreatPlates.L
 local RGB = ThreatPlates.RGB
+
+local InCombatLockdown = InCombatLockdown
 
 ---------------------------------------------------------------------------------------------------
 -- Color definitions
@@ -87,17 +89,21 @@ local function GetUnitVisibility(unit_type)
   return show, unit_visibility.UseHeadlineView
 end
 
-local function SetNamePlateClickThrough(val_friendly, val_enemy)
+local function SetNamePlateClickThrough(friendly, enemy)
   if InCombatLockdown() then
-    ThreatPlates.Print("We're unable to change nameplate clickthrough while in combat", true)
+    ThreatPlates.Print(L["Nameplate clickthrough cannot be changed while in combat."], true)
   else
     local db = TidyPlatesThreat.db.profile
+    db.NamePlateFriendlyClickThrough = friendly
+    db.NamePlateEnemyClickThrough = enemy
+    C_NamePlate.SetNamePlateFriendlyClickThrough(friendly)
+    C_NamePlate.SetNamePlateEnemyClickThrough(enemy)
+  end
+end
 
-    if val_friendly ~= nil then
-      db.NamePlateFriendlyClickThrough = val_friendly
-      db.NamePlateEnemyClickThrough = val_enemy
-    end
-
+local function SyncWithGameSettings(friendly, enemy)
+  if not InCombatLockdown() then
+    local db = TidyPlatesThreat.db.profile
     C_NamePlate.SetNamePlateFriendlyClickThrough(db.NamePlateFriendlyClickThrough)
     C_NamePlate.SetNamePlateEnemyClickThrough(db.NamePlateEnemyClickThrough)
   end
@@ -195,139 +201,48 @@ local Defaults_V1 = {
   },
 }
 
-local Defaults_V2 = {
-  allowClass = true,
-  friendlyClass = true,
-  optionRoleDetectionAutomatic = true,
-  HeadlineView = {
-    width = 140,
-  },
-  text = {
-    amount = false,
-  },
-  AuraWidget = {
-    ModeBar = {
-      Texture = "Aluminium",
-    },
-  },
-  uniqueWidget = {
-    scale = 22,
-    y = 30,
-  },
-  questWidget = {
-    ON = true,
-    ModeHPBar = false,
-  },
-  ResourceWidget  = {
-    BarTexture = "Aluminium"
-  },
-  settings = {
-    elitehealthborder = {
-      show = false,
-    },
-    healthborder = {
-      texture = "TP_HealthBarOverlayThin",
-    },
-    healthbar = {
-      texture = "Smooth",
-      backdrop = "Smooth",
-      BackgroundOpacity = 0.3,
-    },
-    castborder = {
-      texture = "Smooth",
-    },
-    castbar = {
-      texture = "Smooth",
-    },
-    name = {
-      typeface = "Cabin",
-      width = 140,
-      size = 10,
-    },
-    level = {
-      typeface = "Cabin",
-      size = 9,
-      height  = 10,
-      x  = 49,
-      vertical  = "CENTER"
-    },
-    customtext = {
-      typeface = "Cabin",
-      size = 9,
-      y = 0,
-    },
-    spelltext = {
-      typeface = "Cabin",
-      size = 8,
-      y = -14,
-      y_hv  = -14,
-    },
-    eliteicon = {
-      x = 61,
-      y = 7,
-    },
-    skullicon = {
-      x = 51,
-    },
-    raidicon = {
-      y = 30,
-      y_hv = 25,
-    },
-  },
-  threat = {
-    dps = {
-      HIGH = 1.0,
-    },
-    tank = {
-      LOW = 1.0,
-    },
-  },
-}
-
-local function SetDB(db, old_settings, new_settings)
-  for key, old_value in pairs(old_settings) do
-    if type(old_value) == "table" then
-      SetDB(db[key], old_settings[key], new_settings[key])
+local function UpdateAceDB(current_defaults, new_defaults)
+  for key, new_value in pairs(new_defaults) do
+    if type(new_value) == "table" then
+      UpdateAceDB(current_defaults[key], new_defaults[key])
     else
-      if db[key] == new_settings[key] then -- value not changed, on new default
-        db[key] = old_settings[key]
-      end
-    end
+      current_defaults[key] = new_defaults[key]
+     end
   end
 end
 
-local function DefaultSettingsV1()
-  SetDB(TidyPlatesThreat.db.profile, Defaults_V1, Defaults_V2)
+local function GetDefaultSettingsV1(defaults)
+  local new_defaults = ThreatPlates.CopyTable(defaults)
+  UpdateAceDB(new_defaults.profile, Defaults_V1)
+
+  return new_defaults
 end
 
-local function DefaultSettingsV2()
-  SetDB(TidyPlatesThreat.db.profile, Defaults_V2, Defaults_V1)
+local function SwitchToDefaultSettingsV1()
+  local db = TidyPlatesThreat.db
+  local current_profile = db:GetCurrentProfile()
+
+  db:SetProfile("_ThreatPlatesInternal")
+
+  local defaults = ThreatPlates.ActivateDefaultSettingsV1(TidyPlatesThreat.DEFAULT_SETTINGS)
+  db:RegisterDefaults(defaults)
+
+  db:SetProfile(current_profile)
+  db:DeleteProfile("_ThreatPlatesInternal")
 end
 
---local function UpdateSettingValue(old_setting, key, new_setting, new_key)
---  if not new_key then
---    new_key = key
---  end
---
---  local value = old_setting[key]
---  if value then
---    if type(value) == "table" then
---      new_setting[new_key] = t.CopyTable(value)
---    else
---      new_setting[new_key] = value
---    end
---  end
---end
+local function SwitchToCurrentDefaultSettings()
+  local db = TidyPlatesThreat.db
+  local current_profile = db:GetCurrentProfile()
 
---local function ConvertHeadlineView(profile)
---  -- convert old entry and save it
---  if not profile.headlineView then
---    profile.headlineView = {}
---  end
---  profile.headlineView.enabled = old_value
---  -- delete old entry
---end
---
+  db:SetProfile("_ThreatPlatesInternal")
+
+  db:RegisterDefaults(TidyPlatesThreat.DEFAULT_SETTINGS)
+
+  db:SetProfile(current_profile)
+  db:DeleteProfile("_ThreatPlatesInternal")
+end
+
 ---- Entries in the config db that should be migrated and deleted
 --local DEPRECATED_DB_ENTRIES = {
 --  alphaFeatures = true,
@@ -365,9 +280,9 @@ end
 -- convert current aura widget settings to aura widget 2.0
 --local function ConvertAuraWidget1(profile_name, profile)
 --  local old_setting = profile.debuffWidget
---  ThreatPlates.Print (L["xxxxProfile "] .. profile_name .. L[": Converting settings from aura widget to aura widget 2.0 ..."])
+--  ThreatPlates.Print (L"xxxxProfile "] .. profile_name .. L": Converting settings from aura widget to aura widget 2.0 ..."])
 --  if old_setting and not profile.AuraWidget then
---    ThreatPlates.Print (L["Profile "] .. profile_name .. L[": Converting settings from aura widget to aura widget 2.0 ..."])
+--    ThreatPlates.Print (L"Profile "] .. profile_name .. L": Converting settings from aura widget to aura widget 2.0 ..."])
 --    profile.AuraWidget = {}
 --    local new_setting = profile.AuraWidget
 --    if not new_setting.ModeIcon then
@@ -424,14 +339,20 @@ end
 --  --	end
 --end
 
+--local CleanupDatabase()
+--  delete internal profile, if still there: db:DeleteProfile("_ThreatPlatesInternal")
+--then
+
 -----------------------------------------------------
 -- External
 -----------------------------------------------------
 
-ThreatPlates.DefaultSettingsV1 = DefaultSettingsV1
-ThreatPlates.DefaultSettingsV2 = DefaultSettingsV2
+ThreatPlates.ActivateDefaultSettingsV1 = GetDefaultSettingsV1
+ThreatPlates.SwitchToCurrentDefaultSettings = SwitchToCurrentDefaultSettings
+ThreatPlates.SwitchToDefaultSettingsV1 = SwitchToDefaultSettingsV1
 
 --ThreatPlates.UpdateConfiguration = UpdateConfiguration
 --ThreatPlates.MigrateDatabase = MigrateDatabase
 ThreatPlates.GetUnitVisibility = GetUnitVisibility
 ThreatPlates.SetNamePlateClickThrough = SetNamePlateClickThrough
+ThreatPlates.SyncWithGameSettings = SyncWithGameSettings

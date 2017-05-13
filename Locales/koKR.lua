@@ -1,4 +1,4 @@
-local L = LibStub("AceLocale-3.0"):NewLocale("TidyPlatesThreat", "koKR", false, true)
+local L = LibStub("AceLocale-3.0"):NewLocale("TidyPlatesThreat", "koKR", false)
 if not L then return end
 
 L["    <no option>          Displays options dialog"] = "<옵션 없음>          옵션 창을 표시합니다"

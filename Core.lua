@@ -9,19 +9,19 @@ local RGB_P = t.RGB_P
 local L = t.L
 local class = t.Class()
 
+local UnitIsUnit = UnitIsUnit
+
 t.Theme = {}
 
 TidyPlatesThreat = LibStub("AceAddon-3.0"):NewAddon("TidyPlatesThreat", "AceConsole-3.0", "AceEvent-3.0")
 
-local DEFAULT_FONT = "Cabin"
-
 ---------------------------------------------------------------------------------------------------
 -- Global configs and funtions
 ---------------------------------------------------------------------------------------------------
-
 local TIDYPLATES_VERSIONS = { "6.18.10" }
 local TIDYPLATES_INSTALLED_VERSION = GetAddOnMetadata("TidyPlates", "version") or ""
 
+local DEFAULT_FONT = "Cabin"
 -- check if the correct TidyPlates version is installed
 --function CheckTidyPlatesVersion()
   -- local GlobDB = TidyPlatesThreat.db.global
@@ -128,7 +128,7 @@ end
 
 -- AceAddon function: do init tasks here, like loading the Saved Variables, or setting up slash commands.
 function TidyPlatesThreat:OnInitialize()
-  local defaults 	= {
+  TidyPlatesThreat.DEFAULT_SETTINGS = {
     global = {
       version = "",
       -- versioncheck = false,
@@ -1537,46 +1537,16 @@ function TidyPlatesThreat:OnInitialize()
         },
         unique = {
           threatcolor = {
-            LOW = {
-              r = 0,
-              g = 0,
-              b = 0,
-              a = 0
-            },
-            MEDIUM = {
-              r = 0,
-              g = 0,
-              b = 0,
-              a = 0
-            },
-            HIGH = {
-              r = 0,
-              g = 0,
-              b = 0,
-              a = 0
-            },
+            LOW = RGB_P(0, 0, 0, 0),
+            MEDIUM = RGB_P(0, 0, 0, 0),
+            HIGH = RGB_P(0, 0, 0, 0),
           },
         },
         totem = {
           threatcolor = {
-            LOW = {
-              r = 0,
-              g = 0,
-              b = 0,
-              a = 0
-            },
-            MEDIUM = {
-              r = 0,
-              g = 0,
-              b = 0,
-              a = 0
-            },
-            HIGH = {
-              r = 0,
-              g = 0,
-              b = 0,
-              a = 0
-            },
+            LOW = RGB_P(0, 0, 0, 0),
+            MEDIUM = RGB_P(0, 0, 0, 0),
+            HIGH = RGB_P(0, 0, 0, 0),
           },
         },
         normal = {
@@ -1584,29 +1554,13 @@ function TidyPlatesThreat:OnInitialize()
             LOW = RGB_P(1, 1, 1, 1),
             MEDIUM = RGB_P(1, 1, 0, 1),
             HIGH = RGB_P(1, 0, 0, 1),
-            OFFTANK = RGB(15, 170, 200, 1),
           },
         },
         dps = {
           threatcolor = {
-            LOW = {
-              r = 0,
-              g = 1,
-              b = 0,
-              a = 1
-            },
-            MEDIUM = {
-              r = 1,
-              g = 1,
-              b = 0,
-              a = 1
-            },
-            HIGH = {
-              r = 1,
-              g = 0,
-              b = 0,
-              a = 1
-            },
+            LOW = RGB_P(0, 1, 0, 1),
+            MEDIUM = RGB_P(1, 1, 0, 1),
+            HIGH = RGB_P(1, 0, 0, 1),
           },
         },
         tank = {
@@ -1741,6 +1695,13 @@ function TidyPlatesThreat:OnInitialize()
     }
   }
 
+  -- change back defaults old settings if wanted preserved it the user want's to switch back
+  local defaults = TidyPlatesThreat.DEFAULT_SETTINGS
+  if ThreatPlatesDB and ThreatPlatesDB.global and ThreatPlatesDB.global.DefaultsVersion == 1 then
+    -- copy default settings, so that their original values are
+    defaults = t.GetDefaultSettingsV1(defaults)
+  end
+
   local db = LibStub('AceDB-3.0'):New('ThreatPlatesDB', defaults, 'Default')
   self.db = db
 
@@ -1763,7 +1724,6 @@ TidyPlatesThreat.ShowConfigPanel = ShowConfigPanel
 ---------------------------------------------------------------------------------------------------
 
 function ActivateTheme()
-
   -- 	Set aura widget style
   local ProfDB = TidyPlatesThreat.db.profile
   if ProfDB.debuffWidget.style == "square" then
@@ -1889,17 +1849,11 @@ function TidyPlatesThreat:StartUp()
     -- remove (and migrate) any old DB entries
     --    ThreatPlates.MigrateDatabase()
 
-
     local GlobDB = self.db.global
     -- TODO: why not just overwrite the old version entry?
     if GlobDB.version ~= tostring(t.Meta("version")) then
       GlobDB.version = tostring(t.Meta("version"))
 --      GlobDB.versioncheck = false
-    end
-
-    -- change back defaults old settings if wanted
-    if GlobDB.DefaultsVersion == 1 then
-      t.DefaultSettingsV1()
     end
   end
 
@@ -1910,9 +1864,7 @@ function TidyPlatesThreat:StartUp()
   ThreatPlatesWidgets.PrepareFilter()
 	ThreatPlatesWidgets.ConfigAuraWidgetFilter()
   ThreatPlatesWidgets.ConfigAuraWidget()
-  C_NamePlate.SetNamePlateFriendlyClickThrough(self.db.profile.NamePlateFriendlyClickThrough)
-  C_NamePlate.SetNamePlateEnemyClickThrough(self.db.profile.NamePlateEnemyClickThrough)
-  --t.SetNamePlateClickThrough()
+  t.SyncWithGameSettings()
 end
 
 -----------------------------------------------------------------------------------
@@ -1996,6 +1948,9 @@ end
 function TidyPlatesThreat:PLAYER_REGEN_ENABLED()
   self:SetGlows()
   self:SetCvars()
+  -- Syncs addon settings with game settings in case changes weren't possible during startup, reload
+  -- or profile reset because character was in combat.
+  t.SyncWithGameSettings()
 end
 
 -- QuestWidget needs to update all nameplates when a quest was completed
@@ -2025,21 +1980,27 @@ end
 -- Completely handled by TidyPlates
 -- function TidyPlatesThreat:ACTIVE_TALENT_GROUP_CHANGED()
 -- 	if (TidyPlatesOptions.ActiveTheme == t.THEME_NAME) and self.db.profile.verbose then
--- 		t.Print(L["|cff89F559Threat Plates|r: Player spec change detected: |cff"]..t.HCC[class]..self:SpecName()..L["|r, you are now in your "]..self:RoleText()..L[" role."])
+-- 		t.Print(L"|cff89F559Threat Plates|r: Player spec change detected: |cff"]..t.HCC[class]..self:SpecName()..L"|r, you are now in your "]..self:RoleText()..L[" role."])
 -- 	end
 -- end
 
+-- Prevent Blizzard nameplates from re-appearing, but show personal ressources bar, if enabled
 local function FrameOnShow(self)
-  if not self.carrier then
+  --if not self.carrier and InterfaceOptionsNamesPanelUnitNameplatesMakeLarger:GetValue() ~= "1" then
+
+  if not self.carrier and not UnitIsUnit(self.unit, "player") then
     -- hide blizzard's nameplate
     self:Hide()
   end
 end
 
---local function FrameOnUpdate(self)
---  self.carrier:SetFrameLevel(self:GetFrameLevel())
---end
+local function FrameOnUpdate(self)
+  local frame_level = self:GetFrameLevel() * 2
+  self.carrier:SetFrameLevel(frame_level)
+  self.extended:SetFrameLevel(frame_level)
+end
 
+------------
 --local function FrameOnHide(self)
 --  --print ("Hook OnHide: ")
 --end
@@ -2051,6 +2012,6 @@ function TidyPlatesThreat:NAME_PLATE_CREATED(event, plate)
   if plate.UnitFrame then
     plate.UnitFrame:HookScript('OnShow',FrameOnShow)
   end
---  plate:HookScript('OnHide',FrameOnHide)
---  plate:HookScript('OnUpdate',FrameOnUpdate)
+  --plate:HookScript('OnHide',FrameOnHide)
+  plate:HookScript('OnUpdate', FrameOnUpdate)
 end

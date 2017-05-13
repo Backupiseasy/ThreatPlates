@@ -49,14 +49,14 @@ local function TPTPOVERLAP()
 	if tonumber(build) > 13623 then
 		if GetCVar("nameplateMotion") == "3" then
 			if InCombatLockdown() then
-				t.Print("We're unable to change this while in combat")
+				t.Print(L["We're unable to change this while in combat"])
 			else
 				SetCVar("nameplateMotion", 1)
 				t.Print(L["-->>Nameplate Overlapping is now |cffff0000OFF!|r<<--"])
 			end
 		else
 			if InCombatLockdown() then
-				t.Print("We're unable to change this while in combat")
+				t.Print(L["We're unable to change this while in combat"])
 			else
 				SetCVar("nameplateMotion", 3)
 				t.Print(L["-->>Nameplate Overlapping is now |cff00ff00ON!|r<<--"])
@@ -88,10 +88,10 @@ SlashCmdList["TPTPVERBOSE"] = TPTPVERBOSE
 
 local function PrintHelp()
 	t.Print(L["Usage: /tptp [options]"], true)
-	t.Print(L["Options:"], true)
+	t.Print(L["options:"], true)
 --	t.Print(L["  update-profiles    Migrates deprecated settings in your configuration"], true)
-	t.Print(L["  old-defaults       Reverts default settings back to look and feel before 8.4.0"], true)
-  t.Print(L["  new-defaults       Changes default settings to new look and feel (introduced with 8.4.0)"], true)
+	t.Print(L["  old-defaults       Reverts default settings back to look and feel before 8.4"], true)
+  t.Print(L["  new-defaults       Changes default settings to new look and feel (introduced with 8.4)"], true)
 	t.Print(L["  help               Prints this help message"], true)
 	t.Print(L["  <no option>        Displays options dialog"], true)
 end
@@ -106,17 +106,17 @@ local function ParseCommandLine(message)
 --		t.Print(L["Migrating deprecated settings in configuration ..."])
 --		t.UpdateConfiguration()
 	elseif message == "old-defaults" then
-		t.Print(L["Reverting default settings back to look and feel before 8.4.0 ..."])
+		t.Print(L["Reverting default settings back to look and feel before 8.4 ..."])
     TidyPlatesThreat.db.global.DefaultsVersion = 1
-		t.DefaultSettingsV1()
+		t.SwitchToDefaultSettingsV1()
     t.SetThemes(TidyPlatesThreat)
     TidyPlates:ForceUpdate()
   elseif message == "new-defaults" then
-    t.Print(L["Changing default settings to new look and feel (introduced with 8.4.0) ..."])
-    TidyPlatesThreat.db.global.DefaultsVersion = 2
-    t.DefaultSettingsV2()
-    t.SetThemes(TidyPlatesThreat)
-    TidyPlates:ForceUpdate()
+    t.Print(L["Changing default settings to new look and feel (introduced with 8.4) ..."])
+    TidyPlatesThreat.db.global.DefaultsVersion = nil
+		t.SwitchToCurrentDefaultSettings()
+		t.SetThemes(TidyPlatesThreat)
+		TidyPlates:ForceUpdate()
 	elseif message == "help" then
 		PrintHelp()
 	else
