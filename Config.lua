@@ -224,7 +224,7 @@ local function SwitchToDefaultSettingsV1()
 
   db:SetProfile("_ThreatPlatesInternal")
 
-  local defaults = ThreatPlates.ActivateDefaultSettingsV1(TidyPlatesThreat.DEFAULT_SETTINGS)
+  local defaults = ThreatPlates.GetDefaultSettingsV1(TidyPlatesThreat.DEFAULT_SETTINGS)
   db:RegisterDefaults(defaults)
 
   db:SetProfile(current_profile)
@@ -347,7 +347,7 @@ end
 -- External
 -----------------------------------------------------
 
-ThreatPlates.ActivateDefaultSettingsV1 = GetDefaultSettingsV1
+ThreatPlates.GetDefaultSettingsV1 = GetDefaultSettingsV1
 ThreatPlates.SwitchToCurrentDefaultSettings = SwitchToCurrentDefaultSettings
 ThreatPlates.SwitchToDefaultSettingsV1 = SwitchToDefaultSettingsV1
 

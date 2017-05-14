@@ -1,4 +1,10 @@
 ------------------------------------------------------
+8.4.0-Beta5 (works with TidyPlates 6.18.11)
+------------------------------------------------------
+* Fixed a bug which prevented ThreatPlates from loading correctly (mostly only names where shown, no textures).
+* Fixed a bug in localization where missing (not translated) strings resulted in a LUA error.
+
+------------------------------------------------------
 8.4.0-Beta4 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
 * Added new spells to stealth widget and improved performance of aura scanning.
