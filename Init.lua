@@ -162,22 +162,12 @@ t.SPEC_ROLES = {
 -- Debug Functions
 ---------------------------------------------------------------------------------------------------
 
-t.DEBUG = function(...)
-  --print ("DEBUG: ", ...)
-end
-
-t.DEBUG_SIZE = function(msg, data)
-  if type(data) == "table" then
-    local no = 0
-    for k, v in pairs(data) do no = no + 1 end
-    t.DEBUG(msg, no)
-  else
-    t.DEBUG(msg, "<no table>")
-  end
+local function DEBUG(...)
+	-- print ("DEBUG: ", ...)
 end
 
 -- Function from: https://coronalabs.com/blog/2014/09/02/tutorial-printing-table-contents/
-t.DEBUG_PRINT_TABLE = function(data)
+local function DEBUG_PRINT_TABLE(data)
   local print_r_cache={}
   local function sub_print_r(data,indent)
     if (print_r_cache[tostring(data)]) then
@@ -210,7 +200,31 @@ t.DEBUG_PRINT_TABLE = function(data)
   end
 end
 
-t.DEBUG_AURA_LIST = function(data)
+local function DEBUG_PRINT_UNIT(unit)
+	DEBUG("Unit:", unit.name)
+	DEBUG("  -------------------------------------------------------------")
+	DEBUG_PRINT_TABLE(unit)
+	if unit.unitid then
+		DEBUG("  isPet = ", UnitIsOtherPlayersPet(unit))
+		DEBUG("  isControlled = ", UnitPlayerControlled(unit.unitid))
+		DEBUG("  isBattlePet = ", UnitIsBattlePet(unit.unitid))
+		DEBUG("  canAttack = ", UnitCanAttack("player", unit.unitid))
+		DEBUG("  isFriend = ", TidyPlatesUtility.IsFriend(unit.name))
+		DEBUG("  isGuildmate = ", TidyPlatesUtility.IsGuildmate(unit.name))
+		DEBUG("  --------------------------------------------------------------")
+	else
+		DEBUG("  <no unit id>")
+		DEBUG("  --------------------------------------------------------------")
+	end
+end
+
+local function DEBUG_PRINT_TARGET(unit)
+	if unit.isTarget then
+		DEBUG_PRINT_UNIT(unit)
+	end
+end
+
+local function DEBUG_AURA_LIST(data)
 	local res = ""
 	for pos,val in pairs(data) do
 		local a = data[pos]
@@ -227,38 +241,6 @@ t.DEBUG_AURA_LIST = function(data)
 	end
 	t.DEBUG("Aura List = [ " .. res .. " ]")
 end
-	
-t.DEBUG_PRINT_TARGET = function(unit)
-  if unit.isTarget then
-    t.DEBUG("Unit:", unit.name)
-    t.DEBUG("  unitID = ", unit.unitID)
-    t.DEBUG("  type = ", unit.type)
-    t.DEBUG("  class = ", unit.class)
-    t.DEBUG("  reaction = ", unit.reaction)
-    t.DEBUG("  isMini = ", unit.isMini)
-    t.DEBUG("  isTapped = ", unit.isTapped)
-    t.DEBUG("  isElite = ", unit.isBoss)
-    t.DEBUG("  isBoss = ", unit.isElite)
-    t.DEBUG("  isPet = ", UnitIsOtherPlayersPet(unit))
-		t.DEBUG("  isControlled = ", UnitPlayerControlled(unit.unitid))
-		t.DEBUG("  isBattlePet = ", UnitIsBattlePet(unit.unitid))
-		t.DEBUG("  canAttack = ", UnitCanAttack("player", unit.unitid))
-		t.DEBUG("  isFriend = ", TidyPlatesUtility.IsFriend(unit.name))
-		t.DEBUG("  isGuildmate = ", TidyPlatesUtility.IsGuildmate(unit.name))
-		t.DEBUG("  ---------------------------------")
-
-    -- local enemy_totems = GetCVar("nameplateShowEnemyTotems")
-    -- local enemy_guardians = GetCVar("nameplateShowEnemyGuardians")
-    -- local enemy_pets = GetCVar("nameplateShowEnemyPets")
-    -- local enemy_minus = GetCVar("nameplateShowEnemyMinus")
-    -- print ("CVars Enemy: totems = ", enemy_totems, " / guardians = ", enemy_guardians, " / pets = ", enemy_pets, " / minus = ", enemy_minus)
-    --
-    -- local friendly_totems = GetCVar("nameplateShowFriendlyTotems")
-    -- local friendly_guardians = GetCVar("nameplateShowFriendlyGuardians")
-    -- local friendly_pets = GetCVar("nameplateShowFriendlyPets")
-    -- print ("CVars Friendly: totems = ", friendly_totems, " / guardians = ", friendly_guardians, " / pets = ", friendly_pets)
-  end
-end
 
 ---------------------------------------------------------------------------------------------------
 -- Expoerted local functions
@@ -268,3 +250,14 @@ t.RGB = RGB
 t.RGB_P = RGB_P
 t.RGB_UNPACK = RGB_UNPACK
 t.TotemNameBySpellID = TotemNameBySpellID
+
+-- debug functions
+t.DEBUG = DEBUG
+t.DEBUG_PRINT_TABLE = DEBUG_PRINT_TABLE
+t.DEBUG_PRINT_UNIT = DEBUG_PRINT_UNIT
+t.DEBUG_PRINT_TARGET = DEBUG_PRINT_TARGET
+t.DEBUG_AURA_LIST = DEBUG_AURA_LIST
+--t.DEBUG = function(...) end
+--t.DEBUG_PRINT_TABLE = function(...) end
+--t.DEBUG_PRINT_TARGET = function(...) end
+--t.DEBUG_AURA_LIST = function(...) end

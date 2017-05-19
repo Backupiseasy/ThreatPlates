@@ -86,15 +86,20 @@ local function GetUnitType(unit)
   -- not all combinations are possible in the game: Friendly Minus, Neutral Player/Totem/Pet
   if unit_type == "PLAYER" then
     unit_class = "Player"
+    -- Enemy players turn to neutral, e.g., when mounting a flight path mount, so fix faction in that situations
+    if faction == "Neutral" then faction = "Enemy" end
     unit.TP_DetailedUnitType = faction .. unit_class
   elseif totem_id then
     unit_class = "Totem"
+    if faction == "Neutral" then faction = "Enemy" end
     unit.TP_DetailedUnitType = unit_class
   elseif UnitIsOtherPlayersPet(unit_id) then -- player pets are also considered guardians, so this check has priority
     unit_class = "Pet"
+    if faction == "Neutral" then faction = "Enemy" end
     unit.TP_DetailedUnitType = unit_class
   elseif UnitPlayerControlled(unit_id) then
     unit_class = "Guardian"
+    if faction == "Neutral" then faction = "Enemy" end
     unit.TP_DetailedUnitType = unit_class
   elseif unit_mini then
     unit_class = "Minus"
@@ -118,8 +123,7 @@ local function ShowUnit(unit)
   -- If nameplate visibility is controlled by Wow itself (configured via CVars), this function is never used as
   -- nameplates aren't created in the first place (e.g. friendly NPCs, totems, guardians, pets, ...)
   local faction, unit_type = GetUnitType(unit)
-  local full_unit_type = faction .. unit_type
-  local show, headline_view = GetUnitVisibility(full_unit_type)
+  local show, headline_view = GetUnitVisibility(faction, unit_type)
 
   local db_hv = db.HeadlineView
   if not db_hv.ON then

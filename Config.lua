@@ -78,8 +78,9 @@ ThreatPlates.FRIENDLY_SUBTEXT = {
 -- Global functions for accessing the configuration
 ---------------------------------------------------------------------------------------------------
 
-local function GetUnitVisibility(unit_type)
-  local unit_visibility = TidyPlatesThreat.db.profile.Visibility[unit_type]
+local function GetUnitVisibility(faction, unit_type)
+  local full_unit_type = faction .. unit_type
+  local unit_visibility = TidyPlatesThreat.db.profile.Visibility[full_unit_type]
 
   local show = unit_visibility.Show
   if type(show) ~= "boolean" then
@@ -124,7 +125,7 @@ local Defaults_V1 = {
   },
   AuraWidget = {
     ModeBar = {
-      Texture = "Smooth",
+      Texture = "Aluminium",
     },
   },
   uniqueWidget = {
@@ -136,7 +137,7 @@ local Defaults_V1 = {
     ModeHPBar = true,
   },
   ResourceWidget  = {
-    BarTexture = "Smooth"
+    BarTexture = "Aluminium"
   },
   settings = {
     elitehealthborder = {
@@ -151,7 +152,7 @@ local Defaults_V1 = {
       BackgroundOpacity = 1,
     },
     castborder = {
-      texture = "ThreatPlatesBar",
+      texture = "TP_CastBarOverlay",
     },
     castbar = {
       texture = "ThreatPlatesBar",
@@ -188,7 +189,6 @@ local Defaults_V1 = {
     },
     raidicon = {
       y = 27,
-      y_hv = 27,
     },
   },
   threat = {

@@ -247,6 +247,7 @@ function TidyPlatesThreat:OnInitialize()
         FriendlyTotem = { Show = "nameplateShowFriendlyTotems", UseHeadlineView = false },
         FriendlyGuardian = { Show = "nameplateShowFriendlyGuardians", UseHeadlineView = false },
         FriendlyPet = { Show = "nameplateShowFriendlyPets", UseHeadlineView = false },
+        FriendlyMinus = { Show = true, UseHeadlineView = false },
         EnemyPlayer = { Show = true, UseHeadlineView = false },
         EnemyNPC = { Show = true, UseHeadlineView = false },
         EnemyTotem = { Show = "nameplateShowEnemyTotems", UseHeadlineView = false },
@@ -254,7 +255,7 @@ function TidyPlatesThreat:OnInitialize()
         EnemyPet = { Show = "nameplateShowEnemyPets", UseHeadlineView = false },
         EnemyMinus = { Show = "nameplateShowEnemyMinus", UseHeadlineView = false },
         NeutralNPC = { Show = true, UseHeadlineView = false },
-        NeutralGuardian = { Show = true, UseHeadlineView = false },
+--        NeutralGuardian = { Show = true, UseHeadlineView = false },
         NeutralMinus = { Show = true, UseHeadlineView = false },
         -- special units
         HideNormal = false,
@@ -1383,7 +1384,7 @@ function TidyPlatesThreat:OnInitialize()
         },
         elitehealthborder = {
           texture = "TP_HealthBarEliteOverlay",
-          show = false,
+          show = false, -- old default: true
         },
         healthborder = {
           texture = "TP_HealthBarOverlayThin", -- old default: "TP_HealthBarOverlay",
@@ -1458,8 +1459,8 @@ function TidyPlatesThreat:OnInitialize()
           show = true,
           theme = "default",
           scale = 15,
-          x = 61,
-          y = 7,
+          x = 61, -- old default: 64
+          y = 7, -- old default: 9
           level = 22,
           anchor = "CENTER"
         },
@@ -1494,7 +1495,7 @@ function TidyPlatesThreat:OnInitialize()
         raidicon = {
           scale = 20,
           x = 0,
-          y = 30,
+          y = 30, -- old default: 27
           x_hv = 0,
           y_hv = 25,
           anchor = "CENTER",
@@ -1530,7 +1531,7 @@ function TidyPlatesThreat:OnInitialize()
         },
         skullicon = {
           scale = 16,
-          x = 51,
+          x = 51, -- old default: 55
           y = 0,
           anchor = "CENTER",
           show = true,

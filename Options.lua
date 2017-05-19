@@ -15,7 +15,7 @@ local db;
 local UNIT_TYPES = {
   {
     Faction = "Friendly", Disabled = "nameplateShowFriends",
-    UnitTypes = { "Player", "NPC", "Totem", "Guardian", "Pet" }
+    UnitTypes = { "Player", "NPC", "Totem", "Guardian", "Pet", "Minus" }
   },
   {
     Faction = "Enemy", Disabled = "nameplateShowEnemies",
@@ -23,7 +23,7 @@ local UNIT_TYPES = {
   },
   {
     Faction = "Neutral", Disabled = "nameplateShowEnemies",
-    UnitTypes = { "NPC", "Guardian", "Minus" }
+    UnitTypes = { "NPC", "Minus" }
   }
 }
 

@@ -1,4 +1,11 @@
 ------------------------------------------------------
+8.4.0-Beta6 (works with TidyPlates 6.18.11)
+------------------------------------------------------
+* Fixed a bug where a green rectangle was shown covering a casting unit's nameplate instead of the castbar border.
+* Fixed a LUA error related to the visibility settings of units triggered by enemy players turning to neutral, e.g., when using a flight path.
+* Added a visibility option for friendly minor mobs in the configuration.
+
+------------------------------------------------------
 8.4.0-Beta5 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
 * Fixed a bug which prevented ThreatPlates from loading correctly (mostly only names where shown, no textures).
