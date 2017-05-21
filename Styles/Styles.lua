@@ -86,20 +86,15 @@ local function GetUnitType(unit)
   -- not all combinations are possible in the game: Friendly Minus, Neutral Player/Totem/Pet
   if unit_type == "PLAYER" then
     unit_class = "Player"
-    -- Enemy players turn to neutral, e.g., when mounting a flight path mount, so fix faction in that situations
-    if faction == "Neutral" then faction = "Enemy" end
     unit.TP_DetailedUnitType = faction .. unit_class
   elseif totem_id then
     unit_class = "Totem"
-    if faction == "Neutral" then faction = "Enemy" end
     unit.TP_DetailedUnitType = unit_class
   elseif UnitIsOtherPlayersPet(unit_id) then -- player pets are also considered guardians, so this check has priority
     unit_class = "Pet"
-    if faction == "Neutral" then faction = "Enemy" end
     unit.TP_DetailedUnitType = unit_class
   elseif UnitPlayerControlled(unit_id) then
     unit_class = "Guardian"
-    if faction == "Neutral" then faction = "Enemy" end
     unit.TP_DetailedUnitType = unit_class
   elseif unit_mini then
     unit_class = "Minus"
