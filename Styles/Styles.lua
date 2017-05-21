@@ -15,16 +15,9 @@ local GetUnitVisibility = ThreatPlates.GetUnitVisibility
 ---------------------------------------------------------------------------------------------------
 -- Helper functions for styles and functions
 ---------------------------------------------------------------------------------------------------
-local function OnThreatTable(unit)
-  -- "is unit inactive" from TidyPlates - fast, but doesn't meant that player is on threat table
-  -- return  (unit.health < unit.healthmax) or (unit.isInCombat or unit.threatValue > 0) or (unit.isCasting == true) then
-
-  -- nil means player is not on unit's threat table - more acurate, but slower reaction time than the above solution
-  return UnitThreatSituation("player", unit.unitid)
-end
 
 -- Mapping necessary - to removed it, config settings must be changed/migrated
--- Visibility         Scale / Alpha               Threat System
+-- Visibility    Scale / Alpha               Threat System
 -------------------------------------------------------------------------
 -- FriendlyPlayer   = FriendlyPlayer
 -- FriendlyNPC      = FriendlyNPC
@@ -50,6 +43,14 @@ local function GetSimpleUnitType(unit)
   else
     return unit_type
   end
+end
+
+local function OnThreatTable(unit)
+  -- "is unit inactive" from TidyPlates - fast, but doesn't meant that player is on threat table
+  -- return  (unit.health < unit.healthmax) or (unit.isInCombat or unit.threatValue > 0) or (unit.isCasting == true) then
+
+  -- nil means player is not on unit's threat table - more acurate, but slower reaction time than the above solution
+  return UnitThreatSituation("player", unit.unitid)
 end
 
 local function ShowThreatFeedback(unit)
@@ -86,20 +87,15 @@ local function GetUnitType(unit)
   -- not all combinations are possible in the game: Friendly Minus, Neutral Player/Totem/Pet
   if unit_type == "PLAYER" then
     unit_class = "Player"
-    -- Enemy players turn to neutral, e.g., when mounting a flight path mount, so fix faction in that situations
-    if faction == "Neutral" then faction = "Enemy" end
     unit.TP_DetailedUnitType = faction .. unit_class
   elseif totem_id then
     unit_class = "Totem"
-    if faction == "Neutral" then faction = "Enemy" end
     unit.TP_DetailedUnitType = unit_class
   elseif UnitIsOtherPlayersPet(unit_id) then -- player pets are also considered guardians, so this check has priority
     unit_class = "Pet"
-    if faction == "Neutral" then faction = "Enemy" end
     unit.TP_DetailedUnitType = unit_class
   elseif UnitPlayerControlled(unit_id) then
     unit_class = "Guardian"
-    if faction == "Neutral" then faction = "Enemy" end
     unit.TP_DetailedUnitType = unit_class
   elseif unit_mini then
     unit_class = "Minus"
@@ -109,6 +105,7 @@ local function GetUnitType(unit)
     if faction == "Neutral" then
       unit.TP_DetailedUnitType = "Neutral"
     else
+
       unit.TP_DetailedUnitType = faction .. unit_class
     end
   end
@@ -116,14 +113,15 @@ local function GetUnitType(unit)
   return faction, unit_class
 end
 
-
 local function ShowUnit(unit)
   local db = TidyPlatesThreat.db.profile
 
   -- If nameplate visibility is controlled by Wow itself (configured via CVars), this function is never used as
   -- nameplates aren't created in the first place (e.g. friendly NPCs, totems, guardians, pets, ...)
   local faction, unit_type = GetUnitType(unit)
-  local show, headline_view = GetUnitVisibility(faction, unit_type)
+  local full_unit_type = faction .. unit_type
+
+  local show, headline_view = GetUnitVisibility(full_unit_type)
 
   local db_hv = db.HeadlineView
   if not db_hv.ON then
@@ -148,16 +146,6 @@ local function ShowUnit(unit)
     show = false
   end
 
---  if b then
---    unit.TP_DetailedUnitType = "Boss"
---    show = not hide_b
---  elseif e then
---    unit.TP_DetailedUnitType = "Elite"
---    show = not hide_e
---  else
---    show = not hide_n
---  end
-
   if full_unit_type == "EnemyNPC" then
     if b then
       unit.TP_DetailedUnitType = "Boss"
@@ -176,31 +164,18 @@ end
 
 -- Returns style based on threat (currently checks for in combat, should not do hat)
 local function GetThreatStyle(unit)
-  local db = TidyPlatesThreat.db.profile
-
+  local db = TidyPlatesThreat.db.profile.threat
   local style = "normal"
-  local T = GetSimpleUnitType(unit)
-  local db_threat = db.threat
 
   -- style tank/dps only used for NPCs/non-player units
-  if (InCombatLockdown() and unit.type == "NPC" and unit.reaction ~= "FRIENDLY") and db_threat.ON then
-    --		if db.threat.toggle[T] then
-      if db_threat.nonCombat  then
-        if OnThreatTable(unit) then
-          if TidyPlatesThreat:GetSpecRole() then
-            style = "tank"
-          else
-            style = "dps"
-          end
-        end
+  if (InCombatLockdown() and unit.type == "NPC" and unit.reaction ~= "FRIENDLY") and db.ON then
+    if ShowThreatFeedback(unit) then
+      if TidyPlatesThreat:GetSpecRole()	then
+        style = "tank"
       else
-        if TidyPlatesThreat:GetSpecRole()	then
-          style = "tank"
-        else
-          style = "dps"
-        end
+        style = "dps"
       end
---		end
+		end
   end
 
   return style
@@ -226,6 +201,13 @@ local function GetUniqueNameplateSetting(unit)
 end
 
 local function SetStyle(unit)
+  if not unit.unitid then
+    -- sometimes unitid is nil, still don't know why, but it creates all kinds of LUA errors as other attributes are nil
+    -- also, e.g., unit.type, unit.name, ...
+    --ThreatPlates.DEBUG_PRINT_UNIT(unit)
+    return "empty"
+  end
+
   local db = TidyPlatesThreat.db.profile
   local style = "empty"
   local unique_setting
@@ -259,26 +241,16 @@ local function SetStyle(unit)
       elseif unit.reaction == "FRIENDLY" then
         style = "normal"
       else
+        -- could call GetThreatStyle here, but that would at a tiny overhead
         style = "normal"
-        local T = GetSimpleUnitType(unit)
         local db_threat = db.threat
         -- style tank/dps only used for hostile (enemy, neutral) NPCs
         if InCombatLockdown() and unit.type == "NPC" and db_threat.ON then -- and unit.reaction ~= "FRIENDLY" because of previous if-part
-          if db_threat.toggle[T] then
-            if db_threat.nonCombat  then
-              if OnThreatTable(unit) then
-                if TidyPlatesThreat:GetSpecRole() then
-                  style = "tank"
-                else
-                  style = "dps"
-                end
-              end
+          if ShowThreatFeedback(unit) then
+            if TidyPlatesThreat:GetSpecRole() then
+              style = "tank"
             else
-              if TidyPlatesThreat:GetSpecRole()	then
-                style = "tank"
-              else
-                style = "dps"
-              end
+              style = "dps"
             end
           end
         end
@@ -293,5 +265,4 @@ TidyPlatesThreat.OnThreatTable = OnThreatTable
 TidyPlatesThreat.ShowThreatFeedback = ShowThreatFeedback
 TidyPlatesThreat.GetThreatStyle = GetThreatStyle
 TidyPlatesThreat.GetUniqueNameplateSetting = GetUniqueNameplateSetting
-TidyPlatesThreat.GetSimpleUnitType = GetSimpleUnitType
 TidyPlatesThreat.SetStyle = SetStyle

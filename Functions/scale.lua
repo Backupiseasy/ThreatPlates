@@ -8,10 +8,9 @@ local UnitExists = UnitExists
 local InCombatLockdown = InCombatLockdown
 
 local UnitIsOffTanked = TidyPlatesThreat.UnitIsOffTanked
-local OnThreatTable = TidyPlatesThreat.OnThreatTable
 local GetUniqueNameplateSetting = TidyPlatesThreat.GetUniqueNameplateSetting
-local GetSimpleUnitType = TidyPlatesThreat.GetSimpleUnitType
 local SetStyle = TidyPlatesThreat.SetStyle
+local ShowThreatFeedback = TidyPlatesThreat.ShowThreatFeedback
 
 local function GetGeneralScale(unit)
 	local db = TidyPlatesThreat.db.profile.nameplate
@@ -56,32 +55,23 @@ local function GetThreatScale(unit)
 	end
 end
 
-local function ScaleNormal(unit)
+local function ScaleNormal(unit, override_scale)
 	local db = TidyPlatesThreat.db.profile.threat
 	local scale
 
 	if InCombatLockdown() and db.ON and db.useScale then
 		-- use general scale, if threat scaling is disabled for marked units
 		if unit.isMarked and db.marked.scale then
-			scale = GetGeneralScale(unit)
+			scale = override_scale or GetGeneralScale(unit)
 		else
-			local T = GetSimpleUnitType(unit)
-			if db.toggle[T] then
-				if db.nonCombat then
-					if OnThreatTable(unit) then
-						scale = GetThreatScale(unit)
-					else
-						scale = GetGeneralScale(unit)
-					end
-				else
-					scale = GetThreatScale(unit)
-				end
+			if ShowThreatFeedback(unit) then
+				scale = GetThreatScale(unit)
 			else
-				scale = GetGeneralScale(unit)
+				scale = override_scale or GetGeneralScale(unit)
 			end
 		end
  	else
-		scale = GetGeneralScale(unit)
+		scale = override_scale or GetGeneralScale(unit)
 	end
 
 	return scale
@@ -93,6 +83,8 @@ local function ScaleUnique(unit)
 
 	if unique_setting.overrideScale then
 		scale = ScaleNormal(unit)
+	elseif unique_setting.UseThreatColor then
+		scale = ScaleNormal(unit, unique_setting.scale)
 	else
 		scale = unique_setting.scale
 	end
@@ -109,6 +101,8 @@ local function ScaleUniqueNameOnly(unit)
 		if db.useScaling then
 			scale = ScaleNormal(unit)
 		end
+	elseif unique_setting.UseThreatColor then
+		scale = ScaleNormal(unit, unique_setting.scale)
 	else
 		scale = unique_setting.scale
 	end
@@ -146,7 +140,7 @@ local SCALE_FUNCTIONS = {
 local function SetScale(unit)
 	-- sometimes SetScale is called without calling OnUpdate/OnContextUpdate first, so TP_Style may not be initialized
 	-- true for SetAlpha, not sure for SetScale
-	local style = unit.TP_Style --or SetStyle(unit)
+	local style = unit.TP_Style or SetStyle(unit)
 
 	--local nonTargetScale = 0
 	--if db.blizzFadeS.toggle and not unit.isTarget then

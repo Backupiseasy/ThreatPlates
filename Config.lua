@@ -78,8 +78,7 @@ ThreatPlates.FRIENDLY_SUBTEXT = {
 -- Global functions for accessing the configuration
 ---------------------------------------------------------------------------------------------------
 
-local function GetUnitVisibility(faction, unit_type)
-  local full_unit_type = faction .. unit_type
+local function GetUnitVisibility(full_unit_type)
   local unit_visibility = TidyPlatesThreat.db.profile.Visibility[full_unit_type]
 
   local show = unit_visibility.Show
@@ -125,7 +124,7 @@ local Defaults_V1 = {
   },
   AuraWidget = {
     ModeBar = {
-      Texture = "Aluminium",
+      Texture = "Smooth",
     },
   },
   uniqueWidget = {
@@ -137,7 +136,7 @@ local Defaults_V1 = {
     ModeHPBar = true,
   },
   ResourceWidget  = {
-    BarTexture = "Aluminium"
+    BarTexture = "Smooth"
   },
   settings = {
     elitehealthborder = {
@@ -152,7 +151,7 @@ local Defaults_V1 = {
       BackgroundOpacity = 1,
     },
     castborder = {
-      texture = "TP_CastBarOverlay",
+      texture = "ThreatPlatesBar",
     },
     castbar = {
       texture = "ThreatPlatesBar",
@@ -189,6 +188,7 @@ local Defaults_V1 = {
     },
     raidicon = {
       y = 27,
+      y_hv = 27,
     },
   },
   threat = {
@@ -213,6 +213,49 @@ end
 
 local function GetDefaultSettingsV1(defaults)
   local new_defaults = ThreatPlates.CopyTable(defaults)
+
+--  local db = new_defaults.profile
+--  db.allowClass = false
+--  db.friendlyClass = false
+--  db.optionRoleDetectionAutomatic = false
+--  db.HeadlineView.width = 116
+--  db.text.amount = true
+--  db.AuraWidget.ModeBar.Texture = "Smooth"
+--  db.uniqueWidget.scale = 35
+--  db.uniqueWidget.y = 24
+--  db.questWidget.ON = false
+--  db.questWidget.ModeHPBar = true
+--  db.ResourceWidget.BarTexture = "Smooth"
+--  db.settings.elitehealthborder.show = true
+--  db.settings.healthborder.texture = "TP_HealthBarOverlay"
+--  db.settings.healthbar.texture = "ThreatPlatesBar"
+--  db.settings.healthbar.backdrop = "ThreatPlatesEmpty"
+--  db.settings.healthbar.BackgroundOpacity = 1
+--  db.settings.castborder.texture = "ThreatPlatesBar"
+--  db.settings.castbar.texture = "ThreatPlatesBar"
+--  db.settings.name.typeface = "Accidental Presidency"
+--  db.settings.name.width = 116
+--  db.settings.name.size = 14
+--  db.settings.level.typeface = "Accidental Presidency"
+--  db.settings.level.size = 12
+--  db.settings.level.height  = 14
+--  db.settings.level.x = 50
+--  db.settings.level.vertical = "TOP"
+--  db.settings.customtext.typeface = "Accidental Presidency"
+--  db.settings.customtext.size = 12
+--  db.settings.customtext.y = 1
+--  db.settings.spelltext.typeface = "Accidental Presidency"
+--  db.settings.spelltext.size = 12
+--  db.settings.spelltext.y = -13
+--  db.settings.spelltext.y_hv = -13
+--  db.settings.eliteicon.x = 64
+--  db.settings.eliteicon.y = 9
+--  db.settings.skullicon.x = 55
+--  db.settings.raidicon.y = 27
+--  db.settings.raidicon.y_hv = 27
+--  db.threat.dps.HIGH = 1.25
+--  db.threat.tank.LOW = 1.25
+
   UpdateAceDB(new_defaults.profile, Defaults_V1)
 
   return new_defaults

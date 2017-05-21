@@ -59,25 +59,11 @@ local function OnInitialize(plate, theme)
     local widget_list = plate.widgets
 
     -- disable all non Threat Plates widgets - unless they do it themeselves, better is  to use /reload after a theme switch
---    for widgetname, widget in pairs(plate.widgets) do
---			if not widget.TP_Widget then
---        widget:Hide()
---      end
---		end
-
---		for k,v in pairs(ThreatPlatesWidgets.list) do
---			if (not w[k]) or (not w[k].TP_Widget) then
---				local widget = v.create(plate)
---				widget.TP_Widget = true -- mark ThreatPlates widgets
---				w[k] = widget
---			end
---			-- widgets create hidden in there create function, so not necessary?
---			-- right now still necessary to enable event watchers in enabled()
---			if not v.enabled() then
---				w[k]:Hide()
---				w[k] = nil -- deleted the disabled widget, is that what we want? no re-using it later ...
---			end
---		end
+    --    for widgetname, widget in pairs(plate.widgets) do
+    --			if not widget.TP_Widget then
+    --        widget:Hide()
+    --      end
+    --		end
 
     for name,v in pairs(ThreatPlatesWidgets.list) do
       if v.enabled() then
@@ -85,7 +71,7 @@ local function OnInitialize(plate, theme)
 
         if not widget then
           widget = v.create(plate) -- UpdateConfig should/must be called in create()
---          widget.TP_Widget = true -- mark ThreatPlates widgets
+          --widget.TP_Widget = true -- mark ThreatPlates widgets
           widget_list[name] = widget
         else
           if widget.UpdateConfig then widget:UpdateConfig() end
@@ -123,12 +109,20 @@ end
 
 -- TidyPlatesGlobal_OnUpdate() is called when other data about the unit changes, or is requested by an external controller.
 local function OnUpdate(plate, unit)
+  -- sometimes unitid is nil, still don't know why, but it creates all kinds of LUA errors as other attributes are nil
+  -- also, e.g., unit.type, unit.name, ...
+  if not unit.unitid then return end
+--    print ("Nil unitid: GetNamePlateForUnit = ", f)
+--    ThreatPlates.DEBUG_PRINT_UNIT(unit)
+--    ThreatPlates.DEBUG_PRINT_UNIT(plate)
+
+  -- Enemy players turn to neutral, e.g., when mounting a flight path mount, so fix reaction in that situations
+  local unitid = unit.unitid
+  if unit.reaction == "NEUTRAL" and (unit.type == "PLAYER" or UnitPlayerControlled(unitid)) then
+    unit.reaction = "HOSTILE"
+  end
+
   local widget_list = plate.widgets
-
---  if unit.isTarget then
---    ThreatPlates.DEBUG_PRINT_TABLE(plate)
---  end
-
   for name,v in pairs(ThreatPlatesWidgets.list) do
     local show_healthbar_view = v.enabled()
     local show_headline_view = v.EnabledInHeadlineView()
@@ -176,8 +170,17 @@ end
 -- TidyPlatesGlobal_OnContextUpdate() is called when a unit is targeted or moused-over.  (Any time the unitid or GUID changes)
 -- OnContextUpdate must only do something when there is something unit-dependent to display?
 local function OnContextUpdate(plate, unit)
-  local widget_list = plate.widgets
+  -- sometimes unitid is nil, still don't know why, but it creates all kinds of LUA errors as other attributes are nil
+  -- also, e.g., unit.type, unit.name, ...
+  if not unit.unitid then return end
 
+  -- Enemy players turn to neutral, e.g., when mounting a flight path mount, so fix reaction in that situations
+  local unitid = unit.unitid
+  if unit.reaction == "NEUTRAL" and (unit.type == "PLAYER" or UnitPlayerControlled(unitid)) then
+    unit.reaction = "HOSTILE"
+  end
+
+  local widget_list = plate.widgets
   for name,v in pairs(ThreatPlatesWidgets.list) do
     local show_healthbar_view = v.enabled()
     local show_headline_view = v.EnabledInHeadlineView()

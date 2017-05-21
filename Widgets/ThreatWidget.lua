@@ -7,12 +7,9 @@ local ThreatPlates = NAMESPACE.ThreatPlates
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
-local InCombatLockdown = InCombatLockdown
-
 local UnitIsOffTanked = TidyPlatesThreat.UnitIsOffTanked
-local OnThreatTable = TidyPlatesThreat.OnThreatTable
-local GetSimpleUnitType = TidyPlatesThreat.GetSimpleUnitType
 local ShowThreatFeedback = TidyPlatesThreat.ShowThreatFeedback
+local GetUniqueNameplateSetting = TidyPlatesThreat.GetUniqueNameplateSetting
 
 local PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ThreatWidget\\"
 -- local WidgetList = {}
@@ -45,14 +42,17 @@ local function UpdateWidgetFrame(frame, unit)
   else
     local style = unit.TP_Style
 
+    if style == "unique" then
+      local unique_setting = GetUniqueNameplateSetting(unit)
+      if unique_setting.UseThreatColor then
+        -- set style to tank/dps or normal
+        style = TidyPlatesThreat.GetThreatStyle(unit)
+      end
+    end
+
     -- Check for InCombatLockdown() and unit.type == "NPC" and unit.reaction ~= "FRIENDLY" not necessary
     -- for dps/tank as these styles automatically require that
-    local show
-    if style == "unique" then
-      show = InCombatLockdown() and unit.type == "NPC" and unit.reaction ~= "FRIENDLY"
-    else
-      show = (style == "dps" or style == "tank")
-    end
+    local show = (style == "dps" or style == "tank")
 
     if show and ShowThreatFeedback(unit) then
       local threatLevel

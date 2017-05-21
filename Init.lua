@@ -1,17 +1,16 @@
 local ADDON_NAME, NAMESPACE = ...
-
 NAMESPACE.ThreatPlates = {}
-local t = NAMESPACE.ThreatPlates
+local ThreatPlates = NAMESPACE.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------
 -- Libraries
 ---------------------------------------------------------------------------------------------------
 
 local LS = LibStub
-t.L = LS("AceLocale-3.0"):GetLocale("TidyPlatesThreat")
-t.Media = LS("LibSharedMedia-3.0")
-t.MediaWidgets = Media and LS("AceGUISharedMediaWidgets-1.0", false)
-local L = t.L
+ThreatPlates.L = LS("AceLocale-3.0"):GetLocale("TidyPlatesThreat")
+ThreatPlates.Media = LS("LibSharedMedia-3.0")
+ThreatPlates.MediaWidgets = Media and LS("AceGUISharedMediaWidgets-1.0", false)
+local L = ThreatPlates.L
 
 --------------------------------------------------------------------------------------------------
 -- General Functions
@@ -32,15 +31,15 @@ local RGB_UNPACK = function(color)
 	return color.r, color.g, color.b, color.a or 1
 end
 
-t.Update = function()
+ThreatPlates.Update = function()
 	-- ForceUpdate() is called in SetTheme()
-	if (TidyPlatesOptions.ActiveTheme == t.THEME_NAME) then
-		TidyPlates:SetTheme(t.THEME_NAME)
+	if (TidyPlatesOptions.ActiveTheme == ThreatPlates.THEME_NAME) then
+		TidyPlates:SetTheme(ThreatPlates.THEME_NAME)
 	end
 	-- TidyPlates:ForceUpdate()
 end
 
-t.Meta = function(value)
+ThreatPlates.Meta = function(value)
 	local meta
 	if strlower(value) == "titleshort" then
 		meta = "TP|cff89F559TP|r"
@@ -49,11 +48,11 @@ t.Meta = function(value)
 	end
 	return meta or ""
 end
-t.Class = function()
+ThreatPlates.Class = function()
 	local _,class = UnitClass("Player")
 	return class
 end
-t.Active = function()
+ThreatPlates.Active = function()
 	local val = GetSpecialization()
 	return val
 end
@@ -67,15 +66,16 @@ local function TotemNameBySpellID(number)
 end
 
 do
-	t.HCC = {}
+	ThreatPlates.HCC = {}
 	for i=1,#CLASS_SORT_ORDER do
 		local str = RAID_CLASS_COLORS[CLASS_SORT_ORDER[i]].colorStr;
 		local str = gsub(str,"(ff)","",1)
-		t.HCC[CLASS_SORT_ORDER[i]] = str;
+		ThreatPlates.HCC[CLASS_SORT_ORDER[i]] = str;
 	end
 end
+
 -- Helper Functions
-t.STT = function(...)
+ThreatPlates.STT = function(...)
 	local s = {}
 	local i, l
 	for i = 1, select("#", ...) do
@@ -86,7 +86,8 @@ t.STT = function(...)
 	end
 	return s
 end
-t.TTS = function(s)
+
+ThreatPlates.TTS = function(s)
 	local list
 	for i=1,#s do
 		if not list then
@@ -103,11 +104,11 @@ t.TTS = function(s)
 	return list
 end
 
-t.CopyTable = function(input)
+ThreatPlates.CopyTable = function(input)
 	local output = {}
 	for k,v in pairs(input) do
 		if type(v) == "table" then
-			output[k] = t.CopyTable(v)
+			output[k] = ThreatPlates.CopyTable(v)
 		else
 			output[k] = v
 		end
@@ -119,14 +120,14 @@ end
 -- Global constants
 ---------------------------------------------------------------------------------------------------
 
-t.THEME_NAME = "Threat Plates"
+ThreatPlates.THEME_NAME = "Threat Plates"
 
-t.Art = "Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\"
-t.Widgets = "Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\Widgets\\"
-t.FullAlign = {TOPLEFT = "TOPLEFT",TOP = "TOP",TOPRIGHT = "TOPRIGHT",LEFT = "LEFT",CENTER = "CENTER",RIGHT = "RIGHT",BOTTOMLEFT = "BOTTOMLEFT",BOTTOM = "BOTTOM",BOTTOMRIGHT = "BOTTOMRIGHT"}
-t.AlignH = {LEFT = "LEFT", CENTER = "CENTER", RIGHT = "RIGHT"}
-t.AlignV = {BOTTOM = "BOTTOM", CENTER = "CENTER", TOP = "TOP"}
-t.FontStyle = {
+ThreatPlates.Art = "Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\"
+ThreatPlates.Widgets = "Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\Widgets\\"
+ThreatPlates.FullAlign = {TOPLEFT = "TOPLEFT",TOP = "TOP",TOPRIGHT = "TOPRIGHT",LEFT = "LEFT",CENTER = "CENTER",RIGHT = "RIGHT",BOTTOMLEFT = "BOTTOMLEFT",BOTTOM = "BOTTOM",BOTTOMRIGHT = "BOTTOMRIGHT"}
+ThreatPlates.AlignH = {LEFT = "LEFT", CENTER = "CENTER", RIGHT = "RIGHT"}
+ThreatPlates.AlignV = {BOTTOM = "BOTTOM", CENTER = "CENTER", TOP = "TOP"}
+ThreatPlates.FontStyle = {
 	NONE = L["None"],
 	OUTLINE = L["Outline"],
 	THICKOUTLINE = L["Thick Outline"],
@@ -134,7 +135,7 @@ t.FontStyle = {
 	["OUTLINE, MONOCHROME"] = L["Outline, Monochrome"],
 	["THICKOUTLINE, MONOCHROME"] = L["Thick Outline, Monochrome"]
 }
-t.DebuffMode = {
+ThreatPlates.DebuffMode = {
 	["whitelist"] = L["White List"],
 	["blacklist"] = L["Black List"],
 	["whitelistMine"] = L["White List (Mine)"],
@@ -143,7 +144,7 @@ t.DebuffMode = {
 	["allMine"] = L["All Auras (Mine)"]
 }
 
-t.SPEC_ROLES = {
+ThreatPlates.SPEC_ROLES = {
 	DEATHKNIGHT = { true, false, false },
 	DEMONHUNTER = { false, true },
 	DRUID 			= { false, false, true, false },
@@ -163,7 +164,7 @@ t.SPEC_ROLES = {
 ---------------------------------------------------------------------------------------------------
 
 local function DEBUG(...)
-	-- print ("DEBUG: ", ...)
+  print ("DEBUG: ", ...)
 end
 
 -- Function from: https://coronalabs.com/blog/2014/09/02/tutorial-printing-table-contents/
@@ -171,30 +172,30 @@ local function DEBUG_PRINT_TABLE(data)
   local print_r_cache={}
   local function sub_print_r(data,indent)
     if (print_r_cache[tostring(data)]) then
-      t.DEBUG (indent.."*"..tostring(data))
+      ThreatPlates.DEBUG (indent.."*"..tostring(data))
     else
       print_r_cache[tostring(data)]=true
       if (type(data)=="table") then
         for pos,val in pairs(data) do
           if (type(val)=="table") then
-            t.DEBUG (indent.."["..pos.."] => "..tostring(data).." {")
+            ThreatPlates.DEBUG (indent.."["..pos.."] => "..tostring(data).." {")
             sub_print_r(val,indent..string.rep(" ",string.len(pos)+8))
-            t.DEBUG (indent..string.rep(" ",string.len(pos)+6).."}")
+            ThreatPlates.DEBUG (indent..string.rep(" ",string.len(pos)+6).."}")
           elseif (type(val)=="string") then
-            t.DEBUG (indent.."["..pos..'] => "'..val..'"')
+            ThreatPlates.DEBUG (indent.."["..pos..'] => "'..val..'"')
           else
-            t.DEBUG (indent.."["..pos.."] => "..tostring(val))
+            ThreatPlates.DEBUG (indent.."["..pos.."] => "..tostring(val))
           end
         end
       else
-        t.DEBUG (indent..tostring(data))
+        ThreatPlates.DEBUG (indent..tostring(data))
       end
     end
   end
   if (type(data)=="table") then
-    t.DEBUG (tostring(data).." {")
+    ThreatPlates.DEBUG (tostring(data).." {")
     sub_print_r(data,"  ")
-    t.DEBUG ("}")
+    ThreatPlates.DEBUG ("}")
   else
     sub_print_r(data,"  ")
   end
@@ -219,9 +220,9 @@ local function DEBUG_PRINT_UNIT(unit)
 end
 
 local function DEBUG_PRINT_TARGET(unit)
-	if unit.isTarget then
+  if unit.isTarget then
 		DEBUG_PRINT_UNIT(unit)
-	end
+  end
 end
 
 local function DEBUG_AURA_LIST(data)
@@ -239,25 +240,25 @@ local function DEBUG_AURA_LIST(data)
 			res = res .. " - "
 		end
 	end
-	t.DEBUG("Aura List = [ " .. res .. " ]")
+	ThreatPlates.DEBUG("Aura List = [ " .. res .. " ]")
 end
 
 ---------------------------------------------------------------------------------------------------
 -- Expoerted local functions
 ---------------------------------------------------------------------------------------------------
 
-t.RGB = RGB
-t.RGB_P = RGB_P
-t.RGB_UNPACK = RGB_UNPACK
-t.TotemNameBySpellID = TotemNameBySpellID
+ThreatPlates.RGB = RGB
+ThreatPlates.RGB_P = RGB_P
+ThreatPlates.RGB_UNPACK = RGB_UNPACK
+ThreatPlates.TotemNameBySpellID = TotemNameBySpellID
 
 -- debug functions
-t.DEBUG = DEBUG
-t.DEBUG_PRINT_TABLE = DEBUG_PRINT_TABLE
-t.DEBUG_PRINT_UNIT = DEBUG_PRINT_UNIT
-t.DEBUG_PRINT_TARGET = DEBUG_PRINT_TARGET
-t.DEBUG_AURA_LIST = DEBUG_AURA_LIST
---t.DEBUG = function(...) end
---t.DEBUG_PRINT_TABLE = function(...) end
---t.DEBUG_PRINT_TARGET = function(...) end
---t.DEBUG_AURA_LIST = function(...) end
+ThreatPlates.DEBUG = DEBUG
+ThreatPlates.DEBUG_PRINT_TABLE = DEBUG_PRINT_TABLE
+ThreatPlates.DEBUG_PRINT_UNIT = DEBUG_PRINT_UNIT
+ThreatPlates.DEBUG_PRINT_TARGET = DEBUG_PRINT_TARGET
+ThreatPlates.DEBUG_AURA_LIST = DEBUG_AURA_LIST
+--ThreatPlates.DEBUG = function(...) end
+--ThreatPlates.DEBUG_PRINT_TABLE = function(...) end
+--ThreatPlates.DEBUG_PRINT_TARGET = function(...) end
+--ThreatPlates.DEBUG_AURA_LIST = function(...) end
