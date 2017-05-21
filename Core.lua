@@ -93,7 +93,7 @@ end
 
 StaticPopupDialogs["SetToThreatPlates"] = {
   preferredIndex = STATICPOPUP_NUMDIALOGS,
-  text = t.Meta("title")..L[":\n----------\nWould you like to \nset your theme to |cff89F559Threat Plates|r?\n\nClicking '|cff00ff00Yes|r' will set you to Threat Plates & reload UI. \n Clicking '|cffff0000No|r' will open the Tidy Plates options."],
+  text = t.Meta("title")..L[":\n---------------------------------------\nWould you like to \nset your theme to |cff89F559Threat Plates|r?\n\nClicking '|cff00ff00Yes|r' will set you to Threat Plates & reload UI. \n Clicking '|cffff0000No|r' will open the Tidy Plates options."],
   button1 = L["Yes"],
   button2 = L["Cancel"],
   button3 = L["No"],
@@ -106,10 +106,36 @@ StaticPopupDialogs["SetToThreatPlates"] = {
     t.Update()
   end,
   OnAlt = function()
+    -- call OpenToCategory twice to work around an update bug with WoW's internal addons category list introduced with 5.3.0
+    InterfaceOptionsFrame_OpenToCategory("Tidy Plates")
     InterfaceOptionsFrame_OpenToCategory("Tidy Plates")
   end,
   OnCancel = function()
     t.Print(L["-->>|cffff0000Activate Threat Plates from the Tidy Plates options!|r<<--"])
+  end,
+}
+
+StaticPopupDialogs["SwitchToNewLookAndFeel"] = {
+  preferredIndex = STATICPOPUP_NUMDIALOGS,
+  text = t.Meta("title")..L[":\n---------------------------------------\n|cff89F559Threat Plates|r v8.4 introduces a new default look and feel (currently shown). Do you want to switch to this new look and feel?\n\nNone of your custom settings will be changed. You can always use '/tptp classic-design' or '/tptp 8.4-design' to revert your decision later on."],
+  button1 = L["Switch"],
+  button2 = L["Don't Switch"],
+  timeout = 0,
+  whileDead = 1,
+  hideOnEscape = 1,
+  OnAccept = function()
+    TidyPlatesThreat.db.global.DefaultsVersion = 2
+    TidyPlatesThreat.db.global.CheckNewLookAndFeel = true
+    t.SwitchToCurrentDefaultSettings()
+    t.SetThemes(TidyPlatesThreat)
+    TidyPlates:ForceUpdate()
+  end,
+  OnCancel = function()
+    TidyPlatesThreat.db.global.DefaultsVersion = 1
+    TidyPlatesThreat.db.global.CheckNewLookAndFeel = true
+    t.SwitchToDefaultSettingsV1()
+    t.SetThemes(TidyPlatesThreat)
+    TidyPlates:ForceUpdate()
   end,
 }
 
@@ -119,9 +145,9 @@ function TidyPlatesThreat:ProfChange()
   --t.ClearTidyPlatesWidgets(self)
   --t.SetTidyPlatesWidgets(self)
   t.Update()
-  self:ConfigRefresh();
-  self:StartUp();
-  TidyPlates:ForceUpdate();
+  self:ConfigRefresh()
+  self:StartUp()
+  TidyPlates:ForceUpdate()
 end
 
 --[[Options and Default Settings]]--
@@ -132,6 +158,7 @@ function TidyPlatesThreat:OnInitialize()
     global = {
       version = "",
       -- versioncheck = false,
+      CheckNewLookAndFeel = false,
       DefaultsVersion = 2,
     },
     char = {
@@ -247,7 +274,7 @@ function TidyPlatesThreat:OnInitialize()
         FriendlyTotem = { Show = "nameplateShowFriendlyTotems", UseHeadlineView = false },
         FriendlyGuardian = { Show = "nameplateShowFriendlyGuardians", UseHeadlineView = false },
         FriendlyPet = { Show = "nameplateShowFriendlyPets", UseHeadlineView = false },
-        FriendlyMinus = { Show = true, UseHeadlineView = false },
+        FriendlyMinus = { Show = "nameplateShowEnemyMinus", UseHeadlineView = false },
         EnemyPlayer = { Show = true, UseHeadlineView = false },
         EnemyNPC = { Show = true, UseHeadlineView = false },
         EnemyTotem = { Show = "nameplateShowEnemyTotems", UseHeadlineView = false },
@@ -255,7 +282,7 @@ function TidyPlatesThreat:OnInitialize()
         EnemyPet = { Show = "nameplateShowEnemyPets", UseHeadlineView = false },
         EnemyMinus = { Show = "nameplateShowEnemyMinus", UseHeadlineView = false },
         NeutralNPC = { Show = true, UseHeadlineView = false },
---        NeutralGuardian = { Show = true, UseHeadlineView = false },
+        NeutralGuardian = { Show = true, UseHeadlineView = false },
         NeutralMinus = { Show = true, UseHeadlineView = false },
         -- special units
         HideNormal = false,
@@ -1384,7 +1411,7 @@ function TidyPlatesThreat:OnInitialize()
         },
         elitehealthborder = {
           texture = "TP_HealthBarEliteOverlay",
-          show = false, -- old default: true
+          show = false,
         },
         healthborder = {
           texture = "TP_HealthBarOverlayThin", -- old default: "TP_HealthBarOverlay",
@@ -1459,8 +1486,8 @@ function TidyPlatesThreat:OnInitialize()
           show = true,
           theme = "default",
           scale = 15,
-          x = 61, -- old default: 64
-          y = 7, -- old default: 9
+          x = 61,
+          y = 7,
           level = 22,
           anchor = "CENTER"
         },
@@ -1495,7 +1522,7 @@ function TidyPlatesThreat:OnInitialize()
         raidicon = {
           scale = 20,
           x = 0,
-          y = 30, -- old default: 27
+          y = 30,
           x_hv = 0,
           y_hv = 25,
           anchor = "CENTER",
@@ -1531,7 +1558,7 @@ function TidyPlatesThreat:OnInitialize()
         },
         skullicon = {
           scale = 16,
-          x = 51, -- old default: 55
+          x = 51,
           y = 0,
           anchor = "CENTER",
           show = true,
@@ -1726,10 +1753,10 @@ TidyPlatesThreat.ShowConfigPanel = ShowConfigPanel
 
 function ActivateTheme()
   -- 	Set aura widget style
-  local ProfDB = TidyPlatesThreat.db.profile
-  if ProfDB.debuffWidget.style == "square" then
+  local db = TidyPlatesThreat.db.profile
+  if db.debuffWidget.style == "square" then
     TidyPlatesWidgets.UseSquareDebuffIcon()
-  elseif ProfDB.debuffWidget.style == "wide" then
+  elseif db.debuffWidget.style == "wide" then
     TidyPlatesWidgets.UseWideDebuffIcon()
   end
 
@@ -1756,6 +1783,10 @@ local function OnActivateTheme(themeTable)
   if not themeTable then
     ThreatPlatesWidgets.DeleteWidgets()
   else
+    if not TidyPlatesThreat.db.global.CheckNewLookAndFeel then
+      StaticPopup_Show("SwitchToNewLookAndFeel")
+    end
+
     ActivateTheme()
   end
 end
@@ -1793,7 +1824,7 @@ local function ApplyHubFunctions(theme)
   theme.OnContextUpdate = ThreatPlatesWidgets.OnContextUpdate
 
   theme.OnActivateTheme = TidyPlatesThreat.OnActivateTheme -- called by Tidy Plates Core, Theme Loader
-  theme.OnChangeProfile = TidyPlatesThreat.OnChangeProfile -- used by TidyPlates when a specialication change occurs or the profile is changed
+--  theme.OnChangeProfile = TidyPlatesThreat.OnChangeProfile -- used by TidyPlates when a specialication change occurs or the profile is changed
 --  theme.ApplyProfileSettings = TidyPlatesThreat.ApplyProfileSettings
 
   theme.ShowConfigPanel = TidyPlatesThreat.ShowConfigPanel
@@ -1804,8 +1835,6 @@ end
 -- AceAddon function: Do more initialization here, that really enables the use of your addon.
 -- Register Events, Hook functions, Create Frames, Get information from the game that wasn't available in OnInitialize
 function TidyPlatesThreat:OnEnable()
-  local ProfDB = self.db.profile
-
   TidyPlatesThemeList[t.THEME_NAME] = t.Theme
   ApplyHubFunctions(t.Theme)
   ActivateTheme()
@@ -1831,6 +1860,8 @@ function TidyPlatesThreat:OnEnable()
 end
 
 function TidyPlatesThreat:StartUp()
+  local db = self.db.global
+
   if not self.db.char.welcome then
     self.db.char.welcome = true
     local Welcome = L["|cff89f559Welcome to |rTidy Plates: |cff89f559Threat Plates!\nThis is your first time using Threat Plates and you are a(n):\n|r|cff"]..t.HCC[class]..self:SpecName().." "..UnitClass("player").."|r|cff89F559.|r\n"
@@ -1843,23 +1874,35 @@ function TidyPlatesThreat:StartUp()
 
     t.Print(Welcome..L["|cff89f559You are currently in your "]..self:RoleText()..L["|cff89f559 role.|r"])
     t.Print(L["|cff89f559Additional options can be found by typing |r'/tptp'|cff89F559.|r"])
+
     if (TidyPlatesOptions.ActiveTheme ~= t.THEME_NAME) then
       StaticPopup_Show("SetToThreatPlates")
+    else
+      local new_version = tostring(t.Meta("version"))
+      if db.version ~= new_version then
+        db.version = new_version
+      end
+
+      if not db.CheckNewLookAndFeel then
+        StaticPopup_Show("SwitchToNewLookAndFeel")
+      end
     end
   else
     -- remove (and migrate) any old DB entries
     --    ThreatPlates.MigrateDatabase()
 
-    local GlobDB = self.db.global
     -- TODO: why not just overwrite the old version entry?
-    if GlobDB.version ~= tostring(t.Meta("version")) then
-      GlobDB.version = tostring(t.Meta("version"))
---      GlobDB.versioncheck = false
+    local new_version = tostring(t.Meta("version"))
+    if db.version ~= new_version then
+      db.version = new_version
+    end
+
+    if not db.CheckNewLookAndFeel then
+      StaticPopup_Show("SwitchToNewLookAndFeel")
     end
   end
 
   t.SetThemes(self)
-  --t.SetTidyPlatesWidgets(self)
   t.Update()
   -- initialize widgets and other Threat Plates stuff
   ThreatPlatesWidgets.PrepareFilter()

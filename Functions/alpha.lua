@@ -8,10 +8,9 @@ local UnitExists = UnitExists
 local InCombatLockdown = InCombatLockdown
 
 local UnitIsOffTanked = TidyPlatesThreat.UnitIsOffTanked
-local OnThreatTable = TidyPlatesThreat.OnThreatTable
 local GetUniqueNameplateSetting = TidyPlatesThreat.GetUniqueNameplateSetting
-local GetSimpleUnitType = TidyPlatesThreat.GetSimpleUnitType
 local SetStyle = TidyPlatesThreat.SetStyle
+local ShowThreatFeedback = TidyPlatesThreat.ShowThreatFeedback
 
 local function GetGeneralAlpha(unit)
 	local db = TidyPlatesThreat.db.profile.nameplate
@@ -56,7 +55,7 @@ local function GetThreatAlpha(unit)
 	end
 end
 
-local function AlphaNormal(unit)
+local function AlphaNormal(unit, override_alpha)
 	local db = TidyPlatesThreat.db.profile.blizzFadeA
 	local alpha, non_target_alpha = 0, 0
 
@@ -65,28 +64,19 @@ local function AlphaNormal(unit)
 	end
 
 	db = TidyPlatesThreat.db.profile.threat
-	if InCombatLockdown() and db.ON and db.useScale then
+	if InCombatLockdown() and db.ON and db.useAlpha then
 		-- use general alpha, if threat scaling is disabled for marked units
-		if unit.isMarked and db.marked.scale then
-			alpha = GetGeneralAlpha(unit)
+		if unit.isMarked and db.marked.alpha then
+			alpha = override_alpha or GetGeneralAlpha(unit)
 		else
-			local T = GetSimpleUnitType(unit)
-			if db.toggle[T] then
-				if db.nonCombat then
-					if OnThreatTable(unit) then
-						alpha = GetThreatAlpha(unit)
-					else
-						alpha = GetGeneralAlpha(unit)
-					end
-				else
-					alpha = GetThreatAlpha(unit)
-				end
+			if ShowThreatFeedback(unit) then
+				alpha = GetThreatAlpha(unit)
 			else
-				alpha = GetGeneralAlpha(unit)
+				alpha = override_alpha or GetGeneralAlpha(unit)
 			end
 		end
 	else
-		alpha = GetGeneralAlpha(unit)
+		alpha = override_alpha or GetGeneralAlpha(unit)
 	end
 
 	return alpha, non_target_alpha
@@ -97,12 +87,10 @@ local function AlphaUnique(unit)
 	local unique_setting = GetUniqueNameplateSetting(unit)
 	local alpha, non_target_alpha = 0, 0
 
-	if db.toggle and not unit.isTarget and UnitExists("Target") then
-		non_target_alpha = db.amount
-	end
-
 	if unique_setting.overrideAlpha then
-		alpha = AlphaNormal(unit)
+		alpha, non_target_alpha = AlphaNormal(unit)
+	elseif unique_setting.UseThreatColor then
+		alpha = AlphaNormal(unit, unique_setting.alpha)
 	else
 		alpha = unique_setting.alpha
 	end
@@ -117,14 +105,17 @@ local function AlphaUniqueNameOnly(unit)
 
 	if unique_setting.overrideAlpha then
 		if db.useAlpha then
-			alpha = AlphaNormal(unit)
+			alpha, non_target_alpha = AlphaNormal(unit)
+		else
+			alpha = 1 -- ignore all alpha settings for healthbar view
+			if db.blizzFading and not unit.isTarget and UnitExists("Target") then
+				non_target_alpha = db.blizzFadingAlpha
+			end
 		end
+	elseif unique_setting.UseThreatColor then
+		alpha = AlphaNormal(unit, unique_setting.alpha)
 	else
 		alpha = unique_setting.alpha
-
-		if db.blizzFading and not unit.isTarget and UnitExists("Target") then
-			non_target_alpha = db.blizzFadingAlpha
-		end
 	end
 
 	return alpha, non_target_alpha

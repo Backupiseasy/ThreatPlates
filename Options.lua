@@ -15,7 +15,7 @@ local db;
 local UNIT_TYPES = {
   {
     Faction = "Friendly", Disabled = "nameplateShowFriends",
-    UnitTypes = { "Player", "NPC", "Totem", "Guardian", "Pet", "Minus" }
+    UnitTypes = { "Player", "NPC", "Totem", "Guardian", "Pet", "Minus"}
   },
   {
     Faction = "Enemy", Disabled = "nameplateShowEnemies",
@@ -23,7 +23,7 @@ local UNIT_TYPES = {
   },
   {
     Faction = "Neutral", Disabled = "nameplateShowEnemies",
-    UnitTypes = { "NPC", "Minus" }
+    UnitTypes = { "NPC", "Guardian", "Minus" }
   }
 }
 
@@ -5163,197 +5163,184 @@ local function GetOptions()
               name = L["Restore Defaults"],
               order = 8,
               func = function()
-                local defaults = {
-                  name = "",
-                  showNameplate = true,
-                  showIcon = true,
-                  useStyle = true,
-                  useColor = true,
-                  allowMarked = true,
-                  overrideScale = false,
-                  overrideAlpha = false,
-                  icon = "",
-                  scale = 1,
-                  alpha = 1,
-                  color = {
-                    r = 1,
-                    g = 1,
-                    b = 1
-                  },
-                }
+                local defaults = t.CopyTable(TidyPlatesThreat.DEFAULT_SETTINGS.profile.uniqueSettings[k_c])
                 db.uniqueSettings[k_c] = defaults
-                options.args.Custom.args["#" .. k_c].name = "#" .. k_c .. ". " .. ""
-                options.args.Custom.args["#" .. k_c].args.Header.name = ""
-                options.args.Custom.args["#" .. k_c].args.Name.args.SetName.name = ""
-                options.args.Custom.args["#" .. k_c].args.Icon.args.Icon.image = ""
+                options.args.Custom.args["#" .. k_c].name = "#" .. k_c .. ". " .. defaults.name
+                options.args.Custom.args["#" .. k_c].args.Header.name = defaults.name
+                options.args.Custom.args["#" .. k_c].args.Name.args.SetName.name = defaults.name
+                options.args.Custom.args["#" .. k_c].args.Icon.args.Icon.image = defaults.icon
                 UpdateSpecial()
               end,
             },
           },
         },
-        Enabled = {
-          name = L["Enable"],
+        Enable = {
+          name = L["Nameplate Style"],
           type = "group",
           inline = true,
-          order = 2,
+          order = 10,
           args = {
             UseStyle = {
-              name = L["Use Custom Settings"],
-              type = "toggle",
+              name = L["Enable"],
               order = 1,
+              type = "toggle",
+              desc = L["This option allows you to control whether custom settings for nameplate style, color, alpha and scaling should be used for this nameplate."],
               arg = { "uniqueSettings", k_c, "useStyle" },
             },
-            NameplateStyle = {
-              name = L["Nameplate Style"],
+            HeadlineView = {
+              name = L["Healthbar View"],
               order = 20,
-              type = "group",
-              inline = true,
-              args = {
-                HideNameplate = {
-                  name = L["Hide Nameplate"],
-                  order = 1,
-                  type = "toggle",
-                  desc = L["Disables nameplates (healthbar and name) for the units of this type and only shows an icon (if enabled)."],
-                  disabled = function() return not db.uniqueSettings[k_c].useStyle end,
-                  set = function(info, val)
-                    if val then
-                      db.uniqueSettings[k_c].showNameplate = false;
-                      db.uniqueSettings[k_c].ShowHeadlineView = false;
-                      t.Update()
-                    end
-                  end,
-                  get = function(info) return not(db.uniqueSettings[k_c].showNameplate or db.uniqueSettings[k_c].ShowHeadlineView) end,
-                },
-                HeadlineView = {
-                  name = L["Healthbar View"],
-                  order = 2,
-                  type = "toggle",
-                  disabled = function() return not db.uniqueSettings[k_c].useStyle end,
-                  set = function(info, val) if val then db.uniqueSettings[k_c].ShowHeadlineView = false; SetValue(info, val) end end,
-                  arg = { "uniqueSettings", k_c, "showNameplate" },
-                },
-                HealthbarView = {
-                  name = L["Headline View"],
-                  order = 3,
-                  type = "toggle",
-                  disabled = function() return not db.uniqueSettings[k_c].useStyle end,
-                  set = function(info, val) if val then db.uniqueSettings[k_c].showNameplate = false; SetValue(info, val) end end,
-                  arg = { "uniqueSettings", k_c, "ShowHeadlineView" },
-                },
-              },
+              type = "toggle",
+              disabled = function() return not db.uniqueSettings[k_c].useStyle end,
+              set = function(info, val) if val then db.uniqueSettings[k_c].ShowHeadlineView = false; SetValue(info, val) end end,
+              arg = { "uniqueSettings", k_c, "showNameplate" },
             },
-            AlphaSettings = {
-              name = L["Alpha"],
-              type = "group",
+            HealthbarView = {
+              name = L["Headline View"],
               order = 30,
-              inline = true,
+              type = "toggle",
               disabled = function() return not db.uniqueSettings[k_c].useStyle end,
-              args = {
-                DisableOverride = {
-                  name = L["Disable Custom Alpha"],
-                  type = "toggle",
-                  desc = L["Disables the custom alpha setting for this nameplate and instead uses your normal alpha settings."],
-                  descStyle = "inline",
-                  width = "full",
-                  order = 1,
-                  arg = { "uniqueSettings", k_c, "overrideAlpha" },
-                },
-                AlphaSetting = {
-                  name = L["Custom Alpha"],
-                  type = "range",
-                  order = 2,
---                  disabled = function() if db.uniqueSettings[k_c].overrideAlpha or not db.uniqueSettings[k_c].useStyle or not db.uniqueSettings[k_c].showNameplate then return true else return false end end,
-                  min = 0,
-                  max = 1,
-                  step = 0.05,
-                  isPercent = true,
-                  arg = { "uniqueSettings", k_c, "alpha" },
-                },
-              },
+              set = function(info, val) if val then db.uniqueSettings[k_c].showNameplate = false; SetValue(info, val) end end,
+              arg = { "uniqueSettings", k_c, "ShowHeadlineView" },
             },
-            ScaleSettings = {
-              name = L["Scale"],
-              type = "group",
+            HideNameplate = {
+              name = L["Hide Nameplate"],
               order = 40,
-              inline = true,
+              type = "toggle",
+              desc = L["Disables nameplates (healthbar and name) for the units of this type and only shows an icon (if enabled)."],
               disabled = function() return not db.uniqueSettings[k_c].useStyle end,
-              args = {
-                DisableOverride = {
-                  name = L["Disable Custom Scale"],
-                  type = "toggle",
-                  desc = L["Disables the custom scale setting for this nameplate and instead uses your normal scale settings."],
-                  descStyle = "inline",
-                  width = "full",
-                  order = 1,
-                  arg = { "uniqueSettings", k_c, "overrideScale" },
-                },
-                ScaleSetting = {
-                  name = L["Custom Scale"],
-                  type = "range",
-                  order = 2,
---                  disabled = function() if db.uniqueSettings[k_c].overrideScale or not db.uniqueSettings[k_c].useStyle or not db.uniqueSettings[k_c].showNameplate then return true else return false end end,
-                  min = 0,
-                  max = 1.4,
-                  step = 0.05,
-                  isPercent = true,
-                  arg = { "uniqueSettings", k_c, "scale" },
-                },
-              },
+              set = function(info, val)
+                if val then
+                  db.uniqueSettings[k_c].showNameplate = false;
+                  db.uniqueSettings[k_c].ShowHeadlineView = false;
+                  t.Update()
+                end
+              end,
+              get = function(info) return not(db.uniqueSettings[k_c].showNameplate or db.uniqueSettings[k_c].ShowHeadlineView) end,
             },
-            HealthColor = {
-              name = L["Health Coloring"],
-              type = "group",
-              order = 50,
-              inline = true,
+          },
+        },
+        Appearance = {
+          name = L["Appearance"],
+          type = "group",
+          order = 30,
+          inline = true,
+          disabled = function() return not db.uniqueSettings[k_c].useStyle end,
+          args = {
+            CustomColor = {
+              name = L["Enable Custom Color"],
+              order = 1,
+              type = "toggle",
+              desc = L["Define a custom color for this nameplate and overwrite any other color settings."],
+              arg = { "uniqueSettings", k_c, "useColor" },
+            },
+            ColorSetting = {
+              name = L["Color"],
+              order = 2,
+              type = "color",
+              disabled = function() return not db.uniqueSettings[k_c].useStyle or not db.uniqueSettings[k_c].useColor end,
+              get = GetColor,
+              set = SetColor,
+              arg = { "uniqueSettings", k_c, "color" },
+            },
+--            ColorThreatSystem = {
+--              name = L["Use Threat Coloring"],
+--              order = 3,
+--              type = "toggle",
+--              desc = L["In combat, use coloring based on threat level as configured in the threat system. The custom color is only used out of combat."],
+--              disabled = function() return not db.uniqueSettings[k_c].useStyle or not db.uniqueSettings[k_c].useColor end,
+--              arg = {"uniqueSettings", k_c, "UseThreatColor"},
+--            },
+            UseRaidMarked = {
+              name = L["Color by Target Mark"],
+              order = 4,
+              type = "toggle",
+              desc = L["Additionally color the nameplate's healthbar or name based on the target mark if the unit is marked."],
+              disabled = function() return not db.uniqueSettings[k_c].useStyle or not db.uniqueSettings[k_c].useColor end,
+              arg = { "uniqueSettings", k_c, "allowMarked" },
+            },
+            Spacer1 = GetSpacerEntry(10),
+            CustomAlpha = {
+              name = L["Enable Custom Alpha"],
+              order = 11,
+              type = "toggle",
+              desc = L["Define a custom alpha for this nameplate and overwrite any other alpha settings."],
+              set = function(info, val) SetValue(info, not val) end,
+              get = function(info) return not GetValue(info) end,
+              arg = { "uniqueSettings", k_c, "overrideAlpha" },
+            },
+            AlphaSetting = {
+              name = L["Alpha"],
+              type = "range",
+              order = 12,
+              disabled = function() return not db.uniqueSettings[k_c].useStyle or db.uniqueSettings[k_c].overrideAlpha end,
+              min = 0,
+              max = 1,
+              step = 0.05,
+              isPercent = true,
+              arg = { "uniqueSettings", k_c, "alpha" },
+            },
+--            AlphaThreatSystem = {
+--              name = L["Use Threat Alpha"],
+--              order = 13,
+--              type = "toggle",
+--              desc = L["In combat, use alpha based on threat level as configured in the threat system. The custom alpha is only used out of combat."],
+--              disabled = function() return not db.uniqueSettings[k_c].useStyle or db.uniqueSettings[k_c].overrideAlpha end,
+--              arg = {"uniqueSettings", k_c, "UseThreatColor"},
+--            },
+            Spacer2 = GetSpacerEntry(14),
+            CustomScale = {
+              name = L["Enable Custom Scale"],
+              order = 21,
+              type = "toggle",
+              desc = L["Define a custom scaling for this nameplate and overwrite any other scaling settings."],
+              set = function(info, val) SetValue(info, not val) end,
+              get = function(info) return not GetValue(info) end,
+              arg = { "uniqueSettings", k_c, "overrideScale" },
+            },
+            ScaleSetting = {
+              name = L["Scale"],
+              order = 22,
+              type = "range",
+              disabled = function() return not db.uniqueSettings[k_c].useStyle or db.uniqueSettings[k_c].overrideScale end,
+              min = 0,
+              max = 1.4,
+              step = 0.05,
+              isPercent = true,
+              arg = { "uniqueSettings", k_c, "scale" },
+            },
+--            ScaleThreatSystem = {
+--              name = L["Use Threat Scale"],
+--              order = 23,
+--              type = "toggle",
+--              desc = L["In combat, use scaling based on threat level as configured in the threat system. The custom scale is only used out of combat."],
+--              disabled = function() return not db.uniqueSettings[k_c].useStyle or db.uniqueSettings[k_c].overrideScale end,
+--              arg = {"uniqueSettings", k_c, "UseThreatColor"},
+--            },
+--            Spacer3 = GetSpacerEntry(24),
+            Header = { type = "header", order = 24, name = "Threat Options", },
+            ThreatGlow = {
+              name = L["Enabled Threat Glow"],
+              order = 31,
+              type = "toggle",
+              desc = L["Shows a glow based on threat level around the nameplate's healthbar (in combat)."],
               disabled = function() return not db.uniqueSettings[k_c].useStyle end,
-              args = {
-                UseRaidMarked = {
-                  name = L["Color by Target Mark"],
-                  type = "toggle",
-                  desc = L["Additionally color the nameplate's healthbar or name based on the target mark if the unit is marked."],
-                  descStyle = "inline",
-                  width = "full",
-                  order = 1,
-                  arg = { "uniqueSettings", k_c, "allowMarked" },
-                },
-                Enable = {
-                  name = L["Enable Custom Colors"],
-                  type = "toggle",
-                  order = 2,
-                  arg = { "uniqueSettings", k_c, "useColor" },
-                },
-                Color = {
-                  name = L["Color"],
-                  type = "color",
-                  order = 3,
-                  get = GetColor,
-                  set = SetColor,
---                  disabled = function() if not db.uniqueSettings[k_c].useColor or not db.uniqueSettings[k_c].useStyle or not db.uniqueSettings[k_c].showNameplate then return true else return false end end,
-                  arg = { "uniqueSettings", k_c, "color" },
-                },
-                Spacer = GetSpacerEntry(4),
-                ThreatColor = {
-                  name = L["Use Threat Colors"],
-                  order = 5,
-                  type = "toggle",
-                  desc = L["Use coloring based an threat level (configured in Threat System) in combat (custom color is only used out of combat)."],
-                  arg = {"uniqueSettings", k_c, "UseThreatColor"},
-                },
-                ThreatGlow = {
-                  name = L["Show Threat Glow"],
-                  order = 5,
-                  type = "toggle",
-                  desc = L["Show a glow based on threat level around the nameplate's healthbar (in combat)."],
-                  arg = {"uniqueSettings", k_c, "UseThreatGlow"},
-                },
-              },
+              arg = {"uniqueSettings", k_c, "UseThreatGlow"},
+            },
+            ThreatSystem = {
+              name = L["Enable Threat System"],
+              order = 32,
+              type = "toggle",
+              desc = L["In combat, use coloring, alpha, and scaling based on threat level as configured in the threat system. Custom settings are only used out of combat."],
+              disabled = function() return not db.uniqueSettings[k_c].useStyle end,
+              arg = {"uniqueSettings", k_c, "UseThreatColor"},
             },
           },
         },
         Icon = {
           name = L["Icon"],
           type = "group",
-          order = 3,
+          order = 40,
           inline = true,
           disabled = function() return not db.uniqueWidget.ON end,
           args = {

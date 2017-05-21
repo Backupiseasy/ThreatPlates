@@ -1,4 +1,15 @@
 ------------------------------------------------------
+8.4.0-Beta7 (works with TidyPlates 6.18.11)
+------------------------------------------------------
+* Added a that dialog asking for which look and feel should be used as default (shown only once after the first login with v8.4).
+* Renamed commands to switch between classic defaults ("/tptp classic-design") and new defaults of v8.4 ("/tptp 8.4-design").
+* Fixed several inconsistencies in the configuration for custom nameplates (settings as well as the interaction with the threat system).
+* Fixed a bug with button "Restore Defaults" in custom nameplates which now actually restores default settings.
+* Fixed a bug in threat system where alpha was not set correctly based on threat (used wrong settings).
+* Fixed a bug where an incorrect alpha value was applied to custom nameplates in headline view.
+* Fixed a bug with the dialog shown when using Threat Plates the first time on a character that prevented the TidyPlates options from being shown after pressing "No".
+
+------------------------------------------------------
 8.4.0-Beta6 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
 * Fixed a bug where a green rectangle was shown covering a casting unit's nameplate instead of the castbar border.
