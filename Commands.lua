@@ -86,45 +86,33 @@ end
 SLASH_TPTPVERBOSE1 = "/tptpverbose"
 SlashCmdList["TPTPVERBOSE"] = TPTPVERBOSE
 
-local function PrintHelp()
-	t.Print(L["Usage: /tptp [options]"], true)
-	t.Print(L["options:"], true)
---	t.Print(L["  update-profiles    Migrates deprecated settings in your configuration"], true)
-	t.Print(L["  classic-design     Reverts default settings back to look and feel before 8.4"], true)
-  t.Print(L["  8.4-design         Changes default settings to new look and feel (introduced with 8.4)"], true)
-	t.Print(L["  help               Prints this help message"], true)
-	t.Print(L["  <no option>        Displays options dialog"], true)
-end
+--local function PrintHelp()
+--	t.Print(L["Usage: /tptp [options]"], true)
+--	t.Print(L["options:"], true)
+----	t.Print(L["  update-profiles    Migrates deprecated settings in your configuration"], true)
+--	t.Print(L["  help               Prints this help message"], true)
+--	t.Print(L["  <no option>        Displays options dialog"], true)
+--end
 
 -- /tptp
 local function ParseCommandLine(message)
+	TidyPlatesThreat:OpenOptions()
+
 	-- split commands by space
 	--for word in message:gmatch("%S+") do
-	if message == "" then
-		TidyPlatesThreat:OpenOptions()
+	--	if message == "" then
 --	elseif message == "update-profiles" then
 --		t.Print(L["Migrating deprecated settings in configuration ..."])
 --		t.UpdateConfiguration()
-	elseif message == "classic-design" then
-		t.Print(L["Reverting default settings back to look and feel before 8.4 ..."])
-    TidyPlatesThreat.db.global.DefaultsVersion = 1
-		t.SwitchToDefaultSettingsV1()
-    t.SetThemes(TidyPlatesThreat)
-    TidyPlates:ForceUpdate()
-  elseif message == "8.4-design" then
-    t.Print(L["Changing default settings to updated look and feel introduced with 8.4 ..."])
-    TidyPlatesThreat.db.global.DefaultsVersion = 2
-		t.SwitchToCurrentDefaultSettings()
-		t.SetThemes(TidyPlatesThreat)
-		TidyPlates:ForceUpdate()
-	elseif message == "internal" then
-		TidyPlatesThreat.db.global.CheckNewLookAndFeel = nil
-	elseif message == "help" then
-		PrintHelp()
-	else
-		t.Print(L["Unknown option: "] .. message, true)
-		PrintHelp()
-	end
+--	elseif message == "internal" then
+--		TidyPlatesThreat.db.global.CheckNewLookAndFeel = nil
+--		TidyPlatesThreat.db.global.DefaultsVersion = nil
+--	elseif message == "help" then
+--		PrintHelp()
+--	else
+--		t.Print(L["Unknown option: "] .. message, true)
+--		PrintHelp()
+--	end
 end
 
 -----------------------------------------------------

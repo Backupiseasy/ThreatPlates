@@ -93,7 +93,7 @@ end
 
 StaticPopupDialogs["SetToThreatPlates"] = {
   preferredIndex = STATICPOPUP_NUMDIALOGS,
-  text = t.Meta("title")..L[":\n---------------------------------------\nWould you like to \nset your theme to |cff89F559Threat Plates|r?\n\nClicking '|cff00ff00Yes|r' will set you to Threat Plates & reload UI. \n Clicking '|cffff0000No|r' will open the Tidy Plates options."],
+  text = t.Meta("title")..L[":\n---------------------------------------\nWould you like to \nset your theme to |cff89F559Threat Plates|r?\n\nClicking '|cff00ff00Yes|r' will set you to Threat Plates. \nClicking '|cffff0000No|r' will open the Tidy Plates options."],
   button1 = L["Yes"],
   button2 = L["Cancel"],
   button3 = L["No"],
@@ -117,25 +117,27 @@ StaticPopupDialogs["SetToThreatPlates"] = {
 
 StaticPopupDialogs["SwitchToNewLookAndFeel"] = {
   preferredIndex = STATICPOPUP_NUMDIALOGS,
-  text = t.Meta("title")..L[":\n---------------------------------------\n|cff89F559Threat Plates|r v8.4 introduces a new default look and feel (currently shown). Do you want to switch to this new look and feel?\n\nNone of your custom settings will be changed. You can always use '/tptp classic-design' or '/tptp 8.4-design' to revert your decision later on."],
+  text = t.Meta("title")..L[":\n---------------------------------------\n|cff89F559Threat Plates|r v8.4 introduces a new default look and feel (currently shown). Do you want to switch to this new look and feel?\n\nYou can revert your decision by changing the default look and feel again in the options dialog (under Nameplate Settings - Healthbar View - Default Settings).\n\nNote: Some of your custom settings may get overwritten if you switch back and forth."],
   button1 = L["Switch"],
   button2 = L["Don't Switch"],
   timeout = 0,
   whileDead = 1,
   hideOnEscape = 1,
-  OnAccept = function()
-    TidyPlatesThreat.db.global.DefaultsVersion = 2
+  OnAccept = function(self, _, _)
+    TidyPlatesThreat.db.global.DefaultsVersion = "SMOOTH"
     TidyPlatesThreat.db.global.CheckNewLookAndFeel = true
     t.SwitchToCurrentDefaultSettings()
     t.SetThemes(TidyPlatesThreat)
     TidyPlates:ForceUpdate()
   end,
-  OnCancel = function()
-    TidyPlatesThreat.db.global.DefaultsVersion = 1
-    TidyPlatesThreat.db.global.CheckNewLookAndFeel = true
-    t.SwitchToDefaultSettingsV1()
-    t.SetThemes(TidyPlatesThreat)
-    TidyPlates:ForceUpdate()
+  OnCancel = function(self, data, action)
+    if action == "clicked" then
+      TidyPlatesThreat.db.global.DefaultsVersion = "CLASSIC"
+      TidyPlatesThreat.db.global.CheckNewLookAndFeel = true
+      t.SwitchToDefaultSettingsV1()
+      t.SetThemes(TidyPlatesThreat)
+      TidyPlates:ForceUpdate()
+    end
   end,
 }
 
@@ -159,7 +161,7 @@ function TidyPlatesThreat:OnInitialize()
       version = "",
       -- versioncheck = false,
       CheckNewLookAndFeel = false,
-      DefaultsVersion = 2,
+      DefaultsVersion = "SMOOTH",
     },
     char = {
       welcome = false,
@@ -274,7 +276,7 @@ function TidyPlatesThreat:OnInitialize()
         FriendlyTotem = { Show = "nameplateShowFriendlyTotems", UseHeadlineView = false },
         FriendlyGuardian = { Show = "nameplateShowFriendlyGuardians", UseHeadlineView = false },
         FriendlyPet = { Show = "nameplateShowFriendlyPets", UseHeadlineView = false },
-        FriendlyMinus = { Show = "nameplateShowEnemyMinus", UseHeadlineView = false },
+        FriendlyMinus = { Show = true, UseHeadlineView = false },
         EnemyPlayer = { Show = true, UseHeadlineView = false },
         EnemyNPC = { Show = true, UseHeadlineView = false },
         EnemyTotem = { Show = "nameplateShowEnemyTotems", UseHeadlineView = false },
@@ -282,7 +284,7 @@ function TidyPlatesThreat:OnInitialize()
         EnemyPet = { Show = "nameplateShowEnemyPets", UseHeadlineView = false },
         EnemyMinus = { Show = "nameplateShowEnemyMinus", UseHeadlineView = false },
         NeutralNPC = { Show = true, UseHeadlineView = false },
-        NeutralGuardian = { Show = true, UseHeadlineView = false },
+--        NeutralGuardian = { Show = true, UseHeadlineView = false },
         NeutralMinus = { Show = true, UseHeadlineView = false },
         -- special units
         HideNormal = false,
@@ -639,7 +641,7 @@ function TidyPlatesThreat:OnInitialize()
         ShowBar = true,
         BarHeight = 12,
         BarWidth = 80,
-        BarTexture = "Smooth", -- old default: "Aluminium",
+        BarTexture = "Smooth", -- old default: "Aluminium"
         BackgroundUseForegroundColor = false,
         BackgroundColor = RGB(0, 0, 0, 0.3),
         BorderTexture = "squareline",
@@ -1411,7 +1413,7 @@ function TidyPlatesThreat:OnInitialize()
         },
         elitehealthborder = {
           texture = "TP_HealthBarEliteOverlay",
-          show = false,
+          show = false, -- old default: true
         },
         healthborder = {
           texture = "TP_HealthBarOverlayThin", -- old default: "TP_HealthBarOverlay",
@@ -1486,8 +1488,8 @@ function TidyPlatesThreat:OnInitialize()
           show = true,
           theme = "default",
           scale = 15,
-          x = 61,
-          y = 7,
+          x = 61, -- old default: 64
+          y = 7, -- old default: 9
           level = 22,
           anchor = "CENTER"
         },
@@ -1522,7 +1524,7 @@ function TidyPlatesThreat:OnInitialize()
         raidicon = {
           scale = 20,
           x = 0,
-          y = 30,
+          y = 30, -- old default: 27
           x_hv = 0,
           y_hv = 25,
           anchor = "CENTER",
@@ -1558,7 +1560,7 @@ function TidyPlatesThreat:OnInitialize()
         },
         skullicon = {
           scale = 16,
-          x = 51,
+          x = 51, -- old default: 55
           y = 0,
           anchor = "CENTER",
           show = true,
@@ -1725,7 +1727,7 @@ function TidyPlatesThreat:OnInitialize()
 
   -- change back defaults old settings if wanted preserved it the user want's to switch back
   local defaults = TidyPlatesThreat.DEFAULT_SETTINGS
-  if ThreatPlatesDB and ThreatPlatesDB.global and ThreatPlatesDB.global.DefaultsVersion == 1 then
+  if ThreatPlatesDB and ThreatPlatesDB.global and ThreatPlatesDB.global.DefaultsVersion == "CLASSIC" then
     -- copy default settings, so that their original values are
     defaults = t.GetDefaultSettingsV1(defaults)
   end
@@ -1751,7 +1753,7 @@ TidyPlatesThreat.ShowConfigPanel = ShowConfigPanel
 -- Functions called by TidyPlates
 ---------------------------------------------------------------------------------------------------
 
-function ActivateTheme()
+local function ActivateTheme()
   -- 	Set aura widget style
   local db = TidyPlatesThreat.db.profile
   if db.debuffWidget.style == "square" then
@@ -1875,16 +1877,17 @@ function TidyPlatesThreat:StartUp()
     t.Print(Welcome..L["|cff89f559You are currently in your "]..self:RoleText()..L["|cff89f559 role.|r"])
     t.Print(L["|cff89f559Additional options can be found by typing |r'/tptp'|cff89F559.|r"])
 
-    if (TidyPlatesOptions.ActiveTheme ~= t.THEME_NAME) then
+    local current_theme = TidyPlates.GetThemeName()
+    if current_theme == "" then
+      current_theme, _ = next(TidyPlatesThemeList, nil)
+    end
+
+    if current_theme ~= t.THEME_NAME then
       StaticPopup_Show("SetToThreatPlates")
     else
       local new_version = tostring(t.Meta("version"))
       if db.version ~= new_version then
         db.version = new_version
-      end
-
-      if not db.CheckNewLookAndFeel then
-        StaticPopup_Show("SwitchToNewLookAndFeel")
       end
     end
   else
@@ -1897,7 +1900,7 @@ function TidyPlatesThreat:StartUp()
       db.version = new_version
     end
 
-    if not db.CheckNewLookAndFeel then
+    if not db.CheckNewLookAndFeel and TidyPlates.GetThemeName() == t.THEME_NAME then
       StaticPopup_Show("SwitchToNewLookAndFeel")
     end
   end
