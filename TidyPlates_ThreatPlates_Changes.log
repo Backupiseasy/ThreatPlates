@@ -1,4 +1,9 @@
 ------------------------------------------------------
+8.4.0-Beta8 (works with TidyPlates 6.18.11)
+------------------------------------------------------
+* Adjusted new look and feel so that quest widget is now shown in healthbar and headline view as default.
+
+------------------------------------------------------
 8.4.0-Beta7 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
 * Added a that dialog asking for which look and feel should be used as default (shown only once after the first login with v8.4).

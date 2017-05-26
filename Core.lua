@@ -616,7 +616,7 @@ function TidyPlatesThreat:OnInitialize()
         HideInCombat = false,
         HideInCombatAttacked = true,
         HideInInstance = true,
-        ShowInHeadlineView = false,
+        ShowInHeadlineView = true, -- old default: false
       },
       stealthWidget = {
         ON = false,

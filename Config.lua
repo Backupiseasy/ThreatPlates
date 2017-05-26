@@ -223,6 +223,7 @@ local function GetDefaultSettingsV1(defaults)
   db.uniqueWidget.scale = 35
   db.uniqueWidget.y = 24
   db.questWidget.ON = false
+  db.questWidget.ShowInHeadlineView = false
   db.questWidget.ModeHPBar = true
   db.ResourceWidget.BarTexture = "Aluminium"
   db.settings.elitehealthborder.show = true
