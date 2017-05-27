@@ -10,6 +10,7 @@ local UnitPlayerControlled = UnitPlayerControlled
 local UnitIsOtherPlayersPet = UnitIsOtherPlayersPet
 local UnitIsBattlePet = UnitIsBattlePet
 
+local TOTEMS = ThreatPlates.TOTEMS
 local GetUnitVisibility = ThreatPlates.GetUnitVisibility
 
 ---------------------------------------------------------------------------------------------------
@@ -82,7 +83,7 @@ local function GetUnitType(unit)
   local unit_class
 
   local unit_id, unit_mini, unit_type = unit.unitid, unit.isMini, unit.type
-  local totem_id = TidyPlatesThreat.ThreatPlates_Totems[unit.name]
+  local totem_id = TOTEMS[unit.name]
 
   -- not all combinations are possible in the game: Friendly Minus, Neutral Player/Totem/Pet
   if unit_type == "PLAYER" then
@@ -224,7 +225,7 @@ local function SetStyle(unit)
       end
     elseif unit_type == "Totem" then
       local unit_name = unit.name
-      local tS = db.totemSettings[TidyPlatesThreat.ThreatPlates_Totems[unit_name]]
+      local tS = db.totemSettings[TOTEMS[unit_name]]
       if tS[1] then
         -- show healthbar, show headline or show nothing
         -- if db.totemSetting.ShowHeadlineView then

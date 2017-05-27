@@ -1,4 +1,8 @@
 local ADDON_NAME, NAMESPACE = ...
+
+---------------------------------------------------------------------------------------------------
+-- Define table that contains all addon-global variables and functions
+---------------------------------------------------------------------------------------------------
 NAMESPACE.ThreatPlates = {}
 local ThreatPlates = NAMESPACE.ThreatPlates
 
@@ -10,25 +14,30 @@ local LS = LibStub
 ThreatPlates.L = LS("AceLocale-3.0"):GetLocale("TidyPlatesThreat")
 ThreatPlates.Media = LS("LibSharedMedia-3.0")
 ThreatPlates.MediaWidgets = Media and LS("AceGUISharedMediaWidgets-1.0", false)
-local L = ThreatPlates.L
 
 --------------------------------------------------------------------------------------------------
 -- General Functions
 ---------------------------------------------------------------------------------------------------
 
 -- Create a percentage-based WoW color based on integer values from 0 to 255 with optional alpha value
-local RGB = function(red, green, blue, alpha)
+ThreatPlates.RGB = function(red, green, blue, alpha)
 	local color = { r = red/255, g = green/255, b = blue/255 }
 	if alpha then color.a = alpha end
 	return color
 end
 
-local RGB_P = function(red, green, blue, alpha)
+ThreatPlates.RGB_P = function(red, green, blue, alpha)
 	return { r = red, g = green, b = blue, a = alpha}
 end
 
-local RGB_UNPACK = function(color)
+ThreatPlates.RGB_UNPACK = function(color)
 	return color.r, color.g, color.b, color.a or 1
+end
+
+-- thanks to https://github.com/Perkovec/colorise-lua
+ThreatPlates.HEX2RGB = function (hex)
+  hex = hex:gsub("#","")
+  return tonumber("0x"..hex:sub(1,2)), tonumber("0x"..hex:sub(3,4)), tonumber("0x"..hex:sub(5,6))
 end
 
 ThreatPlates.Update = function()
@@ -48,16 +57,18 @@ ThreatPlates.Meta = function(value)
 	end
 	return meta or ""
 end
+
 ThreatPlates.Class = function()
 	local _,class = UnitClass("Player")
 	return class
 end
+
 ThreatPlates.Active = function()
 	local val = GetSpecialization()
 	return val
 end
 
-local function TotemNameBySpellID(number)
+ThreatPlates.TotemNameBySpellID = function(number)
 	local name = GetSpellInfo(number)
 	if not name then
 		return ""
@@ -115,49 +126,6 @@ ThreatPlates.CopyTable = function(input)
 	end
 	return output
 end
-
-----------------------------------------------------------------------------------------------------
--- Global constants
----------------------------------------------------------------------------------------------------
-
-ThreatPlates.THEME_NAME = "Threat Plates"
-
-ThreatPlates.Art = "Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\"
-ThreatPlates.Widgets = "Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\Widgets\\"
-ThreatPlates.FullAlign = {TOPLEFT = "TOPLEFT",TOP = "TOP",TOPRIGHT = "TOPRIGHT",LEFT = "LEFT",CENTER = "CENTER",RIGHT = "RIGHT",BOTTOMLEFT = "BOTTOMLEFT",BOTTOM = "BOTTOM",BOTTOMRIGHT = "BOTTOMRIGHT"}
-ThreatPlates.AlignH = {LEFT = "LEFT", CENTER = "CENTER", RIGHT = "RIGHT"}
-ThreatPlates.AlignV = {BOTTOM = "BOTTOM", CENTER = "CENTER", TOP = "TOP"}
-ThreatPlates.FontStyle = {
-	NONE = L["None"],
-	OUTLINE = L["Outline"],
-	THICKOUTLINE = L["Thick Outline"],
-	["NONE, MONOCHROME"] = L["No Outline, Monochrome"],
-	["OUTLINE, MONOCHROME"] = L["Outline, Monochrome"],
-	["THICKOUTLINE, MONOCHROME"] = L["Thick Outline, Monochrome"]
-}
-ThreatPlates.DebuffMode = {
-	["whitelist"] = L["White List"],
-	["blacklist"] = L["Black List"],
-	["whitelistMine"] = L["White List (Mine)"],
-	["blacklistMine"] = L["Black List (Mine)"],
-	["all"] = L["All Auras"],
-	["allMine"] = L["All Auras (Mine)"]
-}
-
-ThreatPlates.SPEC_ROLES = {
-	DEATHKNIGHT = { true, false, false },
-	DEMONHUNTER = { false, true },
-	DRUID 			= { false, false, true, false },
-	HUNTER			= { false, false, false },
-	MAGE				= { false, false, false },
-	MONK 				= { true, false, false },
-	PALADIN 		= { false, true, false },
-	PRIEST			= { false, false, false },
-	ROGUE				= { false, false, false },
-	SHAMAN			= { false, false, false },
-	WARLOCK			= { false, false, false },
-	WARRIOR			= { false, false, true },
-}
 
 --------------------------------------------------------------------------------------------------
 -- Debug Functions
@@ -247,18 +215,12 @@ end
 -- Expoerted local functions
 ---------------------------------------------------------------------------------------------------
 
-ThreatPlates.RGB = RGB
-ThreatPlates.RGB_P = RGB_P
-ThreatPlates.RGB_UNPACK = RGB_UNPACK
-ThreatPlates.TotemNameBySpellID = TotemNameBySpellID
-
--- debug functions
---ThreatPlates.DEBUG = DEBUG
---ThreatPlates.DEBUG_PRINT_TABLE = DEBUG_PRINT_TABLE
---ThreatPlates.DEBUG_PRINT_UNIT = DEBUG_PRINT_UNIT
---ThreatPlates.DEBUG_PRINT_TARGET = DEBUG_PRINT_TARGET
---ThreatPlates.DEBUG_AURA_LIST = DEBUG_AURA_LIST
-ThreatPlates.DEBUG = function(...) end
-ThreatPlates.DEBUG_PRINT_TABLE = function(...) end
-ThreatPlates.DEBUG_PRINT_TARGET = function(...) end
-ThreatPlates.DEBUG_AURA_LIST = function(...) end
+ThreatPlates.DEBUG = DEBUG
+ThreatPlates.DEBUG_PRINT_TABLE = DEBUG_PRINT_TABLE
+ThreatPlates.DEBUG_PRINT_UNIT = DEBUG_PRINT_UNIT
+ThreatPlates.DEBUG_PRINT_TARGET = DEBUG_PRINT_TARGET
+ThreatPlates.DEBUG_AURA_LIST = DEBUG_AURA_LIST
+--ThreatPlates.DEBUG = function(...) end
+--ThreatPlates.DEBUG_PRINT_TABLE = function(...) end
+--ThreatPlates.DEBUG_PRINT_TARGET = function(...) end
+--ThreatPlates.DEBUG_AURA_LIST = function(...) end

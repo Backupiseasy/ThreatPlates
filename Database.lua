@@ -2,77 +2,13 @@ local ADDON_NAME, NAMESPACE = ...
 local ThreatPlates = NAMESPACE.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------
--- Stuff for handling the configuration of Threat Plates - ThreatPlatesDB
+-- Stuff for handling the database with the SavedVariables of ThreatPlates (ThreatPlatesDB)
 ---------------------------------------------------------------------------------------------------
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
-local L = ThreatPlates.L
-local RGB = ThreatPlates.RGB
-
 local InCombatLockdown = InCombatLockdown
-
----------------------------------------------------------------------------------------------------
--- Color definitions
----------------------------------------------------------------------------------------------------
-
-ThreatPlates.COLOR_TAPPED = RGB(110, 110, 110, 1)	-- grey
-ThreatPlates.COLOR_TRANSPARENT = RGB(0, 0, 0, 0, 0) -- opaque
-ThreatPlates.COLOR_DC = RGB(128, 128, 128, 1) -- dray, darker than tapped color
-ThreatPlates.COLOR_FRIEND = RGB(29, 39, 61) -- Blizzard friend dark blue
-ThreatPlates.COLOR_GUILD = RGB(60, 168, 255) -- light blue
-
----------------------------------------------------------------------------------------------------
--- Global contstants for options
----------------------------------------------------------------------------------------------------
-
-ThreatPlates.ANCHOR_POINT = { TOPLEFT = "Top Left", TOP = "Top", TOPRIGHT = "Top Right", LEFT = "Left", CENTER = "Center", RIGHT = "Right", BOTTOMLEFT = "Bottom Left", BOTTOM = "Bottom ", BOTTOMRIGHT = "Bottom Right" }
-ThreatPlates.ANCHOR_POINT_SETPOINT = {
-  TOPLEFT = {"TOPLEFT", "BOTTOMLEFT"},
-  TOP = {"TOP", "BOTTOM"},
-  TOPRIGHT = {"TOPRIGHT", "BOTTOMRIGHT"},
-  LEFT = {"LEFT", "RIGHT"},
-  CENTER = {"CENTER", "CENTER"},
-  RIGHT = {"RIGHT", "LEFT"},
-  BOTTOMLEFT = {"BOTTOMLEFT", "TOPLEFT"},
-  BOTTOM = {"BOTTOM", "TOP"},
-  BOTTOMRIGHT = {"BOTTOMRIGHT", "TOPRIGHT"}
-}
-
-ThreatPlates.ENEMY_TEXT_COLOR = {
-  CLASS = "By Class",
-  CUSTOM = "By Custom Color",
-  REACTION = "By Reaction",
-  HEALTH = "By Health",
-}
--- "By Threat", "By Level Color", "By Normal/Elite/Boss"
-ThreatPlates.FRIENDLY_TEXT_COLOR = {
-  CLASS = "By Class",
-  CUSTOM = "By Custom Color",
-  REACTION = "By Reaction",
-  HEALTH = "By Health",
-}
-ThreatPlates.ENEMY_SUBTEXT = {
-  NONE = "None",
-  HEALTH = "Percent Health",
-  ROLE = "NPC Role",
-  ROLE_GUILD = "NPC Role, Guild",
-  ROLE_GUILD_LEVEL = "NPC Role, Guild, or Level",
-  LEVEL = "Level",
-  ALL = "Everything"
-}
--- NPC Role, Guild, or Quest", "Quest",
-ThreatPlates.FRIENDLY_SUBTEXT = {
-  NONE = "None",
-  HEALTH = "Percent Health",
-  ROLE = "NPC Role",
-  ROLE_GUILD = "NPC Role, Guild",
-  ROLE_GUILD_LEVEL = "NPC Role, Guild, or Level",
-  LEVEL = "Level",
-  ALL = "Everything"
-}
--- "NPC Role, Guild, or Quest", "Quest"
 
 ---------------------------------------------------------------------------------------------------
 -- Global functions for accessing the configuration
@@ -110,105 +46,8 @@ local function SyncWithGameSettings(friendly, enemy)
 end
 
 ---------------------------------------------------------------------------------------------------
--- Functions for configuration migration
+-- Functions for migration of SavedVariables settings
 ---------------------------------------------------------------------------------------------------
---local Defaults_V1 = {
---  allowClass = false,
---  friendlyClass = false,
---  optionRoleDetectionAutomatic = false,
---  HeadlineView = {
---    width = 116,
---  },
---  text = {
---    amount = true,
---  },
---  AuraWidget = {
---    ModeBar = {
---      Texture = "Aluminium",
---    },
---  },
---  uniqueWidget = {
---    scale = 35,
---    y = 24,
---  },
---  questWidget = {
---    ON = false,
---    ModeHPBar = true,
---  },
---  ResourceWidget  = {
---    BarTexture = "Aluminium"
---  },
---  settings = {
---    elitehealthborder = {
---      show = true,
---    },
---    healthborder = {
---      texture = "TP_HealthBarOverlay",
---    },
---    healthbar = {
---      texture = "ThreatPlatesBar",
---      backdrop = "ThreatPlatesEmpty",
---      BackgroundOpacity = 1,
---    },
---    castborder = {
---      texture = "TP_CastBarOverlay",
---    },
---    castbar = {
---      texture = "ThreatPlatesBar",
---    },
---    name = {
---      typeface = "Accidental Presidency",
---      width = 116,
---      size = 14,
---    },
---    level = {
---      typeface = "Accidental Presidency",
---      size = 12,
---      height  = 14,
---      x = 50,
---      vertical  = "TOP"
---    },
---    customtext = {
---      typeface = "Accidental Presidency",
---      size = 12,
---      y = 1,
---    },
---    spelltext = {
---      typeface = "Accidental Presidency",
---      size = 12,
---      y = -13,
---      y_hv  = -13,
---    },
---    eliteicon = {
---      x = 64,
---      y = 9,
---    },
---    skullicon = {
---      x = 55,
---    },
---    raidicon = {
---      y = 27,
---    },
---  },
---  threat = {
---    dps = {
---      HIGH = 1.25,
---    },
---    tank = {
---      LOW = 1.25,
---    },
---  },
---}
-
---local function UpdateAceDB(current_defaults, new_defaults)
---  for key, new_value in pairs(new_defaults) do
---    if type(new_value) == "table" then
---      UpdateAceDB(current_defaults[key], new_defaults[key])
---    else
---      current_defaults[key] = new_defaults[key]
---     end
---  end
---end
 
 local function GetDefaultSettingsV1(defaults)
   local new_defaults = ThreatPlates.CopyTable(defaults)
@@ -253,8 +92,6 @@ local function GetDefaultSettingsV1(defaults)
   db.settings.raidicon.y = 27
   db.threat.dps.HIGH = 1.25
   db.threat.tank.LOW = 1.25
-
---  UpdateAceDB(new_defaults.profile, Defaults_V1)
 
   return new_defaults
 end

@@ -11,6 +11,7 @@ local RAID_CLASS_COLORS = RAID_CLASS_COLORS
 local floor = floor
 local abs = abs
 
+local TOTEMS = ThreatPlates.TOTEMS
 local OnThreatTable = TidyPlatesThreat.OnThreatTable
 local RGB = ThreatPlates.RGB
 local RGB_P = ThreatPlates.RGB_P
@@ -190,7 +191,7 @@ local function SetHealthbarColor(unit)
     end
   elseif style == "totem" then
     -- currently, no raid marked color (or quest color) for totems, also no custom nameplates
-    local tS = db.totemSettings[TidyPlatesThreat.ThreatPlates_Totems[unit.name]]
+    local tS = db.totemSettings[TOTEMS[unit.name]]
     local allow_hp_color = tS[2]
     if allow_hp_color then
       c = tS.color

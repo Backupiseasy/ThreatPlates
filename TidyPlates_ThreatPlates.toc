@@ -12,8 +12,9 @@ Libs\Libs.xml
 Locales\Locales.xml
 
 Init.lua
+Constants.lua
+Database.lua
 Media.lua
-Config.lua
 Core.lua
 Commands.lua
 Options.lua

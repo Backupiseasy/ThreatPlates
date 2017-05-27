@@ -4948,7 +4948,7 @@ local function GetOptions()
     },
   };
 
-  local totemID = TidyPlatesThreat.TOTEM_DATA
+  local totemID = t.TOTEM_DATA
   table.sort(totemID, function(a, b) return (string.sub(a[2], 1, 1)..TotemNameBySpellID(a[1])) < (string.sub(b[2], 1, 1)..TotemNameBySpellID(b[1])) end)
   for k_c, v_c in ipairs(totemID) do
     TotemOpts[GetSpellName(totemID[k_c][1])] = {
