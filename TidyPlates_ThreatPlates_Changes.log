@@ -1,6 +1,8 @@
 ------------------------------------------------------
 8.4.0-Beta8 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
+* Fixed a bug with quest widget where the quest indication was only shown when unit tooltip was progress-based ("- Prisoners freed: x/y"), but not when progess information was missing ("- Control Orb)".
+* Fixed a bug with quest widget where the quest icon was not placed correctly for custom nameplates in headline view.
 * Adjusted new look and feel so that quest widget is now shown in healthbar and headline view as default.
 
 ------------------------------------------------------
