@@ -2,6 +2,8 @@
 if not L then return end
 
 L["  <no option>        Displays options dialog"] = "  <no option>        Öffnet den Optionsdialog"
+L["  8.4-design         Changes default settings to new look and feel (introduced with 8.4)"] = "  8.4-design         Setzt die Standardwerte auf das neue Look-and-Feel (eingeführt mit 8.4)"
+L["  classic-design     Reverts default settings back to look and feel before 8.4"] = "  classic-design     Setzt die Standardwerte zurück auf Look-and-Feel vor 8.4"
 L["  help               Prints this help message"] = "  help               Zeigt diese Hilfenachricht an"
 L["  new-defaults       Changes default settings to new look and feel (introduced with 8.4)"] = "  new-defaults       Setzt die Standardwerte auf das neue Look-and-Feels (eingeführt mit 8.4)"
 L["  old-defaults       Reverts default settings back to look and feel before 8.4"] = "  old-defaults       Setzt die Standardwerte zurück auf Look-and-Feels vor 8.4"
@@ -29,6 +31,40 @@ Blacksalsify
 (Ursprünglicher Autor: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=]
 L[". You have installed an older or incompatible version of TidyPlates: "] = ". Du hast eine ältere oder inkompatibele Version von TidyPlates installiert: "
 L[ [=[:
+---------------------------------------
+|cff89F559Threat Plates|r v8.4 introduces a new default look and feel (currently shown). Do you want to switch to this new look and feel?
+
+None of your custom settings will be changed. You can always use '/tptp classic-design' or '/tptp 8.4-design' to revert your decision later on.]=] ] = [=[:
+---------------------------------------
+|cff89F559Threat Plates|r v8.4 führt ein neues Standard-Look-and-Feel ein (dieses wird aktuell angezeigt). Willst du auf dieses Look-and-Feel wechseln?
+
+Deine aktuellen benutzerdefinierten Einstellungen werden dabei nicht verändert. Du kannst diese Entscheidung jederzeit mit '/tptp classic-design' oder '/tptp 8.4-design' rückgängig machen.]=]
+L[ [=[:
+---------------------------------------
+|cff89F559Threat Plates|r v8.4 introduces a new default look and feel (currently shown). Do you want to switch to this new look and feel?
+
+You can revert your decision by changing the default look and feel again in the options dialog (under Nameplate Settings - Healthbar View - Default Settings).
+
+Note: Some of your custom settings may get overwritten if you switch back and forth.]=] ] = [=[:
+---------------------------------------
+|cff89F559Threat Plates|r v8.4 führt ein neues Standard-Look-and-Feel ein (dieses wird aktuell angezeigt). Willst du auf dieses Look-and-Feel wechseln?
+
+Du kannst diese Entscheidung jederzeit rückgängig machen, indem zu das Standard-Look-and-Feel wieder im Opionendialog änderst (unter Namensplaketten-Einstellungen - Healthbar-View - Standardeinstellungen).
+
+Hinweis: Einige deiner benutzerdefinierten Einstellungen werden möglicherweise überschrieben, wenn du mehrmals hin und her wechselst.]=]
+L[ [=[:
+---------------------------------------
+Would you like to
+set your theme to |cff89F559Threat Plates|r?
+
+Clicking '|cff00ff00Yes|r' will set you to Threat Plates & reload UI.
+ Clicking '|cffff0000No|r' will open the Tidy Plates options.]=] ] = [=[:
+---------------------------------------
+Möchtest Du Deine Anzeige auf |cff89F559Threat Plates|r umschalten?
+
+Ein Klick auf '|cff00ff00Ja|r' wird Threat Plates voreinstellen und das UI neuladen.
+Durch Klick auf '|cffff0000Nein|r' öffnen sich die Tidy Plates-Optionen.]=]
+L[ [=[:
 ----------
 Would you like to
 set your theme to |cff89F559Threat Plates|r?
@@ -41,6 +77,30 @@ Anzeige auf |cff89F559Threat Plates|r umschalten?
 
 Ein Klick auf '|cff00ff00Ja|r' wird Threat Plates voreinstellen und das UI neuladen.
  Durch Klick auf '|cffff0000Nein|r' öffnen sich die Tidy Plates-Optionen.]=]
+L[ [=[:
+---------------------------------------
+Would you like to
+set your theme to |cff89F559Threat Plates|r?
+
+Clicking '|cff00ff00Yes|r' will set you to Threat Plates & reload UI.
+Clicking '|cffff0000No|r' will open the Tidy Plates options.]=] ] = [=[:
+---------------------------------------
+Möchtest Du Deine Anzeige auf |cff89F559Threat Plates|r umschalten?
+
+Ein Klick auf '|cff00ff00Ja|r' wird Threat Plates voreinstellen und das UI neuladen.
+Durch Klick auf '|cffff0000Nein|r' öffnen sich die Tidy Plates-Optionen.]=]
+L[ [=[:
+---------------------------------------
+Would you like to
+set your theme to |cff89F559Threat Plates|r?
+
+Clicking '|cff00ff00Yes|r' will set you to Threat Plates.
+Clicking '|cffff0000No|r' will open the Tidy Plates options.]=] ] = [=[:
+---------------------------------------
+Möchtest Du Deine Anzeige auf |cff89F559Threat Plates|r umschalten?
+
+Ein Klick auf '|cff00ff00Ja|r' wird Threat Plates voreinstellen.
+Durch Klick auf '|cffff0000Nein|r' öffnen sich die Tidy Plates-Optionen.]=]
 L["|cff00ff00High Threat|r"] = "|cff00ff00Hohe Bedrohung|r"
 L["|cff00ff00Low Threat|r"] = "|cff00ff00Niedrige Bedrohung|r"
 L["|cff00ff00Tank|r"] = "|cff00ff00Tank|r"
@@ -126,7 +186,9 @@ L["Castbar"] = "Zauberleiste"
 L["Casting Units"] = "Zaubernde Einheiten"
 L["Change the color depending on the amount of health points the nameplate shows."] = "Verändert die Farbe abhängig von der Höhe der Gesundheitspunkte, die die Namensplakette anzeigt."
 L["Change the color depending on the reaction of the unit (friendly, hostile, neutral)."] = "Verändert die Farbe abhängig von der Reaktion der Einheit (freundlich, feindlich, neutral)."
+L["Changes the default settings to the selected design. Some of your custom settings may get overwritten if you switch back and forth.."] = "Legt das ausgewählte Design als deine Standardeinstellungen fest. Einige deiner benutzerdefinierten Einstellungen werden möglicherweise überschrieben, wenn du mehrmals hin und her wechselst."
 L["Changing default settings to new look and feel (introduced with 8.4) ..."] = "Setze die Standardwerte auf das neue Look-and-Feel (eingeführt mit 8.4) ..."
+L["Changing default settings to updated look and feel introduced with 8.4 ..."] = "Setze die Standardwerte auf das aktualisierte Look-and-Feel (eingeführt mit 8.4) ..."
 L["Changing these settings will alter the placement of the nameplates, however the mouseover area does not follow. |cffff0000Use with caution!|r"] = "Änderungen an dieser Einstellung wird die Platzierung der Namensplatten verschieben, die Mouseover-Informationen werden dem aber nicht folgen. |cffff0000Vorsicht im Gebrauch!|r"
 L["Class Icons"] = "Klassen-Symbole"
 L["Clear"] = "Löschen"
@@ -141,8 +203,8 @@ L["Color by Dispel Type"] = "Einfärben nach Bannart"
 L["Color by Health"] = "Einfärben nach Gesundheit"
 L["Color by Reaction"] = "Einfärben nach Reaktion"
 L["Color by Target Mark"] = "Einfärben nach Zielmarkierung"
-L["Color Healthbar By Enemy Class"] = "Gesundheitsleiste nach Klasse bei gegnerischen Einheiten einfärben"
-L["Color Healthbar By Friendly Class"] = "Gesundheitsleiste nach Klasse bei freundlichen Einheiten einfärben"
+L["Color Healthbar By Enemy Class"] = "Gegnerischen Einheiten"
+L["Color Healthbar By Friendly Class"] = "Freundlichen Einheiten"
 L["Color Healthbar by Target Marks in Healthbar View"] = "Gesundheitsleiste nach Zielmarkierung in Healthbar-View einfärben"
 L["Color Name by Target Marks in Headline View"] = "Gesundheitsleiste nach Zielmarkierung im Headline-View einfärben"
 L["Coloring"] = "Farben"
@@ -166,7 +228,12 @@ L["Custom-Text-specific"] = "Benutzerdefinierter-Text-spezifisch"
 L["Darnavan"] = "Darnavan"
 L["Default Buff Color"] = "Standardfarbe für Buffs"
 L["Default Debuff Color"] = "Standardfarbe für Debuffs"
+L["Default Settings"] = "Standardeinstellungen"
+L["Default Settings (All Profiles)"] = "Standardeinstellungen (Alle Profile)"
 L["Deficit Text"] = "Defizit-Text"
+L["Define a custom alpha for this nameplate and overwrite any other alpha settings."] = "Lege einen benutzerdefinierten Alphawert für diese Namensplakette fest und überschreibe damit alle anderen Alphaeinstellungen."
+L["Define a custom color for this nameplate and overwrite any other color settings."] = "Lege eine benutzerdefinierte Farbe für diese Namensplakette fest und überschreibe damit alle anderen Farbeinstellungen."
+L["Define a custom scaling for this nameplate and overwrite any other scaling settings."] = "Lege eine benutzerdefinierte Skalierung für diese Namensplakette fest und überschreibe damit alle anderen Skalierungseinstellungen."
 L["Define base alpha settings for various unit types. Only one of these settings is applied to a unit at the same time, i.e., they are mutually exclusive."] = "Lege Basis-Alphawert pro Einheitstyp fest. Nur eine dieser Einstellungen wird zu einem Zeitpunkt auf eine Einheit angewendet, d.h. sie schließen sich gegenseitig aus."
 L["Define base scale settings for various unit types. Only one of these settings is applied to a unit at the same time, i.e., they are mutually exclusive."] = "Lege die Basis-Skalierung pro Einheitstyp fest. Nur eine dieser Einstellungen wird zu einem Zeitpunkt auf eine Einheit angewendet, d.h. sie schließen sich gegenseitig aus."
 L["Define if threat feedback should be shown for various units based on their type or status."] = "Lege für Gegner, basierend auf ihrem Typ oder Status, fest, ob ein Bedrohungsfeedback anzeigt werden"
@@ -184,6 +251,7 @@ L["Display health percentage text."] = "Zeigt den Prozent-Text an."
 L["Display health text on targets with full HP."] = "Zeigt den Lebenspunkte-Text bei Zielen mit voller Gesundheit an."
 L["Display Settings"] = "Einstellungen für Darstellung"
 L["Do not sort auras."] = "Auren nicht sortieren"
+L["Don't Switch"] = "Nicht Wechseln"
 L["DPS/Healing"] = "DPS/Heiler"
 L["Drudge Ghoul"] = "Ghulsklave"
 L["Duration"] = "Dauer"
@@ -191,7 +259,7 @@ L["Ebon Gargoyle"] = "Schwarzer Gargoyle"
 L["Edge Size"] = "Randgröße"
 L["Elite Border"] = "Elite-Markierung"
 L["Elite Icon"] = "Elite-Symbol"
-L["Elite Icon Style"] = "Elite-Symbol-Style"
+L["Elite Icon Style"] = "Elite-Symbol-Stil"
 L["Empowered Adherent"] = "Machterfüllter Kultist"
 L["Enable"] = "Einschalten"
 L["Enable Adjustments"] = "Anpassungen einschalten"
@@ -199,10 +267,13 @@ L["Enable Alpha Threat"] = "Anpassung des Alphawerts bei Bedrohung einschalten"
 L["Enable Arena Widget"] = "Arena-Widget einschalten"
 L["Enable Aura Widget 2.0"] = "Aura-Widget 2.0 einschalten"
 L["Enable Blizzard 'On-Target' Fading"] = "Blizzards 'Am-Ziel'-Verblassen einschalten"
-L["Enable Class Icons Widget"] = "Klassen-Symbole einschalten"
+L["Enable Class Icons Widget"] = "Klassensymbole einschalten"
 L["Enable Coloring"] = "Farbcodierung einschalten"
 L["Enable Combo Points Widget"] = "Combo-Points-Widget einschalten"
-L["Enable Custom Colors"] = "Eigene Farbwahl aktivieren"
+L["Enable Custom Alpha"] = "Benutzerdefinierten Alphawert einschalten"
+L["Enable Custom Color"] = "Benutzerdefinierte Farbe einschalten"
+L["Enable Custom Colors"] = "Benutzerdefinierte Farbe einschalten"
+L["Enable Custom Scale"] = "Benutzerdefinierte Skalierung einschalten"
 L["Enable Enemy"] = "Gegnerische Einheiten einschalten"
 L["Enable Friendly"] = "Freundliche Einheiten einschalten"
 L["Enable Friends"] = "Freunde einschalten"
@@ -221,6 +292,7 @@ L["Enable Target Highlight Widget"] = "Ziel-Highlight-Widget einschalten"
 L["Enable Threat Coloring of Healthbar"] = "Anpassung der Gesundheitsleistenfarbe bei Bedrohung einschalten"
 L["Enable Threat System"] = "Bedrohungssystem einschalten"
 L["Enable Threat Textures"] = "Bedrohungstexturen einschalten"
+L["Enabled Threat Glow"] = "Leuchteffekt bei Bedrohung einschalten"
 L["Enabling this will allow you to set the alpha adjustment for non-target nameplates."] = "Das Einschalten dieser Funktion ermöglicht es, den Alphawert für Nicht-Ziel-Einheiten festzulegen."
 L["Enabling this will allow you to set the alpha adjustment for non-target names in headline view."] = "Das Einschalten dieser Funktion ermöglicht es, den Alphawert für Nicht-Ziel-Einheiten im Headline-View festzulegen."
 L["Enemy Custom Text"] = "Benutzerdefinierter Text für Gegner"
@@ -278,8 +350,8 @@ L["Horizontal Alignment"] = "Horizontale Ausrichtung"
 L["Horizontal Spacing"] = "Horizontaler Zwischenraum"
 L["Hostile NPCs"] = "Feindliche NPCs"
 L["Hostile Players"] = "Feindliche Spieler"
-L["Icon"] = "Icon"
-L["Icon Mode"] = "Modus Icon"
+L["Icon"] = "Symbol"
+L["Icon Mode"] = "Symbol-Modus"
 L["Icon Style"] = "Symbol-Stil"
 L["If checked, nameplates of mobs attacking another tank can be shown with different color, scale, and opacity."] = "Wenn ausgewählt, können die Namensplaketten von Einheiten, die einen anderen Tank angreifen, in einer anderen Farbe, Skalierung und Transparenz angezeigt werden."
 L["If checked, threat feedback from boss level mobs will be shown."] = "Wenn ausgewählt, wird Bedrohungsfeedback von Boss-Gegnern angezeigt."
@@ -297,6 +369,10 @@ L["Ignore Marked Units"] = "Markierte Einheiten ignorieren"
 L["Ignored Alpha"] = "Transparenz ignorierter Einheiten"
 L["Ignored Scaling"] = "Skalierung ignoriert"
 L["Immortal Guardian"] = "Unvergängliche Wache"
+L["In combat, use alpha based on threat level as configured in the threat system. The custom alpha is only used out of combat."] = "Verwende im Kampf einen Alphawert, der auf der Bedrohungsstufe basiert (wie im im Bedrohungssystem konfiguriert). Der benutzerdefinierte Alphawert wird nur außerhalb des Kampfes verwendet."
+L["In combat, use coloring based on threat level as configured in the threat system. The custom color is only used out of combat."] = "Verwende im Kampf eine Farbe, die auf der Bedrohungsstufe basiert (wie im im Bedrohungssystem konfiguriert). Die benutzerdefinierte Farbe wird nur außerhalb des Kampfes verwendet."
+L["In combat, use coloring, alpha, and scaling based on threat level as configured in the threat system. Custom settings are only used out of combat."] = "Verwende im Kampf Einstellungen für Farbe, Alphawert und Skalierung, die auf der Bedrohungsstufe basieren (wie im im Bedrohungssystem konfiguriert). Benutzerdefinierte Einstellungen werden nur außerhalb des Kampfes verwendet."
+L["In combat, use scaling based on threat level as configured in the threat system. The custom scale is only used out of combat."] = "Verwende im Kampf eine Skalierung, die auf der Bedrohungsstufe basiert (wie im im Bedrohungssystem konfiguriert). Die benutzerdefinierte Skalierung wird nur außerhalb des Kampfes verwendet."
 L["Interruptable Casts"] = "Unterbrechbare Zauber"
 L["Kinetic Bomb"] = "Kinetische Bombe"
 L["Label Text Offset"] = "Versatz der Beschriftungstextes"
@@ -306,6 +382,7 @@ L["Level Text"] = "Stufen-Text"
 L["Lich King"] = "Lichkönig"
 L["Living Ember"] = "Lebendiger Funken"
 L["Living Inferno"] = "Lebendiges Inferno"
+L["Look and Feel"] = "Look-and-Feel"
 L["Low Threat"] = "Niedrige Bedrohung"
 L["Marked Immortal Guardian"] = "Markierte unvergängliche Wache"
 L["Max HP Text"] = "Maximale Lebenspunkte-Text"
@@ -376,7 +453,7 @@ L["Same as Headline"] = "Wie Name"
 L["Scale"] = "Skalierung"
 L["Seals"] = "Auren"
 L["Set alpha settings for different threat levels."] = "Lege den Alphawert für verschiedene Bedrohungsstufen fest."
-L["Set Icon"] = "Icon festlegen"
+L["Set Icon"] = "Symbol festlegen"
 L["Set Name"] = "Namen festlegen"
 L["Set scale settings for different threat levels."] = "Lege die Skalierung für verschiedene Bedrohungsstufen fest."
 L["Set the outlining style of the text."] = "Rahmenlinien des Textes einstellen"
@@ -418,7 +495,7 @@ L["Show in Healthbar View"] = "Im Healthbar-View anzeigen"
 L["Show Level Text"] = "Stufentext anzeigen"
 L["Show Mouseover"] = "Mouseover anzeigen"
 L["Show Name Text"] = "Namenstext anzeigen"
-L["Show Nameplate"] = "Plakette zeigen"
+L["Show Nameplate"] = "Namensplakette anzeigen"
 L["Show Neutral Units"] = "Neutrale Einheiten anzeigen"
 L["Show Overlay for Uninterruptable Casts"] = "Overlay für nicht-unterbrechbare Zauber anzeigen"
 L["Show Skull Icon"] = "Totenkopfsymbol anzeigen"
@@ -434,6 +511,7 @@ L["Show Threat Glow"] = "Zeige Leuchteffekt bei Bedrohung"
 L["Show threat glow only on units in combat with the player."] = "Leuchteffekt bei Bedrohung nur bei Einheiten anzeigen, mit denen der Spieler im Kampf ist."
 L["Shows a border around the castbar of nameplates (requires /reload)."] = "Zeigt einen Rand um die Zauberleiste von Namensplaketten an (erfordert /reload)."
 L["Shows a faction icon next to the nameplate of players."] = "Zeigt ein Fraktionssymbol neben der Namensplakette von Spielern an."
+L["Shows a glow based on threat level around the nameplate's healthbar (in combat)."] = "Zeigt im Kampf einen Leuchteffekt um die Gesundheitsleiste der Namensplakette herum an, der auf der Bedrohungsstufe basiert."
 L["Shows an icon for friends and guild members next to the nameplate of players."] = "Zeigt ein Symbol für Freunde und Gildenmitglieder an den Namensplaketten von Spielern an."
 L["Shows resource information for bosses and rares."] = "Ressourceninformation an Bossen und Rares anzeigen"
 L["Shows resource information only for alternatve power (of bosses or rares, mostly)."] = "Ressourceninformation nur für alternative Energie anzeigen (hauptsächlich bei Bossen und Rares)"
@@ -455,6 +533,7 @@ L["Stack Count"] = "Anzahl der Stapel"
 L["Stances"] = "Haltungen"
 L["Stealth"] = "Stealth"
 L["Style"] = "Style"
+L["Switch"] = "Wechseln"
 L["Tank"] = "Tank"
 L["Tapped Units"] = "Getapte Einheiten"
 L["Target Highlight"] = "Ziel-Highlight"
@@ -484,6 +563,7 @@ L["This option allows you to control whether a spell's name is hidden or shown o
 L["This option allows you to control whether a unit's health is hidden or shown on nameplates."] = "Diese Einstellung ermöglicht es dir zu bestimmen, ob die Gesundheit der Einheit an Namensplaketten versteckt oder angezeigt werden soll."
 L["This option allows you to control whether a unit's level is hidden or shown on nameplates."] = "Diese Einstellung ermöglicht es dir zu bestimmen, ob die Stufe der Einheit an Namensplaketten versteckt oder angezeigt werden soll."
 L["This option allows you to control whether a unit's name is hidden or shown on nameplates."] = "Diese Einstellung ermöglicht es dir zu bestimmen, ob der Name der Einheit an Namensplaketten versteckt oder angezeigt werden soll."
+L["This option allows you to control whether custom settings for nameplate style, color, alpha and scaling should be used for this nameplate."] = "Diese Einstellung ermöglicht es dir zu bestimmen, ob die benutzerdefinierten Einstellungen für Stil, Farbe, Alphawert und Skalierung für diese Namensplakette verwendet werden sollen."
 L["This option allows you to control whether headline view (text-only) is enabled for nameplates."] = "Diese Einstellung ermöglicht es dir zu bestimmen, ob Headline-View (nur Namen) für Namensplaketten eingeschaltet werden soll."
 L["This option allows you to control whether nameplates should fade in or out when displayed or hidden."] = "Diese Einstellung ermöglicht es dir zu bestimmen, ob Namensplaketten ein- oder ausgeblendet werden sollen, wenn sie versteckt oder angezeigt werden."
 L["This option allows you to control whether textures are hidden or shown on nameplates for different threat levels. Dps/healing uses regular textures, for tanking textures are swapped."] = "Diese Einstellung ermöglicht es dir zu bestimmen, ob Texturen für die verschiedenen Bedrohungsstufen an Namensplaketten versteckt oder angezeigt werden sollen. DPS/Heilung verwendet die regulären Texturen, für Tank werden die Texturen vertauscht."
@@ -521,12 +601,12 @@ L["Time Text Offset"] = "Versatz des Zeittextes"
 L["Toggling"] = "Umschalten"
 L["Top-to-bottom"] = "Oben nach unten"
 L["Totem Alpha"] = "Totem-Alphawert"
-L["Totem Nameplates"] = "Totem-Namensplaketten"
+L["Totem Nameplates"] = "Totems"
 L["Totem Scale"] = "Totem-Skalierung"
 L["Totems"] = "Totems"
 L["Treant"] = "Treant"
 L["Truncate Text"] = "Text verkürzen"
-L["Type direct icon texture path using '\\' to separate directory folders, or use a spellid."] = "Gib den direkten Dateipfad zur Textur ein. Benutze '\\' zur Separierung von Ordnerstrukturen oder eine Zauber-ID."
+L["Type direct icon texture path using '\\' to separate directory folders, or use a spellid."] = "Gib den direkten Dateipfad zum Symbol ein. Benutze '\\' zur Separierung von Ordnerstrukturen oder eine Zauber-ID."
 L["Typeface"] = "Schriftart"
 L["Undetermined"] = "Unbestimmt"
 L["Uninterruptable Casts"] = "Nicht unterbrechbare Zauber"
@@ -544,7 +624,10 @@ L["Use Target's Name"] = "Benutze Name des Ziels"
 L["Use the healthbar's background color also for the border."] = "Verwende die Hintergrundfarge der Gesundheitsleise auch für den Rand."
 L["Use the healthbar's foreground color also for the background."] = "Verwende die Vordergrundfarbe der Gesundheitsleise auch für den Hintergrund."
 L["Use the healthbar's foreground color also for the border."] = "Verwende die Vordergrundfarbe der Gesundheitsleise auch für den Rand."
+L["Use Threat Alpha"] = "Bedrohungsbasierten Alphawert verwenden"
+L["Use Threat Coloring"] = "Bedrohungsbasierte Farbe verwenden"
 L["Use Threat Colors"] = "Threat-Farben verwenden"
+L["Use Threat Scale"] = "Bedrohungsbasierte Skalierung verwenden"
 L["Val'kyr Shadowguard"] = "Schattenwächterin der Val'kyr"
 L["Venomous Snake"] = "Giftige Schlange"
 L["Vertical Align"] = "Vertikale Ausrichtung"
