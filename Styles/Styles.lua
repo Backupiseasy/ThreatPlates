@@ -105,7 +105,6 @@ local function GetUnitType(unit)
     if faction == "Neutral" then
       unit.TP_DetailedUnitType = "Neutral"
     else
-
       unit.TP_DetailedUnitType = faction .. unit_class
     end
   end

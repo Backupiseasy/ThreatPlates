@@ -23,7 +23,7 @@ local UNIT_TYPES = {
   },
   {
     Faction = "Neutral", Disabled = "nameplateShowEnemies",
-    UnitTypes = { "NPC", "Guardian", "Minus" }
+    UnitTypes = { "NPC", "Minus" }
   }
 }
 
@@ -1114,6 +1114,32 @@ local function GetOptions()
               inline = false,
               order = 20,
               args = {
+                Design = {
+                  name = L["Default Settings (All Profiles)"],
+                  type = "group",
+                  inline = true,
+                  order = 1,
+                  args = {
+                    HealthBarTexture = {
+                      name = L["Look and Feel"],
+                      order = 1,
+                      type = "select",
+                      desc = L["Changes the default settings to the selected design. Some of your custom settings may get overwritten if you switch back and forth.."],
+                      values = { CLASSIC = "Classic", SMOOTH = "Smooth" } ,
+                      set = function(info, val)
+                        TidyPlatesThreat.db.global.DefaultsVersion = val
+                        if val == "CLASSIC" then
+                          t.SwitchToDefaultSettingsV1()
+                        else -- val == "SMOOTH"
+                          t.SwitchToCurrentDefaultSettings()
+                        end
+                        t.SetThemes(TidyPlatesThreat)
+                        TidyPlates:ForceUpdate()
+                      end,
+                      get = function(info) return TidyPlatesThreat.db.global.DefaultsVersion end,
+                    },
+                  },
+                },
                 HealthBarGroup = {
                   name = L["Textures"],
                   type = "group",
@@ -1242,44 +1268,11 @@ local function GetOptions()
                     },
                   },
                 },
-                Placement = {
-                  name = L["Placement"],
-                  type = "group",
-                  inline = true,
-                  order = 20,
-                  args = {
-                    Warning = {
-                      type = "description",
-                      order = 1,
-                      name = L["Changing these settings will alter the placement of the nameplates, however the mouseover area does not follow. |cffff0000Use with caution!|r"],
-                    },
-                    OffsetX = {
-                      name = L["Offset X"],
-                      type = "range",
-                      min = -60,
-                      max = 60,
-                      step = 1,
-                      order = 2,
-                      set = SetThemeValue,
-                      arg = { "settings", "frame", "x" },
-                    },
-                    Offsety = {
-                      name = L["Offset Y"],
-                      type = "range",
-                      min = -60,
-                      max = 60,
-                      step = 1,
-                      order = 3,
-                      set = SetThemeValue,
-                      arg = { "settings", "frame", "y" },
-                    },
-                  },
-                },
                 ColorSettings = {
                   name = L["Coloring"],
                   type = "group",
                   inline = true,
-                  order = 10,
+                  order = 20,
                   args = {
                     General = {
                       order = 1,
@@ -1458,55 +1451,88 @@ local function GetOptions()
                         },
                       },
                     },
-                    ThreatColors = {
-                      name = L["Warning Glow for Threat"],
-                      order = 50,
-                      type = "group",
-                      get = GetColorAlpha,
-                      set = SetColorAlpha,
-                      inline = true,
-                      args = {
-                        ThreatGlow = {
-                          type = "toggle",
-                          order = 1,
-                          name = L["Enable"],
-                          get = GetValue,
-                          set = SetThemeValue,
-                          arg = { "settings", "threatborder", "show" },
-                        },
-                        OnlyAttackedUnits = {
-                          type = "toggle",
-                          order = 2,
-                          name = L["Only on Attacked Units"],
-                          desc = L["Show threat glow only on units in combat with the player."],
-                          width = "double",
-                          get = GetValue,
-                          set = SetValue,
-                          arg = { "ShowThreatGlowOnAttackedUnitsOnly" },
-                        },
-                        Header = { name = L["Colors"], type = "header", order = 10, },
-                        Low = {
-                          name = L["|cff00ff00Low Threat|r"],
-                          type = "color",
-                          order = 20,
-                          arg = { "settings", "normal", "threatcolor", "LOW" },
-                          hasAlpha = true,
-                        },
-                        Med = {
-                          name = L["|cffffff00Medium Threat|r"],
-                          type = "color",
-                          order = 30,
-                          arg = { "settings", "normal", "threatcolor", "MEDIUM" },
-                          hasAlpha = true,
-                        },
-                        High = {
-                          name = L["|cffff0000High Threat|r"],
-                          type = "color",
-                          order = 40,
-                          arg = { "settings", "normal", "threatcolor", "HIGH" },
-                          hasAlpha = true,
-                        },
-                      },
+                  },
+                },
+                ThreatColors = {
+                  name = L["Warning Glow for Threat"],
+                  order = 30,
+                  type = "group",
+                  get = GetColorAlpha,
+                  set = SetColorAlpha,
+                  inline = true,
+                  args = {
+                    ThreatGlow = {
+                      type = "toggle",
+                      order = 1,
+                      name = L["Enable"],
+                      get = GetValue,
+                      set = SetThemeValue,
+                      arg = { "settings", "threatborder", "show" },
+                    },
+                    OnlyAttackedUnits = {
+                      type = "toggle",
+                      order = 2,
+                      name = L["Only on Attacked Units"],
+                      desc = L["Show threat glow only on units in combat with the player."],
+                      width = "double",
+                      get = GetValue,
+                      set = SetValue,
+                      arg = { "ShowThreatGlowOnAttackedUnitsOnly" },
+                    },
+                    Header = { name = L["Colors"], type = "header", order = 10, },
+                    Low = {
+                      name = L["|cff00ff00Low Threat|r"],
+                      type = "color",
+                      order = 20,
+                      arg = { "settings", "normal", "threatcolor", "LOW" },
+                      hasAlpha = true,
+                    },
+                    Med = {
+                      name = L["|cffffff00Medium Threat|r"],
+                      type = "color",
+                      order = 30,
+                      arg = { "settings", "normal", "threatcolor", "MEDIUM" },
+                      hasAlpha = true,
+                    },
+                    High = {
+                      name = L["|cffff0000High Threat|r"],
+                      type = "color",
+                      order = 40,
+                      arg = { "settings", "normal", "threatcolor", "HIGH" },
+                      hasAlpha = true,
+                    },
+                  },
+                },
+                Placement = {
+                  name = L["Placement"],
+                  type = "group",
+                  inline = true,
+                  order = 40,
+                  args = {
+                    Warning = {
+                      type = "description",
+                      order = 1,
+                      name = L["Changing these settings will alter the placement of the nameplates, however the mouseover area does not follow. |cffff0000Use with caution!|r"],
+                    },
+                    OffsetX = {
+                      name = L["Offset X"],
+                      type = "range",
+                      min = -60,
+                      max = 60,
+                      step = 1,
+                      order = 2,
+                      set = SetThemeValue,
+                      arg = { "settings", "frame", "x" },
+                    },
+                    Offsety = {
+                      name = L["Offset Y"],
+                      type = "range",
+                      min = -60,
+                      max = 60,
+                      step = 1,
+                      order = 3,
+                      set = SetThemeValue,
+                      arg = { "settings", "frame", "y" },
                     },
                   },
                 },
@@ -4874,7 +4900,6 @@ local function GetOptions()
               name = L["Enable"],
               order = 5,
               type = "toggle",
-              width = "half",
               arg = { "totemWidget", "ON" },
             },
             Size = GetSizeEntry(10, "totemWidget"),
@@ -4957,7 +4982,7 @@ local function GetOptions()
           disabled = function() if db.totemSettings[totemID[k_c][2]][1] then return false else return true end end,
           args = {
             Enable = {
-              name = L["Enable Custom Colors"],
+              name = L["Enable Custom Color"],
               type = "toggle",
               order = 1,
               arg = { "totemSettings", totemID[k_c][2], 2 },
@@ -4974,7 +4999,7 @@ local function GetOptions()
           },
         },
         Textures = {
-          name = L["Textures"],
+          name = L["Icon"],
           type = "group",
           order = 3,
           inline = true,

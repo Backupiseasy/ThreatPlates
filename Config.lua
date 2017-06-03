@@ -112,151 +112,150 @@ end
 ---------------------------------------------------------------------------------------------------
 -- Functions for configuration migration
 ---------------------------------------------------------------------------------------------------
-local Defaults_V1 = {
-  allowClass = false,
-  friendlyClass = false,
-  optionRoleDetectionAutomatic = false,
-  HeadlineView = {
-    width = 116,
-  },
-  text = {
-    amount = true,
-  },
-  AuraWidget = {
-    ModeBar = {
-      Texture = "Smooth",
-    },
-  },
-  uniqueWidget = {
-    scale = 35,
-    y = 24,
-  },
-  questWidget = {
-    ON = false,
-    ModeHPBar = true,
-  },
-  ResourceWidget  = {
-    BarTexture = "Smooth"
-  },
-  settings = {
-    elitehealthborder = {
-      show = true,
-    },
-    healthborder = {
-      texture = "TP_HealthBarOverlay",
-    },
-    healthbar = {
-      texture = "ThreatPlatesBar",
-      backdrop = "ThreatPlatesEmpty",
-      BackgroundOpacity = 1,
-    },
-    castborder = {
-      texture = "ThreatPlatesBar",
-    },
-    castbar = {
-      texture = "ThreatPlatesBar",
-    },
-    name = {
-      typeface = "Accidental Presidency",
-      width = 116,
-      size = 14,
-    },
-    level = {
-      typeface = "Accidental Presidency",
-      size = 12,
-      height  = 14,
-      x = 50,
-      vertical  = "TOP"
-    },
-    customtext = {
-      typeface = "Accidental Presidency",
-      size = 12,
-      y = 1,
-    },
-    spelltext = {
-      typeface = "Accidental Presidency",
-      size = 12,
-      y = -13,
-      y_hv  = -13,
-    },
-    eliteicon = {
-      x = 64,
-      y = 9,
-    },
-    skullicon = {
-      x = 55,
-    },
-    raidicon = {
-      y = 27,
-      y_hv = 27,
-    },
-  },
-  threat = {
-    dps = {
-      HIGH = 1.25,
-    },
-    tank = {
-      LOW = 1.25,
-    },
-  },
-}
+--local Defaults_V1 = {
+--  allowClass = false,
+--  friendlyClass = false,
+--  optionRoleDetectionAutomatic = false,
+--  HeadlineView = {
+--    width = 116,
+--  },
+--  text = {
+--    amount = true,
+--  },
+--  AuraWidget = {
+--    ModeBar = {
+--      Texture = "Aluminium",
+--    },
+--  },
+--  uniqueWidget = {
+--    scale = 35,
+--    y = 24,
+--  },
+--  questWidget = {
+--    ON = false,
+--    ModeHPBar = true,
+--  },
+--  ResourceWidget  = {
+--    BarTexture = "Aluminium"
+--  },
+--  settings = {
+--    elitehealthborder = {
+--      show = true,
+--    },
+--    healthborder = {
+--      texture = "TP_HealthBarOverlay",
+--    },
+--    healthbar = {
+--      texture = "ThreatPlatesBar",
+--      backdrop = "ThreatPlatesEmpty",
+--      BackgroundOpacity = 1,
+--    },
+--    castborder = {
+--      texture = "TP_CastBarOverlay",
+--    },
+--    castbar = {
+--      texture = "ThreatPlatesBar",
+--    },
+--    name = {
+--      typeface = "Accidental Presidency",
+--      width = 116,
+--      size = 14,
+--    },
+--    level = {
+--      typeface = "Accidental Presidency",
+--      size = 12,
+--      height  = 14,
+--      x = 50,
+--      vertical  = "TOP"
+--    },
+--    customtext = {
+--      typeface = "Accidental Presidency",
+--      size = 12,
+--      y = 1,
+--    },
+--    spelltext = {
+--      typeface = "Accidental Presidency",
+--      size = 12,
+--      y = -13,
+--      y_hv  = -13,
+--    },
+--    eliteicon = {
+--      x = 64,
+--      y = 9,
+--    },
+--    skullicon = {
+--      x = 55,
+--    },
+--    raidicon = {
+--      y = 27,
+--    },
+--  },
+--  threat = {
+--    dps = {
+--      HIGH = 1.25,
+--    },
+--    tank = {
+--      LOW = 1.25,
+--    },
+--  },
+--}
 
-local function UpdateAceDB(current_defaults, new_defaults)
-  for key, new_value in pairs(new_defaults) do
-    if type(new_value) == "table" then
-      UpdateAceDB(current_defaults[key], new_defaults[key])
-    else
-      current_defaults[key] = new_defaults[key]
-     end
-  end
-end
+--local function UpdateAceDB(current_defaults, new_defaults)
+--  for key, new_value in pairs(new_defaults) do
+--    if type(new_value) == "table" then
+--      UpdateAceDB(current_defaults[key], new_defaults[key])
+--    else
+--      current_defaults[key] = new_defaults[key]
+--     end
+--  end
+--end
 
 local function GetDefaultSettingsV1(defaults)
   local new_defaults = ThreatPlates.CopyTable(defaults)
 
---  local db = new_defaults.profile
---  db.allowClass = false
---  db.friendlyClass = false
---  db.optionRoleDetectionAutomatic = false
---  db.HeadlineView.width = 116
---  db.text.amount = true
---  db.AuraWidget.ModeBar.Texture = "Smooth"
---  db.uniqueWidget.scale = 35
---  db.uniqueWidget.y = 24
---  db.questWidget.ON = false
---  db.questWidget.ModeHPBar = true
---  db.ResourceWidget.BarTexture = "Smooth"
---  db.settings.elitehealthborder.show = true
---  db.settings.healthborder.texture = "TP_HealthBarOverlay"
---  db.settings.healthbar.texture = "ThreatPlatesBar"
---  db.settings.healthbar.backdrop = "ThreatPlatesEmpty"
---  db.settings.healthbar.BackgroundOpacity = 1
---  db.settings.castborder.texture = "ThreatPlatesBar"
---  db.settings.castbar.texture = "ThreatPlatesBar"
---  db.settings.name.typeface = "Accidental Presidency"
---  db.settings.name.width = 116
---  db.settings.name.size = 14
---  db.settings.level.typeface = "Accidental Presidency"
---  db.settings.level.size = 12
---  db.settings.level.height  = 14
---  db.settings.level.x = 50
---  db.settings.level.vertical = "TOP"
---  db.settings.customtext.typeface = "Accidental Presidency"
---  db.settings.customtext.size = 12
---  db.settings.customtext.y = 1
---  db.settings.spelltext.typeface = "Accidental Presidency"
---  db.settings.spelltext.size = 12
---  db.settings.spelltext.y = -13
---  db.settings.spelltext.y_hv = -13
---  db.settings.eliteicon.x = 64
---  db.settings.eliteicon.y = 9
---  db.settings.skullicon.x = 55
---  db.settings.raidicon.y = 27
---  db.settings.raidicon.y_hv = 27
---  db.threat.dps.HIGH = 1.25
---  db.threat.tank.LOW = 1.25
+  local db = new_defaults.profile
+  db.allowClass = false
+  db.friendlyClass = false
+  db.optionRoleDetectionAutomatic = false
+  db.HeadlineView.width = 116
+  db.text.amount = true
+  db.AuraWidget.ModeBar.Texture = "Aluminium"
+  db.uniqueWidget.scale = 35
+  db.uniqueWidget.y = 24
+  db.questWidget.ON = false
+  db.questWidget.ShowInHeadlineView = false
+  db.questWidget.ModeHPBar = true
+  db.ResourceWidget.BarTexture = "Aluminium"
+  db.settings.elitehealthborder.show = true
+  db.settings.healthborder.texture = "TP_HealthBarOverlay"
+  db.settings.healthbar.texture = "ThreatPlatesBar"
+  db.settings.healthbar.backdrop = "ThreatPlatesEmpty"
+  db.settings.healthbar.BackgroundOpacity = 1
+  db.settings.castborder.texture = "TP_CastBarOverlay"
+  db.settings.castbar.texture = "ThreatPlatesBar"
+  db.settings.name.typeface = "Accidental Presidency"
+  db.settings.name.width = 116
+  db.settings.name.size = 14
+  db.settings.level.typeface = "Accidental Presidency"
+  db.settings.level.size = 12
+  db.settings.level.height  = 14
+  db.settings.level.x = 50
+  db.settings.level.vertical = "TOP"
+  db.settings.customtext.typeface = "Accidental Presidency"
+  db.settings.customtext.size = 12
+  db.settings.customtext.y = 1
+  db.settings.spelltext.typeface = "Accidental Presidency"
+  db.settings.spelltext.size = 12
+  db.settings.spelltext.y = -13
+  db.settings.spelltext.y_hv = -13
+  db.settings.eliteicon.x = 64
+  db.settings.eliteicon.y = 9
+  db.settings.skullicon.x = 55
+  db.settings.raidicon.y = 27
+  db.threat.dps.HIGH = 1.25
+  db.threat.tank.LOW = 1.25
 
-  UpdateAceDB(new_defaults.profile, Defaults_V1)
+--  UpdateAceDB(new_defaults.profile, Defaults_V1)
 
   return new_defaults
 end

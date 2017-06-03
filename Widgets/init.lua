@@ -10,6 +10,8 @@ local ThreatPlates = NAMESPACE.ThreatPlates
 local DEBUG = ThreatPlates.DEBUG
 local SetStyle = TidyPlatesThreat.SetStyle
 
+local UnitPlayerControlled = UnitPlayerControlled
+
 -- Information about widget layering, from highest to lowest
 --    +2: combo points
 -- 		+1: auras
@@ -107,21 +109,23 @@ local function DeleteWidgets()
   --ThreatPlatesWidgets.AuraWidgetDisableWatcher() -- right now, watcher still necessary for TidyPlates as well
 end
 
+local function FixUpdateUnitCondition(unit)
+  local unitid = unit.unitid
+
+  -- Enemy players turn to neutral, e.g., when mounting a flight path mount, so fix reaction in that situations
+  if unit.reaction == "NEUTRAL" and (unit.type == "PLAYER" or UnitPlayerControlled(unitid)) then
+    unit.reaction = "HOSTILE"
+  end
+end
+
 -- TidyPlatesGlobal_OnUpdate() is called when other data about the unit changes, or is requested by an external controller.
 local function OnUpdate(plate, unit)
   -- sometimes unitid is nil, still don't know why, but it creates all kinds of LUA errors as other attributes are nil
   -- also, e.g., unit.type, unit.name, ...
   if not unit.unitid then return end
---    print ("Nil unitid: GetNamePlateForUnit = ", f)
---    ThreatPlates.DEBUG_PRINT_UNIT(unit)
---    ThreatPlates.DEBUG_PRINT_UNIT(plate)
 
-  -- Enemy players turn to neutral, e.g., when mounting a flight path mount, so fix reaction in that situations
-  local unitid = unit.unitid
-  if unit.reaction == "NEUTRAL" and (unit.type == "PLAYER" or UnitPlayerControlled(unitid)) then
-    unit.reaction = "HOSTILE"
-  end
-
+  FixUpdateUnitCondition(unit)
+  
   local widget_list = plate.widgets
   for name,v in pairs(ThreatPlatesWidgets.list) do
     local show_healthbar_view = v.enabled()
@@ -170,15 +174,9 @@ end
 -- TidyPlatesGlobal_OnContextUpdate() is called when a unit is targeted or moused-over.  (Any time the unitid or GUID changes)
 -- OnContextUpdate must only do something when there is something unit-dependent to display?
 local function OnContextUpdate(plate, unit)
-  -- sometimes unitid is nil, still don't know why, but it creates all kinds of LUA errors as other attributes are nil
-  -- also, e.g., unit.type, unit.name, ...
   if not unit.unitid then return end
 
-  -- Enemy players turn to neutral, e.g., when mounting a flight path mount, so fix reaction in that situations
-  local unitid = unit.unitid
-  if unit.reaction == "NEUTRAL" and (unit.type == "PLAYER" or UnitPlayerControlled(unitid)) then
-    unit.reaction = "HOSTILE"
-  end
+  FixUpdateUnitCondition(unit)
 
   local widget_list = plate.widgets
   for name,v in pairs(ThreatPlatesWidgets.list) do

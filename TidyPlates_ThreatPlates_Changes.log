@@ -1,13 +1,22 @@
 ------------------------------------------------------
+8.4.0-Beta8 (works with TidyPlates 6.18.11)
+------------------------------------------------------
+* Fixed a bug with quest widget where the quest indication was only shown when unit tooltip was progress-based ("- Prisoners freed: x/y"), but not when progess information was missing ("- Control Orb)".
+* Fixed a bug with quest widget where the quest icon was not placed correctly for custom nameplates in headline view.
+* Adjusted new look and feel so that quest widget is now shown in healthbar and headline view as default.
+
+------------------------------------------------------
 8.4.0-Beta7 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
 * Added a that dialog asking for which look and feel should be used as default (shown only once after the first login with v8.4).
-* Renamed commands to switch between classic defaults ("/tptp classic-design") and new defaults of v8.4 ("/tptp 8.4-design").
+* Added an entry in option dialog to switch between classic default settings (before 8.4) and new default settings (introduced with 8.4) under Nameplate Settings - Healthbar View - Default Settings.
 * Fixed several inconsistencies in the configuration for custom nameplates (settings as well as the interaction with the threat system).
 * Fixed a bug with button "Restore Defaults" in custom nameplates which now actually restores default settings.
 * Fixed a bug in threat system where alpha was not set correctly based on threat (used wrong settings).
 * Fixed a bug where an incorrect alpha value was applied to custom nameplates in headline view.
 * Fixed a bug with the dialog shown when using Threat Plates the first time on a character that prevented the TidyPlates options from being shown after pressing "No".
+* Fixed a bug with the dialog shown when using Threat Plates the first time on a character that showed the dialog even when ThreatPlates was already active.
+* Added updated localizations for koKR (Korean) - big thanks to yuk6196.
 
 ------------------------------------------------------
 8.4.0-Beta6 (works with TidyPlates 6.18.11)
