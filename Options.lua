@@ -3033,7 +3033,7 @@ local function GetOptions()
               order = 120,
               args = {
                 Enable = GetEnableEntryTheme(L["Show Spell Icon"], L["This option allows you to control whether a spell's icon is hidden or shown on castbars."], "spellicon"),
-                Layout = GetLayoutEntryTheme(20, "skullicon", true),
+                Layout = GetLayoutEntryTheme(20, "spellicon", true),
               },
             },
             RaidMarks = RaidMarksOptions(),

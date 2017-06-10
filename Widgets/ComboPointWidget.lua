@@ -96,7 +96,7 @@ local function UpdateWidgetFrame(frame, unit)
 		local db = TidyPlatesThreat.db.profile.comboWidget
 
     local style = unit.TP_Style
-		if style == "NameOnly" then
+		if style == "NameOnly" or style == "NameOnly-Unique" then
 			frame:SetPoint("CENTER", frame:GetParent(), "CENTER", db.x_hv, db.y_hv)
 		else
 			frame:SetPoint("CENTER", frame:GetParent(), "CENTER", db.x, db.y)

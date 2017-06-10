@@ -33,7 +33,7 @@ local function SetNameColor(unit)
 			elseif unique_style.useColor then
 				color = unique_style.color
 			end
-		elseif style == "NameOnly" then
+		elseif style == "NameOnly" or style == "NameOnly-Unique" then
 			if unit.isMarked and db_hv.UseRaidMarkColoring then
 				color = db.settings.raidicon.hpMarked[unit.raidIcon]
 			end

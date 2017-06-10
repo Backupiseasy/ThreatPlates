@@ -117,7 +117,7 @@ StaticPopupDialogs["SetToThreatPlates"] = {
 
 StaticPopupDialogs["SwitchToNewLookAndFeel"] = {
   preferredIndex = STATICPOPUP_NUMDIALOGS,
-  text = t.Meta("title")..L[":\n---------------------------------------\n|cff89F559Threat Plates|r v8.4 introduces a new default look and feel (currently shown). Do you want to switch to this new look and feel?\n\nYou can revert your decision by changing the default look and feel again in the options dialog (under Nameplate Settings - Healthbar View - Default Settings).\n\nNote: Some of your custom settings may get overwritten if you switch back and forth."],
+  text = t.Meta("title")..L[":\n---------------------------------------\n|cff89F559Threat Plates|r v8.4 introduces a new default look and feel (which is currently shown). Do you want to switch to this look and feel as new default?\n\nYou can change this setting anytime in the options dialog (under Nameplate Settings - Healthbar View - Default Settings).\n\nNote: Some of your custom settings will change to their default value if you switch back and forth."],
   button1 = L["Switch"],
   button2 = L["Don't Switch"],
   timeout = 0,
@@ -565,7 +565,7 @@ function TidyPlatesThreat:OnInitialize()
         x = 0,
         y = -8,
         x_hv = 0,
-        y_hv = -8,
+        y_hv = -15,
         ShowInHeadlineView = false,
       },
 --      eliteWidget = {

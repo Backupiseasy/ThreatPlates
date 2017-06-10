@@ -1,84 +1,39 @@
 ------------------------------------------------------
-8.4.0-Beta8 (works with TidyPlates 6.18.11)
+8.4.0 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
-* Fixed a bug with quest widget where the quest indication was only shown when unit tooltip was progress-based ("- Prisoners freed: x/y"), but not when progess information was missing ("- Control Orb)".
-* Fixed a bug with quest widget where the quest icon was not placed correctly for custom nameplates in headline view.
-* Adjusted new look and feel so that quest widget is now shown in healthbar and headline view as default.
-
-------------------------------------------------------
-8.4.0-Beta7 (works with TidyPlates 6.18.11)
-------------------------------------------------------
-* Added a that dialog asking for which look and feel should be used as default (shown only once after the first login with v8.4).
-* Added an entry in option dialog to switch between classic default settings (before 8.4) and new default settings (introduced with 8.4) under Nameplate Settings - Healthbar View - Default Settings.
-* Fixed several inconsistencies in the configuration for custom nameplates (settings as well as the interaction with the threat system).
-* Fixed a bug with button "Restore Defaults" in custom nameplates which now actually restores default settings.
-* Fixed a bug in threat system where alpha was not set correctly based on threat (used wrong settings).
-* Fixed a bug where an incorrect alpha value was applied to custom nameplates in headline view.
-* Fixed a bug with the dialog shown when using Threat Plates the first time on a character that prevented the TidyPlates options from being shown after pressing "No".
-* Fixed a bug with the dialog shown when using Threat Plates the first time on a character that showed the dialog even when ThreatPlates was already active.
-* Added updated localizations for koKR (Korean) - big thanks to yuk6196.
-
-------------------------------------------------------
-8.4.0-Beta6 (works with TidyPlates 6.18.11)
-------------------------------------------------------
-* Fixed a bug where a green rectangle was shown covering a casting unit's nameplate instead of the castbar border.
-* Fixed a LUA error related to the visibility settings of units triggered by enemy players turning to neutral, e.g., when using a flight path.
-* Added a visibility option for friendly minor mobs in the configuration.
-
-------------------------------------------------------
-8.4.0-Beta5 (works with TidyPlates 6.18.11)
-------------------------------------------------------
-* Fixed a bug which prevented ThreatPlates from loading correctly (mostly only names where shown, no textures).
-* Fixed a bug in localization where missing (not translated) strings resulted in a LUA error.
-
-------------------------------------------------------
-8.4.0-Beta4 (works with TidyPlates 6.18.11)
-------------------------------------------------------
-* Added new spells to stealth widget and improved performance of aura scanning.
-* Fixed a bug which prevented the personal resources bar from showing up when ThreatPlates was enabled. [Comment #402].
-* Fixed a bug with switching to look and feel before 8.4 did not persist through reloading the UI [Comment #400].
-* Fixed a bug where nameplates where shown in an incorrect order in relation to their distance [Ticket #106].
-* Fixed several inconsistencies in the options dialog (mostly naming and layout of UI elements).
-* Fixed configuration inconsistencies with threat glow and threat system.
-* Fixed a LUA error when nameplate clickthrough was changed while in combat (when resetting the active profile).
-* Added updated localizations for enUS and deDE (German).
-
-------------------------------------------------------
-8.4.0-Beta3 (works with TidyPlates 6.18.11)
-------------------------------------------------------
-* Changed default settings for several options in Threat Plates for a new look and feel. To switch back to the old look and feel, use "/tptp old-defaults"
-* Added Headline View (Text-Only) as an option to custom nameplates.
-* Improved consistency for coloring, scaling and opacity between healthbar and headline view, totems and custom nameplates.
-
-------------------------------------------------------
-8.4.0-Beta2 (works with TidyPlates 6.18.11)
-------------------------------------------------------
+* ThreatPlates v8.4 introduces a new default look and feel. A dialog asking if it should be used as default will be shown after the first login.
+* Added fully customizable headline view (name-only) (added configuration options and removed dependency to TidyPlatesHub) [Ticket #34, #119, Comment #345, #338].
+* Added off-tank mode to threat system (with own color, scale, and opacity for mobs tanked by off-tank) [Ticket #9,Comment #339].
+* Added new filter options to aura widget 2.0 for whitelist and blacklist mode: use All and My before a spell name or ID to whitelist or blacklist a spell based on the caster [Comment #385, email request].
+* Added a new widget for showing the resource or power of target units (mana, rage, or alternate power for bosses) [Request from WowInterface].
+* Added an option to enable clickthrough for friendly and enemy nameplates [Comment #370, #375].
+* Added an option to change scaling and opacity (alpha) for casting, mouseover and target units [Comment #363].
+* Added option to show or hide mini (minor) mobs  (with own scale and opacity).
+* Added Earthbind totem which was added in patch 7.1 and fixed bug with Earthquake totem using incorrect spell ID. Also, totems in the options dialog are now sorted by type and name.
 * Added an option to hide the hatched overlay on the castbar for uninterruptable casts [Ticket #122, Comment #381].
 * Added an option to social widget to color the healthbar of friends' and guildmates' nameplates in a custom color.
 * Added an option to social widget to show a faction icon for players and NPCs [Ticket #115].
-* Scaling and opacity can not be defined based on unit type (friendly, hostile, player, NPCs, and so on) [Ticket #118].
-* Added an option to change scaling and opacity (alpha) for casting, mouseover and target units [Comment #363].
-* Added a new widget for showing the resource or power of target units (mana, rage, or alternate power for bosses) [Request from WowInterface].
-* Added new filter options to aura widget 2.0 for whitelist and blacklist mode: use All and My before a spell name or ID to whitelist or blacklist a spell based on the caster [Comment #385, email request].
-* Added Earthbind totem which was added in patch 7.1 and fixed bug with Earthquake totem using incorrect spell ID. Also, totems in the options dialog are now sorted by type and name.
-* Removed anchoring options as positioning is based was never based on actual healthbar anyways (but some internal frame). Also, improved consistence for size/scale options.
-* Reduced disabling of options based on other options being disabled/enabled.
-* Fixed a bug with custom nameplates not using the correct scaling and opacity when "Disable Custom Scale/Alpha" was enabled.
-* Fixed a bug with Blizzard nameplates reappearing in certain situations.
-* Improved configuration of headline view independent of headline view for various widgets/icons.
-* Reworked healthbar coloring and fixed several errors - please report any bugs you find regarding wrong healthbar colors. 
-
-------------------------------------------------------
-8.4.0-Beta1 (works with TidyPlates 6.18.11)
-------------------------------------------------------
-* Added fully customizable headline view (name-only) (added configuration options and removed dependency to TidyPlatesHub) [Ticket #34, #119, Comment #345].
+* Added new spells to stealth widget and improved performance of aura scanning.
 * Target and mouseover glow in headline view can be disabled now [Comment #360].
-* Widgets (like class icon, raid icon, or auras) can now be  enabled in headline view [Comment #338].
-* Added off-tank mode to threat system (with own color, scale, and opacity for mobs tanked by off-tank) [Ticket #9,Comment #339].
-* Added option to show or hide mini (minor) mobs  (with own scale and opacity).
 * Visibility of unit types can be configured in more details now.
-* Added an option to enable clickthrough for friendly and enemy nameplates [Comment #370, #375].
+* Scaling and opacity can not be defined based on unit type (friendly, hostile, player, NPCs, and so on) [Ticket #118].
+* Reduced disabling of options based on other settings in the options dialog.
+* Removed anchoring options as positioning is based was never based on actual healthbar anyways (but some internal frame). Also, improved consistence for size/scale options.
+* Improved consistency for coloring, scaling and opacity between healthbar and headline view, totems and custom nameplates.
+* Reworked healthbar coloring and fixed several errors. 
+* Fixed a bug with Blizzard nameplates reappearing in certain situations.
+* Fixed a bug with custom nameplates not using the correct scaling and opacity when "Disable Custom Scale/Alpha" was enabled.
+* Fixed a bug which prevented the personal resources bar from showing up when ThreatPlates was enabled. [Comment #402].
+* Fixed a bug where nameplates where shown in an incorrect order in relation to their distance [Ticket #106].
+* Fixed several inconsistencies in the options dialog (mostly naming and layout of UI elements).
+* Fixed several inconsistencies in the configuration for custom nameplates (settings as well as the interaction with the threat system).
+* Fixed configuration inconsistencies with threat glow and threat system.
+* Fixed a bug with button "Restore Defaults" in custom nameplates which now actually restores default settings.
+* Fixed a bug with the dialog shown when using Threat Plates the first time on a character that prevented the TidyPlates options from being shown after pressing "No".
+* Fixed a bug with the dialog shown when using Threat Plates the first time on a character that showed the dialog even when ThreatPlates was already active.
+* Fixed a bug with quest widget where the quest indication was only shown when unit tooltip was progress-based ("- Prisoners freed: x/y"), but not when progess information was missing ("- Control Orb)".
 * Upgrade integrated libraries to LibSharedMedia-3.0 7.0.1, Ace3 Release-r1151, AceGUI-3.0-SharedMediaWidgets r57-release.
+* Updated localizations for enUS, deDE (German), and koKR (Korean, big thanks to yuk6196).
 
 ------------------------------------------------------
 8.3.4 (works with TidyPlates 6.18.11)
