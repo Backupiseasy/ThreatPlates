@@ -177,13 +177,12 @@ local function UpdateWidgetFrame(frame, unit)
 
 	if friend_texture or faction_texture then
     local db = TidyPlatesThreat.db.profile.socialWidget
-    local show_in_hv = db.ShowInHeadlineView
     local x, y
 
     local style = unit.TP_Style
     local icon = frame.Icon
     if friend_texture then
-      if style == "NameOnly" and show_in_hv then
+      if style == "NameOnly" or style == "NameOnly-Unique" then
         x, y = db.x_hv, db.y_hv
       else
         x, y = db.x, db.y
@@ -200,7 +199,7 @@ local function UpdateWidgetFrame(frame, unit)
     if faction_texture then
       -- apply settings to faction icon
       db = TidyPlatesThreat.db.profile.FactionWidget
-      if style == "NameOnly" and show_in_hv then
+      if style == "NameOnly" or style == "NameOnly-Unique" then
         x, y = db.x_hv, db.y_hv
       else
         x, y = db.x, db.y

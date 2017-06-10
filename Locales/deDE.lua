@@ -47,11 +47,24 @@ You can revert your decision by changing the default look and feel again in the 
 
 Note: Some of your custom settings may get overwritten if you switch back and forth.]=] ] = [=[:
 ---------------------------------------
-|cff89F559Threat Plates|r v8.4 führt ein neues Standard-Look-and-Feel ein (dieses wird aktuell angezeigt). Willst du auf dieses Look-and-Feel wechseln?
+|cff89F559Threat Plates|r v8.4 führt ein neues Look-and-Feel als Standard ein. Dieses wird aktuell angezeigt. Willst du zu diesem Look-and-Feel als neuem Standard wechseln?
 
-Du kannst diese Entscheidung jederzeit rückgängig machen, indem zu das Standard-Look-and-Feel wieder im Opionendialog änderst (unter Namensplaketten-Einstellungen - Healthbar-View - Standardeinstellungen).
+Du kannst diese Einstellung im Opionendialog (unter Namensplaketten-Einstellungen - Healthbar-View - Standardeinstellungen) jederzeit wieder ändern.
 
-Hinweis: Einige deiner benutzerdefinierten Einstellungen werden möglicherweise überschrieben, wenn du mehrmals hin und her wechselst.]=]
+Hinweis: Einige deiner benutzerdefinierten Einstellungen werden auf den Standardwert zurückgesetzt, wenn du mehrmals hin und her wechselst.]=]
+L[ [=[:
+---------------------------------------
+|cff89F559Threat Plates|r v8.4 introduces a new default look and feel (which is currently shown). Do you want to switch to this look and feel as new default?
+
+You can change this setting anytime in the options dialog (under Nameplate Settings - Healthbar View - Default Settings).
+
+Note: Some of your custom settings will change to their default value if you switch back and forth.]=] ] = [=[:
+---------------------------------------
+|cff89F559Threat Plates|r v8.4 führt ein neues Look-and-Feel als Standard ein. Dieses wird aktuell angezeigt. Willst du zu diesem Look-and-Feel als neuem Standard wechseln?
+
+Du kannst diese Einstellung im Opionendialog (unter Namensplaketten-Einstellungen - Healthbar-View - Standardeinstellungen) jederzeit wieder ändern.
+
+Hinweis: Einige deiner benutzerdefinierten Einstellungen werden auf den Standardwert zurückgesetzt, wenn du mehrmals hin und her wechselst.]=]
 L[ [=[:
 ---------------------------------------
 Would you like to
@@ -518,7 +531,7 @@ L["Shows resource information only for alternatve power (of bosses or rares, mos
 L["Size"] = "Größe"
 L["Sizing"] = "Größe"
 L["Skull Icon"] = "Totenkopfsymbol"
-L["Social"] = "Soziale Widgets"
+L["Social"] = "Gemeinschaft"
 L["Sort by overall duration in ascending order."] = "Sortiert nach Gesamtdauer in aufsteigender Reihenfolge"
 L["Sort by time left in ascending order."] = "Sortiert nach verbleibender Zeit in aufsteigender Reihenfolge."
 L["Sort in ascending alphabetical order."] = "Sortiert aufsteigend in alphabetischer Reihenfolge."

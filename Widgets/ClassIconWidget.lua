@@ -72,7 +72,7 @@ local function UpdateWidgetFrame(frame, unit)
 	if class then -- Value shouldn't need to change
 		db = TidyPlatesThreat.db.profile.classWidget
 		local style = unit.TP_Style
-		if style == "NameOnly" then
+		if style == "NameOnly" or style == "NameOnly-Unique" then
 			frame:SetPoint("CENTER", frame:GetParent(), db.x_hv, db.y_hv)
 		else
 			frame:SetPoint("CENTER", frame:GetParent(), db.x, db.y)

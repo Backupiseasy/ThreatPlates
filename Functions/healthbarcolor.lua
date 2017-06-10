@@ -150,7 +150,7 @@ end
 
 local function SetHealthbarColor(unit)
   local style, unique_style = TidyPlatesThreat.SetStyle(unit)
-  if style == "NameOnly" or style == "empty" or style == "etotem" then return end
+  if style == "NameOnly" or style == "NameOnly-Unique" or style == "empty" or style == "etotem" then return end
 
   local ShowQuestUnit = TidyPlatesThreat.ShowQuestUnit
   local IsQuestUnit = TidyPlatesThreat.IsQuestUnit
