@@ -1,4 +1,4 @@
-﻿## Interface: 72000
+﻿## Interface: 70200
 ## Title: Tidy Plates: |cff89F559Threat Plates|r
 ## Notes: Tidy Plates theme for threat reactive nameplates.
 ## Notes-deDE: Tidy-Plates-Design für bedrohungsreaktive Namensplaketten.

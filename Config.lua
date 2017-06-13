@@ -81,6 +81,12 @@ ThreatPlates.FRIENDLY_SUBTEXT = {
 local function GetUnitVisibility(full_unit_type)
   local unit_visibility = TidyPlatesThreat.db.profile.Visibility[full_unit_type]
 
+  if not unit_visibility then
+    unit_visibility = TidyPlatesThreat.db.profile.Visibility.FriendlyNPC
+--    print ("ERROR: full_unit_type =", full_unit_type, " - ", TidyPlatesThreat.db.profile.Visibility[full_unit_type])
+--    assert (not TidyPlatesThreat.db.profile.Visibility[full_unit_type], "missing unit type: ".. full_unit_type)
+  end
+
   local show = unit_visibility.Show
   if type(show) ~= "boolean" then
     show = (GetCVar(show) == "1")
