@@ -1,4 +1,9 @@
 ------------------------------------------------------
+8.4.1 (works with TidyPlates 6.18.11)
+------------------------------------------------------
+* Fixed a bug in the aura widget where the aura filter was not used after switching the active theme to ThreatPlates in TidyPlates.
+
+------------------------------------------------------
 8.4.0 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
 * ThreatPlates v8.4 introduces a new default look and feel. A dialog asking if it should be used as default will be shown after the first login.

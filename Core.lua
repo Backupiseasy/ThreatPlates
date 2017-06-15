@@ -1761,6 +1761,7 @@ local function ActivateTheme()
   elseif db.debuffWidget.style == "wide" then
     TidyPlatesWidgets.UseWideDebuffIcon()
   end
+  TidyPlatesWidgets.SetAuraFilter(ThreatPlatesWidgets.AuraFilter)
 
   -- TODO: check with what this  was replaces
   --TidyPlatesUtility:EnableGroupWatcher()
@@ -1776,8 +1777,6 @@ local function ActivateTheme()
   -- 	end
   -- end
   -- TidyPlatesWidgets:EnableTankWatch()
-
-  TidyPlatesWidgets.SetAuraFilter(AuraFilter)
 end
 
 local function OnActivateTheme(themeTable)
