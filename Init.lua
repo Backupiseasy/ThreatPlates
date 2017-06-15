@@ -9,11 +9,18 @@ local ThreatPlates = NAMESPACE.ThreatPlates
 ---------------------------------------------------------------------------------------------------
 -- Libraries
 ---------------------------------------------------------------------------------------------------
+local LibStub = LibStub
 
-local LS = LibStub
-ThreatPlates.L = LS("AceLocale-3.0"):GetLocale("TidyPlatesThreat")
-ThreatPlates.Media = LS("LibSharedMedia-3.0")
-ThreatPlates.MediaWidgets = Media and LS("AceGUISharedMediaWidgets-1.0", false)
+local LibStub = LibStub
+ThreatPlates.L = LibStub("AceLocale-3.0"):GetLocale("TidyPlatesThreat")
+ThreatPlates.Media = LibStub("LibSharedMedia-3.0")
+
+---------------------------------------------------------------------------------------------------
+-- Define AceAddon TidyPlatesThreat
+-- TODO: There's a collision with the addon TidyPlates: Threat because of the same Ace3 addon name
+---------------------------------------------------------------------------------------------------
+
+TidyPlatesThreat = LibStub("AceAddon-3.0"):NewAddon("TidyPlatesThreat", "AceConsole-3.0", "AceEvent-3.0")
 
 --------------------------------------------------------------------------------------------------
 -- General Functions

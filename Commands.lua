@@ -1,15 +1,17 @@
-﻿local _,ns = ...
-local t = ns.ThreatPlates
-local L = t.L
+﻿local ADDON_NAME, NAMESPACE = ...
+local TP = NAMESPACE.ThreatPlates
 
-local Active = function() return GetActiveSpecGroup() end
+---------------------------------------------------------------------------------------------------
+-- Imported functions and constants
+---------------------------------------------------------------------------------------------------
+local L = TP.L
 
 local function toggleDPS()
 	TidyPlatesThreat:SetRole(false)
 	TidyPlatesThreat.db.profile.threat.ON = true
 	if TidyPlatesThreat.db.profile.verbose then
-	t.Print(L["-->>|cffff0000DPS Plates Enabled|r<<--"])
-	t.Print(L["|cff89F559Threat Plates|r: DPS switch detected, you are now in your |cffff0000dpsing / healing|r role."])
+	TP.Print(L["-->>|cffff0000DPS Plates Enabled|r<<--"])
+	TP.Print(L["|cff89F559Threat Plates|r: DPS switch detected, you are now in your |cffff0000dpsing / healing|r role."])
 	end
 	TidyPlates:ForceUpdate()
 end
@@ -18,8 +20,8 @@ local function toggleTANK()
 	TidyPlatesThreat:SetRole(true)
 	TidyPlatesThreat.db.profile.threat.ON = true
 	if TidyPlatesThreat.db.profile.verbose then
-	t.Print(L["-->>|cff00ff00Tank Plates Enabled|r<<--"])
-	t.Print(L["|cff89F559Threat Plates|r: Tank switch detected, you are now in your |cff00ff00tanking|r role."])
+	TP.Print(L["-->>|cff00ff00Tank Plates Enabled|r<<--"])
+	TP.Print(L["|cff89F559Threat Plates|r: Tank switch detected, you are now in your |cff00ff00tanking|r role."])
 	end
 	TidyPlates:ForceUpdate()
 end
@@ -31,7 +33,7 @@ SlashCmdList["TPTPTANK"] = toggleTANK
 
 local function TPTPTOGGLE()
 	if (TidyPlatesThreat.db.profile.optionRoleDetectionAutomatic and TidyPlatesThreat.db.profile.verbose) then
-		t.Print(L["|cff89F559Threat Plates|r: Role toggle not supported because automatic role detection is enabled."])
+		TP.Print(L["|cff89F559Threat Plates|r: Role toggle not supported because automatic role detection is enabled."])
 	else
 		if TidyPlatesThreat:GetSpecRole() then
 			toggleDPS()
@@ -49,24 +51,24 @@ local function TPTPOVERLAP()
 	if tonumber(build) > 13623 then
 		if GetCVar("nameplateMotion") == "3" then
 			if InCombatLockdown() then
-				t.Print(L["We're unable to change this while in combat"])
+				TP.Print(L["We're unable to change this while in combat"])
 			else
 				SetCVar("nameplateMotion", 1)
-				t.Print(L["-->>Nameplate Overlapping is now |cffff0000OFF!|r<<--"])
+				TP.Print(L["-->>Nameplate Overlapping is now |cffff0000OFF!|r<<--"])
 			end
 		else
 			if InCombatLockdown() then
-				t.Print(L["We're unable to change this while in combat"])
+				TP.Print(L["We're unable to change this while in combat"])
 			else
 				SetCVar("nameplateMotion", 3)
-				t.Print(L["-->>Nameplate Overlapping is now |cff00ff00ON!|r<<--"])
+				TP.Print(L["-->>Nameplate Overlapping is now |cff00ff00ON!|r<<--"])
 			end
 		end
 	else
 		if GetCVar("spreadnameplates") == "0" then
-			t.Print(L["-->>Nameplate Overlapping is now |cff00ff00ON!|r<<--"])
+			TP.Print(L["-->>Nameplate Overlapping is now |cff00ff00ON!|r<<--"])
 		else
-			t.Print(L["-->>Nameplate Overlapping is now |cffff0000OFF!|r<<--"])
+			TP.Print(L["-->>Nameplate Overlapping is now |cffff0000OFF!|r<<--"])
 		end
 	end
 end
@@ -76,9 +78,9 @@ SlashCmdList["TPTPOVERLAP"] = TPTPOVERLAP
 
 local function TPTPVERBOSE()
 	if TidyPlatesThreat.db.profile.verbose then
-		t.Print(L["-->>Threat Plates verbose is now |cffff0000OFF!|r<<-- shhh!!"])
+		TP.Print(L["-->>Threat Plates verbose is now |cffff0000OFF!|r<<-- shhh!!"])
 	else
-		t.Print(L["-->>Threat Plates verbose is now |cff00ff00ON!|r<<--"], true)
+		TP.Print(L["-->>Threat Plates verbose is now |cff00ff00ON!|r<<--"], true)
 	end
 	TidyPlatesThreat.db.profile.verbose = not TidyPlatesThreat.db.profile.verbose
 end
@@ -94,13 +96,13 @@ SlashCmdList["TPTPVERBOSE"] = TPTPVERBOSE
 --	t.Print(L["  <no option>        Displays options dialog"], true)
 --end
 
--- /tptp
-local function ParseCommandLine(message)
+-- Command: /tptp
+function TidyPlatesThreat:ChatCommand(input)
 	TidyPlatesThreat:OpenOptions()
 
 	-- split commands by space
 	--for word in message:gmatch("%S+") do
-	--	if message == "" then
+--	if message == "" then
 --	elseif message == "update-profiles" then
 --		t.Print(L["Migrating deprecated settings in configuration ..."])
 --		t.UpdateConfiguration()
@@ -118,5 +120,3 @@ end
 -----------------------------------------------------
 -- External
 -----------------------------------------------------
-
-TidyPlatesThreat.ParseCommandLine = ParseCommandLine

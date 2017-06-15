@@ -179,7 +179,7 @@ local function CreateWidgetFrame(parent)
 	return frame
 end
 
-TidyPlatesThreat.IsQuestUnit = IsQuestUnit
-TidyPlatesThreat.ShowQuestUnit = ShowQuestUnit
+ThreatPlates.IsQuestUnit = IsQuestUnit
+ThreatPlates.ShowQuestUnit = ShowQuestUnit
 
 ThreatPlatesWidgets.RegisterWidget("QuestWidgetTPTP", CreateWidgetFrame, false, enabled, EnabledInHeadlineView)

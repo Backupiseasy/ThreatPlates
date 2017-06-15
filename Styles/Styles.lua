@@ -261,8 +261,8 @@ local function SetStyle(unit)
   return style, unique_setting
 end
 
-TidyPlatesThreat.OnThreatTable = OnThreatTable
-TidyPlatesThreat.ShowThreatFeedback = ShowThreatFeedback
-TidyPlatesThreat.GetThreatStyle = GetThreatStyle
-TidyPlatesThreat.GetUniqueNameplateSetting = GetUniqueNameplateSetting
+ThreatPlates.OnThreatTable = OnThreatTable
+ThreatPlates.ShowThreatFeedback = ShowThreatFeedback
+ThreatPlates.GetThreatStyle = GetThreatStyle
+ThreatPlates.GetUniqueNameplateSetting = GetUniqueNameplateSetting
 TidyPlatesThreat.SetStyle = SetStyle

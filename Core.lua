@@ -4,20 +4,21 @@ local t = ns.ThreatPlates
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
+local LibStub = LibStub
+
+local UnitIsUnit = UnitIsUnit
+
 local RGB = t.RGB
 local RGB_P = t.RGB_P
 local L = t.L
 local class = t.Class()
 
-local UnitIsUnit = UnitIsUnit
-
 t.Theme = {}
-
-TidyPlatesThreat = LibStub("AceAddon-3.0"):NewAddon("TidyPlatesThreat", "AceConsole-3.0", "AceEvent-3.0")
 
 ---------------------------------------------------------------------------------------------------
 -- Global configs and funtions
 ---------------------------------------------------------------------------------------------------
+local TidyPlatesThreat = TidyPlatesThreat
 
 -- check if the correct TidyPlates version is installed
 --function CheckTidyPlatesVersion()
@@ -43,26 +44,12 @@ t.Print = function(val,override)
   end
 end
 
--- Returns if the currently active spec is tank (true) or dps/heal (false)
-function TidyPlatesThreat:GetSpecRole()
-  local active_role
-
-  if (self.db.profile.optionRoleDetectionAutomatic) then
-    active_role = t.SPEC_ROLES[t.Class()][t.Active()]
-    if not active_role then active_role = false end
+function TidyPlatesThreat:SpecName()
+  local _,name,_,_,_,role = GetSpecializationInfo(GetSpecialization(false,false,1),nil,false)
+  if name then
+    return name
   else
-    active_role = self.db.char.spec[t.Active()]
-  end
-
-  return active_role
-end
-
--- Sets the role of the index spec or the active spec to tank (value = true) or dps/healing
-function TidyPlatesThreat:SetRole(value,index)
-  if index then
-    self.db.char.spec[index] = value
-  else
-    self.db.char.spec[t.Active()] = value
+    return L["Undetermined"]
   end
 end
 
@@ -77,13 +64,90 @@ function TidyPlatesThreat:RoleText()
   end
 end
 
-function TidyPlatesThreat:SpecName()
-  local _,name,_,_,_,role = GetSpecializationInfo(GetSpecialization(false,false,1),nil,false)
-  if name then
-    return name
-  else
-    return L["Undetermined"]
+---------------------------------------------------------------------------------------------------
+-- Functions called by TidyPlates
+---------------------------------------------------------------------------------------------------
+
+local function ActivateTheme(theme_table, theme_name)
+  -- 	Set aura widget style for Aura 1.0
+  local db = TidyPlatesThreat.db.profile
+  if db.debuffWidget.style == "square" then
+    TidyPlatesWidgets.UseSquareDebuffIcon()
+  elseif db.debuffWidget.style == "wide" then
+    TidyPlatesWidgets.UseWideDebuffIcon()4
   end
+  TidyPlatesWidgets.SetAuraFilter(ThreatPlatesWidgets.AuraFilter)
+
+  -- TODO: check with what this  was replaces
+  --TidyPlatesUtility:EnableGroupWatcher()
+  -- TPHUub: if LocalVars.AdvancedEnableUnitCache then TidyPlatesUtility:EnableUnitCache() else TidyPlatesUtility:DisableUnitCache() end
+  -- TPHUub: TidyPlatesUtility:EnableHealerTrack()
+  -- if TidyPlatesThreat.db.profile.healerTracker.ON then
+  -- 	if not healerTrackerEnabled then
+  -- 		TidyPlatesUtility.EnableHealerTrack()
+  -- 	end
+  -- else
+  -- 	if healerTrackerEnabled then
+  -- 		TidyPlatesUtility.DisableHealerTrack()
+  -- 	end
+  -- end
+  -- TidyPlatesWidgets:EnableTankWatch()
+  -- initialize widgets and other Threat Plates stuff
+
+  local ThreatPlatesWidgets = ThreatPlatesWidgets
+  ThreatPlatesWidgets.PrepareFilter()
+  ThreatPlatesWidgets.ConfigAuraWidgetFilter()
+  ThreatPlatesWidgets.ConfigAuraWidget()
+  t.SyncWithGameSettings()
+end
+
+-- The theme loader will now call 'theme.OnActivateTheme' (a theme function) when the active theme
+-- is changed.  it passes two value to the function: the active theme table, and the active theme
+-- name.
+-- Changelog entry seems to be wrong, there is never passed a 2nd parameter to this function
+local function OnActivateTheme(theme_table, theme_name)
+  -- Sends a reset notification to all available themes, ie. themeTable == nil
+  if not theme_table then
+    ThreatPlatesWidgets.DeleteWidgets()
+  else
+    if not TidyPlatesThreat.db.global.CheckNewLookAndFeel then
+      StaticPopup_Show("SwitchToNewLookAndFeel")
+    end
+
+    ActivateTheme()
+  end
+
+  -- TidyPlates:ForceUpdate() is called by TidyPlates directly after OnActivateTheme
+end
+
+------------------
+-- ADDON LOADED --
+------------------
+
+local function ApplyHubFunctions(theme)
+  theme.SetStyle = TidyPlatesThreat.SetStyle
+  theme.SetScale = TidyPlatesThreat.SetScale
+  theme.SetAlpha = TidyPlatesThreat.SetAlpha
+  theme.SetCustomText = TidyPlatesThreat.SetCustomText
+  theme.SetNameColor = TidyPlatesThreat.SetNameColor
+  theme.SetThreatColor = TidyPlatesThreat.SetThreatColor
+  theme.SetCastbarColor = TidyPlatesThreat.SetCastbarColor
+  theme.SetHealthbarColor = TidyPlatesThreat.SetHealthbarColor
+
+  local ThreatPlatesWidgets = ThreatPlatesWidgets
+  -- TidyPlatesGlobal_OnInitialize() is called when a nameplate is created or re-shown
+  theme.OnInitialize = ThreatPlatesWidgets.OnInitialize -- Need to provide widget positions
+  -- TidyPlatesGlobal_OnUpdate() is called when other data about the unit changes, or is requested by an external controller.
+  theme.OnUpdate = ThreatPlatesWidgets.OnUpdate
+  -- TidyPlatesGlobal_OnContextUpdate() is called when a unit is targeted or moused-over.  (Any time the unitid or GUID changes)
+  theme.OnContextUpdate = ThreatPlatesWidgets.OnContextUpdate
+
+  theme.OnActivateTheme = OnActivateTheme -- called by Tidy Plates Core, Theme Loader
+  --theme.OnChangeProfile = TidyPlatesThreat.OnChangeProfile -- used by TidyPlates when a specialication change occurs or the profile is changed
+  --theme.ApplyProfileSettings = TidyPlatesThreat.ApplyProfileSettings
+  --theme.ShowConfigPanel = ShowConfigPanel -- I don't think that this function is used any longer by TidyPlates
+
+  return theme
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -100,7 +164,6 @@ StaticPopupDialogs["SetToThreatPlates"] = {
   OnAccept = function()
     TidyPlates:SetTheme(t.THEME_NAME)
     TidyPlatesThreat:StartUp()
-    t.Update()
   end,
   OnAlt = function()
     -- call OpenToCategory twice to work around an update bug with WoW's internal addons category list introduced with 5.3.0
@@ -124,170 +187,34 @@ StaticPopupDialogs["SwitchToNewLookAndFeel"] = {
     TidyPlatesThreat.db.global.DefaultsVersion = "SMOOTH"
     TidyPlatesThreat.db.global.CheckNewLookAndFeel = true
     t.SwitchToCurrentDefaultSettings()
-    t.SetThemes(TidyPlatesThreat)
-    TidyPlates:ForceUpdate()
+    TidyPlatesThreat:ReloadTheme()
   end,
   OnCancel = function(self, data, action)
     if action == "clicked" then
       TidyPlatesThreat.db.global.DefaultsVersion = "CLASSIC"
       TidyPlatesThreat.db.global.CheckNewLookAndFeel = true
       t.SwitchToDefaultSettingsV1()
-      t.SetThemes(TidyPlatesThreat)
-      TidyPlates:ForceUpdate()
+      TidyPlatesThreat:ReloadTheme()
     end
   end,
 }
 
--- Callback Functions
-function TidyPlatesThreat:ProfChange()
+function TidyPlatesThreat:ReloadTheme()
+  -- Recreate all TidyPlates styles for ThreatPlates("normal", "dps", "tank", ...) - required, if theme style settings were changed
   t.SetThemes(self)
-  --t.ClearTidyPlatesWidgets(self)
-  --t.SetTidyPlatesWidgets(self)
-  t.Update()
-  self:ConfigRefresh()
-  self:StartUp()
-  TidyPlates:ForceUpdate()
-end
 
---[[Options and Default Settings]]--
-
--- AceAddon function: do init tasks here, like loading the Saved Variables, or setting up slash commands.
-function TidyPlatesThreat:OnInitialize()
-  local defaults = t.DEFAULT_SETTINGS
-
-  -- change back defaults old settings if wanted preserved it the user want's to switch back
-  if ThreatPlatesDB and ThreatPlatesDB.global and ThreatPlatesDB.global.DefaultsVersion == "CLASSIC" then
-    -- copy default settings, so that their original values are
-    defaults = t.GetDefaultSettingsV1(defaults)
+  -- ForceUpdate() is called in SetTheme(), also calls theme.OnActivateTheme,
+  local TidyPlates = TidyPlates
+  if TidyPlates.GetThemeName() == t.THEME_NAME then
+    TidyPlates:SetTheme(t.THEME_NAME)
   end
 
-  local db = LibStub('AceDB-3.0'):New('ThreatPlatesDB', defaults, 'Default')
-  self.db = db
-
-  local RegisterCallback = db.RegisterCallback
-
-  RegisterCallback(self, 'OnProfileChanged', 'ProfChange')
-  RegisterCallback(self, 'OnProfileCopied', 'ProfChange')
-  RegisterCallback(self, 'OnProfileReset', 'ProfChange')
-
-  self:SetUpInitialOptions()
-end
-
-local function ShowConfigPanel()
-  TidyPlatesThreat:OpenOptions()
-end
-TidyPlatesThreat.ShowConfigPanel = ShowConfigPanel
-
----------------------------------------------------------------------------------------------------
--- Functions called by TidyPlates
----------------------------------------------------------------------------------------------------
-
-local function ActivateTheme()
-  -- 	Set aura widget style
-  local db = TidyPlatesThreat.db.profile
-  if db.debuffWidget.style == "square" then
-    TidyPlatesWidgets.UseSquareDebuffIcon()
-  elseif db.debuffWidget.style == "wide" then
-    TidyPlatesWidgets.UseWideDebuffIcon()
-  end
-
-  -- TODO: check with what this  was replaces
-  --TidyPlatesUtility:EnableGroupWatcher()
-  -- TPHUub: if LocalVars.AdvancedEnableUnitCache then TidyPlatesUtility:EnableUnitCache() else TidyPlatesUtility:DisableUnitCache() end
-  -- TPHUub: TidyPlatesUtility:EnableHealerTrack()
-  -- if TidyPlatesThreat.db.profile.healerTracker.ON then
-  -- 	if not healerTrackerEnabled then
-  -- 		TidyPlatesUtility.EnableHealerTrack()
-  -- 	end
-  -- else
-  -- 	if healerTrackerEnabled then
-  -- 		TidyPlatesUtility.DisableHealerTrack()
-  -- 	end
-  -- end
-  -- TidyPlatesWidgets:EnableTankWatch()
-
-  TidyPlatesWidgets.SetAuraFilter(AuraFilter)
-end
-
-local function OnActivateTheme(themeTable)
-  -- Sends a reset notification to all available themes, ie. themeTable == nil
-  if not themeTable then
-    ThreatPlatesWidgets.DeleteWidgets()
-  else
-    if not TidyPlatesThreat.db.global.CheckNewLookAndFeel then
-      StaticPopup_Show("SwitchToNewLookAndFeel")
-    end
-
-    ActivateTheme()
-  end
-end
-TidyPlatesThreat.OnActivateTheme = OnActivateTheme
-
---local function OnChangeProfile(theme, profile)
---end
---TidyPlatesThreat.OnChangeProfile = OnChangeProfile
-
--- called by TidyPlatesHub when changes in the options panel were made (CallForStyleUpdate)
---local function ApplyProfileSettings(theme, ...)
---  TidyPlates:ForceUpdate()
---end
---TidyPlatesThreat.ApplyProfileSettings = ApplyProfileSettings
-
-------------------
--- ADDON LOADED --
-------------------
-
-local function ApplyHubFunctions(theme)
-  theme.SetStyle = TidyPlatesThreat.SetStyle
-  theme.SetScale = TidyPlatesThreat.SetScale
-  theme.SetAlpha = TidyPlatesThreat.SetAlpha
-  theme.SetCustomText = TidyPlatesThreat.SetCustomText
-  theme.SetNameColor = TidyPlatesThreat.SetNameColor
-  theme.SetThreatColor = TidyPlatesThreat.SetThreatColor
-  theme.SetCastbarColor = TidyPlatesThreat.SetCastbarColor
-  theme.SetHealthbarColor = TidyPlatesThreat.SetHealthbarColor
-
-  -- TidyPlatesGlobal_OnInitialize() is called when a nameplate is created or re-shown
-  -- TidyPlatesGlobal_OnUpdate() is called when other data about the unit changes, or is requested by an external controller.
-  -- TidyPlatesGlobal_OnContextUpdate() is called when a unit is targeted or moused-over.  (Any time the unitid or GUID changes)
-  theme.OnInitialize = ThreatPlatesWidgets.OnInitialize -- Need to provide widget positions
-  theme.OnUpdate = ThreatPlatesWidgets.OnUpdate
-  theme.OnContextUpdate = ThreatPlatesWidgets.OnContextUpdate
-
-  theme.OnActivateTheme = TidyPlatesThreat.OnActivateTheme -- called by Tidy Plates Core, Theme Loader
---  theme.OnChangeProfile = TidyPlatesThreat.OnChangeProfile -- used by TidyPlates when a specialication change occurs or the profile is changed
---  theme.ApplyProfileSettings = TidyPlatesThreat.ApplyProfileSettings
-
-  theme.ShowConfigPanel = TidyPlatesThreat.ShowConfigPanel
-
-  return theme
-end
-
--- AceAddon function: Do more initialization here, that really enables the use of your addon.
--- Register Events, Hook functions, Create Frames, Get information from the game that wasn't available in OnInitialize
-function TidyPlatesThreat:OnEnable()
-  TidyPlatesThemeList[t.THEME_NAME] = t.Theme
-  ApplyHubFunctions(t.Theme)
-  ActivateTheme()
-
-  self:StartUp()
-
-  local events = {
-    -- "PLAYER_ALIVE",
-    "PLAYER_ENTERING_WORLD",
-    --"PLAYER_LEAVING_WORLD",
-    "PLAYER_LOGIN",
-    "PLAYER_LOGOUT",
-    --"PLAYER_REGEN_DISABLED",
-    "PLAYER_REGEN_ENABLED",
-    --"PLAYER_TALENT_UPDATE"
-    "UNIT_FACTION",
-    "QUEST_WATCH_UPDATE",
-    "NAME_PLATE_CREATED",
-  }
-  for i=1,#events do
-    self:RegisterEvent(events[i])
-  end
+--  -- initialize widgets and other Threat Plates stuff
+--  local ThreatPlatesWidgets = ThreatPlatesWidgets
+--  ThreatPlatesWidgets.PrepareFilter()
+--  ThreatPlatesWidgets.ConfigAuraWidgetFilter()
+--  ThreatPlatesWidgets.ConfigAuraWidget()
+--  t.SyncWithGameSettings()
 end
 
 function TidyPlatesThreat:StartUp()
@@ -334,14 +261,81 @@ function TidyPlatesThreat:StartUp()
     end
   end
 
-  t.SetThemes(self)
-  t.Update()
-  -- initialize widgets and other Threat Plates stuff
-  ThreatPlatesWidgets.PrepareFilter()
-	ThreatPlatesWidgets.ConfigAuraWidgetFilter()
-  ThreatPlatesWidgets.ConfigAuraWidget()
-  t.SyncWithGameSettings()
+  TidyPlatesThreat:ReloadTheme()
 end
+
+---------------------------------------------------------------------------------------------------
+-- AceAddon functions: do init tasks here, like loading the Saved Variables, or setting up slash commands.
+---------------------------------------------------------------------------------------------------
+
+-- The OnInitialize() method of your addon object is called by AceAddon when the addon is first loaded
+-- by the game client. It's a good time to do things like restore saved settings (see the info on
+-- AceConfig for more notes about that).
+function TidyPlatesThreat:OnInitialize()
+  local defaults = t.DEFAULT_SETTINGS
+
+  -- change back defaults old settings if wanted preserved it the user want's to switch back
+  if ThreatPlatesDB and ThreatPlatesDB.global and ThreatPlatesDB.global.DefaultsVersion == "CLASSIC" then
+    -- copy default settings, so that their original values are
+    defaults = t.GetDefaultSettingsV1(defaults)
+  end
+
+  local db = LibStub('AceDB-3.0'):New('ThreatPlatesDB', defaults, 'Default')
+  self.db = db
+
+  local RegisterCallback = db.RegisterCallback
+  RegisterCallback(self, 'OnProfileChanged', 'ProfChange')
+  RegisterCallback(self, 'OnProfileCopied', 'ProfChange')
+  RegisterCallback(self, 'OnProfileReset', 'ProfChange')
+
+  -- Setup Interface panel options
+  local app_name = t.ADDON_NAME
+  local dialog_name = app_name .. " Dialog"
+  LibStub("AceConfig-3.0"):RegisterOptionsTable(dialog_name, t.GetInterfaceOptionsTable())
+  LibStub("AceConfigDialog-3.0"):AddToBlizOptions(dialog_name, t.ADDON_NAME)
+
+  -- Setup options dialog
+  LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable(app_name, t.GetOptionsTable())
+  LibStub("AceConfigDialog-3.0"):SetDefaultSize(app_name, 1000, 640)
+
+  -- Setup chat commands
+  self:RegisterChatCommand("tptp", "ChatCommand");
+end
+
+-- The OnEnable() and OnDisable() methods of your addon object are called by AceAddon when your addon is
+-- enabled/disabled by the user. Unlike OnInitialize(), this may occur multiple times without the entire
+-- UI being reloaded.
+-- AceAddon function: Do more initialization here, that really enables the use of your addon.
+-- Register Events, Hook functions, Create Frames, Get information from the game that wasn't available in OnInitialize
+function TidyPlatesThreat:OnEnable()
+  TidyPlatesThemeList[t.THEME_NAME] = t.Theme
+  ApplyHubFunctions(t.Theme)
+  -- ActivateTheme()
+
+  self:StartUp()
+
+  --"PLAYER_ALIVE",
+  --"PLAYER_LEAVING_WORLD",
+  --"PLAYER_REGEN_DISABLED",
+  --"PLAYER_TALENT_UPDATE"
+  local events = {
+    "PLAYER_ENTERING_WORLD",
+    "PLAYER_LOGIN",
+    "PLAYER_LOGOUT",
+    "PLAYER_REGEN_ENABLED",
+    "UNIT_FACTION",
+    "QUEST_WATCH_UPDATE",
+    "NAME_PLATE_CREATED",
+  }
+
+  for i = 1, #events do
+    self:RegisterEvent(events[i])
+  end
+end
+
+--function WelcomeHome:OnDisable()
+--  -- Called when the addon is disabled
+--end
 
 -----------------------------------------------------------------------------------
 -- WoW EVENTS --
@@ -432,7 +426,6 @@ end
 -- QuestWidget needs to update all nameplates when a quest was completed
 function TidyPlatesThreat:UNIT_FACTION(event, unitid)
   TidyPlates:ForceUpdate()
-  --TidyPlatesThreat.ApplyProfileSettings()
 end
 
 -- nameplate color can change when factions change (e.g., with disguises)
@@ -440,7 +433,6 @@ end
 function TidyPlatesThreat:QUEST_WATCH_UPDATE(event, quest_index)
   if TidyPlatesThreat.db.profile.questWidget.ON then
     TidyPlates:ForceUpdate()
-    --TidyPlatesThreat.ApplyProfileSettings()
   end
 end
 

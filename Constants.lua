@@ -24,6 +24,7 @@ local DEFAULT_FONT = "Cabin"
 -- Global contstants for various stuff
 ---------------------------------------------------------------------------------------------------
 
+ThreatPlates.ADDON_NAME = "Tidy Plates: Threat Plates"
 ThreatPlates.THEME_NAME = "Threat Plates"
 -- ThreatPlates.TIDYPLATES_VERSIONS = { "6.18.10" }
 -- ThreatPlates.TIDYPLATES_INSTALLED_VERSION = GetAddOnMetadata("TidyPlates", "version") or ""

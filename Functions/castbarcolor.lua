@@ -1,3 +1,6 @@
+local ADDON_NAME, NAMESPACE = ...
+local ThreatPlates = NAMESPACE.ThreatPlates
+
 local function SetCastbarColor(unit)
 	local db = TidyPlatesThreat.db.profile
 	local c = {r = 1,g = 1,b = 0,a = 1}

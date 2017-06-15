@@ -4,13 +4,15 @@ local t = ns.ThreatPlates
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
+local LibStub = LibStub
+
 local L = t.L
 local class = t.Class()
-local path = t.Art
+local PATH_ART = t.Art
 local TotemNameBySpellID = t.TotemNameBySpellID
 
-local TidyPlatesThreat = LibStub("AceAddon-3.0"):GetAddon("TidyPlatesThreat");
-local db;
+-- local TidyPlatesThreat = LibStub("AceAddon-3.0"):GetAddon("TidyPlatesThreat");
+local TidyPlatesThreat = TidyPlatesThreat
 
 local UNIT_TYPES = {
   {
@@ -27,6 +29,11 @@ local UNIT_TYPES = {
   }
 }
 
+-- local reference to current profile
+local db
+-- table for storing the options dialog
+local options = nil
+
 -- Functions
 
 local function GetSpellName(number)
@@ -35,6 +42,8 @@ local function GetSpellName(number)
 end
 
 local function UpdateSpecial() -- Need to add a way to update options table.
+  local db = TidyPlatesThreat.db.profile
+
   db.uniqueSettings.list = {};
   for k_c, k_v in pairs(db.uniqueSettings) do
     if db.uniqueSettings[k_c].name then
@@ -45,8 +54,6 @@ local function UpdateSpecial() -- Need to add a way to update options table.
   end
   t.Update()
 end
-
-t.UpdateSpecial = UpdateSpecial
 
 local function GetValue(info)
   local DB = TidyPlatesThreat.db.profile
@@ -1029,8 +1036,7 @@ local function CreateTabGeneralSettings()
 end
 
 -- Return the Options table
-local options = nil;
-local function GetOptions()
+local function CreateOptionsTable()
   -- Create a list of specs for the player's class
   local dialog_specs = {
     Automatic_Spec_Detection = {
@@ -1133,8 +1139,7 @@ local function GetOptions()
                         else -- val == "SMOOTH"
                           t.SwitchToCurrentDefaultSettings()
                         end
-                        t.SetThemes(TidyPlatesThreat)
-                        TidyPlates:ForceUpdate()
+                        TidyPlatesThreat:ReloadTheme()
                       end,
                       get = function(info) return TidyPlatesThreat.db.global.DefaultsVersion end,
                     },
@@ -5431,182 +5436,71 @@ local function GetOptions()
     }
     CustomOpts_OrderCnt = CustomOpts_OrderCnt + 10;
   end
-  options.args.Custom.args = CustomOpts;
+
+  options.args.Custom.args = CustomOpts
+
+  UpdateSpecial()
+
+  options.args.profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(TidyPlatesThreat.db)
+  options.args.profiles.order = 10000;
+end
+
+local function GetOptionsTable()
+  db = TidyPlatesThreat.db.profile
+
+  CreateOptionsTable()
+  --t.Update()
+
   return options
 end
 
-local intoptions = nil;
-local function GetIntOptions()
-  if not intoptions then
-    intoptions = {
-      name = t.Meta("title") .. " v" .. t.Meta("version"),
-      handler = TidyPlatesThreat,
-      type = "group",
-      args = {
-        note = {
-          type = "description",
-          name = L["You can access the "] .. t.Meta("titleshort") .. L[" options by typing: /tptp"],
-          order = 10,
-        },
-        openoptions = {
-          type = "execute",
-          name = L["Open Config"],
-          image = path .. "Logo",
-          width = "full",
-          imageWidth = 256,
-          imageHeight = 32,
-          func = function()
-            TidyPlatesThreat:OpenOptions()
-          end,
-          order = 20,
-        },
+local function GetInterfaceOptionsTable()
+  local interface_options = {
+    name = t.Meta("title") .. " v" .. t.Meta("version"),
+    handler = TidyPlatesThreat,
+    type = "group",
+    args = {
+      note = {
+        type = "description",
+        name = L["You can access the "] .. t.Meta("titleshort") .. L[" options by typing: /tptp"],
+        order = 10,
       },
-    };
-  end
-  return intoptions;
+      openoptions = {
+        type = "execute",
+        name = L["Open Options"],
+        image = PATH_ART .. "Logo",
+        width = "full",
+        imageWidth = 256,
+        imageHeight = 32,
+        func = function()
+          TidyPlatesThreat:OpenOptions()
+        end,
+        order = 20,
+      },
+    },
+  }
+
+  return interface_options
+end
+
+function TidyPlatesThreat:ProfChange()
+  db = self.db.profile
+  UpdateSpecial()
+
+  TidyPlatesThreat:ReloadTheme()
 end
 
 function TidyPlatesThreat:OpenOptions()
+  db = self.db.profile
+
   HideUIPanel(InterfaceOptionsFrame)
   HideUIPanel(GameMenuFrame)
-  if not options then TidyPlatesThreat:SetUpOptions() end
-  LibStub("AceConfigDialog-3.0"):Open("Tidy Plates: Threat Plates");
+
+  LibStub("AceConfigDialog-3.0"):Open(t.ADDON_NAME);
 end
 
-function TidyPlatesThreat:ChatCommand(input)
-  TidyPlatesThreat.ParseCommandLine(input)
-end
-
-function TidyPlatesThreat:ConfigRefresh()
-  db = self.db.profile;
-  t.SetThemes(self)
-  UpdateSpecial()
-end
-
-function TidyPlatesThreat:SetUpInitialOptions()
-  -- Chat Command
-  self:RegisterChatCommand("tptp", "ChatCommand");
-
-  -- Interface panel options
-
-  LibStub("AceConfig-3.0"):RegisterOptionsTable("Tidy Plates: Threat Plates Dialog", GetIntOptions);
-
-  self.optionsFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Tidy Plates: Threat Plates Dialog", "Tidy Plates: Threat Plates");
-end
-
-function TidyPlatesThreat:AddOptions(class)
-  local AddOptionsTable = {
-    DEATHKNIGHT = {
-      AuraType = L["Presences"],
-      index = "presences",
-      names = {
-        [1] = GetSpellInfo(48263), -- Blood
-        [2] = GetSpellInfo(48266), -- Frost
-        [3] = GetSpellInfo(48265) -- Unholy
-      },
-    },
-    DRUID = {
-      AuraType = L["Shapeshifts"],
-      index = "shapeshifts",
-      names = {
-        [1] = GetSpellInfo(5487), -- Bear Form
-        [2] = GetSpellInfo(783), -- Cat Form
-        [3] = GetSpellInfo(783), -- Travel Form
-        [4] = GetSpellInfo(114282) .. ", " .. GetSpellInfo(24858) -- Tree of Life (Glyphed), Moonkin
-      },
-    },
-    PALADIN = {
-      AuraType = L["Seals"],
-      index = "seals",
-      names = {
-        [1] = GetSpellInfo(465), -- Devotion Aura
-        [2] = GetSpellInfo(7294), -- Retribution Aura
-        [3] = GetSpellInfo(19746), -- Concentration Aura
-        [4] = GetSpellInfo(19891), -- Resistance Aura
-        [5] = GetSpellInfo(32223) -- Crusader Aura
-      },
-    },
-    WARRIOR = {
-      AuraType = L["Stances"],
-      index = "stances",
-      names = {
-        [1] = GetSpellInfo(2457), -- Battle Stance
-        [2] = GetSpellInfo(71), -- Defensive Stance
-        [3] = GetSpellInfo(2458) -- Berserker Stance
-      },
-    },
-  }
-  local index = AddOptionsTable[class].index
-  local _db = TidyPlatesThreat.db.char[index]
-  local AdditionalOptions = {
-    type = "group",
-    name = AddOptionsTable[class].AuraType,
-    order = 70,
-    args = {
-      Enable = {
-        type = "toggle",
-        order = 1,
-        name = L["Enable"],
-        get = GetValueChar,
-        set = SetValueChar,
-        arg = { index, "ON" },
-      },
-      Options = {
-        type = "group",
-        order = 2,
-        inline = false,
-        disabled = function() if not _db.ON or not TidyPlatesThreat.db.profile.threat.ON then return true else return false end end,
-        name = L["Options"],
-        args = {},
-      },
-    },
-  }
-  local addorder = 20
-  for k_c, k_v in pairs(AddOptionsTable[class].names) do
-    -- t.DEBUG(k_c.. " "..k_v)
-    AdditionalOptions.args.Options.args[index .. k_c] = {
-      type = "group",
-      name = k_v,
-      inline = true,
-      order = k_c,
-      args = {
-        Tank = {
-          type = "toggle",
-          order = 1,
-          name = L["|cff00ff00Tank|r"],
-          get = function(info) if _db[k_c] then return true else return false end end,
-          set = function(info, val) _db[k_c] = true; TidyPlatesThreat.ShapeshiftUpdate() end,
-        },
-        DPS = {
-          type = "toggle",
-          order = 2,
-          name = L["|cffff0000DPS/Healing|r"],
-          get = function(info) if not _db[k_c] then return true else return false end end,
-          set = function(info, val) _db[k_c] = false; TidyPlatesThreat.ShapeshiftUpdate() end,
-        },
-      },
-    }
-    addorder = addorder + 10
-  end
-  options.args.Stances = {};
-  options.args.Stances = AdditionalOptions;
-end
-
-function TidyPlatesThreat:SetUpOptions()
-  db = self.db.profile;
-
-  -- Options Window
-  GetOptions();
-  UpdateSpecial();
-  t.Update();
-
-  if class == "DEATHKNIGHT" or class == "DRUID" or class == "PALADIN" or class == "WARRIOR" then
-    --TidyPlatesThreat:AddOptions(class)
-  end
-
-  options.args.profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db);
-  options.args.profiles.order = 10000;
-
-  LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable("Tidy Plates: Threat Plates", options);
-  LibStub("AceConfigDialog-3.0"):SetDefaultSize("Tidy Plates: Threat Plates", 1000, 640)
-end
+-----------------------------------------------------
+-- External
+-----------------------------------------------------
+t.GetInterfaceOptionsTable = GetInterfaceOptionsTable
+t.GetOptionsTable = GetOptionsTable

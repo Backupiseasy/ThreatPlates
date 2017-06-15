@@ -14,8 +14,37 @@ local InCombatLockdown = InCombatLockdown
 -- Global functions for accessing the configuration
 ---------------------------------------------------------------------------------------------------
 
+-- Returns if the currently active spec is tank (true) or dps/heal (false)
+function TidyPlatesThreat:GetSpecRole()
+  local active_role
+
+  if (self.db.profile.optionRoleDetectionAutomatic) then
+    active_role = ThreatPlates.SPEC_ROLES[ThreatPlates.Class()][ThreatPlates.Active()]
+    if not active_role then active_role = false end
+  else
+    active_role = self.db.char.spec[ThreatPlates.Active()]
+  end
+
+  return active_role
+end
+
+-- Sets the role of the index spec or the active spec to tank (value = true) or dps/healing
+function TidyPlatesThreat:SetRole(value,index)
+  if index then
+    self.db.char.spec[index] = value
+  else
+    self.db.char.spec[ThreatPlates.Active()] = value
+  end
+end
+
 local function GetUnitVisibility(full_unit_type)
   local unit_visibility = TidyPlatesThreat.db.profile.Visibility[full_unit_type]
+
+  if not unit_visibility then
+    unit_visibility = TidyPlatesThreat.db.profile.Visibility.FriendlyNPC
+    print ("ERROR: full_unit_type =", full_unit_type, " - ", TidyPlatesThreat.db.profile.Visibility[full_unit_type])
+    assert (not TidyPlatesThreat.db.profile.Visibility[full_unit_type], "missing unit type: ".. full_unit_type)
+  end
 
   local show = unit_visibility.Show
   if type(show) ~= "boolean" then
@@ -102,7 +131,7 @@ local function SwitchToDefaultSettingsV1()
 
   db:SetProfile("_ThreatPlatesInternal")
 
-  local defaults = ThreatPlates.GetDefaultSettingsV1(TidyPlatesThreat.DEFAULT_SETTINGS)
+  local defaults = ThreatPlates.GetDefaultSettingsV1(ThreatPlates.DEFAULT_SETTINGS)
   db:RegisterDefaults(defaults)
 
   db:SetProfile(current_profile)
@@ -115,7 +144,7 @@ local function SwitchToCurrentDefaultSettings()
 
   db:SetProfile("_ThreatPlatesInternal")
 
-  db:RegisterDefaults(TidyPlatesThreat.DEFAULT_SETTINGS)
+  db:RegisterDefaults(ThreatPlates.DEFAULT_SETTINGS)
 
   db:SetProfile(current_profile)
   db:DeleteProfile("_ThreatPlatesInternal")

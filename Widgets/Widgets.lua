@@ -271,6 +271,7 @@ end
 
 ThreatPlatesWidgets.RegisterWidget("AuraWidgetTPTP", CreateAuraWidget, false, enabled)
 ThreatPlatesWidgets.PrepareFilter = PrepareFilter
+ThreatPlatesWidgets.AuraFilter = AuraFilter
 
 ------------------------
 -- Threat Line Widget --

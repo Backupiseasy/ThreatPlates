@@ -7,10 +7,10 @@ local ThreatPlates = NAMESPACE.ThreatPlates
 local UnitExists = UnitExists
 local InCombatLockdown = InCombatLockdown
 
-local UnitIsOffTanked = TidyPlatesThreat.UnitIsOffTanked
-local GetUniqueNameplateSetting = TidyPlatesThreat.GetUniqueNameplateSetting
+local UnitIsOffTanked = ThreatPlates.UnitIsOffTanked
+local GetUniqueNameplateSetting = ThreatPlates.GetUniqueNameplateSetting
+local ShowThreatFeedback = ThreatPlates.ShowThreatFeedback
 local SetStyle = TidyPlatesThreat.SetStyle
-local ShowThreatFeedback = TidyPlatesThreat.ShowThreatFeedback
 
 local function GetGeneralAlpha(unit)
 	local db = TidyPlatesThreat.db.profile.nameplate

@@ -12,7 +12,7 @@ local floor = floor
 local abs = abs
 
 local TOTEMS = ThreatPlates.TOTEMS
-local OnThreatTable = TidyPlatesThreat.OnThreatTable
+local OnThreatTable = ThreatPlates.OnThreatTable
 local RGB = ThreatPlates.RGB
 local RGB_P = ThreatPlates.RGB_P
 
@@ -153,9 +153,9 @@ local function SetHealthbarColor(unit)
   local style, unique_style = TidyPlatesThreat.SetStyle(unit)
   if style == "NameOnly" or style == "empty" or style == "etotem" then return end
 
-  local ShowQuestUnit = TidyPlatesThreat.ShowQuestUnit
-  local IsQuestUnit = TidyPlatesThreat.IsQuestUnit
-  local GetThreatStyle = TidyPlatesThreat.GetThreatStyle
+  local ShowQuestUnit = ThreatPlates.ShowQuestUnit
+  local IsQuestUnit = ThreatPlates.IsQuestUnit
+  local GetThreatStyle = ThreatPlates.GetThreatStyle
 
   local db = TidyPlatesThreat.db.profile
   local c
@@ -242,6 +242,6 @@ local function SetHealthbarColor(unit)
   return color_r, color_g, color_b, nil, color_bg_r, color_bg_g, color_bg_b, bg_alpha
 end
 
-TidyPlatesThreat.GetColorByHealthDeficit = GetColorByHealthDeficit
+ThreatPlates.GetColorByHealthDeficit = GetColorByHealthDeficit
+ThreatPlates.UnitIsOffTanked = UnitIsOffTanked
 TidyPlatesThreat.SetHealthbarColor = SetHealthbarColor
-TidyPlatesThreat.UnitIsOffTanked = UnitIsOffTanked
