@@ -237,7 +237,8 @@ local FILTER_FUNCTIONS = {
   blacklistMine = FilterBlacklistMine,
 }
 
-local PRIORITY_FUNCTIONS ={
+local PRIORITY_FUNCTIONS = {
+  None = function(aura) return 0 end,
   AtoZ = function(aura) return aura.name end,
   TimeLeft = function(aura) return aura.expiration - GetTime() end,
   Duration = function(aura) return aura.duration end,
@@ -281,15 +282,6 @@ local function AuraFilterFunction(aura)
 
   local sort_order = db.SortOrder
   local priority = PRIORITY_FUNCTIONS[sort_order](aura)
-  --  if sort_order == "AtoZ" then
---    priority = aura.name
---  elseif sort_order == "TimeLeft" then
---    priority = aura.expiration - GetTime()
---  elseif sort_order == "Duration" then
---    priority = aura.duration
---  elseif sort_order == "Creation" then
---    priority = aura.expiration - aura.duration
---  end
 
   return show_aura, priority, color
 end
