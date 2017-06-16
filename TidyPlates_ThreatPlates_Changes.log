@@ -1,8 +1,8 @@
 ------------------------------------------------------
 8.4.1 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
-* Fixed a bug in the aura widget where the aura filter was not used after switching the active theme to ThreatPlates in TidyPlates.
 * Fixed a LUA error bug in the aura 2.0 widget when sort order "None" was selected [Comment #451].
+* Fixed a bug in the aura widget where the aura filter was not used after switching the active theme to ThreatPlates in TidyPlates.
 * Fixed bugs in localization deDE (German).
 
 ------------------------------------------------------
