@@ -31,6 +31,7 @@ local DETECTION_AURAS = {
   [203149] = true, -- Animal Instincts
   [203761] = true, -- Detector
   [213486] = true, -- Demonic Vision
+  [214793] = true, -- Vigilant
   [225649] = true, -- Shadow Sight
   [232234] = true, -- On High Alert
 }
