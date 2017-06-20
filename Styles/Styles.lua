@@ -121,7 +121,7 @@ local function ShowUnit(unit)
   local faction, unit_type = GetUnitType(unit)
   local full_unit_type = faction .. unit_type
 
-  local show, headline_view = GetUnitVisibility(full_unit_type)
+  local show, headline_view = GetUnitVisibility(full_unit_type, unit)
 
   local db_hv = db.HeadlineView
   if not db_hv.ON then
@@ -256,6 +256,10 @@ local function SetStyle(unit)
         end
       end
     end
+  end
+
+  if unit.isTarget then
+    print ("Style: ", style)
   end
 
   return style, unique_setting

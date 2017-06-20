@@ -74,7 +74,7 @@ local function ActivateTheme(theme_table, theme_name)
   if db.debuffWidget.style == "square" then
     TidyPlatesWidgets.UseSquareDebuffIcon()
   elseif db.debuffWidget.style == "wide" then
-    TidyPlatesWidgets.UseWideDebuffIcon()4
+    TidyPlatesWidgets.UseWideDebuffIcon()
   end
   TidyPlatesWidgets.SetAuraFilter(ThreatPlatesWidgets.AuraFilter)
 
