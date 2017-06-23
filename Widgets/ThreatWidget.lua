@@ -7,9 +7,9 @@ local ThreatPlates = NAMESPACE.ThreatPlates
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
-local UnitIsOffTanked = TidyPlatesThreat.UnitIsOffTanked
-local ShowThreatFeedback = TidyPlatesThreat.ShowThreatFeedback
-local GetUniqueNameplateSetting = TidyPlatesThreat.GetUniqueNameplateSetting
+local UnitIsOffTanked = ThreatPlates.UnitIsOffTanked
+local ShowThreatFeedback = ThreatPlates.ShowThreatFeedback
+local GetUniqueNameplateSetting = ThreatPlates.GetUniqueNameplateSetting
 
 local PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ThreatWidget\\"
 -- local WidgetList = {}
@@ -46,7 +46,7 @@ local function UpdateWidgetFrame(frame, unit)
       local unique_setting = GetUniqueNameplateSetting(unit)
       if unique_setting.UseThreatColor then
         -- set style to tank/dps or normal
-        style = TidyPlatesThreat.GetThreatStyle(unit)
+        style = ThreatPlates.GetThreatStyle(unit)
       end
     end
 

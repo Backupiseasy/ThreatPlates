@@ -7,11 +7,13 @@ local ThreatPlates = NAMESPACE.ThreatPlates
 local InCombatLockdown = InCombatLockdown
 local UnitIsConnected = UnitIsConnected
 
-local UnitIsOffTanked = TidyPlatesThreat.UnitIsOffTanked
-local OnThreatTable = TidyPlatesThreat.OnThreatTable
+local RGB = ThreatPlates.RGB
+local UnitIsOffTanked = ThreatPlates.UnitIsOffTanked
+local OnThreatTable = ThreatPlates.OnThreatTable
+local GetUniqueNameplateSetting = ThreatPlates.GetUniqueNameplateSetting
 local SetStyle = TidyPlatesThreat.SetStyle
-local GetUniqueNameplateSetting = TidyPlatesThreat.GetUniqueNameplateSetting
-local COLOR_TRANSPARENT = ThreatPlates.COLOR_TRANSPARENT
+
+local COLOR_TRANSPARENT = RGB(0, 0, 0, 0, 0) -- opaque
 
 local function ShowThreatGlow(unit)
   local db = TidyPlatesThreat.db.profile
@@ -41,7 +43,7 @@ local function SetThreatColor(unit)
       local unique_setting = GetUniqueNameplateSetting(unit)
       if unique_setting.UseThreatGlow then
         -- set style to tank/dps or normal
-        style = TidyPlatesThreat.GetThreatStyle(unit)
+        style = ThreatPlates.GetThreatStyle(unit)
       end
     end
 

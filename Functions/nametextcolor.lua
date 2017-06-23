@@ -7,7 +7,7 @@ local ThreatPlates = NAMESPACE.ThreatPlates
 local UnitIsConnected = UnitIsConnected
 
 local RGB = ThreatPlates.RGB
-local GetColorByHealthDeficit = TidyPlatesThreat.GetColorByHealthDeficit
+local GetColorByHealthDeficit = ThreatPlates.GetColorByHealthDeficit
 
 local reference = {
 	FRIENDLY = { NPC = "FriendlyNPC", PLAYER = "FriendlyPlayer", },

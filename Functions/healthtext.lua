@@ -6,7 +6,7 @@ local ThreatPlates = NAMESPACE.ThreatPlates
 ---------------------------------------------------------------------------------------------------
 local RGB = ThreatPlates.RGB
 local RGB_P = ThreatPlates.RGB_P
-local GetColorByHealthDeficit = TidyPlatesThreat.GetColorByHealthDeficit
+local GetColorByHealthDeficit = ThreatPlates.GetColorByHealthDeficit
 
 ---------------------------------------------------------------------------------------------------
 -- Functions for subtext from TidyPlates

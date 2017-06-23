@@ -1,3 +1,6 @@
+* Restructured lots of internal stuff in various files (default settings, SavedVariables handling, AceAddon handling).
+* Upgrade integrated libraries to Ace3 Release-1158, LibSharedMedia-3.0 7.1.0.
+
 ------------------------------------------------------
 8.4.1 (works with TidyPlates 6.18.11)
 ------------------------------------------------------

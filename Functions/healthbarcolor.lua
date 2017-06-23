@@ -11,7 +11,8 @@ local RAID_CLASS_COLORS = RAID_CLASS_COLORS
 local floor = floor
 local abs = abs
 
-local OnThreatTable = TidyPlatesThreat.OnThreatTable
+local TOTEMS = ThreatPlates.TOTEMS
+local OnThreatTable = ThreatPlates.OnThreatTable
 local RGB = ThreatPlates.RGB
 local RGB_P = ThreatPlates.RGB_P
 
@@ -152,9 +153,9 @@ local function SetHealthbarColor(unit)
   local style, unique_style = TidyPlatesThreat.SetStyle(unit)
   if style == "NameOnly" or style == "NameOnly-Unique" or style == "empty" or style == "etotem" then return end
 
-  local ShowQuestUnit = TidyPlatesThreat.ShowQuestUnit
-  local IsQuestUnit = TidyPlatesThreat.IsQuestUnit
-  local GetThreatStyle = TidyPlatesThreat.GetThreatStyle
+  local ShowQuestUnit = ThreatPlates.ShowQuestUnit
+  local IsQuestUnit = ThreatPlates.IsQuestUnit
+  local GetThreatStyle = ThreatPlates.GetThreatStyle
 
   local db = TidyPlatesThreat.db.profile
   local c
@@ -190,7 +191,7 @@ local function SetHealthbarColor(unit)
     end
   elseif style == "totem" then
     -- currently, no raid marked color (or quest color) for totems, also no custom nameplates
-    local tS = db.totemSettings[TidyPlatesThreat.ThreatPlates_Totems[unit.name]]
+    local tS = db.totemSettings[TOTEMS[unit.name]]
     local allow_hp_color = tS[2]
     if allow_hp_color then
       c = tS.color
@@ -241,6 +242,6 @@ local function SetHealthbarColor(unit)
   return color_r, color_g, color_b, nil, color_bg_r, color_bg_g, color_bg_b, bg_alpha
 end
 
-TidyPlatesThreat.GetColorByHealthDeficit = GetColorByHealthDeficit
+ThreatPlates.GetColorByHealthDeficit = GetColorByHealthDeficit
+ThreatPlates.UnitIsOffTanked = UnitIsOffTanked
 TidyPlatesThreat.SetHealthbarColor = SetHealthbarColor
-TidyPlatesThreat.UnitIsOffTanked = UnitIsOffTanked
