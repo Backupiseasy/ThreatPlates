@@ -69,12 +69,15 @@ end
 ---------------------------------------------------------------------------------------------------
 
 local function ActivateTheme(theme_table, theme_name)
+--  -- Recreate all TidyPlates styles for ThreatPlates("normal", "dps", "tank", ...) - required, if theme style settings were changed
+--  t.SetThemes(self)
+
   -- 	Set aura widget style for Aura 1.0
   local db = TidyPlatesThreat.db.profile
   if db.debuffWidget.style == "square" then
     TidyPlatesWidgets.UseSquareDebuffIcon()
   elseif db.debuffWidget.style == "wide" then
-    TidyPlatesWidgets.UseWideDebuffIcon()4
+    TidyPlatesWidgets.UseWideDebuffIcon()
   end
   TidyPlatesWidgets.SetAuraFilter(ThreatPlatesWidgets.AuraFilter)
 
@@ -115,9 +118,10 @@ local function OnActivateTheme(theme_table, theme_name)
     end
 
     ActivateTheme()
-  end
 
-  -- TidyPlates:ForceUpdate() is called by TidyPlates directly after OnActivateTheme
+    -- disable all non-ThreatPlates widgets - normally, TidyPlates should do that, but it doesn't
+
+  end
 end
 
 ------------------
@@ -164,6 +168,9 @@ StaticPopupDialogs["SetToThreatPlates"] = {
   OnAccept = function()
     TidyPlates:SetTheme(t.THEME_NAME)
     TidyPlatesThreat:StartUp()
+    -- Reset Widgets
+    TidyPlates:ResetWidgets()
+    TidyPlates:ForceUpdate()
   end,
   OnAlt = function()
     -- call OpenToCategory twice to work around an update bug with WoW's internal addons category list introduced with 5.3.0
@@ -208,13 +215,6 @@ function TidyPlatesThreat:ReloadTheme()
   if TidyPlates.GetThemeName() == t.THEME_NAME then
     TidyPlates:SetTheme(t.THEME_NAME)
   end
-
---  -- initialize widgets and other Threat Plates stuff
---  local ThreatPlatesWidgets = ThreatPlatesWidgets
---  ThreatPlatesWidgets.PrepareFilter()
---  ThreatPlatesWidgets.ConfigAuraWidgetFilter()
---  ThreatPlatesWidgets.ConfigAuraWidget()
---  t.SyncWithGameSettings()
 end
 
 function TidyPlatesThreat:StartUp()
