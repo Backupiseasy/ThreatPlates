@@ -1626,6 +1626,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
         ["Minus"] 	= true,
         ["Tapped"] 	= true,
         ["OffTank"] = true,
+        ["InstancesOnly"] = false,
       },
       dps = {
         scale = {

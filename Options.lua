@@ -3068,35 +3068,18 @@ local function CreateOptionsTable()
               order = 0,
               disabled = function() return not db.threat.ON end,
               args = {
-                General = {
-                  name = L["Special Effects"],
+                ByUnitType = {
+                  name = L["Show For"],
                   type = "group",
                   order = 10,
                   inline = true,
                   args = {
-                    OffTank = {
-                      type = "toggle",
-                      name = L["Highlight Mobs on Off-Tanks"],
-                      order = 2,
-                      width = "full",
-                      desc = L["If checked, nameplates of mobs attacking another tank can be shown with different color, scale, and opacity."],
-                      descStyle = "inline",
-                      arg = { "threat", "toggle", "OffTank" },
-                    },
-                  },
-                },
-                ByUnitType = {
-                  name = L["Show Threat Feedback From"],
-                  type = "group",
-                  order = 20,
-                  inline = true,
-                  args = {
                     Help = {
-                      name = L["Define if threat feedback should be shown for various units based on their type or status."],
+                      name = L["Show threat feedback based on unit type or status or environmental conditions."],
                       order = 0,
                       type = "description",
                     },
-                    Header2 = { type = "header", order = 10, name = "Enemy Units", },
+                    Header1 = { type = "header", order = 10, name = L["Enemy Units"], },
                     EnemyNPCs = {
                       type = "toggle",
                       name = L["Enemy NPCs"],
@@ -3118,7 +3101,7 @@ local function CreateOptionsTable()
                       desc = L["If checked, threat feedback from boss level mobs will be shown."],
                       arg = { "threat", "toggle", "Boss" },
                     },
-                    Header1 = { type = "header", order = 20, name = "Neutral Units & Minions & By Status", },
+                    Header2 = { type = "header", order = 20, name = L["Neutral Units & Minions & Status"], },
                     NeutralNPCs = {
                       type = "toggle",
                       name = L["Neutral NPCs"],
@@ -3148,6 +3131,32 @@ local function CreateOptionsTable()
                       order = 24,
                       desc = L["If checked, threat feedback from tapped mobs will be shown regardless of unit type."],
                       arg = { "threat", "toggle", "Tapped" },
+                    },
+                    Header3 = { type = "header", order = 30, name = L["Area"], },
+                    OnlyInInstances = {
+                      type = "toggle",
+                      name = L["Only in Instances"],
+                      order = 31,
+                      width = "full",
+                      desc = L["If checked, threat feedback will only be shown in instances (dungeons, raids, arenas, battlegrounds), not in the open world."],
+                      arg = { "threat", "toggle", "InstancesOnly" },
+                    },
+                  },
+                },
+                General = {
+                  name = L["Special Effects"],
+                  type = "group",
+                  order = 20,
+                  inline = true,
+                  args = {
+                    OffTank = {
+                      type = "toggle",
+                      name = L["Highlight Mobs on Off-Tanks"],
+                      order = 2,
+                      width = "full",
+                      desc = L["If checked, nameplates of mobs attacking another tank can be shown with different color, scale, and opacity."],
+                      descStyle = "inline",
+                      arg = { "threat", "toggle", "OffTank" },
                     },
                   },
                 },
