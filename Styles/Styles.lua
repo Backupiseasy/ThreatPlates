@@ -9,6 +9,7 @@ local InCombatLockdown = InCombatLockdown
 local UnitPlayerControlled = UnitPlayerControlled
 local UnitIsOtherPlayersPet = UnitIsOtherPlayersPet
 local UnitIsBattlePet = UnitIsBattlePet
+local IsInInstance = IsInInstance
 
 local TOTEMS = ThreatPlates.TOTEMS
 local GetUnitVisibility = ThreatPlates.GetUnitVisibility
@@ -57,16 +58,19 @@ end
 
 local function ShowThreatFeedback(unit)
   local db = TidyPlatesThreat.db.profile.threat
-  local T = GetSimpleUnitType(unit)
 
   local show = false
-  if db.toggle[T] then
-    if db.nonCombat then
-      if OnThreatTable(unit) then
+
+  if not db.toggle.InstancesOnly or IsInInstance() then
+    local T = GetSimpleUnitType(unit)
+    if db.toggle[T] then
+      if db.nonCombat then
+        if OnThreatTable(unit) then
+          show = true
+        end
+      else
         show = true
       end
-    else
-      show = true
     end
   end
 
