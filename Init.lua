@@ -7,6 +7,12 @@ NAMESPACE.ThreatPlates = {}
 local ThreatPlates = NAMESPACE.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------
+-- Imported functions and constants
+---------------------------------------------------------------------------------------------------
+
+local UnitPlayerControlled = UnitPlayerControlled
+
+---------------------------------------------------------------------------------------------------
 -- Libraries
 ---------------------------------------------------------------------------------------------------
 local LibStub = LibStub
@@ -135,6 +141,19 @@ ThreatPlates.CopyTable = function(input)
 end
 
 --------------------------------------------------------------------------------------------------
+-- Some functions to fix TidyPlates bugs
+---------------------------------------------------------------------------------------------------
+
+local function FixUpdateUnitCondition(unit)
+	local unitid = unit.unitid
+
+	-- Enemy players turn to neutral, e.g., when mounting a flight path mount, so fix reaction in that situations
+	if unit.reaction == "NEUTRAL" and (unit.type == "PLAYER" or UnitPlayerControlled(unitid)) then
+		unit.reaction = "HOSTILE"
+	end
+end
+
+--------------------------------------------------------------------------------------------------
 -- Debug Functions
 ---------------------------------------------------------------------------------------------------
 
@@ -222,6 +241,8 @@ end
 -- Expoerted local functions
 ---------------------------------------------------------------------------------------------------
 
+ThreatPlates.FixUpdateUnitCondition = FixUpdateUnitCondition
+
 ThreatPlates.DEBUG = DEBUG
 ThreatPlates.DEBUG_PRINT_TABLE = DEBUG_PRINT_TABLE
 ThreatPlates.DEBUG_PRINT_UNIT = DEBUG_PRINT_UNIT
@@ -231,3 +252,5 @@ ThreatPlates.DEBUG_AURA_LIST = DEBUG_AURA_LIST
 --ThreatPlates.DEBUG_PRINT_TABLE = function(...) end
 --ThreatPlates.DEBUG_PRINT_TARGET = function(...) end
 --ThreatPlates.DEBUG_AURA_LIST = function(...) end
+
+

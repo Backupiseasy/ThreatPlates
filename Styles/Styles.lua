@@ -12,6 +12,7 @@ local UnitIsBattlePet = UnitIsBattlePet
 
 local TOTEMS = ThreatPlates.TOTEMS
 local GetUnitVisibility = ThreatPlates.GetUnitVisibility
+local FixUpdateUnitCondition = ThreatPlates.FixUpdateUnitCondition
 
 ---------------------------------------------------------------------------------------------------
 -- Helper functions for styles and functions
@@ -121,7 +122,7 @@ local function ShowUnit(unit)
   local faction, unit_type = GetUnitType(unit)
   local full_unit_type = faction .. unit_type
 
-  local show, headline_view = GetUnitVisibility(full_unit_type, unit)
+  local show, headline_view = GetUnitVisibility(full_unit_type)
 
   local db_hv = db.HeadlineView
   if not db_hv.ON then
@@ -201,12 +202,12 @@ local function GetUniqueNameplateSetting(unit)
 end
 
 local function SetStyle(unit)
-  if not unit.unitid then
-    -- sometimes unitid is nil, still don't know why, but it creates all kinds of LUA errors as other attributes are nil
-    -- also, e.g., unit.type, unit.name, ...
-    --ThreatPlates.DEBUG_PRINT_UNIT(unit)
-    return "empty"
-  end
+  -- sometimes unitid is nil, still don't know why, but it creates all kinds of LUA errors as other attributes are nil
+  -- also, e.g., unit.type, unit.name, ...
+  --ThreatPlates.DEBUG_PRINT_UNIT(unit)
+  if not unit.unitid then return "empty" end
+
+  FixUpdateUnitCondition(unit)
 
   local db = TidyPlatesThreat.db.profile
   local style = "empty"
@@ -256,10 +257,6 @@ local function SetStyle(unit)
         end
       end
     end
-  end
-
-  if unit.isTarget then
-    print ("Style: ", style)
   end
 
   return style, unique_setting

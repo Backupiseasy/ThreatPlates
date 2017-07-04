@@ -37,15 +37,10 @@ function TidyPlatesThreat:SetRole(value,index)
   end
 end
 
-local function GetUnitVisibility(full_unit_type, unit)
+local function GetUnitVisibility(full_unit_type)
   local unit_visibility = TidyPlatesThreat.db.profile.Visibility[full_unit_type]
 
-  if not unit_visibility then
-    unit_visibility = TidyPlatesThreat.db.profile.Visibility.FriendlyNPC
-    print ("ERROR: full_unit_type =", full_unit_type, " - ", TidyPlatesThreat.db.profile.Visibility[full_unit_type])
-    ThreatPlates.DEBUG_PRINT_UNIT(unit)
-    assert (TidyPlatesThreat.db.profile.Visibility[full_unit_type], "missing unit type: ".. full_unit_type)
-  end
+  assert (TidyPlatesThreat.db.profile.Visibility[full_unit_type], "missing unit type: ".. full_unit_type)
 
   local show = unit_visibility.Show
   if type(show) ~= "boolean" then
