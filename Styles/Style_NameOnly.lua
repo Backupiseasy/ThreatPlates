@@ -53,8 +53,6 @@ local function Create(self,name)
 
 		healthborder = {
       texture = EMPTY_TEXTURE,
-      glowtexture = EMPTY_TEXTURE,
-      --elitetexture = EMPTY_TEXTURE,
       width = 128,
       height = 64,
       x = 0,

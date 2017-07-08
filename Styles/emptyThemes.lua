@@ -16,7 +16,6 @@ local function Create(self,name)
 		},
 		threatborder = {
 			texture =						t.Art.."Empty",
-			elitetexture =					t.Art.."Empty",
 			width = 256,
 			height = 64,
 			x = 0,
@@ -25,7 +24,6 @@ local function Create(self,name)
 		},
 		healthborder = {
 			texture = 						t.Art.."Empty",
-			glowtexture = 					t.Art.."Empty",
 			elitetexture = 					t.Art.."Empty",
 			width = 256,
 			height = 64,
