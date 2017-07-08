@@ -5,6 +5,5 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 <Script file="basicThemes.lua"/>
 <Script file="emptyThemes.lua"/>
 <Script file="Style_NameOnly.lua"/>
-<Script file="text.lua"/>
 <Script file="Styles.lua"/>
 </Ui>
