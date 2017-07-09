@@ -15,11 +15,10 @@ local WorldFrame = WorldFrame
 
 local TidyPlatesThreat = TidyPlatesThreat
 
-local ICON_PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\QuestWidget\\questicon_wide"
-
 -- local WidgetList = {}
 local tooltip_frame = CreateFrame("GameTooltip", "ThreatPlates_Tooltip", nil, "GameTooltipTemplate")
 local player_name = UnitName("player")
+local ICON_COLORS = {}
 
 ---------------------------------------------------------------------------------------------------
 -- Threat Plates functions
@@ -47,23 +46,28 @@ local function IsQuestUnit(unit)
 				quest_area = true
 			else
 				local unit_name, progress = string.match(text, "^ ([^ ]-) ?%- (.+)$")
+
 				if progress then
-					quest_area = nil
+					local area_progress = string.match(progress, "(%d+)%%$")
 
-					if unit_name then
-						local current, goal = string.match(progress, "(%d+)/(%d+)")
+					if not (area_progress and quest_area) then
+						quest_area = nil
 
-						if current and goal then
-							if (unit_name == "" or unit_name == player_name) then
-								quest_player = (current ~= goal)
+						if unit_name then
+							local current, goal = string.match(progress, "(%d+)/(%d+)")
+
+							if current and goal then
+								if (unit_name == "" or unit_name == player_name) then
+									quest_player = (current ~= goal)
+								else
+									quest_group = (current ~= goal)
+								end
 							else
-								quest_group = (current ~= goal)
-							end
-						else
-							if (unit_name == "" or unit_name == player_name) then
-								quest_player = true
-							else
-								quest_group = true
+								if (unit_name == "" or unit_name == player_name) then
+									quest_player = true
+								else
+									quest_group = true
+								end
 							end
 						end
 					end
@@ -72,7 +76,13 @@ local function IsQuestUnit(unit)
 		end
 	end
 
-	return quest_player or quest_area --or quest_group
+	local quest_type = (quest_player and 1) or (quest_area and 2) or (quest_group and 3)
+
+--	if unit.isTarget then
+--		print ("Player:", quest_player, " - Area:", quest_area, " - Group:", quest_group, " - Type:", quest_type)
+--	end
+
+	return quest_type ~= false, quest_type
 end
 
 local function ShowQuestUnit(unit)
@@ -126,11 +136,21 @@ local function UpdateSettings(frame)
 	local size = db.scale
 	frame:SetSize(size, size)
 	frame:SetAlpha(db.alpha)
+
+	ICON_COLORS[1] = db.ColorPlayerQuest
+	ICON_COLORS[2] = db.ColorAreaQuest
+	ICON_COLORS[3] = db.ColorGroupQuest
+
+	local icon_path = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\QuestWidget\\" .. db.IconTexture
+	frame.Icon:SetTexture(icon_path)
+	frame.Icon:SetAllPoints()
 end
 
 -- Update Graphics
 local function UpdateWidgetFrame(frame, unit)
-	if ShowQuestUnit(unit) and IsQuestUnit(unit) then
+	local show, quest_type = IsQuestUnit(unit)
+
+	if ShowQuestUnit(unit) and show then
 		local db = TidyPlatesThreat.db.profile.questWidget
 
 		local style = unit.TP_Style
@@ -139,6 +159,9 @@ local function UpdateWidgetFrame(frame, unit)
 		else
 			frame:SetPoint("CENTER", frame:GetParent(), db.x, db.y)
 		end
+
+		local color = ICON_COLORS[quest_type]
+		frame.Icon:SetVertexColor(color.r, color.g, color.b)
 
 		frame:Show()
 	else
@@ -183,8 +206,6 @@ local function CreateWidgetFrame(parent)
 	-- Custom Code III
 	--------------------------------------
 	frame.Icon = frame:CreateTexture(nil, "OVERLAY")
-	frame.Icon:SetTexture(ICON_PATH)
-	frame.Icon:SetAllPoints()
 
 	UpdateSettings(frame)
 	frame.UpdateConfig = UpdateSettings

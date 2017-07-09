@@ -835,11 +835,67 @@ local function QuestWidgetOptions()
             width = "half",
             arg = {"questWidget", "ModeIcon"},
           },
+          Colors = {
+            name = L["Colors"],
+            order = 50,
+            type = "group",
+            inline = true,
+            args = {
+              PlayerColor = {
+                name = L["Player Quest"],
+                order = 10,
+                type = "color",
+                get = GetColor,
+                set = SetColor,
+                arg = {"questWidget", "ColorPlayerQuest"},
+              },
+              AreaColor = {
+                name = L["Area Quest"],
+                order = 20,
+                type = "color",
+                get = GetColor,
+                set = SetColor,
+                arg = {"questWidget", "ColorAreaQuest"},
+              },
+              GroupColor = {
+                name = L["Group Quest"],
+                order = 30,
+                type = "color",
+                get = GetColor,
+                set = SetColor,
+                arg = {"questWidget", "ColorGroupQuest"},
+              },
+            },
+          },
+          Texture = {
+            name = L["Symbol"],
+            type = "group",
+            inline = true,
+            args = {
+              Preview = {
+                name = L["Preview"],
+                order = 10,
+                type = "execute",
+                image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\QuestWidget\\" .. db.questWidget.IconTexture,
+              },
+              Select = {
+                name = L["Style"],
+                type = "select",
+                order = 20,
+                set = function(info, val)
+                  SetValue(info, val)
+                  options.args.Widgets.args.QuestWidget.args.ModeIcon.args.Texture.args.Preview.image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\QuestWidget\\" .. db.questWidget.IconTexture;
+                end,
+                values = { QUESTICON = L["Blizzard"], SKULL = L["Skull"] },
+                arg = { "questWidget", "IconTexture" },
+              },
+            },
+          },
         },
       },
     },
   }
-  AddLayoutOptions(options.args.ModeIcon.args, 80, "questWidget")
+  AddLayoutOptions(options.args.ModeIcon.args, 20, "questWidget")
   return options
 end
 
@@ -2993,7 +3049,7 @@ local function CreateOptionsTable()
               args = {
                 Enable = GetEnableEntryTheme(L["Show Elite Icon"], L["This option allows you to control whether the elite icon for elite units is hidden or shown on nameplates."], "eliteicon"),
                 Texture = {
-                  name = L["Texture"],
+                  name = L["Symbol"],
                   type = "group",
                   inline = true,
                   order = 20,
@@ -4735,34 +4791,32 @@ local function CreateOptionsTable()
                   args = {
                     Preview = {
                       name = L["Preview"],
-                      order = 0,
-                      width = "full",
+                      order = 10,
                       type = "execute",
                       image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\TargetArtWidget\\" .. db.targetWidget.theme,
-                      imageWidth = 256,
-                      imageHeight = 64,
-                    },
-                    Color = {
-                      name = L["Color"],
-                      type = "color",
-                      width = "full",
-                      order = 1,
-                      get = GetColorAlpha,
-                      set = SetColorAlpha,
-                      hasAlpha = true,
-                      arg = { "targetWidget" },
+                      imageWidth = 128,
+                      imageHeight = 32,
                     },
                     Select = {
                       name = L["Style"],
                       type = "select",
-                      width = "full",
-                      order = 3,
+                      order = 20,
                       set = function(info, val)
                         SetValue(info, val)
                         options.args.Widgets.args.TargetArtWidget.args.Texture.args.Preview.image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\TargetArtWidget\\" .. db.targetWidget.theme;
                       end,
                       values = { default = "Default", squarethin = "Thin Square", arrows = "Arrows", crescent = "Crescent", bubble = "Bubble" },
                       arg = { "targetWidget", "theme" },
+                    },
+                    Color = {
+                      name = L["Color"],
+                      type = "color",
+                      order = 30,
+                      width = "half",
+                      get = GetColorAlpha,
+                      set = SetColorAlpha,
+                      hasAlpha = true,
+                      arg = { "targetWidget" },
                     },
                   },
                 },
