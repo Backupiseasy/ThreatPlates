@@ -163,6 +163,8 @@ local function SetHealthbarColor(unit)
     c = db.ColorByReaction.DisconnectedUnit
   elseif unit.isTapped then
     c = db.ColorByReaction.TappedUnit
+  elseif unit.isTarget and db.targetWidget.ModeHPBar then
+    c = db.targetWidget.HPBarColor
   elseif style == "unique" then
     -- Custom nameplate style defined for unit (does not work for totems right now)
     if unit.isMarked and unique_style.allowMarked then

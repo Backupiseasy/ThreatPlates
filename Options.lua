@@ -725,7 +725,7 @@ local function RaidMarksOptions()
             name = RAID_TARGET_5,
             arg = { "settings", "raidicon", "hpMarked", "MOON" },
           },
-          SquestwidgetUARE = {
+          SQUARE = {
             type = "color",
             order = 35,
             name = RAID_TARGET_6,
@@ -1336,8 +1336,8 @@ local function CreateOptionsTable()
                   order = 20,
                   args = {
                     General = {
-                      order = 1,
                       name = L["General Colors"],
+                      order = 10,
                       type = "group",
                       inline = true,
                       get = GetColor,
@@ -1345,13 +1345,34 @@ local function CreateOptionsTable()
                       args = {
                         TappedColor = { name = L["Tapped Units"], order = 1, type = "color", arg = { "ColorByReaction", "TappedUnit" }, },
                         DCedColor = { name = L["Disconnected Units"], order = 2, type = "color", arg = { "ColorByReaction", "DisconnectedUnit" }, },
-                        --FriendColor = { name = L["Friend"], order = 80, type = "color", arg = { "ColorByReaction", "Friend" }, },
-                        --GuildMemberColor = { name = L["Guild Member"], order = 80, type = "color", arg = { "ColorByReaction", "GuildMember" }, },
+                      },
+                    },
+                    TargetColor = {
+                      name = L["Adjust Color For"],
+                      order = 15,
+                      type = "group",
+                      inline = true,
+                      args = {
+                        EnableTarget = {
+                          name = L["Target Unit"],
+                          desc = L["Use a custom color for the healthbar of your current target."],
+                          order = 10,
+                          type = "toggle",
+                          arg = {"targetWidget", "ModeHPBar"},
+                        },
+                        TargetColor = {
+                          name = L["Color"],
+                          order = 20,
+                          type = "color",
+                          get = GetColor,
+                          set = SetColor,
+                          arg = {"targetWidget", "HPBarColor"},
+                        },
                       },
                     },
                     HPAmount = {
                       name = L["Color by Health"],
-                      order = 2,
+                      order = 20,
                       type = "group",
                       inline = true,
                       args = {
@@ -1492,7 +1513,7 @@ local function CreateOptionsTable()
                           name = RAID_TARGET_5,
                           arg = { "settings", "raidicon", "hpMarked", "MOON" },
                         },
-                        SquestwidgetUARE = {
+                        SQUARE = {
                           type = "color",
                           order = 35,
                           name = RAID_TARGET_6,
@@ -2163,7 +2184,7 @@ local function CreateOptionsTable()
                   },
                 },
                 Options = {
-                  name = L["Adjust Alpha for"],
+                  name = L["Adjust Alpha For"],
                   type = "group",
                   order = 20,
                   inline = true,
@@ -2278,7 +2299,7 @@ local function CreateOptionsTable()
                   },
                 },
                 Options = {
-                  name = L["Adjust Scale for"],
+                  name = L["Adjust Scale For"],
                   type = "group",
                   order = 20,
                   inline = true,
@@ -4782,9 +4803,38 @@ local function CreateOptionsTable()
               type = "group",
               order = 70,
               args = {
-                Enable = GetEnableEntry(L["Enable Target Highlight Widget"], L["This widget shows a highlight border around your target nameplate."], "targetWidget"),
+                Enable = GetEnableEntry(L["Enable Target Highlight Widget"], L["This widget shows a highlight border around your target's nameplate or colors the healthbar of your target's nameplate in a custom color."], "targetWidget"),
+                ModeHealthBar = {
+                  name = L["Healthbar Mode"],
+                  order = 20,
+                  type = "group",
+                  inline = true,
+                  args = {
+                    Help = {
+                      name = L["Use a custom color for the healthbar of the current target."],
+                      order = 0,
+                      type = "description",
+                      width = "full",
+                    },
+                    Enable = {
+                      name = L["Enable"],
+                      order = 10,
+                      type = "toggle",
+                      arg = {"targetWidget", "ModeHPBar"},
+                    },
+                    Color = {
+                      name = L["Color"],
+                      order = 20,
+                      type = "color",
+                      get = GetColor,
+                      set = SetColor,
+                      arg = {"targetWidget", "HPBarColor"},
+                    },
+                  },
+                },
                 Texture = {
                   name = L["Texture"],
+                  order = 30,
                   type = "group",
                   inline = true,
 --                  disabled = function() if db.targetWidget.ON then return false else return true end end,
