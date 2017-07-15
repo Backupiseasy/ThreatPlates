@@ -40,7 +40,7 @@ end
 local function GetUnitVisibility(full_unit_type)
   local unit_visibility = TidyPlatesThreat.db.profile.Visibility[full_unit_type]
 
-  assert (TidyPlatesThreat.db.profile.Visibility[full_unit_type], "missing unit type: ".. full_unit_type)
+  -- assert (TidyPlatesThreat.db.profile.Visibility[full_unit_type], "missing unit type: ".. full_unit_type)
 
   local show = unit_visibility.Show
   if type(show) ~= "boolean" then

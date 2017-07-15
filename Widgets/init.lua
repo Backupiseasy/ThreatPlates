@@ -154,8 +154,6 @@ local function OnUpdate(plate, unit)
       HideWidget(widget_list, name)
     end
   end
-
-  --ThreatPlates.DEBUG_PRINT_TARGET(unit)
 end
 
 -- TidyPlatesGlobal_OnContextUpdate() is called when a unit is targeted or moused-over.  (Any time the unitid or GUID changes)

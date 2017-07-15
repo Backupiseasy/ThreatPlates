@@ -1,9 +1,12 @@
-* Restructured lots of internal stuff in various files (default settings, SavedVariables handling, AceAddon handling).
-* Upgrade integrated libraries to Ace3 Release-1158, LibSharedMedia-3.0 7.1.0.
-* Added an option to hide or show threat feedback when not in an instance. Also, fixed some localization bugs.
-* Fixed a LUA error related to the visibility settings of units triggered by enemy players turning to neutral, e.g., when using a flight path [Ticket #124].
+------------------------------------------------------
+8.4.2-Beta1 (works with TidyPlates 6.18.11)
+------------------------------------------------------
 * Added options to change symbol style and color (based on type of quest) to quest widget [Comment #433].
 * Added an option to use a custom color for the target's healthbar (Nameplate Settings - Healthbar View) [Comment #460].
+* Fixed a LUA error related to the visibility settings of units triggered by enemy players turning to neutral, e.g., when using a flight path [Ticket #124].
+* Added an option to hide or show threat feedback when not in an instance. Also, fixed some localization bugs [Comment # 434].
+* Restructured lots of internal stuff in various files (default settings, SavedVariables handling, AceAddon handling).
+* Upgrade integrated libraries to Ace3 Release-1158, LibSharedMedia-3.0 7.1.0.
 
 ------------------------------------------------------
 8.4.1 (works with TidyPlates 6.18.11)

@@ -4803,35 +4803,7 @@ local function CreateOptionsTable()
               type = "group",
               order = 70,
               args = {
-                Enable = GetEnableEntry(L["Enable Target Highlight Widget"], L["This widget shows a highlight border around your target's nameplate or colors the healthbar of your target's nameplate in a custom color."], "targetWidget"),
-                ModeHealthBar = {
-                  name = L["Healthbar Mode"],
-                  order = 20,
-                  type = "group",
-                  inline = true,
-                  args = {
-                    Help = {
-                      name = L["Use a custom color for the healthbar of the current target."],
-                      order = 0,
-                      type = "description",
-                      width = "full",
-                    },
-                    Enable = {
-                      name = L["Enable"],
-                      order = 10,
-                      type = "toggle",
-                      arg = {"targetWidget", "ModeHPBar"},
-                    },
-                    Color = {
-                      name = L["Color"],
-                      order = 20,
-                      type = "color",
-                      get = GetColor,
-                      set = SetColor,
-                      arg = {"targetWidget", "HPBarColor"},
-                    },
-                  },
-                },
+                Enable = GetEnableEntry(L["Enable Target Highlight Widget"], L["This widget shows a highlight border around the healthbar of your target's nameplate."], "targetWidget"),
                 Texture = {
                   name = L["Texture"],
                   order = 30,
