@@ -1,7 +1,6 @@
 local L = LibStub("AceLocale-3.0"):NewLocale("TidyPlatesThreat", "koKR", false)
 if not L then return end
 
-L = L or {}
 L["  <no option>        Displays options dialog"] = " <옵션 없음>        옵션 대화창 표시"
 L["  8.4-design         Changes default settings to new look and feel (introduced with 8.4)"] = " 8.4-design         기본 설정을 새로운 모양과 느낌으로 변경합니다 (8.4에서 도입)"
 L["  classic-design     Reverts default settings back to look and feel before 8.4"] = "  classic-design     기본 설정을 8.4 이전의 모양과 느낌으로 되돌립니다"
@@ -461,6 +460,8 @@ L["Players"] = "플레이어"
 L["Presences"] = "형상"
 L["Preview"] = "미리보기"
 L["Quest"] = "퀘스트"
+--Translation missing
+L["Quests of your group members that you don't have in your quest log or that you have already completed."] = "Quests of your group members that you don't have in your quest log or that you have already completed."
 L["Raging Spirit"] = "노여워하는 영혼"
 L["Rares & Bosses"] = "희귀 & 우두머리"
 L["Rares & Elites"] = "희귀 & 정예"
@@ -685,3 +686,5 @@ L["X"] = "X"
 L["Y"] = "Y"
 L["Yes"] = "네"
 L["You can access the "] = "접근 가능: "
+--Translation missing
+L["Your own quests that you have to complete."] = "Your own quests that you have to complete."
