@@ -325,6 +325,7 @@ function TidyPlatesThreat:OnEnable()
     "UNIT_FACTION",
     "QUEST_WATCH_UPDATE",
     "NAME_PLATE_CREATED",
+    "QUEST_ACCEPTED",
   }
 
   for i = 1, #events do
@@ -430,6 +431,11 @@ end
 -- nameplate color can change when factions change (e.g., with disguises)
 -- Legion example: Suramar city and Masquerade
 function TidyPlatesThreat:QUEST_WATCH_UPDATE(event, quest_index)
+  if TidyPlatesThreat.db.profile.questWidget.ON then
+    TidyPlates:ForceUpdate()
+  end
+end
+function TidyPlatesThreat:QUEST_ACCEPTED(event, quest_index, _)
   if TidyPlatesThreat.db.profile.questWidget.ON then
     TidyPlates:ForceUpdate()
   end
