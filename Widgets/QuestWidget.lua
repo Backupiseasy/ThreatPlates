@@ -46,28 +46,25 @@ local function IsQuestUnit(unit)
 				quest_area = true
 			else
 				local unit_name, progress = string.match(text, "^ ([^ ]-) ?%- (.+)$")
+				-- local area_progress = string.match(progress, "(%d+)%%$")
 
 				if progress then
-					local area_progress = string.match(progress, "(%d+)%%$")
+					quest_area = nil
 
-					if not (area_progress and quest_area) then
-						quest_area = nil
+					if unit_name then
+						local current, goal = string.match(progress, "(%d+)/(%d+)")
 
-						if unit_name then
-							local current, goal = string.match(progress, "(%d+)/(%d+)")
-
-							if current and goal then
-								if (unit_name == "" or unit_name == player_name) then
-									quest_player = (current ~= goal)
-								else
-									quest_group = (current ~= goal)
-								end
+						if current and goal then
+							if (unit_name == "" or unit_name == player_name) then
+								quest_player = (current ~= goal)
 							else
-								if (unit_name == "" or unit_name == player_name) then
-									quest_player = true
-								else
-									quest_group = true
-								end
+								quest_group = (current ~= goal)
+							end
+						else
+							if (unit_name == "" or unit_name == player_name) then
+								quest_player = true
+							else
+								quest_group = true
 							end
 						end
 					end
@@ -76,11 +73,7 @@ local function IsQuestUnit(unit)
 		end
 	end
 
-	local quest_type = (quest_player and 1) or (quest_area and 2) or (quest_group and 3)
-
---	if unit.isTarget then
---		print ("Player:", quest_player, " - Area:", quest_area, " - Group:", quest_group, " - Type:", quest_type)
---	end
+	local quest_type = ((quest_player or quest_area) and 1) or (quest_group and 2)
 
 	return quest_type ~= false, quest_type
 end
@@ -102,6 +95,7 @@ local function ShowQuestUnit(unit)
 
 		if IsInInstance() and db.HideInInstance then
 			show_quest_mark = false
+
 		end
 	end
 
@@ -138,8 +132,7 @@ local function UpdateSettings(frame)
 	frame:SetAlpha(db.alpha)
 
 	ICON_COLORS[1] = db.ColorPlayerQuest
-	ICON_COLORS[2] = db.ColorAreaQuest
-	ICON_COLORS[3] = db.ColorGroupQuest
+	ICON_COLORS[2] = db.ColorGroupQuest
 
 	local icon_path = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\QuestWidget\\" .. db.IconTexture
 	frame.Icon:SetTexture(icon_path)

@@ -3,6 +3,7 @@
 * Added an option to hide or show threat feedback when not in an instance. Also, fixed some localization bugs.
 * Fixed a LUA error related to the visibility settings of units triggered by enemy players turning to neutral, e.g., when using a flight path [Ticket #124].
 * Added options to change symbol style and color (based on type of quest) to quest widget [Comment #433].
+* Fixed a bug with quest widget not being updated immediately after entering a world quest area.
 
 ------------------------------------------------------
 8.4.1 (works with TidyPlates 6.18.11)

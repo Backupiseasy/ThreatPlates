@@ -848,14 +848,7 @@ local function QuestWidgetOptions()
                 get = GetColor,
                 set = SetColor,
                 arg = {"questWidget", "ColorPlayerQuest"},
-              },
-              AreaColor = {
-                name = L["Area Quest"],
-                order = 20,
-                type = "color",
-                get = GetColor,
-                set = SetColor,
-                arg = {"questWidget", "ColorAreaQuest"},
+                desc = L["Your own quests that you have to complete."],
               },
               GroupColor = {
                 name = L["Group Quest"],
@@ -864,6 +857,7 @@ local function QuestWidgetOptions()
                 get = GetColor,
                 set = SetColor,
                 arg = {"questWidget", "ColorGroupQuest"},
+                desc = L["Quests of your group members that you don't have in your quest log or that you have already completed."],
               },
             },
           },
