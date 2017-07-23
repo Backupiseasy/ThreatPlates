@@ -23,7 +23,9 @@ EXIT /B %ERRORLEVEL%
 
 :Zip-Test
 set TP_TEST_SOURCE=%WOW_TEST_PATH%\Interface\Addons\TidyPlates_ThreatPlates
-%ZIP_EXE% a -xr@exclude.lst "%TP_PACKAGE%" "%TP_TEST_SOURCE%"
+set CMD=%ZIP_EXE% a -xr@exclude.lst "%TP_PACKAGE%" "%TP_TEST_SOURCE%"
+echo Packaging: %CMD%
+%CMD%
 EXIT /B %ERRORLEVEL%
 
 
