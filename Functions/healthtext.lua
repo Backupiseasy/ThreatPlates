@@ -253,7 +253,7 @@ local function SetCustomText(unit)
 		end
 	end
 
-	return HpAmt..HpMax..HpPct, color_r, color_g, color_b, color_a
+	return HpAmt..HpMax..HpPct
 end
 
 TidyPlatesThreat.SetCustomText = SetCustomText

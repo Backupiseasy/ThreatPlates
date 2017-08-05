@@ -246,12 +246,10 @@ function TidyPlatesThreat:StartUp()
       end
     end
   else
-    -- remove (and migrate) any old DB entries
-    --    ThreatPlates.MigrateDatabase()
-
-    -- TODO: why not just overwrite the old version entry?
     local new_version = tostring(t.Meta("version"))
     if db.version ~= new_version then
+      -- migrate and/or remove any old DB entries
+      t.MigrateDatabase()
       db.version = new_version
     end
 

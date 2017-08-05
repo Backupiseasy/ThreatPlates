@@ -1,6 +1,8 @@
 ------------------------------------------------------
 8.4.3-Beta1 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
+* Added on option to color names in healthbar view the same way as in headline view (see Nameplate Settings - Names) [Comment #464].
+* Also, improved consistency of names configuration between healthbar and headline view.
 * Fixed a bug with "Filter by Spell" in aura 2.0 widget. Filtering with keywords "All", "My", and (new) "Not" should now work as expected (see https://wow.curseforge.com/projects/tidy-plates-threat-plates/pages/help) [Comment 486].
 
 ------------------------------------------------------
