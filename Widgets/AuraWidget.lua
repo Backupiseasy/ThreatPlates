@@ -173,27 +173,23 @@ local function GetColorForAura(aura)
 end
 
 local function FilterWhitelist(spellfound, isMine)
-  local show_aura = false
-
   if spellfound == "All" or spellfound == true then
-    show_aura = true
+    return true
   elseif spellfound == "My" then
-    show_aura = isMine
+    return isMine
   end
 
-  return show_aura
+  return false
 end
 
 local function FilterWhitelistMine(spellfound, isMine)
-  local show_aura = false
-
   if spellfound == "All" then
-    show_aura = true
+    return true
   elseif spellfound == "My" or spellfound == true then
-    show_aura = isMine
+    return isMine
   end
 
-  return show_aura
+  return false
 end
 
 local function FilterAll(spellfound, isMine)
@@ -205,27 +201,32 @@ local function FilterAllMine(spellfound, isMine)
 end
 
 local function FilterBlacklist(spellfound, isMine)
-  local show_aura = true
-
-  if spellfound == "All" or spellbound == true then
-    show_aura = false
+  -- blacklist all auras, i.e., default is show all auras (no matter who casted it)
+  --   spellfound = true or All - blacklist this aura (from all casters)
+  --   spellfound = My          - blacklist only my aura
+  --   spellfound = nil         - show aura (spell not found in blacklist)
+  --   spellfound = Not         - show aura (found entry not relevant, ignore it)
+  if spellfound == "All" or spellfound == true then
+    return false
   elseif spellfound == "My" then
-    show_aura = not isMine
+    return not isMine
   end
 
-  return show_aura
+  return true
 end
 
 local function FilterBlacklistMine(spellfound, isMine)
-  local show_aura = isMine
-
-  if spellfound == "All" then
-    show_aura = false
-  elseif spellfound == "My" or spellfound == true then
-    show_aura = not isMine
+  --  blacklist my auras, i.e., default is show all of my auras (non of other players/NPCs)
+  --    spellfound = nil             - show my aura (not found in the blacklist)
+  --    spellfound = Not             - show my aura (from all casters) - bypass blacklisting
+  --    spellfound = My, true or All - blacklist my aura (auras from other casters are not shown either)
+  if spellfound == nil then
+    return isMine
+  elseif spellfound == "Not" then
+    return true
   end
 
-  return show_aura
+  return false
 end
 
 local FILTER_FUNCTIONS = {
@@ -1036,9 +1037,9 @@ local function PrepareFilter()
     elseif value:sub(1, 3) == "My " then
       modifier = "My"
       spell = value:match("^My%s*(.-)$")
---    elseif value:sub(1, 4) == "Not " then
---      modifier = "Not"
---      spell = value:match("^Not%s*(.-)$")
+    elseif value:sub(1, 4) == "Not " then
+      modifier = "Not"
+      spell = value:match("^Not%s*(.-)$")
     else
       modifier = true
       spell = value

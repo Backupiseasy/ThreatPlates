@@ -1,4 +1,9 @@
 ------------------------------------------------------
+8.4.3-Beta1 (works with TidyPlates 6.18.11)
+------------------------------------------------------
+* Fixed a bug with "Filter by Spell" in aura 2.0 widget. Filtering with keywords "All", "My", and (new) "Not" should now work as expected (see https://wow.curseforge.com/projects/tidy-plates-threat-plates/pages/help) [Comment 486].
+
+------------------------------------------------------
 8.4.2 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
 * Added options to change symbol style and color (based on type of quest) to quest widget [Comment #433].
