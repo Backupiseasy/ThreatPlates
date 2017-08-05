@@ -4,9 +4,26 @@ local ThreatPlates = NAMESPACE.ThreatPlates
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
+local UnitIsPlayer = UnitIsPlayer
+local UnitPlayerControlled = UnitPlayerControlled
+local UnitExists = UnitExists
+local UnitName = UnitName
+local UNIT_LEVEL_TEMPLATE = UNIT_LEVEL_TEMPLATE
+local UnitClassification = UnitClassification
+local GetGuildInfo = GetGuildInfo
+local UnitName = UnitName
+
+local _G = _G
+local gsub = gsub
+local ceil = ceil
+local format = format
+local string = string
+
+local TidyPlatesThreat = TidyPlatesThreat
 local RGB = ThreatPlates.RGB
 local RGB_P = ThreatPlates.RGB_P
 local GetColorByHealthDeficit = ThreatPlates.GetColorByHealthDeficit
+local SetStyle = TidyPlatesThreat.SetStyle
 
 ---------------------------------------------------------------------------------------------------
 -- Functions for subtext from TidyPlates
@@ -191,11 +208,11 @@ local function Truncate(value)
 end
 
 local function SetCustomText(unit)
-	local S = TidyPlatesThreat.SetStyle(unit)
+  local style = unit.TP_Style or SetStyle(unit)
 
 	-- Headline View (alpha feature) uses TidyPlatesHub config and functionality
 	local db = TidyPlatesThreat.db.profile.HeadlineView
-	if db.ON and (S == "NameOnly") then
+	if style == "NameOnly" or style == "NameOnly-Unique" then
 		local func
 		if unit.reaction == "FRIENDLY" then
 			func = SUBTEXT_FUNCTIONS[db.FriendlySubtext]
