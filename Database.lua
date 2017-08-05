@@ -9,6 +9,8 @@ local ThreatPlates = NAMESPACE.ThreatPlates
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
 local InCombatLockdown = InCombatLockdown
+local RGB = ThreatPlates.RGB
+local L = ThreatPlates.L
 
 ---------------------------------------------------------------------------------------------------
 -- Global functions for accessing the configuration
@@ -147,12 +149,60 @@ local function SwitchToCurrentDefaultSettings()
   db:DeleteProfile("_ThreatPlatesInternal")
 end
 
----- Entries in the config db that should be migrated and deleted
---local DEPRECATED_DB_ENTRIES = {
---  alphaFeatures = true,
---  optionSpecDetectionAutomatic = true,
---  alphaFeatureHeadlineView = ConvertHeadlineView, -- migrate to headlineView.enabled
---}
+local function MigrateNamesColor(profile_name, profile)
+  local old_color = { r = 1, g = 1, b = 1 }
+
+  if profile.settings and profile.settings.name and profile.settings.name.color then
+    local db = profile.settings.name
+    local color = db.color
+
+    color.r = color.r or old_color.r
+    color.g = color.g or old_color.g
+    color.b = color.b or old_color.b
+
+    db.EnemyTextColor = ThreatPlates.CopyTable(color)
+    db.FriendlyTextColor = ThreatPlates.CopyTable(color)
+    db.color = nil
+  end
+end
+
+local function DeleteDatabaseEntry(db, entry)
+  local head = table.remove(entry, 1)
+  if #entry == 0 then
+    db[head] = nil
+  elseif db ~= nil then
+    DeleteDatabaseEntry(db[head], entry)
+  end
+end
+
+---- Settings in the SavedVariables file that should be migrated and/or deleted
+local DEPRECATED_SETTINGS = {
+  MigrateNamesColor, -- settings.name.color
+  { "alphaFeatures" },
+  { "alphaFeatureHeadlineView" },
+  { "alphaFeatureAuraWidget2" },
+  -- { "alphaFriendlyNameOnly" },
+}
+
+local function MigrateDatabase()
+  ThreatPlates.Print(L["Migrating deprecated settings in configuration ..."])
+
+  local profile_table = TidyPlatesThreat.db.profiles
+  for i, entry in ipairs(DEPRECATED_SETTINGS) do
+
+    -- iterate over all profiles
+    for profile_name, profile in pairs(profile_table) do
+
+      if type(entry) == "function" then
+        entry(profile_name, profile)
+      else
+        -- delete the old config entry
+        DeleteDatabaseEntry(profile, ThreatPlates.CopyTable(entry))
+      end
+    end
+  end
+end
+
 --
 ---- Remove all deprected Entries
 ---- Called whenever the addon is loaded and a new version number is detected
@@ -213,20 +263,6 @@ end
 --  end
 --end
 
---local function MigrateDatabase()
---  -- determine current addon version and compare it with the DB version
---  local db_global = TidyPlatesThreat.db.global
---
---  --  -- addon version is newer that the db version => check for old entries
---  --	if db_global.version ~= tostring(ThreatPlates.Meta("version")) then
---  -- iterate over all profiles
---  local db
---  for name, profile in pairs(TidyPlatesThreat.db.profiles) do
---    ConvertAuraWidget1(name, profile)
---  end
---  --	end
---end
-
 -- Update the configuration file:
 --  - convert deprecated settings to their new counterpart
 -- Called whenever the addon is loaded and a new version number is detected
@@ -254,6 +290,7 @@ end
 ThreatPlates.GetDefaultSettingsV1 = GetDefaultSettingsV1
 ThreatPlates.SwitchToCurrentDefaultSettings = SwitchToCurrentDefaultSettings
 ThreatPlates.SwitchToDefaultSettingsV1 = SwitchToDefaultSettingsV1
+ThreatPlates.MigrateDatabase = MigrateDatabase
 
 --ThreatPlates.UpdateConfiguration = UpdateConfiguration
 --ThreatPlates.MigrateDatabase = MigrateDatabase

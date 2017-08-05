@@ -1,216 +1,15 @@
-local ADDON_NAME, NAMESPACE = ...
-local ThreatPlates = NAMESPACE.ThreatPlates
-
----------------------------------------------------------------------------------------------------
--- Stuff for handling the configuration of Threat Plates - ThreatPlatesDB
+-----------------------------------------------------------------------------------------------------
+-- ThreatPlates default configuration for testing
 ---------------------------------------------------------------------------------------------------
 
----------------------------------------------------------------------------------------------------
--- Imported functions and constants
----------------------------------------------------------------------------------------------------
-local L = ThreatPlates.L
 local RGB = ThreatPlates.RGB
 local RGB_P = ThreatPlates.RGB_P
-local TotemNameBySpellID = ThreatPlates.TotemNameBySpellID
-local HEX2RGB = ThreatPlates.HEX2RGB
-
----------------------------------------------------------------------------------------------------
--- Color and font definitions
----------------------------------------------------------------------------------------------------
-
-local DEFAULT_FONT = "Cabin"
-
----------------------------------------------------------------------------------------------------
--- Global contstants for various stuff
----------------------------------------------------------------------------------------------------
-
-ThreatPlates.ADDON_NAME = "Tidy Plates: Threat Plates"
-ThreatPlates.THEME_NAME = "Threat Plates"
--- ThreatPlates.TIDYPLATES_VERSIONS = { "6.18.10" }
--- ThreatPlates.TIDYPLATES_INSTALLED_VERSION = GetAddOnMetadata("TidyPlates", "version") or ""
-
-ThreatPlates.ANCHOR_POINT = {
-  TOPLEFT = "Top Left",
-  TOP = "Top",
-  TOPRIGHT = "Top Right",
-  LEFT = "Left",
-  CENTER = "Center",
-  RIGHT = "Right",
-  BOTTOMLEFT = "Bottom Left",
-  BOTTOM = "Bottom ",
-  BOTTOMRIGHT = "Bottom Right"
-}
-
-ThreatPlates.ANCHOR_POINT_SETPOINT = {
-  TOPLEFT = {"TOPLEFT", "BOTTOMLEFT"},
-  TOP = {"TOP", "BOTTOM"},
-  TOPRIGHT = {"TOPRIGHT", "BOTTOMRIGHT"},
-  LEFT = {"LEFT", "RIGHT"},
-  CENTER = {"CENTER", "CENTER"},
-  RIGHT = {"RIGHT", "LEFT"},
-  BOTTOMLEFT = {"BOTTOMLEFT", "TOPLEFT"},
-  BOTTOM = {"BOTTOM", "TOP"},
-  BOTTOMRIGHT = {"BOTTOMRIGHT", "TOPRIGHT"}
-}
-
--- only used by DebuffWidget (old Auras)
-ThreatPlates.FullAlign = {TOPLEFT = "TOPLEFT",TOP = "TOP",TOPRIGHT = "TOPRIGHT",LEFT = "LEFT",CENTER = "CENTER",RIGHT = "RIGHT",BOTTOMLEFT = "BOTTOMLEFT",BOTTOM = "BOTTOM",BOTTOMRIGHT = "BOTTOMRIGHT"}
-
-ThreatPlates.AlignH = {LEFT = "LEFT", CENTER = "CENTER", RIGHT = "RIGHT"}
-ThreatPlates.AlignV = {BOTTOM = "BOTTOM", CENTER = "CENTER", TOP = "TOP"}
-
-----------------------------------------------------------------------------------------------------
--- Paths
----------------------------------------------------------------------------------------------------
-
-ThreatPlates.Art = "Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\"
-ThreatPlates.Widgets = "Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\Widgets\\"
-
----------------------------------------------------------------------------------------------------
--- Global contstants for options dialog
----------------------------------------------------------------------------------------------------
-
-ThreatPlates.DebuffMode = {
-  ["whitelist"] = L["White List"],
-  ["blacklist"] = L["Black List"],
-  ["whitelistMine"] = L["White List (Mine)"],
-  ["blacklistMine"] = L["Black List (Mine)"],
-  ["all"] = L["All Auras"],
-  ["allMine"] = L["All Auras (Mine)"]
-}
-
-ThreatPlates.SPEC_ROLES = {
-  DEATHKNIGHT = { true, false, false },
-  DEMONHUNTER = { false, true },
-  DRUID 			= { false, false, true, false },
-  HUNTER			= { false, false, false },
-  MAGE				= { false, false, false },
-  MONK 				= { true, false, false },
-  PALADIN 		= { false, true, false },
-  PRIEST			= { false, false, false },
-  ROGUE				= { false, false, false },
-  SHAMAN			= { false, false, false },
-  WARLOCK			= { false, false, false },
-  WARRIOR			= { false, false, true },
-}
-
-ThreatPlates.FontStyle = {
-  NONE = L["None"],
-  OUTLINE = L["Outline"],
-  THICKOUTLINE = L["Thick Outline"],
-  ["NONE, MONOCHROME"] = L["No Outline, Monochrome"],
-  ["OUTLINE, MONOCHROME"] = L["Outline, Monochrome"],
-  ["THICKOUTLINE, MONOCHROME"] = L["Thick Outline, Monochrome"]
-}
-
--- "By Threat", "By Level Color", "By Normal/Elite/Boss"
-ThreatPlates.ENEMY_TEXT_COLOR = {
-  CLASS = "By Class",
-  CUSTOM = "By Custom Color",
-  REACTION = "By Reaction",
-  HEALTH = "By Health",
-}
-
-ThreatPlates.FRIENDLY_TEXT_COLOR = {
-  CLASS = "By Class",
-  CUSTOM = "By Custom Color",
-  REACTION = "By Reaction",
-  HEALTH = "By Health",
-}
-
--- NPC Role, Guild, or Quest", "Quest",
-ThreatPlates.ENEMY_SUBTEXT = {
-  NONE = "None",
-  HEALTH = "Percent Health",
-  ROLE = "NPC Role",
-  ROLE_GUILD = "NPC Role, Guild",
-  ROLE_GUILD_LEVEL = "NPC Role, Guild, or Level",
-  LEVEL = "Level",
-  ALL = "Everything"
-}
-
--- "NPC Role, Guild, or Quest", "Quest"
-ThreatPlates.FRIENDLY_SUBTEXT = {
-  NONE = "None",
-  HEALTH = "Percent Health",
-  ROLE = "NPC Role",
-  ROLE_GUILD = "NPC Role, Guild",
-  ROLE_GUILD_LEVEL = "NPC Role, Guild, or Level",
-  LEVEL = "Level",
-  ALL = "Everything"
-}
-
--------------------------------------------------------------------------------
--- Totem data - define it one time for the whole addon
--------------------------------------------------------------------------------
-
-ThreatPlates.TOTEM_DATA = {
-  -- Totems from Totem Mastery
-  [1]  = {202188, "M1",  "b8d1ff"}, 	-- Resonance Totem
-  [2]  = {210651, "M2",	 "b8d1ff"},		-- Storm Totem
-  [3]  = {210657, "M3",  "b8d1ff"},		-- Ember Totem
-  [4]  = {210660, "M4",  "b8d1ff"},		-- Tailwind Totem
-
-  -- Totems from spezialization
-  [5]  = {98008,  "S1",  "ffb31f"},		-- Spirit Link Totem
-  [6]  = {5394,	  "S2",  "ffb31f"},		-- Healing Stream Totem
-  [7]  = {108280, "S3",  "ffb31f"},		-- Healing Tide Totem
-  [8]  = {160161, "S4",  "ffb31f"}, 	-- Earthquake Totem
-  [9]  = {2484, 	"S5",	 "ffb31f"},  	-- Earthbind Totem (added patch 7.2, TP v8.4.0)
-
-  -- Lonely fire totem
-  [10] = {192222, "F1",  "ff8f8f"}, 	-- Liquid Magma Totem
-
-  -- Totems from talents
-  [11] = {157153, "N1",  "4c9900"},		-- Cloudburst Totem
-  [12] = {51485,  "N2",  "4c9900"},		-- Earthgrab Totem
-  [13] = {192058, "N3",  "4c9900"},		-- Lightning  Surge Totem
-  [14] = {207399, "N4",  "4c9900"},		-- Ancestral Protection Totem
-  [15] = {192077, "N5",  "4c9900"},		-- Wind Rush Totem
-  [16] = {196932, "N6",  "4c9900"},		-- Voodoo Totem
-  [17] = {198838, "N7",  "4c9900"},		-- Earthen Shield Totem
-
-  -- Totems from PVP talents
-  [18] = {204331, "P1",  "2b76ff"},	-- Counterstrike Totem
-  [19] = {204330, "P2",  "2b76ff"},	-- Skyfury Totem
-  [20] = {204332, "P3",  "2b76ff"},	-- Windfury Totem
-  [21] = {204336, "P4",  "2b76ff"},	-- Grounding Totem
-}
-
-ThreatPlates.TOTEMS = {}
+local L = ThreatPlates.L
 
 local function GetTotemSettings()
-  local totem_list = ThreatPlates.TOTEMS
-
-  local settings = { hideHealthbar = false }
-  for no, totem_data in ipairs(ThreatPlates.TOTEM_DATA) do
-    local totem_spell_id = totem_data[1]
-    local totem_id = totem_data[2]
-    local totem_color = RGB(HEX2RGB(totem_data[3]))
-
-    totem_list[TotemNameBySpellID(totem_spell_id)] = totem_id
-
-    --	["Reference"] = {allow totem nameplate, allow hp color, r, g, b, show icon, style}
-    settings[totem_id] = {
-      true, -- allow totem nameplate
-      true, -- allow hp color
-      true, -- show icon
-      nil,
-      nil,
-      nil,
-      "normal", -- style
-      color = totem_color, -- color of totem's healtbar
-    }
-  end
-
-  return settings
 end
 
----------------------------------------------------------------------------------------------------
--- Default settings for ThreatPlates
----------------------------------------------------------------------------------------------------
-
-ThreatPlates.DEFAULT_SETTINGS = {
+local DEFAULT_SETTINGS = {
   global = {
     version = "",
     -- versioncheck = false,
@@ -362,20 +161,20 @@ ThreatPlates.DEFAULT_SETTINGS = {
     },
     aHPbarColor = RGB_P(0, 1, 0),
     bHPbarColor = RGB_P(1, 1, 0),
---    cHPbarColor = {
---      r = 1,
---      g = 0,
---      b = 0
---    },
---    fHPbarColor = RGB(0, 255, 0),
---    nHPbarColor = RGB(255, 255, 0),
---    tapHPbarColor = RGB(100, 100, 100),
---    HPbarColor = RGB(255, 0, 0),
---    tHPbarColor = {
---      r = 0,
---      g = 0.5,
---      b = 1,
---    },
+    --    cHPbarColor = {
+    --      r = 1,
+    --      g = 0,
+    --      b = 0
+    --    },
+    --    fHPbarColor = RGB(0, 255, 0),
+    --    nHPbarColor = RGB(255, 255, 0),
+    --    tapHPbarColor = RGB(100, 100, 100),
+    --    HPbarColor = RGB(255, 0, 0),
+    --    tHPbarColor = {
+    --      r = 0,
+    --      g = 0.5,
+    --      b = 1,
+    --    },
     ColorByReaction = {
       FriendlyPlayer = RGB(0, 0, 255),           -- blue
       FriendlyNPC = RGB(0, 255, 0),              -- green
@@ -1473,6 +1272,12 @@ ThreatPlates.DEFAULT_SETTINGS = {
         FriendlyTextColorMode = "CUSTOM",
         FriendlyTextColor = RGB(255, 255, 255),
         UseRaidMarkColoring = false,
+        --
+        --        color = {
+        --          r = 1,
+        --          g = 1,
+        --          b = 1
+        --        },
       },
       level = {
         typeface = DEFAULT_FONT, -- old default: "Accidental Presidency",
@@ -1728,3 +1533,8 @@ ThreatPlates.DEFAULT_SETTINGS = {
     },
   }
 }
+
+TidyPlatesThreat = {
+  db = DEFAULT_SETTINGS,
+}
+

@@ -260,6 +260,32 @@ local function SetThemeValue(info, val)
   end
 end
 
+local function GetFontFlags(db, flag)
+  if flag == "Thick" then
+    return string.find(db.flags, "^THICKOUTLINE")
+  elseif flag == "Outline" then
+    return string.find(db.flags, "^OUTLINE")
+  else --if flag == "Mono" then
+    return string.find(db.flags, "MONOCHROME$")
+  end
+end
+
+local function SetFontFlags(db, flag, val)
+  if flag == "Thick" then
+    local outline = (val and "THICKOUTLINE") or (GetFontFlags(db, "Outline") and "OUTLINE") or "NONE"
+    local mono = (GetFontFlags(db, "Mono") and ", MONOCHROME") or ""
+    return outline .. mono
+  elseif flag == "Outline" then
+    local outline = (val and "OUTLINE") or (GetFontFlags(db, "Thick") and "THICKOUTLINE") or "NONE"
+    local mono = (GetFontFlags(db, "Mono") and ", MONOCHROME") or ""
+    return outline .. mono
+  else -- flag = "Mono"
+    local outline = (GetFontFlags(db, "Thick") and "THICKOUTLINE") or (GetFontFlags(db, "Outline") and "OUTLINE") or "NONE"
+    local mono = (val and ", MONOCHROME") or ""
+    return outline .. mono
+  end
+end
+
 -- Set widget values
 
 local function SetValueAuraWidget(info, val)
@@ -300,17 +326,15 @@ local function GetSpacerEntry(pos)
   }
 end
 
-local function GetColorEntry(pos, setting, disabled_func)
+local function GetColorEntry(entry_name, pos, setting)
   return {
-    name = L["Color"],
+    name = entry_name,
     order = pos,
     type = "color",
-    width = "half",
     arg = setting,
     get = GetColor,
     set = SetColor,
     hasAlpha = false,
-    disabled = disabled_func
   }
 end
 
@@ -327,10 +351,6 @@ local function GetColorAlphaEntry(pos, setting, disabled_func)
     disabled = disabled_func
   }
 end
-
----------------------------------------------------------------------------------------------------
--- Functions to generate TP options elemements
----------------------------------------------------------------------------------------------------
 
 local function GetEnableEntry(entry_name, description, widget_info, enable_hv)
   local entry = {
@@ -624,6 +644,76 @@ local function GetLayoutEntryTheme(pos, widget_info, hv_mode)
   }
   return entry
 end
+
+local function GetFontEntryTheme(pos, widget_info, func_disabled)
+  local entry = {
+    name = L["Font"],
+    type = "group",
+    inline = true,
+    order = pos,
+    disabled = func_disabled,
+    args = {
+      Font = {
+        name = L["Typeface"],
+        order = 10,
+        type = "select",
+        dialogControl = "LSM30_Font",
+        values = AceGUIWidgetLSMlists.font,
+        set = SetThemeValue,
+        arg = { "settings", widget_info, "typeface" },
+      },
+      Size = {
+        name = L["Size"],
+        order = 20,
+        type = "range",
+        set = SetThemeValue,
+        arg = { "settings", widget_info, "size" },
+        max = 36,
+        min = 6,
+        step = 1,
+        isPercent = false,
+      },
+      Spacer = GetSpacerEntry(35),
+      Outline = {
+        name = L["Outline"],
+        order = 40,
+        type = "toggle",
+        desc = L["Add black outline."],
+        set = function(info, val) SetThemeValue(info, SetFontFlags(db.settings.name, "Outline", val)) end,
+        get = function(info) return GetFontFlags(db.settings.name, "Outline") end,
+        arg = { "settings", widget_info, "flags" },
+      },
+      Thick = {
+        name = L["Thick"],
+        order = 41,
+        type = "toggle",
+        desc = L["Add thick black outline."],
+        set = function(info, val) SetThemeValue(info, SetFontFlags(db.settings.name, "Thick", val)) end,
+        get = function(info) return GetFontFlags(db.settings.name, "Thick") end,
+        arg = { "settings", widget_info, "flags" },
+      },
+      Mono = {
+        name = L["Mono"],
+        order = 42,
+        type = "toggle",
+        desc = L["Render font without antialiasing."],
+        set = function(info, val) SetThemeValue(info, SetFontFlags(db.settings.name, "Mono", val)) end,
+        get = function(info) return GetFontFlags(db.settings.name, "Mono") end,
+        arg = { "settings", widget_info, "flags" },
+      },
+      Shadow = {
+        name = L["Shadow"],
+        order = 43,
+        type = "toggle",
+        desc = L["Show shadow with text."],
+        set = SetThemeValue,
+        arg = { "settings", widget_info, "shadow" },
+      },
+    },
+  }
+  return entry
+end
+
 
 local function AddLayoutOptions(args, pos, widget_info)
   args.Sizing = GetSizeEntry(pos, widget_info)
@@ -1678,42 +1768,6 @@ local function CreateOptionsTable()
                   inline = true,
                   order = 20,
                   args = {
-                    ColorSettings = {
-                      name = L["Colors"],
-                      order = 10,
-                      type = "group",
-                      inline = true,
-                      disabled = function() return not TidyPlatesThreat.db.profile.HeadlineView.ON end,
-                      args = {
-                        FriendlyColor = {
-                          name = L["Friendly Headline Color"],
-                          order = 10,
-                          type = "select",
-                          values = t.FRIENDLY_TEXT_COLOR,
-                          arg = { "HeadlineView", "FriendlyTextColorMode" }
-                        },
-                        FriendlyColorCustom = GetColorAlphaEntry(15, { "HeadlineView", "FriendlyTextColor" }),
-                        EnemyColor = {
-                          name = L["Enemy Headline Color"],
-                          order = 20,
-                          type = "select",
-                          values = t.ENEMY_TEXT_COLOR,
-                          arg = { "HeadlineView", "EnemyTextColorMode" }
-                        },
-                        EnemyColorCustom = GetColorAlphaEntry(25, { "HeadlineView", "EnemyTextColor" }),
-                        Spacer1 = GetSpacerEntry(30),
-                        EnableRaidMarks = {
-                          name = L["Color by Target Mark"],
-                          order = 70,
-                          type = "toggle",
-                          width = "full",
-                          desc = L["Additionally color the name based on the target mark if the unit is marked."],
-                          descStyle = "inline",
-                          set = SetValue,
-                          arg = { "HeadlineView", "UseRaidMarkColoring" },
-                        },
-                      },
-                    },
                     SubtextSettings = {
                       name = L["Custom Text"],
                       order = 20,
@@ -1850,44 +1904,6 @@ local function CreateOptionsTable()
                         },
                       },
                     },
-                    FontSize = {
-                      name = L["Text Bounds and Sizing"],
-                      order = 50,
-                      type = "group",
-                      inline = true,
-                      disabled = function() return not TidyPlatesThreat.db.profile.HeadlineView.ON  end,
-                      args = {
-                        FontSize = { name = L["Font Size"], type = "range", width = "full", order = 1, set = SetThemeValue, arg = { "HeadlineView", "name", "size" }, max = 36, min = 6, step = 1, isPercent = false, },
-                        TextBounds = {
-                          name = L["Text Boundaries"],
-                          type = "group",
-                          order = 2,
-                          args = {
-                            Description = {
-                              type = "description",
-                              order = 1,
-                              name = L["These settings will define the space that text can be placed on the nameplate.\nHaving too large a font and not enough height will cause the text to be not visible."],
-                              width = "full",
-                            },
-                            Width = { type = "range", width = "full", order = 2, name = L["Text Width"], set = SetThemeValue, arg = { "HeadlineView", "name", "width" }, max = 250, min = 20, step = 1, isPercent = false, },
-                            Height = { type = "range", width = "full", order = 3, name = L["Text Height"], set = SetThemeValue, arg = { "HeadlineView", "name", "height" }, max = 40, min = 8, step = 1, isPercent = false, },
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-                Placement = {
-                  name = L["Placement"],
-                  order = 60,
-                  type = "group",
-                  inline = true,
-                  disabled = function() return not TidyPlatesThreat.db.profile.HeadlineView.ON  end,
-                  args = {
-                    X = { name = L["X"], type = "range", order = 1, set = SetThemeValue, arg = { "HeadlineView", "name", "x" }, max = 120, min = -120, step = 1, isPercent = false, },
-                    Y = { name = L["Y"], type = "range", order = 2, set = SetThemeValue, arg = { "HeadlineView", "name", "y" }, max = 120, min = -120, step = 1, isPercent = false, },
-                    AlignH = { name = L["Horizontal Align"], type = "select", order = 4, values = t.AlignH, set = SetThemeValue, arg = { "HeadlineView", "name", "align" }, },
-                    AlignV = { name = L["Vertical Align"], type = "select", order = 5, values = t.AlignV, set = SetThemeValue, arg = { "HeadlineView", "name", "vertical" }, },
                   },
                 },
               },
@@ -2353,165 +2369,170 @@ local function CreateOptionsTable()
                 },
               },
             },
-            Nametext = {
-              name = L["Name Text"],
+            Names = {
+              name = L["Names"],
               type = "group",
-              order = 60,
+              order = 65,
               args = {
-                Enable = GetEnableEntryTheme(L["Show Name Text"], L["This option allows you to control whether a unit's name is hidden or shown on nameplates."], "name"),
-                FontLooks = {
-                  name = L["Font"],
-                  type = "group",
-                  inline = true,
+                HealthbarView = {
+                  name = L["Healthbar View"],
                   order = 10,
-                  args = {
-                    Font = {
-                      name = L["Font"],
-                      type = "select",
-                      order = 1,
-                      dialogControl = "LSM30_Font",
-                      values = AceGUIWidgetLSMlists.font,
-                      set = SetThemeValue,
-                      arg = { "settings", "name", "typeface" },
-                    },
-                    FontStyle = {
-                      type = "select",
-                      order = 2,
-                      name = L["Font Style"],
-                      desc = L["Set the outlining style of the text."],
-                      values = t.FontStyle,
-                      set = SetThemeValue,
-                      arg = { "settings", "name", "flags" },
-                    },
-                    Shadow = {
-                      name = L["Enable Shadow"],
-                      order = 4,
-                      type = "toggle",
-                      width = "full",
-                      set = SetThemeValue,
-                      arg = { "settings", "name", "shadow" },
-                    },
-                    Header1 = {
-                      type = "header",
-                      order = 3,
-                      name = "",
-                    },
-                    Color = {
-                      type = "color",
-                      order = 3,
-                      name = L["Color"],
-                      width = "full",
-                      get = GetColor,
-                      set = SetColor,
-                      arg = { "settings", "name", "color" },
-                      hasAlpha = false,
-                    },
-                  },
-                },
-                FontSize = {
-                  name = L["Text Bounds and Sizing"],
                   type = "group",
-                  order = 20,
                   inline = true,
                   args = {
-                    FontSize = {
-                      name = L["Font Size"],
-                      type = "range",
-                      width = "full",
-                      order = 1,
-                      set = SetThemeValue,
-                      arg = { "settings", "name", "size" },
-                      max = 36,
-                      min = 6,
-                      step = 1,
-                      isPercent = false,
-                    },
-                    TextBounds = {
-                      name = L["Text Boundaries"],
+                    Enable = GetEnableEntryTheme(L["Show Name Text"], L["This option allows you to control whether a unit's name is hidden or shown on nameplates."], "name"),
+                    Font = GetFontEntryTheme(10, "name"),
+                    Color = {
+                      name = L["Colors"],
+                      order = 20,
                       type = "group",
-                      order = 2,
+                      inline = true,
+                      set = SetThemeValue,
+                      args = {
+                        FriendlyColor = {
+                          name = L["Friendly Name Color"],
+                          order = 10,
+                          type = "select",
+                          values = t.FRIENDLY_TEXT_COLOR,
+                          arg = { "settings", "name", "FriendlyTextColorMode" }
+                        },
+                        FriendlyColorCustom = GetColorEntry(L["Custom Color"], 20, { "settings", "name", "FriendlyTextColor" }),
+                        EnemyColor = {
+                          name = L["Enemy Name Color"],
+                          order = 30,
+                          type = "select",
+                          values = t.ENEMY_TEXT_COLOR,
+                          arg = { "settings", "name", "EnemyTextColorMode" }
+                        },
+                        EnemyColorCustom = GetColorEntry(L["Custom Color"], 40, { "settings", "name", "EnemyTextColor" }),
+                        Spacer1 = GetSpacerEntry(50),
+                        EnableRaidMarks = {
+                          name = L["Color by Target Mark"],
+                          order = 60,
+                          type = "toggle",
+                          width = "full",
+                          desc = L["Additionally color the name based on the target mark if the unit is marked."],
+                          descStyle = "inline",
+                          set = SetValue,
+                          arg = { "settings", "name", "UseRaidMarkColoring" },
+                        },
+                      },
+                    },
+                    Placement = {
+                      name = L["Placement"],
+                      order = 30,
+                      type = "group",
+                      inline = true,
+                      args = {
+                        X = { name = L["X"], type = "range", order = 1, set = SetThemeValue, arg = { "settings", "name", "x" }, max = 120, min = -120, step = 1, isPercent = false, },
+                        Y = { name = L["Y"], type = "range", order = 2, set = SetThemeValue, arg = { "settings", "name", "y" }, max = 120, min = -120, step = 1, isPercent = false, },
+                        AlignH = { name = L["Horizontal Align"], type = "select", order = 4, values = t.AlignH, set = SetThemeValue, arg = { "settings", "name", "align" }, },
+                        AlignV = { name = L["Vertical Align"], type = "select", order = 5, values = t.AlignV, set = SetThemeValue, arg = { "settings", "name", "vertical" }, },
+                      },
+                    },
+                    Boundaries = {
+                      name = L["Text Boundaries"],
+                      order = 40,
+                      type = "group",
                       args = {
                         Description = {
                           type = "description",
                           order = 1,
-                          name = L["These settings will define the space that text can be placed on the nameplate.\nHaving too large a font and not enough height will cause the text to be not visible."],
+                          name = L["These settings will define the space that text can be placed on the nameplate. Having too large a font and not enough height will cause the text to be not visible."],
                           width = "full",
                         },
-                        Width = {
+                        Width = { type = "range", width = "double", order = 2, name = L["Text Width"], set = SetThemeValue, arg = { "settings", "name", "width" }, max = 250, min = 20, step = 1, isPercent = false, },
+                        Height = { type = "range", width = "double", order = 3, name = L["Text Height"], set = SetThemeValue, arg = { "settings", "name", "height" }, max = 40, min = 8, step = 1, isPercent = false, },
+                      },
+                    },
+                  },
+                },
+                HeadlineView = {
+                  name = L["Headline View"],
+                  order = 20,
+                  type = "group",
+                  inline = true,
+                  args = {
+                    Font = {
+                      name = L["Font"],
+                      type = "group",
+                      inline = true,
+                      order = 10,
+                      args = {
+                        Size = {
+                          name = L["Size"],
+                          order = 20,
                           type = "range",
-                          width = "full",
-                          order = 2,
-                          name = L["Text Width"],
                           set = SetThemeValue,
-                          arg = { "settings", "name", "width" },
-                          max = 250,
-                          min = 20,
-                          step = 1,
-                          isPercent = false,
-                        },
-                        Height = {
-                          type = "range",
-                          width = "full",
-                          order = 3,
-                          name = L["Text Height"],
-                          set = SetThemeValue,
-                          arg = { "settings", "name", "height" },
-                          max = 40,
-                          min = 8,
+                          arg = { "HeadlineView", "name", "size" },
+                          max = 36,
+                          min = 6,
                           step = 1,
                           isPercent = false,
                         },
                       },
                     },
-                  },
-                },
-                Placement = {
-                  name = L["Placement"],
-                  order = 30,
-                  type = "group",
-                  inline = true,
-                  args = {
-                    X = {
-                      name = L["X"],
-                      type = "range",
-                      width = "full",
-                      order = 1,
-                      set = SetThemeValue,
-                      arg = { "settings", "name", "x" },
-                      max = 120,
-                      min = -120,
-                      step = 1,
-                      isPercent = false,
+                    Color = {
+                      name = L["Colors"],
+                      order = 20,
+                      type = "group",
+                      inline = true,
+                      args = {
+                        FriendlyColor = {
+                          name = L["Friendly ames Color"],
+                          order = 10,
+                          type = "select",
+                          values = t.FRIENDLY_TEXT_COLOR,
+                          arg = { "HeadlineView", "FriendlyTextColorMode" }
+                        },
+                        FriendlyColorCustom = GetColorEntry(L["Custom Color"], 20, { "HeadlineView", "FriendlyTextColor" }),
+                        EnemyColor = {
+                          name = L["Enemy Name Color"],
+                          order = 30,
+                          type = "select",
+                          values = t.ENEMY_TEXT_COLOR,
+                          arg = { "HeadlineView", "EnemyTextColorMode" }
+                        },
+                        EnemyColorCustom = GetColorEntry(L["Custom Color"], 40, { "HeadlineView", "EnemyTextColor" }),
+                        Spacer1 = GetSpacerEntry(50),
+                        EnableRaidMarks = {
+                          name = L["Color by Target Mark"],
+                          order = 60,
+                          type = "toggle",
+                          width = "full",
+                          desc = L["Additionally color the name based on the target mark if the unit is marked."],
+                          descStyle = "inline",
+                          set = SetValue,
+                          arg = { "HeadlineView", "UseRaidMarkColoring" },
+                        },
+                      },
                     },
-                    Y = {
-                      name = L["Y"],
-                      type = "range",
-                      width = "full",
-                      order = 2,
-                      set = SetThemeValue,
-                      arg = { "settings", "name", "y" },
-                      max = 120,
-                      min = -120,
-                      step = 1,
-                      isPercent = false,
+                    Placement = {
+                      name = L["Placement"],
+                      order = 30,
+                      type = "group",
+                      inline = true,
+                      args = {
+                        X = { name = L["X"], type = "range", order = 1, set = SetThemeValue, arg = { "HeadlineView", "name", "x" }, max = 120, min = -120, step = 1, isPercent = false, },
+                        Y = { name = L["Y"], type = "range", order = 2, set = SetThemeValue, arg = { "HeadlineView", "name", "y" }, max = 120, min = -120, step = 1, isPercent = false, },
+                        AlignH = { name = L["Horizontal Align"], type = "select", order = 4, values = t.AlignH, set = SetThemeValue, arg = { "HeadlineView", "name", "align" }, },
+                        AlignV = { name = L["Vertical Align"], type = "select", order = 5, values = t.AlignV, set = SetThemeValue, arg = { "HeadlineView", "name", "vertical" }, },
+                      },
                     },
-                    AlignH = {
-                      name = L["Horizontal Align"],
-                      type = "select",
-                      width = "full",
-                      order = 3,
-                      values = t.AlignH,
-                      set = SetThemeValue,
-                      arg = { "settings", "name", "align" },
-                    },
-                    AlignV = {
-                      name = L["Vertical Align"],
-                      type = "select",
-                      width = "full",
-                      order = 4,
-                      values = t.AlignV,
-                      set = SetThemeValue,
-                      arg = { "settings", "name", "vertical" },
+                    Boundaries = {
+                      name = L["Text Boundaries"],
+                      order = 40,
+                      type = "group",
+                      args = {
+                        Description = {
+                          type = "description",
+                          order = 1,
+                          name = L["These settings will define the space that text can be placed on the nameplate. Having too large a font and not enough height will cause the text to be not visible."],
+                          width = "full",
+                        },
+                        Width = { type = "range", width = "double", order = 2, name = L["Text Width"], set = SetThemeValue, arg = { "HeadlineView", "name", "width" }, max = 250, min = 20, step = 1, isPercent = false, },
+                        Height = { type = "range", width = "double", order = 3, name = L["Text Height"], set = SetThemeValue, arg = { "HeadlineView", "name", "height" }, max = 40, min = 8, step = 1, isPercent = false, },
+                      },
                     },
                   },
                 },
