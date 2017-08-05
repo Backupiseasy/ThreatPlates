@@ -5329,7 +5329,7 @@ local function CreateOptionsTable()
               name = L["Headline View"],
               order = 30,
               type = "toggle",
-              disabled = function() return not db.uniqueSettings[k_c].useStyle end,
+              disabled = function() return not (db.uniqueSettings[k_c].useStyle and db.HeadlineView.ON) end,
               set = function(info, val) if val then db.uniqueSettings[k_c].showNameplate = false; SetValue(info, val) end end,
               arg = { "uniqueSettings", k_c, "ShowHeadlineView" },
             },

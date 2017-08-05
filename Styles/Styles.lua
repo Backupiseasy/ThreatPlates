@@ -226,7 +226,7 @@ local function SetStyle(unit)
       if unique_setting.showNameplate then
         style = "unique"
       elseif unique_setting.ShowHeadlineView then
-        style = "NameOnly-Unique"
+        style = (db.HeadlineView.ON and "NameOnly-Unique") or "unique"
       end
     elseif unit_type == "Totem" then
       local unit_name = unit.name
