@@ -44,6 +44,7 @@ local function SetNameColor(unit)
   end
 
   local unit_reaction = unit.reaction
+  local db_color = db.ColorByReaction
   local mode = (unit_reaction == "FRIENDLY" and db_mode.FriendlyTextColorMode) or db_mode.EnemyTextColorMode
 
   if style == "NameOnly-Unique" and unique_setting.useColor then
@@ -62,10 +63,10 @@ local function SetNameColor(unit)
     return color.r, color.g, color.b
   elseif mode == "CLASS" then
     if unit.unitid and not UnitIsConnected(unit.unitid) then
-      color =  db.DisconnectedUnit
+      color =  db_color.DisconnectedUnit
       return color.r, color.g, color.b
     elseif unit.isTapped then
-      color =  db.TappedUnit
+      color =  db_color.TappedUnit
       return color.r, color.g, color.b
     elseif unit.type == "PLAYER" then
       if unit_reaction == "FRIENDLY" then
@@ -83,16 +84,16 @@ local function SetNameColor(unit)
       return color.r, color.g, color.b
     end
 
-    color =  db.ColorByReaction[reference[unit_reaction][unit.type]]
+    color =  db_color[reference[unit_reaction][unit.type]]
     return color.r, color.g, color.b
   end
 
   -- Default: By Reaction
   if unit.unitid and not UnitIsConnected(unit.unitid) then
-    color =  db.DisconnectedUnit
+    color =  db_color.DisconnectedUnit
     return color.r, color.g, color.b
   elseif unit.isTapped then
-    color =  db.TappedUnit
+    color =  db_color.TappedUnit
     return color.r, color.g, color.b
   elseif unit_reaction == "FRIENDLY" and unit.type == "PLAYER" then
     local db_social = db.socialWidget
@@ -105,7 +106,7 @@ local function SetNameColor(unit)
     end
   end
 
-  color =  db.ColorByReaction[reference[unit_reaction][unit.type]]
+  color =  db_color[reference[unit_reaction][unit.type]]
   return color.r, color.g, color.b
 end
 

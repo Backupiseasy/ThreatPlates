@@ -1,11 +1,16 @@
 ------------------------------------------------------
+8.4.3-Beta2 (works with TidyPlates 6.18.11)
+------------------------------------------------------
+* Fixed a bug with headline view for custom nameplates where health was used exclusively for status text and the actual setting from the options was ignored.
+* Fixed a bug with custom nameplates where headline view was used, although globally disabled.
+* Fixed a LUA error in names coloring for disconnected and tapped units.
+
+------------------------------------------------------
 8.4.3-Beta1 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
 * Added on option to color names in healthbar view the same way as in headline view (see Nameplate Settings - Names) [Comment #464].
 * Also, improved consistency of names configuration between healthbar and headline view.
 * Fixed a bug with "Filter by Spell" in aura 2.0 widget. Filtering with keywords "All", "My", and (new) "Not" should now work as expected (see https://wow.curseforge.com/projects/tidy-plates-threat-plates/pages/help) [Comment #486].
-* Fixed a bug with headline view for custom nameplates where health was used exclusively for status text and the actual setting from the options was ignored.
-* Fixed a bug with custom nameplates where headline view was used, although globally disabled.
 
 ------------------------------------------------------
 8.4.2 (works with TidyPlates 6.18.11)
