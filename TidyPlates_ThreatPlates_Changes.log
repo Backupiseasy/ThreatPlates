@@ -1,4 +1,9 @@
 ------------------------------------------------------
+8.4.3-Beta3 (works with TidyPlates 6.18.11)
+------------------------------------------------------
+* Fixed a LUA error in names coloring for friends and guild members [Ticket #133].
+
+------------------------------------------------------
 8.4.3-Beta2 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
 * Fixed a bug with headline view for custom nameplates where health was used exclusively for status text and the actual setting from the options was ignored.

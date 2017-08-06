@@ -6,8 +6,6 @@ local ThreatPlates = NAMESPACE.ThreatPlates
 ---------------------------------------------------------------------------------------------------
 local UnitIsConnected = UnitIsConnected
 local RAID_CLASS_COLORS = RAID_CLASS_COLORS
-local IsFriend = IsFriend
-local IsGuildmate = IsGuildmate
 
 local TidyPlatesThreat = TidyPlatesThreat
 local SetStyle = TidyPlatesThreat.SetStyle
@@ -21,6 +19,9 @@ local reference = {
 }
 
 local function SetNameColor(unit)
+  local IsFriend = TidyPlatesThreat.IsFriend
+  local IsGuildmate = TidyPlatesThreat.IsGuildmate
+
   local style = unit.TP_Style or SetStyle(unit)
 
   local db = TidyPlatesThreat.db.profile
