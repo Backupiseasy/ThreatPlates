@@ -1,4 +1,10 @@
 ------------------------------------------------------
+8.4.3-Beta4 (works with TidyPlates 6.18.11)
+------------------------------------------------------
+* Using custom horde and alliance icons now (from CleanIcons - Thin, see http://www.wowinterface.com/downloads/info19844) instead of build-in ones to social widget.
+( * Several performance optimizations. )
+
+------------------------------------------------------
 8.4.3-Beta3 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
 * Fixed a LUA error in names coloring for friends and guild members [Ticket #133].

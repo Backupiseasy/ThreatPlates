@@ -7,6 +7,7 @@ local ThreatPlates = NAMESPACE.ThreatPlates
 local UnitExists = UnitExists
 local InCombatLockdown = InCombatLockdown
 
+local TidyPlatesThreat = TidyPlatesThreat
 local UnitIsOffTanked = ThreatPlates.UnitIsOffTanked
 local GetUniqueNameplateSetting = ThreatPlates.GetUniqueNameplateSetting
 local ShowThreatFeedback = ThreatPlates.ShowThreatFeedback

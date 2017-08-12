@@ -11,6 +11,7 @@ local UnitIsOtherPlayersPet = UnitIsOtherPlayersPet
 local UnitIsBattlePet = UnitIsBattlePet
 local IsInInstance = IsInInstance
 
+local TidyPlatesThreat = TidyPlatesThreat
 local TOTEMS = ThreatPlates.TOTEMS
 local GetUnitVisibility = ThreatPlates.GetUnitVisibility
 local FixUpdateUnitCondition = ThreatPlates.FixUpdateUnitCondition
@@ -263,6 +264,8 @@ local function SetStyle(unit)
     end
   end
 
+  unit.TP_Style = style
+  unit.TP_UniqueSetting = unique_setting
   return style, unique_setting
 end
 

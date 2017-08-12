@@ -7,6 +7,7 @@ local ThreatPlates = NAMESPACE.ThreatPlates
 local UnitExists = UnitExists
 local InCombatLockdown = InCombatLockdown
 
+local TidyPlatesThreat = TidyPlatesThreat
 local UnitIsOffTanked = ThreatPlates.UnitIsOffTanked
 local GetUniqueNameplateSetting = ThreatPlates.GetUniqueNameplateSetting
 local ShowThreatFeedback = ThreatPlates.ShowThreatFeedback
@@ -163,10 +164,6 @@ local ALPHA_FUNCTIONS = {
 local function SetAlpha(unit)
 	-- sometimes SetAlpha is called without calling OnUpdate/OnContextUpdate first, so TP_Style may not be initialized
 	local style = unit.TP_Style or SetStyle(unit)
-
---	if not style then
---		style = SetStyle(unit)
---	end
 
 	local alpha, alpha_non_target = ALPHA_FUNCTIONS[style](unit)
 

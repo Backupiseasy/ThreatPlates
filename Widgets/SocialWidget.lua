@@ -13,14 +13,28 @@ local ThreatPlates = NAMESPACE.ThreatPlates
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
 local UnitFactionGroup = UnitFactionGroup
+local GetNumGuildMembers = GetNumGuildMembers
+local GetGuildRosterInfo = GetGuildRosterInfo
+local GetNumFriends = GetNumFriends
+local GetFriendInfo = GetFriendInfo
+local BNGetNumFriends = BNGetNumFriends
+local BNGetFriendInfo = BNGetFriendInfo
+local BNGetToonInfo = BNGetToonInfo
+local UnitGUID = UnitGUID
+local CreateFrame = CreateFrame
 
+local tContains = tContains
+
+local TidyPlatesThreat = TidyPlatesThreat
 local PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\SocialWidget\\"
 local ICON_FRIEND = PATH .."friendicon"
 local ICON_GUILDMATE = PATH .."guildicon"
 local ICON_BNET_FRIEND = "Interface\\FriendsFrame\\PlusManz-BattleNet"
 local ICON_FACTION = {
-  Horde = "Interface\\ICONS\\inv_bannerpvp_01",
-  Alliance = "Interface\\ICONS\\inv_bannerpvp_02",
+--  Horde = "Interface\\ICONS\\inv_bannerpvp_01",
+--  Alliance = "Interface\\ICONS\\inv_bannerpvp_02",
+	Horde = PATH .. "hordeicon",
+	Alliance = PATH .. "allianceicon",
 }
 
 -- local WidgetList = {}
@@ -39,7 +53,7 @@ local watcherIsEnabled = false
 -- end
 -- ThreatPlatesWidgets.ClearAllSocialWidgets = ClearAllWidgets
 
-ListTable = {
+local ListTable = {
 	g = {},
 	b = {},
 	f = {}
@@ -169,9 +183,9 @@ local function UpdateWidgetFrame(frame, unit)
 
 	local faction_texture
 	local db = TidyPlatesThreat.db.profile.socialWidget
-  --local unitid = unit.unitid
-  if db.ShowFactionIcon and unit.type == "PLAYER" then --and unitid then
-    local faction = UnitFactionGroup(unitid)
+	local unitid = unit.unitid
+	if db.ShowFactionIcon and unit.type == "PLAYER" and unitid then
+		local faction = UnitFactionGroup(unitid)
     faction_texture = ICON_FACTION[faction]
 	end
 
@@ -282,9 +296,8 @@ local function IsGuildmate(unit)
   return enabled() and tContains(ListTable.g, unit.name)
 end
 
-
-TidyPlatesThreat.IsFriend = IsFriend
-TidyPlatesThreat.IsGuildmate = IsGuildmate
+ThreatPlates.IsFriend = IsFriend
+ThreatPlates.IsGuildmate = IsGuildmate
 
 ThreatPlatesWidgets.RegisterWidget("SocialWidgetTPTP", CreateWidgetFrame, false, enabled, EnabledInHeadlineView)
 ThreatPlatesWidgets.SocialWidgetDisableWatcher = DisableWatcher
