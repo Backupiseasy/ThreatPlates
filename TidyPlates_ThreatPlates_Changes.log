@@ -1,9 +1,4 @@
 ------------------------------------------------------
-8.4.3-Beta4 (works with TidyPlates 6.18.11)
-------------------------------------------------------
-* Fixed a bug with quest widget where the quest indicator was hidden when one of several quests on the unit was completed.
-
-------------------------------------------------------
 8.4.3-Beta3 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
 * Fixed a LUA error in names coloring for friends and guild members [Ticket #133].
