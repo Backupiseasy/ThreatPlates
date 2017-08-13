@@ -54,11 +54,15 @@ local function IsQuestUnit(unit)
 					if unit_name then
 						local current, goal = string.match(progress, "(%d+)/(%d+)")
 
+						-- A unit may be target of more than one quest, the quest indicator should be show if at least one quest is not completed.
 						if current and goal then
-							if (unit_name == "" or unit_name == player_name) then
-								quest_player = (current ~= goal)
-							else
-								quest_group = (current ~= goal)
+							if (current ~= goal) then
+								if (unit_name == "" or unit_name == player_name) then
+									quest_player = true
+								else
+									quest_group = true
+								end
+								break
 							end
 						else
 							if (unit_name == "" or unit_name == player_name) then
@@ -66,6 +70,7 @@ local function IsQuestUnit(unit)
 							else
 								quest_group = true
 							end
+							break
 						end
 					end
 				end
