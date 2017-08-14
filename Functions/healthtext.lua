@@ -37,6 +37,20 @@ local ScannerName = "ThreatPlates_Tooltip_Subtext"
 local TooltipScanner = CreateFrame( "GameTooltip", ScannerName , nil, "GameTooltipTemplate" ); -- Tooltip name cannot be nil
 TooltipScanner:SetOwner( WorldFrame, "ANCHOR_NONE" );
 
+local function Truncate(value)
+	if TidyPlatesThreat.db.profile.text.truncate then
+		if value >= 1e6 then
+			return format('%.1fm', value / 1e6)
+		elseif value >= 1e4 then
+			return format('%.1fk', value / 1e3)
+		else
+			return value
+		end
+	else
+		return value
+	end
+end
+
 local function GetUnitSubtitle(unit)
 	local unitid = unit.unitid
 
@@ -113,7 +127,49 @@ end
 local function DummyFunction() return nil, COLOR_ROLE end
 
 local function TextHealthPercentColored(unit)
-	return ceil(100 * (unit.health / unit.healthmax)) .. "%", GetColorByHealthDeficit(unit)
+	-- return ceil(100 * (unit.health / unit.healthmax)) .. "%", GetColorByHealthDeficit(unit)
+	local db = TidyPlatesThreat.db.profile.text
+
+	if (not db.full and unit.health == unit.healthmax) then
+		return nil, COLOR_ROLE
+	end
+
+	local HpPct = ""
+	local HpAmt = ""
+	local HpMax = ""
+
+	if db.amount then
+
+		if db.deficit and unit.health ~= unit.healthmax then
+			HpAmt = "-"..Truncate(unit.healthmax - unit.health)
+		else
+			HpAmt = Truncate(unit.health)
+		end
+
+		if db.max then
+			if HpAmt ~= "" then
+				HpMax = " / "..Truncate(unit.healthmax)
+			else
+				HpMax = Truncate(unit.healthmax)
+			end
+		end
+	end
+
+	if db.percent then
+		-- Blizzard calculation:
+		-- local perc = math.ceil(100 * (UnitHealth(frame.displayedUnit)/UnitHealthMax(frame.displayedUnit)));
+
+		local perc = ceil(100 * (unit.health / unit.healthmax))
+		-- old: floor(100*(unit.health / unit.healthmax))
+
+		if HpMax ~= "" or HpAmt ~= "" then
+			HpPct = " - "..perc.."%"
+		else
+			HpPct = perc.."%"
+		end
+	end
+
+	return HpAmt .. HpMax .. HpPct, GetColorByHealthDeficit(unit)
 end
 
 -- Role, Guild or Level
@@ -123,16 +179,14 @@ local function TextRoleGuildLevel(unit)
 
 	if unit.type == "NPC" then
 		description = GetUnitSubtitle(unit)
-
-		if not description then --  and unit.reaction ~= "FRIENDLY" then
-			description, color =  GetLevelDescription(unit)
-      -- color = COLOR_ROLE
-      -- color = RGB_P(unit.levelcolorRed, unit.levelcolorGreen, unit.levelcolorBlue, .70)
-		end
-
 	elseif unit.type == "PLAYER" then
 		description = GetGuildInfo(unit.unitid)
     color = COLOR_GUILD
+	end
+
+	if not description then --  and unit.reaction ~= "FRIENDLY" then
+		description, color = GetLevelDescription(unit)
+		-- color = RGB_P(unit.levelcolorRed, unit.levelcolorGreen, unit.levelcolorBlue, .70)
 	end
 
 	return description, color
@@ -193,84 +247,31 @@ local SUBTEXT_FUNCTIONS =
 --
 ---------------------------------------------------------------------------------------------------
 
-local function Truncate(value)
-	if TidyPlatesThreat.db.profile.text.truncate then
-		if value >= 1e6 then
-			return format('%.1fm', value / 1e6)
-		elseif value >= 1e4 then
-			return format('%.1fk', value / 1e3)
-		else
-			return value
-		end
-	else
-		return value
-	end
-end
-
 local function SetCustomText(unit)
   local style = unit.TP_Style or SetStyle(unit)
 
-	-- Headline View (alpha feature) uses TidyPlatesHub config and functionality
-	local db = TidyPlatesThreat.db.profile.HeadlineView
+	local db = TidyPlatesThreat.db.profile
 	if style == "NameOnly" or style == "NameOnly-Unique" then
-		local func
-		if unit.reaction == "FRIENDLY" then
-			func = SUBTEXT_FUNCTIONS[db.FriendlySubtext]
-		else
-			func = SUBTEXT_FUNCTIONS[db.EnemySubtext]
-		end
+		db = db.HeadlineView
+	else
+		db = db.settings.customtext
+	end
 
-		local subtext, color = func(unit)
+	local customtext = (unit.reaction == "FRIENDLY" and db.FriendlySubtext) or db.EnemySubtext
 
-		if db.SubtextColorUseHeadline then
-			color = RGB_P(TidyPlatesThreat.SetNameColor(unit))
-		elseif not db.SubtextColorUseSpecific then
-			color = db.SubtextColor
-		end
+	if customtext == "NONE" then return nil, COLOR_ROLE end
 
+	local func = SUBTEXT_FUNCTIONS[customtext]
+	local subtext, color = func(unit)
+
+	if db.SubtextColorUseHeadline then
+		return subtext, TidyPlatesThreat.SetNameColor(unit)
+	elseif db.SubtextColorUseSpecific then
 		return subtext, color.r, color.g, color.b, color.a
 	end
 
-	db = TidyPlatesThreat.db.profile.text
-	if (not db.full and unit.health == unit.healthmax) then
-		return ""
-	end
-	local HpPct = ""
-	local HpAmt = ""
-	local HpMax = ""
-
-	if db.amount then
-
-		if db.deficit and unit.health ~= unit.healthmax then
-			HpAmt = "-"..Truncate(unit.healthmax - unit.health)
-		else
-			HpAmt = Truncate(unit.health)
-		end
-
-		if db.max then
-			if HpAmt ~= "" then
-				HpMax = " / "..Truncate(unit.healthmax)
-			else
-				HpMax = Truncate(unit.healthmax)
-			end
-		end
-	end
-
-	if db.percent then
-		-- Blizzard calculation:
-		-- local perc = math.ceil(100 * (UnitHealth(frame.displayedUnit)/UnitHealthMax(frame.displayedUnit)));
-
-		local perc = ceil(100 * (unit.health / unit.healthmax))
-		-- old: floor(100*(unit.health / unit.healthmax))
-
-		if HpMax ~= "" or HpAmt ~= "" then
-			HpPct = " - "..perc.."%"
-		else
-			HpPct = perc.."%"
-		end
-	end
-
-	return HpAmt..HpMax..HpPct
+	local color = db.SubtextColor
+	return subtext, color.r, color.g, color.b, color.a
 end
 
 TidyPlatesThreat.SetCustomText = SetCustomText

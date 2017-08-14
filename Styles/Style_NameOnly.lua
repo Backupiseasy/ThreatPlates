@@ -9,6 +9,42 @@ local EMPTY_TEXTURE = ART_PATH.."Empty"
 -- Style: Text-Only for Headline-View
 -------------------------------------------------------------------------------------
 
+local function GetHeadlineViewHeight(self)
+  local dbprofile = self.db.profile
+
+  local name_y = dbprofile.HeadlineView.name.y
+  local customtext_y = dbprofile.HeadlineView.customtext.y
+  local name_size = dbprofile.HeadlineView.name.size
+  local customtext_size = dbprofile.HeadlineView.customtext.size
+
+  return abs(max(name_y, customtext_y) - min(name_y, customtext_y)) + (name_size + customtext_size) / 2
+end
+
+local function GetTargetTextureY(self)
+  local dbprofile = self.db.profile
+
+  if dbprofile.HeadlineView.name.y >= dbprofile.HeadlineView.customtext.y then
+    -- name above status text
+    return dbprofile.HeadlineView.name.y - 10 + (dbprofile.HeadlineView.name.size / 2) - ((GetHeadlineViewHeight(self) - 18) / 2)
+  else
+    -- status text above name
+    return dbprofile.HeadlineView.customtext.y - 10 + (dbprofile.HeadlineView.customtext.size / 2) - ((GetHeadlineViewHeight(self) - 18) / 2)
+  end
+end
+
+local function GetHightlightTextureY(self)
+  local dbprofile = self.db.profile
+
+  return - 32 + 2 + dbprofile.HeadlineView.name.y + (dbprofile.HeadlineView.name.size / 2)
+  --  if dbprofile.HeadlineView.name.y >= dbprofile.HeadlineView.customtext.y then
+  --    -- name above status text
+  --    return - 32 + 2 + dbprofile.HeadlineView.name.y + (dbprofile.HeadlineView.name.size / 2)
+  --  else
+  --    -- status text above name
+  --    return - 32 + 2 + dbprofile.HeadlineView.customtext.y + (dbprofile.HeadlineView.customtext.size / 2)
+  --  end
+end
+
 local function Create(self,name)
   local db = self.db.profile.settings
   local dbprofile = self.db.profile
@@ -33,20 +69,19 @@ local function Create(self,name)
     highlight = {
       texture = (dbprofile.HeadlineView.ShowMouseoverHighlight and ART_PATH.."Highlight") or EMPTY_TEXTURE,
       width = 128,
-      height = 64 * ( dbprofile.HeadlineView.name.size + dbprofile.HeadlineView.name.size - 2) / 18, -- no effect
+      height = 64, -- no effect, use healthborder
       x = 0, -- not used in headline view, determined from ?
       y = 0, -- not used in headline view, determined from ?
       anchor = "CENTER", --no effect
-			-- show = false -- show not working for highlight
+			-- show = false -- no effect, use healthborder
     },
 
 		target = {
       texture = ART_PATH.."Target",
       width = 128,
-      height = 32 * ( dbprofile.HeadlineView.name.size + dbprofile.HeadlineView.name.size - 2) / 18,
+      height = 32 * GetHeadlineViewHeight(self) / 18,
       x = dbprofile.HeadlineView.name.x,
-      -- 10 is default size
-      y = dbprofile.HeadlineView.name.y - 5 - ((dbprofile.HeadlineView.name.size - 10) / 2),
+      y = GetTargetTextureY(self),
       anchor = "CENTER",
       show = dbprofile.HeadlineView.ShowTargetHighlight,
     },
@@ -56,7 +91,7 @@ local function Create(self,name)
       width = 128,
       height = 64,
       x = 0,
-      y = -21 + ((dbprofile.HeadlineView.name.size - 10) / 2), -- ( dbprofile.HeadlineView.name.size + dbprofile.HeadlineView.name.size - 2), -- also used for highlight position, or: db.name.y, to use offset from options,
+      y = GetHightlightTextureY(self),
       anchor = "CENTER",
     },
 
@@ -114,8 +149,10 @@ local function Create(self,name)
     name = {
       typeface = MEDIA_PATH:Fetch('font', db.name.typeface),
       size = dbprofile.HeadlineView.name.size,
-      width = dbprofile.HeadlineView.name.width,
-      height = dbprofile.HeadlineView.name.height,
+      width = db.name.width, -- use same as for healthbar view
+      height = db.name.height, -- use same as for healthbar view
+      -- width = dbprofile.HeadlineView.name.width,
+      -- height = dbprofile.HeadlineView.name.height,
       x = dbprofile.HeadlineView.name.x,
       y = dbprofile.HeadlineView.name.y,
       align = dbprofile.HeadlineView.name.align,
@@ -142,17 +179,21 @@ local function Create(self,name)
 
     customtext = {
       typeface = MEDIA_PATH:Fetch('font', db.name.typeface),
-      size = dbprofile.HeadlineView.name.size - 2,
-      width = dbprofile.HeadlineView.name.width,
-      height = dbprofile.HeadlineView.name.height,
-      x = dbprofile.HeadlineView.name.x,
-      y = dbprofile.HeadlineView.name.y - dbprofile.HeadlineView.name.size,
-      align = dbprofile.HeadlineView.name.align,
+      -- size = dbprofile.HeadlineView.name.size - 2,
+      size = dbprofile.HeadlineView.customtext.size,
+      -- width = dbprofile.HeadlineView.name.width,
+      -- height = dbprofile.HeadlineView.name.height,
+      width = db.customtext.width, -- use same as for healthbar view
+      height = db.customtext.height, -- use same as for healthbar view
+      x = dbprofile.HeadlineView.customtext.x,
+      -- y = dbprofile.HeadlineView.name.y - dbprofile.HeadlineView.name.size,
+      y = dbprofile.HeadlineView.customtext.y,
+      align = dbprofile.HeadlineView.customtext.align,
       anchor = "CENTER",
-      vertical = dbprofile.HeadlineView.name.vertical,
+      vertical = dbprofile.HeadlineView.customtext.vertical,
       shadow = db.name.shadow,
       flags = db.name.flags,
-      show = true, -- for style NameOnly, type of content is configured in TidyPlatesHub
+      show = true,
     },
 
     spelltext = {

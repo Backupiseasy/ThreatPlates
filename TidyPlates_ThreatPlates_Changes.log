@@ -2,6 +2,10 @@
 8.4.3-Beta4 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
 * Fixed a bug with quest widget where the quest indicator was hidden when one of several quests on the unit was completed.
+* Using custom horde and alliance icons now (from CleanIcons - Thin, see http://www.wowinterface.com/downloads/info19844) instead of build-in ones to social widget.
+* Added on option to choose and color status text (health text) in healthbar view the same way as in headline view (see Nameplate Settings - Status Text) [Comment #464].
+* Also, improved consistency of status/custom/health text configuration between healthbar and headline view.
+* Fixed a bug in status text Everything/NPC Role, Guild, Level where level was not show for players.
 
 ------------------------------------------------------
 8.4.3-Beta3 (works with TidyPlates 6.18.11)
