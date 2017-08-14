@@ -166,6 +166,16 @@ local function MigrateNamesColor(profile_name, profile)
   end
 end
 
+local function MigrateCustomTextShow(profile_name, profile)
+  -- default for db.show was true
+  if profile.settings and profile.settings.customtext and profile.settings.customtext.show ~= nil then
+    local db = profile.settings.customtext
+    db.FriendlySubtext = "NONE"
+    db.EnemySubtext = "NONE"
+    db.show = nil
+  end
+end
+
 local function DeleteDatabaseEntry(db, entry)
   local head = table.remove(entry, 1)
   if #entry == 0 then
@@ -178,10 +188,13 @@ end
 ---- Settings in the SavedVariables file that should be migrated and/or deleted
 local DEPRECATED_SETTINGS = {
   MigrateNamesColor, -- settings.name.color
+  MigrateCustomTextShow, -- settings.customtext.show
   { "alphaFeatures" },
   { "alphaFeatureHeadlineView" },
   { "alphaFeatureAuraWidget2" },
   -- { "alphaFriendlyNameOnly" },
+  -- { "HeadlineView", "name", "width" },  -- in a future release
+  -- { "HeadlineView", "name", "height" }, -- in a future release
 }
 
 local function MigrateDatabase()

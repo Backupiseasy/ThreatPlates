@@ -121,7 +121,7 @@ ThreatPlates.FRIENDLY_TEXT_COLOR = {
 -- NPC Role, Guild, or Quest", "Quest",
 ThreatPlates.ENEMY_SUBTEXT = {
   NONE = "None",
-  HEALTH = "Percent Health",
+  HEALTH = "Health",
   ROLE = "NPC Role",
   ROLE_GUILD = "NPC Role, Guild",
   ROLE_GUILD_LEVEL = "NPC Role, Guild, or Level",
@@ -132,7 +132,7 @@ ThreatPlates.ENEMY_SUBTEXT = {
 -- "NPC Role, Guild, or Quest", "Quest"
 ThreatPlates.FRIENDLY_SUBTEXT = {
   NONE = "None",
-  HEALTH = "Percent Health",
+  HEALTH = "Health",
   ROLE = "NPC Role",
   ROLE_GUILD = "NPC Role, Guild",
   ROLE_GUILD_LEVEL = "NPC Role, Guild, or Level",
@@ -293,10 +293,21 @@ ThreatPlates.DEFAULT_SETTINGS = {
       ON = false,
       name = {
         size = 10,
-        width = 140, -- old default: 116,
-        height = 14,
+        -- width = 140, -- same as for healthbar view -- old default: 116,
+        -- height = 14, -- same as for healthbar view
         x = 0,
         y = 4,
+        align = "CENTER",
+        vertical = "CENTER",
+      },
+      customtext = {
+        size = 8,
+        -- shadow = true,  -- never used
+        -- flags = "NONE", -- never used
+        -- width = 140,    -- never used, same as for healthbar view
+        -- height = 14,    -- never used, same as for healthbar view
+        x = 0,
+        y = -6,
         align = "CENTER",
         vertical = "CENTER",
       },
@@ -1507,7 +1518,12 @@ ThreatPlates.DEFAULT_SETTINGS = {
         vertical = "CENTER",
         shadow = true,
         flags = "NONE",
-        show = true,
+        --
+        FriendlySubtext = "HEALTH",
+        EnemySubtext = "HEALTH",
+        SubtextColorUseHeadline = false,
+        SubtextColorUseSpecific = false,
+        SubtextColor =  RGB(255, 255, 255, 1),
       },
       spelltext = {
         typeface = DEFAULT_FONT, -- old default: "Accidental Presidency",

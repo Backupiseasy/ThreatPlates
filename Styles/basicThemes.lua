@@ -145,7 +145,7 @@ local function Create(self,name)
       vertical = db.customtext.vertical,
       shadow = db.customtext.shadow,
       flags = db.customtext.flags,
-      show = db.customtext.show,
+      show = true,
     },
     spelltext = {
       typeface = ThreatPlates.Media:Fetch('font', db.spelltext.typeface),
