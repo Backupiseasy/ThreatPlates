@@ -22,8 +22,8 @@ local string = string
 local TidyPlatesThreat = TidyPlatesThreat
 local RGB = ThreatPlates.RGB
 local RGB_P = ThreatPlates.RGB_P
-local GetColorByHealthDeficit = ThreatPlates.GetColorByHealthDeficit
 local SetStyle = TidyPlatesThreat.SetStyle
+local GetColorByHealthDeficit = ThreatPlates.GetColorByHealthDeficit
 
 ---------------------------------------------------------------------------------------------------
 -- Functions for subtext from TidyPlates

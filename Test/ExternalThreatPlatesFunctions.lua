@@ -17,14 +17,14 @@ end
 
 ThreatPlates.L = {}
 
-TidyPlatesThreat.IsFriend = function(unit)
+ThreatPlates.IsFriend = function(unit)
   return unit.Test_IsFriend
 end
 
-TidyPlatesThreat.IsGuildmate = function(unit)
+ThreatPlates.IsGuildmate = function(unit)
   return unit.Test_IsGuildmate
 end
 
-function GetColorByHealthDeficit(unit)
+ThreatPlates.GetColorByHealthDeficit = function(unit)
   return ThreatPlates.RGB(230, 100, 0, 1)
 end

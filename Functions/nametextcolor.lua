@@ -8,9 +8,11 @@ local UnitIsConnected = UnitIsConnected
 local RAID_CLASS_COLORS = RAID_CLASS_COLORS
 
 local TidyPlatesThreat = TidyPlatesThreat
+local GetColorByHealthDeficit = ThreatPlates.GetColorByHealthDeficit
 local SetStyle = TidyPlatesThreat.SetStyle
 local GetUniqueNameplateSetting = ThreatPlates.GetUniqueNameplateSetting
-local GetColorByHealthDeficit = ThreatPlates.GetColorByHealthDeficit
+local IsFriend
+local IsGuildmate
 
 local reference = {
 	FRIENDLY = { NPC = "FriendlyNPC", PLAYER = "FriendlyPlayer", },
@@ -19,10 +21,8 @@ local reference = {
 }
 
 local function SetNameColor(unit)
-  local IsFriend = TidyPlatesThreat.IsFriend
-  local IsGuildmate = TidyPlatesThreat.IsGuildmate
-
   local style = unit.TP_Style or SetStyle(unit)
+  local unique_setting = unit.TP_UniqueSetting or GetUniqueNameplateSetting(unit)
 
   local db = TidyPlatesThreat.db.profile
   local db_mode = db.settings.name
@@ -31,7 +31,7 @@ local function SetNameColor(unit)
   end
 
   local color
-  local unique_setting = GetUniqueNameplateSetting(unit)
+  -- local unique_setting = GetUniqueNameplateSetting(unit)
   if unit.isMarked then
     if style == "NameOnly-Unique" and unique_setting.useColor then
       if unique_setting.allowMarked then
@@ -47,6 +47,9 @@ local function SetNameColor(unit)
   local unit_reaction = unit.reaction
   local db_color = db.ColorByReaction
   local mode = (unit_reaction == "FRIENDLY" and db_mode.FriendlyTextColorMode) or db_mode.EnemyTextColorMode
+
+  IsFriend = IsFriend or ThreatPlates.IsFriend
+  IsGuildmate = IsGuildmate or ThreatPlates.IsGuildmate
 
   if style == "NameOnly-Unique" and unique_setting.useColor then
     color = unique_setting.color

@@ -4,8 +4,21 @@ local ThreatPlates = NAMESPACE.ThreatPlates
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
+local DebuffTypeColor = DebuffTypeColor
+local UnitAura = UnitAura
+local CreateFrame = CreateFrame
+local GetFramerate = GetFramerate
+
+local TidyPlatesThreat = TidyPlatesThreat
 local RGB = ThreatPlates.RGB
 local DEBUG = ThreatPlates.DEBUG
+
+local GetTime = GetTime
+local pairs = pairs
+local floor = floor
+local sort = sort
+local math = math
+local tonumber = tonumber
 
 ---------------------------------------------------------------------------------------------------
 -- Aura Widget 2.0

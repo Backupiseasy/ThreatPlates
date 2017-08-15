@@ -8,6 +8,7 @@ local UnitIsConnected = UnitIsConnected
 local UnitIsUnit = UnitIsUnit
 local UnitGroupRolesAssigned = UnitGroupRolesAssigned
 local RAID_CLASS_COLORS = RAID_CLASS_COLORS
+
 local floor = floor
 local abs = abs
 
@@ -15,6 +16,8 @@ local TOTEMS = ThreatPlates.TOTEMS
 local OnThreatTable = ThreatPlates.OnThreatTable
 local RGB = ThreatPlates.RGB
 local RGB_P = ThreatPlates.RGB_P
+local IsFriend
+local IsGuildmate
 
 local reference = {
   FRIENDLY = { NPC = "FriendlyNPC", PLAYER = "FriendlyPlayer", },
@@ -103,9 +106,6 @@ local function GetColorByHealthDeficit(unit)
 end
 
 local function GetColorByClass(unit)
-  local IsFriend = TidyPlatesThreat.IsFriend
-  local IsGuildmate = TidyPlatesThreat.IsGuildmate
-
   local unit_type = unit.type
   local unit_reaction = unit.reaction
   local unit_class = unit.class
@@ -116,6 +116,9 @@ local function GetColorByClass(unit)
     if unit_reaction == "HOSTILE" and db.allowClass then
       c = RAID_CLASS_COLORS[unit_class]
     elseif unit_reaction == "FRIENDLY" then
+      IsFriend = IsFriend or ThreatPlates.IsFriend
+      IsGuildmate = IsGuildmate or ThreatPlates.IsGuildmate
+
       local db_social = db.socialWidget
       if db_social.ShowFriendColor and IsFriend(unit) then
         c = db_social.FriendColor
