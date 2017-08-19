@@ -1,4 +1,9 @@
 ------------------------------------------------------
+8.4.3-Beta5 (works with TidyPlates 6.18.11)
+------------------------------------------------------
+* Fixed a LUA error in combo point widget in certain situations when combo points were updated.
+
+------------------------------------------------------
 8.4.3-Beta4 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
 * Added an option to choose and color status text (health text) in healthbar view the same way as in headline view (see Nameplate Settings - Status Text) [Comment #464].
