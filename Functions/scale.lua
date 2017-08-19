@@ -16,30 +16,33 @@ local SetStyle = TidyPlatesThreat.SetStyle
 local function GetGeneralScale(unit)
 	local db = TidyPlatesThreat.db.profile.nameplate
 
-	--local unit_type = GetDetailedUnitType(unit)
-	local unit_type = unit.TP_DetailedUnitType
-  local scale = db.scale[unit_type] or 1 -- This should also return for totems.
-
 	-- Do checks for target settings, must be spelled out to avoid issues
 	local target_exists = UnitExists("target")
 	if (target_exists and unit.isTarget) and db.toggle.TargetS then
-		scale = db.scale.Target
+		return db.scale.Target
 	elseif not target_exists and db.toggle.NoTargetS then
 		if unit.isMarked and db.toggle.MarkedS then
-			scale = db.scale.Marked
+			return db.scale.Marked
 		else
-			scale = db.scale.NoTarget
+			return db.scale.NoTarget
 		end
-	else -- units will always be set to this scale
-		if unit.isMarked and db.toggle.MarkedS then
-			scale = db.scale.Marked
-		elseif unit.isCasting and db.toggle.CastingUnitScale then
-			scale = db.scale.CastingUnit
-    elseif unit.isMouseover and db.toggle.MouseoverUnitScale then
-      scale = db.scale.MouseoverUnit
+  end
+
+  -- units will always be set to this scale
+  if unit.isMarked and db.toggle.MarkedS then
+    return db.scale.Marked
+  elseif unit.isMouseover and db.toggle.MouseoverUnitScale then
+    return db.scale.MouseoverUnit
+  elseif unit.isCasting then
+    local unit_friendly = (unit.reaction == "FRIENDLY")
+    if unit_friendly and db.toggle.CastingUnitScale then
+      return db.scale.CastingUnit
+    elseif not unit_friendly and db.toggle.CastingEnemyUnitScale then
+      return db.scale.CastingEnemyUnit
     end
   end
-	return scale
+
+  return db.scale[unit.TP_DetailedUnitType] or 1 -- This should also return for totems.
 end
 
 local function GetThreatScale(unit)
@@ -58,57 +61,46 @@ end
 
 local function ScaleNormal(unit, override_scale)
 	local db = TidyPlatesThreat.db.profile.threat
-	local scale
 
 	if InCombatLockdown() and db.ON and db.useScale then
 		-- use general scale, if threat scaling is disabled for marked units
 		if unit.isMarked and db.marked.scale then
-			scale = override_scale or GetGeneralScale(unit)
+			return override_scale or GetGeneralScale(unit)
 		else
 			if ShowThreatFeedback(unit) then
-				scale = GetThreatScale(unit)
-			else
-				scale = override_scale or GetGeneralScale(unit)
+				return GetThreatScale(unit)
 			end
 		end
- 	else
-		scale = override_scale or GetGeneralScale(unit)
 	end
 
-	return scale
+  return override_scale or GetGeneralScale(unit)
 end
 
 local function ScaleUnique(unit)
 	local unique_setting = GetUniqueNameplateSetting(unit)
-	local scale
 
 	if unique_setting.overrideScale then
-		scale = ScaleNormal(unit)
+		return  ScaleNormal(unit)
 	elseif unique_setting.UseThreatColor then
-		scale = ScaleNormal(unit, unique_setting.scale)
-	else
-		scale = unique_setting.scale
-	end
+		return ScaleNormal(unit, unique_setting.scale)
+  end
 
-	return scale
+  return unique_setting.scale
 end
 
 local function ScaleUniqueNameOnly(unit)
 	local db = TidyPlatesThreat.db.profile.HeadlineView
 	local unique_setting = GetUniqueNameplateSetting(unit)
-	local scale = 1
 
 	if unique_setting.overrideScale then
 		if db.useScaling then
-			scale = ScaleNormal(unit)
+			return ScaleNormal(unit)
 		end
 	elseif unique_setting.UseThreatColor then
-		scale = ScaleNormal(unit, unique_setting.scale)
-	else
-		scale = unique_setting.scale
-	end
+		return ScaleNormal(unit, unique_setting.scale)
+  end
 
-	return scale
+  return unique_setting.scale
 end
 
 local function ScaleEmpty(unit)
@@ -117,13 +109,12 @@ end
 
 local function ScaleNameOnly(unit)
 	local db = TidyPlatesThreat.db.profile.HeadlineView
-	local scale = 1
 
 	if db.useScaling then
-		scale = ScaleNormal(unit)
+		return ScaleNormal(unit)
 	end
 
-	return scale
+	return 1
 end
 
 local SCALE_FUNCTIONS = {
@@ -148,11 +139,12 @@ local function SetScale(unit)
 	--nonTargetScale = db.blizzFadeS.amount
 	--end
 
-	local scale = SCALE_FUNCTIONS[style](unit)
+  local scale_func = SCALE_FUNCTIONS[style]
+  local scale = scale_func(unit)
 
 	-- scale may be set to 0 in the options dialog
 	if scale <= 0 then
-		scale = 0.01
+		return 0.01
 	end
 
 	return scale -- + nonTargetScale
