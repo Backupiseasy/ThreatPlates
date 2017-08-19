@@ -133,7 +133,6 @@ local function OnUpdate(plate, unit)
       if style == "NameOnly" or style == "NameOnly-Unique" then
         if show_headline_view then
           if not v.isContext then
-            unit.TP_Style = style
             widget:Update(unit)
             if unit.isTarget then	plate:SetFrameStrata("LOW") else plate:SetFrameStrata("BACKGROUND")	end
           end
@@ -145,7 +144,6 @@ local function OnUpdate(plate, unit)
       elseif show_healthbar_view then -- any other style
         -- context means that widget is only relevant for target (or mouse-over)
         if not v.isContext then
-          unit.TP_Style = style
           widget:Update(unit)
           if unit.isTarget then	plate:SetFrameStrata("LOW") else plate:SetFrameStrata("BACKGROUND") end
         end
