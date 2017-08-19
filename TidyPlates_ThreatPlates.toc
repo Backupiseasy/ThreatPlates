@@ -1,6 +1,6 @@
 ﻿## Interface: 70200
 ## Title: Tidy Plates: |cff89F559Threat Plates|r
-## Version: 8.4.3-Beta5
+## Version: 8.4.3-Beta6
 ## Notes: Tidy Plates theme for threat reactive nameplates.
 ## Notes-deDE: Tidy-Plates-Design für bedrohungsreaktive Namensplaketten.
 ## Author: Suicidal Katt, Blacksalsify

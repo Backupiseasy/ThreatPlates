@@ -7,6 +7,7 @@ local t = ns.ThreatPlates
 local LibStub = LibStub
 
 local UnitIsUnit = UnitIsUnit
+local UnitReaction = UnitReaction
 
 local RGB = t.RGB
 local RGB_P = t.RGB_P
@@ -459,9 +460,21 @@ end
 local function FrameOnShow(self)
   --if not self.carrier and InterfaceOptionsNamesPanelUnitNameplatesMakeLarger:GetValue() ~= "1" then
 
-  if not self.carrier and not UnitIsUnit(self.unit, "player") then
+  -- if not self.carrier and not UnitIsUnit(self.unit, "player") then
+  -- not self:GetParent().carrier and
+  if not self.unit or not UnitIsUnit(self.unit, "player") then
     -- hide blizzard's nameplate
-    self:Hide()
+    if not TidyPlatesThreat.db.profile.ShowFriendlyBlizzardNameplates then
+      self:Hide()
+      return
+    end
+
+    local unit = self.unit
+    local show = unit and UnitReaction(unit, "player") > 4
+    if show then
+      self:Show()
+      return
+    end
   end
 end
 
@@ -469,12 +482,28 @@ local function FrameOnUpdate(self)
   local frame_level = self:GetFrameLevel() * 2
   self.carrier:SetFrameLevel(frame_level)
   self.extended:SetFrameLevel(frame_level)
+
+  if not TidyPlatesThreat.db.profile.ShowFriendlyBlizzardNameplates then return end
+
+  local unit = self.UnitFrame.unit
+  local show = unit and UnitReaction(unit, "player") > 4
+  if show then
+    self:GetChildren():Show()
+    self.carrier:Hide()
+  end
 end
 
-------------
---local function FrameOnHide(self)
---  --print ("Hook OnHide: ")
---end
+local function FrameOnHide(self)
+  if not TidyPlatesThreat.db.profile.ShowFriendlyBlizzardNameplates then return end
+
+  local unit = self.unit
+  local show = unit and UnitReaction(unit, "player") > 4
+
+  if show then
+    self:Show()
+    self:GetParent().carrier:Hide()
+  end
+end
 
 -- Preventing WoW from re-showing Blizzard nameplates in certain situations
 -- e.g., press ESC, got to Interface, Names, press ESC and voila!
@@ -482,7 +511,8 @@ end
 function TidyPlatesThreat:NAME_PLATE_CREATED(event, plate)
   if plate.UnitFrame then
     plate.UnitFrame:HookScript('OnShow',FrameOnShow)
+    plate.UnitFrame:HookScript('OnHide',FrameOnHide)
   end
-  --plate:HookScript('OnHide',FrameOnHide)
+
   plate:HookScript('OnUpdate', FrameOnUpdate)
 end

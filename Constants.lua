@@ -289,6 +289,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
     ShowThreatGlowOffTank = true,
     NamePlateEnemyClickThrough = false,
     NamePlateFriendlyClickThrough = false,
+    ShowFriendlyBlizzardNameplates = false,
     HeadlineView = {
       ON = false,
       name = {

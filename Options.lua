@@ -231,7 +231,7 @@ local function GetUnitVisibilitySetting(info)
   local unit_visibility = TidyPlatesThreat.db.profile.Visibility[unit_type].Show
 
   if type(unit_visibility)  ~= "boolean" then
-    unit_visibility = (GetCVar(unit_visibility) == "1")
+    unit_visibility = GetCVarBool(unit_visibility)
   end
 
   return unit_visibility
@@ -1088,10 +1088,57 @@ local function CreateTabGeneralSettings()
     type = "group",
     order = 10,
     args = {
+      GeneralUnits = {
+        name = L["General Nameplate Settings"],
+        order = 10,
+        type = "group",
+        inline = true,
+        width = "full",
+        get = GetCvar,
+        set = SetCvar,
+        args = {
+          Description = GetDescriptionEntry(L["These options allow you to control which nameplates are visible within the game field while you play."]),
+          Spacer0 = GetSpacerEntry(1),
+          AllUnits = { name = L["Enable Nameplates"], order = 10, type = "toggle", arg = "nameplateShowAll" },
+          AllUnitsDesc = { name = L["Show all nameplates (CTRL-V)."], order = 15, type = "description", width = "double", },
+          Spacer1 = { type = "description", name = "", order = 19, },
+          AllFriendly = { name = L["Enable Friendly"], order = 20, type = "toggle", arg = "nameplateShowFriends", disabled = function() return not GetWoWCVar("nameplateShowAll") end },
+          AllFriendlyDesc = { name = L["Show friendly nameplates (SHIFT-V)."], order = 25, type = "description", width = "double", },
+          Spacer2 = { type = "description", name = "", order = 29, },
+          AllHostile = { name = L["Enable Enemy"], order = 30, type = "toggle", arg = "nameplateShowEnemies", disabled = function() return not GetWoWCVar("nameplateShowAll") end },
+          AllHostileDesc = { name = L["Show enemy nameplates (ALT-V)."], order = 35, type = "description", width = "double", },
+          Header = { type = "header", order = 40, name = "", },
+          ShowBlizzardFriendlyNameplates = {
+            --name = L["Hide Friendly Units"],
+            name = L["Show Blizzard Nameplates for Friendly Units"],
+            order = 50,
+            type = "toggle",
+            width = "double",
+            set = SetValue,
+            get = GetValue,
+            desc = L["Use Blizzard default nameplates for friendly nameplates and disable ThreatPlates for these units."],
+            arg = { "ShowFriendlyBlizzardNameplates" },
+          },
+        },
+      },
+      SpecialUnits = {
+        name = L["Hide Special Units"],
+        type = "group",
+        order = 50,
+        inline = true,
+        width = "full",
+        disabled = function() return not GetWoWCVar("nameplateShowAll") end,
+        args = {
+          HideNormal = { name = L["Normal Units"], order = 1, type = "toggle", arg = { "Visibility", "HideNormal" }, },
+          HideElite = { name = L["Rares & Elites"], order = 2, type = "toggle", arg = { "Visibility", "HideElite" }, },
+          HideBoss = { name = L["Bosses"], order = 3, type = "toggle", arg = { "Visibility", "HideBoss" }, },
+          HideTapped = { name = L["Tapped Units"], order = 4, type = "toggle", arg = { "Visibility", "HideTapped" }, },
+        },
+      },
       TidyPlates = {
         name = L["Tidy Plates Fading"],
         type = "group",
-        order = 10,
+        order = 60,
         inline = true,
         args = {
           Enable = {
@@ -1109,48 +1156,10 @@ local function CreateTabGeneralSettings()
           },
         },
       },
-      GeneralUnits = {
-        name = L["General Nameplate Settings"],
-        order = 20,
-        type = "group",
-        inline = true,
-        width = "full",
---        get = GetCVarSettingSync,
---        set = SetCVarSettingSync,
-        get = GetCvar,
-        set = SetCvar,
-        args = {
-          Description = GetDescriptionEntry(L["These options allow you to control which nameplates are visible within the game field while you play."]),
-          Spacer0 = GetSpacerEntry(1),
-          AllUnits = { name = L["Enable Nameplates"], order = 10, type = "toggle", arg = "nameplateShowAll" },
-          AllUnitsDesc = { name = L["Show all nameplates (CTRL-V)."], order = 15, type = "description", width = "double", },
-          Spacer1 = { type = "description", name = "", order = 19, },
-          AllFriendly = { name = L["Enable Friendly"], order = 20, type = "toggle", arg = "nameplateShowFriends", disabled = function() return not GetWoWCVar("nameplateShowAll") end },
-          AllFriendlyDesc = { name = L["Show friendly nameplates (SHIFT-V)."], order = 25, type = "description", width = "double", },
-          Spacer2 = { type = "description", name = "", order = 29, },
-          AllHostile = { name = L["Enable Enemy"], order = 30, type = "toggle", arg = "nameplateShowEnemies", disabled = function() return not GetWoWCVar("nameplateShowAll") end },
-          AllHostileDesc = { name = L["Show enemy nameplates (ALT-V)."], order = 35, type = "description", width = "double", },
-        },
-      },
-      -- TidyPlatesHub calls this Unit Filter
-      SpecialUnits = {
-        name = L["Hide Special Units"],
-        type = "group",
-        order = 90,
-        inline = true,
-        width = "full",
-        disabled = function() return not GetWoWCVar("nameplateShowAll") end,
-        args = {
-          HideNormal = { name = L["Normal Units"], order = 1, type = "toggle", arg = { "Visibility", "HideNormal" }, },
-          HideElite = { name = L["Rares & Elites"], order = 2, type = "toggle", arg = { "Visibility", "HideElite" }, },
-          HideBoss = { name = L["Bosses"], order = 3, type = "toggle", arg = { "Visibility", "HideBoss" }, },
-          HideTapped = { name = L["Tapped Units"], order = 4, type = "toggle", arg = { "Visibility", "HideTapped" }, },
-        },
-      },
       Clickthrough = {
         name = L["Nameplate Clickthrough"],
         type = "group",
-        order = 100,
+        order = 70,
         inline = true,
         width = "full",
         disabled = function() return not GetWoWCVar("nameplateShowAll") end,
@@ -1179,19 +1188,40 @@ local function CreateTabGeneralSettings()
           },
         },
       },
---      OpenBlizzardSettings = {
---        name = L["Open Blizzard Settings"],
---        order = 90,
---        type = "execute",
---        func = function()
---          InterfaceOptionsFrame_OpenToCategory(_G["InterfaceOptionsNamesPanel"])
---          LibStub("AceConfigDialog-3.0"):Close("Tidy Plates: Threat Plates");
---        end,
+--      Blizzard = {
+--        name = L["Blizzard Nameplates"],
+--        type = "group",
+--        order = 80,
+--        inline = true,
+--        width = "full",
+--        disabled = function() return not GetWoWCVar("nameplateShowAll") end,
+--        args = {
+--          HideFriendlyNameplates = {
+--            --name = L["Hide Friendly Units"],
+--            name = L["Blizzard Nameplates for Friendly Units"],
+--            order = 50,
+--            type = "toggle",
+--            width = "double",
+--            set = SetValue,
+--            get = GetValue,
+--            desc = L["Use Blizzard default nameplates for friendly nameplates and disable ThreatPlates for these units."],
+--            arg = { "ShowFriendlyBlizzardNameplates" },
+--          },
+--        },
 --      },
     },
   }
+  --      OpenBlizzardSettings = {
+  --        name = L["Open Blizzard Settings"],
+  --        order = 90,
+  --        type = "execute",
+  --        func = function()
+  --          InterfaceOptionsFrame_OpenToCategory(_G["InterfaceOptionsNamesPanel"])
+  --          LibStub("AceConfigDialog-3.0"):Close("Tidy Plates: Threat Plates");
+  --        end,
+  --      },
 
-  CreateUnitGroupsVisibility(args.args, 30)
+  CreateUnitGroupsVisibility(args.args, 20)
 
   return args
 end
