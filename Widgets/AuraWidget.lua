@@ -8,8 +8,10 @@ local DebuffTypeColor = DebuffTypeColor
 local UnitAura = UnitAura
 local CreateFrame = CreateFrame
 local GetFramerate = GetFramerate
+local UnitIsFriend = UnitIsFriend
 
 local TidyPlatesThreat = TidyPlatesThreat
+
 local RGB = ThreatPlates.RGB
 local DEBUG = ThreatPlates.DEBUG
 
@@ -18,6 +20,7 @@ local pairs = pairs
 local floor = floor
 local sort = sort
 local math = math
+local string = string
 local tonumber = tonumber
 
 ---------------------------------------------------------------------------------------------------
@@ -52,9 +55,8 @@ local CONFIG_AuraWidgetHeight
 local CONFIG_AuraWidgetWidth
 local CONFIG_AuraWidgetOffset
 local Filter_ByAuraList
-
-local AURA_TARGET_HOSTILE = 1
-local AURA_TARGET_FRIENDLY = 2
+local AURA_FILTER_FRIENDLY = ""
+local AURA_FILTER_ENEMY = ""
 
 local AURA_TYPE_BUFF = 1
 local AURA_TYPE_DEBUFF = 6
@@ -262,15 +264,6 @@ local PRIORITY_FUNCTIONS = {
 local function AuraFilterFunction(aura)
   local db = TidyPlatesThreat.db.profile.AuraWidget
 
-  local isShown
-  if aura.reaction == AURA_TARGET_HOSTILE and db.ShowEnemy then
-    isShown = true
-  elseif aura.reaction == AURA_TARGET_FRIENDLY and db.ShowFriendly then
-    isShown = true
-  end
-
-  if not isShown then return false, nil, nil end
-
   local isType
   if aura.effect == "HELPFUL" and db.FilterByType[AURA_TYPE.Buff] then
     isType = true
@@ -286,10 +279,18 @@ local function AuraFilterFunction(aura)
   if not isType then return false, nil, nil  end
 
   local mode = db.FilterMode
-  local spellfound = Filter_ByAuraList[aura.name] or Filter_ByAuraList[aura.spellid]
-  local isMine = (aura.caster == "player") or (aura.caster == "pet")
+  local isMine = aura.caster == "player" or aura.caster == "pet" or aura.caster == "vehicle"
 
-  local show_aura = FILTER_FUNCTIONS[mode](spellfound, isMine)
+  local show_aura
+  if mode == "BLIZZARD" then
+    show_aura = aura.show_all or (aura.show_personal and isMine)
+  else
+    local spellfound = Filter_ByAuraList[aura.name] or Filter_ByAuraList[aura.spellid]
+
+    local filter_func = FILTER_FUNCTIONS[mode]
+    show_aura = filter_func(spellfound, isMine)
+  end
+
   if not show_aura then return show_aura, nil, nil end
 
   local color = GetColorForAura(aura)
@@ -427,11 +428,28 @@ end
 local function UpdateIconGrid(frame, unitid)
   if not unitid then return end
 
-  local unitReaction
-  if UnitIsFriend("player", unitid) then
-    unitReaction = AURA_TARGET_FRIENDLY
+  local db = TidyPlatesThreat.db.profile.AuraWidget
+  local BLIZZARD_ShowAll = false
+
+  local aura_filter = "NONE"
+  local unit_is_friend = UnitIsFriend("player", unitid)
+  if unit_is_friend then
+    if db.ShowFriendly then
+      aura_filter = AURA_FILTER_FRIENDLY
+      BLIZZARD_ShowAll = (AURA_FILTER_FRIENDLY == '|RAID')
+    end
   else
-    unitReaction = AURA_TARGET_HOSTILE
+    if db.ShowEnemy then
+      aura_filter = AURA_FILTER_ENEMY
+    end
+  end
+
+  local aura_frame_list = frame.AuraFrames
+  if aura_filter == "NONE" then
+    for index = 1, CONFIG_AuraLimit do
+      PolledHideIn(aura_frame_list[index])
+    end
+    return
   end
 
   -- Cache displayable auras
@@ -439,12 +457,11 @@ local function UpdateIconGrid(frame, unitid)
   -- This block will go through the auras on the unit and make a list of those that should
   -- be displayed, listed by priority.
   local searchedDebuffs, searchedBuffs = false, false
-  local auraFilter = "HARMFUL"
 
   --  GetUnitAuras(UnitAuraList2, unitReaction, unitid, "HARMFUL")
   --  GetUnitAuras(UnitAuraList2, unitReaction, unitid, "HELPFUL")
 
-  local sort_order = TidyPlatesThreat.db.profile.AuraWidget.SortOrder
+  local sort_order = db.SortOrder
   if sort_order ~= "None" then
     UnitAuraList = {}
   end
@@ -452,10 +469,12 @@ local function UpdateIconGrid(frame, unitid)
   local aura
   local aura_count = 1
   local index = 0
+
+  local effect = "HARMFUL"
   repeat
     index = index + 1
     -- Example: Gnaw , false, icon, 0 stacks, nil type, duration 1, expiration 8850.436, caster pet, false, false, 91800
-    local name, _, icon, stacks, auraType, duration, expiration, caster, _, _, spellid = UnitAura(unitid, index, auraFilter)		-- UnitaAura
+    local name, _, icon, stacks, auraType, duration, expiration, caster, _, nameplateShowPersonal, spellid, _, _, _, nameplateShowAll = UnitAura(unitid, index, effect .. aura_filter)
 
     -- Auras are evaluated by an external function
     -- Pre-filtering before the icon grid is populated
@@ -468,10 +487,12 @@ local function UpdateIconGrid(frame, unitid)
       aura.texture = icon
       aura.stacks = stacks
       aura.type = auraType
-      aura.effect = auraFilter
+      aura.effect = effect
       aura.duration = duration
-      aura.reaction = unitReaction
+      --aura.reaction = unitReaction
       aura.expiration = expiration
+      aura.show_personal = nameplateShowPersonal
+      aura.show_all = nameplateShowAll or BLIZZARD_ShowAll --(unitReaction == AURA_TARGET_FRIENDLY and aura_filter == "|RAID")
       aura.caster = caster
       aura.spellid = spellid
       aura.unit = unitid 		-- unitid of the plate
@@ -486,9 +507,11 @@ local function UpdateIconGrid(frame, unitid)
         --UnitAuraList[aura_count] = aura
       end
     else
-      if auraFilter == "HARMFUL" then
+      if db.FilterMode == "BLIZZARD" then break end -- skip HELPFUL auras
+
+      if not searchedDebuffs then
         searchedDebuffs = true
-        auraFilter = "HELPFUL"
+        effect = "HELPFUL"
         index = 0
       else
         searchedBuffs = true
@@ -514,8 +537,10 @@ local function UpdateIconGrid(frame, unitid)
   aura_count = aura_count - 1
 
   -- Display Auras
-  local aura_frame_list = frame.AuraFrames
-  local max_auras_no = min(aura_count, CONFIG_AuraLimit)
+  local max_auras_no = aura_count -- min(aura_count, CONFIG_AuraLimit)
+  if CONFIG_AuraLimit < max_auras_no then
+    max_auras_no = CONFIG_AuraLimit
+  end
 
   if aura_count > 0 then
     if sort_order ~= "None" then
@@ -527,13 +552,12 @@ local function UpdateIconGrid(frame, unitid)
     end
 
     local index_start, index_end, index_step
-    if TidyPlatesThreat.db.profile.AuraWidget.SortReverse then
+    if db.SortReverse then
       index_start, index_end, index_step = max_auras_no, 1, -1
     else
       index_start, index_end, index_step = 1, max_auras_no, 1
     end
 
-    --ThreatPlates.DEBUG_AURA_LIST(UnitAuraList)
     aura_count = 1
     for index = index_start, index_end, index_step do
       local aura = UnitAuraList[index]
@@ -553,7 +577,7 @@ local function UpdateIconGrid(frame, unitid)
         aura_info.color = aura.color
 
         -- Call function to display the aura
-        UpdateAuraInformation(aura_frame) -- aura.texture, aura.duration, aura.expiration, aura.stacks, aura.color, aura.name)
+        UpdateAuraInformation(aura_frame)
       end
     end
 
@@ -561,7 +585,6 @@ local function UpdateIconGrid(frame, unitid)
 
   -- Clear extra slots
   for index = max_auras_no + 1, CONFIG_AuraLimit do
-    --UpdateAuraFrame(aura_frame_list[index])
     PolledHideIn(aura_frame_list[index])
   end
 end
@@ -1067,10 +1090,6 @@ local function PrepareFilter()
     end
   end
 
---  print ("Filter_ByAuraList:")
---  for key, value in pairs(Filter_ByAuraList) do
---    print (key,":", value)
---  end
   ConfigLastUpdate = GetTime()
 end
 
@@ -1125,6 +1144,21 @@ local function ConfigAuraWidget()
   CONFIG_AuraLimit = CONFIG_GridNoRows * CONFIG_GridNoCols
   CONFIG_AuraWidth = CONFIG_AuraWidth + CONFIG_GridSpacingCols
   CONFIG_AuraHeight = CONFIG_AuraHeight + CONFIG_GridSpacingRows
+
+
+  if db.FilterMode == "BLIZZARD" then
+    -- Blizzard default is
+    --   UnitReaction <=4: filter = "HARMFUL|INCLUDE_NAME_PLATE_ONLY"
+    --   UnitReaction >4: filter = "NONE" or filter = "HARMFUL|RAID" (with showAll) if nameplateShowDebuffsOnFriendly == true (for 7.3)
+    AURA_FILTER_ENEMY = "|INCLUDE_NAME_PLATE_ONLY"
+    AURA_FILTER_FRIENDLY = (db.ShowDebuffsOnFriendly and '|RAID') or "NONE"
+  elseif string.find(db.FilterMode, "Mine") then
+    AURA_FILTER_ENEMY = "|PLAYER"
+    AURA_FILTER_FRIENDLY = "|PLAYER"
+  else
+    AURA_FILTER_ENEMY = ""
+    AURA_FILTER_FRIENDLY = ""
+  end
 
 	ConfigLastUpdate = GetTime()
 end
