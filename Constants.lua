@@ -76,7 +76,8 @@ ThreatPlates.DebuffMode = {
   ["whitelistMine"] = L["White List (Mine)"],
   ["blacklistMine"] = L["Black List (Mine)"],
   ["all"] = L["All Auras"],
-  ["allMine"] = L["All Auras (Mine)"]
+  ["allMine"] = L["All Auras (Mine)"],
+  ["BLIZZARD"] = L["Blizzard"]
 }
 
 ThreatPlates.SPEC_ROLES = {
@@ -483,6 +484,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
         [5] = true,
         [6] = true
       },
+      ShowDebuffsOnFriendly = false,
       FilterBySpell = {},
       ShowTargetOnly = false,
       ShowCooldownSpiral = false,

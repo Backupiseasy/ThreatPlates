@@ -2,6 +2,7 @@
 8.4.3-Beta5 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
 * Fixed a LUA error in combo point widget in certain situations when combo points were updated.
+* Added new filter mode Blizzard for aura widget 2.0 which uses WoWs internal debuff filtering. Also, added a new option for this filter to show dispellable debuffs on friendly units [Ticket #131].
 
 ------------------------------------------------------
 8.4.3-Beta4 (works with TidyPlates 6.18.11)

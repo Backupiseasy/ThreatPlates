@@ -3973,7 +3973,7 @@ local function CreateOptionsTable()
                     Show = {
                       name = L["Filter by Unit Reaction"],
                       type = "group",
-                      order = 2,
+                      order = 10,
                       inline = true,
                       args = {
                         ShowFriendly = {
@@ -3993,7 +3993,7 @@ local function CreateOptionsTable()
                     Display = {
                       name = L["Filter by Dispel Type"],
                       type = "multiselect",
-                      order = 3,
+                      order = 20,
                       values = {
                         [1] = "Buff",
                         [2] = "Curse",
@@ -4011,9 +4011,32 @@ local function CreateOptionsTable()
                         TidyPlates:ForceUpdate()
                       end,
                     },
+                    SpecialFilter = {
+                      name = L["Blizzard Filter Options"],
+                      order = 30,
+                      type = "group",
+                      inline = true,
+                      args = {
+                        ShowDebuffsOnFriendly = {
+                          name = L["Debuffs On Friendly Units"],
+                          order = 10,
+                          type = "toggle",
+                          width = "double",
+                          desc = L["Show all debuffs on friendly units that you can cure."],
+                          arg = { "AuraWidget", "ShowDebuffsOnFriendly" },
+                        },
+                        --                            ShowBuffsOnBosses = {
+                        --                              name = L["Show Buffs on Bosses"],
+                        --                              order = 20,
+                        --                              type = "toggle",
+                        --                              width = "double",
+                        --                              arg = { "AuraWidget", "ShowDebuffsOnFriendly" },
+                        --                            },
+                      },
+                    },
                     Filtering = {
                       name = L["Filter by Spell"],
-                      order = 30,
+                      order = 40,
                       type = "group",
                       inline = true,
                       args = {
@@ -4030,6 +4053,7 @@ local function CreateOptionsTable()
                           type = "input",
                           order = 2,
                           dialogControl = "MultiLineEditBox",
+                          disabled = function() return db.AuraWidget.FilterMode == "BLIZZARD" end,
                           width = "full",
                           get = function(info) return t.TTS(db.AuraWidget.FilterBySpell) end,
                           set = function(info, v)
