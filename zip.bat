@@ -47,7 +47,7 @@ EXIT /B %ERRORLEVEL%
 :Install-to-Plain
 set SOURCE=%BATCH_DIR%
 set TP_PACKAGE=%TP_PATH%\ThreatPlates_plain.zip
-DEL /S /Q /Q "%TP_PACKAGE%" > nul
+DEL /S /Q "%TP_PACKAGE%" 2> nul > nul
 @echo Package Source: %SOURCE%
 %ZIP_EXE% a -xr@exclude.lst "%TP_PACKAGE%" "%SOURCE%" > nul
 @echo Removing exiting installation in PLAIN environment: %WOW_PLAIN%\WTF
