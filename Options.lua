@@ -2459,7 +2459,7 @@ local function CreateOptionsTable()
                       inline = true,
                       args = {
                         FriendlyColor = {
-                          name = L["Friendly ames Color"],
+                          name = L["Friendly Names Color"],
                           order = 10,
                           type = "select",
                           values = t.FRIENDLY_TEXT_COLOR,

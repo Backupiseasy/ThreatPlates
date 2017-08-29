@@ -106,39 +106,39 @@ ThreatPlates.FontStyle = {
 
 -- "By Threat", "By Level Color", "By Normal/Elite/Boss"
 ThreatPlates.ENEMY_TEXT_COLOR = {
-  CLASS = "By Class",
-  CUSTOM = "By Custom Color",
-  REACTION = "By Reaction",
-  HEALTH = "By Health",
+  CLASS = L["By Class"],
+  CUSTOM = L["By Custom Color"],
+  REACTION = L["By Reaction"],
+  HEALTH = L["By Health"],
 }
 
 ThreatPlates.FRIENDLY_TEXT_COLOR = {
-  CLASS = "By Class",
-  CUSTOM = "By Custom Color",
-  REACTION = "By Reaction",
-  HEALTH = "By Health",
+  CLASS = L["By Class"],
+  CUSTOM = L["By Custom Color"],
+  REACTION = L["By Reaction"],
+  HEALTH = L["By Health"],
 }
 
 -- NPC Role, Guild, or Quest", "Quest",
 ThreatPlates.ENEMY_SUBTEXT = {
-  NONE = "None",
-  HEALTH = "Health",
-  ROLE = "NPC Role",
-  ROLE_GUILD = "NPC Role, Guild",
-  ROLE_GUILD_LEVEL = "NPC Role, Guild, or Level",
-  LEVEL = "Level",
-  ALL = "Everything"
+  NONE = L["None"],
+  HEALTH = L["Health"],
+  ROLE = L["NPC Role"],
+  ROLE_GUILD = L["NPC Role, Guild"],
+  ROLE_GUILD_LEVEL = L["NPC Role, Guild, or Level"],
+  LEVEL = L["Level"],
+  ALL = L["Everything"],
 }
 
 -- "NPC Role, Guild, or Quest", "Quest"
 ThreatPlates.FRIENDLY_SUBTEXT = {
-  NONE = "None",
-  HEALTH = "Health",
-  ROLE = "NPC Role",
-  ROLE_GUILD = "NPC Role, Guild",
-  ROLE_GUILD_LEVEL = "NPC Role, Guild, or Level",
-  LEVEL = "Level",
-  ALL = "Everything"
+  NONE = L["None"],
+  HEALTH = L["Health"],
+  ROLE = L["NPC Role"],
+  ROLE_GUILD = L["NPC Role, Guild"],
+  ROLE_GUILD_LEVEL = L["NPC Role, Guild, or Level"],
+  LEVEL = L["Level"],
+  ALL = L["Everything"],
 }
 
 -------------------------------------------------------------------------------
