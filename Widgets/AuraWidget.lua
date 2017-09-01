@@ -4,17 +4,8 @@ local ThreatPlates = NAMESPACE.ThreatPlates
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
-local DebuffTypeColor = DebuffTypeColor
-local UnitAura = UnitAura
-local CreateFrame = CreateFrame
-local GetFramerate = GetFramerate
-local UnitIsFriend = UnitIsFriend
 
-local TidyPlatesThreat = TidyPlatesThreat
-
-local RGB = ThreatPlates.RGB
-local DEBUG = ThreatPlates.DEBUG
-
+-- Lua APIs
 local GetTime = GetTime
 local pairs = pairs
 local floor = floor
@@ -22,6 +13,19 @@ local sort = sort
 local math = math
 local string = string
 local tonumber = tonumber
+
+-- WoW APIs
+local DebuffTypeColor = DebuffTypeColor
+local UnitAura = UnitAura
+local CreateFrame = CreateFrame
+local GetFramerate = GetFramerate
+local UnitIsFriend = UnitIsFriend
+
+-- ThreatPlates APIs
+local TidyPlatesThreat = TidyPlatesThreat
+local RGB = ThreatPlates.RGB
+local DEBUG = ThreatPlates.DEBUG
+
 
 ---------------------------------------------------------------------------------------------------
 -- Aura Widget 2.0
