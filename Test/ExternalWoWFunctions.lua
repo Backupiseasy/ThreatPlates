@@ -20,3 +20,4 @@ RAID_CLASS_COLORS = {
 function UnitIsConnected(unitid)
   return true
 end
+

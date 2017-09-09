@@ -70,7 +70,7 @@ local DEFAULT_SETTINGS = {
     verbose = false,
     blizzFadeA = {
       toggle  = true,
-      amount = -0.3
+      amount = 0.7
     },
     blizzFadeS = {
       toggle  = true,

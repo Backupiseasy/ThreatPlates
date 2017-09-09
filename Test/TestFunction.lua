@@ -2,7 +2,8 @@ require("ExternalWoWFunctions")
 require("ExternalThreatPlatesFunctions")
 require("ExternalDB")
 
-require("TestNametextcolor")
+--require("TestNametextcolor")
+require("TestAlpha")
 
 local function is_table_equal(t1,t2,ignore_mt)
   local ty1 = type(t1)
@@ -29,11 +30,14 @@ end
 ---------------------------------------------------------------------------------------------------
 
 local TEST_ITERATIONS = 3000000
-local TEST_CONFIGS = 12
+local TEST_CONFIGS = 17
 local TEST_FUNCTIONS = {
-  { SetNameColor_8_4_2 , "SetNameColor_8_4_2"},
-  { SetNameColor_New , "SetNameColor_New"},
-  { SetNameColor_Test , "SetNameColor_Test"},
+--  { SetNameColor_8_4_2 , "SetNameColor_8_4_2"},
+--  { SetNameColor_New , "SetNameColor_New"},
+--  { SetNameColor_Test , "SetNameColor_Test"},
+    { SetAlpha_8_5_0 , "SetAlpha_8_5_0"}, -- 17 iterations
+    { SetAlpha_Test , "SetAlpha_Test"},
+    { SetAlpha_Test2 , "SetAlpha_Test2"},
 }
 
 local measure = {}
@@ -49,7 +53,7 @@ for function_no = 1, #TEST_FUNCTIONS do
   for config_no = 1, TEST_CONFIGS do
     results[function_no][config_no] = {}
 
-    local unit = GetTextConfig(config_no)
+    local unit = GetConfig(config_no)
 
     for testrun = 1, TEST_ITERATIONS do
 

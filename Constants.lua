@@ -272,7 +272,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
     verbose = false,
     blizzFadeA = {
       toggle  = true,
-      amount = -0.3
+      amount = 0.7
     },
     blizzFadeS = {
       toggle  = true,
@@ -314,8 +314,8 @@ ThreatPlates.DEFAULT_SETTINGS = {
         vertical = "CENTER",
       },
       useAlpha = false,
-      blizzFading = true,
-      blizzFadingAlpha = 1,
+      -- blizzFading = true, -- removed in 8.5.1
+      -- blizzFadingAlpha = 1, -- removed in 8.5.1
       useScaling = false,
       ShowTargetHighlight = true,
       ShowMouseoverHighlight = true,
@@ -1727,6 +1727,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
         ["Tapped"] 		       = 0.9,
       },
       alpha = {
+        AddTargetAlpha       = true,
         ["Target"]		       = 1,
         ["NoTarget"]	       = 1,
         ["Totem"]		         = 1,

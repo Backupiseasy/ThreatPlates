@@ -167,6 +167,18 @@ local function MigrateNamesColor(profile_name, profile)
 end
 
 local function MigrateCustomTextShow(profile_name, profile)
+  -- default for blizzFadeA.amount was -0.3
+  if profile.blizzFadeA and profile.blizzFadeA.amount ~= nil then
+    local db = profile.blizzFadeA
+
+    local amount = db.amount
+    if amount <= 0 then
+      db.amount = 1 + amount
+    end
+  end
+end
+
+local function MigrationBlizzFadeA(profile_name, profile)
   -- default for db.show was true
   if profile.settings and profile.settings.customtext and profile.settings.customtext.show ~= nil then
     local db = profile.settings.customtext
@@ -189,12 +201,15 @@ end
 local DEPRECATED_SETTINGS = {
   MigrateNamesColor, -- settings.name.color
   MigrateCustomTextShow, -- settings.customtext.show
+  MigrationBlizzFadeA, -- blizzFadeA.toggle and blizzFadeA.amount
   { "alphaFeatures" },
   { "alphaFeatureHeadlineView" },
   { "alphaFeatureAuraWidget2" },
   -- { "alphaFriendlyNameOnly" },
-  -- { "HeadlineView", "name", "width" },  -- in a future release
-  -- { "HeadlineView", "name", "height" }, -- in a future release
+  -- { "HeadlineView", "blizzFading" },    -- in release 8.6 (removed in 8.5.1)
+  -- { "HeadlineView", "blizzFadingAlpha"},-- in release 8.6 (removed in 8.5.1)
+  -- { "HeadlineView", "name", "width" },  -- in release 8.6 (removed in 8.5.0)
+  -- { "HeadlineView", "name", "height" }, -- in release 8.6 (removed in 8.5.0)
 }
 
 local function MigrateDatabase()

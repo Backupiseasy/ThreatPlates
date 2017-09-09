@@ -96,6 +96,8 @@ local function ScaleUniqueNameOnly(unit)
 		if db.useScaling then
 			return ScaleNormal(unit)
 		end
+
+		return 1
 	elseif unique_setting.UseThreatColor then
 		return ScaleNormal(unit, unique_setting.scale)
   end

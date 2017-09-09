@@ -34,6 +34,7 @@ local DETECTION_AURAS = {
   [214793] = true, -- Vigilant
   [225649] = true, -- Shadow Sight
   [232234] = true, -- On High Alert
+  [201746] = true, -- Weapon Scope
 }
 
 ---------------------------------------------------------------------------------------------------

@@ -1,6 +1,9 @@
 ------------------------------------------------------
 8.5.1 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
+* Reworked transparency (formerly alpha) configuration to make the priority in which settings are applied easier to understand.
+* Added new spell Weapon Scope from Argus mobs to stealth widget.
+* Fixed a bug for custom nameplates which resulted in a wrong scaling in headline view when "Custom Scale" was disabled.
 * Upgrade integrated libraries to Ace3 Release-1166.
 
 ------------------------------------------------------
