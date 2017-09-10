@@ -171,10 +171,12 @@ local function MigrateCustomTextShow(profile_name, profile)
   if profile.blizzFadeA and profile.blizzFadeA.amount ~= nil then
     local db = profile.blizzFadeA
 
+    TidyPlatesThreat:Print("BlizzFade alt: ", db.amount)
     local amount = db.amount
     if amount <= 0 then
-      db.amount = 1 + amount
+      db.amount = min(1, 1 + amount)
     end
+    TidyPlatesThreat:Print("BlizzFade neu: ", db.amount)
   end
 end
 

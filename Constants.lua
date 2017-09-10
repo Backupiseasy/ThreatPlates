@@ -1727,7 +1727,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
         ["Tapped"] 		       = 0.9,
       },
       alpha = {
-        AddTargetAlpha       = true,
+        AbsoluteTargetAlpha  = false,
         ["Target"]		       = 1,
         ["NoTarget"]	       = 1,
         ["Totem"]		         = 1,

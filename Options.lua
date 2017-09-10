@@ -501,13 +501,15 @@ local function GetAnchorEntry(pos, setting, anchor, func_disabled)
   return entry
 end
 
-local function GetTransparencyEntry(name, pos, setting, func_disabled)
+local function GetTransparencyEntry(name, pos, setting, func_disabled, lower_limit)
+  local min_value = (lower_limit and -1) or 0
+
   local entry = {
     name = name,
     order = pos,
     type = "range",
     step = 0.05,
-    min = 0,
+    min = min_value,
     max = 1,
     isPercent = true,
     set = function(info, val) SetValue(info, abs(val - 1)) end,
@@ -516,6 +518,10 @@ local function GetTransparencyEntry(name, pos, setting, func_disabled)
     disabled = func_disabled,
   }
   return entry
+end
+
+local function GetTransparencyOffsetEntry(pos, setting, func_disabled)
+  return GetTransparencyEntry(L["Transparency"], pos, setting, func_disabled, true)
 end
 
 local function GetTransparencyEntryDefault(pos, setting, func_disabled)
@@ -2110,7 +2116,7 @@ local function CreateOptionsTable()
                   inline = true,
                   args = {
                     Help = {
-                      name = L["Change the transparency of nameplates depending on whether a target unit is selected or not. Unless specified otherwise, unit base transparency is overwritten."],
+                      name = L["Change the transparency of nameplates depending on whether a target unit is selected or not. As default, this transparency is added to the unit base transparency."],
                       order = 0,
                       type = "description",
                       width = "full",
@@ -2122,7 +2128,7 @@ local function CreateOptionsTable()
                       desc = L["The target nameplate's transparency if a target unit is selected."],
                       arg = { "nameplate", "toggle", "TargetA" },
                     },
-                    AlphaTargetSet = GetTransparencyEntryDefault(11, { "nameplate", "alpha", "Target" }),
+                    AlphaTargetSet = GetTransparencyOffsetEntry(11, { "nameplate", "alpha", "Target" }),
                     AlphaNonTarget = {
                       name = L["Non-Target"],
                       order = 20,
@@ -2130,7 +2136,7 @@ local function CreateOptionsTable()
                       desc = L["The transparency of non-target nameplates if a target unit is selected."],
                       arg = { "blizzFadeA", "toggle" },
                     },
-                    AlphaNonTargetSet = GetTransparencyEntryDefault(21, { "blizzFadeA", "amount" }),
+                    AlphaNonTargetSet = GetTransparencyOffsetEntry(21, { "blizzFadeA", "amount" }),
                     AlphaNoTarget = {
                       name = L["No Target"],
                       order = 30,
@@ -2138,14 +2144,16 @@ local function CreateOptionsTable()
                       desc = L["The transparency of all nameplates if you have no target unit selected."],
                       arg = { "nameplate", "toggle", "NoTargetA" },
                     },
-                    AlphaNoTargetSet = GetTransparencyEntryDefault(32, { "nameplate", "alpha", "NoTarget" }),
+                    AlphaNoTargetSet = GetTransparencyOffsetEntry(32, { "nameplate", "alpha", "NoTarget" }),
                     Spacer = GetSpacerEntry(40),
                     AddTargetAlpha = {
-                      name = L["Add target-based transparency to unit base transparency; do not overwrite it."],
+                      --name = L["Absolut Transparency"],
+                      name = L["Use Target-based Transparency as absolute transparency and ignore Unit Base Transparency."],
                       order = 50,
                       type = "toggle",
                       width = "full",
-                      arg = { "nameplate", "alpha", "AddTargetAlpha" },
+                      --desc = L["Uses the target-based transparency as absolute transparency and ignore unit base transparency."],
+                      arg = { "nameplate", "alpha", "AbsoluteTargetAlpha" },
                     },
 
                   },

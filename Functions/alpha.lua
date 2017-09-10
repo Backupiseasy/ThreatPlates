@@ -62,13 +62,14 @@ local function TransparencyGeneral(unit)
 	end
 
 	if target_alpha then
-		if db.alpha.AddTargetAlpha then
+		--if db.alpha.AddTargetAlpha then
+    if db.alpha.AbsoluteTargetAlpha then
 			-- units will always be set to this alpha
-			return (db.alpha[unit.TP_DetailedUnitType] or 1) + target_alpha - 1
-		end
+      return target_alpha
+    end
 
-		return target_alpha
-	end
+    return (db.alpha[unit.TP_DetailedUnitType] or 1) + target_alpha - 1
+  end
 
 	return db.alpha[unit.TP_DetailedUnitType] or 1
 end
