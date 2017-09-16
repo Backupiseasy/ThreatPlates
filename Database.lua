@@ -167,16 +167,34 @@ local function MigrateNamesColor(profile_name, profile)
 end
 
 local function MigrateCustomTextShow(profile_name, profile)
-  -- default for blizzFadeA.amount was -0.3
-  if profile.blizzFadeA and profile.blizzFadeA.amount ~= nil then
-    local db = profile.blizzFadeA
-
-    TidyPlatesThreat:Print("BlizzFade alt: ", db.amount)
-    local amount = db.amount
-    if amount <= 0 then
-      db.amount = min(1, 1 + amount)
+  if profile.blizzFadeA then
+    if not profile.nameplate then
+      profile.nameplate = {}
     end
-    TidyPlatesThreat:Print("BlizzFade neu: ", db.amount)
+
+    -- default for blizzFadeA.toggle was true
+    if profile.blizzFadeA.toggle ~= nil then
+      if not profile.nameplate.toggle then
+        profile.nameplate.toggle = {}
+      end
+
+      profile.nameplate.toggle.NonTargetA = profile.blizzFadeA.toggle
+    end
+
+    -- default for blizzFadeA.amount was -0.3
+    if profile.blizzFadeA.amount ~= nil then
+      if not profile.nameplate.alpha then
+        profile.nameplate.alpha = {}
+      end
+
+      local db = profile.nameplate.alpha
+      local amount = profile.blizzFadeA.amount
+      if amount <= 0 then
+        db.NonTarget = min(1, 1 + amount)
+      end
+    end
+
+    profile.blizzFade = nil
   end
 end
 

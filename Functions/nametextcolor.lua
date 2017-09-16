@@ -4,23 +4,23 @@ local ThreatPlates = NAMESPACE.ThreatPlates
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
+
+-- WoW APIs
 local UnitIsConnected = UnitIsConnected
 local RAID_CLASS_COLORS = RAID_CLASS_COLORS
 
+-- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
 local GetColorByHealthDeficit = ThreatPlates.GetColorByHealthDeficit
 local SetStyle = TidyPlatesThreat.SetStyle
 local GetUniqueNameplateSetting = ThreatPlates.GetUniqueNameplateSetting
+local GetColorByReaction = ThreatPlates.GetColorByReaction
 local IsFriend
 local IsGuildmate
 
-local reference = {
-	FRIENDLY = { NPC = "FriendlyNPC", PLAYER = "FriendlyPlayer", },
-	HOSTILE = {	NPC = "HostileNPC", PLAYER = "HostilePlayer", },
-	NEUTRAL = { NPC = "NeutralUnit", PLAYER = "NeutralUnit",	},
-}
-
 local function SetNameColor(unit)
+  if not unit.unitid then return end
+
   local style = unit.TP_Style or SetStyle(unit)
   local unique_setting = unit.TP_UniqueSetting or GetUniqueNameplateSetting(unit)
 
@@ -88,29 +88,28 @@ local function SetNameColor(unit)
       return color.r, color.g, color.b
     end
 
-    color =  db_color[reference[unit_reaction][unit.type]]
+    color = GetColorByReaction(unit)
     return color.r, color.g, color.b
   end
 
   -- Default: By Reaction
-  if unit.unitid and not UnitIsConnected(unit.unitid) then
+  if not UnitIsConnected(unit.unitid) then
     color =  db_color.DisconnectedUnit
-    return color.r, color.g, color.b
   elseif unit.isTapped then
     color =  db_color.TappedUnit
-    return color.r, color.g, color.b
-  elseif unit_reaction == "FRIENDLY" and unit.type == "PLAYER" then
+  elseif unit.reaction == "FRIENDLY" and unit.type == "PLAYER" then
     local db_social = db.socialWidget
     if db_social.ShowFriendColor and IsFriend(unit) then
       color =  db_social.FriendColor
-      return color.r, color.g, color.b
     elseif db_social.ShowGuildmateColor and IsGuildmate(unit) then
       color =  db_social.GuildmateColor
-      return color.r, color.g, color.b
     end
   end
 
-  color =  db_color[reference[unit_reaction][unit.type]]
+  if not color then
+    color = GetColorByReaction(unit)
+  end
+
   return color.r, color.g, color.b
 end
 

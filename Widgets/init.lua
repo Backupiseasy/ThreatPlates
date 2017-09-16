@@ -155,6 +155,9 @@ local function OnUpdate(plate, unit)
       widget_list[name] = nil -- deleted the disabled widget, is that what we want? no re-using it later ...
     end
   end
+--  if unit.isTarget then
+--    ThreatPlates.DEBUG_PRINT_TARGET(unit)
+--  end
 end
 
 -- TidyPlatesGlobal_OnContextUpdate() is called when a unit is targeted or moused-over.  (Any time the unitid or GUID changes)

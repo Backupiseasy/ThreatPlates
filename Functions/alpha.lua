@@ -47,15 +47,14 @@ local function TransparencyGeneral(unit)
 
 	-- Do checks for target settings:
 	local db = TidyPlatesThreat.db.profile.nameplate
-	local db_blizz = TidyPlatesThreat.db.profile.blizzFadeA
 	local target_exists = UnitExists("target")
 
 	local target_alpha
 	if target_exists then
 		if unit.isTarget and db.toggle.TargetA then
 			target_alpha = db.alpha.Target
-	elseif not unit.isTarget and db_blizz.toggle then
-			target_alpha = db_blizz.amount
+	elseif not unit.isTarget and db.toggle.NonTargetA then
+			target_alpha = db.alpha.NonTarget
 	end
 	elseif db.toggle.NoTargetA then
 		target_alpha = db.alpha.NoTarget

@@ -1782,25 +1782,32 @@ local function CreateOptionsTable()
                   args = CreateHeadlineViewShowEntry(),
                 },
                 ShowByStatus = {
-                  name = L["Show By Status"],
+                  name = L["Force View By Status"],
                   order = 15,
                   type = "group",
                   inline = true,
                   disabled = function() return not TidyPlatesThreat.db.profile.HeadlineView.ON  end,
                   args = {
                     ModeOnTarget = {
-                    name = L["Force Healthbar on Target"],
+                    name = L["Healthbar View on Target"],
                     order = 1,
                     type = "toggle",
                     width = "double",
                     arg = { "HeadlineView", "ForceHealthbarOnTarget" }
                     },
                     ModeOoC = {
-                      name = L["Force Headline View while Out-of-Combat"],
+                      name = L["Headline View while Out-of-Combat"],
                       order = 2,
                       type = "toggle",
                       width = "double",
                       arg = { "HeadlineView", "ForceOutOfCombat" }
+                    },
+                    ModeCNA = {
+                      name = L["Headline View on Enemy Units You Cannot Attack"],
+                      order = 3,
+                      type = "toggle",
+                      width = "double",
+                      arg = { "HeadlineView", "ForceNonAttackableUnits" }
                     }
                   }
                 },
@@ -2134,9 +2141,9 @@ local function CreateOptionsTable()
                       order = 20,
                       type = "toggle",
                       desc = L["The transparency of non-target nameplates if a target unit is selected."],
-                      arg = { "blizzFadeA", "toggle" },
+                      arg = { "nameplate", "toggle", "NonTargetA" },
                     },
-                    AlphaNonTargetSet = GetTransparencyOffsetEntry(21, { "blizzFadeA", "amount" }),
+                    AlphaNonTargetSet = GetTransparencyOffsetEntry(21, { "nameplate", "alpha", "NonTarget" }),
                     AlphaNoTarget = {
                       name = L["No Target"],
                       order = 30,

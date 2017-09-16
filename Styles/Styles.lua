@@ -4,12 +4,15 @@ local ThreatPlates = NAMESPACE.ThreatPlates
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
+
+-- WoW APIs
 local UnitThreatSituation = UnitThreatSituation
 local InCombatLockdown = InCombatLockdown
 local UnitPlayerControlled = UnitPlayerControlled
 local UnitIsOtherPlayersPet = UnitIsOtherPlayersPet
 local UnitIsBattlePet = UnitIsBattlePet
 local IsInInstance = IsInInstance
+local UnitCanAttack = UnitCanAttack
 
 local TidyPlatesThreat = TidyPlatesThreat
 local TOTEMS = ThreatPlates.TOTEMS
@@ -129,6 +132,7 @@ local function ShowUnit(unit)
 
   local show, headline_view = GetUnitVisibility(full_unit_type)
 
+  local unit_id = unit.unitid
   local db_hv = db.HeadlineView
   if not db_hv.ON then
     headline_view = false
@@ -136,9 +140,10 @@ local function ShowUnit(unit)
     headline_view = false
   elseif db_hv.ForceOutOfCombat and not InCombatLockdown() then
     headline_view = true
+  elseif db_hv.ForceNonAttackableUnits and unit.reaction ~= "FRIENDLY" and not UnitCanAttack("player", unit_id) then
+    headline_view = true
   end
 
-  local unit_id = unit.unitid
   local e, b, t = (unit.isElite or unit.isRare), unit.isBoss, unit.isTapped
   local visibility = db.Visibility
   local hide_n, hide_e, hide_b, hide_t = visibility.HideNormal , visibility.HideElite, visibility.HideBoss, visibility.HideTapped
@@ -147,7 +152,7 @@ local function ShowUnit(unit)
     show = false
   elseif hide_n and not (e or b) then
     show = false
-  elseif unit_id and UnitIsBattlePet(unit_id) then
+  elseif UnitIsBattlePet(unit_id) then
     -- TODO: add configuration option for enable/disable
     show = false
   end

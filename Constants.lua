@@ -270,10 +270,10 @@ ThreatPlates.DEFAULT_SETTINGS = {
     cache = {},
     OldSetting = true,
     verbose = false,
-    blizzFadeA = {
-      toggle  = true,
-      amount = 0.7
-    },
+    -- blizzFadeA = { -- removed in 8.5.1
+    --   toggle  = true,
+    --   amount = 0.7
+    -- },
     blizzFadeS = {
       toggle  = true,
       amount = -0.3
@@ -321,6 +321,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
       ShowMouseoverHighlight = true,
       ForceHealthbarOnTarget = false,
       ForceOutOfCombat = false,
+      ForceNonAttackableUnits = false,
       --
       EnemyTextColorMode = "CLASS",
       EnemyTextColor = RGB(0, 255, 0),
@@ -397,6 +398,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
       NeutralUnit = RGB(255, 255, 0),            -- yellow
       TappedUnit = RGB(110, 110, 110, 1),	       -- grey
       DisconnectedUnit = RGB(128, 128, 128, 1),  -- dray, darker than tapped color
+      UnfriendlyFaction = RGB(255, 153, 51, 1),  -- brown/orange for unfriendly, hostile, non-attackable units (unit reaction = 3)
     },
     text = {
       amount = false, -- old default: true,
@@ -1693,10 +1695,11 @@ ThreatPlates.DEFAULT_SETTINGS = {
         ["Neutral"]	= true,
         ["Minus"]	= true,
         ["Tapped"] 	= true,
-        ["TargetA"]  = false, -- Custom Target Alpha
-        ["NoTargetA"]  = false, -- Custom Target Alpha
-        ["TargetS"]  = false, -- Custom Target Scale
-        ["NoTargetS"]  = false, -- Custom Target Alpha
+        ["TargetA"]  = false,   -- Target Alpha
+        ["NonTargetA"]	= true, -- Non-Target Alpha
+        ["NoTargetA"]  = false, -- No Target Alpha
+        ["TargetS"]  = false,   -- Target Scale
+        ["NoTargetS"]  = false, -- No Target Alpha
         ["MarkedA"] = false,
         ["MarkedS"] = false,
         ["CastingUnitAlpha"] = false, -- Friendly Unit Alpha
@@ -1729,6 +1732,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
       alpha = {
         AbsoluteTargetAlpha  = false,
         ["Target"]		       = 1,
+        ["NonTarget"]	       = 0.7,
         ["NoTarget"]	       = 1,
         ["Totem"]		         = 1,
         ["Marked"] 		       = 1,

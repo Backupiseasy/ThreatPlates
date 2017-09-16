@@ -1,4 +1,10 @@
 ------------------------------------------------------
+8.5.1-Alpha2 (works with TidyPlates 6.18.11)
+------------------------------------------------------
+* Added a (non-configurable) reaction color for unfriendly, non-attackable hostile units (orange/brown, used in the Argus introduction quests).
+* Added an option to force headline view for non-attackable enemy units (hostile, neutral) [Ticket #132].
+
+------------------------------------------------------
 8.5.1-Alpha1 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
 * Reworked transparency (formerly alpha) configuration to make the priority in which settings are applied easier to understand.
