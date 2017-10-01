@@ -1,9 +1,10 @@
 ------------------------------------------------------
 8.5.1-Alpha3 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
-* Added new spell One With the Void from Argus mobs to stealth widget.
-* Fixed a bug (in TidyPlates) where a unit's name is not updated from "Unknown Entity" as soon as possible (only after, e.g., you mouseover the unit).
+* Added a feature to display absorbs at the healthbar of nameplates [Comment #479].
 * Added new spell "One With the Void" from Argus mobs to stealth widget.
+* Fixed a bug (in TidyPlates) where a unit's name is not updated from "Unknown Entity" as soon as possible (only after, e.g., you mouseover the unit).
+* Fixed a bug in aura widget 2.0 that prevented whitelisting/blacklisting spells with All/Not in "Mine" filter modes (bugfix from release 8.5.0.1).
 
 ------------------------------------------------------
 8.5.1-Alpha2 (works with TidyPlates 6.18.11)
@@ -20,7 +21,7 @@
 * Upgrade integrated libraries to Ace3 Release-1166.
 
 ------------------------------------------------------
-8.5.1 (works with TidyPlates 6.18.11)
+8.5.0.1 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
 * Fixed a bug in aura widget 2.0 that prevented whitelisting/blacklisting spells with All/Not in "Mine" filter modes.
 

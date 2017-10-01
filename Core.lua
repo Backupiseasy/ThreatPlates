@@ -148,7 +148,7 @@ local function OnActivateTheme(theme_table, theme_name)
   -- Sends a reset notification to all available themes, ie. themeTable == nil
   if not theme_table then
     ThreatPlatesWidgets.DeleteWidgets()
-    DisableEvents()
+    --DisableEvents() -- enabling this results in an LUA error for aura widget 2.0 (config variables not initialized)
   else
     if not TidyPlatesThreat.db.global.CheckNewLookAndFeel then
       StaticPopup_Show("SwitchToNewLookAndFeel")
@@ -279,6 +279,8 @@ function TidyPlatesThreat:StartUp()
     else
       local new_version = tostring(t.Meta("version"))
       if db.version ~= new_version then
+        -- migrate and/or remove any old DB entries
+        t.MigrateDatabase()
         db.version = new_version
       end
     end
