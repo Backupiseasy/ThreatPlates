@@ -35,6 +35,8 @@ local DETECTION_AURAS = {
   [225649] = true, -- Shadow Sight
   [232234] = true, -- On High Alert
   [201746] = true, -- Weapon Scope
+  [242962] = true, -- One With the Void
+  [242963] = true, -- One With the Void
 }
 
 ---------------------------------------------------------------------------------------------------

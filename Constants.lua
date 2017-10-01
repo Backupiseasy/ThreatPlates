@@ -1448,6 +1448,8 @@ ThreatPlates.DEFAULT_SETTINGS = {
         BackgroundUseForegroundColor = false,
         BackgroundOpacity = 0.3, -- old default: 1,
         BackgroundColor = RGB(0, 0, 0),
+        ShowAbsorbs = true,
+        AbsorbColor = RGB(0, 255, 255),
       },
       castnostop = {
         texture = "TP_CastBarLock",

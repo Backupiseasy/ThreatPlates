@@ -1351,6 +1351,20 @@ local function CreateOptionsTable()
                       set = SetThemeValue,
                       arg = { "settings", "healthbar", "backdrop" },
                     },
+                    ShowAbsorb = {
+                      type = "toggle",
+                      order = 11,
+                      name = L["Show Absorbs"],
+                      arg = { "settings", "healthbar", "ShowAbsorbs" },
+                    },
+                    AbsorbColor = {
+                      name = L["Color"],
+                      order = 12,
+                      type = "color",
+                      get = GetColor,
+                      set = SetColor,
+                      arg = { "settings", "healthbar", "AbsorbColor" },
+                    },
                     Spacer1 = GetSpacerEntry(14),
                     BGColorText = {
                       type = "description",
@@ -1396,13 +1410,12 @@ local function CreateOptionsTable()
                       arg = { "settings", "healthbar", "BackgroundOpacity" },
                     },
                     Header1 = {
-                      type = "header",
+                      name = L["Borders"],
                       order = 50,
-                      name = "",
+                      type = "header",
                     },
                     HealthBorderToggle = {
                       type = "toggle",
-                      width = "double",
                       order = 60,
                       name = L["Show Border"],
                       set = SetThemeValue,
@@ -1410,7 +1423,6 @@ local function CreateOptionsTable()
                     },
                     HealthBorder = {
                       type = "select",
-                      width = "double",
                       order = 70,
                       name = L["Normal Border"],
                       set = SetThemeValue,
@@ -1418,35 +1430,23 @@ local function CreateOptionsTable()
                       values = { TP_HealthBarOverlay = "Default", TP_HealthBarOverlayThin = "Thin" },
                       arg = { "settings", "healthborder", "texture" },
                     },
-                    Header2 = {
-                      type = "header",
-                      order = 75,
-                      name = "",
-                    },
                     EliteHealthBorderToggle = {
                       type = "toggle",
-                      width = "double",
                       order = 80,
                       name = L["Show Elite Border"],
                       arg = { "settings", "elitehealthborder", "show" },
                     },
                     EliteBorder = {
                       type = "select",
-                      width = "double",
                       order = 90,
                       name = L["Elite Border"],
                       disabled = function() if db.settings.elitehealthborder.show then return false else return true end end,
                       values = { TP_HealthBarEliteOverlay = "Default", TP_HealthBarEliteOverlayThin = "Thin" },
                       arg = { "settings", "elitehealthborder", "texture" }
                     },
-                    Header3 = {
-                      type = "header",
-                      order = 95,
-                      name = "",
-                    },
+                    Spacer2 = GetSpacerEntry(99),
                     Mouseover = {
                       type = "select",
-                      width = "double",
                       order = 100,
                       name = L["Mouseover"],
                       set = SetThemeValue,

@@ -26,7 +26,6 @@ local TidyPlatesThreat = TidyPlatesThreat
 local RGB = ThreatPlates.RGB
 local DEBUG = ThreatPlates.DEBUG
 
-
 ---------------------------------------------------------------------------------------------------
 -- Aura Widget 2.0
 ---------------------------------------------------------------------------------------------------
