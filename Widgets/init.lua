@@ -46,13 +46,13 @@ local function UnregisterWidget(name)
   ThreatPlatesWidgets.list[name] = nil
 end
 
-local function HideWidget(widget_list, widget_name)
-  local widget = widget_list[widget_name]
-  if widget then
-    widget:Hide()
-    widget_list[widget_name] = nil -- deleted the disabled widget, is that what we want? no re-using it later ...
-  end
-end
+--local function HideWidget(widget_list, widget_name)
+--  local widget = widget_list[widget_name]
+--  if widget then
+--    widget:Hide()
+--    widget_list[widget_name] = nil -- deleted the disabled widget, is that what we want? no re-using it later ...
+--  end
+--end
 
 -- TidyPlatesGlobal_OnInitialize() is called when a nameplate is created or re-shown
 -- activetheme is the table, not just the name
@@ -66,6 +66,7 @@ local function OnInitialize(plate, theme)
     --        widget:Hide()
     --      end
     --		end
+    ThreatPlates.CreateExtensions(plate)
 
     for name,v in pairs(ThreatPlatesWidgets.list) do
       local widget = widget_list[name]
@@ -86,34 +87,13 @@ local function OnInitialize(plate, theme)
   end
 end
 
--- Hide all ThreatPlates widgets as another theme was selected in TidyPlates
-local function DeleteWidgets()
-  -- for all widgets types of Threat Plates, call ClearAllWidgets
-  -- ThreatPlatesWidgets.ClearAllArenaWidgets()							-- done
-  -- ThreatPlatesWidgets.ClearAllClassIconWidgets()					-- done
-  -- ThreatPlatesWidgets.ClearAllComboPointWidgets() 				-- done
-  -- ThreatPlatesWidgets.ClearAllEliteArtOverlayWidgets()		-- done
-  -- ThreatPlatesWidgets.ClearAllSocialWidgets()							-- done
-  -- ThreatPlatesWidgets.ClearAllTargetArtWidgets()					-- done
-  -- ThreatPlatesWidgets.ClearAllThreatWidgets()							-- done
-  -- ThreatPlatesWidgets.ClearAllTotemIconWidgets()					-- done
-  -- ThreatPlatesWidgets.ClearAllUniqueIconWidgets()					-- done
-  -- ThreatPlatesWidgets.ClearAllAuraWidgets()								-- done
-  -- ThreatPlatesWidgets.ClearAllHealerTrackerWidgets()			-- disabled
-
-  -- disable all event watchers
-  ThreatPlatesWidgets.ComboPointWidgetDisableWatcher()
-  ThreatPlatesWidgets.ArenaWidgetDisableWatcher()
-  ThreatPlatesWidgets.SocialWidgetDisableWatcher()
-  ThreatPlatesWidgets.ResourceWidgetDisableWatcher()
-  --ThreatPlatesWidgets.AuraWidgetDisableWatcher() -- right now, watcher still necessary for TidyPlates as well
-end
-
 -- TidyPlatesGlobal_OnUpdate() is called when other data about the unit changes, or is requested by an external controller.
 local function OnUpdate(plate, unit)
   -- sometimes unitid is nil, still don't know why, but it creates all kinds of LUA errors as other attributes are nil
   -- also, e.g., unit.type, unit.name, ...
   if not unit.unitid then return end
+
+  ThreatPlates.UpdateExtensions(plate, unit.unitid)
 
   local widget_list = plate.widgets
   for name,v in pairs(ThreatPlatesWidgets.list) do
@@ -155,15 +135,14 @@ local function OnUpdate(plate, unit)
       widget_list[name] = nil -- deleted the disabled widget, is that what we want? no re-using it later ...
     end
   end
---  if unit.isTarget then
---    ThreatPlates.DEBUG_PRINT_TARGET(unit)
---  end
 end
 
 -- TidyPlatesGlobal_OnContextUpdate() is called when a unit is targeted or moused-over.  (Any time the unitid or GUID changes)
 -- OnContextUpdate must only do something when there is something unit-dependent to display?
 local function OnContextUpdate(plate, unit)
   if not unit.unitid then return end
+
+  --ThreatPlates.UpdateExtensions(plate, unit.unitid)
 
   local widget_list = plate.widgets
   for name,v in pairs(ThreatPlatesWidgets.list) do
@@ -200,6 +179,29 @@ local function OnContextUpdate(plate, unit)
       widget_list[name] = nil -- deleted the disabled widget, is that what we want? no re-using it later ...
     end
   end
+end
+
+-- Hide all ThreatPlates widgets as another theme was selected in TidyPlates
+local function DeleteWidgets()
+  -- for all widgets types of Threat Plates, call ClearAllWidgets
+  -- ThreatPlatesWidgets.ClearAllArenaWidgets()							-- done
+  -- ThreatPlatesWidgets.ClearAllClassIconWidgets()					-- done
+  -- ThreatPlatesWidgets.ClearAllComboPointWidgets() 				-- done
+  -- ThreatPlatesWidgets.ClearAllEliteArtOverlayWidgets()		-- done
+  -- ThreatPlatesWidgets.ClearAllSocialWidgets()							-- done
+  -- ThreatPlatesWidgets.ClearAllTargetArtWidgets()					-- done
+  -- ThreatPlatesWidgets.ClearAllThreatWidgets()							-- done
+  -- ThreatPlatesWidgets.ClearAllTotemIconWidgets()					-- done
+  -- ThreatPlatesWidgets.ClearAllUniqueIconWidgets()					-- done
+  -- ThreatPlatesWidgets.ClearAllAuraWidgets()								-- done
+  -- ThreatPlatesWidgets.ClearAllHealerTrackerWidgets()			-- disabled
+
+  -- disable all event watchers
+  ThreatPlatesWidgets.ComboPointWidgetDisableWatcher()
+  ThreatPlatesWidgets.ArenaWidgetDisableWatcher()
+  ThreatPlatesWidgets.SocialWidgetDisableWatcher()
+  ThreatPlatesWidgets.ResourceWidgetDisableWatcher()
+  --ThreatPlatesWidgets.AuraWidgetDisableWatcher() -- right now, watcher still necessary for TidyPlates as well
 end
 
 ThreatPlatesWidgets.RegisterWidget = RegisterWidget				-- used internally by ThreatPlates widgets

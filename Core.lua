@@ -4,13 +4,18 @@ local t = ns.ThreatPlates
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
-local LibStub = LibStub
 
+-- Lua APIs
+
+-- WoW APIs
 local UnitIsUnit = UnitIsUnit
 local UnitReaction = UnitReaction
+local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
+local UnitName = UnitName
+local UNKNOWNOBJECT = UNKNOWNOBJECT
 
-local RGB = t.RGB
-local RGB_P = t.RGB_P
+-- ThreatPlates APIs
+local LibStub = LibStub
 local L = t.L
 local class = t.Class()
 
@@ -65,6 +70,37 @@ function TidyPlatesThreat:RoleText()
   end
 end
 
+local EVENTS = {
+  --"PLAYER_ALIVE",
+  --"PLAYER_LEAVING_WORLD",
+  --"PLAYER_REGEN_DISABLED",
+  --"PLAYER_TALENT_UPDATE"
+
+  "PLAYER_ENTERING_WORLD",
+  "PLAYER_LOGIN",
+  "PLAYER_LOGOUT",
+  "PLAYER_REGEN_ENABLED",
+  "UNIT_FACTION",
+  "QUEST_WATCH_UPDATE",
+  "NAME_PLATE_CREATED",
+  "QUEST_ACCEPTED",
+  "UNIT_ABSORB_AMOUNT_CHANGED",
+  "UNIT_MAXHEALTH",
+  "UNIT_NAME_UPDATE",
+}
+
+local function EnableEvents()
+  for i = 1, #EVENTS do
+    TidyPlatesThreat:RegisterEvent(EVENTS[i])
+  end
+end
+
+local function DisableEvents()
+  for i = 1, #EVENTS do
+    TidyPlatesThreat:UnregisterEvent(EVENTS[i])
+  end
+end
+
 ---------------------------------------------------------------------------------------------------
 -- Functions called by TidyPlates
 ---------------------------------------------------------------------------------------------------
@@ -112,15 +148,15 @@ local function OnActivateTheme(theme_table, theme_name)
   -- Sends a reset notification to all available themes, ie. themeTable == nil
   if not theme_table then
     ThreatPlatesWidgets.DeleteWidgets()
+    DisableEvents()
   else
     if not TidyPlatesThreat.db.global.CheckNewLookAndFeel then
       StaticPopup_Show("SwitchToNewLookAndFeel")
     end
 
     ActivateTheme()
-
+    EnableEvents()
     -- disable all non-ThreatPlates widgets - normally, TidyPlates should do that, but it doesn't
-
   end
 end
 
@@ -308,32 +344,17 @@ end
 function TidyPlatesThreat:OnEnable()
   TidyPlatesThemeList[t.THEME_NAME] = t.Theme
   ApplyHubFunctions(t.Theme)
-  -- ActivateTheme()
 
   self:StartUp()
 
-  --"PLAYER_ALIVE",
-  --"PLAYER_LEAVING_WORLD",
-  --"PLAYER_REGEN_DISABLED",
-  --"PLAYER_TALENT_UPDATE"
-  local events = {
-    "PLAYER_ENTERING_WORLD",
-    "PLAYER_LOGIN",
-    "PLAYER_LOGOUT",
-    "PLAYER_REGEN_ENABLED",
-    "UNIT_FACTION",
-    "QUEST_WATCH_UPDATE",
-    "NAME_PLATE_CREATED",
-    "QUEST_ACCEPTED",
-  }
-
-  for i = 1, #events do
-    self:RegisterEvent(events[i])
-  end
+--  for i = 1, #events do
+--    self:RegisterEvent(events[i])
+--  end
+  EnableEvents()
 end
 
---function WelcomeHome:OnDisable()
---  -- Called when the addon is disabled
+-- Called when the addon is disabled
+--function TidyPlatesThreat:OnDisable()
 --end
 
 -----------------------------------------------------------------------------------
@@ -427,6 +448,7 @@ function TidyPlatesThreat:UNIT_FACTION(event, unitid)
   TidyPlates:ForceUpdate()
 end
 
+-- Fix for TidyPlates:
 -- nameplate color can change when factions change (e.g., with disguises)
 -- Legion example: Suramar city and Masquerade
 function TidyPlatesThreat:QUEST_WATCH_UPDATE(event, quest_index)
@@ -459,9 +481,6 @@ end
 -- Prevent Blizzard nameplates from re-appearing, but show personal ressources bar, if enabled
 local function FrameOnShow(self)
   --if not self.carrier and InterfaceOptionsNamesPanelUnitNameplatesMakeLarger:GetValue() ~= "1" then
-
-  -- if not self.carrier and not UnitIsUnit(self.unit, "player") then
-  -- not self:GetParent().carrier and
   if not self.unit or not UnitIsUnit(self.unit, "player") then
     -- hide blizzard's nameplate
     if not TidyPlatesThreat.db.profile.ShowFriendlyBlizzardNameplates then
@@ -469,9 +488,7 @@ local function FrameOnShow(self)
       return
     end
 
-    local unit = self.unit
-    local show = unit and UnitReaction(unit, "player") > 4
-    if show then
+    if self.unit and UnitReaction(self.unit, "player") > 4 then
       self:Show()
       return
     end
@@ -483,10 +500,14 @@ local function FrameOnUpdate(self)
   self.carrier:SetFrameLevel(frame_level)
   self.extended:SetFrameLevel(frame_level)
 
+--  local frame_level = self:GetFrameLevel()
+--  self.carrier:SetFrameLevel(frame_level)
+--  self.extended:SetFrameLevel(frame_level)
+
   if not TidyPlatesThreat.db.profile.ShowFriendlyBlizzardNameplates then return end
 
-  local unit = self.UnitFrame.unit
-  local show = unit and UnitReaction(unit, "player") > 4
+  local unitid = self.UnitFrame.unit
+  local show = unitid and UnitReaction(unitid, "player") > 4
   if show then
     self:GetChildren():Show()
     self.carrier:Hide()
@@ -505,7 +526,8 @@ local function FrameOnHide(self)
   end
 end
 
--- Preventing WoW from re-showing Blizzard nameplates in certain situations
+-- Fix for TidyPlates:
+-- -- Preventing WoW from re-showing Blizzard nameplates in certain situations
 -- e.g., press ESC, got to Interface, Names, press ESC and voila!
 -- Thanks to Kesava (KuiNameplates) for this solution
 function TidyPlatesThreat:NAME_PLATE_CREATED(event, plate)
@@ -515,4 +537,37 @@ function TidyPlatesThreat:NAME_PLATE_CREATED(event, plate)
   end
 
   plate:HookScript('OnUpdate', FrameOnUpdate)
+end
+
+
+function TidyPlatesThreat:UNIT_ABSORB_AMOUNT_CHANGED(event, unitid)
+  local plate = GetNamePlateForUnit(unitid)
+
+  if plate and plate.extended then
+    t.UpdateExtensions(plate.extended, unitid)
+  end
+end
+
+function TidyPlatesThreat:UNIT_MAXHEALTH(event, unitid)
+  local plate = GetNamePlateForUnit(unitid)
+
+  if plate and plate.extended then
+    t.UpdateExtensions(plate.extended, unitid)
+  end
+end
+
+-- Fix for TidyPlates: Fix name for units where UnitName returns "Unknown" at first
+function TidyPlatesThreat:UNIT_NAME_UPDATE(event, unitid)
+  local plate = GetNamePlateForUnit(unitid)
+
+  if plate and plate.extended then
+    local frame = plate.extended
+    if frame.unit.name == UNKNOWNOBJECT then
+      local current_name = UnitName(unitid) or ""
+      frame.unit.name = current_name
+      frame.visual.name:SetText(current_name)
+      --self.UpdateMe = true
+      -- t.DEBUG("UNIT_NAME_UPDATE: ", unitid, " - ", current_name)
+    end
+  end
 end
