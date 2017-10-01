@@ -1,5 +1,5 @@
 ------------------------------------------------------
-8.5.1 (works with TidyPlates 6.18.11)
+8.5.0.1 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
 * Fixed a bug in aura widget 2.0 that prevented whitelisting/blacklisting spells with All/Not in "Mine" filter modes.
 
