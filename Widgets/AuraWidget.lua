@@ -1152,9 +1152,9 @@ local function ConfigAuraWidget()
     --   UnitReaction >4: filter = "NONE" or filter = "HARMFUL|RAID" (with showAll) if nameplateShowDebuffsOnFriendly == true (for 7.3)
     AURA_FILTER_ENEMY = "|INCLUDE_NAME_PLATE_ONLY"
     AURA_FILTER_FRIENDLY = (db.ShowDebuffsOnFriendly and '|RAID') or "NONE"
-  elseif string.find(db.FilterMode, "Mine") then
-    AURA_FILTER_ENEMY = "|PLAYER"
-    AURA_FILTER_FRIENDLY = "|PLAYER"
+--  elseif string.find(db.FilterMode, "Mine") then
+--    AURA_FILTER_ENEMY = "|PLAYER"
+--    AURA_FILTER_FRIENDLY = "|PLAYER"
   else
     AURA_FILTER_ENEMY = ""
     AURA_FILTER_FRIENDLY = ""

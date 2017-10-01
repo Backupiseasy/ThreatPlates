@@ -1,4 +1,9 @@
 ------------------------------------------------------
+8.5.1 (works with TidyPlates 6.18.11)
+------------------------------------------------------
+* Fixed a bug in aura widget 2.0 that prevented whitelisting/blacklisting spells with All/Not in "Mine" filter modes.
+
+------------------------------------------------------
 8.5.0 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
 * Fixes for compatibility with patch 7.3 (including temporary using Ace3 library version r1163-alpha until it gets updated to 7.3).
