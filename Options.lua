@@ -1113,7 +1113,7 @@ local function CreateTabGeneralSettings()
         },
       },
       SpecialUnits = {
-        name = L["Hide Special Units"],
+        name = L["Hide Nameplates"],
         type = "group",
         order = 50,
         inline = true,
@@ -1124,6 +1124,13 @@ local function CreateTabGeneralSettings()
           HideElite = { name = L["Rares & Elites"], order = 2, type = "toggle", arg = { "Visibility", "HideElite" }, },
           HideBoss = { name = L["Bosses"], order = 3, type = "toggle", arg = { "Visibility", "HideBoss" }, },
           HideTapped = { name = L["Tapped Units"], order = 4, type = "toggle", arg = { "Visibility", "HideTapped" }, },
+          ModeHideFriendlyInCombat = {
+            name = L["Friendly Units in Combat"],
+            order = 10,
+            type = "toggle",
+            width = "double",
+            arg = { "Visibility", "HideFriendlyInCombat" }
+          },
         },
       },
       TidyPlates = {
@@ -1326,6 +1333,22 @@ local function CreateOptionsTable()
                       get = function(info) return TidyPlatesThreat.db.global.DefaultsVersion end,
                     },
                   },
+                },
+                ShowByStatus = {
+                  name = L["Force View By Status"],
+                  order = 15,
+                  type = "group",
+                  inline = true,
+                  disabled = function() return not TidyPlatesThreat.db.profile.HeadlineView.ON  end,
+                  args = {
+                    ModeOnTarget = {
+                      name = L["On Target"],
+                      order = 1,
+                      type = "toggle",
+                      width = "double",
+                      arg = { "HeadlineView", "ForceHealthbarOnTarget" }
+                    },
+                  }
                 },
                 HealthBarGroup = {
                   name = L["Textures"],
@@ -1788,27 +1811,27 @@ local function CreateOptionsTable()
                   inline = true,
                   disabled = function() return not TidyPlatesThreat.db.profile.HeadlineView.ON  end,
                   args = {
-                    ModeOnTarget = {
-                    name = L["Healthbar View on Target"],
-                    order = 1,
-                    type = "toggle",
-                    width = "double",
-                    arg = { "HeadlineView", "ForceHealthbarOnTarget" }
-                    },
                     ModeOoC = {
-                      name = L["Headline View while Out-of-Combat"],
-                      order = 2,
+                      name = L["Out of Combat"],
+                      order = 1,
                       type = "toggle",
                       width = "double",
                       arg = { "HeadlineView", "ForceOutOfCombat" }
                     },
+                    ModeFriendlyInCombat = {
+                      name = L["On Friendly Units in Combat"],
+                      order = 2,
+                      type = "toggle",
+                      width = "double",
+                      arg = { "HeadlineView", "ForceFriendlyInCombat" }
+                    },
                     ModeCNA = {
-                      name = L["Headline View on Enemy Units You Cannot Attack"],
+                      name = L["On Enemy Units You Cannot Attack"],
                       order = 3,
                       type = "toggle",
                       width = "double",
                       arg = { "HeadlineView", "ForceNonAttackableUnits" }
-                    }
+                    },
                   }
                 },
                 Appearance = {
@@ -1849,14 +1872,14 @@ local function CreateOptionsTable()
                       disabled = function() return not TidyPlatesThreat.db.profile.HeadlineView.ON  end,
                       args = {
                         Transparency = {
-                          name = L["Use transparency settings of healthbar view also to headline view."],
+                          name = L["Use Transparency Settings of Healthbar View also for Headline View."],
                           type = "toggle",
                           order = 1,
                           width = "full",
                           arg = { "HeadlineView", "useAlpha" },
                         },
                         Scaling = {
-                          name = L["Use scaling settings of healthbar view also to headline view."],
+                          name = L["Use Scaling Settings of Healthbar View also for Headline View."],
                           type = "toggle",
                           order = 10,
                           width = "full",

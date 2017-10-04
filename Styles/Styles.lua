@@ -142,6 +142,8 @@ local function ShowUnit(unit)
     headline_view = true
   elseif db_hv.ForceNonAttackableUnits and unit.reaction ~= "FRIENDLY" and not UnitCanAttack("player", unit_id) then
     headline_view = true
+  elseif db_hv.ForceFriendlyInCombat and unit.reaction == "FRIENDLY" and InCombatLockdown() then
+    headline_view = true
   end
 
   local e, b, t = (unit.isElite or unit.isRare), unit.isBoss, unit.isTapped
@@ -154,6 +156,8 @@ local function ShowUnit(unit)
     show = false
   elseif UnitIsBattlePet(unit_id) then
     -- TODO: add configuration option for enable/disable
+    show = false
+  elseif visibility.HideFriendlyInCombat and unit.reaction == "FRIENDLY" and InCombatLockdown() then
     show = false
   end
 

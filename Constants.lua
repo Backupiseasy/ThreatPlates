@@ -322,6 +322,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
       ForceHealthbarOnTarget = false,
       ForceOutOfCombat = false,
       ForceNonAttackableUnits = false,
+      ForceFriendlyInCombat = false,
       --
       EnemyTextColorMode = "CLASS",
       EnemyTextColor = RGB(0, 255, 0),
@@ -359,6 +360,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
       HideBoss = false,
       HideElite = false,
       HideTapped = false,
+      HideFriendlyInCombat = false,
     },
     castbarColor = {
       toggle = true,
