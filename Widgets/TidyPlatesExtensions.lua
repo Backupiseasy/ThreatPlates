@@ -53,7 +53,14 @@ local function CreateExtensions(extended)
   end
 end
 
-local function UpdateExtensions(extended, unitid)
+local IGNORED_STYLES = {
+  NameOnly = true,
+  ["NameOnly-Unique"] = true,
+  etotem = true,
+  empty= true,
+}
+
+local function UpdateExtensions(extended, unitid, style)
   local visual = extended.visual
   local absorbbar = visual.absorbbar
 
@@ -62,7 +69,7 @@ local function UpdateExtensions(extended, unitid)
   local absorbglow = visual.absorbglow
 
   local db = TidyPlatesThreat.db.profile.settings.healthbar
-  if not db.ShowAbsorbs then
+  if not db.ShowAbsorbs or IGNORED_STYLES[style] then
     absorbglow:Hide()
     absorbbar:Hide()
     return

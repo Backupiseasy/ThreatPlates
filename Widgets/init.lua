@@ -93,7 +93,8 @@ local function OnUpdate(plate, unit)
   -- also, e.g., unit.type, unit.name, ...
   if not unit.unitid then return end
 
-  ThreatPlates.UpdateExtensions(plate, unit.unitid)
+  local style = SetStyle(unit)
+  ThreatPlates.UpdateExtensions(plate, unit.unitid, style)
 
   local widget_list = plate.widgets
   for name,v in pairs(ThreatPlatesWidgets.list) do
@@ -109,7 +110,6 @@ local function OnUpdate(plate, unit)
         widget_list[name] = widget
       end
 
-      local style = SetStyle(unit)
       if style == "NameOnly" or style == "NameOnly-Unique" then
         if show_headline_view then
           if not v.isContext then
@@ -143,6 +143,7 @@ local function OnContextUpdate(plate, unit)
   if not unit.unitid then return end
 
   --ThreatPlates.UpdateExtensions(plate, unit.unitid)
+  local style = SetStyle(unit)
 
   local widget_list = plate.widgets
   for name,v in pairs(ThreatPlatesWidgets.list) do
@@ -158,7 +159,6 @@ local function OnContextUpdate(plate, unit)
         widget_list[name] = widget
       end
 
-      local style = SetStyle(unit)
       if style == "NameOnly" or style == "NameOnly-Unique" then
         if show_headline_view then
           widget:UpdateContext(unit)
