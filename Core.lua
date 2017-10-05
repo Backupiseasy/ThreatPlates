@@ -330,10 +330,6 @@ function TidyPlatesThreat:OnInitialize()
   LibStub("AceConfig-3.0"):RegisterOptionsTable(dialog_name, t.GetInterfaceOptionsTable())
   LibStub("AceConfigDialog-3.0"):AddToBlizOptions(dialog_name, t.ADDON_NAME)
 
-  -- Setup options dialog
-  LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable(app_name, t.GetOptionsTable())
-  LibStub("AceConfigDialog-3.0"):SetDefaultSize(app_name, 1000, 640)
-
   -- Setup chat commands
   self:RegisterChatCommand("tptp", "ChatCommand");
 end

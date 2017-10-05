@@ -166,7 +166,7 @@ local function MigrateNamesColor(profile_name, profile)
   end
 end
 
-local function MigrateCustomTextShow(profile_name, profile)
+local function MigrationBlizzFadeA(profile_name, profile)
   if profile.blizzFadeA then
     if not profile.nameplate then
       profile.nameplate = {}
@@ -198,7 +198,23 @@ local function MigrateCustomTextShow(profile_name, profile)
   end
 end
 
-local function MigrationBlizzFadeA(profile_name, profile)
+local function MigrationTargetScale(profile_name, profile)
+  if profile.nameplate and profile.nameplate.scale then
+    -- default nameplate.scale.Target was 1
+    local value = profile.nameplate.scale.Target
+    if value ~= nil then
+      profile.nameplate.scale.Target = value - 1
+    end
+
+    -- default nameplate.scale.NoTarget was 1
+    local value = profile.nameplate.scale.NoTarget
+    if value ~= nil then
+      profile.nameplate.scale.NoTarget = value - 1
+    end
+  end
+end
+
+local function MigrateCustomTextShow(profile_name, profile)
   -- default for db.show was true
   if profile.settings and profile.settings.customtext and profile.settings.customtext.show ~= nil then
     local db = profile.settings.customtext
@@ -222,6 +238,7 @@ local DEPRECATED_SETTINGS = {
   MigrateNamesColor, -- settings.name.color
   MigrateCustomTextShow, -- settings.customtext.show
   MigrationBlizzFadeA, -- blizzFadeA.toggle and blizzFadeA.amount
+  MigrationTargetScale, -- nameplate.scale.Target/NoTarget
   { "alphaFeatures" },
   { "alphaFeatureHeadlineView" },
   { "alphaFeatureAuraWidget2" },

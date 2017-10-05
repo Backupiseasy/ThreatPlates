@@ -85,7 +85,7 @@ local function CreateWidgetFrame(parent)
 
 	-- Custom Code III
 	--------------------------------------
-	frame:SetFrameLevel(parent.bars.healthbar:GetFrameLevel())
+	frame:SetFrameLevel(parent.visual.healthbar:GetFrameLevel())
 	frame:SetSize(256, 64)
 	frame:SetPoint("CENTER", parent, "CENTER")
 	frame.Icon = frame:CreateTexture(nil, "OVERLAY")

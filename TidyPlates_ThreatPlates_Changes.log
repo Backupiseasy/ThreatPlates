@@ -1,11 +1,16 @@
 ------------------------------------------------------
 8.5.1-Alpha4 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
-* [Verbesserung Aura-Widget mit PLAYER-Auren ...]
 * Added new spell "Demonic Senses" to stealth widget.
 * Fixed a bug with absorbs where absorb bar and glow where shown in headline view.
 * Added an option to hide friendly nameplates while in combat (Nameplate Settings - Visibility - Hide Nameplates) [Comment #478].
 * Added an option to force headline view on friendly nameplates while in combat (Nameplate Settings - Headline View - Force View By Status) [email request].
+* Reworked scale configuration to make the priority in which settings are applied easier to understand (similar to transparency configuration).
+* Added options to use threat scale and transparency in an additive way with general scale or transparency settings (and not replacing them completely in combat).
+* Fixed some bugs in transparency configuration (inconsistencies in the various options).
+* Fixed a bug in custom nameplates that resulted in a LUA error when using "Restore Defaults".
+* Fixed a bug in custom nameplates where custom color was not used although enabled.
+* Fixed a bug in the "Spec Roles" configuration that resulted in the list of active specs being empty.
 
 ------------------------------------------------------
 8.5.1-Alpha3 (works with TidyPlates 6.18.11)

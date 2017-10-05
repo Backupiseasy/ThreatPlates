@@ -229,10 +229,10 @@ local function SetHealthbarColor(unit)
       elseif unique_setting.UseThreatColor then
         -- Threat System is should also be used for custom nameplate (in combat with thread system on)
         c = GetThreatColor(unit, GetThreatStyle(unit))
+      end
 
-        if not c and unique_setting.useColor then
-          c = unique_setting.color
-        end
+      if not c and unique_setting.useColor then
+        c = unique_setting.color
       end
 
       -- otherwise color defaults to class or reaction color (or WoW defaults, at the end)

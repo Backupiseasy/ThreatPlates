@@ -99,8 +99,8 @@ SlashCmdList["TPTPVERBOSE"] = TPTPVERBOSE
 -- Command: /tptp
 function TidyPlatesThreat:ChatCommand(input)
 	TidyPlatesThreat:OpenOptions()
---
---	-- split commands by space
+
+	--	split commands by space
 --	-- for word in message:gmatch("%S+") do
 --	if input == "" then
 --		TidyPlatesThreat:OpenOptions()

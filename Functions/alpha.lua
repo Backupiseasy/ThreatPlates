@@ -38,7 +38,6 @@ local function TransparencySituational(unit)
 end
 
 local function TransparencyGeneral(unit)
-
 	-- Do checks for situational transparency settings:
 	local tranparency = TransparencySituational(unit)
 	if tranparency then
@@ -53,9 +52,9 @@ local function TransparencyGeneral(unit)
 	if target_exists then
 		if unit.isTarget and db.toggle.TargetA then
 			target_alpha = db.alpha.Target
-	elseif not unit.isTarget and db.toggle.NonTargetA then
-			target_alpha = db.alpha.NonTarget
-	end
+		elseif not unit.isTarget and db.toggle.NonTargetA then
+				target_alpha = db.alpha.NonTarget
+		end
 	elseif db.toggle.NoTargetA then
 		target_alpha = db.alpha.NoTarget
 	end
@@ -90,7 +89,12 @@ local function TransparencyThreat(unit, style)
   local threatSituation = unit.threatSituation
   if style == "tank" and db.toggle.OffTank and UnitIsOffTanked(unit) then
     threatSituation = "OFFTANK"
-  end
+	end
+
+	if db.AdditiveAlpha then
+		return db[style].alpha[threatSituation] + TransparencyGeneral(unit) - 1
+	end
+
   return db[style].alpha[threatSituation]
 end
 
