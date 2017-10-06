@@ -84,6 +84,7 @@ local function UpdateExtensions(extended, unitid, style)
   end
 
   local healthbar = visual.healthbar
+  -- cannot use unit.health or unit.healthmax here as these values are not correctly set when the function is called from event UNIT_ABSORB_AMOUNT_CHANGED in Core.lua
   local health = UnitHealth(unitid) or 0
   local health_max = UnitHealthMax(unitid) or 0
 
