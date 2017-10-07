@@ -542,6 +542,7 @@ function TidyPlatesThreat:UNIT_ABSORB_AMOUNT_CHANGED(event, unitid)
   local plate = GetNamePlateForUnit(unitid)
 
   if plate and plate.extended then
+    --t.UpdateExtensions(plate.extended, nil, unitid)
     t.UpdateExtensions(plate.extended, unitid)
   end
 end
@@ -550,6 +551,7 @@ function TidyPlatesThreat:UNIT_MAXHEALTH(event, unitid)
   local plate = GetNamePlateForUnit(unitid)
 
   if plate and plate.extended then
+    --t.UpdateExtensions(plate.extended, nil, unitid)
     t.UpdateExtensions(plate.extended, unitid)
   end
 end

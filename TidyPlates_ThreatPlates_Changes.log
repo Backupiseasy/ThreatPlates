@@ -1,4 +1,9 @@
 ------------------------------------------------------
+8.5.1-Alpha3 (works with TidyPlates 6.18.11)
+------------------------------------------------------
+* Fixed a bug where the absorbbar texture was not correctly updated after a change to the healthbar texture.
+
+------------------------------------------------------
 8.5.1-Alpha4 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
 * Reworked scale configuration to make the priority in which settings are applied easier to understand (similar to transparency configuration).

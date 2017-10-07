@@ -142,7 +142,7 @@ end
 local function OnContextUpdate(plate, unit)
   if not unit.unitid then return end
 
-  --ThreatPlates.UpdateExtensions(plate, unit.unitid)
+  ThreatPlates.UpdateExtensions(plate, unit.unitid)
   local style = SetStyle(unit)
 
   local widget_list = plate.widgets
