@@ -4,7 +4,8 @@ require("ExternalDB")
 
 --require("TestNametextcolor")
 --require("TestAlpha")
-require("TestSingleFunctions")
+-- require("TestSingleFunctions")
+require("TestLuaStuff")
 
 local function is_table_equal(t1,t2,ignore_mt)
   local ty1 = type(t1)
@@ -30,8 +31,8 @@ end
 -- Measure the runtime of different implementations
 ---------------------------------------------------------------------------------------------------
 
-local TEST_ITERATIONS = 3000000
-local TEST_CONFIGS = 6
+local TEST_ITERATIONS = 300000
+local TEST_CONFIGS = 3
 local TEST_FUNCTIONS = {
 --  { SetNameColor_8_4_2 , "SetNameColor_8_4_2"},
 --  { SetNameColor_New , "SetNameColor_New"},
@@ -39,8 +40,13 @@ local TEST_FUNCTIONS = {
 --    { SetAlpha_8_5_0 , "SetAlpha_8_5_0"}, -- 17 iterations
 --    { SetAlpha_Test , "SetAlpha_Test"},
 --    { SetAlpha_Test2 , "SetAlpha_Test2"},
-  { GetColorByReaction_8_5_0 , "GetColorByReaction_8_5_0"},
-  { GetColorByReaction_Test , "GetColorByReaction_Test"},
+--  { GetColorByReaction_8_5_0 , "GetColorByReaction_8_5_0"},
+--  { GetColorByReaction_Test , "GetColorByReaction_Test"},
+  { Absorbs_Global_Test , "Absorbs_Global_Test"},
+  { Absorbs_Global_Test , "Absorbs_Global_Test"},
+  { Absorbs_Global , "Absorbs_Global"},
+--  { Absorbs_NoOpt , "Absorbs_NoOpt"},
+--  { Absorbs_DB , "Absorbs_DB"},
 }
 
 local measure = {}
