@@ -98,6 +98,7 @@ local function Create(self,name)
     },
     castbar = {
       texture = ThreatPlates.Media:Fetch('statusbar', db.castbar.texture),
+      backdrop = ThreatPlates.Media:Fetch('statusbar', db.castbar.backdrop, true),
       width = 120,
       height = 10,
       x = db.castbar.x,

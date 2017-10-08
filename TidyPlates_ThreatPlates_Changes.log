@@ -1,6 +1,7 @@
 ------------------------------------------------------
-8.5.1-Alpha3 (works with TidyPlates 6.18.11)
+8.5.1-Alpha5 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
+* Added an option to set the background of the nameplate's castbar (including color and transparency) [Ticket #135, PM].
 * Fixed a bug where the absorbbar texture was not correctly updated after a change to the healthbar texture.
 
 ------------------------------------------------------

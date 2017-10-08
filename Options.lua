@@ -1432,7 +1432,7 @@ local function CreateOptionsTable()
                       disabled = function() return db.settings.healthbar.BackgroundUseForegroundColor end,
                     },
                     BackgroundOpacity = {
-                      name = L["Background Opacity"],
+                      name = L["Background Transparency"],
                       order = 40,
                       type = "range",
                       min = 0,
@@ -1954,7 +1954,7 @@ local function CreateOptionsTable()
                   disabled = function() if GetCVar("ShowVKeyCastbar") == "1" then return false else return true end end,
                   args = {
                     CastBarTexture = {
-                      name = L["Castbar"],
+                      name = L["Foreground Texture"],
                       type = "select",
                       order = 1,
                       dialogControl = "LSM30_Statusbar",
@@ -1962,10 +1962,67 @@ local function CreateOptionsTable()
                       set = SetThemeValue,
                       arg = { "settings", "castbar", "texture" },
                     },
-                    Spacer1 = GetSpacerEntry(5),
+                    BGTexture = {
+                      name = L["Background Texture"],
+                      type = "select",
+                      order = 10,
+                      dialogControl = "LSM30_Statusbar",
+                      values = AceGUIWidgetLSMlists.statusbar,
+                      set = SetThemeValue,
+                      arg = { "settings", "castbar", "backdrop" },
+                    },
+                    Spacer1 = GetSpacerEntry(14),
+                    BGColorText = {
+                      type = "description",
+                      order = 15,
+                      width = "single",
+                      name = L["Background Color:"],
+                    },
+                    BGColorForegroundToggle = {
+                      name = L["Same as Foreground"],
+                      order = 20,
+                      type = "toggle",
+                      desc = L["Use the castbar's foreground color also for the background."],
+                      set = SetThemeValue,
+                      arg = { "settings", "castbar", "BackgroundUseForegroundColor" },
+                    },
+                    BGColorCustomToggle = {
+                      name = L["Custom"],
+                      order = 30,
+                      type = "toggle",
+                      width = "half",
+                      desc = L["Use a custom color for the castbar's background."],
+                      set = function(info, val)
+                        SetThemeValue(info, not val)
+                      end,
+                      get = function(info, val)
+                        return not GetValue(info, val)
+                      end,
+                      arg = { "settings", "castbar", "BackgroundUseForegroundColor" },
+                    },
+                    BGColorCustom = {
+                      name = L["Color"], type = "color",	order = 35,	get = GetColor, set = SetColor, arg = {"settings", "castbar", "BackgroundColor"},
+                      width = "half",
+                      disabled = function() return db.settings.castbar.BackgroundUseForegroundColor end,
+                    },
+                    BackgroundOpacity = {
+                      name = L["Background Transparency"],
+                      order = 40,
+                      type = "range",
+                      min = 0,
+                      max = 1,
+                      step = 0.01,
+                      isPercent = true,
+                      arg = { "settings", "castbar", "BackgroundOpacity" },
+                    },
+                    Header1 = {
+                      name = L["Borders"],
+                      order = 50,
+                      type = "header",
+                    },
                     CastBarBorderToggle = {
                       type = "toggle",
-                      order = 10,
+                      order = 60,
                       name = L["Show Border"],
                       desc = L["Shows a border around the castbar of nameplates (requires /reload)."],
                       set = SetThemeValue,
@@ -1973,7 +2030,7 @@ local function CreateOptionsTable()
                     },
                     CastBarBorder = {
                       type = "select",
-                      order = 20,
+                      order = 70,
                       name = L["Border Texture"],
                       set = SetThemeValue,
                       disabled = function() if db.settings.castborder.show then return false else return true end end,
@@ -1982,7 +2039,7 @@ local function CreateOptionsTable()
                     },
                     CastBarOverlay = {
                       name = L["Show Overlay for Uninterruptable Casts"],
-                      order = 30,
+                      order = 80,
                       type = "toggle",
                       width = "double",
                       set = SetThemeValue,
@@ -3059,7 +3116,7 @@ local function CreateOptionsTable()
                       name = L["Highlight Mobs on Off-Tanks"],
                       order = 2,
                       width = "full",
-                      desc = L["If checked, nameplates of mobs attacking another tank can be shown with different color, scale, and opacity."],
+                      desc = L["If checked, nameplates of mobs attacking another tank can be shown with different color, scale, and transparency."],
                       descStyle = "inline",
                       arg = { "threat", "toggle", "OffTank" },
                     },
