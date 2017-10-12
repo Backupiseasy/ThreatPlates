@@ -1,44 +1,23 @@
 ------------------------------------------------------
-8.5.1-Alpha5 (works with TidyPlates 6.18.11)
+8.5.1-Beta1 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
+* Reworked transparency (formerly alpha) and scale configuration to make the priority in which settings are applied easier to understand.
+* Added options to use threat scale and transparency in an additive way with general scale or transparency settings (and not replacing them completely in combat) [Ticket #138].
 * Added an option to set the background of the nameplate's castbar (including color and transparency) [Ticket #135, PM].
-* Fixed a bug where the absorbbar texture was not correctly updated after a change to the healthbar texture.
-
-------------------------------------------------------
-8.5.1-Alpha4 (works with TidyPlates 6.18.11)
-------------------------------------------------------
-* Reworked scale configuration to make the priority in which settings are applied easier to understand (similar to transparency configuration).
+* Added a feature to display absorbs at the healthbar of nameplates [Comment #479].
 * Added an option to hide friendly nameplates while in combat (Nameplate Settings - Visibility - Hide Nameplates) [Comment #478].
 * Added an option to force headline view on friendly nameplates while in combat (Nameplate Settings - Headline View - Force View By Status) [email request].
-* Added options to use threat scale and transparency in an additive way with general scale or transparency settings (and not replacing them completely in combat) [Ticket #138].
-* Added new spell "Demonic Senses" to stealth widget.
-* Fixed a bug with absorbs where absorb bar and glow where shown in headline view.
-* Fixed some bugs in transparency configuration (inconsistencies in the various options).
+* Added new spells from Argus mobs to stealth widget ("Demonic Senses", "One With the Void", "Weapon Scope")  .
+* Added an option to force headline view for non-attackable enemy units (hostile, neutral) [Ticket #132].
+* Added a (non-configurable) reaction color for unfriendly, non-attackable hostile units (orange/brown, used in the Argus introduction quests).
 * Fixed a bug in custom nameplates that resulted in a LUA error when using "Restore Defaults".
 * Fixed a bug in custom nameplates where custom color was not used although enabled [Ticket #139].
 * Fixed a bug in the "Spec Roles" configuration that resulted in the list of active specs being empty.
-
-------------------------------------------------------
-8.5.1-Alpha3 (works with TidyPlates 6.18.11)
-------------------------------------------------------
-* Added a feature to display absorbs at the healthbar of nameplates [Comment #479].
-* Added new spell "One With the Void" from Argus mobs to stealth widget.
 * Fixed a bug (in TidyPlates) where a unit's name is not updated from "Unknown Entity" as soon as possible (only after, e.g., you mouseover the unit).
 * Fixed a bug in aura widget 2.0 that prevented whitelisting/blacklisting spells with All/Not in "Mine" filter modes (bugfix from release 8.5.0.1).
-
-------------------------------------------------------
-8.5.1-Alpha2 (works with TidyPlates 6.18.11)
-------------------------------------------------------
-* Added a (non-configurable) reaction color for unfriendly, non-attackable hostile units (orange/brown, used in the Argus introduction quests).
-* Added an option to force headline view for non-attackable enemy units (hostile, neutral) [Ticket #132].
-
-------------------------------------------------------
-8.5.1-Alpha1 (works with TidyPlates 6.18.11)
-------------------------------------------------------
-* Reworked transparency (formerly alpha) configuration to make the priority in which settings are applied easier to understand.
-* Added new spell "Weapon Scope" from Argus mobs to stealth widget.
 * Fixed a bug for custom nameplates which resulted in a wrong scaling in headline view when "Custom Scale" was disabled.
 * Upgrade integrated libraries to Ace3 Release-1166.
+* Updated localizations for deDE (German), koKR (Korean, big thanks to yuk6196) and zhTW (Traditional Chinese, big thanks to gaspy10).
 
 ------------------------------------------------------
 8.5.0.1 (works with TidyPlates 6.18.11)

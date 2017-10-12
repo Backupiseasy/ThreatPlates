@@ -539,8 +539,8 @@ end
 local function GetPlacementEntryTheme(pos, setting, hv_mode)
   local x_name, y_name
   if hv_mode == true then
-    x_name = L["Healthbar X"]
-    y_name = L["Healthbar Y"]
+    x_name = L["Healthbar View X"]
+    y_name = L["Healthbar View Y"]
   else
     x_name = L["X"]
     y_name = L["Y"]
@@ -567,8 +567,8 @@ end
 local function GetPlacementEntryWidget(pos, widget_info, hv_mode)
   local x_name, y_name
   if hv_mode == true then
-    x_name = L["Healthbar X"]
-    y_name = L["Healthbar Y"]
+    x_name = L["Healthbar View X"]
+    y_name = L["Healthbar View Y"]
   else
     x_name = L["X"]
     y_name = L["Y"]
@@ -603,8 +603,8 @@ local function GetWidgetOffsetEntry(pos, widget_info)
     type = "group",
     inline = true,
     args = {
-      HealthbarX = { type = "range", order = 1, name = L["Healthbar X"], min = -120, max = 120, step = 1, arg = { widget_info, "x" } },
-      HealthbarY = { type = "range", order = 2, name = L["Healthbar Y"], min = -120, max = 120, step = 1, arg = { widget_info, "y" } },
+      HealthbarX = { type = "range", order = 1, name = L["Healthbar View X"], min = -120, max = 120, step = 1, arg = { widget_info, "x" } },
+      HealthbarY = { type = "range", order = 2, name = L["Healthbar View Y"], min = -120, max = 120, step = 1, arg = { widget_info, "y" } },
       HeadlineViewX = { type = "range", order = 3, name = L["Headline View X"], min = -120, max = 120, step = 1, arg = { widget_info, "x_hv" } },
       HeadlineViewY = { type = "range", order = 4, name = L["Headline View Y"], min = -120, max = 120, step = 1, arg = { widget_info, "y_hv" } },
     }
@@ -2056,7 +2056,7 @@ local function CreateOptionsTable()
                   disabled = function() if GetCVar("ShowVKeyCastbar") == "1" then return false else return true end end,
                   args = {
                     PlacementX = {
-                      name = L["Healthbar X"],
+                      name = L["Healthbar View X"],
                       order = 1,
                       type = "range",
                       min = -60,
@@ -2072,7 +2072,7 @@ local function CreateOptionsTable()
                       arg = { "settings", "castbar", "x" },
                     },
                     PlacementY = {
-                      name = L["Healthbar Y"],
+                      name = L["Healthbar View Y"],
                       order = 2,
                       type = "range",
                       min = -60,
@@ -2265,7 +2265,7 @@ local function CreateOptionsTable()
                       type = "description",
                       width = "full",
                     },
-                    Header1 = { type = "header", order = 10, name = "Friendly & Neutral Units", },
+                    Header1 = { type = "header", order = 10, name = L["Friendly & Neutral Units"], },
                     FriendlyPlayers = GetTransparencyEntry(L["Friendly Players"], 11, { "nameplate", "alpha", "FriendlyPlayer" }),
                     FriendlyNPCs = GetTransparencyEntry(L["Friendly NPCs"], 12, { "nameplate", "alpha", "FriendlyNPC" }),
                     NeutralNPCs = GetTransparencyEntry(L["Neutral NPCs"], 13, { "nameplate", "alpha", "Neutral" }),
@@ -2274,7 +2274,7 @@ local function CreateOptionsTable()
                     EnemyNPCs = GetTransparencyEntry(L["Enemy NPCs"], 22, { "nameplate", "alpha", "EnemyNPC" }),
                     EnemyElite = GetTransparencyEntry(L["Rares & Elites"], 23, { "nameplate", "alpha", "Elite" }),
                     EnemyBoss = GetTransparencyEntry(L["Bosses"], 24, { "nameplate", "alpha", "Boss" }),
-                    Header3 = { type = "header", order = 30, name = "Minions & By Status", },
+                    Header3 = { type = "header", order = 30, name = L["Minions & By Status"], },
                     Guardians = GetTransparencyEntry(L["Guardians"], 31, { "nameplate", "alpha", "Guardian" }),
                     Pets = GetTransparencyEntry(L["Pets"], 32, { "nameplate", "alpha", "Pet" }),
                     Minus = GetTransparencyEntry(L["Minor"], 33, { "nameplate", "alpha", "Minus" }),
@@ -2824,7 +2824,7 @@ local function CreateOptionsTable()
                   inline = true,
                   args = {
                     X = {
-                      name = L["Healthbar X"],
+                      name = L["Healthbar View X"],
                       order = 1,
                       type = "range",
                       set = SetThemeValue,
@@ -2835,7 +2835,7 @@ local function CreateOptionsTable()
                       isPercent = false,
                     },
                     Y = {
-                      name = L["Healthbar Y"],
+                      name = L["Healthbar View Y"],
                       order = 2,
                       type = "range",
                       set = SetThemeValue,
@@ -4674,18 +4674,18 @@ local function CreateOptionsTable()
 --							width = "full",
 --							name = "ruRU: Need Translator!!"
 --						},
-            Translators7 = {
-              type = "description",
-              order = 10,
-              width = "full",
-              name = "zhCN: y123ao6 (CurseForge)"
-            },
---						Translators8 = {
---							type = "description",
---							order = 11,
---							width = "full",
---							name = "zhTW: Need Translator!!"
---						},
+--            Translators7 = {
+--              type = "description",
+--              order = 10,
+--              width = "full",
+--              name = "zhCN: y123ao6 (CurseForge)"
+--            },
+						Translators8 = {
+							type = "description",
+							order = 11,
+							width = "full",
+							name = "zhTW: gaspy10 (CurseForge)"
+						},
           },
         },
       },
