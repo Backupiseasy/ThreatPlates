@@ -90,7 +90,7 @@ local TEST_UNIT = {
 }
 
 
-function GetTextConfig(config_no)
+function GetConfig(config_no)
   if config_no == 1 then
     return TEST_UNIT[config_no]
   elseif config_no == 2 then

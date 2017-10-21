@@ -27,13 +27,17 @@ local DETECTION_AURAS = {
   [155183] = true, -- Invisibility and Stealth Detection - not really sure if necessary as aura is hidden
   [169902] = true, -- All-Seeing Eye
   [201626] = true, -- Sight Beyond Sight
+  [201746] = true, -- Weapon Scope
   [202568] = true, -- Piercing Vision
   [203149] = true, -- Animal Instincts
   [203761] = true, -- Detector
   [213486] = true, -- Demonic Vision
   [214793] = true, -- Vigilant
   [225649] = true, -- Shadow Sight
+  [232143] = true, -- Demonic Senses
   [232234] = true, -- On High Alert
+  [242962] = true, -- One With the Void
+  [242963] = true, -- One With the Void
 }
 
 ---------------------------------------------------------------------------------------------------

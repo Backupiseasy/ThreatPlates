@@ -4,20 +4,32 @@ local ThreatPlates = NAMESPACE.ThreatPlates
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
-local UnitIsConnected = UnitIsConnected
-local UnitIsUnit = UnitIsUnit
-local UnitGroupRolesAssigned = UnitGroupRolesAssigned
-local RAID_CLASS_COLORS = RAID_CLASS_COLORS
 
+-- Lua APIs
 local floor = floor
 local abs = abs
 
+-- WoW APIs
+local UnitIsConnected = UnitIsConnected
+local UnitIsUnit = UnitIsUnit
+local UnitGroupRolesAssigned = UnitGroupRolesAssigned
+local UnitReaction = UnitReaction
+local UnitCanAttack = UnitCanAttack
+local RAID_CLASS_COLORS = RAID_CLASS_COLORS
+local FACTION_BAR_COLORS = FACTION_BAR_COLORS
+
+-- ThreatPlates APIs
+local TidyPlatesThreat = TidyPlatesThreat
+local SetStyle = TidyPlatesThreat.SetStyle
+local GetUniqueNameplateSetting = ThreatPlates.GetUniqueNameplateSetting
 local TOTEMS = ThreatPlates.TOTEMS
 local OnThreatTable = ThreatPlates.OnThreatTable
-local RGB = ThreatPlates.RGB
 local RGB_P = ThreatPlates.RGB_P
 local IsFriend
 local IsGuildmate
+local ShowQuestUnit
+local IsQuestUnit
+local GetThreatStyle
 
 local reference = {
   FRIENDLY = { NPC = "FriendlyNPC", PLAYER = "FriendlyPlayer", },
@@ -106,26 +118,20 @@ local function GetColorByHealthDeficit(unit)
 end
 
 local function GetColorByClass(unit)
-  local unit_type = unit.type
-  local unit_reaction = unit.reaction
-  local unit_class = unit.class
-
   local db = TidyPlatesThreat.db.profile
-  local c
-  if unit_type == "PLAYER" then
-    if unit_reaction == "HOSTILE" and db.allowClass then
-      c = RAID_CLASS_COLORS[unit_class]
-    elseif unit_reaction == "FRIENDLY" then
-      IsFriend = IsFriend or ThreatPlates.IsFriend
-      IsGuildmate = IsGuildmate or ThreatPlates.IsGuildmate
 
+  local c
+  if unit.type == "PLAYER" then
+    if unit.reaction == "HOSTILE" and db.allowClass then
+      c = RAID_CLASS_COLORS[unit.class]
+    elseif unit.reaction == "FRIENDLY" then
       local db_social = db.socialWidget
       if db_social.ShowFriendColor and IsFriend(unit) then
         c = db_social.FriendColor
       elseif db_social.ShowGuildmateColor and IsGuildmate(unit) then
         c = db_social.GuildmateColor
       elseif db.friendlyClass then
-        c = RAID_CLASS_COLORS[unit_class]
+        c = RAID_CLASS_COLORS[unit.class]
       end
     end
   end
@@ -134,12 +140,47 @@ local function GetColorByClass(unit)
 end
 
 local function GetColorByReaction(unit)
-  local unit_type = unit.type
-  local unit_reaction = unit.reaction
+  local db = TidyPlatesThreat.db.profile.ColorByReaction
 
-  local db = TidyPlatesThreat.db.profile
-  return db.ColorByReaction[reference[unit_reaction][unit_type]]
+  if unit.type == "NPC" and not UnitCanAttack("player", unit.unitid) and UnitReaction("player", unit.unitid) == 3 then
+    -- 1/2 is same color (red), 4 is neutral (yellow),5-8 is same color (green)
+    return db.UnfriendlyFaction
+    --return FACTION_BAR_COLORS[3]
+  end
+
+  return db[reference[unit.reaction][unit.type]]
 end
+
+--local function GetColorByReaction(unit)
+--  local db = TidyPlatesThreat.db.profile
+--  local db_color = db.ColorByReaction
+--
+--  local color
+--  if not UnitIsConnected(unit.unitid) then
+--    color =  db_color.DisconnectedUnit
+--  elseif unit.isTapped then
+--    color =  db_color.TappedUnit
+--  elseif unit.reaction == "FRIENDLY" and unit.type == "PLAYER" then
+--    IsFriend = IsFriend or ThreatPlates.IsFriend
+--    IsGuildmate = IsGuildmate or ThreatPlates.IsGuildmate
+--
+--    local db_social = db.socialWidget
+--    if db_social.ShowFriendColor and IsFriend(unit) then
+--      color =  db_social.FriendColor
+--    elseif db_social.ShowGuildmateColor and IsGuildmate(unit) then
+--      color =  db_social.GuildmateColor
+--    else
+--      -- wrong: next elseif missing here color = db_color[reference[unit.reaction][unit.type]]
+--    end
+--  elseif unit.type == "NPC" and not UnitCanAttack("player", unit.unitid) and UnitReaction("player", unit.unitid) == 3 then
+--    -- 1/2 is same color (red), 4 is neutral (yellow),5-8 is same color (green)
+--    color = FACTION_BAR_COLORS[3]
+--  else
+--    color = db_color[reference[unit.reaction][unit.type]]
+--  end
+--
+--  return color
+--end
 
 --local HEALTHBAR_COLOR_FUNCTIONS = {
 --  --  NameOnly = nil,
@@ -153,24 +194,27 @@ end
 --}
 
 local function SetHealthbarColor(unit)
-  local style, unique_style = TidyPlatesThreat.SetStyle(unit)
+  if not unit.unitid then return end
+
+  local style = unit.TP_Style or SetStyle(unit)
+  local unique_setting = unit.TP_UniqueSetting or GetUniqueNameplateSetting(unit)
   if style == "NameOnly" or style == "NameOnly-Unique" or style == "empty" or style == "etotem" then return end
 
-  local ShowQuestUnit = ThreatPlates.ShowQuestUnit
-  local IsQuestUnit = ThreatPlates.IsQuestUnit
-  local GetThreatStyle = ThreatPlates.GetThreatStyle
+  ShowQuestUnit = ShowQuestUnit or ThreatPlates.ShowQuestUnit
+  IsQuestUnit = IsQuestUnit or ThreatPlates.IsQuestUnit
+  GetThreatStyle = GetThreatStyle or ThreatPlates.GetThreatStyle
+  IsFriend = IsFriend or ThreatPlates.IsFriend
+  IsGuildmate = IsGuildmate or ThreatPlates.IsGuildmate
 
   local db = TidyPlatesThreat.db.profile
+  local db_color = db.ColorByReaction
+
   local c
-  if unit.unitid and not UnitIsConnected(unit.unitid) then
-    c = db.ColorByReaction.DisconnectedUnit
-  elseif unit.isTapped then
-    c = db.ColorByReaction.TappedUnit
-  elseif unit.isTarget and db.targetWidget.ModeHPBar then
+  if unit.isTarget and db.targetWidget.ModeHPBar then
     c = db.targetWidget.HPBarColor
   elseif style == "unique" then
     -- Custom nameplate style defined for unit (does not work for totems right now)
-    if unit.isMarked and unique_style.allowMarked then
+    if unit.isMarked and unique_setting.allowMarked then
       -- Unit is marked
       local db_raidicon = db.settings.raidicon
       c = db_raidicon.hpMarked[unit.raidIcon]
@@ -178,14 +222,19 @@ local function SetHealthbarColor(unit)
       -- Unit is quest target
       c = db.questWidget.HPBarColor
     else
-      if unique_style.UseThreatColor then
+      if not UnitIsConnected(unit.unitid) then
+        c = db_color.DisconnectedUnit
+      elseif unit.isTapped then
+        c = db_color.TappedUnit
+      elseif unique_setting.UseThreatColor then
         -- Threat System is should also be used for custom nameplate (in combat with thread system on)
         c = GetThreatColor(unit, GetThreatStyle(unit))
       end
 
-      if not c and unique_style.useColor then
-        c = unique_style.color
+      if not c and unique_setting.useColor then
+        c = unique_setting.color
       end
+
       -- otherwise color defaults to class or reaction color (or WoW defaults, at the end)
       if not c then
         c = GetColorByClass(unit)
@@ -215,14 +264,21 @@ local function SetHealthbarColor(unit)
       c = GetColorByHealthDeficit(unit)
     else
       -- order is ThreatSystem, ByClass, ByReaction, WoW Default
-      c = GetThreatColor(unit, style)
+      if not UnitIsConnected(unit.unitid) then
+        c = db_color.DisconnectedUnit
+      elseif unit.isTapped then
+        c = db_color.TappedUnit
+      else
+        c = GetThreatColor(unit, style)
+      end
+
       if not c then
         c = GetColorByClass(unit)
       end
+
       if not c then
         c = GetColorByReaction(unit)
       end
-      -- ? c = GetThreatColor_New(unit, style) or GetColorByClass(unit) or GetColorByReaction(unit)
     end
   end
 
@@ -248,5 +304,7 @@ local function SetHealthbarColor(unit)
 end
 
 ThreatPlates.GetColorByHealthDeficit = GetColorByHealthDeficit
+ThreatPlates.GetColorByClass = GetColorByClass
+ThreatPlates.GetColorByReaction = GetColorByReaction
 ThreatPlates.UnitIsOffTanked = UnitIsOffTanked
 TidyPlatesThreat.SetHealthbarColor = SetHealthbarColor

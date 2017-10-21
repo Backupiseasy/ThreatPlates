@@ -70,7 +70,7 @@ local DEFAULT_SETTINGS = {
     verbose = false,
     blizzFadeA = {
       toggle  = true,
-      amount = -0.3
+      amount = 0.7
     },
     blizzFadeS = {
       toggle  = true,
@@ -1231,6 +1231,8 @@ local DEFAULT_SETTINGS = {
         BackgroundUseForegroundColor = false,
         BackgroundOpacity = 0.3, -- old default: 1,
         BackgroundColor = RGB(0, 0, 0),
+        ShowAbsorbs = true,
+        AbsorbColor = RGB(0, 255, 255),
       },
       castnostop = {
         texture = "TP_CastBarLock",

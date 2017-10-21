@@ -62,7 +62,7 @@ EXIT /B %ERRORLEVEL%
 :Print-Help
 @echo on
 @echo Usage: zip.bat ^<options^>
-@echo   package ^<version^>    Create a new version package based on the the current ThreatPlates directory
+@echo   package ^<version^>      Create a new version package based on the the current ThreatPlates directory
 @echo   plain                  Package up the current ThreatPlates directory and install it to the PLAIN environment
 @echo   help                   Print this help message
 @echo off

@@ -166,6 +166,54 @@ local function MigrateNamesColor(profile_name, profile)
   end
 end
 
+local function MigrationBlizzFadeA(profile_name, profile)
+  if profile.blizzFadeA then
+    if not profile.nameplate then
+      profile.nameplate = {}
+    end
+
+    -- default for blizzFadeA.toggle was true
+    if profile.blizzFadeA.toggle ~= nil then
+      if not profile.nameplate.toggle then
+        profile.nameplate.toggle = {}
+      end
+
+      profile.nameplate.toggle.NonTargetA = profile.blizzFadeA.toggle
+    end
+
+    -- default for blizzFadeA.amount was -0.3
+    if profile.blizzFadeA.amount ~= nil then
+      if not profile.nameplate.alpha then
+        profile.nameplate.alpha = {}
+      end
+
+      local db = profile.nameplate.alpha
+      local amount = profile.blizzFadeA.amount
+      if amount <= 0 then
+        db.NonTarget = min(1, 1 + amount)
+      end
+    end
+
+    profile.blizzFade = nil
+  end
+end
+
+local function MigrationTargetScale(profile_name, profile)
+  if profile.nameplate and profile.nameplate.scale then
+    -- default nameplate.scale.Target was 1
+    local value = profile.nameplate.scale.Target
+    if value ~= nil then
+      profile.nameplate.scale.Target = value - 1
+    end
+
+    -- default nameplate.scale.NoTarget was 1
+    local value = profile.nameplate.scale.NoTarget
+    if value ~= nil then
+      profile.nameplate.scale.NoTarget = value - 1
+    end
+  end
+end
+
 local function MigrateCustomTextShow(profile_name, profile)
   -- default for db.show was true
   if profile.settings and profile.settings.customtext and profile.settings.customtext.show ~= nil then
@@ -189,12 +237,16 @@ end
 local DEPRECATED_SETTINGS = {
   MigrateNamesColor, -- settings.name.color
   MigrateCustomTextShow, -- settings.customtext.show
+  MigrationBlizzFadeA, -- blizzFadeA.toggle and blizzFadeA.amount
+  MigrationTargetScale, -- nameplate.scale.Target/NoTarget
   { "alphaFeatures" },
   { "alphaFeatureHeadlineView" },
   { "alphaFeatureAuraWidget2" },
   -- { "alphaFriendlyNameOnly" },
-  -- { "HeadlineView", "name", "width" },  -- in a future release
-  -- { "HeadlineView", "name", "height" }, -- in a future release
+  -- { "HeadlineView", "blizzFading" },    -- in release 8.6 (removed in 8.5.1)
+  -- { "HeadlineView", "blizzFadingAlpha"},-- in release 8.6 (removed in 8.5.1)
+  -- { "HeadlineView", "name", "width" },  -- in release 8.6 (removed in 8.5.0)
+  -- { "HeadlineView", "name", "height" }, -- in release 8.6 (removed in 8.5.0)
 }
 
 local function MigrateDatabase()

@@ -4,6 +4,9 @@ local t = ns.ThreatPlates
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
+-- Lua APIs
+local abs = abs
+
 local LibStub = LibStub
 
 local L = t.L
@@ -450,40 +453,40 @@ local function GetSizeEntryTheme(pos, setting)
   return entry
 end
 
-local function GetScaleEntryBase(pos, setting)
+local function GetScaleEntry(name, pos, setting, func_disabled, min_value, max_value)
+  local soft_min = min_value or 0.3
+  local soft_max = max_value or 2.0
+
   local entry = {
-    name = L["Scale"],
+    name = name,
     order = pos,
     type = "range",
-    arg = setting,
     step = 0.05,
-    softMin = 0.6,
-    softMax = 1.3,
+    softMin = soft_min,
+    softMax = soft_max,
     isPercent = true,
     arg = setting,
+    disabled = func_disabled,
   }
   return entry
 end
 
-local function GetScaleEntryBase200(pos, setting)
-  local entry = GetScaleEntryBase(pos, setting)
-  entry.softMax = 2.0
+local function GetScaleEntryDefault(pos, setting, func_disabled)
+  return GetScaleEntry(L["Scale"], pos, setting, func_disabled)
+end
+
+local function GetScaleEntryOffset(pos, setting, func_disabled)
+  return GetScaleEntry(L["Scale"], pos, setting, func_disabled, -1.7, 2.0)
+end
+
+local function GetScaleEntryWidget(name, pos, setting, func_disabled)
+  local entry = GetScaleEntry(name, pos, setting, func_disabled)
+  entry.width = "full"
   return entry
 end
 
-local function GetUnitScaleEntry(entry_name, pos, setting)
-  local entry = {
-    name = entry_name,
-    order = pos,
-    type = "range",
-    --width = "full",
-    step = 0.05,
-    softMin = 0.6,
-    softMax = 1.3,
-    isPercent = true,
-    arg = setting,
-  }
-  return entry
+local function GetScaleEntryThreat(name, pos, setting, func_disabled)
+  return GetScaleEntry(name, pos, setting, func_disabled, -1.7, 2.0)
 end
 
 local function GetAnchorEntry(pos, setting, anchor, func_disabled)
@@ -498,54 +501,46 @@ local function GetAnchorEntry(pos, setting, anchor, func_disabled)
   return entry
 end
 
-local function GetAlphaEntry(pos, setting, func_disabled)
+local function GetTransparencyEntry(name, pos, setting, func_disabled, lower_limit)
+  local min_value = (lower_limit and -1) or 0
+
   local entry = {
-    name = L["Alpha"],
+    name = name,
     order = pos,
     type = "range",
     step = 0.05,
-    min = 0,
+    min = min_value,
     max = 1,
     isPercent = true,
-    arg = { setting, "alpha" },
+    set = function(info, val) SetValue(info, abs(val - 1)) end,
+    get = function(info) return 1 - GetValue(info) end,
+    arg = setting,
     disabled = func_disabled,
   }
   return entry
 end
 
-local function GetAlphaEntryBase(pos, setting)
-  local entry = {
-    name = L["Alpha"],
-    order = pos,
-    type = "range",
-    step = 0.05,
-    min = 0,
-    max = 1,
-    isPercent = true,
-    arg = setting
-  }
-  return entry
+local function GetTransparencyEntryOffset(pos, setting, func_disabled)
+  return GetTransparencyEntry(L["Transparency"], pos, setting, func_disabled, true)
 end
 
-local function GetAlphaEntryUnit(entry_name, pos, setting)
-  local entry = {
-    name = entry_name,
-    order = pos,
-    type = "range",
-    step = 0.05,
-    min = 0,
-    max = 1,
-    isPercent = true,
-    arg = setting,
-  }
-  return entry
+local function GetTransparencyEntryDefault(pos, setting, func_disabled)
+  return GetTransparencyEntry(L["Transparency"], pos, setting, func_disabled)
+end
+
+local function GetTransparencyEntryWidget(pos, setting, func_disabled)
+  return GetTransparencyEntry(L["Transparency"], pos, { setting, "alpha" }, func_disabled)
+end
+
+local function GetTransparencyEntryThreat(name, pos, setting, func_disabled)
+  return GetTransparencyEntry(name, pos, setting, func_disabled, true)
 end
 
 local function GetPlacementEntryTheme(pos, setting, hv_mode)
   local x_name, y_name
   if hv_mode == true then
-    x_name = L["Healthbar X"]
-    y_name = L["Healthbar Y"]
+    x_name = L["Healthbar View X"]
+    y_name = L["Healthbar View Y"]
   else
     x_name = L["X"]
     y_name = L["Y"]
@@ -572,8 +567,8 @@ end
 local function GetPlacementEntryWidget(pos, widget_info, hv_mode)
   local x_name, y_name
   if hv_mode == true then
-    x_name = L["Healthbar X"]
-    y_name = L["Healthbar Y"]
+    x_name = L["Healthbar View X"]
+    y_name = L["Healthbar View Y"]
   else
     x_name = L["X"]
     y_name = L["Y"]
@@ -608,8 +603,8 @@ local function GetWidgetOffsetEntry(pos, widget_info)
     type = "group",
     inline = true,
     args = {
-      HealthbarX = { type = "range", order = 1, name = L["Healthbar X"], min = -120, max = 120, step = 1, arg = { widget_info, "x" } },
-      HealthbarY = { type = "range", order = 2, name = L["Healthbar Y"], min = -120, max = 120, step = 1, arg = { widget_info, "y" } },
+      HealthbarX = { type = "range", order = 1, name = L["Healthbar View X"], min = -120, max = 120, step = 1, arg = { widget_info, "x" } },
+      HealthbarY = { type = "range", order = 2, name = L["Healthbar View Y"], min = -120, max = 120, step = 1, arg = { widget_info, "y" } },
       HeadlineViewX = { type = "range", order = 3, name = L["Headline View X"], min = -120, max = 120, step = 1, arg = { widget_info, "x_hv" } },
       HeadlineViewY = { type = "range", order = 4, name = L["Headline View Y"], min = -120, max = 120, step = 1, arg = { widget_info, "y_hv" } },
     }
@@ -738,7 +733,7 @@ end
 
 local function AddLayoutOptions(args, pos, widget_info)
   args.Sizing = GetSizeEntry(pos, widget_info)
-  args.Alpha = GetAlphaEntry(pos + 10, widget_info)
+  args.Alpha = GetTransparencyEntryWidget(pos + 10, widget_info)
   args.Placement = GetPlacementEntryWidget(pos + 20, widget_info, true)
 end
 
@@ -1122,7 +1117,7 @@ local function CreateTabGeneralSettings()
         },
       },
       SpecialUnits = {
-        name = L["Hide Special Units"],
+        name = L["Hide Nameplates"],
         type = "group",
         order = 50,
         inline = true,
@@ -1133,6 +1128,13 @@ local function CreateTabGeneralSettings()
           HideElite = { name = L["Rares & Elites"], order = 2, type = "toggle", arg = { "Visibility", "HideElite" }, },
           HideBoss = { name = L["Bosses"], order = 3, type = "toggle", arg = { "Visibility", "HideBoss" }, },
           HideTapped = { name = L["Tapped Units"], order = 4, type = "toggle", arg = { "Visibility", "HideTapped" }, },
+          ModeHideFriendlyInCombat = {
+            name = L["Friendly Units in Combat"],
+            order = 10,
+            type = "toggle",
+            width = "double",
+            arg = { "Visibility", "HideFriendlyInCombat" }
+          },
         },
       },
       TidyPlates = {
@@ -1226,10 +1228,9 @@ local function CreateTabGeneralSettings()
   return args
 end
 
--- Return the Options table
-local function CreateOptionsTable()
+local function CreateSpecRoles()
   -- Create a list of specs for the player's class
-  local dialog_specs = {
+  local result = {
     Automatic_Spec_Detection = {
       name = L["Determine your role (tank/dps/healing) automatically based on current spec."],
       type = "toggle",
@@ -1248,7 +1249,16 @@ local function CreateOptionsTable()
 
   for index = 1, GetNumSpecializations() do
     local id, spec_name, description, icon, background, role = GetSpecializationInfo(index)
-    dialog_specs["SpecGroup"]["args"][spec_name] = {
+    result.SpecGroup.args[spec_name] = {
+      name = L["Open Blizzard Settings" .. index],
+      order = 90 + index,
+      type = "execute",
+      func = function()
+        InterfaceOptionsFrame_OpenToCategory(_G["InterfaceOptionsNamesPanel"])
+        LibStub("AceConfigDialog-3.0"):Close("Tidy Plates: Threat Plates");
+      end,
+    }
+    result.SpecGroup.args[spec_name] = {
       name = spec_name,
       type = "group",
       inline = true,
@@ -1262,11 +1272,7 @@ local function CreateOptionsTable()
           desc = L["Sets your spec "] .. spec_name .. L[" to tanking."],
           get = function()
             local spec = TidyPlatesThreat.db.char.spec[index]
-            if spec == nil then
-              return t.SPEC_ROLES[t.Class()][index]
-            else
-              return spec
-            end
+            return (spec == nil and role == "TANK") or spec
           end,
           set = function() TidyPlatesThreat.db.char.spec[index] = true; t.Update() end,
         },
@@ -1277,11 +1283,7 @@ local function CreateOptionsTable()
           desc = L["Sets your spec "] .. spec_name .. L[" to DPS."],
           get = function()
             local spec = TidyPlatesThreat.db.char.spec[index]
-            if spec == nil then
-              return not t.SPEC_ROLES[t.Class()][index]
-            else
-              return not spec
-            end
+            return (spec == nil and role ~= "TANK") or not spec
           end,
           set = function() TidyPlatesThreat.db.char.spec[index] = false; t.Update() end,
         },
@@ -1289,6 +1291,11 @@ local function CreateOptionsTable()
     }
   end
 
+  return result
+end
+
+-- Return the Options table
+local function CreateOptionsTable()
   if not options then
     options = {
       name = GetAddOnMetadata("TidyPlates_ThreatPlates", "title"),
@@ -1336,6 +1343,22 @@ local function CreateOptionsTable()
                     },
                   },
                 },
+                ShowByStatus = {
+                  name = L["Force View By Status"],
+                  order = 15,
+                  type = "group",
+                  inline = true,
+                  disabled = function() return not TidyPlatesThreat.db.profile.HeadlineView.ON  end,
+                  args = {
+                    ModeOnTarget = {
+                      name = L["On Target"],
+                      order = 1,
+                      type = "toggle",
+                      width = "double",
+                      arg = { "HeadlineView", "ForceHealthbarOnTarget" }
+                    },
+                  }
+                },
                 HealthBarGroup = {
                   name = L["Textures"],
                   type = "group",
@@ -1359,6 +1382,20 @@ local function CreateOptionsTable()
                       values = AceGUIWidgetLSMlists.statusbar,
                       set = SetThemeValue,
                       arg = { "settings", "healthbar", "backdrop" },
+                    },
+                    ShowAbsorb = {
+                      type = "toggle",
+                      order = 11,
+                      name = L["Show Absorbs"],
+                      arg = { "settings", "healthbar", "ShowAbsorbs" },
+                    },
+                    AbsorbColor = {
+                      name = L["Color"],
+                      order = 12,
+                      type = "color",
+                      get = GetColor,
+                      set = SetColor,
+                      arg = { "settings", "healthbar", "AbsorbColor" },
                     },
                     Spacer1 = GetSpacerEntry(14),
                     BGColorText = {
@@ -1395,7 +1432,7 @@ local function CreateOptionsTable()
                       disabled = function() return db.settings.healthbar.BackgroundUseForegroundColor end,
                     },
                     BackgroundOpacity = {
-                      name = L["Background Opacity"],
+                      name = L["Background Transparency"],
                       order = 40,
                       type = "range",
                       min = 0,
@@ -1405,13 +1442,12 @@ local function CreateOptionsTable()
                       arg = { "settings", "healthbar", "BackgroundOpacity" },
                     },
                     Header1 = {
-                      type = "header",
+                      name = L["Borders"],
                       order = 50,
-                      name = "",
+                      type = "header",
                     },
                     HealthBorderToggle = {
                       type = "toggle",
-                      width = "double",
                       order = 60,
                       name = L["Show Border"],
                       set = SetThemeValue,
@@ -1419,7 +1455,6 @@ local function CreateOptionsTable()
                     },
                     HealthBorder = {
                       type = "select",
-                      width = "double",
                       order = 70,
                       name = L["Normal Border"],
                       set = SetThemeValue,
@@ -1427,35 +1462,23 @@ local function CreateOptionsTable()
                       values = { TP_HealthBarOverlay = "Default", TP_HealthBarOverlayThin = "Thin" },
                       arg = { "settings", "healthborder", "texture" },
                     },
-                    Header2 = {
-                      type = "header",
-                      order = 75,
-                      name = "",
-                    },
                     EliteHealthBorderToggle = {
                       type = "toggle",
-                      width = "double",
                       order = 80,
                       name = L["Show Elite Border"],
                       arg = { "settings", "elitehealthborder", "show" },
                     },
                     EliteBorder = {
                       type = "select",
-                      width = "double",
                       order = 90,
                       name = L["Elite Border"],
                       disabled = function() if db.settings.elitehealthborder.show then return false else return true end end,
                       values = { TP_HealthBarEliteOverlay = "Default", TP_HealthBarEliteOverlayThin = "Thin" },
                       arg = { "settings", "elitehealthborder", "texture" }
                     },
-                    Header3 = {
-                      type = "header",
-                      order = 95,
-                      name = "",
-                    },
+                    Spacer2 = GetSpacerEntry(99),
                     Mouseover = {
                       type = "select",
-                      width = "double",
                       order = 100,
                       name = L["Mouseover"],
                       set = SetThemeValue,
@@ -1791,26 +1814,33 @@ local function CreateOptionsTable()
                   args = CreateHeadlineViewShowEntry(),
                 },
                 ShowByStatus = {
-                  name = L["Show By Status"],
+                  name = L["Force View By Status"],
                   order = 15,
                   type = "group",
                   inline = true,
                   disabled = function() return not TidyPlatesThreat.db.profile.HeadlineView.ON  end,
                   args = {
-                    ModeOnTarget = {
-                    name = L["Force Healthbar on Target"],
-                    order = 1,
-                    type = "toggle",
-                    width = "double",
-                    arg = { "HeadlineView", "ForceHealthbarOnTarget" }
-                    },
                     ModeOoC = {
-                      name = L["Force Headline View while Out-of-Combat"],
-                      order = 2,
+                      name = L["Out of Combat"],
+                      order = 1,
                       type = "toggle",
                       width = "double",
                       arg = { "HeadlineView", "ForceOutOfCombat" }
-                    }
+                    },
+                    ModeFriendlyInCombat = {
+                      name = L["On Friendly Units in Combat"],
+                      order = 2,
+                      type = "toggle",
+                      width = "double",
+                      arg = { "HeadlineView", "ForceFriendlyInCombat" }
+                    },
+                    ModeCNA = {
+                      name = L["On Enemy Units You Cannot Attack"],
+                      order = 3,
+                      type = "toggle",
+                      width = "double",
+                      arg = { "HeadlineView", "ForceNonAttackableUnits" }
+                    },
                   }
                 },
                 Appearance = {
@@ -1843,44 +1873,22 @@ local function CreateOptionsTable()
                         },
                       },
                     },
-                    Alpha = {
-                      name = L["Alpha & Scaling"],
+                    Transparency = {
+                      name = L["Transparency & Scaling"],
                       order = 40,
                       type = "group",
                       inline = true,
                       disabled = function() return not TidyPlatesThreat.db.profile.HeadlineView.ON  end,
                       args = {
-                        Alpha = {
-                          name = L["Use alpha settings of healthbar view also to headline view."],
+                        Transparency = {
+                          name = L["Use transparency settings of Healthbar View also for Headline View."],
                           type = "toggle",
                           order = 1,
                           width = "full",
                           arg = { "HeadlineView", "useAlpha" },
                         },
-                        Enable = {
-                          name = L["Enable Blizzard 'On-Target' Fading"],
-                          type = "toggle",
-                          desc = L["Enabling this will allow you to set the alpha adjustment for non-target names in headline view."],
-                          descStyle = "inline",
-                          order = 2,
-                          width = "double",
-                          arg = { "HeadlineView", "blizzFading" },
-                          disabled = function() return db.HeadlineView.useAlpha end
-                        },
-                        blizzFade = {
-                          name = L["Non-Target Alpha"],
-                          type = "range",
-                          order = 3,
-                          min = -1,
-                          max = 0,
-                          step = 0.01,
-                          isPercent = true,
-                          arg = { "HeadlineView", "blizzFadingAlpha" },
-                          disabled = function() return db.HeadlineView.useAlpha end
-                        },
-                        Spacer = GetSpacerEntry(5),
                         Scaling = {
-                          name = L["Use scaling settings of healthbar view also to headline view."],
+                          name = L["Use scale settings of Healthbar View also for Headline View."],
                           type = "toggle",
                           order = 10,
                           width = "full",
@@ -1946,7 +1954,7 @@ local function CreateOptionsTable()
                   disabled = function() if GetCVar("ShowVKeyCastbar") == "1" then return false else return true end end,
                   args = {
                     CastBarTexture = {
-                      name = L["Castbar"],
+                      name = L["Foreground Texture"],
                       type = "select",
                       order = 1,
                       dialogControl = "LSM30_Statusbar",
@@ -1954,10 +1962,67 @@ local function CreateOptionsTable()
                       set = SetThemeValue,
                       arg = { "settings", "castbar", "texture" },
                     },
-                    Spacer1 = GetSpacerEntry(5),
+                    BGTexture = {
+                      name = L["Background Texture"],
+                      type = "select",
+                      order = 10,
+                      dialogControl = "LSM30_Statusbar",
+                      values = AceGUIWidgetLSMlists.statusbar,
+                      set = SetThemeValue,
+                      arg = { "settings", "castbar", "backdrop" },
+                    },
+                    Spacer1 = GetSpacerEntry(14),
+                    BGColorText = {
+                      type = "description",
+                      order = 15,
+                      width = "single",
+                      name = L["Background Color:"],
+                    },
+                    BGColorForegroundToggle = {
+                      name = L["Same as Foreground"],
+                      order = 20,
+                      type = "toggle",
+                      desc = L["Use the castbar's foreground color also for the background."],
+                      set = SetThemeValue,
+                      arg = { "settings", "castbar", "BackgroundUseForegroundColor" },
+                    },
+                    BGColorCustomToggle = {
+                      name = L["Custom"],
+                      order = 30,
+                      type = "toggle",
+                      width = "half",
+                      desc = L["Use a custom color for the castbar's background."],
+                      set = function(info, val)
+                        SetThemeValue(info, not val)
+                      end,
+                      get = function(info, val)
+                        return not GetValue(info, val)
+                      end,
+                      arg = { "settings", "castbar", "BackgroundUseForegroundColor" },
+                    },
+                    BGColorCustom = {
+                      name = L["Color"], type = "color",	order = 35,	get = GetColor, set = SetColor, arg = {"settings", "castbar", "BackgroundColor"},
+                      width = "half",
+                      disabled = function() return db.settings.castbar.BackgroundUseForegroundColor end,
+                    },
+                    BackgroundOpacity = {
+                      name = L["Background Transparency"],
+                      order = 40,
+                      type = "range",
+                      min = 0,
+                      max = 1,
+                      step = 0.01,
+                      isPercent = true,
+                      arg = { "settings", "castbar", "BackgroundOpacity" },
+                    },
+                    Header1 = {
+                      name = L["Borders"],
+                      order = 50,
+                      type = "header",
+                    },
                     CastBarBorderToggle = {
                       type = "toggle",
-                      order = 10,
+                      order = 60,
                       name = L["Show Border"],
                       desc = L["Shows a border around the castbar of nameplates (requires /reload)."],
                       set = SetThemeValue,
@@ -1965,7 +2030,7 @@ local function CreateOptionsTable()
                     },
                     CastBarBorder = {
                       type = "select",
-                      order = 20,
+                      order = 70,
                       name = L["Border Texture"],
                       set = SetThemeValue,
                       disabled = function() if db.settings.castborder.show then return false else return true end end,
@@ -1974,7 +2039,7 @@ local function CreateOptionsTable()
                     },
                     CastBarOverlay = {
                       name = L["Show Overlay for Uninterruptable Casts"],
-                      order = 30,
+                      order = 80,
                       type = "toggle",
                       width = "double",
                       set = SetThemeValue,
@@ -1991,7 +2056,7 @@ local function CreateOptionsTable()
                   disabled = function() if GetCVar("ShowVKeyCastbar") == "1" then return false else return true end end,
                   args = {
                     PlacementX = {
-                      name = L["Healthbar X"],
+                      name = L["Healthbar View X"],
                       order = 1,
                       type = "range",
                       min = -60,
@@ -2007,7 +2072,7 @@ local function CreateOptionsTable()
                       arg = { "settings", "castbar", "x" },
                     },
                     PlacementY = {
-                      name = L["Healthbar Y"],
+                      name = L["Healthbar View Y"],
                       order = 2,
                       type = "range",
                       min = -60,
@@ -2093,130 +2158,105 @@ local function CreateOptionsTable()
                 },
               },
             },
-            Alpha = {
-              name = L["Alpha"],
+            Transparency = {
+              name = L["Transparency"],
               type = "group",
               order = 40,
               args = {
-                BlizzFadeEnable = {
-                  name = L["Blizzard Target Fading"],
-                  type = "group",
-                  order = 1,
-                  inline = true,
-                  args = {
-                    Enable = {
-                      name = L["Enable Blizzard 'On-Target' Fading"],
-                      type = "toggle",
-                      desc = L["Enabling this will allow you to set the alpha adjustment for non-target nameplates."],
-                      descStyle = "inline",
-                      order = 1,
-                      width = "full",
-                      arg = { "blizzFadeA", "toggle" },
-                    },
-                    blizzFade = {
-                      name = L["Non-Target Alpha"],
-                      type = "range",
-                      order = 2,
-                      width = "full",
-                      disabled = function() return not db.blizzFadeA.toggle end,
-                      min = -1,
-                      max = 0,
-                      step = 0.01,
-                      isPercent = true,
-                      arg = { "blizzFadeA", "amount" },
-                    },
-                  },
-                },
-                Target = {
-                  name = "Target and No Target",
+                Situational = {
+                  name = L["Situational Transparency"],
                   type = "group",
                   order = 10,
                   inline = true,
                   args = {
-                    CustomAlphaTarget = {
-                      name = L["Custom Target Alpha"],
-                      type = "toggle",
-                      desc = L["If enabled your target's alpha will always be the setting below."],
-                      descStyle = "inline",
-                      order = 1,
+                    Help = {
+                      name = L["Change the transparency of nameplates in certain situations, overwriting all other settings."],
+                      order = 0,
+                      type = "description",
                       width = "full",
-                      arg = { "nameplate", "toggle", "TargetA" },
                     },
-                    CustomAlphaTargetSet = {
-                      name = "",
-                      type = "range",
-                      order = 2,
-                      width = "full",
-                      disabled = function() return not db.nameplate.toggle.TargetA end,
-                      min = 0,
-                      max = 1,
-                      step = 0.01,
-                      isPercent = true,
-                      arg = { "nameplate", "alpha", "Target" },
-                    },
-                    CustomAlphaNoTarget = {
-                      name = L["Custom No-Target Alpha"],
-                      type = "toggle",
-                      desc = L["If enabled your nameplates alpha will always be the setting below when you have no target."],
-                      descStyle = "inline",
-                      order = 3,
-                      width = "full",
-                      arg = { "nameplate", "toggle", "NoTargetA" },
-                    },
-                    CustomAlphaNoTargetSet = {
-                      name = "",
-                      type = "range",
-                      order = 4,
-                      width = "full",
-                      disabled = function() return not db.nameplate.toggle.NoTargetA end,
-                      min = 0,
-                      max = 1,
-                      step = 0.01,
-                      isPercent = true,
-                      arg = { "nameplate", "alpha", "NoTarget" },
-                    },
-                  },
-                },
-                Options = {
-                  name = L["Alpha by Status"],
-                  type = "group",
-                  order = 20,
-                  inline = true,
-                  args = {
                     MarkedUnitEnable = {
                       name = L["Target Marked"],
-                      type = "toggle",
                       order = 10,
+                      type = "toggle",
                       arg = { "nameplate", "toggle", "MarkedA" },
                     },
-                    MarkedUnitAlpha = GetAlphaEntryBase(11, { "nameplate", "alpha", "Marked" }),
+                    MarkedUnitAlpha = GetTransparencyEntryDefault(11, { "nameplate", "alpha", "Marked" }),
                     MouseoverUnitEnable = {
                       name = L["Mouseover"],
                       order = 20,
                       type = "toggle",
                       arg = { "nameplate", "toggle", "MouseoverUnitAlpha" },
                     },
-                    MouseoverUnitAlpha = GetAlphaEntryBase(21, { "nameplate", "alpha", "MouseoverUnit" }),
+                    MouseoverUnitAlpha = GetTransparencyEntryDefault(21, { "nameplate", "alpha", "MouseoverUnit" }),
                     CastingFriendlyUnitEnable = {
                       name = L["Friendly Casting"],
                       order = 30,
                       type = "toggle",
                       arg = { "nameplate", "toggle", "CastingUnitAlpha" },
                     },
-                    CastingFriendlyUnitAlpha = GetAlphaEntryBase(31, { "nameplate", "alpha", "CastingUnit" }),
+                    CastingFriendlyUnitAlpha = GetTransparencyEntryDefault(31, { "nameplate", "alpha", "CastingUnit" }),
                     CastingEnemyUnitEnable = {
                       name = L["Enemy Casting"],
                       order = 40,
                       type = "toggle",
                       arg = { "nameplate", "toggle", "CastingEnemyUnitAlpha" },
                     },
-                    CastingEnemyUnitAlpha = GetAlphaEntryBase(41, { "nameplate", "alpha", "CastingEnemyUnit" }),
+                    CastingEnemyUnitAlpha = GetTransparencyEntryDefault(41, { "nameplate", "alpha", "CastingEnemyUnit" }),
+                  },
+                },
+                Target = {
+                  name = L["Target-based Transparency"],
+                  type = "group",
+                  order = 20,
+                  inline = true,
+                  args = {
+                    Help = {
+                      name = L["Change the transparency of nameplates depending on whether a target unit is selected or not. As default, this transparency is added to the unit base transparency."],
+                      order = 0,
+                      type = "description",
+                      width = "full",
+                    },
+                    AlphaTarget = {
+                      name = L["Target"],
+                      order = 10,
+                      type = "toggle",
+                      desc = L["The target nameplate's transparency if a target unit is selected."],
+                      arg = { "nameplate", "toggle", "TargetA" },
+                    },
+                    AlphaTargetSet = GetTransparencyEntryOffset(11, { "nameplate", "alpha", "Target" }),
+                    AlphaNonTarget = {
+                      name = L["Non-Target"],
+                      order = 20,
+                      type = "toggle",
+                      desc = L["The transparency of non-target nameplates if a target unit is selected."],
+                      arg = { "nameplate", "toggle", "NonTargetA" },
+                    },
+                    AlphaNonTargetSet = GetTransparencyEntryOffset(21, { "nameplate", "alpha", "NonTarget" }),
+                    AlphaNoTarget = {
+                      name = L["No Target"],
+                      order = 30,
+                      type = "toggle",
+                      desc = L["The transparency of all nameplates if you have no target unit selected."],
+                      arg = { "nameplate", "toggle", "NoTargetA" },
+                    },
+                    AlphaNoTargetSet = GetTransparencyEntryOffset(32, { "nameplate", "alpha", "NoTarget" }),
+                    Spacer = GetSpacerEntry(40),
+                    AddTargetAlpha = {
+                      --name = L["Absolut Transparency"],
+                      name = L["Use target-based transparency as absolute transparency and ignore unit base transparency."],
+                      order = 50,
+                      type = "toggle",
+                      width = "full",
+                      --desc = L["Uses the target-based transparency as absolute transparency and ignore unit base transparency."],
+                      arg = { "nameplate", "alpha", "AbsoluteTargetAlpha" },
+                    },
                   },
                 },
                 NameplateAlpha = {
-                  name = L["Unit Base Alpha"],
+                  name = L["Unit Base Transparency"],
                   type = "group",
-                  order = 40,
+                  order = 30,
                   inline = true,
                   args = {
                     Help = {
@@ -2225,20 +2265,20 @@ local function CreateOptionsTable()
                       type = "description",
                       width = "full",
                     },
-                    Header1 = { type = "header", order = 10, name = "Friendly & Neutral Units", },
-                    FriendlyPlayers = GetAlphaEntryUnit(L["Friendly Players"], 11, { "nameplate", "alpha", "FriendlyPlayer" }),
-                    FriendlyNPCs = GetAlphaEntryUnit(L["Friendly NPCs"], 12, { "nameplate", "alpha", "FriendlyNPC" }),
-                    NeutralNPCs = GetAlphaEntryUnit(L["Neutral NPCs"], 13, { "nameplate", "alpha", "Neutral" }),
+                    Header1 = { type = "header", order = 10, name = L["Friendly & Neutral Units"], },
+                    FriendlyPlayers = GetTransparencyEntry(L["Friendly Players"], 11, { "nameplate", "alpha", "FriendlyPlayer" }),
+                    FriendlyNPCs = GetTransparencyEntry(L["Friendly NPCs"], 12, { "nameplate", "alpha", "FriendlyNPC" }),
+                    NeutralNPCs = GetTransparencyEntry(L["Neutral NPCs"], 13, { "nameplate", "alpha", "Neutral" }),
                     Header2 = { type = "header", order = 20, name = L["Enemy Units"], },
-                    EnemyPlayers = GetAlphaEntryUnit(L["Enemy Players"], 21, { "nameplate", "alpha", "EnemyPlayer" }),
-                    EnemyNPCs = GetAlphaEntryUnit(L["Enemy NPCs"], 22, { "nameplate", "alpha", "EnemyNPC" }),
-                    EnemyElite = GetAlphaEntryUnit(L["Rares & Elites"], 23, { "nameplate", "alpha", "Elite" }),
-                    EnemyBoss = GetAlphaEntryUnit(L["Bosses"], 24, { "nameplate", "alpha", "Boss" }),
-                    Header3 = { type = "header", order = 30, name = "Minions & By Status", },
-                    Guardians = GetAlphaEntryUnit(L["Guardians"], 31, { "nameplate", "alpha", "Guardian" }),
-                    Pets = GetAlphaEntryUnit(L["Pets"], 32, { "nameplate", "alpha", "Pet" }),
-                    Minus = GetAlphaEntryUnit(L["Minor"], 33, { "nameplate", "alpha", "Minus" }),
-                    Tapped =  GetAlphaEntryUnit(L["Tapped Units"], 41, { "nameplate", "alpha", "Tapped" }),
+                    EnemyPlayers = GetTransparencyEntry(L["Enemy Players"], 21, { "nameplate", "alpha", "EnemyPlayer" }),
+                    EnemyNPCs = GetTransparencyEntry(L["Enemy NPCs"], 22, { "nameplate", "alpha", "EnemyNPC" }),
+                    EnemyElite = GetTransparencyEntry(L["Rares & Elites"], 23, { "nameplate", "alpha", "Elite" }),
+                    EnemyBoss = GetTransparencyEntry(L["Bosses"], 24, { "nameplate", "alpha", "Boss" }),
+                    Header3 = { type = "header", order = 30, name = L["Minions & By Status"], },
+                    Guardians = GetTransparencyEntry(L["Guardians"], 31, { "nameplate", "alpha", "Guardian" }),
+                    Pets = GetTransparencyEntry(L["Pets"], 32, { "nameplate", "alpha", "Pet" }),
+                    Minus = GetTransparencyEntry(L["Minor"], 33, { "nameplate", "alpha", "Minus" }),
+                    Tapped =  GetTransparencyEntry(L["Tapped Units"], 41, { "nameplate", "alpha", "Tapped" }),
                   },
                 },
               },
@@ -2248,96 +2288,98 @@ local function CreateOptionsTable()
               type = "group",
               order = 50,
               args = {
-                Target = {
-                  name = "Target and No Target",
+                Situational = {
+                  name = L["Situational Scale"],
                   type = "group",
                   order = 10,
                   inline = true,
                   args = {
-                    CustomScaleTarget = {
-                      name = L["Custom Target Scale"],
-                      type = "toggle",
-                      desc = L["If enabled your target's scale will always be the setting below."],
-                      descStyle = "inline",
-                      order = 1,
+                    Help = {
+                      name = L["Change the scale of nameplates in certain situations, overwriting all other settings."],
+                      order = 0,
+                      type = "description",
                       width = "full",
-                      arg = { "nameplate", "toggle", "TargetS" },
                     },
-                    CustomScaleTargetSet = {
-                      name = "",
-                      type = "range",
-                      order = 2,
-                      width = "full",
-                      disabled = function() return not db.nameplate.toggle.TargetS end,
-                      step = 0.05,
-                      softMin = 0.6,
-                      softMax = 1.3,
-                      isPercent = true,
-                      arg = { "nameplate", "scale", "Target" },
-                    },
-                    CustomScaleNoTarget = {
-                      name = L["Custom No-Target Scale"],
-                      type = "toggle",
-                      desc = L["If enabled your nameplates scale will always be the setting below when you have no target."],
-                      descStyle = "inline",
-                      order = 3,
-                      width = "full",
-                      arg = { "nameplate", "toggle", "NoTargetS" },
-                    },
-                    CustomScaleNoTargetSet = {
-                      name = "",
-                      type = "range",
-                      order = 4,
-                      width = "full",
-                      disabled = function() return not db.nameplate.toggle.NoTargetS end,
-                      step = 0.05,
-                      softMin = 0.6,
-                      softMax = 1.3,
-                      isPercent = true,
-                      arg = { "nameplate", "scale", "NoTarget" },
-                    },
-                  },
-                },
-                Options = {
-                  name = L["Scale by Status"],
-                  type = "group",
-                  order = 20,
-                  inline = true,
-                  args = {
-                    CustomScaleMarked = {
+                    MarkedUnitEnable = {
                       name = L["Target Marked"],
                       type = "toggle",
                       order = 10,
                       arg = { "nameplate", "toggle", "MarkedS" },
                     },
-                    CustomScaleMarkedSet = GetScaleEntryBase200(11, { "nameplate", "scale", "Marked" }),
-                    MouseoverEnable = {
+                    MarkedUnitScale = GetScaleEntryDefault(11, { "nameplate", "scale", "Marked" }),
+                    MouseoverUnitEnable = {
                       name = L["Mouseover"],
                       order = 20,
                       type = "toggle",
                       arg = { "nameplate", "toggle", "MouseoverUnitScale" },
                     },
-                    MouseoverScale = GetScaleEntryBase200(21, { "nameplate", "scale", "MouseoverUnit" }),
+                    MouseoverUnitScale = GetScaleEntryDefault(21, { "nameplate", "scale", "MouseoverUnit" }),
                     CastingFriendlyUnitsEnable = {
                       name = L["Friendly Casting"],
                       order = 30,
                       type = "toggle",
                       arg = { "nameplate", "toggle", "CastingUnitScale" },
                     },
-                    CastingFriendlyUnitsScale = GetScaleEntryBase200(31, { "nameplate", "scale", "CastingUnit" }),
+                    CastingFriendlyUnitsScale = GetScaleEntryDefault(31, { "nameplate", "scale", "CastingUnit" }),
                     CastingEnemyUnitsEnable = {
                       name = L["Enemy Casting"],
                       order = 40,
                       type = "toggle",
                       arg = { "nameplate", "toggle", "CastingEnemyUnitScale" },
                     },
-                    CastingEnemyUnitsScale = GetScaleEntryBase200(41, { "nameplate", "scale", "CastingEnemyUnit" }),
+                    CastingEnemyUnitsScale = GetScaleEntryDefault(41, { "nameplate", "scale", "CastingEnemyUnit" }),
+                  },
+                },
+                Target = {
+                  name = L["Target-based Scale"],
+                  type = "group",
+                  order = 20,
+                  inline = true,
+                  args = {
+                    Help = {
+                      name = L["Change the scale of nameplates depending on whether a target unit is selected or not. As default, this scale is added to the unit base scale."],
+                      order = 0,
+                      type = "description",
+                      width = "full",
+                    },
+                    ScaleTarget = {
+                      name = L["Target"],
+                      order = 10,
+                      type = "toggle",
+                      desc = L["The target nameplate's scale if a target unit is selected."],
+                      arg = { "nameplate", "toggle", "TargetS" },
+                    },
+                    ScaleTargetSet = GetScaleEntryOffset(11, { "nameplate", "scale", "Target" }),
+                    ScaleNonTarget = {
+                      name = L["Non-Target"],
+                      order = 20,
+                      type = "toggle",
+                      desc = L["The scale of non-target nameplates if a target unit is selected."],
+                      arg = { "nameplate", "toggle", "NonTargetS" },
+                    },
+                    ScaleNonTargetSet = GetScaleEntryOffset(21, { "nameplate", "scale", "NonTarget" }),
+                    ScaleNoTarget = {
+                      name = L["No Target"],
+                      order = 30,
+                      type = "toggle",
+                      desc = L["The scale of all nameplates if you have no target unit selected."],
+                      arg = { "nameplate", "toggle", "NoTargetS" },
+                    },
+                    ScaleNoTargetSet = GetScaleEntryOffset(31, { "nameplate", "scale", "NoTarget" }),
+                    Spacer = GetSpacerEntry(40),
+                    AddTargetScale = {
+                      name = L["Use target-based scale as absolute scale and ignore unit base scale."],
+                      order = 50,
+                      type = "toggle",
+                      width = "full",
+                      arg = { "nameplate", "scale", "AbsoluteTargetScale" },
+                    },
                   },
                 },
                 NameplateScale = {
                   name = L["Unit Base Scale"],
                   type = "group",
-                  order = 40,
+                  order = 30,
                   inline = true,
                   args = {
                     Help = {
@@ -2347,19 +2389,19 @@ local function CreateOptionsTable()
                       width = "full",
                     },
                     Header1 = { type = "header", order = 10, name = "Friendly & Neutral Units", },
-                    FriendlyPlayers = GetUnitScaleEntry(L["Friendly Players"], 11, { "nameplate", "scale", "FriendlyPlayer" }),
-                    FriendlyNPCs = GetUnitScaleEntry(L["Friendly NPCs"], 12, { "nameplate", "scale", "FriendlyNPC" }),
-                    NeutralNPCs = GetUnitScaleEntry(L["Neutral NPCs"], 13, { "nameplate", "scale", "Neutral" }),
+                    FriendlyPlayers = GetScaleEntry(L["Friendly Players"], 11, { "nameplate", "scale", "FriendlyPlayer" }),
+                    FriendlyNPCs = GetScaleEntry(L["Friendly NPCs"], 12, { "nameplate", "scale", "FriendlyNPC" }),
+                    NeutralNPCs = GetScaleEntry(L["Neutral NPCs"], 13, { "nameplate", "scale", "Neutral" }),
                     Header2 = { type = "header", order = 20, name = "Enemy Units", },
-                    EnemyPlayers = GetUnitScaleEntry(L["Enemy Players"], 21, { "nameplate", "scale", "EnemyPlayer" }),
-                    EnemyNPCs = GetUnitScaleEntry(L["Enemy NPCs"], 22, { "nameplate", "scale", "EnemyNPC" }),
-                    EnemyElite = GetUnitScaleEntry(L["Rares & Elites"], 23, { "nameplate", "scale", "Elite" }),
-                    EnemyBoss = GetUnitScaleEntry(L["Bosses"], 24, { "nameplate", "scale", "Boss" }),
+                    EnemyPlayers = GetScaleEntry(L["Enemy Players"], 21, { "nameplate", "scale", "EnemyPlayer" }),
+                    EnemyNPCs = GetScaleEntry(L["Enemy NPCs"], 22, { "nameplate", "scale", "EnemyNPC" }),
+                    EnemyElite = GetScaleEntry(L["Rares & Elites"], 23, { "nameplate", "scale", "Elite" }),
+                    EnemyBoss = GetScaleEntry(L["Bosses"], 24, { "nameplate", "scale", "Boss" }),
                     Header3 = { type = "header", order = 30, name = "Minions & By Status", },
-                    Guardians = GetUnitScaleEntry(L["Guardians"], 31, { "nameplate", "scale", "Guardian" }),
-                    Pets = GetUnitScaleEntry(L["Pets"], 32, { "nameplate", "scale", "Pet" }),
-                    Minus = GetUnitScaleEntry(L["Minor"], 33, { "nameplate", "scale", "Minus" }),
-                    Tapped =  GetUnitScaleEntry(L["Tapped Units"], 41, { "nameplate", "scale", "Tapped" }),
+                    Guardians = GetScaleEntry(L["Guardians"], 31, { "nameplate", "scale", "Guardian" }),
+                    Pets = GetScaleEntry(L["Pets"], 32, { "nameplate", "scale", "Pet" }),
+                    Minus = GetScaleEntry(L["Minor"], 33, { "nameplate", "scale", "Minus" }),
+                    Tapped =  GetScaleEntry(L["Tapped Units"], 41, { "nameplate", "scale", "Tapped" }),
                   },
                 },
               },
@@ -2782,7 +2824,7 @@ local function CreateOptionsTable()
                   inline = true,
                   args = {
                     X = {
-                      name = L["Healthbar X"],
+                      name = L["Healthbar View X"],
                       order = 1,
                       type = "range",
                       set = SetThemeValue,
@@ -2793,7 +2835,7 @@ local function CreateOptionsTable()
                       isPercent = false,
                     },
                     Y = {
-                      name = L["Healthbar Y"],
+                      name = L["Healthbar View Y"],
                       order = 2,
                       type = "range",
                       set = SetThemeValue,
@@ -3074,7 +3116,7 @@ local function CreateOptionsTable()
                       name = L["Highlight Mobs on Off-Tanks"],
                       order = 2,
                       width = "full",
-                      desc = L["If checked, nameplates of mobs attacking another tank can be shown with different color, scale, and opacity."],
+                      desc = L["If checked, nameplates of mobs attacking another tank can be shown with different color, scale, and transparency."],
                       descStyle = "inline",
                       arg = { "threat", "toggle", "OffTank" },
                     },
@@ -3083,14 +3125,14 @@ local function CreateOptionsTable()
               },
             },
             Alpha = {
-              name = L["Alpha"],
+              name = L["Transparency"],
               type = "group",
-              desc = L["Set alpha settings for different threat levels."],
+              desc = L["Set transparency settings for different threat levels."],
               disabled = function() return not db.threat.ON end,
               order = 1,
               args = {
                 Enable = {
-                  name = L["Enable Alpha Threat"],
+                  name = L["Enable Threat Transparency"],
                   type = "group",
                   inline = true,
                   order = 0,
@@ -3098,7 +3140,7 @@ local function CreateOptionsTable()
                     Enable = {
                       type = "toggle",
                       name = L["Enable"],
-                      desc = L["This option allows you to control whether threat affects the alpha of nameplates."],
+                      desc = L["This option allows you to control whether threat affects the transparency of nameplates."],
                       width = "full",
                       descStyle = "inline",
                       order = 2,
@@ -3113,47 +3155,10 @@ local function CreateOptionsTable()
                   order = 1,
                   disabled = function() if db.threat.useAlpha then return false else return true end end,
                   args = {
-                    Low = {
-                      name = L["|cffff0000Low Threat|r"],
-                      type = "range",
-                      order = 1,
-                      arg = { "threat", "tank", "alpha", "LOW" },
-                      min = 0.01,
-                      max = 1,
-                      step = 0.01,
-                      isPercent = true,
-                    },
-                    Med = {
-                      name = L["|cffffff00Medium Threat|r"],
-                      type = "range",
-                      order = 2,
-                      arg = { "threat", "tank", "alpha", "MEDIUM" },
-                      min = 0.01,
-                      max = 1,
-                      step = 0.01,
-                      isPercent = true,
-                    },
-                    High = {
-                      name = L["|cff00ff00High Threat|r"],
-                      type = "range",
-                      order = 3,
-                      arg = { "threat", "tank", "alpha", "HIGH" },
-                      min = 0.01,
-                      max = 1,
-                      step = 0.01,
-                      isPercent = true,
-                    },
-                    OffTank = {
-                      name = L["|cff0faac8Off-Tank|r"],
-                      type = "range",
-                      order = 4,
-                      arg = { "threat", "tank", "alpha", "OFFTANK" },
-                      min = 0.01,
-                      max = 1,
-                      step = 0.01,
-                      isPercent = true,
-                      disabled = function() return not db.threat.toggle.OffTank end
-                    },
+                    Low = GetTransparencyEntryThreat(L["|cffff0000Low Threat|r"], 1, { "threat", "tank", "alpha", "LOW" }),
+                    Med = GetTransparencyEntryThreat(L["|cffffff00Medium Threat|r"], 2, { "threat", "tank", "alpha", "MEDIUM" }),
+                    High = GetTransparencyEntryThreat(L["|cff00ff00High Threat|r"], 3, { "threat", "tank", "alpha", "HIGH" }),
+                    OffTank = GetTransparencyEntryThreat(L["|cff0faac8Off-Tank|r"], 4, { "threat", "tank", "alpha", "OFFTANK" }),
                   },
                 },
                 DPS = {
@@ -3163,64 +3168,32 @@ local function CreateOptionsTable()
                   order = 2,
                   disabled = function() if db.threat.useAlpha then return false else return true end end,
                   args = {
-                    Low = {
-                      name = L["|cff00ff00Low Threat|r"],
-                      type = "range",
-                      order = 1,
-                      arg = { "threat", "dps", "alpha", "LOW" },
-                      min = 0.01,
-                      max = 1,
-                      step = 0.01,
-                      isPercent = true,
-                    },
-                    Med = {
-                      name = L["|cffffff00Medium Threat|r"],
-                      type = "range",
-                      order = 2,
-                      arg = { "threat", "dps", "alpha", "MEDIUM" },
-                      min = 0.01,
-                      max = 1,
-                      step = 0.01,
-                      isPercent = true,
-                    },
-                    High = {
-                      name = L["|cffff0000High Threat|r"],
-                      type = "range",
-                      order = 3,
-                      arg = { "threat", "dps", "alpha", "HIGH" },
-                      min = 0.01,
-                      max = 1,
-                      step = 0.01,
-                      isPercent = true,
-                    },
+                    Low = GetTransparencyEntryThreat(L["|cff00ff00Low Threat|r"], 1, { "threat", "dps", "alpha", "LOW" }),
+                    Med = GetTransparencyEntryThreat(L["|cffffff00Medium Threat|r"], 2, { "threat", "dps", "alpha", "MEDIUM" }),
+                    High = GetTransparencyEntryThreat(L["|cffff0000High Threat|r"], 3, { "threat", "dps", "alpha", "HIGH" }),
                   },
                 },
                 Marked = {
-                  name = L["Target Marked Units"],
+                  name = L["Additional Adjustments"],
                   type = "group",
                   inline = true,
                   order = 3,
                   disabled = function() if db.threat.useAlpha then return false else return true end end,
                   args = {
-                    Toggle = {
-                      name = L["Ignore Marked Units"],
+                    DisableSituational = {
+                      name = L["Disable threat transparency for target marked, mouseover or casting units."],
                       type = "toggle",
-                      order = 2,
+                      order = 10,
                       width = "full",
-                      desc = L["This will allow you to disabled threat alpha changes on target marked units."],
-                      descStyle = "inline",
+                      desc = L["This setting will disable threat transparency for target marked, mouseover or casting units and instead use the general transparency settings."],
                       arg = { "threat", "marked", "alpha" }
                     },
-                    Alpha = {
-                      name = L["Ignored Alpha"],
-                      order = 3,
-                      type = "range",
-                      disabled = function() if not db.threat.marked.alpha or not db.threat.useAlpha then return true else return false end end,
-                      step = 0.05,
-                      min = 0,
-                      max = 1,
-                      isPercent = true,
-                      arg = { "nameplate", "alpha", "Marked" },
+                    AbsoluteThreatAlpha = {
+                      name = L["Use threat transparency as additive transparency and add or substract it from the general transparency settings."],
+                      order = 20,
+                      type = "toggle",
+                      width = "full",
+                      arg = { "threat", "AdditiveAlpha" },
                     },
                   },
                 },
@@ -3234,7 +3207,7 @@ local function CreateOptionsTable()
               order = 1,
               args = {
                 Enable = {
-                  name = L["Enable Scale Threat"],
+                  name = L["Enable Threat Scale"],
                   type = "group",
                   inline = true,
                   order = 0,
@@ -3255,49 +3228,12 @@ local function CreateOptionsTable()
                   type = "group",
                   inline = true,
                   order = 1,
-                  disabled = function() if db.threat.useScale then return false else return true end end,
+                  disabled = function() return not db.threat.useScale end,
                   args = {
-                    Low = {
-                      name = L["|cffff0000Low Threat|r"],
-                      type = "range",
-                      order = 1,
-                      arg = { "threat", "tank", "scale", "LOW" },
-                      min = 0.01,
-                      max = 2,
-                      step = 0.01,
-                      isPercent = true,
-                    },
-                    Med = {
-                      name = L["|cffffff00Medium Threat|r"],
-                      type = "range",
-                      order = 2,
-                      arg = { "threat", "tank", "scale", "MEDIUM" },
-                      min = 0.01,
-                      max = 2,
-                      step = 0.01,
-                      isPercent = true,
-                    },
-                    High = {
-                      name = L["|cff00ff00High Threat|r"],
-                      type = "range",
-                      order = 3,
-                      arg = { "threat", "tank", "scale", "HIGH" },
-                      min = 0.01,
-                      max = 2,
-                      step = 0.01,
-                      isPercent = true,
-                    },
-                    OffTank = {
-                      name = L["|cff0faac8Off-Tank|r"],
-                      type = "range",
-                      order = 4,
-                      arg = { "threat", "tank", "scale", "OFFTANK" },
-                      min = 0.01,
-                      max = 2,
-                      step = 0.01,
-                      isPercent = true,
-                      disabled = function() return not db.threat.toggle.OffTank end
-                    },
+                    Low = GetScaleEntryThreat(L["|cffff0000Low Threat|r"], 1, { "threat", "tank", "scale", "LOW" }),
+                    Med = GetScaleEntryThreat(L["|cffffff00Medium Threat|r"], 2, { "threat", "tank", "scale", "MEDIUM" }),
+                    High = GetScaleEntryThreat(L["|cff00ff00High Threat|r"], 3, { "threat", "tank", "scale", "HIGH" }),
+                    OffTank = GetScaleEntryThreat(L["|cff0faac8Off-Tank|r"], 4, { "threat", "tank", "scale", "OFFTANK" }),
                   },
                 },
                 DPS = {
@@ -3305,66 +3241,34 @@ local function CreateOptionsTable()
                   type = "group",
                   inline = true,
                   order = 2,
-                  disabled = function() if db.threat.useScale then return false else return true end end,
+                  disabled = function() return not db.threat.useScale end,
                   args = {
-                    Low = {
-                      name = L["|cff00ff00Low Threat|r"],
-                      type = "range",
-                      order = 1,
-                      arg = { "threat", "dps", "scale", "LOW" },
-                      min = 0.01,
-                      max = 2,
-                      step = 0.01,
-                      isPercent = true,
-                    },
-                    Med = {
-                      name = L["|cffffff00Medium Threat|r"],
-                      type = "range",
-                      order = 2,
-                      arg = { "threat", "dps", "scale", "MEDIUM" },
-                      min = 0.01,
-                      max = 2,
-                      step = 0.01,
-                      isPercent = true,
-                    },
-                    High = {
-                      name = L["|cffff0000High Threat|r"],
-                      type = "range",
-                      order = 3,
-                      arg = { "threat", "dps", "scale", "HIGH" },
-                      min = 0.01,
-                      max = 2,
-                      step = 0.01,
-                      isPercent = true,
-                    },
+                    Low = GetScaleEntryThreat(L["|cff00ff00Low Threat|r"], 1, { "threat", "dps", "scale", "LOW" }),
+                    Med = GetScaleEntryThreat(L["|cffffff00Medium Threat|r"], 2, { "threat", "dps", "scale", "MEDIUM" }),
+                    High = GetScaleEntryThreat(L["|cffff0000High Threat|r"], 3, { "threat", "dps", "scale", "HIGH" }),
                   },
                 },
                 Marked = {
-                  name = L["Target Marked Units"],
+                  name = L["Additional Adjustments"],
                   type = "group",
                   inline = true,
                   order = 3,
                   disabled = function() return not db.threat.useScale end,
                   args = {
-                    Toggle = {
-                      name = L["Ignore Marked Units"],
+                    DisableSituational = {
+                      name = L["Disable threat scale for target marked, mouseover or casting units."],
                       type = "toggle",
-                      order = 2,
+                      order = 10,
                       width = "full",
-                      desc = L["This will allow you to disable threat scale changes on target marked units."],
-                      descStyle = "inline",
+                      desc = L["This setting will disable threat scale for target marked, mouseover or casting units and instead use the general scale settings."],
                       arg = { "threat", "marked", "scale" }
                     },
-                    Scale = {
-                      name = L["Ignored Scaling"],
-                      type = "range",
-                      order = 3,
-                      disabled = function() if not db.threat.marked.scale or not db.threat.useScale then return true else return false end end,
-                      step = 0.05,
-                      min = 0.3,
-                      max = 2,
-                      isPercent = true,
-                      arg = { "nameplate", "scale", "Marked" },
+                    AbsoluteThreatScale = {
+                      name = L["Use threat scale as additive scale and add or substract it from the general scale settings."],
+                      order = 20,
+                      type = "toggle",
+                      width = "full",
+                      arg = { "threat", "AdditiveScale" },
                     },
                   },
                 },
@@ -3544,7 +3448,7 @@ local function CreateOptionsTable()
               desc = L["Set the roles your specs represent."],
               disabled = function() return not db.threat.ON end,
               order = 5,
-              args = dialog_specs,
+              args = CreateSpecRoles(),
             },
             Textures = {
               name = L["Textures"],
@@ -4200,17 +4104,7 @@ local function CreateOptionsTable()
                       inline = true,
                       disabled = function() return not db.AuraWidget.ON end,
                       args = {
-                        Scale = {
-                          name = L["Scale"],
-                          type = "range",
-                          order = 1,
-                          width = "full",
-                          step = 0.05,
-                          softMin = 0.6,
-                          softMax = 1.3,
-                          isPercent = true,
-                          arg = { "AuraWidget", "scale", }
-                        },
+                        Scale = GetScaleEntryWidget(L["Scale"], 1, { "AuraWidget", "scale", }),
                       },
                     },
                     Placement = {
@@ -4364,7 +4258,7 @@ local function CreateOptionsTable()
                   type = "group",
                   inline = true,
                   args = {
-                    Scale = GetUnitScaleEntry(L["Scale"], 10, { "comboWidget", "scale" }),
+                    Scale = GetScaleEntryDefault(10, { "comboWidget", "scale" }),
                     Placement = GetPlacementEntryWidget(20, "comboWidget", true),
                   },
                 },
@@ -4715,7 +4609,7 @@ local function CreateOptionsTable()
           },
         },
         Totems = {
-          name = L["Totem Nameplates"],
+          name = L["Totems"],
           type = "group",
           childGroups = "list",
           order = 50,
@@ -4780,18 +4674,18 @@ local function CreateOptionsTable()
 --							width = "full",
 --							name = "ruRU: Need Translator!!"
 --						},
-            Translators7 = {
-              type = "description",
-              order = 10,
-              width = "full",
-              name = "zhCN: y123ao6 (CurseForge)"
-            },
---						Translators8 = {
---							type = "description",
---							order = 11,
---							width = "full",
---							name = "zhTW: Need Translator!!"
---						},
+--            Translators7 = {
+--              type = "description",
+--              order = 10,
+--              width = "full",
+--              name = "zhCN: y123ao6 (CurseForge)"
+--            },
+						Translators8 = {
+							type = "description",
+							order = 11,
+							width = "full",
+							name = "zhTW: gaspy10 (CurseForge)"
+						},
           },
         },
       },
@@ -4864,21 +4758,23 @@ local function CreateOptionsTable()
           },
         },
         Alpha = {
-          name = L["Alpha"],
+          name = L["Transparency"],
           type = "group",
           order = 3,
           inline = true,
           args = {
             TotemAlpha = {
-              name = L["Totem Alpha"],
+              name = L["Totem Transparency"],
               order = 1,
               type = "range",
               width = "full",
-              arg = { "nameplate", "alpha", "Totem" },
               step = 0.05,
               min = 0,
               max = 1,
               isPercent = true,
+              set = function(info, val) SetValue(info, abs(val - 1)) end,
+              get = function(info) return 1 - GetValue(info) end,
+              arg = { "nameplate", "alpha", "Totem" },
             },
           },
         },
@@ -4888,18 +4784,8 @@ local function CreateOptionsTable()
           order = 4,
           inline = true,
           args = {
-            TotemAlpha = {
-              name = L["Totem Scale"],
-              order = 1,
-              type = "range",
-              width = "full",
-              arg = { "nameplate", "scale", "Totem" },
-              step = 0.05,
-              softMin = 0.6,
-              softMax = 1.3,
-              isPercent = true,
-            },
-          },
+            TotemScale = GetScaleEntryWidget(L["Totem Scale"], 1, { "nameplate", "scale", "Totem" }),
+          }
         },
       },
     },
@@ -5145,7 +5031,7 @@ local function CreateOptionsTable()
               name = L["Restore Defaults"],
               order = 8,
               func = function()
-                local defaults = t.CopyTable(TidyPlatesThreat.DEFAULT_SETTINGS.profile.uniqueSettings[k_c])
+                local defaults = t.CopyTable(t.DEFAULT_SETTINGS.profile.uniqueSettings[k_c])
                 db.uniqueSettings[k_c] = defaults
                 options.args.Custom.args["#" .. k_c].name = "#" .. k_c .. ". " .. defaults.name
                 options.args.Custom.args["#" .. k_c].args.Header.name = defaults.name
@@ -5166,7 +5052,7 @@ local function CreateOptionsTable()
               name = L["Enable"],
               order = 1,
               type = "toggle",
-              desc = L["This option allows you to control whether custom settings for nameplate style, color, alpha and scaling should be used for this nameplate."],
+              desc = L["This option allows you to control whether custom settings for nameplate style, color, transparency and scaling should be used for this nameplate."],
               arg = { "uniqueSettings", k_c, "useStyle" },
             },
             HeadlineView = {
@@ -5210,7 +5096,7 @@ local function CreateOptionsTable()
           disabled = function() return not db.uniqueSettings[k_c].useStyle end,
           args = {
             CustomColor = {
-              name = L["Enable Custom Color"],
+              name = L["Custom Color"],
               order = 1,
               type = "toggle",
               desc = L["Define a custom color for this nameplate and overwrite any other color settings."],
@@ -5243,25 +5129,15 @@ local function CreateOptionsTable()
             },
             Spacer1 = GetSpacerEntry(10),
             CustomAlpha = {
-              name = L["Enable Custom Alpha"],
+              name = L["Custom Transparency"],
               order = 11,
               type = "toggle",
-              desc = L["Define a custom alpha for this nameplate and overwrite any other alpha settings."],
+              desc = L["Define a custom transparency for this nameplate and overwrite any other transparency settings."],
               set = function(info, val) SetValue(info, not val) end,
               get = function(info) return not GetValue(info) end,
               arg = { "uniqueSettings", k_c, "overrideAlpha" },
             },
-            AlphaSetting = {
-              name = L["Alpha"],
-              type = "range",
-              order = 12,
-              disabled = function() return not db.uniqueSettings[k_c].useStyle or db.uniqueSettings[k_c].overrideAlpha end,
-              min = 0,
-              max = 1,
-              step = 0.05,
-              isPercent = true,
-              arg = { "uniqueSettings", k_c, "alpha" },
-            },
+            AlphaSetting = GetTransparencyEntryDefault(12, { "uniqueSettings", k_c, "alpha" }, function() return not db.uniqueSettings[k_c].useStyle or db.uniqueSettings[k_c].overrideAlpha end),
 --            AlphaThreatSystem = {
 --              name = L["Use Threat Alpha"],
 --              order = 13,
@@ -5272,7 +5148,7 @@ local function CreateOptionsTable()
 --            },
             Spacer2 = GetSpacerEntry(14),
             CustomScale = {
-              name = L["Enable Custom Scale"],
+              name = L["Custom Scale"],
               order = 21,
               type = "toggle",
               desc = L["Define a custom scaling for this nameplate and overwrite any other scaling settings."],
@@ -5280,17 +5156,7 @@ local function CreateOptionsTable()
               get = function(info) return not GetValue(info) end,
               arg = { "uniqueSettings", k_c, "overrideScale" },
             },
-            ScaleSetting = {
-              name = L["Scale"],
-              order = 22,
-              type = "range",
-              disabled = function() return not db.uniqueSettings[k_c].useStyle or db.uniqueSettings[k_c].overrideScale end,
-              min = 0,
-              max = 1.4,
-              step = 0.05,
-              isPercent = true,
-              arg = { "uniqueSettings", k_c, "scale" },
-            },
+            ScaleSetting = GetScaleEntryDefault(22, { "uniqueSettings", k_c, "scale" }, function() return not db.uniqueSettings[k_c].useStyle or db.uniqueSettings[k_c].overrideScale end),
 --            ScaleThreatSystem = {
 --              name = L["Use Threat Scale"],
 --              order = 23,
@@ -5302,7 +5168,7 @@ local function CreateOptionsTable()
 --            Spacer3 = GetSpacerEntry(24),
             Header = { type = "header", order = 24, name = "Threat Options", },
             ThreatGlow = {
-              name = L["Enabled Threat Glow"],
+              name = L["Threat Glow"],
               order = 31,
               type = "toggle",
               desc = L["Shows a glow based on threat level around the nameplate's healthbar (in combat)."],
@@ -5313,7 +5179,7 @@ local function CreateOptionsTable()
               name = L["Enable Threat System"],
               order = 32,
               type = "toggle",
-              desc = L["In combat, use coloring, alpha, and scaling based on threat level as configured in the threat system. Custom settings are only used out of combat."],
+              desc = L["In combat, use coloring, transparency, and scaling based on threat level as configured in the threat system. Custom settings are only used out of combat."],
               disabled = function() return not db.uniqueSettings[k_c].useStyle end,
               arg = {"uniqueSettings", k_c, "UseThreatColor"},
             },
@@ -5397,15 +5263,6 @@ local function CreateOptionsTable()
   options.args.profiles.order = 10000;
 end
 
-local function GetOptionsTable()
-  db = TidyPlatesThreat.db.profile
-
-  CreateOptionsTable()
-  --t.Update()
-
-  return options
-end
-
 local function GetInterfaceOptionsTable()
   local interface_options = {
     name = t.Meta("title") .. " v" .. t.Meta("version"),
@@ -5448,6 +5305,15 @@ function TidyPlatesThreat:OpenOptions()
   HideUIPanel(InterfaceOptionsFrame)
   HideUIPanel(GameMenuFrame)
 
+  if not options then
+    CreateOptionsTable()
+    t.Update()
+
+    -- Setup options dialog
+    LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable(t.ADDON_NAME, options)
+    LibStub("AceConfigDialog-3.0"):SetDefaultSize(t.ADDON_NAME, 1000, 640)
+  end
+
   LibStub("AceConfigDialog-3.0"):Open(t.ADDON_NAME);
 end
 
@@ -5455,4 +5321,3 @@ end
 -- External
 -----------------------------------------------------
 t.GetInterfaceOptionsTable = GetInterfaceOptionsTable
-t.GetOptionsTable = GetOptionsTable
