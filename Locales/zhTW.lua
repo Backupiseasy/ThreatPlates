@@ -1,7 +1,6 @@
 ﻿local L = LibStub("AceLocale-3.0"):NewLocale("TidyPlatesThreat", "zhTW", false)
 if not L then return end
 
-L = L or {}
 L["  <no option>        Displays options dialog"] = "  <沒有選項>        顯示選項視窗"
 L["  8.4-design         Changes default settings to new look and feel (introduced with 8.4)"] = "  8.4-design        將預設的設定更改成新的外觀和風格 (8.4版的新設計)"
 L["  classic-design     Reverts default settings back to look and feel before 8.4"] = "  classic-design    將預設的設定還原成新8.4版之前的外觀和風格"

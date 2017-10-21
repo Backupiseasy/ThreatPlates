@@ -1,5 +1,5 @@
 ------------------------------------------------------
-8.5.1-Beta1 (works with TidyPlates 6.18.11)
+8.5.1 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
 * Reworked transparency (formerly alpha) and scale configuration to make the priority in which settings are applied easier to understand.
 * Added options to use threat scale and transparency in an additive way with general scale or transparency settings (and not replacing them completely in combat) [Ticket #138].
@@ -17,7 +17,7 @@
 * Fixed a bug in aura widget 2.0 that prevented whitelisting/blacklisting spells with All/Not in "Mine" filter modes (bugfix from release 8.5.0.1).
 * Fixed a bug for custom nameplates which resulted in a wrong scaling in headline view when "Custom Scale" was disabled.
 * Upgrade integrated libraries to Ace3 Release-1166.
-* Updated localizations for deDE (German), koKR (Korean, big thanks to yuk6196) and zhTW (Traditional Chinese, big thanks to gaspy10).
+* Updated localizations for deDE (German), koKR (Korean, thanks to yuk6196) and (partly) zhTW (Traditional Chinese, big thanks to gaspy10).
 
 ------------------------------------------------------
 8.5.0.1 (works with TidyPlates 6.18.11)
