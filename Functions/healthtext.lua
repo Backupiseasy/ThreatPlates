@@ -78,7 +78,7 @@ local function GetUnitSubtitle(unit)
 
 
 		-- Tooltip Format Priority:  Faction, Description, Level
-		local toolTipText = TooltipTextLeft2:GetText() or "UNKNOWN"
+		local toolTipText = TooltipTextLeft2:GetText() or ""
 
 		if string.match(toolTipText, UNIT_LEVEL_TEMPLATE) then
 			subTitle = ""

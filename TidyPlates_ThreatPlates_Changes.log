@@ -1,4 +1,10 @@
 ------------------------------------------------------
+8.5.2 (works with TidyPlates 6.18.11)
+------------------------------------------------------
+* Fixed a LUA error with absorbs on character when personal resource bar is enabled.
+* Fixed a bug with custom text where "UNKOWN" was displayed for NPC units without role description.
+
+------------------------------------------------------
 8.5.1 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
 * Reworked transparency (formerly alpha) and scale configuration to make the priority in which settings are applied easier to understand.

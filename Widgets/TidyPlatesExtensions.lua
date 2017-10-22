@@ -111,17 +111,17 @@ local function CreateExtensions(extended)
     --absorbbar:SetStatusBarTexture("Interface\\RaidFrame\\Shield-Fill");
     local color = db.AbsorbColor
     absorbbar:SetStatusBarColor(color.r, color.g, color.b)
-  else
+  elseif absorbbar then
     absorbbar:Hide()
     absorbbar.glow:Hide()
   end
 end
 
 local function UpdateExtensions(extended, unitid, style)
-  if not ENABLE_ABSORB then return end
-
   local visual = extended.visual
   local absorbbar = visual.absorbbar
+
+  if not ENABLE_ABSORB or not absorbbar then return end
 
   -- Code for absorb calculation see CompactUnitFrame.lua
   local absorb = UnitGetTotalAbsorbs(unitid) or 0
