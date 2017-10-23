@@ -1,5 +1,11 @@
 ------------------------------------------------------
-8.5.0.1 (works with TidyPlates 6.18.11)
+8.5.2 (works with TidyPlates 6.18.11)
+------------------------------------------------------
+* Fixed a LUA error with absorbs on character when personal resource bar is enabled.
+* Fixed a bug with custom text where "UNKOWN" was displayed for NPC units without role description.
+
+------------------------------------------------------
+8.5.1 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
 * Reworked transparency (formerly alpha) and scale configuration to make the priority in which settings are applied easier to understand.
 * Added options to use threat scale and transparency in an additive way with general scale or transparency settings (and not replacing them completely in combat) [Ticket #138].
