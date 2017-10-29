@@ -8,9 +8,21 @@ local ThreatPlates = NAMESPACE.ThreatPlates
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
+
+-- Lua APIs
+local floor = floor
+local unpack = unpack
+local type = type
+local min = min
+local pairs = pairs
+
+-- WoW APIs
 local InCombatLockdown = InCombatLockdown
-local RGB = ThreatPlates.RGB
+local GetCVar = GetCVar
+
+-- ThreatPlates APIs
 local L = ThreatPlates.L
+local TidyPlatesThreat = TidyPlatesThreat
 
 ---------------------------------------------------------------------------------------------------
 -- Global functions for accessing the configuration
@@ -149,10 +161,57 @@ local function SwitchToCurrentDefaultSettings()
   db:DeleteProfile("_ThreatPlatesInternal")
 end
 
-local function MigrateNamesColor(profile_name, profile)
-  local old_color = { r = 1, g = 1, b = 1 }
+-- The version number must have a pattern like a.b.c; the rest of string (e.g., "Beta1" is ignored)
+-- everything else (e.g., older version numbers) is set to 0
+local function VersionToNumber(version)
+  --  local len, v1, v2, v3, v4
+  --  _, len, v1, v2 = version:find("(%d+)%.(%d+)")
+  --  if len then
+  --    version = version:sub(len + 1)
+  --    _, len, v3 = version:find("%.(%d+)")
+  --    if len then
+  --      version = version:sub(len + 1)
+  --      _, len, v4 = version:find("%.(%d+)")
+  --    end
+  --  end
+  --
+  --  return floor(v1 * 1e9 + v2 * 1e6 + v3 * 1e3 + v4)
 
-  if profile.settings and profile.settings.name and profile.settings.name.color then
+  local v1, v2, v3 = version:match("(%d+)%.(%d+)%.(%d+)")
+  v1, v2, v3 = v1 or 0, v2 or 0, v3 or 0
+
+  return floor(v1 * 1e6 + v2 * 1e3 + v3)
+end
+
+local function CurrentVersionIsOlderThan(current_version, max_version)
+  return VersionToNumber(current_version) < VersionToNumber(max_version)
+end
+
+local function DatabaseEntryExists(db, keys)
+  for index = 1, #keys do
+    db = db[keys[index]]
+    if db == nil then
+      return false
+    end
+  end
+  return true
+end
+
+local function DatabaseEntryDelete(db, keys)
+  for index = 1, #keys - 1 do
+    db = db[keys[index]]
+    if not db then
+      return
+    end
+  end
+  db[keys[#keys]] = nil
+end
+
+local function MigrateNamesColor(profile_name, profile)
+  local entry = {"settings", "name", "color"}
+
+  local old_color = { r = 1, g = 1, b = 1 }
+  if DatabaseEntryExists(profile, entry) then
     local db = profile.settings.name
     local color = db.color
 
@@ -162,30 +221,26 @@ local function MigrateNamesColor(profile_name, profile)
 
     db.EnemyTextColor = ThreatPlates.CopyTable(color)
     db.FriendlyTextColor = ThreatPlates.CopyTable(color)
-    db.color = nil
+
+    DatabaseEntryDelete(profile, entry)
   end
 end
 
 local function MigrationBlizzFadeA(profile_name, profile)
-  if profile.blizzFadeA then
-    if not profile.nameplate then
-      profile.nameplate = {}
-    end
+  local entry = {"blizzFadeA" }
+
+  if DatabaseEntryExists(profile, entry) then
+    profile.nameplate = profile.nameplate or {}
 
     -- default for blizzFadeA.toggle was true
     if profile.blizzFadeA.toggle ~= nil then
-      if not profile.nameplate.toggle then
-        profile.nameplate.toggle = {}
-      end
-
+      profile.nameplate.toggle = profile.nameplate.toggle or {}
       profile.nameplate.toggle.NonTargetA = profile.blizzFadeA.toggle
     end
 
     -- default for blizzFadeA.amount was -0.3
     if profile.blizzFadeA.amount ~= nil then
-      if not profile.nameplate.alpha then
-        profile.nameplate.alpha = {}
-      end
+      profile.nameplate.alpha = profile.nameplate.alpha or {}
 
       local db = profile.nameplate.alpha
       local amount = profile.blizzFadeA.amount
@@ -194,54 +249,44 @@ local function MigrationBlizzFadeA(profile_name, profile)
       end
     end
 
-    profile.blizzFade = nil
+    DatabaseEntryDelete(profile, entry)
   end
 end
 
 local function MigrationTargetScale(profile_name, profile)
-  if profile.nameplate and profile.nameplate.scale then
-    -- default nameplate.scale.Target was 1
-    local value = profile.nameplate.scale.Target
-    if value ~= nil then
-      profile.nameplate.scale.Target = value - 1
-    end
+  if DatabaseEntryExists(profile, { "nameplate", "scale", "Target" }) then
+    --TidyPlatesThreat.db.global.MigrationLog[profile_name .. "MigrationTargetScaleTarget"] = "Migrating Target from " .. profile.nameplate.scale.Target .. " to " .. (profile.nameplate.scale.Target - 1)
+    profile.nameplate.scale.Target = profile.nameplate.scale.Target - 1
+  end
 
-    -- default nameplate.scale.NoTarget was 1
-    local value = profile.nameplate.scale.NoTarget
-    if value ~= nil then
-      profile.nameplate.scale.NoTarget = value - 1
-    end
+  if DatabaseEntryExists(profile, { "nameplate", "scale", "NoTarget" }) then
+    --TidyPlatesThreat.db.global.MigrationLog[profile_name .. "MigrationTargetScaleNoTarget"] = "Migrating NoTarget from " .. profile.nameplate.scale.NoTarget .. " to " .. (profile.nameplate.scale.NoTarget - 1)
+    profile.nameplate.scale.NoTarget = profile.nameplate.scale.NoTarget - 1
   end
 end
 
 local function MigrateCustomTextShow(profile_name, profile)
+  local entry = {"settings", "customtext", "show"}
+
   -- default for db.show was true
-  if profile.settings and profile.settings.customtext and profile.settings.customtext.show ~= nil then
+  if DatabaseEntryExists(profile, entry) then
     local db = profile.settings.customtext
     db.FriendlySubtext = "NONE"
     db.EnemySubtext = "NONE"
-    db.show = nil
-  end
-end
 
-local function DeleteDatabaseEntry(db, entry)
-  local head = table.remove(entry, 1)
-  if #entry == 0 then
-    db[head] = nil
-  elseif db ~= nil then
-    DeleteDatabaseEntry(db[head], entry)
+    DatabaseEntryDelete(profile, entry)
   end
 end
 
 ---- Settings in the SavedVariables file that should be migrated and/or deleted
 local DEPRECATED_SETTINGS = {
-  MigrateNamesColor, -- settings.name.color
-  MigrateCustomTextShow, -- settings.customtext.show
-  MigrationBlizzFadeA, -- blizzFadeA.toggle and blizzFadeA.amount
-  MigrationTargetScale, -- nameplate.scale.Target/NoTarget
-  { "alphaFeatures" },
-  { "alphaFeatureHeadlineView" },
-  { "alphaFeatureAuraWidget2" },
+  NamesColor = { MigrateNamesColor, },  -- settings.name.color
+  CustomTextShow = { MigrateCustomTextShow, }, -- settings.customtext.show
+  BlizzFadeA = { MigrationBlizzFadeA, }, -- blizzFadeA.toggle and blizzFadeA.amount
+  TargetScale= { MigrationTargetScale, "8.5.0" }, -- nameplate.scale.Target/NoTarget
+  AlphaFeatures = { "alphaFeatures" },
+  AlphaFeatureHeadlineView = { "alphaFeatureHeadlineView" },
+  AlphaFeatureAuraWidget2= { "alphaFeatureAuraWidget2" },
   -- { "alphaFriendlyNameOnly" },
   -- { "HeadlineView", "blizzFading" },    -- in release 8.6 (removed in 8.5.1)
   -- { "HeadlineView", "blizzFadingAlpha"},-- in release 8.6 (removed in 8.5.1)
@@ -249,52 +294,31 @@ local DEPRECATED_SETTINGS = {
   -- { "HeadlineView", "name", "height" }, -- in release 8.6 (removed in 8.5.0)
 }
 
-local function MigrateDatabase()
-  ThreatPlates.Print(L["Migrating deprecated settings in configuration ..."])
+local function MigrateDatabase(current_version)
+  --TidyPlatesThreat.db.global.MigrationLog = {}
 
   local profile_table = TidyPlatesThreat.db.profiles
-  for i, entry in ipairs(DEPRECATED_SETTINGS) do
+  for key, entry in pairs(DEPRECATED_SETTINGS) do
+    local action = entry[1]
 
-    -- iterate over all profiles
-    for profile_name, profile in pairs(profile_table) do
-
-      if type(entry) == "function" then
-        entry(profile_name, profile)
-      else
-        -- delete the old config entry
-        DeleteDatabaseEntry(profile, ThreatPlates.CopyTable(entry))
+    if type(action) == "function" then
+      local max_version = entry[2]
+      if not max_version or CurrentVersionIsOlderThan(current_version, max_version) then
+        -- iterate over all profiles and migrate values
+        --TidyPlatesThreat.db.global.MigrationLog[key] = "Migration" .. (max_version and ( " because " .. current_version .. " < " .. max_version) or "")
+        for profile_name, profile in pairs(profile_table) do
+          action(profile_name, profile)
+        end
+      end
+    else
+      -- iterate over all profiles and delete the old config entry
+      -- TidyPlatesThreat.db.global.MigrationLog[key] = "DELETED"
+      for profile_name, profile in pairs(profile_table) do
+        DatabaseEntryDelete(profile, entry)
       end
     end
   end
 end
-
---
----- Remove all deprected Entries
----- Called whenever the addon is loaded and a new version number is detected
---local function DeleteDeprecatedEntries()
---  -- determine current addon version and compare it with the DB version
---  local db_global = TidyPlatesThreat.db.global
---
---
---  -- Profiles:
---  if db_global.version ~= tostring(ThreatPlates.Meta("version")) then
---    -- addon version is newer that the db version => check for old entries
---    for profile, profile_table in pairs(TidyPlatesThreat.db.profiles) do
---      -- iterate over all profiles
---      for key, func in pairs(DEPRECATED_DB_ENTRIES) do
---        if profile_table[key] ~= nil then
---          if DEPRECATED_DB_ENTRIES[key] == true then
---            ThreatPlates.Print ("Deleting deprecated DB entry \"" .. tostring(key) .. "\"")
---            profile_table[key] = nil
---          elseif type(DEPRECATED_DB_ENTRIES[key]) == "function" then
---            ThreatPlates.Print ("Converting deprecated DB entry \"" .. tostring(key) .. "\"")
---            DEPRECATED_DB_ENTRIES[key](profile_table)
---          end
---        end
---      end
---    end
---  end
---end
 
 -- convert current aura widget settings to aura widget 2.0
 --local function ConvertAuraWidget1(profile_name, profile)
@@ -328,26 +352,6 @@ end
 --  end
 --end
 
--- Update the configuration file:
---  - convert deprecated settings to their new counterpart
--- Called whenever the addon is loaded and a new version number is detected
---local function UpdateConfiguration()
---  -- determine current addon version and compare it with the DB version
---  local db_global = TidyPlatesThreat.db.global
---
---  --  -- addon version is newer that the db version => check for old entries
---  --	if db_global.version ~= tostring(ThreatPlates.Meta("version")) then
---  -- iterate over all profiles
---  for name, profile in pairs(TidyPlatesThreat.db.profiles) do
---    -- ConvertAuraWidget1(name, profile)
---  end
---  --	end
---end
-
---local CleanupDatabase()
---  delete internal profile, if still there: db:DeleteProfile("_ThreatPlatesInternal")
---then
-
 -----------------------------------------------------
 -- External
 -----------------------------------------------------
@@ -357,8 +361,6 @@ ThreatPlates.SwitchToCurrentDefaultSettings = SwitchToCurrentDefaultSettings
 ThreatPlates.SwitchToDefaultSettingsV1 = SwitchToDefaultSettingsV1
 ThreatPlates.MigrateDatabase = MigrateDatabase
 
---ThreatPlates.UpdateConfiguration = UpdateConfiguration
---ThreatPlates.MigrateDatabase = MigrateDatabase
 ThreatPlates.GetUnitVisibility = GetUnitVisibility
 ThreatPlates.SetNamePlateClickThrough = SetNamePlateClickThrough
 ThreatPlates.SyncWithGameSettings = SyncWithGameSettings
