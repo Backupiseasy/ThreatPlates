@@ -2,6 +2,7 @@
 8.5.3 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
 * Fixed a bug with migrating scale settings for Target and No Target (from configurations before 8.5.0) which were migrated every time a new version of ThreatPlates was installed [Ticket #141].
+* Fixed bugs in frame layers of TidyPlates and ThreatPlates nameplate elements (flickering when moving mouse over units.
 * Fixed defaults for Target and No Target scale to be 0% (instead of -100%).
 * Fixed several bugs when migrating old configuration settings.
 * Fixed a wrong translations in German localization.

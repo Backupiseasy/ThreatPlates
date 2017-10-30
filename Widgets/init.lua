@@ -7,8 +7,13 @@ local ThreatPlates = NAMESPACE.ThreatPlates
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
+
+-- Lua APIs
 local pairs = pairs
 
+-- WoW APIs
+
+-- ThreatPlates APIs
 local DEBUG = ThreatPlates.DEBUG
 local SetStyle = TidyPlatesThreat.SetStyle
 
@@ -114,7 +119,7 @@ local function OnUpdate(plate, unit)
         if show_headline_view then
           if not v.isContext then
             widget:Update(unit)
-            if unit.isTarget then	plate:SetFrameStrata("LOW") else plate:SetFrameStrata("BACKGROUND")	end
+            --if unit.isTarget then	plate:SetFrameStrata("LOW") else plate:SetFrameStrata("BACKGROUND")	end
           end
         else
           widget:Hide()
@@ -125,7 +130,7 @@ local function OnUpdate(plate, unit)
         -- context means that widget is only relevant for target (or mouse-over)
         if not v.isContext then
           widget:Update(unit)
-          if unit.isTarget then	plate:SetFrameStrata("LOW") else plate:SetFrameStrata("BACKGROUND") end
+          --if unit.isTarget then	plate:SetFrameStrata("LOW") else plate:SetFrameStrata("BACKGROUND") end
         end
       else
         widget:Hide()
@@ -142,7 +147,6 @@ end
 local function OnContextUpdate(plate, unit)
   if not unit.unitid then return end
 
-  ThreatPlates.UpdateExtensions(plate, unit.unitid)
   local style = SetStyle(unit)
 
   local widget_list = plate.widgets

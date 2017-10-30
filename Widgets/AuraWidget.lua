@@ -705,16 +705,19 @@ local function CreateBarAuraFrame(parent)
   local db = TidyPlatesThreat.db.profile.AuraWidget.ModeBar
   local font = ThreatPlates.Media:Fetch('font', db.Font)
 
+  -- frame is probably not necessary, should be ok do add everything to the statusbar frame
   local frame = CreateFrame("Frame", nil, parent)
-
-  frame.Icon = frame:CreateTexture(nil, "BACKGROUND")
-  frame.Stacks = frame:CreateFontString(nil, "OVERLAY")
+  frame:SetFrameLevel(parent:GetFrameLevel())
 
   frame.Statusbar = CreateFrame("StatusBar", nil, frame)
+  frame.Statusbar:SetFrameLevel(parent:GetFrameLevel())
   frame.Statusbar:SetMinMaxValues(0, 100)
 
   frame.Background = frame.Statusbar:CreateTexture(nil, "BACKGROUND")
   frame.Background:SetAllPoints()
+
+  frame.Icon = frame:CreateTexture(nil, "ARTWORK")
+  frame.Stacks = frame:CreateFontString(nil, "OVERLAY")
 
   frame.LabelText = frame.Statusbar:CreateFontString(nil, "OVERLAY")
   frame.LabelText:SetFont(font, db.FontSize)
@@ -747,11 +750,12 @@ local function CreateIconAuraFrame(parent)
   local db = TidyPlatesThreat.db.profile.AuraWidget.ModeBar
 
   local frame = CreateFrame("Frame", nil, parent)
+  frame:SetFrameLevel(parent:GetFrameLevel())
 
-  frame.Icon = frame:CreateTexture(nil, "BACKGROUND")
-  frame.Stacks = frame:CreateFontString(nil, "OVERLAY")
+  frame.Icon = frame:CreateTexture(nil, "ARTWORK")
   frame.Border = frame:CreateTexture(nil, "ARTWORK")
   frame.BorderHighlight = frame:CreateTexture(nil, "ARTWORK")
+  frame.Stacks = frame:CreateFontString(nil, "OVERLAY")
   frame.Cooldown = CreateFrame("Cooldown", nil, frame, "TidyPlatesAuraWidgetCooldown")
   frame.Cooldown:SetAllPoints(frame.Icon)
   frame.Cooldown:SetReverse(true)
@@ -1206,8 +1210,8 @@ local function CreateAuraWidget(plate)
 
 	-- Custom Code III
 	--------------------------------------
+  --frame:SetFrameLevel(plate:GetFrameLevel())
 	frame:SetSize(128, 32)
-	frame:SetFrameLevel(plate:GetFrameLevel() + 1)
 	frame.AuraFrames = {}
   --UpdateWidgetConfig(frame)
   CreateAuraWidgetLayout(frame)

@@ -494,14 +494,9 @@ local function FrameOnShow(self)
 end
 
 local function FrameOnUpdate(self)
-  local frame_level = self:GetFrameLevel() * 2
-  self.carrier:SetFrameLevel(frame_level)
+  local frame_level = self:GetFrameLevel()
   self.extended:SetFrameLevel(frame_level)
-
---  local frame_level = self:GetFrameLevel()
---  self.carrier:SetFrameLevel(frame_level)
---  self.extended:SetFrameLevel(frame_level)
-  --self.extended.visual.textFrame:SetFrameLevel(frame_level)
+  self.extended.defaultLevel = frame_level -- not sure, if necessary
 
   if not TidyPlatesThreat.db.profile.ShowFriendlyBlizzardNameplates then return end
 
