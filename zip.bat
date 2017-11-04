@@ -14,11 +14,12 @@ set TP_PATH=F:\Eigene Dateien\Dokumente\WoW\ThreatPlates\Releases
 set TP_PACKAGE=%TP_PATH%\ThreatPlates_%version%.zip
 
 
-if "%command%"=="release" (CALL :Zip-Release)
-if "%command%"=="test" (CALL :Zip-Test)
 if "%command%"=="package" (CALL :Package)
 if "%command%"=="plain" (CALL :Install-to-Plain)
+if "%command%"=="int" (CALL :Install-to-Integration)
 if "%command%"=="help" (CALL :Print-Help)
+if "%command%"=="release" (CALL :Zip-Release)
+if "%command%"=="test" (CALL :Zip-Test)
 if "%command%"=="" (CALL :Print-Help)
 EXIT /B
 
@@ -50,12 +51,25 @@ set TP_PACKAGE=%TP_PATH%\ThreatPlates_plain.zip
 DEL /S /Q "%TP_PACKAGE%" 2> nul > nul
 @echo Package Source: %SOURCE%
 %ZIP_EXE% a -xr@exclude.lst "%TP_PACKAGE%" "%SOURCE%" > nul
-@echo Removing exiting installation in PLAIN environment: %WOW_PLAIN%\WTF
+@echo Removing exiting installation in PLAIN environment: %WOW_PLAIN%\Interface\AddOns\TidyPlates_ThreatPlates
 RMDIR /S /Q "%WOW_PLAIN%\Interface\AddOns\TidyPlates_ThreatPlates" 2> nul
-@echo Removing exiting SavedVariables in PLAIN environment: %WOW_PLAIN%\Interface\AddOns\TidyPlates_ThreatPlates
+@echo Removing exiting SavedVariables in PLAIN environment: %WOW_PLAIN%\WTF
 DEL /S /Q /F "%WOW_PLAIN%\WTF\TidyPlates_ThreatPlates*.*" 2> nul
 @echo Installing package to PLAIN environment %WOW_PLAIN%
 %ZIP_EXE% x -o"%WOW_PLAIN%\Interface\AddOns" "%TP_PACKAGE%" > nul
+DEL /S /Q /Q "%TP_PACKAGE%" > nul
+EXIT /B %ERRORLEVEL%
+
+:Install-to-Integration
+set SOURCE=%BATCH_DIR%
+set TP_PACKAGE=%TP_PATH%\ThreatPlates_integration.zip
+DEL /S /Q "%TP_PACKAGE%" 2> nul > nul
+@echo Package Source: %SOURCE%
+%ZIP_EXE% a -xr@exclude.lst "%TP_PACKAGE%" "%SOURCE%" > nul
+@echo Removing exiting installation in INTEGRATION environment: %WOW_INT%\Interface\AddOns\TidyPlates_ThreatPlates
+RMDIR /S /Q "%WOW_INT%\Interface\AddOns\TidyPlates_ThreatPlates" 2> nul
+@echo Installing package to INTEGRATION environment %WOW_INT%
+%ZIP_EXE% x -o"%WOW_INT%\Interface\AddOns" "%TP_PACKAGE%" > nul
 DEL /S /Q /Q "%TP_PACKAGE%" > nul
 EXIT /B %ERRORLEVEL%
 
@@ -64,6 +78,7 @@ EXIT /B %ERRORLEVEL%
 @echo Usage: zip.bat ^<options^>
 @echo   package ^<version^>      Create a new version package based on the the current ThreatPlates directory
 @echo   plain                  Package up the current ThreatPlates directory and install it to the PLAIN environment
+@echo   int                    Package up the current ThreatPlates directory and install it to the INTEGRATION environment
 @echo   help                   Print this help message
 @echo off
 EXIT /B %ERRORLEVEL%
