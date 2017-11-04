@@ -1721,9 +1721,9 @@ ThreatPlates.DEFAULT_SETTINGS = {
       },
       scale = {
         AbsoluteTargetScale  = false,
-        ["Target"]	  	     = 0,
+        ["Target"]	  	     = 1,
         ["NonTarget"]	       = -0.3,
-        ["NoTarget"]	       = 0,
+        ["NoTarget"]	       = 1,
         ["Totem"]		         = 0.75,
         ["Marked"] 		       = 1.3,
         --["Normal"]		     = 1,

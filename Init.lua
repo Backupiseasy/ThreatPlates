@@ -248,6 +248,7 @@ ThreatPlates.FixUpdateUnitCondition = FixUpdateUnitCondition
 
 ThreatPlates.DEBUG = function(...) end
 ThreatPlates.DEBUG_PRINT_TABLE = function(...) end
+ThreatPlates.DEBUG_PRINT_UNIT = function(...) end
 ThreatPlates.DEBUG_PRINT_TARGET = function(...) end
 ThreatPlates.DEBUG_AURA_LIST = function(...) end
 --ThreatPlates.DEBUG = DEBUG

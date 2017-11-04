@@ -280,7 +280,7 @@ function TidyPlatesThreat:StartUp()
       local new_version = tostring(t.Meta("version"))
       if db.version ~= new_version then
         -- migrate and/or remove any old DB entries
-        t.MigrateDatabase()
+        t.MigrateDatabase(db.version)
         db.version = new_version
       end
     end
@@ -288,7 +288,7 @@ function TidyPlatesThreat:StartUp()
     local new_version = tostring(t.Meta("version"))
     if db.version ~= new_version then
       -- migrate and/or remove any old DB entries
-      t.MigrateDatabase()
+      t.MigrateDatabase(db.version)
       db.version = new_version
     end
 
@@ -494,13 +494,9 @@ local function FrameOnShow(self)
 end
 
 local function FrameOnUpdate(self)
-  local frame_level = self:GetFrameLevel() * 2
-  self.carrier:SetFrameLevel(frame_level)
+  local frame_level = self:GetFrameLevel()
   self.extended:SetFrameLevel(frame_level)
-
---  local frame_level = self:GetFrameLevel()
---  self.carrier:SetFrameLevel(frame_level)
---  self.extended:SetFrameLevel(frame_level)
+  self.extended.defaultLevel = frame_level -- not sure, if necessary
 
   if not TidyPlatesThreat.db.profile.ShowFriendlyBlizzardNameplates then return end
 
@@ -530,8 +526,8 @@ end
 -- Thanks to Kesava (KuiNameplates) for this solution
 function TidyPlatesThreat:NAME_PLATE_CREATED(event, plate)
   if plate.UnitFrame then
-    plate.UnitFrame:HookScript('OnShow',FrameOnShow)
-    plate.UnitFrame:HookScript('OnHide',FrameOnHide)
+    plate.UnitFrame:HookScript('OnShow', FrameOnShow)
+    plate.UnitFrame:HookScript('OnHide', FrameOnHide)
   end
 
   plate:HookScript('OnUpdate', FrameOnUpdate)
