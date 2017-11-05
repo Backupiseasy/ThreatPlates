@@ -1,4 +1,8 @@
 ------------------------------------------------------
+8.6.0-Alpha1 (works with TidyPlates 6.18.11)
+------------------------------------------------------
+
+------------------------------------------------------
 8.5.3 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
 * Fixed a bug with migrating scale settings for Target and No Target (from configurations before 8.5.0) which were migrated every time a new version of ThreatPlates was installed [Ticket #141].
