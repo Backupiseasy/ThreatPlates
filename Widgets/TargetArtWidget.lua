@@ -39,6 +39,13 @@ local function UpdateSettings(frame)
   if db.ON then
     frame.Icon:SetTexture(path..db.theme)
     frame.Icon:SetVertexColor(db.r, db.g, db.b, db.a)
+
+    if db.theme == "default" or db.theme == "squarethin" then
+      frame.Icon:SetDrawLayer("OVERLAY", -7)
+    else
+      frame.Icon:SetDrawLayer("OVERLAY", 7)
+    end
+
     frame:Show()
     frame.Icon:Show()
   else
@@ -48,13 +55,6 @@ local function UpdateSettings(frame)
 end
 
 local function UpdateWidgetFrame(frame, unit)
-  local db = TidyPlatesThreat.db.profile.targetWidget
-  if db.theme == "default" or db.theme == "squarethin" then
-    frame.Icon:SetDrawLayer("OVERLAY", -7)
-  else
-    frame.Icon:SetDrawLayer("OVERLAY", 7)
-  end
-
   frame:Show()
   frame.Icon:Show()
 end
