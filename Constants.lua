@@ -26,8 +26,6 @@ local DEFAULT_FONT = "Cabin"
 
 ThreatPlates.ADDON_NAME = "Tidy Plates: Threat Plates"
 ThreatPlates.THEME_NAME = "Threat Plates"
--- ThreatPlates.TIDYPLATES_VERSIONS = { "6.18.10" }
--- ThreatPlates.TIDYPLATES_INSTALLED_VERSION = GetAddOnMetadata("TidyPlates", "version") or ""
 
 ThreatPlates.ANCHOR_POINT = {
   TOPLEFT = "Top Left",
@@ -214,7 +212,6 @@ end
 ThreatPlates.DEFAULT_SETTINGS = {
   global = {
     version = "",
-    -- versioncheck = false,
     CheckNewLookAndFeel = false,
     DefaultsVersion = "SMOOTH",
   },
