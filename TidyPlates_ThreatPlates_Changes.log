@@ -1,4 +1,13 @@
 ------------------------------------------------------
+8.5.4 (works with TidyPlates 6.18.11)
+------------------------------------------------------
+* Fixed a bug with layering of the target highlight (e.g.,  threat glow covered the target highlight) [Comment #568, email].
+* Fixed a bug where changes to the placement of several icons were not applied until reloading the UI.
+* Fixed a bug in the options dialog where preview images where not updated after changing the active profile.
+* Changed defaults for Target and No Target scale again to more reasonable values.
+* Updated localizations for zhTW (Traditional Chinese, thanks to gaspy10).
+
+------------------------------------------------------
 8.5.3 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
 * Fixed a bug with migrating scale settings for Target and No Target (from configurations before 8.5.0) which were migrated every time a new version of ThreatPlates was installed [Ticket #141].

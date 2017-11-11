@@ -278,19 +278,19 @@ function TidyPlatesThreat:StartUp()
       StaticPopup_Show("SetToThreatPlates")
     else
       local new_version = tostring(t.Meta("version"))
-      if db.version ~= new_version then
+      if db.version ~= "" and db.version ~= new_version then
         -- migrate and/or remove any old DB entries
         t.MigrateDatabase(db.version)
-        db.version = new_version
       end
+      db.version = new_version
     end
   else
     local new_version = tostring(t.Meta("version"))
-    if db.version ~= new_version then
+    if db.version ~= "" and db.version ~= new_version then
       -- migrate and/or remove any old DB entries
       t.MigrateDatabase(db.version)
-      db.version = new_version
     end
+    db.version = new_version
 
     if not db.CheckNewLookAndFeel and TidyPlates.GetThemeName() == t.THEME_NAME then
       StaticPopup_Show("SwitchToNewLookAndFeel")

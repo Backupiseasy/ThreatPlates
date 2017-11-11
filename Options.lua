@@ -6,10 +6,21 @@ local t = ns.ThreatPlates
 ---------------------------------------------------------------------------------------------------
 -- Lua APIs
 local abs = abs
+local pairs = pairs
+local ipairs = ipairs
+local string = string
+local table = table
+local tonumber = tonumber
+local select = select
 
+-- WoW APIs
+local CLASS_SORT_ORDER = CLASS_SORT_ORDER
+local GetSpellInfo = GetSpellInfo
+
+-- ThreatPlates APIs
 local LibStub = LibStub
-
 local L = t.L
+
 local class = t.Class()
 local PATH_ART = t.Art
 local TotemNameBySpellID = t.TotemNameBySpellID
@@ -550,6 +561,7 @@ local function GetPlacementEntryTheme(pos, setting, hv_mode)
     name = L["Placement"],
     order = pos,
     type = "group",
+    set = SetThemeValue,
     args = {
       X = { type = "range", order = 1, name = L["X"], min = -120, max = 120, step = 1, arg = { "settings", setting, "x" } },
       Y = { type = "range", order = 2, name = L["Y"], min = -120, max = 120, step = 1, arg = { "settings", setting, "y" } }
@@ -1249,15 +1261,6 @@ local function CreateSpecRoles()
 
   for index = 1, GetNumSpecializations() do
     local id, spec_name, description, icon, background, role = GetSpecializationInfo(index)
-    result.SpecGroup.args[spec_name] = {
-      name = L["Open Blizzard Settings" .. index],
-      order = 90 + index,
-      type = "execute",
-      func = function()
-        InterfaceOptionsFrame_OpenToCategory(_G["InterfaceOptionsNamesPanel"])
-        LibStub("AceConfigDialog-3.0"):Close("Tidy Plates: Threat Plates");
-      end,
-    }
     result.SpecGroup.args[spec_name] = {
       name = spec_name,
       type = "group",
@@ -5295,6 +5298,48 @@ end
 function TidyPlatesThreat:ProfChange()
   db = self.db.profile
   UpdateSpecial()
+
+  -- Update preview icons: EliteArtWidget, TargetHighlightWidget, ClassIconWidget, QuestWidget, Threat Textures, Totem Icons, Custom Nameplate Icons
+  local path = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\"
+
+  if options then
+    options.args.NameplateSettings.args.EliteIcon.args.Texture.args.Preview.image = path .. "EliteArtWidget\\" .. db.settings.eliteicon.theme
+
+    local base = options.args.Widgets.args
+    base.TargetArtWidget.args.Texture.args.Preview.image = path .. "TargetArtWidget\\" .. db.targetWidget.theme;
+    for k_c, v_c in pairs(CLASS_SORT_ORDER) do
+      base.ClassIconWidget.args.Textures.args["Prev" .. k_c].image = path .. "ClassIconWidget\\" .. db.classWidget.theme .. "\\" .. CLASS_SORT_ORDER[k_c]
+    end
+    base.QuestWidget.args.ModeIcon.args.Texture.args.Preview.image = path .. "QuestWidget\\" .. db.questWidget.IconTexture
+
+    local threat_path = path .. "ThreatWidget\\" .. db.threat.art.theme .. "\\"
+    base = options.args.ThreatOptions.args.Textures.args.Options.args
+    base.PrevOffTank.image = threat_path .. "OFFTANK"
+    base.PrevLow.image = threat_path .. "HIGH"
+    base.PrevMed.image = threat_path .. "MEDIUM"
+    base.PrevHigh.image = threat_path .. "LOW"
+
+    local totemID = t.TOTEM_DATA
+    table.sort(totemID, function(a, b) return (string.sub(a[2], 1, 1)..TotemNameBySpellID(a[1])) < (string.sub(b[2], 1, 1)..TotemNameBySpellID(b[1])) end)
+    for k_c, v_c in ipairs(totemID) do
+      options.args.Totems.args[GetSpellName(totemID[k_c][1])].args.Textures.args.Icon.image = path .. "TotemIconWidget\\" .. db.totemSettings[totemID[k_c][2]][7] .. "\\" .. totemID[k_c][2]
+    end
+
+    for k_c, v_c in ipairs(db.uniqueSettings) do
+      options.args.Custom.args["#" .. k_c].args.Icon.args.Icon.image = function()
+        if tonumber(db.uniqueSettings[k_c].icon) == nil then
+          return db.uniqueSettings[k_c].icon
+        else
+          local icon = select(3, GetSpellInfo(tonumber(db.uniqueSettings[k_c].icon)))
+          if icon then
+            return icon
+          else
+            return "Interface\\Icons\\Temp"
+          end
+        end
+      end
+    end
+  end
 
   TidyPlatesThreat:ReloadTheme()
 end

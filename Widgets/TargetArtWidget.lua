@@ -39,14 +39,24 @@ local function UpdateSettings(frame)
   if db.ON then
     frame.Icon:SetTexture(path..db.theme)
     frame.Icon:SetVertexColor(db.r, db.g, db.b, db.a)
+
+    if db.theme == "default" or db.theme == "squarethin" then
+      frame.Icon:SetDrawLayer("OVERLAY", -7)
+    else
+      frame.Icon:SetDrawLayer("OVERLAY", 7)
+    end
+
     frame:Show()
+    frame.Icon:Show()
   else
     frame:_Hide()
+    frame.Icon:Hide()
   end
 end
 
 local function UpdateWidgetFrame(frame, unit)
   frame:Show()
+  frame.Icon:Show()
 end
 
 -- Context
@@ -65,6 +75,7 @@ local function UpdateWidgetContext(frame, unit)
 		UpdateWidgetFrame(frame, unit)
 	else
 		frame:_Hide()
+    frame.Icon:Hide()
 	end
 	--------------------------------------
 	-- End Custom Code
@@ -90,8 +101,10 @@ local function CreateWidgetFrame(parent)
 	frame:SetFrameLevel(parent:GetFrameLevel())
 	frame:SetSize(256, 64)
 	frame:SetPoint("CENTER", parent, "CENTER")
-	frame.Icon = frame:CreateTexture(nil, "BACKGROUND")
-	frame.Icon:SetAllPoints(frame)
+
+  frame.Icon = parent.visual.name:GetParent():CreateTexture(nil, "OVERLAY")
+  frame.Icon:SetAllPoints(frame)
+  frame.Icon:Hide()
 
   UpdateSettings(frame)
   frame.UpdateConfig = UpdateSettings
