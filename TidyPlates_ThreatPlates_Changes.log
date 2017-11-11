@@ -3,6 +3,7 @@
 ------------------------------------------------------
 * Fixed a bug with layering of the target highlight (e.g.,  threat glow covered the target highlight) [Comment #568, email].
 * Fixed a bug where changes to the placement of several icons were not applied until reloading the UI.
+* Fixed a bug in the options dialog where preview images where not updated after changing the active profile.
 * Updated localizations for zhTW (Traditional Chinese, thanks to gaspy10).
 
 ------------------------------------------------------
