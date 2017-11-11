@@ -140,6 +140,16 @@ local function OnUpdate(plate, unit)
       widget_list[name] = nil -- deleted the disabled widget, is that what we want? no re-using it later ...
     end
   end
+
+--  if UnitIsUnit("target", unit.unitid) then
+--    --extended.visual.spellicon:SetTexture("Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ClassIconWidget\\default\\" .. "DRUID")
+--    plate.visual.spellicon:SetTexture(GetSpellTexture("Mondfeuer"))
+--    plate.visual.castborder:Show()
+--    plate.visual.castnostop:Hide()
+--    plate.visual.spellicon:Show()
+--    plate.visual.spelltext:Show()
+--    plate.visual.castbar:Show()
+--  end
 end
 
 -- TidyPlatesGlobal_OnContextUpdate() is called when a unit is targeted or moused-over.  (Any time the unitid or GUID changes)

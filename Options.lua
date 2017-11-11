@@ -550,6 +550,7 @@ local function GetPlacementEntryTheme(pos, setting, hv_mode)
     name = L["Placement"],
     order = pos,
     type = "group",
+    set = SetThemeValue,
     args = {
       X = { type = "range", order = 1, name = L["X"], min = -120, max = 120, step = 1, arg = { "settings", setting, "x" } },
       Y = { type = "range", order = 2, name = L["Y"], min = -120, max = 120, step = 1, arg = { "settings", setting, "y" } }
