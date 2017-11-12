@@ -115,7 +115,12 @@ local function CreateWidgetFrame(parent)
 	frame.UpdateContext = UpdateWidgetContext
 	frame.Update = UpdateWidgetFrame
 	frame._Hide = frame.Hide
-	frame.Hide = function() ClearWidgetContext(frame); frame:_Hide() end
+	-- Have to add frame.Icon:Hide() also here as the frame is no longer the parent of the icon since a fix to widget layering
+	frame.Hide = function()
+		ClearWidgetContext(frame)
+		frame.Icon:Hide()
+		frame:_Hide()
+	end
 
 	return frame
 end
