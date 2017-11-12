@@ -1,4 +1,10 @@
 ------------------------------------------------------
+8.5.5 (works with TidyPlates 6.18.11)
+------------------------------------------------------
+* Fixed a bug where the target highlight was shown in headline view.
+* Fixed a bug where the option to force healthbar view on the current target could only be changed when headline view was enabled.
+
+------------------------------------------------------
 8.5.4 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
 * Fixed a bug with layering of the target highlight (e.g.,  threat glow covered the target highlight) [Comment #568, email].

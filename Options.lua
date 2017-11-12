@@ -1351,7 +1351,6 @@ local function CreateOptionsTable()
                   order = 15,
                   type = "group",
                   inline = true,
-                  disabled = function() return not TidyPlatesThreat.db.profile.HeadlineView.ON  end,
                   args = {
                     ModeOnTarget = {
                       name = L["On Target"],
