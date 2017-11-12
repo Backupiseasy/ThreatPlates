@@ -15,16 +15,16 @@ local UnitName = UnitName
 local UNKNOWNOBJECT = UNKNOWNOBJECT
 
 -- ThreatPlates APIs
+local TidyPlatesThreat = TidyPlatesThreat
 local LibStub = LibStub
 local L = t.L
-local class = t.Class()
 
+local class = t.Class()
 t.Theme = {}
 
 ---------------------------------------------------------------------------------------------------
 -- Global configs and funtions
 ---------------------------------------------------------------------------------------------------
-local TidyPlatesThreat = TidyPlatesThreat
 
 -- check if the correct TidyPlates version is installed
 --function CheckTidyPlatesVersion()
@@ -80,13 +80,23 @@ local EVENTS = {
   "PLAYER_LOGIN",
   "PLAYER_LOGOUT",
   "PLAYER_REGEN_ENABLED",
-  "UNIT_FACTION",
   "QUEST_WATCH_UPDATE",
-  "NAME_PLATE_CREATED",
   "QUEST_ACCEPTED",
+
   "UNIT_ABSORB_AMOUNT_CHANGED",
   "UNIT_MAXHEALTH",
   "UNIT_NAME_UPDATE",
+
+  "NAME_PLATE_CREATED",
+  --"NAME_PLATE_UNIT_ADDED",    -- Blizzard also uses this event
+  --"NAME_PLATE_UNIT_REMOVED",  -- Blizzard also uses this event
+  --"PLAYER_TARGET_CHANGED",    -- Blizzard also uses this event
+  --"DISPLAY_SIZE_CHANGED",     -- Blizzard also uses this event
+  --"UNIT_AURA",                -- used in auras widget
+  --"VARIABLES_LOADED",         -- Blizzard also uses this event
+  --"CVAR_UPDATE",              -- Blizzard also uses this event
+  --"RAID_TARGET_UPDATE",       -- Blizzard also uses this event
+  "UNIT_FACTION",
 }
 
 local function EnableEvents()
@@ -478,30 +488,14 @@ end
 
 -- Prevent Blizzard nameplates from re-appearing, but show personal ressources bar, if enabled
 local function FrameOnShow(UnitFrame)
---  --if not self.carrier and InterfaceOptionsNamesPanelUnitNameplatesMakeLarger:GetValue() ~= "1" then
---  if not UnitFrame.unit or not UnitIsUnit(UnitFrame.unit, "player") then
---    -- hide blizzard's nameplate
---    if not TidyPlatesThreat.db.profile.ShowFriendlyBlizzardNameplates then
---      UnitFrame:Hide()
---      return
---    end
---
---    if UnitFrame.unit and UnitReaction(UnitFrame.unit, "player") > 4 then
---      UnitFrame:Show()
---      return
---    end
---  end
-
-  -- Check that this is not the personal resource bar, better not enable
+  -- Skip the personal resource bar of the player character
   if UnitIsUnit(UnitFrame.unit, "player") then
-    print ("Personal Resource Bar for Player is actived:", UnitFrame.unit)
     return
   end
 
-  --if ThreatPlatesConfig.ShowFriendlyBlizzardNameplates then
-  if not TidyPlatesThreat.db.profile.ShowFriendlyBlizzardNameplates then
-    -- Show Blizzard nameplates and hide ThreatPlates nameplates
-    if UnitReaction(UnitFrame.unit, "player") > 4 then
+  -- Hide ThreatPlates nameplates if Blizzard nameplates should be shown for friendly units
+  if TidyPlatesThreat.db.profile.ShowFriendlyBlizzardNameplates then
+    if UnitFrame.unit and UnitReaction(UnitFrame.unit, "player") > 4 then
       UnitFrame:Show()
       --UnitFrame:GetParent().carrier:Hide()
     end
@@ -510,22 +504,11 @@ local function FrameOnShow(UnitFrame)
   end
 end
 
+-- Frame: self = plate
 local function FrameOnUpdate(plate)
---  local frame_level = self:GetFrameLevel()
---  self.extended:SetFrameLevel(frame_level)
---  self.extended.defaultLevel = frame_level -- not sure, if necessary
---
---  if not TidyPlatesThreat.db.profile.ShowFriendlyBlizzardNameplates then return end
---
---  local unitid = self.UnitFrame.unit
---  local show = unitid and UnitReaction(unitid, "player") > 4
---  if show then
---    self:GetChildren():Show()
---    self.carrier:Hide()
---  end
-
-  local UnitFrame = plate.UnitFrame
-  if UnitIsUnit(UnitFrame.unit, "player") then
+  -- Skip the personal resource bar of the player character
+  local unitid = plate.UnitFrame.unit
+  if UnitIsUnit(unitid, "player") then
     return
   end
 
@@ -533,43 +516,24 @@ local function FrameOnUpdate(plate)
   plate.extended:SetFrameLevel(frame_level)
   plate.extended.defaultLevel = frame_level -- not sure, if necessary
 
-  --if ThreatPlatesConfig.ShowFriendlyBlizzardNameplates then
-  if not TidyPlatesThreat.db.profile.ShowFriendlyBlizzardNameplates then
-    if UnitFrame.unit and UnitReaction(UnitFrame.unit, "player") > 4 then
-      UnitFrame:Show()
-      plate.carrier:Hide()
-    end
+
+  -- Hide ThreatPlates nameplates if Blizzard nameplates should be shown for friendly units
+  if TidyPlatesThreat.db.profile.ShowFriendlyBlizzardNameplates and unitid and UnitReaction(unitid, "player") > 4 then
+    plate.UnitFrame:Show()
+    plate.carrier:Hide()
   end
 end
 
 -- Frame: self = plate.UnitFrame
 local function FrameOnHide(UnitFrame)
---  if not TidyPlatesThreat.db.profile.ShowFriendlyBlizzardNameplates then return end
---
---  local unit = self.unit
---  local show = unit and UnitReaction(unit, "player") > 4
---
---  if show then
---    self:Show()
---    self:GetParent().carrier:Hide()
---  end
-
-  -- Test: make this a local variable to this file
-  --if not TidyPlatesThreat.db.profile.ShowFriendlyBlizzardNameplates then return end
-
-  local test = { ThreatPlatesConfig.ShowFriendlyBlizzardNameplates = true, }
-
-  --if ThreatPlatesConfig.ShowFriendlyBlizzardNameplates then
-  if not TidyPlatesThreat.db.profile.ShowFriendlyBlizzardNameplates then
-    -- Show Blizzard nameplates and hide ThreatPlates nameplates
-    if UnitFrame.unit and UnitReaction(UnitFrame.unit, "player") > 4 then
-      UnitFrame:Show()
-      UnitFrame:GetParent().carrier:Hide()
-      --    local plate = GetNamePlateForUnit(self.unit)
-      --    if plate and plate.carrier then
-      --      plate.carrier:Hide()
-      --    end
-    end
+  -- Hide ThreatPlates nameplates if Blizzard nameplates should be shown for friendly units
+  if TidyPlatesThreat.db.profile.ShowFriendlyBlizzardNameplates and UnitFrame.unit and UnitReaction(UnitFrame.unit, "player") > 4 then
+    UnitFrame:Show()
+    UnitFrame:GetParent().carrier:Hide()
+    --    local plate = GetNamePlateForUnit(self.unit)
+    --    if plate and plate.carrier then
+    --      plate.carrier:Hide()
+    --    end
   end
 end
 
@@ -578,7 +542,7 @@ end
 -- e.g., press ESC, got to Interface, Names, press ESC and voila!
 -- Thanks to Kesava (KuiNameplates) for this solution
 function TidyPlatesThreat:NAME_PLATE_CREATED(event, plate)
-  assert(plate.UnitFrame ~= nil, "Nameplate created without UnitFrame")
+  assert(plate.UnitFrame ~= nil, "Nameplate created without UnitFrame attribute")
 
   if plate.UnitFrame then
     plate.UnitFrame:HookScript('OnShow', FrameOnShow)

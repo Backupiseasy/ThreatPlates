@@ -1,6 +1,7 @@
 ------------------------------------------------------
 8.6.0-Alpha1 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
+* Fixed a bug where the option to force healthbar view on the current target could only be changed when headline view was enabled.
 
 ------------------------------------------------------
 8.5.3 (works with TidyPlates 6.18.11)
