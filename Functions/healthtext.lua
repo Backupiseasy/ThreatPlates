@@ -52,19 +52,17 @@ local function Truncate(value)
 end
 
 local function GetUnitSubtitle(unit)
-	local unitid = unit.unitid
-
 	-- Bypass caching while in an instance
 	--if inInstance or (not UnitExists(unitid)) then return end
-	if ( UnitIsPlayer(unitid) or UnitPlayerControlled(unitid) or (not UnitExists(unitid))) then return end
+	if ( UnitIsPlayer(unit.unitid) or UnitPlayerControlled(unit.unitid) or (not UnitExists(unit.unitid))) then return end
 
-	--local guid = UnitGUID(unitid)
+	--local guid = UnitGUID(unit.unitid)
 	local name = unit.name
 	local subTitle = UnitSubtitles[name]
 
 	if not subTitle then
 		TooltipScanner:ClearLines()
-		TooltipScanner:SetUnit(unitid)
+		TooltipScanner:SetUnit(unit.unitid)
 
 		local TooltipTextLeft1 = _G[ScannerName.."TextLeft1"]
 		local TooltipTextLeft2 = _G[ScannerName.."TextLeft2"]
@@ -74,7 +72,7 @@ local function GetUnitSubtitle(unit)
 		name = TooltipTextLeft1:GetText()
 
 		if name then name = gsub( gsub( (name), "|c........", "" ), "|r", "" ) else return end	-- Strip color escape sequences: "|c"
-		if name ~= UnitName(unitid) then return end	-- Avoid caching information for the wrong unit
+		if name ~= UnitName(unit.unitid) then return end	-- Avoid caching information for the wrong unit
 
 
 		-- Tooltip Format Priority:  Faction, Description, Level
@@ -248,6 +246,8 @@ local SUBTEXT_FUNCTIONS =
 ---------------------------------------------------------------------------------------------------
 
 local function SetCustomText(unit)
+	if not unit.unitid then return end
+
   local style = unit.TP_Style or SetStyle(unit)
 
 	local db = TidyPlatesThreat.db.profile

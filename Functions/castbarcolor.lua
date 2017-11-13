@@ -10,6 +10,8 @@ local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local TidyPlatesThreat = TidyPlatesThreat
 
 local function SetCastbarColor(unit)
+	if not unit.unitid then return end
+
 	local db = TidyPlatesThreat.db.profile
 	local c = {r = 1,g = 1,b = 0,a = 1}
 	if db.castbarColor.toggle then
@@ -24,17 +26,15 @@ local function SetCastbarColor(unit)
 
 	-- There are LUA errors when calling GetNamePlateForUnit with a nil unitid
 	-- Don't know why this could happen here, but the nameplate should be invalid / not visible anyway
-	if unit.unitid then
-		local plate = GetNamePlateForUnit(unit.unitid)
-		if plate and plate.extended then
+	local plate = GetNamePlateForUnit(unit.unitid)
+	if plate and plate.extended then
 
-			db = db.settings.castbar
-			if db.BackgroundUseForegroundColor then
-				plate.extended.visual.castbar.Backdrop:SetVertexColor(c.r, c.g, c.b, db.BackgroundOpacity)
-			else
-				local color = db.BackgroundColor
-				plate.extended.visual.castbar.Backdrop:SetVertexColor(color.r, color.g, color.b, db.BackgroundOpacity)
-			end
+		db = db.settings.castbar
+		if db.BackgroundUseForegroundColor then
+			plate.extended.visual.castbar.Backdrop:SetVertexColor(c.r, c.g, c.b, db.BackgroundOpacity)
+		else
+			local color = db.BackgroundColor
+			plate.extended.visual.castbar.Backdrop:SetVertexColor(color.r, color.g, color.b, db.BackgroundOpacity)
 		end
 	end
 

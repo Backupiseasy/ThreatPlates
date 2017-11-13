@@ -26,13 +26,10 @@ local function ShowThreatGlow(unit)
 end
 
 local function SetThreatColor(unit)
-  local db = TidyPlatesThreat.db.profile
-
   local c = COLOR_TRANSPARENT
 
-  local unitid = unit.unitid
-  if unitid == nil then
-    return c.r, c.g, c.b, c.a
+  if not unit.unitid then
+    return c.r, c.g, c.b, c.a -- transparent color
   end
 
   if InCombatLockdown() and unit.type == "NPC" and unit.reaction ~= "FRIENDLY" then
@@ -47,7 +44,8 @@ local function SetThreatColor(unit)
       end
     end
 
-    if not UnitIsConnected(unitid) then
+    local db = TidyPlatesThreat.db.profile
+    if not UnitIsConnected(unit.unitid) then
       if ShowThreatGlow(unit) then
         c = db.ColorByReaction.DisconnectedUnit
       end

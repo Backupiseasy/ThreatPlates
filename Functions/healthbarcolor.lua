@@ -68,15 +68,11 @@ end
 
 
 local function UnitIsOffTanked(unit)
-  local unitid = unit.unitid
+  local targetOf = unit.unitid.."target"
+  local targetIsTank = UnitIsUnit(targetOf, "pet") or ("TANK" == UnitGroupRolesAssigned(targetOf))
 
-  if unitid then
-    local targetOf = unitid.."target"
-    local targetIsTank = UnitIsUnit(targetOf, "pet") or ("TANK" == UnitGroupRolesAssigned(targetOf))
-
-    if targetIsTank and unit.threatValue < 2 then
-      return true
-    end
+  if targetIsTank and unit.threatValue < 2 then
+    return true
   end
 
   return false

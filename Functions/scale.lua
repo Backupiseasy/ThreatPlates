@@ -9,13 +9,11 @@ local ThreatPlates = NAMESPACE.ThreatPlates
 
 -- WoW APIs
 local UnitExists = UnitExists
-local InCombatLockdown = InCombatLockdown
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
 local UnitIsOffTanked = ThreatPlates.UnitIsOffTanked
 local GetUniqueNameplateSetting = ThreatPlates.GetUniqueNameplateSetting
-local ShowThreatFeedback = ThreatPlates.ShowThreatFeedback
 local SetStyle = TidyPlatesThreat.SetStyle
 local GetThreatStyle = ThreatPlates.GetThreatStyle
 
@@ -167,6 +165,8 @@ local SCALE_FUNCTIONS = {
 }
 
 local function SetScale(unit)
+	if not unit.unitid then return end -- unitid is used in UnitIsOffTanked
+
 	-- sometimes SetScale is called without calling OnUpdate/OnContextUpdate first, so TP_Style may not be initialized
 	-- true for SetAlpha, not sure for SetScale
 	local style = unit.TP_Style or SetStyle(unit)
