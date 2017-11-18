@@ -158,7 +158,7 @@ end
 ---------------------------------------------------------------------------------------------------
 
 local function DEBUG(...)
-  print ("DEBUG: ", ...)
+  print (ThreatPlates.Meta("titleshort") .. "-Debug:", ...)
 end
 
 -- Function from: https://coronalabs.com/blog/2014/09/02/tutorial-printing-table-contents/
