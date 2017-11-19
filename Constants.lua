@@ -674,6 +674,20 @@ ThreatPlates.DEFAULT_SETTINGS = {
       FontSize = 10,
       FontColor = RGB(255, 255, 255),
     },
+    BossModsWidget = {
+      ON = true,
+      ShowInHeadlineView = true,
+      x = 0,
+      y = 66,
+      x_hv = 0,
+      y_hv = 30,
+      scale = 40,
+      AuraSpacing = 4,
+      Font = "Arial Narrow",
+      FontSize = 24,
+      FontColor = RGB(255, 255, 255),
+      -- TODO: add font flags like for custom text
+    },
     totemSettings = GetTotemSettings(),
     uniqueSettings = {
       list = {},

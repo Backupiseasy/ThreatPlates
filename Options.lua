@@ -442,27 +442,26 @@ local function GetEnableEntryTheme(entry_name, description, widget_info)
   return entry
 end
 
-local function GetSizeEntry(pos, setting, func_disabled)
+local function GetSizeEntry(name, pos, setting, func_disabled)
   local entry = {
-    name = L["Size"],
+    name = name,
     order = pos,
     type = "range",
     step = 1,
-    arg = { setting, "scale" },
+    softMin = 1,
+    softMax = 100,
+    arg = setting,
     disabled = func_disabled,
   }
   return entry
 end
 
+local function GetSizeEntryDefault(pos, setting, func_disabled)
+  return GetSizeEntry(L["Size"], pos, { setting, "scale" }, func_disabled)
+end
+
 local function GetSizeEntryTheme(pos, setting)
-  local entry = {
-    name = L["Size"],
-    order = pos,
-    type = "range",
-    step = 1,
-    arg = { "settings", setting, "scale" },
-  }
-  return entry
+  return GetSizeEntry(L["Size"], pos, { "settings", setting, "scale" })
 end
 
 local function GetScaleEntry(name, pos, setting, func_disabled, min_value, max_value)
@@ -632,7 +631,7 @@ local function GetLayoutEntry(pos, widget_info, hv_mode)
     type = "group",
     inline = true,
     args = {
-      Size = GetSizeEntry(10, widget_info),
+      Size = GetSizeEntryDefault(10, widget_info),
       Placement = GetPlacementEntryWidget(20, widget_info, hv_mode),
     },
   }
@@ -745,7 +744,7 @@ local function GetBoundariesEntry(pos, widget_info, func_disabled)
 end
 
 local function AddLayoutOptions(args, pos, widget_info)
-  args.Sizing = GetSizeEntry(pos, widget_info)
+  args.Sizing = GetSizeEntryDefault(pos, widget_info)
   args.Alpha = GetTransparencyEntryWidget(pos + 10, widget_info)
   args.Placement = GetPlacementEntryWidget(pos + 20, widget_info, true)
 end
@@ -4249,6 +4248,61 @@ local function CreateOptionsTable()
               },
             },
             ClassIconWidget = ClassIconsWidgetOptions(),
+            BossModsWidget = {
+              name = L["Boss Mods"],
+              type = "group",
+              order = 35,
+              args = {
+                Enable = GetEnableEntry(L["Enable Boss Mods Widget"], L["This widget shows auras from boss mods on your nameplates (since patch 7.2, hostile nameplates only in instances and raids)."], "BossModsWidget", true),
+                Aura = {
+                  name = L["Aura Icon"],
+                  type = "group",
+                  order = 10,
+                  inline = true,
+                  args = {
+                    Font = {
+                      name = L["Font"],
+                      type = "group",
+                      order = 10,
+                      inline = true,
+                      args = {
+                        Font = { name = L["Typeface"], type = "select", order = 10, dialogControl = "LSM30_Font", values = AceGUIWidgetLSMlists.font, arg = { "BossModsWidget", "Font" }, },
+                        FontSize = { name = L["Size"], order = 20, type = "range", min = 1, max = 36, step = 1, arg = { "BossModsWidget", "FontSize" }, },
+                        FontColor = {	name = L["Color"], type = "color",	order = 30,	get = GetColor,	set = SetColorAuraWidget,	arg = {"BossModsWidget", "FontColor"},	hasAlpha = false, },
+                      },
+                    },
+                    Layout = {
+                      name = L["Layout"],
+                      order = pos,
+                      type = "group",
+                      inline = true,
+                      args = {
+                        Size = GetSizeEntry(L["Size"], 10, {"BossModsWidget",  "scale" } ),
+                        Spacing = { name = L["Spacing"], order = 20, type = "range", min = 0, max = 100, step = 1, arg = { "BossModsWidget", "AuraSpacing" }, },
+                      },
+                    } ,
+                  },
+                },
+                Placement = GetPlacementEntryWidget(20, "BossModsWidget", true),
+                Config = {
+                  name = L["Configuration Mode"],
+                  order = 30,
+                  type = "group",
+                  inline = true,
+                  args = {
+                    Toggle = {
+                      name = L["Toggle on Target"],
+                      type = "execute",
+                      order = 1,
+                      width = "full",
+                      func = function()
+                        ThreatPlatesWidgets.ConfigBossModsWidget()
+                      end,
+                    },
+                  },
+                },
+              },
+            },
             ComboPointWidget = {
               name = L["Combo Points"],
               type = "group",
@@ -4496,7 +4550,7 @@ local function CreateOptionsTable()
                           arg = { "socialWidget", "ShowFriendIcon" },
                           --disabled = function() return not (db.socialWidget.ON or db.socialWidget.ShowInHeadlineView) end,
                         },
-                        Size = GetSizeEntry(10, "socialWidget"),
+                        Size = GetSizeEntryDefault(10, "socialWidget"),
                         --Anchor = GetAnchorEntry(20, "socialWidget"),
                         Offset = GetPlacementEntryWidget(30, "socialWidget", true),
                       },
@@ -4555,7 +4609,7 @@ local function CreateOptionsTable()
                       arg = { "socialWidget", "ShowFactionIcon" },
 --                      disabled = function() return not (db.socialWidget.ON or db.socialWidget.ShowInHeadlineView) end,
                     },
-                    Size = GetSizeEntry(10, "FactionWidget"),
+                    Size = GetSizeEntryDefault(10, "FactionWidget"),
                     Offset = GetPlacementEntryWidget(30, "FactionWidget", true),
                   },
                 },
@@ -4756,7 +4810,7 @@ local function CreateOptionsTable()
               type = "toggle",
               arg = { "totemWidget", "ON" },
             },
-            Size = GetSizeEntry(10, "totemWidget"),
+            Size = GetSizeEntryDefault(10, "totemWidget"),
             Offset = GetPlacementEntryWidget(30, "totemWidget"),
           },
         },
@@ -4902,7 +4956,7 @@ local function CreateOptionsTable()
               width = "half",
               arg = { "uniqueWidget", "ON" }
             },
-            Size = GetSizeEntry(10, "uniqueWidget"),
+            Size = GetSizeEntryDefault(10, "uniqueWidget"),
 --            Anchor = {
 --              name = L["Anchor"],
 --              type = "select",
