@@ -143,6 +143,7 @@ local function OnUpdate(plate, unit)
 end
 
 -- TidyPlatesGlobal_OnContextUpdate() is called when a unit is targeted or moused-over.  (Any time the unitid or GUID changes)
+-- OnContextUpdate is always followed up by a call to OnUpdate
 -- OnContextUpdate must only do something when there is something unit-dependent to display?
 local function OnContextUpdate(plate, unit)
   if not unit.unitid then return end

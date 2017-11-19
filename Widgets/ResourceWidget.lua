@@ -52,7 +52,7 @@ local function UpdateSettings(frame)
     })
     bar:Show()
   else
-    bar:Hide()
+    bar:_Hide()
   end
 
   local text = frame.Text
@@ -66,7 +66,7 @@ local function UpdateSettings(frame)
     text:SetTextColor(font_color.r, font_color.g, font_color.b)
     text:Show()
   else
-    text:Hide()
+    text:_Hide()
   end
 end
 
@@ -246,14 +246,14 @@ local function UpdateWidgetFrame(frame, unit)
         border:SetBackdropBorderColor(color.r, color.g, color.b, color.a)
       end
     else
-      bar:Hide()
+      bar:_Hide()
     end
 
     local text = frame.Text
     if db.ShowText then
       text:SetText(text_value)
     else
-      text:Hide()
+      text:_Hide()
     end
 
     frame:Show()
