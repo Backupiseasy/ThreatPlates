@@ -680,10 +680,10 @@ ThreatPlates.DEFAULT_SETTINGS = {
       x = 0,
       y = 66,
       x_hv = 0,
-      y_hv = 30,
+      y_hv = 40,
       scale = 40,
       AuraSpacing = 4,
-      Font = "Arial Narrow",
+      Font = DEFAULT_FONT,
       FontSize = 24,
       FontColor = RGB(255, 255, 255),
       -- TODO: add font flags like for custom text

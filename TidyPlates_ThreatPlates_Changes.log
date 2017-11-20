@@ -1,10 +1,7 @@
-* Added new widget Boss Mods to show auras from boss mods on your nameplates (since patch 7.2, hostile nameplates only in instances and raids).
-
 ------------------------------------------------------
 8.6.0-Alpha1 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
-* Optimized
-* Fixed a bug where the option to force healthbar view on the current target could only be changed when headline view was enabled.
+* Added new widget Boss Mods to show auras from boss mods on your nameplates (since patch 7.2, hostile nameplates only in instances and raids).
 
 8.5.5 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
