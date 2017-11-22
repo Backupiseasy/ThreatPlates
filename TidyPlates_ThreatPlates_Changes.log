@@ -1,4 +1,10 @@
 ------------------------------------------------------
+8.6.0-Alpha2
+------------------------------------------------------
+* Integrated all necessary parts of TidyPlates into ThreatPlates to make it standalone. TidyPlates is no longer required for ThreatPlates to work.
+* Removed the deprecated aura widget.
+
+------------------------------------------------------
 8.6.0-Alpha1 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
 * Optimized

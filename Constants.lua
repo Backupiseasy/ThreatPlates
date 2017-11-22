@@ -444,28 +444,6 @@ ThreatPlates.DEFAULT_SETTINGS = {
       level = 1,
       anchor = "CENTER"
     },
-    debuffWidget = {
-      ON = false,
-      x = 18,
-      y = 32,
-      mode = "blacklistMine",
-      style = "square",
-      displays = {
-        [1] = true,
-        [2] = true,
-        [3] = true,
-        [4] = true,
-        [5] = true,
-        [6] = true
-      },
-      targetOnly = false,
-      cooldownSpiral = true,
-      showFriendly = true,
-      showEnemy = true,
-      scale = 1,
-      anchor = "CENTER",
-      filter = {}
-    },
     AuraWidget = {
       ON = true,
       x = 0,

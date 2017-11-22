@@ -119,15 +119,6 @@ local function ActivateTheme(theme_table, theme_name)
 --  -- Recreate all TidyPlates styles for ThreatPlates("normal", "dps", "tank", ...) - required, if theme style settings were changed
 --  t.SetThemes(self)
 
-  -- 	Set aura widget style for Aura 1.0
-  local db = TidyPlatesThreat.db.profile
-  if db.debuffWidget.style == "square" then
-    TidyPlatesWidgets.UseSquareDebuffIcon()
-  elseif db.debuffWidget.style == "wide" then
-    TidyPlatesWidgets.UseWideDebuffIcon()
-  end
-  TidyPlatesWidgets.SetAuraFilter(ThreatPlatesWidgets.AuraFilter)
-
   -- TODO: check with what this  was replaces
   --TidyPlatesUtility:EnableGroupWatcher()
   -- TPHUub: if LocalVars.AdvancedEnableUnitCache then TidyPlatesUtility:EnableUnitCache() else TidyPlatesUtility:DisableUnitCache() end
@@ -144,7 +135,6 @@ local function ActivateTheme(theme_table, theme_name)
   -- TidyPlatesWidgets:EnableTankWatch()
   -- initialize widgets and other Threat Plates stuff
   local ThreatPlatesWidgets = ThreatPlatesWidgets
-  ThreatPlatesWidgets.PrepareFilter()
   ThreatPlatesWidgets.ConfigAuraWidgetFilter()
   ThreatPlatesWidgets.ConfigAuraWidget()
   t.SyncWithGameSettings()

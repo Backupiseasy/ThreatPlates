@@ -1,0 +1,53 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.blizzard.com/wow/ui/..\FrameXML\UI.xsd">
+
+    <FontFamily name="TidyPlatesFontNormal" virtual="true">
+        <Member alphabet="roman">
+            <Font font="Fonts\FRIZQT__.TTF" height="10"/>
+        </Member>
+        <Member alphabet="korean">
+            <Font font="Fonts\2002.TTF" height="12" spacing="1"/>
+        </Member>
+        <Member alphabet="simplifiedchinese">
+            <Font font="Fonts\ARKai_T.ttf" height="12"/>
+        </Member>
+        <Member alphabet="traditionalchinese">
+            <Font font="Fonts\bKAI00M.TTF" height="12"/>
+        </Member>
+        <Member alphabet="russian">
+            <Font font="Fonts\FRIZQT___CYR.TTF" height="10"/>
+        </Member>
+    </FontFamily>
+
+    <FontFamily name="TidyPlatesFontSmall" virtual="true">
+        <Member alphabet="roman">
+            <Font font="Fonts\FRIZQT__.TTF" height="8"/>
+        </Member>
+        <Member alphabet="korean">
+            <Font font="Fonts\2002.TTF" height="10" spacing="1"/>
+        </Member>
+        <Member alphabet="simplifiedchinese">
+            <Font font="Fonts\ARKai_T.ttf" height="10"/>
+        </Member>
+        <Member alphabet="traditionalchinese">
+            <Font font="Fonts\bKAI00M.TTF" height="10"/>
+        </Member>
+        <Member alphabet="russian">
+            <Font font="Fonts\FRIZQT___CYR.TTF" height="8"/>
+        </Member>
+    </FontFamily>
+
+    <Cooldown name="TidyPlatesAuraWidgetCooldown" setAllPoints="true" hidden="true" virtual="true">
+        <SwipeTexture>
+            <Color r="0" g="0" b="0" a="0.8"/>
+        </SwipeTexture>
+        <EdgeTexture file="Interface\Addons\TidyPlates_ThreatPlates\TidyPlatesInternal\Artwork\Edge"/>
+    </Cooldown>
+
+    <Script file="TidyPlatesStatusbar.lua"/>
+    <Script file="TidyPlatesCore.lua"/>
+    <Script file="TidyPlatesUtility.lua"/>
+    <Script file="TidyPlatesTemplate.lua"/>
+    <Script file="TidyPlatesParser.lua"/>
+    <Script file="TidyPlatesPanel.lua"/>
+</Ui>
