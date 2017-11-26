@@ -3,6 +3,7 @@
 ------------------------------------------------------
 * Integrated all necessary parts of TidyPlates into ThreatPlates to make it standalone. TidyPlates is no longer required for ThreatPlates to work.
 * Removed the deprecated aura widget.
+* Fixed a bug with castbar background transparency working like alpha (0% should be nontransparent).
 
 ------------------------------------------------------
 8.6.0-Alpha1 (works with TidyPlates 6.18.11)

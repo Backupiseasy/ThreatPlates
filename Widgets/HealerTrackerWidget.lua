@@ -16,12 +16,12 @@ local healerTrackerEnabled
 local function enabled()
   if TidyPlatesThreat.db.profile.healerTracker.ON then
     if not healerTrackerEnabled then
-      TidyPlatesUtility.EnableHealerTrack()
+      TidyPlatesUtilityInternal.EnableHealerTrack()
       healerTrackerEnabled = true
     end
   else
     if healerTrackerEnabled then
-      TidyPlatesUtility.DisableHealerTrack()
+      TidyPlatesUtilityInternal.DisableHealerTrack()
       healerTrackerEnabled = false
     end
   end
@@ -33,7 +33,7 @@ end
 -- 	-- for _, widget in pairs(WidgetList) do
 -- 	-- 	widget:Hide()
 -- 	-- end
---   TidyPlatesUtility.DisableHealerTrack()
+--   TidyPlatesUtilityInternal.DisableHealerTrack()
 --   healerTrackerEnabled = false
 -- end
 -- ThreatPlatesWidgets.ClearAllHealerTrackerWidgets = ClearAllWidgets
@@ -46,7 +46,7 @@ local function CustomUpdateWidgetFrame(frame, unit)
   -- CustomAuraUpdate substitues AuraWidget.Update and AuraWidget.UpdateContext
   --   AuraWidget.Update is sometimes (first call after reload UI) called with unit.unitid = nil
   -- possibly add: if not unit then return end
-	if unit.type == "PLAYER" and TidyPlatesUtility.IsHealer(unit.name)  then
+	if unit.type == "PLAYER" and TidyPlatesUtilityInternal.IsHealer(unit.name)  then
     if (unit and unit.unitid) then
       frame.OldUpdate(frame,unit)
     end

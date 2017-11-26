@@ -1,16 +1,14 @@
+local addonName, addon = ...
+local UseTheme = addon.UseTheme
 
-local addonName, TidyPlatesInternal = ...
-local UseTheme = TidyPlatesInternal.UseTheme
-
-if not TidyPlatesThemeList then TidyPlatesThemeList = {} end
+if not TidyPlatesInternalThemeList then TidyPlatesInternalThemeList = {} end
 
 -------------------------------------------------------------------------------------
 -- Template
 -------------------------------------------------------------------------------------
 
 local TemplateTheme = {}
-local defaultArtPath = "Interface\\Addons\\TidyPlates\\Media"
---local font =					"FONTS\\arialn.ttf"
+local defaultArtPath = "Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork"
 local font =					NAMEPLATE_FONT
 local EMPTY_TEXTURE = defaultArtPath.."\\Empty"
 
@@ -231,5 +229,5 @@ TemplateTheme.threatcolor = {
 -----------------------------------------------
 -- References
 -----------------------------------------------
-TidyPlatesInternal.ThemeTemplate = TemplateTheme
+addon.ThemeTemplate = TemplateTheme
 UseTheme(TemplateTheme)

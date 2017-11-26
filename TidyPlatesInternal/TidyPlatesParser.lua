@@ -1,32 +1,61 @@
+local addonName, addon = ...
 
 -- Requires:
--- TidyPlatesUtility
+-- TidyPlatesUtilityInternal
 -- TidyPlatesDefaults
--- TidyPlatesThemeList, TidyPlatesInternal.ThemeTemplate
+-- TidyPlatesInternalThemeList, TidyPlatesInternal.ThemeTemplate
 
-local addonName, TidyPlatesInternal = ...
-local UseTheme = TidyPlatesInternal.UseTheme
+local UseTheme = addon.UseTheme
 
-local copytable = TidyPlatesUtility.copyTable
-local mergetable = TidyPlatesUtility.mergeTable
+-------------------------------------------------------------------------------------
+--  General Helpers
+-------------------------------------------------------------------------------------
+local _
+
+local copytable         -- Allows self-reference
+copytable = function(original)
+	local duplicate = {}
+	for key, value in pairs(original) do
+		if type(value) == "table" then duplicate[key] = copytable(value)
+		else duplicate[key] = value end
+	end
+	return duplicate
+end
+
+local function mergetable(master, mate)
+	local merged = {}
+	local matedata
+	for key, value in pairs(master) do
+		if type(value) == "table" then
+			matedata = mate[key]
+			if type(matedata) == "table" then merged[key] = mergetable(value, matedata)
+			else merged[key] = copytable(value) end
+		else
+			matedata = mate[key]
+			if matedata == nil then merged[key] = master[key]
+			else merged[key] = matedata end
+		end
+	end
+	return merged
+end
 
 local function SetTheme(...)
 	local arg1, arg2 = ...
 
-	if arg1 == TidyPlates then themeName = arg2
+	if arg1 == TidyPlatesInternal then themeName = arg2
 	else themeName = arg1 end
 
 	local theme 	-- This will store the pointer to the theme table
 
 	-- Sends a nil notification to all available themes to encourage cleanup
-	for themename, themetable in pairs(TidyPlatesThemeList) do
+	for themename, themetable in pairs(TidyPlatesInternalThemeList) do
 		if themetable.OnActivateTheme then themetable.OnActivateTheme(nil) end
 	end
 
 	-- Get theme table
-	if type(TidyPlatesThemeList) == "table" then
+	if type(TidyPlatesInternalThemeList) == "table" then
 		if type(themeName) == 'string' then
-			theme = TidyPlatesThemeList[themeName]
+			theme = TidyPlatesInternalThemeList[themeName]
 		end
 	end
 
@@ -41,14 +70,14 @@ local function SetTheme(...)
 				if type(style) == "table" and style._meta then						-- _meta tag skips parsing
 					theme[stylename] = copytable(style)
 				elseif type(style) == "table" then									-- merge style with template style
-					theme[stylename] = mergetable(TidyPlatesInternal.ThemeTemplate, style)		-- ie. fill in the blanks
+					theme[stylename] = mergetable(addon.ThemeTemplate, style)		-- ie. fill in the blanks
 				end
 			end
 		else
 			-- Single-Style Theme  (Old School!)
 			local newvalue, propertyname, oldvalue
 
-			for propertyname, oldvalue in pairs(TidyPlatesInternal.ThemeTemplate) do
+			for propertyname, oldvalue in pairs(addon.ThemeTemplate) do
 				newvalue = theme[propertyname]
 				if type(newvalue) == "table" then theme[propertyname] = mergetable(oldvalue, newvalue)
 				else theme[propertyname] = copytable(oldvalue) end
@@ -60,24 +89,22 @@ local function SetTheme(...)
 
 		-- ie. (Theme Table, Theme Name) -- nil is sent for all themes, to reset everything (^ above ^) and then the current theme is activated
 		if theme.OnActivateTheme then theme.OnActivateTheme(theme) end
-		TidyPlatesInternal.activeThemeName = themeName
+		addon.activeThemeName = themeName
 
-		TidyPlatesOptions.ActiveTheme = TidyPlatesInternal.activeThemeName
-		TidyPlates:ForceUpdate()
+		TidyPlatesInternal:ForceUpdate()
 		return theme
 	else
 		-- This block falls back to the template, and leaves the field blank...
-		TidyPlatesInternal.activeThemeName = nil
-		TidyPlatesOptions.ActiveTheme = ""
+		addon.activeThemeName = nil
 
-		UseTheme(TidyPlatesInternal.ThemeTemplate)
+		UseTheme(addon.ThemeTemplate)
 		return nil
 	end
 
 
 end
 
--- /run TidyPlates:SetTheme("Neon")
+-- /run TidyPlatesInternal:SetTheme("Neon")
 
-TidyPlates.SetTheme = SetTheme
 TidyPlatesInternal.SetTheme = SetTheme
+addon.SetTheme = SetTheme

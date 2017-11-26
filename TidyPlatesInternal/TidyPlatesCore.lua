@@ -1,31 +1,58 @@
+local addonName, addon = ...
+
 -- Tidy Plates - SMILE! :-D
 
 ---------------------------------------------------------------------------------------------------------------------
 -- Variables and References
 ---------------------------------------------------------------------------------------------------------------------
-local addonName, TidyPlatesInternal = ...
 local TidyPlatesCore = CreateFrame("Frame", nil, WorldFrame)
-TidyPlates = {}
+TidyPlatesInternal = {}
 
 -- Local References
 local _
 local max = math.max
 local select, pairs, tostring  = select, pairs, tostring 			    -- Local function copy
-local CreateTidyPlatesStatusbar = CreateTidyPlatesStatusbar			    -- Local function copy
+local CreateTidyPlatesInternalStatusbar = CreateTidyPlatesInternalStatusbar			    -- Local function copy
+
+-- WoW APIs
+local wipe = wipe
 local WorldFrame, UIParent = WorldFrame, UIParent
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
+local UnitName = UnitName
+local UnitIsUnit = UnitIsUnit
+local UNKNOWNOBJECT = UNKNOWNOBJECT
+local UnitExists = UnitExists
+local CreateFrame = CreateFrame
+local UnitPVPName = UnitPVPName
+local UnitClassification = UnitClassification
+local UnitLevel = UnitLevel
+local UnitIsPlayer = UnitIsPlayer
+local UnitClass = UnitClass
+local UnitGUID = UnitGUID
+local UnitEffectiveLevel = UnitEffectiveLevel
+local GetCreatureDifficultyColor = GetCreatureDifficultyColor
+local UnitSelectionColor = UnitSelectionColor
+local UnitHealth = UnitHealth
+local UnitHealthMax = UnitHealthMax
+local UnitThreatSituation = UnitThreatSituation
+local UnitAffectingCombat = UnitAffectingCombat
+local GetRaidTargetIndex = GetRaidTargetIndex
+local UnitIsTapDenied = UnitIsTapDenied
+local GetTime = GetTime
+local UnitChannelInfo, UnitCastingInfo = UnitChannelInfo, UnitCastingInfo
+local UnitPlayerControlled = UnitPlayerControlled
 
 -- Internal Data
 local Plates, PlatesVisible, PlatesFading, GUID = {}, {}, {}, {}	            	-- Plate Lists
 local PlatesByUnit = {}
 local nameplate, extended, bars, regions, visual, carrier, plateid			    	-- Temp/Local References
-local unit, unitcache, style, stylename, unitchanged	    			-- Temp/Local References
+local unit, unitcache, style, stylename, unitchanged, threatborder	    			-- Temp/Local References
 local numChildren = -1                                                              -- Cache the current number of plates
 local activetheme = {}                                                              -- Table Placeholder
 local InCombat, HasTarget, HasMouseover = false, false, false					    -- Player State Data
 local EnableFadeIn = true
 local ShowCastBars = true
-local EMPTY_TEXTURE = "Interface\\Addons\\TidyPlates\\Media\\Empty"
+local EMPTY_TEXTURE = "Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\Empty"
 local ResetPlates, UpdateAll = false, false
 local OverrideFonts = false
 
@@ -71,20 +98,19 @@ local OnUpdateCasting, OnStartCasting, OnStopCasting, OnUpdateCastMidway
 local OnShowNameplate, OnHideNameplate, OnUpdateNameplate, OnResetNameplate
 local OnHealthUpdate, UpdateUnitCondition
 local UpdateUnitContext, OnRequestWidgetUpdate, OnRequestDelegateUpdate
-local UpdateUnitIdentity
+local UpdateUnitIdentity, UnitNameUpdate
 local OnNewNameplate
 
 -- Main Loop
 local OnUpdate
-local OnNewNameplate
 local ForEachPlate
 
 -- UpdateReferences
 local function UpdateReferences(plate)
 	nameplate = plate
-	extended = plate.extended
+	extended = plate.TP_Extended
 
-	carrier = plate.carrier
+	carrier = plate.TP_Carrier
 	bars = extended.bars
 	regions = extended.regions
 	unit = extended.unit
@@ -104,7 +130,7 @@ do
 	-- ForEachPlate
 	function ForEachPlate(functionToRun, ...)
 		for plate in pairs(PlatesVisible) do
-			if plate.extended.Active then
+			if plate.TP_Extended.Active then
 				functionToRun(plate, ...)
 			end
 		end
@@ -124,8 +150,8 @@ do
 		for plate in pairs(PlatesVisible) do
 			local UpdateMe = UpdateAll or plate.UpdateMe
 			local UpdateHealth = plate.UpdateHealth
-			local carrier = plate.carrier
-			local extended = plate.extended
+			local carrier = plate.TP_Carrier
+			local extended = plate.TP_Extended
 
 			-- Check for an Update Request
 			if UpdateMe or UpdateHealth then
@@ -158,28 +184,26 @@ end
 ---------------------------------------------------------------------------------------------------------------------
 do
 
-	local topFrameLevel = 0
-
 	-- ApplyPlateExtesion
 	function OnNewNameplate(plate, plateid)
 
-        -- Tidy Plates Frame
-        --------------------------------
-        local bars, regions = {}, {}
+    -- Tidy Plates Frame
+    --------------------------------
+    local bars, regions = {}, {}
 		local carrier
-		local frameName = "TidyPlatesCarrier"..numChildren
+		local frameName = "ThreatPlatesCarrier"..numChildren
 
 		carrier = CreateFrame("Frame", frameName, WorldFrame)
 		local extended = CreateFrame("Frame", nil, carrier)
 
-		plate.carrier = carrier
-		plate.extended = extended
+		plate.TP_Carrier = carrier
+		plate.TP_Extended = extended
 
         -- Add Graphical Elements
 		local visual = {}
 		-- Status Bars
-		local healthbar = CreateTidyPlatesStatusbar(extended)
-		local castbar = CreateTidyPlatesStatusbar(extended)
+		local healthbar = CreateTidyPlatesInternalStatusbar(extended)
+		local castbar = CreateTidyPlatesInternalStatusbar(extended)
 		local textFrame = CreateFrame("Frame", nil, healthbar)
 		local widgetParent = CreateFrame("Frame", nil, textFrame)
 
@@ -219,21 +243,11 @@ do
 		textFrame:SetFrameStrata("BACKGROUND")
 		widgetParent:SetFrameStrata("BACKGROUND")
 
-		topFrameLevel = topFrameLevel + 20
-		extended.defaultLevel = topFrameLevel
-		extended:SetFrameLevel(topFrameLevel)
-
 		castbar:Hide()
 		castbar:SetStatusBarColor(1,.8,0)
 		carrier:SetSize(16, 16)
 
-		-- Default Fonts
-		visual.name:SetFontObject("TidyPlatesFontNormal")
-		visual.level:SetFontObject("TidyPlatesFontNormal")
-		visual.spelltext:SetFontObject("TidyPlatesFontNormal")
-		visual.customtext:SetFontObject("TidyPlatesFontNormal")
-
-		-- Tidy Plates Frame References
+    -- Tidy Plates Frame References
 		extended.regions = regions
 		extended.bars = bars
 		extended.visual = visual
@@ -290,7 +304,7 @@ do
 				if unitcache[key] ~= value then
 					unitchanged = true
 				end
-			end
+      end
 
 			-- Update Style/Indicators
 			if unitchanged or UpdateAll or (not style)then --
@@ -314,8 +328,8 @@ do
 
 --[[
 	local function HideWidgets(plate)
-		if plate.extended and plate.extended.widgets then
-			local widgetTable = plate.extended.widgets
+		if plate.TP_Extended and plate.TP_Extended.widgets then
+			local widgetTable = plate.TP_Extended.widgets
 			for widgetIndex, widget in pairs(widgetTable) do
 				widget:Hide()
 				--widgetTable[widgetIndex] = nil
@@ -380,8 +394,8 @@ do
 
 	-- OnHideNameplate
 	function OnHideNameplate(plate, unitid)
-		--plate.extended:Hide()
-		plate.carrier:Hide()
+		--plate.TP_Extended:Hide()
+		plate.TP_Carrier:Hide()
 
 		UpdateReferences(plate)
 
@@ -406,7 +420,7 @@ do
 		-- plate:GetChildren():Hide()
 
 		-- Gather Information
-		unitid = PlatesVisible[plate]
+		local unitid = PlatesVisible[plate]
 		UpdateReferences(plate)
 
 		UpdateUnitIdentity(unitid)
@@ -417,20 +431,20 @@ do
 
 	-- OnHealthUpdate
 	function OnHealthUpdate(plate)
-		unitid = PlatesVisible[plate]
+		local unitid = PlatesVisible[plate]
 
 		UpdateUnitCondition(plate, unitid)
 		ProcessUnitChanges()
 		UpdateIndicator_HealthBar()		-- Just to be on the safe side
-	end
+  end
 
      -- OnResetNameplate
 	function OnResetNameplate(plate)
-		local extended = plate.extended
+		local extended = plate.TP_Extended
 		plate.UpdateMe = true
 		extended.unitcache = ClearIndices(extended.unitcache)
 		extended.stylename = ""
-		unitid = PlatesVisible[plate]
+		local unitid = PlatesVisible[plate]
 
 		OnShowNameplate(plate, unitid)
 	end
@@ -551,7 +565,12 @@ do
 		unit.levelcolorRed, unit.levelcolorGreen, unit.levelcolorBlue = c.r, c.g, c.b
 
 		unit.red, unit.green, unit.blue = UnitSelectionColor(unitid)
+
 		unit.reaction = GetReactionByColor(unit.red, unit.green, unit.blue) or "HOSTILE"
+    -- Enemy players turn to neutral, e.g., when mounting a flight path mount, so fix reaction in that situations
+    if unit.reaction == "NEUTRAL" and (unit.type == "PLAYER" or UnitPlayerControlled(unitid)) then
+      unit.reaction = "HOSTILE"
+    end
 
 		unit.health = UnitHealth(unitid) or 0
 		unit.healthmax = UnitHealthMax(unitid) or 1
@@ -716,16 +735,6 @@ do
 		else
 			extended:Hide()        -- FRAME HIDE TEST
 		end
-
-		-- Better Layering
-		if unit.isTarget then
-			extended:SetFrameLevel(3000)
-		elseif unit.isMouseover then
-			extended:SetFrameLevel(3200)
-		else
-			extended:SetFrameLevel(extended.defaultLevel)
-		end
-
 	end
 
 
@@ -807,14 +816,7 @@ do
 
 		local r, g, b, a = 1, 1, 0, 1
 
-		if activetheme.SetCastbarColor then
-			r, g, b, a = activetheme.SetCastbarColor(unit)
-			if not (r and g and b and a) then return end
-		end
-
-		castBar:SetStatusBarColor( r, g, b)
-
-		castBar:SetAlpha(a or 1)
+    castBar:SetAllColors(activetheme.SetCastbarColor(unit))
 
 		if unit.spellIsShielded then
 			   visual.castnostop:Show(); visual.castborder:Hide()
@@ -873,12 +875,13 @@ do
 	-- Frequently Used Event-handling Functions
 	----------------------------------------
 	-- Update individual plate
-	local function UnitConditionChanged(unitid)
-		--local unitid = ...
-		--if not unitid then return end
-		local plate = GetNamePlateForUnit(unitid)
+	local function UnitConditionChanged(event, unitid)
+    if UnitIsUnit("player", unitid) then return end -- skip personal resource bar
 
-		if plate then OnHealthUpdate(plate) end
+    local plate = GetNamePlateForUnit(unitid)
+    if plate then
+      OnHealthUpdate(plate)
+    end
 	end
 
 	-- Update everything
@@ -887,20 +890,29 @@ do
 	end
 
 	-- Update spell currently being cast
-	local function UnitSpellcastMidway(...)
-		local unitid = ...
-
+	local function UnitSpellcastMidway(event, unitid, ...)
 		if UnitIsUnit("player", unitid) or not ShowCastBars then return end
-
 		local plate = GetNamePlateForUnit(unitid);
-
 		if plate then
 			OnUpdateCastMidway(plate, unitid)
 		end
 	 end
 
+  local function UnitNameUpdate(event, unitid)
+    if UnitIsUnit("player", unitid) then return end -- skip personal resource bar
 
-	local CoreEvents = {}
+    local plate = GetNamePlateForUnit(unitid)
+    if plate then
+      UpdateReferences(plate)
+
+      if unit.name == UNKNOWNOBJECT then
+        unit.name = UnitName(unitid) or ""
+        UpdateIndicator_Name()
+      end
+    end
+  end
+
+  local CoreEvents = {}
 
 	local function EventHandler(self, event, ...)
 		CoreEvents[event](event, ...)
@@ -1022,16 +1034,18 @@ do
 		end
 	end
 
+  -- The following events should not have worked before adjusting UnitSpellcastMidway
 	CoreEvents.UNIT_SPELLCAST_DELAYED = UnitSpellcastMidway
 	CoreEvents.UNIT_SPELLCAST_CHANNEL_UPDATE = UnitSpellcastMidway
 	CoreEvents.UNIT_SPELLCAST_INTERRUPTIBLE = UnitSpellcastMidway
 	CoreEvents.UNIT_SPELLCAST_NOT_INTERRUPTIBLE = UnitSpellcastMidway
 
 	CoreEvents.UNIT_LEVEL = UnitConditionChanged
-	CoreEvents.UNIT_THREAT_SITUATION_UPDATE = UnitConditionChanged
-	CoreEvents.UNIT_FACTION = UnitConditionChanged
+	--CoreEvents.UNIT_THREAT_SITUATION_UPDATE = UnitConditionChanged -- did not work anyway (no unitid)
+	CoreEvents.UNIT_FACTION = WorldConditionChanged
+  CoreEvents.UNIT_NAME_UPDATE = UnitNameUpdate
 
-	CoreEvents.RAID_TARGET_UPDATE = WorldConditionChanged
+  CoreEvents.RAID_TARGET_UPDATE = WorldConditionChanged
 	CoreEvents.PLAYER_FOCUS_CHANGED = WorldConditionChanged
 	CoreEvents.PLAYER_CONTROL_LOST = WorldConditionChanged
 	CoreEvents.PLAYER_CONTROL_GAINED = WorldConditionChanged
@@ -1183,19 +1197,13 @@ local function UseTheme(theme)
 	end
 end
 
-TidyPlatesInternal.UseTheme = UseTheme
+addon.UseTheme = UseTheme
 
 local function GetTheme()
 	return activetheme
 end
 
-local function GetThemeName()
-	return TidyPlatesOptions.ActiveTheme
-end
-
-TidyPlates.GetTheme = GetTheme
-TidyPlates.GetThemeName = GetThemeName
-
+TidyPlatesInternal.GetTheme = GetTheme
 
 --------------------------------------------------------------------------------------------------------------
 -- Misc. Utility
@@ -1203,7 +1211,7 @@ TidyPlates.GetThemeName = GetThemeName
 local function OnResetWidgets(plate)
 	-- At some point, we're going to have to manage the widgets a bit better.
 
-	local extended = plate.extended
+	local extended = plate.TP_Extended
 	local widgets = extended.widgets
 
 	for widgetName, widgetFrame in pairs(widgets) do
@@ -1218,23 +1226,23 @@ end
 -- External Commands: Allows widgets and themes to request updates to the plates.
 -- Useful to make a theme respond to externally-captured data (such as the combat log)
 --------------------------------------------------------------------------------------------------------------
-function TidyPlates:DisableCastBars() ShowCastBars = false end
-function TidyPlates:EnableCastBars() ShowCastBars = true end
+function TidyPlatesInternal:DisableCastBars() ShowCastBars = false end
+function TidyPlatesInternal:EnableCastBars() ShowCastBars = true end
 
-function TidyPlates:ForceUpdate() ForEachPlate(OnResetNameplate) end
-function TidyPlates:ResetWidgets() ForEachPlate(OnResetWidgets) end
-function TidyPlates:Update() SetUpdateAll() end
+function TidyPlatesInternal:ForceUpdate() ForEachPlate(OnResetNameplate) end
+function TidyPlatesInternal:ResetWidgets() ForEachPlate(OnResetWidgets) end
+function TidyPlatesInternal:Update() SetUpdateAll() end
 
-function TidyPlates:RequestUpdate(plate) if plate then SetUpdateMe(plate) else SetUpdateAll() end end
+function TidyPlatesInternal:RequestUpdate(plate) if plate then SetUpdateMe(plate) else SetUpdateAll() end end
 
-function TidyPlates:ActivateTheme(theme) if theme and type(theme) == 'table' then TidyPlates.ActiveThemeTable, activetheme = theme, theme; ResetPlates = true; end end
-function TidyPlates.OverrideFonts( enable) OverrideFonts = enable; end
+function TidyPlatesInternal:ActivateTheme(theme) if theme and type(theme) == 'table' then TidyPlatesInternal.ActiveThemeTable, activetheme = theme, theme; ResetPlates = true; end end
+function TidyPlatesInternal.OverrideFonts( enable) OverrideFonts = enable; end
 
 -- Old and needing deleting - Just here to avoid errors
-function TidyPlates:EnableFadeIn() EnableFadeIn = true; end
-function TidyPlates:DisableFadeIn() EnableFadeIn = nil; end
-TidyPlates.RequestWidgetUpdate = TidyPlates.RequestUpdate
-TidyPlates.RequestDelegateUpdate = TidyPlates.RequestUpdate
+function TidyPlatesInternal:EnableFadeIn() EnableFadeIn = true; end
+function TidyPlatesInternal:DisableFadeIn() EnableFadeIn = nil; end
+TidyPlatesInternal.RequestWidgetUpdate = TidyPlatesInternal.RequestUpdate
+TidyPlatesInternal.RequestDelegateUpdate = TidyPlatesInternal.RequestUpdate
 
 
 

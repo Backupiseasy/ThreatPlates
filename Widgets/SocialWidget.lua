@@ -110,7 +110,7 @@ local function WatcherFrameHandler(frame, event,...)
 				 event == "BN_FRIEND_ACCOUNT_OFFLINE" then
 		UpdateBnetList()
 	end
-	--TidyPlates:ForceUpdate()
+	--TidyPlatesInternal:ForceUpdate()
 end
 
 local function EnableWatcher()

@@ -106,12 +106,12 @@ end
 local function SetValueForceUpdate(info, value)
 	SetValuePlain(info, value)
 	--TidyPlates:ResetWidgets()
-	TidyPlates:ForceUpdate()
+	TidyPlatesInternal:ForceUpdate()
 end
 
 local function SetValueResetWidgets(info, value)
 	SetValuePlain(info, value)
-	TidyPlates:ResetWidgets()
+	TidyPlatesInternal:ResetWidgets()
 end
 
 local function SetSelectValue(info, value)
@@ -227,7 +227,7 @@ local function SetColorAlphaAuraWidget(info, r, g, b, a)
   end
   DB[keys[#keys]].r, DB[keys[#keys]].g, DB[keys[#keys]].b, DB[keys[#keys]].a = r, g, b, a
 	ThreatPlatesWidgets.ForceAurasUpdate()
-	TidyPlates:ForceUpdate()
+	TidyPlatesInternal:ForceUpdate()
 end
 
 local function SetColorAuraWidget(info, r, g, b)
@@ -238,7 +238,7 @@ local function SetColorAuraWidget(info, r, g, b)
 	end
 	DB[keys[#keys]].r, DB[keys[#keys]].g, DB[keys[#keys]].b = r,g,b
 	ThreatPlatesWidgets.ForceAurasUpdate()
-  TidyPlates:ForceUpdate()
+  TidyPlatesInternal:ForceUpdate()
 end
 
 local function GetUnitVisibilitySetting(info)
@@ -261,7 +261,7 @@ local function SetUnitVisibilitySetting(info, value)
   else
     SetWoWCVar(unit_visibility.Show, value)
   end
-  TidyPlates:ForceUpdate()
+  TidyPlatesInternal:ForceUpdate()
 end
 
 -- Set Theme Values
@@ -270,9 +270,11 @@ local function SetThemeValue(info, val)
   SetValue(info, val)
   t.SetThemes(TidyPlatesThreat)
   -- TODO: should not be necessary here
-  if (TidyPlatesOptions.ActiveTheme == t.THEME_NAME) then
-    TidyPlates:SetTheme(t.THEME_NAME)
-  end
+  -- With TidyPlates:
+  --if (TidyPlatesOptions.ActiveTheme == t.THEME_NAME) then
+  --  TidyPlates:SetTheme(t.THEME_NAME)
+  --end
+  TidyPlatesInternal:SetTheme(t.THEME_NAME)
 end
 
 local function GetFontFlags(db, flag)
@@ -306,7 +308,7 @@ end
 local function SetValueAuraWidget(info, val)
   SetValuePlain(info, val)
   ThreatPlatesWidgets.ConfigAuraWidget()
-  TidyPlates:ForceUpdate()
+  TidyPlatesInternal:ForceUpdate()
 end
 
 ---- Validate functions for AceConfig
@@ -1165,7 +1167,7 @@ local function CreateTabGeneralSettings()
             width = "full",
             set = function(info, val)
               SetValue(info, val)
-              if db.tidyplatesFade then TidyPlates:EnableFadeIn() else TidyPlates:DisableFadeIn() end
+              if db.tidyplatesFade then TidyPlatesInternal:EnableFadeIn() else TidyPlatesInternal:DisableFadeIn() end
             end,
             arg = { "tidyplatesFade" },
           },
@@ -1931,9 +1933,9 @@ local function CreateOptionsTable()
 											set = function(info, val)
                         SetCvar(info, val)
                         if val then
-                          TidyPlates:EnableCastBars()
+                          TidyPlatesInternal:EnableCastBars()
                         else
-                          TidyPlates:DisableCastBars()
+                          TidyPlatesInternal:DisableCastBars()
                         end
                       end,
                       arg = "ShowVKeyCastbar",
@@ -2611,7 +2613,7 @@ local function CreateOptionsTable()
                           set = function(info, val)
                             TidyPlatesThreat.db.profile.settings.customtext.SubtextColorUseHeadline = false
                             TidyPlatesThreat.db.profile.settings.customtext.SubtextColorUseSpecific = false
-                            TidyPlates:ForceUpdate()
+                            TidyPlatesInternal:ForceUpdate()
                           end,
                           get = function(info) return not (TidyPlatesThreat.db.profile.settings.customtext.SubtextColorUseHeadline or TidyPlatesThreat.db.profile.settings.customtext.SubtextColorUseSpecific) end,
                         },
@@ -2690,7 +2692,7 @@ local function CreateOptionsTable()
                           set = function(info, val)
                             TidyPlatesThreat.db.profile.HeadlineView.SubtextColorUseHeadline = false
                             TidyPlatesThreat.db.profile.HeadlineView.SubtextColorUseSpecific = false
-                            TidyPlates:ForceUpdate()
+                            TidyPlatesInternal:ForceUpdate()
                           end,
                           get = function(info) return not (TidyPlatesThreat.db.profile.HeadlineView.SubtextColorUseHeadline or TidyPlatesThreat.db.profile.HeadlineView.SubtextColorUseSpecific) end,
                         },
@@ -3742,7 +3744,7 @@ local function CreateOptionsTable()
                       set = function(info, k, v)
                         db.AuraWidget.FilterByType[k] = v
                         ThreatPlatesWidgets.ForceAurasUpdate()
-                        TidyPlates:ForceUpdate()
+                        TidyPlatesInternal:ForceUpdate()
                       end,
                     },
                     SpecialFilter = {
@@ -3794,7 +3796,7 @@ local function CreateOptionsTable()
                             local table = { strsplit("\n", v) };
                             db.AuraWidget.FilterBySpell = table
                             ThreatPlatesWidgets.ConfigAuraWidgetFilter()
-                            TidyPlates:ForceUpdate()
+                            TidyPlatesInternal:ForceUpdate()
                           end,
                         },
                       },

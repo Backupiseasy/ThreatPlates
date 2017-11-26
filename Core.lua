@@ -85,7 +85,6 @@ local EVENTS = {
 
   "UNIT_ABSORB_AMOUNT_CHANGED",
   "UNIT_MAXHEALTH",
-  "UNIT_NAME_UPDATE",
 
   "NAME_PLATE_CREATED",
   --"NAME_PLATE_UNIT_ADDED",    -- Blizzard also uses this event
@@ -96,7 +95,10 @@ local EVENTS = {
   --"VARIABLES_LOADED",         -- Blizzard also uses this event
   --"CVAR_UPDATE",              -- Blizzard also uses this event
   --"RAID_TARGET_UPDATE",       -- Blizzard also uses this event
-  "UNIT_FACTION",
+
+  -- With TidyPlates:
+  -- "UNIT_FACTION",
+  -- "UNIT_NAME_UPDATE",
 }
 
 local function EnableEvents()
@@ -120,16 +122,16 @@ local function ActivateTheme(theme_table, theme_name)
 --  t.SetThemes(self)
 
   -- TODO: check with what this  was replaces
-  --TidyPlatesUtility:EnableGroupWatcher()
-  -- TPHUub: if LocalVars.AdvancedEnableUnitCache then TidyPlatesUtility:EnableUnitCache() else TidyPlatesUtility:DisableUnitCache() end
-  -- TPHUub: TidyPlatesUtility:EnableHealerTrack()
+  --TidyPlatesUtilityInternal:EnableGroupWatcher()
+  -- TPHUub: if LocalVars.AdvancedEnableUnitCache then TidyPlatesUtilityInternal:EnableUnitCache() else TidyPlatesUtilityInternal:DisableUnitCache() end
+  -- TPHUub: TidyPlatesUtilityInternal:EnableHealerTrack()
   -- if TidyPlatesThreat.db.profile.healerTracker.ON then
   -- 	if not healerTrackerEnabled then
-  -- 		TidyPlatesUtility.EnableHealerTrack()
+  -- 		TidyPlatesUtilityInternal.EnableHealerTrack()
   -- 	end
   -- else
   -- 	if healerTrackerEnabled then
-  -- 		TidyPlatesUtility.DisableHealerTrack()
+  -- 		TidyPlatesUtilityInternal.DisableHealerTrack()
   -- 	end
   -- end
   -- TidyPlatesWidgets:EnableTankWatch()
@@ -192,35 +194,45 @@ end
 
 ---------------------------------------------------------------------------------------------------
 
-StaticPopupDialogs["SetToThreatPlates"] = {
+-- With TidyPlates:
+--StaticPopupDialogs["SetToThreatPlates"] = {
+--  preferredIndex = STATICPOPUP_NUMDIALOGS,
+--  text = t.Meta("title")..L[":\n---------------------------------------\nWould you like to \nset your theme to |cff89F559Threat Plates|r?\n\nClicking '|cff00ff00Yes|r' will set you to Threat Plates. \nClicking '|cffff0000No|r' will open the Tidy Plates options."],
+--  button1 = L["Yes"],
+--  button2 = L["Cancel"],
+--  button3 = L["No"],
+--  timeout = 0,
+--  whileDead = 1,
+--  hideOnEscape = 1,
+--  OnAccept = function()
+--    TidyPlatesInternal:SetTheme(t.THEME_NAME)
+--    TidyPlatesThreat:StartUp()
+--    -- Reset Widgets
+--    TidyPlatesInternal:ResetWidgets()
+--    TidyPlatesInternal:ForceUpdate()
+--  end,
+--  OnAlt = function()
+--    -- call OpenToCategory twice to work around an update bug with WoW's internal addons category list introduced with 5.3.0
+--    InterfaceOptionsFrame_OpenToCategory("Tidy Plates")
+--    InterfaceOptionsFrame_OpenToCategory("Tidy Plates")
+--  end,
+--  OnCancel = function()
+--    t.Print(L["-->>|cffff0000Activate Threat Plates from the Tidy Plates options!|r<<--"])
+--  end,
+--}
+
+StaticPopupDialogs["TidyPlatesEnabled"] = {
   preferredIndex = STATICPOPUP_NUMDIALOGS,
-  text = t.Meta("title")..L[":\n---------------------------------------\nWould you like to \nset your theme to |cff89F559Threat Plates|r?\n\nClicking '|cff00ff00Yes|r' will set you to Threat Plates. \nClicking '|cffff0000No|r' will open the Tidy Plates options."],
-  button1 = L["Yes"],
-  button2 = L["Cancel"],
-  button3 = L["No"],
+  text = t.Meta("title")..L[":\n----------------------------------------------------------\n|cff89F559Threat Plates|r v8.6 is no longer a theme of TidyPlates, but a standalone addon that does no longer require TidyPlates. Please enable only one of these two nameplate addons, otherwise two overlapping nameplates will be shown for  units."],
+  button1 = OKAY,
   timeout = 0,
   whileDead = 1,
   hideOnEscape = 1,
-  OnAccept = function()
-    TidyPlates:SetTheme(t.THEME_NAME)
-    TidyPlatesThreat:StartUp()
-    -- Reset Widgets
-    TidyPlates:ResetWidgets()
-    TidyPlates:ForceUpdate()
-  end,
-  OnAlt = function()
-    -- call OpenToCategory twice to work around an update bug with WoW's internal addons category list introduced with 5.3.0
-    InterfaceOptionsFrame_OpenToCategory("Tidy Plates")
-    InterfaceOptionsFrame_OpenToCategory("Tidy Plates")
-  end,
-  OnCancel = function()
-    t.Print(L["-->>|cffff0000Activate Threat Plates from the Tidy Plates options!|r<<--"])
-  end,
+  OnAccept = function(self, _, _) end,
 }
-
 StaticPopupDialogs["SwitchToNewLookAndFeel"] = {
   preferredIndex = STATICPOPUP_NUMDIALOGS,
-  text = t.Meta("title")..L[":\n---------------------------------------\n|cff89F559Threat Plates|r v8.4 introduces a new default look and feel (currently shown). Do you want to switch to this new look and feel?\n\nYou can revert your decision by changing the default look and feel again in the options dialog (under Nameplate Settings - Healthbar View - Default Settings).\n\nNote: Some of your custom settings may get overwritten if you switch back and forth."],
+  text = t.Meta("title")..L[":\n---------------------------------------\n|cff89F559Threat Plates|r v8.4 introduced a new default look and feel (currently shown). Do you want to switch to this new look and feel?\n\nYou can revert your decision by changing the default look and feel again in the options dialog (under Nameplate Settings - Healthbar View - Default Settings).\n\nNote: Some of your custom settings may get overwritten if you switch back and forth."],
   button1 = L["Switch"],
   button2 = L["Don't Switch"],
   timeout = 0,
@@ -247,10 +259,11 @@ function TidyPlatesThreat:ReloadTheme()
   t.SetThemes(self)
 
   -- ForceUpdate() is called in SetTheme(), also calls theme.OnActivateTheme,
-  local TidyPlates = TidyPlates
-  if TidyPlates.GetThemeName() == t.THEME_NAME then
-    TidyPlates:SetTheme(t.THEME_NAME)
-  end
+  -- With TidyPlates:
+  --if TidyPlates.GetThemeName() == t.THEME_NAME then
+  --  TidyPlates:SetTheme(t.THEME_NAME)
+  --end
+  TidyPlatesInternal:SetTheme(t.THEME_NAME)
 end
 
 function TidyPlatesThreat:StartUp()
@@ -269,21 +282,28 @@ function TidyPlatesThreat:StartUp()
     t.Print(Welcome..L["|cff89f559You are currently in your "]..self:RoleText()..L["|cff89f559 role.|r"])
     t.Print(L["|cff89f559Additional options can be found by typing |r'/tptp'|cff89F559.|r"])
 
-    local current_theme = TidyPlates.GetThemeName()
-    if current_theme == "" then
-      current_theme, _ = next(TidyPlatesThemeList, nil)
-    end
+    -- With TidyPlates:
+    --local current_theme = TidyPlates.GetThemeName()
+    --if current_theme == "" then
+    --  current_theme, _ = next(TidyPlatesThemeList, nil)
+    --end
+    --if current_theme ~= t.THEME_NAME then
+    --  StaticPopup_Show("SetToThreatPlates")
+    --else
+    --  if db.version ~= "" and db.version ~= new_version then
+    --   local new_version = tostring(t.Meta("version"))
+    --    -- migrate and/or remove any old DB entries
+    --    t.MigrateDatabase(db.version)
+    --  end
+    --  db.version = new_version
+    --end
 
-    if current_theme ~= t.THEME_NAME then
-      StaticPopup_Show("SetToThreatPlates")
-    else
-      local new_version = tostring(t.Meta("version"))
-      if db.version ~= "" and db.version ~= new_version then
-        -- migrate and/or remove any old DB entries
-        t.MigrateDatabase(db.version)
-      end
-      db.version = new_version
+    local new_version = tostring(t.Meta("version"))
+    if db.version ~= "" and db.version ~= new_version then
+      -- migrate and/or remove any old DB entries
+      t.MigrateDatabase(db.version)
     end
+    db.version = new_version
   else
     local new_version = tostring(t.Meta("version"))
     if db.version ~= "" and db.version ~= new_version then
@@ -292,9 +312,15 @@ function TidyPlatesThreat:StartUp()
     end
     db.version = new_version
 
-    if not db.CheckNewLookAndFeel and TidyPlates.GetThemeName() == t.THEME_NAME then
+    -- With TidyPlates: if not db.CheckNewLookAndFeel and TidyPlates.GetThemeName() == t.THEME_NAME then
+    if not db.CheckNewLookAndFeel then
       StaticPopup_Show("SwitchToNewLookAndFeel")
     end
+  end
+
+  if TidyPlates and not db.StandalonePopup then
+    StaticPopup_Show("TidyPlatesEnabled")
+    db.StandalonePopup = true
   end
 
   TidyPlatesThreat:ReloadTheme()
@@ -340,7 +366,7 @@ end
 -- AceAddon function: Do more initialization here, that really enables the use of your addon.
 -- Register Events, Hook functions, Create Frames, Get information from the game that wasn't available in OnInitialize
 function TidyPlatesThreat:OnEnable()
-  TidyPlatesThemeList[t.THEME_NAME] = t.Theme
+  TidyPlatesInternalThemeList[t.THEME_NAME] = t.Theme
   ApplyHubFunctions(t.Theme)
 
   self:StartUp()
@@ -413,7 +439,9 @@ end
 
 function TidyPlatesThreat:PLAYER_LOGIN(...)
   self.db.profile.cache = {}
-  if self.db.char.welcome and (TidyPlatesOptions.ActiveTheme == t.THEME_NAME) then
+
+  -- With TidyPlates: if self.db.char.welcome and (TidyPlatesOptions.ActiveTheme == t.THEME_NAME) then
+  if self.db.char.welcome then
     t.Print(L["|cff89f559Threat Plates:|r Welcome back |cff"]..t.HCC[class]..UnitName("player").."|r!!")
   end
   -- if class == "WARRIOR" or class == "DRUID" or class == "DEATHKNIGHT" or class == "PALADIN" then
@@ -441,22 +469,22 @@ function TidyPlatesThreat:PLAYER_REGEN_ENABLED()
   t.SyncWithGameSettings()
 end
 
--- QuestWidget needs to update all nameplates when a quest was completed
-function TidyPlatesThreat:UNIT_FACTION(event, unitid)
-  TidyPlates:ForceUpdate()
-end
-
--- Fix for TidyPlates:
+-- With TidyPlates:
 -- nameplate color can change when factions change (e.g., with disguises)
 -- Legion example: Suramar city and Masquerade
+--function TidyPlatesThreat:UNIT_FACTION(event, unitid)
+--  TidyPlates:ForceUpdate()
+--end
+
+-- QuestWidget needs to update all nameplates when a quest was completed
 function TidyPlatesThreat:QUEST_WATCH_UPDATE(event, quest_index)
   if TidyPlatesThreat.db.profile.questWidget.ON then
-    TidyPlates:ForceUpdate()
+    TidyPlatesInternal:ForceUpdate()
   end
 end
 function TidyPlatesThreat:QUEST_ACCEPTED(event, quest_index, _)
   if TidyPlatesThreat.db.profile.questWidget.ON then
-    TidyPlates:ForceUpdate()
+    TidyPlatesInternal:ForceUpdate()
   end
 end
 
@@ -471,7 +499,8 @@ end
 -- Fires when the player switches to another specialication or everytime the player changes a talent
 -- Completely handled by TidyPlates
 -- function TidyPlatesThreat:ACTIVE_TALENT_GROUP_CHANGED()
--- 	if (TidyPlatesOptions.ActiveTheme == t.THEME_NAME) and self.db.profile.verbose then
+-- With TidyPlates:	if (TidyPlatesOptions.ActiveTheme == t.THEME_NAME) and self.db.profile.verbose then
+-- if self.db.profile.verbose then
 -- 		t.Print(L"|cff89F559Threat Plates|r: Player spec change detected: |cff"]..t.HCC[class]..self:SpecName()..L"|r, you are now in your "]..self:RoleText()..L[" role."])
 -- 	end
 -- end
@@ -502,15 +531,21 @@ local function FrameOnUpdate(plate)
     return
   end
 
-  local frame_level = plate:GetFrameLevel()
-  plate.extended:SetFrameLevel(frame_level)
-  plate.extended.defaultLevel = frame_level -- not sure, if necessary
+  -- With TidyPlates:
+  --local frame_level = plate:GetFrameLevel()
+  --plate.extended:SetFrameLevel(frame_level)
+  --plate.extended.defaultLevel = frame_level -- not sure, if necessary
 
+  local frame_level = plate:GetFrameLevel()
+  plate.TP_Extended:SetFrameLevel(frame_level)
+  plate.TP_Extended.defaultLevel = frame_level -- not sure, if necessary
 
   -- Hide ThreatPlates nameplates if Blizzard nameplates should be shown for friendly units
   if TidyPlatesThreat.db.profile.ShowFriendlyBlizzardNameplates and unitid and UnitReaction(unitid, "player") > 4 then
     plate.UnitFrame:Show()
-    plate.carrier:Hide()
+    -- With TidyPlates:
+    --plate.carrier:Hide()
+    plate.TP_Carrier:Hide()
   end
 end
 
@@ -519,10 +554,12 @@ local function FrameOnHide(UnitFrame)
   -- Hide ThreatPlates nameplates if Blizzard nameplates should be shown for friendly units
   if TidyPlatesThreat.db.profile.ShowFriendlyBlizzardNameplates and UnitFrame.unit and UnitReaction(UnitFrame.unit, "player") > 4 then
     UnitFrame:Show()
-    UnitFrame:GetParent().carrier:Hide()
+    -- With TidyPlates:
+    --UnitFrame:GetParent().carrier:Hide()
+    UnitFrame:GetParent().TP_Carrier:Hide()
     --    local plate = GetNamePlateForUnit(self.unit)
     --    if plate and plate.carrier then
-    --      plate.carrier:Hide()
+    --      plate.TP_Carrier:Hide()
     --    end
   end
 end
@@ -532,8 +569,6 @@ end
 -- e.g., press ESC, got to Interface, Names, press ESC and voila!
 -- Thanks to Kesava (KuiNameplates) for this solution
 function TidyPlatesThreat:NAME_PLATE_CREATED(event, plate)
-  assert(plate.UnitFrame ~= nil, "Nameplate created without UnitFrame attribute")
-
   if plate.UnitFrame then
     plate.UnitFrame:HookScript('OnShow', FrameOnShow)
     plate.UnitFrame:HookScript('OnHide', FrameOnHide)
@@ -546,33 +581,40 @@ end
 function TidyPlatesThreat:UNIT_ABSORB_AMOUNT_CHANGED(event, unitid)
   local plate = GetNamePlateForUnit(unitid)
 
-  if plate and plate.extended then
-    --t.UpdateExtensions(plate.extended, nil, unitid)
-    t.UpdateExtensions(plate.extended, unitid)
+  -- With TidyPlates:
+  --if plate and plate.extended then
+  --  t.UpdateExtensions(plate.extended, unitid)
+  --end
+  if plate and plate.TP_Extended then
+    t.UpdateExtensions(plate.TP_Extended, unitid)
   end
 end
 
 function TidyPlatesThreat:UNIT_MAXHEALTH(event, unitid)
   local plate = GetNamePlateForUnit(unitid)
 
-  if plate and plate.extended then
-    --t.UpdateExtensions(plate.extended, nil, unitid)
-    t.UpdateExtensions(plate.extended, unitid)
+  -- With TidyPlates:
+  --if plate and plate.extended then
+  --  t.UpdateExtensions(plate.extended, unitid)
+  --end
+  if plate and plate.TP_Extended then
+    t.UpdateExtensions(plate.TP_Extended, unitid)
   end
 end
 
+-- With TidyPlates:
 -- Fix for TidyPlates: Fix name for units where UnitName returns "Unknown" at first
-function TidyPlatesThreat:UNIT_NAME_UPDATE(event, unitid)
-  local plate = GetNamePlateForUnit(unitid)
-
-  if plate and plate.extended then
-    local frame = plate.extended
-    if frame.unit.name == UNKNOWNOBJECT then
-      local current_name = UnitName(unitid) or ""
-      frame.unit.name = current_name
-      frame.visual.name:SetText(current_name)
-      --self.UpdateMe = true
-      -- t.DEBUG("UNIT_NAME_UPDATE: ", unitid, " - ", current_name)
-    end
-  end
-end
+--function TidyPlatesThreat:UNIT_NAME_UPDATE(event, unitid)
+--  local plate = GetNamePlateForUnit(unitid)
+--
+--  if plate and plate.extended then
+--    local frame = plate.extended
+--    if frame.unit.name == UNKNOWNOBJECT then
+--      local current_name = UnitName(unitid) or ""
+--      frame.unit.name = current_name
+--      frame.visual.name:SetText(current_name)
+--      --self.UpdateMe = true
+--      -- t.DEBUG("UNIT_NAME_UPDATE: ", unitid, " - ", current_name)
+--    end
+--  end
+--end

@@ -119,7 +119,6 @@ local function OnUpdate(plate, unit)
         if show_headline_view then
           if not v.isContext then
             widget:Update(unit)
-            --if unit.isTarget then	plate:SetFrameStrata("LOW") else plate:SetFrameStrata("BACKGROUND")	end
           end
         else
           widget:Hide()
@@ -130,7 +129,6 @@ local function OnUpdate(plate, unit)
         -- context means that widget is only relevant for target (or mouse-over)
         if not v.isContext then
           widget:Update(unit)
-          --if unit.isTarget then	plate:SetFrameStrata("LOW") else plate:SetFrameStrata("BACKGROUND") end
         end
       else
         widget:Hide()
@@ -167,7 +165,7 @@ local function OnContextUpdate(plate, unit)
       if style == "NameOnly" or style == "NameOnly-Unique" then
         if show_headline_view then
           widget:UpdateContext(unit)
-          if unit.isTarget then	plate:SetFrameStrata("LOW") else plate:SetFrameStrata("BACKGROUND") end
+          --if unit.isTarget then	plate:SetFrameStrata("LOW") else plate:SetFrameStrata("BACKGROUND") end
         else
           widget:Hide()
         end
@@ -175,7 +173,7 @@ local function OnContextUpdate(plate, unit)
         widget:Hide()
       elseif show_healthbar_view then -- any other style
         widget:UpdateContext(unit)
-        if unit.isTarget then	plate:SetFrameStrata("LOW") else plate:SetFrameStrata("BACKGROUND") end
+        --if unit.isTarget then	plate:SetFrameStrata("LOW") else plate:SetFrameStrata("BACKGROUND") end
       else
         widget:Hide()
       end

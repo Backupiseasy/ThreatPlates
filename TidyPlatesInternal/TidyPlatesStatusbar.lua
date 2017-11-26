@@ -106,7 +106,7 @@ local function SetBackdropTexture(self, texture)		-- 0. 1. 0. 1
 end
 
 
-function CreateTidyPlatesStatusbar(parent)
+function CreateTidyPlatesInternalStatusbar(parent)
 	local frame = CreateFrame("Frame", nil, parent)
 	--frame.Dim = 1
 	frame:SetHeight(1)
