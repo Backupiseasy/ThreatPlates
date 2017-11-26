@@ -1,4 +1,11 @@
 ------------------------------------------------------
+8.6.0-Alpha2
+------------------------------------------------------
+* Integrated all necessary parts of TidyPlates into ThreatPlates to make it standalone. TidyPlates is no longer required for ThreatPlates to work.
+* Removed the deprecated aura widget.
+* Fixed a bug with castbar background transparency working like alpha (0% should be nontransparent).
+
+------------------------------------------------------
 8.6.0-Alpha1 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
 * Added new widget Boss Mods to show auras from boss mods on your nameplates (since patch 7.2, hostile nameplates only in instances and raids).

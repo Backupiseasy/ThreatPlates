@@ -106,12 +106,12 @@ end
 local function SetValueForceUpdate(info, value)
 	SetValuePlain(info, value)
 	--TidyPlates:ResetWidgets()
-	TidyPlates:ForceUpdate()
+	TidyPlatesInternal:ForceUpdate()
 end
 
 local function SetValueResetWidgets(info, value)
 	SetValuePlain(info, value)
-	TidyPlates:ResetWidgets()
+	TidyPlatesInternal:ResetWidgets()
 end
 
 local function SetSelectValue(info, value)
@@ -227,7 +227,7 @@ local function SetColorAlphaAuraWidget(info, r, g, b, a)
   end
   DB[keys[#keys]].r, DB[keys[#keys]].g, DB[keys[#keys]].b, DB[keys[#keys]].a = r, g, b, a
 	ThreatPlatesWidgets.ForceAurasUpdate()
-	TidyPlates:ForceUpdate()
+	TidyPlatesInternal:ForceUpdate()
 end
 
 local function SetColorAuraWidget(info, r, g, b)
@@ -238,7 +238,7 @@ local function SetColorAuraWidget(info, r, g, b)
 	end
 	DB[keys[#keys]].r, DB[keys[#keys]].g, DB[keys[#keys]].b = r,g,b
 	ThreatPlatesWidgets.ForceAurasUpdate()
-  TidyPlates:ForceUpdate()
+  TidyPlatesInternal:ForceUpdate()
 end
 
 local function GetUnitVisibilitySetting(info)
@@ -261,7 +261,7 @@ local function SetUnitVisibilitySetting(info, value)
   else
     SetWoWCVar(unit_visibility.Show, value)
   end
-  TidyPlates:ForceUpdate()
+  TidyPlatesInternal:ForceUpdate()
 end
 
 -- Set Theme Values
@@ -270,9 +270,11 @@ local function SetThemeValue(info, val)
   SetValue(info, val)
   t.SetThemes(TidyPlatesThreat)
   -- TODO: should not be necessary here
-  if (TidyPlatesOptions.ActiveTheme == t.THEME_NAME) then
-    TidyPlates:SetTheme(t.THEME_NAME)
-  end
+  -- With TidyPlates:
+  --if (TidyPlatesOptions.ActiveTheme == t.THEME_NAME) then
+  --  TidyPlates:SetTheme(t.THEME_NAME)
+  --end
+  TidyPlatesInternal:SetTheme(t.THEME_NAME)
 end
 
 local function GetFontFlags(db, flag)
@@ -306,7 +308,7 @@ end
 local function SetValueAuraWidget(info, val)
   SetValuePlain(info, val)
   ThreatPlatesWidgets.ConfigAuraWidget()
-  TidyPlates:ForceUpdate()
+  TidyPlatesInternal:ForceUpdate()
 end
 
 ---- Validate functions for AceConfig
@@ -1164,7 +1166,7 @@ local function CreateTabGeneralSettings()
             width = "full",
             set = function(info, val)
               SetValue(info, val)
-              if db.tidyplatesFade then TidyPlates:EnableFadeIn() else TidyPlates:DisableFadeIn() end
+              if db.tidyplatesFade then TidyPlatesInternal:EnableFadeIn() else TidyPlatesInternal:DisableFadeIn() end
             end,
             arg = { "tidyplatesFade" },
           },
@@ -1930,9 +1932,9 @@ local function CreateOptionsTable()
 											set = function(info, val)
                         SetCvar(info, val)
                         if val then
-                          TidyPlates:EnableCastBars()
+                          TidyPlatesInternal:EnableCastBars()
                         else
-                          TidyPlates:DisableCastBars()
+                          TidyPlatesInternal:DisableCastBars()
                         end
                       end,
                       arg = "ShowVKeyCastbar",
@@ -2610,7 +2612,7 @@ local function CreateOptionsTable()
                           set = function(info, val)
                             TidyPlatesThreat.db.profile.settings.customtext.SubtextColorUseHeadline = false
                             TidyPlatesThreat.db.profile.settings.customtext.SubtextColorUseSpecific = false
-                            TidyPlates:ForceUpdate()
+                            TidyPlatesInternal:ForceUpdate()
                           end,
                           get = function(info) return not (TidyPlatesThreat.db.profile.settings.customtext.SubtextColorUseHeadline or TidyPlatesThreat.db.profile.settings.customtext.SubtextColorUseSpecific) end,
                         },
@@ -2689,7 +2691,7 @@ local function CreateOptionsTable()
                           set = function(info, val)
                             TidyPlatesThreat.db.profile.HeadlineView.SubtextColorUseHeadline = false
                             TidyPlatesThreat.db.profile.HeadlineView.SubtextColorUseSpecific = false
-                            TidyPlates:ForceUpdate()
+                            TidyPlatesInternal:ForceUpdate()
                           end,
                           get = function(info) return not (TidyPlatesThreat.db.profile.HeadlineView.SubtextColorUseHeadline or TidyPlatesThreat.db.profile.HeadlineView.SubtextColorUseSpecific) end,
                         },
@@ -3689,216 +3691,13 @@ local function CreateOptionsTable()
                 Layout = GetLayoutEntry(60, "arenaWidget"),
               },
             },
-            AuraWidget = {
-              name = L["Aura"],
-              type = "group",
-              order = 20,
-              args = {
-                Enable = {
-                  name = L["Enable"],
-                  type = "group",
-                  inline = true,
-                  order = 10,
-                  args = {
-                    Toggle = {
-                      name = L["Enable"],
-                      type = "toggle",
-                      order = 1,
-                      desc = L["This widget will display auras that match your filtering on your target nameplate and others you recently moused over."],
-                      descStyle = "inline",
-                      width = "full",
-                      arg = { "debuffWidget", "ON" },
-                    },
-                    Show = {
-                      name = "Display Locations",
-                      type = "group",
-                      order = 2,
-                      inline = true,
-                      disabled = function() return not db.debuffWidget.ON end,
-                      args = {
-                        ShowFriendly = {
-                          name = L["Show Friendly"],
-                          order = 1,
-                          type = "toggle",
-                          arg = { "debuffWidget", "showFriendly" },
-                        },
-                        ShowEnemy = {
-                          name = L["Show Enemy"],
-                          order = 2,
-                          type = "toggle",
-                          arg = { "debuffWidget", "showEnemy" }
-                        }
-                      },
-                    },
-                    Display = {
-                      name = "Show Aura Type",
-                      type = "multiselect",
-                      order = 3,
-                      disabled = function() return not db.debuffWidget.ON end,
-                      values = {
-                        [1] = "Buff",
-                        [2] = "Curse",
-                        [3] = "Disease",
-                        [4] = "Magic",
-                        [5] = "Poison",
-                        [6] = "Debuff"
-                      },
-                      get = function(info, k)
-                        return db.debuffWidget.displays[k]
-                      end,
-                      set = function(info, k, v)
-                        db.debuffWidget.displays[k] = v
-                        TidyPlates:ForceUpdate()
-                      end,
-                    },
-                  },
-                },
-                Style = {
-                  name = L["Style"],
-                  type = "group",
-                  inline = true,
-                  disabled = function() return not db.debuffWidget.ON end,
-                  order = 13,
-                  args = {
-                    Style = {
-                      name = L["Style"],
-                      type = "select",
-                      order = 2,
-                      desc = L["This lets you select the layout style of the aura widget. (requires /reload)"],
-                      descStyle = "inline",
-                      width = "full",
-                      values = { wide = L["Wide"], square = L["Square"] },
-                      set = function(info, val)
-                        SetValue(info, val)
-                        if db.debuffWidget.style == "square" then
-                          TidyPlatesWidgets.UseSquareDebuffIcon()
-                        elseif db.debuffWidget.style == "wide" then
-                          TidyPlatesWidgets.UseWideDebuffIcon()
-                        end
-                      end,
-                      arg = { "debuffWidget", "style" },
-                    },
-                    TargetOnly = {
-                      name = L["Target Only"],
-                      type = "toggle",
-                      order = 1,
-                      desc = L["This will toggle the aura widget to only show for your current target."],
-                      descStyle = "inline",
-                      width = "full",
-                      set = function(info, val)
-                        SetValue(info, val)
-                      end,
-                      arg = { "debuffWidget", "targetOnly" },
-                    },
-                    CooldownSpiral = {
-                      name = L["Cooldown Spiral"],
-                      type = "toggle",
-                      order = 3,
-                      desc = L["This will toggle the aura widget to show the cooldown spiral on auras. (requires /reload)"],
-                      descStyle = "inline",
-                      width = "full",
-                      set = function(info, val)
-                        SetValue(info, val)
-                        TidyPlates:ForceUpdate()
-                      end,
-                      arg = { "debuffWidget", "cooldownSpiral" },
-                    }
-                  },
-                },
-                Sizing = {
-                  name = L["Sizing"],
-                  type = "group",
-                  order = 15,
-                  inline = true,
-                  disabled = function() return not db.debuffWidget.ON end,
-                  args = {
-                    Scale = {
-                      name = L["Scale"],
-                      type = "range",
-                      order = 1,
-                      width = "full",
-                      step = 0.05,
-                      softMin = 0.6,
-                      softMax = 1.3,
-                      isPercent = true,
-                      arg = { "debuffWidget", "scale", }
-                    },
-                  },
-                },
-                Placement = {
-                  name = L["Placement"],
-                  type = "group",
-                  inline = true,
-                  order = 20,
-                  disabled = function() return not db.debuffWidget.ON end,
-                  args = {
-                    X = {
-                      name = L["X"],
-                      type = "range",
-                      order = 1,
-                      min = -120,
-                      max = 120,
-                      step = 1,
-                      arg = { "debuffWidget", "x" },
-                    },
-                    Y = {
-                      name = L["Y"],
-                      type = "range",
-                      order = 2,
-                      min = -120,
-                      max = 120,
-                      step = 1,
-                      arg = { "debuffWidget", "y" },
-                    },
-                    Anchor = {
-                      name = L["Anchor"],
-                      type = "select",
-                      order = 3,
-                      values = t.FullAlign,
-                      arg = { "debuffWidget", "anchor" }
-                    },
-                  },
-                },
-                Filtering = {
-                  name = L["Filtering"],
-                  order = 30,
-                  type = "group",
-                  inline = true,
-                  disabled = function() return not db.debuffWidget.ON end,
-                  args = {
-                    Mode = {
-                      name = L["Mode"],
-                      type = "select",
-                      order = 1,
-                      width = "double",
-                      values = t.DebuffMode,
-                      arg = { "debuffWidget", "mode" },
-                    },
-                    DebuffList = {
-                      name = L["Filtered Auras"],
-                      type = "input",
-                      order = 2,
-                      dialogControl = "MultiLineEditBox",
-                      width = "full",
-                      get = function(info) return t.TTS(db.debuffWidget.filter) end,
-                      set = function(info, v)
-                        local table = { strsplit("\n", v) };
-                        db.debuffWidget.filter = table
-                        ThreatPlatesWidgets.ConfigAuraWidgetFilter()
-                        TidyPlates:ForceUpdate()
-                      end,
-                    },
-                  },
-                },
-              },
-            },
             AuraWidget2 = {
-              name = L["Aura 2.0"],
+              name = L["Aura"],
               type = "group",
               order = 25,
               set = SetValueAuraWidget,
               args = {
-                Enable = GetEnableEntry(L["Enable Aura Widget 2.0"], L["This widget shows a unit's auras (buffs and debuffs) on its nameplate."], "AuraWidget", true),
+                Enable = GetEnableEntry(L["Enable Aura Widget"], L["This widget shows a unit's auras (buffs and debuffs) on its nameplate."], "AuraWidget", true),
                 Filtering = {
                   name = L["Filtering"],
                   type = "group",
@@ -3944,7 +3743,7 @@ local function CreateOptionsTable()
                       set = function(info, k, v)
                         db.AuraWidget.FilterByType[k] = v
                         ThreatPlatesWidgets.ForceAurasUpdate()
-                        TidyPlates:ForceUpdate()
+                        TidyPlatesInternal:ForceUpdate()
                       end,
                     },
                     SpecialFilter = {
@@ -3996,7 +3795,7 @@ local function CreateOptionsTable()
                             local table = { strsplit("\n", v) };
                             db.AuraWidget.FilterBySpell = table
                             ThreatPlatesWidgets.ConfigAuraWidgetFilter()
-                            TidyPlates:ForceUpdate()
+                            TidyPlatesInternal:ForceUpdate()
                           end,
                         },
                       },

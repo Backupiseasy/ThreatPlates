@@ -67,7 +67,7 @@ local function WatcherFrameHandler(frame, event,...)
 	else
 		ArenaID = {} -- Clear the table when we leave
 	end
-	--TidyPlates:ForceUpdate()
+	--TidyPlatesInternal:ForceUpdate()
 end
 
 local function EnableWatcher()

@@ -17,7 +17,8 @@ local UnitCanAttack = UnitCanAttack
 local TidyPlatesThreat = TidyPlatesThreat
 local TOTEMS = ThreatPlates.TOTEMS
 local GetUnitVisibility = ThreatPlates.GetUnitVisibility
-local FixUpdateUnitCondition = ThreatPlates.FixUpdateUnitCondition
+-- With TidyPlates:
+--local FixUpdateUnitCondition = ThreatPlates.FixUpdateUnitCondition
 
 ---------------------------------------------------------------------------------------------------
 -- Helper functions for styles and functions
@@ -226,7 +227,8 @@ local function SetStyle(unit)
     return "empty", nil
   end
 
-  FixUpdateUnitCondition(unit)
+  -- With TidyPlates:
+  --FixUpdateUnitCondition(unit)
   local show, unit_type, headline_view = ShowUnit(unit)
 
   if not show then
