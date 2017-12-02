@@ -1,4 +1,9 @@
 ------------------------------------------------------
+8.6.0-Alpha3
+------------------------------------------------------
+* Fixed a bug with healthbar background working like alpha (0% should be nontransparent).
+
+------------------------------------------------------
 8.6.0-Alpha2
 ------------------------------------------------------
 * Integrated all necessary parts of TidyPlates into ThreatPlates to make it standalone. TidyPlates is no longer required for ThreatPlates to work.

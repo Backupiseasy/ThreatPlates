@@ -1312,7 +1312,7 @@ local function CreateOptionsTable()
       args = {
         -- Config Guide
         NameplateSettings = {
-          name = L["Nameplate Settings"],
+          name = L["General"],
           type = "group",
           order = 10,
           args = {

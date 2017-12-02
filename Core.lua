@@ -535,10 +535,7 @@ local function FrameOnUpdate(plate)
   --local frame_level = plate:GetFrameLevel()
   --plate.extended:SetFrameLevel(frame_level)
   --plate.extended.defaultLevel = frame_level -- not sure, if necessary
-
-  local frame_level = plate:GetFrameLevel()
-  plate.TP_Extended:SetFrameLevel(frame_level)
-  plate.TP_Extended.defaultLevel = frame_level -- not sure, if necessary
+  plate.TP_Extended:SetFrameLevel(plate:GetFrameLevel())
 
   -- Hide ThreatPlates nameplates if Blizzard nameplates should be shown for friendly units
   if TidyPlatesThreat.db.profile.ShowFriendlyBlizzardNameplates and unitid and UnitReaction(unitid, "player") > 4 then

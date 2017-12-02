@@ -290,10 +290,10 @@ local function SetHealthbarColor(unit)
   local db_healthbar = db.settings.healthbar
   local color_bg_r, color_bg_g, color_bg_b, bg_alpha
   if db_healthbar.BackgroundUseForegroundColor then
-    color_bg_r, color_bg_g, color_bg_b, bg_alpha = color_r, color_g, color_b, db_healthbar.BackgroundOpacity
+    color_bg_r, color_bg_g, color_bg_b, bg_alpha = color_r, color_g, color_b, 1 - db_healthbar.BackgroundOpacity
   else
     local color = db_healthbar.BackgroundColor
-    color_bg_r, color_bg_g, color_bg_b, bg_alpha = color.r, color.g, color.b, db_healthbar.BackgroundOpacity
+    color_bg_r, color_bg_g, color_bg_b, bg_alpha = color.r, color.g, color.b, 1 - db_healthbar.BackgroundOpacity
   end
 
   return color_r, color_g, color_b, nil, color_bg_r, color_bg_g, color_bg_b, bg_alpha

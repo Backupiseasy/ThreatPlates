@@ -165,7 +165,6 @@ local function OnContextUpdate(plate, unit)
       if style == "NameOnly" or style == "NameOnly-Unique" then
         if show_headline_view then
           widget:UpdateContext(unit)
-          --if unit.isTarget then	plate:SetFrameStrata("LOW") else plate:SetFrameStrata("BACKGROUND") end
         else
           widget:Hide()
         end
@@ -173,7 +172,6 @@ local function OnContextUpdate(plate, unit)
         widget:Hide()
       elseif show_healthbar_view then -- any other style
         widget:UpdateContext(unit)
-        --if unit.isTarget then	plate:SetFrameStrata("LOW") else plate:SetFrameStrata("BACKGROUND") end
       else
         widget:Hide()
       end
