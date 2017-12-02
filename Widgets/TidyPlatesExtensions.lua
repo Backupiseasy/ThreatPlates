@@ -82,6 +82,7 @@ local function CreateExtensions(extended)
   visual.name:GetParent():SetParent(extended)
   -- With TidyPlates:
   --extended.widgetParent:SetParent(extended)
+  --visual.name:GetParent():SetParent(extended)
   --visual.raidicon:SetDrawLayer("OVERLAY")
 
   --  Absorbs on healthbar
