@@ -45,7 +45,7 @@ local UnitPlayerControlled = UnitPlayerControlled
 -- Internal Data
 local Plates, PlatesVisible, PlatesFading, GUID = {}, {}, {}, {}	            	-- Plate Lists
 local PlatesByUnit = {}
-local nameplate, extended, bars, regions, visual, carrier, plateid			    	-- Temp/Local References
+local nameplate, extended, visual, carrier, plateid			    	-- Temp/Local References
 local unit, unitcache, style, stylename, unitchanged, threatborder	    			-- Temp/Local References
 local numChildren = -1                                                              -- Cache the current number of plates
 local activetheme = {}                                                              -- Table Placeholder
@@ -111,8 +111,6 @@ local function UpdateReferences(plate)
 	extended = plate.TP_Extended
 
 	carrier = plate.TP_Carrier
-	bars = extended.bars
-	regions = extended.regions
 	unit = extended.unit
 	unitcache = extended.unitcache
 	visual = extended.visual
@@ -189,7 +187,6 @@ do
 
     -- Tidy Plates Frame
     --------------------------------
-    local bars, regions = {}, {}
 		local carrier
 		local frameName = "ThreatPlatesCarrier"..numChildren
 
@@ -205,21 +202,17 @@ do
 		local healthbar = CreateTidyPlatesInternalStatusbar(extended)
 		local castbar = CreateTidyPlatesInternalStatusbar(extended)
 		local textFrame = CreateFrame("Frame", nil, healthbar)
-		local widgetParent = CreateFrame("Frame", nil, textFrame)
 
 		textFrame:SetAllPoints()
 
-		extended.widgetParent = widgetParent
 		visual.healthbar = healthbar
 		visual.castbar = castbar
-		bars.healthbar = healthbar		-- For Threat Plates Compatibility
-		bars.castbar = castbar			-- For Threat Plates Compatibility
 		-- Parented to Health Bar - Lower Frame
 		visual.healthborder = healthbar:CreateTexture(nil, "ARTWORK")
 		visual.threatborder = healthbar:CreateTexture(nil, "ARTWORK")
 		visual.highlight = healthbar:CreateTexture(nil, "OVERLAY")
 		-- Parented to Extended - Middle Frame
-		visual.raidicon = textFrame:CreateTexture(nil, "ARTWORK")
+		visual.raidicon = textFrame:CreateTexture(nil, "OVERLAY")
 		visual.eliteicon = textFrame:CreateTexture(nil, "OVERLAY")
 		visual.skullicon = textFrame:CreateTexture(nil, "OVERLAY")
 		visual.target = textFrame:CreateTexture(nil, "BACKGROUND")
@@ -241,15 +234,12 @@ do
 		healthbar:SetFrameStrata("BACKGROUND")
 		castbar:SetFrameStrata("BACKGROUND")
 		textFrame:SetFrameStrata("BACKGROUND")
-		widgetParent:SetFrameStrata("BACKGROUND")
 
 		castbar:Hide()
 		castbar:SetStatusBarColor(1,.8,0)
 		carrier:SetSize(16, 16)
 
     -- Tidy Plates Frame References
-		extended.regions = regions
-		extended.bars = bars
 		extended.visual = visual
 
 		-- Allocate Tables
