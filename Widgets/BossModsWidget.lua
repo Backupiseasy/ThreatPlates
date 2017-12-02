@@ -86,7 +86,7 @@ local function UpdateAuraTexture(frame, aura, index)
 end
 
 local function CreateAuraTexture(frame, index)
-  local aura = frame:CreateTexture(nil, "BACKGROUND")
+  local aura = frame:CreateTexture(nil, "OVERLAY", -8)
   local time = frame:CreateFontString(nil, "OVERLAY") -- Duration Text
 
   time:SetJustifyH("CENTER")
@@ -395,6 +395,7 @@ local function CreateWidgetFrame(parent)
   frame:Hide()
 
   -- Custom Code
+  frame:SetFrameLevel(frame:GetFrameLevel() - 3)
   frame.Auras = {}
   frame.AurasNo = 0
   frame.LastUpdate = 0.5

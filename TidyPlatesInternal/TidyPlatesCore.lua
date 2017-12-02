@@ -45,7 +45,7 @@ local UnitPlayerControlled = UnitPlayerControlled
 -- Internal Data
 local Plates, PlatesVisible, PlatesFading, GUID = {}, {}, {}, {}	            	-- Plate Lists
 local PlatesByUnit = {}
-local nameplate, extended, bars, regions, visual, carrier, plateid			    	-- Temp/Local References
+local nameplate, extended, visual, carrier, plateid			    	-- Temp/Local References
 local unit, unitcache, style, stylename, unitchanged, threatborder	    			-- Temp/Local References
 local numChildren = -1                                                              -- Cache the current number of plates
 local activetheme = {}                                                              -- Table Placeholder
@@ -111,8 +111,6 @@ local function UpdateReferences(plate)
 	extended = plate.TP_Extended
 
 	carrier = plate.TP_Carrier
-	bars = extended.bars
-	regions = extended.regions
 	unit = extended.unit
 	unitcache = extended.unitcache
 	visual = extended.visual
@@ -186,15 +184,17 @@ do
 
 	-- ApplyPlateExtesion
 	function OnNewNameplate(plate, plateid)
-
     -- Tidy Plates Frame
     --------------------------------
-    local bars, regions = {}, {}
 		local carrier
 		local frameName = "ThreatPlatesCarrier"..numChildren
 
 		carrier = CreateFrame("Frame", frameName, WorldFrame)
 		local extended = CreateFrame("Frame", nil, carrier)
+
+--		carrier:SetFrameStrata("BACKGROUND")
+
+    --    carrier:SetFrameLevel(0)
 
 		plate.TP_Carrier = carrier
 		plate.TP_Extended = extended
@@ -202,36 +202,40 @@ do
         -- Add Graphical Elements
 		local visual = {}
 		-- Status Bars
-		local healthbar = CreateTidyPlatesInternalStatusbar(extended)
 		local castbar = CreateTidyPlatesInternalStatusbar(extended)
+		castbar.Backdrop:SetDrawLayer("BACKGROUND",-8)
+		castbar.Bar:SetDrawLayer("BACKGROUND",-7)
+		local healthbar = CreateTidyPlatesInternalStatusbar(extended)
+		healthbar.Backdrop:SetDrawLayer("BORDER",-8)
+		healthbar.Bar:SetDrawLayer("BORDER",-7)
 		local textFrame = CreateFrame("Frame", nil, healthbar)
-		local widgetParent = CreateFrame("Frame", nil, textFrame)
+		--local widgetParent = CreateFrame("Frame", nil, textFrame)
 
 		textFrame:SetAllPoints()
 
-		extended.widgetParent = widgetParent
+		--extended.widgetParent = widgetParent
 		visual.healthbar = healthbar
 		visual.castbar = castbar
-		bars.healthbar = healthbar		-- For Threat Plates Compatibility
-		bars.castbar = castbar			-- For Threat Plates Compatibility
+    visual.textframe = textFrame
+
 		-- Parented to Health Bar - Lower Frame
-		visual.healthborder = healthbar:CreateTexture(nil, "ARTWORK")
-		visual.threatborder = healthbar:CreateTexture(nil, "ARTWORK")
-		visual.highlight = healthbar:CreateTexture(nil, "OVERLAY")
-		-- Parented to Extended - Middle Frame
-		visual.raidicon = textFrame:CreateTexture(nil, "ARTWORK")
-		visual.eliteicon = textFrame:CreateTexture(nil, "OVERLAY")
-		visual.skullicon = textFrame:CreateTexture(nil, "OVERLAY")
-		visual.target = textFrame:CreateTexture(nil, "BACKGROUND")
+    visual.threatborder = healthbar:CreateTexture(nil, "BORDER", 2)
+    visual.healthborder = healthbar:CreateTexture(nil, "BORDER", 0)
+		visual.highlight = healthbar:CreateTexture(nil, "ARTWORK")
+    -- Parented to Extended - Middle Frame
+    visual.raidicon = textFrame:CreateTexture(nil, "ARTWORK", 5)
+    visual.skullicon = textFrame:CreateTexture(nil, "ARTWORK", 2)
+    visual.eliteicon = textFrame:CreateTexture(nil, "ARTWORK", 1)
+    visual.target = textFrame:CreateTexture(nil, "BACKGROUND") -- next visual.highlight -5?
 		-- TextFrame
-		visual.customtext = textFrame:CreateFontString(nil, "OVERLAY")
-		visual.name  = textFrame:CreateFontString(nil, "OVERLAY")
-		visual.level = textFrame:CreateFontString(nil, "OVERLAY")
+    visual.name  = textFrame:CreateFontString(nil, "ARTWORK", 0)
+    visual.customtext = textFrame:CreateFontString(nil, "ARTWORK", -1)
+		visual.level = textFrame:CreateFontString(nil, "ARTWORK", -2)
 		-- Cast Bar Frame - Highest Frame
-		visual.castborder = castbar:CreateTexture(nil, "ARTWORK")
-		visual.castnostop = castbar:CreateTexture(nil, "ARTWORK")
-		visual.spellicon = castbar:CreateTexture(nil, "OVERLAY")
-		visual.spelltext = castbar:CreateFontString(nil, "OVERLAY")
+    visual.spellicon = castbar:CreateTexture(nil, "BACKGROUND", 7)
+    visual.castnostop = castbar:CreateTexture(nil, "BACKGROUND", 2)
+    visual.castborder = castbar:CreateTexture(nil, "BACKGROUND", 1)
+		visual.spelltext = castbar:CreateFontString(nil, "BACKGROUND")
 		-- Set Base Properties
 		visual.raidicon:SetTexture("Interface\\TargetingFrame\\UI-RaidTargetingIcons")
 		visual.highlight:SetAllPoints(visual.healthborder)
@@ -241,15 +245,17 @@ do
 		healthbar:SetFrameStrata("BACKGROUND")
 		castbar:SetFrameStrata("BACKGROUND")
 		textFrame:SetFrameStrata("BACKGROUND")
-		widgetParent:SetFrameStrata("BACKGROUND")
+    --widgetParent:SetFrameStrata("BACKGROUND")
+
+    castbar:SetFrameLevel(extended:GetFrameLevel() - 1)
+    healthbar:SetFrameLevel(extended:GetFrameLevel())
+    textFrame:SetFrameLevel(extended:GetFrameLevel() + 1)
 
 		castbar:Hide()
 		castbar:SetStatusBarColor(1,.8,0)
 		carrier:SetSize(16, 16)
 
     -- Tidy Plates Frame References
-		extended.regions = regions
-		extended.bars = bars
 		extended.visual = visual
 
 		-- Allocate Tables
@@ -263,8 +269,7 @@ do
 		extended.stylename = ""
 
 		carrier:SetPoint("CENTER", plate, "CENTER")
-	end
-
+  end
 end
 
 ---------------------------------------------------------------------------------------------------------------------
@@ -388,7 +393,6 @@ do
 
 		-- Skip the initial data gather and let the second cycle do the work.
 		plate.UpdateMe = true
-
 	end
 
 
@@ -427,6 +431,16 @@ do
 		UpdateUnitContext(plate, unitid)
 		ProcessUnitChanges()
 		OnUpdateCastMidway(plate, unitid)
+
+--    if unit.unitid and UnitIsUnit("target", unit.unitid) then
+--      visual.castbar:Show()
+--      visual.castnostop:Show()
+--      visual.castborder:Show()
+--      visual.spellicon:SetTexture(GetSpellTexture("Mondfeuer"))
+--      visual.spellicon:Show()
+--      visual.spelltext:SetText("Moonfire")
+--      visual.spelltext:Show()
+--    end
 	end
 
 	-- OnHealthUpdate
@@ -437,6 +451,7 @@ do
 		ProcessUnitChanges()
 		UpdateIndicator_HealthBar()		-- Just to be on the safe side
   end
+
 
      -- OnResetNameplate
 	function OnResetNameplate(plate)
@@ -812,6 +827,7 @@ do
 
 		visual.spelltext:SetText(text)
 		visual.spellicon:SetTexture(texture)
+    visual.spellicon:SetDrawLayer("BACKGROUND", 7)
 		castBar:SetMinMaxValues( startTime, endTime )
 
 		local r, g, b, a = 1, 1, 0, 1
@@ -1136,7 +1152,17 @@ do
 
 	local texturegroup = { "castborder", "castnostop", "healthborder", "threatborder", "eliteicon",
 						"skullicon", "highlight", "target", "spellicon", }
-
+--  local texturegroup = {
+--    { "castborder",   "BACKGROUND", 1 },
+--    { "castnostop",   "BACKGROUND", 2 },
+--    { "spellicon",    "BACKGROUND", 7 },
+--    { "healthborder", "BORDER", 0 },
+--    { "threatborder", "BORDER", 2 },
+--    { "highlight",    "ARTWORK", 0 },
+--    { "eliteicon",    "ARTWORK", 1 },
+--    { "skullicon",    "ARTWORK", 2 },
+--    { "target",       "BACKGROUND", 0 },
+--  }
 
 	-- UpdateStyle:
 	function UpdateStyle()
@@ -1154,6 +1180,7 @@ do
 				visual[objectname]:Show()
 			else visual[objectname]:Hide() end
 		end
+
 		-- Bars
 		for index = 1, #bargroup do
 			local objectname = bargroup[index]
@@ -1161,14 +1188,21 @@ do
 			if objectstyle then SetBarGroupObject(object, objectstyle, extended) end
 		end
 		-- Texture
-		for index = 1, #texturegroup do
-			local objectname = texturegroup[index]
-			local object, objectstyle = visual[objectname], style[objectname]
-			SetTextureGroupObject(object, objectstyle)
-		end
+    for index = 1, #texturegroup do
+      local objectname = texturegroup[index]
+      local object, objectstyle = visual[objectname], style[objectname]
+      SetTextureGroupObject(object, objectstyle)
+    end
+--		for index = 1, #texturegroup do
+--			local objectname = texturegroup[index][1]
+--			local object, objectstyle = visual[objectname], style[objectname]
+--			SetTextureGroupObject(object, objectstyle)
+--      --object:SetDrawLayer(texturegroup[index][2], texturegroup[index][3])
+--		end
 		-- Raid Icon Texture
 		if style and style.raidicon and style.raidicon.texture then
 			visual.raidicon:SetTexture(style.raidicon.texture)
+      visual.raidicon:SetDrawLayer("ARTWORK", 5)
 		end
 		-- Font Group
 		for index = 1, #fontgroup do
@@ -1182,9 +1216,7 @@ do
 
 		if not unit.isTarget then visual.target:Hide() end
 		if not unit.isMarked then visual.raidicon:Hide() end
-
-	end
-
+  end
 end
 
 --------------------------------------------------------------------------------------------------------------
@@ -1243,10 +1275,3 @@ function TidyPlatesInternal:EnableFadeIn() EnableFadeIn = true; end
 function TidyPlatesInternal:DisableFadeIn() EnableFadeIn = nil; end
 TidyPlatesInternal.RequestWidgetUpdate = TidyPlatesInternal.RequestUpdate
 TidyPlatesInternal.RequestDelegateUpdate = TidyPlatesInternal.RequestUpdate
-
-
-
-
-
-
-

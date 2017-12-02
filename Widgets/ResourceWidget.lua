@@ -356,12 +356,10 @@ local function CreateWidgetFrame(parent)
 
   local bar = CreateFrame("StatusBar", nil, frame)
   frame.Bar = bar
-  bar:SetFrameLevel(frame:GetFrameLevel() - 1)
   bar:SetMinMaxValues(0, 100)
 
   local border = CreateFrame("Frame", nil, bar)
   frame.Border = border
-  border:SetFrameLevel(bar:GetFrameLevel())
 
   UpdateSettings(frame)
   frame.UpdateConfig = UpdateSettings

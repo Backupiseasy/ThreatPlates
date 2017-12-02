@@ -108,12 +108,14 @@ end
 
 function CreateTidyPlatesInternalStatusbar(parent)
 	local frame = CreateFrame("Frame", nil, parent)
+	--frame:SetFrameLevel(0)
+
 	--frame.Dim = 1
 	frame:SetHeight(1)
 	frame:SetWidth(1)
 	frame.Value, frame.MinVal, frame.MaxVal, frame.Orientation = 1, 0, 1, "HORIZONTAL"
 	frame.Left, frame.Right, frame.Top, frame.Bottom = 0, 1, 0, 1
-	frame.Bar = frame:CreateTexture(nil, "BORDER")
+	frame.Bar = frame:CreateTexture(nil, "BORDER", -8)
 	frame.Backdrop = frame:CreateTexture(nil, "BACKGROUND")
 	frame.Backdrop:SetAllPoints(frame)
         
