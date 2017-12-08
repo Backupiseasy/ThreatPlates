@@ -222,15 +222,15 @@ local function DisableWatcher()
 end
 
 local function enabled()
-  local active = TidyPlatesThreat.db.profile.comboWidget.ON
+  local db = TidyPlatesThreat.db.profile.comboWidget
 
-  if active then
-    if not watcherIsEnabled then EnableWatcher() end
-  else
+  if not (db.ON or db.ShowInHeadlineView) then
     if watcherIsEnabled then DisableWatcher()	end
+  else
+    if not watcherIsEnabled then EnableWatcher() end
   end
 
-  return active
+  return db.ON
 end
 
 local function EnabledInHeadlineView()
@@ -259,6 +259,7 @@ local function CreateWidgetFrame(parent)
   frame._Hide = frame.Hide
   frame.Hide = function() ClearWidgetContext(frame); frame:_Hide() end
 
+  -- should not be necessary
   if not watcherIsEnabled then EnableWatcher() end
   return frame
 end

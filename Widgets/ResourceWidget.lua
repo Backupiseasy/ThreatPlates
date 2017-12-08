@@ -7,11 +7,10 @@ local ThreatPlates = NAMESPACE.ThreatPlates
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
-local RGB = ThreatPlates.RGB
 local format = format
 local ceil = ceil
+
 -- WoW functions
---local IsInInstance = IsInInstance
 local UnitPowerMax = UnitPowerMax
 local UnitPower = UnitPower
 local UnitPowerType = UnitPowerType
@@ -35,21 +34,23 @@ local function UpdateSettings(frame)
     bar:SetStatusBarTexture(ThreatPlates.Media:Fetch('statusbar', db.BarTexture))
   --  bar:GetStatusBarTexture():SetHorizTile(false)
   --  bar:GetStatusBarTexture():SetVertTile(false)
-    bar:SetSize(db.BarWidth, db.BarHeight)
     bar:ClearAllPoints()
     bar:SetPoint("CENTER", frame)
+    bar:SetSize(db.BarWidth, db.BarHeight)
 
     local border = frame.Border
     local offset = db.BorderOffset
     border:ClearAllPoints()
     border:SetPoint("TOPLEFT", bar, "TOPLEFT", -offset, offset)
     border:SetPoint("BOTTOMRIGHT", bar, "BOTTOMRIGHT", offset, -offset)
+    border:SetSize(db.BarWidth, db.BarHeight)
     border:SetBackdrop({
       bgFile = ThreatPlates.Media:Fetch('statusbar', db.BarTexture),
       edgeFile = ThreatPlates.Media:Fetch('border', db.BorderTexture),
       tile = false, tileSize = 0, edgeSize = db.BorderEdgeSize,
       insets = { left = offset, right = offset, top = offset, bottom = offset }
     })
+    --border:SetFrameLevel(bar:GetFrameLevel())
     bar:Show()
   else
     bar:_Hide()
@@ -229,6 +230,19 @@ local function UpdateWidgetFrame(frame, unit)
       bar:SetStatusBarColor(r, g, b, a)
 
       local border = frame.Border
+      -- to fix a bug I don't now why it happens
+      local offset = db.BorderOffset
+      border:ClearAllPoints()
+      border:SetPoint("TOPLEFT", bar, "TOPLEFT", -offset, offset)
+      border:SetPoint("BOTTOMRIGHT", bar, "BOTTOMRIGHT", offset, -offset)
+      border:SetSize(db.BarWidth, db.BarHeight)
+      border:SetBackdrop({
+        bgFile = ThreatPlates.Media:Fetch('statusbar', db.BarTexture),
+        edgeFile = ThreatPlates.Media:Fetch('border', db.BorderTexture),
+        tile = false, tileSize = 0, edgeSize = db.BorderEdgeSize,
+        insets = { left = offset, right = offset, top = offset, bottom = offset }
+      })
+
       if db.BackgroundUseForegroundColor then
         border:SetBackdropColor(r, g, b, 0.3)
       else
@@ -249,11 +263,10 @@ local function UpdateWidgetFrame(frame, unit)
       bar:_Hide()
     end
 
-    local text = frame.Text
     if db.ShowText then
-      text:SetText(text_value)
+      frame.Text:SetText(text_value)
     else
-      text:_Hide()
+      frame.Text:_Hide()
     end
 
     frame:Show()
@@ -277,6 +290,7 @@ local function UpdateWidgetContext(frame, unit)
   --------------------------------------
   if UnitGUID("target") == guid then
 --    WidgetList[guid] = frame
+    --UpdateSettings(frame)
     UpdateWidgetFrame(frame, unit)
   else
     frame:_Hide()
@@ -350,16 +364,13 @@ local function CreateWidgetFrame(parent)
   frame:SetSize(32, 32)
   frame:SetFrameLevel(parent:GetFrameLevel() + 3)
 
-  local text = frame:CreateFontString(nil, "OVERLAY")
-  frame.Text = text
-  text:SetAllPoints()
+  frame.Bar = CreateFrame("StatusBar", nil, frame)
+  frame.Bar:SetMinMaxValues(0, 100)
 
-  local bar = CreateFrame("StatusBar", nil, frame)
-  frame.Bar = bar
-  bar:SetMinMaxValues(0, 100)
+  frame.Text = frame.Bar:CreateFontString(nil, "OVERLAY")
+  frame.Text:SetAllPoints()
 
-  local border = CreateFrame("Frame", nil, bar)
-  frame.Border = border
+  frame.Border = CreateFrame("Frame", nil, frame.Bar)
 
   UpdateSettings(frame)
   frame.UpdateConfig = UpdateSettings

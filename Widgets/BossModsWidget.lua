@@ -361,17 +361,9 @@ end
 
 local function enabled()
   ConfigDB = TidyPlatesThreat.db.profile.BossModsWidget
-  Enabled = ConfigDB.ON
+  Enabled = ConfigDB.ON or ConfigDB.ShowInHeadlineView
 
-  if Enabled then
-    if DBM and not CallbacksRegistered then
-      DBM:RegisterCallback('BossMod_ShowNameplateAura', BossMod_ShowNameplateAura)
-      DBM:RegisterCallback('BossMod_HideNameplateAura', BossMod_HideNameplateAura)
-      DBM:RegisterCallback('BossMod_DisableFriendlyNameplates', BossMod_DisableFriendlyNameplates)
-      DBM:RegisterCallback('BossMod_DisableHostileNameplates', BossMod_DisableHostileNameplates)
-      CallbacksRegistered = true
-    end
-  else -- not ENABLED
+  if not Enabled then
     if DBM and CallbacksRegistered then
       DBM:UnregisterCallback('BossMod_ShowNameplateAura', BossMod_ShowNameplateAura)
       DBM:UnregisterCallback('BossMod_HideNameplateAura', BossMod_HideNameplateAura)
@@ -379,9 +371,17 @@ local function enabled()
       DBM:UnregisterCallback('BossMod_DisableHostileNameplates', BossMod_DisableHostileNameplates)
       CallbacksRegistered = false
     end
+  else -- not ENABLED
+    if DBM and not CallbacksRegistered then
+      DBM:RegisterCallback('BossMod_ShowNameplateAura', BossMod_ShowNameplateAura)
+      DBM:RegisterCallback('BossMod_HideNameplateAura', BossMod_HideNameplateAura)
+      DBM:RegisterCallback('BossMod_DisableFriendlyNameplates', BossMod_DisableFriendlyNameplates)
+      DBM:RegisterCallback('BossMod_DisableHostileNameplates', BossMod_DisableHostileNameplates)
+      CallbacksRegistered = true
+    end
   end
 
-  return Enabled
+  return ConfigDB.ON
 end
 
 local function EnabledInHeadlineView()

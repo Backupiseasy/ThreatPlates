@@ -557,7 +557,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
       x = 0,
       y = -8,
       x_hv = 0,
-      y_hv = -8,
+      y_hv = -16,
       ShowInHeadlineView = false,
     },
     --      eliteWidget = {

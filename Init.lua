@@ -250,15 +250,15 @@ end
 -- With TidyPlates:
 --ThreatPlates.FixUpdateUnitCondition = FixUpdateUnitCondition
 
---ThreatPlates.DEBUG = function(...) end
---ThreatPlates.DEBUG_PRINT_TABLE = function(...) end
---ThreatPlates.DEBUG_PRINT_UNIT = function(...) end
---ThreatPlates.DEBUG_PRINT_TARGET = function(...) end
---ThreatPlates.DEBUG_AURA_LIST = function(...) end
-ThreatPlates.DEBUG = DEBUG
-ThreatPlates.DEBUG_PRINT_TABLE = DEBUG_PRINT_TABLE
-ThreatPlates.DEBUG_PRINT_UNIT = DEBUG_PRINT_UNIT
-ThreatPlates.DEBUG_PRINT_TARGET = DEBUG_PRINT_TARGET
-ThreatPlates.DEBUG_AURA_LIST = DEBUG_AURA_LIST
+ThreatPlates.DEBUG = function(...) end
+ThreatPlates.DEBUG_PRINT_TABLE = function(...) end
+ThreatPlates.DEBUG_PRINT_UNIT = function(...) end
+ThreatPlates.DEBUG_PRINT_TARGET = function(...) end
+ThreatPlates.DEBUG_AURA_LIST = function(...) end
+--ThreatPlates.DEBUG = DEBUG
+--ThreatPlates.DEBUG_PRINT_TABLE = DEBUG_PRINT_TABLE
+--ThreatPlates.DEBUG_PRINT_UNIT = DEBUG_PRINT_UNIT
+--ThreatPlates.DEBUG_PRINT_TARGET = DEBUG_PRINT_TARGET
+--ThreatPlates.DEBUG_AURA_LIST = DEBUG_AURA_LIST
 
 

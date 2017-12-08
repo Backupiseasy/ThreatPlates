@@ -134,15 +134,15 @@ local function DisableWatcher()
 end
 
 local function enabled()
-  local active = TidyPlatesThreat.db.profile.socialWidget.ON
+	local db = TidyPlatesThreat.db.profile.socialWidget
 
-	if active then
-		if not watcherIsEnabled then	EnableWatcher() end
-	else
-		if watcherIsEnabled then	DisableWatcher()	end
-	end
+	if not (db.ON or db.ShowInHeadlineView) then
+    if watcherIsEnabled then	DisableWatcher()	end
+  else
+    if not watcherIsEnabled then	EnableWatcher() end
+  end
 
-	return active
+	return db.ON
 end
 
 local function EnabledInHeadlineView()

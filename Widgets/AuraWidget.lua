@@ -644,21 +644,21 @@ local function Disable()
 end
 
 local function enabled()
-  local active = TidyPlatesThreat.db.profile.AuraWidget.ON
+  local db = TidyPlatesThreat.db.profile.AuraWidget
 
-	if active then
-		if not isAuraEnabled then
-			Enable()
-			isAuraEnabled = true
-		end
+	if not (db.ON or db.ShowInHeadlineView) then
+    if isAuraEnabled then
+      Disable()
+      isAuraEnabled = false
+    end
 	else
-		if isAuraEnabled then
-			Disable()
-			isAuraEnabled = false
-		end
-	end
+    if not isAuraEnabled then
+      Enable()
+      isAuraEnabled = true
+    end
+  end
 
-	return active
+	return db.ON
 end
 
 local function EnabledInHeadlineView()

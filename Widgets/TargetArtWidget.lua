@@ -36,6 +36,7 @@ end
 local function UpdateSettings(frame)
   local db = TidyPlatesThreat.db.profile.targetWidget
 
+  -- probably this should be moved to UpdateWidgetFrame
   if db.ON then
     frame.Icon:SetTexture(path..db.theme)
     frame.Icon:SetVertexColor(db.r, db.g, db.b, db.a)

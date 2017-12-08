@@ -1,7 +1,7 @@
 ------------------------------------------------------
-8.7.0-Alpha1
+8.6.0-Beta2 (Standalone, TidyPlates is no longer required)
 ------------------------------------------------------
-
+* Fixed several bugs with widgets not showing up or not updating in headline view even if enabled.
 
 ------------------------------------------------------
 8.6.0-Beta1
@@ -21,6 +21,7 @@
 ------------------------------------------------------
 * Added new widget Boss Mods to show auras from boss mods on your nameplates (since patch 7.2, hostile nameplates only in instances and raids).
 
+------------------------------------------------------
 8.5.5 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
 * Fixed a bug where the target highlight was shown in headline view.
