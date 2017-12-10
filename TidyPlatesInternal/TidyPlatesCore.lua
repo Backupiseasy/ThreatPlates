@@ -819,7 +819,7 @@ do
 			castBar:SetScript("OnUpdate", OnUpdateCastBarForward)
 		end
 
-		--if isTradeSkill then return end
+		if isTradeSkill then return end
 
 		unit.isCasting = true
 		unit.spellIsShielded = notInterruptible
