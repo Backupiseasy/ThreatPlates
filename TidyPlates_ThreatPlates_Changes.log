@@ -1,4 +1,9 @@
 ------------------------------------------------------
+8.6.0-Beta3 (Standalone, TidyPlates is no longer required)
+------------------------------------------------------
+* Fixed bug where the resource widget border was not shown correctly on rare occasions.
+
+------------------------------------------------------
 8.6.0-Beta2 (Standalone, TidyPlates is no longer required)
 ------------------------------------------------------
 * Fixed several bugs with widgets not showing up or not updating in headline view even if enabled.
