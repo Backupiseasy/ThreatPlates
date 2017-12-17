@@ -1,30 +1,13 @@
 ------------------------------------------------------
-8.6.0-Beta3 (Standalone, TidyPlates is no longer required)
-------------------------------------------------------
-* Fixed bug where the resource widget border was not shown correctly on rare occasions.
-
-------------------------------------------------------
-8.6.0-Beta2 (Standalone, TidyPlates is no longer required)
-------------------------------------------------------
-* Fixed several bugs with widgets not showing up or not updating in headline view even if enabled.
-
-------------------------------------------------------
-8.6.0-Beta1
-------------------------------------------------------
-* Fixed a bug with healthbar background working like alpha (0% should be nontransparent).
-* Fixed bug where the default border texture for resource widget as missing.
-
-------------------------------------------------------
-8.6.0-Alpha2
+8.6.0 (Standalone, TidyPlates is no longer required)
 ------------------------------------------------------
 * Integrated all necessary parts of TidyPlates into ThreatPlates to make it standalone. TidyPlates is no longer required for ThreatPlates to work.
-* Removed the deprecated aura widget.
-* Fixed a bug with castbar background transparency working like alpha (0% should be nontransparent).
-
-------------------------------------------------------
-8.6.0-Alpha1 (works with TidyPlates 6.18.11)
-------------------------------------------------------
 * Added new widget Boss Mods to show auras from boss mods on your nameplates (since patch 7.2, hostile nameplates only in instances and raids).
+* Fixed a bug with healthbar background working like alpha (0% should be nontransparent).
+* Fixed a bug with castbar background transparency working like alpha (0% should be nontransparent).
+* Fixed bug where the resource widget border was not shown correctly on rare occasions.
+* Fixed several bugs with widgets not showing up or not updating in headline view even if enabled.
+* Removed the deprecated aura widget.
 
 ------------------------------------------------------
 8.5.5 (works with TidyPlates 6.18.11)

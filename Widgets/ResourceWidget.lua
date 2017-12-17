@@ -49,10 +49,6 @@ local function UpdateSettings(frame)
     local bar_texture = ThreatPlates.Media:Fetch('statusbar', db.BarTexture)
     local border_texture = ThreatPlates.Media:Fetch('border', db.BorderTexture)
     if backdrop.bgFile ~= bar_texture or backdrop.edgeFile ~= border_texture or backdrop.edgeSize ~= db.BorderEdgeSize or backdrop.insets.left ~= offset then
---      print (backdrop.bgFile, ThreatPlates.Media:Fetch('statusbar', db.BarTexture), backdrop.bgFile ~= ThreatPlates.Media:Fetch('statusbar', db.BarTexture))
---      print (backdrop.edgeFile, ThreatPlates.Media:Fetch('border', db.BorderTexture), backdrop.edgeFile ~= ThreatPlates.Media:Fetch('border', db.BorderTexture))
---      print (backdrop.edgeSize, db.BorderEdgeSize, backdrop.edgeSize ~= db.BorderEdgeSize)
---      print (backdrop.insets.left, offset, backdrop.insets.left ~= offset)
       border:SetBackdrop({
           bgFile = bar_texture,
           edgeFile = border_texture,
@@ -60,9 +56,14 @@ local function UpdateSettings(frame)
           insets = { left = offset, right = offset, top = offset, bottom = offset }
       })
     end
-    border:SetSize(db.BarWidth + 2 * offset, db.BarHeight + 2 * offset)
-    border:SetPoint("CENTER", bar, "CENTER", 0, 0)
-    border:SetFrameLevel(frame.Bar:GetFrameLevel())
+
+    local offset_x = db.BarWidth + 2 * offset
+    local offset_y = db.BarHeight + 2 * offset
+    if border:GetWidth() ~= offset_x or border:GetHeight() ~= offset_y  then
+      border:SetSize(offset_x, offset_y)
+      border:SetPoint("CENTER", bar, "CENTER", 0, 0)
+      border:SetFrameLevel(frame.Bar:GetFrameLevel())
+    end
 
     bar:Show()
   else
