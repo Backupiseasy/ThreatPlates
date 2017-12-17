@@ -124,13 +124,14 @@ end
 -- 	print ("Masque: Reskin")
 -- end
 
-local function CreateWidgetFrame(plate)
+local function CreateWidgetFrame(parent)
 	-- Required Widget Code
-	local frame = CreateFrame("Frame", nil, plate)
+	local frame = CreateFrame("Frame", nil, parent)
 	frame:Hide()
 
 	-- Custom Code III
 	--------------------------------------
+	frame:SetFrameLevel(parent:GetFrameLevel() + 2)
 	frame.Icon = frame:CreateTexture(nil, "OVERLAY")
 	frame.Icon:SetAllPoints(frame)
 

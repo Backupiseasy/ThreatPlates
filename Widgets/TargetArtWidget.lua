@@ -36,21 +36,23 @@ end
 local function UpdateSettings(frame)
   local db = TidyPlatesThreat.db.profile.targetWidget
 
+  -- probably this should be moved to UpdateWidgetFrame
   if db.ON then
     frame.Icon:SetTexture(path..db.theme)
     frame.Icon:SetVertexColor(db.r, db.g, db.b, db.a)
+		frame.Icon:SetDrawLayer("BACKGROUND", 0)
 
-    if db.theme == "default" or db.theme == "squarethin" then
-      frame.Icon:SetDrawLayer("OVERLAY", -7)
-    else
-      frame.Icon:SetDrawLayer("OVERLAY", 7)
-    end
+--    if db.theme == "default" or db.theme == "squarethin" then
+--      frame.Icon:SetDrawLayer("ARTWORK", -7)
+--    else
+--      frame.Icon:SetDrawLayer("ARTWORK", 7)
+--    end
 
     frame:Show()
     frame.Icon:Show()
   else
     frame:_Hide()
-    frame.Icon:Hide()
+    --frame.Icon:Hide()
   end
 end
 
@@ -75,7 +77,7 @@ local function UpdateWidgetContext(frame, unit)
 		UpdateWidgetFrame(frame, unit)
 	else
 		frame:_Hide()
-    frame.Icon:Hide()
+    --frame.Icon:Hide()
 	end
 	--------------------------------------
 	-- End Custom Code
@@ -98,13 +100,14 @@ local function CreateWidgetFrame(parent)
 	--------------------------------------
 	-- framelevel of Target Highlight must be the same as visual.target (target highlight of TidyPlates)
   -- that is: extended.healthbar.textFrame, texture target (BACKGROUND)
-	frame:SetFrameLevel(parent:GetFrameLevel())
+	frame:SetFrameLevel(parent:GetFrameLevel() + 1)
 	frame:SetSize(256, 64)
 	frame:SetPoint("CENTER", parent, "CENTER")
 
-  frame.Icon = parent.visual.name:GetParent():CreateTexture(nil, "OVERLAY")
+  --frame.Icon = parent.visual.name:GetParent():CreateTexture(nil, "ARTWORK")
+	frame.Icon = frame:CreateTexture(nil, "BACKGROUND", 0)
   frame.Icon:SetAllPoints(frame)
-  frame.Icon:Hide()
+  --frame.Icon:Hide()
 
   UpdateSettings(frame)
   frame.UpdateConfig = UpdateSettings
@@ -118,7 +121,7 @@ local function CreateWidgetFrame(parent)
 	-- Have to add frame.Icon:Hide() also here as the frame is no longer the parent of the icon since a fix to widget layering
 	frame.Hide = function()
 		ClearWidgetContext(frame)
-		frame.Icon:Hide()
+		--frame.Icon:Hide()
 		frame:_Hide()
 	end
 

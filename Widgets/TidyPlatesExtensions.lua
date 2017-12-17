@@ -80,8 +80,10 @@ local function CreateExtensions(extended)
   -- Fix layering of TidyPlates
   -- set parent of textFrame to extended
   visual.name:GetParent():SetParent(extended)
-  extended.widgetParent:SetParent(extended)
-  visual.raidicon:SetDrawLayer("OVERLAY")
+  -- With TidyPlates:
+  --extended.widgetParent:SetParent(extended)
+  --visual.name:GetParent():SetParent(extended)
+  --visual.raidicon:SetDrawLayer("OVERLAY")
 
   --  Absorbs on healthbar
   local db = TidyPlatesThreat.db.profile.settings.healthbar

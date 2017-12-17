@@ -76,7 +76,7 @@ local function OnInitialize(plate, theme)
     for name,v in pairs(ThreatPlatesWidgets.list) do
       local widget = widget_list[name]
 
-      if v.enabled() then
+      if v.enabled() or v.EnabledInHeadlineView() then
         if not widget then
           widget = v.create(plate) -- UpdateConfig should/must be called in create()
           --widget.TP_Widget = true -- mark ThreatPlates widgets
@@ -119,7 +119,6 @@ local function OnUpdate(plate, unit)
         if show_headline_view then
           if not v.isContext then
             widget:Update(unit)
-            --if unit.isTarget then	plate:SetFrameStrata("LOW") else plate:SetFrameStrata("BACKGROUND")	end
           end
         else
           widget:Hide()
@@ -130,7 +129,6 @@ local function OnUpdate(plate, unit)
         -- context means that widget is only relevant for target (or mouse-over)
         if not v.isContext then
           widget:Update(unit)
-          --if unit.isTarget then	plate:SetFrameStrata("LOW") else plate:SetFrameStrata("BACKGROUND") end
         end
       else
         widget:Hide()
@@ -143,6 +141,7 @@ local function OnUpdate(plate, unit)
 end
 
 -- TidyPlatesGlobal_OnContextUpdate() is called when a unit is targeted or moused-over.  (Any time the unitid or GUID changes)
+-- OnContextUpdate is always followed up by a call to OnUpdate
 -- OnContextUpdate must only do something when there is something unit-dependent to display?
 local function OnContextUpdate(plate, unit)
   if not unit.unitid then return end
@@ -166,7 +165,6 @@ local function OnContextUpdate(plate, unit)
       if style == "NameOnly" or style == "NameOnly-Unique" then
         if show_headline_view then
           widget:UpdateContext(unit)
-          if unit.isTarget then	plate:SetFrameStrata("LOW") else plate:SetFrameStrata("BACKGROUND") end
         else
           widget:Hide()
         end
@@ -174,7 +172,6 @@ local function OnContextUpdate(plate, unit)
         widget:Hide()
       elseif show_healthbar_view then -- any other style
         widget:UpdateContext(unit)
-        if unit.isTarget then	plate:SetFrameStrata("LOW") else plate:SetFrameStrata("BACKGROUND") end
       else
         widget:Hide()
       end

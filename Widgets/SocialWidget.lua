@@ -110,7 +110,7 @@ local function WatcherFrameHandler(frame, event,...)
 				 event == "BN_FRIEND_ACCOUNT_OFFLINE" then
 		UpdateBnetList()
 	end
-	--TidyPlates:ForceUpdate()
+	--TidyPlatesInternal:ForceUpdate()
 end
 
 local function EnableWatcher()
@@ -134,15 +134,15 @@ local function DisableWatcher()
 end
 
 local function enabled()
-  local active = TidyPlatesThreat.db.profile.socialWidget.ON
+	local db = TidyPlatesThreat.db.profile.socialWidget
 
-	if active then
-		if not watcherIsEnabled then	EnableWatcher() end
-	else
-		if watcherIsEnabled then	DisableWatcher()	end
-	end
+	if not (db.ON or db.ShowInHeadlineView) then
+    if watcherIsEnabled then	DisableWatcher()	end
+  else
+    if not watcherIsEnabled then	EnableWatcher() end
+  end
 
-	return active
+	return db.ON
 end
 
 local function EnabledInHeadlineView()
@@ -268,7 +268,7 @@ local function CreateWidgetFrame(parent)
 
 	-- Custom Code III
 	--------------------------------------
-  frame:SetFrameLevel(frame:GetParent():GetFrameLevel() + 2)
+  frame:SetFrameLevel(parent:GetFrameLevel() + 2)
   frame:SetSize(32, 32)
 	frame.Icon = frame:CreateTexture(nil, "OVERLAY")
 	frame.FactionIcon = frame:CreateTexture(nil, "OVERLAY")

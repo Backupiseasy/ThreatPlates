@@ -68,15 +68,11 @@ end
 
 
 local function UnitIsOffTanked(unit)
-  local unitid = unit.unitid
+  local targetOf = unit.unitid.."target"
+  local targetIsTank = UnitIsUnit(targetOf, "pet") or ("TANK" == UnitGroupRolesAssigned(targetOf))
 
-  if unitid then
-    local targetOf = unitid.."target"
-    local targetIsTank = UnitIsUnit(targetOf, "pet") or ("TANK" == UnitGroupRolesAssigned(targetOf))
-
-    if targetIsTank and unit.threatValue < 2 then
-      return true
-    end
+  if targetIsTank and unit.threatValue < 2 then
+    return true
   end
 
   return false
@@ -218,7 +214,7 @@ local function SetHealthbarColor(unit)
       -- Unit is marked
       local db_raidicon = db.settings.raidicon
       c = db_raidicon.hpMarked[unit.raidIcon]
-    elseif db.questWidget.ModeHPBar and ShowQuestUnit(unit) and IsQuestUnit(unit) then
+    elseif ShowQuestUnit(unit) and IsQuestUnit(unit) then
       -- Unit is quest target
       c = db.questWidget.HPBarColor
     else
@@ -257,7 +253,7 @@ local function SetHealthbarColor(unit)
     local db_raidicon = db.settings.raidicon
     if unit.isMarked and db_raidicon.hpColor then
       c = db_raidicon.hpMarked[unit.raidIcon]
-    elseif db.questWidget.ModeHPBar and ShowQuestUnit(unit) and IsQuestUnit(unit) then
+    elseif ShowQuestUnit(unit) and IsQuestUnit(unit) then
       -- small bug here: tapped targets should not be quest marked!
       c = db.questWidget.HPBarColor
     elseif db.healthColorChange then
@@ -294,10 +290,10 @@ local function SetHealthbarColor(unit)
   local db_healthbar = db.settings.healthbar
   local color_bg_r, color_bg_g, color_bg_b, bg_alpha
   if db_healthbar.BackgroundUseForegroundColor then
-    color_bg_r, color_bg_g, color_bg_b, bg_alpha = color_r, color_g, color_b, db_healthbar.BackgroundOpacity
+    color_bg_r, color_bg_g, color_bg_b, bg_alpha = color_r, color_g, color_b, 1 - db_healthbar.BackgroundOpacity
   else
     local color = db_healthbar.BackgroundColor
-    color_bg_r, color_bg_g, color_bg_b, bg_alpha = color.r, color.g, color.b, db_healthbar.BackgroundOpacity
+    color_bg_r, color_bg_g, color_bg_b, bg_alpha = color.r, color.g, color.b, 1 - db_healthbar.BackgroundOpacity
   end
 
   return color_r, color_g, color_b, nil, color_bg_r, color_bg_g, color_bg_b, bg_alpha

@@ -163,6 +163,8 @@ local ALPHA_FUNCTIONS = {
 }
 
 local function SetAlpha(unit)
+	if not unit.unitid then return end -- unitid is used in UnitIsOffTanked
+
 	-- sometimes SetAlpha is called without calling OnUpdate/OnContextUpdate first, so TP_Style may not be initialized
 	local style = unit.TP_Style or SetStyle(unit)
 

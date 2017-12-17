@@ -138,10 +138,10 @@ local function CreateWidgetFrame(parent)
 
   -- Custom Code III
   --------------------------------------
+  frame:SetFrameLevel(parent:GetFrameLevel() + 4)
   frame:SetSize(64, 64)
   frame.Icon = frame:CreateTexture(nil, "OVERLAY")
   frame.Icon:SetAllPoints(frame)
-  frame:SetFrameLevel(parent:GetFrameLevel() + 2)
 
   UpdateSettings(frame)
   frame.UpdateConfig = UpdateSettings

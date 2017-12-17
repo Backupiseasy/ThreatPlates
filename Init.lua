@@ -54,11 +54,13 @@ ThreatPlates.HEX2RGB = function (hex)
 end
 
 ThreatPlates.Update = function()
+	-- With TidyPlates:
+	--if (TidyPlatesOptions.ActiveTheme == ThreatPlates.THEME_NAME) then
+	--	TidyPlates:SetTheme(ThreatPlates.THEME_NAME)
+	--end
+
 	-- ForceUpdate() is called in SetTheme()
-	if (TidyPlatesOptions.ActiveTheme == ThreatPlates.THEME_NAME) then
-		TidyPlates:SetTheme(ThreatPlates.THEME_NAME)
-	end
-	-- TidyPlates:ForceUpdate()
+	TidyPlatesInternal:SetTheme(ThreatPlates.THEME_NAME)
 end
 
 ThreatPlates.Meta = function(value)
@@ -144,21 +146,22 @@ end
 -- Some functions to fix TidyPlates bugs
 ---------------------------------------------------------------------------------------------------
 
-local function FixUpdateUnitCondition(unit)
-	local unitid = unit.unitid
-
-	-- Enemy players turn to neutral, e.g., when mounting a flight path mount, so fix reaction in that situations
-	if unit.reaction == "NEUTRAL" and (unit.type == "PLAYER" or UnitPlayerControlled(unitid)) then
-		unit.reaction = "HOSTILE"
-	end
-end
+-- With TidyPlates:
+--local function FixUpdateUnitCondition(unit)
+--	local unitid = unit.unitid
+--
+--	-- Enemy players turn to neutral, e.g., when mounting a flight path mount, so fix reaction in that situations
+--	if unit.reaction == "NEUTRAL" and (unit.type == "PLAYER" or UnitPlayerControlled(unitid)) then
+--		unit.reaction = "HOSTILE"
+--	end
+--end
 
 --------------------------------------------------------------------------------------------------
 -- Debug Functions
 ---------------------------------------------------------------------------------------------------
 
 local function DEBUG(...)
-  print ("DEBUG: ", ...)
+  print (ThreatPlates.Meta("titleshort") .. "-Debug:", ...)
 end
 
 -- Function from: https://coronalabs.com/blog/2014/09/02/tutorial-printing-table-contents/
@@ -200,8 +203,8 @@ local function DEBUG_PRINT_UNIT(unit)
 	DEBUG("  -------------------------------------------------------------")
 	DEBUG_PRINT_TABLE(unit)
 	if unit.unitid then
-		DEBUG("  isFriend = ", TidyPlatesUtility.IsFriend(unit.name))
-		DEBUG("  isGuildmate = ", TidyPlatesUtility.IsGuildmate(unit.name))
+--		DEBUG("  isFriend = ", TidyPlatesUtilityInternal.IsFriend(unit.name))
+--		DEBUG("  isGuildmate = ", TidyPlatesUtilityInternal.IsGuildmate(unit.name))
 		DEBUG("  IsOtherPlayersPet = ", UnitIsOtherPlayersPet(unit))
 		DEBUG("  IsBattlePet = ", UnitIsBattlePet(unit.unitid))
 		DEBUG("  PlayerControlled = ", UnitPlayerControlled(unit.unitid))
@@ -244,7 +247,8 @@ end
 -- Expoerted local functions
 ---------------------------------------------------------------------------------------------------
 
-ThreatPlates.FixUpdateUnitCondition = FixUpdateUnitCondition
+-- With TidyPlates:
+--ThreatPlates.FixUpdateUnitCondition = FixUpdateUnitCondition
 
 ThreatPlates.DEBUG = function(...) end
 ThreatPlates.DEBUG_PRINT_TABLE = function(...) end

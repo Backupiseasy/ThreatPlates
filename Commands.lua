@@ -10,20 +10,20 @@ local function toggleDPS()
 	TidyPlatesThreat:SetRole(false)
 	TidyPlatesThreat.db.profile.threat.ON = true
 	if TidyPlatesThreat.db.profile.verbose then
-	TP.Print(L["-->>|cffff0000DPS Plates Enabled|r<<--"])
-	TP.Print(L["|cff89F559Threat Plates|r: DPS switch detected, you are now in your |cffff0000dpsing / healing|r role."])
+		TP.Print(L["-->>|cffff0000DPS Plates Enabled|r<<--"])
+		TP.Print(L["|cff89F559Threat Plates|r: DPS switch detected, you are now in your |cffff0000dpsing / healing|r role."])
 	end
-	TidyPlates:ForceUpdate()
+	TidyPlatesInternal:ForceUpdate()
 end
 
 local function toggleTANK()
 	TidyPlatesThreat:SetRole(true)
 	TidyPlatesThreat.db.profile.threat.ON = true
 	if TidyPlatesThreat.db.profile.verbose then
-	TP.Print(L["-->>|cff00ff00Tank Plates Enabled|r<<--"])
-	TP.Print(L["|cff89F559Threat Plates|r: Tank switch detected, you are now in your |cff00ff00tanking|r role."])
+		TP.Print(L["-->>|cff00ff00Tank Plates Enabled|r<<--"])
+		TP.Print(L["|cff89F559Threat Plates|r: Tank switch detected, you are now in your |cff00ff00tanking|r role."])
 	end
-	TidyPlates:ForceUpdate()
+	TidyPlatesInternal:ForceUpdate()
 end
 
 SLASH_TPTPDPS1 = "/tptpdps"
