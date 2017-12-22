@@ -451,6 +451,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
       x_hv = 0,
       y_hv = 5,
       scale = 1,
+      FrameOrder = "HEALTHBAR_AURAS",
       anchor = "TOP",
       ShowInHeadlineView = false,
       ShowEnemy = true,
