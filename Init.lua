@@ -27,6 +27,8 @@ ThreatPlates.Media = LibStub("LibSharedMedia-3.0")
 ---------------------------------------------------------------------------------------------------
 
 TidyPlatesThreat = LibStub("AceAddon-3.0"):NewAddon("TidyPlatesThreat", "AceConsole-3.0", "AceEvent-3.0")
+-- Global for DBM to differentiate between Tidy Plates: Threat Plates and Tidy Plates: Threat
+TidyPlatesThreatDBM = true
 
 --------------------------------------------------------------------------------------------------
 -- General Functions

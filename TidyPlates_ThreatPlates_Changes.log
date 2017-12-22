@@ -1,4 +1,9 @@
 ------------------------------------------------------
+8.6.1 (Standalone, TidyPlates is no longer required)
+------------------------------------------------------
+* Added an option to auras widget to show it above or below the healthbar.
+
+------------------------------------------------------
 8.6.0 (Standalone, TidyPlates is no longer required)
 ------------------------------------------------------
 * Integrated all necessary parts of TidyPlates into ThreatPlates to make it standalone. TidyPlates is no longer required for ThreatPlates to work.
