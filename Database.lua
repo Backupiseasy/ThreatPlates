@@ -292,7 +292,8 @@ local DEPRECATED_SETTINGS = {
   -- { "HeadlineView", "blizzFadingAlpha"},-- in release 8.6 (removed in 8.5.1)
   -- { "HeadlineView", "name", "width" },  -- in release 8.6 (removed in 8.5.0)
   -- { "HeadlineView", "name", "height" }, -- in release 8.6 (removed in 8.5.0)
-  -- [ "debuffWidget" }, -- in release 8.7 (removed in 8.6.0)
+  -- { "debuffWidget" }, -- in release 8.7 (removed in 8.6.0)
+  -- { "OldSettings" }, -- in release 8.7 (removed in 8.7.0)
 }
 
 local function MigrateDatabase(current_version)

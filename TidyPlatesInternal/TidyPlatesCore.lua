@@ -192,14 +192,10 @@ do
 		carrier = CreateFrame("Frame", frameName, WorldFrame)
 		local extended = CreateFrame("Frame", nil, carrier)
 
---		carrier:SetFrameStrata("BACKGROUND")
-
-    --    carrier:SetFrameLevel(0)
-
 		plate.TP_Carrier = carrier
 		plate.TP_Extended = extended
 
-        -- Add Graphical Elements
+		-- Add Graphical Elements
 		local visual = {}
 		-- Status Bars
 		local castbar = CreateTidyPlatesInternalStatusbar(extended)
@@ -208,7 +204,8 @@ do
 		local healthbar = CreateTidyPlatesInternalStatusbar(extended)
 		healthbar.Backdrop:SetDrawLayer("BORDER",-8)
 		healthbar.Bar:SetDrawLayer("BORDER",-7)
-		local textFrame = CreateFrame("Frame", nil, healthbar)
+		--local textFrame = CreateFrame("Frame", nil, healthbar)
+		local textFrame = CreateFrame("Frame", nil, extended)
 		--local widgetParent = CreateFrame("Frame", nil, textFrame)
 
 		textFrame:SetAllPoints()

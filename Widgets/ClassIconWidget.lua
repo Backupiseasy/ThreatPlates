@@ -52,7 +52,7 @@ local function UpdateWidgetFrame(frame, unit)
 
 	local class
 	if unit.type == "PLAYER" then
-		if unit.reaction == "HOSTILE" then
+		if unit.reaction == "HOSTILE" and db.HostileClassIcon then
 			class = unit.class
 		elseif unit.reaction == "FRIENDLY" and db.friendlyClassIcon then
 			-- if db.cacheClass and unit.guid then

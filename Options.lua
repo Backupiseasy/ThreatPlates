@@ -876,18 +876,27 @@ local function ClassIconsWidgetOptions()
     args = {
       Enable = GetEnableEntry(L["Enable Class Icons Widget"], L["This widget shows class icons on nameplates of players."], "classWidget", true),
       Options = {
-        name = L["Options"],
+        name = L["Show For"],
         type = "group",
         inline = true,
         order = 20,
 --        disabled = function() return not db.classWidget.ON end,
         args = {
           FriendlyClass = {
-            name = L["Show Friendly Class Icons"],
+            name = L["Friendly Units"],
+            order = 1,
             type = "toggle",
             descStyle = "inline",
-            width = "full",
+            width = "double",
             arg = { "friendlyClassIcon" },
+          },
+          HostileClass = {
+            name = L["Hostile Units"],
+            order = 2,
+            type = "toggle",
+            descStyle = "inline",
+            width = "double",
+            arg = { "HostileClassIcon" },
           },
 --          FriendlyCaching = {
 --            name = L"Friendly Caching"],
@@ -1372,7 +1381,7 @@ local function CreateOptionsTable()
                     HealthBarTexture = {
                       name = L["Foreground Texture"],
                       type = "select",
-                      order = 1,
+                      order = 10,
                       dialogControl = "LSM30_Statusbar",
                       values = AceGUIWidgetLSMlists.statusbar,
                       set = SetThemeValue,
@@ -1381,36 +1390,22 @@ local function CreateOptionsTable()
                     BGTexture = {
                       name = L["Background Texture"],
                       type = "select",
-                      order = 10,
+                      order = 20,
                       dialogControl = "LSM30_Statusbar",
                       values = AceGUIWidgetLSMlists.statusbar,
                       set = SetThemeValue,
                       arg = { "settings", "healthbar", "backdrop" },
                     },
-                    ShowAbsorb = {
-                      type = "toggle",
-                      order = 11,
-                      name = L["Show Absorbs"],
-                      arg = { "settings", "healthbar", "ShowAbsorbs" },
-                    },
-                    AbsorbColor = {
-                      name = L["Color"],
-                      order = 12,
-                      type = "color",
-                      get = GetColor,
-                      set = SetColor,
-                      arg = { "settings", "healthbar", "AbsorbColor" },
-                    },
-                    Spacer1 = GetSpacerEntry(14),
+                    Spacer1 = GetSpacerEntry(30),
                     BGColorText = {
                       type = "description",
-                      order = 15,
+                      order = 40,
                       width = "single",
                       name = L["Background Color:"],
                     },
                     BGColorForegroundToggle = {
                       name = L["Same as Foreground"],
-                      order = 20,
+                      order = 50,
                       type = "toggle",
                       desc = L["Use the healthbar's foreground color also for the background."],
                       set = SetThemeValue,
@@ -1418,7 +1413,7 @@ local function CreateOptionsTable()
                     },
                     BGColorCustomToggle = {
                       name = L["Custom"],
-                      order = 30,
+                      order = 60,
                       type = "toggle",
                       width = "half",
                       desc = L["Use a custom color for the healtbar's background."],
@@ -1431,13 +1426,16 @@ local function CreateOptionsTable()
                       arg = { "settings", "healthbar", "BackgroundUseForegroundColor" },
                     },
                     BGColorCustom = {
-                      name = L["Color"], type = "color",	order = 35,	get = GetColor, set = SetColor, arg = {"settings", "healthbar", "BackgroundColor"},
+                      name = L["Color"],
+                      order = 70,
+                      type = "color",
+                      get = GetColor, set = SetColor, arg = {"settings", "healthbar", "BackgroundColor"},
                       width = "half",
                       disabled = function() return db.settings.healthbar.BackgroundUseForegroundColor end,
                     },
                     BackgroundOpacity = {
                       name = L["Background Transparency"],
-                      order = 40,
+                      order = 80,
                       type = "range",
                       min = 0,
                       max = 1,
@@ -1445,49 +1443,87 @@ local function CreateOptionsTable()
                       isPercent = true,
                       arg = { "settings", "healthbar", "BackgroundOpacity" },
                     },
-                    Header1 = {
-                      name = L["Borders"],
-                      order = 50,
-                      type = "header",
-                    },
-                    HealthBorderToggle = {
-                      type = "toggle",
-                      order = 60,
-                      name = L["Show Border"],
-                      set = SetThemeValue,
-                      arg = { "settings", "healthborder", "show" },
-                    },
-                    HealthBorder = {
-                      type = "select",
-                      order = 70,
-                      name = L["Normal Border"],
-                      set = SetThemeValue,
-                      disabled = function() if db.settings.healthborder.show then return false else return true end end,
-                      values = { TP_HealthBarOverlay = "Default", TP_HealthBarOverlayThin = "Thin" },
-                      arg = { "settings", "healthborder", "texture" },
-                    },
-                    EliteHealthBorderToggle = {
-                      type = "toggle",
-                      order = 80,
-                      name = L["Show Elite Border"],
-                      arg = { "settings", "elitehealthborder", "show" },
-                    },
-                    EliteBorder = {
-                      type = "select",
+                    AbsorbGroup = {
+                      name = L["Absorbs"],
                       order = 90,
-                      name = L["Elite Border"],
-                      disabled = function() if db.settings.elitehealthborder.show then return false else return true end end,
-                      values = { TP_HealthBarEliteOverlay = "Default", TP_HealthBarEliteOverlayThin = "Thin" },
-                      arg = { "settings", "elitehealthborder", "texture" }
+                      type = "group",
+                      inline = true,
+                      args = {
+                        ShowAbsorb = {
+                          name = L["Show Absorbs"],
+                          order = 100,
+                          type = "toggle",
+                          arg = { "settings", "healthbar", "ShowAbsorbs" },
+                        },
+                        AbsorbColor = {
+                          name = L["Color"],
+                          order = 110,
+                          type = "color",
+                          get = GetColorAlpha,
+                          set = SetColorAlpha,
+                          hasAlpha = true,
+                          arg = { "settings", "healthbar", "AbsorbColor" },
+                        },
+                        AlwaysFullAbsorb = {
+                          name = L["Full Absorbs"],
+                          order = 120,
+                          type = "toggle",
+                          desc = L["Always shows the full amount of absorbs on a unit. In overabsorp situations, the absorb bar ist shifted to the left."],
+                          arg = { "settings", "healthbar", "AlwaysFullAbsorb" },
+                        },
+                        StripedTexture = {
+                          name = L["Striped Texture"],
+                          order = 130,
+                          type = "toggle",
+                          desc = L["Use a striped texture for the absorb overlay. If unchecked, inherit the health bar texture."],
+                          arg = { "settings", "healthbar", "StripedTexture" },
+                        },
+                      },
                     },
-                    Spacer2 = GetSpacerEntry(99),
-                    Mouseover = {
-                      type = "select",
-                      order = 100,
-                      name = L["Mouseover"],
-                      set = SetThemeValue,
-                      values = { TP_HealthBarHighlight = "Default", Empty = "None" },
-                      arg = { "settings", "highlight", "texture" },
+                    BorderGroup = {
+                      name = L["Borders"],
+                      order = 170,
+                      type = "group",
+                      inline = true,
+                      args = {
+                        HealthBorderToggle = {
+                          type = "toggle",
+                          order = 180,
+                          name = L["Show Border"],
+                          set = SetThemeValue,
+                          arg = { "settings", "healthborder", "show" },
+                        },
+                        HealthBorder = {
+                          type = "select",
+                          order = 190,
+                          name = L["Normal Border"],
+                          set = SetThemeValue,
+                          values = { TP_HealthBarOverlay = "Default", TP_HealthBarOverlayThin = "Thin" },
+                          arg = { "settings", "healthborder", "texture" },
+                        },
+                        EliteHealthBorderToggle = {
+                          type = "toggle",
+                          order = 200,
+                          name = L["Show Elite Border"],
+                          arg = { "settings", "elitehealthborder", "show" },
+                        },
+                        EliteBorder = {
+                          type = "select",
+                          order = 210,
+                          name = L["Elite Border"],
+                          values = { TP_HealthBarEliteOverlay = "Default", TP_HealthBarEliteOverlayThin = "Thin" },
+                          arg = { "settings", "elitehealthborder", "texture" }
+                        },
+                        Spacer2 = GetSpacerEntry(99),
+                        Mouseover = {
+                          type = "select",
+                          order = 220,
+                          name = L["Mouseover"],
+                          set = SetThemeValue,
+                          values = { TP_HealthBarHighlight = "Default", Empty = "None" },
+                          arg = { "settings", "highlight", "texture" },
+                        },
+                      },
                     },
                   },
                 },
@@ -3019,13 +3055,13 @@ local function CreateOptionsTable()
               name = L["Enable Threat System"],
               type = "toggle",
               order = 1,
-              set = function(info, val)
-                SetValue(info, val)
-                local inInstance, iType = IsInInstance()
-                if iType == "party" or iType == "raid" or iType == "none" then
-                  db.OldSetting = val
-                end
-              end,
+--              set = function(info, val)
+--                SetValue(info, val)
+--                local inInstance, iType = IsInInstance()
+--                if iType == "party" or iType == "raid" or iType == "none" then
+--                  db.OldSetting = val
+--                end
+--              end,
               arg = { "threat", "ON" }
             },
             GeneralSettings = {

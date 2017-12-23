@@ -231,41 +231,10 @@ ThreatPlates.DEFAULT_SETTINGS = {
       [1] = false,
       [2] = false,
     },
-    stances = {
-      ON = false,
-      [0] = false, -- No Stance
-      [1] = false, -- Battle Stance
-      [2] = true, -- Defensive Stance
-      [3] = false -- Berserker Stance
-    },
-    shapeshifts = {
-      ON = false,
-      [0] = false, -- Caster Form
-      [1] = true, -- Bear Form
-      [2] = false, -- Cat Form
-      [3] = false, -- Travel Form
-      [4] = false, -- Moonkin Form, Tree of Life
-    },
-    presences = {
-      ON = false,
-      [0] = false, -- No Presence
-      [1] = true, -- Blood
-      [2] = false, -- Frost
-      [3] = false -- Unholy
-    },
-    seals = {
-      ON = false,
-      [0] = false, -- No Aura
-      [1] = true, -- Devotion Aura
-      [2] = false, -- Retribution Aura
-      [3] = false, -- Concentration Aura
-      [4] = false, -- Resistance Aura
-      [5] = false -- Crusader Aura
-    },
   },
   profile = {
     cache = {},
-    OldSetting = true,
+    -- OldSetting = true, - removed in 8.7.0
     verbose = false,
     -- blizzFadeA = { -- removed in 8.5.1
     --   toggle  = true,
@@ -281,6 +250,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
     allowClass = true, -- old default: false,
     friendlyClass = true, -- old default: false,
     friendlyClassIcon = false,
+    HostileClassIcon = true,
     cacheClass = false,
     optionRoleDetectionAutomatic = true, -- old default: false,
     ShowThreatGlowOnAttackedUnitsOnly = true,
@@ -1439,7 +1409,9 @@ ThreatPlates.DEFAULT_SETTINGS = {
         BackgroundOpacity = 0.7, -- old default: 1,
         BackgroundColor = RGB(0, 0, 0),
         ShowAbsorbs = true,
-        AbsorbColor = RGB(0, 255, 255),
+        AbsorbColor = RGB(0, 255, 255, 0.5),
+        AlwaysFullAbsorb = false,
+        StripedTexture = false,
       },
       castnostop = {
         texture = "TP_CastBarLock",

@@ -420,14 +420,14 @@ end
 --end
 
 function TidyPlatesThreat:PLAYER_ENTERING_WORLD()
-  local _,type = IsInInstance()
-  local ProfDB = self.db.profile
-  if type == "pvp" or type == "arena" then
-    ProfDB.OldSetting = ProfDB.threat.ON
-    ProfDB.threat.ON = false
-  else
-    ProfDB.threat.ON = ProfDB.OldSetting
-  end
+--  local _,type = IsInInstance()
+--  local ProfDB = self.db.profile
+--  if type == "pvp" or type == "arena" then
+--    ProfDB.OldSetting = ProfDB.threat.ON
+--    ProfDB.threat.ON = false
+--  else
+--    ProfDB.threat.ON = ProfDB.OldSetting
+--  end
 
   -- overwrite things TidyPlatesHub does on PLAYER_ENTERING_WORLD
   ActivateTheme()
@@ -493,7 +493,6 @@ end
 -- end
 
 -- function TidyPlatesThreat:UPDATE_SHAPESHIFT_FORM()
--- 	--self.ShapeshiftUpdate()
 -- end
 
 -- Fires when the player switches to another specialication or everytime the player changes a talent
