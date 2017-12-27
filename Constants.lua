@@ -1411,7 +1411,8 @@ ThreatPlates.DEFAULT_SETTINGS = {
         ShowAbsorbs = true,
         AbsorbColor = RGB(255, 255, 255, 1),
         AlwaysFullAbsorb = false,
-        StripedTexture = true,
+        OverlayTexture = true,
+--        OverlayColor = RGB(0, 255, 255, 1),
       },
       castnostop = {
         texture = "TP_CastBarLock",

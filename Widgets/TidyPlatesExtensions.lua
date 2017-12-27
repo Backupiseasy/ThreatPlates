@@ -54,11 +54,12 @@ local function CreateExtensions(extended)
       absorbbar = healthbar:CreateTexture(nil, "BORDER", -6)
       absorbbar:Hide()
 
-      absorbbar.overlay = healthbar:CreateTexture(nil, "OVERLAY", -5)
---      absorbbar.overlay:SetTexture("Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\stippled-bar.tga", true, false)
---      absorbbar.overlay:SetVertexColor(0, 0, 1, 1)
+      absorbbar.overlay = healthbar:CreateTexture(nil, "Border", -4)
+--      absorbbar.overlay:SetTexture("Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\stippled-bar.tga", true, true)
+--      absorbbar.overlay:SetHorizTile(true)
 --      absorbbar.tileSize = 64
-      absorbbar.overlay:SetTexture("Interface\\RaidFrame\\Shield-Overlay", true, false);	--Tile both vertically and horizontally
+      absorbbar.overlay:SetTexture("Interface\\RaidFrame\\Shield-Overlay", true, true);	--Tile both vertically and horizontally
+      absorbbar.overlay:SetHorizTile(true)
       absorbbar.tileSize = 32
       absorbbar.overlay:Hide()
 
@@ -77,6 +78,8 @@ local function CreateExtensions(extended)
     absorbbar:SetTexture(ThreatPlates.Media:Fetch('statusbar', db.texture), true, false)
     local color = db.AbsorbColor
     absorbbar:SetVertexColor(color.r, color.g, color.b, color.a)
+--    color = db.OverlayColor
+--    absorbbar.overlay:SetVertexColor(color.r, color.g, color.b, color.a)
   elseif absorbbar then
     absorbbar.overlay:Hide()
     absorbbar.glow:Hide()
@@ -93,7 +96,7 @@ local function UpdateExtensions(extended, unitid, style)
   -- Code for absorb calculation see CompactUnitFrame.lua
   local absorb = UnitGetTotalAbsorbs(unitid) or 0
 
---  absorb = UnitHealthMax(unitid) * 0.5 -- REMOVE
+--  absorb = UnitHefealthMax(unitid) * 0.5 -- REMOVE
 
   if absorb == 0 or IGNORED_STYLES[style] then
     absorbbar.overlay:Hide()
@@ -105,23 +108,27 @@ local function UpdateExtensions(extended, unitid, style)
   local health = UnitHealth(unitid) or 0
   local health_max = UnitHealthMax(unitid) or 0
 
---  health = health_max * 0.25 -- REMOVE
+--  health = health_max * 0.75 -- REMOVE
 --  visual.healthbar:SetValue(health)
 
   local db = TidyPlatesThreat.db.profile.settings.healthbar
   local healthbar = visual.healthbar
 
   local health_pct = health / health_max
-  -- Don't fill outside the the health bar with absorbs; instead show an overabsorb glow and an overlay
-  if health + absorb < health_max then
-    local absorb_pct = absorb / health_max
+  local absorb_pct = absorb / health_max
 
+  -- Don't fill outside the the health bar with absorbs; instead show an overabsorb glow and an overlay
+  absorbbar:ClearAllPoints()
+  absorbbar.overlay:ClearAllPoints()
+  absorbbar.glow:ClearAllPoints()
+
+  if health + absorb < health_max then
     absorbbar.glow:Hide()
 
-    if db.StripedTexture or db.AlwaysFullAbsorb then
+    if db.OverlayTexture or db.AlwaysFullAbsorb then
       absorbbar.overlay:SetPoint("LEFT", healthbar, "LEFT", health_pct * healthbar:GetWidth(), 0)
       absorbbar.overlay:SetSize(absorb_pct * healthbar:GetWidth(), healthbar:GetHeight())
-      absorbbar.overlay:SetTexCoord(0, healthbar:GetWidth() / absorbbar.tileSize, 0, 1)
+      --absorbbar.overlay:SetTexCoord(0, healthbar:GetWidth() / absorbbar.tileSize, 0, 1)
       absorbbar.overlay:Show()
     else
       absorbbar.overlay:Hide()
@@ -133,8 +140,6 @@ local function UpdateExtensions(extended, unitid, style)
     absorbbar:Show()
   else
     if db.AlwaysFullAbsorb then
-      local absorb_pct = absorb / health_max
-
       -- Prevent the absorb bar extending to the left of the healthbar if absorb > health_max
       if absorb_pct > 1 then
         absorb_pct = 1
@@ -146,8 +151,8 @@ local function UpdateExtensions(extended, unitid, style)
       absorbbar.glow:Show()
 
       absorbbar.overlay:SetPoint("RIGHT", healthbar, "RIGHT", 0, 0)
-      absorbbar.overlay:SetSize(absorb_pct * healthbar:GetWidth(), healthbar:GetHeight())
-      absorbbar.overlay:SetTexCoord(0, healthbar:GetWidth() / absorbbar.tileSize, 0, 1)
+      absorbbar.overlay:SetSize(absorb_offset, healthbar:GetHeight())
+      --absorbbar.overlay:SetTexCoord(0, healthbar:GetWidth() / absorbbar.tileSize, 0, 1)
       absorbbar.overlay:Show()
 
       -- absorb + current health >  max health => just show absorb up to max health, not outside of healthbar
@@ -171,17 +176,18 @@ local function UpdateExtensions(extended, unitid, style)
       -- absorb + current health >  max health => just show absorb up to max health, not outside of healthbar
       absorb = health_max - health
       if absorb > 0 then
-        local absorb_pct = absorb / health_max
+        absorb_pct = absorb / health_max
+        local absorb_offset = absorb_pct * healthbar:GetWidth()
 
-        absorbbar:SetPoint("LEFT", healthbar, "LEFT", health_pct * healthbar:GetWidth(), 0)
-        absorbbar:SetSize(absorb_pct * healthbar:GetWidth(), healthbar:GetHeight())
-        absorbbar:SetTexCoord(health_pct, health_pct + absorb_pct, 0, 1);
+        absorbbar:SetPoint("RIGHT", healthbar, "RIGHT", 0, 0)
+        absorbbar:SetSize(absorb_offset, healthbar:GetHeight())
+        absorbbar:SetTexCoord(health_pct, health_pct + absorb_pct, 0, 1)
         absorbbar:Show()
 
-        if db.StripedTexture then
-          absorbbar.overlay:SetPoint("LEFT", healthbar, "LEFT", health_pct * healthbar:GetWidth(), 0)
-          absorbbar.overlay:SetSize(absorb_pct * healthbar:GetWidth(), healthbar:GetHeight())
-          absorbbar.overlay:SetTexCoord(0, healthbar:GetWidth() / absorbbar.tileSize, 0, 1)
+        if db.OverlayTexture then
+          absorbbar.overlay:SetPoint("RIGHT", healthbar, "RIGHT", 0, 0)
+          absorbbar.overlay:SetSize(absorb_offset, healthbar:GetHeight())
+          --absorbbar.overlay:SetTexCoord(0, healthbar:GetWidth() / absorbbar.tileSize, 0, 1)
           absorbbar.overlay:Show()
         else
           absorbbar.overlay:Hide()

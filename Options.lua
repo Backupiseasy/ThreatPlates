@@ -1471,15 +1471,24 @@ local function CreateOptionsTable()
                           desc = L["Always shows the full amount of absorbs on a unit. In overabsorp situations, the absorb bar ist shifted to the left."],
                           arg = { "settings", "healthbar", "AlwaysFullAbsorb" },
                         },
-                        StripedTexture = {
+                        OverlayTexture = {
                           name = L["Striped Texture"],
                           order = 130,
                           type = "toggle",
                           desc = L["Use a striped texture for the absorb overlay. Always enabled if full absorbs are shown."],
                           get = function(info) return GetValue(info) or db.settings.healthbar.AlwaysFullAbsorb end,
                           disabled = function() return db.settings.healthbar.AlwaysFullAbsorb end,
-                          arg = { "settings", "healthbar", "StripedTexture" },
+                          arg = { "settings", "healthbar", "OverlayTexture" },
                         },
+--                        OverlayColor = {
+--                          name = L["Striped Texture Color"],
+--                          order = 140,
+--                          type = "color",
+--                          get = GetColorAlpha,
+--                          set = SetColorAlpha,
+--                          hasAlpha = true,
+--                          arg = { "settings", "healthbar", "OverlayColor" },
+--                        },
                       },
                     },
                     BorderGroup = {
