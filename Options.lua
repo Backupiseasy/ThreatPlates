@@ -3739,18 +3739,17 @@ local function CreateOptionsTable()
               },
             },
             AuraWidget2 = {
-              name = L["Aura"],
+              name = L["Auras"],
               type = "group",
               order = 25,
               set = SetValueAuraWidget,
               args = {
-                Enable = GetEnableEntry(L["Enable Aura Widget"], L["This widget shows a unit's auras (buffs and debuffs) on its nameplate."], "AuraWidget", true),
+                Enable = GetEnableEntry(L["Enable Auras Widget"], L["This widget shows a unit's auras (buffs and debuffs) on its nameplate."], "AuraWidget", true),
                 Filtering = {
                   name = L["Filtering"],
                   type = "group",
                   inline = true,
                   order = 10,
-                  disabled = function() return not db.AuraWidget.ON end,
                   args = {
                     Show = {
                       name = L["Filter by Unit Reaction"],
@@ -3835,7 +3834,6 @@ local function CreateOptionsTable()
                           type = "input",
                           order = 2,
                           dialogControl = "MultiLineEditBox",
-                          disabled = function() return db.AuraWidget.FilterMode == "BLIZZARD" end,
                           width = "full",
                           get = function(info) return t.TTS(db.AuraWidget.FilterBySpell) end,
                           set = function(info, v)
@@ -3854,20 +3852,19 @@ local function CreateOptionsTable()
                   order = 13,
                   type = "group",
                   inline = true,
-                  disabled = function() return not db.AuraWidget.ON end,
                   args = {
                     TargetOnly = {
                       name = L["Target Only"],
                       type = "toggle",
                       order = 10,
-                      desc = L["This will toggle the aura widget to only show for your current target."],
+                      desc = L["This will toggle the auras widget to only show for your current target."],
                       arg = { "AuraWidget", "ShowTargetOnly" },
                     },
                     CooldownSpiral = {
                       name = L["Cooldown Spiral"],
                       type = "toggle",
                       order = 20,
-                      desc = L["This will toggle the aura widget to show the cooldown spiral on auras."],
+                      desc = L["This will toggle the auras widget to show the cooldown spiral on auras."],
                       arg = { "AuraWidget", "ShowCooldownSpiral" },
                     },
                     Stacks = {
@@ -3896,7 +3893,7 @@ local function CreateOptionsTable()
                   },
                 },
                 SortOrder = {
-                  name = L["Sort Order"], order = 15,	type = "group",	inline = true, disabled = function() return not db.AuraWidget.ON end,
+                  name = L["Sort Order"], order = 15,	type = "group",	inline = true,
                   args = {
                     NoSorting = {
                       name = L["None"], type = "toggle",	order = 0,	 width = "half",
@@ -3943,31 +3940,36 @@ local function CreateOptionsTable()
                   order = 20,
                   type = "group",
                   inline = true,
-                  disabled = function() return not db.AuraWidget.ON end,
                   args = {
-                    Sizing = {
-                      name = L["Sizing"],
-                      type = "group",
-                      order = 15,
-                      inline = true,
-                      disabled = function() return not db.AuraWidget.ON end,
-                      args = {
-                        Scale = GetScaleEntryWidget(L["Scale"], 1, { "AuraWidget", "scale", }),
-                      },
+--                    Sizing = {
+--                      name = L["Sizing"],
+--                      type = "group",
+--                      order = 10,
+--                      inline = true,
+--                      args = {
+--                      Scale = GetScaleEntryWidget(L["Scale"], 10, { "AuraWidget", "scale", }),
+--                      },
+--                    },
+                    Scale = GetScaleEntryDefault(10, { "AuraWidget", "scale", }),
+                    Layering = {
+                      name = L["Frame Order"],
+                      order = 20,
+                      type = "select",
+                      values = { HEALTHBAR_AURAS = L["Healthbar, Auras"], AURAS_HEALTHBAR = L["Auras, Healthbar"] },
+                      arg = { "AuraWidget", "FrameOrder" },
                     },
                     Placement = {
                       name = L["Placement"],
                       type = "group",
                       inline = true,
-                      order = 20,
-                      disabled = function() return not db.AuraWidget.ON end,
+                      order = 30,
                       args = {
                         Anchor = { name = L["Anchor Point"], order = 1, type = "select", values = t.ANCHOR_POINT, arg = { "AuraWidget", "anchor" } },
                         X = { name = L["Offset X"], order = 2, type = "range", min = -120, max = 120, step = 1, arg = { "AuraWidget", "x" }, },
                         Y = { name = L["Offset Y"], order = 3, type = "range", min = -120, max = 120, step = 1, arg = { "AuraWidget", "y" }, },
                         Spacer = GetSpacerEntry(5),
                         AlignmentH = { name = L["Horizontal Alignment"], order = 6, type = "select", values = { LEFT = L["Left-to-right"], RIGHT = L["Right-to-left"] }, arg = { "AuraWidget", "AlignmentH" } },
-                        AlignmentV = { name = L["Vertical Alignment"], order = 7, type = "select", values = { BOTTOM = L["Bottom-to-top"], TOP = L["Top-to-bottom"] }, arg = { "AuraWidget", "AlignmentV" } }
+                        AlignmentV = { name = L["Vertical Alignment"], order = 7, type = "select", values = { BOTTOM = L["Bottom-to-top"], TOP = L["Top-to-bottom"] }, arg = { "AuraWidget", "AlignmentV" } },
                       },
                     },
                   },
@@ -3977,7 +3979,6 @@ local function CreateOptionsTable()
                   order = 30,
                   type = "group",
                   inline = true,
-                  disabled = function() return not db.AuraWidget.ON or db.AuraWidget.ModeBar.Enabled end,
                   args = {
                     Help = { type = "description", order = 0, width = "full", name = L["Show auras as icons in a grid configuration."], },
                     Enable = {
@@ -3986,7 +3987,6 @@ local function CreateOptionsTable()
                       name = L["Enable"],
                       width = "full",
                       arg = { "AuraWidget", "ModeBar", "Enabled" },
-                      disabled = function() return not db.AuraWidget.ON end,
                       set = function(info, val) SetValueAuraWidget(info, false) end,
                       get = function(info) return not GetValue(info, val) end,
                     },
@@ -4000,7 +4000,7 @@ local function CreateOptionsTable()
                           name = L["Icon Style"],
                           order = 10,
                           type = "select",
-                          desc = L["This lets you select the layout style of the aura widget."],
+                          desc = L["This lets you select the layout style of the auras widget."],
                           descStyle = "inline",
                           values = { wide = L["Wide"], square = L["Square"] },
                           arg = { "AuraWidget", "ModeIcon", "Style" },
@@ -4026,10 +4026,9 @@ local function CreateOptionsTable()
                   order = 40,
                   type = "group",
                   inline = true,
-                  disabled = function() return not db.AuraWidget.ON or not db.AuraWidget.ModeBar.Enabled end,
                   args = {
                     Help = { type = "description", order = 0, width = "full", name = L["Show auras as bars (with optional icons)."], },
-                    Enable = { type = "toggle", order = 10, name = L["Enable"], width = "full", arg = { "AuraWidget", "ModeBar", "Enabled" }, disabled = function() return not db.AuraWidget.ON end, },
+                    Enable = { type = "toggle", order = 10, name = L["Enable"], width = "full", arg = { "AuraWidget", "ModeBar", "Enabled" }},
                     Appearance = {
                       name = L["Appearance"],
                       order = 30,
@@ -4224,12 +4223,19 @@ local function CreateOptionsTable()
                       name = L["Enable"],
                       order = 5,
                       type = "toggle",
-                      width = "half",
                       arg = { "ResourceWidget", "ShowBar" },
                     },
-                    BarWidth = { name = L["Bar Width"], order = 30, type = "range", min = 1, max = 500, step = 1, arg = { "ResourceWidget", "BarWidth" }, },
-                    BarHeight = { name = L["Bar Height"], order = 40, type = "range", min = 1, max = 500, step = 1, arg = { "ResourceWidget", "BarHeight" }, },
-                    BarTexture = { name = L["Foreground Texture"], order = 60, type = "select", dialogControl = "LSM30_Statusbar", values = AceGUIWidgetLSMlists.statusbar, arg = { "ResourceWidget", "BarTexture" }, },
+                    BarTexture = {
+                      name = L["Foreground Texture"],
+                      order = 10,
+                      type = "select",
+                      dialogControl = "LSM30_Statusbar",
+                      values = AceGUIWidgetLSMlists.statusbar,
+                      arg = { "ResourceWidget", "BarTexture" },
+                    },
+                    BarWidth = { name = L["Bar Width"], order = 20, type = "range", min = 1, max = 500, step = 1, arg = { "ResourceWidget", "BarWidth" }, },
+                    BarHeight = { name = L["Bar Height"], order = 30, type = "range", min = 1, max = 500, step = 1, arg = { "ResourceWidget", "BarHeight" }, },
+                    Spacer0 = GetSpacerEntry(70),
                     BorderTexture = {
                       name = L["Bar Border"],
                       order = 80,

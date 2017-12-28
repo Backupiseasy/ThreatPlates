@@ -59,7 +59,7 @@ local function GetChiTarget()
   return points, maxPoints
 end
 
-local function GetPaladinHolyPowner()
+local function GetPaladinHolyPower()
   if GetSpecialization() ~= SPEC_PALADIN_RETRIBUTION then return end
 
   local points = UnitPower("player", SPELL_POWER_HOLY_POWER)
@@ -79,7 +79,7 @@ elseif PlayerClass == "DRUID" then
   GetResourceOnTarget = GetComboPointTarget
 -- Added holy power as combo points for retribution paladin
 elseif PlayerClass == "PALADIN" then
-  GetResourceOnTarget = GetPaladinHolyPowner
+  GetResourceOnTarget = GetPaladinHolyPower
 else
   GetResourceOnTarget = function() end
 end
@@ -177,15 +177,30 @@ end
 -- Watcher Frame
 local WatcherFrame = CreateFrame("Frame", nil, WorldFrame )
 
-local function WatcherFrameHandler(frame, event, unitid)
-  --if UnitExists("target") then
+-- EVENTS:
+-- UNIT_COMBO_POINTS: -- combo points also fire UNIT_POWER
+-- UNIT_POWER: "unitID", "powerType"  -- CHI, COMBO_POINTS
+-- UNIT_DISPLAYPOWER: unitID
+-- UNIT_AURA: unitID
+-- UNIT_FLAGS: unitID
+
+local WATCH_POWER_TYPES = {
+  COMBO_POINTS = true,
+  CHI = true,
+  HOLY_POWER = true,
+}
+
+local function WatcherFrameHandler(frame, event, unitid, power_type)
+  -- only watch for player events
+  if unitid ~= "player" then return end
+  if event == "UNIT_POWER" and not WATCH_POWER_TYPES[power_type] then return end
+
   local guid = UnitGUID("target")
   if guid then
     local widget = WidgetList[guid]
     if widget then
-      local unit = widget.unit
-      if unit then
-        UpdateWidgetFrame(widget, unit)
+      if widget.unit then
+        UpdateWidgetFrame(widget, widget.unit)
       end
     end				-- To update all, use: for guid, widget in pairs(WidgetList) do UpdateWidgetFrame(widget) end
   end
@@ -207,10 +222,10 @@ end
 
 local function EnableWatcher()
   WatcherFrame:SetScript("OnEvent", WatcherFrameHandler)
-  WatcherFrame:RegisterEvent("UNIT_COMBO_POINTS")
+  --WatcherFrame:RegisterEvent("UNIT_COMBO_POINTS")
   WatcherFrame:RegisterEvent("UNIT_POWER")
   WatcherFrame:RegisterEvent("UNIT_DISPLAYPOWER")
-  WatcherFrame:RegisterEvent("UNIT_AURA")
+  --WatcherFrame:RegisterEvent("UNIT_AURA")
   WatcherFrame:RegisterEvent("UNIT_FLAGS")
   watcherIsEnabled = true
 end
@@ -222,15 +237,15 @@ local function DisableWatcher()
 end
 
 local function enabled()
-  local active = TidyPlatesThreat.db.profile.comboWidget.ON
+  local db = TidyPlatesThreat.db.profile.comboWidget
 
-  if active then
-    if not watcherIsEnabled then EnableWatcher() end
-  else
+  if not (db.ON or db.ShowInHeadlineView) then
     if watcherIsEnabled then DisableWatcher()	end
+  else
+    if not watcherIsEnabled then EnableWatcher() end
   end
 
-  return active
+  return db.ON
 end
 
 local function EnabledInHeadlineView()
@@ -259,6 +274,7 @@ local function CreateWidgetFrame(parent)
   frame._Hide = frame.Hide
   frame.Hide = function() ClearWidgetContext(frame); frame:_Hide() end
 
+  -- should not be necessary
   if not watcherIsEnabled then EnableWatcher() end
   return frame
 end

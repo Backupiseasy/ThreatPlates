@@ -214,7 +214,7 @@ local function SetHealthbarColor(unit)
       -- Unit is marked
       local db_raidicon = db.settings.raidicon
       c = db_raidicon.hpMarked[unit.raidIcon]
-    elseif db.questWidget.ModeHPBar and ShowQuestUnit(unit) and IsQuestUnit(unit) then
+    elseif ShowQuestUnit(unit) and IsQuestUnit(unit) then
       -- Unit is quest target
       c = db.questWidget.HPBarColor
     else
@@ -253,7 +253,7 @@ local function SetHealthbarColor(unit)
     local db_raidicon = db.settings.raidicon
     if unit.isMarked and db_raidicon.hpColor then
       c = db_raidicon.hpMarked[unit.raidIcon]
-    elseif db.questWidget.ModeHPBar and ShowQuestUnit(unit) and IsQuestUnit(unit) then
+    elseif ShowQuestUnit(unit) and IsQuestUnit(unit) then
       -- small bug here: tapped targets should not be quest marked!
       c = db.questWidget.HPBarColor
     elseif db.healthColorChange then

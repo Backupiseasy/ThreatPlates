@@ -644,21 +644,21 @@ local function Disable()
 end
 
 local function enabled()
-  local active = TidyPlatesThreat.db.profile.AuraWidget.ON
+  local db = TidyPlatesThreat.db.profile.AuraWidget
 
-	if active then
-		if not isAuraEnabled then
-			Enable()
-			isAuraEnabled = true
-		end
+	if not (db.ON or db.ShowInHeadlineView) then
+    if isAuraEnabled then
+      Disable()
+      isAuraEnabled = false
+    end
 	else
-		if isAuraEnabled then
-			Disable()
-			isAuraEnabled = false
-		end
-	end
+    if not isAuraEnabled then
+      Enable()
+      isAuraEnabled = true
+    end
+  end
 
-	return active
+	return db.ON
 end
 
 local function EnabledInHeadlineView()
@@ -955,6 +955,12 @@ local function UpdateAuraWidgetLayout(widget_frame)
       frame:ClearAllPoints()
       frame:SetPoint(align_layout[1], widget_frame, pos_x, pos_y)
 
+      if db.FrameOrder == "HEALTHBAR_AURAS" then
+        frame:SetFrameLevel(frame:GetParent():GetFrameLevel() - 2)
+      else
+        frame:SetFrameLevel(frame:GetParent():GetFrameLevel() + 4)
+      end
+
       UpdateAuraFrame(frame)
     end
 
@@ -1211,7 +1217,11 @@ local function CreateAuraWidget(plate)
 
 	-- Custom Code III
 	--------------------------------------
-  frame:SetFrameLevel(plate:GetFrameLevel() - 1)
+  if TidyPlatesThreat.db.profile.AuraWidget.FrameOrder == "HEALTHBAR_AURAS" then
+    frame:SetFrameLevel(plate:GetFrameLevel() - 2)
+  else
+    frame:SetFrameLevel(plate:GetFrameLevel() + 4)
+  end
 	frame:SetSize(128, 32)
 	frame.AuraFrames = {}
   --UpdateWidgetConfig(frame)

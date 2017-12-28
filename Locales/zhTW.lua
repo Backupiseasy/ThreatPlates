@@ -32,6 +32,30 @@ Blacksalsify
 L[". You have installed an older or incompatible version of TidyPlates: "] = "。目前安裝的 TidyPlates 是舊的或不相容的版本："
 L[ [=[:
 ---------------------------------------
+|cff89F559Threat Plates|r v8.4 introduced a new default look and feel (currently shown). Do you want to switch to this new look and feel?
+
+You can revert your decision by changing the default look and feel again in the options dialog (under General - Healthbar View - Default Settings).
+
+Note: Some of your custom settings may get overwritten if you switch back and forth.]=] ] = [=[---------------------------------------
+|cff89F559威力血條|r Threat Plates v8.4 使用全新的外觀和風格 (正是目前所顯示的)。是否要切換成這種外觀和風格，做為新的預設血條?
+
+若改變心意了，可以在選項視窗中更改回來 (從一般設定 > 血條檢視 > 預設設定)。
+
+請注意：切換時某些自訂的設定可能會恢復為預設值。]=]
+L[ [=[:
+---------------------------------------
+|cff89F559Threat Plates|r v8.4 introduced a new default look and feel (currently shown). Do you want to switch to this new look and feel?
+
+You can revert your decision by changing the default look and feel again in the options dialog (under Nameplate Settings - Healthbar View - Default Settings).
+
+Note: Some of your custom settings may get overwritten if you switch back and forth.]=] ] = [=[---------------------------------------
+|cff89F559威力血條|r Threat Plates v8.4 使用全新的外觀和風格 (正是目前所顯示的)。是否要切換成這種外觀和風格，做為新的預設血條?
+
+若改變心意了，可以在選項視窗中更改回來 (從血條設定 > 血條檢視 > 預設設定)。
+
+請注意：切換時某些自訂的設定可能會恢復為預設值。]=]
+L[ [=[:
+---------------------------------------
 |cff89F559Threat Plates|r v8.4 introduces a new default look and feel (currently shown). Do you want to switch to this new look and feel?
 
 None of your custom settings will be changed. You can always use '/tptp classic-design' or '/tptp 8.4-design' to revert your decision later on.]=] ] = [=[:
@@ -65,6 +89,10 @@ Note: Some of your custom settings will change to their default value if you swi
 任何時候都可以在選項視窗中更改設定 (從血條設定 > 血條檢視 > 預設設定)。
 
 請注意：切換時某些自訂的設定可能會恢復為預設值。]=]
+L[ [=[:
+----------------------------------------------------------
+|cff89F559Threat Plates|r v8.6 is no longer a theme of TidyPlates, but a standalone addon that does no longer require TidyPlates. Please enable only one of these two nameplate addons, otherwise two overlapping nameplates will be shown for  units.]=] ] = [=[----------------------------------------------------------
+|cff89F559威力血條|r Threat Plates v8.6 不再是 TidyPlates 的血條外觀主題，而是獨立運作的插件，不再需要和 TidyPlates 一起使用。請載入其中一個血條插件即可，否則會同時顯示兩種血條並且重疊在一起。]=]
 L[ [=[:
 ---------------------------------------
 Would you like to
@@ -180,6 +208,7 @@ L["Army of the Dead Ghoul"] = "食屍鬼大軍"
 L["Art Options"] = "美術圖案選項"
 L["Aura"] = "光環"
 L["Aura 2.0"] = "光環 2.0"
+L["Aura Icon"] = "光環圖示"
 L["Background Color"] = "背景顏色"
 L["Background Color:"] = "背景顏色"
 L["Background Opacity"] = "背景不透明度"
@@ -245,6 +274,7 @@ L["Coloring"] = "色彩"
 L["Colors"] = "顏色"
 L["Column Limit"] = "行數限制"
 L["Combo Points"] = "連擊點數"
+L["Configuration Mode"] = "設定模式"
 L["Cooldown Spiral"] = "倒數轉圈動畫"
 L["Copied!"] = "已複製!"
 L["Copy"] = "複製"
@@ -305,6 +335,7 @@ L["Enable"] = "啟用"
 L["Enable Adjustments"] = "啟用調整"
 L["Enable Alpha Threat"] = "啟用仇恨值透明度"
 L["Enable Arena Widget"] = "啟用競技場套件"
+L["Enable Aura Widget"] = "啟用光環套件"
 L["Enable Aura Widget 2.0"] = "啟用光環套件 2.0"
 L["Enable Blizzard 'On-Target' Fading"] = "啟用暴雪 '非當前目標' 淡出"
 L["Enable Boss Mods Widget"] = "啟用首領模組套件"
@@ -378,6 +409,7 @@ L["Friendly Units"] = "友方單位"
 L["Friendly Units in Combat"] = "友方單位戰鬥中"
 L["Friends & Guild Members"] = "好友 & 公會成員"
 L["Gas Cloud"] = "毒氣雲"
+L["General"] = "一般設定"
 L["General Colors"] = "一般顏色"
 L["General Nameplate Settings"] = "一般血條設定"
 L["General Settings"] = "一般設定"
@@ -620,6 +652,7 @@ L["Sort by overall duration in ascending order."] = "依據整體持續時間升
 L["Sort by time left in ascending order."] = "依據剩餘時間升冪排序。"
 L["Sort in ascending alphabetical order."] = "依據英文字母升冪排序。"
 L["Sort Order"] = "排列順序"
+L["Spacing"] = "間距"
 L["Spec Roles"] = "專精角色類型"
 L["Special Effects"] = "特殊效果"
 L["Spell Icon"] = "法術圖示"
@@ -696,6 +729,7 @@ L["This widget shows a quest icon above unit nameplates or colors the nameplate 
 L["This widget shows a stealth icon on nameplates of units that can detect stealth."] = "這個套件會在能夠偵測到的隱形單位血條上顯示隱形圖示。"
 L["This widget shows a unit's auras (buffs and debuffs) on its nameplate."] = "這個套件會在血條上顯示單位的光環 (增益和減益效果)。"
 L["This widget shows auras from boss mods on your nameplate (since patch 7.2, hostile nameplates only in instances and raids)."] = "這個套件會在你的血條上顯示來自於首領模組的光環 (自從魔獸 7.2 更新後，副本內只有敵方血條能使用插件)。"
+L["This widget shows auras from boss mods on your nameplates (since patch 7.2, hostile nameplates only in instances and raids)."] = "這個套件會在血條上顯示來自首領模組的光環 (從魔獸世界 7.2 版開始，副本和團隊中插件只能作用於敵方血條)。"
 L["This widget shows class icons on nameplates of players."] = "這個套件會在玩家血條上顯示職業圖示。"
 L["This widget shows icons for friends, guild members, and faction on nameplates."] = "這個套件會在血條上顯示好友、公會成員和陣營圖示。"
 L["This widget shows information about your target's resource on your target nameplate. The resource bar's color is derived from the type of resource automatically."] = "這個套件會在當前目標血條上顯示目標的資源，會依據資源類型自動變換資源條的顏色。"
@@ -718,6 +752,7 @@ L["Threat System"] = "仇恨值系統"
 L["Tidy Plates Fading"] = "Tidy 血條淡出"
 L["Time Left"] = "剩餘時間"
 L["Time Text Offset"] = "時間文字位置"
+L["Toggle on Target"] = "對當前目標開啟/關閉測試"
 L["Toggling"] = "切換"
 L["Top-to-bottom"] = "由上到下"
 L["Totem Alpha"] = "圖騰透明度"

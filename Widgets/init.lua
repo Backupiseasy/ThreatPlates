@@ -76,7 +76,7 @@ local function OnInitialize(plate, theme)
     for name,v in pairs(ThreatPlatesWidgets.list) do
       local widget = widget_list[name]
 
-      if v.enabled() then
+      if v.enabled() or v.EnabledInHeadlineView() then
         if not widget then
           widget = v.create(plate) -- UpdateConfig should/must be called in create()
           --widget.TP_Widget = true -- mark ThreatPlates widgets

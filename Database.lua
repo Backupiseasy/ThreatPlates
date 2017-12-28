@@ -278,20 +278,49 @@ local function MigrateCustomTextShow(profile_name, profile)
   end
 end
 
+local function MigrateAuraWidget(profile_name, profile)
+  if DatabaseEntryExists(profile, { "debuffWidget" }) then
+    --TidyPlatesThreat.db.global.MigrationLog["AuraWidget"] = "ON = " .. tostring(profile.AuraWidget.ON) .. " and ShowInHeadlineView = " .. tostring(profile.AuraWidget.ShowInHeadlineView)
+    if not profile.AuraWidget.ON and not profile.AuraWidget.ShowInHeadlineView then
+      profile.AuraWidget = profile.AuraWidget or {}
+      profile.AuraWidget.ModeIcon = profile.AuraWidget.ModeIcon or {}
+
+      profile.AuraWidget.FilterMode = profile.debuffWidget.mode
+      profile.AuraWidget.ModeIcon.Style = profile.debuffWidget.style
+      profile.AuraWidget.ShowTargetOnly = profile.debuffWidget.targetOnly
+      profile.AuraWidget.ShowCooldownSpiral = profile.debuffWidget.cooldownSpiral
+      profile.AuraWidget.ShowFriendly = profile.debuffWidget.showFriendly
+      profile.AuraWidget.ShowEnemy = profile.debuffWidget.showEnemy
+      profile.AuraWidget.scale = profile.debuffWidget.scale
+
+      if profile.debuffWidget.displays then
+        profile.AuraWidget.FilterByType = ThreatPlates.CopyTable(profile.debuffWidget.displays)
+      end
+
+      if profile.debuffWidget.filter then
+        profile.AuraWidget.FilterBySpell = ThreatPlates.CopyTable(profile.debuffWidget.filter)
+      end
+
+      -- DatabaseEntryDelete(profile, { "debuffWidget" })
+    end
+  end
+end
+
 ---- Settings in the SavedVariables file that should be migrated and/or deleted
 local DEPRECATED_SETTINGS = {
-  NamesColor = { MigrateNamesColor, },  -- settings.name.color
-  CustomTextShow = { MigrateCustomTextShow, }, -- settings.customtext.show
-  BlizzFadeA = { MigrationBlizzFadeA, }, -- blizzFadeA.toggle and blizzFadeA.amount
-  TargetScale= { MigrationTargetScale, "8.5.0" }, -- nameplate.scale.Target/NoTarget
+  NamesColor = { MigrateNamesColor, },                        -- settings.name.color
+  CustomTextShow = { MigrateCustomTextShow, },                -- settings.customtext.show
+  BlizzFadeA = { MigrationBlizzFadeA, },                      -- blizzFadeA.toggle and blizzFadeA.amount
+  TargetScale = { MigrationTargetScale, "8.5.0" },            -- nameplate.scale.Target/NoTarget
+  --AuraWidget = { MigrateAuraWidget, "8.6.0" },                -- disabled until someone requests it
   AlphaFeatures = { "alphaFeatures" },
   AlphaFeatureHeadlineView = { "alphaFeatureHeadlineView" },
   AlphaFeatureAuraWidget2= { "alphaFeatureAuraWidget2" },
-  -- { "alphaFriendlyNameOnly" },
-  -- { "HeadlineView", "blizzFading" },    -- in release 8.6 (removed in 8.5.1)
-  -- { "HeadlineView", "blizzFadingAlpha"},-- in release 8.6 (removed in 8.5.1)
-  -- { "HeadlineView", "name", "width" },  -- in release 8.6 (removed in 8.5.0)
-  -- { "HeadlineView", "name", "height" }, -- in release 8.6 (removed in 8.5.0)
+  AlphaFriendlyNameOnly = { "alphaFriendlyNameOnly" },
+  HVBlizzFarding = { "HeadlineView", "blizzFading" },         -- (removed in 8.5.1)
+  HVBlizzFadingAlpha = { "HeadlineView", "blizzFadingAlpha"}, -- (removed in 8.5.1)
+  HVNameWidth = { "HeadlineView", "name", "width" },          -- (removed in 8.5.0)
+  HVNameHeight = { "HeadlineView", "name", "height" },       -- (removed in 8.5.0)
   -- { "debuffWidget" }, -- in release 8.7 (removed in 8.6.0)
   -- { "OldSettings" }, -- in release 8.7 (removed in 8.7.0)
 }
@@ -321,38 +350,6 @@ local function MigrateDatabase(current_version)
     end
   end
 end
-
--- convert current aura widget settings to aura widget 2.0
---local function ConvertAuraWidget1(profile_name, profile)
---  local old_setting = profile.debuffWidget
---  ThreatPlates.Print (L"xxxxProfile "] .. profile_name .. L": Converting settings from aura widget to aura widget 2.0 ..."])
---  if old_setting and not profile.AuraWidget then
---    ThreatPlates.Print (L"Profile "] .. profile_name .. L": Converting settings from aura widget to aura widget 2.0 ..."])
---    profile.AuraWidget = {}
---    local new_setting = profile.AuraWidget
---    if not new_setting.ModeIcon then
---      new_setting.ModeIcon = {}
---    end
---
---    new_setting.scale = old_setting.scale
---    new_setting.FilterMode = old_setting.style
---    new_setting.FilterMode = old_setting.mode
---    new_setting.ModeIcon.Style = old_setting.style
---    new_setting.ShowTargetOnly = old_setting.targetOnly
---    new_setting.ShowCooldownSpiral = old_setting.cooldownSpiral
---    new_setting.ShowFriendly = old_setting.showFriendly
---    new_setting.ShowEnemy = old_setting.showEnemy
---
---    if old_setting.filter then
---      new_setting.FilterBySpell = ThreatPlates.CopyTable(old_setting.filter)
---    end
---    if old_setting.displays then
---      new_setting.FilterByType = ThreatPlates.CopyTable(old_setting.displays)
---    end
---    old_setting.ON = false
---    print ("debuffWidget: ", profile.debuffWidget.ON)
---  end
---end
 
 -----------------------------------------------------
 -- External

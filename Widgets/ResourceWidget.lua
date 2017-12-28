@@ -7,15 +7,17 @@ local ThreatPlates = NAMESPACE.ThreatPlates
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
-local RGB = ThreatPlates.RGB
 local format = format
 local ceil = ceil
+
 -- WoW functions
---local IsInInstance = IsInInstance
 local UnitPowerMax = UnitPowerMax
 local UnitPower = UnitPower
 local UnitPowerType = UnitPowerType
 local PowerBarColor = PowerBarColor
+local SPELL_POWER_MANA = SPELL_POWER_MANA
+local UnitGUID = UnitGUID
+local CreateFrame = CreateFrame
 
 local WidgetList = {}
 local WatcherIsEnabled = false
@@ -27,46 +29,59 @@ local WatcherIsEnabled = false
 local function UpdateSettings(frame)
   local db = TidyPlatesThreat.db.profile.ResourceWidget
 
-  frame:ClearAllPoints()
   frame:SetPoint("CENTER", frame:GetParent(), db.x, db.y)
+  frame:SetSize(db.BarWidth, db.BarHeight)
+  frame:SetFrameLevel(frame:GetParent():GetFrameLevel() + 3)
 
   local bar = frame.Bar
   if db.ShowBar then
     bar:SetStatusBarTexture(ThreatPlates.Media:Fetch('statusbar', db.BarTexture))
-  --  bar:GetStatusBarTexture():SetHorizTile(false)
-  --  bar:GetStatusBarTexture():SetVertTile(false)
-    bar:SetSize(db.BarWidth, db.BarHeight)
-    bar:ClearAllPoints()
-    bar:SetPoint("CENTER", frame)
+
+    bar:SetAllPoints()
+    bar:SetFrameLevel(frame:GetFrameLevel())
+    bar:SetMinMaxValues(0, 100)
 
     local border = frame.Border
     local offset = db.BorderOffset
-    border:ClearAllPoints()
-    border:SetPoint("TOPLEFT", bar, "TOPLEFT", -offset, offset)
-    border:SetPoint("BOTTOMRIGHT", bar, "BOTTOMRIGHT", offset, -offset)
-    border:SetBackdrop({
-      bgFile = ThreatPlates.Media:Fetch('statusbar', db.BarTexture),
-      edgeFile = ThreatPlates.Media:Fetch('border', db.BorderTexture),
-      tile = false, tileSize = 0, edgeSize = db.BorderEdgeSize,
-      insets = { left = offset, right = offset, top = offset, bottom = offset }
-    })
+    --border:SetBackdrop(BACKDROP)
+
+    local backdrop = border:GetBackdrop()
+    local bar_texture = ThreatPlates.Media:Fetch('statusbar', db.BarTexture)
+    local border_texture = ThreatPlates.Media:Fetch('border', db.BorderTexture)
+    if backdrop.bgFile ~= bar_texture or backdrop.edgeFile ~= border_texture or backdrop.edgeSize ~= db.BorderEdgeSize or backdrop.insets.left ~= offset then
+      border:SetBackdrop({
+          bgFile = bar_texture,
+          edgeFile = border_texture,
+          edgeSize = db.BorderEdgeSize,
+          insets = { left = offset, right = offset, top = offset, bottom = offset }
+      })
+    end
+
+    local offset_x = db.BarWidth + 2 * offset
+    local offset_y = db.BarHeight + 2 * offset
+    if border:GetWidth() ~= offset_x or border:GetHeight() ~= offset_y  then
+      border:SetSize(offset_x, offset_y)
+      border:SetPoint("CENTER", bar, "CENTER", 0, 0)
+      border:SetFrameLevel(frame.Bar:GetFrameLevel())
+    end
+
     bar:Show()
   else
-    bar:_Hide()
+    bar:Hide()
   end
 
   local text = frame.Text
   if db.ShowText then
-    local font = ThreatPlates.Media:Fetch('font', db.Font)
-    text:SetFont(font, db.FontSize)
+    text:SetFont(ThreatPlates.Media:Fetch('font', db.Font), db.FontSize)
     text:SetJustifyH("CENTER")
     text:SetShadowOffset(1, -1)
     text:SetMaxLines(1)
     local font_color = db.FontColor
     text:SetTextColor(font_color.r, font_color.g, font_color.b)
+    text:SetAllPoints()
     text:Show()
   else
-    text:_Hide()
+    text:Hide()
   end
 end
 
@@ -160,37 +175,33 @@ local POWER_FUNCTIONS = {
 local function UpdateWidgetFrame(frame, unit)
   local db = TidyPlatesThreat.db.profile.ResourceWidget
 
-  --local reaction = UnitIsFriend("player", "target")
   local show = false
-
-    if unit.reaction == "FRIENDLY" then
-      show = db.ShowFriendly
-    else
-      local t = unit.type
-      if t == "PLAYER" then
-        show = db.ShowEnemyPlayer
-      elseif t == "NPC" then
-        local b, r = unit.isBoss, unit.isRare
-        if b or r then
-          show = db.ShowEnemyBoss
+  if unit.reaction == "FRIENDLY" then
+    show = db.ShowFriendly
+  else
+    local t = unit.type
+    if t == "PLAYER" then
+      show = db.ShowEnemyPlayer
+    elseif t == "NPC" then
+      local b, r = unit.isBoss, unit.isRare
+      if b or r then
+        show = db.ShowEnemyBoss
 --        elseif e then
 --          local in_instance, _ = IsInInstance()
 --          show = (not in_instance and db.ShowEnemyBoss) or (in_instance and db.ShowEnemyNPC)
-        else
-          show = db.ShowEnemyNPC
-        end
+      else
+        show = db.ShowEnemyNPC
       end
     end
+  end
 
   if not show then
     frame:_Hide()
     return
   end
 
-  local powerType, powerToken, altR, altG, altB = UnitPowerType("target");
+  local powerType, powerToken, altR, altG, altB = UnitPowerType("target")
   local power_func = POWER_FUNCTIONS[powerToken]
---  print ("Power Type: ", powerType, powerToken)
---  print (UnitPower("target"), UnitPowerMax("target"))
   if UnitPowerMax("target") == 0 or (db.ShowOnlyAltPower and power_func) then
     frame:_Hide()
     return
@@ -245,15 +256,16 @@ local function UpdateWidgetFrame(frame, unit)
         local color = db.BorderColor
         border:SetBackdropBorderColor(color.r, color.g, color.b, color.a)
       end
+      bar:Show()
     else
-      bar:_Hide()
+      bar:Hide()
     end
 
-    local text = frame.Text
     if db.ShowText then
-      text:SetText(text_value)
+      frame.Text:SetText(text_value)
+      frame.Text:Show()
     else
-      text:_Hide()
+      frame.Text:Hide()
     end
 
     frame:Show()
@@ -265,18 +277,18 @@ end
 -- Context
 local function UpdateWidgetContext(frame, unit)
   local guid = unit.guid
-  frame.guid = guid
-  frame.unit = unit
 
   --Add to Widget List
   if guid then
+    if frame.guid then WidgetList[frame.guid] = nil end
+    frame.guid = guid
+    frame.unit = unit
     WidgetList[guid] = frame
   end
 
   -- Custom Code II
   --------------------------------------
   if UnitGUID("target") == guid then
---    WidgetList[guid] = frame
     UpdateWidgetFrame(frame, unit)
   else
     frame:_Hide()
@@ -297,11 +309,12 @@ end
 -- Watcher Frame
 local WatcherFrame = CreateFrame("Frame", nil, WorldFrame)
 
+-- EVENT: UNIT_POWER: "unitID", "powerType"
 local function WatcherFrameHandler(frame, event, unitid, powerType)
-  -- EVENT UNIT_POWER: "unitID", "powerType"
+  -- only watch for target units
+  if unitid ~= "target" then return end
+  --if not UnitIsUnit(unitid, "target") then return end
 
-  --if UnitExists("target") then
-  -- only watch for target unitsm
   local guid = UnitGUID("target")
   if guid then
     local widget = WidgetList[guid]
@@ -347,21 +360,44 @@ local function CreateWidgetFrame(parent)
 
   -- Custom Code III
   --------------------------------------
-  frame:SetSize(32, 32)
-  frame:SetFrameLevel(parent:GetFrameLevel() + 3)
+  frame.Text = frame:CreateFontString(nil, "OVERLAY")
+  frame.Bar = CreateFrame("StatusBar", nil, frame)
+  frame.Border = CreateFrame("Frame", nil, frame.Bar)
 
-  local text = frame:CreateFontString(nil, "OVERLAY")
-  frame.Text = text
-  text:SetAllPoints()
+  local db = TidyPlatesThreat.db.profile.ResourceWidget
+  frame:SetPoint("CENTER", frame:GetParent(), db.x, db.y)
+  frame:SetSize(db.BarWidth, db.BarHeight)
+  frame:SetFrameLevel(frame:GetParent():GetFrameLevel() + 3)
 
-  local bar = CreateFrame("StatusBar", nil, frame)
-  frame.Bar = bar
+  local bar = frame.Bar
+  bar:SetStatusBarTexture(ThreatPlates.Media:Fetch('statusbar', db.BarTexture))
+  bar:SetAllPoints()
+  bar:SetFrameLevel(frame:GetFrameLevel())
   bar:SetMinMaxValues(0, 100)
 
-  local border = CreateFrame("Frame", nil, bar)
-  frame.Border = border
+  local border = frame.Border
+  local offset = db.BorderOffset
+  border:SetBackdrop({
+    bgFile = ThreatPlates.Media:Fetch('statusbar', db.BarTexture),
+    edgeFile = ThreatPlates.Media:Fetch('border', db.BorderTexture),
+    edgeSize = db.BorderEdgeSize,
+    insets = { left = offset, right = offset, top = offset, bottom = offset }
+  })
+  border:SetSize(db.BarWidth + 2 * offset, db.BarHeight + 2 * offset)
+  border:SetPoint("CENTER", bar, "CENTER", 0, 0)
+  border:SetFrameLevel(frame.Bar:GetFrameLevel())
 
-  UpdateSettings(frame)
+  local text = frame.Text
+  local font_color = db.FontColor
+  text:SetFont(ThreatPlates.Media:Fetch('font', db.Font), db.FontSize)
+  text:SetJustifyH("CENTER")
+  text:SetShadowOffset(1, -1)
+  text:SetMaxLines(1)
+  text:SetTextColor(font_color.r, font_color.g, font_color.b)
+  text:SetAllPoints()
+
+
+  --UpdateSettings(frame)
   frame.UpdateConfig = UpdateSettings
   --------------------------------------
   -- End Custom Code

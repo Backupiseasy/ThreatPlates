@@ -78,33 +78,34 @@ local function IsQuestUnit(unit)
 		end
 	end
 
-	local quest_type = ((quest_player or quest_area) and 1) or (quest_group and 2)
+  local quest_type = ((quest_player or quest_area) and 1) or (quest_group and 2)
 
-	return quest_type ~= false, quest_type
+  return quest_type ~= false, quest_type
 end
 
 local function ShowQuestUnit(unit)
 	local db = TidyPlatesThreat.db.profile.questWidget
 
-	local show_quest_mark = db.ON
+  local show_quest_mark = true
+  if InCombatLockdown() then
+    if db.HideInCombat then
+      show_quest_mark = false
+    elseif db.HideInCombatAttacked and unit.unitid then
+      local _, threatStatus = UnitDetailedThreatSituation("player", unit.unitid);
+      show_quest_mark = (threatStatus == nil)
+    end
+  end
 
-	if show_quest_mark then
-		if InCombatLockdown() then
-			if db.HideInCombat then
-				show_quest_mark = false
-			elseif db.HideInCombatAttacked and unit.unitid then
-				local _, threatStatus = UnitDetailedThreatSituation("player", unit.unitid);
-				show_quest_mark = (threatStatus == nil)
-			end
-		end
-
-		if IsInInstance() and db.HideInInstance then
-			show_quest_mark = false
-
-		end
-	end
+  if IsInInstance() and db.HideInInstance then
+    show_quest_mark = false
+  end
 
   return  show_quest_mark
+end
+
+local function ShowQuestUnitHealthbar(unit)
+  local db = TidyPlatesThreat.db.profile.questWidget
+  return db.ON and db.ModeHPBar and ShowQuestUnit(unit)
 end
 
 local function enabled()
@@ -148,11 +149,11 @@ end
 local function UpdateWidgetFrame(frame, unit)
 	local show, quest_type = IsQuestUnit(unit)
 
-	if ShowQuestUnit(unit) and show then
-		local db = TidyPlatesThreat.db.profile.questWidget
+  if ShowQuestUnit(unit) and show then
+    local db = TidyPlatesThreat.db.profile.questWidget
 
-		local style = unit.TP_Style
-		if style == "NameOnly" or style == "NameOnly-Unique" then
+    local style = unit.TP_Style
+    if style == "NameOnly" or style == "NameOnly-Unique" then
 			frame:SetPoint("CENTER", frame:GetParent(), db.x_hv, db.y_hv)
 		else
 			frame:SetPoint("CENTER", frame:GetParent(), db.x, db.y)
@@ -221,6 +222,6 @@ local function CreateWidgetFrame(parent)
 end
 
 ThreatPlates.IsQuestUnit = IsQuestUnit
-ThreatPlates.ShowQuestUnit = ShowQuestUnit
+ThreatPlates.ShowQuestUnit = ShowQuestUnitHealthbar
 
 ThreatPlatesWidgets.RegisterWidget("QuestWidgetTPTP", CreateWidgetFrame, false, enabled, EnabledInHeadlineView)

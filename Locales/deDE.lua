@@ -32,6 +32,32 @@ Blacksalsify
 L[". You have installed an older or incompatible version of TidyPlates: "] = ". Du hast eine ältere oder inkompatibele Version von TidyPlates installiert: "
 L[ [=[:
 ---------------------------------------
+|cff89F559Threat Plates|r v8.4 introduced a new default look and feel (currently shown). Do you want to switch to this new look and feel?
+
+You can revert your decision by changing the default look and feel again in the options dialog (under General - Healthbar View - Default Settings).
+
+Note: Some of your custom settings may get overwritten if you switch back and forth.]=] ] = [=[:
+---------------------------------------
+|cff89F559Threat Plates|r v8.4 führt ein neues Look-and-Feel als Standard ein. Dieses wird aktuell angezeigt. Willst du zu diesem Look-and-Feel als neuem Standard wechseln?
+
+Du kannst diese Einstellung im Opionendialog (unter Allgemein - Healthbar-View - Standardeinstellungen) jederzeit wieder ändern.
+
+Hinweis: Einige deiner benutzerdefinierten Einstellungen werden auf den Standardwert zurückgesetzt, wenn du mehrmals hin und her wechselst.]=]
+L[ [=[:
+---------------------------------------
+|cff89F559Threat Plates|r v8.4 introduced a new default look and feel (currently shown). Do you want to switch to this new look and feel?
+
+You can revert your decision by changing the default look and feel again in the options dialog (under Nameplate Settings - Healthbar View - Default Settings).
+
+Note: Some of your custom settings may get overwritten if you switch back and forth.]=] ] = [=[:
+---------------------------------------
+|cff89F559Threat Plates|r v8.4 führt ein neues Look-and-Feel als Standard ein. Dieses wird aktuell angezeigt. Willst du zu diesem Look-and-Feel als neuem Standard wechseln?
+
+Du kannst diese Einstellung im Opionendialog (unter Allgemein - Healthbar-View - Standardeinstellungen) jederzeit wieder ändern.
+
+Hinweis: Einige deiner benutzerdefinierten Einstellungen werden auf den Standardwert zurückgesetzt, wenn du mehrmals hin und her wechselst.]=]
+L[ [=[:
+---------------------------------------
 |cff89F559Threat Plates|r v8.4 introduces a new default look and feel (currently shown). Do you want to switch to this new look and feel?
 
 None of your custom settings will be changed. You can always use '/tptp classic-design' or '/tptp 8.4-design' to revert your decision later on.]=] ] = [=[:
@@ -65,6 +91,11 @@ Note: Some of your custom settings will change to their default value if you swi
 Du kannst diese Einstellung im Opionendialog (unter Namensplaketten-Einstellungen - Healthbar-View - Standardeinstellungen) jederzeit wieder ändern.
 
 Hinweis: Einige deiner benutzerdefinierten Einstellungen werden auf den Standardwert zurückgesetzt, wenn du mehrmals hin und her wechselst.]=]
+L[ [=[:
+----------------------------------------------------------
+|cff89F559Threat Plates|r v8.6 is no longer a theme of TidyPlates, but a standalone addon that does no longer require TidyPlates. Please enable only one of these two nameplate addons, otherwise two overlapping nameplates will be shown for  units.]=] ] = [=[:
+----------------------------------------------------------
+|cff89F559Threat Plates|r v8.6 ist kein Theme von TidyPlates mehr, sondern ein eigenständiges Addon, das TidyPlates nicht mehr benötigt. Bitte aktiviere nur eines dieser beiden Nameplate-Addons, da ansonsten zwei überlappende Namensplaketten bei Einheiten angezeigt werden.]=]
 L[ [=[:
 ---------------------------------------
 Would you like to
@@ -183,6 +214,9 @@ L["Army of the Dead Ghoul"] = "Ghul aus der Armee der Toten"
 L["Art Options"] = "Texture-Optionen"
 L["Aura"] = "Auras"
 L["Aura 2.0"] = "Aura 2.0"
+L["Aura Icon"] = "Aura-Symbol"
+L["Auras"] = "Auren"
+L["Auras, Healthbar"] = "Auren, Gesundheitsleiste"
 L["Background Color"] = "Hintergrundfarbe"
 L["Background Color:"] = "Hintergrundfarbe:"
 L["Background Opacity"] = "Hintergrund-Transparenz"
@@ -206,7 +240,7 @@ L["Bone Spike"] = "Knochenstachel"
 L["Border Color:"] = "Randfarbe:"
 L["Border Texture"] = "Rand-Textur"
 L["Borders"] = "Rand"
-L["Boss Mods"] = "Boss Mods"
+L["Boss Mods"] = "Boss-Mods"
 L["Bosses"] = "Bosse"
 L["Bottom-to-top"] = "Unten nach oben"
 L["By Class"] = "Klasse"
@@ -248,6 +282,7 @@ L["Coloring"] = "Farben"
 L["Colors"] = "Farben"
 L["Column Limit"] = "Spaltenobergrenze"
 L["Combo Points"] = "Combo-Punkte"
+L["Configuration Mode"] = "Konfigurationsmodus"
 L["Cooldown Spiral"] = "Cooldown-Spirale"
 L["Copied!"] = "Kopiert!"
 L["Copy"] = "Kopieren"
@@ -308,7 +343,9 @@ L["Enable"] = "Einschalten"
 L["Enable Adjustments"] = "Anpassungen einschalten"
 L["Enable Alpha Threat"] = "Anpassung des Alphawerts bei Bedrohung einschalten"
 L["Enable Arena Widget"] = "Arena-Widget einschalten"
+L["Enable Aura Widget"] = "Aura-Widget einschalten"
 L["Enable Aura Widget 2.0"] = "Aura-Widget 2.0 einschalten"
+L["Enable Auras Widget"] = "Auren-Widget einschalten"
 L["Enable Blizzard 'On-Target' Fading"] = "Blizzards 'Am-Ziel'-Verblassen einschalten"
 L["Enable Boss Mods Widget"] = " Boss-Mods-Widget einschalten"
 L["Enable Class Icons Widget"] = "Klassensymbole-Widget einschalten"
@@ -365,6 +402,7 @@ L["Force Headline View while Out-of-Combat"] = "Headline-View außerhalb des Kam
 L["Force Healthbar on Target"] = "Gesundheitsleiste beim Ziel erzwingen"
 L["Force View By Status"] = "View erzwingen bei Status"
 L["Foreground Texture"] = "Vordergrundtextur"
+L["Frame Order"] = "Frame-Reihenfolge"
 L["Friend"] = "Freund"
 L["Friendly & Neutral Units"] = "Freundliche & neutrale Einheiten"
 L["Friendly ames Color"] = "Namen-Farbe für Freunde"
@@ -381,6 +419,7 @@ L["Friendly Units"] = "Freundliche Einheiten"
 L["Friendly Units in Combat"] = "Freundliche Einheiten im Kampf"
 L["Friends & Guild Members"] = "Freunde & Gildenmitglieder"
 L["Gas Cloud"] = "Gaswolke"
+L["General"] = "Allgemein"
 L["General Colors"] = "Allgemeine Farben"
 L["General Nameplate Settings"] = "Allgemeine Namensplaketteneinstellungen"
 L["General Settings"] = "Allgemeine Einstellungen"
@@ -399,6 +438,7 @@ L["Healthbar View X"] = "Healthbar-View X"
 L["Healthbar View Y"] = "Healthbar-View Y"
 L["Healthbar X"] = "Healthbar X"
 L["Healthbar Y"] = "Healthbar Y"
+L["Healthbar, Auras"] = "Gesundheitsleiste, Auren"
 L["Hide Friendly Units"] = "Freundliche Einheiten verstecken"
 L["Hide Healthbars"] = "Gesundheitsleisten verstecken"
 L["Hide in Combat"] = "Im Kampf verstecken"
@@ -596,7 +636,7 @@ L["Show shadow with text."] = "Text mit Schatten anzeigen."
 L["Show Skull Icon"] = "Totenkopfsymbol anzeigen"
 L["Show Spell Icon"] = "Zaubersymbol anzeigen"
 L["Show Spell Text"] = "Zaubertext anzeigen"
-L["Show stack count as overlay on aura icon."] = "Anzahl der Stapel als Overlay über dem Aurasymbol anzeigen."
+L["Show stack count as overlay on aura icon."] = "Zeigt die Anzahl der Stapel einer Aura auf Aurasymbolen an."
 L["Show Target"] = "Ziel anzeigen"
 L["Show Target Mark Icon in Headline View"] = "Zielmarkierungssymbol im Headline-View anzeigen"
 L["Show Target Mark Icon in Healthbar View"] = "Zielmarkierungssymbol im Healthbar-View anzeigen"
@@ -623,6 +663,7 @@ L["Sort by overall duration in ascending order."] = "Sortiert nach Gesamtdauer i
 L["Sort by time left in ascending order."] = "Sortiert nach verbleibender Zeit in aufsteigender Reihenfolge."
 L["Sort in ascending alphabetical order."] = "Sortiert aufsteigend in alphabetischer Reihenfolge."
 L["Sort Order"] = "Sortierungsreihenfolge"
+L["Spacing"] = "Zwischenraum"
 L["Spec Roles"] = "Spezialisierung"
 L["Special Effects"] = "Besondere Effekte"
 L["Spell Icon"] = "Zaubersymbol"
@@ -673,6 +714,7 @@ L["Thick Outline, Monochrome"] = "Dicke Rahmenlinie, einfarbig"
 L["This allows you to save friendly player class information between play sessions or nameplates going off the screen. |cffff0000(Uses more memory)"] = "This allows you to save friendly player class information between play sessions or nameplates going off the screen. |cffff0000(Uses more memory)"
 L["This lets you select the layout style of the aura widget."] = "Hiermit kann der Stil des Aura-Widget-Layouts ausgewählt werden."
 L["This lets you select the layout style of the aura widget. (requires /reload)"] = "Hier wird die Art des Layouts für Auren ausgewählt (erfordert /reload)."
+L["This lets you select the layout style of the auras widget."] = "Hier wird die Art des Layouts für das Auren-Widget ausgewählt."
 L["This option allows you to control whether a spell's icon is hidden or shown on castbars."] = "Diese Einstellung ermöglicht es dir zu bestimmen, ob das Symbol des Zaubers an der Zauberleiste versteckt oder angezeigt werden soll."
 L["This option allows you to control whether a spell's name is hidden or shown on castbars."] = "Diese Einstellung ermöglicht es dir zu bestimmen, ob der Name des Zaubers an der Zauberleiste versteckt oder angezeigt werden soll."
 L["This option allows you to control whether a unit's health is hidden or shown on nameplates."] = "Diese Einstellung ermöglicht es dir zu bestimmen, ob die Gesundheit der Einheit an Namensplaketten versteckt oder angezeigt werden soll."
@@ -699,6 +741,7 @@ L["This widget shows a quest icon above unit nameplates or colors the nameplate 
 L["This widget shows a stealth icon on nameplates of units that can detect stealth."] = "Dieses Widget zeigt ein Verstohlenheitssymbol an den Namensplaketten von Einheiten an, die Verstohlenheit entdecken können."
 L["This widget shows a unit's auras (buffs and debuffs) on its nameplate."] = "Dieses Widget zeigt die Auren (Buffs und Debuffs) einer Einheit an ihrer Namensplakette an."
 L["This widget shows auras from boss mods on your nameplate (since patch 7.2, hostile nameplates only in instances and raids)."] = "Dieses Widget zeigt die Auren von Boss-Mods auf deinen Namensplaketten an (seit Patch 7.2 nur noch gegnerische Namensplaktetten in Instanzen und Raids)."
+L["This widget shows auras from boss mods on your nameplates (since patch 7.2, hostile nameplates only in instances and raids)."] = "Dieses Widget zeigt die Auren von Boss-Mods auf deinen Namensplaketten an (seit Patch 7.2 in Instanzen und Raids nur noch feindliche Namensplaktetten)."
 L["This widget shows class icons on nameplates of players."] = "Dieses Widget zeigt Klassensymbole an den Namensplaketten von Spielern an."
 L["This widget shows icons for friends, guild members, and faction on nameplates."] = "Dieses Widget zeigt Symbole für Freunde, Gildenmitglieder und Franktion an Namensplaketten an."
 L["This widget shows information about your target's resource on your target nameplate. The resource bar's color is derived from the type of resource automatically."] = "Dieses Widget zeigt Informationen über die Ressourcen deines Ziels an ihrer Namensplakette an. Die Farbe der Ressourcenleiste wird automatisch auf Basis des Ressourcentyps bestimmt."
@@ -709,18 +752,21 @@ L["This will allow you to add additional scaling changes to specific mob types."
 L["This will allow you to disable threat art on target marked units."] = "Hiermit wird die Bedrohungstextur bei Einheiten mit Zielmarkierung ausgeschaltet."
 L["This will allow you to disable threat scale changes on target marked units."] = "Hiermit wird die Skalierung nach Bedrohung bei Einheiten mit Zielmarkierung ausgeschaltet."
 L["This will allow you to disabled threat alpha changes on target marked units."] = "Hiermit wird der Alphawert nach Bedrohung bei Einheiten mit Zielmarkierung ausgeschaltet."
-L["This will color the aura based on its type (poison, disease, magic, curse) - for Icon Mode the icon border is colored, for Bar Mode the bar itself."] = "Hiermit wird die Aura basierend auf ihrem Typ (Gift, Krankheit, Magie, Fluch) eingefärbt - im Symbolmodus wird der Symbolrand eingefärbt, im Leistenmodus die Leiste selbst."
+L["This will color the aura based on its type (poison, disease, magic, curse) - for Icon Mode the icon border is colored, for Bar Mode the bar itself."] = "Färbt Auren basierend auf ihrem Typ ein (Gift, Krankheit, Magie, Fluch). Im Symbolmodus wird der Symbolrand eingefärbt, im Leistenmodus die Leiste selbst."
 L["This will format text to a simpler format using M or K for millions and thousands. Disabling this will show exact HP amounts."] = "Hiermit wird der Text verkürzt dargestellt mittels M oder K für Millionen bwz. Tausend. Wenn ausgeschaltet, werden exakte HP-Werte angezeigt."
 L["This will format text to show both the maximum hp and current hp."] = "Hierdurch werden sowohl die maximalen als auch die aktuellen Lebenspunkte angezeigt."
 L["This will format text to show hp as a value the target is missing."] = "Hierdurch werden die fehlenden Lebenspunkte als Wert angezeigt."
 L["This will toggle the aura widget to only show for your current target."] = "This will toggle the aura widget to only show for your current target."
 L["This will toggle the aura widget to show the cooldown spiral on auras."] = "Hiermit wird die Cooldown-Spirale auf Auren eingeschaltet."
 L["This will toggle the aura widget to show the cooldown spiral on auras. (requires /reload)"] = "Hiermit wird die Cooldown-Spirale auf Auren eingeschaltet (erfordert /reload)."
+L["This will toggle the auras widget to only show for your current target."] = "Zeigt Auren nur auf deinem aktuellen Ziel an."
+L["This will toggle the auras widget to show the cooldown spiral on auras."] = "Zeigt eine Cooldown-Spirale auf den Auren an."
 L["Threat Glow"] = "Leuchteffekt bei Bedrohung"
 L["Threat System"] = "Bedrohungssystem"
 L["Tidy Plates Fading"] = "Tidy-Plates-Ausblenden"
 L["Time Left"] = "Verbleibende Zeit"
 L["Time Text Offset"] = "Versatz des Zeittextes"
+L["Toggle on Target"] = "Auf dem Ziel umschalten"
 L["Toggling"] = "Umschalten"
 L["Top-to-bottom"] = "Oben nach unten"
 L["Totem Alpha"] = "Totem-Alphawert"
