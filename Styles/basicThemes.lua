@@ -105,6 +105,7 @@ local function Create(self,name)
       y = db.castbar.y,
       anchor = "CENTER",
       orientation = "HORIZONTAL",
+      show = db.castbar.show,
     },
     name = {
       typeface = ThreatPlates.Media:Fetch('font', db.name.typeface),

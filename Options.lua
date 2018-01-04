@@ -1,5 +1,5 @@
-local _, ns = ...
-local t = ns.ThreatPlates
+local _, Addon = ...
+local t = Addon.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -13,10 +13,16 @@ local string = string
 local table = table
 local tonumber = tonumber
 local select = select
+local type = type
 
 -- WoW APIs
 local CLASS_SORT_ORDER = CLASS_SORT_ORDER
 local GetSpellInfo = GetSpellInfo
+local InCombatLockdown = InCombatLockdown
+local SetCVar = SetCVar
+local GetCVar = GetCVar
+local GetCVarBool = GetCVarBool
+local IsInInstance = IsInInstance
 
 -- ThreatPlates APIs
 local LibStub = LibStub
@@ -145,38 +151,55 @@ local function SetValueChar(info, value)
   t.Update()
 end
 
-local function GetCvar(info)
-  local value = GetCVar(info.arg)
-  if value == "1" then
-    return true
-  else
-    return false
-  end
+local function GetCVarTPTP(info)
+  return tonumber(GetCVar(info.arg))
 end
 
-local function SetCvar(info)
-	if InCombatLockdown() then
-		t.Print("We're unable to change this while in combat", true)
-	else
-    local value = abs(GetCVar(info.arg) - 1)
-    SetCVar(info.arg, value)
-    t.Update()
-	end
+local function GetCVarBoolTPTP(info)
+  return GetCVarBool(info.arg)
 end
 
-local function GetWoWCVar(cvar)
-  return (GetCVar(cvar) == "1")
-end
-
-local function SetWoWCVar(cvar, value)
+local function SetCVarTPTP(info, value)
   if InCombatLockdown() then
     t.Print("We're unable to change this while in combat", true)
   else
-    SetCVar(cvar, (value and 1) or 0)
+    SetCVar(info.arg, value)
     t.Update()
   end
 end
 
+local function SetCVarBoolTPTP(info, value)
+  if InCombatLockdown() then
+    t.Print("We're unable to change this while in combat", true)
+  else
+    if type(info) == "table" then
+      info = info.arg
+    end
+    SetCVar(info, (value and 1) or 0)
+    t.Update()
+  end
+end
+
+local function SyncGameSettings(info, val)
+  if InCombatLockdown() then
+    t.Print("We're unable to change this while in combat", true)
+  else
+    SetValue(info, val)
+    TidyPlatesThreat:PLAYER_REGEN_ENABLED()
+  end
+end
+
+local function SyncGameSettingsWorld(info, val)
+  if InCombatLockdown() then
+    t.Print("We're unable to change this while in combat", true)
+  else
+    SetValue(info, val)
+    local isInstance, instanceType = IsInInstance()
+    if isInstance then
+      TidyPlatesThreat:PLAYER_ENTERING_WORLD()
+    end
+  end
+end
 -- Colors
 
 local function GetColor(info)
@@ -259,7 +282,7 @@ local function SetUnitVisibilitySetting(info, value)
   if type(unit_visibility.Show) == "boolean" then
     unit_visibility.Show = value
   else
-    SetWoWCVar(unit_visibility.Show, value)
+    SetCVarBoolTPTP(unit_visibility.Show, value)
   end
   TidyPlatesInternal:ForceUpdate()
 end
@@ -549,6 +572,20 @@ local function GetTransparencyEntryThreat(name, pos, setting, func_disabled)
   return GetTransparencyEntry(name, pos, setting, func_disabled, true)
 end
 
+local function GetPlacementEntry(name, pos, setting)
+  local entry = {
+    name = name,
+    order = pos,
+    type = "range",
+    min = -120,
+    max = 120,
+    step = 1,
+    arg = setting,
+  }
+
+  return entry
+end
+
 local function GetPlacementEntryTheme(pos, setting, hv_mode)
   local x_name, y_name
   if hv_mode == true then
@@ -724,6 +761,13 @@ local function GetFontEntryTheme(pos, widget_info, func_disabled)
   return entry
 end
 
+local function GetFontEntry(name, pos, widget_info)
+  local entry = GetFontEntryTheme(pos, widget_info)
+  entry.name = name
+
+  return entry
+end
+
 local function GetBoundariesEntry(pos, widget_info, func_disabled)
   local entry = {
     name = L["Text Boundaries"],
@@ -751,7 +795,7 @@ local function AddLayoutOptions(args, pos, widget_info)
   args.Placement = GetPlacementEntryWidget(pos + 20, widget_info, true)
 end
 
-local function RaidMarksOptions()
+local function CreateRaidMarksSettings()
   local options =  {
     name = L["Target Markers"],
     type = "group",
@@ -771,14 +815,14 @@ local function RaidMarksOptions()
             width = "full",
           },
           Enable = {
-            name = L["Show Target Mark Icon in Healthbar View"],
+            name = L["Show in Healthbar View"],
             order = 2,
             type = "toggle",
             width = "double",
             arg = { "settings", "raidicon", "show" },
           },
           EnableHV = {
-            name = L["Show Target Mark Icon in Headline View"],
+            name = L["Show in Headline View"],
             order = 3,
             type = "toggle",
             descStyle = "inline",
@@ -813,7 +857,6 @@ local function RaidMarksOptions()
         inline = true,
         get = GetColor,
         set = SetColor,
-        disabled = function() return not (db.settings.raidicon.hpColor or db.HeadlineView.UseRaidMarkColoring) end,
         args = {
           STAR = {
             type = "color",
@@ -1053,7 +1096,7 @@ local function CreateHeadlineViewShowEntry()
       order = pos,
       type = "group",
       inline = true,
-      disabled = function() return not (GetWoWCVar("nameplateShowAll") and TidyPlatesThreat.db.profile.HeadlineView.ON) end,
+      disabled = function() return not (GetCVarBool("nameplateShowAll") and TidyPlatesThreat.db.profile.HeadlineView.ON) end,
       args = {},
     }
 
@@ -1080,7 +1123,6 @@ local function CreateUnitGroupsVisibility(args, pos)
       order = pos,
       type = "group",
       inline = true,
-      disabled = function() return not (GetWoWCVar("nameplateShowAll") and GetWoWCVar(value.Disabled)) end,
       args = {},
     }
 
@@ -1099,8 +1141,7 @@ local function CreateUnitGroupsVisibility(args, pos)
   end
 end
 
-
-local function CreateTabGeneralSettings()
+local function CreateVisibilitySettings()
   local args = {
     name = L["Visibility"],
     type = "group",
@@ -1112,18 +1153,18 @@ local function CreateTabGeneralSettings()
         type = "group",
         inline = true,
         width = "full",
-        get = GetCvar,
-        set = SetCvar,
+        get = GetCVarBoolTPTP,
+        set = SetCVarBoolTPTP,
         args = {
           Description = GetDescriptionEntry(L["These options allow you to control which nameplates are visible within the game field while you play."]),
           Spacer0 = GetSpacerEntry(1),
           AllUnits = { name = L["Enable Nameplates"], order = 10, type = "toggle", arg = "nameplateShowAll" },
           AllUnitsDesc = { name = L["Show all nameplates (CTRL-V)."], order = 15, type = "description", width = "double", },
           Spacer1 = { type = "description", name = "", order = 19, },
-          AllFriendly = { name = L["Enable Friendly"], order = 20, type = "toggle", arg = "nameplateShowFriends", disabled = function() return not GetWoWCVar("nameplateShowAll") end },
+          AllFriendly = { name = L["Enable Friendly"], order = 20, type = "toggle", arg = "nameplateShowFriends" },
           AllFriendlyDesc = { name = L["Show friendly nameplates (SHIFT-V)."], order = 25, type = "description", width = "double", },
           Spacer2 = { type = "description", name = "", order = 29, },
-          AllHostile = { name = L["Enable Enemy"], order = 30, type = "toggle", arg = "nameplateShowEnemies", disabled = function() return not GetWoWCVar("nameplateShowAll") end },
+          AllHostile = { name = L["Enable Enemy"], order = 30, type = "toggle", arg = "nameplateShowEnemies" },
           AllHostileDesc = { name = L["Show enemy nameplates (ALT-V)."], order = 35, type = "description", width = "double", },
           Header = { type = "header", order = 40, name = "", },
           ShowBlizzardFriendlyNameplates = {
@@ -1145,7 +1186,6 @@ local function CreateTabGeneralSettings()
         order = 50,
         inline = true,
         width = "full",
-        disabled = function() return not GetWoWCVar("nameplateShowAll") end,
         args = {
           HideNormal = { name = L["Normal Units"], order = 1, type = "toggle", arg = { "Visibility", "HideNormal" }, },
           HideElite = { name = L["Rares & Elites"], order = 2, type = "toggle", arg = { "Visibility", "HideElite" }, },
@@ -1160,34 +1200,12 @@ local function CreateTabGeneralSettings()
           },
         },
       },
-      TidyPlates = {
-        name = L["Tidy Plates Fading"],
-        type = "group",
-        order = 60,
-        inline = true,
-        args = {
-          Enable = {
-            type = "toggle",
-            order = 1,
-            name = "Enable",
-            desc = L["This option allows you to control whether nameplates should fade in or out when displayed or hidden."],
-            descStyle = "inline",
-            width = "full",
-            set = function(info, val)
-              SetValue(info, val)
-              if db.tidyplatesFade then TidyPlatesInternal:EnableFadeIn() else TidyPlatesInternal:DisableFadeIn() end
-            end,
-            arg = { "tidyplatesFade" },
-          },
-        },
-      },
       Clickthrough = {
         name = L["Nameplate Clickthrough"],
         type = "group",
         order = 70,
         inline = true,
         width = "full",
-        disabled = function() return not GetWoWCVar("nameplateShowAll") end,
         args = {
           ClickthroughFriendly = {
             name = L["Friendly Units"],
@@ -1213,42 +1231,741 @@ local function CreateTabGeneralSettings()
           },
         },
       },
---      Blizzard = {
---        name = L["Blizzard Nameplates"],
---        type = "group",
---        order = 80,
---        inline = true,
---        width = "full",
---        disabled = function() return not GetWoWCVar("nameplateShowAll") end,
---        args = {
---          HideFriendlyNameplates = {
---            --name = L["Hide Friendly Units"],
---            name = L["Blizzard Nameplates for Friendly Units"],
---            order = 50,
---            type = "toggle",
---            width = "double",
---            set = SetValue,
---            get = GetValue,
---            desc = L["Use Blizzard default nameplates for friendly nameplates and disable ThreatPlates for these units."],
---            arg = { "ShowFriendlyBlizzardNameplates" },
---          },
---        },
---      },
     },
   }
-  --      OpenBlizzardSettings = {
-  --        name = L["Open Blizzard Settings"],
-  --        order = 90,
-  --        type = "execute",
-  --        func = function()
-  --          InterfaceOptionsFrame_OpenToCategory(_G["InterfaceOptionsNamesPanel"])
-  --          LibStub("AceConfigDialog-3.0"):Close("Tidy Plates: Threat Plates");
-  --        end,
-  --      },
-
   CreateUnitGroupsVisibility(args.args, 20)
 
   return args
+end
+
+local function CreateBlizzardSettings()
+-- nameplateGlobalScale
+  -- rmove /tptp command for stacking, not-stacking nameplates
+  -- don'T allow to change all cvar related values in Combat, either by using the correct CVarTPTP function
+  -- or by disabling the options in this case
+
+  local entry = {
+    name = L["Blizzard Settings"],
+    order = 140,
+    type = "group",
+    set = SetCVarTPTP,
+    get = GetCVarTPTP,
+    -- diable while in Combat - überprüfen
+    args = {
+      Note = {
+        name = L["Note"],
+        order = 1,
+        type = "group",
+        inline = true,
+        args = {
+          Header = {
+            name = L["Changing these options may interfere with other nameplate addons or Blizzard default nameplates as console variables (CVars) are changed."],
+            order = 1,
+            type = "description",
+            width = "full",
+          },
+        },
+      },
+      Motion = {
+        name = L["Motion & Overlap"],
+        order = 10,
+        type = "group",
+        inline = true,
+        args = {
+          Motion = {
+            name = L["Movement Model"],
+            order = 10,
+            type = "select",
+            desc = L["Defines the movement/collision model for nameplates."],
+            values = { Overlapping = L["Overlapping"], Stacking = L["Stacking"] },
+            set = function(info, value) SetCVarTPTP(info, (value == "Overlapping" and "0") or "1") end,
+            get = function(info) return (GetCVarBoolTPTP(info) and "Stacking") or "Overlapping" end,
+            arg = "nameplateMotion",
+          },
+          MotionSpeed = {
+            name = L["Motion Speed"],
+            order = 20,
+            type = "range",
+            min = 0,
+            max = 1,
+            step = 0.01,
+            desc = L["Controls the rate at which nameplate animates into their target locations [0.0-1.0]."],
+            arg = "nameplateMotionSpeed",
+          },
+          OverlapH = {
+            name = L["Horizontal Overlap"],
+            order = 30,
+            type = "range",
+            min = 0,
+            max = 1.5,
+            step = 0.01,
+            isPercent = true,
+            desc = L["Percentage amount for horizontal overlap of nameplates."],
+            arg = "nameplateOverlapH",
+          },
+          OverlapV = {
+            name = L["Vertical Overlap"],
+            order = 40,
+            type = "range",
+            min = 0,
+            max = 1.5,
+            step = 0.01,
+            isPercent = true,
+            desc = L["Percentage amount for vertical overlap of nameplates."],
+            arg = "nameplateOverlapV",
+          },
+        },
+      },
+      Distance = {
+        name = L["Distance"],
+        order = 20,
+        type = "group",
+        inline = true,
+        args = {
+          MaxDistance = {
+            name = L["Max Distance"],
+            order = 10,
+            type = "range",
+            min = 0,
+            max = 100,
+            step = 1,
+            width = "double",
+            desc = L["The max distance to show nameplates."],
+            arg = "nameplateMaxDistance",
+          },
+          MaxDistanceBehindCam = {
+            name = L["Max Distance Behind Camera"],
+            order = 20,
+            type = "range",
+            min = 0,
+            max = 100,
+            step = 1,
+            width = "double",
+            desc = L["The max distance to show the target nameplate when the target is behind the camera."],
+            arg = "nameplateTargetBehindMaxDistance",
+          },
+        },
+      },
+      Insets = {
+        name = L["Insets"],
+        order = 30,
+        type = "group",
+        inline = true,
+        args = {
+          OtherTopInset = {
+            name = L["Non-Self Top Inset"],
+            order = 10,
+            type = "range",
+            min = 0,
+            max = 0.20,
+            step = 0.01,
+            isPercent = true,
+            desc = L["The inset from the top (in screen percent) that the non-self nameplates are clamped to."],
+            arg = "nameplateOtherTopInset",
+          },
+          OtherBottomInset = {
+            name = L["Non-Self Bottom Inset"],
+            order = 20,
+            type = "range",
+            min = 0,
+            max = 0.20,
+            step = 0.01,
+            isPercent = true,
+            desc = L["The inset from the bottom (in screen percent) that the non-self nameplates are clamped to."],
+            arg = "nameplateOtherBottomInset",
+          },
+          LargeTopInset = {
+            name = L["Large Top Inset"],
+            order = 30,
+            type = "range",
+            min = 0,
+            max = 0.25,
+            step = 0.01,
+            isPercent = true,
+            desc = L["The inset from the top (in screen percent) that large nameplates are clamped to."],
+            arg = "nameplateLargeTopInset",
+          },
+          LargeBottomInset = {
+            name = L["Large Bottom Inset"],
+            order = 40,
+            type = "range",
+            min = 0,
+            max = 0.25,
+            step = 0.01,
+            isPercent = true,
+            desc = L["The inset from the top (in screen percent) that large nameplates are clamped to."],
+            arg = "nameplateLargeBottomInset",
+          },
+        },
+      },
+      Reset = {
+        name = L["Reset"],
+        order = 40,
+        type = "group",
+        inline = true,
+        args = {
+          Reset = {
+            name = L["Reset to Defaults"],
+            order = 10,
+            type = "execute",
+            width = "double",
+            func = function()
+              if InCombatLockdown() then
+                t.Print("We're unable to change this while in combat", true)
+              else
+                local cvars = {
+                  "nameplateOtherTopInset", "nameplateOtherBottomInset", "nameplateLargeTopInset", "nameplateLargeBottomInset",
+                  "nameplateMotion", "nameplateMotionSpeed", "nameplateOverlapH", "nameplateOverlapV",
+                  "nameplateMaxDistance", "nameplateTargetBehindMaxDistance",
+                }
+                for k, v in pairs(cvars) do
+                  SetCVar(v, GetCVarDefault(v))
+                end
+                t.Update()
+              end
+            end,
+          },
+          OpenBlizzardSettings = {
+            name = L["Open Blizzard Settings"],
+            order = 20,
+            type = "execute",
+            width = "double",
+            func = function()
+              InterfaceOptionsFrame_OpenToCategory(_G["InterfaceOptionsNamesPanel"])
+              LibStub("AceConfigDialog-3.0"):Close("Tidy Plates: Threat Plates");
+            end,
+          },
+        },
+      },
+    },
+    --  ["ShowNamePlateLoseAggroFlash"] = "When enabled, if you are a tank role and lose aggro, the nameplate with briefly flash.",
+  }
+
+  return entry
+end
+
+local function CreateAutomationSettings()
+  -- Small nameplates: in combat, out of instances, ...
+  -- show names or show them automatically, complicated, lots of CVars
+  -- Additional options: disable friendly NPCs in instancesf
+  local entry = {
+    name = L["Automation"],
+    order = 15,
+    type = "group",
+    args = {
+      InCombat = {
+        name = L["Combat"],
+        order = 10,
+        type = "group",
+        inline = true,
+        set = SyncGameSettings,
+        args = {
+          FriendlyUnits = {
+            name = L["Friendly Units"],
+            order = 10,
+            type = "select",
+            width = "double",
+            values = t.AUTOMATION,
+            arg = { "Automation", "FriendlyUnits" },
+          },
+          HostileUnits = {
+            name = L["Enemy Units"],
+            order = 20,
+            type = "select",
+            width = "double",
+            values = t.AUTOMATION,
+            arg = { "Automation", "EnemyUnits" },
+          },
+          SpacerAuto = GetSpacerEntry(30),
+          ModeOoC = {
+            name = L["Headline View Out of Combat"],
+            order = 40,
+            type = "toggle",
+            width = "double",
+            set = SetValue,
+            arg = { "HeadlineView", "ForceOutOfCombat" }
+          },
+          HeadlineViewOnFriendly = {
+            name = L["Headline View on Friendly Units in Combat"],
+            order = 50,
+            type = "toggle",
+            width = "double",
+            set = SetValue,
+            arg = { "HeadlineView", "ForceFriendlyInCombat" }
+          },
+        },
+      },
+      InInstances = {
+        name = L["Instances"],
+        order = 20,
+        type = "group",
+        inline = true,
+        set = SyncGameSettingsWorld,
+        args = {
+          SmallNameplates = {
+            name = L["Small Blizzard Nameplates"],
+            order = 50,
+            type = "toggle",
+            width = "double",
+            --desc = L["Use the small version of the defaul Blizzard nameplates in instances."],
+            desc = L["Reduce the size of the default Blizzard nameplates in instances to 50%."],
+            arg = { "Automation", "SmallPlatesInInstances" },
+          },
+          HideFriendlyInInstances = {
+            name = L["Hide Friendly Nameplates"],
+            order = 60,
+            type = "toggle",
+            width = "double",
+            desc = L["Hide the Blizzard default nameplates for friendly units in instances."],
+            arg = { "Automation", "HideFriendlyUnitsInInstances" },
+          },
+        },
+      },
+      Fading = {
+        name = L["Fading"],
+        type = "group",
+        order = 30,
+        inline = true,
+        args = {
+          Enable = {
+            type = "toggle",
+            order = 1,
+            name = "Enable",
+            desc = L["This option allows you to control whether nameplates should fade in or out when displayed or hidden."],
+            descStyle = "inline",
+            width = "full",
+            set = function(info, val)
+              SetValue(info, val)
+              if db.tidyplatesFade then TidyPlatesInternal:EnableFadeIn() else TidyPlatesInternal:DisableFadeIn() end
+            end,
+            arg = { "tidyplatesFade" },
+          },
+        },
+      },
+    },
+  }
+
+  return entry
+end
+
+local function CreateCastbarOptions()
+  local entry = {
+    name = L["Castbar"],
+    type = "group",
+    order = 30,
+    set = SetThemeValue,
+    args = {
+      Toggles = {
+        name = L["Enable"],
+        type = "group",
+        inline = true,
+        order = 1,
+        args = {
+          Header = {
+            name = L["These options allow you to control whether the castbar is hidden or shown on nameplates."],
+            order = 10,
+            type = "description",
+            width = "full",
+          },
+          Enable = {
+            name = L["Show in Healthbar View"],
+            order = 20,
+            type = "toggle",
+            desc = L["These options allow you to control whether the castbar is hidden or shown on nameplates."],
+            width = "double",
+            set = function(info, val)
+              if val or db.settings.castbar.ShowInHeadlineView then
+                TidyPlatesInternal:EnableCastBars()
+              else
+                TidyPlatesInternal:DisableCastBars()
+              end
+              SetThemeValue(info, val)
+            end,
+            arg = { "settings", "castbar", "show" },
+          },
+          EnableHV = {
+            name = L["Show in Headline View"],
+            order = 30,
+            type = "toggle",
+            width = "double",
+            set = function(info, val)
+              if val or db.settings.castbar.show then
+                TidyPlatesInternal:EnableCastBars()
+              else
+                TidyPlatesInternal:DisableCastBars()
+              end
+              SetThemeValue(info, val)
+            end,
+            arg = {"settings", "castbar", "ShowInHeadlineView" },
+          },
+--          Header2 = { name = "", type = "header", order = 40, },
+--          EnableText = {
+--            name = L["Spell Text"],
+--            order = 50,
+--            type = "toggle",
+--            desc = L["This option allows you to control whether a spell's name is hidden or shown on castbars."],
+--            arg = { "settings", "spelltext", "show" },
+--          },
+--          EnableIcon = {
+--            name = L["Spell Icon"],
+--            order = 60,
+--            type = "toggle",
+--            desc = L["This option allows you to control whether a spell's icon is hidden or shown on castbars."],
+--            arg = { "settings", "spellicon", "show" },
+--          },
+        },
+      },
+      Castbar = {
+        name = L["Castbar"],
+        order = 10,
+        type = "group",
+        inline = true,
+        args = {
+          CastBarTexture = {
+            name = L["Foreground Texture"],
+            type = "select",
+            order = 10,
+            dialogControl = "LSM30_Statusbar",
+            values = AceGUIWidgetLSMlists.statusbar,
+            arg = { "settings", "castbar", "texture" },
+          },
+          BGTexture = {
+            name = L["Background Texture"],
+            type = "select",
+            order = 20,
+            dialogControl = "LSM30_Statusbar",
+            values = AceGUIWidgetLSMlists.statusbar,
+            arg = { "settings", "castbar", "backdrop" },
+          },
+          Spacer1 = GetSpacerEntry(30),
+          BGColorText = {
+            type = "description",
+            order = 40,
+            width = "single",
+            name = L["Background Color:"],
+          },
+          BGColorForegroundToggle = {
+            name = L["Same as Foreground"],
+            order = 50,
+            type = "toggle",
+            desc = L["Use the castbar's foreground color also for the background."],
+            arg = { "settings", "castbar", "BackgroundUseForegroundColor" },
+          },
+          BGColorCustomToggle = {
+            name = L["Custom"],
+            order = 60,
+            type = "toggle",
+            width = "half",
+            desc = L["Use a custom color for the castbar's background."],
+            set = function(info, val)
+              SetThemeValue(info, not val)
+            end,
+            get = function(info, val)
+              return not GetValue(info, val)
+            end,
+            arg = { "settings", "castbar", "BackgroundUseForegroundColor" },
+          },
+          BGColorCustom = {
+            name = L["Color"], type = "color",	order = 70,	get = GetColor, set = SetColor, arg = {"settings", "castbar", "BackgroundColor"},
+            width = "half",
+            disabled = function() return db.settings.castbar.BackgroundUseForegroundColor end,
+          },
+          BackgroundOpacity = {
+            name = L["Background Transparency"],
+            order = 80,
+            type = "range",
+            min = 0,
+            max = 1,
+            step = 0.01,
+            isPercent = true,
+            arg = { "settings", "castbar", "BackgroundOpacity" },
+          },
+          Spacer2 = GetSpacerEntry(90),
+          EnableText = {
+            name = L["Spell Text"],
+            order = 91,
+            type = "toggle",
+            desc = L["This option allows you to control whether a spell's name is hidden or shown on castbars."],
+            arg = { "settings", "spelltext", "show" },
+          },
+          EnableIcon = {
+            name = L["Spell Icon"],
+            order = 92,
+            type = "toggle",
+            desc = L["This option allows you to control whether a spell's icon is hidden or shown on castbars."],
+            arg = { "settings", "spellicon", "show" },
+          },
+          InterruptShield = {
+            name = L["Interrupt Shield"],
+            order = 100,
+            type = "toggle",
+            arg = { "settings", "castnostop", "ShowInterruptShield" },
+          },
+          Spacer3 = GetSpacerEntry(105),
+          CastBarBorderToggle = {
+            type = "toggle",
+            order = 110,
+            name = L["Show Border"],
+            desc = L["Shows a border around the castbar of nameplates (requires /reload)."],
+            arg = { "settings", "castborder", "show" },
+          },
+          CastBarBorder = {
+            type = "select",
+            order = 120,
+            name = L["Border Texture"],
+            values = { TP_CastBarOverlay = "Default", TP_CastBarOverlayThin = "Thin" },
+            disabled = function() return not db.settings.castborder.show end,
+            arg = { "settings", "castborder", "texture" },
+          },
+          CastBarOverlay = {
+            name = L["Interrupt Overlay"],
+            order = 130,
+            type = "toggle",
+            disabled = function() return not db.settings.castborder.show end,
+            arg = { "settings", "castnostop", "ShowOverlay" },
+          },
+          Coloring = {
+            name = L["Spell Coloring"],
+            type = "group",
+            inline = true,
+            order = 140,
+            args = {
+--              Enable = {
+--                name = L["Enable Coloring"],
+--                type = "toggle",
+--                order = 10,
+--                width = "double",
+--                arg = { "castbarColor", "toggle" },
+--              },
+              Interruptable = {
+                name = L["Interruptable"],
+                type = "color",
+                order = 20,
+--                width = "double",
+                get = GetColorAlpha,
+                set = SetColorAlpha,
+                arg = { "castbarColor" },
+              },
+--              Spacer1 = GetSpacerEntry(30),
+--              Enable2 = {
+--                name = L["Shielded Coloring"],
+--                type = "toggle",
+--                order = 40,
+--                width = "double",
+--                arg = { "castbarColorShield", "toggle" },
+--              },
+              Shielded = {
+                name = L["Non-Interruptable"],
+                type = "color",
+                order = 50,
+--                width = "double",
+                get = GetColorAlpha,
+                set = SetColorAlpha,
+                arg = { "castbarColorShield" }
+              },
+            },
+          },
+        },
+      },
+      Spellicon = {
+        name = L["Spell Icon"],
+        order = 20,
+        type = "group",
+        inline = true,
+        args = {
+          Size = GetSizeEntryTheme(90, "spellicon"),
+        },
+      },
+      Spelltext = {
+        name = L["Spell Text"],
+        order = 30,
+        type = "group",
+        inline = true,
+        args = {
+          Font = GetFontEntry(L["Font"], 10, "spelltext"),
+          Align = {
+            name = L["Alignment"],
+            order = 20,
+            type = "group",
+            inline = true,
+            args = {
+              AlignH = {
+                name = L["Horizontal Align"],
+                type = "select",
+                width = "double",
+                order = 110,
+                values = t.AlignH,
+                arg = { "settings", "spelltext", "align" },
+              },
+              AlignV = {
+                name = L["Vertical Align"],
+                type = "select",
+                width = "double",
+                order = 120,
+                values = t.AlignV,
+                arg = { "settings", "spelltext", "vertical" },
+              },
+            },
+          },
+          Boundaries = GetBoundariesEntry(30, "spelltext"),
+        },
+      },
+      Placement = {
+        name = L["Placement"],
+        type = "group",
+        inline = true,
+        order = 40,
+        args = {
+          Castbar = {
+            name = L["Castbar"],
+            order = 20,
+            type = "group",
+            inline = true,
+            args = {
+              Castbar_X_HB = {
+                name = L["Healthbar View X"],
+                order = 10,
+                type = "range",
+                min = -60,
+                max = 60,
+                step = 1,
+                set = function(info, val)
+                  local b1 = {}; b1.arg = { "settings", "castborder", "x" };
+                  local b2 = {}; b2.arg = { "settings", "castnostop", "x" };
+                  SetThemeValue(b1, val)
+                  SetThemeValue(b2, val)
+                  SetThemeValue(info, val)
+                end,
+                arg = { "settings", "castbar", "x" },
+              },
+              Castbar_Y_HB = {
+                name = L["Healthbar View Y"],
+                order = 20,
+                type = "range",
+                min = -60,
+                max = 60,
+                step = 1,
+                set = function(info, val)
+                  local b1 = {}; b1.arg = { "settings", "castborder", "y" };
+                  local b2 = {}; b2.arg = { "settings", "castnostop", "y" };
+                  SetThemeValue(b1, val)
+                  SetThemeValue(b2, val)
+                  SetThemeValue(info, val)
+                end,
+                arg = { "settings", "castbar", "y" },
+              },
+              Castbar_X_Names = GetPlacementEntry(L["Headline View X"], 30, { "settings", "castbar", "x_hv" } ),
+              Castbar_Y_Names = GetPlacementEntry(L["Headline View Y"], 40, { "settings", "castbar", "y_hv" }),
+              Spacer1 = GetSpacerEntry(50),
+              TargetOffsetX = GetPlacementEntry(L["Target Offset X"], 60, { "settings", "castbar", "x_target" } ),
+              TargetOffsetY = GetPlacementEntry(L["Target Offset Y"], 70, { "settings", "castbar", "y_target" } ),
+            },
+          },
+          Spellicon = {
+            name = L["Spell Icon"],
+            order = 20,
+            type = "group",
+            inline = true,
+            args = {
+              Spellicon_X_HB = GetPlacementEntry(L["Healthbar View X"], 150, { "settings", "spellicon", "x" }),
+              Spellicon_Y_HB = GetPlacementEntry(L["Healthbar View Y"], 160, { "settings", "spellicon", "y" }),
+              Spellicon_X_Names = GetPlacementEntry(L["Headline View X"], 170, { "settings", "spellicon", "x_hv" }),
+              Spellicon_Y_Names = GetPlacementEntry(L["Headline View Y"], 180, { "settings", "spellicon", "y_hv" }),
+            },
+          },
+          Spelltext = {
+            name = L["Spell Text"],
+            order = 30,
+            type = "group",
+            inline = true,
+            args = {
+              Spelltext_X_HB = GetPlacementEntry(L["Healthbar View X"], 60, { "settings", "spelltext", "x" }),
+              Spelltext_Y_HB = GetPlacementEntry(L["Healthbar View Y"], 70, { "settings", "spelltext", "y" }),
+              Spelltext_X_Names = GetPlacementEntry(L["Headline View X"], 80, { "settings", "spelltext", "x_hv" }),
+              Spelltext_Y_Names = GetPlacementEntry(L["Headline View Y"], 90, { "settings", "spelltext", "y_hv" }),
+            },
+          },
+        },
+      },
+      Config = {
+        name = L["Configuration Mode"],
+        order = 100,
+        type = "group",
+        inline = true,
+        args = {
+          Toggle = {
+            name = L["Toggle on Target"],
+            type = "execute",
+            order = 1,
+            width = "full",
+            func = function()
+              Addon:ConfigCastbar()
+            end,
+          },
+        },
+      },
+    },
+  }
+
+  return entry
+end
+
+local function CreateBossModsWidgetSettings()
+  local entry = {
+    name = L["Boss Mods"],
+    type = "group",
+    order = 35,
+    args = {
+      Enable = GetEnableEntry(L["Enable Boss Mods Widget"], L["This widget shows auras from boss mods on your nameplates (since patch 7.2, hostile nameplates only in instances and raids)."], "BossModsWidget", true),
+      Aura = {
+        name = L["Aura Icon"],
+        type = "group",
+        order = 10,
+        inline = true,
+        args = {
+          Font = {
+            name = L["Font"],
+            type = "group",
+            order = 10,
+            inline = true,
+            args = {
+              Font = { name = L["Typeface"], type = "select", order = 10, dialogControl = "LSM30_Font", values = AceGUIWidgetLSMlists.font, arg = { "BossModsWidget", "Font" }, },
+              FontSize = { name = L["Size"], order = 20, type = "range", min = 1, max = 36, step = 1, arg = { "BossModsWidget", "FontSize" }, },
+              FontColor = {	name = L["Color"], type = "color",	order = 30,	get = GetColor,	set = SetColorAuraWidget,	arg = {"BossModsWidget", "FontColor"},	hasAlpha = false, },
+            },
+          },
+          Layout = {
+            name = L["Layout"],
+            order = pos,
+            type = "group",
+            inline = true,
+            args = {
+              Size = GetSizeEntry(L["Size"], 10, {"BossModsWidget",  "scale" } ),
+              Spacing = { name = L["Spacing"], order = 20, type = "range", min = 0, max = 100, step = 1, arg = { "BossModsWidget", "AuraSpacing" }, },
+            },
+          } ,
+        },
+      },
+      Placement = GetPlacementEntryWidget(20, "BossModsWidget", true),
+      Config = {
+        name = L["Configuration Mode"],
+        order = 30,
+        type = "group",
+        inline = true,
+        args = {
+          Toggle = {
+            name = L["Toggle on Target"],
+            type = "execute",
+            order = 1,
+            width = "full",
+            func = function() Addon:ConfigBossModsWidget() end,
+          },
+        },
+      },
+    },
+  }
+
+  return entry
 end
 
 local function CreateSpecRoles()
@@ -1325,7 +2042,8 @@ local function CreateOptionsTable()
           type = "group",
           order = 10,
           args = {
-            GeneralSettings = CreateTabGeneralSettings(),
+            GeneralSettings = CreateVisibilitySettings(),
+            AutomationSettings = CreateAutomationSettings(),
             HealthBarView = {
               name = L["Healthbar View"],
               type = "group",
@@ -1480,15 +2198,15 @@ local function CreateOptionsTable()
                           disabled = function() return db.settings.healthbar.AlwaysFullAbsorb end,
                           arg = { "settings", "healthbar", "OverlayTexture" },
                         },
---                        OverlayColor = {
---                          name = L["Striped Texture Color"],
---                          order = 140,
---                          type = "color",
---                          get = GetColorAlpha,
---                          set = SetColorAlpha,
---                          hasAlpha = true,
---                          arg = { "settings", "healthbar", "OverlayColor" },
---                        },
+                        OverlayColor = {
+                          name = L["Striped Texture Color"],
+                          order = 140,
+                          type = "color",
+                          get = GetColorAlpha,
+                          set = SetColorAlpha,
+                          hasAlpha = true,
+                          arg = { "settings", "healthbar", "OverlayColor" },
+                        },
                       },
                     },
                     BorderGroup = {
@@ -1871,20 +2589,20 @@ local function CreateOptionsTable()
                   inline = true,
                   disabled = function() return not TidyPlatesThreat.db.profile.HeadlineView.ON  end,
                   args = {
-                    ModeOoC = {
-                      name = L["Out of Combat"],
-                      order = 1,
-                      type = "toggle",
-                      width = "double",
-                      arg = { "HeadlineView", "ForceOutOfCombat" }
-                    },
-                    ModeFriendlyInCombat = {
-                      name = L["On Friendly Units in Combat"],
-                      order = 2,
-                      type = "toggle",
-                      width = "double",
-                      arg = { "HeadlineView", "ForceFriendlyInCombat" }
-                    },
+--                    ModeOoC = {
+--                      name = L["Out of Combat"],
+--                      order = 1,
+--                      type = "toggle",
+--                      width = "double",
+--                      arg = { "HeadlineView", "ForceOutOfCombat" }
+--                    },
+--                    ModeFriendlyInCombat = {
+--                      name = L["On Friendly Units in Combat"],
+--                      order = 2,
+--                      type = "toggle",
+--                      width = "double",
+--                      arg = { "HeadlineView", "ForceFriendlyInCombat" }
+--                    },
                     ModeCNA = {
                       name = L["On Enemy Units You Cannot Attack"],
                       order = 3,
@@ -1951,264 +2669,7 @@ local function CreateOptionsTable()
                 },
               },
             },
-            CastBarSettings = {
-              name = L["Castbar"],
-              type = "group",
-              order = 30,
-              args = {
-                Toggles = {
-                  name = L["Enable"],
-                  type = "group",
-                  inline = true,
-                  order = 1,
-                  args = {
-                    Header = {
-                      name = L["These options allow you to control whether the castbar is hidden or shown on nameplates."],
-                      order = 1,
-                      type = "description",
-                      width = "full",
-                    },
-                    Enable = {
-                      name = L["Show Castbar"],
-                      order = 2,
-                      type = "toggle",
-                      desc = L["These options allow you to control whether the castbar is hidden or shown on nameplates."],
-                      --descStyle = "inline",
-                      width = "double",
-                      get = GetCvar,
-											set = function(info, val)
-                        SetCvar(info, val)
-                        if val then
-                          TidyPlatesInternal:EnableCastBars()
-                        else
-                          TidyPlatesInternal:DisableCastBars()
-                        end
-                      end,
-                      arg = "ShowVKeyCastbar",
-                    },
-                    EnableHV = {
-                      name = L["Show Castbar in Headline View"],
-                      order = 3,
-                      type = "toggle",
-                      width = "double",
-                      set = SetThemeValue,
-                      arg = {"settings", "castbar", "ShowInHeadlineView" },
-                      disabled = function() return GetCVar("ShowVKeyCastbar") == "0" end,
-                    }
-                  },
-                },
-                Textures = {
-                  name = L["Textures"],
-                  type = "group",
-                  inline = true,
-                  order = 1,
-                  disabled = function() if GetCVar("ShowVKeyCastbar") == "1" then return false else return true end end,
-                  args = {
-                    CastBarTexture = {
-                      name = L["Foreground Texture"],
-                      type = "select",
-                      order = 1,
-                      dialogControl = "LSM30_Statusbar",
-                      values = AceGUIWidgetLSMlists.statusbar,
-                      set = SetThemeValue,
-                      arg = { "settings", "castbar", "texture" },
-                    },
-                    BGTexture = {
-                      name = L["Background Texture"],
-                      type = "select",
-                      order = 10,
-                      dialogControl = "LSM30_Statusbar",
-                      values = AceGUIWidgetLSMlists.statusbar,
-                      set = SetThemeValue,
-                      arg = { "settings", "castbar", "backdrop" },
-                    },
-                    Spacer1 = GetSpacerEntry(14),
-                    BGColorText = {
-                      type = "description",
-                      order = 15,
-                      width = "single",
-                      name = L["Background Color:"],
-                    },
-                    BGColorForegroundToggle = {
-                      name = L["Same as Foreground"],
-                      order = 20,
-                      type = "toggle",
-                      desc = L["Use the castbar's foreground color also for the background."],
-                      set = SetThemeValue,
-                      arg = { "settings", "castbar", "BackgroundUseForegroundColor" },
-                    },
-                    BGColorCustomToggle = {
-                      name = L["Custom"],
-                      order = 30,
-                      type = "toggle",
-                      width = "half",
-                      desc = L["Use a custom color for the castbar's background."],
-                      set = function(info, val)
-                        SetThemeValue(info, not val)
-                      end,
-                      get = function(info, val)
-                        return not GetValue(info, val)
-                      end,
-                      arg = { "settings", "castbar", "BackgroundUseForegroundColor" },
-                    },
-                    BGColorCustom = {
-                      name = L["Color"], type = "color",	order = 35,	get = GetColor, set = SetColor, arg = {"settings", "castbar", "BackgroundColor"},
-                      width = "half",
-                      disabled = function() return db.settings.castbar.BackgroundUseForegroundColor end,
-                    },
-                    BackgroundOpacity = {
-                      name = L["Background Transparency"],
-                      order = 40,
-                      type = "range",
-                      min = 0,
-                      max = 1,
-                      step = 0.01,
-                      isPercent = true,
-                      arg = { "settings", "castbar", "BackgroundOpacity" },
-                    },
-                    Header1 = {
-                      name = L["Borders"],
-                      order = 50,
-                      type = "header",
-                    },
-                    CastBarBorderToggle = {
-                      type = "toggle",
-                      order = 60,
-                      name = L["Show Border"],
-                      desc = L["Shows a border around the castbar of nameplates (requires /reload)."],
-                      set = SetThemeValue,
-                      arg = { "settings", "castborder", "show" },
-                    },
-                    CastBarBorder = {
-                      type = "select",
-                      order = 70,
-                      name = L["Border Texture"],
-                      set = SetThemeValue,
-                      disabled = function() if db.settings.castborder.show then return false else return true end end,
-                      values = { TP_CastBarOverlay = "Default", TP_CastBarOverlayThin = "Thin" },
-                      arg = { "settings", "castborder", "texture" },
-                    },
-                    CastBarOverlay = {
-                      name = L["Show Overlay for Uninterruptable Casts"],
-                      order = 80,
-                      type = "toggle",
-                      width = "double",
-                      set = SetThemeValue,
-                      arg = { "settings", "castnostop", "ShowOverlay" },
-                      disabled = function() return not db.settings.castborder.show end
-                    },
-                  },
-                },
-                Placement = {
-                  name = L["Placement"],
-                  type = "group",
-                  inline = true,
-                  order = 20,
-                  disabled = function() if GetCVar("ShowVKeyCastbar") == "1" then return false else return true end end,
-                  args = {
-                    PlacementX = {
-                      name = L["Healthbar View X"],
-                      order = 1,
-                      type = "range",
-                      min = -60,
-                      max = 60,
-                      step = 1,
-                      set = function(info, val)
-                        local b1 = {}; b1.arg = { "settings", "castborder", "x" };
-                        local b2 = {}; b2.arg = { "settings", "castnostop", "x" };
-                        SetThemeValue(b1, val)
-                        SetThemeValue(b2, val)
-                        SetThemeValue(info, val)
-                      end,
-                      arg = { "settings", "castbar", "x" },
-                    },
-                    PlacementY = {
-                      name = L["Healthbar View Y"],
-                      order = 2,
-                      type = "range",
-                      min = -60,
-                      max = 60,
-                      step = 1,
-                      set = function(info, val)
-                        local b1 = {}; b1.arg = { "settings", "castborder", "y" };
-                        local b2 = {}; b2.arg = { "settings", "castnostop", "y" };
-                        SetThemeValue(b1, val)
-                        SetThemeValue(b2, val)
-                        SetThemeValue(info, val)
-                      end,
-                      arg = { "settings", "castbar", "y" },
-                    },
-                    HeadlineViewX = {
-                      name = L["Headline View X"],
-                      type = "range",
-                      order = 3,
-                      min = -60,
-                      max = 60,
-                      step = 1,
-                      arg = { "settings", "castbar", "x_hv" },
-                      set = SetThemeValue,
-                      disabled = function() return not db.settings.castbar.ShowInHeadlineView or (GetCVar("ShowVKeyCastbar") == "0") end
-                    },
-                    HeadlineViewY = {
-                      name = L["Headline View Y"],
-                      order = 4,
-                      type = "range",
-                      min = -60,
-                      max = 60,
-                      step = 1,
-                      arg = { "settings", "castbar", "y_hv" },
-                      set = SetThemeValue,
-                      disabled = function() return not db.settings.castbar.ShowInHeadlineView or (GetCVar("ShowVKeyCastbar") == "0") end
-                    }
-                  },
-                },
-                Coloring = {
-                  name = L["Coloring"],
-                  type = "group",
-                  inline = true,
-                  order = 30,
-                  args = {
-                    Enable = {
-                      name = L["Enable Coloring"],
-                      type = "toggle",
-                      order = 1,
-                      disabled = function() if GetCVar("ShowVKeyCastbar") == "1" then return false else return true end end,
-                      arg = { "castbarColor", "toggle" },
-                    },
-                    Interruptable = {
-                      name = L["Interruptable Casts"],
-                      type = "color",
-                      order = 2,
-                      get = GetColorAlpha,
-                      set = SetColorAlpha,
-                      disabled = function() if not db.castbarColor.toggle or GetCVar("ShowVKeyCastbar") ~= "1" then return true else return false end end,
-                      arg = { "castbarColor" },
-                    },
-                    Header1 = {
-                      type = "header",
-                      order = 3,
-                      name = "",
-                    },
-                    Enable2 = {
-                      name = L["Shielded Coloring"],
-                      type = "toggle",
-                      order = 4,
-                      disabled = function() if not db.castbarColor.toggle or GetCVar("ShowVKeyCastbar") ~= "1" then return true else return false end end,
-                      arg = { "castbarColorShield", "toggle" },
-                    },
-                    Shielded = {
-                      name = L["Uninterruptable Casts"],
-                      type = "color",
-                      order = 5,
-                      get = GetColorAlpha,
-                      set = SetColorAlpha,
-                      disabled = function() if GetCVar("ShowVKeyCastbar") ~= "1" or not db.castbarColor.toggle or not db.castbarColorShield.toggle then return true else return false end end,
-                      arg = { "castbarColorShield" }
-                    },
-                  },
-                },
-              },
-            },
+            CastBarSettings = CreateCastbarOptions(),
             Transparency = {
               name = L["Transparency"],
               type = "group",
@@ -2861,87 +3322,6 @@ local function CreateOptionsTable()
                 Boundaries = GetBoundariesEntry(40, "customtext"),
               },
             },
-            SpellText = {
-              name = L["Spell Text"],
-              type = "group",
-              order = 80,
-              args = {
-                Enable = GetEnableEntryTheme(L["Show Spell Text"], L["This option allows you to control whether a spell's name is hidden or shown on castbars."], "spelltext"),
-                Font = GetFontEntryTheme(10, "spelltext"),
-                Placement = {
-                  name = L["Placement"],
-                  order = 20,
-                  type = "group",
-                  inline = true,
-                  args = {
-                    X = {
-                      name = L["Healthbar View X"],
-                      order = 1,
-                      type = "range",
-                      set = SetThemeValue,
-                      arg = { "settings", "spelltext", "x" },
-                      max = 120,
-                      min = -120,
-                      step = 1,
-                      isPercent = false,
-                    },
-                    Y = {
-                      name = L["Healthbar View Y"],
-                      order = 2,
-                      type = "range",
-                      set = SetThemeValue,
-                      arg = { "settings", "spelltext", "y" },
-                      max = 120,
-                      min = -120,
-                      step = 1,
-                      isPercent = false,
-                    },
-                    HeadlineViewX = {
-                      name = L["Headline View X"],
-                      order = 3,
-                      type = "range",
-                      min = -120,
-                      max = 120,
-                      step = 1,
-                      arg = { "settings", "spelltext", "x_hv" },
-                      set = SetThemeValue,
-                      disabled = function() return not db.settings.castbar.ShowInHeadlineView end
-                    },
-                    HeadlineViewY = {
-                      name = L["Headline View Y"],
-                      order = 4,
-                      type = "range",
-                      min = -120,
-                      max = 120,
-                      step = 1,
-                      arg = { "settings", "spelltext", "y_hv" },
-                      set = SetThemeValue,
-                      disabled = function() return not db.settings.castbar.ShowInHeadlineView end
-                    },
-                    Spacer = GetSpacerEntry(5),
-                    AlignH = {
-                      name = L["Horizontal Align"],
-                      type = "select",
-                      width = "double",
-                      order = 6,
-                      values = t.AlignH,
-                      set = SetThemeValue,
-                      arg = { "settings", "spelltext", "align" },
-                    },
-                    AlignV = {
-                      name = L["Vertical Align"],
-                      type = "select",
-                      width = "double",
-                      order = 7,
-                      values = t.AlignV,
-                      set = SetThemeValue,
-                      arg = { "settings", "spelltext", "vertical" },
-                    },
-                  },
-                },
-                Boundaries = GetBoundariesEntry(30, "spelltext"),
-              },
-            },
             Leveltext = {
               name = L["Level Text"],
               type = "group",
@@ -3045,16 +3425,8 @@ local function CreateOptionsTable()
                 Layout = GetLayoutEntryTheme(20, "skullicon"),
               },
             },
-            SpellIcon = {
-              name = L["Spell Icon"],
-              type = "group",
-              order = 120,
-              args = {
-                Enable = GetEnableEntryTheme(L["Show Spell Icon"], L["This option allows you to control whether a spell's icon is hidden or shown on castbars."], "spellicon"),
-                Layout = GetLayoutEntryTheme(20, "spellicon", true),
-              },
-            },
-            RaidMarks = RaidMarksOptions(),
+            RaidMarks = CreateRaidMarksSettings(),
+            BlizzardSettings = CreateBlizzardSettings(),
           },
         },
         ThreatOptions = {
@@ -3066,13 +3438,6 @@ local function CreateOptionsTable()
               name = L["Enable Threat System"],
               type = "toggle",
               order = 1,
---              set = function(info, val)
---                SetValue(info, val)
---                local inInstance, iType = IsInInstance()
---                if iType == "party" or iType == "raid" or iType == "none" then
---                  db.OldSetting = val
---                end
---              end,
               arg = { "threat", "ON" }
             },
             GeneralSettings = {
@@ -3941,15 +4306,15 @@ local function CreateOptionsTable()
                   type = "group",
                   inline = true,
                   args = {
---                    Sizing = {
---                      name = L["Sizing"],
---                      type = "group",
---                      order = 10,
---                      inline = true,
---                      args = {
---                      Scale = GetScaleEntryWidget(L["Scale"], 10, { "AuraWidget", "scale", }),
---                      },
---                    },
+                    --                    Sizing = {
+                    --                      name = L["Sizing"],
+                    --                      type = "group",
+                    --                      order = 10,
+                    --                      inline = true,
+                    --                      args = {
+                    --                      Scale = GetScaleEntryWidget(L["Scale"], 10, { "AuraWidget", "scale", }),
+                    --                      },
+                    --                    },
                     Scale = GetScaleEntryDefault(10, { "AuraWidget", "scale", }),
                     Layering = {
                       name = L["Frame Order"],
@@ -4093,61 +4458,7 @@ local function CreateOptionsTable()
               },
             },
             ClassIconWidget = ClassIconsWidgetOptions(),
-            BossModsWidget = {
-              name = L["Boss Mods"],
-              type = "group",
-              order = 35,
-              args = {
-                Enable = GetEnableEntry(L["Enable Boss Mods Widget"], L["This widget shows auras from boss mods on your nameplates (since patch 7.2, hostile nameplates only in instances and raids)."], "BossModsWidget", true),
-                Aura = {
-                  name = L["Aura Icon"],
-                  type = "group",
-                  order = 10,
-                  inline = true,
-                  args = {
-                    Font = {
-                      name = L["Font"],
-                      type = "group",
-                      order = 10,
-                      inline = true,
-                      args = {
-                        Font = { name = L["Typeface"], type = "select", order = 10, dialogControl = "LSM30_Font", values = AceGUIWidgetLSMlists.font, arg = { "BossModsWidget", "Font" }, },
-                        FontSize = { name = L["Size"], order = 20, type = "range", min = 1, max = 36, step = 1, arg = { "BossModsWidget", "FontSize" }, },
-                        FontColor = {	name = L["Color"], type = "color",	order = 30,	get = GetColor,	set = SetColorAuraWidget,	arg = {"BossModsWidget", "FontColor"},	hasAlpha = false, },
-                      },
-                    },
-                    Layout = {
-                      name = L["Layout"],
-                      order = pos,
-                      type = "group",
-                      inline = true,
-                      args = {
-                        Size = GetSizeEntry(L["Size"], 10, {"BossModsWidget",  "scale" } ),
-                        Spacing = { name = L["Spacing"], order = 20, type = "range", min = 0, max = 100, step = 1, arg = { "BossModsWidget", "AuraSpacing" }, },
-                      },
-                    } ,
-                  },
-                },
-                Placement = GetPlacementEntryWidget(20, "BossModsWidget", true),
-                Config = {
-                  name = L["Configuration Mode"],
-                  order = 30,
-                  type = "group",
-                  inline = true,
-                  args = {
-                    Toggle = {
-                      name = L["Toggle on Target"],
-                      type = "execute",
-                      order = 1,
-                      width = "full",
-                      func = function()
-                        ThreatPlatesWidgets.ConfigBossModsWidget()
-                      end,
-                    },
-                  },
-                },
-              },
-            },
+            BossModsWidget = CreateBossModsWidgetSettings(),
             ComboPointWidget = {
               name = L["Combo Points"],
               type = "group",
@@ -4613,7 +4924,7 @@ local function CreateOptionsTable()
           options.args.Widgets.args.ClassIconWidget.args.Textures.args["Prev" .. k_c].image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ClassIconWidget\\" .. db.classWidget.theme .. "\\" .. CLASS_SORT_ORDER[k_c]
         end
       end,
-      values = { default = "Default", transparent = "Transparent" },
+      values = { default = "Default", transparent = "Transparent", },
       arg = { "classWidget", "theme" },
     },
   };

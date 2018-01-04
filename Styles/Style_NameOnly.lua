@@ -132,18 +132,19 @@ local function Create(self,name)
       x = db.castbar.x_hv,
       y = db.castbar.y_hv,
       anchor = "CENTER",
-      show = db.castbar.ShowInHeadlineView and db.castborder.show, -- only checked by TidyPlades after a /reload
+      show = db.castbar.ShowInHeadlineView and db.castborder.show,
     },
 
     castbar = {
-      texture = (db.castbar.ShowInHeadlineView and ThreatPlates.Art..db.castbar.texture) or EMPTY_TEXTURE,
-      backdrop = EMPTY_TEXTURE,
+      texture = (db.castbar.ShowInHeadlineView and ThreatPlates.Media:Fetch('statusbar', db.castbar.texture)) or EMPTY_TEXTURE,
+      backdrop = (db.castbar.ShowInHeadlineView and ThreatPlates.Media:Fetch('statusbar', db.castbar.backdrop, true)) or EMPTY_TEXTURE,
       width = 120,
       height = 10,
       x = db.castbar.x_hv,
       y = db.castbar.y_hv,
       anchor = "CENTER",
       orientation = "HORIZONTAL",
+      show = db.castbar.ShowInHeadlineView,
     },
 
     name = {
@@ -208,7 +209,7 @@ local function Create(self,name)
       vertical = db.spelltext.vertical,
       shadow = db.spelltext.shadow,
       flags = db.spelltext.flags,
-      show = db.spelltext.show and db.castbar.ShowInHeadlineView,
+      show = db.castbar.ShowInHeadlineView and db.spelltext.show,
     },
 
     skullicon = {

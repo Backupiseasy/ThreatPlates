@@ -57,6 +57,12 @@ ThreatPlates.FullAlign = {TOPLEFT = "TOPLEFT",TOP = "TOP",TOPRIGHT = "TOPRIGHT",
 ThreatPlates.AlignH = {LEFT = "LEFT", CENTER = "CENTER", RIGHT = "RIGHT"}
 ThreatPlates.AlignV = {BOTTOM = "BOTTOM", CENTER = "CENTER", TOP = "TOP"}
 
+ThreatPlates.AUTOMATION = {
+  NONE = "No Automation",
+  SHOW_COMBAT = "Show during Combat, Hide when Combat ends",
+  HIDE_COMBAT = "Hide when Combat starts, Show when Combat ends",
+}
+
 ----------------------------------------------------------------------------------------------------
 -- Paths
 ---------------------------------------------------------------------------------------------------
@@ -258,6 +264,12 @@ ThreatPlates.DEFAULT_SETTINGS = {
     NamePlateEnemyClickThrough = false,
     NamePlateFriendlyClickThrough = false,
     ShowFriendlyBlizzardNameplates = false,
+    Automation = {
+      FriendlyUnits = "NONE",
+      EnemyUnits = "NONE",
+      SmallPlatesInInstances = false,
+      HideFriendlyUnitsInInstances = false,
+    },
     HeadlineView = {
       ON = false,
       name = {
@@ -330,14 +342,14 @@ ThreatPlates.DEFAULT_SETTINGS = {
       HideFriendlyInCombat = false,
     },
     castbarColor = {
-      toggle = true,
+      -- toggle = true, -- removed in 8.7.0
       r = 1,
       g = 0.56,
       b = 0.06,
       a = 1
     },
     castbarColorShield = {
-      toggle = true,
+      --toggle = true,  -- removed in 8.7.0
       r = 1,
       g = 0,
       b = 0,
@@ -1410,10 +1422,10 @@ ThreatPlates.DEFAULT_SETTINGS = {
         BackgroundOpacity = 0.7, -- old default: 1,
         BackgroundColor = RGB(0, 0, 0),
         ShowAbsorbs = true,
-        AbsorbColor = RGB(255, 255, 255, 1),
+        AbsorbColor = RGB(0, 255, 255, 1),
         AlwaysFullAbsorb = false,
         OverlayTexture = true,
---        OverlayColor = RGB(0, 255, 255, 1),
+        OverlayColor = RGB(0, 128, 255, 1),
       },
       castnostop = {
         texture = "TP_CastBarLock",
@@ -1421,6 +1433,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
         y = -15,
         show = true,
         ShowOverlay = true,
+        ShowInterruptShield = false,
       },
       castborder = {
         texture = "TP_CastBarOverlayThin", -- old default: "TP_CastBarOverlay",
@@ -1438,6 +1451,8 @@ ThreatPlates.DEFAULT_SETTINGS = {
         y = -15,
         x_hv = 0,
         y_hv = -15,
+        x_target = 0,
+        y_target = -4,
         show = true,
         ShowInHeadlineView = false,
       },

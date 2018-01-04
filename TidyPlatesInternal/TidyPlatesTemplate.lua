@@ -141,6 +141,7 @@ TemplateTheme.castbar = {
 	y = -19,
 	anchor = "CENTER",
 	orientation = "HORIZONTAL",
+	show = true,
 }
 
 TemplateTheme.spelltext = {

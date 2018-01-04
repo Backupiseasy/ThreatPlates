@@ -1,6 +1,5 @@
-local addonName, addon = ...
-
--- Tidy Plates - SMILE! :-D
+local ADDON_NAME, Addon = ...
+local ThreatPlates = Addon.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------------------------
 -- Variables and References
@@ -43,18 +42,27 @@ local UnitChannelInfo, UnitCastingInfo = UnitChannelInfo, UnitCastingInfo
 local UnitPlayerControlled = UnitPlayerControlled
 
 -- Internal Data
-local Plates, PlatesVisible, PlatesFading, GUID = {}, {}, {}, {}	            	-- Plate Lists
-local PlatesByUnit = {}
+local Plates, PlatesFading = {}, {}	            	-- Plate Lists
+local PlatesVisible, PlatesByUnit, PlatesByGUID = {}, {}, {}
 local nameplate, extended, visual, carrier, plateid			    	-- Temp/Local References
 local unit, unitcache, style, stylename, unitchanged, threatborder	    			-- Temp/Local References
 local numChildren = -1                                                              -- Cache the current number of plates
 local activetheme = {}                                                              -- Table Placeholder
 local InCombat, HasTarget, HasMouseover = false, false, false					    -- Player State Data
+local LastTargetPlate
 local EnableFadeIn = true
 local ShowCastBars = true
 local EMPTY_TEXTURE = "Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\Empty"
 local ResetPlates, UpdateAll = false, false
 local OverrideFonts = false
+
+-- External references to internal data
+Addon.PlatesVisible = PlatesVisible
+Addon.PlatesByUnit = PlatesByUnit
+Addon.PlatesByGUID = PlatesByGUID
+
+-- ThreatPlates APIs
+local TidyPlatesThreat = TidyPlatesThreat
 
 -- Raid Icon Reference
 local RaidIconCoordinate = {
@@ -67,6 +75,10 @@ local RaidIconCoordinate = {
 		["CROSS"] = { x = .5, y = 0.25},
 		["SKULL"] = { x = .75, y = 0.25},
 }
+
+-- Constants
+local CASTBAR_FLASH_DURATION = 0.4
+local CASTBAR_FLASH_MIN_ALPHA = 0.4
 
 ---------------------------------------------------------------------------------------------------------------------
 -- Core Function Declaration
@@ -201,6 +213,21 @@ do
 		local castbar = CreateTidyPlatesInternalStatusbar(extended)
 		castbar.Backdrop:SetDrawLayer("BACKGROUND",-8)
 		castbar.Bar:SetDrawLayer("BACKGROUND",-7)
+    castbar.Flash = castbar:CreateAnimationGroup()
+    local anim = castbar.Flash:CreateAnimation("Alpha")
+    anim:SetOrder(1)
+    anim:SetFromAlpha(1)
+    anim:SetToAlpha(CASTBAR_FLASH_MIN_ALPHA)
+    anim:SetDuration(CASTBAR_FLASH_DURATION)
+    anim = castbar.Flash:CreateAnimation("Alpha")
+    anim:SetOrder(2)
+    anim:SetFromAlpha(CASTBAR_FLASH_MIN_ALPHA)
+    anim:SetToAlpha(1)
+    anim:SetDuration(CASTBAR_FLASH_DURATION)
+    castbar.Flash:SetScript("OnFinished", function(self)
+      self:GetParent():Hide()
+    end)
+
 		local healthbar = CreateTidyPlatesInternalStatusbar(extended)
 		healthbar.Backdrop:SetDrawLayer("BORDER",-8)
 		healthbar.Bar:SetDrawLayer("BORDER",-7)
@@ -230,10 +257,17 @@ do
 		visual.level = textFrame:CreateFontString(nil, "ARTWORK", -2)
 		-- Cast Bar Frame - Highest Frame
     visual.spellicon = castbar:CreateTexture(nil, "BACKGROUND", 7)
+    visual.castshield = castbar:CreateTexture(nil, "BACKGROUND", 5)
     visual.castnostop = castbar:CreateTexture(nil, "BACKGROUND", 2)
     visual.castborder = castbar:CreateTexture(nil, "BACKGROUND", 1)
-		visual.spelltext = castbar:CreateFontString(nil, "BACKGROUND")
-		-- Set Base Properties
+    visual.spelltext = castbar:CreateFontString(nil, "BACKGROUND")
+
+    visual.castshield:SetAtlas("nameplates-InterruptShield", true)
+    visual.castshield:SetDrawLayer("BACKGROUND", 5)
+    visual.castshield:SetPoint("CENTER", castbar, "LEFT")
+    visual.castshield:Hide()
+
+    -- Set Base Properties
 		visual.raidicon:SetTexture("Interface\\TargetingFrame\\UI-RaidTargetingIcons")
 		visual.highlight:SetAllPoints(visual.healthborder)
 		visual.highlight:SetBlendMode("ADD")
@@ -309,7 +343,7 @@ do
       end
 
 			-- Update Style/Indicators
-			if unitchanged or UpdateAll or (not style)then --
+			if unitchanged or UpdateAll or (not style) then --
 				CheckNameplateStyle()
 				UpdateIndicator_Standard()
 				UpdateIndicator_HealthBar()
@@ -361,11 +395,14 @@ do
 		unit.isTarget = false
 		unit.isMouseover = false
 		unit.unitid = plateid
+    unit.guid = UnitGUID(unitid)
 		extended.unitcache = ClearIndices(extended.unitcache)
 		extended.stylename = ""
 		extended.Active = true
 
-		visual.highlight:Hide()
+    PlatesByGUID[unit.guid] = plate
+
+    visual.highlight:Hide()
 
 		wipe(extended.unit)
 		wipe(extended.unitcache)
@@ -428,16 +465,6 @@ do
 		UpdateUnitContext(plate, unitid)
 		ProcessUnitChanges()
 		OnUpdateCastMidway(plate, unitid)
-
---    if unit.unitid and UnitIsUnit("target", unit.unitid) then
---      visual.castbar:Show()
---      visual.castnostop:Show()
---      visual.castborder:Show()
---      visual.spellicon:SetTexture(GetSpellTexture("Mondfeuer"))
---      visual.spellicon:Show()
---      visual.spelltext:SetText("Moonfire")
---      visual.spelltext:Show()
---    end
 	end
 
 	-- OnHealthUpdate
@@ -549,13 +576,12 @@ do
 	end
 
 
-        -- UpdateUnitContext: Updates Target/Mouseover
+  -- UpdateUnitContext: Updates Target/Mouseover
 	function UpdateUnitContext(plate, unitid)
-		local guid
-
 		UpdateReferences(plate)
 
 		unit.isMouseover = UnitIsUnit("mouseover", unitid)
+    --local was_target = unit.isTarget
 		unit.isTarget = UnitIsUnit("target", unitid)
 		unit.isFocus = UnitIsUnit("focus", unitid)
 
@@ -563,7 +589,31 @@ do
 
 		UpdateUnitCondition(plate, unitid)	-- This updates a bunch of properties
 
-		if activetheme.OnContextUpdate then activetheme.OnContextUpdate(extended, unit) end
+    -- Target Castbar Offset
+--    if visual.castbar:IsShown() and was_target ~= unit.isTarget then
+--      visual.castbar:ClearAllPoints()
+--      visual.castborder:ClearAllPoints()
+--      visual.castnostop:ClearAllPoints()
+--      visual.spelltext:ClearAllPoints()
+--      --visual.spellicon:ClearAllPoints()
+--
+--      if unit.isTarget then
+--        local db = TidyPlatesThreat.db.profile.settings.castbar
+--        visual.castbar:SetPoint(style.castbar.anchor or "CENTER", extended, style.castbar.x + db.x_target or 0, style.castbar.y + db.y_target or 0)
+--        visual.castborder:SetPoint(style.castborder.anchor or "CENTER", extended, style.castborder.x + db.x_target or 0, style.castborder.y + db.y_target or 0)
+--        visual.castnostop:SetPoint(style.castnostop.anchor or "CENTER", extended, style.castnostop.x + db.x_target or 0, style.castnostop.y + db.y_target or 0)
+--        visual.spelltext:SetPoint(style.spelltext.anchor or "CENTER", extended, style.spelltext.x + db.x_target or 0, style.spelltext.y + db.y_target or 0)
+--        --visual.spellicon:SetPoint(style.spellicon.anchor or "CENTER", extended, style.spellicon.x + db.x_target or 0, style.spellicon.y + db.y_target or 0)
+--      else
+--        visual.castbar:SetPoint(style.castbar.anchor or "CENTER", extended, style.castbar.x or 0, style.castbar.y or 0)
+--        visual.castborder:SetPoint(style.castborder.anchor or "CENTER", extended, style.castborder.x or 0, style.castborder.y or 0)
+--        visual.castnostop:SetPoint(style.castnostop.anchor or "CENTER", extended, style.castnostop.x or 0, style.castnostop.y or 0)
+--        visual.spelltext:SetPoint(style.spelltext.anchor or "CENTER", extended, style.spelltext.x or 0, style.spelltext.y or 0)
+--        --visual.spellicon:SetPoint(style.spellicon.anchor or "CENTER", extended, style.spellicon.x or 0, style.spellicon.y or 0)
+--      end
+--    end
+
+    if activetheme.OnContextUpdate then activetheme.OnContextUpdate(extended, unit) end
 		if activetheme.OnUpdate then activetheme.OnUpdate(extended, unit) end
 	end
 
@@ -735,8 +785,7 @@ do
 	-- UpdateIndicator_CustomAlpha: Calls the alpha delegate to get the requested alpha
 	function UpdateIndicator_CustomAlpha(event)
 		if activetheme.SetAlpha then
-			--local previousAlpha = extended.requestedAlpha
-			extended.requestedAlpha = activetheme.SetAlpha(unit) or previousAlpha or unit.alpha or 1
+			extended.requestedAlpha = activetheme.SetAlpha(unit) or unit.alpha or 1
 		else
 			extended.requestedAlpha = unit.alpha or 1
 		end
@@ -774,17 +823,14 @@ do
 		end
 	end
 
+	local function OnUpdateCastBarForward(self, elapsed)
+    self:SetValue(GetTime() * 1000)
+    -- local currentTime = GetTime() * 1000
+    --local startTime, endTime = self:GetMinMaxValues()
 
-	local function OnUpdateCastBarForward(self)
-		local currentTime = GetTime() * 1000
-		--local startTime, endTime = self:GetMinMaxValues()
-
-		--if currentTime > endTime then OnStopCasting(self)
-		--else self:SetValue(currentTime) end
-
-		self:SetValue(currentTime)
-	end
-
+    --if currentTime > endTime then OnStopCasting(self)
+    --else self:SetValue(currentTime) end
+  end
 
 	local function OnUpdateCastBarReverse(self)
 		local currentTime = GetTime() * 1000
@@ -796,19 +842,16 @@ do
 		self:SetValue((endTime + startTime) - currentTime)
 	end
 
-
-
 	-- OnShowCastbar
 	function OnStartCasting(plate, unitid, channeled)
-		UpdateReferences(plate)
-		--if not extended:IsShown() then return end
-		if not extended:IsShown() then return end
+    UpdateReferences(plate)
 
-		local castBar = extended.visual.castbar
+		if not extended:IsShown() or not style.castbar.show then return end
 
-		local name, subText, text, texture, startTime, endTime, isTradeSkill, castID, notInterruptible
+    local castBar = extended.visual.castbar
+    local name, subText, text, texture, startTime, endTime, isTradeSkill, castID, notInterruptible
 
-		if channeled then
+    if channeled then
 			name, subText, text, texture, startTime, endTime, isTradeSkill, notInterruptible = UnitChannelInfo(unitid)
 			castBar:SetScript("OnUpdate", OnUpdateCastBarReverse)
 		else
@@ -832,27 +875,31 @@ do
     castBar:SetAllColors(activetheme.SetCastbarColor(unit))
 
 		if unit.spellIsShielded then
-			   visual.castnostop:Show(); visual.castborder:Hide()
-		else visual.castnostop:Hide(); visual.castborder:Show() end
+      visual.castnostop:Show()
+      visual.castborder:Hide()
+      visual.castshield:SetShown(TidyPlatesThreat.db.profile.settings.castnostop.ShowInterruptShield)
+		else
+      visual.castnostop:Hide()
+      visual.castborder:Show()
+      visual.castshield:Hide()
+    end
 
 		UpdateIndicator_CustomScaleText()
 		UpdateIndicator_CustomAlpha()
 
 		castBar:Show()
-
 	end
 
 
 	-- OnHideCastbar
 	function OnStopCasting(plate)
-
 		UpdateReferences(plate)
 
 		if not extended:IsShown() then return end
-		local castBar = extended.visual.castbar
 
-		castBar:Hide()
-		castBar:SetScript("OnUpdate", nil)
+		local castBar = extended.visual.castbar
+    castBar:Hide()
+    castBar:SetScript("OnUpdate", nil)
 
 		unit.isCasting = false
 		UpdateIndicator_CustomScaleText()
@@ -867,11 +914,12 @@ do
 		local currentTime = GetTime() * 1000
 
 		-- Check to see if there's a spell being cast
-		if UnitCastingInfo(unitid) then OnStartCasting(plate, unitid, false)
-		else
-		-- See if one is being channeled...
-			if UnitChannelInfo(unitid) then OnStartCasting(plate, unitid, true) end
-		end
+		if UnitCastingInfo(unitid) then
+      OnStartCasting(plate, unitid, false)
+    elseif UnitChannelInfo(unitid) then
+      -- See if one is being channeled...
+      OnStartCasting(plate, unitid, true)
+    end
 	end
 
 
@@ -973,8 +1021,50 @@ do
 	end
 
 	function CoreEvents:PLAYER_TARGET_CHANGED()
-		HasTarget = UnitExists("target") == true;
-		SetUpdateAll()
+		--HasTarget = UnitExists("target") == true;
+
+--    print("PLAYER_TARGET_CHANGED: ", LastTargetPlate)
+--    print("PLAYER_TARGET_CHANGED: ", UnitName("target"), GetNamePlateForUnit("target"), GetNamePlateForUnit("target") and GetNamePlateForUnit("target").TP_Extended)
+    -- Target Castbar Offset
+    local visual, style, extended
+    if LastTargetPlate then
+      extended = LastTargetPlate.TP_Extended
+      visual = extended.visual
+      style = extended.style
+      visual.castbar:ClearAllPoints()
+      visual.castborder:ClearAllPoints()
+      visual.castnostop:ClearAllPoints()
+      visual.spelltext:ClearAllPoints()
+
+      visual.castbar:SetPoint(style.castbar.anchor or "CENTER", extended, style.castbar.x or 0, style.castbar.y or 0)
+      visual.castborder:SetPoint(style.castborder.anchor or "CENTER", extended, style.castborder.x or 0, style.castborder.y or 0)
+      visual.castnostop:SetPoint(style.castnostop.anchor or "CENTER", extended, style.castnostop.x or 0, style.castnostop.y or 0)
+      visual.spelltext:SetPoint(style.spelltext.anchor or "CENTER", extended, style.spelltext.x or 0, style.spelltext.y or 0)
+      --visual.spellicon:SetPoint(style.spellicon.anchor or "CENTER", extended, style.spellicon.x or 0, style.spellicon.y or 0)
+
+      LastTargetPlate = nil
+    end
+
+    local plate = GetNamePlateForUnit("target")
+    if plate and plate.TP_Extended then
+      extended = plate.TP_Extended
+      visual = extended.visual
+      style = extended.style
+      visual.castbar:ClearAllPoints()
+      visual.castborder:ClearAllPoints()
+      visual.castnostop:ClearAllPoints()
+      visual.spelltext:ClearAllPoints()
+      local db = TidyPlatesThreat.db.profile.settings.castbar
+      visual.castbar:SetPoint(style.castbar.anchor or "CENTER", extended, style.castbar.x + db.x_target or 0, style.castbar.y + db.y_target or 0)
+      visual.castborder:SetPoint(style.castborder.anchor or "CENTER", extended, style.castborder.x + db.x_target or 0, style.castborder.y + db.y_target or 0)
+      visual.castnostop:SetPoint(style.castnostop.anchor or "CENTER", extended, style.castnostop.x + db.x_target or 0, style.castnostop.y + db.y_target or 0)
+      visual.spelltext:SetPoint(style.spelltext.anchor or "CENTER", extended, style.spelltext.x + db.x_target or 0, style.spelltext.y + db.y_target or 0)
+      --visual.spellicon:SetPoint(style.spellicon.anchor or "CENTER", extended, style.spellicon.x + db.x_target or 0, style.spellicon.y + db.y_target or 0)
+
+      LastTargetPlate = plate
+    end
+
+    SetUpdateAll()
 	end
 
 	function CoreEvents:UNIT_HEALTH_FREQUENT(...)
@@ -1015,7 +1105,7 @@ do
 
 
 	 function CoreEvents:UNIT_SPELLCAST_STOP(...)
-		local unitid = ...
+    local unitid = ...
 		if UnitIsUnit("player", unitid) or not ShowCastBars then return end
 
 		local plate = GetNamePlateForUnit(unitid)
@@ -1047,6 +1137,32 @@ do
 		end
 	end
 
+  function CoreEvents:COMBAT_LOG_EVENT_UNFILTERED(...)
+    local timeStamp, event, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags  = ...
+
+    if (event == "SPELL_INTERRUPT") then
+      local plate = PlatesByGUID[destGUID]
+
+      if plate then
+        UpdateReferences(plate)
+
+        local castbar = visual.castbar
+        if unit.isTarget then
+          local _, class = UnitClass(sourceName)
+          if class then
+            sourceName = "|cff" .. ThreatPlates.HCC[class] .. sourceName .. "|r"
+          end
+
+          visual.spelltext:SetText(INTERRUPTED .. " [" .. sourceName .. "]")
+          castbar:Show()
+          castbar:SetValue(castbar.MaxVal)
+          castbar:SetAllColors(1, 0, 1, 1, 0, 0, 0, 1)
+          castbar.Flash:Play()
+        end
+      end
+    end
+  end
+
   -- The following events should not have worked before adjusting UnitSpellcastMidway
 	CoreEvents.UNIT_SPELLCAST_DELAYED = UnitSpellcastMidway
 	CoreEvents.UNIT_SPELLCAST_CHANNEL_UPDATE = UnitSpellcastMidway
@@ -1069,19 +1185,34 @@ do
 	for eventName in pairs(CoreEvents) do TidyPlatesCore:RegisterEvent(eventName) end
 end
 
-
-
-
 ---------------------------------------------------------------------------------------------------------------------
 --  Nameplate Styler: These functions parses the definition table for a nameplate's requested style.
 ---------------------------------------------------------------------------------------------------------------------
 do
 	-- Helper Functions
-	local function SetObjectShape(object, width, height) object:SetWidth(width); object:SetHeight(height) end
-	local function SetObjectJustify(object, horz, vert) object:SetJustifyH(horz); object:SetJustifyV(vert) end
-	local function SetObjectAnchor(object, anchor, anchorTo, x, y) object:ClearAllPoints();object:SetPoint(anchor, anchorTo, anchor, x, y) end
-	local function SetObjectTexture(object, texture) object:SetTexture(texture) end
-	local function SetObjectBartexture(obj, tex, ori, crop) obj:SetStatusBarTexture(tex); obj:SetOrientation(ori); end
+	local function SetObjectShape(object, width, height)
+    object:SetWidth(width)
+    object:SetHeight(height)
+  end
+
+  local function SetObjectJustify(object, horz, vert)
+    object:SetJustifyH(horz)
+    object:SetJustifyV(vert)
+  end
+
+  local function SetObjectAnchor(object, anchor, anchorTo, x, y)
+    object:ClearAllPoints()
+    object:SetPoint(anchor, anchorTo, anchor, x, y)
+  end
+
+  local function SetObjectTexture(object, texture)
+    object:SetTexture(texture)
+  end
+
+  local function SetObjectBartexture(obj, tex, ori, crop)
+    obj:SetStatusBarTexture(tex)
+    obj:SetOrientation(ori)
+  end
 
 	local function SetObjectFont(object,  font, size, flags)
 		if (not OverrideFonts) and font then
@@ -1089,15 +1220,16 @@ do
 		--else
 		--	object:SetFontObject("SpellFont_Small")
 		end
-	end --FRIZQT__ or ARIALN.ttf  -- object:SetFont("FONTS\\FRIZQT__.TTF", size or 12, flags)
-
+	end
 
 	-- SetObjectShadow:
 	local function SetObjectShadow(object, shadow)
 		if shadow then
 			object:SetShadowColor(0,0,0, 1)
 			object:SetShadowOffset(1, -1)
-		else object:SetShadowColor(0,0,0,0) end
+		else
+      object:SetShadowColor(0,0,0,0)
+    end
 	end
 
 	-- SetFontGroupObject
@@ -1120,11 +1252,12 @@ do
 	-- SetTextureGroupObject
 	local function SetTextureGroupObject(object, objectstyle)
 		if objectstyle then
-			if objectstyle.texture then SetObjectTexture(object, objectstyle.texture or EMPTY_TEXTURE) end
+			if objectstyle.texture then
+        SetObjectTexture(object, objectstyle.texture or EMPTY_TEXTURE)
+      end
 			object:SetTexCoord(objectstyle.left or 0, objectstyle.right or 1, objectstyle.top or 0, objectstyle.bottom or 1)
 		end
 	end
-
 
 	-- SetBarGroupObject
 	local function SetBarGroupObject(object, objectstyle, anchorTo)
@@ -1141,14 +1274,19 @@ do
 	-- Style Groups
 	local fontgroup = {"name", "level", "spelltext", "customtext"}
 
-	local anchorgroup = {"healthborder", "threatborder", "castborder", "castnostop",
-						"name",  "spelltext", "customtext", "level",
-						"spellicon", "raidicon", "skullicon", "eliteicon", "target"}
+	local anchorgroup = {
+    "healthborder", "threatborder", "castborder", "castnostop",
+		"name",  "spelltext", "customtext", "level",
+		"spellicon", "raidicon", "skullicon", "eliteicon", "target"
+  }
 
 	local bargroup = {"castbar", "healthbar"}
 
-	local texturegroup = { "castborder", "castnostop", "healthborder", "threatborder", "eliteicon",
-						"skullicon", "highlight", "target", "spellicon", }
+	local texturegroup = {
+    "castborder", "castnostop", "healthborder", "threatborder", "eliteicon",
+    "skullicon", "highlight", "target", "spellicon",
+  }
+
 --  local texturegroup = {
 --    { "castborder",   "BACKGROUND", 1 },
 --    { "castnostop",   "BACKGROUND", 2 },
@@ -1172,42 +1310,69 @@ do
 		for index = 1, #anchorgroup do
 			local objectname = anchorgroup[index]
 			local object, objectstyle = visual[objectname], style[objectname]
+
 			if objectstyle and objectstyle.show then
 				SetAnchorGroupObject(object, objectstyle, extended)
 				visual[objectname]:Show()
-			else visual[objectname]:Hide() end
+			else
+        visual[objectname]:Hide()
+      end
 		end
 
-		-- Bars
+    -- Bars
 		for index = 1, #bargroup do
 			local objectname = bargroup[index]
 			local object, objectstyle = visual[objectname], style[objectname]
-			if objectstyle then SetBarGroupObject(object, objectstyle, extended) end
-		end
-		-- Texture
+
+			if objectstyle then
+        SetBarGroupObject(object, objectstyle, extended)
+      end
+    end
+
+    -- Texture
     for index = 1, #texturegroup do
       local objectname = texturegroup[index]
       local object, objectstyle = visual[objectname], style[objectname]
+
       SetTextureGroupObject(object, objectstyle)
     end
---		for index = 1, #texturegroup do
---			local objectname = texturegroup[index][1]
---			local object, objectstyle = visual[objectname], style[objectname]
---			SetTextureGroupObject(object, objectstyle)
---      --object:SetDrawLayer(texturegroup[index][2], texturegroup[index][3])
---		end
+
 		-- Raid Icon Texture
 		if style and style.raidicon and style.raidicon.texture then
 			visual.raidicon:SetTexture(style.raidicon.texture)
       visual.raidicon:SetDrawLayer("ARTWORK", 5)
 		end
+
 		-- Font Group
 		for index = 1, #fontgroup do
 			local objectname = fontgroup[index]
 			local object, objectstyle = visual[objectname], style[objectname]
+
 			SetFontGroupObject(object, objectstyle)
 		end
-		-- Hide Stuff
+
+    visual.castbar:ClearAllPoints()
+    visual.castborder:ClearAllPoints()
+    visual.castnostop:ClearAllPoints()
+    visual.spelltext:ClearAllPoints()
+    --visual.spellicon:ClearAllPoints()
+
+    if unit.isTarget then
+      local db = TidyPlatesThreat.db.profile.settings.castbar
+      SetObjectAnchor(visual.castbar, style.castbar.anchor or "CENTER", extended, style.castbar.x + db.x_target or 0, style.castbar.y + db.y_target or 0)
+      SetObjectAnchor(visual.castborder, style.castborder.anchor or "CENTER", extended, style.castborder.x + db.x_target or 0, style.castborder.y + db.y_target or 0)
+      SetObjectAnchor(visual.castnostop, style.castnostop.anchor or "CENTER", extended, style.castnostop.x + db.x_target or 0, style.castnostop.y + db.y_target or 0)
+      SetObjectAnchor(visual.spelltext, style.spelltext.anchor or "CENTER", extended, style.spelltext.x + db.x_target or 0, style.spelltext.y + db.y_target or 0)
+      --SetObjectAnchor(visual.spellicon, style.spellicon.anchor or "CENTER", extended, style.spellicon.x + db.x_target or 0, style.spellicon.y + db.y_target or 0)
+    else
+      SetObjectAnchor(visual.castbar, style.castbar.anchor or "CENTER", extended, style.castbar.x or 0, style.castbar.y or 0)
+      SetObjectAnchor(visual.castborder, style.castborder.anchor or "CENTER", extended, style.castborder.x or 0, style.castborder.y or 0)
+      SetObjectAnchor(visual.castnostop, style.castnostop.anchor or "CENTER", extended, style.castnostop.x or 0, style.castnostop.y or 0)
+      SetObjectAnchor(visual.spelltext, style.spelltext.anchor or "CENTER", extended, style.spelltext.x or 0, style.spelltext.y or 0)
+      --SetObjectAnchor(visual.spellicon, style.spellicon.anchor or "CENTER", extended, style.spellicon.x or 0, style.spellicon.y or 0)
+    end
+
+    -- Hide Stuff
 		if not unit.isElite then visual.eliteicon:Hide() end
 		if not unit.isBoss then visual.skullicon:Hide() end
 
@@ -1226,7 +1391,7 @@ local function UseTheme(theme)
 	end
 end
 
-addon.UseTheme = UseTheme
+Addon.UseTheme = UseTheme
 
 local function GetTheme()
 	return activetheme

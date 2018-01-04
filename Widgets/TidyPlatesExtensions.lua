@@ -55,12 +55,12 @@ local function CreateExtensions(extended)
       absorbbar:Hide()
 
       absorbbar.overlay = healthbar:CreateTexture(nil, "Border", -4)
---      absorbbar.overlay:SetTexture("Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\stippled-bar.tga", true, true)
---      absorbbar.overlay:SetHorizTile(true)
---      absorbbar.tileSize = 64
-      absorbbar.overlay:SetTexture("Interface\\RaidFrame\\Shield-Overlay", true, true);	--Tile both vertically and horizontally
+      absorbbar.overlay:SetTexture("Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\Striped_Texture.tga", true, true)
       absorbbar.overlay:SetHorizTile(true)
-      absorbbar.tileSize = 32
+      --absorbbar.tileSize = 64
+--      absorbbar.overlay:SetTexture("Interface\\RaidFrame\\Shield-Overlay", true, true);	--Tile both vertically and horizontally
+--      absorbbar.overlay:SetHorizTile(true)
+--      absorbbar.tileSize = 32
       absorbbar.overlay:Hide()
 
       local absorbglow = healthbar:CreateTexture(nil, "OVERLAY", 7)
@@ -78,8 +78,8 @@ local function CreateExtensions(extended)
     absorbbar:SetTexture(ThreatPlates.Media:Fetch('statusbar', db.texture), true, false)
     local color = db.AbsorbColor
     absorbbar:SetVertexColor(color.r, color.g, color.b, color.a)
---    color = db.OverlayColor
---    absorbbar.overlay:SetVertexColor(color.r, color.g, color.b, color.a)
+    color = db.OverlayColor
+    absorbbar.overlay:SetVertexColor(color.r, color.g, color.b, color.a)
   elseif absorbbar then
     absorbbar.overlay:Hide()
     absorbbar.glow:Hide()
@@ -96,7 +96,7 @@ local function UpdateExtensions(extended, unitid, style)
   -- Code for absorb calculation see CompactUnitFrame.lua
   local absorb = UnitGetTotalAbsorbs(unitid) or 0
 
---  absorb = UnitHefealthMax(unitid) * 0.5 -- REMOVE
+--  absorb = UnitHealthMax(unitid) * 0.5 -- REMOVE
 
   if absorb == 0 or IGNORED_STYLES[style] then
     absorbbar.overlay:Hide()

@@ -1,5 +1,12 @@
+local ADDON_NAME, Addon = ...
+local ThreatPlates = Addon.ThreatPlates
 
--- obj:SetTexCoord(crop.left, crop.right, crop.top, crop.bottom)
+-- WoW APIs
+local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
+local GetSpellTexture = GetSpellTexture
+
+-- ThreatPlates APIs
+local TidyPlatesThreat = TidyPlatesThreat
 
 local fraction, range, value, barsize, final
 
@@ -134,8 +141,78 @@ function CreateTidyPlatesInternalStatusbar(parent)
 	frame.SetTexCoord = SetTexCoord
 	frame.SetBackdropTexCoord = SetBackdropTexCoord
 	frame.SetBackdropTexture = SetBackdropTexture
-	
-	frame:SetScript("OnSizeChanged", UpdateSize)
+
+  frame:SetScript("OnSizeChanged", UpdateSize)
 	UpdateSize(frame)
+
 	return frame
+end
+
+local EnabledConfigMode = false
+local ConfigModePlate
+
+local function ShowOnUnit(unit)
+  local db = TidyPlatesThreat.db.profile.settings.castbar
+
+  local style = unit.TP_Style
+  return style ~= "etotem" and style ~= "empty" and
+    ((db.ShowInHeadlineView and (style == "NameOnly" or style == "NameOnly-Unique")) or
+      (db.show and not (style == "NameOnly" or style == "NameOnly-Unique")))
+end
+
+function Addon:ConfigCastbar()
+  if not EnabledConfigMode then
+    local plate = GetNamePlateForUnit("target")
+    if plate then
+      local visual = plate.TP_Extended.visual
+      local castbar = visual.castbar
+
+      if ShowOnUnit(plate.TP_Extended.unit) then
+        ConfigModePlate = plate
+
+        castbar:SetScript("OnUpdate", function(self, elapsed)
+          if ShowOnUnit(plate.TP_Extended.unit) then
+            self:SetAllColors(TidyPlatesThreat.SetCastbarColor(plate.TP_Extended.unit))
+            self:SetValue(castbar.MaxVal * 0.5)
+            visual.spellicon:SetTexture(GetSpellTexture(252616))
+            visual.spelltext:SetText("Cosmic Beacon")
+
+            self.Bar:Show()
+            self.Backdrop:Show()
+            visual.spellicon:SetShown(plate.TP_Extended.style.spellicon.show)
+            visual.castnostop:SetShown(plate.TP_Extended.style.castnostop.show)
+            visual.castborder:SetShown(plate.TP_Extended.style.castborder.show)
+            visual.spelltext:SetShown(plate.TP_Extended.style.spelltext.show)
+            visual.castshield:SetShown(TidyPlatesThreat.db.profile.settings.castnostop.ShowInterruptShield)
+          else
+            self.Bar:Hide()
+            self.Backdrop:Hide()
+            visual.castshield:Hide()
+            visual.spellicon:Hide()
+            visual.castnostop:Hide()
+            visual.castborder:Hide()
+            visual.spelltext:Hide()
+          end
+        end)
+
+        castbar._Hide = castbar.Hide
+        castbar.Hide = function() end
+        castbar:Show()
+        EnabledConfigMode = true
+        TidyPlatesInternal:ForceUpdate()
+      elseif castbar._Hide then
+          castbar:_Hide()
+      end
+    else
+      ThreatPlates.Print("Please select a target unit to enable configuration mode.", true)
+    end
+  else
+    local castbar = ConfigModePlate.TP_Extended.visual.castbar
+    castbar:SetScript("OnUpdate", nil)
+    castbar.Hide = castbar._Hide
+    castbar.Bar:Hide()
+    castbar.Backdrop:Hide()
+    castbar:Hide()
+    EnabledConfigMode = false
+  end
 end

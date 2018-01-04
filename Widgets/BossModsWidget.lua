@@ -1,8 +1,8 @@
 ------------------------
 -- Boss Mod Widget --
 ------------------------
-local ADDON_NAME, NAMESPACE = ...
-local ThreatPlates = NAMESPACE.ThreatPlates
+local ADDON_NAME, Addon = ...
+local ThreatPlates = Addon.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -18,6 +18,7 @@ local UnitGUID = UnitGUID
 local GetSpellTexture = GetSpellTexture
 local GetTime = GetTime
 local tremove = tremove
+local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
@@ -31,7 +32,6 @@ local CallbacksRegistered = false
 local ConfigDB
 local Enabled = false
 local EnabledByBossmod = false
-local EnabledConfigMode = false
 
 local MAX_AURAS_NO = 5
 local UPDATE_INTERVAL = 0.5
@@ -417,7 +417,8 @@ end
 -- Configuration Mode
 ---------------------------------------------------------------------------------------------------
 
-local function ConfigBossModsWidget()
+local EnabledConfigMode = false
+function Addon:ConfigBossModsWidget()
   if not EnabledConfigMode then
     local guid = UnitGUID("target")
     if guid then
@@ -435,8 +436,5 @@ local function ConfigBossModsWidget()
     EnabledConfigMode = false
   end
 end
-
-ThreatPlatesWidgets.ConfigBossModsWidget = ConfigBossModsWidget
-
 
 ThreatPlatesWidgets.RegisterWidget("BossModsWidgetTPTP", CreateWidgetFrame, false, enabled, EnabledInHeadlineView)

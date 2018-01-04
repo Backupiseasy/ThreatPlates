@@ -19,10 +19,12 @@ local pairs = pairs
 -- WoW APIs
 local InCombatLockdown = InCombatLockdown
 local GetCVar = GetCVar
+local SetCVar = SetCVar
 
 -- ThreatPlates APIs
 local L = ThreatPlates.L
 local TidyPlatesThreat = TidyPlatesThreat
+local RGB = ThreatPlates.RGB
 
 ---------------------------------------------------------------------------------------------------
 -- Global functions for accessing the configuration
@@ -73,14 +75,6 @@ local function SetNamePlateClickThrough(friendly, enemy)
     db.NamePlateEnemyClickThrough = enemy
     C_NamePlate.SetNamePlateFriendlyClickThrough(friendly)
     C_NamePlate.SetNamePlateEnemyClickThrough(enemy)
-  end
-end
-
-local function SyncWithGameSettings(friendly, enemy)
-  if not InCombatLockdown() then
-    local db = TidyPlatesThreat.db.profile
-    C_NamePlate.SetNamePlateFriendlyClickThrough(db.NamePlateFriendlyClickThrough)
-    C_NamePlate.SetNamePlateEnemyClickThrough(db.NamePlateEnemyClickThrough)
   end
 end
 
@@ -255,12 +249,10 @@ end
 
 local function MigrationTargetScale(profile_name, profile)
   if DatabaseEntryExists(profile, { "nameplate", "scale", "Target" }) then
-    --TidyPlatesThreat.db.global.MigrationLog[profile_name .. "MigrationTargetScaleTarget"] = "Migrating Target from " .. profile.nameplate.scale.Target .. " to " .. (profile.nameplate.scale.Target - 1)
     profile.nameplate.scale.Target = profile.nameplate.scale.Target - 1
   end
 
   if DatabaseEntryExists(profile, { "nameplate", "scale", "NoTarget" }) then
-    --TidyPlatesThreat.db.global.MigrationLog[profile_name .. "MigrationTargetScaleNoTarget"] = "Migrating NoTarget from " .. profile.nameplate.scale.NoTarget .. " to " .. (profile.nameplate.scale.NoTarget - 1)
     profile.nameplate.scale.NoTarget = profile.nameplate.scale.NoTarget - 1
   end
 end
@@ -274,6 +266,24 @@ local function MigrateCustomTextShow(profile_name, profile)
     db.FriendlySubtext = "NONE"
     db.EnemySubtext = "NONE"
 
+    DatabaseEntryDelete(profile, entry)
+  end
+end
+
+local function MigrateCastbarColoring(profile_name, profile)
+  -- default for castbarColor.toggle was true
+  local entry = { "castbarColor", "toggle" }
+  if DatabaseEntryExists(profile, entry) and profile.castbarColor.toggle == false then
+    profile.castbarColor = RGB(255, 255, 0, 1)
+    profile.castbarColorShield = RGB(255, 255, 0, 1)
+    DatabaseEntryDelete(profile, entry)
+    DatabaseEntryDelete(profile, { "castbarColorShield", "toggle" })
+  end
+
+  -- default for castbarColorShield.toggle was true
+  local entry = { "castbarColorShield", "toggle" }
+  if DatabaseEntryExists(profile, entry) and profile.castbarColorShield.toggle == false then
+    profile.castbarColorShield = profile.castbarColor or { r = 1, g = 0.56, b = 0.06, a = 1 }
     DatabaseEntryDelete(profile, entry)
   end
 end
@@ -320,9 +330,10 @@ local DEPRECATED_SETTINGS = {
   HVBlizzFarding = { "HeadlineView", "blizzFading" },         -- (removed in 8.5.1)
   HVBlizzFadingAlpha = { "HeadlineView", "blizzFadingAlpha"}, -- (removed in 8.5.1)
   HVNameWidth = { "HeadlineView", "name", "width" },          -- (removed in 8.5.0)
-  HVNameHeight = { "HeadlineView", "name", "height" },       -- (removed in 8.5.0)
+  HVNameHeight = { "HeadlineView", "name", "height" },        -- (removed in 8.5.0)
   -- { "debuffWidget" }, -- in release 8.7 (removed in 8.6.0)
   -- { "OldSettings" }, -- in release 8.7 (removed in 8.7.0)
+  CastbarColoring = { MigrateCastbarColoring, },              -- (removed in 8.7.0)
 }
 
 local function MigrateDatabase(current_version)

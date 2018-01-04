@@ -23,9 +23,7 @@ ThreatPlates.Media = LibStub("LibSharedMedia-3.0")
 
 ---------------------------------------------------------------------------------------------------
 -- Define AceAddon TidyPlatesThreat
--- TODO: There's a collision with the addon TidyPlates: Threat because of the same Ace3 addon name
 ---------------------------------------------------------------------------------------------------
-
 TidyPlatesThreat = LibStub("AceAddon-3.0"):NewAddon("TidyPlatesThreat", "AceConsole-3.0", "AceEvent-3.0")
 -- Global for DBM to differentiate between Tidy Plates: Threat Plates and Tidy Plates: Threat
 TidyPlatesThreatDBM = true

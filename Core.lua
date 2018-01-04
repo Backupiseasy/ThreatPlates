@@ -11,8 +11,14 @@ local t = ns.ThreatPlates
 local UnitIsUnit = UnitIsUnit
 local UnitReaction = UnitReaction
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
+local SetNamePlateFriendlyClickThrough = C_NamePlate.SetNamePlateFriendlyClickThrough
+local SetNamePlateEnemyClickThrough = C_NamePlate.SetNamePlateEnemyClickThrough
+local NamePlateDriverFrame = NamePlateDriverFrame
 local UnitName = UnitName
 local UNKNOWNOBJECT = UNKNOWNOBJECT
+local GetCVar = GetCVar
+local SetCVar = SetCVar
+local IsInInstance = IsInInstance
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
@@ -73,13 +79,13 @@ end
 local EVENTS = {
   --"PLAYER_ALIVE",
   --"PLAYER_LEAVING_WORLD",
-  --"PLAYER_REGEN_DISABLED",
   --"PLAYER_TALENT_UPDATE"
 
   "PLAYER_ENTERING_WORLD",
   "PLAYER_LOGIN",
   "PLAYER_LOGOUT",
   "PLAYER_REGEN_ENABLED",
+  "PLAYER_REGEN_DISABLED",
   "QUEST_WATCH_UPDATE",
   "QUEST_ACCEPTED",
 
@@ -117,51 +123,6 @@ end
 -- Functions called by TidyPlates
 ---------------------------------------------------------------------------------------------------
 
-local function ActivateTheme(theme_table, theme_name)
---  -- Recreate all TidyPlates styles for ThreatPlates("normal", "dps", "tank", ...) - required, if theme style settings were changed
---  t.SetThemes(self)
-
-  -- TODO: check with what this  was replaces
-  --TidyPlatesUtilityInternal:EnableGroupWatcher()
-  -- TPHUub: if LocalVars.AdvancedEnableUnitCache then TidyPlatesUtilityInternal:EnableUnitCache() else TidyPlatesUtilityInternal:DisableUnitCache() end
-  -- TPHUub: TidyPlatesUtilityInternal:EnableHealerTrack()
-  -- if TidyPlatesThreat.db.profile.healerTracker.ON then
-  -- 	if not healerTrackerEnabled then
-  -- 		TidyPlatesUtilityInternal.EnableHealerTrack()
-  -- 	end
-  -- else
-  -- 	if healerTrackerEnabled then
-  -- 		TidyPlatesUtilityInternal.DisableHealerTrack()
-  -- 	end
-  -- end
-  -- TidyPlatesWidgets:EnableTankWatch()
-  -- initialize widgets and other Threat Plates stuff
-  local ThreatPlatesWidgets = ThreatPlatesWidgets
-  ThreatPlatesWidgets.ConfigAuraWidgetFilter()
-  ThreatPlatesWidgets.ConfigAuraWidget()
-  t.SyncWithGameSettings()
-end
-
--- The theme loader will now call 'theme.OnActivateTheme' (a theme function) when the active theme
--- is changed.  it passes two value to the function: the active theme table, and the active theme
--- name.
--- Changelog entry seems to be wrong, there is never passed a 2nd parameter to this function
-local function OnActivateTheme(theme_table, theme_name)
-  -- Sends a reset notification to all available themes, ie. themeTable == nil
-  if not theme_table then
-    ThreatPlatesWidgets.DeleteWidgets()
-    --DisableEvents() -- enabling this results in an LUA error for aura widget 2.0 (config variables not initialized)
-  else
-    if not TidyPlatesThreat.db.global.CheckNewLookAndFeel then
-      StaticPopup_Show("SwitchToNewLookAndFeel")
-    end
-
-    ActivateTheme()
-    EnableEvents()
-    -- disable all non-ThreatPlates widgets - normally, TidyPlates should do that, but it doesn't
-  end
-end
-
 ------------------
 -- ADDON LOADED --
 ------------------
@@ -184,7 +145,7 @@ local function ApplyHubFunctions(theme)
   -- TidyPlatesGlobal_OnContextUpdate() is called when a unit is targeted or moused-over.  (Any time the unitid or GUID changes)
   theme.OnContextUpdate = ThreatPlatesWidgets.OnContextUpdate
 
-  theme.OnActivateTheme = OnActivateTheme -- called by Tidy Plates Core, Theme Loader
+  --theme.OnActivateTheme = OnActivateTheme -- called by Tidy Plates Core, Theme Loader
   --theme.OnChangeProfile = TidyPlatesThreat.OnChangeProfile -- used by TidyPlates when a specialication change occurs or the profile is changed
   --theme.ApplyProfileSettings = TidyPlatesThreat.ApplyProfileSettings
   --theme.ShowConfigPanel = ShowConfigPanel -- I don't think that this function is used any longer by TidyPlates
@@ -264,6 +225,16 @@ function TidyPlatesThreat:ReloadTheme()
   --  TidyPlates:SetTheme(t.THEME_NAME)
   --end
   TidyPlatesInternal:SetTheme(t.THEME_NAME)
+
+  ThreatPlatesWidgets.ConfigAuraWidgetFilter()
+  ThreatPlatesWidgets.ConfigAuraWidget()
+
+  -- Castbars have to be disabled everytime we login
+  if TidyPlatesThreat.db.profile.settings.castbar.show or TidyPlatesThreat.db.profile.settings.castbar.ShowInHeadlineView then
+    TidyPlatesInternal:EnableCastBars()
+  else
+    TidyPlatesInternal:DisableCastBars()
+  end
 end
 
 function TidyPlatesThreat:StartUp()
@@ -371,67 +342,99 @@ function TidyPlatesThreat:OnEnable()
 
   self:StartUp()
 
---  for i = 1, #events do
---    self:RegisterEvent(events[i])
---  end
+  -- TODO: check with what this  was replaces
+  --TidyPlatesUtilityInternal:EnableGroupWatcher()
+  -- TPHUub: if LocalVars.AdvancedEnableUnitCache then TidyPlatesUtilityInternal:EnableUnitCache() else TidyPlatesUtilityInternal:DisableUnitCache() end
+  -- TPHUub: TidyPlatesUtilityInternal:EnableHealerTrack()
+  -- if TidyPlatesThreat.db.profile.healerTracker.ON then
+  -- 	if not healerTrackerEnabled then
+  -- 		TidyPlatesUtilityInternal.EnableHealerTrack()
+  -- 	end
+  -- else
+  -- 	if healerTrackerEnabled then
+  -- 		TidyPlatesUtilityInternal.DisableHealerTrack()
+  -- 	end
+  -- end
+  -- TidyPlatesWidgets:EnableTankWatch()
+
   EnableEvents()
 end
 
 -- Called when the addon is disabled
---function TidyPlatesThreat:OnDisable()
---end
+function TidyPlatesThreat:OnDisable()
+  DisableEvents()
+end
 
 -----------------------------------------------------------------------------------
 -- WoW EVENTS --
 -----------------------------------------------------------------------------------
 
-local set = false
-function TidyPlatesThreat:SetCvars()
-  if not set then
-    SetCVar("ShowClassColorInNameplate", 1)
-    local ProfDB = self.db.profile
-    if GetCVar("nameplateShowEnemyTotems") == "1" then
-      ProfDB.nameplate.toggle["Totem"] = true
-    else
-      ProfDB.nameplate.toggle["Totem"] = false
-    end
-
-    if GetCVar("ShowVKeyCastbar") == "1" then
-      ProfDB.settings.castbar.show = true
-    else
-      ProfDB.settings.castbar.show = false
-    end
-
-    set = true
-  end
-end
-
-function TidyPlatesThreat:SetGlows()
-  local ProfDB = self.db.profile.threat
-  -- Required for threat/aggro detection
-  if ProfDB.ON and (GetCVar("threatWarning") ~= 3) then
-    SetCVar("threatWarning", 3)
-  elseif not ProfDB.ON and (GetCVar("threatWarning") ~= 0) then
-    SetCVar("threatWarning", 0)
-  end
-end
-
 --function TidyPlatesThreat:PLAYER_ALIVE()
 --end
 
+-- Fired when the player enters the world, reloads the UI, enters/leaves an instance or battleground, or respawns at a graveyard.
+-- Also fires any other time the player sees a loading screen
 function TidyPlatesThreat:PLAYER_ENTERING_WORLD()
---  local _,type = IsInInstance()
---  local ProfDB = self.db.profile
---  if type == "pvp" or type == "arena" then
---    ProfDB.OldSetting = ProfDB.threat.ON
---    ProfDB.threat.ON = false
---  else
---    ProfDB.threat.ON = ProfDB.OldSetting
+  -- Sync internal settings with Blizzard CVars
+  SetCVar("ShowClassColorInNameplate", 1)
+
+  local db = TidyPlatesThreat.db.profile.Automation
+
+  local isInstance, instanceType = IsInInstance()
+  --isInstance = isInstance and (instanceType == "party" or instanceType == "raid")
+  --print ("PLAYER_ENTERING_WORLD: nameplateShowFriends = ", GetCVar("nameplateShowFriends"), db.OldNameplateShowFriends)
+  if db.HideFriendlyUnitsInInstances then
+    if isInstance then
+      db.OldNameplateShowFriends = GetCVar("nameplateShowFriends")
+      SetCVar("nameplateShowFriends", 0)
+    elseif db.OldNameplateShowFriends then
+      -- reset to previous setting
+      SetCVar("nameplateShowFriends", db.OldNameplateShowFriends)
+      db.OldNameplateShowFriends = nil
+    end
+  elseif isInstance and db.OldNameplateShowFriends then
+    -- reset to previous setting when switched of in an instance
+    SetCVar("nameplateShowFriends", db.OldNameplateShowFriends) -- or GetCVarDefault("nameplateShowFriends"))
+    db.OldNameplateShowFriends = nil
+  end
+
+  if db.SmallPlatesInInstances then
+    if isInstance then
+      db.OldLargerNamePlateStyle = true
+      SetCVar("nameplateGlobalScale", 0.4)
+      --NamePlateDriverFrame:SetBaseNamePlateSize(168, 112.5)
+    elseif db.OldLargerNamePlateStyle then
+      -- reset to previous setting
+      SetCVar("nameplateGlobalScale", db.OldNameplateGlobalScale)
+      db.OldNameplateGlobalScale = nil
+    end
+  elseif db.OldLargerNamePlateStyle and isInstance then
+    -- reset to previous setting when switched of in an instance
+    SetCVar("nameplateGlobalScale", db.OldNameplateGlobalScale)
+    db.OldNameplateGlobalScale = nil
+  end
+
+--  if db.SmallPlatesInInstances then
+--    if isInstance then
+--      db.OldLargerNamePlateStyle = true
+--      SetCVar("NamePlateVerticalScale", 1)
+--      SetCVar("NamePlateHorizontalScale", 1)
+--      NamePlateDriverFrame:UpdateNamePlateOptions()
+--    elseif db.OldLargerNamePlateStyle then
+--      -- reset to previous setting
+--      SetCVar("NamePlateVerticalScale", 2.7)
+--      SetCVar("NamePlateHorizontalScale", 1.4)
+--      NamePlateDriverFrame:UpdateNamePlateOptions()
+--      db.OldLargerNamePlateStyle = nil
+--    end
+--  elseif db.OldLargerNamePlateStyle and isInstance then
+--    -- reset to previous setting when switched of in an instance
+--    SetCVar("NamePlateVerticalScale", 2.7)
+--    SetCVar("NamePlateHorizontalScale", 1.4)
+--    NamePlateDriverFrame:UpdateNamePlateOptions()
+--    db.OldLargerNamePlateStyle = nil
 --  end
 
-  -- overwrite things TidyPlatesHub does on PLAYER_ENTERING_WORLD
-  ActivateTheme()
-  --self:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
 end
 
 --function TidyPlatesThreat:PLAYER_LEAVING_WORLD()
@@ -453,21 +456,48 @@ function TidyPlatesThreat:PLAYER_LOGOUT(...)
   self.db.profile.cache = {}
 end
 
--- Disabled events PLAYER_REGEN_DISABLED, PLAYER_TALENT_UPDATE, UPDATE_SHAPESHIFT_FORM, ACTIVE_TALENT_GROUP_CHANGED
--- as they are not used currently
-
--- function TidyPlatesThreat:PLAYER_REGEN_DISABLED()
--- 	-- Disabled while 5.4.8 changes are being officilizedself
--- 	--self:SetGlows()
--- end
-
+-- Fires when the player leaves combat status
+-- Syncs addon settings with game settings in case changes weren't possible during startup, reload
+-- or profile reset because character was in combat.
 function TidyPlatesThreat:PLAYER_REGEN_ENABLED()
-  self:SetGlows()
-  self:SetCvars()
-  -- Syncs addon settings with game settings in case changes weren't possible during startup, reload
-  -- or profile reset because character was in combat.
-  t.SyncWithGameSettings()
+  local db = TidyPlatesThreat.db.profile
+
+  -- Do this after combat ends, not in PLAYER_ENTERING_WORLD as it won't get set if the player is on combat when
+  -- that event fires.
+  SetNamePlateFriendlyClickThrough(db.NamePlateFriendlyClickThrough)
+  SetNamePlateEnemyClickThrough(db.NamePlateEnemyClickThrough)
+
+  db = TidyPlatesThreat.db.profile.threat
+  -- Required for threat/aggro detection
+  if db.ON and (GetCVar("threatWarning") ~= 3) then
+    SetCVar("threatWarning", 3)
+  elseif not db.ON and (GetCVar("threatWarning") ~= 0) then
+    SetCVar("threatWarning", 0)
+  end
+
+  local db = TidyPlatesThreat.db.profile.Automation
+  -- Dont't use automation for friendly nameplates if in an instance and Hide Friendly Nameplates is enabled (db.OldNameplateShowFriends ~= nil)
+  if db.FriendlyUnits ~= "NONE" and not db.OldNameplateShowFriends then
+    SetCVar("nameplateShowFriends", (db.FriendlyUnits == "SHOW_COMBAT" and 0) or 1)
+  end
+  if db.EnemyUnits ~= "NONE" then
+    SetCVar("nameplateShowEnemies", (db.EnemyUnits == "SHOW_COMBAT" and 0) or 1)
+  end
 end
+
+-- Fires when the player enters combat status
+function TidyPlatesThreat:PLAYER_REGEN_DISABLED()
+  local db = self.db.profile.Automation
+  -- Dont't use automation for friendly nameplates if in an instance and Hide Friendly Nameplates is enabled (db.OldNameplateShowFriends ~= nil)
+  if db.FriendlyUnits ~= "NONE" and not db.OldNameplateShowFriends then
+    SetCVar("nameplateShowFriends", (db.FriendlyUnits == "SHOW_COMBAT" and 1) or 0)
+  end  if db.EnemyUnits ~= "NONE" then
+    SetCVar("nameplateShowEnemies", (db.EnemyUnits == "SHOW_COMBAT" and 1) or 0)
+  end
+end
+
+-- Disabled events PLAYER_TALENT_UPDATE, UPDATE_SHAPESHIFT_FORM, ACTIVE_TALENT_GROUP_CHANGED
+-- as they are not used currently
 
 -- With TidyPlates:
 -- nameplate color can change when factions change (e.g., with disguises)
