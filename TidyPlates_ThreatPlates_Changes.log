@@ -1,4 +1,9 @@
 ------------------------------------------------------
+8.6.2 (Standalone, TidyPlates is no longer required)
+------------------------------------------------------
+* Fixed a LUA error which could occur with nameplates created, but having no unit assigned yet [Comment #634].
+
+------------------------------------------------------
 8.6.1 (Standalone, TidyPlates is no longer required)
 ------------------------------------------------------
 * Added an option to auras widget to show it above or below the healthbar.
