@@ -507,6 +507,11 @@ end
 
 -- Prevent Blizzard nameplates from re-appearing, but show personal ressources bar, if enabled
 local function FrameOnShow(UnitFrame)
+  -- Hide namepaltes that have not yet an unit added
+  if not UnitFrame.unit then
+    UnitFrame:Hide()
+  end
+
   -- Skip the personal resource bar of the player character
   if UnitIsUnit(UnitFrame.unit, "player") then
     return
@@ -514,7 +519,7 @@ local function FrameOnShow(UnitFrame)
 
   -- Hide ThreatPlates nameplates if Blizzard nameplates should be shown for friendly units
   if TidyPlatesThreat.db.profile.ShowFriendlyBlizzardNameplates then
-    if UnitFrame.unit and UnitReaction(UnitFrame.unit, "player") > 4 then
+    if UnitReaction(UnitFrame.unit, "player") > 4 then
       UnitFrame:Show()
       --UnitFrame:GetParent().carrier:Hide()
     end
@@ -535,7 +540,7 @@ local function FrameOnUpdate(plate)
   --local frame_level = plate:GetFrameLevel()
   --plate.extended:SetFrameLevel(frame_level)
   --plate.extended.defaultLevel = frame_level -- not sure, if necessary
-  plate.TP_Extended:SetFrameLevel(plate:GetFrameLevel() * 10)
+  plate.TP_Extended:SetFrameLevel(plate:GetFrameLevel() * 10 + 5)
 
   -- Hide ThreatPlates nameplates if Blizzard nameplates should be shown for friendly units
   if TidyPlatesThreat.db.profile.ShowFriendlyBlizzardNameplates and unitid and UnitReaction(unitid, "player") > 4 then
