@@ -1,5 +1,5 @@
-﻿local _, ns = ...
-local t = ns.ThreatPlates
+﻿local _, Addon = ...
+local t = Addon.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -328,7 +328,7 @@ function TidyPlatesThreat:OnInitialize()
   LibStub("AceConfigDialog-3.0"):AddToBlizOptions(dialog_name, t.ADDON_NAME)
 
   -- Setup chat commands
-  self:RegisterChatCommand("tptp", "ChatCommand");
+  self:RegisterChatCommand("tptp", "ChatCommand")
 end
 
 -- The OnEnable() and OnDisable() methods of your addon object are called by AceAddon when your addon is
@@ -536,17 +536,20 @@ end
 
 -- Prevent Blizzard nameplates from re-appearing, but show personal ressources bar, if enabled
 local function FrameOnShow(UnitFrame)
-  -- Skip the personal resource bar of the player character
+  -- Hide namepaltes that have not yet an unit added
+  if not UnitFrame.unit then
+    UnitFrame:Hide()
+  end
+
+  -- Skip the personal resource bar of the player character and un-hook scripts
   if UnitIsUnit(UnitFrame.unit, "player") then
+    UnitFrame:GetParent():SetScript('OnUpdate', nil)
     return
   end
 
   -- Hide ThreatPlates nameplates if Blizzard nameplates should be shown for friendly units
-  if TidyPlatesThreat.db.profile.ShowFriendlyBlizzardNameplates then
-    if UnitFrame.unit and UnitReaction(UnitFrame.unit, "player") > 4 then
-      UnitFrame:Show()
-      --UnitFrame:GetParent().carrier:Hide()
-    end
+  if TidyPlatesThreat.db.profile.ShowFriendlyBlizzardNameplates and UnitReaction(UnitFrame.unit, "player") > 4 then
+    UnitFrame:Show()
   else
     UnitFrame:Hide()
   end
@@ -554,23 +557,17 @@ end
 
 -- Frame: self = plate
 local function FrameOnUpdate(plate)
-  -- Skip the personal resource bar of the player character
+  -- unitid should always be defined as FrameOnShow hides frames which not have it defined (and FrameOnUpdate is not called on them consequently)
   local unitid = plate.UnitFrame.unit
   if UnitIsUnit(unitid, "player") then
     return
   end
 
-  -- With TidyPlates:
-  --local frame_level = plate:GetFrameLevel()
-  --plate.extended:SetFrameLevel(frame_level)
-  --plate.extended.defaultLevel = frame_level -- not sure, if necessary
-  plate.TP_Extended:SetFrameLevel(plate:GetFrameLevel() * 10)
+  plate.TP_Extended:SetFrameLevel(plate:GetFrameLevel() * 10 + 5)
 
   -- Hide ThreatPlates nameplates if Blizzard nameplates should be shown for friendly units
-  if TidyPlatesThreat.db.profile.ShowFriendlyBlizzardNameplates and unitid and UnitReaction(unitid, "player") > 4 then
+  if TidyPlatesThreat.db.profile.ShowFriendlyBlizzardNameplates and UnitReaction(unitid, "player") > 4 then
     plate.UnitFrame:Show()
-    -- With TidyPlates:
-    --plate.carrier:Hide()
     plate.TP_Carrier:Hide()
   end
 end
@@ -580,13 +577,7 @@ local function FrameOnHide(UnitFrame)
   -- Hide ThreatPlates nameplates if Blizzard nameplates should be shown for friendly units
   if TidyPlatesThreat.db.profile.ShowFriendlyBlizzardNameplates and UnitFrame.unit and UnitReaction(UnitFrame.unit, "player") > 4 then
     UnitFrame:Show()
-    -- With TidyPlates:
-    --UnitFrame:GetParent().carrier:Hide()
     UnitFrame:GetParent().TP_Carrier:Hide()
-    --    local plate = GetNamePlateForUnit(self.unit)
-    --    if plate and plate.carrier then
-    --      plate.TP_Carrier:Hide()
-    --    end
   end
 end
 

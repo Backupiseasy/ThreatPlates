@@ -159,7 +159,7 @@ local SCALE_FUNCTIONS = {
 	totem = ScaleGeneral,
 	unique = ScaleUnique,
 	empty = ScaleEmpty,
-	etotem = ScaleEmpty,
+	etotem = ScaleGeneral,
 	NameOnly = ScaleNameOnly,
 	["NameOnly-Unique"] = ScaleUniqueNameOnly,
 }

@@ -157,7 +157,7 @@ local ALPHA_FUNCTIONS = {
 	totem = TransparencyGeneral,
 	unique = AlphaUnique,
 	empty = TransparencyEmpty,
-	etotem = TransparencyEmpty,
+	etotem = TransparencyGeneral,
 	NameOnly = TransparencyNameOnly,
 	["NameOnly-Unique"] = AlphaUniqueNameOnly,
 }

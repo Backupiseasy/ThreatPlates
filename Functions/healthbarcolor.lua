@@ -1,5 +1,5 @@
-local ADDON_NAME, NAMESPACE = ...
-local ThreatPlates = NAMESPACE.ThreatPlates
+local ADDON_NAME, Addon = ...
+local ThreatPlates = Addon.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -22,7 +22,7 @@ local FACTION_BAR_COLORS = FACTION_BAR_COLORS
 local TidyPlatesThreat = TidyPlatesThreat
 local SetStyle = TidyPlatesThreat.SetStyle
 local GetUniqueNameplateSetting = ThreatPlates.GetUniqueNameplateSetting
-local TOTEMS = ThreatPlates.TOTEMS
+local TOTEMS = Addon.TOTEMS
 local OnThreatTable = ThreatPlates.OnThreatTable
 local RGB_P = ThreatPlates.RGB_P
 local IsFriend
@@ -242,9 +242,8 @@ local function SetHealthbarColor(unit)
   elseif style == "totem" then
     -- currently, no raid marked color (or quest color) for totems, also no custom nameplates
     local tS = db.totemSettings[TOTEMS[unit.name]]
-    local allow_hp_color = tS[2]
-    if allow_hp_color then
-      c = tS.color
+    if tS.ShowHPColor then
+      c = tS.Color
     end
     -- otherwise color defaults to WoW defaults
   else

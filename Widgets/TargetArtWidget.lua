@@ -42,23 +42,14 @@ local function UpdateSettings(frame)
     frame.Icon:SetVertexColor(db.r, db.g, db.b, db.a)
 		frame.Icon:SetDrawLayer("BACKGROUND", 0)
 
---    if db.theme == "default" or db.theme == "squarethin" then
---      frame.Icon:SetDrawLayer("ARTWORK", -7)
---    else
---      frame.Icon:SetDrawLayer("ARTWORK", 7)
---    end
-
     frame:Show()
-    frame.Icon:Show()
   else
     frame:_Hide()
-    --frame.Icon:Hide()
   end
 end
 
 local function UpdateWidgetFrame(frame, unit)
-  frame:Show()
-  frame.Icon:Show()
+	frame:SetShown(unit.TP_Style ~= "etotem")
 end
 
 -- Context
@@ -77,7 +68,6 @@ local function UpdateWidgetContext(frame, unit)
 		UpdateWidgetFrame(frame, unit)
 	else
 		frame:_Hide()
-    --frame.Icon:Hide()
 	end
 	--------------------------------------
 	-- End Custom Code
@@ -107,7 +97,6 @@ local function CreateWidgetFrame(parent)
   --frame.Icon = parent.visual.name:GetParent():CreateTexture(nil, "ARTWORK")
 	frame.Icon = frame:CreateTexture(nil, "BACKGROUND", 0)
   frame.Icon:SetAllPoints(frame)
-  --frame.Icon:Hide()
 
   UpdateSettings(frame)
   frame.UpdateConfig = UpdateSettings
@@ -119,10 +108,7 @@ local function CreateWidgetFrame(parent)
 	frame.Update = UpdateWidgetFrame
 	frame._Hide = frame.Hide
 	-- Have to add frame.Icon:Hide() also here as the frame is no longer the parent of the icon since a fix to widget layering
-	frame.Hide = function()
-		ClearWidgetContext(frame)
-		--frame.Icon:Hide()
-		frame:_Hide()
+	frame.Hide = function() ClearWidgetContext(frame); frame:_Hide()
 	end
 
 	return frame

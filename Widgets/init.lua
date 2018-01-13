@@ -123,7 +123,8 @@ local function OnUpdate(plate, unit)
         else
           widget:Hide()
         end
-      elseif style == "etotem" or style == "empty" then
+      --elseif style == "etotem" or style == "empty" then
+      elseif style == "empty" then
         widget:Hide()
       elseif show_healthbar_view then -- any other style
         -- context means that widget is only relevant for target (or mouse-over)
@@ -168,7 +169,8 @@ local function OnContextUpdate(plate, unit)
         else
           widget:Hide()
         end
-      elseif style == "etotem" or style == "empty" then
+      --elseif style == "etotem" or style == "empty" then
+      elseif style == "empty" then
         widget:Hide()
       elseif show_healthbar_view then -- any other style
         widget:UpdateContext(unit)

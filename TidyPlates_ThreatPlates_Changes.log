@@ -1,16 +1,22 @@
 ------------------------------------------------------
+8.7.0-Alpha4
+------------------------------------------------------
+* Fixed a bug with totem nameplates not being shown if healthbar should be hidden, but icon should be shown.
+
+------------------------------------------------------
 8.7.0-Alpha3
 ------------------------------------------------------
 * Added a new feature to the target castbar to show when a cast was interrupted and by who [Comment #566, E-Mail].
-* Added an option to the castbar to show a shield for non-interruptable casts.
+* Added an option to the castbar to show a shield for non-interruptible casts.
 * Added an option to change the placement of the castbar for target unit [Issue #134].
 * Added a configuration mode (preview) for the castbar for easy setup [Comment #573].
-* Changed the castbar options so that the colors for interruptable and non-interruptable casts can be selected independently from each other [Comment #570].
+* Changed the castbar options so that the colors for interruptible and non-interruptible casts can be selected independently from each other [Comment #570].
 * Added a new texture for the striped absorb overlay and added an option to adjust its color.
 * Reworked the options for castbar, spell icon, and spell text into one page.
 * Added options to show or hide nameplates automatically in combat or in instances, see General - Automation [Comment #602].
 * Added configuration options for several nameplate configuration variables (CVars), see General - Blizzard Settings.
-* Fixed bugs with castbar textures not properly shown in headline view.
+* Fixed a bug with castbar textures not properly shown in headline view.
+* Fixed a bug with castbar not properly hidden when only enabled for healthbar or headline view [Issue #150].
 
 ------------------------------------------------------
 8.7.0-Alpha2
@@ -23,6 +29,11 @@
 * Added options to the absorb display to always show the total absorb even if health is at maximum [Comment #140, Ticket #140].
 * Added an option to enable class icons for friendly and hostile units separately [Comment #143].
 * Removed the restriction that the threat system configuration can only be changed outside of arenas and battlegrounds [E-Mail].
+
+------------------------------------------------------
+8.6.2 (Standalone, TidyPlates is no longer required)
+------------------------------------------------------
+* Fixed a LUA error which could occur with nameplates created, but having no unit assigned yet [Comment #634].
 
 ------------------------------------------------------
 8.6.1 (Standalone, TidyPlates is no longer required)

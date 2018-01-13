@@ -30,7 +30,6 @@ local L = t.L
 
 local class = t.Class()
 local PATH_ART = t.Art
-local TotemNameBySpellID = t.TotemNameBySpellID
 
 -- local TidyPlatesThreat = LibStub("AceAddon-3.0"):GetAddon("TidyPlatesThreat");
 local TidyPlatesThreat = TidyPlatesThreat
@@ -4938,6 +4937,7 @@ local function CreateOptionsTable()
     ClassOpts_OrderCount = ClassOpts_OrderCount + 1
   end
   options.args.Widgets.args.ClassIconWidget.args.Textures.args = ClassOpts
+
   local TotemOpts = {
     TotemSettings = {
       name = L["|cffffffffTotem Settings|r"],
@@ -5011,16 +5011,24 @@ local function CreateOptionsTable()
     },
   };
 
-  local totemID = t.TOTEM_DATA
-  table.sort(totemID, function(a, b) return (string.sub(a[2], 1, 1)..TotemNameBySpellID(a[1])) < (string.sub(b[2], 1, 1)..TotemNameBySpellID(b[1])) end)
-  for k_c, v_c in ipairs(totemID) do
-    TotemOpts[GetSpellName(totemID[k_c][1])] = {
-      name = "|cff" .. totemID[k_c][3] .. GetSpellName(totemID[k_c][1]) .. "|r",
+  local totem_list = {}
+  local i = 1
+  for name, data in pairs(Addon.TotemInformation) do
+    totem_list[i] = data
+    i = i + 1
+  end
+
+  -- properly no longer possible if 7.3.5+ GetSpellInfo changes go live
+  table.sort(totem_list, function(a, b) return a.SortKey  < b.SortKey end)
+
+  for i, totem_info in ipairs(totem_list) do
+    TotemOpts[totem_info.Name] = {
+      name = "|cff" .. totem_info.GroupColor .. totem_info.Name .. "|r",
       type = "group",
-      order = k_c,
+      order = i,
       args = {
         Header = {
-          name = "> |cff" .. totemID[k_c][3] .. GetSpellName(totemID[k_c][1]) .. "|r <",
+          name = "> |cff" .. totem_info.GroupColor .. totem_info.Name .. "|r <",
           type = "header",
           order = 0,
         },
@@ -5033,7 +5041,7 @@ local function CreateOptionsTable()
             Toggle = {
               name = L["Show Nameplate"],
               type = "toggle",
-              arg = { "totemSettings", totemID[k_c][2], 1 },
+              arg = { "totemSettings", totem_info.ID, "ShowNameplate" },
             },
           },
         },
@@ -5042,13 +5050,12 @@ local function CreateOptionsTable()
           type = "group",
           order = 2,
           inline = true,
-          disabled = function() if db.totemSettings[totemID[k_c][2]][1] then return false else return true end end,
           args = {
             Enable = {
               name = L["Enable Custom Color"],
               type = "toggle",
               order = 1,
-              arg = { "totemSettings", totemID[k_c][2], 2 },
+              arg = { "totemSettings", totem_info.ID, "ShowHPColor" },
             },
             Color = {
               name = L["Color"],
@@ -5056,8 +5063,7 @@ local function CreateOptionsTable()
               order = 2,
               get = GetColor,
               set = SetColor,
-              disabled = function() if not db.totemSettings[totemID[k_c][2]][1] or not db.totemSettings[totemID[k_c][2]][2] then return true else return false end end,
-              arg = { "totemSettings", totemID[k_c][2], "color" },
+              arg = { "totemSettings", totem_info.ID, "Color" },
             },
           },
         },
@@ -5066,14 +5072,13 @@ local function CreateOptionsTable()
           type = "group",
           order = 3,
           inline = true,
-          disabled = function() if db.totemSettings[totemID[k_c][2]][1] then return false else return true end end,
           args = {
             Icon = {
               name = "",
               type = "execute",
               width = "full",
               order = 0,
-              image = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\TotemIconWidget\\" .. db.totemSettings[totemID[k_c][2]][7] .. "\\" .. totemID[k_c][2],
+              image = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\TotemIconWidget\\" .. db.totemSettings[totem_info.ID].Style .. "\\" .. totem_info.ID,
             },
             Style = {
               name = "",
@@ -5082,16 +5087,17 @@ local function CreateOptionsTable()
               width = "full",
               set = function(info, val)
                 SetValue(info, val)
-                options.args.Totems.args[GetSpellName(totemID[k_c][1])].args.Textures.args.Icon.image = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\TotemIconWidget\\" .. db.totemSettings[totemID[k_c][2]][7] .. "\\" .. totemID[k_c][2];
+                options.args.Totems.args[totem_info.Name].args.Textures.args.Icon.image = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\TotemIconWidget\\" .. db.totemSettings[totem_info.ID].Style .. "\\" .. totem_info.ID;
               end,
               values = { normal = "Normal", special = "Special" },
-              arg = { "totemSettings", totemID[k_c][2], 7 },
+              arg = { "totemSettings", totem_info.ID, "Style" },
             },
           },
         },
       },
     }
   end
+
   options.args.Totems.args = TotemOpts;
   local CustomOpts_OrderCnt = 30;
   local CustomOpts = {
@@ -5536,10 +5542,8 @@ function TidyPlatesThreat:ProfChange()
     base.PrevMed.image = threat_path .. "MEDIUM"
     base.PrevHigh.image = threat_path .. "LOW"
 
-    local totemID = t.TOTEM_DATA
-    table.sort(totemID, function(a, b) return (string.sub(a[2], 1, 1)..TotemNameBySpellID(a[1])) < (string.sub(b[2], 1, 1)..TotemNameBySpellID(b[1])) end)
-    for k_c, v_c in ipairs(totemID) do
-      options.args.Totems.args[GetSpellName(totemID[k_c][1])].args.Textures.args.Icon.image = path .. "TotemIconWidget\\" .. db.totemSettings[totemID[k_c][2]][7] .. "\\" .. totemID[k_c][2]
+    for _, totem_info in pairs(Addon.TotemInformation) do
+      options.args.Totems.args[totem_info.Name].args.Textures.args.Icon.image = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\TotemIconWidget\\" .. db.totemSettings[totem_info.ID].Style .. "\\" .. totem_info.ID
     end
 
     for k_c, v_c in ipairs(db.uniqueSettings) do

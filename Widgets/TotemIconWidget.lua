@@ -1,16 +1,19 @@
 -------------------------------------------------------------------------------
 -- Totem Icon Widget
 -------------------------------------------------------------------------------
-local ADDON_NAME, NAMESPACE = ...
-local ThreatPlates = NAMESPACE.ThreatPlates
+local ADDON_NAME, Addon = ...
+local ThreatPlates = Addon.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
-local TotemNameBySpellID = ThreatPlates.TotemNameBySpellID
-local TOTEMS = ThreatPlates.TOTEMS
 
-local path = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\TotemIconWidget\\"
+-- ThreatPlates APIs
+local TidyPlatesThreat = TidyPlatesThreat
+
+local TOTEMS = Addon.TOTEMS
+local PATH = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\TotemIconWidget\\"
+
 -- local WidgetList = {}
 
 ---------------------------------------------------------------------------------------------------
@@ -29,19 +32,6 @@ end
 -- end
 -- ThreatPlatesWidgets.ClearAllTotemIconWidgets = ClearAllWidgets
 
--------------------------------------------------------------------------------
-
-local function GetTotemInfo(name)
-	local totem = TOTEMS[name]
-	local db = TidyPlatesThreat.db.profile.totemSettings
-	if totem then
-		local texture =  path..db[totem][7].."\\"..totem
-		return db[totem][3],texture
-	else
-		return false, nil
-	end
-end
-
 ---------------------------------------------------------------------------------------------------
 -- Widget Functions for TidyPlates
 ---------------------------------------------------------------------------------------------------
@@ -54,11 +44,12 @@ local function UpdateSettings(frame)
 end
 
 local function UpdateWidgetFrame(frame, unit)
-	local isActive, texture = GetTotemInfo(unit.name)
-	if isActive then
-		frame.Icon:SetTexture(texture)
-		UpdateSettings(frame)
+	local totem_id = TOTEMS[unit.name]
+	if totem_id then
+		local db = TidyPlatesThreat.db.profile.totemSettings
+		frame.Icon:SetTexture(PATH .. db[totem_id].Style .. "\\" .. totem_id)
 		frame:Show()
+		-- not used: db[totem_id].ShowIcon
 	else
 		frame:_Hide()
 	end
@@ -105,6 +96,9 @@ local function CreateWidgetFrame(parent)
 	frame.Icon = frame:CreateTexture(nil, "OVERLAY")
 	frame.Icon:SetPoint("CENTER",frame)
 	frame.Icon:SetAllPoints(frame)
+
+	UpdateSettings(frame)
+	frame.UpdateConfig = UpdateSettings
 	--------------------------------------
 	-- End Custom Code
 

@@ -1,5 +1,5 @@
-﻿local ADDON_NAME, NAMESPACE = ...
-local TP = NAMESPACE.ThreatPlates
+﻿local ADDON_NAME, Addon = ...
+local TP = Addon.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants

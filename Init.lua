@@ -83,14 +83,6 @@ ThreatPlates.Active = function()
 	return val
 end
 
-ThreatPlates.TotemNameBySpellID = function(number)
-	local name = GetSpellInfo(number)
-	if not name then
-		return ""
-	end
-	return name
-end
-
 do
 	ThreatPlates.HCC = {}
 	for i=1,#CLASS_SORT_ORDER do

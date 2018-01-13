@@ -1,5 +1,5 @@
-local ADDON_NAME, NAMESPACE = ...
-local ThreatPlates = NAMESPACE.ThreatPlates
+local ADDON_NAME, Addon = ...
+local ThreatPlates = Addon.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------
 -- Stuff for handling the configuration of Threat Plates - ThreatPlatesDB
@@ -11,7 +11,6 @@ local ThreatPlates = NAMESPACE.ThreatPlates
 local L = ThreatPlates.L
 local RGB = ThreatPlates.RGB
 local RGB_P = ThreatPlates.RGB_P
-local TotemNameBySpellID = ThreatPlates.TotemNameBySpellID
 local HEX2RGB = ThreatPlates.HEX2RGB
 
 ---------------------------------------------------------------------------------------------------
@@ -23,6 +22,8 @@ local DEFAULT_FONT = "Cabin"
 ---------------------------------------------------------------------------------------------------
 -- Global contstants for various stuff
 ---------------------------------------------------------------------------------------------------
+Addon.TotemInformation = {} -- basic totem information
+Addon.TOTEMS = {} -- mapping table for fast access to totem settings
 
 ThreatPlates.ADDON_NAME = "Tidy Plates: Threat Plates"
 ThreatPlates.THEME_NAME = "Threat Plates"
@@ -149,63 +150,82 @@ ThreatPlates.FRIENDLY_SUBTEXT = {
 -- Totem data - define it one time for the whole addon
 -------------------------------------------------------------------------------
 
-ThreatPlates.TOTEM_DATA = {
+local TOTEM_DATA = {
   -- Totems from Totem Mastery
-  [1]  = {202188, "M1",  "b8d1ff"}, 	-- Resonance Totem
-  [2]  = {210651, "M2",	 "b8d1ff"},		-- Storm Totem
-  [3]  = {210657, "M3",  "b8d1ff"},		-- Ember Totem
-  [4]  = {210660, "M4",  "b8d1ff"},		-- Tailwind Totem
+  [1]  = { SpellID = 202188, ID = "M1", GroupColor = "b8d1ff"}, 	-- Resonance Totem
+  [2]  = { SpellID = 210651, ID = "M2",	GroupColor = "b8d1ff"},		-- Storm Totem
+  [3]  = { SpellID = 210657, ID = "M3", GroupColor = "b8d1ff"},		-- Ember Totem
+  [4]  = { SpellID = 210660, ID = "M4", GroupColor = "b8d1ff"},		-- Tailwind Totem
 
   -- Totems from spezialization
-  [5]  = {98008,  "S1",  "ffb31f"},		-- Spirit Link Totem
-  [6]  = {5394,	  "S2",  "ffb31f"},		-- Healing Stream Totem
-  [7]  = {108280, "S3",  "ffb31f"},		-- Healing Tide Totem
-  [8]  = {160161, "S4",  "ffb31f"}, 	-- Earthquake Totem
-  [9]  = {2484, 	"S5",	 "ffb31f"},  	-- Earthbind Totem (added patch 7.2, TP v8.4.0)
+  [5]  = { SpellID = 98008,  ID = "S1", GroupColor = "ffb31f"},		-- Spirit Link Totem
+  [6]  = { SpellID = 5394,	 ID = "S2", GroupColor = "ffb31f"},		-- Healing Stream Totem
+  [7]  = { SpellID = 108280, ID = "S3", GroupColor = "ffb31f"},		-- Healing Tide Totem
+  [8]  = { SpellID = 160161, ID = "S4", GroupColor = "ffb31f"}, 	-- Earthquake Totem
+  [9]  = { SpellID = 2484, 	 ID = "S5",	GroupColor = "ffb31f"},  	-- Earthbind Totem (added patch 7.2, TP v8.4.0)
 
   -- Lonely fire totem
-  [10] = {192222, "F1",  "ff8f8f"}, 	-- Liquid Magma Totem
+  [10] = { SpellID = 192222, ID = "F1", GroupColor = "ff8f8f"}, 	-- Liquid Magma Totem
 
   -- Totems from talents
-  [11] = {157153, "N1",  "4c9900"},		-- Cloudburst Totem
-  [12] = {51485,  "N2",  "4c9900"},		-- Earthgrab Totem
-  [13] = {192058, "N3",  "4c9900"},		-- Lightning  Surge Totem
-  [14] = {207399, "N4",  "4c9900"},		-- Ancestral Protection Totem
-  [15] = {192077, "N5",  "4c9900"},		-- Wind Rush Totem
-  [16] = {196932, "N6",  "4c9900"},		-- Voodoo Totem
-  [17] = {198838, "N7",  "4c9900"},		-- Earthen Shield Totem
+  [11] = { SpellID = 157153, ID = "N1", GroupColor = "4c9900"},		-- Cloudburst Totem
+  [12] = { SpellID = 51485,  ID = "N2", GroupColor = "4c9900"},		-- Earthgrab Totem
+  [13] = { SpellID = 192058, ID = "N3", GroupColor = "4c9900"},		-- Lightning  Surge Totem
+  [14] = { SpellID = 207399, ID = "N4", GroupColor = "4c9900"},		-- Ancestral Protection Totem
+  [15] = { SpellID = 192077, ID = "N5", GroupColor = "4c9900"},		-- Wind Rush Totem
+  [16] = { SpellID = 196932, ID = "N6", GroupColor = "4c9900"},		-- Voodoo Totem
+  [17] = { SpellID = 198838, ID = "N7", GroupColor = "4c9900"},		-- Earthen Shield Totem
 
   -- Totems from PVP talents
-  [18] = {204331, "P1",  "2b76ff"},	-- Counterstrike Totem
-  [19] = {204330, "P2",  "2b76ff"},	-- Skyfury Totem
-  [20] = {204332, "P3",  "2b76ff"},	-- Windfury Totem
-  [21] = {204336, "P4",  "2b76ff"},	-- Grounding Totem
+  [18] = { SpellID = 204331, ID = "P1", GroupColor = "2b76ff"},	-- Counterstrike Totem
+  [19] = { SpellID = 204330, ID = "P2", GroupColor = "2b76ff"},	-- Skyfury Totem
+  [20] = { SpellID = 204332, ID = "P3", GroupColor = "2b76ff"},	-- Windfury Totem
+  [21] = { SpellID = 204336, ID = "P4", GroupColor = "2b76ff"},	-- Grounding Totem
 }
 
-ThreatPlates.TOTEMS = {}
+function Addon:InitializeTotemInformation()
+  for i, totem_data in ipairs(TOTEM_DATA) do
+    local name, _ = GetSpellInfo(totem_data.SpellID) or UNKNOWNOBJECT, nil
 
-local function GetTotemSettings()
-  local totem_list = ThreatPlates.TOTEMS
+    totem_data.Name = name
+    totem_data.Color = RGB(HEX2RGB(totem_data.GroupColor))
+    totem_data.SortKey = totem_data.ID:sub(1, 1) .. name
+    totem_data.Style = "normal"
+    totem_data.ShowNameplate = true
+    totem_data.ShowHPColor = true
+    totem_data.ShowIcon = true
 
-  local settings = { hideHealthbar = false }
-  for no, totem_data in ipairs(ThreatPlates.TOTEM_DATA) do
-    local totem_spell_id = totem_data[1]
-    local totem_id = totem_data[2]
-    local totem_color = RGB(HEX2RGB(totem_data[3]))
+    Addon.TotemInformation[name] = totem_data
+    Addon.TOTEMS[name] = totem_data.ID
+  end
 
-    totem_list[TotemNameBySpellID(totem_spell_id)] = totem_id
+--  local test_name = "Hochexarch Turalyon"
+--  local id = "P4"
+--  Addon.TotemInformation[test_name] = {
+--    Name = test_name,
+--    SpellID = 204336,
+--    Icon = id,
+--    ID = id,
+--    SortKey = id:sub(1, 1) .. test_name,
+--    Style = "normal",
+--    Color = RGB(HEX2RGB("2b76ff")),
+--    GroupColor = "2b76ff",
+--    ShowNameplate = true,
+--    ShowHPColor = true,
+--    ShowIcon = true,
+--  }
+--  Addon.TOTEMS[test_name] = id
+end
 
-    --	["Reference"] = {allow totem nameplate, allow hp color, r, g, b, show icon, style}
-    settings[totem_id] = {
-      true, -- allow totem nameplate
-      true, -- allow hp color
-      true, -- show icon
-      nil,
-      nil,
-      nil,
-      "normal", -- style
-      color = totem_color, -- color of totem's healtbar
-    }
+local function GetDefaultTotemSettings()
+  Addon:InitializeTotemInformation()
+
+  local settings = {
+    hideHealthbar = false
+  }
+
+  for _, data in pairs(Addon.TotemInformation) do
+    settings[data.ID] = data
   end
 
   return settings
@@ -649,7 +669,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
       FontColor = RGB(255, 255, 255),
       -- TODO: add font flags like for custom text
     },
-    totemSettings = GetTotemSettings(),
+    totemSettings = GetDefaultTotemSettings(),
     uniqueSettings = {
       list = {},
       ["**"] = {

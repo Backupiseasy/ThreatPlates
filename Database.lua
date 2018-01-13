@@ -288,6 +288,25 @@ local function MigrateCastbarColoring(profile_name, profile)
   end
 end
 
+local function MigrationTotemSettings(profile_name, profile)
+  --TidyPlatesThreat.db.global.MigrationLog["TotemSettings"] = true
+  local entry = { "totemSettings" }
+  if DatabaseEntryExists(profile, entry) then
+    for key, value in pairs(profile.totemSettings) do
+      if type(value) == "table" then -- omit hideHealthbar setting
+        --TidyPlatesThreat.db.global.MigrationLog["TotemSettingsConvertign"] = key
+        profile.totemSettings[key] = {
+          Style = value[7],
+          Color = value.color,
+          ShowNameplate = value[1],
+          ShowHPColor = value[2],
+          ShowIcon = value[3],
+        }
+      end
+    end
+  end
+end
+
 local function MigrateAuraWidget(profile_name, profile)
   if DatabaseEntryExists(profile, { "debuffWidget" }) then
     --TidyPlatesThreat.db.global.MigrationLog["AuraWidget"] = "ON = " .. tostring(profile.AuraWidget.ON) .. " and ShowInHeadlineView = " .. tostring(profile.AuraWidget.ShowInHeadlineView)
@@ -322,7 +341,7 @@ local DEPRECATED_SETTINGS = {
   CustomTextShow = { MigrateCustomTextShow, },                -- settings.customtext.show
   BlizzFadeA = { MigrationBlizzFadeA, },                      -- blizzFadeA.toggle and blizzFadeA.amount
   TargetScale = { MigrationTargetScale, "8.5.0" },            -- nameplate.scale.Target/NoTarget
-  --AuraWidget = { MigrateAuraWidget, "8.6.0" },                -- disabled until someone requests it
+  --AuraWidget = { MigrateAuraWidget, "8.6.0" },              -- disabled until someone requests it
   AlphaFeatures = { "alphaFeatures" },
   AlphaFeatureHeadlineView = { "alphaFeatureHeadlineView" },
   AlphaFeatureAuraWidget2= { "alphaFeatureAuraWidget2" },
@@ -331,13 +350,14 @@ local DEPRECATED_SETTINGS = {
   HVBlizzFadingAlpha = { "HeadlineView", "blizzFadingAlpha"}, -- (removed in 8.5.1)
   HVNameWidth = { "HeadlineView", "name", "width" },          -- (removed in 8.5.0)
   HVNameHeight = { "HeadlineView", "name", "height" },        -- (removed in 8.5.0)
-  -- { "debuffWidget" }, -- in release 8.7 (removed in 8.6.0)
-  -- { "OldSettings" }, -- in release 8.7 (removed in 8.7.0)
+  DebuffWidget = { "debuffWidget" },                          -- (removed in 8.6.0)
+  OldSettings = { "OldSettings" },                            -- (removed in 8.7.0)
   CastbarColoring = { MigrateCastbarColoring, },              -- (removed in 8.7.0)
+  TotemSettings = { MigrationTotemSettings, "8.7.0" },        -- (changed in 8.7.0)
 }
 
 local function MigrateDatabase(current_version)
-  --TidyPlatesThreat.db.global.MigrationLog = {}
+  TidyPlatesThreat.db.global.MigrationLog = {}
 
   local profile_table = TidyPlatesThreat.db.profiles
   for key, entry in pairs(DEPRECATED_SETTINGS) do
