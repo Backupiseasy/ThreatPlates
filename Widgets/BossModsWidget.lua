@@ -395,7 +395,7 @@ local function CreateWidgetFrame(parent)
   frame:Hide()
 
   -- Custom Code
-  frame:SetFrameLevel(frame:GetFrameLevel() - 3)
+  frame:SetFrameLevel(frame:GetFrameLevel() + 2)
   frame.Auras = {}
   frame.AurasNo = 0
   frame.LastUpdate = 0.5

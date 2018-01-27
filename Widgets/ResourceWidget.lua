@@ -31,7 +31,7 @@ local function UpdateSettings(frame)
 
   frame:SetPoint("CENTER", frame:GetParent(), db.x, db.y)
   frame:SetSize(db.BarWidth, db.BarHeight)
-  frame:SetFrameLevel(frame:GetParent():GetFrameLevel() + 3)
+  frame:SetFrameLevel(frame:GetParent():GetFrameLevel() + 8)
 
   local bar = frame.Bar
   if db.ShowBar then
@@ -367,7 +367,7 @@ local function CreateWidgetFrame(parent)
   local db = TidyPlatesThreat.db.profile.ResourceWidget
   frame:SetPoint("CENTER", frame:GetParent(), db.x, db.y)
   frame:SetSize(db.BarWidth, db.BarHeight)
-  frame:SetFrameLevel(frame:GetParent():GetFrameLevel() + 3)
+  frame:SetFrameLevel(frame:GetParent():GetFrameLevel() + 8)
 
   local bar = frame.Bar
   bar:SetStatusBarTexture(ThreatPlates.Media:Fetch('statusbar', db.BarTexture))
