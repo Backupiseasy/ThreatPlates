@@ -260,7 +260,7 @@ local function CreateWidgetFrame(parent)
 
   -- Custom Code
   frame:SetSize(64, 64)
-  frame:SetFrameLevel(parent:GetFrameLevel() + 2)
+  frame:SetFrameLevel(parent:GetFrameLevel() + 7)
 
   frame.Icon = frame:CreateTexture(nil, "OVERLAY")
 

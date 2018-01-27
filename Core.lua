@@ -513,7 +513,7 @@ local function FrameOnShow(UnitFrame)
   end
 
   -- Skip the personal resource bar of the player character
-  if UnitIsUnit(UnitFrame.unit, "player") then
+  if UnitIsUnit(UnitFrame.unit, "player") then -- or: ns.PlayerNameplate == GetNamePlateForUnit(UnitFrame.unit)
     return
   end
 
@@ -530,9 +530,17 @@ end
 
 -- Frame: self = plate
 local function FrameOnUpdate(plate)
+--  if plate == ns.PlayerNameplate then
+--    print ("FrameOnUpdate: skipping player")
+--    plate.UnitFrame:SetScript('OnShow', nil)
+--    plate.UnitFrame:SetScript('OnHide', nil)
+--    plate:SetScript('OnUpdate', nil)
+--    return
+--  end
+
   -- Skip the personal resource bar of the player character
   local unitid = plate.UnitFrame.unit
-  if UnitIsUnit(unitid, "player") then
+  if unitid and UnitIsUnit(unitid, "player") then
     return
   end
 
@@ -540,7 +548,7 @@ local function FrameOnUpdate(plate)
   --local frame_level = plate:GetFrameLevel()
   --plate.extended:SetFrameLevel(frame_level)
   --plate.extended.defaultLevel = frame_level -- not sure, if necessary
-  plate.TP_Extended:SetFrameLevel(plate:GetFrameLevel() * 10 + 5)
+  plate.TP_Extended:SetFrameLevel(plate:GetFrameLevel() * 10)
 
   -- Hide ThreatPlates nameplates if Blizzard nameplates should be shown for friendly units
   if TidyPlatesThreat.db.profile.ShowFriendlyBlizzardNameplates and unitid and UnitReaction(unitid, "player") > 4 then

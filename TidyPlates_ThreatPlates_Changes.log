@@ -1,4 +1,10 @@
 ------------------------------------------------------
+8.6.3 (Standalone, TidyPlates is no longer required)
+------------------------------------------------------
+* Fixed a bug where the overlay for non-interruptible casts was shown even for interruptible casts when entering combat for units that were casting at that moment [E-mail message].
+* Optimized the code for ignoring the character's personal resource bar nameplate and for the layering of nameplate elements.
+
+------------------------------------------------------
 8.6.2 (Standalone, TidyPlates is no longer required)
 ------------------------------------------------------
 * Fixed a LUA error which could occur with nameplates created, but having no unit assigned yet [Comment #634].
@@ -28,7 +34,7 @@
 ------------------------------------------------------
 8.5.4 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
-* Fixed a bug with layering of the target highlight (e.g.,  threat glow covered the target highlight) [Comment #568, email].
+* Fixed a bug with layering of the target highlight (e.g.,  threat glow covered the target highlight) [Comment #568, E-mail message].
 * Fixed a bug where changes to the placement of several icons were not applied until reloading the UI.
 * Fixed a bug in the options dialog where preview images where not updated after changing the active profile.
 * Changed defaults for Target and No Target scale again to more reasonable values.
@@ -58,7 +64,7 @@
 * Added an option to set the background of the nameplate's castbar (including color and transparency) [Ticket #135, PM].
 * Added a feature to display absorbs at the healthbar of nameplates [Comment #479].
 * Added an option to hide friendly nameplates while in combat (Nameplate Settings - Visibility - Hide Nameplates) [Comment #478].
-* Added an option to force headline view on friendly nameplates while in combat (Nameplate Settings - Headline View - Force View By Status) [email request].
+* Added an option to force headline view on friendly nameplates while in combat (Nameplate Settings - Headline View - Force View By Status) [E-mail request].
 * Added new spells from Argus mobs to stealth widget ("Demonic Senses", "One With the Void", "Weapon Scope")  .
 * Added an option to force headline view for non-attackable enemy units (hostile, neutral) [Ticket #132].
 * Added a (non-configurable) reaction color for unfriendly, non-attackable hostile units (orange/brown, used in the Argus introduction quests).
@@ -120,7 +126,7 @@
 * ThreatPlates v8.4 introduces a new default look and feel. A dialog asking if it should be used as default will be shown after the first login.
 * Added fully customizable headline view (name-only) (added configuration options and removed dependency to TidyPlatesHub) [Ticket #34, #119, Comment #345, #338].
 * Added off-tank mode to threat system (with own color, scale, and opacity for mobs tanked by off-tank) [Ticket #9,Comment #339].
-* Added new filter options to aura widget 2.0 for whitelist and blacklist mode: use All and My before a spell name or ID to whitelist or blacklist a spell based on the caster [Comment #385, email request].
+* Added new filter options to aura widget 2.0 for whitelist and blacklist mode: use All and My before a spell name or ID to whitelist or blacklist a spell based on the caster [Comment #385, E-mail request].
 * Added a new widget for showing the resource or power of target units (mana, rage, or alternate power for bosses) [Request from WowInterface].
 * Added an option to enable clickthrough for friendly and enemy nameplates [Comment #370, #375].
 * Added an option to change scaling and opacity (alpha) for casting, mouseover and target units [Comment #363].

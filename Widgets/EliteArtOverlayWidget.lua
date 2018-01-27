@@ -79,7 +79,7 @@ local function CreateWidgetFrame(parent)
 
 	-- Custom Code III
 	--------------------------------------
-	frame:SetFrameLevel(parent:GetFrameLevel())
+	frame:SetFrameLevel(parent:GetFrameLevel() + 5)
 	frame:SetSize(256, 64)
 	frame:SetPoint("CENTER",parent,"CENTER")
 	frame.Border = frame:CreateTexture(nil, "ARTWORK", 4)

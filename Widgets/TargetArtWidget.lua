@@ -100,7 +100,7 @@ local function CreateWidgetFrame(parent)
 	--------------------------------------
 	-- framelevel of Target Highlight must be the same as visual.target (target highlight of TidyPlates)
   -- that is: extended.healthbar.textFrame, texture target (BACKGROUND)
-	frame:SetFrameLevel(parent:GetFrameLevel() + 1)
+	frame:SetFrameLevel(parent:GetFrameLevel() + 6)
 	frame:SetSize(256, 64)
 	frame:SetPoint("CENTER", parent, "CENTER")
 

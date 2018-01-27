@@ -208,7 +208,7 @@ do
 		local healthbar = CreateTidyPlatesInternalStatusbar(extended)
 		healthbar.Backdrop:SetDrawLayer("BORDER",-8)
 		healthbar.Bar:SetDrawLayer("BORDER",-7)
-		local textFrame = CreateFrame("Frame", nil, healthbar)
+		local textFrame = CreateFrame("Frame", nil, extended)
 		--local widgetParent = CreateFrame("Frame", nil, textFrame)
 
 		textFrame:SetAllPoints()
@@ -247,9 +247,9 @@ do
 		textFrame:SetFrameStrata("BACKGROUND")
     --widgetParent:SetFrameStrata("BACKGROUND")
 
-    castbar:SetFrameLevel(extended:GetFrameLevel() - 1)
-    healthbar:SetFrameLevel(extended:GetFrameLevel())
-    textFrame:SetFrameLevel(extended:GetFrameLevel() + 1)
+    castbar:SetFrameLevel(extended:GetFrameLevel() + 4)
+    healthbar:SetFrameLevel(extended:GetFrameLevel() + 5)
+    textFrame:SetFrameLevel(extended:GetFrameLevel() + 6)
 
 		castbar:Hide()
 		castbar:SetStatusBarColor(1,.8,0)
@@ -449,7 +449,19 @@ do
 
 		UpdateUnitCondition(plate, unitid)
 		ProcessUnitChanges()
-		UpdateIndicator_HealthBar()		-- Just to be on the safe side
+
+    -- Fix a bug where the overlay for non-interruptible casts was shown even for interruptible casts when entering combat while the unit was already casting
+    if unit.isCasting then
+      if unit.spellIsShielded then
+        visual.castnostop:Show()
+        visual.castborder:Hide()
+      else
+        visual.castnostop:Hide()
+        visual.castborder:Show()
+      end
+    end
+
+    UpdateIndicator_HealthBar()		-- Just to be on the safe side
   end
 
 
@@ -835,8 +847,12 @@ do
     castBar:SetAllColors(activetheme.SetCastbarColor(unit))
 
 		if unit.spellIsShielded then
-			   visual.castnostop:Show(); visual.castborder:Hide()
-		else visual.castnostop:Hide(); visual.castborder:Show() end
+			visual.castnostop:Show()
+			visual.castborder:Hide()
+		else
+			visual.castnostop:Hide()
+			visual.castborder:Show()
+		end
 
 		UpdateIndicator_CustomScaleText()
 		UpdateIndicator_CustomAlpha()
@@ -870,13 +886,15 @@ do
 		local currentTime = GetTime() * 1000
 
 		-- Check to see if there's a spell being cast
-		if UnitCastingInfo(unitid) then OnStartCasting(plate, unitid, false)
+		if UnitCastingInfo(unitid) then
+      OnStartCasting(plate, unitid, false)
 		else
 		-- See if one is being channeled...
-			if UnitChannelInfo(unitid) then OnStartCasting(plate, unitid, true) end
+			if UnitChannelInfo(unitid) then
+        OnStartCasting(plate, unitid, true)
+      end
 		end
 	end
-
 
 end -- End Indicator section
 
@@ -943,13 +961,6 @@ do
 
 	function CoreEvents:NAME_PLATE_CREATED(...)
 		local plate = ...
-		local BlizzardFrame = plate:GetChildren()
-
-		-- hooksecurefunc([table,] "function", hookfunc)
-
-		--BlizzardFrame._Show = BlizzardFrame.Show	-- Store this for later
-		--BlizzardFrame.Show = BlizzardFrame.Hide			-- Try this to keep the plate from showing up
-		-- --BlizzardFrame.Show = BypassFunction			-- Try this to keep the plate from showing up
 		OnNewNameplate(plate)
 	 end
 
@@ -957,15 +968,14 @@ do
 		local unitid = ...
 		local plate = GetNamePlateForUnit(unitid);
 
-		-- Personal Display
+		-- Handle personal resource bar, currently it's ignored by Threat Plates
 		if UnitIsUnit("player", unitid) then
-			-- plate:GetChildren():_Show()
-		-- Normal Plates
+			--addon.PlayerNameplate = plate
+			--print ("NAME_PLATE_UNIT_ADDED: player frame")
 		else
-			plate:GetChildren():Hide()
+			--plate:GetChildren():Hide()
 			OnShowNameplate(plate, unitid)
 		end
-
 	end
 
 	function CoreEvents:NAME_PLATE_UNIT_REMOVED(...)
@@ -1152,17 +1162,6 @@ do
 
 	local texturegroup = { "castborder", "castnostop", "healthborder", "threatborder", "eliteicon",
 						"skullicon", "highlight", "target", "spellicon", }
---  local texturegroup = {
---    { "castborder",   "BACKGROUND", 1 },
---    { "castnostop",   "BACKGROUND", 2 },
---    { "spellicon",    "BACKGROUND", 7 },
---    { "healthborder", "BORDER", 0 },
---    { "threatborder", "BORDER", 2 },
---    { "highlight",    "ARTWORK", 0 },
---    { "eliteicon",    "ARTWORK", 1 },
---    { "skullicon",    "ARTWORK", 2 },
---    { "target",       "BACKGROUND", 0 },
---  }
 
 	-- UpdateStyle:
 	function UpdateStyle()
@@ -1178,38 +1177,38 @@ do
 			if objectstyle and objectstyle.show then
 				SetAnchorGroupObject(object, objectstyle, extended)
 				visual[objectname]:Show()
-			else visual[objectname]:Hide() end
+			else
+        visual[objectname]:Hide()
+      end
 		end
 
-		-- Bars
+    -- Bars
 		for index = 1, #bargroup do
 			local objectname = bargroup[index]
 			local object, objectstyle = visual[objectname], style[objectname]
 			if objectstyle then SetBarGroupObject(object, objectstyle, extended) end
-		end
+    end
+
 		-- Texture
     for index = 1, #texturegroup do
       local objectname = texturegroup[index]
       local object, objectstyle = visual[objectname], style[objectname]
       SetTextureGroupObject(object, objectstyle)
     end
---		for index = 1, #texturegroup do
---			local objectname = texturegroup[index][1]
---			local object, objectstyle = visual[objectname], style[objectname]
---			SetTextureGroupObject(object, objectstyle)
---      --object:SetDrawLayer(texturegroup[index][2], texturegroup[index][3])
---		end
+
 		-- Raid Icon Texture
 		if style and style.raidicon and style.raidicon.texture then
 			visual.raidicon:SetTexture(style.raidicon.texture)
       visual.raidicon:SetDrawLayer("ARTWORK", 5)
-		end
+    end
+
 		-- Font Group
 		for index = 1, #fontgroup do
 			local objectname = fontgroup[index]
 			local object, objectstyle = visual[objectname], style[objectname]
 			SetFontGroupObject(object, objectstyle)
-		end
+    end
+
 		-- Hide Stuff
 		if not unit.isElite then visual.eliteicon:Hide() end
 		if not unit.isBoss then visual.skullicon:Hide() end
