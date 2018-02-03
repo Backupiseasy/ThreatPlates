@@ -1,6 +1,8 @@
 ------------------------------------------------------
 8.7.0-Alpha4
 ------------------------------------------------------
+* Added an option to resize the healthbar, i.e., to change width and height independently from each other [PM, Issue #142, Comment #623].
+* Fixed a Lua error with scaling and transparency on nameplates that had no unit assigned yet.
 * Fixed a bug with totem nameplates not being shown if healthbar should be hidden, but icon should be shown.
 
 ------------------------------------------------------
@@ -33,7 +35,7 @@
 ------------------------------------------------------
 8.6.2 (Standalone, TidyPlates is no longer required)
 ------------------------------------------------------
-* Fixed a LUA error which could occur with nameplates created, but having no unit assigned yet [Comment #634].
+* Fixed a Lua error which could occur with nameplates created, but having no unit assigned yet [Comment #634].
 
 ------------------------------------------------------
 8.6.1 (Standalone, TidyPlates is no longer required)
@@ -72,14 +74,14 @@
 * Fixed a bug with migrating scale settings for Target and No Target (from configurations before 8.5.0) which were migrated every time a new version of ThreatPlates was installed [Ticket #141].
 * Fixed bugs in frame layers of TidyPlates and ThreatPlates nameplate elements (flickering when moving mouse over units).
 * Fixed defaults for Target and No Target scale to be 0% (instead of -100%).
-* Fixed LUA error with the nameplate castbar when a cast was started but no unit was assigned.
+* Fixed Lua error with the nameplate castbar when a cast was started but no unit was assigned.
 * Fixed several bugs when migrating old configuration settings.
 * Fixed a wrong translations in German localization.
 
 ------------------------------------------------------
 8.5.2 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
-* Fixed a LUA error with absorbs on character when personal resource bar is enabled.
+* Fixed a Lua error with absorbs on character when personal resource bar is enabled.
 * Fixed a bug with custom text where "UNKOWN" was displayed for NPC units without role description.
 
 ------------------------------------------------------
@@ -94,7 +96,7 @@
 * Added new spells from Argus mobs to stealth widget ("Demonic Senses", "One With the Void", "Weapon Scope")  .
 * Added an option to force headline view for non-attackable enemy units (hostile, neutral) [Ticket #132].
 * Added a (non-configurable) reaction color for unfriendly, non-attackable hostile units (orange/brown, used in the Argus introduction quests).
-* Fixed a bug in custom nameplates that resulted in a LUA error when using "Restore Defaults".
+* Fixed a bug in custom nameplates that resulted in a Lua error when using "Restore Defaults".
 * Fixed a bug in custom nameplates where custom color was not used although enabled [Ticket #139].
 * Fixed a bug in the "Spec Roles" configuration that resulted in the list of active specs being empty.
 * Fixed a bug (in TidyPlates) where a unit's name is not updated from "Unknown Entity" as soon as possible (only after, e.g., you mouseover the unit).
@@ -119,10 +121,10 @@
 * Added an option to set scale and alpha for casting units based on their reaction (friendly or enemy) [Commen #468].
 * Using custom horde and alliance icons now (from CleanIcons - Thin, see http://www.wowinterface.com/downloads/info19844) instead of build-in ones to social widget.
 * Improved consistency of names and status/custom/health text configuration between healthbar and headline view.
-* Fixed a LUA error in combo point widget in certain situations when combo points were updated.
+* Fixed a Lua error in combo point widget in certain situations when combo points were updated.
 * Fixed a bug with quest widget where the quest indicator was hidden when one of several quests on the unit was completed.
 * Fixed a bug in status text Everything/NPC Role, Guild, Level where level was not show for players.
-* Fixed a LUA error in names coloring for friends and guild members [Ticket #133].
+* Fixed a Lua error in names coloring for friends and guild members [Ticket #133].
 * Fixed a bug with headline view for custom nameplates where health was used exclusively for status text and the actual setting from the options was ignored.
 * Fixed a bug with custom nameplates where headline view was used, although globally disabled.
 * Fixed a bug with "Filter by Spell" in aura 2.0 widget. Filtering with keywords "All", "My", and (new) "Not" should now work as expected (see https://wow.curseforge.com/projects/tidy-plates-threat-plates/pages/help) [Comment #486].
@@ -133,7 +135,7 @@
 * Added options to change symbol style and color (based on type of quest) to quest widget [Comment #433].
 * Added an option to use a custom color for the target's healthbar (Nameplate Settings - Healthbar View) [Comment #460].
 * Added an option to hide or show threat feedback when not in an instance. Also, fixed some localization bugs [Comment # 434].
-* Fixed a LUA error related to the visibility settings of units triggered by enemy players turning to neutral, e.g., when using a flight path [Ticket #124].
+* Fixed a Lua error related to the visibility settings of units triggered by enemy players turning to neutral, e.g., when using a flight path [Ticket #124].
 * Fixed a bug with quest widget not being updated immediately after entering a world quest area.
 * Added new spell Vigilant to stealth widget.
 * Restructured lots of internal stuff in various files (default settings, SavedVariables handling, AceAddon handling).
@@ -142,7 +144,7 @@
 ------------------------------------------------------
 8.4.1 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
-* Fixed a LUA error bug in the aura 2.0 widget when sort order "None" was selected [Comment #451].
+* Fixed a Lua error bug in the aura 2.0 widget when sort order "None" was selected [Comment #451].
 * Fixed a bug in the aura widget where the aura filter was not used after switching the active theme to ThreatPlates in TidyPlates.
 * Fixed bugs in localization deDE (German).
 
@@ -271,7 +273,7 @@
 ------------------------------------------------------
 8.2.2 (works with TidyPlates 6.18.9)
 ------------------------------------------------------
-* Fixed a LUA error in combo point widget
+* Fixed a Lua error in combo point widget
 * Disabled version check for TidyPlates version until working properly
 * Known issues:
   * Switching between ThreatPlates and other themes may require /reload for the new theme to work correctly

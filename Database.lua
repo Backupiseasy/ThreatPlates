@@ -307,6 +307,32 @@ local function MigrationTotemSettings(profile_name, profile)
   end
 end
 
+local function MigrateBorderTextures(profile_name, profile)
+  if DatabaseEntryExists(profile, { "targetWidget", "theme" } ) then
+    if profile.targetWidget.theme == "default" then
+      profile.targetWidget.theme = "TP_Target_Default"
+    elseif profile.targetWidget.theme == "squarethin" then
+      profile.targetWidget.theme = "TP_Target_Thin"
+    end
+  end
+
+  if DatabaseEntryExists(profile, { "settings", "elitehealthborder", "texture" } ) then
+    if profile.settings.elitehealthborder.theme == "TP_HealthBarEliteOverlay" then
+      profile.settings.elitehealthborder.theme = "TP_EliteBorder_Default"
+    else -- TP_HealthBarEliteOverlayThin
+      profile.settings.elitehealthborder.theme = "TP_EliteBorder_Thin"
+    end
+  end
+
+  if DatabaseEntryExists(profile, { "settings", "healthborder", "texture" } ) then
+    if profile.settings.healthborder.theme == "TP_HealthBarOverlay" then
+      profile.settings.healthborder.theme = "TP_Border_Default"
+    else -- TP_HealthBarOverlayThin
+      profile.settings.healthborder.theme = "TP_Border_Thin"
+    end
+  end
+end
+
 local function MigrateAuraWidget(profile_name, profile)
   if DatabaseEntryExists(profile, { "debuffWidget" }) then
     --TidyPlatesThreat.db.global.MigrationLog["AuraWidget"] = "ON = " .. tostring(profile.AuraWidget.ON) .. " and ShowInHeadlineView = " .. tostring(profile.AuraWidget.ShowInHeadlineView)
@@ -354,6 +380,7 @@ local DEPRECATED_SETTINGS = {
   OldSettings = { "OldSettings" },                            -- (removed in 8.7.0)
   CastbarColoring = { MigrateCastbarColoring, },              -- (removed in 8.7.0)
   TotemSettings = { MigrationTotemSettings, "8.7.0" },        -- (changed in 8.7.0)
+  Borders = { MigrateBorderTextures, "8.7.0" }                       -- (changed in 8.7.0)
 }
 
 local function MigrateDatabase(current_version)

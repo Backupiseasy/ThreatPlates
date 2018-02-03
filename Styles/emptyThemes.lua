@@ -1,38 +1,43 @@
 local _, ns = ...
 local t = ns.ThreatPlates
 
+local EMPTY_TEXTURE = t.Art .. "Empty"
+
 local function Create(self,name)
 	local db = self.db.profile.settings
 	local theme = {}
 	theme = {
 		hitbox = { width = 124,	height = 30,	},
+
 		frame = {
-			emptyTexture =					t.Art.."Empty",
+			emptyTexture = EMPTY_TEXTURE,
 			width = 124,
 			height = 30,
 			x = 0,
 			y = 0,
 			anchor = "CENTER",
 		},
-		threatborder = {
-			texture =						t.Art.."Empty",
-			width = 256,
-			height = 64,
-			x = 0,
-			y = 0,
-			anchor = "CENTER",
-		},
+
 		healthborder = {
-			texture = 						t.Art.."Empty",
-			elitetexture = 					t.Art.."Empty",
+			show = false,
+		},
+
+		threatborder = {
+			texture =	EMPTY_TEXTURE,
 			width = 256,
 			height = 64,
 			x = 0,
 			y = 0,
 			anchor = "CENTER",
+			show = false,
 		},
+
+		highlight = {
+			show = false,
+		},
+
 		castborder = {
-			texture =						t.Art.."Empty",
+			texture =	EMPTY_TEXTURE,
 			width = 256,
 			height = 64,
 			x = 0,
@@ -40,15 +45,16 @@ local function Create(self,name)
 			anchor = "CENTER",
 		},
 		castnostop = {
-			texture =						t.Art.."Empty",
+			texture =	EMPTY_TEXTURE,
 			width = 256,
 			height = 64,
 			x = 0,
 			y = -15,
 			anchor = "CENTER",
 		},
+
 		healthbar = {
-			texture = 						t.Art.."Empty",
+			texture = EMPTY_TEXTURE,
 			width = 120,
 			height = 10,
 			x = 0,
@@ -56,8 +62,13 @@ local function Create(self,name)
 			anchor = "CENTER",
 			orientation = "HORIZONTAL",
 		},
+
+    target = {
+      show = false,
+    },
+
 		castbar = {
-			texture =						t.Art.."Empty",
+			texture =	EMPTY_TEXTURE,
 			width = 120,
 			height = 10,
 			x = 0,
@@ -150,7 +161,7 @@ local function Create(self,name)
 			show = false,
 		},
 		eliteicon = {
-      texture = t.Art.."Empty",
+      texture = EMPTY_TEXTURE,
       show = false,
     },
 		threatcolor = {

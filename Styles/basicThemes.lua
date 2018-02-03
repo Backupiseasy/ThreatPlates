@@ -8,18 +8,39 @@ local function Create(self,name)
   local db = self.db.profile.settings
   local theme = {}
   theme = {
+
     hitbox = {
       width = 128,
       height = 24,
     },
+
     frame = {
       emptyTexture = ThreatPlates.Art.."Empty",
-      width = 124,
-      height = 30,
+      width = db.healthbar.width + 4,
+      height = db.healthbar.height + 20,
       x = db.frame.x,
       y = db.frame.y,
       anchor = "CENTER",
     },
+
+    healthbar = {
+      texture = ThreatPlates.Media:Fetch('statusbar', db.healthbar.texture),
+      backdrop = ThreatPlates.Media:Fetch('statusbar', db.healthbar.backdrop, true),
+      width = db.healthbar.width,
+      height = db.healthbar.height,
+      x = 0,
+      y = 0,
+      anchor = "CENTER",
+      orientation = "HORIZONTAL",
+    },
+
+    healthborder = {
+      texture = ThreatPlates.Art .. db.healthborder.texture,
+      edgesize = db.healthborder.EdgeSize,
+      offset = db.healthborder.Offset,
+      show = db.healthborder.show,
+    },
+
     threatborder = {
       texture = ThreatPlates.Art.."TP_Threat",
       width = 256,
@@ -29,24 +50,11 @@ local function Create(self,name)
       anchor = "CENTER",
       show = db.threatborder.show,
     },
+
     highlight = {
-      texture = ThreatPlates.Art..db.highlight.texture,
-      width = 256,
-      height = 64,
-      x = 0,
-      y = 0,
-      anchor = "CENTER",
+      show = db.highlight.show,
     },
-    healthborder = {
-      texture = ThreatPlates.Art..db.healthborder.texture,
-      backdrop = ThreatPlates.Art..db.healthborder.backdrop,
-      width = 256,
-      height = 64,
-      x = 0,
-      y = 0,
-      anchor = "CENTER",
-      show = db.healthborder.show,
-    },
+
     eliteicon = {
       texture = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\EliteArtWidget\\"..db.eliteicon.theme,
       width = db.eliteicon.scale,
@@ -77,25 +85,10 @@ local function Create(self,name)
       show = db.castborder.show, -- only checked by TidyPlades after a /reload
     },
 
-    healthbar = {
-      texture = ThreatPlates.Media:Fetch('statusbar', db.healthbar.texture),
-      backdrop = ThreatPlates.Media:Fetch('statusbar', db.healthbar.backdrop, true),
-      width = 120,
-      height = 10,
-      x = 0,
-      y = 0,
-      anchor = "CENTER",
-      orientation = "HORIZONTAL",
-    },
     target = {
-      texture = "",
-      width = 0,
-      height = 0,
-      x = 0,
-      y = 0,
-      anchor = "CENTER",
       show = false,
     },
+
     castbar = {
       texture = ThreatPlates.Media:Fetch('statusbar', db.castbar.texture),
       backdrop = ThreatPlates.Media:Fetch('statusbar', db.castbar.backdrop, true),

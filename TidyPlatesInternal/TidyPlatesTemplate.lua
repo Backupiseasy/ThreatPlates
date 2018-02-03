@@ -18,24 +18,25 @@ TemplateTheme.hitbox = {
 }
 
 TemplateTheme.highlight = {
-	texture =					EMPTY_TEXTURE,
-	width = 128,
-	height = 64,
+	texture =	EMPTY_TEXTURE,
+	show = false,
 }
 
 TemplateTheme.healthborder = {
-	texture		 =				EMPTY_TEXTURE,
-	width = 0,
-	height = 64,
-	x = 0,
-	y = -5,
-	anchor = "CENTER",
+  texture =	EMPTY_TEXTURE,
+  edgesize = 0,
+  offset = 0,
+  -- width = 0,
+  -- height = 64,
+	-- x = 0,
+  -- y = -5,
+  -- anchor = "CENTER",
 	show = true,
 	-- Texture Coordinates
-	left = 0,
-	right = 1,
-	top = 0,
-	bottom = 1,
+  -- left = 0,
+  -- right = 1,
+  -- top = 0,
+  -- bottom = 1,
 }
 
 TemplateTheme.eliteicon = {

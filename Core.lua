@@ -6,19 +6,16 @@ local t = Addon.ThreatPlates
 ---------------------------------------------------------------------------------------------------
 
 -- Lua APIs
+local tonumber = tonumber
 
 -- WoW APIs
-local UnitIsUnit = UnitIsUnit
-local UnitReaction = UnitReaction
+local UnitIsUnit, UnitReaction = UnitIsUnit, UnitReaction
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local SetNamePlateFriendlyClickThrough = C_NamePlate.SetNamePlateFriendlyClickThrough
 local SetNamePlateEnemyClickThrough = C_NamePlate.SetNamePlateEnemyClickThrough
-local NamePlateDriverFrame = NamePlateDriverFrame
-local UnitName = UnitName
-local UNKNOWNOBJECT = UNKNOWNOBJECT
-local GetCVar = GetCVar
-local SetCVar = SetCVar
-local IsInInstance = IsInInstance
+local UnitName, IsInInstance = UnitName, IsInInstance
+local GetCVar, SetCVar = GetCVar, SetCVar
+local C_NamePlate_SetNamePlateFriendlySize, C_NamePlate_SetNamePlateEnemySize, Lerp =  C_NamePlate.SetNamePlateFriendlySize, C_NamePlate.SetNamePlateEnemySize, Lerp
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
@@ -300,6 +297,20 @@ end
 ---------------------------------------------------------------------------------------------------
 -- AceAddon functions: do init tasks here, like loading the Saved Variables, or setting up slash commands.
 ---------------------------------------------------------------------------------------------------
+-- Copied from ElvUI:
+function TidyPlatesThreat:SetBaseNamePlateSize()
+  local baseWidth = self.db.profile.settings.healthbar.width + 4
+  local baseHeight = self.db.profile.settings.healthbar.height + 35
+
+  -- this wont taint like NamePlateDriverFrame.SetBaseNamePlateSize
+  local zeroBasedScale = tonumber(GetCVar("NamePlateVerticalScale")) - 1.0
+  local horizontalScale = tonumber(GetCVar("NamePlateHorizontalScale"))
+  --local clampedZeroBasedScale = Saturate(zeroBasedScale)
+  C_NamePlate_SetNamePlateFriendlySize(baseWidth * horizontalScale, baseHeight * Lerp(1.0, 1.25, zeroBasedScale))
+  C_NamePlate_SetNamePlateEnemySize(baseWidth * horizontalScale, baseHeight * Lerp(1.0, 1.25, zeroBasedScale))
+  --C_NamePlate_SetNamePlateSelfSize(baseWidth * horizontalScale * Lerp(1.1, 1.0, clampedZeroBasedScale), baseHeight)
+  print ("SetBaseNamePlateSize")
+end
 
 -- The OnInitialize() method of your addon object is called by AceAddon when the addon is first loaded
 -- by the game client. It's a good time to do things like restore saved settings (see the info on
@@ -329,6 +340,7 @@ function TidyPlatesThreat:OnInitialize()
 
   -- Setup chat commands
   self:RegisterChatCommand("tptp", "ChatCommand")
+  self:SetBaseNamePlateSize()
 end
 
 -- The OnEnable() and OnDisable() methods of your addon object are called by AceAddon when your addon is
@@ -559,11 +571,11 @@ end
 local function FrameOnUpdate(plate)
   -- unitid should always be defined as FrameOnShow hides frames which not have it defined (and FrameOnUpdate is not called on them consequently)
   local unitid = plate.UnitFrame.unit
-  if UnitIsUnit(unitid, "player") then
+  if not unitid or UnitIsUnit(unitid, "player") then
     return
   end
 
-  plate.TP_Extended:SetFrameLevel(plate:GetFrameLevel() * 10 + 5)
+  plate.TP_Extended:SetFrameLevel(plate:GetFrameLevel() * 10)
 
   -- Hide ThreatPlates nameplates if Blizzard nameplates should be shown for friendly units
   if TidyPlatesThreat.db.profile.ShowFriendlyBlizzardNameplates and UnitReaction(unitid, "player") > 4 then

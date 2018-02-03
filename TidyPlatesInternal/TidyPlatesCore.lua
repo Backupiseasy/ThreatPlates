@@ -9,7 +9,7 @@ TidyPlatesInternal = {}
 
 -- Local References
 local _
-local max = math.max
+local max, tonumber = math.max, tonumber
 local select, pairs, tostring  = select, pairs, tostring 			    -- Local function copy
 local CreateTidyPlatesInternalStatusbar = CreateTidyPlatesInternalStatusbar			    -- Local function copy
 
@@ -146,12 +146,12 @@ do
 		end
 	end
 
-        -- OnUpdate; This function is run frequently, on every clock cycle
+  -- OnUpdate; This function is run frequently, on every clock cycle
 	function OnUpdate(self, e)
 		-- Poll Loop
-        local plate, curChildren
+    local plate, curChildren
 
-        -- Detect when cursor leaves the mouseover unit
+    -- Detect when cursor leaves the mouseover unit
 		if HasMouseover and not UnitExists("mouseover") then
 			HasMouseover = false
 			SetUpdateAll()
@@ -172,10 +172,7 @@ do
 				end
 				plate.UpdateMe = false
 				plate.UpdateHealth = false
-
-				plate:GetChildren():Hide()
-
-			end
+      end
 		-- This would be useful for alpha fades
 		-- But right now it's just going to get set directly
 		-- extended:SetAlpha(extended.requestedAlpha)
@@ -228,12 +225,11 @@ do
       self:GetParent():Hide()
     end)
 
-		local healthbar = CreateTidyPlatesInternalStatusbar(extended)
-		healthbar.Backdrop:SetDrawLayer("BORDER",-8)
-		healthbar.Bar:SetDrawLayer("BORDER",-7)
-		--local textFrame = CreateFrame("Frame", nil, healthbar)
+--		local healthbar = CreateTidyPlatesInternalStatusbar(extended)
+--		healthbar.Backdrop:SetDrawLayer("BORDER",-8)
+--    healthbar.Bar:SetDrawLayer("BORDER",-7)
+    local healthbar = CreateThreatPlatesHealthbar(extended)
 		local textFrame = CreateFrame("Frame", nil, extended)
-		--local widgetParent = CreateFrame("Frame", nil, textFrame)
 
 		textFrame:SetAllPoints()
 
@@ -243,14 +239,15 @@ do
     visual.textframe = textFrame
 
 		-- Parented to Health Bar - Lower Frame
-    visual.threatborder = healthbar:CreateTexture(nil, "BORDER", 2)
-    visual.healthborder = healthbar:CreateTexture(nil, "BORDER", 0)
-		visual.highlight = healthbar:CreateTexture(nil, "ARTWORK")
+    visual.threatborder = healthbar.ThreatBorder
+    visual.healthborder = healthbar.Border
+    visual.highlight = healthbar:CreateTexture(nil, "ARTWORK")
+
     -- Parented to Extended - Middle Frame
     visual.raidicon = textFrame:CreateTexture(nil, "ARTWORK", 5)
     visual.skullicon = textFrame:CreateTexture(nil, "ARTWORK", 2)
     visual.eliteicon = textFrame:CreateTexture(nil, "ARTWORK", 1)
-    visual.target = textFrame:CreateTexture(nil, "BACKGROUND") -- next visual.highlight -5?
+    visual.target = textFrame:CreateTexture(nil, "BACKGROUND")
 		-- TextFrame
     visual.name  = textFrame:CreateFontString(nil, "ARTWORK", 0)
     visual.customtext = textFrame:CreateFontString(nil, "ARTWORK", -1)
@@ -269,8 +266,9 @@ do
 
     -- Set Base Properties
 		visual.raidicon:SetTexture("Interface\\TargetingFrame\\UI-RaidTargetingIcons")
-		visual.highlight:SetAllPoints(visual.healthborder)
-		visual.highlight:SetBlendMode("ADD")
+    --visual.highlight:SetPoint("TOP", visual.name, "TOP")
+    visual.highlight:SetAllPoints(visual.name)
+    visual.highlight:SetBlendMode("ADD")
 
 		extended:SetFrameStrata("BACKGROUND")
 		healthbar:SetFrameStrata("BACKGROUND")
@@ -278,9 +276,9 @@ do
 		textFrame:SetFrameStrata("BACKGROUND")
     --widgetParent:SetFrameStrata("BACKGROUND")
 
-    castbar:SetFrameLevel(extended:GetFrameLevel() - 1)
-    healthbar:SetFrameLevel(extended:GetFrameLevel())
-    textFrame:SetFrameLevel(extended:GetFrameLevel() + 1)
+    castbar:SetFrameLevel(extended:GetFrameLevel() + 4)
+    healthbar:SetFrameLevel(extended:GetFrameLevel() + 5)
+    textFrame:SetFrameLevel(extended:GetFrameLevel() + 6)
 
 		castbar:Hide()
 		castbar:SetStatusBarColor(1,.8,0)
@@ -402,11 +400,8 @@ do
 
     PlatesByGUID[unit.guid] = plate
 
-    visual.highlight:Hide()
-
 		wipe(extended.unit)
 		wipe(extended.unitcache)
-
 
 		-- For Fading In
 		PlatesFading[plate] = EnableFadeIn
@@ -419,7 +414,7 @@ do
 		unit.isCasting = false
 		visual.castbar:Hide()
 		visual.highlight:Hide()
-
+    visual.healthbar.Highlight:Hide()
 
 		-- Widgets/Extensions
 		-- This goes here because a user might change widget settings after nameplates have been created
@@ -581,37 +576,12 @@ do
 		UpdateReferences(plate)
 
 		unit.isMouseover = UnitIsUnit("mouseover", unitid)
-    --local was_target = unit.isTarget
 		unit.isTarget = UnitIsUnit("target", unitid)
 		unit.isFocus = UnitIsUnit("focus", unitid)
 
 		unit.guid = UnitGUID(unitid)
 
 		UpdateUnitCondition(plate, unitid)	-- This updates a bunch of properties
-
-    -- Target Castbar Offset
---    if visual.castbar:IsShown() and was_target ~= unit.isTarget then
---      visual.castbar:ClearAllPoints()
---      visual.castborder:ClearAllPoints()
---      visual.castnostop:ClearAllPoints()
---      visual.spelltext:ClearAllPoints()
---      --visual.spellicon:ClearAllPoints()
---
---      if unit.isTarget then
---        local db = TidyPlatesThreat.db.profile.settings.castbar
---        visual.castbar:SetPoint(style.castbar.anchor or "CENTER", extended, style.castbar.x + db.x_target or 0, style.castbar.y + db.y_target or 0)
---        visual.castborder:SetPoint(style.castborder.anchor or "CENTER", extended, style.castborder.x + db.x_target or 0, style.castborder.y + db.y_target or 0)
---        visual.castnostop:SetPoint(style.castnostop.anchor or "CENTER", extended, style.castnostop.x + db.x_target or 0, style.castnostop.y + db.y_target or 0)
---        visual.spelltext:SetPoint(style.spelltext.anchor or "CENTER", extended, style.spelltext.x + db.x_target or 0, style.spelltext.y + db.y_target or 0)
---        --visual.spellicon:SetPoint(style.spellicon.anchor or "CENTER", extended, style.spellicon.x + db.x_target or 0, style.spellicon.y + db.y_target or 0)
---      else
---        visual.castbar:SetPoint(style.castbar.anchor or "CENTER", extended, style.castbar.x or 0, style.castbar.y or 0)
---        visual.castborder:SetPoint(style.castborder.anchor or "CENTER", extended, style.castborder.x or 0, style.castborder.y or 0)
---        visual.castnostop:SetPoint(style.castnostop.anchor or "CENTER", extended, style.castnostop.x or 0, style.castnostop.y or 0)
---        visual.spelltext:SetPoint(style.spelltext.anchor or "CENTER", extended, style.spelltext.x or 0, style.spelltext.y or 0)
---        --visual.spellicon:SetPoint(style.spellicon.anchor or "CENTER", extended, style.spellicon.x or 0, style.spellicon.y or 0)
---      end
---    end
 
     if activetheme.OnContextUpdate then activetheme.OnContextUpdate(extended, unit) end
 		if activetheme.OnUpdate then activetheme.OnUpdate(extended, unit) end
@@ -718,26 +688,34 @@ do
 	-- UpdateIndicator_ThreatGlow: Updates the aggro glow
 	function UpdateIndicator_ThreatGlow()
 		if not style.threatborder.show then return end
+
 		threatborder = visual.threatborder
 		if activetheme.SetThreatColor then
-
-			threatborder:SetVertexColor(activetheme.SetThreatColor(unit) )
+      visual.threatborder:SetBackdropBorderColor(activetheme.SetThreatColor(unit))
 		else
 			if InCombat and unit.reaction ~= "FRIENDLY" and unit.type == "NPC" then
 				local color = style.threatcolor[unit.threatSituation]
-				threatborder:Show()
-				threatborder:SetVertexColor(color.r, color.g, color.b, (color.a or 1))
-			else threatborder:Hide() end
+        visual.threatborder:SetBackdropBorderColor(color.r, color.g, color.b, (color.a or 1))
+        visual.threatborder:Show()
+      else
+        visual.threatborder:Hide()
+      end
 		end
 	end
 
 
 	-- UpdateIndicator_Target
 	function UpdateIndicator_Target()
-		if unit.isTarget and style.target.show then visual.target:Show() else visual.target:Hide() end
-		if unit.isMouseover and not unit.isTarget then visual.highlight:Show() else visual.highlight:Hide() end
-	end
+    visual.target:SetShown(unit.isTarget and style.target.show)
 
+		if unit.isMouseover and style.highlight.show and not unit.isTarget then
+      visual.highlight:Show()
+      visual.healthbar.Highlight:Show()
+    else
+      visual.highlight:Hide()
+      visual.healthbar.Highlight:Hide()
+    end
+	end
 
 	-- UpdateIndicator_RaidIcon
 	function UpdateIndicator_RaidIcon()
@@ -805,10 +783,12 @@ do
 
 		if unit.health and (extended.requestedAlpha > 0) then
 			-- Scale
+      scale = Addon.UIScale
+
 			if activetheme.SetScale then
-				scale = activetheme.SetScale(unit)
-				if scale then extended:SetScale( scale )end
+				scale = scale * activetheme.SetScale(unit)
 			end
+      extended:SetScale(scale)
 
 			-- Set Special-Case Regions
 			if style.customtext.show then
@@ -816,7 +796,9 @@ do
 					local text, r, g, b, a = activetheme.SetCustomText(unit)
 					visual.customtext:SetText( text or "")
 					visual.customtext:SetTextColor(r or 1, g or 1, b or 1, a or 1)
-				else visual.customtext:SetText("") end
+				else
+          visual.customtext:SetText("")
+        end
 			end
 
 			UpdateIndicator_UnitColor()
@@ -922,16 +904,13 @@ do
     end
 	end
 
-
 end -- End Indicator section
-
 
 --------------------------------------------------------------------------------------------------------------
 -- WoW Event Handlers: sends event-driven changes to the appropriate gather/update handler.
 --------------------------------------------------------------------------------------------------------------
+
 do
-
-
 	----------------------------------------
 	-- Frequently Used Event-handling Functions
 	----------------------------------------
@@ -988,13 +967,6 @@ do
 
 	function CoreEvents:NAME_PLATE_CREATED(...)
 		local plate = ...
-		local BlizzardFrame = plate:GetChildren()
-
-		-- hooksecurefunc([table,] "function", hookfunc)
-
-		--BlizzardFrame._Show = BlizzardFrame.Show	-- Store this for later
-		--BlizzardFrame.Show = BlizzardFrame.Hide			-- Try this to keep the plate from showing up
-		-- --BlizzardFrame.Show = BypassFunction			-- Try this to keep the plate from showing up
 		OnNewNameplate(plate)
 	 end
 
@@ -1004,10 +976,8 @@ do
 
 		-- Personal Display
 		if UnitIsUnit("player", unitid) then
-			-- plate:GetChildren():_Show()
 		-- Normal Plates
 		else
-			plate:GetChildren():Hide()
 			OnShowNameplate(plate, unitid)
 		end
 
@@ -1046,7 +1016,7 @@ do
     end
 
     local plate = GetNamePlateForUnit("target")
-    if plate and plate.TP_Extended then
+    if plate and plate.TP_Extended and plate.TP_Extended.stylename ~= "" then
       extended = plate.TP_Extended
       visual = extended.visual
       style = extended.style
@@ -1163,6 +1133,23 @@ do
     end
   end
 
+--  function CoreEvents:UI_SCALE_CHANGED()
+--    Addon.UIScale = UIParent:GetEffectiveScale()
+--
+--    if Addon.Ignore_UIScale then
+--      local screen_size = { GetPhysicalScreenSize() }
+--      if screen_size and screen_size[2] then
+--        Addon.UIScale = 768 / screen_size[2]
+--      end
+--    end
+--
+--    print ("Setting frame scale: ", Addon.UIScale)
+--
+--    for plate in pairs(PlatesVisible) do
+--      plate.TP_Extended:SetScale(Addon.UIScale)
+--    end
+--  end
+
   -- The following events should not have worked before adjusting UnitSpellcastMidway
 	CoreEvents.UNIT_SPELLCAST_DELAYED = UnitSpellcastMidway
 	CoreEvents.UNIT_SPELLCAST_CHANNEL_UPDATE = UnitSpellcastMidway
@@ -1275,29 +1262,21 @@ do
 	local fontgroup = {"name", "level", "spelltext", "customtext"}
 
 	local anchorgroup = {
-    "healthborder", "threatborder", "castborder", "castnostop",
+    "castborder", "castnostop",
 		"name",  "spelltext", "customtext", "level",
 		"spellicon", "raidicon", "skullicon", "eliteicon", "target"
+    -- "threatborder"
   }
 
-	local bargroup = {"castbar", "healthbar"}
+	local bargroup = {"castbar" }
 
 	local texturegroup = {
-    "castborder", "castnostop", "healthborder", "threatborder", "eliteicon",
+    "castborder", "castnostop", "eliteicon",
     "skullicon", "highlight", "target", "spellicon",
+    -- threatborder
   }
 
---  local texturegroup = {
---    { "castborder",   "BACKGROUND", 1 },
---    { "castnostop",   "BACKGROUND", 2 },
---    { "spellicon",    "BACKGROUND", 7 },
---    { "healthborder", "BORDER", 0 },
---    { "threatborder", "BORDER", 2 },
---    { "highlight",    "ARTWORK", 0 },
---    { "eliteicon",    "ARTWORK", 1 },
---    { "skullicon",    "ARTWORK", 2 },
---    { "target",       "BACKGROUND", 0 },
---  }
+  --local showgroup = { "healthborder" }
 
 	-- UpdateStyle:
 	function UpdateStyle()
@@ -1329,6 +1308,13 @@ do
       end
     end
 
+		-- Healthbar
+		SetAnchorGroupObject(visual.healthbar, style.healthbar, extended)
+		visual.healthbar:SetStatusBarTexture(style.healthbar.texture or EMPTY_TEXTURE)
+		visual.healthbar:SetOrientation(style.healthbar.orientation or "HORIZONTAL")
+		visual.healthbar:SetStatusBackdrop(style.healthbar.backdrop, style.healthborder.texture, style.healthborder.edgesize, style.healthborder.offset)
+		visual.healthbar:SetShownBorder(style.healthborder.show)
+
     -- Texture
     for index = 1, #texturegroup do
       local objectname = texturegroup[index]
@@ -1336,6 +1322,12 @@ do
 
       SetTextureGroupObject(object, objectstyle)
     end
+
+    -- Show certain elements, don't change anything else
+--		for index = 1, #showgroup do
+--			local objectname = showgroup[index]
+--			visual[objectname]:SetShown(style[objectname].show)
+--		end
 
 		-- Raid Icon Texture
 		if style and style.raidicon and style.raidicon.texture then
@@ -1416,6 +1408,14 @@ local function OnResetWidgets(plate)
 	plate.UpdateMe = true
 end
 
+--local function OnUpdateSettings(plate)
+--  local extended = plate.TP_Extended
+--  local healthbar = extended.visual.healthbar
+--
+--  print ("OnUpdateSettings")
+--  healthbar:SetSize(extended.style.healthbar.width, extended.style.healthbar.height)
+--end
+
 --------------------------------------------------------------------------------------------------------------
 -- External Commands: Allows widgets and themes to request updates to the plates.
 -- Useful to make a theme respond to externally-captured data (such as the combat log)
@@ -1423,6 +1423,7 @@ end
 function TidyPlatesInternal:DisableCastBars() ShowCastBars = false end
 function TidyPlatesInternal:EnableCastBars() ShowCastBars = true end
 
+--function TidyPlatesInternal:UpdateSettings() ForEachPlate(OnUpdateSettings) end
 function TidyPlatesInternal:ForceUpdate() ForEachPlate(OnResetNameplate) end
 function TidyPlatesInternal:ResetWidgets() ForEachPlate(OnResetWidgets) end
 function TidyPlatesInternal:Update() SetUpdateAll() end

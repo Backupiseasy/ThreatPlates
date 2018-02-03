@@ -466,6 +466,20 @@ local function GetEnableEntryTheme(entry_name, description, widget_info)
   return entry
 end
 
+local function GetRangeEntry(name, pos, setting, min, max, set_func)
+  local entry = {
+    name = name,
+    order = pos,
+    type = "range",
+    step = 1,
+    softMin = min,
+    softMax = max,
+    set = set_func,
+    arg = setting,
+  }
+  return entry
+end
+
 local function GetSizeEntry(name, pos, setting, func_disabled)
   local entry = {
     name = name,
@@ -2074,18 +2088,57 @@ local function CreateOptionsTable()
                     },
                   },
                 },
-                ShowByStatus = {
-                  name = L["Force View By Status"],
-                  order = 15,
+                Format = {
+                  name = L["Format"],
+                  order = 5,
                   type = "group",
                   inline = true,
+                  set = SetThemeValue,
                   args = {
-                    ModeOnTarget = {
-                      name = L["On Target"],
-                      order = 1,
+                    Width = GetRangeEntry(L["Bar Width"], 10, { "settings", "healthbar", "width" }, 5, 500,
+                      function(info, val)
+                        if InCombatLockdown() then
+                          t.Print("We're unable to change this while in combat", true)
+                        else
+                          SetThemeValue(info, val)
+                          TidyPlatesThreat:SetBaseNamePlateSize()
+                        end
+                      end),
+                    Height = GetRangeEntry(L["Bar Height"], 20, {"settings", "healthbar", "height" }, 1, 100,
+                      function(info, val)
+                        if InCombatLockdown() then
+                          t.Print("We're unable to change this while in combat", true)
+                        else
+                          SetThemeValue(info, val)
+                          TidyPlatesThreat:SetBaseNamePlateSize()
+                        end
+                      end),
+                    Spacer1 = GetSpacerEntry(25),
+                    ShowAbsorb = {
+                      name = L["Absorbs"],
+                      order = 30,
                       type = "toggle",
-                      width = "double",
-                      arg = { "HeadlineView", "ForceHealthbarOnTarget" }
+                      arg = { "settings", "healthbar", "ShowAbsorbs" },
+                    },
+                    ShowMouseoverHighlight = {
+                      type = "toggle",
+                      order = 40,
+                      name = L["Mouseover"],
+                      set = SetThemeValue,
+                      arg = { "settings", "highlight", "show" },
+                    },
+                    ShowBorder = {
+                      type = "toggle",
+                      order = 50,
+                      name = L["Border"],
+                      set = SetThemeValue,
+                      arg = { "settings", "healthborder", "show" },
+                    },
+                    ShowEliteBorder = {
+                      type = "toggle",
+                      order = 60,
+                      name = L["Elite Border"],
+                      arg = { "settings", "elitehealthborder", "show" },
                     },
                   }
                 },
@@ -2096,7 +2149,7 @@ local function CreateOptionsTable()
                   order = 10,
                   args = {
                     HealthBarTexture = {
-                      name = L["Foreground Texture"],
+                      name = L["Foreground"],
                       type = "select",
                       order = 10,
                       dialogControl = "LSM30_Statusbar",
@@ -2105,13 +2158,37 @@ local function CreateOptionsTable()
                       arg = { "settings", "healthbar", "texture" },
                     },
                     BGTexture = {
-                      name = L["Background Texture"],
+                      name = L["Background"],
                       type = "select",
                       order = 20,
                       dialogControl = "LSM30_Statusbar",
                       values = AceGUIWidgetLSMlists.statusbar,
                       set = SetThemeValue,
                       arg = { "settings", "healthbar", "backdrop" },
+                    },
+                    HealthBorder = {
+                      type = "select",
+                      order = 25,
+                      name = L["Border"],
+                      set = function(info, val)
+                        if val == "TP_Border_Default" then
+                          db.settings.healthborder.EdgeSize = 7
+                          db.settings.healthborder.Offset = 3
+                        else
+                          db.settings.healthborder.EdgeSize = 7
+                          db.settings.healthborder.Offset = 2
+                        end
+                        SetThemeValue(info, val)
+                      end,
+                      values = { TP_Border_Default = "Default", TP_Border_Thin = "Thin" },
+                      arg = { "settings", "healthborder", "texture" },
+                    },
+                    EliteBorder = {
+                      type = "select",
+                      order = 26,
+                      name = L["Elite Border"],
+                      values = { TP_EliteBorder_Default = "Default", TP_EliteBorder_Thin = "Thin" },
+                      arg = { "settings", "elitehealthborder", "texture" }
                     },
                     Spacer1 = GetSpacerEntry(30),
                     BGColorText = {
@@ -2208,52 +2285,67 @@ local function CreateOptionsTable()
                         },
                       },
                     },
-                    BorderGroup = {
-                      name = L["Borders"],
-                      order = 170,
-                      type = "group",
-                      inline = true,
-                      args = {
-                        HealthBorderToggle = {
-                          type = "toggle",
-                          order = 180,
-                          name = L["Show Border"],
-                          set = SetThemeValue,
-                          arg = { "settings", "healthborder", "show" },
-                        },
-                        HealthBorder = {
-                          type = "select",
-                          order = 190,
-                          name = L["Normal Border"],
-                          set = SetThemeValue,
-                          values = { TP_HealthBarOverlay = "Default", TP_HealthBarOverlayThin = "Thin" },
-                          arg = { "settings", "healthborder", "texture" },
-                        },
-                        EliteHealthBorderToggle = {
-                          type = "toggle",
-                          order = 200,
-                          name = L["Show Elite Border"],
-                          arg = { "settings", "elitehealthborder", "show" },
-                        },
-                        EliteBorder = {
-                          type = "select",
-                          order = 210,
-                          name = L["Elite Border"],
-                          values = { TP_HealthBarEliteOverlay = "Default", TP_HealthBarEliteOverlayThin = "Thin" },
-                          arg = { "settings", "elitehealthborder", "texture" }
-                        },
-                        Spacer2 = GetSpacerEntry(99),
-                        Mouseover = {
-                          type = "select",
-                          order = 220,
-                          name = L["Mouseover"],
-                          set = SetThemeValue,
-                          values = { TP_HealthBarHighlight = "Default", Empty = "None" },
-                          arg = { "settings", "highlight", "texture" },
-                        },
-                      },
-                    },
+--                    BorderGroup = {
+--                      name = L["Borders"],
+--                      order = 170,
+--                      type = "group",
+--                      inline = true,
+--                      args = {
+----                        HealthBorderToggle = {
+----                          type = "toggle",
+----                          order = 180,
+----                          name = L["Show Border"],
+----                          set = SetThemeValue,
+----                          arg = { "settings", "healthborder", "show" },
+----                        },
+--                        HealthBorder = {
+--                          type = "select",
+--                          order = 190,
+--                          name = L["Normal Border"],
+--                          set = SetThemeValue,
+--                          values = { TP_Border_Default = "Default", TP_Border_Thin = "Thin" },
+--                          arg = { "settings", "healthborder", "texture" },
+--                        },
+----                        EliteHealthBorderToggle = {
+----                          type = "toggle",
+----                          order = 200,
+----                          name = L["Show Elite Border"],
+----                          arg = { "settings", "elitehealthborder", "show" },
+----                        },
+--                        EliteBorder = {
+--                          type = "select",
+--                          order = 210,
+--                          name = L["Elite Border"],
+--                          values = { TP_EliteBorder_Default = "Default", TP_EliteBorder_Thin = "Thin" },
+--                          arg = { "settings", "elitehealthborder", "texture" }
+--                        },
+----                        Spacer2 = GetSpacerEntry(99),
+----                        Mouseover = {
+----                          type = "select",
+----                          order = 220,
+----                          name = L["Mouseover"],
+----                          set = SetThemeValue,
+----                          values = { TP_HealthBarHighlight = "Default", Empty = "None" },
+----                          arg = { "settings", "highlight", "texture" },
+----                        },
+--                      },
+--                    },
                   },
+                },
+                ShowByStatus = {
+                  name = L["Force View By Status"],
+                  order = 15,
+                  type = "group",
+                  inline = true,
+                  args = {
+                    ModeOnTarget = {
+                      name = L["On Target"],
+                      order = 1,
+                      type = "toggle",
+                      width = "double",
+                      arg = { "HeadlineView", "ForceHealthbarOnTarget" }
+                    },
+                  }
                 },
                 ColorSettings = {
                   name = L["Coloring"],
@@ -3426,6 +3518,121 @@ local function CreateOptionsTable()
             },
             RaidMarks = CreateRaidMarksSettings(),
             BlizzardSettings = CreateBlizzardSettings(),
+            TestSettings = {
+              name = L["Test Settings"],
+              type = "group",
+              order = 1000,
+              set = SetThemeValue,
+              args = {
+                HealthHeaderBorder = { name = L["Healthbar Border"], type = "header", order = 10, },
+                HealthBorder = {
+                  type = "select",
+                  order = 20,
+                  name = L["Border"],
+                  dialogControl = "LSM30_Border",
+                  values = AceGUIWidgetLSMlists.border,
+                  arg = { "settings", "healthborder", "texture" },
+                },
+                HealthBorderEdgeSize = {
+                  name = L["Edge Size"],
+                  order = 30,
+                  type = "range",
+                  min = 0, max = 32, step = 1,
+                  set = SetThemeValue,
+                  arg = { "settings", "healthborder", "EdgeSize" },
+                },
+                HealthBorderOffset = {
+                  name = L["Offset"],
+                  order = 40,
+                  type = "range",
+                  min = -16, max = 16, step = 1,
+                  set = SetThemeValue,
+                  arg = { "settings", "healthborder", "Offset" },
+                },
+                EliteHeaderBorder = { name = L["Elite Border"], type = "header", order = 110, },
+                EliteBorder = {
+                  type = "select",
+                  order = 120,
+                  name = L["Elite Border"],
+                  values = { TP_EliteBorder_Default = "Default", TP_EliteBorder_Thin = "Thin" },
+                  arg = { "settings", "elitehealthborder", "texture" }
+                },
+                EliteBorderEdgeSize = {
+                  name = L["Edge Size"],
+                  order = 130,
+                  type = "range",
+                  min = 0, max = 32, step = 1,
+                  set = SetThemeValue,
+                  arg = { "settings", "elitehealthborder", "EdgeSize" },
+                },
+                EliteBorderOffset = {
+                  name = L["Offset"],
+                  order = 140,
+                  type = "range",
+                  min = -16, max = 16, step = 1,
+                  set = SetThemeValue,
+                  arg = { "settings", "elitehealthborder", "Offset" },
+                },
+                TargetHeaderBorder = { name = L["Target Border"], type = "header", order = 210, },
+                TargetBorder = {
+                  type = "select",
+                  order = 220,
+                  name = L["Target Border"],
+                  values = { default = "Default", squarethin = "Thin Square" },
+                  arg = { "targetWidget", "theme" },
+                },
+                TargetBorderEdgeSize = {
+                  name = L["Edge Size"],
+                  order = 230,
+                  type = "range",
+                  min = 0, max = 32, step = 1,
+                  set = SetThemeValue,
+                  arg = { "targetWidget", "EdgeSize" },
+                },
+                TargetBorderOffset = {
+                  name = L["Offset"],
+                  order = 240,
+                  type = "range",
+                  min = -16, max = 16, step = 1,
+                  set = SetThemeValue,
+                  arg = { "targetWidget", "Offset" },
+                },
+                MouseoverHeaderBorder = { name = L["Mouseover Border"], type = "header", order = 310, },
+                MouseoverBorderEdgeSize = {
+                  name = L["Edge Size"],
+                  order = 330,
+                  type = "range",
+                  min = 0, max = 32, step = 1,
+                  set = SetThemeValue,
+                  arg = { "settings", "highlight", "EdgeSize" },
+                },
+                MouseoverBorderOffset = {
+                  name = L["Offset"],
+                  order = 340,
+                  type = "range",
+                  min = -16, max = 16, step = 1,
+                  set = SetThemeValue,
+                  arg = { "settings", "highlight", "Offset" },
+                },
+                ThreatHeaderBorder = { name = L["Threat Glow Border"], type = "header", order = 410, },
+                ThreatBorderEdgeSize = {
+                  name = L["Edge Size"],
+                  order = 430,
+                  type = "range",
+                  min = 0, max = 32, step = 1,
+                  set = SetThemeValue,
+                  arg = { "settings", "threatborder", "EdgeSize" },
+                },
+                ThreatBorderOffset = {
+                  name = L["Offset"],
+                  order = 440,
+                  type = "range",
+                  min = -16, max = 16, step = 1,
+                  set = SetThemeValue,
+                  arg = { "settings", "threatborder", "Offset" },
+                },
+              },
+            },
           },
         },
         ThreatOptions = {

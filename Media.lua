@@ -12,4 +12,12 @@ Media:Register("statusbar", "Aluminium", [[Interface\Addons\TidyPlates_ThreatPla
 Media:Register("statusbar", "Smooth", [[Interface\Addons\TidyPlates_ThreatPlates\Artwork\Smooth.tga]])
 Media:Register("font", "Accidental Presidency",[[Interface\Addons\TidyPlates_ThreatPlates\Fonts\Accidental Presidency.ttf]])
 Media:Register("font", "Cabin",[[Interface\Addons\TidyPlates_ThreatPlates\Fonts\Cabin.ttf]])
+
 Media:Register("border", "squareline",[[Interface\Addons\TidyPlates_ThreatPlates\Artwork\squareline.tga]])
+
+-- Test borders
+Media:Register("border", "TP_Border_1px", [[Interface\Addons\TidyPlates_ThreatPlates\Artwork\TP_Border_1px.tga]])
+Media:Register("border", "TP_Border_2px", [[Interface\Addons\TidyPlates_ThreatPlates\Artwork\TP_Border_2px.tga]])
+Media:Register("border", "TP_Border_3px", [[Interface\Addons\TidyPlates_ThreatPlates\Artwork\TP_Border_3px.tga]])
+Media:Register("border", "TP_Border_4px", [[Interface\Addons\TidyPlates_ThreatPlates\Artwork\TP_Border_4px.tga]])
+Media:Register("border", "TP_Threat", [[Interface\Addons\TidyPlates_ThreatPlates\Artwork\TP_Threat.tga]])

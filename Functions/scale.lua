@@ -165,7 +165,7 @@ local SCALE_FUNCTIONS = {
 }
 
 local function SetScale(unit)
-	if not unit.unitid then return end -- unitid is used in UnitIsOffTanked
+	if not unit.unitid then return 1 end -- unitid is used in UnitIsOffTanked
 
 	-- sometimes SetScale is called without calling OnUpdate/OnContextUpdate first, so TP_Style may not be initialized
 	-- true for SetAlpha, not sure for SetScale

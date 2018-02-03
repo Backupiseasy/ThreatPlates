@@ -22,6 +22,9 @@ local DEFAULT_FONT = "Cabin"
 ---------------------------------------------------------------------------------------------------
 -- Global contstants for various stuff
 ---------------------------------------------------------------------------------------------------
+Addon.UIScale = 1
+--Addon.Ignore_UIScale = true
+
 Addon.TotemInformation = {} -- basic totem information
 Addon.TOTEMS = {} -- mapping table for fast access to totem settings
 
@@ -533,7 +536,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
     },
     targetWidget = {
       ON = true,
-      theme = "default",
+      theme = "TP_Target_Default",
       r = 1,
       g = 1,
       b = 1,
@@ -1421,21 +1424,26 @@ ThreatPlates.DEFAULT_SETTINGS = {
         y = 0,
       },
       highlight = {
-        texture = "TP_HealthBarHighlight",
+        -- texture = "TP_HealthBarHighlight", -- removed in 8.7.0
+        show = true,
       },
       elitehealthborder = {
-        texture = "TP_HealthBarEliteOverlay",
+        texture = "TP_EliteBorder_Default",
         show = false, -- old default: true
       },
       healthborder = {
-        texture = "TP_HealthBarOverlayThin", -- old default: "TP_HealthBarOverlay",
+        texture = "TP_Border_Default", -- old default: "TP_HealthBarOverlay",
         backdrop = "",
+        EdgeSize = 7,
+        Offset = 3,
         show = true,
       },
       threatborder = {
         show = true,
       },
       healthbar = {
+        width = 120,
+        height = 10,
         texture = "Smooth", -- old default: "ThreatPlatesBar",
         backdrop = "Smooth", -- old default: "ThreatPlatesEmpty",
         BackgroundUseForegroundColor = false,

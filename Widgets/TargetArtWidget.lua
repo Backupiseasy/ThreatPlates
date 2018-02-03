@@ -1,16 +1,30 @@
+local ADDON_NAME, NAMESPACE = ...
+local ThreatPlates = NAMESPACE.ThreatPlates
+
 -----------------------
 -- Target Art Widget --
 -----------------------
-local ADDON_NAME, NAMESPACE = ...
-local ThreatPlates = NAMESPACE.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
 local UnitGUID = UnitGUID
 
-local path = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\TargetArtWidget\\"
+local PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\TargetArtWidget\\"
 -- local WidgetList = {}
+
+local BACKDROP = {
+  default = {
+    edgeFile = PATH .. "TP_Target_Default",
+    edgeSize = 7,
+    inset = 5,
+  },
+  squarethin = {
+    edgeFile = PATH .. "TP_Target_Thin",
+    edgeSize = 4,
+    inset = 3,
+  }
+}
 
 ---------------------------------------------------------------------------------------------------
 -- Threat Plates functions
@@ -37,19 +51,63 @@ local function UpdateSettings(frame)
   local db = TidyPlatesThreat.db.profile.targetWidget
 
   -- probably this should be moved to UpdateWidgetFrame
-  if db.ON then
-    frame.Icon:SetTexture(path..db.theme)
-    frame.Icon:SetVertexColor(db.r, db.g, db.b, db.a)
-		frame.Icon:SetDrawLayer("BACKGROUND", 0)
+  if db.theme == "default" or db.theme == "squarethin" then
+    local backdrop = BACKDROP[db.theme]
 
-    frame:Show()
+    --  backdrop.edgeSize = TidyPlatesThreat.db.profile.targetWidget.EdgeSize
+    --  backdrop.inset = TidyPlatesThreat.db.profile.targetWidget.Offset
+
+    db = TidyPlatesThreat.db.profile.settings.healthbar
+    local offset_x = db.width + 2 * backdrop.inset
+    local offset_y = db.height + 2 * backdrop.inset
+    if frame:GetWidth() ~= offset_x or frame:GetHeight() ~= offset_y  then
+      frame:SetPoint("TOPLEFT", frame:GetParent().visual.healthbar, "TOPLEFT", - backdrop.inset, backdrop.inset)
+      frame:SetPoint("BOTTOMRIGHT", frame:GetParent().visual.healthbar, "BOTTOMRIGHT", backdrop.inset, - backdrop.inset)
+      -- frame:SetSize(offset_x, offset_y)
+    end
+    frame:SetBackdrop({
+      --edgeFile = PATH .. db.theme,
+      edgeFile = backdrop.edgeFile,
+      edgeSize = backdrop.edgeSize,
+      insets = { left = backdrop.inset, right = backdrop.inset, top = backdrop.inset, bottom = backdrop.inset }
+    })
+
+    frame.LeftTexture:Hide()
+    frame.RightTexture:Hide()
   else
-    frame:_Hide()
+    frame.LeftTexture:SetTexture(PATH .. db.theme)
+    frame.LeftTexture:SetTexCoord(0, 0.25, 0, 1)
+    frame.LeftTexture:SetVertexColor(db.r, db.g, db.b, db.a)
+    frame.LeftTexture:Show()
+
+    frame.RightTexture:SetTexture(PATH .. db.theme)
+    frame.RightTexture:SetTexCoord(0.75, 1, 0, 1)
+    frame.RightTexture:SetVertexColor(db.r, db.g, db.b, db.a)
+    frame.RightTexture:Show()
+
+    frame:SetBackdrop(nil)
   end
+
+  local OFFSET_THREAT = TidyPlatesThreat.db.profile.Offset or 6
+  local healthbar = frame:GetParent().visual.healthbar
+  healthbar.ThreatBorder:SetPoint("TOPLEFT", healthbar, "TOPLEFT", - OFFSET_THREAT, OFFSET_THREAT)
+  healthbar.ThreatBorder:SetPoint("BOTTOMRIGHT", healthbar, "BOTTOMRIGHT", OFFSET_THREAT, - OFFSET_THREAT)
+  healthbar.ThreatBorder:SetBackdrop({
+    edgeFile = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Artwork\\" .. "TP_Threat",
+    edgeSize = TidyPlatesThreat.db.profile.EdgeSize or 10,
+    insets = { left = OFFSET_THREAT, right = OFFSET_THREAT, top = OFFSET_THREAT, bottom = OFFSET_THREAT },
+  })
+  healthbar.ThreatBorder:SetBackdropBorderColor(0, 1, 0, 1)
+  healthbar.ThreatBorder:Show()
+
 end
 
 local function UpdateWidgetFrame(frame, unit)
-	frame:SetShown(unit.TP_Style ~= "etotem")
+  if unit.TP_Style == "etotem" then
+    frame:_Hide()
+  else
+    frame:Show()
+  end
 end
 
 -- Context
@@ -88,15 +146,15 @@ local function CreateWidgetFrame(parent)
 
 	-- Custom Code III
 	--------------------------------------
-	-- framelevel of Target Highlight must be the same as visual.target (target highlight of TidyPlates)
-  -- that is: extended.healthbar.textFrame, texture target (BACKGROUND)
-	frame:SetFrameLevel(parent:GetFrameLevel() + 1)
-	frame:SetSize(256, 64)
-	frame:SetPoint("CENTER", parent, "CENTER")
+	--frame:SetPoint("CENTER", parent, "CENTER")
+  frame:SetFrameLevel(parent:GetFrameLevel() + 6)
 
-  --frame.Icon = parent.visual.name:GetParent():CreateTexture(nil, "ARTWORK")
-	frame.Icon = frame:CreateTexture(nil, "BACKGROUND", 0)
-  frame.Icon:SetAllPoints(frame)
+	frame.LeftTexture = frame:CreateTexture(nil, "BACKGROUND", 0)
+  frame.LeftTexture:SetPoint("RIGHT", parent, "LEFT")
+  frame.LeftTexture:SetSize(64, 64)
+  frame.RightTexture = frame:CreateTexture(nil, "BACKGROUND", 0)
+  frame.RightTexture:SetPoint("LEFT", parent, "RIGHT")
+  frame.RightTexture:SetSize(64, 64)
 
   UpdateSettings(frame)
   frame.UpdateConfig = UpdateSettings
@@ -107,7 +165,6 @@ local function CreateWidgetFrame(parent)
 	frame.UpdateContext = UpdateWidgetContext
 	frame.Update = UpdateWidgetFrame
 	frame._Hide = frame.Hide
-	-- Have to add frame.Icon:Hide() also here as the frame is no longer the parent of the icon since a fix to widget layering
 	frame.Hide = function() ClearWidgetContext(frame); frame:_Hide()
 	end
 

@@ -956,9 +956,9 @@ local function UpdateAuraWidgetLayout(widget_frame)
       frame:SetPoint(align_layout[1], widget_frame, pos_x, pos_y)
 
       if db.FrameOrder == "HEALTHBAR_AURAS" then
-        frame:SetFrameLevel(frame:GetParent():GetFrameLevel() - 2)
+        frame:SetFrameLevel(frame:GetParent():GetFrameLevel() + 3)
       else
-        frame:SetFrameLevel(frame:GetParent():GetFrameLevel() + 4)
+        frame:SetFrameLevel(frame:GetParent():GetFrameLevel() + 9)
       end
 
       UpdateAuraFrame(frame)
@@ -1218,9 +1218,9 @@ local function CreateAuraWidget(plate)
 	-- Custom Code III
 	--------------------------------------
   if TidyPlatesThreat.db.profile.AuraWidget.FrameOrder == "HEALTHBAR_AURAS" then
-    frame:SetFrameLevel(plate:GetFrameLevel() - 2)
+    frame:SetFrameLevel(plate:GetFrameLevel() + 3)
   else
-    frame:SetFrameLevel(plate:GetFrameLevel() + 4)
+    frame:SetFrameLevel(plate:GetFrameLevel() + 9)
   end
 	frame:SetSize(128, 32)
 	frame.AuraFrames = {}

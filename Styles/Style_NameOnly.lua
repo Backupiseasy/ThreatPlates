@@ -66,35 +66,6 @@ local function Create(self,name)
       anchor = "CENTER",
     },
 
-    highlight = {
-      texture = (dbprofile.HeadlineView.ShowMouseoverHighlight and ART_PATH.."Highlight") or EMPTY_TEXTURE,
-      width = 128,
-      height = 64, -- no effect, use healthborder
-      x = 0, -- not used in headline view, determined from ?
-      y = 0, -- not used in headline view, determined from ?
-      anchor = "CENTER", --no effect
-			-- show = false -- no effect, use healthborder
-    },
-
-		target = {
-      texture = ART_PATH.."Target",
-      width = 128,
-      height = 32 * GetHeadlineViewHeight(self) / 18,
-      x = dbprofile.HeadlineView.name.x,
-      y = GetTargetTextureY(self),
-      anchor = "CENTER",
-      show = dbprofile.HeadlineView.ShowTargetHighlight,
-    },
-
-		healthborder = {
-      texture = EMPTY_TEXTURE,
-      width = 128,
-      height = 64,
-      x = 0,
-      y = GetHightlightTextureY(self),
-      anchor = "CENTER",
-    },
-
     healthbar = {
       texture = EMPTY_TEXTURE,
       backdrop = EMPTY_TEXTURE,
@@ -106,6 +77,10 @@ local function Create(self,name)
       orientation = "HORIZONTAL",
     },
 
+    healthborder = {
+      show = false,
+    },
+
     threatborder = {
       texture = EMPTY_TEXTURE,
       width = 128,
@@ -113,6 +88,21 @@ local function Create(self,name)
       x = 0,
       y = 0,
       anchor = "CENTER",
+    },
+
+    highlight = {
+      texture = (dbprofile.HeadlineView.ShowMouseoverHighlight and ART_PATH.."Highlight") or EMPTY_TEXTURE,
+      show = true,
+    },
+
+    target = {
+      texture = ART_PATH.."Target",
+      width = 128,
+      height = 32 * GetHeadlineViewHeight(self) / 18,
+      x = dbprofile.HeadlineView.name.x,
+      y = GetTargetTextureY(self),
+      anchor = "CENTER",
+      show = dbprofile.HeadlineView.ShowTargetHighlight,
     },
 
     castborder = {

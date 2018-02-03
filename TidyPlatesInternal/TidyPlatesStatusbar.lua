@@ -1,12 +1,23 @@
 local ADDON_NAME, Addon = ...
 local ThreatPlates = Addon.ThreatPlates
 
+---------------------------------------------------------------------------------------------------
+-- Imported functions and constants
+---------------------------------------------------------------------------------------------------
+
 -- WoW APIs
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local GetSpellTexture = GetSpellTexture
+local CreateFrame = CreateFrame
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
+
+local ART_PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Artwork\\"
+local EMPTY_TEXTURE = "Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\Empty"
+
+local OFFSET_HIGHLIGHT = 3
+local OFFSET_THREAT= 7
 
 local fraction, range, value, barsize, final
 
@@ -112,7 +123,6 @@ local function SetBackdropTexture(self, texture)		-- 0. 1. 0. 1
 	self.Backdrop:SetTexture(texture)
 end
 
-
 function CreateTidyPlatesInternalStatusbar(parent)
 	local frame = CreateFrame("Frame", nil, parent)
 	--frame:SetFrameLevel(0)
@@ -147,6 +157,106 @@ function CreateTidyPlatesInternalStatusbar(parent)
 
 	return frame
 end
+
+------------------------------------------------------------------------------------------------------------
+
+--local function OnSizeChanged(self, width, height)
+--  self.Border:SetSize(width + 2 * BORDER_OFFSET, height + 2 * BORDER_OFFSET)
+--end
+
+local function SetAllColorsNew(self, rBar, gBar, bBar, aBar, rBackdrop, gBackdrop, bBackdrop, aBackdrop)
+  self:SetStatusBarColor(rBar or 1, gBar or 1, bBar or 1, aBar or 1)
+  self.Border:SetBackdropColor(rBackdrop or 1, gBackdrop or 1, bBackdrop or 1, aBackdrop or 1)
+end
+
+local function SetStatusBackdrop(self, backdrop_texture, edge_texture, edge_size, offset)
+  self.Border.BackdropBorder = edge_texture -- TODO: not ideal to store this in every frame, as it's the same for every frame, but not for healthbar/castbar
+
+  self.Border:ClearAllPoints()
+  self.Border:SetPoint("TOPLEFT", self, "TOPLEFT", -offset, offset)
+  self.Border:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", offset, -offset)
+  self.Border:SetBackdrop({
+    bgFile = backdrop_texture,
+    edgeFile = edge_texture,
+    edgeSize = edge_size,
+    insets = { left = offset, right = offset, top = offset, bottom = offset },
+  })
+  self.Border:SetBackdropBorderColor(0, 0, 0, 1)
+
+  OFFSET_THREAT = TidyPlatesThreat.db.profile.settings.threatborder.Offset or OFFSET_THREAT,
+  self.ThreatBorder:SetPoint("TOPLEFT", self, "TOPLEFT", - OFFSET_THREAT, OFFSET_THREAT)
+  self.ThreatBorder:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", OFFSET_THREAT, - OFFSET_THREAT)
+  self.ThreatBorder:SetBackdrop({
+    bgFile = EMPTY_TEXTURE,
+    edgeFile = ART_PATH .. "TP_Threat",
+    edgeSize = TidyPlatesThreat.db.profile.settings.threatborder.EdgeSize or 12,
+    insets = { left = OFFSET_THREAT, right = OFFSET_THREAT, top = OFFSET_THREAT, bottom = OFFSET_THREAT },
+  })
+end
+
+local function SetShownBorder(self, show_border)
+  local backdrop = self.Border:GetBackdrop()
+
+  if show_border then
+    backdrop.edgeFile = self.Border.BackdropBorder
+    self.Border:SetBackdrop(backdrop)
+    self.Border:SetBackdropBorderColor(0, 0, 0, 1)
+  else
+    backdrop.edgeFile = nil
+    self.Border:SetBackdrop(backdrop)
+  end
+
+  self.Border:Show()
+end
+
+function CreateThreatPlatesHealthbar(parent)
+	local frame = CreateFrame("Statusbar", nil, parent)
+  frame.Border = CreateFrame("Frame", nil, frame)
+  frame.ThreatBorder = CreateFrame("Frame", nil, frame)
+  frame.Highlight = CreateFrame("Frame", nil, frame)
+  frame.HighlightTexture =  frame.Highlight:CreateTexture(nil, "ARTWORK", 0)
+
+  frame:SetFrameLevel(parent:GetFrameLevel())
+  frame.Border:SetFrameLevel(frame:GetFrameLevel())
+  frame.ThreatBorder:SetFrameLevel(frame:GetFrameLevel())
+  frame.Highlight:SetFrameLevel(frame:GetFrameLevel() + 1)
+
+  frame.Highlight:SetPoint("TOPLEFT", frame, "TOPLEFT", - OFFSET_HIGHLIGHT, OFFSET_HIGHLIGHT)
+  frame.Highlight:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", OFFSET_HIGHLIGHT, - OFFSET_HIGHLIGHT)
+  frame.Highlight:SetBackdrop({
+    bgFile = EMPTY_TEXTURE,
+    edgeFile = ART_PATH .. "TP_Border_Thin",
+    edgeSize = 7,
+    insets = { left = OFFSET_HIGHLIGHT, right = OFFSET_HIGHLIGHT, top = OFFSET_HIGHLIGHT, bottom = OFFSET_HIGHLIGHT },
+  })
+  frame.Highlight:SetBackdropBorderColor(1, 1, 1, 1)
+
+  frame.ThreatBorder:SetPoint("TOPLEFT", frame, "TOPLEFT", - OFFSET_THREAT, OFFSET_THREAT)
+  frame.ThreatBorder:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", OFFSET_THREAT, - OFFSET_THREAT)
+  frame.ThreatBorder:SetBackdrop({
+    bgFile = EMPTY_TEXTURE,
+    edgeFile = ART_PATH .. "TP_Threat",
+    edgeSize = 12,
+    insets = { left = OFFSET_THREAT, right = OFFSET_THREAT, top = OFFSET_THREAT, bottom = OFFSET_THREAT },
+  })
+
+  frame.HighlightTexture:SetTexture(ART_PATH .. "TP_HealthBar_Highlight")
+  frame.HighlightTexture:SetBlendMode("ADD")
+  frame.HighlightTexture:SetAllPoints(frame)
+
+	frame.SetAllColors = SetAllColorsNew
+  frame.SetTexCoord = function() end
+	frame.SetBackdropTexCoord = function() end
+  frame.SetStatusBackdrop = SetStatusBackdrop
+  frame.SetShownBorder = SetShownBorder
+
+	--frame:SetScript("OnSizeChanged", OnSizeChanged)
+	return frame
+end
+
+---------------------------------------------------------------------------------------------------
+-- Show config mode
+---------------------------------------------------------------------------------------------------
 
 local EnabledConfigMode = false
 local ConfigModePlate

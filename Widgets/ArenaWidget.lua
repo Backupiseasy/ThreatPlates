@@ -147,15 +147,13 @@ local function CreateArenaWidget(parent)
 	-- Custom Code III
 	--------------------------------------
 	frame:SetSize(32, 32)
-	frame:SetFrameLevel(parent:GetFrameLevel() + 2)
+	frame:SetFrameLevel(parent:GetFrameLevel() + 7)
 
 	frame.Icon = frame:CreateTexture(nil, "OVERLAY")
 	frame.Icon:SetAllPoints(frame)
 
 	frame.Overlay = CreateFrame("frame",nil, frame)
 	frame.Overlay:SetPoint("CENTER", frame, "CENTER")
-	--frame.Overlay:SetFrameStrata(frame:GetFrameStrata())
-	--frame.Overlay:SetFrameLevel(frame:GetFrameLevel() + 1)
 
 	frame.Overlay.Num = frame.Overlay:CreateTexture(nil,"OVERLAY")
 	frame.Overlay.Num:SetAllPoints(frame.Overlay)
