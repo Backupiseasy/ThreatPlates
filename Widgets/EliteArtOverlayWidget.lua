@@ -10,19 +10,18 @@ local ThreatPlates = NAMESPACE.ThreatPlates
 ---------------------------------------------------------------------------------------------------
 local UnitGUID = UnitGUID
 
-local PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\EliteArtWidget\\"
 -- local WidgetList = {}
 
 local BACKDROP = {
   TP_EliteBorder_Default = {
-    edgeFile = PATH .. "TP_EliteBorder_Default",
-    edgeSize = 8,
-    inset = 3,
+    edgeFile = ThreatPlates.Art .. "TP_WhiteSquare",
+    edgeSize = 2,
+    offset = 2,
   },
   TP_EliteBorder_Thin = {
-    edgeFile = PATH .. "TP_EliteBorder_Thin",
-    edgeSize = 7,
-    inset = 2,
+    edgeFile = ThreatPlates.Art .. "TP_WhiteSquare",
+    edgeSize = 0.9,
+    offset = 1.1,
   }
 }
 
@@ -52,22 +51,22 @@ local function UpdateSettings(frame)
   local backdrop = BACKDROP[db.texture]
 
   --  backdrop.edgeSize = TidyPlatesThreat.db.profile.settings.elitehealthborder.EdgeSize
-  --  backdrop.inset = TidyPlatesThreat.db.profile.settings.elitehealthborder.Offset
+  --  backdrop.offset = TidyPlatesThreat.db.profile.settings.elitehealthborder.Offset
 
   db = TidyPlatesThreat.db.profile.settings.healthbar
-  local offset_x = db.width + 2 * backdrop.inset
-  local offset_y = db.height + 2 * backdrop.inset
+  local offset_x = db.width + 2 * backdrop.offset
+  local offset_y = db.height + 2 * backdrop.offset
   if frame:GetWidth() ~= offset_x or frame:GetHeight() ~= offset_y  then
-    frame:SetPoint("TOPLEFT", frame:GetParent().visual.healthbar, "TOPLEFT", - backdrop.inset, backdrop.inset)
-    frame:SetPoint("BOTTOMRIGHT", frame:GetParent().visual.healthbar, "BOTTOMRIGHT", backdrop.inset, - backdrop.inset)
+    frame:SetPoint("TOPLEFT", frame:GetParent().visual.healthbar, "TOPLEFT", - backdrop.offset, backdrop.offset)
+    frame:SetPoint("BOTTOMRIGHT", frame:GetParent().visual.healthbar, "BOTTOMRIGHT", backdrop.offset, - backdrop.offset)
     --    frame:SetSize(width, height)
   end
 	frame:SetBackdrop({
     edgeFile = backdrop.edgeFile,
     edgeSize = backdrop.edgeSize,
-    insets = { left = backdrop.inset, right = backdrop.inset, top = backdrop.inset, bottom = backdrop.inset }
+    insets = { left = 0, right = 0, top = 0, bottom = 0 }
 	})
-	frame:SetBackdropBorderColor(1, 1, 0, 1)
+	frame:SetBackdropBorderColor(1, 0.85, 0, 1)
 end
 
 

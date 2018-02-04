@@ -99,7 +99,7 @@ local function GetDefaultSettingsV1(defaults)
   db.questWidget.ModeHPBar = true
   db.ResourceWidget.BarTexture = "Aluminium"
   db.settings.elitehealthborder.show = true
-  db.settings.healthborder.texture = "TP_HealthBarOverlay"
+  db.settings.healthborder.texture = "TP_Border_Default"
   db.settings.healthbar.texture = "ThreatPlatesBar"
   db.settings.healthbar.backdrop = "ThreatPlatesEmpty"
   db.settings.healthbar.BackgroundOpacity = 1
@@ -289,46 +289,61 @@ local function MigrateCastbarColoring(profile_name, profile)
 end
 
 local function MigrationTotemSettings(profile_name, profile)
-  --TidyPlatesThreat.db.global.MigrationLog["TotemSettings"] = true
+  TidyPlatesThreat.db.global.MigrationLog["TotemSettings"] = true
   local entry = { "totemSettings" }
   if DatabaseEntryExists(profile, entry) then
     for key, value in pairs(profile.totemSettings) do
-      if type(value) == "table" then -- omit hideHealthbar setting
-        --TidyPlatesThreat.db.global.MigrationLog["TotemSettingsConvertign"] = key
-        profile.totemSettings[key] = {
-          Style = value[7],
-          Color = value.color,
-          ShowNameplate = value[1],
-          ShowHPColor = value[2],
-          ShowIcon = value[3],
-        }
+      if type(value) == "table" then -- omit hideHealthbar setting and skip if new default totem settings
+        TidyPlatesThreat.db.global.MigrationLog["TotemSettings" .. key .. "Old"] = profile.totemSettings[key]
+
+
+        value.Style = value[7] or profile.totemSettings[key].Style
+        value.Color = value.color or profile.totemSettings[key].Color
+        if value[1] == false then
+          value.ShowNameplate = false
+        end
+        if value[2] == false then
+          value.ShowHPColor = false
+        end
+        if value[3] == false then
+          value.ShowIcon = false
+        end
+
+        value[7] = nil
+        value.color = nil
+        value[1] = nil
+        value[2] = nil
+        value[3] = nil
+
+--        profile.totemSettings[key] = {
+--          Style = value[7],
+--          Color = value.color,
+--          ShowNameplate = value[1],
+--          ShowHPColor = value[2],
+--          ShowIcon = value[3],
+--        }
+        TidyPlatesThreat.db.global.MigrationLog["TotemSettings" .. key .. "New"] = profile.totemSettings[key]
       end
     end
   end
 end
 
 local function MigrateBorderTextures(profile_name, profile)
-  if DatabaseEntryExists(profile, { "targetWidget", "theme" } ) then
-    if profile.targetWidget.theme == "default" then
-      profile.targetWidget.theme = "TP_Target_Default"
-    elseif profile.targetWidget.theme == "squarethin" then
-      profile.targetWidget.theme = "TP_Target_Thin"
-    end
-  end
+  TidyPlatesThreat.db.global.MigrationLog["BorderTextures"] = true
 
   if DatabaseEntryExists(profile, { "settings", "elitehealthborder", "texture" } ) then
-    if profile.settings.elitehealthborder.theme == "TP_HealthBarEliteOverlay" then
-      profile.settings.elitehealthborder.theme = "TP_EliteBorder_Default"
+    if profile.settings.elitehealthborder.texture == "TP_HealthBarEliteOverlay" then
+      profile.settings.elitehealthborder.texture = "TP_EliteBorder_Default"
     else -- TP_HealthBarEliteOverlayThin
-      profile.settings.elitehealthborder.theme = "TP_EliteBorder_Thin"
+      profile.settings.elitehealthborder.texture = "TP_EliteBorder_Thin"
     end
   end
 
   if DatabaseEntryExists(profile, { "settings", "healthborder", "texture" } ) then
-    if profile.settings.healthborder.theme == "TP_HealthBarOverlay" then
-      profile.settings.healthborder.theme = "TP_Border_Default"
+    if profile.settings.healthborder.texture == "TP_HealthBarOverlay" then
+      profile.settings.healthborder.texture = "TP_Border_Default"
     else -- TP_HealthBarOverlayThin
-      profile.settings.healthborder.theme = "TP_Border_Thin"
+      profile.settings.healthborder.texture = "TP_Border_Thin"
     end
   end
 end

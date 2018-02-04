@@ -1181,12 +1181,14 @@ local function CreateVisibilitySettings()
           AllHostileDesc = { name = L["Show enemy nameplates (ALT-V)."], order = 35, type = "description", width = "double", },
           Header = { type = "header", order = 40, name = "", },
           ShowBlizzardFriendlyNameplates = {
-            --name = L["Hide Friendly Units"],
             name = L["Show Blizzard Nameplates for Friendly Units"],
             order = 50,
             type = "toggle",
             width = "double",
-            set = SetValue,
+            set = function(info, val)
+              SetValue(info, val)
+              TidyPlatesThreat:SetBaseNamePlateSize() -- adjust clickable area if switching from Blizzard plates to Threat Plate plates
+            end,
             get = GetValue,
             desc = L["Use Blizzard default nameplates for friendly nameplates and disable ThreatPlates for these units."],
             arg = { "ShowFriendlyBlizzardNameplates" },
@@ -2172,11 +2174,11 @@ local function CreateOptionsTable()
                       name = L["Border"],
                       set = function(info, val)
                         if val == "TP_Border_Default" then
-                          db.settings.healthborder.EdgeSize = 7
-                          db.settings.healthborder.Offset = 3
-                        else
-                          db.settings.healthborder.EdgeSize = 7
+                          db.settings.healthborder.EdgeSize = 2
                           db.settings.healthborder.Offset = 2
+                        else
+                          db.settings.healthborder.EdgeSize = 1
+                          db.settings.healthborder.Offset = 1
                         end
                         SetThemeValue(info, val)
                       end,
@@ -2285,51 +2287,6 @@ local function CreateOptionsTable()
                         },
                       },
                     },
---                    BorderGroup = {
---                      name = L["Borders"],
---                      order = 170,
---                      type = "group",
---                      inline = true,
---                      args = {
-----                        HealthBorderToggle = {
-----                          type = "toggle",
-----                          order = 180,
-----                          name = L["Show Border"],
-----                          set = SetThemeValue,
-----                          arg = { "settings", "healthborder", "show" },
-----                        },
---                        HealthBorder = {
---                          type = "select",
---                          order = 190,
---                          name = L["Normal Border"],
---                          set = SetThemeValue,
---                          values = { TP_Border_Default = "Default", TP_Border_Thin = "Thin" },
---                          arg = { "settings", "healthborder", "texture" },
---                        },
-----                        EliteHealthBorderToggle = {
-----                          type = "toggle",
-----                          order = 200,
-----                          name = L["Show Elite Border"],
-----                          arg = { "settings", "elitehealthborder", "show" },
-----                        },
---                        EliteBorder = {
---                          type = "select",
---                          order = 210,
---                          name = L["Elite Border"],
---                          values = { TP_EliteBorder_Default = "Default", TP_EliteBorder_Thin = "Thin" },
---                          arg = { "settings", "elitehealthborder", "texture" }
---                        },
-----                        Spacer2 = GetSpacerEntry(99),
-----                        Mouseover = {
-----                          type = "select",
-----                          order = 220,
-----                          name = L["Mouseover"],
-----                          set = SetThemeValue,
-----                          values = { TP_HealthBarHighlight = "Default", Empty = "None" },
-----                          arg = { "settings", "highlight", "texture" },
-----                        },
---                      },
---                    },
                   },
                 },
                 ShowByStatus = {
@@ -3523,6 +3480,7 @@ local function CreateOptionsTable()
               type = "group",
               order = 1000,
               set = SetThemeValue,
+              hidden = true,
               args = {
                 HealthHeaderBorder = { name = L["Healthbar Border"], type = "header", order = 10, },
                 HealthBorder = {
@@ -3537,7 +3495,7 @@ local function CreateOptionsTable()
                   name = L["Edge Size"],
                   order = 30,
                   type = "range",
-                  min = 0, max = 32, step = 1,
+                  min = 0, max = 32, step = 0.5,
                   set = SetThemeValue,
                   arg = { "settings", "healthborder", "EdgeSize" },
                 },
@@ -3545,7 +3503,7 @@ local function CreateOptionsTable()
                   name = L["Offset"],
                   order = 40,
                   type = "range",
-                  min = -16, max = 16, step = 1,
+                  min = -16, max = 16, step = 0.5,
                   set = SetThemeValue,
                   arg = { "settings", "healthborder", "Offset" },
                 },
@@ -3561,7 +3519,7 @@ local function CreateOptionsTable()
                   name = L["Edge Size"],
                   order = 130,
                   type = "range",
-                  min = 0, max = 32, step = 1,
+                  min = 0, max = 32, step = 0.5,
                   set = SetThemeValue,
                   arg = { "settings", "elitehealthborder", "EdgeSize" },
                 },
@@ -3569,7 +3527,7 @@ local function CreateOptionsTable()
                   name = L["Offset"],
                   order = 140,
                   type = "range",
-                  min = -16, max = 16, step = 1,
+                  min = -16, max = 16, step = 0.5,
                   set = SetThemeValue,
                   arg = { "settings", "elitehealthborder", "Offset" },
                 },
@@ -3593,7 +3551,7 @@ local function CreateOptionsTable()
                   name = L["Offset"],
                   order = 240,
                   type = "range",
-                  min = -16, max = 16, step = 1,
+                  min = -16, max = 16, step = 0.5,
                   set = SetThemeValue,
                   arg = { "targetWidget", "Offset" },
                 },
@@ -3602,7 +3560,7 @@ local function CreateOptionsTable()
                   name = L["Edge Size"],
                   order = 330,
                   type = "range",
-                  min = 0, max = 32, step = 1,
+                  min = 0, max = 32, step = 0.5,
                   set = SetThemeValue,
                   arg = { "settings", "highlight", "EdgeSize" },
                 },
@@ -3610,7 +3568,7 @@ local function CreateOptionsTable()
                   name = L["Offset"],
                   order = 340,
                   type = "range",
-                  min = -16, max = 16, step = 1,
+                  min = -16, max = 16, step = 0.5,
                   set = SetThemeValue,
                   arg = { "settings", "highlight", "Offset" },
                 },
@@ -3619,7 +3577,7 @@ local function CreateOptionsTable()
                   name = L["Edge Size"],
                   order = 430,
                   type = "range",
-                  min = 0, max = 32, step = 1,
+                  min = 0, max = 32, step = 0.5,
                   set = SetThemeValue,
                   arg = { "settings", "threatborder", "EdgeSize" },
                 },
@@ -3627,10 +3585,60 @@ local function CreateOptionsTable()
                   name = L["Offset"],
                   order = 440,
                   type = "range",
-                  min = -16, max = 16, step = 1,
+                  min = -16, max = 16, step = 0.5,
                   set = SetThemeValue,
                   arg = { "settings", "threatborder", "Offset" },
                 },
+                TestHeaderBorder = { name = L["Test Widget"], type = "header", order = 500, },
+                Width = GetRangeEntry(L["Bar Width"], 501, { "TestWidget", "BarWidth" }, 5, 500),
+                Height = GetRangeEntry(L["Bar Height"], 502, { "TestWidget", "BarHeight" }, 1, 100),
+                TestBarTexture = {
+                  name = L["Foreground"],
+                  type = "select",
+                  order = 505,
+                  dialogControl = "LSM30_Statusbar",
+                  values = AceGUIWidgetLSMlists.statusbar,
+                  set = SetThemeValue,
+                  arg = { "TestWidget", "BarTexture" },
+                },
+                TestBarBorder = {
+                  type = "select",
+                  order = 510,
+                  name = L["Border Texture"],
+                  dialogControl = "LSM30_Border",
+                  values = AceGUIWidgetLSMlists.border,
+                  arg = { "TestWidget", "BorderTexture" },
+                },
+                TestBarBackgroundTexture = {
+                  name = L["Background"],
+                  type = "select",
+                  order = 520,
+                  dialogControl = "LSM30_Statusbar",
+                  values = AceGUIWidgetLSMlists.statusbar,
+                  arg = { "TestWidget", "BorderBackground" },
+                },
+                TestBorderEdgeSize = {
+                  name = L["Edge Size"],
+                  order = 530,
+                  type = "range",
+                  min = 0, max = 32, step = 0.1,
+                  arg = { "TestWidget", "EdgeSize" },
+                },
+                TestBorderOffset = {
+                  name = L["Offset"],
+                  order = 540,
+                  type = "range",
+                  min = -16, max = 16, step = 0.1,
+                  arg = { "TestWidget", "Offset" },
+                },
+                TestBorderInset = {
+                  name = L["Inset"],
+                  order = 545,
+                  type = "range",
+                  min = -16, max = 16, step = 0.1,
+                  arg = { "TestWidget", "Inset" },
+                },
+                TestSacle = GetScaleEntry(L["Scale"], 550, { "TestWidget", "Scale" }, nil, 0, 5.0)
               },
             },
           },

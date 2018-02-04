@@ -16,7 +16,7 @@ local TidyPlatesThreat = TidyPlatesThreat
 local ART_PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Artwork\\"
 local EMPTY_TEXTURE = "Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\Empty"
 
-local OFFSET_HIGHLIGHT = 3
+local OFFSET_HIGHLIGHT = 1
 local OFFSET_THREAT= 7
 
 local fraction, range, value, barsize, final
@@ -173,25 +173,15 @@ local function SetStatusBackdrop(self, backdrop_texture, edge_texture, edge_size
   self.Border.BackdropBorder = edge_texture -- TODO: not ideal to store this in every frame, as it's the same for every frame, but not for healthbar/castbar
 
   self.Border:ClearAllPoints()
-  self.Border:SetPoint("TOPLEFT", self, "TOPLEFT", -offset, offset)
-  self.Border:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", offset, -offset)
+  self.Border:SetPoint("TOPLEFT", self, "TOPLEFT", - offset, offset)
+  self.Border:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", offset, - offset)
   self.Border:SetBackdrop({
     bgFile = backdrop_texture,
     edgeFile = edge_texture,
     edgeSize = edge_size,
-    insets = { left = offset, right = offset, top = offset, bottom = offset },
+    insets = { left = 0, right = 0, top = 0, bottom = 0 },
   })
   self.Border:SetBackdropBorderColor(0, 0, 0, 1)
-
-  OFFSET_THREAT = TidyPlatesThreat.db.profile.settings.threatborder.Offset or OFFSET_THREAT,
-  self.ThreatBorder:SetPoint("TOPLEFT", self, "TOPLEFT", - OFFSET_THREAT, OFFSET_THREAT)
-  self.ThreatBorder:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", OFFSET_THREAT, - OFFSET_THREAT)
-  self.ThreatBorder:SetBackdrop({
-    bgFile = EMPTY_TEXTURE,
-    edgeFile = ART_PATH .. "TP_Threat",
-    edgeSize = TidyPlatesThreat.db.profile.settings.threatborder.EdgeSize or 12,
-    insets = { left = OFFSET_THREAT, right = OFFSET_THREAT, top = OFFSET_THREAT, bottom = OFFSET_THREAT },
-  })
 end
 
 local function SetShownBorder(self, show_border)
@@ -210,7 +200,7 @@ local function SetShownBorder(self, show_border)
 end
 
 function CreateThreatPlatesHealthbar(parent)
-	local frame = CreateFrame("Statusbar", nil, parent)
+	local frame = CreateFrame("StatusBar", nil, parent)
   frame.Border = CreateFrame("Frame", nil, frame)
   frame.ThreatBorder = CreateFrame("Frame", nil, frame)
   frame.Highlight = CreateFrame("Frame", nil, frame)
@@ -225,9 +215,9 @@ function CreateThreatPlatesHealthbar(parent)
   frame.Highlight:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", OFFSET_HIGHLIGHT, - OFFSET_HIGHLIGHT)
   frame.Highlight:SetBackdrop({
     bgFile = EMPTY_TEXTURE,
-    edgeFile = ART_PATH .. "TP_Border_Thin",
-    edgeSize = 7,
-    insets = { left = OFFSET_HIGHLIGHT, right = OFFSET_HIGHLIGHT, top = OFFSET_HIGHLIGHT, bottom = OFFSET_HIGHLIGHT },
+    edgeFile = ART_PATH .. "TP_WhiteSquare",
+    edgeSize = 1,
+    insets = { left = 0, right = 0, top = 0, bottom = 0 },
   })
   frame.Highlight:SetBackdropBorderColor(1, 1, 1, 1)
 

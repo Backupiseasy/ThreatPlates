@@ -306,10 +306,11 @@ function TidyPlatesThreat:SetBaseNamePlateSize()
   local zeroBasedScale = tonumber(GetCVar("NamePlateVerticalScale")) - 1.0
   local horizontalScale = tonumber(GetCVar("NamePlateHorizontalScale"))
   --local clampedZeroBasedScale = Saturate(zeroBasedScale)
-  C_NamePlate_SetNamePlateFriendlySize(baseWidth * horizontalScale, baseHeight * Lerp(1.0, 1.25, zeroBasedScale))
+  if not self.db.profile.ShowFriendlyBlizzardNameplates then
+    C_NamePlate_SetNamePlateFriendlySize(baseWidth * horizontalScale, baseHeight * Lerp(1.0, 1.25, zeroBasedScale))
+  end
   C_NamePlate_SetNamePlateEnemySize(baseWidth * horizontalScale, baseHeight * Lerp(1.0, 1.25, zeroBasedScale))
   --C_NamePlate_SetNamePlateSelfSize(baseWidth * horizontalScale * Lerp(1.1, 1.0, clampedZeroBasedScale), baseHeight)
-  print ("SetBaseNamePlateSize")
 end
 
 -- The OnInitialize() method of your addon object is called by AceAddon when the addon is first loaded
@@ -577,10 +578,13 @@ local function FrameOnUpdate(plate)
 
   plate.TP_Extended:SetFrameLevel(plate:GetFrameLevel() * 10)
 
+
   -- Hide ThreatPlates nameplates if Blizzard nameplates should be shown for friendly units
   if TidyPlatesThreat.db.profile.ShowFriendlyBlizzardNameplates and UnitReaction(unitid, "player") > 4 then
     plate.UnitFrame:Show()
     plate.TP_Carrier:Hide()
+  else
+    plate.UnitFrame:Hide()
   end
 end
 

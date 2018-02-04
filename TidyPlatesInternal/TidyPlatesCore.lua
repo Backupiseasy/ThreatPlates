@@ -173,10 +173,10 @@ do
 				plate.UpdateMe = false
 				plate.UpdateHealth = false
       end
+
 		-- This would be useful for alpha fades
 		-- But right now it's just going to get set directly
 		-- extended:SetAlpha(extended.requestedAlpha)
-
 		end
 
 		-- Reset Mass-Update Flag
@@ -266,7 +266,6 @@ do
 
     -- Set Base Properties
 		visual.raidicon:SetTexture("Interface\\TargetingFrame\\UI-RaidTargetingIcons")
-    --visual.highlight:SetPoint("TOP", visual.name, "TOP")
     visual.highlight:SetAllPoints(visual.name)
     visual.highlight:SetBlendMode("ADD")
 
@@ -708,9 +707,12 @@ do
 	function UpdateIndicator_Target()
     visual.target:SetShown(unit.isTarget and style.target.show)
 
-		if unit.isMouseover and style.highlight.show and not unit.isTarget then
-      visual.highlight:Show()
-      visual.healthbar.Highlight:Show()
+		if unit.isMouseover and not unit.isTarget and style.highlight.show then
+      if style.healthbar.show then -- healthbar view
+        visual.healthbar.Highlight:Show()
+      else
+        visual.highlight:Show()
+      end
     else
       visual.highlight:Hide()
       visual.healthbar.Highlight:Hide()

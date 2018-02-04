@@ -131,6 +131,7 @@ TemplateTheme.healthbar = {
 	y = 10,
 	anchor = "CENTER",
 	orientation = "HORIZONTAL",
+	show = true,
 }
 
 TemplateTheme.castbar = {

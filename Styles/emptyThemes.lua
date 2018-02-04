@@ -61,6 +61,7 @@ local function Create(self,name)
 			y = 0,
 			anchor = "CENTER",
 			orientation = "HORIZONTAL",
+      show = false,
 		},
 
     target = {

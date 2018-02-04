@@ -45,25 +45,28 @@ local function UpdateSettings(frame)
     local offset = db.BorderOffset
     --border:SetBackdrop(BACKDROP)
 
-    local backdrop = border:GetBackdrop()
+--    local backdrop = border:GetBackdrop()
     local bar_texture = ThreatPlates.Media:Fetch('statusbar', db.BarTexture)
     local border_texture = ThreatPlates.Media:Fetch('border', db.BorderTexture)
-    if backdrop.bgFile ~= bar_texture or backdrop.edgeFile ~= border_texture or backdrop.edgeSize ~= db.BorderEdgeSize or backdrop.insets.left ~= offset then
+--    if backdrop.bgFile ~= bar_texture or backdrop.edgeFile ~= border_texture or backdrop.edgeSize ~= db.BorderEdgeSize or backdrop.insets.left ~= offset then
       border:SetBackdrop({
           bgFile = bar_texture,
           edgeFile = border_texture,
           edgeSize = db.BorderEdgeSize,
-          insets = { left = offset, right = offset, top = offset, bottom = offset }
+          insets = { left = 0, right = 0, top = 0, bottom = 0 }
       })
-    end
+--    end
 
     local offset_x = db.BarWidth + 2 * offset
     local offset_y = db.BarHeight + 2 * offset
     if border:GetWidth() ~= offset_x or border:GetHeight() ~= offset_y  then
-      border:SetSize(offset_x, offset_y)
-      border:SetPoint("CENTER", bar, "CENTER", 0, 0)
-      border:SetFrameLevel(frame.Bar:GetFrameLevel())
+      border:SetPoint("TOPLEFT", frame, "TOPLEFT", - offset, offset)
+      border:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", offset, - offset)
+      --      border:SetSize(offset_x, offset_y)
+      --      border:SetPoint("CENTER", bar, "CENTER", 0, 0)
+      --      border:SetFrameLevel(frame.Bar:GetFrameLevel())
     end
+    border:SetFrameLevel(frame.Bar:GetFrameLevel())
 
     bar:Show()
   else
@@ -355,7 +358,7 @@ end
 
 local function CreateWidgetFrame(parent)
   -- Required Widget Code
-  local frame = CreateFrame("Frame", nil, parent)
+  local frame = CreateFrame("StatusBar", nil, parent)
   frame:Hide()
 
   -- Custom Code III
@@ -364,40 +367,39 @@ local function CreateWidgetFrame(parent)
   frame.Bar = CreateFrame("StatusBar", nil, frame)
   frame.Border = CreateFrame("Frame", nil, frame.Bar)
 
-  local db = TidyPlatesThreat.db.profile.ResourceWidget
-  frame:SetPoint("CENTER", frame:GetParent(), db.x, db.y)
-  frame:SetSize(db.BarWidth, db.BarHeight)
-  frame:SetFrameLevel(frame:GetParent():GetFrameLevel() + 8)
+--  local db = TidyPlatesThreat.db.profile.ResourceWidget
+--  frame:SetPoint("CENTER", frame:GetParent(), db.x, db.y)
+--  frame:SetSize(db.BarWidth, db.BarHeight)
+--  frame:SetFrameLevel(frame:GetParent():GetFrameLevel() + 8)
 
-  local bar = frame.Bar
-  bar:SetStatusBarTexture(ThreatPlates.Media:Fetch('statusbar', db.BarTexture))
-  bar:SetAllPoints()
-  bar:SetFrameLevel(frame:GetFrameLevel())
-  bar:SetMinMaxValues(0, 100)
+--  local bar = frame.Bar
+--  bar:SetStatusBarTexture(ThreatPlates.Media:Fetch('statusbar', db.BarTexture))
+--  bar:SetAllPoints()
+--  bar:SetFrameLevel(frame:GetFrameLevel())
+--  bar:SetMinMaxValues(0, 100)
 
-  local border = frame.Border
-  local offset = db.BorderOffset
-  border:SetBackdrop({
-    bgFile = ThreatPlates.Media:Fetch('statusbar', db.BarTexture),
-    edgeFile = ThreatPlates.Media:Fetch('border', db.BorderTexture),
-    edgeSize = db.BorderEdgeSize,
-    insets = { left = offset, right = offset, top = offset, bottom = offset }
-  })
-  border:SetSize(db.BarWidth + 2 * offset, db.BarHeight + 2 * offset)
-  border:SetPoint("CENTER", bar, "CENTER", 0, 0)
-  border:SetFrameLevel(frame.Bar:GetFrameLevel())
+--  local border = frame.Border
+--  local offset = db.BorderOffset
+--  border:SetBackdrop({
+--    bgFile = ThreatPlates.Media:Fetch('statusbar', db.BarTexture),
+--    edgeFile = ThreatPlates.Media:Fetch('border', db.BorderTexture),
+--    edgeSize = db.BorderEdgeSize,
+--    insets = { left = offset, right = offset, top = offset, bottom = offset }
+--  })
+--  border:SetSize(db.BarWidth + 2 * offset, db.BarHeight + 2 * offset)
+--  border:SetPoint("CENTER", bar, "CENTER", 0, 0)
+  --border:SetFrameLevel(frame.Bar:GetFrameLevel())
 
-  local text = frame.Text
-  local font_color = db.FontColor
-  text:SetFont(ThreatPlates.Media:Fetch('font', db.Font), db.FontSize)
-  text:SetJustifyH("CENTER")
-  text:SetShadowOffset(1, -1)
-  text:SetMaxLines(1)
-  text:SetTextColor(font_color.r, font_color.g, font_color.b)
-  text:SetAllPoints()
+--  local text = frame.Text
+--  local font_color = db.FontColor
+--  text:SetFont(ThreatPlates.Media:Fetch('font', db.Font), db.FontSize)
+--  text:SetJustifyH("CENTER")
+--  text:SetShadowOffset(1, -1)
+--  text:SetMaxLines(1)
+--  text:SetTextColor(font_color.r, font_color.g, font_color.b)
+--  text:SetAllPoints()
 
-
-  --UpdateSettings(frame)
+  UpdateSettings(frame)
   frame.UpdateConfig = UpdateSettings
   --------------------------------------
   -- End Custom Code

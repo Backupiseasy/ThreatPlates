@@ -17,5 +17,9 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 <Script file="StealthWidget.lua"/>
 <Script file="ResourceWidget.lua"/>
 <Script file="BossModsWidget.lua"/>
+
+<!-- Just for testing -->
+<!--<Script file="TestWidget.lua"/>-->
+
 <!-- <Script file="HealerTrackerWidget.lua"/> -->
 </Ui>

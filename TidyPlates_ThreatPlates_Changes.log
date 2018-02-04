@@ -2,6 +2,7 @@
 8.7.0-Alpha4
 ------------------------------------------------------
 * Added an option to resize the healthbar, i.e., to change width and height independently from each other [PM, Issue #142, Comment #623].
+* Fixed the migration of totem settings from versions before 8.7.0.
 * Fixed a Lua error with scaling and transparency on nameplates that had no unit assigned yet.
 * Fixed a bug with totem nameplates not being shown if healthbar should be hidden, but icon should be shown.
 

@@ -15,14 +15,14 @@ local PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\TargetArtWidg
 
 local BACKDROP = {
   default = {
-    edgeFile = PATH .. "TP_Target_Default",
-    edgeSize = 7,
-    inset = 5,
+    edgeFile = ThreatPlates.Art .. "TP_WhiteSquare",
+    edgeSize = 1.8,
+    offset = 4,
   },
   squarethin = {
-    edgeFile = PATH .. "TP_Target_Thin",
-    edgeSize = 4,
-    inset = 3,
+    edgeFile = ThreatPlates.Art .. "TP_WhiteSquare",
+    edgeSize = 1,
+    offset = 3,
   }
 }
 
@@ -55,22 +55,23 @@ local function UpdateSettings(frame)
     local backdrop = BACKDROP[db.theme]
 
     --  backdrop.edgeSize = TidyPlatesThreat.db.profile.targetWidget.EdgeSize
-    --  backdrop.inset = TidyPlatesThreat.db.profile.targetWidget.Offset
+    --  backdrop.offset = TidyPlatesThreat.db.profile.targetWidget.Offset
 
-    db = TidyPlatesThreat.db.profile.settings.healthbar
-    local offset_x = db.width + 2 * backdrop.inset
-    local offset_y = db.height + 2 * backdrop.inset
+    local db_hb = TidyPlatesThreat.db.profile.settings.healthbar
+    local offset_x = db_hb.width + 2 * backdrop.offset
+    local offset_y = db_hb.height + 2 * backdrop.offset
     if frame:GetWidth() ~= offset_x or frame:GetHeight() ~= offset_y  then
-      frame:SetPoint("TOPLEFT", frame:GetParent().visual.healthbar, "TOPLEFT", - backdrop.inset, backdrop.inset)
-      frame:SetPoint("BOTTOMRIGHT", frame:GetParent().visual.healthbar, "BOTTOMRIGHT", backdrop.inset, - backdrop.inset)
+      frame:SetPoint("TOPLEFT", frame:GetParent().visual.healthbar, "TOPLEFT", - backdrop.offset, backdrop.offset)
+      frame:SetPoint("BOTTOMRIGHT", frame:GetParent().visual.healthbar, "BOTTOMRIGHT", backdrop.offset, - backdrop.offset)
       -- frame:SetSize(offset_x, offset_y)
     end
     frame:SetBackdrop({
       --edgeFile = PATH .. db.theme,
       edgeFile = backdrop.edgeFile,
       edgeSize = backdrop.edgeSize,
-      insets = { left = backdrop.inset, right = backdrop.inset, top = backdrop.inset, bottom = backdrop.inset }
+      insets = { left = 0, right = 0, top = 0, bottom = 0 }
     })
+    frame:SetBackdropBorderColor(db.r, db.g, db.b, db.a)
 
     frame.LeftTexture:Hide()
     frame.RightTexture:Hide()
@@ -87,19 +88,6 @@ local function UpdateSettings(frame)
 
     frame:SetBackdrop(nil)
   end
-
-  local OFFSET_THREAT = TidyPlatesThreat.db.profile.Offset or 6
-  local healthbar = frame:GetParent().visual.healthbar
-  healthbar.ThreatBorder:SetPoint("TOPLEFT", healthbar, "TOPLEFT", - OFFSET_THREAT, OFFSET_THREAT)
-  healthbar.ThreatBorder:SetPoint("BOTTOMRIGHT", healthbar, "BOTTOMRIGHT", OFFSET_THREAT, - OFFSET_THREAT)
-  healthbar.ThreatBorder:SetBackdrop({
-    edgeFile = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Artwork\\" .. "TP_Threat",
-    edgeSize = TidyPlatesThreat.db.profile.EdgeSize or 10,
-    insets = { left = OFFSET_THREAT, right = OFFSET_THREAT, top = OFFSET_THREAT, bottom = OFFSET_THREAT },
-  })
-  healthbar.ThreatBorder:SetBackdropBorderColor(0, 1, 0, 1)
-  healthbar.ThreatBorder:Show()
-
 end
 
 local function UpdateWidgetFrame(frame, unit)
