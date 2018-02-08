@@ -34,6 +34,12 @@
 * Removed the restriction that the threat system configuration can only be changed outside of arenas and battlegrounds [E-Mail].
 
 ------------------------------------------------------
+8.6.3 (Standalone, TidyPlates is no longer required)
+------------------------------------------------------
+* Fixed a bug where the overlay for non-interruptible casts was shown even for interruptible casts when entering combat for units that were casting at that moment [E-mail message].
+* Optimized the code for ignoring the character's personal resource bar nameplate and for the layering of nameplate elements.
+
+------------------------------------------------------
 8.6.2 (Standalone, TidyPlates is no longer required)
 ------------------------------------------------------
 * Fixed a Lua error which could occur with nameplates created, but having no unit assigned yet [Comment #634].

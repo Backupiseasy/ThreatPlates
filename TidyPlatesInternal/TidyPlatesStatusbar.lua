@@ -17,7 +17,7 @@ local ART_PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Artwork\\"
 local EMPTY_TEXTURE = "Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\Empty"
 
 local OFFSET_HIGHLIGHT = 1
-local OFFSET_THREAT= 7
+local OFFSET_THREAT= 7.5
 
 local fraction, range, value, barsize, final
 
@@ -227,7 +227,7 @@ function CreateThreatPlatesHealthbar(parent)
     bgFile = EMPTY_TEXTURE,
     edgeFile = ART_PATH .. "TP_Threat",
     edgeSize = 12,
-    insets = { left = OFFSET_THREAT, right = OFFSET_THREAT, top = OFFSET_THREAT, bottom = OFFSET_THREAT },
+    insets = { left = 0, right = 0, top = 0, bottom = 0 },
   })
 
   frame.HighlightTexture:SetTexture(ART_PATH .. "TP_HealthBar_Highlight")

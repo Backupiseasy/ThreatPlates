@@ -955,12 +955,6 @@ local function UpdateAuraWidgetLayout(widget_frame)
       frame:ClearAllPoints()
       frame:SetPoint(align_layout[1], widget_frame, pos_x, pos_y)
 
-      if db.FrameOrder == "HEALTHBAR_AURAS" then
-        frame:SetFrameLevel(frame:GetParent():GetFrameLevel() + 3)
-      else
-        frame:SetFrameLevel(frame:GetParent():GetFrameLevel() + 9)
-      end
-
       UpdateAuraFrame(frame)
     end
 
@@ -985,6 +979,12 @@ local function UpdateAuraWidgetLayout(widget_frame)
     widget_frame:SetPoint(ThreatPlates.ANCHOR_POINT_SETPOINT[db.anchor][2], widget_frame:GetParent(), ThreatPlates.ANCHOR_POINT_SETPOINT[db.anchor][1], db.x, db.y)
     widget_frame:SetSize(CONFIG_AuraWidgetWidth, CONFIG_AuraWidgetHeight)
     widget_frame:SetScale(db.scale)
+
+    if db.FrameOrder == "HEALTHBAR_AURAS" then
+      widget_frame:SetFrameLevel(widget_frame:GetParent():GetFrameLevel() + 3)
+    else
+      widget_frame:SetFrameLevel(widget_frame:GetParent():GetFrameLevel() + 9)
+    end
 
     widget_frame.last_update = GetTime()
   end

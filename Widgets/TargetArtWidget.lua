@@ -137,6 +137,7 @@ local function CreateWidgetFrame(parent)
 	--frame:SetPoint("CENTER", parent, "CENTER")
   frame:SetFrameLevel(parent:GetFrameLevel() + 6)
 
+
 	frame.LeftTexture = frame:CreateTexture(nil, "BACKGROUND", 0)
   frame.LeftTexture:SetPoint("RIGHT", parent, "LEFT")
   frame.LeftTexture:SetSize(64, 64)

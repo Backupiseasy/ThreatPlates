@@ -467,7 +467,19 @@ do
 
 		UpdateUnitCondition(plate, unitid)
 		ProcessUnitChanges()
-		UpdateIndicator_HealthBar()		-- Just to be on the safe side
+
+    -- Fix a bug where the overlay for non-interruptible casts was shown even for interruptible casts when entering combat while the unit was already casting
+    if unit.isCasting then
+      if unit.spellIsShielded then
+        visual.castnostop:Show()
+        visual.castborder:Hide()
+      else
+        visual.castnostop:Hide()
+        visual.castborder:Show()
+      end
+    end
+
+    UpdateIndicator_HealthBar()		-- Just to be on the safe side
   end
 
 
@@ -900,9 +912,11 @@ do
 		-- Check to see if there's a spell being cast
 		if UnitCastingInfo(unitid) then
       OnStartCasting(plate, unitid, false)
-    elseif UnitChannelInfo(unitid) then
+    else
       -- See if one is being channeled...
-      OnStartCasting(plate, unitid, true)
+			if UnitChannelInfo(unitid) then
+        OnStartCasting(plate, unitid, true)
+      end
     end
 	end
 
@@ -976,13 +990,14 @@ do
 		local unitid = ...
 		local plate = GetNamePlateForUnit(unitid);
 
-		-- Personal Display
+		-- Handle personal resource bar, currently it's ignored by Threat Plates
 		if UnitIsUnit("player", unitid) then
-		-- Normal Plates
+			--addon.PlayerNameplate = plate
+			--print ("NAME_PLATE_UNIT_ADDED: player frame")
 		else
+			--plate:GetChildren():Hide()
 			OnShowNameplate(plate, unitid)
 		end
-
 	end
 
 	function CoreEvents:NAME_PLATE_UNIT_REMOVED(...)
@@ -1335,7 +1350,7 @@ do
 		if style and style.raidicon and style.raidicon.texture then
 			visual.raidicon:SetTexture(style.raidicon.texture)
       visual.raidicon:SetDrawLayer("ARTWORK", 5)
-		end
+    end
 
 		-- Font Group
 		for index = 1, #fontgroup do
@@ -1343,7 +1358,7 @@ do
 			local object, objectstyle = visual[objectname], style[objectname]
 
 			SetFontGroupObject(object, objectstyle)
-		end
+    end
 
     visual.castbar:ClearAllPoints()
     visual.castborder:ClearAllPoints()

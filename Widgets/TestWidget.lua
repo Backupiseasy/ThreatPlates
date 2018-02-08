@@ -52,7 +52,7 @@ local function UpdateSettings(frame)
   })
 
   frame.Border:SetBackdropColor(1, 1, 1, 0.7)
-  frame.Border:SetBackdropBorderColor(0, 0, 0, 1)
+  frame.Border:SetBackdropBorderColor(1, 0, 0, 1)
 end
 
 local function UpdateWidgetFrame(frame, unit)

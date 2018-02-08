@@ -3480,7 +3480,7 @@ local function CreateOptionsTable()
               type = "group",
               order = 1000,
               set = SetThemeValue,
-              hidden = true,
+              --hidden = true,
               args = {
                 HealthHeaderBorder = { name = L["Healthbar Border"], type = "header", order = 10, },
                 HealthBorder = {
