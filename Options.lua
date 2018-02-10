@@ -1522,8 +1522,7 @@ local function CreateAutomationSettings()
             order = 50,
             type = "toggle",
             width = "double",
-            --desc = L["Use the small version of the defaul Blizzard nameplates in instances."],
-            desc = L["Reduce the size of the default Blizzard nameplates in instances to 50%."],
+            desc = L["Reduce the size of the Blizzard's default large nameplates in instances to 50%."],
             arg = { "Automation", "SmallPlatesInInstances" },
           },
           HideFriendlyInInstances = {
@@ -2190,6 +2189,7 @@ local function CreateOptionsTable()
                       order = 26,
                       name = L["Elite Border"],
                       values = { TP_EliteBorder_Default = "Default", TP_EliteBorder_Thin = "Thin" },
+                      set = SetThemeValue,
                       arg = { "settings", "elitehealthborder", "texture" }
                     },
                     Spacer1 = GetSpacerEntry(30),
@@ -2329,7 +2329,7 @@ local function CreateOptionsTable()
                       inline = true,
                       args = {
                         EnableTarget = {
-                          name = L["Target Unit"],
+                          name = L["Target"],
                           desc = L["Use a custom color for the healthbar of your current target."],
                           order = 10,
                           type = "toggle",

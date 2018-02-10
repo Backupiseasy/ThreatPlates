@@ -19,6 +19,19 @@ local EMPTY_TEXTURE = "Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\Empt
 local OFFSET_HIGHLIGHT = 1
 local OFFSET_THREAT= 7.5
 
+local ELITE_BACKDROP = {
+  TP_EliteBorder_Default = {
+    edgeFile = ThreatPlates.Art .. "TP_WhiteSquare",
+    edgeSize = 1.5,
+    offset = 1.8,
+  },
+  TP_EliteBorder_Thin = {
+    edgeFile = ThreatPlates.Art .. "TP_WhiteSquare",
+    edgeSize = 0.9,
+    offset = 1.1,
+  }
+}
+
 local fraction, range, value, barsize, final
 
 local function UpdateBar(self)
@@ -184,30 +197,49 @@ local function SetStatusBackdrop(self, backdrop_texture, edge_texture, edge_size
   self.Border:SetBackdropBorderColor(0, 0, 0, 1)
 end
 
-local function SetShownBorder(self, show_border)
-  local backdrop = self.Border:GetBackdrop()
+local function SetEliteBorder(self, texture)
+  local backdrop = ELITE_BACKDROP[texture]
 
-  if show_border then
-    backdrop.edgeFile = self.Border.BackdropBorder
-    self.Border:SetBackdrop(backdrop)
-    self.Border:SetBackdropBorderColor(0, 0, 0, 1)
-  else
-    backdrop.edgeFile = nil
-    self.Border:SetBackdrop(backdrop)
-  end
+  self.EliteBorder:SetPoint("TOPLEFT", self, "TOPLEFT", - backdrop.offset, backdrop.offset)
+  self.EliteBorder:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", backdrop.offset, - backdrop.offset)
 
-  self.Border:Show()
+  self.EliteBorder:SetBackdrop({
+    edgeFile = backdrop.edgeFile,
+    edgeSize = backdrop.edgeSize,
+    insets = { left = 0, right = 0, top = 0, bottom = 0 }
+  })
+  self.EliteBorder:SetBackdropBorderColor(1, 0.85, 0, 1)
 end
+
+--local function SetShownBorder(self, show_border)
+--  local backdrop = self.Border:GetBackdrop()
+--
+--  print ("SetShownBorder:", show_border)
+--  if show_border then
+----    backdrop.edgeFile = self.Border.BackdropBorder
+----    self.Border:SetBackdrop(backdrop)
+----    self.Border:SetBackdropBorderColor(0, 0, 0, 1)
+--    self.Border:Show()
+--  else
+----    backdrop.edgeFile = nil
+----    self.Border:SetBackdrop(backdrop)
+--    self.Border:Hide()
+--  end
+--
+--  --self.Border:Show()
+--end
 
 function CreateThreatPlatesHealthbar(parent)
 	local frame = CreateFrame("StatusBar", nil, parent)
   frame.Border = CreateFrame("Frame", nil, frame)
-  frame.ThreatBorder = CreateFrame("Frame", nil, frame)
+  frame.EliteBorder = CreateFrame("Frame", nil, frame)
   frame.Highlight = CreateFrame("Frame", nil, frame)
   frame.HighlightTexture =  frame.Highlight:CreateTexture(nil, "ARTWORK", 0)
+  frame.ThreatBorder = CreateFrame("Frame", nil, frame)
 
   frame:SetFrameLevel(parent:GetFrameLevel())
   frame.Border:SetFrameLevel(frame:GetFrameLevel())
+  frame.EliteBorder:SetFrameLevel(frame:GetFrameLevel() + 1)
   frame.ThreatBorder:SetFrameLevel(frame:GetFrameLevel())
   frame.Highlight:SetFrameLevel(frame:GetFrameLevel() + 1)
 
@@ -239,6 +271,7 @@ function CreateThreatPlatesHealthbar(parent)
 	frame.SetBackdropTexCoord = function() end
   frame.SetStatusBackdrop = SetStatusBackdrop
   frame.SetShownBorder = SetShownBorder
+  frame.SetEliteBorder = SetEliteBorder
 
 	--frame:SetScript("OnSizeChanged", OnSizeChanged)
 	return frame

@@ -71,7 +71,6 @@ ThreatPlates.AUTOMATION = {
 -- Paths
 ---------------------------------------------------------------------------------------------------
 
-ThreatPlates.Art = "Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\"
 ThreatPlates.Widgets = "Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\Widgets\\"
 
 ---------------------------------------------------------------------------------------------------

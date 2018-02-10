@@ -16,6 +16,7 @@ local SetNamePlateEnemyClickThrough = C_NamePlate.SetNamePlateEnemyClickThrough
 local UnitName, IsInInstance = UnitName, IsInInstance
 local GetCVar, SetCVar = GetCVar, SetCVar
 local C_NamePlate_SetNamePlateFriendlySize, C_NamePlate_SetNamePlateEnemySize, Lerp =  C_NamePlate.SetNamePlateFriendlySize, C_NamePlate.SetNamePlateEnemySize, Lerp
+local NamePlateDriverFrame = NamePlateDriverFrame
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
@@ -90,13 +91,14 @@ local EVENTS = {
   "UNIT_MAXHEALTH",
 
   "NAME_PLATE_CREATED",
+
+  -- "CVAR_UPDATE",
   --"NAME_PLATE_UNIT_ADDED",    -- Blizzard also uses this event
   --"NAME_PLATE_UNIT_REMOVED",  -- Blizzard also uses this event
   --"PLAYER_TARGET_CHANGED",    -- Blizzard also uses this event
   --"DISPLAY_SIZE_CHANGED",     -- Blizzard also uses this event
   --"UNIT_AURA",                -- used in auras widget
   --"VARIABLES_LOADED",         -- Blizzard also uses this event
-  --"CVAR_UPDATE",              -- Blizzard also uses this event
   --"RAID_TARGET_UPDATE",       -- Blizzard also uses this event
 
   -- With TidyPlates:
@@ -299,17 +301,18 @@ end
 ---------------------------------------------------------------------------------------------------
 -- Copied from ElvUI:
 function TidyPlatesThreat:SetBaseNamePlateSize()
-  local baseWidth = self.db.profile.settings.healthbar.width + 4
+  local baseWidth = self.db.profile.settings.healthbar.width - 10
   local baseHeight = self.db.profile.settings.healthbar.height + 35
 
   -- this wont taint like NamePlateDriverFrame.SetBaseNamePlateSize
   local zeroBasedScale = tonumber(GetCVar("NamePlateVerticalScale")) - 1.0
   local horizontalScale = tonumber(GetCVar("NamePlateHorizontalScale"))
-  --local clampedZeroBasedScale = Saturate(zeroBasedScale)
   if not self.db.profile.ShowFriendlyBlizzardNameplates then
     C_NamePlate_SetNamePlateFriendlySize(baseWidth * horizontalScale, baseHeight * Lerp(1.0, 1.25, zeroBasedScale))
   end
   C_NamePlate_SetNamePlateEnemySize(baseWidth * horizontalScale, baseHeight * Lerp(1.0, 1.25, zeroBasedScale))
+
+  --local clampedZeroBasedScale = Saturate(zeroBasedScale)
   --C_NamePlate_SetNamePlateSelfSize(baseWidth * horizontalScale * Lerp(1.1, 1.0, clampedZeroBasedScale), baseHeight)
 end
 
@@ -344,6 +347,24 @@ function TidyPlatesThreat:OnInitialize()
   self:SetBaseNamePlateSize()
 end
 
+local function SetCVarHook(name, value, c)
+  if name == "NamePlateVerticalScale" then
+    local db = TidyPlatesThreat.db.profile.Automation
+    local isInstance, instanceType = IsInInstance()
+
+    if not NamePlateDriverFrame:IsUsingLargerNamePlateStyle() then
+      if db.OldNameplateGlobalScale then
+        -- reset to previous setting when switched of in an instance (called if setting is changed in an instance)
+        SetCVar("nameplateGlobalScale", db.OldNameplateGlobalScale)
+        db.OldNameplateGlobalScale = nil
+      end
+    elseif db.SmallPlatesInInstances and isInstance then
+      db.OldNameplateGlobalScale = GetCVar("nameplateGlobalScale")
+      SetCVar("nameplateGlobalScale", 0.4)
+    end
+  end
+end
+
 -- The OnEnable() and OnDisable() methods of your addon object are called by AceAddon when your addon is
 -- enabled/disabled by the user. Unlike OnInitialize(), this may occur multiple times without the entire
 -- UI being reloaded.
@@ -354,6 +375,9 @@ function TidyPlatesThreat:OnEnable()
   ApplyHubFunctions(t.Theme)
 
   self:StartUp()
+
+  -- Get updates for changes regarding: Large Nameplates
+  hooksecurefunc("SetCVar", SetCVarHook)
 
   -- TODO: check with what this  was replaces
   --TidyPlatesUtilityInternal:EnableGroupWatcher()
@@ -406,23 +430,23 @@ function TidyPlatesThreat:PLAYER_ENTERING_WORLD()
       db.OldNameplateShowFriends = nil
     end
   elseif isInstance and db.OldNameplateShowFriends then
-    -- reset to previous setting when switched of in an instance
+    -- reset to previous setting when switched of in an instance (called if setting is changed in an instance)
     SetCVar("nameplateShowFriends", db.OldNameplateShowFriends) -- or GetCVarDefault("nameplateShowFriends"))
     db.OldNameplateShowFriends = nil
   end
 
-  if db.SmallPlatesInInstances then
+  if db.SmallPlatesInInstances and NamePlateDriverFrame:IsUsingLargerNamePlateStyle() then
     if isInstance then
-      db.OldLargerNamePlateStyle = true
+      db.OldNameplateGlobalScale = GetCVar("nameplateGlobalScale")
       SetCVar("nameplateGlobalScale", 0.4)
       --NamePlateDriverFrame:SetBaseNamePlateSize(168, 112.5)
-    elseif db.OldLargerNamePlateStyle then
+    elseif db.OldNameplateGlobalScale then
       -- reset to previous setting
       SetCVar("nameplateGlobalScale", db.OldNameplateGlobalScale)
       db.OldNameplateGlobalScale = nil
     end
-  elseif db.OldLargerNamePlateStyle and isInstance then
-    -- reset to previous setting when switched of in an instance
+  elseif db.OldNameplateGlobalScale and isInstance then
+    -- reset to previous setting when switched of in an instance (called if setting is changed in an instance)
     SetCVar("nameplateGlobalScale", db.OldNameplateGlobalScale)
     db.OldNameplateGlobalScale = nil
   end
@@ -585,7 +609,6 @@ local function FrameOnUpdate(plate)
 
   plate.TP_Extended:SetFrameLevel(plate:GetFrameLevel() * 10)
 
-
   -- Hide ThreatPlates nameplates if Blizzard nameplates should be shown for friendly units
   if TidyPlatesThreat.db.profile.ShowFriendlyBlizzardNameplates and unitid and UnitReaction(unitid, "player") > 4 then
     plate.UnitFrame:Show()
@@ -641,20 +664,3 @@ function TidyPlatesThreat:UNIT_MAXHEALTH(event, unitid)
     t.UpdateExtensions(plate.TP_Extended, unitid)
   end
 end
-
--- With TidyPlates:
--- Fix for TidyPlates: Fix name for units where UnitName returns "Unknown" at first
---function TidyPlatesThreat:UNIT_NAME_UPDATE(event, unitid)
---  local plate = GetNamePlateForUnit(unitid)
---
---  if plate and plate.extended then
---    local frame = plate.extended
---    if frame.unit.name == UNKNOWNOBJECT then
---      local current_name = UnitName(unitid) or ""
---      frame.unit.name = current_name
---      frame.visual.name:SetText(current_name)
---      --self.UpdateMe = true
---      -- t.DEBUG("UNIT_NAME_UPDATE: ", unitid, " - ", current_name)
---    end
---  end
---end

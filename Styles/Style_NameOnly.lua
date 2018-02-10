@@ -48,9 +48,7 @@ end
 local function Create(self,name)
   local db = self.db.profile.settings
   local dbprofile = self.db.profile
-  local theme = {}
-
-  theme = {
+  local theme = {
 
     hitbox = {
       width = 140,
@@ -79,6 +77,10 @@ local function Create(self,name)
     },
 
     healthborder = {
+      show = false,
+    },
+
+    eliteborder = {
       show = false,
     },
 

@@ -6,8 +6,7 @@ local EMPTY_TEXTURE = ART_PATH.."Empty"
 
 local function Create(self,name)
   local db = self.db.profile.settings
-  local theme = {}
-  theme = {
+  local theme = {
 
     hitbox = {
       width = 128,
@@ -40,6 +39,11 @@ local function Create(self,name)
       edgesize = db.healthborder.EdgeSize,
       offset = db.healthborder.Offset,
       show = db.healthborder.show,
+    },
+
+    eliteborder = {
+      texture = db.elitehealthborder.texture,
+      show = db.elitehealthborder.show,
     },
 
     threatborder = {

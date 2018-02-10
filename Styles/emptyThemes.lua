@@ -5,9 +5,12 @@ local EMPTY_TEXTURE = t.Art .. "Empty"
 
 local function Create(self,name)
 	local db = self.db.profile.settings
-	local theme = {}
-	theme = {
-		hitbox = { width = 124,	height = 30,	},
+	local theme = {
+
+		hitbox = {
+			width = 124,
+			height = 30,
+		},
 
 		frame = {
 			emptyTexture = EMPTY_TEXTURE,
@@ -29,6 +32,10 @@ local function Create(self,name)
 			x = 0,
 			y = 0,
 			anchor = "CENTER",
+			show = false,
+		},
+
+		eliteborder = {
 			show = false,
 		},
 

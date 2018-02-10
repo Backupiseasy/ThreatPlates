@@ -1,10 +1,13 @@
 ﻿local ADDON_NAME, NAMESPACE = ...
 local ThreatPlates = NAMESPACE.ThreatPlates
 
+local Media = ThreatPlates.Media
+
+ThreatPlates.Art = "Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\"
+
 ---------------------------------------------------------------------------------------------------
 -- Register media files that ThreatPlates needs at least (because of default settings)
 ---------------------------------------------------------------------------------------------------
-local Media = ThreatPlates.Media
 
 Media:Register("statusbar", "ThreatPlatesBar", [[Interface\Addons\TidyPlates_ThreatPlates\Artwork\TP_BarTexture.tga]])
 Media:Register("statusbar", "ThreatPlatesEmpty", [[Interface\Addons\TidyPlates_ThreatPlates\Artwork\Empty.tga]])

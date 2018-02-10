@@ -14,13 +14,13 @@ Libs\Libs.xml
 Locales\Locales.xml
 
 Init.lua
+Media.lua
 
 # Integration of TidyPlates for standalone version
 TidyPlatesInternal\TidyPlates.xml
 
 Constants.lua
 Database.lua
-Media.lua
 Core.lua
 Commands.lua
 Options.lua

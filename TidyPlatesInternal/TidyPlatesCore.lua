@@ -241,6 +241,7 @@ do
 		-- Parented to Health Bar - Lower Frame
     visual.threatborder = healthbar.ThreatBorder
     visual.healthborder = healthbar.Border
+    visual.eliteborder = healthbar.EliteBorder
     visual.highlight = healthbar:CreateTexture(nil, "ARTWORK")
 
     -- Parented to Extended - Middle Frame
@@ -1302,6 +1303,24 @@ do
 		-- Frame
 		SetAnchorGroupObject(extended, style.frame, carrier)
 
+--    -- Draw background to show for clickable area
+--    if not carrier.Background then
+--      carrier.Background = nameplate:CreateTexture(nil, "BACKGROUND")
+--      carrier.Background:SetTexture(ThreatPlates.Media:Fetch('statusbar', "Flat"))
+--      carrier.Background:SetVertexColor(0,0,0,.5)
+--    end
+--    --local baseWidth, baseHeight = 110, 45
+--    -- Threat Plates base size: 120, 10
+--    --local baseWidth, baseHeight = TidyPlatesThreat.db.profile.settings.healthbar.width + 4, TidyPlatesThreat.db.profile.settings.healthbar.height + 35
+--    local baseWidth, baseHeight =
+--      TidyPlatesThreat.db.profile.settings.healthbar.width - 10,
+--      TidyPlatesThreat.db.profile.settings.healthbar.height + 35
+--    local zeroBasedScale = tonumber(GetCVar("NamePlateVerticalScale")) - 1.0
+--    local horizontalScale = tonumber(GetCVar("NamePlateHorizontalScale"))
+--    carrier.Background:SetPoint("CENTER", nameplate.UnitFrame, "CENTER")
+--    carrier.Background:SetSize(baseWidth * horizontalScale, baseHeight * Lerp(1.0, 1.25, zeroBasedScale))
+--    print ("Clickable Area: ", baseWidth * horizontalScale, baseHeight * Lerp(1.0, 1.25, zeroBasedScale))
+
 		-- Anchorgroup
 		for index = 1, #anchorgroup do
 			local objectname = anchorgroup[index]
@@ -1330,7 +1349,8 @@ do
 		visual.healthbar:SetStatusBarTexture(style.healthbar.texture or EMPTY_TEXTURE)
 		visual.healthbar:SetOrientation(style.healthbar.orientation or "HORIZONTAL")
 		visual.healthbar:SetStatusBackdrop(style.healthbar.backdrop, style.healthborder.texture, style.healthborder.edgesize, style.healthborder.offset)
-		visual.healthbar:SetShownBorder(style.healthborder.show)
+		visual.healthborder:SetShown(style.healthborder.show)
+    visual.healthbar:SetEliteBorder(style.eliteborder.texture)
 
     -- Texture
     for index = 1, #texturegroup do
@@ -1382,7 +1402,12 @@ do
     end
 
     -- Hide Stuff
-		if not unit.isElite then visual.eliteicon:Hide() end
+		if unit.isElite and style.eliteborder.show then
+      visual.eliteborder:Show()
+    else
+      visual.eliteborder:Hide()
+      visual.eliteicon:Hide()
+    end
 		if not unit.isBoss then visual.skullicon:Hide() end
 
 		if not unit.isTarget then visual.target:Hide() end
