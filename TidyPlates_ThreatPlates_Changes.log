@@ -1,4 +1,12 @@
 ------------------------------------------------------
+8.7.0-Alpha5
+------------------------------------------------------
+* Added an option to configure the clickable area for nameplates.
+* Added options to adjust how Threat Plates are scaled (based on UI scale, ignoring UI scale or pixel-perfect), see General - Blizzard Settings.
+* Optimized and improved integration of TidyPlates code into Threat Plates.
+* Optimized how nameplates.are handled after creation and deletion.
+
+------------------------------------------------------
 8.7.0-Alpha4
 ------------------------------------------------------
 * Added an option to resize the healthbar, i.e., to change width and height independently from each other [PM, Issue #142, Comment #623].
@@ -52,7 +60,7 @@
 ------------------------------------------------------
 8.6.0 (Standalone, TidyPlates is no longer required)
 ------------------------------------------------------
-* Integrated all necessary parts of TidyPlates into ThreatPlates to make it standalone. TidyPlates is no longer required for ThreatPlates to work.
+* Integrated all necessary parts of TidyPlates into Threat Plates to make it standalone. TidyPlates is no longer required for Threat Plates to work.
 * Reworked the layering of all nameplate elements (healthbar, castbar, widgets, ...).
 * Added new widget Boss Mods to show auras from boss mods on your nameplates (since patch 7.2, hostile nameplates only in instances and raids).
 * Fixed a bug with healthbar background working like alpha (0% should be nontransparent).
@@ -78,8 +86,8 @@
 ------------------------------------------------------
 8.5.3 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
-* Fixed a bug with migrating scale settings for Target and No Target (from configurations before 8.5.0) which were migrated every time a new version of ThreatPlates was installed [Ticket #141].
-* Fixed bugs in frame layers of TidyPlates and ThreatPlates nameplate elements (flickering when moving mouse over units).
+* Fixed a bug with migrating scale settings for Target and No Target (from configurations before 8.5.0) which were migrated every time a new version of Threat Plates was installed [Ticket #141].
+* Fixed bugs in frame layers of TidyPlates and Threat Plates nameplate elements (flickering when moving mouse over units).
 * Fixed defaults for Target and No Target scale to be 0% (instead of -100%).
 * Fixed Lua error with the nameplate castbar when a cast was started but no unit was assigned.
 * Fixed several bugs when migrating old configuration settings.
@@ -124,7 +132,7 @@
 * Added on option to color names in healthbar view the same way as in headline view (see Nameplate Settings - Names) [Comment #464].
 * Added an option to choose and color status text (health text) in healthbar view the same way as in headline view (see Nameplate Settings - Status Text) [Comment #464].
 * Added new filter mode Blizzard for aura widget 2.0 which uses WoWs internal debuff filtering. Also, added a new option for this filter to show dispellable debuffs on friendly units [Ticket #131].
-* Added an option to disable ThreatPlates for friendly nameplates and keep Blizzard default nameplates for these units [Comment #474].
+* Added an option to disable Threat Plates for friendly nameplates and keep Blizzard default nameplates for these units [Comment #474].
 * Added an option to set scale and alpha for casting units based on their reaction (friendly or enemy) [Commen #468].
 * Using custom horde and alliance icons now (from CleanIcons - Thin, see http://www.wowinterface.com/downloads/info19844) instead of build-in ones to social widget.
 * Improved consistency of names and status/custom/health text configuration between healthbar and headline view.
@@ -152,13 +160,13 @@
 8.4.1 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
 * Fixed a Lua error bug in the aura 2.0 widget when sort order "None" was selected [Comment #451].
-* Fixed a bug in the aura widget where the aura filter was not used after switching the active theme to ThreatPlates in TidyPlates.
+* Fixed a bug in the aura widget where the aura filter was not used after switching the active theme to Threat Plates in TidyPlates.
 * Fixed bugs in localization deDE (German).
 
 ------------------------------------------------------
 8.4.0 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
-* ThreatPlates v8.4 introduces a new default look and feel. A dialog asking if it should be used as default will be shown after the first login.
+* Threat Plates v8.4 introduces a new default look and feel. A dialog asking if it should be used as default will be shown after the first login.
 * Added fully customizable headline view (name-only) (added configuration options and removed dependency to TidyPlatesHub) [Ticket #34, #119, Comment #345, #338].
 * Added off-tank mode to threat system (with own color, scale, and opacity for mobs tanked by off-tank) [Ticket #9,Comment #339].
 * Added new filter options to aura widget 2.0 for whitelist and blacklist mode: use All and My before a spell name or ID to whitelist or blacklist a spell based on the caster [Comment #385, email request].
@@ -180,14 +188,14 @@
 * Reworked healthbar coloring and fixed several errors. 
 * Fixed a bug with Blizzard nameplates reappearing in certain situations.
 * Fixed a bug with custom nameplates not using the correct scaling and opacity when "Disable Custom Scale/Alpha" was enabled.
-* Fixed a bug which prevented the personal resources bar from showing up when ThreatPlates was enabled. [Comment #402].
+* Fixed a bug which prevented the personal resources bar from showing up when Threat Plates was enabled. [Comment #402].
 * Fixed a bug where nameplates where shown in an incorrect order in relation to their distance [Ticket #106].
 * Fixed several inconsistencies in the options dialog (mostly naming and layout of UI elements).
 * Fixed several inconsistencies in the configuration for custom nameplates (settings as well as the interaction with the threat system).
 * Fixed configuration inconsistencies with threat glow and threat system.
 * Fixed a bug with button "Restore Defaults" in custom nameplates which now actually restores default settings.
 * Fixed a bug with the dialog shown when using Threat Plates the first time on a character that prevented the TidyPlates options from being shown after pressing "No".
-* Fixed a bug with the dialog shown when using Threat Plates the first time on a character that showed the dialog even when ThreatPlates was already active.
+* Fixed a bug with the dialog shown when using Threat Plates the first time on a character that showed the dialog even when Threat Plates was already active.
 * Fixed a bug with quest widget where the quest indication was only shown when unit tooltip was progress-based ("- Prisoners freed: x/y"), but not when progess information was missing ("- Control Orb)".
 * Upgrade integrated libraries to LibSharedMedia-3.0 7.0.1, Ace3 Release-r1151, AceGUI-3.0-SharedMediaWidgets r57-release.
 * Updated localizations for enUS, deDE (German), and koKR (Korean, big thanks to yuk6196).
@@ -197,7 +205,7 @@
 ------------------------------------------------------
 * Updated addon metadata to be compatible with patch 7.2.
 * Known issues:
-  * Switching between ThreatPlates and other themes may require /reload for the new theme to work correctly
+  * Switching between Threat Plates and other themes may require /reload for the new theme to work correctly
   * Changing certain settings in the option dialog may require a /reload for the settings to fully take effect.
 
 ------------------------------------------------------
@@ -213,7 +221,7 @@
 * Fixed a bug with in healthbar coloring of nameplates where class colors were used even if disabled in the options.
 * Added updated localizations for koKR (Korean) and zhCN (Simplified Chinese).
 * Known issues:
-  * Switching between ThreatPlates and other themes may require /reload for the new theme to work correctly
+  * Switching between Threat Plates and other themes may require /reload for the new theme to work correctly
   * Changing certain settings in the option dialog may require a /reload for the settings to fully take effect.
 
 ------------------------------------------------------
@@ -225,7 +233,7 @@
 * Enabled localizations for koKR (Korean) and zhCN (Simplified Chinese) - big thanks to yuk6196 and y123ao6 for their translations.
 * Changed default for verbose mode to disabled.
 * Known issues:
-  * Switching between ThreatPlates and other themes may require /reload for the new theme to work correctly
+  * Switching between Threat Plates and other themes may require /reload for the new theme to work correctly
   * Changing certain settings in the option dialog may require a /reload for the settings to fully take effect.
 
 ------------------------------------------------------
@@ -239,12 +247,12 @@
 * Several changes to the options dialog to improve consistency in naming and layout.
 * Changed default healthbar color for quest widget.
 * Adjusted health percentage calculation to Blizzard default calculation (using ceil instead of floor).
-* Fixed inefficient memory allocation for threatplates widgets.
+* Fixed inefficient memory allocation for Threat Plates widgets.
 * Fixed a bug in quest widget where the quest highlight was still shown although the quest was completed.
 * Fixed a bug in the options dialog where default settings for spec roles where incorrect for newly created profiles.
 * Fixed a memory leak which reduced frame rate heavily after changing certain options.
 * Known issues:
-  * Switching between ThreatPlates and other themes may require /reload for the new theme to work correctly
+  * Switching between Threat Plates and other themes may require /reload for the new theme to work correctly
   * Changing certain settings in the option dialog may require a /reload for the settings to fully take effect.
 
 ------------------------------------------------------
@@ -257,7 +265,7 @@
 * Added an option to disable quest widget only on attacked mobs.
 * Added another detection spell to stealth widget.
 * Known issues:
-  * Switching between ThreatPlates and other themes may require /reload for the new theme to work correctly
+  * Switching between Threat Plates and other themes may require /reload for the new theme to work correctly
 
 ------------------------------------------------------
 8.2.4 (works with TidyPlates 6.18.10)
@@ -265,7 +273,7 @@
 * Fixed coloring of tapped units without custom colors enabled
 * Changed default colors for health bar custom colors from white to Blizzard defaults
 * Known issues:
-  * Switching between ThreatPlates and other themes may require /reload for the new theme to work correctly
+  * Switching between Threat Plates and other themes may require /reload for the new theme to work correctly
 
 ------------------------------------------------------
 8.2.3 (works with TidyPlates 6.18.10)
@@ -275,7 +283,7 @@
 * Aura filtering now also possible by aura ID (add aura ID as you would add a spell name)
 * Fixed a bug with target nameplate not always being show on top
 * Known issues:
-  * Switching between ThreatPlates and other themes may require /reload for the new theme to work correctly
+  * Switching between Threat Plates and other themes may require /reload for the new theme to work correctly
 
 ------------------------------------------------------
 8.2.2 (works with TidyPlates 6.18.9)
@@ -283,15 +291,15 @@
 * Fixed a Lua error in combo point widget
 * Disabled version check for TidyPlates version until working properly
 * Known issues:
-  * Switching between ThreatPlates and other themes may require /reload for the new theme to work correctly
+  * Switching between Threat Plates and other themes may require /reload for the new theme to work correctly
 
 ------------------------------------------------------
 8.2.1 (works with TidyPlates 6.18.9)
 ------------------------------------------------------
-* Added a check if ThreatPlates is compatible with the installed version of TidyPlates
+* Added a check if Threat Plates is compatible with the installed version of TidyPlates
 * Optimized widget handling
 * Known issues:
-  * Switching between ThreatPlates and other themes may require /reload for the new theme to work correctly
+  * Switching between Threat Plates and other themes may require /reload for the new theme to work correctly
 
 ------------------------------------------------------
 8.2.0 (works with TidyPlates 6.18.8)
@@ -303,7 +311,7 @@
 * Fixed a bug in auras widget that prevented filtering based on aura type
 * Disabled Healer Tracker widget as it's currently not working at all
 * Known issues:
-  * Switching between ThreatPlates and other themes may require /reload for the new theme to work correctly
+  * Switching between Threat Plates and other themes may require /reload for the new theme to work correctly
 
 ------------------------------------------------------
 8.1.4 (works with TidyPlates 6.18.6)
@@ -395,7 +403,7 @@
 8.003-Alpha (works with TidyPlates 6.18.Beta11)
 ------------------------------------------------------
 * Fixed error with reload UI and AuraWidget
-* Fixed problem with TidyPlatesHub overwritting AuraWidget settings of ThreatPlates
+* Fixed problem with TidyPlatesHub overwritting AuraWidget settings of Threat Plates
 
 ------------------------------------------------------
 8.002-Alpha

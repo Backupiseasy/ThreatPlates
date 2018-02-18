@@ -1,5 +1,5 @@
-local ADDON_NAME, NAMESPACE = ...
-local ThreatPlates = NAMESPACE.ThreatPlates
+local ADDON_NAME, Addon = ...
+local ThreatPlates = Addon.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -12,16 +12,15 @@ local RAID_CLASS_COLORS = RAID_CLASS_COLORS
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
 local GetColorByHealthDeficit = ThreatPlates.GetColorByHealthDeficit
-local SetStyle = TidyPlatesThreat.SetStyle
 local GetUniqueNameplateSetting = ThreatPlates.GetUniqueNameplateSetting
 local GetColorByReaction = ThreatPlates.GetColorByReaction
 local IsFriend
 local IsGuildmate
 
-local function SetNameColor(unit)
+function Addon:SetNameColor(unit)
   if not unit.unitid then return end
 
-  local style = unit.TP_Style or SetStyle(unit)
+  local style = unit.TP_Style or Addon:SetStyle(unit)
   local unique_setting = unit.TP_UniqueSetting or GetUniqueNameplateSetting(unit)
 
   local db = TidyPlatesThreat.db.profile
@@ -112,5 +111,3 @@ local function SetNameColor(unit)
 
   return color.r, color.g, color.b
 end
-
-TidyPlatesThreat.SetNameColor = SetNameColor

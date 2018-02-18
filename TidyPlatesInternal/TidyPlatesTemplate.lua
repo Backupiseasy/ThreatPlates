@@ -12,11 +12,6 @@ local defaultArtPath = "Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork"
 local font =					NAMEPLATE_FONT
 local EMPTY_TEXTURE = defaultArtPath.."\\Empty"
 
-TemplateTheme.hitbox = {
-	width = 160,
-	height = 45,
-}
-
 TemplateTheme.frame = {
 	width = 101,
 	height = 45,

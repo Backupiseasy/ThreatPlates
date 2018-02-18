@@ -63,24 +63,12 @@ local function SetTheme(...)
 	if type(theme) == 'table' then
 
 		-- Multi-Style Theme   (Hub / ThreatPlates Format)
-		if theme.SetStyle and type(theme.SetStyle) == "function" then
-			local style, stylename
-
-			for stylename, style in pairs(theme) do
-				if type(style) == "table" and style._meta then						-- _meta tag skips parsing
-					theme[stylename] = copytable(style)
-				elseif type(style) == "table" then									-- merge style with template style
-					theme[stylename] = mergetable(addon.ThemeTemplate, style)		-- ie. fill in the blanks
-				end
-			end
-		else
-			-- Single-Style Theme  (Old School!)
-			local newvalue, propertyname, oldvalue
-
-			for propertyname, oldvalue in pairs(addon.ThemeTemplate) do
-				newvalue = theme[propertyname]
-				if type(newvalue) == "table" then theme[propertyname] = mergetable(oldvalue, newvalue)
-				else theme[propertyname] = copytable(oldvalue) end
+		local style, stylename
+		for stylename, style in pairs(theme) do
+			if type(style) == "table" and style._meta then						-- _meta tag skips parsing
+				theme[stylename] = copytable(style)
+			elseif type(style) == "table" then									-- merge style with template style
+				theme[stylename] = mergetable(addon.ThemeTemplate, style)		-- ie. fill in the blanks
 			end
 		end
 

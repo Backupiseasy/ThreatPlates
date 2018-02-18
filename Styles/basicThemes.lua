@@ -8,15 +8,10 @@ local function Create(self,name)
   local db = self.db.profile.settings
   local theme = {
 
-    hitbox = {
-      width = 128,
-      height = 24,
-    },
-
     frame = {
       emptyTexture = ThreatPlates.Art.."Empty",
-      width = db.healthbar.width + 4,
-      height = db.healthbar.height + 20,
+      width = db.frame.width,
+      height = db.frame.height,
       x = db.frame.x,
       y = db.frame.y,
       anchor = "CENTER",

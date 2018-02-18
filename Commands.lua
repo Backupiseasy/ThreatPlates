@@ -98,51 +98,12 @@ SlashCmdList["TPTPVERBOSE"] = TPTPVERBOSE
 
 -- Command: /tptp
 function TidyPlatesThreat:ChatCommand(input)
-	if input == "nameplate-size" then
-    print ("IsUsingLargerNamePlateStyle: ", NamePlateDriverFrame:IsUsingLargerNamePlateStyle())
-    print ("CVar nameplateGlobalScale: ", GetCVar("nameplateGlobalScale"))
-    print ("Config OldNameplateGlobalScale: ", TidyPlatesThreat.db.profile.Automation.OldNameplateGlobalScale)
-    return
-      --	elseif input == "big" then
---    SetCVar("NamePlateVerticalScale", 1)
---    SetCVar("NamePlateHorizontalScale", 1)
---    NamePlateDriverFrame:UpdateNamePlateOptions()
---		SetCVar("NamePlateVerticalScale", 2.7)
---		SetCVar("NamePlateHorizontalScale", 1.4)
---		NamePlateDriverFrame:UpdateNamePlateOptions()
-----		print ("GetBaseNamePlateWidth: ", NamePlateDriverFrame:GetBaseNamePlateWidth())
-----		print ("GetBaseNamePlateHeight: ", NamePlateDriverFrame:GetBaseNamePlateHeight())
-----		print ("NamePlateHorizontalScale: ", GetCVar("NamePlateHorizontalScale"))
-----		print ("IsUsingLargerNamePlateStyle: ", NamePlateDriverFrame:IsUsingLargerNamePlateStyle())
-----		TidyPlatesThreat.db.profile.Automation.OldNameplateGlobalScale = nil
---		--SetCVar("NamePlateVerticalScale", "1.0")
---		--SetCVar("NamePlateHorizontalScale", "1.0")
---    --SetCVar("nameplateGlobalScale", "0.4") -- to set height
---		--C_NamePlate.SetNamePlateFriendlySize(300, 100) -- to adjust width, height is ignored
---		--NamePlateDriverFrame:UpdateNamePlateOptions()
---    --NamePlateDriverFrame:SetBaseNamePlateSize( 300, 200 )
---		return
---	elseif input == "test" then
---		print ("GetBaseNamePlateWidth: ", NamePlateDriverFrame:GetBaseNamePlateWidth())
---		print ("GetBaseNamePlateHeight: ", NamePlateDriverFrame:GetBaseNamePlateHeight())
---		print ("NamePlateHorizontalScale: ", GetCVar("NamePlateHorizontalScale"))
---		print ("NamePlateVerticalScale: ", GetCVar("NamePlateVerticalScale"))
---		print ("IsUsingLargerNamePlateStyle: ", NamePlateDriverFrame:IsUsingLargerNamePlateStyle())
---		print ("----------------")
---		local baseWidth = NamePlateDriverFrame:GetBaseNamePlateWidth()
---		local baseHeight = NamePlateDriverFrame:GetBaseNamePlateHeight()
---		local zeroBasedScale = tonumber(GetCVar("NamePlateVerticalScale")) - 1.0
---		local horizontalScale = tonumber(GetCVar("NamePlateHorizontalScale"))
---		print ("BaseNamePlateSize: ", baseWidth * horizontalScale, baseHeight * Lerp(1.0, 1.25, zeroBasedScale))
---
---		--		TidyPlatesThreatTest = true
-----		TidyPlatesInternal:ForceUpdate()
---		return
---	elseif input == "end" then
---		TidyPlatesThreatTest = nil
---		TidyPlatesInternal:ForceUpdate()
---		return
-	end
+--	if input == "nameplate-size" then
+--    print ("IsUsingLargerNamePlateStyle: ", NamePlateDriverFrame:IsUsingLargerNamePlateStyle())
+--    print ("CVar nameplateGlobalScale: ", GetCVar("nameplateGlobalScale"))
+--    print ("Config OldNameplateGlobalScale: ", TidyPlatesThreat.db.profile.Automation.OldNameplateGlobalScale)
+--    return
+--	end
 
 	TidyPlatesThreat:OpenOptions()
 

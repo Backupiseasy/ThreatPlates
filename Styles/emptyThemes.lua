@@ -7,17 +7,12 @@ local function Create(self,name)
 	local db = self.db.profile.settings
 	local theme = {
 
-		hitbox = {
-			width = 124,
-			height = 30,
-		},
-
 		frame = {
 			emptyTexture = EMPTY_TEXTURE,
-			width = 124,
-			height = 30,
-			x = 0,
-			y = 0,
+			width = db.frame.width,
+			height = db.frame.height,
+			x = db.frame.x,
+			y = db.frame.y,
 			anchor = "CENTER",
 		},
 

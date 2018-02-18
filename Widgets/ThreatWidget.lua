@@ -130,10 +130,10 @@ local function CreateWidgetFrame(parent)
   frame:SetFrameLevel(parent:GetFrameLevel() + 7)
 
   frame.LeftTexture = frame:CreateTexture(nil, "OVERLAY", 6)
-  frame.LeftTexture:SetPoint("RIGHT", parent, "LEFT", -4, 0)
+  frame.LeftTexture:SetPoint("RIGHT", parent.visual.healthbar, "LEFT", -4, 0)
   frame.LeftTexture:SetSize(64, 64)
   frame.RightTexture = frame:CreateTexture(nil, "OVERLAY", 6)
-  frame.RightTexture:SetPoint("LEFT", parent, "RIGHT", 4, 0)
+  frame.RightTexture:SetPoint("LEFT", parent.visual.healthbar, "RIGHT", 4, 0)
   frame.RightTexture:SetSize(64, 64)
 
 --  UpdateSettings(frame)

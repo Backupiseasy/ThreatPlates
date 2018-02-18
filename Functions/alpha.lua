@@ -1,5 +1,5 @@
-local ADDON_NAME, NAMESPACE = ...
-local ThreatPlates = NAMESPACE.ThreatPlates
+local ADDON_NAME, Addon = ...
+local ThreatPlates = Addon.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -14,7 +14,6 @@ local UnitExists = UnitExists
 local TidyPlatesThreat = TidyPlatesThreat
 local UnitIsOffTanked = ThreatPlates.UnitIsOffTanked
 local GetUniqueNameplateSetting = ThreatPlates.GetUniqueNameplateSetting
-local SetStyle = TidyPlatesThreat.SetStyle
 local GetThreatStyle = ThreatPlates.GetThreatStyle
 
 local function TransparencySituational(unit)
@@ -162,21 +161,15 @@ local ALPHA_FUNCTIONS = {
 	["NameOnly-Unique"] = AlphaUniqueNameOnly,
 }
 
-local function SetAlpha(unit)
-	if not unit.unitid then return 0.01 end -- unitid is used in UnitIsOffTanked
+function Addon:SetAlpha(unit)
+	if not unit.unitid then return 0 end -- unitid is used in UnitIsOffTanked
 
 	-- sometimes SetAlpha is called without calling OnUpdate/OnContextUpdate first, so TP_Style may not be initialized
-	local style = unit.TP_Style or SetStyle(unit)
+	local style = unit.TP_Style or Addon:SetStyle(unit)
 
   local alpha_func = ALPHA_FUNCTIONS[style]
 
   local alpha = alpha_func(unit, style)
-  -- There is a bug in TidyPlates which hides the nameplate forever if alpha is set to 0 at some point
-  if alpha <= 0 then
-    return 0.01
-  end
 
   return alpha
 end
-
-TidyPlatesThreat.SetAlpha = SetAlpha

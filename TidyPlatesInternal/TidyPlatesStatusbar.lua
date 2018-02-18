@@ -297,25 +297,25 @@ function Addon:ConfigCastbar()
   if not EnabledConfigMode then
     local plate = GetNamePlateForUnit("target")
     if plate then
-      local visual = plate.TP_Extended.visual
+      local visual = plate.TPFrame.visual
       local castbar = visual.castbar
 
-      if ShowOnUnit(plate.TP_Extended.unit) then
+      if ShowOnUnit(plate.TPFrame.unit) then
         ConfigModePlate = plate
 
         castbar:SetScript("OnUpdate", function(self, elapsed)
-          if ShowOnUnit(plate.TP_Extended.unit) then
-            self:SetAllColors(TidyPlatesThreat.SetCastbarColor(plate.TP_Extended.unit))
+          if ShowOnUnit(plate.TPFrame.unit) then
+            self:SetAllColors(Addon:SetCastbarColor(plate.TPFrame.unit))
             self:SetValue(castbar.MaxVal * 0.5)
             visual.spellicon:SetTexture(GetSpellTexture(252616))
             visual.spelltext:SetText("Cosmic Beacon")
 
             self.Bar:Show()
             self.Backdrop:Show()
-            visual.spellicon:SetShown(plate.TP_Extended.style.spellicon.show)
-            visual.castnostop:SetShown(plate.TP_Extended.style.castnostop.show)
-            visual.castborder:SetShown(plate.TP_Extended.style.castborder.show)
-            visual.spelltext:SetShown(plate.TP_Extended.style.spelltext.show)
+            visual.spellicon:SetShown(plate.TPFrame.style.spellicon.show)
+            visual.castnostop:SetShown(plate.TPFrame.style.castnostop.show)
+            visual.castborder:SetShown(plate.TPFrame.style.castborder.show)
+            visual.spelltext:SetShown(plate.TPFrame.style.spelltext.show)
             visual.castshield:SetShown(TidyPlatesThreat.db.profile.settings.castnostop.ShowInterruptShield)
           else
             self.Bar:Hide()
@@ -340,7 +340,7 @@ function Addon:ConfigCastbar()
       ThreatPlates.Print("Please select a target unit to enable configuration mode.", true)
     end
   else
-    local castbar = ConfigModePlate.TP_Extended.visual.castbar
+    local castbar = ConfigModePlate.TPFrame.visual.castbar
     castbar:SetScript("OnUpdate", nil)
     castbar.Hide = castbar._Hide
     castbar.Bar:Hide()

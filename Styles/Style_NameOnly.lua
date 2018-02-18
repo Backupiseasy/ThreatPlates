@@ -50,15 +50,10 @@ local function Create(self,name)
   local dbprofile = self.db.profile
   local theme = {
 
-    hitbox = {
-      width = 140,
-      height = 35,
-    },
-
     frame = {
       emptyTexture = EMPTY_TEXTURE,
-      width = 124,
-      height = 30,
+      width = db.frame.width,
+      height = db.frame.height,
       x = db.frame.x,
       y = db.frame.y,
       anchor = "CENTER",

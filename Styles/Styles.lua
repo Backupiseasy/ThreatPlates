@@ -215,7 +215,7 @@ local function GetUniqueNameplateSetting(unit)
   return nil
 end
 
-local function SetStyle(unit)
+function Addon:SetStyle(unit)
   -- sometimes unitid is nil, still don't know why, but it creates all kinds of LUA errors as other attributes are nil
   -- also, e.g., unit.type, unit.name, ...
   --ThreatPlates.DEBUG_PRINT_UNIT(unit)
@@ -288,4 +288,3 @@ ThreatPlates.OnThreatTable = OnThreatTable
 ThreatPlates.ShowThreatFeedback = ShowThreatFeedback
 ThreatPlates.GetThreatStyle = GetThreatStyle
 ThreatPlates.GetUniqueNameplateSetting = GetUniqueNameplateSetting
-TidyPlatesThreat.SetStyle = SetStyle

@@ -9,7 +9,6 @@ local t = Addon.ThreatPlates
 local tonumber = tonumber
 
 -- WoW APIs
-local UnitIsUnit, UnitReaction = UnitIsUnit, UnitReaction
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local SetNamePlateFriendlyClickThrough = C_NamePlate.SetNamePlateFriendlyClickThrough
 local SetNamePlateEnemyClickThrough = C_NamePlate.SetNamePlateEnemyClickThrough
@@ -90,7 +89,7 @@ local EVENTS = {
   "UNIT_ABSORB_AMOUNT_CHANGED",
   "UNIT_MAXHEALTH",
 
-  "NAME_PLATE_CREATED",
+  -- "NAME_PLATE_CREATED",      -- processed by TidyPlatesCore
 
   -- "CVAR_UPDATE",
   --"NAME_PLATE_UNIT_ADDED",    -- Blizzard also uses this event
@@ -100,10 +99,6 @@ local EVENTS = {
   --"UNIT_AURA",                -- used in auras widget
   --"VARIABLES_LOADED",         -- Blizzard also uses this event
   --"RAID_TARGET_UPDATE",       -- Blizzard also uses this event
-
-  -- With TidyPlates:
-  -- "UNIT_FACTION",
-  -- "UNIT_NAME_UPDATE",
 }
 
 local function EnableEvents()
@@ -125,61 +120,6 @@ end
 ------------------
 -- ADDON LOADED --
 ------------------
-
-local function ApplyHubFunctions(theme)
-  theme.SetStyle = TidyPlatesThreat.SetStyle
-  theme.SetScale = TidyPlatesThreat.SetScale
-  theme.SetAlpha = TidyPlatesThreat.SetAlpha
-  theme.SetCustomText = TidyPlatesThreat.SetCustomText
-  theme.SetNameColor = TidyPlatesThreat.SetNameColor
-  theme.SetThreatColor = TidyPlatesThreat.SetThreatColor
-  theme.SetCastbarColor = TidyPlatesThreat.SetCastbarColor
-  theme.SetHealthbarColor = TidyPlatesThreat.SetHealthbarColor
-
-  local ThreatPlatesWidgets = ThreatPlatesWidgets
-  -- TidyPlatesGlobal_OnInitialize() is called when a nameplate is created or re-shown
-  theme.OnInitialize = ThreatPlatesWidgets.OnInitialize -- Need to provide widget positions
-  -- TidyPlatesGlobal_OnUpdate() is called when other data about the unit changes, or is requested by an external controller.
-  theme.OnUpdate = ThreatPlatesWidgets.OnUpdate
-  -- TidyPlatesGlobal_OnContextUpdate() is called when a unit is targeted or moused-over.  (Any time the unitid or GUID changes)
-  theme.OnContextUpdate = ThreatPlatesWidgets.OnContextUpdate
-
-  --theme.OnActivateTheme = OnActivateTheme -- called by Tidy Plates Core, Theme Loader
-  --theme.OnChangeProfile = TidyPlatesThreat.OnChangeProfile -- used by TidyPlates when a specialication change occurs or the profile is changed
-  --theme.ApplyProfileSettings = TidyPlatesThreat.ApplyProfileSettings
-  --theme.ShowConfigPanel = ShowConfigPanel -- I don't think that this function is used any longer by TidyPlates
-
-  return theme
-end
-
----------------------------------------------------------------------------------------------------
-
--- With TidyPlates:
---StaticPopupDialogs["SetToThreatPlates"] = {
---  preferredIndex = STATICPOPUP_NUMDIALOGS,
---  text = t.Meta("title")..L[":\n---------------------------------------\nWould you like to \nset your theme to |cff89F559Threat Plates|r?\n\nClicking '|cff00ff00Yes|r' will set you to Threat Plates. \nClicking '|cffff0000No|r' will open the Tidy Plates options."],
---  button1 = L["Yes"],
---  button2 = L["Cancel"],
---  button3 = L["No"],
---  timeout = 0,
---  whileDead = 1,
---  hideOnEscape = 1,
---  OnAccept = function()
---    TidyPlatesInternal:SetTheme(t.THEME_NAME)
---    TidyPlatesThreat:StartUp()
---    -- Reset Widgets
---    TidyPlatesInternal:ResetWidgets()
---    TidyPlatesInternal:ForceUpdate()
---  end,
---  OnAlt = function()
---    -- call OpenToCategory twice to work around an update bug with WoW's internal addons category list introduced with 5.3.0
---    InterfaceOptionsFrame_OpenToCategory("Tidy Plates")
---    InterfaceOptionsFrame_OpenToCategory("Tidy Plates")
---  end,
---  OnCancel = function()
---    t.Print(L["-->>|cffff0000Activate Threat Plates from the Tidy Plates options!|r<<--"])
---  end,
---}
 
 StaticPopupDialogs["TidyPlatesEnabled"] = {
   preferredIndex = STATICPOPUP_NUMDIALOGS,
@@ -300,17 +240,29 @@ end
 -- AceAddon functions: do init tasks here, like loading the Saved Variables, or setting up slash commands.
 ---------------------------------------------------------------------------------------------------
 -- Copied from ElvUI:
-function TidyPlatesThreat:SetBaseNamePlateSize()
-  local baseWidth = self.db.profile.settings.healthbar.width - 10
-  local baseHeight = self.db.profile.settings.healthbar.height + 35
+function Addon:SetBaseNamePlateSize()
+  local db = TidyPlatesThreat.db.profile.settings
 
-  -- this wont taint like NamePlateDriverFrame.SetBaseNamePlateSize
-  local zeroBasedScale = tonumber(GetCVar("NamePlateVerticalScale")) - 1.0
-  local horizontalScale = tonumber(GetCVar("NamePlateHorizontalScale"))
-  if not self.db.profile.ShowFriendlyBlizzardNameplates then
-    C_NamePlate_SetNamePlateFriendlySize(baseWidth * horizontalScale, baseHeight * Lerp(1.0, 1.25, zeroBasedScale))
+  local width = db.frame.width
+  local height = db.frame.height
+  if db.frame.SyncWithHealthbar then
+    -- this wont taint like NamePlateDriverFrame.SetBaseNamePlateSize
+    local zeroBasedScale = tonumber(GetCVar("NamePlateVerticalScale")) - 1.0
+    local horizontalScale = tonumber(GetCVar("NamePlateHorizontalScale"))
+
+    width = (db.healthbar.width - 10) * horizontalScale
+    height = (db.healthbar.height + 35) * Lerp(1.0, 1.25, zeroBasedScale)
+
+    db.frame.width = width
+    db.frame.height = height
   end
-  C_NamePlate_SetNamePlateEnemySize(baseWidth * horizontalScale, baseHeight * Lerp(1.0, 1.25, zeroBasedScale))
+
+  if not TidyPlatesThreat.db.profile.ShowFriendlyBlizzardNameplates then
+    C_NamePlate_SetNamePlateFriendlySize(width, height)
+  end
+  C_NamePlate_SetNamePlateEnemySize(width, height)
+
+  Addon:ConfigClickableArea(false)
 
   --local clampedZeroBasedScale = Saturate(zeroBasedScale)
   --C_NamePlate_SetNamePlateSelfSize(baseWidth * horizontalScale * Lerp(1.1, 1.0, clampedZeroBasedScale), baseHeight)
@@ -344,7 +296,6 @@ function TidyPlatesThreat:OnInitialize()
 
   -- Setup chat commands
   self:RegisterChatCommand("tptp", "ChatCommand")
-  self:SetBaseNamePlateSize()
 end
 
 local function SetCVarHook(name, value, c)
@@ -372,9 +323,9 @@ end
 -- Register Events, Hook functions, Create Frames, Get information from the game that wasn't available in OnInitialize
 function TidyPlatesThreat:OnEnable()
   TidyPlatesInternalThemeList[t.THEME_NAME] = t.Theme
-  ApplyHubFunctions(t.Theme)
 
   self:StartUp()
+  Addon:SetBaseNamePlateSize()
 
   -- Get updates for changes regarding: Large Nameplates
   hooksecurefunc("SetCVar", SetCVarHook)
@@ -571,76 +522,6 @@ end
 -- 	end
 -- end
 
--- Prevent Blizzard nameplates from re-appearing, but show personal ressources bar, if enabled
-local function FrameOnShow(UnitFrame)
-  -- Hide namepaltes that have not yet an unit added
-  if not UnitFrame.unit then
-    UnitFrame:Hide()
-  end
-
-  -- Skip the personal resource bar of the player character and un-hook scripts
-  if UnitIsUnit(UnitFrame.unit, "player") then -- or: ns.PlayerNameplate == GetNamePlateForUnit(UnitFrame.unit)
-    UnitFrame:GetParent():SetScript('OnUpdate', nil)
-    return
-  end
-
-  -- Hide ThreatPlates nameplates if Blizzard nameplates should be shown for friendly units
-  if TidyPlatesThreat.db.profile.ShowFriendlyBlizzardNameplates and UnitReaction(UnitFrame.unit, "player") > 4 then
-    UnitFrame:Show()
-  else
-    UnitFrame:Hide()
-  end
-end
-
--- Frame: self = plate
-local function FrameOnUpdate(plate)
---  if plate == ns.PlayerNameplate then
---    print ("FrameOnUpdate: skipping player")
---    plate.UnitFrame:SetScript('OnShow', nil)
---    plate.UnitFrame:SetScript('OnHide', nil)
---    plate:SetScript('OnUpdate', nil)
---    return
---  end
-
-  local unitid = plate.UnitFrame.unit
-  if unitid and UnitIsUnit(unitid, "player") then
-    return
-  end
-
-  plate.TP_Extended:SetFrameLevel(plate:GetFrameLevel() * 10)
-
-  -- Hide ThreatPlates nameplates if Blizzard nameplates should be shown for friendly units
-  if TidyPlatesThreat.db.profile.ShowFriendlyBlizzardNameplates and unitid and UnitReaction(unitid, "player") > 4 then
-    plate.UnitFrame:Show()
-    plate.TP_Carrier:Hide()
-  else
-    plate.UnitFrame:Hide()
-  end
-end
-
--- Frame: self = plate.UnitFrame
-local function FrameOnHide(UnitFrame)
-  -- Hide ThreatPlates nameplates if Blizzard nameplates should be shown for friendly units
-  if TidyPlatesThreat.db.profile.ShowFriendlyBlizzardNameplates and UnitFrame.unit and UnitReaction(UnitFrame.unit, "player") > 4 then
-    UnitFrame:Show()
-    UnitFrame:GetParent().TP_Carrier:Hide()
-  end
-end
-
--- Fix for TidyPlates:
--- -- Preventing WoW from re-showing Blizzard nameplates in certain situations
--- e.g., press ESC, got to Interface, Names, press ESC and voila!
--- Thanks to Kesava (KuiNameplates) for this solution
-function TidyPlatesThreat:NAME_PLATE_CREATED(event, plate)
-  if plate.UnitFrame then
-    plate.UnitFrame:HookScript('OnShow', FrameOnShow)
-    plate.UnitFrame:HookScript('OnHide', FrameOnHide)
-  end
-
-  plate:HookScript('OnUpdate', FrameOnUpdate)
-end
-
-
 function TidyPlatesThreat:UNIT_ABSORB_AMOUNT_CHANGED(event, unitid)
   local plate = GetNamePlateForUnit(unitid)
 
@@ -648,8 +529,8 @@ function TidyPlatesThreat:UNIT_ABSORB_AMOUNT_CHANGED(event, unitid)
   --if plate and plate.extended then
   --  t.UpdateExtensions(plate.extended, unitid)
   --end
-  if plate and plate.TP_Extended then
-    t.UpdateExtensions(plate.TP_Extended, unitid)
+  if plate and plate.TPFrame then
+    t.UpdateExtensions(plate.TPFrame, unitid)
   end
 end
 
@@ -660,7 +541,7 @@ function TidyPlatesThreat:UNIT_MAXHEALTH(event, unitid)
   --if plate and plate.extended then
   --  t.UpdateExtensions(plate.extended, unitid)
   --end
-  if plate and plate.TP_Extended then
-    t.UpdateExtensions(plate.TP_Extended, unitid)
+  if plate and plate.TPFrame then
+    t.UpdateExtensions(plate.TPFrame, unitid)
   end
 end

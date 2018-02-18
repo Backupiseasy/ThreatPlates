@@ -23,7 +23,6 @@ local DEFAULT_FONT = "Cabin"
 -- Global contstants for various stuff
 ---------------------------------------------------------------------------------------------------
 Addon.UIScale = 1
---Addon.Ignore_UIScale = true
 
 Addon.TotemInformation = {} -- basic totem information
 Addon.TOTEMS = {} -- mapping table for fast access to totem settings
@@ -291,6 +290,10 @@ ThreatPlates.DEFAULT_SETTINGS = {
       EnemyUnits = "NONE",
       SmallPlatesInInstances = false,
       HideFriendlyUnitsInInstances = false,
+    },
+    Scale = {
+      IgnoreUIScale = true,
+      PixelPerfectUI = false,
     },
     HeadlineView = {
       ON = false,
@@ -1432,7 +1435,11 @@ ThreatPlates.DEFAULT_SETTINGS = {
     },
     settings = {
       frame = {
+        x = 0,
         y = 0,
+        width = 110,
+        height = 45,
+        SyncWithHealthbar = true,
       },
       highlight = {
         -- texture = "TP_HealthBarHighlight", -- removed in 8.7.0

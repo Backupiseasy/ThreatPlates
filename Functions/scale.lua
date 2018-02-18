@@ -1,5 +1,5 @@
-local ADDON_NAME, NAMESPACE = ...
-local ThreatPlates = NAMESPACE.ThreatPlates
+local ADDON_NAME, Addon = ...
+local ThreatPlates = Addon.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -14,7 +14,6 @@ local UnitExists = UnitExists
 local TidyPlatesThreat = TidyPlatesThreat
 local UnitIsOffTanked = ThreatPlates.UnitIsOffTanked
 local GetUniqueNameplateSetting = ThreatPlates.GetUniqueNameplateSetting
-local SetStyle = TidyPlatesThreat.SetStyle
 local GetThreatStyle = ThreatPlates.GetThreatStyle
 
 local function ScaleSituational(unit)
@@ -164,12 +163,12 @@ local SCALE_FUNCTIONS = {
 	["NameOnly-Unique"] = ScaleUniqueNameOnly,
 }
 
-local function SetScale(unit)
+function Addon:SetScale(unit)
 	if not unit.unitid then return 1 end -- unitid is used in UnitIsOffTanked
 
 	-- sometimes SetScale is called without calling OnUpdate/OnContextUpdate first, so TP_Style may not be initialized
 	-- true for SetAlpha, not sure for SetScale
-	local style = unit.TP_Style or SetStyle(unit)
+	local style = unit.TP_Style or Addon:SetStyle(unit)
 
   local scale_func = SCALE_FUNCTIONS[style]
 
@@ -182,5 +181,3 @@ local function SetScale(unit)
 
 	return scale
 end
-
-TidyPlatesThreat.SetScale = SetScale

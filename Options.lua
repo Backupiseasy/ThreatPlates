@@ -17,12 +17,10 @@ local type = type
 
 -- WoW APIs
 local CLASS_SORT_ORDER = CLASS_SORT_ORDER
+local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
+local SetCVar, GetCVar, GetCVarBool = SetCVar, GetCVar, GetCVarBool
+local UnitReaction = UnitReaction
 local GetSpellInfo = GetSpellInfo
-local InCombatLockdown = InCombatLockdown
-local SetCVar = SetCVar
-local GetCVar = GetCVar
-local GetCVarBool = GetCVarBool
-local IsInInstance = IsInInstance
 
 -- ThreatPlates APIs
 local LibStub = LibStub
@@ -1184,10 +1182,19 @@ local function CreateVisibilitySettings()
             name = L["Show Blizzard Nameplates for Friendly Units"],
             order = 50,
             type = "toggle",
-            width = "double",
+            width = "full",
             set = function(info, val)
               SetValue(info, val)
-              TidyPlatesThreat:SetBaseNamePlateSize() -- adjust clickable area if switching from Blizzard plates to Threat Plate plates
+              Addon:SetBaseNamePlateSize() -- adjust clickable area if switching from Blizzard plates to Threat Plate plates
+              for plate, unitid in pairs(Addon.PlatesVisible) do
+                if db.ShowFriendlyBlizzardNameplates and UnitReaction(unitid, "player") > 4 then
+                  plate.UnitFrame:Show()
+                  plate.TPFrame:Hide()
+                else
+                  plate.UnitFrame:Hide()
+                  plate.TPFrame:Show()
+                end
+              end
             end,
             get = GetValue,
             desc = L["Use Blizzard default nameplates for friendly nameplates and disable ThreatPlates for these units."],
@@ -1281,9 +1288,114 @@ local function CreateBlizzardSettings()
           },
         },
       },
+      Resolution = {
+        name = L["UI Scale"],
+        order = 5,
+        type = "group",
+        inline = true,
+        args = {
+          UIScale = {
+            name = L["UI Scale"],
+            desc = L[""],
+            order = 10,
+            type = "range",
+            min = 0.64,
+            max = 1,
+            step = 0.01,
+            disabled = function() return db.Scale.IgnoreUIScale or db.Scale.PixelPerfectUI end,
+            arg = "uiScale",
+          },
+          IgnoreUIScale = {
+            name = L["Ignore UI Scale"],
+            desc = L["Legacy for Threat Plates defaults"],
+            order = 20,
+            type = "toggle",
+            desc = L[""],
+            set = function(info, val)
+              SetValue(info, val)
+              db.Scale.PixelPerfectUI = not val and db.Scale.PixelPerfectUI
+              Addon:UIScaleChanged()
+            end,
+            get = GetValue,
+            arg = { "Scale", "IgnoreUIScale" },
+          },
+          PixelPerfectUI = {
+            name = L["Pixel-Perfect UI"],
+            desc = L[""],
+            order = 30,
+            type = "toggle",
+            desc = L[""],
+            set = function(info, val)
+              SetValue(info, val)
+              db.Scale.IgnoreUIScale = not val and db.Scale.IgnoreUIScale
+              Addon:UIScaleChanged()
+            end,
+            get = GetValue,
+            arg = { "Scale", "PixelPerfectUI" },
+          },
+        },
+      },
+      Clickarea = {
+        name = L["Clickable Area"],
+        order = 10,
+        type = "group",
+        inline = true,
+        set = SetValue,
+        get = GetValue,
+        args = {
+          ToggleSync = {
+            name = L["Healthbar Sync"],
+            order = 1,
+            type = "toggle",
+            desc = L["The size of the clickable area is always derived from the current size of the healthbar."],
+            set = function(info, val)
+              SetValue(info, val)
+              Addon:SetBaseNamePlateSize()
+            end,
+            arg = { "settings", "frame", "SyncWithHealthbar"},
+          },
+          Width = {
+            name = L["Width"],
+            order = 2,
+            type = "range",
+            min = 1,
+            max = 500,
+            step = 1,
+            set = function(info, val)
+              SetValue(info, val)
+              Addon:SetBaseNamePlateSize()
+            end,
+            disabled = function() return db.settings.frame.SyncWithHealthbar end,
+            arg = { "settings", "frame", "width" },
+          },
+          Height = {
+            name = L["Height"],
+            order = 3,
+            type = "range",
+            min = 1,
+            max = 100,
+            step = 1,
+            set = function(info, val)
+              SetValue(info, val)
+              Addon:SetBaseNamePlateSize()
+            end,
+            disabled = function() return db.settings.frame.SyncWithHealthbar end,
+            arg = { "settings", "frame", "height"},
+          },
+          ShowArea = {
+            name = L["Configuration Mode"],
+            type = "execute",
+            order = 4,
+            desc = "Toggle a background showing the area of the clicable area.",
+            func = function()
+              Addon:ConfigClickableArea(true)
+            end,
+          }
+        },
+      },
       Motion = {
         name = L["Motion & Overlap"],
-        order = 10,
+        order = 20,
         type = "group",
         inline = true,
         args = {
@@ -1333,7 +1445,7 @@ local function CreateBlizzardSettings()
       },
       Distance = {
         name = L["Distance"],
-        order = 20,
+        order = 30,
         type = "group",
         inline = true,
         args = {
@@ -1363,7 +1475,7 @@ local function CreateBlizzardSettings()
       },
       Insets = {
         name = L["Insets"],
-        order = 30,
+        order = 40,
         type = "group",
         inline = true,
         args = {
@@ -1371,8 +1483,8 @@ local function CreateBlizzardSettings()
             name = L["Non-Self Top Inset"],
             order = 10,
             type = "range",
-            min = 0,
-            max = 0.20,
+            min = -0.2,
+            max = 0.3,
             step = 0.01,
             isPercent = true,
             desc = L["The inset from the top (in screen percent) that the non-self nameplates are clamped to."],
@@ -1382,8 +1494,8 @@ local function CreateBlizzardSettings()
             name = L["Non-Self Bottom Inset"],
             order = 20,
             type = "range",
-            min = 0,
-            max = 0.20,
+            min = -0.2,
+            max = 0.3,
             step = 0.01,
             isPercent = true,
             desc = L["The inset from the bottom (in screen percent) that the non-self nameplates are clamped to."],
@@ -1393,8 +1505,8 @@ local function CreateBlizzardSettings()
             name = L["Large Top Inset"],
             order = 30,
             type = "range",
-            min = 0,
-            max = 0.25,
+            min = -0.2,
+            max = 0.3,
             step = 0.01,
             isPercent = true,
             desc = L["The inset from the top (in screen percent) that large nameplates are clamped to."],
@@ -1404,8 +1516,8 @@ local function CreateBlizzardSettings()
             name = L["Large Bottom Inset"],
             order = 40,
             type = "range",
-            min = 0,
-            max = 0.25,
+            min = -0.2,
+            max = 0.3,
             step = 0.01,
             isPercent = true,
             desc = L["The inset from the top (in screen percent) that large nameplates are clamped to."],
@@ -1415,7 +1527,7 @@ local function CreateBlizzardSettings()
       },
       Reset = {
         name = L["Reset"],
-        order = 40,
+        order = 50,
         type = "group",
         inline = true,
         args = {
@@ -2102,7 +2214,7 @@ local function CreateOptionsTable()
                           t.Print("We're unable to change this while in combat", true)
                         else
                           SetThemeValue(info, val)
-                          TidyPlatesThreat:SetBaseNamePlateSize()
+                          Addon:SetBaseNamePlateSize()
                         end
                       end),
                     Height = GetRangeEntry(L["Bar Height"], 20, {"settings", "healthbar", "height" }, 1, 100,
@@ -2111,7 +2223,7 @@ local function CreateOptionsTable()
                           t.Print("We're unable to change this while in combat", true)
                         else
                           SetThemeValue(info, val)
-                          TidyPlatesThreat:SetBaseNamePlateSize()
+                          Addon:SetBaseNamePlateSize()
                         end
                       end),
                     Spacer1 = GetSpacerEntry(25),
@@ -3480,7 +3592,7 @@ local function CreateOptionsTable()
               type = "group",
               order = 1000,
               set = SetThemeValue,
-              --hidden = true,
+              hidden = true,
               args = {
                 HealthHeaderBorder = { name = L["Healthbar Border"], type = "header", order = 10, },
                 HealthBorder = {
