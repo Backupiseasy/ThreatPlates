@@ -346,6 +346,15 @@ local function MigrateBorderTextures(profile_name, profile)
       profile.settings.healthborder.texture = "TP_Border_Thin"
     end
   end
+
+  if DatabaseEntryExists(profile, { "settings", "castborder", "texture" } ) then
+    if profile.settings.healthborder.texture == "TP_CastbarOverlay" then
+      profile.settings.healthborder.texture = "TP_Castbar_Border_Default"
+    else -- TP_CastBarOverlayThin
+      profile.settings.healthborder.texture = "TP_Castbar_Border_Thin"
+    end
+  end
+
 end
 
 local function MigrateAuraWidget(profile_name, profile)
@@ -395,7 +404,7 @@ local DEPRECATED_SETTINGS = {
   OldSettings = { "OldSettings" },                            -- (removed in 8.7.0)
   CastbarColoring = { MigrateCastbarColoring, },              -- (removed in 8.7.0)
   TotemSettings = { MigrationTotemSettings, "8.7.0" },        -- (changed in 8.7.0)
-  Borders = { MigrateBorderTextures, "8.7.0" }                       -- (changed in 8.7.0)
+  Borders = { MigrateBorderTextures, "8.7.0" }                -- (changed in 8.7.0)
 }
 
 local function MigrateDatabase(current_version)

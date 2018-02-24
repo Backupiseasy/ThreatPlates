@@ -800,6 +800,13 @@ local function GetBoundariesEntry(pos, widget_info, func_disabled)
   return entry
 end
 
+local function GetBoundariesEntryName(name, pos, widget_info, func_disabled)
+  local entry = GetBoundariesEntry(pos, widget_info, func_disabled)
+  entry.name = name
+  return entry
+end
+
+
 local function AddLayoutOptions(args, pos, widget_info)
   args.Sizing = GetSizeEntryDefault(pos, widget_info)
   args.Alpha = GetTransparencyEntryWidget(pos + 10, widget_info)
@@ -1724,31 +1731,62 @@ local function CreateCastbarOptions()
             end,
             arg = {"settings", "castbar", "ShowInHeadlineView" },
           },
---          Header2 = { name = "", type = "header", order = 40, },
---          EnableText = {
---            name = L["Spell Text"],
---            order = 50,
---            type = "toggle",
---            desc = L["This option allows you to control whether a spell's name is hidden or shown on castbars."],
---            arg = { "settings", "spelltext", "show" },
---          },
---          EnableIcon = {
---            name = L["Spell Icon"],
---            order = 60,
---            type = "toggle",
---            desc = L["This option allows you to control whether a spell's icon is hidden or shown on castbars."],
---            arg = { "settings", "spellicon", "show" },
---          },
         },
       },
-      Castbar = {
-        name = L["Castbar"],
+      Format = {
+        name = L["Format"],
+        order = 5,
+        type = "group",
+        inline = true,
+        set = SetThemeValue,
+        args = {
+          Width = GetRangeEntry(L["Bar Width"], 10, { "settings", "castbar", "width" }, 5, 500),
+          Height = GetRangeEntry(L["Bar Height"], 20, {"settings", "castbar", "height" }, 1, 100),
+          Spacer1 = GetSpacerEntry(25),
+          EnableSpellText = {
+            name = L["Spell Text"],
+            order = 30,
+            type = "toggle",
+            desc = L["This option allows you to control whether a spell's name is hidden or shown on castbars."],
+            arg = { "settings", "spelltext", "show" },
+          },
+          EnableSpellIcon = {
+            name = L["Spell Icon"],
+            order = 40,
+            type = "toggle",
+            desc = L["This option allows you to control whether a spell's icon is hidden or shown on castbars."],
+            arg = { "settings", "spellicon", "show" },
+          },
+          EnableCastBarBorder = {
+            type = "toggle",
+            order = 50,
+            name = L["Border"],
+            desc = L["Shows a border around the castbar of nameplates (requires /reload)."],
+            arg = { "settings", "castborder", "show" },
+          },
+          EnableCastBarOverlay = {
+            name = L["Interrupt Overlay"],
+            order = 60,
+            type = "toggle",
+            disabled = function() return not db.settings.castborder.show end,
+            arg = { "settings", "castnostop", "ShowOverlay" },
+          },
+          EnableInterruptShield = {
+            name = L["Interrupt Shield"],
+            order = 70,
+            type = "toggle",
+            arg = { "settings", "castnostop", "ShowInterruptShield" },
+          },
+        },
+      },
+      Textures = {
+        name = L["Textures & Colors"],
         order = 10,
         type = "group",
         inline = true,
         args = {
           CastBarTexture = {
-            name = L["Foreground Texture"],
+            name = L["Foreground"],
             type = "select",
             order = 10,
             dialogControl = "LSM30_Statusbar",
@@ -1756,12 +1794,29 @@ local function CreateCastbarOptions()
             arg = { "settings", "castbar", "texture" },
           },
           BGTexture = {
-            name = L["Background Texture"],
+            name = L["Background"],
             type = "select",
             order = 20,
             dialogControl = "LSM30_Statusbar",
             values = AceGUIWidgetLSMlists.statusbar,
             arg = { "settings", "castbar", "backdrop" },
+          },
+          CastBarBorder = {
+            type = "select",
+            order = 25,
+            name = L["Border"],
+            values = { TP_Castbar_Border_Default = "Default", TP_Castbar_Border_Thin = "Thin" },
+            set = function(info, val)
+              if val == "TP_Castbar_Border_Default" then
+                db.settings.castborder.EdgeSize = 2
+                db.settings.castborder.Offset = 2
+              else
+                db.settings.castborder.EdgeSize = 1
+                db.settings.castborder.Offset = 1
+              end
+              SetThemeValue(info, val)
+            end,
+            arg = { "settings", "castborder", "texture" },
           },
           Spacer1 = GetSpacerEntry(30),
           BGColorText = {
@@ -1807,111 +1862,43 @@ local function CreateCastbarOptions()
             arg = { "settings", "castbar", "BackgroundOpacity" },
           },
           Spacer2 = GetSpacerEntry(90),
-          EnableText = {
-            name = L["Spell Text"],
-            order = 91,
-            type = "toggle",
-            desc = L["This option allows you to control whether a spell's name is hidden or shown on castbars."],
-            arg = { "settings", "spelltext", "show" },
-          },
-          EnableIcon = {
-            name = L["Spell Icon"],
-            order = 92,
-            type = "toggle",
-            desc = L["This option allows you to control whether a spell's icon is hidden or shown on castbars."],
-            arg = { "settings", "spellicon", "show" },
-          },
-          InterruptShield = {
-            name = L["Interrupt Shield"],
+          SpellColor = {
+            type = "description",
             order = 100,
-            type = "toggle",
-            arg = { "settings", "castnostop", "ShowInterruptShield" },
+            width = "single",
+            name = L["Spell Color:"],
           },
-          Spacer3 = GetSpacerEntry(105),
-          CastBarBorderToggle = {
-            type = "toggle",
+          Interruptable = {
+            name = L["Interruptable"],
+            type = "color",
             order = 110,
-            name = L["Show Border"],
-            desc = L["Shows a border around the castbar of nameplates (requires /reload)."],
-            arg = { "settings", "castborder", "show" },
+            --width = "double",
+            get = GetColorAlpha,
+            set = SetColorAlpha,
+            arg = { "castbarColor" },
           },
-          CastBarBorder = {
-            type = "select",
+          Shielded = {
+            name = L["Non-Interruptable"],
+            type = "color",
             order = 120,
-            name = L["Border Texture"],
-            values = { TP_CastBarOverlay = "Default", TP_CastBarOverlayThin = "Thin" },
-            disabled = function() return not db.settings.castborder.show end,
-            arg = { "settings", "castborder", "texture" },
-          },
-          CastBarOverlay = {
-            name = L["Interrupt Overlay"],
-            order = 130,
-            type = "toggle",
-            disabled = function() return not db.settings.castborder.show end,
-            arg = { "settings", "castnostop", "ShowOverlay" },
-          },
-          Coloring = {
-            name = L["Spell Coloring"],
-            type = "group",
-            inline = true,
-            order = 140,
-            args = {
---              Enable = {
---                name = L["Enable Coloring"],
---                type = "toggle",
---                order = 10,
---                width = "double",
---                arg = { "castbarColor", "toggle" },
---              },
-              Interruptable = {
-                name = L["Interruptable"],
-                type = "color",
-                order = 20,
---                width = "double",
-                get = GetColorAlpha,
-                set = SetColorAlpha,
-                arg = { "castbarColor" },
-              },
---              Spacer1 = GetSpacerEntry(30),
---              Enable2 = {
---                name = L["Shielded Coloring"],
---                type = "toggle",
---                order = 40,
---                width = "double",
---                arg = { "castbarColorShield", "toggle" },
---              },
-              Shielded = {
-                name = L["Non-Interruptable"],
-                type = "color",
-                order = 50,
---                width = "double",
-                get = GetColorAlpha,
-                set = SetColorAlpha,
-                arg = { "castbarColorShield" }
-              },
-            },
+            --width = "double",
+            get = GetColorAlpha,
+            set = SetColorAlpha,
+            arg = { "castbarColorShield" }
           },
         },
       },
-      Spellicon = {
-        name = L["Spell Icon"],
+      Appeareance = {
+        name = L["Appearance"],
         order = 20,
         type = "group",
         inline = true,
         args = {
-          Size = GetSizeEntryTheme(90, "spellicon"),
-        },
-      },
-      Spelltext = {
-        name = L["Spell Text"],
-        order = 30,
-        type = "group",
-        inline = true,
-        args = {
-          Font = GetFontEntry(L["Font"], 10, "spelltext"),
+          Size = GetSizeEntry(L["Spell Icon Size"], 10, { "settings", "spellicon", "scale" }),
+          Font = GetFontEntry(L["Spell Text"], 20, "spelltext"),
           Align = {
-            name = L["Alignment"],
-            order = 20,
+            name = L["Spell Text Alignment"],
+            order = 30,
             type = "group",
             inline = true,
             args = {
@@ -1933,7 +1920,7 @@ local function CreateCastbarOptions()
               },
             },
           },
-          Boundaries = GetBoundariesEntry(30, "spelltext"),
+          Boundaries = GetBoundariesEntryName(L["Spell Text Boundaries"], 40, "spelltext"),
         },
       },
       Placement = {
@@ -1955,13 +1942,7 @@ local function CreateCastbarOptions()
                 min = -60,
                 max = 60,
                 step = 1,
-                set = function(info, val)
-                  local b1 = {}; b1.arg = { "settings", "castborder", "x" };
-                  local b2 = {}; b2.arg = { "settings", "castnostop", "x" };
-                  SetThemeValue(b1, val)
-                  SetThemeValue(b2, val)
-                  SetThemeValue(info, val)
-                end,
+                set = SetThemeValue,
                 arg = { "settings", "castbar", "x" },
               },
               Castbar_Y_HB = {
@@ -1971,13 +1952,7 @@ local function CreateCastbarOptions()
                 min = -60,
                 max = 60,
                 step = 1,
-                set = function(info, val)
-                  local b1 = {}; b1.arg = { "settings", "castborder", "y" };
-                  local b2 = {}; b2.arg = { "settings", "castnostop", "y" };
-                  SetThemeValue(b1, val)
-                  SetThemeValue(b2, val)
-                  SetThemeValue(info, val)
-                end,
+                set = SetThemeValue,
                 arg = { "settings", "castbar", "y" },
               },
               Castbar_X_Names = GetPlacementEntry(L["Headline View X"], 30, { "settings", "castbar", "x_hv" } ),

@@ -25,7 +25,6 @@ local function Create(self,name)
       x = 0,
       y = 0,
       anchor = "CENTER",
-      orientation = "HORIZONTAL",
       show = true,
     },
 
@@ -65,41 +64,32 @@ local function Create(self,name)
       show = db.eliteicon.show,
     },
 
-    castborder = {
-      texture = (db.castborder.show and ThreatPlates.Art..db.castborder.texture) or EMPTY_TEXTURE,
-      width = 256,
-      height = 64,
-      x = db.castborder.x,
-      y = db.castborder.y,
+    castbar = {
+      texture = ThreatPlates.Media:Fetch('statusbar', db.castbar.texture),
+      backdrop = (db.castbar.show and ThreatPlates.Media:Fetch('statusbar', db.castbar.backdrop, true)) or EMPTY_TEXTURE,
+      width = db.castbar.width,
+      height = db.castbar.height,
+      x = db.castbar.x,
+      y = db.castbar.y,
       anchor = "CENTER",
-      show = db.castborder.show, -- only checked by TidyPlades after a /reload
+      show = db.castbar.show,
+    },
+
+    castborder = {
+      texture = (db.castborder.show and ThreatPlates.Art .. db.castborder.texture) or EMPTY_TEXTURE,
+      edgesize = db.castborder.EdgeSize,
+      offset = db.castborder.Offset,
+      show = true,
     },
 
     castnostop = {
-      texture =  (db.castborder.show and ((db.castnostop.ShowOverlay and ThreatPlates.Art.."TP_CastBarLock") or ThreatPlates.Art..db.castborder.texture)) or EMPTY_TEXTURE,
-      width = 256,
-      height = 64,
-      x = db.castnostop.x,
-      y = db.castnostop.y,
-      anchor = "CENTER",
-      show = db.castborder.show, -- only checked by TidyPlades after a /reload
+      show = db.castborder.show and db.castnostop.ShowOverlay,
     },
 
     target = {
       show = false,
     },
 
-    castbar = {
-      texture = ThreatPlates.Media:Fetch('statusbar', db.castbar.texture),
-      backdrop = ThreatPlates.Media:Fetch('statusbar', db.castbar.backdrop, true),
-      width = 120,
-      height = 10,
-      x = db.castbar.x,
-      y = db.castbar.y,
-      anchor = "CENTER",
-      orientation = "HORIZONTAL",
-      show = db.castbar.show,
-    },
     name = {
       typeface = ThreatPlates.Media:Fetch('font', db.name.typeface),
       size = db.name.size,

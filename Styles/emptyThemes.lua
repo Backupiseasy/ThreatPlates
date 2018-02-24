@@ -38,23 +38,6 @@ local function Create(self,name)
 			show = false,
 		},
 
-		castborder = {
-			texture =	EMPTY_TEXTURE,
-			width = 256,
-			height = 64,
-			x = 0,
-			y = -15,
-			anchor = "CENTER",
-		},
-		castnostop = {
-			texture =	EMPTY_TEXTURE,
-			width = 256,
-			height = 64,
-			x = 0,
-			y = -15,
-			anchor = "CENTER",
-		},
-
 		healthbar = {
 			texture = EMPTY_TEXTURE,
 			width = 120,
@@ -71,14 +54,17 @@ local function Create(self,name)
     },
 
 		castbar = {
-			texture =	EMPTY_TEXTURE,
-			width = 120,
-			height = 10,
-			x = 0,
-			y = -15,
-			anchor = "CENTER",
-			orientation = "HORIZONTAL",
+			show = false,
 		},
+
+		castborder = {
+			show = false,
+		},
+
+		castnostop = {
+			show = false,
+		},
+
 		name = {
 			typeface =						t.Media:Fetch('font', db.name.typeface),
 			size = db.name.size,

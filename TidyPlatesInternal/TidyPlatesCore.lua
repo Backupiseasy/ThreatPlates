@@ -199,11 +199,9 @@ do
 
 		-- Add Graphical Elements
 		local visual = {}
-		-- Status Bars
-		local castbar = CreateTidyPlatesInternalStatusbar(extended)
-		castbar.Backdrop:SetDrawLayer("BACKGROUND",-8)
-		castbar.Bar:SetDrawLayer("BACKGROUND",-7)
 
+    -- Status Bars
+    local castbar = Addon:CreateCastbar(extended)
     castbar.Flash = castbar:CreateAnimationGroup()
     local anim = castbar.Flash:CreateAnimation("Alpha")
     anim:SetOrder(1)
@@ -252,7 +250,7 @@ do
     --		local healthbar = CreateTidyPlatesInternalStatusbar(extended)
 --		healthbar.Backdrop:SetDrawLayer("BORDER",-8)
 --    healthbar.Bar:SetDrawLayer("BORDER",-7)
-    local healthbar = CreateThreatPlatesHealthbar(extended)
+    local healthbar = Addon:CreateHealthbar(extended)
 		local textFrame = CreateFrame("Frame", nil, extended)
 
 		textFrame:SetAllPoints()
@@ -266,28 +264,23 @@ do
     visual.threatborder = healthbar.ThreatBorder
     visual.healthborder = healthbar.Border
     visual.eliteborder = healthbar.EliteBorder
-    visual.highlight = healthbar:CreateTexture(nil, "ARTWORK")
+    visual.highlight = healthbar:CreateTexture(nil, "ARTWORK") -- required for Headline View
 
     -- Parented to Extended - Middle Frame
     visual.raidicon = textFrame:CreateTexture(nil, "ARTWORK", 5)
     visual.skullicon = textFrame:CreateTexture(nil, "ARTWORK", 2)
     visual.eliteicon = textFrame:CreateTexture(nil, "ARTWORK", 1)
     visual.target = textFrame:CreateTexture(nil, "BACKGROUND")
+
 		-- TextFrame
     visual.name  = textFrame:CreateFontString(nil, "ARTWORK", 0)
     visual.customtext = textFrame:CreateFontString(nil, "ARTWORK", -1)
 		visual.level = textFrame:CreateFontString(nil, "ARTWORK", -2)
-		-- Cast Bar Frame - Highest Frame
-    visual.spellicon = castbar:CreateTexture(nil, "BACKGROUND", 7)
-    visual.castshield = castbar:CreateTexture(nil, "BACKGROUND", 5)
-    visual.castnostop = castbar:CreateTexture(nil, "BACKGROUND", 2)
-    visual.castborder = castbar:CreateTexture(nil, "BACKGROUND", 1)
-    visual.spelltext = castbar:CreateFontString(nil, "BACKGROUND")
 
-    visual.castshield:SetAtlas("nameplates-InterruptShield", true)
-    visual.castshield:SetDrawLayer("BACKGROUND", 5)
-    visual.castshield:SetPoint("CENTER", castbar, "LEFT")
-    visual.castshield:Hide()
+		-- Cast Bar Frame - Highest Frame
+    visual.castborder = castbar.Border
+    visual.spellicon = castbar.Overlay:CreateTexture(nil, "ARTWORK", 7)
+    visual.spelltext = castbar.Overlay:CreateFontString(nil, "OVERLAY")
 
     -- Set Base Properties
 		visual.raidicon:SetTexture("Interface\\TargetingFrame\\UI-RaidTargetingIcons")
@@ -325,7 +318,6 @@ end
 -- Nameplate Script Handlers
 ---------------------------------------------------------------------------------------------------------------------
 do
-
 	-- UpdateUnitCache
 	local function UpdateUnitCache() for key, value in pairs(unit) do unitcache[key] = value end end
 
@@ -335,13 +327,13 @@ do
     extended.style = activetheme[stylename]
 
 		style = extended.style
+		style = extended.style
 
 		if style and (extended.stylename ~= stylename) then
 			UpdateStyle()
 			extended.stylename = stylename
 			unit.style = stylename
-		end
-
+    end
 	end
 
 	-- ProcessUnitChanges
@@ -482,13 +474,7 @@ do
 
     -- Fix a bug where the overlay for non-interruptible casts was shown even for interruptible casts when entering combat while the unit was already casting
     if unit.isCasting then
-      if unit.spellIsShielded then
-        visual.castnostop:Show()
-        visual.castborder:Hide()
-      else
-        visual.castnostop:Hide()
-        visual.castborder:Show()
-      end
+      visual.castbar:SetShownInterruptOverlay(unit.spellIsShielded)
     end
 
     UpdateIndicator_HealthBar()		-- Just to be on the safe side
@@ -842,19 +828,8 @@ do
     visual.spellicon:SetDrawLayer("BACKGROUND", 7)
 		castBar:SetMinMaxValues( startTime, endTime )
 
-		local r, g, b, a = 1, 1, 0, 1
-
     castBar:SetAllColors(Addon:SetCastbarColor(unit))
-
-		if unit.spellIsShielded then
-      visual.castnostop:Show()
-      visual.castborder:Hide()
-      visual.castshield:SetShown(TidyPlatesThreat.db.profile.settings.castnostop.ShowInterruptShield)
-		else
-      visual.castnostop:Hide()
-      visual.castborder:Show()
-      visual.castshield:Hide()
-    end
+    visual.castbar:SetShownInterruptOverlay(unit.spellIsShielded)
 
 		UpdateIndicator_CustomScaleText()
 		UpdateIndicator_CustomAlpha()
@@ -1028,13 +1003,8 @@ do
       visual = extended.visual
       style = extended.style
       visual.castbar:ClearAllPoints()
-      visual.castborder:ClearAllPoints()
-      visual.castnostop:ClearAllPoints()
       visual.spelltext:ClearAllPoints()
-
       visual.castbar:SetPoint(style.castbar.anchor or "CENTER", extended, style.castbar.x or 0, style.castbar.y or 0)
-      visual.castborder:SetPoint(style.castborder.anchor or "CENTER", extended, style.castborder.x or 0, style.castborder.y or 0)
-      visual.castnostop:SetPoint(style.castnostop.anchor or "CENTER", extended, style.castnostop.x or 0, style.castnostop.y or 0)
       visual.spelltext:SetPoint(style.spelltext.anchor or "CENTER", extended, style.spelltext.x or 0, style.spelltext.y or 0)
       --visual.spellicon:SetPoint(style.spellicon.anchor or "CENTER", extended, style.spellicon.x or 0, style.spellicon.y or 0)
 
@@ -1047,13 +1017,9 @@ do
       visual = extended.visual
       style = extended.style
       visual.castbar:ClearAllPoints()
-      visual.castborder:ClearAllPoints()
-      visual.castnostop:ClearAllPoints()
       visual.spelltext:ClearAllPoints()
       local db = TidyPlatesThreat.db.profile.settings.castbar
       visual.castbar:SetPoint(style.castbar.anchor or "CENTER", extended, style.castbar.x + db.x_target or 0, style.castbar.y + db.y_target or 0)
-      visual.castborder:SetPoint(style.castborder.anchor or "CENTER", extended, style.castborder.x + db.x_target or 0, style.castborder.y + db.y_target or 0)
-      visual.castnostop:SetPoint(style.castnostop.anchor or "CENTER", extended, style.castnostop.x + db.x_target or 0, style.castnostop.y + db.y_target or 0)
       visual.spelltext:SetPoint(style.spelltext.anchor or "CENTER", extended, style.spelltext.x + db.x_target or 0, style.spelltext.y + db.y_target or 0)
       --visual.spellicon:SetPoint(style.spellicon.anchor or "CENTER", extended, style.spellicon.x + db.x_target or 0, style.spellicon.y + db.y_target or 0)
 
@@ -1151,7 +1117,8 @@ do
 
           visual.spelltext:SetText(INTERRUPTED .. " [" .. sourceName .. "]")
           castbar:Show()
-          castbar:SetValue(castbar.MaxVal)
+          local _, max_val = castbar:GetMinMaxValues()
+					castbar:SetValue(max_val)
           castbar:SetAllColors(1, 0, 1, 1, 0, 0, 0, 1)
           castbar.Flash:Play()
         end
@@ -1280,18 +1247,17 @@ do
 	local fontgroup = {"name", "level", "spelltext", "customtext"}
 
 	local anchorgroup = {
-    "castborder", "castnostop",
 		"name",  "spelltext", "customtext", "level",
 		"spellicon", "raidicon", "skullicon", "eliteicon", "target"
-    -- "threatborder"
+    -- "threatborder", "castborder", "castnostop",
   }
 
-	local bargroup = {"castbar" }
+	local bargroup = { } --"castbar" }
 
 	local texturegroup = {
-    "castborder", "castnostop", "eliteicon",
+    "eliteicon",
     "skullicon", "highlight", "target", "spellicon",
-    -- threatborder
+    -- threatborder, "castborder", "castnostop",
   }
 
   --local showgroup = { "healthborder" }
@@ -1334,10 +1300,17 @@ do
 		-- Healthbar
 		SetAnchorGroupObject(visual.healthbar, style.healthbar, extended)
 		visual.healthbar:SetStatusBarTexture(style.healthbar.texture or EMPTY_TEXTURE)
-		visual.healthbar:SetOrientation(style.healthbar.orientation or "HORIZONTAL")
-		visual.healthbar:SetStatusBackdrop(style.healthbar.backdrop, style.healthborder.texture, style.healthborder.edgesize, style.healthborder.offset)
+		--visual.healthbar:SetOrientation(style.healthbar.orientation or "HORIZONTAL")
+		visual.healthbar:SetStatusBarBackdrop(style.healthbar.backdrop, style.healthborder.texture, style.healthborder.edgesize, style.healthborder.offset)
 		visual.healthborder:SetShown(style.healthborder.show)
     visual.healthbar:SetEliteBorder(style.eliteborder.texture)
+
+    -- Castbar
+    SetAnchorGroupObject(visual.castbar, style.castbar, extended)
+    visual.castbar:SetStatusBarTexture(style.castbar.texture or EMPTY_TEXTURE)
+    --visual.healthbar:SetOrientation(style.healthbar.orientation or "HORIZONTAL")
+    visual.castbar:SetStatusBarBackdrop(style.castbar.backdrop, style.castborder.texture, style.castborder.edgesize, style.castborder.offset)
+    visual.castborder:SetShown(style.castborder.show)
 
     -- Texture
     for index = 1, #texturegroup do
@@ -1368,22 +1341,16 @@ do
     end
 
     visual.castbar:ClearAllPoints()
-    visual.castborder:ClearAllPoints()
-    visual.castnostop:ClearAllPoints()
     visual.spelltext:ClearAllPoints()
     --visual.spellicon:ClearAllPoints()
 
     if unit.isTarget then
       local db = TidyPlatesThreat.db.profile.settings.castbar
       SetObjectAnchor(visual.castbar, style.castbar.anchor or "CENTER", extended, style.castbar.x + db.x_target or 0, style.castbar.y + db.y_target or 0)
-      SetObjectAnchor(visual.castborder, style.castborder.anchor or "CENTER", extended, style.castborder.x + db.x_target or 0, style.castborder.y + db.y_target or 0)
-      SetObjectAnchor(visual.castnostop, style.castnostop.anchor or "CENTER", extended, style.castnostop.x + db.x_target or 0, style.castnostop.y + db.y_target or 0)
       SetObjectAnchor(visual.spelltext, style.spelltext.anchor or "CENTER", extended, style.spelltext.x + db.x_target or 0, style.spelltext.y + db.y_target or 0)
       --SetObjectAnchor(visual.spellicon, style.spellicon.anchor or "CENTER", extended, style.spellicon.x + db.x_target or 0, style.spellicon.y + db.y_target or 0)
     else
       SetObjectAnchor(visual.castbar, style.castbar.anchor or "CENTER", extended, style.castbar.x or 0, style.castbar.y or 0)
-      SetObjectAnchor(visual.castborder, style.castborder.anchor or "CENTER", extended, style.castborder.x or 0, style.castborder.y or 0)
-      SetObjectAnchor(visual.castnostop, style.castnostop.anchor or "CENTER", extended, style.castnostop.x or 0, style.castnostop.y or 0)
       SetObjectAnchor(visual.spelltext, style.spelltext.anchor or "CENTER", extended, style.spelltext.x or 0, style.spelltext.y or 0)
       --SetObjectAnchor(visual.spellicon, style.spellicon.anchor or "CENTER", extended, style.spellicon.x or 0, style.spellicon.y or 0)
     end

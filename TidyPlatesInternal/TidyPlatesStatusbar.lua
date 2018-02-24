@@ -6,15 +6,15 @@ local ThreatPlates = Addon.ThreatPlates
 ---------------------------------------------------------------------------------------------------
 
 -- WoW APIs
-local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
-local GetSpellTexture = GetSpellTexture
 local CreateFrame = CreateFrame
+local GetSpellTexture = GetSpellTexture
+local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
 
 local ART_PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Artwork\\"
-local EMPTY_TEXTURE = "Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\Empty"
+local EMPTY_TEXTURE = ART_PATH .. "Empty"
 
 local OFFSET_HIGHLIGHT = 1
 local OFFSET_THREAT= 7.5
@@ -32,159 +32,19 @@ local ELITE_BACKDROP = {
   }
 }
 
-local fraction, range, value, barsize, final
-
-local function UpdateBar(self)
-	range = self.MaxVal - self.MinVal 
-	value = self.Value - self.MinVal
-
-	barsize = self.Dim or 1
-	
-	if range > 0 and value > 0 and range >= value then
-		fraction = value / range
-	else fraction = .01 end
-	if self.Orientation == "VERTICAL" then 
-		self.Bar:SetHeight(barsize * fraction)
-		final = self.Bottom - ((self.Bottom - self.Top) * fraction)		-- bottom = 1, top = 0
-		self.Bar:SetTexCoord(self.Left, self.Right, final, self.Bottom)
-		--self.Bar:SetTexCoord(0, 1, 1-fraction, 1)
-	else 
-		self.Bar:SetWidth(barsize * fraction) 
-		final = ((self.Right - self.Left) * fraction) + self.Left
-		self.Bar:SetTexCoord(self.Left, final, self.Top, self.Bottom)
-	end
-
-end
-
-local function UpdateSize(self)
-	if self.Orientation == "VERTICAL" then self.Dim = self:GetHeight()
-	else self.Dim = self:GetWidth() end
-	UpdateBar(self)
-end
-
-local function SetValue(self, value) 
-	if value >= self.MinVal and value <= self.MaxVal then self.Value = value end; 
-	UpdateBar(self) 
-end
-	
-local function SetStatusBarTexture(self, texture) self.Bar:SetTexture(texture) end
-local function SetStatusBarColor(self, r, g, b, a) self.Bar:SetVertexColor(r,g,b,a) end
-local function SetStatusBarGradient(self, r1, g1, b1, a1, r2, g2, b2, a2) self.Bar:SetGradientAlpha(self.Orientation, r1, g1, b1, a1, r2, g2, b2, a2) end
-
---[[
-local function SetStatusBarGradientAuto(self, r, g, b, a) 
-	self.Bar:SetGradientAlpha(self.Orientation, .5+(r*1.1), g*.7, b*.7, a, r*.7, g*.7, .5+(b*1.1), a) 
-end
-
-local function SetStatusBarSmartGradient(self, r1, g1, b1, r2, g2, b2) 
-	self.Bar:SetGradientAlpha(self.Orientation, r1, g1, b1, 1, r2 or r1, g2 or g1, b2 or b1, 1) 
-end
---]]
-
-local function SetAllColors(self, rBar, gBar, bBar, aBar, rBackdrop, gBackdrop, bBackdrop, aBackdrop) 
-	self.Bar:SetVertexColor(rBar or 1, gBar or 1, bBar or 1, aBar or 1)
-	self.Backdrop:SetVertexColor(rBackdrop or 1, gBackdrop or 1, bBackdrop or 1, aBackdrop or 1)
-end
-
-local function SetOrientation(self, orientation) 
-	if orientation == "VERTICAL" then
-		self.Orientation = orientation
-		self.Bar:ClearAllPoints()
-		self.Bar:SetPoint("BOTTOMLEFT")
-		self.Bar:SetPoint("BOTTOMRIGHT")
-	else
-		self.Orientation = "HORIZONTAL"
-		self.Bar:ClearAllPoints()
-		self.Bar:SetPoint("TOPLEFT")
-		self.Bar:SetPoint("BOTTOMLEFT")
-	end
-	UpdateSize(self)
-end
-
-local function GetMinMaxValues(self)
-	return self.MinVal, self.MaxVal
-end
-
-
-local function SetMinMaxValues(self, minval, maxval)
-	if not (minval or maxval) then return end
-	
-	if maxval > minval then
-		self.MinVal = minval
-		self.MaxVal = maxval
-	else 
-		self.MinVal = 0
-		self.MaxVal = 1
-	end
-	
-	if self.Value > self.MaxVal then self.Value = self.MaxVal
-	elseif self.Value < self.MinVal then self.Value = self.MinVal end
-	
-	UpdateBar(self) 
-end
-
-local function SetTexCoord(self, left,right,top,bottom)		-- 0. 1. 0. 1
-	self.Left, self.Right, self.Top, self.Bottom = left or 0, right or 1, top or 0, bottom or 1
-	UpdateBar(self) 
-end
-
-local function SetBackdropTexCoord(self, left,right,top,bottom)		-- 0. 1. 0. 1
-	self.Backdrop:SetTexCoord(left or 0, right or 1,top or 0, bottom or 1)
-end
-
-local function SetBackdropTexture(self, texture)		-- 0. 1. 0. 1
-	self.Backdrop:SetTexture(texture)
-end
-
-function CreateTidyPlatesInternalStatusbar(parent)
-	local frame = CreateFrame("Frame", nil, parent)
-	--frame:SetFrameLevel(0)
-
-	--frame.Dim = 1
-	frame:SetHeight(1)
-	frame:SetWidth(1)
-	frame.Value, frame.MinVal, frame.MaxVal, frame.Orientation = 1, 0, 1, "HORIZONTAL"
-	frame.Left, frame.Right, frame.Top, frame.Bottom = 0, 1, 0, 1
-	frame.Bar = frame:CreateTexture(nil, "BORDER", -8)
-	frame.Backdrop = frame:CreateTexture(nil, "BACKGROUND")
-	frame.Backdrop:SetAllPoints(frame)
-        
-        --AddBorders(frame)
-	
-	frame.SetValue = SetValue
-	frame.SetMinMaxValues = SetMinMaxValues
-	frame.GetMinMaxValues = GetMinMaxValues
-	frame.SetOrientation = SetOrientation
-	frame.SetStatusBarColor = SetStatusBarColor
-	frame.SetStatusBarGradient = SetStatusBarGradient
-	--frame.SetStatusBarGradientAuto = SetStatusBarGradientAuto
-	--frame.SetStatusBarSmartGradient = SetStatusBarSmartGradient
-	frame.SetAllColors = SetAllColors
-	frame.SetStatusBarTexture = SetStatusBarTexture
-	frame.SetTexCoord = SetTexCoord
-	frame.SetBackdropTexCoord = SetBackdropTexCoord
-	frame.SetBackdropTexture = SetBackdropTexture
-
-  frame:SetScript("OnSizeChanged", UpdateSize)
-	UpdateSize(frame)
-
-	return frame
-end
-
 ------------------------------------------------------------------------------------------------------------
 
---local function OnSizeChanged(self, width, height)
---  self.Border:SetSize(width + 2 * BORDER_OFFSET, height + 2 * BORDER_OFFSET)
---end
+local function OnSizeChanged(self, width, height)
+  local scale_factor = height / 10
+  self.InterruptShield:SetSize(14 * scale_factor, 16 * scale_factor)
+end
 
 local function SetAllColorsNew(self, rBar, gBar, bBar, aBar, rBackdrop, gBackdrop, bBackdrop, aBackdrop)
   self:SetStatusBarColor(rBar or 1, gBar or 1, bBar or 1, aBar or 1)
   self.Border:SetBackdropColor(rBackdrop or 1, gBackdrop or 1, bBackdrop or 1, aBackdrop or 1)
 end
 
-local function SetStatusBackdrop(self, backdrop_texture, edge_texture, edge_size, offset)
-  self.Border.BackdropBorder = edge_texture -- TODO: not ideal to store this in every frame, as it's the same for every frame, but not for healthbar/castbar
-
+local function SetStatusBarBackdropHealthbar(self, backdrop_texture, edge_texture, edge_size, offset)
   self.Border:ClearAllPoints()
   self.Border:SetPoint("TOPLEFT", self, "TOPLEFT", - offset, offset)
   self.Border:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", offset, - offset)
@@ -192,7 +52,7 @@ local function SetStatusBackdrop(self, backdrop_texture, edge_texture, edge_size
     bgFile = backdrop_texture,
     edgeFile = edge_texture,
     edgeSize = edge_size,
-    insets = { left = 0, right = 0, top = 0, bottom = 0 },
+    insets = { left = offset, right = offset, top = offset, bottom = offset },
   })
   self.Border:SetBackdropBorderColor(0, 0, 0, 1)
 end
@@ -206,30 +66,12 @@ local function SetEliteBorder(self, texture)
   self.EliteBorder:SetBackdrop({
     edgeFile = backdrop.edgeFile,
     edgeSize = backdrop.edgeSize,
-    insets = { left = 0, right = 0, top = 0, bottom = 0 }
+    --insets = { left = 0, right = 0, top = 0, bottom = 0 }
   })
   self.EliteBorder:SetBackdropBorderColor(1, 0.85, 0, 1)
 end
 
---local function SetShownBorder(self, show_border)
---  local backdrop = self.Border:GetBackdrop()
---
---  print ("SetShownBorder:", show_border)
---  if show_border then
-----    backdrop.edgeFile = self.Border.BackdropBorder
-----    self.Border:SetBackdrop(backdrop)
-----    self.Border:SetBackdropBorderColor(0, 0, 0, 1)
---    self.Border:Show()
---  else
-----    backdrop.edgeFile = nil
-----    self.Border:SetBackdrop(backdrop)
---    self.Border:Hide()
---  end
---
---  --self.Border:Show()
---end
-
-function CreateThreatPlatesHealthbar(parent)
+function Addon:CreateHealthbar(parent)
 	local frame = CreateFrame("StatusBar", nil, parent)
   frame.Border = CreateFrame("Frame", nil, frame)
   frame.EliteBorder = CreateFrame("Frame", nil, frame)
@@ -246,20 +88,18 @@ function CreateThreatPlatesHealthbar(parent)
   frame.Highlight:SetPoint("TOPLEFT", frame, "TOPLEFT", - OFFSET_HIGHLIGHT, OFFSET_HIGHLIGHT)
   frame.Highlight:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", OFFSET_HIGHLIGHT, - OFFSET_HIGHLIGHT)
   frame.Highlight:SetBackdrop({
-    bgFile = EMPTY_TEXTURE,
     edgeFile = ART_PATH .. "TP_WhiteSquare",
     edgeSize = 1,
-    insets = { left = 0, right = 0, top = 0, bottom = 0 },
+    --insets = { left = 0, right = 0, top = 0, bottom = 0 },
   })
   frame.Highlight:SetBackdropBorderColor(1, 1, 1, 1)
 
   frame.ThreatBorder:SetPoint("TOPLEFT", frame, "TOPLEFT", - OFFSET_THREAT, OFFSET_THREAT)
   frame.ThreatBorder:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", OFFSET_THREAT, - OFFSET_THREAT)
   frame.ThreatBorder:SetBackdrop({
-    bgFile = EMPTY_TEXTURE,
     edgeFile = ART_PATH .. "TP_Threat",
     edgeSize = 12,
-    insets = { left = 0, right = 0, top = 0, bottom = 0 },
+    --insets = { left = 0, right = 0, top = 0, bottom = 0 },
   })
 
   frame.HighlightTexture:SetTexture(ART_PATH .. "TP_HealthBar_Highlight")
@@ -269,12 +109,79 @@ function CreateThreatPlatesHealthbar(parent)
 	frame.SetAllColors = SetAllColorsNew
   frame.SetTexCoord = function() end
 	frame.SetBackdropTexCoord = function() end
-  frame.SetStatusBackdrop = SetStatusBackdrop
-  frame.SetShownBorder = SetShownBorder
+  frame.SetStatusBarBackdrop = SetStatusBarBackdropHealthbar
   frame.SetEliteBorder = SetEliteBorder
 
 	--frame:SetScript("OnSizeChanged", OnSizeChanged)
 	return frame
+end
+
+local function SetShownInterruptOverlay(self, show)
+  if show then
+    self.InterruptBorder:Show()
+    self.InterruptOverlay:Show()
+    self.InterruptShield:SetShown(TidyPlatesThreat.db.profile.settings.castnostop.ShowInterruptShield)
+  else
+    self.InterruptBorder:Hide()
+    self.InterruptOverlay:Hide()
+    self.InterruptShield:SetShown(TidyPlatesThreat.db.profile.settings.castnostop.ShowInterruptShield)
+  end
+end
+
+local function SetStatusBarBackdropCastbar(self, backdrop_texture, edge_texture, edge_size, offset)
+  SetStatusBarBackdropHealthbar(self, backdrop_texture, edge_texture, edge_size, offset)
+
+  self.InterruptBorder:ClearAllPoints()
+  self.InterruptBorder:SetPoint("TOPLEFT", self, "TOPLEFT", - offset - 1, offset + 1)
+  self.InterruptBorder:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", offset + 1, - offset - 1)
+  self.InterruptBorder:SetBackdrop({
+    edgeFile = ART_PATH .. "TP_WhiteSquare",
+    edgeSize = 1,
+    --insets = { left = 0, right = 0, top = 0, bottom = 0 },
+  })
+  self.InterruptBorder:SetBackdropBorderColor(1, 0, 0, 1)
+end
+
+local function ShowBorder(self)
+  local backdrop = self.Border:GetBackdrop()
+  backdrop.edgeFile = EMPTY_TEXTURE
+end
+
+function Addon:CreateCastbar(parent)
+  -- , spelltext?,
+
+  local frame = CreateFrame("StatusBar", nil, parent)
+  frame:SetFrameLevel(parent:GetFrameLevel())
+
+  frame.Border = CreateFrame("Frame", nil, frame)
+  frame.InterruptBorder = CreateFrame("Frame", nil, frame)
+  frame.Overlay = CreateFrame("Frame", nil, frame)
+
+  frame.Border:SetFrameLevel(frame:GetFrameLevel())
+  -- frame.InterruptBorder:SetFrameLevel(frame:GetFrameLevel())
+  -- frame.Overlay:SetFrameLevel(parent:GetFrameLevel() + 1)
+
+  frame.InterruptOverlay =  frame.Overlay:CreateTexture(nil, "BORDER")
+  frame.InterruptShield = frame.Overlay:CreateTexture(nil, "ARTWORK")
+
+  frame.InterruptOverlay:SetTexture(ART_PATH .. "Striped_Texture")
+  frame.InterruptOverlay:SetAllPoints(frame)
+  frame.InterruptOverlay:SetVertexColor(1, 0, 0, 1)
+
+  frame.InterruptShield:SetAtlas("nameplates-InterruptShield", true)
+  frame.InterruptShield:SetPoint("CENTER", frame, "LEFT")
+
+  --print ("Shield Height: ", frame.InterruptShield:GetSize())
+
+  frame.SetAllColors = SetAllColorsNew
+  frame.SetTexCoord = function() end
+  frame.SetBackdropTexCoord = function() end
+  frame.SetStatusBarBackdrop = SetStatusBarBackdropCastbar
+  frame.SetEliteBorder = SetEliteBorder
+  frame.SetShownInterruptOverlay = SetShownInterruptOverlay
+
+  frame:SetScript("OnSizeChanged", OnSizeChanged)
+  return frame
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -306,25 +213,24 @@ function Addon:ConfigCastbar()
         castbar:SetScript("OnUpdate", function(self, elapsed)
           if ShowOnUnit(plate.TPFrame.unit) then
             self:SetAllColors(Addon:SetCastbarColor(plate.TPFrame.unit))
-            self:SetValue(castbar.MaxVal * 0.5)
+            self:SetMinMaxValues(0, 100)
+            self:SetValue(50)
             visual.spellicon:SetTexture(GetSpellTexture(252616))
             visual.spelltext:SetText("Cosmic Beacon")
 
-            self.Bar:Show()
-            self.Backdrop:Show()
-            visual.spellicon:SetShown(plate.TPFrame.style.spellicon.show)
-            visual.castnostop:SetShown(plate.TPFrame.style.castnostop.show)
-            visual.castborder:SetShown(plate.TPFrame.style.castborder.show)
+            self:Show()
+            self.Border:SetShown(plate.TPFrame.style.castborder.show)
+            self:SetShownInterruptOverlay(plate.TPFrame.style.castnostop.show)
             visual.spelltext:SetShown(plate.TPFrame.style.spelltext.show)
-            visual.castshield:SetShown(TidyPlatesThreat.db.profile.settings.castnostop.ShowInterruptShield)
+            visual.spellicon:SetShown(plate.TPFrame.style.spellicon.show)
           else
-            self.Bar:Hide()
-            self.Backdrop:Hide()
-            visual.castshield:Hide()
-            visual.spellicon:Hide()
-            visual.castnostop:Hide()
-            visual.castborder:Hide()
+            self:SetValue(0) -- don't use self:_Hide() here, otherwise OnUpdate will never be called again
+            self.Border:Hide()
+            self.InterruptBorder:Hide()
+            self.InterruptOverlay:Hide()
+            self.InterruptShield:Hide()
             visual.spelltext:Hide()
+            visual.spellicon:Hide()
           end
         end)
 
@@ -334,7 +240,7 @@ function Addon:ConfigCastbar()
         EnabledConfigMode = true
         TidyPlatesInternal:ForceUpdate()
       elseif castbar._Hide then
-          castbar:_Hide()
+        castbar:_Hide()
       end
     else
       ThreatPlates.Print("Please select a target unit to enable configuration mode.", true)
@@ -343,8 +249,6 @@ function Addon:ConfigCastbar()
     local castbar = ConfigModePlate.TPFrame.visual.castbar
     castbar:SetScript("OnUpdate", nil)
     castbar.Hide = castbar._Hide
-    castbar.Bar:Hide()
-    castbar.Backdrop:Hide()
     castbar:Hide()
     EnabledConfigMode = false
   end

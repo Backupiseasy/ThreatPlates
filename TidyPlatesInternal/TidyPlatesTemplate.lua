@@ -24,12 +24,10 @@ TemplateTheme.healthbar = {
 	texture =					 EMPTY_TEXTURE,
 	backdrop = 				EMPTY_TEXTURE,
 	height = 12,
-	--width = 101,
 	width = 0,
 	x = 0,
 	y = 10,
 	anchor = "CENTER",
-	orientation = "HORIZONTAL",
 	show = true,
 }
 
@@ -101,23 +99,25 @@ TemplateTheme.threatborder = {
 	bottom = 1,
 }
 
-TemplateTheme.castborder = {
-	texture =					EMPTY_TEXTURE,
-	width = 128,
-	height = 64,
+TemplateTheme.castbar = {
+	texture =	EMPTY_TEXTURE,
+	backdrop = EMPTY_TEXTURE,
+	height = 12,
+	width = 99,
 	x = 0,
-	y = -11,
+	y = -19,
 	anchor = "CENTER",
 	show = true,
 }
 
+TemplateTheme.castborder = {
+	texture =	EMPTY_TEXTURE,
+	edgesize = 0,
+	offset = 0,
+	show = true,
+}
+
 TemplateTheme.castnostop = {
-	texture = 				EMPTY_TEXTURE,
-	width = 128,
-	height = 64,
-	x = 0,
-	y = -11,
-	anchor = "CENTER",
 	show = true,
 }
 
@@ -148,18 +148,6 @@ TemplateTheme.level = {
 	vertical = "BOTTOM",
 	shadow = true,
 	flags = "NONE",
-	show = true,
-}
-
-TemplateTheme.castbar = {
-	texture =					EMPTY_TEXTURE,
-	backdrop = 				EMPTY_TEXTURE,
-	height = 12,
-	width = 99,
-	x = 0,
-	y = -19,
-	anchor = "CENTER",
-	orientation = "HORIZONTAL",
 	show = true,
 }
 

@@ -67,7 +67,6 @@ local function Create(self,name)
       x = 0,
       y = 0,
       anchor = "CENTER",
-      orientation = "HORIZONTAL",
       show = false,
     },
 
@@ -103,36 +102,26 @@ local function Create(self,name)
       show = dbprofile.HeadlineView.ShowTargetHighlight,
     },
 
-    castborder = {
-      texture = (db.castborder.show and db.castbar.ShowInHeadlineView and ThreatPlates.Art..db.castborder.texture) or EMPTY_TEXTURE,
-      width = 256,
-      height = 64,
+    castbar = {
+      texture = ThreatPlates.Media:Fetch('statusbar', db.castbar.texture),
+      backdrop = (db.castbar.ShowInHeadlineView and ThreatPlates.Media:Fetch('statusbar', db.castbar.backdrop, true)) or EMPTY_TEXTURE,
+      width = db.castbar.width,
+      height = db.castbar.height,
       x = db.castbar.x_hv,
       y = db.castbar.y_hv,
       anchor = "CENTER",
-      show = db.castbar.ShowInHeadlineView and db.castborder.show, -- only checked by TidyPlades after a /reload
+      show = db.castbar.ShowInHeadlineView,
+    },
+
+    castborder = {
+      texture = (db.castbar.ShowInHeadlineView and db.castborder.show and ThreatPlates.Art .. db.castborder.texture) or EMPTY_TEXTURE,
+      edgesize = db.castborder.EdgeSize,
+      offset = db.castborder.Offset,
+      show = true,
     },
 
     castnostop = {
-      texture = (db.castborder.show and db.castbar.ShowInHeadlineView and ((db.castnostop.ShowOverlay and ThreatPlates.Art.."TP_CastBarLock") or ThreatPlates.Art..db.castborder.texture)) or EMPTY_TEXTURE,
-      width = 256,
-      height = 64,
-      x = db.castbar.x_hv,
-      y = db.castbar.y_hv,
-      anchor = "CENTER",
-      show = db.castbar.ShowInHeadlineView and db.castborder.show,
-    },
-
-    castbar = {
-      texture = (db.castbar.ShowInHeadlineView and ThreatPlates.Media:Fetch('statusbar', db.castbar.texture)) or EMPTY_TEXTURE,
-      backdrop = (db.castbar.ShowInHeadlineView and ThreatPlates.Media:Fetch('statusbar', db.castbar.backdrop, true)) or EMPTY_TEXTURE,
-      width = 120,
-      height = 10,
-      x = db.castbar.x_hv,
-      y = db.castbar.y_hv,
-      anchor = "CENTER",
-      orientation = "HORIZONTAL",
-      show = db.castbar.ShowInHeadlineView,
+      show = db.castbar.ShowInHeadlineView and db.castborder.show and db.castnostop.ShowOverlay,
     },
 
     name = {
