@@ -348,10 +348,10 @@ local function MigrateBorderTextures(profile_name, profile)
   end
 
   if DatabaseEntryExists(profile, { "settings", "castborder", "texture" } ) then
-    if profile.settings.healthborder.texture == "TP_CastbarOverlay" then
-      profile.settings.healthborder.texture = "TP_Castbar_Border_Default"
+    if profile.settings.castborder.texture == "TP_CastBarOverlay" then
+      profile.settings.castborder.texture = "TP_Castbar_Border_Default"
     else -- TP_CastBarOverlayThin
-      profile.settings.healthborder.texture = "TP_Castbar_Border_Thin"
+      profile.settings.castborder.texture = "TP_Castbar_Border_Thin"
     end
   end
 
