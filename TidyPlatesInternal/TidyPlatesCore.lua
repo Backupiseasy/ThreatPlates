@@ -190,7 +190,6 @@ do
     plate.TPFrame = CreateFrame("Frame",  "ThreatPlatesFrame" .. numChildren, UIParent)
 
     local extended = plate.TPFrame
-    --extended:SetPoint("CENTER", plate, "CENTER")
     extended:EnableMouse(false)
     extended:SetAllPoints(plate)
     extended:SetFrameStrata("BACKGROUND")
@@ -272,13 +271,18 @@ do
 
 		-- TextFrame
     visual.name  = textFrame:CreateFontString(nil, "ARTWORK", 0)
-    visual.customtext = textFrame:CreateFontString(nil, "ARTWORK", -1)
+		visual.name:SetFont("Fonts\\FRIZQT__.TTF", 11)
+		visual.customtext = textFrame:CreateFontString(nil, "ARTWORK", -1)
+		visual.customtext:SetFont("Fonts\\FRIZQT__.TTF", 11)
 		visual.level = textFrame:CreateFontString(nil, "ARTWORK", -2)
+		visual.level:SetFont("Fonts\\FRIZQT__.TTF", 11)
 
 		-- Cast Bar Frame - Highest Frame
-    visual.castborder = castbar.Border
-    visual.spellicon = castbar.Overlay:CreateTexture(nil, "ARTWORK", 7)
-    visual.spelltext = castbar.Overlay:CreateFontString(nil, "OVERLAY")
+		visual.castborder = castbar.Border
+		visual.spellicon = castbar.Overlay:CreateTexture(nil, "ARTWORK", 7)
+
+		visual.spelltext = castbar.Overlay:CreateFontString(nil, "OVERLAY")
+		visual.spelltext:SetFont("Fonts\\FRIZQT__.TTF", 11)
 
     -- Set Base Properties
 		visual.raidicon:SetTexture("Interface\\TargetingFrame\\UI-RaidTargetingIcons")
@@ -294,11 +298,6 @@ do
     healthbar:SetFrameLevel(extended:GetFrameLevel() + 5)
     textFrame:SetFrameLevel(extended:GetFrameLevel() + 6)
 
---    visual.name:SetFont("Fonts\\FRIZQT__.TTF", 11)
---    visual.customtext:SetFont("Fonts\\FRIZQT__.TTF", 11)
---    visual.level:SetFont("Fonts\\FRIZQT__.TTF", 11)
---    visual.spelltext:SetFont("Fonts\\FRIZQT__.TTF", 11)
-
     castbar:Hide()
 		castbar:SetStatusBarColor(1,.8,0)
 
@@ -310,9 +309,7 @@ do
 		extended.unit,
 		extended.unitcache,
 		extended.stylecache,
-		extended.widgets
-			= {}, {}, {}, {}, {}
-
+		extended.widgets = {}, {}, {}, {}, {}
 		extended.stylename = ""
   end
 end
