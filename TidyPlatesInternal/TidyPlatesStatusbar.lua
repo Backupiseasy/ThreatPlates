@@ -142,11 +142,6 @@ local function SetStatusBarBackdropCastbar(self, backdrop_texture, edge_texture,
   self.InterruptBorder:SetBackdropBorderColor(1, 0, 0, 1)
 end
 
-local function ShowBorder(self)
-  local backdrop = self.Border:GetBackdrop()
-  backdrop.edgeFile = EMPTY_TEXTURE
-end
-
 function Addon:CreateCastbar(parent)
   -- , spelltext?,
 
@@ -168,10 +163,9 @@ function Addon:CreateCastbar(parent)
   frame.InterruptOverlay:SetAllPoints(frame)
   frame.InterruptOverlay:SetVertexColor(1, 0, 0, 1)
 
-  frame.InterruptShield:SetAtlas("nameplates-InterruptShield", true)
+  --frame.InterruptShield:SetAtlas("nameplates-InterruptShield", true)
+  frame.InterruptShield:SetTexture(ART_PATH .. "Interrupt_Shield")
   frame.InterruptShield:SetPoint("CENTER", frame, "LEFT")
-
-  --print ("Shield Height: ", frame.InterruptShield:GetSize())
 
   frame.SetAllColors = SetAllColorsNew
   frame.SetTexCoord = function() end

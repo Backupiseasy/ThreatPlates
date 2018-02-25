@@ -15,11 +15,9 @@ local CreateTidyPlatesInternalStatusbar = CreateTidyPlatesInternalStatusbar			  
 
 -- WoW APIs
 local wipe = wipe
-local WorldFrame, UIParent = WorldFrame, UIParent
-local CreateFrame = CreateFrame
+local WorldFrame, UIParent, CreateFrame, GameFontNormal, UNKNOWNOBJECT = WorldFrame, UIParent, CreateFrame, GameFontNormal. UNKNOWNOBJECT
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local UnitName, UnitIsUnit, UnitReaction, UnitExists = UnitName, UnitIsUnit, UnitReaction, UnitExists
-local UNKNOWNOBJECT = UNKNOWNOBJECT
 local UnitPVPName = UnitPVPName
 local UnitClassification = UnitClassification
 local UnitLevel = UnitLevel
@@ -43,7 +41,7 @@ local GetCVar, Lerp = GetCVar, Lerp
 -- Internal Data
 local Plates, PlatesFading = {}, {}	            	-- Plate Lists
 local PlatesVisible, PlatesByUnit, PlatesByGUID = {}, {}, {}
-local nameplate, extended, visual, plateid			    	-- Temp/Local References
+local nameplate, extended, visual			    	-- Temp/Local References
 local unit, unitcache, style, stylename, unitchanged, threatborder	    			-- Temp/Local References
 local numChildren = -1                                                              -- Cache the current number of plates
 local activetheme = {}                                                              -- Table Placeholder
@@ -186,7 +184,7 @@ end
 do
 
 	-- ApplyPlateExtesion
-	function OnNewNameplate(plate, plateid)
+	function OnNewNameplate(plate)
     -- Tidy Plates Frame
     --------------------------------
     plate.TPFrame = CreateFrame("Frame",  "ThreatPlatesFrame" .. numChildren, UIParent)
@@ -296,7 +294,12 @@ do
     healthbar:SetFrameLevel(extended:GetFrameLevel() + 5)
     textFrame:SetFrameLevel(extended:GetFrameLevel() + 6)
 
-		castbar:Hide()
+--    visual.name:SetFont("Fonts\\FRIZQT__.TTF", 11)
+--    visual.customtext:SetFont("Fonts\\FRIZQT__.TTF", 11)
+--    visual.level:SetFont("Fonts\\FRIZQT__.TTF", 11)
+--    visual.spelltext:SetFont("Fonts\\FRIZQT__.TTF", 11)
+
+    castbar:Hide()
 		castbar:SetStatusBarColor(1,.8,0)
 
     -- Tidy Plates Frame References
@@ -386,19 +389,15 @@ do
 
 	-- OnShowNameplate
 	function OnShowNameplate(plate, unitid)
-    plate.TPFrame:Show()
-    --plate.TPFrame.FadeIn:Play()
-
-		UpdateReferences(plate)
-
-		PlatesVisible[plate] = unitid
-		PlatesByUnit[unitid] = plate
+    UpdateReferences(plate)
+    PlatesVisible[plate] = unitid
+    PlatesByUnit[unitid] = plate
 
 		unit.frame = extended
 		unit.alpha = 0
 		unit.isTarget = false
 		unit.isMouseover = false
-		unit.unitid = plateid
+		unit.unitid = unitid
     unit.guid = UnitGUID(unitid)
 		extended.unitcache = ClearIndices(extended.unitcache)
 		extended.stylename = ""
@@ -425,7 +424,18 @@ do
 		-- This goes here because a user might change widget settings after nameplates have been created
 		Addon:OnInitialize(extended, activetheme)
 
-		-- Skip the initial data gather and let the second cycle do the work.
+    if TidyPlatesThreat.db.profile.ShowFriendlyBlizzardNameplates and UnitReaction(unitid, "player") > 4 then
+      plate.UnitFrame:Show()
+      plate.TPFrame:Hide()
+      --extended.Active = false
+    else
+      plate.UnitFrame:Hide()
+      plate.TPFrame:Show()
+      --extended.Active = true
+      --plate.TPFrame.FadeIn:Play()
+    end
+
+    -- Skip the initial data gather and let the second cycle do the work.
 		plate.UpdateMe = true
   end
 
@@ -805,6 +815,7 @@ do
     UpdateReferences(plate)
 
 		if not extended:IsShown() or not style.castbar.show then return end
+    --if not extended:IsShown() then return end
 
     local castBar = extended.visual.castbar
     local name, subText, text, texture, startTime, endTime, isTradeSkill, castID, notInterruptible
@@ -977,16 +988,17 @@ do
   end
 
 	function CoreEvents:NAME_PLATE_UNIT_ADDED(unitid)
-		local plate = GetNamePlateForUnit(unitid);
 
 		-- Handle personal resource bar, currently it's ignored by Threat Plates
-		if UnitIsUnit("player", unitid) then
+		if not UnitIsUnit("player", unitid) then
+      --local plate = GetNamePlateForUnit(unitid)
+      --plate.UnitFrame:SetShown(TidyPlatesThreat.db.profile.ShowFriendlyBlizzardNameplates and UnitReaction(unitid, "player") > 4)
+      --plate:GetChildren():Hide()
+			OnShowNameplate(GetNamePlateForUnit(unitid), unitid)
+		--else
 			--addon.PlayerNameplate = plate
 			--print ("NAME_PLATE_UNIT_ADDED: player frame")
-		else
-			--plate:GetChildren():Hide()
-			OnShowNameplate(plate, unitid)
-    end
+		end
 	end
 
 	function CoreEvents:NAME_PLATE_UNIT_REMOVED(unitid)

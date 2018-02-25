@@ -4,8 +4,9 @@
 * Added an option to resize the castbar, i.e., to change width and height independently from each other [Issue #129, Comment #573].
 * Added an option to configure the clickable area for nameplates.
 * Added options to adjust how Threat Plates are scaled (based on UI scale, ignoring UI scale or pixel-perfect), see General - Blizzard Settings.
+* Added a new shield icon for non-interruptable casts.
 * Optimized and improved integration of TidyPlates code into Threat Plates.
-* Optimized how nameplates.are handled after creation and deletion.
+* Optimized how nameplates are handled after creation and deletion.
 
 ------------------------------------------------------
 8.7.0-Alpha4
