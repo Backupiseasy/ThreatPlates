@@ -13,6 +13,7 @@ local UnitReaction = UnitReaction
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local UnitName = UnitName
 local UNKNOWNOBJECT = UNKNOWNOBJECT
+local GetCVarBool, SetCVar = GetCVarBool, SetCVar
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
@@ -427,6 +428,10 @@ function TidyPlatesThreat:PLAYER_ENTERING_WORLD()
     ProfDB.threat.ON = false
   else
     ProfDB.threat.ON = ProfDB.OldSetting
+  end
+
+  if ProfDB.questWidget.ON or ProfDB.questWidget.ShowInHeadlineView then
+    SetCVar("showQuestTrackingTooltips", 1)
   end
 
   -- overwrite things TidyPlatesHub does on PLAYER_ENTERING_WORLD
