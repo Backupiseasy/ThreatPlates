@@ -837,8 +837,6 @@ do
 		if UnitCastingInfo(unitid) then
       OnStartCasting(plate, unitid, false)
     elseif UnitChannelInfo(unitid) then
---      print ("OnUpdateCastMidway:", plate, unitid, UnitChannelInfo(unitid))
---      print ("spell channeled")
       OnStartCasting(plate, unitid, true)
     end
 	end
@@ -1056,8 +1054,6 @@ do
 
 	function CoreEvents:UNIT_SPELLCAST_CHANNEL_START(unitid)
 		if UnitIsUnit("player", unitid) or not ShowCastBars then return end
-
-    --print ("UNIT_SPELLCAST_CHANNEL_START:", unitid, GetNamePlateForUnit(unitid))
 
 		local plate = GetNamePlateForUnit(unitid)
 		if plate then

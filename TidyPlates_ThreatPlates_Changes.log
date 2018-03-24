@@ -2,6 +2,7 @@
 8.7.0-Alpha6
 ------------------------------------------------------
 * Added an option to change the color of an interrupted castbar. Also, changed the castbar animation for interrupted casts.
+* Fixed several bugs and Lua errors with castbar and nameplate creation.
 
 ------------------------------------------------------
 8.7.0-Alpha5
