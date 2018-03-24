@@ -34,7 +34,32 @@ local ELITE_BACKDROP = {
 
 ------------------------------------------------------------------------------------------------------------
 
-local function OnSizeChanged(self, width, height)
+local function OnUpdateCastBar(self, elapsed)
+  if self.IsCasting then
+    self.Value = self.Value + elapsed
+
+    if self.Value < self.MaxValue then
+      self:SetValue(self.Value)
+      return
+    end
+
+    self:SetValue(self.MaxValue)
+  elseif self.IsChanneling then
+    self.Value = self.Value - elapsed
+
+    if self.Value > 0 then
+      self:SetValue(self.Value)
+      return
+    end
+  elseif (self.FlashTime > 0) then
+    self.FlashTime = self.FlashTime - elapsed
+    return
+  end
+
+  self:Hide()
+end
+
+local function OnSizeChangedCastbar(self, width, height)
   local scale_factor = height / 10
   self.InterruptShield:SetSize(14 * scale_factor, 16 * scale_factor)
 end
@@ -101,6 +126,7 @@ function Addon:CreateHealthbar(parent)
     edgeSize = 12,
     --insets = { left = 0, right = 0, top = 0, bottom = 0 },
   })
+  frame.ThreatBorder:SetBackdropBorderColor(0, 0, 0, 0) -- Transparent color as default
 
   frame.HighlightTexture:SetTexture(ART_PATH .. "TP_HealthBar_Highlight")
   frame.HighlightTexture:SetBlendMode("ADD")
@@ -143,8 +169,6 @@ local function SetStatusBarBackdropCastbar(self, backdrop_texture, edge_texture,
 end
 
 function Addon:CreateCastbar(parent)
-  -- , spelltext?,
-
   local frame = CreateFrame("StatusBar", nil, parent)
   frame:SetFrameLevel(parent:GetFrameLevel())
 
@@ -174,7 +198,30 @@ function Addon:CreateCastbar(parent)
   frame.SetEliteBorder = SetEliteBorder
   frame.SetShownInterruptOverlay = SetShownInterruptOverlay
 
-  frame:SetScript("OnSizeChanged", OnSizeChanged)
+--  frame.Flash = frame:CreateAnimationGroup()
+--  local anim = frame.Flash:CreateAnimation("Alpha")
+--  anim:SetOrder(1)
+--  anim:SetFromAlpha(1)
+--  anim:SetToAlpha(CASTBAR_FLASH_MIN_ALPHA)
+--  anim:SetDuration(CASTBAR_FLASH_DURATION)
+--  anim = frame.Flash:CreateAnimation("Alpha")
+--  anim:SetOrder(2)
+--  anim:SetFromAlpha(CASTBAR_FLASH_MIN_ALPHA)
+--  anim:SetToAlpha(1)
+--  anim:SetDuration(CASTBAR_FLASH_DURATION)
+--  frame.Flash:SetScript("OnFinished", function(self)
+--    self:GetParent():Hide()
+--  end)
+
+  frame.IsCasting = false
+  frame.IsChanneling = false
+  frame.FlashTime = 0
+  frame.Value = 0
+  frame.MaxValue = 0
+
+  frame:SetScript("OnUpdate", OnUpdateCastBar)
+  frame:SetScript("OnSizeChanged", OnSizeChangedCastbar)
+
   return frame
 end
 
@@ -241,7 +288,8 @@ function Addon:ConfigCastbar()
     end
   else
     local castbar = ConfigModePlate.TPFrame.visual.castbar
-    castbar:SetScript("OnUpdate", nil)
+    castbar:SetScript("OnUpdate", OnUpdateCastBar)
+    --castbar:SetScript("OnUpdate", nil)
     castbar.Hide = castbar._Hide
     castbar:Hide()
     EnabledConfigMode = false

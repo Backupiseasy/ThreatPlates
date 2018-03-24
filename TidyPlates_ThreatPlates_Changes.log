@@ -1,4 +1,9 @@
 ------------------------------------------------------
+8.7.0-Alpha6
+------------------------------------------------------
+* Added an option to change the color of an interrupted castbar. Also, changed the castbar animation for interrupted casts.
+
+------------------------------------------------------
 8.7.0-Alpha5
 ------------------------------------------------------
 * Added an option to resize the castbar, i.e., to change width and height independently from each other [Issue #129, Comment #573].

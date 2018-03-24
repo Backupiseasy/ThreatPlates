@@ -380,6 +380,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
       b = 0,
       a = 1
     },
+    castbarColorInterrupted = RGB(255, 0, 255, 1),
     aHPbarColor = RGB_P(0, 1, 0),
     bHPbarColor = RGB_P(1, 1, 0),
 --    cHPbarColor = {

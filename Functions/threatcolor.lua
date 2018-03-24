@@ -15,7 +15,7 @@ local OnThreatTable = ThreatPlates.OnThreatTable
 local GetUniqueNameplateSetting = ThreatPlates.GetUniqueNameplateSetting
 local SetStyle = TidyPlatesThreat.SetStyle
 
-local COLOR_TRANSPARENT = RGB(0, 0, 0, 0, 0) -- opaque
+local COLOR_TRANSPARENT = RGB(0, 0, 0, 0) -- opaque
 
 local function ShowThreatGlow(unit)
   local db = TidyPlatesThreat.db.profile

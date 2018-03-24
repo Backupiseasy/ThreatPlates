@@ -228,7 +228,8 @@ function TidyPlatesThreat:StartUp()
     end
   end
 
-  if TidyPlates and not db.StandalonePopup then
+  --if TidyPlates and not db.StandalonePopup then
+  if TidyPlates then
     StaticPopup_Show("TidyPlatesEnabled")
     db.StandalonePopup = true
   end

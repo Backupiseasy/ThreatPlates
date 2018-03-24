@@ -1886,6 +1886,15 @@ local function CreateCastbarOptions()
             set = SetColorAlpha,
             arg = { "castbarColorShield" }
           },
+          Interrupted = {
+            name = L["Interrupted"],
+            type = "color",
+            order = 130,
+            --width = "double",
+            get = GetColorAlpha,
+            set = SetColorAlpha,
+            arg = { "castbarColorInterrupted" }
+          },
         },
       },
       Appeareance = {
@@ -5863,6 +5872,9 @@ function TidyPlatesThreat:ProfChange()
       end
     end
   end
+
+  Addon:UIScaleChanged()
+  Addon:SetBaseNamePlateSize()
 
   TidyPlatesThreat:ReloadTheme()
 end
