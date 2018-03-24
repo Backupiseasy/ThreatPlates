@@ -97,7 +97,7 @@ local ShowBlizzardPlate		-- Holder for later
 local UpdateStyle
 
 -- Indicators
-local UpdateIndicator_CustomScaleText, UpdateIndicator_Standard, UpdateIndicator_CustomAlpha
+local UpdateIndicator_CustomText, UpdateIndicator_CustomScaleText, UpdateIndicator_Standard, UpdateIndicator_CustomAlpha
 local UpdateIndicator_Level, UpdateIndicator_ThreatGlow, UpdateIndicator_RaidIcon
 local UpdateIndicator_EliteIcon, UpdateIndicator_UnitColor, UpdateIndicator_Name
 local UpdateIndicator_HealthBar, UpdateIndicator_Target
@@ -186,6 +186,7 @@ do
     -- Tidy Plates Frame
     --------------------------------
     plate.TPFrame = CreateFrame("Frame",  "ThreatPlatesFrame" .. numChildren, UIParent)
+    plate.TPFrame:Hide()
 
     local extended = plate.TPFrame
     extended:EnableMouse(false)
@@ -344,7 +345,7 @@ do
 			-- Update Delegates
 			UpdateIndicator_ThreatGlow()
 			UpdateIndicator_CustomAlpha()
-			UpdateIndicator_CustomScaleText()
+      UpdateIndicator_CustomScaleText()
 
 			-- Cache the old unit information
 			UpdateUnitCache()
@@ -395,17 +396,24 @@ do
 		-- For Fading In
 		PlatesFading[plate] = EnableFadeIn
 		extended.requestedAlpha = 0
-    -- extended:Hide()		-- Yes, it seems counterintuitive, but...
-    -- extended:SetAlpha(0)
+    --extended:Hide()		-- Yes, it seems counterintuitive, but...
+    --extended:SetAlpha(0)
 
 		-- Graphics
 		visual.castbar:Hide()
 		visual.highlight:Hide()
     visual.healthbar.Highlight:Hide()
 
-		-- Widgets/Extensions
+    -- Widgets/Extensions
 		-- This goes here because a user might change widget settings after nameplates have been created
 		Addon:OnInitialize(extended, activetheme)
+
+    UpdateUnitIdentity(unitid)
+    UpdateUnitCondition(plate, unitid)
+    CheckNameplateStyle()
+    --UpdateUnitContext(plate, unitid)
+    --ProcessUnitChanges()
+    --OnUpdateCastMidway(plate, unitid)
 
     if TidyPlatesThreat.db.profile.ShowFriendlyBlizzardNameplates and UnitReaction(unitid, "player") > 4 then
       plate.UnitFrame:Show()
@@ -569,7 +577,7 @@ do
 		else
 			unit.class = ""
 			unit.type = "NPC"
-		end
+    end
 	end
 
   -- UpdateUnitContext: Updates Target/Mouseover
@@ -644,18 +652,11 @@ do
 		visual.healthbar:SetValue(unit.health)
 	end
 
-
-	-- UpdateIndicator_Name:
 	function UpdateIndicator_Name()
 		visual.name:SetText(unit.name)
-		--unit.pvpname
-
-		-- Name Color
     visual.name:SetTextColor(Addon:SetNameColor(unit))
 	end
 
-
-	-- UpdateIndicator_Level:
 	function UpdateIndicator_Level()
 		if unit.isBoss and style.skullicon.show then visual.level:Hide(); visual.skullicon:Show() else visual.skullicon:Hide() end
 
@@ -663,7 +664,6 @@ do
 		else visual.level:SetText(unit.level) end
 		visual.level:SetTextColor(unit.levelcolorRed, unit.levelcolorGreen, unit.levelcolorBlue)
 	end
-
 
 	-- UpdateIndicator_ThreatGlow: Updates the aggro glow
 	function UpdateIndicator_ThreatGlow()
@@ -674,8 +674,6 @@ do
     visual.threatborder:SetBackdropBorderColor(Addon:SetThreatColor(unit))
 	end
 
-
-	-- UpdateIndicator_Target
 	function UpdateIndicator_Target()
     visual.target:SetShown(unit.isTarget and style.target.show)
 
@@ -756,14 +754,21 @@ do
 		end
 	end
 
+  function UpdateIndicator_CustomText()
+    if style.customtext.show then
+      local text, r, g, b, a = Addon:SetCustomText(unit)
+      visual.customtext:SetText( text or "")
+      visual.customtext:SetTextColor(r or 1, g or 1, b or 1, a or 1)
+    end
+  end
+
 	-- OnShowCastbar
 	function OnStartCasting(plate, unitid, channeled)
     UpdateReferences(plate)
 
 		-- style may be uninitialized (empty) here (e.g., when reloading)
-    if not (extended:IsShown() and style.castbar and style.castbar.show) then
-      return
-    end
+    --if not (extended:IsShown() and style.castbar and style.castbar.show) then
+    if not extended:IsShown() or not style.castbar.show then return end
     --if not extended:IsShown() then return end
 
     local castbar = extended.visual.castbar
@@ -773,11 +778,21 @@ do
 			name, subText, text, texture, startTime, endTime, isTradeSkill, notInterruptible = UnitChannelInfo(unitid)
       castbar.IsChanneling = true
       castbar.IsCasting = false
+
+      castbar.Value = (endTime / 1000) - GetTime()
+      castbar.MaxValue = (endTime - startTime) / 1000
+      castbar:SetMinMaxValues(0, castbar.MaxValue)
+      castbar:SetValue(castbar.Value)
 		else
 			name, subText, text, texture, startTime, endTime, isTradeSkill, castID, notInterruptible = UnitCastingInfo(unitid)
       castbar.IsCasting = true
       castbar.IsChanneling = false
-		end
+
+      castbar.Value = GetTime() - (startTime / 1000)
+      castbar.MaxValue = (endTime - startTime) / 1000
+      castbar:SetMinMaxValues(0, castbar.MaxValue)
+      castbar:SetValue(castbar.Value)
+    end
 
 		if isTradeSkill then return end
 
@@ -788,11 +803,6 @@ do
 		visual.spelltext:SetText(text)
 		visual.spellicon:SetTexture(texture)
     visual.spellicon:SetDrawLayer("BACKGROUND", 7)
-
-		--castBar:SetMinMaxValues( startTime, endTime )
-    castbar.Value = GetTime() - (startTime / 1000)
-    castbar.MaxValue = (endTime - startTime) / 1000
-    castbar:SetMinMaxValues(0, castbar.MaxValue)
 
     castbar:SetAllColors(Addon:SetCastbarColor(unit))
     visual.castbar:SetShownInterruptOverlay(unit.spellIsShielded)
@@ -805,6 +815,8 @@ do
 
 	-- OnHideCastbar
 	function OnStopCasting(plate)
+    if not plate.TPFrame.visual.castbar:IsShown() then return end
+
     UpdateReferences(plate)
     local castbar = extended.visual.castbar
     castbar.IsCasting = false
@@ -821,16 +833,13 @@ do
 	function OnUpdateCastMidway(plate, unitid)
 		if not ShowCastBars then return end
 
-		local currentTime = GetTime() * 1000
-
 		-- Check to see if there's a spell being cast
 		if UnitCastingInfo(unitid) then
-      --OnStartCasting(plate, unitid, false)
-    else
-      -- See if one is being channeled...
-			if UnitChannelInfo(unitid) then
-        --OnStartCasting(plate, unitid, true)
-      end
+      OnStartCasting(plate, unitid, false)
+    elseif UnitChannelInfo(unitid) then
+--      print ("OnUpdateCastMidway:", plate, unitid, UnitChannelInfo(unitid))
+--      print ("spell channeled")
+      OnStartCasting(plate, unitid, true)
     end
 	end
 
@@ -862,7 +871,8 @@ do
 	-- Update spell currently being cast
 	local function UnitSpellcastMidway(event, unitid, ...)
 		if UnitIsUnit("player", unitid) or not ShowCastBars then return end
-		local plate = GetNamePlateForUnit(unitid);
+
+		local plate = GetNamePlateForUnit(unitid)
 		if plate then
 			OnUpdateCastMidway(plate, unitid)
 		end
@@ -931,14 +941,34 @@ do
       --local plate = GetNamePlateForUnit(unitid)
       --plate.UnitFrame:SetShown(TidyPlatesThreat.db.profile.ShowFriendlyBlizzardNameplates and UnitReaction(unitid, "player") > 4)
       --plate:GetChildren():Hide()
-			OnShowNameplate(GetNamePlateForUnit(unitid), unitid)
+
+      OnShowNameplate(GetNamePlateForUnit(unitid), unitid)
 		--else
 			--addon.PlayerNameplate = plate
 			--print ("NAME_PLATE_UNIT_ADDED: player frame")
 		end
 	end
 
-	function CoreEvents:NAME_PLATE_UNIT_REMOVED(unitid)
+  function CoreEvents:UNIT_NAME_UPDATE(unitid)
+    if UnitIsUnit("player", unitid) then return end -- skip personal resource bar
+
+    local plate = GetNamePlateForUnit(unitid)
+    if plate then
+      local extended = plate.TPFrame
+      unit = extended.unit
+
+      unit.name = UnitName(unitid)
+      unit.pvpname = UnitPVPName(unitid)
+      unit.rawName = unit.name
+
+      visual = extended.visual
+      style = extended.style
+      UpdateIndicator_Name() -- needs visual, unit
+      UpdateIndicator_CustomText() -- needs style, visual, unit
+    end
+  end
+
+  function CoreEvents:NAME_PLATE_UNIT_REMOVED(unitid)
 		local plate = GetNamePlateForUnit(unitid);
 
 		OnHideNameplate(plate, unitid)
@@ -1006,41 +1036,40 @@ do
 	function CoreEvents:UNIT_SPELLCAST_START(unitid)
  		if UnitIsUnit("player", unitid) or not ShowCastBars then return end
 
-		local plate = GetNamePlateForUnit(unitid)
-
+    local plate = GetNamePlateForUnit(unitid)
 		if plate then
       OnStartCasting(plate, unitid, false)
 		end
 	end
 
 
-	 function CoreEvents:UNIT_SPELLCAST_STOP(unitid)
+  function CoreEvents:UNIT_SPELLCAST_STOP(unitid)
+    if UnitIsUnit("player", unitid) or not ShowCastBars then return end
+
+    -- plate can be nil, e.g., if unitid = player, combat ends and the player resource bar is already hidden
+    -- when the cast stops (because it's not shown out of combat)
+    local plate = GetNamePlateForUnit(unitid)
+    if plate then
+      OnStopCasting(plate)
+    end
+  end
+
+	function CoreEvents:UNIT_SPELLCAST_CHANNEL_START(unitid)
 		if UnitIsUnit("player", unitid) or not ShowCastBars then return end
 
-		local plate = GetNamePlateForUnit(unitid)
-
-		if plate then
-			OnStopCasting(plate)
-		end
-	 end
-
-	function CoreEvents:UNIT_SPELLCAST_CHANNEL_START(...)
-		local unitid = ...
-		if UnitIsUnit("player", unitid) or not ShowCastBars then return end
+    --print ("UNIT_SPELLCAST_CHANNEL_START:", unitid, GetNamePlateForUnit(unitid))
 
 		local plate = GetNamePlateForUnit(unitid)
-
 		if plate then
 			OnStartCasting(plate, unitid, true)
+      plate.TPFrame.visual.castbar:Show()
 		end
 	end
 
-	function CoreEvents:UNIT_SPELLCAST_CHANNEL_STOP(...)
-		local unitid = ...
+	function CoreEvents:UNIT_SPELLCAST_CHANNEL_STOP(unitid)
 		if UnitIsUnit("player", unitid) or not ShowCastBars then return end
 
 		local plate = GetNamePlateForUnit(unitid)
-
 		if plate then
 			OnStopCasting(plate)
 		end
@@ -1083,23 +1112,6 @@ do
 
   function CoreEvents:UI_SCALE_CHANGED()
     Addon:UIScaleChanged()
-  end
-
-  function CoreEvents:UNIT_NAME_UPDATE(unitid)
-    if UnitIsUnit("player", unitid) then return end -- skip personal resource bar
-
-    local plate = GetNamePlateForUnit(unitid)
-    if plate then
-      UpdateReferences(plate)
-
-      if unit.name == UNKNOWNOBJECT then
-        -- UpdateUnitIdentity()
-        unit.name = UnitName(unitid)
-        unit.pvpname = UnitPVPName(unitid)
-        unit.rawName = unit.name
-        UpdateIndicator_Name()
-      end
-    end
   end
 
   -- The following events should not have worked before adjusting UnitSpellcastMidway

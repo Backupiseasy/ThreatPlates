@@ -190,26 +190,30 @@ local function DEBUG_PRINT_TABLE(data)
   end
 end
 
-local function DEBUG_PRINT_UNIT(unit)
+local function DEBUG_PRINT_UNIT(unit, full_info)
 	DEBUG("Unit:", unit.name)
-	DEBUG("  -------------------------------------------------------------")
-	DEBUG_PRINT_TABLE(unit)
-	if unit.unitid then
---		DEBUG("  isFriend = ", TidyPlatesUtilityInternal.IsFriend(unit.name))
---		DEBUG("  isGuildmate = ", TidyPlatesUtilityInternal.IsGuildmate(unit.name))
-		DEBUG("  IsOtherPlayersPet = ", UnitIsOtherPlayersPet(unit))
-		DEBUG("  IsBattlePet = ", UnitIsBattlePet(unit.unitid))
-		DEBUG("  PlayerControlled = ", UnitPlayerControlled(unit.unitid))
-		DEBUG("  CanAttack = ", UnitCanAttack("player", unit.unitid))
-		DEBUG("  Reaction = ", UnitReaction("player", unit.unitid))
-		local r, g, b, a = UnitSelectionColor(unit.unitid, true)
-		DEBUG("  SelectionColor: r =", ceil(r * 255), ", g =", ceil(g * 255), ", b =", ceil(b * 255), ", a =", ceil(a * 255))
-		DEBUG("  --------------------------------------------------------------")
-	else
-		DEBUG("  <no unit id>")
-		DEBUG("  --------------------------------------------------------------")
-	end
+	DEBUG("-------------------------------------------------------------")
+	for key, val in pairs(unit) do
+		DEBUG(key .. ":", val)
+  end
+
+  if full_info and unit.unitid then
+    --		DEBUG("  isFriend = ", TidyPlatesUtilityInternal.IsFriend(unit.name))
+    --		DEBUG("  isGuildmate = ", TidyPlatesUtilityInternal.IsGuildmate(unit.name))
+    DEBUG("  IsOtherPlayersPet = ", UnitIsOtherPlayersPet(unit))
+    DEBUG("  IsBattlePet = ", UnitIsBattlePet(unit.unitid))
+    DEBUG("  PlayerControlled = ", UnitPlayerControlled(unit.unitid))
+    DEBUG("  CanAttack = ", UnitCanAttack("player", unit.unitid))
+    DEBUG("  Reaction = ", UnitReaction("player", unit.unitid))
+    local r, g, b, a = UnitSelectionColor(unit.unitid, true)
+    DEBUG("  SelectionColor: r =", ceil(r * 255), ", g =", ceil(g * 255), ", b =", ceil(b * 255), ", a =", ceil(a * 255))
+  else
+    DEBUG("  <no unit id>")
+  end
+
+  DEBUG("--------------------------------------------------------------")
 end
+
 
 local function DEBUG_PRINT_TARGET(unit)
   if unit.isTarget then
@@ -242,15 +246,15 @@ end
 -- With TidyPlates:
 --ThreatPlates.FixUpdateUnitCondition = FixUpdateUnitCondition
 
-ThreatPlates.DEBUG = function(...) end
-ThreatPlates.DEBUG_PRINT_TABLE = function(...) end
-ThreatPlates.DEBUG_PRINT_UNIT = function(...) end
-ThreatPlates.DEBUG_PRINT_TARGET = function(...) end
-ThreatPlates.DEBUG_AURA_LIST = function(...) end
---ThreatPlates.DEBUG = DEBUG
---ThreatPlates.DEBUG_PRINT_TABLE = DEBUG_PRINT_TABLE
---ThreatPlates.DEBUG_PRINT_UNIT = DEBUG_PRINT_UNIT
---ThreatPlates.DEBUG_PRINT_TARGET = DEBUG_PRINT_TARGET
---ThreatPlates.DEBUG_AURA_LIST = DEBUG_AURA_LIST
+--ThreatPlates.DEBUG = function(...) end
+--ThreatPlates.DEBUG_PRINT_TABLE = function(...) end
+--ThreatPlates.DEBUG_PRINT_UNIT = function(...) end
+--ThreatPlates.DEBUG_PRINT_TARGET = function(...) end
+--ThreatPlates.DEBUG_AURA_LIST = function(...) end
+ThreatPlates.DEBUG = DEBUG
+ThreatPlates.DEBUG_PRINT_TABLE = DEBUG_PRINT_TABLE
+ThreatPlates.DEBUG_PRINT_UNIT = DEBUG_PRINT_UNIT
+ThreatPlates.DEBUG_PRINT_TARGET = DEBUG_PRINT_TARGET
+ThreatPlates.DEBUG_AURA_LIST = DEBUG_AURA_LIST
 
 
