@@ -27,7 +27,7 @@ Addon.UIScale = 1
 Addon.TotemInformation = {} -- basic totem information
 Addon.TOTEMS = {} -- mapping table for fast access to totem settings
 
-ThreatPlates.ADDON_NAME = "Tidy Plates: Threat Plates"
+ThreatPlates.ADDON_NAME = "Threat Plates"
 ThreatPlates.THEME_NAME = "Threat Plates"
 
 ThreatPlates.ANCHOR_POINT = {

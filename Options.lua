@@ -1566,7 +1566,7 @@ local function CreateBlizzardSettings()
             width = "double",
             func = function()
               InterfaceOptionsFrame_OpenToCategory(_G["InterfaceOptionsNamesPanel"])
-              LibStub("AceConfigDialog-3.0"):Close("Tidy Plates: Threat Plates");
+              LibStub("AceConfigDialog-3.0"):Close("Threat Plates");
             end,
           },
         },
@@ -5161,7 +5161,7 @@ local function CreateOptionsTable()
               type = "description",
               order = 2,
               width = "full",
-              name = L["Clear and easy to use nameplate theme for use with TidyPlates.\n\nCurrent version: "] .. GetAddOnMetadata("TidyPlates_ThreatPlates", "version") .. L["\n\nFeel free to email me at |cff00ff00threatplates@gmail.com|r\n\n--\n\nBlacksalsify\n\n(Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)"],
+              name = L["Clear and easy to use threat-reactive nameplates.\n\nCurrent version: "] .. GetAddOnMetadata("TidyPlates_ThreatPlates", "version") .. L["\n\nFeel free to email me at |cff00ff00threatplates@gmail.com|r\n\n--\n\nBlacksalsify\n\n(Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)"],
             },
             Header1 = {
               order = 3,

@@ -13,7 +13,7 @@ local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local SetNamePlateFriendlyClickThrough = C_NamePlate.SetNamePlateFriendlyClickThrough
 local SetNamePlateEnemyClickThrough = C_NamePlate.SetNamePlateEnemyClickThrough
 local UnitName, IsInInstance = UnitName, IsInInstance
-local GetCVar, SetCVar = GetCVar, SetCVar
+local GetCVar, SetCVar, IsAddOnLoaded = GetCVar, SetCVar, IsAddOnLoaded
 local C_NamePlate_SetNamePlateFriendlySize, C_NamePlate_SetNamePlateEnemySize, Lerp =  C_NamePlate.SetNamePlateFriendlySize, C_NamePlate.SetNamePlateEnemySize, Lerp
 local NamePlateDriverFrame = NamePlateDriverFrame
 
@@ -123,16 +123,29 @@ end
 
 StaticPopupDialogs["TidyPlatesEnabled"] = {
   preferredIndex = STATICPOPUP_NUMDIALOGS,
-  text = t.Meta("title")..L[":\n----------------------------------------------------------\n|cff89F559Threat Plates|r v8.6 is no longer a theme of TidyPlates, but a standalone addon that does no longer require TidyPlates. Please enable only one of these two nameplate addons, otherwise two overlapping nameplates will be shown for  units."],
+  text = "|cffFFA500" .. t.Meta("title") .. " Warning|r \n----------------------------------------------------------\n" ..
+    L["|cff89F559Threat Plates|r is no longer a theme of |cff89F559TidyPlates|r, but a standalone addon that does no longer require TidyPlates. Please disable one of these, otherwise two overlapping nameplates will be shown for units."],
   button1 = OKAY,
   timeout = 0,
   whileDead = 1,
   hideOnEscape = 1,
   OnAccept = function(self, _, _) end,
 }
+
+StaticPopupDialogs["IncompatibleAddon"] = {
+  preferredIndex = STATICPOPUP_NUMDIALOGS,
+  text = "|cffFFA500" .. t.Meta("title") .. " Warning|r \n----------------------------------------------------------\n" ..
+    L["You currently have two nameplate addons enabled: |cff89F559Threat Plates|r and |cff89F559%s|r. Please disable one of these, otherwise two overlapping nameplates will be shown for units."],
+  button1 = OKAY,
+  timeout = 0,
+  whileDead = 1,
+  hideOnEscape = 1,
+  OnAccept = function(self, _, _) end,
+}
+
 StaticPopupDialogs["SwitchToNewLookAndFeel"] = {
   preferredIndex = STATICPOPUP_NUMDIALOGS,
-  text = t.Meta("title")..L[":\n---------------------------------------\n|cff89F559Threat Plates|r v8.4 introduced a new default look and feel (currently shown). Do you want to switch to this new look and feel?\n\nYou can revert your decision by changing the default look and feel again in the options dialog (under General - Healthbar View - Default Settings).\n\nNote: Some of your custom settings may get overwritten if you switch back and forth."],
+  text = t.Meta("title") .. L[":\n---------------------------------------\n|cff89F559Threat Plates|r v8.4 introduced a new default look and feel (currently shown). Do you want to switch to this new look and feel?\n\nYou can revert your decision by changing the default look and feel again in the options dialog (under General - Healthbar View - Default Settings).\n\nNote: Some of your custom settings may get overwritten if you switch back and forth."],
   button1 = L["Switch"],
   button2 = L["Don't Switch"],
   timeout = 0,
@@ -181,7 +194,7 @@ function TidyPlatesThreat:StartUp()
 
   if not self.db.char.welcome then
     self.db.char.welcome = true
-    local Welcome = L["|cff89f559Welcome to |rTidy Plates: |cff89f559Threat Plates!\nThis is your first time using Threat Plates and you are a(n):\n|r|cff"]..t.HCC[class]..self:SpecName().." "..UnitClass("player").."|r|cff89F559.|r\n"
+    local Welcome = L["|cff89f559Welcome to |r|cff89f559Threat Plates!\nThis is your first time using Threat Plates and you are a(n):\n|r|cff"]..t.HCC[class]..self:SpecName().." "..UnitClass("player").."|r|cff89F559.|r\n"
 
     -- initialize roles for all available specs (level > 10) or set to default (dps/healing)
     for index=1, GetNumSpecializations() do
@@ -228,10 +241,24 @@ function TidyPlatesThreat:StartUp()
     end
   end
 
+  -- Check for other active nameplate addons which may create all kinds of errors and doesn't make
+  -- sense anyway:
   --if TidyPlates and not db.StandalonePopup then
-  if TidyPlates then
-    StaticPopup_Show("TidyPlatesEnabled")
-    db.StandalonePopup = true
+  if IsAddOnLoaded("TidyPlates") then
+    StaticPopup_Show("TidyPlatesEnabled", "TidyPlates")
+    --db.StandalonePopup = true
+  end
+  if IsAddOnLoaded("Kui_Nameplates") then
+    StaticPopup_Show("IncompatibleAddon", "KuiNameplates")
+    --db.StandalonePopup = true
+  end
+  if IsAddOnLoaded("ElvUI") then
+    StaticPopup_Show("IncompatibleAddon", "ElvUI Nameplates")
+    --db.StandalonePopup = true
+  end
+  if IsAddOnLoaded("Plater") then
+    StaticPopup_Show("IncompatibleAddon", "Plater Nameplates")
+    --db.StandalonePopup = true
   end
 
   TidyPlatesThreat:ReloadTheme()

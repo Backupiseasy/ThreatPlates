@@ -1,4 +1,10 @@
 ------------------------------------------------------
+8.7.0-Beta1
+------------------------------------------------------
+* Added warning messages at login if other nameplate addons are enabled together with Threat Plates (Kui Nameplates, Plater, ElvUI Nameplates and TidyPlates).
+* Renamed the addon to Threat Plates (instead of Tidy Plates: Threat Plates). Addon directory is still TidyPlates_ThreatPlates though.
+
+------------------------------------------------------
 8.7.0-Alpha6
 ------------------------------------------------------
 * Added an option to change the color of an interrupted castbar. Also, changed the castbar animation for interrupted casts.
