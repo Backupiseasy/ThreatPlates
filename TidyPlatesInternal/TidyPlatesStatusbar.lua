@@ -150,7 +150,7 @@ local function SetShownInterruptOverlay(self, show)
   else
     self.InterruptBorder:Hide()
     self.InterruptOverlay:Hide()
-    self.InterruptShield:SetShown(TidyPlatesThreat.db.profile.settings.castnostop.ShowInterruptShield)
+    self.InterruptShield:Hide()
   end
 end
 

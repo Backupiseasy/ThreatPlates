@@ -23,6 +23,7 @@ local TidyPlatesThreat = TidyPlatesThreat
 local RGB = ThreatPlates.RGB
 local RGB_P = ThreatPlates.RGB_P
 local GetColorByHealthDeficit = ThreatPlates.GetColorByHealthDeficit
+local L = ThreatPlates.L
 
 ---------------------------------------------------------------------------------------------------
 -- Functions for subtext from TidyPlates
@@ -30,6 +31,9 @@ local GetColorByHealthDeficit = ThreatPlates.GetColorByHealthDeficit
 
 local COLOR_ROLE = RGB(255, 255, 255, .7)
 local COLOR_GUILD = RGB(178, 178, 229, .7)
+
+local truncate_k_locale = L["%.1fk"]
+local truncate_m_locale = L["%.1fm"]
 
 local UnitSubtitles = {}
 local ScannerName = "ThreatPlates_Tooltip_Subtext"
@@ -39,9 +43,9 @@ TooltipScanner:SetOwner( WorldFrame, "ANCHOR_NONE" );
 local function Truncate(value)
 	if TidyPlatesThreat.db.profile.text.truncate then
 		if value >= 1e6 then
-			return format('%.1fm', value / 1e6)
+			return format(truncate_m_locale, value / 1e6)
 		elseif value >= 1e4 then
-			return format('%.1fk', value / 1e3)
+			return format(truncate_k_locale, value / 1e3)
 		else
 			return value
 		end
