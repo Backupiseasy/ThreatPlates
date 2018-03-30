@@ -45,7 +45,7 @@ local nameplate, extended, visual			    	-- Temp/Local References
 local unit, unitcache, style, stylename, unitchanged	    			-- Temp/Local References
 local numChildren = -1                                                              -- Cache the current number of plates
 local activetheme = {}                                                              -- Table Placeholder
-local InCombat, HasTarget, HasMouseover = false, false, false					    -- Player State Data
+local InCombat, HasTarget = false, false					    -- Player State Data
 local LastTargetPlate
 local EnableFadeIn = true
 local ShowCastBars = true
@@ -97,7 +97,7 @@ local ShowBlizzardPlate		-- Holder for later
 local UpdateStyle
 
 -- Indicators
-local UpdateIndicator_CustomText, UpdateIndicator_CustomScaleText, UpdateIndicator_Standard, UpdateIndicator_CustomAlpha
+local UpdateIndicator_CustomText, UpdateIndicator_CustomScale, UpdateIndicator_CustomScaleText, UpdateIndicator_Standard, UpdateIndicator_CustomAlpha
 local UpdateIndicator_Level, UpdateIndicator_ThreatGlow, UpdateIndicator_RaidIcon
 local UpdateIndicator_EliteIcon, UpdateIndicator_UnitColor, UpdateIndicator_Name
 local UpdateIndicator_HealthBar, UpdateIndicator_Target
@@ -145,12 +145,6 @@ do
 		-- Poll Loop
     local plate, curChildren
 
-    -- Detect when cursor leaves the mouseover unit
-		if HasMouseover and not UnitExists("mouseover") then
-			HasMouseover = false
-			SetUpdateAll()
-		end
-
 		for plate in pairs(PlatesVisible) do
 			local UpdateMe = UpdateAll or plate.UpdateMe
 			local UpdateHealth = plate.UpdateHealth
@@ -159,8 +153,8 @@ do
 			if UpdateMe or UpdateHealth then
 				if not UpdateMe then
 					OnHealthUpdate(plate)
-				else
-					OnUpdateNameplate(plate)
+        else
+          OnUpdateNameplate(plate)
 				end
 				plate.UpdateMe = false
 				plate.UpdateHealth = false
@@ -185,55 +179,53 @@ do
 	function OnNewNameplate(plate)
     -- Tidy Plates Frame
     --------------------------------
-    plate.TPFrame = CreateFrame("Frame",  "ThreatPlatesFrame" .. numChildren, UIParent)
-    plate.TPFrame:Hide()
-
-    local extended = plate.TPFrame
+    local extended = CreateFrame("Frame",  "ThreatPlatesFrame" .. numChildren, UIParent)
+    extended:Hide()
     extended:EnableMouse(false)
     extended:SetAllPoints(plate)
     extended:SetFrameStrata("BACKGROUND")
+    plate.TPFrame = extended
 
-		-- Add Graphical Elements
-		local visual = {}
+    -- Tidy Plates Frame References
+    local visual = {}
+    extended.visual = visual
+
+    -- Add Graphical Elements
 
     -- Status Bars
     local castbar = Addon:CreateCastbar(extended)
+    local healthbar = Addon:CreateHealthbar(extended)
+    local textFrame = CreateFrame("Frame", nil, extended)
 
     --    extended.FadeOut = extended:CreateAnimationGroup()
---    local anim = extended.FadeOut:CreateAnimation("Alpha")
---    anim:SetOrder(1)
---    --anim:SetFromAlpha(1)
---    anim:SetToAlpha(0)
---    anim:SetDuration(1)
---    anim = extended.FadeOut:CreateAnimation("Scale")
---    anim:SetOrder(2)
---    anim:SetFromScale(1, 1)
---    anim:SetToScale(0.5, 0.5)
---    anim:SetDuration(1)
---    extended.FadeOut:SetScript("OnFinished", function(self)
---      extended:Hide()
---    end)
---
---    extended.FadeIn = extended:CreateAnimationGroup()
---    local anim = extended.FadeIn:CreateAnimation("Alpha")
---    anim:SetOrder(1)
---    anim:SetFromAlpha(0)
---    anim:SetToAlpha(1)
---    anim:SetDuration(1)
---    anim = extended.FadeIn:CreateAnimation("Scale")
---    anim:SetOrder(2)
---    anim:SetFromScale(0, 0)
---    anim:SetToScale(1, 1)
---    anim:SetDuration(1)
---    extended.FadeIn:SetScript("OnFinished", function(self)
---      extended:Show()
---    end)
-
-    --		local healthbar = CreateTidyPlatesInternalStatusbar(extended)
---		healthbar.Backdrop:SetDrawLayer("BORDER",-8)
---    healthbar.Bar:SetDrawLayer("BORDER",-7)
-    local healthbar = Addon:CreateHealthbar(extended)
-		local textFrame = CreateFrame("Frame", nil, extended)
+  --    local anim = extended.FadeOut:CreateAnimation("Alpha")
+  --    anim:SetOrder(1)
+  --    --anim:SetFromAlpha(1)
+  --    anim:SetToAlpha(0)
+  --    anim:SetDuration(1)
+  --    anim = extended.FadeOut:CreateAnimation("Scale")
+  --    anim:SetOrder(2)
+  --    anim:SetFromScale(1, 1)
+  --    anim:SetToScale(0.5, 0.5)
+  --    anim:SetDuration(1)
+  --    extended.FadeOut:SetScript("OnFinished", function(self)
+  --      extended:Hide()
+  --    end)
+  --
+  --    extended.FadeIn = extended:CreateAnimationGroup()
+  --    local anim = extended.FadeIn:CreateAnimation("Alpha")
+  --    anim:SetOrder(1)
+  --    anim:SetFromAlpha(0)
+  --    anim:SetToAlpha(1)
+  --    anim:SetDuration(1)
+  --    anim = extended.FadeIn:CreateAnimation("Scale")
+  --    anim:SetOrder(2)
+  --    anim:SetFromScale(0, 0)
+  --    anim:SetToScale(1, 1)
+  --    anim:SetDuration(1)
+  --    extended.FadeIn:SetScript("OnFinished", function(self)
+  --      extended:Show()
+  --    end)
 
 		textFrame:SetAllPoints()
 
@@ -246,7 +238,6 @@ do
     visual.threatborder = healthbar.ThreatBorder
     visual.healthborder = healthbar.Border
     visual.eliteborder = healthbar.EliteBorder
-    visual.highlight = healthbar:CreateTexture(nil, "ARTWORK") -- required for Headline View
 
     -- Parented to Extended - Middle Frame
     visual.raidicon = textFrame:CreateTexture(nil, "ARTWORK", 5)
@@ -255,7 +246,7 @@ do
     visual.target = textFrame:CreateTexture(nil, "BACKGROUND")
 
 		-- TextFrame
-    visual.name  = textFrame:CreateFontString(nil, "ARTWORK", 0)
+    visual.name = textFrame:CreateFontString(nil, "ARTWORK", 0)
 		visual.name:SetFont("Fonts\\FRIZQT__.TTF", 11)
 		visual.customtext = textFrame:CreateFontString(nil, "ARTWORK", -1)
 		visual.customtext:SetFont("Fonts\\FRIZQT__.TTF", 11)
@@ -269,12 +260,12 @@ do
 		visual.spelltext = castbar.Overlay:CreateFontString(nil, "OVERLAY")
 		visual.spelltext:SetFont("Fonts\\FRIZQT__.TTF", 11)
 
+    visual.Highlight = Addon:Module_Mouseover_Create(extended)
+
     -- Set Base Properties
 		visual.raidicon:SetTexture("Interface\\TargetingFrame\\UI-RaidTargetingIcons")
-    visual.highlight:SetAllPoints(visual.name)
-    visual.highlight:SetBlendMode("ADD")
 
-		--healthbar:SetFrameStrata("BACKGROUND")
+    --healthbar:SetFrameStrata("BACKGROUND")
 		--castbar:SetFrameStrata("BACKGROUND")
 		--textFrame:SetFrameStrata("BACKGROUND")
     --widgetParent:SetFrameStrata("BACKGROUND")
@@ -285,9 +276,6 @@ do
 
     castbar:Hide()
 		castbar:SetStatusBarColor(1,.8,0)
-
-    -- Tidy Plates Frame References
-		extended.visual = visual
 
 		-- Allocate Tables
 		extended.style,
@@ -344,7 +332,7 @@ do
 
 			-- Update Delegates
 			UpdateIndicator_ThreatGlow()
-			UpdateIndicator_CustomAlpha()
+			UpdateIndicator_CustomAlpha(extended, unit)
       UpdateIndicator_CustomScaleText()
 
 			-- Cache the old unit information
@@ -401,8 +389,6 @@ do
 
 		-- Graphics
 		visual.castbar:Hide()
-		visual.highlight:Hide()
-    visual.healthbar.Highlight:Hide()
 
     -- Widgets/Extensions
 		-- This goes here because a user might change widget settings after nameplates have been created
@@ -584,7 +570,7 @@ do
 	function UpdateUnitContext(plate, unitid)
 		UpdateReferences(plate)
 
-		unit.isMouseover = UnitIsUnit("mouseover", unitid)
+		--unit.isMouseover = UnitIsUnit("mouseover", unitid)
 		unit.isTarget = UnitIsUnit("target", unitid)
 		unit.isFocus = UnitIsUnit("focus", unitid)
 
@@ -676,17 +662,6 @@ do
 
 	function UpdateIndicator_Target()
     visual.target:SetShown(unit.isTarget and style.target.show)
-
-		if unit.isMouseover and not unit.isTarget and style.highlight.show then
-      if style.healthbar.show then -- healthbar view
-        visual.healthbar.Highlight:Show()
-      else
-        visual.highlight:Show()
-      end
-    else
-      visual.highlight:Hide()
-      visual.healthbar.Highlight:Hide()
-    end
 	end
 
 	-- UpdateIndicator_RaidIcon
@@ -728,13 +703,15 @@ do
 		end
 	end
 
-
 	-- UpdateIndicator_CustomAlpha: Calls the alpha delegate to get the requested alpha
-	function UpdateIndicator_CustomAlpha(event)
-    extended.requestedAlpha = Addon:SetAlpha(unit) or unit.alpha or 1
-    extended:SetAlpha(extended.requestedAlpha)
+	function UpdateIndicator_CustomAlpha(tp_frame, unit)
+    tp_frame.requestedAlpha = Addon:SetAlpha(unit) or unit.alpha or 1
+    tp_frame:SetAlpha(tp_frame.requestedAlpha)
 	end
 
+  function UpdateIndicator_CustomScale(tp_frame, unit)
+    tp_frame:SetScale(Addon.UIScale * Addon:SetScale(unit))
+  end
 
 	-- UpdateIndicator_CustomScaleText: Updates indicators for custom text and scale
 	function UpdateIndicator_CustomScaleText()
@@ -808,7 +785,7 @@ do
     visual.castbar:SetShownInterruptOverlay(unit.spellIsShielded)
 
 		UpdateIndicator_CustomScaleText()
-		UpdateIndicator_CustomAlpha()
+		UpdateIndicator_CustomAlpha(extended, unit)
 
 		castbar:Show()
 	end
@@ -827,7 +804,7 @@ do
     -- castbar:Hide() -- hiden in castbar's OnUpdateCastbar function
 
 		UpdateIndicator_CustomScaleText()
-		UpdateIndicator_CustomAlpha()
+		UpdateIndicator_CustomAlpha(extended, unit)
 	end
 
 	function OnUpdateCastMidway(plate, unitid)
@@ -935,16 +912,13 @@ do
 	-- Payload: { Name = "unitToken", Type = "string", Nilable = false },
 	function CoreEvents:NAME_PLATE_UNIT_ADDED(unitid)
     -- Handle personal resource bar, currently it's ignored by Threat Plates
-		if not UnitIsUnit("player", unitid) then
-      --local plate = GetNamePlateForUnit(unitid)
-      --plate.UnitFrame:SetShown(TidyPlatesThreat.db.profile.ShowFriendlyBlizzardNameplates and UnitReaction(unitid, "player") > 4)
-      --plate:GetChildren():Hide()
+    if UnitIsUnit("player", unitid) then return end
+      --addon.PlayerNameplate = plate
 
-      OnShowNameplate(GetNamePlateForUnit(unitid), unitid)
-		--else
-			--addon.PlayerNameplate = plate
-			--print ("NAME_PLATE_UNIT_ADDED: player frame")
-		end
+    OnShowNameplate(GetNamePlateForUnit(unitid), unitid)
+    --local plate = GetNamePlateForUnit(unitid)
+    --plate.UnitFrame:SetShown(TidyPlatesThreat.db.profile.ShowFriendlyBlizzardNameplates and UnitReaction(unitid, "player") > 4)
+    --plate:GetChildren():Hide()
 	end
 
   function CoreEvents:UNIT_NAME_UPDATE(unitid)
@@ -1024,12 +998,18 @@ do
 		SetUpdateAll()
 	end
 
-	function CoreEvents:UPDATE_MOUSEOVER_UNIT(...)
-		if UnitExists("mouseover") then
-			HasMouseover = true
-			SetUpdateAll()
-		end
-	end
+--  local frame_mouseover = nil
+	function CoreEvents:UPDATE_MOUSEOVER_UNIT()
+    local plate = GetNamePlateForUnit("mouseover")
+    if plate then
+      local unit = plate.TPFrame.unit
+      unit.isMouseover = true
+
+      Addon:Module_Mouseover_Update(plate.TPFrame)
+      UpdateIndicator_CustomScale(plate.TPFrame, unit)
+      UpdateIndicator_CustomAlpha(plate.TPFrame, unit)
+    end
+  end
 
 	function CoreEvents:UNIT_SPELLCAST_START(unitid)
  		if UnitIsUnit("player", unitid) or not ShowCastBars then return end
@@ -1229,8 +1209,8 @@ do
 
 	local texturegroup = {
     "eliteicon",
-    "skullicon", "highlight", "target", "spellicon",
-    -- threatborder, "castborder", "castnostop",
+    "skullicon", "target", "spellicon",
+    -- "highlight", threatborder, "castborder", "castnostop",
   }
 
   --local showgroup = { "healthborder" }
@@ -1289,6 +1269,7 @@ do
 
       SetTextureGroupObject(object, objectstyle)
     end
+    Addon:Module_Mouseover_Configure(visual.Highlight, style.highlight)
 
     -- Show certain elements, don't change anything else
 --		for index = 1, #showgroup do
@@ -1374,6 +1355,12 @@ local function OnResetWidgets(plate)
 	plate.UpdateMe = true
 end
 
+--function Addon:UpdateNameplate(tp_frame, event)
+--	if event == "Mouseover" then
+--		UpdateIndicator_CustomScale(tp_frame, tp_frame.unit)
+--		UpdateIndicator_CustomAlpha(tp_frame, tp_frame.unit)
+--	end
+--end
 
 function Addon:UIScaleChanged()
   local db = TidyPlatesThreat.db.profile.Scale

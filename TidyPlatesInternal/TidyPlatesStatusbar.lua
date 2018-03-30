@@ -16,7 +16,6 @@ local TidyPlatesThreat = TidyPlatesThreat
 local ART_PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Artwork\\"
 local EMPTY_TEXTURE = ART_PATH .. "Empty"
 
-local OFFSET_HIGHLIGHT = 1
 local OFFSET_THREAT= 7.5
 
 local ELITE_BACKDROP = {
@@ -100,24 +99,12 @@ function Addon:CreateHealthbar(parent)
 	local frame = CreateFrame("StatusBar", nil, parent)
   frame.Border = CreateFrame("Frame", nil, frame)
   frame.EliteBorder = CreateFrame("Frame", nil, frame)
-  frame.Highlight = CreateFrame("Frame", nil, frame)
-  frame.HighlightTexture =  frame.Highlight:CreateTexture(nil, "ARTWORK", 0)
   frame.ThreatBorder = CreateFrame("Frame", nil, frame)
 
   frame:SetFrameLevel(parent:GetFrameLevel())
   frame.Border:SetFrameLevel(frame:GetFrameLevel())
   frame.EliteBorder:SetFrameLevel(frame:GetFrameLevel() + 1)
   frame.ThreatBorder:SetFrameLevel(frame:GetFrameLevel())
-  frame.Highlight:SetFrameLevel(frame:GetFrameLevel() + 1)
-
-  frame.Highlight:SetPoint("TOPLEFT", frame, "TOPLEFT", - OFFSET_HIGHLIGHT, OFFSET_HIGHLIGHT)
-  frame.Highlight:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", OFFSET_HIGHLIGHT, - OFFSET_HIGHLIGHT)
-  frame.Highlight:SetBackdrop({
-    edgeFile = ART_PATH .. "TP_WhiteSquare",
-    edgeSize = 1,
-    --insets = { left = 0, right = 0, top = 0, bottom = 0 },
-  })
-  frame.Highlight:SetBackdropBorderColor(1, 1, 1, 1)
 
   frame.ThreatBorder:SetPoint("TOPLEFT", frame, "TOPLEFT", - OFFSET_THREAT, OFFSET_THREAT)
   frame.ThreatBorder:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", OFFSET_THREAT, - OFFSET_THREAT)
@@ -127,10 +114,6 @@ function Addon:CreateHealthbar(parent)
     --insets = { left = 0, right = 0, top = 0, bottom = 0 },
   })
   frame.ThreatBorder:SetBackdropBorderColor(0, 0, 0, 0) -- Transparent color as default
-
-  frame.HighlightTexture:SetTexture(ART_PATH .. "TP_HealthBar_Highlight")
-  frame.HighlightTexture:SetBlendMode("ADD")
-  frame.HighlightTexture:SetAllPoints(frame)
 
 	frame.SetAllColors = SetAllColorsNew
   frame.SetTexCoord = function() end

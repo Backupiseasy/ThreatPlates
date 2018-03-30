@@ -545,6 +545,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
       b = 1,
       a = 1,
       ModeHPBar = false,
+      ModeNames = false,
       HPBarColor = RGB(255, 0, 255), -- Magenta / Fuchsia
     },
     threatWidget = {

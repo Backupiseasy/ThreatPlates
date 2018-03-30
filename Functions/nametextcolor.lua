@@ -31,7 +31,12 @@ function Addon:SetNameColor(unit)
 
   local color
   -- local unique_setting = GetUniqueNameplateSetting(unit)
-  if unit.isMarked then
+
+
+  if unit.isTarget and db.targetWidget.ModeNames then
+    color = db.targetWidget.HPBarColor
+    return color.r, color.g, color.b
+  elseif unit.isMarked then
     if style == "NameOnly-Unique" and unique_setting.useColor then
       if unique_setting.allowMarked then
         color = db.settings.raidicon.hpMarked[unit.raidIcon]

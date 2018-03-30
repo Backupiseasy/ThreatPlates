@@ -1,10 +1,12 @@
 ------------------------------------------------------
-8.7.0-Beta1
+8.7.0-Alpha7
 ------------------------------------------------------
 * Added warning messages at login if other nameplate addons are enabled together with Threat Plates (Kui Nameplates, Plater, ElvUI Nameplates and TidyPlates).
 * Added localization strings for metric prefixes k (kilo) and m (million) (used for health points text).
+* Added an option to color the name of the target unit's nameplate with the same color as the healthbar. Also, moved this option to Widgets - Target Highlight [Comment #733].
 * Renamed the addon to Threat Plates (instead of Tidy Plates: Threat Plates). Addon directory is still TidyPlates_ThreatPlates though.
 * Fixed a bug with the interrupt shield being shown for every cast (even interruptable casts) [Comment #750].
+* Improved performance of handling mouseover events for nameplates.
 
 ------------------------------------------------------
 8.7.0-Alpha6
