@@ -145,7 +145,7 @@ do
 		-- Poll Loop
     local plate, curChildren
 
-		for plate in pairs(PlatesVisible) do
+    for plate in pairs(PlatesVisible) do
 			local UpdateMe = UpdateAll or plate.UpdateMe
 			local UpdateHealth = plate.UpdateHealth
 
@@ -960,6 +960,10 @@ do
       --visual.spellicon:SetPoint(style.spellicon.anchor or "CENTER", extended, style.spellicon.x or 0, style.spellicon.y or 0)
 
       LastTargetPlate = nil
+
+      -- Update mouseover, if the mouse was hovering over the targeted unit
+      extended.unit.isTarget = false
+      CoreEvents:UPDATE_MOUSEOVER_UNIT()
     end
 
     local plate = GetNamePlateForUnit("target")
@@ -975,6 +979,7 @@ do
       --visual.spellicon:SetPoint(style.spellicon.anchor or "CENTER", extended, style.spellicon.x + db.x_target or 0, style.spellicon.y + db.y_target or 0)
 
       LastTargetPlate = plate
+
     end
 
     SetUpdateAll()
@@ -998,10 +1003,11 @@ do
 		SetUpdateAll()
 	end
 
---  local frame_mouseover = nil
 	function CoreEvents:UPDATE_MOUSEOVER_UNIT()
+    if UnitIsUnit("mouseover", "player") then return end
+
     local plate = GetNamePlateForUnit("mouseover")
-    if plate then
+    if plate then -- check for TPFrame to prevent accessing the personal resource bar
       local unit = plate.TPFrame.unit
       unit.isMouseover = true
 
@@ -1250,7 +1256,6 @@ do
 		-- Healthbar
 		SetAnchorGroupObject(visual.healthbar, style.healthbar, extended)
 		visual.healthbar:SetStatusBarTexture(style.healthbar.texture or EMPTY_TEXTURE)
-		--visual.healthbar:SetOrientation(style.healthbar.orientation or "HORIZONTAL")
 		visual.healthbar:SetStatusBarBackdrop(style.healthbar.backdrop, style.healthborder.texture, style.healthborder.edgesize, style.healthborder.offset)
 		visual.healthborder:SetShown(style.healthborder.show)
     visual.healthbar:SetEliteBorder(style.eliteborder.texture)
@@ -1258,7 +1263,6 @@ do
     -- Castbar
     SetAnchorGroupObject(visual.castbar, style.castbar, extended)
     visual.castbar:SetStatusBarTexture(style.castbar.texture or EMPTY_TEXTURE)
-    --visual.healthbar:SetOrientation(style.healthbar.orientation or "HORIZONTAL")
     visual.castbar:SetStatusBarBackdrop(style.castbar.backdrop, style.castborder.texture, style.castborder.edgesize, style.castborder.offset)
     visual.castborder:SetShown(style.castborder.show)
 

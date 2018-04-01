@@ -22,7 +22,7 @@ local function TransparencySituational(unit)
 	-- Do checks for situational transparency settings:
 	if unit.isMarked and db.toggle.MarkedA then
 		return db.alpha.Marked
-	elseif unit.isMouseover and db.toggle.MouseoverUnitAlpha then
+	elseif unit.isMouseover and not unit.isTarget and db.toggle.MouseoverUnitAlpha then
 		return db.alpha.MouseoverUnit
 	elseif unit.isCasting then
 		local unit_friendly = (unit.reaction == "FRIENDLY")
@@ -37,23 +37,25 @@ local function TransparencySituational(unit)
 end
 
 local function TransparencyGeneral(unit)
-	-- Do checks for situational transparency settings:
-	local tranparency = TransparencySituational(unit)
-	if tranparency then
-		return tranparency
+  -- Target always has priority
+  if not unit.isTarget then
+    -- Do checks for situational transparency settings:
+    local tranparency = TransparencySituational(unit)
+    if tranparency then
+      return tranparency
+    end
   end
 
 	-- Do checks for target settings:
 	local db = TidyPlatesThreat.db.profile.nameplate
-	local target_exists = UnitExists("target")
 
-	local target_alpha
-	if target_exists then
-		if unit.isTarget and db.toggle.TargetA then
-			target_alpha = db.alpha.Target
-		elseif not unit.isTarget and db.toggle.NonTargetA then
-				target_alpha = db.alpha.NonTarget
-		end
+  local target_alpha
+	if UnitExists("target") then
+    if unit.isTarget and db.toggle.TargetA then
+      target_alpha = db.alpha.Target
+    elseif not unit.isTarget and db.toggle.NonTargetA then
+      target_alpha = db.alpha.NonTarget
+    end
 	elseif db.toggle.NoTargetA then
 		target_alpha = db.alpha.NoTarget
 	end

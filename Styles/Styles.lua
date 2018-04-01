@@ -198,21 +198,12 @@ end
 
 -- list traversal is inefficient - convert to hash table
 local function GetUniqueNameplateSetting(unit)
-  local db = TidyPlatesThreat.db.profile
-  local unit_name = unit.name
-
-  for k_c,k_v in pairs(db.uniqueSettings.list) do
-    if k_v == unit_name then
-      local unique_setting = db.uniqueSettings[k_c]
-      if unique_setting.useStyle then
-        return unique_setting
-      else
-        return nil
-      end
+    local unique_setting = TidyPlatesThreat.db.profile.uniqueSettings.map[unit.name]
+    if unique_setting and unique_setting.useStyle then
+      return unique_setting
     end
-  end
 
-  return nil
+    return nil
 end
 
 function Addon:SetStyle(unit)

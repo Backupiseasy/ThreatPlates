@@ -62,14 +62,13 @@ end
 local function UpdateSpecial() -- Need to add a way to update options table.
   local db = TidyPlatesThreat.db.profile
 
-  db.uniqueSettings.list = {};
-  for k_c, k_v in pairs(db.uniqueSettings) do
-    if db.uniqueSettings[k_c].name then
-      if type(db.uniqueSettings[k_c].name) == "string" then
-        db.uniqueSettings.list[k_c] = db.uniqueSettings[k_c].name
-      end
+  db.uniqueSettings.map = {}
+  for i, unique_unit in pairs(db.uniqueSettings) do
+    if unique_unit.name and unique_unit.name ~= "" then
+      db.uniqueSettings.map[unique_unit.name] = unique_unit
     end
   end
+
   t.Update()
 end
 
@@ -1551,6 +1550,7 @@ local function CreateBlizzardSettings()
                   "nameplateOtherTopInset", "nameplateOtherBottomInset", "nameplateLargeTopInset", "nameplateLargeBottomInset",
                   "nameplateMotion", "nameplateMotionSpeed", "nameplateOverlapH", "nameplateOverlapV",
                   "nameplateMaxDistance", "nameplateTargetBehindMaxDistance",
+                  "nameplateGlobalScale" -- Reset it to 1, if it get's somehow corrupted
                 }
                 for k, v in pairs(cvars) do
                   SetCVar(v, GetCVarDefault(v))
@@ -5881,7 +5881,7 @@ function TidyPlatesThreat:ProfChange()
   end
 
   Addon:UIScaleChanged()
-  Addon:SetBaseNamePlateSize()
+  Addon:CallbackWhenOoC(function() Addon:SetBaseNamePlateSize() end, L["Unable to change a setting while in combat."])
 
   TidyPlatesThreat:ReloadTheme()
 end

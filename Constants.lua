@@ -690,7 +690,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
     },
     totemSettings = GetDefaultTotemSettings(),
     uniqueSettings = {
-      list = {},
+      map = {},
       ["**"] = {
         name = "",
         showNameplate = true,

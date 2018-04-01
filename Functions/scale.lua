@@ -22,7 +22,7 @@ local function ScaleSituational(unit)
 	-- Do checks for situational scale settings:
 	if unit.isMarked and db.toggle.MarkedS then
 		return db.scale.Marked
-	elseif unit.isMouseover and db.toggle.MouseoverUnitScale then
+	elseif unit.isMouseover and not unit.isTarget and db.toggle.MouseoverUnitScale then
 		return db.scale.MouseoverUnit
 	elseif unit.isCasting then
 		local unit_friendly = (unit.reaction == "FRIENDLY")
@@ -37,18 +37,20 @@ local function ScaleSituational(unit)
 end
 
 local function ScaleGeneral(unit)
-	-- Do checks for situational scale settings:
-	local scale = ScaleSituational(unit)
-	if scale then
-		return scale
+	-- Target always has priority
+	if not unit.isTarget then
+		-- Do checks for situational scale settings:
+		local scale = ScaleSituational(unit)
+		if scale then
+			return scale
+		end
 	end
 
 	-- Do checks for target settings:
 	local db = TidyPlatesThreat.db.profile.nameplate
-	local target_exists = UnitExists("target")
 
 	local target_scale
-	if target_exists then
+	if UnitExists("target") then
 		if unit.isTarget and db.toggle.TargetS then
 			target_scale = db.scale.Target
 		elseif not unit.isTarget and db.toggle.NonTargetS then
@@ -68,7 +70,6 @@ local function ScaleGeneral(unit)
 		--return (db.scale[unit.TP_DetailedUnitType] or 1) + target_scale - 1
 		return (db.scale[unit.TP_DetailedUnitType] or 1) + target_scale
 	end
-
 
   return db.scale[unit.TP_DetailedUnitType] or 1 -- This should also return for totems.
 end

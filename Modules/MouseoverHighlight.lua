@@ -24,29 +24,34 @@ local function OnUpdateHighlight(tp_frame)
   --if not (UnitExists("mouseover") and UnitIsUnit("mouseover", tp_frame.unit.unitid)) then
   if not UnitIsUnit("mouseover", tp_frame.unit.unitid) then
     tp_frame.unit.isMouseover = false
+    tp_frame.visual.Highlight:Hide()
+
+    Addon.PlatesByUnit[tp_frame.unit.unitid].UpdateMe = true
     -- More general solution, better would be to implement a callback and just update everything
     -- on the old mouseover nameplate that depends on mouseover
     --Addon:UpdateNameplate(tp_frame, "Mouseover")
-    Addon.PlatesByUnit[tp_frame.unit.unitid].UpdateMe = true
-    tp_frame.visual.Highlight:Hide()
   end
 end
 
 function Addon:Module_Mouseover_Update(tp_frame)
-  local frame = tp_frame.visual.Highlight
-  if not tp_frame.unit.isTarget and tp_frame.style.highlight.show then
-    if tp_frame.style.healthbar.show then -- healthbar view
-      frame.Highlight:Show()
-    else
-      frame.NameHighlight:Show()
-    end
-    frame:Show()
-  else
-    frame:Hide()
+  -- Don't show highlight for target units or if it's disabled
+  if tp_frame.unit.isTarget or not tp_frame.style.highlight.show then
+    return
   end
+
+  local frame = tp_frame.visual.Highlight
+  if tp_frame.style.healthbar.show then
+    frame.Highlight:Show()
+  else
+    frame.NameHighlight:Show()
+  end
+
+  frame:Show()
 end
 
+-- Update settings that are global for all nameplates
 function Addon:Module_Mouseover_Configure(frame, style_highlight)
+  -- TODO: Move this to Create as the texture is not changed in Threat Plates
   frame.NameHighlight:SetTexture(style_highlight.texture)
 end
 

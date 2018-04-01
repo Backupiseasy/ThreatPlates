@@ -1,5 +1,5 @@
-local ADDON_NAME, NAMESPACE = ...
-local ThreatPlates = NAMESPACE.ThreatPlates
+local ADDON_NAME, Addon = ...
+local ThreatPlates = Addon.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------
 -- Stuff for handling the database with the SavedVariables of ThreatPlates (ThreatPlatesDB)
@@ -67,15 +67,18 @@ local function GetUnitVisibility(full_unit_type)
 end
 
 local function SetNamePlateClickThrough(friendly, enemy)
-  if InCombatLockdown() then
-    ThreatPlates.Print(L["Nameplate clickthrough cannot be changed while in combat."], true)
-  else
+--  if InCombatLockdown() then
+--    ThreatPlates.Print(L["Nameplate clickthrough cannot be changed while in combat."], true)
+--  else
     local db = TidyPlatesThreat.db.profile
     db.NamePlateFriendlyClickThrough = friendly
     db.NamePlateEnemyClickThrough = enemy
-    C_NamePlate.SetNamePlateFriendlyClickThrough(friendly)
-    C_NamePlate.SetNamePlateEnemyClickThrough(enemy)
-  end
+    Addon:CallbackWhenOoC(function()
+      C_NamePlate.
+      SetNamePlateFriendlyClickThrough(friendly)
+      C_NamePlate.SetNamePlateEnemyClickThrough(enemy)
+    end, L["Nameplate clickthrough cannot be changed while in combat."])
+--  end
 end
 
 ---------------------------------------------------------------------------------------------------

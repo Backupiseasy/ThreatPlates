@@ -12,7 +12,7 @@ local tonumber = tonumber
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local SetNamePlateFriendlyClickThrough = C_NamePlate.SetNamePlateFriendlyClickThrough
 local SetNamePlateEnemyClickThrough = C_NamePlate.SetNamePlateEnemyClickThrough
-local UnitName, IsInInstance = UnitName, IsInInstance
+local UnitName, IsInInstance, InCombatLockdown = UnitName, IsInInstance, InCombatLockdown
 local GetCVar, SetCVar, IsAddOnLoaded = GetCVar, SetCVar, IsAddOnLoaded
 local C_NamePlate_SetNamePlateFriendlySize, C_NamePlate_SetNamePlateEnemySize, Lerp =  C_NamePlate.SetNamePlateFriendlySize, C_NamePlate.SetNamePlateEnemySize, Lerp
 local NamePlateDriverFrame = NamePlateDriverFrame
@@ -24,6 +24,8 @@ local L = t.L
 
 local class = t.Class()
 t.Theme = {}
+
+local task_queue_ooc = {}
 
 ---------------------------------------------------------------------------------------------------
 -- Global configs and funtions
@@ -353,7 +355,15 @@ function TidyPlatesThreat:OnEnable()
   TidyPlatesInternalThemeList[t.THEME_NAME] = t.Theme
 
   self:StartUp()
+
   Addon:SetBaseNamePlateSize()
+  -- Do this after combat ends, not in PLAYER_ENTERING_WORLD as it won't get set if the player is on combat when
+  -- that event fires.
+  Addon:CallbackWhenOoC(function()
+    local db = self.db.profile
+    SetNamePlateFriendlyClickThrough(db.NamePlateFriendlyClickThrough)
+    SetNamePlateEnemyClickThrough(db.NamePlateEnemyClickThrough)
+  end)
 
   -- Get updates for changes regarding: Large Nameplates
   hooksecurefunc("SetCVar", SetCVarHook)
@@ -381,6 +391,17 @@ function TidyPlatesThreat:OnDisable()
   DisableEvents()
 end
 
+function Addon:CallbackWhenOoC(func, msg)
+  if InCombatLockdown() then
+    if msg then
+      t.Print(msg .. L[" The change will be applied after you leave combat."], true)
+    end
+    task_queue_ooc[#task_queue_ooc + 1] = func
+  else
+    func()
+  end
+end
+
 -----------------------------------------------------------------------------------
 -- WoW EVENTS --
 -----------------------------------------------------------------------------------
@@ -397,12 +418,12 @@ function TidyPlatesThreat:PLAYER_ENTERING_WORLD()
   local db = TidyPlatesThreat.db.profile.Automation
 
   local isInstance, instanceType = IsInInstance()
-  --isInstance = isInstance and (instanceType == "party" or instanceType == "raid")
-  --print ("PLAYER_ENTERING_WORLD: nameplateShowFriends = ", GetCVar("nameplateShowFriends"), db.OldNameplateShowFriends)
   if db.HideFriendlyUnitsInInstances then
     if isInstance then
-      db.OldNameplateShowFriends = GetCVar("nameplateShowFriends")
-      SetCVar("nameplateShowFriends", 0)
+      if not db.OldNameplateShowFriends then
+        db.OldNameplateShowFriends = GetCVar("nameplateShowFriends")
+        SetCVar("nameplateShowFriends", 0)
+      end
     elseif db.OldNameplateShowFriends then
       -- reset to previous setting
       SetCVar("nameplateShowFriends", db.OldNameplateShowFriends)
@@ -416,9 +437,11 @@ function TidyPlatesThreat:PLAYER_ENTERING_WORLD()
 
   if db.SmallPlatesInInstances and NamePlateDriverFrame:IsUsingLargerNamePlateStyle() then
     if isInstance then
-      db.OldNameplateGlobalScale = GetCVar("nameplateGlobalScale")
-      SetCVar("nameplateGlobalScale", 0.4)
-      --NamePlateDriverFrame:SetBaseNamePlateSize(168, 112.5)
+      if not db.OldNameplateGlobalScale then
+        db.OldNameplateGlobalScale = GetCVar("nameplateGlobalScale")
+        SetCVar("nameplateGlobalScale", 0.4)
+        --NamePlateDriverFrame:SetBaseNamePlateSize(168, 112.5)
+      end
     elseif db.OldNameplateGlobalScale then
       -- reset to previous setting
       SetCVar("nameplateGlobalScale", db.OldNameplateGlobalScale)
@@ -476,14 +499,13 @@ end
 -- Syncs addon settings with game settings in case changes weren't possible during startup, reload
 -- or profile reset because character was in combat.
 function TidyPlatesThreat:PLAYER_REGEN_ENABLED()
-  local db = TidyPlatesThreat.db.profile
+  -- Execute functions which will fail when executed while in combat
+  for i = #task_queue_ooc, 1, -1 do -- add -1 so that an empty list does not result in a Lua error
+    task_queue_ooc[i]()
+    task_queue_ooc[i] = nil
+  end
 
-  -- Do this after combat ends, not in PLAYER_ENTERING_WORLD as it won't get set if the player is on combat when
-  -- that event fires.
-  SetNamePlateFriendlyClickThrough(db.NamePlateFriendlyClickThrough)
-  SetNamePlateEnemyClickThrough(db.NamePlateEnemyClickThrough)
-
-  db = TidyPlatesThreat.db.profile.threat
+  local db = TidyPlatesThreat.db.profile.threat
   -- Required for threat/aggro detection
   if db.ON and (GetCVar("threatWarning") ~= 3) then
     SetCVar("threatWarning", 3)

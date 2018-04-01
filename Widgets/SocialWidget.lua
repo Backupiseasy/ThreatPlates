@@ -205,6 +205,7 @@ local function UpdateWidgetFrame(frame, unit)
       --icon:SetPoint(friend_icon_anchor, frame:GetParent(), friend_icon_anchor_relative, x, y)
       icon:SetPoint("CENTER", frame:GetParent(), x, y)
       icon:SetTexture(friend_texture)
+      icon:Show()
     else
       icon:Hide()
     end
@@ -222,6 +223,7 @@ local function UpdateWidgetFrame(frame, unit)
       --icon:SetPoint(faction_icon_anchor, frame:GetParent().visual.healthbar, faction_icon_anchor_relative, x, y)
       icon:SetPoint("CENTER", frame:GetParent(), x, y)
       icon:SetTexture(faction_texture)
+      icon:Show()
     else
       icon:Hide()
     end
