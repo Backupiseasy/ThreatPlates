@@ -1,4 +1,9 @@
 ------------------------------------------------------
+8.6.5 (Standalone, TidyPlates is no longer required)
+------------------------------------------------------
+* Fixed a bug with the icon for friends and guild members not shown if the faction icon was also enabled [#Comment 759].
+
+------------------------------------------------------
 8.6.4 (Standalone, TidyPlates is no longer required)
 ------------------------------------------------------
 * Fixed a bug with quest widget that did not show any quest indicators when the console variable "showQuestTrackingTooltips" was disabled [Issue #152, Comment #656].
