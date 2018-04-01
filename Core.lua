@@ -415,8 +415,12 @@ function TidyPlatesThreat:PLAYER_ENTERING_WORLD()
   -- Sync internal settings with Blizzard CVars
   SetCVar("ShowClassColorInNameplate", 1)
 
-  local db = TidyPlatesThreat.db.profile.Automation
+  local db = self.db.profile.questWidget
+  if db.ON or db.ShowInHeadlineView then
+    SetCVar("showQuestTrackingTooltips", 1)
+  end
 
+  local db = self.db.profile.Automation
   local isInstance, instanceType = IsInInstance()
   if db.HideFriendlyUnitsInInstances then
     if isInstance then
@@ -473,7 +477,6 @@ function TidyPlatesThreat:PLAYER_ENTERING_WORLD()
 --    NamePlateDriverFrame:UpdateNamePlateOptions()
 --    db.OldLargerNamePlateStyle = nil
 --  end
-
 end
 
 --function TidyPlatesThreat:PLAYER_LEAVING_WORLD()

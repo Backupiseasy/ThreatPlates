@@ -63,6 +63,16 @@
 * Removed the restriction that the threat system configuration can only be changed outside of arenas and battlegrounds [E-Mail].
 
 ------------------------------------------------------
+8.6.5 (Standalone, TidyPlates is no longer required)
+------------------------------------------------------
+* Fixed a bug with the icon for friends and guild members not shown if the faction icon was also enabled [#Comment 759].
+
+------------------------------------------------------
+8.6.4 (Standalone, TidyPlates is no longer required)
+------------------------------------------------------
+* Fixed a bug with quest widget that did not show any quest indicators when the console variable "showQuestTrackingTooltips" was disabled [Issue #152, Comment #656].
+
+------------------------------------------------------
 8.6.3 (Standalone, TidyPlates is no longer required)
 ------------------------------------------------------
 * Fixed a bug where the overlay for non-interruptible casts was shown even for interruptible casts when entering combat for units that were casting at that moment [E-mail message].

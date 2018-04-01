@@ -388,12 +388,13 @@ local function GetColorAlphaEntry(pos, setting, disabled_func)
   }
 end
 
-local function GetEnableEntry(entry_name, description, widget_info, enable_hv)
+local function GetEnableEntry(entry_name, description, widget_info, enable_hv, func_set)
   local entry = {
     name = entry_name,
     order = 5,
     type = "group",
     inline = true,
+    set = func_set,
     args = {
       Header = {
         name = description,
@@ -432,7 +433,7 @@ local function GetEnableEntry(entry_name, description, widget_info, enable_hv)
         width = "double",
         arg = { widget_info, "ShowInHeadlineView" },
     }
-  end
+    end
 
   return entry
 end
@@ -989,7 +990,13 @@ local function QuestWidgetOptions()
     order = 90,
     type = "group",
     args = {
-      Enable = GetEnableEntry(L["Enable Quest Widget"], L["This widget shows a quest icon above unit nameplates or colors the nameplate healthbar of units that are involved with any of your current quests."], "questWidget", true),
+      Enable = GetEnableEntry(L["Enable Quest Widget"], L["This widget shows a quest icon above unit nameplates or colors the nameplate healthbar of units that are involved with any of your current quests."], "questWidget", true,
+        function(info, val)
+          SetValue(info, val)
+          if db.questWidget.ON or db.questWidget.ShowInHeadlineView then
+            SetCVar("showQuestTrackingTooltips", 1)
+          end
+        end),
       Visibility = { type = "group",	order = 10,	name = L["Visibility"], inline = true,
 --        disabled = function() return not db.questWidget.ON end,
         args = {
