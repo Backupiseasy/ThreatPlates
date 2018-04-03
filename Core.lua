@@ -254,7 +254,7 @@ function TidyPlatesThreat:StartUp()
     StaticPopup_Show("IncompatibleAddon", "KuiNameplates")
     --db.StandalonePopup = true
   end
-  if IsAddOnLoaded("ElvUI") then
+  if IsAddOnLoaded("ElvUI") and ElvUI[1].private.nameplates.enable then
     StaticPopup_Show("IncompatibleAddon", "ElvUI Nameplates")
     --db.StandalonePopup = true
   end

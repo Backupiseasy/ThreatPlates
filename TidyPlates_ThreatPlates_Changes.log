@@ -1,4 +1,9 @@
 ------------------------------------------------------
+8.7.0-Beta1
+------------------------------------------------------
+* Fixed a bug with the warning message for ElvUI nameplates which was shown even if ElvUI nameplates were disabled [Issue #169].
+
+------------------------------------------------------
 8.7.0-Alpha7
 ------------------------------------------------------
 * Added warning messages at login if other nameplate addons are enabled together with Threat Plates (Kui Nameplates, Plater, ElvUI Nameplates and TidyPlates).
