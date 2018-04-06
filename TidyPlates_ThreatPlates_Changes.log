@@ -2,6 +2,8 @@
 8.7.0-Beta1
 ------------------------------------------------------
 * Fixed a bug with the warning message for ElvUI nameplates which was shown even if ElvUI nameplates were disabled [Issue #169].
+* Fixed a bug with the castbar configuration mode where the castbar background was flashing white and the castbar target offset was not working at all.
+* Fixed the layering of the spell icon.
 
 ------------------------------------------------------
 8.7.0-Alpha7

@@ -256,7 +256,6 @@ do
 		-- Cast Bar Frame - Highest Frame
 		visual.castborder = castbar.Border
 		visual.spellicon = castbar.Overlay:CreateTexture(nil, "ARTWORK", 7)
-
 		visual.spelltext = castbar.Overlay:CreateFontString(nil, "OVERLAY")
 		visual.spelltext:SetFont("Fonts\\FRIZQT__.TTF", 11)
 
@@ -1299,7 +1298,7 @@ do
     visual.spelltext:ClearAllPoints()
     --visual.spellicon:ClearAllPoints()
 
-    if unit.isTarget then
+    if UnitIsUnit("target", unit.unitid) then
       local db = TidyPlatesThreat.db.profile.settings.castbar
       SetObjectAnchor(visual.castbar, style.castbar.anchor or "CENTER", extended, style.castbar.x + db.x_target or 0, style.castbar.y + db.y_target or 0)
       SetObjectAnchor(visual.spelltext, style.spelltext.anchor or "CENTER", extended, style.spelltext.x + db.x_target or 0, style.spelltext.y + db.y_target or 0)
@@ -1317,9 +1316,10 @@ do
       visual.eliteborder:Hide()
       visual.eliteicon:Hide()
     end
-		if not unit.isBoss then visual.skullicon:Hide() end
 
+		if not unit.isBoss then visual.skullicon:Hide() end
 		if not unit.isTarget then visual.target:Hide() end
+		-- TOODO: does not really work with ForceUpdate() as isMarked is not set there (no call to UpdateUnitCondition)
 		if not unit.isMarked then visual.raidicon:Hide() end
   end
 end
