@@ -4,7 +4,6 @@ local ThreatPlates = Addon.ThreatPlates
 -- Lua APIs
 
 -- WoW APIs
-local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
@@ -28,7 +27,4 @@ function Addon:SetCastbarColor(unit)
 		local color = db.BackgroundColor
 		return c.r, c.g, c.b, c.a, color.r, color.g, color.b, 1 - db.BackgroundOpacity
 	end
-
-	-- With TidyPlates:
-	--return c.r, c.g, c.b, c.a
 end

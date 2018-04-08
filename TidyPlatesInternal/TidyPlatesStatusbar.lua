@@ -163,8 +163,8 @@ function Addon:CreateCastbar(parent)
   -- frame.InterruptBorder:SetFrameLevel(frame:GetFrameLevel())
   -- frame.Overlay:SetFrameLevel(parent:GetFrameLevel() + 1)
 
-  frame.InterruptOverlay =  frame.Overlay:CreateTexture(nil, "BORDER")
-  frame.InterruptShield = frame.Overlay:CreateTexture(nil, "ARTWORK", 0)
+  frame.InterruptOverlay = frame.Overlay:CreateTexture(nil, "BORDER", 0)
+  frame.InterruptShield = frame.Overlay:CreateTexture(nil, "ARTWORK", -8)
 
   frame.InterruptOverlay:SetTexture(ART_PATH .. "Striped_Texture")
   frame.InterruptOverlay:SetAllPoints(frame)
@@ -259,10 +259,10 @@ function Addon:ConfigCastbar()
 
         -- Fix an drawing error where the castbar background is shown white for a few milliseconds when changing
         -- a castbar setting several times in a second (e.g., moving a position slider left/right several times).
-        castbar.SetStatusBarBackdrop = function(self, backdrop_texture, edge_texture, edge_size, offset)
-          SetStatusBarBackdropCastbar(self, backdrop_texture, edge_texture, edge_size, offset)
-          self:SetAllColors(Addon:SetCastbarColor(plate.TPFrame.unit))
-        end
+--        castbar.SetStatusBarBackdrop = function(self, backdrop_texture, edge_texture, edge_size, offset)
+--          SetStatusBarBackdropCastbar(self, backdrop_texture, edge_texture, edge_size, offset)
+--          self:SetAllColors(Addon:SetCastbarColor(plate.TPFrame.unit))
+--        end
 
         castbar._Hide = castbar.Hide
         castbar.Hide = function() end
@@ -279,7 +279,7 @@ function Addon:ConfigCastbar()
   else
     local castbar = ConfigModePlate.TPFrame.visual.castbar
     castbar:SetScript("OnUpdate", OnUpdateCastBar)
-    castbar.SetStatusBarBackdropCastbar = SetStatusBarBackdropCastbar
+    --castbar.SetStatusBarBackdropCastbar = SetStatusBarBackdropCastbar
     castbar.Hide = castbar._Hide
     castbar:Hide()
     EnabledConfigMode = false

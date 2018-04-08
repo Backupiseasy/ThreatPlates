@@ -368,8 +368,8 @@ do
 		unit.alpha = 0
 		unit.isTarget = false
 		unit.isMouseover = false
-    unit.unitid = unitid
-    unit.guid = UnitGUID(unitid)
+    unit.unitid = unitid         -- set in UpdateUnitIdentity
+    unit.guid = UnitGUID(unitid) -- set in UpdateUnitIdentity
     unit.isCasting = false
 
     --extended.unitcache = ClearIndices(extended.unitcache)
@@ -390,15 +390,16 @@ do
 		visual.castbar:Hide()
 
     -- Widgets/Extensions
-		-- This goes here because a user might change widget settings after nameplates have been created
+    -- This goes here because a user might change widget settings after nameplates have been created
+    -- This should be called in OnNewNameplate as it requires not unit, here OnUpdate should be called
 		Addon:OnInitialize(extended, activetheme)
 
     UpdateUnitIdentity(unitid)
     UpdateUnitCondition(plate, unitid)
     CheckNameplateStyle()
-    --UpdateUnitContext(plate, unitid)
-    --ProcessUnitChanges()
-    --OnUpdateCastMidway(plate, unitid)
+    UpdateUnitContext(plate, unitid)
+
+    --OnUpdateNameplate(plate)
 
     if TidyPlatesThreat.db.profile.ShowFriendlyBlizzardNameplates and UnitReaction(unitid, "player") > 4 then
       plate.UnitFrame:Show()
@@ -430,9 +431,9 @@ do
       PlatesByGUID[unit.guid] = nil
     end
 
+    unit.isCasting = false
     visual.castbar:Hide()
-		--visual.castbar:SetScript("OnUpdate", nil)
-		unit.isCasting = false
+    --visual.castbar:SetScript("OnUpdate", nil)
 
 		-- Remove anything from the function queue
 		plate.UpdateMe = false
@@ -542,16 +543,15 @@ do
 	--------------------------------------------------------
 	function UpdateUnitIdentity(unitid)
 		unit.unitid = unitid
+    unit.guid = UnitGUID(unitid)
     unit.name = UnitName(unitid)
-    unit.pvpname = UnitPVPName(unitid)
-    unit.rawName = unit.name  -- gsub(unit.name, " %(%*%)", "")
+    --unit.pvpname = UnitPVPName(unitid)
+    --unit.rawName = unit.name  -- gsub(unit.name, " %(%*%)", "")
 
-		local classification = UnitClassification(unitid)
+    unit.isBoss = UnitLevel(unitid) == -1
 
-		unit.isBoss = UnitLevel(unitid) == -1
-		unit.isDangerous = unit.isBoss
-
-		unit.isElite = EliteReference[classification]
+    local classification = UnitClassification(unitid)
+    unit.isElite = EliteReference[classification]
 		unit.isRare = RareReference[classification]
 		unit.isMini = classification == "minus"
 		--unit.isPet = UnitIsOtherPlayersPet(unitid)
@@ -572,8 +572,6 @@ do
 		--unit.isMouseover = UnitIsUnit("mouseover", unitid)
 		unit.isTarget = UnitIsUnit("target", unitid)
 		unit.isFocus = UnitIsUnit("focus", unitid)
-
-		unit.guid = UnitGUID(unitid)
 
 		UpdateUnitCondition(plate, unitid)	-- This updates a bunch of properties
 
@@ -778,7 +776,7 @@ do
 
 		visual.spelltext:SetText(text)
 		visual.spellicon:SetTexture(texture)
-    visual.spellicon:SetDrawLayer("BACKGROUND", 7)
+    --visual.spellicon:SetDrawLayer("ARTWORK", 7)
 
     castbar:SetAllColors(Addon:SetCastbarColor(unit))
     visual.castbar:SetShownInterruptOverlay(unit.spellIsShielded)
@@ -799,7 +797,7 @@ do
     castbar.IsChanneling = false
     unit.isCasting = false
 
-    --castBar:SetScript("OnUpdate", nil)
+    -- castbar:SetScript("OnUpdate", nil)
     -- castbar:Hide() -- hiden in castbar's OnUpdateCastbar function
 
 		UpdateIndicator_CustomScaleText()
@@ -1007,12 +1005,11 @@ do
 
     local plate = GetNamePlateForUnit("mouseover")
     if plate then -- check for TPFrame to prevent accessing the personal resource bar
-      local unit = plate.TPFrame.unit
-      unit.isMouseover = true
-
-      Addon:Module_Mouseover_Update(plate.TPFrame)
-      UpdateIndicator_CustomScale(plate.TPFrame, unit)
-      UpdateIndicator_CustomAlpha(plate.TPFrame, unit)
+      local frame = plate.TPFrame
+      frame.unit.isMouseover = true
+      Addon:Module_Mouseover_Update(frame)
+      UpdateIndicator_CustomScale(frame, frame.unit)
+      UpdateIndicator_CustomAlpha(frame, frame.unit)
     end
   end
 
@@ -1043,7 +1040,7 @@ do
 		local plate = GetNamePlateForUnit(unitid)
 		if plate then
 			OnStartCasting(plate, unitid, true)
-      plate.TPFrame.visual.castbar:Show()
+      --late.TPFrame.visual.castbar:Show()
 		end
 	end
 
@@ -1190,16 +1187,16 @@ do
 	end
 
 	-- SetBarGroupObject
-	local function SetBarGroupObject(object, objectstyle, anchorTo)
-		if objectstyle then
-			SetAnchorGroupObject(object, objectstyle, anchorTo)
-			SetObjectBartexture(object, objectstyle.texture or EMPTY_TEXTURE, objectstyle.orientation or "HORIZONTAL")
-			if objectstyle.backdrop then
-				object:SetBackdropTexture(objectstyle.backdrop)
-			end
-			object:SetTexCoord(objectstyle.left, objectstyle.right, objectstyle.top, objectstyle.bottom)
-		end
-	end
+--	local function SetBarGroupObject(object, objectstyle, anchorTo)
+--		if objectstyle then
+--			SetAnchorGroupObject(object, objectstyle, anchorTo)
+--			SetObjectBartexture(object, objectstyle.texture or EMPTY_TEXTURE, objectstyle.orientation or "HORIZONTAL")
+--			if objectstyle.backdrop then
+--				object:SetBackdropTexture(objectstyle.backdrop)
+--			end
+--			object:SetTexCoord(objectstyle.left, objectstyle.right, objectstyle.top, objectstyle.bottom)
+--		end
+--	end
 
 	-- Style Groups
 	local fontgroup = {"name", "level", "spelltext", "customtext"}
@@ -1210,11 +1207,10 @@ do
     -- "threatborder", "castborder", "castnostop",
   }
 
-	local bargroup = { } --"castbar" }
+	--local bargroup = { } --"castbar" }
 
 	local texturegroup = {
-    "eliteicon",
-    "skullicon", "target", "spellicon",
+    "eliteicon", "skullicon", "target", "spellicon",
     -- "highlight", threatborder, "castborder", "castnostop",
   }
 
@@ -1243,14 +1239,14 @@ do
 		end
 
     -- Bars
-		for index = 1, #bargroup do
-			local objectname = bargroup[index]
-			local object, objectstyle = visual[objectname], style[objectname]
-
-			if objectstyle then
-        SetBarGroupObject(object, objectstyle, extended)
-      end
-    end
+--		for index = 1, #bargroup do
+--			local objectname = bargroup[index]
+--			local object, objectstyle = visual[objectname], style[objectname]
+--
+--			if objectstyle then
+--        SetBarGroupObject(object, objectstyle, extended)
+--      end
+--    end
 
 		-- Healthbar
 		SetAnchorGroupObject(visual.healthbar, style.healthbar, extended)
@@ -1264,6 +1260,10 @@ do
     visual.castbar:SetStatusBarTexture(style.castbar.texture or EMPTY_TEXTURE)
     visual.castbar:SetStatusBarBackdrop(style.castbar.backdrop, style.castborder.texture, style.castborder.edgesize, style.castborder.offset)
     visual.castborder:SetShown(style.castborder.show)
+    -- Set castbar color here otherwise it may be shown sometimes with non-initialized backdrop color (white)
+    if visual.castbar:IsShown() then
+      visual.castbar:SetAllColors(Addon:SetCastbarColor(unit))
+    end
 
     -- Texture
     for index = 1, #texturegroup do
