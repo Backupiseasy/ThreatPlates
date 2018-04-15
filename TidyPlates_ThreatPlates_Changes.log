@@ -1,4 +1,11 @@
 ------------------------------------------------------
+8.7.0-Beta2
+------------------------------------------------------
+* Adjusted default positioning of aura widget to compensate for internal frame layout changes.
+* Fixed localization of default fonts for Korean (koKR), Simplified Chinese (zhCN), Traditional Chinese (zhTW), and Russian (ruRU). Default fonts are automatically adjusted so that text in the local alphabet is displayed properly [Issue #171]
+* Updated localization for deDE (German).
+
+------------------------------------------------------
 8.7.0-Beta1
 ------------------------------------------------------
 * Fixed a bug with the warning message for ElvUI nameplates which was shown even if ElvUI nameplates were disabled [Issue #169].

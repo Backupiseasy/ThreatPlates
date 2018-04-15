@@ -18,6 +18,32 @@ local HEX2RGB = ThreatPlates.HEX2RGB
 ---------------------------------------------------------------------------------------------------
 
 local DEFAULT_FONT = "Cabin"
+local DEFAUL_SMALL_FONT = "Arial Narrow"
+
+local locale = GetLocale()
+local MAP_FONT = {
+  koKR = { -- Korrean
+    DefaultFont = "기본 글꼴",      -- "2002"
+    DefaultSmallFont = "기본 글꼴", -- "2002"
+  },
+  zhCN = { -- Simplified Chinese
+    DefaultFont = "默认",      -- "AR ZhongkaiGBK Medium"
+    DefaultSmallFont = "默认", -- "AR ZhongkaiGBK Medium"
+  },
+  zhTW = { -- Traditional Chinese
+    DefaultFont = "傷害數字",       -- "AR Kaiti Medium B5"
+    DefaultSmallFont = "傷害數字",  -- "AR Kaiti Medium B5"
+  },
+  ruRU = { -- Russian
+    DefaultFont = "Friz Quadrata TT", -- "FrizQuadrataCTT"
+    DefaultSmallFont = "Arial Narrow",
+  }
+}
+
+if MAP_FONT[locale] then
+  DEFAULT_FONT = MAP_FONT[locale].DefaultFont
+  DEFAUL_SMALL_FONT = MAP_FONT[locale].DefaultSmallFont
+end
 
 ---------------------------------------------------------------------------------------------------
 -- Global contstants for various stuff
@@ -455,9 +481,9 @@ ThreatPlates.DEFAULT_SETTINGS = {
     AuraWidget = {
       ON = true,
       x = 0,
-      y = 5,
+      y = 16,
       x_hv = 0,
-      y_hv = 5,
+      y_hv = 16,
       scale = 1,
       FrameOrder = "HEALTHBAR_AURAS",
       anchor = "TOP",
@@ -500,7 +526,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
         BarSpacing = 2,
         MaxBars = 10,
         Texture = "Smooth", -- old default: "Aluminium",
-        Font = "Arial Narrow",
+        Font = DEFAUL_SMALL_FONT,
         FontSize = 10,
         FontColor = RGB(255, 255, 255),
         LabelTextIndent = 4,

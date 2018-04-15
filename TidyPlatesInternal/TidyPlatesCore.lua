@@ -182,7 +182,7 @@ do
     local extended = CreateFrame("Frame",  "ThreatPlatesFrame" .. numChildren, UIParent)
     extended:Hide()
     extended:EnableMouse(false)
-    extended:SetAllPoints(plate)
+    --extended:SetAllPoints(plate)
     extended:SetFrameStrata("BACKGROUND")
     plate.TPFrame = extended
 
@@ -1221,11 +1221,17 @@ do
 		local index
 
 		-- Frame
-    --SetAnchorGroupObject(extended, style.frame, nameplate)
     SetObjectAnchor(extended, style.frame.anchor or "CENTER", nameplate, style.frame.x or 0, style.frame.y or 0)
-    extended:SetAllPoints(nameplate)
+    extended:SetSize(style.healthbar.width, style.healthbar.height)
 
-		-- Anchorgroup
+--    if not extended.TestBackground then
+--      extended.TestBackground = extended:CreateTexture(nil, "BACKGROUND")
+--      extended.TestBackground:SetAllPoints(extended)
+--      extended.TestBackground:SetTexture(ThreatPlates.Media:Fetch('statusbar', TidyPlatesThreat.db.profile.AuraWidget.BackgroundTexture))
+--      extended.TestBackground:SetVertexColor(0,0,0,0.5)
+--    end
+
+    -- Anchorgroup
 		for index = 1, #anchorgroup do
 			local objectname = anchorgroup[index]
 			local object, objectstyle = visual[objectname], style[objectname]
