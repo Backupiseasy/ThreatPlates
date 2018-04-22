@@ -384,7 +384,7 @@ do
 		PlatesFading[plate] = EnableFadeIn
 		extended.requestedAlpha = 0
     --extended:Hide()		-- Yes, it seems counterintuitive, but...
-    --extended:SetAlpha(0)
+    extended:SetAlpha(0)
 
 		-- Graphics
 		visual.castbar:Hide()

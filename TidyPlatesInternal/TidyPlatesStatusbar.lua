@@ -127,9 +127,15 @@ end
 
 local function SetShownInterruptOverlay(self, show)
   if show then
-    self.InterruptBorder:Show()
-    self.InterruptOverlay:Show()
-    self.InterruptShield:SetShown(TidyPlatesThreat.db.profile.settings.castnostop.ShowInterruptShield)
+    local db = TidyPlatesThreat.db.profile.settings
+    self.InterruptShield:SetShown(db.castnostop.ShowInterruptShield)
+    if db.castborder.show and db.castnostop.ShowOverlay then
+      self.InterruptBorder:Show()
+      self.InterruptOverlay:Show()
+    else
+      self.InterruptBorder:Hide()
+      self.InterruptOverlay:Hide()
+    end
   else
     self.InterruptBorder:Hide()
     self.InterruptOverlay:Hide()
@@ -243,6 +249,7 @@ function Addon:ConfigCastbar()
 
             self.Border:SetShown(plate.TPFrame.style.castborder.show)
             self:SetShownInterruptOverlay(plate.TPFrame.style.castnostop.show)
+            self.InterruptShield:SetShown(TidyPlatesThreat.db.profile.settings.castnostop.ShowInterruptShield)
             visual.spelltext:SetShown(plate.TPFrame.style.spelltext.show)
             visual.spellicon:SetShown(plate.TPFrame.style.spellicon.show)
             self:Show()
