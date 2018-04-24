@@ -98,18 +98,6 @@ SlashCmdList["TPTPVERBOSE"] = TPTPVERBOSE
 
 -- Command: /tptp
 function TidyPlatesThreat:ChatCommand(input)
---	if input == "test" then
-----    print ("IsUsingLargerNamePlateStyle: ", NamePlateDriverFrame:IsUsingLargerNamePlateStyle())
-----    print ("CVar nameplateGlobalScale: ", GetCVar("nameplateGlobalScale"))
-----    print ("Config OldNameplateGlobalScale: ", TidyPlatesThreat.db.profile.Automation.OldNameplateGlobalScale)
-----		print ("NamePlateFriendlySize: ", C_NamePlate.GetNamePlateFriendlySize())
-----		print ("NamePlateEnemySize:", C_NamePlate.GetNamePlateEnemySize())
-----		print ("NamePlateVerticalScale:", GetCVar("NamePlateVerticalScale"))
-----		print ("NamePlateHorizontalScale:", GetCVar("NamePlateHorizontalScale"))
---		print ("OldNameplateGlobalScale:", TidyPlatesThreat.db.profile.Automation.OldNameplateGlobalScale)
---    return
---	end
-
 	TidyPlatesThreat:OpenOptions()
 
 --	local cmd_list = {}
