@@ -312,7 +312,7 @@ end
 -- Watcher Frame
 local WatcherFrame = CreateFrame("Frame", nil, WorldFrame)
 
--- EVENT: UNIT_POWER: "unitID", "powerType"
+-- EVENT: UNIT_POWER_UPDATE: "unitID", "powerType"
 local function WatcherFrameHandler(frame, event, unitid, powerType)
   -- only watch for target units
   if unitid ~= "target" then return end
@@ -330,7 +330,7 @@ end
 
 local function EnableWatcher()
   WatcherFrame:SetScript("OnEvent", WatcherFrameHandler)
-  WatcherFrame:RegisterEvent("UNIT_POWER")
+  WatcherFrame:RegisterEvent("UNIT_POWER_UPDATE")
   WatcherIsEnabled = true
 end
 

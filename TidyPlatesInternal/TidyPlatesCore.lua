@@ -36,7 +36,7 @@ local UnitIsTapDenied = UnitIsTapDenied
 local GetTime = GetTime
 local UnitChannelInfo, UnitCastingInfo = UnitChannelInfo, UnitCastingInfo
 local UnitPlayerControlled = UnitPlayerControlled
-local GetCVar, Lerp = GetCVar, Lerp
+local GetCVar, Lerp, CombatLogGetCurrentEventInfo = GetCVar, Lerp, CombatLogGetCurrentEventInfo
 
 -- Internal Data
 local Plates, PlatesFading = {}, {}	            	-- Plate Lists
@@ -746,10 +746,10 @@ do
     --if not extended:IsShown() then return end
 
     local castbar = extended.visual.castbar
-    local name, subText, text, texture, startTime, endTime, isTradeSkill, castID, notInterruptible
+    local name, text, texture, startTime, endTime, isTradeSkill, castID, notInterruptible, spellID
 
     if channeled then
-			name, subText, text, texture, startTime, endTime, isTradeSkill, notInterruptible = UnitChannelInfo(unitid)
+			name, text, texture, startTime, endTime, isTradeSkill, notInterruptible, spellID = UnitChannelInfo(unitid)
       castbar.IsChanneling = true
       castbar.IsCasting = false
 
@@ -758,7 +758,7 @@ do
       castbar:SetMinMaxValues(0, castbar.MaxValue)
       castbar:SetValue(castbar.Value)
 		else
-			name, subText, text, texture, startTime, endTime, isTradeSkill, castID, notInterruptible = UnitCastingInfo(unitid)
+			name, text, texture, startTime, endTime, isTradeSkill, castID, notInterruptible = UnitCastingInfo(unitid)
       castbar.IsCasting = true
       castbar.IsChanneling = false
 
@@ -1054,9 +1054,9 @@ do
 	end
 
   function CoreEvents:COMBAT_LOG_EVENT_UNFILTERED(...)
-    local timeStamp, event, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags  = ...
+		local timeStamp, event, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags = CombatLogGetCurrentEventInfo()
 
-    if (event == "SPELL_INTERRUPT") then
+    if event == "SPELL_INTERRUPT" then
       local plate = PlatesByGUID[destGUID]
 
       if plate then
@@ -1097,6 +1097,7 @@ do
 	CoreEvents.UNIT_SPELLCAST_CHANNEL_UPDATE = UnitSpellcastMidway
 	CoreEvents.UNIT_SPELLCAST_INTERRUPTIBLE = UnitSpellcastMidway
 	CoreEvents.UNIT_SPELLCAST_NOT_INTERRUPTIBLE = UnitSpellcastMidway
+	-- UNIT_SPELLCAST_FAILED, UNIT_SPELLCAST_INTERRUPTED
 
 	CoreEvents.UNIT_LEVEL = UnitConditionChanged
 	--CoreEvents.UNIT_THREAT_SITUATION_UPDATE = UnitConditionChanged -- did not work anyway (no unitid)
