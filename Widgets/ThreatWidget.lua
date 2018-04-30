@@ -1,8 +1,9 @@
+local ADDON_NAME, NAMESPACE = ...
+local ThreatPlates = NAMESPACE.ThreatPlates
+
 -------------------
 -- Threat Widget --
 -------------------
-local ADDON_NAME, NAMESPACE = ...
-local ThreatPlates = NAMESPACE.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -10,6 +11,8 @@ local ThreatPlates = NAMESPACE.ThreatPlates
 local UnitIsOffTanked = ThreatPlates.UnitIsOffTanked
 local ShowThreatFeedback = ThreatPlates.ShowThreatFeedback
 local GetUniqueNameplateSetting = ThreatPlates.GetUniqueNameplateSetting
+
+local UnitGUID = UnitGUID
 
 local PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ThreatWidget\\"
 -- local WidgetList = {}
@@ -33,6 +36,9 @@ end
 ---------------------------------------------------------------------------------------------------
 -- Widget Functions for TidyPlates
 ---------------------------------------------------------------------------------------------------
+
+--local function UpdateSettings()
+--end
 
 local function UpdateWidgetFrame(frame, unit)
 	local db = TidyPlatesThreat.db.profile.threat
@@ -72,7 +78,12 @@ local function UpdateWidgetFrame(frame, unit)
         end
       end
 
-      frame.Icon:SetTexture(PATH .. db.art.theme.."\\"..threatLevel)
+      frame.LeftTexture:SetTexture(PATH .. db.art.theme.."\\"..threatLevel)
+      frame.LeftTexture:SetTexCoord(0, 0.25, 0, 1)
+
+      frame.RightTexture:SetTexture(PATH .. db.art.theme.."\\"..threatLevel)
+      frame.RightTexture:SetTexCoord(0.75, 1, 0, 1)
+
       frame:Show()
     else
       frame:_Hide()
@@ -117,10 +128,16 @@ local function CreateWidgetFrame(parent)
 	-- Custom Code III
 	--------------------------------------
   frame:SetFrameLevel(parent:GetFrameLevel() + 7)
-	frame:SetSize(265, 64)
-	frame:SetPoint("CENTER", parent, "CENTER")
-	frame.Icon = frame:CreateTexture(nil, "OVERLAY", 6)
-	frame.Icon:SetAllPoints(frame)
+
+  frame.LeftTexture = frame:CreateTexture(nil, "OVERLAY", 6)
+  frame.LeftTexture:SetPoint("RIGHT", parent.visual.healthbar, "LEFT", -4, 0)
+  frame.LeftTexture:SetSize(64, 64)
+  frame.RightTexture = frame:CreateTexture(nil, "OVERLAY", 6)
+  frame.RightTexture:SetPoint("LEFT", parent.visual.healthbar, "RIGHT", 4, 0)
+  frame.RightTexture:SetSize(64, 64)
+
+--  UpdateSettings(frame)
+--  frame.UpdateConfig = UpdateSettings
 	--------------------------------------
 	-- End Custom Code
 

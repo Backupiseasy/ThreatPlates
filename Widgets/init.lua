@@ -1,8 +1,8 @@
 ---------------------
 -- Widget Handling --
 ---------------------
-local ADDON_NAME, NAMESPACE = ...
-local ThreatPlates = NAMESPACE.ThreatPlates
+local ADDON_NAME, Addon = ...
+local ThreatPlates = Addon.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -15,7 +15,6 @@ local pairs = pairs
 
 -- ThreatPlates APIs
 local DEBUG = ThreatPlates.DEBUG
-local SetStyle = TidyPlatesThreat.SetStyle
 
 ThreatPlatesWidgets = {}
 ThreatPlatesWidgets.list = {}
@@ -61,7 +60,7 @@ end
 
 -- TidyPlatesGlobal_OnInitialize() is called when a nameplate is created or re-shown
 -- activetheme is the table, not just the name
-local function OnInitialize(plate, theme)
+function Addon:OnInitialize(plate, theme)
   if theme then
     local widget_list = plate.widgets
 
@@ -93,12 +92,12 @@ local function OnInitialize(plate, theme)
 end
 
 -- TidyPlatesGlobal_OnUpdate() is called when other data about the unit changes, or is requested by an external controller.
-local function OnUpdate(plate, unit)
+function Addon:OnUpdate(plate, unit)
   -- sometimes unitid is nil, still don't know why, but it creates all kinds of LUA errors as other attributes are nil
   -- also, e.g., unit.type, unit.name, ...
   if not unit.unitid then return end
 
-  local style = SetStyle(unit)
+  local style = Addon:SetStyle(unit)
   ThreatPlates.UpdateExtensions(plate, unit.unitid, style)
 
   local widget_list = plate.widgets
@@ -123,7 +122,8 @@ local function OnUpdate(plate, unit)
         else
           widget:Hide()
         end
-      elseif style == "etotem" or style == "empty" then
+      --elseif style == "etotem" or style == "empty" then
+      elseif style == "empty" then
         widget:Hide()
       elseif show_healthbar_view then -- any other style
         -- context means that widget is only relevant for target (or mouse-over)
@@ -143,10 +143,10 @@ end
 -- TidyPlatesGlobal_OnContextUpdate() is called when a unit is targeted or moused-over.  (Any time the unitid or GUID changes)
 -- OnContextUpdate is always followed up by a call to OnUpdate
 -- OnContextUpdate must only do something when there is something unit-dependent to display?
-local function OnContextUpdate(plate, unit)
+function Addon:OnContextUpdate(plate, unit)
   if not unit.unitid then return end
 
-  local style = SetStyle(unit)
+  local style = Addon:SetStyle(unit)
 
   local widget_list = plate.widgets
   for name,v in pairs(ThreatPlatesWidgets.list) do
@@ -168,7 +168,8 @@ local function OnContextUpdate(plate, unit)
         else
           widget:Hide()
         end
-      elseif style == "etotem" or style == "empty" then
+      --elseif style == "etotem" or style == "empty" then
+      elseif style == "empty" then
         widget:Hide()
       elseif show_healthbar_view then -- any other style
         widget:UpdateContext(unit)
@@ -208,7 +209,4 @@ end
 ThreatPlatesWidgets.RegisterWidget = RegisterWidget				-- used internally by ThreatPlates widgets
 ThreatPlatesWidgets.UnregisterWidget = UnregisterWidget		-- used internally by ThreatPlates widgets
 
-ThreatPlatesWidgets.OnInitialize = OnInitialize
-ThreatPlatesWidgets.OnUpdate = OnUpdate
-ThreatPlatesWidgets.OnContextUpdate = OnContextUpdate
 ThreatPlatesWidgets.DeleteWidgets = DeleteWidgets

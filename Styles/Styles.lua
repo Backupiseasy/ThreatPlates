@@ -1,5 +1,5 @@
-local ADDON_NAME, NAMESPACE = ...
-local ThreatPlates = NAMESPACE.ThreatPlates
+local ADDON_NAME, Addon = ...
+local ThreatPlates = Addon.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -15,7 +15,7 @@ local IsInInstance = IsInInstance
 local UnitCanAttack = UnitCanAttack
 
 local TidyPlatesThreat = TidyPlatesThreat
-local TOTEMS = ThreatPlates.TOTEMS
+local TOTEMS = Addon.TOTEMS
 local GetUnitVisibility = ThreatPlates.GetUnitVisibility
 -- With TidyPlates:
 --local FixUpdateUnitCondition = ThreatPlates.FixUpdateUnitCondition
@@ -92,23 +92,20 @@ local function GetUnitType(unit)
   local faction = REACTION_MAPPING[unit.reaction]
   local unit_class
 
-  local unit_id, unit_mini, unit_type = unit.unitid, unit.isMini, unit.type
-  local totem_id = TOTEMS[unit.name]
-
   -- not all combinations are possible in the game: Friendly Minus, Neutral Player/Totem/Pet
-  if unit_type == "PLAYER" then
+  if unit.type == "PLAYER" then
     unit_class = "Player"
     unit.TP_DetailedUnitType = faction .. unit_class
-  elseif totem_id then
+  elseif TOTEMS[unit.name] then
     unit_class = "Totem"
     unit.TP_DetailedUnitType = unit_class
-  elseif UnitIsOtherPlayersPet(unit_id) then -- player pets are also considered guardians, so this check has priority
+  elseif UnitIsOtherPlayersPet(unit.unitid) then -- player pets are also considered guardians, so this check has priority
     unit_class = "Pet"
     unit.TP_DetailedUnitType = unit_class
-  elseif UnitPlayerControlled(unit_id) then
+  elseif UnitPlayerControlled(unit.unitid) then
     unit_class = "Guardian"
     unit.TP_DetailedUnitType = unit_class
-  elseif unit_mini then
+  elseif unit.isMini then
     unit_class = "Minus"
     unit.TP_DetailedUnitType = unit_class
   else
@@ -201,24 +198,15 @@ end
 
 -- list traversal is inefficient - convert to hash table
 local function GetUniqueNameplateSetting(unit)
-  local db = TidyPlatesThreat.db.profile
-  local unit_name = unit.name
-
-  for k_c,k_v in pairs(db.uniqueSettings.list) do
-    if k_v == unit_name then
-      local unique_setting = db.uniqueSettings[k_c]
-      if unique_setting.useStyle then
-        return unique_setting
-      else
-        return nil
-      end
+    local unique_setting = TidyPlatesThreat.db.profile.uniqueSettings.map[unit.name]
+    if unique_setting and unique_setting.useStyle then
+      return unique_setting
     end
-  end
 
-  return nil
+    return nil
 end
 
-local function SetStyle(unit)
+function Addon:SetStyle(unit)
   -- sometimes unitid is nil, still don't know why, but it creates all kinds of LUA errors as other attributes are nil
   -- also, e.g., unit.type, unit.name, ...
   --ThreatPlates.DEBUG_PRINT_UNIT(unit)
@@ -250,9 +238,8 @@ local function SetStyle(unit)
       style = (db.HeadlineView.ON and "NameOnly-Unique") or "unique"
     end
   elseif unit_type == "Totem" then
-    local unit_name = unit.name
-    local tS = db.totemSettings[TOTEMS[unit_name]]
-    if tS[1] then
+    local tS = db.totemSettings[TOTEMS[unit.name]]
+    if tS.ShowNameplate then
       -- show healthbar, show headline or show nothing
       -- if db.totemSetting.ShowHeadlineView then
       if db.totemSettings.hideHealthbar then
@@ -292,4 +279,3 @@ ThreatPlates.OnThreatTable = OnThreatTable
 ThreatPlates.ShowThreatFeedback = ShowThreatFeedback
 ThreatPlates.GetThreatStyle = GetThreatStyle
 ThreatPlates.GetUniqueNameplateSetting = GetUniqueNameplateSetting
-TidyPlatesThreat.SetStyle = SetStyle

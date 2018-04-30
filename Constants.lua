@@ -1,5 +1,5 @@
-local ADDON_NAME, NAMESPACE = ...
-local ThreatPlates = NAMESPACE.ThreatPlates
+local ADDON_NAME, Addon = ...
+local ThreatPlates = Addon.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------
 -- Stuff for handling the configuration of Threat Plates - ThreatPlatesDB
@@ -11,7 +11,6 @@ local ThreatPlates = NAMESPACE.ThreatPlates
 local L = ThreatPlates.L
 local RGB = ThreatPlates.RGB
 local RGB_P = ThreatPlates.RGB_P
-local TotemNameBySpellID = ThreatPlates.TotemNameBySpellID
 local HEX2RGB = ThreatPlates.HEX2RGB
 
 ---------------------------------------------------------------------------------------------------
@@ -19,12 +18,42 @@ local HEX2RGB = ThreatPlates.HEX2RGB
 ---------------------------------------------------------------------------------------------------
 
 local DEFAULT_FONT = "Cabin"
+local DEFAUL_SMALL_FONT = "Arial Narrow"
+
+local locale = GetLocale()
+local MAP_FONT = {
+  koKR = { -- Korrean
+    DefaultFont = "기본 글꼴",      -- "2002"
+    DefaultSmallFont = "기본 글꼴", -- "2002"
+  },
+  zhCN = { -- Simplified Chinese
+    DefaultFont = "默认",      -- "AR ZhongkaiGBK Medium"
+    DefaultSmallFont = "默认", -- "AR ZhongkaiGBK Medium"
+  },
+  zhTW = { -- Traditional Chinese
+    DefaultFont = "傷害數字",       -- "AR Kaiti Medium B5"
+    DefaultSmallFont = "傷害數字",  -- "AR Kaiti Medium B5"
+  },
+  ruRU = { -- Russian
+    DefaultFont = "Friz Quadrata TT", -- "FrizQuadrataCTT"
+    DefaultSmallFont = "Arial Narrow",
+  }
+}
+
+if MAP_FONT[locale] then
+  DEFAULT_FONT = MAP_FONT[locale].DefaultFont
+  DEFAUL_SMALL_FONT = MAP_FONT[locale].DefaultSmallFont
+end
 
 ---------------------------------------------------------------------------------------------------
 -- Global contstants for various stuff
 ---------------------------------------------------------------------------------------------------
+Addon.UIScale = 1
 
-ThreatPlates.ADDON_NAME = "Tidy Plates: Threat Plates"
+Addon.TotemInformation = {} -- basic totem information
+Addon.TOTEMS = {} -- mapping table for fast access to totem settings
+
+ThreatPlates.ADDON_NAME = "Threat Plates"
 ThreatPlates.THEME_NAME = "Threat Plates"
 
 ThreatPlates.ANCHOR_POINT = {
@@ -57,11 +86,16 @@ ThreatPlates.FullAlign = {TOPLEFT = "TOPLEFT",TOP = "TOP",TOPRIGHT = "TOPRIGHT",
 ThreatPlates.AlignH = {LEFT = "LEFT", CENTER = "CENTER", RIGHT = "RIGHT"}
 ThreatPlates.AlignV = {BOTTOM = "BOTTOM", CENTER = "CENTER", TOP = "TOP"}
 
+ThreatPlates.AUTOMATION = {
+  NONE = "No Automation",
+  SHOW_COMBAT = "Show during Combat, Hide when Combat ends",
+  HIDE_COMBAT = "Hide when Combat starts, Show when Combat ends",
+}
+
 ----------------------------------------------------------------------------------------------------
 -- Paths
 ---------------------------------------------------------------------------------------------------
 
-ThreatPlates.Art = "Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\"
 ThreatPlates.Widgets = "Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\Widgets\\"
 
 ---------------------------------------------------------------------------------------------------
@@ -143,63 +177,82 @@ ThreatPlates.FRIENDLY_SUBTEXT = {
 -- Totem data - define it one time for the whole addon
 -------------------------------------------------------------------------------
 
-ThreatPlates.TOTEM_DATA = {
+local TOTEM_DATA = {
   -- Totems from Totem Mastery
-  [1]  = {202188, "M1",  "b8d1ff"}, 	-- Resonance Totem
-  [2]  = {210651, "M2",	 "b8d1ff"},		-- Storm Totem
-  [3]  = {210657, "M3",  "b8d1ff"},		-- Ember Totem
-  [4]  = {210660, "M4",  "b8d1ff"},		-- Tailwind Totem
+  [1]  = { SpellID = 202188, ID = "M1", GroupColor = "b8d1ff"}, 	-- Resonance Totem
+  [2]  = { SpellID = 210651, ID = "M2",	GroupColor = "b8d1ff"},		-- Storm Totem
+  [3]  = { SpellID = 210657, ID = "M3", GroupColor = "b8d1ff"},		-- Ember Totem
+  [4]  = { SpellID = 210660, ID = "M4", GroupColor = "b8d1ff"},		-- Tailwind Totem
 
   -- Totems from spezialization
-  [5]  = {98008,  "S1",  "ffb31f"},		-- Spirit Link Totem
-  [6]  = {5394,	  "S2",  "ffb31f"},		-- Healing Stream Totem
-  [7]  = {108280, "S3",  "ffb31f"},		-- Healing Tide Totem
-  [8]  = {160161, "S4",  "ffb31f"}, 	-- Earthquake Totem
-  [9]  = {2484, 	"S5",	 "ffb31f"},  	-- Earthbind Totem (added patch 7.2, TP v8.4.0)
+  [5]  = { SpellID = 98008,  ID = "S1", GroupColor = "ffb31f"},		-- Spirit Link Totem
+  [6]  = { SpellID = 5394,	 ID = "S2", GroupColor = "ffb31f"},		-- Healing Stream Totem
+  [7]  = { SpellID = 108280, ID = "S3", GroupColor = "ffb31f"},		-- Healing Tide Totem
+  [8]  = { SpellID = 160161, ID = "S4", GroupColor = "ffb31f"}, 	-- Earthquake Totem
+  [9]  = { SpellID = 2484, 	 ID = "S5",	GroupColor = "ffb31f"},  	-- Earthbind Totem (added patch 7.2, TP v8.4.0)
 
   -- Lonely fire totem
-  [10] = {192222, "F1",  "ff8f8f"}, 	-- Liquid Magma Totem
+  [10] = { SpellID = 192222, ID = "F1", GroupColor = "ff8f8f"}, 	-- Liquid Magma Totem
 
   -- Totems from talents
-  [11] = {157153, "N1",  "4c9900"},		-- Cloudburst Totem
-  [12] = {51485,  "N2",  "4c9900"},		-- Earthgrab Totem
-  [13] = {192058, "N3",  "4c9900"},		-- Lightning  Surge Totem
-  [14] = {207399, "N4",  "4c9900"},		-- Ancestral Protection Totem
-  [15] = {192077, "N5",  "4c9900"},		-- Wind Rush Totem
-  [16] = {196932, "N6",  "4c9900"},		-- Voodoo Totem
-  [17] = {198838, "N7",  "4c9900"},		-- Earthen Shield Totem
+  [11] = { SpellID = 157153, ID = "N1", GroupColor = "4c9900"},		-- Cloudburst Totem
+  [12] = { SpellID = 51485,  ID = "N2", GroupColor = "4c9900"},		-- Earthgrab Totem
+  [13] = { SpellID = 192058, ID = "N3", GroupColor = "4c9900"},		-- Lightning  Surge Totem
+  [14] = { SpellID = 207399, ID = "N4", GroupColor = "4c9900"},		-- Ancestral Protection Totem
+  [15] = { SpellID = 192077, ID = "N5", GroupColor = "4c9900"},		-- Wind Rush Totem
+  [16] = { SpellID = 196932, ID = "N6", GroupColor = "4c9900"},		-- Voodoo Totem
+  [17] = { SpellID = 198838, ID = "N7", GroupColor = "4c9900"},		-- Earthen Shield Totem
 
   -- Totems from PVP talents
-  [18] = {204331, "P1",  "2b76ff"},	-- Counterstrike Totem
-  [19] = {204330, "P2",  "2b76ff"},	-- Skyfury Totem
-  [20] = {204332, "P3",  "2b76ff"},	-- Windfury Totem
-  [21] = {204336, "P4",  "2b76ff"},	-- Grounding Totem
+  [18] = { SpellID = 204331, ID = "P1", GroupColor = "2b76ff"},	-- Counterstrike Totem
+  [19] = { SpellID = 204330, ID = "P2", GroupColor = "2b76ff"},	-- Skyfury Totem
+  [20] = { SpellID = 204332, ID = "P3", GroupColor = "2b76ff"},	-- Windfury Totem
+  [21] = { SpellID = 204336, ID = "P4", GroupColor = "2b76ff"},	-- Grounding Totem
 }
 
-ThreatPlates.TOTEMS = {}
+function Addon:InitializeTotemInformation()
+  for i, totem_data in ipairs(TOTEM_DATA) do
+    local name, _ = GetSpellInfo(totem_data.SpellID) or UNKNOWNOBJECT, nil
 
-local function GetTotemSettings()
-  local totem_list = ThreatPlates.TOTEMS
+    totem_data.Name = name
+    totem_data.Color = RGB(HEX2RGB(totem_data.GroupColor))
+    totem_data.SortKey = totem_data.ID:sub(1, 1) .. name
+    totem_data.Style = "normal"
+    totem_data.ShowNameplate = true
+    totem_data.ShowHPColor = true
+    totem_data.ShowIcon = true
 
-  local settings = { hideHealthbar = false }
-  for no, totem_data in ipairs(ThreatPlates.TOTEM_DATA) do
-    local totem_spell_id = totem_data[1]
-    local totem_id = totem_data[2]
-    local totem_color = RGB(HEX2RGB(totem_data[3]))
+    Addon.TotemInformation[name] = totem_data
+    Addon.TOTEMS[name] = totem_data.ID
+  end
 
-    totem_list[TotemNameBySpellID(totem_spell_id)] = totem_id
+--  local test_name = "Hochexarch Turalyon"
+--  local id = "P4"
+--  Addon.TotemInformation[test_name] = {
+--    Name = test_name,
+--    SpellID = 204336,
+--    Icon = id,
+--    ID = id,
+--    SortKey = id:sub(1, 1) .. test_name,
+--    Style = "normal",
+--    Color = RGB(HEX2RGB("2b76ff")),
+--    GroupColor = "2b76ff",
+--    ShowNameplate = true,
+--    ShowHPColor = true,
+--    ShowIcon = true,
+--  }
+--  Addon.TOTEMS[test_name] = id
+end
 
-    --	["Reference"] = {allow totem nameplate, allow hp color, r, g, b, show icon, style}
-    settings[totem_id] = {
-      true, -- allow totem nameplate
-      true, -- allow hp color
-      true, -- show icon
-      nil,
-      nil,
-      nil,
-      "normal", -- style
-      color = totem_color, -- color of totem's healtbar
-    }
+local function GetDefaultTotemSettings()
+  Addon:InitializeTotemInformation()
+
+  local settings = {
+    hideHealthbar = false
+  }
+
+  for _, data in pairs(Addon.TotemInformation) do
+    settings[data.ID] = data
   end
 
   return settings
@@ -231,41 +284,10 @@ ThreatPlates.DEFAULT_SETTINGS = {
       [1] = false,
       [2] = false,
     },
-    stances = {
-      ON = false,
-      [0] = false, -- No Stance
-      [1] = false, -- Battle Stance
-      [2] = true, -- Defensive Stance
-      [3] = false -- Berserker Stance
-    },
-    shapeshifts = {
-      ON = false,
-      [0] = false, -- Caster Form
-      [1] = true, -- Bear Form
-      [2] = false, -- Cat Form
-      [3] = false, -- Travel Form
-      [4] = false, -- Moonkin Form, Tree of Life
-    },
-    presences = {
-      ON = false,
-      [0] = false, -- No Presence
-      [1] = true, -- Blood
-      [2] = false, -- Frost
-      [3] = false -- Unholy
-    },
-    seals = {
-      ON = false,
-      [0] = false, -- No Aura
-      [1] = true, -- Devotion Aura
-      [2] = false, -- Retribution Aura
-      [3] = false, -- Concentration Aura
-      [4] = false, -- Resistance Aura
-      [5] = false -- Crusader Aura
-    },
   },
   profile = {
     cache = {},
-    OldSetting = true,
+    -- OldSetting = true, - removed in 8.7.0
     verbose = false,
     -- blizzFadeA = { -- removed in 8.5.1
     --   toggle  = true,
@@ -281,6 +303,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
     allowClass = true, -- old default: false,
     friendlyClass = true, -- old default: false,
     friendlyClassIcon = false,
+    HostileClassIcon = true,
     cacheClass = false,
     optionRoleDetectionAutomatic = true, -- old default: false,
     ShowThreatGlowOnAttackedUnitsOnly = true,
@@ -288,6 +311,16 @@ ThreatPlates.DEFAULT_SETTINGS = {
     NamePlateEnemyClickThrough = false,
     NamePlateFriendlyClickThrough = false,
     ShowFriendlyBlizzardNameplates = false,
+    Automation = {
+      FriendlyUnits = "NONE",
+      EnemyUnits = "NONE",
+      SmallPlatesInInstances = false,
+      HideFriendlyUnitsInInstances = false,
+    },
+    Scale = {
+      IgnoreUIScale = true,
+      PixelPerfectUI = false,
+    },
     HeadlineView = {
       ON = false,
       name = {
@@ -360,19 +393,20 @@ ThreatPlates.DEFAULT_SETTINGS = {
       HideFriendlyInCombat = false,
     },
     castbarColor = {
-      toggle = true,
+      -- toggle = true, -- removed in 8.7.0
       r = 1,
       g = 0.56,
       b = 0.06,
       a = 1
     },
     castbarColorShield = {
-      toggle = true,
+      --toggle = true,  -- removed in 8.7.0
       r = 1,
       g = 0,
       b = 0,
       a = 1
     },
+    castbarColorInterrupted = RGB(255, 0, 255, 1),
     aHPbarColor = RGB_P(0, 1, 0),
     bHPbarColor = RGB_P(1, 1, 0),
 --    cHPbarColor = {
@@ -447,9 +481,9 @@ ThreatPlates.DEFAULT_SETTINGS = {
     AuraWidget = {
       ON = true,
       x = 0,
-      y = 5,
+      y = 16,
       x_hv = 0,
-      y_hv = 5,
+      y_hv = 16,
       scale = 1,
       FrameOrder = "HEALTHBAR_AURAS",
       anchor = "TOP",
@@ -492,17 +526,17 @@ ThreatPlates.DEFAULT_SETTINGS = {
         BarSpacing = 2,
         MaxBars = 10,
         Texture = "Smooth", -- old default: "Aluminium",
-        Font = "Arial Narrow",
+        Font = DEFAUL_SMALL_FONT,
         FontSize = 10,
         FontColor = RGB(255, 255, 255),
         LabelTextIndent = 4,
         TimeTextIndent = 4,
         BackgroundTexture = "Smooth",
         BackgroundColor = RGB(0, 0, 0, 0.3),
-        BackgroundBorder = "squareline",
-        BackgroundBorderEdgeSize = 2,
-        BackgroundBorderInset = -4,
-        BackgroundBorderColor = RGB(0, 0, 0, 0.3),
+        -- BackgroundBorder = "ThreatPlatesBorder", -- not used
+        -- BackgroundBorderEdgeSize = 1, -- not used
+        -- BackgroundBorderInset = 1, -- not used
+        -- BackgroundBorderColor = RGB(0, 0, 0, 0.3), -- not used
         ShowIcon = true,
         IconSpacing = 2,
         IconAlignmentLeft = true,
@@ -537,6 +571,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
       b = 1,
       a = 1,
       ModeHPBar = false,
+      ModeNames = false,
       HPBarColor = RGB(255, 0, 255), -- Magenta / Fuchsia
     },
     threatWidget = {
@@ -640,9 +675,9 @@ ThreatPlates.DEFAULT_SETTINGS = {
       BarTexture = "Smooth", -- old default: "Aluminium"
       BackgroundUseForegroundColor = false,
       BackgroundColor = RGB(0, 0, 0, 0.3),
-      BorderTexture = "squareline",
-      BorderEdgeSize = 7,
-      BorderOffset = 2,
+      BorderTexture = "ThreatPlatesBorder",
+      BorderEdgeSize = 1,
+      BorderOffset = 1,
       BorderUseForegroundColor = false,
       BorderUseBackgroundColor = false,
       BorderColor = RGB(255, 255, 255, 1),
@@ -667,9 +702,21 @@ ThreatPlates.DEFAULT_SETTINGS = {
       FontColor = RGB(255, 255, 255),
       -- TODO: add font flags like for custom text
     },
-    totemSettings = GetTotemSettings(),
+    TestWidget = {
+      ON = true,
+      BarWidth = 120,
+      BarHeight = 10,
+      BarTexture = "Smooth",
+      BorderTexture = "TP_Border_1px",
+      BorderBackground = "ThreatPlatesEmpty",
+      EdgeSize = 5,
+      Offset = 5,
+      Inset = 5,
+      Scale = 1,
+    },
+    totemSettings = GetDefaultTotemSettings(),
     uniqueSettings = {
-      list = {},
+      map = {},
       ["**"] = {
         name = "",
         showNameplate = true,
@@ -1416,46 +1463,58 @@ ThreatPlates.DEFAULT_SETTINGS = {
     },
     settings = {
       frame = {
+        x = 0,
         y = 0,
+        width = 110,
+        height = 45,
+        SyncWithHealthbar = true,
       },
       highlight = {
-        texture = "TP_HealthBarHighlight",
+        -- texture = "TP_HealthBarHighlight", -- removed in 8.7.0
+        show = true,
       },
       elitehealthborder = {
-        texture = "TP_HealthBarEliteOverlay",
+        texture = "TP_EliteBorder_Default",
         show = false, -- old default: true
       },
       healthborder = {
-        texture = "TP_HealthBarOverlayThin", -- old default: "TP_HealthBarOverlay",
+        texture = "TP_Border_Thin", -- old default: "TP_HealthBarOverlay",
         backdrop = "",
+        EdgeSize = 1,
+        Offset = 1,
         show = true,
       },
       threatborder = {
         show = true,
       },
       healthbar = {
+        width = 120,
+        height = 10,
         texture = "Smooth", -- old default: "ThreatPlatesBar",
         backdrop = "Smooth", -- old default: "ThreatPlatesEmpty",
         BackgroundUseForegroundColor = false,
         BackgroundOpacity = 0.7, -- old default: 1,
         BackgroundColor = RGB(0, 0, 0),
         ShowAbsorbs = true,
-        AbsorbColor = RGB(0, 255, 255),
+        AbsorbColor = RGB(0, 255, 255, 1),
+        AlwaysFullAbsorb = false,
+        OverlayTexture = true,
+        OverlayColor = RGB(0, 128, 255, 1),
       },
       castnostop = {
-        texture = "TP_CastBarLock",
-        x = 0,
-        y = -15,
         show = true,
         ShowOverlay = true,
+        ShowInterruptShield = false,
       },
       castborder = {
-        texture = "TP_CastBarOverlayThin", -- old default: "TP_CastBarOverlay",
-        x = 0,
-        y = -15,
+        texture = "TP_Castbar_Border_Thin", -- old default: "TP_CastBarOverlay",
+        EdgeSize = 1,
+        Offset = 1,
         show = true,
       },
       castbar = {
+        width = 120,
+        height = 10,
         texture = "Smooth", -- old default: "ThreatPlatesBar",
         backdrop = "Smooth",
         BackgroundUseForegroundColor = false,
@@ -1465,6 +1524,8 @@ ThreatPlates.DEFAULT_SETTINGS = {
         y = -15,
         x_hv = 0,
         y_hv = -15,
+        x_target = 0,
+        y_target = -4,
         show = true,
         ShowInHeadlineView = false,
       },

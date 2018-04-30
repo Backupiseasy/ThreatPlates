@@ -1,16 +1,30 @@
+local ADDON_NAME, NAMESPACE = ...
+local ThreatPlates = NAMESPACE.ThreatPlates
+
 -----------------------
 -- Target Art Widget --
 -----------------------
-local ADDON_NAME, NAMESPACE = ...
-local ThreatPlates = NAMESPACE.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
 local UnitGUID = UnitGUID
 
-local path = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\TargetArtWidget\\"
+local PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\TargetArtWidget\\"
 -- local WidgetList = {}
+
+local BACKDROP = {
+  default = {
+    edgeFile = ThreatPlates.Art .. "TP_WhiteSquare",
+    edgeSize = 1.8,
+    offset = 4,
+  },
+  squarethin = {
+    edgeFile = ThreatPlates.Art .. "TP_WhiteSquare",
+    edgeSize = 1,
+    offset = 3,
+  }
+}
 
 ---------------------------------------------------------------------------------------------------
 -- Threat Plates functions
@@ -37,28 +51,51 @@ local function UpdateSettings(frame)
   local db = TidyPlatesThreat.db.profile.targetWidget
 
   -- probably this should be moved to UpdateWidgetFrame
-  if db.ON then
-    frame.Icon:SetTexture(path..db.theme)
-    frame.Icon:SetVertexColor(db.r, db.g, db.b, db.a)
-		frame.Icon:SetDrawLayer("BACKGROUND", 0)
+  if db.theme == "default" or db.theme == "squarethin" then
+    local backdrop = BACKDROP[db.theme]
 
---    if db.theme == "default" or db.theme == "squarethin" then
---      frame.Icon:SetDrawLayer("ARTWORK", -7)
---    else
---      frame.Icon:SetDrawLayer("ARTWORK", 7)
---    end
+    --  backdrop.edgeSize = TidyPlatesThreat.db.profile.targetWidget.EdgeSize
+    --  backdrop.offset = TidyPlatesThreat.db.profile.targetWidget.Offset
 
-    frame:Show()
-    frame.Icon:Show()
+    local db_hb = TidyPlatesThreat.db.profile.settings.healthbar
+    local offset_x = db_hb.width + 2 * backdrop.offset
+    local offset_y = db_hb.height + 2 * backdrop.offset
+    if frame:GetWidth() ~= offset_x or frame:GetHeight() ~= offset_y  then
+      frame:SetPoint("TOPLEFT", frame:GetParent().visual.healthbar, "TOPLEFT", - backdrop.offset, backdrop.offset)
+      frame:SetPoint("BOTTOMRIGHT", frame:GetParent().visual.healthbar, "BOTTOMRIGHT", backdrop.offset, - backdrop.offset)
+      -- frame:SetSize(offset_x, offset_y)
+    end
+    frame:SetBackdrop({
+      --edgeFile = PATH .. db.theme,
+      edgeFile = backdrop.edgeFile,
+      edgeSize = backdrop.edgeSize,
+      insets = { left = 0, right = 0, top = 0, bottom = 0 }
+    })
+    frame:SetBackdropBorderColor(db.r, db.g, db.b, db.a)
+
+    frame.LeftTexture:Hide()
+    frame.RightTexture:Hide()
   else
-    frame:_Hide()
-    --frame.Icon:Hide()
+    frame.LeftTexture:SetTexture(PATH .. db.theme)
+    frame.LeftTexture:SetTexCoord(0, 0.25, 0, 1)
+    frame.LeftTexture:SetVertexColor(db.r, db.g, db.b, db.a)
+    frame.LeftTexture:Show()
+
+    frame.RightTexture:SetTexture(PATH .. db.theme)
+    frame.RightTexture:SetTexCoord(0.75, 1, 0, 1)
+    frame.RightTexture:SetVertexColor(db.r, db.g, db.b, db.a)
+    frame.RightTexture:Show()
+
+    frame:SetBackdrop(nil)
   end
 end
 
 local function UpdateWidgetFrame(frame, unit)
-  frame:Show()
-  frame.Icon:Show()
+  if unit.TP_Style == "etotem" then
+    frame:_Hide()
+  else
+    frame:Show()
+  end
 end
 
 -- Context
@@ -77,7 +114,6 @@ local function UpdateWidgetContext(frame, unit)
 		UpdateWidgetFrame(frame, unit)
 	else
 		frame:_Hide()
-    --frame.Icon:Hide()
 	end
 	--------------------------------------
 	-- End Custom Code
@@ -98,16 +134,16 @@ local function CreateWidgetFrame(parent)
 
 	-- Custom Code III
 	--------------------------------------
-	-- framelevel of Target Highlight must be the same as visual.target (target highlight of TidyPlates)
-  -- that is: extended.healthbar.textFrame, texture target (BACKGROUND)
-	frame:SetFrameLevel(parent:GetFrameLevel() + 6)
-	frame:SetSize(256, 64)
-	frame:SetPoint("CENTER", parent, "CENTER")
+	--frame:SetPoint("CENTER", parent, "CENTER")
+  frame:SetFrameLevel(parent:GetFrameLevel() + 6)
 
-  --frame.Icon = parent.visual.name:GetParent():CreateTexture(nil, "ARTWORK")
-	frame.Icon = frame:CreateTexture(nil, "BACKGROUND", 0)
-  frame.Icon:SetAllPoints(frame)
-  --frame.Icon:Hide()
+
+	frame.LeftTexture = frame:CreateTexture(nil, "BACKGROUND", 0)
+  frame.LeftTexture:SetPoint("RIGHT", parent, "LEFT")
+  frame.LeftTexture:SetSize(64, 64)
+  frame.RightTexture = frame:CreateTexture(nil, "BACKGROUND", 0)
+  frame.RightTexture:SetPoint("LEFT", parent, "RIGHT")
+  frame.RightTexture:SetSize(64, 64)
 
   UpdateSettings(frame)
   frame.UpdateConfig = UpdateSettings
@@ -118,11 +154,7 @@ local function CreateWidgetFrame(parent)
 	frame.UpdateContext = UpdateWidgetContext
 	frame.Update = UpdateWidgetFrame
 	frame._Hide = frame.Hide
-	-- Have to add frame.Icon:Hide() also here as the frame is no longer the parent of the icon since a fix to widget layering
-	frame.Hide = function()
-		ClearWidgetContext(frame)
-		--frame.Icon:Hide()
-		frame:_Hide()
+	frame.Hide = function() ClearWidgetContext(frame); frame:_Hide()
 	end
 
 	return frame

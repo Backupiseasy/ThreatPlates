@@ -154,8 +154,6 @@ local function CreateArenaWidget(parent)
 
 	frame.Overlay = CreateFrame("frame",nil, frame)
 	frame.Overlay:SetPoint("CENTER", frame, "CENTER")
-	--frame.Overlay:SetFrameStrata(frame:GetFrameStrata())
-	--frame.Overlay:SetFrameLevel(frame:GetFrameLevel() + 1)
 
 	frame.Overlay.Num = frame.Overlay:CreateTexture(nil,"OVERLAY")
 	frame.Overlay.Num:SetAllPoints(frame.Overlay)

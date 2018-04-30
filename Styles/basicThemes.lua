@@ -6,20 +6,40 @@ local EMPTY_TEXTURE = ART_PATH.."Empty"
 
 local function Create(self,name)
   local db = self.db.profile.settings
-  local theme = {}
-  theme = {
-    hitbox = {
-      width = 128,
-      height = 24,
-    },
+  local theme = {
+
     frame = {
       emptyTexture = ThreatPlates.Art.."Empty",
-      width = 124,
-      height = 30,
+      width = db.frame.width,
+      height = db.frame.height,
       x = db.frame.x,
       y = db.frame.y,
       anchor = "CENTER",
     },
+
+    healthbar = {
+      texture = ThreatPlates.Media:Fetch('statusbar', db.healthbar.texture),
+      backdrop = ThreatPlates.Media:Fetch('statusbar', db.healthbar.backdrop, true),
+      width = db.healthbar.width,
+      height = db.healthbar.height,
+      x = 0,
+      y = 0,
+      anchor = "CENTER",
+      show = true,
+    },
+
+    healthborder = {
+      texture = (db.healthborder.show and ThreatPlates.Art .. db.healthborder.texture) or EMPTY_TEXTURE,
+      edgesize = db.healthborder.EdgeSize,
+      offset = db.healthborder.Offset,
+      show = true,
+    },
+
+    eliteborder = {
+      texture = db.elitehealthborder.texture,
+      show = db.elitehealthborder.show,
+    },
+
     threatborder = {
       texture = ThreatPlates.Art.."TP_Threat",
       width = 256,
@@ -29,24 +49,11 @@ local function Create(self,name)
       anchor = "CENTER",
       show = db.threatborder.show,
     },
+
     highlight = {
-      texture = ThreatPlates.Art..db.highlight.texture,
-      width = 256,
-      height = 64,
-      x = 0,
-      y = 0,
-      anchor = "CENTER",
+      show = db.highlight.show,
     },
-    healthborder = {
-      texture = ThreatPlates.Art..db.healthborder.texture,
-      backdrop = ThreatPlates.Art..db.healthborder.backdrop,
-      width = 256,
-      height = 64,
-      x = 0,
-      y = 0,
-      anchor = "CENTER",
-      show = db.healthborder.show,
-    },
+
     eliteicon = {
       texture = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\EliteArtWidget\\"..db.eliteicon.theme,
       width = db.eliteicon.scale,
@@ -57,55 +64,32 @@ local function Create(self,name)
       show = db.eliteicon.show,
     },
 
-    castborder = {
-      texture = (db.castborder.show and ThreatPlates.Art..db.castborder.texture) or EMPTY_TEXTURE,
-      width = 256,
-      height = 64,
-      x = db.castborder.x,
-      y = db.castborder.y,
-      anchor = "CENTER",
-      show = db.castborder.show, -- only checked by TidyPlades after a /reload
-    },
-
-    castnostop = {
-      texture =  (db.castborder.show and ((db.castnostop.ShowOverlay and ThreatPlates.Art.."TP_CastBarLock") or ThreatPlates.Art..db.castborder.texture)) or EMPTY_TEXTURE,
-      width = 256,
-      height = 64,
-      x = db.castnostop.x,
-      y = db.castnostop.y,
-      anchor = "CENTER",
-      show = db.castborder.show, -- only checked by TidyPlades after a /reload
-    },
-
-    healthbar = {
-      texture = ThreatPlates.Media:Fetch('statusbar', db.healthbar.texture),
-      backdrop = ThreatPlates.Media:Fetch('statusbar', db.healthbar.backdrop, true),
-      width = 120,
-      height = 10,
-      x = 0,
-      y = 0,
-      anchor = "CENTER",
-      orientation = "HORIZONTAL",
-    },
-    target = {
-      texture = "",
-      width = 0,
-      height = 0,
-      x = 0,
-      y = 0,
-      anchor = "CENTER",
-      show = false,
-    },
     castbar = {
       texture = ThreatPlates.Media:Fetch('statusbar', db.castbar.texture),
-      backdrop = ThreatPlates.Media:Fetch('statusbar', db.castbar.backdrop, true),
-      width = 120,
-      height = 10,
+      backdrop = (db.castbar.show and ThreatPlates.Media:Fetch('statusbar', db.castbar.backdrop, true)) or EMPTY_TEXTURE,
+      width = db.castbar.width,
+      height = db.castbar.height,
       x = db.castbar.x,
       y = db.castbar.y,
       anchor = "CENTER",
-      orientation = "HORIZONTAL",
+      show = db.castbar.show,
     },
+
+    castborder = {
+      texture = (db.castborder.show and ThreatPlates.Art .. db.castborder.texture) or EMPTY_TEXTURE,
+      edgesize = db.castborder.EdgeSize,
+      offset = db.castborder.Offset,
+      show = true,
+    },
+
+    castnostop = {
+      show = db.castborder.show and db.castnostop.ShowOverlay,
+    },
+
+    target = {
+      show = false,
+    },
+
     name = {
       typeface = ThreatPlates.Media:Fetch('font', db.name.typeface),
       size = db.name.size,

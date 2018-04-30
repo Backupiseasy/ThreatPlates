@@ -1,6 +1,5 @@
-local addonName, addon = ...
-
--- Tidy Plates - SMILE! :-D
+local ADDON_NAME, Addon = ...
+local ThreatPlates = Addon.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------------------------
 -- Variables and References
@@ -10,19 +9,15 @@ TidyPlatesInternal = {}
 
 -- Local References
 local _
-local max = math.max
+local max, tonumber = math.max, tonumber
 local select, pairs, tostring  = select, pairs, tostring 			    -- Local function copy
 local CreateTidyPlatesInternalStatusbar = CreateTidyPlatesInternalStatusbar			    -- Local function copy
 
 -- WoW APIs
 local wipe = wipe
-local WorldFrame, UIParent = WorldFrame, UIParent
+local WorldFrame, UIParent, CreateFrame, GameFontNormal, UNKNOWNOBJECT, INTERRUPTED = WorldFrame, UIParent, CreateFrame, GameFontNormal, UNKNOWNOBJECT, INTERRUPTED
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
-local UnitName = UnitName
-local UnitIsUnit = UnitIsUnit
-local UNKNOWNOBJECT = UNKNOWNOBJECT
-local UnitExists = UnitExists
-local CreateFrame = CreateFrame
+local UnitName, UnitIsUnit, UnitReaction, UnitExists = UnitName, UnitIsUnit, UnitReaction, UnitExists
 local UnitPVPName = UnitPVPName
 local UnitClassification = UnitClassification
 local UnitLevel = UnitLevel
@@ -41,20 +36,30 @@ local UnitIsTapDenied = UnitIsTapDenied
 local GetTime = GetTime
 local UnitChannelInfo, UnitCastingInfo = UnitChannelInfo, UnitCastingInfo
 local UnitPlayerControlled = UnitPlayerControlled
+local GetCVar, Lerp = GetCVar, Lerp
 
 -- Internal Data
-local Plates, PlatesVisible, PlatesFading, GUID = {}, {}, {}, {}	            	-- Plate Lists
-local PlatesByUnit = {}
-local nameplate, extended, visual, carrier, plateid			    	-- Temp/Local References
-local unit, unitcache, style, stylename, unitchanged, threatborder	    			-- Temp/Local References
+local Plates, PlatesFading = {}, {}	            	-- Plate Lists
+local PlatesVisible, PlatesByUnit, PlatesByGUID = {}, {}, {}
+local nameplate, extended, visual			    	-- Temp/Local References
+local unit, unitcache, style, stylename, unitchanged	    			-- Temp/Local References
 local numChildren = -1                                                              -- Cache the current number of plates
 local activetheme = {}                                                              -- Table Placeholder
-local InCombat, HasTarget, HasMouseover = false, false, false					    -- Player State Data
+local InCombat, HasTarget = false, false					    -- Player State Data
+local LastTargetPlate
 local EnableFadeIn = true
 local ShowCastBars = true
 local EMPTY_TEXTURE = "Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\Empty"
 local ResetPlates, UpdateAll = false, false
 local OverrideFonts = false
+
+-- External references to internal data
+Addon.PlatesVisible = PlatesVisible
+Addon.PlatesByUnit = PlatesByUnit
+Addon.PlatesByGUID = PlatesByGUID
+
+-- ThreatPlates APIs
+local TidyPlatesThreat = TidyPlatesThreat
 
 -- Raid Icon Reference
 local RaidIconCoordinate = {
@@ -67,6 +72,10 @@ local RaidIconCoordinate = {
 		["CROSS"] = { x = .5, y = 0.25},
 		["SKULL"] = { x = .75, y = 0.25},
 }
+
+-- Constants
+local CASTBAR_FLASH_DURATION = 1.2
+--local CASTBAR_FLASH_MIN_ALPHA = 0.4
 
 ---------------------------------------------------------------------------------------------------------------------
 -- Core Function Declaration
@@ -88,18 +97,16 @@ local ShowBlizzardPlate		-- Holder for later
 local UpdateStyle
 
 -- Indicators
-local UpdateIndicator_CustomScaleText, UpdateIndicator_Standard, UpdateIndicator_CustomAlpha
+local UpdateIndicator_CustomText, UpdateIndicator_CustomScale, UpdateIndicator_CustomScaleText, UpdateIndicator_Standard, UpdateIndicator_CustomAlpha
 local UpdateIndicator_Level, UpdateIndicator_ThreatGlow, UpdateIndicator_RaidIcon
 local UpdateIndicator_EliteIcon, UpdateIndicator_UnitColor, UpdateIndicator_Name
 local UpdateIndicator_HealthBar, UpdateIndicator_Target
 local OnUpdateCasting, OnStartCasting, OnStopCasting, OnUpdateCastMidway
 
 -- Event Functions
-local OnShowNameplate, OnHideNameplate, OnUpdateNameplate, OnResetNameplate
+local OnNewNameplate, OnShowNameplate, OnHideNameplate, OnUpdateNameplate, OnResetNameplate
 local OnHealthUpdate, UpdateUnitCondition
-local UpdateUnitContext, OnRequestWidgetUpdate, OnRequestDelegateUpdate
-local UpdateUnitIdentity, UnitNameUpdate
-local OnNewNameplate
+local UpdateUnitContext, UpdateUnitIdentity
 
 -- Main Loop
 local OnUpdate
@@ -108,19 +115,18 @@ local ForEachPlate
 -- UpdateReferences
 local function UpdateReferences(plate)
 	nameplate = plate
-	extended = plate.TP_Extended
+	extended = plate.TPFrame
 
-	carrier = plate.TP_Carrier
 	unit = extended.unit
 	unitcache = extended.unitcache
 	visual = extended.visual
 	style = extended.style
-	threatborder = visual.threatborder
 end
 
 ---------------------------------------------------------------------------------------------------------------------
 -- Nameplate Detection & Update Loop
 ---------------------------------------------------------------------------------------------------------------------
+
 do
 	-- Local References
 	local WorldGetNumChildren, WorldGetChildren = WorldFrame.GetNumChildren, WorldFrame.GetChildren
@@ -128,53 +134,40 @@ do
 	-- ForEachPlate
 	function ForEachPlate(functionToRun, ...)
 		for plate in pairs(PlatesVisible) do
-			if plate.TP_Extended.Active then
+			if plate.TPFrame.Active then
 				functionToRun(plate, ...)
 			end
 		end
 	end
 
-        -- OnUpdate; This function is run frequently, on every clock cycle
+  -- OnUpdate; This function is run frequently, on every clock cycle
 	function OnUpdate(self, e)
 		-- Poll Loop
-        local plate, curChildren
+    local plate, curChildren
 
-        -- Detect when cursor leaves the mouseover unit
-		if HasMouseover and not UnitExists("mouseover") then
-			HasMouseover = false
-			SetUpdateAll()
-		end
-
-		for plate in pairs(PlatesVisible) do
+    for plate in pairs(PlatesVisible) do
 			local UpdateMe = UpdateAll or plate.UpdateMe
 			local UpdateHealth = plate.UpdateHealth
-			local carrier = plate.TP_Carrier
-			local extended = plate.TP_Extended
 
 			-- Check for an Update Request
 			if UpdateMe or UpdateHealth then
 				if not UpdateMe then
 					OnHealthUpdate(plate)
-				else
-					OnUpdateNameplate(plate)
+        else
+          OnUpdateNameplate(plate)
 				end
 				plate.UpdateMe = false
 				plate.UpdateHealth = false
+      end
 
-				plate:GetChildren():Hide()
-
-			end
 		-- This would be useful for alpha fades
 		-- But right now it's just going to get set directly
 		-- extended:SetAlpha(extended.requestedAlpha)
-
 		end
 
 		-- Reset Mass-Update Flag
 		UpdateAll = false
 	end
-
-
 end
 
 ---------------------------------------------------------------------------------------------------------------------
@@ -183,33 +176,56 @@ end
 do
 
 	-- ApplyPlateExtesion
-	function OnNewNameplate(plate, plateid)
+	function OnNewNameplate(plate)
     -- Tidy Plates Frame
     --------------------------------
-		local carrier
-		local frameName = "ThreatPlatesCarrier"..numChildren
+    local extended = CreateFrame("Frame",  "ThreatPlatesFrame" .. numChildren, UIParent)
+    extended:Hide()
+    extended:EnableMouse(false)
+    --extended:SetAllPoints(plate)
+    extended:SetFrameStrata("BACKGROUND")
+    plate.TPFrame = extended
 
-		carrier = CreateFrame("Frame", frameName, WorldFrame)
-		local extended = CreateFrame("Frame", nil, carrier)
+    -- Tidy Plates Frame References
+    local visual = {}
+    extended.visual = visual
 
---		carrier:SetFrameStrata("BACKGROUND")
+    -- Add Graphical Elements
 
-    --    carrier:SetFrameLevel(0)
+    -- Status Bars
+    local castbar = Addon:CreateCastbar(extended)
+    local healthbar = Addon:CreateHealthbar(extended)
+    local textFrame = CreateFrame("Frame", nil, extended)
 
-		plate.TP_Carrier = carrier
-		plate.TP_Extended = extended
-
-        -- Add Graphical Elements
-		local visual = {}
-		-- Status Bars
-		local castbar = CreateTidyPlatesInternalStatusbar(extended)
-		castbar.Backdrop:SetDrawLayer("BACKGROUND",-8)
-		castbar.Bar:SetDrawLayer("BACKGROUND",-7)
-		local healthbar = CreateTidyPlatesInternalStatusbar(extended)
-		healthbar.Backdrop:SetDrawLayer("BORDER",-8)
-		healthbar.Bar:SetDrawLayer("BORDER",-7)
-		local textFrame = CreateFrame("Frame", nil, extended)
-		--local widgetParent = CreateFrame("Frame", nil, textFrame)
+    --    extended.FadeOut = extended:CreateAnimationGroup()
+  --    local anim = extended.FadeOut:CreateAnimation("Alpha")
+  --    anim:SetOrder(1)
+  --    --anim:SetFromAlpha(1)
+  --    anim:SetToAlpha(0)
+  --    anim:SetDuration(1)
+  --    anim = extended.FadeOut:CreateAnimation("Scale")
+  --    anim:SetOrder(2)
+  --    anim:SetFromScale(1, 1)
+  --    anim:SetToScale(0.5, 0.5)
+  --    anim:SetDuration(1)
+  --    extended.FadeOut:SetScript("OnFinished", function(self)
+  --      extended:Hide()
+  --    end)
+  --
+  --    extended.FadeIn = extended:CreateAnimationGroup()
+  --    local anim = extended.FadeIn:CreateAnimation("Alpha")
+  --    anim:SetOrder(1)
+  --    anim:SetFromAlpha(0)
+  --    anim:SetToAlpha(1)
+  --    anim:SetDuration(1)
+  --    anim = extended.FadeIn:CreateAnimation("Scale")
+  --    anim:SetOrder(2)
+  --    anim:SetFromScale(0, 0)
+  --    anim:SetToScale(1, 1)
+  --    anim:SetDuration(1)
+  --    extended.FadeIn:SetScript("OnFinished", function(self)
+  --      extended:Show()
+  --    end)
 
 		textFrame:SetAllPoints()
 
@@ -219,56 +235,54 @@ do
     visual.textframe = textFrame
 
 		-- Parented to Health Bar - Lower Frame
-    visual.threatborder = healthbar:CreateTexture(nil, "BORDER", 2)
-    visual.healthborder = healthbar:CreateTexture(nil, "BORDER", 0)
-		visual.highlight = healthbar:CreateTexture(nil, "ARTWORK")
+    visual.threatborder = healthbar.ThreatBorder
+    visual.healthborder = healthbar.Border
+    visual.eliteborder = healthbar.EliteBorder
+
     -- Parented to Extended - Middle Frame
     visual.raidicon = textFrame:CreateTexture(nil, "ARTWORK", 5)
     visual.skullicon = textFrame:CreateTexture(nil, "ARTWORK", 2)
     visual.eliteicon = textFrame:CreateTexture(nil, "ARTWORK", 1)
-    visual.target = textFrame:CreateTexture(nil, "BACKGROUND") -- next visual.highlight -5?
-		-- TextFrame
-    visual.name  = textFrame:CreateFontString(nil, "ARTWORK", 0)
-    visual.customtext = textFrame:CreateFontString(nil, "ARTWORK", -1)
-		visual.level = textFrame:CreateFontString(nil, "ARTWORK", -2)
-		-- Cast Bar Frame - Highest Frame
-    visual.spellicon = castbar:CreateTexture(nil, "BACKGROUND", 7)
-    visual.castnostop = castbar:CreateTexture(nil, "BACKGROUND", 2)
-    visual.castborder = castbar:CreateTexture(nil, "BACKGROUND", 1)
-		visual.spelltext = castbar:CreateFontString(nil, "BACKGROUND")
-		-- Set Base Properties
-		visual.raidicon:SetTexture("Interface\\TargetingFrame\\UI-RaidTargetingIcons")
-		visual.highlight:SetAllPoints(visual.healthborder)
-		visual.highlight:SetBlendMode("ADD")
+    visual.target = textFrame:CreateTexture(nil, "BACKGROUND")
 
-		extended:SetFrameStrata("BACKGROUND")
-		healthbar:SetFrameStrata("BACKGROUND")
-		castbar:SetFrameStrata("BACKGROUND")
-		textFrame:SetFrameStrata("BACKGROUND")
+		-- TextFrame
+    visual.name = textFrame:CreateFontString(nil, "ARTWORK", 0)
+		visual.name:SetFont("Fonts\\FRIZQT__.TTF", 11)
+		visual.customtext = textFrame:CreateFontString(nil, "ARTWORK", -1)
+		visual.customtext:SetFont("Fonts\\FRIZQT__.TTF", 11)
+		visual.level = textFrame:CreateFontString(nil, "ARTWORK", -2)
+		visual.level:SetFont("Fonts\\FRIZQT__.TTF", 11)
+
+		-- Cast Bar Frame - Highest Frame
+		visual.castborder = castbar.Border
+		visual.spellicon = castbar.Overlay:CreateTexture(nil, "ARTWORK", 7)
+		visual.spelltext = castbar.Overlay:CreateFontString(nil, "OVERLAY")
+		visual.spelltext:SetFont("Fonts\\FRIZQT__.TTF", 11)
+
+    visual.Highlight = Addon:Module_Mouseover_Create(extended)
+
+    -- Set Base Properties
+		visual.raidicon:SetTexture("Interface\\TargetingFrame\\UI-RaidTargetingIcons")
+
+    --healthbar:SetFrameStrata("BACKGROUND")
+		--castbar:SetFrameStrata("BACKGROUND")
+		--textFrame:SetFrameStrata("BACKGROUND")
     --widgetParent:SetFrameStrata("BACKGROUND")
 
     castbar:SetFrameLevel(extended:GetFrameLevel() + 4)
     healthbar:SetFrameLevel(extended:GetFrameLevel() + 5)
     textFrame:SetFrameLevel(extended:GetFrameLevel() + 6)
 
-		castbar:Hide()
+    castbar:Hide()
 		castbar:SetStatusBarColor(1,.8,0)
-		carrier:SetSize(16, 16)
-
-    -- Tidy Plates Frame References
-		extended.visual = visual
 
 		-- Allocate Tables
 		extended.style,
 		extended.unit,
 		extended.unitcache,
 		extended.stylecache,
-		extended.widgets
-			= {}, {}, {}, {}, {}
-
+		extended.widgets = {}, {}, {}, {}, {}
 		extended.stylename = ""
-
-		carrier:SetPoint("CENTER", plate, "CENTER")
   end
 end
 
@@ -276,19 +290,13 @@ end
 -- Nameplate Script Handlers
 ---------------------------------------------------------------------------------------------------------------------
 do
-
 	-- UpdateUnitCache
 	local function UpdateUnitCache() for key, value in pairs(unit) do unitcache[key] = value end end
 
 	-- CheckNameplateStyle
 	local function CheckNameplateStyle()
-		if activetheme.SetStyle then				-- If the active theme has a style selection function, run it..
-			stylename = activetheme.SetStyle(unit)
-			extended.style = activetheme[stylename]
-		else 										-- If no style function, use the base table
-			extended.style = activetheme;
-			stylename = tostring(activetheme)
-		end
+    stylename = Addon:SetStyle(unit)
+    extended.style = activetheme[stylename]
 
 		style = extended.style
 
@@ -296,8 +304,7 @@ do
 			UpdateStyle()
 			extended.stylename = stylename
 			unit.style = stylename
-		end
-
+    end
 	end
 
 	-- ProcessUnitChanges
@@ -312,7 +319,7 @@ do
       end
 
 			-- Update Style/Indicators
-			if unitchanged or UpdateAll or (not style)then --
+			if unitchanged or UpdateAll or (not style) then --
 				CheckNameplateStyle()
 				UpdateIndicator_Standard()
 				UpdateIndicator_HealthBar()
@@ -320,12 +327,12 @@ do
 			end
 
 			-- Update Widgets
-			if activetheme.OnUpdate then activetheme.OnUpdate(extended, unit) end
+			Addon:OnUpdate(extended, unit)
 
 			-- Update Delegates
 			UpdateIndicator_ThreatGlow()
-			UpdateIndicator_CustomAlpha()
-			UpdateIndicator_CustomScaleText()
+			UpdateIndicator_CustomAlpha(extended, unit)
+      UpdateIndicator_CustomScaleText()
 
 			-- Cache the old unit information
 			UpdateUnitCache()
@@ -333,8 +340,8 @@ do
 
 --[[
 	local function HideWidgets(plate)
-		if plate.TP_Extended and plate.TP_Extended.widgets then
-			local widgetTable = plate.TP_Extended.widgets
+		if plate.TPFrame and plate.TPFrame.widgets then
+			local widgetTable = plate.TPFrame.widgets
 			for widgetIndex, widget in pairs(widgetTable) do
 				widget:Hide()
 				--widgetTable[widgetIndex] = nil
@@ -350,97 +357,102 @@ do
 
 	-- OnShowNameplate
 	function OnShowNameplate(plate, unitid)
+    UpdateReferences(plate)
 
-		-- or unitid = plate.namePlateUnitToken
-		UpdateReferences(plate)
+    wipe(extended.unit)
+    wipe(extended.unitcache)
+    --extended.unit = {}
+    --extended.unitcache = {}
 
-		carrier:Show()
-
-		PlatesVisible[plate] = unitid
-		PlatesByUnit[unitid] = plate
-
-		unit.frame = extended
+    unit.frame = extended
 		unit.alpha = 0
 		unit.isTarget = false
 		unit.isMouseover = false
-		unit.unitid = plateid
-		extended.unitcache = ClearIndices(extended.unitcache)
+    unit.unitid = unitid         -- set in UpdateUnitIdentity
+    unit.guid = UnitGUID(unitid) -- set in UpdateUnitIdentity
+    unit.isCasting = false
+
+    --extended.unitcache = ClearIndices(extended.unitcache)
 		extended.stylename = ""
 		extended.Active = true
 
-		visual.highlight:Hide()
-
-		wipe(extended.unit)
-		wipe(extended.unitcache)
-
+    PlatesVisible[plate] = unitid
+    PlatesByUnit[unitid] = plate
+    PlatesByGUID[unit.guid] = plate
 
 		-- For Fading In
 		PlatesFading[plate] = EnableFadeIn
 		extended.requestedAlpha = 0
-		--extended.visibleAlpha = 0
-		extended:Hide()		-- Yes, it seems counterintuitive, but...
-		extended:SetAlpha(0)
+    --extended:Hide()		-- Yes, it seems counterintuitive, but...
+    extended:SetAlpha(0)
 
 		-- Graphics
-		unit.isCasting = false
 		visual.castbar:Hide()
-		visual.highlight:Hide()
 
+    -- Widgets/Extensions
+    -- This goes here because a user might change widget settings after nameplates have been created
+    -- This should be called in OnNewNameplate as it requires not unit, here OnUpdate should be called
+		Addon:OnInitialize(extended, activetheme)
 
-		-- Widgets/Extensions
-		-- This goes here because a user might change widget settings after nameplates have been created
-		if activetheme.OnInitialize then activetheme.OnInitialize(extended, activetheme) end
+    UpdateUnitIdentity(unitid)
+    UpdateUnitCondition(plate, unitid)
+    CheckNameplateStyle()
+    UpdateUnitContext(plate, unitid)
 
-		-- Skip the initial data gather and let the second cycle do the work.
+    --OnUpdateNameplate(plate)
+
+    if TidyPlatesThreat.db.profile.ShowFriendlyBlizzardNameplates and UnitReaction(unitid, "player") > 4 then
+      plate.UnitFrame:Show()
+      plate.TPFrame:Hide()
+      --extended.Active = false
+    else
+      plate.UnitFrame:Hide()
+      plate.TPFrame:Show()
+      --extended.Active = true
+      --plate.TPFrame.FadeIn:Play()
+    end
+
+    -- Skip the initial data gather and let the second cycle do the work.
 		plate.UpdateMe = true
-	end
+  end
 
 
 	-- OnHideNameplate
 	function OnHideNameplate(plate, unitid)
-		--plate.TP_Extended:Hide()
-		plate.TP_Carrier:Hide()
-
 		UpdateReferences(plate)
+    extended:Hide()
+    --extended.FadeOut:Play()
 
-		extended.Active = false
+    extended.Active = false
 
 		PlatesVisible[plate] = nil
 		PlatesByUnit[unitid] = nil
+    if unit.guid then -- maybe hide directly after create with unit added?
+      PlatesByGUID[unit.guid] = nil
+    end
 
-		visual.castbar:Hide()
-		visual.castbar:SetScript("OnUpdate", nil)
-		unit.isCasting = false
+    unit.isCasting = false
+    visual.castbar:Hide()
+    --visual.castbar:SetScript("OnUpdate", nil)
 
 		-- Remove anything from the function queue
 		plate.UpdateMe = false
 
-		for widgetname, widget in pairs(extended.widgets) do widget:Hide() end
+		for widgetname, widget in pairs(extended.widgets) do
+      widget:Hide()
+    end
 	end
 
 	-- OnUpdateNameplate
 	function OnUpdateNameplate(plate)
-		-- And stay down!
-		-- plate:GetChildren():Hide()
-
-		-- Gather Information
-		local unitid = PlatesVisible[plate]
-		UpdateReferences(plate)
+    -- Gather Information
+    local unitid = PlatesVisible[plate]
+    UpdateReferences(plate)
 
 		UpdateUnitIdentity(unitid)
 		UpdateUnitContext(plate, unitid)
 		ProcessUnitChanges()
 		OnUpdateCastMidway(plate, unitid)
-
---    if unit.unitid and UnitIsUnit("target", unit.unitid) then
---      visual.castbar:Show()
---      visual.castnostop:Show()
---      visual.castborder:Show()
---      visual.spellicon:SetTexture(GetSpellTexture("Mondfeuer"))
---      visual.spellicon:Show()
---      visual.spelltext:SetText("Moonfire")
---      visual.spelltext:Show()
---    end
 	end
 
 	-- OnHealthUpdate
@@ -452,30 +464,22 @@ do
 
     -- Fix a bug where the overlay for non-interruptible casts was shown even for interruptible casts when entering combat while the unit was already casting
     if unit.isCasting then
-      if unit.spellIsShielded then
-        visual.castnostop:Show()
-        visual.castborder:Hide()
-      else
-        visual.castnostop:Hide()
-        visual.castborder:Show()
-      end
+      visual.castbar:SetShownInterruptOverlay(unit.spellIsShielded)
     end
 
     UpdateIndicator_HealthBar()		-- Just to be on the safe side
   end
 
-
-     -- OnResetNameplate
+  -- OnResetNameplate
 	function OnResetNameplate(plate)
-		local extended = plate.TP_Extended
-		plate.UpdateMe = true
+    plate.UpdateMe = true
+
+    local extended = plate.TPFrame
 		extended.unitcache = ClearIndices(extended.unitcache)
 		extended.stylename = ""
-		local unitid = PlatesVisible[plate]
 
-		OnShowNameplate(plate, unitid)
+    OnShowNameplate(plate, PlatesVisible[plate])
 	end
-
 end
 
 
@@ -538,18 +542,16 @@ do
 	-- (This is essentially static data)
 	--------------------------------------------------------
 	function UpdateUnitIdentity(unitid)
-
 		unit.unitid = unitid
-		unit.name = UnitName(unitid)
-		unit.pvpname = UnitPVPName(unitid)
-		unit.rawName = unit.name  -- gsub(unit.name, " %(%*%)", "")
+    unit.guid = UnitGUID(unitid)
+    unit.name = UnitName(unitid)
+    --unit.pvpname = UnitPVPName(unitid)
+    --unit.rawName = unit.name  -- gsub(unit.name, " %(%*%)", "")
 
-		local classification = UnitClassification(unitid)
+    unit.isBoss = UnitLevel(unitid) == -1
 
-		unit.isBoss = UnitLevel(unitid) == -1
-		unit.isDangerous = unit.isBoss
-
-		unit.isElite = EliteReference[classification]
+    local classification = UnitClassification(unitid)
+    unit.isElite = EliteReference[classification]
 		unit.isRare = RareReference[classification]
 		unit.isMini = classification == "minus"
 		--unit.isPet = UnitIsOtherPlayersPet(unitid)
@@ -560,26 +562,21 @@ do
 		else
 			unit.class = ""
 			unit.type = "NPC"
-		end
+    end
 	end
 
-
-        -- UpdateUnitContext: Updates Target/Mouseover
+  -- UpdateUnitContext: Updates Target/Mouseover
 	function UpdateUnitContext(plate, unitid)
-		local guid
-
 		UpdateReferences(plate)
 
-		unit.isMouseover = UnitIsUnit("mouseover", unitid)
+		--unit.isMouseover = UnitIsUnit("mouseover", unitid)
 		unit.isTarget = UnitIsUnit("target", unitid)
 		unit.isFocus = UnitIsUnit("focus", unitid)
 
-		unit.guid = UnitGUID(unitid)
-
 		UpdateUnitCondition(plate, unitid)	-- This updates a bunch of properties
 
-		if activetheme.OnContextUpdate then activetheme.OnContextUpdate(extended, unit) end
-		if activetheme.OnUpdate then activetheme.OnUpdate(extended, unit) end
+    Addon:OnContextUpdate(extended, unit)
+		Addon:OnUpdate(extended, unit)
 	end
 
 	-- UpdateUnitCondition: High volatility data
@@ -621,25 +618,6 @@ do
 		--unit.platetype = 2 -- trivial mini mob
 
 	end
-
-	-- OnRequestWidgetUpdate: Calls Update on just the Widgets
-	function OnRequestWidgetUpdate(plate)
-		if not IsPlateShown(plate) then return end
-		UpdateReferences(plate)
-		if activetheme.OnContextUpdate then activetheme.OnContextUpdate(extended, unit) end
-		if activetheme.OnUpdate then activetheme.OnUpdate(extended, unit) end
-	end
-
-	-- OnRequestDelegateUpdate: Updates just the delegate function indicators
-	function OnRequestDelegateUpdate(plate)
-			if not IsPlateShown(plate) then return end
-			UpdateReferences(plate)
-			UpdateIndicator_ThreatGlow()
-			UpdateIndicator_CustomAlpha()
-			UpdateIndicator_CustomScaleText()
-	end
-
-
 end		-- End of Nameplate/Unit Events
 
 
@@ -648,7 +626,7 @@ end		-- End of Nameplate/Unit Events
 ---------------------------------------------------------------------------------------------------------------------
 do
 	local color = {}
-	local threatborder, alpha, forcealpha, scale
+	local alpha, forcealpha, scale
 
 
 	-- UpdateIndicator_HealthBar: Updates the value on the health bar
@@ -657,20 +635,11 @@ do
 		visual.healthbar:SetValue(unit.health)
 	end
 
-
-	-- UpdateIndicator_Name:
 	function UpdateIndicator_Name()
 		visual.name:SetText(unit.name)
-		--unit.pvpname
-
-		-- Name Color
-		if activetheme.SetNameColor then
-			visual.name:SetTextColor(activetheme.SetNameColor(unit))
-		else visual.name:SetTextColor(1,1,1,1) end
+    visual.name:SetTextColor(Addon:SetNameColor(unit))
 	end
 
-
-	-- UpdateIndicator_Level:
 	function UpdateIndicator_Level()
 		if unit.isBoss and style.skullicon.show then visual.level:Hide(); visual.skullicon:Show() else visual.skullicon:Hide() end
 
@@ -679,30 +648,18 @@ do
 		visual.level:SetTextColor(unit.levelcolorRed, unit.levelcolorGreen, unit.levelcolorBlue)
 	end
 
-
 	-- UpdateIndicator_ThreatGlow: Updates the aggro glow
 	function UpdateIndicator_ThreatGlow()
-		if not style.threatborder.show then return end
-		threatborder = visual.threatborder
-		if activetheme.SetThreatColor then
+		if not style.threatborder.show then
+      return
+    end
 
-			threatborder:SetVertexColor(activetheme.SetThreatColor(unit) )
-		else
-			if InCombat and unit.reaction ~= "FRIENDLY" and unit.type == "NPC" then
-				local color = style.threatcolor[unit.threatSituation]
-				threatborder:Show()
-				threatborder:SetVertexColor(color.r, color.g, color.b, (color.a or 1))
-			else threatborder:Hide() end
-		end
+    visual.threatborder:SetBackdropBorderColor(Addon:SetThreatColor(unit))
 	end
 
-
-	-- UpdateIndicator_Target
 	function UpdateIndicator_Target()
-		if unit.isTarget and style.target.show then visual.target:Show() else visual.target:Hide() end
-		if unit.isMouseover and not unit.isTarget then visual.highlight:Show() else visual.highlight:Hide() end
+    visual.target:SetShown(unit.isTarget and style.target.show)
 	end
-
 
 	-- UpdateIndicator_RaidIcon
 	function UpdateIndicator_RaidIcon()
@@ -716,25 +673,22 @@ do
 
 	-- UpdateIndicator_EliteIcon: Updates the border overlay art and threat glow to Elite or Non-Elite art
 	function UpdateIndicator_EliteIcon()
-		threatborder = visual.threatborder
-		if unit.isElite and style.eliteicon.show then visual.eliteicon:Show() else visual.eliteicon:Hide() end
+		if unit.isElite and style.eliteicon.show then
+      visual.eliteicon:Show()
+    else
+      visual.eliteicon:Hide()
+    end
 	end
 
 
 	-- UpdateIndicator_UnitColor: Update the health bar coloring, if needed
 	function UpdateIndicator_UnitColor()
 		-- Set Health Bar
-		if activetheme.SetHealthbarColor then
-			visual.healthbar:SetAllColors(activetheme.SetHealthbarColor(unit))
-
-		else visual.healthbar:SetStatusBarColor(unit.red, unit.green, unit.blue) end
+		visual.healthbar:SetAllColors(Addon:SetHealthbarColor(unit))
 
 		-- Name Color
-		if activetheme.SetNameColor then
-			visual.name:SetTextColor(activetheme.SetNameColor(unit))
-		else visual.name:SetTextColor(1,1,1,1) end
+    visual.name:SetTextColor(Addon:SetNameColor(unit))
 	end
-
 
 	-- UpdateIndicator_Standard: Updates Non-Delegate Indicators
 	function UpdateIndicator_Standard()
@@ -746,90 +700,73 @@ do
 		end
 	end
 
-
 	-- UpdateIndicator_CustomAlpha: Calls the alpha delegate to get the requested alpha
-	function UpdateIndicator_CustomAlpha(event)
-		if activetheme.SetAlpha then
-			--local previousAlpha = extended.requestedAlpha
-			extended.requestedAlpha = activetheme.SetAlpha(unit) or previousAlpha or unit.alpha or 1
-		else
-			extended.requestedAlpha = unit.alpha or 1
-		end
-
-		if extended.requestedAlpha > 0 then
-			extended:SetAlpha(extended.requestedAlpha)
-			if nameplate:IsShown() then extended:Show() end
-		else
-			extended:Hide()        -- FRAME HIDE TEST
-		end
+	function UpdateIndicator_CustomAlpha(tp_frame, unit)
+    tp_frame.requestedAlpha = Addon:SetAlpha(unit) or unit.alpha or 1
+    tp_frame:SetAlpha(tp_frame.requestedAlpha)
 	end
 
+  function UpdateIndicator_CustomScale(tp_frame, unit)
+    tp_frame:SetScale(Addon.UIScale * Addon:SetScale(unit))
+  end
 
 	-- UpdateIndicator_CustomScaleText: Updates indicators for custom text and scale
 	function UpdateIndicator_CustomScaleText()
-		threatborder = visual.threatborder
-
 		if unit.health and (extended.requestedAlpha > 0) then
 			-- Scale
-			if activetheme.SetScale then
-				scale = activetheme.SetScale(unit)
-				if scale then extended:SetScale( scale )end
-			end
+      scale = Addon.UIScale * Addon:SetScale(unit)
+      extended:SetScale(scale)
 
 			-- Set Special-Case Regions
 			if style.customtext.show then
-				if activetheme.SetCustomText then
-					local text, r, g, b, a = activetheme.SetCustomText(unit)
-					visual.customtext:SetText( text or "")
-					visual.customtext:SetTextColor(r or 1, g or 1, b or 1, a or 1)
-				else visual.customtext:SetText("") end
+        local text, r, g, b, a = Addon:SetCustomText(unit)
+        visual.customtext:SetText( text or "")
+        visual.customtext:SetTextColor(r or 1, g or 1, b or 1, a or 1)
 			end
 
 			UpdateIndicator_UnitColor()
 		end
 	end
 
-
-	local function OnUpdateCastBarForward(self)
-		local currentTime = GetTime() * 1000
-		--local startTime, endTime = self:GetMinMaxValues()
-
-		--if currentTime > endTime then OnStopCasting(self)
-		--else self:SetValue(currentTime) end
-
-		self:SetValue(currentTime)
-	end
-
-
-	local function OnUpdateCastBarReverse(self)
-		local currentTime = GetTime() * 1000
-		local startTime, endTime = self:GetMinMaxValues()
-
-		--if currentTime > endTime then OnStopCasting(self)
-		--else self:SetValue((endTime + startTime) - currentTime) end
-
-		self:SetValue((endTime + startTime) - currentTime)
-	end
-
-
+  function UpdateIndicator_CustomText()
+    if style.customtext.show then
+      local text, r, g, b, a = Addon:SetCustomText(unit)
+      visual.customtext:SetText( text or "")
+      visual.customtext:SetTextColor(r or 1, g or 1, b or 1, a or 1)
+    end
+  end
 
 	-- OnShowCastbar
 	function OnStartCasting(plate, unitid, channeled)
-		UpdateReferences(plate)
-		--if not extended:IsShown() then return end
-		if not extended:IsShown() then return end
+    UpdateReferences(plate)
 
-		local castBar = extended.visual.castbar
+		-- style may be uninitialized (empty) here (e.g., when reloading)
+    --if not (extended:IsShown() and style.castbar and style.castbar.show) then
+    if not extended:IsShown() or not style.castbar.show then return end
+    --if not extended:IsShown() then return end
 
-		local name, subText, text, texture, startTime, endTime, isTradeSkill, castID, notInterruptible
+    local castbar = extended.visual.castbar
+    local name, subText, text, texture, startTime, endTime, isTradeSkill, castID, notInterruptible
 
-		if channeled then
+    if channeled then
 			name, subText, text, texture, startTime, endTime, isTradeSkill, notInterruptible = UnitChannelInfo(unitid)
-			castBar:SetScript("OnUpdate", OnUpdateCastBarReverse)
+      castbar.IsChanneling = true
+      castbar.IsCasting = false
+
+      castbar.Value = (endTime / 1000) - GetTime()
+      castbar.MaxValue = (endTime - startTime) / 1000
+      castbar:SetMinMaxValues(0, castbar.MaxValue)
+      castbar:SetValue(castbar.Value)
 		else
 			name, subText, text, texture, startTime, endTime, isTradeSkill, castID, notInterruptible = UnitCastingInfo(unitid)
-			castBar:SetScript("OnUpdate", OnUpdateCastBarForward)
-		end
+      castbar.IsCasting = true
+      castbar.IsChanneling = false
+
+      castbar.Value = GetTime() - (startTime / 1000)
+      castbar.MaxValue = (endTime - startTime) / 1000
+      castbar:SetMinMaxValues(0, castbar.MaxValue)
+      castbar:SetValue(castbar.Value)
+    end
 
 		if isTradeSkill then return end
 
@@ -839,72 +776,52 @@ do
 
 		visual.spelltext:SetText(text)
 		visual.spellicon:SetTexture(texture)
-    visual.spellicon:SetDrawLayer("BACKGROUND", 7)
-		castBar:SetMinMaxValues( startTime, endTime )
+    --visual.spellicon:SetDrawLayer("ARTWORK", 7)
 
-		local r, g, b, a = 1, 1, 0, 1
-
-    castBar:SetAllColors(activetheme.SetCastbarColor(unit))
-
-		if unit.spellIsShielded then
-			visual.castnostop:Show()
-			visual.castborder:Hide()
-		else
-			visual.castnostop:Hide()
-			visual.castborder:Show()
-		end
+    castbar:SetAllColors(Addon:SetCastbarColor(unit))
+    visual.castbar:SetShownInterruptOverlay(unit.spellIsShielded)
 
 		UpdateIndicator_CustomScaleText()
-		UpdateIndicator_CustomAlpha()
+		UpdateIndicator_CustomAlpha(extended, unit)
 
-		castBar:Show()
-
+		castbar:Show()
 	end
-
 
 	-- OnHideCastbar
 	function OnStopCasting(plate)
+    if not plate.TPFrame.visual.castbar:IsShown() then return end
 
-		UpdateReferences(plate)
+    UpdateReferences(plate)
+    local castbar = extended.visual.castbar
+    castbar.IsCasting = false
+    castbar.IsChanneling = false
+    unit.isCasting = false
 
-		if not extended:IsShown() then return end
-		local castBar = extended.visual.castbar
+    -- castbar:SetScript("OnUpdate", nil)
+    -- castbar:Hide() -- hiden in castbar's OnUpdateCastbar function
 
-		castBar:Hide()
-		castBar:SetScript("OnUpdate", nil)
-
-		unit.isCasting = false
 		UpdateIndicator_CustomScaleText()
-		UpdateIndicator_CustomAlpha()
+		UpdateIndicator_CustomAlpha(extended, unit)
 	end
-
-
 
 	function OnUpdateCastMidway(plate, unitid)
 		if not ShowCastBars then return end
 
-		local currentTime = GetTime() * 1000
-
 		-- Check to see if there's a spell being cast
 		if UnitCastingInfo(unitid) then
       OnStartCasting(plate, unitid, false)
-		else
-		-- See if one is being channeled...
-			if UnitChannelInfo(unitid) then
-        OnStartCasting(plate, unitid, true)
-      end
-		end
+    elseif UnitChannelInfo(unitid) then
+      OnStartCasting(plate, unitid, true)
+    end
 	end
 
 end -- End Indicator section
 
-
 --------------------------------------------------------------------------------------------------------------
 -- WoW Event Handlers: sends event-driven changes to the appropriate gather/update handler.
 --------------------------------------------------------------------------------------------------------------
+
 do
-
-
 	----------------------------------------
 	-- Frequently Used Event-handling Functions
 	----------------------------------------
@@ -926,24 +843,43 @@ do
 	-- Update spell currently being cast
 	local function UnitSpellcastMidway(event, unitid, ...)
 		if UnitIsUnit("player", unitid) or not ShowCastBars then return end
-		local plate = GetNamePlateForUnit(unitid);
+
+		local plate = GetNamePlateForUnit(unitid)
 		if plate then
 			OnUpdateCastMidway(plate, unitid)
 		end
 	 end
 
-  local function UnitNameUpdate(event, unitid)
-    if UnitIsUnit("player", unitid) then return end -- skip personal resource bar
-
-    local plate = GetNamePlateForUnit(unitid)
-    if plate then
-      UpdateReferences(plate)
-
-      if unit.name == UNKNOWNOBJECT then
-        unit.name = UnitName(unitid) or ""
-        UpdateIndicator_Name()
-      end
+  local function FrameOnShow(UnitFrame)
+    -- Hide namepaltes that have not yet an unit added
+    if not UnitFrame.unit then
+      UnitFrame:Hide()
     end
+
+    -- Skip the personal resource bar of the player character, don't unhook scripts as nameplates, even the personal
+    -- resource bar, get re-used
+    if UnitIsUnit(UnitFrame.unit, "player") then -- or: ns.PlayerNameplate == GetNamePlateForUnit(UnitFrame.unit)
+      return
+    end
+
+    -- Hide ThreatPlates nameplates if Blizzard nameplates should be shown for friendly units
+    UnitFrame:SetShown(TidyPlatesThreat.db.profile.ShowFriendlyBlizzardNameplates and UnitReaction(UnitFrame.unit, "player") > 4)
+  end
+
+  -- Frame: self = plate
+  local function FrameOnUpdate(plate)
+    local unitid = plate.UnitFrame.unit
+    if unitid and UnitIsUnit(unitid, "player") then
+      return
+    end
+
+    plate.TPFrame:SetFrameLevel(plate:GetFrameLevel() * 10)
+  end
+
+  -- Frame: self = plate
+  local function FrameOnHide(plate)
+    plate.TPFrame:Hide()
+    --extended.FadeOut:Play()
   end
 
   local CoreEvents = {}
@@ -959,42 +895,99 @@ do
 		TidyPlatesCore:SetScript("OnUpdate", OnUpdate);
 	end
 
-	function CoreEvents:NAME_PLATE_CREATED(...)
-		local plate = ...
-		OnNewNameplate(plate)
-	 end
+	function CoreEvents:NAME_PLATE_CREATED(plate)
+    OnNewNameplate(plate)
 
-	function CoreEvents:NAME_PLATE_UNIT_ADDED(...)
-		local unitid = ...
-		local plate = GetNamePlateForUnit(unitid);
+    if plate.UnitFrame then -- not plate.TPFrame.onShowHooked then
+      plate.UnitFrame:HookScript("OnShow", FrameOnShow)
+      -- plate.TPFrame.onShowHooked = true
+    end
+    plate:HookScript('OnHide', FrameOnHide)
+    plate:HookScript('OnUpdate', FrameOnUpdate)
+  end
 
-		-- Handle personal resource bar, currently it's ignored by Threat Plates
-		if UnitIsUnit("player", unitid) then
-			--addon.PlayerNameplate = plate
-			--print ("NAME_PLATE_UNIT_ADDED: player frame")
-		else
-			--plate:GetChildren():Hide()
-			OnShowNameplate(plate, unitid)
-		end
+	-- Payload: { Name = "unitToken", Type = "string", Nilable = false },
+	function CoreEvents:NAME_PLATE_UNIT_ADDED(unitid)
+    -- Handle personal resource bar, currently it's ignored by Threat Plates
+    if UnitIsUnit("player", unitid) then return end
+      --addon.PlayerNameplate = plate
+
+    OnShowNameplate(GetNamePlateForUnit(unitid), unitid)
+    --local plate = GetNamePlateForUnit(unitid)
+    --plate.UnitFrame:SetShown(TidyPlatesThreat.db.profile.ShowFriendlyBlizzardNameplates and UnitReaction(unitid, "player") > 4)
+    --plate:GetChildren():Hide()
 	end
 
-	function CoreEvents:NAME_PLATE_UNIT_REMOVED(...)
-		local unitid = ...
+  function CoreEvents:UNIT_NAME_UPDATE(unitid)
+    if UnitIsUnit("player", unitid) then return end -- skip personal resource bar
+
+    local plate = GetNamePlateForUnit(unitid)
+    if plate then
+      local extended = plate.TPFrame
+      unit = extended.unit
+
+      unit.name = UnitName(unitid)
+      unit.pvpname = UnitPVPName(unitid)
+      unit.rawName = unit.name
+
+      visual = extended.visual
+      style = extended.style
+      UpdateIndicator_Name() -- needs visual, unit
+      UpdateIndicator_CustomText() -- needs style, visual, unit
+    end
+  end
+
+  function CoreEvents:NAME_PLATE_UNIT_REMOVED(unitid)
 		local plate = GetNamePlateForUnit(unitid);
 
 		OnHideNameplate(plate, unitid)
 	end
 
 	function CoreEvents:PLAYER_TARGET_CHANGED()
-		HasTarget = UnitExists("target") == true;
-		SetUpdateAll()
+    -- Target Castbar Offset
+    local visual, style, extended
+    if LastTargetPlate then
+      extended = LastTargetPlate.TPFrame
+      visual = extended.visual
+      style = extended.style
+      visual.castbar:ClearAllPoints()
+      visual.spelltext:ClearAllPoints()
+      visual.castbar:SetPoint(style.castbar.anchor or "CENTER", extended, style.castbar.x or 0, style.castbar.y or 0)
+      visual.spelltext:SetPoint(style.spelltext.anchor or "CENTER", extended, style.spelltext.x or 0, style.spelltext.y or 0)
+      --visual.spellicon:SetPoint(style.spellicon.anchor or "CENTER", extended, style.spellicon.x or 0, style.spellicon.y or 0)
+
+      LastTargetPlate = nil
+
+      -- Update mouseover, if the mouse was hovering over the targeted unit
+      extended.unit.isTarget = false
+      CoreEvents:UPDATE_MOUSEOVER_UNIT()
+    end
+
+    local plate = GetNamePlateForUnit("target")
+    if plate and plate.TPFrame and plate.TPFrame.stylename ~= "" then
+      extended = plate.TPFrame
+      visual = extended.visual
+      style = extended.style
+      visual.castbar:ClearAllPoints()
+      visual.spelltext:ClearAllPoints()
+      local db = TidyPlatesThreat.db.profile.settings.castbar
+      visual.castbar:SetPoint(style.castbar.anchor or "CENTER", extended, style.castbar.x + db.x_target or 0, style.castbar.y + db.y_target or 0)
+      visual.spelltext:SetPoint(style.spelltext.anchor or "CENTER", extended, style.spelltext.x + db.x_target or 0, style.spelltext.y + db.y_target or 0)
+      --visual.spellicon:SetPoint(style.spellicon.anchor or "CENTER", extended, style.spellicon.x + db.x_target or 0, style.spellicon.y + db.y_target or 0)
+
+      LastTargetPlate = plate
+
+    end
+
+    SetUpdateAll()
 	end
 
-	function CoreEvents:UNIT_HEALTH_FREQUENT(...)
-		local unitid = ...
+	function CoreEvents:UNIT_HEALTH_FREQUENT(unitid)
 		local plate = PlatesByUnit[unitid]
 
-		if plate then OnHealthUpdate(plate) end
+		if plate then
+      OnHealthUpdate(plate)
+    end
 	end
 
 	function CoreEvents:PLAYER_REGEN_ENABLED()
@@ -1007,58 +1000,97 @@ do
 		SetUpdateAll()
 	end
 
-	function CoreEvents:UPDATE_MOUSEOVER_UNIT(...)
-		if UnitExists("mouseover") then
-			HasMouseover = true
-			SetUpdateAll()
-		end
-	end
+	function CoreEvents:UPDATE_MOUSEOVER_UNIT()
+    if UnitIsUnit("mouseover", "player") then return end
 
-	function CoreEvents:UNIT_SPELLCAST_START(...)
-		local unitid = ...
+    local plate = GetNamePlateForUnit("mouseover")
+    if plate then -- check for TPFrame to prevent accessing the personal resource bar
+      local frame = plate.TPFrame
+      frame.unit.isMouseover = true
+      Addon:Module_Mouseover_Update(frame)
+      UpdateIndicator_CustomScale(frame, frame.unit)
+      UpdateIndicator_CustomAlpha(frame, frame.unit)
+    end
+  end
 
+	function CoreEvents:UNIT_SPELLCAST_START(unitid)
  		if UnitIsUnit("player", unitid) or not ShowCastBars then return end
 
-		local plate = GetNamePlateForUnit(unitid)
-
+    local plate = GetNamePlateForUnit(unitid)
 		if plate then
-			OnStartCasting(plate, unitid, false)
+      OnStartCasting(plate, unitid, false)
 		end
 	end
 
 
-	 function CoreEvents:UNIT_SPELLCAST_STOP(...)
-		local unitid = ...
+  function CoreEvents:UNIT_SPELLCAST_STOP(unitid)
+    if UnitIsUnit("player", unitid) or not ShowCastBars then return end
+
+    -- plate can be nil, e.g., if unitid = player, combat ends and the player resource bar is already hidden
+    -- when the cast stops (because it's not shown out of combat)
+    local plate = GetNamePlateForUnit(unitid)
+    if plate then
+      OnStopCasting(plate)
+    end
+  end
+
+	function CoreEvents:UNIT_SPELLCAST_CHANNEL_START(unitid)
 		if UnitIsUnit("player", unitid) or not ShowCastBars then return end
 
 		local plate = GetNamePlateForUnit(unitid)
-
-		if plate then
-			OnStopCasting(plate)
-		end
-	 end
-
-	function CoreEvents:UNIT_SPELLCAST_CHANNEL_START(...)
-		local unitid = ...
-		if UnitIsUnit("player", unitid) or not ShowCastBars then return end
-
-		local plate = GetNamePlateForUnit(unitid)
-
 		if plate then
 			OnStartCasting(plate, unitid, true)
+      --late.TPFrame.visual.castbar:Show()
 		end
 	end
 
-	function CoreEvents:UNIT_SPELLCAST_CHANNEL_STOP(...)
-		local unitid = ...
+	function CoreEvents:UNIT_SPELLCAST_CHANNEL_STOP(unitid)
 		if UnitIsUnit("player", unitid) or not ShowCastBars then return end
 
 		local plate = GetNamePlateForUnit(unitid)
-
 		if plate then
 			OnStopCasting(plate)
 		end
 	end
+
+  function CoreEvents:COMBAT_LOG_EVENT_UNFILTERED(...)
+    local timeStamp, event, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags  = ...
+
+    if (event == "SPELL_INTERRUPT") then
+      local plate = PlatesByGUID[destGUID]
+
+      if plate then
+        UpdateReferences(plate)
+
+        local castbar = visual.castbar
+        if unit.isTarget then
+          local _, class = UnitClass(sourceName)
+          if class then
+            sourceName = "|cff" .. ThreatPlates.HCC[class] .. sourceName .. "|r"
+          end
+
+          visual.spelltext:SetText(INTERRUPTED .. " [" .. sourceName .. "]")
+          local _, max_val = castbar:GetMinMaxValues()
+          castbar:SetValue(max_val)
+          local color = TidyPlatesThreat.db.profile.castbarColorInterrupted
+          castbar:SetStatusBarColor(color.r, color.g, color.b, color.a)
+          castbar.FlashTime = CASTBAR_FLASH_DURATION
+          castbar:Show() -- OnStopCasting is hiding the castbar and triggered before SPELL_INTERRUPT, so we have to show the castbar again
+          --castbar:SetAllColors(1, 0, 1, 1, 0, 0, 0, 1)
+          --castbar.Flash:Play()
+        end
+      end
+    end
+  end
+
+--  local function ConvertPixelsToUI(pixels, frameScale)
+--    local physicalScreenHeight = select(2, GetPhysicalScreenSize())
+--    return (pixels * 768.0)/(physicalScreenHeight * frameScale)
+--  end
+
+  function CoreEvents:UI_SCALE_CHANGED()
+    Addon:UIScaleChanged()
+  end
 
   -- The following events should not have worked before adjusting UnitSpellcastMidway
 	CoreEvents.UNIT_SPELLCAST_DELAYED = UnitSpellcastMidway
@@ -1069,8 +1101,6 @@ do
 	CoreEvents.UNIT_LEVEL = UnitConditionChanged
 	--CoreEvents.UNIT_THREAT_SITUATION_UPDATE = UnitConditionChanged -- did not work anyway (no unitid)
 	CoreEvents.UNIT_FACTION = WorldConditionChanged
-  CoreEvents.UNIT_NAME_UPDATE = UnitNameUpdate
-
   CoreEvents.RAID_TARGET_UPDATE = WorldConditionChanged
 	CoreEvents.PLAYER_FOCUS_CHANGED = WorldConditionChanged
 	CoreEvents.PLAYER_CONTROL_LOST = WorldConditionChanged
@@ -1082,19 +1112,34 @@ do
 	for eventName in pairs(CoreEvents) do TidyPlatesCore:RegisterEvent(eventName) end
 end
 
-
-
-
 ---------------------------------------------------------------------------------------------------------------------
 --  Nameplate Styler: These functions parses the definition table for a nameplate's requested style.
 ---------------------------------------------------------------------------------------------------------------------
 do
 	-- Helper Functions
-	local function SetObjectShape(object, width, height) object:SetWidth(width); object:SetHeight(height) end
-	local function SetObjectJustify(object, horz, vert) object:SetJustifyH(horz); object:SetJustifyV(vert) end
-	local function SetObjectAnchor(object, anchor, anchorTo, x, y) object:ClearAllPoints();object:SetPoint(anchor, anchorTo, anchor, x, y) end
-	local function SetObjectTexture(object, texture) object:SetTexture(texture) end
-	local function SetObjectBartexture(obj, tex, ori, crop) obj:SetStatusBarTexture(tex); obj:SetOrientation(ori); end
+	local function SetObjectShape(object, width, height)
+    object:SetWidth(width)
+    object:SetHeight(height)
+  end
+
+  local function SetObjectJustify(object, horz, vert)
+    object:SetJustifyH(horz)
+    object:SetJustifyV(vert)
+  end
+
+  local function SetObjectAnchor(object, anchor, anchorTo, x, y)
+    object:ClearAllPoints()
+    object:SetPoint(anchor, anchorTo, anchor, x, y)
+  end
+
+  local function SetObjectTexture(object, texture)
+    object:SetTexture(texture)
+  end
+
+  local function SetObjectBartexture(obj, tex, ori, crop)
+    obj:SetStatusBarTexture(tex)
+    obj:SetOrientation(ori)
+  end
 
 	local function SetObjectFont(object,  font, size, flags)
 		if (not OverrideFonts) and font then
@@ -1102,15 +1147,16 @@ do
 		--else
 		--	object:SetFontObject("SpellFont_Small")
 		end
-	end --FRIZQT__ or ARIALN.ttf  -- object:SetFont("FONTS\\FRIZQT__.TTF", size or 12, flags)
-
+	end
 
 	-- SetObjectShadow:
 	local function SetObjectShadow(object, shadow)
 		if shadow then
 			object:SetShadowColor(0,0,0, 1)
 			object:SetShadowOffset(1, -1)
-		else object:SetShadowColor(0,0,0,0) end
+		else
+      object:SetShadowColor(0,0,0,0)
+    end
 	end
 
 	-- SetFontGroupObject
@@ -1133,47 +1179,63 @@ do
 	-- SetTextureGroupObject
 	local function SetTextureGroupObject(object, objectstyle)
 		if objectstyle then
-			if objectstyle.texture then SetObjectTexture(object, objectstyle.texture or EMPTY_TEXTURE) end
+			if objectstyle.texture then
+        SetObjectTexture(object, objectstyle.texture or EMPTY_TEXTURE)
+      end
 			object:SetTexCoord(objectstyle.left or 0, objectstyle.right or 1, objectstyle.top or 0, objectstyle.bottom or 1)
 		end
 	end
 
-
 	-- SetBarGroupObject
-	local function SetBarGroupObject(object, objectstyle, anchorTo)
-		if objectstyle then
-			SetAnchorGroupObject(object, objectstyle, anchorTo)
-			SetObjectBartexture(object, objectstyle.texture or EMPTY_TEXTURE, objectstyle.orientation or "HORIZONTAL")
-			if objectstyle.backdrop then
-				object:SetBackdropTexture(objectstyle.backdrop)
-			end
-			object:SetTexCoord(objectstyle.left, objectstyle.right, objectstyle.top, objectstyle.bottom)
-		end
-	end
+--	local function SetBarGroupObject(object, objectstyle, anchorTo)
+--		if objectstyle then
+--			SetAnchorGroupObject(object, objectstyle, anchorTo)
+--			SetObjectBartexture(object, objectstyle.texture or EMPTY_TEXTURE, objectstyle.orientation or "HORIZONTAL")
+--			if objectstyle.backdrop then
+--				object:SetBackdropTexture(objectstyle.backdrop)
+--			end
+--			object:SetTexCoord(objectstyle.left, objectstyle.right, objectstyle.top, objectstyle.bottom)
+--		end
+--	end
 
 	-- Style Groups
 	local fontgroup = {"name", "level", "spelltext", "customtext"}
 
-	local anchorgroup = {"healthborder", "threatborder", "castborder", "castnostop",
-						"name",  "spelltext", "customtext", "level",
-						"spellicon", "raidicon", "skullicon", "eliteicon", "target"}
+	local anchorgroup = {
+		"name",  "spelltext", "customtext", "level",
+		"spellicon", "raidicon", "skullicon", "eliteicon", "target"
+    -- "threatborder", "castborder", "castnostop",
+  }
 
-	local bargroup = {"castbar", "healthbar"}
+	--local bargroup = { } --"castbar" }
 
-	local texturegroup = { "castborder", "castnostop", "healthborder", "threatborder", "eliteicon",
-						"skullicon", "highlight", "target", "spellicon", }
+	local texturegroup = {
+    "eliteicon", "skullicon", "target", "spellicon",
+    -- "highlight", threatborder, "castborder", "castnostop",
+  }
+
+  --local showgroup = { "healthborder" }
 
 	-- UpdateStyle:
 	function UpdateStyle()
 		local index
 
 		-- Frame
-		SetAnchorGroupObject(extended, style.frame, carrier)
+    SetObjectAnchor(extended, style.frame.anchor or "CENTER", nameplate, style.frame.x or 0, style.frame.y or 0)
+    extended:SetSize(style.healthbar.width, style.healthbar.height)
 
-		-- Anchorgroup
+--    if not extended.TestBackground then
+--      extended.TestBackground = extended:CreateTexture(nil, "BACKGROUND")
+--      extended.TestBackground:SetAllPoints(extended)
+--      extended.TestBackground:SetTexture(ThreatPlates.Media:Fetch('statusbar', TidyPlatesThreat.db.profile.AuraWidget.BackgroundTexture))
+--      extended.TestBackground:SetVertexColor(0,0,0,0.5)
+--    end
+
+    -- Anchorgroup
 		for index = 1, #anchorgroup do
 			local objectname = anchorgroup[index]
 			local object, objectstyle = visual[objectname], style[objectname]
+
 			if objectstyle and objectstyle.show then
 				SetAnchorGroupObject(object, objectstyle, extended)
 				visual[objectname]:Show()
@@ -1183,18 +1245,46 @@ do
 		end
 
     -- Bars
-		for index = 1, #bargroup do
-			local objectname = bargroup[index]
-			local object, objectstyle = visual[objectname], style[objectname]
-			if objectstyle then SetBarGroupObject(object, objectstyle, extended) end
+--		for index = 1, #bargroup do
+--			local objectname = bargroup[index]
+--			local object, objectstyle = visual[objectname], style[objectname]
+--
+--			if objectstyle then
+--        SetBarGroupObject(object, objectstyle, extended)
+--      end
+--    end
+
+		-- Healthbar
+		SetAnchorGroupObject(visual.healthbar, style.healthbar, extended)
+		visual.healthbar:SetStatusBarTexture(style.healthbar.texture or EMPTY_TEXTURE)
+		visual.healthbar:SetStatusBarBackdrop(style.healthbar.backdrop, style.healthborder.texture, style.healthborder.edgesize, style.healthborder.offset)
+		visual.healthborder:SetShown(style.healthborder.show)
+    visual.healthbar:SetEliteBorder(style.eliteborder.texture)
+
+    -- Castbar
+    SetAnchorGroupObject(visual.castbar, style.castbar, extended)
+    visual.castbar:SetStatusBarTexture(style.castbar.texture or EMPTY_TEXTURE)
+    visual.castbar:SetStatusBarBackdrop(style.castbar.backdrop, style.castborder.texture, style.castborder.edgesize, style.castborder.offset)
+    visual.castborder:SetShown(style.castborder.show)
+    -- Set castbar color here otherwise it may be shown sometimes with non-initialized backdrop color (white)
+    if visual.castbar:IsShown() then
+      visual.castbar:SetAllColors(Addon:SetCastbarColor(unit))
     end
 
-		-- Texture
+    -- Texture
     for index = 1, #texturegroup do
       local objectname = texturegroup[index]
       local object, objectstyle = visual[objectname], style[objectname]
+
       SetTextureGroupObject(object, objectstyle)
     end
+    Addon:Module_Mouseover_Configure(visual.Highlight, style.highlight)
+
+    -- Show certain elements, don't change anything else
+--		for index = 1, #showgroup do
+--			local objectname = showgroup[index]
+--			visual[objectname]:SetShown(style[objectname].show)
+--		end
 
 		-- Raid Icon Texture
 		if style and style.raidicon and style.raidicon.texture then
@@ -1206,14 +1296,36 @@ do
 		for index = 1, #fontgroup do
 			local objectname = fontgroup[index]
 			local object, objectstyle = visual[objectname], style[objectname]
+
 			SetFontGroupObject(object, objectstyle)
     end
 
-		-- Hide Stuff
-		if not unit.isElite then visual.eliteicon:Hide() end
-		if not unit.isBoss then visual.skullicon:Hide() end
+    visual.castbar:ClearAllPoints()
+    visual.spelltext:ClearAllPoints()
+    --visual.spellicon:ClearAllPoints()
 
+    if UnitIsUnit("target", unit.unitid) then
+      local db = TidyPlatesThreat.db.profile.settings.castbar
+      SetObjectAnchor(visual.castbar, style.castbar.anchor or "CENTER", extended, style.castbar.x + db.x_target or 0, style.castbar.y + db.y_target or 0)
+      SetObjectAnchor(visual.spelltext, style.spelltext.anchor or "CENTER", extended, style.spelltext.x + db.x_target or 0, style.spelltext.y + db.y_target or 0)
+      --SetObjectAnchor(visual.spellicon, style.spellicon.anchor or "CENTER", extended, style.spellicon.x + db.x_target or 0, style.spellicon.y + db.y_target or 0)
+    else
+      SetObjectAnchor(visual.castbar, style.castbar.anchor or "CENTER", extended, style.castbar.x or 0, style.castbar.y or 0)
+      SetObjectAnchor(visual.spelltext, style.spelltext.anchor or "CENTER", extended, style.spelltext.x or 0, style.spelltext.y or 0)
+      --SetObjectAnchor(visual.spellicon, style.spellicon.anchor or "CENTER", extended, style.spellicon.x or 0, style.spellicon.y or 0)
+    end
+
+    -- Hide Stuff
+		if unit.isElite and style.eliteborder.show then
+      visual.eliteborder:Show()
+    else
+      visual.eliteborder:Hide()
+      visual.eliteicon:Hide()
+    end
+
+		if not unit.isBoss then visual.skullicon:Hide() end
 		if not unit.isTarget then visual.target:Hide() end
+		-- TOODO: does not really work with ForceUpdate() as isMarked is not set there (no call to UpdateUnitCondition)
 		if not unit.isMarked then visual.raidicon:Hide() end
   end
 end
@@ -1228,7 +1340,7 @@ local function UseTheme(theme)
 	end
 end
 
-addon.UseTheme = UseTheme
+Addon.UseTheme = UseTheme
 
 local function GetTheme()
 	return activetheme
@@ -1242,7 +1354,7 @@ TidyPlatesInternal.GetTheme = GetTheme
 local function OnResetWidgets(plate)
 	-- At some point, we're going to have to manage the widgets a bit better.
 
-	local extended = plate.TP_Extended
+	local extended = plate.TPFrame
 	local widgets = extended.widgets
 
 	for widgetName, widgetFrame in pairs(widgets) do
@@ -1253,6 +1365,85 @@ local function OnResetWidgets(plate)
 	plate.UpdateMe = true
 end
 
+--function Addon:UpdateNameplate(tp_frame, event)
+--	if event == "Mouseover" then
+--		UpdateIndicator_CustomScale(tp_frame, tp_frame.unit)
+--		UpdateIndicator_CustomAlpha(tp_frame, tp_frame.unit)
+--	end
+--end
+
+function Addon:UIScaleChanged()
+  local db = TidyPlatesThreat.db.profile.Scale
+  if db.IgnoreUIScale then
+    Addon.UIScale = 1 / UIParent:GetEffectiveScale()
+  else
+    Addon.UIScale = 1
+
+    if db.PixelPerfectUI then
+      local physicalScreenHeight = select(2, GetPhysicalScreenSize())
+      Addon.UIScale = 768.0 / physicalScreenHeight
+    end
+  end
+end
+
+local ConfigModePlate
+
+function Addon:ConfigClickableArea(toggle_show)
+  if toggle_show then
+    if ConfigModePlate then
+      local extended = ConfigModePlate.TPFrame
+
+      extended.Background:Hide()
+      extended.Background = nil
+      extended:SetScript('OnHide', nil)
+
+      ConfigModePlate = nil
+    else
+      ConfigModePlate = GetNamePlateForUnit("target")
+      if ConfigModePlate then
+        local extended = ConfigModePlate.TPFrame
+
+        -- Draw background to show for clickable area
+        extended.Background = CreateFrame("Frame", nil, plate)
+        extended.Background:SetBackdrop({
+          bgFile = ThreatPlates.Art .. "TP_WhiteSquare.tga",
+          edgeFile = ThreatPlates.Art .. "TP_WhiteSquare.tga",
+          edgeSize = 2,
+          insets = { left = 0, right = 0, top = 0, bottom = 0 },
+        })
+        extended.Background:SetBackdropColor(0,0,0,.3)
+        extended.Background:SetBackdropBorderColor(0, 0, 0, 0.8)
+        extended.Background:SetPoint("CENTER", ConfigModePlate.UnitFrame, "CENTER")
+        extended.Background:SetSize(TidyPlatesThreat.db.profile.settings.frame.width, TidyPlatesThreat.db.profile.settings.frame.height)
+        extended.Background:Show()
+
+        -- remove the config background if the nameplate is hidden to prevent it
+        -- from being shown again when the nameplate is reused at a later date
+        extended:HookScript('OnHide', function(self)
+          self.Background:Hide()
+          self.Background = nil
+          self:SetScript('OnHide', nil)
+          ConfigModePlate = nil
+        end)
+      else
+        ThreatPlates.Print("Please select a target unit to enable configuration mode.", true)
+      end
+    end
+  elseif ConfigModePlate then
+    local background = ConfigModePlate.TPFrame.Background
+    background:SetPoint("CENTER", ConfigModePlate.UnitFrame, "CENTER")
+    background:SetSize(TidyPlatesThreat.db.profile.settings.frame.width, TidyPlatesThreat.db.profile.settings.frame.height)
+  end
+end
+
+--local function OnUpdateSettings(plate)
+--  local extended = plate.TPFrame
+--  local healthbar = extended.visual.healthbar
+--
+--  print ("OnUpdateSettings")
+--  healthbar:SetSize(extended.style.healthbar.width, extended.style.healthbar.height)
+--end
+
 --------------------------------------------------------------------------------------------------------------
 -- External Commands: Allows widgets and themes to request updates to the plates.
 -- Useful to make a theme respond to externally-captured data (such as the combat log)
@@ -1260,6 +1451,7 @@ end
 function TidyPlatesInternal:DisableCastBars() ShowCastBars = false end
 function TidyPlatesInternal:EnableCastBars() ShowCastBars = true end
 
+--function TidyPlatesInternal:UpdateSettings() ForEachPlate(OnUpdateSettings) end
 function TidyPlatesInternal:ForceUpdate() ForEachPlate(OnResetNameplate) end
 function TidyPlatesInternal:ResetWidgets() ForEachPlate(OnResetWidgets) end
 function TidyPlatesInternal:Update() SetUpdateAll() end

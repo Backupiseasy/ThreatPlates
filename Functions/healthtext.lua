@@ -1,5 +1,5 @@
-local ADDON_NAME, NAMESPACE = ...
-local ThreatPlates = NAMESPACE.ThreatPlates
+local ADDON_NAME, Addon = ...
+local ThreatPlates = Addon.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -22,8 +22,8 @@ local string = string
 local TidyPlatesThreat = TidyPlatesThreat
 local RGB = ThreatPlates.RGB
 local RGB_P = ThreatPlates.RGB_P
-local SetStyle = TidyPlatesThreat.SetStyle
 local GetColorByHealthDeficit = ThreatPlates.GetColorByHealthDeficit
+local L = ThreatPlates.L
 
 ---------------------------------------------------------------------------------------------------
 -- Functions for subtext from TidyPlates
@@ -31,6 +31,9 @@ local GetColorByHealthDeficit = ThreatPlates.GetColorByHealthDeficit
 
 local COLOR_ROLE = RGB(255, 255, 255, .7)
 local COLOR_GUILD = RGB(178, 178, 229, .7)
+
+local truncate_k_locale = L["%.1fk"]
+local truncate_m_locale = L["%.1fm"]
 
 local UnitSubtitles = {}
 local ScannerName = "ThreatPlates_Tooltip_Subtext"
@@ -40,9 +43,9 @@ TooltipScanner:SetOwner( WorldFrame, "ANCHOR_NONE" );
 local function Truncate(value)
 	if TidyPlatesThreat.db.profile.text.truncate then
 		if value >= 1e6 then
-			return format('%.1fm', value / 1e6)
+			return format(truncate_m_locale, value / 1e6)
 		elseif value >= 1e4 then
-			return format('%.1fk', value / 1e3)
+			return format(truncate_k_locale, value / 1e3)
 		else
 			return value
 		end
@@ -245,10 +248,10 @@ local SUBTEXT_FUNCTIONS =
 --
 ---------------------------------------------------------------------------------------------------
 
-local function SetCustomText(unit)
+function Addon:SetCustomText(unit)
 	if not unit.unitid then return end
 
-  local style = unit.TP_Style or SetStyle(unit)
+  local style = unit.TP_Style or Addon:SetStyle(unit)
 
 	local db = TidyPlatesThreat.db.profile
 	if style == "NameOnly" or style == "NameOnly-Unique" then
@@ -265,7 +268,7 @@ local function SetCustomText(unit)
 	local subtext, color = func(unit)
 
 	if db.SubtextColorUseHeadline then
-		return subtext, TidyPlatesThreat.SetNameColor(unit)
+		return subtext, Addon:SetNameColor(unit)
 	elseif db.SubtextColorUseSpecific then
 		return subtext, color.r, color.g, color.b, color.a
 	end
@@ -273,5 +276,3 @@ local function SetCustomText(unit)
 	local color = db.SubtextColor
 	return subtext, color.r, color.g, color.b, color.a
 end
-
-TidyPlatesThreat.SetCustomText = SetCustomText

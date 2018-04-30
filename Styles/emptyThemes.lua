@@ -1,70 +1,70 @@
 local _, ns = ...
 local t = ns.ThreatPlates
 
+local EMPTY_TEXTURE = t.Art .. "Empty"
+
 local function Create(self,name)
 	local db = self.db.profile.settings
-	local theme = {}
-	theme = {
-		hitbox = { width = 124,	height = 30,	},
+	local theme = {
+
 		frame = {
-			emptyTexture =					t.Art.."Empty",
-			width = 124,
-			height = 30,
-			x = 0,
-			y = 0,
+			emptyTexture = EMPTY_TEXTURE,
+			width = db.frame.width,
+			height = db.frame.height,
+			x = db.frame.x,
+			y = db.frame.y,
 			anchor = "CENTER",
 		},
-		threatborder = {
-			texture =						t.Art.."Empty",
-			width = 256,
-			height = 64,
-			x = 0,
-			y = 0,
-			anchor = "CENTER",
-		},
+
 		healthborder = {
-			texture = 						t.Art.."Empty",
-			elitetexture = 					t.Art.."Empty",
+			show = false,
+		},
+
+		threatborder = {
+			texture =	EMPTY_TEXTURE,
 			width = 256,
 			height = 64,
 			x = 0,
 			y = 0,
 			anchor = "CENTER",
+			show = false,
 		},
-		castborder = {
-			texture =						t.Art.."Empty",
-			width = 256,
-			height = 64,
-			x = 0,
-			y = -15,
-			anchor = "CENTER",
+
+		eliteborder = {
+			show = false,
 		},
-		castnostop = {
-			texture =						t.Art.."Empty",
-			width = 256,
-			height = 64,
-			x = 0,
-			y = -15,
-			anchor = "CENTER",
+
+		highlight = {
+			show = false,
 		},
+
 		healthbar = {
-			texture = 						t.Art.."Empty",
+			texture = EMPTY_TEXTURE,
 			width = 120,
 			height = 10,
 			x = 0,
 			y = 0,
 			anchor = "CENTER",
 			orientation = "HORIZONTAL",
+      show = false,
 		},
+
+    target = {
+      show = false,
+    },
+
 		castbar = {
-			texture =						t.Art.."Empty",
-			width = 120,
-			height = 10,
-			x = 0,
-			y = -15,
-			anchor = "CENTER",
-			orientation = "HORIZONTAL",
+			show = false,
 		},
+
+		castborder = {
+			show = false,
+		},
+
+		castnostop = {
+			show = false,
+		},
+
 		name = {
 			typeface =						t.Media:Fetch('font', db.name.typeface),
 			size = db.name.size,
@@ -150,7 +150,7 @@ local function Create(self,name)
 			show = false,
 		},
 		eliteicon = {
-      texture = t.Art.."Empty",
+      texture = EMPTY_TEXTURE,
       show = false,
     },
 		threatcolor = {

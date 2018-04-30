@@ -42,26 +42,14 @@ local function UpdateSettings(frame)
 end
 
 local function UpdateWidgetFrame(frame, unit)
-	local db = TidyPlatesThreat.db.profile.uniqueSettings
 	local isShown = false
-	if tContains(db.list, unit.name) then
-		local s
-		for k,v in pairs(db.list) do
-			if v == unit.name then
-				s = db[k]
-				break
-			end
-		end
-		if s and s.showIcon then
-			frame.Icon:SetTexture(s.icon)
-			isShown = true
-		end
-	end
 
-	if isShown then
-		db = TidyPlatesThreat.db.profile.uniqueWidget
-		local style = unit.TP_Style
-		if style == "NameOnly-Unique" then
+	local unique_setting = TidyPlatesThreat.db.profile.uniqueSettings.map[unit.name]
+	if unique_setting and unique_setting.showIcon then
+		frame.Icon:SetTexture(unique_setting.icon)
+
+		local db = TidyPlatesThreat.db.profile.uniqueWidget
+		if unit.TP_Style == "NameOnly-Unique" then
 			frame:SetPoint("CENTER", frame:GetParent(), db.x_hv, db.y_hv)
 		else
 			frame:SetPoint("CENTER", frame:GetParent(), db.x, db.y)

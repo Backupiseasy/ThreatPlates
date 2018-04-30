@@ -1,5 +1,5 @@
-local ADDON_NAME, NAMESPACE = ...
-local ThreatPlates = NAMESPACE.ThreatPlates
+local ADDON_NAME, Addon = ...
+local ThreatPlates = Addon.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -12,16 +12,15 @@ local RAID_CLASS_COLORS = RAID_CLASS_COLORS
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
 local GetColorByHealthDeficit = ThreatPlates.GetColorByHealthDeficit
-local SetStyle = TidyPlatesThreat.SetStyle
 local GetUniqueNameplateSetting = ThreatPlates.GetUniqueNameplateSetting
 local GetColorByReaction = ThreatPlates.GetColorByReaction
 local IsFriend
 local IsGuildmate
 
-local function SetNameColor(unit)
+function Addon:SetNameColor(unit)
   if not unit.unitid then return end
 
-  local style = unit.TP_Style or SetStyle(unit)
+  local style = unit.TP_Style or Addon:SetStyle(unit)
   local unique_setting = unit.TP_UniqueSetting or GetUniqueNameplateSetting(unit)
 
   local db = TidyPlatesThreat.db.profile
@@ -32,7 +31,12 @@ local function SetNameColor(unit)
 
   local color
   -- local unique_setting = GetUniqueNameplateSetting(unit)
-  if unit.isMarked then
+
+
+  if unit.isTarget and db.targetWidget.ModeNames then
+    color = db.targetWidget.HPBarColor
+    return color.r, color.g, color.b
+  elseif unit.isMarked then
     if style == "NameOnly-Unique" and unique_setting.useColor then
       if unique_setting.allowMarked then
         color = db.settings.raidicon.hpMarked[unit.raidIcon]
@@ -112,5 +116,3 @@ local function SetNameColor(unit)
 
   return color.r, color.g, color.b
 end
-
-TidyPlatesThreat.SetNameColor = SetNameColor

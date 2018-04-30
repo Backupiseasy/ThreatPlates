@@ -48,62 +48,34 @@ end
 local function Create(self,name)
   local db = self.db.profile.settings
   local dbprofile = self.db.profile
-  local theme = {}
-
-  theme = {
-
-    hitbox = {
-      width = 140,
-      height = 35,
-    },
+  local theme = {
 
     frame = {
       emptyTexture = EMPTY_TEXTURE,
-      width = 124,
-      height = 30,
+      width = db.frame.width,
+      height = db.frame.height,
       x = db.frame.x,
       y = db.frame.y,
-      anchor = "CENTER",
-    },
-
-    highlight = {
-      texture = (dbprofile.HeadlineView.ShowMouseoverHighlight and ART_PATH.."Highlight") or EMPTY_TEXTURE,
-      width = 128,
-      height = 64, -- no effect, use healthborder
-      x = 0, -- not used in headline view, determined from ?
-      y = 0, -- not used in headline view, determined from ?
-      anchor = "CENTER", --no effect
-			-- show = false -- no effect, use healthborder
-    },
-
-		target = {
-      texture = ART_PATH.."Target",
-      width = 128,
-      height = 32 * GetHeadlineViewHeight(self) / 18,
-      x = dbprofile.HeadlineView.name.x,
-      y = GetTargetTextureY(self),
-      anchor = "CENTER",
-      show = dbprofile.HeadlineView.ShowTargetHighlight,
-    },
-
-		healthborder = {
-      texture = EMPTY_TEXTURE,
-      width = 128,
-      height = 64,
-      x = 0,
-      y = GetHightlightTextureY(self),
       anchor = "CENTER",
     },
 
     healthbar = {
       texture = EMPTY_TEXTURE,
       backdrop = EMPTY_TEXTURE,
-      height = 0,
-      width = 0,
+      height = 10,
+      width = 120,
       x = 0,
       y = 0,
       anchor = "CENTER",
-      orientation = "HORIZONTAL",
+      show = false,
+    },
+
+    healthborder = {
+      show = false,
+    },
+
+    eliteborder = {
+      show = false,
     },
 
     threatborder = {
@@ -115,35 +87,41 @@ local function Create(self,name)
       anchor = "CENTER",
     },
 
-    castborder = {
-      texture = (db.castborder.show and db.castbar.ShowInHeadlineView and ThreatPlates.Art..db.castborder.texture) or EMPTY_TEXTURE,
-      width = 256,
-      height = 64,
-      x = db.castbar.x_hv,
-      y = db.castbar.y_hv,
-      anchor = "CENTER",
-      show = db.castbar.ShowInHeadlineView and db.castborder.show, -- only checked by TidyPlades after a /reload
+    highlight = {
+      texture = (dbprofile.HeadlineView.ShowMouseoverHighlight and ART_PATH.."Highlight") or EMPTY_TEXTURE,
+      show = true,
     },
 
-    castnostop = {
-      texture = (db.castborder.show and db.castbar.ShowInHeadlineView and ((db.castnostop.ShowOverlay and ThreatPlates.Art.."TP_CastBarLock") or ThreatPlates.Art..db.castborder.texture)) or EMPTY_TEXTURE,
-      width = 256,
-      height = 64,
-      x = db.castbar.x_hv,
-      y = db.castbar.y_hv,
+    target = {
+      texture = ART_PATH.."Target",
+      width = 128,
+      height = 32 * GetHeadlineViewHeight(self) / 18,
+      x = dbprofile.HeadlineView.name.x,
+      y = GetTargetTextureY(self),
       anchor = "CENTER",
-      show = db.castbar.ShowInHeadlineView and db.castborder.show, -- only checked by TidyPlades after a /reload
+      show = dbprofile.HeadlineView.ShowTargetHighlight,
     },
 
     castbar = {
-      texture = (db.castbar.ShowInHeadlineView and ThreatPlates.Art..db.castbar.texture) or EMPTY_TEXTURE,
-      backdrop = EMPTY_TEXTURE,
-      width = 120,
-      height = 10,
+      texture = ThreatPlates.Media:Fetch('statusbar', db.castbar.texture),
+      backdrop = (db.castbar.ShowInHeadlineView and ThreatPlates.Media:Fetch('statusbar', db.castbar.backdrop, true)) or EMPTY_TEXTURE,
+      width = db.castbar.width,
+      height = db.castbar.height,
       x = db.castbar.x_hv,
       y = db.castbar.y_hv,
       anchor = "CENTER",
-      orientation = "HORIZONTAL",
+      show = db.castbar.ShowInHeadlineView,
+    },
+
+    castborder = {
+      texture = (db.castbar.ShowInHeadlineView and db.castborder.show and ThreatPlates.Art .. db.castborder.texture) or EMPTY_TEXTURE,
+      edgesize = db.castborder.EdgeSize,
+      offset = db.castborder.Offset,
+      show = true,
+    },
+
+    castnostop = {
+      show = db.castbar.ShowInHeadlineView and db.castborder.show and db.castnostop.ShowOverlay,
     },
 
     name = {
@@ -208,7 +186,7 @@ local function Create(self,name)
       vertical = db.spelltext.vertical,
       shadow = db.spelltext.shadow,
       flags = db.spelltext.flags,
-      show = db.spelltext.show and db.castbar.ShowInHeadlineView,
+      show = db.castbar.ShowInHeadlineView and db.spelltext.show,
     },
 
     skullicon = {

@@ -1,8 +1,9 @@
+local ADDON_NAME, NAMESPACE = ...
+local ThreatPlates = NAMESPACE.ThreatPlates
+
 ------------------------------
 -- Elite Art Overlay Widget --
 ------------------------------
-local ADDON_NAME, NAMESPACE = ...
-local ThreatPlates = NAMESPACE.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -10,6 +11,19 @@ local ThreatPlates = NAMESPACE.ThreatPlates
 local UnitGUID = UnitGUID
 
 -- local WidgetList = {}
+
+local BACKDROP = {
+  TP_EliteBorder_Default = {
+    edgeFile = ThreatPlates.Art .. "TP_WhiteSquare",
+    edgeSize = 2,
+    offset = 2,
+  },
+  TP_EliteBorder_Thin = {
+    edgeFile = ThreatPlates.Art .. "TP_WhiteSquare",
+    edgeSize = 0.9,
+    offset = 1.1,
+  }
+}
 
 ---------------------------------------------------------------------------------------------------
 -- Threat Plates functions
@@ -32,11 +46,32 @@ end
 -- Widget Functions for TidyPlates
 ---------------------------------------------------------------------------------------------------
 
-local function UpdateWidgetFrame(frame, unit)
+local function UpdateSettings(frame)
+	local db = TidyPlatesThreat.db.profile.settings.elitehealthborder
+  local backdrop = BACKDROP[db.texture]
 
-	if unit.isElite then
-		local db = TidyPlatesThreat.db.profile.settings.elitehealthborder
-		frame.Border:SetTexture(ThreatPlates.Art..db.texture)
+  --  backdrop.edgeSize = TidyPlatesThreat.db.profile.settings.elitehealthborder.EdgeSize
+  --  backdrop.offset = TidyPlatesThreat.db.profile.settings.elitehealthborder.Offset
+
+  db = TidyPlatesThreat.db.profile.settings.healthbar
+  local offset_x = db.width + 2 * backdrop.offset
+  local offset_y = db.height + 2 * backdrop.offset
+  if frame:GetWidth() ~= offset_x or frame:GetHeight() ~= offset_y  then
+    frame:SetPoint("TOPLEFT", frame:GetParent().visual.healthbar, "TOPLEFT", - backdrop.offset, backdrop.offset)
+    frame:SetPoint("BOTTOMRIGHT", frame:GetParent().visual.healthbar, "BOTTOMRIGHT", backdrop.offset, - backdrop.offset)
+    --    frame:SetSize(width, height)
+  end
+	frame:SetBackdrop({
+    edgeFile = backdrop.edgeFile,
+    edgeSize = backdrop.edgeSize,
+    insets = { left = 0, right = 0, top = 0, bottom = 0 }
+	})
+	frame:SetBackdropBorderColor(1, 0.85, 0, 1)
+end
+
+
+local function UpdateWidgetFrame(frame, unit)
+	if unit.isElite and not unit.isMouseover then
 		frame:Show()
 	else
 		frame:_Hide()
@@ -79,12 +114,10 @@ local function CreateWidgetFrame(parent)
 
 	-- Custom Code III
 	--------------------------------------
-	frame:SetFrameLevel(parent:GetFrameLevel() + 5)
-	frame:SetSize(256, 64)
-	frame:SetPoint("CENTER",parent,"CENTER")
-	frame.Border = frame:CreateTexture(nil, "ARTWORK", 4)
-	frame.Border:SetAllPoints(frame)
+	frame:SetFrameLevel(parent:GetFrameLevel() + 6)
 
+	frame.UpdateConfig = UpdateSettings
+	UpdateSettings(frame)
 	--------------------------------------
 	-- End Custom Code
 

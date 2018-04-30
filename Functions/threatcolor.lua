@@ -1,5 +1,5 @@
-local ADDON_NAME, NAMESPACE = ...
-local ThreatPlates = NAMESPACE.ThreatPlates
+local ADDON_NAME, Addon = ...
+local ThreatPlates = Addon.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -7,13 +7,15 @@ local ThreatPlates = NAMESPACE.ThreatPlates
 local InCombatLockdown = InCombatLockdown
 local UnitIsConnected = UnitIsConnected
 
+-- ThreatPlates APIs
+local TidyPlatesThreat = TidyPlatesThreat
 local RGB = ThreatPlates.RGB
 local UnitIsOffTanked = ThreatPlates.UnitIsOffTanked
 local OnThreatTable = ThreatPlates.OnThreatTable
 local GetUniqueNameplateSetting = ThreatPlates.GetUniqueNameplateSetting
 local SetStyle = TidyPlatesThreat.SetStyle
 
-local COLOR_TRANSPARENT = RGB(0, 0, 0, 0, 0) -- opaque
+local COLOR_TRANSPARENT = RGB(0, 0, 0, 0) -- opaque
 
 local function ShowThreatGlow(unit)
   local db = TidyPlatesThreat.db.profile
@@ -25,7 +27,7 @@ local function ShowThreatGlow(unit)
   end
 end
 
-local function SetThreatColor(unit)
+function Addon:SetThreatColor(unit)
   local c = COLOR_TRANSPARENT
 
   if not unit.unitid then
@@ -67,8 +69,6 @@ local function SetThreatColor(unit)
 
   return c.r, c.g, c.b, c.a
 end
-
-TidyPlatesThreat.SetThreatColor = SetThreatColor
 
 --  elseif style == "tank" then
 --    local show_offtank = db.threat.toggle.OffTank

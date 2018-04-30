@@ -1,5 +1,5 @@
-local ADDON_NAME, NAMESPACE = ...
-local ThreatPlates = NAMESPACE.ThreatPlates
+local ADDON_NAME, Addon = ...
+local ThreatPlates = Addon.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------
 -- Stuff for handling the database with the SavedVariables of ThreatPlates (ThreatPlatesDB)
@@ -19,10 +19,12 @@ local pairs = pairs
 -- WoW APIs
 local InCombatLockdown = InCombatLockdown
 local GetCVar = GetCVar
+local SetCVar = SetCVar
 
 -- ThreatPlates APIs
 local L = ThreatPlates.L
 local TidyPlatesThreat = TidyPlatesThreat
+local RGB = ThreatPlates.RGB
 
 ---------------------------------------------------------------------------------------------------
 -- Global functions for accessing the configuration
@@ -65,23 +67,18 @@ local function GetUnitVisibility(full_unit_type)
 end
 
 local function SetNamePlateClickThrough(friendly, enemy)
-  if InCombatLockdown() then
-    ThreatPlates.Print(L["Nameplate clickthrough cannot be changed while in combat."], true)
-  else
+--  if InCombatLockdown() then
+--    ThreatPlates.Print(L["Nameplate clickthrough cannot be changed while in combat."], true)
+--  else
     local db = TidyPlatesThreat.db.profile
     db.NamePlateFriendlyClickThrough = friendly
     db.NamePlateEnemyClickThrough = enemy
-    C_NamePlate.SetNamePlateFriendlyClickThrough(friendly)
-    C_NamePlate.SetNamePlateEnemyClickThrough(enemy)
-  end
-end
-
-local function SyncWithGameSettings(friendly, enemy)
-  if not InCombatLockdown() then
-    local db = TidyPlatesThreat.db.profile
-    C_NamePlate.SetNamePlateFriendlyClickThrough(db.NamePlateFriendlyClickThrough)
-    C_NamePlate.SetNamePlateEnemyClickThrough(db.NamePlateEnemyClickThrough)
-  end
+    Addon:CallbackWhenOoC(function()
+      C_NamePlate.
+      SetNamePlateFriendlyClickThrough(friendly)
+      C_NamePlate.SetNamePlateEnemyClickThrough(enemy)
+    end, L["Nameplate clickthrough cannot be changed while in combat."])
+--  end
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -105,7 +102,7 @@ local function GetDefaultSettingsV1(defaults)
   db.questWidget.ModeHPBar = true
   db.ResourceWidget.BarTexture = "Aluminium"
   db.settings.elitehealthborder.show = true
-  db.settings.healthborder.texture = "TP_HealthBarOverlay"
+  db.settings.healthborder.texture = "TP_Border_Default"
   db.settings.healthbar.texture = "ThreatPlatesBar"
   db.settings.healthbar.backdrop = "ThreatPlatesEmpty"
   db.settings.healthbar.BackgroundOpacity = 1
@@ -255,12 +252,10 @@ end
 
 local function MigrationTargetScale(profile_name, profile)
   if DatabaseEntryExists(profile, { "nameplate", "scale", "Target" }) then
-    --TidyPlatesThreat.db.global.MigrationLog[profile_name .. "MigrationTargetScaleTarget"] = "Migrating Target from " .. profile.nameplate.scale.Target .. " to " .. (profile.nameplate.scale.Target - 1)
     profile.nameplate.scale.Target = profile.nameplate.scale.Target - 1
   end
 
   if DatabaseEntryExists(profile, { "nameplate", "scale", "NoTarget" }) then
-    --TidyPlatesThreat.db.global.MigrationLog[profile_name .. "MigrationTargetScaleNoTarget"] = "Migrating NoTarget from " .. profile.nameplate.scale.NoTarget .. " to " .. (profile.nameplate.scale.NoTarget - 1)
     profile.nameplate.scale.NoTarget = profile.nameplate.scale.NoTarget - 1
   end
 end
@@ -278,9 +273,96 @@ local function MigrateCustomTextShow(profile_name, profile)
   end
 end
 
+local function MigrateCastbarColoring(profile_name, profile)
+  -- default for castbarColor.toggle was true
+  local entry = { "castbarColor", "toggle" }
+  if DatabaseEntryExists(profile, entry) and profile.castbarColor.toggle == false then
+    profile.castbarColor = RGB(255, 255, 0, 1)
+    profile.castbarColorShield = RGB(255, 255, 0, 1)
+    DatabaseEntryDelete(profile, entry)
+    DatabaseEntryDelete(profile, { "castbarColorShield", "toggle" })
+  end
+
+  -- default for castbarColorShield.toggle was true
+  local entry = { "castbarColorShield", "toggle" }
+  if DatabaseEntryExists(profile, entry) and profile.castbarColorShield.toggle == false then
+    profile.castbarColorShield = profile.castbarColor or { r = 1, g = 0.56, b = 0.06, a = 1 }
+    DatabaseEntryDelete(profile, entry)
+  end
+end
+
+local function MigrationTotemSettings(profile_name, profile)
+  TidyPlatesThreat.db.global.MigrationLog["TotemSettings"] = true
+  local entry = { "totemSettings" }
+  if DatabaseEntryExists(profile, entry) then
+    for key, value in pairs(profile.totemSettings) do
+      if type(value) == "table" then -- omit hideHealthbar setting and skip if new default totem settings
+        TidyPlatesThreat.db.global.MigrationLog["TotemSettings" .. key .. "Old"] = profile.totemSettings[key]
+
+
+        value.Style = value[7] or profile.totemSettings[key].Style
+        value.Color = value.color or profile.totemSettings[key].Color
+        if value[1] == false then
+          value.ShowNameplate = false
+        end
+        if value[2] == false then
+          value.ShowHPColor = false
+        end
+        if value[3] == false then
+          value.ShowIcon = false
+        end
+
+        value[7] = nil
+        value.color = nil
+        value[1] = nil
+        value[2] = nil
+        value[3] = nil
+
+--        profile.totemSettings[key] = {
+--          Style = value[7],
+--          Color = value.color,
+--          ShowNameplate = value[1],
+--          ShowHPColor = value[2],
+--          ShowIcon = value[3],
+--        }
+        TidyPlatesThreat.db.global.MigrationLog["TotemSettings" .. key .. "New"] = profile.totemSettings[key]
+      end
+    end
+  end
+end
+
+local function MigrateBorderTextures(profile_name, profile)
+  TidyPlatesThreat.db.global.MigrationLog["BorderTextures"] = true
+
+  if DatabaseEntryExists(profile, { "settings", "elitehealthborder", "texture" } ) then
+    if profile.settings.elitehealthborder.texture == "TP_HealthBarEliteOverlay" then
+      profile.settings.elitehealthborder.texture = "TP_EliteBorder_Default"
+    else -- TP_HealthBarEliteOverlayThin
+      profile.settings.elitehealthborder.texture = "TP_EliteBorder_Thin"
+    end
+  end
+
+  if DatabaseEntryExists(profile, { "settings", "healthborder", "texture" } ) then
+    if profile.settings.healthborder.texture == "TP_HealthBarOverlay" then
+      profile.settings.healthborder.texture = "TP_Border_Default"
+    else -- TP_HealthBarOverlayThin
+      profile.settings.healthborder.texture = "TP_Border_Thin"
+    end
+  end
+
+  if DatabaseEntryExists(profile, { "settings", "castborder", "texture" } ) then
+    if profile.settings.castborder.texture == "TP_CastBarOverlay" then
+      profile.settings.castborder.texture = "TP_Castbar_Border_Default"
+    else -- TP_CastBarOverlayThin
+      profile.settings.castborder.texture = "TP_Castbar_Border_Thin"
+    end
+  end
+
+end
+
 local function MigrateAuraWidget(profile_name, profile)
   if DatabaseEntryExists(profile, { "debuffWidget" }) then
-    TidyPlatesThreat.db.global.MigrationLog["AuraWidget"] = "ON = " .. tostring(profile.AuraWidget.ON) .. " and ShowInHeadlineView = " .. tostring(profile.AuraWidget.ShowInHeadlineView)
+    --TidyPlatesThreat.db.global.MigrationLog["AuraWidget"] = "ON = " .. tostring(profile.AuraWidget.ON) .. " and ShowInHeadlineView = " .. tostring(profile.AuraWidget.ShowInHeadlineView)
     if not profile.AuraWidget.ON and not profile.AuraWidget.ShowInHeadlineView then
       profile.AuraWidget = profile.AuraWidget or {}
       profile.AuraWidget.ModeIcon = profile.AuraWidget.ModeIcon or {}
@@ -312,7 +394,7 @@ local DEPRECATED_SETTINGS = {
   CustomTextShow = { MigrateCustomTextShow, },                -- settings.customtext.show
   BlizzFadeA = { MigrationBlizzFadeA, },                      -- blizzFadeA.toggle and blizzFadeA.amount
   TargetScale = { MigrationTargetScale, "8.5.0" },            -- nameplate.scale.Target/NoTarget
-  --AuraWidget = { MigrateAuraWidget, "8.6.0" },                -- disabled until someone requests it
+  --AuraWidget = { MigrateAuraWidget, "8.6.0" },              -- disabled until someone requests it
   AlphaFeatures = { "alphaFeatures" },
   AlphaFeatureHeadlineView = { "alphaFeatureHeadlineView" },
   AlphaFeatureAuraWidget2= { "alphaFeatureAuraWidget2" },
@@ -320,8 +402,12 @@ local DEPRECATED_SETTINGS = {
   HVBlizzFarding = { "HeadlineView", "blizzFading" },         -- (removed in 8.5.1)
   HVBlizzFadingAlpha = { "HeadlineView", "blizzFadingAlpha"}, -- (removed in 8.5.1)
   HVNameWidth = { "HeadlineView", "name", "width" },          -- (removed in 8.5.0)
-  HVNameHeight = { "HeadlineView", "name", "height" },       -- (removed in 8.5.0)
-  -- [ "debuffWidget" }, -- in release 8.7 (removed in 8.6.0)
+  HVNameHeight = { "HeadlineView", "name", "height" },        -- (removed in 8.5.0)
+  DebuffWidget = { "debuffWidget" },                          -- (removed in 8.6.0)
+  OldSettings = { "OldSettings" },                            -- (removed in 8.7.0)
+  CastbarColoring = { MigrateCastbarColoring, },              -- (removed in 8.7.0)
+  TotemSettings = { MigrationTotemSettings, "8.7.0" },        -- (changed in 8.7.0)
+  Borders = { MigrateBorderTextures, "8.7.0" }                -- (changed in 8.7.0)
 }
 
 local function MigrateDatabase(current_version)
