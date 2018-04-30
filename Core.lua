@@ -263,6 +263,8 @@ function TidyPlatesThreat:StartUp()
     --db.StandalonePopup = true
   end
 
+  Addon:UpdateCustomNameplates()
+
   TidyPlatesThreat:ReloadTheme()
 end
 

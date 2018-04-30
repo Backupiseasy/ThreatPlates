@@ -976,7 +976,6 @@ do
       --visual.spellicon:SetPoint(style.spellicon.anchor or "CENTER", extended, style.spellicon.x + db.x_target or 0, style.spellicon.y + db.y_target or 0)
 
       LastTargetPlate = plate
-
     end
 
     SetUpdateAll()

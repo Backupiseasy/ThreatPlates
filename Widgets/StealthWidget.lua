@@ -79,14 +79,13 @@ end
 local function UpdateWidgetFrame(frame, unit)
   if not unit.unitid then return end
 
-  -- name, rank, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable,
-  -- nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, nameplateShowAll, timeMod, value1, value2, value3 = UnitBuff("unit", index or "name"[, "rank"[, "filter"]])
+  -- name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, nameplateShowAll, timeMod, value1, value2, value3 = UnitBuff("unit", index or "name"[, "rank"[, "filter"]])
 
   local i = 1
   local found = false
   -- or check for (?=: Invisibility and Stealth Detection)
   repeat
-    local name, _, _, _, _, _, _, _, _, _, spell_id = UnitBuff(unit.unitid, i)
+    local name, _, _, _, _, _, _, _, _, spell_id = UnitBuff(unit.unitid, i)
     --print ("Aura: ", name, spell_id)
     if DETECTION_AURAS[spell_id] then
       found = true

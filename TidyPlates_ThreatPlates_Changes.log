@@ -1,5 +1,18 @@
 ------------------------------------------------------
+9.0.0-Alpha3
+------------------------------------------------------
+
+------------------------------------------------------
+9.0.0-Alpha2
+------------------------------------------------------
+* Reduced number of custom nameplates available as clicking on "Custom Nameplates" results in the game crashing otherwise.
+* Updated shaman totems - removed voodoo totem.
+* Fixed bugs with saving the icon for a custom nameplate when a spell ID was used to define the icon.
+* Fixed a bug with custom nameplates which were only loaded after the options dialog was opened.
+* Again, fixed several bugs caused by changes to the WoW API and events (Stealth Widget).
+
+------------------------------------------------------
 9.0.0-Alpha1
 ------------------------------------------------------
-* Fixed several Lua errors cased by changes to the WoW API and events.
+* Fixed several Lua errors caused by changes to the WoW API and events.
 * Updated TOC version for Battle for Azeroth.

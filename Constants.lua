@@ -200,7 +200,7 @@ local TOTEM_DATA = {
   [13] = { SpellID = 192058, ID = "N3", GroupColor = "4c9900"},		-- Lightning  Surge Totem
   [14] = { SpellID = 207399, ID = "N4", GroupColor = "4c9900"},		-- Ancestral Protection Totem
   [15] = { SpellID = 192077, ID = "N5", GroupColor = "4c9900"},		-- Wind Rush Totem
-  [16] = { SpellID = 196932, ID = "N6", GroupColor = "4c9900"},		-- Voodoo Totem
+  --[16] = { SpellID = 196932, ID = "N6", GroupColor = "4c9900"},		-- Voodoo Totem - Removed in Bfa
   [17] = { SpellID = 198838, ID = "N7", GroupColor = "4c9900"},		-- Earthen Shield Totem
 
   -- Totems from PVP talents
@@ -212,7 +212,7 @@ local TOTEM_DATA = {
 
 function Addon:InitializeTotemInformation()
   for i, totem_data in ipairs(TOTEM_DATA) do
-    local name, _ = GetSpellInfo(totem_data.SpellID) or UNKNOWNOBJECT, nil
+    local name = GetSpellInfo(totem_data.SpellID) or UNKNOWNOBJECT, nil
 
     totem_data.Name = name
     totem_data.Color = RGB(HEX2RGB(totem_data.GroupColor))
@@ -948,27 +948,27 @@ ThreatPlates.DEFAULT_SETTINGS = {
           b = 0.25
         },
       },
-      [11] = {
-        name = L["Web Wrap"],
-        showNameplate = true,
-        ShowHeadlineView = false,
-        showIcon = true,
-        useStyle = true,
-        useColor = true,
-        UseThreatColor = false,
-        UseThreatGlow = false,
-        allowMarked = true,
-        overrideScale = false,
-        overrideAlpha = false,
-        icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U10",
-        scale = 0.75,
-        alpha = 1,
-        color = {
-          r = 1,
-          g = 0.39,
-          b = 0.96
-        },
-      },
+--      [11] = {
+--        name = L["Web Wrap"],
+--        showNameplate = true,
+--        ShowHeadlineView = false,
+--        showIcon = true,
+--        useStyle = true,
+--        useColor = true,
+--        UseThreatColor = false,
+--        UseThreatGlow = false,
+--        allowMarked = true,
+--        overrideScale = false,
+--        overrideAlpha = false,
+--        icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U10",
+--        scale = 0.75,
+--        alpha = 1,
+--        color = {
+--          r = 1,
+--          g = 0.39,
+--          b = 0.96
+--        },
+--      },
       [12] = {
         name = L["Immortal Guardian"],
         showNameplate = true,
