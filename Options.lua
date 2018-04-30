@@ -59,7 +59,7 @@ local function GetSpellName(number)
   return n
 end
 
-local function UpdateSpecial() -- Need to add a way to update options table.
+function Addon:InitializeCustomNameplates()
   local db = TidyPlatesThreat.db.profile
 
   db.uniqueSettings.map = {}
@@ -68,7 +68,10 @@ local function UpdateSpecial() -- Need to add a way to update options table.
       db.uniqueSettings.map[unique_unit.name] = unique_unit
     end
   end
+end
 
+local function UpdateSpecial() -- Need to add a way to update options table.
+  Addon:InitializeCustomNameplates()
   t.Update()
 end
 
@@ -5465,6 +5468,7 @@ local function CreateOptionsTable()
     CustomOpts["#" .. k_c] = {
       name = "#" .. k_c .. ". " .. db.uniqueSettings[k_c].name,
       type = "group",
+      type = "group",
       --disabled = function() if db.totemSettings[totemID[k_c][2]][1] then return false else return true end end,
       order = CustomOpts_OrderCnt,
       args = {
@@ -5553,15 +5557,12 @@ local function CreateOptionsTable()
                 options.args.Custom.args["#" .. k_c].name = "#" .. k_c .. ". " .. db.uniqueSettings[k_c].name
                 options.args.Custom.args["#" .. k_c].args.Header.name = db.uniqueSettings[k_c].name
                 options.args.Custom.args["#" .. k_c].args.Name.args.SetName.name = db.uniqueSettings[k_c].name
-                if tonumber(db.uniqueSettings[k_c].icon) == nil then
-                  options.args.Custom.args["#" .. k_c].args.Icon.args.Icon.image = db.uniqueSettings[k_c].icon
+                local spell_id = db.uniqueSettings[k_c].SpellID
+                if spell_id then
+                  local _, _, icon = GetSpellInfo(spell_id)
+                  options.args.Custom.args["#" .. k_c].args.Icon.args.Icon.image = icon
                 else
-                  local icon = select(3, GetSpellInfo(tonumber(db.uniqueSettings[k_c].icon)))
-                  if icon then
-                    options.args.Custom.args["#" .. k_c].args.Icon.args.Icon.image = icon
-                  else
-                    options.args.Custom.args["#" .. k_c].args.Icon.args.Icon.image = "Interface\\Icons\\Temp"
-                  end
+                  options.args.Custom.args["#" .. k_c].args.Icon.args.Icon.image = db.uniqueSettings[k_c].icon
                 end
                 UpdateSpecial()
                 clipboard = nil
@@ -5754,15 +5755,12 @@ local function CreateOptionsTable()
               disabled = function() return not db.uniqueSettings[k_c].showIcon or not db.uniqueWidget.ON end,
               order = 2,
               image = function()
-                if tonumber(db.uniqueSettings[k_c].icon) == nil then
-                  return db.uniqueSettings[k_c].icon
+                local spell_id = db.uniqueSettings[k_c].SpellID
+                if spell_id then
+                  local _, _, icon = GetSpellInfo(spell_id)
+                  return icon
                 else
-                  local icon = select(3, GetSpellInfo(tonumber(db.uniqueSettings[k_c].icon)))
-                  if icon then
-                    return icon
-                  else
-                    return "Interface\\Icons\\Temp"
-                  end
+                  return db.uniqueSettings[k_c].icon
                 end
               end,
               imageWidth = 64,
@@ -5781,9 +5779,20 @@ local function CreateOptionsTable()
               disabled = function() return not db.uniqueSettings[k_c].showIcon or not db.uniqueWidget.ON end,
               width = "full",
               set = function(info, val)
-                if tonumber(val) then
-                  val = select(3, GetSpellInfo(tonumber(val)))
+                local spell_id = tonumber(val)
+                if spell_id then -- no string, so val should be a spell ID
+                  local _, _, icon = GetSpellInfo(spell_id)
+                  if icon then
+                    db.uniqueSettings[k_c].SpellID = spell_id
+                    val = select(3, GetSpellInfo(spell_id))
+                  else
+                    t.Print("Invalid spell ID for custom nameplate icon: " .. val, true)
+                    db.uniqueSettings[k_c].SpellID = nil
+                  end
+                else
+                  db.uniqueSettings[k_c].SpellID = nil
                 end
+                -- Either store the path to the icon or the icon ID
                 SetValue(info, val)
                 if val then
                   options.args.Custom.args["#" .. k_c].args.Icon.args.Icon.image = val
@@ -5791,6 +5800,14 @@ local function CreateOptionsTable()
                   options.args.Custom.args["#" .. k_c].args.Icon.args.Icon.image = "Interface\\Icons\\Temp"
                 end
                 UpdateSpecial()
+              end,
+              get = function(info)
+                local spell_id = db.uniqueSettings[k_c].SpellID
+                if spell_id then
+                  return tostring(spell_id)
+                else
+                  return GetValue(info)
+                end
               end,
               arg = { "uniqueSettings", k_c, "icon" },
             },

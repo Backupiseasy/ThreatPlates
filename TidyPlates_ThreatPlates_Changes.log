@@ -1,4 +1,10 @@
 ------------------------------------------------------
+8.7.1
+------------------------------------------------------
+* Fixed a bug with custom nameplates which were only loaded after the options dialog was opened.
+* Fixed bugs with saving the icon for a custom nameplate when a spell ID was used to define the icon.
+
+------------------------------------------------------
 8.7.0
 ------------------------------------------------------
 * Renamed the addon to Threat Plates (instead of Tidy Plates: Threat Plates). Addon directory is still TidyPlates_ThreatPlates though.
