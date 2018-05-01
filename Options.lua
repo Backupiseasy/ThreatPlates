@@ -3439,6 +3439,19 @@ local function CreateOptionsTable()
                               descStyle = "inline",
                               arg = { "text", "deficit" }
                             },
+                            UseLocalizedUnit = {
+                              name = L["Localized Health Text"],
+                              type = "toggle",
+                              order = 4,
+                              width = "full",
+                              desc = L["If enabled, the truncated health text will be localized, i.e. local metric unit symbols (like k for thousands) will be used."],
+                              descStyle = "inline",
+                              set = function(info, val)
+                                SetValue(info, val)
+                                Addon:UpdateConfigurationStatusText()
+                              end,
+                              arg = { "text", "LocalizedUnitSymbol" }
+                            },
                           },
                         },
                       },

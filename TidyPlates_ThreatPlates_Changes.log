@@ -1,8 +1,10 @@
 ------------------------------------------------------
 8.7.1
 ------------------------------------------------------
+* Added an option to use local metric unit symbols (like k for thousands) for truncated health text (for Korean, Traditional and Simplified Chinese) [Issue #165].
 * Fixed a bug with custom nameplates which were only loaded after the options dialog was opened.
 * Fixed bugs with saving the icon for a custom nameplate when a spell ID was used to define the icon.
+* Fixed a bug with the absorb glow sometimes being shown in headline view (without healthbar/absorbbar).
 
 ------------------------------------------------------
 8.7.0
@@ -36,7 +38,6 @@
 * Fixed a bug with castbar not properly hidden when only enabled for healthbar or headline view [Issue #150].
 * Fixed a Lua error with scaling and transparency on nameplates that had no unit assigned yet.
 * Fixed localization of default fonts for Korean (koKR), Simplified Chinese (zhCN), Traditional Chinese (zhTW), and Russian (ruRU). Default fonts are automatically adjusted so that text in the local alphabet is displayed properly [Issue #171]
-* Added localization strings for metric prefixes k (kilo) and m (million) (used for health points text).
 * Updated localization for deDE (German), zhTW (Traditional Chinese, thanks to gaspy10).
 
 ------------------------------------------------------

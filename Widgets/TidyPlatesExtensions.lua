@@ -98,7 +98,8 @@ local function UpdateExtensions(extended, unitid, style)
 
 --  absorb = UnitHealthMax(unitid) * 0.5 -- REMOVE
 
-  if absorb == 0 or IGNORED_STYLES[style] then
+  -- style probably is never nil here
+  if absorb == 0 or not style or IGNORED_STYLES[style] then
     absorbbar.overlay:Hide()
     absorbbar.glow:Hide()
     absorbbar:Hide()

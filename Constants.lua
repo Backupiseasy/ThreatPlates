@@ -16,7 +16,6 @@ local HEX2RGB = ThreatPlates.HEX2RGB
 ---------------------------------------------------------------------------------------------------
 -- Color and font definitions
 ---------------------------------------------------------------------------------------------------
-
 local DEFAULT_FONT = "Cabin"
 local DEFAUL_SMALL_FONT = "Arial Narrow"
 
@@ -439,7 +438,8 @@ ThreatPlates.DEFAULT_SETTINGS = {
       full = false,
       max = false,
       deficit = false,
-      truncate = true
+      truncate = true,
+      LocalizedUnitSymbol = false,
     },
     totemWidget = {
       ON = true,
