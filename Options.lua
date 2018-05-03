@@ -5916,6 +5916,7 @@ function TidyPlatesThreat:ProfChange()
   Addon:CallbackWhenOoC(function() Addon:SetBaseNamePlateSize() end, L["Unable to change a setting while in combat."])
 
   TidyPlatesThreat:ReloadTheme()
+  TidyPlatesInternal:ForceUpdate()
 end
 
 function TidyPlatesThreat:OpenOptions()

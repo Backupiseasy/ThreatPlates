@@ -390,12 +390,13 @@ local DEPRECATED_SETTINGS = {
   OldSettings = { "OldSettings" },                            -- (removed in 8.7.0)
   CastbarColoring = { MigrateCastbarColoring, },              -- (removed in 8.7.0)
   TotemSettings = { MigrationTotemSettings, "8.7.0" },        -- (changed in 8.7.0)
-  Borders = { MigrateBorderTextures, "8.7.0" }                -- (changed in 8.7.0)
-  -- For the future: remove uniqueSettings.list, global.MigrationLog
+  Borders = { MigrateBorderTextures, "8.7.0" },               -- (changed in 8.7.0)
+  UniqueSettingsList = { "uniqueSettings", "list" },          -- (removed in 8.7.0, cleanup added in 8.7.1)
 }
 
 local function MigrateDatabase(current_version)
-  --TidyPlatesThreat.db.global.MigrationLog = {}
+  TidyPlatesThreat.db.global.MigrationLog = nil
+  -- TidyPlatesThreat.db.global.MigrationLog = {}
 
   local profile_table = TidyPlatesThreat.db.profiles
   for key, entry in pairs(DEPRECATED_SETTINGS) do
@@ -431,4 +432,3 @@ ThreatPlates.MigrateDatabase = MigrateDatabase
 
 ThreatPlates.GetUnitVisibility = GetUnitVisibility
 ThreatPlates.SetNamePlateClickThrough = SetNamePlateClickThrough
-ThreatPlates.SyncWithGameSettings = SyncWithGameSettings

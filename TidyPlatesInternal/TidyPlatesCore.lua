@@ -625,10 +625,6 @@ end		-- End of Nameplate/Unit Events
 -- Indicators: These functions update the color, texture, strings, and frames within a style.
 ---------------------------------------------------------------------------------------------------------------------
 do
-	local color = {}
-	local alpha, forcealpha, scale
-
-
 	-- UpdateIndicator_HealthBar: Updates the value on the health bar
 	function UpdateIndicator_HealthBar()
 		visual.healthbar:SetMinMaxValues(0, unit.healthmax)
@@ -650,12 +646,13 @@ do
 
 	-- UpdateIndicator_ThreatGlow: Updates the aggro glow
 	function UpdateIndicator_ThreatGlow()
-		if not style.threatborder.show then
-      return
+--		if not style.threatborder.show then
+--      return
+--    end
+    if visual.threatborder:IsShown() then
+      visual.threatborder:SetBackdropBorderColor(Addon:SetThreatColor(unit))
     end
-
-    visual.threatborder:SetBackdropBorderColor(Addon:SetThreatColor(unit))
-	end
+  end
 
 	function UpdateIndicator_Target()
     visual.target:SetShown(unit.isTarget and style.target.show)
@@ -714,8 +711,7 @@ do
 	function UpdateIndicator_CustomScaleText()
 		if unit.health and (extended.requestedAlpha > 0) then
 			-- Scale
-      scale = Addon.UIScale * Addon:SetScale(unit)
-      extended:SetScale(scale)
+      extended:SetScale(Addon.UIScale * Addon:SetScale(unit))
 
 			-- Set Special-Case Regions
 			if style.customtext.show then
@@ -789,7 +785,9 @@ do
 
 	-- OnHideCastbar
 	function OnStopCasting(plate)
-    if not plate.TPFrame.visual.castbar:IsShown() then return end
+    --if not plate.TPFrame.visual.castbar:IsShown() then return end
+    -- Was initially necessary because of Lua errors when reloading, I think
+    -- Results in an error witch cast scaling/alpha because the following code is not executed then.
 
     UpdateReferences(plate)
     local castbar = extended.visual.castbar
@@ -800,7 +798,8 @@ do
     -- castbar:SetScript("OnUpdate", nil)
     -- castbar:Hide() -- hiden in castbar's OnUpdateCastbar function
 
-		UpdateIndicator_CustomScaleText()
+		--UpdateIndicator_CustomScaleText()
+    UpdateIndicator_CustomScale(extended, unit)
 		UpdateIndicator_CustomAlpha(extended, unit)
 	end
 
@@ -976,7 +975,6 @@ do
       --visual.spellicon:SetPoint(style.spellicon.anchor or "CENTER", extended, style.spellicon.x + db.x_target or 0, style.spellicon.y + db.y_target or 0)
 
       LastTargetPlate = plate
-
     end
 
     SetUpdateAll()
@@ -1285,6 +1283,7 @@ do
 --			local objectname = showgroup[index]
 --			visual[objectname]:SetShown(style[objectname].show)
 --		end
+    visual.threatborder:SetShown(style.threatborder.show)
 
 		-- Raid Icon Texture
 		if style and style.raidicon and style.raidicon.texture then
