@@ -18,7 +18,6 @@ local wipe = wipe
 local WorldFrame, UIParent, CreateFrame, GameFontNormal, UNKNOWNOBJECT, INTERRUPTED = WorldFrame, UIParent, CreateFrame, GameFontNormal, UNKNOWNOBJECT, INTERRUPTED
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local UnitName, UnitIsUnit, UnitReaction, UnitExists = UnitName, UnitIsUnit, UnitReaction, UnitExists
-local UnitPVPName = UnitPVPName
 local UnitClassification = UnitClassification
 local UnitLevel = UnitLevel
 local UnitIsPlayer = UnitIsPlayer
@@ -542,10 +541,12 @@ do
 	-- (This is essentially static data)
 	--------------------------------------------------------
 	function UpdateUnitIdentity(unitid)
+    local realm
 		unit.unitid = unitid
-    unit.name = UnitName(unitid)
-    unit.pvpname = UnitPVPName(unitid)
-    unit.rawName = unit.name  -- gsub(unit.name, " %(%*%)", "")
+    unit.name, realm = UnitName(unitid)
+    -- unit.pvpname = UnitPVPName(unitid)
+    -- unit.rawName = unit.name  -- gsub(unit.name, " %(%*%)", "")
+    -- unit.fullname = GetUnitName(unit.unitid, true)
 
 		local classification = UnitClassification(unitid)
 
@@ -930,8 +931,9 @@ do
       unit = extended.unit
 
       unit.name = UnitName(unitid)
-      unit.pvpname = UnitPVPName(unitid)
-      unit.rawName = unit.name
+      -- unit.fullname = GetUnitName(unit.unitid, true)
+      -- unit.pvpname = UnitPVPName(unitid)
+      -- unit.rawName = unit.name
 
       visual = extended.visual
       style = extended.style
