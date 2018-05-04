@@ -59,7 +59,7 @@ local function GetSpellName(number)
   return n
 end
 
-function Addon:UpdateCustomNameplates()
+function Addon:InitializeCustomNameplates()
   local db = TidyPlatesThreat.db.profile
 
   db.uniqueSettings.map = {}
@@ -71,7 +71,7 @@ function Addon:UpdateCustomNameplates()
 end
 
 local function UpdateSpecial() -- Need to add a way to update options table.
-  Addon:UpdateCustomNameplates()
+  Addon:InitializeCustomNameplates()
   t.Update()
 end
 
@@ -3439,6 +3439,19 @@ local function CreateOptionsTable()
                               descStyle = "inline",
                               arg = { "text", "deficit" }
                             },
+                            UseLocalizedUnit = {
+                              name = L["Localized Health Text"],
+                              type = "toggle",
+                              order = 4,
+                              width = "full",
+                              desc = L["If enabled, the truncated health text will be localized, i.e. local metric unit symbols (like k for thousands) will be used."],
+                              descStyle = "inline",
+                              set = function(info, val)
+                                SetValue(info, val)
+                                Addon:UpdateConfigurationStatusText()
+                              end,
+                              arg = { "text", "LocalizedUnitSymbol" }
+                            },
                           },
                         },
                       },
@@ -5557,15 +5570,12 @@ local function CreateOptionsTable()
                 options.args.Custom.args["#" .. k_c].name = "#" .. k_c .. ". " .. db.uniqueSettings[k_c].name
                 options.args.Custom.args["#" .. k_c].args.Header.name = db.uniqueSettings[k_c].name
                 options.args.Custom.args["#" .. k_c].args.Name.args.SetName.name = db.uniqueSettings[k_c].name
-                if tonumber(db.uniqueSettings[k_c].icon) == nil then
-                  options.args.Custom.args["#" .. k_c].args.Icon.args.Icon.image = db.uniqueSettings[k_c].icon
+                local spell_id = db.uniqueSettings[k_c].SpellID
+                if spell_id then
+                  local _, _, icon = GetSpellInfo(spell_id)
+                  options.args.Custom.args["#" .. k_c].args.Icon.args.Icon.image = icon
                 else
-                  local icon = select(3, GetSpellInfo(tonumber(db.uniqueSettings[k_c].icon)))
-                  if icon then
-                    options.args.Custom.args["#" .. k_c].args.Icon.args.Icon.image = icon
-                  else
-                    options.args.Custom.args["#" .. k_c].args.Icon.args.Icon.image = "Interface\\Icons\\Temp"
-                  end
+                  options.args.Custom.args["#" .. k_c].args.Icon.args.Icon.image = db.uniqueSettings[k_c].icon
                 end
                 UpdateSpecial()
                 clipboard = nil
@@ -5906,6 +5916,7 @@ function TidyPlatesThreat:ProfChange()
   Addon:CallbackWhenOoC(function() Addon:SetBaseNamePlateSize() end, L["Unable to change a setting while in combat."])
 
   TidyPlatesThreat:ReloadTheme()
+  TidyPlatesInternal:ForceUpdate()
 end
 
 function TidyPlatesThreat:OpenOptions()

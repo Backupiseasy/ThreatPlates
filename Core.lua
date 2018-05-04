@@ -183,6 +183,8 @@ function TidyPlatesThreat:ReloadTheme()
   ThreatPlatesWidgets.ConfigAuraWidgetFilter()
   ThreatPlatesWidgets.ConfigAuraWidget()
 
+  Addon:UpdateConfigurationStatusText()
+
   -- Castbars have to be disabled everytime we login
   if TidyPlatesThreat.db.profile.settings.castbar.show or TidyPlatesThreat.db.profile.settings.castbar.ShowInHeadlineView then
     TidyPlatesInternal:EnableCastBars()
@@ -367,9 +369,6 @@ function TidyPlatesThreat:OnEnable()
     SetNamePlateEnemyClickThrough(db.NamePlateEnemyClickThrough)
   end)
 
-  -- Get updates for changes regarding: Large Nameplates
-  hooksecurefunc("SetCVar", SetCVarHook)
-
   -- TODO: check with what this  was replaces
   --TidyPlatesUtilityInternal:EnableGroupWatcher()
   -- TPHUub: if LocalVars.AdvancedEnableUnitCache then TidyPlatesUtilityInternal:EnableUnitCache() else TidyPlatesUtilityInternal:DisableUnitCache() end
@@ -384,6 +383,9 @@ function TidyPlatesThreat:OnEnable()
   -- 	end
   -- end
   -- TidyPlatesWidgets:EnableTankWatch()
+
+  -- Get updates for changes regarding: Large Nameplates
+  hooksecurefunc("SetCVar", SetCVarHook)
 
   EnableEvents()
 end
