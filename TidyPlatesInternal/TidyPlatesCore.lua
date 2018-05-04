@@ -181,7 +181,7 @@ do
     local extended = CreateFrame("Frame",  "ThreatPlatesFrame" .. numChildren, UIParent)
     extended:Hide()
     extended:EnableMouse(false)
-    extended:SetAllPoints(plate)
+    --extended:SetAllPoints(plate)
     extended:SetFrameStrata("BACKGROUND")
     plate.TPFrame = extended
 
@@ -255,7 +255,6 @@ do
 		-- Cast Bar Frame - Highest Frame
 		visual.castborder = castbar.Border
 		visual.spellicon = castbar.Overlay:CreateTexture(nil, "ARTWORK", 7)
-
 		visual.spelltext = castbar.Overlay:CreateFontString(nil, "OVERLAY")
 		visual.spelltext:SetFont("Fonts\\FRIZQT__.TTF", 11)
 
@@ -368,8 +367,8 @@ do
 		unit.alpha = 0
 		unit.isTarget = false
 		unit.isMouseover = false
-    unit.unitid = unitid
-    unit.guid = UnitGUID(unitid)
+    unit.unitid = unitid         -- set in UpdateUnitIdentity
+    unit.guid = UnitGUID(unitid) -- set in UpdateUnitIdentity
     unit.isCasting = false
 
     --extended.unitcache = ClearIndices(extended.unitcache)
@@ -384,21 +383,22 @@ do
 		PlatesFading[plate] = EnableFadeIn
 		extended.requestedAlpha = 0
     --extended:Hide()		-- Yes, it seems counterintuitive, but...
-    --extended:SetAlpha(0)
+    extended:SetAlpha(0)
 
 		-- Graphics
 		visual.castbar:Hide()
 
     -- Widgets/Extensions
-		-- This goes here because a user might change widget settings after nameplates have been created
+    -- This goes here because a user might change widget settings after nameplates have been created
+    -- This should be called in OnNewNameplate as it requires not unit, here OnUpdate should be called
 		Addon:OnInitialize(extended, activetheme)
 
     UpdateUnitIdentity(unitid)
     UpdateUnitCondition(plate, unitid)
     CheckNameplateStyle()
-    --UpdateUnitContext(plate, unitid)
-    --ProcessUnitChanges()
-    --OnUpdateCastMidway(plate, unitid)
+    UpdateUnitContext(plate, unitid)
+
+    --OnUpdateNameplate(plate)
 
     if TidyPlatesThreat.db.profile.ShowFriendlyBlizzardNameplates and UnitReaction(unitid, "player") > 4 then
       plate.UnitFrame:Show()
@@ -430,9 +430,9 @@ do
       PlatesByGUID[unit.guid] = nil
     end
 
+    unit.isCasting = false
     visual.castbar:Hide()
-		--visual.castbar:SetScript("OnUpdate", nil)
-		unit.isCasting = false
+    --visual.castbar:SetScript("OnUpdate", nil)
 
 		-- Remove anything from the function queue
 		plate.UpdateMe = false
@@ -548,11 +548,9 @@ do
     -- unit.rawName = unit.name  -- gsub(unit.name, " %(%*%)", "")
     -- unit.fullname = GetUnitName(unit.unitid, true)
 
-		local classification = UnitClassification(unitid)
-
 		unit.isBoss = UnitLevel(unitid) == -1
-		unit.isDangerous = unit.isBoss
 
+		local classification = UnitClassification(unitid)
 		unit.isElite = EliteReference[classification]
 		unit.isRare = RareReference[classification]
 		unit.isMini = classification == "minus"
@@ -574,8 +572,6 @@ do
 		--unit.isMouseover = UnitIsUnit("mouseover", unitid)
 		unit.isTarget = UnitIsUnit("target", unitid)
 		unit.isFocus = UnitIsUnit("focus", unitid)
-
-		unit.guid = UnitGUID(unitid)
 
 		UpdateUnitCondition(plate, unitid)	-- This updates a bunch of properties
 
@@ -629,10 +625,6 @@ end		-- End of Nameplate/Unit Events
 -- Indicators: These functions update the color, texture, strings, and frames within a style.
 ---------------------------------------------------------------------------------------------------------------------
 do
-	local color = {}
-	local alpha, forcealpha, scale
-
-
 	-- UpdateIndicator_HealthBar: Updates the value on the health bar
 	function UpdateIndicator_HealthBar()
 		visual.healthbar:SetMinMaxValues(0, unit.healthmax)
@@ -654,12 +646,13 @@ do
 
 	-- UpdateIndicator_ThreatGlow: Updates the aggro glow
 	function UpdateIndicator_ThreatGlow()
-		if not style.threatborder.show then
-      return
+--		if not style.threatborder.show then
+--      return
+--    end
+    if visual.threatborder:IsShown() then
+      visual.threatborder:SetBackdropBorderColor(Addon:SetThreatColor(unit))
     end
-
-    visual.threatborder:SetBackdropBorderColor(Addon:SetThreatColor(unit))
-	end
+  end
 
 	function UpdateIndicator_Target()
     visual.target:SetShown(unit.isTarget and style.target.show)
@@ -718,8 +711,7 @@ do
 	function UpdateIndicator_CustomScaleText()
 		if unit.health and (extended.requestedAlpha > 0) then
 			-- Scale
-      scale = Addon.UIScale * Addon:SetScale(unit)
-      extended:SetScale(scale)
+      extended:SetScale(Addon.UIScale * Addon:SetScale(unit))
 
 			-- Set Special-Case Regions
 			if style.customtext.show then
@@ -780,7 +772,7 @@ do
 
 		visual.spelltext:SetText(text)
 		visual.spellicon:SetTexture(texture)
-    visual.spellicon:SetDrawLayer("BACKGROUND", 7)
+    --visual.spellicon:SetDrawLayer("ARTWORK", 7)
 
     castbar:SetAllColors(Addon:SetCastbarColor(unit))
     visual.castbar:SetShownInterruptOverlay(unit.spellIsShielded)
@@ -793,7 +785,10 @@ do
 
 	-- OnHideCastbar
 	function OnStopCasting(plate)
-    if not plate.TPFrame.visual.castbar:IsShown() then return end
+    --if not plate.TPFrame.visual.castbar:IsShown() then return end
+    if not plate.TPFrame.Active then return end
+    -- Was initially necessary because of Lua errors when reloading, I think
+    -- Results in an error witch cast scaling/alpha because the following code is not executed then.
 
     UpdateReferences(plate)
     local castbar = extended.visual.castbar
@@ -801,10 +796,11 @@ do
     castbar.IsChanneling = false
     unit.isCasting = false
 
-    --castBar:SetScript("OnUpdate", nil)
+    -- castbar:SetScript("OnUpdate", nil)
     -- castbar:Hide() -- hiden in castbar's OnUpdateCastbar function
 
-		UpdateIndicator_CustomScaleText()
+		--UpdateIndicator_CustomScaleText()
+    UpdateIndicator_CustomScale(extended, unit)
 		UpdateIndicator_CustomAlpha(extended, unit)
 	end
 
@@ -981,7 +977,6 @@ do
       --visual.spellicon:SetPoint(style.spellicon.anchor or "CENTER", extended, style.spellicon.x + db.x_target or 0, style.spellicon.y + db.y_target or 0)
 
       LastTargetPlate = plate
-
     end
 
     SetUpdateAll()
@@ -1010,12 +1005,11 @@ do
 
     local plate = GetNamePlateForUnit("mouseover")
     if plate then -- check for TPFrame to prevent accessing the personal resource bar
-      local unit = plate.TPFrame.unit
-      unit.isMouseover = true
-
-      Addon:Module_Mouseover_Update(plate.TPFrame)
-      UpdateIndicator_CustomScale(plate.TPFrame, unit)
-      UpdateIndicator_CustomAlpha(plate.TPFrame, unit)
+      local frame = plate.TPFrame
+      frame.unit.isMouseover = true
+      Addon:Module_Mouseover_Update(frame)
+      UpdateIndicator_CustomScale(frame, frame.unit)
+      UpdateIndicator_CustomAlpha(frame, frame.unit)
     end
   end
 
@@ -1046,7 +1040,7 @@ do
 		local plate = GetNamePlateForUnit(unitid)
 		if plate then
 			OnStartCasting(plate, unitid, true)
-      plate.TPFrame.visual.castbar:Show()
+      --late.TPFrame.visual.castbar:Show()
 		end
 	end
 
@@ -1193,16 +1187,16 @@ do
 	end
 
 	-- SetBarGroupObject
-	local function SetBarGroupObject(object, objectstyle, anchorTo)
-		if objectstyle then
-			SetAnchorGroupObject(object, objectstyle, anchorTo)
-			SetObjectBartexture(object, objectstyle.texture or EMPTY_TEXTURE, objectstyle.orientation or "HORIZONTAL")
-			if objectstyle.backdrop then
-				object:SetBackdropTexture(objectstyle.backdrop)
-			end
-			object:SetTexCoord(objectstyle.left, objectstyle.right, objectstyle.top, objectstyle.bottom)
-		end
-	end
+--	local function SetBarGroupObject(object, objectstyle, anchorTo)
+--		if objectstyle then
+--			SetAnchorGroupObject(object, objectstyle, anchorTo)
+--			SetObjectBartexture(object, objectstyle.texture or EMPTY_TEXTURE, objectstyle.orientation or "HORIZONTAL")
+--			if objectstyle.backdrop then
+--				object:SetBackdropTexture(objectstyle.backdrop)
+--			end
+--			object:SetTexCoord(objectstyle.left, objectstyle.right, objectstyle.top, objectstyle.bottom)
+--		end
+--	end
 
 	-- Style Groups
 	local fontgroup = {"name", "level", "spelltext", "customtext"}
@@ -1213,11 +1207,10 @@ do
     -- "threatborder", "castborder", "castnostop",
   }
 
-	local bargroup = { } --"castbar" }
+	--local bargroup = { } --"castbar" }
 
 	local texturegroup = {
-    "eliteicon",
-    "skullicon", "target", "spellicon",
+    "eliteicon", "skullicon", "target", "spellicon",
     -- "highlight", threatborder, "castborder", "castnostop",
   }
 
@@ -1228,11 +1221,17 @@ do
 		local index
 
 		-- Frame
-    --SetAnchorGroupObject(extended, style.frame, nameplate)
     SetObjectAnchor(extended, style.frame.anchor or "CENTER", nameplate, style.frame.x or 0, style.frame.y or 0)
-    extended:SetAllPoints(nameplate)
+    extended:SetSize(style.healthbar.width, style.healthbar.height)
 
-		-- Anchorgroup
+--    if not extended.TestBackground then
+--      extended.TestBackground = extended:CreateTexture(nil, "BACKGROUND")
+--      extended.TestBackground:SetAllPoints(extended)
+--      extended.TestBackground:SetTexture(ThreatPlates.Media:Fetch('statusbar', TidyPlatesThreat.db.profile.AuraWidget.BackgroundTexture))
+--      extended.TestBackground:SetVertexColor(0,0,0,0.5)
+--    end
+
+    -- Anchorgroup
 		for index = 1, #anchorgroup do
 			local objectname = anchorgroup[index]
 			local object, objectstyle = visual[objectname], style[objectname]
@@ -1246,14 +1245,14 @@ do
 		end
 
     -- Bars
-		for index = 1, #bargroup do
-			local objectname = bargroup[index]
-			local object, objectstyle = visual[objectname], style[objectname]
-
-			if objectstyle then
-        SetBarGroupObject(object, objectstyle, extended)
-      end
-    end
+--		for index = 1, #bargroup do
+--			local objectname = bargroup[index]
+--			local object, objectstyle = visual[objectname], style[objectname]
+--
+--			if objectstyle then
+--        SetBarGroupObject(object, objectstyle, extended)
+--      end
+--    end
 
 		-- Healthbar
 		SetAnchorGroupObject(visual.healthbar, style.healthbar, extended)
@@ -1267,6 +1266,10 @@ do
     visual.castbar:SetStatusBarTexture(style.castbar.texture or EMPTY_TEXTURE)
     visual.castbar:SetStatusBarBackdrop(style.castbar.backdrop, style.castborder.texture, style.castborder.edgesize, style.castborder.offset)
     visual.castborder:SetShown(style.castborder.show)
+    -- Set castbar color here otherwise it may be shown sometimes with non-initialized backdrop color (white)
+    if visual.castbar:IsShown() then
+      visual.castbar:SetAllColors(Addon:SetCastbarColor(unit))
+    end
 
     -- Texture
     for index = 1, #texturegroup do
@@ -1282,6 +1285,7 @@ do
 --			local objectname = showgroup[index]
 --			visual[objectname]:SetShown(style[objectname].show)
 --		end
+    visual.threatborder:SetShown(style.threatborder.show)
 
 		-- Raid Icon Texture
 		if style and style.raidicon and style.raidicon.texture then
@@ -1301,7 +1305,7 @@ do
     visual.spelltext:ClearAllPoints()
     --visual.spellicon:ClearAllPoints()
 
-    if unit.isTarget then
+    if UnitIsUnit("target", unit.unitid) then
       local db = TidyPlatesThreat.db.profile.settings.castbar
       SetObjectAnchor(visual.castbar, style.castbar.anchor or "CENTER", extended, style.castbar.x + db.x_target or 0, style.castbar.y + db.y_target or 0)
       SetObjectAnchor(visual.spelltext, style.spelltext.anchor or "CENTER", extended, style.spelltext.x + db.x_target or 0, style.spelltext.y + db.y_target or 0)
@@ -1319,9 +1323,10 @@ do
       visual.eliteborder:Hide()
       visual.eliteicon:Hide()
     end
-		if not unit.isBoss then visual.skullicon:Hide() end
 
+		if not unit.isBoss then visual.skullicon:Hide() end
 		if not unit.isTarget then visual.target:Hide() end
+		-- TOODO: does not really work with ForceUpdate() as isMarked is not set there (no call to UpdateUnitCondition)
 		if not unit.isMarked then visual.raidicon:Hide() end
   end
 end

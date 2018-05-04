@@ -59,7 +59,7 @@ local function GetSpellName(number)
   return n
 end
 
-local function UpdateSpecial() -- Need to add a way to update options table.
+function Addon:InitializeCustomNameplates()
   local db = TidyPlatesThreat.db.profile
 
   db.uniqueSettings.map = {}
@@ -68,7 +68,10 @@ local function UpdateSpecial() -- Need to add a way to update options table.
       db.uniqueSettings.map[unique_unit.name] = unique_unit
     end
   end
+end
 
+local function UpdateSpecial() -- Need to add a way to update options table.
+  Addon:InitializeCustomNameplates()
   t.Update()
 end
 
@@ -1309,7 +1312,6 @@ local function CreateBlizzardSettings()
         args = {
           UIScale = {
             name = L["UI Scale"],
-            desc = L[""],
             order = 10,
             type = "range",
             min = 0.64,
@@ -1320,10 +1322,8 @@ local function CreateBlizzardSettings()
           },
           IgnoreUIScale = {
             name = L["Ignore UI Scale"],
-            desc = L["Legacy for Threat Plates defaults"],
             order = 20,
             type = "toggle",
-            desc = L[""],
             set = function(info, val)
               SetValue(info, val)
               db.Scale.PixelPerfectUI = not val and db.Scale.PixelPerfectUI
@@ -1334,10 +1334,8 @@ local function CreateBlizzardSettings()
           },
           PixelPerfectUI = {
             name = L["Pixel-Perfect UI"],
-            desc = L[""],
             order = 30,
             type = "toggle",
-            desc = L[""],
             set = function(info, val)
               SetValue(info, val)
               db.Scale.IgnoreUIScale = not val and db.Scale.IgnoreUIScale
@@ -1493,7 +1491,7 @@ local function CreateBlizzardSettings()
         inline = true,
         args = {
           OtherTopInset = {
-            name = L["Non-Self Top Inset"],
+            name = L["Top Inset"],
             order = 10,
             type = "range",
             min = -0.2,
@@ -1504,7 +1502,7 @@ local function CreateBlizzardSettings()
             arg = "nameplateOtherTopInset",
           },
           OtherBottomInset = {
-            name = L["Non-Self Bottom Inset"],
+            name = L["Bottom Inset"],
             order = 20,
             type = "range",
             min = -0.2,
@@ -1533,7 +1531,7 @@ local function CreateBlizzardSettings()
             max = 0.3,
             step = 0.01,
             isPercent = true,
-            desc = L["The inset from the top (in screen percent) that large nameplates are clamped to."],
+            desc = L["The inset from the bottom (in screen percent) that large nameplates are clamped to."],
             arg = "nameplateLargeBottomInset",
           },
         },
@@ -2367,14 +2365,14 @@ local function CreateOptionsTable()
                           name = L["Full Absorbs"],
                           order = 120,
                           type = "toggle",
-                          desc = L["Always shows the full amount of absorbs on a unit. In overabsorp situations, the absorb bar ist shifted to the left."],
+                          desc = L["Always shows the full amount of absorbs on a unit. In overabsorb situations, the absorbs bar ist shifted to the left."],
                           arg = { "settings", "healthbar", "AlwaysFullAbsorb" },
                         },
                         OverlayTexture = {
                           name = L["Striped Texture"],
                           order = 130,
                           type = "toggle",
-                          desc = L["Use a striped texture for the absorb overlay. Always enabled if full absorbs are shown."],
+                          desc = L["Use a striped texture for the absorbs overlay. Always enabled if full absorbs are shown."],
                           get = function(info) return GetValue(info) or db.settings.healthbar.AlwaysFullAbsorb end,
                           disabled = function() return db.settings.healthbar.AlwaysFullAbsorb end,
                           arg = { "settings", "healthbar", "OverlayTexture" },
@@ -3441,6 +3439,19 @@ local function CreateOptionsTable()
                               descStyle = "inline",
                               arg = { "text", "deficit" }
                             },
+                            UseLocalizedUnit = {
+                              name = L["Localized Health Text"],
+                              type = "toggle",
+                              order = 4,
+                              width = "full",
+                              desc = L["If enabled, the truncated health text will be localized, i.e. local metric unit symbols (like k for thousands) will be used."],
+                              descStyle = "inline",
+                              set = function(info, val)
+                                SetValue(info, val)
+                                Addon:UpdateConfigurationStatusText()
+                              end,
+                              arg = { "text", "LocalizedUnitSymbol" }
+                            },
                           },
                         },
                       },
@@ -3555,172 +3566,172 @@ local function CreateOptionsTable()
             },
             RaidMarks = CreateRaidMarksSettings(),
             BlizzardSettings = CreateBlizzardSettings(),
-            TestSettings = {
-              name = L["Test Settings"],
-              type = "group",
-              order = 1000,
-              set = SetThemeValue,
-              hidden = true,
-              args = {
-                HealthHeaderBorder = { name = L["Healthbar Border"], type = "header", order = 10, },
-                HealthBorder = {
-                  type = "select",
-                  order = 20,
-                  name = L["Border"],
-                  dialogControl = "LSM30_Border",
-                  values = AceGUIWidgetLSMlists.border,
-                  arg = { "settings", "healthborder", "texture" },
-                },
-                HealthBorderEdgeSize = {
-                  name = L["Edge Size"],
-                  order = 30,
-                  type = "range",
-                  min = 0, max = 32, step = 0.5,
-                  set = SetThemeValue,
-                  arg = { "settings", "healthborder", "EdgeSize" },
-                },
-                HealthBorderOffset = {
-                  name = L["Offset"],
-                  order = 40,
-                  type = "range",
-                  min = -16, max = 16, step = 0.5,
-                  set = SetThemeValue,
-                  arg = { "settings", "healthborder", "Offset" },
-                },
-                EliteHeaderBorder = { name = L["Elite Border"], type = "header", order = 110, },
-                EliteBorder = {
-                  type = "select",
-                  order = 120,
-                  name = L["Elite Border"],
-                  values = { TP_EliteBorder_Default = "Default", TP_EliteBorder_Thin = "Thin" },
-                  arg = { "settings", "elitehealthborder", "texture" }
-                },
-                EliteBorderEdgeSize = {
-                  name = L["Edge Size"],
-                  order = 130,
-                  type = "range",
-                  min = 0, max = 32, step = 0.5,
-                  set = SetThemeValue,
-                  arg = { "settings", "elitehealthborder", "EdgeSize" },
-                },
-                EliteBorderOffset = {
-                  name = L["Offset"],
-                  order = 140,
-                  type = "range",
-                  min = -16, max = 16, step = 0.5,
-                  set = SetThemeValue,
-                  arg = { "settings", "elitehealthborder", "Offset" },
-                },
-                TargetHeaderBorder = { name = L["Target Border"], type = "header", order = 210, },
-                TargetBorder = {
-                  type = "select",
-                  order = 220,
-                  name = L["Target Border"],
-                  values = { default = "Default", squarethin = "Thin Square" },
-                  arg = { "targetWidget", "theme" },
-                },
-                TargetBorderEdgeSize = {
-                  name = L["Edge Size"],
-                  order = 230,
-                  type = "range",
-                  min = 0, max = 32, step = 1,
-                  set = SetThemeValue,
-                  arg = { "targetWidget", "EdgeSize" },
-                },
-                TargetBorderOffset = {
-                  name = L["Offset"],
-                  order = 240,
-                  type = "range",
-                  min = -16, max = 16, step = 0.5,
-                  set = SetThemeValue,
-                  arg = { "targetWidget", "Offset" },
-                },
-                MouseoverHeaderBorder = { name = L["Mouseover Border"], type = "header", order = 310, },
-                MouseoverBorderEdgeSize = {
-                  name = L["Edge Size"],
-                  order = 330,
-                  type = "range",
-                  min = 0, max = 32, step = 0.5,
-                  set = SetThemeValue,
-                  arg = { "settings", "highlight", "EdgeSize" },
-                },
-                MouseoverBorderOffset = {
-                  name = L["Offset"],
-                  order = 340,
-                  type = "range",
-                  min = -16, max = 16, step = 0.5,
-                  set = SetThemeValue,
-                  arg = { "settings", "highlight", "Offset" },
-                },
-                ThreatHeaderBorder = { name = L["Threat Glow Border"], type = "header", order = 410, },
-                ThreatBorderEdgeSize = {
-                  name = L["Edge Size"],
-                  order = 430,
-                  type = "range",
-                  min = 0, max = 32, step = 0.5,
-                  set = SetThemeValue,
-                  arg = { "settings", "threatborder", "EdgeSize" },
-                },
-                ThreatBorderOffset = {
-                  name = L["Offset"],
-                  order = 440,
-                  type = "range",
-                  min = -16, max = 16, step = 0.5,
-                  set = SetThemeValue,
-                  arg = { "settings", "threatborder", "Offset" },
-                },
-                TestHeaderBorder = { name = L["Test Widget"], type = "header", order = 500, },
-                Width = GetRangeEntry(L["Bar Width"], 501, { "TestWidget", "BarWidth" }, 5, 500),
-                Height = GetRangeEntry(L["Bar Height"], 502, { "TestWidget", "BarHeight" }, 1, 100),
-                TestBarTexture = {
-                  name = L["Foreground"],
-                  type = "select",
-                  order = 505,
-                  dialogControl = "LSM30_Statusbar",
-                  values = AceGUIWidgetLSMlists.statusbar,
-                  set = SetThemeValue,
-                  arg = { "TestWidget", "BarTexture" },
-                },
-                TestBarBorder = {
-                  type = "select",
-                  order = 510,
-                  name = L["Border Texture"],
-                  dialogControl = "LSM30_Border",
-                  values = AceGUIWidgetLSMlists.border,
-                  arg = { "TestWidget", "BorderTexture" },
-                },
-                TestBarBackgroundTexture = {
-                  name = L["Background"],
-                  type = "select",
-                  order = 520,
-                  dialogControl = "LSM30_Statusbar",
-                  values = AceGUIWidgetLSMlists.statusbar,
-                  arg = { "TestWidget", "BorderBackground" },
-                },
-                TestBorderEdgeSize = {
-                  name = L["Edge Size"],
-                  order = 530,
-                  type = "range",
-                  min = 0, max = 32, step = 0.1,
-                  arg = { "TestWidget", "EdgeSize" },
-                },
-                TestBorderOffset = {
-                  name = L["Offset"],
-                  order = 540,
-                  type = "range",
-                  min = -16, max = 16, step = 0.1,
-                  arg = { "TestWidget", "Offset" },
-                },
-                TestBorderInset = {
-                  name = L["Inset"],
-                  order = 545,
-                  type = "range",
-                  min = -16, max = 16, step = 0.1,
-                  arg = { "TestWidget", "Inset" },
-                },
-                TestSacle = GetScaleEntry(L["Scale"], 550, { "TestWidget", "Scale" }, nil, 0, 5.0)
-              },
-            },
+--            TestSettings = {
+--              name = "Test Settings",
+--              type = "group",
+--              order = 1000,
+--              set = SetThemeValue,
+--              hidden = true,
+--              args = {
+--                HealthHeaderBorder = { name = "Healthbar Border", type = "header", order = 10, },
+--                HealthBorder = {
+--                  type = "select",
+--                  order = 20,
+--                  name = "Border",
+--                  dialogControl = "LSM30_Border",
+--                  values = AceGUIWidgetLSMlists.border,
+--                  arg = { "settings", "healthborder", "texture" },
+--                },
+--                HealthBorderEdgeSize = {
+--                  name = "Edge Size",
+--                  order = 30,
+--                  type = "range",
+--                  min = 0, max = 32, step = 0.5,
+--                  set = SetThemeValue,
+--                  arg = { "settings", "healthborder", "EdgeSize" },
+--                },
+--                HealthBorderOffset = {
+--                  name = "Offset",
+--                  order = 40,
+--                  type = "range",
+--                  min = -16, max = 16, step = 0.5,
+--                  set = SetThemeValue,
+--                  arg = { "settings", "healthborder", "Offset" },
+--                },
+--                EliteHeaderBorder = { name = L["Elite Border"], type = "header", order = 110, },
+--                EliteBorder = {
+--                  type = "select",
+--                  order = 120,
+--                  name = "Elite Border",
+--                  values = { TP_EliteBorder_Default = "Default", TP_EliteBorder_Thin = "Thin" },
+--                  arg = { "settings", "elitehealthborder", "texture" }
+--                },
+--                EliteBorderEdgeSize = {
+--                  name = "Edge Size",
+--                  order = 130,
+--                  type = "range",
+--                  min = 0, max = 32, step = 0.5,
+--                  set = SetThemeValue,
+--                  arg = { "settings", "elitehealthborder", "EdgeSize" },
+--                },
+--                EliteBorderOffset = {
+--                  name = "Offset",
+--                  order = 140,
+--                  type = "range",
+--                  min = -16, max = 16, step = 0.5,
+--                  set = SetThemeValue,
+--                  arg = { "settings", "elitehealthborder", "Offset" },
+--                },
+--                TargetHeaderBorder = { name = "Target Border", type = "header", order = 210, },
+--                TargetBorder = {
+--                  type = "select",
+--                  order = 220,
+--                  name = "Target Border",
+--                  values = { default = "Default", squarethin = "Thin Square" },
+--                  arg = { "targetWidget", "theme" },
+--                },
+--                TargetBorderEdgeSize = {
+--                  name = "Edge Size",
+--                  order = 230,
+--                  type = "range",
+--                  min = 0, max = 32, step = 1,
+--                  set = SetThemeValue,
+--                  arg = { "targetWidget", "EdgeSize" },
+--                },
+--                TargetBorderOffset = {
+--                  name = "Offset",
+--                  order = 240,
+--                  type = "range",
+--                  min = -16, max = 16, step = 0.5,
+--                  set = SetThemeValue,
+--                  arg = { "targetWidget", "Offset" },
+--                },
+--                MouseoverHeaderBorder = { name = "Mouseover Border", type = "header", order = 310, },
+--                MouseoverBorderEdgeSize = {
+--                  name = L["Edge Size"],
+--                  order = 330,
+--                  type = "range",
+--                  min = 0, max = 32, step = 0.5,
+--                  set = SetThemeValue,
+--                  arg = { "settings", "highlight", "EdgeSize" },
+--                },
+--                MouseoverBorderOffset = {
+--                  name = "Offset",
+--                  order = 340,
+--                  type = "range",
+--                  min = -16, max = 16, step = 0.5,
+--                  set = SetThemeValue,
+--                  arg = { "settings", "highlight", "Offset" },
+--                },
+--                ThreatHeaderBorder = { name = "Threat Glow Border", type = "header", order = 410, },
+--                ThreatBorderEdgeSize = {
+--                  name = "Edge Size",
+--                  order = 430,
+--                  type = "range",
+--                  min = 0, max = 32, step = 0.5,
+--                  set = SetThemeValue,
+--                  arg = { "settings", "threatborder", "EdgeSize" },
+--                },
+--                ThreatBorderOffset = {
+--                  name = "Offset",
+--                  order = 440,
+--                  type = "range",
+--                  min = -16, max = 16, step = 0.5,
+--                  set = SetThemeValue,
+--                  arg = { "settings", "threatborder", "Offset" },
+--                },
+--                TestHeaderBorder = { name = "Test Widget", type = "header", order = 500, },
+--                Width = GetRangeEntry("Bar Width", 501, { "TestWidget", "BarWidth" }, 5, 500),
+--                Height = GetRangeEntry("Bar Height", 502, { "TestWidget", "BarHeight" }, 1, 100),
+--                TestBarTexture = {
+--                  name = "Foreground",
+--                  type = "select",
+--                  order = 505,
+--                  dialogControl = "LSM30_Statusbar",
+--                  values = AceGUIWidgetLSMlists.statusbar,
+--                  set = SetThemeValue,
+--                  arg = { "TestWidget", "BarTexture" },
+--                },
+--                TestBarBorder = {
+--                  type = "select",
+--                  order = 510,
+--                  name = "Border Texture",
+--                  dialogControl = "LSM30_Border",
+--                  values = AceGUIWidgetLSMlists.border,
+--                  arg = { "TestWidget", "BorderTexture" },
+--                },
+--                TestBarBackgroundTexture = {
+--                  name = "Background",
+--                  type = "select",
+--                  order = 520,
+--                  dialogControl = "LSM30_Statusbar",
+--                  values = AceGUIWidgetLSMlists.statusbar,
+--                  arg = { "TestWidget", "BorderBackground" },
+--                },
+--                TestBorderEdgeSize = {
+--                  name = "Edge Size",
+--                  order = 530,
+--                  type = "range",
+--                  min = 0, max = 32, step = 0.1,
+--                  arg = { "TestWidget", "EdgeSize" },
+--                },
+--                TestBorderOffset = {
+--                  name = "Offset",
+--                  order = 540,
+--                  type = "range",
+--                  min = -16, max = 16, step = 0.1,
+--                  arg = { "TestWidget", "Offset" },
+--                },
+--                TestBorderInset = {
+--                  name = "Inset",
+--                  order = 545,
+--                  type = "range",
+--                  min = -16, max = 16, step = 0.1,
+--                  arg = { "TestWidget", "Inset" },
+--                },
+--                TestSacle = GetScaleEntry("Scale", 550, { "TestWidget", "Scale" }, nil, 0, 5.0)
+--              },
+--            },
           },
         },
         ThreatOptions = {
@@ -5470,6 +5481,7 @@ local function CreateOptionsTable()
     CustomOpts["#" .. k_c] = {
       name = "#" .. k_c .. ". " .. db.uniqueSettings[k_c].name,
       type = "group",
+      type = "group",
       --disabled = function() if db.totemSettings[totemID[k_c][2]][1] then return false else return true end end,
       order = CustomOpts_OrderCnt,
       args = {
@@ -5558,15 +5570,12 @@ local function CreateOptionsTable()
                 options.args.Custom.args["#" .. k_c].name = "#" .. k_c .. ". " .. db.uniqueSettings[k_c].name
                 options.args.Custom.args["#" .. k_c].args.Header.name = db.uniqueSettings[k_c].name
                 options.args.Custom.args["#" .. k_c].args.Name.args.SetName.name = db.uniqueSettings[k_c].name
-                if tonumber(db.uniqueSettings[k_c].icon) == nil then
-                  options.args.Custom.args["#" .. k_c].args.Icon.args.Icon.image = db.uniqueSettings[k_c].icon
+                local spell_id = db.uniqueSettings[k_c].SpellID
+                if spell_id then
+                  local _, _, icon = GetSpellInfo(spell_id)
+                  options.args.Custom.args["#" .. k_c].args.Icon.args.Icon.image = icon
                 else
-                  local icon = select(3, GetSpellInfo(tonumber(db.uniqueSettings[k_c].icon)))
-                  if icon then
-                    options.args.Custom.args["#" .. k_c].args.Icon.args.Icon.image = icon
-                  else
-                    options.args.Custom.args["#" .. k_c].args.Icon.args.Icon.image = "Interface\\Icons\\Temp"
-                  end
+                  options.args.Custom.args["#" .. k_c].args.Icon.args.Icon.image = db.uniqueSettings[k_c].icon
                 end
                 UpdateSpecial()
                 clipboard = nil
@@ -5759,15 +5768,12 @@ local function CreateOptionsTable()
               disabled = function() return not db.uniqueSettings[k_c].showIcon or not db.uniqueWidget.ON end,
               order = 2,
               image = function()
-                if tonumber(db.uniqueSettings[k_c].icon) == nil then
-                  return db.uniqueSettings[k_c].icon
+                local spell_id = db.uniqueSettings[k_c].SpellID
+                if spell_id then
+                  local _, _, icon = GetSpellInfo(spell_id)
+                  return icon
                 else
-                  local icon = select(3, GetSpellInfo(tonumber(db.uniqueSettings[k_c].icon)))
-                  if icon then
-                    return icon
-                  else
-                    return "Interface\\Icons\\Temp"
-                  end
+                  return db.uniqueSettings[k_c].icon
                 end
               end,
               imageWidth = 64,
@@ -5786,9 +5792,20 @@ local function CreateOptionsTable()
               disabled = function() return not db.uniqueSettings[k_c].showIcon or not db.uniqueWidget.ON end,
               width = "full",
               set = function(info, val)
-                if tonumber(val) then
-                  val = select(3, GetSpellInfo(tonumber(val)))
+                local spell_id = tonumber(val)
+                if spell_id then -- no string, so val should be a spell ID
+                  local _, _, icon = GetSpellInfo(spell_id)
+                  if icon then
+                    db.uniqueSettings[k_c].SpellID = spell_id
+                    val = select(3, GetSpellInfo(spell_id))
+                  else
+                    t.Print("Invalid spell ID for custom nameplate icon: " .. val, true)
+                    db.uniqueSettings[k_c].SpellID = nil
+                  end
+                else
+                  db.uniqueSettings[k_c].SpellID = nil
                 end
+                -- Either store the path to the icon or the icon ID
                 SetValue(info, val)
                 if val then
                   options.args.Custom.args["#" .. k_c].args.Icon.args.Icon.image = val
@@ -5796,6 +5813,14 @@ local function CreateOptionsTable()
                   options.args.Custom.args["#" .. k_c].args.Icon.args.Icon.image = "Interface\\Icons\\Temp"
                 end
                 UpdateSpecial()
+              end,
+              get = function(info)
+                local spell_id = db.uniqueSettings[k_c].SpellID
+                if spell_id then
+                  return tostring(spell_id)
+                else
+                  return GetValue(info)
+                end
               end,
               arg = { "uniqueSettings", k_c, "icon" },
             },
@@ -5891,6 +5916,7 @@ function TidyPlatesThreat:ProfChange()
   Addon:CallbackWhenOoC(function() Addon:SetBaseNamePlateSize() end, L["Unable to change a setting while in combat."])
 
   TidyPlatesThreat:ReloadTheme()
+  TidyPlatesInternal:ForceUpdate()
 end
 
 function TidyPlatesThreat:OpenOptions()

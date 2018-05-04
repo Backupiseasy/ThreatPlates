@@ -29,10 +29,10 @@ local function Create(self,name)
     },
 
     healthborder = {
-      texture = ThreatPlates.Art .. db.healthborder.texture,
+      texture = (db.healthborder.show and ThreatPlates.Art .. db.healthborder.texture) or EMPTY_TEXTURE,
       edgesize = db.healthborder.EdgeSize,
       offset = db.healthborder.Offset,
-      show = db.healthborder.show,
+      show = true,
     },
 
     eliteborder = {

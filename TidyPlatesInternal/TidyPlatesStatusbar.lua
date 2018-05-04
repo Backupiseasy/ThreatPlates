@@ -63,7 +63,7 @@ local function OnSizeChangedCastbar(self, width, height)
   self.InterruptShield:SetSize(14 * scale_factor, 16 * scale_factor)
 end
 
-local function SetAllColorsNew(self, rBar, gBar, bBar, aBar, rBackdrop, gBackdrop, bBackdrop, aBackdrop)
+local function SetAllColors(self, rBar, gBar, bBar, aBar, rBackdrop, gBackdrop, bBackdrop, aBackdrop)
   self:SetStatusBarColor(rBar or 1, gBar or 1, bBar or 1, aBar or 1)
   self.Border:SetBackdropColor(rBackdrop or 1, gBackdrop or 1, bBackdrop or 1, aBackdrop or 1)
 end
@@ -115,7 +115,7 @@ function Addon:CreateHealthbar(parent)
   })
   frame.ThreatBorder:SetBackdropBorderColor(0, 0, 0, 0) -- Transparent color as default
 
-	frame.SetAllColors = SetAllColorsNew
+	frame.SetAllColors = SetAllColors
   frame.SetTexCoord = function() end
 	frame.SetBackdropTexCoord = function() end
   frame.SetStatusBarBackdrop = SetStatusBarBackdropHealthbar
@@ -127,9 +127,15 @@ end
 
 local function SetShownInterruptOverlay(self, show)
   if show then
-    self.InterruptBorder:Show()
-    self.InterruptOverlay:Show()
-    self.InterruptShield:SetShown(TidyPlatesThreat.db.profile.settings.castnostop.ShowInterruptShield)
+    local db = TidyPlatesThreat.db.profile.settings
+    self.InterruptShield:SetShown(db.castnostop.ShowInterruptShield)
+    if db.castborder.show and db.castnostop.ShowOverlay then
+      self.InterruptBorder:Show()
+      self.InterruptOverlay:Show()
+    else
+      self.InterruptBorder:Hide()
+      self.InterruptOverlay:Hide()
+    end
   else
     self.InterruptBorder:Hide()
     self.InterruptOverlay:Hide()
@@ -163,8 +169,8 @@ function Addon:CreateCastbar(parent)
   -- frame.InterruptBorder:SetFrameLevel(frame:GetFrameLevel())
   -- frame.Overlay:SetFrameLevel(parent:GetFrameLevel() + 1)
 
-  frame.InterruptOverlay =  frame.Overlay:CreateTexture(nil, "BORDER")
-  frame.InterruptShield = frame.Overlay:CreateTexture(nil, "ARTWORK")
+  frame.InterruptOverlay = frame.Overlay:CreateTexture(nil, "BORDER", 0)
+  frame.InterruptShield = frame.Overlay:CreateTexture(nil, "ARTWORK", -8)
 
   frame.InterruptOverlay:SetTexture(ART_PATH .. "Striped_Texture")
   frame.InterruptOverlay:SetAllPoints(frame)
@@ -174,7 +180,7 @@ function Addon:CreateCastbar(parent)
   frame.InterruptShield:SetTexture(ART_PATH .. "Interrupt_Shield")
   frame.InterruptShield:SetPoint("CENTER", frame, "LEFT")
 
-  frame.SetAllColors = SetAllColorsNew
+  frame.SetAllColors = SetAllColors
   frame.SetTexCoord = function() end
   frame.SetBackdropTexCoord = function() end
   frame.SetStatusBarBackdrop = SetStatusBarBackdropCastbar
@@ -236,17 +242,17 @@ function Addon:ConfigCastbar()
 
         castbar:SetScript("OnUpdate", function(self, elapsed)
           if ShowOnUnit(plate.TPFrame.unit) then
-            self:SetAllColors(Addon:SetCastbarColor(plate.TPFrame.unit))
             self:SetMinMaxValues(0, 100)
             self:SetValue(50)
             visual.spellicon:SetTexture(GetSpellTexture(252616))
             visual.spelltext:SetText("Cosmic Beacon")
 
-            self:Show()
             self.Border:SetShown(plate.TPFrame.style.castborder.show)
             self:SetShownInterruptOverlay(plate.TPFrame.style.castnostop.show)
+            self.InterruptShield:SetShown(TidyPlatesThreat.db.profile.settings.castnostop.ShowInterruptShield)
             visual.spelltext:SetShown(plate.TPFrame.style.spelltext.show)
             visual.spellicon:SetShown(plate.TPFrame.style.spellicon.show)
+            self:Show()
           else
             self:SetValue(0) -- don't use self:_Hide() here, otherwise OnUpdate will never be called again
             self.Border:Hide()
@@ -258,8 +264,16 @@ function Addon:ConfigCastbar()
           end
         end)
 
+        -- Fix an drawing error where the castbar background is shown white for a few milliseconds when changing
+        -- a castbar setting several times in a second (e.g., moving a position slider left/right several times).
+--        castbar.SetStatusBarBackdrop = function(self, backdrop_texture, edge_texture, edge_size, offset)
+--          SetStatusBarBackdropCastbar(self, backdrop_texture, edge_texture, edge_size, offset)
+--          self:SetAllColors(Addon:SetCastbarColor(plate.TPFrame.unit))
+--        end
+
         castbar._Hide = castbar.Hide
         castbar.Hide = function() end
+
         castbar:Show()
         EnabledConfigMode = true
         TidyPlatesInternal:ForceUpdate()
@@ -272,7 +286,7 @@ function Addon:ConfigCastbar()
   else
     local castbar = ConfigModePlate.TPFrame.visual.castbar
     castbar:SetScript("OnUpdate", OnUpdateCastBar)
-    --castbar:SetScript("OnUpdate", nil)
+    --castbar.SetStatusBarBackdropCastbar = SetStatusBarBackdropCastbar
     castbar.Hide = castbar._Hide
     castbar:Hide()
     EnabledConfigMode = false

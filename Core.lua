@@ -183,6 +183,8 @@ function TidyPlatesThreat:ReloadTheme()
   ThreatPlatesWidgets.ConfigAuraWidgetFilter()
   ThreatPlatesWidgets.ConfigAuraWidget()
 
+  Addon:UpdateConfigurationStatusText()
+
   -- Castbars have to be disabled everytime we login
   if TidyPlatesThreat.db.profile.settings.castbar.show or TidyPlatesThreat.db.profile.settings.castbar.ShowInHeadlineView then
     TidyPlatesInternal:EnableCastBars()
@@ -254,7 +256,7 @@ function TidyPlatesThreat:StartUp()
     StaticPopup_Show("IncompatibleAddon", "KuiNameplates")
     --db.StandalonePopup = true
   end
-  if IsAddOnLoaded("ElvUI") then
+  if IsAddOnLoaded("ElvUI") and ElvUI[1].private.nameplates.enable then
     StaticPopup_Show("IncompatibleAddon", "ElvUI Nameplates")
     --db.StandalonePopup = true
   end
@@ -365,9 +367,6 @@ function TidyPlatesThreat:OnEnable()
     SetNamePlateEnemyClickThrough(db.NamePlateEnemyClickThrough)
   end)
 
-  -- Get updates for changes regarding: Large Nameplates
-  hooksecurefunc("SetCVar", SetCVarHook)
-
   -- TODO: check with what this  was replaces
   --TidyPlatesUtilityInternal:EnableGroupWatcher()
   -- TPHUub: if LocalVars.AdvancedEnableUnitCache then TidyPlatesUtilityInternal:EnableUnitCache() else TidyPlatesUtilityInternal:DisableUnitCache() end
@@ -382,6 +381,9 @@ function TidyPlatesThreat:OnEnable()
   -- 	end
   -- end
   -- TidyPlatesWidgets:EnableTankWatch()
+
+  -- Get updates for changes regarding: Large Nameplates
+  hooksecurefunc("SetCVar", SetCVarHook)
 
   EnableEvents()
 end
@@ -583,7 +585,7 @@ function TidyPlatesThreat:UNIT_ABSORB_AMOUNT_CHANGED(event, unitid)
   --  t.UpdateExtensions(plate.extended, unitid)
   --end
   if plate and plate.TPFrame then
-    t.UpdateExtensions(plate.TPFrame, unitid)
+    t.UpdateExtensions(plate.TPFrame, unitid, plate.TPFrame.stylename)
   end
 end
 
@@ -595,6 +597,6 @@ function TidyPlatesThreat:UNIT_MAXHEALTH(event, unitid)
   --  t.UpdateExtensions(plate.extended, unitid)
   --end
   if plate and plate.TPFrame then
-    t.UpdateExtensions(plate.TPFrame, unitid)
+    t.UpdateExtensions(plate.TPFrame, unitid, plate.TPFrame.stylename)
   end
 end

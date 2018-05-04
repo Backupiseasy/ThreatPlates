@@ -5,6 +5,52 @@
 * Fixed a bug with the icon for friends and guild members still being shown although disabled.
 
 ------------------------------------------------------
+8.7.1
+------------------------------------------------------
+* Added an option to use local metric unit symbols (like k for thousands) for truncated health text (for Korean, Traditional and Simplified Chinese) [Issue #165].
+* Adjusted defaults settings for castbar, spellicon, and class icons in headline view.
+* Fixed a bug with custom nameplates which were only loaded after the options dialog was opened.
+* Fixed bugs with saving the icon for a custom nameplate when a spell ID was used to define the icon.
+* Fixed a bug with the absorb glow sometimes being shown in headline view (without healthbar/absorbbar).
+* Fixed a Lua error in aura widget when switching to a profile with a larger maximum value for auras that can be displayed simultaneously.
+* Fixed a bug with the warning glow for threat being shown although disabled [Comment #658].
+* Fixed a bug with scaling and transparency of casting unit's nameplates not being reset correctly after the cast ended [Comment #807].
+
+------------------------------------------------------
+8.7.0
+------------------------------------------------------
+* Renamed the addon to Threat Plates (instead of Tidy Plates: Threat Plates). Addon directory is still TidyPlates_ThreatPlates though.
+* Added warning messages at login if other nameplate addons are enabled together with Threat Plates (Kui Nameplates, Plater, ElvUI Nameplates and TidyPlates).
+* Added an option to resize the healthbar, i.e., to change width and height independently from each other [PM, Issue #142, Comment #623].
+* Added an option to resize the castbar, i.e., to change width and height independently from each other [Issue #129, Comment #573].
+* Reworked the options for castbar, spell icon, and spell text into one page.
+* Added a new feature to the target castbar to show when a cast was interrupted and by who [Comment #566, E-Mail].
+* Added a configuration mode (preview) for the castbar for easy setup [Comment #573].
+* Added an option to the castbar to show a shield for non-interruptible casts.
+* Added an option to change the placement of the castbar for target unit [Issue #134].
+* Added an option to change the color of an interrupted castbar. Also, changed the castbar animation for interrupted casts.
+* Added an option to configure the clickable area for nameplates.
+* Added options to adjust how Threat Plates are scaled (based on UI scale, ignoring UI scale or pixel-perfect), see General - Blizzard Settings.
+* Added options to the absorb display to always show the total absorb even if health is at maximum [Comment #140, Ticket #140].
+* Added a new texture for the striped absorb overlay and added an option to adjust its color.
+* Added options to show or hide nameplates automatically in combat or in instances, see General - Automation [Comment #602].
+* Added configuration options for several nameplate configuration variables (CVars), see General - Blizzard Settings.
+* Added an option to enable class icons for friendly and hostile units separately [Comment #143].
+* Added an option to color the name of the target unit's nameplate with the same color as the healthbar. Also, moved this option to Widgets - Target Highlight [Comment #733].
+* If a unit is targeted, situational settings for scale and transparency (mouseover, casting, marked) no longer have priority over the respective target settings [Comment #752].
+* Changed the castbar options so that the colors for interruptible and non-interruptible casts can be selected independently from each other [Comment #570].
+* Removed the restriction that the threat system configuration can only be changed outside of arenas and battlegrounds [E-Mail].
+* Optimized and improved integration of TidyPlates code into Threat Plates.
+* Optimized how nameplates are handled after creation and deletion. Also, improved performance of handling mouseover events for nameplates and custom nameplates.
+* Adjusted default positioning of aura widget to compensate for internal frame layout changes.
+* Fixed the migration of totem settings from versions before 8.7.0.
+* Fixed a bug with totem nameplates not being shown if healthbar should be hidden, but icon should be shown.
+* Fixed a bug with castbar not properly hidden when only enabled for healthbar or headline view [Issue #150].
+* Fixed a Lua error with scaling and transparency on nameplates that had no unit assigned yet.
+* Fixed localization of default fonts for Korean (koKR), Simplified Chinese (zhCN), Traditional Chinese (zhTW), and Russian (ruRU). Default fonts are automatically adjusted so that text in the local alphabet is displayed properly [Issue #171]
+* Updated localization for deDE (German), zhTW (Traditional Chinese, thanks to gaspy10).
+
+------------------------------------------------------
 8.6.5 (Standalone, TidyPlates is no longer required)
 ------------------------------------------------------
 * Fixed a bug with the icon for friends and guild members not shown if the faction icon was also enabled [#Comment 759].

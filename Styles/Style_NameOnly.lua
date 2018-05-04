@@ -62,8 +62,8 @@ local function Create(self,name)
     healthbar = {
       texture = EMPTY_TEXTURE,
       backdrop = EMPTY_TEXTURE,
-      height = 0,
-      width = 0,
+      height = 10,
+      width = 120,
       x = 0,
       y = 0,
       anchor = "CENTER",
