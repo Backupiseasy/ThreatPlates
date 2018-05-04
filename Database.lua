@@ -292,14 +292,10 @@ local function MigrateCastbarColoring(profile_name, profile)
 end
 
 local function MigrationTotemSettings(profile_name, profile)
-  TidyPlatesThreat.db.global.MigrationLog["TotemSettings"] = true
   local entry = { "totemSettings" }
   if DatabaseEntryExists(profile, entry) then
     for key, value in pairs(profile.totemSettings) do
       if type(value) == "table" then -- omit hideHealthbar setting and skip if new default totem settings
-        TidyPlatesThreat.db.global.MigrationLog["TotemSettings" .. key .. "Old"] = profile.totemSettings[key]
-
-
         value.Style = value[7] or profile.totemSettings[key].Style
         value.Color = value.color or profile.totemSettings[key].Color
         if value[1] == false then
@@ -317,23 +313,12 @@ local function MigrationTotemSettings(profile_name, profile)
         value[1] = nil
         value[2] = nil
         value[3] = nil
-
---        profile.totemSettings[key] = {
---          Style = value[7],
---          Color = value.color,
---          ShowNameplate = value[1],
---          ShowHPColor = value[2],
---          ShowIcon = value[3],
---        }
-        TidyPlatesThreat.db.global.MigrationLog["TotemSettings" .. key .. "New"] = profile.totemSettings[key]
       end
     end
   end
 end
 
 local function MigrateBorderTextures(profile_name, profile)
-  TidyPlatesThreat.db.global.MigrationLog["BorderTextures"] = true
-
   if DatabaseEntryExists(profile, { "settings", "elitehealthborder", "texture" } ) then
     if profile.settings.elitehealthborder.texture == "TP_HealthBarEliteOverlay" then
       profile.settings.elitehealthborder.texture = "TP_EliteBorder_Default"
@@ -357,12 +342,10 @@ local function MigrateBorderTextures(profile_name, profile)
       profile.settings.castborder.texture = "TP_Castbar_Border_Thin"
     end
   end
-
 end
 
 local function MigrateAuraWidget(profile_name, profile)
   if DatabaseEntryExists(profile, { "debuffWidget" }) then
-    --TidyPlatesThreat.db.global.MigrationLog["AuraWidget"] = "ON = " .. tostring(profile.AuraWidget.ON) .. " and ShowInHeadlineView = " .. tostring(profile.AuraWidget.ShowInHeadlineView)
     if not profile.AuraWidget.ON and not profile.AuraWidget.ShowInHeadlineView then
       profile.AuraWidget = profile.AuraWidget or {}
       profile.AuraWidget.ModeIcon = profile.AuraWidget.ModeIcon or {}
@@ -407,11 +390,13 @@ local DEPRECATED_SETTINGS = {
   OldSettings = { "OldSettings" },                            -- (removed in 8.7.0)
   CastbarColoring = { MigrateCastbarColoring, },              -- (removed in 8.7.0)
   TotemSettings = { MigrationTotemSettings, "8.7.0" },        -- (changed in 8.7.0)
-  Borders = { MigrateBorderTextures, "8.7.0" }                -- (changed in 8.7.0)
+  Borders = { MigrateBorderTextures, "8.7.0" },               -- (changed in 8.7.0)
+  UniqueSettingsList = { "uniqueSettings", "list" },          -- (removed in 8.7.0, cleanup added in 8.7.1)
 }
 
 local function MigrateDatabase(current_version)
-  TidyPlatesThreat.db.global.MigrationLog = {}
+  TidyPlatesThreat.db.global.MigrationLog = nil
+  -- TidyPlatesThreat.db.global.MigrationLog = {}
 
   local profile_table = TidyPlatesThreat.db.profiles
   for key, entry in pairs(DEPRECATED_SETTINGS) do
@@ -447,4 +432,3 @@ ThreatPlates.MigrateDatabase = MigrateDatabase
 
 ThreatPlates.GetUnitVisibility = GetUnitVisibility
 ThreatPlates.SetNamePlateClickThrough = SetNamePlateClickThrough
-ThreatPlates.SyncWithGameSettings = SyncWithGameSettings
