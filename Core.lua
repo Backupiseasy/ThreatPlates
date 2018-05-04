@@ -585,7 +585,7 @@ function TidyPlatesThreat:UNIT_ABSORB_AMOUNT_CHANGED(event, unitid)
   --  t.UpdateExtensions(plate.extended, unitid)
   --end
   if plate and plate.TPFrame then
-    t.UpdateExtensions(plate.TPFrame, unitid)
+    t.UpdateExtensions(plate.TPFrame, unitid, plate.TPFrame.stylename)
   end
 end
 
@@ -597,6 +597,6 @@ function TidyPlatesThreat:UNIT_MAXHEALTH(event, unitid)
   --  t.UpdateExtensions(plate.extended, unitid)
   --end
   if plate and plate.TPFrame then
-    t.UpdateExtensions(plate.TPFrame, unitid)
+    t.UpdateExtensions(plate.TPFrame, unitid, plate.TPFrame.stylename)
   end
 end
