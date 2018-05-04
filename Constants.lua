@@ -948,27 +948,27 @@ ThreatPlates.DEFAULT_SETTINGS = {
           b = 0.25
         },
       },
---      [11] = {
---        name = L["Web Wrap"],
---        showNameplate = true,
---        ShowHeadlineView = false,
---        showIcon = true,
---        useStyle = true,
---        useColor = true,
---        UseThreatColor = false,
---        UseThreatGlow = false,
---        allowMarked = true,
---        overrideScale = false,
---        overrideAlpha = false,
---        icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U10",
---        scale = 0.75,
---        alpha = 1,
---        color = {
---          r = 1,
---          g = 0.39,
---          b = 0.96
---        },
---      },
+      [11] = {
+        name = L["Web Wrap"],
+        showNameplate = true,
+        ShowHeadlineView = false,
+        showIcon = true,
+        useStyle = true,
+        useColor = true,
+        UseThreatColor = false,
+        UseThreatGlow = false,
+        allowMarked = true,
+        overrideScale = false,
+        overrideAlpha = false,
+        icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U10",
+        scale = 0.75,
+        alpha = 1,
+        color = {
+          r = 1,
+          g = 0.39,
+          b = 0.96
+        },
+      },
       [12] = {
         name = L["Immortal Guardian"],
         showNameplate = true,
