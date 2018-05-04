@@ -786,6 +786,7 @@ do
 	-- OnHideCastbar
 	function OnStopCasting(plate)
     --if not plate.TPFrame.visual.castbar:IsShown() then return end
+    if not plate.TPFrame.Active then return end
     -- Was initially necessary because of Lua errors when reloading, I think
     -- Results in an error witch cast scaling/alpha because the following code is not executed then.
 
