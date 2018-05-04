@@ -30,8 +30,8 @@ Blacksalsify
 Blacksalsify
 
 (原作者: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=]
-L["%.1fk"] = "%.1fk"
-L["%.1fm"] = "%.1fm"
+L["%.1fk"] = "%.1f千"
+L["%.1fm"] = "%.1f百萬"
 L[". You have installed an older or incompatible version of TidyPlates: "] = "。目前安裝的 TidyPlates 是舊的或不相容的版本："
 L[ [=[:
 ---------------------------------------
@@ -509,6 +509,8 @@ L["If enabled your nameplates alpha will always be the setting below when you ha
 L["If enabled your nameplates scale will always be the setting below when you have no target."] = "啟用時，沒有當前目標時血條縮放大小會永遠使用下方的設定值。"
 L["If enabled your target's alpha will always be the setting below."] = "啟用時，當前目標的血條透明度會永遠使用下方的設定值。"
 L["If enabled your target's scale will always be the setting below."] = "啟用時，當前目標的血條縮放大小會永遠使用下方的設定值。"
+L["If enabled, the truncated health text will be localized, e.g. local metric unit symbols (like k for thousands) will be used."] = "啟用時，簡短血量文字會使用中文數字單位 (例如千)。"
+L["If enabled, the truncated health text will be localized, i.e. local metric unit symbols (like k for thousands) will be used."] = "啟用時，簡短血量文字會使用中文單位 (例如千)。"
 L["Ignore Marked Units"] = "忽略被標記圖示的單位"
 L["Ignore UI Scale"] = "忽略使用者介面縮放"
 L["Ignored Alpha"] = "已忽略的透明度"
@@ -539,6 +541,7 @@ L["Level Text"] = "等級文字"
 L["Lich King"] = "巫妖王"
 L["Living Ember"] = "燃燒的餘燼"
 L["Living Inferno"] = "燃燒的煉獄火"
+L["Localized Health Text"] = "中文血量單位"
 L["Look and Feel"] = "外觀和風格"
 L["Low Threat"] = "低仇恨值"
 L["Marked Immortal Guardian"] = "標記的不朽守護者"
