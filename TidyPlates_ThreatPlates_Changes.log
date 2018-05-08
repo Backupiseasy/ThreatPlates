@@ -1,4 +1,12 @@
 ------------------------------------------------------
+8.7.2
+------------------------------------------------------
+* Extended the combo points widget to show also soul shards for warlocks [Issue #158,  Comment #819].
+* Fixed a bug with the icon for friends and guild members still being shown although disabled.
+* Again, fixed a bug with custom nameplates which were only loaded after the options dialog was opened [Comment #837].
+* Fixed a bug with threat textures not being shown when bar style was used.
+
+------------------------------------------------------
 8.7.1
 ------------------------------------------------------
 * Added an option to use local metric unit symbols (like k for thousands) for truncated health text (for Korean, Traditional and Simplified Chinese) [Issue #165].

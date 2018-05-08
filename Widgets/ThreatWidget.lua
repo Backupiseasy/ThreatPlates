@@ -78,11 +78,25 @@ local function UpdateWidgetFrame(frame, unit)
         end
       end
 
-      frame.LeftTexture:SetTexture(PATH .. db.art.theme.."\\"..threatLevel)
-      frame.LeftTexture:SetTexCoord(0, 0.25, 0, 1)
+      if db.art.theme == "bar" then
+        frame.LeftTexture:ClearAllPoints(frame)
+        frame.LeftTexture:SetSize(265, 64)
+        frame.LeftTexture:SetPoint("CENTER", frame:GetParent(), "CENTER")
+        frame.LeftTexture:SetTexture(PATH .. db.art.theme.."\\"..threatLevel)
+        frame.LeftTexture:SetTexCoord(0, 1, 0, 1)
 
-      frame.RightTexture:SetTexture(PATH .. db.art.theme.."\\"..threatLevel)
-      frame.RightTexture:SetTexCoord(0.75, 1, 0, 1)
+        frame.RightTexture:Hide()
+      else
+        frame.LeftTexture:ClearAllPoints(frame)
+        frame.LeftTexture:SetSize(64, 64)
+        frame.LeftTexture:SetPoint("RIGHT", frame:GetParent().visual.healthbar, "LEFT", -4, 0)
+        frame.LeftTexture:SetTexture(PATH .. db.art.theme.."\\"..threatLevel)
+        frame.LeftTexture:SetTexCoord(0, 0.25, 0, 1)
+
+        frame.RightTexture:SetTexture(PATH .. db.art.theme.."\\"..threatLevel)
+        frame.RightTexture:SetTexCoord(0.75, 1, 0, 1)
+        frame.RightTexture:Show()
+      end
 
       frame:Show()
     else
@@ -128,10 +142,7 @@ local function CreateWidgetFrame(parent)
 	-- Custom Code III
 	--------------------------------------
   frame:SetFrameLevel(parent:GetFrameLevel() + 7)
-
   frame.LeftTexture = frame:CreateTexture(nil, "OVERLAY", 6)
-  frame.LeftTexture:SetPoint("RIGHT", parent.visual.healthbar, "LEFT", -4, 0)
-  frame.LeftTexture:SetSize(64, 64)
   frame.RightTexture = frame:CreateTexture(nil, "OVERLAY", 6)
   frame.RightTexture:SetPoint("LEFT", parent.visual.healthbar, "RIGHT", 4, 0)
   frame.RightTexture:SetSize(64, 64)

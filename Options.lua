@@ -5481,7 +5481,6 @@ local function CreateOptionsTable()
     CustomOpts["#" .. k_c] = {
       name = "#" .. k_c .. ". " .. db.uniqueSettings[k_c].name,
       type = "group",
-      type = "group",
       --disabled = function() if db.totemSettings[totemID[k_c][2]][1] then return false else return true end end,
       order = CustomOpts_OrderCnt,
       args = {
