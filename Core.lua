@@ -85,9 +85,6 @@ local EVENTS = {
   "PLAYER_LOGOUT",
   "PLAYER_REGEN_ENABLED",
   "PLAYER_REGEN_DISABLED",
-  "QUEST_WATCH_UPDATE",
-  "QUEST_ACCEPTED",
-
   "UNIT_ABSORB_AMOUNT_CHANGED",
   "UNIT_MAXHEALTH",
 
@@ -101,6 +98,39 @@ local EVENTS = {
   --"UNIT_AURA",                -- used in auras widget
   --"VARIABLES_LOADED",         -- Blizzard also uses this event
   --"RAID_TARGET_UPDATE",       -- Blizzard also uses this event
+
+  -- Events from TidyPlates
+
+  -- NAME_PLATE_CREATED
+  -- NAME_PLATE_UNIT_ADDED
+  -- UNIT_NAME_UPDATE
+  -- NAME_PLATE_UNIT_REMOVED
+
+  -- PLAYER_TARGET_CHANGED
+  -- UPDATE_MOUSEOVER_UNIT
+
+  -- UNIT_HEALTH_FREQUENT
+
+  -- PLAYER_ENTERING_WORLD
+  -- PLAYER_REGEN_ENABLED
+  -- PLAYER_REGEN_DISABLED
+
+  -- UNIT_SPELLCAST_START
+  -- UNIT_SPELLCAST_STOP
+  -- UNIT_SPELLCAST_CHANNEL_START
+  -- UNIT_SPELLCAST_CHANNEL_STOP
+  -- UNIT_SPELLCAST_DELAYED
+  -- UNIT_SPELLCAST_CHANNEL_UPDATE
+  -- UNIT_SPELLCAST_INTERRUPTIBLE
+  -- UNIT_SPELLCAST_NOT_INTERRUPTIBLE
+
+  -- UI_SCALE_CHANGED
+  -- COMBAT_LOG_EVENT_UNFILTERED
+  -- UNIT_LEVEL
+  -- UNIT_FACTION
+  -- RAID_TARGET_UPDATE
+  -- PLAYER_FOCUS_CHANGED
+  -- PLAYER_CONTROL_GAINED
 }
 
 local function EnableEvents()
@@ -180,8 +210,6 @@ function TidyPlatesThreat:ReloadTheme()
   --end
   TidyPlatesInternal:SetTheme(t.THEME_NAME)
 
-  ThreatPlatesWidgets.ConfigAuraWidgetFilter()
-  ThreatPlatesWidgets.ConfigAuraWidget()
 
   Addon:UpdateConfigurationStatusText()
 
@@ -191,6 +219,12 @@ function TidyPlatesThreat:ReloadTheme()
   else
     TidyPlatesInternal:DisableCastBars()
   end
+
+  Addon:InitializeCustomNameplates()
+  Addon:InitializeAllModules()
+
+  ThreatPlatesWidgets.ConfigAuraWidgetFilter()
+  ThreatPlatesWidgets.ConfigAuraWidget()
 end
 
 function TidyPlatesThreat:StartUp()
@@ -548,18 +582,6 @@ end
 --function TidyPlatesThreat:UNIT_FACTION(event, unitid)
 --  TidyPlates:ForceUpdate()
 --end
-
--- QuestWidget needs to update all nameplates when a quest was completed
-function TidyPlatesThreat:QUEST_WATCH_UPDATE(event, quest_index)
-  if TidyPlatesThreat.db.profile.questWidget.ON then
-    TidyPlatesInternal:ForceUpdate()
-  end
-end
-function TidyPlatesThreat:QUEST_ACCEPTED(event, quest_index, _)
-  if TidyPlatesThreat.db.profile.questWidget.ON then
-    TidyPlatesInternal:ForceUpdate()
-  end
-end
 
 -- function TidyPlatesThreat:PLAYER_TALENT_UPDATE()
 -- 	--

@@ -74,8 +74,7 @@ local function SetNamePlateClickThrough(friendly, enemy)
     db.NamePlateFriendlyClickThrough = friendly
     db.NamePlateEnemyClickThrough = enemy
     Addon:CallbackWhenOoC(function()
-      C_NamePlate.
-      SetNamePlateFriendlyClickThrough(friendly)
+      C_NamePlate.SetNamePlateFriendlyClickThrough(friendly)
       C_NamePlate.SetNamePlateEnemyClickThrough(enemy)
     end, L["Nameplate clickthrough cannot be changed while in combat."])
 --  end

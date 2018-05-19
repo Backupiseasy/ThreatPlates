@@ -115,5 +115,3 @@ local function CreateWidgetFrame(parent)
 
   return frame
 end
-
-ThreatPlatesWidgets.RegisterWidget("TestWidget", CreateWidgetFrame, true, enabled)

@@ -57,6 +57,9 @@ local function OnThreatTable(unit)
   -- "is unit inactive" from TidyPlates - fast, but doesn't meant that player is on threat table
   -- return  (unit.health < unit.healthmax) or (unit.isInCombat or unit.threatValue > 0) or (unit.isCasting == true) then
 
+  --  local _, threatStatus = UnitDetailedThreatSituation("player", unit.unitid)
+  --  return threatStatus ~= nil
+
   -- nil means player is not on unit's threat table - more acurate, but slower reaction time than the above solution
   return UnitThreatSituation("player", unit.unitid)
 end
@@ -236,6 +239,8 @@ function Addon:SetStyle(unit)
       style = "unique"
     elseif unique_setting.ShowHeadlineView then
       style = (db.HeadlineView.ON and "NameOnly-Unique") or "unique"
+    else
+      style = "etotem"
     end
   elseif unit_type == "Totem" then
     local tS = db.totemSettings[TOTEMS[unit.name]]

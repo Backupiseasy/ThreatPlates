@@ -28,16 +28,6 @@ local function enabled()
   return TidyPlatesThreat.db.profile.healerTracker.ON
 end
 
--- hides/destroys all widgets of this type created by Threat Plates
--- local function ClearAllWidgets()
--- 	-- for _, widget in pairs(WidgetList) do
--- 	-- 	widget:Hide()
--- 	-- end
---   TidyPlatesUtilityInternal.DisableHealerTrack()
---   healerTrackerEnabled = false
--- end
--- ThreatPlatesWidgets.ClearAllHealerTrackerWidgets = ClearAllWidgets
-
 ---------------------------------------------------------------------------------------------------
 -- Widget Functions for TidyPlates
 ---------------------------------------------------------------------------------------------------
@@ -81,5 +71,3 @@ local function CreateWidgetFrame(plate)
 	-- frame.Hide = function() ClearWidgetContext(frame); frame:_Hide() end
 	return frame
 end
-
-ThreatPlatesWidgets.RegisterWidget("HealerTrackerWidgetTPTP", CreateWidgetFrame, false, enabled)

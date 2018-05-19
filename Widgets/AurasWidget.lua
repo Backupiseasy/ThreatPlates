@@ -1,5 +1,10 @@
-local ADDON_NAME, NAMESPACE = ...
-local ThreatPlates = NAMESPACE.ThreatPlates
+---------------------------------------------------------------------------------------------------
+-- Auras Widget
+---------------------------------------------------------------------------------------------------
+local ADDON_NAME, Addon = ...
+local ThreatPlates = Addon.ThreatPlates
+
+local Module = Addon:NewModule("Auras")
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -15,11 +20,10 @@ local string = string
 local tonumber = tonumber
 
 -- WoW APIs
+local CreateFrame, GetFramerate = CreateFrame, GetFramerate
 local DebuffTypeColor = DebuffTypeColor
-local UnitAura = UnitAura
-local CreateFrame = CreateFrame
-local GetFramerate = GetFramerate
-local UnitIsFriend = UnitIsFriend
+local UnitAura, UnitIsFriend = UnitAura, UnitIsFriend
+local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
@@ -27,7 +31,7 @@ local RGB = ThreatPlates.RGB
 local DEBUG = ThreatPlates.DEBUG
 
 ---------------------------------------------------------------------------------------------------
--- Aura Widget 2.0
+-- Auras Widget Functions
 ---------------------------------------------------------------------------------------------------
 
 local WidgetList = {}
@@ -35,7 +39,6 @@ local WidgetList = {}
 local AuraMonitor = CreateFrame("Frame")
 local isAuraEnabled = false
 
-local UpdateWidget
 -- Functions switched based on icon/bar mode
 local CreateAuraFrame
 local UpdateAuraFrame
@@ -155,19 +158,6 @@ local function PolledHideIn(frame, expiration, duration)
 		end
 	end
 end
-
----------------------------------------------------------------------------------------------------
--- Threat Plates functions
----------------------------------------------------------------------------------------------------
-
--- hides/destroys all widgets of this type created by Threat Plates
--- local function ClearAllWidgets()
-	-- for _, widget in pairs(WidgetList) do
-	-- 	widget:Hide()
-	-- end
-	-- WidgetList = {}
--- end
--- ThreatPlatesWidgets.ClearAllAuraWidgets = ClearAllWidgets
 
 ---------------------------------------------------------------------------------------------------
 -- Filtering and sorting functions
@@ -430,8 +420,6 @@ local function UpdateIconAuraInformation(frame) -- texture, duration, expiration
 end
 
 local function UpdateIconGrid(frame, unitid)
-  if not unitid then return end
-
   local db = TidyPlatesThreat.db.profile.AuraWidget
   local BLIZZARD_ShowAll = false
 
@@ -594,75 +582,9 @@ local function UpdateIconGrid(frame, unitid)
 end
 
 local function ExpireFunction(icon)
-	-- local frame = icon.Parent
-	UpdateWidget(icon:GetParent())
-end
-
--------------------------------------------------------------
--- Watcher for auras on units (gaining and losing buffs/debuffs)
--------------------------------------------------------------
-
-local function EventUnitAura(unitid)
-  if unitid then
-    -- WidgetList contains the units that are tracked, i.e. for which currently nameplates are shown
-    local frame = WidgetList[unitid]
-
-    if frame then
-      UpdateWidget(frame)
-    end
-  end
-end
-
-local AuraEvents = {
-  --["UNIT_TARGET"] = EventUnitTarget,
-  ["UNIT_AURA"] = EventUnitAura,
-}
-
-local function AuraEventHandler(frame, event, ...)
-  --local unitid = ...
-  if event then
-    local eventFunction = AuraEvents[event]
-    eventFunction(...)
-  end
-end
-
-local function Enable()
-	AuraMonitor:SetScript("OnEvent", AuraEventHandler)
-
-	for event in pairs(AuraEvents) do
-		AuraMonitor:RegisterEvent(event)
-	end
-end
-
-local function Disable()
-	AuraMonitor:SetScript("OnEvent", nil)
-	AuraMonitor:UnregisterAllEvents()
-
---	for unitid, widget in pairs(WidgetList) do
---		if frame == widget then WidgetList[unitid] = nil end
---	end
-end
-
-local function enabled()
-  local db = TidyPlatesThreat.db.profile.AuraWidget
-
-	if not (db.ON or db.ShowInHeadlineView) then
-    if isAuraEnabled then
-      Disable()
-      isAuraEnabled = false
-    end
-	else
-    if not isAuraEnabled then
-      Enable()
-      isAuraEnabled = true
-    end
-  end
-
-	return db.ON
-end
-
-local function EnabledInHeadlineView()
-  return TidyPlatesThreat.db.profile.AuraWidget.ShowInHeadlineView
+  print ("Expire")
+	local widget_frame = icon.GetParent()
+  UpdateIconGrid(widget_frame, widget_frame.unit.unitid)
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -973,7 +895,7 @@ local function UpdateAuraWidgetLayout(widget_frame)
     --      PolledHideIn(frame)
     --    end
 
-    UpdateIconGrid(widget_frame, widget_frame.unitid)
+    UpdateIconGrid(widget_frame, widget_frame.unit.unitid)
 
     widget_frame:ClearAllPoints()
     widget_frame:SetPoint(ThreatPlates.ANCHOR_POINT_SETPOINT[db.anchor][2], widget_frame:GetParent(), ThreatPlates.ANCHOR_POINT_SETPOINT[db.anchor][1], db.x, db.y)
@@ -1024,46 +946,6 @@ local function CreateAuraWidgetLayout(widget_frame)
   widget_frame:SetScale(db.scale)
 
   widget_frame.last_update = GetTime()
-end
-
-function UpdateWidget(frame)
-	UpdateIconGrid(frame, frame.unitid)
---  if not frame.Background then
---    frame.Background = frame:CreateTexture(nil, "BACKGROUND")
---    frame.Background:SetAllPoints()
---    frame.Background:SetTexture(ThreatPlates.Media:Fetch('statusbar', TidyPlatesThreat.db.profile.AuraWidget.BackgroundTexture))
---    frame.Background:SetVertexColor(0,0,0,1)
---  end
-end
-
--- Context Update (mouseover, target change)
-local function UpdateWidgetContext(frame, unit)
-	local unitid = unit.unitid
-	frame.unit = unit
-	frame.unitid = unitid
-
-	-- Add to Widget List
-	-- if guid then
-	-- 	WidgetList[guid] = frame
-	-- end
-
-	if unitid then
-    local old_frame = WidgetList[unitid]
-    if old_frame ~= frame then
-      WidgetList[unitid] = frame
-      UpdateIconGrid(frame, frame.unitid)
-    end
-  end
-
-	-- Custom Code II
-	--------------------------------------
-  if TidyPlatesThreat.db.profile.AuraWidget.ShowTargetOnly and not unit.isTarget then
-    frame:_Hide()
-  else
-    frame:Show()
-  end
-	--------------------------------------
-	-- End Custom Code
 end
 
 local function ForceAurasUpdate()
@@ -1195,48 +1077,69 @@ local function ConfigAuraWidget()
 	ConfigLastUpdate = GetTime()
 end
 
-local function ClearWidgetContext(frame)
---  for unitid, widget in pairs(WidgetList) do
---    if frame == widget then WidgetList[unitid] = nil end
---  end
-  local unitid = frame.unitid
-  if unitid then
-    WidgetList[unitid] = nil
-    -- updates keep rolling in even after hiding a aura widget frame, if unit or unitid
-    -- is needed to process these updates, uncomment the following two lines
-    frame.unitid = nil
-    frame.unit = nil
+function Module:UNIT_AURA(unitid)
+  local plate = GetNamePlateForUnit(unitid)
+
+  if plate then -- plate maybe nil as not all UNIT_AURA events are on units with nameplates
+    local widget_frame = plate.TPFrame.widgets["Auras"]
+    UpdateIconGrid(widget_frame, unitid)
   end
 end
 
--- Create the Main Widget Body and Icon Array
-local function CreateAuraWidget(plate)
-	-- Required Widget Code
-	local frame = CreateFrame("Frame", nil, plate)
-	frame:Hide()
+---------------------------------------------------------------------------------------------------
+-- Module functions for creation and update
+---------------------------------------------------------------------------------------------------
 
-	-- Custom Code III
-	--------------------------------------
+function Module:Create(tp_frame)
+  -- Required Widget Code
+  local widget_frame = CreateFrame("Frame", nil, tp_frame)
+  widget_frame:Hide()
+
+  -- Custom Code
+  --------------------------------------
   if TidyPlatesThreat.db.profile.AuraWidget.FrameOrder == "HEALTHBAR_AURAS" then
-    frame:SetFrameLevel(plate:GetFrameLevel() + 3)
+    widget_frame:SetFrameLevel(tp_frame:GetFrameLevel() + 3)
   else
-    frame:SetFrameLevel(plate:GetFrameLevel() + 9)
+    widget_frame:SetFrameLevel(tp_frame:GetFrameLevel() + 9)
   end
-	frame:SetSize(128, 32)
-	frame.AuraFrames = {}
-  --UpdateWidgetConfig(frame)
-  CreateAuraWidgetLayout(frame)
-	--------------------------------------
-	-- End Custom Code
+  widget_frame:SetSize(128, 32)
+  widget_frame.AuraFrames = {}
+  CreateAuraWidgetLayout(widget_frame)
+  --------------------------------------
+  -- End Custom Code
 
-	-- Required Widget Code
-  frame.Update = UpdateWidgetContext
-  frame.UpdateContext = UpdateWidgetContext
-	frame.UpdateConfig = UpdateAuraWidgetLayout
-	frame._Hide = frame.Hide
-	frame.Hide = function() ClearWidgetContext(frame); frame:_Hide() end
+  return widget_frame
+end
 
-	return frame
+function Module:IsEnabled()
+  return TidyPlatesThreat.db.profile.AuraWidget.ON or TidyPlatesThreat.db.profile.AuraWidget.ShowInHeadlineView
+end
+
+function Module:OnEnable()
+  Module:RegisterEvent("UNIT_AURA")
+end
+
+function Module:EnabledForStyle(style, unit)
+  if (style == "NameOnly" or style == "NameOnly-Unique") then
+    return TidyPlatesThreat.db.profile.AuraWidget.ShowInHeadlineView
+  elseif style ~= "etotem" then
+    return TidyPlatesThreat.db.profile.AuraWidget.ON
+  end
+end
+
+function Module:OnUnitAdded(widget_frame, unit)
+  UpdateAuraWidgetLayout(widget_frame)
+  --UpdateIconGrid(widget_frame, unit.unitid)
+
+  self:OnTargetChanged(widget_frame, unit)
+end
+
+function Module:OnTargetChanged(widget_frame, unit)
+  if TidyPlatesThreat.db.profile.AuraWidget.ShowTargetOnly and not unit.isTarget then
+    widget_frame:Hide()
+  else
+    widget_frame:Show()
+  end
 end
 
 -----------------------------------------------------
@@ -1246,9 +1149,3 @@ end
 ThreatPlatesWidgets.ConfigAuraWidget = ConfigAuraWidget
 ThreatPlatesWidgets.ConfigAuraWidgetFilter = PrepareFilter
 ThreatPlatesWidgets.ForceAurasUpdate = ForceAurasUpdate
-
------------------------------------------------------
--- Register widget
------------------------------------------------------
-
-ThreatPlatesWidgets.RegisterWidget("AuraWidget2TPTP", CreateAuraWidget, false, enabled, EnabledInHeadlineView)

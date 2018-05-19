@@ -2,8 +2,7 @@
 local Addon = NAMESPACE.ThreatPlates
 
 local Media = Addon.Media
-local koKR, ruRU, zhCN, zhTW, western = Media.LOCALE_BIT_koKR, Media.LOCALE_BIT_ruRU, Media.LOCALE_BIT_zhCN, Media.LOCALE_BIT_zhTW, Media.LOCALE_BIT_western
-
+--local koKR, ruRU, zhCN, zhTW, western = Media.LOCALE_BIT_koKR, Media.LOCALE_BIT_ruRU, Media.LOCALE_BIT_zhCN, Media.LOCALE_BIT_zhTW, Media.LOCALE_BIT_western
 
 Addon.Art = "Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\"
 

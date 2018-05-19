@@ -1,176 +1,150 @@
-local ADDON_NAME, NAMESPACE = ...
-local ThreatPlates = NAMESPACE.ThreatPlates
+---------------------------------------------------------------------------------------------------
+-- Arena Widget
+---------------------------------------------------------------------------------------------------
+local ADDON_NAME, Addon = ...
 
---------------------
--- Arena Icon Widget
---------------------
+local Module = Addon:NewModule("Arena")
 
-local path = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ArenaWidget\\"
-local watcherIsEnabled = false
+---------------------------------------------------------------------------------------------------
+-- Imported functions and constants
+---------------------------------------------------------------------------------------------------
+
+-- WoW APIs
+local CreateFrame = CreateFrame
+local GetNumArenaOpponents, UnitGUID = GetNumArenaOpponents, UnitGUID
+local IsInInstance, IsInBrawl = IsInInstance, C_PvP.IsInBrawl
+
+-- ThreatPlates APIs
+local TidyPlatesThreat = TidyPlatesThreat
+
+local PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ArenaWidget\\"
+local ICON_TEXTURE = PATH .. "BG"
+local InArena = false
 local ArenaID = {}
 
 ---------------------------------------------------------------------------------------------------
--- Threat Plates functions
+-- Arena Widget Functions
 ---------------------------------------------------------------------------------------------------
 
--- hides/destroys all widgets of this type created by Threat Plates
--- local function ClearAllWidgets()
--- 	for _, widget in pairs(WidgetList) do
--- 		widget:Hide()
--- 	end
--- 	WidgetList = {}
--- end
--- ThreatPlatesWidgets.ClearAllArenaWidgets = ClearAllWidgets
-
-local function BuildTable() -- ArenaId[unit name] = ArenaID #
+local function GetArenaOpponents()
 	for i = 1, GetNumArenaOpponents() do
-		local name = UnitGUID("arena"..i)
-		local petname = UnitGUID("arenapet"..i)
-		if name and not ArenaID[name] then
-			ArenaID[name] = i
+		local name = UnitGUID("arena" .. i)
+		local petname = UnitGUID("arenapet" .. i)
+
+    if name and not ArenaID[name] then
+      ArenaID[name] = i
 		end
+
 		if petname and not ArenaID[petname] then
 			ArenaID[petname] = i
 		end
-	end
+  end
+end
+
+function Module:PLAYER_ENTERING_WORLD()
+  local _, instance_type = IsInInstance()
+  if instance_type == "arena" and not IsInBrawl() then
+    InArena = true
+  else
+    InArena = false
+    ArenaID = {} -- Clear the table when we leave
+  end
 end
 
 ---------------------------------------------------------------------------------------------------
--- TidyPlates ComboPointWidget functions
+-- Module functions for creation and update
 ---------------------------------------------------------------------------------------------------
 
-local function UpdateSettings(frame)
-	local db = TidyPlatesThreat.db.profile.arenaWidget
+function Module:Create(tp_frame)
+  -- Required Widget Code
+  local widget_frame = CreateFrame("Frame", nil, tp_frame)
+  widget_frame:Hide()
 
-	frame:ClearAllPoints()
-	frame:SetPoint("CENTER",frame:GetParent(), db.x, db.y)
+  -- Custom Code
+  --------------------------------------
+  -- widget_frame:SetSize(32, 32)
+  widget_frame:SetFrameLevel(tp_frame:GetFrameLevel() + 7)
 
-	local size = db.scale
-	frame:SetSize(size,size)
-	frame.Overlay:SetSize(size,size)
+  widget_frame.Icon = widget_frame:CreateTexture(nil, "ARTWORK")
+  widget_frame.Icon:SetAllPoints(widget_frame)
+  widget_frame.Icon:SetTexture(ICON_TEXTURE)
+
+  widget_frame.Num = widget_frame:CreateTexture(nil,"OVERLAY")
+  widget_frame.Num:SetAllPoints(widget_frame)
+  --------------------------------------
+  -- End Custom Code
+
+  return widget_frame
 end
 
-local function ClearWidgetContext(frame)
-	local guid = frame.guid
-	if guid then
-		ArenaID[guid] = nil
-		frame.guid = nil
-	end
+function Module:IsEnabled()
+  return TidyPlatesThreat.db.profile.arenaWidget.ON
 end
 
--- Watcher Frame
-local WatcherFrame = CreateFrame("Frame", nil, WorldFrame)
-
-local function WatcherFrameHandler(frame, event,...)
-	if IsActiveBattlefieldArena() and GetNumArenaOpponents() >= 1 then -- If we're in arena
-		BuildTable()
-	else
-		ArenaID = {} -- Clear the table when we leave
-	end
-	--TidyPlatesInternal:ForceUpdate()
+function Module:OnEnable()
+  Module:RegisterEvent("PLAYER_ENTERING_WORLD")
+  --Module:RegisterEvent("ARENA_PREP_OPPONENT_SPECIALIZATIONS")
 end
 
-local function EnableWatcher()
-	WatcherFrame:SetScript("OnEvent", WatcherFrameHandler)
-	WatcherFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
-	watcherIsEnabled = true
+function Module:EnabledForStyle(style, unit)
+  return unit.reaction == "HOSTILE" and not (style == "NameOnly" or style == "NameOnly-Unique" or style == "etotem")
 end
 
-local function DisableWatcher()
-	WatcherFrame:UnregisterAllEvents()
-	WatcherFrame:SetScript("OnEvent", nil);
-	watcherIsEnabled = false
-	ArenaID = {}
+function Module:OnUnitAdded(widget_frame, unit)
+  if not InArena then
+    widget_frame:Hide()
+    return
+  end
+
+  GetArenaOpponents()
+
+  local arena_no = ArenaID[unit.guid]
+  if not arena_no then
+    widget_frame:Hide()
+    return
+  end
+
+  -- Updates based on settings
+  local db = TidyPlatesThreat.db.profile.arenaWidget
+  widget_frame:SetPoint("CENTER",widget_frame:GetParent(), db.x, db.y)
+  widget_frame:SetSize(db.scale, db.scale)
+
+  local icon_color = db.colors[arena_no]
+  local number_color = db.numColors[arena_no]
+
+  widget_frame.Icon:SetVertexColor(icon_color.r, icon_color.g, icon_color.b, icon_color.a)
+  widget_frame.Num:SetTexture(PATH .. arena_no)
+  widget_frame.Num:SetVertexColor(number_color.r, number_color.g, number_color.b, number_color.a)
+
+  widget_frame:Show()
 end
 
-local function enabled()
-	local active = TidyPlatesThreat.db.profile.arenaWidget.ON
-
-	if active then
-		if not watcherIsEnabled then	EnableWatcher() end
-	else
-		if watcherIsEnabled then	DisableWatcher()	end
-	end
-
-	return active
-end
-
--- Update Graphics
-local function UpdateWidgetFrame(frame, unit)
-	BuildTable()
-
-	local db = TidyPlatesThreat.db.profile.arenaWidget
-	if unit.guid and ArenaID[unit.guid] then
-		local c = db.colors[ArenaID[unit.guid]]
-		local c2 = db.numColors[ArenaID[unit.guid]]
-
-		frame.Icon:SetTexture(path.."BG")
-		frame.Icon:SetVertexColor(c.r, c.g, c.b, c.a)
-
-		frame.Overlay.Num:SetTexture(path..ArenaID[unit.guid])
-		frame.Overlay.Num:SetVertexColor(c2.r,c2.g,c2.b,c2.a)
-
-		frame:Show()
-	else
-		frame.Icon:SetTexture(nil)
-		frame.Overlay.Num:SetTexture(nil)
-		frame:_Hide()
-	end
-end
-
--- Context
-local function UpdateWidgetContext(frame, unit)
-	local guid = unit.guid
-	frame.guid = guid
-
-	-- Add to Widget List - done in EventWatcher, only necessary for arena opponents
-	-- if guid then
-	-- 	WidgetList[guid] = frame
-	-- end
-
-	-- Custom Code II
-	--------------------------------------
-	if UnitGUID("target") == guid then
-		UpdateWidgetFrame(frame, unit)
-	else
-		frame:_Hide()
-	end
-	--------------------------------------
-	-- End Custom Code
-end
-
-local function CreateArenaWidget(parent)
-	-- Required Widget Code
-	local frame = CreateFrame("Frame", nil, parent)
-	frame:Hide()
-
-	-- Custom Code III
-	--------------------------------------
-	frame:SetSize(32, 32)
-	frame:SetFrameLevel(parent:GetFrameLevel() + 7)
-
-	frame.Icon = frame:CreateTexture(nil, "OVERLAY")
-	frame.Icon:SetAllPoints(frame)
-
-	frame.Overlay = CreateFrame("frame",nil, frame)
-	frame.Overlay:SetPoint("CENTER", frame, "CENTER")
-
-	frame.Overlay.Num = frame.Overlay:CreateTexture(nil,"OVERLAY")
-	frame.Overlay.Num:SetAllPoints(frame.Overlay)
-
-	UpdateSettings(frame)
-	frame.UpdateConfig = UpdateSettings
-	--------------------------------------
-	-- End Custom Code
-
-	-- Required Widget Code
-	frame.UpdateContext = UpdateWidgetContext
-	frame.Update = UpdateWidgetFrame
-	frame._Hide = frame.Hide
-	frame.Hide = function() ClearWidgetContext(frame); frame:_Hide() end
-
-	return frame
-end
-
-ThreatPlatesWidgets.RegisterWidget("ArenaWidgetTPTP", CreateArenaWidget, false, enabled)
-ThreatPlatesWidgets.ArenaWidgetDisableWatcher = DisableWatcher
+--function Module:UpdateFrame(widget_frame, unit)
+--  --  if not InArena then
+--  --    widget_frame:Hide()
+--  --    return
+--  --  end
+--
+--  local arena_no = ArenaID[unit.guid]
+--  if not arena_no then
+--    widget_frame:Hide()
+--    return
+--  end
+--
+--  --print ("Showing Plate", arena_no, "for", unit.name)
+--
+--  -- Updates based on settings
+--  local db = TidyPlatesThreat.db.profile.arenaWidget
+----  widget_frame:SetPoint("CENTER",widget_frame:GetParent(), db.x, db.y)
+----  widget_frame:SetSize(db.scale, db.scale)
+--
+--  local icon_color = db.colors[arena_no]
+--  local number_color = db.numColors[arena_no]
+--
+--  widget_frame.Icon:SetVertexColor(icon_color.r, icon_color.g, icon_color.b, icon_color.a)
+--
+--  widget_frame.Num:SetTexture(PATH .. arena_no)
+--  widget_frame.Num:SetVertexColor(number_color.r, number_color.g, number_color.b, number_color.a)
+--
+--  widget_frame:Show()
+--end
