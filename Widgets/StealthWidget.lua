@@ -38,6 +38,9 @@ local DETECTION_AURAS = {
   [232234] = true, -- On High Alert
   [242962] = true, -- One With the Void
   [242963] = true, -- One With the Void
+  -- Battle for Azeroth
+  [230368] = true, -- Detector
+  [248705] = true, -- Detector
 }
 
 ---------------------------------------------------------------------------------------------------

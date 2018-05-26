@@ -1,4 +1,10 @@
 ------------------------------------------------------
+9.0.0-Alpha4
+------------------------------------------------------
+* Added some new spells to the stealth widget.
+* Fixed a bug in the quest widget not being updated after a quest update.
+
+------------------------------------------------------
 9.0.0-Alpha3
 ------------------------------------------------------
 * Fixed a bug with the absorb glow sometimes being shown in headline view (without healthbar/absorbbar).

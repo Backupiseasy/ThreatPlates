@@ -87,6 +87,7 @@ local EVENTS = {
   "PLAYER_REGEN_DISABLED",
   "QUEST_WATCH_UPDATE",
   "QUEST_ACCEPTED",
+  "QUEST_ITEM_UPDATE",
 
   "UNIT_ABSORB_AMOUNT_CHANGED",
   "UNIT_MAXHEALTH",
@@ -191,6 +192,8 @@ function TidyPlatesThreat:ReloadTheme()
   else
     TidyPlatesInternal:DisableCastBars()
   end
+
+  Addon:InitializeCustomNameplates()
 end
 
 function TidyPlatesThreat:StartUp()
@@ -551,12 +554,21 @@ end
 
 -- QuestWidget needs to update all nameplates when a quest was completed
 function TidyPlatesThreat:QUEST_WATCH_UPDATE(event, quest_index)
+  -- Feuert nicht bei Updates von Worldquests
   if TidyPlatesThreat.db.profile.questWidget.ON then
+    --TidyPlatesInternal:Update()
     TidyPlatesInternal:ForceUpdate()
   end
 end
 function TidyPlatesThreat:QUEST_ACCEPTED(event, quest_index, _)
   if TidyPlatesThreat.db.profile.questWidget.ON then
+    --TidyPlatesInternal:Update()
+    TidyPlatesInternal:ForceUpdate()
+  end
+end
+function TidyPlatesThreat:QUEST_ITEM_UPDATE(event, quest_index, _)
+  if TidyPlatesThreat.db.profile.questWidget.ON then
+    --TidyPlatesInternal:Update()
     TidyPlatesInternal:ForceUpdate()
   end
 end
