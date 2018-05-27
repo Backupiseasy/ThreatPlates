@@ -756,11 +756,6 @@ local function CreateIconAuraFrame(parent)
   frame.Border = frame:CreateTexture(nil, "ARTWORK", 1)
   frame.BorderHighlight = frame:CreateTexture(nil, "ARTWORK", 2)
   frame.Stacks = frame:CreateFontString(nil, "OVERLAY")
-  frame.Cooldown = CreateFrame("Cooldown", nil, frame, "TidyPlatesAuraWidgetCooldown")
-  frame:SetFrameLevel(parent:GetFrameLevel())
-  frame.Cooldown:SetAllPoints(frame.Icon)
-  frame.Cooldown:SetReverse(true)
-  frame.Cooldown:SetHideCountdownNumbers(true)
 
   --  Time Text
   frame.TimeLeft = frame:CreateFontString(nil, "OVERLAY")
@@ -770,6 +765,12 @@ local function CreateIconAuraFrame(parent)
   frame.TimeLeft:SetPoint("RIGHT", 0, 8)
   frame.TimeLeft:SetSize(26, 16)
   frame.TimeLeft:SetJustifyH("RIGHT")
+
+  frame.Cooldown = CreateFrame("Cooldown", nil, frame, "TidyPlatesAuraWidgetCooldown")
+  frame.Cooldown:SetFrameLevel(parent:GetFrameLevel())
+  frame.Cooldown:SetAllPoints(frame.Icon)
+  frame.Cooldown:SetReverse(true)
+  frame.Cooldown:SetHideCountdownNumbers(true)
 
   frame.AuraInfo = {
     name = "",

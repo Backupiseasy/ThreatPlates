@@ -1,4 +1,10 @@
 ------------------------------------------------------
+8.7.3
+------------------------------------------------------
+* Added two new class icon sets, Crest and Clean (courtesy of Lollzzer, Comment #818).
+* Fixed a bug with strata in the auras widget where the was shown above the duration text [Issue #181].
+
+------------------------------------------------------
 8.7.2
 ------------------------------------------------------
 * Extended the combo points widget to show also soul shards for warlocks [Issue #158,  Comment #819].
