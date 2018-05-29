@@ -18,7 +18,6 @@ local GetRaidTargetIndex = GetRaidTargetIndex
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
-local UnitIsOffTanked = ThreatPlates.UnitIsOffTanked
 local ShowThreatFeedback = ThreatPlates.ShowThreatFeedback
 local GetUniqueNameplateSetting = ThreatPlates.GetUniqueNameplateSetting
 
@@ -119,7 +118,7 @@ function Module:UpdateFrame(widget_frame, unit)
     return
   end
 
-  local style = unit.TP_Style
+  local style = unit.style
 
   if style == "unique" then
     local unique_setting = GetUniqueNameplateSetting(unit)
@@ -142,7 +141,7 @@ function Module:UpdateFrame(widget_frame, unit)
 
   local threatLevel = "MEDIUM"
   if style == "tank" then -- Tanking uses regular textures / swapped for dps / healing
-    if db.toggle.OffTank and UnitIsOffTanked(unit) then
+    if db.toggle.OffTank and Addon:UnitIsOffTanked(unit) then
       threatLevel = "OFFTANK"
     else
       threatLevel = unit.threatSituation
@@ -159,4 +158,8 @@ function Module:UpdateFrame(widget_frame, unit)
   end
 
   widget_frame:Show()
+end
+
+function Module:OnUpdateStyle(widget_frame, unit)
+  self:UpdateFrame(widget_frame, unit)
 end

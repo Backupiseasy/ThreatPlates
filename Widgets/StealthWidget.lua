@@ -110,11 +110,7 @@ function Module:OnUnitAdded(widget_frame, unit)
   local db = TidyPlatesThreat.db.profile.stealthWidget
 
   -- Updates based on settings / unit style
-  if unit.TP_Style == "NameOnly" or unit.TP_Style == "NameOnly-Unique" then
-    widget_frame:SetPoint("CENTER", widget_frame:GetParent(), "CENTER", db.x_hv, db.y_hv)
-  else
-    widget_frame:SetPoint("CENTER", widget_frame:GetParent(), "CENTER", db.x, db.y)
-  end
+  self:OnUpdateStyle(widget_frame, unit)
 
   -- Updates based on settings
   widget_frame:SetSize(db.scale, db.scale)
@@ -124,4 +120,14 @@ function Module:OnUnitAdded(widget_frame, unit)
   widget_frame.Icon:SetTexture(STEALTH_ICON_TEXTURE)
 
   widget_frame:Show()
+end
+
+function Module:OnUpdateStyle(widget_frame, unit)
+  local db = TidyPlatesThreat.db.profile.stealthWidget
+  -- Updates based on settings / unit style
+  if unit.style == "NameOnly" or unit.style == "NameOnly-Unique" then
+    widget_frame:SetPoint("CENTER", widget_frame:GetParent(), "CENTER", db.x_hv, db.y_hv)
+  else
+    widget_frame:SetPoint("CENTER", widget_frame:GetParent(), "CENTER", db.x, db.y)
+  end
 end

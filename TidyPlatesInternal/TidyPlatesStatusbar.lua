@@ -231,7 +231,7 @@ local ConfigModePlate
 local function ShowOnUnit(unit)
   local db = TidyPlatesThreat.db.profile.settings.castbar
 
-  local style = unit.TP_Style
+  local style = unit.style
   return style ~= "etotem" and style ~= "empty" and
     ((db.ShowInHeadlineView and (style == "NameOnly" or style == "NameOnly-Unique")) or
       (db.show and not (style == "NameOnly" or style == "NameOnly-Unique")))

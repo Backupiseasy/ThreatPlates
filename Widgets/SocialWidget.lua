@@ -29,6 +29,7 @@ local GetNumGuildMembers, GetGuildRosterInfo = GetNumGuildMembers, GetGuildRoste
 local GetNumFriends, GetFriendInfo = GetNumFriends, GetFriendInfo
 local BNGetNumFriends, BNGetFriendInfo, BNGetToonInfo = BNGetNumFriends, BNGetFriendInfo, BNGetToonInfo
 local UnitName, GetRealmName, UnitFactionGroup = UnitName, GetRealmName, UnitFactionGroup
+local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
@@ -137,6 +138,19 @@ function Module:BN_FRIEND_TOON_OFFLINE(toon_id)
   Module:UpdateAllFramesAndNameplateColor()
 end
 
+function Module:UNIT_NAME_UPDATE(unitid)
+  local plate = GetNamePlateForUnit(unitid)
+
+  if plate then
+    local unit = plate.TPFrame.unit
+
+    local name, realm = UnitName(unitid)
+    unit.fullname = name .. "-" .. (realm or GetRealmName())
+
+    self:UpdateFrame(plate.TPFrame, unit)
+  end
+end
+
 local function IsFriend(unit)
   -- no need to check for ShowInHeadlineView as this is for coloring the healthbar
   return TidyPlatesThreat.db.profile.socialWidget.ON and (ListFriends[unit.fullname] or ListBnetFriends[unit.fullname])
@@ -182,6 +196,7 @@ function Module:OnEnable()
     self:RegisterEvent("BN_CONNECTED")
     self:RegisterEvent("BN_FRIEND_TOON_ONLINE")
     self:RegisterEvent("BN_FRIEND_TOON_OFFLINE")
+    self:RegisterEvent("UNIT_NAME_UPDATE")
     --Module:RegisterEvent("BN_FRIEND_ACCOUNT_ONLINE", EventHandler)
     --Module:RegisterEvent("BN_FRIEND_ACCOUNT_OFFLINE", EventHandler)
     --Module:RegisterEvent("BN_FRIEND_LIST_SIZE_CHANGED", EventHandler)
@@ -239,17 +254,15 @@ function Module:UpdateFrame(widget_frame, unit)
     return
   end
 
-  local x, y
-  local name_style = unit.TP_Style == "NameOnly" or unit.TP_Style == "NameOnly-Unique"
+  local name_style = unit.style == "NameOnly" or unit.style == "NameOnly-Unique"
   local icon = widget_frame.Icon
   if friend_texture then
     -- db = TidyPlatesThreat.db.profile.socialWidget
     if name_style then
-      x, y = db.x_hv, db.y_hv
+      icon:SetPoint("CENTER", widget_frame:GetParent(), db.x_hv, db.y_hv)
     else
-      x, y = db.x, db.y
+      icon:SetPoint("CENTER", widget_frame:GetParent(), db.x, db.y)
     end
-    icon:SetPoint("CENTER", widget_frame:GetParent(), x, y)
     icon:SetTexture(friend_texture)
 
     icon:Show()
@@ -262,11 +275,10 @@ function Module:UpdateFrame(widget_frame, unit)
     -- apply settings to faction icon
     db = TidyPlatesThreat.db.profile.FactionWidget
     if name_style then
-      x, y = db.x_hv, db.y_hv
+      icon:SetPoint("CENTER", widget_frame:GetParent(), db.x_hv, db.y_hv)
     else
-      x, y = db.x, db.y
+      icon:SetPoint("CENTER", widget_frame:GetParent(), db.x, db.y)
     end
-    icon:SetPoint("CENTER", widget_frame:GetParent(), x, y)
     icon:SetTexture(faction_texture)
 
     icon:Show()
@@ -275,4 +287,26 @@ function Module:UpdateFrame(widget_frame, unit)
   end
 
   widget_frame:Show()
+end
+
+function Module:OnUpdateStyle(widget_frame, unit)
+  local name_style = unit.style == "NameOnly" or unit.style == "NameOnly-Unique"
+  if widget_frame.Icon:IsShown() then
+    local db = TidyPlatesThreat.db.profile.socialWidget
+    if name_style then
+      widget_frame.Icon:SetPoint("CENTER", widget_frame:GetParent(), db.x_hv, db.y_hv)
+    else
+      widget_frame.Icon:SetPoint("CENTER", widget_frame:GetParent(), db.x, db.y)
+    end
+  end
+
+  if widget_frame.FactionIcon:IsShown() then
+    -- apply settings to faction icon
+    local db = TidyPlatesThreat.db.profile.FactionWidget
+    if name_style then
+      widget_frame.FactionIcon:SetPoint("CENTER", widget_frame:GetParent(), db.x_hv, db.y_hv)
+    else
+      widget_frame.FactionIcon:SetPoint("CENTER", widget_frame:GetParent(), db.x, db.y)
+    end
+  end
 end

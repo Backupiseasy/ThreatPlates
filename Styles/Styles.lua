@@ -123,6 +123,35 @@ local function GetUnitType(unit)
   return faction, unit_class
 end
 
+function Addon:UnitStyle_UnitType(tp_frame, unit)
+  local faction = REACTION_MAPPING[unit.reaction]
+  local unit_class
+
+  -- not all combinations are possible in the game: Friendly Minus, Neutral Player/Totem/Pet
+  if unit.type == "PLAYER" then
+    unit_class = "Player"
+    unit.TP_DetailedUnitType = faction .. unit_class
+  elseif UnitIsOtherPlayersPet(unit.unitid) then -- player pets are also considered guardians, so this check has priority
+    unit_class = "Pet"
+    unit.TP_DetailedUnitType = unit_class
+  elseif UnitPlayerControlled(unit.unitid) then
+    unit_class = "Guardian"
+    unit.TP_DetailedUnitType = unit_class
+  elseif unit.isMini then
+    unit_class = "Minus"
+    unit.TP_DetailedUnitType = unit_class
+  else
+    unit_class = "NPC"
+    if faction == "Neutral" then
+      unit.TP_DetailedUnitType = "Neutral"
+    else
+      unit.TP_DetailedUnitType = faction .. unit_class
+    end
+  end
+
+  unit.UnitType = faction .. unit_class
+end
+
 local function ShowUnit(unit)
   -- If nameplate visibility is controlled by Wow itself (configured via CVars), this function is never used as
   -- nameplates aren't created in the first place (e.g. friendly NPCs, totems, guardians, pets, ...)
@@ -209,21 +238,48 @@ local function GetUniqueNameplateSetting(unit)
     return nil
 end
 
-function Addon:SetStyle(unit)
-  -- sometimes unitid is nil, still don't know why, but it creates all kinds of LUA errors as other attributes are nil
-  -- also, e.g., unit.type, unit.name, ...
-  --ThreatPlates.DEBUG_PRINT_UNIT(unit)
-  if not unit.unitid then
-    unit.TP_Style = "empty"
-    return "empty", nil
+-- Check if a unit is a totem or a custom nameplates (e.g., after UNIT_NAME_UPDATE)
+function Addon:UnitStyle_NameDependent(tp_frame, unit)
+  local plate_style
+
+  local db = TidyPlatesThreat.db.profile
+
+  local totem_settings, unique_settings
+
+  local totem_id = TOTEMS[unit.name]
+  if totem_id then
+    totem_settings = db.totemSettings[totem_id]
+    if totem_settings.ShowNameplate then
+      plate_style = (db.totemSettings.hideHealthbar and "etotem") or "totem"
+    end
+
+    unit.TP_DetailedUnitType = "Totem"
+  else
+    local unique_settings = db.uniqueSettings.map[unit.name]
+    if unique_settings and unique_settings.useStyle then
+      if unique_settings.showNameplate then
+        plate_style = "unique"
+      elseif unique_settings.ShowHeadlineView then
+        plate_style = (db.HeadlineView.ON and "NameOnly-Unique") or "unique"
+      else
+        plate_style = "etotem"
+      end
+    end
   end
 
-  -- With TidyPlates:
-  --FixUpdateUnitCondition(unit)
+  unit.TotemSettings = totem_settings
+  unit.CustomPlateSettings = unique_settings
+  unit.TP_UniqueSetting = unique_settings
+
+  if plate_style then
+    tp_frame.stylename = plate_style
+  end
+end
+
+function Addon:SetStyle(unit)
   local show, unit_type, headline_view = ShowUnit(unit)
 
   if not show then
-    unit.TP_Style = "empty"
     return "empty", nil
   end
 
@@ -275,7 +331,6 @@ function Addon:SetStyle(unit)
     end
   end
 
-  unit.TP_Style = style
   unit.TP_UniqueSetting = unique_setting
   return style, unique_setting
 end

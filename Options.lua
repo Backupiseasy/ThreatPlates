@@ -110,13 +110,7 @@ end
 
 local function SetValueForceUpdate(info, value)
 	SetValuePlain(info, value)
-	--TidyPlates:ResetWidgets()
 	TidyPlatesInternal:ForceUpdate()
-end
-
-local function SetValueResetWidgets(info, value)
-	SetValuePlain(info, value)
-	TidyPlatesInternal:ResetWidgets()
 end
 
 local function SetSelectValue(info, value)

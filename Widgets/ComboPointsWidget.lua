@@ -101,13 +101,13 @@ local function UpdateComboPoints(widget_frame)
   end
 end
 
+-- This event handler only watches for events of unit == "player"
 local function EventHandler(event, unitid, power_type)
-  -- only watch for player events
-  if unitid ~= "player" or (event == "UNIT_POWER" and not WATCH_POWER_TYPES[power_type]) then return end
+  if event == "UNIT_POWER" and not WATCH_POWER_TYPES[power_type] then return end
 
   local plate = GetNamePlateForUnit("target")
   if plate and plate.TPFrame:IsShown() then
-    UpdateComboPoints(plate.TPFrame.widgets["ComboPoints"])
+    UpdateComboPoints(plate.TPFrame.widgets.ComboPoints)
   end
 end
 
@@ -151,20 +151,21 @@ end
 --   unitID
 -- UNIT_AURA: unitID
 -- UNIT_FLAGS: unitID
+
 function Module:OnEnable()
   GetResourceOnTarget = GetComboPointFunction()
 
   if GetResourceOnTarget then
-    Module:RegisterEvent("UNIT_POWER", EventHandler)
-    Module:RegisterEvent("UNIT_DISPLAYPOWER", EventHandler)
-    --Module:RegisterEvent("UNIT_AURA", EventHandler)
-    Module:RegisterEvent("UNIT_FLAGS", EventHandler)
-    Module:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
+    Module:RegisterUnitEvent("UNIT_POWER", "player", EventHandler)
+    Module:RegisterUnitEvent("UNIT_DISPLAYPOWER", "player", EventHandler)
+    Module:RegisterUnitEvent("UNIT_FLAGS", "player", EventHandler)
   else
     Module:UnregisterEvent("UNIT_POWER")
     Module:UnregisterEvent("UNIT_DISPLAYPOWER")
     Module:UnregisterEvent("UNIT_FLAGS")
   end
+
+  Module:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
 end
 
 function Module:EnabledForStyle(style, unit)
@@ -182,11 +183,7 @@ function Module:OnUnitAdded(widget_frame, unit)
   local db = TidyPlatesThreat.db.profile.comboWidget
 
   -- Updates based on settings / unit style
-  if unit.TP_Style == "NameOnly" or unit.TP_Style == "NameOnly-Unique" then
-    widget_frame:SetPoint("CENTER", widget_frame:GetParent(), "CENTER", db.x_hv, db.y_hv)
-  else
-    widget_frame:SetPoint("CENTER", widget_frame:GetParent(), "CENTER", db.x, db.y)
-  end
+  self:OnUpdateStyle(widget_frame, unit)
 
   -- Updates based on settings
   widget_frame:SetScale(db.scale)
@@ -194,6 +191,16 @@ function Module:OnUnitAdded(widget_frame, unit)
 
   -- Updates based on unit status
   self:OnTargetChanged(widget_frame, unit)
+end
+
+function Module:OnUpdateStyle(widget_frame, unit)
+  local db = TidyPlatesThreat.db.profile.comboWidget
+  -- Updates based on settings / unit style
+  if unit.style == "NameOnly" or unit.style == "NameOnly-Unique" then
+    widget_frame:SetPoint("CENTER", widget_frame:GetParent(), "CENTER", db.x_hv, db.y_hv)
+  else
+    widget_frame:SetPoint("CENTER", widget_frame:GetParent(), "CENTER", db.x, db.y)
+  end
 end
 
 function Module:OnTargetChanged(widget_frame, unit)

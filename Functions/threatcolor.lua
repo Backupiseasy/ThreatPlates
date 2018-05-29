@@ -10,10 +10,8 @@ local UnitIsConnected = UnitIsConnected
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
 local RGB = ThreatPlates.RGB
-local UnitIsOffTanked = ThreatPlates.UnitIsOffTanked
 local OnThreatTable = ThreatPlates.OnThreatTable
 local GetUniqueNameplateSetting = ThreatPlates.GetUniqueNameplateSetting
-local SetStyle = TidyPlatesThreat.SetStyle
 
 local COLOR_TRANSPARENT = RGB(0, 0, 0, 0) -- opaque
 
@@ -35,8 +33,7 @@ function Addon:SetThreatColor(unit)
   end
 
   if InCombatLockdown() and unit.type == "NPC" and unit.reaction ~= "FRIENDLY" then
-    local style = unit.TP_Style or SetStyle(unit)
-    --    local style, unique_setting = TidyPlatesThreat.SetStyle(unit)
+    local style = unit.style
 
     if style == "unique" then
       local unique_setting = GetUniqueNameplateSetting(unit)
@@ -59,7 +56,7 @@ function Addon:SetThreatColor(unit)
       if ShowThreatGlow(unit) then
         local show_offtank = db.threat.toggle.OffTank
         local threatSituation = unit.threatSituation
-        if style == "tank" and show_offtank and UnitIsOffTanked(unit) then
+        if style == "tank" and show_offtank and Addon:UnitIsOffTanked(unit) then
           threatSituation = "OFFTANK"
         end
         c = db.settings[style]["threatcolor"][threatSituation]

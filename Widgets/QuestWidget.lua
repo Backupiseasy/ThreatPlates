@@ -23,8 +23,8 @@ local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local TidyPlatesThreat = TidyPlatesThreat
 
 local InCombat = false
-local tooltip_frame = CreateFrame("GameTooltip", "ThreatPlates_Tooltip", nil, "GameTooltipTemplate")
-local player_name = UnitName("player")
+local TooltipFrame = CreateFrame("GameTooltip", "ThreatPlates_Tooltip", nil, "GameTooltipTemplate")
+local PlayerName = UnitName("player")
 local ICON_COLORS = {}
 
 ---------------------------------------------------------------------------------------------------
@@ -40,11 +40,11 @@ local function IsQuestUnit(unit)
 
 	-- Read quest information from tooltip. Thanks to Kib: QuestMobs AddOn by Tosaido.
 	if unitid then
-		tooltip_frame:SetOwner(WorldFrame, "ANCHOR_NONE")
+		TooltipFrame:SetOwner(WorldFrame, "ANCHOR_NONE")
 		--tooltip_frame:SetUnit(unitid)
-		tooltip_frame:SetHyperlink("unit:" .. unit.guid)
+		TooltipFrame:SetHyperlink("unit:" .. unit.guid)
 
-		for i = 3, tooltip_frame:NumLines() do
+		for i = 3, TooltipFrame:NumLines() do
 			local line = _G["ThreatPlates_TooltipTextLeft" .. i]
 			local text = line:GetText()
 			local text_r, text_g, text_b = line:GetTextColor()
@@ -64,7 +64,7 @@ local function IsQuestUnit(unit)
 						-- A unit may be target of more than one quest, the quest indicator should be show if at least one quest is not completed.
 						if current and goal then
 							if (current ~= goal) then
-								if (unit_name == "" or unit_name == player_name) then
+								if (unit_name == "" or unit_name == PlayerName) then
 									quest_player = true
 								else
 									quest_group = true
@@ -72,7 +72,7 @@ local function IsQuestUnit(unit)
 								break
 							end
 						else
-							if (unit_name == "" or unit_name == player_name) then
+							if (unit_name == "" or unit_name == PlayerName) then
 								quest_player = true
 							else
 								quest_group = true
@@ -235,12 +235,12 @@ function Module:IsEnabled()
 end
 
 function Module:OnEnable()
-  Module:RegisterEvent("QUEST_ACCEPTED", EventHandler)
-  Module:RegisterEvent("QUEST_WATCH_UPDATE", EventHandler)
-  Module:RegisterEvent("PLAYER_ENTERING_WORLD", EventHandler)
-  Module:RegisterEvent("PLAYER_REGEN_ENABLED")
-  Module:RegisterEvent("PLAYER_REGEN_DISABLED")
-  Module:RegisterEvent("UNIT_THREAT_LIST_UPDATE")
+	self:RegisterEvent("QUEST_ACCEPTED", EventHandler)
+	self:RegisterEvent("QUEST_WATCH_UPDATE", EventHandler)
+	self:RegisterEvent("PLAYER_ENTERING_WORLD", EventHandler)
+	self:RegisterEvent("PLAYER_REGEN_ENABLED")
+	self:RegisterEvent("PLAYER_REGEN_DISABLED")
+	self:RegisterEvent("UNIT_THREAT_LIST_UPDATE")
 
   InCombat = InCombatLockdown()
 end
@@ -273,12 +273,8 @@ function Module:UpdateFrame(widget_frame, unit)
 
   local db = TidyPlatesThreat.db.profile.questWidget
   if show and db.ModeIcon and ShowQuestUnit(unit) then
-    local style = unit.TP_Style
-    if style == "NameOnly" or style == "NameOnly-Unique" then
-      widget_frame:SetPoint("CENTER", widget_frame:GetParent(), db.x_hv, db.y_hv)
-    else
-      widget_frame:SetPoint("CENTER", widget_frame:GetParent(), db.x, db.y)
-    end
+    -- Updates based on settings / unit style
+    self:OnUpdateStyle(widget_frame, unit)
 
     local color = ICON_COLORS[quest_type]
     widget_frame.Icon:SetVertexColor(color.r, color.g, color.b)
@@ -286,5 +282,14 @@ function Module:UpdateFrame(widget_frame, unit)
     widget_frame:Show()
   else
     widget_frame:Hide()
+  end
+end
+
+function Module:OnUpdateStyle(widget_frame, unit)
+  local db = TidyPlatesThreat.db.profile.questWidget
+  if unit.style == "NameOnly" or unit.style == "NameOnly-Unique" then
+    widget_frame:SetPoint("CENTER", widget_frame:GetParent(), db.x_hv, db.y_hv)
+  else
+    widget_frame:SetPoint("CENTER", widget_frame:GetParent(), db.x, db.y)
   end
 end

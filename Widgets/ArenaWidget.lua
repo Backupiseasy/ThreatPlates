@@ -28,15 +28,15 @@ local ArenaID = {}
 
 local function GetArenaOpponents()
 	for i = 1, GetNumArenaOpponents() do
-		local name = UnitGUID("arena" .. i)
-		local petname = UnitGUID("arenapet" .. i)
+		local player_guid = UnitGUID("arena" .. i)
+		local pet_guid = UnitGUID("arenapet" .. i)
 
-    if name and not ArenaID[name] then
-      ArenaID[name] = i
+    if player_guid and not ArenaID[player_guid] then
+      ArenaID[player_guid] = i
 		end
 
-		if petname and not ArenaID[petname] then
-			ArenaID[petname] = i
+		if pet_guid and not ArenaID[pet_guid] then
+			ArenaID[pet_guid] = i
 		end
   end
 end

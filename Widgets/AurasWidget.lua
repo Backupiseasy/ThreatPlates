@@ -419,7 +419,7 @@ local function UpdateIconAuraInformation(frame) -- texture, duration, expiration
   PolledHideIn(frame, expiration, duration)
 end
 
-local function UpdateIconGrid(frame, unitid)
+local function UpdateIconGrid(widget_frame, unitid)
   local db = TidyPlatesThreat.db.profile.AuraWidget
   local BLIZZARD_ShowAll = false
 
@@ -436,7 +436,7 @@ local function UpdateIconGrid(frame, unitid)
     end
   end
 
-  local aura_frame_list = frame.AuraFrames
+  local aura_frame_list = widget_frame.AuraFrames
   if aura_filter == "NONE" then
     for index = 1, CONFIG_AuraLimit do
       PolledHideIn(aura_frame_list[index])
@@ -582,7 +582,6 @@ local function UpdateIconGrid(frame, unitid)
 end
 
 local function ExpireFunction(icon)
-  print ("Expire")
 	local widget_frame = icon.GetParent()
   UpdateIconGrid(widget_frame, widget_frame.unit.unitid)
 end
@@ -895,7 +894,7 @@ local function UpdateAuraWidgetLayout(widget_frame)
     --      PolledHideIn(frame)
     --    end
 
-    UpdateIconGrid(widget_frame, widget_frame.unit.unitid)
+    --UpdateIconGrid(widget_frame, widget_frame.unit.unitid)
 
     widget_frame:ClearAllPoints()
     widget_frame:SetPoint(ThreatPlates.ANCHOR_POINT_SETPOINT[db.anchor][2], widget_frame:GetParent(), ThreatPlates.ANCHOR_POINT_SETPOINT[db.anchor][1], db.x, db.y)
@@ -1078,8 +1077,9 @@ local function ConfigAuraWidget()
 end
 
 function Module:UNIT_AURA(unitid)
-  local plate = GetNamePlateForUnit(unitid)
+  if unitid == "player" then return end
 
+  local plate = GetNamePlateForUnit(unitid)
   if plate then -- plate maybe nil as not all UNIT_AURA events are on units with nameplates
     local widget_frame = plate.TPFrame.widgets["Auras"]
     UpdateIconGrid(widget_frame, unitid)
@@ -1129,7 +1129,7 @@ end
 
 function Module:OnUnitAdded(widget_frame, unit)
   UpdateAuraWidgetLayout(widget_frame)
-  --UpdateIconGrid(widget_frame, unit.unitid)
+  UpdateIconGrid(widget_frame, unit.unitid)
 
   self:OnTargetChanged(widget_frame, unit)
 end

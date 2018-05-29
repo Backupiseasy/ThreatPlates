@@ -18,9 +18,8 @@ local IsFriend
 local IsGuildmate
 
 function Addon:SetNameColor(unit)
-  if not unit.unitid then return end
+  local style = unit.style
 
-  local style = unit.TP_Style or Addon:SetStyle(unit)
   local unique_setting = unit.TP_UniqueSetting or GetUniqueNameplateSetting(unit)
 
   local db = TidyPlatesThreat.db.profile

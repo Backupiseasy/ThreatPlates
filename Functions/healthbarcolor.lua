@@ -65,18 +65,6 @@ function CS:GetSmudgeColorRGB(colorA, colorB, perc)
     return r,g,b
 end
 
-
-local function UnitIsOffTanked(unit)
-  local targetOf = unit.unitid.."target"
-  local targetIsTank = UnitIsUnit(targetOf, "pet") or ("TANK" == UnitGroupRolesAssigned(targetOf))
-
-  if targetIsTank and unit.threatValue < 2 then
-    return true
-  end
-
-  return false
-end
-
 -- Threat System is OP, player is in combat, style is tank or dps
 local function GetThreatColor(unit, style)
   local db = TidyPlatesThreat.db.profile
@@ -88,14 +76,14 @@ local function GetThreatColor(unit, style)
     if db.threat.nonCombat then
       if OnThreatTable(unit) then
         local threatSituation = unit.threatSituation
-        if style == "tank" and show_offtank and UnitIsOffTanked(unit) then
+        if style == "tank" and show_offtank and Addon:UnitIsOffTanked(unit) then
           threatSituation = "OFFTANK"
         end
         c = db.settings[style].threatcolor[threatSituation]
       end
     else
       local threatSituation = unit.threatSituation
-      if style == "tank" and show_offtank and UnitIsOffTanked(unit) then
+      if style == "tank" and show_offtank and Addon:UnitIsOffTanked(unit) then
         threatSituation = "OFFTANK"
       end
       c = db.settings[style].threatcolor[threatSituation]
@@ -189,9 +177,8 @@ end
 --}
 
 function Addon:SetHealthbarColor(unit)
-  if not unit.unitid then return end
+  local style = unit.style
 
-  local style = unit.TP_Style or Addon:SetStyle(unit)
   local unique_setting = unit.TP_UniqueSetting or GetUniqueNameplateSetting(unit)
   if style == "NameOnly" or style == "NameOnly-Unique" or style == "empty" or style == "etotem" then return end
 
@@ -300,4 +287,3 @@ end
 ThreatPlates.GetColorByHealthDeficit = GetColorByHealthDeficit
 ThreatPlates.GetColorByClass = GetColorByClass
 ThreatPlates.GetColorByReaction = GetColorByReaction
-ThreatPlates.UnitIsOffTanked = UnitIsOffTanked

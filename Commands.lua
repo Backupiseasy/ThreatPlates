@@ -98,6 +98,19 @@ SlashCmdList["TPTPVERBOSE"] = TPTPVERBOSE
 
 -- Command: /tptp
 function TidyPlatesThreat:ChatCommand(input)
+	if input == "custom-plate" then
+		local plate = C_NamePlate.GetNamePlateForUnit("target")
+		if not plate then return end
+
+		local unit = plate.TPFrame.unit
+		print ("Adding", unit.name, "as new custom nameplate")
+		TidyPlatesThreat.db.profile.uniqueSettings.map[unit.name] = TidyPlatesThreat.db.profile.uniqueSettings.map["Geisterwolf"]
+
+		Addon.EventHandler:UNIT_NAME_UPDATE(unit.unitid)
+
+		return
+	end
+
 	TidyPlatesThreat:OpenOptions()
 
 --	local cmd_list = {}

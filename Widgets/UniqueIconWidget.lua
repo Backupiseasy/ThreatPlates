@@ -54,11 +54,11 @@ function Module:OnUnitAdded(widget_frame, unit)
 	local db = TidyPlatesThreat.db.profile.uniqueWidget
 
 	-- Updates based on settings / unit style
-	if unit.TP_Style == "NameOnly-Unique" then
-		widget_frame:SetPoint("CENTER", widget_frame:GetParent(), db.x_hv, db.y_hv)
-	else
-		widget_frame:SetPoint("CENTER", widget_frame:GetParent(), db.x, db.y)
-	end
+  if unit.style == "NameOnly-Unique" then
+    widget_frame:SetPoint("CENTER", widget_frame:GetParent(), db.x_hv, db.y_hv)
+  else
+    widget_frame:SetPoint("CENTER", widget_frame:GetParent(), db.x, db.y)
+  end
 
 	-- Updates based on settings
 	widget_frame:SetSize(db.scale, db.scale)

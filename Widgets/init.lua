@@ -9,8 +9,7 @@ local ThreatPlates = Addon.ThreatPlates
 ---------------------------------------------------------------------------------------------------
 
 -- Lua APIs
-local pairs = pairs
-local next = next
+local pairs, next = pairs, next
 
 -- WoW APIs
 
@@ -18,13 +17,13 @@ local next = next
 local DEBUG = ThreatPlates.DEBUG
 
 ThreatPlatesWidgets = {}
+local Modules = {}
+local EnabledModules = {}
+local RegisteredEventsByModule = {}
 
 ---------------------------------------------------------------------------------------------------
 -- Event handling stuff
 ---------------------------------------------------------------------------------------------------
-local EventHandlerFrame = CreateFrame("Frame", nil, WorldFrame )
-local RegisteredEventsByModule = {}
-
 local function EventHandler(self, event, ...)
   local modules = RegisteredEventsByModule[event]
 
@@ -39,6 +38,18 @@ local function EventHandler(self, event, ...)
   end
 end
 
+local function UnitEventHandler(self, event, ...)
+  local module = self.Module
+  local func = module.RegistedUnitEvents[event]
+
+  if func == true then
+    module[event](module, ...)
+  else
+    func(event, ...)
+  end
+end
+
+local EventHandlerFrame = CreateFrame("Frame", nil, WorldFrame)
 EventHandlerFrame:SetScript("OnEvent", EventHandler)
 
 local function RegisterEvent(module, event, func)
@@ -47,8 +58,18 @@ local function RegisterEvent(module, event, func)
   end
 
   RegisteredEventsByModule[event][module] = func or true
-
   EventHandlerFrame:RegisterEvent(event)
+end
+
+local function RegisterUnitEvent(module, event, unitid, func)
+  if not module.EventHandlerFrame then
+    module.EventHandlerFrame = CreateFrame("Frame", nil, WorldFrame)
+    module.EventHandlerFrame.Module = module
+    module.EventHandlerFrame:SetScript("OnEvent", UnitEventHandler)
+  end
+
+  module.RegistedUnitEvents[event] = func or true
+  module.EventHandlerFrame:RegisterUnitEvent(event, unitid)
 end
 
 local function UnregisterEvent(module, event)
@@ -59,12 +80,23 @@ local function UnregisterEvent(module, event)
       EventHandlerFrame:UnregisterEvent(event)
     end
   end
+
+  if module.EventHandlerFrame then
+    module.EventHandlerFrame:UnregisterEvent(event)
+    module.RegistedUnitEvents[event] = nil
+  end
 end
 
 local function UnregisterAllEvents(module)
   for event, _ in pairs(RegisteredEventsByModule) do
     UnregisterEvent(module, event)
   end
+
+  -- Also remove all remaining registered unit events (that are not in RegisteredEventsByModule)
+  for event, _ in pairs(module.RegistedUnitEvents) do
+    module.EventHandlerFrame:UnregisterEvent(event)
+  end
+  module.RegistedUnitEvents = {}
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -107,13 +139,12 @@ end
 --   * OnTargetChanged
 --   * UpdateFrame (if UpdateAllFrames is used)
 ---------------------------------------------------------------------------------------------------
-local Modules = {}
-local EnabledModules = {}
-
 function Addon:NewModule(module_name)
   local module = {
     Name = module_name,
+    RegistedUnitEvents = {},
     RegisterEvent = RegisterEvent,
+    RegisterUnitEvent = RegisterUnitEvent,
     UnregisterEvent = UnregisterEvent,
     UnregisterAllEvents = UnregisterAllEvents,
     UpdateAllFrames = UpdateAllFrames,
@@ -247,12 +278,12 @@ function Addon:ModulesOnUpdateStyle(tp_frame, unit)
 
   for module_name, module in pairs(EnabledModules) do
     if module:EnabledForStyle(tp_frame.stylename, unit) and tp_frame.stylename ~= "empty" then
-      if module.UpdateFrame then
-        module:UpdateFrame(plate_widgets[module_name], unit)
+--      if module.UpdateFrame then
+--        module:UpdateFrame(plate_widgets[module_name], unit)
+--      end
+      if module.OnUpdateStyle then
+        module:OnUpdateStyle(plate_widgets[module_name], unit)
       end
-      -- if module.UpdateStyle then
-      --   module:UpdateStyle(plate_widgets[module_name], unit)
-      -- end
     else
       plate_widgets[module_name]:Hide()
     end

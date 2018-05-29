@@ -40,14 +40,12 @@ local GetCVar, Lerp = GetCVar, Lerp
 -- Internal Data
 local PlatesCreated, PlatesVisible, PlatesByUnit, PlatesByGUID = {}, {}, {}, {}
 local nameplate, extended, visual			    	-- Temp/Local References
-local unit, unitcache, style, stylename, unitchanged	    			-- Temp/Local References
-local activetheme = {}                                                              -- Table Placeholder
-local InCombat, HasTarget = false, false					    -- Player State Data
+local unit, unitcache, style, stylename 	  -- Temp/Local References
+local activetheme = {}                      -- Table Placeholder
 local LastTargetPlate
 local ShowCastBars = true
 local EMPTY_TEXTURE = "Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\Empty"
 local ResetPlates, UpdateAll = false, false
-local OverrideFonts = false
 
 -- External references to internal data
 Addon.PlatesCreated = PlatesCreated
@@ -78,17 +76,11 @@ local CASTBAR_FLASH_DURATION = 1.2
 -- Core Function Declaration
 ---------------------------------------------------------------------------------------------------------------------
 -- Helpers
-local function ClearIndices(t) if t then for i,v in pairs(t) do t[i] = nil end return t end end
 local function IsPlateShown(plate) return plate and plate:IsShown() end
 
 -- Queueing
 local function SetUpdateMe(plate) plate.UpdateMe = true end
 local function SetUpdateAll() UpdateAll = true end
-local function SetUpdateHealth(source) source.parentPlate.UpdateHealth = true end
-
--- Overriding
-local function BypassFunction() return true end
-local ShowBlizzardPlate		-- Holder for later
 
 -- Style
 local UpdateStyle
@@ -102,8 +94,7 @@ local OnUpdateCasting, OnStartCasting, OnStopCasting, OnUpdateCastMidway
 
 -- Event Functions
 local OnNewNameplate, OnShowNameplate, OnHideNameplate, OnUpdateNameplate, OnResetNameplate
-local OnHealthUpdate, UpdateUnitCondition
-local UpdateUnitContext, UpdateUnitIdentity
+local OnHealthUpdate, ProcessUnitChanges
 
 -- Main Loop
 local OnUpdate
@@ -120,9 +111,13 @@ local function UpdateReferences(plate)
 	style = extended.style
 end
 
+-- UpdateUnitCache
+local function UpdateUnitCache() for key, value in pairs(unit) do unitcache[key] = value end end
+
 ---------------------------------------------------------------------------------------------------------------------
 -- Nameplate Detection & Update Loop
 ---------------------------------------------------------------------------------------------------------------------
+
 
 do
 	-- ForEachPlate
@@ -229,6 +224,8 @@ do
 		visual.raidicon:SetTexture("Interface\\TargetingFrame\\UI-RaidTargetingIcons")
 
     extended.widgets = {}
+
+		Addon:CreateExtensions(extended)
     Addon:CreateModules(extended)
 
     -- Allocate Tables
@@ -243,9 +240,6 @@ end
 -- Nameplate Script Handlers
 ---------------------------------------------------------------------------------------------------------------------
 do
-	-- UpdateUnitCache
-	local function UpdateUnitCache() for key, value in pairs(unit) do unitcache[key] = value end end
-
 	-- CheckNameplateStyle
 	local function CheckNameplateStyle()
     stylename = Addon:SetStyle(unit)
@@ -254,33 +248,35 @@ do
 		style = extended.style
 
 		if style and (extended.stylename ~= stylename) then
-			UpdateStyle()
+      UpdateStyle()
 			extended.stylename = stylename
 			unit.style = stylename
+
+			Addon:UpdateExtensions(extended, unit.unitid, style)
+      Addon:ModulesOnUnitAdded(extended, unit)
+      -- Addon:ModulesOnUpdateStyle(extended, unit)
     end
 	end
 
 	-- ProcessUnitChanges
-	local function ProcessUnitChanges()
+	function ProcessUnitChanges()
     -- Unit Cache: Determine if data has changed
-    unitchanged = false
+    local unitchanged = false
 
     for key, value in pairs(unit) do
       if unitcache[key] ~= value then
         unitchanged = true
-        --break -- one change is enough to update the unit
+        break -- one change is enough to update the unit
       end
     end
 
     -- Update Style/Indicators
-    if unitchanged or UpdateAll or (not style) then --
+    if unitchanged or UpdateAll or (not style) then
       CheckNameplateStyle()
       UpdateIndicator_Standard()
       UpdateIndicator_HealthBar()
       UpdateIndicator_Target()
     end
-
-    --Addon:ModulesOnUpdate(extended, unit)
 
     -- Update Delegates
     UpdateIndicator_ThreatGlow()
@@ -291,19 +287,6 @@ do
     UpdateUnitCache()
 	end
 
---[[
-	local function HideWidgets(plate)
-		if plate.TPFrame and plate.TPFrame.widgets then
-			local widgetTable = plate.TPFrame.widgets
-			for widgetIndex, widget in pairs(widgetTable) do
-				widget:Hide()
-				--widgetTable[widgetIndex] = nil
-			end
-		end
-	end
-
---]]
-
 	---------------------------------------------------------------------------------------------------------------------
 	-- Create / Hide / Show Event Handlers
 	---------------------------------------------------------------------------------------------------------------------
@@ -312,69 +295,47 @@ do
 	function OnShowNameplate(plate, unitid)
     UpdateReferences(plate)
 
-    wipe(extended.unit)
-    wipe(extended.unitcache)
-    --extended.unit = {}
-    --extended.unitcache = {}
-
-    unit.frame = extended
-		unit.alpha = 0
-		unit.isTarget = false
-		unit.isMouseover = false
-    unit.unitid = unitid         -- set in UpdateUnitIdentity
-    unit.guid = UnitGUID(unitid) -- set in UpdateUnitIdentity
-    unit.isCasting = false
-
-    --extended.unitcache = ClearIndices(extended.unitcache)
-		extended.stylename = ""
-		extended.Active = true
+    unit.unitid = unitid
+    unit.guid = UnitGUID(unitid)
 
     PlatesVisible[plate] = unitid
     PlatesByUnit[unitid] = plate
     PlatesByGUID[unit.guid] = plate
 
-		-- For Fading In
-		extended.requestedAlpha = 0
-    --extended:Hide()		-- Yes, it seems counterintuitive, but...
-    extended:SetAlpha(0)
+    -- unit.isTarget = false
+    unit.isMouseover = false
+    unit.isCasting = false
 
-		-- Graphics
-		visual.castbar:Hide()
+		extended.stylename = ""
+    extended.requestedAlpha = 0
+    --extended:SetAlpha(0)
 
-    UpdateUnitIdentity(unitid)
-    UpdateUnitCondition(plate, unitid)
-    CheckNameplateStyle()
-    UpdateUnitContext(plate, unitid)
+    Addon:UpdateUnitIdentity(extended, unitid)
+    Addon:UpdateUnitContext(extended, unitid)
+    ProcessUnitChanges()
+    OnUpdateCastMidway(plate, unitid)
 
+		Addon:UpdateExtensions(extended, unit.unitid, style)
     Addon:ModulesOnUnitAdded(extended, unit)
 
-    --OnUpdateNameplate(plate)
+    -- Skip the initial data gather and let the second cycle do the work.
+    --plate.UpdateMe = true
 
     if TidyPlatesThreat.db.profile.ShowFriendlyBlizzardNameplates and UnitReaction(unitid, "player") > 4 then
       plate.UnitFrame:Show()
-      plate.TPFrame:Hide()
-      --extended.Active = false
+      extended:Hide()
     else
       plate.UnitFrame:Hide()
-      plate.TPFrame:Show()
-      --extended.Active = true
-      --plate.TPFrame.FadeIn:Play()
+      extended:Show()
+      extended.Active = true
     end
-
-    -- Skip the initial data gather and let the second cycle do the work.
-		plate.UpdateMe = true
   end
-
 
 	-- OnHideNameplate
 	function OnHideNameplate(plate, unitid)
 		UpdateReferences(plate)
+
     extended:Hide()
-    --extended.FadeOut:Play()
-
-    plate.Hidden = true
-
-    extended.Active = false
 
     PlatesVisible[plate] = nil
 		PlatesByUnit[unitid] = nil
@@ -382,16 +343,21 @@ do
       PlatesByGUID[unit.guid] = nil
     end
 
-    unit.isCasting = false
-    visual.castbar:Hide()
-    --visual.castbar:SetScript("OnUpdate", nil)
+    wipe(extended.unit)
+    wipe(extended.unitcache)
+    --extended.unit = {}
+    --extended.unitcache = {}
 
-		-- Remove anything from the function queue
-		plate.UpdateMe = false
+    --unit.isCasting = false
+    --visual.castbar:Hide()
 
-		for widgetname, widget in pairs(extended.widgets) do
-      widget:Hide()
+		for module_name, widget_frame in pairs(extended.widgets) do
+      widget_frame:Hide()
     end
+
+    extended.Active = false
+    -- Remove anything from the function queue
+    plate.UpdateMe = false
 	end
 
 	-- OnUpdateNameplate
@@ -400,8 +366,8 @@ do
     local unitid = PlatesVisible[plate]
     UpdateReferences(plate)
 
-		UpdateUnitIdentity(unitid)
-		UpdateUnitContext(plate, unitid)
+		--Addon:UpdateUnitIdentity(plate.TPFrame, unitid)
+    Addon:UpdateUnitContext(extended, unitid)
 		ProcessUnitChanges()
 		OnUpdateCastMidway(plate, unitid)
 	end
@@ -409,8 +375,9 @@ do
 	-- OnHealthUpdate
 	function OnHealthUpdate(plate)
 		local unitid = PlatesVisible[plate]
+    UpdateReferences(plate)
 
-		UpdateUnitCondition(plate, unitid)
+    Addon:UpdateUnitCondition(extended, unitid)
 		ProcessUnitChanges()
 
     -- Fix a bug where the overlay for non-interruptible casts was shown even for interruptible casts when entering combat while the unit was already casting
@@ -423,11 +390,8 @@ do
 
   -- OnResetNameplate
 	function OnResetNameplate(plate)
-    plate.UpdateMe = true
-
-    local extended = plate.TPFrame
-		extended.unitcache = ClearIndices(extended.unitcache)
-		extended.stylename = ""
+    -- wipe(plate.TPFrame.unit)
+    wipe(plate.TPFrame.unitcache)
 
     OnShowNameplate(plate, PlatesVisible[plate])
 	end
@@ -437,138 +401,110 @@ end
 ---------------------------------------------------------------------------------------------------------------------
 --  Unit Updates: Updates Unit Data, Requests indicator updates
 ---------------------------------------------------------------------------------------------------------------------
-do
-	local RaidIconList = { "STAR", "CIRCLE", "DIAMOND", "TRIANGLE", "MOON", "SQUARE", "CROSS", "SKULL" }
+local RaidIconList = { "STAR", "CIRCLE", "DIAMOND", "TRIANGLE", "MOON", "SQUARE", "CROSS", "SKULL" }
 
-	-- GetUnitAggroStatus: Determines if a unit is attacking, by looking at aggro glow region
-	local function GetUnitAggroStatus( threatRegion )
-		if not  threatRegion:IsShown() then return "LOW", 0 end
+-- GetUnitReaction: Determines the reaction, and type of unit from the health bar color
+local function GetReactionByColor(red, green, blue)
+  if red < .1 then 	-- Friendly
+    return "FRIENDLY"
+  elseif red > .5 then
+    if green > .9 then return "NEUTRAL"
+    else return "HOSTILE" end
+  end
+end
 
-		local red, green, blue, alpha = threatRegion:GetVertexColor()
-		local opacity = threatRegion:GetVertexColor()
+local EliteReference = {
+  ["elite"] = true,
+  ["rareelite"] = true,
+  ["worldboss"] = true,
+}
 
-		if threatRegion:IsShown() and (alpha < .9 or opacity < .9) then
-			-- Unfinished
-		end
+local RareReference = {
+  ["rare"] = true,
+  ["rareelite"] = true,
+}
 
-		if red > 0 then
-			if green > 0 then
-				if blue > 0 then return "MEDIUM", 1 end
-				return "MEDIUM", 2
-			end
-			return "HIGH", 3
-		end
-	end
+local ThreatReference = {
+  [0] = "LOW",
+  [1] = "MEDIUM",
+  [2] = "MEDIUM",
+  [3] = "HIGH",
+}
 
-		-- GetUnitReaction: Determines the reaction, and type of unit from the health bar color
-	local function GetReactionByColor(red, green, blue)
-		if red < .1 then 	-- Friendly
-			return "FRIENDLY"
-		elseif red > .5 then
-			if green > .9 then return "NEUTRAL"
-			else return "HOSTILE" end
-		end
-	end
+-- UpdateUnitIdentity: Updates Low-volatility Unit Data
+-- (This is essentially static data)
+--------------------------------------------------------
+function Addon:UpdateUnitIdentity(frame, unitid)
+  local unit = frame.unit
 
+  unit.name, _ = UnitName(unitid)
 
-	local EliteReference = {
-		["elite"] = true,
-		["rareelite"] = true,
-		["worldboss"] = true,
-	}
+  -- unit.pvpname = UnitPVPName(unitid)
+  -- unit.rawName = unit.name  -- gsub(unit.name, " %(%*%)", "")
+  -- unit.fullname = unit.name .. "-" .. (realm or GetRealmName())
 
-	local RareReference = {
-		["rare"] = true,
-		["rareelite"] = true,
-	}
+  unit.isBoss = UnitLevel(unitid) == -1
+  --unit.isPet = UnitIsOtherPlayersPet(unitid)
 
-	local ThreatReference = {
-		[0] = "LOW",
-		[1] = "MEDIUM",
-		[2] = "MEDIUM",
-		[3] = "HIGH",
-	}
+  local classification = UnitClassification(unitid)
+  unit.isElite = EliteReference[classification]
+  unit.isRare = RareReference[classification]
+  unit.isMini = classification == "minus"
 
-	-- UpdateUnitIdentity: Updates Low-volatility Unit Data
-	-- (This is essentially static data)
-	--------------------------------------------------------
-	function UpdateUnitIdentity(unitid)
-    unit.unitid = unitid
-    unit.name, _ = UnitName(unitid)
+  if UnitIsPlayer(unitid) then
+    _, unit.class = UnitClass(unitid)
+    unit.type = "PLAYER"
+  else
+    unit.class = ""
+    unit.type = "NPC"
+  end
+end
 
-    -- unit.pvpname = UnitPVPName(unitid)
-    -- unit.rawName = unit.name  -- gsub(unit.name, " %(%*%)", "")
-    -- unit.fullname = unit.name .. "-" .. (realm or GetRealmName())
+-- UpdateUnitContext: Updates Target/Mouseover
+function Addon:UpdateUnitContext(frame, unitid)
+  local unit = frame.unit
 
-		unit.isBoss = UnitLevel(unitid) == -1
+  unit.isMouseover = UnitIsUnit("mouseover", unitid)
+  unit.isTarget = UnitIsUnit("target", unitid) -- required here for config changes which reset all plates without calling TARGET_CHANGED, MOUSEOVER, ...
 
-		local classification = UnitClassification(unitid)
-		unit.isElite = EliteReference[classification]
-		unit.isRare = RareReference[classification]
-		unit.isMini = classification == "minus"
-		--unit.isPet = UnitIsOtherPlayersPet(unitid)
+  Addon:UpdateUnitCondition(frame, unitid)	-- This updates a bunch of properties
+end
 
-		if UnitIsPlayer(unitid) then
-			_, unit.class = UnitClass(unitid)
-			unit.type = "PLAYER"
-		else
-			unit.class = ""
-			unit.type = "NPC"
-    end
-	end
+-- UpdateUnitCondition: High volatility data
+function Addon:UpdateUnitCondition(frame, unitid)
+  local unit = frame.unit
 
-  -- UpdateUnitContext: Updates Target/Mouseover
-	function UpdateUnitContext(plate, unitid)
-		UpdateReferences(plate)
+  unit.level = UnitEffectiveLevel(unitid)
 
-		unit.isMouseover = UnitIsUnit("mouseover", unitid)
-		unit.isTarget = UnitIsUnit("target", unitid) -- required here for config changes which reset all plates without calling TARGET_CHANGED, MOUSEOVER, ...
-		unit.isFocus = UnitIsUnit("focus", unitid)
+  local c = GetCreatureDifficultyColor(unit.level)
+  unit.levelcolorRed, unit.levelcolorGreen, unit.levelcolorBlue = c.r, c.g, c.b
 
-		UpdateUnitCondition(plate, unitid)	-- This updates a bunch of properties
-	end
+  unit.red, unit.green, unit.blue = UnitSelectionColor(unitid)
 
-	-- UpdateUnitCondition: High volatility data
-	function UpdateUnitCondition(plate, unitid)
-		UpdateReferences(plate)
+  unit.reaction = GetReactionByColor(unit.red, unit.green, unit.blue) or "HOSTILE"
+  -- Enemy players turn to neutral, e.g., when mounting a flight path mount, so fix reaction in that situations
+  if unit.reaction == "NEUTRAL" and (unit.type == "PLAYER" or UnitPlayerControlled(unitid)) then
+    unit.reaction = "HOSTILE"
+  end
 
-		unit.level = UnitEffectiveLevel(unitid)
+  unit.health = UnitHealth(unitid) or 0
+  unit.healthmax = UnitHealthMax(unitid) or 1
 
-		local c = GetCreatureDifficultyColor(unit.level)
-		unit.levelcolorRed, unit.levelcolorGreen, unit.levelcolorBlue = c.r, c.g, c.b
+  unit.threatValue = UnitThreatSituation("player", unitid) or 0
+  unit.threatSituation = ThreatReference[unit.threatValue]
+  unit.isInCombat = UnitAffectingCombat(unitid)
 
-		unit.red, unit.green, unit.blue = UnitSelectionColor(unitid)
+  local raidIconIndex = GetRaidTargetIndex(unitid)
 
-		unit.reaction = GetReactionByColor(unit.red, unit.green, unit.blue) or "HOSTILE"
-    -- Enemy players turn to neutral, e.g., when mounting a flight path mount, so fix reaction in that situations
-    if unit.reaction == "NEUTRAL" and (unit.type == "PLAYER" or UnitPlayerControlled(unitid)) then
-      unit.reaction = "HOSTILE"
-    end
+  if raidIconIndex then
+    unit.raidIcon = RaidIconList[raidIconIndex]
+    unit.isMarked = true
+  else
+    unit.isMarked = false
+  end
 
-		unit.health = UnitHealth(unitid) or 0
-		unit.healthmax = UnitHealthMax(unitid) or 1
-
-		unit.threatValue = UnitThreatSituation("player", unitid) or 0
-		unit.threatSituation = ThreatReference[unit.threatValue]
-		unit.isInCombat = UnitAffectingCombat(unitid)
-
-		local raidIconIndex = GetRaidTargetIndex(unitid)
-
-		if raidIconIndex then
-			unit.raidIcon = RaidIconList[raidIconIndex]
-			unit.isMarked = true
-		else
-			unit.isMarked = false
-		end
-
-		-- Unfinished....
-		unit.isTapped = UnitIsTapDenied(unitid)
-		--unit.isInCombat = false
-		--unit.platetype = 2 -- trivial mini mob
-
-	end
-end		-- End of Nameplate/Unit Events
-
+  unit.isTapped = UnitIsTapDenied(unitid)
+end
 
 ---------------------------------------------------------------------------------------------------------------------
 -- Indicators: These functions update the color, texture, strings, and frames within a style.
@@ -598,11 +534,20 @@ do
 	end
 
 	function UpdateIndicator_Level()
-		if unit.isBoss and style.skullicon.show then visual.level:Hide(); visual.skullicon:Show() else visual.skullicon:Hide() end
+		if unit.isBoss and style.skullicon.show then
+      visual.level:Hide()
+      visual.skullicon:Show()
+    else
+      visual.skullicon:Hide()
+    end
 
-		if unit.level < 0 then visual.level:SetText("")
-		else visual.level:SetText(unit.level) end
-		visual.level:SetTextColor(unit.levelcolorRed, unit.levelcolorGreen, unit.levelcolorBlue)
+		if unit.level < 0 then
+      visual.level:SetText("")
+		else
+      visual.level:SetText(unit.level)
+    end
+
+    visual.level:SetTextColor(unit.levelcolorRed, unit.levelcolorGreen, unit.levelcolorBlue)
 	end
 
 	-- UpdateIndicator_ThreatGlow: Updates the aggro glow
@@ -641,7 +586,7 @@ do
 
 	-- UpdateIndicator_Standard: Updates Non-Delegate Indicators
 	function UpdateIndicator_Standard()
-		if IsPlateShown(nameplate) then
+		if IsPlateShown(nameplate) then -- why this check only only here?
 			if unitcache.name ~= unit.name then UpdateIndicator_Name() end
 			if unitcache.level ~= unit.level then UpdateIndicator_Level() end
 			UpdateIndicator_RaidIcon()
@@ -651,7 +596,7 @@ do
 
 	-- UpdateIndicator_CustomAlpha: Calls the alpha delegate to get the requested alpha
 	function UpdateIndicator_CustomAlpha(tp_frame, unit)
-    tp_frame.requestedAlpha = Addon:SetAlpha(unit) or unit.alpha or 1
+    tp_frame.requestedAlpha = Addon:SetAlpha(unit) or 1
     tp_frame:SetAlpha(tp_frame.requestedAlpha)
 	end
 
@@ -737,19 +682,12 @@ do
 
 	-- OnHideCastbar
 	function OnStopCasting(plate)
-    --if not plate.TPFrame.visual.castbar:IsShown() then return end
-    if not plate.TPFrame.Active then return end
-    -- Was initially necessary because of Lua errors when reloading, I think
-    -- Results in an error witch cast scaling/alpha because the following code is not executed then.
-
     UpdateReferences(plate)
+
     local castbar = extended.visual.castbar
     castbar.IsCasting = false
     castbar.IsChanneling = false
     unit.isCasting = false
-
-    -- castbar:SetScript("OnUpdate", nil)
-    -- castbar:Hide() -- hiden in castbar's OnUpdateCastbar function
 
 		--UpdateIndicator_CustomScaleText()
     UpdateIndicator_CustomScale(extended, unit)
@@ -839,6 +777,7 @@ do
   ---------------------------------------------------------------------------------------------------
 
   local CoreEvents = {}
+  Addon.EventHandler = CoreEvents
 
   local function EventHandler(self, event, ...)
     CoreEvents[event](event, ...)
@@ -874,28 +813,29 @@ do
 
     local plate = GetNamePlateForUnit(unitid)
     if plate then
-      local extended = plate.TPFrame
-      unit = extended.unit
+      print ("UNIT_NAME_UPDATE:", plate:GetName(), "for", select(1, UnitName(unitid)), "[" .. plate.TPFrame.unit.name .. "]")
 
+      UpdateReferences(plate)
       unit.name, _ = UnitName(unitid)
 
-      -- unit.pvpname = UnitPVPName(unitid)
-      -- unit.rawName = unit.name
-      -- unit.fullname = unit.name .. "-" .. (realm or GetRealmName())
-
-      visual = extended.visual
-      style = extended.style
-      UpdateIndicator_Name() -- needs visual, unit
-      UpdateIndicator_CustomText() -- needs style, visual, unit
-
-      -- TODO: inefficent (as settings are also updated with OnUnitAdded in most cases
-      -- A seperate function OnNameUpdated would be better
-      Addon:ModulesOnUnitAdded(extended, unit)
+      --Addon:UnitStyle_UnitType(extended, unit)
+      local plate_style = extended.stylename
+      Addon:UnitStyle_NameDependent(extended, unit)
+      if plate_style ~= extended.stylename then
+        -- Totem or Custom Nameplate
+        print ("Unit Style changed:", plate_style, "=>", extended.stylename)
+        ProcessUnitChanges()
+      else
+        -- just update the name
+        print ("Unit Style: just update name", extended.stylename)
+        UpdateIndicator_Name()
+        UpdateIndicator_CustomText() -- if it's an NPC, subtitle is saved by name, change that to guid/unitid
+      end
     end
   end
 
   function CoreEvents:NAME_PLATE_UNIT_REMOVED(unitid)
-		local plate = GetNamePlateForUnit(unitid);
+		local plate = GetNamePlateForUnit(unitid)
 
 		OnHideNameplate(plate, unitid)
 	end
@@ -947,7 +887,7 @@ do
     if UnitIsUnit("mouseover", "player") then return end
 
     local plate = GetNamePlateForUnit("mouseover")
-    if plate then -- check for TPFrame to prevent accessing the personal resource bar
+    if plate and plate.TPFrame.Active then -- check for TPFrame to prevent accessing the personal resource bar
       local frame = plate.TPFrame
       frame.unit.isMouseover = true
       Addon:Module_Mouseover_Update(frame)
@@ -957,9 +897,9 @@ do
   end
 
   function CoreEvents:UNIT_HEALTH_FREQUENT(unitid)
-		local plate = PlatesByUnit[unitid]
+    local plate = GetNamePlateForUnit(unitid)
 
-		if plate then
+    if plate and plate.TPFrame.Active then
       OnHealthUpdate(plate)
     end
 	end
@@ -974,12 +914,10 @@ do
 --  end
 
   function CoreEvents:PLAYER_REGEN_ENABLED()
-		InCombat = false
 		SetUpdateAll()
 	end
 
 	function CoreEvents:PLAYER_REGEN_DISABLED()
-		InCombat = true
 		SetUpdateAll()
 	end
 
@@ -987,7 +925,7 @@ do
  		if UnitIsUnit("player", unitid) or not ShowCastBars then return end
 
     local plate = GetNamePlateForUnit(unitid)
-		if plate then
+		if plate and plate.TPFrame.Active then
       OnStartCasting(plate, unitid, false)
 		end
 	end
@@ -999,7 +937,7 @@ do
     -- plate can be nil, e.g., if unitid = player, combat ends and the player resource bar is already hidden
     -- when the cast stops (because it's not shown out of combat)
     local plate = GetNamePlateForUnit(unitid)
-    if plate then
+    if plate and plate.TPFrame.Active then
       OnStopCasting(plate)
     end
   end
@@ -1008,7 +946,7 @@ do
 		if UnitIsUnit("player", unitid) or not ShowCastBars then return end
 
 		local plate = GetNamePlateForUnit(unitid)
-		if plate then
+		if plate and plate.TPFrame.Active then
 			OnStartCasting(plate, unitid, true)
       --late.TPFrame.visual.castbar:Show()
 		end
@@ -1018,7 +956,7 @@ do
 		if UnitIsUnit("player", unitid) or not ShowCastBars then return end
 
 		local plate = GetNamePlateForUnit(unitid)
-		if plate then
+		if plate and plate.TPFrame.Active then
 			OnStopCasting(plate)
 		end
 	end
@@ -1029,7 +967,7 @@ do
     if (event == "SPELL_INTERRUPT") then
       local plate = PlatesByGUID[destGUID]
 
-      if plate then
+      if plate and plate.TPFrame.Active then
         UpdateReferences(plate)
 
         local castbar = visual.castbar
@@ -1060,6 +998,37 @@ do
 
   function CoreEvents:UI_SCALE_CHANGED()
     Addon:UIScaleChanged()
+	end
+
+	function CoreEvents:UNIT_ABSORB_AMOUNT_CHANGED(unitid)
+		local plate = GetNamePlateForUnit(unitid)
+
+		if plate and plate.TPFrame then
+			Addon:UpdateExtensions(plate.TPFrame, unitid, plate.TPFrame.stylename)
+		end
+	end
+
+	function CoreEvents:UNIT_MAXHEALTH(unitid)
+		local plate = GetNamePlateForUnit(unitid)
+
+		if plate and plate.TPFrame then
+			Addon:UpdateExtensions(plate.TPFrame, unitid, plate.TPFrame.stylename)
+		end
+	end
+
+  -- Update all elements that depend on the unit's reaction towards the player
+  function CoreEvents:UNIT_FACTION(unitid)
+    if unitid == "player" then
+      SetUpdateAll() -- Update all plates
+    else
+      -- Update just the unitid's plate
+      local plate = GetNamePlateForUnit(unitid)
+      if plate then
+        UpdateReferences(plate)
+        Addon:UpdateUnitCondition(extended, unitid)
+        ProcessUnitChanges()
+      end
+    end
   end
 
   -- The following events should not have worked before adjusting UnitSpellcastMidway
@@ -1070,7 +1039,6 @@ do
 
 	CoreEvents.UNIT_LEVEL = UnitConditionChanged
 	--CoreEvents.UNIT_THREAT_SITUATION_UPDATE = UnitConditionChanged -- did not work anyway (no unitid)
-	CoreEvents.UNIT_FACTION = WorldConditionChanged
   CoreEvents.RAID_TARGET_UPDATE = WorldConditionChanged
 	CoreEvents.PLAYER_FOCUS_CHANGED = WorldConditionChanged
 	CoreEvents.PLAYER_CONTROL_LOST = WorldConditionChanged
@@ -1112,11 +1080,7 @@ do
   end
 
 	local function SetObjectFont(object,  font, size, flags)
-		if (not OverrideFonts) and font then
-			object:SetFont(font, size or 10, flags)
-		--else
-		--	object:SetFontObject("SpellFont_Small")
-		end
+		object:SetFont(font, size or 10, flags)
 	end
 
 	-- SetObjectShadow:
@@ -1298,8 +1262,6 @@ do
 		if not unit.isTarget then visual.target:Hide() end
 		-- TOODO: does not really work with ForceUpdate() as isMarked is not set there (no call to UpdateUnitCondition)
 		if not unit.isMarked then visual.raidicon:Hide() end
-
-    --Addon:ModulesOnUpdateStyle()
   end
 end
 
@@ -1324,19 +1286,6 @@ TidyPlatesInternal.GetTheme = GetTheme
 --------------------------------------------------------------------------------------------------------------
 -- Misc. Utility
 --------------------------------------------------------------------------------------------------------------
-local function OnResetWidgets(plate)
-	-- At some point, we're going to have to manage the widgets a bit better.
-
-	local extended = plate.TPFrame
-	local widgets = extended.widgets
-
-	for widgetName, widgetFrame in pairs(widgets) do
-		widgetFrame:Hide()
-		--widgets[widgetName] = nil			-- Nilling the frames may cause leakiness.. or at least garbage collection
-	end
-
-	plate.UpdateMe = true
-end
 
 --function Addon:UpdateNameplate(tp_frame, event)
 --	if event == "Mouseover" then
@@ -1409,14 +1358,6 @@ function Addon:ConfigClickableArea(toggle_show)
   end
 end
 
---local function OnUpdateSettings(plate)
---  local extended = plate.TPFrame
---  local healthbar = extended.visual.healthbar
---
---  print ("OnUpdateSettings")
---  healthbar:SetSize(extended.style.healthbar.width, extended.style.healthbar.height)
---end
-
 --------------------------------------------------------------------------------------------------------------
 -- External Commands: Allows widgets and themes to request updates to the plates.
 -- Useful to make a theme respond to externally-captured data (such as the combat log)
@@ -1424,16 +1365,4 @@ end
 function TidyPlatesInternal:DisableCastBars() ShowCastBars = false end
 function TidyPlatesInternal:EnableCastBars() ShowCastBars = true end
 
---function TidyPlatesInternal:UpdateSettings() ForEachPlate(OnUpdateSettings) end
 function TidyPlatesInternal:ForceUpdate() ForEachPlate(OnResetNameplate) end
-function TidyPlatesInternal:ResetWidgets() ForEachPlate(OnResetWidgets) end
-function TidyPlatesInternal:Update() SetUpdateAll() end
-
-function TidyPlatesInternal:RequestUpdate(plate) if plate then SetUpdateMe(plate) else SetUpdateAll() end end
-
-function TidyPlatesInternal:ActivateTheme(theme) if theme and type(theme) == 'table' then TidyPlatesInternal.ActiveThemeTable, activetheme = theme, theme; ResetPlates = true; end end
-function TidyPlatesInternal.OverrideFonts( enable) OverrideFonts = enable; end
-
--- Old and needing deleting - Just here to avoid errors
-TidyPlatesInternal.RequestWidgetUpdate = TidyPlatesInternal.RequestUpdate
-TidyPlatesInternal.RequestDelegateUpdate = TidyPlatesInternal.RequestUpdate

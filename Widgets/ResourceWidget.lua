@@ -189,11 +189,8 @@ local function UpdateResourceBar(widget_frame)
   widget_frame:Show()
 end
 
+-- This event handler only watches for events of unit == "target"
 function Module:UNIT_POWER(unitid, powerType)
-  -- only watch for target units
-  if unitid ~= "target" then return end
-  --if not UnitIsUnit(unitid, "target") then return end
-
   local plate = GetNamePlateForUnit("target")
   if plate then
     local widget_frame = plate.TPFrame.widgets["Resource"]
@@ -228,7 +225,7 @@ end
 
 
 function Module:OnEnable()
-  Module:RegisterEvent("UNIT_POWER")
+  Module:RegisterUnitEvent("UNIT_POWER", "target")
   -- Module:RegisterEvent("UNIT_DISPLAYPOWER") -- use this to determine power type changes on units
 end
 

@@ -85,19 +85,10 @@ local EVENTS = {
   "PLAYER_LOGOUT",
   "PLAYER_REGEN_ENABLED",
   "PLAYER_REGEN_DISABLED",
-  "UNIT_ABSORB_AMOUNT_CHANGED",
-  "UNIT_MAXHEALTH",
 
-  -- "NAME_PLATE_CREATED",      -- processed by TidyPlatesCore
-
-  -- "CVAR_UPDATE",
-  --"NAME_PLATE_UNIT_ADDED",    -- Blizzard also uses this event
-  --"NAME_PLATE_UNIT_REMOVED",  -- Blizzard also uses this event
-  --"PLAYER_TARGET_CHANGED",    -- Blizzard also uses this event
-  --"DISPLAY_SIZE_CHANGED",     -- Blizzard also uses this event
-  --"UNIT_AURA",                -- used in auras widget
-  --"VARIABLES_LOADED",         -- Blizzard also uses this event
-  --"RAID_TARGET_UPDATE",       -- Blizzard also uses this event
+  -- CVAR_UPDATE,
+  -- DISPLAY_SIZE_CHANGED,     -- Blizzard also uses this event
+  -- VARIABLES_LOADED,         -- Blizzard also uses this event
 
   -- Events from TidyPlates
 
@@ -110,6 +101,8 @@ local EVENTS = {
   -- UPDATE_MOUSEOVER_UNIT
 
   -- UNIT_HEALTH_FREQUENT
+  -- UNIT_MAXHEALTH,
+  -- UNIT_ABSORB_AMOUNT_CHANGED,
 
   -- PLAYER_ENTERING_WORLD
   -- PLAYER_REGEN_ENABLED
@@ -442,9 +435,6 @@ end
 -- WoW EVENTS --
 -----------------------------------------------------------------------------------
 
---function TidyPlatesThreat:PLAYER_ALIVE()
---end
-
 -- Fired when the player enters the world, reloads the UI, enters/leaves an instance or battleground, or respawns at a graveyard.
 -- Also fires any other time the player sees a loading screen
 function TidyPlatesThreat:PLAYER_ENTERING_WORLD()
@@ -570,55 +560,5 @@ function TidyPlatesThreat:PLAYER_REGEN_DISABLED()
     SetCVar("nameplateShowFriends", (db.FriendlyUnits == "SHOW_COMBAT" and 1) or 0)
   end  if db.EnemyUnits ~= "NONE" then
     SetCVar("nameplateShowEnemies", (db.EnemyUnits == "SHOW_COMBAT" and 1) or 0)
-  end
-end
-
--- Disabled events PLAYER_TALENT_UPDATE, UPDATE_SHAPESHIFT_FORM, ACTIVE_TALENT_GROUP_CHANGED
--- as they are not used currently
-
--- With TidyPlates:
--- nameplate color can change when factions change (e.g., with disguises)
--- Legion example: Suramar city and Masquerade
---function TidyPlatesThreat:UNIT_FACTION(event, unitid)
---  TidyPlates:ForceUpdate()
---end
-
--- function TidyPlatesThreat:PLAYER_TALENT_UPDATE()
--- 	--
--- end
-
--- function TidyPlatesThreat:UPDATE_SHAPESHIFT_FORM()
--- end
-
--- Fires when the player switches to another specialication or everytime the player changes a talent
--- Completely handled by TidyPlates
--- function TidyPlatesThreat:ACTIVE_TALENT_GROUP_CHANGED()
--- With TidyPlates:	if (TidyPlatesOptions.ActiveTheme == t.THEME_NAME) and self.db.profile.verbose then
--- if self.db.profile.verbose then
--- 		t.Print(L"|cff89F559Threat Plates|r: Player spec change detected: |cff"]..t.HCC[class]..self:SpecName()..L"|r, you are now in your "]..self:RoleText()..L[" role."])
--- 	end
--- end
-
-function TidyPlatesThreat:UNIT_ABSORB_AMOUNT_CHANGED(event, unitid)
-  local plate = GetNamePlateForUnit(unitid)
-
-  -- With TidyPlates:
-  --if plate and plate.extended then
-  --  t.UpdateExtensions(plate.extended, unitid)
-  --end
-  if plate and plate.TPFrame then
-    t.UpdateExtensions(plate.TPFrame, unitid, plate.TPFrame.stylename)
-  end
-end
-
-function TidyPlatesThreat:UNIT_MAXHEALTH(event, unitid)
-  local plate = GetNamePlateForUnit(unitid)
-
-  -- With TidyPlates:
-  --if plate and plate.extended then
-  --  t.UpdateExtensions(plate.extended, unitid)
-  --end
-  if plate and plate.TPFrame then
-    t.UpdateExtensions(plate.TPFrame, unitid, plate.TPFrame.stylename)
   end
 end

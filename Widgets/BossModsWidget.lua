@@ -39,19 +39,7 @@ local UPDATE_INTERVAL = 0.5
 ---------------------------------------------------------------------------------------------------
 
 local function AlignWidget(widget_frame)
-  --frame:ClearAllPoints()
-  local offset_x = 0
-  if widget_frame.AurasNo > 1 then
-    offset_x = (widget_frame.AurasNo - 1) * (ConfigDB.scale + ConfigDB.AuraSpacing) / 2
-  end
-
-  local style = widget_frame.unit.TP_Style
-  if style == "NameOnly" or style == "NameOnly-Unique" then
-    widget_frame:SetPoint("CENTER", widget_frame:GetParent(), - offset_x + ConfigDB.x_hv, ConfigDB.y_hv)
-  else
-    widget_frame:SetPoint("CENTER", widget_frame:GetParent(), - offset_x + ConfigDB.x, ConfigDB.y)
-  end
-
+  Module:OnUpdateStyle(widget_frame, widget_frame.unit)
   widget_frame:SetSize(64, 64)
 end
 
@@ -333,6 +321,21 @@ function Module:OnUnitAdded(widget_frame, unit)
   UpdateFrameWithAuras(widget_frame, unit_auras)
 
   widget_frame:Show()
+end
+
+function Module:OnUpdateStyle(widget_frame, unit)
+  local db = TidyPlatesThreat.db.profile.BossModsWidget
+
+  local offset_x = 0
+  if widget_frame.AurasNo > 1 then
+    offset_x = (widget_frame.AurasNo - 1) * (db.scale + db.AuraSpacing) / 2
+  end
+
+  if unit.style == "NameOnly" or unit.style == "NameOnly-Unique" then
+    widget_frame:SetPoint("CENTER", widget_frame:GetParent(), - offset_x + db.x_hv, db.y_hv)
+  else
+    widget_frame:SetPoint("CENTER", widget_frame:GetParent(), - offset_x + db.x, db.y)
+  end
 end
 
 ---------------------------------------------------------------------------------------------------

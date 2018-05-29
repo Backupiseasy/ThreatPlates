@@ -1,7 +1,7 @@
 ------------------------------------------------------
 8.8.0-Alpha1
 ------------------------------------------------------
-* Improved performance of Social widget.
+* Completely reworked internal code for widget handling to improve performance.
 * Fixed a bug with the icon for friends and guild members still being shown although disabled.
 * Removed Tidy Plates Fading from options as it was never implemented/working.
 
