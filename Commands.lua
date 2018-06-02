@@ -109,6 +109,12 @@ function TidyPlatesThreat:ChatCommand(input)
 		Addon.EventHandler:UNIT_NAME_UPDATE(unit.unitid)
 
 		return
+	elseif input == "stats" then
+		local plate = C_NamePlate.GetNamePlateForUnit("target")
+		if not plate then return end
+
+		TP.DEBUG_PRINT_UNIT(plate.TPFrame.unit, true)
+		return
 	end
 
 	TidyPlatesThreat:OpenOptions()

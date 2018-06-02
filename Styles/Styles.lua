@@ -239,7 +239,9 @@ local function GetUniqueNameplateSetting(unit)
 end
 
 -- Check if a unit is a totem or a custom nameplates (e.g., after UNIT_NAME_UPDATE)
-function Addon:UnitStyle_NameDependent(tp_frame, unit)
+-- Depends on:
+--   * unit.name
+function Addon:UnitStyle_NameDependent(unit)
   local plate_style
 
   local db = TidyPlatesThreat.db.profile
@@ -271,9 +273,11 @@ function Addon:UnitStyle_NameDependent(tp_frame, unit)
   unit.CustomPlateSettings = unique_settings
   unit.TP_UniqueSetting = unique_settings
 
-  if plate_style then
-    tp_frame.stylename = plate_style
-  end
+  return plate_style
+
+--  if plate_style then
+--    tp_frame.stylename = plate_style
+--  end
 end
 
 function Addon:SetStyle(unit)

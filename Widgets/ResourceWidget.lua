@@ -16,6 +16,7 @@ local ceil = ceil
 
 -- WoW APIs
 local CreateFrame = CreateFrame
+local UnitReaction, UnitIsPlayer, UnitClassification, UnitLevel, UnitIsUnit = UnitReaction, UnitIsPlayer, UnitClassification, UnitLevel, UnitIsUnit
 local UnitPower, UnitPowerMax, UnitPowerType = UnitPower, UnitPowerMax, UnitPowerType
 local PowerBarColor = PowerBarColor
 local SPELL_POWER_MANA = SPELL_POWER_MANA
@@ -23,6 +24,8 @@ local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
+
+local CurrentTarget
 
 ---------------------------------------------------------------------------------------------------
 -- Resource Widget Functions
@@ -187,6 +190,7 @@ local function UpdateResourceBar(widget_frame)
   end
 
   widget_frame:Show()
+  CurrentTarget = widget_frame
 end
 
 -- This event handler only watches for events of unit == "target"
@@ -200,6 +204,21 @@ function Module:UNIT_POWER(unitid, powerType)
   end
 end
 
+function Module:PLAYER_TARGET_CHANGED()
+  if CurrentTarget then
+    CurrentTarget:Hide()
+    CurrentTarget = nil
+  end
+
+  local plate = GetNamePlateForUnit("target")
+  if plate and plate.TPFrame.Active then
+    CurrentTarget = plate.TPFrame.widgets.Resource
+
+    if CurrentTarget.Active and CurrentTarget.ShowWidget then
+      UpdateResourceBar(CurrentTarget)
+    end
+  end
+end
 ---------------------------------------------------------------------------------------------------
 -- Module functions for creation and update
 ---------------------------------------------------------------------------------------------------
@@ -223,9 +242,9 @@ function Module:IsEnabled()
   return TidyPlatesThreat.db.profile.ResourceWidget.ON
 end
 
-
 function Module:OnEnable()
-  Module:RegisterUnitEvent("UNIT_POWER", "target")
+  self:RegisterUnitEvent("UNIT_POWER", "target")
+  self:RegisterEvent("PLAYER_TARGET_CHANGED")
   -- Module:RegisterEvent("UNIT_DISPLAYPOWER") -- use this to determine power type changes on units
 end
 
@@ -237,11 +256,11 @@ function Module:OnUnitAdded(widget_frame, unit)
   local db = TidyPlatesThreat.db.profile.ResourceWidget
 
   widget_frame.ShowWidget = false
-  if unit.reaction == "FRIENDLY" then
+  if UnitReaction(unit.unitid, "player") > 4 then
     widget_frame.ShowWidget = db.ShowFriendly
   elseif unit.type == "PLAYER" then
     widget_frame.ShowWidget = db.ShowEnemyPlayer
-  elseif unit.type == "NPC" then
+  else
     widget_frame.ShowWidget = ((unit.isBoss or unit.isRare) and db.ShowEnemyBoss) or db.ShowEnemyNPC
   end
 
@@ -294,13 +313,19 @@ function Module:OnUnitAdded(widget_frame, unit)
   --    return
   --  end
 
-  self:OnTargetChanged(widget_frame, unit)
-end
-
-function Module:OnTargetChanged(widget_frame, unit)
-  if unit.isTarget and widget_frame.ShowWidget then
+  if UnitIsUnit("target", unit.unitid) then
     UpdateResourceBar(widget_frame)
   else
     widget_frame:Hide()
   end
+
+  --self:OnTargetChanged(widget_frame, unit)
 end
+
+--function Module:OnTargetChanged(widget_frame, unit)
+--  if UnitIsUnit("target", unit.unitid) and widget_frame.ShowWidget then
+--    UpdateResourceBar(widget_frame)
+--  else
+--    widget_frame:Hide()
+--  end
+--end

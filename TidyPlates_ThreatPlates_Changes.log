@@ -1,9 +1,23 @@
 ------------------------------------------------------
 8.8.0-Alpha1
 ------------------------------------------------------
-* Completely reworked internal code for widget handling to improve performance.
+* Completely reworked internal code for widget handling to improve performance. Probably lot's of bugs still existing.
 * Fixed a bug with the icon for friends and guild members still being shown although disabled.
 * Removed Tidy Plates Fading from options as it was never implemented/working.
+
+------------------------------------------------------
+8.7.3
+------------------------------------------------------
+* Added two new class icon sets, Crest and Clean (courtesy of Lollzzer, Comment #818).
+* Fixed a bug with strata in the auras widget where the cooldown spiral was shown above the duration text [Issue #181].
+
+------------------------------------------------------
+8.7.2
+------------------------------------------------------
+* Extended the combo points widget to show also soul shards for warlocks [Issue #158,  Comment #819].
+* Fixed a bug with the icon for friends and guild members still being shown although disabled.
+* Again, fixed a bug with custom nameplates which were only loaded after the options dialog was opened [Comment #837].
+* Fixed a bug with threat textures not being shown when bar style was used.
 
 ------------------------------------------------------
 8.7.1

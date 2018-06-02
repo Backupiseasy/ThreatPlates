@@ -11,7 +11,7 @@ local Module = Addon:NewModule("ComboPoints")
 
 -- WoW APIs
 local CreateFrame = CreateFrame
-local UnitClass, UnitCanAttack = UnitClass, UnitCanAttack
+local UnitClass, UnitCanAttack, UnitIsUnit = UnitClass, UnitCanAttack, UnitIsUnit
 local GetComboPoints, UnitPower, UnitPowerMax = GetComboPoints, UnitPower, UnitPowerMax
 local SPELL_POWER_CHI, SPELL_POWER_HOLY_POWER,SPELL_POWER_SOUL_SHARDS = SPELL_POWER_CHI, SPELL_POWER_HOLY_POWER, SPELL_POWER_SOUL_SHARDS
 local GetSpecialization, SPEC_PALADIN_RETRIBUTION, SPEC_MONK_WINDWALKER = GetSpecialization, SPEC_PALADIN_RETRIBUTION, SPEC_MONK_WINDWALKER
@@ -30,6 +30,7 @@ local WATCH_POWER_TYPES = {
 }
 
 local GetResourceOnTarget
+local CurrentTarget
 
 ---------------------------------------------------------------------------------------------------
 -- Combo Points Widget Functions
@@ -113,10 +114,22 @@ end
 
 function Module:ACTIVE_TALENT_GROUP_CHANGED(...)
   self:OnEnable()
+  self:PLAYER_TARGET_CHANGED()
+end
+
+function Module:PLAYER_TARGET_CHANGED()
+  if CurrentTarget then
+    CurrentTarget:Hide()
+    CurrentTarget = nil
+  end
 
   local plate = GetNamePlateForUnit("target")
-  if plate then
-    self:OnTargetChanged(plate.TPFrame.widgets["ComboPoints"], plate.TPFrame.unit)
+  if plate and plate.TPFrame.Active and UnitCanAttack("player", "target") and GetResourceOnTarget then
+    CurrentTarget = plate.TPFrame.widgets.ComboPoints
+    if CurrentTarget.Active then
+      UpdateComboPoints(CurrentTarget)
+      CurrentTarget:Show()
+    end
   end
 end
 
@@ -156,16 +169,17 @@ function Module:OnEnable()
   GetResourceOnTarget = GetComboPointFunction()
 
   if GetResourceOnTarget then
-    Module:RegisterUnitEvent("UNIT_POWER", "player", EventHandler)
-    Module:RegisterUnitEvent("UNIT_DISPLAYPOWER", "player", EventHandler)
-    Module:RegisterUnitEvent("UNIT_FLAGS", "player", EventHandler)
+    self:RegisterUnitEvent("UNIT_POWER", "player", EventHandler)
+    self:RegisterUnitEvent("UNIT_DISPLAYPOWER", "player", EventHandler)
+    self:RegisterUnitEvent("UNIT_FLAGS", "player", EventHandler)
+    self:RegisterEvent("PLAYER_TARGET_CHANGED")
   else
-    Module:UnregisterEvent("UNIT_POWER")
-    Module:UnregisterEvent("UNIT_DISPLAYPOWER")
-    Module:UnregisterEvent("UNIT_FLAGS")
+    self:UnregisterEvent("UNIT_POWER")
+    self:UnregisterEvent("UNIT_DISPLAYPOWER")
+    self:UnregisterEvent("UNIT_FLAGS")
   end
 
-  Module:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
+  self:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
 end
 
 function Module:EnabledForStyle(style, unit)
@@ -183,31 +197,43 @@ function Module:OnUnitAdded(widget_frame, unit)
   local db = TidyPlatesThreat.db.profile.comboWidget
 
   -- Updates based on settings / unit style
-  self:OnUpdateStyle(widget_frame, unit)
+  if unit.style == "NameOnly" or unit.style == "NameOnly-Unique" then
+    widget_frame:SetPoint("CENTER", widget_frame:GetParent(), "CENTER", db.x_hv, db.y_hv)
+  else
+    widget_frame:SetPoint("CENTER", widget_frame:GetParent(), "CENTER", db.x, db.y)
+  end
 
   -- Updates based on settings
   widget_frame:SetScale(db.scale)
   widget_frame.Icon:SetAllPoints(widget_frame)
 
   -- Updates based on unit status
-  self:OnTargetChanged(widget_frame, unit)
-end
-
-function Module:OnUpdateStyle(widget_frame, unit)
-  local db = TidyPlatesThreat.db.profile.comboWidget
-  -- Updates based on settings / unit style
-  if unit.style == "NameOnly" or unit.style == "NameOnly-Unique" then
-    widget_frame:SetPoint("CENTER", widget_frame:GetParent(), "CENTER", db.x_hv, db.y_hv)
-  else
-    widget_frame:SetPoint("CENTER", widget_frame:GetParent(), "CENTER", db.x, db.y)
-  end
-end
-
-function Module:OnTargetChanged(widget_frame, unit)
-  if unit.isTarget and UnitCanAttack("player", "target") and GetResourceOnTarget then
+  if UnitIsUnit("target", unit.unitid) and UnitCanAttack("player", "target") and GetResourceOnTarget then
     UpdateComboPoints(widget_frame)
     widget_frame:Show()
+    CurrentTarget = widget_frame
   else
     widget_frame:Hide()
   end
+
+  -- self:OnTargetChanged(widget_frame, unit)
 end
+
+--function Module:OnUpdateStyle(widget_frame, unit)
+--  local db = TidyPlatesThreat.db.profile.comboWidget
+--  -- Updates based on settings / unit style
+--  if unit.style == "NameOnly" or unit.style == "NameOnly-Unique" then
+--    widget_frame:SetPoint("CENTER", widget_frame:GetParent(), "CENTER", db.x_hv, db.y_hv)
+--  else
+--    widget_frame:SetPoint("CENTER", widget_frame:GetParent(), "CENTER", db.x, db.y)
+--  end
+--end
+
+--function Module:OnTargetChanged(widget_frame, unit)
+--  if UnitIsUnit("target", unit.unitid) and UnitCanAttack("player", "target") and GetResourceOnTarget then
+--    UpdateComboPoints(widget_frame)
+--    widget_frame:Show()
+--  else
+--    widget_frame:Hide()
+--  end
+--end

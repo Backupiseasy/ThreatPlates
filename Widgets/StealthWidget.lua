@@ -11,8 +11,7 @@ local Module = Addon:NewModule("Stealth")
 
 -- WoW APIs
 local CreateFrame = CreateFrame
-local UnitGUID = UnitGUID
-local UnitBuff = UnitBuff
+local UnitReaction, UnitIsPlayer, UnitBuff = UnitReaction, UnitIsPlayer, UnitBuff
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
@@ -76,7 +75,7 @@ function Module:IsEnabled()
 end
 
 function Module:EnabledForStyle(style, unit)
-  if unit.reaction == "FRIENDLY" or unit.type == "PLAYER" then return false end
+  if UnitReaction(unit.unitid, "player") > 4 or unit.type == "PLAYER" then return false end
 
   if (style == "NameOnly" or style == "NameOnly-Unique") then
     return TidyPlatesThreat.db.profile.stealthWidget.ShowInHeadlineView
@@ -110,7 +109,11 @@ function Module:OnUnitAdded(widget_frame, unit)
   local db = TidyPlatesThreat.db.profile.stealthWidget
 
   -- Updates based on settings / unit style
-  self:OnUpdateStyle(widget_frame, unit)
+  if unit.style == "NameOnly" or unit.style == "NameOnly-Unique" then
+    widget_frame:SetPoint("CENTER", widget_frame:GetParent(), "CENTER", db.x_hv, db.y_hv)
+  else
+    widget_frame:SetPoint("CENTER", widget_frame:GetParent(), "CENTER", db.x, db.y)
+  end
 
   -- Updates based on settings
   widget_frame:SetSize(db.scale, db.scale)
@@ -122,12 +125,12 @@ function Module:OnUnitAdded(widget_frame, unit)
   widget_frame:Show()
 end
 
-function Module:OnUpdateStyle(widget_frame, unit)
-  local db = TidyPlatesThreat.db.profile.stealthWidget
-  -- Updates based on settings / unit style
-  if unit.style == "NameOnly" or unit.style == "NameOnly-Unique" then
-    widget_frame:SetPoint("CENTER", widget_frame:GetParent(), "CENTER", db.x_hv, db.y_hv)
-  else
-    widget_frame:SetPoint("CENTER", widget_frame:GetParent(), "CENTER", db.x, db.y)
-  end
-end
+--function Module:OnUpdateStyle(widget_frame, unit)
+--  local db = TidyPlatesThreat.db.profile.stealthWidget
+--  -- Updates based on settings / unit style
+--  if unit.style == "NameOnly" or unit.style == "NameOnly-Unique" then
+--    widget_frame:SetPoint("CENTER", widget_frame:GetParent(), "CENTER", db.x_hv, db.y_hv)
+--  else
+--    widget_frame:SetPoint("CENTER", widget_frame:GetParent(), "CENTER", db.x, db.y)
+--  end
+--end

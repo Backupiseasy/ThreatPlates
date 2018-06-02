@@ -2,7 +2,6 @@
 -- Class Icon Widget
 ---------------------------------------------------------------------------------------------------
 local ADDON_NAME, Addon = ...
-local ThreatPlates = Addon.ThreatPlates
 
 local Module = Addon:NewModule("ClassIcon")
 
@@ -12,6 +11,7 @@ local Module = Addon:NewModule("ClassIcon")
 
 -- WoW APIs
 local CreateFrame = CreateFrame
+local UnitIsPlayer, UnitReaction, UnitClass = UnitIsPlayer, UnitReaction, UnitClass
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
@@ -53,7 +53,7 @@ function Module:IsEnabled()
 end
 
 function Module:EnabledForStyle(style, unit)
-  if unit.type ~= "PLAYER" then return end
+  if unit.type ~= "PLAYER" then return false end
 
   if (style == "NameOnly" or style == "NameOnly-Unique") then
     return TidyPlatesThreat.db.profile.classWidget.ShowInHeadlineView
@@ -75,11 +75,17 @@ function Module:OnUnitAdded(widget_frame, unit)
   -- else
 
   local db = TidyPlatesThreat.db.profile
-  if (unit.reaction == "HOSTILE" and db.HostileClassIcon) or (unit.reaction == "FRIENDLY" and db.friendlyClassIcon) then
+
+  local unit_reaction = UnitReaction(unit.unitid, "player")
+  if (unit_reaction < 4 and db.HostileClassIcon) or (unit_reaction > 4 and db.friendlyClassIcon) then
     db = db.classWidget
 
     -- Updates based on settings / unit style
-    self:OnUpdateStyle(widget_frame, unit)
+    if unit.style == "NameOnly" or unit.style == "NameOnly-Unique" then
+      widget_frame:SetPoint("CENTER", widget_frame:GetParent(), db.x_hv, db.y_hv)
+    else
+      widget_frame:SetPoint("CENTER", widget_frame:GetParent(), db.x, db.y)
+    end
 
     -- Updates based on settings
     widget_frame:SetSize(db.scale, db.scale)
@@ -98,11 +104,19 @@ function Module:OnUnitAdded(widget_frame, unit)
   end
 end
 
-function Module:OnUpdateStyle(widget_frame, unit)
-  local db = TidyPlatesThreat.db.profile.classWidget
-  if unit.style == "NameOnly" or unit.style == "NameOnly-Unique" then
-    widget_frame:SetPoint("CENTER", widget_frame:GetParent(), db.x_hv, db.y_hv)
-  else
-    widget_frame:SetPoint("CENTER", widget_frame:GetParent(), db.x, db.y)
-  end
-end
+--function Module:OnUpdatePlateMode(widget_frame, unit)
+--  local db = TidyPlatesThreat.db.profile
+--  if (unit.reaction == "HOSTILE" and db.HostileClassIcon) or (unit.reaction == "FRIENDLY" and db.friendlyClassIcon) then
+--    db = db.classWidget
+--
+--    if unit.style == "NameOnly" or unit.style == "NameOnly-Unique" then
+--      widget_frame:SetPoint("CENTER", widget_frame:GetParent(), db.x_hv, db.y_hv)
+--    else
+--      widget_frame:SetPoint("CENTER", widget_frame:GetParent(), db.x, db.y)
+--    end
+--
+--    widget_frame:Show()
+--  else
+--    widget_frame:Hide()
+--  end
+--end

@@ -22,7 +22,7 @@ local tonumber = tonumber
 -- WoW APIs
 local CreateFrame, GetFramerate = CreateFrame, GetFramerate
 local DebuffTypeColor = DebuffTypeColor
-local UnitAura, UnitIsFriend = UnitAura, UnitIsFriend
+local UnitAura, UnitIsFriend, UnitIsUnit = UnitAura, UnitIsFriend, UnitIsUnit
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 
 -- ThreatPlates APIs
@@ -34,10 +34,26 @@ local DEBUG = ThreatPlates.DEBUG
 -- Auras Widget Functions
 ---------------------------------------------------------------------------------------------------
 
-local WidgetList = {}
+local WideArt = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\AuraWidget\\AuraFrameWide"
+local SquareArt = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\AuraWidget\\AuraFrameSquare"
+local WideHighlightArt = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\AuraWidget\\AuraFrameHighlightWide"
+local SquareHighlightArt = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\AuraWidget\\AuraFrameHighlightSquare"
+local AuraFont = "FONTS\\ARIALN.TTF"
 
-local AuraMonitor = CreateFrame("Frame")
-local isAuraEnabled = false
+-- Debuffs are color coded, with poison debuffs having a green border, magic debuffs a blue border, diseases a brown border,
+-- urses a purple border, and physical debuffs a red border
+local AURA_TYPE = { Buff = 1, Curse = 2, Disease = 3, Magic = 4, Poison = 5, Debuff = 6, }
+
+local GRID_LAYOUT = {
+  LEFT = {
+    BOTTOM =  {"BOTTOMLEFT", 1, 1},
+    TOP =     {"TOPLEFT", 1, -1}
+  },
+  RIGHT = {
+    BOTTOM =  {"BOTTOMRIGHT", -1, 1 },
+    TOP =     {"TOPRIGHT", -1 , -1}
+  }
+}
 
 -- Functions switched based on icon/bar mode
 local CreateAuraFrame
@@ -72,26 +88,7 @@ local AURA_TYPE_DEBUFF = 6
 local CooldownNative = CreateFrame("Cooldown", nil, WorldFrame)
 local SetCooldown = CooldownNative.SetCooldown
 
-local WideArt = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\AuraWidget\\AuraFrameWide"
-local SquareArt = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\AuraWidget\\AuraFrameSquare"
-local WideHighlightArt = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\AuraWidget\\AuraFrameHighlightWide"
-local SquareHighlightArt = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\AuraWidget\\AuraFrameHighlightSquare"
-local AuraFont = "FONTS\\ARIALN.TTF"
-
--- Debuffs are color coded, with poison debuffs having a green border, magic debuffs a blue border, diseases a brown border,
--- urses a purple border, and physical debuffs a red border
-local AURA_TYPE = { Buff = 1, Curse = 2, Disease = 3, Magic = 4, Poison = 5, Debuff = 6, }
-
-local GRID_LAYOUT = {
-  LEFT = {
-    BOTTOM =  {"BOTTOMLEFT", 1, 1},
-    TOP =     {"TOPLEFT", 1, -1}
-  },
-  RIGHT = {
-    BOTTOM =  {"BOTTOMRIGHT", -1, 1 },
-    TOP =     {"TOPRIGHT", -1 , -1}
-  }
-}
+local CurrentTarget
 
 ---------------------------------------------------------------------------------------------------
 -- Registers a callback, which polls the frame until it expires, then hides the frame and removes the callback
@@ -424,6 +421,7 @@ local function UpdateIconGrid(widget_frame, unitid)
   local BLIZZARD_ShowAll = false
 
   local aura_filter = "NONE"
+  -- TODO: Should this not be rather UnitReaction(unitid, "player") > 4, like everywhere else?
   local unit_is_friend = UnitIsFriend("player", unitid)
   if unit_is_friend then
     if db.ShowFriendly then
@@ -1086,6 +1084,21 @@ function Module:UNIT_AURA(unitid)
   end
 end
 
+function Module:PLAYER_TARGET_CHANGED()
+  if not TidyPlatesThreat.db.profile.AuraWidget.ShowTargetOnly then return end
+
+  if CurrentTarget then
+    CurrentTarget:Hide()
+    CurrentTarget = nil
+  end
+
+  local plate = GetNamePlateForUnit("target")
+  if plate and plate.TPFrame.Active then
+    CurrentTarget = plate.TPFrame.widgets.Auras
+    CurrentTarget:SetShown(CurrentTarget.Active)
+  end
+end
+
 ---------------------------------------------------------------------------------------------------
 -- Module functions for creation and update
 ---------------------------------------------------------------------------------------------------
@@ -1116,7 +1129,8 @@ function Module:IsEnabled()
 end
 
 function Module:OnEnable()
-  Module:RegisterEvent("UNIT_AURA")
+  self:RegisterEvent("UNIT_AURA")
+  self:RegisterEvent("PLAYER_TARGET_CHANGED")
 end
 
 function Module:EnabledForStyle(style, unit)
@@ -1131,16 +1145,27 @@ function Module:OnUnitAdded(widget_frame, unit)
   UpdateAuraWidgetLayout(widget_frame)
   UpdateIconGrid(widget_frame, unit.unitid)
 
-  self:OnTargetChanged(widget_frame, unit)
-end
-
-function Module:OnTargetChanged(widget_frame, unit)
-  if TidyPlatesThreat.db.profile.AuraWidget.ShowTargetOnly and not unit.isTarget then
-    widget_frame:Hide()
+  if TidyPlatesThreat.db.profile.AuraWidget.ShowTargetOnly then
+    if UnitIsUnit("target", unit.unitid) then
+      widget_frame:Show()
+      CurrentTarget = widget_frame
+    else
+      widget_frame:Hide()
+    end
   else
     widget_frame:Show()
   end
+
+  --self:OnTargetChanged(widget_frame, unit)
 end
+
+--function Module:OnTargetChanged(widget_frame, unit)
+--  if TidyPlatesThreat.db.profile.AuraWidget.ShowTargetOnly and not UnitIsUnit("target", unit.unitid) then
+--    widget_frame:Hide()
+--  else
+--    widget_frame:Show()
+--  end
+--end
 
 -----------------------------------------------------
 -- External

@@ -2147,13 +2147,7 @@ local function CreateVisibilitySettings()
               SetValue(info, val)
               Addon:SetBaseNamePlateSize() -- adjust clickable area if switching from Blizzard plates to Threat Plate plates
               for plate, unitid in pairs(Addon.PlatesVisible) do
-                if db.ShowFriendlyBlizzardNameplates and UnitReaction(unitid, "player") > 4 then
-                  plate.UnitFrame:Show()
-                  plate.TPFrame:Hide()
-                else
-                  plate.UnitFrame:Hide()
-                  plate.TPFrame:Show()
-                end
+                Addon:UpdateFriendleNameplateStyle(plate, unitid)
               end
             end,
             get = GetValue,

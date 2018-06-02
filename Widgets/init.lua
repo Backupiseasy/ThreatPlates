@@ -2,7 +2,6 @@
 -- Widget Handling --
 ---------------------
 local ADDON_NAME, Addon = ...
-local ThreatPlates = Addon.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -14,8 +13,6 @@ local pairs, next = pairs, next
 -- WoW APIs
 
 -- ThreatPlates APIs
-local DEBUG = ThreatPlates.DEBUG
-
 ThreatPlatesWidgets = {}
 local Modules = {}
 local EnabledModules = {}
@@ -107,8 +104,9 @@ local function UpdateAllFrames(module)
   for plate, _ in pairs(Addon.PlatesVisible) do
     local tp_frame = plate.TPFrame
 
-    if module:EnabledForStyle(tp_frame.stylename, tp_frame.unit) and tp_frame.stylename ~= "empty" then
-      module:UpdateFrame(tp_frame.widgets[module.Name], tp_frame.unit)
+    local widget_frame = tp_frame.widgets[module.Name]
+    if widget_frame.Active then
+      module:UpdateFrame(widget_frame, tp_frame.unit)
     end
   end
 end
@@ -117,8 +115,9 @@ local function UpdateAllFramesAndNameplateColor(module)
   for plate, _ in pairs(Addon.PlatesVisible) do
     local tp_frame = plate.TPFrame
 
-    if module:EnabledForStyle(tp_frame.stylename, tp_frame.unit) and tp_frame.stylename ~= "empty" then
-      module:UpdateFrame(tp_frame.widgets[module.Name], tp_frame.unit)
+    local widget_frame = tp_frame.widgets[module.Name]
+    if widget_frame.Active then
+      module:UpdateFrame(widget_frame, tp_frame.unit)
 
       -- Also update healthbar and name color
       Addon:UpdateIndicatorNameplateColor(tp_frame)
@@ -197,10 +196,17 @@ function Addon:EnableModule(module_name)
 
     -- As we are iterating over all plates created, even if no unit is assigned to it currently, we have
     -- to skip plates without units. OnUnitAdded will be called on them anyway
-    if tp_frame.Active and module:EnabledForStyle(tp_frame.stylename, tp_frame.unit) then
-      module:OnUnitAdded(plate_widgets[module_name], tp_frame.unit)
-    else
-      plate_widgets[module_name]:Hide()
+    if tp_frame.Active then
+      local widget_frame = plate_widgets[module_name]
+
+      widget_frame.Active = tp_frame.stylename ~= "empty" and module:EnabledForStyle(tp_frame.stylename, tp_frame.unit)
+      widget_frame.unit = tp_frame.unit
+
+      if widget_frame.Active then
+        module:OnUnitAdded(widget_frame, tp_frame.unit)
+      else
+        widget_frame:Hide()
+      end
     end
   end
 
@@ -243,6 +249,8 @@ function Addon:ModulesOnUnitAdded(tp_frame, unit)
   local plate_widgets = tp_frame.widgets
 
   for module_name, module in pairs(EnabledModules) do
+    local widget_frame = plate_widgets[module_name]
+
     -- I think it could happen that a nameplate was created, then a module is enabled, and afterwise the unit is
     -- added to the nameplate, i.e., InitializedModules is called.
     --    if plate_widgets[module_name] == nil then
@@ -250,57 +258,64 @@ function Addon:ModulesOnUnitAdded(tp_frame, unit)
     --    end
     --    assert (plate_widgets[module_name] ~= nil, "Uninitialized module found: " .. module_name .. " for unit " .. unit.name .. " (" .. tp_frame:GetName() .. ")")
 
-    local widget_frame = plate_widgets[module_name]
+    widget_frame.Active = tp_frame.stylename ~= "empty" and module:EnabledForStyle(tp_frame.stylename, unit)
     widget_frame.unit = unit
 
-    if module:EnabledForStyle(tp_frame.stylename, unit) and tp_frame.stylename ~= "empty" then
+    if widget_frame.Active then
       module:OnUnitAdded(widget_frame, unit)
     else
-      tp_frame.widgets[module_name]:Hide()
+      widget_frame:Hide()
     end
   end
 end
 
-function Addon:ModulesOnUpdate(tp_frame, unit)
-  local plate_widgets = tp_frame.widgets
-
-  for module_name, module in pairs(EnabledModules) do
-    if module:EnabledForStyle(tp_frame.stylename, unit) and module.UpdateFrame and tp_frame.stylename ~= "empty" then
-      module:UpdateFrame(plate_widgets[module_name], unit)
-    else
-      plate_widgets[module_name]:Hide()
-    end
-  end
-end
-
-function Addon:ModulesOnUpdateStyle(tp_frame, unit)
-  local plate_widgets = tp_frame.widgets
-
-  for module_name, module in pairs(EnabledModules) do
-    if module:EnabledForStyle(tp_frame.stylename, unit) and tp_frame.stylename ~= "empty" then
+--function Addon:ModulesOnUpdate(tp_frame, unit)
+--  local plate_widgets = tp_frame.widgets
+--
+--  for module_name, module in pairs(EnabledModules) do
+--    local widget_frame = plate_widgets[module_name]
+--
+--    if widget_frame.Active then
 --      if module.UpdateFrame then
---        module:UpdateFrame(plate_widgets[module_name], unit)
+--        module:UpdateFrame(widget_frame, unit)
 --      end
-      if module.OnUpdateStyle then
-        module:OnUpdateStyle(plate_widgets[module_name], unit)
-      end
-    else
-      plate_widgets[module_name]:Hide()
-    end
-  end
-end
+--    else
+--      widget_frame:Hide()
+--    end
+--  end
+--end
 
--- TODO: Optimize this by storing (at registration) which modules want to process TargetChanged
-function Addon:ModulesOnTargetChanged(tp_frame)
+function Addon:ModulesPlateModeChanged(tp_frame, unit)
   local plate_widgets = tp_frame.widgets
 
   for module_name, module in pairs(EnabledModules) do
-    if module:EnabledForStyle(tp_frame.stylename, tp_frame.unit) and tp_frame.stylename ~= "empty" then
-      if module.OnTargetChanged then
-        module:OnTargetChanged(plate_widgets[module_name], tp_frame.unit)
-      end
+    local widget_frame = plate_widgets[module_name]
+
+    widget_frame.Active = tp_frame.stylename ~= "empty" and module:EnabledForStyle(tp_frame.stylename, unit)
+
+    if widget_frame.Active then
+      --if module.OnUpdatePlateMode then
+      --  module:OnUpdatePlateMode(plate_widgets[module_name], unit)
+      --end
+      module:OnUnitAdded(widget_frame, unit)
     else
-      plate_widgets[module_name]:Hide()
+      widget_frame:Hide()
     end
   end
 end
+
+--function Addon:ModulesOnTargetChanged(tp_frame)
+--  local plate_widgets = tp_frame.widgets
+--
+--  for module_name, module in pairs(EnabledModules) do
+--    local widget_frame = plate_widgets[module_name]
+--
+--    if widget_frame.Active then
+--      if module.OnTargetChanged then
+--        module:OnTargetChanged(plate_widgets[module_name], tp_frame.unit)
+--      end
+--    else
+--      plate_widgets[module_name]:Hide()
+--    end
+--  end
+--end

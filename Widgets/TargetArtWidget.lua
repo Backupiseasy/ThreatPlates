@@ -12,6 +12,8 @@ local Module = Addon:NewModule("TargetArt")
 
 -- WoW APIs
 local CreateFrame = CreateFrame
+local UnitIsUnit = UnitIsUnit
+local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
@@ -30,6 +32,25 @@ local BACKDROP = {
     offset = 3,
   }
 }
+
+local CurrentTarget
+
+---------------------------------------------------------------------------------------------------
+-- Target Art Widget Functions
+---------------------------------------------------------------------------------------------------
+
+function Module:PLAYER_TARGET_CHANGED()
+  if CurrentTarget then
+    CurrentTarget:Hide()
+    CurrentTarget = nil
+  end
+
+  local plate = GetNamePlateForUnit("target")
+  if plate and plate.TPFrame.Active then
+    CurrentTarget = plate.TPFrame.widgets.TargetArt
+    CurrentTarget:SetShown(CurrentTarget.Active)
+  end
+end
 
 ---------------------------------------------------------------------------------------------------
 -- Module functions for creation and update
@@ -57,6 +78,10 @@ end
 
 function Module:IsEnabled()
   return TidyPlatesThreat.db.profile.targetWidget.ON
+end
+
+function Module:OnEnable()
+  self:RegisterEvent("PLAYER_TARGET_CHANGED")
 end
 
 function Module:EnabledForStyle(style, unit)
@@ -94,13 +119,20 @@ function Module:OnUnitAdded(widget_frame, unit)
     widget_frame:SetBackdrop(nil)
   end
 
-  self:OnTargetChanged(widget_frame, unit)
-end
-
-function Module:OnTargetChanged(widget_frame, unit)
-  if unit.isTarget then
+  if UnitIsUnit("target", unit.unitid) then
     widget_frame:Show()
+    CurrentTarget = widget_frame
   else
     widget_frame:Hide()
   end
+
+  -- self:OnTargetChanged(widget_frame, unit)
 end
+
+--function Module:OnTargetChanged(widget_frame, unit)
+--  if UnitIsUnit("target", unit.unitid) then
+--    widget_frame:Show()
+--  else
+--    widget_frame:Hide()
+--  end
+--end

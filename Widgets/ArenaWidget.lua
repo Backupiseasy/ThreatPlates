@@ -11,7 +11,7 @@ local Module = Addon:NewModule("Arena")
 
 -- WoW APIs
 local CreateFrame = CreateFrame
-local GetNumArenaOpponents, UnitGUID = GetNumArenaOpponents, UnitGUID
+local GetNumArenaOpponents, UnitGUID, UnitReaction = GetNumArenaOpponents, UnitGUID, UnitReaction
 local IsInInstance, IsInBrawl = IsInInstance, C_PvP.IsInBrawl
 
 -- ThreatPlates APIs
@@ -82,12 +82,13 @@ function Module:IsEnabled()
 end
 
 function Module:OnEnable()
-  Module:RegisterEvent("PLAYER_ENTERING_WORLD")
+  self:RegisterEvent("PLAYER_ENTERING_WORLD")
   --Module:RegisterEvent("ARENA_PREP_OPPONENT_SPECIALIZATIONS")
+  --Module:RegisterEvent("ARENA_OPPONENT_UPDATE")
 end
 
 function Module:EnabledForStyle(style, unit)
-  return unit.reaction == "HOSTILE" and not (style == "NameOnly" or style == "NameOnly-Unique" or style == "etotem")
+  return UnitReaction(unit.unitid, "player") < 4 and not (style == "NameOnly" or style == "NameOnly-Unique" or style == "etotem")
 end
 
 function Module:OnUnitAdded(widget_frame, unit)
@@ -118,33 +119,3 @@ function Module:OnUnitAdded(widget_frame, unit)
 
   widget_frame:Show()
 end
-
---function Module:UpdateFrame(widget_frame, unit)
---  --  if not InArena then
---  --    widget_frame:Hide()
---  --    return
---  --  end
---
---  local arena_no = ArenaID[unit.guid]
---  if not arena_no then
---    widget_frame:Hide()
---    return
---  end
---
---  --print ("Showing Plate", arena_no, "for", unit.name)
---
---  -- Updates based on settings
---  local db = TidyPlatesThreat.db.profile.arenaWidget
-----  widget_frame:SetPoint("CENTER",widget_frame:GetParent(), db.x, db.y)
-----  widget_frame:SetSize(db.scale, db.scale)
---
---  local icon_color = db.colors[arena_no]
---  local number_color = db.numColors[arena_no]
---
---  widget_frame.Icon:SetVertexColor(icon_color.r, icon_color.g, icon_color.b, icon_color.a)
---
---  widget_frame.Num:SetTexture(PATH .. arena_no)
---  widget_frame.Num:SetVertexColor(number_color.r, number_color.g, number_color.b, number_color.a)
---
---  widget_frame:Show()
---end

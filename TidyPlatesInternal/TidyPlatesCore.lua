@@ -242,6 +242,11 @@ end
 do
 	-- CheckNameplateStyle
 	local function CheckNameplateStyle()
+--    local headline_mode_before = (stylename == "NameOnly" or stylename == "NameOnly-Unique")
+--    if unit.isTarget then
+--      print ("Change of nameplate mode:", unit.name, stylename, headline_mode_before)
+--    end
+
     stylename = Addon:SetStyle(unit)
     extended.style = activetheme[stylename]
 
@@ -252,9 +257,15 @@ do
 			extended.stylename = stylename
 			unit.style = stylename
 
-			Addon:UpdateExtensions(extended, unit.unitid, style)
+--      local headline_mode_after = (stylename == "NameOnly" or stylename == "NameOnly-Unique")
+--      if headline_mode_before ~= headline_mode_after then
+--        print ("Change of nameplate mode:", unit.name, headline_mode_before, "=>", headline_mode_after)
+--      end
+
+      -- TOOD: optimimze that - call OnUnitAdded only when the plate is initialized the first time for a unit, not if only the style changes
+      Addon:UpdateExtensions(extended, unit.unitid, stylename)
       Addon:ModulesOnUnitAdded(extended, unit)
-      -- Addon:ModulesOnUpdateStyle(extended, unit)
+      --Addon:ModulesPlateModeChanged(extended, unit)
     end
 	end
 
@@ -291,44 +302,52 @@ do
 	-- Create / Hide / Show Event Handlers
 	---------------------------------------------------------------------------------------------------------------------
 
+  function Addon:UpdateFriendleNameplateStyle(plate, unitid)
+    if TidyPlatesThreat.db.profile.ShowFriendlyBlizzardNameplates and UnitReaction(unitid, "player") > 4 then
+      plate.UnitFrame:Show()
+      plate.TPFrame:Hide()
+      plate.TPFrame.Active = false
+    else
+      plate.UnitFrame:Hide()
+      plate.TPFrame:Show()
+      plate.TPFrame.Active = true
+    end
+  end
+
 	-- OnShowNameplate
 	function OnShowNameplate(plate, unitid)
     UpdateReferences(plate)
 
-    unit.unitid = unitid
-    unit.guid = UnitGUID(unitid)
+    Addon:UpdateUnitIdentity(unit, unitid)
+
+    unit.name, _ = UnitName(unitid)
+
+    extended.stylename = ""
+    extended.requestedAlpha = 0
+    --extended:SetAlpha(0)
 
     PlatesVisible[plate] = unitid
     PlatesByUnit[unitid] = plate
     PlatesByGUID[unit.guid] = plate
 
-    -- unit.isTarget = false
-    unit.isMouseover = false
-    unit.isCasting = false
+    Addon:UpdateUnitContext(unit, unitid)
 
-		extended.stylename = ""
-    extended.requestedAlpha = 0
-    --extended:SetAlpha(0)
-
-    Addon:UpdateUnitIdentity(extended, unitid)
-    Addon:UpdateUnitContext(extended, unitid)
     ProcessUnitChanges()
     OnUpdateCastMidway(plate, unitid)
 
-		Addon:UpdateExtensions(extended, unit.unitid, style)
-    Addon:ModulesOnUnitAdded(extended, unit)
+		Addon:UpdateExtensions(extended, unit.unitid, stylename)
+    -- Addon:ModulesOnUnitAdded(extended, unit) -- already called in ProcessUnitChanges
 
-    -- Skip the initial data gather and let the second cycle do the work.
-    --plate.UpdateMe = true
-
-    if TidyPlatesThreat.db.profile.ShowFriendlyBlizzardNameplates and UnitReaction(unitid, "player") > 4 then
-      plate.UnitFrame:Show()
-      extended:Hide()
-    else
-      plate.UnitFrame:Hide()
-      extended:Show()
-      extended.Active = true
-    end
+    Addon:UpdateFriendleNameplateStyle(nameplate, unitid)
+--    if TidyPlatesThreat.db.profile.ShowFriendlyBlizzardNameplates and UnitReaction(unitid, "player") > 4 then
+--      plate.UnitFrame:Show()
+--      extended:Hide()
+--      extended.Active = false
+--    else
+--      plate.UnitFrame:Hide()
+--      extended:Show()
+--      extended.Active = true
+--    end
   end
 
 	-- OnHideNameplate
@@ -367,7 +386,7 @@ do
     UpdateReferences(plate)
 
 		--Addon:UpdateUnitIdentity(plate.TPFrame, unitid)
-    Addon:UpdateUnitContext(extended, unitid)
+    Addon:UpdateUnitContext(unit, unitid)
 		ProcessUnitChanges()
 		OnUpdateCastMidway(plate, unitid)
 	end
@@ -377,7 +396,7 @@ do
 		local unitid = PlatesVisible[plate]
     UpdateReferences(plate)
 
-    Addon:UpdateUnitCondition(extended, unitid)
+    Addon:UpdateUnitCondition(unit, unitid)
 		ProcessUnitChanges()
 
     -- Fix a bug where the overlay for non-interruptible casts was shown even for interruptible casts when entering combat while the unit was already casting
@@ -434,22 +453,16 @@ local ThreatReference = {
 -- UpdateUnitIdentity: Updates Low-volatility Unit Data
 -- (This is essentially static data)
 --------------------------------------------------------
-function Addon:UpdateUnitIdentity(frame, unitid)
-  local unit = frame.unit
-
-  unit.name, _ = UnitName(unitid)
-
-  -- unit.pvpname = UnitPVPName(unitid)
-  -- unit.rawName = unit.name  -- gsub(unit.name, " %(%*%)", "")
-  -- unit.fullname = unit.name .. "-" .. (realm or GetRealmName())
+function Addon:UpdateUnitIdentity(unit, unitid)
+  unit.unitid = unitid
+  unit.guid = UnitGUID(unitid)
 
   unit.isBoss = UnitLevel(unitid) == -1
-  --unit.isPet = UnitIsOtherPlayersPet(unitid)
 
-  local classification = UnitClassification(unitid)
-  unit.isElite = EliteReference[classification]
-  unit.isRare = RareReference[classification]
-  unit.isMini = classification == "minus"
+  unit.classification = UnitClassification(unitid)
+  unit.isElite = EliteReference[unit.classification]
+  unit.isRare = RareReference[unit.classification]
+  unit.isMini = unit.classification == "minus"
 
   if UnitIsPlayer(unitid) then
     _, unit.class = UnitClass(unitid)
@@ -461,19 +474,15 @@ function Addon:UpdateUnitIdentity(frame, unitid)
 end
 
 -- UpdateUnitContext: Updates Target/Mouseover
-function Addon:UpdateUnitContext(frame, unitid)
-  local unit = frame.unit
-
+function Addon:UpdateUnitContext(unit, unitid)
   unit.isMouseover = UnitIsUnit("mouseover", unitid)
   unit.isTarget = UnitIsUnit("target", unitid) -- required here for config changes which reset all plates without calling TARGET_CHANGED, MOUSEOVER, ...
 
-  Addon:UpdateUnitCondition(frame, unitid)	-- This updates a bunch of properties
+  Addon:UpdateUnitCondition(unit, unitid)	-- This updates a bunch of properties
 end
 
 -- UpdateUnitCondition: High volatility data
-function Addon:UpdateUnitCondition(frame, unitid)
-  local unit = frame.unit
-
+function Addon:UpdateUnitCondition(unit, unitid)
   unit.level = UnitEffectiveLevel(unitid)
 
   local c = GetCreatureDifficultyColor(unit.level)
@@ -583,7 +592,6 @@ do
     end
 	end
 
-
 	-- UpdateIndicator_Standard: Updates Non-Delegate Indicators
 	function UpdateIndicator_Standard()
 		if IsPlateShown(nameplate) then -- why this check only only here?
@@ -633,12 +641,12 @@ do
 	function OnStartCasting(plate, unitid, channeled)
     UpdateReferences(plate)
 
-		-- style may be uninitialized (empty) here (e.g., when reloading)
-    --if not (extended:IsShown() and style.castbar and style.castbar.show) then
-    if not extended:IsShown() or not style.castbar.show then return end
-    --if not extended:IsShown() then return end
-
     local castbar = extended.visual.castbar
+    if not extended:IsShown() or not style.castbar.show then
+      castbar:Hide()
+      return
+    end
+
     local name, subText, text, texture, startTime, endTime, isTradeSkill, castID, notInterruptible
 
     if channeled then
@@ -813,21 +821,20 @@ do
 
     local plate = GetNamePlateForUnit(unitid)
     if plate then
-      print ("UNIT_NAME_UPDATE:", plate:GetName(), "for", select(1, UnitName(unitid)), "[" .. plate.TPFrame.unit.name .. "]")
+      --print ("UNIT_NAME_UPDATE:", plate:GetName(), "for", select(1, UnitName(unitid)), "[" .. plate.TPFrame.unit.name .. "]")
 
       UpdateReferences(plate)
       unit.name, _ = UnitName(unitid)
 
       --Addon:UnitStyle_UnitType(extended, unit)
-      local plate_style = extended.stylename
-      Addon:UnitStyle_NameDependent(extended, unit)
+      local plate_style = Addon:UnitStyle_NameDependent(unit)
       if plate_style ~= extended.stylename then
         -- Totem or Custom Nameplate
-        print ("Unit Style changed:", plate_style, "=>", extended.stylename)
+        --print ("Unit Style changed:", plate_style, "=>", extended.stylename)
         ProcessUnitChanges()
       else
         -- just update the name
-        print ("Unit Style: just update name", extended.stylename)
+        --print ("Unit Style: just update name", extended.stylename)
         UpdateIndicator_Name()
         UpdateIndicator_CustomText() -- if it's an NPC, subtitle is saved by name, change that to guid/unitid
       end
@@ -858,7 +865,6 @@ do
       -- Update mouseover, if the mouse was hovering over the targeted unit
       extended.unit.isTarget = false
       CoreEvents:UPDATE_MOUSEOVER_UNIT()
-      Addon:ModulesOnTargetChanged(extended)
     end
 
     local plate = GetNamePlateForUnit("target")
@@ -876,9 +882,7 @@ do
       LastTargetPlate = plate
 
       extended.unit.isTarget = true
-      Addon:ModulesOnTargetChanged(extended)
     end
-
 
     SetUpdateAll()
 	end
@@ -1025,7 +1029,7 @@ do
       local plate = GetNamePlateForUnit(unitid)
       if plate then
         UpdateReferences(plate)
-        Addon:UpdateUnitCondition(extended, unitid)
+        Addon:UpdateUnitCondition(unit, unitid)
         ProcessUnitChanges()
       end
     end

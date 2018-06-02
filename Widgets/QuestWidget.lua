@@ -17,6 +17,7 @@ local string = string
 local WorldFrame, CreateFrame = WorldFrame, CreateFrame
 local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
 local UnitName, UnitIsUnit, UnitDetailedThreatSituation, UnitThreatSituation = UnitName, UnitIsUnit, UnitDetailedThreatSituation, UnitThreatSituation
+local UnitGUID = UnitGUID
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 
 -- ThreatPlates APIs
@@ -32,14 +33,12 @@ local ICON_COLORS = {}
 ---------------------------------------------------------------------------------------------------
 
 local function IsQuestUnit(unit)
-  local unitid = unit.unitid
-
 	local quest_area = false
 	local quest_player = false
 	local quest_group = false
 
 	-- Read quest information from tooltip. Thanks to Kib: QuestMobs AddOn by Tosaido.
-	if unitid then
+	if unit.unitid then
 		TooltipFrame:SetOwner(WorldFrame, "ANCHOR_NONE")
 		--tooltip_frame:SetUnit(unitid)
 		TooltipFrame:SetHyperlink("unit:" .. unit.guid)
@@ -206,7 +205,7 @@ function Module:UNIT_THREAT_LIST_UPDATE(unitid)
 
   local plate = GetNamePlateForUnit(unitid)
   if plate then
-    self:UpdateFrame(plate.TPFrame.widgets["Quest"], plate.TPFrame.unit)
+    self:UpdateFrame(plate.TPFrame.widgets.Quest, plate.TPFrame.unit)
 		Addon:UpdateIndicatorNameplateColor(plate.TPFrame)
   end
 end
@@ -274,7 +273,11 @@ function Module:UpdateFrame(widget_frame, unit)
   local db = TidyPlatesThreat.db.profile.questWidget
   if show and db.ModeIcon and ShowQuestUnit(unit) then
     -- Updates based on settings / unit style
-    self:OnUpdateStyle(widget_frame, unit)
+		if unit.style == "NameOnly" or unit.style == "NameOnly-Unique" then
+			widget_frame:SetPoint("CENTER", widget_frame:GetParent(), db.x_hv, db.y_hv)
+		else
+			widget_frame:SetPoint("CENTER", widget_frame:GetParent(), db.x, db.y)
+		end
 
     local color = ICON_COLORS[quest_type]
     widget_frame.Icon:SetVertexColor(color.r, color.g, color.b)
@@ -285,11 +288,11 @@ function Module:UpdateFrame(widget_frame, unit)
   end
 end
 
-function Module:OnUpdateStyle(widget_frame, unit)
-  local db = TidyPlatesThreat.db.profile.questWidget
-  if unit.style == "NameOnly" or unit.style == "NameOnly-Unique" then
-    widget_frame:SetPoint("CENTER", widget_frame:GetParent(), db.x_hv, db.y_hv)
-  else
-    widget_frame:SetPoint("CENTER", widget_frame:GetParent(), db.x, db.y)
-  end
-end
+--function Module:OnUpdateStyle(widget_frame, unit)
+--  local db = TidyPlatesThreat.db.profile.questWidget
+--  if unit.style == "NameOnly" or unit.style == "NameOnly-Unique" then
+--    widget_frame:SetPoint("CENTER", widget_frame:GetParent(), db.x_hv, db.y_hv)
+--  else
+--    widget_frame:SetPoint("CENTER", widget_frame:GetParent(), db.x, db.y)
+--  end
+--end

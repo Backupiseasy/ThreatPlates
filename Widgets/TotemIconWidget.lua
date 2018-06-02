@@ -42,6 +42,13 @@ function Module:IsEnabled()
 	return TidyPlatesThreat.db.profile.totemWidget.ON
 end
 
+--function Module:UNIT_NAME_UPDATE()
+--end
+--
+--function Module:OnEnable()
+--  self:RegisterEvent("UNIT_NAME_UPDATE")
+--end
+
 function Module:EnabledForStyle(style, unit)
 	return (style == "totem" or style == "etotem")
 end

@@ -28,7 +28,7 @@ local CreateFrame = CreateFrame
 local GetNumGuildMembers, GetGuildRosterInfo = GetNumGuildMembers, GetGuildRosterInfo
 local GetNumFriends, GetFriendInfo = GetNumFriends, GetFriendInfo
 local BNGetNumFriends, BNGetFriendInfo, BNGetToonInfo = BNGetNumFriends, BNGetFriendInfo, BNGetToonInfo
-local UnitName, GetRealmName, UnitFactionGroup = UnitName, GetRealmName, UnitFactionGroup
+local UnitIsPlayer, UnitName, GetRealmName, UnitFactionGroup = UnitIsPlayer, UnitName, GetRealmName, UnitFactionGroup
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 
 -- ThreatPlates APIs
@@ -147,7 +147,7 @@ function Module:UNIT_NAME_UPDATE(unitid)
     local name, realm = UnitName(unitid)
     unit.fullname = name .. "-" .. (realm or GetRealmName())
 
-    self:UpdateFrame(plate.TPFrame, unit)
+    self:OnUnitAdded(plate.TPFrame.widgets.Social, unit)
   end
 end
 
@@ -289,24 +289,24 @@ function Module:UpdateFrame(widget_frame, unit)
   widget_frame:Show()
 end
 
-function Module:OnUpdateStyle(widget_frame, unit)
-  local name_style = unit.style == "NameOnly" or unit.style == "NameOnly-Unique"
-  if widget_frame.Icon:IsShown() then
-    local db = TidyPlatesThreat.db.profile.socialWidget
-    if name_style then
-      widget_frame.Icon:SetPoint("CENTER", widget_frame:GetParent(), db.x_hv, db.y_hv)
-    else
-      widget_frame.Icon:SetPoint("CENTER", widget_frame:GetParent(), db.x, db.y)
-    end
-  end
-
-  if widget_frame.FactionIcon:IsShown() then
-    -- apply settings to faction icon
-    local db = TidyPlatesThreat.db.profile.FactionWidget
-    if name_style then
-      widget_frame.FactionIcon:SetPoint("CENTER", widget_frame:GetParent(), db.x_hv, db.y_hv)
-    else
-      widget_frame.FactionIcon:SetPoint("CENTER", widget_frame:GetParent(), db.x, db.y)
-    end
-  end
-end
+--function Module:OnUpdateStyle(widget_frame, unit)
+--  local name_style = unit.style == "NameOnly" or unit.style == "NameOnly-Unique"
+--  if widget_frame.Icon:IsShown() then
+--    local db = TidyPlatesThreat.db.profile.socialWidget
+--    if name_style then
+--      widget_frame.Icon:SetPoint("CENTER", widget_frame:GetParent(), db.x_hv, db.y_hv)
+--    else
+--      widget_frame.Icon:SetPoint("CENTER", widget_frame:GetParent(), db.x, db.y)
+--    end
+--  end
+--
+--  if widget_frame.FactionIcon:IsShown() then
+--    -- apply settings to faction icon
+--    local db = TidyPlatesThreat.db.profile.FactionWidget
+--    if name_style then
+--      widget_frame.FactionIcon:SetPoint("CENTER", widget_frame:GetParent(), db.x_hv, db.y_hv)
+--    else
+--      widget_frame.FactionIcon:SetPoint("CENTER", widget_frame:GetParent(), db.x, db.y)
+--    end
+--  end
+--end
