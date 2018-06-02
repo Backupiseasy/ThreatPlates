@@ -5259,7 +5259,7 @@ local function CreateOptionsTable()
           options.args.Widgets.args.ClassIconWidget.args.Textures.args["Prev" .. k_c].image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ClassIconWidget\\" .. db.classWidget.theme .. "\\" .. CLASS_SORT_ORDER[k_c]
         end
       end,
-      values = { default = "Default", transparent = "Transparent", },
+      values = { default = "Default", transparent = "Transparent", crest = "Crest", clean = "Clean" },
       arg = { "classWidget", "theme" },
     },
   };
@@ -5480,7 +5480,6 @@ local function CreateOptionsTable()
   for k_c, v_c in ipairs(db.uniqueSettings) do
     CustomOpts["#" .. k_c] = {
       name = "#" .. k_c .. ". " .. db.uniqueSettings[k_c].name,
-      type = "group",
       type = "group",
       --disabled = function() if db.totemSettings[totemID[k_c][2]][1] then return false else return true end end,
       order = CustomOpts_OrderCnt,

@@ -172,21 +172,26 @@ end
 
 local function UpdateWidgetFrame(frame, unit)
 	-- I will probably expand this to a table with 'friend = true','guild = true', and 'bnet = true' and have 3 textuers show.
+	local db = TidyPlatesThreat.db.profile.socialWidget
+
 	local friend_texture
-	if tContains(ListTable.f, unit.name) then
-    friend_texture = ICON_FRIEND
-	elseif tContains(ListTable.b, unit.name) then
-    friend_texture = ICON_BNET_FRIEND
-	elseif tContains(ListTable.g, unit.name) then
-    friend_texture = ICON_GUILDMATE
+	if db.ShowFriendIcon then
+		if tContains(ListTable.f, unit.name) then
+			friend_texture = ICON_FRIEND
+		elseif tContains(ListTable.b, unit.name) then
+			friend_texture = ICON_BNET_FRIEND
+		elseif tContains(ListTable.g, unit.name) then
+			friend_texture = ICON_GUILDMATE
+		end
 	end
 
 	local faction_texture
-	local db = TidyPlatesThreat.db.profile.socialWidget
 	local unitid = unit.unitid
 	if db.ShowFactionIcon and unit.type == "PLAYER" and unitid then
 		local faction = UnitFactionGroup(unitid)
-    faction_texture = ICON_FACTION[faction]
+		if faction then
+    	faction_texture = ICON_FACTION[faction]
+		end
 	end
 
 	if friend_texture or faction_texture then

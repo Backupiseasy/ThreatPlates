@@ -326,7 +326,7 @@ end
 local function UpdateWidgetTimeIcon(frame, expiration, duration)
 	if expiration == 0 then
 		frame.TimeLeft:SetText("")
-	else
+  else
 		local timeleft = expiration - GetTime()
 
 		if timeleft > 60 then
@@ -423,7 +423,9 @@ local function UpdateIconAuraInformation(frame) -- texture, duration, expiration
 
   -- Cooldown
   if duration and duration > 0 and expiration and expiration > 0 then
-    SetCooldown(frame.Cooldown, expiration-duration, duration+.25)
+    SetCooldown(frame.Cooldown, expiration - duration, duration + .25)
+  else
+    frame.Cooldown:Clear()
   end
 
   PolledHideIn(frame, expiration, duration)
@@ -750,20 +752,22 @@ local function CreateIconAuraFrame(parent)
   local db = TidyPlatesThreat.db.profile.AuraWidget.ModeBar
 
   local frame = CreateFrame("Frame", nil, parent)
-  frame:SetFrameLevel(parent:GetFrameLevel())
+  --frame:SetFrameLevel(parent:GetFrameLevel())
 
   frame.Icon = frame:CreateTexture(nil, "ARTWORK", 0)
-  frame.Border = frame:CreateTexture(nil, "ARTWORK", 1)
-  frame.BorderHighlight = frame:CreateTexture(nil, "ARTWORK", 2)
-  frame.Stacks = frame:CreateFontString(nil, "OVERLAY")
-  frame.Cooldown = CreateFrame("Cooldown", nil, frame, "TidyPlatesAuraWidgetCooldown")
-  frame:SetFrameLevel(parent:GetFrameLevel())
+
+  frame.Cooldown = CreateFrame("Cooldown", nil, frame, "ThreatPlatesAuraWidgetCooldown")
+  --frame.Cooldown:SetFrameLevel(frame:GetFrameLevel())
   frame.Cooldown:SetAllPoints(frame.Icon)
   frame.Cooldown:SetReverse(true)
   frame.Cooldown:SetHideCountdownNumbers(true)
 
+  frame.Border = frame:CreateTexture(nil, "ARTWORK", 1)
+  frame.BorderHighlight = frame:CreateTexture(nil, "ARTWORK", 2)
+  frame.Stacks = frame.Cooldown:CreateFontString(nil, "OVERLAY")
+
   --  Time Text
-  frame.TimeLeft = frame:CreateFontString(nil, "OVERLAY")
+  frame.TimeLeft = frame.Cooldown:CreateFontString(nil, "OVERLAY")
   frame.TimeLeft:SetFont(AuraFont ,9, "OUTLINE")
   frame.TimeLeft:SetShadowOffset(1, -1)
   frame.TimeLeft:SetShadowColor(0,0,0,1)
@@ -887,7 +891,8 @@ local function UpdateIconAuraFrame(frame)
 
   if TidyPlatesThreat.db.profile.AuraWidget.ShowCooldownSpiral then
     frame.Cooldown:SetDrawEdge(true)
-    frame.Cooldown:SetDrawEdge(true)
+    frame.Cooldown:SetDrawSwipe(true)
+    --frame.Cooldown:SetFrameLevel(frame:GetParent():GetFrameLevel() + 10)
   else
     frame.Cooldown:SetDrawEdge(false)
     frame.Cooldown:SetDrawSwipe(false)
@@ -955,6 +960,7 @@ local function UpdateAuraWidgetLayout(widget_frame)
       frame:ClearAllPoints()
       frame:SetPoint(align_layout[1], widget_frame, pos_x, pos_y)
 
+      --frame:SetFrameLevel(widget_frame:GetFrameLevel())
       UpdateAuraFrame(frame)
     end
 

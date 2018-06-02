@@ -17,6 +17,7 @@ local UnitPower = UnitPower
 local SPELL_POWER_CHI = SPELL_POWER_CHI
 local SPEC_PALADIN_RETRIBUTION = SPEC_PALADIN_RETRIBUTION
 local SPELL_POWER_HOLY_POWER = SPELL_POWER_HOLY_POWER
+local SPELL_POWER_SOUL_SHARDS = SPELL_POWER_SOUL_SHARDS
 local UnitClass = UnitClass
 local SPEC_MONK_WINDWALKER = SPEC_MONK_WINDWALKER
 
@@ -68,6 +69,14 @@ local function GetPaladinHolyPower()
   return points, maxPoints
 end
 
+local function GetWarlockSoulShards()
+  local points = UnitPower("player", SPELL_POWER_SOUL_SHARDS)
+  local maxPoints = UnitPowerMax("player", SPELL_POWER_SOUL_SHARDS)
+
+  return points, maxPoints
+end
+
+
 local GetResourceOnTarget
 local LocalName, PlayerClass = UnitClass("player")
 
@@ -80,6 +89,8 @@ elseif PlayerClass == "DRUID" then
 -- Added holy power as combo points for retribution paladin
 elseif PlayerClass == "PALADIN" then
   GetResourceOnTarget = GetPaladinHolyPower
+elseif PlayerClass == "WARLOCK" then
+  GetResourceOnTarget = GetWarlockSoulShards
 else
   GetResourceOnTarget = function() end
 end
@@ -188,6 +199,7 @@ local WATCH_POWER_TYPES = {
   COMBO_POINTS = true,
   CHI = true,
   HOLY_POWER = true,
+  SOUL_SHARDS = true,
 }
 
 local function WatcherFrameHandler(frame, event, unitid, power_type)

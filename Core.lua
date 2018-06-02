@@ -191,6 +191,8 @@ function TidyPlatesThreat:ReloadTheme()
   else
     TidyPlatesInternal:DisableCastBars()
   end
+
+  Addon:InitializeCustomNameplates()
 end
 
 function TidyPlatesThreat:StartUp()
