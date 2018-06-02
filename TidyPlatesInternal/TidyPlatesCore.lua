@@ -738,10 +738,12 @@ do
 
 		-- style may be uninitialized (empty) here (e.g., when reloading)
     --if not (extended:IsShown() and style.castbar and style.castbar.show) then
-    if not extended:IsShown() or not style.castbar.show then return end
-    --if not extended:IsShown() then return end
+		local castbar = extended.visual.castbar
+		if not extended:IsShown() or not style.castbar.show then
+			castbar:Hide()
+			return
+		end
 
-    local castbar = extended.visual.castbar
     local name, subText, text, texture, startTime, endTime, isTradeSkill, castID, notInterruptible
 
     if channeled then
