@@ -615,7 +615,7 @@ do
 	function OnStartCasting(plate, unitid, channeled)
     UpdateReferences(plate)
 
-    local castbar = extended.visual.castbar
+		local castbar = extended.visual.castbar
     if not extended:IsShown() or not style.castbar.show then
       castbar:Hide()
       return

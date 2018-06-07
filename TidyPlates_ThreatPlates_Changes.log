@@ -6,6 +6,12 @@
 * Removed Tidy Plates Fading from options as it was never implemented/working.
 
 ------------------------------------------------------
+8.7.4
+------------------------------------------------------
+* Fixed a bug (finally) with strata in the auras widget where the cooldown spiral was not shown sometimes [Issue #181].
+* Fixed a bug with the castbar being shown although disabled when switching between healthbar and headline view based on the casting unit's status (e.g., when entering combat or on target change).
+
+------------------------------------------------------
 8.7.3
 ------------------------------------------------------
 * Added two new class icon sets, Crest and Clean (courtesy of Lollzzer, Comment #818).
