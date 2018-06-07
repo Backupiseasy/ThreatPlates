@@ -93,7 +93,7 @@ local UpdateIndicator_HealthBar, UpdateIndicator_Target
 local OnUpdateCasting, OnStartCasting, OnStopCasting, OnUpdateCastMidway
 
 -- Event Functions
-local OnNewNameplate, OnShowNameplate, OnHideNameplate, OnUpdateNameplate, OnResetNameplate
+local OnNewNameplate, OnShowNameplate, OnUpdateNameplate, OnResetNameplate
 local OnHealthUpdate, ProcessUnitChanges
 
 -- Main Loop
@@ -226,7 +226,7 @@ do
     extended.widgets = {}
 
 		Addon:CreateExtensions(extended)
-    Addon:CreateModules(extended)
+    Addon:ModulesOnPlateCreated(extended)
 
     -- Allocate Tables
     extended.style = {}
@@ -350,35 +350,6 @@ do
 --    end
   end
 
-	-- OnHideNameplate
-	function OnHideNameplate(plate, unitid)
-		UpdateReferences(plate)
-
-    extended:Hide()
-
-    PlatesVisible[plate] = nil
-		PlatesByUnit[unitid] = nil
-    if unit.guid then -- maybe hide directly after create with unit added?
-      PlatesByGUID[unit.guid] = nil
-    end
-
-    wipe(extended.unit)
-    wipe(extended.unitcache)
-    --extended.unit = {}
-    --extended.unitcache = {}
-
-    --unit.isCasting = false
-    --visual.castbar:Hide()
-
-		for module_name, widget_frame in pairs(extended.widgets) do
-      widget_frame:Hide()
-    end
-
-    extended.Active = false
-    -- Remove anything from the function queue
-    plate.UpdateMe = false
-	end
-
 	-- OnUpdateNameplate
 	function OnUpdateNameplate(plate)
     -- Gather Information
@@ -457,12 +428,15 @@ function Addon:UpdateUnitIdentity(unit, unitid)
   unit.unitid = unitid
   unit.guid = UnitGUID(unitid)
 
-  unit.isBoss = UnitLevel(unitid) == -1
-
   unit.classification = UnitClassification(unitid)
   unit.isElite = EliteReference[unit.classification]
   unit.isRare = RareReference[unit.classification]
   unit.isMini = unit.classification == "minus"
+
+  unit.isBoss = UnitLevel(unitid) == -1
+  if unit.isBoss then
+    unit.classification = "boss"
+  end
 
   if UnitIsPlayer(unitid) then
     _, unit.class = UnitClass(unitid)
@@ -800,8 +774,10 @@ do
 
     if plate.UnitFrame then -- not plate.TPFrame.onShowHooked then
       plate.UnitFrame:HookScript("OnShow", FrameOnShow)
+      -- TODO: Idea from ElvUI, I think
       -- plate.TPFrame.onShowHooked = true
     end
+
     plate:HookScript('OnHide', FrameOnHide)
     plate:HookScript('OnUpdate', FrameOnUpdate)
 
@@ -810,17 +786,42 @@ do
 
 	-- Payload: { Name = "unitToken", Type = "string", Nilable = false },
 	function CoreEvents:NAME_PLATE_UNIT_ADDED(unitid)
-    -- Handle personal resource bar, currently it's ignored by Threat Plates
+    -- Player's personal resource bar is currently not handled by Threat Plates
+    -- OnShowNameplate is not called on it, therefore plate.TPFrame.Active is nil
     if UnitIsUnit("player", unitid) then return end
 
     OnShowNameplate(GetNamePlateForUnit(unitid), unitid)
 	end
 
-  function CoreEvents:UNIT_NAME_UPDATE(unitid)
-    if UnitIsUnit("player", unitid) then return end -- skip personal resource bar
+  function CoreEvents:NAME_PLATE_UNIT_REMOVED(unitid)
+		local plate = GetNamePlateForUnit(unitid)
+    local frame = plate.TPFrame
 
-    local plate = GetNamePlateForUnit(unitid)
-    if plate then
+    frame.Active = false
+    frame:Hide()
+
+    PlatesVisible[plate] = nil
+    PlatesByUnit[unitid] = nil
+    if frame.unit.guid then -- maybe hide directly after create with unit added?
+      PlatesByGUID[frame.unit.guid] = nil
+    end
+
+    wipe(frame.unit)
+    wipe(frame.unitcache)
+
+    Addon:ModulesOnUnitRemoved(frame)
+
+    -- Remove anything from the function queue
+    frame.UpdateMe = false
+  end
+
+  function CoreEvents:UNIT_NAME_UPDATE(unitid)
+    if UnitIsUnit("player", unitid) then return end -- Skip personal resource bar
+
+    local plate = GetNamePlateForUnit(unitid) -- can plate ever be nil here?
+
+    -- Plate can be nil here, if unitid is party1, partypet4 or something like that
+    if plate and plate.TPFrame.Active then
       --print ("UNIT_NAME_UPDATE:", plate:GetName(), "for", select(1, UnitName(unitid)), "[" .. plate.TPFrame.unit.name .. "]")
 
       UpdateReferences(plate)
@@ -841,16 +842,10 @@ do
     end
   end
 
-  function CoreEvents:NAME_PLATE_UNIT_REMOVED(unitid)
-		local plate = GetNamePlateForUnit(unitid)
-
-		OnHideNameplate(plate, unitid)
-	end
-
-	function CoreEvents:PLAYER_TARGET_CHANGED()
+  function CoreEvents:PLAYER_TARGET_CHANGED()
     -- Target Castbar Offset
     local visual, style, extended
-    if LastTargetPlate then
+    if LastTargetPlate and LastTargetPlate.TPFrame.Active then
       extended = LastTargetPlate.TPFrame
       visual = extended.visual
       style = extended.style
@@ -868,7 +863,8 @@ do
     end
 
     local plate = GetNamePlateForUnit("target")
-    if plate and plate.TPFrame and plate.TPFrame.stylename ~= "" then
+    --if plate and plate.TPFrame and plate.TPFrame.stylename ~= "" then
+    if plate and plate.TPFrame.Active then
       extended = plate.TPFrame
       visual = extended.visual
       style = extended.style
@@ -891,7 +887,7 @@ do
     if UnitIsUnit("mouseover", "player") then return end
 
     local plate = GetNamePlateForUnit("mouseover")
-    if plate and plate.TPFrame.Active then -- check for TPFrame to prevent accessing the personal resource bar
+    if plate and plate.TPFrame.Active then -- check for Active to prevent accessing the personal resource bar
       local frame = plate.TPFrame
       frame.unit.isMouseover = true
       Addon:Module_Mouseover_Update(frame)
@@ -1007,7 +1003,7 @@ do
 	function CoreEvents:UNIT_ABSORB_AMOUNT_CHANGED(unitid)
 		local plate = GetNamePlateForUnit(unitid)
 
-		if plate and plate.TPFrame then
+		if plate and plate.TPFrame.Active then
 			Addon:UpdateExtensions(plate.TPFrame, unitid, plate.TPFrame.stylename)
 		end
 	end
@@ -1015,7 +1011,7 @@ do
 	function CoreEvents:UNIT_MAXHEALTH(unitid)
 		local plate = GetNamePlateForUnit(unitid)
 
-		if plate and plate.TPFrame then
+		if plate and plate.TPFrame.Active then
 			Addon:UpdateExtensions(plate.TPFrame, unitid, plate.TPFrame.stylename)
 		end
 	end
@@ -1027,7 +1023,7 @@ do
     else
       -- Update just the unitid's plate
       local plate = GetNamePlateForUnit(unitid)
-      if plate then
+      if plate and plate.TPFrame.Active then
         UpdateReferences(plate)
         Addon:UpdateUnitCondition(unit, unitid)
         ProcessUnitChanges()
@@ -1040,6 +1036,8 @@ do
 	CoreEvents.UNIT_SPELLCAST_CHANNEL_UPDATE = UnitSpellcastMidway
 	CoreEvents.UNIT_SPELLCAST_INTERRUPTIBLE = UnitSpellcastMidway
 	CoreEvents.UNIT_SPELLCAST_NOT_INTERRUPTIBLE = UnitSpellcastMidway
+  -- UNIT_SPELLCAST_FAILED
+  -- UNIT_SPELLCAST_INTERRUPTED
 
 	CoreEvents.UNIT_LEVEL = UnitConditionChanged
 	--CoreEvents.UNIT_THREAT_SITUATION_UPDATE = UnitConditionChanged -- did not work anyway (no unitid)

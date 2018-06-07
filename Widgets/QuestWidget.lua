@@ -204,7 +204,7 @@ function Module:UNIT_THREAT_LIST_UPDATE(unitid)
   if not unitid or unitid == 'player' or UnitIsUnit('player', unitid) then return end
 
   local plate = GetNamePlateForUnit(unitid)
-  if plate then
+  if plate and plate.TPFrame.Active then
     self:UpdateFrame(plate.TPFrame.widgets.Quest, plate.TPFrame.unit)
 		Addon:UpdateIndicatorNameplateColor(plate.TPFrame)
   end

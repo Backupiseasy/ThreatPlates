@@ -11,7 +11,7 @@ local Module = Addon:NewModule("ClassIcon")
 
 -- WoW APIs
 local CreateFrame = CreateFrame
-local UnitIsPlayer, UnitReaction, UnitClass = UnitIsPlayer, UnitReaction, UnitClass
+local UnitReaction = UnitReaction
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat

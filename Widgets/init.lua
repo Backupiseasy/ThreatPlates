@@ -235,12 +235,27 @@ function Addon:DisableModule(module_name)
   end
 end
 
-function Addon:CreateModules(tp_frame)
+function Addon:ModulesOnPlateCreated(tp_frame)
   local plate_widgets = tp_frame.widgets
 
   for module_name, module in pairs(EnabledModules) do
     plate_widgets[module_name] = module:Create(tp_frame)
   end
+end
+
+
+function Addon:ModulesOnUnitRemoved(frame)
+  for _, widget_frame in pairs(frame.widgets) do
+    widget_frame.Active = false
+    widget_frame:Hide()
+  end
+
+--  local plate_widgets = frame.widgets
+--  for module_name, _ in pairs(EnabledModules) do
+--    local widget_frame = plate_widgets[module_name]
+--    widget_frame.Active = false
+--    widget_frame:Hide()
+--  end
 end
 
 -- TODO: Seperate UnitAdded from UpdateSettings/UpdateConfiguration (unit independent stuff)

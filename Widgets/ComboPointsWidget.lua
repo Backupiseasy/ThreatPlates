@@ -107,7 +107,7 @@ local function EventHandler(event, unitid, power_type)
   if event == "UNIT_POWER" and not WATCH_POWER_TYPES[power_type] then return end
 
   local plate = GetNamePlateForUnit("target")
-  if plate and plate.TPFrame:IsShown() then
+  if plate and plate.TPFrame.widgets.ComboPoints:IsShown() then -- not necessary, prerequisite for IsShown(): plate.TPFrame.Active and
     UpdateComboPoints(plate.TPFrame.widgets.ComboPoints)
   end
 end

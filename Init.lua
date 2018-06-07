@@ -73,16 +73,6 @@ ThreatPlates.Meta = function(value)
 	return meta or ""
 end
 
-ThreatPlates.Class = function()
-	local _,class = UnitClass("Player")
-	return class
-end
-
-ThreatPlates.Active = function()
-	local val = GetSpecialization()
-	return val
-end
-
 do
 	ThreatPlates.HCC = {}
 	for i=1,#CLASS_SORT_ORDER do

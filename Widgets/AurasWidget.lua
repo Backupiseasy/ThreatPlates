@@ -1078,8 +1078,8 @@ function Module:UNIT_AURA(unitid)
   if unitid == "player" then return end
 
   local plate = GetNamePlateForUnit(unitid)
-  if plate then -- plate maybe nil as not all UNIT_AURA events are on units with nameplates
-    local widget_frame = plate.TPFrame.widgets["Auras"]
+  if plate and plate.TPFrame.Active then -- plate maybe nil as not all UNIT_AURA events are on units with nameplates
+    local widget_frame = plate.TPFrame.widgets.Auras
     UpdateIconGrid(widget_frame, unitid)
   end
 end

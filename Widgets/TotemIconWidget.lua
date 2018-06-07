@@ -54,9 +54,10 @@ function Module:EnabledForStyle(style, unit)
 end
 
 function Module:OnUnitAdded(widget_frame, unit)
-  local totem_id = TOTEMS[unit.name]
+  --local totem_id = TOTEMS[unit.name]
 
-  if not totem_id then
+  local totem_settings = unit.TotemSettings
+  if not totem_settings then
     widget_frame:Hide()
     return
   end
@@ -66,7 +67,7 @@ function Module:OnUnitAdded(widget_frame, unit)
   -- not used: db[totem_id].ShowIcon
   widget_frame:SetPoint("CENTER", widget_frame:GetParent(), db.x, db.y)
   widget_frame:SetSize(db.scale, db.scale)
-  widget_frame.Icon:SetTexture(PATH .. TidyPlatesThreat.db.profile.totemSettings[totem_id].Style .. "\\" .. totem_id)
+  widget_frame.Icon:SetTexture(PATH .. totem_settings.Style .. "\\" .. totem_settings.ID)
 
   widget_frame:Show()
 end

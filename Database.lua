@@ -10,16 +10,11 @@ local ThreatPlates = Addon.ThreatPlates
 ---------------------------------------------------------------------------------------------------
 
 -- Lua APIs
-local floor = floor
-local unpack = unpack
-local type = type
-local min = min
-local pairs = pairs
+local floor, select, unpack, type, min, pairs = floor, select, unpack, type, min, pairs
 
 -- WoW APIs
-local InCombatLockdown = InCombatLockdown
-local GetCVar = GetCVar
-local SetCVar = SetCVar
+local GetCVar, SetCVar = GetCVar, SetCVar
+local UnitClass, GetSpecialization = UnitClass, GetSpecialization
 
 -- ThreatPlates APIs
 local L = ThreatPlates.L
@@ -31,17 +26,16 @@ local RGB = ThreatPlates.RGB
 ---------------------------------------------------------------------------------------------------
 
 -- Returns if the currently active spec is tank (true) or dps/heal (false)
-function TidyPlatesThreat:GetSpecRole()
-  local active_role
+Addon.PlayerClass = select(2, UnitClass("player"))
+local PLAYER_ROLE_BY_SPEC = ThreatPlates.SPEC_ROLES[Addon.PlayerClass]
 
-  if (self.db.profile.optionRoleDetectionAutomatic) then
-    active_role = ThreatPlates.SPEC_ROLES[ThreatPlates.Class()][ThreatPlates.Active()]
-    if not active_role then active_role = false end
+function Addon:PlayerRoleIsTank()
+  local db = TidyPlatesThreat.db
+  if db.profile.optionRoleDetectionAutomatic then
+    return PLAYER_ROLE_BY_SPEC[GetSpecialization()] or false
   else
-    active_role = self.db.char.spec[ThreatPlates.Active()]
+    return db.char.spec[GetSpecialization()]
   end
-
-  return active_role
 end
 
 -- Sets the role of the index spec or the active spec to tank (value = true) or dps/healing
@@ -49,7 +43,7 @@ function TidyPlatesThreat:SetRole(value,index)
   if index then
     self.db.char.spec[index] = value
   else
-    self.db.char.spec[ThreatPlates.Active()] = value
+    self.db.char.spec[GetSpecialization()] = value
   end
 end
 

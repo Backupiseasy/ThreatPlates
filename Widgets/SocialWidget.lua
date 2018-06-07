@@ -141,7 +141,7 @@ end
 function Module:UNIT_NAME_UPDATE(unitid)
   local plate = GetNamePlateForUnit(unitid)
 
-  if plate then
+  if plate and plate.TPFrame.Active then
     local unit = plate.TPFrame.unit
 
     local name, realm = UnitName(unitid)

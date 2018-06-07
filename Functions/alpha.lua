@@ -12,8 +12,6 @@ local UnitExists = UnitExists
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
-local GetUniqueNameplateSetting = ThreatPlates.GetUniqueNameplateSetting
-local GetThreatStyle = ThreatPlates.GetThreatStyle
 
 local function TransparencySituational(unit)
 	local db = TidyPlatesThreat.db.profile.nameplate
@@ -99,7 +97,7 @@ local function TransparencyThreat(unit, style)
 end
 
 local function AlphaNormal(unit, non_combat_transparency)
-  local style = GetThreatStyle(unit)
+  local style = Addon:GetThreatStyle(unit)
   if style == "normal" then
     return non_combat_transparency or TransparencyGeneral(unit)
   else -- dps, tank
@@ -108,7 +106,7 @@ local function AlphaNormal(unit, non_combat_transparency)
 end
 
 local function AlphaUnique(unit)
-	local unique_setting = GetUniqueNameplateSetting(unit)
+	local unique_setting = unit.CustomPlateSettings
 
 	if unique_setting.overrideAlpha then
 		return AlphaNormal(unit)

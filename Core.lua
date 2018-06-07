@@ -22,7 +22,6 @@ local TidyPlatesThreat = TidyPlatesThreat
 local LibStub = LibStub
 local L = t.L
 
-local class = t.Class()
 t.Theme = {}
 
 local task_queue_ooc = {}
@@ -68,7 +67,7 @@ local tankRole = L["|cff00ff00tanking|r"]
 local dpsRole = L["|cffff0000dpsing / healing|r"]
 
 function TidyPlatesThreat:RoleText()
-  if TidyPlatesThreat:GetSpecRole() then
+  if Addon:PlayerRoleIsTank() then
     return tankRole
   else
     return dpsRole
@@ -225,12 +224,12 @@ function TidyPlatesThreat:StartUp()
 
   if not self.db.char.welcome then
     self.db.char.welcome = true
-    local Welcome = L["|cff89f559Welcome to |r|cff89f559Threat Plates!\nThis is your first time using Threat Plates and you are a(n):\n|r|cff"]..t.HCC[class]..self:SpecName().." "..UnitClass("player").."|r|cff89F559.|r\n"
+    local Welcome = L["|cff89f559Welcome to |r|cff89f559Threat Plates!\nThis is your first time using Threat Plates and you are a(n):\n|r|cff"]..t.HCC[Addon.PlayerClass]..self:SpecName().." "..UnitClass("player").."|r|cff89F559.|r\n"
 
     -- initialize roles for all available specs (level > 10) or set to default (dps/healing)
     for index=1, GetNumSpecializations() do
       local id, spec_name, description, icon, background, role = GetSpecializationInfo(index)
-      self:SetRole(t.SPEC_ROLES[t.Class()][index], index)
+      self:SetRole(t.SPEC_ROLES[Addon.PlayerClass][index], index)
     end
 
     t.Print(Welcome..L["|cff89f559You are currently in your "]..self:RoleText()..L["|cff89f559 role.|r"])
@@ -513,11 +512,8 @@ function TidyPlatesThreat:PLAYER_LOGIN(...)
 
   -- With TidyPlates: if self.db.char.welcome and (TidyPlatesOptions.ActiveTheme == t.THEME_NAME) then
   if self.db.char.welcome then
-    t.Print(L["|cff89f559Threat Plates:|r Welcome back |cff"]..t.HCC[class]..UnitName("player").."|r!!")
+    t.Print(L["|cff89f559Threat Plates:|r Welcome back |cff"]..t.HCC[Addon.PlayerClass]..UnitName("player").."|r!!")
   end
-  -- if class == "WARRIOR" or class == "DRUID" or class == "DEATHKNIGHT" or class == "PALADIN" then
-  -- 	self:RegisterEvent("UPDATE_SHAPESHIFT_FORM")
-  -- end
 end
 
 function TidyPlatesThreat:PLAYER_LOGOUT(...)

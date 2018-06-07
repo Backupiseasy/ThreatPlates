@@ -11,16 +11,13 @@ local Module = Addon:NewModule("Threat")
 ---------------------------------------------------------------------------------------------------
 
 -- WoW APIs
-local CreateFrame, InCombatLockdown, UNKNOWNOBJECT = CreateFrame, InCombatLockdown, UNKNOWNOBJECT
-local UnitIsUnit, UnitThreatSituation, UnitIsPlayer = UnitIsUnit, UnitThreatSituation, UnitIsPlayer
-local UnitReaction, UnitIsTapDenied, UnitLevel, UnitClassification, UnitName = UnitReaction, UnitIsTapDenied, UnitLevel, UnitClassification, UnitName
-local IsInInstance = IsInInstance
+local CreateFrame, UNKNOWNOBJECT = CreateFrame, UNKNOWNOBJECT
+local UnitIsUnit, UnitThreatSituation, UnitName = UnitIsUnit, UnitThreatSituation, UnitName
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local GetRaidTargetIndex = GetRaidTargetIndex
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
-local OnThreatTable = ThreatPlates.OnThreatTable
 
 local PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ThreatWidget\\"
 local THREAT_REFERENCE = {
@@ -43,12 +40,12 @@ function Module:UNIT_THREAT_LIST_UPDATE(unitid)
   if not unitid or unitid == "player" or UnitIsUnit("player", unitid) then return end
 
   local plate = GetNamePlateForUnit(unitid)
-  if plate then
+  if plate and plate.TPFrame.Active then
     self:UpdateFrame(plate.TPFrame.widgets.Threat, plate.TPFrame.unit)
   end
 end
 
-function Module:RAID_TARGET_UPDATE(...)
+function Module:RAID_TARGET_UPDATE()
   self:UpdateAllFrames()
 end
 
@@ -110,61 +107,6 @@ function Module:OnUnitAdded(widget_frame, unit)
   self:UpdateFrame(widget_frame, unit)
 end
 
-local CLASSIFICATION_MAPPING = {
-  ["worldboss"] = "Elite",
-  ["rareelite"] = "Elite",
-  ["elite"] = "Elite",
-  ["rare"] = "Elite",
-  ["normal"] = "Normal",
-  ["minus"] = "Minus",
-  ["trivial"] = "Minus",
-}
-
---toggle = {
---  ["Boss"]	= true,
---  ["Elite"]	= true,
---  ["Normal"]	= true,
---  ["Neutral"]	= true,
---  ["Minus"] 	= true,
---  ["Tapped"] 	= true,
---  ["OffTank"] = true,
---},
-
-local function GetUnitClassification(unit)
-  local unit_reaction = UnitReaction(unit.unitid, "player")
-
-  --  if unit_reaction < 4 then
-  --    return nil -- Friendly Unit
-  if UnitIsTapDenied(unit.unitid) then
-    return "Tapped"
-  elseif unit_reaction == 4 then
-    return "Neutral"
-  elseif unit.isBoss then
-    return "Boss"
-  end
-
-  return CLASSIFICATION_MAPPING[unit.classification]
-end
-
-local function ShowThreatFeedback(unit)
-  local db = TidyPlatesThreat.db.profile.threat
-
-  -- UnitCanAttack?
-  if not InCombatLockdown() or unit.type == "PLAYER" or UnitReaction(unit.unitid, "player") > 4 or not db.ON then
-    return false
-  end
-
-  if not IsInInstance() and db.toggle.InstancesOnly then
-    return false
-  end
-
-  if db.toggle[GetUnitClassification(unit)] then
-    return not db.nonCombat or OnThreatTable(unit)
-  end
-
-  return false
-end
-
 function Module:UpdateFrame(widget_frame, unit)
   local db = TidyPlatesThreat.db.profile.threat
 
@@ -173,7 +115,7 @@ function Module:UpdateFrame(widget_frame, unit)
     return
   end
 
-  if not ShowThreatFeedback(unit) then
+  if not Addon:ShowThreatFeedback(unit) then
     widget_frame:Hide()
     return
   end
@@ -187,7 +129,7 @@ function Module:UpdateFrame(widget_frame, unit)
     end
   end
 
-  local style = (TidyPlatesThreat:GetSpecRole() and "tank") or "dps"
+  local style = (Addon:PlayerRoleIsTank() and "tank") or "dps"
 
   local threat_value = UnitThreatSituation("player", unit.unitid) or 0
   local threat_situation = THREAT_REFERENCE[threat_value]

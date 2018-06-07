@@ -12,8 +12,6 @@ local UnitExists = UnitExists
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
-local GetUniqueNameplateSetting = ThreatPlates.GetUniqueNameplateSetting
-local GetThreatStyle = ThreatPlates.GetThreatStyle
 
 local function ScaleSituational(unit)
 	local db = TidyPlatesThreat.db.profile.nameplate
@@ -100,7 +98,7 @@ local function ScaleThreat(unit, style)
 end
 
 local function ScaleNormal(unit, non_combat_scale)
-	local style = GetThreatStyle(unit)
+	local style = Addon:GetThreatStyle(unit)
 	if style == "normal" then
 		return non_combat_scale or ScaleGeneral(unit)
 	else -- dps, tank
@@ -109,7 +107,7 @@ local function ScaleNormal(unit, non_combat_scale)
 end
 
 local function ScaleUnique(unit)
-	local unique_setting = GetUniqueNameplateSetting(unit)
+	local unique_setting = unit.CustomPlateSettings
 
 	if unique_setting.overrideScale then
 		return  ScaleNormal(unit)

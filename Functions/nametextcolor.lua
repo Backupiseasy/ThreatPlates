@@ -12,7 +12,6 @@ local RAID_CLASS_COLORS = RAID_CLASS_COLORS
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
 local GetColorByHealthDeficit = ThreatPlates.GetColorByHealthDeficit
-local GetUniqueNameplateSetting = ThreatPlates.GetUniqueNameplateSetting
 local GetColorByReaction = ThreatPlates.GetColorByReaction
 local IsFriend
 local IsGuildmate
@@ -20,7 +19,7 @@ local IsGuildmate
 function Addon:SetNameColor(unit)
   local style = unit.style
 
-  local unique_setting = unit.TP_UniqueSetting or GetUniqueNameplateSetting(unit)
+  local unique_setting = unit.CustomPlateSettings
 
   local db = TidyPlatesThreat.db.profile
   local db_mode = db.settings.name
@@ -29,8 +28,6 @@ function Addon:SetNameColor(unit)
   end
 
   local color
-  -- local unique_setting = GetUniqueNameplateSetting(unit)
-
 
   if unit.isTarget and db.targetWidget.ModeNames then
     color = db.targetWidget.HPBarColor

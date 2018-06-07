@@ -196,7 +196,7 @@ end
 -- This event handler only watches for events of unit == "target"
 function Module:UNIT_POWER(unitid, powerType)
   local plate = GetNamePlateForUnit("target")
-  if plate then
+  if plate and plate.TPFrame.Active then
     local widget_frame = plate.TPFrame.widgets["Resource"]
     if widget_frame.ShowWidget then
       UpdateResourceBar(widget_frame)

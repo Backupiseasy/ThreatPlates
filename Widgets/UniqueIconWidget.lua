@@ -52,7 +52,8 @@ end
 function Module:OnUnitAdded(widget_frame, unit)
   local db = TidyPlatesThreat.db.profile
 
-	local unique_setting = db.uniqueSettings.map[unit.name]
+	--local unique_setting = db.uniqueSettings.map[unit.name]
+  local unique_setting = unit.CustomPlateSettings
 	if not unique_setting or not unique_setting.showIcon then
 		widget_frame:Hide()
 		return

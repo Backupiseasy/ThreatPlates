@@ -26,7 +26,6 @@ local GetSpellInfo = GetSpellInfo
 local LibStub = LibStub
 local L = t.L
 
-local class = t.Class()
 local PATH_ART = t.Art
 
 -- local TidyPlatesThreat = LibStub("AceAddon-3.0"):GetAddon("TidyPlatesThreat");

@@ -10,8 +10,6 @@ local UnitIsConnected = UnitIsConnected
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
 local RGB = ThreatPlates.RGB
-local OnThreatTable = ThreatPlates.OnThreatTable
-local GetUniqueNameplateSetting = ThreatPlates.GetUniqueNameplateSetting
 
 local COLOR_TRANSPARENT = RGB(0, 0, 0, 0) -- opaque
 
@@ -19,7 +17,7 @@ local function ShowThreatGlow(unit)
   local db = TidyPlatesThreat.db.profile
 
   if db.ShowThreatGlowOnAttackedUnitsOnly then
-    return OnThreatTable(unit)
+    return Addon:OnThreatTable(unit)
   else
     return true
   end
@@ -36,10 +34,10 @@ function Addon:SetThreatColor(unit)
     local style = unit.style
 
     if style == "unique" then
-      local unique_setting = GetUniqueNameplateSetting(unit)
+      local unique_setting = unit.CustomPlateSettings
       if unique_setting.UseThreatGlow then
         -- set style to tank/dps or normal
-        style = ThreatPlates.GetThreatStyle(unit)
+        style = Addon:GetThreatStyle(unit)
       end
     end
 
@@ -66,32 +64,3 @@ function Addon:SetThreatColor(unit)
 
   return c.r, c.g, c.b, c.a
 end
-
---  elseif style == "tank" then
---    local show_offtank = db.threat.toggle.OffTank
---    if db.ShowThreatGlowOnAttackedUnitsOnly then
---      if OnThreatTable(unit) then
---        local threatSituation = unit.threatSituation
---        if show_offtank and UnitIsOffTanked(unit) then
---          threatSituation = "OFFTANK"
---        end
---        c = db.settings[style]["threatcolor"][threatSituation]
---      end
---    else
---      local threatSituation = unit.threatSituation
---      if show_offtank and UnitIsOffTanked(unit) then
---        threatSituation = "OFFTANK"
---      end
---      c = db.settings[style]["threatcolor"][threatSituation]
---    end
---  elseif style == "dps" or (style == "normal" and unit.isInCombat) then
---    -- problem with this is if threat system is enabled, it does not work for unique - which it should in this case!
---    if db.ShowThreatGlowOnAttackedUnitsOnly then
---      if OnThreatTable(unit) then
---        local threatSituation = unit.threatSituation
---        c = db.settings[style]["threatcolor"][threatSituation]
---      end
---    else
---      local threatSituation = unit.threatSituation
---      c = db.settings[style]["threatcolor"][threatSituation]
---    end
