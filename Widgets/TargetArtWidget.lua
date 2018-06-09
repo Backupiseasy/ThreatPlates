@@ -4,7 +4,7 @@
 local ADDON_NAME, Addon = ...
 local ThreatPlates = Addon.ThreatPlates
 
-local Module = Addon:NewModule("TargetArt")
+local Widget = Addon:NewWidget("TargetArt")
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -39,7 +39,7 @@ local CurrentTarget
 -- Target Art Widget Functions
 ---------------------------------------------------------------------------------------------------
 
-function Module:PLAYER_TARGET_CHANGED()
+function Widget:PLAYER_TARGET_CHANGED()
   if CurrentTarget then
     CurrentTarget:Hide()
     CurrentTarget = nil
@@ -53,10 +53,10 @@ function Module:PLAYER_TARGET_CHANGED()
 end
 
 ---------------------------------------------------------------------------------------------------
--- Module functions for creation and update
+-- Widget functions for creation and update
 ---------------------------------------------------------------------------------------------------
 
-function Module:Create(tp_frame)
+function Widget:Create(tp_frame)
   -- Required Widget Code
   local widget_frame = CreateFrame("Frame", nil, tp_frame)
   widget_frame:Hide()
@@ -76,19 +76,19 @@ function Module:Create(tp_frame)
   return widget_frame
 end
 
-function Module:IsEnabled()
+function Widget:IsEnabled()
   return TidyPlatesThreat.db.profile.targetWidget.ON
 end
 
-function Module:OnEnable()
+function Widget:OnEnable()
   self:RegisterEvent("PLAYER_TARGET_CHANGED")
 end
 
-function Module:EnabledForStyle(style, unit)
+function Widget:EnabledForStyle(style, unit)
   return not (style == "NameOnly" or style == "NameOnly-Unique" or style == "etotem")
 end
 
-function Module:OnUnitAdded(widget_frame, unit)
+function Widget:OnUnitAdded(widget_frame, unit)
   local db = TidyPlatesThreat.db.profile.targetWidget
 
   if db.theme == "default" or db.theme == "squarethin" then
@@ -129,7 +129,7 @@ function Module:OnUnitAdded(widget_frame, unit)
   -- self:OnTargetChanged(widget_frame, unit)
 end
 
---function Module:OnTargetChanged(widget_frame, unit)
+--function Widget:OnTargetChanged(widget_frame, unit)
 --  if UnitIsUnit("target", unit.unitid) then
 --    widget_frame:Show()
 --  else

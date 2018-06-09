@@ -925,7 +925,7 @@ end
 local function CreateClassIconsWidgetOptions()
   local options = { name = L["Class Icon"], order = 30, type = "group",
     args = {
-      Enable = GetEnableEntry(L["Enable Class Icon Widget"], L["This widget shows a class icon on the nameplates of players."], "classWidget", true, function(info, val) SetValuePlain(info, val); Addon:InitializeModule("ClassIcon") end),
+      Enable = GetEnableEntry(L["Enable Class Icon Widget"], L["This widget shows a class icon on the nameplates of players."], "classWidget", true, function(info, val) SetValuePlain(info, val); Addon:InitializeWidget("ClassIcon") end),
       Options = {
         name = L["Show For"],
         type = "group",
@@ -980,7 +980,7 @@ local function CreateComboPointsWidgetOptions()
     type = "group",
     order = 50,
     args = {
-      Enable = GetEnableEntry(L["Enable Combo Points Widget"], L["This widget shows your combo points on your target nameplate."], "comboWidget", true, function(info, val) SetValuePlain(info, val); Addon:InitializeModule("ComboPoints") end),
+      Enable = GetEnableEntry(L["Enable Combo Points Widget"], L["This widget shows your combo points on your target nameplate."], "comboWidget", true, function(info, val) SetValuePlain(info, val); Addon:InitializeWidget("ComboPoints") end),
       Layout = {
         name = L["Layout"],
         order = 10,
@@ -1003,7 +1003,7 @@ local function CreateArenaWidgetOptions()
     type = "group",
     order = 10,
     args = {
-      Enable = GetEnableEntry(L["Enable Arena Widget"], L["This widget shows various icons (orbs and numbers) on enemy nameplates in arenas for easier differentiation."], "arenaWidget", false, function(info, val) SetValuePlain(info, val); Addon:InitializeModule("Arena") end),
+      Enable = GetEnableEntry(L["Enable Arena Widget"], L["This widget shows various icons (orbs and numbers) on enemy nameplates in arenas for easier differentiation."], "arenaWidget", false, function(info, val) SetValuePlain(info, val); Addon:InitializeWidget("Arena") end),
       Colors = {
         name = L["Arena Orb Colors"],
         type = "group",
@@ -1131,7 +1131,7 @@ end
           if db.questWidget.ON or db.questWidget.ShowInHeadlineView then
             SetCVar("showQuestTrackingTooltips", 1)
           end
-          Addon:InitializeModule("Quest")
+          Addon:InitializeWidget("Quest")
         end),
       Visibility = { type = "group",	order = 10,	name = L["Visibility"], inline = true,
 --        disabled = function() return not db.questWidget.ON end,
@@ -1231,7 +1231,7 @@ local function CreateStealthWidgetOptions()
     order = 80,
     type = "group",
     args = {
-      Enable = GetEnableEntry(L["Enable Stealth Widget"], L["This widget shows a stealth icon on nameplates of units that can detect stealth."], "stealthWidget", true, function(info, val) SetValuePlain(info, val); Addon:InitializeModule("Stealth") end),
+      Enable = GetEnableEntry(L["Enable Stealth Widget"], L["This widget shows a stealth icon on nameplates of units that can detect stealth."], "stealthWidget", true, function(info, val) SetValuePlain(info, val); Addon:InitializeWidget("Stealth") end),
       Layout = {
         name = L["Layout"],
         order = 10,
@@ -1251,7 +1251,7 @@ local function CreateTargetArtWidgetOptions()
     type = "group",
     order = 90,
     args = {
-      Enable = GetEnableEntry(L["Enable Target Highlight Widget"], L["This widget highlights the nameplate of your current target by showing a border around the healthbar and by coloring the nameplate's healtbar and/or name with a custom color."], "targetWidget", false, function(info, val) SetValuePlain(info, val); Addon:InitializeModule("TargetArt") end),
+      Enable = GetEnableEntry(L["Enable Target Highlight Widget"], L["This widget highlights the nameplate of your current target by showing a border around the healthbar and by coloring the nameplate's healtbar and/or name with a custom color."], "targetWidget", false, function(info, val) SetValuePlain(info, val); Addon:InitializeWidget("TargetArt") end),
       Texture = {
         name = L["Texture"],
         order = 10,
@@ -1332,7 +1332,7 @@ local function CreateSocialWidgetOptions()
     type = "group",
     order = 70,
     args = {
-      Enable = GetEnableEntry(L["Enable Social Widget"], L["This widget shows icons for friends, guild members, and faction on nameplates."], "socialWidget", true, function(info, val) SetValuePlain(info, val); Addon:InitializeModule("Social") end),
+      Enable = GetEnableEntry(L["Enable Social Widget"], L["This widget shows icons for friends, guild members, and faction on nameplates."], "socialWidget", true, function(info, val) SetValuePlain(info, val); Addon:InitializeWidget("Social") end),
       Friends = {
         name = L["Friends & Guild Members"],
         order = 10,
@@ -1351,7 +1351,7 @@ local function CreateSocialWidgetOptions()
                 type = "toggle",
                 width = "half",
                 desc = L["Shows an icon for friends and guild members next to the nameplate of players."],
-                set = function(info, val) SetValuePlain(info, val); Addon:InitializeModule("Social") end,
+                set = function(info, val) SetValuePlain(info, val); Addon:InitializeWidget("Social") end,
                 arg = { "socialWidget", "ShowFriendIcon" },
                 --disabled = function() return not (db.socialWidget.ON or db.socialWidget.ShowInHeadlineView) end,
               },
@@ -1430,7 +1430,7 @@ local function CreateResourceWidgetOptions()
     type = "group",
     order = 60,
     args = {
-      Enable = GetEnableEntry(L["Enable Resource Widget"], L["This widget shows information about your target's resource on your target nameplate. The resource bar's color is derived from the type of resource automatically."], "ResourceWidget", false, function(info, val) SetValuePlain(info, val); Addon:InitializeModule("Resource") end),
+      Enable = GetEnableEntry(L["Enable Resource Widget"], L["This widget shows information about your target's resource on your target nameplate. The resource bar's color is derived from the type of resource automatically."], "ResourceWidget", false, function(info, val) SetValuePlain(info, val); Addon:InitializeWidget("Resource") end),
       ShowFor = {
         name = L["Show For"],
         order = 10,
@@ -1644,7 +1644,7 @@ local function CreateBossModsWidgetOptions()
     type = "group",
     order = 30,
     args = {
-      Enable = GetEnableEntry(L["Enable Boss Mods Widget"], L["This widget shows auras from boss mods on your nameplates (since patch 7.2, hostile nameplates only in instances and raids)."], "BossModsWidget", true, function(info, val) SetValuePlain(info, val); Addon:InitializeModule("BossMods") end),
+      Enable = GetEnableEntry(L["Enable Boss Mods Widget"], L["This widget shows auras from boss mods on your nameplates (since patch 7.2, hostile nameplates only in instances and raids)."], "BossModsWidget", true, function(info, val) SetValuePlain(info, val); Addon:InitializeWidget("BossMods") end),
       Aura = {
         name = L["Aura Icon"],
         type = "group",
@@ -1703,7 +1703,7 @@ local function CreateAurasWidgetOptions()
     order = 25,
     set = SetValueAuraWidget,
     args = {
-      Enable = GetEnableEntry(L["Enable Auras Widget"], L["This widget shows a unit's auras (buffs and debuffs) on its nameplate."], "AuraWidget", true, function(info, val) SetValuePlain(info, val); Addon:InitializeModule("Auras") end),
+      Enable = GetEnableEntry(L["Enable Auras Widget"], L["This widget shows a unit's auras (buffs and debuffs) on its nameplate."], "AuraWidget", true, function(info, val) SetValuePlain(info, val); Addon:InitializeWidget("Auras") end),
       Filtering = {
         name = L["Filtering"],
         type = "group",
@@ -5092,7 +5092,7 @@ local function CreateOptionsTable()
                       desc = L["This option allows you to control whether textures are hidden or shown on nameplates for different threat levels. Dps/healing uses regular textures, for tanking textures are swapped."],
                       descStyle = "inline",
                       width = "full",
-                      set = function(info, val) SetValuePlain(info, val); Addon:InitializeModule("Threat") end,
+                      set = function(info, val) SetValuePlain(info, val); Addon:InitializeWidget("Threat") end,
                       arg = { "threat", "art", "ON" },
                     },
                   },
@@ -5333,7 +5333,7 @@ local function CreateOptionsTable()
               name = L["Enable"],
               order = 5,
               type = "toggle",
-              set = function(info, val) SetValuePlain(info, val); Addon:InitializeModule("TotemIcon") end,
+              set = function(info, val) SetValuePlain(info, val); Addon:InitializeWidget("TotemIcon") end,
               arg = { "totemWidget", "ON" },
             },
             Size = GetSizeEntryDefault(10, "totemWidget"),
@@ -5486,7 +5486,7 @@ local function CreateOptionsTable()
               order = 10,
               type = "toggle",
               width = "half",
-              set = function(info, val) SetValuePlain(info, val); Addon:InitializeModule("UniqueIcon") end,
+              set = function(info, val) SetValuePlain(info, val); Addon:InitializeWidget("UniqueIcon") end,
               arg = { "uniqueWidget", "ON" }
             },
             Size = GetSizeEntryDefault(10, "uniqueWidget"),

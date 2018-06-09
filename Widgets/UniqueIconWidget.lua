@@ -3,7 +3,7 @@
 ---------------------------------------------------------------------------------------------------
 local ADDON_NAME, Addon = ...
 
-local Module = Addon:NewModule("UniqueIcon")
+local Widget = Addon:NewWidget("UniqueIcon")
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -16,9 +16,9 @@ local CreateFrame = CreateFrame
 local TidyPlatesThreat = TidyPlatesThreat
 
 ---------------------------------------------------------------------------------------------------
--- Module functions for creation and update
+-- Widget functions for creation and update
 ---------------------------------------------------------------------------------------------------
-function Module:Create(tp_frame)
+function Widget:Create(tp_frame)
   -- Required Widget Code
   local widget_frame = CreateFrame("Frame", nil, tp_frame)
   widget_frame:Hide()
@@ -34,22 +34,22 @@ function Module:Create(tp_frame)
   return widget_frame
 end
 
-function Module:IsEnabled()
+function Widget:IsEnabled()
   return TidyPlatesThreat.db.profile.uniqueWidget.ON
 end
 
---function Module:UNIT_NAME_UPDATE()
+--function Widget:UNIT_NAME_UPDATE()
 --end
 --
---function Module:OnEnable()
+--function Widget:OnEnable()
 --  self:RegisterEvent("UNIT_NAME_UPDATE")
 --end
 
-function Module:EnabledForStyle(style, unit)
+function Widget:EnabledForStyle(style, unit)
   return (style == "unique" or style == "NameOnly-Unique" or style == "etotem")
 end
 
-function Module:OnUnitAdded(widget_frame, unit)
+function Widget:OnUnitAdded(widget_frame, unit)
   local db = TidyPlatesThreat.db.profile
 
 	--local unique_setting = db.uniqueSettings.map[unit.name]

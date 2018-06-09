@@ -4,7 +4,7 @@
 local ADDON_NAME, Addon = ...
 local ThreatPlates = Addon.ThreatPlates
 
-local Module = Addon:NewModule("Threat")
+local Widget = Addon:NewWidget("Threat")
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -36,7 +36,7 @@ local REVERSE_THREAT_SITUATION = {
 -- Event handling stuff
 ---------------------------------------------------------------------------------------------------
 
-function Module:UNIT_THREAT_LIST_UPDATE(unitid)
+function Widget:UNIT_THREAT_LIST_UPDATE(unitid)
   if not unitid or unitid == "player" or UnitIsUnit("player", unitid) then return end
 
   local plate = GetNamePlateForUnit(unitid)
@@ -45,15 +45,15 @@ function Module:UNIT_THREAT_LIST_UPDATE(unitid)
   end
 end
 
-function Module:RAID_TARGET_UPDATE()
+function Widget:RAID_TARGET_UPDATE()
   self:UpdateAllFrames()
 end
 
 ---------------------------------------------------------------------------------------------------
--- Module functions for creation and update
+-- Widget functions for creation and update
 ---------------------------------------------------------------------------------------------------
 
-function Module:Create(tp_frame)
+function Widget:Create(tp_frame)
   -- Required Widget Code
   local widget_frame = CreateFrame("Frame", nil, tp_frame)
   widget_frame:Hide()
@@ -71,20 +71,20 @@ function Module:Create(tp_frame)
   return widget_frame
 end
 
-function Module:IsEnabled()
+function Widget:IsEnabled()
   return TidyPlatesThreat.db.profile.threat.art.ON
 end
 
-function Module:OnEnable()
-  Module:RegisterEvent("UNIT_THREAT_LIST_UPDATE")
-  Module:RegisterEvent("RAID_TARGET_UPDATE")
+function Widget:OnEnable()
+  Widget:RegisterEvent("UNIT_THREAT_LIST_UPDATE")
+  Widget:RegisterEvent("RAID_TARGET_UPDATE")
 end
 
-function Module:EnabledForStyle(style, unit)
+function Widget:EnabledForStyle(style, unit)
   return not (unit.type == "PLAYER" or style == "NameOnly" or style == "NameOnly-Unique" or style == "etotem")
 end
 
-function Module:OnUnitAdded(widget_frame, unit)
+function Widget:OnUnitAdded(widget_frame, unit)
   local db = TidyPlatesThreat.db.profile.threat.art
 
   if db.theme == "bar" then
@@ -107,7 +107,7 @@ function Module:OnUnitAdded(widget_frame, unit)
   self:UpdateFrame(widget_frame, unit)
 end
 
-function Module:UpdateFrame(widget_frame, unit)
+function Widget:UpdateFrame(widget_frame, unit)
   local db = TidyPlatesThreat.db.profile.threat
 
   if GetRaidTargetIndex(unit.unitid) and db.marked.art then
@@ -152,6 +152,6 @@ function Module:UpdateFrame(widget_frame, unit)
   widget_frame:Show()
 end
 
---function Module:OnUpdateStyle(widget_frame, unit)
+--function Widget:OnUpdateStyle(widget_frame, unit)
 --  self:UpdateFrame(widget_frame, unit)
 --end

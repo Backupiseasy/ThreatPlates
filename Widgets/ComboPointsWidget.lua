@@ -3,7 +3,7 @@
 ---------------------------------------------------------------------------------------------------
 local ADDON_NAME, Addon = ...
 
-local Module = Addon:NewModule("ComboPoints")
+local Widget = Addon:NewWidget("ComboPoints")
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -112,12 +112,12 @@ local function EventHandler(event, unitid, power_type)
   end
 end
 
-function Module:ACTIVE_TALENT_GROUP_CHANGED(...)
+function Widget:ACTIVE_TALENT_GROUP_CHANGED(...)
   self:OnEnable()
   self:PLAYER_TARGET_CHANGED()
 end
 
-function Module:PLAYER_TARGET_CHANGED()
+function Widget:PLAYER_TARGET_CHANGED()
   if CurrentTarget then
     CurrentTarget:Hide()
     CurrentTarget = nil
@@ -134,10 +134,10 @@ function Module:PLAYER_TARGET_CHANGED()
 end
 
 ---------------------------------------------------------------------------------------------------
--- Module functions for creation and update
+-- Widget functions for creation and update
 ---------------------------------------------------------------------------------------------------
 
-function Module:Create(tp_frame)
+function Widget:Create(tp_frame)
   -- Required Widget Code
   local widget_frame = CreateFrame("Frame", nil, tp_frame)
   widget_frame:Hide()
@@ -153,7 +153,7 @@ function Module:Create(tp_frame)
   return widget_frame
 end
 
-function Module:IsEnabled()
+function Widget:IsEnabled()
   return TidyPlatesThreat.db.profile.comboWidget.ON or TidyPlatesThreat.db.profile.comboWidget.ShowInHeadlineView
 end
 
@@ -165,7 +165,7 @@ end
 -- UNIT_AURA: unitID
 -- UNIT_FLAGS: unitID
 
-function Module:OnEnable()
+function Widget:OnEnable()
   GetResourceOnTarget = GetComboPointFunction()
 
   if GetResourceOnTarget then
@@ -182,7 +182,7 @@ function Module:OnEnable()
   self:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
 end
 
-function Module:EnabledForStyle(style, unit)
+function Widget:EnabledForStyle(style, unit)
   -- Unit can get attackable at some point in time (e.g., after a roleplay sequence
   -- if not UnitCanAttack("player", "target") then return false end
 
@@ -193,7 +193,7 @@ function Module:EnabledForStyle(style, unit)
   end
 end
 
-function Module:OnUnitAdded(widget_frame, unit)
+function Widget:OnUnitAdded(widget_frame, unit)
   local db = TidyPlatesThreat.db.profile.comboWidget
 
   -- Updates based on settings / unit style
@@ -219,7 +219,7 @@ function Module:OnUnitAdded(widget_frame, unit)
   -- self:OnTargetChanged(widget_frame, unit)
 end
 
---function Module:OnUpdateStyle(widget_frame, unit)
+--function Widget:OnUpdateStyle(widget_frame, unit)
 --  local db = TidyPlatesThreat.db.profile.comboWidget
 --  -- Updates based on settings / unit style
 --  if unit.style == "NameOnly" or unit.style == "NameOnly-Unique" then
@@ -229,7 +229,7 @@ end
 --  end
 --end
 
---function Module:OnTargetChanged(widget_frame, unit)
+--function Widget:OnTargetChanged(widget_frame, unit)
 --  if UnitIsUnit("target", unit.unitid) and UnitCanAttack("player", "target") and GetResourceOnTarget then
 --    UpdateComboPoints(widget_frame)
 --    widget_frame:Show()

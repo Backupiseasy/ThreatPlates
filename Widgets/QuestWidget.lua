@@ -4,7 +4,7 @@
 local ADDON_NAME, Addon = ...
 local ThreatPlates = Addon.ThreatPlates
 
-local Module = Addon:NewModule("Quest")
+local Widget = Addon:NewWidget("Quest")
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -177,30 +177,30 @@ ThreatPlates.ShowQuestUnit = ShowQuestUnitHealthbar
 -- end
 
 local function EventHandler(event, ...)
-  Module:UpdateAllFramesAndNameplateColor()
+  Widget:UpdateAllFramesAndNameplateColor()
 end
 
 -- QuestWidget needs to update all nameplates when a quest was completed
---function Module:QUEST_WATCH_UPDATE(quest_index)
---	Module:UpdateAllFrames()
+--function Widget:QUEST_WATCH_UPDATE(quest_index)
+--	Widget:UpdateAllFrames()
 --end
 --
---function Module:QUEST_ACCEPTED(quest_index, ...)
---	Module:UpdateAllFrames()
+--function Widget:QUEST_ACCEPTED(quest_index, ...)
+--	Widget:UpdateAllFrames()
 --end
 --
 
-function Module:PLAYER_REGEN_ENABLED()
+function Widget:PLAYER_REGEN_ENABLED()
   InCombat = false
-  Module:UpdateAllFrames()
+  Widget:UpdateAllFrames()
 end
 
-function Module:PLAYER_REGEN_DISABLED()
+function Widget:PLAYER_REGEN_DISABLED()
   InCombat = true
-  Module:UpdateAllFrames()
+  Widget:UpdateAllFrames()
 end
 
-function Module:UNIT_THREAT_LIST_UPDATE(unitid)
+function Widget:UNIT_THREAT_LIST_UPDATE(unitid)
   if not unitid or unitid == 'player' or UnitIsUnit('player', unitid) then return end
 
   local plate = GetNamePlateForUnit(unitid)
@@ -211,10 +211,10 @@ function Module:UNIT_THREAT_LIST_UPDATE(unitid)
 end
 
 ---------------------------------------------------------------------------------------------------
--- Module functions for creation and update
+-- Widget functions for creation and update
 ---------------------------------------------------------------------------------------------------
 
-function Module:Create(tp_frame)
+function Widget:Create(tp_frame)
 	-- Required Widget Code
 	local widget_frame = CreateFrame("Frame", nil, tp_frame)
 	widget_frame:Hide()
@@ -229,11 +229,11 @@ function Module:Create(tp_frame)
 	return widget_frame
 end
 
-function Module:IsEnabled()
+function Widget:IsEnabled()
 	return TidyPlatesThreat.db.profile.questWidget.ON or TidyPlatesThreat.db.profile.questWidget.ShowInHeadlineView
 end
 
-function Module:OnEnable()
+function Widget:OnEnable()
 	self:RegisterEvent("QUEST_ACCEPTED", EventHandler)
 	self:RegisterEvent("QUEST_WATCH_UPDATE", EventHandler)
 	self:RegisterEvent("PLAYER_ENTERING_WORLD", EventHandler)
@@ -244,7 +244,7 @@ function Module:OnEnable()
   InCombat = InCombatLockdown()
 end
 
-function Module:EnabledForStyle(style, unit)
+function Widget:EnabledForStyle(style, unit)
 	if (style == "NameOnly" or style == "NameOnly-Unique") then
 		return TidyPlatesThreat.db.profile.questWidget.ShowInHeadlineView
 	elseif style ~= "etotem" then
@@ -252,7 +252,7 @@ function Module:EnabledForStyle(style, unit)
 	end
 end
 
-function Module:OnUnitAdded(widget_frame, unit)
+function Widget:OnUnitAdded(widget_frame, unit)
 	local db = TidyPlatesThreat.db.profile.questWidget
 	widget_frame:SetSize(db.scale, db.scale)
 	widget_frame:SetAlpha(db.alpha)
@@ -267,7 +267,7 @@ function Module:OnUnitAdded(widget_frame, unit)
 	self:UpdateFrame(widget_frame, unit)
 end
 
-function Module:UpdateFrame(widget_frame, unit)
+function Widget:UpdateFrame(widget_frame, unit)
   local show, quest_type = IsQuestUnit(unit)
 
   local db = TidyPlatesThreat.db.profile.questWidget
@@ -288,7 +288,7 @@ function Module:UpdateFrame(widget_frame, unit)
   end
 end
 
---function Module:OnUpdateStyle(widget_frame, unit)
+--function Widget:OnUpdateStyle(widget_frame, unit)
 --  local db = TidyPlatesThreat.db.profile.questWidget
 --  if unit.style == "NameOnly" or unit.style == "NameOnly-Unique" then
 --    widget_frame:SetPoint("CENTER", widget_frame:GetParent(), db.x_hv, db.y_hv)

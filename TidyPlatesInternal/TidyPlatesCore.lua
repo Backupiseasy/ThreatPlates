@@ -218,7 +218,7 @@ do
 		visual.spelltext = castbar.Overlay:CreateFontString(nil, "OVERLAY")
 		visual.spelltext:SetFont("Fonts\\FRIZQT__.TTF", 11)
 
-    visual.Highlight = Addon:Module_Mouseover_Create(extended)
+    visual.Highlight = Addon:Element_Mouseover_Create(extended)
 
     -- Set Base Properties
 		visual.raidicon:SetTexture("Interface\\TargetingFrame\\UI-RaidTargetingIcons")
@@ -226,7 +226,7 @@ do
     extended.widgets = {}
 
 		Addon:CreateExtensions(extended)
-    Addon:ModulesOnPlateCreated(extended)
+    Addon:WidgetsOnPlateCreated(extended)
 
     -- Allocate Tables
     extended.style = {}
@@ -264,8 +264,8 @@ do
 
       -- TOOD: optimimze that - call OnUnitAdded only when the plate is initialized the first time for a unit, not if only the style changes
       Addon:UpdateExtensions(extended, unit.unitid, stylename)
-      Addon:ModulesOnUnitAdded(extended, unit)
-      --Addon:ModulesPlateModeChanged(extended, unit)
+      Addon:WidgetsOnUnitAdded(extended, unit)
+      --Addon:widgetsPlateModeChanged(extended, unit)
     end
 	end
 
@@ -336,7 +336,7 @@ do
     OnUpdateCastMidway(plate, unitid)
 
 		Addon:UpdateExtensions(extended, unit.unitid, stylename)
-    -- Addon:ModulesOnUnitAdded(extended, unit) -- already called in ProcessUnitChanges
+    -- Addon:WidgetsOnUnitAdded(extended, unit) -- already called in ProcessUnitChanges
 
     Addon:UpdateFriendleNameplateStyle(nameplate, unitid)
 --    if TidyPlatesThreat.db.profile.ShowFriendlyBlizzardNameplates and UnitReaction(unitid, "player") > 4 then
@@ -369,13 +369,14 @@ do
 
     Addon:UpdateUnitCondition(unit, unitid)
 		ProcessUnitChanges()
+    OnUpdateCastMidway(nameplate, unit.unitid)
 
     -- Fix a bug where the overlay for non-interruptible casts was shown even for interruptible casts when entering combat while the unit was already casting
-    if unit.isCasting then
-      visual.castbar:SetShownInterruptOverlay(unit.spellIsShielded)
-    end
+    --    if unit.isCasting and visual.castbar:IsShown()then
+    --      visual.castbar:SetShownInterruptOverlay(unit.spellIsShielded)
+    --    end
 
-    UpdateIndicator_HealthBar()		-- Just to be on the safe side
+    --UpdateIndicator_HealthBar()		-- Just to be on the safe side
   end
 
   -- OnResetNameplate
@@ -684,6 +685,8 @@ do
       OnStartCasting(plate, unitid, false)
     elseif UnitChannelInfo(unitid) then
       OnStartCasting(plate, unitid, true)
+    else
+      visual.castbar:Hide()
     end
 	end
 
@@ -809,7 +812,7 @@ do
     wipe(frame.unit)
     wipe(frame.unitcache)
 
-    Addon:ModulesOnUnitRemoved(frame)
+    Addon:WidgetsOnUnitRemoved(frame)
 
     -- Remove anything from the function queue
     frame.UpdateMe = false
@@ -890,7 +893,7 @@ do
     if plate and plate.TPFrame.Active then -- check for Active to prevent accessing the personal resource bar
       local frame = plate.TPFrame
       frame.unit.isMouseover = true
-      Addon:Module_Mouseover_Update(frame)
+      Addon:Element_Mouseover_Update(frame)
       UpdateIndicator_CustomScale(frame, frame.unit)
       UpdateIndicator_CustomAlpha(frame, frame.unit)
     end
@@ -1214,7 +1217,7 @@ do
 
       SetTextureGroupObject(object, objectstyle)
     end
-    Addon:Module_Mouseover_Configure(visual.Highlight, style.highlight)
+    Addon:Element_Mouseover_Configure(visual.Highlight, style.highlight)
 
     -- Show certain elements, don't change anything else
 --		for index = 1, #showgroup do

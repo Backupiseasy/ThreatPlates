@@ -213,7 +213,7 @@ function TidyPlatesThreat:ReloadTheme()
   end
 
   Addon:InitializeCustomNameplates()
-  Addon:InitializeAllModules()
+  Addon:InitializeAllWidgets()
 
   ThreatPlatesWidgets.ConfigAuraWidgetFilter()
   ThreatPlatesWidgets.ConfigAuraWidget()

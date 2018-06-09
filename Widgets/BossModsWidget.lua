@@ -4,7 +4,7 @@
 local ADDON_NAME, Addon = ...
 local ThreatPlates = Addon.ThreatPlates
 
-local Module = Addon:NewModule("BossMods")
+local Widget = Addon:NewWidget("BossMods")
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -144,7 +144,7 @@ local function OnUpdateBossModsWidget(widget_frame, elapsed)
   end
   widget_frame.LastUpdate = 0
 
-  --not Module:IsEnabled() or not Module:EnabledForStyle(widget_frame:GetParent().stylename) or
+  --not Widget:IsEnabled() or not Widget:EnabledForStyle(widget_frame:GetParent().stylename) or
   if not EnabledByBossmod then
     widget_frame:Hide()
     return
@@ -261,10 +261,10 @@ end
 
 
 ---------------------------------------------------------------------------------------------------
--- Module functions for creation and update
+-- Widget functions for creation and update
 ---------------------------------------------------------------------------------------------------
 
-function Module:Create(tp_frame)
+function Widget:Create(tp_frame)
   -- Required Widget Code
   local widget_frame = CreateFrame("Frame", nil, tp_frame)
   widget_frame:Hide()
@@ -282,11 +282,11 @@ function Module:Create(tp_frame)
   return widget_frame
 end
 
-function Module:IsEnabled()
+function Widget:IsEnabled()
   return TidyPlatesThreat.db.profile.BossModsWidget.ON or TidyPlatesThreat.db.profile.BossModsWidget.ShowInHeadlineView
 end
 
-function Module:OnEnable()
+function Widget:OnEnable()
   if DBM then
     DBM:RegisterCallback('BossMod_ShowNameplateAura', BossMod_ShowNameplateAura)
     DBM:RegisterCallback('BossMod_DisableFriendlyNameplates', BossMod_DisableFriendlyNameplates)
@@ -295,7 +295,7 @@ function Module:OnEnable()
   end
 end
 
-function Module:OnDisable()
+function Widget:OnDisable()
   if DBM then
     DBM:UnregisterCallback('BossMod_ShowNameplateAura', BossMod_ShowNameplateAura)
     DBM:UnregisterCallback('BossMod_HideNameplateAura', BossMod_HideNameplateAura)
@@ -304,7 +304,7 @@ function Module:OnDisable()
   end
 end
 
-function Module:EnabledForStyle(style, unit)
+function Widget:EnabledForStyle(style, unit)
   if (style == "NameOnly" or style == "NameOnly-Unique") then
     return TidyPlatesThreat.db.profile.BossModsWidget.ShowInHeadlineView
   elseif style ~= "etotem" then
@@ -312,7 +312,7 @@ function Module:EnabledForStyle(style, unit)
   end
 end
 
-function Module:OnUnitAdded(widget_frame, unit)
+function Widget:OnUnitAdded(widget_frame, unit)
   ConfigDB = TidyPlatesThreat.db.profile.BossModsWidget
 
   if not EnabledByBossmod then
@@ -336,7 +336,7 @@ function Module:OnUnitAdded(widget_frame, unit)
   widget_frame:Show()
 end
 
---function Module:OnUpdateStyle(widget_frame, unit)
+--function Widget:OnUpdateStyle(widget_frame, unit)
 --  local db = TidyPlatesThreat.db.profile.BossModsWidget
 --
 --  local offset_x = 0

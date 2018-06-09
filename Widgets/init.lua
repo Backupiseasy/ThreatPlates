@@ -14,20 +14,20 @@ local pairs, next = pairs, next
 
 -- ThreatPlates APIs
 ThreatPlatesWidgets = {}
-local Modules = {}
-local EnabledModules = {}
-local RegisteredEventsByModule = {}
+local Widgets = {}
+local EnabledWidgets = {}
+local RegisteredEventsByWidget = {}
 
 ---------------------------------------------------------------------------------------------------
 -- Event handling stuff
 ---------------------------------------------------------------------------------------------------
 local function EventHandler(self, event, ...)
-  local modules = RegisteredEventsByModule[event]
+  local widgets = RegisteredEventsByWidget[event]
 
-  if modules then
-    for module, func in pairs(modules) do
+  if widgets then
+    for widget, func in pairs(widgets) do
       if func == true then
-        module[event](module, ...)
+        widget[event](widget, ...)
       else
         func(event, ...)
       end
@@ -36,11 +36,11 @@ local function EventHandler(self, event, ...)
 end
 
 local function UnitEventHandler(self, event, ...)
-  local module = self.Module
-  local func = module.RegistedUnitEvents[event]
+  local widget = self.Widget
+  local func = widget.RegistedUnitEvents[event]
 
   if func == true then
-    module[event](module, ...)
+    widget[event](widget, ...)
   else
     func(event, ...)
   end
@@ -49,75 +49,75 @@ end
 local EventHandlerFrame = CreateFrame("Frame", nil, WorldFrame)
 EventHandlerFrame:SetScript("OnEvent", EventHandler)
 
-local function RegisterEvent(module, event, func)
-  if not RegisteredEventsByModule[event] then
-    RegisteredEventsByModule[event] = {}
+local function RegisterEvent(widget, event, func)
+  if not RegisteredEventsByWidget[event] then
+    RegisteredEventsByWidget[event] = {}
   end
 
-  RegisteredEventsByModule[event][module] = func or true
+  RegisteredEventsByWidget[event][widget] = func or true
   EventHandlerFrame:RegisterEvent(event)
 end
 
-local function RegisterUnitEvent(module, event, unitid, func)
-  if not module.EventHandlerFrame then
-    module.EventHandlerFrame = CreateFrame("Frame", nil, WorldFrame)
-    module.EventHandlerFrame.Module = module
-    module.EventHandlerFrame:SetScript("OnEvent", UnitEventHandler)
+local function RegisterUnitEvent(widget, event, unitid, func)
+  if not widget.EventHandlerFrame then
+    widget.EventHandlerFrame = CreateFrame("Frame", nil, WorldFrame)
+    widget.EventHandlerFrame.Widget = widget
+    widget.EventHandlerFrame:SetScript("OnEvent", UnitEventHandler)
   end
 
-  module.RegistedUnitEvents[event] = func or true
-  module.EventHandlerFrame:RegisterUnitEvent(event, unitid)
+  widget.RegistedUnitEvents[event] = func or true
+  widget.EventHandlerFrame:RegisterUnitEvent(event, unitid)
 end
 
-local function UnregisterEvent(module, event)
-  if RegisteredEventsByModule[event] then
-    RegisteredEventsByModule[event][module] = nil
+local function UnregisterEvent(widget, event)
+  if RegisteredEventsByWidget[event] then
+    RegisteredEventsByWidget[event][widget] = nil
 
-    if next(RegisteredEventsByModule[event]) == nil then -- last registered module removed?
+    if next(RegisteredEventsByWidget[event]) == nil then -- last registered widget removed?
       EventHandlerFrame:UnregisterEvent(event)
     end
   end
 
-  if module.EventHandlerFrame then
-    module.EventHandlerFrame:UnregisterEvent(event)
-    module.RegistedUnitEvents[event] = nil
+  if widget.EventHandlerFrame then
+    widget.EventHandlerFrame:UnregisterEvent(event)
+    widget.RegistedUnitEvents[event] = nil
   end
 end
 
-local function UnregisterAllEvents(module)
-  for event, _ in pairs(RegisteredEventsByModule) do
-    UnregisterEvent(module, event)
+local function UnregisterAllEvents(widget)
+  for event, _ in pairs(RegisteredEventsByWidget) do
+    UnregisterEvent(widget, event)
   end
 
-  -- Also remove all remaining registered unit events (that are not in RegisteredEventsByModule)
-  for event, _ in pairs(module.RegistedUnitEvents) do
-    module.EventHandlerFrame:UnregisterEvent(event)
+  -- Also remove all remaining registered unit events (that are not in RegisteredEventsByWidget)
+  for event, _ in pairs(widget.RegistedUnitEvents) do
+    widget.EventHandlerFrame:UnregisterEvent(event)
   end
-  module.RegistedUnitEvents = {}
+  widget.RegistedUnitEvents = {}
 end
 
 ---------------------------------------------------------------------------------------------------
--- Helper functions for modules
+-- Helper functions for widgets
 ---------------------------------------------------------------------------------------------------
 
-local function UpdateAllFrames(module)
+local function UpdateAllFrames(widget)
   for plate, _ in pairs(Addon.PlatesVisible) do
     local tp_frame = plate.TPFrame
 
-    local widget_frame = tp_frame.widgets[module.Name]
+    local widget_frame = tp_frame.widgets[widget.Name]
     if widget_frame.Active then
-      module:UpdateFrame(widget_frame, tp_frame.unit)
+      widget:UpdateFrame(widget_frame, tp_frame.unit)
     end
   end
 end
 
-local function UpdateAllFramesAndNameplateColor(module)
+local function UpdateAllFramesAndNameplateColor(widget)
   for plate, _ in pairs(Addon.PlatesVisible) do
     local tp_frame = plate.TPFrame
 
-    local widget_frame = tp_frame.widgets[module.Name]
+    local widget_frame = tp_frame.widgets[widget.Name]
     if widget_frame.Active then
-      module:UpdateFrame(widget_frame, tp_frame.unit)
+      widget:UpdateFrame(widget_frame, tp_frame.unit)
 
       -- Also update healthbar and name color
       Addon:UpdateIndicatorNameplateColor(tp_frame)
@@ -126,7 +126,7 @@ local function UpdateAllFramesAndNameplateColor(module)
 end
 
 ---------------------------------------------------------------------------------------------------
--- Module creation and handling
+-- Widget creation and handling
 -- Required functions are:
 --   * Create
 --   * IsEnabled
@@ -138,9 +138,9 @@ end
 --   * OnTargetChanged
 --   * UpdateFrame (if UpdateAllFrames is used)
 ---------------------------------------------------------------------------------------------------
-function Addon:NewModule(module_name)
-  local module = {
-    Name = module_name,
+function Addon:NewWidget(widget_name)
+  local widget = {
+    Name = widget_name,
     RegistedUnitEvents = {},
     RegisterEvent = RegisterEvent,
     RegisterUnitEvent = RegisterUnitEvent,
@@ -150,60 +150,60 @@ function Addon:NewModule(module_name)
     UpdateAllFramesAndNameplateColor = UpdateAllFramesAndNameplateColor,
   }
 
-  Modules[module_name] = module
+  Widgets[widget_name] = widget
 
-  return module
+  return widget
 end
 
-function Addon:InitializeModule(module_name)
-  local module = Modules[module_name]
+function Addon:InitializeWidget(widget_name)
+  local widget = Widgets[widget_name]
 
-  if module:IsEnabled() then
-    Addon:EnableModule(module_name)
+  if widget:IsEnabled() then
+    Addon:EnableWidget(widget_name)
   else
-    Addon:DisableModule(module_name)
+    Addon:DisableWidget(widget_name)
   end
 end
 
-function Addon:UpdateSettingsForModule(module_name)
-  local module = Modules[module_name]
+function Addon:UpdateSettingsForWidget(widget_name)
+  local widget = Widgets[widget_name]
 
   for plate, _ in pairs(Addon.PlatesVisible) do
-    module:UpdateSettings(plate.TPFrame.widgets[module_name])
+    widget:UpdateSettings(plate.TPFrame.widgets[widget_name])
   end
 end
 
-function Addon:InitializeAllModules()
-  for module_name, _ in pairs(Modules) do
-    Addon:InitializeModule(module_name)
+function Addon:InitializeAllWidgets()
+  for widget_name, _ in pairs(Widgets) do
+    Addon:InitializeWidget(widget_name)
   end
 end
 
-function Addon:EnableModule(module_name)
-   local module = Modules[module_name]
+function Addon:EnableWidget(widget_name)
+   local widget = Widgets[widget_name]
 
-  EnabledModules[module_name] = module
+  EnabledWidgets[widget_name] = widget
 
 
   -- Nameplates are re-used by WoW, so we cannot iterate just over all visible plates, but must
-  -- add the new module to all existing plates, even if they are currently not visible
+  -- add the new widget to all existing plates, even if they are currently not visible
   for _, tp_frame in pairs(Addon.PlatesCreated) do
     local plate_widgets = tp_frame.widgets
 
-    if not plate_widgets[module_name] then
-      plate_widgets[module_name] = module:Create(tp_frame)
+    if not plate_widgets[widget_name] then
+      plate_widgets[widget_name] = widget:Create(tp_frame)
     end
 
     -- As we are iterating over all plates created, even if no unit is assigned to it currently, we have
     -- to skip plates without units. OnUnitAdded will be called on them anyway
     if tp_frame.Active then
-      local widget_frame = plate_widgets[module_name]
+      local widget_frame = plate_widgets[widget_name]
 
-      widget_frame.Active = tp_frame.stylename ~= "empty" and module:EnabledForStyle(tp_frame.stylename, tp_frame.unit)
+      widget_frame.Active = tp_frame.stylename ~= "empty" and widget:EnabledForStyle(tp_frame.stylename, tp_frame.unit)
       widget_frame.unit = tp_frame.unit
 
       if widget_frame.Active then
-        module:OnUnitAdded(widget_frame, tp_frame.unit)
+        widget:OnUnitAdded(widget_frame, tp_frame.unit)
       else
         widget_frame:Hide()
       end
@@ -212,47 +212,47 @@ function Addon:EnableModule(module_name)
 
   -- As events are registered in OnEnable, this must be done after all widget frames are created, otherwise an registered event
   -- may already occur before the widget frame exists.
-  if module.OnEnable then
-    module:OnEnable()
+  if widget.OnEnable then
+    widget:OnEnable()
   end
 end
 
-function Addon:DisableModule(module_name)
-  local module = EnabledModules[module_name]
+function Addon:DisableWidget(widget_name)
+  local widget = EnabledWidgets[widget_name]
 
-  if module then
-    if module.OnDisable then
-      module:OnDisable()
+  if widget then
+    if widget.OnDisable then
+      widget:OnDisable()
     end
 
-    -- Disable all events of the module
-    module:UnregisterAllEvents()
+    -- Disable all events of the widget
+    widget:UnregisterAllEvents()
 
     -- for all plates - hide the widget frame (alternatively: remove the widget frame)
     for plate, _ in pairs(Addon.PlatesVisible) do
-      plate.TPFrame.widgets[module_name]:Hide()
+      plate.TPFrame.widgets[widget_name]:Hide()
     end
   end
 end
 
-function Addon:ModulesOnPlateCreated(tp_frame)
+function Addon:WidgetsOnPlateCreated(tp_frame)
   local plate_widgets = tp_frame.widgets
 
-  for module_name, module in pairs(EnabledModules) do
-    plate_widgets[module_name] = module:Create(tp_frame)
+  for widget_name, widget in pairs(EnabledWidgets) do
+    plate_widgets[widget_name] = widget:Create(tp_frame)
   end
 end
 
 
-function Addon:ModulesOnUnitRemoved(frame)
+function Addon:WidgetsOnUnitRemoved(frame)
   for _, widget_frame in pairs(frame.widgets) do
     widget_frame.Active = false
     widget_frame:Hide()
   end
 
 --  local plate_widgets = frame.widgets
---  for module_name, _ in pairs(EnabledModules) do
---    local widget_frame = plate_widgets[module_name]
+--  for widget_name, _ in pairs(EnabledWidgets) do
+--    local widget_frame = plate_widgets[widget_name]
 --    widget_frame.Active = false
 --    widget_frame:Hide()
 --  end
@@ -260,39 +260,39 @@ end
 
 -- TODO: Seperate UnitAdded from UpdateSettings/UpdateConfiguration (unit independent stuff)
 --       Maybe event seperate style dependedt stuff (PlateStyleChanged)
-function Addon:ModulesOnUnitAdded(tp_frame, unit)
+function Addon:WidgetsOnUnitAdded(tp_frame, unit)
   local plate_widgets = tp_frame.widgets
 
-  for module_name, module in pairs(EnabledModules) do
-    local widget_frame = plate_widgets[module_name]
+  for widget_name, widget in pairs(EnabledWidgets) do
+    local widget_frame = plate_widgets[widget_name]
 
-    -- I think it could happen that a nameplate was created, then a module is enabled, and afterwise the unit is
-    -- added to the nameplate, i.e., InitializedModules is called.
-    --    if plate_widgets[module_name] == nil then
+    -- I think it could happen that a nameplate was created, then a widget is enabled, and afterwise the unit is
+    -- added to the nameplate, i.e., InitializedWidgets is called.
+    --    if plate_widgets[widget_name] == nil then
     --      TidyPlatesThreat.db.global.Unit = tp_frame
     --    end
-    --    assert (plate_widgets[module_name] ~= nil, "Uninitialized module found: " .. module_name .. " for unit " .. unit.name .. " (" .. tp_frame:GetName() .. ")")
+    --    assert (plate_widgets[widget_name] ~= nil, "Uninitialized widget found: " .. widget_name .. " for unit " .. unit.name .. " (" .. tp_frame:GetName() .. ")")
 
-    widget_frame.Active = tp_frame.stylename ~= "empty" and module:EnabledForStyle(tp_frame.stylename, unit)
+    widget_frame.Active = tp_frame.stylename ~= "empty" and widget:EnabledForStyle(tp_frame.stylename, unit)
     widget_frame.unit = unit
 
     if widget_frame.Active then
-      module:OnUnitAdded(widget_frame, unit)
+      widget:OnUnitAdded(widget_frame, unit)
     else
       widget_frame:Hide()
     end
   end
 end
 
---function Addon:ModulesOnUpdate(tp_frame, unit)
+--function Addon:WidgetsOnUpdate(tp_frame, unit)
 --  local plate_widgets = tp_frame.widgets
 --
---  for module_name, module in pairs(EnabledModules) do
---    local widget_frame = plate_widgets[module_name]
+--  for widget_name, widget in pairs(EnabledWidgets) do
+--    local widget_frame = plate_widgets[widget_name]
 --
 --    if widget_frame.Active then
---      if module.UpdateFrame then
---        module:UpdateFrame(widget_frame, unit)
+--      if widget.UpdateFrame then
+--        widget:UpdateFrame(widget_frame, unit)
 --      end
 --    else
 --      widget_frame:Hide()
@@ -300,37 +300,37 @@ end
 --  end
 --end
 
-function Addon:ModulesPlateModeChanged(tp_frame, unit)
+function Addon:WidgetsPlateModeChanged(tp_frame, unit)
   local plate_widgets = tp_frame.widgets
 
-  for module_name, module in pairs(EnabledModules) do
-    local widget_frame = plate_widgets[module_name]
+  for widget_name, widget in pairs(EnabledWidgets) do
+    local widget_frame = plate_widgets[widget_name]
 
-    widget_frame.Active = tp_frame.stylename ~= "empty" and module:EnabledForStyle(tp_frame.stylename, unit)
+    widget_frame.Active = tp_frame.stylename ~= "empty" and widget:EnabledForStyle(tp_frame.stylename, unit)
 
     if widget_frame.Active then
-      --if module.OnUpdatePlateMode then
-      --  module:OnUpdatePlateMode(plate_widgets[module_name], unit)
+      --if widget.OnUpdatePlateMode then
+      --  widget:OnUpdatePlateMode(plate_widgets[widget_name], unit)
       --end
-      module:OnUnitAdded(widget_frame, unit)
+      widget:OnUnitAdded(widget_frame, unit)
     else
       widget_frame:Hide()
     end
   end
 end
 
---function Addon:ModulesOnTargetChanged(tp_frame)
+--function Addon:WidgetsOnTargetChanged(tp_frame)
 --  local plate_widgets = tp_frame.widgets
 --
---  for module_name, module in pairs(EnabledModules) do
---    local widget_frame = plate_widgets[module_name]
+--  for widget_name, widget in pairs(EnabledWidgets) do
+--    local widget_frame = plate_widgets[widget_name]
 --
 --    if widget_frame.Active then
---      if module.OnTargetChanged then
---        module:OnTargetChanged(plate_widgets[module_name], tp_frame.unit)
+--      if widget.OnTargetChanged then
+--        widget:OnTargetChanged(plate_widgets[widget_name], tp_frame.unit)
 --      end
 --    else
---      plate_widgets[module_name]:Hide()
+--      plate_widgets[widget_name]:Hide()
 --    end
 --  end
 --end

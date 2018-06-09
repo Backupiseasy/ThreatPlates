@@ -3,7 +3,7 @@
 ---------------------------------------------------------------------------------------------------
 local ADDON_NAME, Addon = ...
 
-local Module = Addon:NewModule("ClassIcon")
+local Widget = Addon:NewWidget("ClassIcon")
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -21,10 +21,10 @@ local PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ClassIconWidg
 -- local group
 
 ---------------------------------------------------------------------------------------------------
--- Module functions for creation and update
+-- Widget functions for creation and update
 ---------------------------------------------------------------------------------------------------
 
-function Module:Create(tp_frame)
+function Widget:Create(tp_frame)
   -- Required Widget Code
   local widget_frame = CreateFrame("Frame", nil, tp_frame)
   widget_frame:Hide()
@@ -48,11 +48,11 @@ function Module:Create(tp_frame)
   return widget_frame
 end
 
-function Module:IsEnabled()
+function Widget:IsEnabled()
   return TidyPlatesThreat.db.profile.classWidget.ON or TidyPlatesThreat.db.profile.classWidget.ShowInHeadlineView
 end
 
-function Module:EnabledForStyle(style, unit)
+function Widget:EnabledForStyle(style, unit)
   if unit.type ~= "PLAYER" then return false end
 
   if (style == "NameOnly" or style == "NameOnly-Unique") then
@@ -62,7 +62,7 @@ function Module:EnabledForStyle(style, unit)
   end
 end
 
-function Module:OnUnitAdded(widget_frame, unit)
+function Widget:OnUnitAdded(widget_frame, unit)
   -- Caching maybe for unknown player (no name update yet?)
   -- if db.cacheClass and unit.guid then
   -- 	-- local _, Class = GetPlayerInfoByGUID(unit.guid)
@@ -104,7 +104,7 @@ function Module:OnUnitAdded(widget_frame, unit)
   end
 end
 
---function Module:OnUpdatePlateMode(widget_frame, unit)
+--function Widget:OnUpdatePlateMode(widget_frame, unit)
 --  local db = TidyPlatesThreat.db.profile
 --  if (unit.reaction == "HOSTILE" and db.HostileClassIcon) or (unit.reaction == "FRIENDLY" and db.friendlyClassIcon) then
 --    db = db.classWidget

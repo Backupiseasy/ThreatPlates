@@ -3,7 +3,7 @@
 ---------------------------------------------------------------------------------------------------
 local ADDON_NAME, Addon = ...
 
-local Module = Addon:NewModule("Arena")
+local Widget = Addon:NewWidget("Arena")
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -41,7 +41,7 @@ local function GetArenaOpponents()
   end
 end
 
-function Module:PLAYER_ENTERING_WORLD()
+function Widget:PLAYER_ENTERING_WORLD()
   local _, instance_type = IsInInstance()
   if instance_type == "arena" and not IsInBrawl() then
     InArena = true
@@ -52,10 +52,10 @@ function Module:PLAYER_ENTERING_WORLD()
 end
 
 ---------------------------------------------------------------------------------------------------
--- Module functions for creation and update
+-- Widget functions for creation and update
 ---------------------------------------------------------------------------------------------------
 
-function Module:Create(tp_frame)
+function Widget:Create(tp_frame)
   -- Required Widget Code
   local widget_frame = CreateFrame("Frame", nil, tp_frame)
   widget_frame:Hide()
@@ -77,21 +77,21 @@ function Module:Create(tp_frame)
   return widget_frame
 end
 
-function Module:IsEnabled()
+function Widget:IsEnabled()
   return TidyPlatesThreat.db.profile.arenaWidget.ON
 end
 
-function Module:OnEnable()
+function Widget:OnEnable()
   self:RegisterEvent("PLAYER_ENTERING_WORLD")
-  --Module:RegisterEvent("ARENA_PREP_OPPONENT_SPECIALIZATIONS")
-  --Module:RegisterEvent("ARENA_OPPONENT_UPDATE")
+  --Widget:RegisterEvent("ARENA_PREP_OPPONENT_SPECIALIZATIONS")
+  --Widget:RegisterEvent("ARENA_OPPONENT_UPDATE")
 end
 
-function Module:EnabledForStyle(style, unit)
+function Widget:EnabledForStyle(style, unit)
   return UnitReaction(unit.unitid, "player") < 4 and not (style == "NameOnly" or style == "NameOnly-Unique" or style == "etotem")
 end
 
-function Module:OnUnitAdded(widget_frame, unit)
+function Widget:OnUnitAdded(widget_frame, unit)
   if not InArena then
     widget_frame:Hide()
     return

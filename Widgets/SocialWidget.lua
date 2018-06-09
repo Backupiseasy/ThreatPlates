@@ -4,7 +4,7 @@
 local ADDON_NAME, Addon = ...
 local ThreatPlates = Addon.ThreatPlates
 
-local Module = Addon:NewModule("Social")
+local Widget = Addon:NewWidget("Social")
 
 ------------------------
 -- Social Icon Widget --
@@ -49,7 +49,7 @@ local ListGuildMembersSize, ListFriendsSize, ListBnetFriendsSize = 0, 0, 0
 -- Social Widget Functions
 ---------------------------------------------------------------------------------------------------
 
-function Module:FRIENDLIST_UPDATE()
+function Widget:FRIENDLIST_UPDATE()
 --  local plate = C_NamePlate.GetNamePlateForUnit("target")
 --  if plate then
 --    ListFriendsSize = ListFriendsSize + 1
@@ -79,11 +79,11 @@ function Module:FRIENDLIST_UPDATE()
 --      end
 --    end
 
-    Module:UpdateAllFramesAndNameplateColor()
+    self:UpdateAllFramesAndNameplateColor()
   end
 end
 
-function Module:GUILD_ROSTER_UPDATE()
+function Widget:GUILD_ROSTER_UPDATE()
   local numTotalGuildMembers, _, _ = GetNumGuildMembers()
   if ListGuildMembersSize ~= numTotalGuildMembers then
     -- Only wipe the guild member list if a member went offline
@@ -98,11 +98,11 @@ function Module:GUILD_ROSTER_UPDATE()
 
     ListGuildMembersSize = numTotalGuildMembers
 
-    Module:UpdateAllFramesAndNameplateColor()
+    self:UpdateAllFramesAndNameplateColor()
   end
 end
 
-function Module:BN_CONNECTED()
+function Widget:BN_CONNECTED()
   local _, BnetOnline = BNGetNumFriends()
   if ListBnetFriendsSize ~= BnetOnline then
     -- Only wipe the Bnet friend list if a member went offline
@@ -120,25 +120,25 @@ function Module:BN_CONNECTED()
 
     ListBnetFriendsSize = BnetOnline
 
-    Module:UpdateAllFramesAndNameplateColor()
+    self:UpdateAllFramesAndNameplateColor()
   end
 end
 
-function Module:BN_FRIEND_TOON_ONLINE(toon_id)
+function Widget:BN_FRIEND_TOON_ONLINE(toon_id)
   local _, name = BNGetToonInfo(toon_id)
   ListBnetFriends[name] = ICON_BNET_FRIEND
 
-  Module:UpdateAllFramesAndNameplateColor()
+  self:UpdateAllFramesAndNameplateColor()
 end
 
-function Module:BN_FRIEND_TOON_OFFLINE(toon_id)
+function Widget:BN_FRIEND_TOON_OFFLINE(toon_id)
   local _, name = BNGetToonInfo(toon_id)
   ListBnetFriends[name] = nil
 
-  Module:UpdateAllFramesAndNameplateColor()
+  self:UpdateAllFramesAndNameplateColor()
 end
 
-function Module:UNIT_NAME_UPDATE(unitid)
+function Widget:UNIT_NAME_UPDATE(unitid)
   local plate = GetNamePlateForUnit(unitid)
 
   if plate and plate.TPFrame.Active then
@@ -165,10 +165,10 @@ ThreatPlates.IsFriend = IsFriend
 ThreatPlates.IsGuildmate = IsGuildmate
 
 ---------------------------------------------------------------------------------------------------
--- Module functions for creation and update
+-- Widget functions for creation and update
 ---------------------------------------------------------------------------------------------------
 
-function Module:Create(tp_frame)
+function Widget:Create(tp_frame)
   -- Required Widget Code
   local widget_frame = CreateFrame("Frame", nil, tp_frame)
   widget_frame:Hide()
@@ -185,11 +185,11 @@ function Module:Create(tp_frame)
   return widget_frame
 end
 
-function Module:IsEnabled()
+function Widget:IsEnabled()
   return TidyPlatesThreat.db.profile.socialWidget.ON or TidyPlatesThreat.db.profile.socialWidget.ShowInHeadlineView
 end
 
-function Module:OnEnable()
+function Widget:OnEnable()
   if TidyPlatesThreat.db.profile.socialWidget.ShowFriendIcon then
     self:RegisterEvent("FRIENDLIST_UPDATE")
     self:RegisterEvent("GUILD_ROSTER_UPDATE")
@@ -197,19 +197,19 @@ function Module:OnEnable()
     self:RegisterEvent("BN_FRIEND_TOON_ONLINE")
     self:RegisterEvent("BN_FRIEND_TOON_OFFLINE")
     self:RegisterEvent("UNIT_NAME_UPDATE")
-    --Module:RegisterEvent("BN_FRIEND_ACCOUNT_ONLINE", EventHandler)
-    --Module:RegisterEvent("BN_FRIEND_ACCOUNT_OFFLINE", EventHandler)
-    --Module:RegisterEvent("BN_FRIEND_LIST_SIZE_CHANGED", EventHandler)
+    --Widget:RegisterEvent("BN_FRIEND_ACCOUNT_ONLINE", EventHandler)
+    --Widget:RegisterEvent("BN_FRIEND_ACCOUNT_OFFLINE", EventHandler)
+    --Widget:RegisterEvent("BN_FRIEND_LIST_SIZE_CHANGED", EventHandler)
 
     self:FRIENDLIST_UPDATE()
-    self:GUILD_ROSTER_UPDATE()
     self:BN_CONNECTED()
+    --self:GUILD_ROSTER_UPDATE() -- called automatically by game
   else
     self:UnregisterAllEvents()
   end
 end
 
-function Module:EnabledForStyle(style, unit)
+function Widget:EnabledForStyle(style, unit)
   if unit.type ~= "PLAYER" then return false end
 
   if (style == "NameOnly" or style == "NameOnly-Unique") then
@@ -219,7 +219,7 @@ function Module:EnabledForStyle(style, unit)
   end
 end
 
-function Module:OnUnitAdded(widget_frame, unit)
+function Widget:OnUnitAdded(widget_frame, unit)
   local db = TidyPlatesThreat.db.profile.socialWidget
   widget_frame.Icon:SetSize(db.scale, db.scale)
 
@@ -232,7 +232,7 @@ function Module:OnUnitAdded(widget_frame, unit)
   self:UpdateFrame(widget_frame, unit)
 end
 
-function Module:UpdateFrame(widget_frame, unit)
+function Widget:UpdateFrame(widget_frame, unit)
   -- I will probably expand this to a table with 'friend = true','guild = true', and 'bnet = true' and have 3 textuers show.
   local db = TidyPlatesThreat.db.profile.socialWidget
   local friend_texture = db.ShowFriendIcon and (ListFriends[unit.fullname] or ListBnetFriends[unit.fullname] or ListGuildMembers[unit.fullname])
@@ -289,7 +289,7 @@ function Module:UpdateFrame(widget_frame, unit)
   widget_frame:Show()
 end
 
---function Module:OnUpdateStyle(widget_frame, unit)
+--function Widget:OnUpdateStyle(widget_frame, unit)
 --  local name_style = unit.style == "NameOnly" or unit.style == "NameOnly-Unique"
 --  if widget_frame.Icon:IsShown() then
 --    local db = TidyPlatesThreat.db.profile.socialWidget

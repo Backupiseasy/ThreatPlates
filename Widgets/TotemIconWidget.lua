@@ -3,7 +3,7 @@
 ---------------------------------------------------------------------------------------------------
 local ADDON_NAME, Addon = ...
 
-local Module = Addon:NewModule("TotemIcon")
+local Widget = Addon:NewWidget("TotemIcon")
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -19,10 +19,10 @@ local TOTEMS = Addon.TOTEMS
 local PATH = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\TotemIconWidget\\"
 
 ---------------------------------------------------------------------------------------------------
--- Module functions for creation and update
+-- Widget functions for creation and update
 ---------------------------------------------------------------------------------------------------
 
-function Module:Create(tp_frame)
+function Widget:Create(tp_frame)
 	-- Required Widget Code
 	local widget_frame = CreateFrame("Frame", nil, tp_frame)
 	widget_frame:Hide()
@@ -38,22 +38,22 @@ function Module:Create(tp_frame)
 	return widget_frame
 end
 
-function Module:IsEnabled()
+function Widget:IsEnabled()
 	return TidyPlatesThreat.db.profile.totemWidget.ON
 end
 
---function Module:UNIT_NAME_UPDATE()
+--function Widget:UNIT_NAME_UPDATE()
 --end
 --
---function Module:OnEnable()
+--function Widget:OnEnable()
 --  self:RegisterEvent("UNIT_NAME_UPDATE")
 --end
 
-function Module:EnabledForStyle(style, unit)
+function Widget:EnabledForStyle(style, unit)
 	return (style == "totem" or style == "etotem")
 end
 
-function Module:OnUnitAdded(widget_frame, unit)
+function Widget:OnUnitAdded(widget_frame, unit)
   --local totem_id = TOTEMS[unit.name]
 
   local totem_settings = unit.TotemSettings

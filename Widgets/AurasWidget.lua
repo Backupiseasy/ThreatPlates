@@ -4,7 +4,7 @@
 local ADDON_NAME, Addon = ...
 local ThreatPlates = Addon.ThreatPlates
 
-local Module = Addon:NewModule("Auras")
+local Widget = Addon:NewWidget("Auras")
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -1078,7 +1078,7 @@ local function ConfigAuraWidget()
 	ConfigLastUpdate = GetTime()
 end
 
-function Module:UNIT_AURA(unitid)
+function Widget:UNIT_AURA(unitid)
   if unitid == "player" then return end
 
   local plate = GetNamePlateForUnit(unitid)
@@ -1088,7 +1088,7 @@ function Module:UNIT_AURA(unitid)
   end
 end
 
-function Module:PLAYER_TARGET_CHANGED()
+function Widget:PLAYER_TARGET_CHANGED()
   if not TidyPlatesThreat.db.profile.AuraWidget.ShowTargetOnly then return end
 
   if CurrentTarget then
@@ -1104,10 +1104,10 @@ function Module:PLAYER_TARGET_CHANGED()
 end
 
 ---------------------------------------------------------------------------------------------------
--- Module functions for creation and update
+-- Widget functions for creation and update
 ---------------------------------------------------------------------------------------------------
 
-function Module:Create(tp_frame)
+function Widget:Create(tp_frame)
   -- Required Widget Code
   local widget_frame = CreateFrame("Frame", nil, tp_frame)
   widget_frame:Hide()
@@ -1128,16 +1128,16 @@ function Module:Create(tp_frame)
   return widget_frame
 end
 
-function Module:IsEnabled()
+function Widget:IsEnabled()
   return TidyPlatesThreat.db.profile.AuraWidget.ON or TidyPlatesThreat.db.profile.AuraWidget.ShowInHeadlineView
 end
 
-function Module:OnEnable()
+function Widget:OnEnable()
   self:RegisterEvent("UNIT_AURA")
   self:RegisterEvent("PLAYER_TARGET_CHANGED")
 end
 
-function Module:EnabledForStyle(style, unit)
+function Widget:EnabledForStyle(style, unit)
   if (style == "NameOnly" or style == "NameOnly-Unique") then
     return TidyPlatesThreat.db.profile.AuraWidget.ShowInHeadlineView
   elseif style ~= "etotem" then
@@ -1145,7 +1145,7 @@ function Module:EnabledForStyle(style, unit)
   end
 end
 
-function Module:OnUnitAdded(widget_frame, unit)
+function Widget:OnUnitAdded(widget_frame, unit)
   UpdateAuraWidgetLayout(widget_frame)
   UpdateIconGrid(widget_frame, unit.unitid)
 
@@ -1163,7 +1163,7 @@ function Module:OnUnitAdded(widget_frame, unit)
   --self:OnTargetChanged(widget_frame, unit)
 end
 
---function Module:OnTargetChanged(widget_frame, unit)
+--function Widget:OnTargetChanged(widget_frame, unit)
 --  if TidyPlatesThreat.db.profile.AuraWidget.ShowTargetOnly and not UnitIsUnit("target", unit.unitid) then
 --    widget_frame:Hide()
 --  else

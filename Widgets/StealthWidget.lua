@@ -3,7 +3,7 @@
 ---------------------------------------------------------------------------------------------------
 local ADDON_NAME, Addon = ...
 
-local Module = Addon:NewModule("Stealth")
+local Widget = Addon:NewWidget("Stealth")
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -50,10 +50,10 @@ local DETECTION_AURAS = {
 ---------------------------------------------------------------------------------------------------
 
 ---------------------------------------------------------------------------------------------------
--- Module functions for creation and update
+-- Widget functions for creation and update
 ---------------------------------------------------------------------------------------------------
 
-function Module:Create(tp_frame)
+function Widget:Create(tp_frame)
   -- Required Widget Code
   local widget_frame = CreateFrame("Frame", nil, tp_frame)
   widget_frame:Hide()
@@ -70,11 +70,11 @@ function Module:Create(tp_frame)
   return widget_frame
 end
 
-function Module:IsEnabled()
+function Widget:IsEnabled()
   return TidyPlatesThreat.db.profile.stealthWidget.ON or TidyPlatesThreat.db.profile.stealthWidget.ShowInHeadlineView
 end
 
-function Module:EnabledForStyle(style, unit)
+function Widget:EnabledForStyle(style, unit)
   if UnitReaction(unit.unitid, "player") > 4 or unit.type == "PLAYER" then return false end
 
   if (style == "NameOnly" or style == "NameOnly-Unique") then
@@ -84,7 +84,7 @@ function Module:EnabledForStyle(style, unit)
   end
 end
 
-function Module:OnUnitAdded(widget_frame, unit)
+function Widget:OnUnitAdded(widget_frame, unit)
   -- name, rank, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable,
   -- nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, nameplateShowAll, timeMod, value1, value2, value3 = UnitBuff("unit", index or "name"[, "rank"[, "filter"]])
 
@@ -125,7 +125,7 @@ function Module:OnUnitAdded(widget_frame, unit)
   widget_frame:Show()
 end
 
---function Module:OnUpdateStyle(widget_frame, unit)
+--function Widget:OnUpdateStyle(widget_frame, unit)
 --  local db = TidyPlatesThreat.db.profile.stealthWidget
 --  -- Updates based on settings / unit style
 --  if unit.style == "NameOnly" or unit.style == "NameOnly-Unique" then

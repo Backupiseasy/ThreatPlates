@@ -4,7 +4,7 @@
 local ADDON_NAME, Addon = ...
 local ThreatPlates = Addon.ThreatPlates
 
-local Module = Addon:NewModule("Resource")
+local Widget = Addon:NewWidget("Resource")
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -194,7 +194,7 @@ local function UpdateResourceBar(widget_frame)
 end
 
 -- This event handler only watches for events of unit == "target"
-function Module:UNIT_POWER(unitid, powerType)
+function Widget:UNIT_POWER(unitid, powerType)
   local plate = GetNamePlateForUnit("target")
   if plate and plate.TPFrame.Active then
     local widget_frame = plate.TPFrame.widgets["Resource"]
@@ -204,7 +204,7 @@ function Module:UNIT_POWER(unitid, powerType)
   end
 end
 
-function Module:PLAYER_TARGET_CHANGED()
+function Widget:PLAYER_TARGET_CHANGED()
   if CurrentTarget then
     CurrentTarget:Hide()
     CurrentTarget = nil
@@ -220,10 +220,10 @@ function Module:PLAYER_TARGET_CHANGED()
   end
 end
 ---------------------------------------------------------------------------------------------------
--- Module functions for creation and update
+-- Widget functions for creation and update
 ---------------------------------------------------------------------------------------------------
 
-function Module:Create(tp_frame)
+function Widget:Create(tp_frame)
   -- Required Widget Code
   local widget_frame = CreateFrame("Frame", nil, tp_frame)
   widget_frame:Hide()
@@ -238,21 +238,21 @@ function Module:Create(tp_frame)
   return widget_frame
 end
 
-function Module:IsEnabled()
+function Widget:IsEnabled()
   return TidyPlatesThreat.db.profile.ResourceWidget.ON
 end
 
-function Module:OnEnable()
+function Widget:OnEnable()
   self:RegisterUnitEvent("UNIT_POWER", "target")
   self:RegisterEvent("PLAYER_TARGET_CHANGED")
-  -- Module:RegisterEvent("UNIT_DISPLAYPOWER") -- use this to determine power type changes on units
+  -- Widget:RegisterEvent("UNIT_DISPLAYPOWER") -- use this to determine power type changes on units
 end
 
-function Module:EnabledForStyle(style, unit)
+function Widget:EnabledForStyle(style, unit)
   return not (style == "NameOnly" or style == "NameOnly-Unique" or style == "etotem")
 end
 
-function Module:OnUnitAdded(widget_frame, unit)
+function Widget:OnUnitAdded(widget_frame, unit)
   local db = TidyPlatesThreat.db.profile.ResourceWidget
 
   widget_frame.ShowWidget = false
@@ -313,16 +313,12 @@ function Module:OnUnitAdded(widget_frame, unit)
   --    return
   --  end
 
-  if UnitIsUnit("target", unit.unitid) then
-    UpdateResourceBar(widget_frame)
-  else
-    widget_frame:Hide()
-  end
+  UpdateResourceBar(widget_frame)
 
   --self:OnTargetChanged(widget_frame, unit)
 end
 
---function Module:OnTargetChanged(widget_frame, unit)
+--function Widget:OnTargetChanged(widget_frame, unit)
 --  if UnitIsUnit("target", unit.unitid) and widget_frame.ShowWidget then
 --    UpdateResourceBar(widget_frame)
 --  else

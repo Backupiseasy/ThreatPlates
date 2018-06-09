@@ -4,7 +4,7 @@
 local ADDON_NAME, Addon = ...
 local ThreatPlates = Addon.ThreatPlates
 
-local Module = Addon:NewModule("")
+local Widget = Addon:NewWidget("")
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -25,10 +25,10 @@ end
 
 
 ---------------------------------------------------------------------------------------------------
--- Module functions for creation and update
+-- Widget functions for creation and update
 ---------------------------------------------------------------------------------------------------
 
-function Module:Create(tp_frame)
+function Widget:Create(tp_frame)
   -- Required Widget Code
   local widget_frame = CreateFrame("Frame", nil, tp_frame)
   widget_frame:Hide()
@@ -42,21 +42,21 @@ function Module:Create(tp_frame)
   return widget_frame
 end
 
-function Module:IsEnabled()
+function Widget:IsEnabled()
 end
 
-function Module:OnEnable()
-  Module:RegisterEvent("EVENT", EventHandler)
+function Widget:OnEnable()
+  Widget:RegisterEvent("EVENT", EventHandler)
 end
 
-function Module:EnabledForStyle(style, unit)
+function Widget:EnabledForStyle(style, unit)
 end
 
-function Module:OnUnitAdded(widget_frame, unit)
+function Widget:OnUnitAdded(widget_frame, unit)
 end
 
-function Module:UpdateFrame(widget_frame, unit)
+function Widget:UpdateFrame(widget_frame, unit)
 end
 
-function Module:OnTargetChanged(widget_frame, unit)
+function Widget:OnTargetChanged(widget_frame, unit)
 end

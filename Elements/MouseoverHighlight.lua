@@ -17,7 +17,7 @@ local OFFSET_HIGHLIGHT = 1
 local ART_PATH = ThreatPlates.Art
 
 ---------------------------------------------------------------------------------------------------
--- Module code
+-- Element code
 ---------------------------------------------------------------------------------------------------
 
 local function OnUpdateHighlight(tp_frame)
@@ -33,7 +33,7 @@ local function OnUpdateHighlight(tp_frame)
   end
 end
 
-function Addon:Module_Mouseover_Update(tp_frame)
+function Addon:Element_Mouseover_Update(tp_frame)
   -- Don't show highlight for target units or if it's disabled
   if tp_frame.unit.isTarget or not tp_frame.style.highlight.show then
     return
@@ -50,12 +50,12 @@ function Addon:Module_Mouseover_Update(tp_frame)
 end
 
 -- Update settings that are global for all nameplates
-function Addon:Module_Mouseover_Configure(frame, style_highlight)
+function Addon:Element_Mouseover_Configure(frame, style_highlight)
   -- TODO: Move this to Create as the texture is not changed in Threat Plates
   frame.NameHighlight:SetTexture(style_highlight.texture)
 end
 
-function Addon:Module_Mouseover_Create(parent)
+function Addon:Element_Mouseover_Create(parent)
   local frame = CreateFrame("Frame", nil, parent)
   frame:SetFrameLevel(parent:GetFrameLevel() + 1)
 

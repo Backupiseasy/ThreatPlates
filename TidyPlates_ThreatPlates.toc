@@ -15,7 +15,7 @@ Locales\Locales.xml
 
 Init.lua
 Media.lua
-Modules\Modules.xml
+Elements\Elements.xml
 
 # Integration of TidyPlates for standalone version
 TidyPlatesInternal\TidyPlates.xml
