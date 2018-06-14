@@ -205,8 +205,11 @@ function Widget:UNIT_THREAT_LIST_UPDATE(unitid)
 
   local plate = GetNamePlateForUnit(unitid)
   if plate and plate.TPFrame.Active then
-    self:UpdateFrame(plate.TPFrame.widgets.Quest, plate.TPFrame.unit)
-		Addon:UpdateIndicatorNameplateColor(plate.TPFrame)
+    local widget_frame = plate.TPFrame.widgets.Quest
+    if widget_frame.Active then
+      self:UpdateFrame(widget_frame, plate.TPFrame.unit)
+      Addon:UpdateIndicatorNameplateColor(plate.TPFrame)
+    end
   end
 end
 

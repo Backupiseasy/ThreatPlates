@@ -196,12 +196,7 @@ function TidyPlatesThreat:ReloadTheme()
   t.SetThemes(self)
 
   -- ForceUpdate() is called in SetTheme(), also calls theme.OnActivateTheme,
-  -- With TidyPlates:
-  --if TidyPlates.GetThemeName() == t.THEME_NAME then
-  --  TidyPlates:SetTheme(t.THEME_NAME)
-  --end
   TidyPlatesInternal:SetTheme(t.THEME_NAME)
-
 
   Addon:UpdateConfigurationStatusText()
 

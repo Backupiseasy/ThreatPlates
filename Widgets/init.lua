@@ -243,21 +243,6 @@ function Addon:WidgetsOnPlateCreated(tp_frame)
   end
 end
 
-
-function Addon:WidgetsOnUnitRemoved(frame)
-  for _, widget_frame in pairs(frame.widgets) do
-    widget_frame.Active = false
-    widget_frame:Hide()
-  end
-
---  local plate_widgets = frame.widgets
---  for widget_name, _ in pairs(EnabledWidgets) do
---    local widget_frame = plate_widgets[widget_name]
---    widget_frame.Active = false
---    widget_frame:Hide()
---  end
-end
-
 -- TODO: Seperate UnitAdded from UpdateSettings/UpdateConfiguration (unit independent stuff)
 --       Maybe event seperate style dependedt stuff (PlateStyleChanged)
 function Addon:WidgetsOnUnitAdded(tp_frame, unit)
@@ -280,6 +265,29 @@ function Addon:WidgetsOnUnitAdded(tp_frame, unit)
       widget:OnUnitAdded(widget_frame, unit)
     else
       widget_frame:Hide()
+    end
+  end
+end
+
+function Addon:WidgetsOnUnitRemoved(tp_frame)
+  --  for widget_name, widget_frame in pairs(tp_frame.widgets) do
+  --    widget_frame.Active = false
+  --    widget_frame:Hide()
+  --
+  --    local widget = EnabledWidgets[widget_name]
+  --    if widget.OnUnitRemoved then
+  --      widget:OnUnitRemoved(widget_frame)
+  --    end
+  --  end
+
+  local plate_widgets = tp_frame.widgets
+  for widget_name, widget in pairs(EnabledWidgets) do
+    local widget_frame = plate_widgets[widget_name]
+    widget_frame.Active = false
+    widget_frame:Hide()
+
+    if widget.OnUnitRemoved then
+      widget:OnUnitRemoved(widget_frame)
     end
   end
 end

@@ -241,7 +241,6 @@ local function SetColorAlphaAuraWidget(info, r, g, b, a)
     DB = DB[keys[index]]
   end
   DB[keys[#keys]].r, DB[keys[#keys]].g, DB[keys[#keys]].b, DB[keys[#keys]].a = r, g, b, a
-	ThreatPlatesWidgets.ForceAurasUpdate()
 	TidyPlatesInternal:ForceUpdate()
 end
 
@@ -252,7 +251,6 @@ local function SetColorAuraWidget(info, r, g, b)
 		DB = DB[keys[index]]
 	end
 	DB[keys[#keys]].r, DB[keys[#keys]].g, DB[keys[#keys]].b = r,g,b
-	ThreatPlatesWidgets.ForceAurasUpdate()
   TidyPlatesInternal:ForceUpdate()
 end
 
@@ -1700,15 +1698,171 @@ local function CreateAurasWidgetOptions()
   local options = {
     name = L["Auras"],
     type = "group",
+    childGroups = "tab",
     order = 25,
     set = SetValueAuraWidget,
     args = {
       Enable = GetEnableEntry(L["Enable Auras Widget"], L["This widget shows a unit's auras (buffs and debuffs) on its nameplate."], "AuraWidget", true, function(info, val) SetValuePlain(info, val); Addon:InitializeWidget("Auras") end),
+      Style = {
+        name = L["Appearance"],
+        order = 10,
+        type = "group",
+        inline = false,
+        args = {
+          Style = {
+            name = L["Auren"],
+            order = 10,
+            type = "group",
+            inline = true,
+            args = {
+              TargetOnly = {
+                name = L["Target Only"],
+                type = "toggle",
+                order = 10,
+                desc = L["This will toggle the auras widget to only show for your current target."],
+                arg = { "AuraWidget", "ShowTargetOnly" },
+              },
+              CooldownSpiral = {
+                name = L["Cooldown Spiral"],
+                type = "toggle",
+                order = 20,
+                desc = L["This will toggle the auras widget to show the cooldown spiral on auras."],
+                arg = { "AuraWidget", "ShowCooldownSpiral" },
+              },
+              Stacks = {
+                name = L["Stack Count"],
+                type = "toggle",
+                order = 30,
+                desc = L["Show stack count as overlay on aura icon."],
+                arg = { "AuraWidget", "ShowStackCount" },
+              },
+              Spacer1 = GetSpacerEntry(40),
+              AuraTypeColors = {
+                name = L["Color by Dispel Type"],
+                type = "toggle",
+                order = 50,
+                desc = L["This will color the aura based on its type (poison, disease, magic, curse) - for Icon Mode the icon border is colored, for Bar Mode the bar itself."],
+                arg = { "AuraWidget", "ShowAuraType" },
+              },
+              DefaultBuffColor = {
+                name = L["Buff Color"], type = "color",	order = 54,	arg = {"AuraWidget", "DefaultBuffColor"},	hasAlpha = true,
+                get = GetColorAlpha, set = SetColorAlphaAuraWidget,
+              },
+              DefaultDebuffColor = {
+                name = L["Debuff Color"], type = "color",	order = 56, arg = {"AuraWidget","DefaultDebuffColor"},	hasAlpha = true,
+                get = GetColorAlpha, set = SetColorAlphaAuraWidget,
+              },
+            },
+          },
+          SortOrder = {
+            name = L["Sort Order"], order = 15,	type = "group",	inline = true,
+            args = {
+              NoSorting = {
+                name = L["None"], type = "toggle",	order = 0,	 width = "half",
+                desc = L["Do not sort auras."],
+                get = function(info) return db.AuraWidget.SortOrder == "None" end,
+                set = function(info, value) SetValueAuraWidget(info, "None") end,
+                arg = {"AuraWidget","SortOrder"},
+              },
+              AtoZ = {
+                name = L["A to Z"], type = "toggle",	order = 10, width = "half",
+                desc = L["Sort in ascending alphabetical order."],
+                get = function(info) return db.AuraWidget.SortOrder == "AtoZ" end,
+                set = function(info, value) SetValueAuraWidget(info, "AtoZ") end,
+                arg = {"AuraWidget","SortOrder"},
+              },
+              TimeLeft = {
+                name = L["Time Left"], type = "toggle",	order = 20,	 width = "half",
+                desc = L["Sort by time left in ascending order."],
+                get = function(info) return db.AuraWidget.SortOrder == "TimeLeft" end,
+                set = function(info, value) SetValueAuraWidget(info, "TimeLeft") end,
+                arg = {"AuraWidget","SortOrder"},
+              },
+              Duration = {
+                name = L["Duration"], type = "toggle",	order = 30,	 width = "half",
+                desc = L["Sort by overall duration in ascending order."],
+                get = function(info) return db.AuraWidget.SortOrder == "Duration" end,
+                set = function(info, value) SetValueAuraWidget(info, "Duration") end,
+                arg = {"AuraWidget","SortOrder"},
+              },
+              Creation = {
+                name = L["Creation"], type = "toggle",	order = 40,	 width = "half",
+                desc = L["Show auras in order created with oldest aura first."],
+                get = function(info) return db.AuraWidget.SortOrder == "Creation" end,
+                set = function(info, value) SetValueAuraWidget(info, "Creation") end,
+                arg = {"AuraWidget","SortOrder"},
+              },
+              ReverseOrder = {
+                name = L["Reverse"], type = "toggle",	order = 50,
+                desc = L['Reverse the sort order (e.g., "A to Z" becomes "Z to A").'],
+                arg = { "AuraWidget", "SortReverse" }
+              },
+            },
+          },
+          Layout = {
+            name = L["Layout"],
+            order = 20,
+            type = "group",
+            inline = true,
+            args = {
+              --                    Sizing = {
+              --                      name = L["Sizing"],
+              --                      type = "group",
+              --                      order = 10,
+              --                      inline = true,
+              --                      args = {
+              --                      Scale = GetScaleEntryWidget(L["Scale"], 10, { "AuraWidget", "scale", }),
+              --                      },
+              --                    },
+              Scale = GetScaleEntryDefault(10, { "AuraWidget", "scale", }),
+              Layering = {
+                name = L["Frame Order"],
+                order = 20,
+                type = "select",
+                values = { HEALTHBAR_AURAS = L["Healthbar, Auras"], AURAS_HEALTHBAR = L["Auras, Healthbar"] },
+                arg = { "AuraWidget", "FrameOrder" },
+              },
+              Placement = {
+                name = L["Placement"],
+                type = "group",
+                inline = true,
+                order = 30,
+                args = {
+                  Anchor = { name = L["Anchor Point"], order = 1, type = "select", values = t.ANCHOR_POINT, arg = { "AuraWidget", "anchor" } },
+                  X = { name = L["Offset X"], order = 2, type = "range", min = -120, max = 120, step = 1, arg = { "AuraWidget", "x" }, },
+                  Y = { name = L["Offset Y"], order = 3, type = "range", min = -120, max = 120, step = 1, arg = { "AuraWidget", "y" }, },
+                  Spacer = GetSpacerEntry(5),
+                  AlignmentH = {
+                    name = L["Horizontal Alignment"],
+                    order = 10,
+                    type = "select",
+                    values = { LEFT = L["Left-to-right"], RIGHT = L["Right-to-left"] },
+                    arg = { "AuraWidget", "AlignmentH" }
+                  },
+                  AlignmentV = {
+                    name = L["Vertical Alignment"],
+                    order = 20,
+                    type = "select",
+                    values = { BOTTOM = L["Bottom-to-top"], TOP = L["Top-to-bottom"] },
+                    arg = { "AuraWidget", "AlignmentV" }
+                  },
+                  CenterAuras = {
+                    type = "toggle",
+                    order = 30,
+                    name = L["Center Auras"],
+                    arg = { "AuraWidget", "CenterAuras" },
+                  }
+                },
+              },
+            },
+          },
+        },
+      },
       Filtering = {
         name = L["Filtering"],
         type = "group",
-        inline = true,
-        order = 10,
+        inline = false,
+        order = 20,
         args = {
           Show = {
             name = L["Filter by Unit Reaction"],
@@ -1806,148 +1960,22 @@ local function CreateAurasWidgetOptions()
           },
         },
       },
-      Style = {
-        name = L["Appearance"],
-        order = 13,
-        type = "group",
-        inline = true,
-        args = {
-          TargetOnly = {
-            name = L["Target Only"],
-            type = "toggle",
-            order = 10,
-            desc = L["This will toggle the auras widget to only show for your current target."],
-            arg = { "AuraWidget", "ShowTargetOnly" },
-          },
-          CooldownSpiral = {
-            name = L["Cooldown Spiral"],
-            type = "toggle",
-            order = 20,
-            desc = L["This will toggle the auras widget to show the cooldown spiral on auras."],
-            arg = { "AuraWidget", "ShowCooldownSpiral" },
-          },
-          Stacks = {
-            name = L["Stack Count"],
-            type = "toggle",
-            order = 30,
-            desc = L["Show stack count as overlay on aura icon."],
-            arg = { "AuraWidget", "ShowStackCount" },
-          },
-          AuraTypeColors = {
-            name = L["Color by Dispel Type"],
-            type = "toggle",
-            order = 50,
-            desc = L["This will color the aura based on its type (poison, disease, magic, curse) - for Icon Mode the icon border is colored, for Bar Mode the bar itself."],
-            width = "full",
-            arg = { "AuraWidget", "ShowAuraType" },
-          },
-          DefaultBuffColor = {
-            name = L["Default Buff Color"], type = "color",	order = 54,	arg = {"AuraWidget", "DefaultBuffColor"},	hasAlpha = true,
-            get = GetColorAlpha, set = SetColorAlphaAuraWidget,
-          },
-          DefaultDebuffColor = {
-            name = L["Default Debuff Color"], type = "color",	order = 56, arg = {"AuraWidget","DefaultDebuffColor"},	hasAlpha = true,
-            get = GetColorAlpha, set = SetColorAlphaAuraWidget,
-          },
-        },
-      },
-      SortOrder = {
-        name = L["Sort Order"], order = 15,	type = "group",	inline = true,
-        args = {
-          NoSorting = {
-            name = L["None"], type = "toggle",	order = 0,	 width = "half",
-            desc = L["Do not sort auras."],
-            get = function(info) return db.AuraWidget.SortOrder == "None" end,
-            set = function(info, value) SetValueAuraWidget(info, "None") end,
-            arg = {"AuraWidget","SortOrder"},
-          },
-          AtoZ = {
-            name = L["A to Z"], type = "toggle",	order = 10, width = "half",
-            desc = L["Sort in ascending alphabetical order."],
-            get = function(info) return db.AuraWidget.SortOrder == "AtoZ" end,
-            set = function(info, value) SetValueAuraWidget(info, "AtoZ") end,
-            arg = {"AuraWidget","SortOrder"},
-          },
-          TimeLeft = {
-            name = L["Time Left"], type = "toggle",	order = 20,	 width = "half",
-            desc = L["Sort by time left in ascending order."],
-            get = function(info) return db.AuraWidget.SortOrder == "TimeLeft" end,
-            set = function(info, value) SetValueAuraWidget(info, "TimeLeft") end,
-            arg = {"AuraWidget","SortOrder"},
-          },
-          Duration = {
-            name = L["Duration"], type = "toggle",	order = 30,	 width = "half",
-            desc = L["Sort by overall duration in ascending order."],
-            get = function(info) return db.AuraWidget.SortOrder == "Duration" end,
-            set = function(info, value) SetValueAuraWidget(info, "Duration") end,
-            arg = {"AuraWidget","SortOrder"},
-          },
-          Creation = {
-            name = L["Creation"], type = "toggle",	order = 40,	 width = "half",
-            desc = L["Show auras in order created with oldest aura first."],
-            get = function(info) return db.AuraWidget.SortOrder == "Creation" end,
-            set = function(info, value) SetValueAuraWidget(info, "Creation") end,
-            arg = {"AuraWidget","SortOrder"},
-          },
-          ReverseOrder = {
-            name = L["Reverse Order"], type = "toggle",	order = 50,	desc = L['Reverse the sort order (e.g., "A to Z" becomes "Z to A").'],	arg = { "AuraWidget", "SortReverse" }
-          },
-        },
-      },
-      Layout = {
-        name = L["Layout"],
-        order = 20,
-        type = "group",
-        inline = true,
-        args = {
-          --                    Sizing = {
-          --                      name = L["Sizing"],
-          --                      type = "group",
-          --                      order = 10,
-          --                      inline = true,
-          --                      args = {
-          --                      Scale = GetScaleEntryWidget(L["Scale"], 10, { "AuraWidget", "scale", }),
-          --                      },
-          --                    },
-          Scale = GetScaleEntryDefault(10, { "AuraWidget", "scale", }),
-          Layering = {
-            name = L["Frame Order"],
-            order = 20,
-            type = "select",
-            values = { HEALTHBAR_AURAS = L["Healthbar, Auras"], AURAS_HEALTHBAR = L["Auras, Healthbar"] },
-            arg = { "AuraWidget", "FrameOrder" },
-          },
-          Placement = {
-            name = L["Placement"],
-            type = "group",
-            inline = true,
-            order = 30,
-            args = {
-              Anchor = { name = L["Anchor Point"], order = 1, type = "select", values = t.ANCHOR_POINT, arg = { "AuraWidget", "anchor" } },
-              X = { name = L["Offset X"], order = 2, type = "range", min = -120, max = 120, step = 1, arg = { "AuraWidget", "x" }, },
-              Y = { name = L["Offset Y"], order = 3, type = "range", min = -120, max = 120, step = 1, arg = { "AuraWidget", "y" }, },
-              Spacer = GetSpacerEntry(5),
-              AlignmentH = { name = L["Horizontal Alignment"], order = 6, type = "select", values = { LEFT = L["Left-to-right"], RIGHT = L["Right-to-left"] }, arg = { "AuraWidget", "AlignmentH" } },
-              AlignmentV = { name = L["Vertical Alignment"], order = 7, type = "select", values = { BOTTOM = L["Bottom-to-top"], TOP = L["Top-to-bottom"] }, arg = { "AuraWidget", "AlignmentV" } },
-            },
-          },
-        },
-      },
       ModeIcon = {
         name = L["Icon Mode"],
         order = 30,
         type = "group",
-        inline = true,
+        inline = false,
         args = {
-          Help = { type = "description", order = 0, width = "full", name = L["Show auras as icons in a grid configuration."], },
+          --Help = { type = "description", order = 0, width = "full", name = L["Show auras as icons in a grid configuration."], },
           Enable = {
             type = "toggle",
             order = 10,
-            name = L["Enable"],
+            --name = L["Enable"],
+            name = L["Show auras as icons in a grid configuration."],
             width = "full",
             arg = { "AuraWidget", "ModeBar", "Enabled" },
             set = function(info, val) SetValueAuraWidget(info, false) end,
-            get = function(info) return not GetValue(info, val) end,
+            get = function(info) return not GetValue(info) end,
           },
           Appearance = {
             name = L["Appearance"],
@@ -1984,10 +2012,19 @@ local function CreateAurasWidgetOptions()
         name = L["Bar Mode"],
         order = 40,
         type = "group",
-        inline = true,
+        inline = false,
         args = {
-          Help = { type = "description", order = 0, width = "full", name = L["Show auras as bars (with optional icons)."], },
-          Enable = { type = "toggle", order = 10, name = L["Enable"], width = "full", arg = { "AuraWidget", "ModeBar", "Enabled" }},
+          --Help = { type = "description", order = 0, width = "full", name = L["Show auras as bars (with optional icons)."], },
+          Enable = {
+            type = "toggle",
+            order = 10,
+            --name = L["Enable"],
+            name = L["Show auras as bars (with optional icons)."],
+            width = "full",
+            set = function(info, val) SetValueAuraWidget(info, true) end,
+            get = function(info) return GetValue(info) end,
+            arg = { "AuraWidget", "ModeBar", "Enabled" }
+          },
           Appearance = {
             name = L["Appearance"],
             order = 30,

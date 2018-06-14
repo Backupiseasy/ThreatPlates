@@ -142,12 +142,14 @@ function Widget:UNIT_NAME_UPDATE(unitid)
   local plate = GetNamePlateForUnit(unitid)
 
   if plate and plate.TPFrame.Active then
-    local unit = plate.TPFrame.unit
+    local widget_frame = plate.TPFrame.widgets.Social
+    if widget_frame.Active then
+      local unit = plate.TPFrame.unit
+      local name, realm = UnitName(unitid)
+      unit.fullname = name .. "-" .. (realm or GetRealmName())
 
-    local name, realm = UnitName(unitid)
-    unit.fullname = name .. "-" .. (realm or GetRealmName())
-
-    self:OnUnitAdded(plate.TPFrame.widgets.Social, unit)
+      self:OnUnitAdded(widget_frame, unit)
+    end
   end
 end
 

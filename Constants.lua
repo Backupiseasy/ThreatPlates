@@ -47,6 +47,8 @@ end
 ---------------------------------------------------------------------------------------------------
 -- Global contstants for various stuff
 ---------------------------------------------------------------------------------------------------
+Addon.ON_UPDATE_INTERVAL = 0.25 -- minimum number of seconds between each update of a frame for OnUpdate handlers
+
 Addon.UIScale = 1
 
 Addon.TotemInformation = {} -- basic totem information
@@ -512,6 +514,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
       SortReverse = false,
       AlignmentH = "LEFT",
       AlignmentV = "BOTTOM",
+      CenterAuras = false,
       ModeIcon = {
         Columns = 5,
         Rows = 3,

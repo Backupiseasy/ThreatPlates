@@ -332,6 +332,7 @@ do
 
     Addon:UpdateUnitContext(unit, unitid)
 
+    Addon:UnitStyle_NameDependent(unit)
     ProcessUnitChanges()
     OnUpdateCastMidway(plate, unitid)
 

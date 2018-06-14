@@ -197,8 +197,8 @@ end
 function Widget:UNIT_POWER(unitid, powerType)
   local plate = GetNamePlateForUnit("target")
   if plate and plate.TPFrame.Active then
-    local widget_frame = plate.TPFrame.widgets["Resource"]
-    if widget_frame.ShowWidget then
+    local widget_frame = plate.TPFrame.widgets.Resource
+    if widget_frame.Active and widget_frame.ShowWidget then
       UpdateResourceBar(widget_frame)
     end
   end
