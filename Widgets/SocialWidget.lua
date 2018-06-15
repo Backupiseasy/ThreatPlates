@@ -27,7 +27,7 @@ local Widget = Addon:NewWidget("Social")
 local CreateFrame = CreateFrame
 local GetNumGuildMembers, GetGuildRosterInfo = GetNumGuildMembers, GetGuildRosterInfo
 local GetNumFriends, GetFriendInfo = GetNumFriends, GetFriendInfo
-local BNGetNumFriends, BNGetFriendInfo, BNGetToonInfo = BNGetNumFriends, BNGetFriendInfo, BNGetToonInfo
+local BNGetNumFriends, BNGetFriendInfo, BNGetToonInfo, BNGetFriendInfoByID = BNGetNumFriends, BNGetFriendInfo, BNGetToonInfo, BNGetFriendInfoByID
 local UnitIsPlayer, UnitName, GetRealmName, UnitFactionGroup = UnitIsPlayer, UnitName, GetRealmName, UnitFactionGroup
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 
@@ -138,6 +138,42 @@ function Widget:BN_FRIEND_TOON_OFFLINE(toon_id)
   self:UpdateAllFramesAndNameplateColor()
 end
 
+function Widget:BN_FRIEND_ACCOUNT_ONLINE(presence_id)
+  local bnetIDAccount, accountName, battle_tag, isBattleTag, character_name, bnetIDGameAccount, client = BNGetFriendInfoByID(presence_id)
+
+  -- don't display a the friend if we didn't get the data in time or the are not logged in into WoW
+  --if not accountName or client ~= "BNET_CLIENT_WOW" then	return end
+
+  print ("Social: BN_FRIEND_ACCOUNT_ONLINE -", character_name)
+
+  if (battle_tag) then
+    character_name = BNet_GetValidatedCharacterName(character_name, battle_tag, client) or ""
+    print ("Social: BN_FRIEND_ACCOUNT_ONLINE - Update -", character_name)
+  end
+
+  ListBnetFriends[character_name] = ICON_BNET_FRIEND
+
+  self:UpdateAllFramesAndNameplateColor()
+end
+
+function Widget:BN_FRIEND_ACCOUNT_OFFLINE(presence_id)
+  local bnetIDAccount, accountName, battle_tag, isBattleTag, character_name, bnetIDGameAccount, client = BNGetFriendInfoByID(presence_id)
+
+  -- don't display a the friend if we didn't get the data in time or the are not logged in into WoW
+  --if not accountName or client ~= "BNET_CLIENT_WOW" then	return end
+
+  print ("Social: BN_FRIEND_ACCOUNT_OFFLINE -", character_name)
+
+  if (battle_tag) then
+    character_name = BNet_GetValidatedCharacterName(character_name, battle_tag, client) or ""
+    print ("Social: BN_FRIEND_ACCOUNT_OFFLINE - Update -", character_name)
+  end
+
+  ListBnetFriends[character_name] = nil
+
+  self:UpdateAllFramesAndNameplateColor()
+end
+
 function Widget:UNIT_NAME_UPDATE(unitid)
   local plate = GetNamePlateForUnit(unitid)
 
@@ -196,11 +232,11 @@ function Widget:OnEnable()
     self:RegisterEvent("FRIENDLIST_UPDATE")
     self:RegisterEvent("GUILD_ROSTER_UPDATE")
     self:RegisterEvent("BN_CONNECTED")
-    self:RegisterEvent("BN_FRIEND_TOON_ONLINE")
-    self:RegisterEvent("BN_FRIEND_TOON_OFFLINE")
+    self:RegisterEvent("BN_FRIEND_TOON_ONLINE") -- remove with BfA
+    self:RegisterEvent("BN_FRIEND_TOON_OFFLINE") -- remove with BfA
+    self:RegisterEvent("BN_FRIEND_ACCOUNT_ONLINE")
+    self:RegisterEvent("BN_FRIEND_ACCOUNT_OFFLINE")
     self:RegisterEvent("UNIT_NAME_UPDATE")
-    --Widget:RegisterEvent("BN_FRIEND_ACCOUNT_ONLINE", EventHandler)
-    --Widget:RegisterEvent("BN_FRIEND_ACCOUNT_OFFLINE", EventHandler)
     --Widget:RegisterEvent("BN_FRIEND_LIST_SIZE_CHANGED", EventHandler)
 
     self:FRIENDLIST_UPDATE()

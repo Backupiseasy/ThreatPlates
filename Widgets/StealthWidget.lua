@@ -43,6 +43,9 @@ local DETECTION_AURAS = {
   [232234] = true, -- On High Alert
   [242962] = true, -- One With the Void
   [242963] = true, -- One With the Void
+  -- Battle for Azeroth
+  [230368] = true, -- Detector
+  [248705] = true, -- Detector
 }
 
 ---------------------------------------------------------------------------------------------------
@@ -85,14 +88,14 @@ function Widget:EnabledForStyle(style, unit)
 end
 
 function Widget:OnUnitAdded(widget_frame, unit)
-  -- name, rank, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable,
-  -- nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, nameplateShowAll, timeMod, value1, value2, value3 = UnitBuff("unit", index or "name"[, "rank"[, "filter"]])
+  -- name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, nameplateShowAll, timeMod, value1, value2, value3 = UnitBuff("unit", index or "name"[, "rank"[, "filter"]])
 
   local i = 1
   local found = false
   -- or check for (?=: Invisibility and Stealth Detection)
   -- TODO: for oder do-while (what#s more efficient) with break
   repeat
+    -- BfA: local name, _, _, _, _, _, _, _, _, spell_id = UnitBuff(unit.unitid, i)
     local name, _, _, _, _, _, _, _, _, _, spell_id = UnitBuff(unit.unitid, i)
     if DETECTION_AURAS[spell_id] then
       found = true

@@ -35,7 +35,7 @@ local UnitIsTapDenied = UnitIsTapDenied
 local GetTime = GetTime
 local UnitChannelInfo, UnitCastingInfo = UnitChannelInfo, UnitCastingInfo
 local UnitPlayerControlled = UnitPlayerControlled
-local GetCVar, Lerp = GetCVar, Lerp
+local GetCVar, Lerp, CombatLogGetCurrentEventInfo = GetCVar, Lerp, CombatLogGetCurrentEventInfo
 
 -- Internal Data
 local PlatesCreated, PlatesVisible, PlatesByUnit, PlatesByGUID = {}, {}, {}, {}
@@ -623,10 +623,12 @@ do
       return
     end
 
+    -- BfA: local name, text, texture, startTime, endTime, isTradeSkill, castID, notInterruptible, spellID
     local name, subText, text, texture, startTime, endTime, isTradeSkill, castID, notInterruptible
 
     if channeled then
-			name, subText, text, texture, startTime, endTime, isTradeSkill, notInterruptible = UnitChannelInfo(unitid)
+      -- BfA: name, text, texture, startTime, endTime, isTradeSkill, notInterruptible, spellID = UnitChannelInfo(unitid)
+      name, subText, text, texture, startTime, endTime, isTradeSkill, notInterruptible = UnitChannelInfo(unitid)
       castbar.IsChanneling = true
       castbar.IsCasting = false
 
@@ -635,6 +637,7 @@ do
       castbar:SetMinMaxValues(0, castbar.MaxValue)
       castbar:SetValue(castbar.Value)
 		else
+      -- BfA: name, text, texture, startTime, endTime, isTradeSkill, castID, notInterruptible = UnitCastingInfo(unitid)
 			name, subText, text, texture, startTime, endTime, isTradeSkill, castID, notInterruptible = UnitCastingInfo(unitid)
       castbar.IsCasting = true
       castbar.IsChanneling = false
@@ -965,10 +968,12 @@ do
 		end
 	end
 
+  -- BfA: function CoreEvents:COMBAT_LOG_EVENT_UNFILTERED)
   function CoreEvents:COMBAT_LOG_EVENT_UNFILTERED(...)
+    -- BfA: local timeStamp, event, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags = CombatLogGetCurrentEventInfo()
     local timeStamp, event, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags  = ...
 
-    if (event == "SPELL_INTERRUPT") then
+    if event == "SPELL_INTERRUPT" then
       local plate = PlatesByGUID[destGUID]
 
       if plate and plate.TPFrame.Active then

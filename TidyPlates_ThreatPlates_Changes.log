@@ -1,4 +1,31 @@
 ------------------------------------------------------
+9.0.0-Alpha4
+------------------------------------------------------
+* Added some new spells to the stealth widget.
+* Fixed a bug in the quest widget not being updated after a quest update.
+
+------------------------------------------------------
+9.0.0-Alpha3
+------------------------------------------------------
+* Fixed a bug with the absorb glow sometimes being shown in headline view (without healthbar/absorbbar).
+* Merged changes from 8.7.1 into BfA version 9.0.0-Alpha3.
+
+------------------------------------------------------
+9.0.0-Alpha2
+------------------------------------------------------
+* Reduced number of custom nameplates available as clicking on "Custom Nameplates" results in the game crashing otherwise.
+* Updated shaman totems - removed voodoo totem.
+* Fixed bugs with saving the icon for a custom nameplate when a spell ID was used to define the icon.
+* Fixed a bug with custom nameplates which were only loaded after the options dialog was opened.
+* Again, fixed several bugs caused by changes to the WoW API and events (Stealth Widget).
+
+------------------------------------------------------
+9.0.0-Alpha1
+------------------------------------------------------
+* Fixed several Lua errors caused by changes to the WoW API and events.
+* Updated TOC version for Battle for Azeroth.
+
+------------------------------------------------------
 8.8.0-Alpha1
 ------------------------------------------------------
 * Added the option to Auras widget to center the displayed auras.

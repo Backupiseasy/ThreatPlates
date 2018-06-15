@@ -104,6 +104,7 @@ end
 
 -- This event handler only watches for events of unit == "player"
 local function EventHandler(event, unitid, power_type)
+  -- BfA:   if event == "UNIT_POWER_UPDATE" and not WATCH_POWER_TYPES[power_type] then return end
   if event == "UNIT_POWER" and not WATCH_POWER_TYPES[power_type] then return end
 
   local plate = GetNamePlateForUnit("target")
@@ -159,17 +160,21 @@ end
 
 -- EVENTS:
 -- UNIT_COMBO_POINTS: -- combo points also fire UNIT_POWER
+-- BfA: UNIT_POWER_UPDATE: "unitID", "powerType"  -- CHI, COMBO_POINTS + Remove UNIT_POWER
 -- UNIT_POWER: "unitID", "powerType"  -- CHI, COMBO_POINTS
 -- UNIT_DISPLAYPOWER: Fired when the unit's mana stype is changed. Occurs when a druid shapeshifts as well as in certain other cases.
 --   unitID
 -- UNIT_AURA: unitID
 -- UNIT_FLAGS: unitID
+-- BfA: UNIT_POWER_FREQUENT: unitToken, powerToken
 
 function Widget:OnEnable()
   GetResourceOnTarget = GetComboPointFunction()
 
   if GetResourceOnTarget then
+    -- BfA: self:RegisterUnitEvent("UNIT_POWER_UPDATE", "player", EventHandler) + remove UNIT_POWER
     self:RegisterUnitEvent("UNIT_POWER", "player", EventHandler)
+    -- self:RegisterUnitEvent("UNIT_POWER_FREQUENT", "player", EventHandler)
     self:RegisterUnitEvent("UNIT_DISPLAYPOWER", "player", EventHandler)
     self:RegisterUnitEvent("UNIT_FLAGS", "player", EventHandler)
     self:RegisterEvent("PLAYER_TARGET_CHANGED")
