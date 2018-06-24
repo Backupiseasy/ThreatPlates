@@ -115,6 +115,38 @@ function TidyPlatesThreat:ChatCommand(input)
 
 		TP.DEBUG_PRINT_UNIT(plate.TPFrame.unit, true)
 		return
+	elseif input == "visible" then
+		local blizzard_plates = {}
+
+		print ("Nameplates via C_NamePlate.GetNamePlates:")
+		for _, plate in pairs(C_NamePlate.GetNamePlates()) do
+			local tp_frame = plate.TPFrame
+			print (" ", plate:GetName(), ": TPFrame =", tp_frame ~= nil)
+			print ("  Plates Created:", Addon.PlatesCreated[plate] ~= nil)
+			print ("  Plates Visible:", Addon.PlatesVisible[plate] ~= nil)
+			blizzard_plates[plate] = true
+		end
+
+		print ("Nameplates via PlatesCreated:")
+		for plate, unitid in pairs(Addon.PlatesCreated) do
+			local tp_frame = plate.TPFrame
+			print (" ", plate:GetName())
+			if not blizzard_plates[plate] then
+				print ("    Unknown Created Plate for Blizzard")
+			end
+		end
+
+		print ("Nameplates via PlatesVisible:")
+		for plate, unitid in pairs(Addon.PlatesVisible) do
+			local tp_frame = plate.TPFrame
+			print (" ", plate:GetName())
+			if not blizzard_plates[plate] then
+				print ("    Unknown Visible Plate for Blizzard")
+			end
+		end
+
+
+		return
 	end
 
 	TidyPlatesThreat:OpenOptions()

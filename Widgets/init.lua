@@ -13,10 +13,11 @@ local pairs, next = pairs, next
 -- WoW APIs
 
 -- ThreatPlates APIs
-ThreatPlatesWidgets = {}
 local Widgets = {}
 local EnabledWidgets = {}
 local RegisteredEventsByWidget = {}
+
+Addon.Widgets = Widgets
 
 ---------------------------------------------------------------------------------------------------
 -- Event handling stuff

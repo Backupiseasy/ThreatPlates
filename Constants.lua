@@ -488,35 +488,59 @@ ThreatPlates.DEFAULT_SETTINGS = {
       y = 16,
       x_hv = 0,
       y_hv = 16,
-      scale = 1,
+      scale = 1, -- removed in 8.8
       FrameOrder = "HEALTHBAR_AURAS",
       anchor = "TOP",
       ShowInHeadlineView = false,
-      ShowEnemy = true,
-      ShowFriendly = true,
-      FilterMode = "blacklistMine",
-      FilterByType = {
-        [1] = true,
-        [2] = true,
-        [3] = true,
-        [4] = true,
-        [5] = true,
-        [6] = true
-      },
-      ShowDebuffsOnFriendly = false,
-      FilterBySpell = {},
+      -- ShowEnemy = true, -- removed in 8.8
+      -- ShowFriendly = true, -- removed in 8.8
+      -- FilterMode = "blacklistMine",
+      --ShowDebuffsOnFriendly = false, -- removed in 8.8
+      -- FilterBySpell = {}, -- removed in 8.8
       ShowTargetOnly = false,
       ShowCooldownSpiral = false,
       ShowStackCount = true,
       ShowAuraType = true,
       DefaultBuffColor = RGB(102, 0, 51, 1),
       DefaultDebuffColor = 	RGB(204, 0, 0, 1),
-      -- DebuffTypeColor["none"]	= { r = 0.80, g = 0, b = 0 };
       SortOrder = "TimeLeft",
       SortReverse = false,
       AlignmentH = "LEFT",
       AlignmentV = "BOTTOM",
-      CenterAuras = false,
+      CenterAuras = true,
+      SwitchScaleByReaction = true,
+      FlashWhenExpiring = false,
+      FlashTime = 5,
+      Debuffs = {
+        ShowEnemy = true,
+        ShowFriendly = true,
+        Scale = 1.0,
+        FilterMode = "blacklistMine",
+        FilterBySpell = {},
+        ShowDebuffsOnFriendly = false, -- change it
+        FilterByType = {
+          --[1] = true, -- Debuffs, removed in 8.8
+          [1] = true,
+          [2] = true,
+          [3] = true,
+          [4] = true,
+          --[6] = true, -- Buffs, removed in 8.8
+        },
+      },
+      Buffs = {
+        ShowEnemy = true,
+        ShowFriendly = true,
+        Scale = 1.0,
+        FilterMode = "blacklistMine",
+        FilterBySpell = {},
+      },
+      CrowdControl = {
+        ShowEnemy = true,
+        ShowFriendly = true,
+        Scale = 2.0,
+        FilterMode = "blacklistMine",
+        FilterBySpell = {},
+      },
       ModeIcon = {
         Columns = 5,
         Rows = 3,
@@ -707,17 +731,20 @@ ThreatPlates.DEFAULT_SETTINGS = {
       FontColor = RGB(255, 255, 255),
       -- TODO: add font flags like for custom text
     },
-    TestWidget = {
-      ON = true,
-      BarWidth = 120,
-      BarHeight = 10,
-      BarTexture = "Smooth",
-      BorderTexture = "TP_Border_1px",
-      BorderBackground = "ThreatPlatesEmpty",
-      EdgeSize = 5,
-      Offset = 5,
-      Inset = 5,
-      Scale = 1,
+--    TestWidget = {
+--      ON = true,
+--      BarWidth = 120,
+--      BarHeight = 10,
+--      BarTexture = "Smooth",
+--      BorderTexture = "TP_Border_1px",
+--      BorderBackground = "ThreatPlatesEmpty",
+--      EdgeSize = 5,
+--      Offset = 5,
+--      Inset = 5,
+--      Scale = 1,
+--    },
+    PersonalNameplate = {
+      HideBuffs = false,
     },
     totemSettings = GetDefaultTotemSettings(),
     uniqueSettings = {

@@ -735,14 +735,21 @@ do
       UnitFrame:Hide()
     end
 
+    local db = TidyPlatesThreat.db.profile
+
     -- Skip the personal resource bar of the player character, don't unhook scripts as nameplates, even the personal
     -- resource bar, get re-used
     if UnitIsUnit(UnitFrame.unit, "player") then -- or: ns.PlayerNameplate == GetNamePlateForUnit(UnitFrame.unit)
+      if db.PersonalNameplate.HideBuffs then
+        UnitFrame.BuffFrame:Hide()
+--      else
+--        UnitFrame.BuffFrame:Show()
+      end
       return
     end
 
     -- Hide ThreatPlates nameplates if Blizzard nameplates should be shown for friendly units
-    UnitFrame:SetShown(TidyPlatesThreat.db.profile.ShowFriendlyBlizzardNameplates and UnitReaction(UnitFrame.unit, "player") > 4)
+    UnitFrame:SetShown(db.ShowFriendlyBlizzardNameplates and UnitReaction(UnitFrame.unit, "player") > 4)
   end
 
   -- Frame: self = plate

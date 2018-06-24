@@ -1,6 +1,6 @@
 ﻿## Interface: 70300
 ## Title: Threat Plates
-## Version: 8.8.0-Alpha1
+## Version: 8.8.0-Alpha2
 ## Notes: Threat-reactive nameplates.
 ## Notes-deDE: Bedrohungsreaktive Namensplaketten.
 ## Author: Suicidal Katt, Blacksalsify

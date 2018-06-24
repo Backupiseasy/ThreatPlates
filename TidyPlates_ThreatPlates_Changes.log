@@ -26,6 +26,13 @@
 * Updated TOC version for Battle for Azeroth.
 
 ------------------------------------------------------
+8.8.0-Alpha2
+------------------------------------------------------
+* Reworked the Auras widget so that buffs, debuffs, and crowd control related auras can be shown independently from each other [Comment #704, Issue #183, Comment #725, PM].
+* Added an option to Auras widget to show a flash animation for auras that are expiring [Comment #546, Issue #181].
+* Added on option to hide buffs on the personal nameplate [Issue #190].
+
+------------------------------------------------------
 8.8.0-Alpha1
 ------------------------------------------------------
 * Added the option to Auras widget to center the displayed auras.

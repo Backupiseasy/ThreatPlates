@@ -320,7 +320,7 @@ end
 
 local function SetValueAuraWidget(info, val)
   SetValuePlain(info, val)
-  ThreatPlatesWidgets.ConfigAuraWidget()
+  Addon.Widgets.Auras:UpdateSettings()
   TidyPlatesInternal:ForceUpdate()
 end
 
@@ -1710,9 +1710,9 @@ local function CreateAurasWidgetOptions()
         inline = false,
         args = {
           Style = {
-            name = L["Auren"],
-            order = 10,
             type = "group",
+            order = 10,
+            name = L["Auren"],
             inline = true,
             args = {
               TargetOnly = {
@@ -1755,7 +1755,10 @@ local function CreateAurasWidgetOptions()
             },
           },
           SortOrder = {
-            name = L["Sort Order"], order = 15,	type = "group",	inline = true,
+            type = "group",
+            order = 20,
+            name = L["Sort Order"],
+            inline = true,
             args = {
               NoSorting = {
                 name = L["None"], type = "toggle",	order = 0,	 width = "half",
@@ -1800,55 +1803,63 @@ local function CreateAurasWidgetOptions()
             },
           },
           Layout = {
-            name = L["Layout"],
-            order = 20,
             type = "group",
+            order = 30,
+            name = L["Layout"],
             inline = true,
             args = {
-              --                    Sizing = {
-              --                      name = L["Sizing"],
-              --                      type = "group",
-              --                      order = 10,
-              --                      inline = true,
-              --                      args = {
-              --                      Scale = GetScaleEntryWidget(L["Scale"], 10, { "AuraWidget", "scale", }),
-              --                      },
-              --                    },
-              Scale = GetScaleEntryDefault(10, { "AuraWidget", "scale", }),
               Layering = {
                 name = L["Frame Order"],
-                order = 20,
+                order = 10,
                 type = "select",
                 values = { HEALTHBAR_AURAS = L["Healthbar, Auras"], AURAS_HEALTHBAR = L["Auras, Healthbar"] },
                 arg = { "AuraWidget", "FrameOrder" },
+              },
+              Scale = {
+                name = L["Scale"],
+                type = "group",
+                inline = true,
+                order = 20,
+                args = {
+                  ScaleDebuffs = GetScaleEntry(L["Debuffs"], 10, { "AuraWidget", "Debuffs", "Scale", }),
+                  ScaleBuffs = GetScaleEntry(L["Buffs"], 20, { "AuraWidget", "Buffs", "Scale", }),
+                  ScaleCrowdControl = GetScaleEntry(L["CrowdControl"], 30, { "AuraWidget", "CrowdControl", "Scale", }),
+                  Reverse = {
+                    type = "toggle",
+                    order = 50,
+                    name = L["Swap By Reaction"],
+                    desc = L["Switch scale values for debuffs and buffs for friendly units."],
+                    arg = { "AuraWidget", "SwitchScaleByReaction" }
+                  }
+                },
               },
               Placement = {
                 name = L["Placement"],
                 type = "group",
                 inline = true,
-                order = 30,
+                order = 50,
                 args = {
-                  Anchor = { name = L["Anchor Point"], order = 1, type = "select", values = t.ANCHOR_POINT, arg = { "AuraWidget", "anchor" } },
-                  X = { name = L["Offset X"], order = 2, type = "range", min = -120, max = 120, step = 1, arg = { "AuraWidget", "x" }, },
-                  Y = { name = L["Offset Y"], order = 3, type = "range", min = -120, max = 120, step = 1, arg = { "AuraWidget", "y" }, },
-                  Spacer = GetSpacerEntry(5),
+                  Anchor = { name = L["Anchor Point"], order = 20, type = "select", values = t.ANCHOR_POINT, arg = { "AuraWidget", "anchor" } },
+                  X = { name = L["Offset X"], order = 30, type = "range", min = -120, max = 120, step = 1, arg = { "AuraWidget", "x" }, },
+                  Y = { name = L["Offset Y"], order = 40, type = "range", min = -120, max = 120, step = 1, arg = { "AuraWidget", "y" }, },
+                  Spacer = GetSpacerEntry(50),
                   AlignmentH = {
                     name = L["Horizontal Alignment"],
-                    order = 10,
+                    order = 60,
                     type = "select",
                     values = { LEFT = L["Left-to-right"], RIGHT = L["Right-to-left"] },
                     arg = { "AuraWidget", "AlignmentH" }
                   },
                   AlignmentV = {
                     name = L["Vertical Alignment"],
-                    order = 20,
+                    order = 70,
                     type = "select",
                     values = { BOTTOM = L["Bottom-to-top"], TOP = L["Top-to-bottom"] },
                     arg = { "AuraWidget", "AlignmentV" }
                   },
                   CenterAuras = {
                     type = "toggle",
-                    order = 30,
+                    order = 80,
                     name = L["Center Auras"],
                     arg = { "AuraWidget", "CenterAuras" },
                   }
@@ -1856,58 +1867,81 @@ local function CreateAurasWidgetOptions()
               },
             },
           },
+          SpecialEffects = {
+            type = "group",
+            order = 40,
+            name = L["Special Effects"],
+            inline = true,
+            args = {
+              Flash = {
+                type = "toggle",
+                order = 10,
+                name = L["Flash When Expiring"],
+                arg = { "AuraWidget", "FlashWhenExpiring" },
+              },
+              FlashTime = {
+                type = "range",
+                order = 20,
+                name = L["Flash Time"],
+                step = 1,
+                softMin = 1,
+                softMax = 20,
+                isPercent = false,
+                arg = { "AuraWidget", "FlashTime" },
+                disabled = function() return not db.AuraWidget.FlashWhenExpiring end
+              },
+            },
+          },
         },
       },
-      Filtering = {
-        name = L["Filtering"],
+      Debuffs = {
+        name = L["Debuffs"],
         type = "group",
-        inline = false,
         order = 20,
+        inline = false,
         args = {
           Show = {
-            name = L["Filter by Unit Reaction"],
+            name = L["Unit Reaction"],
             type = "group",
             order = 10,
             inline = true,
             args = {
               ShowFriendly = {
-                name = L["Show Friendly"],
+                name = L["Friendly Units"],
                 order = 1,
                 type = "toggle",
-                arg = { "AuraWidget", "ShowFriendly" },
+                arg = { "AuraWidget", "Debuffs", "ShowFriendly" },
               },
               ShowEnemy = {
-                name = L["Show Enemy"],
+                name = L["Enemy Units"],
                 order = 2,
                 type = "toggle",
-                arg = { "AuraWidget", "ShowEnemy" }
+                arg = { "AuraWidget", "Debuffs", "ShowEnemy" }
               }
             },
           },
-          Display = {
-            name = L["Filter by Dispel Type"],
+          DispelType = {
+            name = L["Dispel Type"],
             type = "multiselect",
-            order = 20,
+            order = 30,
             values = {
-              [1] = "Buff",
-              [2] = "Curse",
-              [3] = "Disease",
-              [4] = "Magic",
-              [5] = "Poison",
-              [6] = "Debuff"
+              [1] = "Curse",
+              [2] = "Disease",
+              [3] = "Magic",
+              [4] = "Poison",
             },
             get = function(info, k)
-              return db.AuraWidget.FilterByType[k]
+              return db.AuraWidget.Debuffs.FilterByType[k]
             end,
             set = function(info, k, v)
-              db.AuraWidget.FilterByType[k] = v
-              ThreatPlatesWidgets.ForceAurasUpdate()
+              db.AuraWidget.Debuffs.FilterByType[k] = v
+              Addon.Widgets.Auras:UpdateSettings()
               TidyPlatesInternal:ForceUpdate()
             end,
           },
           SpecialFilter = {
             name = L["Blizzard Filter Options"],
-            order = 30,
+            order = 40,
             type = "group",
             inline = true,
             args = {
@@ -1919,18 +1953,11 @@ local function CreateAurasWidgetOptions()
                 desc = L["Show all debuffs on friendly units that you can cure."],
                 arg = { "AuraWidget", "ShowDebuffsOnFriendly" },
               },
-              --                            ShowBuffsOnBosses = {
-              --                              name = L["Show Buffs on Bosses"],
-              --                              order = 20,
-              --                              type = "toggle",
-              --                              width = "double",
-              --                              arg = { "AuraWidget", "ShowDebuffsOnFriendly" },
-              --                            },
             },
           },
-          Filtering = {
+          SpellFilter = {
             name = L["Filter by Spell"],
-            order = 40,
+            order = 50,
             type = "group",
             inline = true,
             args = {
@@ -1940,7 +1967,12 @@ local function CreateAurasWidgetOptions()
                 order = 1,
                 width = "double",
                 values = t.DebuffMode,
-                arg = { "AuraWidget", "FilterMode" },
+                set = function(info, val)
+                  db.AuraWidget.Debuffs.FilterMode = val
+                  Addon.Widgets.Auras:ParseSpellFilters()
+                  TidyPlatesInternal:ForceUpdate()
+                end,
+                arg = { "AuraWidget", "Debuffs", "FilterMode" },
               },
               DebuffList = {
                 name = L["Filtered Auras"],
@@ -1948,11 +1980,137 @@ local function CreateAurasWidgetOptions()
                 order = 2,
                 dialogControl = "MultiLineEditBox",
                 width = "full",
-                get = function(info) return t.TTS(db.AuraWidget.FilterBySpell) end,
+                get = function(info) return t.TTS(db.AuraWidget.Debuffs.FilterBySpell) end,
                 set = function(info, v)
                   local table = { strsplit("\n", v) };
-                  db.AuraWidget.FilterBySpell = table
-                  ThreatPlatesWidgets.ConfigAuraWidgetFilter()
+                  db.AuraWidget.Debuffs.FilterBySpell = table
+                  Addon.Widgets.Auras:ParseSpellFilters()
+                  TidyPlatesInternal:ForceUpdate()
+                end,
+              },
+            },
+          },
+        },
+      },
+      Buffs = {
+        name = L["Buffs"],
+        type = "group",
+        order = 30,
+        inline = false,
+        args = {
+          Show = {
+            name = L["Unit Reaction"],
+            type = "group",
+            order = 10,
+            inline = true,
+            args = {
+              ShowFriendly = {
+                name = L["Friendly Units"],
+                order = 1,
+                type = "toggle",
+                arg = { "AuraWidget", "Buffs", "ShowFriendly" },
+              },
+              ShowEnemy = {
+                name = L["Enemy Units"],
+                order = 2,
+                type = "toggle",
+                arg = { "AuraWidget", "Buffs", "ShowEnemy" }
+              }
+            },
+          },
+          SpellFilter = {
+            name = L["Filter by Spell"],
+            order = 50,
+            type = "group",
+            inline = true,
+            args = {
+              Mode = {
+                name = L["Mode"],
+                type = "select",
+                order = 1,
+                width = "double",
+                values = t.DebuffMode,
+                set = function(info, val)
+                  db.AuraWidget.Buffs.FilterMode = val
+                  Addon.Widgets.Auras:ParseSpellFilters()
+                  TidyPlatesInternal:ForceUpdate()
+                end,
+                arg = { "AuraWidget", "Buffs", "FilterMode" },
+              },
+              DebuffList = {
+                name = L["Filtered Auras"],
+                type = "input",
+                order = 2,
+                dialogControl = "MultiLineEditBox",
+                width = "full",
+                get = function(info) return t.TTS(db.AuraWidget.Buffs.FilterBySpell) end,
+                set = function(info, v)
+                  local table = { strsplit("\n", v) };
+                  db.AuraWidget.Buffs.FilterBySpell = table
+                  Addon.Widgets.Auras:ParseSpellFilters()
+                  TidyPlatesInternal:ForceUpdate()
+                end,
+              },
+            },
+          },
+        },
+      },
+      CrowdControl = {
+        name = L["Crowd Control"],
+        type = "group",
+        order = 40,
+        inline = false,
+        args = {
+          Show = {
+            name = L["Unit Reaction"],
+            type = "group",
+            order = 10,
+            inline = true,
+            args = {
+              ShowFriendly = {
+                name = L["Friendly Units"],
+                order = 1,
+                type = "toggle",
+                arg = { "AuraWidget", "CrowdControl", "ShowFriendly" },
+              },
+              ShowEnemy = {
+                name = L["Enemy Units"],
+                order = 2,
+                type = "toggle",
+                arg = { "AuraWidget", "CrowdControl", "ShowEnemy" }
+              }
+            },
+          },
+          SpellFilter = {
+            name = L["Filter by Spell"],
+            order = 50,
+            type = "group",
+            inline = true,
+            args = {
+              Mode = {
+                name = L["Mode"],
+                type = "select",
+                order = 1,
+                width = "double",
+                values = t.DebuffMode,
+                set = function(info, val)
+                  db.AuraWidget.CrowdControl.FilterMode = val
+                  Addon.Widgets.Auras:ParseSpellFilters()
+                  TidyPlatesInternal:ForceUpdate()
+                end,
+                arg = { "AuraWidget", "CrowdControl", "FilterMode" },
+              },
+              DebuffList = {
+                name = L["Filtered Auras"],
+                type = "input",
+                order = 2,
+                dialogControl = "MultiLineEditBox",
+                width = "full",
+                get = function(info) return t.TTS(db.AuraWidget.CrowdControl.FilterBySpell) end,
+                set = function(info, v)
+                  local table = { strsplit("\n", v) };
+                  db.AuraWidget.CrowdControl.FilterBySpell = table
+                  Addon.Widgets.Auras:ParseSpellFilters()
                   TidyPlatesInternal:ForceUpdate()
                 end,
               },
@@ -1962,7 +2120,7 @@ local function CreateAurasWidgetOptions()
       },
       ModeIcon = {
         name = L["Icon Mode"],
-        order = 30,
+        order = 50,
         type = "group",
         inline = false,
         args = {
@@ -2010,7 +2168,7 @@ local function CreateAurasWidgetOptions()
       },
       ModeBar = {
         name = L["Bar Mode"],
-        order = 40,
+        order = 60,
         type = "group",
         inline = false,
         args = {
@@ -2507,6 +2665,28 @@ local function CreateBlizzardSettings()
             isPercent = true,
             desc = L["The inset from the bottom (in screen percent) that large nameplates are clamped to."],
             arg = "nameplateLargeBottomInset",
+          },
+        },
+      },
+      PersonalNameplate = {
+        name = L["Personal Nameplate"],
+        order = 45,
+        type = "group",
+        inline = true,
+        args = {
+          HideBuffs = {
+            type = "toggle",
+            order = 10,
+            name = L["Hide Buffs"],
+            set = function(info, val)
+              db.PersonalNameplate.HideBuffs = val
+              local plate = C_NamePlate.GetNamePlateForUnit("player")
+              if plate and plate:IsShown() then
+                plate.UnitFrame.BuffFrame:SetShown(not val)
+              end
+            end,
+            get = GetValue,
+            arg = { "PersonalNameplate", "HideBuffs"},
           },
         },
       },

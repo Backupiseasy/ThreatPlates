@@ -15,7 +15,6 @@ local CreateFrame = CreateFrame
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
 
-local TOTEMS = Addon.TOTEMS
 local PATH = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\TotemIconWidget\\"
 
 ---------------------------------------------------------------------------------------------------
