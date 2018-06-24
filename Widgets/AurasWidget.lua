@@ -59,19 +59,36 @@ local GRID_LAYOUT = {
   },
 }
 
+local LOC_CHARM = 1
+local LOC_FEAR = 2
+local LOC_POLYMORPH = 3
+local LOC_STUN = 4
+local LOC_INCAPACITATE = 5
+local LOC_SLEEP = 6
+local LOC_DISORIENT = 7
+local LOC_BANISH = 8
+local LOC_HORROR = 9
+
+local PC_SNARE = 50
+local PC_ROOT = 51
+local PC_DAZE = 52
+local PC_GRIP = 53
+
+local CC_SILENCE = 101
+
 local CROWD_CONTROL_SPELLS = {
   -- Druid
-  [33786] = "Cyclone",            -- (PvP Talent, Restoration)
-  [209753] = "Cyclone",           -- (PvP Talent, Balance)
-  [339] = "Entangling Roots",
-  [99] = "Incapacitating Roar",
-  [22570] = "Maim",
-  [102359] = "Mass Entanglement", -- (Talent)
-  [5211] = "Mighty Bash",         -- (Talent)
-  [163505] = "Rake",
-  [78675] = "Solar Beam",
-  [61391] = "Typhoon",            -- (Talent)
-  [106839] = "Skull Bash",
+  [33786] = LOC_BANISH,           -- Cyclone (PvP Talent, Restoration)
+  [209753] = LOC_BANISH,          -- Cyclone (PvP Talent, Balance)
+  [339] = PC_ROOT,                -- Entangling Roots
+  [99] = LOC_INCAPACITATE,        -- Incapacitating Roar
+  [203123] = LOC_STUN,            -- Maim
+  [102359] = PC_ROOT,             -- Mass Entanglement (Talent)
+  [5211] = LOC_STUN,              -- Mighty Bash (Talent)
+  [163505] = LOC_STUN,            -- Rake
+  [78675] = CC_SILENCE,           -- Solar Beam
+  [61391] = PC_DAZE,              -- Typhoon (Talent)
+  [106839] = CC_SILENCE,          -- Skull Bash
 
   -- Death Knight
   -- Demon Hunter
@@ -228,6 +245,7 @@ local function UpdateWidgetTimeBar(frame, expiration, duration)
   elseif expiration == 0 then
     frame.TimeText:SetText("")
     frame.Statusbar:SetValue(0)
+    Animations:StopFlash(frame)
   else
     local timeleft = expiration - GetTime()
 
@@ -461,7 +479,7 @@ local function UpdateIconAuraInformation(frame) -- texture, duration, expiration
   frame:Show()
 end
 
-local function UpdateUnitAuras(frame, unitid, effect, aura_filter, BLIZZARD_ShowAll)
+local function UpdateUnitAuras(frame, unitid, effect, aura_filter, BLIZZARD_ShowAll, show_cc)
   local aura_frame_list = frame.AuraFrames
   if aura_filter == "NONE" then
     -- If widget_frame is hidden here, calling PolledHideIn should not be necessary - Test!
@@ -514,11 +532,11 @@ local function UpdateUnitAuras(frame, unitid, effect, aura_filter, BLIZZARD_Show
     aura.unit = unitid
     aura.effect = effect
     aura.ShowAll = aura.ShowAll or BLIZZARD_ShowAll --(unitReaction == AURA_TARGET_FRIENDLY and aura_filter == "|RAID")
-    aura.CrowdControl = (effect == "HARMFUL" and CROWD_CONTROL_SPELLS[aura.spellid])
+    aura.CrowdControl = (show_cc and CROWD_CONTROL_SPELLS[aura.spellid])
 
---    if aura.CrowdControl then
+--    if aura.CrowdControl or CROWD_CONTROL_SPELLS[aura.spellid] then
 --      -- Crowd Control Spell
---      print ("CROWD CONTROL: ", aura.name)
+--      print ("CROWD CONTROL: ", aura.name, show_cc)
 --    end
 
     -- Store Order/Priority
@@ -559,7 +577,7 @@ local function UpdateUnitAuras(frame, unitid, effect, aura_filter, BLIZZARD_Show
     max_auras_no = CONFIG_AuraLimit
   end
 
-  local aura_cc_count = 1
+  local aura_count_cc = 1
   if aura_count > 0 then
     if sort_order ~= "None" then
       if sort_order == "AtoZ" then
@@ -577,22 +595,22 @@ local function UpdateUnitAuras(frame, unitid, effect, aura_filter, BLIZZARD_Show
     end
 
     aura_count = 1
-    aura_cc_count = 1
+    aura_count_cc = 1
+    local aura_frame_list_cc = frame:GetParent().CrowdControl.AuraFrames
+
     for index = index_start, index_end, index_step do
       local aura = UnitAuraList[index]
 
       if aura.spellid and aura.expiration then
         local aura_frame
         if aura.CrowdControl then
-          aura_frame = frame:GetParent().CrowdControl.AuraFrames[aura_cc_count]
-          aura_cc_count = aura_cc_count + 1
+          aura_frame = aura_frame_list_cc[aura_count_cc]
+          aura_count_cc = aura_count_cc + 1
         else
           aura_frame = aura_frame_list[aura_count]
           aura_count = aura_count + 1
         end
 
---        local aura_frame = aura_frame_list[aura_count]
---        aura_count = aura_count + 1
 
         local aura_info = aura_frame.AuraInfo
         aura_info.name = aura.name
@@ -608,19 +626,19 @@ local function UpdateUnitAuras(frame, unitid, effect, aura_filter, BLIZZARD_Show
     end
 
   end
-  aura_cc_count = aura_cc_count - 1
+  aura_count_cc = aura_count_cc - 1
 
-  frame.ActiveAuras = max_auras_no - aura_cc_count
+  frame.ActiveAuras = max_auras_no - aura_count_cc
   -- Clear extra slots
   for i = max_auras_no + 1, CONFIG_AuraLimit do
     aura_frame_list[i]:Hide()
   end
 
   if effect == "HARMFUL" then
-    frame:GetParent().CrowdControl.ActiveAuras = aura_cc_count
+    frame:GetParent().CrowdControl.ActiveAuras = aura_count_cc
     --print ("CC ActiveAuras: ", frame:GetParent().CrowdControl.ActiveAuras)
 
-    for i = aura_cc_count + 1, CONFIG_AuraLimit do
+    for i = aura_count_cc + 1, CONFIG_AuraLimit do
       frame:GetParent().CrowdControl.AuraFrames[i]:Hide()
     end
   end
@@ -633,7 +651,10 @@ local function UpdatePositionAuraGrid(frame, y_offset)
   if auras_no == 0 then
     frame:Hide()
   else
-    if not CONFIG_ModeBar then
+    if CONFIG_ModeBar then
+      frame:SetPoint(ANCHOR_POINT_SETPOINT[db.anchor][2], frame:GetParent():GetParent(), ANCHOR_POINT_SETPOINT[db.anchor][1], db.x, db.y + y_offset)
+      frame:SetHeight(ceil(frame.ActiveAuras / CONFIG_GridNoCols) * (CONFIG_AuraHeight + CONFIG_AuraWidgetOffset))
+    else
       if db.CenterAuras then
         if auras_no > CONFIG_GridNoCols then
           auras_no = CONFIG_GridNoCols
@@ -665,12 +686,12 @@ local function UpdateIconGrid(widget_frame, unitid)
 
   local BLIZZARD_ShowAll = false
 
-  local aura_filter2 = (UnitReaction(unitid, "player") > 4 and AuraFilter.Friendly) or AuraFilter.Enemy
+  --local aura_filter2 = (UnitReaction(unitid, "player") > 4 and AuraFilter.Friendly) or AuraFilter.Enemy
 
   local aura_filter_buffs, aura_filter_debuffs = "NONE", "NONE"
   local unit_is_friendly = UnitReaction(unitid, "player") > 4
   if unit_is_friendly then -- friendly or better
-    if db.Debuffs.ShowFriendly then
+    if db.Debuffs.ShowFriendly or db.CrowdControl.ShowFriendly then
       aura_filter_debuffs = AuraFilter.Friendly.Debuffs
       BLIZZARD_ShowAll = (AuraFilter.Friendly.Debuffs == '|RAID')
     end
@@ -679,7 +700,9 @@ local function UpdateIconGrid(widget_frame, unitid)
       BLIZZARD_ShowAll = (AuraFilter.Friendly.Buffs == '|RAID')
     end
   else
-    if db.Debuffs.ShowEnemy then
+    -- aura_filter_debuffs = ((db.Debuffs.ShowEnemy or db.CrowdControl.ShowEnemy) and AuraFilter.Enemy.Debuffs) or "NONE"
+    -- aura_filter_buffs = (db.Buffs.ShowEnemy and AuraFilter.Enemy.Buffs) or "NONE"
+    if db.Debuffs.ShowEnemy or db.CrowdControl.ShowEnemy then
       aura_filter_debuffs = AuraFilter.Enemy.Debuffs
     end
     if db.Buffs.ShowEnemy then
@@ -687,8 +710,10 @@ local function UpdateIconGrid(widget_frame, unitid)
     end
   end
 
-  UpdateUnitAuras(widget_frame.Debuffs, unitid, "HARMFUL", aura_filter_debuffs, BLIZZARD_ShowAll)
-  UpdateUnitAuras(widget_frame.Buffs, unitid, "HELPFUL", aura_filter_buffs, BLIZZARD_ShowAll)
+  local show_CC = (unit_is_friendly and db.CrowdControl.ShowFriendly) or (not unit_is_friendly and db.CrowdControl.ShowEnemy)
+
+  UpdateUnitAuras(widget_frame.Debuffs, unitid, "HARMFUL", aura_filter_debuffs, BLIZZARD_ShowAll, show_CC)
+  UpdateUnitAuras(widget_frame.Buffs, unitid, "HELPFUL", aura_filter_buffs, BLIZZARD_ShowAll, false)
 
   --print ("CCs: ", widget_frame.CrowdControl.ActiveAuras)
 
@@ -758,7 +783,7 @@ local function UpdateIconGrid(widget_frame, unitid)
     y_offset = (height_auras_one / scale_auras_two) + (db.y / scale_auras_two) - db.y
     UpdatePositionAuraGrid(frame_auras_two, y_offset)
 
-    if (unit_is_friendly and db.CrowdControl.ShowFriendly) or (not unit_is_friendly and db.CrowdControl.ShowEnemy) then
+    if show_CC then
       y_offset = ((auras_two_active and (frame_auras_two:GetHeight() * scale_auras_two / scale_cc)) or 0)
       y_offset = y_offset + (height_auras_one / scale_cc) + (db.y / scale_cc) - db.y
       UpdatePositionAuraGrid(widget_frame.CrowdControl, y_offset)
@@ -1172,11 +1197,28 @@ local function ParseFilter(aura_type, db)
       AuraFilter.Enemy.Debuffs = "|PLAYER"
       AuraFilter.Friendly.Debuffs = "|PLAYER"
     else
+      AuraFilter.Enemy.Debuffs = "NONE"
+      AuraFilter.Friendly.Debuffs = "NONE"
+    end
+  else -- aura_type == "CrowdControl"
+    if db.FilterMode == "BLIZZARD" then
+      -- Do not override more generall debuff filter
+      if AuraFilter.Enemy.Debuffs == "|PLAYER" then
+        -- Switch to most general filter
+        AuraFilter.Enemy.Debuffs = ""
+        AuraFilter.Friendly.Debuffs = ""
+      end
+    elseif string.find(db.FilterMode, "Mine") and only_player_auras then
+      -- Do not override more generall debuff filter
+      if AuraFilter.Enemy.Debuffs == "|INCLUDE_NAME_PLATE_ONLY" then
+        -- Switch to most general filter
+        AuraFilter.Enemy.Debuffs = ""
+        AuraFilter.Friendly.Debuffs = ""
+      end
+    else
       AuraFilter.Enemy.Debuffs = ""
       AuraFilter.Friendly.Debuffs = ""
     end
-  else
-    --
   end
   return filter
 end
@@ -1259,16 +1301,16 @@ end
 
 local function UnitAuraEventHandler(widget_frame, event, unitid)
   --print ("AurasWidget: UNIT_AURA: ", event, unitid)
-  if unitid ~= widget_frame.unit.unitid then
-    print ("AurasWidget: UNIT_AURA for", unitid)
-    print ("AurasWidget: Plate Active:", Addon.PlatesByUnit[unitid].Active)
-    print ("AurasWidget: Plate Unit:", Addon.PlatesByUnit[unitid].TPFrame.unit.unitid)
-    print ("AurasWidget: Plate WidgetFrame:", Addon.PlatesByUnit[unitid].TPFrame.widgets.Auras, Addon.PlatesByUnit[unitid].TPFrame.widgets.Auras.Active, Addon.PlatesByUnit[unitid].TPFrame.widgets.Auras == widget_frame)
-    print ("Unit:")
-    print ("Unit Name:", UnitName(unitid))
-    print ("Unit is Player:", UnitIsPlayer(unitid))
-    return
-  end
+--  if unitid ~= widget_frame.unit.unitid then
+--    print ("AurasWidget: UNIT_AURA for", unitid)
+--    print ("AurasWidget: Plate Active:", Addon.PlatesByUnit[unitid].Active)
+--    print ("AurasWidget: Plate Unit:", Addon.PlatesByUnit[unitid].TPFrame.unit.unitid)
+--    print ("AurasWidget: Plate WidgetFrame:", Addon.PlatesByUnit[unitid].TPFrame.widgets.Auras, Addon.PlatesByUnit[unitid].TPFrame.widgets.Auras.Active, Addon.PlatesByUnit[unitid].TPFrame.widgets.Auras == widget_frame)
+--    print ("Unit:")
+--    print ("Unit Name:", UnitName(unitid))
+--    print ("Unit is Player:", UnitIsPlayer(unitid))
+--    return
+--  end
 
   --  -- Skip player (cause TP does not handle player nameplate) and target (as it is updated via it's actual unitid anyway)
   --  if unitid == "player" or unitid == "target" then return end

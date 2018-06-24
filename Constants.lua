@@ -529,16 +529,16 @@ ThreatPlates.DEFAULT_SETTINGS = {
       },
       Buffs = {
         ShowEnemy = true,
-        ShowFriendly = true,
+        ShowFriendly = false,
         Scale = 1.0,
-        FilterMode = "blacklistMine",
+        FilterMode = "Blizzard",
         FilterBySpell = {},
       },
       CrowdControl = {
         ShowEnemy = true,
         ShowFriendly = true,
         Scale = 2.0,
-        FilterMode = "blacklistMine",
+        FilterMode = "blacklist",
         FilterBySpell = {},
       },
       ModeIcon = {
