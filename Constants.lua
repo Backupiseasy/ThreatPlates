@@ -531,7 +531,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
         ShowEnemy = true,
         ShowFriendly = false,
         Scale = 1.0,
-        FilterMode = "Blizzard",
+        FilterMode = "BLIZZARD",
         FilterBySpell = {},
       },
       CrowdControl = {

@@ -362,7 +362,7 @@ local PRIORITY_FUNCTIONS = {
   Creation = function(aura) return aura.expiration - aura.duration end,
 }
 
-local function AuraFilterFunction(db, aura)
+local function FilterAuraBySpell(db, aura)
   -- only show aura types configured in the options
   if db.FilterByType and aura.type then
     if not db.FilterByType[AURA_TYPE[aura.type]] then return false end
@@ -541,9 +541,9 @@ local function UpdateUnitAuras(frame, unitid, effect, aura_filter, BLIZZARD_Show
 
     -- Store Order/Priority
     if aura.CrowdControl then
-      show_aura =  AuraFilterFunction(db.CrowdControl, aura)
+      show_aura =  FilterAuraBySpell(db.CrowdControl, aura)
     else
-      show_aura =  AuraFilterFunction((aura.effect == "HARMFUL" and db.Debuffs) or db.Buffs, aura)
+      show_aura =  FilterAuraBySpell((aura.effect == "HARMFUL" and db.Debuffs) or db.Buffs, aura)
     end
 
     if show_aura then

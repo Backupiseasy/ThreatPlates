@@ -98,56 +98,56 @@ SlashCmdList["TPTPVERBOSE"] = TPTPVERBOSE
 
 -- Command: /tptp
 function TidyPlatesThreat:ChatCommand(input)
-	if input == "custom-plate" then
-		local plate = C_NamePlate.GetNamePlateForUnit("target")
-		if not plate then return end
-
-		local unit = plate.TPFrame.unit
-		print ("Adding", unit.name, "as new custom nameplate")
-		TidyPlatesThreat.db.profile.uniqueSettings.map[unit.name] = TidyPlatesThreat.db.profile.uniqueSettings.map["Geisterwolf"]
-
-		Addon.EventHandler:UNIT_NAME_UPDATE(unit.unitid)
-
-		return
-	elseif input == "stats" then
-		local plate = C_NamePlate.GetNamePlateForUnit("target")
-		if not plate then return end
-
-		TP.DEBUG_PRINT_UNIT(plate.TPFrame.unit, true)
-		return
-	elseif input == "visible" then
-		local blizzard_plates = {}
-
-		print ("Nameplates via C_NamePlate.GetNamePlates:")
-		for _, plate in pairs(C_NamePlate.GetNamePlates()) do
-			local tp_frame = plate.TPFrame
-			print (" ", plate:GetName(), ": TPFrame =", tp_frame ~= nil)
-			print ("  Plates Created:", Addon.PlatesCreated[plate] ~= nil)
-			print ("  Plates Visible:", Addon.PlatesVisible[plate] ~= nil)
-			blizzard_plates[plate] = true
-		end
-
-		print ("Nameplates via PlatesCreated:")
-		for plate, unitid in pairs(Addon.PlatesCreated) do
-			local tp_frame = plate.TPFrame
-			print (" ", plate:GetName())
-			if not blizzard_plates[plate] then
-				print ("    Unknown Created Plate for Blizzard")
-			end
-		end
-
-		print ("Nameplates via PlatesVisible:")
-		for plate, unitid in pairs(Addon.PlatesVisible) do
-			local tp_frame = plate.TPFrame
-			print (" ", plate:GetName())
-			if not blizzard_plates[plate] then
-				print ("    Unknown Visible Plate for Blizzard")
-			end
-		end
-
-
-		return
-	end
+--	if input == "custom-plate" then
+--		local plate = C_NamePlate.GetNamePlateForUnit("target")
+--		if not plate then return end
+--
+--		local unit = plate.TPFrame.unit
+--		print ("Adding", unit.name, "as new custom nameplate")
+--		TidyPlatesThreat.db.profile.uniqueSettings.map[unit.name] = TidyPlatesThreat.db.profile.uniqueSettings.map["Geisterwolf"]
+--
+--		Addon.EventHandler:UNIT_NAME_UPDATE(unit.unitid)
+--
+--		return
+--	elseif input == "stats" then
+--		local plate = C_NamePlate.GetNamePlateForUnit("target")
+--		if not plate then return end
+--
+--		TP.DEBUG_PRINT_UNIT(plate.TPFrame.unit, true)
+--		return
+--	elseif input == "visible" then
+--		local blizzard_plates = {}
+--
+--		print ("Nameplates via C_NamePlate.GetNamePlates:")
+--		for _, plate in pairs(C_NamePlate.GetNamePlates()) do
+--			local tp_frame = plate.TPFrame
+--			print (" ", plate:GetName(), ": TPFrame =", tp_frame ~= nil)
+--			print ("  Plates Created:", Addon.PlatesCreated[plate] ~= nil)
+--			print ("  Plates Visible:", Addon.PlatesVisible[plate] ~= nil)
+--			blizzard_plates[plate] = true
+--		end
+--
+--		print ("Nameplates via PlatesCreated:")
+--		for plate, unitid in pairs(Addon.PlatesCreated) do
+--			local tp_frame = plate.TPFrame
+--			print (" ", plate:GetName())
+--			if not blizzard_plates[plate] then
+--				print ("    Unknown Created Plate for Blizzard")
+--			end
+--		end
+--
+--		print ("Nameplates via PlatesVisible:")
+--		for plate, unitid in pairs(Addon.PlatesVisible) do
+--			local tp_frame = plate.TPFrame
+--			print (" ", plate:GetName())
+--			if not blizzard_plates[plate] then
+--				print ("    Unknown Visible Plate for Blizzard")
+--			end
+--		end
+--
+--
+--		return
+--	end
 
 	TidyPlatesThreat:OpenOptions()
 
