@@ -46,6 +46,83 @@ local UNIT_TYPES = {
   }
 }
 
+local AURA_STYLE = {
+  wide = {
+    IconWidth = 26.5,
+    IconHeight = 14.5,
+    ShowBorder = true,
+    Duration = {
+      Anchor = "RIGHT",
+      InsideAnchor = true,
+      HorizontalOffset = -1,
+      VerticalOffset = 8,
+      Font = {
+        Typeface = Addon.DEFAUL_SMALL_FONT,
+        Size = 10,
+        Transparency = 1,
+        Color = t.RGB(255, 255, 255),
+        flags = "OUTLINE",
+        Shadow = true,
+        HorizontalAlignment = "RIGHT",
+        VerticalAlignment = "CENTER",
+      }
+    },
+    StackCount = {
+      Anchor = "RIGHT",
+      InsideAnchor = true,
+      HorizontalOffset = -1,
+      VerticalOffset = -6,
+      Font = {
+        Typeface = Addon.DEFAUL_SMALL_FONT,
+        Size = 10,
+        Transparency = 1,
+        Color = t.RGB(255, 255, 255),
+        flags = "OUTLINE",
+        Shadow = true,
+        HorizontalAlignment = "RIGHT",
+        VerticalAlignment = "CENTER",
+      }
+    },
+  },
+  square = {
+    IconWidth = 16.5,
+    IconHeight = 14.5,
+    ShowBorder = true,
+    Duration = {
+      Anchor = "RIGHT",
+      InsideAnchor = true,
+      HorizontalOffset = 0,
+      VerticalOffset = 8,
+      Font = {
+        Typeface = Addon.DEFAUL_SMALL_FONT,
+        Size = 10,
+        Transparency = 1,
+        Color = t.RGB(255, 255, 255),
+        flags = "OUTLINE",
+        Shadow = true,
+        HorizontalAlignment = "RIGHT",
+        VerticalAlignment = "CENTER",
+      }
+    },
+    StackCount = {
+      Anchor = "RIGHT",
+      InsideAnchor = true,
+      HorizontalOffset = 0,
+      VerticalOffset = -6,
+      Font = {
+        Typeface = Addon.DEFAUL_SMALL_FONT,
+        Size = 10,
+        Transparency = 1,
+        Color = t.RGB(255, 255, 255),
+        flags = "OUTLINE",
+        Shadow = true,
+        HorizontalAlignment = "RIGHT",
+        VerticalAlignment = "CENTER",
+      }
+    },
+  }
+}
+
 -- local reference to current profile
 local db
 -- table for storing the options dialog
@@ -241,7 +318,7 @@ local function SetColorAlphaAuraWidget(info, r, g, b, a)
     DB = DB[keys[index]]
   end
   DB[keys[#keys]].r, DB[keys[#keys]].g, DB[keys[#keys]].b, DB[keys[#keys]].a = r, g, b, a
-	TidyPlatesInternal:ForceUpdate()
+  Addon.Widgets.Auras:UpdateSettings()
 end
 
 local function SetColorAuraWidget(info, r, g, b)
@@ -251,7 +328,7 @@ local function SetColorAuraWidget(info, r, g, b)
 		DB = DB[keys[index]]
 	end
 	DB[keys[#keys]].r, DB[keys[#keys]].g, DB[keys[#keys]].b = r,g,b
-  TidyPlatesInternal:ForceUpdate()
+  Addon.Widgets.Auras:UpdateSettings()
 end
 
 local function GetUnitVisibilitySetting(info)
@@ -290,27 +367,32 @@ local function SetThemeValue(info, val)
   TidyPlatesInternal:SetTheme(t.THEME_NAME)
 end
 
-local function GetFontFlags(db, flag)
+local function GetFontFlags(settings, flag)
+  local db_font = db
+  for i = 1, #settings do
+    db_font = db_font[settings[i]]
+  end
+
   if flag == "Thick" then
-    return string.find(db.flags, "^THICKOUTLINE")
+    return string.find(db_font, "^THICKOUTLINE")
   elseif flag == "Outline" then
-    return string.find(db.flags, "^OUTLINE")
+    return string.find(db_font, "^OUTLINE")
   else --if flag == "Mono" then
-    return string.find(db.flags, "MONOCHROME$")
+    return string.find(db_font, "MONOCHROME$")
   end
 end
 
-local function SetFontFlags(db, flag, val)
+local function SetFontFlags(settings, flag, val)
   if flag == "Thick" then
-    local outline = (val and "THICKOUTLINE") or (GetFontFlags(db, "Outline") and "OUTLINE") or "NONE"
-    local mono = (GetFontFlags(db, "Mono") and ", MONOCHROME") or ""
+    local outline = (val and "THICKOUTLINE") or (GetFontFlags(settings, "Outline") and "OUTLINE") or "NONE"
+    local mono = (GetFontFlags(settings, "Mono") and ", MONOCHROME") or ""
     return outline .. mono
   elseif flag == "Outline" then
-    local outline = (val and "OUTLINE") or (GetFontFlags(db, "Thick") and "THICKOUTLINE") or "NONE"
-    local mono = (GetFontFlags(db, "Mono") and ", MONOCHROME") or ""
+    local outline = (val and "OUTLINE") or (GetFontFlags(settings, "Thick") and "THICKOUTLINE") or "NONE"
+    local mono = (GetFontFlags(settings, "Mono") and ", MONOCHROME") or ""
     return outline .. mono
   else -- flag = "Mono"
-    local outline = (GetFontFlags(db, "Thick") and "THICKOUTLINE") or (GetFontFlags(db, "Outline") and "OUTLINE") or "NONE"
+    local outline = (GetFontFlags(settings, "Thick") and "THICKOUTLINE") or (GetFontFlags(settings, "Outline") and "OUTLINE") or "NONE"
     local mono = (val and ", MONOCHROME") or ""
     return outline .. mono
   end
@@ -321,7 +403,6 @@ end
 local function SetValueAuraWidget(info, val)
   SetValuePlain(info, val)
   Addon.Widgets.Auras:UpdateSettings()
-  TidyPlatesInternal:ForceUpdate()
 end
 
 ---- Validate functions for AceConfig
@@ -529,7 +610,7 @@ local function GetAnchorEntry(pos, setting, anchor, func_disabled)
     name = L["Anchor Point"],
     order = pos,
     type = "select",
-    values = t.ANCHOR_POINT,
+    values = Addon.ANCHOR_POINT,
     arg = { setting, "anchor" },
     disabled = func_disabled,
   }
@@ -724,8 +805,8 @@ local function GetFontEntryTheme(pos, widget_info, func_disabled)
         order = 40,
         type = "toggle",
         desc = L["Add black outline."],
-        set = function(info, val) SetThemeValue(info, SetFontFlags(db.settings[widget_info], "Outline", val)) end,
-        get = function(info) return GetFontFlags(db.settings[widget_info], "Outline") end,
+        set = function(info, val) SetThemeValue(info, SetFontFlags({ "settings", widget_info, "flags" }, "Outline", val)) end,
+        get = function(info) return GetFontFlags({ "settings", widget_info, "flags" }, "Outline") end,
         arg = { "settings", widget_info, "flags" },
       },
       Thick = {
@@ -733,8 +814,8 @@ local function GetFontEntryTheme(pos, widget_info, func_disabled)
         order = 41,
         type = "toggle",
         desc = L["Add thick black outline."],
-        set = function(info, val) SetThemeValue(info, SetFontFlags(db.settings[widget_info], "Thick", val)) end,
-        get = function(info) return GetFontFlags(db.settings[widget_info], "Thick") end,
+        set = function(info, val) SetThemeValue(info, SetFontFlags({ "settings", widget_info, "flags" }, "Thick", val)) end,
+        get = function(info) return GetFontFlags({ "settings", widget_info, "flags" }, "Thick") end,
         arg = { "settings", widget_info, "flags" },
       },
 
@@ -743,8 +824,8 @@ local function GetFontEntryTheme(pos, widget_info, func_disabled)
         order = 42,
         type = "toggle",
         desc = L["Render font without antialiasing."],
-        set = function(info, val) SetThemeValue(info, SetFontFlags(db.settings[widget_info], "Mono", val)) end,
-        get = function(info) return GetFontFlags(db.settings[widget_info], "Mono") end,
+        set = function(info, val) SetThemeValue(info, SetFontFlags({ "settings", widget_info, "flags" }, "Mono", val)) end,
+        get = function(info) return GetFontFlags({ "settings", widget_info, "flags" }, "Mono") end,
         arg = { "settings", widget_info, "flags" },
       },
       Shadow = {
@@ -763,6 +844,86 @@ end
 local function GetFontEntry(name, pos, widget_info)
   local entry = GetFontEntryTheme(pos, widget_info)
   entry.name = name
+
+  return entry
+end
+
+local function GetFontEntryDefault(name, pos, widget_info, func_disabled)
+  widget_info = Addon.ConcatTables(widget_info, { "Font" } )
+
+  local entry = {
+    type = "group",
+    order = pos,
+    name = name,
+    inline = true,
+    disabled = func_disabled,
+    args = {
+      Font = {
+        name = L["Typeface"],
+        order = 10,
+        type = "select",
+        dialogControl = "LSM30_Font",
+        values = AceGUIWidgetLSMlists.font,
+        arg = Addon.ConcatTables(widget_info, { "Typeface" }),
+      },
+      Size = {
+        name = L["Font Size"],
+        order = 20,
+        type = "range",
+        arg = Addon.ConcatTables(widget_info, { "Size" }),
+        max = 36,
+        min = 6,
+        step = 1,
+        isPercent = false,
+      },
+      Transparency = GetTransparencyEntryDefault(30, Addon.ConcatTables(widget_info, { "Transparency" }) ),
+      Color = GetColorEntry(L["Color"], 40, Addon.ConcatTables(widget_info, { "Color" }) ),
+      Spacer = GetSpacerEntry(100),
+      Outline = {
+        name = L["Outline"],
+        order = 101,
+        type = "toggle",
+        desc = L["Add black outline."],
+        width = "half",
+        set = function(info, val) SetValueAuraWidget(info, SetFontFlags(Addon.ConcatTables(widget_info, { "flags" }), "Outline", val)) end,
+        get = function(info) return GetFontFlags(Addon.ConcatTables(widget_info, { "flags" }), "Outline") end,
+        arg = Addon.ConcatTables(widget_info, { "flags" }),
+      },
+      Thick = {
+        name = L["Thick"],
+        order = 102,
+        type = "toggle",
+        desc = L["Add thick black outline."],
+        width = "half",
+        set = function(info, val) SetValueAuraWidget(info, SetFontFlags(Addon.ConcatTables(widget_info, { "flags" }), "Thick", val)) end,
+        get = function(info) return GetFontFlags(Addon.ConcatTables(widget_info, { "flags" }), "Thick") end,
+        arg = Addon.ConcatTables(widget_info, { "flags" }),
+      },
+
+      Mono = {
+        name = L["Mono"],
+        order = 103,
+        type = "toggle",
+        desc = L["Render font without antialiasing."],
+        width = "half",
+        set = function(info, val) SetValueAuraWidget(info, SetFontFlags(Addon.ConcatTables(widget_info, { "flags" }), "Mono", val)) end,
+        get = function(info) return GetFontFlags(Addon.ConcatTables(widget_info, { "flags" }), "Mono") end,
+        arg = Addon.ConcatTables(widget_info, { "flags" }),
+      },
+      Shadow = {
+        name = L["Shadow"],
+        order = 104,
+        type = "toggle",
+        desc = L["Show shadow with text."],
+        width = "half",
+        arg = Addon.ConcatTables(widget_info, { "Shadow" }),
+      },
+    },
+  }
+
+  entry.args.Color.set = SetColorAuraWidget
+  entry.args.Color.width = "half"
+  entry.args.Transparency.set = function(info, val) SetValueAuraWidget(info, abs(val - 1)) end
 
   return entry
 end
@@ -1695,12 +1856,17 @@ local function CreateBossModsWidgetOptions()
 end
 
 local function CreateAurasWidgetOptions()
+  local set_function = function(func)
+    return function(info, val) func(info, val); Addon.Widgets:UpdateSettings("Auras") end
+  end
+
   local options = {
     name = L["Auras"],
     type = "group",
     childGroups = "tab",
     order = 25,
     set = SetValueAuraWidget,
+    --set = set_function(SetValueAuraWidget),
     args = {
       Enable = GetEnableEntry(L["Enable Auras Widget"], L["This widget shows a unit's auras (buffs and debuffs) on its nameplate."], "AuraWidget", true, function(info, val) SetValuePlain(info, val); Addon:InitializeWidget("Auras") end),
       Style = {
@@ -1729,11 +1895,18 @@ local function CreateAurasWidgetOptions()
                 desc = L["This will toggle the auras widget to show the cooldown spiral on auras."],
                 arg = { "AuraWidget", "ShowCooldownSpiral" },
               },
+              Time = {
+                name = L["Duration"],
+                type = "toggle",
+                order = 30,
+                desc = L["Show time left on auras that have a duration."],
+                arg = { "AuraWidget", "ShowDuration" },
+              },
               Stacks = {
                 name = L["Stack Count"],
                 type = "toggle",
-                order = 30,
-                desc = L["Show stack count as overlay on aura icon."],
+                order = 40,
+                desc = L["Show stack count on auras."],
                 arg = { "AuraWidget", "ShowStackCount" },
               },
               Spacer1 = GetSpacerEntry(40),
@@ -1746,11 +1919,13 @@ local function CreateAurasWidgetOptions()
               },
               DefaultBuffColor = {
                 name = L["Buff Color"], type = "color",	order = 54,	arg = {"AuraWidget", "DefaultBuffColor"},	hasAlpha = true,
-                get = GetColorAlpha, set = SetColorAlphaAuraWidget,
+                set = SetColorAlphaAuraWidget,
+                get = GetColorAlpha,
               },
               DefaultDebuffColor = {
                 name = L["Debuff Color"], type = "color",	order = 56, arg = {"AuraWidget","DefaultDebuffColor"},	hasAlpha = true,
-                get = GetColorAlpha, set = SetColorAlphaAuraWidget,
+                set = SetColorAlphaAuraWidget,
+                get = GetColorAlpha,
               },
             },
           },
@@ -1839,7 +2014,7 @@ local function CreateAurasWidgetOptions()
                 inline = true,
                 order = 50,
                 args = {
-                  Anchor = { name = L["Anchor Point"], order = 20, type = "select", values = t.ANCHOR_POINT, arg = { "AuraWidget", "anchor" } },
+                  Anchor = { name = L["Anchor Point"], order = 20, type = "select", values = Addon.ANCHOR_POINT, arg = { "AuraWidget", "anchor" } },
                   X = { name = L["Offset X"], order = 30, type = "range", min = -120, max = 120, step = 1, arg = { "AuraWidget", "x" }, },
                   Y = { name = L["Offset Y"], order = 40, type = "range", min = -120, max = 120, step = 1, arg = { "AuraWidget", "y" }, },
                   Spacer = GetSpacerEntry(50),
@@ -1936,7 +2111,6 @@ local function CreateAurasWidgetOptions()
             set = function(info, k, v)
               db.AuraWidget.Debuffs.FilterByType[k] = v
               Addon.Widgets.Auras:UpdateSettings()
-              TidyPlatesInternal:ForceUpdate()
             end,
           },
           SpecialFilter = {
@@ -2147,14 +2321,30 @@ local function CreateAurasWidgetOptions()
                 type = "select",
                 desc = L["This lets you select the layout style of the auras widget."],
                 descStyle = "inline",
-                values = { wide = L["Wide"], square = L["Square"] },
+                values = { wide = L["Wide"], square = L["Square"] , custom = L["Custom"] },
+                set = function(info, val)
+                  if val ~= "custom" then
+                    Addon.MergeIntoTable(db.AuraWidget.ModeIcon, AURA_STYLE[val])
+                  end
+                  SetValueAuraWidget(info, val)
+                end,
                 arg = { "AuraWidget", "ModeIcon", "Style" },
+              },
+              Width = GetSizeEntry(L["Icon Width"], 20, { "AuraWidget", "ModeIcon", "IconWidth" }, function() return db.AuraWidget.ModeIcon.Style ~= "custom" end),
+              Height = GetSizeEntry(L["Icon Height"], 30, { "AuraWidget", "ModeIcon", "IconHeight" }, function() return db.AuraWidget.ModeIcon.Style ~= "custom" end),
+              Spacer1 = GetSpacerEntry(40),
+              ShowBorder = {
+                type = "toggle",
+                order = 50,
+                name = L["Border"],
+                disabled = function() return db.AuraWidget.ModeIcon.Style ~= "custom" end,
+                arg = { "AuraWidget", "ModeIcon", "ShowBorder" },
               },
             },
           },
           Layout = {
             name = L["Layout"],
-            order = 40,
+            order = 30,
             type = "group",
             inline = true,
             args = {
@@ -2162,6 +2352,138 @@ local function CreateAurasWidgetOptions()
               Rows = { name = L["Row Limit"], order = 30, type = "range", min = 1, max = 10, step = 1, arg = { "AuraWidget", "ModeIcon", "Rows" }, },
               ColumnSpacing = { name = L["Horizontal Spacing"], order = 40, type = "range", min = 0, max = 100, step = 1, arg = { "AuraWidget", "ModeIcon", "ColumnSpacing" }, },
               RowSpacing = { name = L["Vertical Spacing"], order = 50, type = "range", min = 0, max = 100, step = 1, arg = { "AuraWidget", "ModeIcon", "RowSpacing" }, },
+            },
+          },
+          Duration = {
+            name = L["Duration"],
+            order = 40,
+            type = "group",
+            inline = true,
+            disabled = function() return db.AuraWidget.ModeIcon.Style ~= "custom" end,
+            args = {
+              Font = GetFontEntryDefault(L["Font"], 10, { "AuraWidget", "ModeIcon", "Duration" }),
+              Placement = {
+                type = "group",
+                order = 20,
+                name = L["Placement"],
+                inline = true,
+                args = {
+                  Anchor = {
+                    type = "select",
+                    order = 10,
+                    name = L["Position"],
+                    values = Addon.ANCHOR_POINT,
+                    arg = { "AuraWidget", "ModeIcon", "Duration", "Anchor" }
+                  },
+                  InsideAnchor = {
+                    type = "toggle",
+                    order = 15,
+                    name = L["Inside"],
+                    width = "half",
+                    arg = { "AuraWidget", "ModeIcon", "Duration", "InsideAnchor" }
+                  },
+                  X = {
+                    type = "range",
+                    order = 20,
+                    name = L["Horizontal Offset"],
+                    max = 120,
+                    min = -120,
+                    step = 1,
+                    isPercent = false,
+                    arg = { "AuraWidget", "ModeIcon", "Duration", "HorizontalOffset" },
+                  },
+                  Y = {
+                    type = "range",
+                    order = 30,
+                    name = L["Vertical Offset"],
+                    max = 120,
+                    min = -120,
+                    step = 1,
+                    isPercent = false,
+                    arg = { "AuraWidget", "ModeIcon", "Duration", "VerticalOffset" },
+                  },
+                  AlignX = {
+                    type = "select",
+                    order = 40,
+                    name = L["Horizontal Align"],
+                    values = t.AlignH,
+                    arg = { "AuraWidget", "ModeIcon", "Duration", "Font", "HorizontalAlignment" },
+                  },
+                  AlignY = {
+                    type = "select",
+                    order = 50,
+                    name = L["Vertical Align"],
+                    values = t.AlignV,
+                    arg = { "AuraWidget", "ModeIcon", "Duration", "Font", "VerticalAlignment" },
+                  },
+                },
+              },
+            },
+          },
+          StackCount = {
+            name = L["Stack Count"],
+            order = 50,
+            type = "group",
+            inline = true,
+            disabled = function() return db.AuraWidget.ModeIcon.Style ~= "custom" end,
+            args = {
+              Font = GetFontEntryDefault(L["Font"], 10, { "AuraWidget", "ModeIcon", "StackCount" }),
+              Placement = {
+                type = "group",
+                order = 20,
+                name = L["Placement"],
+                inline = true,
+                args = {
+                  Anchor = {
+                    type = "select",
+                    order = 10,
+                    name = L["Anchor Point"],
+                    values = Addon.ANCHOR_POINT,
+                    arg = { "AuraWidget", "ModeIcon", "StackCount", "Anchor" }
+                  },
+                  InsideAnchor = {
+                    type = "toggle",
+                    order = 15,
+                    name = L["Inside"],
+                    width = "half",
+                    arg = { "AuraWidget", "ModeIcon", "StackCount", "InsideAnchor" }
+                  },
+                  X = {
+                    type = "range",
+                    order = 20,
+                    name = L["Horizontal Offset"],
+                    max = 120,
+                    min = -120,
+                    step = 1,
+                    isPercent = false,
+                    arg = { "AuraWidget", "ModeIcon", "StackCount", "HorizontalOffset" },
+                  },
+                  Y = {
+                    type = "range",
+                    order = 30,
+                    name = L["Vertical Offset"],
+                    max = 120,
+                    min = -120,
+                    step = 1,
+                    isPercent = false,
+                    arg = { "AuraWidget", "ModeIcon", "StackCount", "VerticalOffset" },
+                  },
+                  AlignX = {
+                    type = "select",
+                    order = 40,
+                    name = L["Horizontal Align"],
+                    values = t.AlignH,
+                    arg = { "AuraWidget", "ModeIcon", "StackCount", "Font", "HorizontalAlignment" },
+                  },
+                  AlignY = {
+                    type = "select",
+                    order = 50,
+                    name = L["Vertical Align"],
+                    values = t.AlignV,
+                    arg = { "AuraWidget", "ModeIcon", "StackCount", "Font", "VerticalAlignment" },
+                  },
+                },
+              },
             },
           },
         },

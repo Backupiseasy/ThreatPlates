@@ -1,10 +1,19 @@
-﻿local ADDON_NAME, NAMESPACE = ...
-local Addon = NAMESPACE.ThreatPlates
+﻿local ADDON_NAME, Addon = ...
+local ThreatPlates = Addon.ThreatPlates
 
-local Media = Addon.Media
+---------------------------------------------------------------------------------------------------
+-- Imported functions and constants
+---------------------------------------------------------------------------------------------------
+
+-- Lua APIs
+
+-- WoW APIs
+
+-- ThreatPlates APIs
+local Media = ThreatPlates.Media
 --local koKR, ruRU, zhCN, zhTW, western = Media.LOCALE_BIT_koKR, Media.LOCALE_BIT_ruRU, Media.LOCALE_BIT_zhCN, Media.LOCALE_BIT_zhTW, Media.LOCALE_BIT_western
 
-Addon.Art = "Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\"
+ThreatPlates.Art = "Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\"
 
 ---------------------------------------------------------------------------------------------------
 -- Register media files that ThreatPlates needs at least (because of default settings)

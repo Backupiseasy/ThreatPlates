@@ -26,6 +26,13 @@
 * Updated TOC version for Battle for Azeroth.
 
 ------------------------------------------------------
+8.8.0-Alpha3
+------------------------------------------------------
+* Added serveral customization options for aura icons to the Auras widget (e.g., change height, width, time text font and position) [Comment #827, ].
+* Fixed a bug with Resource widget showing on non-target units.
+* Updated integrated libraries to LibSharedMedia-3.0 7.3.0, Ace3 Release-r1166.
+
+------------------------------------------------------
 8.8.0-Alpha2
 ------------------------------------------------------
 * Reworked the Auras widget so that buffs, debuffs, and crowd control related auras can be shown independently from each other [Comment #704, Issue #183, Comment #725, PM].

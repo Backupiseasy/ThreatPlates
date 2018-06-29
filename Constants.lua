@@ -13,11 +13,21 @@ local RGB = ThreatPlates.RGB
 local RGB_P = ThreatPlates.RGB_P
 local HEX2RGB = ThreatPlates.HEX2RGB
 
+
+---------------------------------------------------------------------------------------------------
+-- Global contstants
+---------------------------------------------------------------------------------------------------
+
+ThreatPlates.ADDON_NAME = "Threat Plates"
+ThreatPlates.THEME_NAME = "Threat Plates"
+
+Addon.ADDON_DIRECTORY = "Interface\\AddOns\\TidyPlates_ThreatPlates\\"
+
 ---------------------------------------------------------------------------------------------------
 -- Color and font definitions
 ---------------------------------------------------------------------------------------------------
-local DEFAULT_FONT = "Cabin"
-local DEFAUL_SMALL_FONT = "Arial Narrow"
+Addon.DEFAULT_FONT = "Cabin"
+Addon.DEFAUL_SMALL_FONT = "Arial Narrow"
 
 local locale = GetLocale()
 local MAP_FONT = {
@@ -40,8 +50,8 @@ local MAP_FONT = {
 }
 
 if MAP_FONT[locale] then
-  DEFAULT_FONT = MAP_FONT[locale].DefaultFont
-  DEFAUL_SMALL_FONT = MAP_FONT[locale].DefaultSmallFont
+  Addon.DEFAULT_FONT = MAP_FONT[locale].DefaultFont
+  Addon.DEFAUL_SMALL_FONT = MAP_FONT[locale].DefaultSmallFont
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -54,22 +64,19 @@ Addon.UIScale = 1
 Addon.TotemInformation = {} -- basic totem information
 Addon.TOTEMS = {} -- mapping table for fast access to totem settings
 
-ThreatPlates.ADDON_NAME = "Threat Plates"
-ThreatPlates.THEME_NAME = "Threat Plates"
-
-ThreatPlates.ANCHOR_POINT = {
-  TOPLEFT = "Top Left",
-  TOP = "Top",
-  TOPRIGHT = "Top Right",
-  LEFT = "Left",
-  CENTER = "Center",
-  RIGHT = "Right",
-  BOTTOMLEFT = "Bottom Left",
-  BOTTOM = "Bottom ",
-  BOTTOMRIGHT = "Bottom Right"
+Addon.ANCHOR_POINT = {
+  TOPLEFT = L["Top Left"],
+  TOP = L["Top"],
+  TOPRIGHT = L["Top Right"],
+  LEFT = L["Left"],
+  CENTER = L["Center"],
+  RIGHT = L["Right"],
+  BOTTOMLEFT = L["Bottom Left"],
+  BOTTOM = L["Bottom"],
+  BOTTOMRIGHT = L["Bottom Right"],
 }
 
-ThreatPlates.ANCHOR_POINT_SETPOINT = {
+Addon.ANCHOR_POINT_SETPOINT = {
   TOPLEFT = {"TOPLEFT", "BOTTOMLEFT"},
   TOP = {"TOP", "BOTTOM"},
   TOPRIGHT = {"TOPRIGHT", "BOTTOMRIGHT"},
@@ -81,11 +88,20 @@ ThreatPlates.ANCHOR_POINT_SETPOINT = {
   BOTTOMRIGHT = {"BOTTOMRIGHT", "TOPRIGHT"}
 }
 
--- only used by DebuffWidget (old Auras)
-ThreatPlates.FullAlign = {TOPLEFT = "TOPLEFT",TOP = "TOP",TOPRIGHT = "TOPRIGHT",LEFT = "LEFT",CENTER = "CENTER",RIGHT = "RIGHT",BOTTOMLEFT = "BOTTOMLEFT",BOTTOM = "BOTTOM",BOTTOMRIGHT = "BOTTOMRIGHT"}
+Addon.ANCHOR_POINT_TEXT = {
+  TOPLEFT = {"TOPLEFT", "BOTTOMRIGHT"},
+  TOP = {"TOP", "BOTTOM"},
+  TOPRIGHT = {"TOPRIGHT", "BOTTOMLEFT"},
+  LEFT = {"LEFT", "RIGHT"},
+  CENTER = {"CENTER", "CENTER"},
+  RIGHT = {"RIGHT", "LEFT"},
+  BOTTOMLEFT = {"BOTTOMLEFT", "TOPRIGHTG"},
+  BOTTOM = {"BOTTOM", "TOP"},
+  BOTTOMRIGHT = {"BOTTOMRIGHT", "TOPLEFT"}
+}
 
-ThreatPlates.AlignH = {LEFT = "LEFT", CENTER = "CENTER", RIGHT = "RIGHT"}
-ThreatPlates.AlignV = {BOTTOM = "BOTTOM", CENTER = "CENTER", TOP = "TOP"}
+ThreatPlates.AlignH = {LEFT = L["Left"], CENTER = L["Center"], RIGHT = L["Right"]}
+ThreatPlates.AlignV = {BOTTOM = L["Bottom"], CENTER = L["Center"], TOP = L["Top"]}
 
 ThreatPlates.AUTOMATION = {
   NONE = "No Automation",
@@ -495,10 +511,11 @@ ThreatPlates.DEFAULT_SETTINGS = {
       -- ShowEnemy = true, -- removed in 8.8
       -- ShowFriendly = true, -- removed in 8.8
       -- FilterMode = "blacklistMine",
-      --ShowDebuffsOnFriendly = false, -- removed in 8.8
+      -- ShowDebuffsOnFriendly = false, -- removed in 8.8
       -- FilterBySpell = {}, -- removed in 8.8
       ShowTargetOnly = false,
       ShowCooldownSpiral = false,
+      ShowDuration = true,
       ShowStackCount = true,
       ShowAuraType = true,
       DefaultBuffColor = RGB(102, 0, 51, 1),
@@ -542,11 +559,46 @@ ThreatPlates.DEFAULT_SETTINGS = {
         FilterBySpell = {},
       },
       ModeIcon = {
+        Style = "square",
+        IconWidth = 16.5,
+        IconHeight = 14.5,
+        ShowBorder = true,
         Columns = 5,
         Rows = 3,
         ColumnSpacing = 5,
         RowSpacing = 8,
-        Style = "square",
+        Duration = {
+          Anchor = "RIGHT",
+          InsideAnchor = true,
+          HorizontalOffset = 0,
+          VerticalOffset = 8,
+          Font = {
+            Typeface = Addon.DEFAUL_SMALL_FONT,
+            Size = 10,
+            Transparency = 1,
+            Color = RGB(255, 255, 255),
+            flags = "OUTLINE",
+            Shadow = true,
+            HorizontalAlignment = "RIGHT",
+            VerticalAlignment = "CENTER",
+          }
+        },
+        StackCount = {
+          Anchor = "RIGHT",
+          InsideAnchor = true,
+          HorizontalOffset = 0,
+          VerticalOffset = -6,
+          Font = {
+            Typeface = Addon.DEFAUL_SMALL_FONT,
+            Size = 10,
+            Transparency = 1,
+            Color = RGB(255, 255, 255),
+            flags = "OUTLINE",
+            Shadow = true,
+            HorizontalAlignment = "RIGHT",
+            VerticalAlignment = "CENTER",
+          }
+        },
       },
       ModeBar = {
         Enabled = false,
@@ -555,7 +607,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
         BarSpacing = 2,
         MaxBars = 10,
         Texture = "Smooth", -- old default: "Aluminium",
-        Font = DEFAUL_SMALL_FONT,
+        Font = Addon.DEFAUL_SMALL_FONT,
         FontSize = 10,
         FontColor = RGB(255, 255, 255),
         LabelTextIndent = 4,
@@ -713,7 +765,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
       --BorderInset = 4,
       --BorderTileSize = 16,
       ShowText = true,
-      Font = DEFAULT_FONT,
+      Font = Addon.DEFAULT_FONT,
       FontSize = 10,
       FontColor = RGB(255, 255, 255),
     },
@@ -726,7 +778,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
       y_hv = 40,
       scale = 40,
       AuraSpacing = 4,
-      Font = DEFAULT_FONT,
+      Font = Addon.DEFAULT_FONT,
       FontSize = 24,
       FontColor = RGB(255, 255, 255),
       -- TODO: add font flags like for custom text
@@ -1563,7 +1615,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
       },
       name = { -- Names for Healthbar View
         show = true,
-        typeface = DEFAULT_FONT, -- old default: "Accidental Presidency",
+        typeface = Addon.DEFAULT_FONT, -- old default: "Accidental Presidency",
         size = 10, -- old default: 14
         shadow = true,
         flags = "NONE",
@@ -1581,7 +1633,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
         UseRaidMarkColoring = false,
       },
       level = {
-        typeface = DEFAULT_FONT, -- old default: "Accidental Presidency",
+        typeface = Addon.DEFAULT_FONT, -- old default: "Accidental Presidency",
         size = 9, -- old default: 12,
         width = 20,
         height = 10, -- old default: 14,
@@ -1603,7 +1655,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
         anchor = "CENTER"
       },
       customtext = {
-        typeface = DEFAULT_FONT, -- old default: "Accidental Presidency",
+        typeface = Addon.DEFAULT_FONT, -- old default: "Accidental Presidency",
         size = 9, -- old default: 12,
         width = 110,
         height = 14,
@@ -1621,7 +1673,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
         SubtextColor =  RGB(255, 255, 255, 1),
       },
       spelltext = {
-        typeface = DEFAULT_FONT, -- old default: "Accidental Presidency",
+        typeface = Addon.DEFAULT_FONT, -- old default: "Accidental Presidency",
         size = 8,  -- old default: 12
         width = 110,
         height = 14,

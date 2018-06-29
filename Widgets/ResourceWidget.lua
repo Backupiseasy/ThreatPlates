@@ -16,7 +16,7 @@ local ceil = ceil
 
 -- WoW APIs
 local CreateFrame = CreateFrame
-local UnitReaction, UnitIsPlayer, UnitClassification, UnitLevel, UnitIsUnit = UnitReaction, UnitIsPlayer, UnitClassification, UnitLevel, UnitIsUnit
+local UnitReaction, UnitIsUnit = UnitReaction, UnitIsUnit
 local UnitPower, UnitPowerMax, UnitPowerType = UnitPower, UnitPowerMax, UnitPowerType
 local PowerBarColor = PowerBarColor
 local SPELL_POWER_MANA = SPELL_POWER_MANA
@@ -146,7 +146,6 @@ local function UpdateResourceBar(widget_frame)
   local db = TidyPlatesThreat.db.profile.ResourceWidget
 
   local power_func = DeterminePowerType(widget_frame)
-
   if not power_func then
     widget_frame:Hide()
     return
@@ -156,9 +155,8 @@ local function UpdateResourceBar(widget_frame)
   local bar = widget_frame.Bar
 
   if db.ShowBar then
-    local a = 1
     bar:SetValue(bar_value)
-    bar:SetStatusBarColor(widget_frame.BarColorRed, widget_frame.BarColorGreen, widget_frame.BarColorBlue, a)
+    bar:SetStatusBarColor(widget_frame.BarColorRed, widget_frame.BarColorGreen, widget_frame.BarColorBlue, 1)
 
     local border = widget_frame.Border
     if db.BackgroundUseForegroundColor then
@@ -315,15 +313,11 @@ function Widget:OnUnitAdded(widget_frame, unit)
   --    return
   --  end
 
-  UpdateResourceBar(widget_frame)
+  if UnitIsUnit("target", unit.unitid) then
+    UpdateResourceBar(widget_frame)
+  else
+    widget_frame:Hide()
+  end
 
-  --self:OnTargetChanged(widget_frame, unit)
+  --UpdateResourceBar(widget_frame)
 end
-
---function Widget:OnTargetChanged(widget_frame, unit)
---  if UnitIsUnit("target", unit.unitid) and widget_frame.ShowWidget then
---    UpdateResourceBar(widget_frame)
---  else
---    widget_frame:Hide()
---  end
---end
