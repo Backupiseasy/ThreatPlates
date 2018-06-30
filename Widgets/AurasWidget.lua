@@ -213,19 +213,27 @@ local function OnUpdateAurasWidget(widget_frame, elapsed)
 end
 
 local function UpdateWidgetTimeIcon(frame, expiration, duration)
+  local db = TidyPlatesThreat.db.profile.AuraWidget
+
   if expiration == 0 then
     frame.TimeLeft:SetText("")
     Animations:StopFlash(frame)
   else
     local timeleft = expiration - GetTime()
 
-    if timeleft > 60 then
-      frame.TimeLeft:SetText(floor(timeleft/60).."m")
-    else
-      frame.TimeLeft:SetText(floor(timeleft))
-      --frame.TimeLeft:SetText(floor(timeleft*10)/10)
+    if db.ShowDuration then
+      if timeleft > 60 then
+        frame.TimeLeft:SetText(floor(timeleft/60).."m")
+      else
+        frame.TimeLeft:SetText(floor(timeleft))
+      end
 
-      local db = TidyPlatesThreat.db.profile.AuraWidget
+      if db.FlashWhenExpiring and timeleft < db.FlashTime then
+        Animations:Flash(frame, FLASH_DURATION)
+      end
+    else
+      frame.TimeLeft:SetText("")
+
       if db.FlashWhenExpiring and timeleft < db.FlashTime then
         Animations:Flash(frame, FLASH_DURATION)
       end
@@ -243,24 +251,33 @@ local function UpdateWidgetTimeBar(frame, expiration, duration)
     frame.Statusbar:SetValue(0)
     Animations:StopFlash(frame)
   else
+    local db = TidyPlatesThreat.db.profile.AuraWidget
+
     local timeleft = expiration - GetTime()
 
-    if timeleft > 60 then
-      frame.TimeText:SetText(floor(timeleft/60).."m")
-    else
-      frame.TimeText:SetText(floor(timeleft))
+    if db.ShowDuration then
+      if timeleft > 60 then
+        frame.TimeText:SetText(floor(timeleft/60).."m")
+      else
+        frame.TimeText:SetText(floor(timeleft))
+      end
 
-      local db = TidyPlatesThreat.db.profile.AuraWidget
+      if db.FlashWhenExpiring and timeleft < db.FlashTime then
+        Animations:Flash(frame, FLASH_DURATION)
+      end
+    else
+      frame.TimeText:SetText("")
+
       if db.FlashWhenExpiring and timeleft < db.FlashTime then
         Animations:Flash(frame, FLASH_DURATION)
       end
     end
+
     frame.Statusbar:SetValue(timeleft * 100 / duration)
   end
 end
 
 local function OnShowHookScript(widget_frame)
-  --print ("AurasWidget: OnShow hook script called")
   widget_frame.TimeSinceLastUpdate = 0
 end
 
@@ -412,7 +429,7 @@ local function UpdateBarAuraInformation(frame) -- texture, duration, expiration,
   -- Expiration
   UpdateWidgetTimeBar(frame, aura_info.expiration, aura_info.duration)
 
-  if db.ShowStackCount and stacks and stacks > 1 then
+  if db.ShowStackCount and stacks > 1 then
     frame.Stacks:SetText(stacks)
   else
     frame.Stacks:SetText("")
@@ -444,7 +461,7 @@ local function UpdateIconAuraInformation(frame) -- texture, duration, expiration
   UpdateWidgetTimeIcon(frame, aura_info.expiration, aura_info.duration)
 
   local db = TidyPlatesThreat.db.profile.AuraWidget
-  if db.ShowStackCount and stacks and stacks > 1 then
+  if db.ShowStackCount and stacks > 1 then
     frame.Stacks:SetText(stacks)
   else
     frame.Stacks:SetText("")

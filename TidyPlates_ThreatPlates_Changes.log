@@ -28,7 +28,7 @@
 ------------------------------------------------------
 8.8.0-Alpha3
 ------------------------------------------------------
-* Added serveral customization options for aura icons to the Auras widget (e.g., change height, width, time text font and position) [Comment #827, ].
+* Added serveral customization options for aura icons to the Auras widget (e.g., change height, width, time text font and position) [Comment #827, Issue #181].
 * Fixed a bug with Resource widget showing on non-target units.
 * Updated integrated libraries to LibSharedMedia-3.0 7.3.0, Ace3 Release-r1166.
 

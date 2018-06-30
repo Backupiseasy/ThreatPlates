@@ -1909,7 +1909,7 @@ local function CreateAurasWidgetOptions()
                 desc = L["Show stack count on auras."],
                 arg = { "AuraWidget", "ShowStackCount" },
               },
-              Spacer1 = GetSpacerEntry(40),
+              Spacer1 = GetSpacerEntry(45),
               AuraTypeColors = {
                 name = L["Color by Dispel Type"],
                 type = "toggle",
