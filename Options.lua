@@ -1410,7 +1410,7 @@ local function CreateHealerTrackerWidgetOptions()
     order = 60,
     type = "group",
     args = {
-      Enable = GetEnableEntry("Enable Healer Tracker", "This widget displays which targets are healers", "healerTracker", true),
+      Enable = GetEnableEntry(L["Enable Healer Tracker"], L["This widget shows players that are healers."], "healerTracker", true, function(info, val) SetValuePlain(info, val); Addon:InitializeWidget("HealerTracker") end),
       Layout = {
         name = L["Layout"],
         order = 10,
