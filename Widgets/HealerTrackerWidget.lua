@@ -253,32 +253,6 @@ local function ClearWidgetContext(frame)
 	end
 end
 
---Life cycle
-local function CreateWidgetFrame(parent)
-    -- Required Widget Code
-	local frame = CreateFrame("Frame", nil, parent)
-	frame:Hide()
-
-	-- Custom Code III
-	--------------------------------------
-	frame:SetFrameLevel(parent:GetFrameLevel() + 7)
-	frame.Icon = frame:CreateTexture(nil, "OVERLAY")
-	frame.Icon:SetAllPoints(frame)
-
-	UpdateSettings(frame)
-	frame.UpdateConfig = UpdateSettings
-	--------------------------------------
-	-- End Custom Code
-
-	-- Required Widget Code
-	frame.UpdateContext = UpdateWidgetContext
-	frame.Update = UpdateWidgetFrame
-	frame._Hide = frame.Hide
-	frame.Hide = function() ClearWidgetContext(frame); frame:_Hide() end
-
-	return frame
-end
-
 function Widget:UPDATE_BATTLEFIELD_SCORE()
 	FindHealersInBgScoreboard();
 end;
@@ -298,7 +272,28 @@ end;
 ---------------------------------------------------------------------------------------------------
 
 function Widget:Create(tp_frame)
+    -- Required Widget Code
+	local frame = CreateFrame("Frame", nil, tp_frame)
+	frame:Hide()
 
+	-- Custom Code III
+	--------------------------------------
+	frame:SetFrameLevel(tp_frame:GetFrameLevel() + 7)
+	frame.Icon = frame:CreateTexture(nil, "OVERLAY")
+	frame.Icon:SetAllPoints(frame)
+
+	UpdateSettings(frame)
+	frame.UpdateConfig = UpdateSettings
+	--------------------------------------
+	-- End Custom Code
+
+	-- Required Widget Code
+	frame.UpdateContext = UpdateWidgetContext
+	frame.Update = UpdateWidgetFrame
+	frame._Hide = frame.Hide
+	frame.Hide = function() ClearWidgetContext(frame); frame:_Hide() end
+
+	return frame
 end
 
 function Widget:IsEnabled()
