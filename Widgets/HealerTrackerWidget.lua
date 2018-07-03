@@ -15,7 +15,7 @@ local HEALER_SPECS = {
 	"Mistweaver",
 	"Holy",
 	"Discipline"
-};
+}
 
 local HEALER_SPELLS = {
     -- Priest
@@ -74,7 +74,7 @@ local HEALER_SPELLS = {
     [116995] = "MONK", -- Surging mist
     [119611] = "MONK", -- Renewing mist
     [132120] = "MONK", -- Envelopping Mist
-};
+}
 
 ---------------------------------------------------------------------------------------------------
 -- Variables
@@ -83,7 +83,7 @@ local HEALER_SPELLS = {
 local healerList = {
 	guids = {},
 	names = {}
-};
+}
 
 ---------------------------------------------------------------------------------------------------
 -- Threat Plates functions
@@ -95,7 +95,7 @@ local function UpdateSettings(frame)
     local alpha = db.alpha
 
 	frame:SetSize(size, size)
-    frame:SetAlpha(alpha);
+    frame:SetAlpha(alpha)
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -104,82 +104,82 @@ end
 
 --NOTE: used for testing
 local function dumpLists()
-	print("dumping lists");
+	print("dumping lists")
 
-	print("name");
+	print("name")
 	for i, v in ipairs(healerList.names) do
-		print(v);
-	end;
+		print(v)
+	end
 
-	print("guid");
+	print("guid")
 	for i, v in ipairs(healerList.guids) do
-		print(v);
-	end;
-end;
+		print(v)
+	end
+end
 
 local function InsertUnique(list, value)
 	for i, v in ipairs(list) do
 		--it already exists
 		if v == value then
-			return;
-		end;
-	end;
+			return
+		end
+	end
 
-	table.insert(list, value);
-end;
+	table.insert(list, value)
+end
 
 local function IsHealerSpec(spec)
-	local isHealer = false;
+	local isHealer = false
 
 	for i, v in ipairs(HEALER_SPECS) do
 		if v == spec then
-			isHealer = true;
-			break;
-		end;
-	end;
+			isHealer = true
+			break
+		end
+	end
 
-	return isHealer;
-end;
+	return isHealer
+end
 
 local function IsHealer(guid)
 	for i, v in ipairs(healerList.guids) do
 		if v == guid then
-			return true;
-		end;
-	end;
+			return true
+		end
+	end
 
-	return false;
-end;
+	return false
+end
 
-local nextUpdate = 0;
+local nextUpdate = 0
 local function RequestBgScoreData()
-	local now = GetTime();
+	local now = GetTime()
 
 	--throttle update to every 3 seconds
 	if now > nextUpdate then
-		nextUpdate = now + 3;
+		nextUpdate = now + 3
 	else
-		return;
-	end;
+		return
+	end
 
-	RequestBattlefieldScoreData();
-end;
+	RequestBattlefieldScoreData()
+end
 
 --look at the scoreboard and assign healers from there
 local function FindHealersInBgScoreboard()
-	local scores = GetNumBattlefieldScores();
+	local scores = GetNumBattlefieldScores()
 
 	for i = 1, scores do
-		local name, killingBlows, honorableKills, deaths, honorGained, faction, race, class, classToken, damageDone, healingDone, bgRating, ratingChange, preMatchMMR, mmrChange, talentSpec = GetBattlefieldScore(i);
+		local name, killingBlows, honorableKills, deaths, honorGained, faction, race, class, classToken, damageDone, healingDone, bgRating, ratingChange, preMatchMMR, mmrChange, talentSpec = GetBattlefieldScore(i)
 
 		if IsHealerSpec(talentSpec) then
-			name = string.gsub(name, "-.+", ""); --remove realm part of name
-			InsertUnique(healerList.names, name);
-		end;
-	end;
+			name = string.gsub(name, "-.+", "") --remove realm part of name
+			InsertUnique(healerList.names, name)
+		end
+	end
 
-	--dumpLists();
-end;
+	--dumpLists()
+end
 
 local SPELL_EVENTS = {
 	["SPELL_HEAL"] = true,
@@ -187,38 +187,38 @@ local SPELL_EVENTS = {
 	["SPELL_CAST_START"] = true,
 	["SPELL_CAST_SUCCESS"] = true,
 	["SPELL_PERIODIC_HEAL"] = true,
-};
+}
 
 local function FindHealersViaCombatLog(...)
 	local timestamp, combatevent, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlag, spellid = ...
 
 	if sourceGUID and sourceName and SPELL_EVENTS[combatevent] and HEALER_SPELLS[spellid] then
-		InsertUnique(healerList.guids, sourceGUID);
-	end;
-end;
+		InsertUnique(healerList.guids, sourceGUID)
+	end
+end
 
 local function ResolveName(unit)
 	for i, v in ipairs(healerList.names) do
 		if v == unit.name then --a healer identified via scoreboard, add it to main guid list
-			InsertUnique(healerList.guids, unit.guid);
-			return;
-		end;
-	end;
-end;
+			InsertUnique(healerList.guids, unit.guid)
+			return
+		end
+	end
+end
 
 function Widget:UPDATE_BATTLEFIELD_SCORE()
-	FindHealersInBgScoreboard();
-end;
+	FindHealersInBgScoreboard()
+end
 
 --triggered when enter and leave instances
 function Widget:PLAYER_ENTERING_WORLD()
-	healerList.names = table.wipe(healerList.names);
-	healerList.guids = table.wipe(healerList.guids);
-end;
+	healerList.names = table.wipe(healerList.names)
+	healerList.guids = table.wipe(healerList.guids)
+end
 
 function Widget:COMBAT_LOG_EVENT_UNFILTERED(...)
-	FindHealersViaCombatLog(...);
-end;
+	FindHealersViaCombatLog(...)
+end
 
 ---------------------------------------------------------------------------------------------------
 -- Widget functions for creation and update
@@ -280,5 +280,5 @@ function Widget:OnUnitAdded(widget_frame, unit)
 		widget_frame:Show()
 	else --hide it
 		widget_frame:Hide()
-	end;
+	end
 end
