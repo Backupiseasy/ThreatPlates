@@ -1404,6 +1404,27 @@ local function CreateStealthWidgetOptions()
   return options
 end
 
+local function CreateHealerTrackerWidgetOptions()
+  local options =  {
+    name = "HealerTracker", --TODO: locale
+    order = 60,
+    type = "group",
+    args = {
+      Enable = GetEnableEntry("Enable Healer Tracker", "This widget displays which targets are healers", "healerTracker", true),
+      Layout = {
+        name = L["Layout"],
+        order = 10,
+        type = "group",
+        inline = true,
+        args = {},
+      }
+    },
+  }
+
+  AddLayoutOptions(options.args.Layout.args, 80, "healerTracker")
+  return options
+end
+
 local function CreateTargetArtWidgetOptions()
   local options = {
     name = L["Target Highlight"],
@@ -3517,6 +3538,7 @@ local function CreateWidgetOptions()
       StealthWidget = CreateStealthWidgetOptions(),
       TargetArtWidget = CreateTargetArtWidgetOptions(),
       QuestWidget = CreateQuestWidgetOptions(),
+      HealerTrackerWidget = CreateHealerTrackerWidgetOptions(),
     },
   }
 
