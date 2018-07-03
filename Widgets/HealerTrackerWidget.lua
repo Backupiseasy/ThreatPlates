@@ -89,10 +89,6 @@ local healerList = {
 -- Threat Plates functions
 ---------------------------------------------------------------------------------------------------
 
-local function EnabledInHeadlineView()
-	return TidyPlatesThreat.db.profile.healerTracker.ShowInHeadlineView
-end
-
 local function UpdateSettings(frame)
     local db = TidyPlatesThreat.db.profile.healerTracker
 	local size = db.scale
@@ -193,8 +189,8 @@ local SPELL_EVENTS = {
 	["SPELL_PERIODIC_HEAL"] = true,
 };
 
-local function FindHealersViaCombatLog()
-	local timestamp, combatevent, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlag, spellid = CombatLogGetCurrentEventInfo();
+local function FindHealersViaCombatLog(...)
+	local timestamp, combatevent, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlag, spellid = ...
 
 	if sourceGUID and sourceName and SPELL_EVENTS[combatevent] and HEALER_SPELLS[spellid] then
 		InsertUnique(healerList.guids, sourceGUID);
@@ -210,49 +206,6 @@ local function ResolveName(unit)
 	end;
 end;
 
--- Update Graphics
---Life cycle
-local function UpdateWidgetFrame(frame, unit)
-    local db = TidyPlatesThreat.db.profile.healerTracker
-
-	RequestBgScoreData();
-
-	--TODO: use inspect api to determine spec if bg score data does not help?
-
-	if unit.type ~= "PLAYER" then
-		frame:Hide();
-		return;
-	end;
-
-	ResolveName(unit);
-
-	frame:SetPoint(db.anchor, frame:GetParent(), db.x, db.y)
-	frame.Icon:SetTexture(PATH .. "healer")
-
-	if IsHealer(unit.guid) then --show it
-		frame:Show()
-	else --hide it
-		frame:Hide()
-	end;
-end
-
--- Context - GUID or unitid should only change here, i.e., class changes should be determined here
---Life cycle
-local function UpdateWidgetContext(frame, unit)
-	local guid = unit.guid
-
-	frame.guid = guid
-end
-
---Life cycle
-local function ClearWidgetContext(frame)
-	local guid = frame.guid
-
-	if guid then
-		frame.guid = nil
-	end
-end
-
 function Widget:UPDATE_BATTLEFIELD_SCORE()
 	FindHealersInBgScoreboard();
 end;
@@ -263,8 +216,8 @@ function Widget:PLAYER_ENTERING_WORLD()
 	healerList.guids = table.wipe(healerList.guids);
 end;
 
-function Widget:COMBAT_LOG_EVENT_UNFILTERED()
-	FindHealersViaCombatLog();
+function Widget:COMBAT_LOG_EVENT_UNFILTERED(...)
+	FindHealersViaCombatLog(...);
 end;
 
 ---------------------------------------------------------------------------------------------------
@@ -287,17 +240,11 @@ function Widget:Create(tp_frame)
 	--------------------------------------
 	-- End Custom Code
 
-	-- Required Widget Code
-	frame.UpdateContext = UpdateWidgetContext
-	frame.Update = UpdateWidgetFrame
-	frame._Hide = frame.Hide
-	frame.Hide = function() ClearWidgetContext(frame); frame:_Hide() end
-
 	return frame
 end
 
 function Widget:IsEnabled()
-    local enabled = TidyPlatesThreat.db.profile.healerTracker.ON
+    local enabled = TidyPlatesThreat.db.profile.healerTracker.ON or TidyPlatesThreat.db.profile.healerTracker.ShowInHeadlineView
 
 	if enabled then
 		self:RegisterEvent("UPDATE_BATTLEFIELD_SCORE")
@@ -311,9 +258,27 @@ function Widget:IsEnabled()
 end
 
 function Widget:EnabledForStyle(style, unit)
+    if unit.type ~= "PLAYER" then return false end
 
+    if (style == "NameOnly" or style == "NameOnly-Unique") then
+        return TidyPlatesThreat.db.profile.healerTracker.ShowInHeadlineView
+    elseif style ~= "etotem" then
+        return TidyPlatesThreat.db.profile.healerTracker.ON
+    end
 end
 
 function Widget:OnUnitAdded(widget_frame, unit)
+    local db = TidyPlatesThreat.db.profile.healerTracker
 
+	RequestBgScoreData()
+	ResolveName(unit)
+
+	widget_frame:SetPoint(db.anchor, widget_frame:GetParent(), db.x, db.y)
+	widget_frame.Icon:SetTexture(PATH .. "healer")
+
+	if IsHealer(unit.guid) then --show it
+		widget_frame:Show()
+	else --hide it
+		widget_frame:Hide()
+	end;
 end
