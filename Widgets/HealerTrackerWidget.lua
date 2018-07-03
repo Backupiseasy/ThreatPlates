@@ -1,8 +1,9 @@
 -----------------------
 -- Healer Tracker Widget --
 -----------------------
-local ADDON_NAME, NAMESPACE = ...
-local ThreatPlates = NAMESPACE.ThreatPlates
+local ADDON_NAME, Addon = ...
+
+local Widget = Addon:NewWidget("HealerTracker")
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -83,8 +84,6 @@ local healerList = {
 	guids = {},
 	names = {}
 };
-
-local watcherFrame = CreateFrame("Frame", nil, WorldFrame);
 
 ---------------------------------------------------------------------------------------------------
 -- Threat Plates functions
@@ -280,43 +279,46 @@ local function CreateWidgetFrame(parent)
 	return frame
 end
 
-local eventHandlers = {};
-
-function eventHandlers.UPDATE_BATTLEFIELD_SCORE()
+function Widget:UPDATE_BATTLEFIELD_SCORE()
 	FindHealersInBgScoreboard();
 end;
 
 --triggered when enter and leave instances
-function eventHandlers.PLAYER_ENTERING_WORLD()
+function Widget:PLAYER_ENTERING_WORLD()
 	healerList.names = table.wipe(healerList.names);
 	healerList.guids = table.wipe(healerList.guids);
 end;
 
-function eventHandlers.COMBAT_LOG_EVENT_UNFILTERED()
+function Widget:COMBAT_LOG_EVENT_UNFILTERED()
 	FindHealersViaCombatLog();
 end;
 
-local function enabled()
-	local enabled = TidyPlatesThreat.db.profile.healerTracker.ON
+---------------------------------------------------------------------------------------------------
+-- Widget functions for creation and update
+---------------------------------------------------------------------------------------------------
 
-	if enabled then
-		local function onEvent(frame, event, ...)
-			local handler = eventHandlers[event];
+function Widget:Create(tp_frame)
 
-			if handler then
-				handler(...);
-			end;
-		end;
-
-		watcherFrame:SetScript('OnEvent', onEvent);
-		watcherFrame:RegisterEvent("UPDATE_BATTLEFIELD_SCORE");
-		watcherFrame:RegisterEvent("PLAYER_ENTERING_WORLD");
-		watcherFrame:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED");
-	else
-		watcherFrame:UnregisterAllEvents();
-	end;
-
-	return enabled;
 end
 
-ThreatPlatesWidgets.RegisterWidget("HealerTrackerWidgetTPTP", CreateWidgetFrame, false, enabled, EnabledInHeadlineView)
+function Widget:IsEnabled()
+    local enabled = TidyPlatesThreat.db.profile.healerTracker.ON
+
+	if enabled then
+		self:RegisterEvent("UPDATE_BATTLEFIELD_SCORE")
+		self:RegisterEvent("PLAYER_ENTERING_WORLD")
+		self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+	else
+		self:UnregisterAllEvents()
+	end
+
+	return enabled
+end
+
+function Widget:EnabledForStyle(style, unit)
+
+end
+
+function Widget:OnUnitAdded(widget_frame, unit)
+
+end
