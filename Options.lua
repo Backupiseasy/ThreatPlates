@@ -1406,7 +1406,7 @@ end
 
 local function CreateHealerTrackerWidgetOptions()
   local options =  {
-    name = "HealerTracker", --TODO: locale
+    name = L["Healer Tracker"],
     order = 60,
     type = "group",
     args = {

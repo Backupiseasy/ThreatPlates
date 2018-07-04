@@ -256,6 +256,7 @@ L["Healthbar View Y"] = true
 L["Healthbar View"] = true
 L["Healthbar"] = true
 L["Healthbar, Auras"] = true
+L["Healer Tracker"] = true
 L["Height"] = true
 L["Hide Friendly Nameplates"] = true
 L["Hide Healthbars"] = true
