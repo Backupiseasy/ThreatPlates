@@ -73,18 +73,18 @@ Widget.UnitAuraList = {}
 local CooldownNative = CreateFrame("Cooldown", nil, WorldFrame)
 Widget.SetCooldown = CooldownNative.SetCooldown
 
-local LOC_CHARM = 1
+local LOC_CHARM = 1 -- Aura: Possess
 local LOC_FEAR = 2
 local LOC_POLYMORPH = 3
 local LOC_STUN = 4
 local LOC_INCAPACITATE = 5
 local LOC_SLEEP = 6
-local LOC_DISORIENT = 7
+local LOC_DISORIENT = 7 -- Aura: Confuse
 local LOC_BANISH = 8
 local LOC_HORROR = 9
 
 local PC_SNARE = 50
-local PC_ROOT = 51
+local PC_ROOT = 51 -- Mechanic: Rooted
 local PC_DAZE = 52
 local PC_GRIP = 53
 
@@ -104,36 +104,53 @@ Widget.CROWD_CONTROL_SPELLS = {
   [33786] = LOC_BANISH,           -- Cyclone (PvP Talent, Restoration)
   [209753] = LOC_BANISH,          -- Cyclone (PvP Talent, Balance)
 
-  --[106839] = CC_SILENCE,          -- Skull Bash
-
   -- Death Knight
+  [108194] = LOC_STUN,             -- Asphyxiate
+  [47476] = LOC_STUN,              -- Strangulate (PvP Talent)
+  [45524] = PC_SNARE,              -- Chains of Ice
+  [111673] = LOC_CHARM,              -- Control Undead
+
   -- Demon Hunter
+  [211881] = LOC_STUN,             -- Fel Eruption (Talent)
+  [217832] = LOC_INCAPACITATE,     -- Imprison
+  [179057] = LOC_STUN,             -- Chaos Nova
 
   -- Hunter
-  [3355] = "Freezing Trap",
-  [19577] = "Intimidation",
-  [19386] = "Wyvern Sting",
+  [147362] = CC_SILENCE,        -- Counter Shot
+  [19577] = LOC_STUN,           -- Intimidation
+  [5116] = PC_DAZE,             -- Concussive Shot
+  [187651] = LOC_INCAPACITATE,  -- Freezing Trap
 
   -- Mage
-  [118] = "Polymorph", -- Sheep
-  [28271] = "Polymorph", -- Turtle
-  [28272] = "Polymorph", -- Pig
-  [61305] = "Polymorph", -- Black Cat
-  [61721] = "Polymorph", -- Rabbit
-  [61025] = "Polymorph", -- Serpent
-  [61780] = "Polymorph", -- Turkey
-  [161372] = "Polymorph", -- Peacock
-  [161355] = "Polymorph", -- Penguin
-  [161353] = "Polymorph", -- Polar Bear Cub
-  [161354] = "Polymorph", -- Monkey
-  [126819] = "Polymorph", -- Porcupine
-  [113724] = "Polymorph", -- Ring of Frost
+  [61780] = LOC_POLYMORPH,  -- Polymorph (Turkey)
+  [161353] = LOC_POLYMORPH, -- Polymorph (Polar Bear Cub)
+  [28272] = LOC_POLYMORPH,  -- Polymorph (Pig)
+  [28271] = LOC_POLYMORPH,  -- Polymorph (Turtle)
+  [161354] = LOC_POLYMORPH, -- Polymorph (Monkey)
+  [118] = LOC_POLYMORPH,    -- Polymorph (Sheep)
+  [126819] = LOC_POLYMORPH, -- Polymorph (Porcupine)
+  [61305] = LOC_POLYMORPH,  -- Polymorph (Black Cat)
+  [61721] = LOC_POLYMORPH,  -- Polymorph (Rabbit)
+  [161372] = LOC_POLYMORPH, -- Polymorph (Peacock)
+  [161355] = LOC_POLYMORPH, -- Polymorph (Penguin)
+  [113724] = LOC_STUN,      -- Ring of Frost
+  [2139] = CC_SILENCE,      -- Counterspell
+  [31661] = LOC_DISORIENT,  -- Dragon's Breath
+  [122] = PC_ROOT,    -- Frost Nova
 
   -- Paladin
-  [20066] = "Repentence",
+  [853] = LOC_STUN,             -- Hammer of Justice
+  [115750] = LOC_DISORIENT,     -- Blinding Light
+  [96231] = CC_SILENCE,         -- Rebuke
+  [173315] = LOC_INCAPACITATE,  -- Repentance
 
   -- Priest
-  [605] = "Mind Control",
+  [15487] = CC_SILENCE,      -- Silence
+  [205369] = LOC_STUN,       -- Mind Bomb
+  [8122] = LOC_FEAR,         -- Psychic Scream
+  [605] = LOC_CHARM,         -- Mind Control
+  [9484] = LOC_POLYMORPH,    -- Shackle Undead
+  [88625] = LOC_STUN,       -- Holy Word: Chastise
 
   -- Rogue
 
@@ -334,7 +351,7 @@ function Widget:FilterEnemyBuffsBySpell(db, aura, AuraFilterFunction)
                     (db.ShowOnEnemyNPCs and aura.UnitIsNPC) or
                     (db.ShowDispellable and aura.StealOrPurge)
 
-  if db.HideUnlimitedDuration and aura.duration == 0 then
+  if db.HideUnlimitedDuration and aura.duration < 0 then
     show_aura = false
   end
 

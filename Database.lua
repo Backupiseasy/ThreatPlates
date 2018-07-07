@@ -339,22 +339,33 @@ end
 
 local function MigrationAurasSettings(profile_name, profile)
   if DatabaseEntryExists(profile, { "AuraWidget" } ) then
-    if not profile.AuraWidget.ShowDebuffsOnFriendly then
-      profile.AuraWdiget.Debuffs.ShowDispellable = false
+    profile.AuraWidget.Debuffs = profile.AuraWidget.Debuffs or {}
+
+    if DatabaseEntryExists(profile, { "AuraWidget", "ShowDebuffsOnFriendly", } ) and profile.AuraWidget.ShowDebuffsOnFriendly then
+      profile.AuraWidget.Debuffs.ShowFriendly = true
     end
+    DatabaseEntryDelete(profile, { "AuraWidget", "ShowDebuffsOnFriendly", } )
 
     -- Don't migration FilterByType, does not make sense
     DatabaseEntryDelete(profile, { "AuraWidget", "FilterByType", } )
-    DatabaseEntryDelete(profile, { "AuraWidget", "ShowEnemy", } )
+    DatabaseEntryDelete(profile, { "AuraWidget", "ShowFriendly", } )
     DatabaseEntryDelete(profile, { "AuraWidget", "ShowEnemy", } )
 
-    profile.AuraWidget.Debuffs.FilterBySpell = profile.AuraWidget.FilterBySpell
-    DatabaseEntryDelete(profile, { "AuraWidget", "FilterBySpell", } )
-    profile.AuraWdiget.Debuffs.FilterMode = profile.AuraWidget.FilterMode:gsub("Mine", "")
-    DatabaseEntryDelete(profile, { "AuraWidget", "FilterMode", } )
 
-    profile.AuraWdiget.Debuffs.Scale = profile.AuraWidget.scale
-    DatabaseEntryDelete(profile, { "AuraWidget", "scale", } )
+    if DatabaseEntryExists(profile, { "AuraWidget", "FilterBySpell", } ) then
+      profile.AuraWidget.Debuffs.FilterBySpell = profile.AuraWidget.FilterBySpell
+      DatabaseEntryDelete(profile, { "AuraWidget", "FilterBySpell", } )
+    end
+
+    if DatabaseEntryExists(profile, { "AuraWidget", "FilterMode", } ) then
+      profile.AuraWidget.Debuffs.FilterMode = profile.AuraWidget.FilterMode:gsub("Mine", "")
+      DatabaseEntryDelete(profile, { "AuraWidget", "FilterMode", } )
+    end
+
+    if DatabaseEntryExists(profile, { "AuraWidget", "scale", } ) then
+      profile.AuraWidget.Debuffs.Scale = profile.AuraWidget.scale
+      DatabaseEntryDelete(profile, { "AuraWidget", "scale", } )
+    end
   end
 end
 
