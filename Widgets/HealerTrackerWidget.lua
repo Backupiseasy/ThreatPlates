@@ -19,10 +19,10 @@ local TidyPlatesThreat = TidyPlatesThreat
 
 local PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\HealerTrackerWidget\\"
 local HEALER_SPECS = {
-  "Restoration",
-  "Mistweaver",
-  "Holy",
-  "Discipline"
+  ["Restoration"] = true,
+  ["Mistweaver"] = true,
+  ["Holy"] = true,
+  ["Discipline"] = true
 }
 
 local HEALER_SPELLS = {
@@ -125,38 +125,12 @@ end
 --	end
 --end
 
-local function InsertUnique(list, value)
-  for i, v in ipairs(list) do
-    --it already exists
-    if v == value then
-      return
-    end
-  end
-
-  table.insert(list, value)
-end
-
 local function IsHealerSpec(spec)
-  local isHealer = false
-
-  for i, v in ipairs(HEALER_SPECS) do
-    if v == spec then
-      isHealer = true
-      break
-    end
-  end
-
-  return isHealer
+  return HEALER_SPECS[spec] == true
 end
 
 local function IsHealer(guid)
-  for i, v in ipairs(healerList.guids) do
-    if v == guid then
-      return true
-    end
-  end
-
-  return false
+  return healerList.guids[guid] == true
 end
 
 local nextUpdate = 0
@@ -182,7 +156,7 @@ local function FindHealersInBgScoreboard()
 
     if IsHealerSpec(talentSpec) then
       name = string.gsub(name, "-.+", "") --remove realm part of name
-      InsertUnique(healerList.names, name)
+      healerList.names[name] = true
     end
   end
 
@@ -202,16 +176,13 @@ local function FindHealersViaCombatLog(...)
   local timestamp, combatevent, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlag, spellid = ...
 
   if sourceGUID and sourceName and SPELL_EVENTS[combatevent] and HEALER_SPELLS[spellid] then
-    InsertUnique(healerList.guids, sourceGUID)
+    healerList.guids[sourceGUID] = true
   end
 end
 
 local function ResolveName(unit)
-  for i, v in ipairs(healerList.names) do
-    if v == unit.name then --a healer identified via scoreboard, add it to main guid list
-      InsertUnique(healerList.guids, unit.guid)
-      return
-    end
+  if healerList.names[unit.name] then --a healer identified via scoreboard, add it to main guid list
+    healerList.guids[unit.guid] = true
   end
 end
 
