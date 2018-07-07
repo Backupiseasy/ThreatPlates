@@ -1917,6 +1917,29 @@ local function CreateAurasWidgetOptions()
                 set = SetColorAlphaAuraWidget,
                 get = GetColorAlpha,
               },
+
+--              TestBorderEdgeSize = {
+--                name = "Edge Size",
+--                order = 530,
+--                type = "range",
+--                min = 0, max = 32, step = 0.1,
+--                arg = { "TestWidget", "EdgeSize" },
+--              },
+--              TestBorderOffset = {
+--                name = "Offset",
+--                order = 540,
+--                type = "range",
+--                min = -16, max = 16, step = 0.1,
+--                arg = { "TestWidget", "Offset" },
+--              },
+--              TestBorderInset = {
+--                name = "Inset",
+--                order = 545,
+--                type = "range",
+--                min = -16, max = 16, step = 0.1,
+--                arg = { "TestWidget", "Inset" },
+--              },
+
             },
           },
           SortOrder = {
@@ -2409,6 +2432,14 @@ local function CreateAurasWidgetOptions()
                   SetValueAuraWidget(info, val)
                 end,
                 arg = { "AuraWidget", "Buffs", "ShowDispellable" },
+                disabled = function() return not db.AuraWidget.Buffs.ShowEnemy end
+              },
+              HidePermanent = {
+                name = L["Hide Unlimited"],
+                order = 60,
+                type = "toggle",
+                desc = L["Hide buffs with unlimted duration."],
+                arg = { "AuraWidget", "Buffs", "HideUnlimitedDuration" },
                 disabled = function() return not db.AuraWidget.Buffs.ShowEnemy end
               },
             },

@@ -35,18 +35,10 @@ local DEBUG = ThreatPlates.DEBUG
 
 -- Default for icon mode is 0.5, for bar mode "1 / GetFramerate()" is used for smooth updates -- GetFramerate() in frames/second
 local UPDATE_INTERVAL = Addon.ON_UPDATE_INTERVAL
-local FLASH_DURATION = Addon.Animations.FLASH_DURATION
-local ANCHOR_POINT_SETPOINT = Addon.ANCHOR_POINT_SETPOINT
 
 ---------------------------------------------------------------------------------------------------
 -- Auras Widget Functions
 ---------------------------------------------------------------------------------------------------
-
-local TEXTURE_BORDER = Addon.ADDON_DIRECTORY .. "Widgets\\AuraWidget\\TP_AuraFrameBorder"
-
--- Debuffs are color coded, with poison debuffs having a green border, magic debuffs a blue border, diseases a brown border,
--- urses a purple border, and physical debuffs a red border
-local AURA_TYPE = { Curse = 1, Disease = 2, Magic = 3, Poison = 4, }
 
 local GRID_LAYOUT = {
   LEFT = {
@@ -59,9 +51,15 @@ local GRID_LAYOUT = {
   },
 }
 
--- Functions switched based on icon/bar mode
-Widget.CenterAurasPositions = {}
-Widget.UnitAuraList = {}
+--local TEXTURE_BORDER = Addon.ADDON_DIRECTORY .. "Widgets\\AuraWidget\\TP_AuraFrameBorder"
+Widget.TEXTURE_BORDER = Addon.ADDON_DIRECTORY .. "Artwork\\squareline"
+
+-- Debuffs are color coded, with poison debuffs having a green border, magic debuffs a blue border, diseases a brown border,
+-- urses a purple border, and physical debuffs a red border
+Widget.AURA_TYPE = { Curse = 1, Disease = 2, Magic = 3, Poison = 4, }
+
+Widget.FLASH_DURATION = Addon.Animations.FLASH_DURATION
+Widget.ANCHOR_POINT_SETPOINT = Addon.ANCHOR_POINT_SETPOINT
 Widget.PRIORITY_FUNCTIONS = {
   None = function(aura) return 0 end,
   AtoZ = function(aura) return aura.name end,
@@ -69,7 +67,8 @@ Widget.PRIORITY_FUNCTIONS = {
   Duration = function(aura) return aura.duration end,
   Creation = function(aura) return aura.expiration - aura.duration end,
 }
-
+Widget.CenterAurasPositions = {}
+Widget.UnitAuraList = {}
 -- Get a clean version of the function...  Avoid OmniCC interference
 local CooldownNative = CreateFrame("Cooldown", nil, WorldFrame)
 Widget.SetCooldown = CooldownNative.SetCooldown
@@ -292,7 +291,7 @@ function Widget:FilterFriendlyDebuffsBySpell(db, aura, AuraFilterFunction)
                     (db.ShowBlizzardForFriendly and (aura.ShowAll or (aura.ShowPersonal and aura.CastByPlayer))) or
                     (db.ShowDispellable and aura.StealOrPurge) or
                     (db.ShowBoss and aura.BossDebuff) or
-                    (aura.type and db.FilterByType[AURA_TYPE[aura.type]])
+                    (aura.type and db.FilterByType[self.AURA_TYPE[aura.type]])
 
   local spellfound = self.AuraFilterDebuffs[aura.name] or self.AuraFilterDebuffs[aura.spellid]
 
@@ -334,6 +333,10 @@ function Widget:FilterEnemyBuffsBySpell(db, aura, AuraFilterFunction)
   local show_aura = db.ShowAllEnemy or
                     (db.ShowOnEnemyNPCs and aura.UnitIsNPC) or
                     (db.ShowDispellable and aura.StealOrPurge)
+
+  if db.HideUnlimitedDuration and aura.duration == 0 then
+    show_aura = false
+  end
 
   local spellfound = self.AuraFilterBuffs[aura.name] or self.AuraFilterBuffs[aura.spellid]
 
@@ -574,15 +577,17 @@ function Widget:UpdatePositionAuraGrid(frame, y_offset)
   if auras_no == 0 then
     frame:Hide()
   else
+    local anchor = self.ANCHOR_POINT_SETPOINT[db.anchor]
+
     if self.IconMode and db.CenterAuras then
       if auras_no > self.GridNoCols then
         auras_no = self.GridNoCols
       end
 
-      frame:SetPoint(ANCHOR_POINT_SETPOINT[db.anchor][2], frame:GetParent():GetParent(), ANCHOR_POINT_SETPOINT[db.anchor][1], db.x + self.CenterAurasPositions[auras_no], db.y + y_offset)
+      frame:SetPoint(anchor[2], frame:GetParent():GetParent(), anchor[1], db.x + self.CenterAurasPositions[auras_no], db.y + y_offset)
       frame:SetHeight(ceil(frame.ActiveAuras / self.GridNoCols) * (self.AuraHeight + self.AuraWidgetOffset))
     else
-      frame:SetPoint(ANCHOR_POINT_SETPOINT[db.anchor][2], frame:GetParent():GetParent(), ANCHOR_POINT_SETPOINT[db.anchor][1], db.x, db.y + y_offset)
+      frame:SetPoint(anchor[2], frame:GetParent():GetParent(), anchor[1], db.x, db.y + y_offset)
       frame:SetHeight(ceil(frame.ActiveAuras / self.GridNoCols) * (self.AuraHeight + self.AuraWidgetOffset))
     end
 
@@ -735,19 +740,29 @@ function Widget:UpdateAuraFrameIconMode(frame)
   frame.Icon:SetTexCoord(.10, 1-.07, .12, 1-.12)  -- Style: Square - remove border from icons
 
   if db.ShowBorder then
-    local offset, edge_size = 2, 8
-    if not show_aura_type then
-      offset, edge_size = 1, 4
-    end
+   --local offset, edge_size, inset = 1, 4, 0
+    local offset, edge_size, inset = 2, 8, 0
+--    local offset, edge_size = 2, 8
+--    if not show_aura_type then
+--      offset, edge_size = 1, 4
+--    end
+--    local db_test = TidyPlatesThreat.db.profile.TestWidget
+--    local offset, edge_size, inset = db_test.Offset, db_test.EdgeSize, db_test.Inset
+--    if not show_aura_type then
+--      offset, edge_size, inset = db_test.Offset, db_test.EdgeSize, db_test.Inset
+--      frame.Border:SetBackdropBorderColor(0, 0, 0, 1)
+--    end
 
     frame.Border:ClearAllPoints()
     frame.Border:SetPoint("TOPLEFT", frame, "TOPLEFT", -offset, offset)
     frame.Border:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", offset, -offset)
     frame.Border:SetBackdrop({
-      edgeFile = TEXTURE_BORDER,
+      edgeFile = self.TEXTURE_BORDER,
       edgeSize = edge_size,
-      --insets = { left = 0, right = 04, top = 0, bottom = 0 },
+      insets = { left = inset, right = inset, top = inset, bottom = inset },
     })
+    frame.Border:SetBackdropBorderColor(0, 0, 0, 1)
+
     frame.Border:Show()
   else
     frame.Border:Hide()
@@ -809,13 +824,13 @@ function Widget:UpdateWidgetTimeIconMode(frame, expiration, duration)
       end
 
       if db.FlashWhenExpiring and timeleft < db.FlashTime then
-        Animations:Flash(frame, FLASH_DURATION)
+        Animations:Flash(frame, self.FLASH_DURATION)
       end
     else
       frame.TimeLeft:SetText("")
 
       if db.FlashWhenExpiring and timeleft < db.FlashTime then
-        Animations:Flash(frame, FLASH_DURATION)
+        Animations:Flash(frame, self.FLASH_DURATION)
       end
     end
   end
@@ -968,13 +983,13 @@ function Widget:UpdateWidgetTimeBarMode(frame, expiration, duration)
       end
 
       if db.FlashWhenExpiring and timeleft < db.FlashTime then
-        Animations:Flash(frame, FLASH_DURATION)
+        Animations:Flash(frame, self.FLASH_DURATION)
       end
     else
       frame.TimeText:SetText("")
 
       if db.FlashWhenExpiring and timeleft < db.FlashTime then
-        Animations:Flash(frame, FLASH_DURATION)
+        Animations:Flash(frame, self.FLASH_DURATION)
       end
     end
 
@@ -987,8 +1002,6 @@ end
 ---------------------------------------------------------------------------------------------------
 
 function Widget:CreateAuraGrid(frame)
-  local align_layout = GRID_LAYOUT[self.db.AlignmentH][self.db.AlignmentV]
-
   local aura_frame_list = frame.AuraFrames
   local pos_x, pos_y
 
@@ -1013,6 +1026,8 @@ function Widget:CreateAuraGrid(frame)
         end
       end
     end
+
+    local align_layout = self.AlignLayout
 
     pos_x = (i - 1) % self.GridNoCols
     pos_x = (pos_x * self.AuraWidth + self.AuraWidgetOffset) * align_layout[2]
@@ -1334,6 +1349,8 @@ function Widget:UpdateSettings()
   else
     self.UpdateSettingsBarMode(self)
   end
+
+  self.AlignLayout = GRID_LAYOUT[self.db.AlignmentH][self.db.AlignmentV]
 
   for plate, tp_frame in pairs(Addon.PlatesCreated) do
     local widget_frame = tp_frame.widgets.Auras

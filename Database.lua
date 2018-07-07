@@ -337,6 +337,27 @@ local function MigrateBorderTextures(profile_name, profile)
   end
 end
 
+local function MigrationAurasSettings(profile_name, profile)
+  if DatabaseEntryExists(profile, { "AuraWidget" } ) then
+    if not profile.AuraWidget.ShowDebuffsOnFriendly then
+      profile.AuraWdiget.Debuffs.ShowDispellable = false
+    end
+
+    -- Don't migration FilterByType, does not make sense
+    DatabaseEntryDelete(profile, { "AuraWidget", "FilterByType", } )
+    DatabaseEntryDelete(profile, { "AuraWidget", "ShowEnemy", } )
+    DatabaseEntryDelete(profile, { "AuraWidget", "ShowEnemy", } )
+
+    profile.AuraWidget.Debuffs.FilterBySpell = profile.AuraWidget.FilterBySpell
+    DatabaseEntryDelete(profile, { "AuraWidget", "FilterBySpell", } )
+    profile.AuraWdiget.Debuffs.FilterMode = profile.AuraWidget.FilterMode:gsub("Mine", "")
+    DatabaseEntryDelete(profile, { "AuraWidget", "FilterMode", } )
+
+    profile.AuraWdiget.Debuffs.Scale = profile.AuraWidget.scale
+    DatabaseEntryDelete(profile, { "AuraWidget", "scale", } )
+  end
+end
+
 local function MigrateAuraWidget(profile_name, profile)
   if DatabaseEntryExists(profile, { "debuffWidget" }) then
     if not profile.AuraWidget.ON and not profile.AuraWidget.ShowInHeadlineView then
@@ -366,25 +387,26 @@ end
 
 ---- Settings in the SavedVariables file that should be migrated and/or deleted
 local DEPRECATED_SETTINGS = {
-  NamesColor = { MigrateNamesColor, },                        -- settings.name.color
-  CustomTextShow = { MigrateCustomTextShow, },                -- settings.customtext.show
-  BlizzFadeA = { MigrationBlizzFadeA, },                      -- blizzFadeA.toggle and blizzFadeA.amount
-  TargetScale = { MigrationTargetScale, "8.5.0" },            -- nameplate.scale.Target/NoTarget
-  --AuraWidget = { MigrateAuraWidget, "8.6.0" },              -- disabled until someone requests it
-  AlphaFeatures = { "alphaFeatures" },
-  AlphaFeatureHeadlineView = { "alphaFeatureHeadlineView" },
-  AlphaFeatureAuraWidget2= { "alphaFeatureAuraWidget2" },
-  AlphaFriendlyNameOnly = { "alphaFriendlyNameOnly" },
-  HVBlizzFarding = { "HeadlineView", "blizzFading" },         -- (removed in 8.5.1)
-  HVBlizzFadingAlpha = { "HeadlineView", "blizzFadingAlpha"}, -- (removed in 8.5.1)
-  HVNameWidth = { "HeadlineView", "name", "width" },          -- (removed in 8.5.0)
-  HVNameHeight = { "HeadlineView", "name", "height" },        -- (removed in 8.5.0)
+--  NamesColor = { MigrateNamesColor, },                        -- settings.name.color
+--  CustomTextShow = { MigrateCustomTextShow, },                -- settings.customtext.show
+--  BlizzFadeA = { MigrationBlizzFadeA, },                      -- blizzFadeA.toggle and blizzFadeA.amount
+--  TargetScale = { MigrationTargetScale, "8.5.0" },            -- nameplate.scale.Target/NoTarget
+--  --AuraWidget = { MigrateAuraWidget, "8.6.0" },              -- disabled until someone requests it
+--  AlphaFeatures = { "alphaFeatures" },
+--  AlphaFeatureHeadlineView = { "alphaFeatureHeadlineView" },
+--  AlphaFeatureAuraWidget2= { "alphaFeatureAuraWidget2" },
+--  AlphaFriendlyNameOnly = { "alphaFriendlyNameOnly" },
+--  HVBlizzFarding = { "HeadlineView", "blizzFading" },         -- (removed in 8.5.1)
+--  HVBlizzFadingAlpha = { "HeadlineView", "blizzFadingAlpha"}, -- (removed in 8.5.1)
+--  HVNameWidth = { "HeadlineView", "name", "width" },          -- (removed in 8.5.0)
+--  HVNameHeight = { "HeadlineView", "name", "height" },        -- (removed in 8.5.0)
   DebuffWidget = { "debuffWidget" },                          -- (removed in 8.6.0)
   OldSettings = { "OldSettings" },                            -- (removed in 8.7.0)
   CastbarColoring = { MigrateCastbarColoring, },              -- (removed in 8.7.0)
   TotemSettings = { MigrationTotemSettings, "8.7.0" },        -- (changed in 8.7.0)
   Borders = { MigrateBorderTextures, "8.7.0" },               -- (changed in 8.7.0)
   UniqueSettingsList = { "uniqueSettings", "list" },          -- (removed in 8.7.0, cleanup added in 8.7.1)
+  Auras = { MigrationAurasSettings, "8.8.0" },                -- (changed in 8.8.0)
 }
 
 local function MigrateDatabase(current_version)
