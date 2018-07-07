@@ -497,11 +497,13 @@ ThreatPlates.DEFAULT_SETTINGS = {
     },
     healerTracker = {
       ON = true,
-      scale = 1,
+      scale = 22,
       x = 0,
       y = 35,
       level = 1,
-      anchor = "CENTER"
+      alpha = 1,
+      anchor = "RIGHT",
+      ShowInHeadlineView = false
     },
     AuraWidget = {
       ON = true,
