@@ -207,11 +207,10 @@ function TidyPlatesThreat:ReloadTheme()
     TidyPlatesInternal:DisableCastBars()
   end
 
+  Addon.Widgets.Auras:ParseSpellFilters() -- Parse Spell Filters calls UpdateSettings ... maybe not the best order to do this
+
   Addon:InitializeCustomNameplates()
   Addon:InitializeAllWidgets()
-
-  Addon.Widgets.Auras:ParseSpellFilters()
-  Addon.Widgets.Auras:UpdateSettings()
 end
 
 function TidyPlatesThreat:StartUp()

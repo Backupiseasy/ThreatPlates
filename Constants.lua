@@ -119,14 +119,19 @@ ThreatPlates.Widgets = "Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\Wid
 -- Global contstants for options dialog
 ---------------------------------------------------------------------------------------------------
 
-ThreatPlates.DebuffMode = {
+Addon.AurasFilterModeDebuffs = {
   ["whitelist"] = L["White List"],
   ["blacklist"] = L["Black List"],
   ["whitelistMine"] = L["White List (Mine)"],
   ["blacklistMine"] = L["Black List (Mine)"],
   ["all"] = L["All Auras"],
   ["allMine"] = L["All Auras (Mine)"],
-  ["BLIZZARD"] = L["Blizzard"]
+}
+
+Addon.AurasFilterMode = {
+  ["whitelist"] = L["White List"],
+  ["blacklist"] = L["Black List"],
+  ["all"] = L["All Auras"],
 }
 
 ThreatPlates.SPEC_ROLES = {
@@ -529,31 +534,51 @@ ThreatPlates.DEFAULT_SETTINGS = {
       FlashWhenExpiring = false,
       FlashTime = 5,
       Debuffs = {
+        ShowFriendly = false,
+        ShowAllFriendly = false,
+        ShowBlizzardForFriendly = true,
+        ShowDispellable = true,
+        ShowBoss = true,
         ShowEnemy = true,
-        ShowFriendly = true,
+        ShowAllEnemy = false,
+        ShowOnlyMine = true,
+        ShowBlizzardForEnemy = false,
+        --ShowDebuffsOnFriendly = false, -- converted to ShowDispellable
         Scale = 1.0,
-        FilterMode = "blacklistMine",
+        FilterMode = "blacklist",
         FilterBySpell = {},
-        ShowDebuffsOnFriendly = false, -- change it
         FilterByType = {
           --[1] = true, -- Debuffs, removed in 8.8
-          [1] = true,
-          [2] = true,
-          [3] = true,
-          [4] = true,
+          [1] = false, -- changed from true to false
+          [2] = false, -- changed from true to false
+          [3] = false, -- changed from true to false
+          [4] = false, -- changed from true to false
           --[6] = true, -- Buffs, removed in 8.8
         },
       },
       Buffs = {
-        ShowEnemy = true,
         ShowFriendly = false,
-        Scale = 1.0,
-        FilterMode = "BLIZZARD",
+        ShowAllFriendly = false,
+        ShowOnFriendlyNPCs = true,
+        ShowPlayerCanApply = false,
+        ShowEnemy = true,
+        ShowAllEnemy = false,
+        ShowOnEnemyNPCs = true,
+        -- ShowBlizzard = true,
+        ShowDispellable = true,
+        Scale = 1.5,
+        FilterMode = "blacklist",
         FilterBySpell = {},
       },
       CrowdControl = {
-        ShowEnemy = true,
         ShowFriendly = true,
+        ShowAllFriendly = false,
+        ShowBlizzardForFriendly = true,
+        ShowDispellable = true,
+        ShowBoss = true,
+        ShowEnemy = true,
+        ShowAllEnemy = false,
+        ShowBlizzardForEnemy = true,
         Scale = 2.0,
         FilterMode = "blacklist",
         FilterBySpell = {},
