@@ -351,7 +351,7 @@ function Widget:FilterEnemyBuffsBySpell(db, aura, AuraFilterFunction)
                     (db.ShowOnEnemyNPCs and aura.UnitIsNPC) or
                     (db.ShowDispellable and aura.StealOrPurge)
 
-  if db.HideUnlimitedDuration and aura.duration < 0 then
+  if db.HideUnlimitedDuration and aura.duration <= 0 then
     show_aura = false
   end
 
