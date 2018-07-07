@@ -28,6 +28,7 @@
 ------------------------------------------------------
 8.8.0-Alpha3
 ------------------------------------------------------
+* Re-activated the HealerTracker widget - big thanks to Sudo1701 for migrating and updating it from legacy code.
 * Added serveral customization options for aura icons to the Auras widget (e.g., change height, width, time text font and position) [Comment #827, Issue #181].
 * Fixed a bug with Resource widget showing on non-target units.
 * Fixed a bug with level text options where text boundaries where incorrectly stored and not used because of that [Issue from WoWInterface].

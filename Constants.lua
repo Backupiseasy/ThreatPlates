@@ -496,7 +496,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
       },
     },
     healerTracker = {
-      ON = true,
+      ON = false,
       scale = 22,
       x = 0,
       y = 35,

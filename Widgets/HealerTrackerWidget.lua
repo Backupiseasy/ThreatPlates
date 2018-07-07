@@ -9,6 +9,14 @@ local Widget = Addon:NewWidget("HealerTracker")
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
 
+-- WoW APIs
+local GetTime = GetTime
+local CreateFrame = CreateFrame
+local RequestBattlefieldScoreData, GetNumBattlefieldScores = RequestBattlefieldScoreData, GetNumBattlefieldScores
+
+-- ThreatPlates APIs
+local TidyPlatesThreat = TidyPlatesThreat
+
 local PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\HealerTrackerWidget\\"
 local HEALER_SPECS = {
 	"Restoration",
@@ -18,62 +26,62 @@ local HEALER_SPECS = {
 }
 
 local HEALER_SPELLS = {
-    -- Priest
-	----------
-    [47540] = "PRIEST", -- Penance
-    [88625] = "PRIEST", -- Holy Word: Chastise
-    [88684] = "PRIEST", -- Holy Word: Serenity
-    [88685] = "PRIEST", -- Holy Word: Sanctuary
-    [89485] = "PRIEST", -- Inner Focus
-    [10060] = "PRIEST", -- Power Infusion
-    [33206] = "PRIEST", -- Pain Suppression
-    [62618] = "PRIEST", -- Power Word: Barrier
-    [724]   = "PRIEST", -- Lightwell
-    [14751] = "PRIEST", -- Chakra
-    [34861] = "PRIEST", -- Circle of Healing
-    [47788] = "PRIEST", -- Guardian Spirit
+  -- Priest
+  ----------
+  [47540] = "PRIEST", -- Penance
+  [88625] = "PRIEST", -- Holy Word: Chastise
+  [88684] = "PRIEST", -- Holy Word: Serenity
+  [88685] = "PRIEST", -- Holy Word: Sanctuary
+  [89485] = "PRIEST", -- Inner Focus
+  [10060] = "PRIEST", -- Power Infusion
+  [33206] = "PRIEST", -- Pain Suppression
+  [62618] = "PRIEST", -- Power Word: Barrier
+  [724]   = "PRIEST", -- Lightwell
+  [14751] = "PRIEST", -- Chakra
+  [34861] = "PRIEST", -- Circle of Healing
+  [47788] = "PRIEST", -- Guardian Spirit
 
-    -- Druid (The affinity traits on the other specs makes this difficult)
-    ---------
-    [17116] = "DRUID", -- Nature's Swiftness
-    [33891] = "DRUID", -- Tree of Life
-	[33763] = "DRUID", -- Lifebloom
-	[88423] = "DRUID", -- Nature's Cure
-	[102342] = "DRUID", -- Ironbark
-	[145205] = "DRUID", -- Efflorescence
-	[740] = "DRUID", -- Tranquility
+  -- Druid (The affinity traits on the other specs makes this difficult)
+  ---------
+  [17116] = "DRUID", -- Nature's Swiftness
+  [33891] = "DRUID", -- Tree of Life
+  [33763] = "DRUID", -- Lifebloom
+  [88423] = "DRUID", -- Nature's Cure
+  [102342] = "DRUID", -- Ironbark
+  [145205] = "DRUID", -- Efflorescence
+  [740] = "DRUID", -- Tranquility
 
-    -- Shaman
-	---------
-    [17116] = "SHAMAN", -- Nature's Swiftness
-    [16190] = "SHAMAN", -- Mana Tide Totem
-    [61295] = "SHAMAN", -- Riptide
-	[5394] = "SHAMAN", -- Healing Stream Totem
-	[1064] = "SHAMAN", -- Chain Heal
-	[77130] = "SHAMAN", -- Purify Spirit
-	[77472] = "SHAMAN", -- Healing Wave
-	[98008] = "SHAMAN", -- Spirit Link Totem
+  -- Shaman
+  ---------
+  [17116] = "SHAMAN", -- Nature's Swiftness
+  [16190] = "SHAMAN", -- Mana Tide Totem
+  [61295] = "SHAMAN", -- Riptide
+  [5394] = "SHAMAN", -- Healing Stream Totem
+  [1064] = "SHAMAN", -- Chain Heal
+  [77130] = "SHAMAN", -- Purify Spirit
+  [77472] = "SHAMAN", -- Healing Wave
+  [98008] = "SHAMAN", -- Spirit Link Totem
 
-    -- Paladin
-	----------
-    [20473] = "PALADIN", -- Holy Shock
-    [53563] = "PALADIN", -- Beacon of Light
-    [31821] = "PALADIN", -- Aura Mastery
-    [85222] = "PALADIN", -- Light of Dawn
-	[4987] = "PALADIN", -- Cleanse
-	[82326] = "PALADIN", -- Holy Light
+  -- Paladin
+  ----------
+  [20473] = "PALADIN", -- Holy Shock
+  [53563] = "PALADIN", -- Beacon of Light
+  [31821] = "PALADIN", -- Aura Mastery
+  [85222] = "PALADIN", -- Light of Dawn
+  [4987] = "PALADIN", -- Cleanse
+  [82326] = "PALADIN", -- Holy Light
 
-    -- Monk
-	---------
-    [115175] = "MONK", -- Soothing Mist
-    [115294] = "MONK", -- Mana Tea
-    [115310] = "MONK", -- Revival
-    [116670] = "MONK", -- Uplift
-    [116680] = "MONK", -- Thunder Focus Tea
-    [116849] = "MONK", -- Life Cocoon
-    [116995] = "MONK", -- Surging mist
-    [119611] = "MONK", -- Renewing mist
-    [132120] = "MONK", -- Envelopping Mist
+  -- Monk
+  ---------
+  [115175] = "MONK", -- Soothing Mist
+  [115294] = "MONK", -- Mana Tea
+  [115310] = "MONK", -- Revival
+  [116670] = "MONK", -- Uplift
+  [116680] = "MONK", -- Thunder Focus Tea
+  [116849] = "MONK", -- Life Cocoon
+  [116995] = "MONK", -- Surging mist
+  [119611] = "MONK", -- Renewing mist
+  [132120] = "MONK", -- Envelopping Mist
 }
 
 ---------------------------------------------------------------------------------------------------
@@ -90,12 +98,12 @@ local healerList = {
 ---------------------------------------------------------------------------------------------------
 
 local function UpdateSettings(frame)
-    local db = TidyPlatesThreat.db.profile.healerTracker
-	local size = db.scale
-    local alpha = db.alpha
+  local db = TidyPlatesThreat.db.profile.healerTracker
+  local size = db.scale
+  local alpha = db.alpha
 
-	frame:SetSize(size, size)
-    frame:SetAlpha(alpha)
+  frame:SetSize(size, size)
+  frame:SetAlpha(alpha)
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -103,19 +111,19 @@ end
 ---------------------------------------------------------------------------------------------------
 
 --NOTE: used for testing
-local function dumpLists()
-	print("dumping lists")
-
-	print("name")
-	for i, v in ipairs(healerList.names) do
-		print(v)
-	end
-
-	print("guid")
-	for i, v in ipairs(healerList.guids) do
-		print(v)
-	end
-end
+--local function dumpLists()
+--	print("dumping lists")
+--
+--	print("name")
+--	for i, v in ipairs(healerList.names) do
+--		print(v)
+--	end
+--
+--	print("guid")
+--	for i, v in ipairs(healerList.guids) do
+--		print(v)
+--	end
+--end
 
 local function InsertUnique(list, value)
 	for i, v in ipairs(list) do
@@ -190,6 +198,7 @@ local SPELL_EVENTS = {
 }
 
 local function FindHealersViaCombatLog(...)
+  -- BfA: local timestamp, combatevent, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlag, spellid = CombatLogGetCurrentEventInfo();
 	local timestamp, combatevent, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlag, spellid = ...
 
 	if sourceGUID and sourceName and SPELL_EVENTS[combatevent] and HEALER_SPELLS[spellid] then
@@ -234,9 +243,6 @@ function Widget:Create(tp_frame)
 	frame:SetFrameLevel(tp_frame:GetFrameLevel() + 7)
 	frame.Icon = frame:CreateTexture(nil, "OVERLAY")
 	frame.Icon:SetAllPoints(frame)
-
-	UpdateSettings(frame)
-	frame.UpdateConfig = UpdateSettings
 	--------------------------------------
 	-- End Custom Code
 
@@ -244,31 +250,29 @@ function Widget:Create(tp_frame)
 end
 
 function Widget:IsEnabled()
-    local enabled = TidyPlatesThreat.db.profile.healerTracker.ON or TidyPlatesThreat.db.profile.healerTracker.ShowInHeadlineView
+  return TidyPlatesThreat.db.profile.healerTracker.ON or TidyPlatesThreat.db.profile.healerTracker.ShowInHeadlineView
+end
 
-	if enabled then
-		self:RegisterEvent("UPDATE_BATTLEFIELD_SCORE")
-		self:RegisterEvent("PLAYER_ENTERING_WORLD")
-		self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-	else
-		self:UnregisterAllEvents()
-	end
-
-	return enabled
+function Widget:OnEnable()
+  self:RegisterEvent("UPDATE_BATTLEFIELD_SCORE")
+  self:RegisterEvent("PLAYER_ENTERING_WORLD")
+  self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 end
 
 function Widget:EnabledForStyle(style, unit)
-    if unit.type ~= "PLAYER" then return false end
+  if unit.type ~= "PLAYER" then return false end
 
-    if (style == "NameOnly" or style == "NameOnly-Unique") then
-        return TidyPlatesThreat.db.profile.healerTracker.ShowInHeadlineView
-    elseif style ~= "etotem" then
-        return TidyPlatesThreat.db.profile.healerTracker.ON
-    end
+  if (style == "NameOnly" or style == "NameOnly-Unique") then
+    return TidyPlatesThreat.db.profile.healerTracker.ShowInHeadlineView
+  elseif style ~= "etotem" then
+    return TidyPlatesThreat.db.profile.healerTracker.ON
+  end
 end
 
 function Widget:OnUnitAdded(widget_frame, unit)
-    local db = TidyPlatesThreat.db.profile.healerTracker
+  local db = TidyPlatesThreat.db.profile.healerTracker
+
+  UpdateSettings(widget_frame)
 
 	RequestBgScoreData()
 	ResolveName(unit)
