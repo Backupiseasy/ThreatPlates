@@ -243,6 +243,12 @@ end
 function Widget:OnUnitAdded(widget_frame, unit)
   local db = TidyPlatesThreat.db.profile.healerTracker
 
+  --Deathknights can be picked up as 'healers' thanks to Dark Simulacrum, so just ignore them.
+  if unit.class == "DEATHKNIGHT" then
+    widget_frame:Hide()
+    return
+  end
+
   UpdateSettings(widget_frame)
 
   RequestBgScoreData()
