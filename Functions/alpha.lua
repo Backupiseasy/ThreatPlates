@@ -12,9 +12,6 @@ local UnitExists = UnitExists
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
-local UnitIsOffTanked = ThreatPlates.UnitIsOffTanked
-local GetUniqueNameplateSetting = ThreatPlates.GetUniqueNameplateSetting
-local GetThreatStyle = ThreatPlates.GetThreatStyle
 
 local function TransparencySituational(unit)
 	local db = TidyPlatesThreat.db.profile.nameplate
@@ -88,7 +85,7 @@ local function TransparencyThreat(unit, style)
 	end
 
   local threatSituation = unit.threatSituation
-  if style == "tank" and db.toggle.OffTank and UnitIsOffTanked(unit) then
+  if style == "tank" and db.toggle.OffTank and Addon:UnitIsOffTanked(unit) then
     threatSituation = "OFFTANK"
 	end
 
@@ -100,7 +97,7 @@ local function TransparencyThreat(unit, style)
 end
 
 local function AlphaNormal(unit, non_combat_transparency)
-  local style = GetThreatStyle(unit)
+  local style = Addon:GetThreatStyle(unit)
   if style == "normal" then
     return non_combat_transparency or TransparencyGeneral(unit)
   else -- dps, tank
@@ -109,7 +106,7 @@ local function AlphaNormal(unit, non_combat_transparency)
 end
 
 local function AlphaUnique(unit)
-	local unique_setting = GetUniqueNameplateSetting(unit)
+	local unique_setting = unit.CustomPlateSettings
 
 	if unique_setting.overrideAlpha then
 		return AlphaNormal(unit)
@@ -164,14 +161,5 @@ local ALPHA_FUNCTIONS = {
 }
 
 function Addon:SetAlpha(unit)
-	if not unit.unitid then return 0 end -- unitid is used in UnitIsOffTanked
-
-	-- sometimes SetAlpha is called without calling OnUpdate/OnContextUpdate first, so TP_Style may not be initialized
-	local style = unit.TP_Style or Addon:SetStyle(unit)
-
-  local alpha_func = ALPHA_FUNCTIONS[style]
-
-  local alpha = alpha_func(unit, style)
-
-  return alpha
+  return ALPHA_FUNCTIONS[unit.style](unit, unit.style)
 end

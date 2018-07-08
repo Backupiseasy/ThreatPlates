@@ -12,9 +12,6 @@ local UnitExists = UnitExists
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
-local UnitIsOffTanked = ThreatPlates.UnitIsOffTanked
-local GetUniqueNameplateSetting = ThreatPlates.GetUniqueNameplateSetting
-local GetThreatStyle = ThreatPlates.GetThreatStyle
 
 local function ScaleSituational(unit)
 	local db = TidyPlatesThreat.db.profile.nameplate
@@ -89,7 +86,7 @@ local function ScaleThreat(unit, style)
 	end
 
 	local threatSituation = unit.threatSituation
-	if style == "tank" and db.toggle.OffTank and UnitIsOffTanked(unit) then
+	if style == "tank" and db.toggle.OffTank and Addon:UnitIsOffTanked(unit) then
 		threatSituation = "OFFTANK"
 	end
 
@@ -101,7 +98,7 @@ local function ScaleThreat(unit, style)
 end
 
 local function ScaleNormal(unit, non_combat_scale)
-	local style = GetThreatStyle(unit)
+	local style = Addon:GetThreatStyle(unit)
 	if style == "normal" then
 		return non_combat_scale or ScaleGeneral(unit)
 	else -- dps, tank
@@ -110,7 +107,7 @@ local function ScaleNormal(unit, non_combat_scale)
 end
 
 local function ScaleUnique(unit)
-	local unique_setting = GetUniqueNameplateSetting(unit)
+	local unique_setting = unit.CustomPlateSettings
 
 	if unique_setting.overrideScale then
 		return  ScaleNormal(unit)
@@ -165,15 +162,7 @@ local SCALE_FUNCTIONS = {
 }
 
 function Addon:SetScale(unit)
-	if not unit.unitid then return 1 end -- unitid is used in UnitIsOffTanked
-
-	-- sometimes SetScale is called without calling OnUpdate/OnContextUpdate first, so TP_Style may not be initialized
-	-- true for SetAlpha, not sure for SetScale
-	local style = unit.TP_Style or Addon:SetStyle(unit)
-
-  local scale_func = SCALE_FUNCTIONS[style]
-
-  local scale = scale_func(unit, style)
+  local scale = SCALE_FUNCTIONS[unit.style](unit, unit.style)
 
 	-- scale may be set to 0 in the options dialog
 	if scale < 0.3 then

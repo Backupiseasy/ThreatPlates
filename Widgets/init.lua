@@ -2,211 +2,344 @@
 -- Widget Handling --
 ---------------------
 local ADDON_NAME, Addon = ...
-local ThreatPlates = Addon.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
 
 -- Lua APIs
-local pairs = pairs
+local pairs, next = pairs, next
 
 -- WoW APIs
 
 -- ThreatPlates APIs
-local DEBUG = ThreatPlates.DEBUG
+local Widgets = {}
+local EnabledWidgets = {}
+local RegisteredEventsByWidget = {}
 
-ThreatPlatesWidgets = {}
-ThreatPlatesWidgets.list = {}
-local ThreatPlatesWidgets = ThreatPlatesWidgets
+Addon.Widgets = Widgets
 
 ---------------------------------------------------------------------------------------------------
--- Information about widget layering, from highest to lowest
---    +2: combo points
--- 		+1: auras
---  widgets: frame level + 3
---  highest frame: cast bar -> spell icon, spell text
---  middle frame: raid icon, elite icon, skull icon, target
---    customtext, name, level
---  lower frame: healthbar -> health border, threat border, highlight (like healborder)
--- Current state:
---   name text is layered above combo point widget
+-- Event handling stuff
+---------------------------------------------------------------------------------------------------
+local function EventHandler(self, event, ...)
+  local widgets = RegisteredEventsByWidget[event]
 
-local function DummyFalse() return false end
-
-local function RegisterWidget(name,create,isContext,enabled, enabled_hv)
-  if not ThreatPlatesWidgets.list[name] then
-    ThreatPlatesWidgets.list[name] = {
-      name = name,
-      create = create,
-      isContext = isContext,
-      enabled = enabled,
-      EnabledInHeadlineView = enabled_hv or DummyFalse
-    }
+  if widgets then
+    for widget, func in pairs(widgets) do
+      if func == true then
+        widget[event](widget, ...)
+      else
+        func(event, ...)
+      end
+    end
   end
 end
 
-local function UnregisterWidget(name)
-  ThreatPlatesWidgets.list[name] = nil
+local function UnitEventHandler(self, event, ...)
+  local widget = self.Widget
+  local func = widget.RegistedUnitEvents[event]
+
+  if func == true then
+    widget[event](widget, ...)
+  else
+    func(event, ...)
+  end
 end
 
---local function HideWidget(widget_list, widget_name)
---  local widget = widget_list[widget_name]
---  if widget then
---    widget:Hide()
---    widget_list[widget_name] = nil -- deleted the disabled widget, is that what we want? no re-using it later ...
+local EventHandlerFrame = CreateFrame("Frame", nil, WorldFrame)
+EventHandlerFrame:SetScript("OnEvent", EventHandler)
+
+local function RegisterEvent(widget, event, func)
+  if not RegisteredEventsByWidget[event] then
+    RegisteredEventsByWidget[event] = {}
+  end
+
+  RegisteredEventsByWidget[event][widget] = func or true
+  EventHandlerFrame:RegisterEvent(event)
+end
+
+local function RegisterUnitEvent(widget, event, unitid, func)
+  if not widget.EventHandlerFrame then
+    widget.EventHandlerFrame = CreateFrame("Frame", nil, WorldFrame)
+    widget.EventHandlerFrame.Widget = widget
+    widget.EventHandlerFrame:SetScript("OnEvent", UnitEventHandler)
+  end
+
+  widget.RegistedUnitEvents[event] = func or true
+  widget.EventHandlerFrame:RegisterUnitEvent(event, unitid)
+end
+
+local function UnregisterEvent(widget, event)
+  if RegisteredEventsByWidget[event] then
+    RegisteredEventsByWidget[event][widget] = nil
+
+    if next(RegisteredEventsByWidget[event]) == nil then -- last registered widget removed?
+      EventHandlerFrame:UnregisterEvent(event)
+    end
+  end
+
+  if widget.EventHandlerFrame then
+    widget.EventHandlerFrame:UnregisterEvent(event)
+    widget.RegistedUnitEvents[event] = nil
+  end
+end
+
+local function UnregisterAllEvents(widget)
+  for event, _ in pairs(RegisteredEventsByWidget) do
+    UnregisterEvent(widget, event)
+  end
+
+  -- Also remove all remaining registered unit events (that are not in RegisteredEventsByWidget)
+  for event, _ in pairs(widget.RegistedUnitEvents) do
+    widget.EventHandlerFrame:UnregisterEvent(event)
+  end
+  widget.RegistedUnitEvents = {}
+end
+
+---------------------------------------------------------------------------------------------------
+-- Helper functions for widgets
+---------------------------------------------------------------------------------------------------
+
+local function UpdateAllFrames(widget)
+  for plate, _ in pairs(Addon.PlatesVisible) do
+    local tp_frame = plate.TPFrame
+
+    local widget_frame = tp_frame.widgets[widget.Name]
+    if widget_frame.Active then
+      widget:UpdateFrame(widget_frame, tp_frame.unit)
+    end
+  end
+end
+
+local function UpdateAllFramesAndNameplateColor(widget)
+  for plate, _ in pairs(Addon.PlatesVisible) do
+    local tp_frame = plate.TPFrame
+
+    local widget_frame = tp_frame.widgets[widget.Name]
+    if widget_frame.Active then
+      widget:UpdateFrame(widget_frame, tp_frame.unit)
+
+      -- Also update healthbar and name color
+      Addon:UpdateIndicatorNameplateColor(tp_frame)
+    end
+  end
+end
+
+---------------------------------------------------------------------------------------------------
+-- Widget creation and handling
+-- Required functions are:
+--   * Create
+--   * IsEnabled
+--   * EnabledForStyle
+--   * OnUnitAdded
+-- Optional funcations are:
+--   * OnEnable
+--   * OnDisable
+--   * OnTargetChanged
+--   * UpdateFrame (if UpdateAllFrames is used)
+---------------------------------------------------------------------------------------------------
+function Addon:NewWidget(widget_name)
+  local widget = {
+    Name = widget_name,
+    RegistedUnitEvents = {},
+    RegisterEvent = RegisterEvent,
+    RegisterUnitEvent = RegisterUnitEvent,
+    UnregisterEvent = UnregisterEvent,
+    UnregisterAllEvents = UnregisterAllEvents,
+    UpdateAllFrames = UpdateAllFrames,
+    UpdateAllFramesAndNameplateColor = UpdateAllFramesAndNameplateColor,
+  }
+
+  Widgets[widget_name] = widget
+
+  return widget
+end
+
+function Addon:InitializeWidget(widget_name)
+  local widget = Widgets[widget_name]
+
+  if widget:IsEnabled() then
+    Addon:EnableWidget(widget_name)
+  else
+    Addon:DisableWidget(widget_name)
+  end
+end
+
+function Addon:UpdateSettingsForWidget(widget_name)
+  local widget = Widgets[widget_name]
+
+  for plate, _ in pairs(Addon.PlatesVisible) do
+    widget:UpdateSettings(plate.TPFrame.widgets[widget_name])
+  end
+end
+
+function Addon:InitializeAllWidgets()
+  for widget_name, _ in pairs(Widgets) do
+    Addon:InitializeWidget(widget_name)
+  end
+end
+
+function Addon:EnableWidget(widget_name)
+   local widget = Widgets[widget_name]
+
+  EnabledWidgets[widget_name] = widget
+
+
+  -- Nameplates are re-used by WoW, so we cannot iterate just over all visible plates, but must
+  -- add the new widget to all existing plates, even if they are currently not visible
+  for _, tp_frame in pairs(Addon.PlatesCreated) do
+    local plate_widgets = tp_frame.widgets
+
+    if not plate_widgets[widget_name] then
+      plate_widgets[widget_name] = widget:Create(tp_frame)
+    end
+
+    -- As we are iterating over all plates created, even if no unit is assigned to it currently, we have
+    -- to skip plates without units. OnUnitAdded will be called on them anyway
+    if tp_frame.Active then
+      local widget_frame = plate_widgets[widget_name]
+
+      widget_frame.Active = tp_frame.stylename ~= "empty" and widget:EnabledForStyle(tp_frame.stylename, tp_frame.unit)
+      widget_frame.unit = tp_frame.unit
+
+      if widget_frame.Active then
+        widget:OnUnitAdded(widget_frame, tp_frame.unit)
+      else
+        widget_frame:Hide()
+      end
+    end
+  end
+
+  -- As events are registered in OnEnable, this must be done after all widget frames are created, otherwise an registered event
+  -- may already occur before the widget frame exists.
+  if widget.OnEnable then
+    widget:OnEnable()
+  end
+end
+
+function Addon:DisableWidget(widget_name)
+  local widget = EnabledWidgets[widget_name]
+
+  if widget then
+    if widget.OnDisable then
+      widget:OnDisable()
+    end
+
+    -- Disable all events of the widget
+    widget:UnregisterAllEvents()
+
+    -- for all plates - hide the widget frame (alternatively: remove the widget frame)
+    for plate, _ in pairs(Addon.PlatesVisible) do
+      plate.TPFrame.widgets[widget_name]:Hide()
+    end
+  end
+end
+
+function Addon:WidgetsOnPlateCreated(tp_frame)
+  local plate_widgets = tp_frame.widgets
+
+  for widget_name, widget in pairs(EnabledWidgets) do
+    plate_widgets[widget_name] = widget:Create(tp_frame)
+  end
+end
+
+-- TODO: Seperate UnitAdded from UpdateSettings/UpdateConfiguration (unit independent stuff)
+--       Maybe event seperate style dependedt stuff (PlateStyleChanged)
+function Addon:WidgetsOnUnitAdded(tp_frame, unit)
+  local plate_widgets = tp_frame.widgets
+
+  for widget_name, widget in pairs(EnabledWidgets) do
+    local widget_frame = plate_widgets[widget_name]
+
+    -- I think it could happen that a nameplate was created, then a widget is enabled, and afterwise the unit is
+    -- added to the nameplate, i.e., InitializedWidgets is called.
+    --    if plate_widgets[widget_name] == nil then
+    --      TidyPlatesThreat.db.global.Unit = tp_frame
+    --    end
+    --    assert (plate_widgets[widget_name] ~= nil, "Uninitialized widget found: " .. widget_name .. " for unit " .. unit.name .. " (" .. tp_frame:GetName() .. ")")
+
+    widget_frame.Active = tp_frame.stylename ~= "empty" and widget:EnabledForStyle(tp_frame.stylename, unit)
+    widget_frame.unit = unit
+
+    if widget_frame.Active then
+      widget:OnUnitAdded(widget_frame, unit)
+    else
+      widget_frame:Hide()
+    end
+  end
+end
+
+function Addon:WidgetsOnUnitRemoved(tp_frame)
+  --  for widget_name, widget_frame in pairs(tp_frame.widgets) do
+  --    widget_frame.Active = false
+  --    widget_frame:Hide()
+  --
+  --    local widget = EnabledWidgets[widget_name]
+  --    if widget.OnUnitRemoved then
+  --      widget:OnUnitRemoved(widget_frame)
+  --    end
+  --  end
+
+  local plate_widgets = tp_frame.widgets
+  for widget_name, widget in pairs(EnabledWidgets) do
+    local widget_frame = plate_widgets[widget_name]
+    widget_frame.Active = false
+    widget_frame:Hide()
+
+    if widget.OnUnitRemoved then
+      widget:OnUnitRemoved(widget_frame)
+    end
+  end
+end
+
+--function Addon:WidgetsOnUpdate(tp_frame, unit)
+--  local plate_widgets = tp_frame.widgets
+--
+--  for widget_name, widget in pairs(EnabledWidgets) do
+--    local widget_frame = plate_widgets[widget_name]
+--
+--    if widget_frame.Active then
+--      if widget.UpdateFrame then
+--        widget:UpdateFrame(widget_frame, unit)
+--      end
+--    else
+--      widget_frame:Hide()
+--    end
 --  end
 --end
 
--- TidyPlatesGlobal_OnInitialize() is called when a nameplate is created or re-shown
--- activetheme is the table, not just the name
-function Addon:OnInitialize(plate, theme)
-  if theme then
-    local widget_list = plate.widgets
+function Addon:WidgetsPlateModeChanged(tp_frame, unit)
+  local plate_widgets = tp_frame.widgets
 
-    -- disable all non Threat Plates widgets - unless they do it themeselves, better is  to use /reload after a theme switch
-    --    for widgetname, widget in pairs(plate.widgets) do
-    --			if not widget.TP_Widget then
-    --        widget:Hide()
-    --      end
-    --		end
-    ThreatPlates.CreateExtensions(plate)
+  for widget_name, widget in pairs(EnabledWidgets) do
+    local widget_frame = plate_widgets[widget_name]
 
-    for name,v in pairs(ThreatPlatesWidgets.list) do
-      local widget = widget_list[name]
+    widget_frame.Active = tp_frame.stylename ~= "empty" and widget:EnabledForStyle(tp_frame.stylename, unit)
 
-      if v.enabled() or v.EnabledInHeadlineView() then
-        if not widget then
-          widget = v.create(plate) -- UpdateConfig should/must be called in create()
-          --widget.TP_Widget = true -- mark ThreatPlates widgets
-          widget_list[name] = widget
-        else
-          if widget.UpdateConfig then widget:UpdateConfig() end
-        end
-      elseif widget then
-        widget:Hide()
-        widget_list[name] = nil -- deleted the disabled widget, is that what we want? no re-using it later ...
-      end
+    if widget_frame.Active then
+      --if widget.OnUpdatePlateMode then
+      --  widget:OnUpdatePlateMode(plate_widgets[widget_name], unit)
+      --end
+      widget:OnUnitAdded(widget_frame, unit)
+    else
+      widget_frame:Hide()
     end
   end
 end
 
--- TidyPlatesGlobal_OnUpdate() is called when other data about the unit changes, or is requested by an external controller.
-function Addon:OnUpdate(plate, unit)
-  -- sometimes unitid is nil, still don't know why, but it creates all kinds of LUA errors as other attributes are nil
-  -- also, e.g., unit.type, unit.name, ...
-  if not unit.unitid then return end
-
-  local style = Addon:SetStyle(unit)
-  ThreatPlates.UpdateExtensions(plate, unit.unitid, style)
-
-  local widget_list = plate.widgets
-  for name,v in pairs(ThreatPlatesWidgets.list) do
-    local widget = widget_list[name]
-
-    local show_healthbar_view = v.enabled()
-    local show_headline_view = v.EnabledInHeadlineView()
-
-    if show_healthbar_view or show_headline_view then
-      -- Because widgets can be disabled anytime, it is not guaranteed that it exists after OnInitialize
-      if not widget then
-        widget = v.create(plate)
-        widget_list[name] = widget
-      end
-
-      if style == "NameOnly" or style == "NameOnly-Unique" then
-        if show_headline_view then
-          if not v.isContext then
-            widget:Update(unit)
-          end
-        else
-          widget:Hide()
-        end
-      --elseif style == "etotem" or style == "empty" then
-      elseif style == "empty" then
-        widget:Hide()
-      elseif show_healthbar_view then -- any other style
-        -- context means that widget is only relevant for target (or mouse-over)
-        if not v.isContext then
-          widget:Update(unit)
-        end
-      else
-        widget:Hide()
-      end
-    elseif widget then
-      widget:Hide()
-      widget_list[name] = nil -- deleted the disabled widget, is that what we want? no re-using it later ...
-    end
-  end
-end
-
--- TidyPlatesGlobal_OnContextUpdate() is called when a unit is targeted or moused-over.  (Any time the unitid or GUID changes)
--- OnContextUpdate is always followed up by a call to OnUpdate
--- OnContextUpdate must only do something when there is something unit-dependent to display?
-function Addon:OnContextUpdate(plate, unit)
-  if not unit.unitid then return end
-
-  local style = Addon:SetStyle(unit)
-
-  local widget_list = plate.widgets
-  for name,v in pairs(ThreatPlatesWidgets.list) do
-    local widget = widget_list[name]
-
-    local show_healthbar_view = v.enabled()
-    local show_headline_view = v.EnabledInHeadlineView()
-
-    if show_healthbar_view or show_headline_view then
-      -- Because widgets can be disabled anytime, it is not guaranteed that it exists after OnInitialize
-      if not widget then
-        widget = v.create(plate)
-        widget_list[name] = widget
-      end
-
-      if style == "NameOnly" or style == "NameOnly-Unique" then
-        if show_headline_view then
-          widget:UpdateContext(unit)
-        else
-          widget:Hide()
-        end
-      --elseif style == "etotem" or style == "empty" then
-      elseif style == "empty" then
-        widget:Hide()
-      elseif show_healthbar_view then -- any other style
-        widget:UpdateContext(unit)
-      else
-        widget:Hide()
-      end
-    elseif widget then
-      widget:Hide()
-      widget_list[name] = nil -- deleted the disabled widget, is that what we want? no re-using it later ...
-    end
-  end
-end
-
--- Hide all ThreatPlates widgets as another theme was selected in TidyPlates
-local function DeleteWidgets()
-  -- for all widgets types of Threat Plates, call ClearAllWidgets
-  -- ThreatPlatesWidgets.ClearAllArenaWidgets()							-- done
-  -- ThreatPlatesWidgets.ClearAllClassIconWidgets()					-- done
-  -- ThreatPlatesWidgets.ClearAllComboPointWidgets() 				-- done
-  -- ThreatPlatesWidgets.ClearAllEliteArtOverlayWidgets()		-- done
-  -- ThreatPlatesWidgets.ClearAllSocialWidgets()							-- done
-  -- ThreatPlatesWidgets.ClearAllTargetArtWidgets()					-- done
-  -- ThreatPlatesWidgets.ClearAllThreatWidgets()							-- done
-  -- ThreatPlatesWidgets.ClearAllTotemIconWidgets()					-- done
-  -- ThreatPlatesWidgets.ClearAllUniqueIconWidgets()					-- done
-  -- ThreatPlatesWidgets.ClearAllAuraWidgets()								-- done
-  -- ThreatPlatesWidgets.ClearAllHealerTrackerWidgets()			-- disabled
-
-  -- disable all event watchers
-  ThreatPlatesWidgets.ComboPointWidgetDisableWatcher()
-  ThreatPlatesWidgets.ArenaWidgetDisableWatcher()
-  ThreatPlatesWidgets.SocialWidgetDisableWatcher()
-  ThreatPlatesWidgets.ResourceWidgetDisableWatcher()
-  --ThreatPlatesWidgets.AuraWidgetDisableWatcher() -- right now, watcher still necessary for TidyPlates as well
-end
-
-ThreatPlatesWidgets.RegisterWidget = RegisterWidget				-- used internally by ThreatPlates widgets
-ThreatPlatesWidgets.UnregisterWidget = UnregisterWidget		-- used internally by ThreatPlates widgets
-
-ThreatPlatesWidgets.DeleteWidgets = DeleteWidgets
+--function Addon:WidgetsOnTargetChanged(tp_frame)
+--  local plate_widgets = tp_frame.widgets
+--
+--  for widget_name, widget in pairs(EnabledWidgets) do
+--    local widget_frame = plate_widgets[widget_name]
+--
+--    if widget_frame.Active then
+--      if widget.OnTargetChanged then
+--        widget:OnTargetChanged(plate_widgets[widget_name], tp_frame.unit)
+--      end
+--    else
+--      plate_widgets[widget_name]:Hide()
+--    end
+--  end
+--end

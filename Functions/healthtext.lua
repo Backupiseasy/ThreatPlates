@@ -112,8 +112,8 @@ local function GetUnitSubtitle(unit)
 
 		local TooltipTextLeft1 = _G[ScannerName.."TextLeft1"]
 		local TooltipTextLeft2 = _G[ScannerName.."TextLeft2"]
-		local TooltipTextLeft3 = _G[ScannerName.."TextLeft3"]
-		local TooltipTextLeft4 = _G[ScannerName.."TextLeft4"]
+		--local TooltipTextLeft3 = _G[ScannerName.."TextLeft3"]
+		--local TooltipTextLeft4 = _G[ScannerName.."TextLeft4"]
 
 		name = TooltipTextLeft1:GetText()
 
@@ -292,9 +292,7 @@ local SUBTEXT_FUNCTIONS =
 ---------------------------------------------------------------------------------------------------
 
 function Addon:SetCustomText(unit)
-	if not unit.unitid then return end
-
-  local style = unit.TP_Style or Addon:SetStyle(unit)
+  local style = unit.style
 
 	local db = TidyPlatesThreat.db.profile
 	if style == "NameOnly" or style == "NameOnly-Unique" then

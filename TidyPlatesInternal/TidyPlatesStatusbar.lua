@@ -97,11 +97,14 @@ end
 
 function Addon:CreateHealthbar(parent)
 	local frame = CreateFrame("StatusBar", nil, parent)
+  --frame:Hide()
+
+  frame:SetFrameLevel(parent:GetFrameLevel() + 5)
+
   frame.Border = CreateFrame("Frame", nil, frame)
   frame.EliteBorder = CreateFrame("Frame", nil, frame)
   frame.ThreatBorder = CreateFrame("Frame", nil, frame)
 
-  frame:SetFrameLevel(parent:GetFrameLevel())
   frame.Border:SetFrameLevel(frame:GetFrameLevel())
   frame.EliteBorder:SetFrameLevel(frame:GetFrameLevel() + 1)
   frame.ThreatBorder:SetFrameLevel(frame:GetFrameLevel())
@@ -159,7 +162,9 @@ end
 
 function Addon:CreateCastbar(parent)
   local frame = CreateFrame("StatusBar", nil, parent)
-  frame:SetFrameLevel(parent:GetFrameLevel())
+  frame:Hide()
+
+  frame:SetFrameLevel(parent:GetFrameLevel() + 4)
 
   frame.Border = CreateFrame("Frame", nil, frame)
   frame.InterruptBorder = CreateFrame("Frame", nil, frame)
@@ -186,6 +191,8 @@ function Addon:CreateCastbar(parent)
   frame.SetStatusBarBackdrop = SetStatusBarBackdropCastbar
   frame.SetEliteBorder = SetEliteBorder
   frame.SetShownInterruptOverlay = SetShownInterruptOverlay
+
+  frame:SetStatusBarColor(1, 0.8, 0)
 
 --  frame.Flash = frame:CreateAnimationGroup()
 --  local anim = frame.Flash:CreateAnimation("Alpha")
@@ -224,7 +231,7 @@ local ConfigModePlate
 local function ShowOnUnit(unit)
   local db = TidyPlatesThreat.db.profile.settings.castbar
 
-  local style = unit.TP_Style
+  local style = unit.style
   return style ~= "etotem" and style ~= "empty" and
     ((db.ShowInHeadlineView and (style == "NameOnly" or style == "NameOnly-Unique")) or
       (db.show and not (style == "NameOnly" or style == "NameOnly-Unique")))

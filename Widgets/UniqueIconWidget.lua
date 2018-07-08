@@ -1,119 +1,76 @@
----------------
+---------------------------------------------------------------------------------------------------
 -- Unique Icon Widget
----------------
+---------------------------------------------------------------------------------------------------
+local ADDON_NAME, Addon = ...
 
-local ADDON_NAME, NAMESPACE = ...
-local ThreatPlates = NAMESPACE.ThreatPlates
+local Widget = Addon:NewWidget("UniqueIcon")
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
 
--- local WidgetList = {}
+-- WoW APIs
+local CreateFrame = CreateFrame
+
+-- ThreatPlates APIs
+local TidyPlatesThreat = TidyPlatesThreat
 
 ---------------------------------------------------------------------------------------------------
--- Threat Plates functions
+-- Widget functions for creation and update
 ---------------------------------------------------------------------------------------------------
+function Widget:Create(tp_frame)
+  -- Required Widget Code
+  local widget_frame = CreateFrame("Frame", nil, tp_frame)
+  widget_frame:Hide()
 
-local function enabled()
-	return TidyPlatesThreat.db.profile.uniqueWidget.ON
+  -- Custom Code
+  --------------------------------------
+  widget_frame:SetFrameLevel(tp_frame:GetFrameLevel() + 7)
+  widget_frame.Icon = widget_frame:CreateTexture(nil, "OVERLAY")
+  widget_frame.Icon:SetAllPoints(widget_frame)
+  --------------------------------------
+  -- End Custom Code
+
+  return widget_frame
 end
 
--- hides/destroys all widgets of this type created by Threat Plates
--- local function ClearAllWidgets()
--- 	for _, widget in pairs(WidgetList) do
--- 		widget:Hide()
--- 	end
--- 	WidgetList = {}
--- end
--- ThreatPlatesWidgets.ClearAllUniqueIconWidgets = ClearAllWidgets
-
----------------------------------------------------------------------------------------------------
--- Widget Functions for TidyPlates
----------------------------------------------------------------------------------------------------
-
-local function UpdateSettings(frame)
-  local db = TidyPlatesThreat.db.profile.uniqueWidget
-  frame:ClearAllPoints()
-  frame:SetPoint("CENTER", frame:GetParent(), db.x, db.y)
-
-  local size = db.scale
-  frame:SetSize(size, size)
+function Widget:IsEnabled()
+  return TidyPlatesThreat.db.profile.uniqueWidget.ON
 end
 
-local function UpdateWidgetFrame(frame, unit)
-	local isShown = false
+--function Widget:UNIT_NAME_UPDATE()
+--end
+--
+--function Widget:OnEnable()
+--  self:RegisterEvent("UNIT_NAME_UPDATE")
+--end
 
-	local unique_setting = TidyPlatesThreat.db.profile.uniqueSettings.map[unit.name]
-	if unique_setting and unique_setting.showIcon then
-		frame.Icon:SetTexture(unique_setting.icon)
+function Widget:EnabledForStyle(style, unit)
+  return (style == "unique" or style == "NameOnly-Unique" or style == "etotem")
+end
 
-		local db = TidyPlatesThreat.db.profile.uniqueWidget
-		if unit.TP_Style == "NameOnly-Unique" then
-			frame:SetPoint("CENTER", frame:GetParent(), db.x_hv, db.y_hv)
-		else
-			frame:SetPoint("CENTER", frame:GetParent(), db.x, db.y)
-		end
+function Widget:OnUnitAdded(widget_frame, unit)
+  local db = TidyPlatesThreat.db.profile
 
-		frame:Show()
-	else
-		frame:_Hide()
+	--local unique_setting = db.uniqueSettings.map[unit.name]
+  local unique_setting = unit.CustomPlateSettings
+	if not unique_setting or not unique_setting.showIcon then
+		widget_frame:Hide()
+		return
 	end
+
+	db = db.uniqueWidget
+
+	-- Updates based on settings / unit style
+  if unit.style == "NameOnly-Unique" then
+    widget_frame:SetPoint("CENTER", widget_frame:GetParent(), db.x_hv, db.y_hv)
+  else
+    widget_frame:SetPoint("CENTER", widget_frame:GetParent(), db.x, db.y)
+  end
+
+	-- Updates based on settings
+	widget_frame:SetSize(db.scale, db.scale)
+	widget_frame.Icon:SetTexture(unique_setting.icon)
+
+	widget_frame:Show()
 end
-
--- Context
-local function UpdateWidgetContext(frame, unit)
-	local guid = unit.guid
-	frame.guid = guid
-
-	-- Add to Widget List
-	-- if guid then
-	-- 	WidgetList[guid] = frame
-	-- end
-
-	-- Custom Code II
-	--------------------------------------
-	if UnitGUID("target") == guid then
-		UpdateWidgetFrame(frame, unit)
-	else
-		frame:_Hide()
-	end
-	--------------------------------------
-	-- End Custom Code
-end
-
-local function ClearWidgetContext(frame)
-	local guid = frame.guid
-	if guid then
-		-- WidgetList[guid] = nil
-		frame.guid = nil
-	end
-end
-
-local function CreateWidgetFrame(parent)
-	-- Required Widget Code
-	local frame = CreateFrame("Frame", nil, parent)
-	frame:Hide()
-
-	-- Custom Code III
-	--------------------------------------
-	frame:SetFrameLevel(parent:GetFrameLevel() + 7)
-	frame:SetSize(64, 64)
-	frame.Icon = frame:CreateTexture(nil, "OVERLAY")
-	frame.Icon:SetAllPoints(frame)
-
-  UpdateSettings(frame)
-  frame.UpdateConfig = UpdateSettings
-	--------------------------------------
-	-- End Custom Code
-
-	-- Required Widget Code
-	frame.UpdateContext = UpdateWidgetContext
-	frame.Update = UpdateWidgetFrame
-	frame._Hide = frame.Hide
-	frame.Hide = function() ClearWidgetContext(frame); frame:_Hide() end
-
-	return frame
-end
-
-ThreatPlatesWidgets.RegisterWidget("UniqueIconWidgetTPTP", CreateWidgetFrame, false, enabled, enabled)

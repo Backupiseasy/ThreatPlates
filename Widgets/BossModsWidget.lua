@@ -1,8 +1,10 @@
-------------------------
--- Boss Mod Widget --
-------------------------
+---------------------------------------------------------------------------------------------------
+-- Boss Mod Widget
+---------------------------------------------------------------------------------------------------
 local ADDON_NAME, Addon = ...
 local ThreatPlates = Addon.ThreatPlates
+
+local Widget = Addon:NewWidget("BossMods")
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -18,7 +20,6 @@ local UnitGUID = UnitGUID
 local GetSpellTexture = GetSpellTexture
 local GetTime = GetTime
 local tremove = tremove
-local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
@@ -26,47 +27,33 @@ local TidyPlatesThreat = TidyPlatesThreat
 --
 local DBM = DBM
 
-local WidgetList = {}
 local GUIDAuraList = {}
-local CallbacksRegistered = false
 local ConfigDB
-local Enabled = false
 local EnabledByBossmod = false
 
 local MAX_AURAS_NO = 5
 local UPDATE_INTERVAL = 0.5
 
 ---------------------------------------------------------------------------------------------------
--- Threat Plates functions
+-- Boss Mods Widget Functions
 ---------------------------------------------------------------------------------------------------
 
--- hides/destroys all widgets of this type created by Threat Plates
--- local function ClearAllWidgets()
--- 	for _, widget in pairs(WidgetList) do
--- 		widget:Hide()
--- 	end
--- 	WidgetList = {}
--- end
+local function AlignWidget(widget_frame)
+  local db = TidyPlatesThreat.db.profile.BossModsWidget
 
----------------------------------------------------------------------------------------------------
--- Register functions with DBM
----------------------------------------------------------------------------------------------------
-
-local function AlignWidget(frame)
-  --frame:ClearAllPoints()
   local offset_x = 0
-  if frame.AurasNo > 1 then
-    offset_x = (frame.AurasNo - 1) * (ConfigDB.scale + ConfigDB.AuraSpacing) / 2
+  if widget_frame.AurasNo > 1 then
+    offset_x = (widget_frame.AurasNo - 1) * (db.scale + db.AuraSpacing) / 2
   end
 
-  local style = frame.unit.TP_Style
+  local style = widget_frame:GetParent().stylename
   if style == "NameOnly" or style == "NameOnly-Unique" then
-    frame:SetPoint("CENTER", frame:GetParent(), - offset_x + ConfigDB.x_hv, ConfigDB.y_hv)
+    widget_frame:SetPoint("CENTER", widget_frame:GetParent(), - offset_x + db.x_hv, db.y_hv)
   else
-    frame:SetPoint("CENTER", frame:GetParent(), - offset_x + ConfigDB.x, ConfigDB.y)
+    widget_frame:SetPoint("CENTER", widget_frame:GetParent(), - offset_x + db.x, db.y)
   end
 
-  frame:SetSize(64, 64)
+  widget_frame:SetSize(64, 64)
 end
 
 local function UpdateAuraTexture(frame, aura, index)
@@ -99,7 +86,7 @@ local function CreateAuraTexture(frame, index)
   return aura
 end
 
-local function UpdateFrameWithAuras(frame, unit_auras)
+local function UpdateFrameWithAuras(widget_frame, unit_auras)
   local aura_texture, aura_info
 
   local no_auras = #unit_auras
@@ -107,10 +94,10 @@ local function UpdateFrameWithAuras(frame, unit_auras)
   while index <= no_auras do
     aura_info = unit_auras[index]
 
-    aura_texture = frame.Auras[index]
+    aura_texture = widget_frame.Auras[index]
     if not aura_texture then
-      aura_texture = CreateAuraTexture(frame, index)
-      frame.Auras[index] = aura_texture
+      aura_texture = CreateAuraTexture(widget_frame, index)
+      widget_frame.Auras[index] = aura_texture
 
     end
 
@@ -140,57 +127,36 @@ local function UpdateFrameWithAuras(frame, unit_auras)
   end
 
   -- Hide all unused aura textures
-  for i = index, frame.AurasNo do
-    aura_texture = frame.Auras[i]
+  for i = index, widget_frame.AurasNo do
+    aura_texture = widget_frame.Auras[i]
     aura_texture.Time:Hide()
     aura_texture:Hide()
   end
 
-  frame.AurasNo = no_auras
-  AlignWidget(frame)
+  widget_frame.AurasNo = no_auras
+  AlignWidget(widget_frame)
 end
 
-local function OnUpdateBossModsWidget(frame, elapsed)
-  if Enabled and EnabledByBossmod then
-    frame.LastUpdate = frame.LastUpdate + elapsed
-    if frame.LastUpdate < UPDATE_INTERVAL then
-      return
-    end
-    frame.LastUpdate = 0
+local function OnUpdateBossModsWidget(widget_frame, elapsed)
+  widget_frame.LastUpdate = widget_frame.LastUpdate + elapsed
+  if widget_frame.LastUpdate < UPDATE_INTERVAL then
+    return
+  end
+  widget_frame.LastUpdate = 0
 
-    local unit_auras = GUIDAuraList[frame.guid]
-    if unit_auras and #unit_auras > 0 then
-      UpdateFrameWithAuras(frame, unit_auras)
-      return
-    end
+  --not Widget:IsEnabled() or not Widget:EnabledForStyle(widget_frame:GetParent().stylename) or
+  if not EnabledByBossmod then
+    widget_frame:Hide()
+    return
   end
 
-  frame.BossModOnUpdateSet = false
-  frame:SetScript("OnUpdate", nil)
-  frame:_Hide()
+  local unit_auras = GUIDAuraList[widget_frame.unit.guid]
+  if not unit_auras or #unit_auras == 0 then
+    widget_frame:Hide()
+    return
+  end
 
---  if not Enabled or not EnabledByBossmod then
---    frame.BossModOnUpdateSet = false
---    frame:SetScript("OnUpdate", nil)
---    frame:_Hide()
---    return
---  end
---
---  frame.LastUpdate = frame.LastUpdate + elapsed
---  if frame.LastUpdate >= UPDATE_INTERVAL then
---    frame.LastUpdate = 0
---
---    local guid = frame.guid
---
---    local unit_auras = GUIDAuraList[guid]
---    if guid and unit_auras and #unit_auras > 0 then
---      UpdateFrameWithAuras(frame, unit_auras)
---    else
---      frame.BossModOnUpdateSet = false
---      frame:SetScript("OnUpdate", nil)
---      frame:_Hide()
---    end
---  end
+  UpdateFrameWithAuras(widget_frame, unit_auras)
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -243,16 +209,13 @@ local function BossMod_ShowNameplateAura(msg, is_guid, unit, aura_texture, durat
     }
     --guid_aura_list[guid] = unit_auras
 
-    local frame = WidgetList[guid]
-    if frame then
-      UpdateFrameWithAuras(frame, GUIDAuraList[guid])
-      frame.LastUpdate = 0.5 -- to show the update immediately
-      if not frame.BossModOnUpdateSet then
-        frame:SetScript("OnUpdate", OnUpdateBossModsWidget)
-        frame.BossModOnUpdateSet = true
-      end
+    local plate = Addon.PlatesByGUID[guid]
+    if plate then
+      local widget_frame = plate.TPFrame.widgets["BossMods"]
+      UpdateFrameWithAuras(widget_frame, GUIDAuraList[guid])
 
-      frame:Show()
+      widget_frame.LastUpdate = 0.5 -- to show the update immediately
+      widget_frame:Show()
     end
   end
 end
@@ -270,9 +233,9 @@ local function BossMod_HideNameplateAura(msg, is_guid, unit, aura_texture)
       if unit_auras[i][1] == aura_texture then
         tremove(unit_auras, i)
 
-        local frame = WidgetList[guid]
-        if frame then
-          UpdateFrameWithAuras(frame, unit_auras)
+        local plate = Addon.PlatesByGUID[guid]
+        if plate then
+          UpdateFrameWithAuras(plate.TPFrame.widgets["BossMods"], unit_auras)
           --frame.LastUpdate = 0.5 -- to show the update immediately
         end
 
@@ -296,122 +259,97 @@ local function BossMod_DisableHostileNameplates()
   GUIDAuraList = {}
 end
 
+
 ---------------------------------------------------------------------------------------------------
--- Widget Functions for TidyPlates
+-- Widget functions for creation and update
 ---------------------------------------------------------------------------------------------------
 
-local function UpdateSettings(frame)
-  for i = 1, frame.AurasNo do
-    UpdateAuraTexture(frame, frame.Auras[i], i)
-  end
+function Widget:Create(tp_frame)
+  -- Required Widget Code
+  local widget_frame = CreateFrame("Frame", nil, tp_frame)
+  widget_frame:Hide()
 
-  frame.ConfigUpdatePending = true
+  -- Custom Code
+  --------------------------------------
+  widget_frame:SetFrameLevel(tp_frame:GetFrameLevel() + 2)
+  widget_frame.Auras = {}
+  widget_frame.AurasNo = 0
+  widget_frame.LastUpdate = 0.5
+  widget_frame:SetScript("OnUpdate", OnUpdateBossModsWidget)
+  --------------------------------------
+  -- End Custom Code
+
+  return widget_frame
 end
 
-local function UpdateWidgetFrame(frame, unit)
-  if EnabledByBossmod and unit.guid then
-    local unit_auras = GUIDAuraList[unit.guid]
-    if unit_auras and #unit_auras > 0 then
-      -- Update auras and alignment if settings were change or plate is re-shown
-      if frame.ConfigUpdatePending then
-        UpdateFrameWithAuras(frame, unit_auras)
-        frame.ConfigUpdatePending = false
-      end
-      if not frame.BossModOnUpdateSet then
-        frame:SetScript("OnUpdate", OnUpdateBossModsWidget)
-        frame.BossModOnUpdateSet = true
-      end
-
-      frame:Show()
-      return
-    end
-  end
-
-  frame:_Hide()
+function Widget:IsEnabled()
+  return TidyPlatesThreat.db.profile.BossModsWidget.ON or TidyPlatesThreat.db.profile.BossModsWidget.ShowInHeadlineView
 end
 
-local function UpdateWidgetContext(frame, unit)
-  if not unit.guid then
-    frame:_Hide()
+function Widget:OnEnable()
+  if DBM then
+    DBM:RegisterCallback('BossMod_ShowNameplateAura', BossMod_ShowNameplateAura)
+    DBM:RegisterCallback('BossMod_DisableFriendlyNameplates', BossMod_DisableFriendlyNameplates)
+    DBM:RegisterCallback('BossMod_HideNameplateAura', BossMod_HideNameplateAura)
+    DBM:RegisterCallback('BossMod_DisableHostileNameplates', BossMod_DisableHostileNameplates)
+  end
+end
+
+function Widget:OnDisable()
+  if DBM then
+    DBM:UnregisterCallback('BossMod_ShowNameplateAura', BossMod_ShowNameplateAura)
+    DBM:UnregisterCallback('BossMod_HideNameplateAura', BossMod_HideNameplateAura)
+    DBM:UnregisterCallback('BossMod_DisableFriendlyNameplates', BossMod_DisableFriendlyNameplates)
+    DBM:UnregisterCallback('BossMod_DisableHostileNameplates', BossMod_DisableHostileNameplates)
+  end
+end
+
+function Widget:EnabledForStyle(style, unit)
+  if (style == "NameOnly" or style == "NameOnly-Unique") then
+    return TidyPlatesThreat.db.profile.BossModsWidget.ShowInHeadlineView
+  elseif style ~= "etotem" then
+    return TidyPlatesThreat.db.profile.BossModsWidget.ON
+  end
+end
+
+function Widget:OnUnitAdded(widget_frame, unit)
+  ConfigDB = TidyPlatesThreat.db.profile.BossModsWidget
+
+  if not EnabledByBossmod then
+    widget_frame:Hide()
     return
   end
 
-  if frame.guid then
-    WidgetList[frame.guid] = nil
+  local unit_auras = GUIDAuraList[unit.guid]
+
+  if not unit_auras or #unit_auras == 0 then
+    widget_frame:Hide()
+    return
   end
 
-  frame.guid = unit.guid
-  frame.unit = unit
-  WidgetList[unit.guid] = frame
+  -- Update auras and alignment if settings were change or plate is re-shown
+  for i = 1, widget_frame.AurasNo do
+    UpdateAuraTexture(widget_frame, widget_frame.Auras[i], i)
+  end
+  UpdateFrameWithAuras(widget_frame, unit_auras)
 
---  if UnitGUID("target") == guid then
---    UpdateWidgetFrame(frame, unit)
---  else
---    frame:_Hide()
+  widget_frame:Show()
+end
+
+--function Widget:OnUpdateStyle(widget_frame, unit)
+--  local db = TidyPlatesThreat.db.profile.BossModsWidget
+--
+--  local offset_x = 0
+--  if widget_frame.AurasNo > 1 then
+--    offset_x = (widget_frame.AurasNo - 1) * (db.scale + db.AuraSpacing) / 2
 --  end
-end
-
-local function ClearWidgetContext(frame)
-  if frame.guid then
-    WidgetList[frame.guid] = nil
-    frame.guid = nil
-    frame.unit = nil
-  end
-end
-
-local function enabled()
-  ConfigDB = TidyPlatesThreat.db.profile.BossModsWidget
-  Enabled = ConfigDB.ON or ConfigDB.ShowInHeadlineView
-
-  if not Enabled then
-    if DBM and CallbacksRegistered then
-      DBM:UnregisterCallback('BossMod_ShowNameplateAura', BossMod_ShowNameplateAura)
-      DBM:UnregisterCallback('BossMod_HideNameplateAura', BossMod_HideNameplateAura)
-      DBM:UnregisterCallback('BossMod_DisableFriendlyNameplates', BossMod_DisableFriendlyNameplates)
-      DBM:UnregisterCallback('BossMod_DisableHostileNameplates', BossMod_DisableHostileNameplates)
-      CallbacksRegistered = false
-    end
-  else -- not ENABLED
-    if DBM and not CallbacksRegistered then
-      DBM:RegisterCallback('BossMod_ShowNameplateAura', BossMod_ShowNameplateAura)
-      DBM:RegisterCallback('BossMod_HideNameplateAura', BossMod_HideNameplateAura)
-      DBM:RegisterCallback('BossMod_DisableFriendlyNameplates', BossMod_DisableFriendlyNameplates)
-      DBM:RegisterCallback('BossMod_DisableHostileNameplates', BossMod_DisableHostileNameplates)
-      CallbacksRegistered = true
-    end
-  end
-
-  return ConfigDB.ON
-end
-
-local function EnabledInHeadlineView()
-  return TidyPlatesThreat.db.profile.BossModsWidget.ShowInHeadlineView
-end
-
--- Widget Creation
-local function CreateWidgetFrame(parent)
-  -- Required Widget Code
-  local frame = CreateFrame("Frame", nil, parent)
-  frame:Hide()
-
-  -- Custom Code
-  frame:SetFrameLevel(frame:GetFrameLevel() + 2)
-  frame.Auras = {}
-  frame.AurasNo = 0
-  frame.LastUpdate = 0.5
-  frame.BossModOnUpdateSet = false
-
-  UpdateSettings(frame)
-  frame.UpdateConfig = UpdateSettings
-  -- End Custom Code
-
-  -- Required Widget Code
-  frame.UpdateContext = UpdateWidgetContext
-  frame.Update = UpdateWidgetFrame
-  frame._Hide = frame.Hide
-  frame.Hide = function() ClearWidgetContext(frame); frame:_Hide() end
-  return frame
-end
+--
+--  if unit.style == "NameOnly" or unit.style == "NameOnly-Unique" then
+--    widget_frame:SetPoint("CENTER", widget_frame:GetParent(), - offset_x + db.x_hv, db.y_hv)
+--  else
+--    widget_frame:SetPoint("CENTER", widget_frame:GetParent(), - offset_x + db.x, db.y)
+--  end
+--end
 
 ---------------------------------------------------------------------------------------------------
 -- Configuration Mode
@@ -436,5 +374,3 @@ function Addon:ConfigBossModsWidget()
     EnabledConfigMode = false
   end
 end
-
-ThreatPlatesWidgets.RegisterWidget("BossModsWidgetTPTP", CreateWidgetFrame, false, enabled, EnabledInHeadlineView)

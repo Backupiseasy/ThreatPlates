@@ -1,17 +1,24 @@
-local ADDON_NAME, NAMESPACE = ...
-local ThreatPlates = NAMESPACE.ThreatPlates
+---------------------------------------------------------------------------------------------------
+-- Target Art Widget
+---------------------------------------------------------------------------------------------------
+local ADDON_NAME, Addon = ...
+local ThreatPlates = Addon.ThreatPlates
 
------------------------
--- Target Art Widget --
------------------------
+local Widget = Addon:NewWidget("TargetArt")
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
-local UnitGUID = UnitGUID
+
+-- WoW APIs
+local CreateFrame = CreateFrame
+local UnitIsUnit = UnitIsUnit
+local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
+
+-- ThreatPlates APIs
+local TidyPlatesThreat = TidyPlatesThreat
 
 local PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\TargetArtWidget\\"
--- local WidgetList = {}
 
 local BACKDROP = {
   default = {
@@ -26,138 +33,106 @@ local BACKDROP = {
   }
 }
 
+local CurrentTarget
+
 ---------------------------------------------------------------------------------------------------
--- Threat Plates functions
+-- Target Art Widget Functions
 ---------------------------------------------------------------------------------------------------
 
-local function enabled()
-	return TidyPlatesThreat.db.profile.targetWidget.ON
+function Widget:PLAYER_TARGET_CHANGED()
+  if CurrentTarget then
+    CurrentTarget:Hide()
+    CurrentTarget = nil
+  end
+
+  local plate = GetNamePlateForUnit("target")
+  if plate and plate.TPFrame.Active then
+    CurrentTarget = plate.TPFrame.widgets.TargetArt
+    CurrentTarget:SetShown(CurrentTarget.Active)
+  end
 end
 
--- hides/destroys all widgets of this type created by Threat Plates
--- local function ClearAllWidgets()
--- 	for _, widget in pairs(WidgetList) do
--- 		widget:Hide()
--- 	end
--- 	WidgetList = {}
--- end
--- ThreatPlatesWidgets.ClearAllTargetArtWidgets = ClearAllWidgets
-
 ---------------------------------------------------------------------------------------------------
--- Widget Functions for TidyPlates
+-- Widget functions for creation and update
 ---------------------------------------------------------------------------------------------------
 
-local function UpdateSettings(frame)
+function Widget:Create(tp_frame)
+  -- Required Widget Code
+  local widget_frame = CreateFrame("Frame", nil, tp_frame)
+  widget_frame:Hide()
+
+  -- Custom Code
+  --------------------------------------
+  widget_frame:SetFrameLevel(tp_frame:GetFrameLevel() + 6)
+  widget_frame.LeftTexture = widget_frame:CreateTexture(nil, "BACKGROUND", 0)
+  widget_frame.LeftTexture:SetPoint("RIGHT", tp_frame, "LEFT")
+  widget_frame.LeftTexture:SetSize(64, 64)
+  widget_frame.RightTexture = widget_frame:CreateTexture(nil, "BACKGROUND", 0)
+  widget_frame.RightTexture:SetPoint("LEFT", tp_frame, "RIGHT")
+  widget_frame.RightTexture:SetSize(64, 64)
+  --------------------------------------
+  -- End Custom Code
+
+  return widget_frame
+end
+
+function Widget:IsEnabled()
+  return TidyPlatesThreat.db.profile.targetWidget.ON
+end
+
+function Widget:OnEnable()
+  self:RegisterEvent("PLAYER_TARGET_CHANGED")
+end
+
+function Widget:EnabledForStyle(style, unit)
+  return not (style == "NameOnly" or style == "NameOnly-Unique" or style == "etotem")
+end
+
+function Widget:OnUnitAdded(widget_frame, unit)
   local db = TidyPlatesThreat.db.profile.targetWidget
 
-  -- probably this should be moved to UpdateWidgetFrame
   if db.theme == "default" or db.theme == "squarethin" then
     local backdrop = BACKDROP[db.theme]
-
-    --  backdrop.edgeSize = TidyPlatesThreat.db.profile.targetWidget.EdgeSize
-    --  backdrop.offset = TidyPlatesThreat.db.profile.targetWidget.Offset
-
-    local db_hb = TidyPlatesThreat.db.profile.settings.healthbar
-    local offset_x = db_hb.width + 2 * backdrop.offset
-    local offset_y = db_hb.height + 2 * backdrop.offset
-    if frame:GetWidth() ~= offset_x or frame:GetHeight() ~= offset_y  then
-      frame:SetPoint("TOPLEFT", frame:GetParent().visual.healthbar, "TOPLEFT", - backdrop.offset, backdrop.offset)
-      frame:SetPoint("BOTTOMRIGHT", frame:GetParent().visual.healthbar, "BOTTOMRIGHT", backdrop.offset, - backdrop.offset)
-      -- frame:SetSize(offset_x, offset_y)
-    end
-    frame:SetBackdrop({
+    widget_frame:SetPoint("TOPLEFT", widget_frame:GetParent().visual.healthbar, "TOPLEFT", - backdrop.offset, backdrop.offset)
+    widget_frame:SetPoint("BOTTOMRIGHT", widget_frame:GetParent().visual.healthbar, "BOTTOMRIGHT", backdrop.offset, - backdrop.offset)
+    widget_frame:SetBackdrop({
       --edgeFile = PATH .. db.theme,
       edgeFile = backdrop.edgeFile,
       edgeSize = backdrop.edgeSize,
       insets = { left = 0, right = 0, top = 0, bottom = 0 }
     })
-    frame:SetBackdropBorderColor(db.r, db.g, db.b, db.a)
+    widget_frame:SetBackdropBorderColor(db.r, db.g, db.b, db.a)
 
-    frame.LeftTexture:Hide()
-    frame.RightTexture:Hide()
+    widget_frame.LeftTexture:Hide()
+    widget_frame.RightTexture:Hide()
   else
-    frame.LeftTexture:SetTexture(PATH .. db.theme)
-    frame.LeftTexture:SetTexCoord(0, 0.25, 0, 1)
-    frame.LeftTexture:SetVertexColor(db.r, db.g, db.b, db.a)
-    frame.LeftTexture:Show()
+    widget_frame.LeftTexture:SetTexture(PATH .. db.theme)
+    widget_frame.LeftTexture:SetTexCoord(0, 0.25, 0, 1)
+    widget_frame.LeftTexture:SetVertexColor(db.r, db.g, db.b, db.a)
+    widget_frame.LeftTexture:Show()
 
-    frame.RightTexture:SetTexture(PATH .. db.theme)
-    frame.RightTexture:SetTexCoord(0.75, 1, 0, 1)
-    frame.RightTexture:SetVertexColor(db.r, db.g, db.b, db.a)
-    frame.RightTexture:Show()
+    widget_frame.RightTexture:SetTexture(PATH .. db.theme)
+    widget_frame.RightTexture:SetTexCoord(0.75, 1, 0, 1)
+    widget_frame.RightTexture:SetVertexColor(db.r, db.g, db.b, db.a)
+    widget_frame.RightTexture:Show()
 
-    frame:SetBackdrop(nil)
+    widget_frame:SetBackdrop(nil)
   end
-end
 
-local function UpdateWidgetFrame(frame, unit)
-  if unit.TP_Style == "etotem" then
-    frame:_Hide()
+  if UnitIsUnit("target", unit.unitid) then
+    widget_frame:Show()
+    CurrentTarget = widget_frame
   else
-    frame:Show()
+    widget_frame:Hide()
   end
+
+  -- self:OnTargetChanged(widget_frame, unit)
 end
 
--- Context
-local function UpdateWidgetContext(frame, unit)
-	local guid = unit.guid
-	frame.guid = guid
-
-	-- Add to Widget List
-	-- if guid then
-	-- 	WidgetList[guid] = frame
-	-- end
-
-	-- Custom Code II
-	--------------------------------------
-	if UnitGUID("target") == guid then
-		UpdateWidgetFrame(frame, unit)
-	else
-		frame:_Hide()
-	end
-	--------------------------------------
-	-- End Custom Code
-end
-
-local function ClearWidgetContext(frame)
-	local guid = frame.guid
-	if guid then
-		-- WidgetList[guid] = nil
-		frame.guid = nil
-	end
-end
-
-local function CreateWidgetFrame(parent)
-	-- Required Widget Code
-	local frame = CreateFrame("Frame", nil, parent)
-	frame:Hide()
-
-	-- Custom Code III
-	--------------------------------------
-	--frame:SetPoint("CENTER", parent, "CENTER")
-  frame:SetFrameLevel(parent:GetFrameLevel() + 6)
-
-
-	frame.LeftTexture = frame:CreateTexture(nil, "BACKGROUND", 0)
-  frame.LeftTexture:SetPoint("RIGHT", parent, "LEFT")
-  frame.LeftTexture:SetSize(64, 64)
-  frame.RightTexture = frame:CreateTexture(nil, "BACKGROUND", 0)
-  frame.RightTexture:SetPoint("LEFT", parent, "RIGHT")
-  frame.RightTexture:SetSize(64, 64)
-
-  UpdateSettings(frame)
-  frame.UpdateConfig = UpdateSettings
-	--------------------------------------
-	-- End Custom Code
-
-	-- Required Widget Code
-	frame.UpdateContext = UpdateWidgetContext
-	frame.Update = UpdateWidgetFrame
-	frame._Hide = frame.Hide
-	frame.Hide = function() ClearWidgetContext(frame); frame:_Hide()
-	end
-
-	return frame
-end
-
-ThreatPlatesWidgets.RegisterWidget("TargetArtWidgetTPTP", CreateWidgetFrame, true, enabled)
+--function Widget:OnTargetChanged(widget_frame, unit)
+--  if UnitIsUnit("target", unit.unitid) then
+--    widget_frame:Show()
+--  else
+--    widget_frame:Hide()
+--  end
+--end

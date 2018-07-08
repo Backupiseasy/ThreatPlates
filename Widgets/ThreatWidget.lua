@@ -1,153 +1,160 @@
-local ADDON_NAME, NAMESPACE = ...
-local ThreatPlates = NAMESPACE.ThreatPlates
+---------------------------------------------------------------------------------------------------
+-- Threat Widget
+---------------------------------------------------------------------------------------------------
+local ADDON_NAME, Addon = ...
+local ThreatPlates = Addon.ThreatPlates
 
--------------------
--- Threat Widget --
--------------------
+local Widget = Addon:NewWidget("Threat")
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
-local UnitIsOffTanked = ThreatPlates.UnitIsOffTanked
-local ShowThreatFeedback = ThreatPlates.ShowThreatFeedback
-local GetUniqueNameplateSetting = ThreatPlates.GetUniqueNameplateSetting
 
-local UnitGUID = UnitGUID
+-- WoW APIs
+local CreateFrame, UNKNOWNOBJECT = CreateFrame, UNKNOWNOBJECT
+local UnitIsUnit, UnitThreatSituation, UnitName = UnitIsUnit, UnitThreatSituation, UnitName
+local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
+local GetRaidTargetIndex = GetRaidTargetIndex
+
+-- ThreatPlates APIs
+local TidyPlatesThreat = TidyPlatesThreat
 
 local PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ThreatWidget\\"
--- local WidgetList = {}
+local THREAT_REFERENCE = {
+  [0] = "LOW",
+  [1] = "MEDIUM",
+  [2] = "MEDIUM",
+  [3] = "HIGH",
+}
+local REVERSE_THREAT_SITUATION = {
+  HIGH = "LOW",
+  MEDIUM ="MEDIUM",
+  LOW = "HIGH",
+}
 
 ---------------------------------------------------------------------------------------------------
--- Threat Plates functions
+-- Event handling stuff
 ---------------------------------------------------------------------------------------------------
 
-local function enabled()
-	return TidyPlatesThreat.db.profile.threat.art.ON
-end
+function Widget:UNIT_THREAT_LIST_UPDATE(unitid)
+  if not unitid or unitid == "player" or UnitIsUnit("player", unitid) then return end
 
--- hides/destroys all widgets of this type created by Threat Plates
--- local function ClearAllWidgets()
--- 	for _, widget in pairs(WidgetList) do
--- 		widget:Hide()
--- 	end
--- end
--- ThreatPlatesWidgets.ClearAllThreatWidgets = ClearAllWidgets
-
----------------------------------------------------------------------------------------------------
--- Widget Functions for TidyPlates
----------------------------------------------------------------------------------------------------
-
---local function UpdateSettings()
---end
-
-local function UpdateWidgetFrame(frame, unit)
-	local db = TidyPlatesThreat.db.profile.threat
-
-  if unit.isMarked and db.marked.art then
-    frame:_Hide()
-  else
-    local style = unit.TP_Style
-
-    if style == "unique" then
-      local unique_setting = GetUniqueNameplateSetting(unit)
-      if unique_setting.UseThreatColor then
-        -- set style to tank/dps or normal
-        style = ThreatPlates.GetThreatStyle(unit)
-      end
-    end
-
-    -- Check for InCombatLockdown() and unit.type == "NPC" and unit.reaction ~= "FRIENDLY" not necessary
-    -- for dps/tank as these styles automatically require that
-    local show = (style == "dps" or style == "tank")
-
-    if show and ShowThreatFeedback(unit) then
-      local threatLevel
-      if style == "tank" then -- Tanking uses regular textures / swapped for dps / healing
-        if db.toggle.OffTank and UnitIsOffTanked(unit) then
-          threatLevel = "OFFTANK"
-        else
-          threatLevel = unit.threatSituation
-        end
-      else -- dps or normal
-        if unit.threatSituation == "HIGH" then
-          threatLevel = "LOW"
-        elseif unit.threatSituation == "LOW" then
-          threatLevel = "HIGH"
-        elseif unit.threatSituation == "MEDIUM" then
-          threatLevel = "MEDIUM"
-        end
-      end
-
-      frame.LeftTexture:SetTexture(PATH .. db.art.theme.."\\"..threatLevel)
-      frame.LeftTexture:SetTexCoord(0, 0.25, 0, 1)
-
-      frame.RightTexture:SetTexture(PATH .. db.art.theme.."\\"..threatLevel)
-      frame.RightTexture:SetTexCoord(0.75, 1, 0, 1)
-
-      frame:Show()
-    else
-      frame:_Hide()
+  local plate = GetNamePlateForUnit(unitid)
+  if plate and plate.TPFrame.Active then
+    local widget_frame = plate.TPFrame.widgets.Threat
+    if widget_frame.Active then
+      self:UpdateFrame(widget_frame, plate.TPFrame.unit)
     end
   end
 end
 
--- Context
-local function UpdateWidgetContext(frame, unit)
-	local guid = unit.guid
-	frame.guid = guid
-
-	-- Add to Widget List
-	-- if guid then
-	-- 	WidgetList[guid] = frame
-	-- end
-
-	-- Custom Code II
-	--------------------------------------
-	if UnitGUID("target") == guid then
-		UpdateWidgetFrame(frame, unit)
-	else
-		frame:_Hide()
-	end
-	--------------------------------------
-	-- End Custom Code
+function Widget:RAID_TARGET_UPDATE()
+  self:UpdateAllFrames()
 end
 
-local function ClearWidgetContext(frame)
-	local guid = frame.guid
-	if guid then
-		-- WidgetList[guid] = nil
-		frame.guid = nil
-	end
+---------------------------------------------------------------------------------------------------
+-- Widget functions for creation and update
+---------------------------------------------------------------------------------------------------
+
+function Widget:Create(tp_frame)
+  -- Required Widget Code
+  local widget_frame = CreateFrame("Frame", nil, tp_frame)
+  widget_frame:Hide()
+
+  -- Custom Code
+  --------------------------------------
+  widget_frame:SetFrameLevel(tp_frame:GetFrameLevel() + 7)
+  widget_frame.LeftTexture = widget_frame:CreateTexture(nil, "OVERLAY", 6)
+  widget_frame.RightTexture = widget_frame:CreateTexture(nil, "OVERLAY", 6)
+  widget_frame.RightTexture:SetPoint("LEFT", tp_frame.visual.healthbar, "RIGHT", 4, 0)
+  widget_frame.RightTexture:SetSize(64, 64)
+  --------------------------------------
+  -- End Custom Code
+
+  return widget_frame
 end
 
-local function CreateWidgetFrame(parent)
-	-- Required Widget Code
-	local frame = CreateFrame("Frame", nil, parent)
-	frame:Hide()
-
-	-- Custom Code III
-	--------------------------------------
-  frame:SetFrameLevel(parent:GetFrameLevel() + 7)
-
-  frame.LeftTexture = frame:CreateTexture(nil, "OVERLAY", 6)
-  frame.LeftTexture:SetPoint("RIGHT", parent.visual.healthbar, "LEFT", -4, 0)
-  frame.LeftTexture:SetSize(64, 64)
-  frame.RightTexture = frame:CreateTexture(nil, "OVERLAY", 6)
-  frame.RightTexture:SetPoint("LEFT", parent.visual.healthbar, "RIGHT", 4, 0)
-  frame.RightTexture:SetSize(64, 64)
-
---  UpdateSettings(frame)
---  frame.UpdateConfig = UpdateSettings
-	--------------------------------------
-	-- End Custom Code
-
-	-- Required Widget Code
-	frame.UpdateContext = UpdateWidgetContext
-	frame.Update = UpdateWidgetFrame
-	frame._Hide = frame.Hide
-	frame.Hide = function() ClearWidgetContext(frame); frame:_Hide() end
-
-	return frame
+function Widget:IsEnabled()
+  return TidyPlatesThreat.db.profile.threat.art.ON
 end
 
-ThreatPlatesWidgets.RegisterWidget("ThreatArtWidgetTPTP", CreateWidgetFrame, false, enabled)
+function Widget:OnEnable()
+  Widget:RegisterEvent("UNIT_THREAT_LIST_UPDATE")
+  Widget:RegisterEvent("RAID_TARGET_UPDATE")
+end
+
+function Widget:EnabledForStyle(style, unit)
+  return not (unit.type == "PLAYER" or style == "NameOnly" or style == "NameOnly-Unique" or style == "etotem")
+end
+
+function Widget:OnUnitAdded(widget_frame, unit)
+  local db = TidyPlatesThreat.db.profile.threat.art
+
+  if db.theme == "bar" then
+    widget_frame.LeftTexture:ClearAllPoints(widget_frame)
+    widget_frame.LeftTexture:SetSize(265, 64)
+    widget_frame.LeftTexture:SetPoint("CENTER", widget_frame:GetParent(), "CENTER")
+    widget_frame.LeftTexture:SetTexCoord(0, 1, 0, 1)
+
+    widget_frame.RightTexture:Hide()
+  else
+    widget_frame.LeftTexture:ClearAllPoints(widget_frame)
+    widget_frame.LeftTexture:SetSize(64, 64)
+    widget_frame.LeftTexture:SetPoint("RIGHT", widget_frame:GetParent().visual.healthbar, "LEFT", -4, 0)
+    widget_frame.LeftTexture:SetTexCoord(0, 0.25, 0, 1)
+
+    widget_frame.RightTexture:SetTexCoord(0.75, 1, 0, 1)
+    widget_frame.RightTexture:Show()
+  end
+
+  self:UpdateFrame(widget_frame, unit)
+end
+
+function Widget:UpdateFrame(widget_frame, unit)
+  local db = TidyPlatesThreat.db.profile.threat
+
+  if GetRaidTargetIndex(unit.unitid) and db.marked.art then
+    widget_frame:Hide()
+    return
+  end
+
+  if not Addon:ShowThreatFeedback(unit) then
+    widget_frame:Hide()
+    return
+  end
+
+  local name, _ = UnitName(unit.unitid) or UNKNOWNOBJECT, nil
+  local unique_setting = TidyPlatesThreat.db.profile.uniqueSettings.map[name]
+  if unique_setting then
+    if not unique_setting.useStyle or not unique_setting.UseThreatColor then
+      widget_frame:Hide()
+      return
+    end
+  end
+
+  local style = (Addon:PlayerRoleIsTank() and "tank") or "dps"
+
+  local threat_value = UnitThreatSituation("player", unit.unitid) or 0
+  local threat_situation = THREAT_REFERENCE[threat_value]
+
+  if style == "tank" then -- Tanking uses regular textures / swapped for dps / healing
+    if db.toggle.OffTank and Addon:UnitIsOffTanked(unit) then
+      threat_situation = "OFFTANK"
+    end
+  else -- dps or normal
+    threat_situation = REVERSE_THREAT_SITUATION[threat_situation]
+  end
+
+  if db.art.theme == "bar" then
+    widget_frame.LeftTexture:SetTexture(PATH .. db.art.theme.."\\".. threat_situation)
+  else
+    widget_frame.LeftTexture:SetTexture(PATH .. db.art.theme.."\\".. threat_situation)
+    widget_frame.RightTexture:SetTexture(PATH .. db.art.theme.."\\".. threat_situation)
+  end
+
+  widget_frame:Show()
+end
+
+--function Widget:OnUpdateStyle(widget_frame, unit)
+--  self:UpdateFrame(widget_frame, unit)
+--end

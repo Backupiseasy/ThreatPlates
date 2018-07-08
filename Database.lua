@@ -10,16 +10,11 @@ local ThreatPlates = Addon.ThreatPlates
 ---------------------------------------------------------------------------------------------------
 
 -- Lua APIs
-local floor = floor
-local unpack = unpack
-local type = type
-local min = min
-local pairs = pairs
+local floor, select, unpack, type, min, pairs = floor, select, unpack, type, min, pairs
 
 -- WoW APIs
-local InCombatLockdown = InCombatLockdown
-local GetCVar = GetCVar
-local SetCVar = SetCVar
+local GetCVar, SetCVar = GetCVar, SetCVar
+local UnitClass, GetSpecialization = UnitClass, GetSpecialization
 
 -- ThreatPlates APIs
 local L = ThreatPlates.L
@@ -31,17 +26,16 @@ local RGB = ThreatPlates.RGB
 ---------------------------------------------------------------------------------------------------
 
 -- Returns if the currently active spec is tank (true) or dps/heal (false)
-function TidyPlatesThreat:GetSpecRole()
-  local active_role
+Addon.PlayerClass = select(2, UnitClass("player"))
+local PLAYER_ROLE_BY_SPEC = ThreatPlates.SPEC_ROLES[Addon.PlayerClass]
 
-  if (self.db.profile.optionRoleDetectionAutomatic) then
-    active_role = ThreatPlates.SPEC_ROLES[ThreatPlates.Class()][ThreatPlates.Active()]
-    if not active_role then active_role = false end
+function Addon:PlayerRoleIsTank()
+  local db = TidyPlatesThreat.db
+  if db.profile.optionRoleDetectionAutomatic then
+    return PLAYER_ROLE_BY_SPEC[GetSpecialization()] or false
   else
-    active_role = self.db.char.spec[ThreatPlates.Active()]
+    return db.char.spec[GetSpecialization()]
   end
-
-  return active_role
 end
 
 -- Sets the role of the index spec or the active spec to tank (value = true) or dps/healing
@@ -49,7 +43,7 @@ function TidyPlatesThreat:SetRole(value,index)
   if index then
     self.db.char.spec[index] = value
   else
-    self.db.char.spec[ThreatPlates.Active()] = value
+    self.db.char.spec[GetSpecialization()] = value
   end
 end
 
@@ -74,8 +68,7 @@ local function SetNamePlateClickThrough(friendly, enemy)
     db.NamePlateFriendlyClickThrough = friendly
     db.NamePlateEnemyClickThrough = enemy
     Addon:CallbackWhenOoC(function()
-      C_NamePlate.
-      SetNamePlateFriendlyClickThrough(friendly)
+      C_NamePlate.SetNamePlateFriendlyClickThrough(friendly)
       C_NamePlate.SetNamePlateEnemyClickThrough(enemy)
     end, L["Nameplate clickthrough cannot be changed while in combat."])
 --  end
@@ -344,6 +337,38 @@ local function MigrateBorderTextures(profile_name, profile)
   end
 end
 
+local function MigrationAurasSettings(profile_name, profile)
+  if DatabaseEntryExists(profile, { "AuraWidget" } ) then
+    profile.AuraWidget.Debuffs = profile.AuraWidget.Debuffs or {}
+
+    if DatabaseEntryExists(profile, { "AuraWidget", "ShowDebuffsOnFriendly", } ) and profile.AuraWidget.ShowDebuffsOnFriendly then
+      profile.AuraWidget.Debuffs.ShowFriendly = true
+    end
+    DatabaseEntryDelete(profile, { "AuraWidget", "ShowDebuffsOnFriendly", } )
+
+    -- Don't migration FilterByType, does not make sense
+    DatabaseEntryDelete(profile, { "AuraWidget", "FilterByType", } )
+    DatabaseEntryDelete(profile, { "AuraWidget", "ShowFriendly", } )
+    DatabaseEntryDelete(profile, { "AuraWidget", "ShowEnemy", } )
+
+
+    if DatabaseEntryExists(profile, { "AuraWidget", "FilterBySpell", } ) then
+      profile.AuraWidget.Debuffs.FilterBySpell = profile.AuraWidget.FilterBySpell
+      DatabaseEntryDelete(profile, { "AuraWidget", "FilterBySpell", } )
+    end
+
+    if DatabaseEntryExists(profile, { "AuraWidget", "FilterMode", } ) then
+      profile.AuraWidget.Debuffs.FilterMode = profile.AuraWidget.FilterMode:gsub("Mine", "")
+      DatabaseEntryDelete(profile, { "AuraWidget", "FilterMode", } )
+    end
+
+    if DatabaseEntryExists(profile, { "AuraWidget", "scale", } ) then
+      profile.AuraWidget.Debuffs.Scale = profile.AuraWidget.scale
+      DatabaseEntryDelete(profile, { "AuraWidget", "scale", } )
+    end
+  end
+end
+
 local function MigrateAuraWidget(profile_name, profile)
   if DatabaseEntryExists(profile, { "debuffWidget" }) then
     if not profile.AuraWidget.ON and not profile.AuraWidget.ShowInHeadlineView then
@@ -373,25 +398,26 @@ end
 
 ---- Settings in the SavedVariables file that should be migrated and/or deleted
 local DEPRECATED_SETTINGS = {
-  NamesColor = { MigrateNamesColor, },                        -- settings.name.color
-  CustomTextShow = { MigrateCustomTextShow, },                -- settings.customtext.show
-  BlizzFadeA = { MigrationBlizzFadeA, },                      -- blizzFadeA.toggle and blizzFadeA.amount
-  TargetScale = { MigrationTargetScale, "8.5.0" },            -- nameplate.scale.Target/NoTarget
-  --AuraWidget = { MigrateAuraWidget, "8.6.0" },              -- disabled until someone requests it
-  AlphaFeatures = { "alphaFeatures" },
-  AlphaFeatureHeadlineView = { "alphaFeatureHeadlineView" },
-  AlphaFeatureAuraWidget2= { "alphaFeatureAuraWidget2" },
-  AlphaFriendlyNameOnly = { "alphaFriendlyNameOnly" },
-  HVBlizzFarding = { "HeadlineView", "blizzFading" },         -- (removed in 8.5.1)
-  HVBlizzFadingAlpha = { "HeadlineView", "blizzFadingAlpha"}, -- (removed in 8.5.1)
-  HVNameWidth = { "HeadlineView", "name", "width" },          -- (removed in 8.5.0)
-  HVNameHeight = { "HeadlineView", "name", "height" },        -- (removed in 8.5.0)
+--  NamesColor = { MigrateNamesColor, },                        -- settings.name.color
+--  CustomTextShow = { MigrateCustomTextShow, },                -- settings.customtext.show
+--  BlizzFadeA = { MigrationBlizzFadeA, },                      -- blizzFadeA.toggle and blizzFadeA.amount
+--  TargetScale = { MigrationTargetScale, "8.5.0" },            -- nameplate.scale.Target/NoTarget
+--  --AuraWidget = { MigrateAuraWidget, "8.6.0" },              -- disabled until someone requests it
+--  AlphaFeatures = { "alphaFeatures" },
+--  AlphaFeatureHeadlineView = { "alphaFeatureHeadlineView" },
+--  AlphaFeatureAuraWidget2= { "alphaFeatureAuraWidget2" },
+--  AlphaFriendlyNameOnly = { "alphaFriendlyNameOnly" },
+--  HVBlizzFarding = { "HeadlineView", "blizzFading" },         -- (removed in 8.5.1)
+--  HVBlizzFadingAlpha = { "HeadlineView", "blizzFadingAlpha"}, -- (removed in 8.5.1)
+--  HVNameWidth = { "HeadlineView", "name", "width" },          -- (removed in 8.5.0)
+--  HVNameHeight = { "HeadlineView", "name", "height" },        -- (removed in 8.5.0)
   DebuffWidget = { "debuffWidget" },                          -- (removed in 8.6.0)
   OldSettings = { "OldSettings" },                            -- (removed in 8.7.0)
   CastbarColoring = { MigrateCastbarColoring, },              -- (removed in 8.7.0)
   TotemSettings = { MigrationTotemSettings, "8.7.0" },        -- (changed in 8.7.0)
   Borders = { MigrateBorderTextures, "8.7.0" },               -- (changed in 8.7.0)
   UniqueSettingsList = { "uniqueSettings", "list" },          -- (removed in 8.7.0, cleanup added in 8.7.1)
+  Auras = { MigrationAurasSettings, "8.8.0" },                -- (changed in 8.8.0)
 }
 
 local function MigrateDatabase(current_version)

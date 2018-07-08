@@ -1,17 +1,22 @@
------------------------
--- Stealth Widget --
------------------------
-local ADDON_NAME, NAMESPACE = ...
-local ThreatPlates = NAMESPACE.ThreatPlates
+---------------------------------------------------------------------------------------------------
+-- Stealth Widget
+---------------------------------------------------------------------------------------------------
+local ADDON_NAME, Addon = ...
+
+local Widget = Addon:NewWidget("Stealth")
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
-local UnitGUID = UnitGUID
-local UnitBuff = UnitBuff
 
-local path = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\StealthWidget\\"
--- local WidgetList = {}
+-- WoW APIs
+local CreateFrame = CreateFrame
+local UnitReaction, UnitIsPlayer, UnitBuff = UnitReaction, UnitIsPlayer, UnitBuff
+
+-- ThreatPlates APIs
+local TidyPlatesThreat = TidyPlatesThreat
+
+local STEALTH_ICON_TEXTURE = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\StealthWidget\\stealthicon"
 
 local DETECTION_AURAS = {
   [18950] = true, -- Invisibility and Stealth Detection - not really sure if necessary as aura is hidden
@@ -44,52 +49,54 @@ local DETECTION_AURAS = {
 }
 
 ---------------------------------------------------------------------------------------------------
--- Threat Plates functions
+-- Stealth Widget Functions
 ---------------------------------------------------------------------------------------------------
 
-local function enabled()
-	return TidyPlatesThreat.db.profile.stealthWidget.ON
-end
-
-local function EnabledInHeadlineView()
-	return TidyPlatesThreat.db.profile.stealthWidget.ShowInHeadlineView
-end
-
--- hides/destroys all widgets of this type created by Threat Plates
--- local function ClearAllWidgets()
--- 	for _, widget in pairs(WidgetList) do
--- 		widget:Hide()
--- 	end
--- 	WidgetList = {} -- should not be necessary, as Hide() does that, just to be sure
--- end
--- ThreatPlatesWidgets.ClearAllQuestWidgets = ClearAllWidgets
-
 ---------------------------------------------------------------------------------------------------
--- Widget Functions for TidyPlates
+-- Widget functions for creation and update
 ---------------------------------------------------------------------------------------------------
 
-local function UpdateSettings(frame)
-  local db = TidyPlatesThreat.db.profile.stealthWidget
+function Widget:Create(tp_frame)
+  -- Required Widget Code
+  local widget_frame = CreateFrame("Frame", nil, tp_frame)
+  widget_frame:Hide()
 
-  local size = db.scale
-  frame:SetSize(size, size)
-  frame:SetPoint("CENTER", frame:GetParent(), db.x, db.y)
-  frame:SetAlpha(db.alpha)
-  frame.Icon:SetTexture(path.."stealthicon")
+  -- Custom Code
+  --------------------------------------
+  widget_frame:SetFrameLevel(tp_frame:GetFrameLevel() + 9)
+  widget_frame:SetSize(64, 64)
+  widget_frame.Icon = widget_frame:CreateTexture(nil, "OVERLAY")
+  widget_frame.Icon:SetAllPoints(widget_frame)
+  --------------------------------------
+  -- End Custom Code
+
+  return widget_frame
 end
 
--- Update Graphics
-local function UpdateWidgetFrame(frame, unit)
-  if not unit.unitid then return end
+function Widget:IsEnabled()
+  return TidyPlatesThreat.db.profile.stealthWidget.ON or TidyPlatesThreat.db.profile.stealthWidget.ShowInHeadlineView
+end
 
+function Widget:EnabledForStyle(style, unit)
+  if UnitReaction(unit.unitid, "player") > 4 or unit.type == "PLAYER" then return false end
+
+  if (style == "NameOnly" or style == "NameOnly-Unique") then
+    return TidyPlatesThreat.db.profile.stealthWidget.ShowInHeadlineView
+  elseif style ~= "etotem" then
+    return TidyPlatesThreat.db.profile.stealthWidget.ON
+  end
+end
+
+function Widget:OnUnitAdded(widget_frame, unit)
   -- name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, nameplateShowAll, timeMod, value1, value2, value3 = UnitBuff("unit", index or "name"[, "rank"[, "filter"]])
 
   local i = 1
   local found = false
   -- or check for (?=: Invisibility and Stealth Detection)
+  -- TODO: for oder do-while (what#s more efficient) with break
   repeat
-    local name, _, _, _, _, _, _, _, _, spell_id = UnitBuff(unit.unitid, i)
-    --print ("Aura: ", name, spell_id)
+    -- BfA: local name, _, _, _, _, _, _, _, _, spell_id = UnitBuff(unit.unitid, i)
+    local name, _, _, _, _, _, _, _, _, _, spell_id = UnitBuff(unit.unitid, i)
     if DETECTION_AURAS[spell_id] then
       found = true
     else
@@ -97,66 +104,36 @@ local function UpdateWidgetFrame(frame, unit)
     end
   until found or not name
 
-  if found then
-		frame:Show()
-  else
-    frame:_Hide()
+  if not found then
+    widget_frame:Hide() -- not necessary as this does never change after a unit was added
+    return
   end
+
+  local db = TidyPlatesThreat.db.profile.stealthWidget
+
+  -- Updates based on settings / unit style
+  if unit.style == "NameOnly" or unit.style == "NameOnly-Unique" then
+    widget_frame:SetPoint("CENTER", widget_frame:GetParent(), "CENTER", db.x_hv, db.y_hv)
+  else
+    widget_frame:SetPoint("CENTER", widget_frame:GetParent(), "CENTER", db.x, db.y)
+  end
+
+  -- Updates based on settings
+  widget_frame:SetSize(db.scale, db.scale)
+  widget_frame:SetAlpha(db.alpha)
+
+  -- Updates based on unit status
+  widget_frame.Icon:SetTexture(STEALTH_ICON_TEXTURE)
+
+  widget_frame:Show()
 end
 
--- Context - GUID or unitid should only change here, i.e., class changes should be determined here
-local function UpdateWidgetContext(frame, unit)
-	local guid = unit.guid
-	frame.guid = guid
-
-	-- Add to Widget List
-	-- if guid then
-	-- 	WidgetList[guid] = frame
-	-- end
-
-	-- Custom Code II
-	--------------------------------------
-	if UnitGUID("target") == guid then
-		UpdateWidgetFrame(frame, unit)
-	else
-		frame:_Hide()
-	end
-	--------------------------------------
-	-- End Custom Code
-end
-
-local function ClearWidgetContext(frame)
-	local guid = frame.guid
-	if guid then
-		-- WidgetList[guid] = nil
-		frame.guid = nil
-	end
-end
-
-local function CreateWidgetFrame(parent)
-	-- Required Widget Code
-	local frame = CreateFrame("Frame", nil, parent)
-	frame:Hide()
-
-  -- Custom Code III
-  --------------------------------------
-  frame:SetFrameLevel(parent:GetFrameLevel() + 9)
-  frame:SetSize(64, 64)
-  frame.Icon = frame:CreateTexture(nil, "OVERLAY")
-  frame.Icon:SetAllPoints(frame)
-
-  UpdateSettings(frame)
-  frame.UpdateConfig = UpdateSettings
-	--------------------------------------
-	-- End Custom Code
-
-	-- Required Widget Code
-	frame.UpdateContext = UpdateWidgetContext
-	frame.Update = UpdateWidgetFrame
-	frame._Hide = frame.Hide
-	frame.Hide = function() ClearWidgetContext(frame); frame:_Hide() end
-
-	return frame
-end
-
-ThreatPlatesWidgets.RegisterWidget("StealthWidgetTPTP", CreateWidgetFrame, false, enabled, EnabledInHeadlineView)
+--function Widget:OnUpdateStyle(widget_frame, unit)
+--  local db = TidyPlatesThreat.db.profile.stealthWidget
+--  -- Updates based on settings / unit style
+--  if unit.style == "NameOnly" or unit.style == "NameOnly-Unique" then
+--    widget_frame:SetPoint("CENTER", widget_frame:GetParent(), "CENTER", db.x_hv, db.y_hv)
+--  else
+--    widget_frame:SetPoint("CENTER", widget_frame:GetParent(), "CENTER", db.x, db.y)
+--  end
+--end

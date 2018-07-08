@@ -1,10 +1,10 @@
-local ADDON_NAME, NAMESPACE = ...
+local ADDON_NAME, Addon = ...
 
 ---------------------------------------------------------------------------------------------------
 -- Define table that contains all addon-global variables and functions
 ---------------------------------------------------------------------------------------------------
-NAMESPACE.ThreatPlates = {}
-local ThreatPlates = NAMESPACE.ThreatPlates
+Addon.ThreatPlates = {}
+local ThreatPlates = Addon.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -73,16 +73,6 @@ ThreatPlates.Meta = function(value)
 	return meta or ""
 end
 
-ThreatPlates.Class = function()
-	local _,class = UnitClass("Player")
-	return class
-end
-
-ThreatPlates.Active = function()
-	local val = GetSpecialization()
-	return val
-end
-
 do
 	ThreatPlates.HCC = {}
 	for i=1,#CLASS_SORT_ORDER do
@@ -132,6 +122,26 @@ ThreatPlates.CopyTable = function(input)
 		end
 	end
 	return output
+end
+
+Addon.MergeIntoTable = function(target, source)
+  for k,v in pairs(source) do
+    if type(v) == "table" then
+      Addon.MergeIntoTable(target[k], v)
+    else
+      target[k] = v
+    end
+  end
+end
+
+Addon.ConcatTables = function(base_table, table_to_concat)
+	local concat_result = ThreatPlates.CopyTable(base_table)
+
+	for i = 1, #table_to_concat do
+		concat_result[#concat_result + 1] = table_to_concat[i]
+	end
+
+	return concat_result
 end
 
 --------------------------------------------------------------------------------------------------
@@ -246,15 +256,15 @@ end
 -- With TidyPlates:
 --ThreatPlates.FixUpdateUnitCondition = FixUpdateUnitCondition
 
---ThreatPlates.DEBUG = function(...) end
---ThreatPlates.DEBUG_PRINT_TABLE = function(...) end
---ThreatPlates.DEBUG_PRINT_UNIT = function(...) end
---ThreatPlates.DEBUG_PRINT_TARGET = function(...) end
---ThreatPlates.DEBUG_AURA_LIST = function(...) end
-ThreatPlates.DEBUG = DEBUG
-ThreatPlates.DEBUG_PRINT_TABLE = DEBUG_PRINT_TABLE
-ThreatPlates.DEBUG_PRINT_UNIT = DEBUG_PRINT_UNIT
-ThreatPlates.DEBUG_PRINT_TARGET = DEBUG_PRINT_TARGET
-ThreatPlates.DEBUG_AURA_LIST = DEBUG_AURA_LIST
+ThreatPlates.DEBUG = function(...) end
+ThreatPlates.DEBUG_PRINT_TABLE = function(...) end
+ThreatPlates.DEBUG_PRINT_UNIT = function(...) end
+ThreatPlates.DEBUG_PRINT_TARGET = function(...) end
+ThreatPlates.DEBUG_AURA_LIST = function(...) end
+--ThreatPlates.DEBUG = DEBUG
+--ThreatPlates.DEBUG_PRINT_TABLE = DEBUG_PRINT_TABLE
+--ThreatPlates.DEBUG_PRINT_UNIT = DEBUG_PRINT_UNIT
+--ThreatPlates.DEBUG_PRINT_TARGET = DEBUG_PRINT_TARGET
+--ThreatPlates.DEBUG_AURA_LIST = DEBUG_AURA_LIST
 
 
