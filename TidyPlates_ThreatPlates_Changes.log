@@ -44,8 +44,8 @@
 ------------------------------------------------------
 8.8.0-Alpha1
 ------------------------------------------------------
-* Added the option to Auras widget to center the displayed auras.
 * Reworked internal code for widgets and widget handling to improve performance. Probably lot's of bugs still existing.
+* Added an option to the Auras widget to center the displayed auras horizontally.
 * Fixed a bug with the icon for friends and guild members still being shown although disabled.
 * Removed Tidy Plates Fading from options as it was never implemented/working.
 
