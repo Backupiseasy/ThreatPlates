@@ -347,12 +347,12 @@ function Widget:FilterFriendlyBuffsBySpell(db, aura, AuraFilterFunction)
 end
 
 function Widget:FilterEnemyBuffsBySpell(db, aura, AuraFilterFunction)
-  local show_aura = db.ShowAllEnemy or
-                    (db.ShowOnEnemyNPCs and aura.UnitIsNPC) or
-                    (db.ShowDispellable and aura.StealOrPurge)
+  local show_aura
 
   if db.HideUnlimitedDuration and aura.duration <= 0 then
     show_aura = false
+  else
+    show_aura = db.ShowAllEnemy or (db.ShowOnEnemyNPCs and aura.UnitIsNPC) or (db.ShowDispellable and aura.StealOrPurge)
   end
 
   local spellfound = self.AuraFilterBuffs[aura.name] or self.AuraFilterBuffs[aura.spellid]
