@@ -1,7 +1,8 @@
 ------------------------------------------------------
 9.0.0-Beta1
 ------------------------------------------------------
-
+* Fixed a bug with the absorbs overlay texture being shown under the healthbar when full absorbs was enabled.
+* Fixed a bug with castbar being shown although not enabled (e.g., in headline view) when interrupting a spell on the current target.
 
 ------------------------------------------------------
 9.0.0-Alpha4
@@ -12,7 +13,7 @@
 ------------------------------------------------------
 9.0.0-Alpha3
 ------------------------------------------------------
-* Fixed a bug with the absorb glow sometimes being shown in headline view (without healthbar/absorbbar).
+* Fixed a bug with the absorbs glow sometimes being shown in headline view (without healthbar/absorbbar).
 * Merged changes from 8.7.1 into BfA version 9.0.0-Alpha3.
 
 ------------------------------------------------------

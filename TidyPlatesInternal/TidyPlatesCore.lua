@@ -987,7 +987,7 @@ do
         UpdateReferences(plate)
 
         local castbar = visual.castbar
-        if unit.isTarget then
+        if unit.isTarget and castbar:IsShown() then
           local _, class = UnitClass(sourceName)
           if class then
             sourceName = "|cff" .. ThreatPlates.HCC[class] .. sourceName .. "|r"

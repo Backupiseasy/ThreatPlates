@@ -73,18 +73,18 @@ Widget.UnitAuraList = {}
 local CooldownNative = CreateFrame("Cooldown", nil, WorldFrame)
 Widget.SetCooldown = CooldownNative.SetCooldown
 
-local LOC_CHARM = 1 -- Aura: Possess
-local LOC_FEAR = 2
+local LOC_CHARM = 1         -- Aura: Possess
+local LOC_FEAR = 2          -- Mechanic: Fleeing
 local LOC_POLYMORPH = 3
 local LOC_STUN = 4
 local LOC_INCAPACITATE = 5
 local LOC_SLEEP = 6
-local LOC_DISORIENT = 7 -- Aura: Confuse
+local LOC_DISORIENT = 7     -- Aura: Confuse
 local LOC_BANISH = 8
 local LOC_HORROR = 9
 
 local PC_SNARE = 50
-local PC_ROOT = 51 -- Mechanic: Rooted
+local PC_ROOT = 51          -- Mechanic: Rooted
 local PC_DAZE = 52
 local PC_GRIP = 53
 
@@ -162,9 +162,20 @@ Widget.CROWD_CONTROL_SPELLS = {
   [211010] = "Hex", -- Snake
 
   -- Warlock
-  [5782] = "Fear",
+  [6789] = LOC_INCAPACITATE,  -- Mortal Coil
+  [5484] = LOC_FEAR,          -- Howl of Terror
+  [30283] = LOC_STUN,         -- Shadowfury
+  [710] = LOC_BANISH,         -- Banish
+  [5782] = LOC_FEAR,         -- Fear
 
   -- Warrior
+  [132168] = LOC_STUN,      -- Shockwave
+  [107570] = LOC_STUN,      -- Storm Bolt
+  [103828] = LOC_STUN,      -- Warbringer
+  [236027] = PC_SNARE,      -- Intercept - Slow
+  [105771] = PC_ROOT,       -- Intercept - Charge
+  [127724] = PC_ROOT,       -- Intercept - Charge
+  [118000] = LOC_STUN,      -- Dragon Roar
 }
 
 ---------------------------------------------------------------------------------------------------

@@ -52,7 +52,7 @@ function Addon:CreateExtensions(tp_frame)
       absorbbar = healthbar:CreateTexture(nil, "BORDER", -6)
       absorbbar:Hide()
 
-      absorbbar.overlay = healthbar:CreateTexture(nil, "Border", -4)
+      absorbbar.overlay = healthbar:CreateTexture(nil, "OVERLAY", 0)
       absorbbar.overlay:SetTexture("Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\Striped_Texture.tga", true, true)
       absorbbar.overlay:SetHorizTile(true)
       --absorbbar.tileSize = 64
@@ -94,7 +94,7 @@ function Addon:UpdateExtensions(tp_frame, unitid, style)
   -- Code for absorb calculation see CompactUnitFrame.lua
   local absorb = UnitGetTotalAbsorbs(unitid) or 0
 
---  absorb = UnitHealthMax(unitid) * 0.5 -- REMOVE
+  -- absorb = UnitHealthMax(unitid) * 0.3 -- REMOVE
 
   -- style probably is never nil here
   if absorb == 0 or not style or IGNORED_STYLES[style] then
