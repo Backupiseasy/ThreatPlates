@@ -1,10 +1,4 @@
 ------------------------------------------------------
-9.0.0-Beta1
-------------------------------------------------------
-* Fixed a bug with the absorbs overlay texture being shown under the healthbar when full absorbs was enabled.
-* Fixed a bug with castbar being shown although not enabled (e.g., in headline view) when interrupting a spell on the current target.
-
-------------------------------------------------------
 9.0.0-Alpha4
 ------------------------------------------------------
 * Added some new spells to the stealth widget.
@@ -30,6 +24,13 @@
 ------------------------------------------------------
 * Fixed several Lua errors caused by changes to the WoW API and events.
 * Updated TOC version for Battle for Azeroth.
+
+------------------------------------------------------
+8.8.0-Beta1
+------------------------------------------------------
+* Fixed a bug with the absorbs overlay texture being shown under the healthbar when full absorbs was enabled.
+* Fixed a bug with castbar being shown although not enabled (e.g., in headline view) when interrupting a spell on the current target.
+* Added several new crowd control spells to the Auras widget.
 
 ------------------------------------------------------
 8.8.0-Alpha3

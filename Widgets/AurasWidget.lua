@@ -75,15 +75,18 @@ Widget.SetCooldown = CooldownNative.SetCooldown
 
 local LOC_CHARM = 1         -- Aura: Possess
 local LOC_FEAR = 2          -- Mechanic: Fleeing
-local LOC_POLYMORPH = 3
-local LOC_STUN = 4
+local LOC_POLYMORPH = 3     -- Aura: Change Model,
+local LOC_STUN = 4          -- Aura: Stun
 local LOC_INCAPACITATE = 5
-local LOC_SLEEP = 6
+local LOC_SLEEP = 6         -- Mechanic: Asleep
 local LOC_DISORIENT = 7     -- Aura: Confuse
 local LOC_BANISH = 8
 local LOC_HORROR = 9
 
-local PC_SNARE = 50
+-- Polymorph: Aura: Pacify & Silence
+-- Hex: Aura: Confuse
+
+local PC_SNARE = 50         -- Mechanic: Snared
 local PC_ROOT = 51          -- Mechanic: Rooted
 local PC_DAZE = 52
 local PC_GRIP = 53
@@ -108,7 +111,7 @@ Widget.CROWD_CONTROL_SPELLS = {
   [108194] = LOC_STUN,             -- Asphyxiate
   [47476] = LOC_STUN,              -- Strangulate (PvP Talent)
   [45524] = PC_SNARE,              -- Chains of Ice
-  [111673] = LOC_CHARM,              -- Control Undead
+  [111673] = LOC_CHARM,            -- Control Undead
 
   -- Demon Hunter
   [211881] = LOC_STUN,             -- Fel Eruption (Talent)
@@ -120,6 +123,9 @@ Widget.CROWD_CONTROL_SPELLS = {
   [19577] = LOC_STUN,           -- Intimidation
   [5116] = PC_DAZE,             -- Concussive Shot
   [187651] = LOC_INCAPACITATE,  -- Freezing Trap
+  [213691] = LOC_INCAPACITATE,  -- Scatter Shot
+  [19386] = LOC_SLEEP,          -- Wyvern Sting
+
 
   -- Mage
   [61780] = LOC_POLYMORPH,  -- Polymorph (Turkey)
@@ -136,7 +142,9 @@ Widget.CROWD_CONTROL_SPELLS = {
   [113724] = LOC_STUN,      -- Ring of Frost
   [2139] = CC_SILENCE,      -- Counterspell
   [31661] = LOC_DISORIENT,  -- Dragon's Breath
-  [122] = PC_ROOT,    -- Frost Nova
+  [122] = PC_ROOT,          -- Frost Nova
+  [231596] = PC_ROOT,       -- Freeze (Pet)
+  [31589] = PC_SNARE,       -- Slow (Pet)
 
   -- Paladin
   [853] = LOC_STUN,             -- Hammer of Justice
@@ -150,23 +158,32 @@ Widget.CROWD_CONTROL_SPELLS = {
   [8122] = LOC_FEAR,         -- Psychic Scream
   [605] = LOC_CHARM,         -- Mind Control
   [9484] = LOC_POLYMORPH,    -- Shackle Undead
-  [88625] = LOC_STUN,       -- Holy Word: Chastise
+  [88625] = LOC_STUN,        -- Holy Word: Chastise
 
   -- Rogue
+  [2094] = LOC_DISORIENT,  -- Blind
+  [1833] = LOC_STUN,       -- Cheap Shot
+  [1776] = LOC_STUN,       -- Gouge
+  [408] = LOC_STUN,        -- Kidney Shot
+  [6770] = LOC_STUN,       -- Sap
+
 
   -- Shaman
-  [51514] = "Hex", -- Frog
-  [210873] = "Hex", -- Compy
-  [211004] = "Hex", -- Spider
-  [211015] = "Hex", -- Cockroach
-  [211010] = "Hex", -- Snake
+  [51485] = PC_ROOT,         -- Earthgrab Totem
+  [192058] = LOC_STUN,       -- Lightning Surge Totem
+  [2484] = PC_SNARE,         -- Earthbind Totem
+  [211015] = LOC_POLYMORPH,  -- Hex (Cockroach)
+  [211010] = LOC_POLYMORPH,  -- Hex (Snake)
+  [51514] = LOC_POLYMORPH,   -- Hex (Frog)
+  [211004] = LOC_POLYMORPH,  -- Hex (Spider)
+  [210873] = LOC_POLYMORPH,  -- Hex (Compy)
 
   -- Warlock
   [6789] = LOC_INCAPACITATE,  -- Mortal Coil
   [5484] = LOC_FEAR,          -- Howl of Terror
   [30283] = LOC_STUN,         -- Shadowfury
   [710] = LOC_BANISH,         -- Banish
-  [5782] = LOC_FEAR,         -- Fear
+  [5782] = LOC_FEAR,          -- Fear
 
   -- Warrior
   [132168] = LOC_STUN,      -- Shockwave
@@ -176,6 +193,8 @@ Widget.CROWD_CONTROL_SPELLS = {
   [105771] = PC_ROOT,       -- Intercept - Charge
   [127724] = PC_ROOT,       -- Intercept - Charge
   [118000] = LOC_STUN,      -- Dragon Roar
+  [1715] = PC_SNARE,        -- Hamstring
+  [5246] = LOC_FEAR,        -- Intimidating Shout
 }
 
 ---------------------------------------------------------------------------------------------------

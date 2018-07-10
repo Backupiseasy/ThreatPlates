@@ -1,8 +1,8 @@
 -- Lua implementation of PHP scandir function
 --local TPTP_DIRECTORY = [[C:\Games\World of Warcraft\Interface\AddOns\TidyPlates_ThreatPlates]]
---local TPTP_DIRECTORY = [[D:\Games\World of Warcraft - Test\Interface\AddOns\TidyPlates_ThreatPlates]]
+local TPTP_DIRECTORY = [[D:\Games\World of Warcraft - Test\Interface\AddOns\TidyPlates_ThreatPlates]]
 --local TPTP_DIRECTORY = [[D:\Games\World of Warcraft - Dev\Interface\AddOns\TidyPlates_ThreatPlates]]
-local TPTP_DIRECTORY = [[D:\Games\World of Warcraft - Int\Interface\AddOns\TidyPlates_ThreatPlates]]
+--local TPTP_DIRECTORY = [[D:\Games\World of Warcraft - Int\Interface\AddOns\TidyPlates_ThreatPlates]]
 local IGNORE_LIST = {
   TPTP_DIRECTORY .. [[\Libs]],
   TPTP_DIRECTORY ..[[\Locales]]
@@ -58,7 +58,7 @@ do
       local lines_in_file = lines_from(file_list[i])
       for line=1, #lines_in_file do
         for w in lines_in_file[line]:gmatch("L%b[]") do
-          if not w:find('%.%.%s*%b""') and not w:find('%b""%s*%.%.') then
+          if not w:find('%.%.%s*%b""') and not w:find('%b""%s*%.%.') and (w:find('"') or w:find("'")) then
             locale_strings[w] = true
           end
         end
