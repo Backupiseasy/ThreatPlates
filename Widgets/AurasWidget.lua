@@ -207,9 +207,6 @@ local function OnUpdateAurasWidget(widget_frame, elapsed)
 
   local widget = widget_frame.Widget
   if widget_frame.TimeSinceLastUpdate >= widget.UpdateInterval then
-    --print ("AurasWidget: OnUpdate handler called -", widget_frame.unit.name, widget_frame.TimeSinceLastUpdate)
-    -- print ("AurasWidget: Active auras -", widget_frame.ActiveAuras)
-
     widget_frame.TimeSinceLastUpdate = 0
 
     local aura_frame
@@ -350,18 +347,7 @@ function Widget:FilterEnemyDebuffsBySpell(db, aura, AuraFilterFunction)
                     (db.ShowOnlyMine and aura.CastByPlayer) or
                     (db.ShowBlizzardForEnemy and (aura.ShowAll or (aura.ShowPersonal and aura.CastByPlayer)))
 
-  --if not show_aura then return false end
-
   local spellfound = self.AuraFilterDebuffs[aura.name] or self.AuraFilterDebuffs[aura.spellid]
-
---  print ("Filter Enemy Debuff: ", aura.name, db.FilterMode)
---  print ("  ShowOnlyMine = ", db.ShowOnlyMine)
---  print ("  spellfound = ", spellfound)
---  print ("  Filter = ", AuraFilterFunction(spellfound, aura.CastByPlayer))
-
---  if UnitIsUnit("target", aura.unit) then
---    print (aura.name, spellfound, AuraFilterFunction(show_aura, spellfound, aura.CastByPlayer), show_aura)
---  end
 
   return AuraFilterFunction(show_aura, spellfound, aura.CastByPlayer, db.ShowOnlyMine)
 end
@@ -454,10 +440,6 @@ function Widget:UpdateUnitAuras(frame, effect, unitid, enabled_auras, enabled_cc
   local AuraFilterFunctionCC = self.FILTER_FUNCTIONS[db.CrowdControl.FilterMode]
   local GetAuraPriority = self.PRIORITY_FUNCTIONS[sort_order]
 
---  if UnitIsUnit("target", unitid) then
---    print ("Filter Function:", effect, filter_mode, AuraFilterFunction)
---  end
-
   local aura, show_aura
   local aura_count = 1
   local rank, isCastByPlayer
@@ -488,29 +470,6 @@ function Widget:UpdateUnitAuras(frame, effect, unitid, enabled_auras, enabled_cc
     aura.ShowAll = aura.ShowAll
     aura.CrowdControl = (enabled_cc and self.CROWD_CONTROL_SPELLS[aura.spellid])
     aura.CastByPlayer = (aura.caster == "player" or aura.caster == "pet" or aura.caster == "vehicle")
-
---    if aura.CrowdControl or CROWD_CONTROL_SPELLS[aura.spellid] then
---      -- Crowd Control Spell
---      print ("CROWD CONTROL: ", aura.name, show_cc)
---    end
---    if UnitIsUnit("target", unitid) then
---      print ("  Spell: ", aura.name)
---    end
---    if aura.StealOrPurge then
---      print ("Aura:", aura.name, " - Dispellable")
---    end
---    if aura.BossDebuff then
---      print ("Aura:", aura.name, " - Boss Debuff7")
---    end
---    if aura.ShowPersonal then
---      print ("Aura:", aura.name, " - Personal")
---    end
---    if aura.ShowAll then
---      print ("Aura:", aura.name, " - Show on All Nameplates")
---    end
---    if isCastByPlayer or aura.CastByPlayer then
---      print ("Aura:", aura.name, " - Cast by player:", aura.CastByPlayer, "vs.", isCastByPlayer)
---    end
 
     -- Store Order/Priority
     if aura.CrowdControl then
@@ -608,7 +567,6 @@ function Widget:UpdateUnitAuras(frame, effect, unitid, enabled_auras, enabled_cc
   if effect == "HARMFUL" then
     local aura_frames_cc = frame:GetParent().CrowdControl
     aura_frames_cc.ActiveAuras = aura_count_cc
-    --print ("CC ActiveAuras: ", frame:GetParent().CrowdControl.ActiveAuras)
 
     local aura_frame_list_cc = aura_frames_cc.AuraFrames
     for i = aura_count_cc + 1, self.MaxAurasPerGrid do
@@ -669,10 +627,6 @@ function Widget:UpdateIconGrid(widget_frame, unitid)
     self:UpdateUnitAuras(widget_frame.Buffs, "HELPFUL", unitid, db.Buffs.ShowEnemy, false, self.FilterEnemyBuffsBySpell, self.FilterEnemyCrowdControlBySpell, db.Buffs.FilterMode)
   end
 
-  --print ("CCs: ", widget_frame.CrowdControl.ActiveAuras)
-  --print ("AurasWidget: #Debuffs: ", widget_frame.Debuffs.ActiveAuras)
-  --print ("AurasWidget: #Buffs: ", widget_frame.Buffs.ActiveAuras)
-
   local buffs_active, debuffs_active, cc_active = widget_frame.Buffs.ActiveAuras > 0, widget_frame.Debuffs.ActiveAuras > 0, widget_frame.CrowdControl.ActiveAuras > 0
 
   if buffs_active or debuffs_active or cc_active then
@@ -711,28 +665,6 @@ function Widget:UpdateIconGrid(widget_frame, unitid)
     else
       widget_frame.CrowdControl:Hide()
     end
-
---    local frame = widget_frame.Debuffs
---    if not frame.TestBackground then
---      frame.TestBackground = frame:CreateTexture(nil, "BACKGROUND")
---    end
---    frame.TestBackground:SetAllPoints(frame)
---    frame.TestBackground:SetTexture(ThreatPlates.Media:Fetch('statusbar', "Smooth"))
---    frame.TestBackground:SetVertexColor(0,0,0,1)
---    frame = widget_frame.Buffs
---    if not frame.TestBackground then
---      frame.TestBackground = frame:CreateTexture(nil, "BACKGROUND")
---    end
---    frame.TestBackground:SetAllPoints(frame)
---    frame.TestBackground:SetTexture(ThreatPlates.Media:Fetch('statusbar', "Smooth"))
---    frame.TestBackground:SetVertexColor(0,0,0,1)
---    frame = widget_frame.CrowdControl
---    if not frame.TestBackground then
---      frame.TestBackground = frame:CreateTexture(nil, "BACKGROUND")
---    end
---    frame.TestBackground:SetAllPoints(frame)
---    frame.TestBackground:SetTexture(ThreatPlates.Media:Fetch('statusbar', "Smooth"))
---    frame.TestBackground:SetVertexColor(0,0,0,1)
 
     widget_frame:Show()
   else
@@ -1112,36 +1044,12 @@ function Widget:UpdateAuraWidgetLayout(widget_frame)
 end
 
 local function UnitAuraEventHandler(widget_frame, event, unitid)
-  --print ("AurasWidget: UNIT_AURA: ", event, unitid)
-  --  if unitid ~= widget_frame.unit.unitid then
-  --    print ("AurasWidget: UNIT_AURA for", unitid)
-  --    print ("AurasWidget: Plate Active:", Addon.PlatesByUnit[unitid].Active)
-  --    print ("AurasWidget: Plate Unit:", Addon.PlatesByUnit[unitid].TPFrame.unit.unitid)
-  --    print ("AurasWidget: Plate WidgetFrame:", Addon.PlatesByUnit[unitid].TPFrame.widgets.Auras, Addon.PlatesByUnit[unitid].TPFrame.widgets.Auras.Active, Addon.PlatesByUnit[unitid].TPFrame.widgets.Auras == widget_frame)
-  --    print ("Unit:")
-  --    print ("Unit Name:", UnitName(unitid))
-  --    print ("Unit is Player:", UnitIsPlayer(unitid))
-  --    return
-  --  end
-
   --  -- Skip player (cause TP does not handle player nameplate) and target (as it is updated via it's actual unitid anyway)
   --  if unitid == "player" or unitid == "target" then return end
 
   if widget_frame.Active then
     widget_frame.Widget:UpdateIconGrid(widget_frame, unitid)
-
-    --    if not widget_frame.TestBackground then
-    --      widget_frame.TestBackground = widget_frame:CreateTexture(nil, "BACKGROUND")
-    --    end
-    --    widget_frame.TestBackground:SetAllPoints(widget_frame)
-    --    widget_frame.TestBackground:SetTexture(ThreatPlates.Media:Fetch('statusbar', "Smooth"))
-    --    widget_frame.TestBackground:SetVertexColor(0,0,0,0.5)
   end
-
-  -- Nameplates are re-used. Old events are unregistered when the unit is added, but if the nameplate is not
-  -- shown for this unit, this does not happen. So do it here the first time we get an event for this unit.
-  --print ("Unregistering events")
-  --widget_frame:UnregisterAllEvents()
 end
 
 function Widget:PLAYER_TARGET_CHANGED()
@@ -1157,7 +1065,6 @@ function Widget:PLAYER_TARGET_CHANGED()
     self.CurrentTarget = plate.TPFrame.widgets.Auras
 
     if self.CurrentTarget.Active and self.CurrentTarget.ActiveAuras > 0 then
-      print ("AurasWidget: SHOWING widget because of active auras")
       self.CurrentTarget:Show()
     end
   end
@@ -1306,16 +1213,6 @@ function Widget:ParseSpellFilters()
   end
 
   self:UpdateSettings()
-
-  --  print ("Debuff FilterMode: ", db.Debuffs.FilterMode)
-  --  print ("Debuff Filter: ", db.Debuffs.FilterBySpell)
-  --
-  --  print ("Debuffs - Friendly: ", AuraFilter.Friendly.Debuffs)
-  --  print ("Debuffs - Enemy: ", AuraFilter.Enemy.Debuffs)
-  --  print ("Debuffs - Filter: ")
-  --  for k, v in pairs(AuraFilterDebuffs) do
-  --    print ("  ", k, "=", v)
-  --  end
 end
 
 function Widget:UpdateSettingsIconMode()

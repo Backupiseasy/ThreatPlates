@@ -26,6 +26,11 @@
 * Updated TOC version for Battle for Azeroth.
 
 ------------------------------------------------------
+8.8.0-Beta2
+------------------------------------------------------
+* Updated localization for deDE (German), zhTW (Traditional Chinese, thanks to gaspy10).
+
+------------------------------------------------------
 8.8.0-Beta1
 ------------------------------------------------------
 * Fixed a bug with the absorbs overlay texture being shown under the healthbar when full absorbs was enabled.

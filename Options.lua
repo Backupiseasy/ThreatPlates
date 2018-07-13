@@ -1400,7 +1400,7 @@ local function CreateHealerTrackerWidgetOptions()
     order = 60,
     type = "group",
     args = {
-      Enable = GetEnableEntry(L["Enable Healer Tracker"], L["This widget shows players that are healers."], "healerTracker", true, function(info, val) SetValuePlain(info, val); Addon:InitializeWidget("HealerTracker") end),
+      Enable = GetEnableEntry(L["Enable Healer Tracker Widget"], L["This widget shows players that are healers."], "healerTracker", true, function(info, val) SetValuePlain(info, val); Addon:InitializeWidget("HealerTracker") end),
       Layout = {
         name = L["Layout"],
         order = 10,
@@ -1889,7 +1889,7 @@ local function CreateAurasWidgetOptions()
           Style = {
             type = "group",
             order = 10,
-            name = L["Auren"],
+            name = L["Auras"],
             inline = true,
             args = {
               TargetOnly = {
@@ -2032,7 +2032,7 @@ local function CreateAurasWidgetOptions()
                 args = {
                   ScaleDebuffs = GetScaleEntry(L["Debuffs"], 10, { "AuraWidget", "Debuffs", "Scale", }),
                   ScaleBuffs = GetScaleEntry(L["Buffs"], 20, { "AuraWidget", "Buffs", "Scale", }),
-                  ScaleCrowdControl = GetScaleEntry(L["CrowdControl"], 30, { "AuraWidget", "CrowdControl", "Scale", }),
+                  ScaleCrowdControl = GetScaleEntry(L["Crowd Control"], 30, { "AuraWidget", "CrowdControl", "Scale", }),
                   Reverse = {
                     type = "toggle",
                     order = 50,
@@ -2459,7 +2459,7 @@ local function CreateAurasWidgetOptions()
                 name = L["Hide Unlimited"],
                 order = 60,
                 type = "toggle",
-                desc = L["Hide buffs with unlimted duration."],
+                desc = L["Hide buffs with unlimited duration."],
                 arg = { "AuraWidget", "Buffs", "HideUnlimitedDuration" },
                 disabled = function() return not db.AuraWidget.Buffs.ShowEnemy end
               },
@@ -2539,7 +2539,7 @@ local function CreateAurasWidgetOptions()
                 name = L["Blizzard"],
                 order = 30,
                 type = "toggle",
-                desc = L["Show crowd control auras hat are shown on Blizzard's default nameplates."],
+                desc = L["Show crowd control auras that are shown on Blizzard's default nameplates."],
                 set = function(info, val)
                   local db = db.AuraWidget.CrowdControl
                   db.ShowAllFriendly = not (val or db.ShowDispellable or db.ShowBoss)

@@ -348,9 +348,23 @@ local function MigrationAurasSettings(profile_name, profile)
 
     -- Don't migration FilterByType, does not make sense
     DatabaseEntryDelete(profile, { "AuraWidget", "FilterByType", } )
-    DatabaseEntryDelete(profile, { "AuraWidget", "ShowFriendly", } )
-    DatabaseEntryDelete(profile, { "AuraWidget", "ShowEnemy", } )
 
+
+    if DatabaseEntryExists(profile, { "AuraWidget", "ShowFriendly", } ) and not profile.AuraWidget.ShowFriendly then
+      profile.AuraWidget.Debuffs.ShowFriendly = false
+      profile.AuraWidget.Buffs.ShowFriendly = false
+      profile.AuraWidget.CrowdControl.ShowFriendly = false
+
+      DatabaseEntryDelete(profile, { "AuraWidget", "ShowFriendly", } )
+    end
+
+    if DatabaseEntryExists(profile, { "AuraWidget", "ShowEnemy", } ) and not profile.AuraWidget.ShowEnemy then
+      profile.AuraWidget.Debuffs.ShowEnemy = false
+      profile.AuraWidget.Buffs.ShowEnemy = false
+      profile.AuraWidget.CrowdControl.ShowEnemy = false
+
+      DatabaseEntryDelete(profile, { "AuraWidget", "ShowEnemy", } )
+    end
 
     if DatabaseEntryExists(profile, { "AuraWidget", "FilterBySpell", } ) then
       profile.AuraWidget.Debuffs.FilterBySpell = profile.AuraWidget.FilterBySpell
