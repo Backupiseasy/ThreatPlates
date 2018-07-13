@@ -106,6 +106,7 @@ Widget.CROWD_CONTROL_SPELLS = {
   [127797] = PC_DAZE,             -- Ursol's Vortex
   [33786] = LOC_BANISH,           -- Cyclone (PvP Talent, Restoration)
   [209753] = LOC_BANISH,          -- Cyclone (PvP Talent, Balance)
+  [2637] = LOC_SLEEP,             -- Hibernate
 
   -- Death Knight
   [108194] = LOC_STUN,             -- Asphyxiate
