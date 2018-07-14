@@ -1,65 +1,24 @@
 ------------------------------------------------------
-9.0.0-Alpha4
+9.0.0 - Release for Battle for Azeroth Pre-Patch 8.0
 ------------------------------------------------------
-* Added some new spells to the stealth widget.
-* Fixed a bug in the quest widget not being updated after a quest update.
-
-------------------------------------------------------
-9.0.0-Alpha3
-------------------------------------------------------
-* Fixed a bug with the absorbs glow sometimes being shown in headline view (without healthbar/absorbbar).
-* Merged changes from 8.7.1 into BfA version 9.0.0-Alpha3.
-
-------------------------------------------------------
-9.0.0-Alpha2
-------------------------------------------------------
-* Reduced number of custom nameplates available as clicking on "Custom Nameplates" results in the game crashing otherwise.
-* Updated shaman totems - removed voodoo totem.
-* Fixed bugs with saving the icon for a custom nameplate when a spell ID was used to define the icon.
-* Fixed a bug with custom nameplates which were only loaded after the options dialog was opened.
-* Again, fixed several bugs caused by changes to the WoW API and events (Stealth Widget).
-
-------------------------------------------------------
-9.0.0-Alpha1
-------------------------------------------------------
-* Fixed several Lua errors caused by changes to the WoW API and events.
-* Updated TOC version for Battle for Azeroth.
-
-------------------------------------------------------
-8.8.0-Beta2
-------------------------------------------------------
-* Updated localization for deDE (German), zhTW (Traditional Chinese, thanks to gaspy10).
-
-------------------------------------------------------
-8.8.0-Beta1
-------------------------------------------------------
-* Fixed a bug with the absorbs overlay texture being shown under the healthbar when full absorbs was enabled.
-* Fixed a bug with castbar being shown although not enabled (e.g., in headline view) when interrupting a spell on the current target.
-* Added several new crowd control spells to the Auras widget.
-
-------------------------------------------------------
-8.8.0-Alpha3
-------------------------------------------------------
+* Updated TOC version for Battle for Azeroth Pre-Patch 8.0 and updated nameplate code due to changes to WoW API and events.
+* Reworked the Auras widget so that buffs, debuffs, and crowd control related auras can be shown independently from each other [Comment #704, Issue #183, Comment #725, PM].
+* Reworked internal code for widgets and widget handling to improve performance.
 * Re-activated the HealerTracker widget - big thanks to Sudo1701 for migrating and updating it from legacy code.
 * Added several customization options for aura icons to the Auras widget (e.g., change height, width, time text font and position) [Comment #827, Issue #181].
+* Added an option to the Auras widget to center the displayed auras horizontally.
+* Added an option to the Auras widget to show a flash animation for auras that are expiring [Comment #546, Issue #181].
+* Added on option to hide buffs on the personal nameplate [Issue #190].
+* Added some new spells to the Stealth widget.
+* Updated shaman totems - removed Voodoo totem.
+* Fixed a bug with the icon for friends and guild members still being shown although disabled.
+* Fixed a bug with the absorbs overlay texture being shown under the healthbar when full absorbs was enabled.
+* Fixed a bug with castbar being shown although not enabled (e.g., in headline view) when interrupting a spell on the current target.
 * Fixed a bug with Resource widget showing on non-target units.
 * Fixed a bug with level text options where text boundaries where incorrectly stored and not used because of that [Issue from WoWInterface].
-* Updated integrated libraries to LibSharedMedia-3.0 7.3.0, Ace3 Release-r1166.
-
-------------------------------------------------------
-8.8.0-Alpha2
-------------------------------------------------------
-* Reworked the Auras widget so that buffs, debuffs, and crowd control related auras can be shown independently from each other [Comment #704, Issue #183, Comment #725, PM].
-* Added an option to Auras widget to show a flash animation for auras that are expiring [Comment #546, Issue #181].
-* Added on option to hide buffs on the personal nameplate [Issue #190].
-
-------------------------------------------------------
-8.8.0-Alpha1
-------------------------------------------------------
-* Reworked internal code for widgets and widget handling to improve performance. Probably lot's of bugs still existing.
-* Added an option to the Auras widget to center the displayed auras horizontally.
-* Fixed a bug with the icon for friends and guild members still being shown although disabled.
 * Removed Tidy Plates Fading from options as it was never implemented/working.
+* Updated localization for deDE (German), zhTW (Traditional Chinese, thanks to gaspy10).
+* Updated integrated libraries to LibSharedMedia-3.0 7.3.0, Ace3 Release-r1166.
 
 ------------------------------------------------------
 8.7.4
