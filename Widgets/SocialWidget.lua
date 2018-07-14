@@ -28,7 +28,8 @@ local CreateFrame = CreateFrame
 local GetNumGuildMembers, GetGuildRosterInfo = GetNumGuildMembers, GetGuildRosterInfo
 local GetNumFriends, GetFriendInfo = GetNumFriends, GetFriendInfo
 local BNGetNumFriends, BNGetFriendInfo, BNGetToonInfo, BNGetFriendInfoByID = BNGetNumFriends, BNGetFriendInfo, BNGetToonInfo, BNGetFriendInfoByID
-local UnitIsPlayer, UnitName, GetRealmName, UnitFactionGroup = UnitIsPlayer, UnitName, GetRealmName, UnitFactionGroup
+local BNet_GetValidatedCharacterName = BNet_GetValidatedCharacterName
+local UnitName, GetRealmName, UnitFactionGroup = UnitName, GetRealmName, UnitFactionGroup
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 
 -- ThreatPlates APIs
@@ -144,11 +145,8 @@ function Widget:BN_FRIEND_ACCOUNT_ONLINE(presence_id)
   -- don't display a the friend if we didn't get the data in time or the are not logged in into WoW
   --if not accountName or client ~= "BNET_CLIENT_WOW" then	return end
 
-  print ("Social: BN_FRIEND_ACCOUNT_ONLINE -", character_name)
-
   if (battle_tag) then
     character_name = BNet_GetValidatedCharacterName(character_name, battle_tag, client) or ""
-    print ("Social: BN_FRIEND_ACCOUNT_ONLINE - Update -", character_name)
   end
 
   ListBnetFriends[character_name] = ICON_BNET_FRIEND
@@ -162,11 +160,8 @@ function Widget:BN_FRIEND_ACCOUNT_OFFLINE(presence_id)
   -- don't display a the friend if we didn't get the data in time or the are not logged in into WoW
   --if not accountName or client ~= "BNET_CLIENT_WOW" then	return end
 
-  print ("Social: BN_FRIEND_ACCOUNT_OFFLINE -", character_name)
-
   if (battle_tag) then
     character_name = BNet_GetValidatedCharacterName(character_name, battle_tag, client) or ""
-    print ("Social: BN_FRIEND_ACCOUNT_OFFLINE - Update -", character_name)
   end
 
   ListBnetFriends[character_name] = nil
