@@ -227,8 +227,6 @@ function Widget:OnEnable()
     self:RegisterEvent("FRIENDLIST_UPDATE")
     self:RegisterEvent("GUILD_ROSTER_UPDATE")
     self:RegisterEvent("BN_CONNECTED")
-    self:RegisterEvent("BN_FRIEND_TOON_ONLINE") -- remove with BfA
-    self:RegisterEvent("BN_FRIEND_TOON_OFFLINE") -- remove with BfA
     self:RegisterEvent("BN_FRIEND_ACCOUNT_ONLINE")
     self:RegisterEvent("BN_FRIEND_ACCOUNT_OFFLINE")
     self:RegisterEvent("UNIT_NAME_UPDATE")

@@ -13,6 +13,7 @@ local Widget = Addon:NewWidget("HealerTracker")
 local GetTime = GetTime
 local CreateFrame = CreateFrame
 local RequestBattlefieldScoreData, GetNumBattlefieldScores = RequestBattlefieldScoreData, GetNumBattlefieldScores
+local CombatLogGetCurrentEventInfo = CombatLogGetCurrentEventInfo
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
@@ -172,8 +173,7 @@ local SPELL_EVENTS = {
 }
 
 local function FindHealersViaCombatLog(...)
-  -- BfA: local timestamp, combatevent, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlag, spellid = CombatLogGetCurrentEventInfo();
-  local timestamp, combatevent, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlag, spellid = ...
+  local timestamp, combatevent, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlag, spellid = CombatLogGetCurrentEventInfo();
 
   if sourceGUID and sourceName and SPELL_EVENTS[combatevent] and HEALER_SPELLS[spellid] then
     healerList.guids[sourceGUID] = true

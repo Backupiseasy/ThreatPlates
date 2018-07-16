@@ -222,8 +222,7 @@ local TOTEM_DATA = {
   [13] = { SpellID = 192058, ID = "N3", GroupColor = "4c9900"},		-- Lightning  Surge Totem
   [14] = { SpellID = 207399, ID = "N4", GroupColor = "4c9900"},		-- Ancestral Protection Totem
   [15] = { SpellID = 192077, ID = "N5", GroupColor = "4c9900"},		-- Wind Rush Totem
-  -- BfA: --[16] = { SpellID = 196932, ID = "N6", GroupColor = "4c9900"},		-- Voodoo Totem
-  [16] = { SpellID = 196932, ID = "N6", GroupColor = "4c9900"},		-- Voodoo Totem
+  --[16] = { SpellID = 196932, ID = "N6", GroupColor = "4c9900"},		-- Voodoo Totem
   [17] = { SpellID = 198838, ID = "N7", GroupColor = "4c9900"},		-- Earthen Shield Totem
 
   -- Totems from PVP talents
@@ -235,8 +234,7 @@ local TOTEM_DATA = {
 
 function Addon:InitializeTotemInformation()
   for i, totem_data in ipairs(TOTEM_DATA) do
-    -- BfA: local name = GetSpellInfo(totem_data.SpellID) or UNKNOWNOBJECT, nil
-    local name, _ = GetSpellInfo(totem_data.SpellID) or UNKNOWNOBJECT, nil
+    local name = GetSpellInfo(totem_data.SpellID) or UNKNOWNOBJECT
 
     totem_data.Name = name
     totem_data.Color = RGB(HEX2RGB(totem_data.GroupColor))

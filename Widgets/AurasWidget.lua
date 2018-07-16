@@ -22,7 +22,7 @@ local tonumber = tonumber
 -- WoW APIs
 local CreateFrame, GetFramerate = CreateFrame, GetFramerate
 local DebuffTypeColor = DebuffTypeColor
-local UnitAura, UnitIsFriend, UnitIsUnit, UnitReaction, UnitIsPlayer = UnitAura, UnitIsFriend, UnitIsUnit, UnitReaction, UnitIsPlayer
+local UnitAura, UnitIsFriend, UnitIsUnit, UnitReaction, UnitIsPlayer, UnitPlayerControlled = UnitAura, UnitIsFriend, UnitIsUnit, UnitReaction, UnitIsPlayer, UnitPlayerControlled
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 
 -- ThreatPlates APIs
@@ -127,7 +127,6 @@ Widget.CROWD_CONTROL_SPELLS = {
   [213691] = LOC_INCAPACITATE,  -- Scatter Shot
   [19386] = LOC_SLEEP,          -- Wyvern Sting
 
-
   -- Mage
   [61780] = LOC_POLYMORPH,  -- Polymorph (Turkey)
   [161353] = LOC_POLYMORPH, -- Polymorph (Polar Bear Cub)
@@ -146,6 +145,7 @@ Widget.CROWD_CONTROL_SPELLS = {
   [122] = PC_ROOT,          -- Frost Nova
   [231596] = PC_ROOT,       -- Freeze (Pet)
   [31589] = PC_SNARE,       -- Slow (Pet)
+  [236299] = PC_SNARE,      -- Arcane Barrage + Chrono Shift (Talent)
 
   -- Paladin
   [853] = LOC_STUN,             -- Hammer of Justice
@@ -167,7 +167,6 @@ Widget.CROWD_CONTROL_SPELLS = {
   [1776] = LOC_STUN,       -- Gouge
   [408] = LOC_STUN,        -- Kidney Shot
   [6770] = LOC_STUN,       -- Sap
-
 
   -- Shaman
   [51485] = PC_ROOT,         -- Earthgrab Totem
@@ -196,6 +195,12 @@ Widget.CROWD_CONTROL_SPELLS = {
   [118000] = LOC_STUN,      -- Dragon Roar
   [1715] = PC_SNARE,        -- Hamstring
   [5246] = LOC_FEAR,        -- Intimidating Shout
+
+  -- Monk
+  [115078] = LOC_STUN,        -- Paralysis
+  [119381] = LOC_STUN,        -- Leg Sweep
+  [116095] = PC_SNARE,        -- Disable
+  [116705] = CC_SILENCE,      -- Spear Hand Strike
 }
 
 ---------------------------------------------------------------------------------------------------
@@ -451,12 +456,8 @@ function Widget:UpdateUnitAuras(frame, effect, unitid, enabled_auras, enabled_cc
     UnitAuraList[aura_count] = UnitAuraList[aura_count] or {}
     aura = UnitAuraList[aura_count]
 
-    -- BfA: Blizzard Code:local name, texture, count, debuffType, duration, expirationTime, caster, _, nameplateShowPersonal, spellId, _, _, _, nameplateShowAll = UnitAura(unit, i, filter);
-    -- BfA: local name, icon, stacks, auraType, duration, expiration, caster, _, nameplateShowPersonal, spellid, _, _, _, nameplateShowAll = UnitAura(unitid, index, effect .. aura_filter)
-
-    -- name, rank, icon, count, debuffType, duration, expirationTime, unitCaster, canStealOrPurge, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod
-
-    aura.name, rank, aura.texture, aura.stacks, aura.type, aura.duration, aura.expiration, aura.caster,
+    -- Blizzard Code:local name, texture, count, debuffType, duration, expirationTime, caster, _, nameplateShowPersonal, spellId, _, _, _, nameplateShowAll = UnitAura(unit, i, filter);
+    aura.name, aura.texture, aura.stacks, aura.type, aura.duration, aura.expiration, aura.caster,
       aura.StealOrPurge, aura.ShowPersonal, aura.spellid, aura.PlayerCanApply, aura.BossDebuff, isCastByPlayer, aura.ShowAll
       = UnitAura(unitid, i, effect)
 
@@ -466,7 +467,7 @@ function Widget:UpdateUnitAuras(frame, effect, unitid, enabled_auras, enabled_cc
     if not aura.name then break end
 
     aura.unit = unitid
-    aura.UnitIsNPC = not UnitIsPlayer(unitid)
+    aura.UnitIsNPC = not (UnitIsPlayer(unitid) or UnitPlayerControlled(unitid))
     aura.effect = effect
     aura.ShowAll = aura.ShowAll
     aura.CrowdControl = (enabled_cc and self.CROWD_CONTROL_SPELLS[aura.spellid])

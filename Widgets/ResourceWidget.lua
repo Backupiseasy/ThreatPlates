@@ -242,8 +242,7 @@ end
 
 -- EVENT: UNIT_POWER_UPDATE: "unitID", "powerType"
 function Widget:OnEnable()
-  -- BfA: self:RegisterUnitEvent("UNIT_POWER_UPDATE", "target")
-  self:RegisterUnitEvent("UNIT_POWER", "target")
+  self:RegisterUnitEvent("UNIT_POWER_UPDATE", "target")
   self:RegisterEvent("PLAYER_TARGET_CHANGED")
   -- Widget:RegisterEvent("UNIT_DISPLAYPOWER") -- use this to determine power type changes on units
 end

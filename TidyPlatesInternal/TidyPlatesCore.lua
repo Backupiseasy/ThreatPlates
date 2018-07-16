@@ -623,12 +623,10 @@ do
       return
     end
 
-    -- BfA: local name, text, texture, startTime, endTime, isTradeSkill, castID, notInterruptible, spellID
-    local name, subText, text, texture, startTime, endTime, isTradeSkill, castID, notInterruptible
+    local name, text, texture, startTime, endTime, isTradeSkill, castID, notInterruptible, spellID
 
     if channeled then
-      -- BfA: name, text, texture, startTime, endTime, isTradeSkill, notInterruptible, spellID = UnitChannelInfo(unitid)
-      name, subText, text, texture, startTime, endTime, isTradeSkill, notInterruptible = UnitChannelInfo(unitid)
+      name, text, texture, startTime, endTime, isTradeSkill, notInterruptible, spellID = UnitChannelInfo(unitid)
       castbar.IsChanneling = true
       castbar.IsCasting = false
 
@@ -637,8 +635,7 @@ do
       castbar:SetMinMaxValues(0, castbar.MaxValue)
       castbar:SetValue(castbar.Value)
 		else
-      -- BfA: name, text, texture, startTime, endTime, isTradeSkill, castID, notInterruptible = UnitCastingInfo(unitid)
-			name, subText, text, texture, startTime, endTime, isTradeSkill, castID, notInterruptible = UnitCastingInfo(unitid)
+      name, text, texture, startTime, endTime, isTradeSkill, castID, notInterruptible = UnitCastingInfo(unitid)
       castbar.IsCasting = true
       castbar.IsChanneling = false
 
@@ -975,10 +972,8 @@ do
 		end
 	end
 
-  -- BfA: function CoreEvents:COMBAT_LOG_EVENT_UNFILTERED)
-  function CoreEvents:COMBAT_LOG_EVENT_UNFILTERED(...)
-    -- BfA: local timeStamp, event, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags = CombatLogGetCurrentEventInfo()
-    local timeStamp, event, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags  = ...
+  function CoreEvents:COMBAT_LOG_EVENT_UNFILTERED()
+    local timeStamp, event, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags = CombatLogGetCurrentEventInfo()
 
     if event == "SPELL_INTERRUPT" then
       local plate = PlatesByGUID[destGUID]

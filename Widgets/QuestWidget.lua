@@ -239,7 +239,7 @@ end
 function Widget:OnEnable()
 	self:RegisterEvent("QUEST_ACCEPTED", EventHandler)
 	self:RegisterEvent("QUEST_WATCH_UPDATE", EventHandler)
-  -- BfA: self:RegisterEvent("QUEST_ITEM_UPDATE", EventHandler)
+  self:RegisterEvent("QUEST_ITEM_UPDATE", EventHandler)
 	self:RegisterEvent("PLAYER_ENTERING_WORLD", EventHandler)
 	self:RegisterEvent("PLAYER_REGEN_ENABLED")
 	self:RegisterEvent("PLAYER_REGEN_DISABLED")
