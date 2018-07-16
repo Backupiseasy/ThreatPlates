@@ -1,7 +1,7 @@
 ------------------------------------------------------
-9.0.0 - Release for Battle for Azeroth Pre-Patch 8.0
+9.0.0 - Release for Battle for Azeroth Pre-Patch
 ------------------------------------------------------
-* Updated TOC version for Battle for Azeroth Pre-Patch 8.0 and updated nameplate code due to changes to WoW API and events.
+* Updated TOC version for Battle for Azeroth Pre-Patch 8.0.1 and updated nameplate code due to changes to WoW API and events.
 * Reworked the Auras widget so that buffs, debuffs, and crowd control related auras can be shown independently from each other [Comment #704, Issue #183, Comment #725, PM].
 * Reworked internal code for widgets and widget handling to improve performance.
 * Re-activated the HealerTracker widget - big thanks to Sudo1701 for migrating and updating it from legacy code.
