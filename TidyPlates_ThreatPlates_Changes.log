@@ -1,4 +1,26 @@
 ------------------------------------------------------
+9.0.0 - Release for Battle for Azeroth Pre-Patch
+------------------------------------------------------
+* Updated TOC version for Battle for Azeroth Pre-Patch 8.0.1 and updated nameplate code due to changes to WoW API and events.
+* Reworked the Auras widget so that buffs, debuffs, and crowd control related auras can be shown independently from each other [Comment #704, Issue #183, Comment #725, PM].
+* Reworked internal code for widgets and widget handling to improve performance.
+* Re-activated the HealerTracker widget - big thanks to Sudo1701 for migrating and updating it from legacy code.
+* Added several customization options for aura icons to the Auras widget (e.g., change height, width, time text font and position) [Comment #827, Issue #181].
+* Added an option to the Auras widget to center the displayed auras horizontally.
+* Added an option to the Auras widget to show a flash animation for auras that are expiring [Comment #546, Issue #181].
+* Added on option to hide buffs on the personal nameplate [Issue #190].
+* Added some new spells to the Stealth widget.
+* Updated shaman totems - removed Voodoo totem.
+* Fixed a bug with the icon for friends and guild members still being shown although disabled.
+* Fixed a bug with the absorbs overlay texture being shown under the healthbar when full absorbs was enabled.
+* Fixed a bug with castbar being shown although not enabled (e.g., in headline view) when interrupting a spell on the current target.
+* Fixed a bug with Resource widget showing on non-target units.
+* Fixed a bug with level text options where text boundaries where incorrectly stored and not used because of that [Issue from WoWInterface].
+* Removed Tidy Plates Fading from options as it was never implemented/working.
+* Updated localization for deDE (German), zhTW (Traditional Chinese, thanks to gaspy10).
+* Updated integrated libraries to LibSharedMedia-3.0 7.3.0, Ace3 Release-r1166.
+
+------------------------------------------------------
 8.7.4
 ------------------------------------------------------
 * Fixed a bug (finally) with strata in the auras widget where the cooldown spiral was not shown sometimes [Issue #181].

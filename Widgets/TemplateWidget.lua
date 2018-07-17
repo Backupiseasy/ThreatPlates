@@ -1,9 +1,10 @@
 ---------------------------------------------------------------------------------------------------
--- Unique Icon Widget
+-- <Name> Widget
 ---------------------------------------------------------------------------------------------------
 local ADDON_NAME, Addon = ...
+local ThreatPlates = Addon.ThreatPlates
 
-local Widget = Addon:NewWidget("UniqueIcon")
+local Widget = Addon:NewWidget("")
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -16,8 +17,17 @@ local CreateFrame = CreateFrame
 local TidyPlatesThreat = TidyPlatesThreat
 
 ---------------------------------------------------------------------------------------------------
+-- Widget Functions
+---------------------------------------------------------------------------------------------------
+
+local function EventHandler(event, ...)
+end
+
+
+---------------------------------------------------------------------------------------------------
 -- Widget functions for creation and update
 ---------------------------------------------------------------------------------------------------
+
 function Widget:Create(tp_frame)
   -- Required Widget Code
   local widget_frame = CreateFrame("Frame", nil, tp_frame)
@@ -25,9 +35,7 @@ function Widget:Create(tp_frame)
 
   -- Custom Code
   --------------------------------------
-  widget_frame:SetFrameLevel(tp_frame:GetFrameLevel() + 7)
-  widget_frame.Icon = widget_frame:CreateTexture(nil, "OVERLAY")
-  widget_frame.Icon:SetAllPoints(widget_frame)
+
   --------------------------------------
   -- End Custom Code
 
@@ -35,42 +43,20 @@ function Widget:Create(tp_frame)
 end
 
 function Widget:IsEnabled()
-  return TidyPlatesThreat.db.profile.uniqueWidget.ON
 end
 
---function Widget:UNIT_NAME_UPDATE()
---end
---
---function Widget:OnEnable()
---  self:RegisterEvent("UNIT_NAME_UPDATE")
---end
+function Widget:OnEnable()
+  Widget:RegisterEvent("EVENT", EventHandler)
+end
 
 function Widget:EnabledForStyle(style, unit)
-  return (style == "unique" or style == "NameOnly-Unique" or style == "etotem")
 end
 
 function Widget:OnUnitAdded(widget_frame, unit)
-  local db = TidyPlatesThreat.db.profile
+end
 
-	--local unique_setting = db.uniqueSettings.map[unit.name]
-  local unique_setting = unit.CustomPlateSettings
-	if not unique_setting or not unique_setting.showIcon then
-		widget_frame:Hide()
-		return
-	end
+function Widget:UpdateFrame(widget_frame, unit)
+end
 
-	db = db.uniqueWidget
-
-	-- Updates based on settings / unit style
-  if unit.style == "NameOnly-Unique" then
-    widget_frame:SetPoint("CENTER", widget_frame:GetParent(), db.x_hv, db.y_hv)
-  else
-    widget_frame:SetPoint("CENTER", widget_frame:GetParent(), db.x, db.y)
-  end
-
-	-- Updates based on settings
-	widget_frame:SetSize(db.scale, db.scale)
-	widget_frame.Icon:SetTexture(unique_setting.icon)
-
-	widget_frame:Show()
+function Widget:OnTargetChanged(widget_frame, unit)
 end

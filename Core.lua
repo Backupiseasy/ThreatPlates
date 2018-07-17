@@ -22,7 +22,6 @@ local TidyPlatesThreat = TidyPlatesThreat
 local LibStub = LibStub
 local L = t.L
 
-local class = t.Class()
 t.Theme = {}
 
 local task_queue_ooc = {}
@@ -68,7 +67,7 @@ local tankRole = L["|cff00ff00tanking|r"]
 local dpsRole = L["|cffff0000dpsing / healing|r"]
 
 function TidyPlatesThreat:RoleText()
-  if TidyPlatesThreat:GetSpecRole() then
+  if Addon:PlayerRoleIsTank() then
     return tankRole
   else
     return dpsRole
@@ -85,22 +84,45 @@ local EVENTS = {
   "PLAYER_LOGOUT",
   "PLAYER_REGEN_ENABLED",
   "PLAYER_REGEN_DISABLED",
-  "QUEST_WATCH_UPDATE",
-  "QUEST_ACCEPTED",
 
-  "UNIT_ABSORB_AMOUNT_CHANGED",
-  "UNIT_MAXHEALTH",
+  -- CVAR_UPDATE,
+  -- DISPLAY_SIZE_CHANGED,     -- Blizzard also uses this event
+  -- VARIABLES_LOADED,         -- Blizzard also uses this event
 
-  -- "NAME_PLATE_CREATED",      -- processed by TidyPlatesCore
+  -- Events from TidyPlates
 
-  -- "CVAR_UPDATE",
-  --"NAME_PLATE_UNIT_ADDED",    -- Blizzard also uses this event
-  --"NAME_PLATE_UNIT_REMOVED",  -- Blizzard also uses this event
-  --"PLAYER_TARGET_CHANGED",    -- Blizzard also uses this event
-  --"DISPLAY_SIZE_CHANGED",     -- Blizzard also uses this event
-  --"UNIT_AURA",                -- used in auras widget
-  --"VARIABLES_LOADED",         -- Blizzard also uses this event
-  --"RAID_TARGET_UPDATE",       -- Blizzard also uses this event
+  -- NAME_PLATE_CREATED
+  -- NAME_PLATE_UNIT_ADDED
+  -- UNIT_NAME_UPDATE
+  -- NAME_PLATE_UNIT_REMOVED
+
+  -- PLAYER_TARGET_CHANGED
+  -- UPDATE_MOUSEOVER_UNIT
+
+  -- UNIT_HEALTH_FREQUENT
+  -- UNIT_MAXHEALTH,
+  -- UNIT_ABSORB_AMOUNT_CHANGED,
+
+  -- PLAYER_ENTERING_WORLD
+  -- PLAYER_REGEN_ENABLED
+  -- PLAYER_REGEN_DISABLED
+
+  -- UNIT_SPELLCAST_START
+  -- UNIT_SPELLCAST_STOP
+  -- UNIT_SPELLCAST_CHANNEL_START
+  -- UNIT_SPELLCAST_CHANNEL_STOP
+  -- UNIT_SPELLCAST_DELAYED
+  -- UNIT_SPELLCAST_CHANNEL_UPDATE
+  -- UNIT_SPELLCAST_INTERRUPTIBLE
+  -- UNIT_SPELLCAST_NOT_INTERRUPTIBLE
+
+  -- UI_SCALE_CHANGED
+  -- COMBAT_LOG_EVENT_UNFILTERED
+  -- UNIT_LEVEL
+  -- UNIT_FACTION
+  -- RAID_TARGET_UPDATE
+  -- PLAYER_FOCUS_CHANGED
+  -- PLAYER_CONTROL_GAINED
 }
 
 local function EnableEvents()
@@ -174,14 +196,7 @@ function TidyPlatesThreat:ReloadTheme()
   t.SetThemes(self)
 
   -- ForceUpdate() is called in SetTheme(), also calls theme.OnActivateTheme,
-  -- With TidyPlates:
-  --if TidyPlates.GetThemeName() == t.THEME_NAME then
-  --  TidyPlates:SetTheme(t.THEME_NAME)
-  --end
   TidyPlatesInternal:SetTheme(t.THEME_NAME)
-
-  ThreatPlatesWidgets.ConfigAuraWidgetFilter()
-  ThreatPlatesWidgets.ConfigAuraWidget()
 
   Addon:UpdateConfigurationStatusText()
 
@@ -192,7 +207,10 @@ function TidyPlatesThreat:ReloadTheme()
     TidyPlatesInternal:DisableCastBars()
   end
 
+  Addon.Widgets.Auras:ParseSpellFilters() -- Parse Spell Filters calls UpdateSettings ... maybe not the best order to do this
+
   Addon:InitializeCustomNameplates()
+  Addon:InitializeAllWidgets()
 end
 
 function TidyPlatesThreat:StartUp()
@@ -200,12 +218,12 @@ function TidyPlatesThreat:StartUp()
 
   if not self.db.char.welcome then
     self.db.char.welcome = true
-    local Welcome = L["|cff89f559Welcome to |r|cff89f559Threat Plates!\nThis is your first time using Threat Plates and you are a(n):\n|r|cff"]..t.HCC[class]..self:SpecName().." "..UnitClass("player").."|r|cff89F559.|r\n"
+    local Welcome = L["|cff89f559Welcome to |r|cff89f559Threat Plates!\nThis is your first time using Threat Plates and you are a(n):\n|r|cff"]..t.HCC[Addon.PlayerClass]..self:SpecName().." "..UnitClass("player").."|r|cff89F559.|r\n"
 
     -- initialize roles for all available specs (level > 10) or set to default (dps/healing)
     for index=1, GetNumSpecializations() do
       local id, spec_name, description, icon, background, role = GetSpecializationInfo(index)
-      self:SetRole(t.SPEC_ROLES[t.Class()][index], index)
+      self:SetRole(t.SPEC_ROLES[Addon.PlayerClass][index], index)
     end
 
     t.Print(Welcome..L["|cff89f559You are currently in your "]..self:RoleText()..L["|cff89f559 role.|r"])
@@ -410,9 +428,6 @@ end
 -- WoW EVENTS --
 -----------------------------------------------------------------------------------
 
---function TidyPlatesThreat:PLAYER_ALIVE()
---end
-
 -- Fired when the player enters the world, reloads the UI, enters/leaves an instance or battleground, or respawns at a graveyard.
 -- Also fires any other time the player sees a loading screen
 function TidyPlatesThreat:PLAYER_ENTERING_WORLD()
@@ -491,11 +506,8 @@ function TidyPlatesThreat:PLAYER_LOGIN(...)
 
   -- With TidyPlates: if self.db.char.welcome and (TidyPlatesOptions.ActiveTheme == t.THEME_NAME) then
   if self.db.char.welcome then
-    t.Print(L["|cff89f559Threat Plates:|r Welcome back |cff"]..t.HCC[class]..UnitName("player").."|r!!")
+    t.Print(L["|cff89f559Threat Plates:|r Welcome back |cff"]..t.HCC[Addon.PlayerClass]..UnitName("player").."|r!!")
   end
-  -- if class == "WARRIOR" or class == "DRUID" or class == "DEATHKNIGHT" or class == "PALADIN" then
-  -- 	self:RegisterEvent("UPDATE_SHAPESHIFT_FORM")
-  -- end
 end
 
 function TidyPlatesThreat:PLAYER_LOGOUT(...)
@@ -538,67 +550,5 @@ function TidyPlatesThreat:PLAYER_REGEN_DISABLED()
     SetCVar("nameplateShowFriends", (db.FriendlyUnits == "SHOW_COMBAT" and 1) or 0)
   end  if db.EnemyUnits ~= "NONE" then
     SetCVar("nameplateShowEnemies", (db.EnemyUnits == "SHOW_COMBAT" and 1) or 0)
-  end
-end
-
--- Disabled events PLAYER_TALENT_UPDATE, UPDATE_SHAPESHIFT_FORM, ACTIVE_TALENT_GROUP_CHANGED
--- as they are not used currently
-
--- With TidyPlates:
--- nameplate color can change when factions change (e.g., with disguises)
--- Legion example: Suramar city and Masquerade
---function TidyPlatesThreat:UNIT_FACTION(event, unitid)
---  TidyPlates:ForceUpdate()
---end
-
--- QuestWidget needs to update all nameplates when a quest was completed
-function TidyPlatesThreat:QUEST_WATCH_UPDATE(event, quest_index)
-  if TidyPlatesThreat.db.profile.questWidget.ON then
-    TidyPlatesInternal:ForceUpdate()
-  end
-end
-function TidyPlatesThreat:QUEST_ACCEPTED(event, quest_index, _)
-  if TidyPlatesThreat.db.profile.questWidget.ON then
-    TidyPlatesInternal:ForceUpdate()
-  end
-end
-
--- function TidyPlatesThreat:PLAYER_TALENT_UPDATE()
--- 	--
--- end
-
--- function TidyPlatesThreat:UPDATE_SHAPESHIFT_FORM()
--- end
-
--- Fires when the player switches to another specialication or everytime the player changes a talent
--- Completely handled by TidyPlates
--- function TidyPlatesThreat:ACTIVE_TALENT_GROUP_CHANGED()
--- With TidyPlates:	if (TidyPlatesOptions.ActiveTheme == t.THEME_NAME) and self.db.profile.verbose then
--- if self.db.profile.verbose then
--- 		t.Print(L"|cff89F559Threat Plates|r: Player spec change detected: |cff"]..t.HCC[class]..self:SpecName()..L"|r, you are now in your "]..self:RoleText()..L[" role."])
--- 	end
--- end
-
-function TidyPlatesThreat:UNIT_ABSORB_AMOUNT_CHANGED(event, unitid)
-  local plate = GetNamePlateForUnit(unitid)
-
-  -- With TidyPlates:
-  --if plate and plate.extended then
-  --  t.UpdateExtensions(plate.extended, unitid)
-  --end
-  if plate and plate.TPFrame then
-    t.UpdateExtensions(plate.TPFrame, unitid, plate.TPFrame.stylename)
-  end
-end
-
-function TidyPlatesThreat:UNIT_MAXHEALTH(event, unitid)
-  local plate = GetNamePlateForUnit(unitid)
-
-  -- With TidyPlates:
-  --if plate and plate.extended then
-  --  t.UpdateExtensions(plate.extended, unitid)
-  --end
-  if plate and plate.TPFrame then
-    t.UpdateExtensions(plate.TPFrame, unitid, plate.TPFrame.stylename)
   end
 end

@@ -1,5 +1,5 @@
-local ADDON_NAME, NAMESPACE = ...
-local ThreatPlates = NAMESPACE.ThreatPlates
+local ADDON_NAME, Addon = ...
+local ThreatPlates = Addon.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -8,8 +8,6 @@ local ThreatPlates = NAMESPACE.ThreatPlates
 -- Lua APIs
 
 -- WoW APIs
-local CreateFrame = CreateFrame
-local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local UnitGetTotalAbsorbs = UnitGetTotalAbsorbs
 local UnitHealth = UnitHealth
 local UnitHealthMax = UnitHealthMax
@@ -30,8 +28,8 @@ local IGNORED_STYLES = {
   empty= true,
 }
 
-local function CreateExtensions(extended)
-  local visual = extended.visual
+function Addon:CreateExtensions(tp_frame)
+  local visual = tp_frame.visual
 
   -- Fix layering of TidyPlates
   -- set parent of textFrame to extended
@@ -54,7 +52,7 @@ local function CreateExtensions(extended)
       absorbbar = healthbar:CreateTexture(nil, "BORDER", -6)
       absorbbar:Hide()
 
-      absorbbar.overlay = healthbar:CreateTexture(nil, "Border", -4)
+      absorbbar.overlay = healthbar:CreateTexture(nil, "OVERLAY", 0)
       absorbbar.overlay:SetTexture("Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\Striped_Texture.tga", true, true)
       absorbbar.overlay:SetHorizTile(true)
       --absorbbar.tileSize = 64
@@ -87,8 +85,8 @@ local function CreateExtensions(extended)
   end
 end
 
-local function UpdateExtensions(extended, unitid, style)
-  local visual = extended.visual
+function Addon:UpdateExtensions(tp_frame, unitid, style)
+  local visual = tp_frame.visual
   local absorbbar = visual.absorbbar
 
   if not ENABLE_ABSORB or not absorbbar then return end
@@ -96,7 +94,7 @@ local function UpdateExtensions(extended, unitid, style)
   -- Code for absorb calculation see CompactUnitFrame.lua
   local absorb = UnitGetTotalAbsorbs(unitid) or 0
 
---  absorb = UnitHealthMax(unitid) * 0.5 -- REMOVE
+  -- absorb = UnitHealthMax(unitid) * 0.3 -- REMOVE
 
   -- style probably is never nil here
   if absorb == 0 or not style or IGNORED_STYLES[style] then
@@ -200,6 +198,3 @@ local function UpdateExtensions(extended, unitid, style)
     end
   end
 end
-
-ThreatPlates.CreateExtensions = CreateExtensions
-ThreatPlates.UpdateExtensions = UpdateExtensions

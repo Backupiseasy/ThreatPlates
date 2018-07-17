@@ -1,6 +1,6 @@
-﻿## Interface: 70300
+﻿## Interface: 80000
 ## Title: Threat Plates
-## Version: 8.7.4
+## Version: 9.0.0
 ## Notes: Threat-reactive nameplates.
 ## Notes-deDE: Bedrohungsreaktive Namensplaketten.
 ## Author: Suicidal Katt, Blacksalsify
@@ -15,12 +15,12 @@ Locales\Locales.xml
 
 Init.lua
 Media.lua
-Modules\Modules.xml
+Constants.lua
+Elements\Elements.xml
 
 # Integration of TidyPlates for standalone version
 TidyPlatesInternal\TidyPlates.xml
 
-Constants.lua
 Database.lua
 Core.lua
 Commands.lua

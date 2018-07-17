@@ -17,7 +17,6 @@ local UnitPower = UnitPower
 local SPELL_POWER_CHI = SPELL_POWER_CHI
 local SPEC_PALADIN_RETRIBUTION = SPEC_PALADIN_RETRIBUTION
 local SPELL_POWER_HOLY_POWER = SPELL_POWER_HOLY_POWER
-local SPELL_POWER_SOUL_SHARDS = SPELL_POWER_SOUL_SHARDS
 local UnitClass = UnitClass
 local SPEC_MONK_WINDWALKER = SPEC_MONK_WINDWALKER
 
@@ -69,14 +68,6 @@ local function GetPaladinHolyPower()
   return points, maxPoints
 end
 
-local function GetWarlockSoulShards()
-  local points = UnitPower("player", SPELL_POWER_SOUL_SHARDS)
-  local maxPoints = UnitPowerMax("player", SPELL_POWER_SOUL_SHARDS)
-
-  return points, maxPoints
-end
-
-
 local GetResourceOnTarget
 local LocalName, PlayerClass = UnitClass("player")
 
@@ -89,8 +80,6 @@ elseif PlayerClass == "DRUID" then
 -- Added holy power as combo points for retribution paladin
 elseif PlayerClass == "PALADIN" then
   GetResourceOnTarget = GetPaladinHolyPower
-elseif PlayerClass == "WARLOCK" then
-  GetResourceOnTarget = GetWarlockSoulShards
 else
   GetResourceOnTarget = function() end
 end
@@ -190,22 +179,22 @@ local WatcherFrame = CreateFrame("Frame", nil, WorldFrame )
 
 -- EVENTS:
 -- UNIT_COMBO_POINTS: -- combo points also fire UNIT_POWER
--- UNIT_POWER: "unitID", "powerType"  -- CHI, COMBO_POINTS
+-- UNIT_POWER_UPDATE: "unitID", "powerType"  -- CHI, COMBO_POINTS
 -- UNIT_DISPLAYPOWER: unitID
 -- UNIT_AURA: unitID
 -- UNIT_FLAGS: unitID
+-- UNIT_POWER_FREQUENT: unitToken, powerToken
 
 local WATCH_POWER_TYPES = {
   COMBO_POINTS = true,
   CHI = true,
   HOLY_POWER = true,
-  SOUL_SHARDS = true,
 }
 
 local function WatcherFrameHandler(frame, event, unitid, power_type)
   -- only watch for player events
   if unitid ~= "player" then return end
-  if event == "UNIT_POWER" and not WATCH_POWER_TYPES[power_type] then return end
+  if event == "UNIT_POWER_UPDATE" and not WATCH_POWER_TYPES[power_type] then return end
 
   local guid = UnitGUID("target")
   if guid then
@@ -235,7 +224,8 @@ end
 local function EnableWatcher()
   WatcherFrame:SetScript("OnEvent", WatcherFrameHandler)
   --WatcherFrame:RegisterEvent("UNIT_COMBO_POINTS")
-  WatcherFrame:RegisterEvent("UNIT_POWER")
+   WatcherFrame:RegisterEvent("UNIT_POWER_UPDATE")
+  --WatcherFrame:RegisterEvent("UNIT_POWER_FREQUENT")
   WatcherFrame:RegisterEvent("UNIT_DISPLAYPOWER")
   --WatcherFrame:RegisterEvent("UNIT_AURA")
   WatcherFrame:RegisterEvent("UNIT_FLAGS")

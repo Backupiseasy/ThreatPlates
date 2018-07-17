@@ -1,115 +1,72 @@
--------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------
 -- Totem Icon Widget
--------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------
 local ADDON_NAME, Addon = ...
-local ThreatPlates = Addon.ThreatPlates
+
+local Widget = Addon:NewWidget("TotemIcon")
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
 
+-- WoW APIs
+local CreateFrame = CreateFrame
+
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
 
-local TOTEMS = Addon.TOTEMS
 local PATH = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\TotemIconWidget\\"
 
--- local WidgetList = {}
-
 ---------------------------------------------------------------------------------------------------
--- Threat Plates functions
+-- Widget functions for creation and update
 ---------------------------------------------------------------------------------------------------
 
-local function enabled()
+function Widget:Create(tp_frame)
+	-- Required Widget Code
+	local widget_frame = CreateFrame("Frame", nil, tp_frame)
+	widget_frame:Hide()
+
+	-- Custom Code
+	--------------------------------------
+  widget_frame:SetFrameLevel(tp_frame:GetFrameLevel() + 7)
+  widget_frame.Icon = widget_frame:CreateTexture(nil, "OVERLAY")
+  widget_frame.Icon:SetAllPoints(widget_frame)
+	--------------------------------------
+	-- End Custom Code
+
+	return widget_frame
+end
+
+function Widget:IsEnabled()
 	return TidyPlatesThreat.db.profile.totemWidget.ON
 end
 
--- hides/destroys all widgets of this type created by Threat Plates
--- local function ClearAllWidgets()
--- 	for _, widget in pairs(WidgetList) do
--- 		widget:Hide()
--- 	end
--- end
--- ThreatPlatesWidgets.ClearAllTotemIconWidgets = ClearAllWidgets
+--function Widget:UNIT_NAME_UPDATE()
+--end
+--
+--function Widget:OnEnable()
+--  self:RegisterEvent("UNIT_NAME_UPDATE")
+--end
 
----------------------------------------------------------------------------------------------------
--- Widget Functions for TidyPlates
----------------------------------------------------------------------------------------------------
-
-local function UpdateSettings(frame)
-	local db = TidyPlatesThreat.db.profile.totemWidget
-	local size = db.scale
-	frame:SetSize(size, size)
-	frame:SetPoint(db.anchor, frame:GetParent(), db.x, db.y)
+function Widget:EnabledForStyle(style, unit)
+	return (style == "totem" or style == "etotem")
 end
 
-local function UpdateWidgetFrame(frame, unit)
-	local totem_id = TOTEMS[unit.name]
-	if totem_id then
-		local db = TidyPlatesThreat.db.profile.totemSettings
-		frame.Icon:SetTexture(PATH .. db[totem_id].Style .. "\\" .. totem_id)
-		frame:Show()
-		-- not used: db[totem_id].ShowIcon
-	else
-		frame:_Hide()
-	end
+function Widget:OnUnitAdded(widget_frame, unit)
+  --local totem_id = TOTEMS[unit.name]
+
+  local totem_settings = unit.TotemSettings
+  if not totem_settings then
+    widget_frame:Hide()
+    return
+  end
+
+  local db = TidyPlatesThreat.db.profile.totemWidget
+
+  -- not used: db[totem_id].ShowIcon
+  widget_frame:SetPoint("CENTER", widget_frame:GetParent(), db.x, db.y)
+  widget_frame:SetSize(db.scale, db.scale)
+  widget_frame.Icon:SetTexture(PATH .. totem_settings.Style .. "\\" .. totem_settings.ID)
+
+  widget_frame:Show()
 end
-
--- Context
-local function UpdateWidgetContext(frame, unit)
-	local guid = unit.guid
-	frame.guid = guid
-
-	-- Add to Widget List
-	-- if guid then
-	-- 	WidgetList[guid] = frame
-	-- end
-
-	-- Custom Code II
-	--------------------------------------
-	if UnitGUID("target") == guid then
-		UpdateWidgetFrame(frame, unit)
-	else
-		frame:_Hide()
-	end
-	--------------------------------------
-	-- End Custom Code
-end
-
-local function ClearWidgetContext(frame)
-	local guid = frame.guid
-	if guid then
-		-- WidgetList[guid] = nil
-		frame.guid = nil
-	end
-end
-
-local function CreateWidgetFrame(parent)
-	-- Required Widget Code
-	local frame = CreateFrame("Frame", nil, parent)
-	frame:Hide()
-
-	-- Custom Code III
-	--------------------------------------
-	frame:SetFrameLevel(parent:GetFrameLevel() + 7)
-	frame:SetSize(64, 64)
-	frame.Icon = frame:CreateTexture(nil, "OVERLAY")
-	frame.Icon:SetPoint("CENTER",frame)
-	frame.Icon:SetAllPoints(frame)
-
-	UpdateSettings(frame)
-	frame.UpdateConfig = UpdateSettings
-	--------------------------------------
-	-- End Custom Code
-
-	-- Required Widget Code
-	frame.UpdateContext = UpdateWidgetContext
-	frame.Update = UpdateWidgetFrame
-	frame._Hide = frame.Hide
-	frame.Hide = function() ClearWidgetContext(frame); frame:_Hide() end
-
-	return frame
-end
-
-ThreatPlatesWidgets.RegisterWidget("TotemIconWidgetTPTP", CreateWidgetFrame, false, enabled)
-

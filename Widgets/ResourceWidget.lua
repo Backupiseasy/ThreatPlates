@@ -1,104 +1,34 @@
-------------------------
--- Resource Widget --
-------------------------
-local ADDON_NAME, NAMESPACE = ...
-local ThreatPlates = NAMESPACE.ThreatPlates
+---------------------------------------------------------------------------------------------------
+-- Resource Widget
+---------------------------------------------------------------------------------------------------
+local ADDON_NAME, Addon = ...
+local ThreatPlates = Addon.ThreatPlates
+
+local Widget = Addon:NewWidget("Resource")
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
+
+-- Lua APIs
 local format = format
 local ceil = ceil
 
--- WoW functions
-local UnitPowerMax = UnitPowerMax
-local UnitPower = UnitPower
-local UnitPowerType = UnitPowerType
+-- WoW APIs
+local CreateFrame = CreateFrame
+local UnitReaction, UnitIsUnit = UnitReaction, UnitIsUnit
+local UnitPower, UnitPowerMax, UnitPowerType = UnitPower, UnitPowerMax, UnitPowerType
 local PowerBarColor = PowerBarColor
 local SPELL_POWER_MANA = SPELL_POWER_MANA
-local UnitGUID = UnitGUID
-local CreateFrame = CreateFrame
+local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 
-local WidgetList = {}
-local WatcherIsEnabled = false
+-- ThreatPlates APIs
+local TidyPlatesThreat = TidyPlatesThreat
 
----------------------------------------------------------------------------------------------------
--- Threat Plates functions
----------------------------------------------------------------------------------------------------
-
-local function UpdateSettings(frame)
-  local db = TidyPlatesThreat.db.profile.ResourceWidget
-
-  frame:SetPoint("CENTER", frame:GetParent(), db.x, db.y)
-  frame:SetSize(db.BarWidth, db.BarHeight)
-  frame:SetFrameLevel(frame:GetParent():GetFrameLevel() + 8)
-
-  local bar = frame.Bar
-  if db.ShowBar then
-    bar:SetStatusBarTexture(ThreatPlates.Media:Fetch('statusbar', db.BarTexture))
-
-    bar:SetAllPoints()
-    bar:SetFrameLevel(frame:GetFrameLevel())
-    bar:SetMinMaxValues(0, 100)
-
-    local border = frame.Border
-    local offset = db.BorderOffset
-    --border:SetBackdrop(BACKDROP)
-
---    local backdrop = border:GetBackdrop()
-    local bar_texture = ThreatPlates.Media:Fetch('statusbar', db.BarTexture)
-    local border_texture = ThreatPlates.Media:Fetch('border', db.BorderTexture)
---    if backdrop.bgFile ~= bar_texture or backdrop.edgeFile ~= border_texture or backdrop.edgeSize ~= db.BorderEdgeSize or backdrop.insets.left ~= offset then
-      border:SetBackdrop({
-          bgFile = bar_texture,
-          edgeFile = border_texture,
-          edgeSize = db.BorderEdgeSize,
-          insets = { left = 0, right = 0, top = 0, bottom = 0 }
-      })
---    end
-
-    local offset_x = db.BarWidth + 2 * offset
-    local offset_y = db.BarHeight + 2 * offset
-    if border:GetWidth() ~= offset_x or border:GetHeight() ~= offset_y  then
-      border:SetPoint("TOPLEFT", frame, "TOPLEFT", - offset, offset)
-      border:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", offset, - offset)
-      --      border:SetSize(offset_x, offset_y)
-      --      border:SetPoint("CENTER", bar, "CENTER", 0, 0)
-      --      border:SetFrameLevel(frame.Bar:GetFrameLevel())
-    end
-    border:SetFrameLevel(frame.Bar:GetFrameLevel())
-
-    bar:Show()
-  else
-    bar:Hide()
-  end
-
-  local text = frame.Text
-  if db.ShowText then
-    text:SetFont(ThreatPlates.Media:Fetch('font', db.Font), db.FontSize)
-    text:SetJustifyH("CENTER")
-    text:SetShadowOffset(1, -1)
-    text:SetMaxLines(1)
-    local font_color = db.FontColor
-    text:SetTextColor(font_color.r, font_color.g, font_color.b)
-    text:SetAllPoints()
-    text:Show()
-  else
-    text:Hide()
-  end
-end
-
--- hides/destroys all widgets of this type created by Threat Plates
--- local function ClearAllWidgets()
--- 	for _, widget in pairs(WidgetList) do
--- 		widget:Hide()
--- 	end
--- 	WidgetList = {}
--- end
--- ThreatPlatesWidgets.ClearAllUniqueIconWidgets = ClearAllWidgets
+local CurrentTarget
 
 ---------------------------------------------------------------------------------------------------
--- Widget Functions for TidyPlates
+-- Resource Widget Functions
 ---------------------------------------------------------------------------------------------------
 
 local function ShortNumber(no)
@@ -175,243 +105,218 @@ local POWER_FUNCTIONS = {
   PAIN = PowerGeneric,
 }
 
-local function UpdateWidgetFrame(frame, unit)
+local function DeterminePowerType(widget_frame)
+  local unitid = widget_frame.unit.unitid
+
+  -- The code to determine the power type could be moved to OnUnitAdded, but then code is necessary to determine when
+  -- the power type on the unit changes (e.g., a druid that shapeshifts). Mabe there's even bosses that do that?!?
+  local powerType, powerToken, altR, altG, altB = UnitPowerType(unitid)
+
   local db = TidyPlatesThreat.db.profile.ResourceWidget
-
-  local show = false
-  if unit.reaction == "FRIENDLY" then
-    show = db.ShowFriendly
-  else
-    local t = unit.type
-    if t == "PLAYER" then
-      show = db.ShowEnemyPlayer
-    elseif t == "NPC" then
-      local b, r = unit.isBoss, unit.isRare
-      if b or r then
-        show = db.ShowEnemyBoss
---        elseif e then
---          local in_instance, _ = IsInInstance()
---          show = (not in_instance and db.ShowEnemyBoss) or (in_instance and db.ShowEnemyNPC)
-      else
-        show = db.ShowEnemyNPC
-      end
-    end
-  end
-
-  if not show then
-    frame:_Hide()
-    return
-  end
-
-  local powerType, powerToken, altR, altG, altB = UnitPowerType("target")
   local power_func = POWER_FUNCTIONS[powerToken]
-  if UnitPowerMax("target") == 0 or (db.ShowOnlyAltPower and power_func) then
-    frame:_Hide()
-    return
+
+  if UnitPowerMax(unitid) == 0 or (db.ShowOnlyAltPower and power_func) then
+    return nil
   elseif not power_func then
     if altR then
       power_func = PowerGeneric
     else
-      frame:_Hide()
-      return
+      return nil
     end
   end
 
   -- determine color for power
-  local info = PowerBarColor[powerToken];
+  local info = PowerBarColor[powerToken]
   local r, b, g
   if info then
     --The PowerBarColor takes priority
-    r, g, b = info.r, info.g, info.b;
+    widget_frame.BarColorRed, widget_frame.BarColorGreen, widget_frame.BarColorBlue = info.r, info.g, info.b;
+  elseif not altR then
+    -- Couldn't find a power token entry. Default to indexing by power type or just mana if  we don't have that either.
+    info = PowerBarColor[powerType] or PowerBarColor["MANA"];
+    widget_frame.BarColorRed, widget_frame.BarColorGreen, widget_frame.BarColorBlue = info.r, info.g, info.b
   else
-    if not altR then
-      -- Couldn't find a power token entry. Default to indexing by power type or just mana if  we don't have that either.
-      info = PowerBarColor[powerType] or PowerBarColor["MANA"];
-      r, g, b = info.r, info.g, info.b;
+    widget_frame.BarColorRed, widget_frame.BarColorGreen, widget_frame.BarColorBlue = altR, altG, altB
+  end
+
+  return power_func
+end
+
+local function UpdateResourceBar(widget_frame)
+  local db = TidyPlatesThreat.db.profile.ResourceWidget
+
+  local power_func = DeterminePowerType(widget_frame)
+  if not power_func then
+    widget_frame:Hide()
+    return
+  end
+
+  local bar_value, text_value = power_func()
+  local bar = widget_frame.Bar
+
+  if db.ShowBar then
+    bar:SetValue(bar_value)
+    bar:SetStatusBarColor(widget_frame.BarColorRed, widget_frame.BarColorGreen, widget_frame.BarColorBlue, 1)
+
+    local border = widget_frame.Border
+    if db.BackgroundUseForegroundColor then
+      border:SetBackdropColor(widget_frame.BarColorRed, widget_frame.BarColorGreen, widget_frame.BarColorBlue, 0.3)
     else
-      r, g, b = altR, altG, altB;
+      local color = db.BackgroundColor
+      border:SetBackdropColor(color.r, color.g, color.b, color.a)
     end
-  end
 
-  if power_func then
-    local bar_value, text_value = power_func()
-
-    local bar = frame.Bar
-    if db.ShowBar then
-      local a = 1
-      bar:SetValue(bar_value)
-      bar:SetStatusBarColor(r, g, b, a)
-
-      local border = frame.Border
-      if db.BackgroundUseForegroundColor then
-        border:SetBackdropColor(r, g, b, 0.3)
-      else
-        local color = db.BackgroundColor
-        border:SetBackdropColor(color.r, color.g, color.b, color.a)
-      end
-
-      if db.BorderUseForegroundColor then
-        border:SetBackdropBorderColor(r, g, b, 1)
-      elseif db.BorderUseBackgroundColor then
-        local color = db.BackgroundColor
-        border:SetBackdropBorderColor(color.r, color.g, color.b, color.a)
-      else
-        local color = db.BorderColor
-        border:SetBackdropBorderColor(color.r, color.g, color.b, color.a)
-      end
-      bar:Show()
+    if db.BorderUseForegroundColor then
+      border:SetBackdropBorderColor(widget_frame.BarColorRed, widget_frame.BarColorGreen, widget_frame.BarColorBlue, 1)
+    elseif db.BorderUseBackgroundColor then
+      local color = db.BackgroundColor
+      border:SetBackdropBorderColor(color.r, color.g, color.b, color.a)
     else
-      bar:Hide()
+      local color = db.BorderColor
+      border:SetBackdropBorderColor(color.r, color.g, color.b, color.a)
     end
+    bar:Show()
+  else
+    bar:Hide()
+  end
 
-    if db.ShowText then
-      frame.Text:SetText(text_value)
-      frame.Text:Show()
-    else
-      frame.Text:Hide()
+  if db.ShowText then
+    widget_frame.Text:SetText(text_value)
+    widget_frame.Text:Show()
+  else
+    widget_frame.Text:Hide()
+  end
+
+  widget_frame:Show()
+  CurrentTarget = widget_frame
+end
+
+-- This event handler only watches for events of unit == "target"
+function Widget:UNIT_POWER(unitid, powerType)
+  local plate = GetNamePlateForUnit("target")
+  if plate and plate.TPFrame.Active then
+    local widget_frame = plate.TPFrame.widgets.Resource
+    if widget_frame.Active and widget_frame.ShowWidget then
+      UpdateResourceBar(widget_frame)
     end
-
-    frame:Show()
-  else
-    frame:_Hide()
   end
 end
 
--- Context
-local function UpdateWidgetContext(frame, unit)
-  local guid = unit.guid
-
-  --Add to Widget List
-  if guid then
-    if frame.guid then WidgetList[frame.guid] = nil end
-    frame.guid = guid
-    frame.unit = unit
-    WidgetList[guid] = frame
+function Widget:PLAYER_TARGET_CHANGED()
+  if CurrentTarget then
+    CurrentTarget:Hide()
+    CurrentTarget = nil
   end
 
-  -- Custom Code II
-  --------------------------------------
-  if UnitGUID("target") == guid then
-    UpdateWidgetFrame(frame, unit)
-  else
-    frame:_Hide()
-  end
-  --------------------------------------
-  -- End Custom Code
-end
+  local plate = GetNamePlateForUnit("target")
+  if plate and plate.TPFrame.Active then
+    CurrentTarget = plate.TPFrame.widgets.Resource
 
-local function ClearWidgetContext(frame)
-  local guid = frame.guid
-  if guid then
-    WidgetList[guid] = nil
-    frame.guid = nil
-    frame.unit = nil
-  end
-end
-
--- Watcher Frame
-local WatcherFrame = CreateFrame("Frame", nil, WorldFrame)
-
--- EVENT: UNIT_POWER: "unitID", "powerType"
-local function WatcherFrameHandler(frame, event, unitid, powerType)
-  -- only watch for target units
-  if unitid ~= "target" then return end
-  --if not UnitIsUnit(unitid, "target") then return end
-
-  local guid = UnitGUID("target")
-  if guid then
-    local widget = WidgetList[guid]
-    if widget then
-      UpdateWidgetFrame(widget, widget.unit)
+    if CurrentTarget.Active and CurrentTarget.ShowWidget then
+      UpdateResourceBar(CurrentTarget)
     end
-    -- To update all, use: for guid, widget in pairs(WidgetList) do UpdateWidgetFrame(widget) end
   end
 end
+---------------------------------------------------------------------------------------------------
+-- Widget functions for creation and update
+---------------------------------------------------------------------------------------------------
 
-local function EnableWatcher()
-  WatcherFrame:SetScript("OnEvent", WatcherFrameHandler)
-  WatcherFrame:RegisterEvent("UNIT_POWER")
-  WatcherIsEnabled = true
-end
-
-local function DisableWatcher()
-  WatcherFrame:UnregisterAllEvents()
-  WatcherFrame:SetScript("OnEvent", nil)
-  WatcherIsEnabled = false
-end
-
-local function enabled()
-  local active = TidyPlatesThreat.db.profile.ResourceWidget.ON
-
-  if active then
-    if not WatcherIsEnabled then EnableWatcher() end
-  else
-    if WatcherIsEnabled then DisableWatcher()	end
-  end
-
-  return active
-end
-
---local function EnabledInHeadlineView()
---  return TidyPlatesThreat.db.profile.ResourceWidget.ShowInHeadlineView
---end
-
-local function CreateWidgetFrame(parent)
+function Widget:Create(tp_frame)
   -- Required Widget Code
-  local frame = CreateFrame("StatusBar", nil, parent)
-  frame:Hide()
+  local widget_frame = CreateFrame("Frame", nil, tp_frame)
+  widget_frame:Hide()
 
-  -- Custom Code III
-  --------------------------------------
-  frame.Text = frame:CreateFontString(nil, "OVERLAY")
-  frame.Bar = CreateFrame("StatusBar", nil, frame)
-  frame.Border = CreateFrame("Frame", nil, frame.Bar)
-
---  local db = TidyPlatesThreat.db.profile.ResourceWidget
---  frame:SetPoint("CENTER", frame:GetParent(), db.x, db.y)
---  frame:SetSize(db.BarWidth, db.BarHeight)
---  frame:SetFrameLevel(frame:GetParent():GetFrameLevel() + 8)
-
---  local bar = frame.Bar
---  bar:SetStatusBarTexture(ThreatPlates.Media:Fetch('statusbar', db.BarTexture))
---  bar:SetAllPoints()
---  bar:SetFrameLevel(frame:GetFrameLevel())
---  bar:SetMinMaxValues(0, 100)
-
---  local border = frame.Border
---  local offset = db.BorderOffset
---  border:SetBackdrop({
---    bgFile = ThreatPlates.Media:Fetch('statusbar', db.BarTexture),
---    edgeFile = ThreatPlates.Media:Fetch('border', db.BorderTexture),
---    edgeSize = db.BorderEdgeSize,
---    insets = { left = offset, right = offset, top = offset, bottom = offset }
---  })
---  border:SetSize(db.BarWidth + 2 * offset, db.BarHeight + 2 * offset)
---  border:SetPoint("CENTER", bar, "CENTER", 0, 0)
-  --border:SetFrameLevel(frame.Bar:GetFrameLevel())
-
---  local text = frame.Text
---  local font_color = db.FontColor
---  text:SetFont(ThreatPlates.Media:Fetch('font', db.Font), db.FontSize)
---  text:SetJustifyH("CENTER")
---  text:SetShadowOffset(1, -1)
---  text:SetMaxLines(1)
---  text:SetTextColor(font_color.r, font_color.g, font_color.b)
---  text:SetAllPoints()
-
-  UpdateSettings(frame)
-  frame.UpdateConfig = UpdateSettings
-  --------------------------------------
+  -- Custom Code
+  widget_frame.Text = widget_frame:CreateFontString(nil, "OVERLAY")
+  widget_frame.Bar = CreateFrame("StatusBar", nil, widget_frame)
+  widget_frame.Border = CreateFrame("Frame", nil, widget_frame.Bar)
   -- End Custom Code
 
   -- Required Widget Code
-  frame.UpdateContext = UpdateWidgetContext
-  frame.Update = UpdateWidgetFrame
-  frame._Hide = frame.Hide
-  frame.Hide = function() ClearWidgetContext(frame); frame:_Hide() end
-
-  return frame
+  return widget_frame
 end
 
-ThreatPlatesWidgets.RegisterWidget("ResourceWidgetTPTP", CreateWidgetFrame, true, enabled)
-ThreatPlatesWidgets.ResourceWidgetDisableWatcher = DisableWatcher
+function Widget:IsEnabled()
+  return TidyPlatesThreat.db.profile.ResourceWidget.ON
+end
+
+-- EVENT: UNIT_POWER_UPDATE: "unitID", "powerType"
+function Widget:OnEnable()
+  self:RegisterUnitEvent("UNIT_POWER_UPDATE", "target")
+  self:RegisterEvent("PLAYER_TARGET_CHANGED")
+  -- Widget:RegisterEvent("UNIT_DISPLAYPOWER") -- use this to determine power type changes on units
+end
+
+function Widget:EnabledForStyle(style, unit)
+  return not (style == "NameOnly" or style == "NameOnly-Unique" or style == "etotem")
+end
+
+function Widget:OnUnitAdded(widget_frame, unit)
+  local db = TidyPlatesThreat.db.profile.ResourceWidget
+
+  widget_frame.ShowWidget = false
+  if UnitReaction(unit.unitid, "player") > 4 then
+    widget_frame.ShowWidget = db.ShowFriendly
+  elseif unit.type == "PLAYER" then
+    widget_frame.ShowWidget = db.ShowEnemyPlayer
+  else
+    widget_frame.ShowWidget = ((unit.isBoss or unit.isRare) and db.ShowEnemyBoss) or db.ShowEnemyNPC
+  end
+
+  if not widget_frame.ShowWidget then
+    widget_frame:Hide()
+    return
+  end
+
+  widget_frame:SetPoint("CENTER", widget_frame:GetParent(), db.x, db.y)
+  widget_frame:SetSize(db.BarWidth, db.BarHeight)
+  widget_frame:SetFrameLevel(widget_frame:GetParent():GetFrameLevel() + 8)
+
+  local bar = widget_frame.Bar
+  if db.ShowBar then
+    bar:SetStatusBarTexture(ThreatPlates.Media:Fetch('statusbar', db.BarTexture))
+
+    bar:SetAllPoints()
+    bar:SetFrameLevel(widget_frame:GetFrameLevel())
+    bar:SetMinMaxValues(0, 100)
+
+    local border = widget_frame.Border
+    local bar_texture = ThreatPlates.Media:Fetch('statusbar', db.BarTexture)
+    local border_texture = ThreatPlates.Media:Fetch('border', db.BorderTexture)
+    border:SetBackdrop({
+      bgFile = bar_texture,
+      edgeFile = border_texture,
+      edgeSize = db.BorderEdgeSize,
+      insets = { left = 0, right = 0, top = 0, bottom = 0 }
+    })
+    border:SetPoint("TOPLEFT", widget_frame, "TOPLEFT", - db.BorderOffset, db.BorderOffset)
+    border:SetPoint("BOTTOMRIGHT", widget_frame, "BOTTOMRIGHT", db.BorderOffset, - db.BorderOffset)
+    border:SetFrameLevel(widget_frame.Bar:GetFrameLevel())
+  end
+
+  local text = widget_frame.Text
+  if db.ShowText then
+    text:SetFont(ThreatPlates.Media:Fetch('font', db.Font), db.FontSize)
+    text:SetJustifyH("CENTER")
+    text:SetShadowOffset(1, -1)
+    text:SetMaxLines(1)
+    local font_color = db.FontColor
+    text:SetTextColor(font_color.r, font_color.g, font_color.b)
+    text:SetAllPoints()
+  end
+
+  --  DeterminePowerType(widget_frame)
+  --
+  --  if not widget_frame.PowerFunction then
+  --    widget_frame:Hide()
+  --    return
+  --  end
+
+  if UnitIsUnit("target", unit.unitid) then
+    UpdateResourceBar(widget_frame)
+  else
+    widget_frame:Hide()
+  end
+
+  --UpdateResourceBar(widget_frame)
+end
