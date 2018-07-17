@@ -431,7 +431,7 @@ local DEPRECATED_SETTINGS = {
   TotemSettings = { MigrationTotemSettings, "8.7.0" },        -- (changed in 8.7.0)
   Borders = { MigrateBorderTextures, "8.7.0" },               -- (changed in 8.7.0)
   UniqueSettingsList = { "uniqueSettings", "list" },          -- (removed in 8.7.0, cleanup added in 8.7.1)
-  Auras = { MigrationAurasSettings, "8.8.0" },                -- (changed in 8.8.0)
+  Auras = { MigrationAurasSettings, "9.0.0" },                -- (changed in 8.8.0)
 }
 
 local function MigrateDatabase(current_version)
