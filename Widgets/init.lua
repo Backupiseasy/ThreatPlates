@@ -185,7 +185,6 @@ function Addon:EnableWidget(widget_name)
 
   EnabledWidgets[widget_name] = widget
 
-
   -- Nameplates are re-used by WoW, so we cannot iterate just over all visible plates, but must
   -- add the new widget to all existing plates, even if they are currently not visible
   for _, tp_frame in pairs(Addon.PlatesCreated) do

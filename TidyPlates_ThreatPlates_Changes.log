@@ -1,4 +1,12 @@
 ------------------------------------------------------
+9.0.1
+------------------------------------------------------
+* Extended the combo points widget to show also arcane charges for arcane mages.
+* Fixed a bug with Combo Points widget [Issue #198, Issue #199, Comment #951].
+* Fixed a bug with Combo Points widget not showing combo points immediately after being enabled.
+* Updated integrated libraries to Ace3 r1182.
+
+------------------------------------------------------
 9.0.0 - Release for Battle for Azeroth Pre-Patch
 ------------------------------------------------------
 * Updated TOC version for Battle for Azeroth Pre-Patch 8.0.1 and updated nameplate code due to changes to WoW API and events.
