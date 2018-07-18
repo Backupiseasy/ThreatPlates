@@ -13,8 +13,8 @@ local Widget = Addon:NewWidget("ComboPoints")
 local CreateFrame = CreateFrame
 local UnitClass, UnitCanAttack, UnitIsUnit = UnitClass, UnitCanAttack, UnitIsUnit
 local GetComboPoints, UnitPower, UnitPowerMax = GetComboPoints, UnitPower, UnitPowerMax
-local SPELL_POWER_CHI, SPELL_POWER_HOLY_POWER,SPELL_POWER_SOUL_SHARDS = SPELL_POWER_CHI, SPELL_POWER_HOLY_POWER, SPELL_POWER_SOUL_SHARDS
-local GetSpecialization, SPEC_PALADIN_RETRIBUTION, SPEC_MONK_WINDWALKER = GetSpecialization, SPEC_PALADIN_RETRIBUTION, SPEC_MONK_WINDWALKER
+local GetSpecialization = GetSpecialization
+local SPEC_PALADIN_RETRIBUTION, SPEC_MONK_WINDWALKER, SPEC_MAGE_ARCANE = SPEC_PALADIN_RETRIBUTION, SPEC_MONK_WINDWALKER, SPEC_MAGE_ARCANE
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 
 -- ThreatPlates APIs
@@ -22,11 +22,17 @@ local TidyPlatesThreat = TidyPlatesThreat
 
 local PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ComboPointWidget\\"
 
+local SPELL_POWER_CHI = Enum.PowerType.Chi
+local SPELL_POWER_HOLY_POWER = Enum.PowerType.HolyPower
+local SPELL_POWER_SOUL_SHARDS = Enum.PowerType.SoulShards
+local SPELL_ARCANE_CHARGES = Enum.PowerType.ArcaneCharges
+
 local WATCH_POWER_TYPES = {
   COMBO_POINTS = true,
   CHI = true,
   HOLY_POWER = true,
   SOUL_SHARDS = true,
+  ARCANE_CHARGES = true
 }
 
 local GetResourceOnTarget
@@ -72,6 +78,10 @@ local function GetWarlockSoulShards()
   return UnitPower("player", SPELL_POWER_SOUL_SHARDS)
 end
 
+local function GetMageArcaneCharges()
+  return UnitPower("player", SPELL_ARCANE_CHARGES)
+end
+
 local function GetComboPointFunction()
   local _, player_class = UnitClass("player")
   local spec = GetSpecialization()
@@ -87,10 +97,15 @@ local function GetComboPointFunction()
     return GetPaladinHolyPower
   elseif player_class == "WARLOCK" then
     return GetWarlockSoulShards
+  elseif player_class == "MAGE" and spec == SPEC_MAGE_ARCANE then
+    return GetMageArcaneCharges
   end
 
   return nil
 end
+
+-- Initialize here as OnEnable is to late
+GetResourceOnTarget = GetComboPointFunction()
 
 local function UpdateComboPoints(widget_frame)
   local points = GetResourceOnTarget()
