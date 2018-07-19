@@ -119,7 +119,7 @@ local function ScaleUnique(unit)
 end
 
 local function ScaleUniqueNameOnly(unit)
-	local unique_setting = GetUniqueNameplateSetting(unit)
+	local unique_setting = unit.CustomPlateSettings
 
 	if unique_setting.overrideScale then
 		local db = TidyPlatesThreat.db.profile.HeadlineView

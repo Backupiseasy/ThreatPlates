@@ -331,24 +331,16 @@ do
     PlatesByGUID[unit.guid] = plate
 
     Addon:UpdateUnitContext(unit, unitid)
-
     Addon:UnitStyle_NameDependent(unit)
     ProcessUnitChanges()
-    OnUpdateCastMidway(plate, unitid)
-
+  
 		Addon:UpdateExtensions(extended, unit.unitid, stylename)
-    -- Addon:WidgetsOnUnitAdded(extended, unit) -- already called in ProcessUnitChanges
 
     Addon:UpdateFriendleNameplateStyle(nameplate, unitid)
---    if TidyPlatesThreat.db.profile.ShowFriendlyBlizzardNameplates and UnitReaction(unitid, "player") > 4 then
---      plate.UnitFrame:Show()
---      extended:Hide()
---      extended.Active = false
---    else
---      plate.UnitFrame:Hide()
---      extended:Show()
---      extended.Active = true
---    end
+
+    -- Call this after the plate is shown as OnStartCasting checks if the plate is shown; if not, the castbar is hidden and
+    -- nothing is updated
+    OnUpdateCastMidway(plate, unitid)
   end
 
 	-- OnUpdateNameplate
