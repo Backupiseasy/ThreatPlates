@@ -340,6 +340,8 @@ end
 local function MigrationAurasSettings(profile_name, profile)
   if DatabaseEntryExists(profile, { "AuraWidget" } ) then
     profile.AuraWidget.Debuffs = profile.AuraWidget.Debuffs or {}
+    profile.AuraWidget.Buffs = profile.AuraWidget.Debuffs or {}
+    profile.AuraWidget.CrowdControl = profile.AuraWidget.Debuffs or {}
 
     if DatabaseEntryExists(profile, { "AuraWidget", "ShowDebuffsOnFriendly", } ) and profile.AuraWidget.ShowDebuffsOnFriendly then
       profile.AuraWidget.Debuffs.ShowFriendly = true

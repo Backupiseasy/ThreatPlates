@@ -1066,8 +1066,8 @@ function Widget:PLAYER_TARGET_CHANGED()
   if plate and plate.TPFrame.Active then
     self.CurrentTarget = plate.TPFrame.widgets.Auras
 
-    if self.CurrentTarget.Active and self.CurrentTarget.ActiveAuras > 0 then
-      self.CurrentTarget:Show()
+    if self.CurrentTarget.Active then
+      self:UpdateIconGrid(self.CurrentTarget, plate.TPFrame.unit.unitid)
     end
   end
 end

@@ -1,4 +1,13 @@
 ------------------------------------------------------
+9.0.2
+------------------------------------------------------
+* Fixed a Lua error that occured when certain Auras widget settings where migrated when updating from Threat Plates version 8.x [Issue #201, Comment #963, Comment #957].
+* Fixed a Lua error with custom nameplates when headline view and custom transparency were enabled [Issue #202].
+* Fixed a Lua error with Auras widget that occured when switching to a new target unit.
+* Fixed a bug where the castbar was not shown immediately for units that were already casting when their nameplate was shown.
+* Updated integrated libraries to LibSharedMedia-3.0 8.0.1.
+
+------------------------------------------------------
 9.0.1
 ------------------------------------------------------
 * Extended the combo points widget to show also arcane charges for arcane mages.
