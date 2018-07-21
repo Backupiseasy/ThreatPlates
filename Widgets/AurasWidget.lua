@@ -478,7 +478,7 @@ function Widget:UpdateUnitAuras(frame, effect, unitid, enabled_auras, enabled_cc
       show_aura = SpellFilterCC(self, db.CrowdControl, aura, AuraFilterFunctionCC)
 
       -- Show crowd control auras that are not shown in Blizard mode as normal debuffs
-      if not show_aura then
+      if not show_aura and enabled_auras then
         aura.CrowdControl = false
         show_aura = SpellFilter(self, db_auras, aura, AuraFilterFunction)
       end

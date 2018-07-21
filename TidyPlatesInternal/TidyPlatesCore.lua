@@ -1374,3 +1374,7 @@ function TidyPlatesInternal:DisableCastBars() ShowCastBars = false end
 function TidyPlatesInternal:EnableCastBars() ShowCastBars = true end
 
 function TidyPlatesInternal:ForceUpdate() ForEachPlate(OnResetNameplate) end
+
+function Addon:ForceUpdateOnNameplate(plate)
+  OnResetNameplate(plate)
+end

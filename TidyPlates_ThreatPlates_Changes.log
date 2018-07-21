@@ -3,6 +3,7 @@
 ------------------------------------------------------
 * In Auras widget, crowd control auras that are not shown with filter Blizzard are now shown as normal debuffs instead of being hidden [Issue #200, Comment #985]
 * Fixed a bug with UI scaling where changes were not immediately applied to all nameplates.
+* Fixed a bug with configuration mode for castbar where the target nameplate was not correctly reset when the configuration mode was disabled.
 
 ------------------------------------------------------
 9.0.3
