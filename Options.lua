@@ -3140,7 +3140,7 @@ local function CreateBlizzardSettings()
             order = 20,
             type = "toggle",
             set = function(info, val)
-              SetValue(info, val)
+              SetValuePlain(info, val)
               db.Scale.PixelPerfectUI = not val and db.Scale.PixelPerfectUI
               Addon:UIScaleChanged()
             end,
@@ -3152,7 +3152,7 @@ local function CreateBlizzardSettings()
             order = 30,
             type = "toggle",
             set = function(info, val)
-              SetValue(info, val)
+              SetValuePlain(info, val)
               db.Scale.IgnoreUIScale = not val and db.Scale.IgnoreUIScale
               Addon:UIScaleChanged()
             end,

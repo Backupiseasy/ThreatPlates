@@ -1312,6 +1312,8 @@ function Addon:UIScaleChanged()
       Addon.UIScale = 768.0 / physicalScreenHeight
     end
   end
+
+  TidyPlatesInternal:ForceUpdate()
 end
 
 local ConfigModePlate
