@@ -191,7 +191,7 @@ function Widget:OnEnable()
     self:RegisterUnitEvent("UNIT_FLAGS", "player", EventHandler)
     self:RegisterEvent("PLAYER_TARGET_CHANGED")
   else
-    self:UnregisterEvent("UNIT_POWER")
+    self:UnregisterEvent("UNIT_POWER_UPDATE")
     self:UnregisterEvent("UNIT_DISPLAYPOWER")
     self:UnregisterEvent("UNIT_FLAGS")
   end

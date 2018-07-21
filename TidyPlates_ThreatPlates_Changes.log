@@ -1,4 +1,11 @@
 ------------------------------------------------------
+9.0.3
+------------------------------------------------------
+* Added a warning message at login if SpartanUI with its new nameplates is enabled together with Threat Plates as there will be two nameplates show for every unit [Issue #205].
+* Changed interrupt information on target castbar to show only interruptors name without realm [Issue #196].
+* Fixed a Lua error with Combo Points widget that occured when switching the active spec.
+
+------------------------------------------------------
 9.0.2
 ------------------------------------------------------
 * Fixed a Lua error that occured when certain Auras widget settings where migrated when updating from Threat Plates version 8.x [Issue #201, Comment #963, Comment #957].

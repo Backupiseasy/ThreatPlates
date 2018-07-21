@@ -30,23 +30,6 @@ local task_queue_ooc = {}
 -- Global configs and funtions
 ---------------------------------------------------------------------------------------------------
 
--- check if the correct TidyPlates version is installed
---function CheckTidyPlatesVersion()
-  -- local GlobDB = TidyPlatesThreat.db.global
-  -- if not GlobDB.versioncheck then
-  -- 	local version_no = 0
-  -- 	local version = string.gsub(TIDYPLATES_INSTALLED_VERSION, "Beta", "")
-  -- 	for w in string.gmatch(version, "[0-9]+") do
-  -- 		version_no = version_no * 1000 + (tonumber(w) or 0)
-  -- 	end
-  --
-  -- 	if version_no < TIDYPLATES_MIN_VERSION_NO then
-  -- 		t.Print("\n---------------------------------------\nThe current version of ThreatPlates requires at least TidyPlates "] .. TIDYPLATES_MIN_VERSION .. L[". You have installed an older or incompatible version of TidyPlates: "] .. TIDYPLATES_INSTALLED_VERSION .. L[". Please update TidyPlates, otherwise ThreatPlates will not work properly.")
-  -- 	end
-  -- 	GlobDB.versioncheck = true
-  -- end
---end
-
 t.Print = function(val,override)
   local db = TidyPlatesThreat.db.profile
   if override or db.verbose then
@@ -147,7 +130,7 @@ end
 
 StaticPopupDialogs["TidyPlatesEnabled"] = {
   preferredIndex = STATICPOPUP_NUMDIALOGS,
-  text = "|cffFFA500" .. t.Meta("title") .. " Warning|r \n----------------------------------------------------------\n" ..
+  text = "|cffFFA500" .. t.Meta("title") .. " Warning|r \n---------------------------------------\n" ..
     L["|cff89F559Threat Plates|r is no longer a theme of |cff89F559TidyPlates|r, but a standalone addon that does no longer require TidyPlates. Please disable one of these, otherwise two overlapping nameplates will be shown for units."],
   button1 = OKAY,
   timeout = 0,
@@ -158,7 +141,7 @@ StaticPopupDialogs["TidyPlatesEnabled"] = {
 
 StaticPopupDialogs["IncompatibleAddon"] = {
   preferredIndex = STATICPOPUP_NUMDIALOGS,
-  text = "|cffFFA500" .. t.Meta("title") .. " Warning|r \n----------------------------------------------------------\n" ..
+  text = "|cffFFA500" .. t.Meta("title") .. " Warning|r \n---------------------------------------\n" ..
     L["You currently have two nameplate addons enabled: |cff89F559Threat Plates|r and |cff89F559%s|r. Please disable one of these, otherwise two overlapping nameplates will be shown for units."],
   button1 = OKAY,
   timeout = 0,
@@ -270,19 +253,18 @@ function TidyPlatesThreat:StartUp()
   --if TidyPlates and not db.StandalonePopup then
   if IsAddOnLoaded("TidyPlates") then
     StaticPopup_Show("TidyPlatesEnabled", "TidyPlates")
-    --db.StandalonePopup = true
   end
   if IsAddOnLoaded("Kui_Nameplates") then
     StaticPopup_Show("IncompatibleAddon", "KuiNameplates")
-    --db.StandalonePopup = true
   end
   if IsAddOnLoaded("ElvUI") and ElvUI[1].private.nameplates.enable then
     StaticPopup_Show("IncompatibleAddon", "ElvUI Nameplates")
-    --db.StandalonePopup = true
   end
   if IsAddOnLoaded("Plater") then
     StaticPopup_Show("IncompatibleAddon", "Plater Nameplates")
-    --db.StandalonePopup = true
+  end
+  if IsAddOnLoaded("SpartanUI") and SUI.DB.EnabledComponents.Nameplates then
+    StaticPopup_Show("IncompatibleAddon", "SpartanUI Nameplates")
   end
 
   TidyPlatesThreat:ReloadTheme()

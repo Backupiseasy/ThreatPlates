@@ -719,7 +719,7 @@ do
 	 end
 
   local function FrameOnShow(UnitFrame)
-    -- Hide namepaltes that have not yet an unit added
+    -- Hide nameplates that have not yet an unit added
     if not UnitFrame.unit then
       UnitFrame:Hide()
     end
@@ -975,6 +975,7 @@ do
 
         local castbar = visual.castbar
         if unit.isTarget and castbar:IsShown() then
+          sourceName, _ = UnitName(sourceName) or sourceName, nil
           local _, class = UnitClass(sourceName)
           if class then
             sourceName = "|cff" .. ThreatPlates.HCC[class] .. sourceName .. "|r"
