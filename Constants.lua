@@ -214,13 +214,13 @@ local TOTEM_DATA = {
   [14] = { SpellID = 207399, ID = "N4", GroupColor = "4c9900"},		-- Ancestral Protection Totem
   [15] = { SpellID = 192077, ID = "N5", GroupColor = "4c9900"},		-- Wind Rush Totem
   --[16] = { SpellID = 196932, ID = "N6", GroupColor = "4c9900"},		-- Voodoo Totem
-  [17] = { SpellID = 198838, ID = "N7", GroupColor = "4c9900"},		-- Earthen Shield Totem
+  [16] = { SpellID = 198838, ID = "N7", GroupColor = "4c9900"},		-- Earthen Shield Totem
 
   -- Totems from PVP talents
-  [18] = { SpellID = 204331, ID = "P1", GroupColor = "2b76ff"},	-- Counterstrike Totem
-  [19] = { SpellID = 204330, ID = "P2", GroupColor = "2b76ff"},	-- Skyfury Totem
-  [20] = { SpellID = 204332, ID = "P3", GroupColor = "2b76ff"},	-- Windfury Totem
-  [21] = { SpellID = 204336, ID = "P4", GroupColor = "2b76ff"},	-- Grounding Totem
+  [17] = { SpellID = 204331, ID = "P1", GroupColor = "2b76ff"},	-- Counterstrike Totem
+  [18] = { SpellID = 204330, ID = "P2", GroupColor = "2b76ff"},	-- Skyfury Totem
+  [19] = { SpellID = 204332, ID = "P3", GroupColor = "2b76ff"},	-- Windfury Totem
+  [20] = { SpellID = 204336, ID = "P4", GroupColor = "2b76ff"},	-- Grounding Totem
 }
 
 function Addon:InitializeTotemInformation()

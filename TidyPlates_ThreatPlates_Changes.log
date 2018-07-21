@@ -6,6 +6,7 @@
 * Fixed a bug with UI scaling where changes were not immediately applied to all nameplates.
 * Fixed a bug with configuration mode for castbar where the target nameplate was not correctly reset when the configuration mode was disabled.
 * Fixed a bug with with the absorbs display where absorbs were not disabled although configured that way in the options.
+* Fixed a bug in the totem definitions that prevented the nameplates of these totems from being shown [Issue #209].
 * Removed a redundant toggle for enabling/disabling the absorbs display.
 
 ------------------------------------------------------
