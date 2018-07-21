@@ -119,15 +119,6 @@ ThreatPlates.Widgets = "Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\Wid
 -- Global contstants for options dialog
 ---------------------------------------------------------------------------------------------------
 
-Addon.AurasFilterModeDebuffs = {
-  ["whitelist"] = L["White List"],
-  ["blacklist"] = L["Black List"],
-  ["whitelistMine"] = L["White List (Mine)"],
-  ["blacklistMine"] = L["Black List (Mine)"],
-  ["all"] = L["All Auras"],
-  ["allMine"] = L["All Auras (Mine)"],
-}
-
 Addon.AurasFilterMode = {
   ["whitelist"] = L["White List"],
   ["blacklist"] = L["Black List"],

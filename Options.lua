@@ -4148,12 +4148,6 @@ local function CreateOptionsTable()
                       type = "group",
                       inline = true,
                       args = {
-                        ShowAbsorb = {
-                          name = L["Show Absorbs"],
-                          order = 100,
-                          type = "toggle",
-                          arg = { "settings", "healthbar", "ShowAbsorbs" },
-                        },
                         AbsorbColor = {
                           name = L["Color"],
                           order = 110,

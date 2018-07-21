@@ -262,8 +262,8 @@ do
 --        print ("Change of nameplate mode:", unit.name, headline_mode_before, "=>", headline_mode_after)
 --      end
 
+      Addon:CreateExtensions(extended, unit.unitid, stylename)
       -- TOOD: optimimze that - call OnUnitAdded only when the plate is initialized the first time for a unit, not if only the style changes
-      Addon:UpdateExtensions(extended, unit.unitid, stylename)
       Addon:WidgetsOnUnitAdded(extended, unit)
       --Addon:widgetsPlateModeChanged(extended, unit)
     end
