@@ -1,9 +1,18 @@
 ------------------------------------------------------
+9.0.5
+------------------------------------------------------
+* Updated localization Simplified Chinese (zhCN, big thanks to y123ao6).
+
+------------------------------------------------------
 9.0.4
 ------------------------------------------------------
 * In Auras widget, crowd control auras that are not shown with filter Blizzard are now shown as normal debuffs instead of being hidden [Issue #200, Comment #985]
+* Fixed a bug with Auras settings migration that converted the settings for debuff/buff/crowd control filter modes into an illegal/non-working state.
 * Fixed a bug with UI scaling where changes were not immediately applied to all nameplates.
 * Fixed a bug with configuration mode for castbar where the target nameplate was not correctly reset when the configuration mode was disabled.
+* Fixed a bug with with the absorbs display where absorbs were not disabled although configured that way in the options.
+* Fixed a bug in the totem definitions that prevented the nameplates of these totems from being shown [Issue #209].
+* Removed a redundant toggle for enabling/disabling the absorbs display.
 
 ------------------------------------------------------
 9.0.3

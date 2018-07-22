@@ -340,8 +340,8 @@ end
 local function MigrationAurasSettings(profile_name, profile)
   if DatabaseEntryExists(profile, { "AuraWidget" } ) then
     profile.AuraWidget.Debuffs = profile.AuraWidget.Debuffs or {}
-    profile.AuraWidget.Buffs = profile.AuraWidget.Debuffs or {}
-    profile.AuraWidget.CrowdControl = profile.AuraWidget.Debuffs or {}
+    profile.AuraWidget.Buffs = profile.AuraWidget.Buffs or {}
+    profile.AuraWidget.CrowdControl = profile.AuraWidget.CrowdControl or {}
 
     if DatabaseEntryExists(profile, { "AuraWidget", "ShowDebuffsOnFriendly", } ) and profile.AuraWidget.ShowDebuffsOnFriendly then
       profile.AuraWidget.Debuffs.ShowFriendly = true
@@ -374,7 +374,14 @@ local function MigrationAurasSettings(profile_name, profile)
     end
 
     if DatabaseEntryExists(profile, { "AuraWidget", "FilterMode", } ) then
-      profile.AuraWidget.Debuffs.FilterMode = profile.AuraWidget.FilterMode:gsub("Mine", "")
+      if profile.AuraWidget.FilterMode == "BLIZZARD" then
+        profile.AuraWidget.Debuffs.FilterMode = "blacklist"
+        profile.AuraWidget.Debuffs.ShowAllEnemy = false
+        profile.AuraWidget.Debuffs.ShowOnlyMine = false
+        profile.AuraWidget.Debuffs.ShowBlizzardForEnemy = true
+      else
+        profile.AuraWidget.Debuffs.FilterMode = profile.AuraWidget.FilterMode:gsub("Mine", "")
+      end
       DatabaseEntryDelete(profile, { "AuraWidget", "FilterMode", } )
     end
 
@@ -382,6 +389,21 @@ local function MigrationAurasSettings(profile_name, profile)
       profile.AuraWidget.Debuffs.Scale = profile.AuraWidget.scale
       DatabaseEntryDelete(profile, { "AuraWidget", "scale", } )
     end
+  end
+end
+
+local function MigrationAurasSettingsFix(profile_name, profile)
+  if DatabaseEntryExists(profile, { "AuraWidget", "Debuffs", "FilterMode", } ) and profile.AuraWidget.Debuffs.FilterMode == "BLIZZARD" then
+    profile.AuraWidget.Debuffs.FilterMode = "blacklist"
+    profile.AuraWidget.Debuffs.ShowAllEnemy = false
+    profile.AuraWidget.Debuffs.ShowOnlyMine = false
+    profile.AuraWidget.Debuffs.ShowBlizzardForEnemy = true
+  end
+  if DatabaseEntryExists(profile, { "AuraWidget", "Buffs", "FilterMode", } ) and profile.AuraWidget.Buffs.FilterMode == "BLIZZARD" then
+    profile.AuraWidget.Buffs.FilterMode = "blacklist"
+  end
+  if DatabaseEntryExists(profile, { "AuraWidget", "CrowdControl", "FilterMode", } ) and profile.AuraWidget.CrowdControl.FilterMode == "BLIZZARD" then
+    profile.AuraWidget.CrowdControl.FilterMode = "blacklist"
   end
 end
 
@@ -433,7 +455,8 @@ local DEPRECATED_SETTINGS = {
   TotemSettings = { MigrationTotemSettings, "8.7.0" },        -- (changed in 8.7.0)
   Borders = { MigrateBorderTextures, "8.7.0" },               -- (changed in 8.7.0)
   UniqueSettingsList = { "uniqueSettings", "list" },          -- (removed in 8.7.0, cleanup added in 8.7.1)
-  Auras = { MigrationAurasSettings, "9.0.0" },                -- (changed in 8.8.0)
+  Auras = { MigrationAurasSettings, "9.0.0" },                -- (changed in 9.0.0)
+  AurasFix = { MigrationAurasSettingsFix, "9.0.3" },          -- (changed in 9.0.4)
 }
 
 local function MigrateDatabase(current_version)
