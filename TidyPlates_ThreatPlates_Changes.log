@@ -2,7 +2,7 @@
 9.0.6
 ------------------------------------------------------
 * Fixed a Lua error in Auras widget when changing the positioning of duration/stacks text to "Bottom Left"
-* Fixed a layout bug in Auras widget when chaning the anchor point multiple times [Issue #210].
+* Fixed a layout bug in Auras widget when changing the anchor point multiple times [Issue #210].
 * Updated integrated libraries to LibSharedMedia-3.0 v8.0.1 (from v8.0.0).
 * Minor updates to Ace3 libraries LibStub and CallbackHandler-1.0.
 
