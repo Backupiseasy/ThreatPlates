@@ -592,6 +592,7 @@ function Widget:UpdatePositionAuraGrid(frame, y_offset)
   else
     local anchor = self.ANCHOR_POINT_SETPOINT[db.anchor]
 
+    frame:ClearAllPoints()
     if self.IconMode and db.CenterAuras then
       if auras_no > self.GridNoCols then
         auras_no = self.GridNoCols
