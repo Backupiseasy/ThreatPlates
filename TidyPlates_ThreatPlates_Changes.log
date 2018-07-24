@@ -1,8 +1,8 @@
-------------------------------------------------------
+﻿------------------------------------------------------
 9.0.6
 ------------------------------------------------------
 * Updated integrated libraries to LibSharedMedia-3.0 v8.0.1 (from v8.0.0).
-
+* Minor updates to Ace3 libraries LibStub and CallbackHandler-1.0.
 ------------------------------------------------------
 9.0.5
 ------------------------------------------------------
@@ -33,7 +33,7 @@
 * Fixed a Lua error with custom nameplates when headline view and custom transparency were enabled [Issue #202].
 * Fixed a Lua error with Auras widget that occured when switching to a new target unit.
 * Fixed a bug where the castbar was not shown immediately for units that were already casting when their nameplate was shown.
-* Updated integrated libraries to LibSharedMedia-3.0 8.0.0.
+* Updated integrated libraries to LibSharedMedia-3.0 8.0.1.
 
 ------------------------------------------------------
 9.0.1
