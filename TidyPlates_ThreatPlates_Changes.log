@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+9.0.7
+------------------------------------------------------
+* Fixed a Lua error in Resource widget that happend when the target's resource changed while the resource bar was shown [Issue #211].
+
+------------------------------------------------------
 9.0.6
 ------------------------------------------------------
 * Fixed a Lua error in Auras widget when changing the positioning of duration/stacks text to "Bottom Left"
