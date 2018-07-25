@@ -1,8 +1,8 @@
 ------------------------------------------------------------------------
-r102 | funkydude | 2018-07-17 19:25:42 +0000 (Tue, 17 Jul 2018) | 1 line
+r104 | funkydude | 2018-07-21 16:34:03 +0000 (Sat, 21 Jul 2018) | 1 line
 Changed paths:
-   M /trunk/LibSharedMedia-3.0.toc
+   M /trunk/CallbackHandler-1.0/CallbackHandler-1.0.lua
 
-bump version
+Update CallbackHandler embed.
 ------------------------------------------------------------------------
 

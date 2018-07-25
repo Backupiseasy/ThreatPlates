@@ -3108,7 +3108,7 @@ local function CreateBlizzardSettings()
             order = 20,
             type = "toggle",
             set = function(info, val)
-              SetValue(info, val)
+              SetValuePlain(info, val)
               db.Scale.PixelPerfectUI = not val and db.Scale.PixelPerfectUI
               Addon:UIScaleChanged()
             end,
@@ -3120,7 +3120,7 @@ local function CreateBlizzardSettings()
             order = 30,
             type = "toggle",
             set = function(info, val)
-              SetValue(info, val)
+              SetValuePlain(info, val)
               db.Scale.IgnoreUIScale = not val and db.Scale.IgnoreUIScale
               Addon:UIScaleChanged()
             end,
@@ -4108,12 +4108,6 @@ local function CreateOptionsTable()
                       type = "group",
                       inline = true,
                       args = {
-                        ShowAbsorb = {
-                          name = L["Show Absorbs"],
-                          order = 100,
-                          type = "toggle",
-                          arg = { "settings", "healthbar", "ShowAbsorbs" },
-                        },
                         AbsorbColor = {
                           name = L["Color"],
                           order = 110,

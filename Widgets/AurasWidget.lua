@@ -476,6 +476,12 @@ function Widget:UpdateUnitAuras(frame, effect, unitid, enabled_auras, enabled_cc
     -- Store Order/Priority
     if aura.CrowdControl then
       show_aura = SpellFilterCC(self, db.CrowdControl, aura, AuraFilterFunctionCC)
+
+      -- Show crowd control auras that are not shown in Blizard mode as normal debuffs
+      if not show_aura and enabled_auras then
+        aura.CrowdControl = false
+        show_aura = SpellFilter(self, db_auras, aura, AuraFilterFunction)
+      end
     elseif enabled_auras then
       show_aura = SpellFilter(self, db_auras, aura, AuraFilterFunction)
     end
@@ -586,6 +592,7 @@ function Widget:UpdatePositionAuraGrid(frame, y_offset)
   else
     local anchor = self.ANCHOR_POINT_SETPOINT[db.anchor]
 
+    frame:ClearAllPoints()
     if self.IconMode and db.CenterAuras then
       if auras_no > self.GridNoCols then
         auras_no = self.GridNoCols
