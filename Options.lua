@@ -124,8 +124,11 @@ local AURA_STYLE = {
 }
 
 -- local reference to current profile
+
 local db
+
 -- table for storing the options dialog
+
 local options = nil
 
 -- Functions
@@ -269,6 +272,7 @@ local function SyncGameSettingsWorld(info, val)
     end
   end
 end
+
 -- Colors
 
 local function GetColor(info)
@@ -405,14 +409,14 @@ local function SetValueAuraWidget(info, val)
   Addon.Widgets.Auras:UpdateSettings()
 end
 
----------------------------------------------------------------------------------------------------
--- Functions to create the options dialog
----------------------------------------------------------------------------------------------------
 
-local function GetDescriptionEntry(text)
+-- Functions to create the options dialog
+
+
+local function GetDescriptionEntry(text,pos)
   return {
     name = text,
-    order = 0,
+    order = pos or 0,
     type = "description",
     width = "full",
   }
@@ -953,11 +957,7 @@ local function AddLayoutOptions(args, pos, widget_info)
 end
 
 local function CreateRaidMarksOptions()
-  local options =  {
-    name = L["Target Markers"],
-    type = "group",
-    order = 130,
-    set = SetThemeValue,
+  local options =  { name = L["Target Markers"], order = 130, type = "group", set = SetThemeValue,
     args = {
       Enable = {
         name = L["Enable"],
@@ -1124,10 +1124,7 @@ local function CreateClassIconsWidgetOptions()
 end
 
 local function CreateComboPointsWidgetOptions()
-  local options = {
-    name = L["Combo Points"],
-    type = "group",
-    order = 50,
+  local options = { name = L["Combo Points"], order = 50, type = "group",
     args = {
       Enable = GetEnableEntry(L["Enable Combo Points Widget"], L["This widget shows your combo points on your target nameplate."], "comboWidget", true, function(info, val) SetValuePlain(info, val); Addon:InitializeWidget("ComboPoints") end),
       Layout = {
@@ -1147,10 +1144,7 @@ local function CreateComboPointsWidgetOptions()
 end
 
 local function CreateArenaWidgetOptions()
-  local options = {
-    name = L["Arena"],
-    type = "group",
-    order = 10,
+  local options = { name = L["Arena"], order = 10, type = "group",
     args = {
       Enable = GetEnableEntry(L["Enable Arena Widget"], L["This widget shows various icons (orbs and numbers) on enemy nameplates in arenas for easier differentiation."], "arenaWidget", false, function(info, val) SetValuePlain(info, val); Addon:InitializeWidget("Arena") end),
       Colors = {
@@ -1268,11 +1262,8 @@ local function CreateArenaWidgetOptions()
   return options
 end
 
-  local function CreateQuestWidgetOptions()
-  local options =  {
-    name = L["Quest"],
-    order = 100,
-    type = "group",
+local function CreateQuestWidgetOptions()
+  local options =  { name = L["Quest"], order = 100, type = "group",
     args = {
       Enable = GetEnableEntry(L["Enable Quest Widget"], L["This widget shows a quest icon above unit nameplates or colors the nameplate healthbar of units that are involved with any of your current quests."], "questWidget", true,
         function(info, val)
@@ -1375,10 +1366,7 @@ end
 end
 
 local function CreateStealthWidgetOptions()
-  local options =  {
-    name = L["Stealth"],
-    order = 80,
-    type = "group",
+  local options =  { name = L["Stealth"], order = 80, type = "group",
     args = {
       Enable = GetEnableEntry(L["Enable Stealth Widget"], L["This widget shows a stealth icon on nameplates of units that can detect stealth."], "stealthWidget", true, function(info, val) SetValuePlain(info, val); Addon:InitializeWidget("Stealth") end),
       Layout = {
@@ -1395,10 +1383,7 @@ local function CreateStealthWidgetOptions()
 end
 
 local function CreateHealerTrackerWidgetOptions()
-  local options =  {
-    name = L["Healer Tracker"],
-    order = 60,
-    type = "group",
+  local options =  { name = L["Healer Tracker"], order = 60, type = "group",
     args = {
       Enable = GetEnableEntry(L["Enable Healer Tracker Widget"], L["This widget shows players that are healers."], "healerTracker", true, function(info, val) SetValuePlain(info, val); Addon:InitializeWidget("HealerTracker") end),
       Layout = {
@@ -1416,10 +1401,7 @@ local function CreateHealerTrackerWidgetOptions()
 end
 
 local function CreateTargetArtWidgetOptions()
-  local options = {
-    name = L["Target Highlight"],
-    type = "group",
-    order = 90,
+  local options = { name = L["Target Highlight"], order = 90, type = "group",
     args = {
       Enable = GetEnableEntry(L["Enable Target Highlight Widget"], L["This widget highlights the nameplate of your current target by showing a border around the healthbar and by coloring the nameplate's healtbar and/or name with a custom color."], "targetWidget", false, function(info, val) SetValuePlain(info, val); Addon:InitializeWidget("TargetArt") end),
       Texture = {
@@ -1497,10 +1479,7 @@ local function CreateTargetArtWidgetOptions()
 end
 
 local function CreateSocialWidgetOptions()
-  local options = {
-    name = L["Social"],
-    type = "group",
-    order = 70,
+  local options = { name = L["Social"], order = 70, type = "group",
     args = {
       Enable = GetEnableEntry(L["Enable Social Widget"], L["This widget shows icons for friends, guild members, and faction on nameplates."], "socialWidget", true, function(info, val) SetValuePlain(info, val); Addon:InitializeWidget("Social") end),
       Friends = {
@@ -1595,10 +1574,7 @@ local function CreateSocialWidgetOptions()
 end
 
 local function CreateResourceWidgetOptions()
-  local options = {
-    name = L["Resource"],
-    type = "group",
-    order = 60,
+  local options = { name = L["Resource"], order = 60, type = "group",
     args = {
       Enable = GetEnableEntry(L["Enable Resource Widget"], L["This widget shows information about your target's resource on your target nameplate. The resource bar's color is derived from the type of resource automatically."], "ResourceWidget", false, function(info, val) SetValuePlain(info, val); Addon:InitializeWidget("Resource") end),
       ShowFor = {
@@ -1809,10 +1785,7 @@ local function CreateResourceWidgetOptions()
 end
 
 local function CreateBossModsWidgetOptions()
-  local entry = {
-    name = L["Boss Mods"],
-    type = "group",
-    order = 30,
+  local options = { name = L["Boss Mods"], order = 30, type = "group",
     args = {
       Enable = GetEnableEntry(L["Enable Boss Mods Widget"], L["This widget shows auras from boss mods on your nameplates (since patch 7.2, hostile nameplates only in instances and raids)."], "BossModsWidget", true, function(info, val) SetValuePlain(info, val); Addon:InitializeWidget("BossMods") end),
       Aura = {
@@ -1863,7 +1836,7 @@ local function CreateBossModsWidgetOptions()
     },
   }
 
-  return entry
+  return options
 end
 
 local function CreateAurasWidgetOptions()
@@ -1871,12 +1844,7 @@ local function CreateAurasWidgetOptions()
     return function(info, val) func(info, val); Addon.Widgets:UpdateSettings("Auras") end
   end
 
-  local options = {
-    name = L["Auras"],
-    type = "group",
-    childGroups = "tab",
-    order = 25,
-    set = SetValueAuraWidget,
+  local options = { name = L["Auras"], order = 25, type = "group", childGroups = "tab", set = SetValueAuraWidget,
     --set = set_function(SetValueAuraWidget),
     args = {
       Enable = GetEnableEntry(L["Enable Auras Widget"], L["This widget shows a unit's auras (buffs and debuffs) on its nameplate."], "AuraWidget", true, function(info, val) SetValuePlain(info, val); Addon:InitializeWidget("Auras") end),
@@ -3863,10 +3831,7 @@ local function CreateCastbarOptions()
 end
 
 local function CreateWidgetOptions()
-  local options = {
-    name = L["Widgets"],
-    type = "group",
-    order = 40,
+  local options = { name = L["Widgets"], order = 40, type = "group",
     args = {
       ArenaWidget = CreateArenaWidgetOptions(),
       AurasWidget = CreateAurasWidgetOptions(),
@@ -3943,15 +3908,10 @@ local function CreateSpecRoles()
 end
 
 -- Return the Options table
+
 local function CreateOptionsTable()
   if not options then
-    options = {
-      name = GetAddOnMetadata("TidyPlates_ThreatPlates", "title"),
-      handler = TidyPlatesThreat,
-      type = "group",
-      childGroups = "tab",
-      get = GetValue,
-      set = SetValue,
+    options = { name = GetAddOnMetadata("TidyPlates_ThreatPlates", "title"), handler = TidyPlatesThreat, type = "group", childGroups = "tab", get = GetValue, set = SetValue,
       args = {
         -- Config Guide
         NameplateSettings = {
@@ -6868,4 +6828,5 @@ end
 -----------------------------------------------------
 -- External
 -----------------------------------------------------
+
 t.GetInterfaceOptionsTable = GetInterfaceOptionsTable
