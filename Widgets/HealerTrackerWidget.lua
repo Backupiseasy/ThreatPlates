@@ -77,7 +77,6 @@ local HEALER_SPELLS = {
   [115175] = "MONK", -- Soothing Mist
   [115294] = "MONK", -- Mana Tea
   [115310] = "MONK", -- Revival
-  [116670] = "MONK", -- Uplift
   [116680] = "MONK", -- Thunder Focus Tea
   [116849] = "MONK", -- Life Cocoon
   [116995] = "MONK", -- Surging mist
