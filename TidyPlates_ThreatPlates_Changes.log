@@ -1,4 +1,11 @@
 ﻿------------------------------------------------------
+9.0.8
+------------------------------------------------------
+* Fixed a bug with the Elite indicator being hidden in combat [Issue #213].
+* Fixed and updated the list of crowd control spells for Hunters for the Auras widget [Issue #216].
+* Fixed a bug in Healer Tracker widget to stop brewmasters and windwalkers showing as healers.
+
+------------------------------------------------------
 9.0.7
 ------------------------------------------------------
 * Fixed a Lua error in Resource widget that happend when the target's resource changed while the resource bar was shown [Issue #211].

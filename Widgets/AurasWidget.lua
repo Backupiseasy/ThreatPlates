@@ -120,12 +120,20 @@ Widget.CROWD_CONTROL_SPELLS = {
   [179057] = LOC_STUN,             -- Chaos Nova
 
   -- Hunter
+  [3355] = LOC_INCAPACITATE,    -- Freezing Trap
+  [24394] = LOC_STUN,           -- Intimidation
+  [162480] = LOC_INCAPACITATE,  -- Steel Trap (Talent, Survival)
+  [5116] = PC_DAZE,             -- Concussive Shot (Not Blizzard)
+  [117405] = PC_ROOT,           -- Binding Shot (Not Blizzard)
+  [186387] = PC_SNARE,          -- Bursting Shot (Marksmanship, Not Blizzard)
+  [213691] = LOC_INCAPACITATE,  -- Scatter Shot (PvP, Not Blizzard)
+  [202914] = CC_SILENCE,        -- Spider Sting (PvP, Not Blizzard)
+  [135299] = PC_SNARE,          -- Sticky Tar (Survival, PvP, Not Blizzard)
+  [212638] = PC_ROOT,           -- Tracker's Net (Survival, PvP, Not Blizzard)
+
   [147362] = CC_SILENCE,        -- Counter Shot
-  [19577] = LOC_STUN,           -- Intimidation
-  [5116] = PC_DAZE,             -- Concussive Shot
-  [187651] = LOC_INCAPACITATE,  -- Freezing Trap
-  [213691] = LOC_INCAPACITATE,  -- Scatter Shot
-  [19386] = LOC_SLEEP,          -- Wyvern Sting
+  -- [19386] = LOC_SLEEP,          -- Wyvern Sting (Deprecated in BfA)
+
 
   -- Mage
   [61780] = LOC_POLYMORPH,  -- Polymorph (Turkey)
