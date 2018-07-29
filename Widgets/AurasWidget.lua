@@ -130,6 +130,7 @@ Widget.CROWD_CONTROL_SPELLS = {
   [202914] = CC_SILENCE,        -- Spider Sting (PvP, Not Blizzard)
   [135299] = PC_SNARE,          -- Sticky Tar (Survival, PvP, Not Blizzard)
   [212638] = PC_ROOT,           -- Tracker's Net (Survival, PvP, Not Blizzard)
+  [195645] = PC_SNARE,          -- Wing Clip (Survival, Not Blizzard)
 
   [147362] = CC_SILENCE,        -- Counter Shot
   -- [19386] = LOC_SLEEP,          -- Wyvern Sting (Deprecated in BfA)
