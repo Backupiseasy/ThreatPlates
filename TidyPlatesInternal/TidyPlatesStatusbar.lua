@@ -297,5 +297,7 @@ function Addon:ConfigCastbar()
     castbar.Hide = castbar._Hide
     castbar:Hide()
     EnabledConfigMode = false
+
+    Addon:ForceUpdateOnNameplate(ConfigModePlate)
   end
 end

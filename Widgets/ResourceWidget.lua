@@ -192,7 +192,7 @@ local function UpdateResourceBar(widget_frame)
 end
 
 -- This event handler only watches for events of unit == "target"
-function Widget:UNIT_POWER(unitid, powerType)
+function Widget:UNIT_POWER_UPDATE(unitid, powerType)
   local plate = GetNamePlateForUnit("target")
   if plate and plate.TPFrame.Active then
     local widget_frame = plate.TPFrame.widgets.Resource

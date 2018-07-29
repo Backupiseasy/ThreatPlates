@@ -262,8 +262,8 @@ do
 --        print ("Change of nameplate mode:", unit.name, headline_mode_before, "=>", headline_mode_after)
 --      end
 
+      Addon:CreateExtensions(extended, unit.unitid, stylename)
       -- TOOD: optimimze that - call OnUnitAdded only when the plate is initialized the first time for a unit, not if only the style changes
-      Addon:UpdateExtensions(extended, unit.unitid, stylename)
       Addon:WidgetsOnUnitAdded(extended, unit)
       --Addon:widgetsPlateModeChanged(extended, unit)
     end
@@ -553,10 +553,12 @@ do
 
 	-- UpdateIndicator_EliteIcon: Updates the border overlay art and threat glow to Elite or Non-Elite art
 	function UpdateIndicator_EliteIcon()
-		if unit.isElite and style.eliteicon.show then
-      visual.eliteicon:Show()
+    if unit.isElite then
+      visual.eliteicon:SetShown(style.eliteicon.show)
+      visual.eliteborder:SetShown(style.eliteborder.show)
     else
       visual.eliteicon:Hide()
+      visual.eliteborder:Hide()
     end
 	end
 
@@ -566,7 +568,10 @@ do
 			if unitcache.name ~= unit.name then UpdateIndicator_Name() end
 			if unitcache.level ~= unit.level then UpdateIndicator_Level() end
 			UpdateIndicator_RaidIcon()
-			if unitcache.isElite ~= unit.isElite then UpdateIndicator_EliteIcon() end
+
+			if unitcache.isElite ~= unit.isElite then
+        UpdateIndicator_EliteIcon()
+      end
 		end
 	end
 
@@ -1257,12 +1262,7 @@ do
     end
 
     -- Hide Stuff
-		if unit.isElite and style.eliteborder.show then
-      visual.eliteborder:Show()
-    else
-      visual.eliteborder:Hide()
-      visual.eliteicon:Hide()
-    end
+    UpdateIndicator_EliteIcon()
 
 		if not unit.isBoss then visual.skullicon:Hide() end
 		if not unit.isTarget then visual.target:Hide() end
@@ -1312,6 +1312,8 @@ function Addon:UIScaleChanged()
       Addon.UIScale = 768.0 / physicalScreenHeight
     end
   end
+
+  TidyPlatesInternal:ForceUpdate()
 end
 
 local ConfigModePlate
@@ -1372,3 +1374,7 @@ function TidyPlatesInternal:DisableCastBars() ShowCastBars = false end
 function TidyPlatesInternal:EnableCastBars() ShowCastBars = true end
 
 function TidyPlatesInternal:ForceUpdate() ForEachPlate(OnResetNameplate) end
+
+function Addon:ForceUpdateOnNameplate(plate)
+  OnResetNameplate(plate)
+end

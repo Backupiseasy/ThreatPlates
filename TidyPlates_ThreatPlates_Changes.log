@@ -1,3 +1,39 @@
+﻿------------------------------------------------------
+9.0.8
+------------------------------------------------------
+* Fixed a bug with the Elite indicator being hidden in combat [Issue #213].
+* Fixed and updated the list of crowd control spells for Hunters for the Auras widget [Issue #216].
+* Fixed a bug in Healer Tracker widget to stop brewmasters and windwalkers showing as healers.
+
+------------------------------------------------------
+9.0.7
+------------------------------------------------------
+* Fixed a Lua error in Resource widget that happend when the target's resource changed while the resource bar was shown [Issue #211].
+
+------------------------------------------------------
+9.0.6
+------------------------------------------------------
+* Fixed a Lua error in Auras widget when changing the positioning of duration/stacks text to "Bottom Left"
+* Fixed a layout bug in Auras widget when changing the anchor point multiple times [Issue #210].
+* Updated integrated libraries to LibSharedMedia-3.0 v8.0.1 (from v8.0.0).
+* Minor updates to Ace3 libraries LibStub and CallbackHandler-1.0.
+
+------------------------------------------------------
+9.0.5
+------------------------------------------------------
+* Updated localization Simplified Chinese (zhCN, big thanks to y123ao6).
+
+------------------------------------------------------
+9.0.4
+------------------------------------------------------
+* In Auras widget, crowd control auras that are not shown with filter Blizzard are now shown as normal debuffs instead of being hidden [Issue #200, Comment #985]
+* Fixed a bug with Auras settings migration that converted the settings for debuff/buff/crowd control filter modes into an illegal/non-working state.
+* Fixed a bug with UI scaling where changes were not immediately applied to all nameplates.
+* Fixed a bug with configuration mode for castbar where the target nameplate was not correctly reset when the configuration mode was disabled.
+* Fixed a bug with with the absorbs display where absorbs were not disabled although configured that way in the options.
+* Fixed a bug in the totem definitions that prevented the nameplates of these totems from being shown [Issue #209].
+* Removed a redundant toggle for enabling/disabling the absorbs display.
+
 ------------------------------------------------------
 9.0.3
 ------------------------------------------------------
