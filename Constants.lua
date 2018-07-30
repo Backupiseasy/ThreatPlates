@@ -191,36 +191,43 @@ ThreatPlates.FRIENDLY_SUBTEXT = {
 -------------------------------------------------------------------------------
 
 local TOTEM_DATA = {
-  -- Totems from Totem Mastery
-  [1]  = { SpellID = 202188, ID = "M1", GroupColor = "b8d1ff"}, 	-- Resonance Totem
-  [2]  = { SpellID = 210651, ID = "M2",	GroupColor = "b8d1ff"},		-- Storm Totem
-  [3]  = { SpellID = 210657, ID = "M3", GroupColor = "b8d1ff"},		-- Ember Totem
-  [4]  = { SpellID = 210660, ID = "M4", GroupColor = "b8d1ff"},		-- Tailwind Totem
+  -- Baseline Totems
+  { SpellID = 192058, ID = "B1", GroupColor = "8A2BE2"},		-- Capacitor Totem (ex-Lightning Surge Totem, baseline since 8.0.1)
+
+  -- Fire totems
+  { SpellID = 192222, ID = "F1", GroupColor = "ff8f8f"}, 	  -- Liquid Magma Totem
+
+  -- Earth Totems
+  { SpellID = 8143,   ID = "E1", GroupColor = "8B4513"},	  -- Tremor Totem (added in pacth 8.0.1, TP v9.0.9)
 
   -- Totems from spezialization
-  [5]  = { SpellID = 98008,  ID = "S1", GroupColor = "ffb31f"},		-- Spirit Link Totem
-  [6]  = { SpellID = 5394,	 ID = "S2", GroupColor = "ffb31f"},		-- Healing Stream Totem
-  [7]  = { SpellID = 108280, ID = "S3", GroupColor = "ffb31f"},		-- Healing Tide Totem
-  [8]  = { SpellID = 160161, ID = "S4", GroupColor = "ffb31f"}, 	-- Earthquake Totem
-  [9]  = { SpellID = 2484, 	 ID = "S5",	GroupColor = "ffb31f"},  	-- Earthbind Totem (added patch 7.2, TP v8.4.0)
+  { SpellID = 98008,  ID = "S1", GroupColor = "ffb31f"},		-- Spirit Link Totem
+  { SpellID = 5394,	  ID = "S2", GroupColor = "ffb31f"},		-- Healing Stream Totem
+  { SpellID = 108280, ID = "S3", GroupColor = "ffb31f"},		-- Healing Tide Totem
+  { SpellID = 160161, ID = "S4", GroupColor = "ffb31f"}, 	  -- Earthquake Totem
+  { SpellID = 2484,   ID = "S5",	GroupColor = "ffb31f"},   -- Earthbind Totem (added patch 7.2, TP v8.4.0)
 
-  -- Lonely fire totem
-  [10] = { SpellID = 192222, ID = "F1", GroupColor = "ff8f8f"}, 	-- Liquid Magma Totem
+  -- Totems from Totem Mastery
+  { SpellID = 202188, ID = "M1", GroupColor = "b8d1ff"}, 	  -- Resonance Totem
+  { SpellID = 210651, ID = "M2", GroupColor = "b8d1ff"},		-- Storm Totem
+  { SpellID = 210657, ID = "M3", GroupColor = "b8d1ff"},		-- Ember Totem
+  { SpellID = 210660, ID = "M4", GroupColor = "b8d1ff"},		-- Tailwind Totem
 
   -- Totems from talents
-  [11] = { SpellID = 157153, ID = "N1", GroupColor = "4c9900"},		-- Cloudburst Totem
-  [12] = { SpellID = 51485,  ID = "N2", GroupColor = "4c9900"},		-- Earthgrab Totem
-  [13] = { SpellID = 192058, ID = "N3", GroupColor = "4c9900"},		-- Lightning  Surge Totem
-  [14] = { SpellID = 207399, ID = "N4", GroupColor = "4c9900"},		-- Ancestral Protection Totem
-  [15] = { SpellID = 192077, ID = "N5", GroupColor = "4c9900"},		-- Wind Rush Totem
-  --[16] = { SpellID = 196932, ID = "N6", GroupColor = "4c9900"},		-- Voodoo Totem
-  [16] = { SpellID = 198838, ID = "N7", GroupColor = "4c9900"},		-- Earthen Shield Totem
+  { SpellID = 157153, ID = "N1", GroupColor = "4c9900"},		-- Cloudburst Totem
+  { SpellID = 51485,  ID = "N2", GroupColor = "4c9900"},		-- Earthgrab Totem
+  { SpellID = 207399, ID = "N4", GroupColor = "4c9900"},		-- Ancestral Protection Totem
+  { SpellID = 192077, ID = "N5", GroupColor = "4c9900"},		-- Wind Rush Totem
+  { SpellID = 198838, ID = "N7", GroupColor = "4c9900"},		-- Earthen Shield Totem
 
   -- Totems from PVP talents
-  [17] = { SpellID = 204331, ID = "P1", GroupColor = "2b76ff"},	-- Counterstrike Totem
-  [18] = { SpellID = 204330, ID = "P2", GroupColor = "2b76ff"},	-- Skyfury Totem
-  [19] = { SpellID = 204332, ID = "P3", GroupColor = "2b76ff"},	-- Windfury Totem
-  [20] = { SpellID = 204336, ID = "P4", GroupColor = "2b76ff"},	-- Grounding Totem
+  { SpellID = 204331, ID = "P1", GroupColor = "2b76ff"},	  -- Counterstrike Totem
+  { SpellID = 204330, ID = "P2", GroupColor = "2b76ff"},	  -- Skyfury Totem
+  { SpellID = 204332, ID = "P3", GroupColor = "2b76ff"},	  -- Windfury Totem
+  { SpellID = 204336, ID = "P4", GroupColor = "2b76ff"},	  -- Grounding Totem
+
+  --{ SpellID = 196932, ID = "N6", GroupColor = "4c9900"},		-- Voodoo Totem (removed in patch 8.0.1)
+  --{ SpellID = 192058, ID = "N3", GroupColor = "4c9900"},		-- Lightning  Surge Totem (renamed to Capacitator Totem in patch 8.0.1)
 }
 
 function Addon:InitializeTotemInformation()

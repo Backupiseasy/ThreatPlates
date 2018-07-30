@@ -179,7 +179,7 @@ function Addon:UnitStyle_NameDependent(unit)
 
   local db = TidyPlatesThreat.db.profile
 
-  local totem_settings, unique_settings
+  local totem_settings
   local unique_settings = db.uniqueSettings.map[unit.name]
   if unique_settings and unique_settings.useStyle then
     if unique_settings.showNameplate then
@@ -192,7 +192,7 @@ function Addon:UnitStyle_NameDependent(unit)
   else
     local totem_id = TOTEMS[unit.name]
     if totem_id then
-      local totem_settings = db.totemSettings[totem_id]
+      totem_settings = db.totemSettings[totem_id]
       if totem_settings.ShowNameplate then
         plate_style = (db.totemSettings.hideHealthbar and "etotem") or "totem"
       else
