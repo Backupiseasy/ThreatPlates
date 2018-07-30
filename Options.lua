@@ -6797,6 +6797,7 @@ function TidyPlatesThreat:ProfChange()
   -- Update preview icons: EliteArtWidget, TargetHighlightWidget, ClassIconWidget, QuestWidget, Threat Textures, Totem Icons, Custom Nameplate Icons
   local path = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\"
 
+  -- Update options stuff after profile change
   if options then
     options.args.NameplateSettings.args.EliteIcon.args.Texture.args.Preview.image = path .. "EliteArtWidget\\" .. db.settings.eliteicon.theme
 
@@ -6834,8 +6835,13 @@ function TidyPlatesThreat:ProfChange()
     end
   end
 
+  -- Update existing nameplates as certain settings may have changed that are not covered by ForceUpdate()
   Addon:UIScaleChanged()
   Addon:CallbackWhenOoC(function() Addon:SetBaseNamePlateSize() end, L["Unable to change a setting while in combat."])
+
+  for plate, unitid in pairs(Addon.PlatesVisible) do
+    Addon:UpdateFriendleNameplateStyle(plate, unitid)
+  end
 
   TidyPlatesThreat:ReloadTheme()
   TidyPlatesInternal:ForceUpdate()

@@ -273,11 +273,11 @@ end
 
 local function FilterWhitelist(show_aura, spellfound, is_mine, show_only_mine)
   if spellfound == "All" then
-    return true
+    return show_aura
   elseif spellfound == true then
-    return (show_only_mine and is_mine) or show_only_mine == false
+    return (show_only_mine == nil and show_aura) or (show_aura and ((show_only_mine and is_mine) or show_only_mine == false))
   elseif spellfound == "My" then
-    return is_mine
+    return show_aura and is_mine
   end
 
   return false

@@ -456,7 +456,7 @@ local DEPRECATED_SETTINGS = {
   Borders = { MigrateBorderTextures, "8.7.0" },               -- (changed in 8.7.0)
   UniqueSettingsList = { "uniqueSettings", "list" },          -- (removed in 8.7.0, cleanup added in 8.7.1)
   Auras = { MigrationAurasSettings, "9.0.0" },                -- (changed in 9.0.0)
-  AurasFix = { MigrationAurasSettingsFix, "9.0.3" },          -- (changed in 9.0.4)
+  AurasFix = { MigrationAurasSettingsFix },                   -- (changed in 9.0.4 and 9.0.9)
 }
 
 local function MigrateDatabase(current_version)
