@@ -498,6 +498,11 @@ function Addon:UpdateIndicatorNameplateColor(tp_frame)
   end
 end
 
+--function Addon:UpdateIndicatorScaleAndAlpha(tp_frame, event)
+--  UpdateIndicator_CustomScale(tp_frame, tp_frame.unit)
+--  UpdateIndicator_CustomAlpha(tp_frame, tp_frame.unit)
+--end
+
 do
 	-- UpdateIndicator_HealthBar: Updates the value on the health bar
 	function UpdateIndicator_HealthBar()
@@ -1292,13 +1297,6 @@ TidyPlatesInternal.GetTheme = GetTheme
 --------------------------------------------------------------------------------------------------------------
 -- Misc. Utility
 --------------------------------------------------------------------------------------------------------------
-
---function Addon:UpdateNameplate(tp_frame, event)
---	if event == "Mouseover" then
---		UpdateIndicator_CustomScale(tp_frame, tp_frame.unit)
---		UpdateIndicator_CustomAlpha(tp_frame, tp_frame.unit)
---	end
---end
 
 function Addon:UIScaleChanged()
   local db = TidyPlatesThreat.db.profile.Scale

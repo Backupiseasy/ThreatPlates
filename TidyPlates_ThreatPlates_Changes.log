@@ -1,4 +1,10 @@
 ﻿------------------------------------------------------
+9.0.9-Beta3
+------------------------------------------------------
+* Fixed a bug which mouseover scaling and transparency when the mouseover texture was disabled where scale/transparency were not reset correctly after the mouseover ended [Issue #223].
+* Updated shaman totems - removed Windfury Totem.
+
+------------------------------------------------------
 9.0.9-Beta2
 ------------------------------------------------------
 * Fixed a bug with Totem nameplates that prevented scaling and transparency settings from being applied [Issue #222].

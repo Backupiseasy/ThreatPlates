@@ -218,14 +218,14 @@ local TOTEM_DATA = {
   { SpellID = 51485,  ID = "N2", GroupColor = "4c9900"},		-- Earthgrab Totem
   { SpellID = 207399, ID = "N4", GroupColor = "4c9900"},		-- Ancestral Protection Totem
   { SpellID = 192077, ID = "N5", GroupColor = "4c9900"},		-- Wind Rush Totem
-  { SpellID = 198838, ID = "N7", GroupColor = "4c9900"},		-- Earthen Shield Totem
+  { SpellID = 198838, ID = "N7", GroupColor = "4c9900"},		-- Earthen Wall Totem
 
   -- Totems from PVP talents
   { SpellID = 204331, ID = "P1", GroupColor = "2b76ff"},	  -- Counterstrike Totem
   { SpellID = 204330, ID = "P2", GroupColor = "2b76ff"},	  -- Skyfury Totem
-  { SpellID = 204332, ID = "P3", GroupColor = "2b76ff"},	  -- Windfury Totem
   { SpellID = 204336, ID = "P4", GroupColor = "2b76ff"},	  -- Grounding Totem
 
+  --{ SpellID = 204332, ID = "P3", GroupColor = "2b76ff"},	  -- Windfury Totem (removed in patch 8.0.1)p
   --{ SpellID = 196932, ID = "N6", GroupColor = "4c9900"},		-- Voodoo Totem (removed in patch 8.0.1)
   --{ SpellID = 192058, ID = "N3", GroupColor = "4c9900"},		-- Lightning  Surge Totem (renamed to Capacitator Totem in patch 8.0.1)
 }

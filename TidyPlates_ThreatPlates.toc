@@ -1,6 +1,6 @@
 ﻿## Interface: 80000
 ## Title: Threat Plates
-## Version: 9.0.9-Beta2
+## Version: 9.0.9-Beta3
 ## Notes: Threat-reactive nameplates.
 ## Notes-deDE: Bedrohungsreaktive Namensplaketten.
 ## Author: Suicidal Katt, Blacksalsify
