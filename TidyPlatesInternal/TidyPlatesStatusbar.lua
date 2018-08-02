@@ -92,7 +92,7 @@ local function SetEliteBorder(self, texture)
     edgeSize = backdrop.edgeSize,
     --insets = { left = 0, right = 0, top = 0, bottom = 0 }
   })
-  self.EliteBorder:SetBackdropBorderColor(1, 0.85, 0, 1)
+  --self.EliteBorder:SetBackdropBorderColor(1, 0.85, 0, 1)
 end
 
 function Addon:CreateHealthbar(parent)

@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+9.0.9-Beta4
+------------------------------------------------------
+* Extended the elite icon to also show an indicator icon for rare mobs (colored silver, instead of gold) [Issue #225, Issue #219, Comment #759, Comment #935, Comment #1094, Comment #1095].
+
+------------------------------------------------------
 9.0.9-Beta3
 ------------------------------------------------------
 * Fixed a bug which mouseover scaling and transparency when the mouseover texture was disabled where scale/transparency were not reset correctly after the mouseover ended [Issue #223].
