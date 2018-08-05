@@ -148,6 +148,19 @@ end
 -- Some functions to fix TidyPlates bugs
 ---------------------------------------------------------------------------------------------------
 
+ThreatPlates.Dump = function(value, index)
+	if not IsAddOnLoaded("Blizzard_DebugTools") then
+		LoadAddOn("Blizzard_DebugTools")
+	end
+	local i
+	if index and type(index) == "number" then
+	  i = index
+	else
+	  i = 1
+	end
+	DevTools_Dump(value, i)
+end
+
 -- With TidyPlates:
 --local function FixUpdateUnitCondition(unit)
 --	local unitid = unit.unitid

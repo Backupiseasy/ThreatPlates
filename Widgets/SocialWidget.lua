@@ -266,8 +266,7 @@ end
 function Widget:UpdateFrame(widget_frame, unit)
   -- I will probably expand this to a table with 'friend = true','guild = true', and 'bnet = true' and have 3 textuers show.
   local db = TidyPlatesThreat.db.profile.socialWidget
-  local friend_texture = db.ShowFriendIcon and (ListFriends[unit.fullname] or ListBnetFriends[unit.fullname] or ListGuildMembers[unit.fullname])
-
+  local friend_texture = db.ShowFriendIcon and (ListFriends[unit.name] or ListBnetFriends[unit.fullname] or ListGuildMembers[unit.fullname])
   local faction_texture
   if db.ShowFactionIcon then
     -- faction can be nil, e.g., for Pandarians that not yet have choosen a faction
