@@ -138,6 +138,17 @@ end
 --   * OnDisable
 --   * OnTargetChanged
 --   * UpdateFrame (if UpdateAllFrames is used)
+--   * UpdateSettings (not yet fully implemented)
+--
+-- If using UpdateSettings (like Auras and ComboPoints do it right now):
+--   Whenever another widget function is called, make sure the settings (stored in the widget object
+--   are up-to-date. Otherwise widget frames are created/updated/accessed with deprecated settings
+--   which may - worst case scenario - result in Lua errors.
+--   Current ways to ensure that this does not happen:
+--   <to be described>
+-- When iterating over widget frames (PlatesVisible or PlatesCreated) be sure to always consider the
+-- following:
+--
 ---------------------------------------------------------------------------------------------------
 function Addon:NewWidget(widget_name)
   local widget = {
@@ -166,17 +177,17 @@ function Addon:InitializeWidget(widget_name)
   end
 end
 
+function Addon:InitializeAllWidgets()
+  for widget_name, _ in pairs(Widgets) do
+    Addon:InitializeWidget(widget_name)
+  end
+end
+
 function Addon:UpdateSettingsForWidget(widget_name)
   local widget = Widgets[widget_name]
 
   for plate, _ in pairs(Addon.PlatesVisible) do
     widget:UpdateSettings(plate.TPFrame.widgets[widget_name])
-  end
-end
-
-function Addon:InitializeAllWidgets()
-  for widget_name, _ in pairs(Widgets) do
-    Addon:InitializeWidget(widget_name)
   end
 end
 
@@ -221,12 +232,12 @@ function Addon:DisableWidget(widget_name)
   local widget = EnabledWidgets[widget_name]
 
   if widget then
+    -- Disable all events of the widget
+    widget:UnregisterAllEvents()
+
     if widget.OnDisable then
       widget:OnDisable()
     end
-
-    -- Disable all events of the widget
-    widget:UnregisterAllEvents()
 
     -- for all plates - hide the widget frame (alternatively: remove the widget frame)
     for plate, _ in pairs(Addon.PlatesVisible) do

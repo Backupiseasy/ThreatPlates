@@ -191,6 +191,7 @@ function TidyPlatesThreat:ReloadTheme()
   end
 
   Addon.Widgets.Auras:ParseSpellFilters() -- Parse Spell Filters calls UpdateSettings ... maybe not the best order to do this
+  Addon.Widgets.ComboPoints:UpdateSettings()
 
   Addon:InitializeCustomNameplates()
   Addon:InitializeAllWidgets()

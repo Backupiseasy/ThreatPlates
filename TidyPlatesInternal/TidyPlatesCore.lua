@@ -165,7 +165,8 @@ end
 do
 
 	function OnNewNameplate(plate)
-    local extended = CreateFrame("Frame",  "ThreatPlatesFrame" .. plate:GetName(), UIParent)
+    -- Parent could be: WorldFrame, UIParent, paren
+    local extended = CreateFrame("Frame",  "ThreatPlatesFrame" .. plate:GetName(), WorldFrame)
     extended:Hide()
 
     extended:SetFrameStrata("BACKGROUND")
@@ -302,7 +303,7 @@ do
 	-- Create / Hide / Show Event Handlers
 	---------------------------------------------------------------------------------------------------------------------
 
-  function Addon:UpdateFriendleNameplateStyle(plate, unitid)
+  function Addon:UpdateFriendlyNameplateStyle(plate, unitid)
     if TidyPlatesThreat.db.profile.ShowFriendlyBlizzardNameplates and UnitReaction(unitid, "player") > 4 then
       plate.UnitFrame:Show()
       plate.TPFrame:Hide()
@@ -336,7 +337,7 @@ do
   
 		Addon:UpdateExtensions(extended, unit.unitid, stylename)
 
-    Addon:UpdateFriendleNameplateStyle(nameplate, unitid)
+    Addon:UpdateFriendlyNameplateStyle(nameplate, unitid)
 
     -- Call this after the plate is shown as OnStartCasting checks if the plate is shown; if not, the castbar is hidden and
     -- nothing is updated
@@ -1002,6 +1003,7 @@ do
 
   function CoreEvents:UI_SCALE_CHANGED()
     Addon:UIScaleChanged()
+    TidyPlatesInternal:ForceUpdate()
 	end
 
 	function CoreEvents:UNIT_ABSORB_AMOUNT_CHANGED(unitid)
@@ -1312,8 +1314,6 @@ function Addon:UIScaleChanged()
       Addon.UIScale = 768.0 / physicalScreenHeight
     end
   end
-
-  TidyPlatesInternal:ForceUpdate()
 end
 
 local ConfigModePlate
@@ -1373,7 +1373,9 @@ end
 function TidyPlatesInternal:DisableCastBars() ShowCastBars = false end
 function TidyPlatesInternal:EnableCastBars() ShowCastBars = true end
 
-function TidyPlatesInternal:ForceUpdate() ForEachPlate(OnResetNameplate) end
+function TidyPlatesInternal:ForceUpdate()
+  ForEachPlate(OnResetNameplate)
+end
 
 function Addon:ForceUpdateOnNameplate(plate)
   OnResetNameplate(plate)

@@ -1,4 +1,9 @@
 ------------------------------------------------------
+9.1.0-Alpha1
+------------------------------------------------------
+* Re-worked the Combo Points widget [Issue #...].
+
+------------------------------------------------------
 9.0.4
 ------------------------------------------------------
 * In Auras widget, crowd control auras that are not shown with filter Blizzard are now shown as normal debuffs instead of being hidden [Issue #200, Comment #985]
