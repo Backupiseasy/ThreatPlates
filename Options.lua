@@ -5314,12 +5314,12 @@ local function CreateOptionsTable()
               },
             },
             EliteIcon = {
-              name = L["Elite Icon"],
+              name = L["Rares & Elites"],
               type = "group",
               order = 100,
               set = SetThemeValue,
               args = {
-                Enable = GetEnableEntryTheme(L["Show Elite Icon"], L["This option allows you to control whether the elite icon for elite units is hidden or shown on nameplates."], "eliteicon"),
+                Enable = GetEnableEntryTheme(L["Show Icon for Rares & Elites"], L["This option allows you to control whether the icon for rare & elite units is hidden or shown on nameplates."], "eliteicon"),
                 Texture = {
                   name = L["Symbol"],
                   type = "group",
@@ -5327,23 +5327,30 @@ local function CreateOptionsTable()
                   order = 20,
                   --                  disabled = function() if db.settings.eliteicon.show then return false else return true end end,
                   args = {
-                    Preview = {
-                      name = L["Preview"],
-                      type = "execute",
-                      order = 1,
-                      image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\EliteArtWidget\\" .. db.settings.eliteicon.theme,
-                    },
                     Style = {
                       type = "select",
-                      order = 2,
-                      name = L["Elite Icon Style"],
+                      order = 10,
+                      name = L["Icon Style"],
                       values = { default = "Default", skullandcross = "Skull and Crossbones" },
                       set = function(info, val)
                         SetThemeValue(info, val)
-                        options.args.NameplateSettings.args.EliteIcon.args.Texture.args.Preview.image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\EliteArtWidget\\" .. val
+                        options.args.NameplateSettings.args.EliteIcon.args.Texture.args.PreviewRare.image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\EliteArtWidget\\" .. val
+                        options.args.NameplateSettings.args.EliteIcon.args.Texture.args.PreviewElite.image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\EliteArtWidget\\" .. "elite-" .. val
                         t.Update()
                       end,
                       arg = { "settings", "eliteicon", "theme" },
+                    },
+                    PreviewRare = {
+                      name = L["Preview Rare"],
+                      type = "execute",
+                      order = 20,
+                      image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\EliteArtWidget\\" .. db.settings.eliteicon.theme,
+                    },
+                    PreviewElite = {
+                      name = L["Preview Elite"],
+                      type = "execute",
+                      order = 30,
+                      image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\EliteArtWidget\\" .. "elite-" .. db.settings.eliteicon.theme,
                     },
                   },
                 },
@@ -5356,7 +5363,7 @@ local function CreateOptionsTable()
               order = 110,
               set = SetThemeValue,
               args = {
-                Enable = GetEnableEntryTheme(L["Show Skull Icon"], L["This option allows you to control whether the skull icon for rare units is hidden or shown on nameplates."], "skullicon"),
+                Enable = GetEnableEntryTheme(L["Show Skull Icon"], L["This option allows you to control whether the skull icon for boss units is hidden or shown on nameplates."], "skullicon"),
                 Layout = GetLayoutEntryTheme(20, "skullicon"),
               },
             },
@@ -6797,8 +6804,10 @@ function TidyPlatesThreat:ProfChange()
   -- Update preview icons: EliteArtWidget, TargetHighlightWidget, ClassIconWidget, QuestWidget, Threat Textures, Totem Icons, Custom Nameplate Icons
   local path = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\"
 
+  -- Update options stuff after profile change
   if options then
-    options.args.NameplateSettings.args.EliteIcon.args.Texture.args.Preview.image = path .. "EliteArtWidget\\" .. db.settings.eliteicon.theme
+    options.args.NameplateSettings.args.EliteIcon.args.Texture.args.PreviewRare.image = path .. "EliteArtWidget\\" .. db.settings.eliteicon.theme
+    options.args.NameplateSettings.args.EliteIcon.args.Texture.args.PreviewElite.image = path .. "EliteArtWidget\\" .. "elite-" .. db.settings.eliteicon.theme
 
     local base = options.args.Widgets.args
     base.TargetArtWidget.args.Texture.args.Preview.image = path .. "TargetArtWidget\\" .. db.targetWidget.theme;
@@ -6834,8 +6843,13 @@ function TidyPlatesThreat:ProfChange()
     end
   end
 
+  -- Update existing nameplates as certain settings may have changed that are not covered by ForceUpdate()
   Addon:UIScaleChanged()
   Addon:CallbackWhenOoC(function() Addon:SetBaseNamePlateSize() end, L["Unable to change a setting while in combat."])
+
+  for plate, unitid in pairs(Addon.PlatesVisible) do
+    Addon:UpdateFriendleNameplateStyle(plate, unitid)
+  end
 
   TidyPlatesThreat:ReloadTheme()
   TidyPlatesInternal:ForceUpdate()

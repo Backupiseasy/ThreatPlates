@@ -29,13 +29,17 @@ local function OnUpdateHighlight(tp_frame)
     Addon.PlatesByUnit[tp_frame.unit.unitid].UpdateMe = true
     -- More general solution, better would be to implement a callback and just update everything
     -- on the old mouseover nameplate that depends on mouseover
-    --Addon:UpdateNameplate(tp_frame, "Mouseover")
+    --Addon:UpdateIndicatorScaleAndAlpha(tp_frame)
   end
 end
 
 function Addon:Element_Mouseover_Update(tp_frame)
   -- Don't show highlight for target units or if it's disabled
   if tp_frame.unit.isTarget or not tp_frame.style.highlight.show then
+    -- frame.Highlight and frame.Highlight are alwways hidden by default, don't show them on targeted units
+    -- but show the frame so that the OnUpdateHighlight function is called when the mouse curser leaves the
+    -- unit
+    tp_frame.visual.Highlight:Show()
     return
   end
 

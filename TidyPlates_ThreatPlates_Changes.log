@@ -1,4 +1,16 @@
 ﻿------------------------------------------------------
+9.0.9
+------------------------------------------------------
+* Extended the elite icon to also show an indicator icon for rare mobs (colored silver, instead of gold) [Issue #225, Issue #219, Comment #759, Comment #935, Comment #1094, Comment #1095].
+* Fixed a bug which mouseover scaling and transparency when the mouseover texture was disabled where scale/transparency were not reset correctly after the mouseover ended [Issue #223].
+* Fixed a bug with Totem nameplates that prevented scaling and transparency settings from being applied [Issue #222].
+* Fixed a bug with "Show Blizzard Nameplates for Friendly Units" where friendly nameplates were not shown with the correct style after switching profiles.
+* Fixed a bug with Auras widget where filter mode Whitelist did not work for buffs unless keywords "All" or "My" were used [Issue #221].
+* Fixed a Lua error that occured when switching profiles from a profile with Auras widget disabled to a profile with Auras widget enabled.
+* Fixed a bug in Social widget where the friends indicator was not shown.
+* Updated shaman totems - added Tremor Totem, removed Windfury Totem.
+
+------------------------------------------------------
 9.0.8
 ------------------------------------------------------
 * Fixed a bug with the Elite indicator being hidden in combat [Issue #213].

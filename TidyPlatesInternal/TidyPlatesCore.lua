@@ -498,6 +498,11 @@ function Addon:UpdateIndicatorNameplateColor(tp_frame)
   end
 end
 
+--function Addon:UpdateIndicatorScaleAndAlpha(tp_frame, event)
+--  UpdateIndicator_CustomScale(tp_frame, tp_frame.unit)
+--  UpdateIndicator_CustomAlpha(tp_frame, tp_frame.unit)
+--end
+
 do
 	-- UpdateIndicator_HealthBar: Updates the value on the health bar
 	function UpdateIndicator_HealthBar()
@@ -553,8 +558,15 @@ do
 
 	-- UpdateIndicator_EliteIcon: Updates the border overlay art and threat glow to Elite or Non-Elite art
 	function UpdateIndicator_EliteIcon()
-    if unit.isElite then
+    if unit.isRare then
+      visual.eliteicon:SetVertexColor(0.8, 0.8, 0.8)
       visual.eliteicon:SetShown(style.eliteicon.show)
+      visual.eliteborder:SetBackdropBorderColor(0.8, 0.8, 0.8)
+      visual.eliteborder:SetShown(style.eliteborder.show)
+    elseif unit.isElite then
+      visual.eliteicon:SetVertexColor(1, 0.85, 0)
+      visual.eliteicon:SetShown(style.eliteicon.show)
+      visual.eliteborder:SetBackdropBorderColor(1, 0.85, 0, 1)
       visual.eliteborder:SetShown(style.eliteborder.show)
     else
       visual.eliteicon:Hide()
@@ -569,7 +581,7 @@ do
 			if unitcache.level ~= unit.level then UpdateIndicator_Level() end
 			UpdateIndicator_RaidIcon()
 
-			if unitcache.isElite ~= unit.isElite then
+			if (unitcache.isElite ~= unit.isElite) or (unitcache.isRare ~= unit.isRare) then
         UpdateIndicator_EliteIcon()
       end
 		end
@@ -1148,15 +1160,15 @@ do
 
 	local anchorgroup = {
 		"name",  "spelltext", "customtext", "level",
-		"spellicon", "raidicon", "skullicon", "eliteicon", "target"
-    -- "threatborder", "castborder", "castnostop",
+		"spellicon", "raidicon", "skullicon", "target"
+    -- "threatborder", "castborder", "castnostop", "eliteicon",
   }
 
 	--local bargroup = { } --"castbar" }
 
 	local texturegroup = {
-    "eliteicon", "skullicon", "target", "spellicon",
-    -- "highlight", threatborder, "castborder", "castnostop",
+    "skullicon", "target", "spellicon",
+    -- "highlight", threatborder, "castborder", "castnostop", "eliteicon",
   }
 
   --local showgroup = { "healthborder" }
@@ -1188,16 +1200,6 @@ do
         visual[objectname]:Hide()
       end
 		end
-
-    -- Bars
---		for index = 1, #bargroup do
---			local objectname = bargroup[index]
---			local object, objectstyle = visual[objectname], style[objectname]
---
---			if objectstyle then
---        SetBarGroupObject(object, objectstyle, extended)
---      end
---    end
 
 		-- Healthbar
 		SetAnchorGroupObject(visual.healthbar, style.healthbar, extended)
@@ -1262,6 +1264,10 @@ do
     end
 
     -- Hide Stuff
+    if style.eliteicon and style.eliteicon.show then
+      SetAnchorGroupObject(visual.eliteicon, style.eliteicon, extended)
+    end
+    SetTextureGroupObject(visual.eliteicon, style.eliteicon)
     UpdateIndicator_EliteIcon()
 
 		if not unit.isBoss then visual.skullicon:Hide() end
@@ -1292,13 +1298,6 @@ TidyPlatesInternal.GetTheme = GetTheme
 --------------------------------------------------------------------------------------------------------------
 -- Misc. Utility
 --------------------------------------------------------------------------------------------------------------
-
---function Addon:UpdateNameplate(tp_frame, event)
---	if event == "Mouseover" then
---		UpdateIndicator_CustomScale(tp_frame, tp_frame.unit)
---		UpdateIndicator_CustomAlpha(tp_frame, tp_frame.unit)
---	end
---end
 
 function Addon:UIScaleChanged()
   local db = TidyPlatesThreat.db.profile.Scale
