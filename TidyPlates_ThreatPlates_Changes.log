@@ -7,6 +7,7 @@
 * Fixed a bug with "Show Blizzard Nameplates for Friendly Units" where friendly nameplates were not shown with the correct style after switching profiles.
 * Fixed a bug with Auras widget where filter mode Whitelist did not work for buffs unless keywords "All" or "My" were used [Issue #221].
 * Fixed a Lua error that occured when switching profiles from a profile with Auras widget disabled to a profile with Auras widget enabled.
+* Fixed a bug in Social widget where the friends indicator was not shown.
 * Updated shaman totems - added Tremor Totem, removed Windfury Totem.
 
 ------------------------------------------------------
