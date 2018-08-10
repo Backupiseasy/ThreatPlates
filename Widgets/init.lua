@@ -13,8 +13,18 @@ local pairs, next = pairs, next
 -- WoW APIs
 
 -- ThreatPlates APIs
+
+-- TODO:
+--   convert Widgets to self.Widgets
+--   Make OnEnable/OnDisable mandatory
+--   Create Addons.Widgets = local WidgetHandler
+--  EventHandler -> with self = Widget as first parameter, so that Widget:EventHandler is possible
+
 local Widgets = {}
+
 local EnabledWidgets = {}
+local EnabledTargetWidgets = {}
+
 local RegisteredEventsByWidget = {}
 
 Addon.Widgets = Widgets
@@ -128,15 +138,35 @@ end
 
 ---------------------------------------------------------------------------------------------------
 -- Widget creation and handling
--- Required functions are:
---   * Create
---   * IsEnabled
---   * EnabledForStyle
---   * OnUnitAdded
+--   * InitializeWidget and InitializeAllWidgets
+--       - To initialize a widget, first Widget:IsEnabled() is called. You should at least check if the
+--         widget is enabled in general (db.ON, db.ShowInHeadlineView).
+--         You may check additional conditions (like Combo Points widget checks for the current
+--         spec actually having combo points). But if these conditions may change without Reload UI
+--         make sure to keep a even active (e.g., ACTIVE_TALENT_GROUP_CHANGED) to be able to react
+--         to that.
+--           - If you are using Widget:UpdateSettings() to cache settings from the configuration, make sure that
+--             it is called before Widget:Create() as it probably will depend on some of these settings.
+--       - After that, eithr WidgetHandler:EnableWidget() or WidgetHandler:DisableWidget() are called.
+--         For EnableWidget(): Here, for all nameplates created
+--           - the widget frame is created (if not already done) with Widget:Create(),
+--           - afterwards,
+--             - it is checked if the widget is enabled for the plate's current style
+--               with Widget:EnabledForStyle()
+--             - if true, the widget frame is set to Active and initialized with the nameplate's
+--               unit with Widget:OnUnitAdded()
+--           - At last, Widget:OnEnable() is called (if implemented) or . Here, you can register events
+--         For DisableWidget():
+--           - Widget:OnDisable() is called if immplemented. Here, you can disable all events if the are
+--             required when the widget is disabled (for Combo Points widget, e.g, ACTIVE_TALENT_GROUP_CHANGED
+--             will be active even afterwards as the player may switch to a spec with combo points).
+--           - Afterwards, all widget frames for all nameplates created will be hidden (if it's not a
+--             target only widget)
+--             For target-only widgets, you have to hide the widget frame in Widget:OnDisable()
+--
 -- Optional funcations are:
 --   * OnEnable
 --   * OnDisable
---   * OnTargetChanged
 --   * UpdateFrame (if UpdateAllFrames is used)
 --   * UpdateSettings (not yet fully implemented)
 --
@@ -153,11 +183,14 @@ end
 function Addon:NewWidget(widget_name)
   local widget = {
     Name = widget_name,
+    --
     RegistedUnitEvents = {},
+    --
     RegisterEvent = RegisterEvent,
     RegisterUnitEvent = RegisterUnitEvent,
     UnregisterEvent = UnregisterEvent,
     UnregisterAllEvents = UnregisterAllEvents,
+    --
     UpdateAllFrames = UpdateAllFrames,
     UpdateAllFramesAndNameplateColor = UpdateAllFramesAndNameplateColor,
   }
@@ -167,8 +200,20 @@ function Addon:NewWidget(widget_name)
   return widget
 end
 
+function Addon:NewTargetWidget(widget_name)
+  local widget = self:NewWidget(widget_name)
+
+  widget.TargetOnly = true
+
+  return widget
+end
+
 function Addon:InitializeWidget(widget_name)
   local widget = Widgets[widget_name]
+
+  if widget.UpdateSettings then
+    widget:UpdateSettings()
+  end
 
   if widget:IsEnabled() then
     Addon:EnableWidget(widget_name)
@@ -192,31 +237,40 @@ function Addon:UpdateSettingsForWidget(widget_name)
 end
 
 function Addon:EnableWidget(widget_name)
-   local widget = Widgets[widget_name]
+  -- Enable widgets only once
+  if EnabledTargetWidgets[widget_name] or EnabledWidgets[widget_name] then
+    return
+  end
 
-  EnabledWidgets[widget_name] = widget
+  local widget = Widgets[widget_name]
+  if widget.TargetOnly then
+    EnabledTargetWidgets[widget_name] = widget
+    widget:Create()
+  else
+    EnabledWidgets[widget_name] = widget
 
-  -- Nameplates are re-used by WoW, so we cannot iterate just over all visible plates, but must
-  -- add the new widget to all existing plates, even if they are currently not visible
-  for _, tp_frame in pairs(Addon.PlatesCreated) do
-    local plate_widgets = tp_frame.widgets
+    -- Nameplates are re-used by WoW, so we cannot iterate just over all visible plates, but must
+    -- add the new widget to all existing plates, even if they are currently not visible
+    for _, tp_frame in pairs(Addon.PlatesCreated) do
+      local plate_widgets = tp_frame.widgets
 
-    if not plate_widgets[widget_name] then
-      plate_widgets[widget_name] = widget:Create(tp_frame)
-    end
+      if not plate_widgets[widget_name] then
+        plate_widgets[widget_name] = widget:Create(tp_frame)
+      end
 
-    -- As we are iterating over all plates created, even if no unit is assigned to it currently, we have
-    -- to skip plates without units. OnUnitAdded will be called on them anyway
-    if tp_frame.Active then
-      local widget_frame = plate_widgets[widget_name]
+      -- As we are iterating over all plates created, even if no unit is assigned to it currently, we have
+      -- to skip plates without units. OnUnitAdded will be called on them anyway
+      if tp_frame.Active then
+        local widget_frame = plate_widgets[widget_name]
 
-      widget_frame.Active = tp_frame.stylename ~= "empty" and widget:EnabledForStyle(tp_frame.stylename, tp_frame.unit)
-      widget_frame.unit = tp_frame.unit
+        widget_frame.Active = tp_frame.stylename ~= "empty" and widget:EnabledForStyle(tp_frame.stylename, tp_frame.unit)
+        widget_frame.unit = tp_frame.unit
 
-      if widget_frame.Active then
-        widget:OnUnitAdded(widget_frame, tp_frame.unit)
-      else
-        widget_frame:Hide()
+        if widget_frame.Active then
+          widget:OnUnitAdded(widget_frame, tp_frame.unit)
+        else
+          widget_frame:Hide()
+        end
       end
     end
   end
@@ -229,19 +283,39 @@ function Addon:EnableWidget(widget_name)
 end
 
 function Addon:DisableWidget(widget_name)
-  local widget = EnabledWidgets[widget_name]
+  -- Disable widgets only once
+  if not (EnabledTargetWidgets[widget_name] or EnabledWidgets[widget_name]) then
+    return
+  end
 
-  if widget then
+  local widget = Widgets[widget_name]
+  if widget.TargetOnly then
+    EnabledTargetWidgets[widget_name] = nil
+
     -- Disable all events of the widget
     widget:UnregisterAllEvents()
 
     if widget.OnDisable then
       widget:OnDisable()
     end
+  else
+    local widget = EnabledWidgets[widget_name]
 
-    -- for all plates - hide the widget frame (alternatively: remove the widget frame)
-    for plate, _ in pairs(Addon.PlatesVisible) do
-      plate.TPFrame.widgets[widget_name]:Hide()
+    if widget then
+      EnabledWidgets[widget_name] = nil
+
+      -- Disable all events of the widget
+      widget:UnregisterAllEvents()
+
+      if widget.OnDisable then
+        widget:OnDisable()
+      end
+
+      if not widget.TargetOnly then
+        for plate, _ in pairs(Addon.PlatesVisible) do
+          plate.TPFrame.widgets[widget_name]:Hide()
+        end
+      end
     end
   end
 end
@@ -255,9 +329,15 @@ function Addon:WidgetsOnPlateCreated(tp_frame)
 end
 
 -- TODO: Seperate UnitAdded from UpdateSettings/UpdateConfiguration (unit independent stuff)
---       Maybe event seperate style dependedt stuff (PlateStyleChanged)
+--       Maybe event seperate style dependedt stuff (PVlateStyleChanged)
 function Addon:WidgetsOnUnitAdded(tp_frame, unit)
   local plate_widgets = tp_frame.widgets
+
+  if unit.isTarget then
+    for _, widget in pairs(EnabledTargetWidgets) do
+      widget:OnTargetUnitAdded(tp_frame, unit)
+    end
+  end
 
   for widget_name, widget in pairs(EnabledWidgets) do
     local widget_frame = plate_widgets[widget_name]
@@ -280,7 +360,7 @@ function Addon:WidgetsOnUnitAdded(tp_frame, unit)
   end
 end
 
-function Addon:WidgetsOnUnitRemoved(tp_frame)
+function Addon:WidgetsOnUnitRemoved(tp_frame, unit)
   --  for widget_name, widget_frame in pairs(tp_frame.widgets) do
   --    widget_frame.Active = false
   --    widget_frame:Hide()
@@ -290,6 +370,12 @@ function Addon:WidgetsOnUnitRemoved(tp_frame)
   --      widget:OnUnitRemoved(widget_frame)
   --    end
   --  end
+
+  if unit.isTarget then
+    for _, widget in pairs(EnabledTargetWidgets) do
+      widget:OnTargetUnitRemoved()
+    end
+  end
 
   local plate_widgets = tp_frame.widgets
   for widget_name, widget in pairs(EnabledWidgets) do
@@ -319,24 +405,33 @@ end
 --  end
 --end
 
-function Addon:WidgetsPlateModeChanged(tp_frame, unit)
-  local plate_widgets = tp_frame.widgets
+-- Currently only working for target-only widgets
+--function Addon:WidgetsModeChanged(tp_frame, unit)
+--  if unit.isTarget then
+--    for _, widget in pairs(EnabledTargetWidgets) do
+--      widget:OnModeChange(tp_frame, unit)
+--    end
+--  end
+--end
 
-  for widget_name, widget in pairs(EnabledWidgets) do
-    local widget_frame = plate_widgets[widget_name]
-
-    widget_frame.Active = tp_frame.stylename ~= "empty" and widget:EnabledForStyle(tp_frame.stylename, unit)
-
-    if widget_frame.Active then
-      --if widget.OnUpdatePlateMode then
-      --  widget:OnUpdatePlateMode(plate_widgets[widget_name], unit)
-      --end
-      widget:OnUnitAdded(widget_frame, unit)
-    else
-      widget_frame:Hide()
-    end
-  end
-end
+  --function Addon:WidgetsPlateModeChanged(tp_frame, unit)
+--  local plate_widgets = tp_frame.widgets
+--
+--  for widget_name, widget in pairs(EnabledWidgets) do
+--    local widget_frame = plate_widgets[widget_name]
+--
+--    widget_frame.Active = tp_frame.stylename ~= "empty" and widget:EnabledForStyle(tp_frame.stylename, unit)
+--
+--    if widget_frame.Active then
+--      --if widget.OnUpdatePlateMode then
+--      --  widget:OnUpdatePlateMode(plate_widgets[widget_name], unit)
+--      --end
+--      widget:OnUnitAdded(widget_frame, unit)
+--    else
+--      widget_frame:Hide()
+--    end
+--  end
+--end
 
 --function Addon:WidgetsOnTargetChanged(tp_frame)
 --  local plate_widgets = tp_frame.widgets

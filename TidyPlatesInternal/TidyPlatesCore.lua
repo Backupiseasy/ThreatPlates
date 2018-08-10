@@ -266,7 +266,7 @@ do
       Addon:CreateExtensions(extended, unit.unitid, stylename)
       -- TOOD: optimimze that - call OnUnitAdded only when the plate is initialized the first time for a unit, not if only the style changes
       Addon:WidgetsOnUnitAdded(extended, unit)
-      --Addon:widgetsPlateModeChanged(extended, unit)
+      --Addon:WidgetsModeChanged(extended, unit)
     end
 	end
 
@@ -810,10 +810,10 @@ do
       PlatesByGUID[frame.unit.guid] = nil
     end
 
+    Addon:WidgetsOnUnitRemoved(frame, frame.unit)
+
     wipe(frame.unit)
     wipe(frame.unitcache)
-
-    Addon:WidgetsOnUnitRemoved(frame)
 
     -- Remove anything from the function queue
     frame.UpdateMe = false

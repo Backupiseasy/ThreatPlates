@@ -1,9 +1,9 @@
-  ---------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------
 -- Combo Points Widget
 ---------------------------------------------------------------------------------------------------
 local ADDON_NAME, Addon = ...
 
-local Widget = Addon:NewWidget("ComboPoints")
+local Widget = Addon:NewTargetWidget("ComboPoints")
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -14,7 +14,7 @@ local pairs, unpack, type = pairs, unpack, type
 
 -- WoW APIs
 local CreateFrame = CreateFrame
-local UnitClass, UnitCanAttack, UnitIsUnit = UnitClass, UnitCanAttack, UnitIsUnit
+local UnitClass, UnitCanAttack = UnitClass, UnitCanAttack
 local UnitPower, UnitPowerMax = UnitPower, UnitPowerMax
 local GetSpecialization = GetSpecialization
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
@@ -193,16 +193,16 @@ local function EventHandler(event, unitid, power_type)
 
   local plate = GetNamePlateForUnit("target")
   if plate then -- not necessary, prerequisite for IsShown(): plate.TPFrame.Active and
-    local widget_frame = plate.TPFrame.widgets.ComboPoints
+    local widget = Widget
+    local widget_frame = widget.WidgetFrame
     if widget_frame:IsShown() then
-      Widget:UpdateComboPoints(widget_frame)
+      widget:UpdateComboPoints(widget_frame)
     end
   end
 end
 
 function Widget:ACTIVE_TALENT_GROUP_CHANGED(...)
   -- Player switched to a spec that has combo points
-  self:UpdateSettings()
   Addon:InitializeWidget("ComboPoints")
 end
 
@@ -212,61 +212,34 @@ function Widget:UNIT_MAXPOWER(unitid, power_type)
     self:DetermineUnitPower()
     self:UpdateComboPointsLayout()
 
-    -- Update all widgets created until now
-    for plate, tp_frame in pairs(Addon.PlatesCreated) do
-      local widget_frame = tp_frame.widgets.ComboPoints
-      if tp_frame.Active then
-        self:OnUnitAdded(widget_frame, widget_frame.unit)
-
-        -- remove excessive CP frames (when called after talent change)
-        for i = self.UnitPowerMax + 1, #widget_frame.ComboPoints do
-          widget_frame.ComboPoints[i]:Hide()
-          widget_frame.ComboPoints[i] = nil
-          widget_frame.ComboPointsOff[i]:Hide()
-          widget_frame.ComboPointsOff[i] = nil
-        end
-      end
+    -- remove excessive CP frames (when called after talent change)
+    local widget_frame = self.WidgetFrame
+    for i = self.UnitPowerMax + 1, #widget_frame.ComboPoints do
+      widget_frame.ComboPoints[i]:Hide()
+      widget_frame.ComboPoints[i] = nil
+      widget_frame.ComboPointsOff[i]:Hide()
+      widget_frame.ComboPointsOff[i] = nil
     end
 
-    --self:PLAYER_TARGET_CHANGED()
+    self:PLAYER_TARGET_CHANGED()
   end
 end
 
 function Widget:PLAYER_TARGET_CHANGED()
-  if self.CurrentTarget then
-    self.CurrentTarget:Hide()
-    self.CurrentTarget = nil
-  end
-
   local plate = GetNamePlateForUnit("target")
-  if plate and plate.TPFrame.Active and UnitCanAttack("player", "target") and self.PowerType then
-    self.CurrentTarget = plate.TPFrame.widgets.ComboPoints
-    if self.CurrentTarget.Active then
-      self:UpdateComboPoints(self.CurrentTarget)
-      self.CurrentTarget:Show()
-    end
+
+  local tp_frame = plate and plate.TPFrame
+  if tp_frame and tp_frame.Active then
+    self:OnTargetUnitAdded(tp_frame, tp_frame.unit)
+  else
+    self.WidgetFrame:Hide()
+    self.WidgetFrame:SetParent(nil)
   end
 end
 
 ---------------------------------------------------------------------------------------------------
 -- Widget functions for creation and update
 ---------------------------------------------------------------------------------------------------
-
-function Widget:Create(tp_frame)
-  -- Required Widget Code
-  local widget_frame = CreateFrame("Frame", nil, tp_frame)
-  widget_frame:Hide()
-
-  -- Custom Code
-  widget_frame:SetFrameLevel(tp_frame:GetFrameLevel() + 7)
-  widget_frame:SetSize(64, 64)
-  widget_frame.ComboPoints = {}
-  widget_frame.ComboPointsOff = {}
-  -- End Custom Code
-
-  -- Required Widget Code
-  return widget_frame
-end
 
 function Widget:IsEnabled()
   self:DetermineUnitPower()
@@ -283,18 +256,19 @@ end
 -- UNIT_AURA: unitID
 -- UNIT_FLAGS: unitID
 -- UNIT_POWER_FREQUENT: unitToken, powerToken
-
 function Widget:OnEnable()
+  self:RegisterEvent("PLAYER_TARGET_CHANGED")
   self:RegisterUnitEvent("UNIT_POWER_UPDATE", "player", EventHandler)
   self:RegisterUnitEvent("UNIT_DISPLAYPOWER", "player", EventHandler)
-  self:RegisterEvent("PLAYER_TARGET_CHANGED")
+  self:RegisterUnitEvent("UNIT_MAXPOWER", "player")
   -- self:RegisterUnitEvent("UNIT_POWER_FREQUENT", "player", EventHandler)
   --self:RegisterUnitEvent("UNIT_FLAGS", "player", EventHandler)
-
-  self:RegisterUnitEvent("UNIT_MAXPOWER", "player")
 end
 
 function Widget:OnDisable()
+  self.WidgetFrame:Hide()
+  self.WidgetFrame:SetParent(nil)
+
   -- Re-register this event, so that we get notified if the player changes to a spec that has a supported
   -- power type
   self:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
@@ -311,7 +285,75 @@ function Widget:EnabledForStyle(style, unit)
   end
 end
 
-function Widget:UpdateTexture(widget_frame, texture, texture_path, cp_no)
+function Widget:Create()
+  if not self.WidgetFrame then
+    local widget_frame = CreateFrame("Frame", nil)
+    widget_frame:Hide()
+
+    self.WidgetFrame = widget_frame
+
+    widget_frame:SetSize(64, 64)
+    widget_frame.ComboPoints = {}
+    widget_frame.ComboPointsOff = {}
+
+    self:UpdateLayout()
+  end
+
+  self:PLAYER_TARGET_CHANGED()
+end
+
+function Widget:OnTargetUnitAdded(tp_frame, unit)
+  local widget_frame = self.WidgetFrame
+
+  if UnitCanAttack("player", "target") and self:EnabledForStyle(unit.style, unit) then
+    widget_frame:SetParent(tp_frame)
+    widget_frame:SetFrameLevel(tp_frame:GetFrameLevel() + 7)
+
+    -- Updates based on settings / unit style
+    local db = self.db
+    if unit.style == "NameOnly" or unit.style == "NameOnly-Unique" then
+      widget_frame:SetPoint("CENTER", tp_frame, "CENTER", db.x_hv, db.y_hv)
+    else
+      widget_frame:SetPoint("CENTER", tp_frame, "CENTER", db.x, db.y)
+    end
+
+    self:UpdateComboPoints(widget_frame)
+
+    widget_frame:Show()
+  else
+    widget_frame:Hide()
+    widget_frame:SetParent(nil)
+  end
+end
+
+function Widget:OnTargetUnitRemoved()
+  self.WidgetFrame:Hide()
+end
+
+--function Widget:OnModeChange(tp_frame, unit)
+--  local widget_frame = self.WidgetFrame
+--  if UnitCanAttack("player", "target") and self:EnabledForStyle(unit.style, unit) then
+--
+--    widget_frame:SetFrameLevel(tp_frame:GetFrameLevel() + 7)
+--
+--    -- Updates based on settings / unit style
+--    local db = self.db
+--    if unit.style == "NameOnly" or unit.style == "NameOnly-Unique" then
+--      widget_frame:SetPoint("CENTER", tp_frame, "CENTER", db.x_hv, db.y_hv)
+--    else
+--      widget_frame:SetPoint("CENTER", tp_frame, "CENTER", db.x, db.y)
+--    end
+--
+--    if not widget_frame:IsShown() then
+--      self:UpdateComboPoints(widget_frame)
+--      widget_frame:Show()
+--    end
+--  else
+--    widget_frame:Hide()
+--  end
+--end
+
+function Widget:UpdateTexture(texture, texture_path, cp_no)
   if self.db.Style == "Blizzard" then
     if type(texture_path) == "table" then
       texture:SetAtlas(texture_path[1])
@@ -326,40 +368,22 @@ function Widget:UpdateTexture(widget_frame, texture, texture_path, cp_no)
   texture:SetTexCoord(unpack(self.TexCoord)) -- obj:SetTexCoord(left,right,top,bottom)
   texture:SetSize(self.IconWidth, self.IconHeight)
   texture:SetScale(self.db.Scale)
-  texture:SetPoint("CENTER", widget_frame, "CENTER", self.TextureCoordinates[cp_no], 0)
+  texture:SetPoint("CENTER", self.WidgetFrame, "CENTER", self.TextureCoordinates[cp_no], 0)
 end
 
-function Widget:OnUnitAdded(widget_frame, unit)
-  if not self.PowerType then return end
-
-  --self.db = TidyPlatesThreat.db.profile.ComboPoints
-  local db = self.db
-
-  -- Updates based on settings / unit style
-  if unit.style == "NameOnly" or unit.style == "NameOnly-Unique" then
-    widget_frame:SetPoint("CENTER", widget_frame:GetParent(), "CENTER", db.x_hv, db.y_hv)
-  else
-    widget_frame:SetPoint("CENTER", widget_frame:GetParent(), "CENTER", db.x, db.y)
-  end
+function Widget:UpdateLayout()
+  local widget_frame = self.WidgetFrame
 
   -- Updates based on settings
+  local db = self.db
   widget_frame:SetAlpha(db.Transparency)
 
   for i = 1, self.UnitPowerMax do
     widget_frame.ComboPoints[i] = widget_frame.ComboPoints[i] or widget_frame:CreateTexture(nil, "BACKGROUND")
-    self:UpdateTexture(widget_frame, widget_frame.ComboPoints[i], self.Texture, i)
+    self:UpdateTexture(widget_frame.ComboPoints[i], self.Texture, i)
 
     widget_frame.ComboPointsOff[i] = widget_frame.ComboPointsOff[i] or widget_frame:CreateTexture(nil, "ARTWORK")
-    self:UpdateTexture(widget_frame, widget_frame.ComboPointsOff[i], self.TextureOff, i)
-  end
-
-  if UnitIsUnit("target", unit.unitid) and UnitCanAttack("player", "target") then --and self.PowerType then
-    -- Updates based on unit status
-    self.CurrentTarget = widget_frame
-    self:UpdateComboPoints(widget_frame)
-    widget_frame:Show()
-  else
-    widget_frame:Hide()
+    self:UpdateTexture(widget_frame.ComboPointsOff[i], self.TextureOff, i)
   end
 end
 
@@ -375,10 +399,11 @@ function Widget:UpdateSettings()
   self.db = TidyPlatesThreat.db.profile.ComboPoints
 
   self:DetermineUnitPower()
+
+  -- Optimization, not really necessary
   if not self.PowerType then return end
 
   -- Update widget variables, only dependent from settings and static information (like player's class)
-
   -- TODO: check what happens if player does not yet have a spec, e.g. < level 10
   local _, player_class = UnitClass("player")
   local texture_info = TEXTURE_INFO[self.db.Style][player_class] or TEXTURE_INFO[self.db.Style]
@@ -406,20 +431,10 @@ function Widget:UpdateSettings()
 
   self:UpdateComboPointsLayout()
 
---  -- Don't update any widget frame if the widget isn't enabled
---  if not self:IsEnabled() then return end
-
-  -- Update all widgets created until now
-  for _, tp_frame in pairs(Addon.PlatesCreated) do
-    local widget_frame = tp_frame.widgets.ComboPoints
-
-    -- widget_frame could be nil if the widget as disabled and is enabled as part of a profile switch
-    -- For these frames, UpdateAuraWidgetLayout will be called anyway when the widget is initalized
-    -- (which happens after the settings update)
-    if widget_frame then
-      if tp_frame.Active then -- equals: plate is visible, i.e., show currently
-        self:OnUnitAdded(widget_frame, widget_frame.unit)
-      end
-    end
+  -- Update the widget if it was already created (not true for immediately after Reload UI or if it was never enabled
+  -- in this since last Reload UI)
+  if self.WidgetFrame then
+    self:UpdateLayout()
+    self:PLAYER_TARGET_CHANGED()
   end
 end

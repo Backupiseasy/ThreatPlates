@@ -111,12 +111,18 @@ function TidyPlatesThreat:ChatCommand(input)
 		print ("Nameplate UnitFrame Parent:", (plate.UnitFrame:GetParent() == UIParent and "UIParent") or (plate.UnitFrame:GetParent() == WorldFrame and "WorldFrame") or ("---"))
 		print ("------------------------------------------")
 		print ("TPFrame FrameStrata:", plate.TPFrame:GetFrameStrata())
-		print ("TPFrame UnitFrame FrameLevel :", plate.TPFrame:GetFrameLevel())
+		print ("TPFrame FrameLevel :", plate.TPFrame:GetFrameLevel())
 		print ("TPFrame Parent:", (plate.TPFrame:GetParent() == UIParent and "UIParent") or (plate.TPFrame:GetParent() == WorldFrame and "WorldFrame") or ("---"))
 		print ("------------------------------------------")
 		print ("Healthbar FrameStrata:", plate.TPFrame.visual.healthbar:GetFrameStrata())
 		print ("Healthbar FrameLevel :", plate.TPFrame.visual.healthbar:GetFrameLevel())
+  elseif input == "cp" then
+      local plate = C_NamePlate.GetNamePlateForUnit("target")
+      if not plate then return end
 
+      print ("TPFrame FrameLevel :", plate.TPFrame:GetFrameLevel())
+      print ("ComboPointsFrameStrata:", Addon.Widgets.ComboPoints.WidgetFrame:GetFrameLevel())
+      print ("TargetHighlight FrameLevel :", plate.TPFrame.widgets.TargetArt:GetFrameLevel())
 		return
 	end
 

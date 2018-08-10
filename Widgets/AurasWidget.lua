@@ -1219,8 +1219,6 @@ function Widget:ParseSpellFilters()
   else
     self.FilterModeEnemyDebuffs = "all"
   end
-
-  self:UpdateSettings()
 end
 
 function Widget:UpdateSettingsIconMode()
@@ -1304,7 +1302,9 @@ function Widget:UpdateSettings()
 
   self.AlignLayout = GRID_LAYOUT[self.db.AlignmentH][self.db.AlignmentV]
 
---  -- Don't update any widget frame if the widget isn't enabled.
+  self:ParseSpellFilters()
+
+  --  -- Don't update any widget frame if the widget isn't enabled.
 --  if not self:IsEnabled() then return end
 
   for plate, tp_frame in pairs(Addon.PlatesCreated) do

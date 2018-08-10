@@ -2552,7 +2552,7 @@ local function CreateAurasWidgetOptions()
                 values = Addon.AurasFilterMode,
                 set = function(info, val)
                   db.AuraWidget.Debuffs.FilterMode = val
-                  Addon.Widgets.Auras:ParseSpellFilters()
+                  Addon.Widgets.Auras:UpdateSettings()
                 end,
                 arg = { "AuraWidget", "Debuffs", "FilterMode" },
               },
@@ -2566,7 +2566,7 @@ local function CreateAurasWidgetOptions()
                 set = function(info, v)
                   local table = { strsplit("\n", v) };
                   db.AuraWidget.Debuffs.FilterBySpell = table
-                  Addon.Widgets.Auras:ParseSpellFilters()
+                  Addon.Widgets.Auras:UpdateSettings()
                 end,
               },
             },
@@ -2713,7 +2713,7 @@ local function CreateAurasWidgetOptions()
                 values = Addon.AurasFilterMode,
                 set = function(info, val)
                   db.AuraWidget.Buffs.FilterMode = val
-                  Addon.Widgets.Auras:ParseSpellFilters()
+                  Addon.Widgets.Auras:UpdateSettings()
                 end,
                 arg = { "AuraWidget", "Buffs", "FilterMode" },
               },
@@ -2727,7 +2727,7 @@ local function CreateAurasWidgetOptions()
                 set = function(info, v)
                   local table = { strsplit("\n", v) };
                   db.AuraWidget.Buffs.FilterBySpell = table
-                  Addon.Widgets.Auras:ParseSpellFilters()
+                  Addon.Widgets.Auras:UpdateSettings()
                 end,
               },
             },
@@ -2866,7 +2866,7 @@ local function CreateAurasWidgetOptions()
                 values = Addon.AurasFilterMode,
                 set = function(info, val)
                   db.AuraWidget.CrowdControl.FilterMode = val
-                  Addon.Widgets.Auras:ParseSpellFilters()
+                  Addon.Widgets.Auras:UpdateSettings()
                 end,
                 arg = { "AuraWidget", "CrowdControl", "FilterMode" },
               },
@@ -2880,7 +2880,7 @@ local function CreateAurasWidgetOptions()
                 set = function(info, v)
                   local table = { strsplit("\n", v) };
                   db.AuraWidget.CrowdControl.FilterBySpell = table
-                  Addon.Widgets.Auras:ParseSpellFilters()
+                  Addon.Widgets.Auras:UpdateSettings()
                 end,
               },
             },
