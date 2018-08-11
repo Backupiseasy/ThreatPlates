@@ -1342,6 +1342,21 @@ end
               },
             },
           },
+          --TODO: localization
+          Details = {
+            name = "Details",
+            order = 40,
+            type = "group",
+            inline = true,
+            args = {
+              Enable = {
+                name = "Show Quest Details",
+                order = 10,
+                type = "toggle",
+                arg = {"questWidget", "ShowDetail"},
+              }
+            }
+          },
           Texture = {
             name = L["Symbol"],
             type = "group",
