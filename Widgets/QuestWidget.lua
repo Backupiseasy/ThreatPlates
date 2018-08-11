@@ -213,7 +213,9 @@ function Widget:UpdateFrame(widget_frame, unit)
 
   local db = TidyPlatesThreat.db.profile.questWidget
   if show and db.ModeIcon and ShowQuestUnit(unit) then
-      print(current.current .. '/' .. current.goal)
+      
+      print(current.current .. '/' .. current.goal) --TODO: REMOVE, debugging only
+
     -- Updates based on settings / unit style
 		if unit.style == "NameOnly" or unit.style == "NameOnly-Unique" then
 			widget_frame:SetPoint("CENTER", widget_frame:GetParent(), db.x_hv, db.y_hv)
