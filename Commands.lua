@@ -98,6 +98,34 @@ SlashCmdList["TPTPVERBOSE"] = TPTPVERBOSE
 
 -- Command: /tptp
 function TidyPlatesThreat:ChatCommand(input)
+	if input == "plate" then
+		local plate = C_NamePlate.GetNamePlateForUnit("target")
+		if not plate then return end
+
+		print ("Nameplate FrameStrata:", plate:GetFrameStrata())
+		print ("Nameplate FrameLevel :", plate:GetFrameLevel())
+		print ("Nameplate Parent:", (plate:GetParent() == UIParent and "UIParent") or (plate:GetParent() == WorldFrame and "WorldFrame") or ("---"))
+		print ("------------------------------------------")
+		print ("Nameplate UnitFrame FrameStrata:", plate.UnitFrame:GetFrameStrata())
+		print ("Nameplate UnitFrame FrameLevel :", plate.UnitFrame:GetFrameLevel())
+		print ("Nameplate UnitFrame Parent:", (plate.UnitFrame:GetParent() == UIParent and "UIParent") or (plate.UnitFrame:GetParent() == WorldFrame and "WorldFrame") or ("---"))
+		print ("------------------------------------------")
+		print ("TPFrame FrameStrata:", plate.TPFrame:GetFrameStrata())
+		print ("TPFrame FrameLevel :", plate.TPFrame:GetFrameLevel())
+		print ("TPFrame Parent:", (plate.TPFrame:GetParent() == UIParent and "UIParent") or (plate.TPFrame:GetParent() == WorldFrame and "WorldFrame") or ("---"))
+		print ("------------------------------------------")
+		print ("Healthbar FrameStrata:", plate.TPFrame.visual.healthbar:GetFrameStrata())
+		print ("Healthbar FrameLevel :", plate.TPFrame.visual.healthbar:GetFrameLevel())
+  elseif input == "cp" then
+      local plate = C_NamePlate.GetNamePlateForUnit("target")
+      if not plate then return end
+
+      print ("TPFrame FrameLevel :", plate.TPFrame:GetFrameLevel())
+      print ("ComboPointsFrameStrata:", Addon.Widgets.ComboPoints.WidgetFrame:GetFrameLevel())
+      print ("TargetHighlight FrameLevel :", plate.TPFrame.widgets.TargetArt:GetFrameLevel())
+		return
+	end
+
 	TidyPlatesThreat:OpenOptions()
 
 --	local cmd_list = {}
