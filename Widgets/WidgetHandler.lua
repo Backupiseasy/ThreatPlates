@@ -14,26 +14,20 @@ local pairs, next = pairs, next
 
 -- ThreatPlates APIs
 
--- TODO:
---   convert Widgets to self.Widgets
---   Make OnEnable/OnDisable mandatory
---   Create Addons.Widgets = local WidgetHandler
---  EventHandler -> with self = Widget as first parameter, so that Widget:EventHandler is possible
+local WidgetHandler = {
+  Widgets = {},
+  EnabledWidgets = {},
+  EnabledTargetWidgets = {},
+  RegisteredEventsByWidget = {}
+}
 
-local Widgets = {}
-
-local EnabledWidgets = {}
-local EnabledTargetWidgets = {}
-
-local RegisteredEventsByWidget = {}
-
-Addon.Widgets = Widgets
+Addon.Widgets = WidgetHandler
 
 ---------------------------------------------------------------------------------------------------
 -- Event handling stuff
 ---------------------------------------------------------------------------------------------------
 local function EventHandler(self, event, ...)
-  local widgets = RegisteredEventsByWidget[event]
+  local widgets = WidgetHandler.RegisteredEventsByWidget[event]
 
   if widgets then
     for widget, func in pairs(widgets) do
@@ -57,16 +51,16 @@ local function UnitEventHandler(self, event, ...)
   end
 end
 
-local EventHandlerFrame = CreateFrame("Frame", nil, WorldFrame)
-EventHandlerFrame:SetScript("OnEvent", EventHandler)
+WidgetHandler.EventHandlerFrame = CreateFrame("Frame", nil, WorldFrame)
+WidgetHandler.EventHandlerFrame:SetScript("OnEvent", EventHandler)
 
 local function RegisterEvent(widget, event, func)
-  if not RegisteredEventsByWidget[event] then
-    RegisteredEventsByWidget[event] = {}
+  if not WidgetHandler.RegisteredEventsByWidget[event] then
+    WidgetHandler.RegisteredEventsByWidget[event] = {}
   end
 
-  RegisteredEventsByWidget[event][widget] = func or true
-  EventHandlerFrame:RegisterEvent(event)
+  WidgetHandler.RegisteredEventsByWidget[event][widget] = func or true
+  WidgetHandler.EventHandlerFrame:RegisterEvent(event)
 end
 
 local function RegisterUnitEvent(widget, event, unitid, func)
@@ -81,11 +75,11 @@ local function RegisterUnitEvent(widget, event, unitid, func)
 end
 
 local function UnregisterEvent(widget, event)
-  if RegisteredEventsByWidget[event] then
-    RegisteredEventsByWidget[event][widget] = nil
+  if WidgetHandler.RegisteredEventsByWidget[event] then
+    WidgetHandler.RegisteredEventsByWidget[event][widget] = nil
 
-    if next(RegisteredEventsByWidget[event]) == nil then -- last registered widget removed?
-      EventHandlerFrame:UnregisterEvent(event)
+    if next(WidgetHandler.RegisteredEventsByWidget[event]) == nil then -- last registered widget removed?
+      WidgetHandler.EventHandlerFrame:UnregisterEvent(event)
     end
   end
 
@@ -96,7 +90,7 @@ local function UnregisterEvent(widget, event)
 end
 
 local function UnregisterAllEvents(widget)
-  for event, _ in pairs(RegisteredEventsByWidget) do
+  for event, _ in pairs(WidgetHandler.RegisteredEventsByWidget) do
     UnregisterEvent(widget, event)
   end
 
@@ -174,15 +168,15 @@ end
 --   Whenever another widget function is called, make sure the settings (stored in the widget object
 --   are up-to-date. Otherwise widget frames are created/updated/accessed with deprecated settings
 --   which may - worst case scenario - result in Lua errors.
---   Current ways to ensure that this does not happen:
 --   <to be described>
 -- When iterating over widget frames (PlatesVisible or PlatesCreated) be sure to always consider the
 -- following:
 --
 ---------------------------------------------------------------------------------------------------
-function Addon:NewWidget(widget_name)
+function WidgetHandler:NewWidget(widget_name)
   local widget = {
     Name = widget_name,
+    WidgetHandler = WidgetHandler,
     --
     RegistedUnitEvents = {},
     --
@@ -193,14 +187,19 @@ function Addon:NewWidget(widget_name)
     --
     UpdateAllFrames = UpdateAllFrames,
     UpdateAllFramesAndNameplateColor = UpdateAllFramesAndNameplateColor,
+    -- Default functions for enabling/disabling the widget
+    OnEnable = function(self) end, -- do nothing
+    OnDisable = function(self)
+      self:UnregisterAllEvents()
+    end,
   }
 
-  Widgets[widget_name] = widget
+  self.Widgets[widget_name] = widget
 
   return widget
 end
 
-function Addon:NewTargetWidget(widget_name)
+function WidgetHandler:NewTargetWidget(widget_name)
   local widget = self:NewWidget(widget_name)
 
   widget.TargetOnly = true
@@ -208,46 +207,38 @@ function Addon:NewTargetWidget(widget_name)
   return widget
 end
 
-function Addon:InitializeWidget(widget_name)
-  local widget = Widgets[widget_name]
+function WidgetHandler:InitializeWidget(widget_name)
+  local widget = self.Widgets[widget_name]
 
   if widget.UpdateSettings then
     widget:UpdateSettings()
   end
 
   if widget:IsEnabled() then
-    Addon:EnableWidget(widget_name)
+    self:EnableWidget(widget_name)
   else
-    Addon:DisableWidget(widget_name)
+    self:DisableWidget(widget_name)
   end
 end
 
-function Addon:InitializeAllWidgets()
-  for widget_name, _ in pairs(Widgets) do
-    Addon:InitializeWidget(widget_name)
+function WidgetHandler:InitializeAllWidgets()
+  for widget_name, _ in pairs(self.Widgets) do
+    self:InitializeWidget(widget_name)
   end
 end
 
-function Addon:UpdateSettingsForWidget(widget_name)
-  local widget = Widgets[widget_name]
-
-  for plate, _ in pairs(Addon.PlatesVisible) do
-    widget:UpdateSettings(plate.TPFrame.widgets[widget_name])
-  end
-end
-
-function Addon:EnableWidget(widget_name)
+function WidgetHandler:EnableWidget(widget_name)
   -- Enable widgets only once
-  if EnabledTargetWidgets[widget_name] or EnabledWidgets[widget_name] then
+  if self.EnabledTargetWidgets[widget_name] or self.EnabledWidgets[widget_name] then
     return
   end
 
-  local widget = Widgets[widget_name]
+  local widget = self.Widgets[widget_name]
   if widget.TargetOnly then
-    EnabledTargetWidgets[widget_name] = widget
+    self.EnabledTargetWidgets[widget_name] = widget
     widget:Create()
   else
-    EnabledWidgets[widget_name] = widget
+    self.EnabledWidgets[widget_name] = widget
 
     -- Nameplates are re-used by WoW, so we cannot iterate just over all visible plates, but must
     -- add the new widget to all existing plates, even if they are currently not visible
@@ -277,39 +268,33 @@ function Addon:EnableWidget(widget_name)
 
   -- As events are registered in OnEnable, this must be done after all widget frames are created, otherwise an registered event
   -- may already occur before the widget frame exists.
-  if widget.OnEnable then
-    widget:OnEnable()
-  end
+  widget:OnEnable()
 end
 
-function Addon:DisableWidget(widget_name)
+function WidgetHandler:DisableWidget(widget_name)
   -- Disable widgets only once
-  if not (EnabledTargetWidgets[widget_name] or EnabledWidgets[widget_name]) then
+  if not (self.EnabledTargetWidgets[widget_name] or self.EnabledWidgets[widget_name]) then
     return
   end
 
-  local widget = Widgets[widget_name]
+  local widget = self.Widgets[widget_name]
   if widget.TargetOnly then
-    EnabledTargetWidgets[widget_name] = nil
+    self.EnabledTargetWidgets[widget_name] = nil
 
     -- Disable all events of the widget
     widget:UnregisterAllEvents()
 
-    if widget.OnDisable then
-      widget:OnDisable()
-    end
+    widget:OnDisable()
   else
-    local widget = EnabledWidgets[widget_name]
+    local widget = self.EnabledWidgets[widget_name]
 
     if widget then
-      EnabledWidgets[widget_name] = nil
+      self.EnabledWidgets[widget_name] = nil
 
       -- Disable all events of the widget
       widget:UnregisterAllEvents()
 
-      if widget.OnDisable then
-        widget:OnDisable()
-      end
+      widget:OnDisable()
 
       if not widget.TargetOnly then
         for plate, _ in pairs(Addon.PlatesVisible) do
@@ -320,26 +305,26 @@ function Addon:DisableWidget(widget_name)
   end
 end
 
-function Addon:WidgetsOnPlateCreated(tp_frame)
+function WidgetHandler:OnPlateCreated(tp_frame)
   local plate_widgets = tp_frame.widgets
 
-  for widget_name, widget in pairs(EnabledWidgets) do
+  for widget_name, widget in pairs(self.EnabledWidgets) do
     plate_widgets[widget_name] = widget:Create(tp_frame)
   end
 end
 
 -- TODO: Seperate UnitAdded from UpdateSettings/UpdateConfiguration (unit independent stuff)
 --       Maybe event seperate style dependedt stuff (PVlateStyleChanged)
-function Addon:WidgetsOnUnitAdded(tp_frame, unit)
+function WidgetHandler:OnUnitAdded(tp_frame, unit)
   local plate_widgets = tp_frame.widgets
 
   if unit.isTarget then
-    for _, widget in pairs(EnabledTargetWidgets) do
+    for _, widget in pairs(self.EnabledTargetWidgets) do
       widget:OnTargetUnitAdded(tp_frame, unit)
     end
   end
 
-  for widget_name, widget in pairs(EnabledWidgets) do
+  for widget_name, widget in pairs(self.EnabledWidgets) do
     local widget_frame = plate_widgets[widget_name]
 
     -- I think it could happen that a nameplate was created, then a widget is enabled, and afterwise the unit is
@@ -360,7 +345,7 @@ function Addon:WidgetsOnUnitAdded(tp_frame, unit)
   end
 end
 
-function Addon:WidgetsOnUnitRemoved(tp_frame, unit)
+function WidgetHandler:OnUnitRemoved(tp_frame, unit)
   --  for widget_name, widget_frame in pairs(tp_frame.widgets) do
   --    widget_frame.Active = false
   --    widget_frame:Hide()
@@ -372,13 +357,13 @@ function Addon:WidgetsOnUnitRemoved(tp_frame, unit)
   --  end
 
   if unit.isTarget then
-    for _, widget in pairs(EnabledTargetWidgets) do
+    for _, widget in pairs(self.EnabledTargetWidgets) do
       widget:OnTargetUnitRemoved()
     end
   end
 
   local plate_widgets = tp_frame.widgets
-  for widget_name, widget in pairs(EnabledWidgets) do
+  for widget_name, widget in pairs(self.EnabledWidgets) do
     local widget_frame = plate_widgets[widget_name]
     widget_frame.Active = false
     widget_frame:Hide()
@@ -387,6 +372,12 @@ function Addon:WidgetsOnUnitRemoved(tp_frame, unit)
       widget:OnUnitRemoved(widget_frame)
     end
   end
+end
+
+function WidgetHandler:UpdateSettings(widget_name)
+  local widget = self.Widgets[widget_name]
+
+  widget:UpdateSettings()
 end
 
 --function Addon:WidgetsOnUpdate(tp_frame, unit)

@@ -3,7 +3,7 @@
 ---------------------------------------------------------------------------------------------------
 local ADDON_NAME, Addon = ...
 
-local Widget = Addon:NewTargetWidget("ComboPoints")
+local Widget = Addon.Widgets:NewTargetWidget("ComboPoints")
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -142,8 +142,6 @@ function Widget:DetermineUnitPower()
   local _, player_class = UnitClass("player")
   local player_spec_no = GetSpecialization()
 
-  print ("Spec: ", player_spec_no)
-
   local power_type = UNIT_POWER[player_class] and (UNIT_POWER[player_class][player_spec_no] or UNIT_POWER[player_class])
 
   if power_type and power_type.Name then
@@ -205,7 +203,7 @@ end
 
 function Widget:ACTIVE_TALENT_GROUP_CHANGED(...)
   -- Player switched to a spec that has combo points
-  Addon:InitializeWidget("ComboPoints")
+  self.WidgetHandler:InitializeWidget("ComboPoints")
 end
 
 function Widget:UNIT_MAXPOWER(unitid, power_type)
@@ -245,7 +243,6 @@ end
 
 function Widget:IsEnabled()
   self:DetermineUnitPower()
-  self:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
 
   return self.PowerType and (self.db.ON or self.db.ShowInHeadlineView)
 end
@@ -264,16 +261,19 @@ function Widget:OnEnable()
   self:RegisterUnitEvent("UNIT_DISPLAYPOWER", "player", EventHandler)
   self:RegisterUnitEvent("UNIT_MAXPOWER", "player")
   -- self:RegisterUnitEvent("UNIT_POWER_FREQUENT", "player", EventHandler)
-  --self:RegisterUnitEvent("UNIT_FLAGS", "player", EventHandler)
+  -- self:RegisterUnitEvent("UNIT_FLAGS", "player", EventHandler)
+
+  self:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
 end
 
 function Widget:OnDisable()
+  self:UnregisterEvent("PLAYER_TARGET_CHANGED")
+  self:UnregisterEvent("UNIT_POWER_UPDATE")
+  self:UnregisterEvent("UNIT_DISPLAYPOWER")
+  self:UnregisterEvent("UNIT_MAXPOWER")
+
   self.WidgetFrame:Hide()
   self.WidgetFrame:SetParent(nil)
-
-  -- Re-register this event, so that we get notified if the player changes to a spec that has a supported
-  -- power type
-  self:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
 end
 
 function Widget:EnabledForStyle(style, unit)

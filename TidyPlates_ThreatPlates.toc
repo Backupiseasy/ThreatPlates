@@ -18,6 +18,8 @@ Media.lua
 Constants.lua
 Elements\Elements.xml
 
+Widgets\WidgetHandler.lua
+
 # Integration of TidyPlates for standalone version
 TidyPlatesInternal\TidyPlates.xml
 

@@ -55,6 +55,7 @@ Addon.PlatesByGUID = PlatesByGUID
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
+local Widgets = Addon.Widgets
 
 -- Raid Icon Reference
 local RaidIconCoordinate = {
@@ -227,7 +228,7 @@ do
     extended.widgets = {}
 
 		Addon:CreateExtensions(extended)
-    Addon:WidgetsOnPlateCreated(extended)
+    Widgets:OnPlateCreated(extended)
 
     -- Allocate Tables
     extended.style = {}
@@ -265,7 +266,7 @@ do
 
       Addon:CreateExtensions(extended, unit.unitid, stylename)
       -- TOOD: optimimze that - call OnUnitAdded only when the plate is initialized the first time for a unit, not if only the style changes
-      Addon:WidgetsOnUnitAdded(extended, unit)
+      Widgets:OnUnitAdded(extended, unit)
       --Addon:WidgetsModeChanged(extended, unit)
     end
 	end
@@ -827,7 +828,7 @@ do
       PlatesByGUID[frame.unit.guid] = nil
     end
 
-    Addon:WidgetsOnUnitRemoved(frame, frame.unit)
+    Widgets:OnUnitRemoved(frame, frame.unit)
 
     wipe(frame.unit)
     wipe(frame.unitcache)

@@ -4,7 +4,7 @@
 local ADDON_NAME, Addon = ...
 local ThreatPlates = Addon.ThreatPlates
 
-local Widget = Addon:NewWidget("Social")
+local Widget = Addon.Widgets:NewWidget("Social")
 
 ------------------------
 -- Social Icon Widget --

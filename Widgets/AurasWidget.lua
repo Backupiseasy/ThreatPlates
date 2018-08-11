@@ -4,7 +4,7 @@
 local ADDON_NAME, Addon = ...
 local ThreatPlates = Addon.ThreatPlates
 
-local Widget = Addon:NewWidget("Auras")
+local Widget = Addon.Widgets:NewWidget("Auras")
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -1140,6 +1140,7 @@ function Widget:OnEnable()
 end
 
 function Widget:OnDisable()
+  self:UnregisterAllEvents()
   for plate, _ in pairs(Addon.PlatesVisible) do
     plate.TPFrame.widgets.Auras:UnregisterAllEvents()
   end

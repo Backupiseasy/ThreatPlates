@@ -3,7 +3,7 @@
 -----------------------
 local ADDON_NAME, Addon = ...
 
-local Widget = Addon:NewWidget("HealerTracker")
+local Widget = Addon.Widgets:NewWidget("HealerTracker")
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants

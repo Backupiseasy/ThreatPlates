@@ -4,7 +4,7 @@
 local ADDON_NAME, Addon = ...
 local ThreatPlates = Addon.ThreatPlates
 
-local Widget = Addon:NewWidget("Quest")
+local Widget = Addon.Widgets:NewWidget("Quest")
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants

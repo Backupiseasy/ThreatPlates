@@ -3,7 +3,7 @@
 ---------------------------------------------------------------------------------------------------
 local ADDON_NAME, Addon = ...
 
-local Widget = Addon:NewWidget("Stealth")
+local Widget = Addon.Widgets:NewWidget("Stealth")
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants

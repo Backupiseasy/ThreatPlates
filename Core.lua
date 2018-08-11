@@ -191,7 +191,7 @@ function TidyPlatesThreat:ReloadTheme()
   end
 
   Addon:InitializeCustomNameplates()
-  Addon:InitializeAllWidgets()
+  Addon.Widgets:InitializeAllWidgets()
 end
 
 function TidyPlatesThreat:StartUp()
