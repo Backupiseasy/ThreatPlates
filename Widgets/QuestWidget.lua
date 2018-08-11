@@ -36,6 +36,7 @@ local function IsQuestUnit(unit)
 	local quest_area = false
 	local quest_player = false
 	local quest_group = false
+    local currentProgress = false
 
 	-- Read quest information from tooltip. Thanks to Kib: QuestMobs AddOn by Tosaido.
 	if unit.unitid then
@@ -68,6 +69,12 @@ local function IsQuestUnit(unit)
 								else
 									quest_group = true
 								end
+
+                                currentProgress = {
+                                    ['current'] = current,
+                                    ['goal'] = goal
+                                }
+
 								break
 							end
 						else
@@ -86,7 +93,7 @@ local function IsQuestUnit(unit)
 
   local quest_type = ((quest_player or quest_area) and 1) or (quest_group and 2)
 
-  return quest_type ~= false, quest_type
+  return quest_type ~= false, quest_type, currentProgress
 end
 
 local function ShowQuestUnit(unit)
@@ -116,79 +123,9 @@ end
 ThreatPlates.IsQuestUnit = IsQuestUnit
 ThreatPlates.ShowQuestUnit = ShowQuestUnitHealthbar
 
----------------------------------------------------------------------------------------------------
--- Event Watcher Code for Quest Widget
----------------------------------------------------------------------------------------------------
---local EventHandler = CreateFrame("Frame", nil, WorldFrame)
---local EventHandlerIsEnabled = false
---
---local function OnEventHandler(frame, event, ...)
---  if event == "QUEST_LOG_UPDATE" then
---    return
---  elseif event == "QUEST_WATCH_UPDATE" then
---    local quest_log_index = ...
---    local title, level, suggestedGroup, isHeader, isCollapsed, isComplete, frequency, questID, startEvent, displayQuestID, isOnMap, hasLocalPOI, isTask, isBounty, isStory = GetQuestLogTitle(quest_log_index)
---    print ("QuestWidget: ", event, title)
---
---    -- If complete, disable all indicators on the mobs for this quest => Hashmap with ID -> QuestWidgetFrames
---  elseif event == "QUEST_ACCEPTED" then
---    local quest_log_index, quest_id = ...
---  else
---    print ("QuestWidget: ", event, ...)
---  end
---end
---
---local function EnableWatcher()
---  -- This event is fired very often. This includes, but is not limited to: viewing a quest for the first time in a session in the
---  -- Quest Log; (once for each quest?) every time the player changes zones across an instance boundary; every time the player picks
---  -- up a non-grey item; every time after the player completes a quest goal, such as killing a mob for a quest. It also fires whenever
---  -- the player (or addon using the CollapseQuestHeader or ExpandQuestHeader() functions) collapses or expands any zone header in the
---  -- quest log.
---  EventHandler:RegisterEvent("QUEST_LOG_UPDATE")
---  -- Fired just before a quest goal was completed. At this point the game client's quest data is not yet updated, but will be after a
---  -- subsequent QUEST_LOG_UPDATE event.
---  -- Parameters:
---  --   arg1     questIndex (not watch index)
---  EventHandler:RegisterEvent("QUEST_WATCH_UPDATE")
---  -- This event fires whenever the player accepts a quest.
---  -- Parameters:
---  --   arg1     Quest log index. You may pass this to GetQuestLogTitle() for information about the accepted quest.
---  --   arg2     QuestID of the quest accepted.
---  EventHandler:RegisterEvent("QUEST_ACCEPTED")
---
---  EventHandler:RegisterEvent("QUEST_GREETING")
---  --frame:RegisterEvent("QUEST_DETAIL");
---  EventHandler:RegisterEvent("QUEST_PROGRESS")
---  --frame:RegisterEvent("QUEST_COMPLETE")
---  --frame:RegisterEvent("QUEST_FINISHED")
---  EventHandler:RegisterEvent("QUEST_ITEM_UPDATE")
---  --frame:RegisterEvent("UNIT_PORTRAIT_UPDATE");
---  --frame:RegisterEvent("PORTRAITS_UPDATED");
---  --frame:RegisterEvent("LEARNED_SPELL_IN_TAB");
---
---  EventHandler:SetScript("OnEvent", OnEventHandler)
---  EventHandlerIsEnabled = true
---end
---
---local function DisableWatcher()
---  EventHandler:UnregisterAllEvents()
---  EventHandler:SetScript("OnEvent", nil)
---  EventHandlerIsEnabled = false
--- end
-
 local function EventHandler(event, ...)
   Widget:UpdateAllFramesAndNameplateColor()
 end
-
--- QuestWidget needs to update all nameplates when a quest was completed
---function Widget:QUEST_WATCH_UPDATE(quest_index)
---	Widget:UpdateAllFrames()
---end
---
---function Widget:QUEST_ACCEPTED(quest_index, ...)
---	Widget:UpdateAllFrames()
---end
---
 
 function Widget:PLAYER_REGEN_ENABLED()
   InCombat = false
@@ -272,10 +209,11 @@ function Widget:OnUnitAdded(widget_frame, unit)
 end
 
 function Widget:UpdateFrame(widget_frame, unit)
-  local show, quest_type = IsQuestUnit(unit)
+  local show, quest_type, current = IsQuestUnit(unit)
 
   local db = TidyPlatesThreat.db.profile.questWidget
   if show and db.ModeIcon and ShowQuestUnit(unit) then
+      print(current.current .. '/' .. current.goal)
     -- Updates based on settings / unit style
 		if unit.style == "NameOnly" or unit.style == "NameOnly-Unique" then
 			widget_frame:SetPoint("CENTER", widget_frame:GetParent(), db.x_hv, db.y_hv)
@@ -291,12 +229,3 @@ function Widget:UpdateFrame(widget_frame, unit)
     widget_frame:Hide()
   end
 end
-
---function Widget:OnUpdateStyle(widget_frame, unit)
---  local db = TidyPlatesThreat.db.profile.questWidget
---  if unit.style == "NameOnly" or unit.style == "NameOnly-Unique" then
---    widget_frame:SetPoint("CENTER", widget_frame:GetParent(), db.x_hv, db.y_hv)
---  else
---    widget_frame:SetPoint("CENTER", widget_frame:GetParent(), db.x, db.y)
---  end
---end
