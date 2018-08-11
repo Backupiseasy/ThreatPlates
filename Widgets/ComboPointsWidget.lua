@@ -10,7 +10,7 @@ local Widget = Addon:NewTargetWidget("ComboPoints")
 ---------------------------------------------------------------------------------------------------
 
 -- Lua APIs
-local pairs, unpack, type = pairs, unpack, type
+local unpack, type = unpack, type
 
 -- WoW APIs
 local CreateFrame = CreateFrame
@@ -142,6 +142,8 @@ function Widget:DetermineUnitPower()
   local _, player_class = UnitClass("player")
   local player_spec_no = GetSpecialization()
 
+  print ("Spec: ", player_spec_no)
+
   local power_type = UNIT_POWER[player_class] and (UNIT_POWER[player_class][player_spec_no] or UNIT_POWER[player_class])
 
   if power_type and power_type.Name then
@@ -210,7 +212,7 @@ function Widget:UNIT_MAXPOWER(unitid, power_type)
   if self.PowerType then
     -- Number of max power units changed (e.g., for a rogue)
     self:DetermineUnitPower()
-    self:UpdateComboPointsLayout()
+    self:UpdateLayout()
 
     -- remove excessive CP frames (when called after talent change)
     local widget_frame = self.WidgetFrame
@@ -333,7 +335,7 @@ function Widget:OnTargetUnitRemoved()
   self.WidgetFrame:Hide()
 end
 
-function Widget:UpdateTexture(self, texture, texture_path, cp_no)
+function Widget:UpdateTexture(texture, texture_path, cp_no)
   if self.db.Style == "Blizzard" then
     if type(texture_path) == "table" then
       texture:SetAtlas(texture_path[1])
@@ -359,17 +361,19 @@ function Widget:UpdateLayout()
   local db = self.db
   local scale = db.Scale
   local scaledIconWidth, scaledIconHeight, scaledSpacing = (scale * self.IconWidth),(scale * self.IconHeight),(scale * db.HorizontalSpacing)
+
   -- This was moved into the UpdateLayout from UpdateComboPointLaout as this was not updating after a ReloadUI
   -- Combo Point position is now based off of WidgetFrame width
   widget_frame:SetAlpha(db.Transparency)
   widget_frame:SetHeight(scaledIconHeight)
   widget_frame:SetWidth((scaledIconWidth * self.UnitPowerMax) + ((self.UnitPowerMax - 1) * scaledSpacing))
+
   for i = 1, self.UnitPowerMax do
     widget_frame.ComboPoints[i] = widget_frame.ComboPoints[i] or widget_frame:CreateTexture(nil, "BACKGROUND")
-    self:UpdateTexture(self, widget_frame.ComboPoints[i], self.Texture, i)
+    self:UpdateTexture(widget_frame.ComboPoints[i], self.Texture, i)
 
     widget_frame.ComboPointsOff[i] = widget_frame.ComboPointsOff[i] or widget_frame:CreateTexture(nil, "ARTWORK")
-    self:UpdateTexture(self, widget_frame.ComboPointsOff[i], self.TextureOff, i)
+    self:UpdateTexture(widget_frame.ComboPointsOff[i], self.TextureOff, i)
   end  
 end
 
@@ -382,7 +386,6 @@ function Widget:UpdateSettings()
   if not self.PowerType then return end
 
   -- Update widget variables, only dependent from settings and static information (like player's class)
-  -- TODO: check what happens if player does not yet have a spec, e.g. < level 10
   local _, player_class = UnitClass("player")
   local texture_info = TEXTURE_INFO[self.db.Style][player_class] or TEXTURE_INFO[self.db.Style]
 
