@@ -291,11 +291,14 @@ function Widget:Create()
     widget_frame:Hide()
 
     self.WidgetFrame = widget_frame
-
-    widget_frame:SetSize(64, 64)
     widget_frame.ComboPoints = {}
     widget_frame.ComboPointsOff = {}
-
+	local frameBackground = false -- debug frame size
+	if frameBackground then
+		widget_frame.Background = widget_frame:CreateTexture(nil, "BACKGROUND")
+		widget_frame.Background:SetAllPoints()
+		widget_frame.Background:SetColorTexture(1, 1, 1, 0.5)
+	end
     self:UpdateLayout()
   end
 
@@ -330,30 +333,7 @@ function Widget:OnTargetUnitRemoved()
   self.WidgetFrame:Hide()
 end
 
---function Widget:OnModeChange(tp_frame, unit)
---  local widget_frame = self.WidgetFrame
---  if UnitCanAttack("player", "target") and self:EnabledForStyle(unit.style, unit) then
---
---    widget_frame:SetFrameLevel(tp_frame:GetFrameLevel() + 7)
---
---    -- Updates based on settings / unit style
---    local db = self.db
---    if unit.style == "NameOnly" or unit.style == "NameOnly-Unique" then
---      widget_frame:SetPoint("CENTER", tp_frame, "CENTER", db.x_hv, db.y_hv)
---    else
---      widget_frame:SetPoint("CENTER", tp_frame, "CENTER", db.x, db.y)
---    end
---
---    if not widget_frame:IsShown() then
---      self:UpdateComboPoints(widget_frame)
---      widget_frame:Show()
---    end
---  else
---    widget_frame:Hide()
---  end
---end
-
-function Widget:UpdateTexture(texture, texture_path, cp_no)
+function Widget:UpdateTexture(self, texture, texture_path, cp_no)
   if self.db.Style == "Blizzard" then
     if type(texture_path) == "table" then
       texture:SetAtlas(texture_path[1])
@@ -366,9 +346,10 @@ function Widget:UpdateTexture(texture, texture_path, cp_no)
   end
 
   texture:SetTexCoord(unpack(self.TexCoord)) -- obj:SetTexCoord(left,right,top,bottom)
-  texture:SetSize(self.IconWidth, self.IconHeight)
-  texture:SetScale(self.db.Scale)
-  texture:SetPoint("CENTER", self.WidgetFrame, "CENTER", self.TextureCoordinates[cp_no], 0)
+  local scale = self.db.Scale
+  local scaledIconWidth, scaledIconHeight, scaledSpacing = (scale * self.IconWidth),(scale * self.IconHeight),(scale * self.db.HorizontalSpacing)
+  texture:SetSize(scaledIconWidth, scaledIconHeight)
+  texture:SetPoint("LEFT", self.WidgetFrame, "LEFT", (self.WidgetFrame:GetWidth()/self.UnitPowerMax)*(cp_no-1)+(scaledSpacing/2), 0)  
 end
 
 function Widget:UpdateLayout()
@@ -376,23 +357,20 @@ function Widget:UpdateLayout()
 
   -- Updates based on settings
   local db = self.db
+  local scale = db.Scale
+  local scaledIconWidth, scaledIconHeight, scaledSpacing = (scale * self.IconWidth),(scale * self.IconHeight),(scale * db.HorizontalSpacing)
+  -- This was moved into the UpdateLayout from UpdateComboPointLaout as this was not updating after a ReloadUI
+  -- Combo Point position is now based off of WidgetFrame width
   widget_frame:SetAlpha(db.Transparency)
-
+  widget_frame:SetHeight(scaledIconHeight)
+  widget_frame:SetWidth((scaledIconWidth * self.UnitPowerMax) + ((self.UnitPowerMax - 1) * scaledSpacing))
   for i = 1, self.UnitPowerMax do
     widget_frame.ComboPoints[i] = widget_frame.ComboPoints[i] or widget_frame:CreateTexture(nil, "BACKGROUND")
-    self:UpdateTexture(widget_frame.ComboPoints[i], self.Texture, i)
+    self:UpdateTexture(self, widget_frame.ComboPoints[i], self.Texture, i)
 
     widget_frame.ComboPointsOff[i] = widget_frame.ComboPointsOff[i] or widget_frame:CreateTexture(nil, "ARTWORK")
-    self:UpdateTexture(widget_frame.ComboPointsOff[i], self.TextureOff, i)
-  end
-end
-
-function Widget:UpdateComboPointsLayout()
-  -- Update widget variables, dependent from non-static information (talents)
-  local offset_from_center = ( (self.db.Scale * self.UnitPowerMax * self.IconWidth) + ((self.UnitPowerMax - 1) * self.db.HorizontalSpacing) - (self.IconWidth * self.db.Scale)) / 2
-  for i = 1, self.UnitPowerMax do
-    self.TextureCoordinates[i] = (i - 1) * self.db.Scale * (self.IconWidth + self.db.HorizontalSpacing) - offset_from_center
-  end
+    self:UpdateTexture(self, widget_frame.ComboPointsOff[i], self.TextureOff, i)
+  end  
 end
 
 function Widget:UpdateSettings()
@@ -428,8 +406,6 @@ function Widget:UpdateSettings()
       end
     end
   end
-
-  self:UpdateComboPointsLayout()
 
   -- Update the widget if it was already created (not true for immediately after Reload UI or if it was never enabled
   -- in this since last Reload UI)

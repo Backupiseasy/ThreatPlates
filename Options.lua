@@ -1364,7 +1364,7 @@ local function CreateComboPointsWidgetOptions()
             name = L["Spacing"],
             order = 10,
             type = "range",
-            min = -100,
+            min = 0,
             max = 100,
             step = 1,
             arg = { "ComboPoints", "HorizontalSpacing" },
