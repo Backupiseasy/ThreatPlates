@@ -27,6 +27,7 @@ local InCombat = false
 local TooltipFrame = CreateFrame("GameTooltip", "ThreatPlates_Tooltip", nil, "GameTooltipTemplate")
 local PlayerName = UnitName("player")
 local ICON_COLORS = {}
+local Font = nil
 
 ---------------------------------------------------------------------------------------------------
 -- Quest Functions
@@ -155,6 +156,8 @@ end
 ---------------------------------------------------------------------------------------------------
 
 function Widget:Create(tp_frame)
+  local db = TidyPlatesThreat.db.profile.questWidget
+
   -- Required Widget Code
   local widget_frame = CreateFrame("Frame", nil, tp_frame)
   widget_frame:Hide()
@@ -163,6 +166,17 @@ function Widget:Create(tp_frame)
   --------------------------------------
   widget_frame:SetFrameLevel(tp_frame:GetFrameLevel() + 7)
   widget_frame.Icon = widget_frame:CreateTexture(nil, "OVERLAY")
+  widget_frame.Text = false
+
+  if db.ShowDetail then
+    local text_frame = widget_frame:CreateFontString(nil, "OVERLAY")
+
+    text_frame:SetFont(Font, db.FontSize)
+    text_frame:SetShadowOffset(1, -1)
+    text_frame:SetShadowColor(0,0,0,1)
+
+    widget_frame.Text = text_frame
+  end
   --------------------------------------
   -- End Custom Code
 
@@ -174,6 +188,8 @@ function Widget:IsEnabled()
 end
 
 function Widget:OnEnable()
+  Font = ThreatPlates.Media:Fetch('font', TidyPlatesThreat.db.profile.questWidget.Font)
+
   self:RegisterEvent("QUEST_ACCEPTED", EventHandler)
   self:RegisterEvent("QUEST_WATCH_UPDATE", EventHandler)
   -- BfA: self:RegisterEvent("QUEST_ITEM_UPDATE", EventHandler)
@@ -205,6 +221,12 @@ function Widget:OnUnitAdded(widget_frame, unit)
   widget_frame.Icon:SetTexture(icon_path)
   widget_frame.Icon:SetAllPoints()
 
+  if db.ShowDetail and widget_frame.Text then
+    widget_frame.Text:SetPoint("CENTER", widget_frame, 0, 20)
+    widget_frame.Text:SetSize(db.scale, db.scale)
+    widget_frame.Text:SetAlpha(db.alpha)
+  end
+
   self:UpdateFrame(widget_frame, unit)
 end
 
@@ -213,8 +235,6 @@ function Widget:UpdateFrame(widget_frame, unit)
 
   local db = TidyPlatesThreat.db.profile.questWidget
   if show and db.ModeIcon and ShowQuestUnit(unit) then
-
-    print(current.current .. '/' .. current.goal) --TODO: REMOVE, debugging only
 
     -- Updates based on settings / unit style
     if unit.style == "NameOnly" or unit.style == "NameOnly-Unique" then
@@ -225,6 +245,13 @@ function Widget:UpdateFrame(widget_frame, unit)
 
     local color = ICON_COLORS[quest_type]
     widget_frame.Icon:SetVertexColor(color.r, color.g, color.b)
+
+    if db.ShowDetail and current and widget_frame.Text then
+      local text = current.current .. '/' .. current.goal
+
+      widget_frame.Text:SetText(text)
+      widget_frame.Text:SetTextColor(color.r, color.g, color.b)
+    end
 
     widget_frame:Show()
   else

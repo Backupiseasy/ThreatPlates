@@ -755,6 +755,9 @@ ThreatPlates.DEFAULT_SETTINGS = {
       HideInCombatAttacked = true,
       HideInInstance = true,
       ShowInHeadlineView = false,
+      ShowDetail = true,
+      Font = Addon.DEFAULT_FONT,
+      FontSize = 10
     },
     stealthWidget = {
       ON = false,
