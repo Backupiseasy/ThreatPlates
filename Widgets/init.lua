@@ -221,6 +221,8 @@ function Addon:DisableWidget(widget_name)
   local widget = EnabledWidgets[widget_name]
 
   if widget then
+    EnabledWidgets[widget_name] = nil
+
     if widget.OnDisable then
       widget:OnDisable()
     end

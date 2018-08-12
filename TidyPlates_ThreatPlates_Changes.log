@@ -1,4 +1,10 @@
 ﻿------------------------------------------------------
+9.0.10
+------------------------------------------------------
+* Updated the crowd control aura list for Auras widget (Betweeen the Eyes from Outlaw rogues) [Comment #1155].
+* Fixed a bug with widgets still being shown although disabled in the options [Comment #1160, Issue #197].
+
+------------------------------------------------------
 9.0.9
 ------------------------------------------------------
 * Extended the elite icon to also show an indicator icon for rare mobs (colored silver, instead of gold) [Issue #225, Issue #219, Comment #759, Comment #935, Comment #1094, Comment #1095].

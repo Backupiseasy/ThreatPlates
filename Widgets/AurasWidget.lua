@@ -131,10 +131,8 @@ Widget.CROWD_CONTROL_SPELLS = {
   [135299] = PC_SNARE,          -- Sticky Tar (Survival, PvP, Not Blizzard)
   [212638] = PC_ROOT,           -- Tracker's Net (Survival, PvP, Not Blizzard)
   [195645] = PC_SNARE,          -- Wing Clip (Survival, Not Blizzard)
-
   [147362] = CC_SILENCE,        -- Counter Shot
   -- [19386] = LOC_SLEEP,          -- Wyvern Sting (Deprecated in BfA)
-
 
   -- Mage
   [61780] = LOC_POLYMORPH,  -- Polymorph (Turkey)
@@ -176,6 +174,7 @@ Widget.CROWD_CONTROL_SPELLS = {
   [1776] = LOC_STUN,       -- Gouge
   [408] = LOC_STUN,        -- Kidney Shot
   [6770] = LOC_STUN,       -- Sap
+  [199804] = LOC_STUN,     -- Between the Eyes (Outlaw)
 
   -- Shaman
   [51485] = PC_ROOT,         -- Earthgrab Totem
