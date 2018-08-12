@@ -166,8 +166,8 @@ end
 do
 
 	function OnNewNameplate(plate)
-    -- Parent could be: WorldFrame, UIParent, paren
-    local extended = CreateFrame("Frame",  "ThreatPlatesFrame" .. plate:GetName(), WorldFrame)
+    -- Parent could be: WorldFrame, UIParent, plate
+    local extended = CreateFrame("Frame",  "ThreatPlatesFrame" .. plate:GetName(), plate)
     extended:Hide()
 
     extended:SetFrameStrata("BACKGROUND")
@@ -1302,16 +1302,17 @@ TidyPlatesInternal.GetTheme = GetTheme
 -- Misc. Utility
 --------------------------------------------------------------------------------------------------------------
 
+-- Blizzard default nameplates always have the same size, no matter what the UI scale actually is
 function Addon:UIScaleChanged()
   local db = TidyPlatesThreat.db.profile.Scale
   if db.IgnoreUIScale then
-    Addon.UIScale = 1 / UIParent:GetEffectiveScale()
+    self.UIScale = 1
   else
-    Addon.UIScale = 1
+    self.UIScale = UIParent:GetEffectiveScale() * (4/3)
 
     if db.PixelPerfectUI then
       local physicalScreenHeight = select(2, GetPhysicalScreenSize())
-      Addon.UIScale = 768.0 / physicalScreenHeight
+      self.UIScale = 768.0 / physicalScreenHeight
     end
   end
 end
