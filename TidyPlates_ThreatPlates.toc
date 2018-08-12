@@ -9,6 +9,7 @@
 ## OptionalDeps: Ace3, LibSharedMedia-3.0
 ## X-Website: https://wow.curseforge.com/projects/tidy-plates-threat-plates
 ## X-License: GNU General Public License
+## X-Credits: danltiger (for Tidy Plates), Tosaido (for quest handling code from QuestMobs)
 
 Libs\Libs.xml
 Locales\Locales.xml

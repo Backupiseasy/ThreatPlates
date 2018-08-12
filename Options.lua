@@ -7079,7 +7079,7 @@ function TidyPlatesThreat:ProfChange()
   Addon:CallbackWhenOoC(function() Addon:SetBaseNamePlateSize() end, L["Unable to change a setting while in combat."])
 
   for plate, unitid in pairs(Addon.PlatesVisible) do
-    Addon:UpdateFriendleNameplateStyle(plate, unitid)
+    Addon:UpdateFriendlyNameplateStyle(plate, unitid)
   end
 
   TidyPlatesThreat:ReloadTheme()

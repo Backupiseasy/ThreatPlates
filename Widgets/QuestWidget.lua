@@ -192,12 +192,12 @@ end
 
 function Widget:PLAYER_REGEN_ENABLED()
   InCombat = false
-  Widget:UpdateAllFrames()
+  self:UpdateAllFrames()
 end
 
 function Widget:PLAYER_REGEN_DISABLED()
   InCombat = true
-  Widget:UpdateAllFrames()
+  self:UpdateAllFrames()
 end
 
 function Widget:UNIT_THREAT_LIST_UPDATE(unitid)

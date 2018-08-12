@@ -434,6 +434,20 @@ local function MigrateAuraWidget(profile_name, profile)
   end
 end
 
+local function MigrationComboPointsWidget(profile_name, profile)
+  if DatabaseEntryExists(profile, { "comboWidget" }) then
+    profile.ComboPoints.ON = profile.comboWidget.ON
+    profile.ComboPoints.Scale = profile.comboWidget.scale
+    profile.ComboPoints.x = profile.comboWidget.x
+    profile.ComboPoints.y = profile.comboWidget.y
+    profile.ComboPoints.x_hv = profile.comboWidget.x_hv
+    profile.ComboPoints.y_hv = profile.comboWidget.y_hv
+    profile.ComboPoints.ShowInHeadlineView = profile.comboWidget.ShowInHeadlineView
+
+    DatabaseEntryDelete(profile, { "comboWidget" })
+  end
+end
+
 ---- Settings in the SavedVariables file that should be migrated and/or deleted
 local DEPRECATED_SETTINGS = {
 --  NamesColor = { MigrateNamesColor, },                        -- settings.name.color
@@ -457,6 +471,7 @@ local DEPRECATED_SETTINGS = {
   UniqueSettingsList = { "uniqueSettings", "list" },          -- (removed in 8.7.0, cleanup added in 8.7.1)
   Auras = { MigrationAurasSettings, "9.0.0" },                -- (changed in 9.0.0)
   AurasFix = { MigrationAurasSettingsFix },                   -- (changed in 9.0.4 and 9.0.9)
+  MigrationComboPointsWidget = { MigrationComboPointsWidget, "9.1.0" },  -- (changed in 9.1.0)
 }
 
 local function MigrateDatabase(current_version)
