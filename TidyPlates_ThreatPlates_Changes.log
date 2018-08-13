@@ -3,6 +3,7 @@
 ------------------------------------------------------
 * Updated the crowd control aura list for Auras widget (Betweeen the Eyes from Outlaw rogues) [Comment #1155].
 * Fixed a bug with widgets still being shown although disabled in the options [Comment #1160, Issue #197].
+* Fixed a Lua error in Social widget that could occur when logging in [Issue #237].
 
 ------------------------------------------------------
 9.0.9

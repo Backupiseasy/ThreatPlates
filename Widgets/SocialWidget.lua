@@ -64,12 +64,16 @@ function Widget:FRIENDLIST_UPDATE()
       ListFriends = {}
     end
 
+    local no_friends = 0
     for i = 1, friendsOnline do
       local name, _ = GetFriendInfo(i)
-      ListFriends[name] = ICON_FRIEND
+      if name then
+        ListFriends[name] = ICON_FRIEND
+        no_friends = no_friends + 1
+      end
     end
 
-    ListFriendsSize = friendsOnline
+    ListFriendsSize = no_friends -- as name might be nil, friendsOnline might not be correct here
 
 --    if plate then
 --      local unit = plate.TPFrame.unit
