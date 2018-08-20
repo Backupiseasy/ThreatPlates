@@ -19,7 +19,6 @@ local HEX2RGB = ThreatPlates.HEX2RGB
 ---------------------------------------------------------------------------------------------------
 
 ThreatPlates.ADDON_NAME = "Threat Plates"
-ThreatPlates.THEME_NAME = "Threat Plates"
 
 Addon.ADDON_DIRECTORY = "Interface\\AddOns\\TidyPlates_ThreatPlates\\"
 

@@ -1,13 +1,9 @@
-﻿local _, ns = ...
-local t = ns.ThreatPlates
-
-if not TidyPlatesInternalThemeList[t.THEME_NAME] then
-	TidyPlatesInternalThemeList[t.THEME_NAME] = {}
-end
+﻿local _, Addon = ...
+local t = Addon.ThreatPlates
 
 local ThemeTable = {}
 
-local function RegisterTheme(name,create)
+function Addon:RegisterTheme(name, create)
 	if not ThemeTable[name] then
 		ThemeTable[name] = {
 			name = name,
@@ -18,15 +14,8 @@ local function RegisterTheme(name,create)
 	end
 end
 
-local function SetThemes(self)
+function Addon:SetThemes(tidy_plates_threat)
 	for k, v in pairs(ThemeTable) do
-		TidyPlatesInternalThemeList[t.THEME_NAME][v.name] = v.create(self, v.name)
+		self.Theme[v.name] = v.create(tidy_plates_threat, v.name)
 	end
 end
-
-local function GetTheme(name)
-	return ThemeTable[name]
-end
-
-t.RegisterTheme = RegisterTheme
-t.SetThemes = SetThemes

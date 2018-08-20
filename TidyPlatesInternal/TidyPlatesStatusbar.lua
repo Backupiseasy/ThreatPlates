@@ -283,7 +283,7 @@ function Addon:ConfigCastbar()
 
         castbar:Show()
         EnabledConfigMode = true
-        TidyPlatesInternal:ForceUpdate()
+        Addon:ForceUpdate()
       elseif castbar._Hide then
         castbar:_Hide()
       end

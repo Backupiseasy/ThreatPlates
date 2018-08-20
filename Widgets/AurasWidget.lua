@@ -1333,6 +1333,6 @@ function Widget:UpdateSettings()
     end
   end
 
-  --TidyPlatesInternal:ForceUpdate()
+  --Addon:ForceUpdate()
 end
 

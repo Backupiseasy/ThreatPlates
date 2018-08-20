@@ -41,21 +41,22 @@ local GetCVar, Lerp, CombatLogGetCurrentEventInfo = GetCVar, Lerp, CombatLogGetC
 local PlatesCreated, PlatesVisible, PlatesByUnit, PlatesByGUID = {}, {}, {}, {}
 local nameplate, extended, visual			    	-- Temp/Local References
 local unit, unitcache, style, stylename 	  -- Temp/Local References
-local activetheme = {}                      -- Table Placeholder
 local LastTargetPlate
 local ShowCastBars = true
 local EMPTY_TEXTURE = "Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\Empty"
-local ResetPlates, UpdateAll = false, false
+local UpdateAll = false
 
 -- External references to internal data
 Addon.PlatesCreated = PlatesCreated
 Addon.PlatesVisible = PlatesVisible
 Addon.PlatesByUnit = PlatesByUnit
 Addon.PlatesByGUID = PlatesByGUID
+Addon.Theme = {}
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
 local Widgets = Addon.Widgets
+local activetheme = Addon.Theme
 
 -- Raid Icon Reference
 local RaidIconCoordinate = {
@@ -99,7 +100,6 @@ local OnHealthUpdate, ProcessUnitChanges
 
 -- Main Loop
 local OnUpdate
-local ForEachPlate
 
 -- UpdateReferences
 local function UpdateReferences(plate)
@@ -119,17 +119,7 @@ local function UpdateUnitCache() for key, value in pairs(unit) do unitcache[key]
 -- Nameplate Detection & Update Loop
 ---------------------------------------------------------------------------------------------------------------------
 
-
 do
-	-- ForEachPlate
-	function ForEachPlate(functionToRun, ...)
-		for plate in pairs(PlatesVisible) do
-			if plate.TPFrame.Active then
-				functionToRun(plate, ...)
-			end
-		end
-	end
-
   -- OnUpdate; This function is run frequently, on every clock cycle
 	function OnUpdate(self, e)
 		-- Poll Loop
@@ -223,7 +213,7 @@ do
     visual.Highlight = Addon:Element_Mouseover_Create(extended)
 
     -- Set Base Properties
-		visual.raidicon:SetTexture("Interface\\TargetingFrame\\UI-RaidTargetingIcons")
+		-- visual.raidicon:SetTexture("Interface\\TargetingFrame\\UI-RaidTargetingIcons")
 
     extended.widgets = {}
 
@@ -554,7 +544,9 @@ do
 			visual.raidicon:Show()
 			local iconCoord = RaidIconCoordinate[unit.raidIcon]
 			visual.raidicon:SetTexCoord(iconCoord.x, iconCoord.x + 0.25, iconCoord.y,  iconCoord.y + 0.25)
-		else visual.raidicon:Hide() end
+		else
+      visual.raidicon:Hide()
+    end
 	end
 
 
@@ -1021,7 +1013,7 @@ do
 
   function CoreEvents:UI_SCALE_CHANGED()
     Addon:UIScaleChanged()
-    TidyPlatesInternal:ForceUpdate()
+    Addon:ForceUpdate()
 	end
 
 	function CoreEvents:UNIT_ABSORB_AMOUNT_CHANGED(unitid)
@@ -1146,18 +1138,6 @@ do
 		end
 	end
 
-	-- SetBarGroupObject
---	local function SetBarGroupObject(object, objectstyle, anchorTo)
---		if objectstyle then
---			SetAnchorGroupObject(object, objectstyle, anchorTo)
---			SetObjectBartexture(object, objectstyle.texture or EMPTY_TEXTURE, objectstyle.orientation or "HORIZONTAL")
---			if objectstyle.backdrop then
---				object:SetBackdropTexture(objectstyle.backdrop)
---			end
---			object:SetTexCoord(objectstyle.left, objectstyle.right, objectstyle.top, objectstyle.bottom)
---		end
---	end
-
 	-- Style Groups
 	local fontgroup = {"name", "level", "spelltext", "customtext"}
 
@@ -1167,20 +1147,16 @@ do
     -- "threatborder", "castborder", "castnostop", "eliteicon",
   }
 
-	--local bargroup = { } --"castbar" }
-
 	local texturegroup = {
     "skullicon", "target", "spellicon",
     -- "highlight", threatborder, "castborder", "castnostop", "eliteicon",
   }
 
-  --local showgroup = { "healthborder" }
-
 	-- UpdateStyle:
 	function UpdateStyle()
 		local index
 
-		-- Frame
+    -- Frame
     SetObjectAnchor(extended, style.frame.anchor or "CENTER", nameplate, style.frame.x or 0, style.frame.y or 0)
     extended:SetSize(style.healthbar.width, style.healthbar.height)
 
@@ -1237,10 +1213,14 @@ do
 --		end
     visual.threatborder:SetShown(style.threatborder.show)
 
-		-- Raid Icon Texture
-		if style and style.raidicon and style.raidicon.texture then
+    -- Raid Icon Texture
+		if style.raidicon and style.raidicon.texture then
 			visual.raidicon:SetTexture(style.raidicon.texture)
       visual.raidicon:SetDrawLayer("ARTWORK", 5)
+    end
+    -- TOODO: does not really work with ForceUpdate() as isMarked is not set there (no call to UpdateUnitCondition)
+    if not unit.isMarked then
+      visual.raidicon:Hide()
     end
 
 		-- Font Group
@@ -1275,28 +1255,8 @@ do
 
 		if not unit.isBoss then visual.skullicon:Hide() end
 		if not unit.isTarget then visual.target:Hide() end
-		-- TOODO: does not really work with ForceUpdate() as isMarked is not set there (no call to UpdateUnitCondition)
-		if not unit.isMarked then visual.raidicon:Hide() end
   end
 end
-
---------------------------------------------------------------------------------------------------------------
--- Theme Handling
---------------------------------------------------------------------------------------------------------------
-local function UseTheme(theme)
-	if theme and type(theme) == 'table' and not theme.IsShown then
-		activetheme = theme 						-- Store a local copy
-		ResetPlates = true
-	end
-end
-
-Addon.UseTheme = UseTheme
-
-local function GetTheme()
-	return activetheme
-end
-
-TidyPlatesInternal.GetTheme = GetTheme
 
 --------------------------------------------------------------------------------------------------------------
 -- Misc. Utility
@@ -1374,8 +1334,12 @@ end
 function TidyPlatesInternal:DisableCastBars() ShowCastBars = false end
 function TidyPlatesInternal:EnableCastBars() ShowCastBars = true end
 
-function TidyPlatesInternal:ForceUpdate()
-  ForEachPlate(OnResetNameplate)
+function Addon:ForceUpdate()
+  for plate in pairs(self.PlatesVisible) do
+    if plate.TPFrame.Active then
+      OnResetNameplate(plate)
+    end
+  end
 end
 
 function Addon:ForceUpdateOnNameplate(plate)

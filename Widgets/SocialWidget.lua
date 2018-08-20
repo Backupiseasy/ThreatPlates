@@ -56,20 +56,26 @@ function Widget:FRIENDLIST_UPDATE()
 --    ListFriendsSize = ListFriendsSize + 1
 --  end
 
+
   -- First check if there was actually a change to the friend list (event fires for other reasons too)
   local _, friendsOnline = GetNumFriends()
+
   if ListFriendsSize ~= friendsOnline then
     -- Only wipe the friend list if a member went offline
     if friendsOnline < ListFriendsSize then
       ListFriends = {}
     end
 
+    local no_friends = 0
     for i = 1, friendsOnline do
       local name, _ = GetFriendInfo(i)
-      ListFriends[name] = ICON_FRIEND
+      if name then
+        ListFriends[name] = ICON_FRIEND
+        no_friends = no_friends + 1
+      end
     end
 
-    ListFriendsSize = friendsOnline
+    ListFriendsSize = no_friends -- as name might be nil, friendsOnline might not be correct here#
 
 --    if plate then
 --      local unit = plate.TPFrame.unit
@@ -232,7 +238,8 @@ function Widget:OnEnable()
     self:RegisterEvent("UNIT_NAME_UPDATE")
     --Widget:RegisterEvent("BN_FRIEND_LIST_SIZE_CHANGED", EventHandler)
 
-    self:FRIENDLIST_UPDATE()
+    --self:FRIENDLIST_UPDATE()
+    ShowFriends() -- Will fire FRIENDLIST_UPDATE
     self:BN_CONNECTED()
     --self:GUILD_ROSTER_UPDATE() -- called automatically by game
   else

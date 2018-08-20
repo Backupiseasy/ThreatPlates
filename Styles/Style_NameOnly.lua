@@ -1,5 +1,5 @@
-local ADDON_NAME, NAMESPACE = ...
-local ThreatPlates = NAMESPACE.ThreatPlates
+local ADDON_NAME, Addon = ...
+local ThreatPlates = Addon.ThreatPlates
 
 local ART_PATH = ThreatPlates.Art
 local MEDIA_PATH = ThreatPlates.Media
@@ -32,26 +32,12 @@ local function GetTargetTextureY(self)
   end
 end
 
-local function GetHightlightTextureY(self)
-  local dbprofile = self.db.profile
-
-  return - 32 + 2 + dbprofile.HeadlineView.name.y + (dbprofile.HeadlineView.name.size / 2)
-  --  if dbprofile.HeadlineView.name.y >= dbprofile.HeadlineView.customtext.y then
-  --    -- name above status text
-  --    return - 32 + 2 + dbprofile.HeadlineView.name.y + (dbprofile.HeadlineView.name.size / 2)
-  --  else
-  --    -- status text above name
-  --    return - 32 + 2 + dbprofile.HeadlineView.customtext.y + (dbprofile.HeadlineView.customtext.size / 2)
-  --  end
-end
-
 local function Create(self,name)
   local db = self.db.profile.settings
   local dbprofile = self.db.profile
   local theme = {
 
     frame = {
-      emptyTexture = EMPTY_TEXTURE,
       width = db.frame.width,
       height = db.frame.height,
       x = db.frame.x,
@@ -72,19 +58,32 @@ local function Create(self,name)
 
     healthborder = {
       show = false,
+      -- Not used:
+      texture = EMPTY_TEXTURE,
+      edgesize = 0,
+      offset = 0,
     },
 
     eliteborder = {
       show = false,
+      -- Not used:
+      texture = "TP_EliteBorder_Default",
     },
 
     threatborder = {
+      show = false,
+      -- Not used:
       texture = EMPTY_TEXTURE,
       width = 128,
       height = 64,
       x = 0,
       y = 0,
       anchor = "CENTER",
+      -- Texture Coordinates
+      left = 0,
+      right = 1,
+      top = 0,
+      bottom = 1,
     },
 
     highlight = {
@@ -129,8 +128,6 @@ local function Create(self,name)
       size = dbprofile.HeadlineView.name.size,
       width = db.name.width, -- use same as for healthbar view
       height = db.name.height, -- use same as for healthbar view
-      -- width = dbprofile.HeadlineView.name.width,
-      -- height = dbprofile.HeadlineView.name.height,
       x = dbprofile.HeadlineView.name.x,
       y = dbprofile.HeadlineView.name.y,
       align = dbprofile.HeadlineView.name.align,
@@ -157,14 +154,10 @@ local function Create(self,name)
 
     customtext = {
       typeface = MEDIA_PATH:Fetch('font', db.name.typeface),
-      -- size = dbprofile.HeadlineView.name.size - 2,
       size = dbprofile.HeadlineView.customtext.size,
-      -- width = dbprofile.HeadlineView.name.width,
-      -- height = dbprofile.HeadlineView.name.height,
       width = db.customtext.width, -- use same as for healthbar view
       height = db.customtext.height, -- use same as for healthbar view
       x = dbprofile.HeadlineView.customtext.x,
-      -- y = dbprofile.HeadlineView.name.y - dbprofile.HeadlineView.name.size,
       y = dbprofile.HeadlineView.customtext.y,
       align = dbprofile.HeadlineView.customtext.align,
       anchor = "CENTER",
@@ -190,21 +183,30 @@ local function Create(self,name)
     },
 
     skullicon = {
-      -- width = (db.skullicon.scale),
-      -- height = (db.skullicon.scale),
-      -- x = (db.skullicon.x),
-      -- y = (db.skullicon.y),
-      -- anchor = (db.skullicon.anchor),
       show = false,
+      -- Not used:
+      texture = EMPTY_TEXTURE,
+      width = 0,
+      height = 0,
+      x = 0,
+      y = 0,
+      anchor = "CENTER"
     },
 
     eliteicon = {
-      -- width = db.eliteicon.scale,
-      -- height = db.eliteicon.scale,
-      -- x = db.eliteicon.x,
-      -- y = db.eliteicon.y,
-      -- anchor = db.eliteicon.anchor,
       show = false,
+      -- Not used:
+      texture = EMPTY_TEXTURE,
+      width = 0,
+      height = 0,
+      x = 0,
+      y = 0,
+      anchor = "CENTER",
+      -- Texture Coordinates
+      left = 0,
+      right = 1,
+      top = 0,
+      bottom = 1,
     },
 
     spellicon = {
@@ -217,21 +219,13 @@ local function Create(self,name)
     },
 
     raidicon = {
+      texture = "Interface\\TargetingFrame\\UI-RaidTargetingIcons",
       width = db.raidicon.scale,
       height = db.raidicon.scale,
       x = db.raidicon.x_hv,
       y = db.raidicon.y_hv,
       anchor = "CENTER", --db.raidicon.anchor,
       show = db.raidicon.ShowInHeadlineView,
-    },
-
-    customart = { -- Depreciated?
-      -- width = (db.customart.scale),
-      -- height = (db.customart.scale),
-      -- x = (db.customart.x),
-      -- y = (db.customart.y),
-      -- anchor = (db.customart.anchor),
-      show = false,
     },
 
     threatcolor = {
@@ -244,5 +238,5 @@ local function Create(self,name)
 end
 
 -- Register style in ThreatPlates
-ThreatPlates.RegisterTheme("NameOnly",Create)
-ThreatPlates.RegisterTheme("NameOnly-Unique",Create)
+Addon:RegisterTheme("NameOnly",Create)
+Addon:RegisterTheme("NameOnly-Unique",Create)

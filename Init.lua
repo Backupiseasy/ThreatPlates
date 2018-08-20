@@ -54,13 +54,7 @@ ThreatPlates.HEX2RGB = function (hex)
 end
 
 ThreatPlates.Update = function()
-	-- With TidyPlates:
-	--if (TidyPlatesOptions.ActiveTheme == ThreatPlates.THEME_NAME) then
-	--	TidyPlates:SetTheme(ThreatPlates.THEME_NAME)
-	--end
-
-	-- ForceUpdate() is called in SetTheme()
-	TidyPlatesInternal:SetTheme(ThreatPlates.THEME_NAME)
+	Addon:ForceUpdate()
 end
 
 ThreatPlates.Meta = function(value)

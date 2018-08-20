@@ -149,7 +149,7 @@ end
 
 local function UpdateSpecial() -- Need to add a way to update options table.
   Addon:InitializeCustomNameplates()
-  t.Update()
+  Addon:ForceUpdate()
 end
 
 local function GetValue(info)
@@ -174,20 +174,8 @@ local function SetValuePlain(info, value)
 end
 
 local function SetValue(info, value)
-  -- info: table with path to setting in options dialog, that was changed
-  -- info.arg: table with parameter arg from options definition
-  local DB = TidyPlatesThreat.db.profile
-  local keys = info.arg
-  for index = 1, #keys - 1 do
-    DB = DB[keys[index]]
-  end
-  DB[keys[#keys]] = value
-  t.Update()
-end
-
-local function SetValueForceUpdate(info, value)
-	SetValuePlain(info, value)
-	TidyPlatesInternal:ForceUpdate()
+  SetValuePlain(info, value)
+  Addon:ForceUpdate()
 end
 
 local function SetSelectValue(info, value)
@@ -218,7 +206,7 @@ local function SetValueChar(info, value)
     DB = DB[keys[index]]
   end
   DB[keys[#keys]] = value
-  t.Update()
+  Addon:ForceUpdate()
 end
 
 local function GetCVarTPTP(info)
@@ -234,7 +222,7 @@ local function SetCVarTPTP(info, value)
     t.Print("We're unable to change this while in combat", true)
   else
     SetCVar(info.arg, value)
-    t.Update()
+    Addon:ForceUpdate()
   end
 end
 
@@ -246,7 +234,7 @@ local function SetCVarBoolTPTP(info, value)
       info = info.arg
     end
     SetCVar(info, (value and 1) or 0)
-    t.Update()
+    Addon:ForceUpdate()
   end
 end
 
@@ -289,7 +277,7 @@ local function SetColor(info, r, g, b)
     DB = DB[keys[index]]
   end
   DB[keys[#keys]].r, DB[keys[#keys]].g, DB[keys[#keys]].b = r, g, b
-  t.Update()
+  Addon:ForceUpdate()
 end
 
 local function GetColorAlpha(info)
@@ -309,7 +297,7 @@ local function SetColorAlpha(info, r, g, b, a)
     DB = DB[keys[index]]
   end
   DB[keys[#keys]].r, DB[keys[#keys]].g, DB[keys[#keys]].b, DB[keys[#keys]].a = r, g, b, a
-  t.Update()
+  Addon:ForceUpdate()
 end
 
 local function SetColorAlphaAuraWidget(info, r, g, b, a)
@@ -352,20 +340,15 @@ local function SetUnitVisibilitySetting(info, value)
   else
     SetCVarBoolTPTP(unit_visibility.Show, value)
   end
-  TidyPlatesInternal:ForceUpdate()
+  Addon:ForceUpdate()
 end
 
 -- Set Theme Values
 
 local function SetThemeValue(info, val)
-  SetValue(info, val)
-  t.SetThemes(TidyPlatesThreat)
-  -- TODO: should not be necessary here
-  -- With TidyPlates:
-  --if (TidyPlatesOptions.ActiveTheme == t.THEME_NAME) then
-  --  TidyPlates:SetTheme(t.THEME_NAME)
-  --end
-  TidyPlatesInternal:SetTheme(t.THEME_NAME)
+  SetValuePlain(info, val)
+  Addon:SetThemes(TidyPlatesThreat)
+  Addon:ForceUpdate()
 end
 
 local function GetFontFlags(settings, flag)
@@ -2001,7 +1984,7 @@ local function CreateResourceWidgetOptions()
             type = "toggle",
             width = "half",
             desc = L["Use a custom color for the healtbar's border."],
-            set = function(info, val) db.ResourceWidget.BorderUseForegroundColor = false; db.ResourceWidget.BorderUseBackgroundColor = false; t.Update() end,
+            set = function(info, val) db.ResourceWidget.BorderUseForegroundColor = false; db.ResourceWidget.BorderUseBackgroundColor = false; Addon:ForceUpdate() end,
             get = function(info, val) return not (db.ResourceWidget.BorderUseForegroundColor or db.ResourceWidget.BorderUseBackgroundColor) end,
             arg = { "ResourceWidget", "BackgroundUseForegroundColor" },
           },
@@ -3372,7 +3355,7 @@ local function CreateBlizzardSettings()
               SetValuePlain(info, val)
               db.Scale.PixelPerfectUI = not val and db.Scale.PixelPerfectUI
               Addon:UIScaleChanged()
-              TidyPlatesInternal:ForceUpdate()
+              Addon:ForceUpdate()
             end,
             get = GetValue,
             arg = { "Scale", "IgnoreUIScale" },
@@ -3385,7 +3368,7 @@ local function CreateBlizzardSettings()
               SetValuePlain(info, val)
               db.Scale.IgnoreUIScale = not val and db.Scale.IgnoreUIScale
               Addon:UIScaleChanged()
-              TidyPlatesInternal:ForceUpdate()
+              Addon:ForceUpdate()
             end,
             get = GetValue,
             arg = { "Scale", "PixelPerfectUI" },
@@ -3628,7 +3611,7 @@ local function CreateBlizzardSettings()
                 for k, v in pairs(cvars) do
                   SetCVar(v, GetCVarDefault(v))
                 end
-                t.Update()
+                Addon:ForceUpdate()
               end
             end,
           },
@@ -4153,7 +4136,7 @@ local function CreateSpecRoles()
             local spec = TidyPlatesThreat.db.char.spec[index]
             return (spec == nil and role == "TANK") or spec
           end,
-          set = function() TidyPlatesThreat.db.char.spec[index] = true; t.Update() end,
+          set = function() TidyPlatesThreat.db.char.spec[index] = true; Addon:ForceUpdate() end,
         },
         DPS = {
           name = L["DPS/Healing"],
@@ -4164,7 +4147,7 @@ local function CreateSpecRoles()
             local spec = TidyPlatesThreat.db.char.spec[index]
             return (spec == nil and role ~= "TANK") or not spec
           end,
-          set = function() TidyPlatesThreat.db.char.spec[index] = false; t.Update() end,
+          set = function() TidyPlatesThreat.db.char.spec[index] = false; Addon:ForceUpdate() end,
         },
       },
     }
@@ -5273,7 +5256,7 @@ local function CreateOptionsTable()
                           set = function(info, val)
                             TidyPlatesThreat.db.profile.settings.customtext.SubtextColorUseHeadline = false
                             TidyPlatesThreat.db.profile.settings.customtext.SubtextColorUseSpecific = false
-                            TidyPlatesInternal:ForceUpdate()
+                            Addon:ForceUpdate()
                           end,
                           get = function(info) return not (TidyPlatesThreat.db.profile.settings.customtext.SubtextColorUseHeadline or TidyPlatesThreat.db.profile.settings.customtext.SubtextColorUseSpecific) end,
                         },
@@ -5352,7 +5335,7 @@ local function CreateOptionsTable()
                           set = function(info, val)
                             TidyPlatesThreat.db.profile.HeadlineView.SubtextColorUseHeadline = false
                             TidyPlatesThreat.db.profile.HeadlineView.SubtextColorUseSpecific = false
-                            TidyPlatesInternal:ForceUpdate()
+                            Addon:ForceUpdate()
                           end,
                           get = function(info) return not (TidyPlatesThreat.db.profile.HeadlineView.SubtextColorUseHeadline or TidyPlatesThreat.db.profile.HeadlineView.SubtextColorUseSpecific) end,
                         },
@@ -5567,7 +5550,7 @@ local function CreateOptionsTable()
                         SetThemeValue(info, val)
                         options.args.NameplateSettings.args.EliteIcon.args.Texture.args.PreviewRare.image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\EliteArtWidget\\" .. val
                         options.args.NameplateSettings.args.EliteIcon.args.Texture.args.PreviewElite.image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\EliteArtWidget\\" .. "elite-" .. val
-                        t.Update()
+                        Addon:ForceUpdate()
                       end,
                       arg = { "settings", "eliteicon", "theme" },
                     },
@@ -6801,7 +6784,7 @@ local function CreateOptionsTable()
                 if val then
                   db.uniqueSettings[k_c].showNameplate = false;
                   db.uniqueSettings[k_c].ShowHeadlineView = false;
-                  t.Update()
+                  Addon:ForceUpdate()
                 end
               end,
               get = function(info) return not(db.uniqueSettings[k_c].showNameplate or db.uniqueSettings[k_c].ShowHeadlineView) end,
@@ -7074,17 +7057,8 @@ function TidyPlatesThreat:ProfChange()
     end
   end
 
-  -- Update existing nameplates as certain settings may have changed that are not covered by ForceUpdate()
-  Addon:UIScaleChanged()
-  Addon:CallbackWhenOoC(function() Addon:SetBaseNamePlateSize() end, L["Unable to change a setting while in combat."])
-
-  for plate, unitid in pairs(Addon.PlatesVisible) do
-    Addon:UpdateFriendlyNameplateStyle(plate, unitid)
-  end
-
   TidyPlatesThreat:ReloadTheme()
-
-  TidyPlatesInternal:ForceUpdate()
+  Addon:ForceUpdate()
 end
 
 function TidyPlatesThreat:OpenOptions()
@@ -7095,7 +7069,7 @@ function TidyPlatesThreat:OpenOptions()
 
   if not options then
     CreateOptionsTable()
-    t.Update()
+    Addon:ForceUpdate()
 
     -- Setup options dialog
     LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable(t.ADDON_NAME, options)
