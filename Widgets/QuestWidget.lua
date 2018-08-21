@@ -251,6 +251,9 @@ function Widget:UpdateFrame(widget_frame, unit)
 
       widget_frame.Text:SetText(text)
       widget_frame.Text:SetTextColor(color.r, color.g, color.b)
+      widget_frame.Text:Show()
+    elseif widget_frame.Text then
+      widget_frame.Text:Hide()
     end
 
     widget_frame:Show()
