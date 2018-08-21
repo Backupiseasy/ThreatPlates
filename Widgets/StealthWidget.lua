@@ -3,7 +3,7 @@
 ---------------------------------------------------------------------------------------------------
 local ADDON_NAME, Addon = ...
 
-local Widget = Addon:NewWidget("Stealth")
+local Widget = Addon.Widgets:NewWidget("Stealth")
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -95,8 +95,7 @@ function Widget:OnUnitAdded(widget_frame, unit)
   -- or check for (?=: Invisibility and Stealth Detection)
   -- TODO: for oder do-while (what#s more efficient) with break
   repeat
-    -- BfA: local name, _, _, _, _, _, _, _, _, spell_id = UnitBuff(unit.unitid, i)
-    local name, _, _, _, _, _, _, _, _, _, spell_id = UnitBuff(unit.unitid, i)
+    local name, _, _, _, _, _, _, _, _, spell_id = UnitBuff(unit.unitid, i)
     if DETECTION_AURAS[spell_id] then
       found = true
     else

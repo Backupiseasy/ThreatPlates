@@ -1,5 +1,5 @@
-﻿local ADDON_NAME, NAMESPACE = ...
-local ThreatPlates = NAMESPACE.ThreatPlates
+﻿local ADDON_NAME, Addon = ...
+local ThreatPlates = Addon.ThreatPlates
 
 local ART_PATH = ThreatPlates.Art
 local EMPTY_TEXTURE = ART_PATH.."Empty"
@@ -9,7 +9,6 @@ local function Create(self,name)
   local theme = {
 
     frame = {
-      emptyTexture = ThreatPlates.Art.."Empty",
       width = db.frame.width,
       height = db.frame.height,
       x = db.frame.x,
@@ -48,20 +47,28 @@ local function Create(self,name)
       y = 0,
       anchor = "CENTER",
       show = db.threatborder.show,
+      -- Texture Coordinates
+      left = 0,
+      right = 1,
+      top = 0,
+      bottom = 1,
     },
 
     highlight = {
       show = db.highlight.show,
+      -- Not used:
+      texture = EMPTY_TEXTURE,
     },
 
-    eliteicon = {
-      texture = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\EliteArtWidget\\"..db.eliteicon.theme,
-      width = db.eliteicon.scale,
-      height = db.eliteicon.scale,
-      x = db.eliteicon.x,
-      y = db.eliteicon.y,
-      anchor = "CENTER",  --db.eliteicon.anchor,
-      show = db.eliteicon.show,
+    target = {
+      show = false,
+      -- Not used:
+      texture = ART_PATH.."Target",
+      width = 0,
+      height = 0,
+      x = 0,
+      y = 0,
+      anchor = "CENTER",
     },
 
     castbar = {
@@ -86,10 +93,6 @@ local function Create(self,name)
       show = db.castborder.show and db.castnostop.ShowOverlay,
     },
 
-    target = {
-      show = false,
-    },
-
     name = {
       typeface = ThreatPlates.Media:Fetch('font', db.name.typeface),
       size = db.name.size,
@@ -104,6 +107,7 @@ local function Create(self,name)
       flags = db.name.flags,
       show = db.name.show,
     },
+
     level = {
       typeface = ThreatPlates.Media:Fetch('font', db.level.typeface),
       size = db.level.size,
@@ -118,6 +122,7 @@ local function Create(self,name)
       flags = db.level.flags,
       show = db.level.show,
     },
+
     customtext = {
       typeface = ThreatPlates.Media:Fetch('font', db.customtext.typeface),
       size = db.customtext.size,
@@ -132,6 +137,7 @@ local function Create(self,name)
       flags = db.customtext.flags,
       show = true,
     },
+
     spelltext = {
       typeface = ThreatPlates.Media:Fetch('font', db.spelltext.typeface),
       size = db.spelltext.size,
@@ -146,7 +152,9 @@ local function Create(self,name)
       flags = db.spelltext.flags,
       show = db.spelltext.show,
     },
+
     skullicon = {
+      texture = "Interface\\TargetingFrame\\UI-TargetingFrame-Skull",
       width = (db.skullicon.scale),
       height = (db.skullicon.scale),
       x = (db.skullicon.x),
@@ -154,14 +162,22 @@ local function Create(self,name)
       anchor = "CENTER", --(db.skullicon.anchor),
       show = db.skullicon.show,
     },
-    customart = { -- Depreciated?
-      width = 256,
-      height = 64,
-      x = 0,
-      y = 0,
-      anchor = "CENTER",
-      show = db.customart.show,
+
+    eliteicon = {
+      texture = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\EliteArtWidget\\"..db.eliteicon.theme,
+      width = db.eliteicon.scale,
+      height = db.eliteicon.scale,
+      x = db.eliteicon.x,
+      y = db.eliteicon.y,
+      anchor = "CENTER",  --db.eliteicon.anchor,
+      show = db.eliteicon.show,
+      -- Texture Coordinates
+      left = 0,
+      right = 1,
+      top = 0,
+      bottom = 1,
     },
+
     spellicon = {
       width = (db.spellicon.scale),
       height = (db.spellicon.scale),
@@ -170,15 +186,18 @@ local function Create(self,name)
       anchor = "CENTER", --(db.spellicon.anchor),
       show = db.spellicon.show,
     },
+
     raidicon = {
+      texture = "Interface\\TargetingFrame\\UI-RaidTargetingIcons",
       width = (db.raidicon.scale),
       height = (db.raidicon.scale),
       x = (db.raidicon.x),
       y = (db.raidicon.y),
       anchor = "CENTER", --(db.raidicon.anchor),
       show = db.raidicon.show,
-    }
+    },
   }
+
   local threat = db[name].threatcolor
   theme.threatcolor = {
     LOW = {
@@ -213,6 +232,6 @@ local themeList = {
 
 do
   for i=1,#themeList do
-    ThreatPlates.RegisterTheme(themeList[i],Create)
+    Addon:RegisterTheme(themeList[i], Create)
   end
 end

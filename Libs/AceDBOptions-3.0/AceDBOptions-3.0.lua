@@ -434,7 +434,7 @@ local optionsTable = {
 }
 
 --- Get/Create a option table that you can use in your addon to control the profiles of AceDB-3.0.
--- @param filter_as_string The database object to create the options table for.
+-- @param db The database object to create the options table for.
 -- @return The options table to be used in AceConfig-3.0
 -- @usage 
 -- -- Assuming `options` is your top-level options table and `self.db` is your database:

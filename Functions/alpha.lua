@@ -118,7 +118,7 @@ local function AlphaUnique(unit)
 end
 
 local function AlphaUniqueNameOnly(unit)
-	local unique_setting = GetUniqueNameplateSetting(unit)
+	local unique_setting = unit.CustomPlateSettings
 
   if unique_setting.overrideAlpha then
     local db = TidyPlatesThreat.db.profile.HeadlineView

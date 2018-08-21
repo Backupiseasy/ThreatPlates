@@ -4,7 +4,7 @@
 local ADDON_NAME, Addon = ...
 local ThreatPlates = Addon.ThreatPlates
 
-local Widget = Addon:NewWidget("Social")
+local Widget = Addon.Widgets:NewWidget("Social")
 
 ------------------------
 -- Social Icon Widget --
@@ -28,7 +28,8 @@ local CreateFrame = CreateFrame
 local GetNumGuildMembers, GetGuildRosterInfo = GetNumGuildMembers, GetGuildRosterInfo
 local GetNumFriends, GetFriendInfo = GetNumFriends, GetFriendInfo
 local BNGetNumFriends, BNGetFriendInfo, BNGetToonInfo, BNGetFriendInfoByID = BNGetNumFriends, BNGetFriendInfo, BNGetToonInfo, BNGetFriendInfoByID
-local UnitIsPlayer, UnitName, GetRealmName, UnitFactionGroup = UnitIsPlayer, UnitName, GetRealmName, UnitFactionGroup
+local BNet_GetValidatedCharacterName = BNet_GetValidatedCharacterName
+local UnitName, GetRealmName, UnitFactionGroup = UnitName, GetRealmName, UnitFactionGroup
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 
 -- ThreatPlates APIs
@@ -55,20 +56,26 @@ function Widget:FRIENDLIST_UPDATE()
 --    ListFriendsSize = ListFriendsSize + 1
 --  end
 
+
   -- First check if there was actually a change to the friend list (event fires for other reasons too)
   local _, friendsOnline = GetNumFriends()
+
   if ListFriendsSize ~= friendsOnline then
     -- Only wipe the friend list if a member went offline
     if friendsOnline < ListFriendsSize then
       ListFriends = {}
     end
 
+    local no_friends = 0
     for i = 1, friendsOnline do
       local name, _ = GetFriendInfo(i)
-      ListFriends[name] = ICON_FRIEND
+      if name then
+        ListFriends[name] = ICON_FRIEND
+        no_friends = no_friends + 1
+      end
     end
 
-    ListFriendsSize = friendsOnline
+    ListFriendsSize = no_friends -- as name might be nil, friendsOnline might not be correct here#
 
 --    if plate then
 --      local unit = plate.TPFrame.unit
@@ -144,11 +151,8 @@ function Widget:BN_FRIEND_ACCOUNT_ONLINE(presence_id)
   -- don't display a the friend if we didn't get the data in time or the are not logged in into WoW
   --if not accountName or client ~= "BNET_CLIENT_WOW" then	return end
 
-  print ("Social: BN_FRIEND_ACCOUNT_ONLINE -", character_name)
-
   if (battle_tag) then
     character_name = BNet_GetValidatedCharacterName(character_name, battle_tag, client) or ""
-    print ("Social: BN_FRIEND_ACCOUNT_ONLINE - Update -", character_name)
   end
 
   ListBnetFriends[character_name] = ICON_BNET_FRIEND
@@ -162,11 +166,8 @@ function Widget:BN_FRIEND_ACCOUNT_OFFLINE(presence_id)
   -- don't display a the friend if we didn't get the data in time or the are not logged in into WoW
   --if not accountName or client ~= "BNET_CLIENT_WOW" then	return end
 
-  print ("Social: BN_FRIEND_ACCOUNT_OFFLINE -", character_name)
-
   if (battle_tag) then
     character_name = BNet_GetValidatedCharacterName(character_name, battle_tag, client) or ""
-    print ("Social: BN_FRIEND_ACCOUNT_OFFLINE - Update -", character_name)
   end
 
   ListBnetFriends[character_name] = nil
@@ -232,14 +233,13 @@ function Widget:OnEnable()
     self:RegisterEvent("FRIENDLIST_UPDATE")
     self:RegisterEvent("GUILD_ROSTER_UPDATE")
     self:RegisterEvent("BN_CONNECTED")
-    self:RegisterEvent("BN_FRIEND_TOON_ONLINE") -- remove with BfA
-    self:RegisterEvent("BN_FRIEND_TOON_OFFLINE") -- remove with BfA
     self:RegisterEvent("BN_FRIEND_ACCOUNT_ONLINE")
     self:RegisterEvent("BN_FRIEND_ACCOUNT_OFFLINE")
     self:RegisterEvent("UNIT_NAME_UPDATE")
     --Widget:RegisterEvent("BN_FRIEND_LIST_SIZE_CHANGED", EventHandler)
 
-    self:FRIENDLIST_UPDATE()
+    --self:FRIENDLIST_UPDATE()
+    ShowFriends() -- Will fire FRIENDLIST_UPDATE
     self:BN_CONNECTED()
     --self:GUILD_ROSTER_UPDATE() -- called automatically by game
   else
@@ -273,8 +273,7 @@ end
 function Widget:UpdateFrame(widget_frame, unit)
   -- I will probably expand this to a table with 'friend = true','guild = true', and 'bnet = true' and have 3 textuers show.
   local db = TidyPlatesThreat.db.profile.socialWidget
-  local friend_texture = db.ShowFriendIcon and (ListFriends[unit.fullname] or ListBnetFriends[unit.fullname] or ListGuildMembers[unit.fullname])
-
+  local friend_texture = db.ShowFriendIcon and (ListFriends[unit.name] or ListBnetFriends[unit.fullname] or ListGuildMembers[unit.fullname])
   local faction_texture
   if db.ShowFactionIcon then
     -- faction can be nil, e.g., for Pandarians that not yet have choosen a faction

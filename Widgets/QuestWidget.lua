@@ -4,7 +4,7 @@
 local ADDON_NAME, Addon = ...
 local ThreatPlates = Addon.ThreatPlates
 
-local Widget = Addon:NewWidget("Quest")
+local Widget = Addon.Widgets:NewWidget("Quest")
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -130,12 +130,12 @@ end
 
 function Widget:PLAYER_REGEN_ENABLED()
   InCombat = false
-  Widget:UpdateAllFrames()
+  self:UpdateAllFrames()
 end
 
 function Widget:PLAYER_REGEN_DISABLED()
   InCombat = true
-  Widget:UpdateAllFrames()
+  self:UpdateAllFrames()
 end
 
 function Widget:UNIT_THREAT_LIST_UPDATE(unitid)
@@ -192,7 +192,7 @@ function Widget:OnEnable()
 
   self:RegisterEvent("QUEST_ACCEPTED", EventHandler)
   self:RegisterEvent("QUEST_WATCH_UPDATE", EventHandler)
-  -- BfA: self:RegisterEvent("QUEST_ITEM_UPDATE", EventHandler)
+  self:RegisterEvent("QUEST_ITEM_UPDATE", EventHandler)
   self:RegisterEvent("PLAYER_ENTERING_WORLD", EventHandler)
   self:RegisterEvent("PLAYER_REGEN_ENABLED")
   self:RegisterEvent("PLAYER_REGEN_DISABLED")

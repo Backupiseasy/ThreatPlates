@@ -1,6 +1,6 @@
-﻿## Interface: 70300
+﻿## Interface: 80000
 ## Title: Threat Plates
-## Version: 8.8.0-Alpha3
+## Version: 9.1.0-Alpha1
 ## Notes: Threat-reactive nameplates.
 ## Notes-deDE: Bedrohungsreaktive Namensplaketten.
 ## Author: Suicidal Katt, Blacksalsify
@@ -9,6 +9,7 @@
 ## OptionalDeps: Ace3, LibSharedMedia-3.0
 ## X-Website: https://wow.curseforge.com/projects/tidy-plates-threat-plates
 ## X-License: GNU General Public License
+## X-Credits: danltiger (for Tidy Plates), Tosaido (for quest handling code from QuestMobs)
 
 Libs\Libs.xml
 Locales\Locales.xml
@@ -17,6 +18,8 @@ Init.lua
 Media.lua
 Constants.lua
 Elements\Elements.xml
+
+Widgets\WidgetHandler.lua
 
 # Integration of TidyPlates for standalone version
 TidyPlatesInternal\TidyPlates.xml

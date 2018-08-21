@@ -54,13 +54,7 @@ ThreatPlates.HEX2RGB = function (hex)
 end
 
 ThreatPlates.Update = function()
-	-- With TidyPlates:
-	--if (TidyPlatesOptions.ActiveTheme == ThreatPlates.THEME_NAME) then
-	--	TidyPlates:SetTheme(ThreatPlates.THEME_NAME)
-	--end
-
-	-- ForceUpdate() is called in SetTheme()
-	TidyPlatesInternal:SetTheme(ThreatPlates.THEME_NAME)
+	Addon:ForceUpdate()
 end
 
 ThreatPlates.Meta = function(value)
@@ -147,6 +141,19 @@ end
 --------------------------------------------------------------------------------------------------
 -- Some functions to fix TidyPlates bugs
 ---------------------------------------------------------------------------------------------------
+
+ThreatPlates.Dump = function(value, index)
+	if not IsAddOnLoaded("Blizzard_DebugTools") then
+		LoadAddOn("Blizzard_DebugTools")
+	end
+	local i
+	if index and type(index) == "number" then
+	  i = index
+	else
+	  i = 1
+	end
+	DevTools_Dump(value, i)
+end
 
 -- With TidyPlates:
 --local function FixUpdateUnitCondition(unit)

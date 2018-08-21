@@ -13,7 +13,7 @@ local function toggleDPS()
 		TP.Print(L["-->>|cffff0000DPS Plates Enabled|r<<--"])
 		TP.Print(L["|cff89F559Threat Plates|r: DPS switch detected, you are now in your |cffff0000dpsing / healing|r role."])
 	end
-	TidyPlatesInternal:ForceUpdate()
+	Addon:ForceUpdate()
 end
 
 local function toggleTANK()
@@ -23,7 +23,7 @@ local function toggleTANK()
 		TP.Print(L["-->>|cff00ff00Tank Plates Enabled|r<<--"])
 		TP.Print(L["|cff89F559Threat Plates|r: Tank switch detected, you are now in your |cff00ff00tanking|r role."])
 	end
-	TidyPlatesInternal:ForceUpdate()
+	Addon:ForceUpdate()
 end
 
 SLASH_TPTPDPS1 = "/tptpdps"
@@ -98,56 +98,33 @@ SlashCmdList["TPTPVERBOSE"] = TPTPVERBOSE
 
 -- Command: /tptp
 function TidyPlatesThreat:ChatCommand(input)
---	if input == "custom-plate" then
---		local plate = C_NamePlate.GetNamePlateForUnit("target")
---		if not plate then return end
---
---		local unit = plate.TPFrame.unit
---		print ("Adding", unit.name, "as new custom nameplate")
---		TidyPlatesThreat.db.profile.uniqueSettings.map[unit.name] = TidyPlatesThreat.db.profile.uniqueSettings.map["Geisterwolf"]
---
---		Addon.EventHandler:UNIT_NAME_UPDATE(unit.unitid)
---
---		return
---	elseif input == "stats" then
---		local plate = C_NamePlate.GetNamePlateForUnit("target")
---		if not plate then return end
---
---		TP.DEBUG_PRINT_UNIT(plate.TPFrame.unit, true)
---		return
---	elseif input == "visible" then
---		local blizzard_plates = {}
---
---		print ("Nameplates via C_NamePlate.GetNamePlates:")
---		for _, plate in pairs(C_NamePlate.GetNamePlates()) do
---			local tp_frame = plate.TPFrame
---			print (" ", plate:GetName(), ": TPFrame =", tp_frame ~= nil)
---			print ("  Plates Created:", Addon.PlatesCreated[plate] ~= nil)
---			print ("  Plates Visible:", Addon.PlatesVisible[plate] ~= nil)
---			blizzard_plates[plate] = true
---		end
---
---		print ("Nameplates via PlatesCreated:")
---		for plate, unitid in pairs(Addon.PlatesCreated) do
---			local tp_frame = plate.TPFrame
---			print (" ", plate:GetName())
---			if not blizzard_plates[plate] then
---				print ("    Unknown Created Plate for Blizzard")
---			end
---		end
---
---		print ("Nameplates via PlatesVisible:")
---		for plate, unitid in pairs(Addon.PlatesVisible) do
---			local tp_frame = plate.TPFrame
---			print (" ", plate:GetName())
---			if not blizzard_plates[plate] then
---				print ("    Unknown Visible Plate for Blizzard")
---			end
---		end
---
---
---		return
---	end
+	if input == "plate" then
+		local plate = C_NamePlate.GetNamePlateForUnit("target")
+		if not plate then return end
+
+		print ("Nameplate FrameStrata:", plate:GetFrameStrata())
+		print ("Nameplate FrameLevel :", plate:GetFrameLevel())
+		print ("Nameplate Parent:", (plate:GetParent() == UIParent and "UIParent") or (plate:GetParent() == WorldFrame and "WorldFrame") or ("---"))
+		print ("------------------------------------------")
+		print ("Nameplate UnitFrame FrameStrata:", plate.UnitFrame:GetFrameStrata())
+		print ("Nameplate UnitFrame FrameLevel :", plate.UnitFrame:GetFrameLevel())
+		print ("Nameplate UnitFrame Parent:", (plate.UnitFrame:GetParent() == UIParent and "UIParent") or (plate.UnitFrame:GetParent() == WorldFrame and "WorldFrame") or ("---"))
+		print ("------------------------------------------")
+		print ("TPFrame FrameStrata:", plate.TPFrame:GetFrameStrata())
+		print ("TPFrame FrameLevel :", plate.TPFrame:GetFrameLevel())
+		print ("TPFrame Parent:", (plate.TPFrame:GetParent() == UIParent and "UIParent") or (plate.TPFrame:GetParent() == WorldFrame and "WorldFrame") or ("---"))
+		print ("------------------------------------------")
+		print ("Healthbar FrameStrata:", plate.TPFrame.visual.healthbar:GetFrameStrata())
+		print ("Healthbar FrameLevel :", plate.TPFrame.visual.healthbar:GetFrameLevel())
+  elseif input == "cp" then
+      local plate = C_NamePlate.GetNamePlateForUnit("target")
+      if not plate then return end
+
+      print ("TPFrame FrameLevel :", plate.TPFrame:GetFrameLevel())
+      print ("ComboPointsFrameStrata:", Addon.Widgets.ComboPoints.WidgetFrame:GetFrameLevel())
+      print ("TargetHighlight FrameLevel :", plate.TPFrame.widgets.TargetArt:GetFrameLevel())
+		return
+	end
 
 	TidyPlatesThreat:OpenOptions()
 

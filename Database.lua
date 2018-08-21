@@ -340,6 +340,8 @@ end
 local function MigrationAurasSettings(profile_name, profile)
   if DatabaseEntryExists(profile, { "AuraWidget" } ) then
     profile.AuraWidget.Debuffs = profile.AuraWidget.Debuffs or {}
+    profile.AuraWidget.Buffs = profile.AuraWidget.Buffs or {}
+    profile.AuraWidget.CrowdControl = profile.AuraWidget.CrowdControl or {}
 
     if DatabaseEntryExists(profile, { "AuraWidget", "ShowDebuffsOnFriendly", } ) and profile.AuraWidget.ShowDebuffsOnFriendly then
       profile.AuraWidget.Debuffs.ShowFriendly = true
@@ -348,9 +350,23 @@ local function MigrationAurasSettings(profile_name, profile)
 
     -- Don't migration FilterByType, does not make sense
     DatabaseEntryDelete(profile, { "AuraWidget", "FilterByType", } )
-    DatabaseEntryDelete(profile, { "AuraWidget", "ShowFriendly", } )
-    DatabaseEntryDelete(profile, { "AuraWidget", "ShowEnemy", } )
 
+
+    if DatabaseEntryExists(profile, { "AuraWidget", "ShowFriendly", } ) and not profile.AuraWidget.ShowFriendly then
+      profile.AuraWidget.Debuffs.ShowFriendly = false
+      profile.AuraWidget.Buffs.ShowFriendly = false
+      profile.AuraWidget.CrowdControl.ShowFriendly = false
+
+      DatabaseEntryDelete(profile, { "AuraWidget", "ShowFriendly", } )
+    end
+
+    if DatabaseEntryExists(profile, { "AuraWidget", "ShowEnemy", } ) and not profile.AuraWidget.ShowEnemy then
+      profile.AuraWidget.Debuffs.ShowEnemy = false
+      profile.AuraWidget.Buffs.ShowEnemy = false
+      profile.AuraWidget.CrowdControl.ShowEnemy = false
+
+      DatabaseEntryDelete(profile, { "AuraWidget", "ShowEnemy", } )
+    end
 
     if DatabaseEntryExists(profile, { "AuraWidget", "FilterBySpell", } ) then
       profile.AuraWidget.Debuffs.FilterBySpell = profile.AuraWidget.FilterBySpell
@@ -358,7 +374,14 @@ local function MigrationAurasSettings(profile_name, profile)
     end
 
     if DatabaseEntryExists(profile, { "AuraWidget", "FilterMode", } ) then
-      profile.AuraWidget.Debuffs.FilterMode = profile.AuraWidget.FilterMode:gsub("Mine", "")
+      if profile.AuraWidget.FilterMode == "BLIZZARD" then
+        profile.AuraWidget.Debuffs.FilterMode = "blacklist"
+        profile.AuraWidget.Debuffs.ShowAllEnemy = false
+        profile.AuraWidget.Debuffs.ShowOnlyMine = false
+        profile.AuraWidget.Debuffs.ShowBlizzardForEnemy = true
+      else
+        profile.AuraWidget.Debuffs.FilterMode = profile.AuraWidget.FilterMode:gsub("Mine", "")
+      end
       DatabaseEntryDelete(profile, { "AuraWidget", "FilterMode", } )
     end
 
@@ -366,6 +389,21 @@ local function MigrationAurasSettings(profile_name, profile)
       profile.AuraWidget.Debuffs.Scale = profile.AuraWidget.scale
       DatabaseEntryDelete(profile, { "AuraWidget", "scale", } )
     end
+  end
+end
+
+local function MigrationAurasSettingsFix(profile_name, profile)
+  if DatabaseEntryExists(profile, { "AuraWidget", "Debuffs", "FilterMode", } ) and profile.AuraWidget.Debuffs.FilterMode == "BLIZZARD" then
+    profile.AuraWidget.Debuffs.FilterMode = "blacklist"
+    profile.AuraWidget.Debuffs.ShowAllEnemy = false
+    profile.AuraWidget.Debuffs.ShowOnlyMine = false
+    profile.AuraWidget.Debuffs.ShowBlizzardForEnemy = true
+  end
+  if DatabaseEntryExists(profile, { "AuraWidget", "Buffs", "FilterMode", } ) and profile.AuraWidget.Buffs.FilterMode == "BLIZZARD" then
+    profile.AuraWidget.Buffs.FilterMode = "blacklist"
+  end
+  if DatabaseEntryExists(profile, { "AuraWidget", "CrowdControl", "FilterMode", } ) and profile.AuraWidget.CrowdControl.FilterMode == "BLIZZARD" then
+    profile.AuraWidget.CrowdControl.FilterMode = "blacklist"
   end
 end
 
@@ -396,6 +434,20 @@ local function MigrateAuraWidget(profile_name, profile)
   end
 end
 
+local function MigrationComboPointsWidget(profile_name, profile)
+  if DatabaseEntryExists(profile, { "comboWidget" }) then
+    profile.ComboPoints.ON = profile.comboWidget.ON
+    profile.ComboPoints.Scale = profile.comboWidget.scale
+    profile.ComboPoints.x = profile.comboWidget.x
+    profile.ComboPoints.y = profile.comboWidget.y
+    profile.ComboPoints.x_hv = profile.comboWidget.x_hv
+    profile.ComboPoints.y_hv = profile.comboWidget.y_hv
+    profile.ComboPoints.ShowInHeadlineView = profile.comboWidget.ShowInHeadlineView
+
+    DatabaseEntryDelete(profile, { "comboWidget" })
+  end
+end
+
 ---- Settings in the SavedVariables file that should be migrated and/or deleted
 local DEPRECATED_SETTINGS = {
 --  NamesColor = { MigrateNamesColor, },                        -- settings.name.color
@@ -417,7 +469,9 @@ local DEPRECATED_SETTINGS = {
   TotemSettings = { MigrationTotemSettings, "8.7.0" },        -- (changed in 8.7.0)
   Borders = { MigrateBorderTextures, "8.7.0" },               -- (changed in 8.7.0)
   UniqueSettingsList = { "uniqueSettings", "list" },          -- (removed in 8.7.0, cleanup added in 8.7.1)
-  Auras = { MigrationAurasSettings, "8.8.0" },                -- (changed in 8.8.0)
+  Auras = { MigrationAurasSettings, "9.0.0" },                -- (changed in 9.0.0)
+  AurasFix = { MigrationAurasSettingsFix },                   -- (changed in 9.0.4 and 9.0.9)
+  MigrationComboPointsWidget = { MigrationComboPointsWidget, "9.1.0" },  -- (changed in 9.1.0)
 }
 
 local function MigrateDatabase(current_version)

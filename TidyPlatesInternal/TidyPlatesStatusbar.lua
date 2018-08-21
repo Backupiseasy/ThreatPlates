@@ -92,7 +92,7 @@ local function SetEliteBorder(self, texture)
     edgeSize = backdrop.edgeSize,
     --insets = { left = 0, right = 0, top = 0, bottom = 0 }
   })
-  self.EliteBorder:SetBackdropBorderColor(1, 0.85, 0, 1)
+  --self.EliteBorder:SetBackdropBorderColor(1, 0.85, 0, 1)
 end
 
 function Addon:CreateHealthbar(parent)
@@ -283,7 +283,7 @@ function Addon:ConfigCastbar()
 
         castbar:Show()
         EnabledConfigMode = true
-        TidyPlatesInternal:ForceUpdate()
+        Addon:ForceUpdate()
       elseif castbar._Hide then
         castbar:_Hide()
       end
@@ -297,5 +297,7 @@ function Addon:ConfigCastbar()
     castbar.Hide = castbar._Hide
     castbar:Hide()
     EnabledConfigMode = false
+
+    Addon:ForceUpdateOnNameplate(ConfigModePlate)
   end
 end

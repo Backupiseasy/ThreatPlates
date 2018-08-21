@@ -4,7 +4,7 @@
 local ADDON_NAME, Addon = ...
 local ThreatPlates = Addon.ThreatPlates
 
-local Widget = Addon:NewWidget("Resource")
+local Widget = Addon.Widgets:NewWidget("Resource")
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -192,7 +192,7 @@ local function UpdateResourceBar(widget_frame)
 end
 
 -- This event handler only watches for events of unit == "target"
-function Widget:UNIT_POWER(unitid, powerType)
+function Widget:UNIT_POWER_UPDATE(unitid, powerType)
   local plate = GetNamePlateForUnit("target")
   if plate and plate.TPFrame.Active then
     local widget_frame = plate.TPFrame.widgets.Resource
@@ -242,8 +242,7 @@ end
 
 -- EVENT: UNIT_POWER_UPDATE: "unitID", "powerType"
 function Widget:OnEnable()
-  -- BfA: self:RegisterUnitEvent("UNIT_POWER_UPDATE", "target")
-  self:RegisterUnitEvent("UNIT_POWER", "target")
+  self:RegisterUnitEvent("UNIT_POWER_UPDATE", "target")
   self:RegisterEvent("PLAYER_TARGET_CHANGED")
   -- Widget:RegisterEvent("UNIT_DISPLAYPOWER") -- use this to determine power type changes on units
 end

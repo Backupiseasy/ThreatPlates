@@ -4,7 +4,7 @@
 local ADDON_NAME, Addon = ...
 local ThreatPlates = Addon.ThreatPlates
 
-local Widget = Addon:NewWidget("Auras")
+local Widget = Addon.Widgets:NewWidget("Auras")
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -22,7 +22,7 @@ local tonumber = tonumber
 -- WoW APIs
 local CreateFrame, GetFramerate = CreateFrame, GetFramerate
 local DebuffTypeColor = DebuffTypeColor
-local UnitAura, UnitIsFriend, UnitIsUnit, UnitReaction, UnitIsPlayer = UnitAura, UnitIsFriend, UnitIsUnit, UnitReaction, UnitIsPlayer
+local UnitAura, UnitIsFriend, UnitIsUnit, UnitReaction, UnitIsPlayer, UnitPlayerControlled = UnitAura, UnitIsFriend, UnitIsUnit, UnitReaction, UnitIsPlayer, UnitPlayerControlled
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 
 -- ThreatPlates APIs
@@ -73,18 +73,21 @@ Widget.UnitAuraList = {}
 local CooldownNative = CreateFrame("Cooldown", nil, WorldFrame)
 Widget.SetCooldown = CooldownNative.SetCooldown
 
-local LOC_CHARM = 1 -- Aura: Possess
-local LOC_FEAR = 2
-local LOC_POLYMORPH = 3
-local LOC_STUN = 4
+local LOC_CHARM = 1         -- Aura: Possess
+local LOC_FEAR = 2          -- Mechanic: Fleeing
+local LOC_POLYMORPH = 3     -- Aura: Change Model,
+local LOC_STUN = 4          -- Aura: Stun
 local LOC_INCAPACITATE = 5
-local LOC_SLEEP = 6
-local LOC_DISORIENT = 7 -- Aura: Confuse
+local LOC_SLEEP = 6         -- Mechanic: Asleep
+local LOC_DISORIENT = 7     -- Aura: Confuse
 local LOC_BANISH = 8
 local LOC_HORROR = 9
 
-local PC_SNARE = 50
-local PC_ROOT = 51 -- Mechanic: Rooted
+-- Polymorph: Aura: Pacify & Silence
+-- Hex: Aura: Confuse
+
+local PC_SNARE = 50         -- Mechanic: Snared
+local PC_ROOT = 51          -- Mechanic: Rooted
 local PC_DAZE = 52
 local PC_GRIP = 53
 
@@ -103,12 +106,13 @@ Widget.CROWD_CONTROL_SPELLS = {
   [127797] = PC_DAZE,             -- Ursol's Vortex
   [33786] = LOC_BANISH,           -- Cyclone (PvP Talent, Restoration)
   [209753] = LOC_BANISH,          -- Cyclone (PvP Talent, Balance)
+  [2637] = LOC_SLEEP,             -- Hibernate
 
   -- Death Knight
   [108194] = LOC_STUN,             -- Asphyxiate
   [47476] = LOC_STUN,              -- Strangulate (PvP Talent)
   [45524] = PC_SNARE,              -- Chains of Ice
-  [111673] = LOC_CHARM,              -- Control Undead
+  [111673] = LOC_CHARM,            -- Control Undead
 
   -- Demon Hunter
   [211881] = LOC_STUN,             -- Fel Eruption (Talent)
@@ -116,10 +120,21 @@ Widget.CROWD_CONTROL_SPELLS = {
   [179057] = LOC_STUN,             -- Chaos Nova
 
   -- Hunter
+  [3355] = LOC_INCAPACITATE,    -- Freezing Trap
+  [24394] = LOC_STUN,           -- Intimidation
+  [162480] = LOC_INCAPACITATE,  -- Steel Trap (Talent, Survival)
+  [5116] = PC_DAZE,             -- Concussive Shot (Not Blizzard)
+  [117405] = PC_ROOT,           -- Binding Shot (Not Blizzard)
+  [186387] = PC_SNARE,          -- Bursting Shot (Marksmanship, Not Blizzard)
+  [213691] = LOC_INCAPACITATE,  -- Scatter Shot (PvP, Not Blizzard)
+  [202914] = CC_SILENCE,        -- Spider Sting (PvP, Not Blizzard)
+  [135299] = PC_SNARE,          -- Sticky Tar (Survival, PvP, Not Blizzard)
+  [212638] = PC_ROOT,           -- Tracker's Net (Survival, PvP, Not Blizzard)
+  [195645] = PC_SNARE,          -- Wing Clip (Survival, Not Blizzard)
+
   [147362] = CC_SILENCE,        -- Counter Shot
-  [19577] = LOC_STUN,           -- Intimidation
-  [5116] = PC_DAZE,             -- Concussive Shot
-  [187651] = LOC_INCAPACITATE,  -- Freezing Trap
+  -- [19386] = LOC_SLEEP,          -- Wyvern Sting (Deprecated in BfA)
+
 
   -- Mage
   [61780] = LOC_POLYMORPH,  -- Polymorph (Turkey)
@@ -136,7 +151,10 @@ Widget.CROWD_CONTROL_SPELLS = {
   [113724] = LOC_STUN,      -- Ring of Frost
   [2139] = CC_SILENCE,      -- Counterspell
   [31661] = LOC_DISORIENT,  -- Dragon's Breath
-  [122] = PC_ROOT,    -- Frost Nova
+  [122] = PC_ROOT,          -- Frost Nova
+  [231596] = PC_ROOT,       -- Freeze (Pet)
+  [31589] = PC_SNARE,       -- Slow (Pet)
+  [236299] = PC_SNARE,      -- Arcane Barrage + Chrono Shift (Talent)
 
   -- Paladin
   [853] = LOC_STUN,             -- Hammer of Justice
@@ -150,21 +168,48 @@ Widget.CROWD_CONTROL_SPELLS = {
   [8122] = LOC_FEAR,         -- Psychic Scream
   [605] = LOC_CHARM,         -- Mind Control
   [9484] = LOC_POLYMORPH,    -- Shackle Undead
-  [88625] = LOC_STUN,       -- Holy Word: Chastise
+  [88625] = LOC_STUN,        -- Holy Word: Chastise
 
   -- Rogue
+  [2094] = LOC_DISORIENT,  -- Blind
+  [1833] = LOC_STUN,       -- Cheap Shot
+  [1776] = LOC_STUN,       -- Gouge
+  [408] = LOC_STUN,        -- Kidney Shot
+  [6770] = LOC_STUN,       -- Sap
 
   -- Shaman
-  [51514] = "Hex", -- Frog
-  [210873] = "Hex", -- Compy
-  [211004] = "Hex", -- Spider
-  [211015] = "Hex", -- Cockroach
-  [211010] = "Hex", -- Snake
+  [51485] = PC_ROOT,         -- Earthgrab Totem
+  [192058] = LOC_STUN,       -- Lightning Surge Totem
+  [2484] = PC_SNARE,         -- Earthbind Totem
+  [211015] = LOC_POLYMORPH,  -- Hex (Cockroach)
+  [211010] = LOC_POLYMORPH,  -- Hex (Snake)
+  [51514] = LOC_POLYMORPH,   -- Hex (Frog)
+  [211004] = LOC_POLYMORPH,  -- Hex (Spider)
+  [210873] = LOC_POLYMORPH,  -- Hex (Compy)
 
   -- Warlock
-  [5782] = "Fear",
+  [6789] = LOC_INCAPACITATE,  -- Mortal Coil
+  [5484] = LOC_FEAR,          -- Howl of Terror
+  [30283] = LOC_STUN,         -- Shadowfury
+  [710] = LOC_BANISH,         -- Banish
+  [5782] = LOC_FEAR,          -- Fear
 
   -- Warrior
+  [132168] = LOC_STUN,      -- Shockwave
+  [107570] = LOC_STUN,      -- Storm Bolt
+  [103828] = LOC_STUN,      -- Warbringer
+  [236027] = PC_SNARE,      -- Intercept - Slow
+  [105771] = PC_ROOT,       -- Intercept - Charge
+  [127724] = PC_ROOT,       -- Intercept - Charge
+  [118000] = LOC_STUN,      -- Dragon Roar
+  [1715] = PC_SNARE,        -- Hamstring
+  [5246] = LOC_FEAR,        -- Intimidating Shout
+
+  -- Monk
+  [115078] = LOC_STUN,        -- Paralysis
+  [119381] = LOC_STUN,        -- Leg Sweep
+  [116095] = PC_SNARE,        -- Disable
+  [116705] = CC_SILENCE,      -- Spear Hand Strike
 }
 
 ---------------------------------------------------------------------------------------------------
@@ -177,9 +222,6 @@ local function OnUpdateAurasWidget(widget_frame, elapsed)
 
   local widget = widget_frame.Widget
   if widget_frame.TimeSinceLastUpdate >= widget.UpdateInterval then
-    --print ("AurasWidget: OnUpdate handler called -", widget_frame.unit.name, widget_frame.TimeSinceLastUpdate)
-    -- print ("AurasWidget: Active auras -", widget_frame.ActiveAuras)
-
     widget_frame.TimeSinceLastUpdate = 0
 
     local aura_frame
@@ -231,11 +273,11 @@ end
 
 local function FilterWhitelist(show_aura, spellfound, is_mine, show_only_mine)
   if spellfound == "All" then
-    return true
+    return show_aura
   elseif spellfound == true then
-    return (show_only_mine and is_mine) or show_only_mine == false
+    return (show_only_mine == nil and show_aura) or (show_aura and ((show_only_mine and is_mine) or show_only_mine == false))
   elseif spellfound == "My" then
-    return is_mine
+    return show_aura and is_mine
   end
 
   return false
@@ -320,18 +362,7 @@ function Widget:FilterEnemyDebuffsBySpell(db, aura, AuraFilterFunction)
                     (db.ShowOnlyMine and aura.CastByPlayer) or
                     (db.ShowBlizzardForEnemy and (aura.ShowAll or (aura.ShowPersonal and aura.CastByPlayer)))
 
-  --if not show_aura then return false end
-
   local spellfound = self.AuraFilterDebuffs[aura.name] or self.AuraFilterDebuffs[aura.spellid]
-
---  print ("Filter Enemy Debuff: ", aura.name, db.FilterMode)
---  print ("  ShowOnlyMine = ", db.ShowOnlyMine)
---  print ("  spellfound = ", spellfound)
---  print ("  Filter = ", AuraFilterFunction(spellfound, aura.CastByPlayer))
-
---  if UnitIsUnit("target", aura.unit) then
---    print (aura.name, spellfound, AuraFilterFunction(show_aura, spellfound, aura.CastByPlayer), show_aura)
---  end
 
   return AuraFilterFunction(show_aura, spellfound, aura.CastByPlayer, db.ShowOnlyMine)
 end
@@ -424,10 +455,6 @@ function Widget:UpdateUnitAuras(frame, effect, unitid, enabled_auras, enabled_cc
   local AuraFilterFunctionCC = self.FILTER_FUNCTIONS[db.CrowdControl.FilterMode]
   local GetAuraPriority = self.PRIORITY_FUNCTIONS[sort_order]
 
---  if UnitIsUnit("target", unitid) then
---    print ("Filter Function:", effect, filter_mode, AuraFilterFunction)
---  end
-
   local aura, show_aura
   local aura_count = 1
   local rank, isCastByPlayer
@@ -438,12 +465,8 @@ function Widget:UpdateUnitAuras(frame, effect, unitid, enabled_auras, enabled_cc
     UnitAuraList[aura_count] = UnitAuraList[aura_count] or {}
     aura = UnitAuraList[aura_count]
 
-    -- BfA: Blizzard Code:local name, texture, count, debuffType, duration, expirationTime, caster, _, nameplateShowPersonal, spellId, _, _, _, nameplateShowAll = UnitAura(unit, i, filter);
-    -- BfA: local name, icon, stacks, auraType, duration, expiration, caster, _, nameplateShowPersonal, spellid, _, _, _, nameplateShowAll = UnitAura(unitid, index, effect .. aura_filter)
-
-    -- name, rank, icon, count, debuffType, duration, expirationTime, unitCaster, canStealOrPurge, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod
-
-    aura.name, rank, aura.texture, aura.stacks, aura.type, aura.duration, aura.expiration, aura.caster,
+    -- Blizzard Code:local name, texture, count, debuffType, duration, expirationTime, caster, _, nameplateShowPersonal, spellId, _, _, _, nameplateShowAll = UnitAura(unit, i, filter);
+    aura.name, aura.texture, aura.stacks, aura.type, aura.duration, aura.expiration, aura.caster,
       aura.StealOrPurge, aura.ShowPersonal, aura.spellid, aura.PlayerCanApply, aura.BossDebuff, isCastByPlayer, aura.ShowAll
       = UnitAura(unitid, i, effect)
 
@@ -453,38 +476,21 @@ function Widget:UpdateUnitAuras(frame, effect, unitid, enabled_auras, enabled_cc
     if not aura.name then break end
 
     aura.unit = unitid
-    aura.UnitIsNPC = not UnitIsPlayer(unitid)
+    aura.UnitIsNPC = not (UnitIsPlayer(unitid) or UnitPlayerControlled(unitid))
     aura.effect = effect
     aura.ShowAll = aura.ShowAll
     aura.CrowdControl = (enabled_cc and self.CROWD_CONTROL_SPELLS[aura.spellid])
     aura.CastByPlayer = (aura.caster == "player" or aura.caster == "pet" or aura.caster == "vehicle")
 
---    if aura.CrowdControl or CROWD_CONTROL_SPELLS[aura.spellid] then
---      -- Crowd Control Spell
---      print ("CROWD CONTROL: ", aura.name, show_cc)
---    end
---    if UnitIsUnit("target", unitid) then
---      print ("  Spell: ", aura.name)
---    end
---    if aura.StealOrPurge then
---      print ("Aura:", aura.name, " - Dispellable")
---    end
---    if aura.BossDebuff then
---      print ("Aura:", aura.name, " - Boss Debuff7")
---    end
---    if aura.ShowPersonal then
---      print ("Aura:", aura.name, " - Personal")
---    end
---    if aura.ShowAll then
---      print ("Aura:", aura.name, " - Show on All Nameplates")
---    end
---    if isCastByPlayer or aura.CastByPlayer then
---      print ("Aura:", aura.name, " - Cast by player:", aura.CastByPlayer, "vs.", isCastByPlayer)
---    end
-
     -- Store Order/Priority
     if aura.CrowdControl then
       show_aura = SpellFilterCC(self, db.CrowdControl, aura, AuraFilterFunctionCC)
+
+      -- Show crowd control auras that are not shown in Blizard mode as normal debuffs
+      if not show_aura and enabled_auras then
+        aura.CrowdControl = false
+        show_aura = SpellFilter(self, db_auras, aura, AuraFilterFunction)
+      end
     elseif enabled_auras then
       show_aura = SpellFilter(self, db_auras, aura, AuraFilterFunction)
     end
@@ -578,7 +584,6 @@ function Widget:UpdateUnitAuras(frame, effect, unitid, enabled_auras, enabled_cc
   if effect == "HARMFUL" then
     local aura_frames_cc = frame:GetParent().CrowdControl
     aura_frames_cc.ActiveAuras = aura_count_cc
-    --print ("CC ActiveAuras: ", frame:GetParent().CrowdControl.ActiveAuras)
 
     local aura_frame_list_cc = aura_frames_cc.AuraFrames
     for i = aura_count_cc + 1, self.MaxAurasPerGrid do
@@ -596,6 +601,7 @@ function Widget:UpdatePositionAuraGrid(frame, y_offset)
   else
     local anchor = self.ANCHOR_POINT_SETPOINT[db.anchor]
 
+    frame:ClearAllPoints()
     if self.IconMode and db.CenterAuras then
       if auras_no > self.GridNoCols then
         auras_no = self.GridNoCols
@@ -639,10 +645,6 @@ function Widget:UpdateIconGrid(widget_frame, unitid)
     self:UpdateUnitAuras(widget_frame.Buffs, "HELPFUL", unitid, db.Buffs.ShowEnemy, false, self.FilterEnemyBuffsBySpell, self.FilterEnemyCrowdControlBySpell, db.Buffs.FilterMode)
   end
 
-  --print ("CCs: ", widget_frame.CrowdControl.ActiveAuras)
-  --print ("AurasWidget: #Debuffs: ", widget_frame.Debuffs.ActiveAuras)
-  --print ("AurasWidget: #Buffs: ", widget_frame.Buffs.ActiveAuras)
-
   local buffs_active, debuffs_active, cc_active = widget_frame.Buffs.ActiveAuras > 0, widget_frame.Debuffs.ActiveAuras > 0, widget_frame.CrowdControl.ActiveAuras > 0
 
   if buffs_active or debuffs_active or cc_active then
@@ -681,28 +683,6 @@ function Widget:UpdateIconGrid(widget_frame, unitid)
     else
       widget_frame.CrowdControl:Hide()
     end
-
---    local frame = widget_frame.Debuffs
---    if not frame.TestBackground then
---      frame.TestBackground = frame:CreateTexture(nil, "BACKGROUND")
---    end
---    frame.TestBackground:SetAllPoints(frame)
---    frame.TestBackground:SetTexture(ThreatPlates.Media:Fetch('statusbar', "Smooth"))
---    frame.TestBackground:SetVertexColor(0,0,0,1)
---    frame = widget_frame.Buffs
---    if not frame.TestBackground then
---      frame.TestBackground = frame:CreateTexture(nil, "BACKGROUND")
---    end
---    frame.TestBackground:SetAllPoints(frame)
---    frame.TestBackground:SetTexture(ThreatPlates.Media:Fetch('statusbar', "Smooth"))
---    frame.TestBackground:SetVertexColor(0,0,0,1)
---    frame = widget_frame.CrowdControl
---    if not frame.TestBackground then
---      frame.TestBackground = frame:CreateTexture(nil, "BACKGROUND")
---    end
---    frame.TestBackground:SetAllPoints(frame)
---    frame.TestBackground:SetTexture(ThreatPlates.Media:Fetch('statusbar', "Smooth"))
---    frame.TestBackground:SetVertexColor(0,0,0,1)
 
     widget_frame:Show()
   else
@@ -1082,36 +1062,12 @@ function Widget:UpdateAuraWidgetLayout(widget_frame)
 end
 
 local function UnitAuraEventHandler(widget_frame, event, unitid)
-  --print ("AurasWidget: UNIT_AURA: ", event, unitid)
-  --  if unitid ~= widget_frame.unit.unitid then
-  --    print ("AurasWidget: UNIT_AURA for", unitid)
-  --    print ("AurasWidget: Plate Active:", Addon.PlatesByUnit[unitid].Active)
-  --    print ("AurasWidget: Plate Unit:", Addon.PlatesByUnit[unitid].TPFrame.unit.unitid)
-  --    print ("AurasWidget: Plate WidgetFrame:", Addon.PlatesByUnit[unitid].TPFrame.widgets.Auras, Addon.PlatesByUnit[unitid].TPFrame.widgets.Auras.Active, Addon.PlatesByUnit[unitid].TPFrame.widgets.Auras == widget_frame)
-  --    print ("Unit:")
-  --    print ("Unit Name:", UnitName(unitid))
-  --    print ("Unit is Player:", UnitIsPlayer(unitid))
-  --    return
-  --  end
-
   --  -- Skip player (cause TP does not handle player nameplate) and target (as it is updated via it's actual unitid anyway)
   --  if unitid == "player" or unitid == "target" then return end
 
   if widget_frame.Active then
     widget_frame.Widget:UpdateIconGrid(widget_frame, unitid)
-
-    --    if not widget_frame.TestBackground then
-    --      widget_frame.TestBackground = widget_frame:CreateTexture(nil, "BACKGROUND")
-    --    end
-    --    widget_frame.TestBackground:SetAllPoints(widget_frame)
-    --    widget_frame.TestBackground:SetTexture(ThreatPlates.Media:Fetch('statusbar', "Smooth"))
-    --    widget_frame.TestBackground:SetVertexColor(0,0,0,0.5)
   end
-
-  -- Nameplates are re-used. Old events are unregistered when the unit is added, but if the nameplate is not
-  -- shown for this unit, this does not happen. So do it here the first time we get an event for this unit.
-  --print ("Unregistering events")
-  --widget_frame:UnregisterAllEvents()
 end
 
 function Widget:PLAYER_TARGET_CHANGED()
@@ -1126,9 +1082,8 @@ function Widget:PLAYER_TARGET_CHANGED()
   if plate and plate.TPFrame.Active then
     self.CurrentTarget = plate.TPFrame.widgets.Auras
 
-    if self.CurrentTarget.Active and self.CurrentTarget.ActiveAuras > 0 then
-      print ("AurasWidget: SHOWING widget because of active auras")
-      self.CurrentTarget:Show()
+    if self.CurrentTarget.Active then
+      self:UpdateIconGrid(self.CurrentTarget, plate.TPFrame.unit.unitid)
     end
   end
 end
@@ -1174,6 +1129,7 @@ function Widget:Create(tp_frame)
 end
 
 function Widget:IsEnabled()
+  self.db = TidyPlatesThreat.db.profile.AuraWidget
   return self.db.ON or self.db.ShowInHeadlineView
 end
 
@@ -1184,6 +1140,7 @@ function Widget:OnEnable()
 end
 
 function Widget:OnDisable()
+  self:UnregisterAllEvents()
   for plate, _ in pairs(Addon.PlatesVisible) do
     plate.TPFrame.widgets.Auras:UnregisterAllEvents()
   end
@@ -1274,18 +1231,6 @@ function Widget:ParseSpellFilters()
   else
     self.FilterModeEnemyDebuffs = "all"
   end
-
-  self:UpdateSettings()
-
-  --  print ("Debuff FilterMode: ", db.Debuffs.FilterMode)
-  --  print ("Debuff Filter: ", db.Debuffs.FilterBySpell)
-  --
-  --  print ("Debuffs - Friendly: ", AuraFilter.Friendly.Debuffs)
-  --  print ("Debuffs - Enemy: ", AuraFilter.Enemy.Debuffs)
-  --  print ("Debuffs - Filter: ")
-  --  for k, v in pairs(AuraFilterDebuffs) do
-  --    print ("  ", k, "=", v)
-  --  end
 end
 
 function Widget:UpdateSettingsIconMode()
@@ -1369,13 +1314,25 @@ function Widget:UpdateSettings()
 
   self.AlignLayout = GRID_LAYOUT[self.db.AlignmentH][self.db.AlignmentV]
 
+  self:ParseSpellFilters()
+
+  --  -- Don't update any widget frame if the widget isn't enabled.
+--  if not self:IsEnabled() then return end
+
   for plate, tp_frame in pairs(Addon.PlatesCreated) do
     local widget_frame = tp_frame.widgets.Auras
 
-    self:UpdateAuraWidgetLayout(widget_frame)
-    if tp_frame.Active then
-      self:OnUnitAdded(widget_frame, widget_frame.unit)
+    -- widget_frame could be nil if the widget as disabled and is enabled as part of a profile switch
+    -- For these frames, UpdateAuraWidgetLayout will be called anyway when the widget is initalized
+    -- (which happens after the settings update)
+    if widget_frame then
+      self:UpdateAuraWidgetLayout(widget_frame)
+      if tp_frame.Active then -- equals: plate is visible, i.e., show currently
+        self:OnUnitAdded(widget_frame, widget_frame.unit)
+      end
     end
   end
+
+  --Addon:ForceUpdate()
 end
 

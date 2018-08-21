@@ -58,7 +58,7 @@ do
       local lines_in_file = lines_from(file_list[i])
       for line=1, #lines_in_file do
         for w in lines_in_file[line]:gmatch("L%b[]") do
-          if not w:find('%.%.%s*%b""') and not w:find('%b""%s*%.%.') then
+          if not w:find('%.%.%s*%b""') and not w:find('%b""%s*%.%.') and (w:find('"') or w:find("'")) then
             locale_strings[w] = true
           end
         end
