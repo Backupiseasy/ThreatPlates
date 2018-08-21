@@ -697,11 +697,14 @@ function Widget:CreateAuraFrameIconMode(parent)
   local db = self.db_icon
 
   local frame = CreateFrame("Frame", nil, parent)
+  frame:SetFrameLevel(parent:GetFrameLevel())
 
   frame.Icon = frame:CreateTexture(nil, "ARTWORK", 0)
   frame.Border = CreateFrame("Frame", nil, frame)
+  frame.Border:SetFrameLevel(parent:GetFrameLevel())
 
   frame.Cooldown = CreateFrame("Cooldown", nil, frame, "ThreatPlatesAuraWidgetCooldown")
+  frame.Cooldown:SetFrameLevel(parent:GetFrameLevel())
   frame.Cooldown:SetAllPoints(frame.Icon)
   frame.Cooldown:SetReverse(true)
   frame.Cooldown:SetHideCountdownNumbers(true)
@@ -845,7 +848,7 @@ function Widget:CreateAuraFrameBarMode(parent)
   frame:SetFrameLevel(parent:GetFrameLevel())
 
   frame.Statusbar = CreateFrame("StatusBar", nil, frame)
-  frame:SetFrameLevel(parent:GetFrameLevel())
+  frame.Statusbar:SetFrameLevel(parent:GetFrameLevel())
   frame.Statusbar:SetMinMaxValues(0, 100)
 
   frame.Background = frame.Statusbar:CreateTexture(nil, "BACKGROUND", 0)
@@ -1054,10 +1057,13 @@ function Widget:UpdateAuraWidgetLayout(widget_frame)
   self:CreateAuraGrid(widget_frame.CrowdControl)
 
   if self.db.FrameOrder == "HEALTHBAR_AURAS" then
-    widget_frame:SetFrameLevel(widget_frame:GetFrameLevel() + 3)
+    widget_frame:SetFrameLevel(widget_frame:GetParent():GetFrameLevel() + 3)
   else
-    widget_frame:SetFrameLevel(widget_frame:GetFrameLevel() + 9)
+    widget_frame:SetFrameLevel(widget_frame:GetParent():GetFrameLevel() + 9)
   end
+  widget_frame.Buffs:SetFrameLevel(widget_frame:GetFrameLevel())
+  widget_frame.Debuffs:SetFrameLevel(widget_frame:GetFrameLevel())
+  widget_frame.CrowdControl:SetFrameLevel(widget_frame:GetFrameLevel())
 end
 
 local function UnitAuraEventHandler(widget_frame, event, unitid)
