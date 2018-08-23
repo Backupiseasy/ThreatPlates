@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+9.0.12
+------------------------------------------------------
+* Fixed a bug with the cooldown spiral of auras being not shown consistently.
+
+------------------------------------------------------
 9.0.11
 ------------------------------------------------------
 * Fixed a layering issue between target markers and Auras widget.
