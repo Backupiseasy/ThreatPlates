@@ -29,6 +29,8 @@ local PlayerName = UnitName("player")
 local ICON_COLORS = {}
 local Font = nil
 
+local Quests = {}
+
 ---------------------------------------------------------------------------------------------------
 -- Quest Functions
 ---------------------------------------------------------------------------------------------------
@@ -37,6 +39,7 @@ local function IsQuestUnit(unit)
   local quest_area = false
   local quest_player = false
   local quest_group = false
+  local quest_title = false
   local currentProgress = false
 
   -- Read quest information from tooltip. Thanks to Kib: QuestMobs AddOn by Tosaido.
@@ -50,8 +53,9 @@ local function IsQuestUnit(unit)
       local text = line:GetText()
       local text_r, text_g, text_b = line:GetTextColor()
 
-      if text_r > 0.99 and text_g > 0.82 and text_b == 0 then
+      if text_r > 0.99 and text_g > 0.82 and text_b == 0 then --quest header
         quest_area = true
+        quest_title = text
       else
         local unit_name, progress = string.match(text, "^ ([^ ]-) ?%- (.+)$")
         -- local area_progress = string.match(progress, "(%d+)%%$")
@@ -71,9 +75,16 @@ local function IsQuestUnit(unit)
                   quest_group = true
                 end
 
+                local objType = false
+
+                if Quests[quest_title] then
+                  objType = Quests[quest_title].type
+                end
+
                 currentProgress = {
                   ['current'] = current,
-                  ['goal'] = goal
+                  ['goal'] = goal,
+                  ['type'] = objType
                 }
 
                 break
@@ -126,6 +137,32 @@ ThreatPlates.ShowQuestUnit = ShowQuestUnitHealthbar
 
 local function EventHandler(event, ...)
   Widget:UpdateAllFramesAndNameplateColor()
+end
+
+local function GenerateQuestCache()
+  local entries = GetNumQuestLogEntries()
+
+  Quests = {}
+
+  for questIndex=1, entries do
+    local title, _, _, isHeader, _, _, _, questID = GetQuestLogTitle(questIndex)
+
+    if not isHeader then --ignore quest log headers
+      local objectives = GetNumQuestLeaderBoards(questIndex)
+
+      for o=1, objectives do
+        local text, objectiveType, finished = GetQuestObjectiveInfo(questID, o, false)
+
+        if not finished then
+          Quests[title] = {
+            ["id"] = questID,
+            ["type"] = objectiveType
+          }
+          break
+        end
+      end
+    end
+  end
 end
 
 function Widget:PLAYER_REGEN_ENABLED()
@@ -199,6 +236,7 @@ function Widget:OnEnable()
   self:RegisterEvent("UNIT_THREAT_LIST_UPDATE")
 
   InCombat = InCombatLockdown()
+  GenerateQuestCache()
 end
 
 function Widget:EnabledForStyle(style, unit)
@@ -248,6 +286,13 @@ function Widget:UpdateFrame(widget_frame, unit)
 
     if db.ShowDetail and current and widget_frame.Text then
       local text = current.current .. '/' .. current.goal
+
+      --TODO: replace with icon
+      if current.type == "monster" then
+        text = 'K' .. text
+      elseif current.type == "item" then
+        text = 'L' .. text
+      end
 
       widget_frame.Text:SetText(text)
       widget_frame.Text:SetTextColor(color.r, color.g, color.b)
