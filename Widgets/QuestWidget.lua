@@ -31,6 +31,7 @@ local Font = nil
 
 local FONT_SCALING = 0.4
 local TEXTURE_SCALING = 0.5
+local ICON_PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\QuestWidget\\"
 
 local Quests = {}
 
@@ -283,8 +284,7 @@ function Widget:OnUnitAdded(widget_frame, unit)
   ICON_COLORS[1] = db.ColorPlayerQuest
   ICON_COLORS[2] = db.ColorGroupQuest
 
-  local icon_path = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\QuestWidget\\" .. db.IconTexture
-  widget_frame.Icon:SetTexture(icon_path)
+  widget_frame.Icon:SetTexture(ICON_PATH .. db.IconTexture)
   widget_frame.Icon:SetAllPoints()
 
   if db.ShowDetail and widget_frame.Text then
@@ -320,16 +320,13 @@ function Widget:UpdateFrame(widget_frame, unit)
     if db.ShowDetail and current and widget_frame.Text then
       local text = current.current .. '/' .. current.goal
 
-      if current.type then
-        local icon_path = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\QuestWidget\\"
-
-        if current.type == "monster" then
-          icon_path = icon_path .. "kill"
-        elseif current.type == "item" then
-          icon_path = icon_path .. "loot"
-        end
-
-        widget_frame.Text.TypeTexture:SetTexture(icon_path)
+      if current.type == "monster" then
+        widget_frame.Text.TypeTexture:SetTexture(ICON_PATH .. "kill")
+      elseif current.type == "item" then
+        widget_frame.Text.TypeTexture:SetTexture(ICON_PATH .. "loot")
+      else
+        --set text to be center as no texture to load (invalid quest type)
+        widget_frame.Text:SetPoint("CENTER", widget_frame, 0, db.scale * 0.7)
       end
 
       widget_frame.Text:SetText(text)
