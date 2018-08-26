@@ -29,7 +29,7 @@ local PlayerName = UnitName("player")
 local ICON_COLORS = {}
 local Font = nil
 
-local FONT_SCALING = 0.4
+local FONT_SCALING = 0.3
 local TEXTURE_SCALING = 0.5
 local ICON_PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\QuestWidget\\"
 
@@ -288,12 +288,12 @@ function Widget:OnUnitAdded(widget_frame, unit)
   widget_frame.Icon:SetAllPoints()
 
   if db.ShowDetail and widget_frame.Text then
-    widget_frame.Text:SetPoint("CENTER", widget_frame, db.scale * 0.4, db.scale * 0.7)
-    widget_frame.Text:SetSize(db.scale, db.scale)
+    widget_frame.Text:SetPoint("CENTER", widget_frame, db.scale * 0.5, db.scale * 0.75)
+    widget_frame.Text:SetSize(db.scale * 1.4, db.scale)
     widget_frame.Text:SetFont(Font, db.FontSize + (db.scale * FONT_SCALING))
     widget_frame.Text:SetAlpha(db.alpha)
 
-    widget_frame.Text.TypeTexture:SetPoint("CENTER", widget_frame, -(db.scale * 0.4), (db.scale * 0.7) + 1)
+    widget_frame.Text.TypeTexture:SetPoint("CENTER", widget_frame, -(db.scale * 0.5), (db.scale * 0.75) + 1)
     widget_frame.Text.TypeTexture:SetSize(db.scale * TEXTURE_SCALING, db.scale * TEXTURE_SCALING)
     widget_frame.Text.TypeTexture:SetAlpha(db.alpha)
   end
@@ -330,7 +330,7 @@ function Widget:UpdateFrame(widget_frame, unit)
         widget_frame.Text.TypeTexture:SetTexture(ICON_PATH .. "loot")
       else
         --set text to be center as no texture to load (invalid quest type)
-        widget_frame.Text:SetPoint("CENTER", widget_frame, 0, db.scale * 0.7)
+        widget_frame.Text:SetPoint("CENTER", widget_frame, 0, db.scale * 0.75)
       end
 
       widget_frame.Text:SetText(text)
