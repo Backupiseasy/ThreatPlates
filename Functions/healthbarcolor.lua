@@ -25,7 +25,6 @@ local RGB_P = ThreatPlates.RGB_P
 local IsFriend
 local IsGuildmate
 local ShowQuestUnit
-local IsQuestUnit
 
 local reference = {
   FRIENDLY = { NPC = "FriendlyNPC", PLAYER = "FriendlyPlayer", },
@@ -181,7 +180,6 @@ function Addon:SetHealthbarColor(unit)
   if style == "NameOnly" or style == "NameOnly-Unique" or style == "empty" or style == "etotem" then return end
 
   ShowQuestUnit = ShowQuestUnit or ThreatPlates.ShowQuestUnit
-  IsQuestUnit = IsQuestUnit or ThreatPlates.IsQuestUnit
   IsFriend = IsFriend or ThreatPlates.IsFriend
   IsGuildmate = IsGuildmate or ThreatPlates.IsGuildmate
 
@@ -197,7 +195,7 @@ function Addon:SetHealthbarColor(unit)
       -- Unit is marked
       local db_raidicon = db.settings.raidicon
       c = db_raidicon.hpMarked[unit.raidIcon]
-    elseif ShowQuestUnit(unit) and IsQuestUnit(unit) then
+    elseif ShowQuestUnit(unit) and Addon:IsPlayerQuestUnit(unit) then
       -- Unit is quest target
       c = db.questWidget.HPBarColor
     else
@@ -235,8 +233,7 @@ function Addon:SetHealthbarColor(unit)
     local db_raidicon = db.settings.raidicon
     if unit.isMarked and db_raidicon.hpColor then
       c = db_raidicon.hpMarked[unit.raidIcon]
-    elseif ShowQuestUnit(unit) and IsQuestUnit(unit) then
-      -- small bug here: tapped targets should not be quest marked!
+    elseif ShowQuestUnit(unit) and Addon:IsPlayerQuestUnit(unit) then
       c = db.questWidget.HPBarColor
     elseif db.healthColorChange then
       c = GetColorByHealthDeficit(unit)

@@ -1,4 +1,10 @@
 ﻿------------------------------------------------------
+9.0.13-Beta1
+------------------------------------------------------
+* Fixed a bug in quest widget where the nameplate color of quest units was not updated reset after the player completed the quest [Comment #1269].
+* Updated the /tptpol command to switch between nameplate overlapping and stacking (nameplate motion only works for enemy nameplates).
+
+------------------------------------------------------
 9.0.12
 ------------------------------------------------------
 * Fixed a bug with the cooldown spiral of auras being not shown consistently.
