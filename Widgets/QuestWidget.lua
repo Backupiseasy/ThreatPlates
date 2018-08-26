@@ -288,12 +288,12 @@ function Widget:OnUnitAdded(widget_frame, unit)
   widget_frame.Icon:SetAllPoints()
 
   if db.ShowDetail and widget_frame.Text then
-    widget_frame.Text:SetPoint("CENTER", widget_frame, 10, 20)
+    widget_frame.Text:SetPoint("CENTER", widget_frame, db.scale * 0.4, db.scale * 0.7)
     widget_frame.Text:SetSize(db.scale, db.scale)
     widget_frame.Text:SetFont(Font, db.FontSize + (db.scale * FONT_SCALING))
     widget_frame.Text:SetAlpha(db.alpha)
 
-    widget_frame.Text.TypeTexture:SetPoint("CENTER", widget_frame, -10, 21)
+    widget_frame.Text.TypeTexture:SetPoint("CENTER", widget_frame, -(db.scale * 0.4), (db.scale * 0.7) + 1)
     widget_frame.Text.TypeTexture:SetSize(db.scale * TEXTURE_SCALING, db.scale * TEXTURE_SCALING)
     widget_frame.Text.TypeTexture:SetAlpha(db.alpha)
   end
