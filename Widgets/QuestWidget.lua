@@ -135,8 +135,26 @@ end
 ThreatPlates.IsQuestUnit = IsQuestUnit
 ThreatPlates.ShowQuestUnit = ShowQuestUnitHealthbar
 
-local function EventHandler(event, ...)
-  Widget:UpdateAllFramesAndNameplateColor()
+local function AddQuestCacheEntry(questIndex)
+  local title, _, _, isHeader, _, _, _, questID = GetQuestLogTitle(questIndex)
+
+  if not isHeader then --ignore quest log headers
+    local objectives = GetNumQuestLeaderBoards(questIndex)
+
+    for o=1, objectives do
+      local text, objectiveType, finished = GetQuestObjectiveInfo(questID, o, false)
+
+      if not finished then
+        Quests[title] = {
+          ["id"] = questID,
+          ["type"] = objectiveType
+        }
+
+        Quests[questID] = title
+        break
+      end
+    end
+  end
 end
 
 local function GenerateQuestCache()
@@ -145,23 +163,27 @@ local function GenerateQuestCache()
   Quests = {}
 
   for questIndex=1, entries do
-    local title, _, _, isHeader, _, _, _, questID = GetQuestLogTitle(questIndex)
+    AddQuestCacheEntry(questIndex)
+  end
+end
 
-    if not isHeader then --ignore quest log headers
-      local objectives = GetNumQuestLeaderBoards(questIndex)
+local function EventHandler(event, ...)
+  Widget:UpdateAllFramesAndNameplateColor()
 
-      for o=1, objectives do
-        local text, objectiveType, finished = GetQuestObjectiveInfo(questID, o, false)
+  if event == "QUEST_ACCEPTED" then
+    local questIndex, questID = ...
 
-        if not finished then
-          Quests[title] = {
-            ["id"] = questID,
-            ["type"] = objectiveType
-          }
-          break
-        end
-      end
-    end
+    AddQuestCacheEntry(questIndex)
+  end
+end
+
+function Widget:QUEST_REMOVED(questId)
+  --clean up cache
+  if Quests[questId] then
+    local questTitle = Quests[questId]
+
+    Quests[questTitle] = nil
+    Quests[questId] = nil
   end
 end
 
@@ -227,6 +249,7 @@ end
 function Widget:OnEnable()
   Font = ThreatPlates.Media:Fetch('font', TidyPlatesThreat.db.profile.questWidget.Font)
 
+  self:RegisterEvent("QUEST_REMOVED")
   self:RegisterEvent("QUEST_ACCEPTED", EventHandler)
   self:RegisterEvent("QUEST_WATCH_UPDATE", EventHandler)
   self:RegisterEvent("QUEST_ITEM_UPDATE", EventHandler)
