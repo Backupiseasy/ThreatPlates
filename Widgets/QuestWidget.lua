@@ -317,7 +317,11 @@ function Widget:UpdateFrame(widget_frame, unit)
     local color = ICON_COLORS[quest_type]
     widget_frame.Icon:SetVertexColor(color.r, color.g, color.b)
 
-    if db.ShowDetail and current and widget_frame.Text then
+    if db.ShowDetail and
+      current and
+      tonumber(current.goal) > 1 and --NOTE: skip showing for quests that have 1 of something, as WoW uses this for things like events eg "Push back the alliance 0/1"
+      widget_frame.Text then
+
       local text = current.current .. '/' .. current.goal
 
       if current.type == "monster" then
