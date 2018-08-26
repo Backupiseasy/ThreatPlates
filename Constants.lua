@@ -811,7 +811,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
       ShowInHeadlineView = false,
       ShowDetail = true,
       Font = Addon.DEFAULT_FONT,
-      FontSize = 10
+      FontSize = 3
     },
     stealthWidget = {
       ON = false,

@@ -29,6 +29,9 @@ local PlayerName = UnitName("player")
 local ICON_COLORS = {}
 local Font = nil
 
+local FONT_SCALING = 0.4
+local TEXTURE_SCALING = 0.5
+
 local Quests = {}
 
 ---------------------------------------------------------------------------------------------------
@@ -231,7 +234,7 @@ function Widget:Create(tp_frame)
     local text_frame = widget_frame:CreateFontString(nil, "OVERLAY")
     local type_frame = widget_frame:CreateTexture(nil, "OVERLAY")
 
-    text_frame:SetFont(Font, db.FontSize)
+    text_frame:SetFont(Font, db.FontSize + (db.scale * FONT_SCALING))
     text_frame:SetShadowOffset(1, -1)
     text_frame:SetShadowColor(0,0,0,1)
     text_frame.TypeTexture = type_frame
@@ -287,10 +290,11 @@ function Widget:OnUnitAdded(widget_frame, unit)
   if db.ShowDetail and widget_frame.Text then
     widget_frame.Text:SetPoint("CENTER", widget_frame, 10, 20)
     widget_frame.Text:SetSize(db.scale, db.scale)
+    widget_frame.Text:SetFont(Font, db.FontSize + (db.scale * FONT_SCALING))
     widget_frame.Text:SetAlpha(db.alpha)
 
     widget_frame.Text.TypeTexture:SetPoint("CENTER", widget_frame, -10, 21)
-    widget_frame.Text.TypeTexture:SetSize(db.scale * 0.5, db.scale * 0.5)
+    widget_frame.Text.TypeTexture:SetSize(db.scale * TEXTURE_SCALING, db.scale * TEXTURE_SCALING)
     widget_frame.Text.TypeTexture:SetAlpha(db.alpha)
   end
 
