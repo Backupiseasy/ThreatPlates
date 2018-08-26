@@ -229,10 +229,12 @@ function Widget:Create(tp_frame)
 
   if db.ShowDetail then
     local text_frame = widget_frame:CreateFontString(nil, "OVERLAY")
+    local type_frame = widget_frame:CreateTexture(nil, "OVERLAY")
 
     text_frame:SetFont(Font, db.FontSize)
     text_frame:SetShadowOffset(1, -1)
     text_frame:SetShadowColor(0,0,0,1)
+    text_frame.TypeTexture = type_frame
 
     widget_frame.Text = text_frame
   end
@@ -283,9 +285,13 @@ function Widget:OnUnitAdded(widget_frame, unit)
   widget_frame.Icon:SetAllPoints()
 
   if db.ShowDetail and widget_frame.Text then
-    widget_frame.Text:SetPoint("CENTER", widget_frame, 0, 20)
+    widget_frame.Text:SetPoint("CENTER", widget_frame, 10, 20)
     widget_frame.Text:SetSize(db.scale, db.scale)
     widget_frame.Text:SetAlpha(db.alpha)
+
+    widget_frame.Text.TypeTexture:SetPoint("CENTER", widget_frame, -10, 21)
+    widget_frame.Text.TypeTexture:SetSize(db.scale * 0.5, db.scale * 0.5)
+    widget_frame.Text.TypeTexture:SetAlpha(db.alpha)
   end
 
   self:UpdateFrame(widget_frame, unit)
@@ -310,18 +316,25 @@ function Widget:UpdateFrame(widget_frame, unit)
     if db.ShowDetail and current and widget_frame.Text then
       local text = current.current .. '/' .. current.goal
 
-      --TODO: replace with icon
-      if current.type == "monster" then
-        text = 'K' .. text
-      elseif current.type == "item" then
-        text = 'L' .. text
+      if current.type then
+        local icon_path = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\QuestWidget\\"
+
+        if current.type == "monster" then
+          icon_path = icon_path .. "kill"
+        elseif current.type == "item" then
+          icon_path = icon_path .. "loot"
+        end
+
+        widget_frame.Text.TypeTexture:SetTexture(icon_path)
       end
 
       widget_frame.Text:SetText(text)
       widget_frame.Text:SetTextColor(color.r, color.g, color.b)
       widget_frame.Text:Show()
+      widget_frame.Text.TypeTexture:Show()
     elseif widget_frame.Text then
       widget_frame.Text:Hide()
+      widget_frame.Text.TypeTexture:Hide()
     end
 
     widget_frame:Show()
