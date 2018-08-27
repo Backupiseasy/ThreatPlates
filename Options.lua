@@ -1564,7 +1564,6 @@ end
               },
             },
           },
-          --TODO: localization
           Details = {
             name = L["Quest Details"],
             order = 40,
