@@ -189,6 +189,8 @@ local function EventHandler(event, ...)
 end
 
 function Widget:QUEST_REMOVED(questId)
+  self:UpdateAllFramesAndNameplateColor()
+
   --clean up cache
   if Quests[questId] then
     local questTitle = Quests[questId]
@@ -269,7 +271,7 @@ function Widget:OnEnable()
 	-- This event fires whenever the player turns in a quest, whether automatically with a Task-type quest
 	-- (Bonus Objectives/World Quests), or by pressing the Complete button in a quest dialog window.
   -- also handles abandon quest
-	self:RegisterEvent("QUEST_REMOVED", EventHandler)
+	self:RegisterEvent("QUEST_REMOVED")
 
 	-- Handle in-combat situations:
 	self:RegisterEvent("PLAYER_REGEN_ENABLED")
