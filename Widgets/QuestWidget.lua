@@ -229,7 +229,6 @@ local function EventHandler(event, ...)
 end
 
 function Widget:QUEST_WATCH_UPDATE(questIndex)
-  self:UpdateAllFramesAndNameplateColor()
   QuestsToUpdate[questIndex] = true
 end
 
