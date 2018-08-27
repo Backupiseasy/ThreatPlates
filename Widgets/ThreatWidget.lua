@@ -79,8 +79,8 @@ function Widget:IsEnabled()
 end
 
 function Widget:OnEnable()
-  Widget:RegisterEvent("UNIT_THREAT_LIST_UPDATE")
-  Widget:RegisterEvent("RAID_TARGET_UPDATE")
+  self:RegisterEvent("UNIT_THREAT_LIST_UPDATE")
+  self:RegisterEvent("RAID_TARGET_UPDATE")
 end
 
 function Widget:EnabledForStyle(style, unit)
@@ -154,7 +154,3 @@ function Widget:UpdateFrame(widget_frame, unit)
 
   widget_frame:Show()
 end
-
---function Widget:OnUpdateStyle(widget_frame, unit)
---  self:UpdateFrame(widget_frame, unit)
---end

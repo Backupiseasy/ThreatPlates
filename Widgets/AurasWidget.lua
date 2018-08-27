@@ -131,10 +131,8 @@ Widget.CROWD_CONTROL_SPELLS = {
   [135299] = PC_SNARE,          -- Sticky Tar (Survival, PvP, Not Blizzard)
   [212638] = PC_ROOT,           -- Tracker's Net (Survival, PvP, Not Blizzard)
   [195645] = PC_SNARE,          -- Wing Clip (Survival, Not Blizzard)
-
   [147362] = CC_SILENCE,        -- Counter Shot
   -- [19386] = LOC_SLEEP,          -- Wyvern Sting (Deprecated in BfA)
-
 
   -- Mage
   [61780] = LOC_POLYMORPH,  -- Polymorph (Turkey)
@@ -176,6 +174,7 @@ Widget.CROWD_CONTROL_SPELLS = {
   [1776] = LOC_STUN,       -- Gouge
   [408] = LOC_STUN,        -- Kidney Shot
   [6770] = LOC_STUN,       -- Sap
+  [199804] = LOC_STUN,     -- Between the Eyes (Outlaw)
 
   -- Shaman
   [51485] = PC_ROOT,         -- Earthgrab Totem
@@ -698,10 +697,14 @@ function Widget:CreateAuraFrameIconMode(parent)
   local db = self.db_icon
 
   local frame = CreateFrame("Frame", nil, parent)
+  frame:SetFrameLevel(parent:GetFrameLevel())
 
   frame.Icon = frame:CreateTexture(nil, "ARTWORK", 0)
   frame.Border = CreateFrame("Frame", nil, frame)
+  frame.Border:SetFrameLevel(parent:GetFrameLevel())
 
+  -- When the cooldown shares the frameLevel of its parent, the icon texture can sometimes render
+  -- ontop of it. So it looks like it's not drawing a cooldown but it's just hidden by the icon.
   frame.Cooldown = CreateFrame("Cooldown", nil, frame, "ThreatPlatesAuraWidgetCooldown")
   frame.Cooldown:SetAllPoints(frame.Icon)
   frame.Cooldown:SetReverse(true)
@@ -846,7 +849,7 @@ function Widget:CreateAuraFrameBarMode(parent)
   frame:SetFrameLevel(parent:GetFrameLevel())
 
   frame.Statusbar = CreateFrame("StatusBar", nil, frame)
-  frame:SetFrameLevel(parent:GetFrameLevel())
+  frame.Statusbar:SetFrameLevel(parent:GetFrameLevel())
   frame.Statusbar:SetMinMaxValues(0, 100)
 
   frame.Background = frame.Statusbar:CreateTexture(nil, "BACKGROUND", 0)
@@ -1055,10 +1058,13 @@ function Widget:UpdateAuraWidgetLayout(widget_frame)
   self:CreateAuraGrid(widget_frame.CrowdControl)
 
   if self.db.FrameOrder == "HEALTHBAR_AURAS" then
-    widget_frame:SetFrameLevel(widget_frame:GetFrameLevel() + 3)
+    widget_frame:SetFrameLevel(widget_frame:GetParent():GetFrameLevel() + 3)
   else
-    widget_frame:SetFrameLevel(widget_frame:GetFrameLevel() + 9)
+    widget_frame:SetFrameLevel(widget_frame:GetParent():GetFrameLevel() + 9)
   end
+  widget_frame.Buffs:SetFrameLevel(widget_frame:GetFrameLevel())
+  widget_frame.Debuffs:SetFrameLevel(widget_frame:GetFrameLevel())
+  widget_frame.CrowdControl:SetFrameLevel(widget_frame:GetFrameLevel())
 end
 
 local function UnitAuraEventHandler(widget_frame, event, unitid)

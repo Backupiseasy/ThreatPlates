@@ -1511,7 +1511,12 @@ end
         name = L["Healthbar Mode"], order = 20, type = "group", inline = true,
 --        disabled = function() return not db.questWidget.ON end,
         args = {
-          Help = { type = "description", order = 0,	width = "full",	name = L["Use a custom color for the healthbar of quest mobs."],	},
+          Help = {
+            type = "description",
+            order = 0,
+            width = "full",
+            name = L["Use a custom color for the healthbar of quest mobs (for player quests only)."],
+          },
           Enable = { type = "toggle", order = 10, name = L["Enable"],	arg = {"questWidget", "ModeHPBar"}, },
           Color = {
             name = L["Color"], type = "color", desc = "", descStyle = "inline", width = "half",

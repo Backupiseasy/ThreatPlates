@@ -47,28 +47,19 @@ SLASH_TPTPTOGGLE1 = "/tptptoggle"
 SlashCmdList["TPTPTOGGLE"] = TPTPTOGGLE
 
 local function TPTPOVERLAP()
-	local _, build = GetBuildInfo()
-	if tonumber(build) > 13623 then
-		if GetCVar("nameplateMotion") == "3" then
-			if InCombatLockdown() then
-				TP.Print(L["We're unable to change this while in combat"])
-			else
-				SetCVar("nameplateMotion", 1)
-				TP.Print(L["-->>Nameplate Overlapping is now |cffff0000OFF!|r<<--"])
-			end
+	if GetCVar("nameplateMotion") == "0" then
+		if InCombatLockdown() then
+			TP.Print(L["We're unable to change this while in combat"])
 		else
-			if InCombatLockdown() then
-				TP.Print(L["We're unable to change this while in combat"])
-			else
-				SetCVar("nameplateMotion", 3)
-				TP.Print(L["-->>Nameplate Overlapping is now |cff00ff00ON!|r<<--"])
-			end
+			SetCVar("nameplateMotion", 1)
+			TP.Print(L["-->>Nameplate Overlapping is now |cffff0000OFF!|r<<--"])
 		end
 	else
-		if GetCVar("spreadnameplates") == "0" then
-			TP.Print(L["-->>Nameplate Overlapping is now |cff00ff00ON!|r<<--"])
+		if InCombatLockdown() then
+			TP.Print(L["We're unable to change this while in combat"])
 		else
-			TP.Print(L["-->>Nameplate Overlapping is now |cffff0000OFF!|r<<--"])
+			SetCVar("nameplateMotion", 0)
+			TP.Print(L["-->>Nameplate Overlapping is now |cff00ff00ON!|r<<--"])
 		end
 	end
 end

@@ -75,7 +75,7 @@ function Widget:FRIENDLIST_UPDATE()
       end
     end
 
-    ListFriendsSize = no_friends -- as name might be nil, friendsOnline might not be correct here#
+    ListFriendsSize = no_friends -- as name might be nil, friendsOnline might not be correct here
 
 --    if plate then
 --      local unit = plate.TPFrame.unit
