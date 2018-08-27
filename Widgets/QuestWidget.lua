@@ -34,6 +34,7 @@ local TEXTURE_SCALING = 0.5
 local ICON_PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\QuestWidget\\"
 
 local Quests = {}
+local QuestsToUpdate = {}
 
 ---------------------------------------------------------------------------------------------------
 -- Quest Functions
@@ -68,7 +69,17 @@ local function IsQuestUnit(unit)
           quest_area = nil
 
           if unit_name then
-            local current, goal = string.match(progress, "(%d+)/(%d+)")
+            local current, goal, objectiveName = string.match(progress, "^(%d+)/(%d+) (.+)$")
+            local objType = false
+
+            --Tooltips do not update right away, so fetch current and goal from the cache (which is from the api)
+            if Quests[quest_title] and Quests[quest_title].objectives[objectiveName] then
+              local obj = Quests[quest_title].objectives[objectiveName]
+
+              current = obj.current
+              goal = obj.goal
+              objType = obj.type
+            end
 
             -- A unit may be target of more than one quest, the quest indicator should be show if at least one quest is not completed.
             if current and goal then
@@ -77,12 +88,6 @@ local function IsQuestUnit(unit)
                   quest_player = true
                 else
                   quest_group = true
-                end
-
-                local objType = false
-
-                if Quests[quest_title] then
-                  objType = Quests[quest_title].type
                 end
 
                 currentProgress = {
@@ -148,19 +153,60 @@ local function AddQuestCacheEntry(questIndex)
 
   if not isHeader then --ignore quest log headers
     local objectives = GetNumQuestLeaderBoards(questIndex)
+    local quest = {
+      ["id"] = questID,
+      ["objectives"] = {}
+    }
 
     for o=1, objectives do
       local text, objectiveType, finished = GetQuestObjectiveInfo(questID, o, false)
+      local current, goal, objectiveName = string.match(text, "^(%d+)/(%d+) (.+)$")
 
-      if not finished then
-        Quests[title] = {
-          ["id"] = questID,
-          ["type"] = objectiveType
-        }
+      quest.objectives[objectiveName] = {
+        ["type"] = objectiveType,
+        ["current"] = current,
+        ["goal"] = goal,
+        ["finished"] = finished
+      }
+    end
 
-        Quests[questID] = title
-        break
-      end
+    Quests[title] = quest
+    Quests[questID] = title --so it can be found by remove
+  end
+end
+
+local function UpdateQuestCacheEntry(questIndex)
+  local title, _, _, _, _, _, _, questID = GetQuestLogTitle(questIndex)
+
+  if not title then
+    return
+  end
+
+  if not Quests[title] then --for whatever reason it doesn't exist, so just add it
+    AddQuestCacheEntry(questIndex)
+    return
+  end
+
+  --update Objectives
+  local objectives = GetNumQuestLeaderBoards(questIndex)
+
+  for o=1, objectives do
+    local text, objectiveType, finished = GetQuestObjectiveInfo(questID, o, false)
+    local current, goal, objectiveName = string.match(text, "^(%d+)/(%d+) (.+)$")
+
+    if Quests[title].objectives[objectiveName] then
+      local obj = Quests[title].objectives[objectiveName]
+
+      obj.current = current
+      obj.goal = goal
+      obj.finished = finished
+    else --one of those breadcrumb-ish quests where the written objectives change
+      Quests[title].objectives[objectiveName] = {
+        ["type"] = objectiveType,
+        ["current"] = current,
+        ["goal"] = goal,
+        ["finished"] = finished
+      }
     end
   end
 end
@@ -180,6 +226,27 @@ end
 ---------------------------------------------------------------------------------------------------
 local function EventHandler(event, ...)
   Widget:UpdateAllFramesAndNameplateColor()
+end
+
+function Widget:QUEST_WATCH_UPDATE(questIndex)
+  self:UpdateAllFramesAndNameplateColor()
+  QuestsToUpdate[questIndex] = true
+end
+
+function Widget:QUEST_LOG_UPDATE()
+  local refreshPlates = false
+
+  for questIndex in pairs(QuestsToUpdate) do
+    UpdateQuestCacheEntry(questIndex)
+    QuestsToUpdate[questIndex] = false
+    refreshPlates = true
+  end
+
+  QuestsToUpdate = {}
+
+  if refreshPlates then
+    self:UpdateAllFramesAndNameplateColor()
+  end
 end
 
 function Widget:QUEST_ACCEPTED(questIndex, questID)
@@ -265,7 +332,8 @@ function Widget:OnEnable()
   Font = ThreatPlates.Media:Fetch('font', TidyPlatesThreat.db.profile.questWidget.Font)
 
 	self:RegisterEvent("PLAYER_ENTERING_WORLD", EventHandler)
-	self:RegisterEvent("QUEST_WATCH_UPDATE", EventHandler)
+	self:RegisterEvent("QUEST_WATCH_UPDATE")
+  self:RegisterEvent("QUEST_LOG_UPDATE")
 
   self:RegisterEvent("QUEST_ACCEPTED")
 	-- This event fires whenever the player turns in a quest, whether automatically with a Task-type quest
