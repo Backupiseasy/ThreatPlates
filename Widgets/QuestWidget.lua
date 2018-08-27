@@ -162,12 +162,15 @@ local function AddQuestCacheEntry(questIndex)
       local text, objectiveType, finished = GetQuestObjectiveInfo(questID, o, false)
       local current, goal, objectiveName = string.match(text, "^(%d+)/(%d+) (.+)$")
 
-      quest.objectives[objectiveName] = {
-        ["type"] = objectiveType,
-        ["current"] = current,
-        ["goal"] = goal,
-        ["finished"] = finished
-      }
+      --only want to track quests in this format
+      if objectiveName then
+        quest.objectives[objectiveName] = {
+          ["type"] = objectiveType,
+          ["current"] = current,
+          ["goal"] = goal,
+          ["finished"] = finished
+        }
+      end
     end
 
     Quests[title] = quest
@@ -194,19 +197,22 @@ local function UpdateQuestCacheEntry(questIndex)
     local text, objectiveType, finished = GetQuestObjectiveInfo(questID, o, false)
     local current, goal, objectiveName = string.match(text, "^(%d+)/(%d+) (.+)$")
 
-    if Quests[title].objectives[objectiveName] then
-      local obj = Quests[title].objectives[objectiveName]
+    --only want to track quests in this format
+    if objectiveName then
+      if Quests[title].objectives[objectiveName] then
+        local obj = Quests[title].objectives[objectiveName]
 
-      obj.current = current
-      obj.goal = goal
-      obj.finished = finished
-    else --one of those breadcrumb-ish quests where the written objectives change
-      Quests[title].objectives[objectiveName] = {
-        ["type"] = objectiveType,
-        ["current"] = current,
-        ["goal"] = goal,
-        ["finished"] = finished
-      }
+        obj.current = current
+        obj.goal = goal
+        obj.finished = finished
+      else --one of those breadcrumb-ish quests where the written objectives change
+        Quests[title].objectives[objectiveName] = {
+          ["type"] = objectiveType,
+          ["current"] = current,
+          ["goal"] = goal,
+          ["finished"] = finished
+        }
+      end
     end
   end
 end
