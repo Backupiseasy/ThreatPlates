@@ -309,17 +309,15 @@ function Widget:Create(tp_frame)
   widget_frame.Icon = widget_frame:CreateTexture(nil, "OVERLAY")
   widget_frame.Text = false
 
-  if db.ShowDetail then
-    local text_frame = widget_frame:CreateFontString(nil, "OVERLAY")
-    local type_frame = widget_frame:CreateTexture(nil, "OVERLAY")
+  local text_frame = widget_frame:CreateFontString(nil, "OVERLAY")
+  local type_frame = widget_frame:CreateTexture(nil, "OVERLAY")
 
-    text_frame:SetFont(Font, db.FontSize + (db.scale * FONT_SCALING))
-    text_frame:SetShadowOffset(1, -1)
-    text_frame:SetShadowColor(0,0,0,1)
-    text_frame.TypeTexture = type_frame
+  text_frame:SetFont(Font, db.FontSize + (db.scale * FONT_SCALING))
+  text_frame:SetShadowOffset(1, -1)
+  text_frame:SetShadowColor(0,0,0,1)
+  text_frame.TypeTexture = type_frame
 
-    widget_frame.Text = text_frame
-  end
+  widget_frame.Text = text_frame
   --------------------------------------
   -- End Custom Code
 
