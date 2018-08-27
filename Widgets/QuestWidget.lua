@@ -180,12 +180,12 @@ end
 ---------------------------------------------------------------------------------------------------
 local function EventHandler(event, ...)
   Widget:UpdateAllFramesAndNameplateColor()
+end
 
-  if event == "QUEST_ACCEPTED" then
-    local questIndex, questID = ...
+function Widget:QUEST_ACCEPTED(questIndex, questID)
+  self:UpdateAllFramesAndNameplateColor()
 
-    AddQuestCacheEntry(questIndex)
-  end
+  AddQuestCacheEntry(questIndex)
 end
 
 function Widget:QUEST_REMOVED(questId)
@@ -265,9 +265,9 @@ function Widget:OnEnable()
   Font = ThreatPlates.Media:Fetch('font', TidyPlatesThreat.db.profile.questWidget.Font)
 
 	self:RegisterEvent("PLAYER_ENTERING_WORLD", EventHandler)
-
-	self:RegisterEvent("QUEST_ACCEPTED", EventHandler)
 	self:RegisterEvent("QUEST_WATCH_UPDATE", EventHandler)
+
+  self:RegisterEvent("QUEST_ACCEPTED")
 	-- This event fires whenever the player turns in a quest, whether automatically with a Task-type quest
 	-- (Bonus Objectives/World Quests), or by pressing the Complete button in a quest dialog window.
   -- also handles abandon quest
