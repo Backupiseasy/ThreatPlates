@@ -112,6 +112,11 @@ local function IsQuestUnit(unit)
   return quest_type ~= false, quest_type, currentProgress
 end
 
+function Addon:IsPlayerQuestUnit(unit)
+	local show, quest_type = IsQuestUnit(unit)
+	return show and (quest_type == 1) -- don't show quest color for party member#s quest targets
+end
+
 local function ShowQuestUnit(unit)
   local db = TidyPlatesThreat.db.profile.questWidget
 
@@ -119,7 +124,7 @@ local function ShowQuestUnit(unit)
     return false
   end
 
-  if InCombatLockdown() or InCombat then
+  if InCombatLockdown() or InCombat then -- InCombat is necessary here - at least was - forgot why, though
     if db.HideInCombat then
       return false
     elseif db.HideInCombatAttacked then
@@ -136,7 +141,6 @@ local function ShowQuestUnitHealthbar(unit)
   return db.ON and db.ModeHPBar and ShowQuestUnit(unit)
 end
 
-ThreatPlates.IsQuestUnit = IsQuestUnit
 ThreatPlates.ShowQuestUnit = ShowQuestUnitHealthbar
 
 local function AddQuestCacheEntry(questIndex)
@@ -171,6 +175,9 @@ local function GenerateQuestCache()
   end
 end
 
+---------------------------------------------------------------------------------------------------
+-- Event Watcher Code for Quest Widget
+---------------------------------------------------------------------------------------------------
 local function EventHandler(event, ...)
   Widget:UpdateAllFramesAndNameplateColor()
 
@@ -193,12 +200,12 @@ end
 
 function Widget:PLAYER_REGEN_ENABLED()
   InCombat = false
-  self:UpdateAllFrames()
+  self:UpdateAllFramesAndNameplateColor()
 end
 
 function Widget:PLAYER_REGEN_DISABLED()
   InCombat = true
-  self:UpdateAllFrames()
+  self:UpdateAllFramesAndNameplateColor()
 end
 
 function Widget:UNIT_THREAT_LIST_UPDATE(unitid)
@@ -255,14 +262,20 @@ end
 function Widget:OnEnable()
   Font = ThreatPlates.Media:Fetch('font', TidyPlatesThreat.db.profile.questWidget.Font)
 
-  self:RegisterEvent("QUEST_REMOVED")
-  self:RegisterEvent("QUEST_ACCEPTED", EventHandler)
-  self:RegisterEvent("QUEST_WATCH_UPDATE", EventHandler)
-  self:RegisterEvent("QUEST_ITEM_UPDATE", EventHandler)
-  self:RegisterEvent("PLAYER_ENTERING_WORLD", EventHandler)
-  self:RegisterEvent("PLAYER_REGEN_ENABLED")
-  self:RegisterEvent("PLAYER_REGEN_DISABLED")
-  self:RegisterEvent("UNIT_THREAT_LIST_UPDATE")
+	self:RegisterEvent("PLAYER_ENTERING_WORLD", EventHandler)
+
+	self:RegisterEvent("QUEST_ACCEPTED", EventHandler)
+	self:RegisterEvent("QUEST_WATCH_UPDATE", EventHandler)
+	-- This event fires whenever the player turns in a quest, whether automatically with a Task-type quest
+	-- (Bonus Objectives/World Quests), or by pressing the Complete button in a quest dialog window.
+  -- also handles abandon quest
+	self:RegisterEvent("QUEST_REMOVED", EventHandler)
+
+	-- Handle in-combat situations:
+	self:RegisterEvent("PLAYER_REGEN_ENABLED")
+	self:RegisterEvent("PLAYER_REGEN_DISABLED")
+	-- Also use UNIT_THREAT_LIST_UPDATE as new mobs may enter the combat mid-fight (PLAYER_REGEN_DISABLED already triggered)
+	self:RegisterEvent("UNIT_THREAT_LIST_UPDATE")
 
   InCombat = InCombatLockdown()
   GenerateQuestCache()

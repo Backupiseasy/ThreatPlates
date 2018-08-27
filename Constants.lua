@@ -1772,8 +1772,8 @@ ThreatPlates.DEFAULT_SETTINGS = {
       },
       raidicon = {
         scale = 20,
-        x = 0,
-        y = 30, -- old default: 27
+        x = -78,
+        y = 0, -- old default: 27
         x_hv = 0,
         y_hv = 25,
         anchor = "CENTER",
