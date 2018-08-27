@@ -167,8 +167,7 @@ local function AddQuestCacheEntry(questIndex)
         quest.objectives[objectiveName] = {
           ["type"] = objectiveType,
           ["current"] = current,
-          ["goal"] = goal,
-          ["finished"] = finished
+          ["goal"] = goal
         }
       end
     end
@@ -204,13 +203,11 @@ local function UpdateQuestCacheEntry(questIndex)
 
         obj.current = current
         obj.goal = goal
-        obj.finished = finished
       else --one of those breadcrumb-ish quests where the written objectives change
         Quests[title].objectives[objectiveName] = {
           ["type"] = objectiveType,
           ["current"] = current,
-          ["goal"] = goal,
-          ["finished"] = finished
+          ["goal"] = goal
         }
       end
     end
