@@ -151,7 +151,7 @@ ThreatPlates.ShowQuestUnit = ShowQuestUnitHealthbar
 local function AddQuestCacheEntry(questIndex)
   local title, _, _, isHeader, _, _, _, questID = GetQuestLogTitle(questIndex)
 
-  if not isHeader then --ignore quest log headers
+  if not isHeader and title then --ignore quest log headers
     local objectives = GetNumQuestLeaderBoards(questIndex)
     local quest = {
       ["id"] = questID,
