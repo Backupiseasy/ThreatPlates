@@ -152,8 +152,10 @@ local function ShowUnit(unit)
     headline_view = true
   elseif db.ForceNonAttackableUnits and unit.reaction ~= "FRIENDLY" and not UnitCanAttack("player", unit.unitid) then
     headline_view = true
-  elseif db.ForceFriendlyInCombat and unit.reaction == "FRIENDLY" and InCombatLockdown() then
+  elseif db.ForceFriendlyInCombat == "HEADLINE" and unit.reaction == "FRIENDLY" and InCombatLockdown() then
     headline_view = true
+  elseif db.ForceFriendlyInCombat == "NORMAL" and unit.reaction == "FRIENDLY" and InCombatLockdown() then
+    headline_view = false
   end
 
   return show, headline_view

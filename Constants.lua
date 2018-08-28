@@ -372,7 +372,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
       ForceHealthbarOnTarget = false,
       ForceOutOfCombat = false,
       ForceNonAttackableUnits = false,
-      ForceFriendlyInCombat = false,
+      ForceFriendlyInCombat = "NONE",
       --
       EnemyTextColorMode = "CLASS",
       EnemyTextColor = RGB(0, 255, 0),
