@@ -28,7 +28,7 @@ local TooltipFrame = CreateFrame("GameTooltip", "ThreatPlates_Tooltip", nil, "Ga
 local PlayerName = UnitName("player")
 local ICON_COLORS = {}
 
-Widget.ToUpdate = false
+--Widget.ToUpdate = false
 
 ---------------------------------------------------------------------------------------------------
 -- Quest Functions
@@ -126,18 +126,18 @@ ThreatPlates.ShowQuestUnit = ShowQuestUnitHealthbar
 -- Event Watcher Code for Quest Widget
 ---------------------------------------------------------------------------------------------------
 
-local function EventHandler(event, ...)
-  Widget:UpdateAllFramesAndNameplateColor()
+function Widget:PLAYER_ENTERING_WORLD()
+	self:UpdateAllFramesAndNameplateColor()
 end
 
 function Widget:PLAYER_REGEN_ENABLED()
   InCombat = false
-  Widget:UpdateAllFramesAndNameplateColor()
+	self:UpdateAllFramesAndNameplateColor()
 end
 
 function Widget:PLAYER_REGEN_DISABLED()
   InCombat = true
-  Widget:UpdateAllFramesAndNameplateColor()
+	self:UpdateAllFramesAndNameplateColor()
 end
 
 function Widget:UNIT_THREAT_LIST_UPDATE(unitid)
@@ -153,16 +153,16 @@ function Widget:UNIT_THREAT_LIST_UPDATE(unitid)
   end
 end
 
-function Widget:QUEST_WATCH_UPDATE()
-	self.ToUpdate = true
-end
+--function Widget:QUEST_LOG_UPDATE()
+--	if self.ToUpdate then
+--		self:UpdateAllFramesAndNameplateColor()
+--		self.ToUpdate = false
+--	end
+--end
 
-function Widget:QUEST_LOG_UPDATE()
-	if self.ToUpdate then
-		print ("QUEST_LOG_UPDATE")
-		self:UpdateAllFramesAndNameplateColor()
-		self.ToUpdate = false
-	end
+function Widget:UNIT_QUEST_LOG_CHANGED(...)
+  self:UpdateAllFramesAndNameplateColor()
+  --self.ToUpdate = true
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -189,14 +189,10 @@ function Widget:IsEnabled()
 end
 
 function Widget:OnEnable()
-	self:RegisterEvent("PLAYER_ENTERING_WORLD", EventHandler)
+	self:RegisterEvent("PLAYER_ENTERING_WORLD")
 
-	self:RegisterEvent("QUEST_ACCEPTED", EventHandler)
-	self:RegisterEvent("QUEST_WATCH_UPDATE")
-	self:RegisterEvent("QUEST_LOG_UPDATE")
-	-- This event fires whenever the player turns in a quest, whether automatically with a Task-type quest
-	-- (Bonus Objectives/World Quests), or by pressing the Complete button in a quest dialog window.
-	self:RegisterEvent("QUEST_TURNED_IN", EventHandler)
+	--self:RegisterEvent("QUEST_LOG_UPDATE")
+	self:RegisterUnitEvent("UNIT_QUEST_LOG_CHANGED", "player")
 
 	-- Handle in-combat situations:
 	self:RegisterEvent("PLAYER_REGEN_ENABLED")

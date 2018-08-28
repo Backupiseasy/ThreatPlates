@@ -1,4 +1,10 @@
 ﻿------------------------------------------------------
+9.0.13-Beta2
+------------------------------------------------------
+* Changed priority of healthbar coloring with regard to Quest widget so that tapped units no longer are shown with quest target color.
+* Again, fixed update issues with Quest widget not showing proper quest status on nameplates when with completed quests.
+
+------------------------------------------------------
 9.0.13-Beta1
 ------------------------------------------------------
 * Fixed a bug in quest widget where the nameplate color of quest units was not updated reset after the player completed the quest [Comment #1269].
@@ -8,7 +14,7 @@
 9.0.12
 ------------------------------------------------------
 * Fixed a bug with the cooldown spiral of auras being not shown consistently.
-
+m
 ------------------------------------------------------
 9.0.11
 ------------------------------------------------------
