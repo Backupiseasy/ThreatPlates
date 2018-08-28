@@ -28,6 +28,8 @@ local TooltipFrame = CreateFrame("GameTooltip", "ThreatPlates_Tooltip", nil, "Ga
 local PlayerName = UnitName("player")
 local ICON_COLORS = {}
 
+Widget.ToUpdate = false
+
 ---------------------------------------------------------------------------------------------------
 -- Quest Functions
 ---------------------------------------------------------------------------------------------------
@@ -84,7 +86,7 @@ local function IsQuestUnit(unit)
 		end
 	end
 
-  local quest_type = ((quest_player or quest_area) and 1) or (quest_group and 2)
+  local quest_type = ((quest_player or quest_area) and 1) or false -- disabling group quests: or (quest_group and 2)
 
   return quest_type ~= false, quest_type
 end
@@ -151,6 +153,18 @@ function Widget:UNIT_THREAT_LIST_UPDATE(unitid)
   end
 end
 
+function Widget:QUEST_WATCH_UPDATE()
+	self.ToUpdate = true
+end
+
+function Widget:QUEST_LOG_UPDATE()
+	if self.ToUpdate then
+		print ("QUEST_LOG_UPDATE")
+		self:UpdateAllFramesAndNameplateColor()
+		self.ToUpdate = false
+	end
+end
+
 ---------------------------------------------------------------------------------------------------
 -- Widget functions for creation and update
 ---------------------------------------------------------------------------------------------------
@@ -178,7 +192,8 @@ function Widget:OnEnable()
 	self:RegisterEvent("PLAYER_ENTERING_WORLD", EventHandler)
 
 	self:RegisterEvent("QUEST_ACCEPTED", EventHandler)
-	self:RegisterEvent("QUEST_WATCH_UPDATE", EventHandler)
+	self:RegisterEvent("QUEST_WATCH_UPDATE")
+	self:RegisterEvent("QUEST_LOG_UPDATE")
 	-- This event fires whenever the player turns in a quest, whether automatically with a Task-type quest
 	-- (Bonus Objectives/World Quests), or by pressing the Complete button in a quest dialog window.
 	self:RegisterEvent("QUEST_TURNED_IN", EventHandler)
