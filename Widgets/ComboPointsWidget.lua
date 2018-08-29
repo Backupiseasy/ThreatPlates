@@ -16,7 +16,7 @@ local unpack, type = unpack, type
 local CreateFrame = CreateFrame
 local UnitClass, UnitCanAttack = UnitClass, UnitCanAttack
 local UnitPower, UnitPowerMax = UnitPower, UnitPowerMax
-local GetSpecialization = GetSpecialization
+local GetSpecialization, GetShapeshiftFormID = GetSpecialization, GetShapeshiftFormID
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local InCombatLockdown = InCombatLockdown
 
@@ -133,6 +133,7 @@ local TEXTURE_INFO = {
 
 Widget.TextureCoordinates = {}
 Widget.Colors = {}
+Widget.ShowInShapeshiftForm = true
 
 ---------------------------------------------------------------------------------------------------
 -- Combo Points Widget Functions
@@ -237,6 +238,18 @@ function Widget:PLAYER_TARGET_CHANGED()
   end
 end
 
+-- As this event is only registered for druid characters, ShowInShapeshiftForm is true by initialization for all other classes
+function Widget:UPDATE_SHAPESHIFT_FORM()
+  self.ShowInShapeshiftForm = (GetShapeshiftFormID() == 1)
+
+  if self.ShowInShapeshiftForm then
+    self:PLAYER_TARGET_CHANGED()
+  else
+    self.WidgetFrame:Hide()
+    self.WidgetFrame:SetParent(nil)
+  end
+end
+
 ---------------------------------------------------------------------------------------------------
 -- Widget functions for creation and update
 ---------------------------------------------------------------------------------------------------
@@ -260,6 +273,13 @@ function Widget:OnEnable()
   self:RegisterUnitEvent("UNIT_POWER_UPDATE", "player", EventHandler)
   self:RegisterUnitEvent("UNIT_DISPLAYPOWER", "player", EventHandler)
   self:RegisterUnitEvent("UNIT_MAXPOWER", "player")
+
+  local _, player_class = UnitClass("player")
+  if player_class == "DRUID" then
+    self:RegisterEvent("UPDATE_SHAPESHIFT_FORM")
+    self.ShowInShapeshiftForm = (GetShapeshiftFormID() == 1)
+  end
+
   -- self:RegisterUnitEvent("UNIT_POWER_FREQUENT", "player", EventHandler)
   -- self:RegisterUnitEvent("UNIT_FLAGS", "player", EventHandler)
 
@@ -281,9 +301,9 @@ function Widget:EnabledForStyle(style, unit)
   -- if not UnitCanAttack("player", "target") then return false end
 
   if (style == "NameOnly" or style == "NameOnly-Unique") then
-    return self.db.ShowInHeadlineView
+    return self.db.ShowInHeadlineView and self.ShowInShapeshiftForm -- a little bit of a hack, logically would be better checked in OnTargetUnitAdded
   elseif style ~= "etotem" then
-    return self.db.ON
+    return self.db.ON and self.ShowInShapeshiftForm
   end
 end
 
