@@ -1298,7 +1298,7 @@ end
             type = "description",
             order = 0,
             width = "full",
-            name = L["Use a custom color for the healthbar of quest mobs (for player quests only)."],
+            name = L["Use a custom color for the healthbar of quest mobs."],
           },
           Enable = { type = "toggle", order = 10, name = L["Enable"],	arg = {"questWidget", "ModeHPBar"}, },
           Color = {
