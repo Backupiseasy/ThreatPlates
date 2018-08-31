@@ -70,7 +70,7 @@ end
 local function GetUnitClassification(unit)
   if UnitIsTapDenied(unit.unitid) then
     return "Tapped"
-  elseif UnitReaction(unit.unitid, "player") then
+  elseif UnitReaction(unit.unitid, "player") == 4 then
     return "Neutral"
   end
 

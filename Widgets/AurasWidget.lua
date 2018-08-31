@@ -158,7 +158,7 @@ Widget.CROWD_CONTROL_SPELLS = {
   [853] = LOC_STUN,             -- Hammer of Justice
   [115750] = LOC_DISORIENT,     -- Blinding Light
   [96231] = CC_SILENCE,         -- Rebuke
-  [173315] = LOC_INCAPACITATE,  -- Repentance
+  [20066] = LOC_INCAPACITATE,   -- Repentance (Retribution, Blizzard)
 
   -- Priest
   [15487] = CC_SILENCE,      -- Silence

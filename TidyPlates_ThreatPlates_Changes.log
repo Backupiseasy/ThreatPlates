@@ -1,4 +1,10 @@
 ﻿------------------------------------------------------
+9.0.13-Beta3
+------------------------------------------------------
+* The aura for Repentance is now correctly recognized as crowd-control aura [Issue #261].
+* Fixed a bug where the threat system was disabled for all mobs when threat feedback for neutral mobs was disabled [Issue #264].
+
+------------------------------------------------------
 9.0.13-Beta2
 ------------------------------------------------------
 * Changed priority of healthbar coloring with regard to Quest widget so that tapped units no longer are shown with quest target color.
