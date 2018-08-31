@@ -315,12 +315,14 @@ function Widget:Create()
     self.WidgetFrame = widget_frame
     widget_frame.ComboPoints = {}
     widget_frame.ComboPointsOff = {}
-	local frameBackground = false -- debug frame size
-	if frameBackground then
-		widget_frame.Background = widget_frame:CreateTexture(nil, "BACKGROUND")
-		widget_frame.Background:SetAllPoints()
-		widget_frame.Background:SetColorTexture(1, 1, 1, 0.5)
-	end
+
+--    local frameBackground = false -- debug frame size
+--    if frameBackground then
+--      widget_frame.Background = widget_frame:CreateTexture(nil, "BACKGROUND")
+--      widget_frame.Background:SetAllPoints()
+--      widget_frame.Background:SetColorTexture(1, 1, 1, 0.5)
+--    end
+
     self:UpdateLayout()
   end
 

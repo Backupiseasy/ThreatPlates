@@ -300,26 +300,6 @@ local function SetColorAlpha(info, r, g, b, a)
   Addon:ForceUpdate()
 end
 
-local function SetColorAlphaAuraWidget(info, r, g, b, a)
-  local DB = TidyPlatesThreat.db.profile
-  local keys = info.arg
-  for index = 1, #keys - 1 do
-    DB = DB[keys[index]]
-  end
-  DB[keys[#keys]].r, DB[keys[#keys]].g, DB[keys[#keys]].b, DB[keys[#keys]].a = r, g, b, a
-  Addon.Widgets:UpdateSettings("Auras")
-end
-
-local function SetColorAuraWidget(info, r, g, b)
-	local DB = TidyPlatesThreat.db.profile
-	local keys = info.arg
-	for index = 1, #keys - 1 do
-		DB = DB[keys[index]]
-	end
-	DB[keys[#keys]].r, DB[keys[#keys]].g, DB[keys[#keys]].b = r,g,b
-  Addon.Widgets:UpdateSettings("Auras")
-end
-
 local function GetUnitVisibilitySetting(info)
   local unit_type = info.arg
   local unit_visibility = TidyPlatesThreat.db.profile.Visibility[unit_type].Show
@@ -384,14 +364,37 @@ end
 
 -- Set widget values
 
-local function SetValueAuraWidget(info, val)
-  SetValuePlain(info, val)
-  Addon.Widgets:UpdateSettings("Auras")
-end
+local MAP_OPTION_TO_WIDGET = {
+  ComboPointsWidget = "ComboPoints",
+  ResourceWidget = "Resource",
+  AurasWidget = "Auras",
+}
 
 local function SetValueWidget(info, val)
   SetValuePlain(info, val)
-  Addon.Widgets:UpdateSettings(CurrentWidgetOptions)
+  Addon.Widgets:UpdateSettings(MAP_OPTION_TO_WIDGET[info[2]])
+end
+
+local function SetColorWidget(info, r, g, b, a)
+  local DB = TidyPlatesThreat.db.profile
+  local keys = info.arg
+  for index = 1, #keys - 1 do
+    DB = DB[keys[index]]
+  end
+  DB[keys[#keys]].r, DB[keys[#keys]].g, DB[keys[#keys]].b = r, g, b
+
+  Addon.Widgets:UpdateSettings(MAP_OPTION_TO_WIDGET[info[2]])
+end
+
+local function SetColorAlphaWidget(info, r, g, b, a)
+  local DB = TidyPlatesThreat.db.profile
+  local keys = info.arg
+  for index = 1, #keys - 1 do
+    DB = DB[keys[index]]
+  end
+  DB[keys[#keys]].r, DB[keys[#keys]].g, DB[keys[#keys]].b, DB[keys[#keys]].a = r, g, b, a
+
+  Addon.Widgets:UpdateSettings(MAP_OPTION_TO_WIDGET[info[2]])
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -871,7 +874,7 @@ local function GetFontEntryDefault(name, pos, widget_info, func_disabled)
         type = "toggle",
         desc = L["Add black outline."],
         width = "half",
-        set = function(info, val) SetValueAuraWidget(info, SetFontFlags(Addon.ConcatTables(widget_info, { "flags" }), "Outline", val)) end,
+        set = function(info, val) SetValueWidget(info, SetFontFlags(Addon.ConcatTables(widget_info, { "flags" }), "Outline", val)) end,
         get = function(info) return GetFontFlags(Addon.ConcatTables(widget_info, { "flags" }), "Outline") end,
         arg = Addon.ConcatTables(widget_info, { "flags" }),
       },
@@ -881,7 +884,7 @@ local function GetFontEntryDefault(name, pos, widget_info, func_disabled)
         type = "toggle",
         desc = L["Add thick black outline."],
         width = "half",
-        set = function(info, val) SetValueAuraWidget(info, SetFontFlags(Addon.ConcatTables(widget_info, { "flags" }), "Thick", val)) end,
+        set = function(info, val) SetValueWidget(info, SetFontFlags(Addon.ConcatTables(widget_info, { "flags" }), "Thick", val)) end,
         get = function(info) return GetFontFlags(Addon.ConcatTables(widget_info, { "flags" }), "Thick") end,
         arg = Addon.ConcatTables(widget_info, { "flags" }),
       },
@@ -892,7 +895,7 @@ local function GetFontEntryDefault(name, pos, widget_info, func_disabled)
         type = "toggle",
         desc = L["Render font without antialiasing."],
         width = "half",
-        set = function(info, val) SetValueAuraWidget(info, SetFontFlags(Addon.ConcatTables(widget_info, { "flags" }), "Mono", val)) end,
+        set = function(info, val) SetValueWidget(info, SetFontFlags(Addon.ConcatTables(widget_info, { "flags" }), "Mono", val)) end,
         get = function(info) return GetFontFlags(Addon.ConcatTables(widget_info, { "flags" }), "Mono") end,
         arg = Addon.ConcatTables(widget_info, { "flags" }),
       },
@@ -907,9 +910,9 @@ local function GetFontEntryDefault(name, pos, widget_info, func_disabled)
     },
   }
 
-  entry.args.Color.set = SetColorAuraWidget
+  entry.args.Color.set = SetColorWidget
   entry.args.Color.width = "half"
-  entry.args.Transparency.set = function(info, val) SetValueAuraWidget(info, abs(val - 1)) end
+  entry.args.Transparency.set = function(info, val) SetValueWidget(info, abs(val - 1)) end
 
   return entry
 end
@@ -1120,8 +1123,6 @@ local function CreateClassIconsWidgetOptions()
 end
 
 local function CreateComboPointsWidgetOptions()
-  CurrentWidgetOptions = "ComboPoints"
-
   local options = {
     name = L["Combo Points"],
     type = "group",
@@ -1821,6 +1822,7 @@ local function CreateResourceWidgetOptions()
     name = L["Resource"],
     type = "group",
     order = 60,
+    set = SetValueWidget,
     args = {
       Enable = GetEnableEntry(L["Enable Resource Widget"], L["This widget shows information about your target's resource on your target nameplate. The resource bar's color is derived from the type of resource automatically."], "ResourceWidget", false, function(info, val) SetValuePlain(info, val); Addon.Widgets:InitializeWidget("Resource") end),
       ShowFor = {
@@ -1929,7 +1931,7 @@ local function CreateResourceWidgetOptions()
             type = "toggle",
             width = "half",
             desc = L["Use a custom color for the healtbar's background."],
-            set = function(info, val) SetValue(info, not val) end,
+            set = function(info, val) SetValueWidget(info, not val) end,
             get = function(info, val) return not GetValue(info, val) end,
             arg = { "ResourceWidget", "BackgroundUseForegroundColor" },
           },
@@ -1938,7 +1940,7 @@ local function CreateResourceWidgetOptions()
             type = "color",
             order = 235,
             get = GetColorAlpha,
-            set = SetColorAlpha,
+            set = SetColorAlphaWidget,
             hasAlpha = true,
             arg = {"ResourceWidget", "BackgroundColor"},
             width = "half",
@@ -1958,10 +1960,10 @@ local function CreateResourceWidgetOptions()
             set = function(info, val)
               if val then
                 db.ResourceWidget.BorderUseBackgroundColor = false
-                SetValue(info, val);
+                SetValueWidget(info, val);
               else
                 db.ResourceWidget.BorderUseBackgroundColor = false
-                SetValue(info, val);
+                SetValueWidget(info, val);
               end
             end,
             --get = function(info, val) return not (db.ResourceWidget.BorderUseForegroundColor or db.ResourceWidget.BorderUseBackgroundColor) end,
@@ -1975,10 +1977,10 @@ local function CreateResourceWidgetOptions()
             set = function(info, val)
               if val then
                 db.ResourceWidget.BorderUseForegroundColor = false
-                SetValue(info, val);
+                SetValueWidget(info, val);
               else
                 db.ResourceWidget.BorderUseForegroundColor = false
-                SetValue(info, val);
+                SetValueWidget(info, val);
               end
             end,
             arg = { "ResourceWidget", "BorderUseBackgroundColor" },
@@ -1998,7 +2000,7 @@ local function CreateResourceWidgetOptions()
             type = "color",
             order = 335,
             get = GetColorAlpha,
-            set = SetColorAlpha,
+            set = SetColorAlphaWidget,
             hasAlpha = true,
             arg = {"ResourceWidget", "BorderColor"},
             width = "half",
@@ -2020,7 +2022,7 @@ local function CreateResourceWidgetOptions()
           },
           Font = { name = L["Typeface"], type = "select", order = 10, dialogControl = "LSM30_Font", values = AceGUIWidgetLSMlists.font, arg = { "ResourceWidget", "Font" }, },
           FontSize = { name = L["Size"], order = 20, type = "range", min = 1, max = 36, step = 1, arg = { "ResourceWidget", "FontSize" }, },
-          FontColor = {	name = L["Color"], type = "color",	order = 30,	get = GetColor,	set = SetColorAuraWidget,	arg = {"ResourceWidget", "FontColor"},	hasAlpha = false, },
+          FontColor = {	name = L["Color"], type = "color",	order = 30,	get = GetColor,	set = SetColorWidget,	arg = {"ResourceWidget", "FontColor"},	hasAlpha = false, },
         },
       },
       Placement = GetPlacementEntryWidget(40, "ResourceWidget"),
@@ -2051,7 +2053,7 @@ local function CreateBossModsWidgetOptions()
             args = {
               Font = { name = L["Typeface"], type = "select", order = 10, dialogControl = "LSM30_Font", values = AceGUIWidgetLSMlists.font, arg = { "BossModsWidget", "Font" }, },
               FontSize = { name = L["Size"], order = 20, type = "range", min = 1, max = 36, step = 1, arg = { "BossModsWidget", "FontSize" }, },
-              FontColor = {	name = L["Color"], type = "color",	order = 30,	get = GetColor,	set = SetColorAuraWidget,	arg = {"BossModsWidget", "FontColor"},	hasAlpha = false, },
+              FontColor = {	name = L["Color"], type = "color",	order = 30,	get = GetColor,	set = SetColorWidget,	arg = {"BossModsWidget", "FontColor"},	hasAlpha = false, },
             },
           },
           Layout = {
@@ -2094,7 +2096,7 @@ local function CreateAurasWidgetOptions()
     type = "group",
     childGroups = "tab",
     order = 25,
-    set = SetValueAuraWidget,
+    set = SetValueWidget,
     args = {
       Enable = GetEnableEntry(L["Enable Auras Widget"], L["This widget shows a unit's auras (buffs and debuffs) on its nameplate."], "AuraWidget", true, function(info, val) SetValuePlain(info, val); Addon.Widgets:InitializeWidget("Auras") end),
       Style = {
@@ -2147,12 +2149,12 @@ local function CreateAurasWidgetOptions()
               },
               DefaultBuffColor = {
                 name = L["Buff Color"], type = "color",	order = 54,	arg = {"AuraWidget", "DefaultBuffColor"},	hasAlpha = true,
-                set = SetColorAlphaAuraWidget,
+                set = SetColorAlphaWidget,
                 get = GetColorAlpha,
               },
               DefaultDebuffColor = {
                 name = L["Debuff Color"], type = "color",	order = 56, arg = {"AuraWidget","DefaultDebuffColor"},	hasAlpha = true,
-                set = SetColorAlphaAuraWidget,
+                set = SetColorAlphaWidget,
                 get = GetColorAlpha,
               },
 
@@ -2190,35 +2192,35 @@ local function CreateAurasWidgetOptions()
                 name = L["None"], type = "toggle",	order = 0,	 width = "half",
                 desc = L["Do not sort auras."],
                 get = function(info) return db.AuraWidget.SortOrder == "None" end,
-                set = function(info, value) SetValueAuraWidget(info, "None") end,
+                set = function(info, value) SetValueWidget(info, "None") end,
                 arg = {"AuraWidget","SortOrder"},
               },
               AtoZ = {
                 name = L["A to Z"], type = "toggle",	order = 10, width = "half",
                 desc = L["Sort in ascending alphabetical order."],
                 get = function(info) return db.AuraWidget.SortOrder == "AtoZ" end,
-                set = function(info, value) SetValueAuraWidget(info, "AtoZ") end,
+                set = function(info, value) SetValueWidget(info, "AtoZ") end,
                 arg = {"AuraWidget","SortOrder"},
               },
               TimeLeft = {
                 name = L["Time Left"], type = "toggle",	order = 20,	 width = "half",
                 desc = L["Sort by time left in ascending order."],
                 get = function(info) return db.AuraWidget.SortOrder == "TimeLeft" end,
-                set = function(info, value) SetValueAuraWidget(info, "TimeLeft") end,
+                set = function(info, value) SetValueWidget(info, "TimeLeft") end,
                 arg = {"AuraWidget","SortOrder"},
               },
               Duration = {
                 name = L["Duration"], type = "toggle",	order = 30,	 width = "half",
                 desc = L["Sort by overall duration in ascending order."],
                 get = function(info) return db.AuraWidget.SortOrder == "Duration" end,
-                set = function(info, value) SetValueAuraWidget(info, "Duration") end,
+                set = function(info, value) SetValueWidget(info, "Duration") end,
                 arg = {"AuraWidget","SortOrder"},
               },
               Creation = {
                 name = L["Creation"], type = "toggle",	order = 40,	 width = "half",
                 desc = L["Show auras in order created with oldest aura first."],
                 get = function(info) return db.AuraWidget.SortOrder == "Creation" end,
-                set = function(info, value) SetValueAuraWidget(info, "Creation") end,
+                set = function(info, value) SetValueWidget(info, "Creation") end,
                 arg = {"AuraWidget","SortOrder"},
               },
               ReverseOrder = {
@@ -2354,7 +2356,7 @@ local function CreateAurasWidgetOptions()
                     db.FilterByType[2] = false
                     db.FilterByType[3] = false
                     db.FilterByType[4] = false
-                    SetValueAuraWidget(info, val)
+                    SetValueWidget(info, val)
                   end
                 end,
                 arg = { "AuraWidget", "Debuffs", "ShowAllFriendly" },
@@ -2369,7 +2371,7 @@ local function CreateAurasWidgetOptions()
                   local db = db.AuraWidget.Debuffs
                   db.ShowAllFriendly = not (val or db.ShowDispellable or db.ShowBoss or
                   db.FilterByType[1] or db.FilterByType[2] or db.FilterByType[3] or db.FilterByType[4])
-                  SetValueAuraWidget(info, val)
+                  SetValueWidget(info, val)
                 end,
                 arg = { "AuraWidget", "Debuffs", "ShowBlizzardForFriendly" },
                 disabled = function() return not db.AuraWidget.Debuffs.ShowFriendly end,
@@ -2383,7 +2385,7 @@ local function CreateAurasWidgetOptions()
                   local db = db.AuraWidget.Debuffs
                   db.ShowAllFriendly = not (val or db.ShowBlizzardForFriendly or db.ShowBoss or
                     db.FilterByType[1] or db.FilterByType[2] or db.FilterByType[3] or db.FilterByType[4])
-                  SetValueAuraWidget(info, val)
+                  SetValueWidget(info, val)
                 end,
                 arg = { "AuraWidget", "Debuffs", "ShowDispellable" },
                 disabled = function() return not db.AuraWidget.Debuffs.ShowFriendly end
@@ -2397,7 +2399,7 @@ local function CreateAurasWidgetOptions()
                   local db = db.AuraWidget.Debuffs
                   db.ShowAllFriendly = not (val or db.ShowBlizzardForFriendly or db.ShowDispellable or
                     db.FilterByType[1] or db.FilterByType[2] or db.FilterByType[3] or db.FilterByType[4])
-                  SetValueAuraWidget(info, val)
+                  SetValueWidget(info, val)
                 end,
                 arg = { "AuraWidget", "Debuffs", "ShowBoss" },
                 disabled = function() return not db.AuraWidget.Debuffs.ShowFriendly end
@@ -2487,7 +2489,7 @@ local function CreateAurasWidgetOptions()
                   if db.ShowOnlyMine or db.ShowBlizzardForEnemy then
                     db.ShowOnlyMine = false
                     db.ShowBlizzardForEnemy = false
-                    SetValueAuraWidget(info, val)
+                    SetValueWidget(info, val)
                   end
                 end,
                 arg = { "AuraWidget", "Debuffs", "ShowAllEnemy" },
@@ -2501,7 +2503,7 @@ local function CreateAurasWidgetOptions()
                 set = function(info, val)
                   local db = db.AuraWidget.Debuffs
                   db.ShowAllEnemy = not (val or db.ShowBlizzardForEnemy)
-                  SetValueAuraWidget(info, val)
+                  SetValueWidget(info, val)
                 end,
                 arg = { "AuraWidget", "Debuffs", "ShowOnlyMine" },
                 disabled = function() return not db.AuraWidget.Debuffs.ShowEnemy end,
@@ -2514,7 +2516,7 @@ local function CreateAurasWidgetOptions()
                 set = function(info, val)
                   local db = db.AuraWidget.Debuffs
                   db.ShowAllEnemy = not (val or db.ShowOnlyMine)
-                  SetValueAuraWidget(info, val)
+                  SetValueWidget(info, val)
                 end,
                 arg = { "AuraWidget", "Debuffs", "ShowBlizzardForEnemy" },
                 disabled = function() return not db.AuraWidget.Debuffs.ShowEnemy end,
@@ -2585,7 +2587,7 @@ local function CreateAurasWidgetOptions()
                   if db.ShowPlayerCanApply or db.ShowOnFriendlyNPCs then
                     db.ShowPlayerCanApply = false
                     db.ShowOnFriendlyNPCs = false
-                    SetValueAuraWidget(info, val)
+                    SetValueWidget(info, val)
                   end
                 end,
                 disabled = function() return not db.AuraWidget.Buffs.ShowFriendly end
@@ -2598,7 +2600,7 @@ local function CreateAurasWidgetOptions()
                 set = function(info, val)
                   local db = db.AuraWidget.Buffs
                   db.ShowAllFriendly = not (val or db.ShowPlayerCanApply)
-                  SetValueAuraWidget(info, val)
+                  SetValueWidget(info, val)
                 end,
                 arg = { "AuraWidget", "Buffs", "ShowOnFriendlyNPCs" },
                 disabled = function() return not db.AuraWidget.Buffs.ShowFriendly end
@@ -2611,7 +2613,7 @@ local function CreateAurasWidgetOptions()
                 set = function(info, val)
                   local db = db.AuraWidget.Buffs
                   db.ShowAllFriendly = not (val or db.ShowOnFriendlyNPCs)
-                  SetValueAuraWidget(info, val)
+                  SetValueWidget(info, val)
                 end,
                 arg = { "AuraWidget", "Buffs", "ShowPlayerCanApply" },
                 disabled = function() return not db.AuraWidget.Buffs.ShowFriendly end
@@ -2640,7 +2642,7 @@ local function CreateAurasWidgetOptions()
                   if db.ShowOnEnemyNPCs or db.ShowDispellable then
                     db.ShowOnEnemyNPCs = false
                     db.ShowDispellable = false
-                    SetValueAuraWidget(info, val)
+                    SetValueWidget(info, val)
                   end
                 end,
                 arg = { "AuraWidget", "Buffs", "ShowAllEnemy" },
@@ -2654,7 +2656,7 @@ local function CreateAurasWidgetOptions()
                 set = function(info, val)
                   local db = db.AuraWidget.Buffs
                   db.ShowAllEnemy = not (val or db.ShowDispellable)
-                  SetValueAuraWidget(info, val)
+                  SetValueWidget(info, val)
                 end,
                 arg = { "AuraWidget", "Buffs", "ShowOnEnemyNPCs" },
                 disabled = function() return not db.AuraWidget.Buffs.ShowEnemy end
@@ -2667,7 +2669,7 @@ local function CreateAurasWidgetOptions()
                 set = function(info, val)
                   local db = db.AuraWidget.Buffs
                   db.ShowAllEnemy = not (val or db.ShowOnEnemyNPCs)
-                  SetValueAuraWidget(info, val)
+                  SetValueWidget(info, val)
                 end,
                 arg = { "AuraWidget", "Buffs", "ShowDispellable" },
                 disabled = function() return not db.AuraWidget.Buffs.ShowEnemy end
@@ -2746,7 +2748,7 @@ local function CreateAurasWidgetOptions()
                     db.ShowBlizzardForFriendly = false
                     db.ShowDispellable = false
                     db.ShowBoss = false
-                    SetValueAuraWidget(info, val)
+                    SetValueWidget(info, val)
                   end
                 end,
                 arg = { "AuraWidget", "CrowdControl", "ShowAllFriendly" },
@@ -2760,7 +2762,7 @@ local function CreateAurasWidgetOptions()
                 set = function(info, val)
                   local db = db.AuraWidget.CrowdControl
                   db.ShowAllFriendly = not (val or db.ShowDispellable or db.ShowBoss)
-                  SetValueAuraWidget(info, val)
+                  SetValueWidget(info, val)
                 end,
                 arg = { "AuraWidget", "CrowdControl", "ShowBlizzardForFriendly" },
                 disabled = function() return not db.AuraWidget.CrowdControl.ShowFriendly end,
@@ -2773,7 +2775,7 @@ local function CreateAurasWidgetOptions()
                 set = function(info, val)
                   local db = db.AuraWidget.CrowdControl
                   db.ShowAllFriendly = not (val or db.ShowBlizzardForFriendly or db.ShowBoss)
-                  SetValueAuraWidget(info, val)
+                  SetValueWidget(info, val)
                 end,
                 arg = { "AuraWidget", "CrowdControl", "ShowDispellable" },
                 disabled = function() return not db.AuraWidget.CrowdControl.ShowFriendly end
@@ -2786,7 +2788,7 @@ local function CreateAurasWidgetOptions()
                 set = function(info, val)
                   local db = db.AuraWidget.CrowdControl
                   db.ShowAllFriendly = not (val or db.ShowBlizzardForFriendly or db.ShowDispellable)
-                  SetValueAuraWidget(info, val)
+                  SetValueWidget(info, val)
                 end,
                 arg = { "AuraWidget", "CrowdControl", "ShowBoss" },
                 disabled = function() return not db.AuraWidget.CrowdControl.ShowFriendly end
@@ -2814,7 +2816,7 @@ local function CreateAurasWidgetOptions()
                   local db = db.AuraWidget.CrowdControl
                   if db.ShowBlizzardForEnemy then
                     db.ShowBlizzardForEnemy = false
-                    SetValueAuraWidget(info, val)
+                    SetValueWidget(info, val)
                   end
                 end,
                 arg = { "AuraWidget", "CrowdControl", "ShowAllEnemy" },
@@ -2828,7 +2830,7 @@ local function CreateAurasWidgetOptions()
                 set = function(info, val)
                   local db = db.AuraWidget.CrowdControl
                   db.ShowAllEnemy = not (val)
-                  SetValueAuraWidget(info, val)
+                  SetValueWidget(info, val)
                 end,
                 arg = { "AuraWidget", "CrowdControl", "ShowBlizzardForEnemy" },
                 disabled = function() return not db.AuraWidget.CrowdControl.ShowEnemy end,
@@ -2884,7 +2886,7 @@ local function CreateAurasWidgetOptions()
             name = L["Show auras as icons in a grid configuration."],
             width = "full",
             arg = { "AuraWidget", "ModeBar", "Enabled" },
-            set = function(info, val) SetValueAuraWidget(info, false) end,
+            set = function(info, val) SetValueWidget(info, false) end,
             get = function(info) return not GetValue(info) end,
           },
           Appearance = {
@@ -2904,7 +2906,7 @@ local function CreateAurasWidgetOptions()
                   if val ~= "custom" then
                     Addon.MergeIntoTable(db.AuraWidget.ModeIcon, AURA_STYLE[val])
                   end
-                  SetValueAuraWidget(info, val)
+                  SetValueWidget(info, val)
                 end,
                 arg = { "AuraWidget", "ModeIcon", "Style" },
               },
@@ -3079,7 +3081,7 @@ local function CreateAurasWidgetOptions()
             --name = L["Enable"],
             name = L["Show auras as bars (with optional icons)."],
             width = "full",
-            set = function(info, val) SetValueAuraWidget(info, true) end,
+            set = function(info, val) SetValueWidget(info, true) end,
             get = function(info) return GetValue(info) end,
             arg = { "AuraWidget", "ModeBar", "Enabled" }
           },
@@ -3099,7 +3101,7 @@ local function CreateAurasWidgetOptions()
                   --Spacer2 = GetSpacerEntry(75),
                   BackgroundTexture = { name = L["Background Texture"], order = 80, type = "select", dialogControl = "LSM30_Statusbar", values = AceGUIWidgetLSMlists.statusbar, arg = { "AuraWidget", "ModeBar", "BackgroundTexture" }, },
                   BackgroundColor = {	name = L["Background Color"], type = "color",	order = 90, arg = {"AuraWidget","ModeBar", "BackgroundColor"},	hasAlpha = true,
-                    get = GetColorAlpha, set = SetColorAlphaAuraWidget,
+                    get = GetColorAlpha, set = SetColorAlphaWidget,
                   },
                 },
               },
@@ -3111,7 +3113,7 @@ local function CreateAurasWidgetOptions()
                 args = {
                   Font = { name = L["Typeface"], type = "select", order = 10, dialogControl = "LSM30_Font", values = AceGUIWidgetLSMlists.font, arg = { "AuraWidget", "ModeBar", "Font" }, },
                   FontSize = { name = L["Size"], order = 20, type = "range", min = 1, max = 36, step = 1, arg = { "AuraWidget", "ModeBar", "FontSize" }, },
-                  FontColor = {	name = L["Color"], type = "color",	order = 30,	get = GetColor,	set = SetColorAuraWidget,	arg = {"AuraWidget","ModeBar", "FontColor"},	hasAlpha = false, },
+                  FontColor = {	name = L["Color"], type = "color",	order = 30,	get = GetColor,	set = SetColorWidget,	arg = {"AuraWidget","ModeBar", "FontColor"},	hasAlpha = false, },
                   Spacer1 = GetSpacerEntry(35),
                   IndentLabel = { name = L["Label Text Offset"], order = 40, type = "range", min = -16, max = 16, step = 1, arg = { "AuraWidget", "ModeBar", "LabelTextIndent" }, },
                   IndentTime = { name = L["Time Text Offset"], order = 50, type = "range", min = -16, max = 16, step = 1, arg = { "AuraWidget", "ModeBar", "TimeTextIndent" }, },
@@ -4092,7 +4094,7 @@ local function CreateWidgetOptions()
       BossModsWidget = CreateBossModsWidgetOptions(),
       ClassIconWidget = CreateClassIconsWidgetOptions(),
       ComboPointsWidget = CreateComboPointsWidgetOptions(),
-      Resourceidget = CreateResourceWidgetOptions(),
+      ResourceWidget = CreateResourceWidgetOptions(),
       SocialWidget = CreateSocialWidgetOptions(),
       StealthWidget = CreateStealthWidgetOptions(),
       TargetArtWidget = CreateTargetArtWidgetOptions(),
