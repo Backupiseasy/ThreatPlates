@@ -118,6 +118,8 @@ Widget.CROWD_CONTROL_SPELLS = {
   [211881] = LOC_STUN,             -- Fel Eruption (Talent)
   [217832] = LOC_INCAPACITATE,     -- Imprison
   [179057] = LOC_STUN,             -- Chaos Nova
+  [207685] = LOC_DISORIENT,        -- Sigil of Misery (Vengeance, Blizzard)
+  [204490] = CC_SILENCE,           -- Sigil of Silence (Vengeance, Blizzard)
 
   -- Hunter
   [3355] = LOC_INCAPACITATE,    -- Freezing Trap

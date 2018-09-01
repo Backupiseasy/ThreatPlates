@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+9.0.13-Beta4
+------------------------------------------------------
+* Added Sigil of Misery and Sigil of Silence from Vengeance demon hunters to the Auras widget as CC auras [Issue #261].
+
+------------------------------------------------------
 9.0.13-Beta3
 ------------------------------------------------------
 * The aura for Repentance is now correctly recognized as crowd-control aura [Issue #261].
