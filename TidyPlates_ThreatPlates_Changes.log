@@ -1,8 +1,7 @@
 ﻿------------------------------------------------------
-9.0.13-Beta1
+9.1.0-Beta1
 ------------------------------------------------------
-* Fixed a bug in quest widget where the nameplate color of quest units was not updated reset after the player completed the quest [Comment #1269].
-* Updated the /tptpol command to switch between nameplate overlapping and stacking (nameplate motion only works for enemy nameplates).
+* Combo Points widget now has different styles (Squares, Orbs, Blizzard) and colors combo points depending on the current number of combo points [Issue #45, Comment #843, Comment #927, Comment #1028, Comment #1029, Issue #217, E-Mail Requests].
 
 ------------------------------------------------------
 9.0.12
