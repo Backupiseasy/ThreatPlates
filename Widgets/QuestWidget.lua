@@ -254,14 +254,12 @@ function Widget:QUEST_LOG_UPDATE()
 end
 
 function Widget:QUEST_ACCEPTED(questIndex, questID)
-  self:UpdateAllFramesAndNameplateColor()
-
   AddQuestCacheEntry(questIndex)
+
+  self:UpdateAllFramesAndNameplateColor()
 end
 
 function Widget:QUEST_REMOVED(questId)
-  self:UpdateAllFramesAndNameplateColor()
-
   --clean up cache
   if Quests[questId] then
     local questTitle = Quests[questId]
@@ -269,6 +267,8 @@ function Widget:QUEST_REMOVED(questId)
     Quests[questTitle] = nil
     Quests[questId] = nil
   end
+
+  self:UpdateAllFramesAndNameplateColor()
 end
 
 function Widget:PLAYER_REGEN_ENABLED()
