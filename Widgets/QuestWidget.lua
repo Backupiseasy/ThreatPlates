@@ -333,6 +333,8 @@ end
 function Widget:OnEnable()
   Font = ThreatPlates.Media:Fetch('font', TidyPlatesThreat.db.profile.questWidget.Font)
 
+  GenerateQuestCache()
+
 	self:RegisterEvent("PLAYER_ENTERING_WORLD", EventHandler)
 	self:RegisterEvent("QUEST_WATCH_UPDATE")
   self:RegisterEvent("QUEST_LOG_UPDATE")
@@ -350,7 +352,6 @@ function Widget:OnEnable()
 	self:RegisterEvent("UNIT_THREAT_LIST_UPDATE")
 
   InCombat = InCombatLockdown()
-  GenerateQuestCache()
 end
 
 function Widget:EnabledForStyle(style, unit)
