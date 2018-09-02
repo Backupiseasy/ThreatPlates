@@ -69,7 +69,8 @@ local function IsQuestUnit(unit)
           quest_area = nil
 
           if unit_name then
-            local current, goal, objectiveName = string.match(progress, "^(%d+)/(%d+) (.+)$")
+            local current, goal = string.match(progress, "(%d+)/(%d+)") --use these as a fallback if the cache is empty
+            local objectiveName = string.gsub(progress, "(%d+)/(%d+)", "")
             local objType = false
 
             --Tooltips do not update right away, so fetch current and goal from the cache (which is from the api)
@@ -159,21 +160,21 @@ function Widget:CreateQuest(questID, questIndex)
     local objectives = GetNumQuestLeaderBoards(self.index)
 
     for objIndex=1, objectives do
-      local text, objectiveType, finished = GetQuestObjectiveInfo(self.id, objIndex, false)
-      local current, goal, objectiveName = string.match(text, "^(%d+)/(%d+) (.+)$")
+      local text, objectiveType, finished, numFulfilled, numRequired = GetQuestObjectiveInfo(self.id, objIndex, false)
+      local objectiveName = string.gsub(text, "(%d+)/(%d+)", "")
 
       --only want to track quests in this format
-      if objectiveName then
+      if numRequired and numRequired > 1 then
         if self.objectives[objectiveName] then
           local obj = self.objectives[objectiveName]
 
-          obj.current = current
-          obj.goal = goal
-        else --one of those breadcrumb-ish quests where the written objectives change
+          obj.current = numFulfilled
+          obj.goal = numRequired
+        else --new objective
           self.objectives[objectiveName] = {
             ["type"] = objectiveType,
-            ["current"] = current,
-            ["goal"] = goal
+            ["current"] = numFulfilled,
+            ["goal"] = numRequired
           }
         end
       end
