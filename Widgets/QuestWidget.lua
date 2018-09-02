@@ -209,7 +209,10 @@ local function UpdateQuestCacheEntry(questIndex)
   end
 
   --update Objectives
-  Quests[title]:UpdateObjectives()
+  local quest = Quests[title]
+
+  quest:UpdateObjectives()
+  quest.index = questIndex
 end
 
 local function GenerateQuestCache()
