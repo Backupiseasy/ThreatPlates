@@ -148,29 +148,48 @@ end
 
 ThreatPlates.ShowQuestUnit = ShowQuestUnitHealthbar
 
-local function AddQuestCacheEntry(questIndex)
-  local title, _, _, isHeader, _, _, _, questID = GetQuestLogTitle(questIndex)
+function Widget:CreateQuest(questID, questIndex)
+  local Quest = {
+    ["id"] = questID,
+    ["index"] = questIndex,
+    ["objectives"] = {}
+  }
 
-  if not isHeader and title then --ignore quest log headers
-    local objectives = GetNumQuestLeaderBoards(questIndex)
-    local quest = {
-      ["id"] = questID,
-      ["objectives"] = {}
-    }
+  function Quest:UpdateObjectives()
+    local objectives = GetNumQuestLeaderBoards(self.index)
 
-    for o=1, objectives do
-      local text, objectiveType, finished = GetQuestObjectiveInfo(questID, o, false)
+    for objIndex=1, objectives do
+      local text, objectiveType, finished = GetQuestObjectiveInfo(self.id, objIndex, false)
       local current, goal, objectiveName = string.match(text, "^(%d+)/(%d+) (.+)$")
 
       --only want to track quests in this format
       if objectiveName then
-        quest.objectives[objectiveName] = {
-          ["type"] = objectiveType,
-          ["current"] = current,
-          ["goal"] = goal
-        }
+        if self.objectives[objectiveName] then
+          local obj = self.objectives[objectiveName]
+
+          obj.current = current
+          obj.goal = goal
+        else --one of those breadcrumb-ish quests where the written objectives change
+          self.objectives[objectiveName] = {
+            ["type"] = objectiveType,
+            ["current"] = current,
+            ["goal"] = goal
+          }
+        end
       end
     end
+  end
+
+  return Quest
+end
+
+local function AddQuestCacheEntry(questIndex)
+  local title, _, _, isHeader, _, _, _, questID = GetQuestLogTitle(questIndex)
+
+  if not isHeader and title then --ignore quest log headers
+    local quest = Widget:CreateQuest(questID, questIndex)
+
+    quest:UpdateObjectives()
 
     Quests[title] = quest
     Quests[questID] = title --so it can be found by remove
@@ -190,28 +209,7 @@ local function UpdateQuestCacheEntry(questIndex)
   end
 
   --update Objectives
-  local objectives = GetNumQuestLeaderBoards(questIndex)
-
-  for o=1, objectives do
-    local text, objectiveType, finished = GetQuestObjectiveInfo(questID, o, false)
-    local current, goal, objectiveName = string.match(text, "^(%d+)/(%d+) (.+)$")
-
-    --only want to track quests in this format
-    if objectiveName then
-      if Quests[title].objectives[objectiveName] then
-        local obj = Quests[title].objectives[objectiveName]
-
-        obj.current = current
-        obj.goal = goal
-      else --one of those breadcrumb-ish quests where the written objectives change
-        Quests[title].objectives[objectiveName] = {
-          ["type"] = objectiveType,
-          ["current"] = current,
-          ["goal"] = goal
-        }
-      end
-    end
-  end
+  Quests[title]:UpdateObjectives()
 end
 
 local function GenerateQuestCache()
