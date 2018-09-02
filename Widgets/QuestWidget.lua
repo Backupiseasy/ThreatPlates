@@ -120,8 +120,8 @@ local function IsQuestUnit(unit)
 end
 
 function Addon:IsPlayerQuestUnit(unit)
-	local show, quest_type = IsQuestUnit(unit)
-	return show and (quest_type == 1) -- don't show quest color for party member#s quest targets
+  local show, quest_type = IsQuestUnit(unit)
+  return show and (quest_type == 1) -- don't show quest color for party member#s quest targets
 end
 
 local function ShowQuestUnit(unit)
@@ -160,7 +160,7 @@ function Widget:CreateQuest(questID, questIndex)
   function Quest:UpdateObjectives()
     local objectives = GetNumQuestLeaderBoards(self.index)
 
-    for objIndex=1, objectives do
+    for objIndex = 1, objectives do
       local text, objectiveType, finished, numFulfilled, numRequired = GetQuestObjectiveInfo(self.id, objIndex, false)
       local objectiveName = string.gsub(text, "(%d+)/(%d+)", "")
 
@@ -222,7 +222,7 @@ local function GenerateQuestCache()
 
   Quests = {}
 
-  for questIndex=1, entries do
+  for questIndex = 1, entries do
     AddQuestCacheEntry(questIndex)
   end
 end
@@ -316,8 +316,8 @@ function Widget:Create(tp_frame)
   local type_frame = widget_frame:CreateTexture(nil, "OVERLAY")
 
   text_frame:SetFont(Font, db.FontSize + (db.scale * FONT_SCALING))
-  text_frame:SetShadowOffset(1, -1)
-  text_frame:SetShadowColor(0,0,0,1)
+  text_frame:SetShadowOffset(1, - 1)
+  text_frame:SetShadowColor(0, 0, 0, 1)
   text_frame.TypeTexture = type_frame
 
   widget_frame.Text = text_frame
@@ -336,21 +336,21 @@ function Widget:OnEnable()
 
   GenerateQuestCache()
 
-	self:RegisterEvent("PLAYER_ENTERING_WORLD", EventHandler)
-	self:RegisterEvent("QUEST_WATCH_UPDATE")
+  self:RegisterEvent("PLAYER_ENTERING_WORLD", EventHandler)
+  self:RegisterEvent("QUEST_WATCH_UPDATE")
   self:RegisterEvent("QUEST_LOG_UPDATE")
 
   self:RegisterEvent("QUEST_ACCEPTED")
-	-- This event fires whenever the player turns in a quest, whether automatically with a Task-type quest
-	-- (Bonus Objectives/World Quests), or by pressing the Complete button in a quest dialog window.
+  -- This event fires whenever the player turns in a quest, whether automatically with a Task-type quest
+  -- (Bonus Objectives/World Quests), or by pressing the Complete button in a quest dialog window.
   -- also handles abandon quest
-	self:RegisterEvent("QUEST_REMOVED")
+  self:RegisterEvent("QUEST_REMOVED")
 
-	-- Handle in-combat situations:
-	self:RegisterEvent("PLAYER_REGEN_ENABLED")
-	self:RegisterEvent("PLAYER_REGEN_DISABLED")
-	-- Also use UNIT_THREAT_LIST_UPDATE as new mobs may enter the combat mid-fight (PLAYER_REGEN_DISABLED already triggered)
-	self:RegisterEvent("UNIT_THREAT_LIST_UPDATE")
+  -- Handle in-combat situations:
+  self:RegisterEvent("PLAYER_REGEN_ENABLED")
+  self:RegisterEvent("PLAYER_REGEN_DISABLED")
+  -- Also use UNIT_THREAT_LIST_UPDATE as new mobs may enter the combat mid-fight (PLAYER_REGEN_DISABLED already triggered)
+  self:RegisterEvent("UNIT_THREAT_LIST_UPDATE")
 
   InCombat = InCombatLockdown()
 end
@@ -380,7 +380,7 @@ function Widget:OnUnitAdded(widget_frame, unit)
     widget_frame.Text:SetFont(Font, db.FontSize + (db.scale * FONT_SCALING))
     widget_frame.Text:SetAlpha(db.alpha)
 
-    widget_frame.Text.TypeTexture:SetPoint("CENTER", widget_frame, -(db.scale * 0.5), (db.scale * 0.75) + 1)
+    widget_frame.Text.TypeTexture:SetPoint("CENTER", widget_frame, - (db.scale * 0.5), (db.scale * 0.75) + 1)
     widget_frame.Text.TypeTexture:SetSize(db.scale * TEXTURE_SCALING, db.scale * TEXTURE_SCALING)
     widget_frame.Text.TypeTexture:SetAlpha(db.alpha)
   end
@@ -405,9 +405,9 @@ function Widget:UpdateFrame(widget_frame, unit)
     widget_frame.Icon:SetVertexColor(color.r, color.g, color.b)
 
     if db.ShowDetail and
-      current and
-      tonumber(current.goal) > 1 and --NOTE: skip showing for quests that have 1 of something, as WoW uses this for things like events eg "Push back the alliance 0/1"
-      widget_frame.Text then
+       current and
+       tonumber(current.goal) > 1 and --NOTE: skip showing for quests that have 1 of something, as WoW uses this for things like events eg "Push back the alliance 0/1"
+       widget_frame.Text then
 
       local text = current.current .. '/' .. current.goal
 
