@@ -1,25 +1,12 @@
 ﻿------------------------------------------------------
-9.0.13-Beta4
+9.0.13
 ------------------------------------------------------
-* Added Sigil of Misery and Sigil of Silence from Vengeance demon hunters to the Auras widget as CC auras [Issue #261].
-
-------------------------------------------------------
-9.0.13-Beta3
-------------------------------------------------------
-* The aura for Repentance is now correctly recognized as crowd-control aura [Issue #261].
 * Fixed a bug where the threat system was disabled for all mobs when threat feedback for neutral mobs was disabled [Issue #264].
-* Fixed a bug with interrupted message on the castbar which was not shown reliably when the same unit was interrupted multiple times [Issue #268].
-
-------------------------------------------------------
-9.0.13-Beta2
-------------------------------------------------------
-* Changed priority of healthbar coloring with regard to Quest widget so that tapped units no longer are shown with quest target color.
-* Again, fixed update issues with Quest widget not showing proper quest status on nameplates when with completed quests.
-
-------------------------------------------------------
-9.0.13-Beta1
-------------------------------------------------------
+* (Mostly) Fixed a bug with interrupted message on the castbar which was not shown reliably when the same unit was interrupted multiple times [Issue #268].
 * Fixed a bug in quest widget where the nameplate color of quest units was not updated reset after the player completed the quest [Comment #1269].
+* Changed priority of healthbar coloring with regard to Quest widget so that tapped units no longer are shown with quest target color.
+* Added Sigil of Misery and Sigil of Silence from Vengeance demon hunters to the Auras widget as CC auras [Issue #261].
+* The aura for Repentance is now correctly recognized as crowd-control aura [Issue #261].
 * Updated the /tptpol command to switch between nameplate overlapping and stacking (nameplate motion only works for enemy nameplates).
 
 ------------------------------------------------------
