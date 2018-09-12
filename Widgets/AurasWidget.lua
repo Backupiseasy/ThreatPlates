@@ -148,6 +148,8 @@ Widget.CROWD_CONTROL_SPELLS = {
   [61721] = LOC_POLYMORPH,  -- Polymorph (Rabbit)
   [161372] = LOC_POLYMORPH, -- Polymorph (Peacock)
   [161355] = LOC_POLYMORPH, -- Polymorph (Penguin)
+  [277787] = LOC_POLYMORPH, -- Polymorph (Direhorn)
+  [277792] = LOC_POLYMORPH, -- Polymorph (Bumblebee)
   [113724] = LOC_STUN,      -- Ring of Frost
   [2139] = CC_SILENCE,      -- Counterspell
   [31661] = LOC_DISORIENT,  -- Dragon's Breath
@@ -193,7 +195,7 @@ Widget.CROWD_CONTROL_SPELLS = {
   [5484] = LOC_FEAR,          -- Howl of Terror
   [30283] = LOC_STUN,         -- Shadowfury
   [710] = LOC_BANISH,         -- Banish
-  [5782] = LOC_FEAR,          -- Fear
+  [118699] = LOC_FEAR,          -- Fear
 
   -- Warrior
   [132168] = LOC_STUN,      -- Shockwave
@@ -211,6 +213,11 @@ Widget.CROWD_CONTROL_SPELLS = {
   [119381] = LOC_STUN,        -- Leg Sweep
   [116095] = PC_SNARE,        -- Disable
   [116705] = CC_SILENCE,      -- Spear Hand Strike
+
+  -- Racial Traits
+  [255723] = LOC_STUN,        -- Bull Rush (Highmountain Tauren)
+  [20549] = LOC_STUN,         -- War Stomp (Tauren)
+
 }
 
 ---------------------------------------------------------------------------------------------------

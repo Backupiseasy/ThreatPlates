@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+9.0.14
+------------------------------------------------------
+* Aura for Fear (Warlock), Bull Rush (Highmountain Tauren), War Stomp (Tauren), Polymorph (Direhorn, Mage), and Polymorph (Bumblebee, Mage) are now correctly recognized as crowd-control auras.
+
+------------------------------------------------------
 9.0.13
 ------------------------------------------------------
 * Fixed a bug where the threat system was disabled for all mobs when threat feedback for neutral mobs was disabled [Issue #264].
@@ -13,7 +18,7 @@
 9.0.12
 ------------------------------------------------------
 * Fixed a bug with the cooldown spiral of auras being not shown consistently.
-m
+
 ------------------------------------------------------
 9.0.11
 ------------------------------------------------------
