@@ -38,19 +38,8 @@ function Addon:UnitIsOffTanked(unit)
   end
 
   local target_of_unit = unitid .. "target"
-  local targeting_statue = false
 
-  local _, player_class = UnitClass("player")
-  local spec = GetSpecialization()
-
-  if player_class == "MONK" and spec == SPEC_MONK_BREWMASTER then
-    local have_statue, statue_name = GetTotemInfo(1)
-    if have_statue then
-      targeting_statue = statue_name == UnitName(target_of_unit)
-    end
-  end
-
-  return targeting_statue or UnitIsUnit(target_of_unit, "pet") or ("TANK" == UnitGroupRolesAssigned(target_of_unit))
+  return UnitIsUnit(target_of_unit, "pet") or "Totem" == UnitCreatureType(target_of_unit) or ("TANK" == UnitGroupRolesAssigned(target_of_unit))
 end
 
 ---------------------------------------------------------------------------------------------------
