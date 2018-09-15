@@ -471,7 +471,7 @@ local DEPRECATED_SETTINGS = {
   UniqueSettingsList = { "uniqueSettings", "list" },            -- (removed in 8.7.0, cleanup added in 8.7.1)
   Auras = { MigrationAurasSettings, "9.0.0" },                  -- (changed in 9.0.0)
   AurasFix = { MigrationAurasSettingsFix },                     -- (changed in 9.0.4 and 9.0.9)
-  ForceFriendlyInCombatEx = { MigrationForceFriendlyInCombat }, -- (TODO: write approve version)
+  ForceFriendlyInCombatEx = { MigrationForceFriendlyInCombat }, -- (changed in 9.1.0)
 }
 
 local function MigrateDatabase(current_version)
