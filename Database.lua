@@ -434,6 +434,20 @@ local function MigrateAuraWidget(profile_name, profile)
   end
 end
 
+local function MigrationForceFriendlyInCombat(profile_name, profile)
+  if not DatabaseEntryExists(profile, { "HeadlineView" }) then
+    return
+  end
+
+  if profile.HeadlineView.ForceFriendlyInCombat == true then
+    profile.HeadlineView.ForceFriendlyInCombat = "HEADLINE"
+  end
+  
+  if profile.HeadlineView.ForceFriendlyInCombat == false then
+    profile.HeadlineView.ForceFriendlyInCombat = "NONE"
+  end
+end
+
 ---- Settings in the SavedVariables file that should be migrated and/or deleted
 local DEPRECATED_SETTINGS = {
 --  NamesColor = { MigrateNamesColor, },                        -- settings.name.color
@@ -449,14 +463,15 @@ local DEPRECATED_SETTINGS = {
 --  HVBlizzFadingAlpha = { "HeadlineView", "blizzFadingAlpha"}, -- (removed in 8.5.1)
 --  HVNameWidth = { "HeadlineView", "name", "width" },          -- (removed in 8.5.0)
 --  HVNameHeight = { "HeadlineView", "name", "height" },        -- (removed in 8.5.0)
-  DebuffWidget = { "debuffWidget" },                          -- (removed in 8.6.0)
-  OldSettings = { "OldSettings" },                            -- (removed in 8.7.0)
-  CastbarColoring = { MigrateCastbarColoring, },              -- (removed in 8.7.0)
-  TotemSettings = { MigrationTotemSettings, "8.7.0" },        -- (changed in 8.7.0)
-  Borders = { MigrateBorderTextures, "8.7.0" },               -- (changed in 8.7.0)
-  UniqueSettingsList = { "uniqueSettings", "list" },          -- (removed in 8.7.0, cleanup added in 8.7.1)
-  Auras = { MigrationAurasSettings, "9.0.0" },                -- (changed in 9.0.0)
-  AurasFix = { MigrationAurasSettingsFix },                   -- (changed in 9.0.4 and 9.0.9)
+  DebuffWidget = { "debuffWidget" },                            -- (removed in 8.6.0)
+  OldSettings = { "OldSettings" },                              -- (removed in 8.7.0)
+  CastbarColoring = { MigrateCastbarColoring, },                -- (removed in 8.7.0)
+  TotemSettings = { MigrationTotemSettings, "8.7.0" },          -- (changed in 8.7.0)
+  Borders = { MigrateBorderTextures, "8.7.0" },                 -- (changed in 8.7.0)
+  UniqueSettingsList = { "uniqueSettings", "list" },            -- (removed in 8.7.0, cleanup added in 8.7.1)
+  Auras = { MigrationAurasSettings, "9.0.0" },                  -- (changed in 9.0.0)
+  AurasFix = { MigrationAurasSettingsFix },                     -- (changed in 9.0.4 and 9.0.9)
+  ForceFriendlyInCombatEx = { MigrationForceFriendlyInCombat }, -- (todo: write approve version)
 }
 
 local function MigrateDatabase(current_version)
