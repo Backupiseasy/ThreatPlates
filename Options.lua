@@ -552,16 +552,16 @@ local function GetSizeEntryTheme(pos, setting)
 end
 
 local function GetScaleEntry(name, pos, setting, func_disabled, min_value, max_value)
-  local soft_min = min_value or 0.3
-  local soft_max = max_value or 2.0
+  min_value = min_value or 0.3
+  max_value = max_value or 2.0
 
   local entry = {
     name = name,
     order = pos,
     type = "range",
     step = 0.05,
-    softMin = soft_min,
-    softMax = soft_max,
+    min = min_value,
+    max = max_value,
     isPercent = true,
     arg = setting,
     disabled = func_disabled,
@@ -1516,7 +1516,7 @@ end
             type = "description",
             order = 0,
             width = "full",
-            name = L["Use a custom color for the healthbar of quest mobs (for player quests only)."],
+            name = L["Use a custom color for the healthbar of quest mobs."],
           },
           Enable = { type = "toggle", order = 10, name = L["Enable"],	arg = {"questWidget", "ModeHPBar"}, },
           Color = {
@@ -1539,53 +1539,62 @@ end
             width = "half",
             arg = {"questWidget", "ModeIcon"},
           },
-          Colors = {
-            name = L["Colors"],
-            order = 50,
-            type = "group",
-            inline = true,
-            args = {
-              PlayerColor = {
-                name = L["Player Quest"],
-                order = 10,
-                type = "color",
-                get = GetColor,
-                set = SetColor,
-                arg = {"questWidget", "ColorPlayerQuest"},
-                desc = L["Your own quests that you have to complete."],
-              },
-              GroupColor = {
-                name = L["Group Quest"],
-                order = 30,
-                type = "color",
-                get = GetColor,
-                set = SetColor,
-                arg = {"questWidget", "ColorGroupQuest"},
-                desc = L["Quests of your group members that you don't have in your quest log or that you have already completed."],
-              },
-            },
-          },
+--          Colors = {
+--            name = L["Colors"],
+--            order = 50,
+--            type = "group",
+--            inline = true,
+--            args = {
+--              PlayerColor = {
+--                name = L["Player Quest"],
+--                order = 10,
+--                type = "color",
+--                get = GetColor,
+--                set = SetColor,
+--                arg = {"questWidget", "ColorPlayerQuest"},
+--                desc = L["Your own quests that you have to complete."],
+--              },
+--              GroupColor = {
+--                name = L["Group Quest"],
+--                order = 30,
+--                type = "color",
+--                get = GetColor,
+--                set = SetColor,
+--                arg = {"questWidget", "ColorGroupQuest"},
+--                desc = L["Quests of your group members that you don't have in your quest log or that you have already completed."],
+--              },
+--            },
+--          },
           Texture = {
             name = L["Symbol"],
             type = "group",
             inline = true,
             args = {
-              Preview = {
-                name = L["Preview"],
-                order = 10,
-                type = "execute",
-                image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\QuestWidget\\" .. db.questWidget.IconTexture,
-              },
               Select = {
                 name = L["Style"],
                 type = "select",
-                order = 20,
+                order = 10,
                 set = function(info, val)
                   SetValue(info, val)
                   options.args.Widgets.args.QuestWidget.args.ModeIcon.args.Texture.args.Preview.image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\QuestWidget\\" .. db.questWidget.IconTexture;
                 end,
                 values = { QUESTICON = L["Blizzard"], SKULL = L["Skull"] },
                 arg = { "questWidget", "IconTexture" },
+              },
+              Preview = {
+                name = L["Preview"],
+                order = 20,
+                type = "execute",
+                image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\QuestWidget\\" .. db.questWidget.IconTexture,
+              },
+              PlayerColor = {
+                name = L["Color"],
+                order = 30,
+                type = "color",
+                get = GetColor,
+                set = SetColor,
+                arg = {"questWidget", "ColorPlayerQuest"},
+                --desc = L["Your own quests that you have to complete."],
               },
             },
           },

@@ -14,7 +14,6 @@ local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local TidyPlatesThreat = TidyPlatesThreat
 
 local ART_PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Artwork\\"
-local EMPTY_TEXTURE = ART_PATH .. "Empty"
 
 local OFFSET_THREAT= 7.5
 
@@ -56,6 +55,14 @@ local function OnUpdateCastBar(self, elapsed)
   end
 
   self:Hide()
+end
+
+local function OnHideCastBar(self)
+  -- OnStopCasting is hiding the castbar and may be triggered before or after SPELL_INTERRUPT
+  -- So we have to show the castbar again or not hide it if the interrupt message should still be shown.
+  if self.FlashTime > 0 then
+    self:Show()
+  end
 end
 
 local function OnSizeChangedCastbar(self, width, height)
@@ -216,6 +223,7 @@ function Addon:CreateCastbar(parent)
   frame.MaxValue = 0
 
   frame:SetScript("OnUpdate", OnUpdateCastBar)
+  frame:SetScript("OnHide", OnHideCastBar)
   frame:SetScript("OnSizeChanged", OnSizeChangedCastbar)
 
   return frame

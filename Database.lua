@@ -429,7 +429,7 @@ local function MigrateAuraWidget(profile_name, profile)
         profile.AuraWidget.FilterBySpell = ThreatPlates.CopyTable(profile.debuffWidget.filter)
       end
 
-      -- DatabaseEntryDelete(profile, { "debuffWidget" })
+      -- DatabaseEntryDelete(profile, { "debuffWidget" }) -- TODO
     end
   end
 end
