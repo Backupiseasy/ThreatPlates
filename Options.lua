@@ -560,16 +560,16 @@ local function GetSizeEntryTheme(pos, setting)
 end
 
 local function GetScaleEntry(name, pos, setting, func_disabled, min_value, max_value)
-  local soft_min = min_value or 0.3
-  local soft_max = max_value or 2.0
+  min_value = min_value or 0.3
+  max_value = max_value or 2.0
 
   local entry = {
     name = name,
     order = pos,
     type = "range",
     step = 0.05,
-    softMin = soft_min,
-    softMax = soft_max,
+    min = min_value,
+    max = max_value,
     isPercent = true,
     arg = setting,
     disabled = func_disabled,

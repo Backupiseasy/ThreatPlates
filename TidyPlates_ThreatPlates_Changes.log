@@ -1,7 +1,8 @@
 ﻿------------------------------------------------------
 9.0.14
 ------------------------------------------------------
-* Aura for Fear (Warlock), Bull Rush (Highmountain Tauren), War Stomp (Tauren), Polymorph (Direhorn, Mage), and Polymorph (Bumblebee, Mage) are now correctly recognized as crowd-control auras.
+* Aura for Fear (Warlock), Bull Rush (Highmountain Tauren), War Stomp (Tauren), Polymorph (Direhorn, Mage), and Polymorph (Bumblebee, Mage) are now correctly recognized as crowd-control auras [Issue #278, #280].
+* Fixed a Lua error with scaling (e.g., in Auras or Combo Points widget) when a scaling value less or equal to 0 was entered manually [Issue #282].
 
 ------------------------------------------------------
 9.0.13
