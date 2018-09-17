@@ -5331,7 +5331,8 @@ local function CreateOptionsTable()
                       type = "select",
                       order = 10,
                       name = L["Icon Style"],
-                      values = { default = "Default", skullandcross = "Skull and Crossbones" },
+                      --Blizzard Dragon <- TARGETINGFRAME\\Nameplates.png
+                      values = { default = "Default", stddragon = "Blizzard Dragon", skullandcross = "Skull and Crossbones" },
                       set = function(info, val)
                         SetThemeValue(info, val)
                         options.args.NameplateSettings.args.EliteIcon.args.Texture.args.PreviewRare.image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\EliteArtWidget\\" .. val
