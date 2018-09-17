@@ -64,15 +64,25 @@ local function IsQuestUnit(unit)
         quest_title = text
       else
         local unit_name, progress = string.match(text, "^ ([^ ]-) ?%- (.+)$")
-        -- local area_progress = string.match(progress, "(%d+)%%$")
+        local area_progress = string.match(text, "(%d+)%%$")
 
-        if progress then
+        if progress or area_progress then
           quest_area = nil
 
           if unit_name then
-            local current, goal = string.match(progress, "(%d+)/(%d+)") --use these as a fallback if the cache is empty
-            local objectiveName = string.gsub(progress, "(%d+)/(%d+)", "")
+            local current, goal
+            local objectiveName
             local objType = false
+
+            if area_progress then
+              current = area_progress
+              goal = 100
+              objType = "area"
+            else
+              current, goal = string.match(progress, "(%d+)/(%d+)") --use these as a fallback if the cache is empty
+              objectiveName = string.gsub(progress, "(%d+)/(%d+)", "")
+            end
+
 
             --Tooltips do not update right away, so fetch current and goal from the cache (which is from the api)
             if Quests[quest_title] and Quests[quest_title].objectives[objectiveName] then
@@ -407,25 +417,36 @@ function Widget:UpdateFrame(widget_frame, unit)
 
     if db.ShowDetail and
        current and
-       tonumber(current.goal) > 1 and --NOTE: skip showing for quests that have 1 of something, as WoW uses this for things like events eg "Push back the alliance 0/1"
-       widget_frame.Text then
+       tonumber(current.goal) > 1 then --NOTE: skip showing for quests that have 1 of something, as WoW uses this for things like events eg "Push back the alliance 0/1"
 
-      local text = current.current .. '/' .. current.goal
+      local text
 
-      if current.type == "monster" then
-        widget_frame.Text.TypeTexture:SetTexture(ICON_PATH .. "kill")
-      elseif current.type == "item" then
-        widget_frame.Text.TypeTexture:SetTexture(ICON_PATH .. "loot")
+      if current.type == "area" then
+        text = current.current .. '%'
+
+        if unit.reaction ~= "FRIENDLY" then
+          widget_frame.Text.TypeTexture:SetTexture(ICON_PATH .. "kill")
+        else --center text
+          widget_frame.Text:SetPoint("CENTER", widget_frame, 0, db.scale * 0.75)
+        end
       else
-        --set text to be center as no texture to load (invalid quest type)
-        widget_frame.Text:SetPoint("CENTER", widget_frame, 0, db.scale * 0.75)
+        text = current.current .. '/' .. current.goal
+
+        if current.type == "monster" then
+          widget_frame.Text.TypeTexture:SetTexture(ICON_PATH .. "kill")
+        elseif current.type == "item" then
+          widget_frame.Text.TypeTexture:SetTexture(ICON_PATH .. "loot")
+        else
+          --set text to be center as no texture to load (invalid quest type)
+          widget_frame.Text:SetPoint("CENTER", widget_frame, 0, db.scale * 0.75)
+        end
       end
 
       widget_frame.Text:SetText(text)
       widget_frame.Text:SetTextColor(color.r, color.g, color.b)
       widget_frame.Text:Show()
       widget_frame.Text.TypeTexture:Show()
-    elseif widget_frame.Text then
+    else
       widget_frame.Text:Hide()
       widget_frame.Text.TypeTexture:Hide()
     end
