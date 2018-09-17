@@ -71,7 +71,7 @@ local RaidIconCoordinate = {
 }
 
 -- Constants
-local CASTBAR_FLASH_DURATION = 1.2
+local CASTBAR_INTERRUPT_HOLD_TIME = 1
 --local CASTBAR_FLASH_MIN_ALPHA = 0.4
 
 ---------------------------------------------------------------------------------------------------------------------
@@ -997,10 +997,10 @@ do
           castbar:SetValue(max_val)
           local color = TidyPlatesThreat.db.profile.castbarColorInterrupted
           castbar:SetStatusBarColor(color.r, color.g, color.b, color.a)
-          castbar.FlashTime = CASTBAR_FLASH_DURATION
-          castbar:Show() -- OnStopCasting is hiding the castbar and triggered before SPELL_INTERRUPT, so we have to show the castbar again
-          --castbar:SetAllColors(1, 0, 1, 1, 0, 0, 0, 1)
-          --castbar.Flash:Play()
+          castbar.FlashTime = CASTBAR_INTERRUPT_HOLD_TIME
+          -- OnStopCasting is hiding the castbar and may be triggered before or after SPELL_INTERRUPT
+          -- So we have to show the castbar again or not hide it if the interrupt message should still be shown.
+          castbar:Show()
         end
       end
     end

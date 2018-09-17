@@ -195,14 +195,14 @@ function Addon:SetHealthbarColor(unit)
       -- Unit is marked
       local db_raidicon = db.settings.raidicon
       c = db_raidicon.hpMarked[unit.raidIcon]
-    elseif ShowQuestUnit(unit) and Addon:IsPlayerQuestUnit(unit) then
-      -- Unit is quest target
-      c = db.questWidget.HPBarColor
     else
       if not UnitIsConnected(unit.unitid) then
         c = db_color.DisconnectedUnit
       elseif unit.isTapped then
         c = db_color.TappedUnit
+      elseif ShowQuestUnit(unit) and Addon:IsPlayerQuestUnit(unit) then
+        -- Unit is quest target
+        c = db.questWidget.HPBarColor
       elseif unique_setting.UseThreatColor then
         -- Threat System is should also be used for custom nameplate (in combat with thread system on)
         c = GetThreatColor(unit, Addon:GetThreatStyle(unit))
@@ -233,8 +233,6 @@ function Addon:SetHealthbarColor(unit)
     local db_raidicon = db.settings.raidicon
     if unit.isMarked and db_raidicon.hpColor then
       c = db_raidicon.hpMarked[unit.raidIcon]
-    elseif ShowQuestUnit(unit) and Addon:IsPlayerQuestUnit(unit) then
-      c = db.questWidget.HPBarColor
     elseif db.healthColorChange then
       c = GetColorByHealthDeficit(unit)
     else
@@ -243,6 +241,8 @@ function Addon:SetHealthbarColor(unit)
         c = db_color.DisconnectedUnit
       elseif unit.isTapped then
         c = db_color.TappedUnit
+      elseif ShowQuestUnit(unit) and Addon:IsPlayerQuestUnit(unit) then
+        c = db.questWidget.HPBarColor
       else
         c = GetThreatColor(unit, style)
       end

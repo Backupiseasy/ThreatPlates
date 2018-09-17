@@ -114,7 +114,7 @@ local function IsQuestUnit(unit)
     end
   end
 
-  local quest_type = ((quest_player or quest_area) and 1) or (quest_group and 2)
+  local quest_type = ((quest_player or quest_area) and 1) or false -- disabling group quests: or (quest_group and 2)
 
   return quest_type ~= false, quest_type, currentProgress
 end
@@ -230,8 +230,9 @@ end
 ---------------------------------------------------------------------------------------------------
 -- Event Watcher Code for Quest Widget
 ---------------------------------------------------------------------------------------------------
-local function EventHandler(event, ...)
-  Widget:UpdateAllFramesAndNameplateColor()
+
+function Widget:PLAYER_ENTERING_WORLD()
+	self:UpdateAllFramesAndNameplateColor()
 end
 
 function Widget:QUEST_WATCH_UPDATE(questIndex)
@@ -274,12 +275,12 @@ end
 
 function Widget:PLAYER_REGEN_ENABLED()
   InCombat = false
-  self:UpdateAllFramesAndNameplateColor()
+	self:UpdateAllFramesAndNameplateColor()
 end
 
 function Widget:PLAYER_REGEN_DISABLED()
   InCombat = true
-  self:UpdateAllFramesAndNameplateColor()
+	self:UpdateAllFramesAndNameplateColor()
 end
 
 function Widget:UNIT_THREAT_LIST_UPDATE(unitid)
@@ -336,7 +337,7 @@ function Widget:OnEnable()
 
   GenerateQuestCache()
 
-  self:RegisterEvent("PLAYER_ENTERING_WORLD", EventHandler)
+  self:RegisterEvent("PLAYER_ENTERING_WORLD")
   self:RegisterEvent("QUEST_WATCH_UPDATE")
   self:RegisterEvent("QUEST_LOG_UPDATE")
 
