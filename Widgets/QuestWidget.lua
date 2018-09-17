@@ -249,20 +249,14 @@ function Widget:QUEST_WATCH_UPDATE(questIndex)
   QuestsToUpdate[questIndex] = true
 end
 
-function Widget:QUEST_LOG_UPDATE()
-  local refreshPlates = false
-
+function Widget:UNIT_QUEST_LOG_CHANGED()
   for questIndex in pairs(QuestsToUpdate) do
     UpdateQuestCacheEntry(questIndex)
     QuestsToUpdate[questIndex] = false
-    refreshPlates = true
   end
 
   QuestsToUpdate = {}
-
-  if refreshPlates then
-    self:UpdateAllFramesAndNameplateColor()
-  end
+  self:UpdateAllFramesAndNameplateColor()
 end
 
 function Widget:QUEST_ACCEPTED(questIndex, questID)
@@ -349,7 +343,8 @@ function Widget:OnEnable()
 
   self:RegisterEvent("PLAYER_ENTERING_WORLD")
   self:RegisterEvent("QUEST_WATCH_UPDATE")
-  self:RegisterEvent("QUEST_LOG_UPDATE")
+  
+  self:RegisterUnitEvent("UNIT_QUEST_LOG_CHANGED", "player")
 
   self:RegisterEvent("QUEST_ACCEPTED")
   -- This event fires whenever the player turns in a quest, whether automatically with a Task-type quest
