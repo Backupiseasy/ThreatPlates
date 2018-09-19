@@ -174,21 +174,25 @@ function Widget:CreateQuest(questID, questIndex)
 
     for objIndex = 1, objectives do
       local text, objectiveType, finished, numFulfilled, numRequired = GetQuestObjectiveInfo(self.id, objIndex, false)
-      local objectiveName = string.gsub(text, "(%d+)/(%d+)", "")
 
-      --only want to track quests in this format
-      if numRequired and numRequired > 1 then
-        if self.objectives[objectiveName] then
-          local obj = self.objectives[objectiveName]
+      --occasionally the game will return nil text, this happens when some world quests/bonus area quests finish (the objective no longer exists)
+      if text then
+        local objectiveName = string.gsub(text, "(%d+)/(%d+)", "")
 
-          obj.current = numFulfilled
-          obj.goal = numRequired
-        else --new objective
-          self.objectives[objectiveName] = {
-            ["type"] = objectiveType,
-            ["current"] = numFulfilled,
-            ["goal"] = numRequired
-          }
+        --only want to track quests in this format
+        if numRequired and numRequired > 1 then
+          if self.objectives[objectiveName] then
+            local obj = self.objectives[objectiveName]
+
+            obj.current = numFulfilled
+            obj.goal = numRequired
+          else --new objective
+            self.objectives[objectiveName] = {
+              ["type"] = objectiveType,
+              ["current"] = numFulfilled,
+              ["goal"] = numRequired
+            }
+          end
         end
       end
     end
