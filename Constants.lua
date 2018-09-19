@@ -809,7 +809,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
       HideInCombatAttacked = true,
       HideInInstance = true,
       ShowInHeadlineView = false,
-      ShowDetail = true,
+      ShowProgress = true,
       Font = Addon.DEFAULT_FONT,
       FontSize = 3
     },

@@ -405,7 +405,7 @@ function Widget:UpdateFrame(widget_frame, unit)
     local color = ICON_COLORS[quest_type]
     widget_frame.Icon:SetVertexColor(color.r, color.g, color.b)
 
-    if db.ShowDetail and
+    if db.ShowProgress and
        current and
        current.goal > 1 then --NOTE: skip showing for quests that have 1 of something, as WoW uses this for things like events eg "Push back the alliance 0/1"
 

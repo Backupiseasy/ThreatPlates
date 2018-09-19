@@ -1575,7 +1575,7 @@ end
                 name = L["Show Quest Details"],
                 order = 10,
                 type = "toggle",
-                arg = {"questWidget", "ShowDetail"},
+                arg = {"questWidget", "ShowProgress"},
                 desc = L["Show the amount you need to loot or kill"]
               }
             }
