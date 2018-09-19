@@ -5,6 +5,8 @@ local ADDON_NAME, Addon = ...
 local ThreatPlates = Addon.ThreatPlates
 
 local Widget = Addon.Widgets:NewWidget("Quest")
+Widget.Quests = {}
+Widget.QuestsToUpdate = {}
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -33,9 +35,6 @@ local Font = nil
 local FONT_SCALING = 0.3
 local TEXTURE_SCALING = 0.5
 local ICON_PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\QuestWidget\\"
-
-local Quests = {}
-local QuestsToUpdate = {}
 
 ---------------------------------------------------------------------------------------------------
 -- Quest Functions
@@ -83,6 +82,7 @@ local function IsQuestUnit(unit)
               objectiveName = string.gsub(progress, "(%d+)/(%d+)", "")
             end
 
+            local Quests = Widget.Quests
 
             --Tooltips do not update right away, so fetch current and goal from the cache (which is from the api)
             if Quests[quest_title] and Quests[quest_title].objectives[objectiveName] then
@@ -195,7 +195,7 @@ function Widget:CreateQuest(questID, questIndex)
   return Quest
 end
 
-local function AddQuestCacheEntry(questIndex)
+function Widget:AddQuestCacheEntry(questIndex)
   local title, _, _, isHeader, _, _, _, questID = GetQuestLogTitle(questIndex)
 
   if not isHeader and title then --ignore quest log headers
@@ -203,37 +203,37 @@ local function AddQuestCacheEntry(questIndex)
 
     quest:UpdateObjectives()
 
-    Quests[title] = quest
-    Quests[questID] = title --so it can be found by remove
+    self.Quests[title] = quest
+    self.Quests[questID] = title --so it can be found by remove
   end
 end
 
-local function UpdateQuestCacheEntry(questIndex)
+function Widget:UpdateQuestCacheEntry(questIndex)
   local title, _, _, _, _, _, _, questID = GetQuestLogTitle(questIndex)
 
   if not title then
     return
   end
 
-  if not Quests[title] then --for whatever reason it doesn't exist, so just add it
-    AddQuestCacheEntry(questIndex)
+  if not self.Quests[title] then --for whatever reason it doesn't exist, so just add it
+    self:AddQuestCacheEntry(questIndex)
     return
   end
 
   --update Objectives
-  local quest = Quests[title]
+  local quest = self.Quests[title]
 
   quest:UpdateObjectives()
   quest.index = questIndex
 end
 
-local function GenerateQuestCache()
+function Widget:GenerateQuestCache()
   local entries = GetNumQuestLogEntries()
 
-  Quests = {}
+  self.Quests = {}
 
   for questIndex = 1, entries do
-    AddQuestCacheEntry(questIndex)
+    self:AddQuestCacheEntry(questIndex)
   end
 end
 
@@ -246,12 +246,14 @@ function Widget:PLAYER_ENTERING_WORLD()
 end
 
 function Widget:QUEST_WATCH_UPDATE(questIndex)
-  QuestsToUpdate[questIndex] = true
+  self.QuestsToUpdate[questIndex] = true
 end
 
 function Widget:UNIT_QUEST_LOG_CHANGED()
+  local QuestsToUpdate = self.QuestsToUpdate
+
   for questIndex in pairs(QuestsToUpdate) do
-    UpdateQuestCacheEntry(questIndex)
+    self:UpdateQuestCacheEntry(questIndex)
     QuestsToUpdate[questIndex] = false
   end
 
@@ -260,12 +262,14 @@ function Widget:UNIT_QUEST_LOG_CHANGED()
 end
 
 function Widget:QUEST_ACCEPTED(questIndex, questID)
-  AddQuestCacheEntry(questIndex)
+  self:AddQuestCacheEntry(questIndex)
 
   self:UpdateAllFramesAndNameplateColor()
 end
 
 function Widget:QUEST_REMOVED(questId)
+  local Quests = self.Quests
+
   --clean up cache
   if Quests[questId] then
     local questTitle = Quests[questId]
@@ -339,7 +343,7 @@ end
 function Widget:OnEnable()
   Font = ThreatPlates.Media:Fetch('font', TidyPlatesThreat.db.profile.questWidget.Font)
 
-  GenerateQuestCache()
+  self:GenerateQuestCache()
 
   self:RegisterEvent("PLAYER_ENTERING_WORLD")
   self:RegisterEvent("QUEST_WATCH_UPDATE")
