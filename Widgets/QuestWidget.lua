@@ -13,7 +13,7 @@ Widget.QuestsToUpdate = {}
 ---------------------------------------------------------------------------------------------------
 
 -- Lua APIs
-local string = string
+local string, tonumber = string, tonumber
 
 -- WoW APIs
 local WorldFrame, CreateFrame = WorldFrame, CreateFrame
@@ -79,6 +79,8 @@ local function IsQuestUnit(unit)
               objType = "area"
             else
               current, goal = string.match(progress, "(%d+)/(%d+)") --use these as a fallback if the cache is empty
+              goal = tonumber(goal)
+
               objectiveName = string.gsub(progress, "(%d+)/(%d+)", "")
             end
 
@@ -414,7 +416,7 @@ function Widget:UpdateFrame(widget_frame, unit)
 
     if db.ShowDetail and
        current and
-       tonumber(current.goal) > 1 then --NOTE: skip showing for quests that have 1 of something, as WoW uses this for things like events eg "Push back the alliance 0/1"
+       current.goal > 1 then --NOTE: skip showing for quests that have 1 of something, as WoW uses this for things like events eg "Push back the alliance 0/1"
 
       local text
 
