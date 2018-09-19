@@ -1506,7 +1506,7 @@ end
           InCombatAll = { type = "toggle", order = 10, name = L["Hide in Combat"],	arg = {"questWidget", "HideInCombat"}, },
           InCombatAttacked = { type = "toggle", order = 20, name = L["Hide on Attacked Units"],	arg = {"questWidget", "HideInCombatAttacked"}, },
           InInstance = { type = "toggle", order = 30, name = L["Hide in Instance"],	arg = {"questWidget", "HideInInstance"}, },
-          ShowQuestProgress = { name = L["Show Quest Details"], order = 10, type = "toggle", arg = {"questWidget", "ShowProgress"}, desc = L["Show the amount you need to loot or kill"] },
+          ShowQuestProgress = { name = L["Quest Progress"], order = 10, type = "toggle", arg = {"questWidget", "ShowProgress"}, desc = L["Show the amount you need to loot or kill"] },
         },
       },
       ModeHealthBar = {
