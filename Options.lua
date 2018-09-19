@@ -1506,6 +1506,7 @@ end
           InCombatAll = { type = "toggle", order = 10, name = L["Hide in Combat"],	arg = {"questWidget", "HideInCombat"}, },
           InCombatAttacked = { type = "toggle", order = 20, name = L["Hide on Attacked Units"],	arg = {"questWidget", "HideInCombatAttacked"}, },
           InInstance = { type = "toggle", order = 30, name = L["Hide in Instance"],	arg = {"questWidget", "HideInInstance"}, },
+          ShowQuestProgress = { name = L["Show Quest Details"], order = 10, type = "toggle", arg = {"questWidget", "ShowProgress"}, desc = L["Show the amount you need to loot or kill"] },
         },
       },
       ModeHealthBar = {
@@ -1538,47 +1539,6 @@ end
             type = "toggle",
             width = "half",
             arg = {"questWidget", "ModeIcon"},
-          },
---          Colors = {
---            name = L["Colors"],
---            order = 50,
---            type = "group",
---            inline = true,
---            args = {
---              PlayerColor = {
---                name = L["Player Quest"],
---                order = 10,
---                type = "color",
---                get = GetColor,
---                set = SetColor,
---                arg = {"questWidget", "ColorPlayerQuest"},
---                desc = L["Your own quests that you have to complete."],
---              },
---              GroupColor = {
---                name = L["Group Quest"],
---                order = 30,
---                type = "color",
---                get = GetColor,
---                set = SetColor,
---                arg = {"questWidget", "ColorGroupQuest"},
---                desc = L["Quests of your group members that you don't have in your quest log or that you have already completed."],
---              },
---            },
---          },
-          Details = {
-            name = L["Quest Details"],
-            order = 40,
-            type = "group",
-            inline = true,
-            args = {
-              Enable = {
-                name = L["Show Quest Details"],
-                order = 10,
-                type = "toggle",
-                arg = {"questWidget", "ShowProgress"},
-                desc = L["Show the amount you need to loot or kill"]
-              }
-            }
           },
           Texture = {
             name = L["Symbol"],

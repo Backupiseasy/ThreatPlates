@@ -404,7 +404,6 @@ L["Preview Rare"] = true
 L["Preview"] = true
 L["Quest"] = true
 L["Quests of your group members that you don't have in your quest log or that you have already completed."] = true
-L["Quest Details"] = true
 L["Raging Spirit"] = true
 L["Rares & Bosses"] = true
 L["Rares & Elites"] = true
