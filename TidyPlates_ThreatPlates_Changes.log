@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+9.0.16
+------------------------------------------------------
+* Aura for Stormbolt (Warrior) is now correctly recognized as crowd-control auras [Issue #290].
+
+------------------------------------------------------
 9.0.15
 ------------------------------------------------------
 * Fixed a bug with OmniCC cooldown numbers being shown on the Auras widget [Comment #1409].

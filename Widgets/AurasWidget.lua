@@ -192,11 +192,11 @@ Widget.CROWD_CONTROL_SPELLS = {
   [5484] = LOC_FEAR,          -- Howl of Terror
   [30283] = LOC_STUN,         -- Shadowfury
   [710] = LOC_BANISH,         -- Banish
-  [118699] = LOC_FEAR,          -- Fear
+  [118699] = LOC_FEAR,        -- Fear
 
   -- Warrior
   [132168] = LOC_STUN,      -- Shockwave
-  [107570] = LOC_STUN,      -- Storm Bolt
+  [132169] = LOC_STUN,      -- Storm Bolt (Blizzard)
   [103828] = LOC_STUN,      -- Warbringer
   [236027] = PC_SNARE,      -- Intercept - Slow
   [105771] = PC_ROOT,       -- Intercept - Charge
