@@ -343,7 +343,7 @@ function Widget:OnEnable()
 
   self:RegisterEvent("PLAYER_ENTERING_WORLD")
   self:RegisterEvent("QUEST_WATCH_UPDATE")
-  
+
   self:RegisterUnitEvent("UNIT_QUEST_LOG_CHANGED", "player")
 
   self:RegisterEvent("QUEST_ACCEPTED")
@@ -384,11 +384,9 @@ function Widget:OnUnitAdded(widget_frame, unit)
     widget_frame.Text:SetPoint("CENTER", widget_frame, db.scale * 0.5, db.scale * 0.75)
     widget_frame.Text:SetSize(db.scale * 1.4, db.scale)
     widget_frame.Text:SetFont(Font, db.FontSize + (db.scale * FONT_SCALING))
-    widget_frame.Text:SetAlpha(db.alpha)
 
     widget_frame.Text.TypeTexture:SetPoint("CENTER", widget_frame, - (db.scale * 0.5), (db.scale * 0.75) + 1)
     widget_frame.Text.TypeTexture:SetSize(db.scale * TEXTURE_SCALING, db.scale * TEXTURE_SCALING)
-    widget_frame.Text.TypeTexture:SetAlpha(db.alpha)
   end
 
   self:UpdateFrame(widget_frame, unit)
