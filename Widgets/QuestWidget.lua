@@ -79,6 +79,7 @@ local function IsQuestUnit(unit)
               objType = "area"
             else
               current, goal = string.match(progress, "(%d+)/(%d+)") --use these as a fallback if the cache is empty
+              current = tonumber(current)
               goal = tonumber(goal)
 
               objectiveName = string.gsub(progress, "(%d+)/(%d+)", "")
