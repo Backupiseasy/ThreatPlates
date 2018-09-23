@@ -4,6 +4,7 @@
 * Combo Points widget now has different styles (Squares, Orbs, Blizzard) and colors combo points depending on the current number of combo points [Issue #45, Comment #843, Comment #927, Comment #1028, Comment #1029, Issue #217, E-Mail Requests].
 * Optimized code for widgets that are only displayed on the target unit (Combo Points, Resource).
 * Changed default settings for Auras and Combo Points widget for better, non-overlapping positioning.
+* Monk's Black Ox Statue is now correctly recognized as off-tank [Issue #270, Comment #318, #1420, E-Mail]
 
 ------------------------------------------------------
 9.0.14

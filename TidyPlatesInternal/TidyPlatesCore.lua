@@ -89,7 +89,7 @@ local UpdateStyle
 
 -- Indicators
 local UpdateIndicator_CustomText, UpdateIndicator_CustomScale, UpdateIndicator_CustomScaleText, UpdateIndicator_Standard, UpdateIndicator_CustomAlpha
-local UpdateIndicator_Level, UpdateIndicator_ThreatGlow, UpdateIndicator_RaidIcon
+local UpdateIndicator_Level, UpdateIndicator_RaidIcon
 local UpdateIndicator_EliteIcon, UpdateIndicator_Name
 local UpdateIndicator_HealthBar, UpdateIndicator_Target
 local OnUpdateCasting, OnStartCasting, OnStopCasting, OnUpdateCastMidway
@@ -282,7 +282,6 @@ do
     end
 
     -- Update Delegates
-    UpdateIndicator_ThreatGlow()
     UpdateIndicator_CustomAlpha(extended, unit)
     UpdateIndicator_CustomScaleText()
 
@@ -481,12 +480,19 @@ end
 
 -- Update the health bar and name coloring, if needed
 function Addon:UpdateIndicatorNameplateColor(tp_frame)
-  if tp_frame.visual.healthbar:IsShown() then
-    tp_frame.visual.healthbar:SetAllColors(Addon:SetHealthbarColor(tp_frame.unit))
+  local visual = tp_frame.visual
+
+  if visual.healthbar:IsShown() then
+    visual.healthbar:SetAllColors(Addon:SetHealthbarColor(tp_frame.unit))
+
+    -- Updates warning glow for threat
+    if visual.threatborder:IsShown() then
+      visual.threatborder:SetBackdropBorderColor(Addon:SetThreatColor(tp_frame.unit))
+    end
   end
 
-  if tp_frame.visual.name:IsShown() then
-    tp_frame.visual.name:SetTextColor(Addon:SetNameColor(tp_frame.unit))
+  if visual.name:IsShown() then
+    visual.name:SetTextColor(Addon:SetNameColor(tp_frame.unit))
   end
 end
 
@@ -523,16 +529,6 @@ do
 
     visual.level:SetTextColor(unit.levelcolorRed, unit.levelcolorGreen, unit.levelcolorBlue)
 	end
-
-	-- UpdateIndicator_ThreatGlow: Updates the aggro glow
-	function UpdateIndicator_ThreatGlow()
---		if not style.threatborder.show then
---      return
---    end
-    if visual.threatborder:IsShown() then
-      visual.threatborder:SetBackdropBorderColor(Addon:SetThreatColor(unit))
-    end
-  end
 
 	function UpdateIndicator_Target()
     visual.target:SetShown(unit.isTarget and style.target.show)
@@ -918,14 +914,31 @@ do
     end
 	end
 
---  function  CoreEvents:UNIT_THREAT_LIST_UPDATE(unitid)
---    if not unitid then return end
---
---    local plate = PlatesByUnit[unitid]
---    if plate then
---      OnHealthUpdate(plate)
---    end
---  end
+  function  CoreEvents:UNIT_THREAT_LIST_UPDATE(unitid)
+    if unitid == "player" or unitid == "target" then return end
+    local plate = PlatesByUnit[unitid]
+
+    if plate then
+      --local threat_value = UnitThreatSituation("player", unitid) or 0
+      --if threat_value ~= plate.TPFrame.unit.threatValue then
+      if (UnitThreatSituation("player", unitid) or 0) ~= plate.TPFrame.unit.threatValue then
+
+        --OnHealthUpdate(plate)
+
+        plate.UpdateMe = true
+
+        -- TODO: Optimize this - only update elements that need updating
+        -- Don't use OnHealthUpdate(), more like: OnThreatUpdate()
+        -- UpdateReferences(plate)
+        --Addon:UpdateUnitCondition(unit, unitid)
+        --        unit.threatValue = UnitThreatSituation("player", unitid) or 0
+        --        unit.threatSituation = ThreatReference[unit.threatValue]
+        --        unit.isInCombat = UnitAffectingCombat(unitid)
+        --ProcessUnitChanges()
+        --OnUpdateCastMidway(nameplate, unit.unitid)
+      end
+    end
+  end
 
   function CoreEvents:PLAYER_REGEN_ENABLED()
 		SetUpdateAll()
