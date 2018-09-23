@@ -69,9 +69,6 @@ Widget.PRIORITY_FUNCTIONS = {
 }
 Widget.CenterAurasPositions = {}
 Widget.UnitAuraList = {}
--- Get a clean version of the function...  Avoid OmniCC interference
-local CooldownNative = CreateFrame("Cooldown", nil, WorldFrame)
-Widget.SetCooldown = CooldownNative.SetCooldown
 
 local LOC_CHARM = 1         -- Aura: Possess
 local LOC_FEAR = 2          -- Mechanic: Fleeing
@@ -195,11 +192,11 @@ Widget.CROWD_CONTROL_SPELLS = {
   [5484] = LOC_FEAR,          -- Howl of Terror
   [30283] = LOC_STUN,         -- Shadowfury
   [710] = LOC_BANISH,         -- Banish
-  [118699] = LOC_FEAR,          -- Fear
+  [118699] = LOC_FEAR,        -- Fear
 
   -- Warrior
   [132168] = LOC_STUN,      -- Shockwave
-  [107570] = LOC_STUN,      -- Storm Bolt
+  [132169] = LOC_STUN,      -- Storm Bolt (Blizzard)
   [103828] = LOC_STUN,      -- Warbringer
   [236027] = PC_SNARE,      -- Intercept - Slow
   [105771] = PC_ROOT,       -- Intercept - Charge
@@ -719,6 +716,9 @@ function Widget:CreateAuraFrameIconMode(parent)
   frame.Cooldown:SetReverse(true)
   frame.Cooldown:SetHideCountdownNumbers(true)
 
+  -- Fix for OmnniCC cooldown numbers being shown on auras
+  frame.Cooldown.noCooldownCount = true
+
   frame.Stacks = frame.Cooldown:CreateFontString(nil, "OVERLAY")
   frame.TimeLeft = frame.Cooldown:CreateFontString(nil, "OVERLAY")
 
@@ -806,7 +806,7 @@ function Widget:UpdateAuraInformationIconMode(frame) -- texture, duration, expir
 
   -- Cooldown
   if duration and duration > 0 and expiration and expiration > 0 then
-    self.SetCooldown(frame.Cooldown, expiration - duration, duration + .25)
+    frame.Cooldown:SetCooldown(expiration - duration, duration + .25)
   else
     frame.Cooldown:Clear()
   end
