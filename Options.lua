@@ -3692,9 +3692,11 @@ local function CreateAutomationSettings()
             arg = { "HeadlineView", "ForceOutOfCombat" }
           },
           HeadlineViewOnFriendly = {
-            name = L["Headline View on Friendly Units in Combat"],
+            name = L["Special view on Friendly Units in Combat"],
             order = 50,
-            type = "toggle",
+            type = "select",
+            values = { HEADLINE = L["Force headline"], NORMAL = L["Force healtbar"], NONE = L["None"] },
+            style = "dropdown",
             width = "double",
             set = SetValue,
             arg = { "HeadlineView", "ForceFriendlyInCombat" }

@@ -434,6 +434,20 @@ local function MigrateAuraWidget(profile_name, profile)
   end
 end
 
+local function MigrationForceFriendlyInCombat(profile_name, profile)
+  if not DatabaseEntryExists(profile, { "HeadlineView" }) then
+    return
+  end
+
+  if profile.HeadlineView.ForceFriendlyInCombat == true then
+    profile.HeadlineView.ForceFriendlyInCombat = "HEADLINE"
+  end
+  
+  if profile.HeadlineView.ForceFriendlyInCombat == false then
+    profile.HeadlineView.ForceFriendlyInCombat = "NONE"
+  end
+end
+  
 local function MigrationComboPointsWidget(profile_name, profile)
   if DatabaseEntryExists(profile, { "comboWidget" }) then
     profile.ComboPoints.ON = profile.comboWidget.ON
@@ -472,6 +486,7 @@ local DEPRECATED_SETTINGS = {
   Auras = { MigrationAurasSettings, "9.0.0" },                -- (changed in 9.0.0)
   AurasFix = { MigrationAurasSettingsFix },                   -- (changed in 9.0.4 and 9.0.9)
   MigrationComboPointsWidget = { MigrationComboPointsWidget, "9.1.0" },  -- (changed in 9.1.0)
+  ForceFriendlyInCombatEx = { MigrationForceFriendlyInCombat }, -- (changed in 9.1.0)
 }
 
 local function MigrateDatabase(current_version)
