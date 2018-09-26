@@ -10,6 +10,4 @@
 
     <Script file="TidyPlatesStatusbar.lua"/>
     <Script file="TidyPlatesCore.lua"/>
-    <Script file="TidyPlatesTemplate.lua"/>
-    <Script file="TidyPlatesParser.lua"/>
 </Ui>

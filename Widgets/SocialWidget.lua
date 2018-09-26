@@ -4,7 +4,7 @@
 local ADDON_NAME, Addon = ...
 local ThreatPlates = Addon.ThreatPlates
 
-local Widget = Addon:NewWidget("Social")
+local Widget = Addon.Widgets:NewWidget("Social")
 
 ------------------------
 -- Social Icon Widget --
@@ -56,8 +56,10 @@ function Widget:FRIENDLIST_UPDATE()
 --    ListFriendsSize = ListFriendsSize + 1
 --  end
 
+
   -- First check if there was actually a change to the friend list (event fires for other reasons too)
   local _, friendsOnline = GetNumFriends()
+
   if ListFriendsSize ~= friendsOnline then
     -- Only wipe the friend list if a member went offline
     if friendsOnline < ListFriendsSize then
@@ -236,7 +238,8 @@ function Widget:OnEnable()
     self:RegisterEvent("UNIT_NAME_UPDATE")
     --Widget:RegisterEvent("BN_FRIEND_LIST_SIZE_CHANGED", EventHandler)
 
-    self:FRIENDLIST_UPDATE()
+    --self:FRIENDLIST_UPDATE()
+    ShowFriends() -- Will fire FRIENDLIST_UPDATE
     self:BN_CONNECTED()
     --self:GUILD_ROSTER_UPDATE() -- called automatically by game
   else

@@ -429,7 +429,7 @@ local function MigrateAuraWidget(profile_name, profile)
         profile.AuraWidget.FilterBySpell = ThreatPlates.CopyTable(profile.debuffWidget.filter)
       end
 
-      -- DatabaseEntryDelete(profile, { "debuffWidget" })
+      -- DatabaseEntryDelete(profile, { "debuffWidget" }) -- TODO
     end
   end
 end
@@ -445,6 +445,20 @@ local function MigrationForceFriendlyInCombat(profile_name, profile)
   
   if profile.HeadlineView.ForceFriendlyInCombat == false then
     profile.HeadlineView.ForceFriendlyInCombat = "NONE"
+  end
+end
+  
+local function MigrationComboPointsWidget(profile_name, profile)
+  if DatabaseEntryExists(profile, { "comboWidget" }) then
+    profile.ComboPoints.ON = profile.comboWidget.ON
+    profile.ComboPoints.Scale = profile.comboWidget.scale
+    profile.ComboPoints.x = profile.comboWidget.x
+    profile.ComboPoints.y = profile.comboWidget.y
+    profile.ComboPoints.x_hv = profile.comboWidget.x_hv
+    profile.ComboPoints.y_hv = profile.comboWidget.y_hv
+    profile.ComboPoints.ShowInHeadlineView = profile.comboWidget.ShowInHeadlineView
+
+    DatabaseEntryDelete(profile, { "comboWidget" })
   end
 end
 
@@ -463,14 +477,15 @@ local DEPRECATED_SETTINGS = {
 --  HVBlizzFadingAlpha = { "HeadlineView", "blizzFadingAlpha"}, -- (removed in 8.5.1)
 --  HVNameWidth = { "HeadlineView", "name", "width" },          -- (removed in 8.5.0)
 --  HVNameHeight = { "HeadlineView", "name", "height" },        -- (removed in 8.5.0)
-  DebuffWidget = { "debuffWidget" },                            -- (removed in 8.6.0)
-  OldSettings = { "OldSettings" },                              -- (removed in 8.7.0)
-  CastbarColoring = { MigrateCastbarColoring, },                -- (removed in 8.7.0)
-  TotemSettings = { MigrationTotemSettings, "8.7.0" },          -- (changed in 8.7.0)
-  Borders = { MigrateBorderTextures, "8.7.0" },                 -- (changed in 8.7.0)
-  UniqueSettingsList = { "uniqueSettings", "list" },            -- (removed in 8.7.0, cleanup added in 8.7.1)
-  Auras = { MigrationAurasSettings, "9.0.0" },                  -- (changed in 9.0.0)
-  AurasFix = { MigrationAurasSettingsFix },                     -- (changed in 9.0.4 and 9.0.9)
+  DebuffWidget = { "debuffWidget" },                          -- (removed in 8.6.0)
+  OldSettings = { "OldSettings" },                            -- (removed in 8.7.0)
+  CastbarColoring = { MigrateCastbarColoring, },              -- (removed in 8.7.0)
+  TotemSettings = { MigrationTotemSettings, "8.7.0" },        -- (changed in 8.7.0)
+  Borders = { MigrateBorderTextures, "8.7.0" },               -- (changed in 8.7.0)
+  UniqueSettingsList = { "uniqueSettings", "list" },          -- (removed in 8.7.0, cleanup added in 8.7.1)
+  Auras = { MigrationAurasSettings, "9.0.0" },                -- (changed in 9.0.0)
+  AurasFix = { MigrationAurasSettingsFix },                   -- (changed in 9.0.4 and 9.0.9)
+  MigrationComboPointsWidget = { MigrationComboPointsWidget, "9.1.0" },  -- (changed in 9.1.0)
   ForceFriendlyInCombatEx = { MigrationForceFriendlyInCombat }, -- (changed in 9.1.0)
 }
 

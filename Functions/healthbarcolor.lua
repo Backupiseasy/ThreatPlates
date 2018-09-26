@@ -25,7 +25,6 @@ local RGB_P = ThreatPlates.RGB_P
 local IsFriend
 local IsGuildmate
 local ShowQuestUnit
-local IsQuestUnit
 
 local reference = {
   FRIENDLY = { NPC = "FriendlyNPC", PLAYER = "FriendlyPlayer", },
@@ -62,29 +61,38 @@ function CS:GetSmudgeColorRGB(colorA, colorB, perc)
     return r,g,b
 end
 
+function Addon:GetThreatColor(unit, style, show_attacked_units_only)
+  local db = TidyPlatesThreat.db.profile
+  local color
+
+  if show_attacked_units_only then
+    if Addon:OnThreatTable(unit) then
+      local threatSituation = unit.threatSituation
+      if style == "tank" and db.threat.toggle.OffTank and Addon:UnitIsOffTanked(unit) then
+        threatSituation = "OFFTANK"
+      end
+
+      color = db.settings[style].threatcolor[threatSituation]
+    end
+  else
+    local threatSituation = unit.threatSituation
+    if style == "tank" and db.threat.toggle.OffTank and Addon:UnitIsOffTanked(unit) then
+      threatSituation = "OFFTANK"
+    end
+
+    color = db.settings[style].threatcolor[threatSituation]
+  end
+
+  return color
+end
+
 -- Threat System is OP, player is in combat, style is tank or dps
-local function GetThreatColor(unit, style)
+local function CetColorByThreat(unit, style)
   local db = TidyPlatesThreat.db.profile
   local c
 
   if (db.threat.ON and db.threat.useHPColor and (style == "dps" or style == "tank")) then
-    local show_offtank = db.threat.toggle.OffTank
-
-    if db.threat.nonCombat then
-      if Addon:OnThreatTable(unit) then
-        local threatSituation = unit.threatSituation
-        if style == "tank" and show_offtank and Addon:UnitIsOffTanked(unit) then
-          threatSituation = "OFFTANK"
-        end
-        c = db.settings[style].threatcolor[threatSituation]
-      end
-    else
-      local threatSituation = unit.threatSituation
-      if style == "tank" and show_offtank and Addon:UnitIsOffTanked(unit) then
-        threatSituation = "OFFTANK"
-      end
-      c = db.settings[style].threatcolor[threatSituation]
-    end
+    c = Addon:GetThreatColor(unit, style, db.threat.nonCombat)
   end
 
   return c
@@ -181,7 +189,6 @@ function Addon:SetHealthbarColor(unit)
   if style == "NameOnly" or style == "NameOnly-Unique" or style == "empty" or style == "etotem" then return end
 
   ShowQuestUnit = ShowQuestUnit or ThreatPlates.ShowQuestUnit
-  IsQuestUnit = IsQuestUnit or ThreatPlates.IsQuestUnit
   IsFriend = IsFriend or ThreatPlates.IsFriend
   IsGuildmate = IsGuildmate or ThreatPlates.IsGuildmate
 
@@ -197,17 +204,17 @@ function Addon:SetHealthbarColor(unit)
       -- Unit is marked
       local db_raidicon = db.settings.raidicon
       c = db_raidicon.hpMarked[unit.raidIcon]
-    elseif ShowQuestUnit(unit) and IsQuestUnit(unit) then
-      -- Unit is quest target
-      c = db.questWidget.HPBarColor
     else
       if not UnitIsConnected(unit.unitid) then
         c = db_color.DisconnectedUnit
       elseif unit.isTapped then
         c = db_color.TappedUnit
+      elseif ShowQuestUnit(unit) and Addon:IsPlayerQuestUnit(unit) then
+        -- Unit is quest target
+        c = db.questWidget.HPBarColor
       elseif unique_setting.UseThreatColor then
         -- Threat System is should also be used for custom nameplate (in combat with thread system on)
-        c = GetThreatColor(unit, Addon:GetThreatStyle(unit))
+        c = CetColorByThreat(unit, Addon:GetThreatStyle(unit))
       end
 
       if not c and unique_setting.useColor then
@@ -235,9 +242,6 @@ function Addon:SetHealthbarColor(unit)
     local db_raidicon = db.settings.raidicon
     if unit.isMarked and db_raidicon.hpColor then
       c = db_raidicon.hpMarked[unit.raidIcon]
-    elseif ShowQuestUnit(unit) and IsQuestUnit(unit) then
-      -- small bug here: tapped targets should not be quest marked!
-      c = db.questWidget.HPBarColor
     elseif db.healthColorChange then
       c = GetColorByHealthDeficit(unit)
     else
@@ -246,8 +250,10 @@ function Addon:SetHealthbarColor(unit)
         c = db_color.DisconnectedUnit
       elseif unit.isTapped then
         c = db_color.TappedUnit
+      elseif ShowQuestUnit(unit) and Addon:IsPlayerQuestUnit(unit) then
+        c = db.questWidget.HPBarColor
       else
-        c = GetThreatColor(unit, style)
+        c = CetColorByThreat(unit, style)
       end
 
       if not c then

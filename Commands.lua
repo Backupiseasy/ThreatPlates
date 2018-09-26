@@ -13,7 +13,7 @@ local function toggleDPS()
 		TP.Print(L["-->>|cffff0000DPS Plates Enabled|r<<--"])
 		TP.Print(L["|cff89F559Threat Plates|r: DPS switch detected, you are now in your |cffff0000dpsing / healing|r role."])
 	end
-	TidyPlatesInternal:ForceUpdate()
+	Addon:ForceUpdate()
 end
 
 local function toggleTANK()
@@ -23,7 +23,7 @@ local function toggleTANK()
 		TP.Print(L["-->>|cff00ff00Tank Plates Enabled|r<<--"])
 		TP.Print(L["|cff89F559Threat Plates|r: Tank switch detected, you are now in your |cff00ff00tanking|r role."])
 	end
-	TidyPlatesInternal:ForceUpdate()
+	Addon:ForceUpdate()
 end
 
 SLASH_TPTPDPS1 = "/tptpdps"
@@ -47,28 +47,19 @@ SLASH_TPTPTOGGLE1 = "/tptptoggle"
 SlashCmdList["TPTPTOGGLE"] = TPTPTOGGLE
 
 local function TPTPOVERLAP()
-	local _, build = GetBuildInfo()
-	if tonumber(build) > 13623 then
-		if GetCVar("nameplateMotion") == "3" then
-			if InCombatLockdown() then
-				TP.Print(L["We're unable to change this while in combat"])
-			else
-				SetCVar("nameplateMotion", 1)
-				TP.Print(L["-->>Nameplate Overlapping is now |cffff0000OFF!|r<<--"])
-			end
+	if GetCVar("nameplateMotion") == "0" then
+		if InCombatLockdown() then
+			TP.Print(L["We're unable to change this while in combat"])
 		else
-			if InCombatLockdown() then
-				TP.Print(L["We're unable to change this while in combat"])
-			else
-				SetCVar("nameplateMotion", 3)
-				TP.Print(L["-->>Nameplate Overlapping is now |cff00ff00ON!|r<<--"])
-			end
+			SetCVar("nameplateMotion", 1)
+			TP.Print(L["-->>Nameplate Overlapping is now |cffff0000OFF!|r<<--"])
 		end
 	else
-		if GetCVar("spreadnameplates") == "0" then
-			TP.Print(L["-->>Nameplate Overlapping is now |cff00ff00ON!|r<<--"])
+		if InCombatLockdown() then
+			TP.Print(L["We're unable to change this while in combat"])
 		else
-			TP.Print(L["-->>Nameplate Overlapping is now |cffff0000OFF!|r<<--"])
+			SetCVar("nameplateMotion", 0)
+			TP.Print(L["-->>Nameplate Overlapping is now |cff00ff00ON!|r<<--"])
 		end
 	end
 end
@@ -98,6 +89,34 @@ SlashCmdList["TPTPVERBOSE"] = TPTPVERBOSE
 
 -- Command: /tptp
 function TidyPlatesThreat:ChatCommand(input)
+	if input == "plate" then
+		local plate = C_NamePlate.GetNamePlateForUnit("target")
+		if not plate then return end
+
+		print ("Nameplate FrameStrata:", plate:GetFrameStrata())
+		print ("Nameplate FrameLevel :", plate:GetFrameLevel())
+		print ("Nameplate Parent:", (plate:GetParent() == UIParent and "UIParent") or (plate:GetParent() == WorldFrame and "WorldFrame") or ("---"))
+		print ("------------------------------------------")
+		print ("Nameplate UnitFrame FrameStrata:", plate.UnitFrame:GetFrameStrata())
+		print ("Nameplate UnitFrame FrameLevel :", plate.UnitFrame:GetFrameLevel())
+		print ("Nameplate UnitFrame Parent:", (plate.UnitFrame:GetParent() == UIParent and "UIParent") or (plate.UnitFrame:GetParent() == WorldFrame and "WorldFrame") or ("---"))
+		print ("------------------------------------------")
+		print ("TPFrame FrameStrata:", plate.TPFrame:GetFrameStrata())
+		print ("TPFrame FrameLevel :", plate.TPFrame:GetFrameLevel())
+		print ("TPFrame Parent:", (plate.TPFrame:GetParent() == UIParent and "UIParent") or (plate.TPFrame:GetParent() == WorldFrame and "WorldFrame") or ("---"))
+		print ("------------------------------------------")
+		print ("Healthbar FrameStrata:", plate.TPFrame.visual.healthbar:GetFrameStrata())
+		print ("Healthbar FrameLevel :", plate.TPFrame.visual.healthbar:GetFrameLevel())
+  elseif input == "cp" then
+      local plate = C_NamePlate.GetNamePlateForUnit("target")
+      if not plate then return end
+
+      print ("TPFrame FrameLevel :", plate.TPFrame:GetFrameLevel())
+      print ("ComboPointsFrameStrata:", Addon.Widgets.ComboPoints.WidgetFrame:GetFrameLevel())
+      print ("TargetHighlight FrameLevel :", plate.TPFrame.widgets.TargetArt:GetFrameLevel())
+		return
+	end
+
 	TidyPlatesThreat:OpenOptions()
 
 --	local cmd_list = {}

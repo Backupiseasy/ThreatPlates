@@ -22,8 +22,6 @@ local TidyPlatesThreat = TidyPlatesThreat
 local LibStub = LibStub
 local L = t.L
 
-t.Theme = {}
-
 local task_queue_ooc = {}
 
 ---------------------------------------------------------------------------------------------------
@@ -175,14 +173,6 @@ StaticPopupDialogs["SwitchToNewLookAndFeel"] = {
 }
 
 function TidyPlatesThreat:ReloadTheme()
-  -- Recreate all TidyPlates styles for ThreatPlates("normal", "dps", "tank", ...) - required, if theme style settings were changed
-  t.SetThemes(self)
-
-  -- ForceUpdate() is called in SetTheme(), also calls theme.OnActivateTheme,
-  TidyPlatesInternal:SetTheme(t.THEME_NAME)
-
-  Addon:UpdateConfigurationStatusText()
-
   -- Castbars have to be disabled everytime we login
   if TidyPlatesThreat.db.profile.settings.castbar.show or TidyPlatesThreat.db.profile.settings.castbar.ShowInHeadlineView then
     TidyPlatesInternal:EnableCastBars()
@@ -190,13 +180,32 @@ function TidyPlatesThreat:ReloadTheme()
     TidyPlatesInternal:DisableCastBars()
   end
 
-  Addon.Widgets.Auras:ParseSpellFilters() -- Parse Spell Filters calls UpdateSettings ... maybe not the best order to do this
+  -- Recreate all TidyPlates styles for ThreatPlates("normal", "dps", "tank", ...) - required, if theme style settings were changed
+  Addon:SetThemes(self)
+  Addon:ForceUpdate()
+  Addon:UpdateConfigurationStatusText()
 
   Addon:InitializeCustomNameplates()
-  Addon:InitializeAllWidgets()
+  Addon.Widgets:InitializeAllWidgets()
+
+  -- Update existing nameplates as certain settings may have changed that are not covered by ForceUpdate()
+  Addon:UIScaleChanged()
+
+  -- Do this after combat ends, not in PLAYER_ENTERING_WORLD as it won't get set if the player is on combat when
+  -- that event fires.
+  Addon:CallbackWhenOoC(function() Addon:SetBaseNamePlateSize() end, L["Unable to change a setting while in combat."])
+  Addon:CallbackWhenOoC(function()
+    local db = self.db.profile
+    SetNamePlateFriendlyClickThrough(db.NamePlateFriendlyClickThrough)
+    SetNamePlateEnemyClickThrough(db.NamePlateEnemyClickThrough)
+  end)
+
+  for plate, unitid in pairs(Addon.PlatesVisible) do
+    Addon:UpdateFriendlyNameplateStyle(plate, unitid)
+  end
 end
 
-function TidyPlatesThreat:StartUp()
+function TidyPlatesThreat:CheckForFirstStartUp()
   local db = self.db.global
 
   if not self.db.char.welcome then
@@ -212,22 +221,6 @@ function TidyPlatesThreat:StartUp()
     t.Print(Welcome..L["|cff89f559You are currently in your "]..self:RoleText()..L["|cff89f559 role.|r"])
     t.Print(L["|cff89f559Additional options can be found by typing |r'/tptp'|cff89F559.|r"])
 
-    -- With TidyPlates:
-    --local current_theme = TidyPlates.GetThemeName()
-    --if current_theme == "" then
-    --  current_theme, _ = next(TidyPlatesThemeList, nil)
-    --end
-    --if current_theme ~= t.THEME_NAME then
-    --  StaticPopup_Show("SetToThreatPlates")
-    --else
-    --  if db.version ~= "" and db.version ~= new_version then
-    --   local new_version = tostring(t.Meta("version"))
-    --    -- migrate and/or remove any old DB entries
-    --    t.MigrateDatabase(db.version)
-    --  end
-    --  db.version = new_version
-    --end
-
     local new_version = tostring(t.Meta("version"))
     if db.version ~= "" and db.version ~= new_version then
       -- migrate and/or remove any old DB entries
@@ -242,15 +235,15 @@ function TidyPlatesThreat:StartUp()
     end
     db.version = new_version
 
-    -- With TidyPlates: if not db.CheckNewLookAndFeel and TidyPlates.GetThemeName() == t.THEME_NAME then
     if not db.CheckNewLookAndFeel then
       StaticPopup_Show("SwitchToNewLookAndFeel")
     end
   end
+end
 
+function TidyPlatesThreat:CheckForIncompatibleAddons()
   -- Check for other active nameplate addons which may create all kinds of errors and doesn't make
   -- sense anyway:
-  --if TidyPlates and not db.StandalonePopup then
   if IsAddOnLoaded("TidyPlates") then
     StaticPopup_Show("TidyPlatesEnabled", "TidyPlates")
   end
@@ -266,8 +259,6 @@ function TidyPlatesThreat:StartUp()
   if IsAddOnLoaded("SpartanUI") and SUI.DB.EnabledComponents.Nameplates then
     StaticPopup_Show("IncompatibleAddon", "SpartanUI Nameplates")
   end
-
-  TidyPlatesThreat:ReloadTheme()
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -356,18 +347,10 @@ end
 -- AceAddon function: Do more initialization here, that really enables the use of your addon.
 -- Register Events, Hook functions, Create Frames, Get information from the game that wasn't available in OnInitialize
 function TidyPlatesThreat:OnEnable()
-  TidyPlatesInternalThemeList[t.THEME_NAME] = t.Theme
+  TidyPlatesThreat:CheckForFirstStartUp()
+  TidyPlatesThreat:CheckForIncompatibleAddons()
 
-  self:StartUp()
-
-  Addon:SetBaseNamePlateSize()
-  -- Do this after combat ends, not in PLAYER_ENTERING_WORLD as it won't get set if the player is on combat when
-  -- that event fires.
-  Addon:CallbackWhenOoC(function()
-    local db = self.db.profile
-    SetNamePlateFriendlyClickThrough(db.NamePlateFriendlyClickThrough)
-    SetNamePlateEnemyClickThrough(db.NamePlateEnemyClickThrough)
-  end)
+  TidyPlatesThreat:ReloadTheme()
 
   -- TODO: check with what this  was replaces
   --TidyPlatesUtilityInternal:EnableGroupWatcher()
@@ -486,7 +469,6 @@ end
 function TidyPlatesThreat:PLAYER_LOGIN(...)
   self.db.profile.cache = {}
 
-  -- With TidyPlates: if self.db.char.welcome and (TidyPlatesOptions.ActiveTheme == t.THEME_NAME) then
   if self.db.char.welcome then
     t.Print(L["|cff89f559Threat Plates:|r Welcome back |cff"]..t.HCC[Addon.PlayerClass]..UnitName("player").."|r!!")
   end

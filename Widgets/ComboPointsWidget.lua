@@ -3,29 +3,26 @@
 ---------------------------------------------------------------------------------------------------
 local ADDON_NAME, Addon = ...
 
-local Widget = Addon:NewWidget("ComboPoints")
+local Widget = Addon.Widgets:NewTargetWidget("ComboPoints")
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
 
+-- Lua APIs
+local unpack, type = unpack, type
+
 -- WoW APIs
 local CreateFrame = CreateFrame
-local UnitClass, UnitCanAttack, UnitIsUnit = UnitClass, UnitCanAttack, UnitIsUnit
-local GetComboPoints, UnitPower, UnitPowerMax = GetComboPoints, UnitPower, UnitPowerMax
-local GetSpecialization = GetSpecialization
-local SPEC_PALADIN_RETRIBUTION, SPEC_MONK_WINDWALKER, SPEC_MAGE_ARCANE = SPEC_PALADIN_RETRIBUTION, SPEC_MONK_WINDWALKER, SPEC_MAGE_ARCANE
+local UnitClass, UnitCanAttack = UnitClass, UnitCanAttack
+local UnitPower, UnitPowerMax = UnitPower, UnitPowerMax
+local GetSpecialization, GetShapeshiftFormID = GetSpecialization, GetShapeshiftFormID
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
+local InCombatLockdown = InCombatLockdown
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
-
-local PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ComboPointWidget\\"
-
-local SPELL_POWER_CHI = Enum.PowerType.Chi
-local SPELL_POWER_HOLY_POWER = Enum.PowerType.HolyPower
-local SPELL_POWER_SOUL_SHARDS = Enum.PowerType.SoulShards
-local SPELL_ARCANE_CHARGES = Enum.PowerType.ArcaneCharges
+local RGB = Addon.ThreatPlates.RGB
 
 local WATCH_POWER_TYPES = {
   COMBO_POINTS = true,
@@ -35,85 +32,159 @@ local WATCH_POWER_TYPES = {
   ARCANE_CHARGES = true
 }
 
-local GetResourceOnTarget
-local CurrentTarget
+local UNIT_POWER = {
+  DRUID = {
+    PowerType = Enum.PowerType.ComboPoints,
+    Name = "COMBO_POINTS",
+  },
+  MAGE = {
+    [1] = {
+      PowerType = Enum.PowerType.ArcaneCharges,
+      Name = "ARCANE_CHARGES",
+    },
+  },
+  MONK = {
+    [3] = {
+      PowerType = Enum.PowerType.Chi,
+      Name = "CHI",
+    }
+  },
+  PALADIN = {
+    [3] = {
+      PowerType = Enum.PowerType.HolyPower,
+      Name = "HOLY_POWER",
+    }
+  },
+  ROGUE = {
+    PowerType = Enum.PowerType.ComboPoints,
+    Name = "COMBO_POINTS",
+  },
+  WARLOCK = {
+    PowerType = Enum.PowerType.SoulShards,
+    Name = "SOUL_SHARDS",
+  },
+}
+
+local PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ComboPointsWidget\\"
+local TEXTURE_INFO = {
+  Squares = {
+    Texture = PATH .. "ComboPointDefault",
+    TextureOff = PATH .. "ComboPointDefaultOff",
+    TextureWidth = 128,
+    TextureHeight = 64,
+    IconWidth = 62 * 0.25,
+    IconHeight = 34 * 0.25,
+    TexCoord = { 0, 62 / 128, 0, 34 / 64 }
+  },
+  Orbs = {
+    Texture = PATH .. "ComboPointOrb",
+    TextureOff = PATH .. "ComboPointOrbOff",
+    TextureWidth = 64,
+    TextureHeight = 64,
+    IconWidth = 60 * 0.22,
+    IconHeight = 60 * 0.22,
+    TexCoord = { 2/64, 62/64, 2/64, 62/64 }
+  },
+  Blizzard = {
+    DRUID = {
+      Texture = "ClassOverlay-ComboPoint",
+      TextureOff = "ClassOverlay-ComboPoint-Off",
+      IconWidth = 13,
+      IconHeight = 13,
+      TexCoord = { 0, 1, 0, 1 }
+    },
+    MAGE = {
+      Texture = "Mage-ArcaneCharge",
+      TextureOff = { "Mage-ArcaneCharge", 0.3 },
+      IconWidth = 22,
+      IconHeight = 22,
+      TexCoord = { 0, 1, 0, 1 }
+    },
+    MONK = {
+      Texture = "MonkUI-LightOrb",
+      TextureOff = "MonkUI-OrbOff",
+      IconWidth = 15,
+      IconHeight = 15,
+      TexCoord = { 0, 1, 0, 1 }
+    },
+    PALADIN = {
+      Texture = "nameplates-holypower1-on",
+      TextureOff = "nameplates-holypower1-off",
+      IconWidth = 25,
+      IconHeight = 19,
+      TexCoord = { 0, 1, 0, 1 }
+    },
+    ROGUE = {
+      Texture = "ClassOverlay-ComboPoint",
+      TextureOff = "ClassOverlay-ComboPoint-Off",
+      IconWidth = 13,
+      IconHeight = 13,
+      TexCoord = { 0, 1, 0, 1 }
+    },
+    WARLOCK = {
+      Texture = "Warlock-ReadyShard",
+      TextureOff = "Warlock-EmptyShard",
+      IconWidth = 12,
+      IconHeight = 16,
+      TexCoord = { 0, 1, 0, 1 }
+    },
+  }
+}
+
+Widget.TextureCoordinates = {}
+Widget.Colors = {}
+Widget.ShowInShapeshiftForm = true
 
 ---------------------------------------------------------------------------------------------------
 -- Combo Points Widget Functions
 ---------------------------------------------------------------------------------------------------
 
-local function GetComboPointTarget()
---    local points = GetComboPoints("player", "target")
---    local maxPoints = UnitPowerMax("player", 4)
---
---    return points, maxPoints
-
-  return GetComboPoints("player", "target")
-end
-
-local function GetChiTarget()
---    local points = UnitPower("player", SPELL_POWER_CHI)
---    local maxPoints = UnitPowerMax("player", SPELL_POWER_CHI)
---
---    return points, maxPoints
-
-  return UnitPower("player", SPELL_POWER_CHI)
-end
-
-local function GetPaladinHolyPower()
---    local points = UnitPower("player", SPELL_POWER_HOLY_POWER)
---    local maxPoints = UnitPowerMax("player", SPELL_POWER_HOLY_POWER)
---
---    return points, maxPoints
-
-  return UnitPower("player", SPELL_POWER_HOLY_POWER)
-end
-
-local function GetWarlockSoulShards()
---    local points = UnitPower("player", SPELL_POWER_SOUL_SHARDS)
---    local maxPoints = UnitPowerMax("player", SPELL_POWER_SOUL_SHARDS)
---
---    return points, maxPoints
-
-  return UnitPower("player", SPELL_POWER_SOUL_SHARDS)
-end
-
-local function GetMageArcaneCharges()
-  return UnitPower("player", SPELL_ARCANE_CHARGES)
-end
-
-local function GetComboPointFunction()
+function Widget:DetermineUnitPower()
   local _, player_class = UnitClass("player")
-  local spec = GetSpecialization()
+  local player_spec_no = GetSpecialization()
 
-  if player_class == "MONK" and spec == SPEC_MONK_WINDWALKER then
-    return GetChiTarget
-  elseif player_class == "ROGUE" then
-    return GetComboPointTarget
-  elseif player_class == "DRUID" then
-    -- optimal: check for affinity, only with feral combo points should be necessary
-    return GetComboPointTarget
-  elseif player_class == "PALADIN" and spec == SPEC_PALADIN_RETRIBUTION then
-    return GetPaladinHolyPower
-  elseif player_class == "WARLOCK" then
-    return GetWarlockSoulShards
-  elseif player_class == "MAGE" and spec == SPEC_MAGE_ARCANE then
-    return GetMageArcaneCharges
+  local power_type = UNIT_POWER[player_class] and (UNIT_POWER[player_class][player_spec_no] or UNIT_POWER[player_class])
+
+  if power_type and power_type.Name then
+    self.PowerType = power_type.PowerType
+    self.UnitPowerMax = UnitPowerMax("player", self.PowerType)
+  else
+    self.PowerType = nil
+    self.UnitPowerMax = 0
   end
-
-  return nil
 end
 
--- Initialize here as OnEnable is to late
-GetResourceOnTarget = GetComboPointFunction()
+function Widget:UpdateComboPoints(widget_frame)
+  local points = UnitPower("player", self.PowerType) or 0
 
-local function UpdateComboPoints(widget_frame)
-  local points = GetResourceOnTarget()
-
-  if points > 0 then
-    widget_frame.Icon:SetTexture(PATH .. points)
+  if points == 0 and not InCombatLockdown() then
+    for i = 1, self.UnitPowerMax do
+      widget_frame.ComboPoints[i]:Hide()
+      widget_frame.ComboPointsOff[i]:Hide()
+    end
   else
-    widget_frame.Icon:SetTexture(nil)
+    local color = self.Colors[points]
+    local cp_texture, cp_texture_off, cp_color
+
+    for i = 1, self.UnitPowerMax do
+      cp_texture = widget_frame.ComboPoints[i]
+      cp_texture_off = widget_frame.ComboPointsOff[i]
+
+      if points >= i then
+        cp_color = color[i]
+        cp_texture:SetVertexColor(cp_color.r, cp_color.g, cp_color.b)
+        cp_texture:Show()
+        cp_texture_off:Hide()
+      elseif self.db.ShowOffCPs then
+        cp_texture:Hide()
+        cp_texture_off:Show()
+      elseif cp_texture:IsShown() or cp_texture_off:IsShown() then
+        cp_texture:Hide()
+        cp_texture_off:Hide()
+      else
+        break
+      end
+    end
   end
 end
 
@@ -122,29 +193,60 @@ local function EventHandler(event, unitid, power_type)
   if event == "UNIT_POWER_UPDATE" and not WATCH_POWER_TYPES[power_type] then return end
 
   local plate = GetNamePlateForUnit("target")
-  if plate and plate.TPFrame.widgets.ComboPoints:IsShown() then -- not necessary, prerequisite for IsShown(): plate.TPFrame.Active and
-    UpdateComboPoints(plate.TPFrame.widgets.ComboPoints)
+  if plate then -- not necessary, prerequisite for IsShown(): plate.TPFrame.Active and
+    local widget = Widget
+    local widget_frame = widget.WidgetFrame
+    if widget_frame:IsShown() then
+      widget:UpdateComboPoints(widget_frame)
+    end
   end
 end
 
 function Widget:ACTIVE_TALENT_GROUP_CHANGED(...)
-  self:OnEnable()
-  self:PLAYER_TARGET_CHANGED()
+  -- Player switched to a spec that has combo points
+  self.WidgetHandler:InitializeWidget("ComboPoints")
+end
+
+function Widget:UNIT_MAXPOWER(unitid, power_type)
+  if self.PowerType then
+    -- Number of max power units changed (e.g., for a rogue)
+    self:DetermineUnitPower()
+    self:UpdateLayout()
+
+    -- remove excessive CP frames (when called after talent change)
+    local widget_frame = self.WidgetFrame
+    for i = self.UnitPowerMax + 1, #widget_frame.ComboPoints do
+      widget_frame.ComboPoints[i]:Hide()
+      widget_frame.ComboPoints[i] = nil
+      widget_frame.ComboPointsOff[i]:Hide()
+      widget_frame.ComboPointsOff[i] = nil
+    end
+
+    self:PLAYER_TARGET_CHANGED()
+  end
 end
 
 function Widget:PLAYER_TARGET_CHANGED()
-  if CurrentTarget then
-    CurrentTarget:Hide()
-    CurrentTarget = nil
-  end
-
   local plate = GetNamePlateForUnit("target")
-  if plate and plate.TPFrame.Active and UnitCanAttack("player", "target") and GetResourceOnTarget then
-    CurrentTarget = plate.TPFrame.widgets.ComboPoints
-    if CurrentTarget.Active then
-      UpdateComboPoints(CurrentTarget)
-      CurrentTarget:Show()
-    end
+
+  local tp_frame = plate and plate.TPFrame
+  if tp_frame and tp_frame.Active then
+    self:OnTargetUnitAdded(tp_frame, tp_frame.unit)
+  else
+    self.WidgetFrame:Hide()
+    self.WidgetFrame:SetParent(nil)
+  end
+end
+
+-- As this event is only registered for druid characters, ShowInShapeshiftForm is true by initialization for all other classes
+function Widget:UPDATE_SHAPESHIFT_FORM()
+  self.ShowInShapeshiftForm = (GetShapeshiftFormID() == 1)
+
+  if self.ShowInShapeshiftForm then
+    self:PLAYER_TARGET_CHANGED()
+  else
+    self.WidgetFrame:Hide()
+    self.WidgetFrame:SetParent(nil)
   end
 end
 
@@ -152,24 +254,10 @@ end
 -- Widget functions for creation and update
 ---------------------------------------------------------------------------------------------------
 
-function Widget:Create(tp_frame)
-  -- Required Widget Code
-  local widget_frame = CreateFrame("Frame", nil, tp_frame)
-  widget_frame:Hide()
-
-  -- Custom Code
-  widget_frame:SetSize(64, 64)
-  widget_frame:SetFrameLevel(tp_frame:GetFrameLevel() + 7)
-  widget_frame.Icon = widget_frame:CreateTexture(nil, "OVERLAY")
-  widget_frame.Icon:SetAllPoints(tp_frame)
-  -- End Custom Code
-
-  -- Required Widget Code
-  return widget_frame
-end
-
 function Widget:IsEnabled()
-  return TidyPlatesThreat.db.profile.comboWidget.ON or TidyPlatesThreat.db.profile.comboWidget.ShowInHeadlineView
+  self:DetermineUnitPower()
+
+  return self.PowerType and (self.db.ON or self.db.ShowInHeadlineView)
 end
 
 -- EVENTS:
@@ -180,23 +268,32 @@ end
 -- UNIT_AURA: unitID
 -- UNIT_FLAGS: unitID
 -- UNIT_POWER_FREQUENT: unitToken, powerToken
-
 function Widget:OnEnable()
-  GetResourceOnTarget = GetComboPointFunction()
+  self:RegisterEvent("PLAYER_TARGET_CHANGED")
+  self:RegisterUnitEvent("UNIT_POWER_UPDATE", "player", EventHandler)
+  self:RegisterUnitEvent("UNIT_DISPLAYPOWER", "player", EventHandler)
+  self:RegisterUnitEvent("UNIT_MAXPOWER", "player")
 
-  if GetResourceOnTarget then
-    self:RegisterUnitEvent("UNIT_POWER_UPDATE", "player", EventHandler)
-    -- self:RegisterUnitEvent("UNIT_POWER_FREQUENT", "player", EventHandler)
-    self:RegisterUnitEvent("UNIT_DISPLAYPOWER", "player", EventHandler)
-    self:RegisterUnitEvent("UNIT_FLAGS", "player", EventHandler)
-    self:RegisterEvent("PLAYER_TARGET_CHANGED")
-  else
-    self:UnregisterEvent("UNIT_POWER_UPDATE")
-    self:UnregisterEvent("UNIT_DISPLAYPOWER")
-    self:UnregisterEvent("UNIT_FLAGS")
+  local _, player_class = UnitClass("player")
+  if player_class == "DRUID" then
+    self:RegisterEvent("UPDATE_SHAPESHIFT_FORM")
+    self.ShowInShapeshiftForm = (GetShapeshiftFormID() == 1)
   end
 
+  -- self:RegisterUnitEvent("UNIT_POWER_FREQUENT", "player", EventHandler)
+  -- self:RegisterUnitEvent("UNIT_FLAGS", "player", EventHandler)
+
   self:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
+end
+
+function Widget:OnDisable()
+  self:UnregisterEvent("PLAYER_TARGET_CHANGED")
+  self:UnregisterEvent("UNIT_POWER_UPDATE")
+  self:UnregisterEvent("UNIT_DISPLAYPOWER")
+  self:UnregisterEvent("UNIT_MAXPOWER")
+
+  self.WidgetFrame:Hide()
+  self.WidgetFrame:SetParent(nil)
 end
 
 function Widget:EnabledForStyle(style, unit)
@@ -204,53 +301,141 @@ function Widget:EnabledForStyle(style, unit)
   -- if not UnitCanAttack("player", "target") then return false end
 
   if (style == "NameOnly" or style == "NameOnly-Unique") then
-    return TidyPlatesThreat.db.profile.comboWidget.ShowInHeadlineView
+    return self.db.ShowInHeadlineView and self.ShowInShapeshiftForm -- a little bit of a hack, logically would be better checked in OnTargetUnitAdded
   elseif style ~= "etotem" then
-    return TidyPlatesThreat.db.profile.comboWidget.ON
+    return self.db.ON and self.ShowInShapeshiftForm
   end
 end
 
-function Widget:OnUnitAdded(widget_frame, unit)
-  local db = TidyPlatesThreat.db.profile.comboWidget
+function Widget:Create()
+  if not self.WidgetFrame then
+    local widget_frame = CreateFrame("Frame", nil)
+    widget_frame:Hide()
 
-  -- Updates based on settings / unit style
-  if unit.style == "NameOnly" or unit.style == "NameOnly-Unique" then
-    widget_frame:SetPoint("CENTER", widget_frame:GetParent(), "CENTER", db.x_hv, db.y_hv)
-  else
-    widget_frame:SetPoint("CENTER", widget_frame:GetParent(), "CENTER", db.x, db.y)
+    self.WidgetFrame = widget_frame
+    widget_frame.ComboPoints = {}
+    widget_frame.ComboPointsOff = {}
+
+--    local frameBackground = false -- debug frame size
+--    if frameBackground then
+--      widget_frame.Background = widget_frame:CreateTexture(nil, "BACKGROUND")
+--      widget_frame.Background:SetAllPoints()
+--      widget_frame.Background:SetColorTexture(1, 1, 1, 0.5)
+--    end
+
+    self:UpdateLayout()
   end
 
-  -- Updates based on settings
-  widget_frame:SetScale(db.scale)
-  widget_frame.Icon:SetAllPoints(widget_frame)
+  self:PLAYER_TARGET_CHANGED()
+end
 
-  -- Updates based on unit status
-  if UnitIsUnit("target", unit.unitid) and UnitCanAttack("player", "target") and GetResourceOnTarget then
-    UpdateComboPoints(widget_frame)
+function Widget:OnTargetUnitAdded(tp_frame, unit)
+  local widget_frame = self.WidgetFrame
+
+  if UnitCanAttack("player", "target") and self:EnabledForStyle(unit.style, unit) then
+    widget_frame:SetParent(tp_frame)
+    widget_frame:SetFrameLevel(tp_frame:GetFrameLevel() + 7)
+
+    -- Updates based on settings / unit style
+    local db = self.db
+    if unit.style == "NameOnly" or unit.style == "NameOnly-Unique" then
+      widget_frame:SetPoint("CENTER", tp_frame, "CENTER", db.x_hv, db.y_hv)
+    else
+      widget_frame:SetPoint("CENTER", tp_frame, "CENTER", db.x, db.y)
+    end
+
+    self:UpdateComboPoints(widget_frame)
+
     widget_frame:Show()
-    CurrentTarget = widget_frame
   else
     widget_frame:Hide()
+    widget_frame:SetParent(nil)
   end
-
-  -- self:OnTargetChanged(widget_frame, unit)
 end
 
---function Widget:OnUpdateStyle(widget_frame, unit)
---  local db = TidyPlatesThreat.db.profile.comboWidget
---  -- Updates based on settings / unit style
---  if unit.style == "NameOnly" or unit.style == "NameOnly-Unique" then
---    widget_frame:SetPoint("CENTER", widget_frame:GetParent(), "CENTER", db.x_hv, db.y_hv)
---  else
---    widget_frame:SetPoint("CENTER", widget_frame:GetParent(), "CENTER", db.x, db.y)
---  end
---end
+function Widget:OnTargetUnitRemoved()
+  self.WidgetFrame:Hide()
+end
 
---function Widget:OnTargetChanged(widget_frame, unit)
---  if UnitIsUnit("target", unit.unitid) and UnitCanAttack("player", "target") and GetResourceOnTarget then
---    UpdateComboPoints(widget_frame)
---    widget_frame:Show()
---  else
---    widget_frame:Hide()
---  end
---end
+function Widget:UpdateTexture(texture, texture_path, cp_no)
+  if self.db.Style == "Blizzard" then
+    if type(texture_path) == "table" then
+      texture:SetAtlas(texture_path[1])
+      texture:SetAlpha(texture_path[2])
+    else
+      texture:SetAtlas(texture_path)
+    end
+  else
+    texture:SetTexture(texture_path)
+  end
+
+  texture:SetTexCoord(unpack(self.TexCoord)) -- obj:SetTexCoord(left,right,top,bottom)
+  local scale = self.db.Scale
+  local scaledIconWidth, scaledIconHeight, scaledSpacing = (scale * self.IconWidth),(scale * self.IconHeight),(scale * self.db.HorizontalSpacing)
+  texture:SetSize(scaledIconWidth, scaledIconHeight)
+  texture:SetPoint("LEFT", self.WidgetFrame, "LEFT", (self.WidgetFrame:GetWidth()/self.UnitPowerMax)*(cp_no-1)+(scaledSpacing/2), 0)  
+end
+
+function Widget:UpdateLayout()
+  local widget_frame = self.WidgetFrame
+
+  -- Updates based on settings
+  local db = self.db
+  local scale = db.Scale
+  local scaledIconWidth, scaledIconHeight, scaledSpacing = (scale * self.IconWidth),(scale * self.IconHeight),(scale * db.HorizontalSpacing)
+
+  -- This was moved into the UpdateLayout from UpdateComboPointLaout as this was not updating after a ReloadUI
+  -- Combo Point position is now based off of WidgetFrame width
+  widget_frame:SetAlpha(db.Transparency)
+  widget_frame:SetHeight(scaledIconHeight)
+  widget_frame:SetWidth((scaledIconWidth * self.UnitPowerMax) + ((self.UnitPowerMax - 1) * scaledSpacing))
+
+  for i = 1, self.UnitPowerMax do
+    widget_frame.ComboPoints[i] = widget_frame.ComboPoints[i] or widget_frame:CreateTexture(nil, "BACKGROUND")
+    self:UpdateTexture(widget_frame.ComboPoints[i], self.Texture, i)
+
+    widget_frame.ComboPointsOff[i] = widget_frame.ComboPointsOff[i] or widget_frame:CreateTexture(nil, "ARTWORK")
+    self:UpdateTexture(widget_frame.ComboPointsOff[i], self.TextureOff, i)
+  end  
+end
+
+function Widget:UpdateSettings()
+  self.db = TidyPlatesThreat.db.profile.ComboPoints
+
+  self:DetermineUnitPower()
+
+  -- Optimization, not really necessary
+  if not self.PowerType then return end
+
+  -- Update widget variables, only dependent from settings and static information (like player's class)
+  local _, player_class = UnitClass("player")
+  local texture_info = TEXTURE_INFO[self.db.Style][player_class] or TEXTURE_INFO[self.db.Style]
+
+  self.TexCoord = texture_info.TexCoord
+  self.IconWidth = texture_info.IconWidth
+  self.IconHeight = texture_info.IconHeight
+  self.Texture = texture_info.Texture
+  self.TextureOff = texture_info.TextureOff
+
+  local colors = self.db.ColorBySpec[player_class]
+  for current_cp = 1, #colors do
+    for cp_no = 1, #colors do
+
+      self.Colors[current_cp] = self.Colors[current_cp] or {}
+      if self.db.Style == "Blizzard" then
+        self.Colors[current_cp][cp_no] = RGB(255, 255, 255)
+      elseif self.db.UseUniformColor then
+        self.Colors[current_cp][cp_no] = colors[current_cp]
+      else
+        self.Colors[current_cp][cp_no] = colors[cp_no]
+      end
+    end
+  end
+
+  -- Update the widget if it was already created (not true for immediately after Reload UI or if it was never enabled
+  -- in this since last Reload UI)
+  if self.WidgetFrame then
+    self:UpdateLayout()
+    self:PLAYER_TARGET_CHANGED()
+  end
+end

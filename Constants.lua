@@ -19,7 +19,6 @@ local HEX2RGB = ThreatPlates.HEX2RGB
 ---------------------------------------------------------------------------------------------------
 
 ThreatPlates.ADDON_NAME = "Threat Plates"
-ThreatPlates.THEME_NAME = "Threat Plates"
 
 Addon.ADDON_DIRECTORY = "Interface\\AddOns\\TidyPlates_ThreatPlates\\"
 
@@ -504,7 +503,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
     AuraWidget = {
       ON = true,
       x = 0,
-      y = 16,
+      y = 30,
       x_hv = 0,
       y_hv = 16,
       scale = 1, -- Removed in 8.8.0
@@ -690,15 +689,74 @@ ThreatPlates.DEFAULT_SETTINGS = {
       y = 6,
       anchor = "CENTER",
     },
-    comboWidget = {
+    ComboPoints = {
       ON = false,
-      scale = 1,
-      x = 0,
-      y = -8,
-      x_hv = 0,
-      y_hv = -16,
       ShowInHeadlineView = false,
+      Style = "Orbs",
+      HorizontalSpacing = 0,
+      UseUniformColor = true,
+      ShowOffCPs = false,
+      Scale = 1,
+      Transparency = 1,
+      x = 0,
+      y = 26,
+      x_hv = 0,
+      y_hv = -22,
+      Specialization = "DRUID",
+      ColorBySpec = {
+        ROGUE = {
+          [1] = RGB(0, 0, 255),
+          [2] = RGB(0, 150, 255),
+          [3] = RGB(0, 255, 0),
+          [4] = RGB(255, 105, 0),
+          [5] = RGB(255, 0, 0),
+          [6] = RGB(255, 0, 0),
+        },
+        DRUID = {
+          [1] = RGB(0, 0, 255),
+          [2] = RGB(0, 150, 255),
+          [3] = RGB(0, 255, 0),
+          [4] = RGB(255, 105, 0),
+          [5] = RGB(255, 0, 0),
+        },
+        MONK = {
+          [1] = RGB(0, 225, 255), -- Cyan
+          [2] = RGB(0, 225, 255),
+          [3] = RGB(0, 225, 255),
+          [4] = RGB(0, 225, 255),
+          [5] = RGB(0, 225, 255),
+        },
+        PALADIN = {
+          [1] = RGB(255, 255, 0),
+          [2] = RGB(255, 255, 0),
+          [3] = RGB(255, 255, 0),
+          [4] = RGB(255, 255, 0),
+          [5] = RGB(255, 255, 0),
+        },
+        WARLOCK = {
+          [1] = RGB(148, 130, 201),
+          [2] = RGB(148, 130, 201),
+          [3] = RGB(148, 130, 201),
+          [4] = RGB(148, 130, 201),
+          [5] = RGB(148, 130, 201),
+        },
+        MAGE = {
+          [1] = RGB(105, 204, 240),
+          [2] = RGB(105, 204, 240),
+          [3] = RGB(105, 204, 240),
+          [4] = RGB(105, 204, 240),
+        },
+      },
     },
+    --comboWidget = { -- removed in 9.1
+    --  ON = false,
+    --  scale = 1,
+    --  x = 0,
+    --  y = -8,
+    --  x_hv = 0,
+    --  y_hv = -16,
+    --  ShowInHeadlineView = false,
+    --},
     --      eliteWidget = {
     --        ON = true,
     --        theme = "default",
@@ -783,7 +841,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
       BorderOffset = 1,
       BorderUseForegroundColor = false,
       BorderUseBackgroundColor = false,
-      BorderColor = RGB(255, 255, 255, 1),
+      BorderColor = RGB(0, 0, 0, 1),
       --BorderInset = 4,
       --BorderTileSize = 16,
       ShowText = true,

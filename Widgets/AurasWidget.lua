@@ -4,7 +4,7 @@
 local ADDON_NAME, Addon = ...
 local ThreatPlates = Addon.ThreatPlates
 
-local Widget = Addon:NewWidget("Auras")
+local Widget = Addon.Widgets:NewWidget("Auras")
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -69,9 +69,6 @@ Widget.PRIORITY_FUNCTIONS = {
 }
 Widget.CenterAurasPositions = {}
 Widget.UnitAuraList = {}
--- Get a clean version of the function...  Avoid OmniCC interference
-local CooldownNative = CreateFrame("Cooldown", nil, WorldFrame)
-Widget.SetCooldown = CooldownNative.SetCooldown
 
 local LOC_CHARM = 1         -- Aura: Possess
 local LOC_FEAR = 2          -- Mechanic: Fleeing
@@ -118,6 +115,8 @@ Widget.CROWD_CONTROL_SPELLS = {
   [211881] = LOC_STUN,             -- Fel Eruption (Talent)
   [217832] = LOC_INCAPACITATE,     -- Imprison
   [179057] = LOC_STUN,             -- Chaos Nova
+  [207685] = LOC_DISORIENT,        -- Sigil of Misery (Vengeance, Blizzard)
+  [204490] = CC_SILENCE,           -- Sigil of Silence (Vengeance, Blizzard)
 
   -- Hunter
   [3355] = LOC_INCAPACITATE,    -- Freezing Trap
@@ -146,6 +145,8 @@ Widget.CROWD_CONTROL_SPELLS = {
   [61721] = LOC_POLYMORPH,  -- Polymorph (Rabbit)
   [161372] = LOC_POLYMORPH, -- Polymorph (Peacock)
   [161355] = LOC_POLYMORPH, -- Polymorph (Penguin)
+  [277787] = LOC_POLYMORPH, -- Polymorph (Direhorn)
+  [277792] = LOC_POLYMORPH, -- Polymorph (Bumblebee)
   [113724] = LOC_STUN,      -- Ring of Frost
   [2139] = CC_SILENCE,      -- Counterspell
   [31661] = LOC_DISORIENT,  -- Dragon's Breath
@@ -158,7 +159,7 @@ Widget.CROWD_CONTROL_SPELLS = {
   [853] = LOC_STUN,             -- Hammer of Justice
   [115750] = LOC_DISORIENT,     -- Blinding Light
   [96231] = CC_SILENCE,         -- Rebuke
-  [173315] = LOC_INCAPACITATE,  -- Repentance
+  [20066] = LOC_INCAPACITATE,   -- Repentance (Retribution, Blizzard)
 
   -- Priest
   [15487] = CC_SILENCE,      -- Silence
@@ -191,11 +192,11 @@ Widget.CROWD_CONTROL_SPELLS = {
   [5484] = LOC_FEAR,          -- Howl of Terror
   [30283] = LOC_STUN,         -- Shadowfury
   [710] = LOC_BANISH,         -- Banish
-  [5782] = LOC_FEAR,          -- Fear
+  [118699] = LOC_FEAR,        -- Fear
 
   -- Warrior
   [132168] = LOC_STUN,      -- Shockwave
-  [107570] = LOC_STUN,      -- Storm Bolt
+  [132169] = LOC_STUN,      -- Storm Bolt (Blizzard)
   [103828] = LOC_STUN,      -- Warbringer
   [236027] = PC_SNARE,      -- Intercept - Slow
   [105771] = PC_ROOT,       -- Intercept - Charge
@@ -209,6 +210,11 @@ Widget.CROWD_CONTROL_SPELLS = {
   [119381] = LOC_STUN,        -- Leg Sweep
   [116095] = PC_SNARE,        -- Disable
   [116705] = CC_SILENCE,      -- Spear Hand Strike
+
+  -- Racial Traits
+  [255723] = LOC_STUN,        -- Bull Rush (Highmountain Tauren)
+  [20549] = LOC_STUN,         -- War Stomp (Tauren)
+
 }
 
 ---------------------------------------------------------------------------------------------------
@@ -710,6 +716,9 @@ function Widget:CreateAuraFrameIconMode(parent)
   frame.Cooldown:SetReverse(true)
   frame.Cooldown:SetHideCountdownNumbers(true)
 
+  -- Fix for OmnniCC cooldown numbers being shown on auras
+  frame.Cooldown.noCooldownCount = true
+
   frame.Stacks = frame.Cooldown:CreateFontString(nil, "OVERLAY")
   frame.TimeLeft = frame.Cooldown:CreateFontString(nil, "OVERLAY")
 
@@ -797,7 +806,7 @@ function Widget:UpdateAuraInformationIconMode(frame) -- texture, duration, expir
 
   -- Cooldown
   if duration and duration > 0 and expiration and expiration > 0 then
-    self.SetCooldown(frame.Cooldown, expiration - duration, duration + .25)
+    frame.Cooldown:SetCooldown(expiration - duration, duration + .25)
   else
     frame.Cooldown:Clear()
   end
@@ -1146,6 +1155,7 @@ function Widget:OnEnable()
 end
 
 function Widget:OnDisable()
+  self:UnregisterAllEvents()
   for plate, _ in pairs(Addon.PlatesVisible) do
     plate.TPFrame.widgets.Auras:UnregisterAllEvents()
   end
@@ -1236,8 +1246,6 @@ function Widget:ParseSpellFilters()
   else
     self.FilterModeEnemyDebuffs = "all"
   end
-
-  self:UpdateSettings()
 end
 
 function Widget:UpdateSettingsIconMode()
@@ -1321,6 +1329,11 @@ function Widget:UpdateSettings()
 
   self.AlignLayout = GRID_LAYOUT[self.db.AlignmentH][self.db.AlignmentV]
 
+  self:ParseSpellFilters()
+
+  --  -- Don't update any widget frame if the widget isn't enabled.
+--  if not self:IsEnabled() then return end
+
   for plate, tp_frame in pairs(Addon.PlatesCreated) do
     local widget_frame = tp_frame.widgets.Auras
 
@@ -1335,6 +1348,6 @@ function Widget:UpdateSettings()
     end
   end
 
-  --TidyPlatesInternal:ForceUpdate()
+  --Addon:ForceUpdate()
 end
 
