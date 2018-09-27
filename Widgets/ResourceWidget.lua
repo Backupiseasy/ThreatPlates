@@ -111,8 +111,6 @@ function Widget:SetTargetPowerType(widget_frame)
   local db = self.db
   local power_func = self.POWER_FUNCTIONS[powerToken]
 
-  print ("Power Function:", powerToken)
-
   if UnitPowerMax("target") == 0 or (db.ShowOnlyAltPower and power_func) then
     self.PowerFunction = nil
     return

@@ -3172,7 +3172,7 @@ local function CreateHeadlineViewShowEntry()
       order = pos,
       type = "group",
       inline = true,
-      disabled = function() return not (GetCVarBool("nameplateShowAll") and TidyPlatesThreat.db.profile.HeadlineView.ON) end,
+      disabled = function() return not GetCVarBool("nameplateShowAll") end,
       args = {},
     }
 
@@ -3692,10 +3692,10 @@ local function CreateAutomationSettings()
             arg = { "HeadlineView", "ForceOutOfCombat" }
           },
           HeadlineViewOnFriendly = {
-            name = L["Special view on Friendly Units in Combat"],
+            name = L["Nameplate Mode for Friendly Units in Combat"],
             order = 50,
             type = "select",
-            values = { HEADLINE = L["Force headline"], NORMAL = L["Force healtbar"], NONE = L["None"] },
+            values = { NAME = L["Headline View"], HEALTHBAR = L["Healthbar View"], NONE = L["None"] },
             style = "dropdown",
             width = "double",
             set = SetValue,
@@ -4707,33 +4707,32 @@ local function CreateOptionsTable()
               inline = false,
               order = 25,
               args = {
-                Enable = {
-                  name = L["Enable"],
-                  order = 5,
-                  type = "group",
-                  inline = true,
-                  args = {
-                    Header = {
-                      name = L["This option allows you to control whether headline view (text-only) is enabled for nameplates."],
-                      order = 1,
-                      type = "description",
-                      width = "full",
-                    },
-                    Enable = {
-                      name = L["Enable Headline View (Text-Only)"],
-                      order = 2,
-                      type = "toggle",
-                      width = "double",
-                      arg = { "HeadlineView", "ON" },
-                    },
-                  },
-                },
+--                Enable = {
+--                  name = L["Enable"],
+--                  order = 5,
+--                  type = "group",
+--                  inline = true,
+--                  args = {
+--                    Header = {
+--                      name = L["This option allows you to control whether headline view (text-only) is enabled for nameplates."],
+--                      order = 1,
+--                      type = "description",
+--                      width = "full",
+--                    },
+--                    Enable = {
+--                      name = L["Enable Headline View (Text-Only)"],
+--                      order = 2,
+--                      type = "toggle",
+--                      width = "double",
+--                      arg = { "HeadlineView", "ON" },
+--                    },
+--                  },
+--                },
                 ShowByUnitType = {
                   name = L["Show By Unit Type"],
                   order = 10,
                   type = "group",
                   inline = true,
-                  disabled = function() return not TidyPlatesThreat.db.profile.HeadlineView.ON  end,
                   args = CreateHeadlineViewShowEntry(),
                 },
                 ShowByStatus = {
@@ -4741,7 +4740,6 @@ local function CreateOptionsTable()
                   order = 15,
                   type = "group",
                   inline = true,
-                  disabled = function() return not TidyPlatesThreat.db.profile.HeadlineView.ON  end,
                   args = {
 --                    ModeOoC = {
 --                      name = L["Out of Combat"],
@@ -4777,7 +4775,6 @@ local function CreateOptionsTable()
                       order = 30,
                       type = "group",
                       inline = true,
-                      disabled = function()return not TidyPlatesThreat.db.profile.HeadlineView.ON end,
                       args = {
                         TargetHighlight = {
                           name = L["Show Target"],
@@ -4801,7 +4798,6 @@ local function CreateOptionsTable()
                       order = 40,
                       type = "group",
                       inline = true,
-                      disabled = function() return not TidyPlatesThreat.db.profile.HeadlineView.ON  end,
                       args = {
                         Transparency = {
                           name = L["Use transparency settings of Healthbar View also for Headline View."],
@@ -6788,7 +6784,7 @@ local function CreateOptionsTable()
               name = L["Headline View"],
               order = 30,
               type = "toggle",
-              disabled = function() return not (db.uniqueSettings[k_c].useStyle and db.HeadlineView.ON) end,
+              disabled = function() return not db.uniqueSettings[k_c].useStyle end,
               set = function(info, val) if val then db.uniqueSettings[k_c].showNameplate = false; SetValue(info, val) end end,
               arg = { "uniqueSettings", k_c, "ShowHeadlineView" },
             },

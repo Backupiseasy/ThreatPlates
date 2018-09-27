@@ -341,7 +341,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
       PixelPerfectUI = false,
     },
     HeadlineView = {
-      ON = false,
+      -- ON = false, -- removed in 9.1.0
       name = {
         size = 10,
         -- width = 140, -- same as for healthbar view -- old default: 116,
