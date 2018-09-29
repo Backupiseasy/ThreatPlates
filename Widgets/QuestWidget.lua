@@ -415,15 +415,12 @@ function Widget:UpdateFrame(widget_frame, unit)
        current.goal > 1 then --NOTE: skip showing for quests that have 1 of something, as WoW uses this for things like events eg "Push back the alliance 0/1"
 
       local text
-      local centerText = false
 
       if current.type == "area" then
         text = current.current .. '%'
 
         if unit.reaction ~= "FRIENDLY" then
           widget_frame.Text.TypeTexture:SetTexture(ICON_PATH .. "kill")
-        else --center text
-          centerText = true
         end
       else
         text = current.current .. '/' .. current.goal
@@ -432,25 +429,18 @@ function Widget:UpdateFrame(widget_frame, unit)
           widget_frame.Text.TypeTexture:SetTexture(ICON_PATH .. "kill")
         elseif current.type == "item" then
           widget_frame.Text.TypeTexture:SetTexture(ICON_PATH .. "loot")
-        else
-          --set text to be center as no texture to load (invalid quest type)
-          centerText = true
         end
       end
 
       widget_frame.Text:SetText(text)
       widget_frame.Text:SetTextColor(color.r, color.g, color.b)
 
-      if centerText then
-        widget_frame.Text:SetPoint("CENTER", widget_frame, 0, db.scale * 0.75)
-      else
-        widget_frame.Text:SetPoint("CENTER", widget_frame, db.scale * 0.5, db.scale * 0.75)
-      end
+      widget_frame.Text:SetPoint("CENTER", widget_frame, 0, db.scale * 0.75)
 
-      widget_frame.Text:SetSize(db.scale * 1.4, db.scale)
+      widget_frame.Text:SetSize(db.scale * 1.9, db.scale)
       widget_frame.Text:SetFont(Font, db.FontSize + (db.scale * FONT_SCALING))
 
-      widget_frame.Text.TypeTexture:SetPoint("CENTER", widget_frame, - (db.scale * 0.5), (db.scale * 0.75) + 1)
+      widget_frame.Text.TypeTexture:SetPoint("LEFT", widget_frame.Text)
       widget_frame.Text.TypeTexture:SetSize(db.scale * TEXTURE_SCALING, db.scale * TEXTURE_SCALING)
 
       widget_frame.Text:Show()
