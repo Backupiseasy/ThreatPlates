@@ -440,7 +440,7 @@ function Widget:UpdateFrame(widget_frame, unit)
       widget_frame.Text:SetSize(db.scale * 1.9, db.scale)
       widget_frame.Text:SetFont(Font, db.FontSize + (db.scale * FONT_SCALING))
 
-      widget_frame.Text.TypeTexture:SetPoint("LEFT", widget_frame.Text)
+      widget_frame.Text.TypeTexture:SetPoint("LEFT", widget_frame.Text, 0, 1.5)
       widget_frame.Text.TypeTexture:SetSize(db.scale * TEXTURE_SCALING, db.scale * TEXTURE_SCALING)
 
       widget_frame.Text:Show()
