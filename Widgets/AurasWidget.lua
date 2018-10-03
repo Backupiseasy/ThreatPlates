@@ -106,7 +106,7 @@ Widget.CROWD_CONTROL_SPELLS = {
   [2637] = LOC_SLEEP,             -- Hibernate
 
   -- Death Knight
-  [108194] = LOC_STUN,             -- Asphyxiate
+  [221562] = LOC_STUN,             -- Asphyxiate
   [47476] = LOC_STUN,              -- Strangulate (PvP Talent)
   [45524] = PC_SNARE,              -- Chains of Ice
   [111673] = LOC_CHARM,            -- Control Undead
@@ -719,8 +719,13 @@ function Widget:CreateAuraFrameIconMode(parent)
   -- Fix for OmnniCC cooldown numbers being shown on auras
   frame.Cooldown.noCooldownCount = true
 
-  frame.Stacks = frame.Cooldown:CreateFontString(nil, "OVERLAY")
-  frame.TimeLeft = frame.Cooldown:CreateFontString(nil, "OVERLAY")
+  -- Use a seperate frame for text elements as a) using frame as parent results in the text being shown below
+  -- the cooldown frame and b) using the cooldown frame results in the text not being visible if there is no
+  -- cooldown (i.e., duration and expiration are nil which is true for auras with unlimited duration)
+  local text_frame =  CreateFrame("Frame", nil, frame)
+  text_frame:SetAllPoints(frame.Icon)
+  frame.Stacks = text_frame:CreateFontString(nil, "OVERLAY")
+  frame.TimeLeft = text_frame:CreateFontString(nil, "OVERLAY")
 
   frame:Hide()
 
@@ -916,8 +921,9 @@ function Widget:UpdateAuraFrameBarMode(frame)
       frame.Icon:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", db.BarWidth + db.IconSpacing, 0)
       frame.Statusbar:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 0, 0)
     end
-    frame.Stacks:SetAllPoints(frame.Icon)
-    frame.Stacks:SetSize(db.BarHeight, db.BarHeight)
+    frame.Stacks:SetPoint("CENTER", frame.Icon, "CENTER")
+    --frame.Stacks:SetAllPoints(frame.Icon)
+    --frame.Stacks:SetSize(db.BarHeight, db.BarHeight)
     frame.Stacks:SetJustifyH("CENTER")
     frame.Stacks:SetFont(font, db.FontSize, "OUTLINE")
     frame.Stacks:SetShadowOffset(1, -1)
