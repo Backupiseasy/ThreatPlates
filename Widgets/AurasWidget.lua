@@ -92,18 +92,22 @@ local CC_SILENCE = 101
 
 Widget.CROWD_CONTROL_SPELLS = {
   -- Druid
-  [81261] = CC_SILENCE,           -- Solar Beam (Moonkin)
   [339] = PC_ROOT,                -- Entangling Roots
   [5211] = LOC_STUN,              -- Mighty Bash (Talent)
   [61391] = PC_DAZE,              -- Typhoon (Talent)
   [102359] = PC_ROOT,             -- Mass Entanglement (Talent)
-  [203123] = LOC_STUN,            -- Maim (Feral)
-  [163505] = LOC_STUN,            -- Rake (Feral)
-  [99] = LOC_INCAPACITATE,        -- Incapacitating Roar (Guardian)
-  [127797] = PC_DAZE,             -- Ursol's Vortex
-  [33786] = LOC_BANISH,           -- Cyclone (PvP Talent, Restoration)
-  [209753] = LOC_BANISH,          -- Cyclone (PvP Talent, Balance)
   [2637] = LOC_SLEEP,             -- Hibernate
+  -- Balance Druid
+  [81261] = CC_SILENCE,           -- Solar Beam (Moonkin)
+  [209753] = LOC_BANISH,          -- Cyclone (PvP Talent)
+  -- Feral Druid
+  [163505] = LOC_STUN,            -- Rake
+  [203123] = LOC_STUN,            -- Maim
+  -- Guardian Druid
+  [99] = LOC_INCAPACITATE,        -- Incapacitating Roar
+  -- Restoration Druid
+  [127797] = PC_DAZE,             -- Ursol's Vortex
+  [33786] = LOC_BANISH,           -- Cyclone (PvP Talent)
 
   -- Death Knight
   [221562] = LOC_STUN,             -- Asphyxiate
@@ -147,13 +151,22 @@ Widget.CROWD_CONTROL_SPELLS = {
   [161355] = LOC_POLYMORPH, -- Polymorph (Penguin)
   [277787] = LOC_POLYMORPH, -- Polymorph (Direhorn)
   [277792] = LOC_POLYMORPH, -- Polymorph (Bumblebee)
-  [113724] = LOC_STUN,      -- Ring of Frost
   [2139] = CC_SILENCE,      -- Counterspell
-  [31661] = LOC_DISORIENT,  -- Dragon's Breath
-  [122] = PC_ROOT,          -- Frost Nova
-  [231596] = PC_ROOT,       -- Freeze (Pet)
-  [31589] = PC_SNARE,       -- Slow (Pet)
-  [236299] = PC_SNARE,      -- Arcane Barrage + Chrono Shift (Talent)
+  [122] = PC_ROOT,          -- Frost Nova (Blizzard)
+  [113724] = LOC_STUN,      -- Ring of Frost (Talent, Blizzard)
+  -- Arcane Mage
+  [31589] = PC_SNARE,       -- Slow
+  [236299] = PC_SNARE,      -- Arcane Barrage with Chrono Shift (Talent)
+  -- Fire Mage
+  [31661] = LOC_DISORIENT,  -- Dragon's Breath (Blizzard)
+  [2120] = PC_SNARE,        -- Flamestrike
+  [157981] = PC_SNARE,      -- Blast Wave (Talent)
+  -- Frost Mage
+  [205708] = PC_SNARE,      -- Chilled
+  [33395] = PC_ROOT,        -- Freeze (Blizzard)
+  [212792] = PC_SNARE,      -- Cone of Cold
+  [157997] = PC_ROOT,       -- Ice Nova (Talent)
+  [228600] = PC_ROOT,       -- Glacial Spike (Talent, Blizzard)
 
   -- Paladin
   [853] = LOC_STUN,             -- Hammer of Justice
@@ -195,15 +208,21 @@ Widget.CROWD_CONTROL_SPELLS = {
   [118699] = LOC_FEAR,        -- Fear
 
   -- Warrior
-  [132168] = LOC_STUN,      -- Shockwave
-  [132169] = LOC_STUN,      -- Storm Bolt (Blizzard)
-  [103828] = LOC_STUN,      -- Warbringer
-  [236027] = PC_SNARE,      -- Intercept - Slow
   [105771] = PC_ROOT,       -- Intercept - Charge
-  [127724] = PC_ROOT,       -- Intercept - Charge
-  [118000] = LOC_STUN,      -- Dragon Roar
+  [5246] = LOC_FEAR,        -- Intimidating Shout (Blizzard)
+  [132169] = LOC_STUN,      -- Storm Bolt (Talent, Blizzard)
+  --[6552] = CC_SILENCE,      -- Pummel -- does not leave a debuff on target
+  -- Arms Warrior
   [1715] = PC_SNARE,        -- Hamstring
-  [5246] = LOC_FEAR,        -- Intimidating Shout
+  [236077] = PC_SNARE,      -- Disarm (PvP)
+  -- Fury Warrior
+  [12323] = PC_SNARE,       -- Piercing Howl
+  -- Protection Warrior
+  [132168] = LOC_STUN,      -- Shockwave (Blizzard)
+  [118000] = LOC_STUN,      -- Dragon Roar (Talent, Blizzard)
+  -- [6343] = PC_SNARE,        -- Thunder Clap
+  [199042] = LOC_STUN,      -- Thunderstruck (PvP, Blizzard)
+  [199085] = LOC_STUN,      -- Warpath (PvP, Blizzard)
 
   -- Monk
   [115078] = LOC_STUN,        -- Paralysis
@@ -214,7 +233,6 @@ Widget.CROWD_CONTROL_SPELLS = {
   -- Racial Traits
   [255723] = LOC_STUN,        -- Bull Rush (Highmountain Tauren)
   [20549] = LOC_STUN,         -- War Stomp (Tauren)
-
 }
 
 ---------------------------------------------------------------------------------------------------
@@ -472,12 +490,11 @@ function Widget:UpdateUnitAuras(frame, effect, unitid, enabled_auras, enabled_cc
 
     -- Blizzard Code:local name, texture, count, debuffType, duration, expirationTime, caster, _, nameplateShowPersonal, spellId, _, _, _, nameplateShowAll = UnitAura(unit, i, filter);
     aura.name, aura.texture, aura.stacks, aura.type, aura.duration, aura.expiration, aura.caster,
-      aura.StealOrPurge, aura.ShowPersonal, aura.spellid, aura.PlayerCanApply, aura.BossDebuff, isCastByPlayer, aura.ShowAll
-      = UnitAura(unitid, i, effect)
+      aura.StealOrPurge, aura.ShowPersonal, aura.spellid, aura.PlayerCanApply, aura.BossDebuff, isCastByPlayer, aura.ShowAll =
+      UnitAura(unitid, i, effect)
 
     -- ShowPesonal: Debuffs  that are shown on Blizzards nameplate, no matter who casted them (and
     -- ShowAll: Debuffs
-
     if not aura.name then break end
 
     aura.unit = unitid

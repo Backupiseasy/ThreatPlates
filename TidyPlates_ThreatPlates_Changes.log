@@ -1,7 +1,7 @@
 ﻿------------------------------------------------------
 9.0.17
 ------------------------------------------------------
-* Aura for Asphyxiate (Death Knight) is now correctly recognized as crowd-control auras.
+* Aura for Asphyxiate (Death Knight) as well as several Mage and Warrior auras are now correctly recognized as crowd-control auras.
 * Fixed a bug with Auras widget where stacks were not shown on auras with unlimited duration.
 * Fixed a bug with Auras widget where the stack count in bar mode was shown as "..." when it's size exceeded the size of the aura icon [Issue #297].
 
