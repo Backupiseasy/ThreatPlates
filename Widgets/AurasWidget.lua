@@ -151,9 +151,9 @@ Widget.CROWD_CONTROL_SPELLS = {
   [161355] = LOC_POLYMORPH, -- Polymorph (Penguin)
   [277787] = LOC_POLYMORPH, -- Polymorph (Direhorn)
   [277792] = LOC_POLYMORPH, -- Polymorph (Bumblebee)
-  [2139] = CC_SILENCE,      -- Counterspell
+  -- [2139] = CC_SILENCE,      -- Counterspell -- does not leave a debuff on target
   [122] = PC_ROOT,          -- Frost Nova (Blizzard)
-  [113724] = LOC_STUN,      -- Ring of Frost (Talent, Blizzard)
+  [82691] = LOC_STUN,       -- Ring of Frost (Talent, Blizzard)
   -- Arcane Mage
   [31589] = PC_SNARE,       -- Slow
   [236299] = PC_SNARE,      -- Arcane Barrage with Chrono Shift (Talent)
@@ -162,7 +162,7 @@ Widget.CROWD_CONTROL_SPELLS = {
   [2120] = PC_SNARE,        -- Flamestrike
   [157981] = PC_SNARE,      -- Blast Wave (Talent)
   -- Frost Mage
-  [205708] = PC_SNARE,      -- Chilled
+  -- [205708] = PC_SNARE,      -- Chilled
   [33395] = PC_ROOT,        -- Freeze (Blizzard)
   [212792] = PC_SNARE,      -- Cone of Cold
   [157997] = PC_ROOT,       -- Ice Nova (Talent)
