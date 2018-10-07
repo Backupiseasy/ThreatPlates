@@ -116,11 +116,19 @@ Widget.CROWD_CONTROL_SPELLS = {
   [111673] = LOC_CHARM,            -- Control Undead
 
   -- Demon Hunter
-  [211881] = LOC_STUN,             -- Fel Eruption (Talent)
   [217832] = LOC_INCAPACITATE,     -- Imprison (Blizzard)
-  [179057] = LOC_STUN,             -- Chaos Nova
-  [207685] = LOC_DISORIENT,        -- Sigil of Misery (Vengeance, Blizzard)
-  [204490] = CC_SILENCE,           -- Sigil of Silence (Vengeance, Blizzard)
+  -- Vengeance Demon Hunter
+  [207685] = LOC_DISORIENT,        -- Sigil of Misery (Blizzard)
+  [204490] = CC_SILENCE,           -- Sigil of Silence (Blizzard)
+  [204843] = PC_SNARE,             -- Sigil of Chains
+  [205630] = LOC_STUN,             -- Illidan's Grasp
+  [208618] = LOC_STUN,             -- Illidan's Grasp Stun
+  -- Havoc Demon Hunter
+  [179057] = LOC_STUN,             -- Chaos Nova (Blizzard)
+  [200166] = LOC_STUN,             -- Metamorphosis (Blizzard)
+  [198813] = PC_SNARE,             -- Vengeful Retreat
+  [213405] = PC_SNARE,             -- Master of the Glaive (Talent)
+  [211881] = LOC_STUN,             -- Fel Eruption (Talent, Blizzard)
 
   -- Hunter
   [3355] = LOC_INCAPACITATE,    -- Freezing Trap
@@ -496,6 +504,10 @@ function Widget:UpdateUnitAuras(frame, effect, unitid, enabled_auras, enabled_cc
     -- ShowPesonal: Debuffs  that are shown on Blizzards nameplate, no matter who casted them (and
     -- ShowAll: Debuffs
     if not aura.name then break end
+
+    if UnitIsUnit(unitid, "target") and aura.name == "Illidans Griff" then
+      print(aura.name, aura.spellid, aura.ShowAll)
+    end
 
     aura.unit = unitid
     aura.UnitIsNPC = not (UnitIsPlayer(unitid) or UnitPlayerControlled(unitid))
