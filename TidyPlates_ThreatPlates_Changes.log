@@ -1,5 +1,5 @@
 ﻿------------------------------------------------------
-9.1.0-Beta1
+9.1.0-Alpha1
 ------------------------------------------------------
 * Combo Points widget now has different styles (Squares, Orbs, Blizzard) and colors combo points depending on the current number of combo points [Issue #45, Comment #843, Comment #927, Comment #1028, Comment #1029, Issue #217, E-Mail Requests].
 * Optimized code for widgets that are only displayed on the target unit (Combo Points, Resource).

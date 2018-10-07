@@ -181,9 +181,9 @@ end
 -- Widget functions for creation and update
 ---------------------------------------------------------------------------------------------------
 
-function Widget:Create(tp_frame)
+function Widget:Create()
   if not self.WidgetFrame then
-    local widget_frame = CreateFrame("Frame", nil, tp_frame)
+    local widget_frame = CreateFrame("Frame", nil)
     widget_frame:Hide()
 
     self.WidgetFrame = widget_frame
@@ -222,6 +222,12 @@ function Widget:OnTargetUnitAdded(tp_frame, unit)
   local db = self.db
   local widget_frame = self.WidgetFrame
 
+  if not self:EnabledForStyle(unit.style, unit) then
+    widget_frame:Hide()
+    widget_frame:SetParent(nil)
+    return
+  end
+
   self.ShowWidget = false
 
   local show = (UnitReaction(unit.unitid, "player") > 4 and db.ShowFriendly) or
@@ -231,12 +237,14 @@ function Widget:OnTargetUnitAdded(tp_frame, unit)
 
   if not show then
     widget_frame:Hide()
+    widget_frame:SetParent(nil)
     return
   end
 
   self:SetTargetPowerType()
   if not self.PowerFunction then
     widget_frame:Hide()
+    widget_frame:SetParent(nil)
     return
   end
 

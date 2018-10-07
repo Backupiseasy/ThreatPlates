@@ -518,6 +518,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
       ShowTargetOnly = false,
       ShowCooldownSpiral = false,
       ShowDuration = true,
+      ShowOmnicCC = false,
       ShowStackCount = true,
       ShowAuraType = true,
       DefaultBuffColor = RGB(102, 0, 51, 1),

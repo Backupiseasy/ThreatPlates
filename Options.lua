@@ -368,6 +368,7 @@ local MAP_OPTION_TO_WIDGET = {
   ComboPointsWidget = "ComboPoints",
   ResourceWidget = "Resource",
   AurasWidget = "Auras",
+  TargetArtWidget = "TargetArt",
 }
 
 local function SetValueWidget(info, val)
@@ -1659,7 +1660,6 @@ local function CreateTargetArtWidgetOptions()
         order = 10,
         type = "group",
         inline = true,
-        --                  disabled = function() if db.targetWidget.ON then return false else return true end end,
         args = {
           Preview = {
             name = L["Preview"],
@@ -1674,7 +1674,7 @@ local function CreateTargetArtWidgetOptions()
             type = "select",
             order = 20,
             set = function(info, val)
-              SetValue(info, val)
+              SetValueWidget(info, val)
               options.args.Widgets.args.TargetArtWidget.args.Texture.args.Preview.image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\TargetArtWidget\\" .. db.targetWidget.theme;
             end,
             values = { default = "Default", squarethin = "Thin Square", arrows = "Arrows", crescent = "Crescent", bubble = "Bubble" },
@@ -1686,7 +1686,7 @@ local function CreateTargetArtWidgetOptions()
             order = 30,
             width = "half",
             get = GetColorAlpha,
-            set = SetColorAlpha,
+            set = SetColorAlphaWidget,
             hasAlpha = true,
             arg = { "targetWidget" },
           },
@@ -1703,7 +1703,7 @@ local function CreateTargetArtWidgetOptions()
             order = 10,
             type = "color",
             get = GetColor,
-            set = SetColor,
+            set = SetColorWidget,
             arg = {"targetWidget", "HPBarColor"},
           },
           EnableHealthbar = {
@@ -2140,6 +2140,14 @@ local function CreateAurasWidgetOptions()
                 order = 30,
                 desc = L["Show time left on auras that have a duration."],
                 arg = { "AuraWidget", "ShowDuration" },
+                disabled = function() return db.AuraWidget.ShowOmniCC end
+              },
+              OmniCC = {
+                name = L["OmniCC"],
+                type = "toggle",
+                order = 35,
+                desc = L["Show the OmniCC couldown count instead of the built-in duration text on auras."],
+                arg = { "AuraWidget", "ShowOmniCC" },
               },
               Stacks = {
                 name = L["Stack Count"],
@@ -4781,7 +4789,10 @@ local function CreateOptionsTable()
                           order = 10,
                           type = "toggle",
                           arg = { "HeadlineView", "ShowTargetHighlight" },
-                          set = SetThemeValue,
+                          set = function(info, val)
+                            SetValuePlain(info, val)
+                            Addon.Widgets:UpdateSettings("TargetArt")
+                          end,
                         },
                         TargetMouseoverHighlight = {
                           name = L["Show Mouseover"],

@@ -91,7 +91,7 @@ local UpdateStyle
 local UpdateIndicator_CustomText, UpdateIndicator_CustomScale, UpdateIndicator_CustomScaleText, UpdateIndicator_Standard, UpdateIndicator_CustomAlpha
 local UpdateIndicator_Level, UpdateIndicator_RaidIcon
 local UpdateIndicator_EliteIcon, UpdateIndicator_Name
-local UpdateIndicator_HealthBar, UpdateIndicator_Target
+local UpdateIndicator_HealthBar
 local OnUpdateCasting, OnStartCasting, OnStopCasting, OnUpdateCastMidway
 
 -- Event Functions
@@ -194,7 +194,6 @@ do
     visual.raidicon = textFrame:CreateTexture(nil, "ARTWORK", 5)
     visual.skullicon = textFrame:CreateTexture(nil, "ARTWORK", 2)
     visual.eliteicon = textFrame:CreateTexture(nil, "ARTWORK", 1)
-    visual.target = textFrame:CreateTexture(nil, "BACKGROUND")
 
 		-- TextFrame
     visual.name = textFrame:CreateFontString(nil, "ARTWORK", 0)
@@ -278,7 +277,6 @@ do
       CheckNameplateStyle()
       UpdateIndicator_Standard()
       UpdateIndicator_HealthBar()
-      UpdateIndicator_Target()
     end
 
     -- Update Delegates
@@ -528,10 +526,6 @@ do
     end
 
     visual.level:SetTextColor(unit.levelcolorRed, unit.levelcolorGreen, unit.levelcolorBlue)
-	end
-
-	function UpdateIndicator_Target()
-    visual.target:SetShown(unit.isTarget and style.target.show)
 	end
 
 	-- UpdateIndicator_RaidIcon
@@ -1156,13 +1150,13 @@ do
 
 	local anchorgroup = {
 		"name",  "spelltext", "customtext", "level",
-		"spellicon", "raidicon", "skullicon", "target"
-    -- "threatborder", "castborder", "castnostop", "eliteicon",
+		"spellicon", "raidicon", "skullicon"
+    -- "threatborder", "castborder", "castnostop", "eliteicon", "target"
   }
 
 	local texturegroup = {
-    "skullicon", "target", "spellicon",
-    -- "highlight", threatborder, "castborder", "castnostop", "eliteicon",
+    "skullicon", "spellicon",
+    -- "highlight", threatborder, "castborder", "castnostop", "eliteicon", "target"
   }
 
 	-- UpdateStyle:
@@ -1267,7 +1261,6 @@ do
     UpdateIndicator_EliteIcon()
 
 		if not unit.isBoss then visual.skullicon:Hide() end
-		if not unit.isTarget then visual.target:Hide() end
   end
 end
 
