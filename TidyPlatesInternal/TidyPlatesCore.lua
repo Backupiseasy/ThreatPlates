@@ -157,7 +157,7 @@ do
 
 	function OnNewNameplate(plate)
     -- Parent could be: WorldFrame, UIParent, plate
-    local extended = CreateFrame("Frame",  "ThreatPlatesFrame" .. plate:GetName(), plate)
+    local extended = CreateFrame("Frame",  "ThreatPlatesFrame" .. plate:GetName(), UIParent)
     extended:Hide()
 
     extended:SetFrameStrata("BACKGROUND")
@@ -574,6 +574,13 @@ do
 	-- UpdateIndicator_CustomAlpha: Calls the alpha delegate to get the requested alpha
 	function UpdateIndicator_CustomAlpha(tp_frame, unit)
     tp_frame.requestedAlpha = Addon:SetAlpha(unit) or 1
+
+--    local occluded_alpha = tonumber(GetCVar("nameplateOccludedAlphaMult"))
+--    if tp_frame.Parent:GetAlpha() < occluded_alpha then
+--      tp_frame.requestedAlpha = occluded_alpha
+--    end
+
+    --tp_frame.requestedAlpha = tp_frame.Parent:GetAlpha() or 1
     tp_frame:SetAlpha(tp_frame.requestedAlpha)
 	end
 
@@ -1272,9 +1279,11 @@ end
 function Addon:UIScaleChanged()
   local db = TidyPlatesThreat.db.profile.Scale
   if db.IgnoreUIScale then
-    self.UIScale = 1
+    -- self.UIScale = 1 -- Code for anchoring TPFrame to Blizzard nameplate instead of UIParent
+    self.UIScale = 1 / UIParent:GetEffectiveScale()
   else
-    self.UIScale = UIParent:GetEffectiveScale() * (4/3)
+    --self.UIScale = UIParent:GetEffectiveScale() * (4/3) -- Code for anchoring TPFrame to Blizzard nameplate instead of UIParent
+    self.UIScale = 1
 
     if db.PixelPerfectUI then
       local physicalScreenHeight = select(2, GetPhysicalScreenSize())

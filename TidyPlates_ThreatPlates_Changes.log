@@ -6,6 +6,7 @@
 * Changed default settings for Auras and Combo Points widget for better, non-overlapping positioning.
 * Monk's Black Ox Statue is now correctly recognized as off-tank [Issue #270, Comment #318, #1420, E-Mail]
 * Added a feature to switch nameplate mode of friendly nameplates also to healthbar view when entering combat [Comment #1254, #1411].
+* Added support for OmniCC cooldown text to Auras widget.
 
 ------------------------------------------------------
 9.0.16
