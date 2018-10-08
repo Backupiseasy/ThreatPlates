@@ -89,9 +89,9 @@ local UpdateStyle
 
 -- Indicators
 local UpdateIndicator_CustomText, UpdateIndicator_CustomScale, UpdateIndicator_CustomScaleText, UpdateIndicator_Standard, UpdateIndicator_CustomAlpha
-local UpdateIndicator_Level, UpdateIndicator_ThreatGlow, UpdateIndicator_RaidIcon
+local UpdateIndicator_Level, UpdateIndicator_RaidIcon
 local UpdateIndicator_EliteIcon, UpdateIndicator_Name
-local UpdateIndicator_HealthBar, UpdateIndicator_Target
+local UpdateIndicator_HealthBar
 local OnUpdateCasting, OnStartCasting, OnStopCasting, OnUpdateCastMidway
 
 -- Event Functions
@@ -157,7 +157,7 @@ do
 
 	function OnNewNameplate(plate)
     -- Parent could be: WorldFrame, UIParent, plate
-    local extended = CreateFrame("Frame",  "ThreatPlatesFrame" .. plate:GetName(), plate)
+    local extended = CreateFrame("Frame",  "ThreatPlatesFrame" .. plate:GetName(), UIParent)
     extended:Hide()
 
     extended:SetFrameStrata("BACKGROUND")
@@ -194,7 +194,6 @@ do
     visual.raidicon = textFrame:CreateTexture(nil, "ARTWORK", 5)
     visual.skullicon = textFrame:CreateTexture(nil, "ARTWORK", 2)
     visual.eliteicon = textFrame:CreateTexture(nil, "ARTWORK", 1)
-    visual.target = textFrame:CreateTexture(nil, "BACKGROUND")
 
 		-- TextFrame
     visual.name = textFrame:CreateFontString(nil, "ARTWORK", 0)
@@ -278,11 +277,9 @@ do
       CheckNameplateStyle()
       UpdateIndicator_Standard()
       UpdateIndicator_HealthBar()
-      UpdateIndicator_Target()
     end
 
     -- Update Delegates
-    UpdateIndicator_ThreatGlow()
     UpdateIndicator_CustomAlpha(extended, unit)
     UpdateIndicator_CustomScaleText()
 
@@ -481,12 +478,19 @@ end
 
 -- Update the health bar and name coloring, if needed
 function Addon:UpdateIndicatorNameplateColor(tp_frame)
-  if tp_frame.visual.healthbar:IsShown() then
-    tp_frame.visual.healthbar:SetAllColors(Addon:SetHealthbarColor(tp_frame.unit))
+  local visual = tp_frame.visual
+
+  if visual.healthbar:IsShown() then
+    visual.healthbar:SetAllColors(Addon:SetHealthbarColor(tp_frame.unit))
+
+    -- Updates warning glow for threat
+    if visual.threatborder:IsShown() then
+      visual.threatborder:SetBackdropBorderColor(Addon:SetThreatColor(tp_frame.unit))
+    end
   end
 
-  if tp_frame.visual.name:IsShown() then
-    tp_frame.visual.name:SetTextColor(Addon:SetNameColor(tp_frame.unit))
+  if visual.name:IsShown() then
+    visual.name:SetTextColor(Addon:SetNameColor(tp_frame.unit))
   end
 end
 
@@ -522,20 +526,6 @@ do
     end
 
     visual.level:SetTextColor(unit.levelcolorRed, unit.levelcolorGreen, unit.levelcolorBlue)
-	end
-
-	-- UpdateIndicator_ThreatGlow: Updates the aggro glow
-	function UpdateIndicator_ThreatGlow()
---		if not style.threatborder.show then
---      return
---    end
-    if visual.threatborder:IsShown() then
-      visual.threatborder:SetBackdropBorderColor(Addon:SetThreatColor(unit))
-    end
-  end
-
-	function UpdateIndicator_Target()
-    visual.target:SetShown(unit.isTarget and style.target.show)
 	end
 
 	-- UpdateIndicator_RaidIcon
@@ -584,6 +574,13 @@ do
 	-- UpdateIndicator_CustomAlpha: Calls the alpha delegate to get the requested alpha
 	function UpdateIndicator_CustomAlpha(tp_frame, unit)
     tp_frame.requestedAlpha = Addon:SetAlpha(unit) or 1
+
+--    local occluded_alpha = tonumber(GetCVar("nameplateOccludedAlphaMult"))
+--    if tp_frame.Parent:GetAlpha() < occluded_alpha then
+--      tp_frame.requestedAlpha = occluded_alpha
+--    end
+
+    --tp_frame.requestedAlpha = tp_frame.Parent:GetAlpha() or 1
     tp_frame:SetAlpha(tp_frame.requestedAlpha)
 	end
 
@@ -918,14 +915,31 @@ do
     end
 	end
 
---  function  CoreEvents:UNIT_THREAT_LIST_UPDATE(unitid)
---    if not unitid then return end
---
---    local plate = PlatesByUnit[unitid]
---    if plate then
---      OnHealthUpdate(plate)
---    end
---  end
+  function  CoreEvents:UNIT_THREAT_LIST_UPDATE(unitid)
+    if unitid == "player" or unitid == "target" then return end
+    local plate = PlatesByUnit[unitid]
+
+    if plate then
+      --local threat_value = UnitThreatSituation("player", unitid) or 0
+      --if threat_value ~= plate.TPFrame.unit.threatValue then
+      if (UnitThreatSituation("player", unitid) or 0) ~= plate.TPFrame.unit.threatValue then
+
+        --OnHealthUpdate(plate)
+
+        plate.UpdateMe = true
+
+        -- TODO: Optimize this - only update elements that need updating
+        -- Don't use OnHealthUpdate(), more like: OnThreatUpdate()
+        -- UpdateReferences(plate)
+        --Addon:UpdateUnitCondition(unit, unitid)
+        --        unit.threatValue = UnitThreatSituation("player", unitid) or 0
+        --        unit.threatSituation = ThreatReference[unit.threatValue]
+        --        unit.isInCombat = UnitAffectingCombat(unitid)
+        --ProcessUnitChanges()
+        --OnUpdateCastMidway(nameplate, unit.unitid)
+      end
+    end
+  end
 
   function CoreEvents:PLAYER_REGEN_ENABLED()
 		SetUpdateAll()
@@ -1143,13 +1157,13 @@ do
 
 	local anchorgroup = {
 		"name",  "spelltext", "customtext", "level",
-		"spellicon", "raidicon", "skullicon", "target"
-    -- "threatborder", "castborder", "castnostop", "eliteicon",
+		"spellicon", "raidicon", "skullicon"
+    -- "threatborder", "castborder", "castnostop", "eliteicon", "target"
   }
 
 	local texturegroup = {
-    "skullicon", "target", "spellicon",
-    -- "highlight", threatborder, "castborder", "castnostop", "eliteicon",
+    "skullicon", "spellicon",
+    -- "highlight", threatborder, "castborder", "castnostop", "eliteicon", "target"
   }
 
 	-- UpdateStyle:
@@ -1254,7 +1268,6 @@ do
     UpdateIndicator_EliteIcon()
 
 		if not unit.isBoss then visual.skullicon:Hide() end
-		if not unit.isTarget then visual.target:Hide() end
   end
 end
 
@@ -1266,9 +1279,11 @@ end
 function Addon:UIScaleChanged()
   local db = TidyPlatesThreat.db.profile.Scale
   if db.IgnoreUIScale then
-    self.UIScale = 1
+    -- self.UIScale = 1 -- Code for anchoring TPFrame to Blizzard nameplate instead of UIParent
+    self.UIScale = 1 / UIParent:GetEffectiveScale()
   else
-    self.UIScale = UIParent:GetEffectiveScale() * (4/3)
+    --self.UIScale = UIParent:GetEffectiveScale() * (4/3) -- Code for anchoring TPFrame to Blizzard nameplate instead of UIParent
+    self.UIScale = 1
 
     if db.PixelPerfectUI then
       local physicalScreenHeight = select(2, GetPhysicalScreenSize())

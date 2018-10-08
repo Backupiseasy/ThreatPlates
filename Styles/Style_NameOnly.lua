@@ -9,29 +9,6 @@ local EMPTY_TEXTURE = ART_PATH.."Empty"
 -- Style: Text-Only for Headline-View
 -------------------------------------------------------------------------------------
 
-local function GetHeadlineViewHeight(self)
-  local dbprofile = self.db.profile
-
-  local name_y = dbprofile.HeadlineView.name.y
-  local customtext_y = dbprofile.HeadlineView.customtext.y
-  local name_size = dbprofile.HeadlineView.name.size
-  local customtext_size = dbprofile.HeadlineView.customtext.size
-
-  return abs(max(name_y, customtext_y) - min(name_y, customtext_y)) + (name_size + customtext_size) / 2
-end
-
-local function GetTargetTextureY(self)
-  local dbprofile = self.db.profile
-
-  if dbprofile.HeadlineView.name.y >= dbprofile.HeadlineView.customtext.y then
-    -- name above status text
-    return dbprofile.HeadlineView.name.y - 10 + (dbprofile.HeadlineView.name.size / 2) - ((GetHeadlineViewHeight(self) - 18) / 2)
-  else
-    -- status text above name
-    return dbprofile.HeadlineView.customtext.y - 10 + (dbprofile.HeadlineView.customtext.size / 2) - ((GetHeadlineViewHeight(self) - 18) / 2)
-  end
-end
-
 local function Create(self,name)
   local db = self.db.profile.settings
   local dbprofile = self.db.profile
@@ -89,16 +66,6 @@ local function Create(self,name)
     highlight = {
       texture = (dbprofile.HeadlineView.ShowMouseoverHighlight and ART_PATH.."Highlight") or EMPTY_TEXTURE,
       show = true,
-    },
-
-    target = {
-      texture = ART_PATH.."Target",
-      width = 128,
-      height = 32 * GetHeadlineViewHeight(self) / 18,
-      x = dbprofile.HeadlineView.name.x,
-      y = GetTargetTextureY(self),
-      anchor = "CENTER",
-      show = dbprofile.HeadlineView.ShowTargetHighlight,
     },
 
     castbar = {

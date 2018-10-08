@@ -63,17 +63,6 @@ local function Create(self,name)
 			texture =	EMPTY_TEXTURE,
 		},
 
-    target = {
-      show = false,
-			-- Not used:
-			texture = EMPTY_TEXTURE,
-			width = 0,
-			height = 0,
-			x = 0,
-			y = 0,
-			anchor = "CENTER",
-    },
-
 		castbar = {
 			show = false,
 			-- Not used:

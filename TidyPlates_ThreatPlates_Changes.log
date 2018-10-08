@@ -1,9 +1,22 @@
 ﻿------------------------------------------------------
-9.1.0-Beta1
+9.1.0-Alpha1
 ------------------------------------------------------
 * Combo Points widget now has different styles (Squares, Orbs, Blizzard) and colors combo points depending on the current number of combo points [Issue #45, Comment #843, Comment #927, Comment #1028, Comment #1029, Issue #217, E-Mail Requests].
 * Optimized code for widgets that are only displayed on the target unit (Combo Points, Resource).
 * Changed default settings for Auras and Combo Points widget for better, non-overlapping positioning.
+* Monk's Black Ox Statue is now correctly recognized as off-tank [Issue #270, Comment #318, #1420, E-Mail]
+* Added a feature to switch nameplate mode of friendly nameplates also to healthbar view when entering combat [Comment #1254, #1411].
+* Added support for OmniCC cooldown text to Auras widget.
+
+------------------------------------------------------
+9.0.16
+------------------------------------------------------
+* Aura for Stormbolt (Warrior) is now correctly recognized as crowd-control auras [Issue #290].
+
+------------------------------------------------------
+9.0.15
+------------------------------------------------------
+* Fixed a bug with OmniCC cooldown numbers being shown on the Auras widget [Comment #1409].
 
 ------------------------------------------------------
 9.0.14

@@ -60,17 +60,6 @@ local function Create(self,name)
       texture = EMPTY_TEXTURE,
     },
 
-    target = {
-      show = false,
-      -- Not used:
-      texture = ART_PATH.."Target",
-      width = 0,
-      height = 0,
-      x = 0,
-      y = 0,
-      anchor = "CENTER",
-    },
-
     castbar = {
       texture = ThreatPlates.Media:Fetch('statusbar', db.castbar.texture),
       backdrop = (db.castbar.show and ThreatPlates.Media:Fetch('statusbar', db.castbar.backdrop, true)) or EMPTY_TEXTURE,

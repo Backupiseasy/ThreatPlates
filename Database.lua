@@ -434,8 +434,20 @@ local function MigrateAuraWidget(profile_name, profile)
   end
 end
 
+local function MigrationForceFriendlyInCombat(profile_name, profile)
+  if DatabaseEntryExists(profile, { "HeadlineView" }) then
+    if profile.HeadlineView.ForceFriendlyInCombat == true then
+      profile.HeadlineView.ForceFriendlyInCombat = "NAME"
+    elseif profile.HeadlineView.ForceFriendlyInCombat == false then
+      profile.HeadlineView.ForceFriendlyInCombat = "NONE"
+    end
+  end
+end
+  
 local function MigrationComboPointsWidget(profile_name, profile)
   if DatabaseEntryExists(profile, { "comboWidget" }) then
+    profile.ComboPoints = profile.ComboPoints or {}
+
     profile.ComboPoints.ON = profile.comboWidget.ON
     profile.ComboPoints.Scale = profile.comboWidget.scale
     profile.ComboPoints.x = profile.comboWidget.x
@@ -472,11 +484,13 @@ local DEPRECATED_SETTINGS = {
   Auras = { MigrationAurasSettings, "9.0.0" },                -- (changed in 9.0.0)
   AurasFix = { MigrationAurasSettingsFix },                   -- (changed in 9.0.4 and 9.0.9)
   MigrationComboPointsWidget = { MigrationComboPointsWidget, "9.1.0" },  -- (changed in 9.1.0)
+  ForceFriendlyInCombatEx = { MigrationForceFriendlyInCombat }, -- (changed in 9.1.0)
+  HeadlineViewEnableToggle = { "HeadlineView", "ON" },        -- (removed in 9.1.0)
 }
 
 local function MigrateDatabase(current_version)
   TidyPlatesThreat.db.global.MigrationLog = nil
-  -- TidyPlatesThreat.db.global.MigrationLog = {}
+  --TidyPlatesThreat.db.global.MigrationLog = {}
 
   local profile_table = TidyPlatesThreat.db.profiles
   for key, entry in pairs(DEPRECATED_SETTINGS) do
@@ -493,7 +507,7 @@ local function MigrateDatabase(current_version)
       end
     else
       -- iterate over all profiles and delete the old config entry
-      -- TidyPlatesThreat.db.global.MigrationLog[key] = "DELETED"
+      --TidyPlatesThreat.db.global.MigrationLog[key] = "DELETED"
       for profile_name, profile in pairs(profile_table) do
         DatabaseEntryDelete(profile, entry)
       end

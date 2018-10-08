@@ -69,9 +69,6 @@ Widget.PRIORITY_FUNCTIONS = {
 }
 Widget.CenterAurasPositions = {}
 Widget.UnitAuraList = {}
--- Get a clean version of the function...  Avoid OmniCC interference
-local CooldownNative = CreateFrame("Cooldown", nil, WorldFrame)
-Widget.SetCooldown = CooldownNative.SetCooldown
 
 local LOC_CHARM = 1         -- Aura: Possess
 local LOC_FEAR = 2          -- Mechanic: Fleeing
@@ -195,11 +192,11 @@ Widget.CROWD_CONTROL_SPELLS = {
   [5484] = LOC_FEAR,          -- Howl of Terror
   [30283] = LOC_STUN,         -- Shadowfury
   [710] = LOC_BANISH,         -- Banish
-  [118699] = LOC_FEAR,          -- Fear
+  [118699] = LOC_FEAR,        -- Fear
 
   -- Warrior
   [132168] = LOC_STUN,      -- Shockwave
-  [107570] = LOC_STUN,      -- Storm Bolt
+  [132169] = LOC_STUN,      -- Storm Bolt (Blizzard)
   [103828] = LOC_STUN,      -- Warbringer
   [236027] = PC_SNARE,      -- Intercept - Slow
   [105771] = PC_ROOT,       -- Intercept - Charge
@@ -219,6 +216,11 @@ Widget.CROWD_CONTROL_SPELLS = {
   [20549] = LOC_STUN,         -- War Stomp (Tauren)
 
 }
+
+---------------------------------------------------------------------------------------------------
+-- Cached configuration settings
+---------------------------------------------------------------------------------------------------
+local HideOmniCC, ShowDuration
 
 ---------------------------------------------------------------------------------------------------
 -- OnUpdate code - updates the auras remaining uptime and stacks and hides them after they expired
@@ -699,6 +701,49 @@ function Widget:UpdateIconGrid(widget_frame, unitid)
 end
 
 ---------------------------------------------------------------------------------------------------
+-- Functions for cooldown handling incl. OmniCC support
+---------------------------------------------------------------------------------------------------
+
+local function CreateCooldown(parent)
+  -- When the cooldown shares the frameLevel of its parent, the icon texture can sometimes render
+  -- ontop of it. So it looks like it's not drawing a cooldown but it's just hidden by the icon.
+
+  local cooldown_frame = CreateFrame("Cooldown", nil, parent, "ThreatPlatesAuraWidgetCooldown")
+  cooldown_frame:SetAllPoints(parent.Icon)
+  cooldown_frame:SetReverse(true)
+  cooldown_frame:SetHideCountdownNumbers(true)
+  cooldown_frame.noCooldownCount = HideOmniCC
+
+  return cooldown_frame
+end
+
+local function UpdateCooldown(cooldown_frame, db)
+  if db.ShowCooldownSpiral then
+    cooldown_frame:SetDrawEdge(true)
+    cooldown_frame:SetDrawSwipe(true)
+  else
+    cooldown_frame:SetDrawEdge(false)
+    cooldown_frame:SetDrawSwipe(false)
+  end
+
+  -- Fix for OmnniCC cooldown numbers being shown on auras
+  if cooldown_frame.noCooldownCount ~= HideOmniCC then
+    cooldown_frame.noCooldownCount = HideOmniCC
+    -- Force an update on OmniCC cooldowns
+    cooldown_frame:Hide()
+    cooldown_frame:Show()
+  end
+end
+
+local function SetCooldown(cooldown_frame, duration, expiration)
+  if duration and expiration and duration > 0 and expiration > 0 then
+    cooldown_frame:SetCooldown(expiration - duration, duration + .25)
+  else
+    cooldown_frame:Clear()
+  end
+end
+
+---------------------------------------------------------------------------------------------------
 -- Functions for the aura grid with icons
 ---------------------------------------------------------------------------------------------------
 
@@ -711,16 +756,15 @@ function Widget:CreateAuraFrameIconMode(parent)
   frame.Icon = frame:CreateTexture(nil, "ARTWORK", 0)
   frame.Border = CreateFrame("Frame", nil, frame)
   frame.Border:SetFrameLevel(parent:GetFrameLevel())
+  frame.Cooldown = CreateCooldown(frame)
 
-  -- When the cooldown shares the frameLevel of its parent, the icon texture can sometimes render
-  -- ontop of it. So it looks like it's not drawing a cooldown but it's just hidden by the icon.
-  frame.Cooldown = CreateFrame("Cooldown", nil, frame, "ThreatPlatesAuraWidgetCooldown")
-  frame.Cooldown:SetAllPoints(frame.Icon)
-  frame.Cooldown:SetReverse(true)
-  frame.Cooldown:SetHideCountdownNumbers(true)
-
-  frame.Stacks = frame.Cooldown:CreateFontString(nil, "OVERLAY")
-  frame.TimeLeft = frame.Cooldown:CreateFontString(nil, "OVERLAY")
+  -- Use a seperate frame for text elements as a) using frame as parent results in the text being shown below
+  -- the cooldown frame and b) using the cooldown frame results in the text not being visible if there is no
+  -- cooldown (i.e., duration and expiration are nil which is true for auras with unlimited duration)
+  local text_frame =  CreateFrame("Frame", nil, frame)
+  text_frame:SetAllPoints(frame.Icon)
+  frame.Stacks = text_frame:CreateFontString(nil, "OVERLAY")
+  frame.TimeLeft = text_frame:CreateFontString(nil, "OVERLAY")
 
   frame:Hide()
 
@@ -730,16 +774,12 @@ end
 function Widget:UpdateAuraFrameIconMode(frame)
   local db = self.db
 
-  if db.ShowCooldownSpiral then
-    frame.Cooldown:SetDrawEdge(true)
-    frame.Cooldown:SetDrawSwipe(true)
-    --frame.Cooldown:SetFrameLevel(frame:GetParent():GetFrameLevel() + 10)
+  UpdateCooldown(frame.Cooldown, db)
+  if ShowDuration then
+    frame.TimeLeft:Show()
   else
-    frame.Cooldown:SetDrawEdge(false)
-    frame.Cooldown:SetDrawSwipe(false)
+    frame.TimeLeft:Hide()
   end
-
-  local show_aura_type = db.ShowAuraType
 
   db = self.db_icon
   -- Icon
@@ -749,19 +789,7 @@ function Widget:UpdateAuraFrameIconMode(frame)
   frame.Icon:SetTexCoord(.10, 1-.07, .12, 1-.12)  -- Style: Square - remove border from icons
 
   if db.ShowBorder then
-   --local offset, edge_size, inset = 1, 4, 0
     local offset, edge_size, inset = 2, 8, 0
---    local offset, edge_size = 2, 8
---    if not show_aura_type then
---      offset, edge_size = 1, 4
---    end
---    local db_test = TidyPlatesThreat.db.profile.TestWidget
---    local offset, edge_size, inset = db_test.Offset, db_test.EdgeSize, db_test.Inset
---    if not show_aura_type then
---      offset, edge_size, inset = db_test.Offset, db_test.EdgeSize, db_test.Inset
---      frame.Border:SetBackdropBorderColor(0, 0, 0, 1)
---    end
-
     frame.Border:ClearAllPoints()
     frame.Border:SetPoint("TOPLEFT", frame, "TOPLEFT", -offset, offset)
     frame.Border:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", offset, -offset)
@@ -804,43 +832,27 @@ function Widget:UpdateAuraInformationIconMode(frame) -- texture, duration, expir
     frame.Border:SetBackdropBorderColor(color.r, color.g, color.b, 1)
   end
 
-  -- Cooldown
-  if duration and duration > 0 and expiration and expiration > 0 then
-    self.SetCooldown(frame.Cooldown, expiration - duration, duration + .25)
-  else
-    frame.Cooldown:Clear()
-  end
-
+  SetCooldown(frame.Cooldown, duration, expiration)
   Animations:StopFlash(frame)
 
   frame:Show()
 end
 
 function Widget:UpdateWidgetTimeIconMode(frame, expiration, duration)
-  local db = self.db
-
   if expiration == 0 then
     frame.TimeLeft:SetText("")
     Animations:StopFlash(frame)
   else
     local timeleft = expiration - GetTime()
-
-    if db.ShowDuration then
-      if timeleft > 60 then
-        frame.TimeLeft:SetText(floor(timeleft/60).."m")
-      else
-        frame.TimeLeft:SetText(floor(timeleft))
-      end
-
-      if db.FlashWhenExpiring and timeleft < db.FlashTime then
-        Animations:Flash(frame, self.FLASH_DURATION)
-      end
+    if timeleft > 60 then
+      frame.TimeLeft:SetText(floor(timeleft/60).."m")
     else
-      frame.TimeLeft:SetText("")
+      frame.TimeLeft:SetText(floor(timeleft))
+    end
 
-      if db.FlashWhenExpiring and timeleft < db.FlashTime then
-        Animations:Flash(frame, self.FLASH_DURATION)
-      end
+    local db = self.db
+    if db.FlashWhenExpiring and timeleft < db.FlashTime then
+      Animations:Flash(frame, self.FLASH_DURATION)
     end
   end
 end
@@ -878,13 +890,24 @@ function Widget:CreateAuraFrameBarMode(parent)
   frame.TimeText:SetJustifyH("RIGHT")
   frame.TimeText:SetShadowOffset(1, -1)
 
+  frame.Cooldown = CreateCooldown(frame)
+
   frame:Hide()
 
   return frame
 end
 
 function Widget:UpdateAuraFrameBarMode(frame)
-  local db = self.db_bar
+  local db = self.db
+
+  UpdateCooldown(frame.Cooldown, db)
+  if ShowDuration then
+    frame.TimeText:Show()
+  else
+    frame.TimeText:Hide()
+  end
+
+  db = self.db_bar
   local font = ThreatPlates.Media:Fetch('font', db.Font)
 
   -- width and position calculations
@@ -943,14 +966,21 @@ end
 function Widget:UpdateAuraInformationBarMode(frame) -- texture, duration, expiration, stacks, color, name)
   local db = self.db
 
+  local duration = frame.AuraDuration
+  local expiration = frame.AuraExpiration
   local stacks = frame.AuraStacks
   local color = frame.AuraColor
 
   -- Expiration
-  self:UpdateWidgetTime(frame, frame.AuraExpiration, frame.AuraDuration)
+  self:UpdateWidgetTime(frame, expiration, duration)
 
   if db.ShowStackCount and stacks > 1 then
-    frame.Stacks:SetText(stacks)
+    if HideOmniCC then
+      frame.Stacks:SetText(stacks)
+    else
+      frame.Stacks:SetText("")
+      frame.AuraName = frame.AuraName .. " (" .. stacks .. ")"
+    end
   else
     frame.Stacks:SetText("")
   end
@@ -965,6 +995,7 @@ function Widget:UpdateAuraInformationBarMode(frame) -- texture, duration, expira
   -- Highlight Coloring
   frame.Statusbar:SetStatusBarColor(color.r, color.g, color.b, color.a or 1)
 
+  SetCooldown(frame.Cooldown, duration, expiration)
   Animations:StopFlash(frame)
 
   frame:Show()
@@ -1000,6 +1031,30 @@ function Widget:UpdateWidgetTimeBarMode(frame, expiration, duration)
       if db.FlashWhenExpiring and timeleft < db.FlashTime then
         Animations:Flash(frame, self.FLASH_DURATION)
       end
+    end
+
+    frame.Statusbar:SetValue(timeleft * 100 / duration)
+  end
+end
+
+function Widget:UpdateWidgetTimeBarModeNoDuration(frame, expiration, duration)
+  if duration == 0 then
+    frame.Statusbar:SetValue(100)
+    Animations:StopFlash(frame)
+  elseif expiration == 0 then
+    frame.Statusbar:SetValue(0)
+    Animations:StopFlash(frame)
+  else
+    local timeleft = expiration - GetTime()
+    if timeleft > 60 then
+      frame.TimeText:SetText(floor(timeleft/60).."m")
+    else
+      frame.TimeText:SetText(floor(timeleft))
+    end
+
+    local db = self.db
+    if db.FlashWhenExpiring and timeleft < db.FlashTime then
+      Animations:Flash(frame, self.FLASH_DURATION)
     end
 
     frame.Statusbar:SetValue(timeleft * 100 / duration)
@@ -1065,6 +1120,12 @@ function Widget:UpdateAuraWidgetLayout(widget_frame)
   self:CreateAuraGrid(widget_frame.Buffs)
   self:CreateAuraGrid(widget_frame.Debuffs)
   self:CreateAuraGrid(widget_frame.CrowdControl)
+
+  if ShowDuration or not self.IconMode then
+    widget_frame:SetScript("OnUpdate", OnUpdateAurasWidget)
+  else
+    widget_frame:SetScript("OnUpdate", nil)
+  end
 
   if self.db.FrameOrder == "HEALTHBAR_AURAS" then
     widget_frame:SetFrameLevel(widget_frame:GetParent():GetFrameLevel() + 3)
@@ -1134,7 +1195,6 @@ function Widget:Create(tp_frame)
   self:UpdateAuraWidgetLayout(widget_frame)
 
   widget_frame:SetScript("OnEvent", UnitAuraEventHandler)
-  widget_frame:SetScript("OnUpdate", OnUpdateAurasWidget)
   widget_frame:HookScript("OnShow", OnShowHookScript)
   -- widget_frame:HookScript("OnHide", OnHideHookScript)
   --------------------------------------
@@ -1312,7 +1372,12 @@ function Widget:UpdateSettingsBarMode()
   self.CreateAuraFrame = self.CreateAuraFrameBarMode
   self.UpdateAuraFrame = self.UpdateAuraFrameBarMode
   self.UpdateAuraInformation = self.UpdateAuraInformationBarMode
-  self.UpdateWidgetTime = self.UpdateWidgetTimeBarMode
+
+  if ShowDuration then
+    self.UpdateWidgetTime = self.UpdateWidgetTimeBarMode
+  else
+    self.UpdateWidgetTime = self.UpdateWidgetTimeBarModeNoDuration
+  end
 end
 
 -- Load settings from the configuration which are shared across all aura widgets
@@ -1331,6 +1396,8 @@ function Widget:UpdateSettings()
 
   self:ParseSpellFilters()
 
+  HideOmniCC = not self.db.ShowOmniCC
+  ShowDuration = self.db.ShowDuration and not self.db.ShowOmniCC
   --  -- Don't update any widget frame if the widget isn't enabled.
 --  if not self:IsEnabled() then return end
 

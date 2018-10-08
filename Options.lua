@@ -368,6 +368,7 @@ local MAP_OPTION_TO_WIDGET = {
   ComboPointsWidget = "ComboPoints",
   ResourceWidget = "Resource",
   AurasWidget = "Auras",
+  TargetArtWidget = "TargetArt",
 }
 
 local function SetValueWidget(info, val)
@@ -1634,7 +1635,6 @@ local function CreateTargetArtWidgetOptions()
         order = 10,
         type = "group",
         inline = true,
-        --                  disabled = function() if db.targetWidget.ON then return false else return true end end,
         args = {
           Preview = {
             name = L["Preview"],
@@ -1649,7 +1649,7 @@ local function CreateTargetArtWidgetOptions()
             type = "select",
             order = 20,
             set = function(info, val)
-              SetValue(info, val)
+              SetValueWidget(info, val)
               options.args.Widgets.args.TargetArtWidget.args.Texture.args.Preview.image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\TargetArtWidget\\" .. db.targetWidget.theme;
             end,
             values = { default = "Default", squarethin = "Thin Square", arrows = "Arrows", crescent = "Crescent", bubble = "Bubble" },
@@ -1661,7 +1661,7 @@ local function CreateTargetArtWidgetOptions()
             order = 30,
             width = "half",
             get = GetColorAlpha,
-            set = SetColorAlpha,
+            set = SetColorAlphaWidget,
             hasAlpha = true,
             arg = { "targetWidget" },
           },
@@ -1678,7 +1678,7 @@ local function CreateTargetArtWidgetOptions()
             order = 10,
             type = "color",
             get = GetColor,
-            set = SetColor,
+            set = SetColorWidget,
             arg = {"targetWidget", "HPBarColor"},
           },
           EnableHealthbar = {
@@ -2115,6 +2115,14 @@ local function CreateAurasWidgetOptions()
                 order = 30,
                 desc = L["Show time left on auras that have a duration."],
                 arg = { "AuraWidget", "ShowDuration" },
+                disabled = function() return db.AuraWidget.ShowOmniCC end
+              },
+              OmniCC = {
+                name = L["OmniCC"],
+                type = "toggle",
+                order = 35,
+                desc = L["Show the OmniCC couldown count instead of the built-in duration text on auras."],
+                arg = { "AuraWidget", "ShowOmniCC" },
               },
               Stacks = {
                 name = L["Stack Count"],
@@ -3147,7 +3155,7 @@ local function CreateHeadlineViewShowEntry()
       order = pos,
       type = "group",
       inline = true,
-      disabled = function() return not (GetCVarBool("nameplateShowAll") and TidyPlatesThreat.db.profile.HeadlineView.ON) end,
+      disabled = function() return not GetCVarBool("nameplateShowAll") end,
       args = {},
     }
 
@@ -3667,9 +3675,11 @@ local function CreateAutomationSettings()
             arg = { "HeadlineView", "ForceOutOfCombat" }
           },
           HeadlineViewOnFriendly = {
-            name = L["Headline View on Friendly Units in Combat"],
+            name = L["Nameplate Mode for Friendly Units in Combat"],
             order = 50,
-            type = "toggle",
+            type = "select",
+            values = { NAME = L["Headline View"], HEALTHBAR = L["Healthbar View"], NONE = L["None"] },
+            style = "dropdown",
             width = "double",
             set = SetValue,
             arg = { "HeadlineView", "ForceFriendlyInCombat" }
@@ -4680,33 +4690,32 @@ local function CreateOptionsTable()
               inline = false,
               order = 25,
               args = {
-                Enable = {
-                  name = L["Enable"],
-                  order = 5,
-                  type = "group",
-                  inline = true,
-                  args = {
-                    Header = {
-                      name = L["This option allows you to control whether headline view (text-only) is enabled for nameplates."],
-                      order = 1,
-                      type = "description",
-                      width = "full",
-                    },
-                    Enable = {
-                      name = L["Enable Headline View (Text-Only)"],
-                      order = 2,
-                      type = "toggle",
-                      width = "double",
-                      arg = { "HeadlineView", "ON" },
-                    },
-                  },
-                },
+--                Enable = {
+--                  name = L["Enable"],
+--                  order = 5,
+--                  type = "group",
+--                  inline = true,
+--                  args = {
+--                    Header = {
+--                      name = L["This option allows you to control whether headline view (text-only) is enabled for nameplates."],
+--                      order = 1,
+--                      type = "description",
+--                      width = "full",
+--                    },
+--                    Enable = {
+--                      name = L["Enable Headline View (Text-Only)"],
+--                      order = 2,
+--                      type = "toggle",
+--                      width = "double",
+--                      arg = { "HeadlineView", "ON" },
+--                    },
+--                  },
+--                },
                 ShowByUnitType = {
                   name = L["Show By Unit Type"],
                   order = 10,
                   type = "group",
                   inline = true,
-                  disabled = function() return not TidyPlatesThreat.db.profile.HeadlineView.ON  end,
                   args = CreateHeadlineViewShowEntry(),
                 },
                 ShowByStatus = {
@@ -4714,7 +4723,6 @@ local function CreateOptionsTable()
                   order = 15,
                   type = "group",
                   inline = true,
-                  disabled = function() return not TidyPlatesThreat.db.profile.HeadlineView.ON  end,
                   args = {
 --                    ModeOoC = {
 --                      name = L["Out of Combat"],
@@ -4750,14 +4758,16 @@ local function CreateOptionsTable()
                       order = 30,
                       type = "group",
                       inline = true,
-                      disabled = function()return not TidyPlatesThreat.db.profile.HeadlineView.ON end,
                       args = {
                         TargetHighlight = {
                           name = L["Show Target"],
                           order = 10,
                           type = "toggle",
                           arg = { "HeadlineView", "ShowTargetHighlight" },
-                          set = SetThemeValue,
+                          set = function(info, val)
+                            SetValuePlain(info, val)
+                            Addon.Widgets:UpdateSettings("TargetArt")
+                          end,
                         },
                         TargetMouseoverHighlight = {
                           name = L["Show Mouseover"],
@@ -4774,7 +4784,6 @@ local function CreateOptionsTable()
                       order = 40,
                       type = "group",
                       inline = true,
-                      disabled = function() return not TidyPlatesThreat.db.profile.HeadlineView.ON  end,
                       args = {
                         Transparency = {
                           name = L["Use transparency settings of Healthbar View also for Headline View."],
@@ -5536,7 +5545,8 @@ local function CreateOptionsTable()
                       type = "select",
                       order = 10,
                       name = L["Icon Style"],
-                      values = { default = "Default", skullandcross = "Skull and Crossbones" },
+                      --Blizzard Dragon <- TARGETINGFRAME\\Nameplates.png
+                      values = { default = "Default", stddragon = "Blizzard Dragon", skullandcross = "Skull and Crossbones" },
                       set = function(info, val)
                         SetThemeValue(info, val)
                         options.args.NameplateSettings.args.EliteIcon.args.Texture.args.PreviewRare.image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\EliteArtWidget\\" .. val
@@ -6761,7 +6771,7 @@ local function CreateOptionsTable()
               name = L["Headline View"],
               order = 30,
               type = "toggle",
-              disabled = function() return not (db.uniqueSettings[k_c].useStyle and db.HeadlineView.ON) end,
+              disabled = function() return not db.uniqueSettings[k_c].useStyle end,
               set = function(info, val) if val then db.uniqueSettings[k_c].showNameplate = false; SetValue(info, val) end end,
               arg = { "uniqueSettings", k_c, "ShowHeadlineView" },
             },
