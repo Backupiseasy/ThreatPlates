@@ -11,6 +11,13 @@
 * Added the option to use Blizzard elite/rare icons as indicator for elite/rare units [#Comment 579] - Thanks to sslebedev for implementing.
 
 ------------------------------------------------------
+9.0.17
+------------------------------------------------------
+* Aura for Asphyxiate (Death Knight) as well as several Mage and Warrior auras are now correctly recognized as crowd-control auras.
+* Fixed a bug with Auras widget where stacks were not shown on auras with unlimited duration.
+* Fixed a bug with Auras widget where the stack count in bar mode was shown as "..." when it's size exceeded the size of the aura icon [Issue #297].
+
+------------------------------------------------------
 9.0.16
 ------------------------------------------------------
 * Aura for Stormbolt (Warrior) is now correctly recognized as crowd-control auras [Issue #290].
