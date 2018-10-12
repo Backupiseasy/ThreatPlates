@@ -2,11 +2,13 @@
 9.1.0-Alpha1
 ------------------------------------------------------
 * Combo Points widget now has different styles (Squares, Orbs, Blizzard) and colors combo points depending on the current number of combo points [Issue #45, Comment #843, Comment #927, Comment #1028, Comment #1029, Issue #217, E-Mail Requests].
+* Enhanced the Quest widget to show the quest progress on quest target units [Comment #797] - Thanks to Kungfumoo for implementing this.
 * Optimized code for widgets that are only displayed on the target unit (Combo Points, Resource).
 * Changed default settings for Auras and Combo Points widget for better, non-overlapping positioning.
-* Monk's Black Ox Statue is now correctly recognized as off-tank [Issue #270, Comment #318, #1420, E-Mail]
-* Added a feature to switch nameplate mode of friendly nameplates also to healthbar view when entering combat [Comment #1254, #1411].
+* Monk's Black Ox Statue is now correctly recognized as off-tank [Issue #270, Comment #318, #1420, E-Mail]  - Thanks to dlwyatt for implementing.
+* Added a feature to switch nameplate mode of friendly nameplates also to healthbar view when entering combat [Comment #1254, #1411] - Thanks to sslebedev for implementing.
 * Added support for OmniCC cooldown text to Auras widget.
+* Added the option to use Blizzard elite/rare icons as indicator for elite/rare units [#Comment 579] - Thanks to sslebedev for implementing.
 
 ------------------------------------------------------
 9.0.16
