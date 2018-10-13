@@ -520,6 +520,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
       ShowDuration = true,
       ShowOmnicCC = false,
       ShowStackCount = true,
+      ShowTooltips = false,
       ShowAuraType = true,
       DefaultBuffColor = RGB(102, 0, 51, 1),
       DefaultDebuffColor = 	RGB(204, 0, 0, 1),

@@ -24,6 +24,7 @@ local CreateFrame, GetFramerate = CreateFrame, GetFramerate
 local DebuffTypeColor = DebuffTypeColor
 local UnitAura, UnitIsFriend, UnitIsUnit, UnitReaction, UnitIsPlayer, UnitPlayerControlled = UnitAura, UnitIsFriend, UnitIsUnit, UnitReaction, UnitIsPlayer, UnitPlayerControlled
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
+local GameTooltip = GameTooltip
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
@@ -465,7 +466,7 @@ end
 -- Widget Object Functions
 -------------------------------------------------------------
 
-function Widget:UpdateUnitAuras(frame, effect, unitid, enabled_auras, enabled_cc, SpellFilter, SpellFilterCC, filter_mode)
+function Widget:UpdateUnitAuras(frame, unitid, enabled_auras, enabled_cc, SpellFilter, SpellFilterCC, filter_mode)
   local aura_frames = frame.AuraFrames
   if not (enabled_auras or enabled_cc) then
     for i = 1, self.MaxAurasPerGrid do
@@ -486,6 +487,7 @@ function Widget:UpdateUnitAuras(frame, effect, unitid, enabled_auras, enabled_cc
     UnitAuraList = {}
   end
 
+  local effect = frame.Filter
   local db_auras = (effect == "HARMFUL" and db.Debuffs) or db.Buffs
   local AuraFilterFunction = self.FILTER_FUNCTIONS[filter_mode]
   local AuraFilterFunctionCC = self.FILTER_FUNCTIONS[db.CrowdControl.FilterMode]
@@ -510,9 +512,10 @@ function Widget:UpdateUnitAuras(frame, effect, unitid, enabled_auras, enabled_cc
     -- ShowAll: Debuffs
     if not aura.name then break end
 
-    aura.unit = unitid
-    aura.UnitIsNPC = not (UnitIsPlayer(unitid) or UnitPlayerControlled(unitid))
+    --aura.unit = unitid
+    aura.index = i
     aura.effect = effect
+    aura.UnitIsNPC = not (UnitIsPlayer(unitid) or UnitPlayerControlled(unitid))
     aura.ShowAll = aura.ShowAll
     aura.CrowdControl = (enabled_cc and self.CROWD_CONTROL_SPELLS[aura.spellid])
     aura.CastByPlayer = (aura.caster == "player" or aura.caster == "pet" or aura.caster == "vehicle")
@@ -602,6 +605,9 @@ function Widget:UpdateUnitAuras(frame, effect, unitid, enabled_auras, enabled_cc
         aura_frame.AuraStacks = aura.stacks
         aura_frame.AuraColor = aura.color
 
+        -- Information for aura tooltips
+        aura_frame.AuraIndex = aura.index
+
         -- Call function to display the aura
         self:UpdateAuraInformation(aura_frame)
       end
@@ -671,13 +677,13 @@ function Widget:UpdateIconGrid(widget_frame, unitid)
   if unit_is_friendly then -- friendly or better
     enabled_cc = db.CrowdControl.ShowFriendly
 
-    self:UpdateUnitAuras(widget_frame.Debuffs, "HARMFUL", unitid, db.Debuffs.ShowFriendly, enabled_cc, self.FilterFriendlyDebuffsBySpell, self.FilterFriendlyCrowdControlBySpell, db.Debuffs.FilterMode)
-    self:UpdateUnitAuras(widget_frame.Buffs, "HELPFUL", unitid, db.Buffs.ShowFriendly, false, self.FilterFriendlyBuffsBySpell, self.FilterFriendlyCrowdControlBySpell, db.Buffs.FilterMode)
+    self:UpdateUnitAuras(widget_frame.Debuffs, unitid, db.Debuffs.ShowFriendly, enabled_cc, self.FilterFriendlyDebuffsBySpell, self.FilterFriendlyCrowdControlBySpell, db.Debuffs.FilterMode)
+    self:UpdateUnitAuras(widget_frame.Buffs, unitid, db.Buffs.ShowFriendly, false, self.FilterFriendlyBuffsBySpell, self.FilterFriendlyCrowdControlBySpell, db.Buffs.FilterMode)
   else
     enabled_cc = db.CrowdControl.ShowEnemy
 
-    self:UpdateUnitAuras(widget_frame.Debuffs, "HARMFUL", unitid, db.Debuffs.ShowEnemy, enabled_cc, self.FilterEnemyDebuffsBySpell, self.FilterEnemyCrowdControlBySpell, db.Debuffs.FilterMode)
-    self:UpdateUnitAuras(widget_frame.Buffs, "HELPFUL", unitid, db.Buffs.ShowEnemy, false, self.FilterEnemyBuffsBySpell, self.FilterEnemyCrowdControlBySpell, db.Buffs.FilterMode)
+    self:UpdateUnitAuras(widget_frame.Debuffs, unitid, db.Debuffs.ShowEnemy, enabled_cc, self.FilterEnemyDebuffsBySpell, self.FilterEnemyCrowdControlBySpell, db.Debuffs.FilterMode)
+    self:UpdateUnitAuras(widget_frame.Buffs, unitid, db.Buffs.ShowEnemy, false, self.FilterEnemyBuffsBySpell, self.FilterEnemyCrowdControlBySpell, db.Buffs.FilterMode)
   end
 
   local buffs_active, debuffs_active, cc_active = widget_frame.Buffs.ActiveAuras > 0, widget_frame.Debuffs.ActiveAuras > 0, widget_frame.CrowdControl.ActiveAuras > 0
@@ -769,6 +775,19 @@ local function SetCooldown(cooldown_frame, duration, expiration)
 end
 
 ---------------------------------------------------------------------------------------------------
+-- Functions for showing tooltips on auras
+---------------------------------------------------------------------------------------------------
+
+local function AuraFrameOnEnter(self)
+  GameTooltip:SetOwner(self, "ANCHOR_LEFT")
+  GameTooltip:SetUnitAura(self:GetParent():GetParent().unit.unitid, self.AuraIndex, self:GetParent().Filter)
+end
+
+local function AuraFrameOnLeave(self)
+  GameTooltip:Hide()
+end
+
+---------------------------------------------------------------------------------------------------
 -- Functions for the aura grid with icons
 ---------------------------------------------------------------------------------------------------
 
@@ -804,6 +823,15 @@ function Widget:UpdateAuraFrameIconMode(frame)
     frame.TimeLeft:Show()
   else
     frame.TimeLeft:Hide()
+  end
+
+  -- Add tooltips to icons
+  if db.ShowTooltips then
+    frame:SetScript("OnEnter", AuraFrameOnEnter)
+    frame:SetScript("OnLeave", AuraFrameOnLeave)
+  else
+    frame:SetScript("OnEnter", nil)
+    frame:SetScript("OnLeave", nil)
   end
 
   db = self.db_icon
@@ -930,6 +958,15 @@ function Widget:UpdateAuraFrameBarMode(frame)
     frame.TimeText:Show()
   else
     frame.TimeText:Hide()
+  end
+
+  -- Add tooltips to icons
+  if db.ShowTooltips then
+    frame:SetScript("OnEnter", AuraFrameOnEnter)
+    frame:SetScript("OnLeave", AuraFrameOnLeave)
+  else
+    frame:SetScript("OnEnter", nil)
+    frame:SetScript("OnLeave", nil)
   end
 
   db = self.db_bar
@@ -1207,14 +1244,17 @@ function Widget:Create(tp_frame)
   widget_frame.Debuffs = CreateFrame("Frame", nil, widget_frame)
   widget_frame.Debuffs.AuraFrames = {}
   widget_frame.Debuffs.ActiveAuras = 0
+  widget_frame.Debuffs.Filter = "HARMFUL"
 
   widget_frame.Buffs = CreateFrame("Frame", nil, widget_frame)
   widget_frame.Buffs.AuraFrames = {}
   widget_frame.Buffs.ActiveAuras = 0
+  widget_frame.Buffs.Filter = "HELPFUL"
 
   widget_frame.CrowdControl = CreateFrame("Frame", nil, widget_frame)
   widget_frame.CrowdControl.AuraFrames = {}
   widget_frame.CrowdControl.ActiveAuras = 0
+  widget_frame.CrowdControl.Filter = "HARMFUL"
 
   widget_frame.Widget = self
 
@@ -1258,7 +1298,7 @@ end
 function Widget:OnUnitAdded(widget_frame, unit)
   local db = self.db
 
-  if db.SwitchScaleByReaction and UnitReaction(widget_frame.unit.unitid, "player") > 4 then
+  if db.SwitchScaleByReaction and UnitReaction(unit.unitid, "player") > 4 then
     widget_frame.Buffs:SetScale(db.Debuffs.Scale)
     widget_frame.Debuffs:SetScale(db.Buffs.Scale)
   else

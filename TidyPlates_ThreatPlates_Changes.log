@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+9.1.0-Alpha2
+------------------------------------------------------
+* Added an option to Auras widget to show tooltips when hovering above auras [Comment #1362].
+
+------------------------------------------------------
 9.1.0-Alpha1
 ------------------------------------------------------
 * Combo Points widget now has different styles (Squares, Orbs, Blizzard) and colors combo points depending on the current number of combo points [Issue #45, Comment #843, Comment #927, Comment #1028, Comment #1029, Issue #217, E-Mail Requests].

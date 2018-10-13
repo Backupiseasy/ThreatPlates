@@ -2131,6 +2131,13 @@ local function CreateAurasWidgetOptions()
                 desc = L["Show stack count on auras."],
                 arg = { "AuraWidget", "ShowStackCount" },
               },
+              Tooltips = {
+                name = L["Tooltips"],
+                type = "toggle",
+                order = 43,
+                desc = L["Show a tooltip when hovering above an aura."],
+                arg = { "AuraWidget", "ShowTooltips" },
+              },
               Spacer1 = GetSpacerEntry(45),
               AuraTypeColors = {
                 name = L["Color by Dispel Type"],
