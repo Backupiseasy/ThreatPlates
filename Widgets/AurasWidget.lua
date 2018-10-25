@@ -281,7 +281,9 @@ end
 function Widget:GetColorForAura(aura)
 	local db = self.db
 
-  if aura.type and db.ShowAuraType then
+  if aura.StealOrPurge then
+    return RGB(255, 255, 255, 1)
+  elseif aura.type and db.ShowAuraType then
     return DebuffTypeColor[aura.type]
   elseif aura.effect == "HARMFUL" then
     return db.DefaultDebuffColor
