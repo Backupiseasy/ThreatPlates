@@ -88,7 +88,7 @@ local PC_ROOT = 51          -- Mechanic: Rooted
 local PC_DAZE = 52
 local PC_GRIP = 53
 local PC_DISARM = 54        -- Apply Aura: Disarm
-local PC_DPUSHBACK = 55        -- Apply Aura: Disarm
+local PC_DPUSHBACK = 55     -- Apply Aura: Disarm
 
 local CC_SILENCE = 101
 
@@ -591,11 +591,6 @@ function Widget:UpdateUnitAuras(frame, effect, unitid, enabled_auras, enabled_cc
     -- ShowPesonal: Debuffs  that are shown on Blizzards nameplate, no matter who casted them (and
     -- ShowAll: Debuffs
     if not aura.name then break end
-
-    if UnitIsUnit(unitid, "target") then
-      print(aura.name, aura.spellid, aura.ShowAll)
-      --print("Can Apply:", aura.PlayerCanApply)
-    end
 
     aura.unit = unitid
     aura.UnitIsNPC = not (UnitIsPlayer(unitid) or UnitPlayerControlled(unitid))

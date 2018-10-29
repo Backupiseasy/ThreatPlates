@@ -548,11 +548,22 @@ do
 
 	-- UpdateIndicator_RaidIcon
 	function UpdateIndicator_RaidIcon()
+--    if unit.isMarked and RaidIconCoordinate[unit.raidIcon] == nil then
+--      ThreatPlates.DEBUG("UpdateIndicator_RaidIcon:", unit.unitid, "- isMarked:", unit.isMarked, "/ raidIcon:", unit.raidIcon)
+--      ThreatPlates.DEBUG("UpdateIndicator_RaidIcon: RaidIconCoordinate:", RaidIconCoordinate[unit.raidIcon])
+--    end
+
 		if unit.isMarked and style.raidicon.show then
-			visual.raidicon:Show()
-			local iconCoord = RaidIconCoordinate[unit.raidIcon]
-			visual.raidicon:SetTexCoord(iconCoord.x, iconCoord.x + 0.25, iconCoord.y,  iconCoord.y + 0.25)
-		else visual.raidicon:Hide() end
+      local iconCoord = RaidIconCoordinate[unit.raidIcon]
+      if iconCoord then
+        visual.raidicon:Show()
+        visual.raidicon:SetTexCoord(iconCoord.x, iconCoord.x + 0.25, iconCoord.y,  iconCoord.y + 0.25)
+      else
+        visual.raidicon:Hide()
+      end
+		else
+      visual.raidicon:Hide()
+    end
 	end
 
 
