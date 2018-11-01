@@ -15,6 +15,12 @@
 * Added support for OmniCC cooldown text to Auras widget.
 * Added the option to use Blizzard elite/rare icons as indicator for elite/rare units [#Comment 579] - Thanks to sslebedev for implementing.
 
+﻿------------------------------------------------------
+9.0.18
+------------------------------------------------------
+* All auras for Demon Hunter, Rogues, Hunter, Death Knight, Paladin, Priest, Shaman, Monk, and Druid are now correctly recognized as crowd-control auras [Comment #1560, #1556, #1541].
+* Fixed a Lua error that occured when a unit got a nameplate and was target marked at the same time [Issue #304].
+
 ------------------------------------------------------
 9.0.17
 ------------------------------------------------------

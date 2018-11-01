@@ -88,6 +88,8 @@ local PC_SNARE = 50         -- Mechanic: Snared
 local PC_ROOT = 51          -- Mechanic: Rooted
 local PC_DAZE = 52
 local PC_GRIP = 53
+local PC_DISARM = 54        -- Apply Aura: Disarm
+local PC_DPUSHBACK = 55     -- Apply Aura: Disarm
 
 local CC_SILENCE = 101
 
@@ -98,23 +100,39 @@ Widget.CROWD_CONTROL_SPELLS = {
   [61391] = PC_DAZE,              -- Typhoon (Talent)
   [102359] = PC_ROOT,             -- Mass Entanglement (Talent)
   [2637] = LOC_SLEEP,             -- Hibernate
+  [45334] = LOC_SLEEP,             -- Immobilized from Wild Charge (Bear) (Blizzard)
+  [50259] = LOC_SLEEP,             -- Dazed from Wild Charge (Cat)
   -- Balance Druid
-  [81261] = CC_SILENCE,           -- Solar Beam (Moonkin)
-  [209753] = LOC_BANISH,          -- Cyclone (PvP Talent)
+  [81261] = CC_SILENCE,           -- Solar Beam
+  [209753] = LOC_BANISH,          -- Cyclone (Honor)
+  [209749] = PC_DISARM,          -- Faerie Swarm (Honor) & PC_SNARE
   -- Feral Druid
   [163505] = LOC_STUN,            -- Rake
   [203123] = LOC_STUN,            -- Maim
   -- Guardian Druid
   [99] = LOC_INCAPACITATE,        -- Incapacitating Roar
+  [202244] = LOC_INCAPACITATE,    -- Overrun (Honor)
   -- Restoration Druid
   [127797] = PC_DAZE,             -- Ursol's Vortex
-  [33786] = LOC_BANISH,           -- Cyclone (PvP Talent)
+  [33786] = LOC_BANISH,           -- Cyclone (Honor)
 
   -- Death Knight
-  [221562] = LOC_STUN,             -- Asphyxiate
-  [47476] = LOC_STUN,              -- Strangulate (PvP Talent)
-  [45524] = PC_SNARE,              -- Chains of Ice
-  [111673] = LOC_CHARM,            -- Control Undead
+  [273977] = PC_SNARE,            -- Grip of the Dead (Talent)
+  [221562] = LOC_STUN,            -- Asphyxiate
+  [45524] = PC_SNARE,             -- Chains of Ictggtse
+  [111673] = LOC_CHARM,           -- Control Undead
+  --[77606] = LOC_CHARM,            -- Dark Simulacrum (Honor) -- no CC aura
+  -- Blood
+  [47476] = CC_SILENCE,           -- Strangulate (Honor)
+  -- Frost
+  [207167] = LOC_DISORIENT,       -- Blinding Sleet (Talent, Blizzard)
+  [204085] = PC_ROOT,             -- Deathchill (Honor)
+  [204206] = PC_SNARE,            -- Chilled from Chill Streasek (Honor)
+  [233395] = PC_ROOT,             -- Frozen Center (Honor)
+  [279303] = PC_SNARE,            -- Frost Breath from Frostwyrm's Fury (Talent)
+  --[211793] = PC_SNARE,            -- Remorseless Winter - not shown because uptime to high
+  -- Unholy
+  [200646] = PC_SNARE,            -- Unholy Mutation (Honor)
 
   -- Demon Hunter
   [217832] = LOC_INCAPACITATE,     -- Imprison (Blizzard)
@@ -132,19 +150,24 @@ Widget.CROWD_CONTROL_SPELLS = {
   [211881] = LOC_STUN,             -- Fel Eruption (Talent, Blizzard)
 
   -- Hunter
-  [3355] = LOC_INCAPACITATE,    -- Freezing Trap
-  [24394] = LOC_STUN,           -- Intimidation
-  [162480] = LOC_INCAPACITATE,  -- Steel Trap (Talent, Survival)
-  [5116] = PC_DAZE,             -- Concussive Shot (Not Blizzard)
-  [117405] = PC_ROOT,           -- Binding Shot (Not Blizzard)
-  [186387] = PC_SNARE,          -- Bursting Shot (Marksmanship, Not Blizzard)
-  [213691] = LOC_INCAPACITATE,  -- Scatter Shot (PvP, Not Blizzard)
-  [202914] = CC_SILENCE,        -- Spider Sting (PvP, Not Blizzard)
-  [135299] = PC_SNARE,          -- Sticky Tar (Survival, PvP, Not Blizzard)
-  [212638] = PC_ROOT,           -- Tracker's Net (Survival, PvP, Not Blizzard)
-  [195645] = PC_SNARE,          -- Wing Clip (Survival, Not Blizzard)
-  [147362] = CC_SILENCE,        -- Counter Shot
-  -- [19386] = LOC_SLEEP,          -- Wyvern Sting (Deprecated in BfA)
+  [5116] = PC_DAZE,             -- Concussive Shot
+  [3355] = LOC_INCAPACITATE,    -- Freezing Trap (Blizzard)
+  [24394] = LOC_STUN,           -- Intimidation (Blizzard)
+  [117405] = PC_ROOT,           -- Binding Shot
+  [202914] = CC_SILENCE,        -- Spider Sting (Honor)
+  [135299] = PC_SNARE,          -- Tar Trap (Honor)
+  --[147362] = CC_SILENCE,        -- Counter Shot
+  -- Beast Mastery
+  -- Marksmanship
+  [213691] = LOC_INCAPACITATE,  -- Scatter Shot (Honor)
+  [186387] = PC_SNARE,          -- Bursting Shot
+  -- Survival
+  [162480] = LOC_INCAPACITATE,  -- Steel Trap (Blizzard)
+  [212638] = PC_ROOT,           -- Tracker's Net
+  [190927] = PC_ROOT,           -- Harpoon
+  [195645] = PC_SNARE,          -- Wing Clip
+  [203337] = LOC_INCAPACITATE,  -- Freezing Trap with Diamond Ice
+  --[187707] = CC_SILENCE,        -- Muzzle
 
   -- Mage
   [61780] = LOC_POLYMORPH,  -- Polymorph (Turkey)
@@ -178,43 +201,94 @@ Widget.CROWD_CONTROL_SPELLS = {
   [228600] = PC_ROOT,       -- Glacial Spike (Talent, Blizzard)
 
   -- Paladin
-  [853] = LOC_STUN,             -- Hammer of Justice
-  [115750] = LOC_DISORIENT,     -- Blinding Light
-  [96231] = CC_SILENCE,         -- Rebuke
-  [20066] = LOC_INCAPACITATE,   -- Repentance (Retribution, Blizzard)
+  [20066] = LOC_INCAPACITATE,   -- Repentance (Blizzard)
+  [853] = LOC_STUN,             -- Hammer of Jeustice (Blizzard)
+  [105421] = LOC_DISORIENT,     -- Blinding Light (Blizzard)
+  --[96231] = CC_SILENCE,       -- Rebuke
+  -- Holy
+  -- Protection
+  [31935] = CC_SILENCE,         -- Avenger's Shield (Blizzard)
+  [217824] = CC_SILENCE,        -- Shield of Virtue
+  --[204242] = PC_SNARE,        -- Consecrated Ground - same aura as Consecration
+  -- Retribution
+  -- [205273] = PC_SNARE,       -- Wake of Ashes - from Artefact weapon
+  [183218] = PC_SNARE,          -- Hand of Hindrance
 
   -- Priest
-  [15487] = CC_SILENCE,      -- Silence
-  [205369] = LOC_STUN,       -- Mind Bomb
-  [8122] = LOC_FEAR,         -- Psychic Scream
-  [605] = LOC_CHARM,         -- Mind Control
-  [9484] = LOC_POLYMORPH,    -- Shackle Undead
-  [88625] = LOC_STUN,        -- Holy Word: Chastise
+  [8122] = LOC_FEAR,            -- Psychic Scream (Blizzard)
+  [605] = LOC_CHARM,            -- Mind Control (Blizzard)
+  [204263] = PC_SNARE,          -- Shining Force
+  [9484] = LOC_POLYMORPH,       -- Shackle Undead (Blizzard)
+  -- Discipline
+  -- Holy
+  [200200] = LOC_STUN,          -- Censure for Holy Word: Chastise
+  [200196] = LOC_INCAPACITATE,  -- Holy Word: Chastise (Blizzard)
+  -- Shadow
+  [205369] = LOC_STUN,          -- Mind Bomb (Blizzard)
+  [15487] = CC_SILENCE,         -- Silence (Blizzard)
+  [64044] = LOC_STUN,           -- Psychic Horror (Blizzard)
+  --[15407] = PC_SNARE,           -- Mind Flay - not shown as very high uptime
+  -- TODO:
+  --[34914] = LOC_FEAR,           -- Fear effect after dispell of Vampiric Touch ?87204
 
   -- Rogue
+  [1833] = LOC_STUN,       -- Cheap Shot (Blizzard)
+  [6770] = LOC_STUN,       -- Sap (Blizzard)
   [2094] = LOC_DISORIENT,  -- Blind
-  [1833] = LOC_STUN,       -- Cheap Shot
-  [1776] = LOC_STUN,       -- Gouge
-  [408] = LOC_STUN,        -- Kidney Shot
-  [6770] = LOC_STUN,       -- Sap
-  [199804] = LOC_STUN,     -- Between the Eyes (Outlaw)
+  [408] = LOC_STUN,        -- Kidney Shot (Blizzard)
+  [212183] = LOC_STUN,     -- Smoke Bomb (Honor)
+  [248744] = PC_SNARE,     -- Shiv (Honor)
+  [1330] = CC_SILENCE,     -- Garrote (Blizzard)
+  -- Assassination
+  -- [3409] = LOC_STUN,    -- Crippling Poison - Not shown as 100% uptime
+  -- Outlaw
+  [207777] = PC_DISARM,    -- Dismantle (Honor)
+  [1776] = LOC_STUN,       -- Gouge (Blizzard)
+  [185763] = PC_SNARE,     -- Pistol Shot
+  [199804] = LOC_STUN,     -- Between the Eyes (Blizzard)
+  -- Subtlety
+  [206760] = PC_SNARE,     -- Night Terrors
 
   -- Shaman
-  [51485] = PC_ROOT,         -- Earthgrab Totem
-  [192058] = LOC_STUN,       -- Lightning Surge Totem
-  [2484] = PC_SNARE,         -- Earthbind Totem
-  [211015] = LOC_POLYMORPH,  -- Hex (Cockroach)
-  [211010] = LOC_POLYMORPH,  -- Hex (Snake)
-  [51514] = LOC_POLYMORPH,   -- Hex (Frog)
-  [211004] = LOC_POLYMORPH,  -- Hex (Spider)
-  [210873] = LOC_POLYMORPH,  -- Hex (Compy)
+  [51514] = LOC_POLYMORPH,      -- Hex (Frog) (Blizzard)
+  [210873] = LOC_POLYMORPH,     -- Hex (Compy) (Blizzard)
+  [211004] = LOC_POLYMORPH,     -- Hex (Spider) (Blizzard)
+  [211010] = LOC_POLYMORPH,     -- Hex (Snake) (Blizzard)
+  [211015] = LOC_POLYMORPH,     -- Hex (Cockroach) (Blizzard)
+  [269352] = LOC_POLYMORPH,     -- Hex (Skeletal Hatchling) (Blizzard)
+  [277778] = LOC_POLYMORPH,     -- Hex (Zandalari Tendonripper) (Blizzard)
+  [277784] = LOC_POLYMORPH,     -- Hex (Wicker Mongrel) (Blizzard)
+  [118905] = LOC_STUN,          -- Static Charge from Capacitor Totem
+  -- [57994] = CC_SILENCE,         -- Wind Shear
+  [3600] = PC_SNARE,            -- Earthbind Totem
+  -- Elemental
+  [51490] = PC_SNARE,           -- Thunderstorm
+  [204399] = LOC_STUN,          -- Stun aura from Earthfury (Honor)
+  [196840] = PC_SNARE,          -- Frost Shock
+  [204437] = LOC_STUN,          -- Lightning Lasso (Honor)
+  -- Enhancement
+  -- [196834] = PC_SNARE,          -- Frostbrand - Not shown as ability is part of the rotation
+  [197214] = LOC_INCAPACITATE,  -- Sundering
+  -- [197385] = PC_SNARE,          -- Fury of Air - Not shown as too much uptime
+  -- Restoration
+  [64695] = PC_ROOT,            -- Earthgrab Totem (Blizzard)
 
   -- Warlock
-  [6789] = LOC_INCAPACITATE,  -- Mortal Coil
-  [5484] = LOC_FEAR,          -- Howl of Terror
-  [30283] = LOC_STUN,         -- Shadowfury
-  [710] = LOC_BANISH,         -- Banish
-  [118699] = LOC_FEAR,        -- Fear
+  [6789] = LOC_INCAPACITATE,  -- Mortal Coil (Blizzard)s
+  [118699] = LOC_FEAR,        -- Fear (Blizzard)
+  [710] = LOC_BANISH,         -- Banish (Blizzard)
+  [30283] = LOC_STUN,         -- Shadowfury (Blizzard)
+  -- [19647] = LOC_STUN,         -- Spell Lock aura from Call Felhunter
+  [1098] = LOC_CHARM,         -- Enslave Demon
+  [6358] = LOC_DISORIENT,     -- Seduction from Command Demon (Apply Aura: Stun) (Blizzard)
+  -- Affliction
+  [278350] = PC_SNARE,        -- Vile Taint
+  -- TODO:
+  --[30108] = CC_SILENCE,       -- Silence effect after dispell of Unstable Affliction
+  -- Demonology
+  [213688] = LOC_STUN,        -- Fel Cleave aura from Call Fel Lord (Honor)
+  -- Destruction
+  [233582] = PC_SNARE,        -- Entrenched in Flame
 
   -- Warrior
   [105771] = PC_ROOT,       -- Intercept - Charge
@@ -223,7 +297,7 @@ Widget.CROWD_CONTROL_SPELLS = {
   --[6552] = CC_SILENCE,      -- Pummel -- does not leave a debuff on target
   -- Arms Warrior
   [1715] = PC_SNARE,        -- Hamstring
-  [236077] = PC_SNARE,      -- Disarm (PvP)
+  [236077] = PC_DISARM,      -- Disarm (PvP)
   -- Fury Warrior
   [12323] = PC_SNARE,       -- Piercing Howl
   -- Protection Warrior
@@ -234,14 +308,27 @@ Widget.CROWD_CONTROL_SPELLS = {
   [199085] = LOC_STUN,      -- Warpath (PvP, Blizzard)
 
   -- Monk
-  [115078] = LOC_STUN,        -- Paralysis
-  [119381] = LOC_STUN,        -- Leg Sweep
-  [116095] = PC_SNARE,        -- Disable
-  [116705] = CC_SILENCE,      -- Spear Hand Strike
+  -- [116189] = PC_SNARE,      -- Provoke
+  [115078] = LOC_STUN,      -- Paralysis (Blizzard)se
+  -- [116705] = CC_SILENCE,    -- Spear Hand Strike
+  [119381] = LOC_STUN,      -- Leg Sweep (Blizzard)
+  [233759] = PC_DISARM,     -- Grapple Weapon
+  -- Brewmaster
+  -- [121253] = PC_SNARE,      -- Keg Smash - not shown as high uptime
+  -- [196733] = PC_SNARE,      -- Special Delivery - not shown as high uptime
+  [202274] = LOC_DISORIENT, -- Incendiary Brew from Incendiary Breath
+  [202346] = LOC_STUN,      -- Double Barrel
+  -- Mistweaver
+  [198909] = LOC_DISORIENT, -- Song of Chi-Ji (Blizzard)
+  -- Windwalker
+  [116095] = PC_SNARE,      -- Disable
+  [123586] = PC_SNARE,      -- Flying Serpent Kick
 
   -- Racial Traits
-  [255723] = LOC_STUN,        -- Bull Rush (Highmountain Tauren)
-  [20549] = LOC_STUN,         -- War Stomp (Tauren)
+  [255723] = LOC_STUN,      -- Bull Rush (Highmountain Tauren)
+  [20549] = LOC_STUN,       -- War Stomp (Tauren)
+  [260369] = PC_SNARE,      -- Arcane Pulse (Nightborne)
+  [107079] = LOC_STUN,      -- Quaking Palm (Pandarian)
 }
 
 ---------------------------------------------------------------------------------------------------
@@ -513,7 +600,7 @@ function Widget:UpdateUnitAuras(frame, unitid, enabled_auras, enabled_cc, SpellF
     if not aura.name then break end
 
     --aura.unit = unitid
-    aura.index = i
+    aura.Index = i
     aura.effect = effect
     aura.UnitIsNPC = not (UnitIsPlayer(unitid) or UnitPlayerControlled(unitid))
     aura.ShowAll = aura.ShowAll
@@ -606,7 +693,7 @@ function Widget:UpdateUnitAuras(frame, unitid, enabled_auras, enabled_cc, SpellF
         aura_frame.AuraColor = aura.color
 
         -- Information for aura tooltips
-        aura_frame.AuraIndex = aura.index
+        aura_frame.AuraIndex = aura.Index
 
         -- Call function to display the aura
         self:UpdateAuraInformation(aura_frame)

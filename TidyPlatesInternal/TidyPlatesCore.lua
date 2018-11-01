@@ -41,22 +41,20 @@ local GetCVar, Lerp, CombatLogGetCurrentEventInfo = GetCVar, Lerp, CombatLogGetC
 local PlatesCreated, PlatesVisible, PlatesByUnit, PlatesByGUID = {}, {}, {}, {}
 local nameplate, extended, visual			    	-- Temp/Local References
 local unit, unitcache, style, stylename 	  -- Temp/Local References
+local activetheme = {}                      -- Table Placeholder
 local LastTargetPlate
 local ShowCastBars = true
 local EMPTY_TEXTURE = "Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\Empty"
-local UpdateAll = false
+local ResetPlates, UpdateAll = false, false
 
 -- External references to internal data
 Addon.PlatesCreated = PlatesCreated
 Addon.PlatesVisible = PlatesVisible
 Addon.PlatesByUnit = PlatesByUnit
 Addon.PlatesByGUID = PlatesByGUID
-Addon.Theme = {}
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
-local Widgets = Addon.Widgets
-local activetheme = Addon.Theme
 
 -- Raid Icon Reference
 local RaidIconCoordinate = {
@@ -89,9 +87,9 @@ local UpdateStyle
 
 -- Indicators
 local UpdateIndicator_CustomText, UpdateIndicator_CustomScale, UpdateIndicator_CustomScaleText, UpdateIndicator_Standard, UpdateIndicator_CustomAlpha
-local UpdateIndicator_Level, UpdateIndicator_RaidIcon
+local UpdateIndicator_Level, UpdateIndicator_ThreatGlow, UpdateIndicator_RaidIcon
 local UpdateIndicator_EliteIcon, UpdateIndicator_Name
-local UpdateIndicator_HealthBar
+local UpdateIndicator_HealthBar, UpdateIndicator_Target
 local OnUpdateCasting, OnStartCasting, OnStopCasting, OnUpdateCastMidway
 
 -- Event Functions
@@ -100,6 +98,7 @@ local OnHealthUpdate, ProcessUnitChanges
 
 -- Main Loop
 local OnUpdate
+local ForEachPlate
 
 -- UpdateReferences
 local function UpdateReferences(plate)
@@ -119,7 +118,17 @@ local function UpdateUnitCache() for key, value in pairs(unit) do unitcache[key]
 -- Nameplate Detection & Update Loop
 ---------------------------------------------------------------------------------------------------------------------
 
+
 do
+	-- ForEachPlate
+	function ForEachPlate(functionToRun, ...)
+		for plate in pairs(PlatesVisible) do
+			if plate.TPFrame.Active then
+				functionToRun(plate, ...)
+			end
+		end
+	end
+
   -- OnUpdate; This function is run frequently, on every clock cycle
 	function OnUpdate(self, e)
 		-- Poll Loop
@@ -156,7 +165,6 @@ end
 do
 
 	function OnNewNameplate(plate)
-    -- Parent could be: WorldFrame, UIParent, plate
     local extended = CreateFrame("Frame",  "ThreatPlatesFrame" .. plate:GetName(), UIParent)
     extended:Hide()
 
@@ -194,6 +202,7 @@ do
     visual.raidicon = textFrame:CreateTexture(nil, "ARTWORK", 5)
     visual.skullicon = textFrame:CreateTexture(nil, "ARTWORK", 2)
     visual.eliteicon = textFrame:CreateTexture(nil, "ARTWORK", 1)
+    visual.target = textFrame:CreateTexture(nil, "BACKGROUND")
 
 		-- TextFrame
     visual.name = textFrame:CreateFontString(nil, "ARTWORK", 0)
@@ -212,12 +221,12 @@ do
     visual.Highlight = Addon:Element_Mouseover_Create(extended)
 
     -- Set Base Properties
-		-- visual.raidicon:SetTexture("Interface\\TargetingFrame\\UI-RaidTargetingIcons")
+		visual.raidicon:SetTexture("Interface\\TargetingFrame\\UI-RaidTargetingIcons")
 
     extended.widgets = {}
 
 		Addon:CreateExtensions(extended)
-    Widgets:OnPlateCreated(extended)
+    Addon:WidgetsOnPlateCreated(extended)
 
     -- Allocate Tables
     extended.style = {}
@@ -255,8 +264,8 @@ do
 
       Addon:CreateExtensions(extended, unit.unitid, stylename)
       -- TOOD: optimimze that - call OnUnitAdded only when the plate is initialized the first time for a unit, not if only the style changes
-      Widgets:OnUnitAdded(extended, unit)
-      --Addon:WidgetsModeChanged(extended, unit)
+      Addon:WidgetsOnUnitAdded(extended, unit)
+      --Addon:widgetsPlateModeChanged(extended, unit)
     end
 	end
 
@@ -277,9 +286,11 @@ do
       CheckNameplateStyle()
       UpdateIndicator_Standard()
       UpdateIndicator_HealthBar()
+      UpdateIndicator_Target()
     end
 
     -- Update Delegates
+    UpdateIndicator_ThreatGlow()
     UpdateIndicator_CustomAlpha(extended, unit)
     UpdateIndicator_CustomScaleText()
 
@@ -291,7 +302,7 @@ do
 	-- Create / Hide / Show Event Handlers
 	---------------------------------------------------------------------------------------------------------------------
 
-  function Addon:UpdateFriendlyNameplateStyle(plate, unitid)
+  function Addon:UpdateFriendleNameplateStyle(plate, unitid)
     if TidyPlatesThreat.db.profile.ShowFriendlyBlizzardNameplates and UnitReaction(unitid, "player") > 4 then
       plate.UnitFrame:Show()
       plate.TPFrame:Hide()
@@ -325,7 +336,7 @@ do
   
 		Addon:UpdateExtensions(extended, unit.unitid, stylename)
 
-    Addon:UpdateFriendlyNameplateStyle(nameplate, unitid)
+    Addon:UpdateFriendleNameplateStyle(nameplate, unitid)
 
     -- Call this after the plate is shown as OnStartCasting checks if the plate is shown; if not, the castbar is hidden and
     -- nothing is updated
@@ -478,19 +489,12 @@ end
 
 -- Update the health bar and name coloring, if needed
 function Addon:UpdateIndicatorNameplateColor(tp_frame)
-  local visual = tp_frame.visual
-
-  if visual.healthbar:IsShown() then
-    visual.healthbar:SetAllColors(Addon:SetHealthbarColor(tp_frame.unit))
-
-    -- Updates warning glow for threat
-    if visual.threatborder:IsShown() then
-      visual.threatborder:SetBackdropBorderColor(Addon:SetThreatColor(tp_frame.unit))
-    end
+  if tp_frame.visual.healthbar:IsShown() then
+    tp_frame.visual.healthbar:SetAllColors(Addon:SetHealthbarColor(tp_frame.unit))
   end
 
-  if visual.name:IsShown() then
-    visual.name:SetTextColor(Addon:SetNameColor(tp_frame.unit))
+  if tp_frame.visual.name:IsShown() then
+    tp_frame.visual.name:SetTextColor(Addon:SetNameColor(tp_frame.unit))
   end
 end
 
@@ -528,12 +532,35 @@ do
     visual.level:SetTextColor(unit.levelcolorRed, unit.levelcolorGreen, unit.levelcolorBlue)
 	end
 
+	-- UpdateIndicator_ThreatGlow: Updates the aggro glow
+	function UpdateIndicator_ThreatGlow()
+--		if not style.threatborder.show then
+--      return
+--    end
+    if visual.threatborder:IsShown() then
+      visual.threatborder:SetBackdropBorderColor(Addon:SetThreatColor(unit))
+    end
+  end
+
+	function UpdateIndicator_Target()
+    visual.target:SetShown(unit.isTarget and style.target.show)
+	end
+
 	-- UpdateIndicator_RaidIcon
 	function UpdateIndicator_RaidIcon()
+--    if unit.isMarked and RaidIconCoordinate[unit.raidIcon] == nil then
+--      ThreatPlates.DEBUG("UpdateIndicator_RaidIcon:", unit.unitid, "- isMarked:", unit.isMarked, "/ raidIcon:", unit.raidIcon)
+--      ThreatPlates.DEBUG("UpdateIndicator_RaidIcon: RaidIconCoordinate:", RaidIconCoordinate[unit.raidIcon])
+--    end
+
 		if unit.isMarked and style.raidicon.show then
-			visual.raidicon:Show()
-			local iconCoord = RaidIconCoordinate[unit.raidIcon]
-			visual.raidicon:SetTexCoord(iconCoord.x, iconCoord.x + 0.25, iconCoord.y,  iconCoord.y + 0.25)
+      local iconCoord = RaidIconCoordinate[unit.raidIcon]
+      if iconCoord then
+        visual.raidicon:Show()
+        visual.raidicon:SetTexCoord(iconCoord.x, iconCoord.x + 0.25, iconCoord.y,  iconCoord.y + 0.25)
+      else
+        visual.raidicon:Hide()
+      end
 		else
       visual.raidicon:Hide()
     end
@@ -574,13 +601,6 @@ do
 	-- UpdateIndicator_CustomAlpha: Calls the alpha delegate to get the requested alpha
 	function UpdateIndicator_CustomAlpha(tp_frame, unit)
     tp_frame.requestedAlpha = Addon:SetAlpha(unit) or 1
-
---    local occluded_alpha = tonumber(GetCVar("nameplateOccludedAlphaMult"))
---    if tp_frame.Parent:GetAlpha() < occluded_alpha then
---      tp_frame.requestedAlpha = occluded_alpha
---    end
-
-    --tp_frame.requestedAlpha = tp_frame.Parent:GetAlpha() or 1
     tp_frame:SetAlpha(tp_frame.requestedAlpha)
 	end
 
@@ -817,10 +837,10 @@ do
       PlatesByGUID[frame.unit.guid] = nil
     end
 
-    Widgets:OnUnitRemoved(frame, frame.unit)
-
     wipe(frame.unit)
     wipe(frame.unitcache)
+
+    Addon:WidgetsOnUnitRemoved(frame)
 
     -- Remove anything from the function queue
     frame.UpdateMe = false
@@ -915,31 +935,14 @@ do
     end
 	end
 
-  function  CoreEvents:UNIT_THREAT_LIST_UPDATE(unitid)
-    if unitid == "player" or unitid == "target" then return end
-    local plate = PlatesByUnit[unitid]
-
-    if plate then
-      --local threat_value = UnitThreatSituation("player", unitid) or 0
-      --if threat_value ~= plate.TPFrame.unit.threatValue then
-      if (UnitThreatSituation("player", unitid) or 0) ~= plate.TPFrame.unit.threatValue then
-
-        --OnHealthUpdate(plate)
-
-        plate.UpdateMe = true
-
-        -- TODO: Optimize this - only update elements that need updating
-        -- Don't use OnHealthUpdate(), more like: OnThreatUpdate()
-        -- UpdateReferences(plate)
-        --Addon:UpdateUnitCondition(unit, unitid)
-        --        unit.threatValue = UnitThreatSituation("player", unitid) or 0
-        --        unit.threatSituation = ThreatReference[unit.threatValue]
-        --        unit.isInCombat = UnitAffectingCombat(unitid)
-        --ProcessUnitChanges()
-        --OnUpdateCastMidway(nameplate, unit.unitid)
-      end
-    end
-  end
+--  function  CoreEvents:UNIT_THREAT_LIST_UPDATE(unitid)
+--    if not unitid then return end
+--
+--    local plate = PlatesByUnit[unitid]
+--    if plate then
+--      OnHealthUpdate(plate)
+--    end
+--  end
 
   function CoreEvents:PLAYER_REGEN_ENABLED()
 		SetUpdateAll()
@@ -1027,7 +1030,6 @@ do
 
   function CoreEvents:UI_SCALE_CHANGED()
     Addon:UIScaleChanged()
-    Addon:ForceUpdate()
 	end
 
 	function CoreEvents:UNIT_ABSORB_AMOUNT_CHANGED(unitid)
@@ -1152,25 +1154,41 @@ do
 		end
 	end
 
+	-- SetBarGroupObject
+--	local function SetBarGroupObject(object, objectstyle, anchorTo)
+--		if objectstyle then
+--			SetAnchorGroupObject(object, objectstyle, anchorTo)
+--			SetObjectBartexture(object, objectstyle.texture or EMPTY_TEXTURE, objectstyle.orientation or "HORIZONTAL")
+--			if objectstyle.backdrop then
+--				object:SetBackdropTexture(objectstyle.backdrop)
+--			end
+--			object:SetTexCoord(objectstyle.left, objectstyle.right, objectstyle.top, objectstyle.bottom)
+--		end
+--	end
+
 	-- Style Groups
 	local fontgroup = {"name", "level", "spelltext", "customtext"}
 
 	local anchorgroup = {
 		"name",  "spelltext", "customtext", "level",
-		"spellicon", "raidicon", "skullicon"
-    -- "threatborder", "castborder", "castnostop", "eliteicon", "target"
+		"spellicon", "raidicon", "skullicon", "target"
+    -- "threatborder", "castborder", "castnostop", "eliteicon",
   }
 
+	--local bargroup = { } --"castbar" }
+
 	local texturegroup = {
-    "skullicon", "spellicon",
-    -- "highlight", threatborder, "castborder", "castnostop", "eliteicon", "target"
+    "skullicon", "target", "spellicon",
+    -- "highlight", threatborder, "castborder", "castnostop", "eliteicon",
   }
+
+  --local showgroup = { "healthborder" }
 
 	-- UpdateStyle:
 	function UpdateStyle()
 		local index
 
-    -- Frame
+		-- Frame
     SetObjectAnchor(extended, style.frame.anchor or "CENTER", nameplate, style.frame.x or 0, style.frame.y or 0)
     extended:SetSize(style.healthbar.width, style.healthbar.height)
 
@@ -1227,14 +1245,10 @@ do
 --		end
     visual.threatborder:SetShown(style.threatborder.show)
 
-    -- Raid Icon Texture
-		if style.raidicon and style.raidicon.texture then
+		-- Raid Icon Texture
+		if style and style.raidicon and style.raidicon.texture then
 			visual.raidicon:SetTexture(style.raidicon.texture)
       visual.raidicon:SetDrawLayer("ARTWORK", 5)
-    end
-    -- TOODO: does not really work with ForceUpdate() as isMarked is not set there (no call to UpdateUnitCondition)
-    if not unit.isMarked then
-      visual.raidicon:Hide()
     end
 
 		-- Font Group
@@ -1268,28 +1282,48 @@ do
     UpdateIndicator_EliteIcon()
 
 		if not unit.isBoss then visual.skullicon:Hide() end
+		if not unit.isTarget then visual.target:Hide() end
+		-- TOODO: does not really work with ForceUpdate() as isMarked is not set there (no call to UpdateUnitCondition)
+		if not unit.isMarked then visual.raidicon:Hide() end
   end
 end
+
+--------------------------------------------------------------------------------------------------------------
+-- Theme Handling
+--------------------------------------------------------------------------------------------------------------
+local function UseTheme(theme)
+	if theme and type(theme) == 'table' and not theme.IsShown then
+		activetheme = theme 						-- Store a local copy
+		ResetPlates = true
+	end
+end
+
+Addon.UseTheme = UseTheme
+
+local function GetTheme()
+	return activetheme
+end
+
+TidyPlatesInternal.GetTheme = GetTheme
 
 --------------------------------------------------------------------------------------------------------------
 -- Misc. Utility
 --------------------------------------------------------------------------------------------------------------
 
--- Blizzard default nameplates always have the same size, no matter what the UI scale actually is
 function Addon:UIScaleChanged()
   local db = TidyPlatesThreat.db.profile.Scale
   if db.IgnoreUIScale then
-    -- self.UIScale = 1 -- Code for anchoring TPFrame to Blizzard nameplate instead of UIParent
-    self.UIScale = 1 / UIParent:GetEffectiveScale()
+    Addon.UIScale = 1 / UIParent:GetEffectiveScale()
   else
-    --self.UIScale = UIParent:GetEffectiveScale() * (4/3) -- Code for anchoring TPFrame to Blizzard nameplate instead of UIParent
-    self.UIScale = 1
+    Addon.UIScale = 1
 
     if db.PixelPerfectUI then
       local physicalScreenHeight = select(2, GetPhysicalScreenSize())
-      self.UIScale = 768.0 / physicalScreenHeight
+      Addon.UIScale = 768.0 / physicalScreenHeight
     end
   end
+
+  TidyPlatesInternal:ForceUpdate()
 end
 
 local ConfigModePlate
@@ -1349,13 +1383,7 @@ end
 function TidyPlatesInternal:DisableCastBars() ShowCastBars = false end
 function TidyPlatesInternal:EnableCastBars() ShowCastBars = true end
 
-function Addon:ForceUpdate()
-  for plate in pairs(self.PlatesVisible) do
-    if plate.TPFrame.Active then
-      OnResetNameplate(plate)
-    end
-  end
-end
+function TidyPlatesInternal:ForceUpdate() ForEachPlate(OnResetNameplate) end
 
 function Addon:ForceUpdateOnNameplate(plate)
   OnResetNameplate(plate)
