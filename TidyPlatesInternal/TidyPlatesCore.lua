@@ -1058,7 +1058,7 @@ do
         UpdateReferences(plate)
 
         local castbar = visual.castbar
-        if unit.isTarget and castbar:IsShown() then
+        if castbar:IsShown() then
           sourceName, _ = UnitName(sourceName) or sourceName, nil
           local _, class = UnitClass(sourceName)
           if class then
