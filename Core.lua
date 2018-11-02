@@ -390,6 +390,45 @@ function Addon:CallbackWhenOoC(func, msg)
 end
 
 -----------------------------------------------------------------------------------
+-- Functions for keybindings
+-----------------------------------------------------------------------------------
+
+function TidyPlatesThreat:ToggleNameplateModeFriendlyUnits()
+  local db = TidyPlatesThreat.db.profile
+
+  db.Visibility.FriendlyPlayer.UseHeadlineView = not db.Visibility.FriendlyPlayer.UseHeadlineView
+  db.Visibility.FriendlyNPC.UseHeadlineView = not db.Visibility.FriendlyNPC.UseHeadlineView
+  db.Visibility.FriendlyTotem.UseHeadlineView = not db.Visibility.FriendlyTotem.UseHeadlineView
+  db.Visibility.FriendlyGuardian.UseHeadlineView = not db.Visibility.FriendlyGuardian.UseHeadlineView
+  db.Visibility.FriendlyPet.UseHeadlineView = not db.Visibility.FriendlyPet.UseHeadlineView
+  db.Visibility.FriendlyMinus.UseHeadlineView = not db.Visibility.FriendlyMinus.UseHeadlineView
+
+  Addon:ForceUpdate()
+end
+
+function TidyPlatesThreat:ToggleNameplateModeNeutralUnits()
+  local db = TidyPlatesThreat.db.profile
+
+  db.Visibility.NeutralNPC.UseHeadlineView = not db.Visibility.NeutralNPC.UseHeadlineView
+  db.Visibility.NeutralMinus.UseHeadlineView = not db.Visibility.NeutralMinus.UseHeadlineView
+
+  Addon:ForceUpdate()
+end
+
+function TidyPlatesThreat:ToggleNameplateModeEnemyUnits()
+  local db = TidyPlatesThreat.db.profile
+
+  db.Visibility.EnemyPlayer.UseHeadlineView = not db.Visibility.EnemyPlayer.UseHeadlineView
+  db.Visibility.EnemyNPC.UseHeadlineView = not db.Visibility.EnemyNPC.UseHeadlineView
+  db.Visibility.EnemyTotem.UseHeadlineView = not db.Visibility.EnemyTotem.UseHeadlineView
+  db.Visibility.EnemyGuardian.UseHeadlineView = not db.Visibility.EnemyGuardian.UseHeadlineView
+  db.Visibility.EnemyPet.UseHeadlineView = not db.Visibility.EnemyPet.UseHeadlineView
+  db.Visibility.EnemyMinus.UseHeadlineView = not db.Visibility.EnemyMinus.UseHeadlineView
+
+  Addon:ForceUpdate()
+end
+
+-----------------------------------------------------------------------------------
 -- WoW EVENTS --
 -----------------------------------------------------------------------------------
 

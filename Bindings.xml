@@ -1,0 +1,11 @@
+<Bindings>
+    <Binding name="THREATPLATES_NAMEPLATE_MODE_FOR_FRIENDLY_UNITS" header="THREATPLATES">
+      TidyPlatesThreat:ToggleNameplateModeFriendlyUnits()
+    </Binding>
+    <Binding name="THREATPLATES_NAMEPLATE_MODE_FOR_NEUTRAL_UNITS">
+        TidyPlatesThreat:ToggleNameplateModeNeutralUnits()
+    </Binding>
+    <Binding name="THREATPLATES_NAMEPLATE_MODE_FOR_ENEMY_UNITS">
+       TidyPlatesThreat:ToggleNameplateModeEnemyUnits()
+    </Binding>
+</Bindings>
