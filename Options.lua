@@ -3571,6 +3571,50 @@ local function CreateBlizzardSettings()
           },
         },
       },
+--      Alpha = {
+--        name = L["Alpha"],
+--        order = 43,
+--        type = "group",
+--        inline = true,
+--        args = {
+--          OccludedUnits = {
+--            name = L["Mult for Occluded Units"],
+--            order = 10,
+--            type = "range",
+--            min = -10,
+--            max = 10,
+--            step = 0.01,
+--            isPercent = false,
+--            set = function(info, value) SetCVarTPTP(info, value); Addon:ForceUpdate() end,
+--            desc = L["Alpha multiplier of nameplates for occluded units."],
+--            arg = "nameplateOccludedAlphaMult",
+--          },
+--          MinAlpha = {
+--            name = L["Min Alpha"],
+--            order = 20,
+--            type = "range",
+--            min = 0,
+--            max = 1,
+--            step = 0.01,
+--            isPercent = false,
+--            set = function(info, value) SetCVarTPTP(info, value); Addon:ForceUpdate() end,
+--            desc = L["The minimum alpha of nameplates."],
+--            arg = "nameplateMinAlpha",
+--          },
+--          MaxAlpha = {
+--            name = L["Max Alpha"],
+--            order = 30,
+--            type = "range",
+--            min = 0,
+--            max = 1,
+--            step = 0.01,
+--            isPercent = false,
+--            set = function(info, value) SetCVarTPTP(info, value); Addon:ForceUpdate() end,
+--            desc = L["The max alpha of nameplates."],
+--            arg = "nameplateMaxAlpha",
+--          },
+--        },
+--      },
       PersonalNameplate = {
         name = L["Personal Nameplate"],
         order = 45,
@@ -4906,6 +4950,46 @@ local function CreateOptionsTable()
                       --desc = L["Uses the target-based transparency as absolute transparency and ignore unit base transparency."],
                       arg = { "nameplate", "alpha", "AbsoluteTargetAlpha" },
                     },
+                  },
+                },
+                OccludedUnits = {
+                  name = L["Occluded Units"],
+                  type = "group",
+                  order = 25,
+                  inline = true,
+                  args = {
+                    Help = {
+                      name = L["Change the transparency of nameplates for occluded units (e.g., units behind walls)."],
+                      order = 0,
+                      type = "description",
+                      width = "full",
+                    },
+                    ImportantNotice = {
+                      name = L["|cffff0000IMPORTANT: Enabling this feature changes console variables (CVARs) which will change the appearance of default Blizzard nameplates. Disabling this feature will reset these CVARs to their default value, but not to the original value they had when you enabled this feature.|r"],
+                      order = 1,
+                      type = "description",
+                      width = "full",
+                    },
+                    OccludedUnitsEnable = {
+                      name = L["Enable"],
+                      order = 10,
+                      type = "toggle",
+                      set = function(info, value)
+                        info = t.CopyTable(info)
+                        Addon:CallbackWhenOoC(function()
+                          if value then
+                            SetCVar("nameplateMinAlpha", 1)
+                            SetCVar("nameplateMaxAlpha", 1)
+                          else
+                            SetCVar("nameplateMinAlpha", GetCVarDefault("nameplateMinAlpha"))
+                            SetCVar("nameplateMaxAlpha", GetCVarDefault("nameplateMaxAlpha"))
+                          end
+                          SetValue(info, value)
+                        end, L["Unable to change a setting while in combat."])
+                      end,
+                      arg = { "nameplate", "toggle", "OccludedUnits" },
+                    },
+                    OccludedUnitsAlpha = GetTransparencyEntryDefault(11, { "nameplate", "alpha", "OccludedUnits" }),
                   },
                 },
                 NameplateAlpha = {

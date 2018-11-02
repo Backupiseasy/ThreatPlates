@@ -1938,6 +1938,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
         ["CastingEnemyUnitScale"] = false,
         ["MouseoverUnitAlpha"] = false,
         ["MouseoverUnitScale"] = false,
+        OccludedUnits        = false,
       },
       scale = {
         AbsoluteTargetScale  = false,
@@ -1984,6 +1985,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
         ["Pet"]              = 0.8,
         ["Minus"]	           = 0.8,
         ["Tapped"]		       = 1,
+        OccludedUnits        = 0.4,
       },
     },
   }

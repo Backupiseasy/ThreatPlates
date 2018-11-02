@@ -11,6 +11,7 @@ TidyPlatesInternal = {}
 local _
 local max, tonumber = math.max, tonumber
 local select, pairs, tostring  = select, pairs, tostring 			    -- Local function copy
+local math_abs = math.abs
 local CreateTidyPlatesInternalStatusbar = CreateTidyPlatesInternalStatusbar			    -- Local function copy
 
 -- WoW APIs
@@ -37,6 +38,27 @@ local UnitChannelInfo, UnitCastingInfo = UnitChannelInfo, UnitCastingInfo
 local UnitPlayerControlled = UnitPlayerControlled
 local GetCVar, Lerp, CombatLogGetCurrentEventInfo = GetCVar, Lerp, CombatLogGetCurrentEventInfo
 
+-- ThreatPlates APIs
+local TidyPlatesThreat = TidyPlatesThreat
+local Widgets = Addon.Widgets
+local activetheme = Addon.Theme
+
+-- Constants
+-- Raid Icon Reference
+local RaidIconCoordinate = {
+  ["STAR"] = { x = 0, y =0 },
+  ["CIRCLE"] = { x = 0.25, y = 0 },
+  ["DIAMOND"] = { x = 0.5, y = 0 },
+  ["TRIANGLE"] = { x = 0.75, y = 0},
+  ["MOON"] = { x = 0, y = 0.25},
+  ["SQUARE"] = { x = .25, y = 0.25},
+  ["CROSS"] = { x = .5, y = 0.25},
+  ["SKULL"] = { x = .75, y = 0.25},
+}
+
+local CASTBAR_INTERRUPT_HOLD_TIME = 1
+--local CASTBAR_FLASH_MIN_ALPHA = 0.4
+
 -- Internal Data
 local PlatesCreated, PlatesVisible, PlatesByUnit, PlatesByGUID = {}, {}, {}, {}
 local nameplate, extended, visual			    	-- Temp/Local References
@@ -46,33 +68,19 @@ local ShowCastBars = true
 local EMPTY_TEXTURE = "Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\Empty"
 local UpdateAll = false
 
+local PlateOnUpdateQueue = {}
+
+-- Cached CVARs (updated on every PLAYER_ENTERING_WORLD event
+local CVAR_NameplateOccludedAlphaMult
+-- Cached database settings
+local SettingsOccludedAlpha
+
 -- External references to internal data
 Addon.PlatesCreated = PlatesCreated
 Addon.PlatesVisible = PlatesVisible
 Addon.PlatesByUnit = PlatesByUnit
 Addon.PlatesByGUID = PlatesByGUID
 Addon.Theme = {}
-
--- ThreatPlates APIs
-local TidyPlatesThreat = TidyPlatesThreat
-local Widgets = Addon.Widgets
-local activetheme = Addon.Theme
-
--- Raid Icon Reference
-local RaidIconCoordinate = {
-		["STAR"] = { x = 0, y =0 },
-		["CIRCLE"] = { x = 0.25, y = 0 },
-		["DIAMOND"] = { x = 0.5, y = 0 },
-		["TRIANGLE"] = { x = 0.75, y = 0},
-		["MOON"] = { x = 0, y = 0.25},
-		["SQUARE"] = { x = .25, y = 0.25},
-		["CROSS"] = { x = .5, y = 0.25},
-		["SKULL"] = { x = .75, y = 0.25},
-}
-
--- Constants
-local CASTBAR_INTERRUPT_HOLD_TIME = 1
---local CASTBAR_FLASH_MIN_ALPHA = 0.4
 
 ---------------------------------------------------------------------------------------------------------------------
 -- Core Function Declaration
@@ -88,7 +96,8 @@ local function SetUpdateAll() UpdateAll = true end
 local UpdateStyle
 
 -- Indicators
-local UpdateIndicator_CustomText, UpdateIndicator_CustomScale, UpdateIndicator_CustomScaleText, UpdateIndicator_Standard, UpdateIndicator_CustomAlpha
+local UpdateIndicator_CustomText, UpdateIndicator_CustomScale, UpdateIndicator_CustomScaleText, UpdateIndicator_Standard
+local UpdateIndicator_CustomAlpha, UpdateIndicator_OccludedAlpha
 local UpdateIndicator_Level, UpdateIndicator_RaidIcon
 local UpdateIndicator_EliteIcon, UpdateIndicator_Name
 local UpdateIndicator_HealthBar
@@ -162,7 +171,7 @@ do
 
     extended:SetFrameStrata("BACKGROUND")
     extended:EnableMouse(false)
-    --extended.Parent = plate
+    extended.Parent = plate
     --extended:SetAllPoints(plate)
     plate.TPFrame = extended
 
@@ -313,6 +322,8 @@ do
 
     extended.stylename = ""
     extended.requestedAlpha = 0
+
+    unit.OccludedAlpha = nil
     --extended:SetAlpha(0)
 
     PlatesVisible[plate] = unitid
@@ -582,16 +593,35 @@ do
 
 	-- UpdateIndicator_CustomAlpha: Calls the alpha delegate to get the requested alpha
 	function UpdateIndicator_CustomAlpha(tp_frame, unit)
-    tp_frame.requestedAlpha = Addon:SetAlpha(unit) or 1
-
---    local occluded_alpha = tonumber(GetCVar("nameplateOccludedAlphaMult"))
---    if tp_frame.Parent:GetAlpha() < occluded_alpha then
---      tp_frame.requestedAlpha = occluded_alpha
---    end
-
-    --tp_frame.requestedAlpha = tp_frame.Parent:GetAlpha() or 1
+    tp_frame.requestedAlpha = unit.OccludedAlpha or Addon:SetAlpha(unit)
     tp_frame:SetAlpha(tp_frame.requestedAlpha)
 	end
+
+  function UpdateIndicator_OccludedAlpha(plate, unit)
+    local tp_frame = plate.TPFrame
+    local occluded_alpha = CVAR_NameplateOccludedAlphaMult
+
+    if math_abs(plate:GetAlpha() - occluded_alpha) < 0.05 then
+      if not unit.OccludedAlpha then
+        unit.OccludedAlpha = SettingsOccludedAlpha
+
+        tp_frame.requestedAlpha = SettingsOccludedAlpha
+        tp_frame:SetAlpha(SettingsOccludedAlpha)
+      end
+    elseif unit.OccludedAlpha then
+      unit.OccludedAlpha = nil
+
+      tp_frame.requestedAlpha = Addon:SetAlpha(unit)
+      tp_frame:SetAlpha(tp_frame.requestedAlpha)
+    end
+  end
+
+--  function UpdateIndicator_OccludedAlpha2(plate, unit)
+--    local tp_frame = plate.TPFrame
+--
+--    Addon.SetUnitOccludedAlpha(tp_frame, unit, plate:GetAlpha(), CVAR_NameplateOccludedAlphaMult)
+--    UpdateIndicator_CustomAlpha(tp_frame, unit)
+--  end
 
   function UpdateIndicator_CustomScale(tp_frame, unit)
     tp_frame:SetScale(Addon.UIScale * Addon:SetScale(unit))
@@ -766,6 +796,10 @@ do
     end
 
     plate.TPFrame:SetFrameLevel(plate:GetFrameLevel() * 10)
+
+    for i = 1, #PlateOnUpdateQueue do
+      PlateOnUpdateQueue[i](plate, plate.TPFrame.unit)
+    end
   end
 
   -- Frame: self = plate
@@ -787,7 +821,7 @@ do
 
   function CoreEvents:PLAYER_ENTERING_WORLD()
 		TidyPlatesCore:SetScript("OnUpdate", OnUpdate)
-	end
+  end
 
 	function CoreEvents:NAME_PLATE_CREATED(plate)
     OnNewNameplate(plate)
@@ -1359,6 +1393,16 @@ function TidyPlatesInternal:DisableCastBars() ShowCastBars = false end
 function TidyPlatesInternal:EnableCastBars() ShowCastBars = true end
 
 function Addon:ForceUpdate()
+  CVAR_NameplateOccludedAlphaMult = tonumber(GetCVar("nameplateOccludedAlphaMult"))
+
+  wipe(PlateOnUpdateQueue)
+
+  if TidyPlatesThreat.db.profile.nameplate.toggle.OccludedUnits then
+    PlateOnUpdateQueue[#PlateOnUpdateQueue + 1] = UpdateIndicator_OccludedAlpha
+  end
+
+  SettingsOccludedAlpha = TidyPlatesThreat.db.profile.nameplate.alpha.OccludedUnits
+
   for plate in pairs(self.PlatesVisible) do
     if plate.TPFrame.Active then
       OnResetNameplate(plate)

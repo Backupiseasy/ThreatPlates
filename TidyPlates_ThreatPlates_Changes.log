@@ -2,6 +2,7 @@
 9.1.0-Alpha2
 ------------------------------------------------------
 * Added an option to Auras widget to show tooltips when hovering above auras [Comment #1362].
+* Added an option to reduce the transparency of occluded units (see General - Transparency - Occluded Units) [#Comment #1312, #1437, #1477, E-Mail-Request].
 
 ------------------------------------------------------
 9.1.0-Alpha1
