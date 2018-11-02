@@ -330,6 +330,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
     NamePlateEnemyClickThrough = false,
     NamePlateFriendlyClickThrough = false,
     ShowFriendlyBlizzardNameplates = false,
+    ShowEnemyBlizzardNameplates = false,
     Automation = {
       FriendlyUnits = "NONE",
       EnemyUnits = "NONE",

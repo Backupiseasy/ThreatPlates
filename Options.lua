@@ -3242,12 +3242,28 @@ local function CreateVisibilitySettings()
               SetValue(info, val)
               Addon:SetBaseNamePlateSize() -- adjust clickable area if switching from Blizzard plates to Threat Plate plates
               for plate, unitid in pairs(Addon.PlatesVisible) do
-                Addon:UpdateFriendlyNameplateStyle(plate, unitid)
+                Addon:UpdateNameplateStyle(plate, unitid)
               end
             end,
             get = GetValue,
             desc = L["Use Blizzard default nameplates for friendly nameplates and disable ThreatPlates for these units."],
             arg = { "ShowFriendlyBlizzardNameplates" },
+          },
+          ShowBlizzardEnemyNameplates = {
+            name = L["Show Blizzard Nameplates for Neutral and Enemy Units"],
+            order = 60,
+            type = "toggle",
+            width = "full",
+            set = function(info, val)
+              SetValue(info, val)
+              Addon:SetBaseNamePlateSize() -- adjust clickable area if switching from Blizzard plates to Threat Plate plates
+              for plate, unitid in pairs(Addon.PlatesVisible) do
+                Addon:UpdateNameplateStyle(plate, unitid)
+              end
+            end,
+            get = GetValue,
+            desc = L["Use Blizzard default nameplates for neutral and enemy nameplates and disable ThreatPlates for these units."],
+            arg = { "ShowEnemyBlizzardNameplates" },
           },
         },
       },

@@ -201,7 +201,7 @@ function TidyPlatesThreat:ReloadTheme()
   end)
 
   for plate, unitid in pairs(Addon.PlatesVisible) do
-    Addon:UpdateFriendlyNameplateStyle(plate, unitid)
+    Addon:UpdateNameplateStyle(plate, unitid)
   end
 end
 

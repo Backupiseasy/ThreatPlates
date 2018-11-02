@@ -41,7 +41,6 @@ local GetCVar, Lerp, CombatLogGetCurrentEventInfo = GetCVar, Lerp, CombatLogGetC
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
 local Widgets = Addon.Widgets
-local activetheme = Addon.Theme
 
 -- Constants
 -- Raid Icon Reference
@@ -74,6 +73,7 @@ local PlateOnUpdateQueue = {}
 local CVAR_NameplateOccludedAlphaMult
 -- Cached database settings
 local SettingsOccludedAlpha
+local SettingsShowEnemyBlizzardNameplates, SettingsShowFriendlyBlizzardNameplates
 
 -- External references to internal data
 Addon.PlatesCreated = PlatesCreated
@@ -81,6 +81,8 @@ Addon.PlatesVisible = PlatesVisible
 Addon.PlatesByUnit = PlatesByUnit
 Addon.PlatesByGUID = PlatesByGUID
 Addon.Theme = {}
+
+local activetheme = Addon.Theme
 
 ---------------------------------------------------------------------------------------------------------------------
 -- Core Function Declaration
@@ -300,8 +302,18 @@ do
 	-- Create / Hide / Show Event Handlers
 	---------------------------------------------------------------------------------------------------------------------
 
-  function Addon:UpdateFriendlyNameplateStyle(plate, unitid)
-    if TidyPlatesThreat.db.profile.ShowFriendlyBlizzardNameplates and UnitReaction(unitid, "player") > 4 then
+  function Addon:UpdateNameplateStyle(plate, unitid)
+    if UnitReaction(unitid, "player") > 4 then
+      if SettingsShowFriendlyBlizzardNameplates then
+        plate.UnitFrame:Show()
+        plate.TPFrame:Hide()
+        plate.TPFrame.Active = false
+      else
+        plate.UnitFrame:Hide()
+        plate.TPFrame:Show()
+        plate.TPFrame.Active = true
+      end
+    elseif SettingsShowEnemyBlizzardNameplates then
       plate.UnitFrame:Show()
       plate.TPFrame:Hide()
       plate.TPFrame.Active = false
@@ -336,7 +348,7 @@ do
   
 		Addon:UpdateExtensions(extended, unit.unitid, stylename)
 
-    Addon:UpdateFriendlyNameplateStyle(nameplate, unitid)
+    Addon:UpdateNameplateStyle(nameplate, unitid)
 
     -- Call this after the plate is shown as OnStartCasting checks if the plate is shown; if not, the castbar is hidden and
     -- nothing is updated
@@ -785,7 +797,11 @@ do
     end
 
     -- Hide ThreatPlates nameplates if Blizzard nameplates should be shown for friendly units
-    UnitFrame:SetShown(db.ShowFriendlyBlizzardNameplates and UnitReaction(UnitFrame.unit, "player") > 4)
+    if UnitReaction(UnitFrame.unit, "player") > 4 then
+      UnitFrame:SetShown(SettingsShowFriendlyBlizzardNameplates)
+    else
+      UnitFrame:SetShown(SettingsShowEnemyBlizzardNameplates)
+    end
   end
 
   -- Frame: self = plate
@@ -1402,6 +1418,8 @@ function Addon:ForceUpdate()
   end
 
   SettingsOccludedAlpha = TidyPlatesThreat.db.profile.nameplate.alpha.OccludedUnits
+  SettingsShowFriendlyBlizzardNameplates = TidyPlatesThreat.db.profile.ShowFriendlyBlizzardNameplates
+  SettingsShowEnemyBlizzardNameplates = TidyPlatesThreat.db.profile.ShowEnemyBlizzardNameplates
 
   for plate in pairs(self.PlatesVisible) do
     if plate.TPFrame.Active then
