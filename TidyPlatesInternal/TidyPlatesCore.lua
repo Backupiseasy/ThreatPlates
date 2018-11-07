@@ -5,14 +5,12 @@ local ThreatPlates = Addon.ThreatPlates
 -- Variables and References
 ---------------------------------------------------------------------------------------------------------------------
 local TidyPlatesCore = CreateFrame("Frame", nil, WorldFrame)
-TidyPlatesInternal = {}
 
 -- Local References
 local _
 local max, tonumber = math.max, tonumber
 local select, pairs, tostring  = select, pairs, tostring 			    -- Local function copy
 local math_abs = math.abs
-local CreateTidyPlatesInternalStatusbar = CreateTidyPlatesInternalStatusbar			    -- Local function copy
 
 -- WoW APIs
 local wipe = wipe
@@ -55,7 +53,9 @@ local RaidIconCoordinate = {
   ["SKULL"] = { x = .75, y = 0.25},
 }
 
+local ON_UPDATE_INTERVAL = 1 / GetFramerate()
 local CASTBAR_INTERRUPT_HOLD_TIME = 1
+local PLATE_FADE_IN_TIME = 1
 --local CASTBAR_FLASH_MIN_ALPHA = 0.4
 
 -- Internal Data
@@ -72,7 +72,7 @@ local PlateOnUpdateQueue = {}
 -- Cached CVARs (updated on every PLAYER_ENTERING_WORLD event
 local CVAR_NameplateOccludedAlphaMult
 -- Cached database settings
-local SettingsOccludedAlpha
+local SettingsOccludedAlpha, SettingsEnabledOccludedAlpha
 local SettingsShowEnemyBlizzardNameplates, SettingsShowFriendlyBlizzardNameplates
 
 -- External references to internal data
@@ -98,8 +98,9 @@ local function SetUpdateAll() UpdateAll = true end
 local UpdateStyle
 
 -- Indicators
+local UpdatePlate_Transparency, UpdatePlate_TransparencyOnUpdate
+
 local UpdateIndicator_CustomText, UpdateIndicator_CustomScale, UpdateIndicator_CustomScaleText, UpdateIndicator_Standard
-local UpdateIndicator_CustomAlpha, UpdateIndicator_OccludedAlpha
 local UpdateIndicator_Level, UpdateIndicator_RaidIcon
 local UpdateIndicator_EliteIcon, UpdateIndicator_Name
 local UpdateIndicator_HealthBar
@@ -186,15 +187,15 @@ do
     -- Status Bars
     local castbar = Addon:CreateCastbar(extended)
     local healthbar = Addon:CreateHealthbar(extended)
-    local textFrame = CreateFrame("Frame", nil, extended)
+    local textframe = CreateFrame("Frame", nil, extended)
 
-		textFrame:SetAllPoints()
-    textFrame:SetFrameLevel(extended:GetFrameLevel() + 6)
+		textframe:SetAllPoints()
+    textframe:SetFrameLevel(extended:GetFrameLevel() + 6)
 
     --extended.widgetParent = widgetParent
 		visual.healthbar = healthbar
 		visual.castbar = castbar
-    visual.textframe = textFrame
+    visual.textframe = textframe
 
 		-- Parented to Health Bar - Lower Frame
     visual.threatborder = healthbar.ThreatBorder
@@ -202,16 +203,16 @@ do
     visual.eliteborder = healthbar.EliteBorder
 
     -- Parented to Extended - Middle Frame
-    visual.raidicon = textFrame:CreateTexture(nil, "ARTWORK", 5)
-    visual.skullicon = textFrame:CreateTexture(nil, "ARTWORK", 2)
-    visual.eliteicon = textFrame:CreateTexture(nil, "ARTWORK", 1)
+    visual.raidicon = textframe:CreateTexture(nil, "ARTWORK", 5)
+    visual.skullicon = textframe:CreateTexture(nil, "ARTWORK", 2)
+    visual.eliteicon = textframe:CreateTexture(nil, "ARTWORK", 1)
 
 		-- TextFrame
-    visual.name = textFrame:CreateFontString(nil, "ARTWORK", 0)
+    visual.name = textframe:CreateFontString(nil, "ARTWORK", 0)
 		visual.name:SetFont("Fonts\\FRIZQT__.TTF", 11)
-		visual.customtext = textFrame:CreateFontString(nil, "ARTWORK", -1)
+		visual.customtext = textframe:CreateFontString(nil, "ARTWORK", -1)
 		visual.customtext:SetFont("Fonts\\FRIZQT__.TTF", 11)
-		visual.level = textFrame:CreateFontString(nil, "ARTWORK", -2)
+		visual.level = textframe:CreateFontString(nil, "ARTWORK", -2)
 		visual.level:SetFont("Fonts\\FRIZQT__.TTF", 11)
 
 		-- Cast Bar Frame - Highest Frame
@@ -241,6 +242,7 @@ end
 ---------------------------------------------------------------------------------------------------------------------
 -- Nameplate Script Handlers
 ---------------------------------------------------------------------------------------------------------------------
+
 do
 	-- CheckNameplateStyle
 	local function CheckNameplateStyle()
@@ -291,7 +293,7 @@ do
     end
 
     -- Update Delegates
-    UpdateIndicator_CustomAlpha(extended, unit)
+    UpdatePlate_Transparency(extended, unit)
     UpdateIndicator_CustomScaleText()
 
     -- Cache the old unit information
@@ -333,10 +335,10 @@ do
     unit.name, _ = UnitName(unitid)
 
     extended.stylename = ""
-    extended.requestedAlpha = 0
 
-    unit.OccludedAlpha = nil
-    --extended:SetAlpha(0)
+    extended.CurrentAlpha = nil
+    extended.OccludedAlpha = false
+    extended:SetAlpha(0)
 
     PlatesVisible[plate] = unitid
     PlatesByUnit[unitid] = plate
@@ -345,7 +347,7 @@ do
     Addon:UpdateUnitContext(unit, unitid)
     Addon:UnitStyle_NameDependent(unit)
     ProcessUnitChanges()
-  
+
 		Addon:UpdateExtensions(extended, unit.unitid, stylename)
 
     Addon:UpdateNameplateStyle(nameplate, unitid)
@@ -517,10 +519,60 @@ function Addon:UpdateIndicatorNameplateColor(tp_frame)
   end
 end
 
---function Addon:UpdateIndicatorScaleAndAlpha(tp_frame, event)
---  UpdateIndicator_CustomScale(tp_frame, tp_frame.unit)
---  UpdateIndicator_CustomAlpha(tp_frame, tp_frame.unit)
---end
+---------------------------------------------------------------------------------------------------------------------
+-- Nameplate Transparency:
+---------------------------------------------------------------------------------------------------------------------
+
+-- UpdateIndicator_CustomAlpha: Calls the alpha delegate to get the requested alpha
+local	function UpdatePlate_TransparencyNoOcclusion(tp_frame, unit)
+  local target_alpha = Addon:SetAlpha(unit)
+
+  if target_alpha ~= tp_frame.CurrentAlpha then
+    tp_frame:SetAlpha(target_alpha)
+    tp_frame.CurrentAlpha = target_alpha
+  end
+end
+
+local	function UpdatePlate_TransparencyOcclusion(tp_frame, unit)
+  if not tp_frame:IsShown() or (tp_frame.OccludedAlpha and not unit.isTarget) then
+    return
+  end
+
+  local target_alpha = Addon:SetAlpha(unit)
+
+  if target_alpha ~= tp_frame.CurrentAlpha then
+    tp_frame:SetAlpha(target_alpha)
+    --    if tp_frame.TargetAlpha ~= tp_frame:GetAlpha() then
+    --      Addon.Animations:FadeIn(tp_frame, tp_frame.TargetAlpha, 1)
+    --    end
+    tp_frame.CurrentAlpha = target_alpha
+  end
+end
+
+local function UpdatePlate_TransparencyOcclusionOnUpdate(tp_frame, unit)
+  local target_alpha
+
+  local plate_alpha = tp_frame.Parent:GetAlpha()
+  if plate_alpha < (CVAR_NameplateOccludedAlphaMult + 0.05) then
+    tp_frame.OccludedAlpha = true
+    target_alpha = SettingsOccludedAlpha
+  elseif tp_frame.OccludedAlpha or not tp_frame.CurrentAlpha then
+    tp_frame.OccludedAlpha = false
+    target_alpha = Addon:SetAlpha(unit)
+  end
+
+  if target_alpha and target_alpha ~= tp_frame.CurrentAlpha then
+    Addon.Animations:StopFadeIn(tp_frame)
+
+    if tp_frame.OccludedAlpha then
+      tp_frame:SetAlpha(target_alpha)
+    else
+      Addon.Animations:FadeIn(tp_frame, target_alpha, PLATE_FADE_IN_TIME)
+    end
+
+    tp_frame.CurrentAlpha = target_alpha
+  end
+end
 
 do
 	-- UpdateIndicator_HealthBar: Updates the value on the health bar
@@ -603,45 +655,15 @@ do
 		end
 	end
 
-	-- UpdateIndicator_CustomAlpha: Calls the alpha delegate to get the requested alpha
-	function UpdateIndicator_CustomAlpha(tp_frame, unit)
-    tp_frame.requestedAlpha = unit.OccludedAlpha or Addon:SetAlpha(unit)
-    tp_frame:SetAlpha(tp_frame.requestedAlpha)
-	end
-
-  function UpdateIndicator_OccludedAlpha(plate, unit)
-    local tp_frame = plate.TPFrame
-    local occluded_alpha = CVAR_NameplateOccludedAlphaMult
-
-    if math_abs(plate:GetAlpha() - occluded_alpha) < 0.05 then
-      if not unit.OccludedAlpha then
-        unit.OccludedAlpha = SettingsOccludedAlpha
-
-        tp_frame.requestedAlpha = SettingsOccludedAlpha
-        tp_frame:SetAlpha(SettingsOccludedAlpha)
-      end
-    elseif unit.OccludedAlpha then
-      unit.OccludedAlpha = nil
-
-      tp_frame.requestedAlpha = Addon:SetAlpha(unit)
-      tp_frame:SetAlpha(tp_frame.requestedAlpha)
-    end
-  end
-
---  function UpdateIndicator_OccludedAlpha2(plate, unit)
---    local tp_frame = plate.TPFrame
---
---    Addon.SetUnitOccludedAlpha(tp_frame, unit, plate:GetAlpha(), CVAR_NameplateOccludedAlphaMult)
---    UpdateIndicator_CustomAlpha(tp_frame, unit)
---  end
-
   function UpdateIndicator_CustomScale(tp_frame, unit)
     tp_frame:SetScale(Addon.UIScale * Addon:SetScale(unit))
   end
 
 	-- UpdateIndicator_CustomScaleText: Updates indicators for custom text and scale
 	function UpdateIndicator_CustomScaleText()
-		if unit.health and (extended.requestedAlpha > 0) then
+		--if unit.health and (extended.requestedAlpha > 0) then
+    --if unit.health and extended.CurrentAlpha > 0 then
+    if unit.health then
 			-- Scale
       extended:SetScale(Addon.UIScale * Addon:SetScale(unit))
 
@@ -709,8 +731,8 @@ do
     castbar:SetAllColors(Addon:SetCastbarColor(unit))
     visual.castbar:SetShownInterruptOverlay(unit.spellIsShielded)
 
-		UpdateIndicator_CustomScaleText()
-		UpdateIndicator_CustomAlpha(extended, unit)
+    UpdatePlate_Transparency(extended, unit)
+    UpdateIndicator_CustomScaleText()
 
 		castbar:Show()
 	end
@@ -725,8 +747,8 @@ do
     unit.isCasting = false
 
 		--UpdateIndicator_CustomScaleText()
+    UpdatePlate_Transparency(extended, unit)
     UpdateIndicator_CustomScale(extended, unit)
-		UpdateIndicator_CustomAlpha(extended, unit)
 	end
 
 	function OnUpdateCastMidway(plate, unitid)
@@ -805,16 +827,27 @@ do
   end
 
   -- Frame: self = plate
-  local function FrameOnUpdate(plate)
-    local unitid = plate.UnitFrame.unit
-    if unitid and UnitIsUnit(unitid, "player") then
-      return
-    end
+  local function FrameOnUpdate(plate, elapsed)
+    -- Update the number of seconds since the last update
+    plate.TimeSinceLastUpdate = (plate.TimeSinceLastUpdate or 0) + elapsed
 
-    plate.TPFrame:SetFrameLevel(plate:GetFrameLevel() * 10)
+    if plate.TimeSinceLastUpdate >= ON_UPDATE_INTERVAL then
+      plate.TimeSinceLastUpdate = 0
 
-    for i = 1, #PlateOnUpdateQueue do
-      PlateOnUpdateQueue[i](plate, plate.TPFrame.unit)
+      local unitid = plate.UnitFrame.unit
+      if unitid and UnitIsUnit(unitid, "player") then
+        return
+      end
+
+      plate.TPFrame:SetFrameLevel(plate:GetFrameLevel() * 10)
+
+--    for i = 1, #PlateOnUpdateQueue do
+--      PlateOnUpdateQueue[i](plate, plate.TPFrame.unit)
+--    end
+
+      if SettingsEnabledOccludedAlpha then
+        UpdatePlate_TransparencyOcclusionOnUpdate(plate.TPFrame, plate.TPFrame.unit)
+      end
     end
   end
 
@@ -962,7 +995,7 @@ do
       frame.unit.isMouseover = true
       Addon:Element_Mouseover_Update(frame)
       UpdateIndicator_CustomScale(frame, frame.unit)
-      UpdateIndicator_CustomAlpha(frame, frame.unit)
+      UpdatePlate_Transparency(frame, frame.unit)
     end
   end
 
@@ -1405,21 +1438,28 @@ end
 -- External Commands: Allows widgets and themes to request updates to the plates.
 -- Useful to make a theme respond to externally-captured data (such as the combat log)
 --------------------------------------------------------------------------------------------------------------
-function TidyPlatesInternal:DisableCastBars() ShowCastBars = false end
-function TidyPlatesInternal:EnableCastBars() ShowCastBars = true end
+function Addon:DisableCastBars() ShowCastBars = false end
+function Addon:EnableCastBars() ShowCastBars = true end
 
 function Addon:ForceUpdate()
-  CVAR_NameplateOccludedAlphaMult = tonumber(GetCVar("nameplateOccludedAlphaMult"))
-
   wipe(PlateOnUpdateQueue)
 
-  if TidyPlatesThreat.db.profile.nameplate.toggle.OccludedUnits then
-    PlateOnUpdateQueue[#PlateOnUpdateQueue + 1] = UpdateIndicator_OccludedAlpha
-  end
+  CVAR_NameplateOccludedAlphaMult = tonumber(GetCVar("nameplateOccludedAlphaMult"))
 
-  SettingsOccludedAlpha = TidyPlatesThreat.db.profile.nameplate.alpha.OccludedUnits
-  SettingsShowFriendlyBlizzardNameplates = TidyPlatesThreat.db.profile.ShowFriendlyBlizzardNameplates
-  SettingsShowEnemyBlizzardNameplates = TidyPlatesThreat.db.profile.ShowEnemyBlizzardNameplates
+  local db = TidyPlatesThreat.db.profile
+
+  SettingsShowFriendlyBlizzardNameplates = db.ShowFriendlyBlizzardNameplates
+  SettingsShowEnemyBlizzardNameplates = db.ShowEnemyBlizzardNameplates
+
+  SettingsEnabledOccludedAlpha = db.nameplate.toggle.OccludedUnits
+  SettingsOccludedAlpha = db.nameplate.alpha.OccludedUnits
+
+  if SettingsEnabledOccludedAlpha then
+    UpdatePlate_Transparency = UpdatePlate_TransparencyOcclusion
+    PlateOnUpdateQueue[#PlateOnUpdateQueue + 1] = UpdatePlate_TransparencyOcclusionOnUpdate
+  else
+    UpdatePlate_Transparency = UpdatePlate_TransparencyNoOcclusion
+  end
 
   for plate in pairs(self.PlatesVisible) do
     if plate.TPFrame.Active then

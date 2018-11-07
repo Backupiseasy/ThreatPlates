@@ -3832,9 +3832,9 @@ local function CreateCastbarOptions()
             width = "double",
             set = function(info, val)
               if val or db.settings.castbar.ShowInHeadlineView then
-                TidyPlatesInternal:EnableCastBars()
+                Addon:EnableCastBars()
               else
-                TidyPlatesInternal:DisableCastBars()
+                Addon:DisableCastBars()
               end
               SetThemeValue(info, val)
             end,
@@ -3847,9 +3847,9 @@ local function CreateCastbarOptions()
             width = "double",
             set = function(info, val)
               if val or db.settings.castbar.show then
-                TidyPlatesInternal:EnableCastBars()
+                Addon:EnableCastBars()
               else
-                TidyPlatesInternal:DisableCastBars()
+                Addon:DisableCastBars()
               end
               SetThemeValue(info, val)
             end,

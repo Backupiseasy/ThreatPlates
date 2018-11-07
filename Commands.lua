@@ -115,6 +115,20 @@ function TidyPlatesThreat:ChatCommand(input)
       print ("ComboPointsFrameStrata:", Addon.Widgets.ComboPoints.WidgetFrame:GetFrameLevel())
       print ("TargetHighlight FrameLevel :", plate.TPFrame.widgets.TargetArt:GetFrameLevel())
 		return
+	elseif input == "occ" then
+		local plate = C_NamePlate.GetNamePlateForUnit("mouseover")
+		if not plate then return end
+
+		print ("Plate Alpha:", plate:GetAlpha())
+		print ("TP Alpha::", plate.TPFrame:GetAlpha(), " => Current:", plate.TPFrame.CurrentAlpha)
+		print ("Occluded Alpha:", plate.TPFrame.OccludedAlpha)
+
+    Addon:UpdatePlate_TransparencyTest(plate.TPFrame, plate.TPFrame.unit)
+
+    print ("Plate Alpha:", plate:GetAlpha())
+    print ("TP Alpha::", plate.TPFrame:GetAlpha(), " => Current:", plate.TPFrame.CurrentAlpha)
+    print ("Occluded Alpha:", plate.TPFrame.OccludedAlpha)
+		return
 	end
 
 	TidyPlatesThreat:OpenOptions()

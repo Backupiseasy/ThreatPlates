@@ -175,9 +175,9 @@ StaticPopupDialogs["SwitchToNewLookAndFeel"] = {
 function TidyPlatesThreat:ReloadTheme()
   -- Castbars have to be disabled everytime we login
   if TidyPlatesThreat.db.profile.settings.castbar.show or TidyPlatesThreat.db.profile.settings.castbar.ShowInHeadlineView then
-    TidyPlatesInternal:EnableCastBars()
+    Addon:EnableCastBars()
   else
-    TidyPlatesInternal:DisableCastBars()
+    Addon:DisableCastBars()
   end
 
   -- Recreate all TidyPlates styles for ThreatPlates("normal", "dps", "tank", ...) - required, if theme style settings were changed

@@ -47,23 +47,94 @@ function Animations:CreateFlashLoop(frame)
 end
 
 function Animations:Flash(frame, duration)
-  if frame.Playing then return end
-
   if not frame.FlashAnimation then
     self:CreateFlashLoop(frame)
   end
 
-  if not frame.Playing then
-    frame.FlashAnimation.FadeIn:SetDuration(duration)
-    frame.FlashAnimation.FadeOut:SetDuration(duration)
-    frame.FlashAnimation:Play()
-    frame.FlashAnimation.Playing = true
+  local animation = frame.FlashAnimation
+  if not animation.Playing then
+    animation.FadeIn:SetDuration(duration)
+    animation.FadeOut:SetDuration(duration)
+    animation:Play()
+    animation.Playing = true
   end
 end
 
 function Animations:StopFlash(frame)
-  if frame.FlashAnimation and frame.FlashAnimation.Playing then
-    frame.FlashAnimation:Stop()
-    frame.FlashAnimation.Playing = nil;
+  local animation = frame.FlashAnimation
+  if animation and animation.Playing then
+    animation:Stop()
+    animation.Playing = nil;
   end
 end
+
+function Animations:CreateFadeIn(frame)
+  frame.FadeInAnimation = frame:CreateAnimationGroup("FadeIn")
+  frame.FadeInAnimation.FadeIn = frame.FadeInAnimation:CreateAnimation("ALPHA", "FadeIn")
+
+  frame.FadeInAnimation:SetScript("OnFinished", function(self, requested)
+    self:Stop()
+    self.Playing = nil
+    frame:SetAlpha(self.TargetAlpha)
+  end)
+end
+
+function Animations:FadeIn(frame, target_alpha, duration)
+  if not frame.FadeInAnimation then
+    self:CreateFadeIn(frame, target_alpha)
+  end
+
+  local animation = frame.FadeInAnimation
+  if not frame.Playing then
+    animation.FadeIn:SetFromAlpha(frame:GetAlpha())
+    animation.FadeIn:SetToAlpha(target_alpha)
+    animation.FadeIn:SetDuration(duration)
+    animation:Play()
+    animation.Playing = true
+    animation.TargetAlpha = target_alpha
+  end
+end
+
+function Animations:StopFadeIn(frame)
+  local animation = frame.FadeInAnimation
+  if animation and animation.Playing then
+    animation:Stop()
+    animation.Playing = nil
+  end
+end
+
+--function Animations:CreateShrink(frame)
+--  frame.ShrinkAnimation = frame:CreateAnimationGroup("Scale")
+--  frame.ShrinkAnimation.Anim = frame.ShrinkAnimation:CreateAnimation("Scale", "Shrink")
+--
+--  frame.ShrinkAnimation:SetScript("OnFinished", function(self, requested)
+--    self:Stop()
+--    self.Playing = nil
+--    frame:Hide()
+--  end)
+--end
+--
+--function Animations:Shrink(frame, duration)
+--  if frame.Playing then return end
+--
+--  if not frame.ShrinkAnimation then
+--    self:CreateShrink(frame)
+--  end
+--
+--  local animation = frame.ShrinkAnimation
+--  if not frame.Playing then
+--    --animation.Anim:SetFromScale(frame:GetAlpha())
+--    animation.Anim:SetScale(0.2, 0.2)
+--    animation.Anim:SetDuration(duration)
+--    animation:Play()
+--    animation.Playing = true
+--  end
+--end
+--
+--function Animations:StopShrink(frame)
+--  local animation = frame.ShrinkAnimation
+--  if animation and animation.Playing then
+--    animation:Stop()
+--    animation.Playing = nil
+--  end
+--end
