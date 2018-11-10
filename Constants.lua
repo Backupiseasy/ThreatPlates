@@ -1636,6 +1636,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
       [79] = {},
       [80] = {},
     },
+    CVarsBackup = {}, -- Backup for CVars that should be restored when TP is disabled
     settings = {
       frame = {
         x = 0,
@@ -1991,7 +1992,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
         ["Pet"]              = 0.8,
         ["Minus"]	           = 0.8,
         ["Tapped"]		       = 1,
-        OccludedUnits        = 0.4,
+        OccludedUnits        = 1.0,
       },
     },
   }

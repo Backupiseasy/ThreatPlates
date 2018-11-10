@@ -402,6 +402,28 @@ end
 -- Functions to create the options dialog
 ---------------------------------------------------------------------------------------------------
 
+function Addon:SetCVarsForOcclusionDetection()
+  Addon.CVars:Set("nameplateMinAlpha", 1)
+  Addon.CVars:Set("nameplateMaxAlpha", 1)
+
+  -- Create enough separation between occluded and not occluded nameplates, even for targeted units
+  local occluded_alpha_mult = tonumber(GetCVar("nameplateOccludedAlphaMult"))
+  if occluded_alpha_mult > 0.9  then
+    occluded_alpha_mult = 0.9
+    Addon.CVars:Set("nameplateOccludedAlphaMult", occluded_alpha_mult)
+  end
+
+  local selected_alpha =  tonumber(GetCVar("nameplateSelectedAlpha"))
+  if not selected_alpha or (selected_alpha < occluded_alpha_mult + 0.1) then
+    selected_alpha = occluded_alpha_mult + 0.1
+    Addon.CVars:Set("nameplateSelectedAlpha", selected_alpha)
+  end
+end
+
+---------------------------------------------------------------------------------------------------
+-- Functions to create the options dialog
+---------------------------------------------------------------------------------------------------
+
 local function GetDescriptionEntry(text)
   return {
     name = text,
@@ -3672,10 +3694,10 @@ local function CreateBlizzardSettings()
                   "nameplateOtherTopInset", "nameplateOtherBottomInset", "nameplateLargeTopInset", "nameplateLargeBottomInset",
                   "nameplateMotion", "nameplateMotionSpeed", "nameplateOverlapH", "nameplateOverlapV",
                   "nameplateMaxDistance", "nameplateTargetBehindMaxDistance",
-                  "nameplateGlobalScale" -- Reset it to 1, if it get's somehow corrupted
+                  -- "nameplateGlobalScale" -- Reset it to 1, if it get's somehow corrupted
                 }
                 for k, v in pairs(cvars) do
-                  SetCVar(v, GetCVarDefault(v))
+                  Addon.CVars:SetToDefault(v)
                 end
                 Addon:ForceUpdate()
               end
@@ -4992,16 +5014,18 @@ local function CreateOptionsTable()
                       type = "toggle",
                       set = function(info, value)
                         info = t.CopyTable(info)
+
                         Addon:CallbackWhenOoC(function()
                           if value then
-                            SetCVar("nameplateMinAlpha", 1)
-                            SetCVar("nameplateMaxAlpha", 1)
+                            Addon:SetCVarsForOcclusionDetection()
                           else
-                            SetCVar("nameplateMinAlpha", GetCVarDefault("nameplateMinAlpha"))
-                            SetCVar("nameplateMaxAlpha", GetCVarDefault("nameplateMaxAlpha"))
+                            Addon.CVars:RestoreFromProfile("nameplateMinAlpha")
+                            Addon.CVars:RestoreFromProfile("nameplateMaxAlpha")
+                            Addon.CVars:RestoreFromProfile("nameplateSelectedAlpha")
+                            Addon.CVars:RestoreFromProfile("nameplateOccludedAlphaMult")
                           end
                           SetValue(info, value)
-                        end, L["Unable to change a setting while in combat."])
+                        end, L["Unable to change transparency for occluded units while in combat."])
                       end,
                       arg = { "nameplate", "toggle", "OccludedUnits" },
                     },

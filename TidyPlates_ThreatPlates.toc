@@ -15,6 +15,7 @@ Libs\Libs.xml
 Locales\Locales.xml
 
 Init.lua
+CVarsManager.lua
 Media.lua
 Constants.lua
 Elements\Elements.xml

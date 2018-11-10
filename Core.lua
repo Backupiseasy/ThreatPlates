@@ -200,6 +200,13 @@ function TidyPlatesThreat:ReloadTheme()
     SetNamePlateEnemyClickThrough(db.NamePlateEnemyClickThrough)
   end)
 
+  -- CVars setup for nameplates of occluded units
+  if TidyPlatesThreat.db.profile.nameplate.toggle.OccludedUnits then
+    Addon:CallbackWhenOoC(function()
+      Addon:SetCVarsForOcclusionDetection()
+    end)
+  end
+
   for plate, unitid in pairs(Addon.PlatesVisible) do
     Addon:UpdateNameplateStyle(plate, unitid)
   end
@@ -329,14 +336,10 @@ local function SetCVarHook(name, value, c)
     local isInstance, instanceType = IsInInstance()
 
     if not NamePlateDriverFrame:IsUsingLargerNamePlateStyle() then
-      if db.OldNameplateGlobalScale then
-        -- reset to previous setting when switched of in an instance (called if setting is changed in an instance)
-        SetCVar("nameplateGlobalScale", db.OldNameplateGlobalScale)
-        db.OldNameplateGlobalScale = nil
-      end
+      -- reset to previous setting
+      Addon.CVars:RestoreFromProfile("nameplateGlobalScale")
     elseif db.SmallPlatesInInstances and isInstance then
-      db.OldNameplateGlobalScale = GetCVar("nameplateGlobalScale")
-      SetCVar("nameplateGlobalScale", 0.4)
+      Addon.CVars:Set("nameplateGlobalScale", 0.4)
     end
   end
 end
@@ -376,6 +379,9 @@ end
 -- Called when the addon is disabled
 function TidyPlatesThreat:OnDisable()
   DisableEvents()
+
+  -- Reset all CVars to its initial values
+  -- Addon.CVars:RestoreAllFromProfile()
 end
 
 function Addon:CallbackWhenOoC(func, msg)
@@ -445,61 +451,20 @@ function TidyPlatesThreat:PLAYER_ENTERING_WORLD()
 
   local db = self.db.profile.Automation
   local isInstance, instanceType = IsInInstance()
-  if db.HideFriendlyUnitsInInstances then
-    if isInstance then
-      if not db.OldNameplateShowFriends then
-        db.OldNameplateShowFriends = GetCVar("nameplateShowFriends")
-        SetCVar("nameplateShowFriends", 0)
-      end
-    elseif db.OldNameplateShowFriends then
-      -- reset to previous setting
-      SetCVar("nameplateShowFriends", db.OldNameplateShowFriends)
-      db.OldNameplateShowFriends = nil
-    end
-  elseif isInstance and db.OldNameplateShowFriends then
-    -- reset to previous setting when switched of in an instance (called if setting is changed in an instance)
-    SetCVar("nameplateShowFriends", db.OldNameplateShowFriends) -- or GetCVarDefault("nameplateShowFriends"))
-    db.OldNameplateShowFriends = nil
+
+  if db.HideFriendlyUnitsInInstances and isInstance then
+    Addon.CVars:Set("nameplateShowFriends", 0)
+  else
+    -- reset to previous setting
+    Addon.CVars:RestoreFromProfile("nameplateShowFriends")
   end
 
-  if db.SmallPlatesInInstances and NamePlateDriverFrame:IsUsingLargerNamePlateStyle() then
-    if isInstance then
-      if not db.OldNameplateGlobalScale then
-        db.OldNameplateGlobalScale = GetCVar("nameplateGlobalScale")
-        SetCVar("nameplateGlobalScale", 0.4)
-        --NamePlateDriverFrame:SetBaseNamePlateSize(168, 112.5)
-      end
-    elseif db.OldNameplateGlobalScale then
-      -- reset to previous setting
-      SetCVar("nameplateGlobalScale", db.OldNameplateGlobalScale)
-      db.OldNameplateGlobalScale = nil
-    end
-  elseif db.OldNameplateGlobalScale and isInstance then
-    -- reset to previous setting when switched of in an instance (called if setting is changed in an instance)
-    SetCVar("nameplateGlobalScale", db.OldNameplateGlobalScale)
-    db.OldNameplateGlobalScale = nil
+  if db.SmallPlatesInInstances and NamePlateDriverFrame:IsUsingLargerNamePlateStyle() and isInstance then
+    Addon.CVars:Set("nameplateGlobalScale", 0.4)
+  else
+    -- reset to previous setting
+    Addon.CVars:RestoreFromProfile("nameplateGlobalScale")
   end
-
---  if db.SmallPlatesInInstances then
---    if isInstance then
---      db.OldLargerNamePlateStyle = true
---      SetCVar("NamePlateVerticalScale", 1)
---      SetCVar("NamePlateHorizontalScale", 1)
---      NamePlateDriverFrame:UpdateNamePlateOptions()
---    elseif db.OldLargerNamePlateStyle then
---      -- reset to previous setting
---      SetCVar("NamePlateVerticalScale", 2.7)
---      SetCVar("NamePlateHorizontalScale", 1.4)
---      NamePlateDriverFrame:UpdateNamePlateOptions()
---      db.OldLargerNamePlateStyle = nil
---    end
---  elseif db.OldLargerNamePlateStyle and isInstance then
---    -- reset to previous setting when switched of in an instance
---    SetCVar("NamePlateVerticalScale", 2.7)
---    SetCVar("NamePlateHorizontalScale", 1.4)
---    NamePlateDriverFrame:UpdateNamePlateOptions()
---    db.OldLargerNamePlateStyle = nil
---  end
 end
 
 --function TidyPlatesThreat:PLAYER_LEAVING_WORLD()
