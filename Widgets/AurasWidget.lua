@@ -135,6 +135,7 @@ Widget.CROWD_CONTROL_SPELLS = {
 
   -- Demon Hunter
   [217832] = LOC_INCAPACITATE,     -- Imprison (Blizzard)
+  [221527] = LOC_INCAPACITATE,     -- Imprison with PvP talent Detainment (Blizzard)
   -- Vengeance Demon Hunter
   [207685] = LOC_DISORIENT,        -- Sigil of Misery (Blizzard)
   [204490] = CC_SILENCE,           -- Sigil of Silence (Blizzard)

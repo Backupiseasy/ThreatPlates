@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+9.0.19
+------------------------------------------------------
+Aura for Imprison (Demon Hunter) is now correctly recognized as crowd-control auras when the PvP talent Detainment was selected [Comment #1602].
+
+------------------------------------------------------
 9.0.18
 ------------------------------------------------------
 * All auras for Demon Hunter, Rogues, Hunter, Death Knight, Paladin, Priest, Shaman, Monk, and Druid are now correctly recognized as crowd-control auras [Comment #1560, #1556, #1541].
