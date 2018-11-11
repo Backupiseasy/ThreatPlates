@@ -6,6 +6,7 @@
 * Added an option to disable Threat Plates for neutral and enemy nameplates and keep Blizzard default nameplates for these units [Comment #701, #1390, #1459].
 * Changed interrupt information on target castbar to show interrupt information on all units, not only on the current target [PM].
 * Added keybindings to toggle headline view for friendly, neutral, and enemy units.
+* Fixed a bug with nameplate layering where nameplates where shown above unit frames [Comment #1086, #1124, Issue #215].
 
 ------------------------------------------------------
 9.1.0-Alpha1

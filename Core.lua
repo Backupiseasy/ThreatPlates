@@ -442,14 +442,17 @@ end
 -- Also fires any other time the player sees a loading screen
 function TidyPlatesThreat:PLAYER_ENTERING_WORLD()
   -- Sync internal settings with Blizzard CVars
-  SetCVar("ShowClassColorInNameplate", 1)
+  -- SetCVar("ShowClassColorInNameplate", 1)
 
   local db = self.db.profile.questWidget
   if db.ON or db.ShowInHeadlineView then
-    SetCVar("showQuestTrackingTooltips", 1)
+    Addon.CVars:Set("showQuestTrackingTooltips", 1)
+    --SetCVar("showQuestTrackingTooltips", 1)
+  else
+    Addon.CVars:RestoreFromProfile("showQuestTrackingTooltips")
   end
 
-  local db = self.db.profile.Automation
+  db = self.db.profile.Automation
   local isInstance, instanceType = IsInInstance()
 
   if db.HideFriendlyUnitsInInstances and isInstance then
@@ -492,17 +495,19 @@ function TidyPlatesThreat:PLAYER_REGEN_ENABLED()
     task_queue_ooc[i] = nil
   end
 
-  local db = TidyPlatesThreat.db.profile.threat
-  -- Required for threat/aggro detection
-  if db.ON and (GetCVar("threatWarning") ~= 3) then
-    SetCVar("threatWarning", 3)
-  elseif not db.ON and (GetCVar("threatWarning") ~= 0) then
-    SetCVar("threatWarning", 0)
-  end
+--  local db = TidyPlatesThreat.db.profile.threat
+--  -- Required for threat/aggro detection
+--  if db.ON and (GetCVar("threatWarning") ~= 3) then
+--    SetCVar("threatWarning", 3)
+--  elseif not db.ON and (GetCVar("threatWarning") ~= 0) then
+--    SetCVar("threatWarning", 0)
+--  end
 
   local db = TidyPlatesThreat.db.profile.Automation
-  -- Dont't use automation for friendly nameplates if in an instance and Hide Friendly Nameplates is enabled (db.OldNameplateShowFriends ~= nil)
-  if db.FriendlyUnits ~= "NONE" and not db.OldNameplateShowFriends then
+  local isInstance, _ = IsInInstance()
+
+  -- Dont't use automation for friendly nameplates if in an instance and Hide Friendly Nameplates is enabled
+  if db.FriendlyUnits ~= "NONE" and not (isInstance and db.HideFriendlyUnitsInInstances) then
     SetCVar("nameplateShowFriends", (db.FriendlyUnits == "SHOW_COMBAT" and 0) or 1)
   end
   if db.EnemyUnits ~= "NONE" then
@@ -513,8 +518,10 @@ end
 -- Fires when the player enters combat status
 function TidyPlatesThreat:PLAYER_REGEN_DISABLED()
   local db = self.db.profile.Automation
-  -- Dont't use automation for friendly nameplates if in an instance and Hide Friendly Nameplates is enabled (db.OldNameplateShowFriends ~= nil)
-  if db.FriendlyUnits ~= "NONE" and not db.OldNameplateShowFriends then
+  local isInstance, _ = IsInInstance()
+
+  -- Dont't use automation for friendly nameplates if in an instance and Hide Friendly Nameplates is enabled
+  if db.FriendlyUnits ~= "NONE" and not (isInstance and db.HideFriendlyUnitsInInstances) then
     SetCVar("nameplateShowFriends", (db.FriendlyUnits == "SHOW_COMBAT" and 1) or 0)
   end  if db.EnemyUnits ~= "NONE" then
     SetCVar("nameplateShowEnemies", (db.EnemyUnits == "SHOW_COMBAT" and 1) or 0)
