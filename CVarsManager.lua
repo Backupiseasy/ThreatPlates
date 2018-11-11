@@ -6,7 +6,7 @@ local ThreatPlates = Addon.ThreatPlates
 ---------------------------------------------------------------------------------------------------
 
 -- Lua APIs
-local pairs, tonumber = pairs, tonumber
+local pairs, tonumber, tostring = pairs, tonumber, tostring
 
 -- WoW APIs
 local SetCVar, GetCVar, GetCVarDefault = SetCVar, GetCVar, GetCVarDefault
@@ -19,12 +19,12 @@ Addon.CVars = {}
 
 local CVars = Addon.CVars
 
---local COMBAT_PROTECTED = {
---  nameplateMinAlpha = true,
---  nameplateMaxAlpha = true,
---  nameplateSelectedAlpha = true,
---  nameplateOccludedAlphaMult = true,
---}
+local COMBAT_PROTECTED = {
+  nameplateMinAlpha = true,
+  nameplateMaxAlpha = true,
+  nameplateSelectedAlpha = true,
+  nameplateOccludedAlphaMult = true,
+}
 
 local function SetConsoleVariable(cvar, value)
   -- Store in settings to be able to restore it later, but don't overwrite an existing value unless the current value
@@ -32,23 +32,16 @@ local function SetConsoleVariable(cvar, value)
   -- last login with TP by the player or another addon.
   local db = TidyPlatesThreat.db.profile.CVarsBackup
 
-  local backup_value = db[cvar]
+  value = tostring(value) -- convert to string, otherwise the following comparisons would compare numbers with strings
   local current_value = GetCVar(cvar)
+  local backup_value = db[cvar]
+
   if (value ~= current_value) and (current_value ~= backup_value) then
     db[cvar] = current_value
   end
 
   SetCVar(cvar, value)
 end
-
---function CVars:Set(cvar, value)
---
---  if COMBAT_PROTECTED[cvar] then
---    Addon:CallbackWhenOoC(function() SetConsoleVariable(cvar, value) end, L["Unable to change the following console variable while in combat: "] .. cvar .. ". ")
---  else
---    SetConsoleVariable(cvar, value)
---  end
---end
 
 function CVars:Set(cvar, value)
   SetConsoleVariable(cvar, value)
@@ -86,3 +79,29 @@ end
 --
 --  return value
 --end
+
+---------------------------------------------------------------------------------------------------
+-- Set CVars in a safe way when in combat
+---------------------------------------------------------------------------------------------------
+
+function CVars:SetProtected(cvar, value)
+  if COMBAT_PROTECTED[cvar] then
+    Addon:CallbackWhenOoC(function()
+      SetConsoleVariable(cvar, value)
+    end, L["Unable to change the following console variable while in combat: "] .. cvar .. ". ")
+  else
+    SetConsoleVariable(cvar, value)
+  end
+end
+
+function CVars:SetToDefaultProtected(cvar)
+  if COMBAT_PROTECTED[cvar] then
+    Addon:CallbackWhenOoC(function()
+      SetCVar(cvar, GetCVarDefault())
+      TidyPlatesThreat.db.profile.CVarsBackup[cvar] = nil
+    end, L["Unable to change the following console variable while in combat: "] .. cvar .. ". ")
+  else
+    SetCVar(cvar, GetCVarDefault())
+    TidyPlatesThreat.db.profile.CVarsBackup[cvar] = nil
+  end
+end

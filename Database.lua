@@ -85,7 +85,7 @@ local function GetDefaultSettingsV1(defaults)
   db.allowClass = false
   db.friendlyClass = false
   db.optionRoleDetectionAutomatic = false
-  db.HeadlineView.width = 116
+  --db.HeadlineView.width = 116
   db.text.amount = true
   db.AuraWidget.ModeBar.Texture = "Aluminium"
   db.uniqueWidget.scale = 35
