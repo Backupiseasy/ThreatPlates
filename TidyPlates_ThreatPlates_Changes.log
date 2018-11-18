@@ -1,7 +1,7 @@
 ﻿------------------------------------------------------
 9.0.19
 ------------------------------------------------------
-Aura for Imprison (Demon Hunter) is now correctly recognized as crowd-control auras when the PvP talent Detainment was selected [Comment #1602].
+* Auras for Imprison (Demon Hunter), Sin and Punishment (Priest), and Unstable Affliction silence effect (Warlock) are now correctly recognized as crowd-control auras when the PvP talent Detainment was selected [Comment #1602].
 
 ------------------------------------------------------
 9.0.18
