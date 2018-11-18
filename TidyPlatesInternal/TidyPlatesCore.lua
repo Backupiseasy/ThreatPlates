@@ -529,7 +529,12 @@ local	function UpdatePlate_TransparencyNoOcclusion(tp_frame, unit)
   local target_alpha = Addon:SetAlpha(unit)
 
   if target_alpha ~= tp_frame.CurrentAlpha then
-    tp_frame:SetAlpha(target_alpha)
+    if SettingsEnabledFading then
+      Addon.Animations:StopFadeIn(tp_frame)
+      Addon.Animations:FadeIn(tp_frame, target_alpha, PLATE_FADE_IN_TIME)
+    else
+      tp_frame:SetAlpha(target_alpha)
+    end
     tp_frame.CurrentAlpha = target_alpha
   end
 end
