@@ -3800,27 +3800,6 @@ local function CreateAutomationSettings()
           },
         },
       },
---      Fading = {
---        name = L["Fading"],
---        type = "group",
---        order = 30,
---        inline = true,
---        args = {
---          Enable = {
---            type = "toggle",
---            order = 1,
---            name = "Enable",
---            desc = L["This option allows you to control whether nameplates should fade in or out when displayed or hidden."],
---            descStyle = "inline",
---            width = "full",
---            set = function(info, val)
---              SetValue(info, val)
---              if db.tidyplatesFade then TidyPlatesInternal:EnableFadeIn() else TidyPlatesInternal:DisableFadeIn() end
---            end,
---            arg = { "tidyplatesFade" },
---          },
---        },
---      },
     },
   }
 
@@ -4900,6 +4879,22 @@ local function CreateOptionsTable()
               type = "group",
               order = 40,
               args = {
+                Fading = {
+                  name = L["Fading"],
+                  type = "group",
+                  order = 5,
+                  inline = true,
+                  args = {
+                    Enable = {
+                      type = "toggle",
+                      order = 10,
+                      name = "Enable Fade-In",
+                      desc = L["This option allows you to control whether nameplates should fade in when displayed."],
+                      width = "full",
+                      arg = { "Transparency", "Fading" },
+                    },
+                  },
+                },
                 Situational = {
                   name = L["Situational Transparency"],
                   type = "group",
@@ -5003,7 +4998,7 @@ local function CreateOptionsTable()
                       width = "full",
                     },
                     ImportantNotice = {
-                      name = L["|cffff0000IMPORTANT: Enabling this feature changes console variables (CVARs) which will change the appearance of default Blizzard nameplates. Disabling this feature will reset these CVARs to their default value, but not to the original value they had when you enabled this feature.|r"],
+                      name = L["|cffff0000IMPORTANT: Enabling this feature changes console variables (CVARs) which will change the appearance of default Blizzard nameplates. Disabling this feature will reset these CVARs to the original value they had when you enabled this feature.|r"],
                       order = 1,
                       type = "description",
                       width = "full",

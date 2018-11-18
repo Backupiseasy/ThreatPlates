@@ -13,6 +13,17 @@ local UnitExists = UnitExists
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
 
+---------------------------------------------------------------------------------------------------
+-- Cached configuration settings
+---------------------------------------------------------------------------------------------------
+--local db
+--
+--local FrameSetAlpha
+
+---------------------------------------------------------------------------------------------------
+-- Functions handling transparency of nameplates
+---------------------------------------------------------------------------------------------------
+
 local function TransparencySituational(unit)
 	local db = TidyPlatesThreat.db.profile.nameplate
 
@@ -163,3 +174,34 @@ local ALPHA_FUNCTIONS = {
 function Addon:SetAlpha(unit)
   return ALPHA_FUNCTIONS[unit.style](unit, unit.style)
 end
+
+--local function SetAlphaWithFading(tp_frame, unit)
+--  local target_alpha = ALPHA_FUNCTIONS[unit.style](unit, unit.style)
+--
+--  if target_alpha ~= tp_frame.CurrentAlpha then
+--    Addon.Animations:StopFadeIn(tp_frame)
+--    Addon.Animations:FadeIn(tp_frame, target_alpha, PLATE_FADE_IN_TIME)
+--    tp_frame.CurrentAlpha = target_alpha
+--  end
+--end
+--
+--local function SetAlphaNoFading(tp_frame, unit)
+--  local target_alpha = ALPHA_FUNCTIONS[unit.style](unit, unit.style)
+--
+--  if target_alpha ~= tp_frame.CurrentAlpha then
+--    tp_frame:SetAlpha(target_alpha)
+--    tp_frame.CurrentAlpha = target_alpha
+--  end
+--end
+--
+--function Addon:UpdateConfigurationStatusText()
+--  db = TidyPlatesThreat.db.profile
+--
+--  if db.Transparency.Fading then
+--    Addon.FrameSetAlpha = SetAlphaWithFading
+--  else
+--    Addon.FrameSetAlpha = SetAlphaNoFading
+--  end
+--end
+
+

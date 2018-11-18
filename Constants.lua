@@ -1995,5 +1995,8 @@ ThreatPlates.DEFAULT_SETTINGS = {
         OccludedUnits        = 1.0,
       },
     },
+    Transparency = {
+      Fadeing = true,
+    },
   }
 }

@@ -72,6 +72,7 @@ local PlateOnUpdateQueue = {}
 -- Cached CVARs (updated on every PLAYER_ENTERING_WORLD event
 local CVAR_NameplateOccludedAlphaMult
 -- Cached database settings
+local SettingsEnabledFading
 local SettingsOccludedAlpha, SettingsEnabledOccludedAlpha
 local SettingsShowEnemyBlizzardNameplates, SettingsShowFriendlyBlizzardNameplates
 
@@ -541,10 +542,12 @@ local	function UpdatePlate_TransparencyOcclusion(tp_frame, unit)
   local target_alpha = Addon:SetAlpha(unit)
 
   if target_alpha ~= tp_frame.CurrentAlpha then
-    tp_frame:SetAlpha(target_alpha)
-    --    if tp_frame.TargetAlpha ~= tp_frame:GetAlpha() then
-    --      Addon.Animations:FadeIn(tp_frame, tp_frame.TargetAlpha, 1)
-    --    end
+    if SettingsEnabledFading then
+      Addon.Animations:StopFadeIn(tp_frame)
+      Addon.Animations:FadeIn(tp_frame, target_alpha, PLATE_FADE_IN_TIME)
+    else
+      tp_frame:SetAlpha(target_alpha)
+    end
     tp_frame.CurrentAlpha = target_alpha
   end
 end
@@ -564,7 +567,7 @@ local function UpdatePlate_TransparencyOcclusionOnUpdate(tp_frame, unit)
   if target_alpha and target_alpha ~= tp_frame.CurrentAlpha then
     Addon.Animations:StopFadeIn(tp_frame)
 
-    if tp_frame.OccludedAlpha then
+    if tp_frame.OccludedAlpha or not SettingsEnabledFading then
       tp_frame:SetAlpha(target_alpha)
     else
       Addon.Animations:FadeIn(tp_frame, target_alpha, PLATE_FADE_IN_TIME)
@@ -1451,6 +1454,7 @@ function Addon:ForceUpdate()
   SettingsShowFriendlyBlizzardNameplates = db.ShowFriendlyBlizzardNameplates
   SettingsShowEnemyBlizzardNameplates = db.ShowEnemyBlizzardNameplates
 
+  SettingsEnabledFading = db.Transparency.Fading
   SettingsEnabledOccludedAlpha = db.nameplate.toggle.OccludedUnits
   SettingsOccludedAlpha = db.nameplate.alpha.OccludedUnits
 
