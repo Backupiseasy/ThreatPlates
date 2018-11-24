@@ -117,14 +117,14 @@ Widget.CROWD_CONTROL_SPELLS = {
 
   -- Death Knight
   [273977] = PC_SNARE,            -- Grip of the Dead (Talent)
-  [221562] = LOC_STUN,            -- Asphyxiate (Blood)
-  [108194] = LOC_STUN,            -- Asphyxiate (Unholy/Frost)
   [45524] = PC_SNARE,             -- Chains of Ictggtse
   [111673] = LOC_CHARM,           -- Control Undead
   --[77606] = LOC_CHARM,            -- Dark Simulacrum (Honor) -- no CC aura
   -- Blood
+  [221562] = LOC_STUN,            -- Asphyxiate (Blood, Blizzard)
   [47476] = CC_SILENCE,           -- Strangulate (Honor)
   -- Frost
+  [108194] = LOC_STUN,            -- Asphyxiate (Unholy/Frost, Blizzard)
   [207167] = LOC_DISORIENT,       -- Blinding Sleet (Talent, Blizzard)
   [204085] = PC_ROOT,             -- Deathchill (Honor)
   [204206] = PC_SNARE,            -- Chilled from Chill Streasek (Honor)

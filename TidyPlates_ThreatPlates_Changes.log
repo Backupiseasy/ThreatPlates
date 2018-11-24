@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+9.0.20
+------------------------------------------------------
+* Aura for Asphyxiate (Frost and Unholy Death Knight) is now correctly recognized as crowd-control aura [Pull Request #103, thanks to xeropresence].
+
+------------------------------------------------------
 9.0.19
 ------------------------------------------------------
 * Aura for Imprison (Demon Hunter) is now correctly recognized as crowd-control auras when the PvP talent Detainment was selected [Comment #1602].
