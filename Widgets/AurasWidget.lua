@@ -117,7 +117,8 @@ Widget.CROWD_CONTROL_SPELLS = {
 
   -- Death Knight
   [273977] = PC_SNARE,            -- Grip of the Dead (Talent)
-  [221562] = LOC_STUN,            -- Asphyxiate
+  [221562] = LOC_STUN,            -- Asphyxiate (Blood)
+  [108194] = LOC_STUN,            -- Asphyxiate (Unholy/Frost)
   [45524] = PC_SNARE,             -- Chains of Ictggtse
   [111673] = LOC_CHARM,           -- Control Undead
   --[77606] = LOC_CHARM,            -- Dark Simulacrum (Honor) -- no CC aura
