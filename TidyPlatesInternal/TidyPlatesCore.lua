@@ -1395,11 +1395,11 @@ end
 function Addon:UIScaleChanged()
   local db = TidyPlatesThreat.db.profile.Scale
   if db.IgnoreUIScale then
-    self.UIScale = 1 -- Code for anchoring TPFrame to WorldFrame/Blizzard nameplate instead of UIParent
+    self.UIScale = 1  -- Code for anchoring TPFrame to WorldFrame/Blizzard nameplate instead of UIParent
     --self.UIScale = 1 / UIParent:GetEffectiveScale()
   else
-    self.UIScale = UIParent:GetEffectiveScale() * (4/3) -- Code for anchoring TPFrame to WorldFrame/Blizzard nameplate instead of UIParent
     --self.UIScale = 1
+    self.UIScale = UIParent:GetEffectiveScale() -- Code for anchoring TPFrame to WorldFrame/Blizzard nameplate instead of UIParent
 
     if db.PixelPerfectUI then
       local physicalScreenHeight = select(2, GetPhysicalScreenSize())

@@ -1,6 +1,7 @@
 ﻿------------------------------------------------------
 9.1.0-Alpha3
 ------------------------------------------------------
+* Fixed a bug with UI scaling which resulted in nameplates being to big when "Ignore UI Scale" was disabled [Comment #1648].
 
 ------------------------------------------------------
 9.1.0-Alpha2
