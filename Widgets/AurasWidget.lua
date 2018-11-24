@@ -118,13 +118,14 @@ Widget.CROWD_CONTROL_SPELLS = {
 
   -- Death Knight
   [273977] = PC_SNARE,            -- Grip of the Dead (Talent)
-  [221562] = LOC_STUN,            -- Asphyxiate
   [45524] = PC_SNARE,             -- Chains of Ictggtse
   [111673] = LOC_CHARM,           -- Control Undead
   --[77606] = LOC_CHARM,            -- Dark Simulacrum (Honor) -- no CC aura
   -- Blood
+  [221562] = LOC_STUN,            -- Asphyxiate (Blood, Blizzard)
   [47476] = CC_SILENCE,           -- Strangulate (Honor)
   -- Frost
+  [108194] = LOC_STUN,            -- Asphyxiate (Unholy/Frost, Blizzard)
   [207167] = LOC_DISORIENT,       -- Blinding Sleet (Talent, Blizzard)
   [204085] = PC_ROOT,             -- Deathchill (Honor)
   [204206] = PC_SNARE,            -- Chilled from Chill Streasek (Honor)
@@ -136,6 +137,7 @@ Widget.CROWD_CONTROL_SPELLS = {
 
   -- Demon Hunter
   [217832] = LOC_INCAPACITATE,     -- Imprison (Blizzard)
+  [221527] = LOC_INCAPACITATE,     -- Imprison with PvP talent Detainment (Blizzard)
   -- Vengeance Demon Hunter
   [207685] = LOC_DISORIENT,        -- Sigil of Misery (Blizzard)
   [204490] = CC_SILENCE,           -- Sigil of Silence (Blizzard)
@@ -228,8 +230,7 @@ Widget.CROWD_CONTROL_SPELLS = {
   [15487] = CC_SILENCE,         -- Silence (Blizzard)
   [64044] = LOC_STUN,           -- Psychic Horror (Blizzard)
   --[15407] = PC_SNARE,           -- Mind Flay - not shown as very high uptime
-  -- TODO:
-  --[34914] = LOC_FEAR,           -- Fear effect after dispell of Vampiric Touch ?87204
+  [87204] = LOC_FEAR,           -- Sin and Punishment, fear effect after dispell of Vampiric Touch ?87204
 
   -- Rogue
   [1833] = LOC_STUN,       -- Cheap Shot (Blizzard)
@@ -283,8 +284,7 @@ Widget.CROWD_CONTROL_SPELLS = {
   [6358] = LOC_DISORIENT,     -- Seduction from Command Demon (Apply Aura: Stun) (Blizzard)
   -- Affliction
   [278350] = PC_SNARE,        -- Vile Taint
-  -- TODO:
-  --[30108] = CC_SILENCE,       -- Silence effect after dispell of Unstable Affliction
+  [196364] = CC_SILENCE,      -- Unstable Affliction, silence effect after dispell of Unstable Affliction
   -- Demonology
   [213688] = LOC_STUN,        -- Fel Cleave aura from Call Fel Lord (Honor)
   -- Destruction
@@ -1451,14 +1451,6 @@ function Widget:ParseSpellFilters()
   self.AuraFilterDebuffs = ParseFilter(self.db.Debuffs.FilterBySpell)
   self.AuraFilterCrowdControl = ParseFilter(self.db.CrowdControl.FilterBySpell)
 
-  -- Mine does not make sense here, so ignore it.
-  if self.db.Debuffs.ShowAllEnemy then
-    self.FilterModeEnemyDebuffs = self.db.Debuffs.FilterMode
-  elseif self.db.Debuffs.ShowOnlyMine then
-    self.FilterModeEnemyDebuffs = self.db.Debuffs.FilterMode .. "Mine"
-  else
-    self.FilterModeEnemyDebuffs = "all"
-  end
 end
 
 function Widget:UpdateSettingsIconMode()
