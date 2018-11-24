@@ -53,10 +53,9 @@ local RaidIconCoordinate = {
   ["SKULL"] = { x = .75, y = 0.25},
 }
 
-local ON_UPDATE_INTERVAL = 1 / GetFramerate()
-local CASTBAR_INTERRUPT_HOLD_TIME = 1
-local PLATE_FADE_IN_TIME = 1
---local CASTBAR_FLASH_MIN_ALPHA = 0.4
+local CASTBAR_INTERRUPT_HOLD_TIME = Addon.CASTBAR_INTERRUPT_HOLD_TIME
+local ON_UPDATE_INTERVAL = Addon.ON_UPDATE_PER_FRAME
+local PLATE_FADE_IN_TIME = Addon.PLATE_FADE_IN_TIME
 
 -- Internal Data
 local PlatesCreated, PlatesVisible, PlatesByUnit, PlatesByGUID = {}, {}, {}, {}
@@ -99,7 +98,8 @@ local function SetUpdateAll() UpdateAll = true end
 local UpdateStyle
 
 -- Indicators
-local UpdatePlate_Transparency, UpdatePlate_TransparencyOnUpdate
+local UpdatePlate_SetAlpha, UpdatePlate_SetAlphaOnUpdate
+local UpdatePlate_Transparency
 
 local UpdateIndicator_CustomText, UpdateIndicator_CustomScale, UpdateIndicator_CustomScaleText, UpdateIndicator_Standard
 local UpdateIndicator_Level, UpdateIndicator_RaidIcon
@@ -337,8 +337,8 @@ do
 
     extended.stylename = ""
 
+    extended.IsOccluded = false
     extended.CurrentAlpha = nil
-    extended.OccludedAlpha = false
     extended:SetAlpha(0)
 
     PlatesVisible[plate] = unitid
@@ -524,55 +524,50 @@ end
 -- Nameplate Transparency:
 ---------------------------------------------------------------------------------------------------------------------
 
--- UpdateIndicator_CustomAlpha: Calls the alpha delegate to get the requested alpha
-local	function UpdatePlate_TransparencyNoOcclusion(tp_frame, unit)
-  local target_alpha = Addon:SetAlpha(unit)
+local function UpdatePlate_SetAlphaWithFading(tp_frame, unit)
+  local target_alpha = Addon:GetAlpha(unit)
 
   if target_alpha ~= tp_frame.CurrentAlpha then
-    if SettingsEnabledFading then
-      Addon.Animations:StopFadeIn(tp_frame)
-      Addon.Animations:FadeIn(tp_frame, target_alpha, PLATE_FADE_IN_TIME)
-    else
-      tp_frame:SetAlpha(target_alpha)
-    end
+    Addon.Animations:StopFadeIn(tp_frame)
+    Addon.Animations:FadeIn(tp_frame, target_alpha, PLATE_FADE_IN_TIME)
     tp_frame.CurrentAlpha = target_alpha
   end
 end
 
-local	function UpdatePlate_TransparencyOcclusion(tp_frame, unit)
-  if not tp_frame:IsShown() or (tp_frame.OccludedAlpha and not unit.isTarget) then
+local function UpdatePlate_SetAlphaNoFading(tp_frame, unit)
+  local target_alpha = Addon:GetAlpha(unit)
+
+  if target_alpha ~= tp_frame.CurrentAlpha then
+    tp_frame:SetAlpha(target_alpha)
+    tp_frame.CurrentAlpha = target_alpha
+  end
+end
+
+local	function UpdatePlate_SetAlphaWithOcclusion(tp_frame, unit)
+  if not tp_frame:IsShown() or (tp_frame.IsOccluded and not unit.isTarget) then
     return
   end
 
-  local target_alpha = Addon:SetAlpha(unit)
-
-  if target_alpha ~= tp_frame.CurrentAlpha then
-    if SettingsEnabledFading then
-      Addon.Animations:StopFadeIn(tp_frame)
-      Addon.Animations:FadeIn(tp_frame, target_alpha, PLATE_FADE_IN_TIME)
-    else
-      tp_frame:SetAlpha(target_alpha)
-    end
-    tp_frame.CurrentAlpha = target_alpha
-  end
+  UpdatePlate_SetAlpha(tp_frame, unit)
 end
 
-local function UpdatePlate_TransparencyOcclusionOnUpdate(tp_frame, unit)
+
+local function UpdatePlate_SetAlphaWithFadingOcclusionOnUpdate(tp_frame, unit)
   local target_alpha
 
   local plate_alpha = tp_frame.Parent:GetAlpha()
   if plate_alpha < (CVAR_NameplateOccludedAlphaMult + 0.05) then
-    tp_frame.OccludedAlpha = true
+    tp_frame.IsOccluded = true
     target_alpha = SettingsOccludedAlpha
-  elseif tp_frame.OccludedAlpha or not tp_frame.CurrentAlpha then
-    tp_frame.OccludedAlpha = false
-    target_alpha = Addon:SetAlpha(unit)
+  elseif tp_frame.IsOccluded or not tp_frame.CurrentAlpha then
+    tp_frame.IsOccluded = false
+    target_alpha = Addon:GetAlpha(unit)
   end
 
   if target_alpha and target_alpha ~= tp_frame.CurrentAlpha then
     Addon.Animations:StopFadeIn(tp_frame)
 
-    if tp_frame.OccludedAlpha or not SettingsEnabledFading then
+    if tp_frame.IsOccluded then
       tp_frame:SetAlpha(target_alpha)
     else
       Addon.Animations:FadeIn(tp_frame, target_alpha, PLATE_FADE_IN_TIME)
@@ -581,6 +576,28 @@ local function UpdatePlate_TransparencyOcclusionOnUpdate(tp_frame, unit)
     tp_frame.CurrentAlpha = target_alpha
   end
 end
+
+local function UpdatePlate_SetAlphaNoFadingOcclusionOnUpdate(tp_frame, unit)
+  local target_alpha
+
+  local plate_alpha = tp_frame.Parent:GetAlpha()
+  if plate_alpha < (CVAR_NameplateOccludedAlphaMult + 0.05) then
+    tp_frame.IsOccluded = true
+    target_alpha = SettingsOccludedAlpha
+  elseif tp_frame.IsOccluded or not tp_frame.CurrentAlpha then
+    tp_frame.IsOccluded = false
+    target_alpha = Addon:GetAlpha(unit)
+  end
+
+  if target_alpha and target_alpha ~= tp_frame.CurrentAlpha then
+    tp_frame:SetAlpha(target_alpha)
+    tp_frame.CurrentAlpha = target_alpha
+  end
+end
+
+---------------------------------------------------------------------------------------------------------------------
+-- Nameplate Updating:
+---------------------------------------------------------------------------------------------------------------------
 
 do
 	-- UpdateIndicator_HealthBar: Updates the value on the health bar
@@ -854,7 +871,7 @@ do
 --    end
 
       if SettingsEnabledOccludedAlpha then
-        UpdatePlate_TransparencyOcclusionOnUpdate(plate.TPFrame, plate.TPFrame.unit)
+        UpdatePlate_SetAlphaOnUpdate(plate.TPFrame, plate.TPFrame.unit)
       end
     end
   end
@@ -862,7 +879,6 @@ do
   -- Frame: self = plate
   local function FrameOnHide(plate)
     plate.TPFrame:Hide()
-    --extended.FadeOut:Play()
   end
 
   ---------------------------------------------------------------------------------------------------
@@ -1459,15 +1475,22 @@ function Addon:ForceUpdate()
   SettingsShowFriendlyBlizzardNameplates = db.ShowFriendlyBlizzardNameplates
   SettingsShowEnemyBlizzardNameplates = db.ShowEnemyBlizzardNameplates
 
-  SettingsEnabledFading = db.Transparency.Fading
+  if db.Transparency.Fading then
+    UpdatePlate_SetAlpha = UpdatePlate_SetAlphaWithFading
+    UpdatePlate_SetAlphaOnUpdate = UpdatePlate_SetAlphaWithFadingOcclusionOnUpdate
+  else
+    UpdatePlate_SetAlpha = UpdatePlate_SetAlphaNoFading
+    UpdatePlate_SetAlphaOnUpdate = UpdatePlate_SetAlphaNoFadingOcclusionOnUpdate
+  end
+
   SettingsEnabledOccludedAlpha = db.nameplate.toggle.OccludedUnits
   SettingsOccludedAlpha = db.nameplate.alpha.OccludedUnits
 
   if SettingsEnabledOccludedAlpha then
-    UpdatePlate_Transparency = UpdatePlate_TransparencyOcclusion
-    PlateOnUpdateQueue[#PlateOnUpdateQueue + 1] = UpdatePlate_TransparencyOcclusionOnUpdate
+    UpdatePlate_Transparency = UpdatePlate_SetAlphaWithOcclusion
+    PlateOnUpdateQueue[#PlateOnUpdateQueue + 1] = UpdatePlate_SetAlphaOnUpdate
   else
-    UpdatePlate_Transparency = UpdatePlate_TransparencyNoOcclusion
+    UpdatePlate_Transparency = UpdatePlate_SetAlpha
   end
 
   for plate in pairs(self.PlatesVisible) do
