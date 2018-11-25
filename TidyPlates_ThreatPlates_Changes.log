@@ -1,6 +1,7 @@
 ﻿------------------------------------------------------
 9.1.0-Alpha3
 ------------------------------------------------------
+* Added new filter options for auras for friendly buffs (Mine) and enemy unlimited buffs (e.g. only show in combat or in instances).
 * Fixed a bug with UI scaling which resulted in nameplates being to big when "Ignore UI Scale" was disabled [Comment #1648].
 
 ------------------------------------------------------

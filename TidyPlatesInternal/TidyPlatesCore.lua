@@ -438,14 +438,15 @@ function Addon:UpdateUnitIdentity(unit, unitid)
   unit.guid = UnitGUID(unitid)
 
   unit.classification = UnitClassification(unitid)
-  unit.isElite = EliteReference[unit.classification]
-  unit.isRare = RareReference[unit.classification]
+  unit.isElite = EliteReference[unit.classification] or false
+  unit.isRare = RareReference[unit.classification] or false
   unit.isMini = unit.classification == "minus"
 
   unit.isBoss = UnitLevel(unitid) == -1
   if unit.isBoss then
     unit.classification = "boss"
   end
+  unit.IsBossOrRare = (unit.isBoss or unit.isRare)
 
   if UnitIsPlayer(unitid) then
     _, unit.class = UnitClass(unitid)

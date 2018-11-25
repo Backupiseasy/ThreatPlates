@@ -2605,9 +2605,10 @@ local function CreateAurasWidgetOptions()
                 arg = { "AuraWidget", "Buffs", "ShowAllFriendly" },
                 set = function(info, val)
                   local db = db.AuraWidget.Buffs
-                  if db.ShowPlayerCanApply or db.ShowOnFriendlyNPCs then
-                    db.ShowPlayerCanApply = false
+                  if db.ShowOnFriendlyNPCs or db.ShowOnlyMine or db.ShowPlayerCanApply then
                     db.ShowOnFriendlyNPCs = false
+                    db.ShowOnlyMine = false
+                    db.ShowPlayerCanApply = false
                     SetValueWidget(info, val)
                   end
                 end,
@@ -2620,10 +2621,23 @@ local function CreateAurasWidgetOptions()
                 desc = L["Show all buffs on NPCs."],
                 set = function(info, val)
                   local db = db.AuraWidget.Buffs
-                  db.ShowAllFriendly = not (val or db.ShowPlayerCanApply)
+                  db.ShowAllFriendly = not (val or db.ShowOnlyMine or db.ShowPlayerCanApply)
                   SetValueWidget(info, val)
                 end,
                 arg = { "AuraWidget", "Buffs", "ShowOnFriendlyNPCs" },
+                disabled = function() return not db.AuraWidget.Buffs.ShowFriendly end
+              },
+              OnlyMine = {
+                name = L["Mine"],
+                order = 40,
+                type = "toggle",
+                desc = L["Show buffs that were applied by you."],
+                set = function(info, val)
+                  local db = db.AuraWidget.Buffs
+                  db.ShowAllFriendly = not (db.ShowOnFriendlyNPCs or val or db.ShowPlayerCanApply)
+                  SetValueWidget(info, val)
+                end,
+                arg = { "AuraWidget", "Buffs", "ShowOnlyMine" },
                 disabled = function() return not db.AuraWidget.Buffs.ShowFriendly end
               },
               CanApply = {
@@ -2633,7 +2647,7 @@ local function CreateAurasWidgetOptions()
                 desc = L["Show buffs that you can apply."],
                 set = function(info, val)
                   local db = db.AuraWidget.Buffs
-                  db.ShowAllFriendly = not (val or db.ShowOnFriendlyNPCs)
+                  db.ShowAllFriendly = not (db.ShowOnFriendlyNPCs or db.ShowOnlyMine or val)
                   SetValueWidget(info, val)
                 end,
                 arg = { "AuraWidget", "Buffs", "ShowPlayerCanApply" },
@@ -2695,12 +2709,61 @@ local function CreateAurasWidgetOptions()
                 arg = { "AuraWidget", "Buffs", "ShowDispellable" },
                 disabled = function() return not db.AuraWidget.Buffs.ShowEnemy end
               },
-              HidePermanent = {
-                name = L["Hide Unlimited"],
-                order = 60,
+              Header = { type = "header", order = 70, name = "Show Unlimited Buffs", },
+              Always = {
+                name = L["Always"],
+                order = 80,
                 type = "toggle",
-                desc = L["Hide buffs with unlimited duration."],
-                arg = { "AuraWidget", "Buffs", "HideUnlimitedDuration" },
+                desc = L["Always show buffs with unlimited duration."],
+                set = function(info, val)
+                  local db = db.AuraWidget.Buffs
+                  if db.ShowUnlimitedInCombat or db.ShowUnlimitedInInstances or db.ShowUnlimitedOnBosses then
+                    db.ShowUnlimitedInCombat = false
+                    db.ShowUnlimitedInInstances = false
+                    db.ShowUnlimitedOnBosses = false
+                    SetValueWidget(info, val)
+                  end
+                end,
+                arg = { "AuraWidget", "Buffs", "ShowUnlimitedAlways" },
+                disabled = function() return not db.AuraWidget.Buffs.ShowEnemy end
+              },
+              InCombat = {
+                name = L["In Combat"],
+                order = 90,
+                type = "toggle",
+                desc = L["Show unlimited buffs in combat."],
+                set = function(info, val)
+                  local db = db.AuraWidget.Buffs
+                  db.ShowUnlimitedAlways = not (val or db.ShowUnlimitedInInstances or db.ShowUnlimitedOnBosses)
+                  SetValueWidget(info, val)
+                end,
+                arg = { "AuraWidget", "Buffs", "ShowUnlimitedInCombat" },
+                disabled = function() return not db.AuraWidget.Buffs.ShowEnemy end
+              },
+              InInstances = {
+                name = L["In Instances"],
+                order = 100,
+                type = "toggle",
+                desc = L["Show unlimited buffs in instances (e.g., dungeons or raids)."],
+                set = function(info, val)
+                  local db = db.AuraWidget.Buffs
+                  db.ShowUnlimitedAlways = not (db.ShowUnlimitedInCombat or val or db.ShowUnlimitedOnBosses)
+                  SetValueWidget(info, val)
+                end,
+                arg = { "AuraWidget", "Buffs", "ShowUnlimitedInInstances" },
+                disabled = function() return not db.AuraWidget.Buffs.ShowEnemy end
+              },
+              OnBosses = {
+                name = L["On Bosses & Rares"],
+                order = 110,
+                type = "toggle",
+                desc = L["Show unlimited buffs on bosses and rares."],
+                set = function(info, val)
+                  local db = db.AuraWidget.Buffs
+                  db.ShowUnlimitedAlways = not (db.ShowUnlimitedInCombat or db.ShowUnlimitedInInstances or val)
+                  SetValueWidget(info, val)
+                end,
+                arg = { "AuraWidget", "Buffs", "ShowUnlimitedOnBosses" },
                 disabled = function() return not db.AuraWidget.Buffs.ShowEnemy end
               },
             },

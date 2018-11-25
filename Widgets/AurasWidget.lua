@@ -25,6 +25,7 @@ local DebuffTypeColor = DebuffTypeColor
 local UnitAura, UnitIsFriend, UnitIsUnit, UnitReaction, UnitIsPlayer, UnitPlayerControlled = UnitAura, UnitIsFriend, UnitIsUnit, UnitReaction, UnitIsPlayer, UnitPlayerControlled
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local GameTooltip = GameTooltip
+local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
@@ -332,6 +333,12 @@ Widget.CROWD_CONTROL_SPELLS = {
 }
 
 ---------------------------------------------------------------------------------------------------
+-- Global attributes
+---------------------------------------------------------------------------------------------------
+local PLayerIsInInstance = false
+--local PLayerIsInCombat = false
+
+---------------------------------------------------------------------------------------------------
 -- Cached configuration settings
 ---------------------------------------------------------------------------------------------------
 local HideOmniCC, ShowDuration
@@ -491,9 +498,10 @@ function Widget:FilterEnemyDebuffsBySpell(db, aura, AuraFilterFunction)
   return AuraFilterFunction(show_aura, spellfound, aura.CastByPlayer, db.ShowOnlyMine)
 end
 
-function Widget:FilterFriendlyBuffsBySpell(db, aura, AuraFilterFunction)
+function Widget:FilterFriendlyBuffsBySpell(db, aura, AuraFilterFunction, unit)
   local show_aura = db.ShowAllFriendly or
-                    (db.ShowOnFriendlyNPCs and aura.UnitIsNPC) or
+                    (db.ShowOnFriendlyNPCs and unit.type == "NPC") or
+                    (db.ShowOnlyMine and aura.CastByPlayer) or
                     (db.ShowPlayerCanApply and aura.PlayerCanApply)
 
   local spellfound = self.AuraFilterBuffs[aura.name] or self.AuraFilterBuffs[aura.spellid]
@@ -501,14 +509,8 @@ function Widget:FilterFriendlyBuffsBySpell(db, aura, AuraFilterFunction)
   return AuraFilterFunction(show_aura, spellfound, aura.CastByPlayer)
 end
 
-function Widget:FilterEnemyBuffsBySpell(db, aura, AuraFilterFunction)
-  local show_aura
-
-  if db.HideUnlimitedDuration and aura.duration <= 0 then
-    show_aura = false
-  else
-    show_aura = db.ShowAllEnemy or (db.ShowOnEnemyNPCs and aura.UnitIsNPC) or (db.ShowDispellable and aura.StealOrPurge)
-  end
+function Widget:FilterEnemyBuffsBySpell(db, aura, AuraFilterFunction, unit)
+  local show_aura = db.ShowAllEnemy or (db.ShowOnEnemyNPCs and unit.type == "NPC") or (db.ShowDispellable and aura.StealOrPurge)
 
   local spellfound = self.AuraFilterBuffs[aura.name] or self.AuraFilterBuffs[aura.spellid]
 
@@ -535,6 +537,13 @@ function Widget:FilterEnemyCrowdControlBySpell(db, aura, AuraFilterFunction)
   return AuraFilterFunction(show_aura, spellfound, aura.CastByPlayer)
 end
 
+function Widget:FilterEnemyBuffsBySpellDynamic(db, aura, unit)
+  return aura.duration > 0 or db.ShowUnlimitedAlways or
+    (db.ShowUnlimitedInCombat and unit.isInCombat) or
+    (db.ShowUnlimitedInInstances and PLayerIsInInstance) or
+    (db.ShowUnlimitedOnBosses and unit.IsBossOrRare)
+end
+
 Widget.AuraSortFunctionAtoZ = function(a, b)
   return a.priority < b.priority
 end
@@ -553,7 +562,7 @@ end
 -- Widget Object Functions
 -------------------------------------------------------------
 
-function Widget:UpdateUnitAuras(frame, unitid, enabled_auras, enabled_cc, SpellFilter, SpellFilterCC, filter_mode)
+function Widget:UpdateUnitAuras(frame, unit, enabled_auras, enabled_cc, SpellFilter, SpellFilterCC, filter_mode)
   local aura_frames = frame.AuraFrames
   if not (enabled_auras or enabled_cc) then
     for i = 1, self.MaxAurasPerGrid do
@@ -574,7 +583,11 @@ function Widget:UpdateUnitAuras(frame, unitid, enabled_auras, enabled_cc, SpellF
     UnitAuraList = {}
   end
 
+  local widget_frame = frame:GetParent()
+  unit.HasUnlimitedAuras = false
   local effect = frame.Filter
+  local unitid = unit.unitid
+
   local db_auras = (effect == "HARMFUL" and db.Debuffs) or db.Buffs
   local AuraFilterFunction = self.FILTER_FUNCTIONS[filter_mode]
   local AuraFilterFunctionCC = self.FILTER_FUNCTIONS[db.CrowdControl.FilterMode]
@@ -602,7 +615,6 @@ function Widget:UpdateUnitAuras(frame, unitid, enabled_auras, enabled_cc, SpellF
     --aura.unit = unitid
     aura.Index = i
     aura.effect = effect
-    aura.UnitIsNPC = not (UnitIsPlayer(unitid) or UnitPlayerControlled(unitid))
     aura.ShowAll = aura.ShowAll
     aura.CrowdControl = (enabled_cc and self.CROWD_CONTROL_SPELLS[aura.spellid])
     aura.CastByPlayer = (aura.caster == "player" or aura.caster == "pet" or aura.caster == "vehicle")
@@ -617,7 +629,12 @@ function Widget:UpdateUnitAuras(frame, unitid, enabled_auras, enabled_cc, SpellF
         show_aura = SpellFilter(self, db_auras, aura, AuraFilterFunction)
       end
     elseif enabled_auras then
-      show_aura = SpellFilter(self, db_auras, aura, AuraFilterFunction)
+      show_aura = SpellFilter(self, db_auras, aura, AuraFilterFunction, unit)
+
+      if show_aura and effect == "HELPFUL" and unit.reaction ~= "FRIENDLY" then
+        unit.HasUnlimitedAuras = unit.HasUnlimitedAuras or (aura.duration <= 0)
+        show_aura = self:FilterEnemyBuffsBySpellDynamic(db_auras, aura, unit)
+      end
     end
 
     if show_aura then
@@ -670,7 +687,7 @@ function Widget:UpdateUnitAuras(frame, unitid, enabled_auras, enabled_cc, SpellF
 
     aura_count = 1
     aura_count_cc = 1
-    local aura_frames_cc = frame:GetParent().CrowdControl.AuraFrames
+    local aura_frames_cc = widget_frame.CrowdControl.AuraFrames
 
     for index = index_start, index_end, index_step do
       aura = UnitAuraList[index]
@@ -710,7 +727,7 @@ function Widget:UpdateUnitAuras(frame, unitid, enabled_auras, enabled_cc, SpellF
   end
 
   if effect == "HARMFUL" then
-    local aura_frames_cc = frame:GetParent().CrowdControl
+    local aura_frames_cc = widget_frame.CrowdControl
     aura_frames_cc.ActiveAuras = aura_count_cc
 
     local aura_frame_list_cc = aura_frames_cc.AuraFrames
@@ -746,8 +763,9 @@ function Widget:UpdatePositionAuraGrid(frame, y_offset)
   end
 end
 
-function Widget:UpdateIconGrid(widget_frame, unitid)
+function Widget:UpdateIconGrid(widget_frame, unit)
   local db = self.db
+  local unitid = unit.unitid
 
   if db.ShowTargetOnly then
     if not UnitIsUnit("target", unitid) then
@@ -759,18 +777,17 @@ function Widget:UpdateIconGrid(widget_frame, unitid)
   end
 
   local enabled_cc
-
   local unit_is_friendly = UnitReaction(unitid, "player") > 4
   if unit_is_friendly then -- friendly or better
     enabled_cc = db.CrowdControl.ShowFriendly
 
-    self:UpdateUnitAuras(widget_frame.Debuffs, unitid, db.Debuffs.ShowFriendly, enabled_cc, self.FilterFriendlyDebuffsBySpell, self.FilterFriendlyCrowdControlBySpell, db.Debuffs.FilterMode)
-    self:UpdateUnitAuras(widget_frame.Buffs, unitid, db.Buffs.ShowFriendly, false, self.FilterFriendlyBuffsBySpell, self.FilterFriendlyCrowdControlBySpell, db.Buffs.FilterMode)
+    self:UpdateUnitAuras(widget_frame.Debuffs, unit, db.Debuffs.ShowFriendly, enabled_cc, self.FilterFriendlyDebuffsBySpell, self.FilterFriendlyCrowdControlBySpell, db.Debuffs.FilterMode)
+    self:UpdateUnitAuras(widget_frame.Buffs, unit, db.Buffs.ShowFriendly, false, self.FilterFriendlyBuffsBySpell, self.FilterFriendlyCrowdControlBySpell, db.Buffs.FilterMode)
   else
     enabled_cc = db.CrowdControl.ShowEnemy
 
-    self:UpdateUnitAuras(widget_frame.Debuffs, unitid, db.Debuffs.ShowEnemy, enabled_cc, self.FilterEnemyDebuffsBySpell, self.FilterEnemyCrowdControlBySpell, db.Debuffs.FilterMode)
-    self:UpdateUnitAuras(widget_frame.Buffs, unitid, db.Buffs.ShowEnemy, false, self.FilterEnemyBuffsBySpell, self.FilterEnemyCrowdControlBySpell, db.Buffs.FilterMode)
+    self:UpdateUnitAuras(widget_frame.Debuffs, unit, db.Debuffs.ShowEnemy, enabled_cc, self.FilterEnemyDebuffsBySpell, self.FilterEnemyCrowdControlBySpell, db.Debuffs.FilterMode)
+    self:UpdateUnitAuras(widget_frame.Buffs, unit, db.Buffs.ShowEnemy, false, self.FilterEnemyBuffsBySpell, self.FilterEnemyCrowdControlBySpell, db.Buffs.FilterMode)
   end
 
   local buffs_active, debuffs_active, cc_active = widget_frame.Buffs.ActiveAuras > 0, widget_frame.Debuffs.ActiveAuras > 0, widget_frame.CrowdControl.ActiveAuras > 0
@@ -1292,7 +1309,7 @@ local function UnitAuraEventHandler(widget_frame, event, unitid)
   --  if unitid == "player" or unitid == "target" then return end
 
   if widget_frame.Active then
-    widget_frame.Widget:UpdateIconGrid(widget_frame, unitid)
+    widget_frame.Widget:UpdateIconGrid(widget_frame, widget_frame:GetParent().unit)
   end
 end
 
@@ -1309,10 +1326,41 @@ function Widget:PLAYER_TARGET_CHANGED()
     self.CurrentTarget = plate.TPFrame.widgets.Auras
 
     if self.CurrentTarget.Active then
-      self:UpdateIconGrid(self.CurrentTarget, plate.TPFrame.unit.unitid)
+      self:UpdateIconGrid(self.CurrentTarget, plate.TPFrame.unit)
     end
   end
 end
+
+function Widget:PLAYER_REGEN_ENABLED()
+  --PLayerIsInCombat = false
+
+  for plate, _ in pairs(Addon.PlatesVisible) do
+    local widget_frame = plate.TPFrame.widgets.Auras
+    local unit = plate.TPFrame.unit
+
+    if widget_frame.Active and unit.HasUnlimitedAuras then
+      self:UpdateIconGrid(widget_frame, unit)
+    end
+  end
+end
+
+function Widget:PLAYER_REGEN_DISABLED()
+  --PLayerIsInCombat = true
+
+  for plate, _ in pairs(Addon.PlatesVisible) do
+    local widget_frame = plate.TPFrame.widgets.Auras
+    local unit = plate.TPFrame.unit
+
+    if widget_frame.Active and unit.HasUnlimitedAuras then
+      self:UpdateIconGrid(widget_frame, unit)
+    end
+  end
+end
+
+function Widget:PLAYER_ENTERING_WORLD()
+  PLayerIsInInstance = IsInInstance()
+end
+
 
 ---------------------------------------------------------------------------------------------------
 -- Widget functions for creation and update
@@ -1363,6 +1411,9 @@ end
 
 function Widget:OnEnable()
   self:RegisterEvent("PLAYER_TARGET_CHANGED")
+  self:RegisterEvent("PLAYER_REGEN_ENABLED")
+  self:RegisterEvent("PLAYER_REGEN_DISABLED")
+  self:RegisterEvent("PLAYER_ENTERING_WORLD")
   -- LOSS_OF_CONTROL_ADDED
   -- LOSS_OF_CONTROL_UPDATE
 end
@@ -1397,7 +1448,7 @@ function Widget:OnUnitAdded(widget_frame, unit)
   widget_frame:UnregisterAllEvents()
   widget_frame:RegisterUnitEvent("UNIT_AURA", unit.unitid)
 
-  self:UpdateIconGrid(widget_frame, unit.unitid)
+  self:UpdateIconGrid(widget_frame, unit)
 end
 
 function Widget:OnUnitRemoved(widget_frame)
@@ -1450,7 +1501,6 @@ function Widget:ParseSpellFilters()
   self.AuraFilterBuffs = ParseFilter(self.db.Buffs.FilterBySpell)
   self.AuraFilterDebuffs = ParseFilter(self.db.Debuffs.FilterBySpell)
   self.AuraFilterCrowdControl = ParseFilter(self.db.CrowdControl.FilterBySpell)
-
 end
 
 function Widget:UpdateSettingsIconMode()
