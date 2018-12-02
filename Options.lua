@@ -5505,11 +5505,12 @@ local function CreateOptionsTable()
                       order = 60,
                       type = "group",
                       inline = true,
+                      set = SetThemeValue,
                       args = {
-                        X = { name = L["X"], type = "range", order = 1, set = SetThemeValue, arg = { "settings", "customtext", "x" }, max = 120, min = -120, step = 1, isPercent = false, },
-                        Y = { name = L["Y"], type = "range", order = 2, set = SetThemeValue, arg = { "settings", "customtext", "y" }, max = 120, min = -120, step = 1, isPercent = false, },
-                        AlignH = { name = L["Horizontal Align"], type = "select", order = 4, values = t.AlignH, set = SetThemeValue, arg = { "settings", "customtext", "align" }, },
-                        AlignV = { name = L["Vertical Align"], type = "select", order = 5, values = t.AlignV, set = SetThemeValue, arg = { "settings", "customtext", "vertical" }, },
+                        X = { name = L["X"], type = "range", order = 1, arg = { "settings", "customtext", "x" }, max = 120, min = -120, step = 1, isPercent = false, },
+                        Y = { name = L["Y"], type = "range", order = 2, arg = { "settings", "customtext", "y" }, max = 120, min = -120, step = 1, isPercent = false, },
+                        AlignH = { name = L["Horizontal Align"], type = "select", order = 4, values = t.AlignH, arg = { "settings", "customtext", "align" }, },
+                        AlignV = { name = L["Vertical Align"], type = "select", order = 5, values = t.AlignV, arg = { "settings", "customtext", "vertical" }, },
                       },
                     },
                   },
@@ -5603,11 +5604,12 @@ local function CreateOptionsTable()
                       order = 60,
                       type = "group",
                       inline = true,
+                      set = SetThemeValue,
                       args = {
-                        X = { name = L["X"], type = "range", order = 1, set = SetThemeValue, arg = { "HeadlineView", "customtext", "x" }, max = 120, min = -120, step = 1, isPercent = false, },
-                        Y = { name = L["Y"], type = "range", order = 2, set = SetThemeValue, arg = { "HeadlineView", "customtext", "y" }, max = 120, min = -120, step = 1, isPercent = false, },
-                        AlignH = { name = L["Horizontal Align"], type = "select", order = 4, values = t.AlignH, set = SetThemeValue, arg = { "HeadlineView", "customtext", "align" }, },
-                        AlignV = { name = L["Vertical Align"], type = "select", order = 5, values = t.AlignV, set = SetThemeValue, arg = { "HeadlineView", "customtext", "vertical" }, },
+                        X = { name = L["X"], type = "range", order = 1, arg = { "HeadlineView", "customtext", "x" }, max = 120, min = -120, step = 1, isPercent = false, },
+                        Y = { name = L["Y"], type = "range", order = 2, arg = { "HeadlineView", "customtext", "y" }, max = 120, min = -120, step = 1, isPercent = false, },
+                        AlignH = { name = L["Horizontal Align"], type = "select", order = 4, values = t.AlignH, arg = { "HeadlineView", "customtext", "align" }, },
+                        AlignV = { name = L["Vertical Align"], type = "select", order = 5, values = t.AlignV, arg = { "HeadlineView", "customtext", "vertical" }, },
                       },
                     },
                   },
@@ -5617,89 +5619,90 @@ local function CreateOptionsTable()
                   order = 30,
                   type = "group",
                   inline = true,
+                  set = SetThemeValue,
                   args = {
-                    DisplaySettings = {
-                      name = L["Display Settings"],
-                      type = "group",
+                    EnableAmount = {
+                      name = L["Amount"],
+                      type = "toggle",
                       order = 10,
-                      inline = true,
-                      args = {
-                        Full = {
-                          name = L["Text at Full HP"],
-                          type = "toggle",
-                          order = 0,
-                          width = "full",
-                          desc = L["Display health text on targets with full HP."],
-                          descStyle = "inline",
-                          arg = { "text", "full" }
-                        },
-                        EnablePercent = {
-                          name = L["Percent Text"],
-                          type = "toggle",
-                          order = 1,
-                          width = "full",
-                          desc = L["Display health percentage text."],
-                          descStyle = "inline",
-                          arg = { "text", "percent" }
-                        },
-                        EnableAmount = {
-                          name = L["Amount Text"],
-                          type = "toggle",
-                          order = 2,
-                          width = "full",
-                          desc = L["Display health amount text."],
-                          descStyle = "inline",
-                          arg = { "text", "amount" }
-                        },
-                        AmountSettings = {
-                          name = L["Amount Text Formatting"],
-                          type = "group",
-                          order = 3,
-                          inline = true,
-                          args = {
-                            Truncate = {
-                              name = L["Truncate Text"],
-                              type = "toggle",
-                              order = 1,
-                              width = "full",
-                              desc = L["This will format text to a simpler format using M or K for millions and thousands. Disabling this will show exact HP amounts."],
-                              descStyle = "inline",
-                              arg = { "text", "truncate" }
-                            },
-                            MaxHP = {
-                              name = L["Max HP Text"],
-                              type = "toggle",
-                              order = 2,
-                              width = "full",
-                              desc = L["This will format text to show both the maximum hp and current hp."],
-                              descStyle = "inline",
-                              arg = { "text", "max" }
-                            },
-                            Deficit = {
-                              name = L["Deficit Text"],
-                              type = "toggle",
-                              order = 3,
-                              width = "full",
-                              desc = L["This will format text to show hp as a value the target is missing."],
-                              descStyle = "inline",
-                              arg = { "text", "deficit" }
-                            },
-                            UseLocalizedUnit = {
-                              name = L["Localized Health Text"],
-                              type = "toggle",
-                              order = 4,
-                              width = "full",
-                              desc = L["If enabled, the truncated health text will be localized, i.e. local metric unit symbols (like k for thousands) will be used."],
-                              descStyle = "inline",
-                              set = function(info, val)
-                                SetValue(info, val)
-                                Addon:UpdateConfigurationStatusText()
-                              end,
-                              arg = { "text", "LocalizedUnitSymbol" }
-                            },
-                          },
-                        },
-                      },
+                      desc = L["Display health amount text."],
+                      arg = { "text", "amount" }
+                    },
+                    MaxHP = {
+                      name = L["Max Health"],
+                      type = "toggle",
+                      order = 20,
+                      desc = L["This will format text to show both the maximum hp and current hp."],
+                      arg = { "text", "max" },
+                      disabled = function() return not db.text.amount end
+                    },
+                    Deficit = {
+                      name = L["Deficit"],
+                      type = "toggle",
+                      order = 30,
+                      desc = L["This will format text to show hp as a value the target is missing."],
+                      arg = { "text", "deficit" },
+                      disabled = function() return not db.text.amount end
+                    },
+                    EnablePercent = {
+                      name = L["Percentage"],
+                      type = "toggle",
+                      order = 40,
+                      desc = L["Display health percentage text."],
+                      arg = { "text", "percent" }
+                    },
+                    Spacer1 = GetSpacerEntry(50),
+                    Full = {
+                      name = L["Full Health"],
+                      type = "toggle",
+                      order = 60,
+                      desc = L["Display health text on targets with full health."],
+                      arg = { "text", "full" }
+                    },
+                    Truncate = {
+                      name = L["Shorten"],
+                      type = "toggle",
+                      order = 70,
+                      desc = L["This will format text to a simpler format using M or K for millions and thousands. Disabling this will show exact health amounts."],
+                      arg = { "text", "truncate" },
+                    },
+                    UseLocalizedUnit = {
+                      name = L["Localization"],
+                      type = "toggle",
+                      order = 80,
+                      desc = L["If enabled, the truncated health text will be localized, i.e. local metric unit symbols (like k for thousands) will be used."],
+                      arg = { "text", "LocalizedUnitSymbol" }
+                    },
+                  },
+                },
+                AbsorbsText = {
+                  name = L["Absorbs Text"],
+                  order = 35,
+                  type = "group",
+                  inline = true,
+                  set = SetThemeValue,
+                  args = {
+                    EnableAmount = {
+                      name = L["Amount"],
+                      type = "toggle",
+                      order = 10,
+                      desc = L["Display absorbs amount text."],
+                      arg = { "text", "AbsorbsAmount" }
+                    },
+                    EnableShorten = {
+                      name = L["Shorten"],
+                      type = "toggle",
+                      order = 20,
+                      desc = L["This will format text to a simpler format using M or K for millions and thousands. Disabling this will show exact absorbs amounts."],
+                      arg = { "text", "AbsorbsShorten" },
+                      disabled = function() return not db.text.AbsorbsAmount end
+                    },
+                    EnablePercentage = {
+                      name = L["Percentage"],
+                      type = "toggle",
+                      order = 30,
+                      desc = L["Display absorbs percentage text."],
+                      arg = { "text", "AbsorbsPercentage" }
                     },
                   },
                 },

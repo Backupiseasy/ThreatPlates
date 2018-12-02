@@ -469,6 +469,10 @@ ThreatPlates.DEFAULT_SETTINGS = {
       deficit = false,
       truncate = true,
       LocalizedUnitSymbol = false,
+      -- Absorbs
+      AbsorbsAmount = false,
+      AbsorbsShorten = true,
+      AbsorbsPercentage = false,
     },
     totemWidget = {
       ON = true,

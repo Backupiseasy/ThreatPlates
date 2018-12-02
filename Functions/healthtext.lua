@@ -7,7 +7,7 @@ local ThreatPlates = Addon.ThreatPlates
 local UnitIsPlayer = UnitIsPlayer
 local UnitPlayerControlled = UnitPlayerControlled
 local UnitExists = UnitExists
-local UnitName = UnitName
+local UnitName, UnitGetTotalAbsorbs = UnitName, UnitGetTotalAbsorbs
 local UNIT_LEVEL_TEMPLATE = UNIT_LEVEL_TEMPLATE
 local UnitClassification = UnitClassification
 local GetGuildInfo = GetGuildInfo
@@ -35,6 +35,12 @@ local UnitSubtitles = {}
 local ScannerName = "ThreatPlates_Tooltip_Subtext"
 local TooltipScanner = CreateFrame( "GameTooltip", ScannerName , nil, "GameTooltipTemplate" ) -- Tooltip name cannot be nil
 TooltipScanner:SetOwner( WorldFrame, "ANCHOR_NONE" )
+
+---------------------------------------------------------------------------------------------------
+-- Cached configuration settings
+---------------------------------------------------------------------------------------------------
+local Settings
+local ShowHealth, ShowAbsorbs
 
 ---------------------------------------------------------------------------------------------------
 -- Determine correct number units: Western or East Asian Nations (CJK)
@@ -170,50 +176,77 @@ end
 
 local function DummyFunction() return nil, COLOR_ROLE end
 
+-- return ceil(100 * (unit.health / unit.healthmax)) .. "%", GetColorByHealthDeficit(unit)
 local function TextHealthPercentColored(unit)
-	-- return ceil(100 * (unit.health / unit.healthmax)) .. "%", GetColorByHealthDeficit(unit)
-	local db = TidyPlatesThreat.db.profile.text
+  local text_health, text_absorbs, color = "", "", "", COLOR_ROLE
 
-	if (not db.full and unit.health == unit.healthmax) then
-		return nil, COLOR_ROLE
-	end
+  local absorbs_amount = UnitGetTotalAbsorbs(unit.unitid) or 0
+  if ShowAbsorbs and absorbs_amount > 0 then
+    if Settings.AbsorbsAmount then
+      if Settings.AbsorbsShorten then
+        text_absorbs = Truncate(absorbs_amount)
+      else
+        text_absorbs = absorbs_amount
+      end
+    end
 
-	local HpPct = ""
-	local HpAmt = ""
-	local HpMax = ""
+    if Settings.AbsorbsPercentage then
+      local absorbs_percentage = ceil(100 * absorbs_amount / unit.healthmax) .. "%"
 
-	if db.amount then
+      if text_absorbs == "" then
+        text_absorbs = absorbs_percentage
+      else
+        text_absorbs = text_absorbs .. " - " .. absorbs_percentage
+      end
+    end
 
-		if db.deficit and unit.health ~= unit.healthmax then
-			HpAmt = "-" .. Truncate(unit.healthmax - unit.health)
-		else
-			HpAmt = Truncate(unit.health)
-		end
+    if text_absorbs ~= "" then
+      text_absorbs = "[" .. text_absorbs .. "]"
+    end
+  end
 
-		if db.max then
-			if HpAmt ~= "" then
-				HpMax = " / " .. Truncate(unit.healthmax)
-			else
-				HpMax = Truncate(unit.healthmax)
-			end
-		end
-	end
+  if ShowHealth and (Settings.full or unit.health ~= unit.healthmax) then
+    local HpPct, HpAmt, HpMax = "", "", ""
 
-	if db.percent then
-		-- Blizzard calculation:
-		-- local perc = math.ceil(100 * (UnitHealth(frame.displayedUnit)/UnitHealthMax(frame.displayedUnit)));
+    if Settings.amount then
+      if Settings.deficit and unit.health ~= unit.healthmax then
+        HpAmt = "-" .. Truncate(unit.healthmax - unit.health)
+      else
+        HpAmt = Truncate(unit.health)
+      end
 
-		local perc = ceil(100 * (unit.health / unit.healthmax))
-		-- old: floor(100*(unit.health / unit.healthmax))
+      if Settings.max then
+        if HpAmt ~= "" then
+          HpMax = " / " .. Truncate(unit.healthmax)
+        else
+          HpMax = Truncate(unit.healthmax)
+        end
+      end
+    end
 
-		if HpMax ~= "" or HpAmt ~= "" then
-			HpPct = " - "..perc.."%"
-		else
-			HpPct = perc.."%"
-		end
-	end
+    if Settings.percent then
+      -- Blizzard calculation:
+      -- local perc = math.ceil(100 * (UnitHealth(frame.displayedUnit)/UnitHealthMax(frame.displayedUnit)));
 
-	return HpAmt .. HpMax .. HpPct, GetColorByHealthDeficit(unit)
+      local perc = ceil(100 * (unit.health / unit.healthmax))
+      -- old: floor(100*(unit.health / unit.healthmax))
+
+      if HpMax ~= "" or HpAmt ~= "" then
+        HpPct = " - "..perc.."%"
+      else
+        HpPct = perc.."%"
+      end
+    end
+
+    text_health = HpAmt .. HpMax .. HpPct
+    color = GetColorByHealthDeficit(unit)
+  end
+
+  if text_health and text_absorbs then
+    return text_health .. " " .. text_absorbs, color
+  else
+    return text_health .. text_absorbs, color
+  end
 end
 
 -- Role, Guild or Level
@@ -319,8 +352,11 @@ function Addon:SetCustomText(unit)
 end
 
 function Addon:UpdateConfigurationStatusText()
-  Truncate = (TidyPlatesThreat.db.profile.text.LocalizedUnitSymbol and TruncateEastAsian) or TruncateWestern
+  Settings = TidyPlatesThreat.db.profile.text
 
-  -- TODO: pre-select functions for text and color
+  Truncate = (Settings.LocalizedUnitSymbol and TruncateEastAsian) or TruncateWestern
+
+  ShowAbsorbs = Settings.AbsorbsAmount or Settings.AbsorbsPercentage
+  ShowHealth = Settings.amount or Settings.percent
 end
 

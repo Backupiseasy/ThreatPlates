@@ -1248,6 +1248,8 @@ do
 			SetObjectFont(object, objectstyle.typeface, objectstyle.size, objectstyle.flags)
 			SetObjectJustify(object, objectstyle.align or "CENTER", objectstyle.vertical or "BOTTOM")
 			SetObjectShadow(object, objectstyle.shadow)
+      -- Set text to nil to enforce text string update, otherwise updates to justification will not take effect
+      object:SetText(nil)
 		end
 	end
 
@@ -1273,8 +1275,7 @@ do
 	local fontgroup = {"name", "level", "spelltext", "customtext"}
 
 	local anchorgroup = {
-		"name",  "spelltext", "customtext", "level",
-		"spellicon", "raidicon", "skullicon"
+		"name",  "spelltext", "customtext", "level", "spellicon", "raidicon", "skullicon"
     -- "threatborder", "castborder", "castnostop", "eliteicon", "target"
   }
 
@@ -1311,7 +1312,15 @@ do
       end
 		end
 
-		-- Healthbar
+    -- Font Group
+    for index = 1, #fontgroup do
+      local objectname = fontgroup[index]
+      local object, objectstyle = visual[objectname], style[objectname]
+
+      SetFontGroupObject(object, objectstyle)
+    end
+
+    -- Healthbar
 		SetAnchorGroupObject(visual.healthbar, style.healthbar, extended)
 		visual.healthbar:SetStatusBarTexture(style.healthbar.texture or EMPTY_TEXTURE)
 		visual.healthbar:SetStatusBarBackdrop(style.healthbar.backdrop, style.healthborder.texture, style.healthborder.edgesize, style.healthborder.offset)
@@ -1352,14 +1361,6 @@ do
     -- TOODO: does not really work with ForceUpdate() as isMarked is not set there (no call to UpdateUnitCondition)
     if not unit.isMarked then
       visual.raidicon:Hide()
-    end
-
-		-- Font Group
-		for index = 1, #fontgroup do
-			local objectname = fontgroup[index]
-			local object, objectstyle = visual[objectname], style[objectname]
-
-			SetFontGroupObject(object, objectstyle)
     end
 
     visual.castbar:ClearAllPoints()
@@ -1468,6 +1469,8 @@ function Addon:EnableCastBars() ShowCastBars = true end
 
 function Addon:ForceUpdate()
   wipe(PlateOnUpdateQueue)
+
+  Addon:UpdateConfigurationStatusText()
 
   CVAR_NameplateOccludedAlphaMult = tonumber(GetCVar("nameplateOccludedAlphaMult"))
 
