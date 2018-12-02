@@ -26,7 +26,6 @@ local GetSpellInfo = GetSpellInfo
 local LibStub = LibStub
 local L = t.L
 
-local CurrentWidgetOptions
 local PATH_ART = t.Art
 
 -- local TidyPlatesThreat = LibStub("AceAddon-3.0"):GetAddon("TidyPlatesThreat");
@@ -160,6 +159,12 @@ local function GetValue(info)
     value = value[keys[index]]
   end
   return value
+end
+
+local function CheckIfValueExists(widget_info, setting)
+  local info = { arg = Addon.ConcatTables(widget_info, setting) }
+
+  return GetValue(info) ~= nil
 end
 
 local function SetValuePlain(info, value)
@@ -860,8 +865,28 @@ local function GetFontEntry(name, pos, widget_info)
   return entry
 end
 
+-- Syntax for settings:
+--  Font = {
+--    Typeface = Addon.DEFAUL_SMALL_FONT,
+--    Size = 10,
+--    Transparency = 1,
+--    Color = RGB(255, 255, 255),
+--    flags = "OUTLINE",
+--    Shadow = true,
+--    HorizontalAlignment = "CENTER",
+--    VerticalAlignment = "CENTER",
+--  },
 local function GetFontEntryDefault(name, pos, widget_info, func_disabled)
   widget_info = Addon.ConcatTables(widget_info, { "Font" } )
+
+  -- Check if certain configuration options should be shown:
+  local entry_transparency, entry_color
+  if CheckIfValueExists(widget_info, { "Transparency" } ) then
+    entry_transparency = GetTransparencyEntryDefault(30, Addon.ConcatTables(widget_info, { "Transparency" }) )
+  end
+  if CheckIfValueExists(widget_info, { "Color" } ) then
+    entry_color = GetColorEntry(L["Color"], 40, Addon.ConcatTables(widget_info, { "Color" }) )
+  end
 
   local entry = {
     type = "group",
@@ -888,8 +913,8 @@ local function GetFontEntryDefault(name, pos, widget_info, func_disabled)
         step = 1,
         isPercent = false,
       },
-      Transparency = GetTransparencyEntryDefault(30, Addon.ConcatTables(widget_info, { "Transparency" }) ),
-      Color = GetColorEntry(L["Color"], 40, Addon.ConcatTables(widget_info, { "Color" }) ),
+      Transparency = entry_transparency,
+      Color = entry_color,
       Spacer = GetSpacerEntry(100),
       Outline = {
         name = L["Outline"],
@@ -933,9 +958,14 @@ local function GetFontEntryDefault(name, pos, widget_info, func_disabled)
     },
   }
 
-  entry.args.Color.set = SetColorWidget
-  entry.args.Color.width = "half"
-  entry.args.Transparency.set = function(info, val) SetValueWidget(info, abs(val - 1)) end
+  if entry_color then
+    entry.args.Color.set = SetColorWidget
+    entry.args.Color.width = "half"
+  end
+
+  if entry_transparency then
+    entry.args.Transparency.set = function(info, val) SetValueWidget(info, abs(val - 1)) end
+  end
 
   return entry
 end
@@ -1096,7 +1126,7 @@ end
 local function CreateClassIconsWidgetOptions()
   local options = { name = L["Class Icon"], order = 30, type = "group",
     args = {
-      Enable = GetEnableEntry(L["Enable Class Icon Widget"], L["This widget shows a class icon on the nameplates of players."], "classWidget", true, function(info, val) SetValuePlain(info, val); Addon:InitializeWidget("ClassIcon") end),
+      Enable = GetEnableEntry(L["Enable Class Icon Widget"], L["This widget shows a class icon on the nameplates of players."], "classWidget", true, function(info, val) SetValuePlain(info, val); Addon.Widgets:InitializeWidget("ClassIcon") end),
       Options = {
         name = L["Show For"],
         type = "group",
@@ -1256,12 +1286,13 @@ local function CreateComboPointsWidgetOptions()
             type = "select",
             order = 10,
             values = {
-              ROGUE = L["Rogue"],
+              DEATHKNIGHT = L["Death Knight"],
               DRUID = L["Druid"],
+              MAGE = L["Arcane Mage"],
               MONK = L["Windwalker Monk"],
               PALADIN = L["Retribution Paladin"],
+              ROGUE = L["Rogue"],
               WARLOCK = L["Warlock"],
-              MAGE = L["Arcane Mage"],
             },
             arg = { "ComboPoints", "Specialization" },
           },
@@ -1283,7 +1314,7 @@ local function CreateComboPointsWidgetOptions()
             end,
             set = function(info, r, g, b)
               db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][1] = t.RGB(r * 255, g * 255, b * 255)
-              Addon.Widgets:UpdateSettings(CurrentWidgetOptions)
+              Addon.Widgets:UpdateSettings(MAP_OPTION_TO_WIDGET[info[2]])
             end,
             hasAlpha = false,
           },
@@ -1297,7 +1328,7 @@ local function CreateComboPointsWidgetOptions()
             end,
             set = function(info, r, g, b)
               db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][2] = t.RGB(r * 255, g * 255, b * 255)
-              Addon.Widgets:UpdateSettings(CurrentWidgetOptions)
+              Addon.Widgets:UpdateSettings(MAP_OPTION_TO_WIDGET[info[2]])
             end,
             hasAlpha = false,
           },
@@ -1311,7 +1342,7 @@ local function CreateComboPointsWidgetOptions()
             end,
             set = function(info, r, g, b)
               db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][3] = t.RGB(r * 255, g * 255, b * 255)
-              Addon.Widgets:UpdateSettings(CurrentWidgetOptions)
+              Addon.Widgets:UpdateSettings(MAP_OPTION_TO_WIDGET[info[2]])
             end,
             hasAlpha = false,
           },
@@ -1325,7 +1356,7 @@ local function CreateComboPointsWidgetOptions()
             end,
             set = function(info, r, g, b)
               db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][4] = t.RGB(r * 255, g * 255, b * 255)
-              Addon.Widgets:UpdateSettings(CurrentWidgetOptions)
+              Addon.Widgets:UpdateSettings(MAP_OPTION_TO_WIDGET[info[2]])
             end,
             hasAlpha = false,
           },
@@ -1339,7 +1370,7 @@ local function CreateComboPointsWidgetOptions()
             end,
             set = function(info, r, g, b)
               db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][5] = t.RGB(r * 255, g * 255, b * 255)
-              Addon.Widgets:UpdateSettings(CurrentWidgetOptions)
+              Addon.Widgets:UpdateSettings(MAP_OPTION_TO_WIDGET[info[2]])
             end,
             hasAlpha = false,
             disabled = function() return #db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization] < 5 end
@@ -1354,7 +1385,7 @@ local function CreateComboPointsWidgetOptions()
             end,
             set = function(info, r, g, b)
               db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][6] = t.RGB(r * 255, g * 255, b * 255)
-              Addon.Widgets:UpdateSettings(CurrentWidgetOptions)
+              Addon.Widgets:UpdateSettings(MAP_OPTION_TO_WIDGET[info[2]])
             end,
             hasAlpha = false,
             disabled = function() return #db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization] < 6 end
@@ -1379,6 +1410,21 @@ local function CreateComboPointsWidgetOptions()
           Scale = GetScaleEntry(L["Scale"], 20, { "ComboPoints", "Scale" }),
           Transparency = GetTransparencyEntryWidgetNew(30, { "ComboPoints", "Transparency" } ),
           Placement = GetPlacementEntryWidget(40, "ComboPoints", true),
+        },
+      },
+      DKRuneCooldown= {
+        name = L["Death Knigh Rune Cooldown"],
+        order = 70,
+        type = "group",
+        inline = true,
+        args = {
+          Enable = {
+            name = L["Enable"],
+            order = 10,
+            type = "toggle",
+            arg = { "ComboPoints", "RuneCooldown", "Show" },
+          },
+          Font = GetFontEntryDefault("Font", 20, { "ComboPoints", "RuneCooldown" } )
         },
       },
     },

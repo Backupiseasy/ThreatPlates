@@ -281,25 +281,17 @@ function WidgetHandler:DisableWidget(widget_name)
   if widget.TargetOnly then
     self.EnabledTargetWidgets[widget_name] = nil
 
-    -- Disable all events of the widget
-    widget:UnregisterAllEvents()
-
     widget:OnDisable()
+    widget.WidgetFrame:Hide()
   else
     local widget = self.EnabledWidgets[widget_name]
 
     if widget then
       self.EnabledWidgets[widget_name] = nil
 
-      -- Disable all events of the widget
-      widget:UnregisterAllEvents()
-
       widget:OnDisable()
-
-      if not widget.TargetOnly then
-        for plate, _ in pairs(Addon.PlatesVisible) do
-          plate.TPFrame.widgets[widget_name]:Hide()
-        end
+      for plate, _ in pairs(Addon.PlatesVisible) do
+        plate.TPFrame.widgets[widget_name]:Hide()
       end
     end
   end

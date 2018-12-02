@@ -2,6 +2,7 @@
 -- Combo Points Widget
 ---------------------------------------------------------------------------------------------------
 local ADDON_NAME, Addon = ...
+local ThreatPlates = Addon.ThreatPlates
 
 local Widget = Addon.Widgets:NewTargetWidget("ComboPoints")
 
@@ -11,11 +12,13 @@ local Widget = Addon.Widgets:NewTargetWidget("ComboPoints")
 
 -- Lua APIs
 local unpack, type = unpack, type
+local floor = floor
+local sort = sort
 
 -- WoW APIs
-local CreateFrame = CreateFrame
+local CreateFrame, GetTime = CreateFrame, GetTime
 local UnitClass, UnitCanAttack = UnitClass, UnitCanAttack
-local UnitPower, UnitPowerMax = UnitPower, UnitPowerMax
+local UnitPower, UnitPowerMax, GetRuneCooldown = UnitPower, UnitPowerMax, GetRuneCooldown
 local GetSpecialization, GetShapeshiftFormID = GetSpecialization, GetShapeshiftFormID
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local InCombatLockdown = InCombatLockdown
@@ -23,8 +26,12 @@ local InCombatLockdown = InCombatLockdown
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
 local RGB = Addon.ThreatPlates.RGB
+local Font = Addon.Font
+
+local UPDATE_INTERVAL = Addon.ON_UPDATE_INTERVAL
 
 local WATCH_POWER_TYPES = {
+  RUNIC_POWER = true,
   COMBO_POINTS = true,
   CHI = true,
   HOLY_POWER = true,
@@ -33,6 +40,10 @@ local WATCH_POWER_TYPES = {
 }
 
 local UNIT_POWER = {
+  DEATHKNIGHT= {
+    PowerType = Enum.PowerType.Runes,
+    Name = "RUNIC_POWER",
+  },
   DRUID = {
     PowerType = Enum.PowerType.ComboPoints,
     Name = "COMBO_POINTS",
@@ -86,6 +97,28 @@ local TEXTURE_INFO = {
     TexCoord = { 2/64, 62/64, 2/64, 62/64 }
   },
   Blizzard = {
+--    DEATHKNIGHT = {
+--      Texture = { Texture = "Interface\\PlayerFrame\\UI-PlayerFrame-Deathknight-SingleRune.blp" },
+--      TextureOff = "Interface\PlayerFrame\ClassOverlayDeathKnightRunes",
+--      IconWidth = 16,
+--      IconHeight = 16,
+--      TexCoord = { 0, 1, 0, 1 }
+--    },
+    DEATHKNIGHT = {
+      Texture = {
+        [1] = { Atlas = "DK-Blood-Rune-Ready" },
+        [2] = { Atlas = "DK-Frost-Rune-Ready" },
+        [3] = { Atlas = "DK-Unholy-Rune-Ready" },
+      },
+      TextureOff = {
+        [1] = { Atlas = "DK-Blood-Rune-Ready", Desaturation = 1, Alpha = 0.9 },
+        [2] = { Atlas = "DK-Frost-Rune-Ready", Desaturation = 1, Alpha = 0.9 },
+        [3] = { Atlas = "DK-Unholy-Rune-Ready", Desaturation = 1, Alpha = 0.9 },
+      },
+      IconWidth = 16,
+      IconHeight = 16,
+      TexCoord = { 0, 1, 0, 1 }
+    },
     DRUID = {
       Texture = "ClassOverlay-ComboPoint",
       TextureOff = "ClassOverlay-ComboPoint-Off",
@@ -95,7 +128,9 @@ local TEXTURE_INFO = {
     },
     MAGE = {
       Texture = "Mage-ArcaneCharge",
-      TextureOff = { "Mage-ArcaneCharge", 0.3 },
+      TextureOff = {
+        [1] = { Atlas = "Mage-ArcaneCharge", Alpha = 0.3 },
+      },
       IconWidth = 22,
       IconHeight = 22,
       TexCoord = { 0, 1, 0, 1 }
@@ -131,9 +166,22 @@ local TEXTURE_INFO = {
   }
 }
 
+local DEATHKNIGHT_COLORS = {
+  [1] = RGB(196, 30, 58),
+  [2] = RGB(0, 102, 178),
+  [3] = RGB(76, 204, 25),
+}
+
 Widget.TextureCoordinates = {}
 Widget.Colors = {}
 Widget.ShowInShapeshiftForm = true
+
+local RuneCooldowns = { 0, 0, 0, 0, 0, 0 }
+
+---------------------------------------------------------------------------------------------------
+-- Cached configuration settings
+---------------------------------------------------------------------------------------------------
+local DeathKnightSpecColor, ShowRuneCooldown
 
 ---------------------------------------------------------------------------------------------------
 -- Combo Points Widget Functions
@@ -188,6 +236,89 @@ function Widget:UpdateComboPoints(widget_frame)
   end
 end
 
+local function OnUpdateWidget(widget_frame, elapsed)
+  -- Update the number of seconds since the last update
+  widget_frame.TimeSinceLastUpdate = widget_frame.TimeSinceLastUpdate + elapsed
+
+  local widget = widget_frame.Widget
+  if widget_frame.TimeSinceLastUpdate >= UPDATE_INTERVAL then
+    widget_frame.TimeSinceLastUpdate = 0
+
+    local current_time = floor(GetTime())
+    local cp_texture_off
+    for rune_id = 1, 6 do
+      cp_texture_off = widget_frame.ComboPointsOff[rune_id]
+
+      if cp_texture_off:IsShown() then
+        local cooldown = cp_texture_off.Time.Expiration - current_time
+        cp_texture_off.Time:SetText(cooldown)
+        if cooldown <= 3 then
+          cp_texture_off.Time:SetTextColor(1, 1, 0)
+        end
+      end
+    end
+  end
+end
+
+function Widget:UpdateRunicPower(widget_frame)
+  local ready_runes_no = 0
+
+  local start, duration, rune_ready
+  for rune_id = 1, 6 do
+    start, duration, rune_ready = GetRuneCooldown(rune_id)
+    if rune_ready then
+      ready_runes_no = ready_runes_no + 1
+    else
+      RuneCooldowns[rune_id] = floor(start + duration)
+    end
+  end
+
+  --sort(RuneCooldowns, function(a, b) return a < b  end)
+  sort(RuneCooldowns)
+
+  local current_time = floor(GetTime())
+
+  local color, cp_texture, cp_texture_off, rune_cd, cp_color, expiration
+  for rune_id = 1, 6 do
+    color = self.Colors[ready_runes_no]
+    cp_texture = widget_frame.ComboPoints[rune_id]
+    cp_texture_off = widget_frame.ComboPointsOff[rune_id]
+
+    if rune_id <= ready_runes_no then
+      cp_color = color[rune_id]
+      cp_texture:SetVertexColor(cp_color.r, cp_color.g, cp_color.b)
+      cp_texture:Show()
+      cp_texture_off:Hide()
+
+      if ShowRuneCooldown then
+        cp_texture_off.Time:Hide()
+      end
+    elseif self.db.ShowOffCPs then
+      cp_texture:Hide()
+      cp_texture_off:Show()
+
+      if ShowRuneCooldown then
+        rune_cd = cp_texture_off.Time
+
+        expiration = RuneCooldowns[rune_id]
+        rune_cd.Expiration = expiration
+
+        rune_cd:SetText(expiration - current_time)
+        rune_cd:SetTextColor(DeathKnightSpecColor.r, DeathKnightSpecColor.g, DeathKnightSpecColor.b)
+
+        rune_cd:Show()
+      end
+    elseif cp_texture:IsShown() or cp_texture_off:IsShown() then
+      cp_texture:Hide()
+      cp_texture_off:Hide()
+
+      if ShowRuneCooldown then
+        cp_texture_off.Time:Hide()
+      end
+    end
+  end
+end
+
 -- This event handler only watches for events of unit == "player"
 local function EventHandler(event, unitid, power_type)
   if event == "UNIT_POWER_UPDATE" and not WATCH_POWER_TYPES[power_type] then return end
@@ -197,7 +328,7 @@ local function EventHandler(event, unitid, power_type)
     local widget = Widget
     local widget_frame = widget.WidgetFrame
     if widget_frame:IsShown() then
-      widget:UpdateComboPoints(widget_frame)
+      widget:UpdateUnitPower(widget_frame)
     end
   end
 end
@@ -278,6 +409,8 @@ function Widget:OnEnable()
   if player_class == "DRUID" then
     self:RegisterEvent("UPDATE_SHAPESHIFT_FORM")
     self.ShowInShapeshiftForm = (GetShapeshiftFormID() == 1)
+  elseif player_class == "DEATHKNIGHT" then
+    self:RegisterEvent("RUNE_POWER_UPDATE", EventHandler)
   end
 
   -- self:RegisterUnitEvent("UNIT_POWER_FREQUENT", "player", EventHandler)
@@ -291,6 +424,7 @@ function Widget:OnDisable()
   self:UnregisterEvent("UNIT_POWER_UPDATE")
   self:UnregisterEvent("UNIT_DISPLAYPOWER")
   self:UnregisterEvent("UNIT_MAXPOWER")
+  self:UnregisterEvent("RUNE_POWER_UPDATE")
 
   self.WidgetFrame:Hide()
   self.WidgetFrame:SetParent(nil)
@@ -344,7 +478,7 @@ function Widget:OnTargetUnitAdded(tp_frame, unit)
       widget_frame:SetPoint("CENTER", tp_frame, "CENTER", db.x, db.y)
     end
 
-    self:UpdateComboPoints(widget_frame)
+    self:UpdateUnitPower(widget_frame)
 
     widget_frame:Show()
   else
@@ -360,8 +494,10 @@ end
 function Widget:UpdateTexture(texture, texture_path, cp_no)
   if self.db.Style == "Blizzard" then
     if type(texture_path) == "table" then
-      texture:SetAtlas(texture_path[1])
-      texture:SetAlpha(texture_path[2])
+      local texture_data = texture_path[GetSpecialization()]
+      texture:SetAtlas(texture_data.Atlas)
+      texture:SetAlpha(texture_data.Alpha or 1)
+      texture:SetDesaturated(texture_data.Desaturation) -- nil means no desaturation
     else
       texture:SetAtlas(texture_path)
     end
@@ -390,13 +526,32 @@ function Widget:UpdateLayout()
   widget_frame:SetHeight(scaledIconHeight)
   widget_frame:SetWidth((scaledIconWidth * self.UnitPowerMax) + ((self.UnitPowerMax - 1) * scaledSpacing))
 
+  local _, player_class = UnitClass("player")
+  local show_rune_cooldown = player_class == "DEATHKNIGHT" and ShowRuneCooldown
+
   for i = 1, self.UnitPowerMax do
     widget_frame.ComboPoints[i] = widget_frame.ComboPoints[i] or widget_frame:CreateTexture(nil, "BACKGROUND")
     self:UpdateTexture(widget_frame.ComboPoints[i], self.Texture, i)
 
     widget_frame.ComboPointsOff[i] = widget_frame.ComboPointsOff[i] or widget_frame:CreateTexture(nil, "ARTWORK")
     self:UpdateTexture(widget_frame.ComboPointsOff[i], self.TextureOff, i)
-  end  
+
+    if show_rune_cooldown then
+      local time_text = widget_frame.ComboPointsOff[i].Time or widget_frame:CreateFontString(nil, "ARTWORK", 0)
+      widget_frame.ComboPointsOff[i].Time = time_text
+
+      Font:UpdateText(widget_frame.ComboPointsOff[i], time_text, db.RuneCooldown)
+    elseif widget_frame.ComboPointsOff[i].Time then
+      widget_frame.ComboPointsOff[i].Time:Hide()
+    end
+  end
+
+  if show_rune_cooldown then
+    widget_frame.TimeSinceLastUpdate = 0
+    widget_frame:SetScript("OnUpdate", OnUpdateWidget)
+  else
+    widget_frame:SetScript("OnUpdate", nil)
+  end
 end
 
 function Widget:UpdateSettings()
@@ -410,6 +565,14 @@ function Widget:UpdateSettings()
   -- Update widget variables, only dependent from settings and static information (like player's class)
   local _, player_class = UnitClass("player")
   local texture_info = TEXTURE_INFO[self.db.Style][player_class] or TEXTURE_INFO[self.db.Style]
+
+  if player_class == "DEATHKNIGHT" then
+    self.UpdateUnitPower = self.UpdateRunicPower
+    DeathKnightSpecColor = DEATHKNIGHT_COLORS[GetSpecialization()]
+    ShowRuneCooldown = self.db.RuneCooldown.Show
+  else
+    self.UpdateUnitPower = self.UpdateComboPoints
+  end
 
   self.TexCoord = texture_info.TexCoord
   self.IconWidth = texture_info.IconWidth

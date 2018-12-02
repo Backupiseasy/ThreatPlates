@@ -1,8 +1,13 @@
 ﻿------------------------------------------------------
 9.1.0-Alpha3
 ------------------------------------------------------
+* Extended the combo points widget to also show Death Knight runes including cooldown timers [Comment #989, #1240, #1252, #1558].
 * Added new filter options for auras for friendly buffs (Mine) and enemy unlimited buffs (e.g. only show in combat or in instances).
 * Fixed a bug with UI scaling which resulted in nameplates being to big when "Ignore UI Scale" was disabled [Comment #1648].
+* Fixed a Lua error with the Combo Points widget options when changing the combo points colors.
+* Fixed a Lua error when enabling or disabling the Class Icon widget.
+* Fixed a bug where widgets did not work correctly after disabling and enabling them again as the widget's event handling was still disabled.
+* Changed how "Show Unlimited Buffs" in the Auras widget works: settings for unlimited buffs are applied after aura filtering, so the cannot overwrite filters.
 
 ------------------------------------------------------
 9.1.0-Alpha2

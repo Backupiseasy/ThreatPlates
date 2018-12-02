@@ -509,12 +509,31 @@ function Widget:FilterFriendlyBuffsBySpell(db, aura, AuraFilterFunction, unit)
   return AuraFilterFunction(show_aura, spellfound, aura.CastByPlayer)
 end
 
+--function Widget:FilterEnemyBuffsBySpellDynamic(db, aura, unit)
+--  return aura.duration > 0 or db.ShowUnlimitedAlways or
+--    (db.ShowUnlimitedInCombat and unit.isInCombat) or
+--    (db.ShowUnlimitedInInstances and PLayerIsInInstance) or
+--    (db.ShowUnlimitedOnBosses and unit.IsBossOrRare)
+--end
+
 function Widget:FilterEnemyBuffsBySpell(db, aura, AuraFilterFunction, unit)
   local show_aura = db.ShowAllEnemy or (db.ShowOnEnemyNPCs and unit.type == "NPC") or (db.ShowDispellable and aura.StealOrPurge)
-
   local spellfound = self.AuraFilterBuffs[aura.name] or self.AuraFilterBuffs[aura.spellid]
 
-  return AuraFilterFunction(show_aura, spellfound, aura.CastByPlayer)
+  show_aura = AuraFilterFunction(show_aura, spellfound, aura.CastByPlayer)
+
+  -- Checking unlimited auras after filter function results in the filter list not being able to overwrite
+  -- the "Show Unlimited Buffs" settings
+  if show_aura and (aura.duration <= 0) then
+    show_aura =  db.ShowUnlimitedAlways or
+                (db.ShowUnlimitedInCombat and unit.isInCombat) or
+                (db.ShowUnlimitedInInstances and PLayerIsInInstance) or
+                (db.ShowUnlimitedOnBosses and unit.IsBossOrRare)
+    unit.HasUnlimitedAuras = true
+  end
+
+  return show_aura
+  --return AuraFilterFunction(show_aura, spellfound, aura.CastByPlayer)
 end
 
 function Widget:FilterFriendlyCrowdControlBySpell(db, aura, AuraFilterFunction)
@@ -535,13 +554,6 @@ function Widget:FilterEnemyCrowdControlBySpell(db, aura, AuraFilterFunction)
   local spellfound = self.AuraFilterCrowdControl[aura.name] or self.AuraFilterCrowdControl[aura.spellid]
 
   return AuraFilterFunction(show_aura, spellfound, aura.CastByPlayer)
-end
-
-function Widget:FilterEnemyBuffsBySpellDynamic(db, aura, unit)
-  return aura.duration > 0 or db.ShowUnlimitedAlways or
-    (db.ShowUnlimitedInCombat and unit.isInCombat) or
-    (db.ShowUnlimitedInInstances and PLayerIsInInstance) or
-    (db.ShowUnlimitedOnBosses and unit.IsBossOrRare)
 end
 
 Widget.AuraSortFunctionAtoZ = function(a, b)
@@ -631,10 +643,10 @@ function Widget:UpdateUnitAuras(frame, unit, enabled_auras, enabled_cc, SpellFil
     elseif enabled_auras then
       show_aura = SpellFilter(self, db_auras, aura, AuraFilterFunction, unit)
 
-      if show_aura and effect == "HELPFUL" and unit.reaction ~= "FRIENDLY" then
-        unit.HasUnlimitedAuras = unit.HasUnlimitedAuras or (aura.duration <= 0)
-        show_aura = self:FilterEnemyBuffsBySpellDynamic(db_auras, aura, unit)
-      end
+      --      if show_aura and effect == "HELPFUL" and unit.reaction ~= "FRIENDLY" then
+      --        unit.HasUnlimitedAuras = unit.HasUnlimitedAuras or (aura.duration <= 0)
+      --        show_aura = self:FilterEnemyBuffsBySpellDynamic(db_auras, aura, unit)
+      --      end
     end
 
     if show_aura then

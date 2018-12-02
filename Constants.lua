@@ -720,13 +720,13 @@ ThreatPlates.DEFAULT_SETTINGS = {
       y_hv = -20,
       Specialization = "DRUID",
       ColorBySpec = {
-        ROGUE = {
-          [1] = RGB(0, 0, 255),
-          [2] = RGB(0, 150, 255),
-          [3] = RGB(0, 255, 0),
-          [4] = RGB(255, 105, 0),
-          [5] = RGB(255, 0, 0),
-          [6] = RGB(255, 0, 0),
+        DEATHKNIGHT = {
+          [1] = RGB(255, 0, 255),
+          [2] = RGB(255, 0, 255),
+          [3] = RGB(255, 0, 255),
+          [4] = RGB(255, 0, 255),
+          [5] = RGB(255, 0, 255),
+          [6] = RGB(255, 0, 255),
         },
         DRUID = {
           [1] = RGB(0, 0, 255),
@@ -734,6 +734,12 @@ ThreatPlates.DEFAULT_SETTINGS = {
           [3] = RGB(0, 255, 0),
           [4] = RGB(255, 105, 0),
           [5] = RGB(255, 0, 0),
+        },
+        MAGE = {
+          [1] = RGB(105, 204, 240),
+          [2] = RGB(105, 204, 240),
+          [3] = RGB(105, 204, 240),
+          [4] = RGB(105, 204, 240),
         },
         MONK = {
           [1] = RGB(0, 225, 255), -- Cyan
@@ -749,6 +755,14 @@ ThreatPlates.DEFAULT_SETTINGS = {
           [4] = RGB(255, 255, 0),
           [5] = RGB(255, 255, 0),
         },
+        ROGUE = {
+          [1] = RGB(0, 0, 255),
+          [2] = RGB(0, 150, 255),
+          [3] = RGB(0, 255, 0),
+          [4] = RGB(255, 105, 0),
+          [5] = RGB(255, 0, 0),
+          [6] = RGB(255, 0, 0),
+        },
         WARLOCK = {
           [1] = RGB(148, 130, 201),
           [2] = RGB(148, 130, 201),
@@ -756,31 +770,19 @@ ThreatPlates.DEFAULT_SETTINGS = {
           [4] = RGB(148, 130, 201),
           [5] = RGB(148, 130, 201),
         },
-        MAGE = {
-          [1] = RGB(105, 204, 240),
-          [2] = RGB(105, 204, 240),
-          [3] = RGB(105, 204, 240),
-          [4] = RGB(105, 204, 240),
+      },
+      RuneCooldown = {
+        Show = true,
+        HorizontalOffset = 1,
+        VerticalOffset = 0,
+        Font = {
+          Typeface = Addon.DEFAULT_FONT,
+          Size = 10,
+          flags = "OUTLINE",
+          Shadow = true,
         },
       },
     },
-    --comboWidget = { -- removed in 9.1
-    --  ON = false,
-    --  scale = 1,
-    --  x = 0,
-    --  y = -8,
-    --  x_hv = 0,
-    --  y_hv = -16,
-    --  ShowInHeadlineView = false,
-    --},
-    --      eliteWidget = {
-    --        ON = true,
-    --        theme = "default",
-    --        scale = 15,
-    --        x = 64,
-    --        y = 9,
-    --        anchor = "CENTER"
-    --      },
     socialWidget = {
       ON = false,
       scale = 16,
