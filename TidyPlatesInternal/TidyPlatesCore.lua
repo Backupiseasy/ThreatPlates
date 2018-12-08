@@ -1210,8 +1210,16 @@ do
   end
 
   local function SetObjectJustify(object, horz, vert)
-    object:SetJustifyH(horz)
-    object:SetJustifyV(vert)
+    local align_horz, align_vert = object:GetJustifyH(), object:GetJustifyV()
+    if align_horz ~= horz or align_vert ~= vert then
+      object:SetJustifyH(horz)
+      object:SetJustifyV(vert)
+
+      -- Set text to nil to enforce text string update, otherwise updates to justification will not take effect
+      local text = object:GetText()
+      object:SetText(nil)
+      object:SetText(text)
+    end
   end
 
   local function SetObjectAnchor(object, anchor, anchorTo, x, y)
@@ -1245,11 +1253,9 @@ do
 	-- SetFontGroupObject
 	local function SetFontGroupObject(object, objectstyle)
 		if objectstyle then
-			SetObjectFont(object, objectstyle.typeface, objectstyle.size, objectstyle.flags)
-			SetObjectJustify(object, objectstyle.align or "CENTER", objectstyle.vertical or "BOTTOM")
-			SetObjectShadow(object, objectstyle.shadow)
-      -- Set text to nil to enforce text string update, otherwise updates to justification will not take effect
-      object:SetText(nil)
+      SetObjectFont(object, objectstyle.typeface, objectstyle.size, objectstyle.flags)
+      SetObjectJustify(object, objectstyle.align or "CENTER", objectstyle.vertical or "BOTTOM")
+      SetObjectShadow(object, objectstyle.shadow)
 		end
 	end
 
