@@ -176,6 +176,7 @@ Widget.TextureCoordinates = {}
 Widget.Colors = {}
 Widget.ShowInShapeshiftForm = true
 
+local ActiveSpec
 local RuneCooldowns = { 0, 0, 0, 0, 0, 0 }
 
 ---------------------------------------------------------------------------------------------------
@@ -333,9 +334,16 @@ local function EventHandler(event, unitid, power_type)
   end
 end
 
+-- Arguments of ACTIVE_TALENT_GROUP_CHANGED (curr, prev) always seemt to be 1, 1
 function Widget:ACTIVE_TALENT_GROUP_CHANGED(...)
-  -- Player switched to a spec that has combo points
-  self.WidgetHandler:InitializeWidget("ComboPoints")
+  -- ACTIVE_TALENT_GROUP_CHANGED fires twice, so prevent that InitializeWidget is called twice (does not hurt,
+  -- but is not necesary either
+  local current_spec = GetSpecialization()
+  if ActiveSpec ~= current_spec then
+    -- Player switched to a spec that has combo points
+    self.WidgetHandler:InitializeWidget("ComboPoints")
+    ActiveSpec = current_spec
+  end
 end
 
 function Widget:UNIT_MAXPOWER(unitid, power_type)
@@ -386,9 +394,17 @@ end
 ---------------------------------------------------------------------------------------------------
 
 function Widget:IsEnabled()
+  local enabled = self.db.ON or self.db.ShowInHeadlineView
+
+  if enabled then
+    -- Register ACTIVE_TALENT_GROUP_CHANGED here otherwise it won't be registerd when an spec is active that does not have combo points.
+    -- If you then switch to a spec with talent points, the widget won't be enabled.
+    self:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
+  end
+
   self:DetermineUnitPower()
 
-  return self.PowerType and (self.db.ON or self.db.ShowInHeadlineView)
+  return self.PowerType and enabled
 end
 
 -- EVENTS:
@@ -415,8 +431,6 @@ function Widget:OnEnable()
 
   -- self:RegisterUnitEvent("UNIT_POWER_FREQUENT", "player", EventHandler)
   -- self:RegisterUnitEvent("UNIT_FLAGS", "player", EventHandler)
-
-  self:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
 end
 
 function Widget:OnDisable()
