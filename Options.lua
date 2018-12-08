@@ -57,7 +57,7 @@ local AURA_STYLE = {
       HorizontalOffset = -1,
       VerticalOffset = 8,
       Font = {
-        Typeface = Addon.DEFAUL_SMALL_FONT,
+        Typeface = Addon.DEFAULT_SMALL_FONT,
         Size = 10,
         Transparency = 1,
         Color = t.RGB(255, 255, 255),
@@ -73,7 +73,7 @@ local AURA_STYLE = {
       HorizontalOffset = -1,
       VerticalOffset = -6,
       Font = {
-        Typeface = Addon.DEFAUL_SMALL_FONT,
+        Typeface = Addon.DEFAULT_SMALL_FONT,
         Size = 10,
         Transparency = 1,
         Color = t.RGB(255, 255, 255),
@@ -94,7 +94,7 @@ local AURA_STYLE = {
       HorizontalOffset = 0,
       VerticalOffset = 8,
       Font = {
-        Typeface = Addon.DEFAUL_SMALL_FONT,
+        Typeface = Addon.DEFAULT_SMALL_FONT,
         Size = 10,
         Transparency = 1,
         Color = t.RGB(255, 255, 255),
@@ -110,7 +110,7 @@ local AURA_STYLE = {
       HorizontalOffset = 0,
       VerticalOffset = -6,
       Font = {
-        Typeface = Addon.DEFAUL_SMALL_FONT,
+        Typeface = Addon.DEFAULT_SMALL_FONT,
         Size = 10,
         Transparency = 1,
         Color = t.RGB(255, 255, 255),
@@ -369,11 +369,13 @@ end
 
 -- Set widget values
 
+-- Key is key from options data structure for the widget, value is widget name as used in NewWidget
 local MAP_OPTION_TO_WIDGET = {
   ComboPointsWidget = "ComboPoints",
   ResourceWidget = "Resource",
   AurasWidget = "Auras",
   TargetArtWidget = "TargetArt",
+  ArenaWidget = "Arena",
 }
 
 local function SetValueWidget(info, val)
@@ -867,7 +869,7 @@ end
 
 -- Syntax for settings:
 --  Font = {
---    Typeface = Addon.DEFAUL_SMALL_FONT,
+--    Typeface = Addon.DEFAULT_SMALL_FONT,
 --    Size = 10,
 --    Transparency = 1,
 --    Color = RGB(255, 255, 255),
@@ -1438,117 +1440,194 @@ local function CreateArenaWidgetOptions()
     name = L["Arena"],
     type = "group",
     order = 10,
+    set = SetValueWidget,
     args = {
       Enable = GetEnableEntry(L["Enable Arena Widget"], L["This widget shows various icons (orbs and numbers) on enemy nameplates in arenas for easier differentiation."], "arenaWidget", false, function(info, val) SetValuePlain(info, val); Addon.Widgets:InitializeWidget("Arena") end),
-      Colors = {
-        name = L["Arena Orb Colors"],
+      Orbs = {
+        name = L["Arena Orb"],
         type = "group",
         inline = true,
-        order = 40,
-        --                  disabled = function() return not db.arenaWidget.ON end,
+        order = 10,
         args = {
-          Arena1 = {
-            name = L["Arena 1"],
-            type = "color",
-            order = 1,
-            get = GetColorAlpha,
-            set = SetColorAlpha,
-            hasAlpha = true,
-            arg = { "arenaWidget", "colors", 1 },
+          EnableOrbs = {
+            name = L["Show Orb"],
+            order = 10,
+            type = "toggle",
+            arg = { "arenaWidget", "ShowOrb" } ,
           },
-          Arena2 = {
-            name = L["Arena 2"],
-            type = "color",
-            order = 2,
+          Size = GetSizeEntryDefault(20, "arenaWidget" ),
+          Colors = {
+            name = L["Colors"],
+            type = "group",
+            inline = true,
+            order = 30,
             get = GetColorAlpha,
             set = SetColorAlpha,
-            hasAlpha = true,
-            arg = { "arenaWidget", "colors", 2 },
-          },
-          Arena3 = {
-            name = L["Arena 3"],
-            type = "color",
-            order = 3,
-            get = GetColorAlpha,
-            set = SetColorAlpha,
-            hasAlpha = true,
-            arg = { "arenaWidget", "colors", 3 },
-          },
-          Arena4 = {
-            name = L["Arena 4"],
-            type = "color",
-            order = 4,
-            get = GetColorAlpha,
-            set = SetColorAlpha,
-            hasAlpha = true,
-            arg = { "arenaWidget", "colors", 4 },
-          },
-          Arena5 = {
-            name = L["Arena 5"],
-            type = "color",
-            order = 5,
-            get = GetColorAlpha,
-            set = SetColorAlpha,
-            hasAlpha = true,
-            arg = { "arenaWidget", "colors", 5 },
+            --                  disabled = function() return not db.arenaWidget.ON end,
+            args = {
+              Arena1 = {
+                name = L["Arena 1"],
+                type = "color",
+                order = 1,
+                hasAlpha = true,
+                arg = { "arenaWidget", "colors", 1 },
+              },
+              Arena2 = {
+                name = L["Arena 2"],
+                type = "color",
+                order = 2,
+                hasAlpha = true,
+                arg = { "arenaWidget", "colors", 2 },
+              },
+              Arena3 = {
+                name = L["Arena 3"],
+                type = "color",
+                order = 3,
+                hasAlpha = true,
+                arg = { "arenaWidget", "colors", 3 },
+              },
+              Arena4 = {
+                name = L["Arena 4"],
+                type = "color",
+                order = 4,
+                hasAlpha = true,
+                arg = { "arenaWidget", "colors", 4 },
+              },
+              Arena5 = {
+                name = L["Arena 5"],
+                type = "color",
+                order = 5,
+                hasAlpha = true,
+                arg = { "arenaWidget", "colors", 5 },
+              },
+            },
           },
         },
       },
-      numColors = {
-        name = L["Arena Number Colors"],
+      Numbers = {
+        name = L["Arena Number"],
         type = "group",
         inline = true,
-        order = 50,
-        --                  disabled = function() return not db.arenaWidget.ON end,
+        order = 20,
         args = {
-          Arena1 = {
-            name = L["Arena 1"],
-            type = "color",
-            order = 1,
-            get = GetColorAlpha,
-            set = SetColorAlpha,
-            hasAlpha = true,
-            arg = { "arenaWidget", "numColors", 1 },
+          EnableNumbers = {
+            name = L["Show Number"],
+            order = 10,
+            type = "toggle",
+            arg = {"arenaWidget", "ShowNumber"},
           },
-          Arena2 = {
-            name = L["Arena 2"],
-            type = "color",
-            order = 2,
-            get = GetColorAlpha,
-            set = SetColorAlpha,
-            hasAlpha = true,
-            arg = { "arenaWidget", "numColors", 2 },
+          HideUnitName = {
+            name = L["Hide Name"],
+            order = 20,
+            type = "toggle",
+            arg = {"arenaWidget", "HideName"},
           },
-          Arena3 = {
-            name = L["Arena 3"],
-            type = "color",
-            order = 3,
-            get = GetColorAlpha,
-            set = SetColorAlpha,
-            hasAlpha = true,
-            arg = { "arenaWidget", "numColors", 3 },
+          Font = GetFontEntryDefault(L["Font"], 30, { "arenaWidget", "NumberText" }),
+          Placement = {
+            type = "group",
+            order = 35,
+            name = L["Placement"],
+            inline = true,
+            args = {
+              Anchor = {
+                type = "select",
+                order = 10,
+                name = L["Anchor Point"],
+                values = Addon.ANCHOR_POINT,
+                arg = { "arenaWidget", "NumberText", "Anchor" }
+              },
+              InsideAnchor = {
+                type = "toggle",
+                order = 15,
+                name = L["Inside"],
+                width = "half",
+                arg = { "arenaWidget", "NumberText", "InsideAnchor" }
+              },
+              X = {
+                type = "range",
+                order = 20,
+                name = L["Horizontal Offset"],
+                max = 120,
+                min = -120,
+                step = 1,
+                isPercent = false,
+                arg = { "arenaWidget", "NumberText", "HorizontalOffset" },
+              },
+              Y = {
+                type = "range",
+                order = 30,
+                name = L["Vertical Offset"],
+                max = 120,
+                min = -120,
+                step = 1,
+                isPercent = false,
+                arg = { "arenaWidget", "NumberText", "VerticalOffset" },
+              },
+              AlignX = {
+                type = "select",
+                order = 40,
+                name = L["Horizontal Align"],
+                values = t.AlignH,
+                arg = { "arenaWidget", "NumberText", "Font", "HorizontalAlignment" },
+              },
+              AlignY = {
+                type = "select",
+                order = 50,
+                name = L["Vertical Align"],
+                values = t.AlignV,
+                arg = { "arenaWidget", "NumberText", "Font", "VerticalAlignment" },
+              },
+            },
           },
-          Arena4 = {
-            name = L["Arena 4"],
-            type = "color",
-            order = 4,
+          numColors = {
+            name = L["Colors"],
+            type = "group",
+            inline = true,
+            order = 40,
             get = GetColorAlpha,
             set = SetColorAlpha,
-            hasAlpha = true,
-            arg = { "arenaWidget", "numColors", 4 },
-          },
-          Arena5 = {
-            name = L["Arena 5"],
-            type = "color",
-            order = 5,
-            get = GetColorAlpha,
-            set = SetColorAlpha,
-            hasAlpha = true,
-            arg = { "arenaWidget", "numColors", 5 },
+            --                  disabled = function() return not db.arenaWidget.ON end,
+            args = {
+              Arena1 = {
+                name = L["Arena 1"],
+                type = "color",
+                order = 1,
+                hasAlpha = true,
+                arg = { "arenaWidget", "numColors", 1 },
+              },
+              Arena2 = {
+                name = L["Arena 2"],
+                type = "color",
+                order = 2,
+                hasAlpha = true,
+                arg = { "arenaWidget", "numColors", 2 },
+              },
+              Arena3 = {
+                name = L["Arena 3"],
+                type = "color",
+                order = 3,
+                hasAlpha = true,
+                arg = { "arenaWidget", "numColors", 3 },
+              },
+              Arena4 = {
+                name = L["Arena 4"],
+                type = "color",
+                order = 4,
+                hasAlpha = true,
+                arg = { "arenaWidget", "numColors", 4 },
+              },
+              Arena5 = {
+                name = L["Arena 5"],
+                type = "color",
+                order = 5,
+                hasAlpha = true,
+                arg = { "arenaWidget", "numColors", 5 },
+              },
+            },
           },
         },
       },
-      Layout = GetLayoutEntry(60, "arenaWidget"),
+      Placement = GetPlacementEntryWidget(60, "arenaWidget", false),
     },
   }
 

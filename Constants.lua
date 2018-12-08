@@ -31,7 +31,7 @@ _G["BINDING_NAME_" .. "THREATPLATES_NAMEPLATE_MODE_FOR_ENEMY_UNITS"] = L["Toggle
 -- Color and font definitions
 ---------------------------------------------------------------------------------------------------
 Addon.DEFAULT_FONT = "Cabin"
-Addon.DEFAUL_SMALL_FONT = "Arial Narrow"
+Addon.DEFAULT_SMALL_FONT = "Arial Narrow"
 
 local locale = GetLocale()
 local MAP_FONT = {
@@ -55,7 +55,7 @@ local MAP_FONT = {
 
 if MAP_FONT[locale] then
   Addon.DEFAULT_FONT = MAP_FONT[locale].DefaultFont
-  Addon.DEFAUL_SMALL_FONT = MAP_FONT[locale].DefaultSmallFont
+  Addon.DEFAULT_SMALL_FONT = MAP_FONT[locale].DefaultSmallFont
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -488,6 +488,9 @@ ThreatPlates.DEFAULT_SETTINGS = {
       x = 36,
       y = -6,
       anchor = "CENTER",
+      ShowOrb = true,
+      ShowNumber = true,
+      HideName = false,
       colors = {
         [1] = RGB_P(1, 0, 0, 1),
         [2] = RGB_P(1, 1, 0, 1),
@@ -501,6 +504,20 @@ ThreatPlates.DEFAULT_SETTINGS = {
         [3] = RGB_P(1, 1, 1, 1),
         [4] = RGB_P(1, 1, 1, 1),
         [5] = RGB_P(1, 1, 1, 1),
+      },
+      NumberText = {
+        Anchor = "CENTER",
+        InsideAnchor = true,
+        HorizontalOffset = 1,
+        VerticalOffset = 0,
+        Font = {
+          Typeface = Addon.DEFAULT_FONT,
+          Size = 12,
+          flags = "OUTLINE",
+          Shadow = true,
+          HorizontalAlignment = "CENTER",
+          VerticalAlignment = "CENTER",
+        },
       },
     },
     healerTracker = {
@@ -614,7 +631,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
           HorizontalOffset = 0,
           VerticalOffset = 8,
           Font = {
-            Typeface = Addon.DEFAUL_SMALL_FONT,
+            Typeface = Addon.DEFAULT_SMALL_FONT,
             Size = 10,
             Transparency = 1,
             Color = RGB(255, 255, 255),
@@ -630,7 +647,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
           HorizontalOffset = 0,
           VerticalOffset = -6,
           Font = {
-            Typeface = Addon.DEFAUL_SMALL_FONT,
+            Typeface = Addon.DEFAULT_SMALL_FONT,
             Size = 10,
             Transparency = 1,
             Color = RGB(255, 255, 255),
@@ -648,7 +665,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
         BarSpacing = 2,
         MaxBars = 10,
         Texture = "Smooth", -- old default: "Aluminium",
-        Font = Addon.DEFAUL_SMALL_FONT,
+        Font = Addon.DEFAULT_SMALL_FONT,
         FontSize = 10,
         FontColor = RGB(255, 255, 255),
         LabelTextIndent = 4,
