@@ -9,11 +9,10 @@ local t = Addon.ThreatPlates
 local tonumber = tonumber
 
 -- WoW APIs
-local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local SetNamePlateFriendlyClickThrough = C_NamePlate.SetNamePlateFriendlyClickThrough
 local SetNamePlateEnemyClickThrough = C_NamePlate.SetNamePlateEnemyClickThrough
-local UnitName, IsInInstance, InCombatLockdown = UnitName, IsInInstance, InCombatLockdown
-local GetCVar, SetCVar, IsAddOnLoaded = GetCVar, SetCVar, IsAddOnLoaded
+local IsInInstance = IsInInstance
+local GetCVar, IsAddOnLoaded = GetCVar, IsAddOnLoaded
 local C_NamePlate_SetNamePlateFriendlySize, C_NamePlate_SetNamePlateEnemySize, Lerp =  C_NamePlate.SetNamePlateFriendlySize, C_NamePlate.SetNamePlateEnemySize, Lerp
 local NamePlateDriverFrame = NamePlateDriverFrame
 
@@ -21,8 +20,6 @@ local NamePlateDriverFrame = NamePlateDriverFrame
 local TidyPlatesThreat = TidyPlatesThreat
 local LibStub = LibStub
 local L = t.L
-
-local task_queue_ooc = {}
 
 ---------------------------------------------------------------------------------------------------
 -- Global configs and funtions
@@ -52,69 +49,6 @@ function TidyPlatesThreat:RoleText()
     return tankRole
   else
     return dpsRole
-  end
-end
-
-local EVENTS = {
-  --"PLAYER_ALIVE",
-  --"PLAYER_LEAVING_WORLD",
-  --"PLAYER_TALENT_UPDATE"
-
-  "PLAYER_ENTERING_WORLD",
-  "PLAYER_LOGIN",
-  "PLAYER_LOGOUT",
-  "PLAYER_REGEN_ENABLED",
-  "PLAYER_REGEN_DISABLED",
-
-  -- CVAR_UPDATE,
-  -- DISPLAY_SIZE_CHANGED,     -- Blizzard also uses this event
-  -- VARIABLES_LOADED,         -- Blizzard also uses this event
-
-  -- Events from TidyPlates
-
-  -- NAME_PLATE_CREATED
-  -- NAME_PLATE_UNIT_ADDED
-  -- UNIT_NAME_UPDATE
-  -- NAME_PLATE_UNIT_REMOVED
-
-  -- PLAYER_TARGET_CHANGED
-  -- UPDATE_MOUSEOVER_UNIT
-
-  -- UNIT_HEALTH_FREQUENT
-  -- UNIT_MAXHEALTH,
-  -- UNIT_ABSORB_AMOUNT_CHANGED,
-
-  -- PLAYER_ENTERING_WORLD
-  -- PLAYER_REGEN_ENABLED
-  -- PLAYER_REGEN_DISABLED
-
-  -- UNIT_SPELLCAST_START
-  -- UNIT_SPELLCAST_STOP
-  -- UNIT_SPELLCAST_CHANNEL_START
-  -- UNIT_SPELLCAST_CHANNEL_STOP
-  -- UNIT_SPELLCAST_DELAYED
-  -- UNIT_SPELLCAST_CHANNEL_UPDATE
-  -- UNIT_SPELLCAST_INTERRUPTIBLE
-  -- UNIT_SPELLCAST_NOT_INTERRUPTIBLE
-
-  -- UI_SCALE_CHANGED
-  -- COMBAT_LOG_EVENT_UNFILTERED
-  -- UNIT_LEVEL
-  -- UNIT_FACTION
-  -- RAID_TARGET_UPDATE
-  -- PLAYER_FOCUS_CHANGED
-  -- PLAYER_CONTROL_GAINED
-}
-
-local function EnableEvents()
-  for i = 1, #EVENTS do
-    TidyPlatesThreat:RegisterEvent(EVENTS[i])
-  end
-end
-
-local function DisableEvents()
-  for i = 1, #EVENTS do
-    TidyPlatesThreat:UnregisterEvent(EVENTS[i])
   end
 end
 
@@ -373,26 +307,15 @@ function TidyPlatesThreat:OnEnable()
   -- Get updates for changes regarding: Large Nameplates
   hooksecurefunc("SetCVar", SetCVarHook)
 
-  EnableEvents()
+  Addon:EnableEvents()
 end
 
 -- Called when the addon is disabled
 function TidyPlatesThreat:OnDisable()
-  DisableEvents()
+  -- DisableEvents()
 
   -- Reset all CVars to its initial values
   -- Addon.CVars:RestoreAllFromProfile()
-end
-
-function Addon:CallbackWhenOoC(func, msg)
-  if InCombatLockdown() then
-    if msg then
-      t.Print(msg .. L[" The change will be applied after you leave combat."], true)
-    end
-    task_queue_ooc[#task_queue_ooc + 1] = func
-  else
-    func()
-  end
 end
 
 -----------------------------------------------------------------------------------
@@ -432,98 +355,4 @@ function TidyPlatesThreat:ToggleNameplateModeEnemyUnits()
   db.Visibility.EnemyMinus.UseHeadlineView = not db.Visibility.EnemyMinus.UseHeadlineView
 
   Addon:ForceUpdate()
-end
-
------------------------------------------------------------------------------------
--- WoW EVENTS --
------------------------------------------------------------------------------------
-
--- Fired when the player enters the world, reloads the UI, enters/leaves an instance or battleground, or respawns at a graveyard.
--- Also fires any other time the player sees a loading screen
-function TidyPlatesThreat:PLAYER_ENTERING_WORLD()
-  -- Sync internal settings with Blizzard CVars
-  -- SetCVar("ShowClassColorInNameplate", 1)
-
-  local db = self.db.profile.questWidget
-  if db.ON or db.ShowInHeadlineView then
-    Addon.CVars:Set("showQuestTrackingTooltips", 1)
-    --SetCVar("showQuestTrackingTooltips", 1)
-  else
-    Addon.CVars:RestoreFromProfile("showQuestTrackingTooltips")
-  end
-
-  db = self.db.profile.Automation
-  local isInstance, instanceType = IsInInstance()
-
-  if db.HideFriendlyUnitsInInstances and isInstance then
-    Addon.CVars:Set("nameplateShowFriends", 0)
-  else
-    -- reset to previous setting
-    Addon.CVars:RestoreFromProfile("nameplateShowFriends")
-  end
-
-  if db.SmallPlatesInInstances and NamePlateDriverFrame:IsUsingLargerNamePlateStyle() and isInstance then
-    Addon.CVars:Set("nameplateGlobalScale", 0.4)
-  else
-    -- reset to previous setting
-    Addon.CVars:RestoreFromProfile("nameplateGlobalScale")
-  end
-end
-
---function TidyPlatesThreat:PLAYER_LEAVING_WORLD()
---end
-
-function TidyPlatesThreat:PLAYER_LOGIN(...)
-  self.db.profile.cache = {}
-
-  if self.db.char.welcome then
-    t.Print(L["|cff89f559Threat Plates:|r Welcome back |cff"]..t.HCC[Addon.PlayerClass]..UnitName("player").."|r!!")
-  end
-end
-
-function TidyPlatesThreat:PLAYER_LOGOUT(...)
-  self.db.profile.cache = {}
-end
-
--- Fires when the player leaves combat status
--- Syncs addon settings with game settings in case changes weren't possible during startup, reload
--- or profile reset because character was in combat.
-function TidyPlatesThreat:PLAYER_REGEN_ENABLED()
-  -- Execute functions which will fail when executed while in combat
-  for i = #task_queue_ooc, 1, -1 do -- add -1 so that an empty list does not result in a Lua error
-    task_queue_ooc[i]()
-    task_queue_ooc[i] = nil
-  end
-
---  local db = TidyPlatesThreat.db.profile.threat
---  -- Required for threat/aggro detection
---  if db.ON and (GetCVar("threatWarning") ~= 3) then
---    SetCVar("threatWarning", 3)
---  elseif not db.ON and (GetCVar("threatWarning") ~= 0) then
---    SetCVar("threatWarning", 0)
---  end
-
-  local db = TidyPlatesThreat.db.profile.Automation
-  local isInstance, _ = IsInInstance()
-
-  -- Dont't use automation for friendly nameplates if in an instance and Hide Friendly Nameplates is enabled
-  if db.FriendlyUnits ~= "NONE" and not (isInstance and db.HideFriendlyUnitsInInstances) then
-    SetCVar("nameplateShowFriends", (db.FriendlyUnits == "SHOW_COMBAT" and 0) or 1)
-  end
-  if db.EnemyUnits ~= "NONE" then
-    SetCVar("nameplateShowEnemies", (db.EnemyUnits == "SHOW_COMBAT" and 0) or 1)
-  end
-end
-
--- Fires when the player enters combat status
-function TidyPlatesThreat:PLAYER_REGEN_DISABLED()
-  local db = self.db.profile.Automation
-  local isInstance, _ = IsInInstance()
-
-  -- Dont't use automation for friendly nameplates if in an instance and Hide Friendly Nameplates is enabled
-  if db.FriendlyUnits ~= "NONE" and not (isInstance and db.HideFriendlyUnitsInInstances) then
-    SetCVar("nameplateShowFriends", (db.FriendlyUnits == "SHOW_COMBAT" and 1) or 0)
-  end  if db.EnemyUnits ~= "NONE" then
-    SetCVar("nameplateShowEnemies", (db.EnemyUnits == "SHOW_COMBAT" and 1) or 0)
-  end
 end

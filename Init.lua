@@ -4,6 +4,8 @@ local ADDON_NAME, Addon = ...
 -- Define table that contains all addon-global variables and functions
 ---------------------------------------------------------------------------------------------------
 Addon.ThreatPlates = {}
+Addon.Debug = {}
+
 local ThreatPlates = Addon.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------
@@ -17,7 +19,6 @@ local UnitPlayerControlled = UnitPlayerControlled
 ---------------------------------------------------------------------------------------------------
 local LibStub = LibStub
 
-local LibStub = LibStub
 ThreatPlates.L = LibStub("AceLocale-3.0"):GetLocale("TidyPlatesThreat")
 ThreatPlates.Media = LibStub("LibSharedMedia-3.0")
 
@@ -138,10 +139,6 @@ Addon.ConcatTables = function(base_table, table_to_concat)
 	return concat_result
 end
 
---------------------------------------------------------------------------------------------------
--- Some functions to fix TidyPlates bugs
----------------------------------------------------------------------------------------------------
-
 ThreatPlates.Dump = function(value, index)
 	if not IsAddOnLoaded("Blizzard_DebugTools") then
 		LoadAddOn("Blizzard_DebugTools")
@@ -154,124 +151,3 @@ ThreatPlates.Dump = function(value, index)
 	end
 	DevTools_Dump(value, i)
 end
-
--- With TidyPlates:
---local function FixUpdateUnitCondition(unit)
---	local unitid = unit.unitid
---
---	-- Enemy players turn to neutral, e.g., when mounting a flight path mount, so fix reaction in that situations
---	if unit.reaction == "NEUTRAL" and (unit.type == "PLAYER" or UnitPlayerControlled(unitid)) then
---		unit.reaction = "HOSTILE"
---	end
---end
-
---------------------------------------------------------------------------------------------------
--- Debug Functions
----------------------------------------------------------------------------------------------------
-
-local function DEBUG(...)
-  print (ThreatPlates.Meta("titleshort") .. "-Debug:", ...)
-end
-
--- Function from: https://coronalabs.com/blog/2014/09/02/tutorial-printing-table-contents/
-local function DEBUG_PRINT_TABLE(data)
-  local print_r_cache={}
-  local function sub_print_r(data,indent)
-    if (print_r_cache[tostring(data)]) then
-      ThreatPlates.DEBUG (indent.."*"..tostring(data))
-    else
-      print_r_cache[tostring(data)]=true
-      if (type(data)=="table") then
-        for pos,val in pairs(data) do
-          if (type(val)=="table") then
-            ThreatPlates.DEBUG (indent.."["..pos.."] => "..tostring(data).." {")
-            sub_print_r(val,indent..string.rep(" ",string.len(pos)+8))
-            ThreatPlates.DEBUG (indent..string.rep(" ",string.len(pos)+6).."}")
-          elseif (type(val)=="string") then
-            ThreatPlates.DEBUG (indent.."["..pos..'] => "'..val..'"')
-          else
-            ThreatPlates.DEBUG (indent.."["..pos.."] => "..tostring(val))
-          end
-        end
-      else
-        ThreatPlates.DEBUG (indent..tostring(data))
-      end
-    end
-  end
-  if (type(data)=="table") then
-    ThreatPlates.DEBUG (tostring(data).." {")
-    sub_print_r(data,"  ")
-    ThreatPlates.DEBUG ("}")
-  else
-    sub_print_r(data,"  ")
-  end
-end
-
-local function DEBUG_PRINT_UNIT(unit, full_info)
-	DEBUG("Unit:", unit.name)
-	DEBUG("-------------------------------------------------------------")
-	for key, val in pairs(unit) do
-		DEBUG(key .. ":", val)
-  end
-
-  if full_info and unit.unitid then
-    --		DEBUG("  isFriend = ", TidyPlatesUtilityInternal.IsFriend(unit.name))
-    --		DEBUG("  isGuildmate = ", TidyPlatesUtilityInternal.IsGuildmate(unit.name))
-    DEBUG("  IsOtherPlayersPet = ", UnitIsOtherPlayersPet(unit))
-    DEBUG("  IsBattlePet = ", UnitIsBattlePet(unit.unitid))
-    DEBUG("  PlayerControlled = ", UnitPlayerControlled(unit.unitid))
-    DEBUG("  CanAttack = ", UnitCanAttack("player", unit.unitid))
-    DEBUG("  Reaction = ", UnitReaction("player", unit.unitid))
-    local r, g, b, a = UnitSelectionColor(unit.unitid, true)
-    DEBUG("  SelectionColor: r =", ceil(r * 255), ", g =", ceil(g * 255), ", b =", ceil(b * 255), ", a =", ceil(a * 255))
-  else
-    DEBUG("  <no unit id>")
-  end
-
-  DEBUG("--------------------------------------------------------------")
-end
-
-
-local function DEBUG_PRINT_TARGET(unit)
-  if unit.isTarget then
-		DEBUG_PRINT_UNIT(unit)
-  end
-end
-
-local function DEBUG_AURA_LIST(data)
-	local res = ""
-	for pos,val in pairs(data) do
-		local a = data[pos]
-		if not a then
-			res = res .. " nil"
-		elseif not a.priority then
-			res = res .. " nil(" .. a.name .. ")"
-		else
-			res = res .. a.name
-		end
-		if pos ~= #data then
-			res = res .. " - "
-		end
-	end
-	ThreatPlates.DEBUG("Aura List = [ " .. res .. " ]")
-end
-
----------------------------------------------------------------------------------------------------
--- Expoerted local functions
----------------------------------------------------------------------------------------------------
-
--- With TidyPlates:
---ThreatPlates.FixUpdateUnitCondition = FixUpdateUnitCondition
-
---ThreatPlates.DEBUG = function(...) end
---ThreatPlates.DEBUG_PRINT_TABLE = function(...) end
---ThreatPlates.DEBUG_PRINT_UNIT = function(...) end
---ThreatPlates.DEBUG_PRINT_TARGET = function(...) end
---ThreatPlates.DEBUG_AURA_LIST = function(...) end
-ThreatPlates.DEBUG = DEBUG
-ThreatPlates.DEBUG_PRINT_TABLE = DEBUG_PRINT_TABLE
-ThreatPlates.DEBUG_PRINT_UNIT = DEBUG_PRINT_UNIT
-ThreatPlates.DEBUG_PRINT_TARGET = DEBUG_PRINT_TARGET
-ThreatPlates.DEBUG_AURA_LIST = DEBUG_AURA_LIST
-
-
