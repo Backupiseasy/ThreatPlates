@@ -1,4 +1,34 @@
 ﻿------------------------------------------------------
+9.1.0-Beta2
+------------------------------------------------------
+Druid's Force of Nature Treants are now recognized as off-tank.
+
+------------------------------------------------------
+9.1.0-Beta1
+------------------------------------------------------
+* Combo Points widget now has different styles (Squares, Orbs, Blizzard) and colors combo points depending on the current number of combo points [Issue #45, Comment #843, Comment #927, Comment #1028, Comment #1029, Issue #217, E-Mail Requests].
+* Extended the combo points widget to also show Death Knight runes including cooldown timers [Comment #989, #1240, #1252, #1558].
+* Added an option to reduce the transparency of occluded units (see General - Transparency - Occluded Units) [#Comment #1312, #1437, #1477, E-Mail-Request].
+* Added new filter options for auras for friendly buffs (Mine) and enemy unlimited buffs (e.g. only show in combat or in instances).
+* Added an option to status text to show absorbs text (amount and/or percentage) [PM].
+* Added an option to Auras widget to show tooltips when hovering above auras [Comment #1362].
+* Added an option to disable Threat Plates for neutral and enemy nameplates and keep Blizzard default nameplates for these units [Comment #701, #1390, #1459].
+* Added an option for fading in newly shown nameplates.
+* Added keybindings to toggle headline view for friendly, neutral, and enemy units.
+* Added a feature to switch nameplate mode of friendly nameplates also to healthbar view when entering combat [Comment #1254, #1411] - Thanks to sslebedev for implementing.
+* Added support for OmniCC cooldown text to Auras widget.
+* Added the option to use Blizzard elite/rare icons as indicator for elite/rare units [#Comment 579] - Thanks to sslebedev for implementing.
+* Updated the Arena widget to hide unit names and show arena numbers (with customizable font) instead [Comment #710, #1656, #1565, #1590].
+* Changed how "Show Unlimited Buffs" in the Auras widget works: settings for unlimited buffs are applied after aura filtering, so the cannot overwrite filters.
+* Changed interrupt information on target castbar to show interrupt information on all units, not only on the current target [PM].
+* Enhanced the Quest widget to show the quest progress on quest target units [Comment #797] - Thanks to Kungfumoo for implementing this.
+* Optimized code for widgets that are only displayed on the target unit (Combo Points, Resource).
+* Changed default settings for Auras and Combo Points widget for better, non-overlapping positioning.
+* Monk's Black Ox Statue is now correctly recognized as off-tank [Issue #270, Comment #318, #1420, E-Mail]  - Thanks to dlwyatt for implementing.
+* Fixed a bug with nameplate layering where nameplates where shown above unit frames [Comment #1086, #1124, Issue #215].
+* Fixed a bug where changes to text alignment (e.g., for name or status text) were not applied until the text was changed.
+
+------------------------------------------------------
 9.1.0-Alpha3
 ------------------------------------------------------
 * Extended the combo points widget to also show Death Knight runes including cooldown timers [Comment #989, #1240, #1252, #1558].
