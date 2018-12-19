@@ -1758,6 +1758,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
       level = {
         typeface = Addon.DEFAULT_FONT, -- old default: "Accidental Presidency",
         size = 9, -- old default: 12,
+        size = 9, -- old default: 12,
         width = 20,
         height = 10, -- old default: 14,
         x = 49, -- old default: 50,
@@ -2023,7 +2024,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
         ["Pet"]              = 0.8,
         ["Minus"]	           = 0.8,
         ["Tapped"]		       = 1,
-        OccludedUnits        = 1.0,
+        OccludedUnits        = 0,
       },
     },
     Transparency = {

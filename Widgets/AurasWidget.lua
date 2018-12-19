@@ -23,6 +23,7 @@ local tonumber = tonumber
 local CreateFrame, GetFramerate = CreateFrame, GetFramerate
 local DebuffTypeColor = DebuffTypeColor
 local UnitAura, UnitIsFriend, UnitIsUnit, UnitReaction, UnitIsPlayer, UnitPlayerControlled = UnitAura, UnitIsFriend, UnitIsUnit, UnitReaction, UnitIsPlayer, UnitPlayerControlled
+local UnitAffectingCombat = UnitAffectingCombat
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local GameTooltip = GameTooltip
 local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
@@ -1351,6 +1352,7 @@ function Widget:PLAYER_REGEN_ENABLED()
     local unit = plate.TPFrame.unit
 
     if widget_frame.Active and unit.HasUnlimitedAuras then
+      unit.isInCombat = UnitAffectingCombat(unit.unitid)
       self:UpdateIconGrid(widget_frame, unit)
     end
   end
@@ -1364,6 +1366,7 @@ function Widget:PLAYER_REGEN_DISABLED()
     local unit = plate.TPFrame.unit
 
     if widget_frame.Active and unit.HasUnlimitedAuras then
+      unit.isInCombat = UnitAffectingCombat(unit.unitid)
       self:UpdateIconGrid(widget_frame, unit)
     end
   end

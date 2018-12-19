@@ -5,10 +5,10 @@ SET BATCH_DIR=%~dp0
 set command=%1
 set version=%2
 set ZIP_EXE="C:\Program Files\7-Zip\7z.exe"
-set WOW_PATH=C:\Games\World of Warcraft
-set WOW_TEST_PATH=D:\Games\World of Warcraft - Test
-set WOW_INT_PATH=D:\Games\World of Warcraft - Int
-set WOW_PLAIN=F:\Games\World of Warcraft French
+set WOW_PATH=C:\Games\World of Warcraft\_retail_
+set WOW_TEST_PATH=D:\Games\World of Warcraft - Test\_retail_
+set WOW_INT_PATH=D:\Games\World of Warcraft - Int\_retail_
+set WOW_PLAIN=F:\Games\World of Warcraft French\_retail_
 
 set TP_PATH=F:\Eigene Dateien\Dokumente\WoW\ThreatPlates\Releases
 set TP_PACKAGE=%TP_PATH%\ThreatPlates_%version%.zip
@@ -51,12 +51,12 @@ set TP_PACKAGE=%TP_PATH%\ThreatPlates_plain.zip
 DEL /S /Q "%TP_PACKAGE%" 2> nul > nul
 @echo Package Source: %SOURCE%
 %ZIP_EXE% a -xr@exclude.lst "%TP_PACKAGE%" "%SOURCE%" > nul
-@echo Removing exiting installation in PLAIN environment: %WOW_PLAIN%\_retail_\Interface\AddOns\TidyPlates_ThreatPlates
-RMDIR /S /Q "%WOW_PLAIN%\_retail_\Interface\AddOns\TidyPlates_ThreatPlates" 2> nul
+@echo Removing exiting installation in PLAIN environment: %WOW_PLAIN%\Interface\AddOns\TidyPlates_ThreatPlates
+RMDIR /S /Q "%WOW_PLAIN%\Interface\AddOns\TidyPlates_ThreatPlates" 2> nul
 @echo Removing exiting SavedVariables in PLAIN environment: %WOW_PLAIN%\WTF
-DEL /S /Q /F "%WOW_PLAIN%\_retail_\WTF\TidyPlates_ThreatPlates*.*" 2> nul
+DEL /S /Q /F "%WOW_PLAIN%\WTF\TidyPlates_ThreatPlates*.*" 2> nul
 @echo Installing package to PLAIN environment %WOW_PLAIN%
-%ZIP_EXE% x -o"%WOW_PLAIN%\_retail_\Interface\AddOns" "%TP_PACKAGE%" > nul
+%ZIP_EXE% x -o"%WOW_PLAIN%\Interface\AddOns" "%TP_PACKAGE%" > nul
 DEL /S /Q /Q "%TP_PACKAGE%" > nul
 EXIT /B %ERRORLEVEL%
 

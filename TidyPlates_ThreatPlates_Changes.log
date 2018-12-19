@@ -1,7 +1,10 @@
 ﻿------------------------------------------------------
 9.1.0-Beta2
 ------------------------------------------------------
-Druid's Force of Nature Treants are now recognized as off-tank.
+* Druid's Force of Nature Treants are now recognized as off-tank [PR #85].
+* Fixed a bug where auras with unlimited duration were not correctly shown or hidden entering in or out of combat.
+* Changed default value of occluded transparency from 0% to 100%.
+* Updated localization for enUS and deDE.
 
 ------------------------------------------------------
 9.1.0-Beta1
