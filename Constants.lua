@@ -9,9 +9,9 @@ local ThreatPlates = Addon.ThreatPlates
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
 local L = ThreatPlates.L
-local RGB = ThreatPlates.RGB
-local RGB_P = ThreatPlates.RGB_P
-local HEX2RGB = ThreatPlates.HEX2RGB
+local RGB = Addon.RGB
+local RGB_P = Addon.RGB_P
+local HEX2RGB = Addon.HEX2RGB
 
 ---------------------------------------------------------------------------------------------------
 -- Global contstants

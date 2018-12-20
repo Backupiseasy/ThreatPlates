@@ -13,12 +13,13 @@ local pairs, next = pairs, next
 -- WoW APIs
 
 -- ThreatPlates APIs
+local EventServiceSubscribe, EventServiceSubscribeUnit, EventServiceUnsubscribe = Addon.EventService.Subscribe, Addon.EventService.SubscribeUnitEvent, Addon.EventService.Unsubscribe
 
 local WidgetHandler = {
   Widgets = {},
   EnabledWidgets = {},
   EnabledTargetWidgets = {},
-  RegisteredEventsByWidget = {}
+  --RegisteredEventsByWidget = {}
 }
 
 Addon.Widgets = WidgetHandler
@@ -26,79 +27,85 @@ Addon.Widgets = WidgetHandler
 ---------------------------------------------------------------------------------------------------
 -- Event handling stuff
 ---------------------------------------------------------------------------------------------------
-local function EventHandler(self, event, ...)
-  local widgets = WidgetHandler.RegisteredEventsByWidget[event]
+--local function EventHandler(self, event, ...)
+--  local widgets = WidgetHandler.RegisteredEventsByWidget[event]
+--
+--  if widgets then
+--    for widget, func in pairs(widgets) do
+--      if func == true then
+--        widget[event](widget, ...)
+--      else
+--        func(event, ...)
+--      end
+--    end
+--  end
+--end
+--
+--local function UnitEventHandler(self, event, ...)
+--  local widget = self.Widget
+--  local func = widget.RegistedUnitEvents[event]
+--
+--  if func == true then
+--    widget[event](widget, ...)
+--  else
+--    func(event, ...)
+--  end
+--end
+--
+--WidgetHandler.EventHandlerFrame = CreateFrame("Frame", nil, WorldFrame)
+--WidgetHandler.EventHandlerFrame:SetScript("OnEvent", EventHandler)
 
-  if widgets then
-    for widget, func in pairs(widgets) do
-      if func == true then
-        widget[event](widget, ...)
-      else
-        func(event, ...)
-      end
-    end
-  end
+local function SubscribeEvent(widget, event, func)
+  EventServiceSubscribe(widget, event, func)
+
+  --  if not WidgetHandler.RegisteredEventsByWidget[event] then
+--    WidgetHandler.RegisteredEventsByWidget[event] = {}
+--  end
+--
+--  WidgetHandler.RegisteredEventsByWidget[event][widget] = func or true
+--  WidgetHandler.EventHandlerFrame:RegisterEvent(event)
 end
 
-local function UnitEventHandler(self, event, ...)
-  local widget = self.Widget
-  local func = widget.RegistedUnitEvents[event]
+local function SubscribeUnitEvent(widget, event, unitid, func)
+  EventServiceSubscribeUnit(widget, event, unitid, func)
 
-  if func == true then
-    widget[event](widget, ...)
-  else
-    func(event, ...)
-  end
+--  if not widget.EventHandlerFrame then
+--    widget.EventHandlerFrame = CreateFrame("Frame", nil, WorldFrame)
+--    widget.EventHandlerFrame.Widget = widget
+--    widget.EventHandlerFrame:SetScript("OnEvent", UnitEventHandler)
+--  end
+--
+--  widget.RegistedUnitEvents[event] = func or true
+--  widget.EventHandlerFrame:RegisterUnitEvent(event, unitid)
 end
 
-WidgetHandler.EventHandlerFrame = CreateFrame("Frame", nil, WorldFrame)
-WidgetHandler.EventHandlerFrame:SetScript("OnEvent", EventHandler)
+local function UnsubscribeEvent(widget, event)
+  EventServiceUnsubscribe(widget, event)
 
-local function RegisterEvent(widget, event, func)
-  if not WidgetHandler.RegisteredEventsByWidget[event] then
-    WidgetHandler.RegisteredEventsByWidget[event] = {}
-  end
-
-  WidgetHandler.RegisteredEventsByWidget[event][widget] = func or true
-  WidgetHandler.EventHandlerFrame:RegisterEvent(event)
+--  if WidgetHandler.RegisteredEventsByWidget[event] then
+--    WidgetHandler.RegisteredEventsByWidget[event][widget] = nil
+--
+--    if next(WidgetHandler.RegisteredEventsByWidget[event]) == nil then -- last registered widget removed?
+--      WidgetHandler.EventHandlerFrame:UnregisterEvent(event)
+--    end
+--  end
+--
+--  if widget.EventHandlerFrame then
+--    widget.EventHandlerFrame:UnregisterEvent(event)
+--    widget.RegistedUnitEvents[event] = nil
+--  end
 end
 
-local function RegisterUnitEvent(widget, event, unitid, func)
-  if not widget.EventHandlerFrame then
-    widget.EventHandlerFrame = CreateFrame("Frame", nil, WorldFrame)
-    widget.EventHandlerFrame.Widget = widget
-    widget.EventHandlerFrame:SetScript("OnEvent", UnitEventHandler)
-  end
-
-  widget.RegistedUnitEvents[event] = func or true
-  widget.EventHandlerFrame:RegisterUnitEvent(event, unitid)
-end
-
-local function UnregisterEvent(widget, event)
-  if WidgetHandler.RegisteredEventsByWidget[event] then
-    WidgetHandler.RegisteredEventsByWidget[event][widget] = nil
-
-    if next(WidgetHandler.RegisteredEventsByWidget[event]) == nil then -- last registered widget removed?
-      WidgetHandler.EventHandlerFrame:UnregisterEvent(event)
-    end
-  end
-
-  if widget.EventHandlerFrame then
-    widget.EventHandlerFrame:UnregisterEvent(event)
-    widget.RegistedUnitEvents[event] = nil
-  end
-end
-
-local function UnregisterAllEvents(widget)
-  for event, _ in pairs(WidgetHandler.RegisteredEventsByWidget) do
-    UnregisterEvent(widget, event)
-  end
-
-  -- Also remove all remaining registered unit events (that are not in RegisteredEventsByWidget)
-  for event, _ in pairs(widget.RegistedUnitEvents) do
-    widget.EventHandlerFrame:UnregisterEvent(event)
-  end
-  widget.RegistedUnitEvents = {}
+local function UnsubscribeAllEvents(widget)
+--  for event, _ in pairs(WidgetHandler.RegisteredEventsByWidget) do
+--    UnregisterEvent(widget, event)
+--  end
+--
+--  -- Also remove all remaining registered unit events (that are not in RegisteredEventsByWidget)
+--  for event, _ in pairs(widget.RegistedUnitEvents) do
+--    widget.EventHandlerFrame:UnregisterEvent(event)
+--  end
+--  widget.RegistedUnitEvents = {}
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -178,12 +185,12 @@ function WidgetHandler:NewWidget(widget_name)
     Name = widget_name,
     WidgetHandler = WidgetHandler,
     --
-    RegistedUnitEvents = {},
+    --RegistedUnitEvents = {},
     --
-    RegisterEvent = RegisterEvent,
-    RegisterUnitEvent = RegisterUnitEvent,
-    UnregisterEvent = UnregisterEvent,
-    UnregisterAllEvents = UnregisterAllEvents,
+    SubscribeEvent = SubscribeEvent,
+    SubscribeUnitEvent = SubscribeUnitEvent,
+    UnsubscribeEvent = UnsubscribeEvent,
+    UnsubscribeAllEvents = UnsubscribeAllEvents,
     --
     UpdateAllFrames = UpdateAllFrames,
     UpdateAllFramesAndNameplateColor = UpdateAllFramesAndNameplateColor,

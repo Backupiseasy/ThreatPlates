@@ -230,20 +230,20 @@ end
 
 function Widget:OnEnable()
   if TidyPlatesThreat.db.profile.socialWidget.ShowFriendIcon then
-    self:RegisterEvent("FRIENDLIST_UPDATE")
-    self:RegisterEvent("GUILD_ROSTER_UPDATE")
-    self:RegisterEvent("BN_CONNECTED")
-    self:RegisterEvent("BN_FRIEND_ACCOUNT_ONLINE")
-    self:RegisterEvent("BN_FRIEND_ACCOUNT_OFFLINE")
-    self:RegisterEvent("UNIT_NAME_UPDATE")
-    --Widget:RegisterEvent("BN_FRIEND_LIST_SIZE_CHANGED", EventHandler)
+    self:SubscribeEvent("FRIENDLIST_UPDATE")
+    self:SubscribeEvent("GUILD_ROSTER_UPDATE")
+    self:SubscribeEvent("BN_CONNECTED")
+    self:SubscribeEvent("BN_FRIEND_ACCOUNT_ONLINE")
+    self:SubscribeEvent("BN_FRIEND_ACCOUNT_OFFLINE")
+    self:SubscribeEvent("UNIT_NAME_UPDATE")
+    --Widget:SubscribeEvent("BN_FRIEND_LIST_SIZE_CHANGED", EventHandler)
 
     --self:FRIENDLIST_UPDATE()
     ShowFriends() -- Will fire FRIENDLIST_UPDATE
     self:BN_CONNECTED()
     --self:GUILD_ROSTER_UPDATE() -- called automatically by game
   else
-    self:UnregisterAllEvents()
+    self:UnsubscribeAllEvents()
   end
 end
 

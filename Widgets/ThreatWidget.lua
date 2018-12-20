@@ -79,8 +79,8 @@ function Widget:IsEnabled()
 end
 
 function Widget:OnEnable()
-  self:RegisterEvent("UNIT_THREAT_LIST_UPDATE")
-  self:RegisterEvent("RAID_TARGET_UPDATE")
+  self:SubscribeEvent("UNIT_THREAT_LIST_UPDATE")
+  self:SubscribeEvent("RAID_TARGET_UPDATE")
 end
 
 function Widget:EnabledForStyle(style, unit)

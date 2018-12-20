@@ -1,4 +1,4 @@
-﻿local ADDON_NAME, Addon = ...
+﻿local _, Addon = ...
 local ThreatPlates = Addon.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------
@@ -19,23 +19,23 @@ ThreatPlates.Art = "Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\"
 -- Register media files that ThreatPlates needs at least (because of default settings)
 ---------------------------------------------------------------------------------------------------
 
--- -----
---   STATUSBAR
--- -----
+---------------------------------------------------------------------------------------------------
+-- Bar textures
+---------------------------------------------------------------------------------------------------
 Media:Register("statusbar", "ThreatPlatesBar", [[Interface\Addons\TidyPlates_ThreatPlates\Artwork\TP_BarTexture.tga]])
 Media:Register("statusbar", "ThreatPlatesEmpty", [[Interface\Addons\TidyPlates_ThreatPlates\Artwork\Empty.tga]])
 Media:Register("statusbar", "Aluminium", [[Interface\Addons\TidyPlates_ThreatPlates\Artwork\Aluminium.tga]])
 Media:Register("statusbar", "Smooth", [[Interface\Addons\TidyPlates_ThreatPlates\Artwork\Smooth.tga]])
 
--- -----
---   FONT
--- -----
+---------------------------------------------------------------------------------------------------
+-- Fonts
+---------------------------------------------------------------------------------------------------
 Media:Register("font", "Accidental Presidency",[[Interface\Addons\TidyPlates_ThreatPlates\Fonts\Accidental Presidency.ttf]])
 Media:Register("font", "Cabin",[[Interface\Addons\TidyPlates_ThreatPlates\Fonts\Cabin.ttf]]) --, koKR + ruRU + zhCN + zhTW + western)
 
--- -----
---  BORDER
--- ----
+---------------------------------------------------------------------------------------------------
+-- Borders
+---------------------------------------------------------------------------------------------------
 Media:Register("border", "ThreatPlatesBorder",[[Interface\Addons\TidyPlates_ThreatPlates\Artwork\TP_WhiteSquare.tga]])
 
 -- Test borders

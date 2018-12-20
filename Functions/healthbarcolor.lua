@@ -21,7 +21,7 @@ local FACTION_BAR_COLORS = FACTION_BAR_COLORS
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
 local TOTEMS = Addon.TOTEMS
-local RGB_P = ThreatPlates.RGB_P
+local RGB_P = Addon.RGB_P
 local IsFriend
 local IsGuildmate
 local ShowQuestUnit

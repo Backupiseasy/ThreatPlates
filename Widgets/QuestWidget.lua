@@ -352,22 +352,22 @@ function Widget:OnEnable()
 
   self:GenerateQuestCache()
 
-  self:RegisterEvent("PLAYER_ENTERING_WORLD")
-  self:RegisterEvent("QUEST_WATCH_UPDATE")
+  self:SubscribeEvent("PLAYER_ENTERING_WORLD")
+  self:SubscribeEvent("QUEST_WATCH_UPDATE")
 
-  self:RegisterUnitEvent("UNIT_QUEST_LOG_CHANGED", "player")
+  self:SubscribeUnitEvent("UNIT_QUEST_LOG_CHANGED", "player")
 
-  self:RegisterEvent("QUEST_ACCEPTED")
+  self:SubscribeEvent("QUEST_ACCEPTED")
   -- This event fires whenever the player turns in a quest, whether automatically with a Task-type quest
   -- (Bonus Objectives/World Quests), or by pressing the Complete button in a quest dialog window.
   -- also handles abandon quest
-  self:RegisterEvent("QUEST_REMOVED")
+  self:SubscribeEvent("QUEST_REMOVED")
 
   -- Handle in-combat situations:
-  self:RegisterEvent("PLAYER_REGEN_ENABLED")
-  self:RegisterEvent("PLAYER_REGEN_DISABLED")
+  self:SubscribeEvent("PLAYER_REGEN_ENABLED")
+  self:SubscribeEvent("PLAYER_REGEN_DISABLED")
   -- Also use UNIT_THREAT_LIST_UPDATE as new mobs may enter the combat mid-fight (PLAYER_REGEN_DISABLED already triggered)
-  self:RegisterEvent("UNIT_THREAT_LIST_UPDATE")
+  self:SubscribeEvent("UNIT_THREAT_LIST_UPDATE")
 
   InCombat = InCombatLockdown()
 end

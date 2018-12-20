@@ -87,7 +87,7 @@ function Widget:IsEnabled()
 end
 
 function Widget:OnEnable()
-  self:RegisterEvent("PLAYER_TARGET_CHANGED")
+  self:SubscribeEvent("PLAYER_TARGET_CHANGED")
 end
 
 function Widget:EnabledForStyle(style, unit)

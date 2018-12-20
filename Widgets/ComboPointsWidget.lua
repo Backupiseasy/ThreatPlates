@@ -25,7 +25,7 @@ local InCombatLockdown = InCombatLockdown
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
-local RGB = Addon.ThreatPlates.RGB
+local RGB = Addon.RGB
 local Font = Addon.Font
 
 local UPDATE_INTERVAL = Addon.ON_UPDATE_INTERVAL
@@ -324,6 +324,7 @@ end
 local function EventHandler(event, unitid, power_type)
   if event == "UNIT_POWER_UPDATE" and not WATCH_POWER_TYPES[power_type] then return end
 
+  print ("ComboPoints: Event =", event, unitid)
   local plate = GetNamePlateForUnit("target")
   if plate then -- not necessary, prerequisite for IsShown(): plate.TPFrame.Active and
     local widget = Widget
@@ -336,6 +337,8 @@ end
 
 -- Arguments of ACTIVE_TALENT_GROUP_CHANGED (curr, prev) always seemt to be 1, 1
 function Widget:ACTIVE_TALENT_GROUP_CHANGED(...)
+  print ("ComboPoints: CTIVE_TALENT_GROUP_CHANGED")
+
   -- ACTIVE_TALENT_GROUP_CHANGED fires twice, so prevent that InitializeWidget is called twice (does not hurt,
   -- but is not necesary either
   local current_spec = GetSpecialization()
@@ -348,6 +351,7 @@ end
 
 function Widget:UNIT_MAXPOWER(unitid, power_type)
   if self.PowerType then
+    print ("ComboPoints: UNIT_MAXPOWER")
     -- Number of max power units changed (e.g., for a rogue)
     self:DetermineUnitPower()
     self:UpdateLayout()
@@ -366,6 +370,8 @@ function Widget:UNIT_MAXPOWER(unitid, power_type)
 end
 
 function Widget:PLAYER_TARGET_CHANGED()
+  print ("ComboPoints: PLAYER_TARGET_CHANGED")
+
   local plate = GetNamePlateForUnit("target")
 
   local tp_frame = plate and plate.TPFrame
@@ -399,12 +405,13 @@ function Widget:IsEnabled()
   if enabled then
     -- Register ACTIVE_TALENT_GROUP_CHANGED here otherwise it won't be registerd when an spec is active that does not have combo points.
     -- If you then switch to a spec with talent points, the widget won't be enabled.
-    self:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
+    self:SubscribeEvent("ACTIVE_TALENT_GROUP_CHANGED")
   end
 
   self:DetermineUnitPower()
 
-  return self.PowerType and enabled
+
+  return self.PowerType ~= nil and enabled
 end
 
 -- EVENTS:
@@ -416,17 +423,16 @@ end
 -- UNIT_FLAGS: unitID
 -- UNIT_POWER_FREQUENT: unitToken, powerToken
 function Widget:OnEnable()
-  self:RegisterEvent("PLAYER_TARGET_CHANGED")
-  self:RegisterUnitEvent("UNIT_POWER_UPDATE", "player", EventHandler)
-  self:RegisterUnitEvent("UNIT_DISPLAYPOWER", "player", EventHandler)
-  self:RegisterUnitEvent("UNIT_MAXPOWER", "player")
+  self:SubscribeEvent("PLAYER_TARGET_CHANGED")
+  self:SubscribeUnitEvent("UNIT_POWER_UPDATE", "player", EventHandler)
+  self:SubscribeUnitEvent("UNIT_DISPLAYPOWER", "player", EventHandler)
+  self:SubscribeUnitEvent("UNIT_MAXPOWER", "player")
 
-  local _, player_class = UnitClass("player")
-  if player_class == "DRUID" then
-    self:RegisterEvent("UPDATE_SHAPESHIFT_FORM")
+  if Addon.PlayerClass == "DRUID" then
+    self:SubscribeEvent("UPDATE_SHAPESHIFT_FORM")
     self.ShowInShapeshiftForm = (GetShapeshiftFormID() == 1)
-  elseif player_class == "DEATHKNIGHT" then
-    self:RegisterEvent("RUNE_POWER_UPDATE", EventHandler)
+  elseif Addon.PlayerClass == "DEATHKNIGHT" then
+    self:SubscribeEvent("RUNE_POWER_UPDATE", EventHandler)
   end
 
   -- self:RegisterUnitEvent("UNIT_POWER_FREQUENT", "player", EventHandler)
@@ -434,11 +440,18 @@ function Widget:OnEnable()
 end
 
 function Widget:OnDisable()
-  self:UnregisterEvent("PLAYER_TARGET_CHANGED")
-  self:UnregisterEvent("UNIT_POWER_UPDATE")
-  self:UnregisterEvent("UNIT_DISPLAYPOWER")
-  self:UnregisterEvent("UNIT_MAXPOWER")
-  self:UnregisterEvent("RUNE_POWER_UPDATE")
+  self:UnsubscribeEvent("PLAYER_TARGET_CHANGED")
+  self:UnsubscribeEvent("UNIT_POWER_UPDATE")
+  self:UnsubscribeEvent("UNIT_DISPLAYPOWER")
+  self:UnsubscribeEvent("UNIT_MAXPOWER")
+  self:UnsubscribeEvent("UPDATE_SHAPESHIFT_FORM")
+  self:UnsubscribeEvent("RUNE_POWER_UPDATE")
+
+  -- Disable ACTIVE_TALENT_GROUP_CHANGED only if the widget is completely disabled, not if just the
+  -- curent spec does not support combo points
+  if not self.db.ON and not self.db.ShowInHeadlineView then
+    self:UnsubscribeEvent("ACTIVE_TALENT_GROUP_CHANGED")
+  end
 
   self.WidgetFrame:Hide()
   self.WidgetFrame:SetParent(nil)
@@ -577,7 +590,7 @@ function Widget:UpdateSettings()
   if not self.PowerType then return end
 
   -- Update widget variables, only dependent from settings and static information (like player's class)
-  local _, player_class = UnitClass("player")
+  local player_class = Addon.PlayerClass
   local texture_info = TEXTURE_INFO[self.db.Style][player_class] or TEXTURE_INFO[self.db.Style]
 
   if player_class == "DEATHKNIGHT" then

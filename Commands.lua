@@ -89,7 +89,12 @@ SlashCmdList["TPTPVERBOSE"] = TPTPVERBOSE
 
 -- Command: /tptp
 function TidyPlatesThreat:ChatCommand(input)
---	if input == "plate" then
+	if input == "event" then
+    Addon:PrintEventService()
+    return
+  end
+
+	--	if input == "plate" then
 --		local plate = C_NamePlate.GetNamePlateForUnit("target")
 --		if not plate then return end
 --

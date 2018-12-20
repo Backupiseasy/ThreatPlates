@@ -209,9 +209,9 @@ end
 
 -- EVENT: UNIT_POWER_UPDATE: "unitID", "powerType"
 function Widget:OnEnable()
-  self:RegisterUnitEvent("UNIT_POWER_UPDATE", "target")
-  self:RegisterEvent("PLAYER_TARGET_CHANGED")
-  -- Widget:RegisterEvent("UNIT_DISPLAYPOWER") -- use this to determine power type changes on units
+  self:SubscribeUnitEvent("UNIT_POWER_UPDATE", "target")
+  self:SubscribeEvent("PLAYER_TARGET_CHANGED")
+  -- Widget:SubscribeEvent("UNIT_DISPLAYPOWER") -- use this to determine power type changes on units
 end
 
 function Widget:EnabledForStyle(style, unit)

@@ -92,9 +92,9 @@ function Widget:IsEnabled()
 end
 
 function Widget:OnEnable()
-  self:RegisterEvent("PLAYER_ENTERING_WORLD")
-  --Widget:RegisterEvent("ARENA_PREP_OPPONENT_SPECIALIZATIONS")
-  --Widget:RegisterEvent("ARENA_OPPONENT_UPDATE")
+  self:SubscribeEvent("PLAYER_ENTERING_WORLD")
+  --Widget:SubscribeEvent("ARENA_PREP_OPPONENT_SPECIALIZATIONS")
+  --Widget:SubscribeEvent("ARENA_OPPONENT_UPDATE")
 end
 
 function Widget:EnabledForStyle(style, unit)

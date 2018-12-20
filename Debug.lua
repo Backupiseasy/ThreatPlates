@@ -7,6 +7,7 @@ local _, Addon = ...
 -- ThreatPlates APIs
 local Debug = Addon.Debug
 local ThreatPlates = Addon.ThreatPlates
+local Meta = Addon.Meta
 
 --------------------------------------------------------------------------------------------------
 -- Local variables
@@ -15,11 +16,28 @@ local ThreatPlates = Addon.ThreatPlates
 Debug.Enabled = true
 
 --------------------------------------------------------------------------------------------------
+-- Debug tools
+---------------------------------------------------------------------------------------------------
+
+Debug.Dump = function(value, index)
+  if not IsAddOnLoaded("Blizzard_DebugTools") then
+    LoadAddOn("Blizzard_DebugTools")
+  end
+  local i
+  if index and type(index) == "number" then
+    i = index
+  else
+    i = 1
+  end
+  DevTools_Dump(value, i)
+end
+
+--------------------------------------------------------------------------------------------------
 -- Debug Functions
 ---------------------------------------------------------------------------------------------------
 
 local function Print(...)
-  print (ThreatPlates.Meta("titleshort") .. "-Debug:", ...)
+  print (Meta("titleshort") .. "-Debug:", ...)
 end
 
 -- Function from: https://coronalabs.com/blog/2014/09/02/tutorial-printing-table-contents/

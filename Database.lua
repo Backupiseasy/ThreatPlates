@@ -19,7 +19,7 @@ local UnitClass, GetSpecialization = UnitClass, GetSpecialization
 -- ThreatPlates APIs
 local L = ThreatPlates.L
 local TidyPlatesThreat = TidyPlatesThreat
-local RGB = ThreatPlates.RGB
+local RGB = Addon.RGB
 
 ---------------------------------------------------------------------------------------------------
 -- Global functions for accessing the configuration
@@ -79,7 +79,7 @@ end
 ---------------------------------------------------------------------------------------------------
 
 local function GetDefaultSettingsV1(defaults)
-  local new_defaults = ThreatPlates.CopyTable(defaults)
+  local new_defaults = Addon.CopyTable(defaults)
 
   local db = new_defaults.profile
   db.allowClass = false
@@ -209,8 +209,8 @@ local function MigrateNamesColor(profile_name, profile)
     color.g = color.g or old_color.g
     color.b = color.b or old_color.b
 
-    db.EnemyTextColor = ThreatPlates.CopyTable(color)
-    db.FriendlyTextColor = ThreatPlates.CopyTable(color)
+    db.EnemyTextColor = Addon.CopyTable(color)
+    db.FriendlyTextColor = Addon.CopyTable(color)
 
     DatabaseEntryDelete(profile, entry)
   end
@@ -422,11 +422,11 @@ local function MigrateAuraWidget(profile_name, profile)
       profile.AuraWidget.scale = profile.debuffWidget.scale
 
       if profile.debuffWidget.displays then
-        profile.AuraWidget.FilterByType = ThreatPlates.CopyTable(profile.debuffWidget.displays)
+        profile.AuraWidget.FilterByType = Addon.CopyTable(profile.debuffWidget.displays)
       end
 
       if profile.debuffWidget.filter then
-        profile.AuraWidget.FilterBySpell = ThreatPlates.CopyTable(profile.debuffWidget.filter)
+        profile.AuraWidget.FilterBySpell = Addon.CopyTable(profile.debuffWidget.filter)
       end
 
       -- DatabaseEntryDelete(profile, { "debuffWidget" }) -- TODO

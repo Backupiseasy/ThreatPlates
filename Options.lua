@@ -25,6 +25,8 @@ local GetSpellInfo = GetSpellInfo
 -- ThreatPlates APIs
 local LibStub = LibStub
 local L = t.L
+local ConcatTables = Addon.ConcatTables
+local Meta = Addon.Meta
 
 local PATH_ART = t.Art
 
@@ -60,7 +62,7 @@ local AURA_STYLE = {
         Typeface = Addon.DEFAULT_SMALL_FONT,
         Size = 10,
         Transparency = 1,
-        Color = t.RGB(255, 255, 255),
+        Color = Addon.RGB(255, 255, 255),
         flags = "OUTLINE",
         Shadow = true,
         HorizontalAlignment = "RIGHT",
@@ -76,7 +78,7 @@ local AURA_STYLE = {
         Typeface = Addon.DEFAULT_SMALL_FONT,
         Size = 10,
         Transparency = 1,
-        Color = t.RGB(255, 255, 255),
+        Color = Addon.RGB(255, 255, 255),
         flags = "OUTLINE",
         Shadow = true,
         HorizontalAlignment = "RIGHT",
@@ -97,7 +99,7 @@ local AURA_STYLE = {
         Typeface = Addon.DEFAULT_SMALL_FONT,
         Size = 10,
         Transparency = 1,
-        Color = t.RGB(255, 255, 255),
+        Color = Addon.RGB(255, 255, 255),
         flags = "OUTLINE",
         Shadow = true,
         HorizontalAlignment = "RIGHT",
@@ -113,7 +115,7 @@ local AURA_STYLE = {
         Typeface = Addon.DEFAULT_SMALL_FONT,
         Size = 10,
         Transparency = 1,
-        Color = t.RGB(255, 255, 255),
+        Color = Addon.RGB(255, 255, 255),
         flags = "OUTLINE",
         Shadow = true,
         HorizontalAlignment = "RIGHT",
@@ -162,7 +164,7 @@ local function GetValue(info)
 end
 
 local function CheckIfValueExists(widget_info, setting)
-  local info = { arg = Addon.ConcatTables(widget_info, setting) }
+  local info = { arg = ConcatTables(widget_info, setting) }
 
   return GetValue(info) ~= nil
 end
@@ -879,15 +881,15 @@ end
 --    VerticalAlignment = "CENTER",
 --  },
 local function GetFontEntryDefault(name, pos, widget_info, func_disabled)
-  widget_info = Addon.ConcatTables(widget_info, { "Font" } )
+  widget_info = ConcatTables(widget_info, { "Font" } )
 
   -- Check if certain configuration options should be shown:
   local entry_transparency, entry_color
   if CheckIfValueExists(widget_info, { "Transparency" } ) then
-    entry_transparency = GetTransparencyEntryDefault(30, Addon.ConcatTables(widget_info, { "Transparency" }) )
+    entry_transparency = GetTransparencyEntryDefault(30, ConcatTables(widget_info, { "Transparency" }) )
   end
   if CheckIfValueExists(widget_info, { "Color" } ) then
-    entry_color = GetColorEntry(L["Color"], 40, Addon.ConcatTables(widget_info, { "Color" }) )
+    entry_color = GetColorEntry(L["Color"], 40, ConcatTables(widget_info, { "Color" }) )
   end
 
   local entry = {
@@ -903,13 +905,13 @@ local function GetFontEntryDefault(name, pos, widget_info, func_disabled)
         type = "select",
         dialogControl = "LSM30_Font",
         values = AceGUIWidgetLSMlists.font,
-        arg = Addon.ConcatTables(widget_info, { "Typeface" }),
+        arg = ConcatTables(widget_info, { "Typeface" }),
       },
       Size = {
         name = L["Font Size"],
         order = 20,
         type = "range",
-        arg = Addon.ConcatTables(widget_info, { "Size" }),
+        arg = ConcatTables(widget_info, { "Size" }),
         max = 36,
         min = 6,
         step = 1,
@@ -924,9 +926,9 @@ local function GetFontEntryDefault(name, pos, widget_info, func_disabled)
         type = "toggle",
         desc = L["Add black outline."],
         width = "half",
-        set = function(info, val) SetValueWidget(info, SetFontFlags(Addon.ConcatTables(widget_info, { "flags" }), "Outline", val)) end,
-        get = function(info) return GetFontFlags(Addon.ConcatTables(widget_info, { "flags" }), "Outline") end,
-        arg = Addon.ConcatTables(widget_info, { "flags" }),
+        set = function(info, val) SetValueWidget(info, SetFontFlags(ConcatTables(widget_info, { "flags" }), "Outline", val)) end,
+        get = function(info) return GetFontFlags(ConcatTables(widget_info, { "flags" }), "Outline") end,
+        arg = ConcatTables(widget_info, { "flags" }),
       },
       Thick = {
         name = L["Thick"],
@@ -934,9 +936,9 @@ local function GetFontEntryDefault(name, pos, widget_info, func_disabled)
         type = "toggle",
         desc = L["Add thick black outline."],
         width = "half",
-        set = function(info, val) SetValueWidget(info, SetFontFlags(Addon.ConcatTables(widget_info, { "flags" }), "Thick", val)) end,
-        get = function(info) return GetFontFlags(Addon.ConcatTables(widget_info, { "flags" }), "Thick") end,
-        arg = Addon.ConcatTables(widget_info, { "flags" }),
+        set = function(info, val) SetValueWidget(info, SetFontFlags(ConcatTables(widget_info, { "flags" }), "Thick", val)) end,
+        get = function(info) return GetFontFlags(ConcatTables(widget_info, { "flags" }), "Thick") end,
+        arg = ConcatTables(widget_info, { "flags" }),
       },
 
       Mono = {
@@ -945,9 +947,9 @@ local function GetFontEntryDefault(name, pos, widget_info, func_disabled)
         type = "toggle",
         desc = L["Render font without antialiasing."],
         width = "half",
-        set = function(info, val) SetValueWidget(info, SetFontFlags(Addon.ConcatTables(widget_info, { "flags" }), "Mono", val)) end,
-        get = function(info) return GetFontFlags(Addon.ConcatTables(widget_info, { "flags" }), "Mono") end,
-        arg = Addon.ConcatTables(widget_info, { "flags" }),
+        set = function(info, val) SetValueWidget(info, SetFontFlags(ConcatTables(widget_info, { "flags" }), "Mono", val)) end,
+        get = function(info) return GetFontFlags(ConcatTables(widget_info, { "flags" }), "Mono") end,
+        arg = ConcatTables(widget_info, { "flags" }),
       },
       Shadow = {
         name = L["Shadow"],
@@ -955,7 +957,7 @@ local function GetFontEntryDefault(name, pos, widget_info, func_disabled)
         type = "toggle",
         desc = L["Show shadow with text."],
         width = "half",
-        arg = Addon.ConcatTables(widget_info, { "Shadow" }),
+        arg = ConcatTables(widget_info, { "Shadow" }),
       },
     },
   }
@@ -1315,7 +1317,7 @@ local function CreateComboPointsWidgetOptions()
               return color.r, color.g, color.b
             end,
             set = function(info, r, g, b)
-              db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][1] = t.RGB(r * 255, g * 255, b * 255)
+              db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][1] = Addon.RGB(r * 255, g * 255, b * 255)
               Addon.Widgets:UpdateSettings(MAP_OPTION_TO_WIDGET[info[2]])
             end,
             hasAlpha = false,
@@ -1329,7 +1331,7 @@ local function CreateComboPointsWidgetOptions()
               return color.r, color.g, color.b
             end,
             set = function(info, r, g, b)
-              db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][2] = t.RGB(r * 255, g * 255, b * 255)
+              db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][2] = Addon.RGB(r * 255, g * 255, b * 255)
               Addon.Widgets:UpdateSettings(MAP_OPTION_TO_WIDGET[info[2]])
             end,
             hasAlpha = false,
@@ -1343,7 +1345,7 @@ local function CreateComboPointsWidgetOptions()
               return color.r, color.g, color.b
             end,
             set = function(info, r, g, b)
-              db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][3] = t.RGB(r * 255, g * 255, b * 255)
+              db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][3] = Addon.RGB(r * 255, g * 255, b * 255)
               Addon.Widgets:UpdateSettings(MAP_OPTION_TO_WIDGET[info[2]])
             end,
             hasAlpha = false,
@@ -1357,7 +1359,7 @@ local function CreateComboPointsWidgetOptions()
               return color.r, color.g, color.b
             end,
             set = function(info, r, g, b)
-              db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][4] = t.RGB(r * 255, g * 255, b * 255)
+              db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][4] = Addon.RGB(r * 255, g * 255, b * 255)
               Addon.Widgets:UpdateSettings(MAP_OPTION_TO_WIDGET[info[2]])
             end,
             hasAlpha = false,
@@ -1367,11 +1369,11 @@ local function CreateComboPointsWidgetOptions()
             type = "color",
             order = 150,
             get = function(info)
-              local color = db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][5] or t.RGB(0, 0, 0)
+              local color = db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][5] or Addon.RGB(0, 0, 0)
               return color.r, color.g, color.b
             end,
             set = function(info, r, g, b)
-              db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][5] = t.RGB(r * 255, g * 255, b * 255)
+              db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][5] = Addon.RGB(r * 255, g * 255, b * 255)
               Addon.Widgets:UpdateSettings(MAP_OPTION_TO_WIDGET[info[2]])
             end,
             hasAlpha = false,
@@ -1382,11 +1384,11 @@ local function CreateComboPointsWidgetOptions()
             type = "color",
             order = 160,
             get = function(info)
-              local color = db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][6] or t.RGB(0, 0, 0)
+              local color = db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][6] or Addon.RGB(0, 0, 0)
               return color.r, color.g, color.b
             end,
             set = function(info, r, g, b)
-              db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][6] = t.RGB(r * 255, g * 255, b * 255)
+              db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][6] = Addon.RGB(r * 255, g * 255, b * 255)
               Addon.Widgets:UpdateSettings(MAP_OPTION_TO_WIDGET[info[2]])
             end,
             hasAlpha = false,
@@ -2693,7 +2695,7 @@ local function CreateAurasWidgetOptions()
                 order = 2,
                 dialogControl = "MultiLineEditBox",
                 width = "full",
-                get = function(info) return t.TTS(db.AuraWidget.Debuffs.FilterBySpell) end,
+                get = function(info) return Addon.TTS(db.AuraWidget.Debuffs.FilterBySpell) end,
                 set = function(info, v)
                   local table = { strsplit("\n", v) };
                   db.AuraWidget.Debuffs.FilterBySpell = table
@@ -2917,7 +2919,7 @@ local function CreateAurasWidgetOptions()
                 order = 2,
                 dialogControl = "MultiLineEditBox",
                 width = "full",
-                get = function(info) return t.TTS(db.AuraWidget.Buffs.FilterBySpell) end,
+                get = function(info) return Addon.TTS(db.AuraWidget.Buffs.FilterBySpell) end,
                 set = function(info, v)
                   local table = { strsplit("\n", v) };
                   db.AuraWidget.Buffs.FilterBySpell = table
@@ -3070,7 +3072,7 @@ local function CreateAurasWidgetOptions()
                 order = 2,
                 dialogControl = "MultiLineEditBox",
                 width = "full",
-                get = function(info) return t.TTS(db.AuraWidget.CrowdControl.FilterBySpell) end,
+                get = function(info) return Addon.TTS(db.AuraWidget.CrowdControl.FilterBySpell) end,
                 set = function(info, v)
                   local table = { strsplit("\n", v) };
                   db.AuraWidget.CrowdControl.FilterBySpell = table
@@ -5196,7 +5198,7 @@ local function CreateOptionsTable()
                       order = 10,
                       type = "toggle",
                       set = function(info, value)
-                        info = t.CopyTable(info)
+                        info = Addon.CopyTable(info)
 
                         Addon:CallbackWhenOoC(function()
                           if value then
@@ -7013,7 +7015,7 @@ local function CreateOptionsTable()
               type = "execute",
               func = function()
                 clipboard = {}
-                clipboard = t.CopyTable(db.uniqueSettings[k_c])
+                clipboard = Addon.CopyTable(db.uniqueSettings[k_c])
                 t.Print(L["Copied!"])
               end,
             },
@@ -7023,7 +7025,7 @@ local function CreateOptionsTable()
               type = "execute",
               func = function()
                 if type(clipboard) == "table" and clipboard.name then
-                  db.uniqueSettings[k_c] = t.CopyTable(clipboard)
+                  db.uniqueSettings[k_c] = Addon.CopyTable(clipboard)
                   t.Print(L["Pasted!"])
                 else
                   t.Print(L["Nothing to paste!"])
@@ -7052,7 +7054,7 @@ local function CreateOptionsTable()
               name = L["Restore Defaults"],
               order = 8,
               func = function()
-                local defaults = t.CopyTable(t.DEFAULT_SETTINGS.profile.uniqueSettings[k_c])
+                local defaults = Addon.CopyTable(t.DEFAULT_SETTINGS.profile.uniqueSettings[k_c])
                 db.uniqueSettings[k_c] = defaults
                 options.args.Custom.args["#" .. k_c].name = "#" .. k_c .. ". " .. defaults.name
                 options.args.Custom.args["#" .. k_c].args.Header.name = defaults.name
@@ -7302,13 +7304,13 @@ end
 
 local function GetInterfaceOptionsTable()
   local interface_options = {
-    name = t.Meta("title") .. " v" .. t.Meta("version"),
+    name = Meta("title") .. " v" .. Meta("version"),
     handler = TidyPlatesThreat,
     type = "group",
     args = {
       note = {
         type = "description",
-        name = L["You can access the "] .. t.Meta("titleshort") .. L[" options by typing: /tptp"],
+        name = L["You can access the "] .. Meta("titleshort") .. L[" options by typing: /tptp"],
         order = 10,
       },
       openoptions = {

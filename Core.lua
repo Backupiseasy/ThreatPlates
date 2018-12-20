@@ -20,6 +20,7 @@ local NamePlateDriverFrame = NamePlateDriverFrame
 local TidyPlatesThreat = TidyPlatesThreat
 local LibStub = LibStub
 local L = t.L
+local Meta = Addon.Meta
 
 ---------------------------------------------------------------------------------------------------
 -- Global configs and funtions
@@ -28,7 +29,7 @@ local L = t.L
 t.Print = function(val,override)
   local db = TidyPlatesThreat.db.profile
   if override or db.verbose then
-    print(t.Meta("titleshort")..": "..val)
+    print(Meta("titleshort")..": "..val)
   end
 end
 
@@ -62,7 +63,7 @@ end
 
 StaticPopupDialogs["TidyPlatesEnabled"] = {
   preferredIndex = STATICPOPUP_NUMDIALOGS,
-  text = "|cffFFA500" .. t.Meta("title") .. " Warning|r \n---------------------------------------\n" ..
+  text = "|cffFFA500" .. Meta("title") .. " Warning|r \n---------------------------------------\n" ..
     L["|cff89F559Threat Plates|r is no longer a theme of |cff89F559TidyPlates|r, but a standalone addon that does no longer require TidyPlates. Please disable one of these, otherwise two overlapping nameplates will be shown for units."],
   button1 = OKAY,
   timeout = 0,
@@ -73,7 +74,7 @@ StaticPopupDialogs["TidyPlatesEnabled"] = {
 
 StaticPopupDialogs["IncompatibleAddon"] = {
   preferredIndex = STATICPOPUP_NUMDIALOGS,
-  text = "|cffFFA500" .. t.Meta("title") .. " Warning|r \n---------------------------------------\n" ..
+  text = "|cffFFA500" .. Meta("title") .. " Warning|r \n---------------------------------------\n" ..
     L["You currently have two nameplate addons enabled: |cff89F559Threat Plates|r and |cff89F559%s|r. Please disable one of these, otherwise two overlapping nameplates will be shown for units."],
   button1 = OKAY,
   timeout = 0,
@@ -84,7 +85,7 @@ StaticPopupDialogs["IncompatibleAddon"] = {
 
 StaticPopupDialogs["SwitchToNewLookAndFeel"] = {
   preferredIndex = STATICPOPUP_NUMDIALOGS,
-  text = t.Meta("title") .. L[":\n---------------------------------------\n|cff89F559Threat Plates|r v8.4 introduced a new default look and feel (currently shown). Do you want to switch to this new look and feel?\n\nYou can revert your decision by changing the default look and feel again in the options dialog (under General - Healthbar View - Default Settings).\n\nNote: Some of your custom settings may get overwritten if you switch back and forth."],
+  text = Meta("title") .. L[":\n---------------------------------------\n|cff89F559Threat Plates|r v8.4 introduced a new default look and feel (currently shown). Do you want to switch to this new look and feel?\n\nYou can revert your decision by changing the default look and feel again in the options dialog (under General - Healthbar View - Default Settings).\n\nNote: Some of your custom settings may get overwritten if you switch back and forth."],
   button1 = L["Switch"],
   button2 = L["Don't Switch"],
   timeout = 0,
@@ -162,14 +163,14 @@ function TidyPlatesThreat:CheckForFirstStartUp()
     t.Print(Welcome..L["|cff89f559You are currently in your "]..self:RoleText()..L["|cff89f559 role.|r"])
     t.Print(L["|cff89f559Additional options can be found by typing |r'/tptp'|cff89F559.|r"])
 
-    local new_version = tostring(t.Meta("version"))
+    local new_version = tostring(Meta("version"))
     if db.version ~= "" and db.version ~= new_version then
       -- migrate and/or remove any old DB entries
       t.MigrateDatabase(db.version)
     end
     db.version = new_version
   else
-    local new_version = tostring(t.Meta("version"))
+    local new_version = tostring(Meta("version"))
     if db.version ~= "" and db.version ~= new_version then
       -- migrate and/or remove any old DB entries
       t.MigrateDatabase(db.version)

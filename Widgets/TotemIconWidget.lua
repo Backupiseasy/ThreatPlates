@@ -45,7 +45,7 @@ end
 --end
 --
 --function Widget:OnEnable()
---  self:RegisterEvent("UNIT_NAME_UPDATE")
+--  self:SubscribeEvent("UNIT_NAME_UPDATE")
 --end
 
 function Widget:EnabledForStyle(style, unit)

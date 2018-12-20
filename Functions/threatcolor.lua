@@ -9,7 +9,7 @@ local UnitIsConnected = UnitIsConnected
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
-local RGB = ThreatPlates.RGB
+local RGB = Addon.RGB
 
 local COLOR_TRANSPARENT = RGB(0, 0, 0, 0) -- opaque
 

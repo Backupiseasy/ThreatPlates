@@ -224,9 +224,9 @@ function Widget:IsEnabled()
 end
 
 function Widget:OnEnable()
-  self:RegisterEvent("UPDATE_BATTLEFIELD_SCORE")
-  self:RegisterEvent("PLAYER_ENTERING_WORLD")
-  self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+  self:SubscribeEvent("UPDATE_BATTLEFIELD_SCORE")
+  self:SubscribeEvent("PLAYER_ENTERING_WORLD")
+  self:SubscribeEvent("COMBAT_LOG_EVENT_UNFILTERED")
 end
 
 function Widget:EnabledForStyle(style, unit)

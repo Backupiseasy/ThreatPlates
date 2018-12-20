@@ -32,7 +32,7 @@ local TidyPlatesThreat = TidyPlatesThreat
 local Animations = Addon.Animations
 local Font = Addon.Font
 local UpdateTextPosition = Addon.Font.UpdateTextPosition
-local RGB = ThreatPlates.RGB
+local RGB = Addon.RGB
 local DEBUG = ThreatPlates.DEBUG
 
 -- Default for icon mode is 0.5, for bar mode "1 / GetFramerate()" is used for smooth updates -- GetFramerate() in frames/second
@@ -379,7 +379,7 @@ local function OnShowHookScript(widget_frame)
 end
 
 --local function OnHideHookScript(widget_frame)
---  widget_frame:UnregisterAllEvents()
+--  widget_frame:UnsubscribeAllEvents()
 --end
 
 ---------------------------------------------------------------------------------------------------
@@ -1422,18 +1422,18 @@ function Widget:IsEnabled()
 end
 
 function Widget:OnEnable()
-  self:RegisterEvent("PLAYER_TARGET_CHANGED")
-  self:RegisterEvent("PLAYER_REGEN_ENABLED")
-  self:RegisterEvent("PLAYER_REGEN_DISABLED")
-  self:RegisterEvent("PLAYER_ENTERING_WORLD")
+  self:SubscribeEvent("PLAYER_TARGET_CHANGED")
+  self:SubscribeEvent("PLAYER_REGEN_ENABLED")
+  self:SubscribeEvent("PLAYER_REGEN_DISABLED")
+  self:SubscribeEvent("PLAYER_ENTERING_WORLD")
   -- LOSS_OF_CONTROL_ADDED
   -- LOSS_OF_CONTROL_UPDATE
 end
 
 function Widget:OnDisable()
-  self:UnregisterAllEvents()
+  self:UnsubscribeAllEvents()
   for plate, _ in pairs(Addon.PlatesVisible) do
-    plate.TPFrame.widgets.Auras:UnregisterAllEvents()
+    plate.TPFrame.widgets.Auras:UnsubscribeAllEvents()
   end
 end
 
@@ -1464,6 +1464,7 @@ function Widget:OnUnitAdded(widget_frame, unit)
 end
 
 function Widget:OnUnitRemoved(widget_frame)
+  -- Unregister UNIT_AURA which was registerd by this frame - TODO: change this to SubscribeUnitEvent
   widget_frame:UnregisterAllEvents()
 end
 
@@ -1484,6 +1485,7 @@ local function ParseFilter(filter_by_spell)
       spell = value:match("^All%s*(.-)$")
       only_player_auras = false
     elseif value:sub(1, 3) == "My " then
+      modifier = "My"
       modifier = "My"
       spell = value:match("^My%s*(.-)$")
     elseif value:sub(1, 4) == "Not " then

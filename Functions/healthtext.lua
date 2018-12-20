@@ -20,8 +20,8 @@ local format = format
 local string = string
 
 local TidyPlatesThreat = TidyPlatesThreat
-local RGB = ThreatPlates.RGB
-local RGB_P = ThreatPlates.RGB_P
+local RGB = Addon.RGB
+local RGB_P = Addon.RGB_P
 local GetColorByHealthDeficit = ThreatPlates.GetColorByHealthDeficit
 
 ---------------------------------------------------------------------------------------------------
