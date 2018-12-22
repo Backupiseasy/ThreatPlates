@@ -32,9 +32,9 @@ function Addon:SetThreatColor(unit)
 --
 
   local db = TidyPlatesThreat.db.profile
-  if not UnitIsConnected(unit.unitid) then
+  if not UnitIsConnected(unit.unitid) and ShowThreatGlow(unit) then
     color = db.ColorByReaction.DisconnectedUnit
-  elseif unit.isTapped then
+  elseif unit.isTapped and ShowThreatGlow(unit) then
     color = db.ColorByReaction.TappedUnit
   elseif unit.type == "NPC" and unit.reaction ~= "FRIENDLY" then
     local style = unit.style
