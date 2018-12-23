@@ -15,6 +15,7 @@ local UnitCanAttack, UnitIsTapDenied = UnitCanAttack, UnitIsTapDenied
 local TidyPlatesThreat = TidyPlatesThreat
 local TOTEMS = Addon.TOTEMS
 local GetUnitVisibility = ThreatPlates.GetUnitVisibility
+local PlayerRoleIsTank = Addon.PlayerRoleIsTank
 
 ---------------------------------------------------------------------------------------------------
 -- Helper functions for styles and functions
@@ -165,7 +166,7 @@ function Addon:GetThreatStyle(unit)
   -- style tank/dps only used for NPCs/non-player units
   if InCombatLockdown() and unit.type == "NPC" and unit.reaction ~= "FRIENDLY" and TidyPlatesThreat.db.profile.threat.ON then
     if Addon:ShowThreatFeedback(unit) then
-      return (Addon:PlayerRoleIsTank() and "tank") or "dps"
+      return (PlayerRoleIsTank() and "tank") or "dps"
     end
   end
 
@@ -231,7 +232,7 @@ function Addon:SetStyle(unit)
     -- style tank/dps only used for hostile (enemy, neutral) NPCs
     if InCombatLockdown() and unit.type == "NPC" and TidyPlatesThreat.db.profile.threat.ON then
       if Addon:ShowThreatFeedback(unit) then
-        style = (Addon:PlayerRoleIsTank() and "tank") or "dps"
+        style = (PlayerRoleIsTank() and "tank") or "dps"
       end
     end
   end

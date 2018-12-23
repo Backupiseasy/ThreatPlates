@@ -34,7 +34,7 @@ local SubscribersByEvent = {}
 local EventHandlerFrame = CreateFrame("Frame", nil, WorldFrame)
 
 local function EventHandler(self, event, ...)
-  local pairs, Addon, RegisteredEvents,SubscribersByEvent = pairs, Addon, RegisteredEvents, SubscribersByEvent
+  local pairs, Addon, RegisteredEvents, SubscribersByEvent = pairs, Addon, RegisteredEvents, SubscribersByEvent
   --print ("EVENT:", event)
 
   -- Process the main subscriber that regestered the event
@@ -108,14 +108,15 @@ end
 EventHandlerFrame:SetScript("OnEvent", EventHandler)
 
 ---------------------------------------------------------------------------------------------------
+-- Threat-Plates-internal events
+---------------------------------------------------------------------------------------------------
+local INTERNAL_EVENTS = {
+  ThreatUpdate = true, -- Parameters: tp_frame, unitid
+}
+
+---------------------------------------------------------------------------------------------------
 -- Event Service Functions
 ---------------------------------------------------------------------------------------------------
-
--- RegisterWoWEvent
--- Subscribe (to event, message)
--- Publish (to event, messag)
--- Unsubscribe (to event, message)
-
 
 -- Register as main subscriber (only one is supported) for a WoW event - all other subscribers
 -- will receive the event after the main subscriber
@@ -131,7 +132,7 @@ end
 function EventService.Subscribe(subscriber, event, func)
   print ("EventService: Subscribe", event)
 
-  if not RegisteredEvents[event] then
+  if not RegisteredEvents[event] and not INTERNAL_EVENTS[event] then
     EventHandlerFrame:RegisterEvent(event)
   end
 
@@ -161,6 +162,23 @@ function EventService.SubscribeUnitEvent(subscriber, event, unitid, func)
   end
 
   all_subscribers[subscriber] = func or true
+end
+
+function EventService.Publish(event, ...)
+  local pairs, SubscribersByEvent = pairs, SubscribersByEvent
+
+  -- Process all subscribers that subscribed to the event
+  local all_subscribers = SubscribersByEvent[event]
+  if all_subscribers then
+    for subscriber, func in pairs(all_subscribers) do
+      print ("Publishing", event)
+      if func == true then
+        subscriber[event](subscriber, ...)
+      else
+        func(event, ...)
+      end
+    end
+  end
 end
 
 --function EventService.SubscribeUnitEvent(subscriber, event, unitid, func)

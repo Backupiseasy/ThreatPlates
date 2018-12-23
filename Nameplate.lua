@@ -36,6 +36,7 @@ local GetCVar, Lerp, CombatLogGetCurrentEventInfo = GetCVar, Lerp, CombatLogGetC
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
 local Widgets = Addon.Widgets
+local RegisterEvent, PublishEvent = Addon.EventService.RegisterEvent, Addon.EventService.Publish
 
 -- Constants
 -- Raid Icon Reference
@@ -348,6 +349,8 @@ do
     PlatesByUnit[unitid] = plate
     PlatesByGUID[unit.guid] = plate
 
+    --visual.threatborder:Hide()
+
     Addon:UpdateUnitContext(unit, unitid)
     Addon:UnitStyle_NameDependent(unit)
     ProcessUnitChanges()
@@ -426,7 +429,7 @@ local RareReference = {
   ["rareelite"] = true,
 }
 
-local ThreatReference = {
+local THREAT_REFERENCE = {
   [0] = "LOW",
   [1] = "MEDIUM",
   [2] = "MEDIUM",
@@ -486,10 +489,6 @@ function Addon:UpdateUnitCondition(unit, unitid)
   unit.health = UnitHealth(unitid) or 0
   unit.healthmax = UnitHealthMax(unitid) or 1
 
-  unit.threatValue = UnitThreatSituation("player", unitid) or 0
-  unit.threatSituation = ThreatReference[unit.threatValue]
-  unit.isInCombat = UnitAffectingCombat(unitid)
-
   local raidIconIndex = GetRaidTargetIndex(unitid)
 
   if raidIconIndex then
@@ -512,11 +511,6 @@ function Addon:UpdateIndicatorNameplateColor(tp_frame)
 
   if visual.healthbar:IsShown() then
     visual.healthbar:SetAllColors(Addon:SetHealthbarColor(tp_frame.unit))
-
-    -- Updates warning glow for threat
-    if visual.threatborder:IsShown() then
-      visual.threatborder:SetBackdropBorderColor(Addon:SetThreatColor(tp_frame.unit))
-    end
   end
 
   if visual.name:IsShown() then
@@ -977,7 +971,7 @@ do
 --			local objectname = showgroup[index]
 --			visual[objectname]:SetShown(style[objectname].show)
 --		end
-    visual.threatborder:SetShown(style.threatborder.show)
+--    visual.threatborder:SetShown(style.threatborder.show)
 
     -- Raid Icon Texture
 		if style.raidicon and style.raidicon.texture then
@@ -1141,8 +1135,6 @@ end
 local IsInInstance, InCombatLockdown = IsInInstance, InCombatLockdown
 local NamePlateDriverFrame = NamePlateDriverFrame
 local SetCVar = SetCVar
-local RegisterEvent = Addon.EventService.RegisterEvent
-
 local L = ThreatPlates.L
 
 local TaskQueueOoC = {}
@@ -1364,6 +1356,15 @@ function Addon:PLAYER_REGEN_ENABLED()
     SetCVar("nameplateShowEnemies", (db.EnemyUnits == "SHOW_COMBAT" and 0) or 1)
   end
 
+--  local tp_frame
+--  for plate, _ in pairs(PlatesVisible) do
+--    tp_frame = plate.TPFrame
+--    print ("Combat ended ", tp_frame.unit.unitid, "-", tp_frame.unit.InCombat)
+--    if tp_frame.unit.InCombat then
+--      PublishEvent("CombatEnded", tp_frame)
+--    end
+--  end
+
   SetUpdateAll()
 end
 
@@ -1537,27 +1538,28 @@ end
 
 function  Addon:UNIT_THREAT_LIST_UPDATE(unitid)
   if unitid == "player" or unitid == "target" then return end
+
+  local PlatesByUnit, THREAT_REFERENCE = PlatesByUnit, THREAT_REFERENCE
+  local UnitThreatSituation, UnitAffectingCombat = UnitThreatSituation, UnitAffectingCombat
+
   local plate = PlatesByUnit[unitid]
-
   if plate then
-    --local threat_value = UnitThreatSituation("player", unitid) or 0
-    --if threat_value ~= plate.TPFrame.unit.threatValue then
-    if (UnitThreatSituation("player", unitid) or 0) ~= plate.TPFrame.unit.threatValue then
+    local unit = plate.TPFrame.unit
+    print ("UNIT_THREAT_LIST_UPDATE:", unitid, " =>", UnitThreatSituation("player", unitid) or "(nil)")
 
-      --OnHealthUpdate(plate)
+    local threat_status = UnitThreatSituation("player", unitid)
 
-      plate.UpdateMe = true
-
-      -- TODO: Optimize this - only update elements that need updating
-      -- Don't use OnHealthUpdate(), more like: OnThreatUpdate()
-      -- UpdateReferences(plate)
-      --Addon:UpdateUnitCondition(unit, unitid)
-      --        unit.threatValue = UnitThreatSituation("player", unitid) or 0
-      --        unit.threatSituation = ThreatReference[unit.threatValue]
-      --        unit.isInCombat = UnitAffectingCombat(unitid)
-      --ProcessUnitChanges()
-      --OnUpdateCastMidway(nameplate, unit.unitid)
+    -- If threat_status is nil, unit is leaving combat
+    if threat_status == nil then
+      unit.ThreatStatus = nil
+    elseif threat_status ~= unit.ThreatStatus then
+      unit.ThreatStatus = threat_status
+      unit.ThreatLevel = THREAT_REFERENCE[threat_status]
+      unit.InCombat = UnitAffectingCombat(unitid)
+      plate.UpdateMe = true -- transparency, scale, and color still must be updated this way
     end
+
+    PublishEvent("ThreatUpdate", plate.TPFrame, unit)
   end
 end
 

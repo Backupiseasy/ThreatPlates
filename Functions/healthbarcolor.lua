@@ -22,6 +22,7 @@ local FACTION_BAR_COLORS = FACTION_BAR_COLORS
 local TidyPlatesThreat = TidyPlatesThreat
 local TOTEMS = Addon.TOTEMS
 local RGB_P = Addon.RGB_P
+local PlayerRoleIsTank = Addon.PlayerRoleIsTank
 local IsFriend
 local IsGuildmate
 local ShowQuestUnit
@@ -67,7 +68,9 @@ function Addon:GetThreatColor(unit, style, show_attacked_units_only)
 
   if show_attacked_units_only then
     if Addon:OnThreatTable(unit) then
-      local threatSituation = unit.threatSituation
+      local threatSituation = unit.ThreatLevel
+      local style = (PlayerRoleIsTank() and "tank") or "dps"
+
       if style == "tank" and db.threat.toggle.OffTank and Addon:UnitIsOffTanked(unit) then
         threatSituation = "OFFTANK"
       end
@@ -75,7 +78,7 @@ function Addon:GetThreatColor(unit, style, show_attacked_units_only)
       color = db.settings[style].threatcolor[threatSituation]
     end
   else
-    local threatSituation = unit.threatSituation
+    local threatSituation = unit.ThreatLevel
     if style == "tank" and db.threat.toggle.OffTank and Addon:UnitIsOffTanked(unit) then
       threatSituation = "OFFTANK"
     end

@@ -3,16 +3,23 @@
 ---------------------------------------------------------------------------------------------------
 local ADDON_NAME, Addon = ...
 
+---------------------------------------------------------------------------------------------------
+-- Imported functions and constants
+---------------------------------------------------------------------------------------------------
+
 -- Lua APIs
-local string, strsplit = string, strsplit
+local strsplit = strsplit
 
 -- WoW APIs
-local UnitThreatSituation, UnitGroupRolesAssigned, UnitIsUnit = UnitThreatSituation, UnitGroupRolesAssigned, UnitIsUnit
 local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
-local UnitReaction, UnitIsTapDenied, UnitGUID = UnitReaction, UnitIsTapDenied, UnitGUID
+local UnitThreatSituation, UnitGroupRolesAssigned, UnitIsUnit = UnitThreatSituation, UnitGroupRolesAssigned, UnitIsUnit
+local UnitGUID, UnitReaction, UnitIsTapDenied, UnitIsConnected = UnitGUID, UnitReaction, UnitIsTapDenied, UnitIsConnected
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
+local RGB = Addon.RGB
+
+local COLOR_TRANSPARENT = RGB(0, 0, 0, 0) -- opaque
 
 local CLASSIFICATION_MAPPING = {
   ["boss"] = "Boss",
@@ -28,25 +35,9 @@ local CLASSIFICATION_MAPPING = {
 Addon.CreatureCache = {}
 
 ---------------------------------------------------------------------------------------------------
--- @return    Returns if the unit is tanked by another tank or pet (not by the player character,
---            not by a dps)
---
--- @docu      Function is mostly called in combat situations with the character being the tank
---            (i.e., style == "tank")
+-- Returns if the unit is tanked by another tank or pet (not by the player character,
+-- not by a dps)
 ---------------------------------------------------------------------------------------------------
-function Addon:UnitIsOffTanked(unit)
-  local unitid = unit.unitid
-
-  local threat_status = UnitThreatSituation("player", unitid) or 0
-  if threat_status > 1 then -- tanked by player character
-    return false
-  end
-
-  local target_of_unit = unitid .. "target"
-
-  return ("TANK" == UnitGroupRolesAssigned(target_of_unit)) or UnitIsUnit(target_of_unit, "pet") or self:IsBlackOxStatue(target_of_unit)
-end
-
 -- Black Ox Statue of monks is: Creature with id 61146
 function Addon:IsBlackOxStatue(unitid)
   local guid = UnitGUID(unitid)
@@ -65,20 +56,30 @@ function Addon:IsBlackOxStatue(unitid)
   return is_black_ox_statue
 end
 
----------------------------------------------------------------------------------------------------
--- @return
---
--- @docu
----------------------------------------------------------------------------------------------------
+function Addon:UnitIsOffTanked(unit)
+  local unitid = unit.unitid
+
+  local threat_status = UnitThreatSituation("player", unitid) or 0
+  if threat_status > 1 then -- tanked by player character
+    return false
+  end
+
+  local target_of_unit = unitid .. "target"
+
+  return ("TANK" == UnitGroupRolesAssigned(target_of_unit)) or UnitIsUnit(target_of_unit, "pet") or self:IsBlackOxStatue(target_of_unit)
+end
+
 function Addon:OnThreatTable(unit)
   -- "is unit inactive" from TidyPlates - fast, but doesn't meant that player is on threat table
-  -- return  (unit.health < unit.healthmax) or (unit.isInCombat or unit.threatValue > 0) or (unit.isCasting == true) then
+  -- return  (unit.health < unit.healthmax) or (unit.InCombat or unit.ThreatStatus > 0) or (unit.isCasting == true) then
 
   --  local _, threatStatus = UnitDetailedThreatSituation("player", unit.unitid)
   --  return threatStatus ~= nil
 
   -- nil means player is not on unit's threat table - more acurate, but slower reaction time than the above solution
-  return UnitThreatSituation("player", unit.unitid)
+  -- return UnitThreatSituation("player", unit.unitid) ~= nil
+
+  return unit.ThreatStatus ~= nil
 end
 
 --toggle = {
@@ -101,11 +102,6 @@ local function GetUnitClassification(unit)
   return CLASSIFICATION_MAPPING[unit.classification]
 end
 
----------------------------------------------------------------------------------------------------
--- @return
---
--- @docu
----------------------------------------------------------------------------------------------------
 function Addon:ShowThreatFeedback(unit)
   local db = TidyPlatesThreat.db.profile.threat
 
@@ -123,4 +119,42 @@ function Addon:ShowThreatFeedback(unit)
   end
 
   return false
+end
+
+local function ShowThreatGlow(unit)
+  local db = TidyPlatesThreat.db.profile
+
+  if db.ShowThreatGlowOnAttackedUnitsOnly then
+    return Addon:OnThreatTable(unit)
+  else
+    return true
+  end
+end
+
+function Addon:SetThreatColor(unit)
+  local color
+
+  local db = TidyPlatesThreat.db.profile
+  if not UnitIsConnected(unit.unitid) then
+    color = db.ColorByReaction.DisconnectedUnit
+  elseif unit.isTapped then
+    color = db.ColorByReaction.TappedUnit
+  elseif unit.type == "NPC" and unit.reaction ~= "FRIENDLY" then
+    local style = unit.style
+    if style == "unique" then
+      local unique_setting = unit.CustomPlateSettings
+      if unique_setting.UseThreatGlow then
+        -- set style to tank/dps or normal
+        style = Addon:GetThreatStyle(unit)
+      end
+    end
+
+    if style == "dps" or style == "tank" or (style == "normal" and InCombatLockdown()) then
+      color = Addon:GetThreatColor(unit, style, db.ShowThreatGlowOnAttackedUnitsOnly)
+    end
+  end
+
+  color = color or COLOR_TRANSPARENT
+
+  return color.r, color.g, color.b, color.a
 end

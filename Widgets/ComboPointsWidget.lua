@@ -324,7 +324,6 @@ end
 local function EventHandler(event, unitid, power_type)
   if event == "UNIT_POWER_UPDATE" and not WATCH_POWER_TYPES[power_type] then return end
 
-  print ("ComboPoints: Event =", event, unitid)
   local plate = GetNamePlateForUnit("target")
   if plate then -- not necessary, prerequisite for IsShown(): plate.TPFrame.Active and
     local widget = Widget
@@ -337,8 +336,6 @@ end
 
 -- Arguments of ACTIVE_TALENT_GROUP_CHANGED (curr, prev) always seemt to be 1, 1
 function Widget:ACTIVE_TALENT_GROUP_CHANGED(...)
-  print ("ComboPoints: CTIVE_TALENT_GROUP_CHANGED")
-
   -- ACTIVE_TALENT_GROUP_CHANGED fires twice, so prevent that InitializeWidget is called twice (does not hurt,
   -- but is not necesary either
   local current_spec = GetSpecialization()
@@ -351,7 +348,6 @@ end
 
 function Widget:UNIT_MAXPOWER(unitid, power_type)
   if self.PowerType then
-    print ("ComboPoints: UNIT_MAXPOWER")
     -- Number of max power units changed (e.g., for a rogue)
     self:DetermineUnitPower()
     self:UpdateLayout()
@@ -370,8 +366,6 @@ function Widget:UNIT_MAXPOWER(unitid, power_type)
 end
 
 function Widget:PLAYER_TARGET_CHANGED()
-  print ("ComboPoints: PLAYER_TARGET_CHANGED")
-
   local plate = GetNamePlateForUnit("target")
 
   local tp_frame = plate and plate.TPFrame

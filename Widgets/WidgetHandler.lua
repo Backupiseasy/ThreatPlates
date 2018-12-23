@@ -13,7 +13,8 @@ local pairs, next = pairs, next
 -- WoW APIs
 
 -- ThreatPlates APIs
-local EventServiceSubscribe, EventServiceSubscribeUnit, EventServiceUnsubscribe = Addon.EventService.Subscribe, Addon.EventService.SubscribeUnitEvent, Addon.EventService.Unsubscribe
+local EventServiceSubscribe, EventServiceSubscribeUnit = Addon.EventService.Subscribe, Addon.EventService.SubscribeUnitEvent
+local EventServiceUnsubscribe, EventServiceUnsubscribeAll = Addon.EventService.Unsubscribe, Addon.EventService.UnsubscribeAll
 
 local WidgetHandler = {
   Widgets = {},
@@ -97,6 +98,7 @@ local function UnsubscribeEvent(widget, event)
 end
 
 local function UnsubscribeAllEvents(widget)
+  EventServiceUnsubscribeAll(widget)
 --  for event, _ in pairs(WidgetHandler.RegisteredEventsByWidget) do
 --    UnregisterEvent(widget, event)
 --  end
@@ -197,7 +199,7 @@ function WidgetHandler:NewWidget(widget_name)
     -- Default functions for enabling/disabling the widget
     OnEnable = function(self) end, -- do nothing
     OnDisable = function(self)
-      self:UnregisterAllEvents()
+      self:UnsubscribeAllEvents()
     end,
   }
 

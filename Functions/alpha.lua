@@ -12,6 +12,7 @@ local UnitExists = UnitExists
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
+local PlayerRoleIsTank = Addon.PlayerRoleIsTank
 
 ---------------------------------------------------------------------------------------------------
 -- Functions handling transparency of nameplates
@@ -88,7 +89,9 @@ local function TransparencyThreat(unit, style)
 		end
 	end
 
-  local threatSituation = unit.threatSituation
+  local threatSituation = unit.ThreatLevel or "LOW"
+	local style = (PlayerRoleIsTank() and "tank") or "dps"
+
   if style == "tank" and db.toggle.OffTank and Addon:UnitIsOffTanked(unit) then
     threatSituation = "OFFTANK"
 	end

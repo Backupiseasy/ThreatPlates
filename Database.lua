@@ -29,7 +29,7 @@ local RGB = Addon.RGB
 Addon.PlayerClass = select(2, UnitClass("player"))
 local PLAYER_ROLE_BY_SPEC = ThreatPlates.SPEC_ROLES[Addon.PlayerClass]
 
-function Addon:PlayerRoleIsTank()
+function Addon.PlayerRoleIsTank()
   local db = TidyPlatesThreat.db
   if db.profile.optionRoleDetectionAutomatic then
     return PLAYER_ROLE_BY_SPEC[GetSpecialization()] or false

@@ -46,7 +46,7 @@ local tankRole = L["|cff00ff00tanking|r"]
 local dpsRole = L["|cffff0000dpsing / healing|r"]
 
 function TidyPlatesThreat:RoleText()
-  if Addon:PlayerRoleIsTank() then
+  if Addon.PlayerRoleIsTank() then
     return tankRole
   else
     return dpsRole

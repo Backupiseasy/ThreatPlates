@@ -511,7 +511,7 @@ end
 
 --function Widget:FilterEnemyBuffsBySpellDynamic(db, aura, unit)
 --  return aura.duration > 0 or db.ShowUnlimitedAlways or
---    (db.ShowUnlimitedInCombat and unit.isInCombat) or
+--    (db.ShowUnlimitedInCombat and unit.InCombat) or
 --    (db.ShowUnlimitedInInstances and PLayerIsInInstance) or
 --    (db.ShowUnlimitedOnBosses and unit.IsBossOrRare)
 --end
@@ -526,7 +526,7 @@ function Widget:FilterEnemyBuffsBySpell(db, aura, AuraFilterFunction, unit)
   -- the "Show Unlimited Buffs" settings
   if show_aura and (aura.duration <= 0) then
     show_aura =  db.ShowUnlimitedAlways or
-                (db.ShowUnlimitedInCombat and unit.isInCombat) or
+                (db.ShowUnlimitedInCombat and unit.InCombat) or
                 (db.ShowUnlimitedInInstances and PLayerIsInInstance) or
                 (db.ShowUnlimitedOnBosses and unit.IsBossOrRare)
     unit.HasUnlimitedAuras = true
