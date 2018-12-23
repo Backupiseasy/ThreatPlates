@@ -31,6 +31,8 @@ Core.lua
 Commands.lua
 Options.lua
 
+Options.xml
+
 Styles\Styles.xml
 Functions\Functions.xml
 Widgets\Widgets.xml
