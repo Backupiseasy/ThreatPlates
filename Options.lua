@@ -131,6 +131,30 @@ local db
 local options = nil
 
 -- Functions
+local function AddImportExportOptions(profileOptions)
+  --TODO: localisation
+  profileOptions.args.exportimportdesc = {
+		order = 90,
+		type = "description",
+		name = "\n" .. "TODO some description about importing and explorting profiles", --TODO
+	}
+
+  profileOptions.args.exportprofile = {
+    order = 95,
+		type = "execute",
+		name = "Export current profile",
+		desc = "Export the current profile into text that can be pasted by another user",
+		func = function() print("Export") end,
+	}
+
+  profileOptions.args.importprofile = {
+    order = 100,
+		type = "execute",
+		name = "Import a profile",
+		desc = "Import a profile from another user",
+		func = function() print("Import") end,
+	}
+end
 
 local function GetSpellName(number)
   local n = GetSpellInfo(number)
@@ -7300,6 +7324,8 @@ local function CreateOptionsTable()
 
   options.args.profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(TidyPlatesThreat.db)
   options.args.profiles.order = 10000;
+
+  AddImportExportOptions(options.args.profiles);
 end
 
 local function GetInterfaceOptionsTable()
