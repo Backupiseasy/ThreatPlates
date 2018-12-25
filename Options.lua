@@ -130,6 +130,68 @@ local db
 -- table for storing the options dialog
 local options = nil
 
+-- cache copyFrame if used multiple times
+local copyFrame = nil
+
+local function CreateCopyFrame()
+  local AceGUI = LibStub("AceGUI-3.0")
+
+  local frame = AceGUI:Create("Frame")
+  frame:SetTitle("Import/Export Profile") --TODO: localisation
+  frame:SetCallback("OnEscapePressed", function()
+    frame:Hide()
+  end)
+
+  local editBox = AceGUI:Create("MultiLineEditBox")
+  editBox:SetFullWidth(true)
+  editBox.button:Hide()
+  editBox.label:Hide()
+  editBox.frame:SetClipsChildren(true)
+
+  frame:AddChild(editBox)
+  frame.editBox = editBox
+
+  function frame:OpenExport(text)
+    local editBox = self.editBox
+
+    editBox:SetMaxLetters(0)
+    editBox.editBox:SetScript("OnChar", function() editBox:SetText(text); editBox:HighlightText(); end)
+    editBox.editBox:SetScript("OnMouseUp", function() editBox:HighlightText(); end)
+    editBox:SetText(text)
+    editBox:HighlightText()
+    editBox:SetFocus()
+
+    self:Show()
+  end
+
+  function frame:OpenImport()
+    local editBox = self.editBox
+
+    editBox:SetMaxLetters(0)
+    editBox.editBox:SetScript("OnChar", nil)
+    editBox.editBox:SetScript("OnMouseUp", nil)
+    editBox:SetText("")
+    editBox:SetFocus()
+
+    self:Show()
+  end
+
+  return frame
+end
+
+local function ShowCopyFrame(mode)
+  -- show the appropriate frames
+  if copyFrame == nil then
+    copyFrame = CreateCopyFrame()
+  end
+
+  if mode == "export" then
+    copyFrame:OpenExport("Some Text") --TODO
+  else
+    copyFrame:OpenImport()
+  end
+end
+
 -- Functions
 local function AddImportExportOptions(profileOptions)
   --TODO: localisation
@@ -144,7 +206,7 @@ local function AddImportExportOptions(profileOptions)
 		type = "execute",
 		name = "Export current profile",
 		desc = "Export the current profile into text that can be pasted by another user",
-		func = function() print("Export") end,
+		func = function() ShowCopyFrame("export") end,
 	}
 
   profileOptions.args.importprofile = {
@@ -152,7 +214,7 @@ local function AddImportExportOptions(profileOptions)
 		type = "execute",
 		name = "Import a profile",
 		desc = "Import a profile from another user",
-		func = function() print("Import") end,
+		func = function() ShowCopyFrame("import") end,
 	}
 end
 
