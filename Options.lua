@@ -130,18 +130,6 @@ local db
 -- table for storing the options dialog
 local options = nil
 
-local function ShowCopyFrame(text)
-  -- show the appropriate frames
-  TpOptionsCopyFrame:Show()
-  TpOptionsCopyFrameScroll:Show()
-  TpOptionsCopyFrameScrollText:Show()
-  TpOptionsCopyFrameScrollText:SetText(text)
-  TpOptionsCopyFrameScrollText:HighlightText()
-  TpOptionsCopyFrameScrollText:SetScript("OnEscapePressed", function(self)
-    TpOptionsCopyFrame:Hide()
-  end)
-end
-
 -- Functions
 local function AddImportExportOptions(profileOptions)
   --TODO: localisation
@@ -156,7 +144,7 @@ local function AddImportExportOptions(profileOptions)
 		type = "execute",
 		name = "Export current profile",
 		desc = "Export the current profile into text that can be pasted by another user",
-		func = function() ShowCopyFrame("export") end,
+		func = function() print("Export") end,
 	}
 
   profileOptions.args.importprofile = {
@@ -164,7 +152,7 @@ local function AddImportExportOptions(profileOptions)
 		type = "execute",
 		name = "Import a profile",
 		desc = "Import a profile from another user",
-		func = function() ShowCopyFrame("import") end,
+		func = function() print("Import") end,
 	}
 end
 
