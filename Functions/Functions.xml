@@ -2,7 +2,6 @@
 xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 ..\FrameXML\UI.xsd">
 <Script file="threat.lua"/>
-<Script file="threatglow.lua"/>
 <Script file="healthbarcolor.lua"/>
 <Script file="alpha.lua"/>
 <Script file="scale.lua"/>

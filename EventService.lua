@@ -111,7 +111,9 @@ EventHandlerFrame:SetScript("OnEvent", EventHandler)
 -- Threat-Plates-internal events
 ---------------------------------------------------------------------------------------------------
 local INTERNAL_EVENTS = {
-  ThreatUpdate = true, -- Parameters: tp_frame, unitid
+  ThreatUpdate = true,      -- Parameters: tp_frame, unitid
+  MouseoverOnEnter = true,  -- Parameters: tp_frame
+  MouseoverOnLeave = true,  -- Parameters: tp_frame
 }
 
 ---------------------------------------------------------------------------------------------------

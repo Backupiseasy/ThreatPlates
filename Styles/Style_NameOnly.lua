@@ -65,7 +65,7 @@ local function Create(self,name)
 
     highlight = {
       texture = (dbprofile.HeadlineView.ShowMouseoverHighlight and ART_PATH.."Highlight") or EMPTY_TEXTURE,
-      show = true,
+      show = dbprofile.HeadlineView.ShowMouseoverHighlight,
     },
 
     castbar = {
