@@ -181,18 +181,7 @@ local function SituationalEvent(tp_frame)
   tp_frame:SetScale(Addon.UIScale * Addon:SetScale(tp_frame.unit))
 end
 
-local function SituationalCastingEvent(unitid, ...)
-  --if unitid == "player" or unitid == "target" then return end
-
-  local tp_frame = PlatesByUnit[unitid]
-  if tp_frame then
-    tp_frame:SetScale(Addon.UIScale * Addon:SetScale(tp_frame.unit))
-  end
-end
-
 SubscribeEvent("Scale", "MouseoverOnEnter", SituationalEvent)
 SubscribeEvent("Scale", "MouseoverOnLeave", SituationalEvent)
-SubscribeEvent("Scale", "UNIT_SPELLCAST_START", SituationalCastingEvent)
-SubscribeEvent("Scale", "UNIT_SPELLCAST_STOP", SituationalCastingEvent)
-SubscribeEvent("Scale", "UNIT_SPELLCAST_CHANNEL_START", SituationalCastingEvent)
-SubscribeEvent("Scale", "UNIT_SPELLCAST_CHANNEL_STOP", SituationalCastingEvent)
+SubscribeEvent("Scale", "CastingStarted", SituationalEvent)
+SubscribeEvent("Scale", "CastingStopped", SituationalEvent)

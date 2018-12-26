@@ -369,17 +369,12 @@ local function OnStartCasting(tp_frame, unitid, channeled)
   castbar:SetAllColors(Addon:SetCastbarColor(unit))
   visual.castbar:SetShownInterruptOverlay(unit.spellIsShielded)
 
+  -- Only publish this event once (OnStartCasting is called for re-freshing as well)
+  if not castbar:IsShown() then
+    PublishEvent("CastingStarted", tp_frame)
+  end
+
   castbar:Show()
-end
-
--- OnHideCastbar
-local function OnStopCasting(tp_frame)
-  local unit = tp_frame.unit
-
-  local castbar = tp_frame.visual.castbar
-  castbar.IsCasting = false
-  castbar.IsChanneling = false
-  unit.isCasting = false
 end
 
 local function OnUpdateCastMidway(tp_frame, unitid)
@@ -397,11 +392,11 @@ end
 
 -- Update spell currently being cast
 local function UnitSpellcastMidway(unitid, ...)
-  if UnitIsUnit("player", unitid) or not ShowCastBars then return end
+  if not ShowCastBars then return end
 
-  local plate = GetNamePlateForUnit(unitid)
-  if plate then
-    OnUpdateCastMidway(plate.TPFrame, unitid)
+  local tp_frame = PlatesByUnit[unitid]
+  if tp_frame then
+    OnUpdateCastMidway(tp_frame, unitid)
   end
 end
 
@@ -1376,15 +1371,8 @@ function Addon:NAME_PLATE_UNIT_REMOVED(unitid)
 end
 
 function Addon:UNIT_NAME_UPDATE(unitid)
-  if UnitIsUnit("player", unitid) then return end -- Skip personal resource bar
-
-  local plate = GetNamePlateForUnit(unitid) -- can plate ever be nil here?
-
-  -- Plate can be nil here, if unitid is party1, partypet4 or something like that
-  if plate and plate.TPFrame.Active then
-    --print ("UNIT_NAME_UPDATE:", plate:GetName(), "for", select(1, UnitName(unitid)), "[" .. plate.TPFrame.unit.name .. "]")
-
-    local tp_frame = plate.TPFrame
+  local tp_frame = PlatesByUnit[unitid]
+  if tp_frame then
     local unit, stylename = tp_frame.unit, tp_frame.stylename
 
     unit.name, _ = UnitName(unitid)
@@ -1468,15 +1456,11 @@ function Addon:UNIT_MAXHEALTH(unitid)
 end
 
 function  Addon:UNIT_THREAT_LIST_UPDATE(unitid)
-  if unitid == "player" or unitid == "target" then return end
-
   local tp_frame = PlatesByUnit[unitid]
   if tp_frame then
-    local unit = tp_frame.unit
-    print ("UNIT_THREAT_LIST_UPDATE:", unitid, " =>", UnitThreatSituation("player", unitid) or "(nil)")
-
     local threat_status = UnitThreatSituation("player", unitid)
 
+    local unit = tp_frame.unit
     -- If threat_status is nil, unit is leaving combat
     if threat_status == nil then
       unit.ThreatStatus = nil
@@ -1517,44 +1501,40 @@ function Addon:UNIT_FACTION(unitid)
 end
 
 function Addon:UNIT_SPELLCAST_START(unitid)
-  if UnitIsUnit("player", unitid) or not ShowCastBars then return end
+  if not ShowCastBars then return end
 
-  local plate = GetNamePlateForUnit(unitid)
-  if plate and plate.TPFrame.Active then
-    OnStartCasting(plate.TPFrame, unitid, false)
-  end
-end
-
-
-function Addon:UNIT_SPELLCAST_STOP(unitid)
-  if UnitIsUnit("player", unitid) or not ShowCastBars then return end
-
-  -- plate can be nil, e.g., if unitid = player, combat ends and the player resource bar is already hidden
-  -- when the cast stops (because it's not shown out of combat)
-  local plate = GetNamePlateForUnit(unitid)
-  if plate and plate.TPFrame.Active then
-    OnStopCasting(plate.TPFrame)
+  local tp_frame = PlatesByUnit[unitid]
+  if tp_frame then
+    OnStartCasting(tp_frame, unitid, false)
   end
 end
 
 function Addon:UNIT_SPELLCAST_CHANNEL_START(unitid)
-  if UnitIsUnit("player", unitid) or not ShowCastBars then return end
+  if not ShowCastBars then return end
 
-  local plate = GetNamePlateForUnit(unitid)
-  if plate and plate.TPFrame.Active then
-    OnStartCasting(plate.TPFrame, unitid, true)
-    --late.TPFrame.visual.castbar:Show()
+  local tp_frame = PlatesByUnit[unitid]
+  if tp_frame then
+    OnStartCasting(tp_frame, unitid, true)
   end
 end
 
-function Addon:UNIT_SPELLCAST_CHANNEL_STOP(unitid)
-  if UnitIsUnit("player", unitid) or not ShowCastBars then return end
+-- Used for UNIT_SPELLCAST_STOP and UNIT_SPELLCAST_CHANNEL_STOP
+function Addon:UNIT_SPELLCAST_STOP(unitid)
+  if not ShowCastBars then return end
 
-  local plate = GetNamePlateForUnit(unitid)
-  if plate and plate.TPFrame.Active then
-    OnStopCasting(plate.TPFrame)
+  local tp_frame = PlatesByUnit[unitid]
+  if tp_frame then
+    tp_frame.unit.isCasting = false
+
+    local castbar = tp_frame.visual.castbar
+    castbar.IsCasting = false
+    castbar.IsChanneling = false
+
+    PublishEvent("CastingStopped", tp_frame)
   end
 end
+
+Addon.UNIT_SPELLCAST_CHANNEL_STOP = Addon.UNIT_SPELLCAST_STOP
 
 function Addon:COMBAT_LOG_EVENT_UNFILTERED()
   local timeStamp, event, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags = CombatLogGetCurrentEventInfo()

@@ -188,18 +188,7 @@ local function SituationalEvent(tp_frame)
 	end
 end
 
-local function SituationalCastingEvent(unitid, ...)
-  --if unitid == "player" or unitid == "target" then return end
-
-  local tp_frame = PlatesByUnit[unitid]
-  if tp_frame then
-    SituationalEvent(tp_frame)
-  end
-end
-
 SubscribeEvent("Transparency", "MouseoverOnEnter", SituationalEvent)
 SubscribeEvent("Transparency", "MouseoverOnLeave", SituationalEvent)
-SubscribeEvent("Transparency", "UNIT_SPELLCAST_START", SituationalCastingEvent)
-SubscribeEvent("Transparency", "UNIT_SPELLCAST_STOP", SituationalCastingEvent)
-SubscribeEvent("Transparency", "UNIT_SPELLCAST_CHANNEL_START", SituationalCastingEvent)
-SubscribeEvent("Transparency", "UNIT_SPELLCAST_CHANNEL_STOP", SituationalCastingEvent)
+SubscribeEvent("Transparency", "CastingStarted", SituationalEvent)
+SubscribeEvent("Transparency", "CastingStopped", SituationalEvent)

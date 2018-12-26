@@ -85,6 +85,8 @@ local INTERNAL_EVENTS = {
   -- PlayerTargetLost = true,  -- Parameters: tp_frame
   -- RaidTargetGained = true,  -- Parameters: tp_frame
   -- RaidTargetLost = true,  -- Parameters: tp_frame
+  CastingStarted = true,   -- Parameters: tp_frame
+  CastingStopped = true,   -- Parameters: tp_frame
 }
 
 ---------------------------------------------------------------------------------------------------
