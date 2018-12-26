@@ -179,14 +179,20 @@ local function CreateCopyFrame()
   return frame
 end
 
-local function ShowCopyFrame(mode)
+local function ShowCopyFrame(mode, modeArg)
+  local Serializer = LibStub:GetLibrary("AceSerializer-3.0")
+  local LibDeflate = LibStub:GetLibrary("LibDeflate")
+
   -- show the appropriate frames
   if copyFrame == nil then
     copyFrame = CreateCopyFrame()
   end
 
   if mode == "export" then
-    copyFrame:OpenExport("Some Text") --TODO
+    local serialized = Serializer:Serialize(modeArg)
+    local compressed = LibDeflate:CompressDeflate(serialized)
+
+    copyFrame:OpenExport(LibDeflate:EncodeForPrint(compressed))
   else
     copyFrame:OpenImport()
   end
@@ -206,7 +212,7 @@ local function AddImportExportOptions(profileOptions)
 		type = "execute",
 		name = "Export current profile",
 		desc = "Export the current profile into text that can be pasted by another user",
-		func = function() ShowCopyFrame("export") end,
+		func = function() ShowCopyFrame("export", TidyPlatesThreat.db.profile) end
 	}
 
   profileOptions.args.importprofile = {
@@ -214,7 +220,7 @@ local function AddImportExportOptions(profileOptions)
 		type = "execute",
 		name = "Import a profile",
 		desc = "Import a profile from another user",
-		func = function() ShowCopyFrame("import") end,
+		func = function() ShowCopyFrame("import") end
 	}
 end
 
