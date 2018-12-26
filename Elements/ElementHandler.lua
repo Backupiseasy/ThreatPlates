@@ -1,8 +1,7 @@
-local ADDON_NAME, Addon = ...
-
 ---------------------------------------------------------------------------------------------------
 -- Element Handler
 ---------------------------------------------------------------------------------------------------
+local ADDON_NAME, Addon = ...
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -16,13 +15,15 @@ local pairs = pairs
 -- ThreatPlates APIs
 
 ---------------------------------------------------------------------------------------------------
--- Attributes for Element Handler
+-- Local variables
 ---------------------------------------------------------------------------------------------------
-
-Addon.Elements = {}
-
-local ElementHandler = Addon.Elements
+local ElementHandler = {}
+Addon.Elements = ElementHandler
 local Elements = {}
+
+---------------------------------------------------------------------------------------------------
+-- Element Handler code
+---------------------------------------------------------------------------------------------------
 
 function ElementHandler.NewElement(name)
   local element = {
@@ -32,6 +33,10 @@ function ElementHandler.NewElement(name)
   Elements[name] = element
 
   return element
+end
+
+function ElementHandler.GetElement(name)
+  return Elements[name]
 end
 
 function ElementHandler.Created(frame)
@@ -46,7 +51,9 @@ function ElementHandler.UnitAdded(frame)
   local pairs, Elements = pairs, Elements
 
   for _, element in pairs(Elements) do
-    element.UnitAdded(frame)
+    if element.UnitAdded then
+      element.UnitAdded(frame)
+    end
   end
 end
 
@@ -54,7 +61,9 @@ function ElementHandler.UnitRemoved(frame)
   local pairs, Elements = pairs, Elements
 
   for _, element in pairs(Elements) do
-    element.UnitRemoved(frame)
+    if element.UnitRemoved then
+      element.UnitRemoved(frame)
+    end
   end
 end
 
@@ -62,7 +71,9 @@ function ElementHandler.UpdateStyle(frame, style)
   local pairs, Elements = pairs, Elements
 
   for _, element in pairs(Elements) do
-    element.UpdateStyle(frame, style)
+    if element.UpdateStyle then
+      element.UpdateStyle(frame, style)
+    end
   end
 end
 
@@ -70,6 +81,8 @@ function ElementHandler.UpdateSettings()
   local pairs, Elements = pairs, Elements
 
   for _, element in pairs(Elements) do
-    element.UpdateSettings()
+    if element.UpdateSettings then
+      element.UpdateSettings()
+    end
   end
 end

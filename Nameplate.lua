@@ -188,7 +188,6 @@ end
 
 -- UpdateUnitContext: Updates Target/Mouseover
 local function UpdateUnitContext(unit, unitid)
-  --unit.isMouseover = UnitIsUnit("mouseover", unitid)
   unit.isTarget = UnitIsUnit("target", unitid) -- required here for config changes which reset all plates without calling TARGET_CHANGED, MOUSEOVER, ...
 
   UpdateUnitCondition(unit, unitid)	-- This updates a bunch of properties
@@ -294,10 +293,6 @@ local function UpdateIndicator_Standard(tp_frame, unit)
   end
 end
 
-local function UpdateIndicator_CustomScale(tp_frame, unit)
-  tp_frame:SetScale(Addon.UIScale * Addon:SetScale(unit))
-end
-
 -- UpdateIndicator_CustomScaleText: Updates indicators for custom text and scale
 local function UpdateIndicator_CustomScaleText(tp_frame, unit)
   local customtext, style = tp_frame.visual.customtext, tp_frame.style
@@ -374,9 +369,6 @@ local function OnStartCasting(tp_frame, unitid, channeled)
   castbar:SetAllColors(Addon:SetCastbarColor(unit))
   visual.castbar:SetShownInterruptOverlay(unit.spellIsShielded)
 
-  UpdatePlate_Transparency(tp_frame, unit)
-  UpdateIndicator_CustomScaleText(tp_frame, unit)
-
   castbar:Show()
 end
 
@@ -388,10 +380,6 @@ local function OnStopCasting(tp_frame)
   castbar.IsCasting = false
   castbar.IsChanneling = false
   unit.isCasting = false
-
-  --UpdateIndicator_CustomScaleText()
-  UpdatePlate_Transparency(tp_frame, unit)
-  UpdateIndicator_CustomScale(tp_frame, unit)
 end
 
 local function OnUpdateCastMidway(tp_frame, unitid)
@@ -408,7 +396,7 @@ local function OnUpdateCastMidway(tp_frame, unitid)
 end
 
 -- Update spell currently being cast
-local function UnitSpellcastMidway(event, unitid, ...)
+local function UnitSpellcastMidway(unitid, ...)
   if UnitIsUnit("player", unitid) or not ShowCastBars then return end
 
   local plate = GetNamePlateForUnit(unitid)
@@ -569,7 +557,7 @@ local function UpdateStyle(tp_frame)
 
     SetTextureGroupObject(object, objectstyle)
   end
-  --Addon:Element_Mouseover_Configure(visual.Highlight, style.highlight)
+
   ElementsUpdateStyle(tp_frame, style)
 
   -- Show certain elements, don't change anything else
@@ -760,7 +748,6 @@ local	function OnNewNameplate(plate)
   visual.spelltext = castbar.Overlay:CreateFontString(nil, "OVERLAY")
   visual.spelltext:SetFont("Fonts\\FRIZQT__.TTF", 11)
 
-  --visual.Highlight = Addon:Element_Mouseover_Create(tp_frame)
   ElementsCreated(tp_frame)
 
   -- Set Base Properties
@@ -794,10 +781,11 @@ local function OnShowNameplate(plate, unitid)
   tp_frame:SetAlpha(0)
 
   PlatesVisible[plate] = unitid
-  PlatesByUnit[unitid] = plate
+  PlatesByUnit[unitid] = tp_frame
   PlatesByGUID[unit.guid] = plate
 
   --visual.threatborder:Hide()
+  Addon:UpdateNameplateStyle(plate, unitid)
 
   UpdateUnitContext(unit, unitid)
   Addon:UnitStyle_NameDependent(unit)
@@ -807,7 +795,6 @@ local function OnShowNameplate(plate, unitid)
 
   Addon:UpdateExtensions(tp_frame, unitid, tp_frame.stylename)
 
-  Addon:UpdateNameplateStyle(plate, unitid)
 
   -- Call this after the plate is shown as OnStartCasting checks if the plate is shown; if not, the castbar is hidden and
   -- nothing is updated
@@ -854,7 +841,7 @@ end
 
 
 -- Update individual plate
-local function UnitConditionChanged(event, unitid)
+local function UnitConditionChanged(unitid)
   if UnitIsUnit("player", unitid) then return end -- skip personal resource bar
 
   local plate = GetNamePlateForUnit(unitid)
@@ -1101,8 +1088,8 @@ local ENABLED_EVENTS = {
   "NAME_PLATE_UNIT_REMOVED",
 
   "PLAYER_TARGET_CHANGED",
-  PLAYER_FOCUS_CHANGED = WorldConditionChanged,
-  UPDATE_MOUSEOVER_UNIT = Addon.Elements.MouseoverHighlight.UPDATE_MOUSEOVER_UNIT,
+  --PLAYER_FOCUS_CHANGED = WorldConditionChanged, -- no idea why we shoul listen for this event
+  UPDATE_MOUSEOVER_UNIT = Addon.Elements.GetElement("MouseoverHighlight").UPDATE_MOUSEOVER_UNIT,
   RAID_TARGET_UPDATE = WorldConditionChanged,
 
   "UNIT_NAME_UPDATE",
@@ -1114,9 +1101,16 @@ local ENABLED_EVENTS = {
   UNIT_LEVEL = UnitConditionChanged,
 
   "UNIT_SPELLCAST_START",
+  UNIT_SPELLCAST_DELAYED = UnitSpellcastMidway,
   "UNIT_SPELLCAST_STOP",
   "UNIT_SPELLCAST_CHANNEL_START",
+  UNIT_SPELLCAST_CHANNEL_UPDATE = UnitSpellcastMidway,
   "UNIT_SPELLCAST_CHANNEL_STOP",
+  UNIT_SPELLCAST_INTERRUPTIBLE = UnitSpellcastMidway,
+  UNIT_SPELLCAST_NOT_INTERRUPTIBLE = UnitSpellcastMidway,
+  -- UNIT_SPELLCAST_FAILED
+  -- UNIT_SPELLCAST_FAILED_QUIET
+  -- UNIT_SPELLCAST_INTERRUPTED
 
   PLAYER_CONTROL_LOST = WorldConditionChanged,
   PLAYER_CONTROL_GAINED = WorldConditionChanged,
@@ -1124,12 +1118,6 @@ local ENABLED_EVENTS = {
   "COMBAT_LOG_EVENT_UNFILTERED",
   "UI_SCALE_CHANGED",
 
-  UNIT_SPELLCAST_DELAYED = UnitSpellcastMidway,
-  UNIT_SPELLCAST_CHANNEL_UPDATE = UnitSpellcastMidway,
-  UNIT_SPELLCAST_INTERRUPTIBLE = UnitSpellcastMidway,
-  UNIT_SPELLCAST_NOT_INTERRUPTIBLE = UnitSpellcastMidway,
-  -- UNIT_SPELLCAST_FAILED
-  -- UNIT_SPELLCAST_INTERRUPTED
 
   --"PLAYER_ALIVE",
   --"PLAYER_LEAVING_WORLD",
@@ -1431,9 +1419,7 @@ function Addon:PLAYER_TARGET_CHANGED()
 
     LastTargetPlate = nil
 
-    -- Update mouseover, if the mouse was hovering over the targeted unit
     tp_frame.unit.isTarget = false
-    Addon:UPDATE_MOUSEOVER_UNIT()
   end
 
   local plate = GetNamePlateForUnit("target")
@@ -1455,27 +1441,6 @@ function Addon:PLAYER_TARGET_CHANGED()
   end
 
   SetUpdateAll()
-end
-
--- Implement with events:
--- MouseoverUpdate (old_unit, new_unit)?
--- MouseoverUpdate (unit, got/lost mouseover)?
--- ...
-
--- Fired when the target of the UnitID 'mouseover' has changed and is a 3d model. (Does not fire when UnitExists('mouseover') becomes
--- nil, or if you mouse over a unitframe.)
-function Addon:UPDATE_MOUSEOVER_UNIT()
-  if UnitIsUnit("mouseover", "player") then return end
-
-  local plate = GetNamePlateForUnit("mouseover")
-  if plate and plate.TPFrame.Active then -- check for Active to prevent accessing the personal resource bar
-    local tp_frame = plate.TPFrame
-    tp_frame.unit.isMouseover = true
-
-    --PublishEvent("MouseoverOnEnter", tp_frame)
-    UpdateIndicator_CustomScale(tp_frame, tp_frame.unit)
-    UpdatePlate_Transparency(tp_frame, tp_frame.unit)
-  end
 end
 
 function Addon:UNIT_HEALTH_FREQUENT(unitid)
@@ -1505,13 +1470,8 @@ end
 function  Addon:UNIT_THREAT_LIST_UPDATE(unitid)
   if unitid == "player" or unitid == "target" then return end
 
-  local PlatesByUnit, THREAT_REFERENCE = PlatesByUnit, THREAT_REFERENCE
-  local UnitThreatSituation, UnitAffectingCombat, PublishEvent = UnitThreatSituation, UnitAffectingCombat, PublishEvent
-  local CheckNameplateStyle, UpdatePlate_Transparency, UpdateIndicator_CustomScaleText, UpdateUnitCache = CheckNameplateStyle, UpdatePlate_Transparency, UpdateIndicator_CustomScaleText, UpdateUnitCache
-
-  local plate = PlatesByUnit[unitid]
-  if plate then
-    local tp_frame = plate.TPFrame
+  local tp_frame = PlatesByUnit[unitid]
+  if tp_frame then
     local unit = tp_frame.unit
     print ("UNIT_THREAT_LIST_UPDATE:", unitid, " =>", UnitThreatSituation("player", unitid) or "(nil)")
 
@@ -1535,7 +1495,7 @@ function  Addon:UNIT_THREAT_LIST_UPDATE(unitid)
       UpdateUnitCache(tp_frame, unit)
     end
 
-    PublishEvent("ThreatUpdate", plate.TPFrame, unit)
+    PublishEvent("ThreatUpdate", tp_frame, unit)
   end
 end
 
@@ -1646,9 +1606,6 @@ TidyPlatesCore:SetFrameStrata("TOOLTIP") 	-- When parented to WorldFrame, causes
 
 -- OnUpdate; This function is run frequently, on every clock cycle
 local function OnUpdate(self, e)
-  local pairs = pairs
-  local PlatesVisible, UpdateAll, OnHealthUpdate, OnUpdateNameplate = PlatesVisible, UpdateAll, OnHealthUpdate, OnUpdateNameplate
-
   local plate, curChildren
 
   for plate in pairs(PlatesVisible) do
@@ -1657,6 +1614,8 @@ local function OnUpdate(self, e)
 
     -- Check for an Update Request
     if UpdateMe or UpdateHealth then
+      print ("Update plate", plate.TPFrame.unit.unitid)
+
       if not UpdateMe then
         OnHealthUpdate(plate)
       else

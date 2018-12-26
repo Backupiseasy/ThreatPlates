@@ -12,7 +12,9 @@ local UnitExists = UnitExists
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
+local PlatesByUnit = Addon.PlatesByUnit
 local PlayerRoleIsTank = Addon.PlayerRoleIsTank
+local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
 
 ---------------------------------------------------------------------------------------------------
 -- Functions handling transparency of nameplates
@@ -171,4 +173,33 @@ function Addon:GetAlpha(unit)
   return ALPHA_FUNCTIONS[unit.style](unit, unit.style)
 end
 
+-- TODO: Better integrate this with occlusion transparency
+-- Move UpdatePlate_SetAlpha to this file
+local function SituationalEvent(tp_frame)
+  if not tp_frame:IsShown() or (tp_frame.IsOccluded and not tp_frame.unit.isTarget) then
+    return
+  end
 
+  local target_alpha = Addon:GetAlpha(tp_frame.unit)
+
+	if target_alpha ~= tp_frame.CurrentAlpha then
+		tp_frame:SetAlpha(target_alpha)
+		tp_frame.CurrentAlpha = target_alpha
+	end
+end
+
+local function SituationalCastingEvent(unitid, ...)
+  --if unitid == "player" or unitid == "target" then return end
+
+  local tp_frame = PlatesByUnit[unitid]
+  if tp_frame then
+    SituationalEvent(tp_frame)
+  end
+end
+
+SubscribeEvent("Transparency", "MouseoverOnEnter", SituationalEvent)
+SubscribeEvent("Transparency", "MouseoverOnLeave", SituationalEvent)
+SubscribeEvent("Transparency", "UNIT_SPELLCAST_START", SituationalCastingEvent)
+SubscribeEvent("Transparency", "UNIT_SPELLCAST_STOP", SituationalCastingEvent)
+SubscribeEvent("Transparency", "UNIT_SPELLCAST_CHANNEL_START", SituationalCastingEvent)
+SubscribeEvent("Transparency", "UNIT_SPELLCAST_CHANNEL_STOP", SituationalCastingEvent)
