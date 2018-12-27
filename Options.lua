@@ -1827,7 +1827,7 @@ local function CreateTargetArtWidgetOptions()
             order = 10,
             type = "color",
             get = GetColor,
-            set = SetColorWidget,
+            set = SetColor,
             arg = {"targetWidget", "HPBarColor"},
           },
           EnableHealthbar = {
