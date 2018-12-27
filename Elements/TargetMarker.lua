@@ -10,11 +10,13 @@ local ADDON_NAME, Addon = ...
 -- Lua APIs
 
 -- WoW APIs
+local GetRaidTargetIndex = GetRaidTargetIndex
 
 -- ThreatPlates APIs
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
 
 -- Raid Icon Reference
+local RAID_ICON_LIST = { "STAR", "CIRCLE", "DIAMOND", "TRIANGLE", "MOON", "SQUARE", "CROSS", "SKULL" }
 local RAID_ICON_COORDINATE = {
   ["STAR"] = { x = 0, y =0 },
   ["CIRCLE"] = { x = 0.25, y = 0 },
@@ -59,6 +61,11 @@ function Element.Created(tp_frame)
   target_marker:SetDrawLayer("ARTWORK", 5)
 
   tp_frame.visual.TargetMarker = target_marker
+end
+
+-- Called in processing event: NAME_PLATE_UNIT_ADDED
+function Element.UnitData(tp_frame)
+  tp_frame.unit.TargetMarker = RAID_ICON_LIST[GetRaidTargetIndex(tp_frame.unit.unitid)]
 end
 
 -- Called in processing event: NAME_PLATE_UNIT_ADDED

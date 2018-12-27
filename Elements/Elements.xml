@@ -8,4 +8,5 @@
     <Script file="MouseoverHighlight.lua"/>
     <Script file="ThreatGlow.lua"/>
     <Script file="TargetMarker.lua"/>
+    <Script file="Level.lua"/>
 </Ui>

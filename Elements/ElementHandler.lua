@@ -40,16 +40,20 @@ function ElementHandler.GetElement(name)
 end
 
 function ElementHandler.Created(frame)
-  local pairs, Elements = pairs, Elements
-
   for _, element in pairs(Elements) do
     element.Created(frame)
   end
 end
 
-function ElementHandler.UnitAdded(frame)
-  local pairs, Elements = pairs, Elements
+function ElementHandler.UnitData(frame)
+  for _, element in pairs(Elements) do
+    if element.UnitData then
+      element.UnitData(frame)
+    end
+  end
+end
 
+function ElementHandler.UnitAdded(frame)
   for _, element in pairs(Elements) do
     if element.UnitAdded then
       element.UnitAdded(frame)
@@ -58,8 +62,6 @@ function ElementHandler.UnitAdded(frame)
 end
 
 function ElementHandler.UnitRemoved(frame)
-  local pairs, Elements = pairs, Elements
-
   for _, element in pairs(Elements) do
     if element.UnitRemoved then
       element.UnitRemoved(frame)
@@ -68,8 +70,6 @@ function ElementHandler.UnitRemoved(frame)
 end
 
 function ElementHandler.UpdateStyle(frame, style)
-  local pairs, Elements = pairs, Elements
-
   for _, element in pairs(Elements) do
     if element.UpdateStyle then
       element.UpdateStyle(frame, style)
@@ -78,8 +78,6 @@ function ElementHandler.UpdateStyle(frame, style)
 end
 
 function ElementHandler.UpdateSettings()
-  local pairs, Elements = pairs, Elements
-
   for _, element in pairs(Elements) do
     if element.UpdateSettings then
       element.UpdateSettings()

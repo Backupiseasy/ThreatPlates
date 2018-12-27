@@ -37,7 +37,7 @@ local GetCVar, Lerp, CombatLogGetCurrentEventInfo = GetCVar, Lerp, CombatLogGetC
 local TidyPlatesThreat = TidyPlatesThreat
 local Widgets = Addon.Widgets
 local RegisterEvent, PublishEvent = Addon.EventService.RegisterEvent, Addon.EventService.Publish
-local ElementsCreated, ElementsUnitAdded, ElementsUnitRemoved = Addon.Elements.Created, Addon.Elements.UnitAdded, Addon.Elements.UnitRemoved
+local ElementsCreated, ElementsUnitData, ElementsUnitAdded, ElementsUnitRemoved = Addon.Elements.Created, Addon.Elements.UnitData, Addon.Elements.UnitAdded, Addon.Elements.UnitRemoved
 local ElementsUpdateStyle, ElementsUpdateSettings = Addon.Elements.UpdateStyle, Addon.Elements.UpdateSettings
 
 -- Constants
@@ -147,11 +147,7 @@ end
 
 -- UpdateUnitCondition: High volatility data
 local function UpdateUnitCondition(unit, unitid)
-  unit.level = UnitEffectiveLevel(unitid)
-
-  local c = GetCreatureDifficultyColor(unit.level)
-  unit.levelcolorRed, unit.levelcolorGreen, unit.levelcolorBlue = c.r, c.g, c.b
-
+  -- Unit Reaction
   unit.red, unit.green, unit.blue = UnitSelectionColor(unitid)
 
   unit.reaction = GetReactionByColor(unit.red, unit.green, unit.blue) or "HOSTILE"
@@ -205,14 +201,6 @@ local function UpdateIndicator_Level(tp_frame, unit)
   else
     visual.skullicon:Hide()
   end
-
-  if unit.level < 0 then
-    visual.level:SetText("")
-  else
-    visual.level:SetText(unit.level)
-  end
-
-  visual.level:SetTextColor(unit.levelcolorRed, unit.levelcolorGreen, unit.levelcolorBlue)
 end
 
 -- UpdateIndicator_EliteIcon: Updates the border overlay art and threat glow to Elite or Non-Elite art
@@ -241,8 +229,6 @@ local function UpdateIndicator_Standard(tp_frame, unit)
 
   if tp_frame.Active then -- why this check only only here?
     if unitcache.name ~= unit.name then UpdateIndicator_Name(tp_frame, unit) end
-    if unitcache.level ~= unit.level then UpdateIndicator_Level(tp_frame, unit) end
-
     if (unitcache.isElite ~= unit.isElite) or (unitcache.isRare ~= unit.isRare) then
       UpdateIndicator_EliteIcon(tp_frame, unit)
     end
@@ -433,11 +419,11 @@ local function SetTextureGroupObject(object, objectstyle)
 end
 
 -- Style Groups
-local fontgroup = {"name", "level", "spelltext", "customtext"}
+local fontgroup = {"name", "spelltext", "customtext"} -- "level",
 
 local anchorgroup = {
-  "name",  "spelltext", "customtext", "level", "spellicon", "skullicon"
-  -- "threatborder", "castborder", "castnostop", "eliteicon", "target", "raidicon",
+  "name",  "spelltext", "customtext", "spellicon", "skullicon"
+  -- "threatborder", "castborder", "castnostop", "eliteicon", "target", "raidicon", "level",
 }
 
 local texturegroup = {
@@ -678,8 +664,6 @@ local	function OnNewNameplate(plate)
   visual.name:SetFont("Fonts\\FRIZQT__.TTF", 11)
   visual.customtext = textframe:CreateFontString(nil, "ARTWORK", -1)
   visual.customtext:SetFont("Fonts\\FRIZQT__.TTF", 11)
-  visual.level = textframe:CreateFontString(nil, "ARTWORK", -2)
-  visual.level:SetFont("Fonts\\FRIZQT__.TTF", 11)
 
   -- Cast Bar Frame - Highest Frame
   visual.castborder = castbar.Border
@@ -720,15 +704,15 @@ local function OnShowNameplate(plate, unitid)
   PlatesByUnit[unitid] = tp_frame
   PlatesByGUID[unit.guid] = plate
 
-  --visual.threatborder:Hide()
   Addon:UpdateNameplateStyle(plate, unitid)
+
+  -- Update state data for which there are no events when players enters world
+
+  ElementsUnitData(tp_frame)
 
   UpdateUnitContext(unit, unitid)
   Addon:UnitStyle_NameDependent(unit)
   ProcessUnitChanges(tp_frame)
-
-  -- Update state data for which there are no events when players enters world
-  tp_frame.unit.TargetMarker = RAID_ICON_LIST[GetRaidTargetIndex(unitid)]
 
   ElementsUnitAdded(tp_frame)
 
@@ -1036,7 +1020,7 @@ local ENABLED_EVENTS = {
   "UNIT_ABSORB_AMOUNT_CHANGED",
   "UNIT_THREAT_LIST_UPDATE",
   "UNIT_FACTION",
-  UNIT_LEVEL = UnitConditionChanged,
+  UNIT_LEVEL =  Addon.Elements.GetElement("Level").UNIT_LEVEL,
 
   "UNIT_SPELLCAST_START",
   UNIT_SPELLCAST_DELAYED = UnitSpellcastMidway,
