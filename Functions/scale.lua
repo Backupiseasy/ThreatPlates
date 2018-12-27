@@ -166,25 +166,6 @@ local SCALE_FUNCTIONS = {
 }
 
 function Addon:SetScale(unit)
-  if not unit.style then
-    local function Size(table)
-      local no = 0
-      for key, value in pairs(table) do
-        no = no + 1
-      end
-
-      return no
-    end
-    print ("Unit.style is nil")
-    print ("unitid:", unit.unitid)
-    print ("#unit:", Size(unit))
-    Addon.Debug:PrintUnit(unit)
-    if unit.unitid then
-      print ("Active:", Addon.PlatesByUnit[unit.unitid].Active)
-    end
-    return
-  end
-
   local scale = SCALE_FUNCTIONS[unit.style](unit, unit.style)
 
 	-- scale may be set to 0 in the options dialog

@@ -58,11 +58,12 @@ end
 
 local function OnUpdateMouseoverHighlight(frame, elapsed)
   -- Mouseover unit may have been removed from nameplate (e.g., unit died) or unit may have lost mouseover
-  if not UnitIsUnit("mouseover", CurrentMouseoverUnitID) then
-    HideMouseoverHighlightFrame()
-  elseif not CurrentMouseoverPlate.Active then
+  if not CurrentMouseoverPlate.Active then
     -- No need to hide stuff of set isMouseover to false as the plate was already wiped
+    CurrentMouseoverUnitID = nil
     MouseoverHighlightFrame:Hide()
+  elseif not UnitIsUnit("mouseover", CurrentMouseoverUnitID) then
+    HideMouseoverHighlightFrame()
   end
 end
 
