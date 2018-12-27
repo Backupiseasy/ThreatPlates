@@ -47,11 +47,6 @@ local function Create(self,name)
       y = 0,
       anchor = "CENTER",
       show = db.threatborder.show,
-      -- Texture Coordinates
-      left = 0,
-      right = 1,
-      top = 0,
-      bottom = 1,
     },
 
     highlight = {
@@ -160,11 +155,6 @@ local function Create(self,name)
       y = db.eliteicon.y,
       anchor = "CENTER",  --db.eliteicon.anchor,
       show = db.eliteicon.show,
-      -- Texture Coordinates
-      left = 0,
-      right = 1,
-      top = 0,
-      bottom = 1,
     },
 
     spellicon = {

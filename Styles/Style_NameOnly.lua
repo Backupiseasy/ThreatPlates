@@ -56,11 +56,6 @@ local function Create(self,name)
       x = 0,
       y = 0,
       anchor = "CENTER",
-      -- Texture Coordinates
-      left = 0,
-      right = 1,
-      top = 0,
-      bottom = 1,
     },
 
     highlight = {
@@ -169,11 +164,6 @@ local function Create(self,name)
       x = 0,
       y = 0,
       anchor = "CENTER",
-      -- Texture Coordinates
-      left = 0,
-      right = 1,
-      top = 0,
-      bottom = 1,
     },
 
     spellicon = {

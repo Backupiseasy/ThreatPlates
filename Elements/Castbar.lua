@@ -1,5 +1,7 @@
+---------------------------------------------------------------------------------------------------
+-- Element: Castbar
+---------------------------------------------------------------------------------------------------
 local ADDON_NAME, Addon = ...
-local ThreatPlates = Addon.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -11,26 +13,21 @@ local GetSpellTexture = GetSpellTexture
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 
 -- ThreatPlates APIs
+local ThreatPlates = Addon.ThreatPlates
 local TidyPlatesThreat = TidyPlatesThreat
 
 local ART_PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Artwork\\"
-
-local ELITE_BACKDROP = {
-  TP_EliteBorder_Default = {
-    edgeFile = ThreatPlates.Art .. "TP_WhiteSquare",
-    edgeSize = 1.5,
-    offset = 1.8,
-  },
-  TP_EliteBorder_Thin = {
-    edgeFile = ThreatPlates.Art .. "TP_WhiteSquare",
-    edgeSize = 0.9,
-    offset = 1.1,
-  }
+local INTERRUPT_BORDER_BACKDROP = {
+  edgeFile = ART_PATH .. "TP_WhiteSquare",
+  edgeSize = 1,
+  --insets = { left = 0, right = 0, top = 0, bottom = 0 },
 }
 
-------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------
+-- Scripts (functions) for event handling
+---------------------------------------------------------------------------------------------------
 
-local function OnUpdateCastBar(self, elapsed)
+local function OnUpdate(self, elapsed)
   if self.IsCasting then
     self.Value = self.Value + elapsed
 
@@ -55,7 +52,7 @@ local function OnUpdateCastBar(self, elapsed)
   self:Hide()
 end
 
-local function OnHideCastBar(self)
+local function OnHide(self)
   -- OnStopCasting is hiding the castbar and may be triggered before or after SPELL_INTERRUPT
   -- So we have to show the castbar again or not hide it if the interrupt message should still be shown.
   if self.FlashTime > 0 then
@@ -63,63 +60,18 @@ local function OnHideCastBar(self)
   end
 end
 
-local function OnSizeChangedCastbar(self, width, height)
+local function OnSizeChanged(self, width, height)
   local scale_factor = height / 10
   self.InterruptShield:SetSize(14 * scale_factor, 16 * scale_factor)
 end
 
+---------------------------------------------------------------------------------------------------
+-- Basic castbar functions
+---------------------------------------------------------------------------------------------------
+
 local function SetAllColors(self, rBar, gBar, bBar, aBar, rBackdrop, gBackdrop, bBackdrop, aBackdrop)
   self:SetStatusBarColor(rBar or 1, gBar or 1, bBar or 1, aBar or 1)
   self.Border:SetBackdropColor(rBackdrop or 1, gBackdrop or 1, bBackdrop or 1, aBackdrop or 1)
-end
-
-local function SetStatusBarBackdropHealthbar(self, backdrop_texture, edge_texture, edge_size, offset)
-  self.Border:ClearAllPoints()
-  self.Border:SetPoint("TOPLEFT", self, "TOPLEFT", - offset, offset)
-  self.Border:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", offset, - offset)
-  self.Border:SetBackdrop({
-    bgFile = backdrop_texture,
-    edgeFile = edge_texture,
-    edgeSize = edge_size,
-    insets = { left = offset, right = offset, top = offset, bottom = offset },
-  })
-  self.Border:SetBackdropBorderColor(0, 0, 0, 1)
-end
-
-local function SetEliteBorder(self, texture)
-  local backdrop = ELITE_BACKDROP[texture]
-
-  self.EliteBorder:SetPoint("TOPLEFT", self, "TOPLEFT", - backdrop.offset, backdrop.offset)
-  self.EliteBorder:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", backdrop.offset, - backdrop.offset)
-
-  self.EliteBorder:SetBackdrop({
-    edgeFile = backdrop.edgeFile,
-    edgeSize = backdrop.edgeSize,
-    --insets = { left = 0, right = 0, top = 0, bottom = 0 }
-  })
-  --self.EliteBorder:SetBackdropBorderColor(1, 0.85, 0, 1)
-end
-
-function Addon:CreateHealthbar(parent)
-	local frame = CreateFrame("StatusBar", nil, parent)
-  --frame:Hide()
-
-  frame:SetFrameLevel(parent:GetFrameLevel() + 5)
-
-  frame.Border = CreateFrame("Frame", nil, frame)
-  frame.EliteBorder = CreateFrame("Frame", nil, frame)
-
-  frame.Border:SetFrameLevel(frame:GetFrameLevel())
-  frame.EliteBorder:SetFrameLevel(frame:GetFrameLevel() + 1)
-
-	frame.SetAllColors = SetAllColors
-  frame.SetTexCoord = function() end
-	frame.SetBackdropTexCoord = function() end
-  frame.SetStatusBarBackdrop = SetStatusBarBackdropHealthbar
-  frame.SetEliteBorder = SetEliteBorder
-
-	--frame:SetScript("OnSizeChanged", OnSizeChanged)
-	return frame
 end
 
 local function SetShownInterruptOverlay(self, show)
@@ -140,25 +92,29 @@ local function SetShownInterruptOverlay(self, show)
   end
 end
 
-local function SetStatusBarBackdropCastbar(self, backdrop_texture, edge_texture, edge_size, offset)
-  SetStatusBarBackdropHealthbar(self, backdrop_texture, edge_texture, edge_size, offset)
+local function SetStatusBarBackdrop(self, backdrop_texture, edge_texture, edge_size, offset)
+  self.Border:ClearAllPoints()
+  self.Border:SetPoint("TOPLEFT", self, "TOPLEFT", - offset, offset)
+  self.Border:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", offset, - offset)
+  self.Border:SetBackdrop({
+    bgFile = backdrop_texture,
+    edgeFile = edge_texture,
+    edgeSize = edge_size,
+    insets = { left = offset, right = offset, top = offset, bottom = offset },
+  })
+  self.Border:SetBackdropBorderColor(0, 0, 0, 1)
 
   self.InterruptBorder:ClearAllPoints()
   self.InterruptBorder:SetPoint("TOPLEFT", self, "TOPLEFT", - offset - 1, offset + 1)
   self.InterruptBorder:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", offset + 1, - offset - 1)
-  self.InterruptBorder:SetBackdrop({
-    edgeFile = ART_PATH .. "TP_WhiteSquare",
-    edgeSize = 1,
-    --insets = { left = 0, right = 0, top = 0, bottom = 0 },
-  })
+  self.InterruptBorder:SetBackdrop(INTERRUPT_BORDER_BACKDROP)
   self.InterruptBorder:SetBackdropBorderColor(1, 0, 0, 1)
 end
 
-function Addon:CreateCastbar(parent)
-  local frame = CreateFrame("StatusBar", nil, parent)
+function Addon:CreateCastbar(tp_frame)
+  local frame = CreateFrame("StatusBar", nil, tp_frame)
+  frame:SetFrameLevel(tp_frame:GetFrameLevel() + 4)
   frame:Hide()
-
-  frame:SetFrameLevel(parent:GetFrameLevel() + 4)
 
   frame.Border = CreateFrame("Frame", nil, frame)
   frame.InterruptBorder = CreateFrame("Frame", nil, frame)
@@ -180,28 +136,10 @@ function Addon:CreateCastbar(parent)
   frame.InterruptShield:SetPoint("CENTER", frame, "LEFT")
 
   frame.SetAllColors = SetAllColors
-  frame.SetTexCoord = function() end
-  frame.SetBackdropTexCoord = function() end
-  frame.SetStatusBarBackdrop = SetStatusBarBackdropCastbar
-  frame.SetEliteBorder = SetEliteBorder
+  frame.SetStatusBarBackdrop = SetStatusBarBackdrop
   frame.SetShownInterruptOverlay = SetShownInterruptOverlay
 
   frame:SetStatusBarColor(1, 0.8, 0)
-
---  frame.Flash = frame:CreateAnimationGroup()
---  local anim = frame.Flash:CreateAnimation("Alpha")
---  anim:SetOrder(1)
---  anim:SetFromAlpha(1)
---  anim:SetToAlpha(CASTBAR_FLASH_MIN_ALPHA)
---  anim:SetDuration(CASTBAR_FLASH_DURATION)
---  anim = frame.Flash:CreateAnimation("Alpha")
---  anim:SetOrder(2)
---  anim:SetFromAlpha(CASTBAR_FLASH_MIN_ALPHA)
---  anim:SetToAlpha(1)
---  anim:SetDuration(CASTBAR_FLASH_DURATION)
---  frame.Flash:SetScript("OnFinished", function(self)
---    self:GetParent():Hide()
---  end)
 
   frame.IsCasting = false
   frame.IsChanneling = false
@@ -209,9 +147,9 @@ function Addon:CreateCastbar(parent)
   frame.Value = 0
   frame.MaxValue = 0
 
-  frame:SetScript("OnUpdate", OnUpdateCastBar)
-  frame:SetScript("OnHide", OnHideCastBar)
-  frame:SetScript("OnSizeChanged", OnSizeChangedCastbar)
+  frame:SetScript("OnUpdate", OnUpdate)
+  frame:SetScript("OnHide", OnHide)
+  frame:SetScript("OnSizeChanged", OnSizeChanged)
 
   return frame
 end
@@ -268,10 +206,10 @@ function Addon:ConfigCastbar()
 
         -- Fix an drawing error where the castbar background is shown white for a few milliseconds when changing
         -- a castbar setting several times in a second (e.g., moving a position slider left/right several times).
---        castbar.SetStatusBarBackdrop = function(self, backdrop_texture, edge_texture, edge_size, offset)
---          SetStatusBarBackdropCastbar(self, backdrop_texture, edge_texture, edge_size, offset)
---          self:SetAllColors(Addon:SetCastbarColor(plate.TPFrame.unit))
---        end
+        --        castbar.SetStatusBarBackdrop = function(self, backdrop_texture, edge_texture, edge_size, offset)
+        --          SetStatusBarBackdropCastbar(self, backdrop_texture, edge_texture, edge_size, offset)
+        --          self:SetAllColors(Addon:SetCastbarColor(plate.TPFrame.unit))
+        --        end
 
         castbar._Hide = castbar.Hide
         castbar.Hide = function() end
@@ -287,7 +225,7 @@ function Addon:ConfigCastbar()
     end
   else
     local castbar = ConfigModePlate.TPFrame.visual.castbar
-    castbar:SetScript("OnUpdate", OnUpdateCastBar)
+    castbar:SetScript("OnUpdate", OnUpdate)
     --castbar.SetStatusBarBackdropCastbar = SetStatusBarBackdropCastbar
     castbar.Hide = castbar._Hide
     castbar:Hide()

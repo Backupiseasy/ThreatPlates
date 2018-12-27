@@ -473,7 +473,6 @@ local function SetTextureGroupObject(object, objectstyle)
     if objectstyle.texture then
       SetObjectTexture(object, objectstyle.texture or EMPTY_TEXTURE)
     end
-    object:SetTexCoord(objectstyle.left or 0, objectstyle.right or 1, objectstyle.top or 0, objectstyle.bottom or 1)
   end
 end
 

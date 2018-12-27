@@ -3,7 +3,8 @@
     <Script file="Fonts.lua"/>
     <Script file="Animations.lua"/>
     <Script file="ElementHandler.lua"/>
-    <Script file="Statusbar.lua"/>
+    <Script file="Healthbar.lua"/>
+    <Script file="Castbar.lua"/>
     <Script file="MouseoverHighlight.lua"/>
     <Script file="ThreatGlow.lua"/>
 </Ui>
