@@ -88,18 +88,7 @@ local UpdatePlate_Transparency
 ---------------------------------------------------------------------------------------------------------------------
 --  Unit Updates: Updates Unit Data, Requests indicator updates
 ---------------------------------------------------------------------------------------------------------------------
--- Raid Icon Reference
 local RAID_ICON_LIST = { "STAR", "CIRCLE", "DIAMOND", "TRIANGLE", "MOON", "SQUARE", "CROSS", "SKULL" }
-local RAID_ICON_COORDINATE = {
-  ["STAR"] = { x = 0, y =0 },
-  ["CIRCLE"] = { x = 0.25, y = 0 },
-  ["DIAMOND"] = { x = 0.5, y = 0 },
-  ["TRIANGLE"] = { x = 0.75, y = 0},
-  ["MOON"] = { x = 0, y = 0.25},
-  ["SQUARE"] = { x = .25, y = 0.25},
-  ["CROSS"] = { x = .5, y = 0.25},
-  ["SKULL"] = { x = .75, y = 0.25},
-}
 
 local ELITE_REFERENCE = {
   ["elite"] = true,
@@ -174,15 +163,6 @@ local function UpdateUnitCondition(unit, unitid)
   unit.health = UnitHealth(unitid) or 0
   unit.healthmax = UnitHealthMax(unitid) or 1
 
-  local raidIconIndex = GetRaidTargetIndex(unitid)
-
-  if raidIconIndex then
-    unit.raidIcon = RAID_ICON_LIST[raidIconIndex]
-    unit.isMarked = true
-  else
-    unit.isMarked = false
-  end
-
   unit.isTapped = UnitIsTapDenied(unitid)
 end
 
@@ -235,29 +215,6 @@ local function UpdateIndicator_Level(tp_frame, unit)
   visual.level:SetTextColor(unit.levelcolorRed, unit.levelcolorGreen, unit.levelcolorBlue)
 end
 
--- UpdateIndicator_RaidIcon
-local function UpdateIndicator_RaidIcon(tp_frame, unit)
-  local raidicon, style = tp_frame.visual.raidicon, tp_frame.style
-
-  --    if unit.isMarked and RaidIconCoordinate[unit.raidIcon] == nil then
-  --      ThreatPlates.DEBUG("UpdateIndicator_RaidIcon:", unit.unitid, "- isMarked:", unit.isMarked, "/ raidIcon:", unit.raidIcon)
-  --      ThreatPlates.DEBUG("UpdateIndicator_RaidIcon: RaidIconCoordinate:", RaidIconCoordinate[unit.raidIcon])
-  --    end
-
-  if unit.isMarked and style.raidicon.show then
-    local iconCoord = RAID_ICON_COORDINATE[unit.raidIcon]
-    if iconCoord then
-      raidicon:Show()
-      raidicon:SetTexCoord(iconCoord.x, iconCoord.x + 0.25, iconCoord.y,  iconCoord.y + 0.25)
-    else
-      raidicon:Hide()
-    end
-  else
-    raidicon:Hide()
-  end
-end
-
-
 -- UpdateIndicator_EliteIcon: Updates the border overlay art and threat glow to Elite or Non-Elite art
 local function UpdateIndicator_EliteIcon(tp_frame, unit)
   local visual, style = tp_frame.visual, tp_frame.style
@@ -285,7 +242,6 @@ local function UpdateIndicator_Standard(tp_frame, unit)
   if tp_frame.Active then -- why this check only only here?
     if unitcache.name ~= unit.name then UpdateIndicator_Name(tp_frame, unit) end
     if unitcache.level ~= unit.level then UpdateIndicator_Level(tp_frame, unit) end
-    UpdateIndicator_RaidIcon(tp_frame, unit)
 
     if (unitcache.isElite ~= unit.isElite) or (unitcache.isRare ~= unit.isRare) then
       UpdateIndicator_EliteIcon(tp_frame, unit)
@@ -395,7 +351,7 @@ local function UnitSpellcastMidway(unitid, ...)
   if not ShowCastBars then return end
 
   local tp_frame = PlatesByUnit[unitid]
-  if tp_frame then
+  if tp_frame and tp_frame.Active then
     OnUpdateCastMidway(tp_frame, unitid)
   end
 end
@@ -480,8 +436,8 @@ end
 local fontgroup = {"name", "level", "spelltext", "customtext"}
 
 local anchorgroup = {
-  "name",  "spelltext", "customtext", "level", "spellicon", "raidicon", "skullicon"
-  -- "threatborder", "castborder", "castnostop", "eliteicon", "target"
+  "name",  "spelltext", "customtext", "level", "spellicon", "skullicon"
+  -- "threatborder", "castborder", "castnostop", "eliteicon", "target", "raidicon",
 }
 
 local texturegroup = {
@@ -560,16 +516,6 @@ local function UpdateStyle(tp_frame)
   --			visual[objectname]:SetShown(style[objectname].show)
   --		end
   --    visual.threatborder:SetShown(style.threatborder.show)
-
-  -- Raid Icon Texture
-  if style.raidicon and style.raidicon.texture then
-    visual.raidicon:SetTexture(style.raidicon.texture)
-    visual.raidicon:SetDrawLayer("ARTWORK", 5)
-  end
-  -- TOODO: does not really work with ForceUpdate() as isMarked is not set there (no call to UpdateUnitCondition)
-  if not unit.isMarked then
-    visual.raidicon:Hide()
-  end
 
   visual.castbar:ClearAllPoints()
   visual.spelltext:ClearAllPoints()
@@ -724,7 +670,6 @@ local	function OnNewNameplate(plate)
   visual.eliteborder = healthbar.EliteBorder
 
   -- Parented to ThreatPlates frame - Middle Frame
-  visual.raidicon = textframe:CreateTexture(nil, "ARTWORK", 5)
   visual.skullicon = textframe:CreateTexture(nil, "ARTWORK", 2)
   visual.eliteicon = textframe:CreateTexture(nil, "ARTWORK", 1)
 
@@ -743,9 +688,6 @@ local	function OnNewNameplate(plate)
   visual.spelltext:SetFont("Fonts\\FRIZQT__.TTF", 11)
 
   ElementsCreated(tp_frame)
-
-  -- Set Base Properties
-  -- visual.raidicon:SetTexture("Interface\\TargetingFrame\\UI-RaidTargetingIcons")
 
   tp_frame.widgets = {}
 
@@ -785,10 +727,12 @@ local function OnShowNameplate(plate, unitid)
   Addon:UnitStyle_NameDependent(unit)
   ProcessUnitChanges(tp_frame)
 
+  -- Update state data for which there are no events when players enters world
+  tp_frame.unit.TargetMarker = RAID_ICON_LIST[GetRaidTargetIndex(unitid)]
+
   ElementsUnitAdded(tp_frame)
 
   Addon:UpdateExtensions(tp_frame, unitid, tp_frame.stylename)
-
 
   -- Call this after the plate is shown as OnStartCasting checks if the plate is shown; if not, the castbar is hidden and
   -- nothing is updated
@@ -1084,7 +1028,7 @@ local ENABLED_EVENTS = {
   "PLAYER_TARGET_CHANGED",
   --PLAYER_FOCUS_CHANGED = WorldConditionChanged, -- no idea why we shoul listen for this event
   UPDATE_MOUSEOVER_UNIT = Addon.Elements.GetElement("MouseoverHighlight").UPDATE_MOUSEOVER_UNIT,
-  RAID_TARGET_UPDATE = WorldConditionChanged,
+  "RAID_TARGET_UPDATE",
 
   "UNIT_NAME_UPDATE",
   "UNIT_MAXHEALTH",
@@ -1111,7 +1055,6 @@ local ENABLED_EVENTS = {
 
   "COMBAT_LOG_EVENT_UNFILTERED",
   "UI_SCALE_CHANGED",
-
 
   --"PLAYER_ALIVE",
   --"PLAYER_LEAVING_WORLD",
@@ -1371,7 +1314,7 @@ end
 
 function Addon:UNIT_NAME_UPDATE(unitid)
   local tp_frame = PlatesByUnit[unitid]
-  if tp_frame then
+  if tp_frame and tp_frame.Active then
     local unit, stylename = tp_frame.unit, tp_frame.stylename
 
     unit.name, _ = UnitName(unitid)
@@ -1430,6 +1373,17 @@ function Addon:PLAYER_TARGET_CHANGED()
   SetUpdateAll()
 end
 
+function Addon:RAID_TARGET_UPDATE()
+  for unitid, tp_frame in pairs(PlatesByUnit) do
+    local target_marker = RAID_ICON_LIST[GetRaidTargetIndex(unitid)]
+    -- Only update plates that changed
+    if target_marker ~= tp_frame.unit.TargetMarker then
+      tp_frame.unit.TargetMarker = target_marker
+      PublishEvent("TargetMarkerUpdate", tp_frame)
+    end
+  end
+end
+
 function Addon:UNIT_HEALTH_FREQUENT(unitid)
   local plate = GetNamePlateForUnit(unitid)
 
@@ -1456,7 +1410,7 @@ end
 
 function  Addon:UNIT_THREAT_LIST_UPDATE(unitid)
   local tp_frame = PlatesByUnit[unitid]
-  if tp_frame then
+  if tp_frame and tp_frame.Active then
     local threat_status = UnitThreatSituation("player", unitid)
 
     local unit = tp_frame.unit
@@ -1503,7 +1457,7 @@ function Addon:UNIT_SPELLCAST_START(unitid)
   if not ShowCastBars then return end
 
   local tp_frame = PlatesByUnit[unitid]
-  if tp_frame then
+  if tp_frame and tp_frame.Active then
     OnStartCasting(tp_frame, unitid, false)
   end
 end
@@ -1512,7 +1466,7 @@ function Addon:UNIT_SPELLCAST_CHANNEL_START(unitid)
   if not ShowCastBars then return end
 
   local tp_frame = PlatesByUnit[unitid]
-  if tp_frame then
+  if tp_frame and tp_frame.Active then
     OnStartCasting(tp_frame, unitid, true)
   end
 end
@@ -1522,7 +1476,7 @@ function Addon:UNIT_SPELLCAST_STOP(unitid)
   if not ShowCastBars then return end
 
   local tp_frame = PlatesByUnit[unitid]
-  if tp_frame then
+  if tp_frame and tp_frame.Active then
     tp_frame.unit.isCasting = false
 
     local castbar = tp_frame.visual.castbar
@@ -1593,7 +1547,7 @@ local function OnUpdate(self, e)
 
     -- Check for an Update Request
     if UpdateMe or UpdateHealth then
-      print ("Update plate", plate.TPFrame.unit.unitid)
+      print ("Nameplate - OnUpdate:", plate.TPFrame.unit.unitid)
 
       if not UpdateMe then
         OnHealthUpdate(plate)

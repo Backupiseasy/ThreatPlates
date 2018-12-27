@@ -1,8 +1,7 @@
-local ADDON_NAME, Addon = ...
-
 ---------------------------------------------------------------------------------------------------
 -- Element: Warning Glow for Threat
 ---------------------------------------------------------------------------------------------------
+local ADDON_NAME, Addon = ...
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -14,6 +13,7 @@ local ADDON_NAME, Addon = ...
 local CreateFrame = CreateFrame
 
 -- ThreatPlates APIs
+local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
 
 local OFFSET_THREAT = 7.5
 local ART_PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Artwork\\"
@@ -70,4 +70,4 @@ function Element.ThreatUpdate(tp_frame, unit)
   end
 end
 
-Addon.EventService.Subscribe(Element, "ThreatUpdate", Element.ThreatUpdate)
+SubscribeEvent(Element, "ThreatUpdate", Element.ThreatUpdate)

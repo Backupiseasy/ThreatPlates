@@ -12,7 +12,6 @@ local UnitExists = UnitExists
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
-local PlatesByUnit = Addon.PlatesByUnit
 local PlayerRoleIsTank = Addon.PlayerRoleIsTank
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
 
@@ -20,7 +19,7 @@ local function ScaleSituational(unit)
 	local db = TidyPlatesThreat.db.profile.nameplate
 
 	-- Do checks for situational scale settings:
-	if unit.isMarked and db.toggle.MarkedS then
+	if unit.TargetMarker and db.toggle.MarkedS then
 		return db.scale.Marked
 	elseif unit.isMouseover and not unit.isTarget and db.toggle.MouseoverUnitScale then
 		return db.scale.MouseoverUnit
@@ -167,6 +166,25 @@ local SCALE_FUNCTIONS = {
 }
 
 function Addon:SetScale(unit)
+  if not unit.style then
+    local function Size(table)
+      local no = 0
+      for key, value in pairs(table) do
+        no = no + 1
+      end
+
+      return no
+    end
+    print ("Unit.style is nil")
+    print ("unitid:", unit.unitid)
+    print ("#unit:", Size(unit))
+    Addon.Debug:PrintUnit(unit)
+    if unit.unitid then
+      print ("Active:", Addon.PlatesByUnit[unit.unitid].Active)
+    end
+    return
+  end
+
   local scale = SCALE_FUNCTIONS[unit.style](unit, unit.style)
 
 	-- scale may be set to 0 in the options dialog
@@ -185,3 +203,4 @@ SubscribeEvent("Scale", "MouseoverOnEnter", SituationalEvent)
 SubscribeEvent("Scale", "MouseoverOnLeave", SituationalEvent)
 SubscribeEvent("Scale", "CastingStarted", SituationalEvent)
 SubscribeEvent("Scale", "CastingStopped", SituationalEvent)
+SubscribeEvent("Scale", "TargetMarkerUpdate", SituationalEvent)

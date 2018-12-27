@@ -12,8 +12,7 @@ local Widget = Addon.Widgets:NewWidget("Threat")
 
 -- WoW APIs
 local CreateFrame, UNKNOWNOBJECT = CreateFrame, UNKNOWNOBJECT
-local UnitIsUnit, UnitThreatSituation, UnitName = UnitIsUnit, UnitThreatSituation, UnitName
-local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
+local UnitThreatSituation, UnitName = UnitThreatSituation, UnitName
 local GetRaidTargetIndex = GetRaidTargetIndex
 
 -- ThreatPlates APIs
@@ -37,20 +36,18 @@ local REVERSE_THREAT_SITUATION = {
 -- Event handling stuff
 ---------------------------------------------------------------------------------------------------
 
-function Widget:UNIT_THREAT_LIST_UPDATE(unitid)
-  if not unitid or unitid == "player" or UnitIsUnit("player", unitid) then return end
-
-  local plate = GetNamePlateForUnit(unitid)
-  if plate and plate.TPFrame.Active then
-    local widget_frame = plate.TPFrame.widgets.Threat
-    if widget_frame.Active then
-      self:UpdateFrame(widget_frame, plate.TPFrame.unit)
-    end
+function Widget:ThreatUpdate(tp_frame)
+  local widget_frame = tp_frame.widgets.Threat
+  if widget_frame.Active then
+    self:UpdateFrame(widget_frame, tp_frame.unit)
   end
 end
 
-function Widget:RAID_TARGET_UPDATE()
-  self:UpdateAllFrames()
+function Widget:TargetMarkerUpdate(tp_frame)
+  local widget_frame = tp_frame.widgets.Threat
+  if widget_frame.Active then
+    self:UpdateFrame(widget_frame, tp_frame.unit)
+  end
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -80,8 +77,8 @@ function Widget:IsEnabled()
 end
 
 function Widget:OnEnable()
-  self:SubscribeEvent("UNIT_THREAT_LIST_UPDATE")
-  self:SubscribeEvent("RAID_TARGET_UPDATE")
+  self:SubscribeEvent("ThreatUpdate")
+  self:SubscribeEvent("TargetMarkerUpdate")
 end
 
 function Widget:EnabledForStyle(style, unit)

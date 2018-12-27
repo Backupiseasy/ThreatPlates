@@ -81,12 +81,11 @@ local INTERNAL_EVENTS = {
   ThreatUpdate = true,      -- Parameters: tp_frame, unitid
   MouseoverOnEnter = true,  -- Parameters: tp_frame
   MouseoverOnLeave = true,  -- Parameters: tp_frame
-  -- PlayerTargetGained = true,  -- Parameters: tp_frame
-  -- PlayerTargetLost = true,  -- Parameters: tp_frame
-  -- RaidTargetGained = true,  -- Parameters: tp_frame
-  -- RaidTargetLost = true,  -- Parameters: tp_frame
   CastingStarted = true,   -- Parameters: tp_frame
   CastingStopped = true,   -- Parameters: tp_frame
+  TargetMarkerUpdate = true,  -- Parameters: tp_frame
+  -- PlayerTargetGained = true,  -- Parameters: tp_frame
+  -- PlayerTargetLost = true,  -- Parameters: tp_frame
 }
 
 ---------------------------------------------------------------------------------------------------
@@ -224,16 +223,41 @@ local function Size(table)
   return no
 end
 
+local function sort_function(a,b)
+  if type(a) == "table"  then
+    a = a.Name
+  end
+  if type(b) == "table" then
+    b = b.Name
+  end
+
+  return a<b
+end
+
+local function pairsByKeys (t)
+  local a = {}
+  for n in pairs(t) do table.insert(a, n) end
+  table.sort(a, sort_function)
+  local i = 0      -- iterator variable
+  local iter = function ()   -- iterator function
+    i = i + 1
+    if a[i] == nil then return nil
+    else return a[i], t[a[i]]
+    end
+  end
+  return iter
+end
+
 function Addon:PrintEventService()
   print ("EventService: Registered Events")
-  for event, _ in pairs(RegisteredEvents) do
+  for event, _ in pairsByKeys(RegisteredEvents) do
     print ("  " .. event)
   end
 
   print ("EventService: Subscribed Events")
-  for event, all_subscribers in pairs(SubscribersByEvent) do
+  for event, all_subscribers in pairsByKeys(SubscribersByEvent) do
     print ("  " .. event .. ": #Subscribers =", Size(all_subscribers))
-    for subscriber, func in pairs(all_subscribers) do
+    for subscriber, func in pairsByKeys(all_subscribers) do
       print ("    ->", subscriber.Name or subscriber)
     end
   end

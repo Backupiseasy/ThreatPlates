@@ -177,7 +177,6 @@ local function Create(self,name)
 		raidicon = {
 			show = false,
 			-- Not used:
-      texture = EMPTY_TEXTURE,
 			width = (db.raidicon.scale),
 			height = (db.raidicon.scale),
 			x = (db.raidicon.x),

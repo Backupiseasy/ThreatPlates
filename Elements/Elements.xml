@@ -7,4 +7,5 @@
     <Script file="Castbar.lua"/>
     <Script file="MouseoverHighlight.lua"/>
     <Script file="ThreatGlow.lua"/>
+    <Script file="TargetMarker.lua"/>
 </Ui>

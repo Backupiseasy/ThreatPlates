@@ -12,7 +12,6 @@ local UnitExists = UnitExists
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
-local PlatesByUnit = Addon.PlatesByUnit
 local PlayerRoleIsTank = Addon.PlayerRoleIsTank
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
 
@@ -24,7 +23,7 @@ local function TransparencySituational(unit)
 	local db = TidyPlatesThreat.db.profile.nameplate
 
 	-- Do checks for situational transparency settings:
-	if unit.isMarked and db.toggle.MarkedA then
+	if unit.TargetMarker and db.toggle.MarkedA then
 		return db.alpha.Marked
 	elseif unit.isMouseover and not unit.isTarget and db.toggle.MouseoverUnitAlpha then
 		return db.alpha.MouseoverUnit
@@ -70,7 +69,6 @@ local function TransparencyGeneral(unit)
 			-- units will always be set to this alpha
       return target_alpha
     end
-
     return (db.alpha[unit.TP_DetailedUnitType] or 1) + target_alpha - 1
   end
 
@@ -192,3 +190,4 @@ SubscribeEvent("Transparency", "MouseoverOnEnter", SituationalEvent)
 SubscribeEvent("Transparency", "MouseoverOnLeave", SituationalEvent)
 SubscribeEvent("Transparency", "CastingStarted", SituationalEvent)
 SubscribeEvent("Transparency", "CastingStopped", SituationalEvent)
+SubscribeEvent("Transparency", "TargetMarkerUpdate", SituationalEvent)

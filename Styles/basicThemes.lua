@@ -167,7 +167,6 @@ local function Create(self,name)
     },
 
     raidicon = {
-      texture = "Interface\\TargetingFrame\\UI-RaidTargetingIcons",
       width = (db.raidicon.scale),
       height = (db.raidicon.scale),
       x = (db.raidicon.x),

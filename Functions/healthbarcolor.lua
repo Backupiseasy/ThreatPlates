@@ -26,6 +26,7 @@ local PlayerRoleIsTank = Addon.PlayerRoleIsTank
 local IsFriend
 local IsGuildmate
 local ShowQuestUnit
+local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
 
 local reference = {
   FRIENDLY = { NPC = "FriendlyNPC", PLAYER = "FriendlyPlayer", },
@@ -203,10 +204,10 @@ function Addon:SetHealthbarColor(unit)
     c = db.targetWidget.HPBarColor
   elseif style == "unique" then
     -- Custom nameplate style defined for unit (does not work for totems right now)
-    if unit.isMarked and unique_setting.allowMarked then
+    if unit.TargetMarker and unique_setting.allowMarked then
       -- Unit is marked
       local db_raidicon = db.settings.raidicon
-      c = db_raidicon.hpMarked[unit.raidIcon]
+      c = db_raidicon.hpMarked[unit.TargetMarker]
     else
       if not UnitIsConnected(unit.unitid) then
         c = db_color.DisconnectedUnit
@@ -243,8 +244,8 @@ function Addon:SetHealthbarColor(unit)
     -- branch for standard coloring (ByHealth or ByClass, ByReaction, ByThreat), style = normal, tank, dps
     -- (healthbar disabled for empty, etotem, NameOnly)
     local db_raidicon = db.settings.raidicon
-    if unit.isMarked and db_raidicon.hpColor then
-      c = db_raidicon.hpMarked[unit.raidIcon]
+    if unit.TargetMarker and db_raidicon.hpColor then
+      c = db_raidicon.hpMarked[unit.TargetMarker]
     elseif db.healthColorChange then
       c = GetColorByHealthDeficit(unit)
     else
@@ -293,3 +294,18 @@ end
 ThreatPlates.GetColorByHealthDeficit = GetColorByHealthDeficit
 ThreatPlates.GetColorByClass = GetColorByClass
 ThreatPlates.GetColorByReaction = GetColorByReaction
+
+
+local function TargetMarkerUpdate(tp_frame)
+  local visual = tp_frame.visual
+
+  if visual.healthbar:IsShown() then
+    visual.healthbar:SetAllColors(Addon:SetHealthbarColor(tp_frame.unit))
+  end
+
+  if visual.name:IsShown() then
+    visual.name:SetTextColor(Addon:SetNameColor(tp_frame.unit))
+  end
+end
+
+SubscribeEvent("Name", "TargetMarkerUpdate", TargetMarkerUpdate)
