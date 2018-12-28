@@ -129,7 +129,6 @@ local AURA_STYLE = {
 local db
 -- table for storing the options dialog
 local options = nil
-
 -- cache copyFrame if used multiple times
 local copyFrame = nil
 
@@ -161,10 +160,14 @@ local function CreateCopyFrame()
     editBox:HighlightText()
     editBox:SetFocus()
 
+    self:SetCallback("OnClose", function()
+      --do nothing
+    end)
+
     self:Show()
   end
 
-  function frame:OpenImport()
+  function frame:OpenImport(onImportHandler)
     local editBox = self.editBox
 
     editBox:SetMaxLetters(0)
@@ -172,6 +175,10 @@ local function CreateCopyFrame()
     editBox.editBox:SetScript("OnMouseUp", nil)
     editBox:SetText("")
     editBox:SetFocus()
+
+    self:SetCallback("OnClose", function()
+      onImportHandler(editBox:GetText());
+    end);
 
     self:Show()
   end
@@ -194,7 +201,38 @@ local function ShowCopyFrame(mode, modeArg)
 
     copyFrame:OpenExport(LibDeflate:EncodeForPrint(compressed))
   else
-    copyFrame:OpenImport()
+    local function ImportHandler(encoded)
+      --window opened by mistake etc, just ignore it
+      if string.len(encoded) == 0 then
+        return
+      end
+
+      local errorMsg = "Something went wrong importing your profile, please check the import string" --TODO: localisation
+      local decoded = LibDeflate:DecodeForPrint(encoded)
+
+      if not decoded then
+        print(errorMsg)
+        return
+      end
+
+      local decompressed = LibDeflate:DecompressDeflate(decoded)
+
+      if not decompressed then
+        print(errorMsg)
+        return
+      end
+
+      local success, deserialized = Serializer:Deserialize(decompressed)
+
+      if not success then
+        print(errorMsg)
+        return
+      end
+
+      --TODO: apply new profile
+    end
+
+    copyFrame:OpenImport(ImportHandler)
   end
 end
 
@@ -212,7 +250,7 @@ local function AddImportExportOptions(profileOptions)
 		type = "execute",
 		name = "Export current profile",
 		desc = "Export the current profile into text that can be pasted by another user",
-		func = function() ShowCopyFrame("export", TidyPlatesThreat.db.profile) end
+		func = function() ShowCopyFrame("export", {prop1 = "Hello", prop2 = "World", prop3 = 4, prop4 = {test = "moo"}}) end
 	}
 
   profileOptions.args.importprofile = {
