@@ -134,6 +134,7 @@ local copyFrame = nil
 
 local function CreateCopyFrame()
   local AceGUI = LibStub("AceGUI-3.0")
+  local AceConfigDialog = LibStub("AceConfigDialog-3.0")
 
   local frame = AceGUI:Create("Frame")
   frame:SetTitle("Import/Export Profile") --TODO: localisation
@@ -151,6 +152,8 @@ local function CreateCopyFrame()
   frame.editBox = editBox
 
   function frame:OpenExport(text)
+    AceConfigDialog:Close(t.ADDON_NAME)
+
     local editBox = self.editBox
 
     editBox:SetMaxLetters(0)
@@ -162,13 +165,15 @@ local function CreateCopyFrame()
     editBox:SetFocus()
 
     self:SetCallback("OnClose", function()
-      --do nothing
+      AceConfigDialog:Open(t.ADDON_NAME)
     end)
 
     self:Show()
   end
 
   function frame:OpenImport(onImportHandler)
+    AceConfigDialog:Close(t.ADDON_NAME)
+
     local editBox = self.editBox
 
     editBox:SetMaxLetters(0)
@@ -180,6 +185,7 @@ local function CreateCopyFrame()
 
     self:SetCallback("OnClose", function()
       onImportHandler(editBox:GetText());
+      AceConfigDialog:Open(t.ADDON_NAME)
     end);
 
     self:Show()
@@ -231,7 +237,9 @@ local function ShowCopyFrame(mode, modeArg)
         return
       end
 
-      --TODO: apply new profile
+      --apply imported profile as a new profile
+      TidyPlatesThreat.db:SetProfile("imported profile") --will create a new profile
+      TidyPlatesThreat.db.profile = deserialized
     end
 
     copyFrame:OpenImport(ImportHandler)
@@ -252,7 +260,7 @@ local function AddImportExportOptions(profileOptions)
 		type = "execute",
 		name = "Export current profile",
 		desc = "Export the current profile into text that can be pasted by another user",
-		func = function() ShowCopyFrame("export", {prop1 = "Hello", prop2 = "World", prop3 = 4, prop4 = {test = "moo"}}) end
+		func = function() ShowCopyFrame("export", TidyPlatesThreat.db.profile) end
 	}
 
   profileOptions.args.importprofile = {
