@@ -50,3 +50,16 @@ function Font:UpdateText(parent, font, db)
     font:SetPoint(anchor, parent, anchor, db.HorizontalOffset or 0, db.VerticalOffset or 0)
   end
 end
+
+function Font.SetJustify(font_string, horz, vert)
+  local align_horz, align_vert = font_string:GetJustifyH(), font_string:GetJustifyV()
+  if align_horz ~= horz or align_vert ~= vert then
+    font_string:SetJustifyH(horz)
+    font_string:SetJustifyV(vert)
+
+    -- Set text to nil to enforce text string update, otherwise updates to justification will not take effect
+    local text = font_string:GetText()
+    font_string:SetText(nil)
+    font_string:SetText(text)
+  end
+end

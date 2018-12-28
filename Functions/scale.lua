@@ -185,3 +185,4 @@ SubscribeEvent("Scale", "MouseoverOnLeave", SituationalEvent)
 SubscribeEvent("Scale", "CastingStarted", SituationalEvent)
 SubscribeEvent("Scale", "CastingStopped", SituationalEvent)
 SubscribeEvent("Scale", "TargetMarkerUpdate", SituationalEvent)
+

@@ -26,7 +26,6 @@ local PlayerRoleIsTank = Addon.PlayerRoleIsTank
 local IsFriend
 local IsGuildmate
 local ShowQuestUnit
-local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
 
 local reference = {
   FRIENDLY = { NPC = "FriendlyNPC", PLAYER = "FriendlyPlayer", },
@@ -294,18 +293,3 @@ end
 ThreatPlates.GetColorByHealthDeficit = GetColorByHealthDeficit
 ThreatPlates.GetColorByClass = GetColorByClass
 ThreatPlates.GetColorByReaction = GetColorByReaction
-
-
-local function TargetMarkerUpdate(tp_frame)
-  local visual = tp_frame.visual
-
-  if visual.healthbar:IsShown() then
-    visual.healthbar:SetAllColors(Addon:SetHealthbarColor(tp_frame.unit))
-  end
-
-  if visual.name:IsShown() then
-    visual.name:SetTextColor(Addon:SetNameColor(tp_frame.unit))
-  end
-end
-
-SubscribeEvent("Name", "TargetMarkerUpdate", TargetMarkerUpdate)

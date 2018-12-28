@@ -78,14 +78,14 @@ EventHandlerFrame:SetScript("OnEvent", EventHandler)
 -- Threat-Plates-internal events
 ---------------------------------------------------------------------------------------------------
 local INTERNAL_EVENTS = {
-  ThreatUpdate = true,      -- Parameters: tp_frame, unitid
-  MouseoverOnEnter = true,  -- Parameters: tp_frame
-  MouseoverOnLeave = true,  -- Parameters: tp_frame
-  CastingStarted = true,   -- Parameters: tp_frame
-  CastingStopped = true,   -- Parameters: tp_frame
+  ThreatUpdate = true,        -- Parameters: tp_frame, unitid
+  MouseoverOnEnter = true,    -- Parameters: tp_frame
+  MouseoverOnLeave = true,    -- Parameters: tp_frame
+  CastingStarted = true,      -- Parameters: tp_frame
+  CastingStopped = true,      -- Parameters: tp_frame
   TargetMarkerUpdate = true,  -- Parameters: tp_frame
-  -- PlayerTargetGained = true,  -- Parameters: tp_frame
-  -- PlayerTargetLost = true,  -- Parameters: tp_frame
+  TargetGained = true,        -- Parameters: tp_frame
+  TargetLost = true,          -- Parameters: tp_frame
 }
 
 ---------------------------------------------------------------------------------------------------

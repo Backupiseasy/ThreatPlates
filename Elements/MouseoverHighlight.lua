@@ -16,6 +16,7 @@ local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local UnitIsUnit = UnitIsUnit
 
 -- ThreatPlates APIs
+local TidyPlatesThreat = TidyPlatesThreat
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
 
 local OFFSET_HIGHLIGHT = 1
@@ -30,6 +31,8 @@ local BACKDROP = {
 ---------------------------------------------------------------------------------------------------
 -- Local variables
 ---------------------------------------------------------------------------------------------------
+local TargetHighlightDisabled
+
 local MouseoverHighlightFrame = CreateFrame("Frame", nil)
 local CurrentMouseoverPlate
 local CurrentMouseoverUnitID
@@ -47,7 +50,7 @@ local function HideMouseoverHighlightFrame()
   if CurrentMouseoverUnitID then
     local tp_frame = CurrentMouseoverPlate
     tp_frame.unit.isMouseover = false
-    tp_frame.visual.healthbar.MouseoverHighlight:Hide()
+    tp_frame.visual.Healthbar.MouseoverHighlight:Hide()
 
     PublishEvent("MouseoverOnLeave", tp_frame)
     CurrentMouseoverUnitID = nil
@@ -77,7 +80,7 @@ MouseoverHighlightFrame:Hide()
 -- Called in processing event: NAME_PLATE_CREATED
 function Element.Created(tp_frame)
   -- Highlight for healthbar
-  local healthbar = tp_frame.visual.healthbar
+  local healthbar = tp_frame.visual.Healthbar
   healthbar.Highlight = CreateFrame("Frame", nil, healthbar)
   healthbar.Highlight:SetPoint("TOPLEFT", healthbar, "TOPLEFT", - OFFSET_HIGHLIGHT, OFFSET_HIGHLIGHT)
   healthbar.Highlight:SetPoint("BOTTOMRIGHT", healthbar, "BOTTOMRIGHT", OFFSET_HIGHLIGHT, - OFFSET_HIGHLIGHT)
@@ -92,7 +95,7 @@ function Element.Created(tp_frame)
   -- Highlight for name
   healthbar.NameHighlight = healthbar:CreateTexture(nil, "ARTWORK") -- required for Headline View
   healthbar.NameHighlight:SetTexture(NAME_STYLE_TEXTURE)
-  healthbar.NameHighlight:SetAllPoints(tp_frame.visual.name)
+  healthbar.NameHighlight:SetAllPoints(tp_frame.visual.Name)
   healthbar.NameHighlight:SetBlendMode("ADD")
 
   healthbar.Highlight:Hide() -- HighlightTexture is shown/hidden together with Highlight
@@ -109,7 +112,7 @@ end
 --
 ---- Called in processing event: UpdateStyle in Nameplate.lua
 function Element.UpdateStyle(tp_frame, style)
-  local healthbar = tp_frame.visual.healthbar
+  local healthbar = tp_frame.visual.Healthbar
   if style.healthbar.show then
     healthbar.MouseoverHighlight = healthbar.Highlight
     healthbar.NameHighlight:Hide()
@@ -118,30 +121,12 @@ function Element.UpdateStyle(tp_frame, style)
     healthbar.Highlight:Hide()
   end
 
-  healthbar.MouseoverHighlight:SetShown(tp_frame.unit.isMouseover and style.highlight.show and not tp_frame.unit.isTarget)
-
---  if tp_frame.unit.isMouseover then
---    local healthbar = tp_frame.visual.healthbar
---
---    if style.highlight.show and not tp_frame.unit.isTarget then
---      if style.healthbar.show then
---        -- Nameplate Style: Healthbar
---        healthbar.Highlight:Show()
---        healthbar.NameHighlight:Hide()
---      else
---        -- Nameplate Style: Name
---        healthbar.Highlight:Hide()
---        healthbar.NameHighlight:Show()
---      end
---    else
---      healthbar.Highlight:Hide()
---      healthbar.NameHighlight:Hide()
---    end
---  end
+  healthbar.MouseoverHighlight:SetShown(tp_frame.unit.isMouseover and style.highlight.show and (not tp_frame.unit.isTarget or TargetHighlightDisabled))
 end
 
---function Element.UpdateSettings()
---end
+function Element.UpdateSettings()
+  TargetHighlightDisabled = not (TidyPlatesThreat.db.profile.targetWidget.ON or TidyPlatesThreat.db.profile.HeadlineView.ShowTargetHighlight)
+end
 
 -- Registered in Nameplate.lua
 function Element.UPDATE_MOUSEOVER_UNIT()
@@ -156,20 +141,7 @@ function Element.UPDATE_MOUSEOVER_UNIT()
 
   local tp_frame = plate.TPFrame
   tp_frame.unit.isMouseover = true
-  tp_frame.visual.healthbar.MouseoverHighlight:SetShown(tp_frame.style.highlight.show and not tp_frame.unit.isTarget)
-
---  if style.highlight.show and not tp_frame.unit.isTarget then
---    local healthbar = tp_frame.visual.healthbar
---    if style.healthbar.show then
---      -- Nameplate Style: Healthbar
---      healthbar.Highlight:Show()
---      healthbar.NameHighlight:Hide()
---    else
---      -- Nameplate Style: Name
---      healthbar.Highlight:Hide()
---      healthbar.NameHighlight:Show()
---    end
---  end
+  tp_frame.visual.Healthbar.MouseoverHighlight:SetShown(tp_frame.style.highlight.show and (not tp_frame.unit.isTarget or TargetHighlightDisabled))
 
   CurrentMouseoverUnitID = tp_frame.unit.unitid
   CurrentMouseoverPlate = tp_frame

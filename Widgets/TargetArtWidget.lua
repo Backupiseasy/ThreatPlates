@@ -118,8 +118,8 @@ function Widget:OnTargetUnitAdded(tp_frame, unit)
 
       if db.theme == "default" or db.theme == "squarethin" then
         local offset = BACKDROP[db.theme].offset
-        healthbar_mode_frame:SetPoint("TOPLEFT", tp_frame.visual.healthbar, "TOPLEFT", - offset, offset)
-        healthbar_mode_frame:SetPoint("BOTTOMRIGHT", tp_frame.visual.healthbar, "BOTTOMRIGHT", offset, - offset)
+        healthbar_mode_frame:SetPoint("TOPLEFT", tp_frame.visual.Healthbar, "TOPLEFT", - offset, offset)
+        healthbar_mode_frame:SetPoint("BOTTOMRIGHT", tp_frame.visual.Healthbar, "BOTTOMRIGHT", offset, - offset)
 
         --healthbar_mode_frame.LeftTexture:Hide()
         --healthbar_mode_frame.RightTexture:Hide()

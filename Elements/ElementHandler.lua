@@ -8,7 +8,7 @@ local ADDON_NAME, Addon = ...
 ---------------------------------------------------------------------------------------------------
 
 -- Lua APIs
-local pairs = pairs
+local ipairs = ipairs
 
 -- WoW APIs
 
@@ -20,6 +20,7 @@ local pairs = pairs
 local ElementHandler = {}
 Addon.Elements = ElementHandler
 local Elements = {}
+local ElementsPriority = {}
 
 ---------------------------------------------------------------------------------------------------
 -- Element Handler code
@@ -30,6 +31,7 @@ function ElementHandler.NewElement(name)
     Name = name,
   }
 
+  ElementsPriority[#ElementsPriority + 1] = element
   Elements[name] = element
 
   return element
@@ -40,13 +42,16 @@ function ElementHandler.GetElement(name)
 end
 
 function ElementHandler.Created(frame)
-  for _, element in pairs(Elements) do
-    element.Created(frame)
+  for i = 1, #ElementsPriority do
+    ElementsPriority[i].Created(frame)
   end
 end
 
 function ElementHandler.UnitData(frame)
-  for _, element in pairs(Elements) do
+  local element
+
+  for i = 1, #ElementsPriority do
+    element = ElementsPriority[i]
     if element.UnitData then
       element.UnitData(frame)
     end
@@ -54,7 +59,10 @@ function ElementHandler.UnitData(frame)
 end
 
 function ElementHandler.UnitAdded(frame)
-  for _, element in pairs(Elements) do
+  local element
+
+  for i = 1, #ElementsPriority do
+    element = ElementsPriority[i]
     if element.UnitAdded then
       element.UnitAdded(frame)
     end
@@ -62,7 +70,10 @@ function ElementHandler.UnitAdded(frame)
 end
 
 function ElementHandler.UnitRemoved(frame)
-  for _, element in pairs(Elements) do
+  local element
+
+  for i = 1, #ElementsPriority do
+    element = ElementsPriority[i]
     if element.UnitRemoved then
       element.UnitRemoved(frame)
     end
@@ -70,7 +81,10 @@ function ElementHandler.UnitRemoved(frame)
 end
 
 function ElementHandler.UpdateStyle(frame, style)
-  for _, element in pairs(Elements) do
+  local element
+
+  for i = 1, #ElementsPriority do
+    element = ElementsPriority[i]
     if element.UpdateStyle then
       element.UpdateStyle(frame, style)
     end
@@ -78,7 +92,10 @@ function ElementHandler.UpdateStyle(frame, style)
 end
 
 function ElementHandler.UpdateSettings()
-  for _, element in pairs(Elements) do
+  local element
+
+  for i = 1, #ElementsPriority do
+    element = ElementsPriority[i]
     if element.UpdateSettings then
       element.UpdateSettings()
     end

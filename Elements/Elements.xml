@@ -3,10 +3,15 @@
     <Script file="Fonts.lua"/>
     <Script file="Animations.lua"/>
     <Script file="ElementHandler.lua"/>
+    <!--Order is relevant for creation -->
     <Script file="Healthbar.lua"/>
+    <Script file="Name.lua"/>
     <Script file="Castbar.lua"/>
+    <Script file="SpellIcon.lua"/>
     <Script file="MouseoverHighlight.lua"/>
     <Script file="ThreatGlow.lua"/>
     <Script file="TargetMarker.lua"/>
+    <Script file="Classification.lua"/>
+    <Script file="StatusText.lua"/>
     <Script file="Level.lua"/>
 </Ui>

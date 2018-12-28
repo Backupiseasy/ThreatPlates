@@ -6,6 +6,11 @@ local ADDON_NAME, Addon = ...
 Addon.ThreatPlates = {}
 Addon.Debug = {}
 
+Addon.PlatesCreated = {}
+Addon.PlatesVisible = {}
+Addon.PlatesByUnit = {}
+Addon.PlatesByGUID = {}
+
 local ThreatPlates = Addon.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------

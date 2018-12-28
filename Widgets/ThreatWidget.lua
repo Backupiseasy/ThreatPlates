@@ -64,7 +64,7 @@ function Widget:Create(tp_frame)
   widget_frame:SetFrameLevel(tp_frame:GetFrameLevel() + 7)
   widget_frame.LeftTexture = widget_frame:CreateTexture(nil, "OVERLAY", 6)
   widget_frame.RightTexture = widget_frame:CreateTexture(nil, "OVERLAY", 6)
-  widget_frame.RightTexture:SetPoint("LEFT", tp_frame.visual.healthbar, "RIGHT", 4, 0)
+  widget_frame.RightTexture:SetPoint("LEFT", tp_frame.visual.Healthbar, "RIGHT", 4, 0)
   widget_frame.RightTexture:SetSize(64, 64)
   --------------------------------------
   -- End Custom Code
@@ -98,7 +98,7 @@ function Widget:OnUnitAdded(widget_frame, unit)
   else
     widget_frame.LeftTexture:ClearAllPoints(widget_frame)
     widget_frame.LeftTexture:SetSize(64, 64)
-    widget_frame.LeftTexture:SetPoint("RIGHT", widget_frame:GetParent().visual.healthbar, "LEFT", -4, 0)
+    widget_frame.LeftTexture:SetPoint("RIGHT", widget_frame:GetParent().visual.Healthbar, "LEFT", -4, 0)
     widget_frame.LeftTexture:SetTexCoord(0, 0.25, 0, 1)
 
     widget_frame.RightTexture:SetTexCoord(0.75, 1, 0, 1)

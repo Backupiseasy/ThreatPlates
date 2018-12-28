@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------------------------------
--- Element: Unit Level
+-- Element: Status Text
 ---------------------------------------------------------------------------------------------------
 local ADDON_NAME, Addon = ...
 
@@ -10,7 +10,6 @@ local ADDON_NAME, Addon = ...
 -- Lua APIs
 
 -- WoW APIs
-local UnitEffectiveLevel, GetCreatureDifficultyColor = UnitEffectiveLevel, GetCreatureDifficultyColor
 
 -- ThreatPlates APIs
 local PlatesByUnit = Addon.PlatesByUnit
@@ -24,77 +23,72 @@ local SetFontJustify = Addon.Font.SetJustify
 ---------------------------------------------------------------------------------------------------
 -- Element code
 ---------------------------------------------------------------------------------------------------
+local Element = Addon.Elements.NewElement("StatusText")
 
-local Element = Addon.Elements.NewElement("Level")
+---------------------------------------------------------------------------------------------------
+-- Core element code
+---------------------------------------------------------------------------------------------------
 
 -- Called in processing event: NAME_PLATE_CREATED
 function Element.Created(tp_frame)
-  local level_text = tp_frame.visual.textframe:CreateFontString(nil, "ARTWORK", -2)
+  local status_text = tp_frame.visual.textframe:CreateFontString(nil, "ARTWORK", -1)
 
-  tp_frame.visual.LevelText = level_text
-end
-
--- Called in processing event: NAME_PLATE_UNIT_ADDED
-function Element.UnitData(tp_frame)
-  local unit = tp_frame.unit
-
-  local unit_level = UnitEffectiveLevel(unit.unitid)
-  local level_color = GetCreatureDifficultyColor(unit_level)
-
-  unit.level = unit_level
-  unit.levelcolorRed, unit.levelcolorGreen, unit.levelcolorBlue = level_color.r, level_color.g, level_color.b
+  tp_frame.visual.StatusText = status_text
 end
 
 -- Called in processing event: NAME_PLATE_UNIT_ADDED
 function Element.UnitAdded(tp_frame)
-  local level_text = tp_frame.visual.LevelText
-  local unit = tp_frame.unit
+  local status_text = tp_frame.visual.StatusText
 
-  local unit_level = unit.level
-  if unit_level < 0 then
-    level_text:SetText("")
-  else
-    level_text:SetText(unit_level)
-  end
-
-  level_text:SetTextColor(unit.levelcolorRed, unit.levelcolorGreen, unit.levelcolorBlue)
+  local text, r, g, b, a = Addon:SetCustomText(tp_frame.unit)
+  status_text:SetText(text or "")
+  status_text:SetTextColor(r or 1, g or 1, b or 1, a or 1)
 end
 
 -- Called in processing event: NAME_PLATE_UNIT_REMOVED
 --function Element.UnitRemoved(tp_frame)
---  tp_frame.visual.ThreatGlow:Hide() -- done in UpdateStyle
 --end
 
+---- Called in processing event: UpdateStyle in Nameplate.lua
 function Element.UpdateStyle(tp_frame, style)
-  local level_text = tp_frame.visual.LevelText
-  local style = style.level
+  local status_text = tp_frame.visual.StatusText
+  local style = style.customtext
 
   -- At least font must be set as otherwise it results in a Lua error when UnitAdded with SetText is called
-  level_text:SetFont(style.typeface, style.size, style.flags)
+  status_text:SetFont(style.typeface, style.size, style.flags)
 
   if style.show then
-    SetFontJustify(level_text, style.align, style.vertical)
+    SetFontJustify(status_text, style.align, style.vertical)
 
     if style.shadow then
-      level_text:SetShadowColor(0,0,0, 1)
-      level_text:SetShadowOffset(1, -1)
+      status_text:SetShadowColor(0,0,0, 1)
+      status_text:SetShadowOffset(1, -1)
     end
 
-    level_text:SetSize(style.width, style.height)
-    level_text:ClearAllPoints()
-    level_text:SetPoint(style.anchor, tp_frame, style.anchor, style.x, style.y)
+    status_text:SetSize(style.width, style.height)
+    status_text:ClearAllPoints()
+    status_text:SetPoint(style.anchor, tp_frame, style.anchor, style.x, style.y)
 
-    level_text:Show()
+    status_text:Show()
   else
-    level_text:Hide()
-  end
+    status_text:Hide()
+    end
 end
 
-function Element.UNIT_LEVEL(unitid)
+--function Element.UpdateSettings()
+--end
+
+local function StatusTextUpdateByUnit(unitid)
   local tp_frame = PlatesByUnit[unitid]
   if tp_frame and tp_frame.Active then
-    Element.UnitData(tp_frame)
     Element.UnitAdded(tp_frame)
   end
 end
 
+SubscribeEvent(Element, "UNIT_NAME_UPDATE", StatusTextUpdateByUnit)
+SubscribeEvent(Element, "UNIT_LEVEL", StatusTextUpdateByUnit)
+SubscribeEvent(Element, "UNIT_HEALTH_FREQUENT", StatusTextUpdateByUnit)
+-- TODO: Subscribe/unsubscribe to this event based on settings
+SubscribeEvent(Element, "ThreatUpdate", Element.UnitAdded)
+
+-- Missing: Updates to Guild information (like entering new guild)
