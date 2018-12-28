@@ -152,6 +152,7 @@ local function CreateCopyFrame()
   frame.editBox = editBox
 
   function frame:OpenExport(text)
+    --NOTE: options are closed and re-opened around the copyframe so the state of the profile is always reflected in that window
     AceConfigDialog:Close(t.ADDON_NAME)
 
     local editBox = self.editBox
