@@ -241,6 +241,8 @@ local function ShowCopyFrame(mode, modeArg)
       --apply imported profile as a new profile
       TidyPlatesThreat.db:SetProfile("imported profile") --will create a new profile
       TidyPlatesThreat.db.profile = deserialized
+
+      Addon:ForceUpdate()
     end
 
     copyFrame:OpenImport(ImportHandler)
