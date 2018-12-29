@@ -5,6 +5,7 @@ local ADDON_NAME, Addon = ...
 ---------------------------------------------------------------------------------------------------
 Addon.ThreatPlates = {}
 Addon.Debug = {}
+Addon.Theme = {}
 
 Addon.PlatesCreated = {}
 Addon.PlatesVisible = {}

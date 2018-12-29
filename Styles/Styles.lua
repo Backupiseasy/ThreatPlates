@@ -5,6 +5,9 @@ local ThreatPlates = Addon.ThreatPlates
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
 
+-- Lua APIs
+local pairs = pairs
+
 -- WoW APIs
 local InCombatLockdown = InCombatLockdown
 local UnitPlayerControlled = UnitPlayerControlled
@@ -12,10 +15,23 @@ local UnitIsOtherPlayersPet = UnitIsOtherPlayersPet
 local UnitIsBattlePet = UnitIsBattlePet
 local UnitCanAttack, UnitIsTapDenied = UnitCanAttack, UnitIsTapDenied
 
+-- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
+local PlatesByUnit = Addon.PlatesByUnit
 local TOTEMS = Addon.TOTEMS
 local GetUnitVisibility = ThreatPlates.GetUnitVisibility
 local PlayerRoleIsTank = Addon.PlayerRoleIsTank
+local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
+local ActiveTheme = Addon.Theme
+
+---------------------------------------------------------------------------------------------------
+-- Local variables
+---------------------------------------------------------------------------------------------------
+
+---------------------------------------------------------------------------------------------------
+-- Element code
+---------------------------------------------------------------------------------------------------
+local Element = "Style"
 
 ---------------------------------------------------------------------------------------------------
 -- Helper functions for styles and functions
@@ -176,7 +192,7 @@ end
 -- Check if a unit is a totem or a custom nameplates (e.g., after UNIT_NAME_UPDATE)
 -- Depends on:
 --   * unit.name
-function Addon:UnitStyle_NameDependent(unit)
+local function UnitStyle_NameDependent(unit)
   local plate_style
 
   local db = TidyPlatesThreat.db.profile
@@ -225,7 +241,7 @@ function Addon:SetStyle(unit)
   end
 
   -- Check if custom nameplate should be used for the unit:
-  local style = Addon:UnitStyle_NameDependent(unit) or (headline_view and "NameOnly")
+  local style = UnitStyle_NameDependent(unit) or (headline_view and "NameOnly")
 
   if not style and unit.reaction ~= "FRIENDLY" then
     -- could call GetThreatStyle here, but that would at a tiny overhead
@@ -239,3 +255,61 @@ function Addon:SetStyle(unit)
 
   return style or "normal"
 end
+
+local function CheckNameplateStyle(tp_frame)
+  local unit = tp_frame.unit
+
+  local stylename = Addon:SetStyle(unit)
+
+  if tp_frame.stylename ~= stylename then
+    local style = ActiveTheme[stylename]
+
+    tp_frame.stylename = stylename
+    tp_frame.style = style
+    unit.style = stylename
+
+    PublishEvent("StyleUpdate", tp_frame, style, stylename)
+  end
+end
+
+local function UNIT_NAME_UPDATE(unitid)
+  local tp_frame = PlatesByUnit[unitid]
+  if tp_frame and tp_frame.Active then
+    local stylename = UnitStyle_NameDependent(tp_frame.unit)
+
+    if stylename and tp_frame.stylename ~= stylename then
+      local style = ActiveTheme[stylename]
+
+      tp_frame.stylename = stylename
+      tp_frame.style = style
+      tp_frame.unit.style = stylename
+
+      PublishEvent("StyleUpdate", tp_frame, style, stylename)
+    end
+  end
+end
+
+local function EnteringOrLeavingCombat()
+  for _, tp_frame in pairs(PlatesByUnit) do
+    if tp_frame.Active then
+      CheckNameplateStyle(tp_frame)
+    end
+  end
+  --  local tp_frame
+  --  for plate, _ in pairs(PlatesVisible) do
+  --    tp_frame = plate.TPFrame
+  --    print ("Combat ended ", tp_frame.unit.unitid, "-", tp_frame.unit.InCombat)
+  --    if tp_frame.unit.InCombat then
+  --      PublishEvent("CombatEnded", tp_frame)
+  --    end
+  --  end
+
+end
+
+Addon.InitializeStyle = CheckNameplateStyle
+
+SubscribeEvent(Element, "FactionUpdate", CheckNameplateStyle)
+SubscribeEvent(Element, "ThreatUpdate", CheckNameplateStyle)
+SubscribeEvent(Element, "UNIT_NAME_UPDATE", UNIT_NAME_UPDATE)
+SubscribeEvent(Element, "PLAYER_REGEN_ENABLED", EnteringOrLeavingCombat)
+SubscribeEvent(Element, "PLAYER_REGEN_DISABLED", EnteringOrLeavingCombat)

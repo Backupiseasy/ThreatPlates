@@ -148,8 +148,8 @@ local function ShowQuestUnit(unit)
     if db.HideInCombat then
       return false
     elseif db.HideInCombatAttacked then
-      local _, threatStatus = UnitDetailedThreatSituation("player", unit.unitid)
-      return (threatStatus == nil)
+      local _, threat_status = UnitDetailedThreatSituation("player", unit.unitid)
+      return (threat_status == nil)
     end
   end
 

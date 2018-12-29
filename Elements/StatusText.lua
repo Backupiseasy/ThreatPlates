@@ -63,6 +63,8 @@ function Element.UpdateStyle(tp_frame, style)
     if style.shadow then
       status_text:SetShadowColor(0,0,0, 1)
       status_text:SetShadowOffset(1, -1)
+    else
+      status_text:SetShadowColor(0,0,0,0)
     end
 
     status_text:SetSize(style.width, style.height)

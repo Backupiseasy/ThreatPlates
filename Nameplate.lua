@@ -5,7 +5,7 @@ local ThreatPlates = Addon.ThreatPlates
 -- Variables and References
 ---------------------------------------------------------------------------------------------------------------------
 
--- Local References
+-- Lua APIs
 local _
 local type, select, pairs, tostring  = type, select, pairs, tostring 			    -- Local function copy
 local max, tonumber, math_abs = math.max, tonumber, math.abs
@@ -36,23 +36,22 @@ local GetCVar, Lerp, CombatLogGetCurrentEventInfo = GetCVar, Lerp, CombatLogGetC
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
 local Widgets = Addon.Widgets
-local RegisterEvent, PublishEvent = Addon.EventService.RegisterEvent, Addon.EventService.Publish
+local RegisterEvent, SubscribeEvent, PublishEvent = Addon.EventService.RegisterEvent, Addon.EventService.Subscribe, Addon.EventService.Publish
 local ElementsCreated, ElementsUnitData, ElementsUnitAdded, ElementsUnitRemoved = Addon.Elements.Created, Addon.Elements.UnitData, Addon.Elements.UnitAdded, Addon.Elements.UnitRemoved
 local ElementsUpdateStyle, ElementsUpdateSettings = Addon.Elements.UpdateStyle, Addon.Elements.UpdateSettings
 
 -- Constants
-
 local CASTBAR_INTERRUPT_HOLD_TIME = Addon.CASTBAR_INTERRUPT_HOLD_TIME
 local ON_UPDATE_INTERVAL = Addon.ON_UPDATE_PER_FRAME
 local PLATE_FADE_IN_TIME = Addon.PLATE_FADE_IN_TIME
 
--- Internal Data
+---------------------------------------------------------------------------------------------------
+-- Local variables
+---------------------------------------------------------------------------------------------------
+local PlateOnUpdateQueue = {}
+
 local LastTargetPlate
 local ShowCastBars = true
-local EMPTY_TEXTURE = "Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\Empty"
-local UpdateAll = false
-
-local PlateOnUpdateQueue = {}
 
 -- Cached CVARs (updated on every PLAYER_ENTERING_WORLD event
 local CVAR_NameplateOccludedAlphaMult
@@ -67,25 +66,13 @@ local PlatesVisible = Addon.PlatesVisible
 local PlatesByUnit = Addon.PlatesByUnit
 local PlatesByGUID = Addon.PlatesByGUID
 
-Addon.Theme = {}
-local ActiveTheme = Addon.Theme
-
 ---------------------------------------------------------------------------------------------------------------------
 -- Core Function Declaration
 ---------------------------------------------------------------------------------------------------------------------
--- Helpers
-local function IsPlateShown(plate) return plate and plate:IsShown() end
-
--- Queueing
-local function SetUpdateMe(plate) plate.UpdateMe = true end
-local function SetUpdateAll() UpdateAll = true end
-
--- Indicators
-local UpdatePlate_SetAlpha, UpdatePlate_SetAlphaOnUpdate
-local UpdatePlate_Transparency
+local UpdatePlate_SetAlpha, UpdatePlate_SetAlphaOnUpdate, UpdatePlate_Transparency
 
 ---------------------------------------------------------------------------------------------------------------------
---  Unit Updates: Updates Unit Data, Requests indicator updates
+--  Initialize unit data after NAME_PLATE_UNIT_ADDED and update it
 ---------------------------------------------------------------------------------------------------------------------
 local RAID_ICON_LIST = { "STAR", "CIRCLE", "DIAMOND", "TRIANGLE", "MOON", "SQUARE", "CROSS", "SKULL" }
 
@@ -107,34 +94,6 @@ local THREAT_REFERENCE = {
   [3] = "HIGH",
 }
 
--- UpdateUnitIdentity: Updates Low-volatility Unit Data
--- (This is essentially static data)
---------------------------------------------------------
-local function UpdateUnitIdentity(unit, unitid)
-  unit.unitid = unitid
-  unit.guid = UnitGUID(unitid)
-
-  unit.classification = UnitClassification(unitid)
-  unit.isElite = ELITE_REFERENCE[unit.classification] or false
-  unit.isRare = RARE_REFERENCE[unit.classification] or false
-  unit.isMini = unit.classification == "minus"
-
-  unit.isBoss = UnitLevel(unitid) == -1
-  if unit.isBoss then
-    unit.classification = "boss"
-  end
-  unit.IsBossOrRare = (unit.isBoss or unit.isRare)
-
-  if UnitIsPlayer(unitid) then
-    _, unit.class = UnitClass(unitid)
-    unit.type = "PLAYER"
-  else
-    unit.class = ""
-    unit.type = "NPC"
-  end
-end
-
--- GetUnitReaction: Determines the reaction, and type of unit from the health bar color
 local function GetReactionByColor(red, green, blue)
   if red < .1 then 	-- Friendly
     return "FRIENDLY"
@@ -147,6 +106,13 @@ local function GetReactionByColor(red, green, blue)
   end
 end
 
+local function UpdateUnitLevel(unit, unitid)
+  local unit_level = UnitEffectiveLevel(unitid)
+  local level_color = GetCreatureDifficultyColor(unit_level)
+  unit.level = unit_level
+  unit.levelcolorRed, unit.levelcolorGreen, unit.levelcolorBlue = level_color.r, level_color.g, level_color.b
+end
+
 local function UpdateUnitReaction(unit, unitid)
   unit.red, unit.green, unit.blue = UnitSelectionColor(unitid)
   unit.reaction = GetReactionByColor(unit.red, unit.green, unit.blue) or "HOSTILE"
@@ -155,49 +121,65 @@ local function UpdateUnitReaction(unit, unitid)
   if unit.reaction == "NEUTRAL" and (unit.type == "PLAYER" or UnitPlayerControlled(unitid)) then
     unit.reaction = "HOSTILE"
   end
-end
-
-local function UpdateUnitCondition(unit, unitid)
-  -- Unit Reaction
-  unit.red, unit.green, unit.blue = UnitSelectionColor(unitid)
-
-  unit.reaction = GetReactionByColor(unit.red, unit.green, unit.blue) or "HOSTILE"
-  -- Enemy players turn to neutral, e.g., when mounting a flight path mount, so fix reaction in that situations
-  if unit.reaction == "NEUTRAL" and (unit.type == "PLAYER" or UnitPlayerControlled(unitid)) then
-    unit.reaction = "HOSTILE"
-  end
-
-  unit.health = UnitHealth(unitid) or 0
-  unit.healthmax = UnitHealthMax(unitid) or 1
 
   unit.isTapped = UnitIsTapDenied(unitid)
 end
 
-local function UpdateUnitContext(unit, unitid)
-  -- Required here for initialization in OnShowNameplate as the corresponding events won't be triggerd, e.g., when
-  -- enabling/disabling nameplates
-  -- Also: for config changes which reset all plates without calling TARGET_CHANGED, MOUSEOVER, ...
+local function InitializeUnit(unit, unitid)
+  -- Unit data that does not change after nameplate creation
+  unit.unitid = unitid
+  unit.guid = UnitGUID(unitid)
+
+  unit.isBoss = UnitLevel(unitid) == -1
+
+  unit.classification = (unit.isBoss and "boss") or UnitClassification(unitid)
+  unit.isElite = ELITE_REFERENCE[unit.classification] or false
+  unit.isRare = RARE_REFERENCE[unit.classification] or false
+  unit.isMini = (unit.classification == "minus")
+  unit.IsBossOrRare = (unit.isBoss or unit.isRare)
+
+  if UnitIsPlayer(unitid) then
+    local _, unit_class = UnitClass(unitid)
+    unit.class = unit_class
+    unit.type = "PLAYER"
+  else
+    unit.class = ""
+    unit.type = "NPC"
+  end
+
+  -- Can be UNKNOWNOBJECT => UNIT_NAME_UPDATE
+  unit.name = UnitName(unitid)
+
+  -- Health and Absorbs => UNIT_HEALTH_FREQUENT, UNIT_MAXHEALTH & UNIT_ABSORB_AMOUNT_CHANGED
+  unit.health = UnitHealth(unitid) or 0
+  unit.healthmax = UnitHealthMax(unitid) or 1
+  -- unit.Absorbs = UnitGetTotalAbsorbs(unitid) or 0
+
+  -- Casting => UNIT_SPELLCAST_*
+  -- Initialized in OnUpdateCastMidway in OnShowNameplate
+  -- unit.isCasting = false
+  -- unit.spellIsShielded = notInterruptible
+
+  -- Target and Mouseover => PLAYER_TARGET_CHANGED, UPDATE_MOUSEOVER_UNIT
   unit.isTarget = UnitIsUnit("target", unitid)
-  unit.isMouseover = UnitIsUnit("mouseover", unitid) -- or move that to MouseoverHighlight.UnitData
+  unit.isMouseover = UnitIsUnit("mouseover", unitid)
+
+  -- Threat and Combat => UNIT_THREAT_LIST_UPDATE
+  -- See Addon:UNIT_THREAT_LIST_UPDATE(unitid) - is fired after entering world, so no need to update this here
+
+  -- Target Mark => RAID_TARGET_UPDATE
+  unit.TargetMarker = RAID_ICON_LIST[GetRaidTargetIndex(unitid)]
+
+  -- Level => UNIT_LEVEL
+  UpdateUnitLevel(unit, unitid)
+
+  -- Reaction => UNIT_FACTION
+  UpdateUnitReaction(unit, unitid)
 end
 
 ---------------------------------------------------------------------------------------------------------------------
 -- Nameplate Updating:
 ---------------------------------------------------------------------------------------------------------------------
-
--- UpdateIndicator_CustomScaleText: Updates indicators for custom text and scale
-local function UpdateIndicator_CustomScale(tp_frame, unit)
-  local style = tp_frame.style
-
-  --if unit.health and (extended.requestedAlpha > 0) then
-  --if unit.health and extended.CurrentAlpha > 0 then
-  if unit.health then
-    -- Scale
-    tp_frame:SetScale(Addon.UIScale * Addon:SetScale(unit))
-
-    Addon:UpdateIndicatorNameplateColor(tp_frame)
-  end
-end
 
 -- OnShowCastbar
 local function OnStartCasting(tp_frame, unitid, channeled)
@@ -235,7 +217,6 @@ local function OnStartCasting(tp_frame, unitid, channeled)
 
   unit.isCasting = true
   unit.spellIsShielded = notInterruptible
-  unit.spellInterruptible = not unit.spellIsShielded
 
   visual.SpellText:SetText(text)
   visual.SpellIcon:SetTexture(texture)
@@ -279,15 +260,14 @@ end
 --  Nameplate Styler: These functions parses the definition table for a nameplate's requested style.
 ---------------------------------------------------------------------------------------------------------------------
 
-local function UpdateStyle(tp_frame)
-  local style = tp_frame.style
-
+local function UpdateStyle(tp_frame, style, stylename)
   -- Frame
   tp_frame:ClearAllPoints()
   tp_frame:SetPoint(style.frame.anchor, tp_frame.Parent, style.frame.anchor, style.frame.x, style.frame.y)
   tp_frame:SetSize(style.healthbar.width, style.healthbar.height)
 
   ElementsUpdateStyle(tp_frame, style)
+  Widgets:OnUnitAdded(tp_frame, tp_frame.unit)
 
 --  if not tp_frame.TestBackground then
 --    tp_frame.TestBackground = tp_frame:CreateTexture(nil, "BACKGROUND")
@@ -297,68 +277,7 @@ local function UpdateStyle(tp_frame)
 --  end
 end
 
----------------------------------------------------------------------------------------------------------------------
--- Nameplate Script Handlers
----------------------------------------------------------------------------------------------------------------------
-
--- CheckNameplateStyle
-local function CheckNameplateStyle(tp_frame)
-  local unit = tp_frame.unit
-
-  local new_stylename = Addon:SetStyle(unit)
-  local new_style = ActiveTheme[new_stylename]
-
-  if tp_frame.stylename ~= new_stylename then
-    tp_frame.stylename = new_stylename
-    tp_frame.style = new_style
-    unit.style = new_stylename
-
-    UpdateStyle(tp_frame)
---      local headline_mode_after = (stylename == "NameOnly" or stylename == "NameOnly-Unique")
---      if headline_mode_before ~= headline_mode_after then
---        print ("Change of nameplate mode:", unit.name, headline_mode_before, "=>", headline_mode_after)
---      end
-
-    -- TOOD: optimimze that - call OnUnitAdded only when the plate is initialized the first time for a unit, not if only the style changes
-    Widgets:OnUnitAdded(tp_frame, unit)
-    --Addon:WidgetsModeChanged(extended, unit)
-  end
-end
-
--- UpdateUnitCache
-local function UpdateUnitCache(tp_frame, unit)
-  local unitcache = tp_frame.unitcache
-  for key, value in pairs(unit) do
-    unitcache[key] = value
-  end
-end
-
--- ProcessUnitChanges
-local function ProcessUnitChanges(tp_frame)
-  local unit, unitcache, style = tp_frame.unit, tp_frame.unitcache, tp_frame.style
-
-  -- Unit Cache: Determine if data has changed
-  local unitchanged = false
-
-  for key, value in pairs(unit) do
-    if unitcache[key] ~= value then
-      unitchanged = true
-      break -- one change is enough to update the unit
-    end
-  end
-
-  -- Update Style/Indicators
-  if unitchanged or UpdateAll or (not style) then
-    CheckNameplateStyle(tp_frame)
-  end
-
-  -- Update Delegates
-  UpdatePlate_Transparency(tp_frame, unit)
-  UpdateIndicator_CustomScale(tp_frame, unit)
-
-  -- Cache the old unit information
-  UpdateUnitCache(tp_frame, unit)
-end
+SubscribeEvent(Addon, "StyleUpdate", UpdateStyle)
 
 ---------------------------------------------------------------------------------------------------------------------
 -- Create / Hide / Show Event Handlers
@@ -411,14 +330,12 @@ local	function OnNewNameplate(plate)
   ElementsCreated(tp_frame)
 
   tp_frame.widgets = {}
-
   Widgets:OnPlateCreated(tp_frame)
 
   -- Allocate Tables
   tp_frame.style = {}
   tp_frame.stylename = ""
   tp_frame.unit = {}
-  tp_frame.unitcache = {}
 end
 
 -- OnShowNameplate
@@ -426,8 +343,10 @@ local function OnShowNameplate(plate, unitid)
   local tp_frame = plate.TPFrame
   local unit = tp_frame.unit
 
-  UpdateUnitIdentity(unit, unitid)
-  unit.name, _ = UnitName(unitid)
+  -- Initialize unit data for which there are no events when players enters world or that
+  -- do not change over the nameplate lifetime
+  InitializeUnit(unit, unitid)
+  --ElementsUnitData(tp_frame)
 
   tp_frame.stylename = ""
 
@@ -435,21 +354,23 @@ local function OnShowNameplate(plate, unitid)
   tp_frame.CurrentAlpha = nil
   tp_frame:SetAlpha(0)
 
+  -- Update LastTargetPlate as target units may leave the screen, lose their nameplate and
+  -- get a new one when the enter the screen again
+  if unit.isTarget then
+    LastTargetPlate = tp_frame
+  end
+
   PlatesVisible[plate] = unitid
   PlatesByUnit[unitid] = tp_frame
   PlatesByGUID[unit.guid] = plate
 
+  -- Initialized nameplate style
   Addon:UpdateNameplateStyle(plate, unitid)
+  Addon.InitializeStyle(tp_frame)
 
-  -- Update state data for which there are no events when players enters world
-
-  ElementsUnitData(tp_frame)
-
-  UpdateUnitContext(unit, unitid)
-  UpdateUnitCondition(unit, unitid)	-- This updates a bunch of properties
-
-  Addon:UnitStyle_NameDependent(unit)
-  ProcessUnitChanges(tp_frame)
+  -- Initialize scale and transparency
+  tp_frame:SetScale(Addon.UIScale * Addon:SetScale(tp_frame.unit))
+  UpdatePlate_Transparency(tp_frame, unit)
 
   ElementsUnitAdded(tp_frame)
 
@@ -458,57 +379,9 @@ local function OnShowNameplate(plate, unitid)
   OnUpdateCastMidway(tp_frame, unitid)
 end
 
--- OnUpdateNameplate
-local function OnUpdateNameplate(plate)
-  local tp_frame = plate.TPFrame
-  local unit = tp_frame.unit
-  local unitid = unit.unitid
-
-  --Addon:UpdateUnitIdentity(plate.TPFrame, unitid)
-  --UpdateUnitContext(unit, unitid)
-  UpdateUnitCondition(unit, unitid)	-- This updates a bunch of properties
-  ProcessUnitChanges(tp_frame)
-  OnUpdateCastMidway(tp_frame, unitid)
-end
-
--- OnHealthUpdate
-local function OnHealthUpdate(plate)
-  local tp_frame = plate.TPFrame
-  local unit = tp_frame.unit
-  local unitid = unit.unitid
-
-  UpdateUnitCondition(unit, unitid)
-  ProcessUnitChanges(tp_frame)
-  OnUpdateCastMidway(tp_frame, unitid)
-
-  -- Fix a bug where the overlay for non-interruptible casts was shown even for interruptible casts when entering combat while the unit was already casting
-  --    if unit.isCasting and visual.castbar:IsShown()then
-  --      visual.castbar:SetShownInterruptOverlay(unit.spellIsShielded)
-  --    end
-end
-
 -- OnResetNameplate
 local function OnResetNameplate(plate)
-  -- wipe(plate.TPFrame.unit)
-  wipe(plate.TPFrame.unitcache)
-
   OnShowNameplate(plate, PlatesVisible[plate])
-end
-
-
--- Update individual plate
-local function UnitConditionChanged(unitid)
-  if UnitIsUnit("player", unitid) then return end -- skip personal resource bar
-
-  local plate = GetNamePlateForUnit(unitid)
-  if plate then
-    OnHealthUpdate(plate)
-  end
-end
-
--- Update everything
-local function WorldConditionChanged()
-  SetUpdateAll()
 end
 
 ---------------------------------------------------------------------------------------------------------------------
@@ -707,9 +580,11 @@ function Addon:ForceUpdate()
     UpdatePlate_Transparency = UpdatePlate_SetAlpha
   end
 
-  for plate in pairs(self.PlatesVisible) do
+  for plate, _ in pairs(PlatesVisible) do
     if plate.TPFrame.Active then
       OnResetNameplate(plate)
+      -- TODO: Better would be to implement a custom event SettingsUpdate
+      --Addon:UNIT_FACTION(unitid)
     end
   end
 end
@@ -741,7 +616,7 @@ local ENABLED_EVENTS = {
   "NAME_PLATE_UNIT_REMOVED",
 
   "PLAYER_TARGET_CHANGED",
-  --PLAYER_FOCUS_CHANGED = WorldConditionChanged, -- no idea why we shoul listen for this event
+  --PLAYER_FOCUS_CHANGED = ..., -- no idea why we shoul listen for this event
   UPDATE_MOUSEOVER_UNIT = Addon.Elements.GetElement("MouseoverHighlight").UPDATE_MOUSEOVER_UNIT,
   "RAID_TARGET_UPDATE",
 
@@ -751,7 +626,7 @@ local ENABLED_EVENTS = {
   --"UNIT_ABSORB_AMOUNT_CHANGED",
   "UNIT_THREAT_LIST_UPDATE",
   "UNIT_FACTION",
-  UNIT_LEVEL = Addon.Elements.GetElement("Level").UNIT_LEVEL,
+  "UNIT_LEVEL",
 
   "UNIT_SPELLCAST_START",
   UNIT_SPELLCAST_DELAYED = UnitSpellcastMidway,
@@ -765,8 +640,8 @@ local ENABLED_EVENTS = {
   -- UNIT_SPELLCAST_FAILED_QUIET
   -- UNIT_SPELLCAST_INTERRUPTED
 
-  PLAYER_CONTROL_LOST = WorldConditionChanged,
-  PLAYER_CONTROL_GAINED = WorldConditionChanged,
+  --PLAYER_CONTROL_LOST = ..., -- Does not seem to be necessary
+  --PLAYER_CONTROL_GAINED = ...,  -- Does not seem to be necessary
 
   "COMBAT_LOG_EVENT_UNFILTERED",
   "UI_SCALE_CHANGED",
@@ -920,6 +795,10 @@ function Addon:PLAYER_ENTERING_WORLD()
     -- reset to previous setting
     self.CVars:RestoreFromProfile("nameplateGlobalScale")
   end
+
+  -- Call some events manually to initialize nameplates correctly as these events are not called upon login
+  --   * Scale is initalized via UNIT_FACTION as this event fires at PLAYER_ENTERING_WORLD for every unit visible
+  --   * Transparency is initalized via UNIT_FACTION as this event fires at PLAYER_ENTERING_WORLD for every unit visible
 end
 
 -- Fires when the player leaves combat status
@@ -950,17 +829,6 @@ function Addon:PLAYER_REGEN_ENABLED()
   if db.EnemyUnits ~= "NONE" then
     SetCVar("nameplateShowEnemies", (db.EnemyUnits == "SHOW_COMBAT" and 0) or 1)
   end
-
---  local tp_frame
---  for plate, _ in pairs(PlatesVisible) do
---    tp_frame = plate.TPFrame
---    print ("Combat ended ", tp_frame.unit.unitid, "-", tp_frame.unit.InCombat)
---    if tp_frame.unit.InCombat then
---      PublishEvent("CombatEnded", tp_frame)
---    end
---  end
-
-  SetUpdateAll()
 end
 
 -- Fires when the player enters combat status
@@ -976,8 +844,6 @@ function Addon:PLAYER_REGEN_DISABLED()
   if db.EnemyUnits ~= "NONE" then
     SetCVar("nameplateShowEnemies", (db.EnemyUnits == "SHOW_COMBAT" and 1) or 0)
   end
-
-  SetUpdateAll()
 end
 
 function Addon:NAME_PLATE_CREATED(plate)
@@ -1009,6 +875,13 @@ function Addon:NAME_PLATE_UNIT_REMOVED(unitid)
   local tp_frame = plate.TPFrame
 
   tp_frame.Active = false
+
+  -- Update LastTargetPlate as target units may leave the screen, lose their nameplate and
+  -- get a new one when the enter the screen again
+  if tp_frame.unit.isTarget then
+    LastTargetPlate = nil
+  end
+
   tp_frame:Hide()
 
   PlatesVisible[plate] = nil
@@ -1021,7 +894,6 @@ function Addon:NAME_PLATE_UNIT_REMOVED(unitid)
   Widgets:OnUnitRemoved(tp_frame, tp_frame.unit)
 
   wipe(tp_frame.unit)
-  wipe(tp_frame.unitcache)
 
   -- Remove anything from the function queue
   plate.UpdateMe = false
@@ -1030,45 +902,29 @@ end
 function Addon:UNIT_NAME_UPDATE(unitid)
   local tp_frame = PlatesByUnit[unitid]
   if tp_frame and tp_frame.Active then
-    local unit, stylename = tp_frame.unit, tp_frame.stylename
-
-    unit.name, _ = UnitName(unitid)
-
-    --Addon:UnitStyle_UnitType(extended, unit)
-    local plate_style = Addon:UnitStyle_NameDependent(unit)
-    if plate_style ~= stylename then
-      -- Totem or Custom Nameplate
-      --print ("Unit Style changed:", plate_style, "=>", extended.stylename)
-      ProcessUnitChanges(tp_frame)
-    end
+    tp_frame.unit.name = UnitName(unitid)
   end
 end
 
 function Addon:PLAYER_TARGET_CHANGED()
-  -- Target Castbar Offset
-  local tp_frame
-  if LastTargetPlate and LastTargetPlate.TPFrame.Active then
-    tp_frame = LastTargetPlate.TPFrame
+  -- If the previous target unit's nameplate is still shown, update it:
+    if LastTargetPlate and LastTargetPlate.Active then
+      LastTargetPlate.unit.isTarget = false
+      PublishEvent("TargetLost", LastTargetPlate)
 
-    tp_frame.unit.isTarget = false
-    LastTargetPlate = nil
+      LastTargetPlate = nil
+    end
 
-    PublishEvent("TargetLost", tp_frame)
-  end
+    local plate = GetNamePlateForUnit("target")
+    --if plate and plate.TPFrame and plate.TPFrame.stylename ~= "" then
+    if plate and plate.TPFrame.Active then
+      LastTargetPlate = plate.TPFrame
 
-  local plate = GetNamePlateForUnit("target")
-  --if plate and plate.TPFrame and plate.TPFrame.stylename ~= "" then
-  if plate and plate.TPFrame.Active then
-    tp_frame = plate.TPFrame
-
-    tp_frame.unit.isTarget = true
-    LastTargetPlate = plate
-
-    PublishEvent("TargetGained", tp_frame)
-  end
-
-  SetUpdateAll()
+      LastTargetPlate.unit.isTarget = true
+      PublishEvent("TargetGained", LastTargetPlate)
+    end
 end
+
 
 function Addon:RAID_TARGET_UPDATE()
   for unitid, tp_frame in pairs(PlatesByUnit) do
@@ -1091,7 +947,7 @@ function Addon:UNIT_HEALTH_FREQUENT(unitid)
   end
 end
 
-function  Addon:UNIT_THREAT_LIST_UPDATE(unitid)
+function Addon:UNIT_THREAT_LIST_UPDATE(unitid)
   local tp_frame = PlatesByUnit[unitid]
   if tp_frame and tp_frame.Active then
     local threat_status = UnitThreatSituation("player", unitid)
@@ -1104,35 +960,35 @@ function  Addon:UNIT_THREAT_LIST_UPDATE(unitid)
       unit.ThreatStatus = threat_status
       unit.ThreatLevel = THREAT_REFERENCE[threat_status]
       unit.InCombat = UnitAffectingCombat(unitid)
-
-      -- plate.UpdateMe = true -- transparency, scale, and color still must be updated this way
-
-      -- UpdateUnitContext(unit, unitid)
-      -- ProcessUnitChanges()
-      CheckNameplateStyle(tp_frame)
-      UpdatePlate_Transparency(tp_frame, unit)
-      UpdateIndicator_CustomScale(tp_frame, unit)
-      UpdateUnitCache(tp_frame, unit)
     end
 
     PublishEvent("ThreatUpdate", tp_frame, unit)
+    Addon:UpdateIndicatorNameplateColor(tp_frame)
   end
 end
 
 -- Update all elements that depend on the unit's reaction towards the player
 function Addon:UNIT_FACTION(unitid)
   if unitid == "player" then
-    SetUpdateAll() -- Update all plates
+    for _, tp_frame in pairs(PlatesByUnit) do
+      UpdateUnitReaction(tp_frame.unit, unitid)
+      PublishEvent("FationUpdate", tp_frame)
+    end
   else
     -- Update just the unitid's plate
-    local plate = GetNamePlateForUnit(unitid)
-    if plate and plate.TPFrame.Active then
-      local tp_frame = plate.TPFrame
-      local unit = tp_frame.unit
-
-      UpdateUnitCondition(unit, unitid)
-      ProcessUnitChanges(tp_frame)
+    local tp_frame = PlatesByUnit[unitid]
+    if tp_frame and tp_frame.Active then
+      UpdateUnitReaction(tp_frame.unit, unitid)
+      PublishEvent("FationUpdate", tp_frame)
     end
+  end
+end
+
+function Addon:UNIT_LEVEL(unitid)
+  -- Update just the unitid's plate
+  local tp_frame = PlatesByUnit[unitid]
+  if tp_frame and tp_frame.Active then
+    UpdateUnitLevel(tp_frame.unit, unitid)
   end
 end
 
@@ -1212,42 +1068,3 @@ function Addon:UI_SCALE_CHANGED()
   Addon:UIScaleChanged()
   Addon:ForceUpdate()
 end
-
----------------------------------------------------------------------------------------------------------------------
--- Nameplate Detection & Update Loop
----------------------------------------------------------------------------------------------------------------------
-
-local TidyPlatesCore = CreateFrame("Frame", nil, WorldFrame)
-TidyPlatesCore:SetFrameStrata("TOOLTIP") 	-- When parented to WorldFrame, causes OnUpdate handler to run close to last
-
--- OnUpdate; This function is run frequently, on every clock cycle
-local function OnUpdate(self, e)
-  local plate, curChildren
-
-  for plate in pairs(PlatesVisible) do
-    local UpdateMe = UpdateAll or plate.UpdateMe
-    local UpdateHealth = plate.UpdateHealth
-
-    -- Check for an Update Request
-    if UpdateMe or UpdateHealth then
-      print ("Nameplate - OnUpdate:", plate.TPFrame.unit.unitid)
-
-      if not UpdateMe then
-        OnHealthUpdate(plate)
-      else
-        OnUpdateNameplate(plate)
-      end
-      plate.UpdateMe = false
-      plate.UpdateHealth = false
-    end
-
-    -- This would be useful for alpha fades
-    -- But right now it's just going to get set directly
-    -- extended:SetAlpha(extended.requestedAlpha)
-  end
-
-  -- Reset Mass-Update Flag
-  UpdateAll = false
-end
-
-TidyPlatesCore:SetScript("OnUpdate", OnUpdate)

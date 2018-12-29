@@ -35,17 +35,6 @@ function Element.Created(tp_frame)
 end
 
 -- Called in processing event: NAME_PLATE_UNIT_ADDED
-function Element.UnitData(tp_frame)
-  local unit = tp_frame.unit
-
-  local unit_level = UnitEffectiveLevel(unit.unitid)
-  local level_color = GetCreatureDifficultyColor(unit_level)
-
-  unit.level = unit_level
-  unit.levelcolorRed, unit.levelcolorGreen, unit.levelcolorBlue = level_color.r, level_color.g, level_color.b
-end
-
--- Called in processing event: NAME_PLATE_UNIT_ADDED
 function Element.UnitAdded(tp_frame)
   local level_text = tp_frame.visual.LevelText
   local unit = tp_frame.unit
@@ -78,6 +67,8 @@ function Element.UpdateStyle(tp_frame, style)
     if style.shadow then
       level_text:SetShadowColor(0,0,0, 1)
       level_text:SetShadowOffset(1, -1)
+    else
+      level_text:SetShadowColor(0,0,0,0)
     end
 
     level_text:SetSize(style.width, style.height)
@@ -90,11 +81,11 @@ function Element.UpdateStyle(tp_frame, style)
   end
 end
 
-function Element.UNIT_LEVEL(unitid)
+local function UNIT_LEVEL(unitid)
   local tp_frame = PlatesByUnit[unitid]
   if tp_frame and tp_frame.Active then
-    Element.UnitData(tp_frame)
     Element.UnitAdded(tp_frame)
   end
 end
 
+SubscribeEvent(Element, "UNIT_LEVEL", UNIT_LEVEL)

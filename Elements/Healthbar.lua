@@ -285,7 +285,13 @@ local function UnitAbsorbsUpdate(unitid)
   end
 end
 
+local function TargetUpdate(tp_frame)
+  tp_frame.visual.Healthbar:SetAllColors(Addon:SetHealthbarColor(tp_frame.unit))
+end
+
 SubscribeEvent(Element, "TargetMarkerUpdate", TargetMarkerUpdate)
 SubscribeEvent(Element, "UNIT_HEALTH_FREQUENT", UNIT_HEALTH_FREQUENT)
 SubscribeEvent(Element, "UNIT_ABSORB_AMOUNT_CHANGED", UnitAbsorbsUpdate)
 SubscribeEvent(Element, "UNIT_MAXHEALTH", UnitAbsorbsUpdate)
+SubscribeEvent(Element, "TargetGained", TargetUpdate)
+SubscribeEvent(Element, "TargetLost", TargetUpdate)

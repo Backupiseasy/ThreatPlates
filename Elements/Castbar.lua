@@ -155,12 +155,12 @@ function Element.Created(tp_frame)
 end
 
 -- Called in processing event: NAME_PLATE_UNIT_ADDED
-function Element.UnitAdded(tp_frame)
-end
+--function Element.UnitAdded(tp_frame)
+--end
 
 -- Called in processing event: NAME_PLATE_UNIT_REMOVED
-function Element.UnitRemoved(tp_frame)
-end
+--function Element.UnitRemoved(tp_frame)
+--end
 
 -- Called in processing event: UpdateStyle in Nameplate.lua
 function Element.UpdateStyle(tp_frame, style)

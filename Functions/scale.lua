@@ -6,14 +6,25 @@ local ThreatPlates = Addon.ThreatPlates
 ---------------------------------------------------------------------------------------------------
 
 -- Lua APIs
+local pairs = pairs
 
 -- WoW APIs
 local UnitExists = UnitExists
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
+local PlatesByUnit = Addon.PlatesByUnit
 local PlayerRoleIsTank = Addon.PlayerRoleIsTank
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
+
+---------------------------------------------------------------------------------------------------
+-- Local variables
+---------------------------------------------------------------------------------------------------
+
+---------------------------------------------------------------------------------------------------
+-- Element code
+---------------------------------------------------------------------------------------------------
+local Element = "Scale"
 
 local function ScaleSituational(unit)
 	local db = TidyPlatesThreat.db.profile.nameplate
@@ -176,13 +187,56 @@ function Addon:SetScale(unit)
 	return scale
 end
 
+---------------------------------------------------------------------------------------------------
+-- React to events that could change the nameplate scale/size
+---------------------------------------------------------------------------------------------------
+
 local function SituationalEvent(tp_frame)
   tp_frame:SetScale(Addon.UIScale * Addon:SetScale(tp_frame.unit))
 end
 
-SubscribeEvent("Scale", "MouseoverOnEnter", SituationalEvent)
-SubscribeEvent("Scale", "MouseoverOnLeave", SituationalEvent)
-SubscribeEvent("Scale", "CastingStarted", SituationalEvent)
-SubscribeEvent("Scale", "CastingStopped", SituationalEvent)
-SubscribeEvent("Scale", "TargetMarkerUpdate", SituationalEvent)
+-- Update the target unit and all non-target units
+local function TargetGained(tp_frame)
+  local ui_scale = Addon.UIScale
+
+  -- Update the nameplate of the current target unit
+  tp_frame:SetScale(ui_scale * Addon:SetScale(tp_frame.unit))
+
+  local db = TidyPlatesThreat.db.profile.nameplate
+  if db.toggle.NonTargetS then
+    -- Update all non-target units
+    for _, frame in pairs(PlatesByUnit) do
+      if not frame.unit.isTarget and frame.Active then
+        frame:SetScale(ui_scale * Addon:SetScale(frame.unit))
+      end
+    end
+  end
+end
+
+-- Update all units unless there is a new target unit (TargetGained will be called then anyway)
+local function TargetLost(tp_frame)
+  local ui_scale = Addon.UIScale
+
+  -- Update the nameplate of the unit that lost the target
+  tp_frame:SetScale(ui_scale * Addon:SetScale(tp_frame.unit))
+
+  if UnitExists("target") then return end
+
+  -- Update all units as there is no target now (except the unit that lost the target as it was already updated above
+  for _, frame in pairs(PlatesByUnit) do
+    if frame ~= tp_frame and frame.Active then
+      frame:SetScale(ui_scale * Addon:SetScale(frame.unit))
+    end
+  end
+end
+
+SubscribeEvent(Element, "MouseoverOnEnter", SituationalEvent)
+SubscribeEvent(Element, "MouseoverOnLeave", SituationalEvent)
+SubscribeEvent(Element, "CastingStarted", SituationalEvent)
+SubscribeEvent(Element, "CastingStopped", SituationalEvent)
+SubscribeEvent(Element, "TargetMarkerUpdate", SituationalEvent)
+SubscribeEvent(Element, "TargetGained", TargetGained)
+SubscribeEvent(Element, "TargetLost", TargetLost)
+SubscribeEvent(Element, "FactionUpdate", SituationalEvent)
+SubscribeEvent(Element, "ThreatUpdate", SituationalEvent)
 

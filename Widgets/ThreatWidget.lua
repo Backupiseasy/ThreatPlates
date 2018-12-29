@@ -132,22 +132,22 @@ function Widget:UpdateFrame(widget_frame, unit)
 
   local style = (PlayerRoleIsTank() and "tank") or "dps"
 
-  local threat_value = UnitThreatSituation("player", unit.unitid) or 0
-  local threat_situation = THREAT_REFERENCE[threat_value]
+  local threat_status = UnitThreatSituation("player", unit.unitid) or 0
+  local threat_level = THREAT_REFERENCE[threat_status]
 
   if style == "tank" then -- Tanking uses regular textures / swapped for dps / healing
     if db.toggle.OffTank and Addon:UnitIsOffTanked(unit) then
-      threat_situation = "OFFTANK"
+      threat_level = "OFFTANK"
     end
   else -- dps or normal
-    threat_situation = REVERSE_THREAT_SITUATION[threat_situation]
+    threat_level = REVERSE_THREAT_SITUATION[threat_level]
   end
 
   if db.art.theme == "bar" then
-    widget_frame.LeftTexture:SetTexture(PATH .. db.art.theme.."\\".. threat_situation)
+    widget_frame.LeftTexture:SetTexture(PATH .. db.art.theme.."\\".. threat_level)
   else
-    widget_frame.LeftTexture:SetTexture(PATH .. db.art.theme.."\\".. threat_situation)
-    widget_frame.RightTexture:SetTexture(PATH .. db.art.theme.."\\".. threat_situation)
+    widget_frame.LeftTexture:SetTexture(PATH .. db.art.theme.."\\".. threat_level)
+    widget_frame.RightTexture:SetTexture(PATH .. db.art.theme.."\\".. threat_level)
   end
 
   widget_frame:Show()

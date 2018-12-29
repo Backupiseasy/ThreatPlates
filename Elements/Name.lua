@@ -68,6 +68,8 @@ function Element.UpdateStyle(tp_frame, style)
     if style.shadow then
       name_text:SetShadowColor(0,0,0, 1)
       name_text:SetShadowOffset(1, -1)
+    else
+      name_text:SetShadowColor(0,0,0,0)
     end
 
     name_text:SetSize(style.width, style.height)
@@ -100,5 +102,13 @@ local function UNIT_NAME_UPDATE(unitid)
   end
 end
 
+local function UNIT_HEALTH_FREQUENT(unitid)
+  local tp_frame = PlatesByUnit[unitid]
+  if tp_frame and tp_frame.Active then
+    tp_frame.visual.NameText:SetTextColor(Addon:SetNameColor(tp_frame.unit))
+  end
+end
+
 SubscribeEvent(Element, "TargetMarkerUpdate", TargetMarkerUpdate)
 SubscribeEvent(Element, "UNIT_NAME_UPDATE", UNIT_NAME_UPDATE)
+SubscribeEvent(Element, "UNIT_HEALTH_FREQUENT", UNIT_HEALTH_FREQUENT)

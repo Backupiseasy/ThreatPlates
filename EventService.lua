@@ -33,6 +33,8 @@ local SubscribersByEvent = {}
 local EventHandlerFrame = CreateFrame("Frame", nil, WorldFrame)
 
 local function EventHandler(self, event, ...)
+  --print ("Publishing Event", event, ...)
+
   -- Process the main subscriber that regestered the event
   local subscriber = RegisteredEvents[event]
   if subscriber then
@@ -78,7 +80,10 @@ EventHandlerFrame:SetScript("OnEvent", EventHandler)
 -- Threat-Plates-internal events
 ---------------------------------------------------------------------------------------------------
 local INTERNAL_EVENTS = {
-  ThreatUpdate = true,        -- Parameters: tp_frame, unitid
+  -- Payload:
+  --   { Name = "tp_frame", Type = "table", Nilable = false }
+  --   { Name = "unitid", Type = "string", Nilable = false }
+  ThreatUpdate = true,
   MouseoverOnEnter = true,    -- Parameters: tp_frame
   MouseoverOnLeave = true,    -- Parameters: tp_frame
   CastingStarted = true,      -- Parameters: tp_frame
@@ -86,6 +91,14 @@ local INTERNAL_EVENTS = {
   TargetMarkerUpdate = true,  -- Parameters: tp_frame
   TargetGained = true,        -- Parameters: tp_frame
   TargetLost = true,          -- Parameters: tp_frame
+  -- Payload:
+  --   { Name = "tp_frame", Type = "table", Nilable = false },
+  FactionUpdate = true,
+  -- Payload:
+  --   { Name = "tp_frame", Type = "table", Nilable = false }
+  --   { Name = "style", Type = "table", Nilable = false }
+  --   { Name = "stylename", Type = "string", Nilable = false }
+  StyleUpdate = true,
 }
 
 ---------------------------------------------------------------------------------------------------
@@ -139,7 +152,7 @@ function EventService.SubscribeUnitEvent(subscriber, event, unitid, func)
 end
 
 function EventService.Publish(event, ...)
-  local pairs, SubscribersByEvent = pairs, SubscribersByEvent
+  --print ("Publishing event", event, "=>", ...)
 
   -- Process all subscribers that subscribed to the event
   local all_subscribers = SubscribersByEvent[event]
