@@ -141,12 +141,12 @@ local function CreateCopyFrame()
   frame:SetCallback("OnEscapePressed", function()
     frame:Hide()
   end)
+  frame:SetLayout("fill")
 
   local editBox = AceGUI:Create("MultiLineEditBox")
   editBox:SetFullWidth(true)
   editBox.button:Hide()
   editBox.label:SetText("Paste ThreatPlates profile string into the box and then close the window") --TODO: localisation
-  editBox.frame:SetClipsChildren(true)
 
   frame:AddChild(editBox)
   frame.editBox = editBox
