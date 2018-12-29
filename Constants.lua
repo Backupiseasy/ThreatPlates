@@ -1732,7 +1732,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
         x_hv = 0,
         y_hv = -20,
         x_target = 0,
-        y_target = -4,
+        y_target = 0,
         show = true,
         ShowInHeadlineView = false,
       },
