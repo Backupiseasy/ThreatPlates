@@ -240,8 +240,13 @@ local function ShowCopyFrame(mode, modeArg)
 
       --apply imported profile as a new profile
       TidyPlatesThreat.db:SetProfile("imported profile") --will create a new profile
-      TidyPlatesThreat.db.profile = deserialized
 
+      --[[
+        NOTE: using merge as there appears to be an observer that writes changes to the savedvariables.
+        using assignment (profile = deserialized) removes this functionality which means the imported profile is never saved.
+      ]]--
+
+      Addon.MergeIntoTable(TidyPlatesThreat.db.profile, deserialized)
       Addon:ForceUpdate()
     end
 
