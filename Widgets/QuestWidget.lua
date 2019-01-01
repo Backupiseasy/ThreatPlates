@@ -19,7 +19,7 @@ local string, tonumber = string, tonumber
 local WorldFrame, CreateFrame = WorldFrame, CreateFrame
 local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
 local UnitName, UnitIsUnit, UnitDetailedThreatSituation, UnitThreatSituation = UnitName, UnitIsUnit, UnitDetailedThreatSituation, UnitThreatSituation
-local GetNumQuestLeaderBoards, GetQuestObjectiveInfo, GetQuestLogTitle, GetNumQuestLogEntries = GetNumQuestLeaderBoards, GetQuestObjectiveInfo, GetQuestLogTitle, GetNumQuestLogEntries
+local GetNumQuestLeaderBoards, GetQuestObjectiveInfo, GetQuestLogTitle, GetNumQuestLogEntries, GetQuestLogIndexByID = GetNumQuestLeaderBoards, GetQuestObjectiveInfo, GetQuestLogTitle, GetNumQuestLogEntries, GetQuestLogIndexByID
 local UnitGUID = UnitGUID
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 
@@ -215,13 +215,7 @@ function Widget:AddQuestCacheEntry(questIndex)
   end
 end
 
-function Widget:UpdateQuestCacheEntry(questIndex)
-  local title, _, _, _, _, _, _, questID = GetQuestLogTitle(questIndex)
-
-  if not title then
-    return
-  end
-
+function Widget:UpdateQuestCacheEntry(questIndex, title)
   if not self.Quests[title] then --for whatever reason it doesn't exist, so just add it
     self:AddQuestCacheEntry(questIndex)
     return
@@ -253,16 +247,24 @@ function Widget:PLAYER_ENTERING_WORLD()
 end
 
 function Widget:QUEST_WATCH_UPDATE(questIndex)
-  self.QuestsToUpdate[questIndex] = true
+  local title, _, _, _, _, _, _, questID = GetQuestLogTitle(questIndex)
+
+  if not title then
+    return
+  end
+
+  self.QuestsToUpdate[questID] = title
 end
 
 function Widget:UNIT_QUEST_LOG_CHANGED()
   local QuestsToUpdate = self.QuestsToUpdate
 
   if next(QuestsToUpdate) then
-    for questIndex in pairs(QuestsToUpdate) do
-      self:UpdateQuestCacheEntry(questIndex)
-      QuestsToUpdate[questIndex] = nil
+    for questID, title in pairs(QuestsToUpdate) do
+      local questIndex = GetQuestLogIndexByID(questID)
+
+      self:UpdateQuestCacheEntry(questIndex, title)
+      QuestsToUpdate[questID] = nil
     end
 
     self:UpdateAllFramesAndNameplateColor()
