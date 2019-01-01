@@ -259,13 +259,14 @@ end
 function Widget:UNIT_QUEST_LOG_CHANGED()
   local QuestsToUpdate = self.QuestsToUpdate
 
-  for questIndex in pairs(QuestsToUpdate) do
-    self:UpdateQuestCacheEntry(questIndex)
-    QuestsToUpdate[questIndex] = false
-  end
+  if next(QuestsToUpdate) then
+    for questIndex in pairs(QuestsToUpdate) do
+      self:UpdateQuestCacheEntry(questIndex)
+      QuestsToUpdate[questIndex] = nil
+    end
 
-  QuestsToUpdate = {}
-  self:UpdateAllFramesAndNameplateColor()
+    self:UpdateAllFramesAndNameplateColor()
+  end
 end
 
 function Widget:QUEST_ACCEPTED(questIndex, questID)
