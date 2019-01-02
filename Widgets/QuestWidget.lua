@@ -13,15 +13,13 @@ Widget.QuestsToUpdate = {}
 ---------------------------------------------------------------------------------------------------
 
 -- Lua APIs
-local string, tonumber = string, tonumber
+local string, tonumber, pairs, next = string, tonumber, pairs, next
 
 -- WoW APIs
 local WorldFrame, CreateFrame = WorldFrame, CreateFrame
 local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
-local UnitName, UnitIsUnit, UnitDetailedThreatSituation, UnitThreatSituation = UnitName, UnitIsUnit, UnitDetailedThreatSituation, UnitThreatSituation
+local UnitName, UnitDetailedThreatSituation = UnitName, UnitDetailedThreatSituation
 local GetNumQuestLeaderBoards, GetQuestObjectiveInfo, GetQuestLogTitle, GetNumQuestLogEntries = GetNumQuestLeaderBoards, GetQuestObjectiveInfo, GetQuestLogTitle, GetNumQuestLogEntries
-local UnitGUID = UnitGUID
-local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
@@ -30,12 +28,17 @@ local InCombat = false
 local TooltipFrame = CreateFrame("GameTooltip", "ThreatPlates_Tooltip", nil, "GameTooltipTemplate")
 local PlayerName = UnitName("player")
 local ICON_COLORS = {}
-local Font = nil
+local Font
 
 local FONT_SCALING = 0.3
 local TEXTURE_SCALING = 0.5
 local ICON_PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\QuestWidget\\"
 
+---------------------------------------------------------------------------------------------------
+-- Local variables
+---------------------------------------------------------------------------------------------------
+local Settings
+local HideInCombat
 ---------------------------------------------------------------------------------------------------
 -- Quest Functions
 ---------------------------------------------------------------------------------------------------
@@ -156,12 +159,10 @@ local function ShowQuestUnit(unit)
   return true
 end
 
-local function ShowQuestUnitHealthbar(unit)
+function Addon:ShowQuestUnit(unit)
   local db = TidyPlatesThreat.db.profile.questWidget
   return db.ON and db.ModeHPBar and ShowQuestUnit(unit)
 end
-
-ThreatPlates.ShowQuestUnit = ShowQuestUnitHealthbar
 
 function Widget:CreateQuest(questID, questIndex)
   local Quest = {
@@ -248,30 +249,43 @@ end
 -- Event Watcher Code for Quest Widget
 ---------------------------------------------------------------------------------------------------
 
-function Widget:PLAYER_ENTERING_WORLD()
-	self:UpdateAllFramesAndNameplateColor()
+function Widget:RefreshCombatVisisbility()
+  for _, tp_frame in pairs(Addon.PlatesByUnit) do
+    local widget_frame = tp_frame.widgets.Quest
+    if widget_frame.Active and widget_frame.IsQuestUnit then
+      -- Call UpdateFrame as widget may be non-initialized if player entered world while in combat
+      self:UpdateFrame(widget_frame, tp_frame.unit)
+      self:PublishEvent("QuestUpdate", tp_frame)  -- to update healthbar/name color, if necessary
+    end
+  end
 end
 
 function Widget:QUEST_WATCH_UPDATE(questIndex)
   self.QuestsToUpdate[questIndex] = true
 end
 
-function Widget:UNIT_QUEST_LOG_CHANGED()
+function Widget:UNIT_QUEST_LOG_CHANGED(unitid)
   local QuestsToUpdate = self.QuestsToUpdate
 
-  for questIndex in pairs(QuestsToUpdate) do
-    self:UpdateQuestCacheEntry(questIndex)
-    QuestsToUpdate[questIndex] = false
-  end
+  if next(QuestsToUpdate) then
+    for questIndex, _ in pairs(QuestsToUpdate) do
+      self:UpdateQuestCacheEntry(questIndex)
+      QuestsToUpdate[questIndex] = nil
+    end
 
-  QuestsToUpdate = {}
-  self:UpdateAllFramesAndNameplateColor()
+    -- Re-scan all nameplates for updated quest information (not only new quest targets, but
+    -- also, e.g., changes to the progress information
+    -- TODO: RefreshCombatVisibility would be sufficient here if new quest targets would only be signaled
+    -- by QUEST_ACCEPTED - with quest with multiple intermediate steps, I am not sure if that is true
+    self:UpdateAllFramesWithPublish("QuestUpdate")
+  end
 end
 
 function Widget:QUEST_ACCEPTED(questIndex, questID)
   self:AddQuestCacheEntry(questIndex)
 
-  self:UpdateAllFramesAndNameplateColor()
+  -- Re-scan all nameplates for new quest information
+  self:UpdateAllFramesWithPublish("QuestUpdate")
 end
 
 function Widget:QUEST_REMOVED(questId)
@@ -285,29 +299,30 @@ function Widget:QUEST_REMOVED(questId)
     Quests[questId] = nil
   end
 
-  self:UpdateAllFramesAndNameplateColor()
+  self:UpdateNameplates()
 end
 
 function Widget:PLAYER_REGEN_ENABLED()
   InCombat = false
-	self:UpdateAllFramesAndNameplateColor()
+  if TidyPlatesThreat.db.profile.questWidget.HideInCombat then
+    Widget:RefreshCombatVisisbility()
+  end
 end
 
 function Widget:PLAYER_REGEN_DISABLED()
   InCombat = true
-	self:UpdateAllFramesAndNameplateColor()
+  if TidyPlatesThreat.db.profile.questWidget.HideInCombat then
+    Widget:RefreshCombatVisisbility()
+  end
 end
 
-function Widget:UNIT_THREAT_LIST_UPDATE(unitid)
-  if not unitid or unitid == 'player' or UnitIsUnit('player', unitid) then return end
-
-  local plate = GetNamePlateForUnit(unitid)
-  if plate and plate.TPFrame.Active then
-    local widget_frame = plate.TPFrame.widgets.Quest
-    if widget_frame.Active then
-      self:UpdateFrame(widget_frame, plate.TPFrame.unit)
-      Addon:UpdateIndicatorNameplateColor(plate.TPFrame)
-    end
+function Widget:ThreatUpdate(tp_frame)
+  local widget_frame = tp_frame.widgets.Quest
+  if widget_frame.Active and not TidyPlatesThreat.db.profile.questWidget.HideInCombat and widget_frame.IsQuestUnit then
+    -- Call UpdateFrame as widget may be non-initialized if player entered world while in combat
+    self:UpdateFrame(widget_frame, tp_frame.unit)
+    --widget_frame:SetShown(widget_frame.IsQuestUnit and tp_frame.unit.ThreatLevel == nil)
+    self:PublishEvent("QuestUpdate", tp_frame) -- to update healthbar/name color, if necessary
   end
 end
 
@@ -352,9 +367,8 @@ function Widget:OnEnable()
 
   self:GenerateQuestCache()
 
-  self:SubscribeEvent("PLAYER_ENTERING_WORLD")
+  -- self:SubscribeEvent("PLAYER_ENTERING_WORLD") -- Disabled as nameplates are not yet created when this event fires
   self:SubscribeEvent("QUEST_WATCH_UPDATE")
-
   self:SubscribeUnitEvent("UNIT_QUEST_LOG_CHANGED", "player")
 
   self:SubscribeEvent("QUEST_ACCEPTED")
@@ -366,8 +380,8 @@ function Widget:OnEnable()
   -- Handle in-combat situations:
   self:SubscribeEvent("PLAYER_REGEN_ENABLED")
   self:SubscribeEvent("PLAYER_REGEN_DISABLED")
-  -- Also use UNIT_THREAT_LIST_UPDATE as new mobs may enter the combat mid-fight (PLAYER_REGEN_DISABLED already triggered)
-  self:SubscribeEvent("UNIT_THREAT_LIST_UPDATE")
+  -- Also use ThreatUpdate Threatas new mobs may enter the combat mid-fight (PLAYER_REGEN_DISABLED already triggered)
+  self:SubscribeEvent("ThreatUpdate")
 
   InCombat = InCombatLockdown()
 end
@@ -396,6 +410,8 @@ end
 
 function Widget:UpdateFrame(widget_frame, unit)
   local show, quest_type, current = IsQuestUnit(unit)
+
+  widget_frame.IsQuestUnit = show
 
   local db = TidyPlatesThreat.db.profile.questWidget
   if show and db.ModeIcon and ShowQuestUnit(unit) then
@@ -454,4 +470,10 @@ function Widget:UpdateFrame(widget_frame, unit)
   else
     widget_frame:Hide()
   end
+end
+
+function Widget:UpdateSettings()
+  Settings = TidyPlatesThreat.db.profile.questWidget
+
+  HideInCombat = Settings.HideInCombat
 end

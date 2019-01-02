@@ -117,6 +117,17 @@ ThreatPlates.AUTOMATION = {
 }
 
 ----------------------------------------------------------------------------------------------------
+-- Constants for threat/combat handling stuff
+---------------------------------------------------------------------------------------------------
+
+Addon.THREAT_REFERENCE = {
+  [0] = "LOW",
+  [1] = "MEDIUM",
+  [2] = "MEDIUM",
+  [3] = "HIGH",
+}
+
+----------------------------------------------------------------------------------------------------
 -- Paths
 ---------------------------------------------------------------------------------------------------
 
@@ -157,6 +168,18 @@ ThreatPlates.FontStyle = {
 }
 
 -- "By Threat", "By Level Color", "By Normal/Elite/Boss"
+ThreatPlates.ENEMY_HEALTHBAR_COLOR = {
+  REACTION = L["By Reaction"],
+  CLASS = L["By Class"],
+  HEALTH = L["By Health"],
+}
+
+ThreatPlates.FRIENDLY_HEALTHBAR_COLOR = {
+  REACTION = L["By Reaction"],
+  CLASS = L["By Class"],
+  HEALTH = L["By Health"],
+}
+
 ThreatPlates.ENEMY_TEXT_COLOR = {
   CLASS = L["By Class"],
   CUSTOM = L["By Custom Color"],
@@ -324,17 +347,17 @@ ThreatPlates.DEFAULT_SETTINGS = {
       toggle  = true,
       amount = -0.3
     },
-    tidyplatesFade = false,
-    healthColorChange = false,
+    --tidyplatesFade = false, -- removed in 9.2.0
+    --healthColorChange = false, -- removed in 9.2.0 TODO:
     customColor =  false,
-    allowClass = true, -- old default: false,
-    friendlyClass = true, -- old default: false,
+    -- allowClass = true, -- old default: false, removed in 9.2.0
+    -- friendlyClass = true, -- old default: false, removed in 9.2.0
     friendlyClassIcon = false,
     HostileClassIcon = true,
     cacheClass = false,
     optionRoleDetectionAutomatic = true, -- old default: false,
     ShowThreatGlowOnAttackedUnitsOnly = true,
-    ShowThreatGlowOffTank = true,
+    -- ShowThreatGlowOffTank = true,  -- never used
     NamePlateEnemyClickThrough = false,
     NamePlateFriendlyClickThrough = false,
     ShowFriendlyBlizzardNameplates = false,
@@ -348,6 +371,34 @@ ThreatPlates.DEFAULT_SETTINGS = {
     Scale = {
       IgnoreUIScale = true,
       PixelPerfectUI = false,
+    },
+    Healthbar = {
+      FriendlyUnitMode = "CLASS",
+      EnemyUnitMode = "CLASS",
+      UseRaidMarkColoring = false,
+      BackgroundUseForegroundColor = false,
+      BackgroundOpacity = 0.7, -- old default: 1,
+      BackgroundColor = RGB(0, 0, 0),
+    },
+    Name = {
+      HealthbarMode = {
+        -- TODO: Healthbar Mode und Name Mode!
+        FriendlyUnitMode = "CUSTOM",
+        FriendlyTextColor = RGB(255, 255, 255),
+        EnemyUnitMode = "CUSTOM",
+        EnemyTextColor = RGB(255, 255, 255),
+        UseRaidMarkColoring = false,
+      },
+      NameMode = {
+        FriendlyUnitMode = "CLASS",
+        FriendlyTextColor = RGB(0, 255, 0),
+        EnemyUnitMode = "CLASS",
+        EnemyTextColor = RGB(0, 255, 0),
+        UseRaidMarkColoring = false,
+      },
+    },
+    StatusText = {
+      -- TODO:
     },
     HeadlineView = {
       -- ON = false, -- removed in 9.1.0
@@ -382,11 +433,6 @@ ThreatPlates.DEFAULT_SETTINGS = {
       ForceNonAttackableUnits = false,
       ForceFriendlyInCombat = "NONE",
       --
-      EnemyTextColorMode = "CLASS",
-      EnemyTextColor = RGB(0, 255, 0),
-      FriendlyTextColorMode = "CLASS",
-      FriendlyTextColor = RGB(0, 255, 0),
-      UseRaidMarkColoring = false,
       SubtextColorUseHeadline = false,
       SubtextColorUseSpecific = true,
       SubtextColor =  RGB(255, 255, 255, 1),
@@ -435,22 +481,6 @@ ThreatPlates.DEFAULT_SETTINGS = {
       a = 1
     },
     castbarColorInterrupted = RGB(255, 0, 255, 1),
-    aHPbarColor = RGB_P(0, 1, 0),
-    bHPbarColor = RGB_P(1, 1, 0),
---    cHPbarColor = {
---      r = 1,
---      g = 0,
---      b = 0
---    },
---    fHPbarColor = RGB(0, 255, 0),
---    nHPbarColor = RGB(255, 255, 0),
---    tapHPbarColor = RGB(100, 100, 100),
---    HPbarColor = RGB(255, 0, 0),
---    tHPbarColor = {
---      r = 0,
---      g = 0.5,
---      b = 1,
---    },
     ColorByReaction = {
       FriendlyPlayer = RGB(0, 0, 255),           -- blue
       FriendlyNPC = RGB(0, 255, 0),              -- green
@@ -458,8 +488,12 @@ ThreatPlates.DEFAULT_SETTINGS = {
       HostilePlayer = RGB(255, 0, 0),            -- red
       NeutralUnit = RGB(255, 255, 0),            -- yellow
       TappedUnit = RGB(110, 110, 110, 1),	       -- grey
-      DisconnectedUnit = RGB(128, 128, 128, 1),  -- dray, darker than tapped color
+      -- DisconnectedUnit = RGB(128, 128, 128, 1),  -- Removed in 9.2
       UnfriendlyFaction = RGB(255, 153, 51, 1),  -- brown/orange for unfriendly, hostile, non-attackable units (unit reaction = 3)
+    },
+    ColorByHealth = {
+      Low = RGB_P(0, 1, 0),
+      High = RGB_P(1, 1, 0),
     },
     text = {
       amount = false, -- old default: true,
@@ -1699,9 +1733,6 @@ ThreatPlates.DEFAULT_SETTINGS = {
         height = 10,
         texture = "Smooth", -- old default: "ThreatPlatesBar",
         backdrop = "Smooth", -- old default: "ThreatPlatesEmpty",
-        BackgroundUseForegroundColor = false,
-        BackgroundOpacity = 0.7, -- old default: 1,
-        BackgroundColor = RGB(0, 0, 0),
         ShowAbsorbs = true,
         AbsorbColor = RGB(0, 255, 255, 1),
         AlwaysFullAbsorb = false,

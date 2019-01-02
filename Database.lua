@@ -25,19 +25,6 @@ local RGB = Addon.RGB
 -- Global functions for accessing the configuration
 ---------------------------------------------------------------------------------------------------
 
--- Returns if the currently active spec is tank (true) or dps/heal (false)
-Addon.PlayerClass = select(2, UnitClass("player"))
-local PLAYER_ROLE_BY_SPEC = ThreatPlates.SPEC_ROLES[Addon.PlayerClass]
-
-function Addon.PlayerRoleIsTank()
-  local db = TidyPlatesThreat.db
-  if db.profile.optionRoleDetectionAutomatic then
-    return PLAYER_ROLE_BY_SPEC[GetSpecialization()] or false
-  else
-    return db.char.spec[GetSpecialization()]
-  end
-end
-
 -- Sets the role of the index spec or the active spec to tank (value = true) or dps/healing
 function TidyPlatesThreat:SetRole(value,index)
   if index then
@@ -82,8 +69,11 @@ local function GetDefaultSettingsV1(defaults)
   local new_defaults = Addon.CopyTable(defaults)
 
   local db = new_defaults.profile
-  db.allowClass = false
-  db.friendlyClass = false
+  -- Migrated to Healthbar.FriendlyUnitMode/EnemyUnitMode
+  -- db.allowClass = false, db.friendlyClass = false
+  db.Healthbar.FriendlyUnitMode = "REACTION"
+  db.Healthbar.EnemyUnitMode = "REACTION"
+  db.Healthbar.BackgroundOpacity = 1
   db.optionRoleDetectionAutomatic = false
   --db.HeadlineView.width = 116
   db.text.amount = true
@@ -98,7 +88,6 @@ local function GetDefaultSettingsV1(defaults)
   db.settings.healthborder.texture = "TP_Border_Default"
   db.settings.healthbar.texture = "ThreatPlatesBar"
   db.settings.healthbar.backdrop = "ThreatPlatesEmpty"
-  db.settings.healthbar.BackgroundOpacity = 1
   db.settings.castborder.texture = "TP_CastBarOverlay"
   db.settings.castbar.texture = "ThreatPlatesBar"
   db.settings.name.typeface = "Accidental Presidency"
@@ -460,6 +449,61 @@ local function MigrationComboPointsWidget(profile_name, profile)
   end
 end
 
+local function MigrationColorSettings(profile_name, profile)
+  if DatabaseEntryExists(profile, { "settings", "healthbar" }) then
+    profile.Healthbar = profile.Healthbar or {}
+
+    profile.Healthbar.BackgroundUseForegroundColor = profile.settings.healthbar.BackgroundUseForegroundColor
+    profile.Healthbar.BackgroundOpacity = profile.settings.healthbar.BackgroundOpacity
+    profile.Healthbar.BackgroundColor = profile.settings.healthbar.BackgroundColor
+
+    DatabaseEntryDelete(profile, { "settings", "healthbar", "BackgroundUseForegroundColor" })
+    DatabaseEntryDelete(profile, { "settings", "healthbar", "BackgroundOpacity" })
+    DatabaseEntryDelete(profile, { "settings", "healthbar", "BackgroundColor" })
+  end
+
+  if DatabaseEntryExists(profile, { "settings", "raidicon" }) then
+    profile.Healthbar = profile.Healthbar or {}
+
+    profile.Healthbar.UseRaidMarkColoring = profile.settings.raidicon.hpColor
+
+    DatabaseEntryDelete(profile, { "settings", "raidicon", "hpColor" })
+  end
+
+  if DatabaseEntryExists(profile, { "settings", "name" }) then
+    profile.Name = profile.Name or {}
+    profile.Name.HealthbarMode = profile.Name.HealthbarMode or {}
+    profile.Name.NameMode = profile.Name.NameMode or {}
+
+    profile.Name.HealthbarMode.FriendlyUnitMode = profile.HeadlineView.FriendlyTextColorMode
+    profile.Name.HealthbarMode.FriendlyTextColor = profile.HeadlineView.FriendlyTextColor
+    profile.Name.HealthbarMode.EnemyUnitMode = profile.HeadlineView.EnemyTextColorMode
+    profile.Name.HealthbarMode.EnemyTextColor = profile.HeadlineView.EnemyTextColor
+    profile.Name.HealthbarMode.UseRaidMarkColoring = profile.HeadlineView.UseRaidMarkColoring
+
+    DatabaseEntryDelete(profile, { "HeadlineView", "FriendlyTextColorMode" })
+    DatabaseEntryDelete(profile, { "HeadlineView", "FriendlyTextColor" })
+    DatabaseEntryDelete(profile, { "HeadlineView", "EnemyTextColorMode" })
+    DatabaseEntryDelete(profile, { "HeadlineView", "EnemyTextColor" })
+    DatabaseEntryDelete(profile, { "HeadlineView", "UseRaidMarkColoring" })
+
+    profile.Name.NameMode.FriendlyUnitMode = profile.settings.name.FriendlyTextColorMode
+    profile.Name.NameMode.FriendlyTextColor = profile.settings.name.FriendlyTextColor
+    profile.Name.NameMode.EnemyUnitMode = profile.settings.name.EnemyTextColorMode
+    profile.Name.NameMode.EnemyTextColor = profile.settings.name.EnemyTextColor
+    profile.Name.NameMode.UseRaidMarkColoring = profile.settings.name.UseRaidMarkColoring
+
+    DatabaseEntryDelete(profile, { "settings", "name", "FriendlyTextColorMode" })
+    DatabaseEntryDelete(profile, { "settings", "name", "FriendlyTextColor" })
+    DatabaseEntryDelete(profile, { "settings", "name", "EnemyTextColorMode" })
+    DatabaseEntryDelete(profile, { "settings", "name", "EnemyTextColor" })
+    DatabaseEntryDelete(profile, { "settings", "name", "UseRaidMarkColoring" })
+  end
+
+  -- Migration from to FriendlyUnitMode/EnemyUnitMode
+  -- healthColorChange customColor allowClass ...
+end
+
 ---- Settings in the SavedVariables file that should be migrated and/or deleted
 local DEPRECATED_SETTINGS = {
 --  NamesColor = { MigrateNamesColor, },                        -- settings.name.color
@@ -486,6 +530,10 @@ local DEPRECATED_SETTINGS = {
   MigrationComboPointsWidget = { MigrationComboPointsWidget, "9.1.0" },  -- (changed in 9.1.0)
   ForceFriendlyInCombatEx = { MigrationForceFriendlyInCombat }, -- (changed in 9.1.0)
   HeadlineViewEnableToggle = { "HeadlineView", "ON" },        -- (removed in 9.1.0)
+  ShowThreatGlowOffTank = { "ShowThreatGlowOffTank" },        -- (removed in 9.2.0), never used
+  MigrationColorSettings = { MigrationColorSettings, "9.2.0" },  -- (changed in 9.2.0)
+  DisconnectedUnitColor = { "ColorByReaction", "DisconnectedUnit" }, -- (removed in 9.2.0)
+  DisconnectedUnitColor = { "tidyplatesFade" }, -- (removed in 9.2.0)
 }
 
 local function MigrateDatabase(current_version)

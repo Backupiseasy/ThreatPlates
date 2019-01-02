@@ -20,7 +20,6 @@ local TidyPlatesThreat = TidyPlatesThreat
 local PlatesByUnit = Addon.PlatesByUnit
 local TOTEMS = Addon.TOTEMS
 local GetUnitVisibility = ThreatPlates.GetUnitVisibility
-local PlayerRoleIsTank = Addon.PlayerRoleIsTank
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
 local ActiveTheme = Addon.Theme
 
@@ -182,7 +181,7 @@ function Addon:GetThreatStyle(unit)
   -- style tank/dps only used for NPCs/non-player units
   if InCombatLockdown() and unit.type == "NPC" and unit.reaction ~= "FRIENDLY" and TidyPlatesThreat.db.profile.threat.ON then
     if Addon:ShowThreatFeedback(unit) then
-      return (PlayerRoleIsTank() and "tank") or "dps"
+      return (Addon.PlayerRoleIsTank and "tank") or "dps"
     end
   end
 
@@ -248,13 +247,25 @@ function Addon:SetStyle(unit)
     -- style tank/dps only used for hostile (enemy, neutral) NPCs
     if InCombatLockdown() and unit.type == "NPC" and TidyPlatesThreat.db.profile.threat.ON then
       if Addon:ShowThreatFeedback(unit) then
-        style = (PlayerRoleIsTank() and "tank") or "dps"
+        style = (Addon.PlayerRoleIsTank and "tank") or "dps"
       end
     end
   end
 
   return style or "normal"
 end
+
+local NAMEPLATE_STYLES_BY_THEME = {
+  dps = "HEALTHBAR",
+  tank = "HEALTHBAR",
+  normal = "HEALTHBAR",
+  totem = "HEALTHBAR",
+  unique = "HEALTHBAR",
+  empty = "NONE",
+  etotem = "NONE",
+  NameOnly = "NAME",
+  ["NameOnly-Unique"] = "NAME",
+}
 
 local function CheckNameplateStyle(tp_frame)
   local unit = tp_frame.unit
@@ -264,6 +275,7 @@ local function CheckNameplateStyle(tp_frame)
   if tp_frame.stylename ~= stylename then
     local style = ActiveTheme[stylename]
 
+    tp_frame.PlateStyle = NAMEPLATE_STYLES_BY_THEME[stylename]
     tp_frame.stylename = stylename
     tp_frame.style = style
     unit.style = stylename
@@ -280,9 +292,13 @@ local function UNIT_NAME_UPDATE(unitid)
     if stylename and tp_frame.stylename ~= stylename then
       local style = ActiveTheme[stylename]
 
+      tp_frame.PlateStyle = NAMEPLATE_STYLES_BY_THEME[stylename]
       tp_frame.stylename = stylename
       tp_frame.style = style
       tp_frame.unit.style = stylename
+
+      tp_frame.PlateStyle = ((stylename == "NameOnly" or stylename == "NameOnly-Unique") and "NAME") or "HEALTHBAR"
+
 
       PublishEvent("StyleUpdate", tp_frame, style, stylename)
     end

@@ -13,7 +13,7 @@ local pairs, next = pairs, next
 -- WoW APIs
 
 -- ThreatPlates APIs
-local EventServiceSubscribe, EventServiceSubscribeUnit = Addon.EventService.Subscribe, Addon.EventService.SubscribeUnitEvent
+local EventServiceSubscribe, EventServiceSubscribeUnit, EventServicePublish = Addon.EventService.Subscribe, Addon.EventService.SubscribeUnitEvent, Addon.EventService.Publish
 local EventServiceUnsubscribe, EventServiceUnsubscribeAll = Addon.EventService.Unsubscribe, Addon.EventService.UnsubscribeAll
 
 local WidgetHandler = {
@@ -80,6 +80,10 @@ local function SubscribeUnitEvent(widget, event, unitid, func)
 --  widget.EventHandlerFrame:RegisterUnitEvent(event, unitid)
 end
 
+local function PublishEvent(widget, event, ...)
+  EventServicePublish(event, ...)
+end
+
 local function UnsubscribeEvent(widget, event)
   EventServiceUnsubscribe(widget, event)
 
@@ -125,16 +129,18 @@ local function UpdateAllFrames(widget)
   end
 end
 
-local function UpdateAllFramesAndNameplateColor(widget)
+-- If no event to fire as part of the update is specified, QuestUpdate is used
+local function UpdateAllFramesWithPublish(widget, event)
   for plate, _ in pairs(Addon.PlatesVisible) do
     local tp_frame = plate.TPFrame
 
     local widget_frame = tp_frame.widgets[widget.Name]
     if widget_frame.Active then
-      widget:UpdateFrame(widget_frame, tp_frame.unit)
 
-      -- Also update healthbar and name color
-      Addon:UpdateIndicatorNameplateColor(tp_frame)
+      widget:UpdateFrame(widget_frame, tp_frame.unit)
+      -- Also publish that unit data was changed (mainly for color updates currently)
+      print ("UpdateAllFramesWithPublish: Fire Event =>", event, "for", tp_frame.unit.name)
+      PublishEvent(event, tp_frame)
     end
   end
 end
@@ -191,11 +197,12 @@ function WidgetHandler:NewWidget(widget_name)
     --
     SubscribeEvent = SubscribeEvent,
     SubscribeUnitEvent = SubscribeUnitEvent,
+    PublishEvent = PublishEvent,
     UnsubscribeEvent = UnsubscribeEvent,
     UnsubscribeAllEvents = UnsubscribeAllEvents,
     --
     UpdateAllFrames = UpdateAllFrames,
-    UpdateAllFramesAndNameplateColor = UpdateAllFramesAndNameplateColor,
+    UpdateAllFramesWithPublish = UpdateAllFramesWithPublish,
     -- Default functions for enabling/disabling the widget
     OnEnable = function(self) end, -- do nothing
     OnDisable = function(self)

@@ -28,6 +28,12 @@ local IGNORED_STYLES = {
 -- Local variables
 ---------------------------------------------------------------------------------------------------
 local Settings
+local BorderBackdrop = {
+  bgFile = "",
+  edgeFile = "",
+  edgeSize = 0,
+  insets = { left = 0, right = 0, top = 0, bottom = 0 }
+}
 
 ---------------------------------------------------------------------------------------------------
 -- Element code
@@ -37,11 +43,6 @@ local Element = Addon.Elements.NewElement("Healthbar")
 ---------------------------------------------------------------------------------------------------
 -- Additional functions
 ---------------------------------------------------------------------------------------------------
-
-local function SetAllColors(self, rBar, gBar, bBar, aBar, rBackdrop, gBackdrop, bBackdrop, aBackdrop)
-  self:SetStatusBarColor(rBar or 1, gBar or 1, bBar or 1, aBar or 1)
-  self.Border:SetBackdropColor(rBackdrop or 1, gBackdrop or 1, bBackdrop or 1, aBackdrop or 1)
-end
 
 local function UpdateAbsorbs(tp_frame)
   if not Settings.ShowAbsorbs then return end
@@ -174,6 +175,7 @@ function Element.Created(tp_frame)
   absorbs.Overlay = healthbar:CreateTexture(nil, "OVERLAY", 0)
   absorbs.Overlay:SetTexture("Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\Striped_Texture.tga", true, true)
   absorbs.Overlay:SetHorizTile(true)
+
   --absorbbar.tileSize = 64
   --      absorbbar.overlay:SetTexture("Interface\\RaidFrame\\Shield-Overlay", true, true);	--Tile both vertically and horizontally
   --      absorbbar.overlay:SetHorizTile(true)
@@ -187,7 +189,6 @@ function Element.Created(tp_frame)
   absorbs_spark:SetPoint("TOPLEFT", healthbar, "TOPRIGHT", -4, 1)
   absorbs.Spark = absorbs_spark
 
-  healthbar.SetAllColors = SetAllColors
   healthbar.Absorbs = absorbs
 
   --frame:SetScript("OnSizeChanged", OnSizeChanged)
@@ -201,7 +202,6 @@ function Element.UnitAdded(tp_frame)
 
   healthbar:SetMinMaxValues(0, unit.healthmax)
   healthbar:SetValue(unit.health)
-  healthbar:SetAllColors(Addon:SetHealthbarColor(tp_frame.unit))
   UpdateAbsorbs(tp_frame)
 end
 
@@ -209,7 +209,7 @@ end
 --function Element.UnitRemoved(tp_frame)
 --end
 
----- Called in processing event: UpdateStyle in Nameplate.lua
+-- Called in processing event: UpdateStyle in Nameplate.lua
 function Element.UpdateStyle(tp_frame, style)
   local healthbar, healthbar_style = tp_frame.visual.Healthbar, style.healthbar
   local healthborder_style = style.healthborder
@@ -221,16 +221,12 @@ function Element.UpdateStyle(tp_frame, style)
     healthbar:SetPoint(healthbar_style.anchor, tp_frame, healthbar_style.anchor, healthbar_style.x, healthbar_style.y)
 
     local offset = healthborder_style.offset
-    healthbar.Border:ClearAllPoints()
-    healthbar.Border:SetPoint("TOPLEFT", healthbar, "TOPLEFT", - offset, offset)
-    healthbar.Border:SetPoint("BOTTOMRIGHT", healthbar, "BOTTOMRIGHT", offset, - offset)
-    healthbar.Border:SetBackdrop({
-      bgFile = healthbar_style.backdrop,
-      edgeFile = healthborder_style.texture,
-      edgeSize = healthborder_style.edgesize,
-      insets = { left = offset, right = offset, top = offset, bottom = offset },
-    })
-    healthbar.Border:SetBackdropBorderColor(0, 0, 0, 1)
+    local border = healthbar.Border
+    border:ClearAllPoints()
+    border:SetPoint("TOPLEFT", healthbar, "TOPLEFT", - offset, offset)
+    border:SetPoint("BOTTOMRIGHT", healthbar, "BOTTOMRIGHT", offset, - offset)
+    border:SetBackdrop(BorderBackdrop)
+    border:SetBackdropBorderColor(0, 0, 0, 1)
 
     -- Absorbs
     local absorbs = healthbar.Absorbs
@@ -254,18 +250,19 @@ end
 
 function Element.UpdateSettings()
   Settings = TidyPlatesThreat.db.profile.settings.healthbar
+
+  local db = TidyPlatesThreat.db.profile.settings.healthborder
+  BorderBackdrop.bgFile = ThreatPlates.Media:Fetch('statusbar', Settings.backdrop, true)
+  BorderBackdrop.edgeFile = (db.show and ThreatPlates.Art .. db.texture) or nil
+  BorderBackdrop.edgeSize = db.EdgeSize
+  BorderBackdrop.insets.left = db.Offset
+  BorderBackdrop.insets.right = db.Offset
+  BorderBackdrop.insets.top = db.Offset
+  BorderBackdrop.insets.bottom = db.Offset
 end
 
 --function Element.UpdateFrame()
 --end
-
-local function TargetMarkerUpdate(tp_frame)
-  local healthbar = tp_frame.visual.Healthbar
-
-  if healthbar:IsShown() then
-    healthbar:SetAllColors(Addon:SetHealthbarColor(tp_frame.unit))
-  end
-end
 
 local function UNIT_HEALTH_FREQUENT(unitid)
   local tp_frame = PlatesByUnit[unitid]
@@ -273,25 +270,36 @@ local function UNIT_HEALTH_FREQUENT(unitid)
     local healthbar = tp_frame.visual.Healthbar
     local unit = tp_frame.unit
 
-    healthbar:SetMinMaxValues(0, unit.healthmax)
-    healthbar:SetValue(unit.health)
+    if healthbar:IsShown() then
+      healthbar:SetMinMaxValues(0, unit.healthmax)
+      healthbar:SetValue(unit.health)
+    end
   end
 end
 
 local function UnitAbsorbsUpdate(unitid)
   local tp_frame = PlatesByUnit[unitid]
   if tp_frame and tp_frame.Active then
-    UpdateAbsorbs(tp_frame)
+    local healthbar = tp_frame.visual.Healthbar
+
+    if healthbar:IsShown() then
+      UpdateAbsorbs(tp_frame)
+    end
   end
 end
 
-local function TargetUpdate(tp_frame)
-  tp_frame.visual.Healthbar:SetAllColors(Addon:SetHealthbarColor(tp_frame.unit))
+local function ColorUpdate(tp_frame, fg_color, bg_color)
+  local healthbar = tp_frame.visual.Healthbar
+
+  if healthbar:IsShown() then
+    healthbar:SetStatusBarColor(fg_color.r, fg_color.g, fg_color.b, 1)
+    healthbar.Border:SetBackdropColor(bg_color.r, bg_color.g, bg_color.b, bg_color.a)
+
+    assert (bg_color.r ~= 0 or bg_color.g ~= 0 or bg_color.b ~= 0 or bg_color.a ~= 0, "Not initialized background: " .. tostring(bg_color.r) .. " - " .. tostring(bg_color.g) .. " - " .. tostring(bg_color.b) .. " - " .. tostring(bg_color.a))
+  end
 end
 
-SubscribeEvent(Element, "TargetMarkerUpdate", TargetMarkerUpdate)
+
 SubscribeEvent(Element, "UNIT_HEALTH_FREQUENT", UNIT_HEALTH_FREQUENT)
 SubscribeEvent(Element, "UNIT_ABSORB_AMOUNT_CHANGED", UnitAbsorbsUpdate)
 SubscribeEvent(Element, "UNIT_MAXHEALTH", UnitAbsorbsUpdate)
-SubscribeEvent(Element, "TargetGained", TargetUpdate)
-SubscribeEvent(Element, "TargetLost", TargetUpdate)

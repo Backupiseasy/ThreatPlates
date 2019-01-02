@@ -14,7 +14,6 @@ local UnitExists = UnitExists
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
 local PlatesByUnit = Addon.PlatesByUnit
-local PlayerRoleIsTank = Addon.PlayerRoleIsTank
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
 
 ---------------------------------------------------------------------------------------------------
@@ -101,7 +100,7 @@ local function TransparencyThreat(unit, style)
 	end
 
   local threatSituation = unit.ThreatLevel or "LOW"
-	local style = (PlayerRoleIsTank() and "tank") or "dps"
+	local style = (Addon.PlayerRoleIsTank and "tank") or "dps"
 
   if style == "tank" and db.toggle.OffTank and Addon:UnitIsOffTanked(unit) then
     threatSituation = "OFFTANK"

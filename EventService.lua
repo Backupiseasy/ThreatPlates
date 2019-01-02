@@ -92,13 +92,16 @@ local INTERNAL_EVENTS = {
   TargetGained = true,        -- Parameters: tp_frame
   TargetLost = true,          -- Parameters: tp_frame
   -- Payload:
-  --   { Name = "tp_frame", Type = "table", Nilable = false },
+  --   tp_frame: Frame (table), Nilable = false
   FactionUpdate = true,
   -- Payload:
-  --   { Name = "tp_frame", Type = "table", Nilable = false }
+  --   tp_frame: Frame (table), Nilable = false
   --   { Name = "style", Type = "table", Nilable = false }
   --   { Name = "stylename", Type = "string", Nilable = false }
   StyleUpdate = true,
+  -- Payload:
+  --   tp_frame: Frame (table), Nilable = false
+  QuestUpdate = true, -- Curently: Updates for Quest (Unit Color)
 }
 
 ---------------------------------------------------------------------------------------------------
@@ -112,7 +115,6 @@ function EventService.RegisterEvent(event, func)
 
   RegisteredEvents[event] = func or Addon
   EventHandlerFrame:RegisterEvent(event)
-  -- TidyPlatesThreat:RegisterEvent(event)
 end
 
 -- Subscribe to an event (WoW event or ThreatPlates internal event)

@@ -88,8 +88,8 @@ function Debug:PrintUnit(unit, full_info)
   end
 
   if full_info and unit.unitid then
-    --		DEBUG("  isFriend = ", TidyPlatesUtilityInternal.IsFriend(unit.name))
-    --		DEBUG("  isGuildmate = ", TidyPlatesUtilityInternal.IsGuildmate(unit.name))
+    --		DEBUG("  isFriend = ", Addon:IsFriend(unit.name))
+    --		DEBUG("  isGuildmate = ", Addon:IsGuildmate(unit.name))
     Print("  IsOtherPlayersPet = ", UnitIsOtherPlayersPet(unit))
     Print("  IsBattlePet = ", UnitIsBattlePet(unit.unitid))
     Print("  PlayerControlled = ", UnitPlayerControlled(unit.unitid))
@@ -110,5 +110,21 @@ function Debug:PrintTarget(unit)
 
   if unit.isTarget then
     self:PrintUnit(unit)
+  end
+end
+
+function Debug:ColorToString(color)
+  if not color then
+    return "(nil)"
+  end
+
+  local r, b, g, a = color.r, color.g, color.b, color.a
+
+  if a then
+    r, b, g, a = ceil(r * 255), ceil(g * 255), ceil(b * 255), ceil(a * 255)
+    return string.format("%i / %i / %i / %i", r, g, b, a)
+  else
+    r, b, g = ceil(r * 255), ceil(g * 255), ceil(b * 255)
+    return string.format("%i / %i / %i", r, g, b)
   end
 end

@@ -1,5 +1,4 @@
 local ADDON_NAME, Addon = ...
-local ThreatPlates = Addon.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------------------------
 -- Variables and References
@@ -13,27 +12,18 @@ local max, tonumber, math_abs = math.max, tonumber, math.abs
 -- WoW APIs
 local wipe = wipe
 local WorldFrame, UIParent, CreateFrame, GameFontNormal, UNKNOWNOBJECT, INTERRUPTED = WorldFrame, UIParent, CreateFrame, GameFontNormal, UNKNOWNOBJECT, INTERRUPTED
+local UnitName, UnitReaction, UnitClassification, UnitLevel, UnitClass = UnitName, UnitReaction, UnitClassification, UnitLevel, UnitClass
+local UnitGUID, UnitEffectiveLevel, UnitSelectionColor, UnitThreatSituation =UnitGUID, UnitEffectiveLevel, UnitSelectionColor, UnitThreatSituation
+local UnitHealth, UnitHealthMax, UnitAffectingCombat, UnitIsTapDenied = UnitHealth, UnitHealthMax, UnitAffectingCombat, UnitIsTapDenied
+local UnitChannelInfo, UnitCastingInfo, UnitPlayerControlled = UnitChannelInfo, UnitCastingInfo, UnitPlayerControlled
+local UnitIsUnit, UnitIsPlayer, UnitExists = UnitIsUnit, UnitIsPlayer, UnitExists
+local GetCreatureDifficultyColor, GetRaidTargetIndex = GetCreatureDifficultyColor, GetRaidTargetIndex
+local GetTime, GetCVar, Lerp, CombatLogGetCurrentEventInfo = GetTime, GetCVar, Lerp, CombatLogGetCurrentEventInfo
+local GetSpecialization = GetSpecialization
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
-local UnitName, UnitIsUnit, UnitReaction, UnitExists = UnitName, UnitIsUnit, UnitReaction, UnitExists
-local UnitClassification = UnitClassification
-local UnitLevel = UnitLevel
-local UnitIsPlayer = UnitIsPlayer
-local UnitClass = UnitClass
-local UnitGUID = UnitGUID
-local UnitEffectiveLevel = UnitEffectiveLevel
-local GetCreatureDifficultyColor = GetCreatureDifficultyColor
-local UnitSelectionColor = UnitSelectionColor
-local UnitHealth, UnitHealthMax = UnitHealth, UnitHealthMax
-local UnitThreatSituation = UnitThreatSituation
-local UnitAffectingCombat = UnitAffectingCombat
-local GetRaidTargetIndex = GetRaidTargetIndex
-local UnitIsTapDenied = UnitIsTapDenied
-local GetTime = GetTime
-local UnitChannelInfo, UnitCastingInfo = UnitChannelInfo, UnitCastingInfo
-local UnitPlayerControlled = UnitPlayerControlled
-local GetCVar, Lerp, CombatLogGetCurrentEventInfo = GetCVar, Lerp, CombatLogGetCurrentEventInfo
 
 -- ThreatPlates APIs
+local ThreatPlates = Addon.ThreatPlates
 local TidyPlatesThreat = TidyPlatesThreat
 local Widgets = Addon.Widgets
 local RegisterEvent, SubscribeEvent, PublishEvent = Addon.EventService.RegisterEvent, Addon.EventService.Subscribe, Addon.EventService.Publish
@@ -44,6 +34,7 @@ local ElementsUpdateStyle, ElementsUpdateSettings = Addon.Elements.UpdateStyle, 
 local CASTBAR_INTERRUPT_HOLD_TIME = Addon.CASTBAR_INTERRUPT_HOLD_TIME
 local ON_UPDATE_INTERVAL = Addon.ON_UPDATE_PER_FRAME
 local PLATE_FADE_IN_TIME = Addon.PLATE_FADE_IN_TIME
+local THREAT_REFERENCE = Addon.THREAT_REFERENCE
 
 ---------------------------------------------------------------------------------------------------
 -- Local variables
@@ -85,13 +76,6 @@ local ELITE_REFERENCE = {
 local RARE_REFERENCE = {
   ["rare"] = true,
   ["rareelite"] = true,
-}
-
-local THREAT_REFERENCE = {
-  [0] = "LOW",
-  [1] = "MEDIUM",
-  [2] = "MEDIUM",
-  [3] = "HIGH",
 }
 
 local function GetReactionByColor(red, green, blue)
@@ -165,7 +149,10 @@ local function InitializeUnit(unit, unitid)
   unit.isMouseover = UnitIsUnit("mouseover", unitid)
 
   -- Threat and Combat => UNIT_THREAT_LIST_UPDATE
-  -- See Addon:UNIT_THREAT_LIST_UPDATE(unitid) - is fired after entering world, so no need to update this here
+  local threat_status = UnitThreatSituation("player", unitid)
+  unit.ThreatStatus = threat_status
+  unit.ThreatLevel = THREAT_REFERENCE[threat_status]
+  unit.InCombat = UnitAffectingCombat(unitid)
 
   -- Target Mark => RAID_TARGET_UPDATE
   unit.TargetMarker = RAID_ICON_LIST[GetRaidTargetIndex(unitid)]
@@ -385,19 +372,6 @@ local function OnResetNameplate(plate)
 end
 
 ---------------------------------------------------------------------------------------------------------------------
--- Indicators: These functions update the color, texture, strings, and frames within a style.
----------------------------------------------------------------------------------------------------------------------
-
--- Update the health bar and name coloring, if needed
-function Addon:UpdateIndicatorNameplateColor(tp_frame)
-  local visual = tp_frame.visual
-
-  if visual.Healthbar:IsShown() then
-    visual.Healthbar:SetAllColors(Addon:SetHealthbarColor(tp_frame.unit))
-  end
-end
-
----------------------------------------------------------------------------------------------------------------------
 -- Nameplate Transparency:
 ---------------------------------------------------------------------------------------------------------------------
 
@@ -582,9 +556,8 @@ function Addon:ForceUpdate()
 
   for plate, _ in pairs(PlatesVisible) do
     if plate.TPFrame.Active then
-      OnResetNameplate(plate)
       -- TODO: Better would be to implement a custom event SettingsUpdate
-      --Addon:UNIT_FACTION(unitid)
+      OnResetNameplate(plate)
     end
   end
 end
@@ -645,6 +618,7 @@ local ENABLED_EVENTS = {
 
   "COMBAT_LOG_EVENT_UNFILTERED",
   "UI_SCALE_CHANGED",
+  "ACTIVE_TALENT_GROUP_CHANGED",
 
   --"PLAYER_ALIVE",
   --"PLAYER_LEAVING_WORLD",
@@ -956,32 +930,41 @@ function Addon:UNIT_THREAT_LIST_UPDATE(unitid)
     -- If threat_status is nil, unit is leaving combat
     if threat_status == nil then
       unit.ThreatStatus = nil
+      PublishEvent("ThreatUpdate", tp_frame, unit)
     elseif threat_status ~= unit.ThreatStatus then
       unit.ThreatStatus = threat_status
       unit.ThreatLevel = THREAT_REFERENCE[threat_status]
       unit.InCombat = UnitAffectingCombat(unitid)
+      PublishEvent("ThreatUpdate", tp_frame, unit)
     end
-
-    PublishEvent("ThreatUpdate", tp_frame, unit)
-    Addon:UpdateIndicatorNameplateColor(tp_frame)
   end
 end
 
 -- Update all elements that depend on the unit's reaction towards the player
 function Addon:UNIT_FACTION(unitid)
-  if unitid == "player" then
-    for _, tp_frame in pairs(PlatesByUnit) do
-      UpdateUnitReaction(tp_frame.unit, unitid)
-      PublishEvent("FationUpdate", tp_frame)
-    end
-  else
-    -- Update just the unitid's plate
-    local tp_frame = PlatesByUnit[unitid]
-    if tp_frame and tp_frame.Active then
-      UpdateUnitReaction(tp_frame.unit, unitid)
-      PublishEvent("FationUpdate", tp_frame)
-    end
+  -- I assume here that, if the player's faction changes, also UNIT_FACTION events for all other
+  -- units are fired
+
+  -- So, just update just the unitid's plate
+  local tp_frame = PlatesByUnit[unitid]
+  if tp_frame and tp_frame.Active then
+    UpdateUnitReaction(tp_frame.unit, unitid)
+    PublishEvent("FactionUpdate", tp_frame)
   end
+
+  --  if unitid == "player" then
+--    for _, tp_frame in pairs(PlatesByUnit) do
+--      UpdateUnitReaction(tp_frame.unit, unitid)
+--      PublishEvent("FationUpdate", tp_frame)
+--    end
+--  else
+--    -- Update just the unitid's plate
+--    local tp_frame = PlatesByUnit[unitid]
+--    if tp_frame and tp_frame.Active then
+--      UpdateUnitReaction(tp_frame.unit, unitid)
+--      PublishEvent("FationUpdate", tp_frame)
+--    end
+--  end
 end
 
 function Addon:UNIT_LEVEL(unitid)
@@ -1065,6 +1048,15 @@ end
 --  end
 
 function Addon:UI_SCALE_CHANGED()
-  Addon:UIScaleChanged()
   Addon:ForceUpdate()
+end
+
+function Addon:ACTIVE_TALENT_GROUP_CHANGED()
+  local db = TidyPlatesThreat.db
+  if db.profile.optionRoleDetectionAutomatic then
+    local PLAYER_ROLE_BY_SPEC = ThreatPlates.SPEC_ROLES[Addon.PlayerClass]
+    Addon.PlayerRoleIsTank = PLAYER_ROLE_BY_SPEC[GetSpecialization()] or false
+  else
+    Addon.PlayerRoleIsTank = db.char.spec[GetSpecialization()]
+  end
 end

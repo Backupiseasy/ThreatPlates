@@ -13,14 +13,15 @@ local strsplit = strsplit
 -- WoW APIs
 local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
 local UnitThreatSituation, UnitGroupRolesAssigned, UnitIsUnit = UnitThreatSituation, UnitGroupRolesAssigned, UnitIsUnit
-local UnitGUID, UnitReaction, UnitIsTapDenied, UnitIsConnected = UnitGUID, UnitReaction, UnitIsTapDenied, UnitIsConnected
+local UnitGUID, UnitReaction, UnitIsTapDenied = UnitGUID, UnitReaction, UnitIsTapDenied
+local GetSpecialization = GetSpecialization
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
+local ThreatPlates = Addon.ThreatPlates
 local RGB = Addon.RGB
 
 local COLOR_TRANSPARENT = RGB(0, 0, 0, 0) -- opaque
-
 local CLASSIFICATION_MAPPING = {
   ["boss"] = "Boss",
   ["worldboss"] = "Elite",
@@ -32,6 +33,9 @@ local CLASSIFICATION_MAPPING = {
   ["trivial"] = "Minus",
 }
 
+---------------------------------------------------------------------------------------------------
+-- Local variables
+---------------------------------------------------------------------------------------------------
 Addon.CreatureCache = {}
 
 ---------------------------------------------------------------------------------------------------
@@ -135,9 +139,7 @@ function Addon:SetThreatColor(unit)
   local color
 
   local db = TidyPlatesThreat.db.profile
-  if not UnitIsConnected(unit.unitid) then
-    color = db.ColorByReaction.DisconnectedUnit
-  elseif unit.isTapped then
+  if unit.isTapped then
     color = db.ColorByReaction.TappedUnit
   elseif unit.type == "NPC" and unit.reaction ~= "FRIENDLY" then
     local style = unit.style

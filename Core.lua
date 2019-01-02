@@ -1,12 +1,12 @@
 ﻿local _, Addon = ...
-local t = Addon.ThreatPlates
+local ThreatPlates = Addon.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
 
 -- Lua APIs
-local tonumber = tonumber
+local tonumber, select = tonumber, select
 
 -- WoW APIs
 local SetNamePlateFriendlyClickThrough = C_NamePlate.SetNamePlateFriendlyClickThrough
@@ -15,18 +15,21 @@ local IsInInstance = IsInInstance
 local GetCVar, IsAddOnLoaded = GetCVar, IsAddOnLoaded
 local C_NamePlate_SetNamePlateFriendlySize, C_NamePlate_SetNamePlateEnemySize, Lerp =  C_NamePlate.SetNamePlateFriendlySize, C_NamePlate.SetNamePlateEnemySize, Lerp
 local NamePlateDriverFrame = NamePlateDriverFrame
+local UnitClass, GetSpecialization = UnitClass, GetSpecialization
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
 local LibStub = LibStub
-local L = t.L
+local L = ThreatPlates.L
 local Meta = Addon.Meta
 
 ---------------------------------------------------------------------------------------------------
 -- Global configs and funtions
 ---------------------------------------------------------------------------------------------------
 
-t.Print = function(val,override)
+Addon.PlayerClass = select(2, UnitClass("player"))
+
+ThreatPlates.Print = function(val,override)
   local db = TidyPlatesThreat.db.profile
   if override or db.verbose then
     print(Meta("titleshort")..": "..val)
@@ -46,7 +49,7 @@ local tankRole = L["|cff00ff00tanking|r"]
 local dpsRole = L["|cffff0000dpsing / healing|r"]
 
 function TidyPlatesThreat:RoleText()
-  if Addon.PlayerRoleIsTank() then
+  if Addon.PlayerRoleIsTank then
     return tankRole
   else
     return dpsRole
@@ -94,14 +97,14 @@ StaticPopupDialogs["SwitchToNewLookAndFeel"] = {
   OnAccept = function(self, _, _)
     TidyPlatesThreat.db.global.DefaultsVersion = "SMOOTH"
     TidyPlatesThreat.db.global.CheckNewLookAndFeel = true
-    t.SwitchToCurrentDefaultSettings()
+    ThreatPlates.SwitchToCurrentDefaultSettings()
     TidyPlatesThreat:ReloadTheme()
   end,
   OnCancel = function(self, data, action)
     if action == "clicked" then
       TidyPlatesThreat.db.global.DefaultsVersion = "CLASSIC"
       TidyPlatesThreat.db.global.CheckNewLookAndFeel = true
-      t.SwitchToDefaultSettingsV1()
+      ThreatPlates.SwitchToDefaultSettingsV1()
       TidyPlatesThreat:ReloadTheme()
     end
   end,
@@ -152,28 +155,35 @@ function TidyPlatesThreat:CheckForFirstStartUp()
 
   if not self.db.char.welcome then
     self.db.char.welcome = true
-    local Welcome = L["|cff89f559Welcome to |r|cff89f559Threat Plates!\nThis is your first time using Threat Plates and you are a(n):\n|r|cff"]..t.HCC[Addon.PlayerClass]..self:SpecName().." "..UnitClass("player").."|r|cff89F559.|r\n"
+    local Welcome = L["|cff89f559Welcome to |r|cff89f559Threat Plates!\nThis is your first time using Threat Plates and you are a(n):\n|r|cff"].. ThreatPlates.HCC[Addon.PlayerClass]..self:SpecName().." ".. Addon.PlayerClass .."|r|cff89F559.|r\n"
 
     -- initialize roles for all available specs (level > 10) or set to default (dps/healing)
     for index=1, GetNumSpecializations() do
-      local id, spec_name, description, icon, background, role = GetSpecializationInfo(index)
-      self:SetRole(t.SPEC_ROLES[Addon.PlayerClass][index], index)
+      self:SetRole(ThreatPlates.SPEC_ROLES[Addon.PlayerClass][index], index)
     end
 
-    t.Print(Welcome..L["|cff89f559You are currently in your "]..self:RoleText()..L["|cff89f559 role.|r"])
-    t.Print(L["|cff89f559Additional options can be found by typing |r'/tptp'|cff89F559.|r"])
+    -- Determine player spec
+    if self.db.profile.optionRoleDetectionAutomatic then
+      local PLAYER_ROLE_BY_SPEC = ThreatPlates.SPEC_ROLES[Addon.PlayerClass]
+      Addon.PlayerRoleIsTank = PLAYER_ROLE_BY_SPEC[GetSpecialization()] or false
+    else
+      Addon.PlayerRoleIsTank = self.db.char.spec[GetSpecialization()]
+    end
+
+    ThreatPlates.Print(Welcome..L["|cff89f559You are currently in your "]..self:RoleText()..L["|cff89f559 role.|r"])
+    ThreatPlates.Print(L["|cff89f559Additional options can be found by typing |r'/tptp'|cff89F559.|r"])
 
     local new_version = tostring(Meta("version"))
     if db.version ~= "" and db.version ~= new_version then
       -- migrate and/or remove any old DB entries
-      t.MigrateDatabase(db.version)
+      ThreatPlates.MigrateDatabase(db.version)
     end
     db.version = new_version
   else
     local new_version = tostring(Meta("version"))
     if db.version ~= "" and db.version ~= new_version then
       -- migrate and/or remove any old DB entries
-      t.MigrateDatabase(db.version)
+      ThreatPlates.MigrateDatabase(db.version)
     end
     db.version = new_version
 
@@ -239,12 +249,12 @@ end
 -- by the game client. It's a good time to do things like restore saved settings (see the info on
 -- AceConfig for more notes about that).
 function TidyPlatesThreat:OnInitialize()
-  local defaults = t.DEFAULT_SETTINGS
+  local defaults = ThreatPlates.DEFAULT_SETTINGS
 
   -- change back defaults old settings if wanted preserved it the user want's to switch back
   if ThreatPlatesDB and ThreatPlatesDB.global and ThreatPlatesDB.global.DefaultsVersion == "CLASSIC" then
     -- copy default settings, so that their original values are
-    defaults = t.GetDefaultSettingsV1(defaults)
+    defaults = ThreatPlates.GetDefaultSettingsV1(defaults)
   end
 
   local db = LibStub('AceDB-3.0'):New('ThreatPlatesDB', defaults, 'Default')
@@ -256,10 +266,10 @@ function TidyPlatesThreat:OnInitialize()
   RegisterCallback(self, 'OnProfileReset', 'ProfChange')
 
   -- Setup Interface panel options
-  local app_name = t.ADDON_NAME
+  local app_name = ThreatPlates.ADDON_NAME
   local dialog_name = app_name .. " Dialog"
-  LibStub("AceConfig-3.0"):RegisterOptionsTable(dialog_name, t.GetInterfaceOptionsTable())
-  LibStub("AceConfigDialog-3.0"):AddToBlizOptions(dialog_name, t.ADDON_NAME)
+  LibStub("AceConfig-3.0"):RegisterOptionsTable(dialog_name, ThreatPlates.GetInterfaceOptionsTable())
+  LibStub("AceConfigDialog-3.0"):AddToBlizOptions(dialog_name, ThreatPlates.ADDON_NAME)
 
   -- Setup chat commands
   self:RegisterChatCommand("tptp", "ChatCommand")

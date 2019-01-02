@@ -4,6 +4,7 @@
     <Script file="Animations.lua"/>
     <Script file="ElementHandler.lua"/>
     <!--Order is relevant for creation -->
+    <Script file="Color.lua"/>
     <Script file="Healthbar.lua"/>
     <Script file="Name.lua"/>
     <Script file="Castbar.lua"/>

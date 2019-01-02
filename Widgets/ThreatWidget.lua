@@ -17,15 +17,9 @@ local GetRaidTargetIndex = GetRaidTargetIndex
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
-local PlayerRoleIsTank = Addon.PlayerRoleIsTank
 
 local PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ThreatWidget\\"
-local THREAT_REFERENCE = {
-  [0] = "LOW",
-  [1] = "MEDIUM",
-  [2] = "MEDIUM",
-  [3] = "HIGH",
-}
+local THREAT_REFERENCE = Addon.THREAT_REFERENCE
 local REVERSE_THREAT_SITUATION = {
   HIGH = "LOW",
   MEDIUM ="MEDIUM",
@@ -130,7 +124,7 @@ function Widget:UpdateFrame(widget_frame, unit)
     end
   end
 
-  local style = (PlayerRoleIsTank() and "tank") or "dps"
+  local style = (Addon.PlayerRoleIsTank and "tank") or "dps"
 
   local threat_status = UnitThreatSituation("player", unit.unitid) or 0
   local threat_level = THREAT_REFERENCE[threat_status]

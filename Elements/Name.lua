@@ -10,7 +10,6 @@ local ADDON_NAME, Addon = ...
 -- Lua APIs
 
 -- WoW APIs
-local UnitName = UnitName
 
 -- ThreatPlates APIs
 local PlatesByUnit = Addon.PlatesByUnit
@@ -47,7 +46,6 @@ function Element.UnitAdded(tp_frame)
   local unit = tp_frame.unit
 
   name_text:SetText(unit.name)
-  name_text:SetTextColor(Addon:SetNameColor(unit))
 end
 
 -- Called in processing event: NAME_PLATE_UNIT_REMOVED
@@ -85,16 +83,6 @@ end
 --function Element.UpdateSettings()
 --end
 
-local function TargetMarkerUpdate(tp_frame)
-  local name_text = tp_frame.visual.NameText
-
-  name_text:SetTextColor(Addon:SetNameColor(tp_frame.unit))
-  -- Don't check for IsShown, because if the style changes later, the color will not be corrent
-  -- TODO:
-  --  if name_text:IsShown() then
---  end
-end
-
 local function UNIT_NAME_UPDATE(unitid)
   local tp_frame = PlatesByUnit[unitid]
   if tp_frame and tp_frame.Active then
@@ -102,13 +90,4 @@ local function UNIT_NAME_UPDATE(unitid)
   end
 end
 
-local function UNIT_HEALTH_FREQUENT(unitid)
-  local tp_frame = PlatesByUnit[unitid]
-  if tp_frame and tp_frame.Active then
-    tp_frame.visual.NameText:SetTextColor(Addon:SetNameColor(tp_frame.unit))
-  end
-end
-
-SubscribeEvent(Element, "TargetMarkerUpdate", TargetMarkerUpdate)
 SubscribeEvent(Element, "UNIT_NAME_UPDATE", UNIT_NAME_UPDATE)
-SubscribeEvent(Element, "UNIT_HEALTH_FREQUENT", UNIT_HEALTH_FREQUENT)

@@ -86,7 +86,7 @@ function Widget:FRIENDLIST_UPDATE()
 --      end
 --    end
 
-    self:UpdateAllFramesAndNameplateColor()
+    self:UpdateAllFramesWithPublish("FactionUpdate")
   end
 end
 
@@ -105,7 +105,7 @@ function Widget:GUILD_ROSTER_UPDATE()
 
     ListGuildMembersSize = numTotalGuildMembers
 
-    self:UpdateAllFramesAndNameplateColor()
+    self:UpdateAllFramesWithPublish("FactionUpdate")
   end
 end
 
@@ -127,7 +127,7 @@ function Widget:BN_CONNECTED()
 
     ListBnetFriendsSize = BnetOnline
 
-    self:UpdateAllFramesAndNameplateColor()
+    self:UpdateAllFramesWithPublish("FactionUpdate")
   end
 end
 
@@ -135,14 +135,14 @@ function Widget:BN_FRIEND_TOON_ONLINE(toon_id)
   local _, name = BNGetToonInfo(toon_id)
   ListBnetFriends[name] = ICON_BNET_FRIEND
 
-  self:UpdateAllFramesAndNameplateColor()
+  self:UpdateAllFramesWithPublish("FactionUpdate")
 end
 
 function Widget:BN_FRIEND_TOON_OFFLINE(toon_id)
   local _, name = BNGetToonInfo(toon_id)
   ListBnetFriends[name] = nil
 
-  self:UpdateAllFramesAndNameplateColor()
+  self:UpdateAllFramesWithPublish("FactionUpdate")
 end
 
 function Widget:BN_FRIEND_ACCOUNT_ONLINE(presence_id)
@@ -157,7 +157,7 @@ function Widget:BN_FRIEND_ACCOUNT_ONLINE(presence_id)
 
   ListBnetFriends[character_name] = ICON_BNET_FRIEND
 
-  self:UpdateAllFramesAndNameplateColor()
+  self:UpdateAllFramesWithPublish("FactionUpdate")
 end
 
 function Widget:BN_FRIEND_ACCOUNT_OFFLINE(presence_id)
@@ -172,7 +172,7 @@ function Widget:BN_FRIEND_ACCOUNT_OFFLINE(presence_id)
 
   ListBnetFriends[character_name] = nil
 
-  self:UpdateAllFramesAndNameplateColor()
+  self:UpdateAllFramesWithPublish("FactionUpdate")
 end
 
 function Widget:UNIT_NAME_UPDATE(unitid)
@@ -190,18 +190,15 @@ function Widget:UNIT_NAME_UPDATE(unitid)
   end
 end
 
-local function IsFriend(unit)
+function Addon:IsFriend(unit)
   -- no need to check for ShowInHeadlineView as this is for coloring the healthbar
   return TidyPlatesThreat.db.profile.socialWidget.ON and (ListFriends[unit.fullname] or ListBnetFriends[unit.fullname])
 end
 
-local function IsGuildmate(unit)
+function Addon:IsGuildmate(unit)
   -- no need to check for ShowInHeadlineView as this is for coloring the healthbar
   return TidyPlatesThreat.db.profile.socialWidget.ON and ListGuildMembers[unit.fullname]
 end
-
-ThreatPlates.IsFriend = IsFriend
-ThreatPlates.IsGuildmate = IsGuildmate
 
 ---------------------------------------------------------------------------------------------------
 -- Widget functions for creation and update

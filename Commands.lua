@@ -35,7 +35,7 @@ local function TPTPTOGGLE()
 	if (TidyPlatesThreat.db.profile.optionRoleDetectionAutomatic and TidyPlatesThreat.db.profile.verbose) then
 		TP.Print(L["|cff89F559Threat Plates|r: Role toggle not supported because automatic role detection is enabled."])
 	else
-		if Addon.PlayerRoleIsTank() then
+		if Addon.PlayerRoleIsTank then
 			toggleDPS()
 		else
 			toggleTANK()
@@ -92,7 +92,28 @@ function TidyPlatesThreat:ChatCommand(input)
 	if input == "event" then
     Addon:PrintEventService()
     return
-  end
+	elseif input == "combat" then
+		local plate = C_NamePlate.GetNamePlateForUnit("target")
+		if not plate then return end
+
+		print ("In Combat:", IsInCombat())
+		print ("In Combat with Player:", UnitAffectingCombat("target", "player"))
+		return
+	elseif input == "debug" then
+		local plate = C_NamePlate.GetNamePlateForUnit("target")
+		if not plate then return end
+
+		local tp_frame = plate.TPFrame
+		local unit = tp_frame.unit
+		local stylename = tp_frame.stylename
+		local nameplate_style = ((stylename == "NameOnly" or stylename == "NameOnly-Unique") and "NAME") or "HEALTHBAR"
+
+		print ("Unit Name:", unit.name)
+		print ("Unit Reaction:", unit.reaction)
+		print ("Frame Style:", stylename)
+		print ("Plate Style:", nameplate_style)
+		return
+	end
 
 	--	if input == "plate" then
 --		local plate = C_NamePlate.GetNamePlateForUnit("target")

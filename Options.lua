@@ -4581,7 +4581,7 @@ local function CreateOptionsTable()
                       type = "toggle",
                       desc = L["Use the healthbar's foreground color also for the background."],
                       set = SetThemeValue,
-                      arg = { "settings", "healthbar", "BackgroundUseForegroundColor" },
+                      arg = { "Healthbar", "BackgroundUseForegroundColor" },
                     },
                     BGColorCustomToggle = {
                       name = L["Custom"],
@@ -4595,15 +4595,16 @@ local function CreateOptionsTable()
                       get = function(info, val)
                         return not GetValue(info, val)
                       end,
-                      arg = { "settings", "healthbar", "BackgroundUseForegroundColor" },
+                      arg = { "Healthbar", "BackgroundUseForegroundColor" },
                     },
                     BGColorCustom = {
                       name = L["Color"],
                       order = 70,
                       type = "color",
-                      get = GetColor, set = SetColor, arg = {"settings", "healthbar", "BackgroundColor"},
+                      get = GetColor, set = SetColor,
                       width = "half",
-                      disabled = function() return db.settings.healthbar.BackgroundUseForegroundColor end,
+                      disabled = function() return db.Healthbar.BackgroundUseForegroundColor end,
+                      arg = { "Healthbar", "BackgroundColor"},
                     },
                     BackgroundOpacity = {
                       name = L["Background Transparency"],
@@ -4613,7 +4614,7 @@ local function CreateOptionsTable()
                       max = 1,
                       step = 0.01,
                       isPercent = true,
-                      arg = { "settings", "healthbar", "BackgroundOpacity" },
+                      arg = { "Healthbar", "BackgroundOpacity" },
                     },
                     AbsorbGroup = {
                       name = L["Absorbs"],
@@ -4674,38 +4675,50 @@ local function CreateOptionsTable()
                     },
                   }
                 },
+                Color = {
+                  name = L["Coloring"],
+                  order = 19,
+                  type = "group",
+                  inline = true,
+                  set = SetThemeValue,
+                  args = {
+                    FriendlyColor = {
+                      name = L["Friendly Healthbar Color"],
+                      order = 10,
+                      type = "select",
+                      values = t.FRIENDLY_HEALTHBAR_COLOR,
+                      arg = { "Healthbar", "FriendlyUnitMode" }
+                    },
+                    EnemyColor = {
+                      name = L["Enemy Healthbar Color"],
+                      order = 20,
+                      type = "select",
+                      values = t.ENEMY_HEALTHBAR_COLOR,
+                      arg = { "Healthbar", "EnemyUnitMode" }
+                    },
+                    EnableRaidMarks = {
+                      name = L["Additionally color the healthbar based on the target mark if the unit is marked."],
+                      order = 30,
+                      type = "toggle",
+                      width = "full",
+                      set = SetValue,
+                      get = GetValue,
+                      arg = { "Healthbar", "UseRaidMarkColoring" },
+                    },
+                  },
+                },
                 ColorSettings = {
                   name = L["Coloring"],
                   type = "group",
                   inline = true,
                   order = 20,
                   args = {
-                    General = {
-                      name = L["General Colors"],
-                      order = 10,
-                      type = "group",
-                      inline = true,
-                      get = GetColor,
-                      set = SetColor,
-                      args = {
-                        TappedColor = { name = L["Tapped Units"], order = 1, type = "color", arg = { "ColorByReaction", "TappedUnit" }, },
-                        DCedColor = { name = L["Disconnected Units"], order = 2, type = "color", arg = { "ColorByReaction", "DisconnectedUnit" }, },
-                      },
-                    },
                     HPAmount = {
-                      name = L["Color by Health"],
+                      name = L["Health"],
                       order = 20,
                       type = "group",
                       inline = true,
                       args = {
-                        ColorByHPLevel = {
-                          name = L["Change the color depending on the amount of health points the nameplate shows."],
-                          order = 10,
-                          type = "toggle",
-                          width = "full",
-                          arg = { "healthColorChange" },
-                        },
-                        Header = { name = L["Colors"], type = "header", order = 20, },
                         ColorLow = {
                           name = "Low Color",
                           order = 30,
@@ -4714,7 +4727,7 @@ local function CreateOptionsTable()
                           descStyle = "inline",
                           get = GetColor,
                           set = SetColor,
-                          arg = { "aHPbarColor" },
+                          arg = { "ColorByHealth", "Low" },
                         },
                         ColorHigh = {
                           name = "High Color",
@@ -4724,62 +4737,18 @@ local function CreateOptionsTable()
                           descStyle = "inline",
                           get = GetColor,
                           set = SetColor,
-                          arg = { "bHPbarColor" },
+                          arg = { "ColorByHealth", "High" },
                         },
-                      },
-                    },
-                    ClassColors = {
-                      name = L["Color By Class"],
-                      order = 30,
-                      type = "group",
-                      disabled = function() return db.healthColorChange end,
-                      inline = true,
-                      args = {
-                        Enable = {
-                          name = L["Color Healthbar By Enemy Class"],
-                          order = 1,
-                          type = "toggle",
-                          descStyle = "inline",
-                          width = "double",
-                          arg = { "allowClass" }
-                        },
-                        FriendlyClass = {
-                          name = L["Color Healthbar By Friendly Class"],
-                          order = 2,
-                          type = "toggle",
-                          descStyle = "inline",
-                          width = "double",
-                          arg = { "friendlyClass" },
-                        },
---                        FriendlyCaching = {
---                          name = L["Friendly Caching"],
---                          order = 3,
---                          type = "toggle",
---                          desc = L["This allows you to save friendly player class information between play sessions or nameplates going off the screen. |cffff0000(Uses more memory)"],
---                          descStyle = "inline",
---                          width = "full",
---                          arg = { "cacheClass" },
---                        },
                       },
                     },
                     Reaction = {
                       order = 20,
-                      name = L["Color by Reaction"],
+                      name = L["Reaction"],
                       type = "group",
                       inline = true,
                       get = GetColor,
                       set = SetColor,
                       args = {
-                        ColorByReaction = {
-                          name = L["Change the color depending on the reaction of the unit (friendly, hostile, neutral)."],
-                          type = "toggle",
-                          width = "full",
-                          order = 1,
-                          arg = { "healthColorChange" }, -- false, if Color by Reaction (customColor), true if Color by Health
-                          get = function(info) return not GetValue(info) end,
-                          set = function(info, val) SetValue(info, not val) end,
-                        },
-                        Header = { name = L["Colors"], type = "header", order = 10, },
                         FriendlyColorNPC = { name = L["Friendly NPCs"], order = 20, type = "color", arg = { "ColorByReaction", "FriendlyNPC", }, },
                         FriendlyColorPlayer = { name = L["Friendly Players"], order = 30, type = "color", arg = { "ColorByReaction", "FriendlyPlayer" }, },
                         EnemyColorNPC = { name = L["Hostile NPCs"], order = 40, type = "color", arg = { "ColorByReaction", "HostileNPC" }, },
@@ -4788,23 +4757,13 @@ local function CreateOptionsTable()
                       },
                     },
                     RaidMark = {
-                      name = L["Color by Target Mark"],
+                      name = L["Target Mark"],
                       order = 40,
                       type = "group",
                       inline = true,
                       get = GetColor,
                       set = SetColor,
                       args = {
-                        EnableRaidMarks = {
-                          name = L["Additionally color the healthbar based on the target mark if the unit is marked."],
-                          order = 1,
-                          type = "toggle",
-                          width = "full",
-                          set = SetValue,
-                          get = GetValue,
-                          arg = { "settings", "raidicon", "hpColor" },
-                        },
-                        Header = { name = L["Colors"], type = "header", order = 20, },
                         STAR = {
                           type = "color",
                           order = 30,
@@ -4853,6 +4812,18 @@ local function CreateOptionsTable()
                           name = RAID_TARGET_8,
                           arg = { "settings", "raidicon", "hpMarked", "SKULL" },
                         },
+                      },
+                    },
+                    General = {
+                      name = L["Unit Status"],
+                      order = 50,
+                      type = "group",
+                      inline = true,
+                      get = GetColor,
+                      set = SetColor,
+                      args = {
+                        TappedColor = { name = L["Tapped"], order = 1, type = "color", arg = { "ColorByReaction", "TappedUnit" }, },
+                        --DCedColor = { name = L["Disconnected"], order = 2, type = "color", arg = { "ColorByReaction", "DisconnectedUnit" }, },
                       },
                     },
                   },
@@ -4948,27 +4919,6 @@ local function CreateOptionsTable()
               inline = false,
               order = 25,
               args = {
---                Enable = {
---                  name = L["Enable"],
---                  order = 5,
---                  type = "group",
---                  inline = true,
---                  args = {
---                    Header = {
---                      name = L["This option allows you to control whether headline view (text-only) is enabled for nameplates."],
---                      order = 1,
---                      type = "description",
---                      width = "full",
---                    },
---                    Enable = {
---                      name = L["Enable Headline View (Text-Only)"],
---                      order = 2,
---                      type = "toggle",
---                      width = "double",
---                      arg = { "HeadlineView", "ON" },
---                    },
---                  },
---                },
                 ShowByUnitType = {
                   name = L["Show By Unit Type"],
                   order = 10,
@@ -4982,20 +4932,6 @@ local function CreateOptionsTable()
                   type = "group",
                   inline = true,
                   args = {
---                    ModeOoC = {
---                      name = L["Out of Combat"],
---                      order = 1,
---                      type = "toggle",
---                      width = "double",
---                      arg = { "HeadlineView", "ForceOutOfCombat" }
---                    },
---                    ModeFriendlyInCombat = {
---                      name = L["On Friendly Units in Combat"],
---                      order = 2,
---                      type = "toggle",
---                      width = "double",
---                      arg = { "HeadlineView", "ForceFriendlyInCombat" }
---                    },
                     ModeCNA = {
                       name = L["On Enemy Units You Cannot Attack"],
                       order = 3,
@@ -5370,8 +5306,8 @@ local function CreateOptionsTable()
                 },
               },
             },
-            Names = {
-              name = L["Names"],
+            Name = {
+              name = L["Name"],
               type = "group",
               order = 65,
               args = {
@@ -5395,27 +5331,26 @@ local function CreateOptionsTable()
                           order = 10,
                           type = "select",
                           values = t.FRIENDLY_TEXT_COLOR,
-                          arg = { "settings", "name", "FriendlyTextColorMode" }
+                          arg = { "Name", "HealthbarMode", "FriendlyUnitMode" }
                         },
-                        FriendlyColorCustom = GetColorEntry(L["Custom Color"], 20, { "settings", "name", "FriendlyTextColor" }),
+                        FriendlyColorCustom = GetColorEntry(L["Custom Color"], 20, { "Name", "HealthbarMode", "FriendlyTextColor" }),
                         EnemyColor = {
                           name = L["Enemy Name Color"],
                           order = 30,
                           type = "select",
                           values = t.ENEMY_TEXT_COLOR,
-                          arg = { "settings", "name", "EnemyTextColorMode" }
+                          arg = { "Name", "HealthbarMode", "EnemyUnitMode" }
                         },
-                        EnemyColorCustom = GetColorEntry(L["Custom Color"], 40, { "settings", "name", "EnemyTextColor" }),
+                        EnemyColorCustom = GetColorEntry(L["Custom Color"], 40, { "Name", "HealthbarMode", "EnemyTextColor" }),
                         Spacer1 = GetSpacerEntry(50),
                         EnableRaidMarks = {
-                          name = L["Color by Target Mark"],
+                          name = L["Additionally color the name based on the target mark if the unit is marked."],
                           order = 60,
                           type = "toggle",
                           width = "full",
-                          desc = L["Additionally color the name based on the target mark if the unit is marked."],
                           descStyle = "inline",
                           set = SetValue,
-                          arg = { "settings", "name", "UseRaidMarkColoring" },
+                          arg = { "Name", "HealthbarMode", "UseRaidMarkColoring" },
                         },
                       },
                     },
@@ -5469,27 +5404,26 @@ local function CreateOptionsTable()
                           order = 10,
                           type = "select",
                           values = t.FRIENDLY_TEXT_COLOR,
-                          arg = { "HeadlineView", "FriendlyTextColorMode" }
+                          arg = { "Name", "NameMode", "FriendlyUnitMode" }
                         },
-                        FriendlyColorCustom = GetColorEntry(L["Custom Color"], 20, { "HeadlineView", "FriendlyTextColor" }),
+                        FriendlyColorCustom = GetColorEntry(L["Custom Color"], 20, {  "Name", "NameMode", "FriendlyTextColor" }),
                         EnemyColor = {
                           name = L["Enemy Name Color"],
                           order = 30,
                           type = "select",
                           values = t.ENEMY_TEXT_COLOR,
-                          arg = { "HeadlineView", "EnemyTextColorMode" }
+                          arg = { "Name", "NameMode", "EnemyUnitMode" }
                         },
-                        EnemyColorCustom = GetColorEntry(L["Custom Color"], 40, { "HeadlineView", "EnemyTextColor" }),
+                        EnemyColorCustom = GetColorEntry(L["Custom Color"], 40, { "Name", "NameMode", "EnemyTextColor" }),
                         Spacer1 = GetSpacerEntry(50),
                         EnableRaidMarks = {
-                          name = L["Color by Target Mark"],
+                          name = L["Additionally color the name based on the target mark if the unit is marked."],
                           order = 60,
                           type = "toggle",
                           width = "full",
-                          desc = L["Additionally color the name based on the target mark if the unit is marked."],
                           descStyle = "inline",
                           set = SetValue,
-                          arg = { "HeadlineView", "UseRaidMarkColoring" },
+                          arg = { "Name", "NameMode", "UseRaidMarkColoring" },
                         },
                       },
                     },
