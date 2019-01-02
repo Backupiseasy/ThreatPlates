@@ -299,7 +299,7 @@ function Widget:QUEST_REMOVED(questId)
     Quests[questId] = nil
   end
 
-  self:UpdateNameplates()
+  self:UpdateAllFramesWithPublish()
 end
 
 function Widget:PLAYER_REGEN_ENABLED()
