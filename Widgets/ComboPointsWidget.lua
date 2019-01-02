@@ -526,7 +526,7 @@ function Widget:UpdateTexture(texture, texture_path, cp_no)
     texture:SetTexture(texture_path)
   end
 
-  texture:SetTexCoord(unpack(self.TexCoord)) -- obj:SetTexCoord(left,right,top,bottom)
+  texture:SetTexCoord(self.TexCoord[1], self.TexCoord[2], self.TexCoord[3], self.TexCoord[4]) -- obj:SetTexCoord(left,right,top,bottom)
   local scale = self.db.Scale
   local scaledIconWidth, scaledIconHeight, scaledSpacing = (scale * self.IconWidth),(scale * self.IconHeight),(scale * self.db.HorizontalSpacing)
   texture:SetSize(scaledIconWidth, scaledIconHeight)
