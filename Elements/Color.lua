@@ -221,10 +221,17 @@ end
 ---------------------------------------------------------------------------------------------------
 
 function Addon:GetColorByHealthDeficit(unit)
-  local db = TidyPlatesThreat.db.profile
-  local pct = unit.health / unit.healthmax
-  local r, g, b = CS:GetSmudgeColorRGB(db.ColorByHealth.Low, db.ColorByHealth.High, pct)
-  return RGB_P(r, g, b, 1)
+  local health_pct = ceil(100 * (unit.health / unit.healthmax))
+  local health_color = HealthColorCache[health_pct]
+
+  if not health_color then
+    print ("Cache: ", health_color)
+    health_color = RGB_P(CS:GetSmudgeColorRGB(ColorByHealth.Low, ColorByHealth.High, unit.health / unit.healthmax))
+    HealthColorCache[health_pct] = health_color
+    print ("Color: Adding color for", health_pct, "%: ", health_color.r, health_color.g, health_color.b, " / ", CS:GetSmudgeColorRGB(ColorByHealth.Low, ColorByHealth.High, unit.health / unit.healthmax))
+  end
+
+  return health_color
 end
 
 ---------------------------------------------------------------------------------------------------
