@@ -65,10 +65,8 @@ local function GetUnitColorByClass(tp_frame)
 end
 
 local function GetUnitColorCustomColor(tp_frame)
-  local unit = tp_frame.unit
-
   -- PlateStyle should never be "NONE" here as healthbar and/or name are not shown in this case
-  assert (tp_frame.PlateStyle ~= "NONE", "PlateStyle 'NONE' detected in Color.GetUnitColorCustomColor")
+  local unit = tp_frame.unit
   return NameCustomColor[tp_frame.PlateStyle][unit.reaction]
 end
 
@@ -141,6 +139,19 @@ local function UpdatePlateColors(tp_frame)
   if tp_frame.style.name.show then
     fg_color = tp_frame:GetNameColor()
 
+--    if fg_color == nil then
+--      local unit = tp_frame.unit
+--      print ("Unit:", unit.name)
+--      print ("Situational:", Addon.Debug:ColorToString(unit.SituationalNameColor))
+--      print ("Combat:", Addon.Debug:ColorToString(unit.CombatColor))
+--      print ("Reaction:", Addon.Debug:ColorToString(unit.ReactionColor))
+--      print ("Class:", Addon.Debug:ColorToString(unit.ClassColor))
+--      print ("Health:", Addon.Debug:ColorToString(unit.HealthColor))
+--      print ("Custom:", Addon.Debug:ColorToString(unit.CustomColor))
+--
+--      print ("NAME COLOR:", tp_frame:GetNameColor())
+--    end
+
     tp_frame.visual.NameText:SetTextColor(fg_color.r, fg_color.g, fg_color.b)
   end
 end
@@ -209,14 +220,12 @@ end
 -- Still to migrate
 ---------------------------------------------------------------------------------------------------
 
-local function GetColorByHealthDeficit(unit)
+function Addon:GetColorByHealthDeficit(unit)
   local db = TidyPlatesThreat.db.profile
   local pct = unit.health / unit.healthmax
   local r, g, b = CS:GetSmudgeColorRGB(db.ColorByHealth.Low, db.ColorByHealth.High, pct)
   return RGB_P(r, g, b, 1)
 end
-
-ThreatPlates.GetColorByHealthDeficit = GetColorByHealthDeficit
 
 ---------------------------------------------------------------------------------------------------
 -- Functions to the the base color for a unit
@@ -512,11 +521,11 @@ function Element.UpdateSettings()
   --  Custom color for Name text in healthbar and name mode
   NameCustomColor["HEALTHBAR"]["FRIENDLY"] = SettingsName.HealthbarMode.FriendlyTextColor
   NameCustomColor["HEALTHBAR"]["HOSTILE"] = SettingsName.HealthbarMode.EnemyTextColor
-  NameCustomColor["HEALTHBAR"]["NEUTRAL"] = NameCustomColor["HEALTHBAR"]["NEUTRAL"]
+  NameCustomColor["HEALTHBAR"]["NEUTRAL"] = NameCustomColor["HEALTHBAR"]["HOSTILE"]
 
   NameCustomColor["NAME"]["FRIENDLY"] = SettingsName.NameMode.FriendlyTextColor
   NameCustomColor["NAME"]["HOSTILE"] = SettingsName.NameMode.EnemyTextColor
-  NameCustomColor["NAME"]["NEUTRAL"] = NameCustomColor["NAME"]["NEUTRAL"]
+  NameCustomColor["NAME"]["NEUTRAL"] = NameCustomColor["NAME"]["HOSTILE"]
 
   ColorByReaction = SettingsBase.ColorByReaction
   ColorByHealth = SettingsBase.ColorByHealth

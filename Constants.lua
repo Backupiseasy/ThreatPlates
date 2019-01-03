@@ -1885,6 +1885,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
         anchor = "CENTER",
         show = true,
       },
+      -- Needed in themes (e.g., basicTheme) for creating
       unique = {
         threatcolor = {
           LOW = RGB_P(0, 0, 0, 0),

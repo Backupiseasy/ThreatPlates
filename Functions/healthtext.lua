@@ -22,7 +22,6 @@ local string = string
 local TidyPlatesThreat = TidyPlatesThreat
 local RGB = Addon.RGB
 local RGB_P = Addon.RGB_P
-local GetColorByHealthDeficit = ThreatPlates.GetColorByHealthDeficit
 
 ---------------------------------------------------------------------------------------------------
 -- Functions for subtext from TidyPlates
@@ -239,7 +238,7 @@ local function TextHealthPercentColored(unit)
     end
 
     text_health = HpAmt .. HpMax .. HpPct
-    color = GetColorByHealthDeficit(unit)
+    color = Addon:GetColorByHealthDeficit(unit)
   end
 
   if text_health and text_absorbs then

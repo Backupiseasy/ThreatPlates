@@ -5351,6 +5351,7 @@ local function CreateOptionsTable()
                           descStyle = "inline",
                           set = SetValue,
                           arg = { "Name", "HealthbarMode", "UseRaidMarkColoring" },
+                          arg = { "Name", "HealthbarMode", "UseRaidMarkColoring" },
                         },
                       },
                     },

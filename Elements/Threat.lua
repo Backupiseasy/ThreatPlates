@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------------------------------
--- Threat related functions
+-- Element: Threat
 ---------------------------------------------------------------------------------------------------
 local ADDON_NAME, Addon = ...
 
@@ -11,17 +11,13 @@ local ADDON_NAME, Addon = ...
 local strsplit = strsplit
 
 -- WoW APIs
-local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
+local IsInInstance = IsInInstance
 local UnitThreatSituation, UnitGroupRolesAssigned, UnitIsUnit = UnitThreatSituation, UnitGroupRolesAssigned, UnitIsUnit
 local UnitGUID, UnitReaction, UnitIsTapDenied = UnitGUID, UnitReaction, UnitIsTapDenied
-local GetSpecialization = GetSpecialization
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
-local ThreatPlates = Addon.ThreatPlates
-local RGB = Addon.RGB
 
-local COLOR_TRANSPARENT = RGB(0, 0, 0, 0) -- opaque
 local CLASSIFICATION_MAPPING = {
   ["boss"] = "Boss",
   ["worldboss"] = "Elite",
@@ -36,7 +32,11 @@ local CLASSIFICATION_MAPPING = {
 ---------------------------------------------------------------------------------------------------
 -- Local variables
 ---------------------------------------------------------------------------------------------------
-Addon.CreatureCache = {}
+local CreatureCache = {}
+
+local Settings
+local ShowOnAttackedUnitsOnly, ShowOffTank, ShowInstancesOnly
+local ThreatColor = {}
 
 ---------------------------------------------------------------------------------------------------
 -- Returns if the unit is tanked by another tank or pet (not by the player character,
@@ -48,13 +48,13 @@ function Addon:IsBlackOxStatue(unitid)
 
   if not guid then return false end
 
-  local is_black_ox_statue = self.CreatureCache[guid]
+  local is_black_ox_statue = CreatureCache[guid]
   if is_black_ox_statue == nil then
     --local unit_type, server_id, instance_id, zone_uid, id, spawn_uid = string.match(guid, '^([^-]+)%-0%-([0-9A-F]+)%-([0-9A-F]+)%-([0-9A-F]+)%-([0-9A-F]+)%-([0-9A-F]+)$')
     --local unit_type, zero, server_id, instance_id, zone_uid, npc_id, spawn_uid = strsplit("-", guid)
     local unit_type, _,  _, _, _, npc_id, _ = strsplit("-", guid)
     is_black_ox_statue = ("61146" == npc_id and "Creature" == unit_type)
-    self.CreatureCache[guid] = is_black_ox_statue
+    CreatureCache[guid] = is_black_ox_statue
   end
 
   return is_black_ox_statue
@@ -74,7 +74,6 @@ function Addon:UnitIsOffTanked(unit)
 end
 
 function Addon:OnThreatTable(unit)
-  -- "is unit inactive" from TidyPlates - fast, but doesn't meant that player is on threat table
   -- return  (unit.health < unit.healthmax) or (unit.InCombat or unit.ThreatStatus > 0) or (unit.isCasting == true) then
 
   --  local _, threatStatus = UnitDetailedThreatSituation("player", unit.unitid)
@@ -106,57 +105,84 @@ local function GetUnitClassification(unit)
   return CLASSIFICATION_MAPPING[unit.classification]
 end
 
+---------------------------------------------------------------------------------------------------
+-- This function returns if threat feedback is enabled for the given unit. It does assume that
+-- player (and unit) are in combat. It does not check for that.
+---------------------------------------------------------------------------------------------------
 function Addon:ShowThreatFeedback(unit)
-  local db = TidyPlatesThreat.db.profile.threat
-
   -- UnitCanAttack?
-  if not InCombatLockdown() or unit.type == "PLAYER" or UnitReaction(unit.unitid, "player") > 4 or not db.ON then
+  --if not InCombatLockdown() or unit.type == "PLAYER" or UnitReaction(unit.unitid, "player") > 4 or not db.ON then
+  if not Settings.ON or unit.type == "PLAYER" or UnitReaction(unit.unitid, "player") > 4 then
     return false
   end
 
-  if not IsInInstance() and db.toggle.InstancesOnly then
+  if not IsInInstance() and ShowInstancesOnly then
     return false
   end
 
-  if db.toggle[GetUnitClassification(unit)] then
-    return not db.nonCombat or Addon:OnThreatTable(unit)
+  if Settings.toggle[GetUnitClassification(unit)] then
+    return not Settings.nonCombat or Addon:OnThreatTable(unit)
   end
 
   return false
 end
 
-local function ShowThreatGlow(unit)
-  local db = TidyPlatesThreat.db.profile
+function Addon:ShowThreatGlowFeedback(unit)
+  -- Check for Threat Glow enabled
+  if unit.type == "PLAYER" or UnitReaction(unit.unitid, "player") > 4 then
+    return false
+  end
 
-  if db.ShowThreatGlowOnAttackedUnitsOnly then
-    return Addon:OnThreatTable(unit)
+  -- Move ShowThreatGlowOnAttackedUnitsOnly to healtbar?-
+  return not ShowOnAttackedUnitsOnly or Addon:OnThreatTable(unit)
+end
+
+
+function Addon:GetThreatColor(unit)
+  -- Use either normal style colors (configured under Healthbar - Warning Glow) or threat system colors (if enabled)
+  if Settings.ON and Settings.useHPColor then
+    local style = (Addon.PlayerRoleIsTank and "tank") or "dps"
+
+    if style == "tank" and ShowOffTank and Addon:UnitIsOffTanked(unit) then
+      return ThreatColor[style]["OFFTANK"]
+    else
+      return ThreatColor[style][unit.ThreatLevel]
+    end
   else
-    return true
+    return ThreatColor.normal[unit.ThreatLevel]
   end
 end
 
-function Addon:SetThreatColor(unit)
-  local color
+---------------------------------------------------------------------------------------------------
+-- Element code
+---------------------------------------------------------------------------------------------------
 
-  local db = TidyPlatesThreat.db.profile
-  if unit.isTapped then
-    color = db.ColorByReaction.TappedUnit
-  elseif unit.type == "NPC" and unit.reaction ~= "FRIENDLY" then
-    local style = unit.style
-    if style == "unique" then
-      local unique_setting = unit.CustomPlateSettings
-      if unique_setting.UseThreatGlow then
-        -- set style to tank/dps or normal
-        style = Addon:GetThreatStyle(unit)
-      end
-    end
+local Element = Addon.Elements.NewElement("Threat")
 
-    if style == "dps" or style == "tank" or (style == "normal" and InCombatLockdown()) then
-      color = Addon:GetThreatColor(unit, style, db.ShowThreatGlowOnAttackedUnitsOnly)
-    end
+-- Called in processing event: NAME_PLATE_CREATED
+function Element.Created(tp_frame)
+end
+
+-- Called in processing event: NAME_PLATE_UNIT_ADDED
+--function Element.UnitAdded(tp_frame)
+--end
+
+-- Called in processing event: NAME_PLATE_UNIT_REMOVED
+--function Element.UnitRemoved(tp_frame)
+--  tp_frame.visual.ThreatGlow:Hide() -- done in UpdateStyle
+--end
+
+--function Element.UpdateStyle(tp_frame, style)
+--end
+
+function Element.UpdateSettings()
+  Settings = TidyPlatesThreat.db.profile.threat
+
+  ShowOnAttackedUnitsOnly = TidyPlatesThreat.db.profile.ShowThreatGlowOnAttackedUnitsOnly
+  ShowOffTank = TidyPlatesThreat.db.profile.toggle.OffTank
+  ShowInstancesOnly = Settings.toggle.InstancesOnly
+
+  for style, settings in pairs(TidyPlatesThreat.db.profile.settings) do
+    ThreatColor[style] = settings.threatcolor
   end
-
-  color = color or COLOR_TRANSPARENT
-
-  return color.r, color.g, color.b, color.a
 end
