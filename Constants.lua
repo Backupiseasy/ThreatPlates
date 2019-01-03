@@ -919,6 +919,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
 --    },
     PersonalNameplate = {
       HideBuffs = false,
+      ShowResourceOnTarget = false,
     },
     totemSettings = GetDefaultTotemSettings(),
     uniqueSettings = {

@@ -355,6 +355,9 @@ function TidyPlatesThreat:OnEnable()
 
   TidyPlatesThreat:ReloadTheme()
 
+
+  Addon.CVars:OverwriteBoolProtected("nameplateResourceOnTarget", self.db.profile.PersonalNameplate.ShowResourceOnTarget)
+
   -- TODO: check with what this  was replaces
   --TidyPlatesUtilityInternal:EnableGroupWatcher()
   -- TPHUub: if LocalVars.AdvancedEnableUnitCache then TidyPlatesUtilityInternal:EnableUnitCache() else TidyPlatesUtilityInternal:DisableUnitCache() end
@@ -468,6 +471,7 @@ function TidyPlatesThreat:PLAYER_ENTERING_WORLD()
     -- reset to previous setting
     Addon.CVars:RestoreFromProfile("nameplateGlobalScale")
   end
+
 end
 
 --function TidyPlatesThreat:PLAYER_LEAVING_WORLD()

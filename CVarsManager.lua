@@ -24,6 +24,7 @@ local COMBAT_PROTECTED = {
   nameplateMaxAlpha = true,
   nameplateSelectedAlpha = true,
   nameplateOccludedAlphaMult = true,
+  nameplateResourceOnTarget = true,
 }
 
 local function SetConsoleVariable(cvar, value)
@@ -94,6 +95,10 @@ function CVars:SetProtected(cvar, value)
   end
 end
 
+function CVars:SetBoolProtected(cvar, value)
+  self:SetProtected(cvar, (value and 1) or 0)
+end
+
 function CVars:SetToDefaultProtected(cvar)
   if COMBAT_PROTECTED[cvar] then
     Addon:CallbackWhenOoC(function()
@@ -104,4 +109,18 @@ function CVars:SetToDefaultProtected(cvar)
     SetCVar(cvar, GetCVarDefault())
     TidyPlatesThreat.db.profile.CVarsBackup[cvar] = nil
   end
+end
+
+function CVars:OverwriteProtected(cvar, value)
+  if COMBAT_PROTECTED[cvar] then
+    Addon:CallbackWhenOoC(function()
+      SetCVar(cvar, value)
+    end, L["Unable to change the following console variable while in combat: "] .. cvar .. ". ")
+  else
+    SetCVar(cvar, value)
+  end
+end
+
+function CVars:OverwriteBoolProtected(cvar, value)
+  self:OverwriteProtected(cvar, (value and 1) or 0)
 end
