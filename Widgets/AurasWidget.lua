@@ -23,6 +23,7 @@ local tonumber = tonumber
 local CreateFrame, GetFramerate = CreateFrame, GetFramerate
 local DebuffTypeColor = DebuffTypeColor
 local UnitAura, UnitIsFriend, UnitIsUnit, UnitReaction, UnitIsPlayer, UnitPlayerControlled = UnitAura, UnitIsFriend, UnitIsUnit, UnitReaction, UnitIsPlayer, UnitPlayerControlled
+local UnitAffectingCombat = UnitAffectingCombat
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local GameTooltip = GameTooltip
 local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
@@ -432,48 +433,10 @@ local function FilterBlacklist(show_aura, spellfound, is_mine, show_only_mine)
   return show_aura
 end
 
---local function FilterWhitelistMine(show_aura, spellfound, is_mine)
---  return show_aura
---
-----  if spellfound == "All" then
-----    return true
-----  elseif spellfound == "My" or spellfound == true then
-----    return isMine
-----  end
-----
-----  return false
---end
---
---local function FilterAllMine(show_aura, spellfound, is_mine)
---  return show_aura
---
---  --  return is_mine
---end
---
---local function FilterBlacklistMine(show_aura, spellfound, is_mine)
---  --  blacklist my auras, i.e., default is show all of my auras (non of other players/NPCs)
---  --    spellfound = nil             - show my aura (not found in the blacklist)
---  --    spellfound = Not             - show my aura (from all casters) - bypass blacklisting
---  --    spellfound = My, true or All - blacklist my aura (auras from other casters are not shown either)
---
---  return show_aura
---
-----  if spellfound == nil then
-----    return isMine
-----  elseif spellfound == "Not" then
-----    return true
-----  end
-----
-----  return false
---end
-
 Widget.FILTER_FUNCTIONS = {
   all = FilterAll,
   blacklist = FilterBlacklist,
   whitelist = FilterWhitelist,
---  allMine = FilterAllMine,
---  blacklistMine = FilterBlacklistMine,
---  whitelistMine = FilterWhitelistMine,
 }
 
 function Widget:FilterFriendlyDebuffsBySpell(db, aura, AuraFilterFunction)
@@ -508,13 +471,6 @@ function Widget:FilterFriendlyBuffsBySpell(db, aura, AuraFilterFunction, unit)
 
   return AuraFilterFunction(show_aura, spellfound, aura.CastByPlayer)
 end
-
---function Widget:FilterEnemyBuffsBySpellDynamic(db, aura, unit)
---  return aura.duration > 0 or db.ShowUnlimitedAlways or
---    (db.ShowUnlimitedInCombat and unit.InCombat) or
---    (db.ShowUnlimitedInInstances and PLayerIsInInstance) or
---    (db.ShowUnlimitedOnBosses and unit.IsBossOrRare)
---end
 
 function Widget:FilterEnemyBuffsBySpell(db, aura, AuraFilterFunction, unit)
   local show_aura = db.ShowAllEnemy or (db.ShowOnEnemyNPCs and unit.type == "NPC") or (db.ShowDispellable and aura.StealOrPurge)
@@ -1349,8 +1305,9 @@ function Widget:PLAYER_REGEN_ENABLED()
   for plate, _ in pairs(Addon.PlatesVisible) do
     local widget_frame = plate.TPFrame.widgets.Auras
     local unit = plate.TPFrame.unit
-
+-
     if widget_frame.Active and unit.HasUnlimitedAuras then
+      unit.InCombat = UnitAffectingCombat(unit.unitid)
       self:UpdateIconGrid(widget_frame, unit)
     end
   end
@@ -1364,6 +1321,7 @@ function Widget:PLAYER_REGEN_DISABLED()
     local unit = plate.TPFrame.unit
 
     if widget_frame.Active and unit.HasUnlimitedAuras then
+      unit.InCombat = UnitAffectingCombat(unit.unitid)
       self:UpdateIconGrid(widget_frame, unit)
     end
   end
@@ -1485,7 +1443,6 @@ local function ParseFilter(filter_by_spell)
       spell = value:match("^All%s*(.-)$")
       only_player_auras = false
     elseif value:sub(1, 3) == "My " then
-      modifier = "My"
       modifier = "My"
       spell = value:match("^My%s*(.-)$")
     elseif value:sub(1, 4) == "Not " then

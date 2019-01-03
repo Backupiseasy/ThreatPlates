@@ -5,10 +5,10 @@ SET BATCH_DIR=%~dp0
 set command=%1
 set version=%2
 set ZIP_EXE="C:\Program Files\7-Zip\7z.exe"
-set WOW_PATH=C:\Games\World of Warcraft
-set WOW_TEST_PATH=D:\Games\World of Warcraft - Test
-set WOW_INT_PATH=D:\Games\World of Warcraft - Int
-set WOW_PLAIN=F:\Games\World of Warcraft French
+set WOW_PATH=C:\Games\World of Warcraft\_retail_
+set WOW_TEST_PATH=D:\Games\World of Warcraft - Test\_retail_
+set WOW_INT_PATH=D:\Games\World of Warcraft - Int\_retail_
+set WOW_PLAIN=F:\Games\World of Warcraft French\_retail_
 
 set TP_PATH=F:\Eigene Dateien\Dokumente\WoW\ThreatPlates\Releases
 set TP_PACKAGE=%TP_PATH%\ThreatPlates_%version%.zip

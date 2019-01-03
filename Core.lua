@@ -300,6 +300,9 @@ function TidyPlatesThreat:OnEnable()
 
   TidyPlatesThreat:ReloadTheme()
 
+
+  Addon.CVars:OverwriteBoolProtected("nameplateResourceOnTarget", self.db.profile.PersonalNameplate.ShowResourceOnTarget)
+
   -- TODO: check with what this  was replaces
   --TidyPlatesUtilityInternal:EnableGroupWatcher()
   -- TPHUub: if LocalVars.AdvancedEnableUnitCache then TidyPlatesUtilityInternal:EnableUnitCache() else TidyPlatesUtilityInternal:DisableUnitCache() end

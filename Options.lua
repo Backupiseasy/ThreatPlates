@@ -1205,7 +1205,7 @@ local function CreateComboPointsWidgetOptions()
             arg = { "ComboPoints", "Style" },
           },
           EmptyCPs = {
-            name = L["Show On & Off"],
+            name = L["On & Off"],
             order = 20,
             type = "toggle",
             desc = L["In combat, always show all combo points no matter if they are on or off. Off combo points are shown greyed-out."],
@@ -1428,7 +1428,7 @@ local function CreateComboPointsWidgetOptions()
             type = "toggle",
             arg = { "ComboPoints", "RuneCooldown", "Show" },
           },
-          Font = GetFontEntryDefault("Font", 20, { "ComboPoints", "RuneCooldown" } )
+          Font = GetFontEntryDefault(L["Font"], 20, { "ComboPoints", "RuneCooldown" } )
         },
       },
     },
@@ -2270,7 +2270,7 @@ local function CreateAurasWidgetOptions()
                 name = L["OmniCC"],
                 type = "toggle",
                 order = 35,
-                desc = L["Show the OmniCC couldown count instead of the built-in duration text on auras."],
+                desc = L["Show the OmniCC cooldown count instead of the built-in duration text on auras."],
                 arg = { "AuraWidget", "ShowOmniCC" },
               },
               Stacks = {
@@ -3863,6 +3863,19 @@ local function CreateBlizzardSettings()
             get = GetValue,
             arg = { "PersonalNameplate", "HideBuffs"},
           },
+          ShowResources = {
+            type = "toggle",
+            order = 20,
+            name = L["Resources on Targets"],
+            desc = L["Enable this if you want to show Blizzards special resources above the target nameplate."],
+            width = "double",
+            set = function(info, val)
+              SetValuePlain(info, val)
+              Addon.CVars:OverwriteBoolProtected("nameplateResourceOnTarget", val)
+            end,
+            get = GetValue,
+            arg = { "PersonalNameplate", "ShowResourceOnTarget"},
+          },
         },
       },
       Reset = {
@@ -5124,7 +5137,7 @@ local function CreateOptionsTable()
                       width = "full",
                     },
                     ImportantNotice = {
-                      name = L["|cffff0000IMPORTANT: Enabling this feature changes console variables (CVARs) which will change the appearance of default Blizzard nameplates. Disabling this feature will reset these CVARs to the original value they had when you enabled this feature.|r"],
+                      name = L["|cffff0000IMPORTANT: Enabling this feature changes console variables (CVars) which will change the appearance of default Blizzard nameplates. Disabling this feature will reset these CVars to the original value they had when you enabled this feature.|r"],
                       order = 1,
                       type = "description",
                       width = "full",
@@ -5672,7 +5685,7 @@ local function CreateOptionsTable()
                       name = L["Full Health"],
                       type = "toggle",
                       order = 60,
-                      desc = L["Display health text on targets with full health."],
+                      desc = L["Display health text on units with full health."],
                       arg = { "text", "full" }
                     },
                     Truncate = {
