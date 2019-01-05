@@ -5,15 +5,15 @@
     <Script file="ElementHandler.lua"/>
     <!--Order is relevant for creation -->
     <Script file="Threat.lua"/>
-    <Script file="Color.lua"/>
     <Script file="Healthbar.lua"/>
     <Script file="Name.lua"/>
+    <Script file="StatusText.lua"/>
+    <Script file="Color.lua"/>
     <Script file="Castbar.lua"/>
     <Script file="SpellIcon.lua"/>
     <Script file="MouseoverHighlight.lua"/>
     <Script file="ThreatGlow.lua"/>
     <Script file="TargetMarker.lua"/>
     <Script file="Classification.lua"/>
-    <Script file="StatusText.lua"/>
     <Script file="Level.lua"/>
 </Ui>
