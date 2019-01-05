@@ -1744,6 +1744,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
         show = true,
         ShowOverlay = true,
         ShowInterruptShield = false,
+        ShowInterruptSource = true,
       },
       castborder = {
         texture = "TP_Castbar_Border_Thin", -- old default: "TP_CastBarOverlay",

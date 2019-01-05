@@ -113,12 +113,17 @@ function Debug:PrintTarget(unit)
   end
 end
 
-function Debug:ColorToString(color)
+function Debug:ColorToString(color, ...)
+  local r, b, g, a
   if not color then
     return "(nil)"
+  elseif type(color) == "string" then
+    r, b, g, a = color.r, color.g, color.b, color.a
+  else
+    r, b, g, a = color, ...
   end
 
-  local r, b, g, a = color.r, color.g, color.b, color.a
+
 
   if a then
     r, b, g, a = ceil(r * 255), ceil(g * 255), ceil(b * 255), ceil(a * 255)

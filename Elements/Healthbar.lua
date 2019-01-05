@@ -168,8 +168,16 @@ function Element.Created(tp_frame)
   healthbar:SetFrameLevel(tp_frame:GetFrameLevel() + 5)
   --frame:Hide()
 
-  healthbar.Border = CreateFrame("Frame", nil, healthbar)
-  healthbar.Border:SetFrameLevel(healthbar:GetFrameLevel())
+  local border = CreateFrame("Frame", nil, healthbar)
+  border:SetFrameLevel(healthbar:GetFrameLevel())
+  border:SetBackdrop(BorderBackdrop)
+  border:SetBackdropBorderColor(0, 0, 0, 1)
+  healthbar.Border = border
+
+  -- Save border backdrop color for restoring it later as it will be reset (to white) when updating the backdrop
+  -- => not necessary any more as the backdrop is only changed when the element is created now
+  -- local r, g, b, a = border:GetBackdropColor()
+  -- border:SetBackdropColor(r, g, b, a)
 
   local absorbs = healthbar:CreateTexture(nil, "BORDER", -6)
   absorbs.Overlay = healthbar:CreateTexture(nil, "OVERLAY", 0)
@@ -220,13 +228,11 @@ function Element.UpdateStyle(tp_frame, style)
     healthbar:ClearAllPoints()
     healthbar:SetPoint(healthbar_style.anchor, tp_frame, healthbar_style.anchor, healthbar_style.x, healthbar_style.y)
 
-    local offset = healthborder_style.offset
     local border = healthbar.Border
+    local offset = healthborder_style.offset
     border:ClearAllPoints()
     border:SetPoint("TOPLEFT", healthbar, "TOPLEFT", - offset, offset)
     border:SetPoint("BOTTOMRIGHT", healthbar, "BOTTOMRIGHT", offset, - offset)
-    border:SetBackdrop(BorderBackdrop)
-    border:SetBackdropBorderColor(0, 0, 0, 1)
 
     -- Absorbs
     local absorbs = healthbar.Absorbs
@@ -287,18 +293,6 @@ local function UnitAbsorbsUpdate(unitid)
     end
   end
 end
-
-local function ColorUpdate(tp_frame, fg_color, bg_color)
-  local healthbar = tp_frame.visual.Healthbar
-
-  if healthbar:IsShown() then
-    healthbar:SetStatusBarColor(fg_color.r, fg_color.g, fg_color.b, 1)
-    healthbar.Border:SetBackdropColor(bg_color.r, bg_color.g, bg_color.b, bg_color.a)
-
-    assert (bg_color.r ~= 0 or bg_color.g ~= 0 or bg_color.b ~= 0 or bg_color.a ~= 0, "Not initialized background: " .. tostring(bg_color.r) .. " - " .. tostring(bg_color.g) .. " - " .. tostring(bg_color.b) .. " - " .. tostring(bg_color.a))
-  end
-end
-
 
 SubscribeEvent(Element, "UNIT_HEALTH_FREQUENT", UNIT_HEALTH_FREQUENT)
 SubscribeEvent(Element, "UNIT_ABSORB_AMOUNT_CHANGED", UnitAbsorbsUpdate)

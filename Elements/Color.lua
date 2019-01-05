@@ -8,7 +8,7 @@ local ADDON_NAME, Addon = ...
 ---------------------------------------------------------------------------------------------------
 
 -- Lua APIs
-local abs, floor, ceil = abs, floor, ceil
+local abs, floor, ceil, pairs = abs, floor, ceil, pairs
 
 -- WoW APIs
 local UnitReaction = UnitReaction
@@ -23,13 +23,17 @@ local SubscribeEvent, PublishEvent,  UnsubscribeEvent = Addon.EventService.Subsc
 local RGB_P = Addon.RGB_P
 
 local REACTION_REFERENCE = {
-  FRIENDLY = { NPC7 = "FriendlyNPC", PLAYER = "FriendlyPlayer", },
+  FRIENDLY = { NPC = "FriendlyNPC", PLAYER = "FriendlyPlayer", },
   HOSTILE = {	NPC = "HostileNPC", PLAYER = "HostilePlayer", },
   NEUTRAL = { NPC = "NeutralUnit", PLAYER = "NeutralUnit",	},
 }
 
 ---------------------------------------------------------------------------------------------------
 -- Local variables
+---------------------------------------------------------------------------------------------------
+
+---------------------------------------------------------------------------------------------------
+-- Cached configuration settings (for performance reasons)
 ---------------------------------------------------------------------------------------------------
 local SettingsBase, Settings, SettingsName
 local ColorByReaction, ColorByHealth
@@ -44,6 +48,7 @@ local NameCustomColor = {
   NAME = {}
 }
 local TargetMarkColoring = {}
+local ThreatColor = {}
 
 ---------------------------------------------------------------------------------------------------
 -- ThreatPlates Frame functions to return the current color for healthbar/name based on settings
@@ -56,23 +61,23 @@ end
 
 local function GetUnitColorByReaction(tp_frame)
   local unit = tp_frame.unit
-  return unit.SituationalColor or unit.CombatColor or unit.ReactionColor
+  return unit.TappedColor or unit.SituationalColor or unit.CombatColor or unit.ReactionColor
 end
 
 local function GetUnitColorByClass(tp_frame)
   local unit = tp_frame.unit
-  return unit.SituationalColor or unit.CombatColor or unit.ClassColor or unit.ReactionColor
+  return unit.TappedColor or unit.SituationalColor or unit.CombatColor or unit.ClassColor or unit.ReactionColor
 end
 
 local function GetUnitColorCustomColor(tp_frame)
   -- PlateStyle should never be "NONE" here as healthbar and/or name are not shown in this case
   local unit = tp_frame.unit
-  return NameCustomColor[tp_frame.PlateStyle][unit.reaction]
+  return unit.TappedColor or NameCustomColor[tp_frame.PlateStyle][unit.reaction]
 end
 
 local function GetUnitColorCustomPlate(tp_frame)
   local unit = tp_frame.unit
-  return unit.SituationalColor or unit.CombatColor or unit.CustomColor
+  return unit.TappedColor or unit.SituationalColor or unit.CombatColor or unit.CustomColor
 end
 
 local HEALTHBAR_COLOR_MODE_REFERENCE = {
@@ -138,20 +143,6 @@ local function UpdatePlateColors(tp_frame)
 
   if tp_frame.style.name.show then
     fg_color = tp_frame:GetNameColor()
-
---    if fg_color == nil then
---      local unit = tp_frame.unit
---      print ("Unit:", unit.name)
---      print ("Situational:", Addon.Debug:ColorToString(unit.SituationalNameColor))
---      print ("Combat:", Addon.Debug:ColorToString(unit.CombatColor))
---      print ("Reaction:", Addon.Debug:ColorToString(unit.ReactionColor))
---      print ("Class:", Addon.Debug:ColorToString(unit.ClassColor))
---      print ("Health:", Addon.Debug:ColorToString(unit.HealthColor))
---      print ("Custom:", Addon.Debug:ColorToString(unit.CustomColor))
---
---      print ("NAME COLOR:", tp_frame:GetNameColor())
---    end
-
     tp_frame.visual.NameText:SetTextColor(fg_color.r, fg_color.g, fg_color.b)
   end
 end
@@ -225,10 +216,10 @@ function Addon:GetColorByHealthDeficit(unit)
   local health_color = HealthColorCache[health_pct]
 
   if not health_color then
-    print ("Cache: ", health_color)
+   --print ("Cache: ", health_color)
     health_color = RGB_P(CS:GetSmudgeColorRGB(ColorByHealth.Low, ColorByHealth.High, unit.health / unit.healthmax))
     HealthColorCache[health_pct] = health_color
-    print ("Color: Adding color for", health_pct, "%: ", health_color.r, health_color.g, health_color.b, " / ", CS:GetSmudgeColorRGB(ColorByHealth.Low, ColorByHealth.High, unit.health / unit.healthmax))
+    --print ("Color: Adding color for", health_pct, "%: ", health_color.r, health_color.g, health_color.b, " / ", CS:GetSmudgeColorRGB(ColorByHealth.Low, ColorByHealth.High, unit.health / unit.healthmax))
   end
 
   return health_color
@@ -244,10 +235,10 @@ local function GetColorByHealth(unit)
   local health_color = HealthColorCache[health_pct]
 
   if not health_color then
-    print ("Cache: ", health_color)
+    --print ("Cache: ", health_color)
     health_color = RGB_P(CS:GetSmudgeColorRGB(ColorByHealth.Low, ColorByHealth.High, unit.health / unit.healthmax))
     HealthColorCache[health_pct] = health_color
-    print ("Color: Adding color for", health_pct, "%: ", health_color.r, health_color.g, health_color.b, " / ", CS:GetSmudgeColorRGB(ColorByHealth.Low, ColorByHealth.High, unit.health / unit.healthmax))
+    --print ("Color: Adding color for", health_pct, "%: ", health_color.r, health_color.g, health_color.b, " / ", CS:GetSmudgeColorRGB(ColorByHealth.Low, ColorByHealth.High, unit.health / unit.healthmax))
   end
 
   --color.r, color.g, color.b = CS:GetSmudgeColorRGB(ColorByHealth.Low, ColorByHealth.High, unit.health / unit.healthmax)
@@ -260,9 +251,7 @@ end
 local function GetColorByReaction(unit)
   local color
 
-  if unit.isTapped then
-    color = ColorByReaction.TappedUnit
-  elseif unit.type == "NPC" and not UnitCanAttack("player", unit.unitid) and UnitReaction("player", unit.unitid) == 3 then
+  if unit.type == "NPC" and not UnitCanAttack("player", unit.unitid) and UnitReaction("player", unit.unitid) == 3 then
     -- 1/2 is same color (red), 4 is neutral (yellow),5-8 is same color (green)
     color = ColorByReaction.UnfriendlyFaction
     --return FACTION_BAR_COLORS[3]
@@ -318,9 +307,6 @@ end
 
 -- Threat System is OP, player is in combat, style is tank or dps
 local function GetCombatColor(unit)
-  local db = SettingsBase.threat
-  local color
-
   -- Threat System is should also be used for custom nameplate (in combat with thread system on)
   local unique_setting = unit.CustomPlateSettings
   if unique_setting and not unique_setting.UseThreatColor then
@@ -328,13 +314,10 @@ local function GetCombatColor(unit)
     return
   end
 
-  if db.useHPColor and Addon:ShowThreatFeedback(unit) then
+  local color
+  if Addon:ShowThreatFeedback(unit) then
     local style = (Addon.PlayerRoleIsTank and "tank") or "dps"
-    if style == "tank" and db.toggle.OffTank and Addon:UnitIsOffTanked(unit) then
-      color = SettingsBase.settings[style].threatcolor["OFFTANK"]
-    else
-      color = SettingsBase.settings[style].threatcolor[unit.ThreatLevel]
-    end
+    color = ThreatColor[style][Addon.GetThreatLevel(unit, style, Settings.useHPColor)]
   end
 
   unit.CombatColor = color
@@ -342,8 +325,7 @@ local function GetCombatColor(unit)
   return color
 end
 
--- Current situational colors are:
---   Target, Target Mark, Quest Target
+-- Sitational Color - Order is: target, target marked, tapped, quest)
 local function GetSituationalColor(unit)
   local color
 
@@ -361,6 +343,8 @@ local function GetSituationalColor(unit)
 
       if use_target_mark_color then
         color = SettingsBase.settings.raidicon.hpMarked[unit.TargetMarker]
+      elseif unit.isTapped then
+        color = ColorByReaction.TappedUnit
       elseif Addon:ShowQuestUnit(unit) and Addon:IsPlayerQuestUnit(unit) then
         -- Unit is quest target
         color = SettingsBase.questWidget.HPBarColor
@@ -373,6 +357,7 @@ local function GetSituationalColor(unit)
   return color
 end
 
+-- Sitational Color - Order is: target, target marked, tapped, quest)
 local function GetSituationalColorName(unit, tp_frame)
   local color
 
@@ -390,6 +375,8 @@ local function GetSituationalColorName(unit, tp_frame)
 
       if use_target_mark_color then
         color = SettingsBase.settings.raidicon.hpMarked[unit.TargetMarker]
+      elseif unit.isTapped then
+        color = ColorByReaction.TappedUnit
       elseif Addon:ShowQuestUnit(unit) and Addon:IsPlayerQuestUnit(unit) then
         -- Unit is quest target
         color = SettingsBase.questWidget.HPBarColor
@@ -429,11 +416,18 @@ function Element.UnitAdded(tp_frame)
   end
 
   if not (tp_frame.GetHealthbarColor == GetUnitColorByHealth and tp_frame.GetNameColor == GetUnitColorByHealth) then
+--    print ("Unit:", unit.name)
     GetColorByReaction(unit)
     GetColorByClass(unit)
+--    print ("  Reaction:", Addon.Debug:ColorToString(unit.ReactionColor))
+--    print ("    ->:", unit.reaction, unit.type, REACTION_REFERENCE[unit.reaction][unit.type])
+--    print ("  Class:", Addon.Debug:ColorToString(unit.ClassColor))
   end
 
+  GetCombatColor(unit)
+
   UpdatePlateColors(tp_frame)
+  --print ("Unit:", unit.name, "-> Updating Plate Colors:", Addon.Debug:ColorToString(tp_frame:GetHealthbarColor()))
 end
 
 -- Called in processing event: NAME_PLATE_UNIT_REMOVED
@@ -446,13 +440,6 @@ function Element.UpdateStyle(tp_frame, style)
 
   local color = GetCustomStyleColor(unit)
   if color then
---    if tp_frame.PlateStyle == "HEALTHBAR" then
---      tp_frame.GetHealthbarColor = GetUnitColorCustomPlate
---      tp_frame.GetNameColor = NameColorFunctions[tp_frame.PlateStyle][unit.reaction]
---    else
---      tp_frame.GetHealthbarColor = GetUnitColorCustomPlate -- does not matter
---      tp_frame.GetNameColor = GetUnitColorCustomPlate
---    end
     tp_frame.GetHealthbarColor = GetUnitColorCustomPlate
     tp_frame.GetNameColor = GetUnitColorCustomPlateName
   else
@@ -464,7 +451,7 @@ end
 local function UNIT_HEALTH(unitid)
   local tp_frame = PlatesByUnit[unitid]
   if tp_frame and tp_frame.Active then
-    print ("Color - UNIT_HEALTH:", unitid)
+    --print ("Color - UNIT_HEALTH:", unitid)
 
     GetColorByHealth(tp_frame.unit)
     UpdatePlateColors(tp_frame)
@@ -472,38 +459,36 @@ local function UNIT_HEALTH(unitid)
 end
 
 local function SituationalUpdate(tp_frame)
---  print ("Unit:", unit.name)
---  local r, g, b, a = tp_frame.visual.Healthbar:GetStatusBarColor()
---  print ("  - Healthbar:", r, g, b, a)
---  r, g, b, a = tp_frame.visual.Healthbar.Border:GetBackdropColor()
---  print ("  - Background:", r, g, b, a)
---  r, g, b, a = tp_frame.visual.Healthbar.Absorbs:GetVertexColor()
---  print ("  - Healthbar Absorbs:", r, g, b, a)
---
   GetSituationalColor(tp_frame.unit)
   GetSituationalColorName(tp_frame.unit, tp_frame)
   UpdatePlateColors(tp_frame)
 
-  print ("Color - Situational Update:", tp_frame.unit.name .. "(" .. tp_frame.unit.unitid .. ") =>", tp_frame.unit.SituationalColor)
+  --print ("Color - Situational Update:", tp_frame.unit.name .. "(" .. tp_frame.unit.unitid .. ") =>", tp_frame.unit.SituationalColor)
 end
 
 local function CombatUpdate(tp_frame)
   GetCombatColor(tp_frame.unit)
   UpdatePlateColors(tp_frame)
 
-  print ("Color - CombatUpdate:", tp_frame.unit.name .. "(" .. tp_frame.unit.unitid .. ") =>", tp_frame.unit.ThreatLevel)
+  --print ("Color - CombatUpdate:", tp_frame.unit.name .. "(" .. tp_frame.unit.unitid .. ") =>", tp_frame.unit.ThreatLevel)
 end
 
 local function FactionUpdate(tp_frame)
   local unit = tp_frame.unit
 
-  -- Only update faction if not a custom nameplate with custom color or mode ~= "HEALTH"
-  -- not unit.CustomColor and
+  -- Only update reaction color if color mode ~= "HEALTH" for healthbar and name
   if not (tp_frame.GetHealthbarColor == GetUnitColorByHealth and tp_frame.GetNameColor == GetUnitColorByHealth) then
+    -- Tapped is detected by a UNIT_FACTION event (I think), but handled as a situational color change
+    -- Update situational color if unit is now tapped or was tapped
+    if unit.isTapped or unit.SituationalColor == ColorByReaction.TappedUnit then
+      GetSituationalColor(tp_frame.unit)
+      GetSituationalColorName(tp_frame.unit, tp_frame)
+    end
+
     GetColorByReaction(unit)
     UpdatePlateColors(tp_frame)
 
-    print ("Color - ReactionUpdate:", tp_frame.unit.unitid)
+    --print ("Color - ReactionUpdate:", tp_frame.unit.unitid)
   end
 end
 
@@ -540,6 +525,12 @@ function Element.UpdateSettings()
   TargetMarkColoring["HEALTHBAR"] = SettingsName.HealthbarMode.UseRaidMarkColoring
   TargetMarkColoring["NAME"] = SettingsName.NameMode.UseRaidMarkColoring
 
+  for style, settings in pairs(TidyPlatesThreat.db.profile.settings) do
+    if settings.threatcolor then -- there are several subentries unter settings. Only use style subsettings like unique, normal, dps, ...
+      ThreatColor[style] = settings.threatcolor
+    end
+  end
+
   -- Subscribe/unsubscribe to events based on settings
   if SettingsBase.threat.ON and SettingsBase.threat.useHPColor and
     not (Settings.FriendlyUnitMode == "HEALTH" and Settings.EnemyUnitMode == "HEALTH" and
@@ -565,6 +556,5 @@ function Element.UpdateSettings()
   SubscribeEvent(Element, "FactionUpdate", FactionUpdate) -- Updates on faction (including social) information for units
   SubscribeEvent(Element, "QuestUpdate", SituationalUpdate) -- Updates on quests information for units
 
-  print ("Wiping HealthColorCache")
   wipe(HealthColorCache)
 end

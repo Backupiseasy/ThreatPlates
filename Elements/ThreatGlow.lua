@@ -31,7 +31,7 @@ local COLOR_TRANSPARENT = RGB(0, 0, 0, 0) -- opaque
 ---------------------------------------------------------------------------------------------------
 local Settings
 local ShowOnAttackedUnitsOnly
-local ThreatColor, TappedColor
+local ThreatColorWOThreatSystem, TappedColor
 
 ---------------------------------------------------------------------------------------------------
 -- Local threat functions
@@ -45,7 +45,7 @@ local function ShowThreatGlow(unit)
   end
 end
 
-local function GetThreatColor(unit)
+local function GetThreatGlowColor(unit)
   local color
 
   if unit.isTapped and ShowThreatGlow(unit) then
@@ -56,10 +56,10 @@ local function GetThreatColor(unit)
     --if unit.type == "NPC" and UnitAffectingCombat("player") and UnitReaction(unit.unitid, "player") <= 4 then
     if (not unique_setting or (unique_setting and unique_setting.UseThreatGlow)) and Addon:ShowThreatGlowFeedback(unit) then
       -- Use either normal style colors (configured under Healthbar - Warning Glow) or threat system colors (if enabled)
-      if Settings.ON and Settings.useHPColor then
-        color = Addon:GetThreatColor()
+      if Settings.ON then
+        color = Addon:GetThreatColor(unit)
       else
-        color = ThreatColor[unit.ThreatLevel]
+        color = ThreatColorWOThreatSystem[unit.ThreatLevel]
       end
     end
   end
@@ -103,7 +103,7 @@ function Element.UpdateStyle(tp_frame, style)
 
   if unit.ThreatStatus and style.threatborder.show then
     local threatglow = tp_frame.visual.ThreatGlow
-    threatglow:SetBackdropBorderColor(GetThreatColor(unit))
+    threatglow:SetBackdropBorderColor(GetThreatGlowColor(unit))
     threatglow:Show()
   else
     tp_frame.visual.ThreatGlow:Hide()
@@ -113,7 +113,7 @@ end
 function Element.ThreatUpdate(tp_frame, unit)
   if unit.ThreatStatus and tp_frame.style.threatborder.show then
     local threatglow = tp_frame.visual.ThreatGlow
-    threatglow:SetBackdropBorderColor(GetThreatColor(unit))
+    threatglow:SetBackdropBorderColor(GetThreatGlowColor(unit))
     threatglow:Show()
   else
     tp_frame.visual.ThreatGlow:Hide()
@@ -121,12 +121,13 @@ function Element.ThreatUpdate(tp_frame, unit)
 end
 
 function Element.UpdateSettings()
-  Settings = TidyPlatesThreat.db.profile.threat
+  local db = TidyPlatesThreat.db.profile
+  Settings = db.threat
 
-  ShowOnAttackedUnitsOnly = TidyPlatesThreat.db.profile.ShowThreatGlowOnAttackedUnitsOnly
+  ShowOnAttackedUnitsOnly = db.ShowThreatGlowOnAttackedUnitsOnly
 
-  ThreatColor = Settings.settings.normal.threatcolor
-  TappedColor = Settings.ColorByReaction.TappedUnit
+  ThreatColorWOThreatSystem = db.settings.normal.threatcolor
+  TappedColor = db.ColorByReaction.TappedUnit
 
   SubscribeEvent(Element, "ThreatUpdate", Element.ThreatUpdate)
 end

@@ -1,5 +1,4 @@
 local ADDON_NAME, Addon = ...
-local ThreatPlates = Addon.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -97,18 +96,14 @@ local function ScaleThreat(unit, style)
 		end
 	end
 
-	local threatSituation = unit.ThreatLevel or "LOW"
-	local style = (Addon.PlayerRoleIsTank and "tank") or "dps"
-
-	if style == "tank" and db.toggle.OffTank and Addon:UnitIsOffTanked(unit) then
-		threatSituation = "OFFTANK"
-	end
+	local threat_level = Addon.GetThreatLevel(unit, style, true) -- useScale is always true here
+	local scale = db[style].scale[threat_level]
 
 	if db.AdditiveScale then
-		return db[style].scale[threatSituation] + ScaleGeneral(unit)
+		scale = scale + ScaleGeneral(unit)
 	end
 
-	return db[style].scale[threatSituation]
+	return scale
 end
 
 local function ScaleNormal(unit, non_combat_scale)

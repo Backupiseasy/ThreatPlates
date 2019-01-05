@@ -1305,7 +1305,7 @@ function Widget:PLAYER_REGEN_ENABLED()
   for plate, _ in pairs(Addon.PlatesVisible) do
     local widget_frame = plate.TPFrame.widgets.Auras
     local unit = plate.TPFrame.unit
--
+
     if widget_frame.Active and unit.HasUnlimitedAuras then
       unit.InCombat = UnitAffectingCombat(unit.unitid)
       self:UpdateIconGrid(widget_frame, unit)

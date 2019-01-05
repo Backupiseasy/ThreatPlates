@@ -111,10 +111,29 @@ local INTERNAL_EVENTS = {
 -- Register as main subscriber (only one is supported) for a WoW event - all other subscribers
 -- will receive the event after the main subscriber
 function EventService.RegisterEvent(event, func)
-  --print ("EventService: Register", event)
 
+  local previous_subscriber = RegisteredEvents[event]
   RegisteredEvents[event] = func or Addon
-  EventHandlerFrame:RegisterEvent(event)
+
+  -- Register at WoW only once,
+  if not previous_subscriber then
+    --print ("EventService: Register", event)
+    EventHandlerFrame:RegisterEvent(event)
+  end
+end
+
+-- Unregister as main subscriber all other subscribers
+function EventService.UnregisterEvent(event, func)
+  --print ("EventService: Unregister", event)
+
+  local previous_subscriber = RegisteredEvents[event]
+  RegisteredEvents[event] = nil
+
+  -- or not SubscribersByEvent[event] or not next(SubscribersByEvent[event])
+  if previous_subscriber and not (SubscribersByEvent[event] and next(SubscribersByEvent[event])) then
+    --print ("EventService: Unregistering at WoW - ", event)
+    EventHandlerFrame:UnregisterEvent(event)
+  end
 end
 
 -- Subscribe to an event (WoW event or ThreatPlates internal event)
@@ -228,6 +247,10 @@ function EventService.UnsubscribeAll(subscriber)
     end
   end
 end
+
+---------------------------------------------------------------------------------------------------
+-- Debug functions
+---------------------------------------------------------------------------------------------------
 
 local function Size(table)
   local no = 0

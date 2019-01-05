@@ -4105,6 +4105,13 @@ local function CreateCastbarOptions()
             type = "toggle",
             arg = { "settings", "castnostop", "ShowInterruptShield" },
           },
+          InterruptSource = {
+            name = L["Interrupt Source"],
+            desc = L["Shows the name of the player that interrupted the spell. |cffff0000IMPORTANT: This parses the Combat Log and therefore is a CPU-instensive functionality.|r"],
+            order = 80,
+            type = "toggle",
+            arg = { "settings", "castnostop", "ShowInterruptSource" },
+          },
         },
       },
       Textures = {

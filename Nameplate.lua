@@ -26,7 +26,8 @@ local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local ThreatPlates = Addon.ThreatPlates
 local TidyPlatesThreat = TidyPlatesThreat
 local Widgets = Addon.Widgets
-local RegisterEvent, SubscribeEvent, PublishEvent = Addon.EventService.RegisterEvent, Addon.EventService.Subscribe, Addon.EventService.Publish
+local RegisterEvent, UnregisterEvent = Addon.EventService.RegisterEvent, Addon.EventService.UnregisterEvent
+local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
 local ElementsCreated, ElementsUnitData, ElementsUnitAdded, ElementsUnitRemoved = Addon.Elements.Created, Addon.Elements.UnitData, Addon.Elements.UnitAdded, Addon.Elements.UnitRemoved
 local ElementsUpdateStyle, ElementsUpdateSettings = Addon.Elements.UpdateStyle, Addon.Elements.UpdateSettings
 
@@ -44,18 +45,21 @@ local PlateOnUpdateQueue = {}
 local LastTargetPlate
 local ShowCastBars = true
 
--- Cached CVARs (updated on every PLAYER_ENTERING_WORLD event
-local CVAR_NameplateOccludedAlphaMult
--- Cached database settings
-local SettingsEnabledFading
-local SettingsOccludedAlpha, SettingsEnabledOccludedAlpha
-local SettingsShowEnemyBlizzardNameplates, SettingsShowFriendlyBlizzardNameplates
-
 -- External references to internal data
 local PlatesCreated = Addon.PlatesCreated
 local PlatesVisible = Addon.PlatesVisible
 local PlatesByUnit = Addon.PlatesByUnit
 local PlatesByGUID = Addon.PlatesByGUID
+
+---------------------------------------------------------------------------------------------------
+-- Cached configuration settings (for performance reasons)
+---------------------------------------------------------------------------------------------------
+local SettingsEnabledFading
+local SettingsOccludedAlpha, SettingsEnabledOccludedAlpha
+local SettingsShowEnemyBlizzardNameplates, SettingsShowFriendlyBlizzardNameplates
+
+-- Cached CVARs (updated on every PLAYER_ENTERING_WORLD event
+local CVAR_NameplateOccludedAlphaMult
 
 ---------------------------------------------------------------------------------------------------------------------
 -- Core Function Declaration
@@ -554,6 +558,12 @@ function Addon:ForceUpdate()
     UpdatePlate_Transparency = UpdatePlate_SetAlpha
   end
 
+  if TidyPlatesThreat.db.profile.settings.castnostop.ShowInterruptSource then
+    RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+  else
+    UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+  end
+
   for plate, _ in pairs(PlatesVisible) do
     if plate.TPFrame.Active then
       -- TODO: Better would be to implement a custom event SettingsUpdate
@@ -616,7 +626,6 @@ local ENABLED_EVENTS = {
   --PLAYER_CONTROL_LOST = ..., -- Does not seem to be necessary
   --PLAYER_CONTROL_GAINED = ...,  -- Does not seem to be necessary
 
-  "COMBAT_LOG_EVENT_UNFILTERED",
   "UI_SCALE_CHANGED",
   "ACTIVE_TALENT_GROUP_CHANGED",
 
@@ -627,6 +636,9 @@ local ENABLED_EVENTS = {
   -- CVAR_UPDATE,
   -- DISPLAY_SIZE_CHANGED,     -- Blizzard also uses this event
   -- VARIABLES_LOADED,         -- Blizzard also uses this event
+
+  -- Depending on settings, registered or unregistered in ForceUpdate
+  -- "COMBAT_LOG_EVENT_UNFILTERED",
 }
 
 function Addon:EnableEvents()

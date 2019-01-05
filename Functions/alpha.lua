@@ -1,5 +1,4 @@
 local ADDON_NAME, Addon = ...
-local ThreatPlates = Addon.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -99,18 +98,14 @@ local function TransparencyThreat(unit, style)
 		end
 	end
 
-  local threatSituation = unit.ThreatLevel or "LOW"
-	local style = (Addon.PlayerRoleIsTank and "tank") or "dps"
+  local threat_level = Addon.GetThreatLevel(unit, style, true) -- useAlpha is always true here
+  local alpha = db[style].alpha[threat_level]
 
-  if style == "tank" and db.toggle.OffTank and Addon:UnitIsOffTanked(unit) then
-    threatSituation = "OFFTANK"
-	end
+  if db.AdditiveAlpha then
+    alpha = alpha + TransparencyGeneral(unit) - 1
+  end
 
-	if db.AdditiveAlpha then
-		return db[style].alpha[threatSituation] + TransparencyGeneral(unit) - 1
-	end
-
-  return db[style].alpha[threatSituation]
+  return alpha
 end
 
 local function AlphaNormal(unit, non_combat_transparency)

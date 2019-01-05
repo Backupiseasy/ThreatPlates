@@ -8,7 +8,7 @@ local ADDON_NAME, Addon = ...
 ---------------------------------------------------------------------------------------------------
 
 -- Lua APIs
-local strsplit = strsplit
+local strsplit, pairs = strsplit, pairs
 
 -- WoW APIs
 local IsInInstance = IsInInstance
@@ -139,20 +139,44 @@ function Addon:ShowThreatGlowFeedback(unit)
   return not ShowOnAttackedUnitsOnly or Addon:OnThreatTable(unit)
 end
 
+--function Addon:GetThreatColor(unit)
+--  -- Use either normal style colors (configured under Healthbar - Warning Glow) or threat system colors (if enabled)
+--  if Settings.ON and Settings.useHPColor then
+--    local style = (Addon.PlayerRoleIsTank and "tank") or "dps"
+--
+--    if style == "tank" and ShowOffTank and Addon:UnitIsOffTanked(unit) then
+--      return ThreatColor[style]["OFFTANK"]
+--    else
+--      return ThreatColor[style][unit.ThreatLevel]
+--    end
+--  else
+--    return ThreatColor.normal[unit.ThreatLevel]
+--  end
+--end
 
-function Addon:GetThreatColor(unit)
-  -- Use either normal style colors (configured under Healthbar - Warning Glow) or threat system colors (if enabled)
-  if Settings.ON and Settings.useHPColor then
-    local style = (Addon.PlayerRoleIsTank and "tank") or "dps"
-
+-- GetThreatLevel is only called from situations where the threat system is enabled (threat.ON)
+-- No need to test it here.
+local function GetThreatLevel(unit, style, threat_element)
+  if threat_element then
     if style == "tank" and ShowOffTank and Addon:UnitIsOffTanked(unit) then
-      return ThreatColor[style]["OFFTANK"]
+      return "OFFTANK"
     else
-      return ThreatColor[style][unit.ThreatLevel]
+      return unit.ThreatLevel
     end
   else
-    return ThreatColor.normal[unit.ThreatLevel]
+    return unit.ThreatLevel
   end
+end
+
+Addon.GetThreatLevel = GetThreatLevel
+
+-- Returns the threat color based on the unit's role (tank or dps)
+function Addon:GetThreatColor(unit)
+  -- Use either normal style colors (configured under Healthbar - Warning Glow) or threat system colors (if enabled)
+  local style = (Addon.PlayerRoleIsTank and "tank") or "dps"
+  local threat_level = GetThreatLevel(unit, style, Settings.useHPColor)
+
+  return ThreatColor[style][threat_level]
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -181,10 +205,12 @@ function Element.UpdateSettings()
   Settings = TidyPlatesThreat.db.profile.threat
 
   ShowOnAttackedUnitsOnly = TidyPlatesThreat.db.profile.ShowThreatGlowOnAttackedUnitsOnly
-  ShowOffTank = TidyPlatesThreat.db.profile.toggle.OffTank
+  ShowOffTank = Settings.toggle.OffTank
   ShowInstancesOnly = Settings.toggle.InstancesOnly
 
   for style, settings in pairs(TidyPlatesThreat.db.profile.settings) do
-    ThreatColor[style] = settings.threatcolor
+    if settings.threatcolor then -- there are several subentries unter settings. Only use style subsettings like unique, normal, dps, ...
+      ThreatColor[style] = settings.threatcolor
+    end
   end
 end

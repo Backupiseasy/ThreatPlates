@@ -112,6 +112,38 @@ function TidyPlatesThreat:ChatCommand(input)
 		print ("Unit Reaction:", unit.reaction)
 		print ("Frame Style:", stylename)
 		print ("Plate Style:", nameplate_style)
+		print ("Color Statusbar:", Addon.Debug:ColorToString(tp_frame.visual.Healthbar:GetStatusBarColor()))
+		print ("Color Border:", Addon.Debug:ColorToString(tp_frame.visual.Healthbar.Border:GetBackdropColor()))
+		return
+	elseif input == "plate" then
+		local plate = C_NamePlate.GetNamePlateForUnit("target")
+		if not plate then return end
+
+		local tp_frame = plate.TPFrame
+		local unit = tp_frame.unit
+
+		local stylename = "dps"
+		local style = Addon.Theme[stylename]
+
+		local NAMEPLATE_STYLES_BY_THEME = {
+			dps = "HEALTHBAR",
+			tank = "HEALTHBAR",
+			normal = "HEALTHBAR",
+			totem = "HEALTHBAR",
+			unique = "HEALTHBAR",
+			empty = "NONE",
+			etotem = "NONE",
+			NameOnly = "NAME",
+			["NameOnly-Unique"] = "NAME",
+		}
+
+		tp_frame.PlateStyle = NAMEPLATE_STYLES_BY_THEME[stylename]
+		tp_frame.stylename = stylename
+		tp_frame.style = style
+		unit.style = stylename
+
+
+		Addon.Elements.GetElement("Healthbar").UpdateStyle(tp_frame, style)
 		return
 	end
 
