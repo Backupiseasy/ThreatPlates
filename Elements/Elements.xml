@@ -7,8 +7,8 @@
     <Script file="Threat.lua"/>
     <Script file="Healthbar.lua"/>
     <Script file="Name.lua"/>
-    <Script file="StatusText.lua"/>
     <Script file="Color.lua"/>
+    <Script file="StatusText.lua"/>
     <Script file="Castbar.lua"/>
     <Script file="SpellIcon.lua"/>
     <Script file="MouseoverHighlight.lua"/>

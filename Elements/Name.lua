@@ -37,10 +37,6 @@ function Element.Created(tp_frame)
 end
 
 -- Called in processing event: NAME_PLATE_UNIT_ADDED
---function Element.UnitData(tp_frame)
---end
-
--- Called in processing event: NAME_PLATE_UNIT_ADDED
 function Element.UnitAdded(tp_frame)
   local name_text = tp_frame.visual.NameText
   local unit = tp_frame.unit

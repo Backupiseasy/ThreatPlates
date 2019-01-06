@@ -398,7 +398,20 @@ ThreatPlates.DEFAULT_SETTINGS = {
       },
     },
     StatusText = {
-      -- TODO:
+      HealthbarMode = {
+        FriendlySubtext = "HEALTH",
+        EnemySubtext = "HEALTH",
+        SubtextColorUseHeadline = false,
+        SubtextColorUseSpecific = false,
+        SubtextColor =  RGB(255, 255, 255, 1),
+      },
+      NameMode = {
+        FriendlySubtext = "ROLE_GUILD",
+        EnemySubtext = "ROLE_GUILD_LEVEL",
+        SubtextColorUseHeadline = false,
+        SubtextColorUseSpecific = true,
+        SubtextColor =  RGB(255, 255, 255, 1),
+      },
     },
     HeadlineView = {
       -- ON = false, -- removed in 9.1.0
@@ -432,13 +445,6 @@ ThreatPlates.DEFAULT_SETTINGS = {
       ForceOutOfCombat = false,
       ForceNonAttackableUnits = false,
       ForceFriendlyInCombat = "NONE",
-      --
-      SubtextColorUseHeadline = false,
-      SubtextColorUseSpecific = true,
-      SubtextColor =  RGB(255, 255, 255, 1),
-      --
-      EnemySubtext = "ROLE_GUILD_LEVEL",
-      FriendlySubtext = "ROLE_GUILD",
     },
     Visibility = {
       --				showNameplates = true,
@@ -1822,12 +1828,6 @@ ThreatPlates.DEFAULT_SETTINGS = {
         vertical = "CENTER",
         shadow = true,
         flags = "NONE",
-        --
-        FriendlySubtext = "HEALTH",
-        EnemySubtext = "HEALTH",
-        SubtextColorUseHeadline = false,
-        SubtextColorUseSpecific = false,
-        SubtextColor =  RGB(255, 255, 255, 1),
       },
       spelltext = {
         typeface = Addon.DEFAULT_FONT, -- old default: "Accidental Presidency",

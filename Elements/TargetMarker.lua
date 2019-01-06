@@ -64,11 +64,6 @@ function Element.Created(tp_frame)
 end
 
 -- Called in processing event: NAME_PLATE_UNIT_ADDED
-function Element.UnitData(tp_frame)
-  tp_frame.unit.TargetMarker = RAID_ICON_LIST[GetRaidTargetIndex(tp_frame.unit.unitid)]
-end
-
--- Called in processing event: NAME_PLATE_UNIT_ADDED
 Element.UnitAdded = Element.TargetMarkerUpdate
 
 -- Called in processing event: NAME_PLATE_UNIT_REMOVED

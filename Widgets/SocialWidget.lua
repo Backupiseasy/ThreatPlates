@@ -26,7 +26,7 @@ local Widget = Addon.Widgets:NewWidget("Social")
 -- WoW APIs
 local CreateFrame = CreateFrame
 local GetNumGuildMembers, GetGuildRosterInfo = GetNumGuildMembers, GetGuildRosterInfo
-local GetNumFriends, GetFriendInfo = GetNumFriends, GetFriendInfo
+local GetNumFriends, GetFriendInfo, ShowFriends = GetNumFriends, GetFriendInfo, ShowFriends
 local BNGetNumFriends, BNGetFriendInfo, BNGetToonInfo, BNGetFriendInfoByID = BNGetNumFriends, BNGetFriendInfo, BNGetToonInfo, BNGetFriendInfoByID
 local BNet_GetValidatedCharacterName = BNet_GetValidatedCharacterName
 local UnitName, GetRealmName, UnitFactionGroup = UnitName, GetRealmName, UnitFactionGroup

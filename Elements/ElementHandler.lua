@@ -45,21 +45,12 @@ function ElementHandler.Created(frame)
   for i = 1, #ElementsPriority do
     ElementsPriority[i].Created(frame)
   end
-end
-
-function ElementHandler.UnitData(frame)
-  local element
-
-  for i = 1, #ElementsPriority do
-    element = ElementsPriority[i]
-    if element.UnitData then
-      element.UnitData(frame)
-    end
-  end
-end
+ end
 
 function ElementHandler.UnitAdded(frame)
   local element
+
+  if frame.PlateStyle == "NONE" then return end
 
   for i = 1, #ElementsPriority do
     element = ElementsPriority[i]
@@ -71,6 +62,8 @@ end
 
 function ElementHandler.UnitRemoved(frame)
   local element
+
+  if frame.PlateStyle == "NONE" then return end
 
   for i = 1, #ElementsPriority do
     element = ElementsPriority[i]

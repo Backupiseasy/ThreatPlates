@@ -139,7 +139,7 @@ local function UpdateAllFramesWithPublish(widget, event)
 
       widget:UpdateFrame(widget_frame, tp_frame.unit)
       -- Also publish that unit data was changed (mainly for color updates currently)
-      print ("UpdateAllFramesWithPublish: Fire Event =>", event, "for", tp_frame.unit.name)
+      --print ("UpdateAllFramesWithPublish: Fire Event =>", event, "for", tp_frame.unit.name)
       PublishEvent(event, tp_frame)
     end
   end

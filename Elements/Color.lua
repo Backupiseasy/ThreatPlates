@@ -27,6 +27,7 @@ local REACTION_REFERENCE = {
   HOSTILE = {	NPC = "HostileNPC", PLAYER = "HostilePlayer", },
   NEUTRAL = { NPC = "NeutralUnit", PLAYER = "NeutralUnit",	},
 }
+local COLOR_TRANSPARENT = RGB_P(0, 0, 0, 0) -- opaque
 
 ---------------------------------------------------------------------------------------------------
 -- Local variables
@@ -41,7 +42,8 @@ local HealthbarColorFunctions = {}
 local NameColorFunctions = {
   HEALTHBAR = {},
   NAME = {},
-  NONE = {}, -- If color mode is NONE, the name color function should never been called (as name is not shown)
+  -- If color mode is NONE, name as well as status text will not be shown.
+  NONE = {},
 }
 local NameCustomColor = {
   HEALTHBAR = {},
@@ -129,47 +131,41 @@ local function UpdatePlateColors(tp_frame)
   if tp_frame.style.healthbar.show then
     fg_color = tp_frame:GetHealthbarColor()
 
-    local bg_color
-    if Settings.BackgroundUseForegroundColor then
-      bg_color = fg_color
-    else
-      bg_color = Settings.BackgroundColor
-    end
+    if fg_color ~= tp_frame.CurrentHealthbarColor then
+      local bg_color
+      if Settings.BackgroundUseForegroundColor then
+        bg_color = fg_color
+      else
+        bg_color = Settings.BackgroundColor
+      end
 
-    local healthbar = tp_frame.visual.Healthbar
-    healthbar:SetStatusBarColor(fg_color.r, fg_color.g, fg_color.b, 1)
-    healthbar.Border:SetBackdropColor(bg_color.r, bg_color.g, bg_color.b, 1 - Settings.BackgroundOpacity)
+      local healthbar = tp_frame.visual.Healthbar
+      healthbar:SetStatusBarColor(fg_color.r, fg_color.g, fg_color.b, 1)
+      healthbar.Border:SetBackdropColor(bg_color.r, bg_color.g, bg_color.b, 1 - Settings.BackgroundOpacity)
+
+      tp_frame.CurrentHealthbarColor = fg_color
+    end
   end
 
-  if tp_frame.style.name.show then
-    fg_color = tp_frame:GetNameColor()
-    tp_frame.visual.NameText:SetTextColor(fg_color.r, fg_color.g, fg_color.b)
-  end
-end
+  fg_color = tp_frame:GetNameColor()
 
-local function UpdateStatusTextColor(tp_frame, fg_color)
-  local style = tp_frame.style
+  --    if fg_color == nil then
+  --      local unit = tp_frame.unit
+  --      print ("Unit:", unit.name)
+  --      print ("  Tapped:", unit.isTapped)
+  --      print ("  Health-Color:", unit.HealthColor)
+  --      fg_color = RGB_P(255, 255, 255)
+  --    end
 
-  if style.customtext.show then
-    local db = TidyPlatesThreat.db.profile
-    if style == "NameOnly" or style == "NameOnly-Unique" then
-      db = db.HeadlineView
-    else
-      db = db.settings.customtext
+  -- Only update the color and fire the event if there's actually a change in color
+  local name_text = tp_frame.visual.NameText
+  if fg_color ~= tp_frame.CurrentNameColor then
+    if tp_frame.style.name.show then
+      name_text:SetTextColor(fg_color.r, fg_color.g, fg_color.b)
     end
+    PublishEvent("NameColorUpdate", tp_frame, fg_color)
 
---    local subtext, color = Addon:SetNameColor(unit)
---    if db.SubtextColorUseHeadline then
---      return subtext, Addon:SetNameColor(unit)
---    elseif db.SubtextColorUseSpecific then
---      return subtext, color.r, color.g, color.b, color.a
---    end
-
-    local status_text = tp_frame.visual.StatusText
-
-
-    local _, r, g, b, a = Addon:SetCustomText(tp_frame.unit)
-    status_text:SetTextColor(fg_color.r, fg_color.g, fg_color.b, fg_color.a)
+    tp_frame.CurrentNameColor = fg_color
   end
 end
 
@@ -211,7 +207,7 @@ end
 -- Still to migrate
 ---------------------------------------------------------------------------------------------------
 
-function Addon:GetColorByHealthDeficit(unit)
+function Addon.GetColorByHealthDeficit(unit)
   local health_pct = ceil(100 * (unit.health / unit.healthmax))
   local health_color = HealthColorCache[health_pct]
 
@@ -411,11 +407,11 @@ function Element.UnitAdded(tp_frame)
   GetSituationalColorName(unit, tp_frame)
 
   -- Not sure if this checks are 100% correct, might be just easier to initialize all colors anyway
-  if tp_frame.GetHealthbarColor == GetUnitColorByHealth or tp_frame.GetNameColor == GetUnitColorByHealth or unit.CustomColor then
+  if tp_frame.GetHealthbarColor == GetUnitColorByHealth or tp_frame.GetNameColor == GetUnitColorByHealthName or unit.CustomColor then
     GetColorByHealth(unit)
   end
 
-  if not (tp_frame.GetHealthbarColor == GetUnitColorByHealth and tp_frame.GetNameColor == GetUnitColorByHealth) then
+  if not (tp_frame.GetHealthbarColor == GetUnitColorByHealth and tp_frame.GetNameColor == GetUnitColorByHealthName) then
 --    print ("Unit:", unit.name)
     GetColorByReaction(unit)
     GetColorByClass(unit)
@@ -446,6 +442,10 @@ function Element.UpdateStyle(tp_frame, style)
     tp_frame.GetHealthbarColor = HealthbarColorFunctions[unit.reaction]
     tp_frame.GetNameColor = NameColorFunctions[tp_frame.PlateStyle][unit.reaction]
   end
+
+  assert (tp_frame.GetHealthbarColor ~= nil and tp_frame.GetNameColor ~= nil,
+    "Color: Color function not initialized - Healthbar = " .. tp_frame.GetHealthbarColor .. " / Name = " ..
+      tp_frame.GetNameColor .. " (Style: " .. tp_frame.PlateStyle .. ")")
 end
 
 local function UNIT_HEALTH(unitid)

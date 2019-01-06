@@ -5482,7 +5482,7 @@ local function CreateOptionsTable()
                       order = 10,
                       type = "select",
                       values = t.FRIENDLY_SUBTEXT,
-                      arg = { "settings", "customtext", "FriendlySubtext"}
+                      arg = { "StatusText", "HealthbarMode", "FriendlySubtext"}
                     },
                     Spacer1 = { name = "", order = 15, type = "description", width = "half", },
                     EnemySubtext = {
@@ -5490,7 +5490,7 @@ local function CreateOptionsTable()
                       order = 20,
                       type = "select",
                       values = t.ENEMY_SUBTEXT,
-                      arg = { "settings", "customtext", "EnemySubtext"}
+                      arg = { "StatusText", "HealthbarMode", "EnemySubtext"}
                     },
                     Spacer2 = GetSpacerEntry(30),
                     SubtextColor = {
@@ -5504,18 +5504,18 @@ local function CreateOptionsTable()
                           order = 10,
                           type = "toggle",
                           set = function(info, val)
-                            TidyPlatesThreat.db.profile.settings.customtext.SubtextColorUseSpecific = false
+                            TidyPlatesThreat.db.profile.StatusText.HealthbarMode.SubtextColorUseSpecific = false
                             SetValue(info, true)
                           end,
-                          arg = { "settings", "customtext", "SubtextColorUseHeadline" },
+                          arg = { "StatusText", "HealthbarMode", "SubtextColorUseHeadline" },
                         },
                         SubtextColorSpecific = {
                           name = L["Custom-Text-specific"],
                           order = 20,
                           type = "toggle",
-                          arg = { "settings", "customtext", "SubtextColorUseSpecific" },
+                          arg = { "StatusText", "HealthbarMode", "SubtextColorUseSpecific" },
                           set = function(info, val)
-                            TidyPlatesThreat.db.profile.settings.customtext.SubtextColorUseHeadline = false
+                            TidyPlatesThreat.db.profile.StatusText.HealthbarMode.SubtextColorUseHeadline = false
                             SetValue(info, true)
                           end,
                         },
@@ -5525,14 +5525,14 @@ local function CreateOptionsTable()
                           type = "toggle",
                           width = "half",
                           set = function(info, val)
-                            TidyPlatesThreat.db.profile.settings.customtext.SubtextColorUseHeadline = false
-                            TidyPlatesThreat.db.profile.settings.customtext.SubtextColorUseSpecific = false
+                            TidyPlatesThreat.db.profile.StatusText.HealthbarMode.SubtextColorUseHeadline = false
+                            TidyPlatesThreat.db.profile.StatusText.HealthbarMode.SubtextColorUseSpecific = false
                             Addon:ForceUpdate()
                           end,
-                          get = function(info) return not (TidyPlatesThreat.db.profile.settings.customtext.SubtextColorUseHeadline or TidyPlatesThreat.db.profile.settings.customtext.SubtextColorUseSpecific) end,
+                          get = function(info) return not (TidyPlatesThreat.db.profile.StatusText.HealthbarMode.SubtextColorUseHeadline or TidyPlatesThreat.db.profile.StatusText.HealthbarMode.SubtextColorUseSpecific) end,
                         },
-                        SubtextColorCustomColor = GetColorAlphaEntry(35, { "settings", "customtext", "SubtextColor" },
-                          function() return (TidyPlatesThreat.db.profile.settings.customtext.SubtextColorUseHeadline or TidyPlatesThreat.db.profile.settings.customtext.SubtextColorUseSpecific) end ),
+                        SubtextColorCustomColor = GetColorAlphaEntry(35, { "StatusText", "HealthbarMode", "SubtextColor" },
+                          function() return (TidyPlatesThreat.db.profile.StatusText.HealthbarMode.SubtextColorUseHeadline or TidyPlatesThreat.db.profile.StatusText.HealthbarMode.SubtextColorUseSpecific) end ),
                       },
                     },
                     Font = GetFontEntryTheme(50, "customtext"),
@@ -5562,7 +5562,7 @@ local function CreateOptionsTable()
                       order = 10,
                       type = "select",
                       values = t.FRIENDLY_SUBTEXT,
-                      arg = {"HeadlineView", "FriendlySubtext"}
+                      arg = { "StatusText", "NameMode", "FriendlySubtext"}
                     },
                     Spacer1 = { name = "", order = 15, type = "description", width = "half", },
                     EnemySubtext = {
@@ -5570,7 +5570,7 @@ local function CreateOptionsTable()
                       order = 20,
                       type = "select",
                       values = t.ENEMY_SUBTEXT,
-                      arg = {"HeadlineView", "EnemySubtext"}
+                      arg = { "StatusText", "NameMode", "EnemySubtext"}
                     },
                     Spacer2 = GetSpacerEntry(25),
                     SubtextColor = {
@@ -5583,9 +5583,9 @@ local function CreateOptionsTable()
                           name = L["Same as Headline"],
                           order = 10,
                           type = "toggle",
-                          arg = { "HeadlineView", "SubtextColorUseHeadline" },
+                          arg = { "StatusText", "NameMode", "SubtextColorUseHeadline" },
                           set = function(info, val)
-                            TidyPlatesThreat.db.profile.HeadlineView.SubtextColorUseSpecific = false
+                            TidyPlatesThreat.db.profile.StatusText.NameMode.SubtextColorUseSpecific = false
                             SetValue(info, true)
                           end,
                         },
@@ -5593,9 +5593,9 @@ local function CreateOptionsTable()
                           name = L["Custom-Text-specific"],
                           order = 20,
                           type = "toggle",
-                          arg = { "HeadlineView", "SubtextColorUseSpecific" },
+                          arg = { "StatusText", "NameMode", "SubtextColorUseSpecific" },
                           set = function(info, val)
-                            TidyPlatesThreat.db.profile.HeadlineView.SubtextColorUseHeadline = false
+                            TidyPlatesThreat.db.profile.StatusText.NameMode.SubtextColorUseHeadline = false
                             SetValue(info, true)
                           end,
                         },
@@ -5605,14 +5605,14 @@ local function CreateOptionsTable()
                           type = "toggle",
                           width = "half",
                           set = function(info, val)
-                            TidyPlatesThreat.db.profile.HeadlineView.SubtextColorUseHeadline = false
-                            TidyPlatesThreat.db.profile.HeadlineView.SubtextColorUseSpecific = false
+                            TidyPlatesThreat.db.profile.StatusText.NameMode.SubtextColorUseHeadline = false
+                            TidyPlatesThreat.db.profile.StatusText.NameMode.SubtextColorUseSpecific = false
                             Addon:ForceUpdate()
                           end,
-                          get = function(info) return not (TidyPlatesThreat.db.profile.HeadlineView.SubtextColorUseHeadline or TidyPlatesThreat.db.profile.HeadlineView.SubtextColorUseSpecific) end,
+                          get = function(info) return not (TidyPlatesThreat.db.profile.StatusText.NameMode.SubtextColorUseHeadline or TidyPlatesThreat.db.profile.StatusText.NameMode.SubtextColorUseSpecific) end,
                         },
-                        SubtextColorCustomColor = GetColorAlphaEntry(35, { "HeadlineView", "SubtextColor" },
-                          function() return (TidyPlatesThreat.db.profile.HeadlineView.SubtextColorUseHeadline or TidyPlatesThreat.db.profile.HeadlineView.SubtextColorUseSpecific) end ),
+                        SubtextColorCustomColor = GetColorAlphaEntry(35, { "StatusText", "NameMode", "SubtextColor" },
+                          function() return (TidyPlatesThreat.db.profile.StatusText.NameMode.SubtextColorUseHeadline or TidyPlatesThreat.db.profile.StatusText.NameMode.SubtextColorUseSpecific) end ),
                       },
                     },
                     -- Font = GetFontEntry(50, { "HeadlineView", "name" } ),

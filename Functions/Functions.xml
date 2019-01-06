@@ -4,5 +4,4 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 <Script file="alpha.lua"/>
 <Script file="scale.lua"/>
 <Script file="castbarcolor.lua"/>
-<Script file="healthtext.lua"/>
 </Ui>

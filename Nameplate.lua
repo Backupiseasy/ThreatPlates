@@ -28,7 +28,7 @@ local TidyPlatesThreat = TidyPlatesThreat
 local Widgets = Addon.Widgets
 local RegisterEvent, UnregisterEvent = Addon.EventService.RegisterEvent, Addon.EventService.UnregisterEvent
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
-local ElementsCreated, ElementsUnitData, ElementsUnitAdded, ElementsUnitRemoved = Addon.Elements.Created, Addon.Elements.UnitData, Addon.Elements.UnitAdded, Addon.Elements.UnitRemoved
+local ElementsCreated, ElementsUnitAdded, ElementsUnitRemoved = Addon.Elements.Created, Addon.Elements.UnitAdded, Addon.Elements.UnitRemoved
 local ElementsUpdateStyle, ElementsUpdateSettings = Addon.Elements.UpdateStyle, Addon.Elements.UpdateSettings
 
 -- Constants
@@ -96,9 +96,8 @@ end
 
 local function UpdateUnitLevel(unit, unitid)
   local unit_level = UnitEffectiveLevel(unitid)
-  local level_color = GetCreatureDifficultyColor(unit_level)
   unit.level = unit_level
-  unit.levelcolorRed, unit.levelcolorGreen, unit.levelcolorBlue = level_color.r, level_color.g, level_color.b
+  unit.LevelColor = GetCreatureDifficultyColor(unit_level)
 end
 
 local function UpdateUnitReaction(unit, unitid)
@@ -530,7 +529,6 @@ function Addon:EnableCastBars() ShowCastBars = true end
 function Addon:ForceUpdate()
   wipe(PlateOnUpdateQueue)
 
-  Addon:UpdateConfigurationStatusText()
   ElementsUpdateSettings()
 
   CVAR_NameplateOccludedAlphaMult = tonumber(GetCVar("nameplateOccludedAlphaMult"))

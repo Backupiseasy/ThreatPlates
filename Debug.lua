@@ -117,7 +117,7 @@ function Debug:ColorToString(color, ...)
   local r, b, g, a
   if not color then
     return "(nil)"
-  elseif type(color) == "string" then
+  elseif type(color) == "table" then
     r, b, g, a = color.r, color.g, color.b, color.a
   else
     r, b, g, a = color, ...
@@ -132,4 +132,16 @@ function Debug:ColorToString(color, ...)
     r, b, g = ceil(r * 255), ceil(g * 255), ceil(b * 255)
     return string.format("%i / %i / %i", r, g, b)
   end
+end
+
+function Debug:TableSize(table)
+  local size = 0
+
+  if type(table) == "table" then
+    for key, _ in pairs(table) do
+      size = size + 1
+    end
+  end
+
+  return size
 end

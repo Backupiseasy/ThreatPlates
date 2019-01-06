@@ -102,6 +102,10 @@ local INTERNAL_EVENTS = {
   -- Payload:
   --   tp_frame: Frame (table), Nilable = false
   QuestUpdate = true, -- Curently: Updates for Quest (Unit Color)
+  -- Payload:
+  --   tp_frame: Frame (table), Nilable = false
+  --   color: Color (table), Nilable = false
+  NameColorUpdate = true,
 }
 
 ---------------------------------------------------------------------------------------------------
@@ -197,7 +201,7 @@ function EventService.Unsubscribe(subscriber, event)
     SubscribersByEvent[event][subscriber] = nil
 
     -- Unregister the event if the last subscriber was removed an there is no main subscriber
-    if next(SubscribersByEvent[event]) == nil and RegisteredEvents[event] == nil then
+    if not INTERNAL_EVENTS[event] and next(SubscribersByEvent[event]) == nil and RegisteredEvents[event] == nil then
       --print ("EventService: Unregistering event", event)
       EventHandlerFrame:UnregisterEvent(event)
     end
@@ -252,15 +256,6 @@ end
 -- Debug functions
 ---------------------------------------------------------------------------------------------------
 
-local function Size(table)
-  local no = 0
-  for key, value in pairs(table) do
-    no = no + 1
-  end
-
-  return no
-end
-
 local function sort_function(a,b)
   if type(a) == "table"  then
     a = a.Name
@@ -294,7 +289,7 @@ function Addon:PrintEventService()
 
   print ("EventService: Subscribed Events")
   for event, all_subscribers in pairsByKeys(SubscribersByEvent) do
-    print ("  " .. event .. ": #Subscribers =", Size(all_subscribers))
+    print ("  " .. event .. ": #Subscribers =", Addon.Debug:TableSize(all_subscribers))
     for subscriber, func in pairsByKeys(all_subscribers) do
       print ("    ->", subscriber.Name or subscriber)
     end
@@ -302,9 +297,9 @@ function Addon:PrintEventService()
 
   print ("EventService: Subscribed Events for Units")
   for unitid, event_handler_frame in pairs(RegisteredUnitEvents) do
-    print ("  " .. unitid .. ": #Events =", Size(event_handler_frame.Events))
+    print ("  " .. unitid .. ": #Events =", Addon.Debug:TableSize(event_handler_frame.Events))
     for event, all_subscribers in pairs(event_handler_frame.Events) do
-      print ("    " .. event .. ": #Subscribers =", Size(all_subscribers))
+      print ("    " .. event .. ": #Subscribers =", Addon.Debug:TableSize(all_subscribers))
       for subscriber, func in pairs(all_subscribers) do
         print ("      ->", subscriber.Name or subscriber)
       end

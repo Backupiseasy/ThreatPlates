@@ -46,7 +46,8 @@ function Element.UnitAdded(tp_frame)
     level_text:SetText(unit_level)
   end
 
-  level_text:SetTextColor(unit.levelcolorRed, unit.levelcolorGreen, unit.levelcolorBlue)
+  local color = unit.LevelColor
+  level_text:SetTextColor(color.r, color.g, color.b)
 end
 
 -- Called in processing event: NAME_PLATE_UNIT_REMOVED
