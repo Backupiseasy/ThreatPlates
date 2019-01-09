@@ -5556,7 +5556,7 @@ local function CreateOptionsTable()
                       inline = true,
                       args = {
                         SubtextColorHeadline = {
-                          name = L["Same as Headline"],
+                          name = L["Same as Name"],
                           order = 10,
                           type = "toggle",
                           set = function(info, val)
@@ -5566,7 +5566,7 @@ local function CreateOptionsTable()
                           arg = { "settings", "customtext", "SubtextColorUseHeadline" },
                         },
                         SubtextColorSpecific = {
-                          name = L["Custom-Text-specific"],
+                          name = L["Status Text"],
                           order = 20,
                           type = "toggle",
                           arg = { "settings", "customtext", "SubtextColorUseSpecific" },
@@ -5636,7 +5636,7 @@ local function CreateOptionsTable()
                       inline = true,
                       args = {
                         SubtextColorHeadline = {
-                          name = L["Same as Headline"],
+                          name = L["Same as Name"],
                           order = 10,
                           type = "toggle",
                           arg = { "HeadlineView", "SubtextColorUseHeadline" },
@@ -5646,7 +5646,7 @@ local function CreateOptionsTable()
                           end,
                         },
                         SubtextColorSpecific = {
-                          name = L["Custom-Text-specific"],
+                          name = L["Status Text"],
                           order = 20,
                           type = "toggle",
                           arg = { "HeadlineView", "SubtextColorUseSpecific" },

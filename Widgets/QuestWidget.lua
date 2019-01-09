@@ -13,14 +13,13 @@ Widget.QuestsToUpdate = {}
 ---------------------------------------------------------------------------------------------------
 
 -- Lua APIs
-local string, tonumber = string, tonumber
+local string, tonumber, next, pairs = string, tonumber, next, pairs
 
 -- WoW APIs
 local WorldFrame, CreateFrame = WorldFrame, CreateFrame
 local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
-local UnitName, UnitIsUnit, UnitDetailedThreatSituation, UnitThreatSituation = UnitName, UnitIsUnit, UnitDetailedThreatSituation, UnitThreatSituation
-local GetNumQuestLeaderBoards, GetQuestObjectiveInfo, GetQuestLogTitle, GetNumQuestLogEntries = GetNumQuestLeaderBoards, GetQuestObjectiveInfo, GetQuestLogTitle, GetNumQuestLogEntries
-local UnitGUID = UnitGUID
+local UnitName, UnitIsUnit, UnitDetailedThreatSituation = UnitName, UnitIsUnit, UnitDetailedThreatSituation
+local GetNumQuestLeaderBoards, GetQuestObjectiveInfo, GetQuestLogTitle, GetNumQuestLogEntries, GetQuestLogIndexByID = GetNumQuestLeaderBoards, GetQuestObjectiveInfo, GetQuestLogTitle, GetNumQuestLogEntries, GetQuestLogIndexByID
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 
 -- ThreatPlates APIs
@@ -30,7 +29,7 @@ local InCombat = false
 local TooltipFrame = CreateFrame("GameTooltip", "ThreatPlates_Tooltip", nil, "GameTooltipTemplate")
 local PlayerName = UnitName("player")
 local ICON_COLORS = {}
-local Font = nil
+local Font
 
 local FONT_SCALING = 0.3
 local TEXTURE_SCALING = 0.5
@@ -215,13 +214,7 @@ function Widget:AddQuestCacheEntry(questIndex)
   end
 end
 
-function Widget:UpdateQuestCacheEntry(questIndex)
-  local title, _, _, _, _, _, _, questID = GetQuestLogTitle(questIndex)
-
-  if not title then
-    return
-  end
-
+function Widget:UpdateQuestCacheEntry(questIndex, title)
   if not self.Quests[title] then --for whatever reason it doesn't exist, so just add it
     self:AddQuestCacheEntry(questIndex)
     return
@@ -253,19 +246,28 @@ function Widget:PLAYER_ENTERING_WORLD()
 end
 
 function Widget:QUEST_WATCH_UPDATE(questIndex)
-  self.QuestsToUpdate[questIndex] = true
+  local title, _, _, _, _, _, _, questID = GetQuestLogTitle(questIndex)
+
+  if not title then
+    return
+  end
+
+  self.QuestsToUpdate[questID] = title
 end
 
 function Widget:UNIT_QUEST_LOG_CHANGED()
   local QuestsToUpdate = self.QuestsToUpdate
 
-  for questIndex in pairs(QuestsToUpdate) do
-    self:UpdateQuestCacheEntry(questIndex)
-    QuestsToUpdate[questIndex] = false
-  end
+  if next(QuestsToUpdate) then
+    for questID, title in pairs(QuestsToUpdate) do
+      local questIndex = GetQuestLogIndexByID(questID)
 
-  QuestsToUpdate = {}
-  self:UpdateAllFramesAndNameplateColor()
+      self:UpdateQuestCacheEntry(questIndex, title)
+      QuestsToUpdate[questID] = nil
+    end
+
+    self:UpdateAllFramesAndNameplateColor()
+  end
 end
 
 function Widget:QUEST_ACCEPTED(questIndex, questID)

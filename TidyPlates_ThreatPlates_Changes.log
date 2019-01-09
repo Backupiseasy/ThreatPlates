@@ -1,5 +1,26 @@
+﻿﻿------------------------------------------------------
+9.1.0-Beta4
+------------------------------------------------------
+* Blizzard's display for special resources (e.g., combo points) on targets is now hidden by default at login time. To enable it again, see in General - Blizzard Settings - Personal Nameplate [Comment #1681].
+* Fixed some translations for localization deDE.
+* Fixed a performance issue in Quest widget.
+
 ﻿------------------------------------------------------
-9.1.0
+9.1.0-Beta3
+------------------------------------------------------
+* Fixed a bug where Warning Glow for Threat Only ignored the setting "Only on Attacked Units" for tapped and disconnected units.
+* Updated localization for zhTW (Traditional Chinese, thanks to gaspy10).
+
+------------------------------------------------------
+9.1.0-Beta2
+------------------------------------------------------
+* Druid's Force of Nature Treants are now recognized as off-tank [PR #85].
+* Fixed a bug where auras with unlimited duration were not correctly shown or hidden entering in or out of combat.
+* Changed default value of occluded transparency from 0% to 100%.
+* Updated localization for enUS and deDE.
+
+------------------------------------------------------
+9.1.0-Beta1
 ------------------------------------------------------
 * Combo Points widget now has different styles (Squares, Orbs, Blizzard) and colors combo points depending on the current number of combo points [Issue #45, Comment #843, Comment #927, Comment #1028, Comment #1029, Issue #217, E-Mail Requests].
 * Extended the combo points widget to also show Death Knight runes including cooldown timers [Comment #989, #1240, #1252, #1558].
@@ -19,12 +40,9 @@
 * Enhanced the Quest widget to show the quest progress on quest target units [Comment #797] - Thanks to Kungfumoo for implementing this.
 * Optimized code for widgets that are only displayed on the target unit (Combo Points, Resource).
 * Changed default settings for Auras and Combo Points widget for better, non-overlapping positioning.
-* Changed default setting for castbar offset to no offset (0/0).
-* Monk's Black Ox Statue and Druid's Force of Nature Treants arenow correctly recognized as off-tank [Issue #270, Comment #318, #1420, E-Mail, PR #85]  - Thanks to dlwyatt for implementing.
+* Monk's Black Ox Statue is now correctly recognized as off-tank [Issue #270, Comment #318, #1420, E-Mail]  - Thanks to dlwyatt for implementing.
 * Fixed a bug with nameplate layering where nameplates where shown above unit frames [Comment #1086, #1124, Issue #215].
 * Fixed a bug where changes to text alignment (e.g., for name or status text) were not applied until the text was changed.
-* Fixed a bug where Warning Glow for Threat Only ignored the setting "Only on Attacked Units" for tapped and disconnected units.
-* Updated localization for enUS, deDE and zhTW (Traditional Chinese, thanks to gaspy10).
 
 ﻿------------------------------------------------------
 9.0.20
