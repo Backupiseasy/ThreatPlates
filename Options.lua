@@ -260,22 +260,22 @@ local function AddImportExportOptions(profileOptions)
   profileOptions.args.exportimportdesc = {
 		order = 90,
 		type = "description",
-		name = "\n" .. "TODO some description about importing and explorting profiles", --TODO
+		name = "\n" .. L["Import and export profiles that can be shared with other players"],
 	}
 
   profileOptions.args.exportprofile = {
     order = 95,
 		type = "execute",
-		name = "Export current profile",
-		desc = "Export the current profile into text that can be pasted by another user",
+		name = L["Export current profile"],
+		desc = L["Export the current profile into text that can be pasted by another user"],
 		func = function() ShowCopyFrame("export", TidyPlatesThreat.db.profile) end
 	}
 
   profileOptions.args.importprofile = {
     order = 100,
 		type = "execute",
-		name = "Import a profile",
-		desc = "Import a profile from another user",
+		name = L["Import a profile"],
+		desc = L["Import a profile from another user"],
 		func = function() ShowCopyFrame("import") end
 	}
 end
