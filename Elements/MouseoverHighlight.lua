@@ -1,3 +1,6 @@
+---------------------------------------------------------------------------------------------------
+-- Element: Moueover Highlight
+---------------------------------------------------------------------------------------------------
 local ADDON_NAME, Addon = ...
 local ThreatPlates = Addon.ThreatPlates
 
@@ -9,91 +12,166 @@ local ThreatPlates = Addon.ThreatPlates
 local CreateFrame = CreateFrame
 
 -- WoW APIs
-local UnitExists, UnitIsUnit = UnitExists, UnitIsUnit
+local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
+local UnitIsUnit = UnitIsUnit
 
 -- ThreatPlates APIs
+local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
 
 local OFFSET_HIGHLIGHT = 1
 local ART_PATH = ThreatPlates.Art
+local NAME_STYLE_TEXTURE = ART_PATH .. "Highlight"
+local HEALTHBAR_STYLE_TEXTURE = ART_PATH .. "TP_HealthBar_Highlight"
+local BACKDROP = {
+  edgeFile = ART_PATH .. "TP_WhiteSquare",
+  edgeSize = 1,
+}
+
+---------------------------------------------------------------------------------------------------
+-- Local variables
+---------------------------------------------------------------------------------------------------
+local MouseoverHighlightFrame = CreateFrame("Frame", nil)
+local CurrentMouseoverPlate
+local CurrentMouseoverUnitID
 
 ---------------------------------------------------------------------------------------------------
 -- Element code
 ---------------------------------------------------------------------------------------------------
+local Element = Addon.Elements.NewElement("MouseoverHighlight")
 
-local function OnUpdateHighlight(tp_frame)
-  --if not (UnitExists("mouseover") and UnitIsUnit("mouseover", tp_frame.unit.unitid)) then
-  if not UnitIsUnit("mouseover", tp_frame.unit.unitid) then
+---------------------------------------------------------------------------------------------------
+-- Mouseover Highlight Frame for detecting when mouseover ends for a unit
+---------------------------------------------------------------------------------------------------
+
+local function HideMouseoverHighlightFrame()
+  if CurrentMouseoverUnitID then
+    local tp_frame = CurrentMouseoverPlate
     tp_frame.unit.isMouseover = false
-    tp_frame.visual.Highlight:Hide()
+    tp_frame.visual.healthbar.MouseoverHighlight:Hide()
 
-    Addon.PlatesByUnit[tp_frame.unit.unitid].UpdateMe = true
-    -- More general solution, better would be to implement a callback and just update everything
-    -- on the old mouseover nameplate that depends on mouseover
-    --Addon:UpdateIndicatorScaleAndAlpha(tp_frame)
-  end
-end
-
-function Addon:Element_Mouseover_Update(tp_frame)
-  -- Don't show highlight for target units or if it's disabled
-  if tp_frame.unit.isTarget or not tp_frame.style.highlight.show then
-    -- frame.Highlight and frame.Highlight are alwways hidden by default, don't show them on targeted units
-    -- but show the frame so that the OnUpdateHighlight function is called when the mouse curser leaves the
-    -- unit
-    tp_frame.visual.Highlight:Show()
-    return
+    PublishEvent("MouseoverOnLeave", tp_frame)
+    CurrentMouseoverUnitID = nil
   end
 
-  local frame = tp_frame.visual.Highlight
-  if tp_frame.style.healthbar.show then
-    frame.Highlight:Show()
-  else
-    frame.NameHighlight:Show()
-  end
-
-  frame:Show()
+  MouseoverHighlightFrame:Hide()
 end
 
--- Update settings that are global for all nameplates
-function Addon:Element_Mouseover_Configure(frame, style_highlight)
-  -- TODO: Move this to Create as the texture is not changed in Threat Plates
-  frame.NameHighlight:SetTexture(style_highlight.texture)
+local function OnUpdateMouseoverHighlight(frame, elapsed)
+  -- Mouseover unit may have been removed from nameplate (e.g., unit died) or unit may have lost mouseover
+  if not CurrentMouseoverPlate.Active or UnitIsUnit("mouseover", CurrentMouseoverUnitID) then return end
+
+  HideMouseoverHighlightFrame()
 end
 
-function Addon:Element_Mouseover_Create(parent)
-  local frame = CreateFrame("Frame", nil, parent)
-  frame:SetFrameLevel(parent:GetFrameLevel() + 1)
+MouseoverHighlightFrame:SetScript("OnUpdate", OnUpdateMouseoverHighlight)
+MouseoverHighlightFrame:Hide()
 
+---------------------------------------------------------------------------------------------------
+-- Core element code
+---------------------------------------------------------------------------------------------------
+
+-- Called in processing event: NAME_PLATE_CREATED
+function Element.Created(tp_frame)
   -- Highlight for healthbar
-  local healthbar = parent.visual.healthbar
-  frame.Highlight = CreateFrame("Frame", nil, healthbar)
-  frame.Highlight:SetPoint("TOPLEFT", healthbar, "TOPLEFT", - OFFSET_HIGHLIGHT, OFFSET_HIGHLIGHT)
-  frame.Highlight:SetPoint("BOTTOMRIGHT", healthbar, "BOTTOMRIGHT", OFFSET_HIGHLIGHT, - OFFSET_HIGHLIGHT)
-  frame.Highlight:SetBackdrop({
-    edgeFile = ART_PATH .. "TP_WhiteSquare",
-    edgeSize = 1,
-  })
-  frame.Highlight:SetBackdropBorderColor(1, 1, 1, 1)
+  local healthbar = tp_frame.visual.healthbar
+  healthbar.Highlight = CreateFrame("Frame", nil, healthbar)
+  healthbar.Highlight:SetPoint("TOPLEFT", healthbar, "TOPLEFT", - OFFSET_HIGHLIGHT, OFFSET_HIGHLIGHT)
+  healthbar.Highlight:SetPoint("BOTTOMRIGHT", healthbar, "BOTTOMRIGHT", OFFSET_HIGHLIGHT, - OFFSET_HIGHLIGHT)
+  healthbar.Highlight:SetBackdrop(BACKDROP)
+  healthbar.Highlight:SetBackdropBorderColor(1, 1, 1, 1)
 
-  frame.HighlightTexture = frame.Highlight:CreateTexture(nil, "ARTWORK", 0)
-  frame.HighlightTexture:SetTexture(ART_PATH .. "TP_HealthBar_Highlight")
-  frame.HighlightTexture:SetBlendMode("ADD")
-  frame.HighlightTexture:SetAllPoints(healthbar)
-  --frame.HighlightTexture:SetVertexColor(1,0,0,1)
+  healthbar.HighlightTexture = healthbar.Highlight:CreateTexture(nil, "ARTWORK", 0)
+  healthbar.HighlightTexture:SetTexture(HEALTHBAR_STYLE_TEXTURE)
+  healthbar.HighlightTexture:SetBlendMode("ADD")
+  healthbar.HighlightTexture:SetAllPoints(healthbar)
 
   -- Highlight for name
-  frame.NameHighlight = healthbar:CreateTexture(nil, "ARTWORK") -- required for Headline View
-  frame.NameHighlight:SetAllPoints(parent.visual.name)
-  frame.NameHighlight:SetBlendMode("ADD")
+  healthbar.NameHighlight = healthbar:CreateTexture(nil, "ARTWORK") -- required for Headline View
+  healthbar.NameHighlight:SetTexture(NAME_STYLE_TEXTURE)
+  healthbar.NameHighlight:SetAllPoints(tp_frame.visual.name)
+  healthbar.NameHighlight:SetBlendMode("ADD")
 
-  frame.Highlight:Hide() -- HighlightTexture is shown/hidden together with Highlight
-  frame.NameHighlight:Hide()
-  frame:Hide()
-
-  frame:SetScript("OnUpdate", function() OnUpdateHighlight(parent) end)
-  frame:HookScript("OnHide", function()
-    frame.Highlight:Hide()
-    frame.NameHighlight:Hide()
-  end)
-
-  return frame
+  healthbar.Highlight:Hide() -- HighlightTexture is shown/hidden together with Highlight
+  healthbar.NameHighlight:Hide()
 end
+
+---- Called in processing event: NAME_PLATE_UNIT_ADDED
+--function Element.UnitAdded(tp_frame)
+--end
+--
+---- Called in processing event: NAME_PLATE_UNIT_REMOVED
+--function Element.UnitRemoved(tp_frame)
+--end
+--
+---- Called in processing event: UpdateStyle in Nameplate.lua
+function Element.UpdateStyle(tp_frame, style)
+  local healthbar = tp_frame.visual.healthbar
+  if style.healthbar.show then
+    healthbar.MouseoverHighlight = healthbar.Highlight
+    healthbar.NameHighlight:Hide()
+  else
+    healthbar.MouseoverHighlight = healthbar.NameHighlight
+    healthbar.Highlight:Hide()
+  end
+
+  healthbar.MouseoverHighlight:SetShown(tp_frame.unit.isMouseover and style.highlight.show and not tp_frame.unit.isTarget)
+
+--  if tp_frame.unit.isMouseover then
+--    local healthbar = tp_frame.visual.healthbar
+--
+--    if style.highlight.show and not tp_frame.unit.isTarget then
+--      if style.healthbar.show then
+--        -- Nameplate Style: Healthbar
+--        healthbar.Highlight:Show()
+--        healthbar.NameHighlight:Hide()
+--      else
+--        -- Nameplate Style: Name
+--        healthbar.Highlight:Hide()
+--        healthbar.NameHighlight:Show()
+--      end
+--    else
+--      healthbar.Highlight:Hide()
+--      healthbar.NameHighlight:Hide()
+--    end
+--  end
+end
+
+--function Element.UpdateSettings()
+--end
+
+-- Registered in Nameplate.lua
+function Element.UPDATE_MOUSEOVER_UNIT()
+  if UnitIsUnit("mouseover", "player") then return end -- TODO: target as well?
+
+  local plate = GetNamePlateForUnit("mouseover")
+
+  -- Check for TPFrame.Active to prevent accessing the personal resource bar
+  if not plate or not plate.TPFrame.Active then return end
+
+  HideMouseoverHighlightFrame()
+
+  local tp_frame = plate.TPFrame
+  tp_frame.unit.isMouseover = true
+  tp_frame.visual.healthbar.MouseoverHighlight:SetShown(tp_frame.style.highlight.show and not tp_frame.unit.isTarget)
+
+--  if style.highlight.show and not tp_frame.unit.isTarget then
+--    local healthbar = tp_frame.visual.healthbar
+--    if style.healthbar.show then
+--      -- Nameplate Style: Healthbar
+--      healthbar.Highlight:Show()
+--      healthbar.NameHighlight:Hide()
+--    else
+--      -- Nameplate Style: Name
+--      healthbar.Highlight:Hide()
+--      healthbar.NameHighlight:Show()
+--    end
+--  end
+
+  CurrentMouseoverUnitID = tp_frame.unit.unitid
+  CurrentMouseoverPlate = tp_frame
+  MouseoverHighlightFrame:Show()
+
+  PublishEvent("MouseoverOnEnter", tp_frame)
+end
+
+SubscribeEvent(Element, "PLAYER_TARGET_CHANGED", Element.UPDATE_MOUSEOVER_UNIT)

@@ -15,8 +15,6 @@ local TidyPlatesThreat = TidyPlatesThreat
 
 local ART_PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Artwork\\"
 
-local OFFSET_THREAT= 7.5
-
 local ELITE_BACKDROP = {
   TP_EliteBorder_Default = {
     edgeFile = ThreatPlates.Art .. "TP_WhiteSquare",
@@ -110,20 +108,9 @@ function Addon:CreateHealthbar(parent)
 
   frame.Border = CreateFrame("Frame", nil, frame)
   frame.EliteBorder = CreateFrame("Frame", nil, frame)
-  frame.ThreatBorder = CreateFrame("Frame", nil, frame)
 
   frame.Border:SetFrameLevel(frame:GetFrameLevel())
   frame.EliteBorder:SetFrameLevel(frame:GetFrameLevel() + 1)
-  frame.ThreatBorder:SetFrameLevel(frame:GetFrameLevel())
-
-  frame.ThreatBorder:SetPoint("TOPLEFT", frame, "TOPLEFT", - OFFSET_THREAT, OFFSET_THREAT)
-  frame.ThreatBorder:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", OFFSET_THREAT, - OFFSET_THREAT)
-  frame.ThreatBorder:SetBackdrop({
-    edgeFile = ART_PATH .. "TP_Threat",
-    edgeSize = 12,
-    --insets = { left = 0, right = 0, top = 0, bottom = 0 },
-  })
-  frame.ThreatBorder:SetBackdropBorderColor(0, 0, 0, 0) -- Transparent color as default
 
 	frame.SetAllColors = SetAllColors
   frame.SetTexCoord = function() end
