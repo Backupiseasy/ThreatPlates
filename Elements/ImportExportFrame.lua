@@ -10,6 +10,7 @@ local string = string
 local print = print
 
 -- WoW APIs
+local GameTooltip = GameTooltip
 
 -- ThreatPlates APIs
 local LibStub = LibStub
@@ -41,6 +42,7 @@ local function CreateCopyFrame()
   function frame:OpenExport(text)
     --NOTE: options are closed and re-opened around the copyframe so the state of the profile is always reflected in that window
     AceConfigDialog:Close(t.ADDON_NAME)
+    GameTooltip:Hide()
 
     local editBox = self.editBox
 
@@ -61,6 +63,7 @@ local function CreateCopyFrame()
 
   function frame:OpenImport(onImportHandler)
     AceConfigDialog:Close(t.ADDON_NAME)
+    GameTooltip:Hide()
 
     local editBox = self.editBox
 
