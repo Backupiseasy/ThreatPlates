@@ -12,6 +12,7 @@ local string = string
 
 -- ThreatPlates APIs
 local LibStub = LibStub
+local L = t.L
 local TidyPlatesThreat = TidyPlatesThreat
 
 -- cache copyFrame if used multiple times
@@ -22,7 +23,7 @@ local function CreateCopyFrame()
   local AceConfigDialog = LibStub("AceConfigDialog-3.0")
 
   local frame = AceGUI:Create("Frame")
-  frame:SetTitle("Import/Export Profile") --TODO: localisation
+  frame:SetTitle(L["Import/Export Profile"])
   frame:SetCallback("OnEscapePressed", function()
     frame:Hide()
   end)
@@ -31,7 +32,7 @@ local function CreateCopyFrame()
   local editBox = AceGUI:Create("MultiLineEditBox")
   editBox:SetFullWidth(true)
   editBox.button:Hide()
-  editBox.label:SetText("Paste ThreatPlates profile string into the box and then close the window") --TODO: localisation
+  editBox.label:SetText(L["Paste ThreatPlates profile string into the box and then close the window"])
 
   frame:AddChild(editBox)
   frame.editBox = editBox
@@ -70,9 +71,9 @@ local function CreateCopyFrame()
     editBox:SetFocus()
 
     self:SetCallback("OnClose", function()
-      onImportHandler(editBox:GetText());
+      onImportHandler(editBox:GetText())
       AceConfigDialog:Open(t.ADDON_NAME)
-    end);
+    end)
 
     self:Show()
   end
@@ -101,7 +102,7 @@ function Addon:ShowCopyFrame(mode, modeArg)
         return
       end
 
-      local errorMsg = "Something went wrong importing your profile, please check the import string" --TODO: localisation
+      local errorMsg = L["Something went wrong importing your profile, please check the import string"]
       local decoded = LibDeflate:DecodeForPrint(encoded)
 
       if not decoded then
