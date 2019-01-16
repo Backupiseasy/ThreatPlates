@@ -6,4 +6,5 @@
     <Script file="Statusbar.lua"/>
     <Script file="MouseoverHighlight.lua"/>
     <Script file="ThreatGlow.lua"/>
+    <Script file="ImportExportFrame.lua"/>
 </Ui>
