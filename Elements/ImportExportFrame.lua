@@ -7,6 +7,7 @@ local t = Addon.ThreatPlates
 
 -- Lua APIs
 local string = string
+local print = print
 
 -- WoW APIs
 
