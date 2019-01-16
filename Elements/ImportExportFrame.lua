@@ -52,13 +52,13 @@ local function CreateCopyFrame()
     editBox.label:Hide()
     editBox:SetText(text)
     editBox:HighlightText()
-    editBox:SetFocus()
 
     self:SetCallback("OnClose", function()
       AceConfigDialog:Open(t.ADDON_NAME)
     end)
 
     self:Show()
+    editBox:SetFocus()
   end
 
   function frame:OpenImport(onImportHandler)
@@ -72,7 +72,6 @@ local function CreateCopyFrame()
     editBox.editBox:SetScript("OnMouseUp", nil)
     editBox.label:Show()
     editBox:SetText("")
-    editBox:SetFocus()
 
     self:SetCallback("OnClose", function()
       onImportHandler(editBox:GetText())
@@ -80,6 +79,7 @@ local function CreateCopyFrame()
     end)
 
     self:Show()
+    editBox:SetFocus()
   end
 
   return frame
