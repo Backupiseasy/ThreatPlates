@@ -1,9 +1,9 @@
 ﻿﻿------------------------------------------------------
 9.1.0
 ------------------------------------------------------
-* Combo Points widget now has different styles (Squares, Orbs, Blizzard) and colors combo points depending on the current number of combo points [Issue #45, Comment #843, Comment #927, Comment #1028, Comment #1029, Issue #217, E-Mail Requests].
+* Combo Points widget now has different styles (Squares, Orbs, Blizzard) and colors combo points depending on the current number of combo points [Issue #145, Comment #843, Comment #927, Comment #1028, Comment #1029, #1723, Issue #217, E-Mail Requests].
 * Blizzard's display for special resources (e.g., combo points) on targets is now hidden by default at login time. To enable it again, see in General - Blizzard Settings - Personal Nameplate [Comment #1681].
-* Extended the combo points widget to also show Death Knight runes including cooldown timers [Comment #989, #1240, #1252, #1558, #1723].
+* Extended the combo points widget to also show Death Knight runes including cooldown timers [Comment #989, #1240, #1252, #1558].
 * Added an option to reduce the transparency of occluded units (see General - Transparency - Occluded Units) [#Comment #1312, #1437, #1477, E-Mail-Request].
 * Added new filter options for auras for friendly buffs (Mine) and enemy unlimited buffs (e.g. only show in combat or in instances).
 * Added an option to status text to show absorbs text (amount and/or percentage) [PM].
@@ -21,7 +21,7 @@
 * Optimized code for widgets that are only displayed on the target unit (Combo Points, Resource).
 * Changed default settings for Auras and Combo Points widget for better, non-overlapping positioning.
 * Changed default setting for castbar offset to no offset (0/0).
-* Monk's Black Ox Statue and Druid's Force of Nature Treants arenow correctly recognized as off-tank [Issue #270, Comment #318, #1420, E-Mail, PR #85]  - Thanks to dlwyatt for implementing.
+* Monk's Black Ox Statue and Druid's Force of Nature Treants arenow correctly recognized as off-tank [Issue #270, Comment #1318, #1420, E-Mail, PR #85]  - Thanks to dlwyatt for implementing.
 * Fixed a bug with nameplate layering where nameplates where shown above unit frames [Comment #1086, #1124, Issue #215].
 * Fixed a bug where changes to text alignment (e.g., for name or status text) were not applied until the text was changed.
 * Fixed a bug where Warning Glow for Threat Only ignored the setting "Only on Attacked Units" for tapped and disconnected units.
