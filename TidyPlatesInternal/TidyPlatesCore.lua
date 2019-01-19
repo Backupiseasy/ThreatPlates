@@ -8,9 +8,8 @@ local TidyPlatesCore = CreateFrame("Frame", nil, WorldFrame)
 
 -- Local References
 local _
-local max, tonumber = math.max, tonumber
+local max, gsub, tonumber = math.max, string.gsub, tonumber
 local select, pairs, tostring  = select, pairs, tostring 			    -- Local function copy
-local math_abs = math.abs
 
 -- WoW APIs
 local wipe = wipe
@@ -35,6 +34,7 @@ local GetTime = GetTime
 local UnitChannelInfo, UnitCastingInfo = UnitChannelInfo, UnitCastingInfo
 local UnitPlayerControlled = UnitPlayerControlled
 local GetCVar, Lerp, CombatLogGetCurrentEventInfo = GetCVar, Lerp, CombatLogGetCurrentEventInfo
+local GetPlayerInfoByGUID, RAID_CLASS_COLORS = GetPlayerInfoByGUID, RAID_CLASS_COLORS
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
@@ -1117,10 +1117,12 @@ do
 
         local castbar = visual.castbar
         if castbar:IsShown() then
-          sourceName, _ = UnitName(sourceName) or sourceName, nil
-          local _, class = UnitClass(sourceName)
-          if class then
-            sourceName = "|cff" .. ThreatPlates.HCC[class] .. sourceName .. "|r"
+          sourceName = gsub(sourceName, "%-[^|]+", "") -- UnitName(sourceName) only works in groups
+
+          local _, class_id = GetPlayerInfoByGUID(sourceGUID)
+          if class_id then
+            --local color_str = (RAID_CLASS_COLORS[classId] and RAID_CLASS_COLORS[classId].colorStr) or ""
+            sourceName = "|c" .. RAID_CLASS_COLORS[class_id].colorStr .. sourceName .. "|r"
           end
 
           visual.spelltext:SetText(INTERRUPTED .. " [" .. sourceName .. "]")
