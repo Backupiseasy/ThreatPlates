@@ -7344,7 +7344,8 @@ end
 
 function TidyPlatesThreat:ProfChange()
   db = self.db.profile
-  UpdateSpecial()
+
+  Addon:InitializeCustomNameplates()
 
   -- Update preview icons: EliteArtWidget, TargetHighlightWidget, ClassIconWidget, QuestWidget, Threat Textures, Totem Icons, Custom Nameplate Icons
   local path = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\"
@@ -7389,7 +7390,6 @@ function TidyPlatesThreat:ProfChange()
   end
 
   TidyPlatesThreat:ReloadTheme()
-  Addon:ForceUpdate()
 end
 
 function TidyPlatesThreat:OpenOptions()

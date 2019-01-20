@@ -1,4 +1,11 @@
 ﻿﻿------------------------------------------------------
+9.1.1
+------------------------------------------------------
+* Fixed a Lua error with Combo Points widget resulting from a wrong migration of combo point widget settings [Comment #1764].
+* Fixed a Lua error that occurred when switching profiles because of a wrong widget initialization.
+* Removed a debug print message from Arena widget [Comment #1765].
+
+﻿------------------------------------------------------
 9.1.0
 ------------------------------------------------------
 * Combo Points widget now has different styles (Squares, Orbs, Blizzard) and colors combo points depending on the current number of combo points [Issue #145, Comment #843, Comment #927, Comment #1028, Comment #1029, #1723, Issue #217, E-Mail Requests].

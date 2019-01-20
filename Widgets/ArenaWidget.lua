@@ -127,7 +127,6 @@ function Widget:OnUnitAdded(widget_frame, unit)
     widget_frame.NumText:SetText(arena_no)
   end
 
-  print ("Arena: Hiding name:", unit.style)
   if Settings.HideName then
     widget_frame:GetParent().visual.name:Hide()
   elseif TidyPlatesThreat.db.profile.settings.name.show then
