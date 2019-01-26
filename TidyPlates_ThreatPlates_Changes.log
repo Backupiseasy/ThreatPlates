@@ -1,4 +1,9 @@
 ﻿﻿------------------------------------------------------
+9.1.2
+------------------------------------------------------
+* Removed information popup about new look and feel when using the addon the first time.
+
+﻿------------------------------------------------------
 9.1.1
 ------------------------------------------------------
 * Fixed a Lua error with Combo Points widget resulting from a wrong migration of combo point widget settings [Comment #1764].

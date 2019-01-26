@@ -292,7 +292,6 @@ end
 ThreatPlates.DEFAULT_SETTINGS = {
   global = {
     version = "",
-    CheckNewLookAndFeel = false,
     DefaultsVersion = "SMOOTH",
   },
   char = {
