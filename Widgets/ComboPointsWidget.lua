@@ -21,7 +21,7 @@ local UnitClass, UnitCanAttack = UnitClass, UnitCanAttack
 local UnitPower, UnitPowerMax, GetRuneCooldown = UnitPower, UnitPowerMax, GetRuneCooldown
 local GetSpecialization, GetShapeshiftFormID = GetSpecialization, GetShapeshiftFormID
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
-local InCombatLockdown = InCombatLockdown
+local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
@@ -377,6 +377,16 @@ function Widget:PLAYER_TARGET_CHANGED()
   end
 end
 
+function Widget:PLAYER_ENTERING_WORLD()
+  -- From KuiNameplates: Update icons after zoning to workaround UnitPowerMax returning 0 when
+  -- zoning into/out of instanced PVP
+  local _, instanceType = IsInInstance()
+  if instanceType == "pvp" or instanceType == "arena" then
+    self:DetermineUnitPower()
+    self:UpdateLayout()
+  end
+end
+
 -- As this event is only registered for druid characters, ShowInShapeshiftForm is true by initialization for all other classes
 function Widget:UPDATE_SHAPESHIFT_FORM()
   self.ShowInShapeshiftForm = (GetShapeshiftFormID() == 1)
@@ -416,6 +426,7 @@ end
 -- UNIT_FLAGS: unitID
 -- UNIT_POWER_FREQUENT: unitToken, powerToken
 function Widget:OnEnable()
+  self:RegisterEvent("PLAYER_ENTERING_WORLD")
   self:RegisterEvent("PLAYER_TARGET_CHANGED")
   self:RegisterUnitEvent("UNIT_POWER_UPDATE", "player", EventHandler)
   self:RegisterUnitEvent("UNIT_DISPLAYPOWER", "player", EventHandler)
@@ -434,6 +445,7 @@ function Widget:OnEnable()
 end
 
 function Widget:OnDisable()
+  self:UnregisterEvent("PLAYER_ENTERING_WORLD")
   self:UnregisterEvent("PLAYER_TARGET_CHANGED")
   self:UnregisterEvent("UNIT_POWER_UPDATE")
   self:UnregisterEvent("UNIT_DISPLAYPOWER")

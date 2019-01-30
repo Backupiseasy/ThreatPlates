@@ -1,6 +1,8 @@
 ﻿﻿------------------------------------------------------
 9.1.2
 ------------------------------------------------------
+* Fixed a bug with Combo Points widget that prevented the widget from working in arenas and battlegrounds [#Comment 1795].
+* Fixed a Lua error with Combo Points widget when talent Ascension (6 Chi) was used by Monks [Issue #325].
 * Removed information popup about new look and feel when using the addon the first time.
 
 ﻿------------------------------------------------------
