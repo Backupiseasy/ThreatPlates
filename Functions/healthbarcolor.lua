@@ -10,13 +10,10 @@ local floor = floor
 local abs = abs
 
 -- WoW APIs
-local UnitIsConnected = UnitIsConnected
-local UnitIsUnit = UnitIsUnit
-local UnitGroupRolesAssigned = UnitGroupRolesAssigned
-local UnitReaction = UnitReaction
-local UnitCanAttack = UnitCanAttack
+local UnitIsConnected, UnitReaction, UnitCanAttack, UnitAffectingCombat = UnitIsConnected, UnitReaction, UnitCanAttack, UnitAffectingCombat
+local UnitThreatSituation, UnitIsUnit = UnitThreatSituation, UnitIsUnit
+local IsInInstance = IsInInstance
 local RAID_CLASS_COLORS = RAID_CLASS_COLORS
-local FACTION_BAR_COLORS = FACTION_BAR_COLORS
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
@@ -61,38 +58,59 @@ function CS:GetSmudgeColorRGB(colorA, colorB, perc)
     return r,g,b
 end
 
-function Addon:GetThreatColor(unit, style, show_attacked_units_only)
+local function GetThreatSituation(unit, style, db)
+  local threat_situation
+
+  if UnitThreatSituation("player", unit.unitid) then
+    threat_situation = unit.threatSituation
+  else
+    local target_unit = unit.unitid .. "target"
+    if UnitIsUnit(target_unit, "player") or UnitIsUnit("targettarget", "vehicle") or UnitIsUnit("targettarget", "pet") then
+      threat_situation = "HIGH"
+    else
+      threat_situation = "LOW"
+    end
+  end
+
+  if style == "tank" and db.threat.toggle.OffTank and Addon:UnitIsOffTanked(unit) then
+    threat_situation = "OFFTANK"
+  end
+
+  return threat_situation
+end
+
+function Addon:GetThreatColor(unit, style, use_threat_table)
   local db = TidyPlatesThreat.db.profile
+
   local color
 
-  if show_attacked_units_only then
-    if Addon:OnThreatTable(unit) then
-      local threatSituation = unit.threatSituation
-      if style == "tank" and db.threat.toggle.OffTank and Addon:UnitIsOffTanked(unit) then
-        threatSituation = "OFFTANK"
-      end
-
-      color = db.settings[style].threatcolor[threatSituation]
+  local on_threat_table
+  if use_threat_table then
+    if IsInInstance() and db.threat.UseHeuristicInInstances then
+      -- Use threat detection heuristic in instance
+      on_threat_table = UnitAffectingCombat(unit.unitid)
+    else
+      on_threat_table = Addon:OnThreatTable(unit)
     end
   else
-    local threatSituation = unit.threatSituation
-    if style == "tank" and db.threat.toggle.OffTank and Addon:UnitIsOffTanked(unit) then
-      threatSituation = "OFFTANK"
-    end
+    -- Use threat detection heuristic
+    on_threat_table = UnitAffectingCombat(unit.unitid)
+  end
 
-    color = db.settings[style].threatcolor[threatSituation]
+  if on_threat_table then
+    color = db.settings[style].threatcolor[GetThreatSituation(unit, style, db)]
   end
 
   return color
 end
 
 -- Threat System is OP, player is in combat, style is tank or dps
-local function CetColorByThreat(unit, style)
+local function GetColorByThreat(unit, style)
   local db = TidyPlatesThreat.db.profile
   local c
 
   if (db.threat.ON and db.threat.useHPColor and (style == "dps" or style == "tank")) then
-    c = Addon:GetThreatColor(unit, style, db.threat.nonCombat)
+    c = Addon:GetThreatColor(unit, style, db.threat.UseThreatTable)
   end
 
   return c
@@ -214,7 +232,7 @@ function Addon:SetHealthbarColor(unit)
         c = db.questWidget.HPBarColor
       elseif unique_setting.UseThreatColor then
         -- Threat System is should also be used for custom nameplate (in combat with thread system on)
-        c = CetColorByThreat(unit, Addon:GetThreatStyle(unit))
+        c = GetColorByThreat(unit, Addon:GetThreatStyle(unit))
       end
 
       if not c and unique_setting.useColor then
@@ -253,7 +271,7 @@ function Addon:SetHealthbarColor(unit)
       elseif ShowQuestUnit(unit) and Addon:IsPlayerQuestUnit(unit) then
         c = db.questWidget.HPBarColor
       else
-        c = CetColorByThreat(unit, style)
+        c = GetColorByThreat(unit, style)
       end
 
       if not c then

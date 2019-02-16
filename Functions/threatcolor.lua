@@ -4,8 +4,8 @@ local ThreatPlates = Addon.ThreatPlates
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
-local InCombatLockdown = InCombatLockdown
-local UnitIsConnected = UnitIsConnected
+local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
+local UnitIsConnected, UnitAffectingCombat = UnitIsConnected, UnitAffectingCombat
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
@@ -17,19 +17,18 @@ local function ShowThreatGlow(unit)
   local db = TidyPlatesThreat.db.profile
 
   if db.ShowThreatGlowOnAttackedUnitsOnly then
-    return Addon:OnThreatTable(unit)
+    if IsInInstance() and db.threat.UseHeuristicInInstances then
+      return UnitAffectingCombat(unit.unitid)
+    else
+      return Addon:OnThreatTable(unit)
+    end
   else
-    return true
+    return UnitAffectingCombat(unit.unitid)
   end
 end
 
 function Addon:SetThreatColor(unit)
   local color
-
---  if not unit.unitid then
---    return c.r, c.g, c.b, c.a -- transparent color
---  end
---
 
   local db = TidyPlatesThreat.db.profile
   if not UnitIsConnected(unit.unitid) and ShowThreatGlow(unit) then

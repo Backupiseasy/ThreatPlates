@@ -9,7 +9,7 @@ local string, strsplit = string, strsplit
 -- WoW APIs
 local UnitThreatSituation, UnitGroupRolesAssigned, UnitIsUnit = UnitThreatSituation, UnitGroupRolesAssigned, UnitIsUnit
 local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
-local UnitReaction, UnitIsTapDenied, UnitGUID = UnitReaction, UnitIsTapDenied, UnitGUID
+local UnitReaction, UnitIsTapDenied, UnitGUID, UnitAffectingCombat = UnitReaction, UnitIsTapDenied, UnitGUID, UnitAffectingCombat
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
@@ -73,14 +73,11 @@ end
 -- @docu
 ---------------------------------------------------------------------------------------------------
 function Addon:OnThreatTable(unit)
-  -- "is unit inactive" from TidyPlates - fast, but doesn't meant that player is on threat table
-  -- return  (unit.health < unit.healthmax) or (unit.isInCombat or unit.threatValue > 0) or (unit.isCasting == true) then
-
   --  local _, threatStatus = UnitDetailedThreatSituation("player", unit.unitid)
   --  return threatStatus ~= nil
 
   -- nil means player is not on unit's threat table - more acurate, but slower reaction time than the above solution
-  return UnitThreatSituation("player", unit.unitid)
+  return UnitThreatSituation("player", unit.unitid) ~= nil
 end
 
 --toggle = {
@@ -111,17 +108,26 @@ end
 function Addon:ShowThreatFeedback(unit)
   local db = TidyPlatesThreat.db.profile.threat
 
-  -- UnitCanAttack?
+
   if not InCombatLockdown() or unit.type == "PLAYER" or UnitReaction(unit.unitid, "player") > 4 or not db.ON then
     return false
   end
 
-  if not IsInInstance() and db.toggle.InstancesOnly then
+  local isInstance, _ = IsInInstance()
+  if not isInstance and db.toggle.InstancesOnly then
     return false
   end
 
   if db.toggle[GetUnitClassification(unit)] then
-    return not db.nonCombat or Addon:OnThreatTable(unit)
+    if db.UseThreatTable then
+      if isInstance and db.UseHeuristicInInstances then
+        return UnitAffectingCombat(unit.unitid)
+      else
+        return Addon:OnThreatTable(unit)
+      end
+    else
+      return UnitAffectingCombat(unit.unitid)
+    end
   end
 
   return false

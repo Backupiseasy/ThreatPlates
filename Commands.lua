@@ -92,6 +92,19 @@ SlashCmdList["TPTPVERBOSE"] = TPTPVERBOSE
 --	TidyPlatesThreat:OpenOptions()
 --end
 
+local function SearchDBForString(db, prefix, keyword)
+  for key, value in pairs(db) do
+    local search_text = prefix .. "." .. key
+    if type(value) == "table" then
+      SearchDBForString(db[key], search_text, keyword )
+    else
+      if string.match(string.lower(search_text), keyword) then
+        print (search_text, "=", value)
+      end
+    end
+  end
+end
+
 function TidyPlatesThreat:ChatCommand(input)
 	local cmd_list = {}
 	for w in input:gmatch("%S+") do cmd_list[#cmd_list + 1] = w end
@@ -121,13 +134,31 @@ function TidyPlatesThreat:ChatCommand(input)
 
 
 		TP.DEBUG_PRINT_UNIT(unit, true)
-	elseif command == "quest" then
+  elseif command == "heuristic" then
+    local plate = C_NamePlate.GetNamePlateForUnit("target")
+    if not plate then return end
+    local unit = plate.TPFrame.unit
+
+--    print ("Use Threat Table:", TidyPlatesThreat.db.profile.threat.UseThreatTable)
+--    print ("Use Heuristic in Instances:", TidyPlatesThreat.db.profile.threat.UseHeuristicInInstances)
+
+    print ("InCombat:", InCombatLockdown())
+
+    --Addon:ShowThreatFeedback(unit,true)
+    --Addon:GetThreatColor(unit, unit.style, TidyPlatesThreat.db.profile.threat.UseThreatTable, true)
+    Addon:SetThreatColor(unit, true)
+  elseif command == "quest" then
 		Addon:PrintQuests()
+	elseif command == "migrate" then
+		Addon.MigrateDatabase(cmd_list[2])
 --	elseif command == "help" then
 --		--PrintHelp()
 --	else
 --		TP.Print(L["Unknown option: "] .. input, true)
 --		PrintHelp()
+	elseif command == "db" then
+		print ("Searching settings:")
+		SearchDBForString(TidyPlatesThreat.db.profile, "<Profile>", string.lower(cmd_list[2]))
 	end
 end
 

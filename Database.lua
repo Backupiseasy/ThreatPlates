@@ -462,6 +462,22 @@ local function MigrationComboPointsWidget(profile_name, profile)
   end
 end
 
+local function MigrationThreatDetection(profile_name, profile)
+  if DatabaseEntryExists(profile, { "threat", "nonCombat" }) then
+
+    print ("Migrate nonCombat for", profile_name)
+
+    print ("  <before> nonCombat = ", profile.threat.nonCombat)
+
+    local default_profile = ThreatPlates.DEFAULT_SETTINGS.profile.threat
+    profile.threat.UseThreatTable = profile.threat.nonCombat                         or default_profile.UseThreatTable
+
+    print ("  <after>  nonCombat = ", profile.threat.UseThreatTable)
+
+    --DatabaseEntryDelete(profile, { "threat", "nonCombat" })
+  end
+end
+
 ---- Settings in the SavedVariables file that should be migrated and/or deleted
 local DEPRECATED_SETTINGS = {
 --  NamesColor = { MigrateNamesColor, },                        -- settings.name.color
@@ -479,7 +495,7 @@ local DEPRECATED_SETTINGS = {
 --  HVNameHeight = { "HeadlineView", "name", "height" },        -- (removed in 8.5.0)
   DebuffWidget = { "debuffWidget" },                          -- (removed in 8.6.0)
   OldSettings = { "OldSettings" },                            -- (removed in 8.7.0)
-  CastbarColoring = { MigrateCastbarColoring, },              -- (removed in 8.7.0)
+  CastbarColoring = { MigrateCastbarColoring },              -- (removed in 8.7.0)
   TotemSettings = { MigrationTotemSettings, "8.7.0" },        -- (changed in 8.7.0)
   Borders = { MigrateBorderTextures, "8.7.0" },               -- (changed in 8.7.0)
   UniqueSettingsList = { "uniqueSettings", "list" },          -- (removed in 8.7.0, cleanup added in 8.7.1)
@@ -488,6 +504,8 @@ local DEPRECATED_SETTINGS = {
   MigrationComboPointsWidget = { MigrationComboPointsWidget, "9.1.0" },  -- (changed in 9.1.0)
   ForceFriendlyInCombatEx = { MigrationForceFriendlyInCombat }, -- (changed in 9.1.0)
   HeadlineViewEnableToggle = { "HeadlineView", "ON" },        -- (removed in 9.1.0)
+  ThreatDetection = { MigrationThreatDetection, "9.1.3" },  -- (changed in 9.1.0)
+  -- hideNonCombat = { "threat", "hideNonCombat" },        -- (removed in 9.1.0)
 }
 
 local function MigrateDatabase(current_version)
@@ -501,6 +519,8 @@ local function MigrateDatabase(current_version)
     if type(action) == "function" then
       local max_version = entry[2]
       if not max_version or CurrentVersionIsOlderThan(current_version, max_version) then
+
+        print ("=>", key, ":", current_version, "<", max_version)
         -- iterate over all profiles and migrate values
         --TidyPlatesThreat.db.global.MigrationLog[key] = "Migration" .. (max_version and ( " because " .. current_version .. " < " .. max_version) or "")
         for profile_name, profile in pairs(profile_table) do
@@ -516,6 +536,8 @@ local function MigrateDatabase(current_version)
     end
   end
 end
+
+Addon.MigrateDatabase = MigrateDatabase
 
 -----------------------------------------------------
 -- External
