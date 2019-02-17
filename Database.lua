@@ -464,9 +464,7 @@ end
 
 local function MigrationThreatDetection(profile_name, profile)
   if DatabaseEntryExists(profile, { "threat", "nonCombat" }) then
-
     print ("Migrate nonCombat for", profile_name)
-
     print ("  <before> nonCombat = ", profile.threat.nonCombat)
 
     local default_profile = ThreatPlates.DEFAULT_SETTINGS.profile.threat
@@ -504,7 +502,7 @@ local DEPRECATED_SETTINGS = {
   MigrationComboPointsWidget = { MigrationComboPointsWidget, "9.1.0" },  -- (changed in 9.1.0)
   ForceFriendlyInCombatEx = { MigrationForceFriendlyInCombat }, -- (changed in 9.1.0)
   HeadlineViewEnableToggle = { "HeadlineView", "ON" },        -- (removed in 9.1.0)
-  ThreatDetection = { MigrationThreatDetection, "9.1.3" },  -- (changed in 9.1.0)
+  -- ThreatDetection = { MigrationThreatDetection, "9.1.3" },  -- (changed in 9.1.0)
   -- hideNonCombat = { "threat", "hideNonCombat" },        -- (removed in 9.1.0)
 }
 

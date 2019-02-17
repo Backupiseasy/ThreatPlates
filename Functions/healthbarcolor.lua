@@ -11,7 +11,7 @@ local abs = abs
 
 -- WoW APIs
 local UnitIsConnected, UnitReaction, UnitCanAttack, UnitAffectingCombat = UnitIsConnected, UnitReaction, UnitCanAttack, UnitAffectingCombat
-local UnitThreatSituation, UnitIsUnit = UnitThreatSituation, UnitIsUnit
+local UnitThreatSituation, UnitIsUnit, UnitExists = UnitThreatSituation, UnitIsUnit, UnitExists
 local IsInInstance = IsInInstance
 local RAID_CLASS_COLORS = RAID_CLASS_COLORS
 
@@ -65,10 +65,18 @@ local function GetThreatSituation(unit, style, db)
     threat_situation = unit.threatSituation
   else
     local target_unit = unit.unitid .. "target"
-    if UnitIsUnit(target_unit, "player") or UnitIsUnit("targettarget", "vehicle") or UnitIsUnit("targettarget", "pet") then
-      threat_situation = "HIGH"
+
+    if UnitExists(target_unit) then
+
+      if UnitIsUnit(target_unit, "player") or UnitIsUnit("targettarget", "vehicle") or UnitIsUnit("targettarget", "pet") then
+        threat_situation = "HIGH"
+      else
+        threat_situation = "LOW"
+      end
+
+      unit.threatSituation = threat_situation
     else
-      threat_situation = "LOW"
+      threat_situation = unit.threatSituation
     end
   end
 
