@@ -35,6 +35,12 @@ local CreatureCache = {}
 --            (i.e., style == "tank")
 ---------------------------------------------------------------------------------------------------
 
+local OFFTANK_PETS = {
+  ["61146"] = true,  -- Monk's Black Ox Statue
+  ["103822"] = true, -- Druid's Force of Nature Treants
+  ["95072"] = true,  -- Shaman's Earth Elemental
+}
+
 -- Black Ox Statue of monks is: Creature with id 61146
 -- Treants of druids is: Creature with id 103822
 local function IsOffTankCreature(unitid)
@@ -47,7 +53,7 @@ local function IsOffTankCreature(unitid)
     --local unit_type, server_id, instance_id, zone_uid, id, spawn_uid = string.match(guid, '^([^-]+)%-0%-([0-9A-F]+)%-([0-9A-F]+)%-([0-9A-F]+)%-([0-9A-F]+)%-([0-9A-F]+)$')
     --local unit_type, zero, server_id, instance_id, zone_uid, npc_id, spawn_uid = strsplit("-", guid)
     local unit_type, _,  _, _, _, npc_id, _ = strsplit("-", guid)
-    is_off_tank = (("61146" == npc_id or "103822" == npc_id) and "Creature" == unit_type)
+    is_off_tank = OFFTANK_PETS[npc_id] and "Creature" == unit_type
     CreatureCache[guid] = is_off_tank
   end
 

@@ -1,7 +1,8 @@
 ﻿﻿------------------------------------------------------
-9.1.3
+9.1.3-Beta1
 ------------------------------------------------------
-* Added heuristic threat detection to show threat feedback on mobs that do not have a threat table, especially in instances (e.g., snake adds on Merektha in Temple of Sethraliss or reaping mobs) [Comment #1790, #1811, E-Mail].
+* Added heuristic threat detection to show threat feedback on mobs that do not have a threat table, especially in instances (e.g., snake adds on Merektha in Temple of Sethraliss or reaping mobs) [Comment #1790, #1811, E-Mail  Request, Issue #331].
+* Shaman's Earth Elemental is now recognized as off-tank [E-Mail Request].
 * Fixed a bug with Quest widget where the quest type icon was not shown consistently because of a delay of the tooltip update.
 
 ﻿------------------------------------------------------
@@ -41,7 +42,7 @@
 * Optimized code for widgets that are only displayed on the target unit (Combo Points, Resource).
 * Changed default settings for Auras and Combo Points widget for better, non-overlapping positioning.
 * Changed default setting for castbar offset to no offset (0/0).
-* Monk's Black Ox Statue and Druid's Force of Nature Treants arenow correctly recognized as off-tank [Issue #270, Comment #1318, #1420, E-Mail, PR #85]  - Thanks to dlwyatt for implementing.
+* Monk's Black Ox Statue and Druid's Force of Nature Treants are now correctly recognized as off-tank [Issue #270, Comment #1318, #1420, E-Mail, PR #85]  - Thanks to dlwyatt for implementing.
 * Fixed a bug with nameplate layering where nameplates where shown above unit frames [Comment #1086, #1124, Issue #215].
 * Fixed a bug where changes to text alignment (e.g., for name or status text) were not applied until the text was changed.
 * Fixed a bug where Warning Glow for Threat Only ignored the setting "Only on Attacked Units" for tapped and disconnected units.
