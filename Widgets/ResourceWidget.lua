@@ -230,10 +230,17 @@ function Widget:OnTargetUnitAdded(tp_frame, unit)
 
   self.ShowWidget = false
 
-  local show = (UnitReaction(unit.unitid, "player") > 4 and db.ShowFriendly) or
-               (unit.type == "PLAYER" and db.ShowEnemyPlayer) or
-               ((unit.isBoss or unit.isRare) and db.ShowEnemyBoss) or
-               db.ShowEnemyNPC
+--  local show = (UnitReaction(unit.unitid, "player") > 4 and db.ShowFriendly) or
+--               (unit.type == "PLAYER" and db.ShowEnemyPlayer) or
+--               ((unit.isBoss or unit.isRare) and db.ShowEnemyBoss) or
+--               db.ShowEnemyNPC
+
+  local show
+  if unit.type == "PLAYER" then
+    show = (UnitReaction(unit.unitid, "player") > 4 and db.ShowFriendly) or db.ShowEnemyPlayer
+  else
+    show = ((unit.isBoss or unit.isRare) and db.ShowEnemyBoss) or db.ShowEnemyNPC
+  end
 
   if not show then
     widget_frame:Hide()

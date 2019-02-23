@@ -755,7 +755,7 @@ do
     --visual.spellicon:SetDrawLayer("ARTWORK", 7)
 
     castbar:SetAllColors(Addon:SetCastbarColor(unit))
-    visual.castbar:SetShownInterruptOverlay(unit.spellIsShielded)
+    castbar:SetFormat(unit.spellIsShielded)
 
     UpdatePlate_Transparency(extended, unit)
     UpdateIndicator_CustomScaleText()

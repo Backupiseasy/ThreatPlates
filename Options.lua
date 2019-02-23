@@ -4083,6 +4083,12 @@ local function CreateCastbarOptions()
             desc = L["This option allows you to control whether a spell's icon is hidden or shown on castbars."],
             arg = { "settings", "spellicon", "show" },
           },
+          EnableSpark = {
+            name = L["Spark"],
+            order = 45,
+            type = "toggle",
+            arg = { "settings", "castbar", "ShowSpark" },
+          },
           EnableCastBarBorder = {
             type = "toggle",
             order = 50,

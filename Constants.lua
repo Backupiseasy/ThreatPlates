@@ -1736,6 +1736,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
         y_target = 0,
         show = true,
         ShowInHeadlineView = false,
+        ShowSpark = true,
       },
       name = { -- Names for Healthbar View
         show = true,

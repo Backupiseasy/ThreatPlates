@@ -36,17 +36,21 @@ local function OnUpdateCastBar(self, elapsed)
   if self.IsCasting then
     self.Value = self.Value + elapsed
 
-    if self.Value < self.MaxValue then
-      self:SetValue(self.Value)
+    local value, max_value = self.Value, self.MaxValue
+    if value < max_value then
+      self:SetValue(value)
+      self.Spark:SetPoint("CENTER", self, "LEFT", (value / max_value) * self:GetWidth(), 0)
       return
     end
 
-    self:SetValue(self.MaxValue)
+    self:SetValue(max_value)
   elseif self.IsChanneling then
     self.Value = self.Value - elapsed
 
-    if self.Value > 0 then
-      self:SetValue(self.Value)
+    local value = self.Value
+    if value > 0 then
+      self:SetValue(value)
+      self.Spark:SetPoint("CENTER", self, "LEFT", (value / self.MaxValue) * self:GetWidth(), 0)
       return
     end
   elseif (self.FlashTime > 0) then
@@ -68,6 +72,7 @@ end
 local function OnSizeChangedCastbar(self, width, height)
   local scale_factor = height / 10
   self.InterruptShield:SetSize(14 * scale_factor, 16 * scale_factor)
+  self.Spark:SetSize(3, self:GetHeight())
 end
 
 local function SetAllColors(self, rBar, gBar, bBar, aBar, rBackdrop, gBackdrop, bBackdrop, aBackdrop)
@@ -135,9 +140,10 @@ function Addon:CreateHealthbar(parent)
 	return frame
 end
 
-local function SetShownInterruptOverlay(self, show)
+local function SetFormat(self, show)
+  local db = TidyPlatesThreat.db.profile.settings
+
   if show then
-    local db = TidyPlatesThreat.db.profile.settings
     self.InterruptShield:SetShown(db.castnostop.ShowInterruptShield)
     if db.castborder.show and db.castnostop.ShowOverlay then
       self.InterruptBorder:Show()
@@ -151,6 +157,8 @@ local function SetShownInterruptOverlay(self, show)
     self.InterruptOverlay:Hide()
     self.InterruptShield:Hide()
   end
+
+  self.Spark:SetShown(db.castbar.ShowSpark)
 end
 
 local function SetStatusBarBackdropCastbar(self, backdrop_texture, edge_texture, edge_size, offset)
@@ -197,9 +205,14 @@ function Addon:CreateCastbar(parent)
   frame.SetBackdropTexCoord = function() end
   frame.SetStatusBarBackdrop = SetStatusBarBackdropCastbar
   frame.SetEliteBorder = SetEliteBorder
-  frame.SetShownInterruptOverlay = SetShownInterruptOverlay
+  frame.SetFormat = SetFormat
 
   frame:SetStatusBarColor(1, 0.8, 0)
+
+  local spark = frame:CreateTexture(nil, "OVERLAY", 7)
+  spark:SetTexture(ART_PATH .. "Spark")
+  spark:SetBlendMode("ADD")
+  frame.Spark = spark
 
 --  frame.Flash = frame:CreateAnimationGroup()
 --  local anim = frame.Flash:CreateAnimation("Alpha")
@@ -263,8 +276,12 @@ function Addon:ConfigCastbar()
             visual.spelltext:SetText("Cosmic Beacon")
 
             self.Border:SetShown(plate.TPFrame.style.castborder.show)
-            self:SetShownInterruptOverlay(plate.TPFrame.style.castnostop.show)
+            self:SetFormat(plate.TPFrame.style.castnostop.show)
             self.InterruptShield:SetShown(TidyPlatesThreat.db.profile.settings.castnostop.ShowInterruptShield)
+
+            self.Spark:SetSize(3, self:GetHeight() + 1)
+            self.Spark:SetPoint("CENTER", self, "LEFT", 0.5 * self:GetWidth(), 0)
+
             visual.spelltext:SetShown(plate.TPFrame.style.spelltext.show)
             visual.spellicon:SetShown(plate.TPFrame.style.spellicon.show)
             self:Show()
@@ -274,6 +291,7 @@ function Addon:ConfigCastbar()
             self.InterruptBorder:Hide()
             self.InterruptOverlay:Hide()
             self.InterruptShield:Hide()
+            self.Spark:Hide()
             visual.spelltext:Hide()
             visual.spellicon:Hide()
           end

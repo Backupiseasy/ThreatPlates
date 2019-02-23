@@ -64,6 +64,9 @@ local function GetThreatSituation(unit, style, db)
   if UnitThreatSituation("player", unit.unitid) then
     threat_situation = unit.threatSituation
   else
+    -- if (IsInInstance() and db.threat.UseHeuristicInInstances) or not db.threat.UseThreatTable then
+    -- Should not be necessary here as GetThreatSituation is only called if either a threat table is available
+    -- or the heuristic is enabled
     local target_unit = unit.unitid .. "target"
 
     if UnitExists(target_unit) then

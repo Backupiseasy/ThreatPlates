@@ -1,4 +1,10 @@
 ﻿﻿------------------------------------------------------
+9.1.3-Beta2
+------------------------------------------------------
+* Fixed a bug in Resources widget where the resource bar was shown for friendly players although only enabled for enemy players.
+* Added an option to the castbar to show a spark [Issue #178, #333, Comment #1773].
+
+﻿------------------------------------------------------
 9.1.3-Beta1
 ------------------------------------------------------
 * Added heuristic threat detection to show threat feedback on mobs that do not have a threat table, especially in instances (e.g., snake adds on Merektha in Temple of Sethraliss or reaping mobs) [Comment #1790, #1811, E-Mail  Request, Issue #331].
