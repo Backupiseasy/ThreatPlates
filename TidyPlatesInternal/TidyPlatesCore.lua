@@ -605,7 +605,7 @@ do
 	function UpdateIndicator_HealthBar()
 		visual.healthbar:SetMinMaxValues(0, unit.healthmax)
 		visual.healthbar:SetValue(unit.health)
-	end
+  end
 
 	function UpdateIndicator_Name()
 		visual.name:SetText(unit.name)
@@ -1029,6 +1029,7 @@ do
 
     if plate and plate.TPFrame.Active then
       OnHealthUpdate(plate)
+      Addon:UpdateExtensions(plate.TPFrame, unitid, plate.TPFrame.stylename)
     end
 	end
 
@@ -1155,7 +1156,16 @@ do
 		if plate and plate.TPFrame.Active then
 			Addon:UpdateExtensions(plate.TPFrame, unitid, plate.TPFrame.stylename)
 		end
-	end
+  end
+
+  function CoreEvents:UNIT_HEAL_ABSORB_AMOUNT_CHANGED(unitid)
+    local plate = GetNamePlateForUnit(unitid)
+
+    if plate and plate.TPFrame.Active then
+      Addon:UpdateExtensions(plate.TPFrame, unitid, plate.TPFrame.stylename)
+    end
+  end
+
 
 	function CoreEvents:UNIT_MAXHEALTH(unitid)
 		local plate = GetNamePlateForUnit(unitid)
@@ -1330,7 +1340,7 @@ do
 
     -- Healthbar
 		SetAnchorGroupObject(visual.healthbar, style.healthbar, extended)
-		visual.healthbar:SetStatusBarTexture(style.healthbar.texture or EMPTY_TEXTURE)
+		visual.healthbar:SetHealthBarTexture(style.healthbar)
 		visual.healthbar:SetStatusBarBackdrop(style.healthbar.backdrop, style.healthborder.texture, style.healthborder.edgesize, style.healthborder.offset)
 		visual.healthborder:SetShown(style.healthborder.show)
     visual.healthbar:SetEliteBorder(style.eliteborder.texture)

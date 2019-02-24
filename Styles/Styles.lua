@@ -163,11 +163,9 @@ end
 -- Returns style based on threat (currently checks for in combat, should not do hat)
 function Addon:GetThreatStyle(unit)
   -- style tank/dps only used for NPCs/non-player units
-  --if InCombatLockdown() and unit.type == "NPC" and unit.reaction ~= "FRIENDLY" and TidyPlatesThreat.db.profile.threat.ON then
-    if Addon:ShowThreatFeedback(unit) then
-      return (Addon:PlayerRoleIsTank() and "tank") or "dps"
-    end
-  --end
+  if Addon:ShowThreatFeedback(unit) then
+    return (Addon:PlayerRoleIsTank() and "tank") or "dps"
+  end
 
   return "normal"
 end
@@ -230,11 +228,7 @@ function Addon:SetStyle(unit)
   if not style and Addon:ShowThreatFeedback(unit) then
     -- could call GetThreatStyle here, but that would at a tiny overhead
     -- style tank/dps only used for hostile (enemy, neutral) NPCs
-    --if InCombatLockdown() and unit.type == "NPC" and TidyPlatesThreat.db.profile.threat.ON then
-      --if Addon:ShowThreatFeedback(unit) then
-        style = (Addon:PlayerRoleIsTank() and "tank") or "dps"
-      --end
-    --end
+    style = (Addon:PlayerRoleIsTank() and "tank") or "dps"
   end
 
   return style or "normal"

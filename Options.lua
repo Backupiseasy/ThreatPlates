@@ -4508,7 +4508,13 @@ local function CreateOptionsTable()
                         end
                       end),
                     Spacer1 = GetSpacerEntry(25),
-                    ShowAbsorb = {
+                    ShowHealAbsorbs = {
+                      name = L["Heal Absorbs"],
+                      order = 29,
+                      type = "toggle",
+                      arg = { "settings", "healthbar", "ShowHealAbsorbs" },
+                    },
+                    ShowAbsorbs = {
                       name = L["Absorbs"],
                       order = 30,
                       type = "toggle",
@@ -6216,7 +6222,7 @@ local function CreateOptionsTable()
                       type = "toggle",
                       name = L["Heuristic In Instances"],
                       order = 30,
-                      desc = L["Use a heuristic to detect if a mob is in combat with you, but only in instances (like dungeons or raits)."],
+                      desc = L["Use a heuristic to detect if a mob is in combat with you, but only in instances (like dungeons or raids)."],
                       arg = { "threat", "UseHeuristicInInstances" },
                     },
                   },

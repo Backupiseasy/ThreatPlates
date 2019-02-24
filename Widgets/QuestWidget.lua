@@ -141,8 +141,6 @@ function IsQuestUnit(unit, create_watcher)
               end
             end
 
-            --print ("IsQuestUnit:", area_progress, current)
-
             -- A unit may be target of more than one quest, the quest indicator should be show if at least one quest is not completed.
             if current and goal then
               if (current ~= goal) then

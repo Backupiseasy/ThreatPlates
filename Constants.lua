@@ -1703,6 +1703,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
         BackgroundUseForegroundColor = false,
         BackgroundOpacity = 0.7, -- old default: 1,
         BackgroundColor = RGB(0, 0, 0),
+        ShowHealAbsorbs = true,
         ShowAbsorbs = true,
         AbsorbColor = RGB(0, 255, 255, 1),
         AlwaysFullAbsorb = false,

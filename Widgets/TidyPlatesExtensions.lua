@@ -8,7 +8,7 @@ local ThreatPlates = Addon.ThreatPlates
 -- Lua APIs
 
 -- WoW APIs
-local UnitGetTotalAbsorbs = UnitGetTotalAbsorbs
+local UnitGetTotalAbsorbs, UnitGetTotalHealAbsorbs = UnitGetTotalAbsorbs, UnitGetTotalHealAbsorbs
 local UnitHealth = UnitHealth
 local UnitHealthMax = UnitHealthMax
 
@@ -45,10 +45,10 @@ function Addon:CreateExtensions(tp_frame)
 
   local absorbbar = visual.absorbbar
 
+  local healthbar = visual.healthbar
   if ENABLE_ABSORB then
     -- check if absorbbar and glow are created at the samel level as healthbar
     if not absorbbar then
-      local healthbar = visual.healthbar
       absorbbar = healthbar:CreateTexture(nil, "BORDER", -6)
       absorbbar:Hide()
 
@@ -88,113 +88,161 @@ end
 function Addon:UpdateExtensions(tp_frame, unitid, style)
   local visual = tp_frame.visual
   local absorbbar = visual.absorbbar
-
-  if not ENABLE_ABSORB or not absorbbar then return end
-
-  -- Code for absorb calculation see CompactUnitFrame.lua
-  local absorb = UnitGetTotalAbsorbs(unitid) or 0
-
-  -- absorb = UnitHealthMax(unitid) * 0.3 -- REMOVE
+  local healthbar = visual.healthbar
 
   -- style probably is never nil here
-  if absorb == 0 or not style or IGNORED_STYLES[style] then
-    absorbbar.overlay:Hide()
-    absorbbar.glow:Hide()
-    absorbbar:Hide()
+  if not style or IGNORED_STYLES[style] then
+    healthbar.HealAbsorbGlow:Hide()
+    healthbar.HealAbsorb:Hide()
+    healthbar.HealAbsorbLeftShadow:Hide()
+    healthbar.HealAbsorbRightShadow:Hide()
+
+    if absorbbar then
+      absorbbar.overlay:Hide()
+      absorbbar.glow:Hide()
+      absorbbar:Hide()
+    end
+
     return
   end
 
+  -- Code for absorb calculation see CompactUnitFrame.lua
   local health = UnitHealth(unitid) or 0
   local health_max = UnitHealthMax(unitid) or 0
+  local heal_absorb = UnitGetTotalHealAbsorbs(unitid) or 0
+  local absorb = UnitGetTotalAbsorbs(unitid) or 0
 
---  health = health_max * 0.75 -- REMOVE
---  visual.healthbar:SetValue(health)
+  -- heal_absorb = 0.25 * UnitHealth(unitid)
+  -- absorb = UnitHealthMax(unitid) * 0.3 -- REMOVE
+  -- health = health_max * 0.75 -- REMOVE
+  -- visual.healthbar:SetValue(health)
 
   local db = TidyPlatesThreat.db.profile.settings.healthbar
-  local healthbar = visual.healthbar
 
-  local health_pct = health / health_max
-  local absorb_pct = absorb / health_max
+  if db.ShowHealAbsorbs and heal_absorb > 0 then
+    healthbar.HealAbsorbGlow:SetShown(heal_absorb > health)
 
-  -- Don't fill outside the the health bar with absorbs; instead show an overabsorb glow and an overlay
-  absorbbar:ClearAllPoints()
-  absorbbar.overlay:ClearAllPoints()
-  absorbbar.glow:ClearAllPoints()
-
-  if health + absorb < health_max then
-    absorbbar.glow:Hide()
-
-    if db.OverlayTexture or db.AlwaysFullAbsorb then
-      absorbbar.overlay:SetPoint("LEFT", healthbar, "LEFT", health_pct * healthbar:GetWidth(), 0)
-      absorbbar.overlay:SetSize(absorb_pct * healthbar:GetWidth(), healthbar:GetHeight())
-      --absorbbar.overlay:SetTexCoord(0, healthbar:GetWidth() / absorbbar.tileSize, 0, 1)
-      absorbbar.overlay:Show()
-    else
-      absorbbar.overlay:Hide()
+    if heal_absorb > health then
+      heal_absorb = health
     end
 
-    absorbbar:SetPoint("LEFT", healthbar, "LEFT", health_pct * healthbar:GetWidth(), 0)
-    absorbbar:SetSize(absorb_pct * healthbar:GetWidth(), healthbar:GetHeight())
-    absorbbar:SetTexCoord(health_pct, health_pct + absorb_pct, 0, 1);
-    absorbbar:Show()
-  else
-    if db.AlwaysFullAbsorb then
-      -- Prevent the absorb bar extending to the left of the healthbar if absorb > health_max
-      if absorb_pct > 1 then
-        absorb_pct = 1
-      end
+    local heal_absorb_pct = heal_absorb / health_max
+    local healthbar_texture = healthbar:GetStatusBarTexture()
+    healthbar.HealAbsorb:SetSize(heal_absorb_pct * healthbar:GetWidth(), healthbar:GetHeight())
+    healthbar.HealAbsorb:SetPoint("TOPRIGHT", healthbar_texture, "TOPRIGHT", 0, 0)
+    healthbar.HealAbsorb:SetPoint("BOTTOMRIGHT", healthbar_texture, "BOTTOMRIGHT", 0, 0)
+    healthbar.HealAbsorb:Show()
 
-      local absorb_offset = absorb_pct * healthbar:GetWidth()
-      absorbbar.glow:SetPoint("BOTTOMLEFT", healthbar, "BOTTOMRIGHT", -4 - absorb_offset, -1)
-      absorbbar.glow:SetPoint("TOPLEFT", healthbar, "TOPRIGHT", -4 - absorb_offset, 1)
-      absorbbar.glow:Show()
+    local healabsorb_texture = healthbar.HealAbsorb
+    healthbar.HealAbsorbLeftShadow:SetPoint("TOPLEFT", healabsorb_texture, "TOPLEFT", 0, 0);
+    healthbar.HealAbsorbLeftShadow:SetPoint("BOTTOMLEFT", healabsorb_texture, "BOTTOMLEFT", 0, 0)
+    healthbar.HealAbsorbLeftShadow:Show()
 
-      absorbbar.overlay:SetPoint("RIGHT", healthbar, "RIGHT", 0, 0)
-      absorbbar.overlay:SetSize(absorb_offset, healthbar:GetHeight())
-      --absorbbar.overlay:SetTexCoord(0, healthbar:GetWidth() / absorbbar.tileSize, 0, 1)
-      absorbbar.overlay:Show()
-
-      -- absorb + current health >  max health => just show absorb up to max health, not outside of healthbar
-      absorb = health_max - health
-      if absorb > 0 then
-        absorb_pct = absorb / health_max
-
-        absorbbar:SetPoint("RIGHT", healthbar, "RIGHT", 0, 0)
-        absorbbar:SetSize(absorb_pct * healthbar:GetWidth(), healthbar:GetHeight())
-        absorbbar:SetTexCoord(health_pct, health_pct + absorb_pct, 0, 1)
-        absorbbar:Show()
-      else
-        absorbbar:Hide()
-      end
+    -- The right shadow is only shown if there are absorbs on the health bar.
+    if absorb > 0 and ENABLE_ABSORB then
+      healthbar.HealAbsorbRightShadow:SetPoint("TOPLEFT", healabsorb_texture, "TOPRIGHT", -8, 0)
+      healthbar.HealAbsorbRightShadow:SetPoint("BOTTOMLEFT", healabsorb_texture, "BOTTOMRIGHT", -8, 0)
+      healthbar.HealAbsorbRightShadow:Show()
     else
-      -- show spark for over-absorbs
-      absorbbar.glow:SetPoint("BOTTOMLEFT", healthbar, "BOTTOMRIGHT", -4, -1)
-      absorbbar.glow:SetPoint("TOPLEFT", healthbar, "TOPRIGHT", -4, 1)
-      absorbbar.glow:Show()
+      healthbar.HealAbsorbRightShadow:Hide()
+    end
+  else
+    healthbar.HealAbsorbGlow:Hide()
+    healthbar.HealAbsorb:Hide()
+    healthbar.HealAbsorbLeftShadow:Hide()
+    healthbar.HealAbsorbRightShadow:Hide()
+  end
 
-      -- absorb + current health >  max health => just show absorb up to max health, not outside of healthbar
-      absorb = health_max - health
-      if absorb > 0 then
-        absorb_pct = absorb / health_max
-        local absorb_offset = absorb_pct * healthbar:GetWidth()
+  if not ENABLE_ABSORB or not absorbbar then return end
 
-        absorbbar:SetPoint("RIGHT", healthbar, "RIGHT", 0, 0)
-        absorbbar:SetSize(absorb_offset, healthbar:GetHeight())
-        absorbbar:SetTexCoord(health_pct, health_pct + absorb_pct, 0, 1)
-        absorbbar:Show()
+  if absorb > 0 then
+    local health_pct = health / health_max
+    local absorb_pct = absorb / health_max
 
-        if db.OverlayTexture then
-          absorbbar.overlay:SetPoint("RIGHT", healthbar, "RIGHT", 0, 0)
-          absorbbar.overlay:SetSize(absorb_offset, healthbar:GetHeight())
-          --absorbbar.overlay:SetTexCoord(0, healthbar:GetWidth() / absorbbar.tileSize, 0, 1)
-          absorbbar.overlay:Show()
-        else
-          absorbbar.overlay:Hide()
-        end
+    -- Don't fill outside the the health bar with absorbs; instead show an overabsorb glow and an overlay
+    absorbbar:ClearAllPoints()
+    absorbbar.overlay:ClearAllPoints()
+    absorbbar.glow:ClearAllPoints()
+
+    if health + absorb < health_max then
+      absorbbar.glow:Hide()
+
+      if db.OverlayTexture or db.AlwaysFullAbsorb then
+        absorbbar.overlay:SetPoint("LEFT", healthbar, "LEFT", health_pct * healthbar:GetWidth(), 0)
+        absorbbar.overlay:SetSize(absorb_pct * healthbar:GetWidth(), healthbar:GetHeight())
+        --absorbbar.overlay:SetTexCoord(0, healthbar:GetWidth() / absorbbar.tileSize, 0, 1)
+        absorbbar.overlay:Show()
       else
-        absorbbar:Hide()
         absorbbar.overlay:Hide()
       end
+
+      absorbbar:SetPoint("LEFT", healthbar, "LEFT", health_pct * healthbar:GetWidth(), 0)
+      absorbbar:SetSize(absorb_pct * healthbar:GetWidth(), healthbar:GetHeight())
+      absorbbar:SetTexCoord(health_pct, health_pct + absorb_pct, 0, 1);
+      absorbbar:Show()
+    else
+      if db.AlwaysFullAbsorb then
+        -- Prevent the absorb bar extending to the left of the healthbar if absorb > health_max
+        if absorb_pct > 1 then
+          absorb_pct = 1
+        end
+
+        local absorb_offset = absorb_pct * healthbar:GetWidth()
+        absorbbar.glow:SetPoint("BOTTOMLEFT", healthbar, "BOTTOMRIGHT", -4 - absorb_offset, -1)
+        absorbbar.glow:SetPoint("TOPLEFT", healthbar, "TOPRIGHT", -4 - absorb_offset, 1)
+        absorbbar.glow:Show()
+
+        absorbbar.overlay:SetPoint("RIGHT", healthbar, "RIGHT", 0, 0)
+        absorbbar.overlay:SetSize(absorb_offset, healthbar:GetHeight())
+        --absorbbar.overlay:SetTexCoord(0, healthbar:GetWidth() / absorbbar.tileSize, 0, 1)
+        absorbbar.overlay:Show()
+
+        -- absorb + current health >  max health => just show absorb up to max health, not outside of healthbar
+        absorb = health_max - health
+        if absorb > 0 then
+          absorb_pct = absorb / health_max
+
+          absorbbar:SetPoint("RIGHT", healthbar, "RIGHT", 0, 0)
+          absorbbar:SetSize(absorb_pct * healthbar:GetWidth(), healthbar:GetHeight())
+          absorbbar:SetTexCoord(health_pct, health_pct + absorb_pct, 0, 1)
+          absorbbar:Show()
+        else
+          absorbbar:Hide()
+        end
+      else
+        -- show spark for over-absorbs
+        absorbbar.glow:SetPoint("BOTTOMLEFT", healthbar, "BOTTOMRIGHT", -4, -1)
+        absorbbar.glow:SetPoint("TOPLEFT", healthbar, "TOPRIGHT", -4, 1)
+        absorbbar.glow:Show()
+
+        -- absorb + current health >  max health => just show absorb up to max health, not outside of healthbar
+        absorb = health_max - health
+        if absorb > 0 then
+          absorb_pct = absorb / health_max
+          local absorb_offset = absorb_pct * healthbar:GetWidth()
+
+          absorbbar:SetPoint("RIGHT", healthbar, "RIGHT", 0, 0)
+          absorbbar:SetSize(absorb_offset, healthbar:GetHeight())
+          absorbbar:SetTexCoord(health_pct, health_pct + absorb_pct, 0, 1)
+          absorbbar:Show()
+
+          if db.OverlayTexture then
+            absorbbar.overlay:SetPoint("RIGHT", healthbar, "RIGHT", 0, 0)
+            absorbbar.overlay:SetSize(absorb_offset, healthbar:GetHeight())
+            --absorbbar.overlay:SetTexCoord(0, healthbar:GetWidth() / absorbbar.tileSize, 0, 1)
+            absorbbar.overlay:Show()
+          else
+            absorbbar.overlay:Hide()
+          end
+        else
+          absorbbar:Hide()
+          absorbbar.overlay:Hide()
+        end
+      end
     end
+  else
+    absorbbar.overlay:Hide()
+    absorbbar.glow:Hide()
+    absorbbar:Hide()
   end
 end

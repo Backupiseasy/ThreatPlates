@@ -444,19 +444,27 @@ local function MigrationForceFriendlyInCombat(profile_name, profile)
     end
   end
 end
-  
+
+local function SetValueOrDefault(old_value, default_value)
+  if old_value ~= nil then
+    return old_value
+  else
+    return default_value
+  end
+end
+
 local function MigrationComboPointsWidget(profile_name, profile)
   if DatabaseEntryExists(profile, { "comboWidget" }) then
     profile.ComboPoints = profile.ComboPoints or {}
 
     local default_profile = ThreatPlates.DEFAULT_SETTINGS.profile.ComboPoints
-    profile.ComboPoints.ON = profile.comboWidget.ON                                  or default_profile.ON
-    profile.ComboPoints.Scale = profile.comboWidget.scale                            or default_profile.Scale
-    profile.ComboPoints.x = profile.comboWidget.x                                    or default_profile.x
-    profile.ComboPoints.y = profile.comboWidget.y                                    or default_profile.y
-    profile.ComboPoints.x_hv = profile.comboWidget.x_hv                              or default_profile.x_hv
-    profile.ComboPoints.y_hv = profile.comboWidget.y_hv                              or default_profile.y_hv
-    profile.ComboPoints.ShowInHeadlineView = profile.comboWidget.ShowInHeadlineView  or default_profile.ShowInHeadlineView
+    profile.ComboPoints.ON = SetValueOrDefault(profile.comboWidget.ON. default_profile.ON)
+    profile.ComboPoints.Scale = SetValueOrDefault(profile.comboWidget.scale, default_profile.Scale)
+    profile.ComboPoints.x = SetValueOrDefault(profile.comboWidget.x, default_profile.x)
+    profile.ComboPoints.y = SetValueOrDefault(profile.comboWidget.y, default_profile.y)
+    profile.ComboPoints.x_hv = SetValueOrDefault(profile.comboWidget.x_hv, default_profile.x_hv)
+    profile.ComboPoints.y_hv = SetValueOrDefault(profile.comboWidget.y_hv, default_profile.y_hv)
+    profile.ComboPoints.ShowInHeadlineView = SetValueOrDefault(profile.comboWidget.ShowInHeadlineView, default_profile.ShowInHeadlineView)
 
     DatabaseEntryDelete(profile, { "comboWidget" })
   end
@@ -464,14 +472,8 @@ end
 
 local function MigrationThreatDetection(profile_name, profile)
   if DatabaseEntryExists(profile, { "threat", "nonCombat" }) then
-    print ("Migrate nonCombat for", profile_name)
-    print ("  <before> nonCombat = ", profile.threat.nonCombat)
-
     local default_profile = ThreatPlates.DEFAULT_SETTINGS.profile.threat
-    profile.threat.UseThreatTable = profile.threat.nonCombat                         or default_profile.UseThreatTable
-
-    print ("  <after>  nonCombat = ", profile.threat.UseThreatTable)
-
+    profile.threat.UseThreatTable = SetValueOrDefault(profile.threat.nonCombat, default_profile.UseThreatTable)
     --DatabaseEntryDelete(profile, { "threat", "nonCombat" })
   end
 end
@@ -502,8 +504,9 @@ local DEPRECATED_SETTINGS = {
   MigrationComboPointsWidget = { MigrationComboPointsWidget, "9.1.0" },  -- (changed in 9.1.0)
   ForceFriendlyInCombatEx = { MigrationForceFriendlyInCombat }, -- (changed in 9.1.0)
   HeadlineViewEnableToggle = { "HeadlineView", "ON" },        -- (removed in 9.1.0)
-  -- ThreatDetection = { MigrationThreatDetection, "9.1.3" },  -- (changed in 9.1.0)
-  -- hideNonCombat = { "threat", "hideNonCombat" },        -- (removed in 9.1.0)
+  ThreatDetection = { MigrationThreatDetection, "9.1.3" },  -- (changed in 9.1.0)
+  -- hideNonCombat = { "threat", "hideNonCombat" },        -- (removed in ...)
+  -- nonCombat = { "threat", "nonCombat" },                -- (removed in 9.1.0)
 }
 
 local function MigrateDatabase(current_version)

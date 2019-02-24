@@ -104,7 +104,7 @@ end
 --    end
 --  end
 --end
---
+
 --function TidyPlatesThreat:ChatCommand(input)
 --	local cmd_list = {}
 --	for w in input:gmatch("%S+") do cmd_list[#cmd_list + 1] = w end

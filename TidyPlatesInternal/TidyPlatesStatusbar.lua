@@ -14,6 +14,7 @@ local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local TidyPlatesThreat = TidyPlatesThreat
 
 local ART_PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Artwork\\"
+local EMPTY_TEXTURE = ART_PATH .. "Empty"
 
 local OFFSET_THREAT= 7.5
 
@@ -80,6 +81,11 @@ local function SetAllColors(self, rBar, gBar, bBar, aBar, rBackdrop, gBackdrop, 
   self.Border:SetBackdropColor(rBackdrop or 1, gBackdrop or 1, bBackdrop or 1, aBackdrop or 1)
 end
 
+local function SetHealthBarTexture(self, style)
+  self:SetStatusBarTexture(style.texture or EMPTY_TEXTURE)
+  self.HealAbsorb:SetTexture(style.texture or EMPTY_TEXTURE, true, false)
+end
+
 local function SetStatusBarBackdropHealthbar(self, backdrop_texture, edge_texture, edge_size, offset)
   self.Border:ClearAllPoints()
   self.Border:SetPoint("TOPLEFT", self, "TOPLEFT", - offset, offset)
@@ -133,8 +139,30 @@ function Addon:CreateHealthbar(parent)
 	frame.SetAllColors = SetAllColors
   frame.SetTexCoord = function() end
 	frame.SetBackdropTexCoord = function() end
+	frame.SetHealthBarTexture = SetHealthBarTexture
   frame.SetStatusBarBackdrop = SetStatusBarBackdropHealthbar
   frame.SetEliteBorder = SetEliteBorder
+
+  local healabsorb_bar = frame:CreateTexture(nil, "OVERLAY", 0)
+  healabsorb_bar:SetVertexColor(0, 0, 0)
+  healabsorb_bar:SetAlpha(0.5)
+
+  local healabsorb_glow = frame:CreateTexture(nil, "OVERLAY", 7)
+  healabsorb_glow:SetTexture([[Interface\RaidFrame\Absorb-Overabsorb]])
+  healabsorb_glow:SetBlendMode("ADD")
+  healabsorb_glow:SetWidth(8)
+  healabsorb_glow:SetPoint("BOTTOMRIGHT", frame, "BOTTOMLEFT", 2, 0)
+  healabsorb_glow:SetPoint("TOPRIGHT", frame, "TOPLEFT", 2, 0)
+  healabsorb_glow:Hide()
+
+  frame.HealAbsorbLeftShadow = frame:CreateTexture(nil, "OVERLAY", 4)
+  frame.HealAbsorbLeftShadow:SetTexture([[Interface\RaidFrame\Absorb-Edge]])
+  frame.HealAbsorbRightShadow = frame:CreateTexture(nil, "OVERLAY", 4)
+  frame.HealAbsorbRightShadow:SetTexture([[Interface\RaidFrame\Absorb-Edge]])
+  frame.HealAbsorbRightShadow:SetTexCoord(1, 0, 0, 1) -- reverse texture (right to left)
+
+  frame.HealAbsorb = healabsorb_bar
+  frame.HealAbsorbGlow = healabsorb_glow
 
 	--frame:SetScript("OnSizeChanged", OnSizeChanged)
 	return frame
