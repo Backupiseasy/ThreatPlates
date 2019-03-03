@@ -12,6 +12,7 @@ local UnitExists = UnitExists
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
+local GetThreatSituation = Addon.GetThreatSituation
 
 local function ScaleSituational(unit)
 	local db = TidyPlatesThreat.db.profile.nameplate
@@ -85,11 +86,7 @@ local function ScaleThreat(unit, style)
 		end
 	end
 
-	local threatSituation = unit.threatSituation
-	if style == "tank" and db.toggle.OffTank and Addon:UnitIsOffTanked(unit) then
-		threatSituation = "OFFTANK"
-	end
-
+	local threatSituation = GetThreatSituation(unit, style, db.toggle.OffTank)
 	if db.AdditiveScale then
 		return db[style].scale[threatSituation] + ScaleGeneral(unit)
 	end

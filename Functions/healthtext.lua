@@ -6,7 +6,7 @@ local ThreatPlates = Addon.ThreatPlates
 ---------------------------------------------------------------------------------------------------
 local UnitIsPlayer = UnitIsPlayer
 local UnitPlayerControlled = UnitPlayerControlled
-local UnitExists = UnitExists
+local UnitExists, UnitHealth, UnitHealthMax = UnitExists, UnitHealth, UnitHealthMax
 local UnitName, UnitGetTotalAbsorbs = UnitName, UnitGetTotalAbsorbs
 local UNIT_LEVEL_TEMPLATE = UNIT_LEVEL_TEMPLATE
 local UnitClassification = UnitClassification

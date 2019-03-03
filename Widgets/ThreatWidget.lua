@@ -18,6 +18,7 @@ local GetRaidTargetIndex = GetRaidTargetIndex
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
+local GetThreatSituation = Addon.GetThreatSituation
 
 local PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ThreatWidget\\"
 local THREAT_REFERENCE = {
@@ -134,14 +135,9 @@ function Widget:UpdateFrame(widget_frame, unit)
 
   local style = (Addon:PlayerRoleIsTank() and "tank") or "dps"
 
-  local threat_value = UnitThreatSituation("player", unit.unitid) or 0
-  local threat_situation = THREAT_REFERENCE[threat_value]
-
-  if style == "tank" then -- Tanking uses regular textures / swapped for dps / healing
-    if db.toggle.OffTank and Addon:UnitIsOffTanked(unit) then
-      threat_situation = "OFFTANK"
-    end
-  else -- dps or normal
+  local threat_situation = GetThreatSituation(unit, style, db.toggle.OffTank)
+  if style ~= "tank" then
+    -- Tanking uses regular textures / swapped for dps / healing
     threat_situation = REVERSE_THREAT_SITUATION[threat_situation]
   end
 

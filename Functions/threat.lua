@@ -7,7 +7,7 @@ local ADDON_NAME, Addon = ...
 local string, strsplit = string, strsplit
 
 -- WoW APIs
-local UnitThreatSituation, UnitGroupRolesAssigned, UnitIsUnit = UnitThreatSituation, UnitGroupRolesAssigned, UnitIsUnit
+local UnitThreatSituation = UnitThreatSituation
 local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
 local UnitReaction, UnitIsTapDenied, UnitGUID, UnitAffectingCombat = UnitReaction, UnitIsTapDenied, UnitGUID, UnitAffectingCombat
 
@@ -43,7 +43,7 @@ local OFFTANK_PETS = {
 
 -- Black Ox Statue of monks is: Creature with id 61146
 -- Treants of druids is: Creature with id 103822
-local function IsOffTankCreature(unitid)
+function Addon.IsOffTankCreature(unitid)
   local guid = UnitGUID(unitid)
 
   if not guid then return false end
@@ -60,24 +60,6 @@ local function IsOffTankCreature(unitid)
   return is_off_tank
 end
 
-function Addon:UnitIsOffTanked(unit)
-  local unitid = unit.unitid
-
-  local threat_status = UnitThreatSituation("player", unitid) or 0
-  if threat_status > 1 then -- tanked by player character
-    return false
-  end
-
-  local target_of_unit = unitid .. "target"
-
-  return ("TANK" == UnitGroupRolesAssigned(target_of_unit)) or UnitIsUnit(target_of_unit, "pet") or IsOffTankCreature(target_of_unit)
-end
-
----------------------------------------------------------------------------------------------------
--- @return
---
--- @docu
----------------------------------------------------------------------------------------------------
 function Addon:OnThreatTable(unit)
   --  local _, threatStatus = UnitDetailedThreatSituation("player", unit.unitid)
   --  return threatStatus ~= nil
@@ -106,11 +88,6 @@ local function GetUnitClassification(unit)
   return CLASSIFICATION_MAPPING[unit.classification]
 end
 
----------------------------------------------------------------------------------------------------
--- @return
---
--- @docu
----------------------------------------------------------------------------------------------------
 function Addon:ShowThreatFeedback(unit)
   local db = TidyPlatesThreat.db.profile.threat
 
