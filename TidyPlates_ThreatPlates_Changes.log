@@ -1,5 +1,9 @@
 ﻿﻿------------------------------------------------------
-9.1.3-Beta2
+9.1.3-Beta4
+------------------------------------------------------
+
+﻿------------------------------------------------------
+9.1.3-Beta3
 ------------------------------------------------------
 * Improved threat detection heuristic to better work with units that change their target for a spell cast.
 * Fixed a bug with castbar spark being shown on last position after a cast was interrupted.
@@ -17,7 +21,7 @@
 ﻿------------------------------------------------------
 9.1.3-Beta1
 ------------------------------------------------------
-* Added heuristic threat detection to show threat feedback on mobs that do not have a threat table, especially in instances (e.g., snake adds on Merektha in Temple of Sethraliss or reaping mobs) [Comment #1790, #1811, E-Mail  Request, Issue #331].
+* Added heuristic threat detection to show threat feedback on mobs that do not have a threat table, especially in instances (e.g., snake adds on Merektha in Temple of Sethraliss or reaping mobs) [Comment #1790, #1811, E-Mail Request, Issue #331].
 * Shaman's Earth Elemental is now recognized as off-tank [E-Mail Request].
 * Fixed a bug with Quest widget where the quest type icon was not shown consistently because of a delay of the tooltip update.
 
