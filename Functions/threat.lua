@@ -91,7 +91,6 @@ end
 function Addon:ShowThreatFeedback(unit)
   local db = TidyPlatesThreat.db.profile.threat
 
-
   if not InCombatLockdown() or unit.type == "PLAYER" or UnitReaction(unit.unitid, "player") > 4 or not db.ON then
     return false
   end

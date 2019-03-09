@@ -45,7 +45,14 @@ function Addon:SetThreatColor(unit)
       end
     end
 
-    if style == "dps" or style == "tank" or (style == "normal" and InCombatLockdown()) then
+    -- Split this up into two if-parts, otherweise there is an inconsistency between
+    -- healthbar color and threat glow at the beginning of a combat when the player
+    -- is already in combat, but not yet on the mob's threat table for a sec or so.
+    if db.threat.ON and db.threat.useHPColor then
+      if style == "dps" or style == "tank" then
+        color = Addon:GetThreatColor(unit, style, db.ShowThreatGlowOnAttackedUnitsOnly)
+      end
+    elseif (style == "normal" and InCombatLockdown()) then
       color = Addon:GetThreatColor(unit, style, db.ShowThreatGlowOnAttackedUnitsOnly)
     end
   end

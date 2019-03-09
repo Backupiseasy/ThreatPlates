@@ -1306,7 +1306,10 @@ function Widget:PLAYER_REGEN_ENABLED()
     local widget_frame = plate.TPFrame.widgets.Auras
     local unit = plate.TPFrame.unit
 
-    if widget_frame.Active and unit.HasUnlimitedAuras then
+    -- It seems that unitid here can be nil when using the healthstone while in combat
+    -- assert (unit.unitid ~= nil, "Auras: PLAYER_REGEN_ENABLED - unitid =", unit.unitid)
+
+    if widget_frame.Active and unit.HasUnlimitedAuras and unit.unitid then
       unit.isInCombat = UnitAffectingCombat(unit.unitid)
       self:UpdateIconGrid(widget_frame, unit)
     end

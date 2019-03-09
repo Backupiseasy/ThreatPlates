@@ -224,6 +224,16 @@ local function DEBUG_PRINT_UNIT(unit, full_info)
     DEBUG("  Reaction = ", UnitReaction("player", unit.unitid))
     local r, g, b, a = UnitSelectionColor(unit.unitid, true)
     DEBUG("  SelectionColor: r =", ceil(r * 255), ", g =", ceil(g * 255), ", b =", ceil(b * 255), ", a =", ceil(a * 255))
+		DEBUG("  Threat ---------------------------------")
+		DEBUG("    UnitAffectingCombat = ", UnitAffectingCombat(unit.unitid))
+		DEBUG("    Addon:OnThreatTable = ", Addon:OnThreatTable(unit))
+		DEBUG("    UnitThreatSituation = ", UnitThreatSituation("player", unit.unitid))
+		DEBUG("    Target Unit = ", UnitExists(unit.unitid .. "target"))
+		if unit.style == "unique" then
+			DEBUG("    GetThreatSituation(Unique) = ", Addon.GetThreatSituation(unit, unit.style, TidyPlatesThreat.db.profile.threat.toggle.OffTank))
+		else
+			DEBUG("    GetThreatSituation = ", Addon.GetThreatSituation(unit, Addon:GetThreatStyle(unit), TidyPlatesThreat.db.profile.threat.toggle.OffTank))
+		end
   else
     DEBUG("  <no unit id>")
   end
