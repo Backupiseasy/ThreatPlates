@@ -52,7 +52,7 @@ function Addon:SetThreatColor(unit)
       if style == "dps" or style == "tank" then
         color = Addon:GetThreatColor(unit, style, db.ShowThreatGlowOnAttackedUnitsOnly)
       end
-    elseif (style == "normal" and InCombatLockdown()) then
+    elseif InCombatLockdown() and (style == "normal" or style == "dps" or style == "tank") then
       color = Addon:GetThreatColor(unit, style, db.ShowThreatGlowOnAttackedUnitsOnly)
     end
   end
