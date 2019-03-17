@@ -689,7 +689,7 @@ function Widget:UpdateUnitAuras(frame, unit, enabled_auras, enabled_cc, SpellFil
         aura_frame.AuraExpiration = aura.expiration
         aura_frame.AuraStacks = aura.stacks
         aura_frame.AuraColor = aura.color
-        aura_frame.AuraStealOrPurge = aura.StealOrPurge or true
+        aura_frame.AuraStealOrPurge = aura.StealOrPurge
 
         -- Information for aura tooltips
         aura_frame.AuraIndex = aura.Index
