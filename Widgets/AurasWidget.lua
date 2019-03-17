@@ -1,4 +1,5 @@
 ---------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------
 -- Auras Widget
 ---------------------------------------------------------------------------------------------------
 local ADDON_NAME, Addon = ...
@@ -29,6 +30,7 @@ local GameTooltip = GameTooltip
 local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
 
 -- ThreatPlates APIs
+local LibCustomGlow = Addon.LibCustomGlow
 local TidyPlatesThreat = TidyPlatesThreat
 local Animations = Addon.Animations
 local Font = Addon.Font
@@ -38,6 +40,16 @@ local DEBUG = ThreatPlates.DEBUG
 
 -- Default for icon mode is 0.5, for bar mode "1 / GetFramerate()" is used for smooth updates -- GetFramerate() in frames/second
 local UPDATE_INTERVAL = Addon.ON_UPDATE_INTERVAL
+
+---------------------------------------------------------------------------------------------------
+-- Aura Highlighting
+---------------------------------------------------------------------------------------------------
+
+local CUSTOM_GLOW_FUNCTIONS = {
+  Button = { "ButtonGlow_Start", "ButtonGlow_Stop", 8 },
+  Pixel = { "PixelGlow_Start", "PixelGlow_Stop", 3 },
+  AutoCast = { "AutoCastGlow_Start", "AutoCastGlow_Stop", 4 },
+}
 
 ---------------------------------------------------------------------------------------------------
 -- Auras Widget Functions
@@ -54,7 +66,6 @@ local GRID_LAYOUT = {
   },
 }
 
---local TEXTURE_BORDER = Addon.ADDON_DIRECTORY .. "Widgets\\AuraWidget\\TP_AuraFrameBorder"
 Widget.TEXTURE_BORDER = Addon.ADDON_DIRECTORY .. "Artwork\\squareline"
 
 -- Debuffs are color coded, with poison debuffs having a green border, magic debuffs a blue border, diseases a brown border,
@@ -343,6 +354,8 @@ local PLayerIsInInstance = false
 -- Cached configuration settings
 ---------------------------------------------------------------------------------------------------
 local HideOmniCC, ShowDuration
+local AuraHighlightEnabled, AuraHighlightStart, AuraHighlightStop, AuraHighlightStopPrevious, AuraHighlightOffset
+local AuraHighlightColor = { 0, 0, 0, 0 }
 
 ---------------------------------------------------------------------------------------------------
 -- OnUpdate code - updates the auras remaining uptime and stacks and hides them after they expired
@@ -676,6 +689,7 @@ function Widget:UpdateUnitAuras(frame, unit, enabled_auras, enabled_cc, SpellFil
         aura_frame.AuraExpiration = aura.expiration
         aura_frame.AuraStacks = aura.stacks
         aura_frame.AuraColor = aura.color
+        aura_frame.AuraStealOrPurge = aura.StealOrPurge or true
 
         -- Information for aura tooltips
         aura_frame.AuraIndex = aura.Index
@@ -692,6 +706,7 @@ function Widget:UpdateUnitAuras(frame, unit, enabled_auras, enabled_cc, SpellFil
   -- Clear extra slots
   for i = max_auras_no + 1, self.MaxAurasPerGrid do
     aura_frames[i]:Hide()
+    AuraHighlightStop(aura_frames[i].Highlight)
   end
 
   if effect == "HARMFUL" then
@@ -874,10 +889,15 @@ function Widget:CreateAuraFrameIconMode(parent)
   frame.Border:SetFrameLevel(parent:GetFrameLevel())
   frame.Cooldown = CreateCooldown(frame)
 
+  frame.Highlight = CreateFrame("Frame", nil, frame)
+  frame.Highlight:SetFrameLevel(parent:GetFrameLevel())
+  frame.Highlight:SetPoint("CENTER")
+
   -- Use a seperate frame for text elements as a) using frame as parent results in the text being shown below
   -- the cooldown frame and b) using the cooldown frame results in the text not being visible if there is no
   -- cooldown (i.e., duration and expiration are nil which is true for auras with unlimited duration)
-  local text_frame =  CreateFrame("Frame", nil, frame)
+  local text_frame = CreateFrame("Frame", nil, frame)
+  text_frame:SetFrameLevel(parent:GetFrameLevel() + 9) -- +9 as the glow is set to +8 by LibCustomGlow
   text_frame:SetAllPoints(frame.Icon)
   frame.Stacks = text_frame:CreateFontString(nil, "OVERLAY")
   frame.TimeLeft = text_frame:CreateFontString(nil, "OVERLAY")
@@ -924,10 +944,15 @@ function Widget:UpdateAuraFrameIconMode(frame)
       insets = { left = inset, right = inset, top = inset, bottom = inset },
     })
     frame.Border:SetBackdropBorderColor(0, 0, 0, 1)
-
     frame.Border:Show()
+
   else
     frame.Border:Hide()
+  end
+
+  AuraHighlightStopPrevious(frame.Highlight)
+  if AuraHighlightEnabled then
+    frame.Highlight:SetSize(frame:GetWidth() + AuraHighlightOffset, frame:GetHeight() + AuraHighlightOffset)
   end
 
   Font:UpdateText(frame, frame.TimeLeft, db.Duration)
@@ -953,8 +978,18 @@ function Widget:UpdateAuraInformationIconMode(frame) -- texture, duration, expir
   frame.Icon:SetTexture(frame.AuraTexture)
 
   -- Highlight Coloring
-  if db.ModeIcon.ShowBorder and db.ShowAuraType then
-    frame.Border:SetBackdropBorderColor(color.r, color.g, color.b, 1)
+  if db.ModeIcon.ShowBorder then
+    if db.ShowAuraType then
+      frame.Border:SetBackdropBorderColor(color.r, color.g, color.b, 1)
+    end
+  end
+
+  if AuraHighlightEnabled then
+    if frame.AuraStealOrPurge then
+      AuraHighlightStart(frame.Highlight, AuraHighlightColor)
+    else
+      AuraHighlightStop(frame.Highlight)
+    end
   end
 
   SetCooldown(frame.Cooldown, duration, expiration)
@@ -1000,6 +1035,9 @@ function Widget:CreateAuraFrameBarMode(parent)
 
   frame.Background = frame.Statusbar:CreateTexture(nil, "BACKGROUND", 0)
   frame.Background:SetAllPoints()
+
+  frame.Highlight = CreateFrame("Frame", nil, frame)
+  frame.Highlight:SetFrameLevel(parent:GetFrameLevel())
 
   frame.Icon = frame:CreateTexture(nil, "OVERLAY", 1)
   frame.Stacks = frame.Statusbar:CreateFontString(nil, "OVERLAY")
@@ -1090,6 +1128,26 @@ function Widget:UpdateAuraFrameBarMode(frame)
     frame.Icon:Hide()
   end
 
+  AuraHighlightStopPrevious(frame.Highlight)
+  if AuraHighlightEnabled then
+    local aura_highlight = frame.Highlight
+
+    aura_highlight:ClearAllPoints()
+    if self.db.Highlight.Type == "ActionButton" then
+      -- Align to icon because of bad scaling otherwise
+      local offset = - (AuraHighlightOffset * 0.5)
+      if db.IconAlignmentLeft then
+        aura_highlight:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", offset, offset)
+      else
+        aura_highlight:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", db.BarWidth + db.IconSpacing + offset, offset)
+      end
+      aura_highlight:SetSize(db.BarHeight + AuraHighlightOffset, db.BarHeight + AuraHighlightOffset)
+    else
+      aura_highlight:SetPoint("CENTER")
+      aura_highlight:SetSize(frame:GetWidth() + AuraHighlightOffset, frame:GetHeight() + AuraHighlightOffset)
+    end
+  end
+
   frame.Statusbar:SetSize(db.BarWidth, db.BarHeight)
   --    frame.Statusbar:SetWidth(db.BarWidth)
   frame.Statusbar:SetStatusBarTexture(ThreatPlates.Media:Fetch('statusbar', db.Texture))
@@ -1123,6 +1181,14 @@ function Widget:UpdateAuraInformationBarMode(frame) -- texture, duration, expira
   -- Icon
   if db.ModeBar.ShowIcon then
     frame.Icon:SetTexture(frame.AuraTexture)
+  end
+
+  if AuraHighlightEnabled then
+    if frame.AuraStealOrPurge then
+      AuraHighlightStart(frame.Highlight, AuraHighlightColor)
+    else
+      AuraHighlightStop(frame.Highlight)
+    end
   end
 
   frame.LabelText:SetWidth(self.LabelLength - frame.TimeText:GetStringWidth())
@@ -1568,6 +1634,19 @@ function Widget:UpdateSettings()
   ShowDuration = self.db.ShowDuration and not self.db.ShowOmniCC
   --  -- Don't update any widget frame if the widget isn't enabled.
 --  if not self:IsEnabled() then return end
+
+  -- Highlighting
+  AuraHighlightEnabled = self.db.Highlight.Enabled
+  AuraHighlightStart = LibCustomGlow[CUSTOM_GLOW_FUNCTIONS[self.db.Highlight.Type][1]]
+  AuraHighlightStopPrevious = AuraHighlightStop or LibCustomGlow.PixelGlow_Stop
+  AuraHighlightStop = LibCustomGlow[CUSTOM_GLOW_FUNCTIONS[self.db.Highlight.Type][2]]
+  AuraHighlightOffset = CUSTOM_GLOW_FUNCTIONS[self.db.Highlight.Type][3]
+
+  local color = (self.db.Highlight.CustomColor and self.db.Highlight.Color) or ThreatPlates.DEFAULT_SETTINGS.profile.AuraWidget.Highlight.Color
+  AuraHighlightColor[1] = color.r
+  AuraHighlightColor[2] = color.g
+  AuraHighlightColor[3] = color.b
+  AuraHighlightColor[4] = color.a
 
   for plate, tp_frame in pairs(Addon.PlatesCreated) do
     local widget_frame = tp_frame.widgets.Auras

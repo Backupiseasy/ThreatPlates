@@ -116,6 +116,12 @@ ThreatPlates.AUTOMATION = {
   HIDE_COMBAT = "Hide when Combat starts, Show when Combat ends",
 }
 
+Addon.GLOW_TYPES = {
+  Button = L["Button"],
+  Pixel = L["Pixel"],
+  AutoCast = L["Auto-Cast"],
+}
+
 ----------------------------------------------------------------------------------------------------
 -- Paths
 ---------------------------------------------------------------------------------------------------
@@ -553,6 +559,12 @@ ThreatPlates.DEFAULT_SETTINGS = {
       ShowAuraType = true,
       DefaultBuffColor = RGB(102, 0, 51, 1),
       DefaultDebuffColor = 	RGB(204, 0, 0, 1),
+      Highlight = {
+        Enabled = true,
+        Type = "ActionButton",
+        CustomColor = false,
+        Color = RGB_P(0.95, 0.95, 0.32, 1),
+      },
       SortOrder = "TimeLeft",
       SortReverse = false,
       AlignmentH = "LEFT",
