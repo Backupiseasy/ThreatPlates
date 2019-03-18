@@ -1,7 +1,7 @@
 ﻿﻿------------------------------------------------------
 9.1.4
 ------------------------------------------------------
-* Added an option to Auras widget to highlight auras that can be stolen or purged [PR #100].
+* Added an option to Auras widget to highlight auras that can be stolen or purged [PR #100, Comment #1707, Issue #338].
 * Added some new mobs that can detect stealth to the Stealth widget.
 * Fixed a bug with Warning Glow for Threat not working when threat system as enabled, but threat coloring was disabled [Comment #1888].
 

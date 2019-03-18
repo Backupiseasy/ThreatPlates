@@ -561,7 +561,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
       DefaultDebuffColor = 	RGB(204, 0, 0, 1),
       Highlight = {
         Enabled = true,
-        Type = "ActionButton",
+        Type = "Button",
         CustomColor = false,
         Color = RGB_P(0.95, 0.95, 0.32, 1),
       },
