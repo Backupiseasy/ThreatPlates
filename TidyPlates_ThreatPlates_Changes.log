@@ -4,6 +4,13 @@
 * Fully re-wrote internal WoW event handling and communication between different elements of Threat Plates. This should improve performance as elements are only updated when something changes. The legacy TidyPlates code was based on polling and updating the all plate elements after a unit update. Plenty of bugs probably still in the code currently.
 
 ﻿------------------------------------------------------
+9.1.4
+------------------------------------------------------
+* Added an option to Auras widget to highlight auras that can be stolen or purged [PR #100, Comment #1707, Issue #338].
+* Added some new mobs that can detect stealth to the Stealth widget.
+* Fixed a bug with Warning Glow for Threat not working when threat system as enabled, but threat coloring was disabled [Comment #1888].
+
+﻿------------------------------------------------------
 9.1.3
 ------------------------------------------------------
 * Added heuristic threat detection to show threat feedback on mobs that do not have a threat table, especially in instances (e.g., snake adds on Merektha in Temple of Sethraliss or reaping mobs) [Comment #1790, #1811, E-Mail Request, Issue #331].

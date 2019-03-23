@@ -54,6 +54,7 @@ local DETECTION_AURAS = {
 local DETECTION_UNITS = {
   ["148483"] = true, -- Ancestral Avenger (Battle of Dazar'alor)
   ["148488"] = true, -- Unliving Augur (Battle of Dazar'alor)
+  ["122984"] = true, -- Dazar'ai Colossus (Atal'Dazar)
 }
 
 ---------------------------------------------------------------------------------------------------

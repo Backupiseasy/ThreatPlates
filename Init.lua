@@ -29,6 +29,7 @@ local LibStub = LibStub
 
 ThreatPlates.L = LibStub("AceLocale-3.0"):GetLocale("TidyPlatesThreat")
 ThreatPlates.Media = LibStub("LibSharedMedia-3.0")
+Addon.LibCustomGlow = LibStub("LibCustomGlow-1.0")
 
 ---------------------------------------------------------------------------------------------------
 -- Define AceAddon TidyPlatesThreat

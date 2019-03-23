@@ -197,11 +197,10 @@ end
 --    --Addon:SetThreatColor(unit, true)
 --  elseif command == "quest" then
 --		Addon:PrintQuests()
---	elseif command == "tank" then
---		print ("GUID:", UnitGUID("target"))
---
---		local unit_type, _,  _, _, _, npc_id, _ = strsplit("-", UnitGUID("target"))
---		print ("  =>:", unit_type, npc_id)
+--	elseif command == "test" then
+--    for k, v in pairs(Addon.LibCustomGlow) do
+--      print(k, v)
+--    end
 --	elseif command == "migrate" then
 --		Addon.MigrateDatabase(cmd_list[2])
 --		--		--PrintHelp()
