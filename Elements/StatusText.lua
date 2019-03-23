@@ -199,7 +199,7 @@ end
 
 -- return ceil(100 * (unit.health / unit.healthmax)) .. "%", GetColorByHealthDeficit(unit)
 local function TextHealthPercentColored(unit)
-  local text_health, text_absorbs, color = "", "", GetRoleColor
+  local text_health, text_absorbs, color = "", "", COLOR_ROLE
 
   local absorbs_amount = UnitGetTotalAbsorbs(unit.unitid) or 0
   if ShowAbsorbs and absorbs_amount > 0 then

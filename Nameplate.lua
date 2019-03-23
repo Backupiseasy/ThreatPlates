@@ -7,7 +7,7 @@ local ADDON_NAME, Addon = ...
 -- Lua APIs
 local _
 local type, select, pairs, tostring  = type, select, pairs, tostring 			    -- Local function copy
-local max, tonumber, math_abs = math.max, tonumber, math.abs
+local max, gsub, tonumber, math_abs = math.max, string.gsub, tonumber, math.abs
 
 -- WoW APIs
 local wipe = wipe
@@ -21,6 +21,7 @@ local GetCreatureDifficultyColor, GetRaidTargetIndex = GetCreatureDifficultyColo
 local GetTime, GetCVar, Lerp, CombatLogGetCurrentEventInfo = GetTime, GetCVar, Lerp, CombatLogGetCurrentEventInfo
 local GetSpecialization = GetSpecialization
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
+local GetPlayerInfoByGUID, RAID_CLASS_COLORS = GetPlayerInfoByGUID, RAID_CLASS_COLORS
 
 -- ThreatPlates APIs
 local ThreatPlates = Addon.ThreatPlates
@@ -1032,10 +1033,12 @@ function Addon:COMBAT_LOG_EVENT_UNFILTERED()
 
       local castbar = visual.Castbar
       if castbar:IsShown() then
-        sourceName, _ = UnitName(sourceName) or sourceName, nil
-        local _, class = UnitClass(sourceName)
-        if class then
-          sourceName = "|cff" .. ThreatPlates.HCC[class] .. sourceName .. "|r"
+        sourceName = gsub(sourceName, "%-[^|]+", "") -- UnitName(sourceName) only works in groups
+
+        local _, class_id = GetPlayerInfoByGUID(sourceGUID)
+        if class_id then
+          --local color_str = (RAID_CLASS_COLORS[classId] and RAID_CLASS_COLORS[classId].colorStr) or ""
+          sourceName = "|c" .. RAID_CLASS_COLORS[class_id].colorStr .. sourceName .. "|r"
         end
 
         visual.SpellText:SetText(INTERRUPTED .. " [" .. sourceName .. "]")
