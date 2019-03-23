@@ -402,13 +402,14 @@ local function MigrateAuraWidget(profile_name, profile)
       profile.AuraWidget = profile.AuraWidget or {}
       profile.AuraWidget.ModeIcon = profile.AuraWidget.ModeIcon or {}
 
-      profile.AuraWidget.FilterMode = profile.debuffWidget.mode
-      profile.AuraWidget.ModeIcon.Style = profile.debuffWidget.style
-      profile.AuraWidget.ShowTargetOnly = profile.debuffWidget.targetOnly
-      profile.AuraWidget.ShowCooldownSpiral = profile.debuffWidget.cooldownSpiral
-      profile.AuraWidget.ShowFriendly = profile.debuffWidget.showFriendly
-      profile.AuraWidget.ShowEnemy = profile.debuffWidget.showEnemy
-      profile.AuraWidget.scale = profile.debuffWidget.scale
+      local default_profile = ThreatPlates.DEFAULT_SETTINGS.profile.AuraWidget
+      profile.AuraWidget.FilterMode = profile.debuffWidget.mode                     or default_profile.FilterMode
+      profile.AuraWidget.ModeIcon.Style = profile.debuffWidget.style                or default_profile.ModeIcon.Style
+      profile.AuraWidget.ShowTargetOnly = profile.debuffWidget.targetOnly           or default_profile.ShowTargetOnly
+      profile.AuraWidget.ShowCooldownSpiral = profile.debuffWidget.cooldownSpiral   or default_profile.ShowCooldownSpiral
+      profile.AuraWidget.ShowFriendly = profile.debuffWidget.showFriendly           or default_profile.ShowFriendly
+      profile.AuraWidget.ShowEnemy = profile.debuffWidget.showEnemy                 or default_profile.ShowEnemy
+      profile.AuraWidget.scale = profile.debuffWidget.scale                         or default_profile.scale
 
       if profile.debuffWidget.displays then
         profile.AuraWidget.FilterByType = Addon.CopyTable(profile.debuffWidget.displays)
@@ -437,13 +438,14 @@ local function MigrationComboPointsWidget(profile_name, profile)
   if DatabaseEntryExists(profile, { "comboWidget" }) then
     profile.ComboPoints = profile.ComboPoints or {}
 
-    profile.ComboPoints.ON = profile.comboWidget.ON
-    profile.ComboPoints.Scale = profile.comboWidget.scale
-    profile.ComboPoints.x = profile.comboWidget.x
-    profile.ComboPoints.y = profile.comboWidget.y
-    profile.ComboPoints.x_hv = profile.comboWidget.x_hv
-    profile.ComboPoints.y_hv = profile.comboWidget.y_hv
-    profile.ComboPoints.ShowInHeadlineView = profile.comboWidget.ShowInHeadlineView
+    local default_profile = ThreatPlates.DEFAULT_SETTINGS.profile.ComboPoints
+    profile.ComboPoints.ON = profile.comboWidget.ON                                  or default_profile.ON
+    profile.ComboPoints.Scale = profile.comboWidget.scale                            or default_profile.Scale
+    profile.ComboPoints.x = profile.comboWidget.x                                    or default_profile.x
+    profile.ComboPoints.y = profile.comboWidget.y                                    or default_profile.y
+    profile.ComboPoints.x_hv = profile.comboWidget.x_hv                              or default_profile.x_hv
+    profile.ComboPoints.y_hv = profile.comboWidget.y_hv                              or default_profile.y_hv
+    profile.ComboPoints.ShowInHeadlineView = profile.comboWidget.ShowInHeadlineView  or default_profile.ShowInHeadlineView
 
     DatabaseEntryDelete(profile, { "comboWidget" })
   end

@@ -3,6 +3,13 @@
 ------------------------------------------------------
 * Fully re-wrote internal WoW event handling and communication between different elements of Threat Plates. This should improve performance as elements are only updated when something changes. The legacy TidyPlates code was based on polling and updating the all plate elements after a unit update. Plenty of bugs probably still in the code currently.
 
+﻿﻿------------------------------------------------------
+9.1.1
+------------------------------------------------------
+* Fixed a Lua error with Combo Points widget resulting from a wrong migration of combo point widget settings [Comment #1764].
+* Fixed a Lua error that occurred when switching profiles because of a wrong widget initialization.
+* Removed a debug print message from Arena widget [Comment #1765].
+
 ﻿------------------------------------------------------
 9.1.0
 ------------------------------------------------------

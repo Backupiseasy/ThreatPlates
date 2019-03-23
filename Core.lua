@@ -120,7 +120,6 @@ function TidyPlatesThreat:ReloadTheme()
 
   -- Recreate all TidyPlates styles for ThreatPlates("normal", "dps", "tank", ...) - required, if theme style settings were changed
   Addon:SetThemes(self)
-  Addon:ForceUpdate()
 
   Addon:InitializeCustomNameplates()
   Addon.Widgets:InitializeAllWidgets()
@@ -147,6 +146,8 @@ function TidyPlatesThreat:ReloadTheme()
   for plate, unitid in pairs(Addon.PlatesVisible) do
     Addon:UpdateNameplateStyle(plate, unitid)
   end
+
+  Addon:ForceUpdate()
 end
 
 function TidyPlatesThreat:CheckForFirstStartUp()
