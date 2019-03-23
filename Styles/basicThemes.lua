@@ -107,21 +107,6 @@ local function Create(self,name)
       show = db.level.show,
     },
 
-    customtext = {
-      typeface = ThreatPlates.Media:Fetch('font', db.customtext.typeface),
-      size = db.customtext.size,
-      width = db.customtext.width,
-      height = db.customtext.height,
-      x = db.customtext.x,
-      y = db.customtext.y,
-      align = db.customtext.align,
-      anchor = "CENTER",
-      vertical = db.customtext.vertical,
-      shadow = db.customtext.shadow,
-      flags = db.customtext.flags,
-      show = true,
-    },
-
     spelltext = {
       typeface = ThreatPlates.Media:Fetch('font', db.spelltext.typeface),
       size = db.spelltext.size,

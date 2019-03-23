@@ -35,8 +35,7 @@ local BACKDROP = {
 ---------------------------------------------------------------------------------------------------
 -- Cached configuration settings
 ---------------------------------------------------------------------------------------------------
-local Settings
-local SettingsHV
+local Settings, SettingsHV, SettingsStatusText
 local WidgetFrame
 local NameModeOffsetX, NameModeOffsetY
 
@@ -147,20 +146,16 @@ function Widget:OnTargetUnitRemoved()
 end
 
 local function GetHeadlineViewHeight()
-  local db = SettingsHV
-
-  return abs(max(db.name.y, db.customtext.y) - min(db.name.y, db.customtext.y)) + (db.name.size + db.customtext.size) / 2
+  return abs(max(SettingsHV.name.y, SettingsStatusText.VerticalOffset) - min(SettingsHV.name.y, SettingsStatusText.VerticalOffset)) + (SettingsHV.name.size + SettingsStatusText.Font.Size) / 2
 end
 
 local function GetTargetTextureY()
-  local db = SettingsHV
-
-  if db.name.y >= db.customtext.y then
+  if SettingsHV.name.y >= SettingsStatusText.VerticalOffset then
     -- name above status text
-    return db.name.y - 10 + (db.name.size / 2) - ((GetHeadlineViewHeight() - 18) / 2)
+    return SettingsHV.name.y - 10 + (SettingsHV.name.size / 2) - ((GetHeadlineViewHeight() - 18) / 2)
   else
     -- status text above name
-    return db.customtext.y - 10 + (db.customtext.size / 2) - ((GetHeadlineViewHeight() - 18) / 2)
+    return SettingsStatusText.VerticalOffset - 10 + (SettingsStatusText.Font.Size / 2) - ((GetHeadlineViewHeight() - 18) / 2)
   end
 end
 
@@ -205,6 +200,7 @@ end
 function Widget:UpdateSettings()
   Settings = TidyPlatesThreat.db.profile.targetWidget
   SettingsHV = TidyPlatesThreat.db.profile.HeadlineView
+  SettingsStatusText = TidyPlatesThreat.db.profile.StatusText.NameMode
 
   NameModeOffsetX = SettingsHV.name.x
   NameModeOffsetY = GetTargetTextureY()

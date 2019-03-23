@@ -19,6 +19,21 @@ Addon.Font = Font
 -- Element code
 ---------------------------------------------------------------------------------------------------
 
+function Font.SetJustify(font_string, horz, vert)
+  local align_horz, align_vert = font_string:GetJustifyH(), font_string:GetJustifyV()
+  if align_horz ~= horz or align_vert ~= vert then
+    font_string:SetJustifyH(horz)
+    font_string:SetJustifyV(vert)
+
+    -- Set text to nil to enforce text string update, otherwise updates to justification will not take effect
+    local text = font_string:GetText()
+    font_string:SetText(nil)
+    font_string:SetText(text)
+  end
+end
+
+local SetJustify = Font.SetJustify
+
 function Font:UpdateTextFont(font, db)
   font:SetFont(ThreatPlates.Media:Fetch('font', db.Typeface), db.Size, db.flags)
 
@@ -33,8 +48,10 @@ function Font:UpdateTextFont(font, db)
     font:SetTextColor(db.Color.r, db.Color.g, db.Color.b, db.Transparency or 1)
   end
 
-  font:SetJustifyH(db.HorizontalAlignment or "CENTER")
-  font:SetJustifyV(db.VerticalAlignment or "CENTER")
+  SetJustify(font, db.HorizontalAlignment or "CENTER", db.VerticalAlignment or "CENTER")
+
+--  font:SetJustifyH(db.HorizontalAlignment or "CENTER")
+--  font:SetJustifyV(db.VerticalAlignment or "CENTER")
 end
 
 function Font:UpdateText(parent, font, db)
@@ -48,18 +65,5 @@ function Font:UpdateText(parent, font, db)
     font:SetPoint(anchor_point_text[2], parent, anchor_point_text[1], db.HorizontalOffset or 0, db.VerticalOffset or 0)
   else -- db.InsideAnchor not defined in settings or true
     font:SetPoint(anchor, parent, anchor, db.HorizontalOffset or 0, db.VerticalOffset or 0)
-  end
-end
-
-function Font.SetJustify(font_string, horz, vert)
-  local align_horz, align_vert = font_string:GetJustifyH(), font_string:GetJustifyV()
-  if align_horz ~= horz or align_vert ~= vert then
-    font_string:SetJustifyH(horz)
-    font_string:SetJustifyV(vert)
-
-    -- Set text to nil to enforce text string update, otherwise updates to justification will not take effect
-    local text = font_string:GetText()
-    font_string:SetText(nil)
-    font_string:SetText(text)
   end
 end

@@ -98,9 +98,9 @@ local function GetDefaultSettingsV1(defaults)
   db.settings.level.height  = 14
   db.settings.level.x = 50
   db.settings.level.vertical = "TOP"
-  db.settings.customtext.typeface = "Accidental Presidency"
-  db.settings.customtext.size = 12
-  db.settings.customtext.y = 1
+  db.StatusText.HealthbarMode.Font.Typeface = "Accidental Presidency"
+  db.StatusText.HealthbarMode.Font.Size = 12
+  db.StatusText.HealthbarMode.Font.VerticalOffset = 1
   db.settings.spelltext.typeface = "Accidental Presidency"
   db.settings.spelltext.size = 12
   db.settings.spelltext.y = -13
@@ -242,18 +242,18 @@ local function MigrationTargetScale(profile_name, profile)
   end
 end
 
-local function MigrateCustomTextShow(profile_name, profile)
-  local entry = {"settings", "customtext", "show"}
-
-  -- default for db.show was true
-  if DatabaseEntryExists(profile, entry) then
-    local db = profile.settings.customtext
-    db.FriendlySubtext = "NONE"
-    db.EnemySubtext = "NONE"
-
-    DatabaseEntryDelete(profile, entry)
-  end
-end
+--local function MigrateCustomTextShow(profile_name, profile)
+--  local entry = {"settings", "customtext", "show"}
+--
+--  -- default for db.show was true
+--  if DatabaseEntryExists(profile, entry) then
+--    local db = profile.settings.customtext
+--    db.FriendlySubtext = "NONE"
+--    db.EnemySubtext = "NONE"
+--
+--    DatabaseEntryDelete(profile, entry)
+--  end
+--end
 
 local function MigrateCastbarColoring(profile_name, profile)
   -- default for castbarColor.toggle was true

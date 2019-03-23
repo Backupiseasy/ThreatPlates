@@ -114,21 +114,6 @@ local function Create(self,name)
       show = false,
     },
 
-    customtext = {
-      typeface = MEDIA_PATH:Fetch('font', db.name.typeface),
-      size = dbprofile.HeadlineView.customtext.size,
-      width = db.customtext.width, -- use same as for healthbar view
-      height = db.customtext.height, -- use same as for healthbar view
-      x = dbprofile.HeadlineView.customtext.x,
-      y = dbprofile.HeadlineView.customtext.y,
-      align = dbprofile.HeadlineView.customtext.align,
-      anchor = "CENTER",
-      vertical = dbprofile.HeadlineView.customtext.vertical,
-      shadow = db.name.shadow,
-      flags = db.name.flags,
-      show = true,
-    },
-
     spelltext = {
       typeface = ThreatPlates.Media:Fetch('font', db.spelltext.typeface),
       size = db.spelltext.size,

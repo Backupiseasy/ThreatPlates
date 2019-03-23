@@ -18,6 +18,10 @@ local ThreatPlates = Addon.ThreatPlates
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
 
+-- Lua APIs
+local ipairs, type, insert = ipairs, type, table.insert
+
+
 ---------------------------------------------------------------------------------------------------
 -- Libraries
 ---------------------------------------------------------------------------------------------------
@@ -40,7 +44,7 @@ TidyPlatesThreatDBM = true
 Addon.Meta = function(value)
 	local meta
 	if strlower(value) == "titleshort" then
-		meta = "TP|cff89F559TP|r"
+		meta = "|cff89F559TP|r"
 	else
 		meta = GetAddOnMetadata("TidyPlates_ThreatPlates",value)
 	end
@@ -150,4 +154,32 @@ Addon.ConcatTables = function(base_table, table_to_concat)
 	end
 
 	return concat_result
+end
+
+--
+-- Flattens a hierarchy of tables into a single array containing all
+-- of the values.
+--
+
+Addon.FlattenTable = function(arr, ...)
+	local result = {}
+
+	local function LocalFlatten(arr)
+		for _, v in ipairs(arr) do
+			if type(v) == "table" then
+        LocalFlatten(v)
+			else
+				insert(result, v)
+			end
+		end
+	end
+
+  LocalFlatten(arr)
+
+  local arg = { ... }
+  for i = 1, #arg do
+    result[#result + 1] = arg[i]
+  end
+
+	return result
 end

@@ -404,6 +404,21 @@ ThreatPlates.DEFAULT_SETTINGS = {
         SubtextColorUseHeadline = false,
         SubtextColorUseSpecific = false,
         SubtextColor =  RGB(255, 255, 255, 1),
+        --
+        Anchor = "CENTER",
+        InsideAnchor = true,
+        HorizontalOffset = 0,
+        VerticalOffset = 0, -- old default: 1,
+        Font = {
+          Typeface = Addon.DEFAULT_FONT, -- old default: "Accidental Presidency",
+          Size = 9, -- old default: 12,
+          flags = "NONE",
+          Shadow = true,
+          HorizontalAlignment = "CENTER",
+          VerticalAlignment = "CENTER",
+          Width = 110,
+          Height = 14,
+        },
       },
       NameMode = {
         FriendlySubtext = "ROLE_GUILD",
@@ -411,6 +426,16 @@ ThreatPlates.DEFAULT_SETTINGS = {
         SubtextColorUseHeadline = false,
         SubtextColorUseSpecific = true,
         SubtextColor =  RGB(255, 255, 255, 1),
+        --
+        Anchor = "CENTER",
+        InsideAnchor = true,
+        HorizontalOffset = 0,
+        VerticalOffset = -6,
+        Font = {
+          Size = 8,
+          HorizontalAlignment = "CENTER",
+          VerticalAlignment = "CENTER",
+        },
       },
     },
     HeadlineView = {
@@ -421,17 +446,6 @@ ThreatPlates.DEFAULT_SETTINGS = {
         -- height = 14, -- same as for healthbar view
         x = 0,
         y = 4,
-        align = "CENTER",
-        vertical = "CENTER",
-      },
-      customtext = {
-        size = 8,
-        -- shadow = true,  -- never used
-        -- flags = "NONE", -- never used
-        -- width = 140,    -- never used, same as for healthbar view
-        -- height = 14,    -- never used, same as for healthbar view
-        x = 0,
-        y = -6,
         align = "CENTER",
         vertical = "CENTER",
       },
@@ -1816,18 +1830,6 @@ ThreatPlates.DEFAULT_SETTINGS = {
         y = 7, -- old default: 9
         level = 22,
         anchor = "CENTER"
-      },
-      customtext = {
-        typeface = Addon.DEFAULT_FONT, -- old default: "Accidental Presidency",
-        size = 9, -- old default: 12,
-        width = 110,
-        height = 14,
-        x = 0,
-        y = 0, -- old default: 1,
-        align = "CENTER",
-        vertical = "CENTER",
-        shadow = true,
-        flags = "NONE",
       },
       spelltext = {
         typeface = Addon.DEFAULT_FONT, -- old default: "Accidental Presidency",

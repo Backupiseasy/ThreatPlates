@@ -22,7 +22,7 @@ local PlatesByUnit = Addon.PlatesByUnit
 local SubscribeEvent, PublishEvent,  UnsubscribeEvent = Addon.EventService.Subscribe, Addon.EventService.Publish, Addon.EventService.Unsubscribe
 local SetFontJustify = Addon.Font.SetJustify
 local RGB = Addon.RGB
-local RGB_P = Addon.RGB_P
+local Font = Addon.Font
 
 local COLOR_ROLE = RGB(255, 255, 255, .7)
 local COLOR_GUILD = RGB(178, 178, 229, .7)
@@ -39,10 +39,7 @@ TooltipScanner:SetOwner( WorldFrame, "ANCHOR_NONE" )
 -- Cached configuration settings
 ---------------------------------------------------------------------------------------------------
 local Settings, SettingsStatusText
-local SettingsMode = {
-  HEALTHBAR = {},
-  NAME = {}
-}
+local ModeSettings = {}
 local ShowHealth, ShowAbsorbs
 local StatusTextFunction = {
   HEALTHBAR = {},
@@ -278,7 +275,7 @@ local function TextRoleGuildLevel(unit)
   local description, color
 
   if unit.type == "NPC" then
-    description = GetUnitSubtitle(unit)
+    description, color = GetUnitSubtitle(unit)
   elseif unit.type == "PLAYER" then
     description = GetGuildInfo(unit.unitid)
     color = GetGuildColor
@@ -295,7 +292,7 @@ local function TextRoleGuild(unit)
   local description, color
 
   if unit.type == "NPC" then
-    description = GetUnitSubtitle(unit)
+    description, color = GetUnitSubtitle(unit)
   elseif unit.type == "PLAYER" then
     description = GetGuildInfo(unit.unitid)
     color = GetGuildColor
@@ -309,7 +306,7 @@ local function TextNPCRole(unit)
   local description, color
 
   if unit.type == "NPC" then
-    description = GetUnitSubtitle(unit)
+    description, color = GetUnitSubtitle(unit)
   end
 
   return description, color
@@ -339,18 +336,32 @@ local STATUS_TEXT_REFERENCE =
 --
 ---------------------------------------------------------------------------------------------------
 
+local function MAP(status_text_func)
+  for mode, func in pairs(STATUS_TEXT_REFERENCE) do
+    if func == status_text_func then
+      return mode
+    end
+  end
+  return "UNKOWN"
+end
+
 local function SetCustomText(tp_frame)
   local unit = tp_frame.unit
 
   local status_text, color
 
   local status_text_func = StatusTextFunction[tp_frame.PlateStyle][unit.reaction]
+
   if status_text_func then
     local subtext, color_func = status_text_func(unit)
+
+    assert (color_func ~= nil, "StatusText: Color function is nil - Style: " .. tp_frame.PlateStyle .. " / Reaction: " .. unit.reaction ..
+      " / Function: " .. MAP(status_text_func))
+
     if subtext then
       status_text = subtext
 
-      local db = SettingsMode[tp_frame.PlateStyle]
+      local db = ModeSettings[tp_frame.PlateStyle]
       if db.SubtextColorUseHeadline then
         color = tp_frame:GetNameColor()
       elseif db.SubtextColorUseSpecific then
@@ -398,30 +409,16 @@ end
 
 ---- Called in processing event: UpdateStyle in Nameplate.lua
 function Element.UpdateStyle(tp_frame, style)
+  local db = ModeSettings[tp_frame.PlateStyle]
+
   local status_text = tp_frame.visual.StatusText
-  local style = style.customtext
 
   -- At least font must be set as otherwise it results in a Lua error when UnitAdded with SetText is called
-  status_text:SetFont(style.typeface, style.size, style.flags)
+  status_text:SetSize(db.Font.Width, db.Font.Height)
+  Font:UpdateText(tp_frame, status_text, db)
 
-  if style.show then
-    SetFontJustify(status_text, style.align, style.vertical)
-
-    if style.shadow then
-      status_text:SetShadowColor(0,0,0, 1)
-      status_text:SetShadowOffset(1, -1)
-    else
-      status_text:SetShadowColor(0,0,0,0)
-    end
-
-    status_text:SetSize(style.width, style.height)
-    status_text:ClearAllPoints()
-    status_text:SetPoint(style.anchor, tp_frame, style.anchor, style.x, style.y)
-
-    status_text:Show()
-  else
-    status_text:Hide()
-  end
+  --SetFontJustify(status_text, style.align, style.vertical)
+  status_text:SetShown(tp_frame.PlateStyle ~= "NONE")
 end
 
 -- Text and color may change
@@ -443,7 +440,7 @@ local function HealthUpdate(unitid)
 end
 
 local function NameColorUpdate(tp_frame, color)
-  if SettingsMode[tp_frame.PlateStyle].SubtextColorUseHeadline then
+  if ModeSettings[tp_frame.PlateStyle].SubtextColorUseHeadline then
     tp_frame.visual.StatusText:SetTextColor(color.r, color.g, color.b, color.a)
   end
 end
@@ -465,8 +462,15 @@ function Element.UpdateSettings()
   StatusTextFunction["NAME"]["HOSTILE"] = STATUS_TEXT_REFERENCE[SettingsStatusText.NameMode.EnemySubtext]
   StatusTextFunction["NAME"]["NEUTRAL"] = StatusTextFunction["NAME"]["HOSTILE"]
 
-  SettingsMode["HEALTHBAR"] = SettingsStatusText.HealthbarMode
-  SettingsMode["NAME"] = SettingsStatusText.NameMode
+  ModeSettings["HEALTHBAR"] = SettingsStatusText.HealthbarMode
+
+  -- Settings for name mode are not complete, so complete them with the corresponding setttings from the healthbar mode
+  ModeSettings["NAME"] = Addon.CopyTable(SettingsStatusText.NameMode)
+  ModeSettings["NAME"].Font.Typeface = SettingsStatusText.HealthbarMode.Font.Typeface
+  ModeSettings["NAME"].Font.flags = SettingsStatusText.HealthbarMode.Font.flags
+  ModeSettings["NAME"].Font.Shadow = SettingsStatusText.HealthbarMode.Font.Shadow
+  ModeSettings["NAME"].Font.Width = SettingsStatusText.HealthbarMode.Font.Width
+  ModeSettings["NAME"].Font.Height = SettingsStatusText.HealthbarMode.Font.Height
 
   if SettingsStatusText.HealthbarMode.SubtextColorUseHeadline or SettingsStatusText.NameMode.SubtextColorUseHeadline then
     SubscribeEvent(Element, "NameColorUpdate", NameColorUpdate)

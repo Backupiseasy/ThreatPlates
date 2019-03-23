@@ -112,21 +112,6 @@ local function Create(self,name)
 			show = false,
 		},
 
-		customtext = {
-			typeface =						t.Media:Fetch('font', db.customtext.typeface),
-			size = db.customtext.size,
-			width = db.customtext.width,
-			height = db.customtext.height,
-			x = db.customtext.x,
-			y = db.customtext.y,
-			align = db.customtext.align,
-			anchor = "CENTER",
-			vertical = db.customtext.vertical,
-			shadow = true,
-			flags = db.spelltext.flags,
-			show = false,
-		},
-
 		spelltext = {
 			typeface =						t.Media:Fetch('font', db.spelltext.typeface),
 			size = db.spelltext.size,

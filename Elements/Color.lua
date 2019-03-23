@@ -444,8 +444,8 @@ function Element.UpdateStyle(tp_frame, style)
   end
 
   assert (tp_frame.GetHealthbarColor ~= nil and tp_frame.GetNameColor ~= nil,
-    "Color: Color function not initialized - Healthbar = " .. tp_frame.GetHealthbarColor .. " / Name = " ..
-      tp_frame.GetNameColor .. " (Style: " .. tp_frame.PlateStyle .. ")")
+    "Color: Color function not initialized - Healthbar = " .. tostring(tp_frame.GetHealthbarColor) .. " / Name = " ..
+      tostring(tp_frame.GetNameColor) .. " (Style: " .. tp_frame.PlateStyle .. ")")
 end
 
 local function UNIT_HEALTH(unitid)
