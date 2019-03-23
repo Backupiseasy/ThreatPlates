@@ -150,6 +150,19 @@ function TidyPlatesThreat:ChatCommand(input)
 	TidyPlatesThreat:OpenOptions()
 end
 
+--local function SearchDBForString(db, prefix, keyword)
+--  for key, value in pairs(db) do
+--    local search_text = prefix .. "." .. key
+--    if type(value) == "table" then
+--      SearchDBForString(db[key], search_text, keyword )
+--    else
+--      if string.match(string.lower(search_text), keyword) then
+--        print (search_text, "=", value)
+--      end
+--    end
+--  end
+--end
+--
 --function TidyPlatesThreat:ChatCommand(input)
 --	local cmd_list = {}
 --	for w in input:gmatch("%S+") do cmd_list[#cmd_list + 1] = w end
@@ -157,29 +170,47 @@ end
 --	local command = cmd_list[1]
 --	if not command or command == "" then
 --		TidyPlatesThreat:OpenOptions()
---	elseif command == "test" then
---		local status = UnitThreatSituation("player", "target")
---		print ("Threat: ", status)
+--	elseif command == "unit" then
+--		local plate = C_NamePlate.GetNamePlateForUnit("target")
+--		if not plate then return end
+--		local unit = plate.TPFrame.unit
 --
---		local isTanking, status, threatpct, rawthreatpct, threatvalue = UnitDetailedThreatSituation("player", "target")
---		print ("Detailed Threat: ", isTanking, status, threatpct, rawthreatpct, threatvalue)
+--		TP.DEBUG_PRINT_UNIT(unit, true)
+--    local type, zero, server_id, instance_id, zone_uid, npc_id, spawn_uid = strsplit("-", unit.guid)
+--    print ("GUID:", type, zero, server_id, instance_id, zone_uid, npc_id, spawn_uid)
+--  elseif command == "heuristic" then
+--    local plate = C_NamePlate.GetNamePlateForUnit("target")
+--    if not plate then return end
+--    local unit = plate.TPFrame.unit
 --
---		-- Unit is in combat and attacking the player (if unit has not threat list, this is the only way to determine if unit is attacking player)
---		-- Maybe even: UnitIsUnit("playertarget", "target)
---		local is_attacking = UnitAffectingCombat("target") and (UnitIsUnit("targettarget", "player") or UnitIsUnit("targettarget", "vehicle") or UnitIsUnit("targettarget", "pet"))
---	  print ("Attacking:", is_attacking)
+--    Addon.GetColorByThreat(unit, unit.style, true)
 --
---		-- party, partypet, raid, raidpet, arena
---		local party_member = Unit("targettarget", "party")
---		print ("Attacking:", is_attacking)
---	elseif command == "combo" then
---		Addon:DebugComboPointsWidget()
---		return
-----	elseif command == "help" then
-----		--PrintHelp()
+--		--print (unit.name, "- InCombatThreat =", unit.InCombatThreat)
+--
+--		--    print ("Use Threat Table:", TidyPlatesThreat.db.profile.threat.UseThreatTable)
+--    --    print ("Use Heuristic in Instances:", TidyPlatesThreat.db.profile.threat.UseHeuristicInInstances)
+--
+--    --print ("InCombat:", InCombatLockdown())
+--
+--    --Addon:ShowThreatFeedback(unit,true)
+--    --Addon:GetThreatColor(unit, unit.style, TidyPlatesThreat.db.profile.threat.UseThreatTable, true)
+--    --Addon:SetThreatColor(unit, true)
+--  elseif command == "quest" then
+--		Addon:PrintQuests()
+--	elseif command == "tank" then
+--		print ("GUID:", UnitGUID("target"))
+--
+--		local unit_type, _,  _, _, _, npc_id, _ = strsplit("-", UnitGUID("target"))
+--		print ("  =>:", unit_type, npc_id)
+--	elseif command == "migrate" then
+--		Addon.MigrateDatabase(cmd_list[2])
+--		--		--PrintHelp()
 ----	else
 ----		TP.Print(L["Unknown option: "] .. input, true)
 ----		PrintHelp()
+--	elseif command == "db" then
+--		print ("Searching settings:")
+--		SearchDBForString(TidyPlatesThreat.db.profile, "<Profile>", string.lower(cmd_list[2]))
 --	end
 --end
 

@@ -12,7 +12,6 @@ local Widget = Addon.Widgets:NewTargetWidget("TargetArt")
 
 -- WoW APIs
 local CreateFrame = CreateFrame
-local UnitIsUnit = UnitIsUnit
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 
 -- ThreatPlates APIs
@@ -106,31 +105,26 @@ function Widget:OnTargetUnitAdded(tp_frame, unit)
   if self:EnabledForStyle(unit.style, unit) then
     widget_frame:SetParent(tp_frame)
     widget_frame:SetFrameLevel(tp_frame:GetFrameLevel() + 6)
+    widget_frame:SetAllPoints(tp_frame.visual.healthbar)
 
     local healthbar_mode_frame = widget_frame.HealthbarMode
     if unit.style == "NameOnly" or unit.style == "NameOnly-Unique" then
-      widget_frame.NameModeTexture:SetPoint("CENTER", tp_frame, "CENTER", NameModeOffsetX, NameModeOffsetY)
-
+      healthbar_mode_frame.LeftTexture:Hide()
+      healthbar_mode_frame.RightTexture:Hide()
       healthbar_mode_frame:Hide()
+
       widget_frame.NameModeTexture:Show()
     else
-
       if db.theme == "default" or db.theme == "squarethin" then
-        local offset = BACKDROP[db.theme].offset
-        healthbar_mode_frame:SetPoint("TOPLEFT", tp_frame.visual.Healthbar, "TOPLEFT", - offset, offset)
-        healthbar_mode_frame:SetPoint("BOTTOMRIGHT", tp_frame.visual.Healthbar, "BOTTOMRIGHT", offset, - offset)
-
-        --healthbar_mode_frame.LeftTexture:Hide()
-        --healthbar_mode_frame.RightTexture:Hide()
+        healthbar_mode_frame:Show()
+        healthbar_mode_frame.LeftTexture:Hide()
+        healthbar_mode_frame.RightTexture:Hide()
       else
-        healthbar_mode_frame.LeftTexture:SetPoint("RIGHT", tp_frame, "LEFT")
-        healthbar_mode_frame.RightTexture:SetPoint("LEFT", tp_frame, "RIGHT")
-
-        --healthbar_mode_frame.LeftTexture:Show()
-        --healthbar_mode_frame.RightTexture:Show()
+        healthbar_mode_frame:Hide()
+        healthbar_mode_frame.LeftTexture:Show()
+        healthbar_mode_frame.RightTexture:Show()
       end
 
-      healthbar_mode_frame:Show()
       widget_frame.NameModeTexture:Hide()
     end
 
@@ -172,10 +166,13 @@ function Widget:UpdateLayout()
       edgeSize = backdrop.edgeSize,
       insets = { left = 0, right = 0, top = 0, bottom = 0 }
     })
+
+    local offset = backdrop.offset
+    healthbar_mode_frame:SetPoint("TOPLEFT", widget_frame, "TOPLEFT", - backdrop.offset, offset)
+    healthbar_mode_frame:SetPoint("BOTTOMRIGHT", widget_frame, "BOTTOMRIGHT", offset, - offset)
+
     healthbar_mode_frame:SetBackdropBorderColor(db.r, db.g, db.b, db.a)
 
-    --widget_frame.LeftTexture:SetTexture(nil)
-    --widget_frame.RightTexture:SetTexture(nil)
     healthbar_mode_frame.LeftTexture:Hide()
     healthbar_mode_frame.RightTexture:Hide()
   else
@@ -183,11 +180,13 @@ function Widget:UpdateLayout()
     healthbar_mode_frame.LeftTexture:SetTexCoord(0, 0.25, 0, 1)
     healthbar_mode_frame.LeftTexture:SetVertexColor(db.r, db.g, db.b, db.a)
     healthbar_mode_frame.LeftTexture:SetSize(64, 64)
+    healthbar_mode_frame.LeftTexture:SetPoint("RIGHT", widget_frame, "LEFT")
 
     healthbar_mode_frame.RightTexture:SetTexture(ART_PATH .. db.theme)
     healthbar_mode_frame.RightTexture:SetTexCoord(0.75, 1, 0, 1)
     healthbar_mode_frame.RightTexture:SetVertexColor(db.r, db.g, db.b, db.a)
     healthbar_mode_frame.RightTexture:SetSize(64, 64)
+    healthbar_mode_frame.RightTexture:SetPoint("LEFT", widget_frame, "RIGHT")
 
     healthbar_mode_frame.LeftTexture:Show()
     healthbar_mode_frame.RightTexture:Show()
@@ -195,6 +194,7 @@ function Widget:UpdateLayout()
   end
 
   widget_frame.NameModeTexture:SetSize(128, 32 * GetHeadlineViewHeight() / 18)
+  widget_frame.NameModeTexture:SetPoint("CENTER", widget_frame, "CENTER", NameModeOffsetX, NameModeOffsetY)
 end
 
 function Widget:UpdateSettings()

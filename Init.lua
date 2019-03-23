@@ -172,6 +172,16 @@ Addon.FlattenTable = function(arr, ...)
 				insert(result, v)
 			end
 		end
+		DEBUG("  Threat ---------------------------------")
+		DEBUG("    UnitAffectingCombat = ", UnitAffectingCombat(unit.unitid))
+		DEBUG("    Addon:OnThreatTable = ", Addon:OnThreatTable(unit))
+		DEBUG("    UnitThreatSituation = ", UnitThreatSituation("player", unit.unitid))
+		DEBUG("    Target Unit = ", UnitExists(unit.unitid .. "target"))
+		if unit.style == "unique" then
+			DEBUG("    GetThreatSituation(Unique) = ", Addon.GetThreatSituation(unit, unit.style, TidyPlatesThreat.db.profile.threat.toggle.OffTank))
+		else
+			DEBUG("    GetThreatSituation = ", Addon.GetThreatSituation(unit, Addon:GetThreatStyle(unit), TidyPlatesThreat.db.profile.threat.toggle.OffTank))
+		end
 	end
 
   LocalFlatten(arr)

@@ -214,7 +214,7 @@ local function OnStartCasting(tp_frame, unitid, channeled)
   --visual.SpellIcon:SetDrawLayer("ARTWORK", 7)
 
   castbar:SetAllColors(Addon:SetCastbarColor(unit))
-  castbar:SetShownInterruptOverlay(unit.spellIsShielded)
+  castbar:SetFormat(unit.spellIsShielded)
 
   -- Only publish this event once (OnStartCasting is called for re-freshing as well)
   if not castbar:IsShown() then
@@ -603,7 +603,7 @@ local ENABLED_EVENTS = {
   "RAID_TARGET_UPDATE",
 
   "UNIT_NAME_UPDATE",
-  --"UNIT_MAXHEALTH",
+  "UNIT_MAXHEALTH",
   "UNIT_HEALTH_FREQUENT",
   --"UNIT_ABSORB_AMOUNT_CHANGED",
   "UNIT_THREAT_LIST_UPDATE",
@@ -932,6 +932,16 @@ function Addon:UNIT_HEALTH_FREQUENT(unitid)
   end
 end
 
+function Addon:UNIT_MAXHEALTH(unitid)
+  local tp_frame = PlatesByUnit[unitid]
+  if tp_frame and tp_frame.Active then
+    local unit = tp_frame.unit
+
+    unit.health = UnitHealth(unitid) or 0
+    unit.healthmax = UnitHealthMax(unitid) or 1
+  end
+end
+
 function Addon:UNIT_THREAT_LIST_UPDATE(unitid)
   local tp_frame = PlatesByUnit[unitid]
   if tp_frame and tp_frame.Active then
@@ -1042,8 +1052,11 @@ function Addon:COMBAT_LOG_EVENT_UNFILTERED()
         end
 
         visual.SpellText:SetText(INTERRUPTED .. " [" .. sourceName .. "]")
+
         local _, max_val = castbar:GetMinMaxValues()
         castbar:SetValue(max_val)
+        castbar.Spark:Hide()
+
         local color = TidyPlatesThreat.db.profile.castbarColorInterrupted
         castbar:SetStatusBarColor(color.r, color.g, color.b, color.a)
         castbar.FlashTime = CASTBAR_INTERRUPT_HOLD_TIME

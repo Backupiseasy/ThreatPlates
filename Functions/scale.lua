@@ -12,6 +12,7 @@ local UnitExists = UnitExists
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
+local GetThreatLevel = Addon.GetThreatLevel
 local PlatesByUnit = Addon.PlatesByUnit
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
 
@@ -96,8 +97,7 @@ local function ScaleThreat(unit, style)
 		end
 	end
 
-	local threat_level = Addon.GetThreatLevel(unit, style, true) -- useScale is always true here
-	local scale = db[style].scale[threat_level]
+	local scale = db[style].scale[GetThreatLevel(unit, style, db.toggle.OffTank)]
 
 	if db.AdditiveScale then
 		scale = scale + ScaleGeneral(unit)

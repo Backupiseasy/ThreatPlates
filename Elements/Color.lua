@@ -11,13 +11,15 @@ local ADDON_NAME, Addon = ...
 local abs, floor, ceil, pairs = abs, floor, ceil, pairs
 
 -- WoW APIs
-local UnitReaction = UnitReaction
-local UnitCanAttack = UnitCanAttack
+local UnitIsConnected, UnitReaction, UnitCanAttack, UnitAffectingCombat = UnitIsConnected, UnitReaction, UnitCanAttack, UnitAffectingCombat
+local UnitThreatSituation, UnitIsUnit, UnitExists, UnitGroupRolesAssigned = UnitThreatSituation, UnitIsUnit, UnitExists, UnitGroupRolesAssigned
+local IsInInstance = IsInInstance
 local RAID_CLASS_COLORS = RAID_CLASS_COLORS
 
 -- ThreatPlates APIs
 local ThreatPlates = Addon.ThreatPlates
 local PlatesByUnit = Addon.PlatesByUnit
+local IsOffTankCreature = Addon.IsOffTankCreature
 local TidyPlatesThreat = TidyPlatesThreat
 local SubscribeEvent, PublishEvent,  UnsubscribeEvent = Addon.EventService.Subscribe, Addon.EventService.Publish, Addon.EventService.Unsubscribe
 local RGB_P = Addon.RGB_P
@@ -227,12 +229,14 @@ end
 
 -- Threat System is OP, player is in combat, style is tank or dps
 local function GetColorByHealth(unit)
-  local health_pct = ceil(100 * (unit.health / unit.healthmax))
+  local pct = unit.health / unit.healthmax
+
+  local health_pct = ceil(100 * pct)
   local health_color = HealthColorCache[health_pct]
 
   if not health_color then
     --print ("Cache: ", health_color)
-    health_color = RGB_P(CS:GetSmudgeColorRGB(ColorByHealth.Low, ColorByHealth.High, unit.health / unit.healthmax))
+    health_color = RGB_P(CS:GetSmudgeColorRGB(ColorByHealth.Low, ColorByHealth.High, pct))
     HealthColorCache[health_pct] = health_color
     --print ("Color: Adding color for", health_pct, "%: ", health_color.r, health_color.g, health_color.b, " / ", CS:GetSmudgeColorRGB(ColorByHealth.Low, ColorByHealth.High, unit.health / unit.healthmax))
   end
@@ -301,6 +305,69 @@ local function GetCustomStyleColor(unit)
   return color
 end
 
+local function GetThreatLevel(unit, style, enable_off_tank)
+  local threat_status = UnitThreatSituation("player", unit.unitid)
+
+  local threat_level, is_offtanked
+  if threat_status then
+    threat_level = unit.threatSituation
+    is_offtanked = (threat_status < 2)
+  else
+    -- if (IsInInstance() and db.threat.UseHeuristicInInstances) or not db.threat.UseThreatTable then
+    -- Should not be necessary here as GetThreatLevel is only called if either a threat table is available
+    -- or the heuristic is enabled
+
+    local target_unit = unit.unitid .. "target"
+    if UnitExists(target_unit) and not unit.isCasting then
+      if UnitIsUnit(target_unit, "player") or UnitIsUnit(target_unit, "vehicle") then
+        threat_level = "HIGH"
+      else
+        threat_level = "LOW"
+      end
+
+      unit.threatSituation = threat_level
+    else
+      threat_level = unit.threatSituation
+    end
+
+    is_offtanked = (style == "tank" and enable_off_tank and threat_level == "LOW")
+  end
+
+  if style == "tank" and enable_off_tank and is_offtanked then
+    local target_unit = unit.unitid .. "target"
+    if ("TANK" == UnitGroupRolesAssigned(target_unit) and not UnitIsUnit("player", target_unit)) or UnitIsUnit(target_unit, "pet") or IsOffTankCreature(target_unit) then
+      threat_level = "OFFTANK"
+    end
+  end
+
+  return threat_level
+end
+
+function Addon:GetThreatColor(unit, style, use_threat_table)
+  local db = TidyPlatesThreat.db.profile
+
+  local color
+
+  local on_threat_table
+  if use_threat_table then
+    if IsInInstance() and db.threat.UseHeuristicInInstances then
+      -- Use threat detection heuristic in instance
+      on_threat_table = UnitAffectingCombat(unit.unitid)
+    else
+      on_threat_table = Addon:OnThreatTable(unit)
+    end
+  else
+    -- Use threat detection heuristic
+    on_threat_table = UnitAffectingCombat(unit.unitid)
+  end
+
+  if on_threat_table then
+    color = ThreatColor[GetThreatLevel(unit, style, db.threat.toggle.OffTank)]
+  end
+
+  return color
+end
+
 -- Threat System is OP, player is in combat, style is tank or dps
 local function GetCombatColor(unit)
   -- Threat System is should also be used for custom nameplate (in combat with thread system on)
@@ -313,7 +380,7 @@ local function GetCombatColor(unit)
   local color
   if Addon:ShowThreatFeedback(unit) then
     local style = (Addon.PlayerRoleIsTank and "tank") or "dps"
-    color = ThreatColor[style][Addon.GetThreatLevel(unit, style, Settings.useHPColor)]
+    color = Addon:GetThreatColor(unit, style, SettingsBase.threat.UseThreatTable)
   end
 
   unit.CombatColor = color
@@ -558,3 +625,5 @@ function Element.UpdateSettings()
 
   wipe(HealthColorCache)
 end
+
+Addon.GetThreatLevel = GetThreatLevel

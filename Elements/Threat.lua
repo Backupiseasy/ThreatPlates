@@ -12,8 +12,7 @@ local strsplit, pairs = strsplit, pairs
 
 -- WoW APIs
 local IsInInstance = IsInInstance
-local UnitThreatSituation, UnitGroupRolesAssigned, UnitIsUnit = UnitThreatSituation, UnitGroupRolesAssigned, UnitIsUnit
-local UnitGUID, UnitReaction, UnitIsTapDenied = UnitGUID, UnitReaction, UnitIsTapDenied
+local UnitReaction, UnitIsTapDenied, UnitGUID, UnitAffectingCombat = UnitReaction, UnitIsTapDenied, UnitGUID, UnitAffectingCombat
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
@@ -43,9 +42,15 @@ local ThreatColor = {}
 -- not by a dps)
 ---------------------------------------------------------------------------------------------------
 
+local OFFTANK_PETS = {
+  ["61146"] = true,  -- Monk's Black Ox Statue
+  ["103822"] = true, -- Druid's Force of Nature Treants
+  ["95072"] = true,  -- Shaman's Earth Elemental
+}
+
 -- Black Ox Statue of monks is: Creature with id 61146
 -- Treants of druids is: Creature with id 103822
-local function IsOffTankCreature(unitid)
+function Addon.IsOffTankCreature(unitid)
   local guid = UnitGUID(unitid)
 
   if not guid then return false end
@@ -55,29 +60,14 @@ local function IsOffTankCreature(unitid)
     --local unit_type, server_id, instance_id, zone_uid, id, spawn_uid = string.match(guid, '^([^-]+)%-0%-([0-9A-F]+)%-([0-9A-F]+)%-([0-9A-F]+)%-([0-9A-F]+)%-([0-9A-F]+)$')
     --local unit_type, zero, server_id, instance_id, zone_uid, npc_id, spawn_uid = strsplit("-", guid)
     local unit_type, _,  _, _, _, npc_id, _ = strsplit("-", guid)
-    is_off_tank = (("61146" == npc_id or "103822" == npc_id) and "Creature" == unit_type)
+    is_off_tank = OFFTANK_PETS[npc_id] and "Creature" == unit_type
     CreatureCache[guid] = is_off_tank
   end
 
   return is_off_tank
 end
 
-function Addon:UnitIsOffTanked(unit)
-  local unitid = unit.unitid
-
-  local threat_status = UnitThreatSituation("player", unitid) or 0
-  if threat_status > 1 then -- tanked by player character
-    return false
-  end
-
-  local target_of_unit = unitid .. "target"
-
-  return ("TANK" == UnitGroupRolesAssigned(target_of_unit)) or UnitIsUnit(target_of_unit, "pet") or IsOffTankCreature(target_of_unit)
-end
-
 function Addon:OnThreatTable(unit)
-  -- return  (unit.health < unit.healthmax) or (unit.InCombat or unit.ThreatStatus > 0) or (unit.isCasting == true) then
-
   --  local _, threatStatus = UnitDetailedThreatSituation("player", unit.unitid)
   --  return threatStatus ~= nil
 
@@ -112,71 +102,29 @@ end
 -- player (and unit) are in combat. It does not check for that.
 ---------------------------------------------------------------------------------------------------
 function Addon:ShowThreatFeedback(unit)
-  -- UnitCanAttack?
   --if not InCombatLockdown() or unit.type == "PLAYER" or UnitReaction(unit.unitid, "player") > 4 or not db.ON then
   if not Settings.ON or unit.type == "PLAYER" or UnitReaction(unit.unitid, "player") > 4 then
     return false
   end
 
-  if not IsInInstance() and ShowInstancesOnly then
+  local isInstance, _ = IsInInstance()
+  if not isInstance and ShowInstancesOnly then
     return false
   end
 
   if Settings.toggle[GetUnitClassification(unit)] then
-    return not Settings.nonCombat or Addon:OnThreatTable(unit)
+    if Settings.UseThreatTable then
+      if isInstance and Settings.UseHeuristicInInstances then
+        return UnitAffectingCombat(unit.unitid)
+      else
+        return Addon:OnThreatTable(unit)
+      end
+    else
+      return UnitAffectingCombat(unit.unitid)
+    end
   end
 
   return false
-end
-
-function Addon:ShowThreatGlowFeedback(unit)
-  -- Check for Threat Glow enabled
-  if unit.type == "PLAYER" or UnitReaction(unit.unitid, "player") > 4 then
-    return false
-  end
-
-  -- Move ShowThreatGlowOnAttackedUnitsOnly to healtbar?-
-  return not ShowOnAttackedUnitsOnly or Addon:OnThreatTable(unit)
-end
-
---function Addon:GetThreatColor(unit)
---  -- Use either normal style colors (configured under Healthbar - Warning Glow) or threat system colors (if enabled)
---  if Settings.ON and Settings.useHPColor then
---    local style = (Addon.PlayerRoleIsTank and "tank") or "dps"
---
---    if style == "tank" and ShowOffTank and Addon:UnitIsOffTanked(unit) then
---      return ThreatColor[style]["OFFTANK"]
---    else
---      return ThreatColor[style][unit.ThreatLevel]
---    end
---  else
---    return ThreatColor.normal[unit.ThreatLevel]
---  end
---end
-
--- GetThreatLevel is only called from situations where the threat system is enabled (threat.ON)
--- No need to test it here.
-local function GetThreatLevel(unit, style, threat_element)
-  if threat_element then
-    if style == "tank" and ShowOffTank and Addon:UnitIsOffTanked(unit) then
-      return "OFFTANK"
-    else
-      return unit.ThreatLevel
-    end
-  else
-    return unit.ThreatLevel
-  end
-end
-
-Addon.GetThreatLevel = GetThreatLevel
-
--- Returns the threat color based on the unit's role (tank or dps)
-function Addon:GetThreatColor(unit)
-  -- Use either normal style colors (configured under Healthbar - Warning Glow) or threat system colors (if enabled)
-  local style = (Addon.PlayerRoleIsTank and "tank") or "dps"
-  local threat_level = GetThreatLevel(unit, style, Settings.useHPColor)
-
-  return ThreatColor[style][threat_level]
 end
 
 ---------------------------------------------------------------------------------------------------

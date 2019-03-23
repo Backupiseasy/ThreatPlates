@@ -433,21 +433,37 @@ local function MigrationForceFriendlyInCombat(profile_name, profile)
     end
   end
 end
-  
+
+local function SetValueOrDefault(old_value, default_value)
+  if old_value ~= nil then
+    return old_value
+  else
+    return default_value
+  end
+end
+
 local function MigrationComboPointsWidget(profile_name, profile)
   if DatabaseEntryExists(profile, { "comboWidget" }) then
     profile.ComboPoints = profile.ComboPoints or {}
 
     local default_profile = ThreatPlates.DEFAULT_SETTINGS.profile.ComboPoints
-    profile.ComboPoints.ON = profile.comboWidget.ON                                  or default_profile.ON
-    profile.ComboPoints.Scale = profile.comboWidget.scale                            or default_profile.Scale
-    profile.ComboPoints.x = profile.comboWidget.x                                    or default_profile.x
-    profile.ComboPoints.y = profile.comboWidget.y                                    or default_profile.y
-    profile.ComboPoints.x_hv = profile.comboWidget.x_hv                              or default_profile.x_hv
-    profile.ComboPoints.y_hv = profile.comboWidget.y_hv                              or default_profile.y_hv
-    profile.ComboPoints.ShowInHeadlineView = profile.comboWidget.ShowInHeadlineView  or default_profile.ShowInHeadlineView
+    profile.ComboPoints.ON = SetValueOrDefault(profile.comboWidget.ON. default_profile.ON)
+    profile.ComboPoints.Scale = SetValueOrDefault(profile.comboWidget.scale, default_profile.Scale)
+    profile.ComboPoints.x = SetValueOrDefault(profile.comboWidget.x, default_profile.x)
+    profile.ComboPoints.y = SetValueOrDefault(profile.comboWidget.y, default_profile.y)
+    profile.ComboPoints.x_hv = SetValueOrDefault(profile.comboWidget.x_hv, default_profile.x_hv)
+    profile.ComboPoints.y_hv = SetValueOrDefault(profile.comboWidget.y_hv, default_profile.y_hv)
+    profile.ComboPoints.ShowInHeadlineView = SetValueOrDefault(profile.comboWidget.ShowInHeadlineView, default_profile.ShowInHeadlineView)
 
     DatabaseEntryDelete(profile, { "comboWidget" })
+  end
+end
+
+local function MigrationThreatDetection(profile_name, profile)
+  if DatabaseEntryExists(profile, { "threat", "nonCombat" }) then
+    local default_profile = ThreatPlates.DEFAULT_SETTINGS.profile.threat
+    profile.threat.UseThreatTable = SetValueOrDefault(profile.threat.nonCombat, default_profile.UseThreatTable)
+    --DatabaseEntryDelete(profile, { "threat", "nonCombat" })
   end
 end
 
@@ -523,7 +539,7 @@ local DEPRECATED_SETTINGS = {
 --  HVNameHeight = { "HeadlineView", "name", "height" },        -- (removed in 8.5.0)
   DebuffWidget = { "debuffWidget" },                          -- (removed in 8.6.0)
   OldSettings = { "OldSettings" },                            -- (removed in 8.7.0)
-  CastbarColoring = { MigrateCastbarColoring, },              -- (removed in 8.7.0)
+  CastbarColoring = { MigrateCastbarColoring },              -- (removed in 8.7.0)
   TotemSettings = { MigrationTotemSettings, "8.7.0" },        -- (changed in 8.7.0)
   Borders = { MigrateBorderTextures, "8.7.0" },               -- (changed in 8.7.0)
   UniqueSettingsList = { "uniqueSettings", "list" },          -- (removed in 8.7.0, cleanup added in 8.7.1)
@@ -532,6 +548,9 @@ local DEPRECATED_SETTINGS = {
   MigrationComboPointsWidget = { MigrationComboPointsWidget, "9.1.0" },  -- (changed in 9.1.0)
   ForceFriendlyInCombatEx = { MigrationForceFriendlyInCombat }, -- (changed in 9.1.0)
   HeadlineViewEnableToggle = { "HeadlineView", "ON" },        -- (removed in 9.1.0)
+  ThreatDetection = { MigrationThreatDetection, "9.1.3" },  -- (changed in 9.1.0)
+  -- hideNonCombat = { "threat", "hideNonCombat" },        -- (removed in ...)
+  -- nonCombat = { "threat", "nonCombat" },                -- (removed in 9.1.0)
   ShowThreatGlowOffTank = { "ShowThreatGlowOffTank" },        -- (removed in 9.2.0), never used
   MigrationColorSettings = { MigrationColorSettings, "9.2.0" },  -- (changed in 9.2.0)
   DisconnectedUnitColor = { "ColorByReaction", "DisconnectedUnit" }, -- (removed in 9.2.0)
@@ -549,6 +568,7 @@ local function MigrateDatabase(current_version)
     if type(action) == "function" then
       local max_version = entry[2]
       if not max_version or CurrentVersionIsOlderThan(current_version, max_version) then
+
         -- iterate over all profiles and migrate values
         --TidyPlatesThreat.db.global.MigrationLog[key] = "Migration" .. (max_version and ( " because " .. current_version .. " < " .. max_version) or "")
         for profile_name, profile in pairs(profile_table) do
@@ -564,6 +584,8 @@ local function MigrateDatabase(current_version)
     end
   end
 end
+
+Addon.MigrateDatabase = MigrateDatabase
 
 -----------------------------------------------------
 -- External

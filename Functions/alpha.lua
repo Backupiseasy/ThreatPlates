@@ -12,6 +12,7 @@ local UnitExists = UnitExists
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
+local GetThreatLevel = Addon.GetThreatLevel
 local PlatesByUnit = Addon.PlatesByUnit
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
 
@@ -98,8 +99,7 @@ local function TransparencyThreat(unit, style)
 		end
 	end
 
-  local threat_level = Addon.GetThreatLevel(unit, style, true) -- useAlpha is always true here
-  local alpha = db[style].alpha[threat_level]
+  local alpha = db[style].alpha[GetThreatLevel(unit, style, db.toggle.OffTank)]
 
   if db.AdditiveAlpha then
     alpha = alpha + TransparencyGeneral(unit) - 1
