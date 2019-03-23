@@ -155,13 +155,31 @@ end
 --	for w in input:gmatch("%S+") do cmd_list[#cmd_list + 1] = w end
 --
 --	local command = cmd_list[1]
---	if command == "" then
+--	if not command or command == "" then
 --		TidyPlatesThreat:OpenOptions()
---	elseif command == "help" then
---		--PrintHelp()
---	else
---		TP.Print(L["Unknown option: "] .. input, true)
---		PrintHelp()
+--	elseif command == "test" then
+--		local status = UnitThreatSituation("player", "target")
+--		print ("Threat: ", status)
+--
+--		local isTanking, status, threatpct, rawthreatpct, threatvalue = UnitDetailedThreatSituation("player", "target")
+--		print ("Detailed Threat: ", isTanking, status, threatpct, rawthreatpct, threatvalue)
+--
+--		-- Unit is in combat and attacking the player (if unit has not threat list, this is the only way to determine if unit is attacking player)
+--		-- Maybe even: UnitIsUnit("playertarget", "target)
+--		local is_attacking = UnitAffectingCombat("target") and (UnitIsUnit("targettarget", "player") or UnitIsUnit("targettarget", "vehicle") or UnitIsUnit("targettarget", "pet"))
+--	  print ("Attacking:", is_attacking)
+--
+--		-- party, partypet, raid, raidpet, arena
+--		local party_member = Unit("targettarget", "party")
+--		print ("Attacking:", is_attacking)
+--	elseif command == "combo" then
+--		Addon:DebugComboPointsWidget()
+--		return
+----	elseif command == "help" then
+----		--PrintHelp()
+----	else
+----		TP.Print(L["Unknown option: "] .. input, true)
+----		PrintHelp()
 --	end
 --end
 

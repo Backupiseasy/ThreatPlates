@@ -3,6 +3,13 @@
 ------------------------------------------------------
 * Fully re-wrote internal WoW event handling and communication between different elements of Threat Plates. This should improve performance as elements are only updated when something changes. The legacy TidyPlates code was based on polling and updating the all plate elements after a unit update. Plenty of bugs probably still in the code currently.
 
+﻿------------------------------------------------------
+9.1.2
+------------------------------------------------------
+* Fixed a bug with Combo Points widget that prevented the widget from working in arenas and battlegrounds [#Comment 1795].
+* Fixed a Lua error with Combo Points widget when talent Ascension (6 Chi) was used by Monks [Issue #325].
+* Removed information popup about new look and feel when using the addon the first time.
+
 ﻿﻿------------------------------------------------------
 9.1.1
 ------------------------------------------------------

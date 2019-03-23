@@ -86,30 +86,6 @@ StaticPopupDialogs["IncompatibleAddon"] = {
   OnAccept = function(self, _, _) end,
 }
 
-StaticPopupDialogs["SwitchToNewLookAndFeel"] = {
-  preferredIndex = STATICPOPUP_NUMDIALOGS,
-  text = Meta("title") .. L[":\n---------------------------------------\n|cff89F559Threat Plates|r v8.4 introduced a new default look and feel (currently shown). Do you want to switch to this new look and feel?\n\nYou can revert your decision by changing the default look and feel again in the options dialog (under General - Healthbar View - Default Settings).\n\nNote: Some of your custom settings may get overwritten if you switch back and forth."],
-  button1 = L["Switch"],
-  button2 = L["Don't Switch"],
-  timeout = 0,
-  whileDead = 1,
-  hideOnEscape = 1,
-  OnAccept = function(self, _, _)
-    TidyPlatesThreat.db.global.DefaultsVersion = "SMOOTH"
-    TidyPlatesThreat.db.global.CheckNewLookAndFeel = true
-    ThreatPlates.SwitchToCurrentDefaultSettings()
-    TidyPlatesThreat:ReloadTheme()
-  end,
-  OnCancel = function(self, data, action)
-    if action == "clicked" then
-      TidyPlatesThreat.db.global.DefaultsVersion = "CLASSIC"
-      TidyPlatesThreat.db.global.CheckNewLookAndFeel = true
-      ThreatPlates.SwitchToDefaultSettingsV1()
-      TidyPlatesThreat:ReloadTheme()
-    end
-  end,
-}
-
 function TidyPlatesThreat:ReloadTheme()
   -- Castbars have to be disabled everytime we login
   if TidyPlatesThreat.db.profile.settings.castbar.show or TidyPlatesThreat.db.profile.settings.castbar.ShowInHeadlineView then
@@ -186,10 +162,6 @@ function TidyPlatesThreat:CheckForFirstStartUp()
       ThreatPlates.MigrateDatabase(db.version)
     end
     db.version = new_version
-
-    if not db.CheckNewLookAndFeel then
-      StaticPopup_Show("SwitchToNewLookAndFeel")
-    end
   end
 end
 

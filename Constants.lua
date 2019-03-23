@@ -315,7 +315,6 @@ end
 ThreatPlates.DEFAULT_SETTINGS = {
   global = {
     version = "",
-    CheckNewLookAndFeel = false,
     DefaultsVersion = "SMOOTH",
   },
   char = {
@@ -822,6 +821,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
           [3] = RGB(0, 225, 255),
           [4] = RGB(0, 225, 255),
           [5] = RGB(0, 225, 255),
+          [6] = RGB(0, 225, 255),
         },
         PALADIN = {
           [1] = RGB(255, 255, 0),
