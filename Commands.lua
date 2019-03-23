@@ -147,96 +147,23 @@ function TidyPlatesThreat:ChatCommand(input)
 		return
 	end
 
-	--	if input == "plate" then
---		local plate = C_NamePlate.GetNamePlateForUnit("target")
---		if not plate then return end
---
---		print ("Nameplate FrameStrata:", plate:GetFrameStrata())
---		print ("Nameplate FrameLevel :", plate:GetFrameLevel())
---		print ("Nameplate Parent:", (plate:GetParent() == UIParent and "UIParent") or (plate:GetParent() == WorldFrame and "WorldFrame") or ("---"))
---		print ("------------------------------------------")
---		print ("Nameplate UnitFrame FrameStrata:", plate.UnitFrame:GetFrameStrata())
---		print ("Nameplate UnitFrame FrameLevel :", plate.UnitFrame:GetFrameLevel())
---		print ("Nameplate UnitFrame Parent:", (plate.UnitFrame:GetParent() == UIParent and "UIParent") or (plate.UnitFrame:GetParent() == WorldFrame and "WorldFrame") or ("---"))
---		print ("------------------------------------------")
---		print ("TPFrame FrameStrata:", plate.TPFrame:GetFrameStrata())
---		print ("TPFrame FrameLevel :", plate.TPFrame:GetFrameLevel())
---		print ("TPFrame Parent:", (plate.TPFrame:GetParent() == UIParent and "UIParent") or (plate.TPFrame:GetParent() == WorldFrame and "WorldFrame") or ("---"))
---		print ("------------------------------------------")
---		print ("Healthbar FrameStrata:", plate.TPFrame.visual.healthbar:GetFrameStrata())
---		print ("Healthbar FrameLevel :", plate.TPFrame.visual.healthbar:GetFrameLevel())
---    return
---  elseif input == "cp" then
---      local plate = C_NamePlate.GetNamePlateForUnit("target")
---      if not plate then return end
---
---      print ("TPFrame FrameLevel :", plate.TPFrame:GetFrameLevel())
---      print ("ComboPointsFrameStrata:", Addon.Widgets.ComboPoints.WidgetFrame:GetFrameLevel())
---      print ("TargetHighlight FrameLevel :", plate.TPFrame.widgets.TargetArt:GetFrameLevel())
---		return
---	elseif input == "occ" then
---		local plate = C_NamePlate.GetNamePlateForUnit("mouseover")
---		if not plate then return end
---
---		print ("Plate Alpha:", plate:GetAlpha())
---		print ("TP Alpha::", plate.TPFrame:GetAlpha(), " => Current:", plate.TPFrame.CurrentAlpha)
---		print ("Occluded Alpha:", plate.TPFrame.OccludedAlpha)
---
---    Addon:UpdatePlate_TransparencyTest(plate.TPFrame, plate.TPFrame.unit)
---
---    print ("Plate Alpha:", plate:GetAlpha())
---    print ("TP Alpha::", plate.TPFrame:GetAlpha(), " => Current:", plate.TPFrame.CurrentAlpha)
---    print ("Occluded Alpha:", plate.TPFrame.OccludedAlpha)
---		return
---  elseif input == "print" then
---    print ("nameplateMinAlpha:", GetCVar("nameplateMinAlpha"))
---    print ("nameplateMaxAlpha:", GetCVar("nameplateMaxAlpha"))
---    print ("nameplateSelectedAlpha:", GetCVar("nameplateSelectedAlpha"))
---    print ("nameplateOccludedAlphaMult:", GetCVar("nameplateOccludedAlphaMult"))
---    return
---  elseif input == "set-occ" then
---    Addon.CVars:Set("nameplateMinAlpha", 1)
---    Addon.CVars:Set("nameplateMaxAlpha", 1)
---
---    -- Create enough separation between occluded and not occluded nameplates, even for targeted units
---    local occluded_alpha_mult = tonumber(GetCVar("nameplateOccludedAlphaMult"))
---    if occluded_alpha_mult > 0.9  then
---      occluded_alpha_mult = 0.9
---      Addon.CVars:Set("nameplateOccludedAlphaMult", occluded_alpha_mult)
---    end
---
---    local selected_alpha =  tonumber(GetCVar("nameplateSelectedAlpha"))
---    if not selected_alpha or (selected_alpha < occluded_alpha_mult + 0.1) then
---      selected_alpha = occluded_alpha_mult + 0.1
---      Addon.CVars:Set("nameplateSelectedAlpha", selected_alpha)
---    end
---
---    return
---  elseif input == "reset-occ" then
---    Addon.CVars:RestoreAllFromProfile()
---    return
---  elseif input == "cache-occ" then
---    for cvar, value in pairs(TidyPlatesThreat.db.profile.CVarsBackup) do
---      print (cvar .. ":", value)
---    end
---    return
---  end
-
 	TidyPlatesThreat:OpenOptions()
+end
 
+--function TidyPlatesThreat:ChatCommand(input)
 --	local cmd_list = {}
 --	for w in input:gmatch("%S+") do cmd_list[#cmd_list + 1] = w end
 --
 --	local command = cmd_list[1]
 --	if command == "" then
---		-- do something
+--		TidyPlatesThreat:OpenOptions()
 --	elseif command == "help" then
---		PrintHelp()
+--		--PrintHelp()
 --	else
---		t.Print(L["Unknown option: "] .. input, true)
+--		TP.Print(L["Unknown option: "] .. input, true)
 --		PrintHelp()
 --	end
-end
+--end
 
 -----------------------------------------------------
 -- External
