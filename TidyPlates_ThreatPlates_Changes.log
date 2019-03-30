@@ -1,4 +1,9 @@
 ﻿﻿------------------------------------------------------
+9.1.5
+------------------------------------------------------
+* Added the option to hide unlimited duration buffs on enemy units again to allow for a more fine-grained configuration with black- and whitelist filtering [Comment #1820].
+
+﻿------------------------------------------------------
 9.1.4
 ------------------------------------------------------
 * Added an option to Auras widget to highlight auras that can be stolen or purged [PR #100, Comment #1707, Issue #338].

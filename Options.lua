@@ -2874,7 +2874,17 @@ local function CreateAurasWidgetOptions()
                 arg = { "AuraWidget", "Buffs", "ShowDispellable" },
                 disabled = function() return not db.AuraWidget.Buffs.ShowEnemy end
               },
-              Header = { type = "header", order = 70, name = "Show Unlimited Buffs", },
+              Spacer1 = GetSpacerEntry(55),
+              UnlimitedDuration = {
+                name = L["Disable Unlimited Duration"],
+                order = 60,
+                type = "toggle",
+                width = "double",
+                desc = L["Do not show buffs with umlimited duration."],
+                arg = { "AuraWidget", "Buffs", "HideUnlimitedDuration" },
+                disabled = function() return not db.AuraWidget.Buffs.ShowEnemy end
+              },
+              Header = { type = "header", order = 70, name = L["If Enabled, Show Unlimited Duration Buffs"], },
               Always = {
                 name = L["Always"],
                 order = 80,
@@ -2882,7 +2892,7 @@ local function CreateAurasWidgetOptions()
                 desc = L["Always show buffs with unlimited duration."],
                 set = function(info, val)
                   local db = db.AuraWidget.Buffs
-                  if db.ShowUnlimitedInCombat or db.ShowUnlimitedInInstances or db.ShowUnlimitedOnBosses then
+                  if val and not db.ShowUnlimitedAlways then
                     db.ShowUnlimitedInCombat = false
                     db.ShowUnlimitedInInstances = false
                     db.ShowUnlimitedOnBosses = false
