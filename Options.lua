@@ -2839,9 +2839,10 @@ local function CreateAurasWidgetOptions()
                 desc = L["Show all buffs on enemy units."],
                 set = function(info, val)
                   local db = db.AuraWidget.Buffs
-                  if db.ShowOnEnemyNPCs or db.ShowDispellable then
+                  if val and not db.ShowAllEnemy then
                     db.ShowOnEnemyNPCs = false
                     db.ShowDispellable = false
+                    db.ShowMagic = false
                     SetValueWidget(info, val)
                   end
                 end,
@@ -2855,7 +2856,7 @@ local function CreateAurasWidgetOptions()
                 desc = L["Show all buffs on NPCs."],
                 set = function(info, val)
                   local db = db.AuraWidget.Buffs
-                  db.ShowAllEnemy = not (val or db.ShowDispellable)
+                  db.ShowAllEnemy = not (val or db.ShowDispellable or db.ShowMagic)
                   SetValueWidget(info, val)
                 end,
                 arg = { "AuraWidget", "Buffs", "ShowOnEnemyNPCs" },
@@ -2868,28 +2869,40 @@ local function CreateAurasWidgetOptions()
                 desc = L["Show buffs that you can dispell."],
                 set = function(info, val)
                   local db = db.AuraWidget.Buffs
-                  db.ShowAllEnemy = not (val or db.ShowOnEnemyNPCs)
+                  db.ShowAllEnemy = not (db.ShowOnEnemyNPCs or val or db.ShowMagic)
                   SetValueWidget(info, val)
                 end,
                 arg = { "AuraWidget", "Buffs", "ShowDispellable" },
                 disabled = function() return not db.AuraWidget.Buffs.ShowEnemy end
               },
-              Spacer1 = GetSpacerEntry(55),
-              UnlimitedDuration = {
-                name = L["Disable Unlimited Duration"],
+              Magics = {
+                name = L["Magic"],
                 order = 60,
                 type = "toggle",
-                width = "double",
+                desc = L["Show buffs of dispell type Magic."],
+                set = function(info, val)
+                  local db = db.AuraWidget.Buffs
+                  db.ShowAllEnemy = not (db.ShowOnEnemyNPCs or db.ShowDispellable or val)
+                  SetValueWidget(info, val)
+                end,
+                arg = { "AuraWidget", "Buffs", "ShowMagic" },
+                disabled = function() return not db.AuraWidget.Buffs.ShowEnemy end
+              },
+              Header2 = { type = "header", order = 200, name = L["Unlimited Duration"], },
+              UnlimitedDuration = {
+                name = L["Disable"],
+                order = 210,
+                type = "toggle",
                 desc = L["Do not show buffs with umlimited duration."],
                 arg = { "AuraWidget", "Buffs", "HideUnlimitedDuration" },
                 disabled = function() return not db.AuraWidget.Buffs.ShowEnemy end
               },
-              Header = { type = "header", order = 70, name = L["If Enabled, Show Unlimited Duration Buffs"], },
+              Spacer1 = GetSpacerEntry(220),
               Always = {
-                name = L["Always"],
-                order = 80,
+                name = L["Show Always"],
+                order = 230,
                 type = "toggle",
-                desc = L["Always show buffs with unlimited duration."],
+                desc = L["If enabled, show buffs with unlimited duration in all situations (e.g., in and out of combat)."],
                 set = function(info, val)
                   local db = db.AuraWidget.Buffs
                   if val and not db.ShowUnlimitedAlways then
@@ -2904,9 +2917,9 @@ local function CreateAurasWidgetOptions()
               },
               InCombat = {
                 name = L["In Combat"],
-                order = 90,
+                order = 240,
                 type = "toggle",
-                desc = L["Show unlimited buffs in combat."],
+                desc = L["If enabled, show unlimited buffs in combat."],
                 set = function(info, val)
                   local db = db.AuraWidget.Buffs
                   db.ShowUnlimitedAlways = not (val or db.ShowUnlimitedInInstances or db.ShowUnlimitedOnBosses)
@@ -2917,9 +2930,9 @@ local function CreateAurasWidgetOptions()
               },
               InInstances = {
                 name = L["In Instances"],
-                order = 100,
+                order = 250,
                 type = "toggle",
-                desc = L["Show unlimited buffs in instances (e.g., dungeons or raids)."],
+                desc = L["If enabled, show unlimited buffs in instances (e.g., dungeons or raids)."],
                 set = function(info, val)
                   local db = db.AuraWidget.Buffs
                   db.ShowUnlimitedAlways = not (db.ShowUnlimitedInCombat or val or db.ShowUnlimitedOnBosses)
@@ -2930,9 +2943,9 @@ local function CreateAurasWidgetOptions()
               },
               OnBosses = {
                 name = L["On Bosses & Rares"],
-                order = 110,
+                order = 260,
                 type = "toggle",
-                desc = L["Show unlimited buffs on bosses and rares."],
+                desc = L["If enabled, show unlimited buffs on bosses and rares."],
                 set = function(info, val)
                   local db = db.AuraWidget.Buffs
                   db.ShowUnlimitedAlways = not (db.ShowUnlimitedInCombat or db.ShowUnlimitedInInstances or val)

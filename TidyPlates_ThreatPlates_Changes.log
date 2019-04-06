@@ -2,6 +2,7 @@
 9.1.5
 ------------------------------------------------------
 * Added the option to hide unlimited duration buffs on enemy units again to allow for a more fine-grained configuration with black- and whitelist filtering [Comment #1820].
+* Added an option to Auras widget to show Magic buffs on enemy units [PM].
 
 ﻿------------------------------------------------------
 9.1.4
