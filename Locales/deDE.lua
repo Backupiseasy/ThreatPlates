@@ -969,7 +969,7 @@ Eine zu große Schriftart mit zu niedriger Höhe wird dazu führen, dass der Tex
 L["Thick"] = "Stark"
 L["Thick Outline"] = "Dicke Kontur"
 L["Thick Outline, Monochrome"] = "Dicke Rahmenlinie, einfarbig"
-L["Thickness"] = "Dicke"
+L["Thickness"] = "Linienstärke"
 L["This allows you to save friendly player class information between play sessions or nameplates going off the screen. |cffff0000(Uses more memory)"] = "This allows you to save friendly player class information between play sessions or nameplates going off the screen. |cffff0000(Uses more memory)"
 L["This lets you select the layout style of the aura widget."] = "Hiermit kann der Stil des Aura-Widget-Layouts ausgewählt werden."
 L["This lets you select the layout style of the aura widget. (requires /reload)"] = "Hier wird die Art des Layouts für Auren ausgewählt (erfordert /reload)."
