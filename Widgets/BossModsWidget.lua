@@ -12,10 +12,9 @@ local Widget = Addon.Widgets:NewWidget("BossMods")
 
 -- Lua APIs
 local floor = math.floor
-local pairs = pairs
 
 -- WoW APIs
-local CreateFrame = CreateFrame
+local UIParent, CreateFrame = UIParent, CreateFrame
 local UnitGUID = UnitGUID
 local GetSpellTexture = GetSpellTexture
 local GetTime = GetTime
@@ -87,7 +86,7 @@ local function CreateAuraTexture(frame, index)
 end
 
 local function UpdateFrameWithAuras(widget_frame, unit_auras)
-  local aura_texture, aura_info
+  local aura_texture, aura_info, line_color
 
   local no_auras = #unit_auras
   local index = 1
@@ -98,7 +97,6 @@ local function UpdateFrameWithAuras(widget_frame, unit_auras)
     if not aura_texture then
       aura_texture = CreateAuraTexture(widget_frame, index)
       widget_frame.Auras[index] = aura_texture
-
     end
 
     if aura_info[2] then -- aura with duration
@@ -124,6 +122,10 @@ local function UpdateFrameWithAuras(widget_frame, unit_auras)
 
       index = index + 1
     end
+
+    if aura_info.ShowLine then
+      line_color = aura_info.LineColor or { 1, 0, 0, 1 }
+    end
   end
 
   -- Hide all unused aura textures
@@ -131,6 +133,15 @@ local function UpdateFrameWithAuras(widget_frame, unit_auras)
     aura_texture = widget_frame.Auras[i]
     aura_texture.Time:Hide()
     aura_texture:Hide()
+  end
+
+  if line_color and ConfigDB.ShowTrackingLine then
+    local line = widget_frame.Line
+    line:SetThickness(ConfigDB.TrackingLineThickness)
+    line:SetColorTexture(line_color[1], line_color[2], line_color[3], line_color[4])
+    widget_frame.Line:Show()
+  else
+    widget_frame.Line:Hide()
   end
 
   widget_frame.AurasNo = no_auras
@@ -163,14 +174,8 @@ end
 -- Callback functions for DBM
 ---------------------------------------------------------------------------------------------------
 
--- Events from: DBM
---   DBM:FireEvent("BossMod_DisableFriendlyNameplates")
---   DBM:FireEvent("BossMod_DisableHostileNameplates")
---   DBM:FireEvent("BossMod_ShowNameplateAura", isGUID, unit, currentTexture, duration, desaturate)
---   DBM:FireEvent("BossMod_HideNameplateAura", isGUID, unit, currentTexture)
-
--- DBM:FireEvent("BossMod_ShowNameplateAura", isGUID, unit, currentTexture, duration, desaturate)
-local function BossMod_ShowNameplateAura(msg, is_guid, unit, aura_texture, duration, desaturate)
+-- DBM:FireEvent("BossMod_ShowNameplateAura", isGUID, unit, currentTexture, duration, desaturate, addLine, lineColor)
+local function BossMod_ShowNameplateAura(msg, is_guid, unit, aura_texture, duration, desaturate, addLine, lineColor)
   local guid = (is_guid and unit) or UnitGUID(unit)
   if not guid then
     -- ThreatPlates.DEBUG('bossmods show discarded unmatched name: ' .. unit)
@@ -182,14 +187,19 @@ local function BossMod_ShowNameplateAura(msg, is_guid, unit, aura_texture, durat
   -- Aura Info:
   --   1: aura texture (spell id)
   --   2: time the aura ends
+  --   3: show a tracking line: yes or no
+  --   4: color of the tracking line
 
+  local no_auras = 0
   local unit_auras = GUIDAuraList[guid]
   if unit_auras then
-    local no_auras = #unit_auras
+    no_auras = #unit_auras
     if no_auras < MAX_AURAS_NO then
       for i = 1, no_auras do
         if unit_auras[i][1] == aura_texture then
           unit_auras[i][2] = (duration and (GetTime() + duration)) or nil
+          unit_auras.ShowLine = addLine
+          unit_auras.LineColor = lineColor
           return
         end
       end
@@ -197,18 +207,25 @@ local function BossMod_ShowNameplateAura(msg, is_guid, unit, aura_texture, durat
       -- append a new aura
       unit_auras[no_auras + 1] = {
         aura_texture,
-        (duration and (GetTime() + duration)) or nil
+        (duration and (GetTime() + duration)) or nil,
+        ShowLine = addLine,
+        LineColor = lineColor,
       }
     end
   else
     GUIDAuraList[guid] = {
       {
         aura_texture,
-        (duration and GetTime() + duration) or nil
+        (duration and GetTime() + duration) or nil,
+        ShowLine = addLine,
+        LineColor = lineColor,
       }
     }
     --guid_aura_list[guid] = unit_auras
+  end
 
+  -- Show frame is this is the first aura shown (no_auras == 0 in this case)
+  if no_auras == 0 then
     local plate = Addon.PlatesByGUID[guid]
     if plate then
       local widget_frame = plate.TPFrame.widgets["BossMods"]
@@ -259,7 +276,6 @@ local function BossMod_DisableHostileNameplates()
   GUIDAuraList = {}
 end
 
-
 ---------------------------------------------------------------------------------------------------
 -- Widget functions for creation and update
 ---------------------------------------------------------------------------------------------------
@@ -274,8 +290,22 @@ function Widget:Create(tp_frame)
   widget_frame:SetFrameLevel(tp_frame:GetFrameLevel() + 2)
   widget_frame.Auras = {}
   widget_frame.AurasNo = 0
+
+  widget_frame.Line = UIParent:CreateLine(nil,'OVERLAY')
+
+  local line = widget_frame.Line
+  line:SetStartPoint('CENTER', UIParent)
+  line:SetEndPoint('CENTER', tp_frame)
+  line:Hide()
+
   widget_frame.LastUpdate = 0.5
   widget_frame:SetScript("OnUpdate", OnUpdateBossModsWidget)
+
+  widget_frame.FrameHide = widget_frame.Hide
+  widget_frame.Hide = function(self)
+    self.Line:Hide()
+    self:FrameHide()
+  end
   --------------------------------------
   -- End Custom Code
 
@@ -360,8 +390,8 @@ function Addon:ConfigBossModsWidget()
   if not EnabledConfigMode then
     local guid = UnitGUID("target")
     if guid then
-      BossMod_ShowNameplateAura("Configuration Mode", true, guid, GetSpellTexture(241600), nil)
-      BossMod_ShowNameplateAura("Configuration Mode", true, guid, GetSpellTexture(207327), 7)
+      BossMod_ShowNameplateAura("Configuration Mode", true, guid, GetSpellTexture(241600), nil, false, true, {1, 1, 0.5, 1})
+      BossMod_ShowNameplateAura("Configuration Mode", true, guid, GetSpellTexture(207327), 7, false, true, {0, 0, 1, 1})
       BossMod_ShowNameplateAura("Configuration Mode", true, guid, GetSpellTexture(236513), 60)
 
       EnabledConfigMode = true

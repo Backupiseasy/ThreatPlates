@@ -3,6 +3,7 @@
 ------------------------------------------------------
 * Added the option to hide unlimited duration buffs on enemy units again to allow for a more fine-grained configuration with black- and whitelist filtering [Comment #1820].
 * Added an option to Auras widget to show Magic buffs on enemy units [PM].
+* Added an option to the Boss Mods widget to show tracking lines between player and active nameplate auras.
 * Improved offtank detection of the threat system (thanks to cremor for reporting the issue and helping fixing it) [Issue #331].
 
 ﻿------------------------------------------------------

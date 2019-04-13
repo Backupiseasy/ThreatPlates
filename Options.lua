@@ -2189,7 +2189,7 @@ local function CreateBossModsWidgetOptions()
           },
           Layout = {
             name = L["Layout"],
-            order = pos,
+            order = 20,
             type = "group",
             inline = true,
             args = {
@@ -2199,10 +2199,35 @@ local function CreateBossModsWidgetOptions()
           } ,
         },
       },
-      Placement = GetPlacementEntryWidget(20, "BossModsWidget", true),
+      TrackingLine = {
+        name = L["Tracking Line"],
+        type = "group",
+        order = 20,
+        inline = true,
+        args = {
+          Show = {
+            name = L["Enable"],
+            order = 1,
+            type = "toggle",
+            desc = L["Show tracking lines between player and an active nameplate aura."],
+            arg = { "BossModsWidget", "ShowTrackingLine" },
+          },
+          Thickness = {
+            name = L["Thickness"],
+            type = "range",
+            order = 20,
+            step = 1,
+            min = 1,
+            max = 20,
+            isPercent = false,
+            arg = { "BossModsWidget", "TrackingLineThickness" },
+          },
+        },
+      },
+      Placement = GetPlacementEntryWidget(30, "BossModsWidget", true),
       Config = {
         name = L["Configuration Mode"],
-        order = 30,
+        order = 40,
         type = "group",
         inline = true,
         args = {
@@ -2902,7 +2927,7 @@ local function CreateAurasWidgetOptions()
                 name = L["Show Always"],
                 order = 230,
                 type = "toggle",
-                desc = L["If enabled, show buffs with unlimited duration in all situations (e.g., in and out of combat)."],
+                desc = L["Show buffs with unlimited duration in all situations (e.g., in and out of combat)."],
                 set = function(info, val)
                   local db = db.AuraWidget.Buffs
                   if val and not db.ShowUnlimitedAlways then
@@ -2919,7 +2944,7 @@ local function CreateAurasWidgetOptions()
                 name = L["In Combat"],
                 order = 240,
                 type = "toggle",
-                desc = L["If enabled, show unlimited buffs in combat."],
+                desc = L["Show unlimited buffs in combat."],
                 set = function(info, val)
                   local db = db.AuraWidget.Buffs
                   db.ShowUnlimitedAlways = not (val or db.ShowUnlimitedInInstances or db.ShowUnlimitedOnBosses)
@@ -2932,7 +2957,7 @@ local function CreateAurasWidgetOptions()
                 name = L["In Instances"],
                 order = 250,
                 type = "toggle",
-                desc = L["If enabled, show unlimited buffs in instances (e.g., dungeons or raids)."],
+                desc = L["Show unlimited buffs in instances (e.g., dungeons or raids)."],
                 set = function(info, val)
                   local db = db.AuraWidget.Buffs
                   db.ShowUnlimitedAlways = not (db.ShowUnlimitedInCombat or val or db.ShowUnlimitedOnBosses)
@@ -2945,7 +2970,7 @@ local function CreateAurasWidgetOptions()
                 name = L["On Bosses & Rares"],
                 order = 260,
                 type = "toggle",
-                desc = L["If enabled, show unlimited buffs on bosses and rares."],
+                desc = L["Show unlimited buffs on bosses and rares."],
                 set = function(info, val)
                   local db = db.AuraWidget.Buffs
                   db.ShowUnlimitedAlways = not (db.ShowUnlimitedInCombat or db.ShowUnlimitedInInstances or val)
