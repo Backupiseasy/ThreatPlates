@@ -25,13 +25,13 @@ local TidyPlatesThreat = TidyPlatesThreat
 
 --
 local DBM = DBM
-
 local GUIDAuraList = {}
 local ConfigDB
 local EnabledByBossmod = false
 
 local MAX_AURAS_NO = 5
 local UPDATE_INTERVAL = 0.5
+local DEFAULT_TRACKING_LINE_COLOR = {1, 0, 0, 1}
 
 ---------------------------------------------------------------------------------------------------
 -- Boss Mods Widget Functions
@@ -124,7 +124,7 @@ local function UpdateFrameWithAuras(widget_frame, unit_auras)
     end
 
     if aura_info.ShowLine then
-      line_color = aura_info.LineColor or { 1, 0, 0, 1 }
+      line_color = aura_info.LineColor or DEFAULT_TRACKING_LINE_COLOR
     end
   end
 
