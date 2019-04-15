@@ -658,12 +658,13 @@ ThreatPlates.DEFAULT_SETTINGS = {
         ShowEnemy = true,
         ShowAllEnemy = false,
         ShowOnEnemyNPCs = true,
+        ShowDispellable = true,
+        ShowMagic = false,
         ShowUnlimitedAlways = false,
         ShowUnlimitedInCombat = true,
         ShowUnlimitedInInstances = true,
         ShowUnlimitedOnBosses = true,
-        -- HideUnlimitedDuration = false, -- removed in 9.1.0
-        ShowDispellable = true,
+        HideUnlimitedDuration = false,
         Scale = 1.5,
         FilterMode = "blacklist",
         FilterBySpell = {},
@@ -970,6 +971,8 @@ ThreatPlates.DEFAULT_SETTINGS = {
       FontSize = 24,
       FontColor = RGB(255, 255, 255),
       -- TODO: add font flags like for custom text
+      ShowTrackingLine = true,
+      TrackingLineThickness = 4
     },
 --    TestWidget = {
 --      ON = true,
