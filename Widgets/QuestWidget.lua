@@ -432,14 +432,16 @@ function Widget:OnEnable()
   self:GenerateQuestCache()
 
   -- self:SubscribeEvent("PLAYER_ENTERING_WORLD") -- Disabled as nameplates are not yet created when this event fires
-  self:SubscribeEvent("QUEST_WATCH_UPDATE")
-  self:SubscribeUnitEvent("UNIT_QUEST_LOG_CHANGED", "player")
 
   self:SubscribeEvent("QUEST_ACCEPTED")
   -- This event fires whenever the player turns in a quest, whether automatically with a Task-type quest
   -- (Bonus Objectives/World Quests), or by pressing the Complete button in a quest dialog window.
   -- also handles abandon quest
   self:SubscribeEvent("QUEST_REMOVED")
+  self:SubscribeEvent("QUEST_WATCH_UPDATE")
+
+  self:SubscribeEvent("QUEST_LOG_UPDATE")
+  self:SubscribeUnitEvent("UNIT_QUEST_LOG_CHANGED", "player")
 
   -- Handle in-combat situations:
   self:SubscribeEvent("PLAYER_REGEN_ENABLED")
