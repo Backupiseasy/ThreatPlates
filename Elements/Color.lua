@@ -306,11 +306,11 @@ local function GetCustomStyleColor(unit)
 end
 
 local function GetThreatLevel(unit, style, enable_off_tank)
-  local threat_status = UnitThreatSituation("player", unit.unitid)
+  local threat_status = unit.ThreatStatus
 
   local threat_level, is_offtanked
   if threat_status then
-    threat_level = unit.threatSituation
+    threat_level = unit.ThreatLevel
     is_offtanked = (threat_status < 2)
   else
     -- if (IsInInstance() and db.threat.UseHeuristicInInstances) or not db.threat.UseThreatTable then
@@ -325,9 +325,9 @@ local function GetThreatLevel(unit, style, enable_off_tank)
         threat_level = "LOW"
       end
 
-      unit.threatSituation = threat_level
+      unit.ThreatLevel = threat_level
     else
-      threat_level = unit.threatSituation
+      threat_level = unit.ThreatLevel
     end
 
     is_offtanked = (style == "tank" and enable_off_tank and threat_level == "LOW")
@@ -346,9 +346,8 @@ end
 function Addon:GetThreatColor(unit, style, use_threat_table)
   local db = TidyPlatesThreat.db.profile
 
-  local color
+  local color, on_threat_table
 
-  local on_threat_table
   if use_threat_table then
     if IsInInstance() and db.threat.UseHeuristicInInstances then
       -- Use threat detection heuristic in instance
@@ -362,7 +361,7 @@ function Addon:GetThreatColor(unit, style, use_threat_table)
   end
 
   if on_threat_table then
-    color = ThreatColor[GetThreatLevel(unit, style, db.threat.toggle.OffTank)]
+    color = ThreatColor[style][GetThreatLevel(unit, style, db.threat.toggle.OffTank)]
   end
 
   return color
@@ -498,8 +497,12 @@ end
 --end
 
 -- Called in processing event: UpdateStyle in Nameplate.lua
-function Element.UpdateStyle(tp_frame, style)
+function Element.UpdateStyle(tp_frame, style, plate_style)
   local unit = tp_frame.unit
+
+  if plate_style == "NONE" then
+    return
+  end
 
   local color = GetCustomStyleColor(unit)
   if color then

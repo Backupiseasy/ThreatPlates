@@ -131,38 +131,22 @@ function TidyPlatesThreat:CheckForFirstStartUp()
 
   if not self.db.char.welcome then
     self.db.char.welcome = true
-    local Welcome = L["|cff89f559Welcome to |r|cff89f559Threat Plates!\nThis is your first time using Threat Plates and you are a(n):\n|r|cff"].. ThreatPlates.HCC[Addon.PlayerClass]..self:SpecName().." ".. Addon.PlayerClass .."|r|cff89F559.|r\n"
-
     -- initialize roles for all available specs (level > 10) or set to default (dps/healing)
     for index=1, GetNumSpecializations() do
       self:SetRole(ThreatPlates.SPEC_ROLES[Addon.PlayerClass][index], index)
     end
 
-    -- Determine player spec
-    if self.db.profile.optionRoleDetectionAutomatic then
-      local PLAYER_ROLE_BY_SPEC = ThreatPlates.SPEC_ROLES[Addon.PlayerClass]
-      Addon.PlayerRoleIsTank = PLAYER_ROLE_BY_SPEC[GetSpecialization()] or false
-    else
-      Addon.PlayerRoleIsTank = self.db.char.spec[GetSpecialization()]
-    end
-
-    ThreatPlates.Print(Welcome..L["|cff89f559You are currently in your "]..self:RoleText()..L["|cff89f559 role.|r"])
-    ThreatPlates.Print(L["|cff89f559Additional options can be found by typing |r'/tptp'|cff89F559.|r"])
-
-    local new_version = tostring(Meta("version"))
-    if db.version ~= "" and db.version ~= new_version then
-      -- migrate and/or remove any old DB entries
-      ThreatPlates.MigrateDatabase(db.version)
-    end
-    db.version = new_version
-  else
-    local new_version = tostring(Meta("version"))
-    if db.version ~= "" and db.version ~= new_version then
-      -- migrate and/or remove any old DB entries
-      ThreatPlates.MigrateDatabase(db.version)
-    end
-    db.version = new_version
+    ThreatPlates.Print(L["Welcome to |cff89f559Threat Plates|r! Additional options can be found by typing '|cff89F559/tptp|r.'"], true)
   end
+
+  local new_version = tostring(Meta("version"))
+  if db.version ~= "" and db.version ~= new_version then
+    -- migrate and/or remove any old DB entries
+    ThreatPlates.MigrateDatabase(db.version)
+  end
+  db.version = new_version
+
+  Addon:ACTIVE_TALENT_GROUP_CHANGED()
 end
 
 function TidyPlatesThreat:CheckForIncompatibleAddons()

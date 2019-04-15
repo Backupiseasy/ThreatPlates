@@ -49,31 +49,32 @@ end
 --end
 
 ---- Called in processing event: UpdateStyle in Nameplate.lua
-function Element.UpdateStyle(tp_frame, style)
+function Element.UpdateStyle(tp_frame, style, plate_style)
   local name_text = tp_frame.visual.NameText
-  local style = style.name
+  local name_style = style.name
 
   -- At least font must be set as otherwise it results in a Lua error when UnitAdded with SetText is called
-  name_text:SetFont(style.typeface, style.size, style.flags)
+  name_text:SetFont(name_style.typeface, name_style.size, name_style.flags)
 
-  if style.show then
-    SetFontJustify(name_text, style.align, style.vertical)
-
-    if style.shadow then
-      name_text:SetShadowColor(0,0,0, 1)
-      name_text:SetShadowOffset(1, -1)
-    else
-      name_text:SetShadowColor(0,0,0,0)
-    end
-
-    name_text:SetSize(style.width, style.height)
-    name_text:ClearAllPoints()
-    name_text:SetPoint(style.anchor, tp_frame, style.anchor, style.x, style.y)
-
-    name_text:Show()
-  else
+  if plate_style == "NONE" or not name_style.show then
     name_text:Hide()
+    return
   end
+
+  SetFontJustify(name_text, name_style.align, name_style.vertical)
+
+  if name_style.shadow then
+    name_text:SetShadowColor(0,0,0, 1)
+    name_text:SetShadowOffset(1, -1)
+  else
+    name_text:SetShadowColor(0,0,0,0)
+  end
+
+  name_text:SetSize(name_style.width, name_style.height)
+  name_text:ClearAllPoints()
+  name_text:SetPoint(name_style.anchor, tp_frame, name_style.anchor, name_style.x, name_style.y)
+
+  name_text:Show()
 end
 
 --function Element.UpdateSettings()

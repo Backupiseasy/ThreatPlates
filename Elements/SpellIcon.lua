@@ -44,18 +44,19 @@ end
 --end
 
 ---- Called in processing event: UpdateStyle in Nameplate.lua
-function Element.UpdateStyle(tp_frame, style)
+function Element.UpdateStyle(tp_frame, style, plate_style)
   local spell_icon, spell_icon_style = tp_frame.visual.SpellIcon, style.spellicon
 
-  if spell_icon_style.show then
-    spell_icon:SetTexture(spell_icon_style.texture)
-    spell_icon:SetSize(spell_icon_style.width, spell_icon_style.height)
-    spell_icon:ClearAllPoints()
-    spell_icon:SetPoint(spell_icon_style.anchor, tp_frame, spell_icon_style.anchor, spell_icon_style.x, spell_icon_style.y)
-    spell_icon:Show()
-  else
+  if plate_style == "NONE" or not spell_icon_style.show then
     spell_icon:Hide()
+    return
   end
+
+  spell_icon:SetTexture(spell_icon_style.texture)
+  spell_icon:SetSize(spell_icon_style.width, spell_icon_style.height)
+  spell_icon:ClearAllPoints()
+  spell_icon:SetPoint(spell_icon_style.anchor, tp_frame, spell_icon_style.anchor, spell_icon_style.x, spell_icon_style.y)
+  spell_icon:Show()
 end
 
 --function Element.UpdateSettings()

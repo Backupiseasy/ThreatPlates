@@ -71,14 +71,19 @@ Element.UnitAdded = Element.TargetMarkerUpdate
 --  tp_frame.visual.ThreatGlow:Hide() -- done in UpdateStyle
 --end
 
-function Element.UpdateStyle(tp_frame, style)
+function Element.UpdateStyle(tp_frame, style, plate_style)
   local target_marker = tp_frame.visual.TargetMarker
-  local style = style.raidicon
+  local target_marker_style = style.raidicon
 
-  target_marker:SetSize(style.width, style.height)
+  if plate_style == "NONE" or not target_marker_style.show then
+    target_marker:Hide()
+    return
+  end
+
+  target_marker:SetSize(target_marker_style.width, target_marker_style.height)
   target_marker:ClearAllPoints()
-  target_marker:SetPoint(style.anchor, tp_frame, style.anchor, style.x, style.y)
-  target_marker:SetShown(tp_frame.unit.TargetMarker and style.show)
+  target_marker:SetPoint(target_marker_style.anchor, tp_frame, target_marker_style.anchor, target_marker_style.x, target_marker_style.y)
+  target_marker:SetShown(tp_frame.unit.TargetMarker)
 end
 
 SubscribeEvent(Element, "TargetMarkerUpdate", Element.TargetMarkerUpdate)

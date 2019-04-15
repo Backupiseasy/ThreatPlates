@@ -111,15 +111,20 @@ end
 --  tp_frame.visual.ThreatGlow:Hide() -- done in UpdateStyle
 --end
 
-function Element.UpdateStyle(tp_frame, style)
-  local unit = tp_frame.unit
+function Element.UpdateStyle(tp_frame, style, plate_style)
+  local threatglow = tp_frame.visual.ThreatGlow
 
-  if unit.ThreatStatus and style.threatborder.show then
-    local threatglow = tp_frame.visual.ThreatGlow
+  if plate_style == "NONE" or not style.threatborder.show then
+    threatglow:Hide()
+    return
+  end
+
+  local unit = tp_frame.unit
+  if unit.ThreatStatus then
     threatglow:SetBackdropBorderColor(GetThreatGlowColor(unit))
     threatglow:Show()
   else
-    tp_frame.visual.ThreatGlow:Hide()
+    threatglow:Hide()
   end
 end
 

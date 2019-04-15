@@ -284,42 +284,44 @@ end
 --end
 
 -- Called in processing event: UpdateStyle in Nameplate.lua
-function Element.UpdateStyle(tp_frame, style)
+function Element.UpdateStyle(tp_frame, style, plate_style)
   local healthbar, healthbar_style = tp_frame.visual.Healthbar, style.healthbar
+
+  if plate_style == "NONE" or not healthbar_style.show then
+    healthbar:Hide()
+    return
+  end
+
   local healthborder_style = style.healthborder
 
-  if healthbar_style.show then
-    healthbar:SetStatusBarTexture(healthbar_style.texture)
-    healthbar:SetSize(healthbar_style.width, healthbar_style.height)
-    healthbar:ClearAllPoints()
-    healthbar:SetPoint(healthbar_style.anchor, tp_frame, healthbar_style.anchor, healthbar_style.x, healthbar_style.y)
+  healthbar:SetStatusBarTexture(healthbar_style.texture)
+  healthbar:SetSize(healthbar_style.width, healthbar_style.height)
+  healthbar:ClearAllPoints()
+  healthbar:SetPoint(healthbar_style.anchor, tp_frame, healthbar_style.anchor, healthbar_style.x, healthbar_style.y)
 
-    healthbar.HealAbsorb:SetTexture(healthbar_style.texture, true, false)
+  healthbar.HealAbsorb:SetTexture(healthbar_style.texture, true, false)
 
-    local border = healthbar.Border
-    local offset = healthborder_style.offset
-    border:ClearAllPoints()
-    border:SetPoint("TOPLEFT", healthbar, "TOPLEFT", - offset, offset)
-    border:SetPoint("BOTTOMRIGHT", healthbar, "BOTTOMRIGHT", offset, - offset)
+  local border = healthbar.Border
+  local offset = healthborder_style.offset
+  border:ClearAllPoints()
+  border:SetPoint("TOPLEFT", healthbar, "TOPLEFT", - offset, offset)
+  border:SetPoint("BOTTOMRIGHT", healthbar, "BOTTOMRIGHT", offset, - offset)
 
-    -- Absorbs
-    local absorbs = healthbar.Absorbs
-    if Settings.ShowAbsorbs then
-      absorbs:SetTexture(ThreatPlates.Media:Fetch('statusbar', Settings.texture), true, false)
-      local color = Settings.AbsorbColor
-      absorbs:SetVertexColor(color.r, color.g, color.b, color.a)
-      color = Settings.OverlayColor
-      absorbs.Overlay:SetVertexColor(color.r, color.g, color.b, color.a)
-    else
-      absorbs:Hide()
-      absorbs.Overlay:Hide()
-      absorbs.Spark:Hide()
-    end
-
-    healthbar:Show()
+  -- Absorbs
+  local absorbs = healthbar.Absorbs
+  if Settings.ShowAbsorbs then
+    absorbs:SetTexture(ThreatPlates.Media:Fetch('statusbar', Settings.texture), true, false)
+    local color = Settings.AbsorbColor
+    absorbs:SetVertexColor(color.r, color.g, color.b, color.a)
+    color = Settings.OverlayColor
+    absorbs.Overlay:SetVertexColor(color.r, color.g, color.b, color.a)
   else
-    healthbar:Hide()
+    absorbs:Hide()
+    absorbs.Overlay:Hide()
+    absorbs.Spark:Hide()
   end
+
+  healthbar:Show()
 end
 
 function Element.UpdateSettings()

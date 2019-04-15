@@ -168,29 +168,19 @@ Addon.FlattenTable = function(arr, ...)
 	local function LocalFlatten(arr)
 		for _, v in ipairs(arr) do
 			if type(v) == "table" then
-        LocalFlatten(v)
+				LocalFlatten(v)
 			else
 				insert(result, v)
 			end
 		end
-		DEBUG("  Threat ---------------------------------")
-		DEBUG("    UnitAffectingCombat = ", UnitAffectingCombat(unit.unitid))
-		DEBUG("    Addon:OnThreatTable = ", Addon:OnThreatTable(unit))
-		DEBUG("    UnitThreatSituation = ", UnitThreatSituation("player", unit.unitid))
-		DEBUG("    Target Unit = ", UnitExists(unit.unitid .. "target"))
-		if unit.style == "unique" then
-			DEBUG("    GetThreatSituation(Unique) = ", Addon.GetThreatSituation(unit, unit.style, TidyPlatesThreat.db.profile.threat.toggle.OffTank))
-		else
-			DEBUG("    GetThreatSituation = ", Addon.GetThreatSituation(unit, Addon:GetThreatStyle(unit), TidyPlatesThreat.db.profile.threat.toggle.OffTank))
-		end
 	end
 
-  LocalFlatten(arr)
+	LocalFlatten(arr)
 
-  local arg = { ... }
-  for i = 1, #arg do
-    result[#result + 1] = arg[i]
-  end
+	local arg = { ... }
+	for i = 1, #arg do
+		result[#result + 1] = arg[i]
+	end
 
 	return result
 end

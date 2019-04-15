@@ -111,8 +111,15 @@ end
 --end
 --
 ---- Called in processing event: UpdateStyle in Nameplate.lua
-function Element.UpdateStyle(tp_frame, style)
+function Element.UpdateStyle(tp_frame, style, plate_style)
   local healthbar = tp_frame.visual.Healthbar
+
+  if plate_style == "NONE" or TargetHighlightDisabled then
+    healthbar.Highlight:Hide()
+    healthbar.NameHighlight()
+    return
+  end
+
   if style.healthbar.show then
     healthbar.MouseoverHighlight = healthbar.Highlight
     healthbar.NameHighlight:Hide()

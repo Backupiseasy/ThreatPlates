@@ -76,12 +76,10 @@ end
 function ElementHandler.UpdateStyle(frame, style)
   local element
 
-  --if frame.PlateStyle == "NONE" then return end
-
   for i = 1, #ElementsPriority do
     element = ElementsPriority[i]
     if element.UpdateStyle then
-      element.UpdateStyle(frame, style)
+      element.UpdateStyle(frame, style, frame.PlateStyle)
     end
   end
 end

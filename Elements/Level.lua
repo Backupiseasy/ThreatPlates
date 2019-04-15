@@ -55,31 +55,32 @@ end
 --  tp_frame.visual.ThreatGlow:Hide() -- done in UpdateStyle
 --end
 
-function Element.UpdateStyle(tp_frame, style)
+function Element.UpdateStyle(tp_frame, style, plate_style)
   local level_text = tp_frame.visual.LevelText
   local style = style.level
+
+  if plate_style == "NONE" or not style.show then
+    level_text:Hide()
+    return
+  end
 
   -- At least font must be set as otherwise it results in a Lua error when UnitAdded with SetText is called
   level_text:SetFont(style.typeface, style.size, style.flags)
 
-  if style.show then
-    SetFontJustify(level_text, style.align, style.vertical)
+  SetFontJustify(level_text, style.align, style.vertical)
 
-    if style.shadow then
-      level_text:SetShadowColor(0,0,0, 1)
-      level_text:SetShadowOffset(1, -1)
-    else
-      level_text:SetShadowColor(0,0,0,0)
-    end
-
-    level_text:SetSize(style.width, style.height)
-    level_text:ClearAllPoints()
-    level_text:SetPoint(style.anchor, tp_frame, style.anchor, style.x, style.y)
-
-    level_text:Show()
+  if style.shadow then
+    level_text:SetShadowColor(0,0,0, 1)
+    level_text:SetShadowOffset(1, -1)
   else
-    level_text:Hide()
+    level_text:SetShadowColor(0,0,0,0)
   end
+
+  level_text:SetSize(style.width, style.height)
+  level_text:ClearAllPoints()
+  level_text:SetPoint(style.anchor, tp_frame, style.anchor, style.x, style.y)
+
+  level_text:Show()
 end
 
 local function UNIT_LEVEL(unitid)

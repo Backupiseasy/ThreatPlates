@@ -408,17 +408,22 @@ end
 --end
 
 ---- Called in processing event: UpdateStyle in Nameplate.lua
-function Element.UpdateStyle(tp_frame, style)
-  local db = ModeSettings[tp_frame.PlateStyle]
-
+function Element.UpdateStyle(tp_frame, style, plate_style)
   local status_text = tp_frame.visual.StatusText
+
+  if plate_style == "NONE" then
+    status_text:Hide()
+    return
+  end
+
+  local db = ModeSettings[tp_frame.PlateStyle]
 
   -- At least font must be set as otherwise it results in a Lua error when UnitAdded with SetText is called
   status_text:SetSize(db.Font.Width, db.Font.Height)
   Font:UpdateText(tp_frame, status_text, db)
 
   --SetFontJustify(status_text, style.align, style.vertical)
-  status_text:SetShown(tp_frame.PlateStyle ~= "NONE")
+  status_text:Show()
 end
 
 -- Text and color may change
