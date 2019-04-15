@@ -487,12 +487,12 @@ function Element.UpdateSettings()
     SettingsStatusText.HealthbarMode.EnemySubtext == "HEALTH" or SettingsStatusText.HealthbarMode.EnemySubtext == "ALL" or
     SettingsStatusText.NameMode.FriendlySubtext == "HEALTH" or SettingsStatusText.NameMode.FriendlySubtext == "ALL" or
     SettingsStatusText.NameMode.EnemySubtext == "HEALTH" or SettingsStatusText.NameMode.EnemySubtext == "ALL" then
-    SubscribeEvent(Element, "UNIT_HEALTH", HealthUpdate)
+    SubscribeEvent(Element, "UNIT_HEALTH_FREQUENT", HealthUpdate)
     SubscribeEvent(Element, "UNIT_MAXHEALTH", HealthUpdate)
     SubscribeEvent(Element, "UNIT_ABSORB_AMOUNT_CHANGED", HealthUpdate)
 
   else
-    UnsubscribeEvent(Element, "UNIT_HEALTH", HealthUpdate)
+    UnsubscribeEvent(Element, "UNIT_HEALTH_FREQUENT", HealthUpdate)
     UnsubscribeEvent(Element, "UNIT_MAXHEALTH", HealthUpdate)
     UnsubscribeEvent(Element, "UNIT_ABSORB_AMOUNT_CHANGED", HealthUpdate)
   end
