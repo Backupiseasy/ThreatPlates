@@ -116,7 +116,7 @@ function Element.UpdateStyle(tp_frame, style, plate_style)
 
   if plate_style == "NONE" or TargetHighlightDisabled then
     healthbar.Highlight:Hide()
-    healthbar.NameHighlight()
+    healthbar.NameHighlight:Hide()
     return
   end
 
