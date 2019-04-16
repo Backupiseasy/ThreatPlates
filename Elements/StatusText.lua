@@ -428,18 +428,18 @@ end
 
 -- Text and color may change
 local function StatusTextUpdateByUnit(unitid)
-  local tp_frame = PlatesByUnit[unitid]
-  if tp_frame and tp_frame.Active then
-    Element.UnitAdded(tp_frame)
+  local frame = PlatesByUnit[unitid]
+  if frame and frame.Active and frame.PlateStyle ~= "NONE" then
+    Element.UnitAdded(frame)
   end
 end
 
 local function HealthUpdate(unitid)
-  local tp_frame = PlatesByUnit[unitid]
-  if tp_frame and tp_frame.Active then
-    local status_text_func = StatusTextFunction[tp_frame.PlateStyle][tp_frame.unit.reaction]
+  local frame = PlatesByUnit[unitid]
+  if frame and frame.Active and frame.PlateStyle ~= "NONE" then
+    local status_text_func = StatusTextFunction[frame.PlateStyle][frame.unit.reaction]
     if status_text_func == TextHealthPercentColored or status_text_func == TextAll then
-      Element.UnitAdded(tp_frame)
+      Element.UnitAdded(frame)
     end
   end
 end
