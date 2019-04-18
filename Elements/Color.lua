@@ -16,6 +16,7 @@ local UnitHealth, UnitHealthMax, UnitIsPlayer, UnitPlayerControlled = UnitHealth
 local UnitThreatSituation, UnitIsUnit, UnitExists, UnitGroupRolesAssigned = UnitThreatSituation, UnitIsUnit, UnitExists, UnitGroupRolesAssigned
 local IsInInstance = IsInInstance
 local RAID_CLASS_COLORS = RAID_CLASS_COLORS
+local GetNamePlates, GetNamePlateForUnit = C_NamePlate.GetNamePlates, C_NamePlate.GetNamePlateForUnit
 
 -- ThreatPlates APIs
 local ThreatPlates = Addon.ThreatPlates
@@ -541,46 +542,53 @@ function Element.UpdateStyle(tp_frame, style, plate_style)
 end
 
 local function UNIT_HEALTH(unitid)
-  local tp_frame = PlatesByUnit[unitid]
-  if tp_frame and tp_frame.Active then
+  local plate = GetNamePlateForUnit(unitid)
+  local frame = plate and plate.TPFrame
+  if frame and frame.Active and frame.PlateStyle ~= "NONE" then
     --print ("Color - UNIT_HEALTH:", unitid)
 
-    GetColorByHealth(tp_frame.unit)
-    UpdatePlateColors(tp_frame)
+    GetColorByHealth(frame.unit)
+    UpdatePlateColors(frame)
   end
 end
 
-local function SituationalUpdate(tp_frame)
-  GetSituationalColor(tp_frame.unit)
-  GetSituationalColorName(tp_frame.unit, tp_frame)
-  UpdatePlateColors(tp_frame)
+local function SituationalUpdate(frame)
+  if frame.PlateStyle ~= "NONE" then
+    GetSituationalColor(frame.unit)
+    GetSituationalColorName(frame.unit, frame)
+    UpdatePlateColors(frame)
 
-  --print ("Color - Situational Update:", tp_frame.unit.name .. "(" .. tp_frame.unit.unitid .. ") =>", tp_frame.unit.SituationalColor)
+    --print ("Color - Situational Update:", tp_frame.unit.name .. "(" .. tp_frame.unit.unitid .. ") =>", tp_frame.unit.SituationalColor)
+  end
 end
 
-local function CombatUpdate(tp_frame)
-  GetCombatColor(tp_frame.unit)
-  UpdatePlateColors(tp_frame)
+local function CombatUpdate(frame)
+  if frame.PlateStyle ~= "NONE" then
+    GetCombatColor(frame.unit)
+    UpdatePlateColors(frame)
 
-  --print ("Color - CombatUpdate:", tp_frame.unit.name .. "(" .. tp_frame.unit.unitid .. ") =>", tp_frame.unit.ThreatLevel)
+    --print ("Color - CombatUpdate:", tp_frame.unit.name .. "(" .. tp_frame.unit.unitid .. ") =>", tp_frame.unit.ThreatLevel)
+  end
 end
 
-local function FactionUpdate(tp_frame)
-  local unit = tp_frame.unit
+local function FactionUpdate(frame)
+  if frame.PlateStyle ~= "NONE" then
+    local unit = frame.unit
 
-  -- Only update reaction color if color mode ~= "HEALTH" for healthbar and name
-  if not (tp_frame.GetHealthbarColor == GetUnitColorByHealth and tp_frame.GetNameColor == GetUnitColorByHealth) then
-    -- Tapped is detected by a UNIT_FACTION event (I think), but handled as a situational color change
-    -- Update situational color if unit is now tapped or was tapped
-    if unit.isTapped or unit.SituationalColor == ColorByReaction.TappedUnit then
-      GetSituationalColor(tp_frame.unit)
-      GetSituationalColorName(tp_frame.unit, tp_frame)
+    -- Only update reaction color if color mode ~= "HEALTH" for healthbar and name
+    if not (frame.GetHealthbarColor == GetUnitColorByHealth and frame.GetNameColor == GetUnitColorByHealth) then
+      -- Tapped is detected by a UNIT_FACTION event (I think), but handled as a situational color change
+      -- Update situational color if unit is now tapped or was tapped
+      if unit.isTapped or unit.SituationalColor == ColorByReaction.TappedUnit then
+        GetSituationalColor(frame.unit)
+        GetSituationalColorName(frame.unit, frame)
+      end
+
+      GetColorByReaction(unit)
+      UpdatePlateColors(frame)
+
+      --print ("Color - ReactionUpdate:", tp_frame.unit.unitid)
     end
-
-    GetColorByReaction(unit)
-    UpdatePlateColors(tp_frame)
-
-    --print ("Color - ReactionUpdate:", tp_frame.unit.unitid)
   end
 end
 
