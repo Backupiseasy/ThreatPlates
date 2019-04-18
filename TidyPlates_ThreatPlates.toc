@@ -1,4 +1,4 @@
-﻿## Interface: 80000
+﻿## Interface: 80100
 ## Title: Threat Plates
 ## Version: 9.2.0-Alpha1
 ## Notes: Threat-reactive nameplates.
@@ -27,7 +27,7 @@ Widgets\WidgetHandler.lua
 
 Nameplate.lua
 Database.lua
-Core.lua
+Addon.lua
 Commands.lua
 Options.lua
 
