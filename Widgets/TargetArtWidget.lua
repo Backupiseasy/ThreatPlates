@@ -105,7 +105,7 @@ function Widget:OnTargetUnitAdded(tp_frame, unit)
   if self:EnabledForStyle(unit.style, unit) then
     widget_frame:SetParent(tp_frame)
     widget_frame:SetFrameLevel(tp_frame:GetFrameLevel() + 6)
-    widget_frame:SetAllPoints(tp_frame.visual.healthbar)
+    widget_frame:SetAllPoints(tp_frame.visual.Healthbar)
 
     local healthbar_mode_frame = widget_frame.HealthbarMode
     if unit.style == "NameOnly" or unit.style == "NameOnly-Unique" then
