@@ -22,6 +22,7 @@ local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
 local SetCVar, GetCVar, GetCVarBool = SetCVar, GetCVar, GetCVarBool
 local UnitReaction = UnitReaction
 local GetSpellInfo = GetSpellInfo
+local GetNamePlates, GetNamePlateForUnit = C_NamePlate.GetNamePlates, C_NamePlate.GetNamePlateForUnit
 
 -- ThreatPlates APIs
 local LibStub = LibStub
@@ -3703,8 +3704,11 @@ local function CreateVisibilitySettings()
             set = function(info, val)
               SetValue(info, val)
               Addon:SetBaseNamePlateSize() -- adjust clickable area if switching from Blizzard plates to Threat Plate plates
-              for plate, unitid in pairs(Addon.PlatesVisible) do
-                Addon:UpdateNameplateStyle(plate, unitid)
+              for _, plate in pairs(GetNamePlates()) do
+                local frame = plate and plate.TPFrame
+                if frame and frame.Active then
+                  Addon:UpdateNameplateStyle(plate, frame.unit.unitid)
+                end
               end
             end,
             get = GetValue,
@@ -3719,8 +3723,11 @@ local function CreateVisibilitySettings()
             set = function(info, val)
               SetValue(info, val)
               Addon:SetBaseNamePlateSize() -- adjust clickable area if switching from Blizzard plates to Threat Plate plates
-              for plate, unitid in pairs(Addon.PlatesVisible) do
-                Addon:UpdateNameplateStyle(plate, unitid)
+              for _, plate in pairs(GetNamePlates()) do
+                local frame = plate and plate.TPFrame
+                if frame and frame.Active then
+                  Addon:UpdateNameplateStyle(plate, frame.unit.unitid)
+                end
               end
             end,
             get = GetValue,

@@ -11,6 +11,7 @@ local ADDON_NAME, Addon = ...
 local pairs, next = pairs, next
 
 -- WoW APIs
+local GetNamePlates, GetNamePlateForUnit = C_NamePlate.GetNamePlates, C_NamePlate.GetNamePlateForUnit
 
 -- ThreatPlates APIs
 local EventServiceSubscribe, EventServiceSubscribeUnit, EventServicePublish = Addon.EventService.Subscribe, Addon.EventService.SubscribeUnitEvent, Addon.EventService.Publish
@@ -119,28 +120,32 @@ end
 ---------------------------------------------------------------------------------------------------
 
 local function UpdateAllFrames(widget)
-  for plate, _ in pairs(Addon.PlatesVisible) do
-    local tp_frame = plate.TPFrame
-
-    local widget_frame = tp_frame.widgets[widget.Name]
-    if widget_frame.Active then
-      widget:UpdateFrame(widget_frame, tp_frame.unit)
+  local frame, widget_frame
+  for _, plate in pairs(GetNamePlates()) do
+    frame = plate and plate.TPFrame
+    if frame and frame.Active then
+      widget_frame = frame.widgets[widget.Name]
+      if widget_frame.Active then
+        widget:UpdateFrame(widget_frame, frame.unit)
+      end
     end
   end
 end
 
 -- If no event to fire as part of the update is specified, QuestUpdate is used
 local function UpdateAllFramesWithPublish(widget, event)
-  for plate, _ in pairs(Addon.PlatesVisible) do
-    local tp_frame = plate.TPFrame
+  local frame, widget_frame
+  for _, plate in pairs(GetNamePlates()) do
+    frame = plate and plate.TPFrame
+    if frame and frame.Active then
+      widget_frame = frame.widgets[widget.Name]
+      if widget_frame.Active then
 
-    local widget_frame = tp_frame.widgets[widget.Name]
-    if widget_frame.Active then
-
-      widget:UpdateFrame(widget_frame, tp_frame.unit)
-      -- Also publish that unit data was changed (mainly for color updates currently)
-      --print ("UpdateAllFramesWithPublish: Fire Event =>", event, "for", tp_frame.unit.name)
-      PublishEvent(event, tp_frame)
+        widget:UpdateFrame(widget_frame, frame.unit)
+        -- Also publish that unit data was changed (mainly for color updates currently)
+        --print ("UpdateAllFramesWithPublish: Fire Event =>", event, "for", tp_frame.unit.name)
+        PublishEvent(event, frame)
+      end
     end
   end
 end
@@ -184,7 +189,7 @@ end
 --   are up-to-date. Otherwise widget frames are created/updated/accessed with deprecated settings
 --   which may - worst case scenario - result in Lua errors.
 --   <to be described>
--- When iterating over widget frames (PlatesVisible or PlatesCreated) be sure to always consider the
+-- When iterating over widget frames (GetNamePlates() or PlatesCreated) be sure to always consider the
 -- following:
 --
 ---------------------------------------------------------------------------------------------------
@@ -306,8 +311,12 @@ function WidgetHandler:DisableWidget(widget_name)
       self.EnabledWidgets[widget_name] = nil
 
       widget:OnDisable()
-      for plate, _ in pairs(Addon.PlatesVisible) do
-        plate.TPFrame.widgets[widget_name]:Hide()
+      local frame
+      for _, plate in pairs(GetNamePlates()) do
+        frame = plate and plate.TPFrame
+        if frame and frame.Active then
+          frame.widgets[widget_name]:Hide()
+        end
       end
     end
   end

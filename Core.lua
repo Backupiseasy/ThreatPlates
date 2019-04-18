@@ -6,13 +6,14 @@ local ThreatPlates = Addon.ThreatPlates
 ---------------------------------------------------------------------------------------------------
 
 -- Lua APIs
-local tonumber, select = tonumber, select
+local tonumber, select, pairs = tonumber, select, pairs
 
 -- WoW APIs
 local SetNamePlateFriendlyClickThrough = C_NamePlate.SetNamePlateFriendlyClickThrough
 local SetNamePlateEnemyClickThrough = C_NamePlate.SetNamePlateEnemyClickThrough
 local IsInInstance = IsInInstance
 local GetCVar, IsAddOnLoaded = GetCVar, IsAddOnLoaded
+local GetNamePlates, GetNamePlateForUnit = C_NamePlate.GetNamePlates, C_NamePlate.GetNamePlateForUnit
 local C_NamePlate_SetNamePlateFriendlySize, C_NamePlate_SetNamePlateEnemySize, Lerp =  C_NamePlate.SetNamePlateFriendlySize, C_NamePlate.SetNamePlateEnemySize, Lerp
 local NamePlateDriverFrame = NamePlateDriverFrame
 local UnitClass, GetSpecialization = UnitClass, GetSpecialization
@@ -119,8 +120,12 @@ function TidyPlatesThreat:ReloadTheme()
     end)
   end
 
-  for plate, unitid in pairs(Addon.PlatesVisible) do
-    Addon:UpdateNameplateStyle(plate, unitid)
+  local frame
+  for _, plate in pairs(GetNamePlates()) do
+    frame = plate and plate.TPFrame
+    if frame and frame.Active then
+      Addon:UpdateNameplateStyle(plate, frame.unit.unitid)
+    end
   end
 
   Addon:ForceUpdate()

@@ -1,5 +1,4 @@
 ---------------------------------------------------------------------------------------------------
----------------------------------------------------------------------------------------------------
 -- Auras Widget
 ---------------------------------------------------------------------------------------------------
 local ADDON_NAME, Addon = ...
@@ -24,8 +23,8 @@ local tonumber = tonumber
 local CreateFrame, GetFramerate = CreateFrame, GetFramerate
 local DebuffTypeColor = DebuffTypeColor
 local UnitAura, UnitIsFriend, UnitIsUnit, UnitReaction, UnitIsPlayer, UnitPlayerControlled = UnitAura, UnitIsFriend, UnitIsUnit, UnitReaction, UnitIsPlayer, UnitPlayerControlled
-local UnitAffectingCombat = UnitAffectingCombat
-local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
+local UnitAffectingCombat, UnitExists = UnitAffectingCombat, UnitExists
+local GetNamePlates, GetNamePlateForUnit = C_NamePlate.GetNamePlates, C_NamePlate.GetNamePlateForUnit
 local GameTooltip = GameTooltip
 local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
 
@@ -1375,33 +1374,45 @@ end
 function Widget:PLAYER_REGEN_ENABLED()
   --PLayerIsInCombat = false
 
-  for plate, _ in pairs(Addon.PlatesVisible) do
-    local widget_frame = plate.TPFrame.widgets.Auras
-    local unit = plate.TPFrame.unit
+  local frame
+  for _, plate in pairs(GetNamePlates()) do
+    frame = plate and plate.TPFrame
+    if frame and frame.Active then
+      local widget_frame = frame.widgets.Auras
+      local unit = frame.unit
 
-    -- It seems that unitid here can be nil when using the healthstone while in combat
-    -- assert (unit.unitid ~= nil, "Auras: PLAYER_REGEN_ENABLED - unitid =", unit.unitid)
+      -- It seems that unitid here can be nil when using the healthstone while in combat
+      -- Bug occurs probably because PlatesVisible is not up to date when porting out and players loosing
+      -- their nameplates while doing that ???
+      assert (unit.unitid ~= nil, "Auras: PLAYER_REGEN_ENABLED - unitid =", unit.unitid, "=>", UnitExists(unit.unitid))
 
-    if widget_frame.Active and unit.HasUnlimitedAuras and unit.unitid then
-      unit.InCombat = UnitAffectingCombat(unit.unitid)
-      self:UpdateIconGrid(widget_frame, unit)
+      if widget_frame.Active and unit.HasUnlimitedAuras then
+        unit.InCombat = UnitAffectingCombat(unit.unitid)
+        self:UpdateIconGrid(widget_frame, unit)
+      end
     end
   end
 end
 
-function Widget:PLAYER_REGEN_DISABLED()
-  --PLayerIsInCombat = true
+Widget.PLAYER_REGEN_DISABLED = Widget.PLAYER_REGEN_ENABLED
 
-  for plate, _ in pairs(Addon.PlatesVisible) do
-    local widget_frame = plate.TPFrame.widgets.Auras
-    local unit = plate.TPFrame.unit
-
-    if widget_frame.Active and unit.HasUnlimitedAuras then
-      unit.InCombat = UnitAffectingCombat(unit.unitid)
-      self:UpdateIconGrid(widget_frame, unit)
-    end
-  end
-end
+--function Widget:PLAYER_REGEN_DISABLED()
+--  --PLayerIsInCombat = true
+--
+--  local frame
+--  for _, plate in pairs(GetNamePlates()) do
+--    frame = plate and plate.TPFrame
+--    if frame and frame.Active then
+--      local widget_frame = frame.widgets.Auras
+--      local unit = frame.unit
+--
+--      if widget_frame.Active and unit.HasUnlimitedAuras then
+--        unit.InCombat = UnitAffectingCombat(unit.unitid)
+--        self:UpdateIconGrid(widget_frame, unit)
+--      end
+--    end
+--  end
+--end
 
 function Widget:PLAYER_ENTERING_WORLD()
   PLayerIsInInstance = IsInInstance()
@@ -1466,8 +1477,12 @@ end
 
 function Widget:OnDisable()
   self:UnsubscribeAllEvents()
-  for plate, _ in pairs(Addon.PlatesVisible) do
-    plate.TPFrame.widgets.Auras:UnsubscribeAllEvents()
+  local frame
+  for _, plate in pairs(GetNamePlates()) do
+    frame = plate and plate.TPFrame
+    if frame and frame.Active then
+      frame.widgets.Auras:UnsubscribeAllEvents()
+    end
   end
 end
 

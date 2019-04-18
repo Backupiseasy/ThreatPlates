@@ -14,10 +14,10 @@ local UnitPlayerControlled = UnitPlayerControlled
 local UnitIsOtherPlayersPet = UnitIsOtherPlayersPet
 local UnitIsBattlePet = UnitIsBattlePet
 local UnitCanAttack, UnitIsTapDenied = UnitCanAttack, UnitIsTapDenied
+local GetNamePlates, GetNamePlateForUnit = C_NamePlate.GetNamePlates, C_NamePlate.GetNamePlateForUnit
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
-local PlatesByUnit = Addon.PlatesByUnit
 local TOTEMS = Addon.TOTEMS
 local GetUnitVisibility = ThreatPlates.GetUnitVisibility
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
@@ -280,41 +280,36 @@ local function CheckNameplateStyle(tp_frame)
 end
 
 local function UNIT_NAME_UPDATE(unitid)
-  local tp_frame = PlatesByUnit[unitid]
-  if tp_frame and tp_frame.Active then
-    local stylename = UnitStyle_NameDependent(tp_frame.unit)
+  local plate = GetNamePlateForUnit(unitid)
+  local frame = plate and plate.TPFrame
 
-    if stylename and tp_frame.stylename ~= stylename then
+  if frame and frame.Active then
+    local stylename = UnitStyle_NameDependent(frame.unit)
+
+    if stylename and frame.stylename ~= stylename then
       local style = ActiveTheme[stylename]
 
-      tp_frame.PlateStyle = NAMEPLATE_STYLES_BY_THEME[stylename]
-      tp_frame.stylename = stylename
-      tp_frame.style = style
-      tp_frame.unit.style = stylename
+      frame.PlateStyle = NAMEPLATE_STYLES_BY_THEME[stylename]
+      frame.stylename = stylename
+      frame.style = style
+      frame.unit.style = stylename
 
-      tp_frame.PlateStyle = ((stylename == "NameOnly" or stylename == "NameOnly-Unique") and "NAME") or "HEALTHBAR"
+      frame.PlateStyle = ((stylename == "NameOnly" or stylename == "NameOnly-Unique") and "NAME") or "HEALTHBAR"
 
 
-      PublishEvent("StyleUpdate", tp_frame, style, stylename)
+      PublishEvent("StyleUpdate", frame, style, stylename)
     end
   end
 end
 
 local function EnteringOrLeavingCombat()
-  for _, tp_frame in pairs(PlatesByUnit) do
-    if tp_frame.Active then
-      CheckNameplateStyle(tp_frame)
+  local frame
+  for _, plate in pairs(GetNamePlates()) do
+    frame = plate.TPFrame
+    if frame and frame.Active then
+      CheckNameplateStyle(frame)
     end
   end
-  --  local tp_frame
-  --  for plate, _ in pairs(PlatesVisible) do
-  --    tp_frame = plate.TPFrame
-  --    print ("Combat ended ", tp_frame.unit.unitid, "-", tp_frame.unit.InCombat)
-  --    if tp_frame.unit.InCombat then
-  --      PublishEvent("CombatEnded", tp_frame)
-  --    end
-  --  end
-
 end
 
 Addon.InitializeStyle = CheckNameplateStyle

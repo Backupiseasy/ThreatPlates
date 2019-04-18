@@ -8,7 +8,6 @@ Addon.Debug = {}
 Addon.Theme = {}
 
 Addon.PlatesCreated = {}
-Addon.PlatesVisible = {}
 Addon.PlatesByUnit = {}
 Addon.PlatesByGUID = {}
 

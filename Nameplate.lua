@@ -20,7 +20,7 @@ local UnitIsUnit, UnitIsPlayer, UnitExists = UnitIsUnit, UnitIsPlayer, UnitExist
 local GetCreatureDifficultyColor, GetRaidTargetIndex = GetCreatureDifficultyColor, GetRaidTargetIndex
 local GetTime, GetCVar, Lerp, CombatLogGetCurrentEventInfo = GetTime, GetCVar, Lerp, CombatLogGetCurrentEventInfo
 local GetSpecialization = GetSpecialization
-local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
+local GetNamePlates, GetNamePlateForUnit = C_NamePlate.GetNamePlates, C_NamePlate.GetNamePlateForUnit
 local GetPlayerInfoByGUID, RAID_CLASS_COLORS = GetPlayerInfoByGUID, RAID_CLASS_COLORS
 
 -- ThreatPlates APIs
@@ -48,7 +48,6 @@ local ShowCastBars = true
 
 -- External references to internal data
 local PlatesCreated = Addon.PlatesCreated
-local PlatesVisible = Addon.PlatesVisible
 local PlatesByUnit = Addon.PlatesByUnit
 local PlatesByGUID = Addon.PlatesByGUID
 
@@ -82,6 +81,26 @@ local RARE_REFERENCE = {
   ["rare"] = true,
   ["rareelite"] = true,
 }
+
+--function Addon.ForEachPlate(functionToRun, ...)
+--  local frame
+--  for _, plate in pairs(GetNamePlates()) do
+--    frame = plate.TPFrame
+--    if frame and frame.Active then
+--      functionToRun(frame, ...)
+--    end
+--  end
+--end
+--
+--function Addon:ForEachPlate(functionToRun, ...)
+--  local frame
+--  for _, plate in pairs(GetNamePlates()) do
+--    frame = plate.TPFrame
+--    if frame and frame.Active then
+--      self[functionToRun](self, frame, ...)
+--    end
+--  end
+--end
 
 local function GetReactionByColor(red, green, blue)
   if red < .1 then 	-- Friendly
@@ -351,7 +370,6 @@ local function OnShowNameplate(plate, unitid)
     LastTargetPlate = tp_frame
   end
 
-  PlatesVisible[plate] = unitid
   PlatesByUnit[unitid] = tp_frame
   PlatesByGUID[unit.guid] = plate
 
@@ -372,7 +390,8 @@ end
 
 -- OnResetNameplate
 local function OnResetNameplate(plate)
-  OnShowNameplate(plate, PlatesVisible[plate])
+  -- plate here always is a Threat Plates frame
+  OnShowNameplate(plate, plate.TPFrame.unit.unitid)
 end
 
 ---------------------------------------------------------------------------------------------------------------------
@@ -563,8 +582,10 @@ function Addon:ForceUpdate()
     UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
   end
 
-  for plate, _ in pairs(PlatesVisible) do
-    if plate.TPFrame.Active then
+  local frame
+  for _, plate in pairs(GetNamePlates()) do
+    frame = plate.TPFrame
+    if frame and frame.Active then
       -- TODO: Better would be to implement a custom event SettingsUpdate
       OnResetNameplate(plate)
     end
@@ -869,7 +890,6 @@ function Addon:NAME_PLATE_UNIT_REMOVED(unitid)
 
   tp_frame:Hide()
 
-  PlatesVisible[plate] = nil
   PlatesByUnit[unitid] = nil
   if tp_frame.unit.guid then -- maybe hide directly after create with unit added?
     PlatesByGUID[tp_frame.unit.guid] = nil
