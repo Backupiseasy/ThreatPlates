@@ -93,24 +93,24 @@ function Element.Created(tp_frame)
   healthbar.HighlightTexture:SetAllPoints(healthbar)
 
   -- Highlight for name
-  healthbar.NameHighlight = healthbar:CreateTexture(nil, "ARTWORK") -- required for Headline View
+  healthbar.NameHighlight = tp_frame:CreateTexture(nil, "ARTWORK") -- required for Headline View
   healthbar.NameHighlight:SetTexture(NAME_STYLE_TEXTURE)
-  healthbar.NameHighlight:SetAllPoints(tp_frame.visual.Name)
   healthbar.NameHighlight:SetBlendMode("ADD")
-
+  healthbar.NameHighlight:SetAllPoints(tp_frame.visual.NameText)
+  
   healthbar.Highlight:Hide() -- HighlightTexture is shown/hidden together with Highlight
   healthbar.NameHighlight:Hide()
 end
 
----- Called in processing event: NAME_PLATE_UNIT_ADDED
+-- Called in processing event: NAME_PLATE_UNIT_ADDED
 --function Element.UnitAdded(tp_frame)
 --end
---
----- Called in processing event: NAME_PLATE_UNIT_REMOVED
+
+-- Called in processing event: NAME_PLATE_UNIT_REMOVED
 --function Element.UnitRemoved(tp_frame)
 --end
---
----- Called in processing event: UpdateStyle in Nameplate.lua
+
+-- Called in processing event: UpdateStyle in Nameplate.lua
 function Element.UpdateStyle(tp_frame, style, plate_style)
   local healthbar = tp_frame.visual.Healthbar
 
