@@ -427,8 +427,6 @@ function Widget:IsEnabled()
 end
 
 function Widget:OnEnable()
-  Font = ThreatPlates.Media:Fetch('font', TidyPlatesThreat.db.profile.questWidget.Font)
-
   self:GenerateQuestCache()
 
   -- self:SubscribeEvent("PLAYER_ENTERING_WORLD") -- Disabled as nameplates are not yet created when this event fires
@@ -448,6 +446,8 @@ function Widget:OnEnable()
   self:SubscribeEvent("PLAYER_REGEN_DISABLED")
   -- Also use ThreatUpdate Threatas new mobs may enter the combat mid-fight (PLAYER_REGEN_DISABLED already triggered)
   self:SubscribeEvent("ThreatUpdate")
+
+  Addon.CVars:OverwriteProtected("showQuestTrackingTooltips", 1)
 
   InCombat = InCombatLockdown()
 end
@@ -540,7 +540,14 @@ end
 
 function Widget:UpdateSettings()
   Settings = TidyPlatesThreat.db.profile.questWidget
+
   HideInCombat = Settings.HideInCombat
+  Font = ThreatPlates.Media:Fetch('font', Settings.Font)
+
+  if Settings.HPBarColor then
+    -- Initiate a update of the healthbar color
+    self:UpdateAllFramesWithPublish("QuestUpdate")
+  end
 end
 
 --local function tablelength(T)

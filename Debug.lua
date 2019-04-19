@@ -54,13 +54,13 @@ function Debug:PrintTable(data)
       if (type(data)=="table") then
         for pos,val in pairs(data) do
           if (type(val)=="table") then
-            Print(indent.."["..pos.."] => "..tostring(data).." {")
-            sub_print_r(val,indent..string.rep(" ",string.len(pos)+8))
-            Print(indent..string.rep(" ",string.len(pos)+6).."}")
+            Print(indent.."["..tostring(pos).."] => "..tostring(data).." {")
+            sub_print_r(val,indent..string.rep(" ",string.len(tostring(pos))+8))
+            Print(indent..string.rep(" ",string.len(tostring(pos))+6).."}")
           elseif (type(val)=="string") then
-            Print(indent.."["..pos..'] => "'..val..'"')
+            Print(indent.."["..tostring(pos)..'] => "'..val..'"')
           else
-            Print(indent.."["..pos.."] => "..tostring(val))
+            Print(indent.."["..tostring(pos).."] => "..tostring(val))
           end
         end
       else

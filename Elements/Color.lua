@@ -135,7 +135,8 @@ local function UpdatePlateColors(tp_frame)
   if tp_frame.style.healthbar.show then
     fg_color = tp_frame:GetHealthbarColor()
 
-    if fg_color ~= tp_frame.CurrentHealthbarColor then
+    --if fg_color.r ~= current_color.r or fg_color.g ~= current_color.g or fg_color.b ~= current_color.b or fg_color.a ~= current_color.a then
+    --if fg_color ~= tp_frame.CurrentHealthbarColor then
       local bg_color
       if Settings.BackgroundUseForegroundColor then
         bg_color = fg_color
@@ -148,7 +149,7 @@ local function UpdatePlateColors(tp_frame)
       healthbar.Border:SetBackdropColor(bg_color.r, bg_color.g, bg_color.b, 1 - Settings.BackgroundOpacity)
 
       tp_frame.CurrentHealthbarColor = fg_color
-    end
+    --end
   end
 
   fg_color = tp_frame:GetNameColor()
@@ -490,6 +491,8 @@ end
 
 -- Called in processing event: NAME_PLATE_UNIT_ADDED
 function Element.UnitAdded(tp_frame)
+  tp_frame.CurrentHealthbarColor = nil
+
   local unit = tp_frame.unit
 
   GetSituationalColor(unit)
@@ -585,10 +588,20 @@ local function FactionUpdate(frame)
       end
 
       GetColorByReaction(unit)
+      GetColorByClass(unit)
       UpdatePlateColors(frame)
 
       --print ("Color - ReactionUpdate:", tp_frame.unit.unitid)
     end
+  end
+end
+
+local function SocialUpdate(frame)
+  -- Only update reaction color if color mode ~= "HEALTH" for healthbar and name
+  if frame.PlateStyle ~= "NONE" and not (frame.GetHealthbarColor == GetUnitColorByHealth and frame.GetNameColor == GetUnitColorByHealth) then
+      -- No tapped unit detection necessary as this event only fires for player nameplates (which cannot be tapped, I hope)
+      GetColorByClass(frame.unit)
+      UpdatePlateColors(frame)
   end
 end
 
@@ -655,6 +668,7 @@ function Element.UpdateSettings()
   SubscribeEvent(Element, "TargetMarkerUpdate", SituationalUpdate)
   SubscribeEvent(Element, "FactionUpdate", FactionUpdate) -- Updates on faction (including social) information for units
   SubscribeEvent(Element, "QuestUpdate", SituationalUpdate) -- Updates on quests information for units
+  SubscribeEvent(Element, "SocialUpdate", SocialUpdate) -- Updates on quests information for units
 
   wipe(HealthColorCache)
 end

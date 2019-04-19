@@ -134,17 +134,20 @@ end
 
 -- If no event to fire as part of the update is specified, QuestUpdate is used
 local function UpdateAllFramesWithPublish(widget, event)
+  if event == "SocialUpdate" then
+    print ("SocialUpdate")
+  end
+
   local frame, widget_frame
   for _, plate in pairs(GetNamePlates()) do
     frame = plate and plate.TPFrame
     if frame and frame.Active then
       widget_frame = frame.widgets[widget.Name]
       if widget_frame.Active then
-
         widget:UpdateFrame(widget_frame, frame.unit)
         -- Also publish that unit data was changed (mainly for color updates currently)
         --print ("UpdateAllFramesWithPublish: Fire Event =>", event, "for", tp_frame.unit.name)
-        PublishEvent(event, frame)
+        widget:PublishEvent(event, frame)
       end
     end
   end

@@ -779,19 +779,6 @@ ThreatPlates.DEFAULT_SETTINGS = {
       ModeNames = false,
       HPBarColor = RGB(255, 0, 255), -- Magenta / Fuchsia
     },
-    threatWidget = {
-      ON = false,
-      x = 0,
-      y = 26,
-      anchor = "CENTER",
-    },
-    tankedWidget = {
-      ON = false,
-      scale = 1,
-      x = 65,
-      y = 6,
-      anchor = "CENTER",
-    },
     ComboPoints = {
       ON = false,
       ShowInHeadlineView = false,

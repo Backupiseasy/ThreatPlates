@@ -97,7 +97,7 @@ function Element.Created(tp_frame)
   healthbar.NameHighlight:SetTexture(NAME_STYLE_TEXTURE)
   healthbar.NameHighlight:SetBlendMode("ADD")
   healthbar.NameHighlight:SetAllPoints(tp_frame.visual.NameText)
-  
+
   healthbar.Highlight:Hide() -- HighlightTexture is shown/hidden together with Highlight
   healthbar.NameHighlight:Hide()
 end

@@ -106,6 +106,8 @@ local INTERNAL_EVENTS = {
   --   tp_frame: Frame (table), Nilable = false
   --   color: Color (table), Nilable = false
   NameColorUpdate = true,
+  -- Event: SocialUpdate is fired when a new friend/guildmate/... is detected with a nameplate
+  SocialUpdate = true,
 }
 
 ---------------------------------------------------------------------------------------------------

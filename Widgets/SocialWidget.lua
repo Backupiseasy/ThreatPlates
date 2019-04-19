@@ -47,6 +47,11 @@ local ListBnetFriends = {}
 local ListGuildMembersSize, ListFriendsSize, ListBnetFriendsSize = 0, 0, 0
 
 ---------------------------------------------------------------------------------------------------
+-- Cached configuration settings
+---------------------------------------------------------------------------------------------------
+local Settings, SettingsFaction
+
+---------------------------------------------------------------------------------------------------
 -- Social Widget Functions
 ---------------------------------------------------------------------------------------------------
 
@@ -86,7 +91,7 @@ function Widget:FRIENDLIST_UPDATE()
 --      end
 --    end
 
-    self:UpdateAllFramesWithPublish("FactionUpdate")
+    self:UpdateAllFramesWithPublish("SocialUpdate")
   end
 end
 
@@ -105,7 +110,7 @@ function Widget:GUILD_ROSTER_UPDATE()
 
     ListGuildMembersSize = numTotalGuildMembers
 
-    self:UpdateAllFramesWithPublish("FactionUpdate")
+    self:UpdateAllFramesWithPublish("SocialUpdate")
   end
 end
 
@@ -127,7 +132,7 @@ function Widget:BN_CONNECTED()
 
     ListBnetFriendsSize = BnetOnline
 
-    self:UpdateAllFramesWithPublish("FactionUpdate")
+    self:UpdateAllFramesWithPublish("SocialUpdate")
   end
 end
 
@@ -135,14 +140,14 @@ function Widget:BN_FRIEND_TOON_ONLINE(toon_id)
   local _, name = BNGetToonInfo(toon_id)
   ListBnetFriends[name] = ICON_BNET_FRIEND
 
-  self:UpdateAllFramesWithPublish("FactionUpdate")
+  self:UpdateAllFramesWithPublish("SocialUpdate")
 end
 
 function Widget:BN_FRIEND_TOON_OFFLINE(toon_id)
   local _, name = BNGetToonInfo(toon_id)
   ListBnetFriends[name] = nil
 
-  self:UpdateAllFramesWithPublish("FactionUpdate")
+  self:UpdateAllFramesWithPublish("SocialUpdate")
 end
 
 function Widget:BN_FRIEND_ACCOUNT_ONLINE(presence_id)
@@ -157,7 +162,7 @@ function Widget:BN_FRIEND_ACCOUNT_ONLINE(presence_id)
 
   ListBnetFriends[character_name] = ICON_BNET_FRIEND
 
-  self:UpdateAllFramesWithPublish("FactionUpdate")
+  self:UpdateAllFramesWithPublish("SocialUpdate")
 end
 
 function Widget:BN_FRIEND_ACCOUNT_OFFLINE(presence_id)
@@ -172,7 +177,7 @@ function Widget:BN_FRIEND_ACCOUNT_OFFLINE(presence_id)
 
   ListBnetFriends[character_name] = nil
 
-  self:UpdateAllFramesWithPublish("FactionUpdate")
+  self:UpdateAllFramesWithPublish("SocialUpdate")
 end
 
 function Widget:UNIT_NAME_UPDATE(unitid)
@@ -192,12 +197,12 @@ end
 
 function Addon:IsFriend(unit)
   -- no need to check for ShowInHeadlineView as this is for coloring the healthbar
-  return TidyPlatesThreat.db.profile.socialWidget.ON and (ListFriends[unit.fullname] or ListBnetFriends[unit.fullname])
+  return Settings.ON and (ListFriends[unit.fullname] or ListBnetFriends[unit.fullname])
 end
 
 function Addon:IsGuildmate(unit)
   -- no need to check for ShowInHeadlineView as this is for coloring the healthbar
-  return TidyPlatesThreat.db.profile.socialWidget.ON and ListGuildMembers[unit.fullname]
+  return Settings.ON and ListGuildMembers[unit.fullname]
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -226,22 +231,10 @@ function Widget:IsEnabled()
 end
 
 function Widget:OnEnable()
-  if TidyPlatesThreat.db.profile.socialWidget.ShowFriendIcon then
-    self:SubscribeEvent("FRIENDLIST_UPDATE")
-    self:SubscribeEvent("GUILD_ROSTER_UPDATE")
-    self:SubscribeEvent("BN_CONNECTED")
-    self:SubscribeEvent("BN_FRIEND_ACCOUNT_ONLINE")
-    self:SubscribeEvent("BN_FRIEND_ACCOUNT_OFFLINE")
-    self:SubscribeEvent("UNIT_NAME_UPDATE")
-    --Widget:SubscribeEvent("BN_FRIEND_LIST_SIZE_CHANGED", EventHandler)
-
-    --self:FRIENDLIST_UPDATE()
-    ShowFriends() -- Will fire FRIENDLIST_UPDATE
-    self:BN_CONNECTED()
-    --self:GUILD_ROSTER_UPDATE() -- called automatically by game
-  else
-    self:UnsubscribeAllEvents()
-  end
+  --self:FRIENDLIST_UPDATE()
+  ShowFriends() -- Will fire FRIENDLIST_UPDATE
+  self:BN_CONNECTED()
+  --self:GUILD_ROSTER_UPDATE() -- called automatically by game
 end
 
 function Widget:EnabledForStyle(style, unit)
@@ -255,11 +248,9 @@ function Widget:EnabledForStyle(style, unit)
 end
 
 function Widget:OnUnitAdded(widget_frame, unit)
-  local db = TidyPlatesThreat.db.profile.socialWidget
-  widget_frame.Icon:SetSize(db.scale, db.scale)
+  widget_frame.Icon:SetSize(Settings.scale, Settings.scale)
 
-  db = TidyPlatesThreat.db.profile.FactionWidget
-  widget_frame.FactionIcon:SetSize(db.scale, db.scale)
+  widget_frame.FactionIcon:SetSize(SettingsFaction.scale, SettingsFaction.scale)
 
   local name, realm = UnitName(unit.unitid)
   unit.fullname = name .. "-" .. (realm or GetRealmName())
@@ -268,11 +259,8 @@ function Widget:OnUnitAdded(widget_frame, unit)
 end
 
 function Widget:UpdateFrame(widget_frame, unit)
-  -- I will probably expand this to a table with 'friend = true','guild = true', and 'bnet = true' and have 3 textuers show.
-  local db = TidyPlatesThreat.db.profile.socialWidget
-  local friend_texture = db.ShowFriendIcon and (ListFriends[unit.name] or ListBnetFriends[unit.fullname] or ListGuildMembers[unit.fullname])
   local faction_texture
-  if db.ShowFactionIcon then
+  if Settings.ShowFactionIcon then
     -- faction can be nil, e.g., for Pandarians that not yet have choosen a faction
     local faction = UnitFactionGroup(unit.unitid)
     if faction == "Horde" then
@@ -281,6 +269,9 @@ function Widget:UpdateFrame(widget_frame, unit)
       faction_texture = ICON_FACTION_ALLIANCE
     end
   end
+
+  -- I will probably expand this to a table with 'friend = true','guild = true', and 'bnet = true' and have 3 textuers show.
+  local friend_texture = Settings.ShowFriendIcon and (ListFriends[unit.name] or ListBnetFriends[unit.fullname] or ListGuildMembers[unit.fullname])
 
   -- Need to hide the frame here as it may have been shown before
   if not (friend_texture or faction_texture) then
@@ -293,9 +284,9 @@ function Widget:UpdateFrame(widget_frame, unit)
   if friend_texture then
     -- db = TidyPlatesThreat.db.profile.socialWidget
     if name_style then
-      icon:SetPoint("CENTER", widget_frame:GetParent(), db.x_hv, db.y_hv)
+      icon:SetPoint("CENTER", widget_frame:GetParent(), Settings.x_hv, Settings.y_hv)
     else
-      icon:SetPoint("CENTER", widget_frame:GetParent(), db.x, db.y)
+      icon:SetPoint("CENTER", widget_frame:GetParent(), Settings.x, Settings.y)
     end
     icon:SetTexture(friend_texture)
 
@@ -307,11 +298,10 @@ function Widget:UpdateFrame(widget_frame, unit)
   icon = widget_frame.FactionIcon
   if faction_texture then
     -- apply settings to faction icon
-    db = TidyPlatesThreat.db.profile.FactionWidget
     if name_style then
-      icon:SetPoint("CENTER", widget_frame:GetParent(), db.x_hv, db.y_hv)
+      icon:SetPoint("CENTER", widget_frame:GetParent(), SettingsFaction.x_hv, SettingsFaction.y_hv)
     else
-      icon:SetPoint("CENTER", widget_frame:GetParent(), db.x, db.y)
+      icon:SetPoint("CENTER", widget_frame:GetParent(), SettingsFaction.x, SettingsFaction.y)
     end
     icon:SetTexture(faction_texture)
 
@@ -323,24 +313,26 @@ function Widget:UpdateFrame(widget_frame, unit)
   widget_frame:Show()
 end
 
---function Widget:OnUpdateStyle(widget_frame, unit)
---  local name_style = unit.style == "NameOnly" or unit.style == "NameOnly-Unique"
---  if widget_frame.Icon:IsShown() then
---    local db = TidyPlatesThreat.db.profile.socialWidget
---    if name_style then
---      widget_frame.Icon:SetPoint("CENTER", widget_frame:GetParent(), db.x_hv, db.y_hv)
---    else
---      widget_frame.Icon:SetPoint("CENTER", widget_frame:GetParent(), db.x, db.y)
---    end
---  end
---
---  if widget_frame.FactionIcon:IsShown() then
---    -- apply settings to faction icon
---    local db = TidyPlatesThreat.db.profile.FactionWidget
---    if name_style then
---      widget_frame.FactionIcon:SetPoint("CENTER", widget_frame:GetParent(), db.x_hv, db.y_hv)
---    else
---      widget_frame.FactionIcon:SetPoint("CENTER", widget_frame:GetParent(), db.x, db.y)
---    end
---  end
---end
+function Widget:UpdateSettings()
+  Settings = TidyPlatesThreat.db.profile.socialWidget
+  SettingsFaction = TidyPlatesThreat.db.profile.FactionWidget
+
+  if Settings.ShowFriendIcon or Settings.ShowFriendColor or Settings.ShowGuildmateColor then
+    self:SubscribeEvent("FRIENDLIST_UPDATE")
+    self:SubscribeEvent("GUILD_ROSTER_UPDATE")
+    self:SubscribeEvent("BN_CONNECTED")
+    self:SubscribeEvent("BN_FRIEND_ACCOUNT_ONLINE")
+    self:SubscribeEvent("BN_FRIEND_ACCOUNT_OFFLINE")
+    self:SubscribeEvent("UNIT_NAME_UPDATE")
+    --Widget:SubscribeEvent("BN_FRIEND_LIST_SIZE_CHANGED", EventHandler)
+
+    -- At startup, OnEnable populates all lists and fires SocialUpdate, so not necessary to do it here.
+    -- The event here must only be fired if UpdateSettings is called after a settings change (basically in all other cases).
+    if ListGuildMembersSize + ListFriendsSize + ListBnetFriendsSize > 0 then
+      self:UpdateAllFramesWithPublish("SocialUpdate")
+    end
+  else
+    self:UnsubscribeAllEvents()
+  end
+end
+
