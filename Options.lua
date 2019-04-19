@@ -3522,15 +3522,42 @@ local function CreateVisibilitySettings()
         args = {
           Description = GetDescriptionEntry(L["These options allow you to control which nameplates are visible within the game field while you play."]),
           Spacer0 = GetSpacerEntry(1),
-          AllUnits = { name = L["Enable Nameplates"], order = 10, type = "toggle", arg = "nameplateShowAll" },
-          AllUnitsDesc = { name = L["Show all nameplates (CTRL-V)."], order = 15, type = "description", width = "double", },
-          Spacer1 = { type = "description", name = "", order = 19, },
-          AllFriendly = { name = L["Enable Friendly"], order = 20, type = "toggle", arg = "nameplateShowFriends" },
-          AllFriendlyDesc = { name = L["Show friendly nameplates (SHIFT-V)."], order = 25, type = "description", width = "double", },
-          Spacer2 = { type = "description", name = "", order = 29, },
-          AllHostile = { name = L["Enable Enemy"], order = 30, type = "toggle", arg = "nameplateShowEnemies" },
-          AllHostileDesc = { name = L["Show enemy nameplates (ALT-V)."], order = 35, type = "description", width = "double", },
-          Header = { type = "header", order = 40, name = "", },
+          AllPlates = {
+            name = L["Always Show Nameplates"],
+            desc = L["Show nameplates at all times."],
+            type = "toggle",
+            order = 10,
+            width = "full",
+            arg = "nameplateShowAll"
+          },
+          AllUnits = {
+            name = L["Show All Nameplates (Friendly and Enemy Units) (CTRL-V)"],
+            order = 20,
+            type = "toggle",
+            width = "full",
+            set = function(info, value)
+              Addon.CVars:OverwriteProtected("nameplateShowFriends", (value and 1) or 0)
+              Addon.CVars:OverwriteProtected("nameplateShowEnemies", (value and 1) or 0)
+            end,
+            get = function(info)
+              return GetCVarBool("nameplateShowFriends") and GetCVarBool("nameplateShowEnemies")
+            end,
+          },
+          AllFriendly = {
+            name = L["Show Friendly Nameplates (SHIFT-V)"],
+            type = "toggle",
+            order = 30,
+            width = "full",
+            arg = "nameplateShowFriends"
+          },
+          AllHostile = {
+            name = L["Show Enemy Nameplates (ALT-V)"],
+            order = 40,
+            type = "toggle",
+            width = "full",
+            arg = "nameplateShowEnemies"
+          },
+          Header = { type = "header", order = 45, name = "", },
           ShowBlizzardFriendlyNameplates = {
             name = L["Show Blizzard Nameplates for Friendly Units"],
             order = 50,

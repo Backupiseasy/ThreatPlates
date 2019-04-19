@@ -458,7 +458,7 @@ local function MigrationComboPointsWidget(profile_name, profile)
     profile.ComboPoints = profile.ComboPoints or {}
 
     local default_profile = ThreatPlates.DEFAULT_SETTINGS.profile.ComboPoints
-    profile.ComboPoints.ON = SetValueOrDefault(profile.comboWidget.ON. default_profile.ON)
+    profile.ComboPoints.ON = SetValueOrDefault(profile.comboWidget.ON, default_profile.ON)
     profile.ComboPoints.Scale = SetValueOrDefault(profile.comboWidget.scale, default_profile.Scale)
     profile.ComboPoints.x = SetValueOrDefault(profile.comboWidget.x, default_profile.x)
     profile.ComboPoints.y = SetValueOrDefault(profile.comboWidget.y, default_profile.y)

@@ -20,11 +20,35 @@ Addon.CVars = {}
 local CVars = Addon.CVars
 
 local COMBAT_PROTECTED = {
-  nameplateMinAlpha = true,
+  nameplateLargeBottomInset = true,
+  nameplateLargeTopInset = true,
   nameplateMaxAlpha = true,
-  nameplateSelectedAlpha = true,
+  nameplateMaxDistance = true,
+  nameplateMinAlpha = true,
+  nameplateMotion = true,
+  nameplateMotionSpeed = true,
   nameplateOccludedAlphaMult = true,
+  nameplateOtherBottomInset = true,
+  nameplateOtherTopInset = true,
+  nameplateOverlapH = true,
+  nameplateOverlapV = true,
   nameplateResourceOnTarget = true,
+  nameplateSelectedAlpha = true,
+  nameplateTargetBehindMaxDistance = true,
+  -- Nameplate CVars
+  nameplateShowAll = true,
+  nameplateShowFriends = true,
+  nameplateShowEnemies = true,
+  nameplateShowEnemyGuardians = true,
+  nameplateShowEnemyMinions = true,
+  nameplateShowEnemyMinus = true,
+  nameplateShowEnemyPets = true,
+  nameplateShowEnemyTotems = true,
+  nameplateShowFriendlyGuardians = true,
+  nameplateShowFriendlyMinions = true,
+  nameplateShowFriendlyNPCs = true,
+  nameplateShowFriendlyPets = true,
+  nameplateShowFriendlyTotems = true,
 }
 
 local function SetConsoleVariable(cvar, value)

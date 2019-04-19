@@ -1,4 +1,10 @@
 ﻿------------------------------------------------------
+9.1.6
+------------------------------------------------------
+* Fixed a Lua error that occured when migrating deprecated settings of the Combo Points widget [Comment #1956].
+* Adjusted Threat Plates' general nameplate settings to be in line with the corresponding WoW settings.
+
+------------------------------------------------------
 9.1.5
 ------------------------------------------------------
 * Added the option to hide unlimited duration buffs on enemy units again to allow for a more fine-grained configuration with black- and whitelist filtering [Comment #1820].
