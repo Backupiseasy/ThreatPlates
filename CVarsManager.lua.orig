@@ -35,6 +35,10 @@ local COMBAT_PROTECTED = {
   nameplateResourceOnTarget = true,
   nameplateSelectedAlpha = true,
   nameplateTargetBehindMaxDistance = true,
+<<<<<<< HEAD
+  uiScale = true,
+=======
+>>>>>>> devel/91/main
   -- Nameplate CVars
   nameplateShowAll = true,
   nameplateShowFriends = true,

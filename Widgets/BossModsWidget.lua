@@ -294,6 +294,7 @@ function Widget:Create(tp_frame)
   widget_frame.Line = UIParent:CreateLine(nil,'OVERLAY')
 
   local line = widget_frame.Line
+  line.GetPoint = function() return end
   line:SetStartPoint('CENTER', UIParent)
   line:SetEndPoint('CENTER', tp_frame)
   line:Hide()
