@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+9.1.7
+------------------------------------------------------
+* Fixed a Lua error in the Boss Mods widget when used together with MoveAnything [Comment #1951, #1956].
+
+------------------------------------------------------
 9.1.6
 ------------------------------------------------------
 * Fixed a Lua error that occured when migrating deprecated settings of the Combo Points widget [Comment #1956].
