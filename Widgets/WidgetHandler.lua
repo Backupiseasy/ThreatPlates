@@ -282,7 +282,7 @@ function WidgetHandler:DisableWidget(widget_name)
     self.EnabledTargetWidgets[widget_name] = nil
 
     widget:OnDisable()
-    widget.WidgetFrame:Hide()
+    widget:OnTargetUnitRemoved()
   else
     local widget = self.EnabledWidgets[widget_name]
 

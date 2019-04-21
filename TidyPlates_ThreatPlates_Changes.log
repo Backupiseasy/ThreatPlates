@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+9.1.8
+------------------------------------------------------
+* Fixed a Lua error that occured when target highlight for healthbar and headline view were disabled while having an active target.
+
+------------------------------------------------------
 9.1.7
 ------------------------------------------------------
 * Fixed a Lua error in the Boss Mods widget when used together with MoveAnything [Comment #1951, #1956].
