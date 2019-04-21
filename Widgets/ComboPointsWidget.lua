@@ -412,8 +412,8 @@ function Widget:IsEnabled()
     self:SubscribeEvent("ACTIVE_TALENT_GROUP_CHANGED")
   end
 
-  self:DetermineUnitPower()
-
+  -- TODO: Better write a dedicated function to test if the player/spec used combo points and move DetermineUnitPower to OnEnable
+  self:DetermineUnitPower() -- must be done here, not in the if-part, so that PowerType is set to nil correctly (?)
 
   return self.PowerType ~= nil and enabled
 end

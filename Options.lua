@@ -185,15 +185,34 @@ local SET_FUNCTIONS = {
 local function SetValue(info, ...)
   --print ("SetValue: Function =", info.type)
 
+  -- For widgets: check if the widget if enabled or disabled. If so, call InitializeWidget additionally
+  -- Also: Fix some bad configuration settings design by me:
+  local widget_info_key = info.arg[1]
+  if widget_info_key == "HeadlineView" and info.arg[2] == "ShowTargetHighlight" then
+    widget_info_key = "targetWidget"
+  end
+
+  local widget_info = WIDGET_INFO[widget_info_key]
+  local widget_is_enabled = widget_info and Addon.Widgets:IsEnabled(widget_info.Name)
+
   local setter_function = SET_FUNCTIONS[info.type] or SetValueGeneral
   setter_function(info, ...)
 
-  -- info.arg[1] => name of the settings part of the widget
-  local widget_info = WIDGET_INFO[info.arg[1]]
   -- Update the corresponding parts of Threat Plates based on the setting
-  if widget_info and widget_info.UpdateSettings then
-    --print ("SetValue: Widget =>", info[2])
-    Addon.Widgets:UpdateSettings(widget_info.Name)
+  if widget_info then
+    --print ("SetValue: Enabling/Disabling Widget =>",widget_is_enabled, Addon.Widgets:IsEnabled(widget_info.Name))
+    if widget_is_enabled ~= Addon.Widgets:IsEnabled(widget_info.Name) then
+      --print ("SetValue: Enabling/Disabling Widget =>", widget_info.Name)
+      Addon.Widgets:InitializeWidget(widget_info.Name)
+      -- Required for some widgets that also update aspects of the healthbar (e.g., Quest, Social)
+      if widget_info.ForceUpdate then
+        Addon:ForceUpdate()
+      end
+    elseif widget_info.UpdateSettings then
+      --print ("SetValue: Widget =>", info[2])
+      Addon.Widgets:UpdateSettings(widget_info.Name)
+      -- Addon:ForceUpdate()
+    end
   else
     --print ("SetValue: Normal =>", info[2])
 
@@ -212,18 +231,6 @@ end
 
 local function SetValueCVarBool(info, value)
   Addon.CVars:OverwriteProtected(info.arg, (value and 1) or 0)
-end
-
-local function SetValueEnable(info, value)
-  SetValueGeneral(info, value)
-
-  -- info.arg[1] => name of the settings part of the widget
-  local widget_info = WIDGET_INFO[info.arg[1]]
-  Addon.Widgets:InitializeWidget(widget_info.Name)
-  -- Required for some widgets that also update aspects of the healthbar (e.g., Quest, Social)
-  if widget_info.ForceUpdate then
-    Addon:ForceUpdate()
-  end
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -456,7 +463,6 @@ local function GetEnableEntry(entry_name, description, widget_info, enable_hv)
     order = 5,
     type = "group",
     inline = true,
-    set = SetValueEnable,
     args = {
       Header = {
         name = description,
@@ -4965,10 +4971,6 @@ local function CreateOptionsTable()
                           order = 10,
                           type = "toggle",
                           arg = { "HeadlineView", "ShowTargetHighlight" },
-                          set = function(info, val)
-                            SetValueGeneral(info, val)
-                            Addon.Widgets:UpdateSettings("TargetArt")
-                          end,
                         },
                         TargetMouseoverHighlight = {
                           name = L["Show Mouseover"],

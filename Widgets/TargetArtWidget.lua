@@ -105,7 +105,6 @@ function Widget:OnTargetUnitAdded(tp_frame, unit)
   if self:EnabledForStyle(unit.style, unit) then
     widget_frame:SetParent(tp_frame)
     widget_frame:SetFrameLevel(tp_frame:GetFrameLevel() + 6)
-    widget_frame:SetAllPoints(tp_frame.visual.Healthbar)
 
     local healthbar_mode_frame = widget_frame.HealthbarMode
     if unit.style == "NameOnly" or unit.style == "NameOnly-Unique" then
@@ -113,6 +112,7 @@ function Widget:OnTargetUnitAdded(tp_frame, unit)
       healthbar_mode_frame.RightTexture:Hide()
       healthbar_mode_frame:Hide()
 
+      widget_frame:SetAllPoints(tp_frame)
       widget_frame.NameModeTexture:Show()
     else
       if db.theme == "default" or db.theme == "squarethin" then
@@ -125,6 +125,7 @@ function Widget:OnTargetUnitAdded(tp_frame, unit)
         healthbar_mode_frame.RightTexture:Show()
       end
 
+      widget_frame:SetAllPoints(tp_frame.visual.Healthbar)
       widget_frame.NameModeTexture:Hide()
     end
 

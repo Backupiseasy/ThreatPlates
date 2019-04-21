@@ -114,7 +114,7 @@ end
 function Element.UpdateStyle(tp_frame, style, plate_style)
   local healthbar = tp_frame.visual.Healthbar
 
-  if plate_style == "NONE" or TargetHighlightDisabled then
+  if plate_style == "NONE" then
     healthbar.Highlight:Hide()
     healthbar.NameHighlight:Hide()
     return

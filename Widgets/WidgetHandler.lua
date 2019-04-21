@@ -134,10 +134,6 @@ end
 
 -- If no event to fire as part of the update is specified, QuestUpdate is used
 local function UpdateAllFramesWithPublish(widget, event)
-  if event == "SocialUpdate" then
-    print ("SocialUpdate")
-  end
-
   local frame, widget_frame
   for _, plate in pairs(GetNamePlates()) do
     frame = plate and plate.TPFrame
@@ -145,10 +141,11 @@ local function UpdateAllFramesWithPublish(widget, event)
       widget_frame = frame.widgets[widget.Name]
       if widget_frame.Active then
         widget:UpdateFrame(widget_frame, frame.unit)
-        -- Also publish that unit data was changed (mainly for color updates currently)
-        --print ("UpdateAllFramesWithPublish: Fire Event =>", event, "for", tp_frame.unit.name)
-        widget:PublishEvent(event, frame)
       end
+
+      -- Publish that unit data was changed (for color updates of healthbar/name)
+      --print ("UpdateAllFramesWithPublish: Fire Event =>", event, "for", tp_frame.unit.name)
+      widget:PublishEvent(event, frame)
     end
   end
 end
@@ -158,12 +155,14 @@ end
 --   * InitializeWidget and InitializeAllWidgets
 --       - To initialize a widget, first Widget:IsEnabled() is called. You should at least check if the
 --         widget is enabled in general (db.ON, db.ShowInHeadlineView).
---         You may check additional conditions (like Combo Points widget checks for the current
---         spec actually having combo points). But if these conditions may change without Reload UI
---         make sure to keep a even active (e.g., ACTIVE_TALENT_GROUP_CHANGED) to be able to react
---         to that.
---           - If you are using Widget:UpdateSettings() to cache settings from the configuration, make sure that
---             it is called before Widget:Create() as it probably will depend on some of these settings.
+--           * You need to make sure that all configuration settings that are checked here, i.e., that
+--             define if a widget is enabled or not, use SetValueEnabled as setter function. If you just
+--             use the default GetValue, the widget is not enabled (as only UpdateSettings is called)
+--             and, e.g., events may not be registered.
+--           * You may check additional conditions (like Combo Points widget checks for the current
+--             spec actually having combo points). But if these conditions may change without Reload UI
+--             make sure to keep a even active (e.g., ACTIVE_TALENT_GROUP_CHANGED) to be able to react
+--             to that.
 --       - After that, eithr WidgetHandler:EnableWidget() or WidgetHandler:DisableWidget() are called.
 --         For EnableWidget(): Here, for all nameplates created
 --           - the widget frame is created (if not already done) with Widget:Create(),
@@ -229,6 +228,10 @@ function WidgetHandler:NewTargetWidget(widget_name)
   widget.TargetOnly = true
 
   return widget
+end
+
+function WidgetHandler:IsEnabled(widget_name)
+  return self.Widgets[widget_name]:IsEnabled()
 end
 
 function WidgetHandler:InitializeWidget(widget_name)
@@ -306,7 +309,7 @@ function WidgetHandler:DisableWidget(widget_name)
     self.EnabledTargetWidgets[widget_name] = nil
 
     widget:OnDisable()
-    widget.WidgetFrame:Hide()
+    widget:OnTargetUnitRemoved()
   else
     local widget = self.EnabledWidgets[widget_name]
 

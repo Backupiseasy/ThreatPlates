@@ -135,6 +135,7 @@ local function UpdatePlateColors(tp_frame)
   if tp_frame.style.healthbar.show then
     fg_color = tp_frame:GetHealthbarColor()
 
+    -- TODO: Caching of colors does not work currently
     --if fg_color.r ~= current_color.r or fg_color.g ~= current_color.g or fg_color.b ~= current_color.b or fg_color.a ~= current_color.a then
     --if fg_color ~= tp_frame.CurrentHealthbarColor then
       local bg_color
@@ -148,7 +149,7 @@ local function UpdatePlateColors(tp_frame)
       healthbar:SetStatusBarColor(fg_color.r, fg_color.g, fg_color.b, 1)
       healthbar.Border:SetBackdropColor(bg_color.r, bg_color.g, bg_color.b, 1 - Settings.BackgroundOpacity)
 
-      tp_frame.CurrentHealthbarColor = fg_color
+      --tp_frame.CurrentHealthbarColor = fg_color
     --end
   end
 
@@ -164,14 +165,14 @@ local function UpdatePlateColors(tp_frame)
 
   -- Only update the color and fire the event if there's actually a change in color
   local name_text = tp_frame.visual.NameText
-  if fg_color ~= tp_frame.CurrentNameColor then
-    if tp_frame.style.name.show then
-      name_text:SetTextColor(fg_color.r, fg_color.g, fg_color.b)
-    end
-    PublishEvent("NameColorUpdate", tp_frame, fg_color)
-
-    tp_frame.CurrentNameColor = fg_color
+  --if fg_color ~= tp_frame.CurrentNameColor then
+  if tp_frame.style.name.show then
+    name_text:SetTextColor(fg_color.r, fg_color.g, fg_color.b)
   end
+  PublishEvent("NameColorUpdate", tp_frame, fg_color)
+
+  --tp_frame.CurrentNameColor = fg_color
+  --end
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -267,7 +268,7 @@ local function GetColorByReaction(unit)
   return color
 end
 
-local function GetColorByClass(unit)
+local function GetColorByClass(unit, plate_style)
   local color
 
   if unit.type == "PLAYER" then
@@ -275,9 +276,9 @@ local function GetColorByClass(unit)
       color = RAID_CLASS_COLORS[unit.class]
     elseif unit.reaction == "FRIENDLY" then
       local db_social = SettingsBase.socialWidget
-      if db_social.ShowFriendColor and Addon:IsFriend(unit) then
+      if db_social.ShowFriendColor and Addon:IsFriend(unit, plate_style) then
         color = db_social.FriendColor
-      elseif db_social.ShowGuildmateColor and Addon:IsGuildmate(unit) then
+      elseif db_social.ShowGuildmateColor and Addon:IsGuildmate(unit, plate_style) then
         color = db_social.GuildmateColor
       else
         color = RAID_CLASS_COLORS[unit.class]
@@ -491,7 +492,7 @@ end
 
 -- Called in processing event: NAME_PLATE_UNIT_ADDED
 function Element.UnitAdded(tp_frame)
-  tp_frame.CurrentHealthbarColor = nil
+  --tp_frame.CurrentHealthbarColor = nil
 
   local unit = tp_frame.unit
 
@@ -506,7 +507,7 @@ function Element.UnitAdded(tp_frame)
   if not (tp_frame.GetHealthbarColor == GetUnitColorByHealth and tp_frame.GetNameColor == GetUnitColorByHealthName) then
 --    print ("Unit:", unit.name)
     GetColorByReaction(unit)
-    GetColorByClass(unit)
+    GetColorByClass(unit, tp_frame.PlateStyle)
 --    print ("  Reaction:", Addon.Debug:ColorToString(unit.ReactionColor))
 --    print ("    ->:", unit.reaction, unit.type, REACTION_REFERENCE[unit.reaction][unit.type])
 --    print ("  Class:", Addon.Debug:ColorToString(unit.ClassColor))
@@ -588,7 +589,6 @@ local function FactionUpdate(frame)
       end
 
       GetColorByReaction(unit)
-      GetColorByClass(unit)
       UpdatePlateColors(frame)
 
       --print ("Color - ReactionUpdate:", tp_frame.unit.unitid)
@@ -599,8 +599,12 @@ end
 local function SocialUpdate(frame)
   -- Only update reaction color if color mode ~= "HEALTH" for healthbar and name
   if frame.PlateStyle ~= "NONE" and not (frame.GetHealthbarColor == GetUnitColorByHealth and frame.GetNameColor == GetUnitColorByHealth) then
+      if frame.unit.isTarget then
+        print ("Social Update:", frame.unit.unitid)
+      end
+
       -- No tapped unit detection necessary as this event only fires for player nameplates (which cannot be tapped, I hope)
-      GetColorByClass(frame.unit)
+      GetColorByClass(frame.unit, frame.PlateStyle)
       UpdatePlateColors(frame)
   end
 end

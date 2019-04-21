@@ -195,14 +195,12 @@ function Widget:UNIT_NAME_UPDATE(unitid)
   end
 end
 
-function Addon:IsFriend(unit)
-  -- no need to check for ShowInHeadlineView as this is for coloring the healthbar
-  return Settings.ON and (ListFriends[unit.fullname] or ListBnetFriends[unit.fullname])
+function Addon:IsFriend(unit, plate_style)
+  return ((plate_style == "HEALTHBAR" and Settings.ON) or Settings.ShowInHeadlineView) and (ListFriends[unit.fullname] or ListBnetFriends[unit.fullname])
 end
 
-function Addon:IsGuildmate(unit)
-  -- no need to check for ShowInHeadlineView as this is for coloring the healthbar
-  return Settings.ON and ListGuildMembers[unit.fullname]
+function Addon:IsGuildmate(unit, plate_style)
+  return ((plate_style == "HEALTHBAR" and Settings.ON) or Settings.ShowInHeadlineView)  and ListGuildMembers[unit.fullname]
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -227,10 +225,19 @@ function Widget:Create(tp_frame)
 end
 
 function Widget:IsEnabled()
-  return TidyPlatesThreat.db.profile.socialWidget.ON or TidyPlatesThreat.db.profile.socialWidget.ShowInHeadlineView
+  return (Settings.ON or Settings.ShowInHeadlineView) and
+      (Settings.ShowFriendIcon or Settings.ShowFriendColor or Settings.ShowGuildmateColor)
 end
 
 function Widget:OnEnable()
+  self:SubscribeEvent("FRIENDLIST_UPDATE")
+  self:SubscribeEvent("GUILD_ROSTER_UPDATE")
+  self:SubscribeEvent("BN_CONNECTED")
+  self:SubscribeEvent("BN_FRIEND_ACCOUNT_ONLINE")
+  self:SubscribeEvent("BN_FRIEND_ACCOUNT_OFFLINE")
+  self:SubscribeEvent("UNIT_NAME_UPDATE")
+  --Widget:SubscribeEvent("BN_FRIEND_LIST_SIZE_CHANGED", EventHandler)
+
   --self:FRIENDLIST_UPDATE()
   ShowFriends() -- Will fire FRIENDLIST_UPDATE
   self:BN_CONNECTED()
@@ -317,22 +324,10 @@ function Widget:UpdateSettings()
   Settings = TidyPlatesThreat.db.profile.socialWidget
   SettingsFaction = TidyPlatesThreat.db.profile.FactionWidget
 
-  if Settings.ShowFriendIcon or Settings.ShowFriendColor or Settings.ShowGuildmateColor then
-    self:SubscribeEvent("FRIENDLIST_UPDATE")
-    self:SubscribeEvent("GUILD_ROSTER_UPDATE")
-    self:SubscribeEvent("BN_CONNECTED")
-    self:SubscribeEvent("BN_FRIEND_ACCOUNT_ONLINE")
-    self:SubscribeEvent("BN_FRIEND_ACCOUNT_OFFLINE")
-    self:SubscribeEvent("UNIT_NAME_UPDATE")
-    --Widget:SubscribeEvent("BN_FRIEND_LIST_SIZE_CHANGED", EventHandler)
-
-    -- At startup, OnEnable populates all lists and fires SocialUpdate, so not necessary to do it here.
-    -- The event here must only be fired if UpdateSettings is called after a settings change (basically in all other cases).
-    if ListGuildMembersSize + ListFriendsSize + ListBnetFriendsSize > 0 then
-      self:UpdateAllFramesWithPublish("SocialUpdate")
-    end
-  else
-    self:UnsubscribeAllEvents()
+  -- At startup, OnEnable populates all lists and fires SocialUpdate, so not necessary to do it here.
+  -- The event here must only be fired if UpdateSettings is called after a settings change (basically in all other cases).
+  if ListGuildMembersSize + ListFriendsSize + ListBnetFriendsSize > 0 then
+    self:UpdateAllFramesWithPublish("SocialUpdate")
   end
 end
 
