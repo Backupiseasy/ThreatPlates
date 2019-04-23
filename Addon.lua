@@ -92,7 +92,7 @@ StaticPopupDialogs["IncompatibleAddon"] = {
 
 function TidyPlatesThreat:ReloadTheme()
   -- Castbars have to be disabled everytime we login
-  if TidyPlatesThreat.db.profile.settings.castbar.show or TidyPlatesThreat.db.profile.settings.castbar.ShowInHeadlineView then
+  if self.db.profile.settings.castbar.show or self.db.profile.settings.castbar.ShowInHeadlineView then
     Addon:EnableCastBars()
   else
     Addon:DisableCastBars()
@@ -101,8 +101,10 @@ function TidyPlatesThreat:ReloadTheme()
   -- Recreate all TidyPlates styles for ThreatPlates("normal", "dps", "tank", ...) - required, if theme style settings were changed
   Addon:SetThemes(self)
 
+  -- Re-read all cached settings, ideally do not update any UI elements here
   Addon:InitializeCustomNameplates()
-  Addon.Widgets:InitializeAllWidgets()
+  Addon:UpdateSettings()
+  Addon.Widgets:InitializeAllWidgets() -- UpdateSettings and enable widgets
 
   -- Update existing nameplates as certain settings may have changed that are not covered by ForceUpdate()
   Addon:UIScaleChanged()
@@ -123,6 +125,8 @@ function TidyPlatesThreat:ReloadTheme()
     end)
   end
 
+  Addon.CVars:OverwriteBoolProtected("nameplateResourceOnTarget", self.db.profile.PersonalNameplate.ShowResourceOnTarget)
+
   local frame
   for _, plate in pairs(GetNamePlates()) do
     frame = plate and plate.TPFrame
@@ -131,7 +135,8 @@ function TidyPlatesThreat:ReloadTheme()
     end
   end
 
-  Addon:ForceUpdate()
+  -- Update all UI elements (frames, textures, ...)
+  Addon:UpdateAllPlates()
 end
 
 function TidyPlatesThreat:CheckForFirstStartUp()
@@ -150,7 +155,7 @@ function TidyPlatesThreat:CheckForFirstStartUp()
   local new_version = tostring(Meta("version"))
   if db.version ~= "" and db.version ~= new_version then
     -- migrate and/or remove any old DB entries
-    ThreatPlates.MigrateDatabase(db.version)
+    Addon.MigrateDatabase(db.version)
   end
   db.version = new_version
 
@@ -263,24 +268,6 @@ function TidyPlatesThreat:OnEnable()
   TidyPlatesThreat:CheckForIncompatibleAddons()
 
   TidyPlatesThreat:ReloadTheme()
-
-
-  Addon.CVars:OverwriteBoolProtected("nameplateResourceOnTarget", self.db.profile.PersonalNameplate.ShowResourceOnTarget)
-
-  -- TODO: check with what this  was replaces
-  --TidyPlatesUtilityInternal:EnableGroupWatcher()
-  -- TPHUub: if LocalVars.AdvancedEnableUnitCache then TidyPlatesUtilityInternal:EnableUnitCache() else TidyPlatesUtilityInternal:DisableUnitCache() end
-  -- TPHUub: TidyPlatesUtilityInternal:EnableHealerTrack()
-  -- if TidyPlatesThreat.db.profile.healerTracker.ON then
-  -- 	if not healerTrackerEnabled then
-  -- 		TidyPlatesUtilityInternal.EnableHealerTrack()
-  -- 	end
-  -- else
-  -- 	if healerTrackerEnabled then
-  -- 		TidyPlatesUtilityInternal.DisableHealerTrack()
-  -- 	end
-  -- end
-  -- TidyPlatesWidgets:EnableTankWatch()
 
   -- Get updates for changes regarding: Large Nameplates
   hooksecurefunc("SetCVar", SetCVarHook)

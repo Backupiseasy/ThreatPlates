@@ -18,8 +18,8 @@ local ThreatPlates = Addon.ThreatPlates
 ---------------------------------------------------------------------------------------------------
 
 -- Lua APIs
+local next, setmetatable, getmetatable = next, setmetatable, getmetatable
 local ipairs, type, insert = ipairs, type, table.insert
-
 
 ---------------------------------------------------------------------------------------------------
 -- Libraries
@@ -124,17 +124,34 @@ end
 -- Functions for working with tables
 ---------------------------------------------------------------------------------------------------
 
-Addon.CopyTable = function(input)
-	local output = {}
-	for k,v in pairs(input) do
-		if type(v) == "table" then
-			output[k] = Addon.CopyTable(v)
-		else
-			output[k] = v
+local function DeepCopyTable(orig)
+	local orig_type = type(orig)
+	local copy
+	if orig_type == 'table' then
+		copy = {}
+		for orig_key, orig_value in next, orig, nil do
+			copy[DeepCopyTable(orig_key)] = DeepCopyTable(orig_value)
 		end
+		setmetatable(copy, DeepCopyTable(getmetatable(orig)))
+	else -- number, string, boolean, etc
+		copy = orig
 	end
-	return output
+	return copy
 end
+
+Addon.CopyTable = DeepCopyTable
+
+--Addon.CopyTable = function(input)
+--	local output = {}
+--	for k,v in pairs(input) do
+--		if type(v) == "table" then
+--			output[k] = Addon.CopyTable(v)
+--		else
+--			output[k] = v
+--		end
+--	end
+--	return output
+--end
 
 Addon.MergeIntoTable = function(target, source)
   for k,v in pairs(source) do

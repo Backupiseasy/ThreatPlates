@@ -41,7 +41,7 @@ local THREAT_REFERENCE = Addon.THREAT_REFERENCE
 ---------------------------------------------------------------------------------------------------
 -- Local variables
 ---------------------------------------------------------------------------------------------------
-local PlateOnUpdateQueue = {}
+--local PlateOnUpdateQueue = {}
 
 local LastTargetPlate
 local ShowCastBars = true
@@ -546,8 +546,9 @@ end
 function Addon:DisableCastBars() ShowCastBars = false end
 function Addon:EnableCastBars() ShowCastBars = true end
 
-function Addon:ForceUpdate()
-  wipe(PlateOnUpdateQueue)
+
+function Addon:UpdateSettings()
+  --wipe(PlateOnUpdateQueue)
 
   ElementsUpdateSettings()
 
@@ -571,7 +572,7 @@ function Addon:ForceUpdate()
 
   if SettingsEnabledOccludedAlpha then
     UpdatePlate_Transparency = UpdatePlate_SetAlphaWithOcclusion
-    PlateOnUpdateQueue[#PlateOnUpdateQueue + 1] = UpdatePlate_SetAlphaOnUpdate
+    --PlateOnUpdateQueue[#PlateOnUpdateQueue + 1] = UpdatePlate_SetAlphaOnUpdate
   else
     UpdatePlate_Transparency = UpdatePlate_SetAlpha
   end
@@ -581,7 +582,9 @@ function Addon:ForceUpdate()
   else
     UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
   end
+end
 
+function Addon:UpdateAllPlates()
   local frame
   for _, plate in pairs(GetNamePlates()) do
     frame = plate.TPFrame
@@ -590,6 +593,21 @@ function Addon:ForceUpdate()
       OnResetNameplate(plate)
     end
   end
+end
+
+function Addon:PublishToEachPlate(event)
+  local frame
+  for _, plate in pairs(GetNamePlates()) do
+    frame = plate.TPFrame
+    if frame and frame.Active then
+      PublishEvent(event, frame)
+    end
+  end
+end
+
+function Addon:ForceUpdate()
+  Addon:UpdateSettings()
+  Addon:UpdateAllPlates()
 end
 
 function Addon:ForceUpdateOnNameplate(plate)
@@ -773,10 +791,7 @@ end
 
 -- Fired when the player enters the world, reloads the UI, enters/leaves an instance or battleground, or respawns at a graveyard.
 -- Also fires any other time the player sees a loading screen
-function Addon:PLAYER_ENTERING_WORLD()
-  -- Sync internal settings with Blizzard CVars
-  -- SetCVar("ShowClassColorInNameplate", 1)
-
+function Addon:PLAYER_ENTERING_WORLD(initialLogin, reloadingUI)
   local db = TidyPlatesThreat.db.profile.questWidget
   if db.ON or db.ShowInHeadlineView then
     self.CVars:Set("showQuestTrackingTooltips", 1)
@@ -785,6 +800,7 @@ function Addon:PLAYER_ENTERING_WORLD()
     self.CVars:RestoreFromProfile("showQuestTrackingTooltips")
   end
 
+  -- This code must be executed every time the player enters a instance (dungeon, raid, ...)
   db = TidyPlatesThreat.db.profile.Automation
   local isInstance, instanceType = IsInInstance()
 

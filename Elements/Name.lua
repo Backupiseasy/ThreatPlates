@@ -77,8 +77,10 @@ function Element.UpdateStyle(tp_frame, style, plate_style)
   name_text:Show()
 end
 
---function Element.UpdateSettings()
---end
+function Element.UpdateSettings()
+  -- Update TargetArt widget as it depends on some settings here
+  Addon.Widgets:UpdateSettings("TargetArt")
+end
 
 local function UNIT_NAME_UPDATE(unitid)
   local tp_frame = PlatesByUnit[unitid]

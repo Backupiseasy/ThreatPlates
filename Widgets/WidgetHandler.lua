@@ -150,6 +150,27 @@ local function UpdateAllFramesWithPublish(widget, event)
   end
 end
 
+local function UpdateAllFrameAfterSettingsUpdate(widget)
+  for _, tp_frame in pairs(Addon.PlatesCreated) do
+    local widget_frame = tp_frame.widgets[widget.Name]
+    -- widget_frame could be nil if the widget as disabled and is enabled as part of a profile switch
+    -- For these frames, UpdateAuraWidgetLayout will be called anyway when the widget is initalized
+    -- (which happens after the settings update)
+    if widget_frame then
+      if widget.UpdateLayout then
+        widget:UpdateLayout(widget_frame)
+      end
+
+      widget_frame.Active = tp_frame.stylename ~= "empty" and widget:EnabledForStyle(tp_frame.stylename, widget_frame.unit)
+      if widget_frame.Active then
+        widget:OnUnitAdded(widget_frame, widget_frame.unit)
+      else
+        widget_frame:Hide()
+      end
+    end
+  end
+end
+
 ---------------------------------------------------------------------------------------------------
 -- Widget creation and handling
 --   * InitializeWidget and InitializeAllWidgets
@@ -210,6 +231,7 @@ function WidgetHandler:NewWidget(widget_name)
     --
     UpdateAllFrames = UpdateAllFrames,
     UpdateAllFramesWithPublish = UpdateAllFramesWithPublish,
+    UpdateAllFrameAfterSettingsUpdate = UpdateAllFrameAfterSettingsUpdate,
     -- Default functions for enabling/disabling the widget
     OnEnable = function(self) end, -- do nothing
     OnDisable = function(self)
@@ -401,6 +423,7 @@ function WidgetHandler:UpdateSettings(widget_name)
   local widget = self.Widgets[widget_name]
 
   widget:UpdateSettings()
+  widget:UpdateAllFrameAfterSettingsUpdate()
 end
 
 --function Addon:WidgetsOnUpdate(tp_frame, unit)

@@ -20,7 +20,6 @@ local GetGuildInfo = GetGuildInfo
 local TidyPlatesThreat = TidyPlatesThreat
 local PlatesByUnit = Addon.PlatesByUnit
 local SubscribeEvent, PublishEvent,  UnsubscribeEvent = Addon.EventService.Subscribe, Addon.EventService.Publish, Addon.EventService.Unsubscribe
-local SetFontJustify = Addon.Font.SetJustify
 local RGB = Addon.RGB
 local Font = Addon.Font
 
@@ -422,7 +421,6 @@ function Element.UpdateStyle(tp_frame, style, plate_style)
   status_text:SetSize(db.Font.Width, db.Font.Height)
   Font:UpdateText(tp_frame, status_text, db)
 
-  --SetFontJustify(status_text, style.align, style.vertical)
   status_text:Show()
 end
 
@@ -497,6 +495,8 @@ function Element.UpdateSettings()
     UnsubscribeEvent(Element, "UNIT_ABSORB_AMOUNT_CHANGED", HealthUpdate)
   end
 
+  -- Update TargetArt widget as it depends on some settings here
+  Addon.Widgets:UpdateSettings("TargetArt")
 end
 
 --local function GuildRosterUpdate(local_change)

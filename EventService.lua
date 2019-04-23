@@ -108,6 +108,8 @@ local INTERNAL_EVENTS = {
   NameColorUpdate = true,
   -- Event: SocialUpdate is fired when a new friend/guildmate/... is detected with a nameplate
   SocialUpdate = true,
+  -- Event: ColorUpdate is fired when the nameplate color might change, e.g., the unit is a quest target or a
+  -- new friend/guildmate/... is detected with a nameplate
 }
 
 ---------------------------------------------------------------------------------------------------

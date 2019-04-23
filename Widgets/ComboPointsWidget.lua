@@ -176,6 +176,7 @@ Widget.TextureCoordinates = {}
 Widget.Colors = {}
 Widget.ShowInShapeshiftForm = true
 
+local WidgetFrame
 local ActiveSpec
 local RuneCooldowns = { 0, 0, 0, 0, 0, 0 }
 
@@ -327,7 +328,7 @@ local function EventHandler(event, unitid, power_type)
   local plate = GetNamePlateForUnit("target")
   if plate then -- not necessary, prerequisite for IsShown(): plate.TPFrame.Active and
     local widget = Widget
-    local widget_frame = widget.WidgetFrame
+    local widget_frame = WidgetFrame
     if widget_frame:IsShown() then
       widget:UpdateUnitPower(widget_frame)
     end
@@ -353,7 +354,7 @@ function Widget:UNIT_MAXPOWER(unitid, power_type)
     self:UpdateLayout()
 
     -- remove excessive CP frames (when called after talent change)
-    local widget_frame = self.WidgetFrame
+    local widget_frame = WidgetFrame
     for i = self.UnitPowerMax + 1, #widget_frame.ComboPoints do
       widget_frame.ComboPoints[i]:Hide()
       widget_frame.ComboPoints[i] = nil
@@ -372,8 +373,8 @@ function Widget:PLAYER_TARGET_CHANGED()
   if tp_frame and tp_frame.Active then
     self:OnTargetUnitAdded(tp_frame, tp_frame.unit)
   else
-    self.WidgetFrame:Hide()
-    self.WidgetFrame:SetParent(nil)
+    WidgetFrame:Hide()
+    WidgetFrame:SetParent(nil)
   end
 end
 
@@ -394,8 +395,8 @@ function Widget:UPDATE_SHAPESHIFT_FORM()
   if self.ShowInShapeshiftForm then
     self:PLAYER_TARGET_CHANGED()
   else
-    self.WidgetFrame:Hide()
-    self.WidgetFrame:SetParent(nil)
+    WidgetFrame:Hide()
+    WidgetFrame:SetParent(nil)
   end
 end
 
@@ -459,8 +460,8 @@ function Widget:OnDisable()
     self:UnsubscribeEvent("ACTIVE_TALENT_GROUP_CHANGED")
   end
 
-  self.WidgetFrame:Hide()
-  self.WidgetFrame:SetParent(nil)
+  WidgetFrame:Hide()
+  WidgetFrame:SetParent(nil)
 end
 
 function Widget:EnabledForStyle(style, unit)
@@ -475,11 +476,11 @@ function Widget:EnabledForStyle(style, unit)
 end
 
 function Widget:Create()
-  if not self.WidgetFrame then
+  if not WidgetFrame then
     local widget_frame = CreateFrame("Frame", nil)
     widget_frame:Hide()
 
-    self.WidgetFrame = widget_frame
+    WidgetFrame = widget_frame
     widget_frame.ComboPoints = {}
     widget_frame.ComboPointsOff = {}
 
@@ -497,7 +498,7 @@ function Widget:Create()
 end
 
 function Widget:OnTargetUnitAdded(tp_frame, unit)
-  local widget_frame = self.WidgetFrame
+  local widget_frame = WidgetFrame
 
   if UnitCanAttack("player", "target") and self:EnabledForStyle(unit.style, unit) then
     widget_frame:SetParent(tp_frame)
@@ -521,7 +522,7 @@ function Widget:OnTargetUnitAdded(tp_frame, unit)
 end
 
 function Widget:OnTargetUnitRemoved()
-  self.WidgetFrame:Hide()
+  WidgetFrame:Hide()
 end
 
 function Widget:UpdateTexture(texture, texture_path, cp_no)
@@ -542,11 +543,11 @@ function Widget:UpdateTexture(texture, texture_path, cp_no)
   local scale = self.db.Scale
   local scaledIconWidth, scaledIconHeight, scaledSpacing = (scale * self.IconWidth),(scale * self.IconHeight),(scale * self.db.HorizontalSpacing)
   texture:SetSize(scaledIconWidth, scaledIconHeight)
-  texture:SetPoint("LEFT", self.WidgetFrame, "LEFT", (self.WidgetFrame:GetWidth()/self.UnitPowerMax)*(cp_no-1)+(scaledSpacing/2), 0)  
+  texture:SetPoint("LEFT", WidgetFrame, "LEFT", (WidgetFrame:GetWidth()/self.UnitPowerMax)*(cp_no-1)+(scaledSpacing/2), 0)
 end
 
 function Widget:UpdateLayout()
-  local widget_frame = self.WidgetFrame
+  local widget_frame = WidgetFrame
 
   -- Updates based on settings
   local db = self.db
@@ -627,10 +628,12 @@ function Widget:UpdateSettings()
       end
     end
   end
+end
 
+function Widget:UpdateAllFrameAfterSettingsUpdate()
   -- Update the widget if it was already created (not true for immediately after Reload UI or if it was never enabled
   -- in this since last Reload UI)
-  if self.WidgetFrame then
+  if WidgetFrame then
     self:UpdateLayout()
     self:PLAYER_TARGET_CHANGED()
   end

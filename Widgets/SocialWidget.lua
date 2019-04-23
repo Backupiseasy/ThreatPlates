@@ -50,6 +50,7 @@ local ListGuildMembersSize, ListFriendsSize, ListBnetFriendsSize = 0, 0, 0
 -- Cached configuration settings
 ---------------------------------------------------------------------------------------------------
 local Settings, SettingsFaction
+local PlateColorEnabled = {}
 
 ---------------------------------------------------------------------------------------------------
 -- Social Widget Functions
@@ -196,11 +197,11 @@ function Widget:UNIT_NAME_UPDATE(unitid)
 end
 
 function Addon:IsFriend(unit, plate_style)
-  return ((plate_style == "HEALTHBAR" and Settings.ON) or Settings.ShowInHeadlineView) and (ListFriends[unit.fullname] or ListBnetFriends[unit.fullname])
+  return PlateColorEnabled[plate_style] and (ListFriends[unit.fullname] or ListBnetFriends[unit.fullname])
 end
 
 function Addon:IsGuildmate(unit, plate_style)
-  return ((plate_style == "HEALTHBAR" and Settings.ON) or Settings.ShowInHeadlineView)  and ListGuildMembers[unit.fullname]
+  return PlateColorEnabled[plate_style] and ListGuildMembers[unit.fullname]
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -324,10 +325,7 @@ function Widget:UpdateSettings()
   Settings = TidyPlatesThreat.db.profile.socialWidget
   SettingsFaction = TidyPlatesThreat.db.profile.FactionWidget
 
-  -- At startup, OnEnable populates all lists and fires SocialUpdate, so not necessary to do it here.
-  -- The event here must only be fired if UpdateSettings is called after a settings change (basically in all other cases).
-  if ListGuildMembersSize + ListFriendsSize + ListBnetFriendsSize > 0 then
-    self:UpdateAllFramesWithPublish("SocialUpdate")
-  end
+  PlateColorEnabled["HEALTHBAR"] = Settings.ON
+  PlateColorEnabled["NAME"] = Settings.ShowInHeadlineView
 end
 

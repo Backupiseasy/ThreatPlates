@@ -25,6 +25,8 @@ local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
 
+local WidgetFrame
+
 ---------------------------------------------------------------------------------------------------
 -- Resource Widget Functions
 ---------------------------------------------------------------------------------------------------
@@ -140,7 +142,7 @@ function Widget:SetTargetPowerType(widget_frame)
 end
 
 function Widget:UpdateResourceBar()
-  local widget_frame = self.WidgetFrame
+  local widget_frame = WidgetFrame
 
   local bar_value, text_value = self:PowerFunction()
 
@@ -173,8 +175,8 @@ function Widget:PLAYER_TARGET_CHANGED()
   if tp_frame and tp_frame.Active then
     self:OnTargetUnitAdded(tp_frame, tp_frame.unit)
   else
-    self.WidgetFrame:Hide()
-    self.WidgetFrame:SetParent(nil)
+    WidgetFrame:Hide()
+    WidgetFrame:SetParent(nil)
   end
 end
 ---------------------------------------------------------------------------------------------------
@@ -182,11 +184,11 @@ end
 ---------------------------------------------------------------------------------------------------
 
 function Widget:Create()
-  if not self.WidgetFrame then
+  if not WidgetFrame then
     local widget_frame = CreateFrame("Frame", nil)
     widget_frame:Hide()
 
-    self.WidgetFrame = widget_frame
+    WidgetFrame = widget_frame
 
     widget_frame.Text = widget_frame:CreateFontString(nil, "OVERLAY")
 
@@ -220,7 +222,7 @@ end
 
 function Widget:OnTargetUnitAdded(tp_frame, unit)
   local db = self.db
-  local widget_frame = self.WidgetFrame
+  local widget_frame = WidgetFrame
 
   if not self:EnabledForStyle(unit.style, unit) then
     widget_frame:Hide()
@@ -290,11 +292,11 @@ function Widget:OnTargetUnitAdded(tp_frame, unit)
 end
 
 function Widget:OnTargetUnitRemoved()
-  self.WidgetFrame:Hide()
+  WidgetFrame:Hide()
 end
 
 function Widget:UpdateLayout()
-  local widget_frame = self.WidgetFrame
+  local widget_frame = WidgetFrame
 
   -- Updates based on settings
   local db = self.db
@@ -339,10 +341,12 @@ end
 
 function Widget:UpdateSettings()
   self.db = TidyPlatesThreat.db.profile.ResourceWidget
+end
 
+function Widget:UpdateAllFrameAfterSettingsUpdate()
   -- Update the widget if it was already created (not true for immediately after Reload UI or if it was never enabled
   -- in this since last Reload UI)
-  if self.WidgetFrame then
+  if WidgetFrame then
     self:UpdateLayout()
     self:PLAYER_TARGET_CHANGED()
   end

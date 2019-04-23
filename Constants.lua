@@ -458,7 +458,6 @@ ThreatPlates.DEFAULT_SETTINGS = {
       -- blizzFading = true, -- removed in 8.5.1
       -- blizzFadingAlpha = 1, -- removed in 8.5.1
       useScaling = false,
-      ShowTargetHighlight = true,
       ShowMouseoverHighlight = true,
       ForceHealthbarOnTarget = false,
       ForceOutOfCombat = false,
@@ -770,6 +769,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
     },
     targetWidget = {
       ON = true,
+      ShowInHeadlineView = true,
       theme = "default",
       r = 1,
       g = 1,

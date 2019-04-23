@@ -599,10 +599,6 @@ end
 local function SocialUpdate(frame)
   -- Only update reaction color if color mode ~= "HEALTH" for healthbar and name
   if frame.PlateStyle ~= "NONE" and not (frame.GetHealthbarColor == GetUnitColorByHealth and frame.GetNameColor == GetUnitColorByHealth) then
-      if frame.unit.isTarget then
-        print ("Social Update:", frame.unit.unitid)
-      end
-
       -- No tapped unit detection necessary as this event only fires for player nameplates (which cannot be tapped, I hope)
       GetColorByClass(frame.unit, frame.PlateStyle)
       UpdatePlateColors(frame)
@@ -670,9 +666,9 @@ function Element.UpdateSettings()
   SubscribeEvent(Element, "TargetGained", SituationalUpdate)
   SubscribeEvent(Element, "TargetLost", SituationalUpdate)
   SubscribeEvent(Element, "TargetMarkerUpdate", SituationalUpdate)
-  SubscribeEvent(Element, "FactionUpdate", FactionUpdate) -- Updates on faction (including social) information for units
-  SubscribeEvent(Element, "QuestUpdate", SituationalUpdate) -- Updates on quests information for units
-  SubscribeEvent(Element, "SocialUpdate", SocialUpdate) -- Updates on quests information for units
+  SubscribeEvent(Element, "FactionUpdate", FactionUpdate) -- Updates on faction information for units
+  SubscribeEvent(Element, "QuestUpdate", SituationalUpdate) -- Updates on quest information for units
+  SubscribeEvent(Element, "SocialUpdate", SocialUpdate) -- Updates on friend/guildmate information for units (part of class info currently)
 
   wipe(HealthColorCache)
 end

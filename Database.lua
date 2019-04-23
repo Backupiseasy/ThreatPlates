@@ -162,7 +162,7 @@ local function VersionToNumber(version)
   return floor(v1 * 1e6 + v2 * 1e3 + v3)
 end
 
-local function CurrentVersionIsOlderThan(current_version, max_version)
+local function CurrentVersionIsLowerThan(current_version, max_version)
   return VersionToNumber(current_version) < VersionToNumber(max_version)
 end
 
@@ -471,9 +471,10 @@ local function MigrationColorSettings(profile_name, profile)
   if DatabaseEntryExists(profile, { "settings", "healthbar" }) then
     profile.Healthbar = profile.Healthbar or {}
 
-    profile.Healthbar.BackgroundUseForegroundColor = profile.settings.healthbar.BackgroundUseForegroundColor
-    profile.Healthbar.BackgroundOpacity = profile.settings.healthbar.BackgroundOpacity
-    profile.Healthbar.BackgroundColor = profile.settings.healthbar.BackgroundColor
+    local default_profile = ThreatPlates.DEFAULT_SETTINGS.profile.Healthbar
+    profile.Healthbar.BackgroundUseForegroundColor = SetValueOrDefault(profile.settings.healthbar.BackgroundUseForegroundColor, default_profile.BackgroundUseForegroundColor)
+    profile.Healthbar.BackgroundOpacity = SetValueOrDefault(profile.settings.healthbar.BackgroundOpacity, default_profile.BackgroundOpacity)
+    profile.Healthbar.BackgroundColor = SetValueOrDefault(profile.settings.healthbar.BackgroundColor, default_profile.BackgroundColor)
 
     DatabaseEntryDelete(profile, { "settings", "healthbar", "BackgroundUseForegroundColor" })
     DatabaseEntryDelete(profile, { "settings", "healthbar", "BackgroundOpacity" })
@@ -483,39 +484,46 @@ local function MigrationColorSettings(profile_name, profile)
   if DatabaseEntryExists(profile, { "settings", "raidicon" }) then
     profile.Healthbar = profile.Healthbar or {}
 
-    profile.Healthbar.UseRaidMarkColoring = profile.settings.raidicon.hpColor
+    local default_profile = ThreatPlates.DEFAULT_SETTINGS.profile.Healthbar
+    profile.Healthbar.UseRaidMarkColoring = SetValueOrDefault(profile.settings.raidicon.hpColor, default_profile.UseRaidMarkColoring)
 
     DatabaseEntryDelete(profile, { "settings", "raidicon", "hpColor" })
   end
 
   if DatabaseEntryExists(profile, { "settings", "name" }) then
     profile.Name = profile.Name or {}
-    profile.Name.HealthbarMode = profile.Name.HealthbarMode or {}
     profile.Name.NameMode = profile.Name.NameMode or {}
 
-    profile.Name.HealthbarMode.FriendlyUnitMode = profile.HeadlineView.FriendlyTextColorMode
-    profile.Name.HealthbarMode.FriendlyTextColor = profile.HeadlineView.FriendlyTextColor
-    profile.Name.HealthbarMode.EnemyUnitMode = profile.HeadlineView.EnemyTextColorMode
-    profile.Name.HealthbarMode.EnemyTextColor = profile.HeadlineView.EnemyTextColor
-    profile.Name.HealthbarMode.UseRaidMarkColoring = profile.HeadlineView.UseRaidMarkColoring
-
-    DatabaseEntryDelete(profile, { "HeadlineView", "FriendlyTextColorMode" })
-    DatabaseEntryDelete(profile, { "HeadlineView", "FriendlyTextColor" })
-    DatabaseEntryDelete(profile, { "HeadlineView", "EnemyTextColorMode" })
-    DatabaseEntryDelete(profile, { "HeadlineView", "EnemyTextColor" })
-    DatabaseEntryDelete(profile, { "HeadlineView", "UseRaidMarkColoring" })
-
-    profile.Name.NameMode.FriendlyUnitMode = profile.settings.name.FriendlyTextColorMode
-    profile.Name.NameMode.FriendlyTextColor = profile.settings.name.FriendlyTextColor
-    profile.Name.NameMode.EnemyUnitMode = profile.settings.name.EnemyTextColorMode
-    profile.Name.NameMode.EnemyTextColor = profile.settings.name.EnemyTextColor
-    profile.Name.NameMode.UseRaidMarkColoring = profile.settings.name.UseRaidMarkColoring
+    local default_profile = ThreatPlates.DEFAULT_SETTINGS.profile.Name.NameMode
+    profile.Name.NameMode.FriendlyUnitMode = SetValueOrDefault(profile.settings.name.FriendlyTextColorMode, default_profile.FriendlyUnitMode)
+    profile.Name.NameMode.FriendlyTextColor = SetValueOrDefault(profile.settings.name.FriendlyTextColor, default_profile.FriendlyTextColor)
+    profile.Name.NameMode.EnemyUnitMode = SetValueOrDefault(profile.settings.name.EnemyTextColorMode, default_profile.EnemyUnitMode)
+    profile.Name.NameMode.EnemyTextColor = SetValueOrDefault(profile.settings.name.EnemyTextColor, default_profile.EnemyTextColor)
+    profile.Name.NameMode.UseRaidMarkColoring = SetValueOrDefault(profile.settings.name.UseRaidMarkColoring, default_profile.UseRaidMarkColoring)
 
     DatabaseEntryDelete(profile, { "settings", "name", "FriendlyTextColorMode" })
     DatabaseEntryDelete(profile, { "settings", "name", "FriendlyTextColor" })
     DatabaseEntryDelete(profile, { "settings", "name", "EnemyTextColorMode" })
     DatabaseEntryDelete(profile, { "settings", "name", "EnemyTextColor" })
     DatabaseEntryDelete(profile, { "settings", "name", "UseRaidMarkColoring" })
+  end
+
+  if DatabaseEntryExists(profile, { "HeadlineView" }) then
+    profile.Name = profile.Name or {}
+    profile.Name.HealthbarMode = profile.Name.HealthbarMode or {}
+
+    local default_profile = ThreatPlates.DEFAULT_SETTINGS.profile.Name.HealthbarMode
+    profile.Name.HealthbarMode.FriendlyUnitMode = SetValueOrDefault(profile.HeadlineView.FriendlyTextColorMode, default_profile.FriendlyUnitMode)
+    profile.Name.HealthbarMode.FriendlyTextColor = SetValueOrDefault(profile.HeadlineView.FriendlyTextColor, default_profile.FriendlyTextColor)
+    profile.Name.HealthbarMode.EnemyUnitMode = SetValueOrDefault(profile.HeadlineView.EnemyTextColorMode, default_profile.EnemyUnitMode)
+    profile.Name.HealthbarMode.EnemyTextColor = SetValueOrDefault(profile.HeadlineView.EnemyTextColor, default_profile.EnemyTextColor)
+    profile.Name.HealthbarMode.UseRaidMarkColoring = SetValueOrDefault(profile.HeadlineView.UseRaidMarkColoring, default_profile.UseRaidMarkColoring)
+
+    DatabaseEntryDelete(profile, { "HeadlineView", "FriendlyTextColorMode" })
+    DatabaseEntryDelete(profile, { "HeadlineView", "FriendlyTextColor" })
+    DatabaseEntryDelete(profile, { "HeadlineView", "EnemyTextColorMode" })
+    DatabaseEntryDelete(profile, { "HeadlineView", "EnemyTextColor" })
+    DatabaseEntryDelete(profile, { "HeadlineView", "UseRaidMarkColoring" })
   end
 
   -- Migration from to FriendlyUnitMode/EnemyUnitMode
@@ -552,12 +560,13 @@ local DEPRECATED_SETTINGS = {
   -- hideNonCombat = { "threat", "hideNonCombat" },        -- (removed in ...)
   -- nonCombat = { "threat", "nonCombat" },                -- (removed in 9.1.0)
   ShowThreatGlowOffTank = { "ShowThreatGlowOffTank" },        -- (removed in 9.2.0), never used
-  MigrationColorSettings = { MigrationColorSettings, "9.2.0" },  -- (changed in 9.2.0)
+  --MigrationColorSettings = { MigrationColorSettings, "9.2.0" },  -- (changed in 9.2.0)
   DisconnectedUnitColor = { "ColorByReaction", "DisconnectedUnit" }, -- (removed in 9.2.0)
   DisconnectedUnitColor = { "tidyplatesFade" }, -- (removed in 9.2.0)
 }
 
-local function MigrateDatabase(current_version)
+
+function Addon.MigrateDatabase(current_version)
   TidyPlatesThreat.db.global.MigrationLog = nil
   --TidyPlatesThreat.db.global.MigrationLog = {}
 
@@ -567,7 +576,7 @@ local function MigrateDatabase(current_version)
 
     if type(action) == "function" then
       local max_version = entry[2]
-      if not max_version or CurrentVersionIsOlderThan(current_version, max_version) then
+      if not max_version or CurrentVersionIsLowerThan(current_version, max_version) then
 
         -- iterate over all profiles and migrate values
         --TidyPlatesThreat.db.global.MigrationLog[key] = "Migration" .. (max_version and ( " because " .. current_version .. " < " .. max_version) or "")
@@ -585,7 +594,162 @@ local function MigrateDatabase(current_version)
   end
 end
 
-Addon.MigrateDatabase = MigrateDatabase
+local ENTRIES_TO_DELETE = {
+  -- 9.2.0
+  ["9.2.0"] = {
+    { "ShowThreatGlowOffTank" }, -- never used
+    { "ColorByReaction", "DisconnectedUnit" },
+    { "tidyplatesFade" }
+  },
+}
+
+local ENTRIES_TO_RENAME = {
+  ["9.2.0"] = {
+    -- Color settings for healthbar and name
+    { Deprecated = { "settings", "healthbar", "BackgroundUseForegroundColor" }, New = { "Healthbar", "BackgroundUseForegroundColor" }, },
+    { Deprecated = { "settings", "healthbar", "BackgroundOpacity" }, New = { "Healthbar", "BackgroundOpacity" }, },
+    { Deprecated = { "settings", "healthbar", "BackgroundColor" }, New = { "Healthbar", "BackgroundColor" }, },
+    { Deprecated = { "settings", "raidicon", "hpColor" }, New = { "Healthbar", "UseRaidMarkColoring" }, },
+    { Deprecated = { "settings", "name", "FriendlyTextColorMode" }, New = { "Name", "NameMode", "FriendlyUnitMode" }, },
+    { Deprecated = { "settings", "name", "FriendlyTextColor" }, New = { "Name", "NameMode", "FriendlyTextColor" }, },
+    { Deprecated = { "settings", "name", "EnemyTextColorMode" }, New = { "Name", "NameMode", "EnemyUnitMode" }, },
+    { Deprecated = { "settings", "name", "EnemyTextColor" }, New = { "Name", "NameMode", "EnemyTextColor" }, },
+    { Deprecated = { "settings", "name", "UseRaidMarkColoring" }, New = { "Name", "NameMode", "UseRaidMarkColoring" }, },
+    { Deprecated = { "HeadlineView", "FriendlyTextColorMode" }, New = { "Name", "HealthbarMode", "FriendlyUnitMode" }, },
+    { Deprecated = { "HeadlineView", "FriendlyTextColor" }, New = { "Name", "HealthbarMode", "FriendlyTextColor" }, },
+    { Deprecated = { "HeadlineView", "EnemyTextColorMode" }, New = { "Name", "HealthbarMode", "EnemyUnitMode" }, },
+    { Deprecated = { "HeadlineView", "EnemyTextColor" }, New = { "Name", "HealthbarMode", "EnemyTextColor" }, },
+    { Deprecated = { "HeadlineView", "UseRaidMarkColoring" }, New = { "Name", "HealthbarMode", "UseRaidMarkColoring" }, },
+    -- Customtext is now Status Text
+    { Deprecated = { "settings", "customtext", "x" }, New = { "StatusText", "HealthbarMode", "HorizontalOffset" }, },
+    { Deprecated = { "settings", "customtext", "y" }, New = { "StatusText", "HealthbarMode", "VerticalOffset" }, },
+    { Deprecated = { "settings", "customtext", "typeface" }, New = { "StatusText", "HealthbarMode", "Font", "Typeface" }, },
+    { Deprecated = { "settings", "customtext", "size" }, New = { "StatusText", "HealthbarMode", "Font", "Size" }, },
+    { Deprecated = { "settings", "customtext", "width" }, New = { "StatusText", "HealthbarMode", "Font", "Width" }, },
+    { Deprecated = { "settings", "customtext", "height" }, New = { "StatusText", "HealthbarMode", "Font", "Height" }, },
+    { Deprecated = { "settings", "customtext", "align" }, New = { "StatusText", "HealthbarMode", "Font", "HorizontalAlignment" }, },
+    { Deprecated = { "settings", "customtext", "vertical" }, New = { "StatusText", "HealthbarMode", "Font", "VerticalAlignment" }, },
+    { Deprecated = { "settings", "customtext", "shadow" }, New = { "StatusText", "HealthbarMode", "Font", "Shadow" }, },
+    { Deprecated = { "settings", "customtext", "flags" }, New = { "StatusText", "HealthbarMode", "Font", "flags" }, },
+    { Deprecated = { "settings", "customtext", "FriendlySubtext" }, New = { "StatusText", "HealthbarMode", "FriendlySubtext" }, },
+    { Deprecated = { "settings", "customtext", "EnemySubtext" }, New = { "StatusText", "HealthbarMode", "EnemySubtext" }, },
+    { Deprecated = { "settings", "customtext", "SubtextColorUseHeadline" }, New = { "StatusText", "HealthbarMode", "SubtextColorUseHeadline" }, },
+    { Deprecated = { "settings", "customtext", "SubtextColorUseSpecific" }, New = { "StatusText", "HealthbarMode", "SubtextColorUseSpecific" }, },
+    { Deprecated = { "settings", "customtext", "SubtextColor" }, New = { "StatusText", "HealthbarMode", "SubtextColor" }, },
+    { Deprecated = { "HeadlineView", "customtext", "x" }, New = { "StatusText", "NameMode", "HorizontalOffset" }, },
+    { Deprecated = { "HeadlineView", "customtext", "y" }, New = { "StatusText", "NameMode", "VerticalOffset" }, },
+    { Deprecated = { "HeadlineView", "customtext", "size" }, New = { "StatusText", "NameMode", "Font", "Size" }, },
+    { Deprecated = { "HeadlineView", "customtext", "align" }, New = { "StatusText", "NameMode", "Font", "HorizontalAlignment" }, },
+    { Deprecated = { "HeadlineView", "customtext", "vertical" }, New = { "StatusText", "NameMode", "Font", "VerticalAlignment" }, },
+    -- Others
+    { Deprecated = { "HeadlineView", "ShowTargetHighlight" }, New = { "targetWidget", "ShowInHeadlineView" }, },
+  },
+}
+
+local function GetCurrentValue(profile, deprecated_entry)
+  local keys = deprecated_entry
+  local value = profile
+
+  for index = 1, #keys do
+    --print ("    -->", keys[index], value[keys[index]])
+    value = value[keys[index]]
+    -- If value is nil, the current profile uses the default value for this setting, so no migration required
+    if value == nil then
+      return nil
+    end
+  end
+
+  -- Delete the deprecated entry (not nil) from the profile
+  --DatabaseEntryDelete(profile, deprecated_entry)
+
+  return value
+end
+
+local function RenameEntries(current_version)
+  local profile_table = TidyPlatesThreat.db.profiles
+
+  for max_version, entries in pairs(ENTRIES_TO_RENAME) do
+    if CurrentVersionIsLowerThan(current_version, max_version) then
+
+      print ("Migrating", max_version, "...")
+
+      for i = 1, #entries do
+        local deprecated_entry = entries[i].Deprecated
+        local new_entry = entries[i].New
+
+        -- Iterate over all profiles, copy the deprecated entry to the new entry and delete the deprecated entry
+        for profile_name, profile in pairs(profile_table) do
+          if profile_name == "MIGRATE" then
+            local current_value = GetCurrentValue(profile, deprecated_entry)
+
+            if current_value == nil then
+              print ("    " .. profile_name ..":", table.concat(deprecated_entry, "."), "=> <not set>")
+            else
+              print ("    " .. profile_name ..":", table.concat(deprecated_entry, "."), "=>", table.concat(new_entry, "."), "=", current_value)
+            end
+
+            if current_value ~= nil then
+              -- Iterate to the new entry in the current profile
+              local value = profile
+              for index = 1, #new_entry - 1 do
+                local key = new_entry[index]
+                -- If value[key] does not exist, create an empty hash table
+                -- As the current entry is not the last one, it cannot be a leave, i.e., it must be a table
+                value[key] = value[key] or {}
+                value = value[key]
+              end
+
+              -- We only iterate to the next-to-last entry, as we need to overwrite it:
+              value[new_entry[#new_entry]] = current_value
+            end
+          end
+        end
+      end
+    end
+  end
+
+  for max_version, entries in pairs(ENTRIES_TO_DELETE) do
+    if CurrentVersionIsLowerThan(current_version, max_version) then
+      -- iterate over all profiles and delete the old config entry
+      --TidyPlatesThreat.db.global.MigrationLog[key] = "DELETED"
+      for i = 1, #entries do
+        for profile_name, profile in pairs(profile_table) do
+          print ("  " .. profile_name ..": Deleting", unpack(entries[i]))
+          --DatabaseEntryDelete(profile, entries[i])
+        end
+      end
+    end
+  end
+end
+
+Addon.MigrateEntries = RenameEntries
+
+local function DeleteEntry(current_entry, default_entry, prefix)
+  for key, value in pairs(current_entry) do
+    if key ~= "uniqueSettings" then
+      local entry = prefix .. "." .. key
+      if default_entry[key] == nil then
+        print ("  =>", entry ..":", value)
+        -- Delete current entry
+      elseif type(value) == "table" then
+        if type(default_entry[key]) == "table" then
+          DeleteEntry(value, default_entry[key], entry)
+        else -- This should never happen - i.e. an old entry (which was a table) is re-used as simple value)
+          print ("  =>", entry ..": Type Mismatch - New Value is no table!")
+        end
+      end
+    end
+  end
+end
+
+function Addon:DeleteDeprecatedSettings()
+  local profile_table = TidyPlatesThreat.db.profiles
+
+  for profile_name, profile in pairs(profile_table) do
+    print ("Profile:", profile_name)
+    DeleteEntry(profile, ThreatPlates.DEFAULT_SETTINGS.profile, profile_name)
+  end
+end
 
 -----------------------------------------------------
 -- External
@@ -594,7 +758,6 @@ Addon.MigrateDatabase = MigrateDatabase
 ThreatPlates.GetDefaultSettingsV1 = GetDefaultSettingsV1
 ThreatPlates.SwitchToCurrentDefaultSettings = SwitchToCurrentDefaultSettings
 ThreatPlates.SwitchToDefaultSettingsV1 = SwitchToDefaultSettingsV1
-ThreatPlates.MigrateDatabase = MigrateDatabase
 
 ThreatPlates.GetUnitVisibility = GetUnitVisibility
 ThreatPlates.SetNamePlateClickThrough = SetNamePlateClickThrough

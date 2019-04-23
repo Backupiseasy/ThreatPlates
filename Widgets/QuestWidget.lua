@@ -18,7 +18,7 @@ local WorldFrame, CreateFrame = WorldFrame, CreateFrame
 local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
 local UnitName, UnitIsUnit, UnitDetailedThreatSituation = UnitName, UnitIsUnit, UnitDetailedThreatSituation
 local GetNumQuestLeaderBoards, GetQuestObjectiveInfo, GetQuestLogTitle, GetNumQuestLogEntries, GetQuestLogIndexByID = GetNumQuestLeaderBoards, GetQuestObjectiveInfo, GetQuestLogTitle, GetNumQuestLogEntries, GetQuestLogIndexByID
-local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
+local GetNamePlates, GetNamePlateForUnit = C_NamePlate.GetNamePlates, C_NamePlate.GetNamePlateForUnit
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
@@ -27,7 +27,6 @@ local ON_UPDATE_INTERVAL = Addon.ON_UPDATE_PER_FRAME
 local InCombat = false
 local TooltipFrame = CreateFrame("GameTooltip", "ThreatPlates_Tooltip", nil, "GameTooltipTemplate")
 local PlayerName = UnitName("player")
-local ICON_COLORS = {}
 local Font
 
 local FONT_SCALING = 0.3
@@ -293,13 +292,20 @@ end
 -- Event Watcher Code for Quest Widget
 ---------------------------------------------------------------------------------------------------
 
+-- Same as Widget:UpdateAllFramesWithPublish but with the additiona check of widget_frame.IsQuestUnit
 function Widget:RefreshCombatVisisbility()
-  for _, tp_frame in pairs(Addon.PlatesByUnit) do
-    local widget_frame = tp_frame.widgets.Quest
-    if widget_frame.Active and widget_frame.IsQuestUnit then
-      -- Call UpdateFrame as widget may be non-initialized if player entered world while in combat
-      self:UpdateFrame(widget_frame, tp_frame.unit)
-      self:PublishEvent("QuestUpdate", tp_frame)  -- to update healthbar/name color, if necessary
+  local frame, widget_frame
+  for _, plate in pairs(GetNamePlates()) do
+    frame = plate and plate.TPFrame
+    if frame and frame.Active then
+      widget_frame = frame.widgets.Quest
+      if widget_frame.IsQuestUnit then
+        -- Call UpdateFrame as widget may be non-initialized if player entered world while in combat
+        if widget_frame.Active then
+          self:UpdateFrame(widget_frame, frame.unit)
+        end
+        self:PublishEvent("QuestUpdate", frame)  -- to update healthbar/name color, if necessary
+      end
     end
   end
 end
@@ -363,7 +369,7 @@ function Widget:QUEST_REMOVED(quest_id)
     QuestsToUpdate[quest_id] = nil
   end
 
-  self:UpdateAllFramesWithPublish()
+  self:UpdateAllFramesWithPublish("QuestUpdate")
 end
 
 function Widget:PLAYER_REGEN_ENABLED()
@@ -377,16 +383,17 @@ function Widget:PLAYER_REGEN_DISABLED()
   InCombat = true
   if TidyPlatesThreat.db.profile.questWidget.HideInCombat then
     Widget:RefreshCombatVisisbility()
+  end
 end
-    end
 
-function Widget:ThreatUpdate(tp_frame)
-  local widget_frame = tp_frame.widgets.Quest
-  if widget_frame.Active and not TidyPlatesThreat.db.profile.questWidget.HideInCombat and widget_frame.IsQuestUnit then
+function Widget:ThreatUpdate(frame)
+  local widget_frame = frame.widgets.Quest
+  if not TidyPlatesThreat.db.profile.questWidget.HideInCombat and widget_frame.IsQuestUnit then
     -- Call UpdateFrame as widget may be non-initialized if player entered world while in combat
-    self:UpdateFrame(widget_frame, tp_frame.unit)
-    --widget_frame:SetShown(widget_frame.IsQuestUnit and tp_frame.unit.ThreatLevel == nil)
-    self:PublishEvent("QuestUpdate", tp_frame) -- to update healthbar/name color, if necessary
+    if widget_frame.Active then
+      self:UpdateFrame(widget_frame, frame.unit)
+    end
+    self:PublishEvent("QuestUpdate", frame) -- to update healthbar/name color, if necessary
   end
 end
 
@@ -465,9 +472,6 @@ function Widget:OnUnitAdded(widget_frame, unit)
   widget_frame:SetSize(db.scale, db.scale)
   widget_frame:SetAlpha(db.alpha)
 
-  ICON_COLORS[1] = db.ColorPlayerQuest
-  ICON_COLORS[2] = db.ColorGroupQuest
-
   widget_frame.Icon:SetTexture(ICON_PATH .. db.IconTexture)
   widget_frame.Icon:SetAllPoints()
 
@@ -489,13 +493,11 @@ function Widget:UpdateFrame(widget_frame, unit)
       widget_frame:SetPoint("CENTER", widget_frame:GetParent(), db.x, db.y)
     end
 
-    local color = ICON_COLORS[quest_type]
+    local color = db.ColorPlayerQuest
     widget_frame.Icon:SetVertexColor(color.r, color.g, color.b)
 
-    if db.ShowProgress and
-       current and
-       current.goal > 1 then --NOTE: skip showing for quests that have 1 of something, as WoW uses this for things like events eg "Push back the alliance 0/1"
-
+    --NOTE: skip showing for quests that have 1 of something, as WoW uses this for things like events eg "Push back the alliance 0/1"
+    if db.ShowProgress and current and current.goal > 1 then
       local text
 
       if current.type == "area" then
@@ -543,11 +545,6 @@ function Widget:UpdateSettings()
 
   HideInCombat = Settings.HideInCombat
   Font = ThreatPlates.Media:Fetch('font', Settings.Font)
-
-  if Settings.HPBarColor then
-    -- Initiate a update of the healthbar color
-    self:UpdateAllFramesWithPublish("QuestUpdate")
-  end
 end
 
 --local function tablelength(T)

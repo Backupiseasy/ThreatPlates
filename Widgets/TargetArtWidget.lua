@@ -10,6 +10,9 @@ local Widget = Addon.Widgets:NewTargetWidget("TargetArt")
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
 
+-- Lua APIs
+local abs, max, min = abs, max, min
+
 -- WoW APIs
 local CreateFrame = CreateFrame
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
@@ -31,11 +34,12 @@ local BACKDROP = {
   }
 }
 
+local WidgetFrame
+
 ---------------------------------------------------------------------------------------------------
 -- Cached configuration settings
 ---------------------------------------------------------------------------------------------------
 local Settings, SettingsHV, SettingsStatusText
-local WidgetFrame
 local NameModeOffsetX, NameModeOffsetY
 
 ---------------------------------------------------------------------------------------------------
@@ -104,6 +108,7 @@ function Widget:OnTargetUnitAdded(tp_frame, unit)
 
   if self:EnabledForStyle(unit.style, unit) then
     widget_frame:SetParent(tp_frame)
+    widget_frame:SetAllPoints(tp_frame)
     widget_frame:SetFrameLevel(tp_frame:GetFrameLevel() + 6)
 
     local healthbar_mode_frame = widget_frame.HealthbarMode
@@ -112,7 +117,6 @@ function Widget:OnTargetUnitAdded(tp_frame, unit)
       healthbar_mode_frame.RightTexture:Hide()
       healthbar_mode_frame:Hide()
 
-      widget_frame:SetAllPoints(tp_frame)
       widget_frame.NameModeTexture:Show()
     else
       if db.theme == "default" or db.theme == "squarethin" then
@@ -194,6 +198,8 @@ function Widget:UpdateLayout()
     healthbar_mode_frame:SetBackdrop(nil)
   end
 
+--  widget_frame.NameModeTexture:SetWidth(128)
+
   widget_frame.NameModeTexture:SetSize(128, 32 * GetHeadlineViewHeight() / 18)
   widget_frame.NameModeTexture:SetPoint("CENTER", widget_frame, "CENTER", NameModeOffsetX, NameModeOffsetY)
 end
@@ -205,7 +211,9 @@ function Widget:UpdateSettings()
 
   NameModeOffsetX = SettingsHV.name.x
   NameModeOffsetY = GetTargetTextureY()
+end
 
+function Widget:UpdateAllFrameAfterSettingsUpdate()
   -- Update the widget if it was already created (not true for immediately after Reload UI or if it was never enabled
   -- in this since last Reload UI)
   if WidgetFrame then

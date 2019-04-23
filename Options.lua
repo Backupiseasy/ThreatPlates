@@ -141,9 +141,9 @@ local WIDGET_INFO = {
   classWidget = { Name = "ClassIcon", UpdateSettings = false, ForceUpdate = false },
   ComboPoints = { Name = "ComboPoints", UpdateSettings = true, ForceUpdate = false },
   healerTracker = { Name = "HealerTracker", UpdateSettings = false, ForceUpdate = false },
-  questWidget = { Name = "Quest", UpdateSettings = true, ForceUpdate = true },
+  questWidget = { Name = "Quest", UpdateSettings = true, ForceUpdate = true, PublishEvent = "QuestUpdate" },
   ResourceWidget = { Name = "Resource", UpdateSettings = true, ForceUpdate = false },
-  socialWidget = { Name = "Social", UpdateSettings = true, ForceUpdate = true },
+  socialWidget = { Name = "Social", UpdateSettings = true, ForceUpdate = true, PublishEvent = "SocialUpdate"  },
   stealthWidget = { Name = "Stealth", UpdateSettings = false, ForceUpdate = false },
   targetWidget = { Name = "TargetArt", UpdateSettings = true, ForceUpdate = false },
   threat = { Name = "Threat", UpdateSettings = false, ForceUpdate = false }, -- ThreatWidget
@@ -205,13 +205,19 @@ local function SetValue(info, ...)
       --print ("SetValue: Enabling/Disabling Widget =>", widget_info.Name)
       Addon.Widgets:InitializeWidget(widget_info.Name)
       -- Required for some widgets that also update aspects of the healthbar (e.g., Quest, Social)
-      if widget_info.ForceUpdate then
-        Addon:ForceUpdate()
+--      if widget_info.ForceUpdate then
+--        Addon:ForceUpdate()
+--      end
+      if widget_info.PublishEvent then
+        Addon:PublishToEachPlate(widget_info.PublishEvent)
       end
     elseif widget_info.UpdateSettings then
       --print ("SetValue: Widget =>", info[2])
       Addon.Widgets:UpdateSettings(widget_info.Name)
-      -- Addon:ForceUpdate()
+      -- Required for some widgets that also update aspects of the healthbar (e.g., Quest, Social)
+      if widget_info.PublishEvent then
+        Addon:PublishToEachPlate(widget_info.PublishEvent)
+      end
     end
   else
     --print ("SetValue: Normal =>", info[2])
@@ -284,6 +290,8 @@ end
 function Addon:InitializeCustomNameplates()
   local db = TidyPlatesThreat.db.profile
 
+  print ("InitializeCustomNameplates")
+
   db.uniqueSettings.map = {}
   for i, unique_unit in pairs(db.uniqueSettings) do
     if unique_unit.name and unique_unit.name ~= "" then
@@ -292,7 +300,7 @@ function Addon:InitializeCustomNameplates()
   end
 end
 
-local function UpdateSpecial() -- Need to add a way to update options table.
+local function UpdateCustomNameplates() -- Need to add a way to update options table.
   Addon:InitializeCustomNameplates()
   Addon:ForceUpdate()
 end
@@ -5142,8 +5150,6 @@ local function CreateOptionsTable()
                       order = 10,
                       type = "toggle",
                       set = function(info, value)
-                        info = Addon.CopyTable(info)
-
                         Addon:CallbackWhenOoC(function()
                           if value then
                             Addon:SetCVarsForOcclusionDetection()
@@ -5153,7 +5159,8 @@ local function CreateOptionsTable()
                             Addon.CVars:RestoreFromProfile("nameplateSelectedAlpha")
                             Addon.CVars:RestoreFromProfile("nameplateOccludedAlphaMult")
                           end
-                          SetValue(info, value)
+                          -- Using SetValue here would require to make a copy of info (upvalue), very inefficient
+                          db.nameplate.toggle.OccludedUnits = value
                         end, L["Unable to change transparency for occluded units while in combat."])
                       end,
                       arg = { "nameplate", "toggle", "OccludedUnits" },
@@ -6932,7 +6939,7 @@ local function CreateOptionsTable()
                 options.args.Custom.args["#" .. k_c].name = "#" .. k_c .. ". " .. val
                 options.args.Custom.args["#" .. k_c].args.Header.name = val
                 options.args.Custom.args["#" .. k_c].args.Name.args.SetName.name = val
-                UpdateSpecial()
+                UpdateCustomNameplates()
               end,
               arg = { "uniqueSettings", k_c, "name" },
             },
@@ -6948,7 +6955,7 @@ local function CreateOptionsTable()
                   options.args.Custom.args["#" .. k_c].name = "#" .. k_c .. ". " .. target
                   options.args.Custom.args["#" .. k_c].args.Header.name = target
                   options.args.Custom.args["#" .. k_c].args.Name.args.SetName.name = target
-                  UpdateSpecial()
+                  UpdateCustomNameplates()
                 else
                   t.Print(L["No target found."])
                 end
@@ -6964,7 +6971,7 @@ local function CreateOptionsTable()
                 options.args.Custom.args["#" .. k_c].name = "#" .. k_c .. ". " .. ""
                 options.args.Custom.args["#" .. k_c].args.Header.name = ""
                 options.args.Custom.args["#" .. k_c].args.Name.args.SetName.name = ""
-                UpdateSpecial()
+                UpdateCustomNameplates()
               end,
             },
             Header1 = {
@@ -7003,7 +7010,7 @@ local function CreateOptionsTable()
                 else
                   options.args.Custom.args["#" .. k_c].args.Icon.args.Icon.image = db.uniqueSettings[k_c].icon
                 end
-                UpdateSpecial()
+                UpdateCustomNameplates()
                 clipboard = nil
               end,
             },
@@ -7023,7 +7030,7 @@ local function CreateOptionsTable()
                 options.args.Custom.args["#" .. k_c].args.Header.name = defaults.name
                 options.args.Custom.args["#" .. k_c].args.Name.args.SetName.name = defaults.name
                 options.args.Custom.args["#" .. k_c].args.Icon.args.Icon.image = defaults.icon
-                UpdateSpecial()
+                UpdateCustomNameplates()
               end,
             },
           },
@@ -7236,7 +7243,7 @@ local function CreateOptionsTable()
                 else
                   options.args.Custom.args["#" .. k_c].args.Icon.args.Icon.image = "Interface\\Icons\\Temp"
                 end
-                UpdateSpecial()
+                UpdateCustomNameplates()
               end,
               get = function(info)
                 local spell_id = db.uniqueSettings[k_c].SpellID
@@ -7256,8 +7263,6 @@ local function CreateOptionsTable()
   end
 
   options.args.Custom.args = CustomOpts
-
-  UpdateSpecial()
 
   options.args.profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(TidyPlatesThreat.db)
   options.args.profiles.order = 10000;
@@ -7295,7 +7300,7 @@ end
 function TidyPlatesThreat:ProfChange()
   db = self.db.profile
 
-  Addon:InitializeCustomNameplates()
+  TidyPlatesThreat:ReloadTheme()
 
   -- Update preview icons: EliteArtWidget, TargetHighlightWidget, ClassIconWidget, QuestWidget, Threat Textures, Totem Icons, Custom Nameplate Icons
   local path = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\"
@@ -7338,8 +7343,6 @@ function TidyPlatesThreat:ProfChange()
       end
     end
   end
-
-  TidyPlatesThreat:ReloadTheme()
 end
 
 function TidyPlatesThreat:OpenOptions()
