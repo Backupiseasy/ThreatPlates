@@ -289,9 +289,6 @@ end
 
 function Addon:InitializeCustomNameplates()
   local db = TidyPlatesThreat.db.profile
-
-  print ("InitializeCustomNameplates")
-
   db.uniqueSettings.map = {}
   for i, unique_unit in pairs(db.uniqueSettings) do
     if unique_unit.name and unique_unit.name ~= "" then
@@ -4978,7 +4975,7 @@ local function CreateOptionsTable()
                           name = L["Show Target"],
                           order = 10,
                           type = "toggle",
-                          arg = { "HeadlineView", "ShowTargetHighlight" },
+                          arg = { "targetWidget", "ShowInHeadlineView" },
                         },
                         TargetMouseoverHighlight = {
                           name = L["Show Mouseover"],
@@ -5161,6 +5158,7 @@ local function CreateOptionsTable()
                           end
                           -- Using SetValue here would require to make a copy of info (upvalue), very inefficient
                           db.nameplate.toggle.OccludedUnits = value
+                          Addon:ForceUpdate()
                         end, L["Unable to change transparency for occluded units while in combat."])
                       end,
                       arg = { "nameplate", "toggle", "OccludedUnits" },

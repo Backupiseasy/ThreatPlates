@@ -132,7 +132,7 @@ function Element.UpdateStyle(tp_frame, style, plate_style)
 end
 
 function Element.UpdateSettings()
-  TargetHighlightDisabled = not (TidyPlatesThreat.db.profile.targetWidget.ON or TidyPlatesThreat.db.profile.HeadlineView.ShowTargetHighlight)
+  TargetHighlightDisabled = not (TidyPlatesThreat.db.profile.targetWidget.ON or TidyPlatesThreat.db.profile.targetWidget.ShowInHeadlineView)
 end
 
 -- Registered in Nameplate.lua

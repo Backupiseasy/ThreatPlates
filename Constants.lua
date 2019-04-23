@@ -342,27 +342,17 @@ ThreatPlates.DEFAULT_SETTINGS = {
   },
   profile = {
     cache = {},
-    -- OldSetting = true, - removed in 8.7.0
     verbose = false,
-    -- blizzFadeA = { -- removed in 8.5.1
-    --   toggle  = true,
-    --   amount = 0.7
-    -- },
     blizzFadeS = {
       toggle  = true,
       amount = -0.3
     },
-    --tidyplatesFade = false, -- removed in 9.2.0
-    --healthColorChange = false, -- removed in 9.2.0 TODO:
     customColor =  false,
-    -- allowClass = true, -- old default: false, removed in 9.2.0
-    -- friendlyClass = true, -- old default: false, removed in 9.2.0
     friendlyClassIcon = false,
     HostileClassIcon = true,
     cacheClass = false,
     optionRoleDetectionAutomatic = true, -- old default: false,
     ShowThreatGlowOnAttackedUnitsOnly = true,
-    -- ShowThreatGlowOffTank = true,  -- never used
     NamePlateEnemyClickThrough = false,
     NamePlateFriendlyClickThrough = false,
     ShowFriendlyBlizzardNameplates = false,
@@ -444,7 +434,6 @@ ThreatPlates.DEFAULT_SETTINGS = {
       },
     },
     HeadlineView = {
-      -- ON = false, -- removed in 9.1.0
       name = {
         size = 10,
         -- width = 140, -- same as for healthbar view -- old default: 116,
@@ -455,8 +444,6 @@ ThreatPlates.DEFAULT_SETTINGS = {
         vertical = "CENTER",
       },
       useAlpha = false,
-      -- blizzFading = true, -- removed in 8.5.1
-      -- blizzFadingAlpha = 1, -- removed in 8.5.1
       useScaling = false,
       ShowMouseoverHighlight = true,
       ForceHealthbarOnTarget = false,
@@ -465,9 +452,6 @@ ThreatPlates.DEFAULT_SETTINGS = {
       ForceFriendlyInCombat = "NONE",
     },
     Visibility = {
-      --				showNameplates = true,
-      --				showHostileUnits = true,
-      --				showFriendlyUnits = false,
       FriendlyPlayer = { Show = true, UseHeadlineView = false },
       FriendlyNPC = { Show = "nameplateShowFriendlyNPCs", UseHeadlineView = false },
       FriendlyTotem = { Show = "nameplateShowFriendlyTotems", UseHeadlineView = false },
@@ -491,14 +475,12 @@ ThreatPlates.DEFAULT_SETTINGS = {
       HideFriendlyInCombat = false,
     },
     castbarColor = {
-      -- toggle = true, -- removed in 8.7.0
       r = 1,
       g = 0.56,
       b = 0.06,
       a = 1
     },
     castbarColorShield = {
-      --toggle = true,  -- removed in 8.7.0
       r = 1,
       g = 0,
       b = 0,
@@ -512,7 +494,6 @@ ThreatPlates.DEFAULT_SETTINGS = {
       HostilePlayer = RGB(255, 0, 0),            -- red
       NeutralUnit = RGB(255, 255, 0),            -- yellow
       TappedUnit = RGB(110, 110, 110, 1),	       -- grey
-      -- DisconnectedUnit = RGB(128, 128, 128, 1),  -- Removed in 9.2
       UnfriendlyFaction = RGB(255, 153, 51, 1),  -- brown/orange for unfriendly, hostile, non-attackable units (unit reaction = 3)
     },
     ColorByHealth = {
@@ -594,15 +575,9 @@ ThreatPlates.DEFAULT_SETTINGS = {
       y = 16,
       x_hv = 0,
       y_hv = 16,
-      scale = 1, -- Removed in 8.8.0
       FrameOrder = "HEALTHBAR_AURAS",
       anchor = "TOP",
       ShowInHeadlineView = false,
-      -- ShowEnemy = true, -- Removed in 8.8.0
-      -- ShowFriendly = true, -- Removed in 8.8.0
-      -- FilterMode = "blacklistMine", -- Moved to Debuffs in 8.8.0
-      -- ShowDebuffsOnFriendly = false, -- Moved to Debuffs in 8.8.0
-      -- FilterBySpell = {}, -- Moved to Debuffs in 8.8.0
       ShowTargetOnly = false,
       ShowCooldownSpiral = false,
       ShowDuration = true,
@@ -640,12 +615,10 @@ ThreatPlates.DEFAULT_SETTINGS = {
         FilterMode = "blacklist",
         FilterBySpell = {},
         FilterByType = {
-          --[1] = true, -- Removed in 8.8.0
           [1] = false,  -- Moved to Debuffs and negated meaning in 8.8.0
           [2] = false,  -- Moved to Debuffs and negated meaning in 8.8.0
           [3] = false,  -- Moved to Debuffs and negated meaning in 8.8.0
           [4] = false,  -- Moved to Debuffs and negated meaning in 8.8.0
-          --[6] = true, -- Removed in 8.8.0
         },
       },
       Buffs = {
@@ -737,10 +710,6 @@ ThreatPlates.DEFAULT_SETTINGS = {
         TimeTextIndent = 4,
         BackgroundTexture = "Smooth",
         BackgroundColor = RGB(0, 0, 0, 0.3),
-        -- BackgroundBorder = "ThreatPlatesBorder", -- not used
-        -- BackgroundBorderEdgeSize = 1, -- not used
-        -- BackgroundBorderInset = 1, -- not used
-        -- BackgroundBorderColor = RGB(0, 0, 0, 0.3), -- not used
         ShowIcon = true,
         IconSpacing = 2,
         IconAlignmentLeft = true,
@@ -865,7 +834,6 @@ ThreatPlates.DEFAULT_SETTINGS = {
       y = 6,
       x_hv = 65,
       y_hv = 6,
-      --anchor = "Top",
       ShowInHeadlineView = false,
       ShowFriendIcon = true,
       ShowFactionIcon = true,
@@ -875,13 +843,11 @@ ThreatPlates.DEFAULT_SETTINGS = {
       GuildmateColor = RGB(60, 168, 255), -- light blue, color for healthbars of guildmembers
     },
     FactionWidget = {
-      --ON = false,
       scale = 16,
       x = 0,
       y = 28,
       x_hv = 0,
       y_hv = 20,
-      --anchor = "Top",
     },
     questWidget = {
       ON = true, -- old default: false
@@ -917,8 +883,6 @@ ThreatPlates.DEFAULT_SETTINGS = {
     },
     ResourceWidget  = {
       ON = false,
-      --ShowInHeadlineView = false,
-      --scale = 28,
       x = 0,
       y = -18,
       ShowFriendly = false,
@@ -938,8 +902,6 @@ ThreatPlates.DEFAULT_SETTINGS = {
       BorderUseForegroundColor = false,
       BorderUseBackgroundColor = false,
       BorderColor = RGB(0, 0, 0, 1),
-      --BorderInset = 4,
-      --BorderTileSize = 16,
       ShowText = true,
       Font = Addon.DEFAULT_FONT,
       FontSize = 10,
@@ -1734,7 +1696,6 @@ ThreatPlates.DEFAULT_SETTINGS = {
         SyncWithHealthbar = true,
       },
       highlight = {
-        -- texture = "TP_HealthBarHighlight", -- removed in 8.7.0
         show = true,
       },
       elitehealthborder = {
@@ -1805,12 +1766,6 @@ ThreatPlates.DEFAULT_SETTINGS = {
         y = 13,
         align = "CENTER",
         vertical = "CENTER",
-        --
-        EnemyTextColorMode = "CUSTOM",
-        EnemyTextColor = RGB(255, 255, 255),
-        FriendlyTextColorMode = "CUSTOM",
-        FriendlyTextColor = RGB(255, 255, 255),
-        UseRaidMarkColoring = false,
       },
       level = {
         typeface = Addon.DEFAULT_FONT, -- old default: "Accidental Presidency",
@@ -1857,7 +1812,6 @@ ThreatPlates.DEFAULT_SETTINGS = {
         x_hv = 0,
         y_hv = 25,
         anchor = "CENTER",
-        hpColor = true,
         show = true,
         ShowInHeadlineView = false,
         hpMarked = {
@@ -1935,10 +1889,8 @@ ThreatPlates.DEFAULT_SETTINGS = {
     threat = {
       ON = true,
       marked = false,
-      -- nonCombat = true, -- removed in 9.1.3
       UseThreatTable = true,
       UseHeuristicInInstances = false,
-      -- hideNonCombat = false, -- no longer used, removed in 9.1.3
       useType = true,
       useScale = true,
       AdditiveScale = false,
@@ -1949,12 +1901,6 @@ ThreatPlates.DEFAULT_SETTINGS = {
         ON = true,
         theme = "default",
       },
-      --        scaleType = {
-      --          ["Normal"] = -0.2,
-      --          ["Elite"] = 0,
-      --          ["Boss"] = 0.2,
-      --          ["Minus"] = -0.2,
-      --        },
       toggle = {
         ["Boss"]	= true,
         ["Elite"]	= true,

@@ -85,7 +85,7 @@ function Widget:Create()
 end
 
 function Widget:IsEnabled()
-  return Settings.ON or SettingsHV.ShowTargetHighlight
+  return Settings.ON or Settings.ShowInHeadlineView
 end
 
 function Widget:OnEnable()
@@ -94,7 +94,7 @@ end
 
 function Widget:EnabledForStyle(style, unit)
   if (style == "NameOnly" or style == "NameOnly-Unique") then
-    return SettingsHV.ShowTargetHighlight
+    return Settings.ShowInHeadlineView
   elseif style ~= "etotem" then
     return Settings.ON
   end
