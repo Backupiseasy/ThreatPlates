@@ -1138,7 +1138,7 @@ local function CreateRaidMarksOptions()
   return options
 end
 
-local function CreateClassIconsWidgetOptions()
+local function CreateClassIconWidgetOptions()
   local options = { name = L["Class Icon"], order = 30, type = "group",
     args = {
       Enable = GetEnableEntry(L["Enable Class Icon Widget"], L["This widget shows a class icon on the nameplates of players."], "classWidget", true),
@@ -4367,7 +4367,7 @@ local function CreateWidgetOptions()
       ArenaWidget = CreateArenaWidgetOptions(),
       AurasWidget = CreateAurasWidgetOptions(),
       BossModsWidget = CreateBossModsWidgetOptions(),
-      ClassIconWidget = CreateClassIconsWidgetOptions(),
+      ClassIconWidget = CreateClassIconWidgetOptions(),
       ComboPointsWidget = CreateComboPointsWidgetOptions(),
       ResourceWidget = CreateResourceWidgetOptions(),
       SocialWidget = CreateSocialWidgetOptions(),
@@ -7242,7 +7242,7 @@ local function CreateOptionsTable()
   options.args.Custom.args = CustomOpts
 
   options.args.profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(TidyPlatesThreat.db)
-  options.args.profiles.order = 10000;
+  options.args.profiles.order = 10000
 end
 
 local function GetInterfaceOptionsTable()
@@ -7330,7 +7330,8 @@ function TidyPlatesThreat:OpenOptions()
 
   if not options then
     CreateOptionsTable()
-    Addon:ForceUpdate()
+    -- 9.2.0 - No idea why this should be necessary here ...
+    -- Addon:ForceUpdate()
 
     -- Setup options dialog
     LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable(t.ADDON_NAME, options)
