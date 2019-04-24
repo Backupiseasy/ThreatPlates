@@ -76,7 +76,6 @@ local function GetUnitColorByClass(tp_frame)
 end
 
 local function GetUnitColorCustomColor(tp_frame)
-  -- PlateStyle should never be "NONE" here as healthbar and/or name are not shown in this case
   local unit = tp_frame.unit
   return unit.TappedColor or NameCustomColor[tp_frame.PlateStyle][unit.reaction]
 end
@@ -108,6 +107,11 @@ local function GetUnitColorByClassName(tp_frame)
   return unit.SituationalNameColor or unit.CombatColor or unit.ClassColor or unit.ReactionColor
 end
 
+local function GetUnitColorCustomColorName(tp_frame)
+  local unit = tp_frame.unit
+  return unit.TappedColor or unit.SituationalNameColor or NameCustomColor[tp_frame.PlateStyle][unit.reaction]
+end
+
 local function GetUnitColorCustomPlateName(tp_frame)
   local unit = tp_frame.unit
 
@@ -122,7 +126,7 @@ local NAME_COLOR_MODE_REFERENCE = {
   REACTION = GetUnitColorByReactionName,
   CLASS = GetUnitColorByClassName,
   HEALTH = GetUnitColorByHealthName,
-  CUSTOM = GetUnitColorCustomColor,
+  CUSTOM = GetUnitColorCustomColorName,
 }
 
 ---------------------------------------------------------------------------------------------------
@@ -164,10 +168,9 @@ local function UpdatePlateColors(tp_frame)
   --    end
 
   -- Only update the color and fire the event if there's actually a change in color
-  local name_text = tp_frame.visual.NameText
   --if fg_color ~= tp_frame.CurrentNameColor then
   if tp_frame.style.name.show then
-    name_text:SetTextColor(fg_color.r, fg_color.g, fg_color.b)
+    tp_frame.visual.NameText:SetTextColor(fg_color.r, fg_color.g, fg_color.b)
   end
   PublishEvent("NameColorUpdate", tp_frame, fg_color)
 
@@ -556,16 +559,6 @@ local function UNIT_HEALTH(unitid)
   end
 end
 
-local function SituationalUpdate(frame)
-  if frame.PlateStyle ~= "NONE" then
-    GetSituationalColor(frame.unit)
-    GetSituationalColorName(frame.unit, frame)
-    UpdatePlateColors(frame)
-
-    --print ("Color - Situational Update:", tp_frame.unit.name .. "(" .. tp_frame.unit.unitid .. ") =>", tp_frame.unit.SituationalColor)
-  end
-end
-
 local function CombatUpdate(frame)
   if frame.PlateStyle ~= "NONE" then
     GetCombatColor(frame.unit)
@@ -576,11 +569,10 @@ local function CombatUpdate(frame)
 end
 
 local function FactionUpdate(frame)
-  if frame.PlateStyle ~= "NONE" then
-    local unit = frame.unit
+  -- Only update reaction color if color mode ~= "HEALTH" for healthbar and name
+  if frame.PlateStyle ~= "NONE" and not (frame.GetHealthbarColor == GetUnitColorByHealth and frame.GetNameColor == GetUnitColorByHealth) then
+      local unit = frame.unit
 
-    -- Only update reaction color if color mode ~= "HEALTH" for healthbar and name
-    if not (frame.GetHealthbarColor == GetUnitColorByHealth and frame.GetNameColor == GetUnitColorByHealth) then
       -- Tapped is detected by a UNIT_FACTION event (I think), but handled as a situational color change
       -- Update situational color if unit is now tapped or was tapped
       if unit.isTapped or unit.SituationalColor == ColorByReaction.TappedUnit then
@@ -592,11 +584,20 @@ local function FactionUpdate(frame)
       UpdatePlateColors(frame)
 
       --print ("Color - ReactionUpdate:", tp_frame.unit.unitid)
-    end
   end
 end
 
-local function SocialUpdate(frame)
+local function SituationalColorUpdate(frame)
+  if frame.PlateStyle ~= "NONE" then
+    GetSituationalColor(frame.unit)
+    GetSituationalColorName(frame.unit, frame)
+    UpdatePlateColors(frame)
+
+    --print ("Color - Situational Update:", tp_frame.unit.name .. "(" .. tp_frame.unit.unitid .. ") =>", tp_frame.unit.SituationalColor)
+  end
+end
+
+local function ClassColorUpdate(frame)
   -- Only update reaction color if color mode ~= "HEALTH" for healthbar and name
   if frame.PlateStyle ~= "NONE" and not (frame.GetHealthbarColor == GetUnitColorByHealth and frame.GetNameColor == GetUnitColorByHealth) then
       -- No tapped unit detection necessary as this event only fires for player nameplates (which cannot be tapped, I hope)
@@ -663,12 +664,12 @@ function Element.UpdateSettings()
   end
 
   --SubscribeEvent(Element, "UNIT_HEALTH_FREQUENT", UNIT_HEALTH_FREQUENT)
-  SubscribeEvent(Element, "TargetGained", SituationalUpdate)
-  SubscribeEvent(Element, "TargetLost", SituationalUpdate)
-  SubscribeEvent(Element, "TargetMarkerUpdate", SituationalUpdate)
+  SubscribeEvent(Element, "TargetGained", SituationalColorUpdate)
+  SubscribeEvent(Element, "TargetLost", SituationalColorUpdate)
+  SubscribeEvent(Element, "TargetMarkerUpdate", SituationalColorUpdate)
   SubscribeEvent(Element, "FactionUpdate", FactionUpdate) -- Updates on faction information for units
-  SubscribeEvent(Element, "QuestUpdate", SituationalUpdate) -- Updates on quest information for units
-  SubscribeEvent(Element, "SocialUpdate", SocialUpdate) -- Updates on friend/guildmate information for units (part of class info currently)
+  SubscribeEvent(Element, "SituationalColorUpdate", SituationalColorUpdate) -- Updates on e.g., quest information or target status for units
+  SubscribeEvent(Element, "ClassColorUpdate", ClassColorUpdate) -- Updates on friend/guildmate information for units (part of class info currently)
 
   wipe(HealthColorCache)
 end

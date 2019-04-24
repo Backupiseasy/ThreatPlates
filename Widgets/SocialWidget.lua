@@ -92,7 +92,7 @@ function Widget:FRIENDLIST_UPDATE()
 --      end
 --    end
 
-    self:UpdateAllFramesWithPublish("SocialUpdate")
+    self:UpdateAllFramesWithPublish("ClassColorUpdate")
   end
 end
 
@@ -111,7 +111,7 @@ function Widget:GUILD_ROSTER_UPDATE()
 
     ListGuildMembersSize = numTotalGuildMembers
 
-    self:UpdateAllFramesWithPublish("SocialUpdate")
+    self:UpdateAllFramesWithPublish("ClassColorUpdate")
   end
 end
 
@@ -133,7 +133,7 @@ function Widget:BN_CONNECTED()
 
     ListBnetFriendsSize = BnetOnline
 
-    self:UpdateAllFramesWithPublish("SocialUpdate")
+    self:UpdateAllFramesWithPublish("ClassColorUpdate")
   end
 end
 
@@ -141,14 +141,14 @@ function Widget:BN_FRIEND_TOON_ONLINE(toon_id)
   local _, name = BNGetToonInfo(toon_id)
   ListBnetFriends[name] = ICON_BNET_FRIEND
 
-  self:UpdateAllFramesWithPublish("SocialUpdate")
+  self:UpdateAllFramesWithPublish("ClassColorUpdate")
 end
 
 function Widget:BN_FRIEND_TOON_OFFLINE(toon_id)
   local _, name = BNGetToonInfo(toon_id)
   ListBnetFriends[name] = nil
 
-  self:UpdateAllFramesWithPublish("SocialUpdate")
+  self:UpdateAllFramesWithPublish("ClassColorUpdate")
 end
 
 function Widget:BN_FRIEND_ACCOUNT_ONLINE(presence_id)
@@ -163,7 +163,7 @@ function Widget:BN_FRIEND_ACCOUNT_ONLINE(presence_id)
 
   ListBnetFriends[character_name] = ICON_BNET_FRIEND
 
-  self:UpdateAllFramesWithPublish("SocialUpdate")
+  self:UpdateAllFramesWithPublish("ClassColorUpdate")
 end
 
 function Widget:BN_FRIEND_ACCOUNT_OFFLINE(presence_id)
@@ -178,7 +178,7 @@ function Widget:BN_FRIEND_ACCOUNT_OFFLINE(presence_id)
 
   ListBnetFriends[character_name] = nil
 
-  self:UpdateAllFramesWithPublish("SocialUpdate")
+  self:UpdateAllFramesWithPublish("ClassColorUpdate")
 end
 
 function Widget:UNIT_NAME_UPDATE(unitid)

@@ -304,7 +304,7 @@ function Widget:RefreshCombatVisisbility()
         if widget_frame.Active then
           self:UpdateFrame(widget_frame, frame.unit)
         end
-        self:PublishEvent("QuestUpdate", frame)  -- to update healthbar/name color, if necessary
+        self:PublishEvent("SituationalColorUpdate", frame)  -- to update healthbar/name color, if necessary
       end
     end
   end
@@ -343,7 +343,7 @@ function Widget:QUEST_LOG_UPDATE()
     -- also, e.g., changes to the progress information
     -- TODO: RefreshCombatVisibility would be sufficient here if new quest targets would only be signaled
     -- by QUEST_ACCEPTED - with quest with multiple intermediate steps, I am not sure if that is true
-    self:UpdateAllFramesWithPublish("QuestUpdate")
+    self:UpdateAllFramesWithPublish("SituationalColorUpdate")
   end
 
   if QuestLogNotComplete then
@@ -356,7 +356,7 @@ function Widget:QUEST_ACCEPTED(questIndex, questID)
   self:AddQuestCacheEntry(questIndex)
 
   -- Re-scan all nameplates for new quest information
-  self:UpdateAllFramesWithPublish("QuestUpdate")
+  self:UpdateAllFramesWithPublish("SituationalColorUpdate")
 end
 
 function Widget:QUEST_REMOVED(quest_id)
@@ -369,7 +369,7 @@ function Widget:QUEST_REMOVED(quest_id)
     QuestsToUpdate[quest_id] = nil
   end
 
-  self:UpdateAllFramesWithPublish("QuestUpdate")
+  self:UpdateAllFramesWithPublish("SituationalColorUpdate")
 end
 
 function Widget:PLAYER_REGEN_ENABLED()
@@ -393,7 +393,7 @@ function Widget:ThreatUpdate(frame)
     if widget_frame.Active then
       self:UpdateFrame(widget_frame, frame.unit)
     end
-    self:PublishEvent("QuestUpdate", frame) -- to update healthbar/name color, if necessary
+    self:PublishEvent("SituationalColorUpdate", frame) -- to update healthbar/name color, if necessary
   end
 end
 

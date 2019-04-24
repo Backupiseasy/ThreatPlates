@@ -1,5 +1,4 @@
-local _, Addon = ...
-local _, Addon = ...
+local ADDON_NAME, Addon = ...
 local t = Addon.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------
@@ -135,20 +134,20 @@ local options = nil
 
 -- Key is key from options data structure for the widget, value is widget name as used in NewWidget
 local WIDGET_INFO = {
-  arenaWidget = { Name = "Arena", UpdateSettings = true, ForceUpdate = false },
-  AuraWidget = { Name = "Auras", UpdateSettings = true, ForceUpdate = false },
-  BossModsWidget = { Name = "BossMods", UpdateSettings = false, ForceUpdate = false },
-  classWidget = { Name = "ClassIcon", UpdateSettings = false, ForceUpdate = false },
-  ComboPoints = { Name = "ComboPoints", UpdateSettings = true, ForceUpdate = false },
-  healerTracker = { Name = "HealerTracker", UpdateSettings = false, ForceUpdate = false },
-  questWidget = { Name = "Quest", UpdateSettings = true, ForceUpdate = true, PublishEvent = "QuestUpdate" },
-  ResourceWidget = { Name = "Resource", UpdateSettings = true, ForceUpdate = false },
-  socialWidget = { Name = "Social", UpdateSettings = true, ForceUpdate = true, PublishEvent = "SocialUpdate"  },
-  stealthWidget = { Name = "Stealth", UpdateSettings = false, ForceUpdate = false },
-  targetWidget = { Name = "TargetArt", UpdateSettings = true, ForceUpdate = false },
-  threat = { Name = "Threat", UpdateSettings = false, ForceUpdate = false }, -- ThreatWidget
-  totemWidget = { Name = "TotemIcon", UpdateSettings = false, ForceUpdate = false },
-  uniqueWidget = { Name = "UniqueIcon", UpdateSettings = false, ForceUpdate = false },
+  arenaWidget = { Name = "Arena", UpdateSettings = true },
+  AuraWidget = { Name = "Auras", UpdateSettings = true },
+  BossModsWidget = { Name = "BossMods", UpdateSettings = false },
+  classWidget = { Name = "ClassIcon", UpdateSettings = false },
+  ComboPoints = { Name = "ComboPoints", UpdateSettings = true },
+  healerTracker = { Name = "HealerTracker", UpdateSettings = false },
+  questWidget = { Name = "Quest", UpdateSettings = true, PublishEvent = "SituationalColorUpdate" },
+  ResourceWidget = { Name = "Resource", UpdateSettings = true,  },
+  socialWidget = { Name = "Social", UpdateSettings = true, PublishEvent = "ClassColorUpdate" },
+  stealthWidget = { Name = "Stealth", UpdateSettings = false, },
+  targetWidget = { Name = "TargetArt", UpdateSettings = true, PublishEvent = "SituationalColorUpdate" },
+  threat = { Name = "Threat", UpdateSettings = false, }, -- ThreatWidget
+  totemWidget = { Name = "TotemIcon", UpdateSettings = false, },
+  uniqueWidget = { Name = "UniqueIcon", UpdateSettings = false, },
 }
 
 ---------------------------------------------------------------------------------------------------
@@ -205,9 +204,6 @@ local function SetValue(info, ...)
       --print ("SetValue: Enabling/Disabling Widget =>", widget_info.Name)
       Addon.Widgets:InitializeWidget(widget_info.Name)
       -- Required for some widgets that also update aspects of the healthbar (e.g., Quest, Social)
---      if widget_info.ForceUpdate then
---        Addon:ForceUpdate()
---      end
       if widget_info.PublishEvent then
         Addon:PublishToEachPlate(widget_info.PublishEvent)
       end
@@ -1068,14 +1064,14 @@ local function CreateRaidMarksOptions()
             order = 4,
             type = "toggle",
             width = "double",
-            arg = { "settings", "raidicon", "hpColor" },
+            arg = { "Healthbar", "UseRaidMarkColoring" },
           },
           EnableHeadlineView = {
             name = L["Color Name by Target Marks in Headline View"],
             order = 5,
             type = "toggle",
             width = "double",
-            arg = { "HeadlineView", "UseRaidMarkColoring" },
+            arg = { "Name", "NameMode", "UseRaidMarkColoring" },
           },
         },
       },
@@ -5361,7 +5357,6 @@ local function CreateOptionsTable()
                           type = "toggle",
                           width = "full",
                           descStyle = "inline",
-                          arg = { "Name", "HealthbarMode", "UseRaidMarkColoring" },
                           arg = { "Name", "HealthbarMode", "UseRaidMarkColoring" },
                         },
                       },

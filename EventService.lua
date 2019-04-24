@@ -101,15 +101,16 @@ local INTERNAL_EVENTS = {
   StyleUpdate = true,
   -- Payload:
   --   tp_frame: Frame (table), Nilable = false
-  QuestUpdate = true, -- Curently: Updates for Quest (Unit Color)
-  -- Payload:
-  --   tp_frame: Frame (table), Nilable = false
   --   color: Color (table), Nilable = false
   NameColorUpdate = true,
-  -- Event: SocialUpdate is fired when a new friend/guildmate/... is detected with a nameplate
-  SocialUpdate = true,
-  -- Event: ColorUpdate is fired when the nameplate color might change, e.g., the unit is a quest target or a
-  -- new friend/guildmate/... is detected with a nameplate
+  -- Event: SituationalColorUpdate
+  --   Fired when the situational color (e.g., target, target mark) must be re-evaluated
+  --   Event(frame)
+  SituationalColorUpdate = true, -- Curently: Updates for Quest (Unit Color) and
+  -- Event: ClassColorUpdate
+  --   Fired when the class color of a unit must be re-evaluated
+  --   Event(frame)
+  ClassColorUpdate = true,
 }
 
 ---------------------------------------------------------------------------------------------------
