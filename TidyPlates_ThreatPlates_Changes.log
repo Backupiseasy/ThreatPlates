@@ -2,6 +2,8 @@
 9.1.8
 ------------------------------------------------------
 * Fixed a Lua error that occured when target highlight for healthbar and headline view were disabled while having an active target.
+* Fixed a bug with the target highlight texture which was not resized when certain name and/or status text settings were changed.
+* Updated localizations for deDE and zhTW (Traditional Chinese, thanks to gaspy10)
 
 ------------------------------------------------------
 9.1.7

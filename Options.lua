@@ -333,6 +333,12 @@ end
 local function SetThemeValue(info, val)
   SetValuePlain(info, val)
   Addon:SetThemes(TidyPlatesThreat)
+
+  -- Update TargetArt widget as it depends on some settings of customtext and name
+  if info.arg[1] == "HeadlineView" and (info.arg[2] == "customtext" or info.arg[2] == "name") and (info.arg[3] == "y" or info.arg[3] == "size") then
+    Addon.Widgets:UpdateSettings("TargetArt")
+  end
+
   Addon:ForceUpdate()
 end
 
