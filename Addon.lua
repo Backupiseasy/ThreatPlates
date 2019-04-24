@@ -91,13 +91,6 @@ StaticPopupDialogs["IncompatibleAddon"] = {
 }
 
 function TidyPlatesThreat:ReloadTheme()
-  -- Castbars have to be disabled everytime we login
-  if self.db.profile.settings.castbar.show or self.db.profile.settings.castbar.ShowInHeadlineView then
-    Addon:EnableCastBars()
-  else
-    Addon:DisableCastBars()
-  end
-
   -- Recreate all TidyPlates styles for ThreatPlates("normal", "dps", "tank", ...) - required, if theme style settings were changed
   Addon:SetThemes(self)
 

@@ -44,7 +44,6 @@ local THREAT_REFERENCE = Addon.THREAT_REFERENCE
 --local PlateOnUpdateQueue = {}
 
 local LastTargetPlate
-local ShowCastBars = true
 
 -- External references to internal data
 local PlatesCreated = Addon.PlatesCreated
@@ -57,6 +56,7 @@ local PlatesByGUID = Addon.PlatesByGUID
 local SettingsEnabledFading
 local SettingsOccludedAlpha, SettingsEnabledOccludedAlpha
 local SettingsShowEnemyBlizzardNameplates, SettingsShowFriendlyBlizzardNameplates
+local ShowCastBars
 
 -- Cached CVARs (updated on every PLAYER_ENTERING_WORLD event
 local CVAR_NameplateOccludedAlphaMult
@@ -543,9 +543,6 @@ end
 -- External Commands: Allows widgets and themes to request updates to the plates.
 -- Useful to make a theme respond to externally-captured data (such as the combat log)
 --------------------------------------------------------------------------------------------------------------
-function Addon:DisableCastBars() ShowCastBars = false end
-function Addon:EnableCastBars() ShowCastBars = true end
-
 
 function Addon:UpdateSettings()
   --wipe(PlateOnUpdateQueue)
@@ -582,6 +579,8 @@ function Addon:UpdateSettings()
   else
     UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
   end
+
+  ShowCastBars = db.settings.castbar.show or db.settings.castbar.ShowInHeadlineView
 end
 
 function Addon:UpdateAllPlates()

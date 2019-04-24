@@ -112,6 +112,9 @@ function TidyPlatesThreat:ChatCommand(input)
 	local command = cmd_list[1]
 	if not command or command == "" then
 		TidyPlatesThreat:OpenOptions()
+  elseif command == "prune" then
+    TP.Print(L["|cff89F559Threat Plates|r: Pruning deprecated data from addon settings ..."], true)
+    Addon:DeleteDeprecatedSettings()
 	elseif input == "event" then
 		Addon:PrintEventService()
 	elseif input == "combat" then
@@ -204,8 +207,6 @@ function TidyPlatesThreat:ChatCommand(input)
 		Addon.MigrateEntries("9.1.0")
 		print ("Migrate with current version = 9.2.0:")
 		Addon.MigrateEntries("9.2.0")
-	elseif command == "prune" then
-		Addon:DeleteDeprecatedSettings()
 	elseif command == "migrate" then
 		Addon.MigrateDatabase(cmd_list[2])
 		--		--PrintHelp()

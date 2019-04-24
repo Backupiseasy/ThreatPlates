@@ -4059,14 +4059,6 @@ local function CreateCastbarOptions()
             type = "toggle",
             desc = L["These options allow you to control whether the castbar is hidden or shown on nameplates."],
             width = "double",
-            set = function(info, val)
-              if val or db.settings.castbar.ShowInHeadlineView then
-                Addon:EnableCastBars()
-              else
-                Addon:DisableCastBars()
-              end
-              SetValue(info, val)
-            end,
             arg = { "settings", "castbar", "show" },
           },
           EnableHV = {
@@ -4074,14 +4066,6 @@ local function CreateCastbarOptions()
             order = 30,
             type = "toggle",
             width = "double",
-            set = function(info, val)
-              if val or db.settings.castbar.show then
-                Addon:EnableCastBars()
-              else
-                Addon:DisableCastBars()
-              end
-              SetValue(info, val)
-            end,
             arg = {"settings", "castbar", "ShowInHeadlineView" },
           },
         },

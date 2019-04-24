@@ -522,6 +522,8 @@ local ENTRIES_TO_DELETE = {
     { "allowClass" },
     { "friendlyClass" },
     { "threat", "hideNonCombat" },
+    { "aHPbarColor", },
+    { "bHPbarColor", },
   },
 }
 
@@ -654,18 +656,23 @@ function Addon.MigrateDatabase(current_version)
   end
 end
 
-local function DeleteEntry(current_entry, default_entry, prefix)
-  for key, value in pairs(current_entry) do
+local function DeleteEntry(current_entry, default_entry, path)
+  for key, current_value in pairs(current_entry) do
     if key ~= "uniqueSettings" then
-      local entry = prefix .. "." .. key
-      if default_entry[key] == nil then
-        print ("  =>", entry ..":", value)
+      local current_path = path .. "." .. key
+
+      local default_value = default_entry[key]
+      if default_value == nil then
+        ThreatPlates.Print(L["    Deleting "] .. current_path .. " = " .. tostring(current_value), true)
         -- Delete current entry
-      elseif type(value) == "table" then
-        if type(default_entry[key]) == "table" then
-          DeleteEntry(value, default_entry[key], entry)
+      elseif type(current_value) == "table" then
+        if type(default_value) == "table" then
+          -- Skip entries that ahve a default value of {} (all values there are ok, I guess)
+          if not (type(default_value) == "table" and #default_value == 0) then
+            DeleteEntry(current_value, default_value, current_path)
+          end
         else -- This should never happen - i.e. an old entry (which was a table) is re-used as simple value)
-          print ("  =>", entry ..": Type Mismatch - New Value is no table!")
+          print ("  =>", current_path ..": Type Mismatch - New Value is no table!")
         end
       end
     end
@@ -676,8 +683,8 @@ function Addon:DeleteDeprecatedSettings()
   local profile_table = TidyPlatesThreat.db.profiles
 
   for profile_name, profile in pairs(profile_table) do
-    print ("Profile:", profile_name)
-    DeleteEntry(profile, ThreatPlates.DEFAULT_SETTINGS.profile, profile_name)
+    ThreatPlates.Print(L["  Profile: "] .. profile_name, true)
+    DeleteEntry(profile, ThreatPlates.DEFAULT_SETTINGS.profile, "")
   end
 end
 
