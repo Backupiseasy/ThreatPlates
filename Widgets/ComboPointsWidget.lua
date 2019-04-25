@@ -630,7 +630,7 @@ function Widget:UpdateSettings()
   end
 end
 
-function Widget:UpdateAllFrameAfterSettingsUpdate()
+function Widget:UpdateAllFramesAfterSettingsUpdate()
   -- Update the widget if it was already created (not true for immediately after Reload UI or if it was never enabled
   -- in this since last Reload UI)
   if WidgetFrame then
