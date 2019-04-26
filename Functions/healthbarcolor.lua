@@ -40,7 +40,7 @@ function CS:GetSmudgeColorRGB(colorA, colorB, perc)
   local h2, s2, v2 = self:GetColorHSV()
   local h3 = floor(h1-(h1-h2)*perc)
   if abs(h1-h2) > 180 then
-        local radius = (360-abs(h1-h2))*perc/100
+        local radius = (360-abs(h1-h2))*perc
     if h1 < h2 then
       h3 = floor(h1-radius)
       if h3 < 0 then
