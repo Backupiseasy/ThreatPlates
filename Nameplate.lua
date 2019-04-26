@@ -19,7 +19,7 @@ local UnitChannelInfo, UnitCastingInfo, UnitPlayerControlled = UnitChannelInfo, 
 local UnitIsUnit, UnitIsPlayer, UnitExists = UnitIsUnit, UnitIsPlayer, UnitExists
 local GetCreatureDifficultyColor, GetRaidTargetIndex = GetCreatureDifficultyColor, GetRaidTargetIndex
 local GetTime, GetCVar, Lerp, CombatLogGetCurrentEventInfo = GetTime, GetCVar, Lerp, CombatLogGetCurrentEventInfo
-local GetSpecialization = GetSpecialization
+local GetSpecialization, GetSpecializationInfo = GetSpecialization, GetSpecializationInfo
 local GetNamePlates, GetNamePlateForUnit = C_NamePlate.GetNamePlates, C_NamePlate.GetNamePlateForUnit
 local GetPlayerInfoByGUID, RAID_CLASS_COLORS = GetPlayerInfoByGUID, RAID_CLASS_COLORS
 
@@ -581,6 +581,8 @@ function Addon:UpdateSettings()
   end
 
   ShowCastBars = db.settings.castbar.show or db.settings.castbar.ShowInHeadlineView
+
+  self:ACTIVE_TALENT_GROUP_CHANGED() -- to update the player's role
 end
 
 function Addon:UpdateAllPlates()
@@ -1058,8 +1060,8 @@ function Addon:UNIT_SPELLCAST_STOP(unitid)
     tp_frame.unit.isCasting = false
 
     local castbar = tp_frame.visual.Castbar
-    castbar.IsCasting = false
     castbar.IsChanneling = false
+    castbar.IsCasting = false
 
     PublishEvent("CastingStopped", tp_frame)
   end
@@ -1115,9 +1117,10 @@ end
 function Addon:ACTIVE_TALENT_GROUP_CHANGED()
   local db = TidyPlatesThreat.db
   if db.profile.optionRoleDetectionAutomatic then
-    local PLAYER_ROLE_BY_SPEC = ThreatPlates.SPEC_ROLES[Addon.PlayerClass]
-    Addon.PlayerRoleIsTank = PLAYER_ROLE_BY_SPEC[GetSpecialization()] or false
+    local role = select(5, GetSpecializationInfo(GetSpecialization()))
+    Addon.PlayerRole = (role == "TANK" and "tank") or "dps"
   else
-    Addon.PlayerRoleIsTank = db.char.spec[GetSpecialization()]
+    local role = db.char.spec[GetSpecialization()]
+    Addon.PlayerRole = (role == true and "tank") or "dps"
   end
 end

@@ -149,21 +149,6 @@ Addon.AurasFilterMode = {
   ["all"] = L["All Auras"],
 }
 
-ThreatPlates.SPEC_ROLES = {
-  DEATHKNIGHT = { true, false, false },
-  DEMONHUNTER = { false, true },
-  DRUID 			= { false, false, true, false },
-  HUNTER			= { false, false, false },
-  MAGE				= { false, false, false },
-  MONK 				= { true, false, false },
-  PALADIN 		= { false, true, false },
-  PRIEST			= { false, false, false },
-  ROGUE				= { false, false, false },
-  SHAMAN			= { false, false, false },
-  WARLOCK			= { false, false, false },
-  WARRIOR			= { false, false, true },
-}
-
 ThreatPlates.FontStyle = {
   NONE = L["None"],
   OUTLINE = L["Outline"],
@@ -325,20 +310,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
   },
   char = {
     welcome = false,
-    specInfo = {
-      [1] = {
-        name = "",
-        role = "",
-      },
-      [2] = {
-        name = "",
-        role = "",
-      },
-    },
-    spec = {
-      [1] = false,
-      [2] = false,
-    },
+    spec = {} -- true => Tank, false => DPS/Heal }
   },
   profile = {
     cache = {},

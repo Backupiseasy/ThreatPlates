@@ -7,23 +7,27 @@ local TP = Addon.ThreatPlates
 local L = TP.L
 
 local function toggleDPS()
-	TidyPlatesThreat:SetRole(false)
-	TidyPlatesThreat.db.profile.threat.ON = true
-	if TidyPlatesThreat.db.profile.verbose then
-		TP.Print(L["-->>|cffff0000DPS Plates Enabled|r<<--"])
-		TP.Print(L["|cff89F559Threat Plates|r: DPS switch detected, you are now in your |cffff0000dpsing / healing|r role."])
-	end
-	Addon:ForceUpdate()
+  if TidyPlatesThreat.db.profile.optionRoleDetectionAutomatic then
+    TP.Print(L["|cff89F559Threat Plates|r: Role toggle not supported because automatic role detection is enabled."], true)
+  else
+    TidyPlatesThreat.db.char.spec[GetSpecialization()] = false
+    TidyPlatesThreat.db.profile.threat.ON = true
+    TP.Print(L["-->>|cffff0000DPS Plates Enabled|r<<--"])
+    TP.Print(L["|cff89F559Threat Plates|r: DPS switch detected, you are now in your |cffff0000dpsing / healing|r role."])
+    Addon:ForceUpdate()
+  end
 end
 
 local function toggleTANK()
-	TidyPlatesThreat:SetRole(true)
-	TidyPlatesThreat.db.profile.threat.ON = true
-	if TidyPlatesThreat.db.profile.verbose then
-		TP.Print(L["-->>|cff00ff00Tank Plates Enabled|r<<--"])
-		TP.Print(L["|cff89F559Threat Plates|r: Tank switch detected, you are now in your |cff00ff00tanking|r role."])
-	end
-	Addon:ForceUpdate()
+  if TidyPlatesThreat.db.profile.optionRoleDetectionAutomatic then
+    TP.Print(L["|cff89F559Threat Plates|r: Role toggle not supported because automatic role detection is enabled."], true)
+  else
+    TidyPlatesThreat.db.char.spec[GetSpecialization()] = true
+    TidyPlatesThreat.db.profile.threat.ON = true
+    TP.Print(L["-->>|cff00ff00Tank Plates Enabled|r<<--"])
+    TP.Print(L["|cff89F559Threat Plates|r: Tank switch detected, you are now in your |cff00ff00tanking|r role."])
+    Addon:ForceUpdate()
+  end
 end
 
 SLASH_TPTPDPS1 = "/tptpdps"
@@ -32,10 +36,10 @@ SLASH_TPTPTANK1 = "/tptptank"
 SlashCmdList["TPTPTANK"] = toggleTANK
 
 local function TPTPTOGGLE()
-	if (TidyPlatesThreat.db.profile.optionRoleDetectionAutomatic and TidyPlatesThreat.db.profile.verbose) then
-		TP.Print(L["|cff89F559Threat Plates|r: Role toggle not supported because automatic role detection is enabled."])
+	if TidyPlatesThreat.db.profile.optionRoleDetectionAutomatic then
+		TP.Print(L["|cff89F559Threat Plates|r: Role toggle not supported because automatic role detection is enabled."], true)
 	else
-		if Addon.PlayerRoleIsTank then
+		if Addon.PlayerRole == "tank" then
 			toggleDPS()
 		else
 			toggleTANK()
@@ -209,7 +213,44 @@ function TidyPlatesThreat:ChatCommand(input)
 		Addon.MigrateEntries("9.2.0")
 	elseif command == "migrate" then
 		Addon.MigrateDatabase(cmd_list[2])
-		--		--PrintHelp()
+  elseif command == "role" then
+
+    local spec_roles = TidyPlatesThreat.db.char.spec
+    for i, is_tank in pairs(spec_roles) do
+      print (i, "=", is_tank)
+    end
+
+    local spec_roles = self.db.char.spec
+    if #spec_roles + 1 ~= GetNumSpecializations() then
+      for i = 1, GetNumSpecializations() do
+        local is_tank = spec_roles[i]
+        if is_tank == nil then
+          local id, spec_name, _, _, role = GetSpecializationInfo(i)
+          local role = (role == "TANK" and true) or false
+          spec_roles[i] = role
+          print ("Role", i, " => ", is_tank, " to ", role)
+        else
+          print ("Role", i, " => ", is_tank)
+        end
+      end
+    end
+
+--
+--    for index = 1, GetNumSpecializations() do
+--      local id, name, description, icon, role, primaryStat = GetSpecializationInfo(index)
+--      --local id, name, description, texture, role, class = GetSpecializationInfoByID(specID);
+--      print (name, "(", id, ") =>", role)
+--    end
+--
+--    for i = 1, GetNumClasses() do
+--      local _, class, classID = GetClassInfo(i)
+--      for j = 1, GetNumSpecializationsForClassID(classID) do
+--        local _, spec, _, _, role = GetSpecializationInfoForClassID(classID, j)
+--        print (class .. ":", spec, "=>", role)
+--      end
+--    end
+
+      --		--PrintHelp()
 		--	else
 --		TP.Print(L["Unknown option: "] .. input, true)
 --		PrintHelp()

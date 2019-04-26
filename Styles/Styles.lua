@@ -180,7 +180,7 @@ end
 function Addon:GetThreatStyle(unit)
   -- style tank/dps only used for NPCs/non-player units
   if Addon:ShowThreatFeedback(unit) then
-      return (Addon.PlayerRoleIsTank and "tank") or "dps"
+      return Addon.PlayerRole
   end
 
   return "normal"
@@ -244,7 +244,7 @@ function Addon:SetStyle(unit)
   if not style and Addon:ShowThreatFeedback(unit) then
     -- could call GetThreatStyle here, but that would at a tiny overhead
     -- style tank/dps only used for hostile (enemy, neutral) NPCs
-    style = (Addon.PlayerRoleIsTank and "tank") or "dps"
+    style = Addon.PlayerRole
   end
 
   return style or "normal"

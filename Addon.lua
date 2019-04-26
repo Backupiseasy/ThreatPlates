@@ -19,7 +19,7 @@ local GetCVar, IsAddOnLoaded = GetCVar, IsAddOnLoaded
 local GetNamePlates, GetNamePlateForUnit = C_NamePlate.GetNamePlates, C_NamePlate.GetNamePlateForUnit
 local C_NamePlate_SetNamePlateFriendlySize, C_NamePlate_SetNamePlateEnemySize, Lerp =  C_NamePlate.SetNamePlateFriendlySize, C_NamePlate.SetNamePlateEnemySize, Lerp
 local NamePlateDriverFrame = NamePlateDriverFrame
-local UnitClass, GetSpecialization = UnitClass, GetSpecialization
+local UnitClass, GetNumSpecializations, GetSpecializationInfo = UnitClass, GetNumSpecializations, GetSpecializationInfo
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
@@ -37,26 +37,6 @@ ThreatPlates.Print = function(val,override)
   local db = TidyPlatesThreat.db.profile
   if override or db.verbose then
     print(Meta("titleshort")..": "..val)
-  end
-end
-
-function TidyPlatesThreat:SpecName()
-  local _,name,_,_,_,role = GetSpecializationInfo(GetSpecialization(false,false,1),nil,false)
-  if name then
-    return name
-  else
-    return L["Undetermined"]
-  end
-end
-
-local tankRole = L["|cff00ff00tanking|r"]
-local dpsRole = L["|cffff0000dpsing / healing|r"]
-
-function TidyPlatesThreat:RoleText()
-  if Addon.PlayerRoleIsTank then
-    return tankRole
-  else
-    return dpsRole
   end
 end
 
@@ -135,14 +115,14 @@ end
 function TidyPlatesThreat:CheckForFirstStartUp()
   local db = self.db.global
 
-  if not self.db.char.welcome then
-    self.db.char.welcome = true
-    -- initialize roles for all available specs (level > 10) or set to default (dps/healing)
-    for index=1, GetNumSpecializations() do
-      self:SetRole(ThreatPlates.SPEC_ROLES[Addon.PlayerClass][index], index)
+  local spec_roles = self.db.char.spec
+  if #spec_roles ~= GetNumSpecializations() then
+    for i = 1, GetNumSpecializations() do
+      if spec_roles[i] == nil then
+        local _, _, _, _, role = GetSpecializationInfo(i)
+        spec_roles[i] = (role == "TANK" and true) or false
+      end
     end
-
-    ThreatPlates.Print(L["Welcome to |cff89f559Threat Plates|r! Additional options can be found by typing '|cff89F559/tptp|r.'"], true)
   end
 
   local new_version = tostring(Meta("version"))
@@ -151,8 +131,6 @@ function TidyPlatesThreat:CheckForFirstStartUp()
     Addon.MigrateDatabase(db.version)
   end
   db.version = new_version
-
-  Addon:ACTIVE_TALENT_GROUP_CHANGED()
 end
 
 function TidyPlatesThreat:CheckForIncompatibleAddons()

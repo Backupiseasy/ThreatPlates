@@ -182,9 +182,13 @@ end
 -- Color-colculating Functions
 ---------------------------------------------------------------------------------------------------
 
-local HealthColorCache = {}
+--local HealthColorCache = {}
 local CS = CreateFrame("ColorSelect")
 
+--GetSmudgeColorRGB function - from: https://www.wowinterface.com/downloads/info22536-ColorSmudge.html
+--arg1: color table in RGB {r=0,g=0,b=0}
+--arg2: color table in RGB {r=1,g=1,b=1}
+--arg3: percentage 0-1
 function CS:GetSmudgeColorRGB(colorA, colorB, perc)
   self:SetColorRGB(colorA.r,colorA.g,colorA.b)
   local h1, s1, v1 = self:GetColorHSV()
@@ -192,7 +196,7 @@ function CS:GetSmudgeColorRGB(colorA, colorB, perc)
   local h2, s2, v2 = self:GetColorHSV()
   local h3 = floor(h1-(h1-h2)*perc)
   if abs(h1-h2) > 180 then
-    local radius = (360-abs(h1-h2))*perc/100
+    local radius = (360-abs(h1-h2))*perc --/100
     if h1 < h2 then
       h3 = floor(h1-radius)
       if h3 < 0 then
@@ -205,6 +209,7 @@ function CS:GetSmudgeColorRGB(colorA, colorB, perc)
       end
     end
   end
+
   local s3 = s1-(s1-s2)*perc
   local v3 = v1-(v1-v2)*perc
   self:SetColorHSV(h3, s3, v3)
@@ -213,46 +218,43 @@ function CS:GetSmudgeColorRGB(colorA, colorB, perc)
 end
 
 ---------------------------------------------------------------------------------------------------
--- Still to migrate
----------------------------------------------------------------------------------------------------
-
-function Addon.GetColorByHealthDeficit(unit)
-  local health_pct = ceil(100 * (unit.health / unit.healthmax))
-  local health_color = HealthColorCache[health_pct]
-
-  if not health_color then
-   --print ("Cache: ", health_color)
-    health_color = RGB_P(CS:GetSmudgeColorRGB(ColorByHealth.Low, ColorByHealth.High, unit.health / unit.healthmax))
-    HealthColorCache[health_pct] = health_color
-    --print ("Color: Adding color for", health_pct, "%: ", health_color.r, health_color.g, health_color.b, " / ", CS:GetSmudgeColorRGB(ColorByHealth.Low, ColorByHealth.High, unit.health / unit.healthmax))
-  end
-
-  return health_color
-end
-
----------------------------------------------------------------------------------------------------
 -- Functions to the the base color for a unit
 ---------------------------------------------------------------------------------------------------
 
 -- Threat System is OP, player is in combat, style is tank or dps
 local function GetColorByHealth(unit)
-  local pct = unit.health / unit.healthmax
+  -- Implementing a cache for the different health colors is not worth it performance-wise. At least
+  -- based on limited testing (< 2 sec improvement on 1,000,000 calls
 
-  local health_pct = ceil(100 * pct)
-  local health_color = HealthColorCache[health_pct]
+  --  local pct = unit.health / unit.healthmax
+  --  local health_pct = ceil(100 * pct)
+  --  local health_color = HealthColorCache[health_pct]
+  --
+  --  if not health_color then
+  --    --print ("Cache: ", health_color)
+  --    health_color = RGB_P(CS:GetSmudgeColorRGB(ColorByHealth.Low, ColorByHealth.High, pct))
+  --    HealthColorCache[health_pct] = health_color
+  --    --print ("Color: Adding color for", health_pct, "%: ", health_color.r, health_color.g, health_color.b, " / ", CS:GetSmudgeColorRGB(ColorByHealth.Low, ColorByHealth.High, unit.health / unit.healthmax))
+  --  end
+  --
+  --unit.HealthColor = health_color
 
+  local health_color = unit.HealthColor
   if not health_color then
-    --print ("Cache: ", health_color)
-    health_color = RGB_P(CS:GetSmudgeColorRGB(ColorByHealth.Low, ColorByHealth.High, pct))
-    HealthColorCache[health_pct] = health_color
-    --print ("Color: Adding color for", health_pct, "%: ", health_color.r, health_color.g, health_color.b, " / ", CS:GetSmudgeColorRGB(ColorByHealth.Low, ColorByHealth.High, unit.health / unit.healthmax))
+    health_color = {}
+    unit.HealthColor = health_color
   end
 
-  --color.r, color.g, color.b = CS:GetSmudgeColorRGB(ColorByHealth.Low, ColorByHealth.High, unit.health / unit.healthmax)
-  --return color
+  health_color.r, health_color.g, health_color.b = CS:GetSmudgeColorRGB(ColorByHealth.Low, ColorByHealth.High, unit.health / unit.healthmax)
+  --print ("Color:", ceil(100 * (unit.health / unit.healthmax)), "%: ", health_color.r, health_color.g, health_color.b, " / ", CS:GetSmudgeColorRGB(ColorByHealth.Low, ColorByHealth.High, unit.health / unit.healthmax))
 
-  unit.HealthColor = health_color
   return health_color
+end
+
+-- Addon.GetColorByHealthDeficit = GetColorByHealth
+-- Works as all functions using this function are triggerd by the NameColorChanged event
+Addon.GetColorByHealthDeficit = function(unit)
+  return unit.HealthColor
 end
 
 local function GetColorByReaction(unit)
@@ -406,8 +408,7 @@ local function GetCombatColor(unit)
 
   local color
   if Addon:ShowThreatFeedback(unit) then
-    local style = (Addon.PlayerRoleIsTank and "tank") or "dps"
-    color = Addon:GetThreatColor(unit, style, SettingsBase.threat.UseThreatTable)
+    color = Addon:GetThreatColor(unit, Addon.PlayerRole, SettingsBase.threat.UseThreatTable)
   end
 
   unit.CombatColor = color
@@ -671,7 +672,7 @@ function Element.UpdateSettings()
   SubscribeEvent(Element, "SituationalColorUpdate", SituationalColorUpdate) -- Updates on e.g., quest information or target status for units
   SubscribeEvent(Element, "ClassColorUpdate", ClassColorUpdate) -- Updates on friend/guildmate information for units (part of class info currently)
 
-  wipe(HealthColorCache)
+  --wipe(HealthColorCache)
 end
 
 Addon.GetThreatLevel = GetThreatLevel

@@ -124,7 +124,7 @@ function Widget:UpdateFrame(widget_frame, unit)
     end
   end
 
-  local style = (Addon.PlayerRoleIsTank and "tank") or "dps"
+  local style = Addon.PlayerRole
 
   local threat_level = GetThreatLevel(unit, style, db.toggle.OffTank)
   if style ~= "tank" then

@@ -25,15 +25,6 @@ local RGB = Addon.RGB
 -- Global functions for accessing the configuration
 ---------------------------------------------------------------------------------------------------
 
--- Sets the role of the index spec or the active spec to tank (value = true) or dps/healing
-function TidyPlatesThreat:SetRole(value,index)
-  if index then
-    self.db.char.spec[index] = value
-  else
-    self.db.char.spec[GetSpecialization()] = value
-  end
-end
-
 local function GetUnitVisibility(full_unit_type)
   local unit_visibility = TidyPlatesThreat.db.profile.Visibility[full_unit_type]
 
@@ -487,7 +478,7 @@ local MIGRATION_FUNCTIONS = {
 --  AurasFix = { MigrationAurasSettingsFix },                   -- (changed in 9.0.4 and 9.0.9)
   ["9.1.0"] = {
     MigrationForceFriendlyInCombat,
-  }
+  },
 }
 
 local ENTRIES_TO_DELETE = {

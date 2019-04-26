@@ -4401,7 +4401,7 @@ local function CreateSpecRoles()
   }
 
   for index = 1, GetNumSpecializations() do
-    local id, spec_name, description, icon, background, role = GetSpecializationInfo(index)
+    local id, spec_name, _, _, role = GetSpecializationInfo(index)
     result.SpecGroup.args[spec_name] = {
       name = spec_name,
       type = "group",
@@ -4414,22 +4414,20 @@ local function CreateSpecRoles()
           type = "toggle",
           order = 1,
           desc = L["Sets your spec "] .. spec_name .. L[" to tanking."],
-          get = function()
-            local spec = TidyPlatesThreat.db.char.spec[index]
-            return (spec == nil and role == "TANK") or spec
+          get = function(info)
+            return TidyPlatesThreat.db.char.spec[index]
           end,
-          set = function() TidyPlatesThreat.db.char.spec[index] = true; Addon:ForceUpdate() end,
+          set = function(info, val) TidyPlatesThreat.db.char.spec[index] = true; Addon:ForceUpdate() end,
         },
         DPS = {
           name = L["DPS/Healing"],
           type = "toggle",
           order = 2,
           desc = L["Sets your spec "] .. spec_name .. L[" to DPS."],
-          get = function()
-            local spec = TidyPlatesThreat.db.char.spec[index]
-            return (spec == nil and role ~= "TANK") or not spec
+          get = function(info)
+            return not TidyPlatesThreat.db.char.spec[index]
           end,
-          set = function() TidyPlatesThreat.db.char.spec[index] = false; Addon:ForceUpdate() end,
+          set = function(info, val) TidyPlatesThreat.db.char.spec[index] = false; Addon:ForceUpdate() end,
         },
       },
     }
