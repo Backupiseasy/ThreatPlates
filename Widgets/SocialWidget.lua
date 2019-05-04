@@ -325,7 +325,7 @@ function Widget:UpdateSettings()
   Settings = TidyPlatesThreat.db.profile.socialWidget
   SettingsFaction = TidyPlatesThreat.db.profile.FactionWidget
 
-  PlateColorEnabled["HEALTHBAR"] = Settings.ON
-  PlateColorEnabled["NAME"] = Settings.ShowInHeadlineView
+  PlateColorEnabled["HealthbarMode"] = Settings.ON
+  PlateColorEnabled["NameMode"] = Settings.ShowInHeadlineView
 end
 

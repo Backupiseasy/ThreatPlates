@@ -44,14 +44,12 @@ local SettingsBase, Settings, SettingsName
 local ColorByReaction, ColorByHealth
 local HealthbarColorFunctions = {}
 local NameColorFunctions = {
-  HEALTHBAR = {},
-  NAME = {},
-  -- If color mode is NONE, name as well as status text will not be shown.
-  NONE = {},
+  HealthbarMode = {},
+  NameMode = {},
 }
 local NameCustomColor = {
-  HEALTHBAR = {},
-  NAME = {}
+  HealthbarMode = {},
+  NameMode = {}
 }
 local TargetMarkColoring = {}
 local ThreatColor = {}
@@ -115,8 +113,8 @@ end
 local function GetUnitColorCustomPlateName(tp_frame)
   local unit = tp_frame.unit
 
-  if tp_frame.PlateStyle == "HEALTHBAR" then
-    return NameColorFunctions.HEALTHBAR[unit.reaction](tp_frame)
+  if tp_frame.PlateStyle == "HealthbarMode" then
+    return NameColorFunctions.HealthbarMode[unit.reaction](tp_frame)
   else
     return unit.SituationalNameColor or unit.CombatColor or unit.CustomColor
   end
@@ -169,7 +167,7 @@ local function UpdatePlateColors(tp_frame)
 
   -- Only update the color and fire the event if there's actually a change in color
   --if fg_color ~= tp_frame.CurrentNameColor then
-  if tp_frame.style.name.show then
+  if SettingsName[tp_frame.PlateStyle].Enabled then
     tp_frame.visual.NameText:SetTextColor(fg_color.r, fg_color.g, fg_color.b)
   end
   PublishEvent("NameColorUpdate", tp_frame, fg_color)
@@ -531,7 +529,7 @@ end
 function Element.UpdateStyle(tp_frame, style, plate_style)
   local unit = tp_frame.unit
 
-  if plate_style == "NONE" then
+  if plate_style == "None" then
     return
   end
 
@@ -551,59 +549,59 @@ end
 
 local function UNIT_HEALTH(unitid)
   local plate = GetNamePlateForUnit(unitid)
-  local frame = plate and plate.TPFrame
-  if frame and frame.Active and frame.PlateStyle ~= "NONE" then
+  local tp_frame = plate and plate.TPFrame
+  if tp_frame and tp_frame.Active and tp_frame.PlateStyle ~= "None" then
     --print ("Color - UNIT_HEALTH:", unitid)
 
-    GetColorByHealth(frame.unit)
-    UpdatePlateColors(frame)
+    GetColorByHealth(tp_frame.unit)
+    UpdatePlateColors(tp_frame)
   end
 end
 
-local function CombatUpdate(frame)
-  if frame.PlateStyle ~= "NONE" then
-    GetCombatColor(frame.unit)
-    UpdatePlateColors(frame)
+local function CombatUpdate(tp_frame)
+  if tp_frame.PlateStyle ~= "None" then
+    GetCombatColor(tp_frame.unit)
+    UpdatePlateColors(tp_frame)
 
     --print ("Color - CombatUpdate:", tp_frame.unit.name .. "(" .. tp_frame.unit.unitid .. ") =>", tp_frame.unit.ThreatLevel)
   end
 end
 
-local function FactionUpdate(frame)
+local function FactionUpdate(tp_frame)
   -- Only update reaction color if color mode ~= "HEALTH" for healthbar and name
-  if frame.PlateStyle ~= "NONE" and not (frame.GetHealthbarColor == GetUnitColorByHealth and frame.GetNameColor == GetUnitColorByHealth) then
-      local unit = frame.unit
+  if tp_frame.PlateStyle ~= "None" and not (tp_frame.GetHealthbarColor == GetUnitColorByHealth and tp_frame.GetNameColor == GetUnitColorByHealth) then
+      local unit = tp_frame.unit
 
       -- Tapped is detected by a UNIT_FACTION event (I think), but handled as a situational color change
       -- Update situational color if unit is now tapped or was tapped
       if unit.isTapped or unit.SituationalColor == ColorByReaction.TappedUnit then
-        GetSituationalColor(frame.unit)
-        GetSituationalColorName(frame.unit, frame)
+        GetSituationalColor(tp_frame.unit)
+        GetSituationalColorName(tp_frame.unit, tp_frame)
       end
 
       GetColorByReaction(unit)
-      UpdatePlateColors(frame)
+      UpdatePlateColors(tp_frame)
 
       --print ("Color - ReactionUpdate:", tp_frame.unit.unitid)
   end
 end
 
-local function SituationalColorUpdate(frame)
-  if frame.PlateStyle ~= "NONE" then
-    GetSituationalColor(frame.unit)
-    GetSituationalColorName(frame.unit, frame)
-    UpdatePlateColors(frame)
+local function SituationalColorUpdate(tp_frame)
+  if tp_frame.PlateStyle ~= "None" then
+    GetSituationalColor(tp_frame.unit)
+    GetSituationalColorName(tp_frame.unit, tp_frame)
+    UpdatePlateColors(tp_frame)
 
     --print ("Color - Situational Update:", tp_frame.unit.name .. "(" .. tp_frame.unit.unitid .. ") =>", tp_frame.unit.SituationalColor)
   end
 end
 
-local function ClassColorUpdate(frame)
+local function ClassColorUpdate(tp_frame)
   -- Only update reaction color if color mode ~= "HEALTH" for healthbar and name
-  if frame.PlateStyle ~= "NONE" and not (frame.GetHealthbarColor == GetUnitColorByHealth and frame.GetNameColor == GetUnitColorByHealth) then
+  if tp_frame.PlateStyle ~= "None" and not (tp_frame.GetHealthbarColor == GetUnitColorByHealth and tp_frame.GetNameColor == GetUnitColorByHealth) then
       -- No tapped unit detection necessary as this event only fires for player nameplates (which cannot be tapped, I hope)
-      GetColorByClass(frame.unit, frame.PlateStyle)
-      UpdatePlateColors(frame)
+      GetColorByClass(tp_frame.unit, tp_frame.PlateStyle)
+      UpdatePlateColors(tp_frame)
   end
 end
 
@@ -617,28 +615,28 @@ function Element.UpdateSettings()
   HealthbarColorFunctions["HOSTILE"] = HEALTHBAR_COLOR_MODE_REFERENCE[Settings.EnemyUnitMode]
   HealthbarColorFunctions["NEUTRAL"] = HealthbarColorFunctions["HOSTILE"]
 
-  NameColorFunctions["HEALTHBAR"]["FRIENDLY"] = NAME_COLOR_MODE_REFERENCE[SettingsName.HealthbarMode.FriendlyUnitMode]
-  NameColorFunctions["HEALTHBAR"]["HOSTILE"] = NAME_COLOR_MODE_REFERENCE[SettingsName.HealthbarMode.EnemyUnitMode]
-  NameColorFunctions["HEALTHBAR"]["NEUTRAL"] = NameColorFunctions["HEALTHBAR"]["HOSTILE"]
+  NameColorFunctions["HealthbarMode"]["FRIENDLY"] = NAME_COLOR_MODE_REFERENCE[SettingsName.HealthbarMode.FriendlyUnitMode]
+  NameColorFunctions["HealthbarMode"]["HOSTILE"] = NAME_COLOR_MODE_REFERENCE[SettingsName.HealthbarMode.EnemyUnitMode]
+  NameColorFunctions["HealthbarMode"]["NEUTRAL"] = NameColorFunctions["HealthbarMode"]["HOSTILE"]
 
-  NameColorFunctions["NAME"]["FRIENDLY"] = NAME_COLOR_MODE_REFERENCE[SettingsName.NameMode.FriendlyUnitMode]
-  NameColorFunctions["NAME"]["HOSTILE"] = NAME_COLOR_MODE_REFERENCE[SettingsName.NameMode.EnemyUnitMode]
-  NameColorFunctions["NAME"]["NEUTRAL"] = NameColorFunctions["NAME"]["HOSTILE"]
+  NameColorFunctions["NameMode"]["FRIENDLY"] = NAME_COLOR_MODE_REFERENCE[SettingsName.NameMode.FriendlyUnitMode]
+  NameColorFunctions["NameMode"]["HOSTILE"] = NAME_COLOR_MODE_REFERENCE[SettingsName.NameMode.EnemyUnitMode]
+  NameColorFunctions["NameMode"]["NEUTRAL"] = NameColorFunctions["NameMode"]["HOSTILE"]
 
   --  Custom color for Name text in healthbar and name mode
-  NameCustomColor["HEALTHBAR"]["FRIENDLY"] = SettingsName.HealthbarMode.FriendlyTextColor
-  NameCustomColor["HEALTHBAR"]["HOSTILE"] = SettingsName.HealthbarMode.EnemyTextColor
-  NameCustomColor["HEALTHBAR"]["NEUTRAL"] = NameCustomColor["HEALTHBAR"]["HOSTILE"]
+  NameCustomColor["HealthbarMode"]["FRIENDLY"] = SettingsName.HealthbarMode.FriendlyTextColor
+  NameCustomColor["HealthbarMode"]["HOSTILE"] = SettingsName.HealthbarMode.EnemyTextColor
+  NameCustomColor["HealthbarMode"]["NEUTRAL"] = NameCustomColor["HealthbarMode"]["HOSTILE"]
 
-  NameCustomColor["NAME"]["FRIENDLY"] = SettingsName.NameMode.FriendlyTextColor
-  NameCustomColor["NAME"]["HOSTILE"] = SettingsName.NameMode.EnemyTextColor
-  NameCustomColor["NAME"]["NEUTRAL"] = NameCustomColor["NAME"]["HOSTILE"]
+  NameCustomColor["NameMode"]["FRIENDLY"] = SettingsName.NameMode.FriendlyTextColor
+  NameCustomColor["NameMode"]["HOSTILE"] = SettingsName.NameMode.EnemyTextColor
+  NameCustomColor["NameMode"]["NEUTRAL"] = NameCustomColor["NameMode"]["HOSTILE"]
 
   ColorByReaction = SettingsBase.ColorByReaction
   ColorByHealth = SettingsBase.ColorByHealth
 
-  TargetMarkColoring["HEALTHBAR"] = SettingsName.HealthbarMode.UseRaidMarkColoring
-  TargetMarkColoring["NAME"] = SettingsName.NameMode.UseRaidMarkColoring
+  TargetMarkColoring["HealthbarMode"] = SettingsName.HealthbarMode.UseRaidMarkColoring
+  TargetMarkColoring["NameMode"] = SettingsName.NameMode.UseRaidMarkColoring
 
   for style, settings in pairs(TidyPlatesThreat.db.profile.settings) do
     if settings.threatcolor then -- there are several subentries unter settings. Only use style subsettings like unique, normal, dps, ...

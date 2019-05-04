@@ -1019,6 +1019,46 @@ local function GetBoundariesEntryName(name, pos, widget_info, func_disabled)
   return entry
 end
 
+local function GetBoundariesEntryDefault(pos, widget_info, func_disabled)
+  local entry = {
+    name = L["Text Boundaries"],
+    order = pos,
+    type = "group",
+    inline = true,
+    disabled = func_disabled,
+    args = {
+      Description = {
+        type = "description",
+        order = 1,
+        name = L["These settings will define the space that text can be placed on the nameplate. Having too large a font and not enough height will cause the text to be not visible."],
+        width = "full",
+      },
+      Width = {
+        name = L["Text Width"],
+        type = "range",
+        width = "double",
+        order = 2,
+        max = 250,
+        min = 20,
+        step = 1,
+        isPercent = false,
+        arg = F(widget_info, "Width"),
+      },
+      Height = {
+        name = L["Text Height"],
+        type = "range",
+        width = "double",
+        order = 3,
+        max = 40,
+        min = 8,
+        step = 1,
+        isPercent = false,
+        arg = F(widget_info, "Height"),
+      },
+    },
+  }
+  return entry
+end
 
 local function AddLayoutOptions(args, pos, widget_info)
   args.Sizing = GetSizeEntryDefault(pos, widget_info)
@@ -1165,15 +1205,6 @@ local function CreateClassIconWidgetOptions()
             width = "double",
             arg = { "HostileClassIcon" },
           },
---          FriendlyCaching = {
---            name = L"Friendly Caching"],
---            type = "toggle",
---            desc = L"This allows you to save friendly player class information between play sessions or nameplates going off the screen.|cffff0000(Uses more memory)"],
---            descStyle = "inline",
---            width = "full",
-----            disabled = function() if not db.friendlyClassIcon or not db.classWidget.ON then return true else return false end end,
---            arg = { "cacheClass" }
---          },
         },
       },
       Textures = {
@@ -5301,18 +5332,47 @@ local function CreateOptionsTable()
               name = L["Name"],
               type = "group",
               order = 65,
+              childGroups = "tab",
               args = {
-                HealthbarView = {
-                  name = L["Healthbar View"],
+                General = {
+                  name = L["General"],
                   order = 10,
                   type = "group",
-                  inline = true,
+                  inline = false,
                   args = {
-                    Enable = GetEnableEntryTheme(L["Show Name Text"], L["This option allows you to control whether a unit's name is hidden or shown on nameplates."], "name"),
-                    Font = GetFontEntryTheme(10, "name"),
+                    Boundaries = GetBoundariesEntryDefault(10, { "Name", "HealthbarMode", "Font" }),
+                  },
+                },
+                HealthbarView = {
+                  name = L["Healthbar View"],
+                  order = 20,
+                  type = "group",
+                  inline = false,
+                  args = {
+                    Enable = {
+                      name = L["Enable"],
+                      order = 5,
+                      type = "group",
+                      inline = true,
+                      args = {
+                        Header = {
+                          name = L["This option allows you to control whether a unit's name is hidden or shown on nameplates."],
+                          order = 1,
+                          type = "description",
+                          width = "full",
+                        },
+                        Enable = {
+                          name = L["Show Name Text"],
+                          order = 2,
+                          type = "toggle",
+                          width = "double",
+                          arg = { "Name", "HealthbarMode", "Enabled" },
+                        },
+                      },
+                    },
                     Color = {
                       name = L["Colors"],
-                      order = 20,
+                      order = 10,
                       type = "group",
                       inline = true,
                       args = {
@@ -5320,7 +5380,7 @@ local function CreateOptionsTable()
                           name = L["Friendly Name Color"],
                           order = 10,
                           type = "select",
-                          values = t.FRIENDLY_TEXT_COLOR,
+                          values = t.FRIENDLY_NAME_COLOR,
                           arg = { "Name", "HealthbarMode", "FriendlyUnitMode" }
                         },
                         FriendlyColorCustom = GetColorEntry(L["Custom Color"], 20, { "Name", "HealthbarMode", "FriendlyTextColor" }),
@@ -5328,7 +5388,7 @@ local function CreateOptionsTable()
                           name = L["Enemy Name Color"],
                           order = 30,
                           type = "select",
-                          values = t.ENEMY_TEXT_COLOR,
+                          values = t.ENEMY_NAME_COLOR,
                           arg = { "Name", "HealthbarMode", "EnemyUnitMode" }
                         },
                         EnemyColorCustom = GetColorEntry(L["Custom Color"], 40, { "Name", "HealthbarMode", "EnemyTextColor" }),
@@ -5343,47 +5403,19 @@ local function CreateOptionsTable()
                         },
                       },
                     },
-                    Placement = {
-                      name = L["Placement"],
-                      order = 30,
-                      type = "group",
-                      inline = true,
-                      args = {
-                        X = { name = L["X"], type = "range", order = 1, arg = { "settings", "name", "x" }, max = 120, min = -120, step = 1, isPercent = false, },
-                        Y = { name = L["Y"], type = "range", order = 2, arg = { "settings", "name", "y" }, max = 120, min = -120, step = 1, isPercent = false, },
-                        AlignH = { name = L["Horizontal Align"], type = "select", order = 4, values = t.AlignH, arg = { "settings", "name", "align" }, },
-                        AlignV = { name = L["Vertical Align"], type = "select", order = 5, values = t.AlignV, arg = { "settings", "name", "vertical" }, },
-                      },
-                    },
+                    Font = GetFontEntryDefault(L["Name"], 20, { "Name", "HealthbarMode", } ),
+                    Placement = GetPlacementEntryNew(30, { "Name", "HealthbarMode", }),
                   },
                 },
                 HeadlineView = {
                   name = L["Headline View"],
-                  order = 20,
+                  order = 30,
                   type = "group",
-                  inline = true,
+                  inline = false,
                   args = {
-                    Font = {
-                      name = L["Font"],
-                      type = "group",
-                      inline = true,
-                      order = 10,
-                      args = {
-                        Size = {
-                          name = L["Size"],
-                          order = 20,
-                          type = "range",
-                          arg = { "HeadlineView", "name", "size" },
-                          max = 36,
-                          min = 6,
-                          step = 1,
-                          isPercent = false,
-                        },
-                      },
-                    },
                     Color = {
                       name = L["Colors"],
-                      order = 20,
+                      order = 10,
                       type = "group",
                       inline = true,
                       args = {
@@ -5391,7 +5423,7 @@ local function CreateOptionsTable()
                           name = L["Friendly Names Color"],
                           order = 10,
                           type = "select",
-                          values = t.FRIENDLY_TEXT_COLOR,
+                          values = t.FRIENDLY_NAME_COLOR,
                           arg = { "Name", "NameMode", "FriendlyUnitMode" }
                         },
                         FriendlyColorCustom = GetColorEntry(L["Custom Color"], 20, {  "Name", "NameMode", "FriendlyTextColor" }),
@@ -5399,7 +5431,7 @@ local function CreateOptionsTable()
                           name = L["Enemy Name Color"],
                           order = 30,
                           type = "select",
-                          values = t.ENEMY_TEXT_COLOR,
+                          values = t.ENEMY_NAME_COLOR,
                           arg = { "Name", "NameMode", "EnemyUnitMode" }
                         },
                         EnemyColorCustom = GetColorEntry(L["Custom Color"], 40, { "Name", "NameMode", "EnemyTextColor" }),
@@ -5414,21 +5446,27 @@ local function CreateOptionsTable()
                         },
                       },
                     },
-                    Placement = {
-                      name = L["Placement"],
-                      order = 30,
+                    Font = {
+                      name = L["Font"],
                       type = "group",
                       inline = true,
+                      order = 20,
                       args = {
-                        X = { name = L["X"], type = "range", order = 1, arg = { "HeadlineView", "name", "x" }, max = 120, min = -120, step = 1, isPercent = false, },
-                        Y = { name = L["Y"], type = "range", order = 2, arg = { "HeadlineView", "name", "y" }, max = 120, min = -120, step = 1, isPercent = false, },
-                        AlignH = { name = L["Horizontal Align"], type = "select", order = 4, values = t.AlignH, arg = { "HeadlineView", "name", "align" }, },
-                        AlignV = { name = L["Vertical Align"], type = "select", order = 5, values = t.AlignV, arg = { "HeadlineView", "name", "vertical" }, },
+                        Size = {
+                          name = L["Size"],
+                          order = 20,
+                          type = "range",
+                          arg = { "Name", "NameMode", "Size" },
+                          max = 36,
+                          min = 6,
+                          step = 1,
+                          isPercent = false,
+                        },
                       },
                     },
+                    Placement = GetPlacementEntryNew(30, { "Name", "NameMode", }),
                   },
                 },
-                Boundaries = GetBoundariesEntry(30, "name"),
               },
             },
             Statustext = {
@@ -5438,7 +5476,7 @@ local function CreateOptionsTable()
               order = 70,
               args = {
                 TextSettings = {
-                  name = L["Texts"],
+                  name = L["General"],
                   order = 10,
                   type = "group",
                   inline = false,
@@ -5533,42 +5571,7 @@ local function CreateOptionsTable()
                         },
                       },
                     },
-                    Boundaries = {
-                      name = L["Text Boundaries"],
-                      order = 70,
-                      type = "group",
-                      inline = true,
-                      args = {
-                        Description = {
-                          type = "description",
-                          order = 1,
-                          name = L["These settings will define the space that text can be placed on the nameplate. Having too large a font and not enough height will cause the text to be not visible."],
-                          width = "full",
-                        },
-                        Width = {
-                          name = L["Text Width"],
-                          type = "range",
-                          width = "double",
-                          order = 2,
-                          max = 250,
-                          min = 20,
-                          step = 1,
-                          isPercent = false,
-                          arg = { "StatusText", "HealthbarMode", "Font", "Width" },
-                        },
-                        Height = {
-                          name = L["Text Height"],
-                          type = "range",
-                          width = "double",
-                          order = 3,
-                          max = 40,
-                          min = 8,
-                          step = 1,
-                          isPercent = false,
-                          arg = { "StatusText", "HealthbarMode", "Font", "Height" },
-                        },
-                      },
-                    },
+                    Boundaries = GetBoundariesEntryDefault(70, {"StatusText", "HealthbarMode", "Font" }),
                   },
                 },
                 HealthbarView = {

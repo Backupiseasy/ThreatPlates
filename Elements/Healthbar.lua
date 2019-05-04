@@ -287,7 +287,7 @@ end
 function Element.UpdateStyle(tp_frame, style, plate_style)
   local healthbar, healthbar_style = tp_frame.visual.Healthbar, style.healthbar
 
-  if plate_style == "NONE" or not healthbar_style.show then
+  if plate_style == "None" or not healthbar_style.show then
     healthbar:Hide()
     return
   end

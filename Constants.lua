@@ -171,19 +171,20 @@ ThreatPlates.FRIENDLY_HEALTHBAR_COLOR = {
   HEALTH = L["By Health"],
 }
 
-ThreatPlates.ENEMY_TEXT_COLOR = {
+ThreatPlates.ENEMY_NAME_COLOR = {
   CLASS = L["By Class"],
   CUSTOM = L["By Custom Color"],
   REACTION = L["By Reaction"],
   HEALTH = L["By Health"],
 }
 
-ThreatPlates.FRIENDLY_TEXT_COLOR = {
+ThreatPlates.FRIENDLY_NAME_COLOR = {
   CLASS = L["By Class"],
   CUSTOM = L["By Custom Color"],
   REACTION = L["By Reaction"],
   HEALTH = L["By Health"],
 }
+
 
 -- NPC Role, Guild, or Quest", "Quest",
 ThreatPlates.ENEMY_SUBTEXT = {
@@ -309,20 +310,13 @@ ThreatPlates.DEFAULT_SETTINGS = {
     DefaultsVersion = "SMOOTH",
   },
   char = {
-    welcome = false,
+    welcome = false, -- no longer used since 9.2.0
     spec = {} -- true => Tank, false => DPS/Heal }
   },
   profile = {
-    cache = {},
     verbose = false,
-    blizzFadeS = {
-      toggle  = true,
-      amount = -0.3
-    },
-    customColor =  false,
     friendlyClassIcon = false,
     HostileClassIcon = true,
-    cacheClass = false,
     optionRoleDetectionAutomatic = true, -- old default: false,
     ShowThreatGlowOnAttackedUnitsOnly = true,
     NamePlateEnemyClickThrough = false,
@@ -349,19 +343,47 @@ ThreatPlates.DEFAULT_SETTINGS = {
     },
     Name = {
       HealthbarMode = {
-        -- TODO: Healthbar Mode und Name Mode!
+        Enabled = true,
         FriendlyUnitMode = "CUSTOM",
         FriendlyTextColor = RGB(255, 255, 255),
         EnemyUnitMode = "CUSTOM",
         EnemyTextColor = RGB(255, 255, 255),
         UseRaidMarkColoring = false,
+        -- Font anchoring and format
+        -- Anchor = "CENTER",
+        -- InsideAnchor = true,
+        HorizontalOffset = 0,
+        VerticalOffset = 13,
+        Font = {
+          Typeface = Addon.DEFAULT_FONT, -- old default: "Accidental Presidency",
+          Size = 10, -- old default: 14
+          flags = "NONE",
+          Shadow = true,
+          HorizontalAlignment = "CENTER",
+          VerticalAlignment = "CENTER",
+          Width = 140, -- old default: 116,
+          Height = 14,
+        },
       },
       NameMode = {
+        Enabled = true, -- Must be true as name must always be shown in Headline View - no config option for it
         FriendlyUnitMode = "CLASS",
         FriendlyTextColor = RGB(0, 255, 0),
         EnemyUnitMode = "CLASS",
         EnemyTextColor = RGB(0, 255, 0),
         UseRaidMarkColoring = false,
+        -- Font anchoring and format
+        -- Anchor = "CENTER",
+        -- InsideAnchor = true,
+        HorizontalOffset = 0,
+        VerticalOffset = 4,
+        Font = {
+          Size = 10,
+          -- Width = 140, -- same as for healthbar view -- old default: 116,
+          -- Height = 14, -- same as for healthbar view
+          HorizontalAlignment = "CENTER",
+          VerticalAlignment = "CENTER",
+        },
       },
     },
     StatusText = {
@@ -371,7 +393,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
         SubtextColorUseHeadline = false,
         SubtextColorUseSpecific = false,
         SubtextColor =  RGB(255, 255, 255, 1),
-        --
+        -- Font anchoring and format
         Anchor = "CENTER",
         InsideAnchor = true,
         HorizontalOffset = 0,
@@ -406,15 +428,6 @@ ThreatPlates.DEFAULT_SETTINGS = {
       },
     },
     HeadlineView = {
-      name = {
-        size = 10,
-        -- width = 140, -- same as for healthbar view -- old default: 116,
-        -- height = 14, -- same as for healthbar view
-        x = 0,
-        y = 4,
-        align = "CENTER",
-        vertical = "CENTER",
-      },
       useAlpha = false,
       useScaling = false,
       ShowMouseoverHighlight = true,
@@ -1725,19 +1738,6 @@ ThreatPlates.DEFAULT_SETTINGS = {
         show = true,
         ShowInHeadlineView = false,
         ShowSpark = true,
-      },
-      name = { -- Names for Healthbar View
-        show = true,
-        typeface = Addon.DEFAULT_FONT, -- old default: "Accidental Presidency",
-        size = 10, -- old default: 14
-        shadow = true,
-        flags = "NONE",
-        width = 140, -- old default: 116,
-        height = 14,
-        x = 0,
-        y = 13,
-        align = "CENTER",
-        vertical = "CENTER",
       },
       level = {
         typeface = Addon.DEFAULT_FONT, -- old default: "Accidental Presidency",

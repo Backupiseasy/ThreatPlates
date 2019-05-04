@@ -82,21 +82,6 @@ local function Create(self,name)
 			show = false,
 		},
 
-		name = {
-			typeface =						t.Media:Fetch('font', db.name.typeface),
-			size = db.name.size,
-			width = db.name.width,
-			height = db.name.height,
-			x = db.name.x,
-			y = db.name.y,
-			align = db.name.align,
-			anchor = "CENTER",
-			vertical = db.name.vertical,
-			shadow = false,
-			flags = db.spelltext.flags,
-			show = false,
-		},
-
 		level = {
 			typeface =						t.Media:Fetch('font', db.level.typeface),
 			size = db.level.size,

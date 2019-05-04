@@ -39,7 +39,7 @@ local WidgetFrame
 ---------------------------------------------------------------------------------------------------
 -- Cached configuration settings
 ---------------------------------------------------------------------------------------------------
-local Settings, SettingsHV, SettingsStatusText
+local Settings, SettingsName, SettingsStatusText
 local NameModeOffsetX, NameModeOffsetY
 
 ---------------------------------------------------------------------------------------------------
@@ -145,13 +145,13 @@ function Widget:OnTargetUnitRemoved()
 end
 
 local function GetHeadlineViewHeight()
-  return abs(max(SettingsHV.name.y, SettingsStatusText.VerticalOffset) - min(SettingsHV.name.y, SettingsStatusText.VerticalOffset)) + (SettingsHV.name.size + SettingsStatusText.Font.Size) / 2
+  return abs(max(SettingsName.VerticalOffset, SettingsStatusText.VerticalOffset) - min(SettingsName.VerticalOffset, SettingsStatusText.VerticalOffset)) + (SettingsName.Font.Size + SettingsStatusText.Font.Size) / 2
 end
 
 local function GetTargetTextureY()
-  if SettingsHV.name.y >= SettingsStatusText.VerticalOffset then
+  if SettingsName.VerticalOffset >= SettingsStatusText.VerticalOffset then
     -- name above status text
-    return SettingsHV.name.y - 10 + (SettingsHV.name.size / 2) - ((GetHeadlineViewHeight() - 18) / 2)
+    return SettingsName.VerticalOffset - 10 + (SettingsName.Font.Size / 2) - ((GetHeadlineViewHeight() - 18) / 2)
   else
     -- status text above name
     return SettingsStatusText.VerticalOffset - 10 + (SettingsStatusText.Font.Size / 2) - ((GetHeadlineViewHeight() - 18) / 2)
@@ -206,10 +206,10 @@ end
 
 function Widget:UpdateSettings()
   Settings = TidyPlatesThreat.db.profile.targetWidget
-  SettingsHV = TidyPlatesThreat.db.profile.HeadlineView
+  SettingsName = TidyPlatesThreat.db.profile.Name.NameMode
   SettingsStatusText = TidyPlatesThreat.db.profile.StatusText.NameMode
 
-  NameModeOffsetX = SettingsHV.name.x
+  NameModeOffsetX = SettingsName.HorizontalOffset
   NameModeOffsetY = GetTargetTextureY()
 end
 

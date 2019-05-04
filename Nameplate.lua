@@ -628,8 +628,8 @@ local TaskQueueOoC = {}
 
 local ENABLED_EVENTS = {
   "PLAYER_ENTERING_WORLD",
-  "PLAYER_LOGIN",
-  "PLAYER_LOGOUT",
+  -- "PLAYER_LOGIN",
+  -- "PLAYER_LOGOUT",
   "PLAYER_REGEN_ENABLED",
   "PLAYER_REGEN_DISABLED",
 
@@ -778,17 +778,11 @@ end
 -- WoW Event Handling: Event handling functions
 --------------------------------------------------------------------------------------------------------------
 
-function Addon:PLAYER_LOGIN(...)
-  TidyPlatesThreat.db.profile.cache = {}
-
-  if TidyPlatesThreat.db.char.welcome then
-    ThreatPlates.Print(L["|cff89f559Threat Plates:|r Welcome back |cff"]..ThreatPlates.HCC[self.PlayerClass]..UnitName("player").."|r!!")
-  end
-end
-
-function Addon:PLAYER_LOGOUT(...)
-  TidyPlatesThreat.db.profile.cache = {}
-end
+--function Addon:PLAYER_LOGIN(...)
+--end
+--
+--function Addon:PLAYER_LOGOUT(...)
+--end
 
 -- Fired when the player enters the world, reloads the UI, enters/leaves an instance or battleground, or respawns at a graveyard.
 -- Also fires any other time the player sees a loading screen

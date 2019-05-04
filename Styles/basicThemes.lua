@@ -77,21 +77,6 @@ local function Create(self,name)
       show = db.castborder.show and db.castnostop.ShowOverlay,
     },
 
-    name = {
-      typeface = ThreatPlates.Media:Fetch('font', db.name.typeface),
-      size = db.name.size,
-      width = db.name.width,
-      height = db.name.height,
-      x = db.name.x,
-      y = db.name.y,
-      align = db.name.align,
-      anchor = "CENTER",
-      vertical = db.name.vertical,
-      shadow = db.name.shadow,
-      flags = db.name.flags,
-      show = db.name.show,
-    },
-
     level = {
       typeface = ThreatPlates.Media:Fetch('font', db.level.typeface),
       size = db.level.size,

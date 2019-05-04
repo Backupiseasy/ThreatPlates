@@ -50,7 +50,7 @@ function ElementHandler.Created(frame)
 function ElementHandler.UnitAdded(frame)
   local element
 
-  if frame.PlateStyle == "NONE" then return end
+  if frame.PlateStyle == "None" then return end
 
   for i = 1, #ElementsPriority do
     element = ElementsPriority[i]
@@ -63,7 +63,7 @@ end
 function ElementHandler.UnitRemoved(frame)
   local element
 
-  if frame.PlateStyle == "NONE" then return end
+  if frame.PlateStyle == "None" then return end
 
   for i = 1, #ElementsPriority do
     element = ElementsPriority[i]

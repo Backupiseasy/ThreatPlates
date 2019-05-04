@@ -39,17 +39,13 @@ local function GetUnitVisibility(full_unit_type)
 end
 
 local function SetNamePlateClickThrough(friendly, enemy)
---  if InCombatLockdown() then
---    ThreatPlates.Print(L["Nameplate clickthrough cannot be changed while in combat."], true)
---  else
-    local db = TidyPlatesThreat.db.profile
-    db.NamePlateFriendlyClickThrough = friendly
-    db.NamePlateEnemyClickThrough = enemy
-    Addon:CallbackWhenOoC(function()
-      C_NamePlate.SetNamePlateFriendlyClickThrough(friendly)
-      C_NamePlate.SetNamePlateEnemyClickThrough(enemy)
-    end, L["Nameplate clickthrough cannot be changed while in combat."])
---  end
+  local db = TidyPlatesThreat.db.profile
+  db.NamePlateFriendlyClickThrough = friendly
+  db.NamePlateEnemyClickThrough = enemy
+  Addon:CallbackWhenOoC(function()
+    C_NamePlate.SetNamePlateFriendlyClickThrough(friendly)
+    C_NamePlate.SetNamePlateEnemyClickThrough(enemy)
+  end, L["Nameplate clickthrough cannot be changed while in combat."])
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -66,7 +62,7 @@ local function GetDefaultSettingsV1(defaults)
   db.Healthbar.EnemyUnitMode = "REACTION"
   db.Healthbar.BackgroundOpacity = 1
   db.optionRoleDetectionAutomatic = false
-  --db.HeadlineView.width = 116
+  --db.HeadlineView.width = 116 -- No longer used
   db.text.amount = true
   db.AuraWidget.ModeBar.Texture = "Aluminium"
   db.uniqueWidget.scale = 35
@@ -81,9 +77,9 @@ local function GetDefaultSettingsV1(defaults)
   db.settings.healthbar.backdrop = "ThreatPlatesEmpty"
   db.settings.castborder.texture = "TP_CastBarOverlay"
   db.settings.castbar.texture = "ThreatPlatesBar"
-  db.settings.name.typeface = "Accidental Presidency"
-  db.settings.name.width = 116
-  db.settings.name.size = 14
+  db.Name.HealthbarMode.Font.Typeface = "Accidental Presidency"
+  db.Name.HealthbarMode.Font.Width = 116
+  db.Name.HealthbarMode.Font.Size = 14
   db.settings.level.typeface = "Accidental Presidency"
   db.settings.level.size = 12
   db.settings.level.height  = 14
@@ -479,6 +475,9 @@ local MIGRATION_FUNCTIONS = {
   ["9.1.0"] = {
     MigrationForceFriendlyInCombat,
   },
+  ["9.2.0"] = {
+    -- MigrateDeprecatedSettingsEntries, -- TODO
+  },
 }
 
 local ENTRIES_TO_DELETE = {
@@ -515,6 +514,12 @@ local ENTRIES_TO_DELETE = {
     { "threat", "hideNonCombat" },
     { "aHPbarColor", },
     { "bHPbarColor", },
+    { "settings", "name", },
+    { "HeadlineView", "name", },
+    { "blizzFadeS", },
+    { "cache", },
+    { "cacheClass", },
+    { "customColor", },
   },
 }
 
@@ -568,6 +573,23 @@ local ENTRIES_TO_RENAME = {
     { Deprecated = { "HeadlineView", "customtext", "size" }, New = { "StatusText", "NameMode", "Font", "Size" }, },
     { Deprecated = { "HeadlineView", "customtext", "align" }, New = { "StatusText", "NameMode", "Font", "HorizontalAlignment" }, },
     { Deprecated = { "HeadlineView", "customtext", "vertical" }, New = { "StatusText", "NameMode", "Font", "VerticalAlignment" }, },
+    -- Name settings for healthbar and headline view
+    { Deprecated = { "HeadlineView", "name", "size" }, New = { "Name", "NameMode", "Size" }, },
+    { Deprecated = { "HeadlineView", "name", "x" }, New = { "Name", "NameMode", "HorizontalOffset" }, },
+    { Deprecated = { "HeadlineView", "name", "y" }, New = { "Name", "NameMode", "VerticalOffset" }, },
+    { Deprecated = { "HeadlineView", "name", "align" }, New = { "Name", "NameMode", "Font", "HorizontalAlignment" }, },
+    { Deprecated = { "HeadlineView", "name", "vertical" }, New = { "Name", "NameMode", "Font", "VerticalAlignment" }, },
+    { Deprecated = { "settings", "name", "show" }, New = { "Name", "HealthbarMode", "Enabled" }, },
+    { Deprecated = { "settings", "name", "x" }, New = { "Name", "HealthbarMode", "HorizontalOffset" }, },
+    { Deprecated = { "settings", "name", "y" }, New = { "Name", "HealthbarMode", "VerticalOffset" }, },
+    { Deprecated = { "settings", "name", "typeface" }, New = { "Name", "HealthbarMode", "Font", "Typeface" }, },
+    { Deprecated = { "settings", "name", "size" }, New = { "Name", "HealthbarMode", "Font", "Size", }, },
+    { Deprecated = { "settings", "name", "shadow" }, New = { "Name", "HealthbarMode", "Font", "Shadow" }, },
+    { Deprecated = { "settings", "name", "flags" }, New = { "Name", "HealthbarMode", "Font", "flags" }, },
+    { Deprecated = { "settings", "name", "align" }, New = { "Name", "HealthbarMode", "Font", "HorizontalAlignment" }, },
+    { Deprecated = { "settings", "name", "vertical" }, New = { "Name", "HealthbarMode", "Font", "VerticalAlignment" }, },
+    { Deprecated = { "settings", "name", "width" }, New = { "Name", "HealthbarMode", "Font", "Width" }, },
+    { Deprecated = { "settings", "name", "height" }, New = { "Name", "HealthbarMode", "Font", "Height" }, },
     -- Others
     { Deprecated = { "HeadlineView", "ShowTargetHighlight" }, New = { "targetWidget", "ShowInHeadlineView" }, },
   },

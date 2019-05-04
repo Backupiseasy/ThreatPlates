@@ -75,7 +75,7 @@ function Element.UpdateStyle(tp_frame, style, plate_style)
   local target_marker = tp_frame.visual.TargetMarker
   local target_marker_style = style.raidicon
 
-  if plate_style == "NONE" or not target_marker_style.show then
+  if plate_style == "None" or not target_marker_style.show then
     target_marker:Hide()
     return
   end

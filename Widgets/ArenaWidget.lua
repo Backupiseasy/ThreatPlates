@@ -129,7 +129,7 @@ function Widget:OnUnitAdded(widget_frame, unit)
 
   if Settings.HideName then
     widget_frame:GetParent().visual.Name:Hide()
-  elseif TidyPlatesThreat.db.profile.settings.name.show then
+  elseif TidyPlatesThreat.db.profile.Name.HealthbarMode.Enabled then
     widget_frame:GetParent().visual.Name:Show()
   end
 

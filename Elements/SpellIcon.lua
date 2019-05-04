@@ -47,7 +47,7 @@ end
 function Element.UpdateStyle(tp_frame, style, plate_style)
   local spell_icon, spell_icon_style = tp_frame.visual.SpellIcon, style.spellicon
 
-  if plate_style == "NONE" or not spell_icon_style.show then
+  if plate_style == "None" or not spell_icon_style.show then
     spell_icon:Hide()
     return
   end

@@ -62,7 +62,7 @@ function Element.UpdateStyle(tp_frame, style, plate_style)
   -- At least font must be set as otherwise it results in a Lua error when UnitAdded with SetText is called
   level_text:SetFont(style.typeface, style.size, style.flags)
 
-  if plate_style == "NONE" or not style.show then
+  if plate_style == "None" or not style.show then
     level_text:Hide()
     return
   end

@@ -114,7 +114,7 @@ end
 function Element.UpdateStyle(tp_frame, style, plate_style)
   local threatglow = tp_frame.visual.ThreatGlow
 
-  if plate_style == "NONE" or not style.threatborder.show then
+  if plate_style == "None" or not style.threatborder.show then
     threatglow:Hide()
     return
   end

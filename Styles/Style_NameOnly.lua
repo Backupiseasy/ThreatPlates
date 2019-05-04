@@ -85,21 +85,6 @@ local function Create(self,name)
       show = db.castbar.ShowInHeadlineView and db.castborder.show and db.castnostop.ShowOverlay,
     },
 
-    name = {
-      typeface = MEDIA_PATH:Fetch('font', db.name.typeface),
-      size = dbprofile.HeadlineView.name.size,
-      width = db.name.width, -- use same as for healthbar view
-      height = db.name.height, -- use same as for healthbar view
-      x = dbprofile.HeadlineView.name.x,
-      y = dbprofile.HeadlineView.name.y,
-      align = dbprofile.HeadlineView.name.align,
-      anchor = "CENTER",
-      vertical = dbprofile.HeadlineView.name.vertical,
-      shadow = db.name.shadow, -- or: true,
-      flags = db.name.flags, -- or: true
-      show = true,
-    },
-
     level = {
       typeface = MEDIA_PATH:Fetch('font', db.level.typeface),
       size = db.level.size,

@@ -250,16 +250,16 @@ function Addon:SetStyle(unit)
   return style or "normal"
 end
 
-local NAMEPLATE_STYLES_BY_THEME = {
-  dps = "HEALTHBAR",
-  tank = "HEALTHBAR",
-  normal = "HEALTHBAR",
-  totem = "HEALTHBAR",
-  unique = "HEALTHBAR",
-  empty = "NONE",
-  etotem = "NONE",
-  NameOnly = "NAME",
-  ["NameOnly-Unique"] = "NAME",
+local NAMEPLATE_MODE_BY_THEME = {
+  dps = "HealthbarMode",
+  tank = "HealthbarMode",
+  normal = "HealthbarMode",
+  totem = "HealthbarMode",
+  unique = "HealthbarMode",
+  empty = "None",
+  etotem = "None",
+  NameOnly = "NameMode",
+  ["NameOnly-Unique"] = "NameMode",
 }
 
 local function CheckNameplateStyle(tp_frame)
@@ -270,7 +270,7 @@ local function CheckNameplateStyle(tp_frame)
   if tp_frame.stylename ~= stylename then
     local style = ActiveTheme[stylename]
 
-    tp_frame.PlateStyle = NAMEPLATE_STYLES_BY_THEME[stylename]
+    tp_frame.PlateStyle = NAMEPLATE_MODE_BY_THEME[stylename]
     tp_frame.stylename = stylename
     tp_frame.style = style
     unit.style = stylename
@@ -289,13 +289,10 @@ local function UNIT_NAME_UPDATE(unitid)
     if stylename and frame.stylename ~= stylename then
       local style = ActiveTheme[stylename]
 
-      frame.PlateStyle = NAMEPLATE_STYLES_BY_THEME[stylename]
+      frame.PlateStyle = NAMEPLATE_MODE_BY_THEME[stylename]
       frame.stylename = stylename
       frame.style = style
       frame.unit.style = stylename
-
-      frame.PlateStyle = ((stylename == "NameOnly" or stylename == "NameOnly-Unique") and "NAME") or "HEALTHBAR"
-
 
       PublishEvent("StyleUpdate", frame, style, stylename)
     end

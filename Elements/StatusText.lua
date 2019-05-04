@@ -41,8 +41,8 @@ local Settings, SettingsStatusText
 local ModeSettings = {}
 local ShowHealth, ShowAbsorbs
 local StatusTextFunction = {
-  HEALTHBAR = {},
-  NAME = {}
+  HealthbarMode = {},
+  NameMode = {}
 }
 
 ---------------------------------------------------------------------------------------------------
@@ -387,6 +387,8 @@ local Element = Addon.Elements.NewElement("StatusText")
 -- Called in processing event: NAME_PLATE_CREATED
 function Element.Created(tp_frame)
   local status_text = tp_frame.visual.textframe:CreateFontString(nil, "ARTWORK", -1)
+  -- At least font must be set as otherwise it results in a Lua error when UnitAdded with SetText is called
+  status_text:SetFont("Fonts\\FRIZQT__.TTF", 11)
 
   tp_frame.visual.StatusText = status_text
 end
@@ -410,14 +412,13 @@ end
 function Element.UpdateStyle(tp_frame, style, plate_style)
   local status_text = tp_frame.visual.StatusText
 
-  if plate_style == "NONE" then
+  if plate_style == "None" then
     status_text:Hide()
     return
   end
 
   local db = ModeSettings[tp_frame.PlateStyle]
 
-  -- At least font must be set as otherwise it results in a Lua error when UnitAdded with SetText is called
   status_text:SetSize(db.Font.Width, db.Font.Height)
   Font:UpdateText(tp_frame, status_text, db)
 
@@ -427,14 +428,14 @@ end
 -- Text and color may change
 local function StatusTextUpdateByUnit(unitid)
   local frame = PlatesByUnit[unitid]
-  if frame and frame.Active and frame.PlateStyle ~= "NONE" then
+  if frame and frame.Active and frame.PlateStyle ~= "None" then
     Element.UnitAdded(frame)
   end
 end
 
 local function HealthUpdate(unitid)
   local frame = PlatesByUnit[unitid]
-  if frame and frame.Active and frame.PlateStyle ~= "NONE" then
+  if frame and frame.Active and frame.PlateStyle ~= "None" then
     local status_text_func = StatusTextFunction[frame.PlateStyle][frame.unit.reaction]
     if status_text_func == TextHealthPercentColored or status_text_func == TextAll then
       Element.UnitAdded(frame)
@@ -457,23 +458,23 @@ function Element.UpdateSettings()
   ShowAbsorbs = Settings.AbsorbsAmount or Settings.AbsorbsPercentage
   ShowHealth = Settings.amount or Settings.percent
 
-  StatusTextFunction["HEALTHBAR"]["FRIENDLY"] = STATUS_TEXT_REFERENCE[SettingsStatusText.HealthbarMode.FriendlySubtext]
-  StatusTextFunction["HEALTHBAR"]["HOSTILE"] = STATUS_TEXT_REFERENCE[SettingsStatusText.HealthbarMode.EnemySubtext]
-  StatusTextFunction["HEALTHBAR"]["NEUTRAL"] = StatusTextFunction["HEALTHBAR"]["HOSTILE"]
+  StatusTextFunction["HealthbarMode"]["FRIENDLY"] = STATUS_TEXT_REFERENCE[SettingsStatusText.HealthbarMode.FriendlySubtext]
+  StatusTextFunction["HealthbarMode"]["HOSTILE"] = STATUS_TEXT_REFERENCE[SettingsStatusText.HealthbarMode.EnemySubtext]
+  StatusTextFunction["HealthbarMode"]["NEUTRAL"] = StatusTextFunction["HealthbarMode"]["HOSTILE"]
 
-  StatusTextFunction["NAME"]["FRIENDLY"] = STATUS_TEXT_REFERENCE[SettingsStatusText.NameMode.FriendlySubtext]
-  StatusTextFunction["NAME"]["HOSTILE"] = STATUS_TEXT_REFERENCE[SettingsStatusText.NameMode.EnemySubtext]
-  StatusTextFunction["NAME"]["NEUTRAL"] = StatusTextFunction["NAME"]["HOSTILE"]
+  StatusTextFunction["NameMode"]["FRIENDLY"] = STATUS_TEXT_REFERENCE[SettingsStatusText.NameMode.FriendlySubtext]
+  StatusTextFunction["NameMode"]["HOSTILE"] = STATUS_TEXT_REFERENCE[SettingsStatusText.NameMode.EnemySubtext]
+  StatusTextFunction["NameMode"]["NEUTRAL"] = StatusTextFunction["NameMode"]["HOSTILE"]
 
-  ModeSettings["HEALTHBAR"] = SettingsStatusText.HealthbarMode
+  ModeSettings["HealthbarMode"] = SettingsStatusText.HealthbarMode
 
   -- Settings for name mode are not complete, so complete them with the corresponding setttings from the healthbar mode
-  ModeSettings["NAME"] = Addon.CopyTable(SettingsStatusText.NameMode)
-  ModeSettings["NAME"].Font.Typeface = SettingsStatusText.HealthbarMode.Font.Typeface
-  ModeSettings["NAME"].Font.flags = SettingsStatusText.HealthbarMode.Font.flags
-  ModeSettings["NAME"].Font.Shadow = SettingsStatusText.HealthbarMode.Font.Shadow
-  ModeSettings["NAME"].Font.Width = SettingsStatusText.HealthbarMode.Font.Width
-  ModeSettings["NAME"].Font.Height = SettingsStatusText.HealthbarMode.Font.Height
+  ModeSettings["NameMode"] = Addon.CopyTable(SettingsStatusText.NameMode)
+  ModeSettings["NameMode"].Font.Typeface = SettingsStatusText.HealthbarMode.Font.Typeface
+  ModeSettings["NameMode"].Font.flags = SettingsStatusText.HealthbarMode.Font.flags
+  ModeSettings["NameMode"].Font.Shadow = SettingsStatusText.HealthbarMode.Font.Shadow
+  ModeSettings["NameMode"].Font.Width = SettingsStatusText.HealthbarMode.Font.Width
+  ModeSettings["NameMode"].Font.Height = SettingsStatusText.HealthbarMode.Font.Height
 
   if SettingsStatusText.HealthbarMode.SubtextColorUseHeadline or SettingsStatusText.NameMode.SubtextColorUseHeadline then
     SubscribeEvent(Element, "NameColorUpdate", NameColorUpdate)
