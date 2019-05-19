@@ -54,7 +54,7 @@ end
 local function GetThreatGlowColor(unit)
   local color
 
-  if unit.isTapped and ShowThreatGlow(unit) then
+  if unit.IsTapDenied and ShowThreatGlow(unit) then
     color = TappedColor
   elseif unit.type == "NPC" and unit.reaction ~= "FRIENDLY" then
     local style = unit.style

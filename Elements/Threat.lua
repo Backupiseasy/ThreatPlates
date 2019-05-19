@@ -12,7 +12,7 @@ local strsplit, pairs = strsplit, pairs
 
 -- WoW APIs
 local IsInInstance = IsInInstance
-local UnitReaction, UnitIsTapDenied, UnitGUID, UnitAffectingCombat = UnitReaction, UnitIsTapDenied, UnitGUID, UnitAffectingCombat
+local UnitReaction, UnitGUID, UnitAffectingCombat = UnitReaction, UnitGUID, UnitAffectingCombat
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
@@ -88,7 +88,7 @@ end
 --},
 
 local function GetUnitClassification(unit)
-  if UnitIsTapDenied(unit.unitid) then
+  if unit.IsTapDenied then
     return "Tapped"
   elseif UnitReaction(unit.unitid, "player") == 4 then
     return "Neutral"

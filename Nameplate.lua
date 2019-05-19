@@ -129,7 +129,7 @@ local function UpdateUnitReaction(unit, unitid)
     unit.reaction = "HOSTILE"
   end
 
-  unit.isTapped = UnitIsTapDenied(unitid)
+  unit.IsTapDenied = UnitIsTapDenied(unitid)
 end
 
 local function InitializeUnit(unit, unitid)

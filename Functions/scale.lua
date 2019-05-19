@@ -173,6 +173,20 @@ local SCALE_FUNCTIONS = {
 function Addon:SetScale(unit)
   local scale = SCALE_FUNCTIONS[unit.style](unit, unit.style)
 
+	if scale == nil then
+		local db = TidyPlatesThreat.db.profile.threat
+		print ("Scale: Function returned nil (style =", unit.style, ")")
+		print ("Toggle:", db.toggle.OffTank)
+		print ("GetThreatLevel:", GetThreatLevel(unit, unit.style, db.toggle.OffTank))
+		print ("Scale:", db[unit.style].scale[GetThreatLevel(unit, unit.style, db.toggle.OffTank)])
+		print ("Threat Status:", unit.ThreatStatus)
+		print ("Threat Level:", unit.ThreatLevel)
+
+		Addon.Debug:PrintUnit(unit, true)
+	end
+
+	assert (scale ~= nil)
+
 	-- scale may be set to 0 in the options dialog
 	if scale < 0.3 then
 		return 0.3
@@ -233,4 +247,3 @@ SubscribeEvent(Element, "TargetGained", TargetGained)
 SubscribeEvent(Element, "TargetLost", TargetLost)
 SubscribeEvent(Element, "FactionUpdate", SituationalEvent)
 SubscribeEvent(Element, "ThreatUpdate", SituationalEvent)
-

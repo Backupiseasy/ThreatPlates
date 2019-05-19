@@ -144,7 +144,7 @@ local WIDGET_INFO = {
   ResourceWidget = { Name = "Resource", UpdateSettings = true,  },
   socialWidget = { Name = "Social", UpdateSettings = true, PublishEvent = "ClassColorUpdate" },
   stealthWidget = { Name = "Stealth", UpdateSettings = false, },
-  targetWidget = { Name = "TargetArt", UpdateSettings = true, PublishEvent = "SituationalColorUpdate" },
+  targetWidget = { Name = "TargetArt", UpdateSettings = true, UpdateAllSettings = true, PublishEvent = "SituationalColorUpdate" },
   threat = { Name = "Threat", UpdateSettings = false, }, -- ThreatWidget
   totemWidget = { Name = "TotemIcon", UpdateSettings = false, },
   uniqueWidget = { Name = "UniqueIcon", UpdateSettings = false, },
@@ -210,6 +210,10 @@ local function SetValue(info, ...)
     elseif widget_info.UpdateSettings then
       --print ("SetValue: Widget =>", info[2])
       Addon.Widgets:UpdateSettings(widget_info.Name)
+      -- Some elements also use widget settings. In this case, update them
+      if widget_info.UpdateAllSettings then
+        Addon:UpdateSettings()
+      end
       -- Required for some widgets that also update aspects of the healthbar (e.g., Quest, Social)
       if widget_info.PublishEvent then
         Addon:PublishToEachPlate(widget_info.PublishEvent)

@@ -13,7 +13,7 @@ local InCombatLockdown = InCombatLockdown
 local UnitPlayerControlled = UnitPlayerControlled
 local UnitIsOtherPlayersPet = UnitIsOtherPlayersPet
 local UnitIsBattlePet = UnitIsBattlePet
-local UnitCanAttack, UnitIsTapDenied = UnitCanAttack, UnitIsTapDenied
+local UnitCanAttack = UnitCanAttack
 local GetNamePlates, GetNamePlateForUnit = C_NamePlate.GetNamePlates, C_NamePlate.GetNamePlateForUnit
 
 -- ThreatPlates APIs
@@ -115,7 +115,7 @@ local function GetUnitType(unit)
     unit.TP_DetailedUnitType = (unit.isBoss and "Boss") or (unit.isElite and "Elite") or unit.TP_DetailedUnitType
   end
 
-  if UnitIsTapDenied(unit.unitid) then
+  if unit.IsTapDenied then
     unit.TP_DetailedUnitType = "Tapped"
   end
 
@@ -130,7 +130,7 @@ local function ShowUnit(unit)
 
   if not show then return false end
 
-  local e, b, t = (unit.isElite or unit.isRare), unit.isBoss, UnitIsTapDenied(unit.unitid)
+  local e, b, t = (unit.isElite or unit.isRare), unit.isBoss, unit.IsTapDenied
   local db_base = TidyPlatesThreat.db.profile
   local db = db_base.Visibility
 

@@ -11,16 +11,14 @@ local ADDON_NAME, Addon = ...
 local abs, floor, ceil, pairs = abs, floor, ceil, pairs
 
 -- WoW APIs
-local UnitIsConnected, UnitReaction, UnitCanAttack, UnitAffectingCombat = UnitIsConnected, UnitReaction, UnitCanAttack, UnitAffectingCombat
-local UnitHealth, UnitHealthMax, UnitIsPlayer, UnitPlayerControlled = UnitHealth, UnitHealthMax, UnitIsPlayer, UnitPlayerControlled
+local UnitReaction, UnitCanAttack, UnitAffectingCombat = UnitReaction, UnitCanAttack, UnitAffectingCombat
+local UnitIsPlayer, UnitPlayerControlled = UnitIsPlayer, UnitPlayerControlled
 local UnitThreatSituation, UnitIsUnit, UnitExists, UnitGroupRolesAssigned = UnitThreatSituation, UnitIsUnit, UnitExists, UnitGroupRolesAssigned
 local IsInInstance = IsInInstance
 local RAID_CLASS_COLORS = RAID_CLASS_COLORS
 local GetNamePlates, GetNamePlateForUnit = C_NamePlate.GetNamePlates, C_NamePlate.GetNamePlateForUnit
 
 -- ThreatPlates APIs
-local ThreatPlates = Addon.ThreatPlates
-local PlatesByUnit = Addon.PlatesByUnit
 local IsOffTankCreature = Addon.IsOffTankCreature
 local TidyPlatesThreat = TidyPlatesThreat
 local SubscribeEvent, PublishEvent,  UnsubscribeEvent = Addon.EventService.Subscribe, Addon.EventService.Publish, Addon.EventService.Unsubscribe
@@ -31,7 +29,6 @@ local REACTION_REFERENCE = {
   HOSTILE = {	NPC = "HostileNPC", PLAYER = "HostilePlayer", },
   NEUTRAL = { NPC = "NeutralUnit", PLAYER = "NeutralUnit",	},
 }
-local COLOR_TRANSPARENT = RGB_P(0, 0, 0, 0) -- opaque
 
 ---------------------------------------------------------------------------------------------------
 -- Local variables
@@ -51,8 +48,11 @@ local NameCustomColor = {
   HealthbarMode = {},
   NameMode = {}
 }
-local TargetMarkColoring = {}
 local ThreatColor = {}
+local NameModeSettings = {
+  HealthbarMode = {},
+  NameMode = {},
+}
 
 ---------------------------------------------------------------------------------------------------
 -- ThreatPlates Frame functions to return the current color for healthbar/name based on settings
@@ -65,29 +65,23 @@ end
 
 local function GetUnitColorByReaction(tp_frame)
   local unit = tp_frame.unit
-  return unit.TappedColor or unit.SituationalColor or unit.CombatColor or unit.ReactionColor
+  return unit.SituationalColor or unit.CombatColor or unit.ReactionColor
 end
 
 local function GetUnitColorByClass(tp_frame)
   local unit = tp_frame.unit
-  return unit.TappedColor or unit.SituationalColor or unit.CombatColor or unit.ClassColor or unit.ReactionColor
-end
-
-local function GetUnitColorCustomColor(tp_frame)
-  local unit = tp_frame.unit
-  return unit.TappedColor or NameCustomColor[tp_frame.PlateStyle][unit.reaction]
+  return unit.SituationalColor or unit.CombatColor or unit.ClassColor or unit.ReactionColor
 end
 
 local function GetUnitColorCustomPlate(tp_frame)
   local unit = tp_frame.unit
-  return unit.TappedColor or unit.SituationalColor or unit.CombatColor or unit.CustomColor
+  return unit.SituationalColor or unit.CombatColor or unit.CustomColor
 end
 
-local HEALTHBAR_COLOR_MODE_REFERENCE = {
+local HEALTHBAR_COLOR_FUNCTIONS = {
   REACTION = GetUnitColorByReaction,
   CLASS = GetUnitColorByClass,
   HEALTH = GetUnitColorByHealth,
-  CUSTOM = GetUnitColorCustomColor,
 }
 
 local function GetUnitColorByHealthName(tp_frame)
@@ -107,7 +101,7 @@ end
 
 local function GetUnitColorCustomColorName(tp_frame)
   local unit = tp_frame.unit
-  return unit.TappedColor or unit.SituationalNameColor or NameCustomColor[tp_frame.PlateStyle][unit.reaction]
+  return unit.SituationalNameColor or NameCustomColor[tp_frame.PlateStyle][unit.reaction]
 end
 
 local function GetUnitColorCustomPlateName(tp_frame)
@@ -120,7 +114,7 @@ local function GetUnitColorCustomPlateName(tp_frame)
   end
 end
 
-local NAME_COLOR_MODE_REFERENCE = {
+local NAME_COLOR_FUNCTIONS = {
   REACTION = GetUnitColorByReactionName,
   CLASS = GetUnitColorByClassName,
   HEALTH = GetUnitColorByHealthName,
@@ -147,6 +141,7 @@ local function UpdatePlateColors(tp_frame)
         bg_color = Settings.BackgroundColor
       end
 
+
       local healthbar = tp_frame.visual.Healthbar
       healthbar:SetStatusBarColor(fg_color.r, fg_color.g, fg_color.b, 1)
       healthbar.Border:SetBackdropColor(bg_color.r, bg_color.g, bg_color.b, 1 - Settings.BackgroundOpacity)
@@ -160,7 +155,7 @@ local function UpdatePlateColors(tp_frame)
   --    if fg_color == nil then
   --      local unit = tp_frame.unit
   --      print ("Unit:", unit.name)
-  --      print ("  Tapped:", unit.isTapped)
+  --      print ("  Tapped:", unit.IsTapDenied)
   --      print ("  Health-Color:", unit.HealthColor)
   --      fg_color = RGB_P(255, 255, 255)
   --    end
@@ -180,21 +175,23 @@ end
 -- Color-colculating Functions
 ---------------------------------------------------------------------------------------------------
 
---local HealthColorCache = {}
+local HealthColorCache = {}
 local CS = CreateFrame("ColorSelect")
 
 --GetSmudgeColorRGB function - from: https://www.wowinterface.com/downloads/info22536-ColorSmudge.html
 --arg1: color table in RGB {r=0,g=0,b=0}
 --arg2: color table in RGB {r=1,g=1,b=1}
---arg3: percentage 0-1
+--arg3: percentage 0-100
 function CS:GetSmudgeColorRGB(colorA, colorB, perc)
+  perc = perc * 0.01
+
   self:SetColorRGB(colorA.r,colorA.g,colorA.b)
   local h1, s1, v1 = self:GetColorHSV()
   self:SetColorRGB(colorB.r,colorB.g,colorB.b)
   local h2, s2, v2 = self:GetColorHSV()
-  local h3 = floor(h1-(h1-h2)*perc)
+  local h3 = floor(h1-(h1-h2) * perc)
   if abs(h1-h2) > 180 then
-    local radius = (360-abs(h1-h2))*perc --/100
+    local radius = (360-abs(h1-h2)) * perc
     if h1 < h2 then
       h3 = floor(h1-radius)
       if h3 < 0 then
@@ -208,8 +205,8 @@ function CS:GetSmudgeColorRGB(colorA, colorB, perc)
     end
   end
 
-  local s3 = s1-(s1-s2)*perc
-  local v3 = v1-(v1-v2)*perc
+  local s3 = s1-(s1-s2) * perc
+  local v3 = v1-(v1-v2) * perc
   self:SetColorHSV(h3, s3, v3)
 
   return self:GetColorRGB()
@@ -219,37 +216,19 @@ end
 -- Functions to the the base color for a unit
 ---------------------------------------------------------------------------------------------------
 
--- Threat System is OP, player is in combat, style is tank or dps
 local function GetColorByHealth(unit)
-  -- Implementing a cache for the different health colors is not worth it performance-wise. At least
-  -- based on limited testing (< 2 sec improvement on 1,000,000 calls
+  local health_pct = ceil(100 * unit.health / unit.healthmax)
 
-  --  local pct = unit.health / unit.healthmax
-  --  local health_pct = ceil(100 * pct)
-  --  local health_color = HealthColorCache[health_pct]
-  --
-  --  if not health_color then
-  --    --print ("Cache: ", health_color)
-  --    health_color = RGB_P(CS:GetSmudgeColorRGB(ColorByHealth.Low, ColorByHealth.High, pct))
-  --    HealthColorCache[health_pct] = health_color
-  --    --print ("Color: Adding color for", health_pct, "%: ", health_color.r, health_color.g, health_color.b, " / ", CS:GetSmudgeColorRGB(ColorByHealth.Low, ColorByHealth.High, unit.health / unit.healthmax))
-  --  end
-  --
-  --unit.HealthColor = health_color
-
-  local health_color = unit.HealthColor
+  local health_color = HealthColorCache[health_pct]
   if not health_color then
-    health_color = {}
-    unit.HealthColor = health_color
+    health_color = RGB_P(CS:GetSmudgeColorRGB(ColorByHealth.Low, ColorByHealth.High, health_pct))
+    HealthColorCache[health_pct] = health_color
+    --print ("Color: Adding color for", health_pct, "=>", Addon.Debug:ColorToString(health_color))
   end
 
-  health_color.r, health_color.g, health_color.b = CS:GetSmudgeColorRGB(ColorByHealth.Low, ColorByHealth.High, unit.health / unit.healthmax)
-  --print ("Color:", ceil(100 * (unit.health / unit.healthmax)), "%: ", health_color.r, health_color.g, health_color.b, " / ", CS:GetSmudgeColorRGB(ColorByHealth.Low, ColorByHealth.High, unit.health / unit.healthmax))
-
-  return health_color
+  unit.HealthColor = health_color
 end
 
--- Addon.GetColorByHealthDeficit = GetColorByHealth
 -- Works as all functions using this function are triggerd by the NameColorChanged event
 Addon.GetColorByHealthDeficit = function(unit)
   return unit.HealthColor
@@ -267,8 +246,6 @@ local function GetColorByReaction(unit)
   end
 
   unit.ReactionColor = color
-
-  return color
 end
 
 local function GetColorByClass(unit, plate_style)
@@ -290,8 +267,6 @@ local function GetColorByClass(unit, plate_style)
   end
 
   unit.ClassColor = color
-
-  return color
 end
 
 local function GetCustomStyleColor(unit)
@@ -332,7 +307,7 @@ local function GetThreatLevel(unit, style, enable_off_tank)
 
       unit.ThreatLevel = threat_situation
     else
-      threat_situation = unit.ThreatLevel
+      threat_situation = unit.ThreatLevel or "LOW"
     end
 
     other_player_has_aggro = (threat_situation == "LOW")
@@ -410,72 +385,114 @@ local function GetCombatColor(unit)
   end
 
   unit.CombatColor = color
-
-  return color
 end
 
+---- Sitational Color - Order is: target, target marked, tapped, quest)
+--local function GetSituationalColorHealthbar(unit, plate_style)
+--  -- Not situational coloring for totems (currently)
+--  if unit.TotemSettings then return end
+--
+--  local color
+--  -- NameModeSettings.HealthbarMode.UseTargetColoring = SettingsBase.targetWidget.ModeHPBar
+--  if unit.isTarget and SettingsBase.targetWidget.ModeHPBar then
+--    color = SettingsBase.targetWidget.HPBarColor
+--  else
+--    local use_target_mark_color
+--    if unit.CustomPlateSettings then
+--      use_target_mark_color = unit.TargetMarker and unit.CustomPlateSettings.allowMarked
+--    else
+--      use_target_mark_color = unit.TargetMarker and Settings.UseRaidMarkColoring
+--    end
+--
+--    if use_target_mark_color then
+--      color = SettingsBase.settings.raidicon.hpMarked[unit.TargetMarker]
+--    elseif unit.IsTapDenied then
+--      color = ColorByReaction.TappedUnit
+--    elseif Addon:ShowQuestUnit(unit) and Addon:IsPlayerQuestUnit(unit) then
+--      -- Unit is quest target
+--      color = SettingsBase.questWidget.HPBarColor
+--    end
+--  end
+--
+--  unit.SituationalColor = color
+--end
+--
+---- Sitational Color - Order is: target, target marked, tapped, quest)
+--local function GetSituationalColorName(unit, plate_style)
+--  -- Not situational coloring for totems (currently)
+--  if unit.TotemSettings then return end
+--
+--  local mode_settings = NameModeSettings[plate_style]
+--
+--  local color
+--  if unit.isTarget and mode_settings.UseTargetColoring then
+--    color = SettingsBase.targetWidget.HPBarColor
+--  else
+--    local use_target_mark_color
+--    if unit.CustomPlateSettings then
+--      use_target_mark_color = unit.TargetMarker and unit.CustomPlateSettings.allowMarked
+--    else
+--      use_target_mark_color = unit.TargetMarker and mode_settings.UseRaidMarkColoring
+--    end
+--
+--    if use_target_mark_color then
+--      color = SettingsBase.settings.raidicon.hpMarked[unit.TargetMarker]
+--    elseif unit.IsTapDenied and tp_frame.PlateStyle == "NameMode" then
+--      color = ColorByReaction.TappedUnit
+--    end
+--  end
+--
+--  unit.SituationalNameColor = color
+--end
+
 -- Sitational Color - Order is: target, target marked, tapped, quest)
-local function GetSituationalColor(unit)
-  local color
-
+local function GetSituationalColor(unit, plate_style)
   -- Not situational coloring for totems (currently)
-  if not unit.TotemSettings then
-    if unit.isTarget and SettingsBase.targetWidget.ModeHPBar then
-      color = SettingsBase.targetWidget.HPBarColor
-    else
-      local use_target_mark_color
-      if unit.CustomPlateSettings then
-        use_target_mark_color = unit.TargetMarker and unit.CustomPlateSettings.allowMarked
-      else
-        use_target_mark_color = unit.TargetMarker and Settings.UseRaidMarkColoring
-      end
+  if unit.TotemSettings then return end
 
-      if use_target_mark_color then
-        color = SettingsBase.settings.raidicon.hpMarked[unit.TargetMarker]
-      elseif unit.isTapped then
-        color = ColorByReaction.TappedUnit
-      elseif Addon:ShowQuestUnit(unit) and Addon:IsPlayerQuestUnit(unit) then
-        -- Unit is quest target
-        color = SettingsBase.questWidget.HPBarColor
-      end
+  local healthbar_color, name_color
+
+  local mode_settings = NameModeSettings[plate_style]
+  if unit.isTarget then
+    -- NameModeSettings.HealthbarMode.UseTargetColoring = SettingsBase.targetWidget.ModeHPBar
+    healthbar_color = NameModeSettings.HealthbarMode.UseTargetColoring and SettingsBase.targetWidget.HPBarColor
+    name_color = mode_settings.UseTargetColoring and SettingsBase.targetWidget.HPBarColor
+  end
+
+  if not healthbar_color then
+    local use_target_mark_color
+    if unit.CustomPlateSettings then
+      use_target_mark_color = unit.TargetMarker and unit.CustomPlateSettings.allowMarked
+    else
+      use_target_mark_color = unit.TargetMarker and Settings.UseRaidMarkColoring
+    end
+
+    if use_target_mark_color then
+      healthbar_color = SettingsBase.settings.raidicon.hpMarked[unit.TargetMarker]
+    elseif unit.IsTapDenied then
+      healthbar_color = ColorByReaction.TappedUnit
+    elseif Addon:ShowQuestUnit(unit) and Addon:IsPlayerQuestUnit(unit) then
+      healthbar_color = SettingsBase.questWidget.HPBarColor
     end
   end
 
-  unit.SituationalColor = color
-
-  return color
-end
-
--- Sitational Color - Order is: target, target marked, tapped, quest)
-local function GetSituationalColorName(unit, tp_frame)
-  local color
-
-  -- Not situational coloring for totems (currently)
-  if not unit.TotemSettings then
-    if unit.isTarget and SettingsBase.targetWidget.ModeNames then
-      color = SettingsBase.targetWidget.HPBarColor
+  if not name_color then
+    local use_target_mark_color
+    if unit.CustomPlateSettings then
+      use_target_mark_color = unit.TargetMarker and unit.CustomPlateSettings.allowMarked
     else
-      local use_target_mark_color
-      if unit.CustomPlateSettings then
-        use_target_mark_color = unit.TargetMarker and unit.CustomPlateSettings.allowMarked
-      else
-        use_target_mark_color = unit.TargetMarker and TargetMarkColoring[tp_frame.PlateStyle]
-      end
+      use_target_mark_color = unit.TargetMarker and mode_settings.UseRaidMarkColoring
+    end
 
-      if use_target_mark_color then
-        color = SettingsBase.settings.raidicon.hpMarked[unit.TargetMarker]
-      elseif unit.isTapped then
-        color = ColorByReaction.TappedUnit
-      elseif Addon:ShowQuestUnit(unit) and Addon:IsPlayerQuestUnit(unit) then
-        -- Unit is quest target
-        color = SettingsBase.questWidget.HPBarColor
-      end
+    if use_target_mark_color then
+      name_color = SettingsBase.settings.raidicon.hpMarked[unit.TargetMarker]
+    elseif unit.IsTapDenied and plate_style == "NameMode" then
+      name_color = ColorByReaction.TappedUnit
     end
   end
 
-  unit.SituationalNameColor = color
-
-  return color
+  unit.SituationalColor = healthbar_color
+  unit.SituationalNameColor = name_color
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -498,8 +515,9 @@ function Element.UnitAdded(tp_frame)
 
   local unit = tp_frame.unit
 
-  GetSituationalColor(unit)
-  GetSituationalColorName(unit, tp_frame)
+  --GetSituationalColorHealthbar(unit, tp_frame.PlateStyle)
+  --GetSituationalColorName(unit, tp_frame.PlateStyle)
+  GetSituationalColor(unit, tp_frame.PlateStyle)
 
   -- Not sure if this checks are 100% correct, might be just easier to initialize all colors anyway
   if tp_frame.GetHealthbarColor == GetUnitColorByHealth or tp_frame.GetNameColor == GetUnitColorByHealthName or unit.CustomColor then
@@ -574,9 +592,10 @@ local function FactionUpdate(tp_frame)
 
       -- Tapped is detected by a UNIT_FACTION event (I think), but handled as a situational color change
       -- Update situational color if unit is now tapped or was tapped
-      if unit.isTapped or unit.SituationalColor == ColorByReaction.TappedUnit then
-        GetSituationalColor(tp_frame.unit)
-        GetSituationalColorName(tp_frame.unit, tp_frame)
+      if unit.IsTapDenied or unit.SituationalColor == ColorByReaction.TappedUnit then
+        --GetSituationalColorHealthbar(unit, tp_frame.PlateStyle)
+        --GetSituationalColorName(unit, tp_frame.PlateStyle)
+        GetSituationalColor(unit, tp_frame.PlateStyle)
       end
 
       GetColorByReaction(unit)
@@ -588,8 +607,9 @@ end
 
 local function SituationalColorUpdate(tp_frame)
   if tp_frame.PlateStyle ~= "None" then
-    GetSituationalColor(tp_frame.unit)
-    GetSituationalColorName(tp_frame.unit, tp_frame)
+    --GetSituationalColorHealthbar(unit, tp_frame.PlateStyle)
+    --GetSituationalColorName(unit, tp_frame.PlateStyle)
+    GetSituationalColor(tp_frame.unit, tp_frame.PlateStyle)
     UpdatePlateColors(tp_frame)
 
     --print ("Color - Situational Update:", tp_frame.unit.name .. "(" .. tp_frame.unit.unitid .. ") =>", tp_frame.unit.SituationalColor)
@@ -611,16 +631,16 @@ function Element.UpdateSettings()
   SettingsName = SettingsBase.Name
 
   --  Functions to calculate the healthbar/name color for a unit based
-  HealthbarColorFunctions["FRIENDLY"] = HEALTHBAR_COLOR_MODE_REFERENCE[Settings.FriendlyUnitMode]
-  HealthbarColorFunctions["HOSTILE"] = HEALTHBAR_COLOR_MODE_REFERENCE[Settings.EnemyUnitMode]
+  HealthbarColorFunctions["FRIENDLY"] = HEALTHBAR_COLOR_FUNCTIONS[Settings.FriendlyUnitMode]
+  HealthbarColorFunctions["HOSTILE"] = HEALTHBAR_COLOR_FUNCTIONS[Settings.EnemyUnitMode]
   HealthbarColorFunctions["NEUTRAL"] = HealthbarColorFunctions["HOSTILE"]
 
-  NameColorFunctions["HealthbarMode"]["FRIENDLY"] = NAME_COLOR_MODE_REFERENCE[SettingsName.HealthbarMode.FriendlyUnitMode]
-  NameColorFunctions["HealthbarMode"]["HOSTILE"] = NAME_COLOR_MODE_REFERENCE[SettingsName.HealthbarMode.EnemyUnitMode]
+  NameColorFunctions["HealthbarMode"]["FRIENDLY"] = NAME_COLOR_FUNCTIONS[SettingsName.HealthbarMode.FriendlyUnitMode]
+  NameColorFunctions["HealthbarMode"]["HOSTILE"] = NAME_COLOR_FUNCTIONS[SettingsName.HealthbarMode.EnemyUnitMode]
   NameColorFunctions["HealthbarMode"]["NEUTRAL"] = NameColorFunctions["HealthbarMode"]["HOSTILE"]
 
-  NameColorFunctions["NameMode"]["FRIENDLY"] = NAME_COLOR_MODE_REFERENCE[SettingsName.NameMode.FriendlyUnitMode]
-  NameColorFunctions["NameMode"]["HOSTILE"] = NAME_COLOR_MODE_REFERENCE[SettingsName.NameMode.EnemyUnitMode]
+  NameColorFunctions["NameMode"]["FRIENDLY"] = NAME_COLOR_FUNCTIONS[SettingsName.NameMode.FriendlyUnitMode]
+  NameColorFunctions["NameMode"]["HOSTILE"] = NAME_COLOR_FUNCTIONS[SettingsName.NameMode.EnemyUnitMode]
   NameColorFunctions["NameMode"]["NEUTRAL"] = NameColorFunctions["NameMode"]["HOSTILE"]
 
   --  Custom color for Name text in healthbar and name mode
@@ -635,14 +655,17 @@ function Element.UpdateSettings()
   ColorByReaction = SettingsBase.ColorByReaction
   ColorByHealth = SettingsBase.ColorByHealth
 
-  TargetMarkColoring["HealthbarMode"] = SettingsName.HealthbarMode.UseRaidMarkColoring
-  TargetMarkColoring["NameMode"] = SettingsName.NameMode.UseRaidMarkColoring
+  NameModeSettings.HealthbarMode.UseTargetColoring = SettingsBase.targetWidget.ModeNames
+  NameModeSettings.HealthbarMode.UseRaidMarkColoring = SettingsName.HealthbarMode.UseRaidMarkColoring
+  NameModeSettings.NameMode.UseTargetColoring = SettingsBase.targetWidget.ModeNames
+  NameModeSettings.NameMode.UseRaidMarkColoring = SettingsName.NameMode.UseRaidMarkColoring
 
   for style, settings in pairs(TidyPlatesThreat.db.profile.settings) do
     if settings.threatcolor then -- there are several subentries unter settings. Only use style subsettings like unique, normal, dps, ...
       ThreatColor[style] = settings.threatcolor
     end
   end
+
 
   -- Subscribe/unsubscribe to events based on settings
   if SettingsBase.threat.ON and SettingsBase.threat.useHPColor and
