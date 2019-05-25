@@ -1,4 +1,10 @@
 ﻿------------------------------------------------------
+9.1.9
+------------------------------------------------------
+* Fixed bug with healthbar background and threat glow where the elements transparency value always would be set to 100% if fade-in was enabled.
+* Fixed a bug with Resource widget where the resource bar was not shown on the current target's nameplate when switching targets.
+
+------------------------------------------------------
 9.1.8
 ------------------------------------------------------
 * Fixed a Lua error that occured when target highlight for healthbar and headline view were disabled while having an active target.
