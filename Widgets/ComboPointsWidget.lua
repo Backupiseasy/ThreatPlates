@@ -496,6 +496,7 @@ function Widget:OnTargetUnitAdded(tp_frame, unit)
     widget_frame:SetParent(tp_frame)
     widget_frame:SetFrameLevel(tp_frame:GetFrameLevel() + 7)
 
+    widget_frame:ClearAllPoints()
     -- Updates based on settings / unit style
     local db = self.db
     if unit.style == "NameOnly" or unit.style == "NameOnly-Unique" then

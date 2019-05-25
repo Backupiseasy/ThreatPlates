@@ -259,6 +259,7 @@ function Widget:OnTargetUnitAdded(tp_frame, unit)
 
   widget_frame:SetParent(tp_frame)
   widget_frame:SetFrameLevel(tp_frame:GetFrameLevel() + 8)
+  widget_frame:ClearAllPoints()
   widget_frame:SetPoint("CENTER", widget_frame:GetParent(), db.x, db.y)
 
   local bar = widget_frame.Bar
