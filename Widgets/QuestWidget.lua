@@ -22,7 +22,6 @@ local GetNamePlates, GetNamePlateForUnit = C_NamePlate.GetNamePlates, C_NamePlat
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
-local ON_UPDATE_INTERVAL = Addon.ON_UPDATE_PER_FRAME
 
 local InCombat = false
 local TooltipFrame = CreateFrame("GameTooltip", "ThreatPlates_Tooltip", nil, "GameTooltipTemplate")
@@ -49,22 +48,15 @@ local IsQuestUnit -- Function
 -- Update Hook to compensate for deleyed quest information update on unit tooltips
 ---------------------------------------------------------------------------------------------------
 local function WatchforQuestUpdateOnTooltip(self, elapsed)
-  -- Update the number of seconds since the last update
-  self.TimeSinceLastUpdate = (self.TimeSinceLastUpdate or 0) + elapsed
+  -- Rest watch list and check again
+  self.WatchTooltip = nil
+  IsQuestUnit(self.unit)
 
-  if self.TimeSinceLastUpdate >= ON_UPDATE_INTERVAL then
-    self.TimeSinceLastUpdate = 0
-
-    -- Rest watch list and check again
+  if not self.WatchTooltip then
     self.WatchTooltip = nil
-    IsQuestUnit(self.unit)
+    self:SetScript("OnUpdate", nil)
 
-    if not self.WatchTooltip then
-      self.WatchTooltip = nil
-      self:SetScript("OnUpdate", nil)
-
-      Widget:UpdateFrame(self, self.unit) -- Calls IsQuestUnit again, but right now no way to not do that
-    end
+    Widget:UpdateFrame(self, self.unit) -- Calls IsQuestUnit again, but right now no way to not do that
   end
 end
 

@@ -61,7 +61,6 @@ end
 ---------------------------------------------------------------------------------------------------
 -- Global contstants for various stuff
 ---------------------------------------------------------------------------------------------------
-Addon.ON_UPDATE_PER_FRAME = 1 / GetFramerate()
 Addon.ON_UPDATE_INTERVAL = 0.25 -- minimum number of seconds between each update of a frame for OnUpdate handlers
 Addon.PLATE_FADE_IN_TIME = 0.5
 Addon.CASTBAR_INTERRUPT_HOLD_TIME = 1

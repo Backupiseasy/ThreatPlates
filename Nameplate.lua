@@ -34,7 +34,6 @@ local ElementsUpdateStyle, ElementsUpdateSettings = Addon.Elements.UpdateStyle, 
 
 -- Constants
 local CASTBAR_INTERRUPT_HOLD_TIME = Addon.CASTBAR_INTERRUPT_HOLD_TIME
-local ON_UPDATE_INTERVAL = Addon.ON_UPDATE_PER_FRAME
 local PLATE_FADE_IN_TIME = Addon.PLATE_FADE_IN_TIME
 local THREAT_REFERENCE = Addon.THREAT_REFERENCE
 
@@ -321,22 +320,19 @@ local	function OnNewNameplate(plate)
   -- Parent could be: WorldFrame, UIParent, plate
   local tp_frame = CreateFrame("Frame",  "ThreatPlatesFrame" .. plate:GetName(), WorldFrame)
   tp_frame:Hide()
-
   tp_frame:SetFrameStrata("BACKGROUND")
   tp_frame:EnableMouse(false)
   tp_frame.Parent = plate
-  --extended:SetAllPoints(plate)
   plate.TPFrame = tp_frame
 
   -- Tidy Plates Frame References
-  local visual = {}
-  tp_frame.visual = visual
+  tp_frame.visual = {}
 
   -- Status Bars
   local textframe = CreateFrame("Frame", nil, tp_frame)
   textframe:SetAllPoints()
   textframe:SetFrameLevel(tp_frame:GetFrameLevel() + 6)
-  visual.textframe = textframe
+  tp_frame.visual.textframe = textframe
 
   -- Add Graphical Elements
   ElementsCreated(tp_frame)
@@ -732,31 +728,20 @@ end
 
 -- Frame: self = plate
 local function FrameOnUpdate(plate, elapsed)
-  local ON_UPDATE_INTERVAL = ON_UPDATE_INTERVAL
-  local SettingsEnabledOccludedAlpha, UpdatePlate_SetAlphaOnUpdate = SettingsEnabledOccludedAlpha, UpdatePlate_SetAlphaOnUpdate
-  local UnitIsUnit = UnitIsUnit
+  local unitid = plate.UnitFrame.unit
+  if unitid and UnitIsUnit(unitid, "player") then
+    return
+  end
 
-  -- Update the number of seconds since the last update
-  plate.TimeSinceLastUpdate = (plate.TimeSinceLastUpdate or 0) + elapsed
+  local tp_frame = plate.TPFrame
+  tp_frame:SetFrameLevel(plate:GetFrameLevel() * 10)
 
-  if plate.TimeSinceLastUpdate >= ON_UPDATE_INTERVAL then
-    plate.TimeSinceLastUpdate = 0
+  --    for i = 1, #PlateOnUpdateQueue do
+  --      PlateOnUpdateQueue[i](plate, tp_frame.unit)
+  --    end
 
-    local unitid = plate.UnitFrame.unit
-    if unitid and UnitIsUnit(unitid, "player") then
-      return
-    end
-
-    local tp_frame = plate.TPFrame
-    tp_frame:SetFrameLevel(plate:GetFrameLevel() * 10)
-
-    --    for i = 1, #PlateOnUpdateQueue do
-    --      PlateOnUpdateQueue[i](plate, tp_frame.unit)
-    --    end
-
-    if SettingsEnabledOccludedAlpha then
-      UpdatePlate_SetAlphaOnUpdate(tp_frame, tp_frame.unit)
-    end
+  if SettingsEnabledOccludedAlpha then
+    UpdatePlate_SetAlphaOnUpdate(tp_frame, tp_frame.unit)
   end
 end
 
