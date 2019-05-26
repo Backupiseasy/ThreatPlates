@@ -141,11 +141,9 @@ local function UpdatePlateColors(tp_frame)
         bg_color = Settings.BackgroundColor
       end
 
-
       local healthbar = tp_frame.visual.Healthbar
       healthbar:SetStatusBarColor(fg_color.r, fg_color.g, fg_color.b, 1)
       healthbar.Border:SetBackdropColor(bg_color.r, bg_color.g, bg_color.b, 1 - Settings.BackgroundOpacity)
-
       --tp_frame.CurrentHealthbarColor = fg_color
     --end
   end
@@ -290,9 +288,9 @@ end
 local function GetThreatLevel(unit, style, enable_off_tank)
   local threat_status = unit.ThreatStatus
 
-  local threat_situation, other_player_has_aggro
+  local threat_level, other_player_has_aggro
   if threat_status then
-    threat_situation = unit.ThreatLevel
+    threat_level = unit.ThreatLevel
     other_player_has_aggro = (threat_status < 2)
   else
     -- Should not be necessary here as GetThreatSituation is only called if either a threat table is available
@@ -300,17 +298,17 @@ local function GetThreatLevel(unit, style, enable_off_tank)
     local target_unit = unit.unitid .. "target"
     if UnitExists(target_unit) and not unit.isCasting then
       if UnitIsUnit(target_unit, "player") or UnitIsUnit(target_unit, "vehicle") then
-        threat_situation = "HIGH"
+        threat_level = "HIGH"
       else
-        threat_situation = "LOW"
+        threat_level = "LOW"
       end
 
-      unit.ThreatLevel = threat_situation
+      unit.ThreatLevel = threat_level
     else
-      threat_situation = unit.ThreatLevel or "LOW"
+      threat_level = unit.ThreatLevel or "LOW"
     end
 
-    other_player_has_aggro = (threat_situation == "LOW")
+    other_player_has_aggro = (threat_level == "LOW")
   end
 
   -- Reset "unit.IsOfftanked" if the player is tanking
@@ -339,11 +337,11 @@ local function GetThreatLevel(unit, style, enable_off_tank)
     -- Player does not tank the unit, but it might have been off-tanked before losing target.
     -- If so, assume that it is still securely off-tanked
     if unit.IsOfftanked then
-      threat_situation = "OFFTANK"
+      threat_level = "OFFTANK"
     end
   end
 
-  return threat_situation
+  return threat_level
 end
 
 function Addon:GetThreatColor(unit, style, use_threat_table)

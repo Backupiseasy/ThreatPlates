@@ -211,18 +211,13 @@ end
 function Element.Created(tp_frame)
   local healthbar = CreateFrame("StatusBar", nil, tp_frame)
   healthbar:SetFrameLevel(tp_frame:GetFrameLevel() + 5)
-  --frame:Hide()
+  --healthbar:Hide()
 
   local border = CreateFrame("Frame", nil, healthbar)
   border:SetFrameLevel(healthbar:GetFrameLevel())
   border:SetBackdrop(BorderBackdrop)
   border:SetBackdropBorderColor(0, 0, 0, 1)
   healthbar.Border = border
-
-  -- Save border backdrop color for restoring it later as it will be reset (to white) when updating the backdrop
-  -- => not necessary any more as the backdrop is only changed when the element is created now
-  -- local r, g, b, a = border:GetBackdropColor()
-  -- border:SetBackdropColor(r, g, b, a)
 
   local absorbs = healthbar:CreateTexture(nil, "BORDER", -6)
   absorbs.Overlay = healthbar:CreateTexture(nil, "OVERLAY", 0)

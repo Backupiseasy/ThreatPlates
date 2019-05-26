@@ -268,22 +268,43 @@ function TidyPlatesThreat:ChatCommandDebug(cmd_list)
     --Addon:ShowThreatFeedback(unit,true)
     --Addon:GetThreatColor(unit, unit.style, TidyPlatesThreat.db.profile.threat.UseThreatTable, true)
     --Addon:SetThreatColor(unit, true)
+  elseif command == "mouse" then
+    local plate = C_NamePlate.GetNamePlateForUnit("target")
+    if not plate then return end
+    local unit = plate.TPFrame.unit
+
+    local frame = plate.TPFrame
+
+    print ("FadeIn:", frame:GetAlpha(), "=>", target_alpha)
+    print ("  Healthbar:", frame.visual.Healthbar:GetAlpha())
+    print ("  Border:", frame.visual.Healthbar.Border:GetAlpha())
+    print ("  Backdrop:", frame.visual.Healthbar.Border:GetBackdropColor())
   elseif command == "quest" then
 		Addon:PrintQuests()
-	elseif command == "test" then
---		local profile = TidyPlatesThreat.db.profile
---		local prefix = { "HeadlineView", "customtext" }
---		print ("profile.StatusText.NameMode.Size =", Addon:TestGetValueOrDefault(profile, prefix, "size"))
---		print ("profile.StatusText.NameMode.HorizontalOffset =", Addon:TestGetValueOrDefault(profile, prefix, "x"))
---		print ("profile.StatusText.NameMode.VerticalOffset =", Addon:TestGetValueOrDefault(profile, prefix, "y"))
---		print ("profile.StatusText.NameMode.HorizontalAlignment =", Addon:TestGetValueOrDefault(profile, prefix, "align"))
---		print ("profile.StatusText.NameMode.VerticalAlignment =", Addon:TestGetValueOrDefault(profile, prefix, "vertical"))
-		print ("Migrate with current version = 9.3.0:")
-		Addon.MigrateEntries("9.3.0")
-		print ("Migrate with current version = 9.1.0:")
-		Addon.MigrateEntries("9.1.0")
-		print ("Migrate with current version = 9.2.0:")
-		Addon.MigrateEntries("9.2.0")
+	elseif command == "fadein" then
+    local plate = C_NamePlate.GetNamePlateForUnit("target")
+    if not plate then return end
+    local frame, unit = plate.TPFrame, plate.TPFrame.unit
+
+    Addon.Animations:Fade(frame, 1, 5)
+  elseif command == "fadeout" then
+    local plate = C_NamePlate.GetNamePlateForUnit("target")
+    if not plate then return end
+    local frame, unit = plate.TPFrame, plate.TPFrame.unit
+
+    Addon.Animations:Fade(frame, 0.1, 5)
+  elseif command == "scale" then
+    local plate = C_NamePlate.GetNamePlateForUnit("target")
+    if not plate then return end
+    local frame, unit = plate.TPFrame, plate.TPFrame.unit
+
+    Addon.Animations:Scale(frame, cmd_list[2], 1)
+  elseif command == "stop" then
+    local plate = C_NamePlate.GetNamePlateForUnit("target")
+    if not plate then return end
+    local frame, unit = plate.TPFrame, plate.TPFrame.unit
+
+    Addon.Animations:Stop(frame)
 	elseif command == "migrate" then
 		Addon.MigrateDatabase(cmd_list[2])
   elseif command == "role" then
@@ -332,7 +353,3 @@ function TidyPlatesThreat:ChatCommandDebug(cmd_list)
 		SearchDBForString(TidyPlatesThreat.db.profile, "<Profile>", string.lower(cmd_list[2]))
 	end
 end
-
------------------------------------------------------
--- External
------------------------------------------------------
