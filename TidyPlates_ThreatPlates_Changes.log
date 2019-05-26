@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+9.1.10
+------------------------------------------------------
+* Fixed a bug with the status bar backgrounds of healthbar, castbar, and Resource widget where the background color shines through the status bar when transparency is enabled.
+
+------------------------------------------------------
 9.1.9
 ------------------------------------------------------
 * Fixed bug with healthbar background and threat glow where the elements transparency value always would be set to 100% if fade-in was enabled.
