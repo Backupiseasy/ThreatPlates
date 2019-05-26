@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+9.1.10
+------------------------------------------------------
+* Removed DMB-based tracking lines between player and active nameplate auras as Blizzard changed the WoW API in a way to prevent this kind of feature [Issue #352].
+
+------------------------------------------------------
 9.1.8
 ------------------------------------------------------
 * Fixed a Lua error that occured when target highlight for healthbar and headline view were disabled while having an active target.

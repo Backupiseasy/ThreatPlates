@@ -917,8 +917,8 @@ ThreatPlates.DEFAULT_SETTINGS = {
       FontSize = 24,
       FontColor = RGB(255, 255, 255),
       -- TODO: add font flags like for custom text
-      ShowTrackingLine = true,
-      TrackingLineThickness = 4
+      --ShowTrackingLine = true, -- Removed in 9.1.9
+      --TrackingLineThickness = 4  -- Removed in 9.1.9
     },
 --    TestWidget = {
 --      ON = true,
