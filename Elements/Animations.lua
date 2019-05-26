@@ -8,10 +8,8 @@ local ADDON_NAME, Addon = ...
 ---------------------------------------------------------------------------------------------------
 
 -- WoW APIs
-local CreateFrame = CreateFrame
 
 -- ThreatPlates APIs
-local TidyPlatesThreat = TidyPlatesThreat
 
 local Animations = {}
 
@@ -76,6 +74,26 @@ function Animations:CreateFadeIn(frame)
     self:Stop()
     self.Playing = nil
     frame:SetAlpha(self.TargetAlpha)
+
+    -- Workaround: Re-set the backdrop color for the healthbar, so that the correct alpha value is applied
+    -- Otherwise, the backdrop's alpha is set to 1 for some unknown reason.
+    local backdrop = frame.visual.healthbar.Border
+    backdrop:SetBackdropColor(backdrop:GetBackdropColor())
+    backdrop = frame.visual.threatborder
+    if backdrop:IsShown() then
+      backdrop:SetBackdropBorderColor(backdrop:GetBackdropBorderColor())
+    end
+  end)
+
+  frame.FadeInAnimation:SetScript("OnUpdate", function(self, elapsed)
+    -- Workaround: Re-set the backdrop color for the healthbar, so that the correct alpha value is applied
+    -- Otherwise, the backdrop's alpha is set to 1 for some unknown reason.
+    local backdrop = frame.visual.healthbar.Border
+    backdrop:SetBackdropColor(backdrop:GetBackdropColor())
+    backdrop = frame.visual.threatborder
+    if backdrop:IsShown() then
+      backdrop:SetBackdropBorderColor(backdrop:GetBackdropBorderColor())
+    end
   end)
 end
 
