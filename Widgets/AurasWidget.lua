@@ -16,30 +16,22 @@ local GetTime = GetTime
 local pairs = pairs
 local floor, ceil = floor, ceil
 local sort = sort
-local math = math
-local string = string
 local tonumber = tonumber
 
 -- WoW APIs
 local CreateFrame, GetFramerate = CreateFrame, GetFramerate
 local DebuffTypeColor = DebuffTypeColor
-local UnitAura, UnitIsFriend, UnitIsUnit, UnitReaction, UnitIsPlayer, UnitPlayerControlled = UnitAura, UnitIsFriend, UnitIsUnit, UnitReaction, UnitIsPlayer, UnitPlayerControlled
+local UnitAura, UnitIsUnit, UnitReaction = UnitAura, UnitIsUnit, UnitReaction
 local UnitAffectingCombat = UnitAffectingCombat
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local GameTooltip = GameTooltip
-local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
+local IsInInstance = IsInInstance
 
 -- ThreatPlates APIs
 local LibCustomGlow = Addon.LibCustomGlow
 local TidyPlatesThreat = TidyPlatesThreat
 local Animations = Addon.Animations
 local Font = Addon.Font
-local UpdateTextPosition = Addon.Font.UpdateTextPosition
-local RGB = ThreatPlates.RGB
-local DEBUG = ThreatPlates.DEBUG
-
--- Default for icon mode is 0.5, for bar mode "1 / GetFramerate()" is used for smooth updates -- GetFramerate() in frames/second
-local UPDATE_INTERVAL = Addon.ON_UPDATE_INTERVAL
 
 ---------------------------------------------------------------------------------------------------
 -- Aura Highlighting
@@ -370,7 +362,6 @@ local function OnUpdateAurasWidget(widget_frame, elapsed)
     widget_frame.TimeSinceLastUpdate = 0
 
     local aura_frame
-    local current_time = GetTime()
     for i = 1, widget_frame.Debuffs.ActiveAuras do
       aura_frame = widget_frame.Debuffs.AuraFrames[i]
       widget:UpdateWidgetTime(aura_frame, aura_frame.AuraExpiration, aura_frame.AuraDuration)
