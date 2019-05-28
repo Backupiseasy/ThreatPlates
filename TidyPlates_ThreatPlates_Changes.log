@@ -1,5 +1,5 @@
 ﻿------------------------------------------------------
-9.1.10
+9.1.10-Beta1
 ------------------------------------------------------
 * Fixed a bug with the status bar backgrounds of healthbar, castbar, and Resource widget where the background color shines through the status bar when transparency is enabled.
 
