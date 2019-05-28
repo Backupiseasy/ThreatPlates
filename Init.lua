@@ -29,6 +29,8 @@ TidyPlatesThreat = LibStub("AceAddon-3.0"):NewAddon("TidyPlatesThreat", "AceCons
 -- Global for DBM to differentiate between Threat Plates and Tidy Plates: Threat
 TidyPlatesThreatDBM = true
 
+Addon.Animations = {}
+
 --------------------------------------------------------------------------------------------------
 -- General Functions
 ---------------------------------------------------------------------------------------------------

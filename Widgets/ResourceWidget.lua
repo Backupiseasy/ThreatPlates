@@ -265,9 +265,8 @@ function Widget:OnTargetUnitAdded(tp_frame, unit)
   widget_frame:ClearAllPoints()
   widget_frame:SetPoint("CENTER", widget_frame:GetParent(), db.x, db.y)
 
-  local bar = widget_frame.Bar
   if db.ShowBar then
-    bar:SetStatusBarColor(self.BarColorRed, self.BarColorGreen, self.BarColorBlue, 1)
+    widget_frame.Bar:SetStatusBarColor(self.BarColorRed, self.BarColorGreen, self.BarColorBlue, 1)
 
     if db.BackgroundUseForegroundColor then
       widget_frame.Background:SetVertexColor(self.BarColorRed, self.BarColorGreen, self.BarColorBlue, 0.3)
@@ -306,11 +305,13 @@ function Widget:UpdateLayout()
 
   local bar = widget_frame.Bar
   if db.ShowBar then
+    local bar_texture = ThreatPlates.Media:Fetch('statusbar', db.BarTexture)
+
     bar:SetAllPoints()
-    bar:SetStatusBarTexture(ThreatPlates.Media:Fetch('statusbar', db.BarTexture))
+    bar:SetStatusBarTexture(bar_texture)
 
     local background = widget_frame.Background
-    background:SetTexture(ThreatPlates.Media:Fetch('statusbar', db.BarTexture))
+    background:SetTexture(bar_texture)
     background:SetPoint("TOPLEFT", bar:GetStatusBarTexture(), "TOPRIGHT")
     background:SetPoint("BOTTOMRIGHT", bar, "BOTTOMRIGHT")
 

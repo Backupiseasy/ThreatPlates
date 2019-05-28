@@ -38,6 +38,7 @@ local GetPlayerInfoByGUID, RAID_CLASS_COLORS = GetPlayerInfoByGUID, RAID_CLASS_C
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
 local Widgets = Addon.Widgets
+local Animations = Addon.Animations
 
 -- Constants
 -- Raid Icon Reference
@@ -284,8 +285,8 @@ do
     end
 
     -- Update Delegates
-    UpdatePlate_Transparency(extended, unit)
     UpdateIndicator_CustomScaleText()
+    UpdatePlate_Transparency(extended, unit)
 
     -- Cache the old unit information
     UpdateUnitCache()
@@ -519,8 +520,9 @@ local function UpdatePlate_SetAlphaWithFading(tp_frame, unit)
   local target_alpha = Addon:GetAlpha(unit)
 
   if target_alpha ~= tp_frame.CurrentAlpha then
-    Addon.Animations:StopFadeIn(tp_frame)
-    Addon.Animations:FadeIn(tp_frame, target_alpha, PLATE_FADE_IN_TIME)
+    --Animations:StopFadeIn(tp_frame)
+    --Animations:FadeIn(tp_frame, target_alpha, PLATE_FADE_IN_TIME)
+    Animations:FadePlate(tp_frame, target_alpha, PLATE_FADE_IN_TIME)
     tp_frame.CurrentAlpha = target_alpha
   end
 end
@@ -556,12 +558,14 @@ local function UpdatePlate_SetAlphaWithFadingOcclusionOnUpdate(tp_frame, unit)
   end
 
   if target_alpha and target_alpha ~= tp_frame.CurrentAlpha then
-    Addon.Animations:StopFadeIn(tp_frame)
+    --Animations:StopFadeIn(tp_frame)
+    Animations:StopFade(tp_frame)
 
     if tp_frame.IsOccluded then
       tp_frame:SetAlpha(target_alpha)
     else
-      Addon.Animations:FadeIn(tp_frame, target_alpha, PLATE_FADE_IN_TIME)
+      --Animations:FadeIn(tp_frame, target_alpha, PLATE_FADE_IN_TIME)
+      Animations:FadePlate(tp_frame, target_alpha, PLATE_FADE_IN_TIME)
     end
 
     tp_frame.CurrentAlpha = target_alpha
@@ -751,8 +755,8 @@ do
     castbar:SetAllColors(Addon:SetCastbarColor(unit))
     castbar:SetFormat(unit.spellIsShielded)
 
-    UpdatePlate_Transparency(extended, unit)
     UpdateIndicator_CustomScaleText()
+    UpdatePlate_Transparency(extended, unit)
 
 		castbar:Show()
 	end
@@ -767,8 +771,8 @@ do
     unit.isCasting = false
 
 		--UpdateIndicator_CustomScaleText()
-    UpdatePlate_Transparency(extended, unit)
     UpdateIndicator_CustomScale(extended, unit)
+    UpdatePlate_Transparency(extended, unit)
 	end
 
 	function OnUpdateCastMidway(plate, unitid)

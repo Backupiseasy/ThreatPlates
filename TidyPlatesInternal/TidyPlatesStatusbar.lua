@@ -78,7 +78,6 @@ end
 
 local function SetAllColors(self, rBar, gBar, bBar, aBar, rBackdrop, gBackdrop, bBackdrop, aBackdrop)
   self:SetStatusBarColor(rBar or 1, gBar or 1, bBar or 1, aBar or 1)
-  --self.Border:SetBackdropColor(rBackdrop or 1, gBackdrop or 1, bBackdrop or 1, aBackdrop or 1)
   self.Background:SetVertexColor(rBackdrop or 1, gBackdrop or 1, bBackdrop or 1, aBackdrop or 1)
 end
 
@@ -125,9 +124,7 @@ function Addon:CreateHealthbar(parent)
   frame:SetFrameLevel(parent:GetFrameLevel() + 5)
 
   frame.Border = CreateFrame("Frame", nil, frame)
-
   frame.Background = frame:CreateTexture(nil, "BACKGROUND")
-
   frame.EliteBorder = CreateFrame("Frame", nil, frame)
   frame.ThreatBorder = CreateFrame("Frame", nil, frame)
 
@@ -218,9 +215,7 @@ function Addon:CreateCastbar(parent)
   frame:SetFrameLevel(parent:GetFrameLevel() + 4)
 
   frame.Border = CreateFrame("Frame", nil, frame)
-
   frame.Background = frame:CreateTexture(nil, "BACKGROUND")
-
   frame.InterruptBorder = CreateFrame("Frame", nil, frame)
   frame.Overlay = CreateFrame("Frame", nil, frame)
 
