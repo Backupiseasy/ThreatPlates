@@ -12,7 +12,6 @@ local pairs, next = pairs, next
 
 -- WoW APIs
 local CreateFrame, UIParent = CreateFrame, UIParent
-local floor, abs = floor, abs
 
 -- ThreatPlates APIs
 
@@ -100,74 +99,74 @@ function Animations:StopFlash(frame)
   end
 end
 
-function Animations:CreateFadeIn(frame)
-  frame.FadeInAnimation = frame:CreateAnimationGroup("FadeIn")
-  frame.FadeInAnimation.FadeIn = frame.FadeInAnimation:CreateAnimation("ALPHA", "FadeIn")
+--function Animations:CreateFadeIn(frame)
+--  frame.FadeInAnimation = frame:CreateAnimationGroup("FadeIn")
+--  frame.FadeInAnimation.FadeIn = frame.FadeInAnimation:CreateAnimation("ALPHA", "FadeIn")
+--
+--  frame.FadeInAnimation:SetScript("OnFinished", function(self, requested)
+--    self:Stop()
+--    self.Playing = nil
+--    frame:SetAlpha(self.TargetAlpha)
+--
+--    -- Workaround: Re-set the backdrop color for the healthbar, so that the correct alpha value is applied
+--    -- Otherwise, the backdrop's alpha is set to 1 for some unknown reason.
+--    local backdrop = frame.visual.healthbar.Background
+--    backdrop:SetVertexColor(backdrop:GetVertexColor())
+--    backdrop = frame.visual.threatborder
+--    if backdrop:IsShown() then
+--      backdrop:SetBackdropBorderColor(backdrop:GetBackdropBorderColor())
+--    end
+--  end)
+--
+--  frame.FadeInAnimation:SetScript("OnUpdate", function(self, elapsed)
+--    -- Workaround: Re-set the backdrop color for the healthbar, so that the correct alpha value is applied
+--    -- Otherwise, the backdrop's alpha is set to 1 for some unknown reason.
+--    local backdrop = frame.visual.healthbar.Background
+--    backdrop:SetVertexColor(backdrop:GetVertexColor())
+--    backdrop = frame.visual.threatborder
+--    if backdrop:IsShown() then
+--      backdrop:SetBackdropBorderColor(backdrop:GetBackdropBorderColor())
+--    end
+--  end)
+--end
 
-  frame.FadeInAnimation:SetScript("OnFinished", function(self, requested)
-    self:Stop()
-    self.Playing = nil
-    frame:SetAlpha(self.TargetAlpha)
-
-    -- Workaround: Re-set the backdrop color for the healthbar, so that the correct alpha value is applied
-    -- Otherwise, the backdrop's alpha is set to 1 for some unknown reason.
-    local backdrop = frame.visual.healthbar.Background
-    backdrop:SetVertexColor(backdrop:GetVertexColor())
-    backdrop = frame.visual.threatborder
-    if backdrop:IsShown() then
-      backdrop:SetBackdropBorderColor(backdrop:GetBackdropBorderColor())
-    end
-  end)
-
-  frame.FadeInAnimation:SetScript("OnUpdate", function(self, elapsed)
-    -- Workaround: Re-set the backdrop color for the healthbar, so that the correct alpha value is applied
-    -- Otherwise, the backdrop's alpha is set to 1 for some unknown reason.
-    local backdrop = frame.visual.healthbar.Background
-    backdrop:SetVertexColor(backdrop:GetVertexColor())
-    backdrop = frame.visual.threatborder
-    if backdrop:IsShown() then
-      backdrop:SetBackdropBorderColor(backdrop:GetBackdropBorderColor())
-    end
-  end)
-end
-
-function Animations:FadeIn(frame, target_alpha, duration)
-  if not frame.FadeInAnimation then
-    self:CreateFadeIn(frame, target_alpha)
-  end
-
-  local animation = frame.FadeInAnimation
-  if not frame.Playing then
-    animation.FadeIn:SetFromAlpha(frame:GetAlpha())
-    animation.FadeIn:SetToAlpha(target_alpha)
-    animation.FadeIn:SetDuration(duration)
-    animation:Play()
-    animation.Playing = true
-    animation.TargetAlpha = target_alpha
-  end
-end
-
-function Animations:StopFadeIn(frame)
-  local animation = frame.FadeInAnimation
-  if animation and animation.Playing then
-
-    local r, g, b, a = frame.visual.healthbar.Background:GetVertexColor()
-    if frame.unit.isTarget then
-      print (GetTime(), "Vor Stop: a =>", a)
-    end
-
-    animation:Pause()
-
-    local r, g, b, a = frame.visual.healthbar.Background:GetVertexColor()
-    if frame.unit.isTarget then
-      print (GetTime(), "Nach Stop: a =>", a)
-    end
-
-    frame:SetAlpha(animation.TargetAlpha)
-    --frame:SetAlpha(frame.CurrentAlpha)
-    animation.Playing = nil
-  end
-end
+--function Animations:FadeIn(frame, target_alpha, duration)
+--  if not frame.FadeInAnimation then
+--    self:CreateFadeIn(frame, target_alpha)
+--  end
+--
+--  local animation = frame.FadeInAnimation
+--  if not frame.Playing then
+--    animation.FadeIn:SetFromAlpha(frame:GetAlpha())
+--    animation.FadeIn:SetToAlpha(target_alpha)
+--    animation.FadeIn:SetDuration(duration)
+--    animation:Play()
+--    animation.Playing = true
+--    animation.TargetAlpha = target_alpha
+--  end
+--end
+--
+--function Animations:StopFadeIn(frame)
+--  local animation = frame.FadeInAnimation
+--  if animation and animation.Playing then
+--
+--    local r, g, b, a = frame.visual.healthbar.Background:GetVertexColor()
+--    if frame.unit.isTarget then
+--      print (GetTime(), "Vor Stop: a =>", a)
+--    end
+--
+--    animation:Pause()
+--
+--    local r, g, b, a = frame.visual.healthbar.Background:GetVertexColor()
+--    if frame.unit.isTarget then
+--      print (GetTime(), "Nach Stop: a =>", a)
+--    end
+--
+--    frame:SetAlpha(animation.TargetAlpha)
+--    --frame:SetAlpha(frame.CurrentAlpha)
+--    animation.Playing = nil
+--  end
+--end
 
 function Animations:FadePlate(frame, target_alpha, duration)
   --local current_alpha = frame:GetAlpha()

@@ -378,12 +378,9 @@ end
 
 function Widget:PLAYER_ENTERING_WORLD()
   -- From KuiNameplates: Update icons after zoning to workaround UnitPowerMax returning 0 when
-  -- zoning into/out of instanced PVP
-  local _, instanceType = IsInInstance()
-  if instanceType == "pvp" or instanceType == "arena" then
-    self:DetermineUnitPower()
-    self:UpdateLayout()
-  end
+  -- zoning into/out of instanced PVP, also in timewalking dungeons
+  self:DetermineUnitPower()
+  self:UpdateLayout()
 end
 
 -- As this event is only registered for druid characters, ShowInShapeshiftForm is true by initialization for all other classes

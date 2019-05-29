@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+9.1.10-Beta2
+------------------------------------------------------
+* Fixed a bug with Combo Points widget not properly being shown on the target unit's nameplate after entering a timewalking dungeon [Comment #1994].
+
+------------------------------------------------------
 9.1.10-Beta1
 ------------------------------------------------------
 * Fixed a bug with the status bar backgrounds of healthbar, castbar, and Resource widget where the background color shines through the status bar when transparency is enabled.
