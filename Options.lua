@@ -2205,31 +2205,6 @@ local function CreateBossModsWidgetOptions()
           } ,
         },
       },
-      TrackingLine = {
-        name = L["Tracking Line"],
-        type = "group",
-        order = 20,
-        inline = true,
-        args = {
-          Show = {
-            name = L["Enable"],
-            order = 1,
-            type = "toggle",
-            desc = L["Show tracking lines between player and an active nameplate aura."],
-            arg = { "BossModsWidget", "ShowTrackingLine" },
-          },
-          Thickness = {
-            name = L["Thickness"],
-            type = "range",
-            order = 20,
-            step = 1,
-            min = 1,
-            max = 20,
-            isPercent = false,
-            arg = { "BossModsWidget", "TrackingLineThickness" },
-          },
-        },
-      },
       Placement = GetPlacementEntryWidget(30, "BossModsWidget", true),
       Config = {
         name = L["Configuration Mode"],
