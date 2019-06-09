@@ -325,25 +325,7 @@ function TidyPlatesThreat:OnEnable()
   TidyPlatesThreat:CheckForFirstStartUp()
   TidyPlatesThreat:CheckForIncompatibleAddons()
 
-  TidyPlatesThreat:ReloadTheme()
-
-
   Addon.CVars:OverwriteBoolProtected("nameplateResourceOnTarget", self.db.profile.PersonalNameplate.ShowResourceOnTarget)
-
-  -- TODO: check with what this  was replaces
-  --TidyPlatesUtilityInternal:EnableGroupWatcher()
-  -- TPHUub: if LocalVars.AdvancedEnableUnitCache then TidyPlatesUtilityInternal:EnableUnitCache() else TidyPlatesUtilityInternal:DisableUnitCache() end
-  -- TPHUub: TidyPlatesUtilityInternal:EnableHealerTrack()
-  -- if TidyPlatesThreat.db.profile.healerTracker.ON then
-  -- 	if not healerTrackerEnabled then
-  -- 		TidyPlatesUtilityInternal.EnableHealerTrack()
-  -- 	end
-  -- else
-  -- 	if healerTrackerEnabled then
-  -- 		TidyPlatesUtilityInternal.DisableHealerTrack()
-  -- 	end
-  -- end
-  -- TidyPlatesWidgets:EnableTankWatch()
 
   -- Get updates for changes regarding: Large Nameplates
   hooksecurefunc("SetCVar", SetCVarHook)
@@ -455,6 +437,8 @@ function TidyPlatesThreat:PLAYER_LOGIN(...)
   if self.db.char.welcome then
     t.Print(L["|cff89f559Threat Plates:|r Welcome back |cff"]..t.HCC[Addon.PlayerClass]..UnitName("player").."|r!!")
   end
+
+  TidyPlatesThreat:ReloadTheme()
 end
 
 function TidyPlatesThreat:PLAYER_LOGOUT(...)
