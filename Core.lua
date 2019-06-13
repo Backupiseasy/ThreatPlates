@@ -6,23 +6,28 @@ local t = Addon.ThreatPlates
 ---------------------------------------------------------------------------------------------------
 
 -- Lua APIs
-local tonumber = tonumber
+local tonumber, pairs = tonumber, pairs
 
 -- WoW APIs
-local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local SetNamePlateFriendlyClickThrough = C_NamePlate.SetNamePlateFriendlyClickThrough
 local SetNamePlateEnemyClickThrough = C_NamePlate.SetNamePlateEnemyClickThrough
 local UnitName, IsInInstance, InCombatLockdown = UnitName, IsInInstance, InCombatLockdown
 local GetCVar, SetCVar, IsAddOnLoaded = GetCVar, SetCVar, IsAddOnLoaded
 local C_NamePlate_SetNamePlateFriendlySize, C_NamePlate_SetNamePlateEnemySize, Lerp =  C_NamePlate.SetNamePlateFriendlySize, C_NamePlate.SetNamePlateEnemySize, Lerp
+local C_Timer_After = C_Timer.After
 local NamePlateDriverFrame = NamePlateDriverFrame
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
 local LibStub = LibStub
+local LSM = t.Media
 local L = t.L
 
+---------------------------------------------------------------------------------------------------
+-- Local variables
+---------------------------------------------------------------------------------------------------
 local task_queue_ooc = {}
+local LSMUpdateTimer
 
 ---------------------------------------------------------------------------------------------------
 -- Global configs and funtions
@@ -84,7 +89,6 @@ local EVENTS = {
   -- UNIT_MAXHEALTH,
   -- UNIT_ABSORB_AMOUNT_CHANGED,
 
-  -- PLAYER_ENTERING_WORLD
   -- PLAYER_REGEN_ENABLED
   -- PLAYER_REGEN_DISABLED
 
@@ -327,6 +331,13 @@ function TidyPlatesThreat:OnEnable()
 
   Addon.CVars:OverwriteBoolProtected("nameplateResourceOnTarget", self.db.profile.PersonalNameplate.ShowResourceOnTarget)
 
+  TidyPlatesThreat:ReloadTheme()
+
+  -- Register callbacks at LSM, so that we can refresh everything if additional media is added after TP is loaded
+  -- Register this callback after ReloadTheme as media will be updated there anyway
+  LSM.RegisterCallback(self, "LibSharedMedia_SetGlobal", "MediaUpdate" )
+  LSM.RegisterCallback(self, "LibSharedMedia_Registered", "MediaUpdate" )
+
   -- Get updates for changes regarding: Large Nameplates
   hooksecurefunc("SetCVar", SetCVarHook)
 
@@ -349,6 +360,24 @@ function Addon:CallbackWhenOoC(func, msg)
     task_queue_ooc[#task_queue_ooc + 1] = func
   else
     func()
+  end
+end
+
+-- Register callbacks at LSM, so that we can refresh everything if additional media is added after TP is loaded
+function TidyPlatesThreat.MediaUpdate(addon_name, name, mediatype, key)
+  if mediatype ~= LSM.MediaType.SOUND and not LSMUpdateTimer then
+    LSMUpdateTimer = true
+
+    -- Delay the update for one second to avoid firering this several times when multiple media are registered by another addon
+    C_Timer_After(1, function()
+      LSMUpdateTimer = nil
+      -- Basically, ReloadTheme but without CVar and some other stuff
+      Addon:SetThemes(TidyPlatesThreat)
+      -- no media used: Addon:UpdateConfigurationStatusText()
+      -- no media used: Addon:InitializeCustomNameplates()
+      Addon.Widgets:InitializeAllWidgets()
+      Addon:ForceUpdate()
+    end)
   end
 end
 
@@ -425,7 +454,6 @@ function TidyPlatesThreat:PLAYER_ENTERING_WORLD()
     -- reset to previous setting
     Addon.CVars:RestoreFromProfile("nameplateGlobalScale")
   end
-
 end
 
 --function TidyPlatesThreat:PLAYER_LEAVING_WORLD()
@@ -437,8 +465,6 @@ function TidyPlatesThreat:PLAYER_LOGIN(...)
   if self.db.char.welcome then
     t.Print(L["|cff89f559Threat Plates:|r Welcome back |cff"]..t.HCC[Addon.PlayerClass]..UnitName("player").."|r!!")
   end
-
-  TidyPlatesThreat:ReloadTheme()
 end
 
 function TidyPlatesThreat:PLAYER_LOGOUT(...)
