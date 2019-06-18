@@ -219,6 +219,7 @@ Widget.CROWD_CONTROL_SPELLS = {
   --[204242] = PC_SNARE,        -- Consecrated Ground - same aura as Consecration
   -- Retribution
   -- [205273] = PC_SNARE,       -- Wake of Ashes - from Artefact weapon
+  [255937] = PC_SNARE,          -- Wake of Ashes - Talent
   [183218] = PC_SNARE,          -- Hand of Hindrance
 
   -- Priest

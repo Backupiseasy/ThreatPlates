@@ -1,12 +1,9 @@
 ﻿------------------------------------------------------
-9.1.11-Beta2
+9.1.11
 ------------------------------------------------------
 * Fixed a bug with media like textures not being correctly loaded after login or reloading the UI [Issue #355].
-
-------------------------------------------------------
-9.1.11-Beta1
-------------------------------------------------------
 * Removed DMB-based tracking lines between player and active nameplate auras as Blizzard changed the WoW API in a way to prevent this kind of feature [Issue #352].
+* Aura for Wake of Ashes (Talend) (Retribution Paladin) is now correctly recognized as crowd-control aura [Issue #356].
 
 ﻿------------------------------------------------------
 9.1.10
