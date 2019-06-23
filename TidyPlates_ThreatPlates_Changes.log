@@ -1,9 +1,11 @@
 ﻿------------------------------------------------------
-9.1.11-Beta3
+9.1.11
 ------------------------------------------------------
+* Updates and bug fixes for WoW Patch 8.2.
 * Fixed a bug with media like textures not being correctly loaded after login or reloading the UI [Issue #355].
 * Removed DMB-based tracking lines between player and active nameplate auras as Blizzard changed the WoW API in a way to prevent this kind of feature [Issue #352].
 * Aura for Wake of Ashes (Talend) (Retribution Paladin) is now correctly recognized as crowd-control aura [Issue #356].
+* Increased the slots for custom nameplates to 130 [PM].
 * Fixed a Lua error when changing certain settings related to the healthbar size in combat. This settings can only be changed out of combat now.
 * Fixed a bug in Auras widget where some debuffs were displayed twice when changing the aura type filter for crowd-control auras (e.g., from All to Blizzard) in the options.
 
