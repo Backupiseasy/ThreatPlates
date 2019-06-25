@@ -106,6 +106,7 @@ function Widget:OnTargetUnitAdded(tp_frame, unit)
   if self:EnabledForStyle(unit.style, unit) then
     widget_frame:SetParent(tp_frame)
     widget_frame:SetFrameLevel(tp_frame:GetFrameLevel() + 6)
+    widget_frame:ClearAllPoints()
     widget_frame:SetAllPoints(tp_frame.visual.healthbar)
 
     local healthbar_mode_frame = widget_frame.HealthbarMode
