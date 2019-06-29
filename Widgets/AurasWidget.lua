@@ -23,7 +23,7 @@ local CreateFrame, GetFramerate = CreateFrame, GetFramerate
 local DebuffTypeColor = DebuffTypeColor
 local UnitAura, UnitIsUnit, UnitReaction = UnitAura, UnitIsUnit, UnitReaction
 local UnitAffectingCombat = UnitAffectingCombat
-local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
+local GetNamePlates, GetNamePlateForUnit = C_NamePlate.GetNamePlates, C_NamePlate.GetNamePlateForUnit
 local GameTooltip = GameTooltip
 local IsInInstance = IsInInstance
 
@@ -1367,18 +1367,20 @@ function Widget:PLAYER_TARGET_CHANGED()
 end
 
 function Widget:PLAYER_REGEN_ENABLED()
-  --PLayerIsInCombat = false
+  -- It seems that unitid here can be nil when using the healthstone while in combat
+  -- assert (unit.unitid ~= nil, "Auras: PLAYER_REGEN_ENABLED - unitid =", unit.unitid)
 
-  for plate, _ in pairs(Addon.PlatesVisible) do
-    local widget_frame = plate.TPFrame.widgets.Auras
-    local unit = plate.TPFrame.unit
+  local frame
+  for _, plate in pairs(GetNamePlates()) do
+    frame = plate and plate.TPFrame
+    if frame and frame.Active then
+      local widget_frame = frame.widgets.Auras
+      local unit = frame.unit
 
-    -- It seems that unitid here can be nil when using the healthstone while in combat
-    -- assert (unit.unitid ~= nil, "Auras: PLAYER_REGEN_ENABLED - unitid =", unit.unitid)
-
-    if widget_frame.Active and unit.HasUnlimitedAuras and unit.unitid then
-      unit.isInCombat = UnitAffectingCombat(unit.unitid)
-      self:UpdateIconGrid(widget_frame, unit)
+      if widget_frame.Active and unit.HasUnlimitedAuras then
+        unit.isInCombat = UnitAffectingCombat(unit.unitid)
+        self:UpdateIconGrid(widget_frame, unit)
+      end
     end
   end
 end

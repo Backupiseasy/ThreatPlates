@@ -70,7 +70,12 @@ function Widget:OnUnitAdded(widget_frame, unit)
 
 	-- Updates based on settings
 	widget_frame:SetSize(db.scale, db.scale)
-	widget_frame.Icon:SetTexture(unique_setting.icon)
+
+  if unique_setting.icon:sub(-4) == ".blp" then
+	  widget_frame.Icon:SetTexture("Interface\\Icons\\" .. unique_setting.icon)
+  else
+    widget_frame.Icon:SetTexture(unique_setting.icon)
+  end
 
 	widget_frame:Show()
 end

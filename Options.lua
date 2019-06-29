@@ -4757,7 +4757,12 @@ local function CreateCustomNameplatesGroup()
                     local _, _, icon = GetSpellInfo(spell_id)
                     options.args.Custom.args["#" .. index].args.Icon.args.Icon.image = icon
                   else
-                    options.args.Custom.args["#" .. index].args.Icon.args.Icon.image = db.uniqueSettings[index].icon
+                    local icon_path = db.uniqueSettings[index].icon
+                    if icon_path:sub(-4) == ".blp" then
+                      options.args.Custom.args["#" .. index].args.Icon.args.Icon.image = "Interface\\Icons\\" .. icon_path
+                    else
+                      options.args.Custom.args["#" .. index].args.Icon.args.Icon.image = icon_path
+                    end
                   end
                   UpdateSpecial()
                   clipboard = nil
@@ -4936,7 +4941,12 @@ local function CreateCustomNameplatesGroup()
                     local _, _, icon = GetSpellInfo(spell_id)
                     return icon
                   else
-                    return db.uniqueSettings[index].icon
+                    local icon_path = db.uniqueSettings[index].icon
+                    if icon_path:sub(-4) == ".blp" then
+                      return "Interface\\Icons\\" .. icon_path
+                    else
+                      return icon_path
+                    end
                   end
                 end,
                 imageWidth = 64,
@@ -4945,7 +4955,7 @@ local function CreateCustomNameplatesGroup()
               Description = {
                 type = "description",
                 order = 3,
-                name = L["Type direct icon texture path using '\\' to separate directory folders, or use a spellid."],
+                name = L["Enter an icons name (with the *.blp ending), a spell ID or a full icon path (using '\\' to separate directory folders)."],
                 width = "full",
               },
               SetIcon = {
@@ -4971,7 +4981,11 @@ local function CreateCustomNameplatesGroup()
                   -- Either store the path to the icon or the icon ID
                   SetValue(info, val)
                   if val then
-                    options.args.Custom.args["#" .. index].args.Icon.args.Icon.image = val
+                    if val:sub(-4) == ".blp" then
+                      options.args.Custom.args["#" .. index].args.Icon.args.Icon.image = "Interface\\Icons\\" .. val
+                    else
+                      options.args.Custom.args["#" .. index].args.Icon.args.Icon.image = val
+                    end
                   else
                     options.args.Custom.args["#" .. index].args.Icon.args.Icon.image = "Interface\\Icons\\Temp"
                   end
