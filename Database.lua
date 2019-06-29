@@ -478,6 +478,26 @@ local function MigrationThreatDetection(profile_name, profile)
   end
 end
 
+local function MigrationUniqueSettings(profile_name, profile)
+  local settings = profile.uniqueSettings
+
+  local custom_plates_to_keep = {}
+  for k, v in pairs(settings) do
+    if k ~= "map" then
+      if v.name and v.name ~= "<Enter name here>" then
+        custom_plates_to_keep[#custom_plates_to_keep + 1] = v
+      end
+
+      settings[k] = nil
+    end
+  end
+
+  for i = 1, #custom_plates_to_keep do
+    settings[#settings + 1] = custom_plates_to_keep[i]
+  end
+end
+Addon.MigrationUniqueSettings = MigrationUniqueSettings
+
 ---- Settings in the SavedVariables file that should be migrated and/or deleted
 local DEPRECATED_SETTINGS = {
 --  NamesColor = { MigrateNamesColor, },                        -- settings.name.color

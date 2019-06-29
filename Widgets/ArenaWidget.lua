@@ -109,7 +109,7 @@ function Widget:OnUnitAdded(widget_frame, unit)
 
   GetArenaOpponents()
 
-  local arena_no = ArenaID[unit.guid] or 5
+  local arena_no = ArenaID[unit.guid]
 
   if not arena_no then
     widget_frame:Hide()

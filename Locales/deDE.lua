@@ -171,12 +171,27 @@ This is your first time using Threat Plates and you are a(n):
 Das ist das erste Mal, dass Du Threat Plates benutzt und Du bist ein(n):
 |r|cff]=]
 L["|cff89f559You are currently in your "] = "|cff89f559Du bist derzeit in Deiner "
+L[ [=[|cffFF0000DELETE CUSTOM NAMEPLATE|r
+Are you sure you want to delete the selected custom nameplate?]=] ] = [=[|cffFF0000LÖSCHE DIE BENUTZERDEFINIERTE NAMENSPLAKETTE|r
+Bist du sicher, dass du die ausgewählte benutzerdefinierte Namensplakette löschen möchtest?]=]
 L["|cffff0000DPS/Healing|r"] = "|cffff0000DPS/Heiler|r"
 L["|cffff0000dpsing / healing|r"] = "|cffff0000DPS/Heiler|r"
 L["|cffff0000High Threat|r"] = "|cffff0000Hohe Bedrohung|r"
 L["|cffff0000IMPORTANT: Enabling this feature changes console variables (CVARs) which will change the appearance of default Blizzard nameplates. Disabling this feature will reset these CVARs to the original value they had when you enabled this feature.|r"] = "|cffff0000IMPORTANT: Bei Aktivierung dieses Feature werden Konsolenvariablen (CVars) verändert, die das Aussehen der Standard-Namensplaketten von Blizzard anpassen. Das Ausschalten des Features setzt diese CVars wieder auf den Wert zurück, den sie zu dem Zeitpunkt hatten, als du das Feature aktiviert hast.|r"
 L["|cffff0000IMPORTANT: Enabling this feature changes console variables (CVars) which will change the appearance of default Blizzard nameplates. Disabling this feature will reset these CVars to the original value they had when you enabled this feature.|r"] = "|cffff0000IMPORTANT: Bei Aktivierung dieses Feature werden Konsolenvariablen (CVars) verändert, die das Aussehen der Standard-Namensplaketten von Blizzard anpassen. Das Ausschalten des Features setzt diese CVars wieder auf den Wert zurück, den sie zu dem Zeitpunkt hatten, als du das Feature aktiviert hast.|r"
 L["|cffff0000Low Threat|r"] = "|cffff0000Niedrige Bedrohung|r"
+L["|cffFF0000Migrate Custom Nameplates Settings|r"] = "|cffFF0000Migriere die Einstellungen für benutzerdefinierte Namensplaketten|r"
+L["|cffFF0000Migrate Custom Nameplates|r"] = "|cffFF0000Migriere die benutzerdefinierte Namensplaketten|r"
+L[ [=[|cffFF0000MIGRATE CUSTOM NAMEPLATES|r
+Migration should only delete deprecated default custom nameplates and re-order the remaining ones. Nevertheless, it is highly advised to backup your settings (the SavedVariables file TidyPlates_ThreatPlates.lua) in case something goes wrong.
+
+Are you sure you want to migrate your custom nameplates?]=] ] = "|cffFF0000HINWEIS|r Die Migration sollte nur veraltete, standardmäßig bereitgestellte benutzerdefinierte Namensplaketten löschen und die verbleibenden neu anordnen. Dennoch ist es ratsam, deine Einstellungen zu sichern (in der Datei SavedVariables TidyPlates_ThreatPlates.lua), falls etwas schief geht. Bist du sicher, dass du deine benutzerdefinierten Namensplaketten migrieren möchtest?"
+L[ [=[|cffFF0000NOTE|r
+Migration should only delete deprecated default custom nameplates and re-order the remaining ones. Nevertheless, it is highly advised to backup your settings (the SavedVariables file TidyPlates_ThreatPlates.lua) in case something goes wrong.
+
+Are you sure you want to migrate your custom nameplates?]=] ] = [=[|cffFF0000HINWEIS|r
+Die Migration sollte nur veraltete, standardmäßig bereitgestellte benutzerdefinierte Namensplaketten löschen und die verbleibenden neu anordnen. Dennoch ist es ratsam, deine Einstellungen zu sichern (in der SavedVariables-Datei TidyPlates_ThreatPlates.lua), falls etwas schief geht.
+Bist du sicher, dass du deine benutzerdefinierten Namensplaketten migrieren möchtest?]=]
 L["|cffffff00Medium Threat|r"] = "|cffffff00Mitllere Bedrohung|r"
 L["|cffffffffGeneral Settings|r"] = "|cffffffffAllgemeine Einstellungen|r"
 L["|cffffffffLow Threat|r"] = "|cffffffffNiedrige Bedrohung|r"
@@ -378,6 +393,7 @@ L["Define base scale settings for various unit types. Only one of these settings
 L["Define if threat feedback should be shown for various units based on their type or status."] = "Lege für Gegner, basierend auf ihrem Typ oder Status, fest, ob ein Bedrohungsfeedback anzeigt werden"
 L["Defines the movement/collision model for nameplates."] = "Legt das Bewegungs-/Kollisionsmodell für Nameplaketten fest."
 L["Deformed Fanatic"] = "Deformierter Fanatiker"
+L["Delete"] = "Löschen"
 L["Determine your role (tank/dps/healing) automatically based on current spec."] = "Ermittelt deine Rolle (Tank/DPS/Heiler) automatisch basierend auf deiner Spezialisierung fest."
 L["Disable"] = "Ausschalten"
 L["Disable Custom Alpha"] = "Benutzerdefinierten Alphawert ausschalten"
@@ -668,6 +684,7 @@ L["Neutral NPCs"] = "Neutrale NPCs"
 L["Neutral Units"] = "Neutrale Einheiten"
 L["Neutral Units & Minions"] = "Neutrale & geringe Gegner"
 L["Neutral Units & Minions & Status"] = "Neutrale und geringe Gegner & Status"
+L["New"] = "Neu"
 L["No"] = "Nein"
 L["No Outline, Monochrome"] = "Keine Rahmenlinie, einfarbig"
 L["No Target"] = "Kein Ziel"
@@ -1142,5 +1159,6 @@ L["X"] = "X"
 L["Y"] = "Y"
 L["Yes"] = "Ja"
 L["You can access the "] = "Die Einstellungen können für "
+L["You cannot delete General Settings, only custom nameplates entries."] = "Du kannst die allgemeinen Einstellungen nicht löschen, nur Einträge für benutzerdefinierte Namensplaketten."
 L["You currently have two nameplate addons enabled: |cff89F559Threat Plates|r and |cff89F559%s|r. Please disable one of these, otherwise two overlapping nameplates will be shown for units."] = "Du hast aktuell zwei Nameplate-Addons aktiviert: |cff89F559Threat Plates|r und |cff89F559%s|r. Bitte deaktiviere eines dieser beiden Addons, da ansonsten zwei überlappende Namensplaketten bei Einheiten angezeigt werden."
 L["Your own quests that you have to complete."] = "Quests von dir, die du noch abschließen musst."

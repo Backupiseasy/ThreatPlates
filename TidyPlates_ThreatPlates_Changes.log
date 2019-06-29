@@ -1,4 +1,10 @@
-﻿------------------------------------------------------
+﻿﻿------------------------------------------------------
+9.1.13-Beta1
+------------------------------------------------------
+* Custom nameplates no longer have a fixed number of slots. You can now add (or remove) as many custom nameplates as you want. Before you can use this feature, you have to migrate your current custom nameplates. It is highly recommended to backup the Threat Plates SavedVariables file before doing that!
+* Fixed a bug in Arena widget where a wrong number could be displayed in some situations.
+
+------------------------------------------------------
 9.1.12
 ------------------------------------------------------
 * Fixed a Lua error with Target Highlight widget when switching targets in combat [Comment #2024].
