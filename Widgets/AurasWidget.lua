@@ -24,7 +24,6 @@ local DebuffTypeColor = DebuffTypeColor
 local UnitAura, UnitIsUnit, UnitReaction = UnitAura, UnitIsUnit, UnitReaction
 local UnitAffectingCombat = UnitAffectingCombat
 local GetNamePlates, GetNamePlateForUnit = C_NamePlate.GetNamePlates, C_NamePlate.GetNamePlateForUnit
-local GameTooltip = GameTooltip
 local IsInInstance = IsInInstance
 
 -- ThreatPlates APIs
@@ -46,6 +45,8 @@ local CUSTOM_GLOW_FUNCTIONS = {
 ---------------------------------------------------------------------------------------------------
 -- Auras Widget Functions
 ---------------------------------------------------------------------------------------------------
+
+local AuraTooltip = CreateFrame("GameTooltip", "ThreatPlatesAuraTooltip", UIParent, "GameTooltipTemplate")
 
 local GRID_LAYOUT = {
   LEFT = {
@@ -867,12 +868,12 @@ end
 ---------------------------------------------------------------------------------------------------
 
 local function AuraFrameOnEnter(self)
-  GameTooltip:SetOwner(self, "ANCHOR_LEFT")
-  GameTooltip:SetUnitAura(self:GetParent():GetParent().unit.unitid, self.AuraIndex, self:GetParent().Filter)
+  AuraTooltip:SetOwner(self, "ANCHOR_LEFT")
+  AuraTooltip:SetUnitAura(self:GetParent():GetParent().unit.unitid, self.AuraIndex, self:GetParent().Filter)
 end
 
 local function AuraFrameOnLeave(self)
-  GameTooltip:Hide()
+  AuraTooltip:Hide()
 end
 
 ---------------------------------------------------------------------------------------------------
