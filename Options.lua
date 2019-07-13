@@ -140,7 +140,7 @@ function Addon:InitializeCustomNameplates()
 
   db.uniqueSettings.map = {}
   for i, unique_unit in pairs(db.uniqueSettings) do
-    if unique_unit.name and unique_unit.name ~= "<Enter name here>" then
+    if type(i) == "number" and unique_unit.name and unique_unit.name ~= "<Enter name here>" then
       db.uniqueSettings.map[unique_unit.name] = unique_unit
     end
   end
@@ -4679,7 +4679,7 @@ local function CreateCustomNameplatesGroup()
   local clipboard = nil;
 
   for index, unique_unit in pairs(db.uniqueSettings) do
-    if unique_unit.name and unique_unit.name ~= "<Enter name here>" then
+    if type(index) == "number" and unique_unit.name and unique_unit.name ~= "<Enter name here>" then
       entry["#" .. index] = {
         name = "#" .. index .. ". " .. db.uniqueSettings[index].name,
         type = "group",

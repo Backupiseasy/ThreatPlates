@@ -140,9 +140,16 @@ end
 --  elseif command == "quest" then
 --		Addon:PrintQuests()
 --	elseif command == "test" then
---    for k, v in pairs(Addon.LibCustomGlow) do
---      print(k, v)
---    end
+--		local settings = TidyPlatesThreat.db.profile.uniqueSettings
+--
+--		local i = 0
+--		for k, v in pairs(settings) do
+--			i = i + 1
+--			print (i, "=>", k, "=", v, " => ", v and v.name and v.name)
+--			if type(i) == "number" and v.name and v.name ~= "<Enter name here>" then
+--				print ("  => Custom")
+--			end
+--		end
 --	elseif command == "migrate" then
 --		Addon.MigrateDatabase(cmd_list[2])
 --		--		--PrintHelp()

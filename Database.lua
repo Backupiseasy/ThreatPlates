@@ -74,6 +74,739 @@ local function SetNamePlateClickThrough(friendly, enemy)
 --  end
 end
 
+local DEPRECATED_UNIQUE_SETTINGS = {
+  map = {},
+  ["**"] = {
+    name = "",
+    showNameplate = true,
+    ShowHeadlineView = false,
+    showIcon = true,
+    useStyle = true,
+    useColor = true,
+    UseThreatColor = false,
+    UseThreatGlow = false,
+    allowMarked = true,
+    overrideScale = false,
+    overrideAlpha = false,
+    icon = "",
+    scale = 1,
+    alpha = 1,
+    color = {
+      r = 1,
+      g = 1,
+      b = 1
+    },
+    Deprecated = true,
+  },
+  [1] = {
+    name = L["Shadow Fiend"],
+    showNameplate = true,
+    ShowHeadlineView = false,
+    showIcon = true,
+    useStyle = true,
+    useColor = true,
+    UseThreatColor = false,
+    UseThreatGlow = false,
+    allowMarked = true,
+    overrideScale = false,
+    overrideAlpha = false,
+    icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U1",
+    scale = 0.45,
+    alpha = 1,
+    color = {
+      r = 0.61,
+      g = 0.40,
+      b = 0.86
+    },
+  },
+  [2] = {
+    name = L["Spirit Wolf"],
+    showNameplate = true,
+    ShowHeadlineView = false,
+    showIcon = true,
+    useStyle = true,
+    useColor = true,
+    UseThreatColor = false,
+    UseThreatGlow = false,
+    allowMarked = true,
+    overrideScale = false,
+    overrideAlpha = false,
+    icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U2",
+    scale = 0.45,
+    alpha = 1,
+    color = {
+      r = 0.32,
+      g = 0.7,
+      b = 0.89
+    },
+  },
+  [3] = {
+    name = L["Ebon Gargoyle"],
+    showNameplate = true,
+    ShowHeadlineView = false,
+    showIcon = true,
+    useStyle = true,
+    useColor = true,
+    UseThreatColor = false,
+    UseThreatGlow = false,
+    allowMarked = true,
+    overrideScale = false,
+    overrideAlpha = false,
+    icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U3",
+    scale = 0.45,
+    alpha = 1,
+    color = {
+      r = 1,
+      g = 0.71,
+      b = 0
+    },
+  },
+  [4] = {
+    name = L["Water Elemental"],
+    showNameplate = true,
+    ShowHeadlineView = false,
+    showIcon = true,
+    useStyle = true,
+    useColor = true,
+    UseThreatColor = false,
+    UseThreatGlow = false,
+    allowMarked = true,
+    overrideScale = false,
+    overrideAlpha = false,
+    icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U4",
+    scale = 0.45,
+    alpha = 1,
+    color = {
+      r = 0.33,
+      g = 0.72,
+      b = 0.44
+    },
+  },
+  [5] = {
+    name = L["Treant"],
+    showNameplate = true,
+    ShowHeadlineView = false,
+    showIcon = true,
+    useStyle = true,
+    useColor = true,
+    UseThreatColor = false,
+    UseThreatGlow = false,
+    allowMarked = true,
+    overrideScale = false,
+    overrideAlpha = false,
+    icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U5",
+    scale = 0.45,
+    alpha = 1,
+    color = {
+      r = 1,
+      g = 0.71,
+      b = 0
+    },
+  },
+  [6] = {
+    name = L["Viper"],
+    showNameplate = true,
+    ShowHeadlineView = false,
+    showIcon = true,
+    useStyle = true,
+    useColor = true,
+    UseThreatColor = false,
+    UseThreatGlow = false,
+    allowMarked = true,
+    overrideScale = false,
+    overrideAlpha = false,
+    icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U6",
+    scale = 0.45,
+    alpha = 1,
+    color = {
+      r = 0.39,
+      g = 1,
+      b = 0.11
+    },
+  },
+  [7] = {
+    name = L["Venomous Snake"],
+    showNameplate = true,
+    ShowHeadlineView = false,
+    showIcon = true,
+    useStyle = true,
+    useColor = true,
+    UseThreatColor = false,
+    UseThreatGlow = false,
+    allowMarked = true,
+    overrideScale = false,
+    overrideAlpha = false,
+    icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U6",
+    scale = 0.45,
+    alpha = 1,
+    color = {
+      r = 0.75,
+      g = 0,
+      b = 0.02
+    },
+  },
+  [8] = {
+    name = L["Army of the Dead Ghoul"],
+    showNameplate = true,
+    ShowHeadlineView = false,
+    showIcon = true,
+    useStyle = true,
+    useColor = true,
+    UseThreatColor = false,
+    UseThreatGlow = false,
+    allowMarked = true,
+    overrideScale = false,
+    overrideAlpha = false,
+    icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U7",
+    scale = 0.45,
+    alpha = 1,
+    color = {
+      r = 0.87,
+      g = 0.78,
+      b = 0.88
+    },
+  },
+  [9] = {
+    name = L["Shadowy Apparition"],
+    showNameplate = true,
+    ShowHeadlineView = false,
+    showIcon = true,
+    useStyle = true,
+    useColor = true,
+    UseThreatColor = false,
+    UseThreatGlow = false,
+    allowMarked = true,
+    overrideScale = false,
+    overrideAlpha = false,
+    icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U8",
+    scale = 1,
+    alpha = 1,
+    color = {
+      r = 0.62,
+      g = 0.19,
+      b = 1
+    },
+  },
+  [10] = {
+    name = L["Shambling Horror"],
+    showNameplate = true,
+    ShowHeadlineView = false,
+    showIcon = true,
+    useStyle = true,
+    useColor = true,
+    UseThreatColor = false,
+    UseThreatGlow = false,
+    allowMarked = true,
+    overrideScale = false,
+    overrideAlpha = false,
+    icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U9",
+    scale = 1,
+    alpha = 1,
+    color = {
+      r = 0.69,
+      g = 0.26,
+      b = 0.25
+    },
+  },
+  [11] = {
+    name = L["Web Wrap"],
+    showNameplate = true,
+    ShowHeadlineView = false,
+    showIcon = true,
+    useStyle = true,
+    useColor = true,
+    UseThreatColor = false,
+    UseThreatGlow = false,
+    allowMarked = true,
+    overrideScale = false,
+    overrideAlpha = false,
+    icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U10",
+    scale = 0.75,
+    alpha = 1,
+    color = {
+      r = 1,
+      g = 0.39,
+      b = 0.96
+    },
+  },
+  [12] = {
+    name = L["Immortal Guardian"],
+    showNameplate = true,
+    ShowHeadlineView = false,
+    showIcon = true,
+    useStyle = true,
+    useColor = true,
+    UseThreatColor = false,
+    UseThreatGlow = false,
+    allowMarked = true,
+    overrideScale = false,
+    overrideAlpha = false,
+    icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U11",
+    scale = 1,
+    alpha = 1,
+    color = {
+      r = 0.33,
+      g = 0.33,
+      b = 0.33
+    },
+  },
+  [13] = {
+    name = L["Marked Immortal Guardian"],
+    showNameplate = true,
+    ShowHeadlineView = false,
+    showIcon = true,
+    useStyle = true,
+    useColor = true,
+    UseThreatColor = false,
+    UseThreatGlow = false,
+    allowMarked = true,
+    overrideScale = false,
+    overrideAlpha = false,
+    icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U12",
+    scale = 1,
+    alpha = 1,
+    color = {
+      r = 0.75,
+      g = 0,
+      b = 0.02
+    },
+  },
+  [14] = {
+    name = L["Empowered Adherent"],
+    showNameplate = true,
+    ShowHeadlineView = false,
+    showIcon = true,
+    useStyle = true,
+    useColor = true,
+    UseThreatColor = false,
+    UseThreatGlow = false,
+    allowMarked = true,
+    overrideScale = false,
+    overrideAlpha = false,
+    icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U13",
+    scale = 1,
+    alpha = 1,
+    color = {
+      r = 0.29,
+      g = 0.11,
+      b = 1
+    },
+  },
+  [15] = {
+    name = L["Deformed Fanatic"],
+    showNameplate = true,
+    ShowHeadlineView = false,
+    showIcon = true,
+    useStyle = true,
+    useColor = true,
+    UseThreatColor = false,
+    UseThreatGlow = false,
+    allowMarked = true,
+    overrideScale = false,
+    overrideAlpha = false,
+    icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U14",
+    scale = 1,
+    alpha = 1,
+    color = {
+      r = 0.55,
+      g = 0.7,
+      b = 0.29
+    },
+  },
+  [16] = {
+    name = L["Reanimated Adherent"],
+    showNameplate = true,
+    ShowHeadlineView = false,
+    showIcon = true,
+    useStyle = true,
+    useColor = true,
+    UseThreatColor = false,
+    UseThreatGlow = false,
+    allowMarked = true,
+    overrideScale = false,
+    overrideAlpha = false,
+    icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U15",
+    scale = 1,
+    alpha = 1,
+    color = {
+      r = 1,
+      g = 0.88,
+      b = 0.61
+    },
+  },
+  [17] = {
+    name = L["Reanimated Fanatic"],
+    showNameplate = true,
+    ShowHeadlineView = false,
+    showIcon = true,
+    useStyle = true,
+    useColor = true,
+    UseThreatColor = false,
+    UseThreatGlow = false,
+    allowMarked = true,
+    overrideScale = false,
+    overrideAlpha = false,
+    icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U15",
+    scale = 1,
+    alpha = 1,
+    color = {
+      r = 1,
+      g = 0.88,
+      b = 0.61
+    },
+  },
+  [18] = {
+    name = L["Bone Spike"],
+    showNameplate = true,
+    ShowHeadlineView = false,
+    showIcon = true,
+    useStyle = true,
+    useColor = true,
+    UseThreatColor = false,
+    UseThreatGlow = false,
+    allowMarked = true,
+    overrideScale = false,
+    overrideAlpha = false,
+    icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U16",
+    scale = 1,
+    alpha = 1,
+    color = {
+      r = 1,
+      g = 1,
+      b = 1
+    },
+  },
+  [19] = {
+    name = L["Onyxian Whelp"],
+    showNameplate = false,
+    ShowHealthbarView = true,
+    ShowHeadlineView = false,
+    showIcon = true,
+    useStyle = true,
+    useColor = true,
+    UseThreatColor = false,
+    UseThreatGlow = false,
+    allowMarked = true,
+    overrideScale = false,
+    overrideAlpha = false,
+    icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U17",
+    scale = 1,
+    alpha = 1,
+    color = {
+      r = 0.33,
+      g = 0.28,
+      b = 0.71
+    },
+  },
+  [20] = {
+    name = L["Gas Cloud"],
+    showNameplate = true,
+    ShowHeadlineView = false,
+    showIcon = true,
+    useStyle = true,
+    useColor = true,
+    UseThreatColor = false,
+    UseThreatGlow = false,
+    allowMarked = true,
+    overrideScale = false,
+    overrideAlpha = false,
+    icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U18",
+    scale = 1,
+    alpha = 1,
+    color = {
+      r = 0.96,
+      g = 0.56,
+      b = 0.07
+    },
+  },
+  [21] = {
+    name = L["Volatile Ooze"],
+    showNameplate = true,
+    ShowHeadlineView = false,
+    showIcon = true,
+    useStyle = true,
+    useColor = true,
+    UseThreatColor = false,
+    UseThreatGlow = false,
+    allowMarked = true,
+    overrideScale = false,
+    overrideAlpha = false,
+    icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U19",
+    scale = 1,
+    alpha = 1,
+    color = {
+      r = 0.36,
+      g = 0.95,
+      b = 0.33
+    },
+  },
+  [22] = {
+    name = L["Darnavan"],
+    showNameplate = true,
+    ShowHeadlineView = false,
+    showIcon = true,
+    useStyle = true,
+    useColor = true,
+    UseThreatColor = false,
+    UseThreatGlow = false,
+    allowMarked = true,
+    overrideScale = false,
+    overrideAlpha = false,
+    icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U20",
+    scale = 1,
+    alpha = 1,
+    color = {
+      r = 0.78,
+      g = 0.61,
+      b = 0.43
+    },
+  },
+  [23] = {
+    name = L["Val'kyr Shadowguard"],
+    showNameplate = true,
+    ShowHeadlineView = false,
+    showIcon = true,
+    useStyle = true,
+    useColor = true,
+    UseThreatColor = false,
+    UseThreatGlow = false,
+    allowMarked = true,
+    overrideScale = false,
+    overrideAlpha = false,
+    icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U21",
+    scale = 1,
+    alpha = 1,
+    color = {
+      r = 0.47,
+      g = 0.89,
+      b = 1
+    },
+  },
+  [24] = {
+    name = L["Kinetic Bomb"],
+    showNameplate = true,
+    ShowHeadlineView = false,
+    showIcon = true,
+    useStyle = true,
+    useColor = true,
+    UseThreatColor = false,
+    UseThreatGlow = false,
+    allowMarked = true,
+    overrideScale = false,
+    overrideAlpha = false,
+    icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U22",
+    scale = 1,
+    alpha = 1,
+    color = {
+      r = 0.91,
+      g = 0.71,
+      b = 0.1
+    },
+  },
+  [25] = {
+    name = L["Lich King"],
+    showNameplate = true,
+    ShowHeadlineView = false,
+    showIcon = true,
+    useStyle = true,
+    useColor = true,
+    UseThreatColor = false,
+    UseThreatGlow = false,
+    allowMarked = true,
+    overrideScale = false,
+    overrideAlpha = false,
+    icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U23",
+    scale = 1,
+    alpha = 1,
+    color = {
+      r = 0.77,
+      g = 0.12,
+      b = 0.23
+    },
+  },
+  [26] = {
+    name = L["Raging Spirit"],
+    showNameplate = true,
+    ShowHeadlineView = false,
+    showIcon = true,
+    useStyle = true,
+    useColor = true,
+    UseThreatColor = false,
+    UseThreatGlow = false,
+    allowMarked = true,
+    overrideScale = false,
+    overrideAlpha = false,
+    icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U24",
+    scale = 1,
+    alpha = 1,
+    color = {
+      r = 0.77,
+      g = 0.27,
+      b = 0
+    },
+  },
+  [27] = {
+    name = L["Drudge Ghoul"],
+    showNameplate = true,
+    ShowHeadlineView = false,
+    showIcon = false,
+    useStyle = true,
+    useColor = true,
+    UseThreatColor = false,
+    UseThreatGlow = false,
+    allowMarked = true,
+    overrideScale = false,
+    overrideAlpha = false,
+    icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U25",
+    scale = 0.85,
+    alpha = 1,
+    color = {
+      r = 0.43,
+      g = 0.43,
+      b = 0.43
+    },
+  },
+  [28] = {
+    name = L["Living Inferno"],
+    showNameplate = true,
+    ShowHeadlineView = false,
+    showIcon = true,
+    useStyle = true,
+    useColor = true,
+    UseThreatColor = false,
+    UseThreatGlow = false,
+    allowMarked = true,
+    overrideScale = false,
+    overrideAlpha = false,
+    icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U27",
+    scale = 1,
+    alpha = 1,
+    color = {
+      r = 0,
+      g = 1,
+      b = 0
+    },
+  },
+  [29] = {
+    name = L["Living Ember"],
+    showNameplate = true,
+    ShowHeadlineView = false,
+    showIcon = false,
+    useStyle = true,
+    useColor = true,
+    UseThreatColor = false,
+    UseThreatGlow = false,
+    allowMarked = true,
+    overrideScale = false,
+    overrideAlpha = false,
+    icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U28",
+    scale = 0.60,
+    alpha = 0.75,
+    color = {
+      r = 0.25,
+      g = 0.25,
+      b = 0.25
+    },
+  },
+  [30] = {
+    name = L["Fanged Pit Viper"],
+    showNameplate = false,
+    ShowHealthbarView = true,
+    ShowHeadlineView = false,
+    showIcon = false,
+    useStyle = true,
+    useColor = true,
+    UseThreatColor = false,
+    UseThreatGlow = false,
+    allowMarked = true,
+    overrideScale = false,
+    overrideAlpha = false,
+    icon = "",
+    scale = 0,
+    alpha = 0,
+    color = {
+      r = 1,
+      g = 1,
+      b = 1
+    },
+  },
+  [31] = {
+    name = L["Canal Crab"],
+    showNameplate = true,
+    ShowHeadlineView = false,
+    showIcon = true,
+    useStyle = true,
+    useColor = true,
+    UseThreatColor = false,
+    UseThreatGlow = false,
+    allowMarked = true,
+    overrideScale = false,
+    overrideAlpha = false,
+    icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U29",
+    scale = 1,
+    alpha = 1,
+    color = {
+      r = 0,
+      g = 1,
+      b = 1
+    },
+  },
+  [32] = {
+    name = L["Muddy Crawfish"],
+    showNameplate = true,
+    ShowHeadlineView = false,
+    showIcon = true,
+    useStyle = true,
+    useColor = true,
+    UseThreatColor = false,
+    UseThreatGlow = false,
+    allowMarked = true,
+    overrideScale = false,
+    overrideAlpha = false,
+    icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U30",
+    scale = 1,
+    alpha = 1,
+    color = {
+      r = 0.96,
+      g = 0.36,
+      b = 0.34
+    },
+  },
+}
+
+--local DEPRECATED_ICON_DEFAULTS = {
+--  ["Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U1"] = "spell_shadow_shadowfiend.blp",
+--  ["Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U2"] = "spell_shaman_feralspirit.blp",
+--  ["Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U3"] = "Ability_hunter_pet_bat.blp",
+--  ["Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U4"] = "Spell_frost_summonwaterelemental_2.blp",
+--  ["Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U5"] = "ability_druid_forceofnature.blp",
+--  ["Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U6"] = "Ability_hunter_snaketrap.blp",
+--  ["Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U7"] = "spell_deathknight_armyofthedead.blp",
+--  ["Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U8"] = "ability_priest_shadowyapparition.blp",
+--  ["Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U9"] = "ability_warrior_shockwave.blp",
+--  ["Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U10"] = "spell_nature_web.blp",
+--  ["Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U11"] = "spell_shadow_mindtwisting.blp",
+--  ["Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U12"] = "ability_hunter_markedfordeath.blp",
+--  ["Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U13"] = "spell_shadow_twistedfaith.blp",
+--  ["Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U14"] = "Spell_deathknight_thrash_ghoul.blp",
+--  ["Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U15"] = "Spell_shadow_raisedead.blp",
+--  ["Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U16"] = ".blp",
+--  ["Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U17"] = "Inv_misc_head_dragon_black.blp",
+--  ["Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U18"] = "inv_inscription_inkorange01.blp",
+--  ["Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U19"] = "inv_inscription_inkgreen03.blp",
+--  ["Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U20"] = "inv_misc_head_scourge_01.blp",
+--  ["Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U21"] = "Ability_druid_flightform.blp",
+--  ["Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U22"] = "spell_holy_circleofrenewal.blp",
+--  ["Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U23"] = "achievement_boss_lichking.blp",
+--  ["Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U24"] = "ability_warlock_eradication.blp",
+--  ["Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U25"] = "spell_shadow_deadofnight.blp",
+--  ["Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U26"] = "spell_arcane_prismaticcloak.blp",
+--  ["Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U27"] = "Spell_fire_elemental_totem.blp",
+--  ["Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U28"] = "Spell_fire_totemofwrath.blp",
+--  ["Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U29"] = "inv_jewelcrafting_truesilvercrab.blp",
+--  ["Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U30"] = "inv_misc_food_92_lobster.blp",
+--}
+
 ---------------------------------------------------------------------------------------------------
 -- Functions for migration of SavedVariables settings
 ---------------------------------------------------------------------------------------------------
@@ -478,22 +1211,60 @@ local function MigrationThreatDetection(profile_name, profile)
   end
 end
 
-local function MigrationUniqueSettings(profile_name, profile)
-  local settings = profile.uniqueSettings
-
-  local custom_plates_to_keep = {}
-  for k, v in pairs(settings) do
-    if k ~= "map" then
-      if v.name and v.name ~= "<Enter name here>" then
-        custom_plates_to_keep[#custom_plates_to_keep + 1] = v
-      end
-
-      settings[k] = nil
-    end
+local function GetValueOrDefault(old_value, default_value)
+  if old_value ~= nil then
+    return old_value
+  else
+    return default_value
   end
+end
 
-  for i = 1, #custom_plates_to_keep do
-    settings[#settings + 1] = custom_plates_to_keep[i]
+local function MigrationUniqueSettings(profile_name, profile)
+  if DatabaseEntryExists(profile, { "uniqueSettings" }) then
+
+    local settings = profile.uniqueSettings
+
+    local custom_plates_to_keep = {}
+    for k, v in pairs(settings) do
+      if k ~= "map" then
+        if v.name and v.name ~= "<Enter name here>" then
+          custom_plates_to_keep[#custom_plates_to_keep + 1] = v
+        end
+
+        settings[k] = nil
+      end
+    end
+
+    for i = 1, #custom_plates_to_keep do
+      local unique_unit = custom_plates_to_keep[i]
+
+      -- As default values are now different, copy the deprecated slots default value
+      local deprecated_settings = DEPRECATED_UNIQUE_SETTINGS[i]
+
+      unique_unit.showNameplate = GetValueOrDefault(unique_unit.showNameplate, deprecated_settings.showNameplate)
+      unique_unit.ShowHeadlineView = GetValueOrDefault(unique_unit.ShowHeadlineView, deprecated_settings.ShowHeadlineView)
+      unique_unit.showIcon = GetValueOrDefault(unique_unit.showIcon, deprecated_settings.showIcon)
+      unique_unit.useStyle = GetValueOrDefault(unique_unit.useStyle, deprecated_settings.useStyle)
+      unique_unit.useColor = GetValueOrDefault(unique_unit.useColor, deprecated_settings.useColor)
+      unique_unit.UseThreatColor = GetValueOrDefault(unique_unit.UseThreatColor, deprecated_settings.UseThreatColor)
+      unique_unit.UseThreatGlow = GetValueOrDefault(unique_unit.UseThreatGlow, deprecated_settings.UseThreatGlow)
+      unique_unit.allowMarked = GetValueOrDefault(unique_unit.allowMarked, deprecated_settings.allowMarked)
+      unique_unit.overrideScale = GetValueOrDefault(unique_unit.overrideScale, deprecated_settings.overrideScale)
+      unique_unit.overrideAlpha = GetValueOrDefault(unique_unit.overrideAlpha, deprecated_settings.overrideAlpha)
+      -- Replace the old Threat Plates internal icons with the WoW original ones
+      --unique_unit.icon = GetValueOrDefault(DEPRECATED_ICON_DEFAULTS[unique_unit.icon] or unique_unit.icon, DEPRECATED_ICON_DEFAULTS[deprecated_settings.icon])
+      unique_unit.icon = GetValueOrDefault(unique_unit.icon, deprecated_settings.icon)
+      unique_unit.SpellID = GetValueOrDefault(unique_unit.SpellID, deprecated_settings.SpellID)
+      unique_unit.scale = GetValueOrDefault(unique_unit.scale, deprecated_settings.scale)
+      unique_unit.alpha = GetValueOrDefault(unique_unit.alpha, deprecated_settings.alpha)
+
+      unique_unit.color = GetValueOrDefault(unique_unit.color, {})
+      unique_unit.color.r = GetValueOrDefault(unique_unit.color.r, deprecated_settings.color.r)
+      unique_unit.color.g = GetValueOrDefault(unique_unit.color.g, deprecated_settings.color.g)
+      unique_unit.color.b = GetValueOrDefault(unique_unit.color.b, deprecated_settings.color.b)
+
+      settings[#settings + 1] = custom_plates_to_keep[i]
+    end
   end
 end
 Addon.MigrationUniqueSettings = MigrationUniqueSettings
