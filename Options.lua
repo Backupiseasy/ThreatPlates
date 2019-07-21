@@ -3441,7 +3441,6 @@ local function CreateHeadlineViewShowEntry()
       order = pos,
       type = "group",
       inline = true,
-      disabled = function() return not GetCVarBool("nameplateShowAll") end,
       args = {},
     }
 
