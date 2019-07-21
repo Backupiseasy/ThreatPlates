@@ -1,5 +1,5 @@
 ﻿﻿------------------------------------------------------
-9.1.13-Beta
+9.1.13-Beta3
 ------------------------------------------------------
 * Fixed a Lua error when migrating custom nameplate settings [Issue #365].
 * Removed a unnecessary restriction for enabling headline view setttings [Comment #3776, #3782]
