@@ -1228,18 +1228,16 @@ local function MigrationUniqueSettings(profile_name, profile)
     for k, v in pairs(settings) do
       if k ~= "map" then
         if v.name and v.name ~= "<Enter name here>" then
-          custom_plates_to_keep[#custom_plates_to_keep + 1] = v
+          custom_plates_to_keep[k] = v
         end
 
         settings[k] = nil
       end
     end
 
-    for i = 1, #custom_plates_to_keep do
-      local unique_unit = custom_plates_to_keep[i]
-
+    for i, unique_unit in pairs(custom_plates_to_keep) do
       -- As default values are now different, copy the deprecated slots default value
-      local deprecated_settings = DEPRECATED_UNIQUE_SETTINGS[i]
+      local deprecated_settings = DEPRECATED_UNIQUE_SETTINGS[i] or DEPRECATED_UNIQUE_SETTINGS["**"]
 
       unique_unit.showNameplate = GetValueOrDefault(unique_unit.showNameplate, deprecated_settings.showNameplate)
       unique_unit.ShowHeadlineView = GetValueOrDefault(unique_unit.ShowHeadlineView, deprecated_settings.ShowHeadlineView)
