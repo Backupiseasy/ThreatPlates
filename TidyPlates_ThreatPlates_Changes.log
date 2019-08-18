@@ -33,6 +33,7 @@
 * Fixed a bug in Arena widget where a wrong number could be displayed in some situations.
 * Fixed Lua error in Auras widget which could happen when porting out of a BG or instanced content while auras where still shown on nameplates [Comment #3754].
 * Fixed a bug where the game tooltip's anchor was changed when tooltips for auras were enabled [#3745, #3752].
+* Fixed a bug with custom nameplate settings where custom nameplate names where not updated when switching the active profile.
 
 * Fixed a Lua error when migrating custom nameplate settings [Issue #365].
 

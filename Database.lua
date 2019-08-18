@@ -75,6 +75,7 @@ local function SetNamePlateClickThrough(friendly, enemy)
 end
 
 local DEPRECATED_UNIQUE_SETTINGS = {
+  map = {},
   ["**"] = {
     name = "<Enter name here>",
     showNameplate = true,
@@ -1281,22 +1282,7 @@ Addon.SetDefaultsForCustomNameplates = function()
   if TidyPlatesThreat.db.global.CustomNameplatesVersion > 1 then return end
 
   local defaults = ThreatPlates.CopyTable(TidyPlatesThreat.db.defaults)
-  local deprecated_defaults = {
-    map = {},
-    ["**"] = DEPRECATED_UNIQUE_SETTINGS["**"]
-  }
-
-  for profile_name, profile in pairs(TidyPlatesThreat.db.profiles) do
-    for index = 1, #DEPRECATED_UNIQUE_SETTINGS do
-      local unique_unit = profile.uniqueSettings[index]
-      -- uniqueSettings are already processed, so name is always defined if the slot is used
-      if unique_unit and unique_unit.name ~= "<Enter name here>" then
-        deprecated_defaults[index] = DEPRECATED_UNIQUE_SETTINGS[index]
-      end
-    end
-  end
-
-  defaults.profile.uniqueSettings = deprecated_defaults
+  defaults.profile.uniqueSettings = DEPRECATED_UNIQUE_SETTINGS
   TidyPlatesThreat.db:RegisterDefaults(defaults)
 end
 
