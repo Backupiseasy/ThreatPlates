@@ -75,9 +75,8 @@ local function SetNamePlateClickThrough(friendly, enemy)
 end
 
 local DEPRECATED_UNIQUE_SETTINGS = {
-  map = {},
   ["**"] = {
-    name = "",
+    name = "<Enter name here>",
     showNameplate = true,
     ShowHeadlineView = false,
     showIcon = true,
@@ -96,7 +95,6 @@ local DEPRECATED_UNIQUE_SETTINGS = {
       g = 1,
       b = 1
     },
-    Deprecated = true,
   },
   [1] = {
     name = L["Shadow Fiend"],
@@ -1219,53 +1217,88 @@ local function GetValueOrDefault(old_value, default_value)
   end
 end
 
-local function MigrationUniqueSettings(profile_name, profile)
-  if DatabaseEntryExists(profile, { "uniqueSettings" }) then
+Addon.MigrationCustomNameplatesV1 = function()
+  local defaults = ThreatPlates.CopyTable(TidyPlatesThreat.db.defaults)
+  TidyPlatesThreat.db:RegisterDefaults({})
 
-    local settings = profile.uniqueSettings
+  -- Set default to empty so that new defaul values don't impact the migration
+  for profile_name, profile in pairs(TidyPlatesThreat.db.profiles) do
+    if DatabaseEntryExists(profile, { "uniqueSettings" }) then
+      local settings = profile.uniqueSettings
 
-    local custom_plates_to_keep = {}
-    for k, v in pairs(settings) do
-      if k ~= "map" then
-        if v.name and v.name ~= "<Enter name here>" then
-          custom_plates_to_keep[k] = v
+      local custom_plates_to_keep = {}
+      for index, unique_unit in pairs(settings) do
+        -- Don't change entries map and ["**"]
+        if type(index) == "number" then
+          if unique_unit.name and unique_unit.name ~= "<Enter name here>" then
+            custom_plates_to_keep[index] = unique_unit
+          end
+
+          settings[index] = nil
         end
+      end
 
-        settings[k] = nil
+      local slot_counter = 0
+      for index, unique_unit in pairs(custom_plates_to_keep) do
+        -- As default values are now different, copy the deprecated slots default value
+        local deprecated_settings = DEPRECATED_UNIQUE_SETTINGS[index] or DEPRECATED_UNIQUE_SETTINGS["**"]
+
+        unique_unit.showNameplate = GetValueOrDefault(unique_unit.showNameplate, deprecated_settings.showNameplate)
+        unique_unit.ShowHeadlineView = GetValueOrDefault(unique_unit.ShowHeadlineView, deprecated_settings.ShowHeadlineView)
+        unique_unit.showIcon = GetValueOrDefault(unique_unit.showIcon, deprecated_settings.showIcon)
+        unique_unit.useStyle = GetValueOrDefault(unique_unit.useStyle, deprecated_settings.useStyle)
+        unique_unit.useColor = GetValueOrDefault(unique_unit.useColor, deprecated_settings.useColor)
+        unique_unit.UseThreatColor = GetValueOrDefault(unique_unit.UseThreatColor, deprecated_settings.UseThreatColor)
+        unique_unit.UseThreatGlow = GetValueOrDefault(unique_unit.UseThreatGlow, deprecated_settings.UseThreatGlow)
+        unique_unit.allowMarked = GetValueOrDefault(unique_unit.allowMarked, deprecated_settings.allowMarked)
+        unique_unit.overrideScale = GetValueOrDefault(unique_unit.overrideScale, deprecated_settings.overrideScale)
+        unique_unit.overrideAlpha = GetValueOrDefault(unique_unit.overrideAlpha, deprecated_settings.overrideAlpha)
+        -- Replace the old Threat Plates internal icons with the WoW original ones
+        --unique_unit.icon = GetValueOrDefault(DEPRECATED_ICON_DEFAULTS[unique_unit.icon] or unique_unit.icon, DEPRECATED_ICON_DEFAULTS[deprecated_settings.icon])
+        unique_unit.icon = GetValueOrDefault(unique_unit.icon, deprecated_settings.icon)
+        unique_unit.SpellID = GetValueOrDefault(unique_unit.SpellID, deprecated_settings.SpellID)
+        unique_unit.scale = GetValueOrDefault(unique_unit.scale, deprecated_settings.scale)
+        unique_unit.alpha = GetValueOrDefault(unique_unit.alpha, deprecated_settings.alpha)
+
+        unique_unit.color = GetValueOrDefault(unique_unit.color, {})
+        unique_unit.color.r = GetValueOrDefault(unique_unit.color.r, deprecated_settings.color.r)
+        unique_unit.color.g = GetValueOrDefault(unique_unit.color.g, deprecated_settings.color.g)
+        unique_unit.color.b = GetValueOrDefault(unique_unit.color.b, deprecated_settings.color.b)
+
+        -- #settings + 1 does not work here as settings also has entries for map, ** which interfere with #
+        slot_counter = slot_counter + 1
+        settings[slot_counter] = unique_unit
       end
     end
+  end
 
-    for i, unique_unit in pairs(custom_plates_to_keep) do
-      -- As default values are now different, copy the deprecated slots default value
-      local deprecated_settings = DEPRECATED_UNIQUE_SETTINGS[i] or DEPRECATED_UNIQUE_SETTINGS["**"]
+  defaults.profile.uniqueSettings = ThreatPlates.CopyTable(ThreatPlates.DEFAULT_SETTINGS.profile.uniqueSettings)
+  TidyPlatesThreat.db:RegisterDefaults(defaults)
+  TidyPlatesThreat.db.global.CustomNameplatesVersion = 2
+end
 
-      unique_unit.showNameplate = GetValueOrDefault(unique_unit.showNameplate, deprecated_settings.showNameplate)
-      unique_unit.ShowHeadlineView = GetValueOrDefault(unique_unit.ShowHeadlineView, deprecated_settings.ShowHeadlineView)
-      unique_unit.showIcon = GetValueOrDefault(unique_unit.showIcon, deprecated_settings.showIcon)
-      unique_unit.useStyle = GetValueOrDefault(unique_unit.useStyle, deprecated_settings.useStyle)
-      unique_unit.useColor = GetValueOrDefault(unique_unit.useColor, deprecated_settings.useColor)
-      unique_unit.UseThreatColor = GetValueOrDefault(unique_unit.UseThreatColor, deprecated_settings.UseThreatColor)
-      unique_unit.UseThreatGlow = GetValueOrDefault(unique_unit.UseThreatGlow, deprecated_settings.UseThreatGlow)
-      unique_unit.allowMarked = GetValueOrDefault(unique_unit.allowMarked, deprecated_settings.allowMarked)
-      unique_unit.overrideScale = GetValueOrDefault(unique_unit.overrideScale, deprecated_settings.overrideScale)
-      unique_unit.overrideAlpha = GetValueOrDefault(unique_unit.overrideAlpha, deprecated_settings.overrideAlpha)
-      -- Replace the old Threat Plates internal icons with the WoW original ones
-      --unique_unit.icon = GetValueOrDefault(DEPRECATED_ICON_DEFAULTS[unique_unit.icon] or unique_unit.icon, DEPRECATED_ICON_DEFAULTS[deprecated_settings.icon])
-      unique_unit.icon = GetValueOrDefault(unique_unit.icon, deprecated_settings.icon)
-      unique_unit.SpellID = GetValueOrDefault(unique_unit.SpellID, deprecated_settings.SpellID)
-      unique_unit.scale = GetValueOrDefault(unique_unit.scale, deprecated_settings.scale)
-      unique_unit.alpha = GetValueOrDefault(unique_unit.alpha, deprecated_settings.alpha)
+Addon.SetDefaultsForCustomNameplates = function()
+  if TidyPlatesThreat.db.global.CustomNameplatesVersion > 1 then return end
 
-      unique_unit.color = GetValueOrDefault(unique_unit.color, {})
-      unique_unit.color.r = GetValueOrDefault(unique_unit.color.r, deprecated_settings.color.r)
-      unique_unit.color.g = GetValueOrDefault(unique_unit.color.g, deprecated_settings.color.g)
-      unique_unit.color.b = GetValueOrDefault(unique_unit.color.b, deprecated_settings.color.b)
+  local defaults = ThreatPlates.CopyTable(TidyPlatesThreat.db.defaults)
+  local deprecated_defaults = {
+    map = {},
+    ["**"] = DEPRECATED_UNIQUE_SETTINGS["**"]
+  }
 
-      settings[#settings + 1] = custom_plates_to_keep[i]
+  for profile_name, profile in pairs(TidyPlatesThreat.db.profiles) do
+    for index = 1, #DEPRECATED_UNIQUE_SETTINGS do
+      local unique_unit = profile.uniqueSettings[index]
+      -- uniqueSettings are already processed, so name is always defined if the slot is used
+      if unique_unit and unique_unit.name ~= "<Enter name here>" then
+        deprecated_defaults[index] = DEPRECATED_UNIQUE_SETTINGS[index]
+      end
     end
   end
+
+  defaults.profile.uniqueSettings = deprecated_defaults
+  TidyPlatesThreat.db:RegisterDefaults(defaults)
 end
-Addon.MigrationUniqueSettings = MigrationUniqueSettings
 
 ---- Settings in the SavedVariables file that should be migrated and/or deleted
 local DEPRECATED_SETTINGS = {

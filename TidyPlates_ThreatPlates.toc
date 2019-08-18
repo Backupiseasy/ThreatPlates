@@ -1,6 +1,6 @@
 ﻿## Interface: 80200
 ## Title: Threat Plates
-## Version: 9.1.13-Beta3
+## Version: 9.1.13-Beta4
 ## Notes: Threat-reactive nameplates.
 ## Notes-deDE: Bedrohungsreaktive Namensplaketten.
 ## Author: Suicidal Katt, Blacksalsify
