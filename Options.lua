@@ -148,6 +148,8 @@ end
 
 local function UpdateSpecial() -- Need to add a way to update options table.
   Addon:InitializeCustomNameplates()
+  -- Update widgets as well as at least some of them use custom nameplate settings
+  Addon.Widgets:InitializeAllWidgets()
   Addon:ForceUpdate()
 end
 
@@ -4562,16 +4564,7 @@ local function CreateCustomNameplatesGroup()
 
         Addon.LibAceConfigDialog:SelectGroup(t.ADDON_NAME, "Custom", "#" ..  slot_no)
       end,
-      hidden = function()
-        -- Require a migration of legacy custom nameplates first:
-        local slot_no = 0
-        for k, v in pairs(db.uniqueSettings) do
-          if v.name and v.name ~= "<Enter name here>" then
-            slot_no = slot_no + 1
-          end
-        end
-        return #db.uniqueSettings ~= slot_no
-      end
+      hidden = function() return TidyPlatesThreat.db.global.CustomNameplatesVersion == 1 end,
     },
     DeleteSlot = {
       name = L["Delete"],
@@ -4602,41 +4595,21 @@ local function CreateCustomNameplatesGroup()
           return false
         end
       end,
-      hidden = function()
-        -- Require a migration of legacy custom nameplates first:
-        local slot_no = 0
-        for k, v in pairs(db.uniqueSettings) do
-          if v.name and v.name ~= "<Enter name here>" then
-            slot_no = slot_no + 1
-          end
-        end
-        return #db.uniqueSettings ~= slot_no
-      end
+      hidden = function() return TidyPlatesThreat.db.global.CustomNameplatesVersion == 1 end,
     },
-    Migrate = {
+    MigrateVersion1 = {
       name = L["|cffFF0000Migrate Custom Nameplates Settings|r"],
       order = 3,
       type = "execute",
       width = "full",
       func = function()
-        for profile_name, profile in pairs(TidyPlatesThreat.db.profiles) do
-          Addon.MigrationUniqueSettings(profile_name, profile)
-        end
+        Addon.MigrationCustomNameplatesV1()
 
         options.args.Custom.args = CreateCustomNameplatesGroup()
         UpdateSpecial()
       end,
       confirm = function(info) return L["|cffFF0000NOTE|r\nMigration should only delete deprecated default custom nameplates and re-order the remaining ones. Nevertheless, it is highly advised to backup your settings (the SavedVariables file TidyPlates_ThreatPlates.lua) in case something goes wrong.\n\nAre you sure you want to migrate your custom nameplates?"] end,
-      hidden = function()
-        -- Require a migration of legacy custom nameplates first:
-        local slot_no = 0
-        for k, v in pairs(db.uniqueSettings) do
-          if v.name and v.name ~= "<Enter name here>" then
-            slot_no = slot_no + 1
-          end
-        end
-        return #db.uniqueSettings == slot_no
-      end
+      hidden = function() return TidyPlatesThreat.db.global.CustomNameplatesVersion > 1 end,
     },
     Spacer1 = GetSpacerEntry(3),
     GeneralSettings = {

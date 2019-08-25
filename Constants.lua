@@ -295,6 +295,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
   global = {
     version = "",
     DefaultsVersion = "SMOOTH",
+    CustomNameplatesVersion = 1,
   },
   char = {
     welcome = false,
@@ -951,9 +952,9 @@ ThreatPlates.DEFAULT_SETTINGS = {
         scale = 1,
         alpha = 1,
         color = {
-          r = 0.61,
-          g = 0.40,
-          b = 0.86,
+          r = 1,
+          g = 1,
+          b = 1,
         },
       },
     },
