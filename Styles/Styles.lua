@@ -122,9 +122,9 @@ local function ShowUnit(unit)
     return false
   elseif db.HideNormal and not (e or b) then
     return false
-  elseif UnitIsBattlePet(unit.unitid) then
-    -- TODO: add configuration option for enable/disable
-    return false
+  --elseif UnitIsBattlePet(unit.unitid) then
+  --  -- TODO: add configuration option for enable/disable
+  --  return false
   elseif db.HideFriendlyInCombat and unit.reaction == "FRIENDLY" and InCombatLockdown() then
     return false
   end

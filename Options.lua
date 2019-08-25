@@ -1294,11 +1294,11 @@ local function CreateComboPointsWidgetOptions()
             type = "select",
             order = 10,
             values = {
-              DEATHKNIGHT = L["Death Knight"],
+              --DEATHKNIGHT = L["Death Knight"],
               DRUID = L["Druid"],
               MAGE = L["Arcane Mage"],
-              MONK = L["Windwalker Monk"],
-              PALADIN = L["Retribution Paladin"],
+              --MONK = L["Windwalker Monk"],
+              --PALADIN = L["Retribution Paladin"],
               ROGUE = L["Rogue"],
               WARLOCK = L["Warlock"],
             },
@@ -1640,7 +1640,7 @@ local function CreateArenaWidgetOptions()
   return options
 end
 
-  local function CreateQuestWidgetOptions()
+local function CreateQuestWidgetOptions()
   local options =  {
     name = L["Quest"],
     order = 100,
@@ -3954,41 +3954,41 @@ local function CreateBlizzardSettings()
 --          },
 --        },
 --      },
-      PersonalNameplate = {
-        name = L["Personal Nameplate"],
-        order = 45,
-        type = "group",
-        inline = true,
-        args = {
-          HideBuffs = {
-            type = "toggle",
-            order = 10,
-            name = L["Hide Buffs"],
-            set = function(info, val)
-              db.PersonalNameplate.HideBuffs = val
-              local plate = C_NamePlate.GetNamePlateForUnit("player")
-              if plate and plate:IsShown() then
-                plate.UnitFrame.BuffFrame:SetShown(not val)
-              end
-            end,
-            get = GetValue,
-            arg = { "PersonalNameplate", "HideBuffs"},
-          },
-          ShowResources = {
-            type = "toggle",
-            order = 20,
-            name = L["Resources on Targets"],
-            desc = L["Enable this if you want to show Blizzards special resources above the target nameplate."],
-            width = "double",
-            set = function(info, val)
-              SetValuePlain(info, val)
-              Addon.CVars:OverwriteBoolProtected("nameplateResourceOnTarget", val)
-            end,
-            get = GetValue,
-            arg = { "PersonalNameplate", "ShowResourceOnTarget"},
-          },
-        },
-      },
+--      PersonalNameplate = {
+--        name = L["Personal Nameplate"],
+--        order = 45,
+--        type = "group",
+--        inline = true,
+--        args = {
+--          HideBuffs = {
+--            type = "toggle",
+--            order = 10,
+--            name = L["Hide Buffs"],
+--            set = function(info, val)
+--              db.PersonalNameplate.HideBuffs = val
+--              local plate = C_NamePlate.GetNamePlateForUnit("player")
+--              if plate and plate:IsShown() then
+--                plate.UnitFrame.BuffFrame:SetShown(not val)
+--              end
+--            end,
+--            get = GetValue,
+--            arg = { "PersonalNameplate", "HideBuffs"},
+--          },
+--          ShowResources = {
+--            type = "toggle",
+--            order = 20,
+--            name = L["Resources on Targets"],
+--            desc = L["Enable this if you want to show Blizzards special resources above the target nameplate."],
+--            width = "double",
+--            set = function(info, val)
+--              SetValuePlain(info, val)
+--              Addon.CVars:OverwriteBoolProtected("nameplateResourceOnTarget", val)
+--            end,
+--            get = GetValue,
+--            arg = { "PersonalNameplate", "ShowResourceOnTarget"},
+--          },
+--        },
+--      },
       Reset = {
         name = L["Reset"],
         order = 50,
@@ -4471,16 +4471,16 @@ local function CreateWidgetOptions()
     type = "group",
     order = 40,
     args = {
-      ArenaWidget = CreateArenaWidgetOptions(),
+      --ArenaWidget = CreateArenaWidgetOptions(),
       AurasWidget = CreateAurasWidgetOptions(),
       BossModsWidget = CreateBossModsWidgetOptions(),
       ClassIconWidget = CreateClassIconsWidgetOptions(),
       ComboPointsWidget = CreateComboPointsWidgetOptions(),
       ResourceWidget = CreateResourceWidgetOptions(),
       SocialWidget = CreateSocialWidgetOptions(),
-      StealthWidget = CreateStealthWidgetOptions(),
+      --StealthWidget = CreateStealthWidgetOptions(),
       TargetArtWidget = CreateTargetArtWidgetOptions(),
-      QuestWidget = CreateQuestWidgetOptions(),
+      --QuestWidget = CreateQuestWidgetOptions(),
       HealerTrackerWidget = CreateHealerTrackerWidgetOptions(),
     },
   }
@@ -4488,62 +4488,62 @@ local function CreateWidgetOptions()
   return options
 end
 
-local function CreateSpecRoles()
-  -- Create a list of specs for the player's class
-  local result = {
-    Automatic_Spec_Detection = {
-      name = L["Determine your role (tank/dps/healing) automatically based on current spec."],
-      type = "toggle",
-      width = "full",
-      order = 1,
-      arg = { "optionRoleDetectionAutomatic" }
-    },
-    SpecGroup = {
-      name = " ",
-      type = "group",
-      inline = true,
-      order = 3,
-      args = {}
-    }
-  }
-
-  for index = 1, GetNumSpecializations() do
-    local id, spec_name, description, icon, background, role = GetSpecializationInfo(index)
-    result.SpecGroup.args[spec_name] = {
-      name = spec_name,
-      type = "group",
-      inline = true,
-      order = index + 2,
-      disabled = function() return TidyPlatesThreat.db.profile.optionRoleDetectionAutomatic end,
-      args = {
-        Tank = {
-          name = L["Tank"],
-          type = "toggle",
-          order = 1,
-          desc = L["Sets your spec "] .. spec_name .. L[" to tanking."],
-          get = function()
-            local spec = TidyPlatesThreat.db.char.spec[index]
-            return (spec == nil and role == "TANK") or spec
-          end,
-          set = function() TidyPlatesThreat.db.char.spec[index] = true; Addon:ForceUpdate() end,
-        },
-        DPS = {
-          name = L["DPS/Healing"],
-          type = "toggle",
-          order = 2,
-          desc = L["Sets your spec "] .. spec_name .. L[" to DPS."],
-          get = function()
-            local spec = TidyPlatesThreat.db.char.spec[index]
-            return (spec == nil and role ~= "TANK") or not spec
-          end,
-          set = function() TidyPlatesThreat.db.char.spec[index] = false; Addon:ForceUpdate() end,
-        },
-      },
-    }
-  end
-
-  return result
-end
+--local function CreateSpecRoles()
+--  -- Create a list of specs for the player's class
+--  local result = {
+--    Automatic_Spec_Detection = {
+--      name = L["Determine your role (tank/dps/healing) automatically based on current spec."],
+--      type = "toggle",
+--      width = "full",
+--      order = 1,
+--      arg = { "optionRoleDetectionAutomatic" }
+--    },
+--    SpecGroup = {
+--      name = " ",
+--      type = "group",
+--      inline = true,
+--      order = 3,
+--      args = {}
+--    }
+--  }
+--
+--  for index = 1, GetNumTalentTabs() do
+--    local spec_name, iconTexture, pointsSpent = GetTalentTabInfo(index)
+--    result.SpecGroup.args[spec_name] = {
+--      name = spec_name,
+--      type = "group",
+--      inline = true,
+--      order = index + 2,
+--      disabled = function() return TidyPlatesThreat.db.profile.optionRoleDetectionAutomatic end,
+--      args = {
+--        Tank = {
+--          name = L["Tank"],
+--          type = "toggle",
+--          order = 1,
+--          desc = L["Sets your spec "] .. spec_name .. L[" to tanking."],
+--          get = function()
+--            local spec = TidyPlatesThreat.db.char.spec[index]
+--            return (spec == nil and role == "TANK") or spec
+--          end,
+--          set = function() TidyPlatesThreat.db.char.spec[index] = true; Addon:ForceUpdate() end,
+--        },
+--        DPS = {
+--          name = L["DPS/Healing"],
+--          type = "toggle",
+--          order = 2,
+--          desc = L["Sets your spec "] .. spec_name .. L[" to DPS."],
+--          get = function()
+--            local spec = TidyPlatesThreat.db.char.spec[index]
+--            return (spec == nil and role ~= "TANK") or not spec
+--          end,
+--          set = function() TidyPlatesThreat.db.char.spec[index] = false; Addon:ForceUpdate() end,
+--        },
+--      },
+--    }
+--  end
+--
+--  return result
+--end
 
 local function CreateCustomNameplatesGroup()
   local entry = {
@@ -5086,18 +5086,18 @@ local function CreateOptionsTable()
                         end
                       end),
                     Spacer1 = GetSpacerEntry(25),
-                    ShowHealAbsorbs = {
-                      name = L["Heal Absorbs"],
-                      order = 29,
-                      type = "toggle",
-                      arg = { "settings", "healthbar", "ShowHealAbsorbs" },
-                    },
-                    ShowAbsorbs = {
-                      name = L["Absorbs"],
-                      order = 30,
-                      type = "toggle",
-                      arg = { "settings", "healthbar", "ShowAbsorbs" },
-                    },
+                    --ShowHealAbsorbs = {
+                    --  name = L["Heal Absorbs"],
+                    --  order = 29,
+                    --  type = "toggle",
+                    --  arg = { "settings", "healthbar", "ShowHealAbsorbs" },
+                    --},
+                    --ShowAbsorbs = {
+                    --  name = L["Absorbs"],
+                    --  order = 30,
+                    --  type = "toggle",
+                    --  arg = { "settings", "healthbar", "ShowAbsorbs" },
+                    --},
                     ShowMouseoverHighlight = {
                       type = "toggle",
                       order = 40,
@@ -5216,48 +5216,48 @@ local function CreateOptionsTable()
                       isPercent = true,
                       arg = { "settings", "healthbar", "BackgroundOpacity" },
                     },
-                    AbsorbGroup = {
-                      name = L["Absorbs"],
-                      order = 90,
-                      type = "group",
-                      inline = true,
-                      args = {
-                        AbsorbColor = {
-                          name = L["Color"],
-                          order = 110,
-                          type = "color",
-                          get = GetColorAlpha,
-                          set = SetColorAlpha,
-                          hasAlpha = true,
-                          arg = { "settings", "healthbar", "AbsorbColor" },
-                        },
-                        AlwaysFullAbsorb = {
-                          name = L["Full Absorbs"],
-                          order = 120,
-                          type = "toggle",
-                          desc = L["Always shows the full amount of absorbs on a unit. In overabsorb situations, the absorbs bar ist shifted to the left."],
-                          arg = { "settings", "healthbar", "AlwaysFullAbsorb" },
-                        },
-                        OverlayTexture = {
-                          name = L["Striped Texture"],
-                          order = 130,
-                          type = "toggle",
-                          desc = L["Use a striped texture for the absorbs overlay. Always enabled if full absorbs are shown."],
-                          get = function(info) return GetValue(info) or db.settings.healthbar.AlwaysFullAbsorb end,
-                          disabled = function() return db.settings.healthbar.AlwaysFullAbsorb end,
-                          arg = { "settings", "healthbar", "OverlayTexture" },
-                        },
-                        OverlayColor = {
-                          name = L["Striped Texture Color"],
-                          order = 140,
-                          type = "color",
-                          get = GetColorAlpha,
-                          set = SetColorAlpha,
-                          hasAlpha = true,
-                          arg = { "settings", "healthbar", "OverlayColor" },
-                        },
-                      },
-                    },
+                    --AbsorbGroup = {
+                    --  name = L["Absorbs"],
+                    --  order = 90,
+                    --  type = "group",
+                    --  inline = true,
+                    --  args = {
+                    --    AbsorbColor = {
+                    --      name = L["Color"],
+                    --      order = 110,
+                    --      type = "color",
+                    --      get = GetColorAlpha,
+                    --      set = SetColorAlpha,
+                    --      hasAlpha = true,
+                    --      arg = { "settings", "healthbar", "AbsorbColor" },
+                    --    },
+                    --    AlwaysFullAbsorb = {
+                    --      name = L["Full Absorbs"],
+                    --      order = 120,
+                    --      type = "toggle",
+                    --      desc = L["Always shows the full amount of absorbs on a unit. In overabsorb situations, the absorbs bar ist shifted to the left."],
+                    --      arg = { "settings", "healthbar", "AlwaysFullAbsorb" },
+                    --    },
+                    --    OverlayTexture = {
+                    --      name = L["Striped Texture"],
+                    --      order = 130,
+                    --      type = "toggle",
+                    --      desc = L["Use a striped texture for the absorbs overlay. Always enabled if full absorbs are shown."],
+                    --      get = function(info) return GetValue(info) or db.settings.healthbar.AlwaysFullAbsorb end,
+                    --      disabled = function() return db.settings.healthbar.AlwaysFullAbsorb end,
+                    --      arg = { "settings", "healthbar", "OverlayTexture" },
+                    --    },
+                    --    OverlayColor = {
+                    --      name = L["Striped Texture Color"],
+                    --      order = 140,
+                    --      type = "color",
+                    --      get = GetColorAlpha,
+                    --      set = SetColorAlpha,
+                    --      hasAlpha = true,
+                    --      arg = { "settings", "healthbar", "OverlayColor" },
+                    --    },
+                    --  },
+                    --},
                   },
                 },
                 ShowByStatus = {
@@ -5474,16 +5474,16 @@ local function CreateOptionsTable()
                       set = SetThemeValue,
                       arg = { "settings", "threatborder", "show" },
                     },
-                    OnlyAttackedUnits = {
-                      type = "toggle",
-                      order = 2,
-                      name = L["Threat Detection Heuristic"],
-                      desc = L["Use a heuristic instead of a mob's threat table to detect if you are in combat with a mob (see Threat System - General Settings for a more detailed explanation)."],
-                      width = "double",
-                      set = function(info, val) SetValue(info, not val) end,
-                      get = function(info) return not GetValue(info) end,
-                      arg = { "ShowThreatGlowOnAttackedUnitsOnly" },
-                    },
+--                    OnlyAttackedUnits = {
+--                      type = "toggle",
+--                      order = 2,
+--                      name = L["Threat Detection Heuristic"],
+--                      desc = L["Use a heuristic instead of a mob's threat table to detect if you are in combat with a mob (see Threat System - General Settings for a more detailed explanation)."],
+--                      width = "double",
+--                      set = function(info, val) SetValue(info, not val) end,
+--                      get = function(info) return not GetValue(info) end,
+--                      arg = { "ShowThreatGlowOnAttackedUnitsOnly" },
+--                    },
                     Header = { name = L["Colors"], type = "header", order = 10, },
                     Low = {
                       name = L["|cffffffffLow Threat|r"],
@@ -6357,37 +6357,37 @@ local function CreateOptionsTable()
                     },
                   },
                 },
-                AbsorbsText = {
-                  name = L["Absorbs Text"],
-                  order = 35,
-                  type = "group",
-                  inline = true,
-                  set = SetThemeValue,
-                  args = {
-                    EnableAmount = {
-                      name = L["Amount"],
-                      type = "toggle",
-                      order = 10,
-                      desc = L["Display absorbs amount text."],
-                      arg = { "text", "AbsorbsAmount" }
-                    },
-                    EnableShorten = {
-                      name = L["Shorten"],
-                      type = "toggle",
-                      order = 20,
-                      desc = L["This will format text to a simpler format using M or K for millions and thousands. Disabling this will show exact absorbs amounts."],
-                      arg = { "text", "AbsorbsShorten" },
-                      disabled = function() return not db.text.AbsorbsAmount end
-                    },
-                    EnablePercentage = {
-                      name = L["Percentage"],
-                      type = "toggle",
-                      order = 30,
-                      desc = L["Display absorbs percentage text."],
-                      arg = { "text", "AbsorbsPercentage" }
-                    },
-                  },
-                },
+                --AbsorbsText = {
+                --  name = L["Absorbs Text"],
+                --  order = 35,
+                --  type = "group",
+                --  inline = true,
+                --  set = SetThemeValue,
+                --  args = {
+                --    EnableAmount = {
+                --      name = L["Amount"],
+                --      type = "toggle",
+                --      order = 10,
+                --      desc = L["Display absorbs amount text."],
+                --      arg = { "text", "AbsorbsAmount" }
+                --    },
+                --    EnableShorten = {
+                --      name = L["Shorten"],
+                --      type = "toggle",
+                --      order = 20,
+                --      desc = L["This will format text to a simpler format using M or K for millions and thousands. Disabling this will show exact absorbs amounts."],
+                --      arg = { "text", "AbsorbsShorten" },
+                --      disabled = function() return not db.text.AbsorbsAmount end
+                --    },
+                --    EnablePercentage = {
+                --      name = L["Percentage"],
+                --      type = "toggle",
+                --      order = 30,
+                --      desc = L["Display absorbs percentage text."],
+                --      arg = { "text", "AbsorbsPercentage" }
+                --    },
+                --  },
+                --},
                 Boundaries = GetBoundariesEntry(40, "customtext"),
               },
             },
@@ -6771,40 +6771,40 @@ local function CreateOptionsTable()
                     },
                   },
                 },
-                ThreatHeuristic = {
-                  name = L["Threat Detection"],
-                  type = "group",
-                  order = 20,
-                  inline = true,
-                  args = {
-                    Note = {
-                      name = L["By default, the threat system works based on a mob's threat table. Some mobs do not have such a threat table even if you are in combat with them. The threat detection heuristic uses other factors to determine if you are in combat with a mob. This works well in instances. In the open world, this can show units in combat with you that are actually just in combat with another player (and not you)."],
-                      order = 0,
-                      type = "description",
-                    },
-                    ThreatTable = {
-                      type = "toggle",
-                      name = L["Threat Table"],
-                      order = 10,
-                      arg = { "threat", "UseThreatTable" },
-                    },
-                    Heuristic = {
-                      type = "toggle",
-                      name = L["Heuristic"],
-                      order = 20,
-                      set = function(info, val) SetValue(info, not val) end,
-                      get = function(info) return not GetValue(info) end,
-                      arg = { "threat", "UseThreatTable" },
-                    },
-                    HeuristicOnlyInInstances = {
-                      type = "toggle",
-                      name = L["Heuristic In Instances"],
-                      order = 30,
-                      desc = L["Use a heuristic to detect if a mob is in combat with you, but only in instances (like dungeons or raids)."],
-                      arg = { "threat", "UseHeuristicInInstances" },
-                    },
-                  },
-                },
+--                ThreatHeuristic = {
+--                  name = L["Threat Detection"],
+--                  type = "group",
+--                  order = 20,
+--                  inline = true,
+--                  args = {
+--                    Note = {
+--                      name = L["By default, the threat system works based on a mob's threat table. Some mobs do not have such a threat table even if you are in combat with them. The threat detection heuristic uses other factors to determine if you are in combat with a mob. This works well in instances. In the open world, this can show units in combat with you that are actually just in combat with another player (and not you)."],
+--                      order = 0,
+--                      type = "description",
+--                    },
+--                    ThreatTable = {
+--                      type = "toggle",
+--                      name = L["Threat Table"],
+--                      order = 10,
+--                      arg = { "threat", "UseThreatTable" },
+--                    },
+--                    Heuristic = {
+--                      type = "toggle",
+--                      name = L["Heuristic"],
+--                      order = 20,
+--                      set = function(info, val) SetValue(info, not val) end,
+--                      get = function(info) return not GetValue(info) end,
+--                      arg = { "threat", "UseThreatTable" },
+--                    },
+--                    HeuristicOnlyInInstances = {
+--                      type = "toggle",
+--                      name = L["Heuristic In Instances"],
+--                      order = 30,
+--                      desc = L["Use a heuristic to detect if a mob is in combat with you, but only in instances (like dungeons or raids)."],
+--                      arg = { "threat", "UseHeuristicInInstances" },
+--                    },
+--                  },
+--                },
               },
             },
             Alpha = {
@@ -7125,14 +7125,14 @@ local function CreateOptionsTable()
                 },
               },
             },
-            DualSpec = {
-              name = L["Spec Roles"],
-              type = "group",
-              desc = L["Set the roles your specs represent."],
-              disabled = function() return not db.threat.ON end,
-              order = 5,
-              args = CreateSpecRoles(),
-            },
+--            DualSpec = {
+--              name = L["Spec Roles"],
+--              type = "group",
+--              desc = L["Set the roles your specs represent."],
+--              disabled = function() return not db.threat.ON end,
+--              order = 5,
+--              args = CreateSpecRoles(),
+--            },
             Textures = {
               name = L["Textures"],
               type = "group",

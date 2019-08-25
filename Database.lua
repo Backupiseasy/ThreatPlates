@@ -15,6 +15,7 @@ local floor, select, unpack, type, min, pairs = floor, select, unpack, type, min
 -- WoW APIs
 local GetCVar, SetCVar = GetCVar, SetCVar
 local UnitClass, GetSpecialization = UnitClass, GetSpecialization
+local GetShapeshiftFormID = GetShapeshiftFormID
 
 -- ThreatPlates APIs
 local L = ThreatPlates.L
@@ -30,12 +31,17 @@ Addon.PlayerClass = select(2, UnitClass("player"))
 local PLAYER_ROLE_BY_SPEC = ThreatPlates.SPEC_ROLES[Addon.PlayerClass]
 
 function Addon:PlayerRoleIsTank()
-  local db = TidyPlatesThreat.db
-  if db.profile.optionRoleDetectionAutomatic then
-    return PLAYER_ROLE_BY_SPEC[GetSpecialization()] or false
-  else
-    return db.char.spec[GetSpecialization()]
-  end
+  local index = GetShapeshiftFormID()
+
+  -- Tanks are only Warriors in Defensive Stance or Druids in Bear form
+  return index == 5 or index == 18
+
+--  local db = TidyPlatesThreat.db
+--  if db.profile.optionRoleDetectionAutomatic then
+--    return PLAYER_ROLE_BY_SPEC[GetSpecialization()] or false
+--  else
+--    return db.char.spec[GetSpecialization()]
+--  end
 end
 
 -- Sets the role of the index spec or the active spec to tank (value = true) or dps/healing

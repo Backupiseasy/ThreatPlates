@@ -21,16 +21,15 @@ local UnitLevel = UnitLevel
 local UnitIsPlayer = UnitIsPlayer
 local UnitClass = UnitClass
 local UnitGUID = UnitGUID
-local UnitEffectiveLevel = UnitEffectiveLevel
 local GetCreatureDifficultyColor = GetCreatureDifficultyColor
 local UnitSelectionColor = UnitSelectionColor
 local UnitHealth, UnitHealthMax = UnitHealth, UnitHealthMax
-local UnitThreatSituation = UnitThreatSituation
 local UnitAffectingCombat = UnitAffectingCombat
 local GetRaidTargetIndex = GetRaidTargetIndex
 local UnitIsTapDenied = UnitIsTapDenied
 local GetTime = GetTime
-local UnitChannelInfo, UnitCastingInfo = UnitChannelInfo, UnitCastingInfo
+local ChannelInfo, CastingInfo = ChannelInfo, CastingInfo
+--local ChannelInfo, CastingInfo = UnitChannelInfo, UnitCastingInfo
 local UnitPlayerControlled = UnitPlayerControlled
 local GetCVar, Lerp, CombatLogGetCurrentEventInfo = GetCVar, Lerp, CombatLogGetCurrentEventInfo
 local GetPlayerInfoByGUID, RAID_CLASS_COLORS = GetPlayerInfoByGUID, RAID_CLASS_COLORS
@@ -230,8 +229,8 @@ do
 
     extended.widgets = {}
 
-		Addon:CreateExtensions(extended)
-    Widgets:OnPlateCreated(extended)
+		--Addon:CreateExtensions(extended)
+    Addon.Widgets:OnPlateCreated(extended)
 
     -- Allocate Tables
     extended.style = {}
@@ -258,7 +257,7 @@ do
 			extended.stylename = stylename
 			unit.style = stylename
 
-      Addon:CreateExtensions(extended, unit.unitid, stylename)
+      --Addon:CreateExtensions(extended, unit.unitid, stylename)
       -- TOOD: optimimze that - call OnUnitAdded only when the plate is initialized the first time for a unit, not if only the style changes
       Widgets:OnUnitAdded(extended, unit)
       --Addon:WidgetsModeChanged(extended, unit)
@@ -340,7 +339,7 @@ do
     Addon:UnitStyle_NameDependent(unit)
     ProcessUnitChanges()
 
-		Addon:UpdateExtensions(extended, unit.unitid, stylename)
+		--Addon:UpdateExtensions(extended, unit.unitid, stylename)
 
     Addon:UpdateNameplateStyle(nameplate, unitid)
 
@@ -458,7 +457,7 @@ end
 
 -- UpdateUnitCondition: High volatility data
 function Addon:UpdateUnitCondition(unit, unitid)
-  unit.level = UnitEffectiveLevel(unitid)
+  unit.level = UnitLevel(unitid)
 
   local c = GetCreatureDifficultyColor(unit.level)
   unit.levelcolorRed, unit.levelcolorGreen, unit.levelcolorBlue = c.r, c.g, c.b
@@ -474,8 +473,9 @@ function Addon:UpdateUnitCondition(unit, unitid)
   unit.health = UnitHealth(unitid) or 0
   unit.healthmax = UnitHealthMax(unitid) or 1
 
-  unit.threatValue = UnitThreatSituation("player", unitid) or 0
-  unit.threatSituation = ThreatReference[unit.threatValue]
+  --unit.threatValue = UnitThreatSituation("player", unitid) or 0
+  --unit.threatSituation = ThreatReference[unit.threatValue]
+  unit.threatSituation = "LOW"
   unit.isInCombat = UnitAffectingCombat(unitid)
 
   local raidIconIndex = GetRaidTargetIndex(unitid)
@@ -723,7 +723,7 @@ do
     local name, text, texture, startTime, endTime, isTradeSkill, castID, notInterruptible, spellID
 
     if channeled then
-      name, text, texture, startTime, endTime, isTradeSkill, notInterruptible, spellID = UnitChannelInfo(unitid)
+      name, text, texture, startTime, endTime, isTradeSkill, notInterruptible, spellID = ChannelInfo(unitid)
       castbar.IsChanneling = true
       castbar.IsCasting = false
 
@@ -732,7 +732,7 @@ do
       castbar:SetMinMaxValues(0, castbar.MaxValue)
       castbar:SetValue(castbar.Value)
 		else
-      name, text, texture, startTime, endTime, isTradeSkill, castID, notInterruptible = UnitCastingInfo(unitid)
+      name, text, texture, startTime, endTime, isTradeSkill, castID, notInterruptible = CastingInfo(unitid)
       castbar.IsCasting = true
       castbar.IsChanneling = false
 
@@ -779,14 +779,14 @@ do
 		if not ShowCastBars then return end
 
 		-- Check to see if there's a spell being cast
-		if UnitCastingInfo(unitid) then
+		if CastingInfo(unitid) then
       OnStartCasting(plate, unitid, false)
-    elseif UnitChannelInfo(unitid) then
+    elseif ChannelInfo(unitid) then
       OnStartCasting(plate, unitid, true)
     else
       visual.castbar:Hide()
     end
-	end
+  end
 
 end -- End Indicator section
 
@@ -833,14 +833,14 @@ do
 
     -- Skip the personal resource bar of the player character, don't unhook scripts as nameplates, even the personal
     -- resource bar, get re-used
-    if UnitIsUnit(UnitFrame.unit, "player") then -- or: ns.PlayerNameplate == GetNamePlateForUnit(UnitFrame.unit)
-      if db.PersonalNameplate.HideBuffs then
-        UnitFrame.BuffFrame:Hide()
---      else
---        UnitFrame.BuffFrame:Show()
-      end
-      return
-    end
+--    if UnitIsUnit(UnitFrame.unit, "player") then -- or: ns.PlayerNameplate == GetNamePlateForUnit(UnitFrame.unit)
+--      if db.PersonalNameplate.HideBuffs then
+--        UnitFrame.BuffFrame:Hide()
+----      else
+----        UnitFrame.BuffFrame:Show()
+--      end
+--      return
+--    end
 
     -- Hide ThreatPlates nameplates if Blizzard nameplates should be shown for friendly units
     if UnitReaction(UnitFrame.unit, "player") > 4 then
@@ -1023,7 +1023,7 @@ do
 
     if plate and plate.TPFrame.Active then
       OnHealthUpdate(plate)
-      Addon:UpdateExtensions(plate.TPFrame, unitid, plate.TPFrame.stylename)
+      --Addon:UpdateExtensions(plate.TPFrame, unitid, plate.TPFrame.stylename)
     end
 	end
 
@@ -1032,35 +1032,35 @@ do
 
     if plate and plate.TPFrame.Active then
       OnHealthUpdate(plate)
-      Addon:UpdateExtensions(plate.TPFrame, unitid, plate.TPFrame.stylename)
+      --Addon:UpdateExtensions(plate.TPFrame, unitid, plate.TPFrame.stylename)
     end
   end
 
-  function  CoreEvents:UNIT_THREAT_LIST_UPDATE(unitid)
-    if unitid == "player" or unitid == "target" then return end
-    local plate = PlatesByUnit[unitid]
-
-    if plate then
-      --local threat_value = UnitThreatSituation("player", unitid) or 0
-      --if threat_value ~= plate.TPFrame.unit.threatValue then
-      if (UnitThreatSituation("player", unitid) or 0) ~= plate.TPFrame.unit.threatValue then
-
-        --OnHealthUpdate(plate)
-
-        plate.UpdateMe = true
-
-        -- TODO: Optimize this - only update elements that need updating
-        -- Don't use OnHealthUpdate(), more like: OnThreatUpdate()
-        -- UpdateReferences(plate)
-        --Addon:UpdateUnitCondition(unit, unitid)
-        --        unit.threatValue = UnitThreatSituation("player", unitid) or 0
-        --        unit.threatSituation = ThreatReference[unit.threatValue]
-        --        unit.isInCombat = UnitAffectingCombat(unitid)
-        --ProcessUnitChanges()
-        --OnUpdateCastMidway(nameplate, unit.unitid)
-      end
-    end
-  end
+  --function  CoreEvents:UNIT_THREAT_LIST_UPDATE(unitid)
+  --  if unitid == "player" or unitid == "target" then return end
+  --  local plate = PlatesByUnit[unitid]
+  --
+  --  if plate then
+  --    --local threat_value = UnitThreatSituation("player", unitid) or 0
+  --    --if threat_value ~= plate.TPFrame.unit.threatValue then
+  --    if (UnitThreatSituation("player", unitid) or 0) ~= plate.TPFrame.unit.threatValue then
+  --
+  --      --OnHealthUpdate(plate)
+  --
+  --      plate.UpdateMe = true
+  --
+  --      -- TODO: Optimize this - only update elements that need updating
+  --      -- Don't use OnHealthUpdate(), more like: OnThreatUpdate()
+  --      -- UpdateReferences(plate)
+  --      --Addon:UpdateUnitCondition(unit, unitid)
+  --      --        unit.threatValue = UnitThreatSituation("player", unitid) or 0
+  --      --        unit.threatSituation = ThreatReference[unit.threatValue]
+  --      --        unit.isInCombat = UnitAffectingCombat(unitid)
+  --      --ProcessUnitChanges()
+  --      --OnUpdateCastMidway(nameplate, unit.unitid)
+  --    end
+  --  end
+  --end
 
   function CoreEvents:PLAYER_REGEN_ENABLED()
 		SetUpdateAll()
@@ -1153,30 +1153,30 @@ do
     Addon:ForceUpdate()
 	end
 
-	function CoreEvents:UNIT_ABSORB_AMOUNT_CHANGED(unitid)
-		local plate = GetNamePlateForUnit(unitid)
+	--function CoreEvents:UNIT_ABSORB_AMOUNT_CHANGED(unitid)
+	--	local plate = GetNamePlateForUnit(unitid)
+  --
+	--	if plate and plate.TPFrame.Active then
+  --    local tp_frame = plate.TPFrame
+  --    local unit = tp_frame.unit
+  --    local unitid  = unit.unitid
+  --
+  --    -- As this does not use OnUpdate with OnHealthUpdate, we have to update this values here
+  --    unit.health = UnitHealth(unit.unitid) or 0
+  --    unit.healthmax = UnitHealthMax(unit.unitid) or 1
+  --
+	--		Addon:UpdateExtensions(tp_frame, unitid, tp_frame.stylename)
+  --    UpdateIndicator_CustomText(tp_frame)
+	--	end
+  --end
 
-		if plate and plate.TPFrame.Active then
-      local tp_frame = plate.TPFrame
-      local unit = tp_frame.unit
-      local unitid  = unit.unitid
-
-      -- As this does not use OnUpdate with OnHealthUpdate, we have to update this values here
-      unit.health = UnitHealth(unit.unitid) or 0
-      unit.healthmax = UnitHealthMax(unit.unitid) or 1
-
-			Addon:UpdateExtensions(tp_frame, unitid, tp_frame.stylename)
-      UpdateIndicator_CustomText(tp_frame)
-		end
-  end
-
-  function CoreEvents:UNIT_HEAL_ABSORB_AMOUNT_CHANGED(unitid)
-    local plate = GetNamePlateForUnit(unitid)
-
-    if plate and plate.TPFrame.Active then
-      Addon:UpdateExtensions(plate.TPFrame, unitid, plate.TPFrame.stylename)
-    end
-  end
+  --function CoreEvents:UNIT_HEAL_ABSORB_AMOUNT_CHANGED(unitid)
+  --  local plate = GetNamePlateForUnit(unitid)
+  --
+  --  if plate and plate.TPFrame.Active then
+  --    Addon:UpdateExtensions(plate.TPFrame, unitid, plate.TPFrame.stylename)
+  --  end
+  --end
 
   -- Update all elements that depend on the unit's reaction towards the player
   function CoreEvents:UNIT_FACTION(unitid)
@@ -1196,15 +1196,15 @@ do
   -- The following events should not have worked before adjusting UnitSpellcastMidway
 	CoreEvents.UNIT_SPELLCAST_DELAYED = UnitSpellcastMidway
 	CoreEvents.UNIT_SPELLCAST_CHANNEL_UPDATE = UnitSpellcastMidway
-	CoreEvents.UNIT_SPELLCAST_INTERRUPTIBLE = UnitSpellcastMidway
-	CoreEvents.UNIT_SPELLCAST_NOT_INTERRUPTIBLE = UnitSpellcastMidway
+	--CoreEvents.UNIT_SPELLCAST_INTERRUPTIBLE = UnitSpellcastMidway
+	--CoreEvents.UNIT_SPELLCAST_NOT_INTERRUPTIBLE = UnitSpellcastMidway
   -- UNIT_SPELLCAST_FAILED
   -- UNIT_SPELLCAST_INTERRUPTED
 
 	CoreEvents.UNIT_LEVEL = UnitConditionChanged
 	--CoreEvents.UNIT_THREAT_SITUATION_UPDATE = UnitConditionChanged -- did not work anyway (no unitid)
   CoreEvents.RAID_TARGET_UPDATE = WorldConditionChanged
-	CoreEvents.PLAYER_FOCUS_CHANGED = WorldConditionChanged
+	--CoreEvents.PLAYER_FOCUS_CHANGED = WorldConditionChanged
 	CoreEvents.PLAYER_CONTROL_LOST = WorldConditionChanged
 	CoreEvents.PLAYER_CONTROL_GAINED = WorldConditionChanged
 

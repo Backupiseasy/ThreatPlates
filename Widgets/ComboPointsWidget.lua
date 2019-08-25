@@ -1,4 +1,5 @@
 ---------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------
 -- Combo Points Widget
 ---------------------------------------------------------------------------------------------------
 local ADDON_NAME, Addon = ...
@@ -190,9 +191,9 @@ local DeathKnightSpecColor, ShowRuneCooldown
 
 function Widget:DetermineUnitPower()
   local _, player_class = UnitClass("player")
-  local player_spec_no = GetSpecialization()
+  --local player_spec_no = GetSpecialization()
 
-  local power_type = UNIT_POWER[player_class] and (UNIT_POWER[player_class][player_spec_no] or UNIT_POWER[player_class])
+  local power_type = UNIT_POWER[player_class] --and (UNIT_POWER[player_class][player_spec_no] or UNIT_POWER[player_class])
 
   if power_type and power_type.Name then
     self.PowerType = power_type.PowerType
@@ -334,16 +335,16 @@ local function EventHandler(event, unitid, power_type)
 end
 
 -- Arguments of ACTIVE_TALENT_GROUP_CHANGED (curr, prev) always seemt to be 1, 1
-function Widget:ACTIVE_TALENT_GROUP_CHANGED(...)
-  -- ACTIVE_TALENT_GROUP_CHANGED fires twice, so prevent that InitializeWidget is called twice (does not hurt,
-  -- but is not necesary either
-  local current_spec = GetSpecialization()
-  if ActiveSpec ~= current_spec then
-    -- Player switched to a spec that has combo points
-    self.WidgetHandler:InitializeWidget("ComboPoints")
-    ActiveSpec = current_spec
-  end
-end
+--function Widget:ACTIVE_TALENT_GROUP_CHANGED(...)
+--  -- ACTIVE_TALENT_GROUP_CHANGED fires twice, so prevent that InitializeWidget is called twice (does not hurt,
+--  -- but is not necesary either
+--  local current_spec = GetSpecialization()
+--  if ActiveSpec ~= current_spec then
+--    -- Player switched to a spec that has combo points
+--    self.WidgetHandler:InitializeWidget("ComboPoints")
+--    ActiveSpec = current_spec
+--  end
+--end
 
 function Widget:UNIT_MAXPOWER(unitid, power_type)
   if self.PowerType then
@@ -405,7 +406,7 @@ function Widget:IsEnabled()
   if enabled then
     -- Register ACTIVE_TALENT_GROUP_CHANGED here otherwise it won't be registerd when an spec is active that does not have combo points.
     -- If you then switch to a spec with talent points, the widget won't be enabled.
-    self:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
+    -- self:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
   end
 
   self:DetermineUnitPower()
@@ -432,8 +433,8 @@ function Widget:OnEnable()
   if player_class == "DRUID" then
     self:RegisterEvent("UPDATE_SHAPESHIFT_FORM")
     self.ShowInShapeshiftForm = (GetShapeshiftFormID() == 1)
-  elseif player_class == "DEATHKNIGHT" then
-    self:RegisterEvent("RUNE_POWER_UPDATE", EventHandler)
+--  elseif player_class == "DEATHKNIGHT" then
+--    self:RegisterEvent("RUNE_POWER_UPDATE", EventHandler)
   end
 
   -- self:RegisterUnitEvent("UNIT_POWER_FREQUENT", "player", EventHandler)
@@ -446,7 +447,7 @@ function Widget:OnDisable()
   self:UnregisterEvent("UNIT_POWER_UPDATE")
   self:UnregisterEvent("UNIT_DISPLAYPOWER")
   self:UnregisterEvent("UNIT_MAXPOWER")
-  self:UnregisterEvent("RUNE_POWER_UPDATE")
+--  self:UnregisterEvent("RUNE_POWER_UPDATE")
 
   self.WidgetFrame:Hide()
   self.WidgetFrame:SetParent(nil)
@@ -517,7 +518,8 @@ end
 function Widget:UpdateTexture(texture, texture_path, cp_no)
   if self.db.Style == "Blizzard" then
     if type(texture_path) == "table" then
-      local texture_data = texture_path[GetSpecialization()]
+      --local texture_data = texture_path[GetSpecialization()]
+      local texture_data = texture_path[1]
       texture:SetAtlas(texture_data.Atlas)
       texture:SetAlpha(texture_data.Alpha or 1)
       texture:SetDesaturated(texture_data.Desaturation) -- nil means no desaturation
@@ -589,13 +591,14 @@ function Widget:UpdateSettings()
   local _, player_class = UnitClass("player")
   local texture_info = TEXTURE_INFO[self.db.Style][player_class] or TEXTURE_INFO[self.db.Style]
 
-  if player_class == "DEATHKNIGHT" then
-    self.UpdateUnitPower = self.UpdateRunicPower
-    DeathKnightSpecColor = DEATHKNIGHT_COLORS[GetSpecialization()]
-    ShowRuneCooldown = self.db.RuneCooldown.Show
-  else
-    self.UpdateUnitPower = self.UpdateComboPoints
-  end
+  self.UpdateUnitPower = self.UpdateComboPoints
+  --  if player_class == "DEATHKNIGHT" then
+  --    self.UpdateUnitPower = self.UpdateRunicPower
+  --    DeathKnightSpecColor = DEATHKNIGHT_COLORS[GetSpecialization()]
+  --    ShowRuneCooldown = self.db.RuneCooldown.Show
+  --  else
+  --    self.UpdateUnitPower = self.UpdateComboPoints
+  --  end
 
   self.TexCoord = texture_info.TexCoord
   self.IconWidth = texture_info.IconWidth

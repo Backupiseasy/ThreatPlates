@@ -14,17 +14,19 @@ local RGB = ThreatPlates.RGB
 local COLOR_TRANSPARENT = RGB(0, 0, 0, 0) -- opaque
 
 local function ShowThreatGlow(unit)
-  local db = TidyPlatesThreat.db.profile
+  -- local db = TidyPlatesThreat.db.profile
 
-  if db.ShowThreatGlowOnAttackedUnitsOnly then
-    if IsInInstance() and db.threat.UseHeuristicInInstances then
-      return UnitAffectingCombat(unit.unitid)
-    else
-      return Addon:OnThreatTable(unit)
-    end
-  else
-    return UnitAffectingCombat(unit.unitid)
-  end
+  return UnitAffectingCombat(unit.unitid)
+
+  --  if db.ShowThreatGlowOnAttackedUnitsOnly then
+  --    if IsInInstance() and db.threat.UseHeuristicInInstances then
+  --      return UnitAffectingCombat(unit.unitid)
+  --    else
+  --      return Addon:OnThreatTable(unit)
+  --    end
+  --  else
+  --    return UnitAffectingCombat(unit.unitid)
+  --  end
 end
 
 function Addon:SetThreatColor(unit)
@@ -50,10 +52,12 @@ function Addon:SetThreatColor(unit)
     -- is already in combat, but not yet on the mob's threat table for a sec or so.
     if db.threat.ON and db.threat.useHPColor then
       if style == "dps" or style == "tank" then
-        color = Addon:GetThreatColor(unit, style, db.ShowThreatGlowOnAttackedUnitsOnly)
+        --color = Addon:GetThreatColor(unit, style, db.ShowThreatGlowOnAttackedUnitsOnly)
+        color = Addon:GetThreatColor(unit, style, false)
       end
     elseif InCombatLockdown() and (style == "normal" or style == "dps" or style == "tank") then
-      color = Addon:GetThreatColor(unit, style, db.ShowThreatGlowOnAttackedUnitsOnly)
+      --color = Addon:GetThreatColor(unit, style, db.ShowThreatGlowOnAttackedUnitsOnly)
+      color = Addon:GetThreatColor(unit, style, false)
     end
   end
 

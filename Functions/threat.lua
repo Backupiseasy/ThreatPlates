@@ -65,7 +65,8 @@ function Addon:OnThreatTable(unit)
   --  return threatStatus ~= nil
 
   -- nil means player is not on unit's threat table - more acurate, but slower reaction time than the above solution
-  return UnitThreatSituation("player", unit.unitid) ~= nil
+  -- return false UnitThreatSituation("player", unit.unitid) ~= nil
+  return UnitAffectingCombat(unit.unitid)
 end
 
 --toggle = {
@@ -101,15 +102,16 @@ function Addon:ShowThreatFeedback(unit)
   end
 
   if db.toggle[GetUnitClassification(unit)] then
-    if db.UseThreatTable then
-      if isInstance and db.UseHeuristicInInstances then
-        return UnitAffectingCombat(unit.unitid)
-      else
-        return Addon:OnThreatTable(unit)
-      end
-    else
-      return UnitAffectingCombat(unit.unitid)
-    end
+    return UnitAffectingCombat(unit.unitid)
+--    if db.UseThreatTable then
+--      if isInstance and db.UseHeuristicInInstances then
+--        return UnitAffectingCombat(unit.unitid)
+--      else
+--        return Addon:OnThreatTable(unit)
+--      end
+--    else
+--      return UnitAffectingCombat(unit.unitid)
+--    end
   end
 
   return false

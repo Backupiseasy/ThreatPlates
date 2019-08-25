@@ -23,7 +23,7 @@ local TOTEMS = Addon.TOTEMS
 local RGB_P = ThreatPlates.RGB_P
 local IsFriend
 local IsGuildmate
-local ShowQuestUnit
+--local ShowQuestUnit
 
 local reference = {
   FRIENDLY = { NPC = "FriendlyNPC", PLAYER = "FriendlyPlayer", },
@@ -61,32 +61,22 @@ function CS:GetSmudgeColorRGB(colorA, colorB, perc)
 end
 
 local function GetThreatSituation(unit, style, enable_off_tank)
-  local threat_status = UnitThreatSituation("player", unit.unitid)
-
   local threat_situation, other_player_has_aggro
-  if threat_status then
-    threat_situation = unit.threatSituation
-    other_player_has_aggro = (threat_status < 2)
-  else
-    -- if (IsInInstance() and db.threat.UseHeuristicInInstances) or not db.threat.UseThreatTable then
-    -- Should not be necessary here as GetThreatSituation is only called if either a threat table is available
-    -- or the heuristic is enabled
 
-    local target_unit = unit.unitid .. "target"
-    if UnitExists(target_unit) and not unit.isCasting then
-      if UnitIsUnit(target_unit, "player") or UnitIsUnit(target_unit, "vehicle") then
-        threat_situation = "HIGH"
-      else
-        threat_situation = "LOW"
-      end
-
-      unit.threatSituation = threat_situation
+  local target_unit = unit.unitid .. "target"
+  if UnitExists(target_unit) and not unit.isCasting then
+    if UnitIsUnit(target_unit, "player") or UnitIsUnit(target_unit, "vehicle") then
+      threat_situation = "HIGH"
     else
-      threat_situation = unit.threatSituation
+      threat_situation = "LOW"
     end
 
-    other_player_has_aggro = (threat_situation == "LOW")
+    unit.threatSituation = threat_situation
+  else
+    threat_situation = unit.threatSituation
   end
+
+  other_player_has_aggro = (threat_situation == "LOW")
 
   -- Reset "unit.IsOfftanked" if the player is tanking
   if not other_player_has_aggro then
@@ -100,7 +90,8 @@ local function GetThreatSituation(unit, style, enable_off_tank)
         local target_threat_situation = UnitThreatSituation(target_unit, unit.unitid) or 0
         if target_threat_situation > 1 then
           -- Target unit does tank unit, so check if target unit is a tank or an tank-like pet/guardian
-          if ("TANK" == UnitGroupRolesAssigned(target_unit) and not UnitIsUnit("player", target_unit)) or UnitIsUnit(target_unit, "pet") or IsOffTankCreature(target_unit) then
+          --if ("TANK" == UnitGroupRolesAssigned(target_unit) and not UnitIsUnit("player", target_unit)) or UnitIsUnit(target_unit, "pet") or IsOffTankCreature(target_unit) then
+          if UnitIsUnit(target_unit, "pet") or IsOffTankCreature(target_unit) then
             unit.IsOfftanked = true
           else
             -- Reset "unit.IsOfftanked"
@@ -119,6 +110,65 @@ local function GetThreatSituation(unit, style, enable_off_tank)
   end
 
   return threat_situation
+
+--  local threat_status = UnitThreatSituation("player", unit.unitid)
+--
+--  local threat_situation, other_player_has_aggro
+--  if threat_status then
+--    threat_situation = unit.threatSituation
+--    other_player_has_aggro = (threat_status < 2)
+--  else
+--    -- if (IsInInstance() and db.threat.UseHeuristicInInstances) or not db.threat.UseThreatTable then
+--    -- Should not be necessary here as GetThreatSituation is only called if either a threat table is available
+--    -- or the heuristic is enabled
+--
+--    local target_unit = unit.unitid .. "target"
+--    if UnitExists(target_unit) and not unit.isCasting then
+--      if UnitIsUnit(target_unit, "player") or UnitIsUnit(target_unit, "vehicle") then
+--        threat_situation = "HIGH"
+--      else
+--        threat_situation = "LOW"
+--      end
+--
+--      unit.threatSituation = threat_situation
+--    else
+--      threat_situation = unit.threatSituation
+--    end
+--
+--    other_player_has_aggro = (threat_situation == "LOW")
+--  end
+--
+--  -- Reset "unit.IsOfftanked" if the player is tanking
+--  if not other_player_has_aggro then
+--    unit.IsOfftanked = false
+--  elseif style == "tank" and enable_off_tank and other_player_has_aggro then
+--    local target_unit = unit.unitid .. "target"
+--
+--    -- Player does not tank the unit, so check if it is off-tanked:
+--    if UnitExists(target_unit) then
+--      if UnitIsPlayer(target_unit) or UnitPlayerControlled(target_unit) then
+--        local target_threat_situation = UnitThreatSituation(target_unit, unit.unitid) or 0
+--        if target_threat_situation > 1 then
+--          -- Target unit does tank unit, so check if target unit is a tank or an tank-like pet/guardian
+--          if ("TANK" == UnitGroupRolesAssigned(target_unit) and not UnitIsUnit("player", target_unit)) or UnitIsUnit(target_unit, "pet") or IsOffTankCreature(target_unit) then
+--            unit.IsOfftanked = true
+--          else
+--            -- Reset "unit.IsOfftanked"
+--            -- Target unit does tank unit, but is not a tank or a tank-like pet/guardian
+--            unit.IsOfftanked = false
+--          end
+--        end
+--      end
+--    end
+--
+--    -- Player does not tank the unit, but it might have been off-tanked before losing target.
+--    -- If so, assume that it is still securely off-tanked
+--    if unit.IsOfftanked then
+--      threat_situation = "OFFTANK"
+--    end
+--  end
+--
+--  return threat_situation
 end
 
 function Addon:GetThreatColor(unit, style, use_threat_table)
@@ -126,18 +176,21 @@ function Addon:GetThreatColor(unit, style, use_threat_table)
 
   local color
 
-  local on_threat_table
-  if use_threat_table then
-    if IsInInstance() and db.threat.UseHeuristicInInstances then
-      -- Use threat detection heuristic in instance
-      on_threat_table = UnitAffectingCombat(unit.unitid)
-    else
-      on_threat_table = Addon:OnThreatTable(unit)
-    end
-  else
-    -- Use threat detection heuristic
-    on_threat_table = UnitAffectingCombat(unit.unitid)
-  end
+  -- Use threat detection heuristic
+  local on_threat_table = UnitAffectingCombat(unit.unitid)
+
+  -- local on_threat_table
+  --  if use_threat_table then
+  --    if IsInInstance() and db.threat.UseHeuristicInInstances then
+  --      -- Use threat detection heuristic in instance
+  --      on_threat_table = UnitAffectingCombat(unit.unitid)
+  --    else
+  --      on_threat_table = Addon:OnThreatTable(unit)
+  --    end
+  --  else
+  --    -- Use threat detection heuristic
+  --    on_threat_table = UnitAffectingCombat(unit.unitid)
+  --  end
 
   if on_threat_table then
     color = db.settings[style].threatcolor[GetThreatSituation(unit, style, db.threat.toggle.OffTank)]
@@ -152,7 +205,8 @@ local function GetColorByThreat(unit, style)
   local c
 
   if (db.threat.ON and db.threat.useHPColor and (style == "dps" or style == "tank")) then
-    c = Addon:GetThreatColor(unit, style, db.threat.UseThreatTable)
+    --c = Addon:GetThreatColor(unit, style, db.threat.UseThreatTable)
+    c = Addon:GetThreatColor(unit, style, false)
   end
 
   return c
@@ -207,7 +261,7 @@ end
 --  local color
 --  if not UnitIsConnected(unit.unitid) then
 --    color =  db_color.DisconnectedUnit
---  elseif unit.isTapped then
+--  elseif unit.isTapped  then
 --    color =  db_color.TappedUnit
 --  elseif unit.reaction == "FRIENDLY" and unit.type == "PLAYER" then
 --    IsFriend = IsFriend or ThreatPlates.IsFriend
@@ -249,7 +303,7 @@ function Addon:SetHealthbarColor(unit)
 
   if style == "NameOnly" or style == "NameOnly-Unique" or style == "empty" or style == "etotem" then return end
 
-  ShowQuestUnit = ShowQuestUnit or ThreatPlates.ShowQuestUnit
+  --ShowQuestUnit = ShowQuestUnit or ThreatPlates.ShowQuestUnit
   IsFriend = IsFriend or ThreatPlates.IsFriend
   IsGuildmate = IsGuildmate or ThreatPlates.IsGuildmate
 
@@ -270,9 +324,9 @@ function Addon:SetHealthbarColor(unit)
         c = db_color.DisconnectedUnit
       elseif unit.isTapped then
         c = db_color.TappedUnit
-      elseif ShowQuestUnit(unit) and Addon:IsPlayerQuestUnit(unit) then
-        -- Unit is quest target
-        c = db.questWidget.HPBarColor
+      --elseif ShowQuestUnit(unit) and Addon:IsPlayerQuestUnit(unit) then
+      --  -- Unit is quest target
+      --  c = db.questWidget.HPBarColor
       elseif unique_setting.UseThreatColor then
         -- Threat System is should also be used for custom nameplate (in combat with thread system on)
         c = GetColorByThreat(unit, Addon:GetThreatStyle(unit))
@@ -311,8 +365,8 @@ function Addon:SetHealthbarColor(unit)
         c = db_color.DisconnectedUnit
       elseif unit.isTapped then
         c = db_color.TappedUnit
-      elseif ShowQuestUnit(unit) and Addon:IsPlayerQuestUnit(unit) then
-        c = db.questWidget.HPBarColor
+      --elseif ShowQuestUnit(unit) and Addon:IsPlayerQuestUnit(unit) then
+      --  c = db.questWidget.HPBarColor
       else
         c = GetColorByThreat(unit, style)
       end
