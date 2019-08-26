@@ -13,4 +13,5 @@
 <Include file="AceConfig-3.0\AceConfig-3.0.xml"/>
 <Include file="AceConsole-3.0\AceConsole-3.0.xml"/>
 <Include file="LibCustomGlow-1.0\LibCustomGlow-1.0.xml"/>
+<Include file="ThreatClassic-1.0\lib.xml"/>
 </Ui>

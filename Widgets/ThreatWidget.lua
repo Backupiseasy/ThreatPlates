@@ -12,13 +12,14 @@ local Widget = Addon.Widgets:NewWidget("Threat")
 
 -- WoW APIs
 local CreateFrame, UNKNOWNOBJECT = CreateFrame, UNKNOWNOBJECT
-local UnitIsUnit, UnitThreatSituation, UnitName = UnitIsUnit, UnitThreatSituation, UnitName
-local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
+local UnitIsUnit, UnitName = UnitIsUnit, UnitName
 local GetRaidTargetIndex = GetRaidTargetIndex
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
 local GetThreatSituation = Addon.GetThreatSituation
+local LibThreatClassic = Addon.LibThreatClassic
+local PlatesByGUID= Addon.PlatesByGUID
 
 local PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ThreatWidget\\"
 local THREAT_REFERENCE = {
@@ -37,14 +38,17 @@ local REVERSE_THREAT_SITUATION = {
 -- Event handling stuff
 ---------------------------------------------------------------------------------------------------
 
-function Widget:UNIT_THREAT_LIST_UPDATE(unitid)
-  if not unitid or unitid == "player" or UnitIsUnit("player", unitid) then return end
+local function UNIT_THREAT_LIST_UPDATE(lib_name, unit_guid, target_guid, threat)
+  local plate = PlatesByGUID[target_guid]
+  if plate then
+    local unitid = plate.TPFrame.unit.unitid
+    if not unitid or unitid == "player" or UnitIsUnit("player", unitid) then return end
 
-  local plate = GetNamePlateForUnit(unitid)
-  if plate and plate.TPFrame.Active then
-    local widget_frame = plate.TPFrame.widgets.Threat
-    if widget_frame.Active then
-      self:UpdateFrame(widget_frame, plate.TPFrame.unit)
+    if plate.TPFrame.Active then
+      local widget_frame = plate.TPFrame.widgets.Threat
+      if widget_frame.Active then
+        Widget:UpdateFrame(widget_frame, plate.TPFrame.unit)
+      end
     end
   end
 end
@@ -80,8 +84,13 @@ function Widget:IsEnabled()
 end
 
 function Widget:OnEnable()
-  self:RegisterEvent("UNIT_THREAT_LIST_UPDATE")
+  LibThreatClassic.RegisterCallback(TidyPlatesThreat, "ThreatUpdated", UNIT_THREAT_LIST_UPDATE)
   self:RegisterEvent("RAID_TARGET_UPDATE")
+end
+
+function Widget:OnDisable()
+  LibThreatClassic.UnregisterCallback(TidyPlatesThreat, "ThreatUpdated")
+  self:UnregisterEvent("RAID_TARGET_UPDATE")
 end
 
 function Widget:EnabledForStyle(style, unit)

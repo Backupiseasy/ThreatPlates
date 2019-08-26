@@ -7,12 +7,12 @@ local ADDON_NAME, Addon = ...
 local string, strsplit = string, strsplit
 
 -- WoW APIs
-local UnitThreatSituation = UnitThreatSituation
 local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
 local UnitReaction, UnitIsTapDenied, UnitGUID, UnitAffectingCombat = UnitReaction, UnitIsTapDenied, UnitGUID, UnitAffectingCombat
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
+local LibThreatClassic = Addon.LibThreatClassic
 
 local CLASSIFICATION_MAPPING = {
   ["boss"] = "Boss",
@@ -65,8 +65,10 @@ function Addon:OnThreatTable(unit)
   --  return threatStatus ~= nil
 
   -- nil means player is not on unit's threat table - more acurate, but slower reaction time than the above solution
-  -- return false UnitThreatSituation("player", unit.unitid) ~= nil
-  return UnitAffectingCombat(unit.unitid)
+  -- return UnitThreatSituation("player", unit.unitid) ~= nil
+
+  local _, _, scaledPercent, _, threatValue = LibThreatClassic:UnitDetailedThreatSituation("player", unit.unitid)
+  return scaledPercent and scaledPercent > 0
 end
 
 --toggle = {
@@ -102,16 +104,15 @@ function Addon:ShowThreatFeedback(unit)
   end
 
   if db.toggle[GetUnitClassification(unit)] then
-    return UnitAffectingCombat(unit.unitid)
---    if db.UseThreatTable then
---      if isInstance and db.UseHeuristicInInstances then
---        return UnitAffectingCombat(unit.unitid)
---      else
---        return Addon:OnThreatTable(unit)
---      end
---    else
---      return UnitAffectingCombat(unit.unitid)
---    end
+    if db.UseThreatTable then
+      if isInstance and db.UseHeuristicInInstances then
+        return UnitAffectingCombat(unit.unitid)
+      else
+        return Addon:OnThreatTable(unit)
+      end
+    else
+      return UnitAffectingCombat(unit.unitid)
+    end
   end
 
   return false

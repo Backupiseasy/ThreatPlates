@@ -241,36 +241,20 @@ local TOTEM_DATA = {
 
 function Addon:InitializeTotemInformation()
   for i, totem_data in ipairs(TOTEM_DATA) do
-    local name = GetSpellInfo(totem_data.SpellID) or UNKNOWNOBJECT
+    local name = GetSpellInfo(totem_data.SpellID)
+    if name then
+      totem_data.Name = name
+      totem_data.Color = RGB(HEX2RGB(totem_data.GroupColor))
+      totem_data.SortKey = totem_data.ID:sub(1, 1) .. name
+      totem_data.Style = "normal"
+      totem_data.ShowNameplate = true
+      totem_data.ShowHPColor = true
+      totem_data.ShowIcon = true
 
-    totem_data.Name = name
-    totem_data.Color = RGB(HEX2RGB(totem_data.GroupColor))
-    totem_data.SortKey = totem_data.ID:sub(1, 1) .. name
-    totem_data.Style = "normal"
-    totem_data.ShowNameplate = true
-    totem_data.ShowHPColor = true
-    totem_data.ShowIcon = true
-
-    Addon.TotemInformation[name] = totem_data
-    Addon.TOTEMS[name] = totem_data.ID
+      Addon.TotemInformation[name] = totem_data
+      Addon.TOTEMS[name] = totem_data.ID
+    end
   end
-
---  local test_name = "Hochexarch Turalyon"
---  local id = "P4"
---  Addon.TotemInformation[test_name] = {
---    Name = test_name,
---    SpellID = 204336,
---    Icon = id,
---    ID = id,
---    SortKey = id:sub(1, 1) .. test_name,
---    Style = "normal",
---    Color = RGB(HEX2RGB("2b76ff")),
---    GroupColor = "2b76ff",
---    ShowNameplate = true,
---    ShowHPColor = true,
---    ShowIcon = true,
---  }
---  Addon.TOTEMS[test_name] = id
 end
 
 local function GetDefaultTotemSettings()

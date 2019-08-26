@@ -28,8 +28,8 @@ local UnitAffectingCombat = UnitAffectingCombat
 local GetRaidTargetIndex = GetRaidTargetIndex
 local UnitIsTapDenied = UnitIsTapDenied
 local GetTime = GetTime
-local ChannelInfo, CastingInfo = ChannelInfo, CastingInfo
---local ChannelInfo, CastingInfo = UnitChannelInfo, UnitCastingInfo
+--local ChannelInfo, CastingInfo = ChannelInfo, CastingInfo
+local ChannelInfo, CastingInfo = UnitChannelInfo, UnitCastingInfo
 local UnitPlayerControlled = UnitPlayerControlled
 local GetCVar, Lerp, CombatLogGetCurrentEventInfo = GetCVar, Lerp, CombatLogGetCurrentEventInfo
 local GetPlayerInfoByGUID, RAID_CLASS_COLORS = GetPlayerInfoByGUID, RAID_CLASS_COLORS
@@ -38,6 +38,7 @@ local GetPlayerInfoByGUID, RAID_CLASS_COLORS = GetPlayerInfoByGUID, RAID_CLASS_C
 local TidyPlatesThreat = TidyPlatesThreat
 local Widgets = Addon.Widgets
 local Animations = Addon.Animations
+local LibThreatClassic = Addon.LibThreatClassic
 
 -- Constants
 -- Raid Icon Reference
@@ -473,9 +474,8 @@ function Addon:UpdateUnitCondition(unit, unitid)
   unit.health = UnitHealth(unitid) or 0
   unit.healthmax = UnitHealthMax(unitid) or 1
 
-  --unit.threatValue = UnitThreatSituation("player", unitid) or 0
-  --unit.threatSituation = ThreatReference[unit.threatValue]
-  unit.threatSituation = "LOW"
+  unit.threatValue = LibThreatClassic:UnitThreatSituation("player", unitid) or 0
+  unit.threatSituation = ThreatReference[unit.threatValue]
   unit.isInCombat = UnitAffectingCombat(unitid)
 
   local raidIconIndex = GetRaidTargetIndex(unitid)
@@ -1036,31 +1036,33 @@ do
     end
   end
 
-  --function  CoreEvents:UNIT_THREAT_LIST_UPDATE(unitid)
-  --  if unitid == "player" or unitid == "target" then return end
-  --  local plate = PlatesByUnit[unitid]
-  --
-  --  if plate then
-  --    --local threat_value = UnitThreatSituation("player", unitid) or 0
-  --    --if threat_value ~= plate.TPFrame.unit.threatValue then
-  --    if (UnitThreatSituation("player", unitid) or 0) ~= plate.TPFrame.unit.threatValue then
-  --
-  --      --OnHealthUpdate(plate)
-  --
-  --      plate.UpdateMe = true
-  --
-  --      -- TODO: Optimize this - only update elements that need updating
-  --      -- Don't use OnHealthUpdate(), more like: OnThreatUpdate()
-  --      -- UpdateReferences(plate)
-  --      --Addon:UpdateUnitCondition(unit, unitid)
-  --      --        unit.threatValue = UnitThreatSituation("player", unitid) or 0
-  --      --        unit.threatSituation = ThreatReference[unit.threatValue]
-  --      --        unit.isInCombat = UnitAffectingCombat(unitid)
-  --      --ProcessUnitChanges()
-  --      --OnUpdateCastMidway(nameplate, unit.unitid)
-  --    end
-  --  end
-  --end
+  -- LibThreatClassic - Event: ThreatUpdated
+  function Addon.UNIT_THREAT_LIST_UPDATE(lib_name, unit_guid, target_guid, threat)
+    local plate = PlatesByGUID[target_guid]
+    if plate then
+      local unitid = plate.TPFrame.unit.unitid
+      if not unitid or unitid == "player" or unitid == "target" then return end
+
+      --local threat_value = UnitThreatSituation("player", unitid) or 0
+      --if threat_value ~= plate.TPFrame.unit.threatValue then
+      if (LibThreatClassic:UnitThreatSituation("player", unitid) or 0) ~= plate.TPFrame.unit.threatValue then
+
+        --OnHealthUpdate(plate)
+
+        plate.UpdateMe = true
+
+        -- TODO: Optimize this - only update elements that need updating
+        -- Don't use OnHealthUpdate(), more like: OnThreatUpdate()
+        -- UpdateReferences(plate)
+        --Addon:UpdateUnitCondition(unit, unitid)
+        --        unit.threatValue = UnitThreatSituation("player", unitid) or 0
+        --        unit.threatSituation = ThreatReference[unit.threatValue]
+        --        unit.isInCombat = UnitAffectingCombat(unitid)
+        --ProcessUnitChanges()
+        --OnUpdateCastMidway(nameplate, unit.unitid)
+      end
+    end
+  end
 
   function CoreEvents:PLAYER_REGEN_ENABLED()
 		SetUpdateAll()

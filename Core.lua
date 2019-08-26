@@ -22,6 +22,7 @@ local TidyPlatesThreat = TidyPlatesThreat
 local LibStub = LibStub
 local LSM = t.Media
 local L = t.L
+local LibThreatClassic = Addon.LibThreatClassic
 
 ---------------------------------------------------------------------------------------------------
 -- Local variables
@@ -307,6 +308,11 @@ function TidyPlatesThreat:OnInitialize()
 
   -- Setup chat commands
   self:RegisterChatCommand("tptp", "ChatCommand")
+
+  LibThreatClassic.RegisterCallback(self, "Activate", Addon.UNIT_THREAT_LIST_UPDATE)
+  LibThreatClassic.RegisterCallback(self, "Deactivate", Addon.UNIT_THREAT_LIST_UPDATE)
+  LibThreatClassic.RegisterCallback(self, "ThreatUpdated", Addon.UNIT_THREAT_LIST_UPDATE)
+  LibThreatClassic:RequestActiveOnSolo(true)
 end
 
 local function SetCVarHook(name, value, c)
