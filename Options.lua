@@ -4490,62 +4490,48 @@ local function CreateWidgetOptions()
   return options
 end
 
---local function CreateSpecRoles()
---  -- Create a list of specs for the player's class
---  local result = {
---    Automatic_Spec_Detection = {
---      name = L["Determine your role (tank/dps/healing) automatically based on current spec."],
---      type = "toggle",
---      width = "full",
---      order = 1,
---      arg = { "optionRoleDetectionAutomatic" }
---    },
---    SpecGroup = {
---      name = " ",
---      type = "group",
---      inline = true,
---      order = 3,
---      args = {}
---    }
---  }
---
---  for index = 1, GetNumTalentTabs() do
---    local spec_name, iconTexture, pointsSpent = GetTalentTabInfo(index)
---    result.SpecGroup.args[spec_name] = {
---      name = spec_name,
---      type = "group",
---      inline = true,
---      order = index + 2,
---      disabled = function() return TidyPlatesThreat.db.profile.optionRoleDetectionAutomatic end,
---      args = {
---        Tank = {
---          name = L["Tank"],
---          type = "toggle",
---          order = 1,
---          desc = L["Sets your spec "] .. spec_name .. L[" to tanking."],
---          get = function()
---            local spec = TidyPlatesThreat.db.char.spec[index]
---            return (spec == nil and role == "TANK") or spec
---          end,
---          set = function() TidyPlatesThreat.db.char.spec[index] = true; Addon:ForceUpdate() end,
---        },
---        DPS = {
---          name = L["DPS/Healing"],
---          type = "toggle",
---          order = 2,
---          desc = L["Sets your spec "] .. spec_name .. L[" to DPS."],
---          get = function()
---            local spec = TidyPlatesThreat.db.char.spec[index]
---            return (spec == nil and role ~= "TANK") or not spec
---          end,
---          set = function() TidyPlatesThreat.db.char.spec[index] = false; Addon:ForceUpdate() end,
---        },
---      },
---    }
---  end
---
---  return result
---end
+local function CreateSpecRoles()
+  -- Create a list of specs for the player's class
+  local result = {
+    Automatic_Spec_Detection = {
+      name = L["Determine your role (tank/dps/healing) automatically based on current stance (Warrior) or form (Druid)."],
+      type = "toggle",
+      width = "full",
+      order = 1,
+      arg = { "optionRoleDetectionAutomatic" }
+    },
+    SpecGroup = {
+      name = " ",
+      type = "group",
+      inline = true,
+      order = 3,
+      args = {
+        Tank = {
+          name = L["Tank"],
+          type = "toggle",
+          order = 1,
+          desc = L["Sets your role to tanking."],
+          get = function()
+            return TidyPlatesThreat.db.char.spec[1]
+          end,
+          set = function() TidyPlatesThreat.db.char.spec[1] = true; Addon:ForceUpdate() end,
+        },
+        DPS = {
+          name = L["DPS/Healing"],
+          type = "toggle",
+          order = 2,
+          desc = L["Sets your role to DPS."],
+          get = function()
+            return not TidyPlatesThreat.db.char.spec[1]
+          end,
+          set = function() TidyPlatesThreat.db.char.spec[1] = false; Addon:ForceUpdate() end,
+        },
+      }
+    }
+  }
+
+  return result
+end
 
 local function CreateCustomNameplatesGroup()
   local entry = {
@@ -7098,14 +7084,14 @@ local function CreateOptionsTable()
                 },
               },
             },
---            DualSpec = {
---              name = L["Spec Roles"],
---              type = "group",
---              desc = L["Set the roles your specs represent."],
---              disabled = function() return not db.threat.ON end,
---              order = 5,
---              args = CreateSpecRoles(),
---            },
+            DualSpec = {
+              name = L["Role"],
+              type = "group",
+              desc = L["Set the roles your specs represent."],
+              disabled = function() return not db.threat.ON end,
+              order = 5,
+              args = CreateSpecRoles(),
+            },
             Textures = {
               name = L["Textures"],
               type = "group",

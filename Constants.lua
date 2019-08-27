@@ -293,6 +293,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
         role = "",
       },
     },
+    -- Still using table here for compatibility with non-classic version of Threat Plates, although only [1] is used in classic.
     spec = {
       [1] = false,
       [2] = false,

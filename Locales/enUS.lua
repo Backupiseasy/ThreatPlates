@@ -18,6 +18,14 @@ L["Minuss"] = "Minors"
 L["Show Neutral Units"] = true
 
 ---------------------------------------------------------------------------------------------------
+-- String constants just for the classic version
+---------------------------------------------------------------------------------------------------
+L["Determine your role (tank/dps/healing) automatically based on current stance (Warrior) or form (Druid)."] = true
+L["Sets your role to tanking."] = true
+L["Sets your role to DPS."] = true
+L["Role"] = true
+
+---------------------------------------------------------------------------------------------------
 -- String constants in the game
 ---------------------------------------------------------------------------------------------------
 L["  <no option>        Displays options dialog"] = true

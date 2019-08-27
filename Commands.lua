@@ -26,10 +26,10 @@ local function toggleTANK()
 	Addon:ForceUpdate()
 end
 
---SLASH_TPTPDPS1 = "/tptpdps"
---SlashCmdList["TPTPDPS"] = toggleDPS
---SLASH_TPTPTANK1 = "/tptptank"
---SlashCmdList["TPTPTANK"] = toggleTANK
+SLASH_TPTPDPS1 = "/tptpdps"
+SlashCmdList["TPTPDPS"] = toggleDPS
+SLASH_TPTPTANK1 = "/tptptank"
+SlashCmdList["TPTPTANK"] = toggleTANK
 
 local function TPTPTOGGLE()
 	if (TidyPlatesThreat.db.profile.optionRoleDetectionAutomatic and TidyPlatesThreat.db.profile.verbose) then
