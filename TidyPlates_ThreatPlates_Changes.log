@@ -2,6 +2,7 @@
 1.1.3
 ------------------------------------------------------
 * Adjusted maximum value for maximum distance up to which nameplates are shown to 20 in the options as this is the maximum value possible in Classic.
+* Disabled castbar on nameplates as it is not working currently with the current Classic API without a major rework.
 
 ﻿------------------------------------------------------
 1.1.2
