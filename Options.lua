@@ -3841,7 +3841,7 @@ local function CreateBlizzardSettings()
             order = 10,
             type = "range",
             min = 0,
-            max = 100,
+            max = 20,
             step = 1,
             width = "double",
             desc = L["The max distance to show nameplates."],
