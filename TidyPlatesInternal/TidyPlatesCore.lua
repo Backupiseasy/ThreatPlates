@@ -170,7 +170,7 @@ do
 
 	function OnNewNameplate(plate)
     -- Parent could be: WorldFrame, UIParent, plate
-    local extended = CreateFrame("Frame",  "ThreatPlatesFrame" .. plate:GetName(), WorldFrame)
+    local extended = CreateFrame("Frame",  "ThreatPlatesFrame" .. plate:GetName():gsub("NamePlate", "Plate"), WorldFrame)
     extended:Hide()
 
     extended:SetFrameStrata("BACKGROUND")
