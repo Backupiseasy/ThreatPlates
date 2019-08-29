@@ -1,9 +1,11 @@
 ﻿﻿------------------------------------------------------
 1.2.0
 ------------------------------------------------------
-* Enabled support for roles (tank or dps/healing) again to the threat system, based on stance (Warriors) or form (Druid) [Issue #20, #8].
-* Enabled support for showing the castbar again based on LibClassicCasterino (https://github.com/rgd87/LibClassicCasterino) - No pushback support currently [Issue #29, #30].
-* Added support for Real Mob Health (https://www.wowinterface.com/downloads/info24924-RealMobHealth.html), an addon that estimates mob health values [Issue #43, #57].
+* Enabled support for roles (tank or dps/healing) again to the threat system, based on stance (Warriors) or form (Druid) [Comment #20, #8].
+* Enabled support for showing the castbar again based on LibClassicCasterino (https://github.com/rgd87/LibClassicCasterino) - No pushback support currently [Comment #29, #30, #61].
+* Added support for Real Mob Health (https://www.wowinterface.com/downloads/info24924-RealMobHealth.html), an addon that estimates mob health values [Comment #43, #57].
+* Added support for aura durations in the Auras widget based on LibClassicDurations (https://www.curseforge.com/wow/addons/libclassicdurations) [Comment #44, #65, #70, #72, #75]
+* Updated all included libraries Ace3, LibSharedMedia-3.0, Ace3GUI-3.0-SharedMediaWidgetes and LibCustomGlow.
 
 ﻿------------------------------------------------------
 1.1.4
