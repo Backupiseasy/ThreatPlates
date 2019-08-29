@@ -743,8 +743,8 @@ do
     --if isTradeSkill then return end
 
 		unit.isCasting = true
-		--unit.spellIsShielded = notInterruptible
-		unit.spellInterruptible = not unit.spellIsShielded
+    unit.spellIsShielded = false -- Classic does not provide this information
+    unit.spellInterruptible = not unit.spellIsShielded
 
 		visual.spelltext:SetText(name)
 		visual.spellicon:SetTexture(icon)
