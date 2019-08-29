@@ -3,6 +3,7 @@
 ------------------------------------------------------
 * Enabled support for roles (tank or dps/healing) again to the threat system, based on stance (Warriors) or form (Druid) [Issue #20, #8].
 * Enabled support for showing the castbar again based on LibClassicCasterino (https://github.com/rgd87/LibClassicCasterino) - No pushback support currently [Issue #29, #30].
+* Added support for Real Mob Health (https://www.wowinterface.com/downloads/info24924-RealMobHealth.html), an addon that estimates mob health values [Issue #43, #57].
 
 ﻿------------------------------------------------------
 1.1.4
