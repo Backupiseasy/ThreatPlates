@@ -167,7 +167,7 @@ end
 local function GetColorByHealthDeficit(unit)
   local db = TidyPlatesThreat.db.profile
 
-  local pct = (UnitHealth(unit.unitid) or 0) / (UnitHealthMax(unit.unitid) or 1)
+  local pct = unit.health / unit.healthmax
   local r, g, b = CS:GetSmudgeColorRGB(db.aHPbarColor, db.bHPbarColor, pct)
   return RGB_P(r, g, b, 1)
 end

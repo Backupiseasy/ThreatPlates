@@ -23,7 +23,6 @@ local UnitClass = UnitClass
 local UnitGUID = UnitGUID
 local GetCreatureDifficultyColor = GetCreatureDifficultyColor
 local UnitSelectionColor = UnitSelectionColor
-local UnitHealth, UnitHealthMax = UnitHealth, UnitHealthMax
 local UnitAffectingCombat = UnitAffectingCombat
 local GetRaidTargetIndex = GetRaidTargetIndex
 local UnitIsTapDenied = UnitIsTapDenied
@@ -38,6 +37,7 @@ local Widgets = Addon.Widgets
 local Animations = Addon.Animations
 local LibThreatClassic = Addon.LibThreatClassic
 local LibClassicCasterino = Addon.LibClassicCasterino
+local GetUnitHealth = Addon.GetUnitHealth
 
 -- Constants
 -- Raid Icon Reference
@@ -470,8 +470,7 @@ function Addon:UpdateUnitCondition(unit, unitid)
     unit.reaction = "HOSTILE"
   end
 
-  unit.health = UnitHealth(unitid) or 0
-  unit.healthmax = UnitHealthMax(unitid) or 1
+  unit.health, unit.healthmax = GetUnitHealth(unitid)
 
   unit.threatValue = LibThreatClassic:UnitThreatSituation("player", unitid) or 0
   unit.threatSituation = ThreatReference[unit.threatValue]

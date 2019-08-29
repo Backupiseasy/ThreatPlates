@@ -10,6 +10,8 @@ local ThreatPlates = Addon.ThreatPlates
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
 
+-- WoW APIs
+local UnitHealth, UnitHealthMax = UnitHealth, UnitHealthMax
 local UnitPlayerControlled = UnitPlayerControlled
 
 ---------------------------------------------------------------------------------------------------
@@ -34,6 +36,16 @@ TidyPlatesThreatDBM = true
 
 Addon.Animations = {}
 Addon.Widgets = {}
+
+--------------------------------------------------------------------------------------------------
+-- Functions to abstract from the presence of certain addons
+---------------------------------------------------------------------------------------------------
+
+local function GetUnitHealthDefault(unitid)
+	return UnitHealth(unitid) or 0, UnitHealthMax(unitid) or 1
+end
+
+Addon.GetUnitHealth = (RealMobHealth and RealMobHealth.GetUnitHealth) or GetUnitHealthDefault
 
 --------------------------------------------------------------------------------------------------
 -- General Functions
