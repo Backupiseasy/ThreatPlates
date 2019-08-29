@@ -113,24 +113,7 @@ function TidyPlatesThreat:ChatCommand(input)
 	if not command or command == "" then
 		TidyPlatesThreat:OpenOptions()
 	elseif command == "test" then
-		print (MAX_TALENT_TABS)
-		for i = 1, MAX_TALENT_TABS do
-			--name, iconTexture, pointsSpent = GetTalentTabInfo(i);
-			print (GetTalentTabInfo(i))
-		--		if ( i == PanelTemplates_GetSelectedTab(TalentFrame) ) then
-		--			-- If tab is the selected tab set the points spent info
-		--			TalentFrameSpentPoints:SetText(MASTERY_POINTS_SPENT:format(name).." "..HIGHLIGHT_FONT_COLOR_CODE..pointsSpent..FONT_COLOR_CODE_CLOSE);
-		--			TalentFrame.pointsSpent = pointsSpent;
-		--		end
-		--		tab:SetText(name);
-		--		PanelTemplates_TabResize(tab, 10);
-		--		tab:Show();
-		--	else
-		--		tab:Hide();
-		--	end
-		end
-
-		print (TP.DEBUG_PRINT_TABLE(NIT_POWER["DRUID"]))
+		Addon.LibClassicCasterino:PrintDebug()
 	end
 end
 

@@ -28,8 +28,6 @@ local UnitAffectingCombat = UnitAffectingCombat
 local GetRaidTargetIndex = GetRaidTargetIndex
 local UnitIsTapDenied = UnitIsTapDenied
 local GetTime = GetTime
-local ChannelInfo, CastingInfo = ChannelInfo, CastingInfo
---local ChannelInfo, CastingInfo = UnitChannelInfo, UnitCastingInfo
 local UnitPlayerControlled = UnitPlayerControlled
 local GetCVar, Lerp, CombatLogGetCurrentEventInfo = GetCVar, Lerp, CombatLogGetCurrentEventInfo
 local GetPlayerInfoByGUID, RAID_CLASS_COLORS = GetPlayerInfoByGUID, RAID_CLASS_COLORS
@@ -39,6 +37,7 @@ local TidyPlatesThreat = TidyPlatesThreat
 local Widgets = Addon.Widgets
 local Animations = Addon.Animations
 local LibThreatClassic = Addon.LibThreatClassic
+local LibClassicCasterino = Addon.LibClassicCasterino
 
 -- Constants
 -- Raid Icon Reference
@@ -105,7 +104,7 @@ local UpdateIndicator_CustomText, UpdateIndicator_CustomScale, UpdateIndicator_C
 local UpdateIndicator_Level, UpdateIndicator_RaidIcon
 local UpdateIndicator_EliteIcon, UpdateIndicator_Name
 local UpdateIndicator_HealthBar
-local OnUpdateCasting, OnStartCasting, OnStopCasting, OnUpdateCastMidway
+local OnStartCasting, OnStopCasting, OnUpdateCastMidway
 
 -- Event Functions
 local OnNewNameplate, OnShowNameplate, OnUpdateNameplate, OnResetNameplate
@@ -346,7 +345,7 @@ do
 
     -- Call this after the plate is shown as OnStartCasting checks if the plate is shown; if not, the castbar is hidden and
     -- nothing is updated
-    -- OnUpdateCastMidway(plate, unitid)
+    OnUpdateCastMidway(plate, unitid)
   end
 
 	-- OnUpdateNameplate
@@ -358,7 +357,7 @@ do
 		--Addon:UpdateUnitIdentity(plate.TPFrame, unitid)
     Addon:UpdateUnitContext(unit, unitid)
 		ProcessUnitChanges()
-		--OnUpdateCastMidway(plate, unitid)
+		OnUpdateCastMidway(plate, unitid)
 	end
 
 	-- OnHealthUpdate
@@ -368,7 +367,7 @@ do
 
     Addon:UpdateUnitCondition(unit, unitid)
 		ProcessUnitChanges()
-    --OnUpdateCastMidway(nameplate, unit.unitid)
+    OnUpdateCastMidway(nameplate, unit.unitid)
 
     -- Fix a bug where the overlay for non-interruptible casts was shown even for interruptible casts when entering combat while the unit was already casting
     --    if unit.isCasting and visual.castbar:IsShown()then
@@ -711,82 +710,82 @@ do
   end
 
 	-- OnShowCastbar
---	function OnStartCasting(plate, unitid, channeled)
---    UpdateReferences(plate)
---
---		local castbar = extended.visual.castbar
---    if not extended:IsShown() or not style.castbar.show then
---      castbar:Hide()
---      return
---    end
---
---    local name, text, texture, startTime, endTime, isTradeSkill, castID, notInterruptible, spellID
---
---    if channeled then
---      name, text, texture, startTime, endTime, isTradeSkill, notInterruptible, spellID = ChannelInfo(unitid)
---      castbar.IsChanneling = true
---      castbar.IsCasting = false
---
---      castbar.Value = (endTime / 1000) - GetTime()
---      castbar.MaxValue = (endTime - startTime) / 1000
---      castbar:SetMinMaxValues(0, castbar.MaxValue)
---      castbar:SetValue(castbar.Value)
---		else
---      name, text, texture, startTime, endTime, isTradeSkill, castID, notInterruptible = CastingInfo(unitid)
---      castbar.IsCasting = true
---      castbar.IsChanneling = false
---
---      castbar.Value = GetTime() - (startTime / 1000)
---      castbar.MaxValue = (endTime - startTime) / 1000
---      castbar:SetMinMaxValues(0, castbar.MaxValue)
---      castbar:SetValue(castbar.Value)
---    end
---
---		if isTradeSkill then return end
---
---		unit.isCasting = true
---		unit.spellIsShielded = notInterruptible
---		unit.spellInterruptible = not unit.spellIsShielded
---
---		visual.spelltext:SetText(text)
---		visual.spellicon:SetTexture(texture)
---    --visual.spellicon:SetDrawLayer("ARTWORK", 7)
---
---    castbar:SetAllColors(Addon:SetCastbarColor(unit))
---    castbar:SetFormat(unit.spellIsShielded)
---
---    UpdateIndicator_CustomScaleText()
---    UpdatePlate_Transparency(extended, unit)
---
---		castbar:Show()
---	end
---
---	-- OnHideCastbar
---	function OnStopCasting(plate)
---    UpdateReferences(plate)
---
---    local castbar = extended.visual.castbar
---    castbar.IsCasting = false
---    castbar.IsChanneling = false
---    unit.isCasting = false
---
---		--UpdateIndicator_CustomScaleText()
---    UpdateIndicator_CustomScale(extended, unit)
---    UpdatePlate_Transparency(extended, unit)
---	end
---
---	function OnUpdateCastMidway(plate, unitid)
---		if not ShowCastBars then return end
---
---		-- Check to see if there's a spell being cast
---		if CastingInfo(unitid) then
---      OnStartCasting(plate, unitid, false)
---    elseif ChannelInfo(unitid) then
---      OnStartCasting(plate, unitid, true)
---    else
---      visual.castbar:Hide()
---    end
---  end
+	function OnStartCasting(plate, unitid, channeled)
+    UpdateReferences(plate)
+
+		local castbar = extended.visual.castbar
+    if not extended:IsShown() or not style.castbar.show then
+      castbar:Hide()
+      return
+    end
+
+    local name, icon, startTime, endTime, spellID
+
+    if channeled then
+      name, _, icon, startTime, endTime, _, _, _, spellID = LibClassicCasterino:UnitChannelInfo(unitid)
+      castbar.IsChanneling = true
+      castbar.IsCasting = false
+
+      castbar.Value = (endTime / 1000) - GetTime()
+      castbar.MaxValue = (endTime - startTime) / 1000
+      castbar:SetMinMaxValues(0, castbar.MaxValue)
+      castbar:SetValue(castbar.Value)
+		else
+      name, _, icon, startTime, endTime, _, _, _, spellID = LibClassicCasterino:UnitCastingInfo(unitid)
+      castbar.IsCasting = true
+      castbar.IsChanneling = false
+
+      castbar.Value = GetTime() - (startTime / 1000)
+      castbar.MaxValue = (endTime - startTime) / 1000
+      castbar:SetMinMaxValues(0, castbar.MaxValue)
+      castbar:SetValue(castbar.Value)
+    end
+
+    --if isTradeSkill then return end
+
+		unit.isCasting = true
+		--unit.spellIsShielded = notInterruptible
+		unit.spellInterruptible = not unit.spellIsShielded
+
+		visual.spelltext:SetText(name)
+		visual.spellicon:SetTexture(icon)
+    --visual.spellicon:SetDrawLayer("ARTWORK", 7)
+
+    castbar:SetAllColors(Addon:SetCastbarColor(unit))
+    castbar:SetFormat(unit.spellIsShielded)
+
+    UpdateIndicator_CustomScaleText()
+    UpdatePlate_Transparency(extended, unit)
+
+		castbar:Show()
+	end
+
+	-- OnHideCastbar
+	function OnStopCasting(plate)
+    UpdateReferences(plate)
+
+    local castbar = extended.visual.castbar
+    castbar.IsCasting = false
+    castbar.IsChanneling = false
+    unit.isCasting = false
+
+		--UpdateIndicator_CustomScaleText()
+    UpdateIndicator_CustomScale(extended, unit)
+    UpdatePlate_Transparency(extended, unit)
+	end
+
+	function OnUpdateCastMidway(plate, unitid, onshow)
+    if not ShowCastBars then return end
+
+    -- Check to see if there's a spell being cast
+    if LibClassicCasterino:UnitCastingInfo(unitid) then
+      OnStartCasting(plate, unitid, false)
+    elseif LibClassicCasterino:UnitChannelInfo(unitid) then
+      OnStartCasting(plate, unitid, true)
+    else
+      visual.castbar:Hide()
+    end
+  end
 
 end -- End Indicator section
 
@@ -812,16 +811,6 @@ do
 	local function WorldConditionChanged()
 		SetUpdateAll()
 	end
-
-	-- Update spell currently being cast
---	local function UnitSpellcastMidway(event, unitid, ...)
---		if UnitIsUnit("player", unitid) or not ShowCastBars then return end
---
---		local plate = GetNamePlateForUnit(unitid)
---		if plate then
---			OnUpdateCastMidway(plate, unitid)
---		end
---	 end
 
   local function FrameOnShow(UnitFrame)
     -- Hide nameplates that have not yet an unit added
@@ -1072,78 +1061,87 @@ do
 		SetUpdateAll()
 	end
 
---	function CoreEvents:UNIT_SPELLCAST_START(unitid)
--- 		if UnitIsUnit("player", unitid) or not ShowCastBars then return end
---
---    local plate = GetNamePlateForUnit(unitid)
---		if plate and plate.TPFrame.Active then
---      OnStartCasting(plate, unitid, false)
---		end
---	end
---
---  function CoreEvents:UNIT_SPELLCAST_STOP(unitid)
---    if UnitIsUnit("player", unitid) or not ShowCastBars then return end
---
---    -- plate can be nil, e.g., if unitid = player, combat ends and the player resource bar is already hidden
---    -- when the cast stops (because it's not shown out of combat)
---    local plate = GetNamePlateForUnit(unitid)
---    if plate and plate.TPFrame.Active then
---      OnStopCasting(plate)
---    end
---  end
---
---	function CoreEvents:UNIT_SPELLCAST_CHANNEL_START(unitid)
---		if UnitIsUnit("player", unitid) or not ShowCastBars then return end
---
---		local plate = GetNamePlateForUnit(unitid)
---		if plate and plate.TPFrame.Active then
---			OnStartCasting(plate, unitid, true)
---      --late.TPFrame.visual.castbar:Show()
---		end
---	end
---
---	function CoreEvents:UNIT_SPELLCAST_CHANNEL_STOP(unitid)
---		if UnitIsUnit("player", unitid) or not ShowCastBars then return end
---
---		local plate = GetNamePlateForUnit(unitid)
---		if plate and plate.TPFrame.Active then
---			OnStopCasting(plate)
---		end
---	end
+	function Addon.UNIT_SPELLCAST_START(event, unitid)
+ 		if UnitIsUnit("player", unitid) or not ShowCastBars then return end
 
---  function CoreEvents:COMBAT_LOG_EVENT_UNFILTERED()
---    local timeStamp, event, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags = CombatLogGetCurrentEventInfo()
---
---    if event == "SPELL_INTERRUPT" then
---      local plate = PlatesByGUID[destGUID]
---
---      if plate and plate.TPFrame.Active then
---        UpdateReferences(plate)
---
---        local castbar = visual.castbar
---        if castbar:IsShown() then
---          sourceName = gsub(sourceName, "%-[^|]+", "") -- UnitName(sourceName) only works in groups
---          local _, class_id = GetPlayerInfoByGUID(sourceGUID)
---          if class_id then
---            --local color_str = (RAID_CLASS_COLORS[classId] and RAID_CLASS_COLORS[classId].colorStr) or ""
---            sourceName = "|c" .. RAID_CLASS_COLORS[class_id].colorStr .. sourceName .. "|r"
---          end
---          visual.spelltext:SetText(INTERRUPTED .. " [" .. sourceName .. "]")
---
---          local _, max_val = castbar:GetMinMaxValues()
---          castbar:SetValue(max_val)
---          castbar.Spark:Hide()
---
---          local color = TidyPlatesThreat.db.profile.castbarColorInterrupted
---          castbar:SetStatusBarColor(color.r, color.g, color.b, color.a)
---          castbar.FlashTime = CASTBAR_INTERRUPT_HOLD_TIME
---          -- OnStopCasting is hiding the castbar and may be triggered before or after SPELL_INTERRUPT
---          -- So we have to show the castbar again or not hide it if the interrupt message should still be shown.
---          castbar:Show()
---        end
---      end
---    end
---  end
+    local plate = GetNamePlateForUnit(unitid)
+		if plate and plate.TPFrame.Active then
+      OnStartCasting(plate, unitid, false)
+		end
+	end
+
+  function Addon.UnitSpellcastMidway(event, unitid)
+    if UnitIsUnit("player", unitid) or not ShowCastBars then return end
+
+    local plate = GetNamePlateForUnit(unitid)
+    if plate then
+      OnUpdateCastMidway(plate, unitid)
+    end
+   end
+
+  function Addon.UNIT_SPELLCAST_STOP(event, unitid)
+    if UnitIsUnit("player", unitid) or not ShowCastBars then return end
+
+    -- plate can be nil, e.g., if unitid = player, combat ends and the player resource bar is already hidden
+    -- when the cast stops (because it's not shown out of combat)
+    local plate = GetNamePlateForUnit(unitid)
+    if plate and plate.TPFrame.Active then
+      OnStopCasting(plate)
+    end
+  end
+
+	function Addon.UNIT_SPELLCAST_CHANNEL_START(event, unitid)
+		if UnitIsUnit("player", unitid) or not ShowCastBars then return end
+
+		local plate = GetNamePlateForUnit(unitid)
+		if plate and plate.TPFrame.Active then
+			OnStartCasting(plate, unitid, true)
+      --late.TPFrame.visual.castbar:Show()
+		end
+	end
+
+	function Addon.UNIT_SPELLCAST_CHANNEL_STOP(event, unitid)
+		if UnitIsUnit("player", unitid) or not ShowCastBars then return end
+
+		local plate = GetNamePlateForUnit(unitid)
+		if plate and plate.TPFrame.Active then
+			OnStopCasting(plate)
+		end
+	end
+
+  function CoreEvents:COMBAT_LOG_EVENT_UNFILTERED()
+    local timeStamp, event, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags = CombatLogGetCurrentEventInfo()
+
+    if event == "SPELL_INTERRUPT" then
+      local plate = PlatesByGUID[destGUID]
+
+      if plate and plate.TPFrame.Active then
+        UpdateReferences(plate)
+
+        local castbar = visual.castbar
+        if castbar:IsShown() then
+          sourceName = gsub(sourceName, "%-[^|]+", "") -- UnitName(sourceName) only works in groups
+          local _, class_id = GetPlayerInfoByGUID(sourceGUID)
+          if class_id then
+            --local color_str = (RAID_CLASS_COLORS[classId] and RAID_CLASS_COLORS[classId].colorStr) or ""
+            sourceName = "|c" .. RAID_CLASS_COLORS[class_id].colorStr .. sourceName .. "|r"
+          end
+          visual.spelltext:SetText(INTERRUPTED .. " [" .. sourceName .. "]")
+
+          local _, max_val = castbar:GetMinMaxValues()
+          castbar:SetValue(max_val)
+          castbar.Spark:Hide()
+
+          local color = TidyPlatesThreat.db.profile.castbarColorInterrupted
+          castbar:SetStatusBarColor(color.r, color.g, color.b, color.a)
+          castbar.FlashTime = CASTBAR_INTERRUPT_HOLD_TIME
+          -- OnStopCasting is hiding the castbar and may be triggered before or after SPELL_INTERRUPT
+          -- So we have to show the castbar again or not hide it if the interrupt message should still be shown.
+          castbar:Show()
+        end
+      end
+    end
+  end
 
 --  local function ConvertPixelsToUI(pixels, frameScale)
 --    local physicalScreenHeight = select(2, GetPhysicalScreenSize())

@@ -23,6 +23,7 @@ local LibStub = LibStub
 local LSM = t.Media
 local L = t.L
 local LibThreatClassic = Addon.LibThreatClassic
+local LibClassicCasterino = Addon.LibClassicCasterino
 
 ---------------------------------------------------------------------------------------------------
 -- Local variables
@@ -309,10 +310,21 @@ function TidyPlatesThreat:OnInitialize()
   -- Setup chat commands
   self:RegisterChatCommand("tptp", "ChatCommand")
 
+  -- Register callbacks for threat library
   LibThreatClassic.RegisterCallback(self, "Activate", Addon.UNIT_THREAT_LIST_UPDATE)
   LibThreatClassic.RegisterCallback(self, "Deactivate", Addon.UNIT_THREAT_LIST_UPDATE)
   LibThreatClassic.RegisterCallback(self, "ThreatUpdated", Addon.UNIT_THREAT_LIST_UPDATE)
   LibThreatClassic:RequestActiveOnSolo(true)
+
+  -- Register callsbacks for spellcasting library
+  LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_START", Addon.UNIT_SPELLCAST_START)
+  LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_DELAYED", Addon.UnitSpellcastMidway) -- only for player
+  LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_STOP", Addon.UNIT_SPELLCAST_STOP)
+  LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_FAILED", Addon.UNIT_SPELLCAST_STOP)
+  --LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_INTERRUPTED", CastbarEventHandler)
+  LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_CHANNEL_START", Addon.UNIT_SPELLCAST_CHANNEL_START)
+  LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_CHANNEL_UPDATE", Addon.UnitSpellcastMidway) -- only for player
+  LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_CHANNEL_STOP", Addon.UNIT_SPELLCAST_CHANNEL_STOP)
 end
 
 local function SetCVarHook(name, value, c)

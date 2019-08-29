@@ -5623,7 +5623,7 @@ local function CreateOptionsTable()
                 },
               },
             },
-            -- CastBarSettings = CreateCastbarOptions(),
+            CastBarSettings = CreateCastbarOptions(),
             Transparency = {
               name = L["Transparency"],
               type = "group",
