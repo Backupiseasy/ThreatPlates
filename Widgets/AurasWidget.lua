@@ -32,6 +32,9 @@ local TidyPlatesThreat = TidyPlatesThreat
 local Animations = Addon.Animations
 local Font = Addon.Font
 
+local LibClassicDurations = LibStub("LibClassicDurations")
+LibClassicDurations:Register("ThreatPlates")
+
 ---------------------------------------------------------------------------------------------------
 -- Aura Highlighting
 ---------------------------------------------------------------------------------------------------
@@ -585,9 +588,13 @@ function Widget:UpdateUnitAuras(frame, unit, enabled_auras, enabled_cc, SpellFil
     aura = UnitAuraList[aura_count]
 
     -- Blizzard Code:local name, texture, count, debuffType, duration, expirationTime, caster, _, nameplateShowPersonal, spellId, _, _, _, nameplateShowAll = UnitAura(unit, i, filter);
+    --aura.name, aura.texture, aura.stacks, aura.type, aura.duration, aura.expiration, aura.caster,
+    --  aura.StealOrPurge, aura.ShowPersonal, aura.spellid, aura.PlayerCanApply, aura.BossDebuff, isCastByPlayer, aura.ShowAll =
+    --  UnitAura(unitid, i, effect)
+
     aura.name, aura.texture, aura.stacks, aura.type, aura.duration, aura.expiration, aura.caster,
-      aura.StealOrPurge, aura.ShowPersonal, aura.spellid, aura.PlayerCanApply, aura.BossDebuff, isCastByPlayer, aura.ShowAll =
-      UnitAura(unitid, i, effect)
+    aura.StealOrPurge, aura.ShowPersonal, aura.spellid, aura.PlayerCanApply, aura.BossDebuff, isCastByPlayer, aura.ShowAll =
+    LibClassicDurations:UnitAura(unitid, i, effect)
 
     -- ShowPesonal: Debuffs  that are shown on Blizzards nameplate, no matter who casted them (and
     -- ShowAll: Debuffs

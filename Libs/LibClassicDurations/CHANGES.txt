@@ -1,0 +1,142 @@
+tag b4231574bb33ce9f72f42b854bcf8264eb2a7e43 1.6
+Author:	d87 <d87d87@gmail.com>
+Date:	Sat Jun 22 14:12:03 2019 +0700
+
+commit 7d8e816a579f41d57727c503d1a90debee6005c6
+Author: d87 <d87d87@gmail.com>
+Date:   Sat Jun 22 14:09:57 2019 +0700
+
+    moved some  values into consts
+
+commit 7c6716881d391f6968ded9dad7340424a2d183e4
+Author: d87 <d87d87@gmail.com>
+Date:   Sat Jun 22 12:24:32 2019 +0700
+
+    removed changelog.md, updated README
+
+commit d5f7861c58a8639bc07aec535dbfe98cfc411941
+Author: d87 <d87d87@gmail.com>
+Date:   Fri Jun 21 21:46:18 2019 +0700
+
+    disabled long self-buffs after all
+
+commit 626b6f956d39113a174a7e77eef5b683301d3739
+Author: d87 <d87d87@gmail.com>
+Date:   Fri Jun 21 20:51:33 2019 +0700
+
+    updated README
+
+commit 77a434ccdf56e09b7c5cbcb53e0da7dc6abc391d
+Author: d87 <d87d87@gmail.com>
+Date:   Fri Jun 21 20:20:43 2019 +0700
+
+    actually collecting garbage now
+
+commit cad13b2574b3034fc1636c876f3b025f202466de
+Author: d87 <d87d87@gmail.com>
+Date:   Fri Jun 21 19:50:31 2019 +0700
+
+    stopped being retarded
+
+commit b9e7bb017772d5bf5132978cd7459cd69c4e3545
+Author: d87 <d87d87@gmail.com>
+Date:   Fri Jun 21 19:18:53 2019 +0700
+
+    fire UNIT_BUFF on death, bugfixes
+
+commit 051e7a4b6e0fe52a417338718e92a3635fc204bc
+Author: d87 <d87d87@gmail.com>
+Date:   Fri Jun 21 19:08:04 2019 +0700
+
+    showing indefinite duration enemy buffs
+
+commit c24aae32d17644cb89f892980fac46bd3d01d4a0
+Author: d87 <d87d87@gmail.com>
+Date:   Fri Jun 21 17:40:29 2019 +0700
+
+    added as much as possible of remaining class buffs, before trying full enemy buff tracking
+
+commit 2bfe5ae06089b3a4b23a55c4ffbf73ed3d78049b
+Author: d87 <d87d87@gmail.com>
+Date:   Thu Jun 20 16:46:15 2019 +0700
+
+    ---
+
+commit 5dda6619abaaab5117474d7cb1d511f24cbf0824
+Author: d87 <d87d87@gmail.com>
+Date:   Thu Jun 20 16:20:09 2019 +0700
+
+    library's UnitAura method swaps in durations and expiration automatically
+
+commit e0100a98c89a8a5c9e7fe03ee8a0967ab095949f
+Author: d87 <d87d87@gmail.com>
+Date:   Thu Jun 20 14:24:53 2019 +0700
+
+    added racial buffs
+
+commit a16c5bd55c64e373c77aa056ca1f84e745e21fea
+Author: d87 <d87d87@gmail.com>
+Date:   Thu Jun 20 00:35:15 2019 +0700
+
+    alias for RegisterFrame
+
+commit 05d597988960a1b90c5b511ac9cda07e93ee2475
+Author: d87 <d87d87@gmail.com>
+Date:   Thu Jun 20 00:24:50 2019 +0700
+
+    spell id assertion
+
+commit c75636f8c2224e55c86022695f6cf4d6f7a11930
+Author: d87 <d87d87@gmail.com>
+Date:   Wed Jun 19 18:30:27 2019 +0700
+
+    removed debug messages
+
+commit 1134d90191508116f0a89e8cd8f8b826a203540c
+Author: d87 <d87d87@gmail.com>
+Date:   Wed Jun 19 17:59:30 2019 +0700
+
+    nameplate unit lookup
+
+commit 05690607c9bd1a0dab9bf6dc0afd7cdeb8b6febd
+Author: d87 <d87d87@gmail.com>
+Date:   Wed Jun 19 14:11:18 2019 +0700
+
+    clear buff cache on death
+
+commit 5fea6416318684cfda9d7619f86e899ca2d332fb
+Author: d87 <d87d87@gmail.com>
+Date:   Wed Jun 19 14:09:00 2019 +0700
+
+    buff list cache and UnitAura-like interface
+
+commit 8dccd10b9085e015109ef8db5b056926834dda78
+Author: d87 <d87d87@gmail.com>
+Date:   Wed Jun 19 11:44:28 2019 +0700
+
+    got enemy buffs to work, added list of npc auras
+
+commit d7e27a2d62414f72ded0ab1e9bd28e889870659e
+Author: d87 <d87d87@gmail.com>
+Date:   Mon Jun 17 12:30:37 2019 +0700
+
+    added Intimidating Shout main target effect
+
+commit 6f5db6ec8ba7e20ab0b648f69c95b17b1d185df5
+Author: d87 <d87d87@gmail.com>
+Date:   Mon Jun 17 12:03:52 2019 +0700
+
+    added Fear Ward, Wyper Sting Dot, fixed Immo Trap duration
+
+commit 1a04e4b05cc0ec1abe87233cd2e60bf71df850d5
+Author: d87 <d87d87@gmail.com>
+Date:   Sat Jun 15 23:48:39 2019 +0700
+
+    added Ancesrtal Healing
+
+commit 76651e4b1e5b2ec54f976d3f32bc52de5c891c4b
+Author: d87 <d87d87@gmail.com>
+Date:   Sat Jun 15 22:40:15 2019 +0700
+
+    multiple spell fixes/additions from AV premades
+
