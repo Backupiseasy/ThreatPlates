@@ -11,9 +11,8 @@ local abs = abs
 
 -- WoW APIs
 local UnitIsConnected, UnitReaction, UnitCanAttack, UnitAffectingCombat = UnitIsConnected, UnitReaction, UnitCanAttack, UnitAffectingCombat
-local UnitHealth, UnitHealthMax, UnitIsPlayer, UnitPlayerControlled = UnitHealth, UnitHealthMax, UnitIsPlayer, UnitPlayerControlled
+local UnitIsPlayer, UnitPlayerControlled = UnitIsPlayer, UnitPlayerControlled
 local UnitIsUnit, UnitExists = UnitIsUnit, UnitExists
-local IsInInstance = IsInInstance
 local RAID_CLASS_COLORS = RAID_CLASS_COLORS
 
 -- ThreatPlates APIs

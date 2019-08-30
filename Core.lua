@@ -325,6 +325,12 @@ function TidyPlatesThreat:OnInitialize()
   LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_CHANNEL_START", Addon.UNIT_SPELLCAST_CHANNEL_START)
   LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_CHANNEL_UPDATE", Addon.UnitSpellcastMidway) -- only for player
   LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_CHANNEL_STOP", Addon.UNIT_SPELLCAST_CHANNEL_STOP)
+
+  -- Add support for Real Mob Health
+  if IsAddOnLoaded("RealMobHealth") then
+    Addon.GetUnitHealth = RealMobHealth.GetUnitHealth
+    --RealMobHealth.RegisterAddOnEvent("HEALTH_UPDATE", Addon.RMH_HEALTH_UPDATE)
+  end
 end
 
 local function SetCVarHook(name, value, c)

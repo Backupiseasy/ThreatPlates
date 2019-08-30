@@ -37,7 +37,7 @@ local Widgets = Addon.Widgets
 local Animations = Addon.Animations
 local LibThreatClassic = Addon.LibThreatClassic
 local LibClassicCasterino = Addon.LibClassicCasterino
-local GetUnitHealth = Addon.GetUnitHealth
+--local RMH_GetCreatureIDFromKey = RealMobHealth.GetCreatureIDFromKey
 
 -- Constants
 -- Raid Icon Reference
@@ -470,7 +470,7 @@ function Addon:UpdateUnitCondition(unit, unitid)
     unit.reaction = "HOSTILE"
   end
 
-  unit.health, unit.healthmax = GetUnitHealth(unitid)
+  unit.health, unit.healthmax = Addon.GetUnitHealth(unitid)
 
   unit.threatValue = LibThreatClassic:UnitThreatSituation("player", unitid) or 0
   unit.threatSituation = ThreatReference[unit.threatValue]
@@ -1023,6 +1023,17 @@ do
       --Addon:UpdateExtensions(plate.TPFrame, unitid, plate.TPFrame.stylename)
     end
   end
+
+  --function Addon.RMH_HEALTH_UPDATE(event, creatureKey, maxHealth)
+  --  print ("RMH_HEALTH_UPDATE:", creatureKey, maxHealth)
+  --
+  --  if creatureKey then
+  --    CoreEvents:UNIT_MAXHEALTH(RMH_GetCreatureIDFromKey(creatureKey))
+  --  --else
+  --  --  -- creatureKey and maxHealth are nil if more than one creature was affected
+  --  --  SetUpdateAll()
+  --  end
+  --end
 
   -- LibThreatClassic - Event: ThreatUpdated
   function Addon.UNIT_THREAT_LIST_UPDATE(lib_name, unit_guid, target_guid, threat)
