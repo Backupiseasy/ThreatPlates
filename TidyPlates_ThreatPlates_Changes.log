@@ -1,4 +1,9 @@
 ﻿﻿------------------------------------------------------
+1.2.1
+------------------------------------------------------
+* Fixed a bug where totems with a rank greater than 1 were not recognized as totems correctly [Comment #128, IM].
+
+﻿------------------------------------------------------
 1.2.0
 ------------------------------------------------------
 * Enabled support for roles (tank or dps/healing) again to the threat system, based on stance (Warriors) or form (Druid) [Comment #20, #8].

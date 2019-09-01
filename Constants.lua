@@ -205,41 +205,40 @@ ThreatPlates.FRIENDLY_SUBTEXT = {
 
 local TOTEM_DATA = {
   -- Earth Totems
-  { SpellID = 25361,   ID = "E1", GroupColor = "8B4513"},	  -- Strength of Earth Totem
-  { SpellID = 10408,   ID = "E2", GroupColor = "8B4513"},	  -- Stoneskin Totem
-  { SpellID = 10428,   ID = "E3", GroupColor = "8B4513"},	  -- Stoneclaw Totem
-  { SpellID = 2484,    ID = "E4", GroupColor = "8B4513"},	  -- Earthbind Totem
-  { SpellID = 8143,    ID = "E5", GroupColor = "8B4513"},	  -- Tremor Totem
+  { SpellID = 25361,   ID = "E1", GroupColor = "8B4513", Ranks = 5, },	  -- Strength of Earth Totem
+  { SpellID = 10408,   ID = "E2", GroupColor = "8B4513", Ranks = 6, },	  -- Stoneskin Totem
+  { SpellID = 10428,   ID = "E3", GroupColor = "8B4513", Ranks = 6, },	  -- Stoneclaw Totem
+  { SpellID = 2484,    ID = "E4", GroupColor = "8B4513", },           	  -- Earthbind Totem
+  { SpellID = 8143,    ID = "E5", GroupColor = "8B4513", },	              -- Tremor Totem
 
   -- Fire Totems
-  { SpellID = 10438, ID = "F1", GroupColor = "ff8f8f"}, 	  -- Searing Totem
-  { SpellID = 10479, ID = "F2", GroupColor = "ff8f8f"}, 	  -- Frost Resistance Totem
-  { SpellID = 11315, ID = "F3", GroupColor = "ff8f8f"}, 	  -- Fire Nova Totem
-  { SpellID = 10587, ID = "F4", GroupColor = "ff8f8f"}, 	  -- Magma Totem
-  { SpellID = 16387, ID = "F5", GroupColor = "ff8f8f"}, 	  -- Flametongue Totem
+  { SpellID = 10438, ID = "F1", GroupColor = "ff8f8f", Ranks = 6, }, 	  -- Searing Totem
+  { SpellID = 10479, ID = "F2", GroupColor = "ff8f8f", Ranks = 3, }, 	  -- Frost Resistance Totem
+  { SpellID = 11315, ID = "F3", GroupColor = "ff8f8f", Ranks = 5, }, 	  -- Fire Nova Totem
+  { SpellID = 10587, ID = "F4", GroupColor = "ff8f8f", Ranks = 4, }, 	  -- Magma Totem
+  { SpellID = 16387, ID = "F5", GroupColor = "ff8f8f", Ranks = 4, }, 	  -- Flametongue Totem
 
   -- Air Totems
-  { SpellID = 25359,  ID = "A1", GroupColor = "ffb31f"},		-- Grace of Air Totem
-  { SpellID = 10601,  ID = "A2", GroupColor = "ffb31f"},		-- Nature Resistance Totem
-  { SpellID = 15112,  ID = "A3", GroupColor = "ffb31f"},		-- Windwall Totem
-  { SpellID = 10614,  ID = "A4", GroupColor = "ffb31f"},		-- Windfury Totem
-  { SpellID = 8177,   ID = "A5", GroupColor = "ffb31f"},		-- Grounding Totem
-  { SpellID = 6495,   ID = "A6", GroupColor = "ffb31f"},		-- Sentry Totem
-  { SpellID = 25908,  ID = "A7", GroupColor = "ffb31f"},		-- Tranquil Air Totem
+  { SpellID = 25359,  ID = "A1", GroupColor = "ffb31f", Ranks = 3, },		-- Grace of Air Totem
+  { SpellID = 10601,  ID = "A2", GroupColor = "ffb31f", Ranks = 3, },		-- Nature Resistance Totem
+  { SpellID = 15112,  ID = "A3", GroupColor = "ffb31f", Ranks = 3, },		-- Windwall Totem
+  { SpellID = 10614,  ID = "A4", GroupColor = "ffb31f", Ranks = 3, },		-- Windfury Totem
+  { SpellID = 8177,   ID = "A5", GroupColor = "ffb31f", },          		-- Grounding Totem
+  { SpellID = 6495,   ID = "A6", GroupColor = "ffb31f", },		          -- Sentry Totem
+  { SpellID = 25908,  ID = "A7", GroupColor = "ffb31f", },		          -- Tranquil Air Totem
 
   -- Water Totems
-  { SpellID = 10463,  ID = "W1", GroupColor = "b8d1ff"},		-- Healing Stream Totem
-  { SpellID = 10497,  ID = "W2", GroupColor = "b8d1ff"},		-- Mana Spring Totem
-  { SpellID = 10538,  ID = "W3", GroupColor = "b8d1ff"},		-- Fire Resistance Totem
-  { SpellID = 17359,  ID = "W4", GroupColor = "b8d1ff"},		-- Mana Tide Totem
-  { SpellID = 8170,   ID = "W5", GroupColor = "b8d1ff"},		  -- Disease Cleansing Totem
-  { SpellID = 8166,   ID = "W6", GroupColor = "b8d1ff"},		  -- Poison Cleansing Totem
-
---  { SpellID = 157153, ID = "N1", GroupColor = "4c9900"},		-- Cloudburst Totem
---  { SpellID = 204331, ID = "P1", GroupColor = "2b76ff"},	  -- Counterstrike Totem
+  { SpellID = 10463,  ID = "W1", GroupColor = "b8d1ff", Ranks = 5, },		-- Healing Stream Totem
+  { SpellID = 10497,  ID = "W2", GroupColor = "b8d1ff", Ranks = 4, },		-- Mana Spring Totem
+  { SpellID = 10538,  ID = "W3", GroupColor = "b8d1ff", Ranks = 3, },		-- Fire Resistance Totem
+  { SpellID = 17359,  ID = "W4", GroupColor = "b8d1ff", Ranks = 3, },		-- Mana Tide Totem
+  { SpellID = 8170,   ID = "W5", GroupColor = "b8d1ff", },		          -- Disease Cleansing Totem
+  { SpellID = 8166,   ID = "W6", GroupColor = "b8d1ff", },        		  -- Poison Cleansing Totem
 }
 
 function Addon:InitializeTotemInformation()
+  local totem_name_suffix = { " II", " III", " IV", " V", " VI" }
+
   for i, totem_data in ipairs(TOTEM_DATA) do
     local name = GetSpellInfo(totem_data.SpellID)
     if name then
@@ -253,6 +252,10 @@ function Addon:InitializeTotemInformation()
 
       Addon.TotemInformation[name] = totem_data
       Addon.TOTEMS[name] = totem_data.ID
+
+      for rank = 1, (totem_data.Ranks or 1) - 1  do
+        Addon.TOTEMS[name .. totem_name_suffix[rank]] = totem_data.ID
+      end
     end
   end
 end
