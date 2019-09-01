@@ -37,6 +37,78 @@ f:SetScript("OnEvent", function(self, event, ...)
     return self[event](self, event, ...)
 end)
 
+-- List of crowd controls - Reused from ClassicCastbars
+-- We want to stop the castbar when these auras are detected
+-- as SPELL_CAST_FAILED is not triggered when an unit gets CC'ed.
+local SPELL_DB_CROWD_CONTROL = {
+    [GetSpellInfo(5211)] = 1,       -- Bash
+    [GetSpellInfo(24394)] = 1,      -- Intimidation
+    [GetSpellInfo(853)] = 1,        -- Hammer of Justice
+    [GetSpellInfo(22703)] = 1,      -- Inferno Effect (Summon Infernal)
+    [GetSpellInfo(408)] = 1,        -- Kidney Shot
+    [GetSpellInfo(12809)] = 1,      -- Concussion Blow
+    [GetSpellInfo(20253)] = 1,      -- Intercept Stun
+    [GetSpellInfo(20549)] = 1,      -- War Stomp
+    [GetSpellInfo(2637)] = 1,       -- Hibernate
+    [GetSpellInfo(3355)] = 1,       -- Freezing Trap
+    [GetSpellInfo(19386)] = 1,      -- Wyvern Sting
+    [GetSpellInfo(118)] = 1,        -- Polymorph
+    [GetSpellInfo(28271)] = 1,      -- Polymorph: Turtle
+    [GetSpellInfo(28272)] = 1,      -- Polymorph: Pig
+    [GetSpellInfo(20066)] = 1,      -- Repentance
+    [GetSpellInfo(1776)] = 1,       -- Gouge
+    [GetSpellInfo(6770)] = 1,       -- Sap
+    [GetSpellInfo(1513)] = 1,       -- Scare Beast
+    [GetSpellInfo(8122)] = 1,       -- Psychic Scream
+    [GetSpellInfo(2094)] = 1,       -- Blind
+    [GetSpellInfo(5782)] = 1,       -- Fear
+    [GetSpellInfo(5484)] = 1,       -- Howl of Terror
+    [GetSpellInfo(6358)] = 1,       -- Seduction
+    [GetSpellInfo(5246)] = 1,       -- Intimidating Shout
+    [GetSpellInfo(6789)] = 1,       -- Death Coil
+    [GetSpellInfo(9005)] = 1,       -- Pounce
+    [GetSpellInfo(1833)] = 1,       -- Cheap Shot
+    [GetSpellInfo(16922)] = 1,      -- Improved Starfire
+    [GetSpellInfo(19410)] = 1,      -- Improved Concussive Shot
+    [GetSpellInfo(12355)] = 1,      -- Impact
+    [GetSpellInfo(20170)] = 1,      -- Seal of Justice Stun
+    [GetSpellInfo(15269)] = 1,      -- Blackout
+    [GetSpellInfo(18093)] = 1,      -- Pyroclasm
+    [GetSpellInfo(12798)] = 1,      -- Revenge Stun
+    [GetSpellInfo(5530)] = 1,       -- Mace Stun
+    [GetSpellInfo(19503)] = 1,      -- Scatter Shot
+    [GetSpellInfo(605)] = 1,        -- Mind Control
+    [GetSpellInfo(7922)] = 1,       -- Charge Stun
+    [GetSpellInfo(18469)] = 1,      -- Counterspell - Silenced
+    [GetSpellInfo(15487)] = 1,      -- Silence
+    [GetSpellInfo(18425)] = 1,      -- Kick - Silenced
+    [GetSpellInfo(24259)] = 1,      -- Spell Lock
+    [GetSpellInfo(18498)] = 1,      -- Shield Bash - Silenced
+
+    -- ITEMS
+    [GetSpellInfo(13327)] = 1,      -- Reckless Charge
+    [GetSpellInfo(1090)] = 1,       -- Sleep
+    [GetSpellInfo(5134)] = 1,       -- Flash Bomb Fear
+    [GetSpellInfo(19821)] = 1,      -- Arcane Bomb Silence
+    [GetSpellInfo(4068)] = 1,       -- Iron Grenade
+    [GetSpellInfo(19769)] = 1,      -- Thorium Grenade
+    [GetSpellInfo(13808)] = 1,      -- M73 Frag Grenade
+    [GetSpellInfo(4069)] = 1,       -- Big Iron Bomb
+    [GetSpellInfo(12543)] = 1,      -- Hi-Explosive Bomb
+    [GetSpellInfo(4064)] = 1,       -- Rough Copper Bomb
+    [GetSpellInfo(12421)] = 1,      -- Mithril Frag Bomb
+    [GetSpellInfo(19784)] = 1,      -- Dark Iron Bomb
+    [GetSpellInfo(4067)] = 1,       -- Big Bronze Bomb
+    [GetSpellInfo(4066)] = 1,       -- Small Bronze Bomb
+    [GetSpellInfo(4065)] = 1,       -- Large Copper Bomb
+    [GetSpellInfo(13237)] = 1,      -- Goblin Mortar
+    [GetSpellInfo(835)] = 1,        -- Tidal Charm
+    [GetSpellInfo(13181)] = 1,      -- Gnomish Mind Control Cap
+    [GetSpellInfo(12562)] = 1,      -- The Big One
+    [GetSpellInfo(15283)] = 1,      -- Stunning Blow (Weapon Proc)
+    [GetSpellInfo(56)] = 1,         -- Stun (Weapon Proc)
+    [GetSpellInfo(26108)] = 1,      -- Glimpse of Madness
+}
 
 local spellNameToID = {}
 local NPCspellNameToID = {}
@@ -106,14 +178,17 @@ local function CastStart(srcGUID, castType, spellName, spellID, overrideCastTime
     end
 end
 
-local function CastStop(srcGUID, castType, suffix )
+local function CastStop(srcGUID, castType, suffix, srcName)
     local currentCast = casters[srcGUID]
     if currentCast then
         castType = castType or currentCast[1]
 
         casters[srcGUID] = nil
 
-        if castType == "CAST" then
+
+        if suffix == "INTERRUPTED" then
+            FireToUnits("UNIT_SPELLCAST_INTERRUPTED", srcGUID, srcName)
+        elseif castType == "CAST" then
             local event = "UNIT_SPELLCAST_"..suffix
             FireToUnits(event, srcGUID)
         else
@@ -179,13 +254,23 @@ function f:COMBAT_LOG_EVENT_UNFILTERED(event)
             CastStop(srcGUID, nil, "STOP")
 
     elseif eventType == "SPELL_INTERRUPT" then
-
-            CastStop(dstGUID, nil, "INTERRUPTED")
-    elseif eventType == "UNIT_DIED" then
+            CastStop(dstGUID, nil, "INTERRUPTED", srcName)
+    elseif eventType == "UNIT_DIED" then -- or eventType == "PARTY_KILL" then
             CastStop(dstGUID, nil, "FAILED")
-
-    elseif  eventType == "SPELL_AURA_APPLIED" or
-            eventType == "SPELL_AURA_REFRESH" or
+    elseif eventType == "SPELL_AURA_APPLIED" then
+        if isSrcPlayer then
+            local isChanneling = classChannels[spellID]
+            if isChanneling then
+                CastStart(srcGUID, "CHANNEL", spellName, spellID)
+            end
+        end
+        -- Check if a cast was interrupted with a stun or something like that
+        -- With "SPELL_AURA_APPLIED" we are looking for stuns etc. that were applied.
+        -- As the "SPELL_INTERRUPT" event doesn't get logged for those types of interrupts, but does trigger a "UNIT_SPELLCAST_INTERRUPTED" event.
+        if casters[dstGUID] and SPELL_DB_CROWD_CONTROL[spellName] then
+            CastStop(dstGUID, nil, "INTERRUPTED", srcName)
+        end
+    elseif  eventType == "SPELL_AURA_REFRESH" or
             eventType == "SPELL_AURA_APPLIED_DOSE"
     then
         if isSrcPlayer then
