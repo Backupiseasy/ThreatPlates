@@ -1,5 +1,5 @@
 local MAJOR_VERSION = "ThreatClassic-1.0"
-local MINOR_VERSION = 2
+local MINOR_VERSION = 3
 
 if MINOR_VERSION > _G.ThreatLib_MINOR_VERSION then _G.ThreatLib_MINOR_VERSION = MINOR_VERSION end
 
@@ -77,8 +77,16 @@ ThreatLib_funcs[#ThreatLib_funcs + 1] = function()
 		}
 
 		-- Life Tap
+		--[[
 		self.ExemptGains[31818] = true
 		self.ExemptGains[32553] = true
+		--]]
+		self.ExemptGains[1454] = true
+		self.ExemptGains[1455] = true
+		self.ExemptGains[1456] = true
+		self.ExemptGains[11687] = true
+		self.ExemptGains[11688] = true
+		self.ExemptGains[11689] = true
 
 		-- Death Coil Heals
 		self.ExemptGains[6789] = true

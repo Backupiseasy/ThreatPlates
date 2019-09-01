@@ -1,6 +1,6 @@
 --[[-----------------------------------------------------------------------------
 Name: ThreatClassic-1.0
-Revision: $Revision: 1 $
+Revision: $Revision: 3 $
 Author(s): Es (EsreverWoW)
 Website: https://github.com/EsreverWoW/LibThreatClassic
 Documentation: https://github.com/EsreverWoW/LibThreatClassic/wiki
@@ -55,14 +55,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 -------------------------------------------------------------------------------]]
 
 local MAJOR_VERSION = "ThreatClassic-1.0"
-local MINOR_VERSION = 2
+local MINOR_VERSION = 3
 
 if MINOR_VERSION > _G.ThreatLib_MINOR_VERSION then _G.ThreatLib_MINOR_VERSION = MINOR_VERSION end
 
 ThreatLib_funcs[#ThreatLib_funcs + 1] = function()
 
 -- Need to update this when backwards incompatible changes are made
-local LAST_BACKWARDS_COMPATIBLE_REVISION = 2
+local LAST_BACKWARDS_COMPATIBLE_REVISION = 3
 
 local _G = _G
 local error = _G.error
@@ -1084,33 +1084,6 @@ function ThreatLib:GetThreatStatusColor(statusIndex)
 end
 
 ------------------------------------------------------------------------
--- :UnitThreatSituation("unit", "mob")
--- Arguments: 
---  string - unitID of the unit to get threat information for.
---  string - unitID of the target unit to reference.
--- Returns:
---  integer - returns the threat status for the unit on the mob, or nil if unit is not on mob's threat table. (3 = securely tanking, 2 = insecurely tanking, 1 = not tanking but higher threat than tank, 0 = not tanking and lower threat than tank)
-------------------------------------------------------------------------
-function ThreatLib:UnitThreatSituation(unit, target)
-	local unitGUID, targetGUID = UnitGUID(unit), UnitGUID(target)
-	local maxVal, maxGUID = self:GetMaxThreatOnTarget(targetGUID)
-	local secondGUID, secondThreat = self:GetPlayerAtPosition(targetGUID, 2)
-	local threatValue = self:GetThreat(unitGUID, targetGUID) or 0
-
-	if UnitIsUnit(unit, target .. "target") then
-		if secondThreat and secondThreat > threatValue then
-			return 2
-		else
-			return 3
-		end
-	elseif threatValue > maxVal then
-		return 1
-	else
-		return 0
-	end
-end
-
-------------------------------------------------------------------------
 -- :UnitDetailedThreatSituation("unit", "mob")
 -- Arguments: 
 --  string - unitID of the unit to get threat information for.
@@ -1124,37 +1097,77 @@ end
 ------------------------------------------------------------------------
 function ThreatLib:UnitDetailedThreatSituation(unit, target)
 	local isTanking, threatStatus, threatPercent, rawThreatPercent, threatValue = nil, 0, nil, nil, 0
+	if not UnitExists(unit) or not UnitExists(target) then
+		return isTanking, threatStatus, threatPercent, rawThreatPercent, threatValue
+	end
 
-	local unitGUID = UnitGUID(unit)
-	local targetGUID = UnitGUID(target)
-	local isMelee = self:UnitInMeleeRange(target)
+	local unitGUID, targetGUID = UnitGUID(unit), UnitGUID(target)
+	local threatValue = self:GetThreat(unitGUID, targetGUID) or 0
+	if threatValue == 0 then
+		return isTanking, threatStatus, threatPercent, rawThreatPercent, threatValue
+	end
+
+	local targetTarget = target .. "target"
+	local targetTargetGUID = UnitGUID(targetTarget)
+	local targetTargetVal = self:GetThreat(unitGUID, targetTargetGUID) or 0
+
+	local isPlayer
+	if unit == "player" then isPlayer = true end
+	local class = select(2, UnitClass(unit))
+
+	local aggroMod = 1.3
+	if isPlayer and self:UnitInMeleeRange(targetGUID) or (not isPlayer and (class == "ROGUE" or class == "WARRIOR")) or (strsplit("-", unitGUID) == "Pet" and class ~= "MAGE") then
+		aggroMod = 1.1
+	end
+
 	local maxVal, maxGUID = self:GetMaxThreatOnTarget(targetGUID)
-	local secondGUID, secondThreat = self:GetPlayerAtPosition(targetGUID, 2)
 
-	threatValue = self:GetThreat(unitGUID, targetGUID)
-
-	if UnitIsUnit(unit, target .. "target") then
-		isTanking = 1
-		threatStatus = 3
-		if secondThreat and secondThreat > threatValue then
-			threatStatus = 2
-		end
-	elseif threatValue > maxVal then
-		threatStatus = 1
+	local aggroVal = 0
+	if targetTargetVal >= maxVal / aggroMod then
+		aggroVal = targetTargetVal
+	else
+		aggroVal = maxVal
 	end
 
-	if threatValue > 0 then
-		rawThreatPercent = threatValue / maxVal * 100
-		if maxGUID == unitGUID then
-			threatPercent = rawThreatPercent
-		elseif isMelee then
-			threatPercent = threatValue / (maxVal * 1.1) * 100
+	local hasTarget = UnitExists(target .. "target")
+
+	if threatValue >= aggroVal then
+		if UnitIsUnit(unit, targetTarget) then
+			isTanking = 1
+			if unitGUID == maxGUID then
+				threatStatus = 3
+			else
+				threatStatus = 2
+			end
 		else
-			threatPercent = threatValue / (maxVal * 1.3) * 100
+			threatStatus = 1
 		end
 	end
+
+	rawThreatPercent = threatValue / aggroVal * 100
+
+	if isTanking or (not hasTarget and threatStatus ~= 0 ) then
+		threatPercent = 100
+	else
+		threatPercent = rawThreatPercent / aggroMod
+	end
+
+	threatValue = math_floor(threatValue)
 
 	return isTanking, threatStatus, threatPercent, rawThreatPercent, threatValue
+end
+
+------------------------------------------------------------------------
+-- :UnitThreatSituation("unit", "mob")
+-- Arguments: 
+--  string - unitID of the unit to get threat information for.
+--  string - unitID of the target unit to reference.
+-- Returns:
+--  integer - returns the threat status for the unit on the mob, or nil if unit is not on mob's threat table. (3 = securely tanking, 2 = insecurely tanking, 1 = not tanking but higher threat than tank, 0 = not tanking and lower threat than tank)
+------------------------------------------------------------------------
+function ThreatLib:UnitThreatSituation(unit, target)
+	if not UnitExists(unit) or not UnitExists(target) then return 0 end
+	return select(2, self:UnitDetailedThreatSituation(unit, target))
 end
 
 end

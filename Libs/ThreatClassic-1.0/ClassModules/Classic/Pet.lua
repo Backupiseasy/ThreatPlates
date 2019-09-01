@@ -1,5 +1,5 @@
 local MAJOR_VERSION = "ThreatClassic-1.0"
-local MINOR_VERSION = 2
+local MINOR_VERSION = 3
 
 if MINOR_VERSION > _G.ThreatLib_MINOR_VERSION then _G.ThreatLib_MINOR_VERSION = MINOR_VERSION end
 
@@ -61,18 +61,18 @@ ThreatLib_funcs[#ThreatLib_funcs + 1] = function()
 		-- Unscaling skills
 		-- Scorpid Poison
 		[GetSpellInfo(24640)] = {
-			spellIDs 	= {24640, 24583, 24586, 24587},
-			rankThreat 	= {5, 5, 5, 5},
+			spellIDs	= {24640, 24583, 24586, 24587},
+			rankThreat	= {5, 5, 5, 5},
 		},
 		-- Cower
 		[GetSpellInfo(1742)] = {
-			spellIDs 	= {1742, 1753, 1754, 1755, 1756, 16697},
-			rankThreat 	= {-30, -55, -85, -125, -175, -225},
+			spellIDs	= {1742, 1753, 1754, 1755, 1756, 16697},
+			rankThreat	= {-30, -55, -85, -125, -175, -225},
 		},
 		-- Soothing Kiss
 		[GetSpellInfo(6360)] = {
-			spellIDs 	= {6360, 7813, 11784, 11785},
-			rankThreat = {-45, -75, -127, -165}
+			spellIDs	= {6360, 7813, 11784, 11785},
+			rankThreat	= {-45, -75, -127, -165}
 		},
 	}
 
@@ -108,8 +108,8 @@ ThreatLib_funcs[#ThreatLib_funcs + 1] = function()
 	end
 
 	function Pet:ScanPetSkillRanks()
-		for i = 1,10 do
-			local name, rank = GetPetActionInfo(i)
+		for i = 1, 10 do
+			local name, _, _, _, _ , _, rank = GetPetActionInfo(i)
 			if skillData[name] then
 				self.skillRanks[name] = rank
 			end

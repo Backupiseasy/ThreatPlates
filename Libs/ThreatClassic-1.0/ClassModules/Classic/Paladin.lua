@@ -1,5 +1,5 @@
 local MAJOR_VERSION = "ThreatClassic-1.0"
-local MINOR_VERSION = 2
+local MINOR_VERSION = 3
 
 if MINOR_VERSION > _G.ThreatLib_MINOR_VERSION then _G.ThreatLib_MINOR_VERSION = MINOR_VERSION end
 
@@ -71,8 +71,8 @@ ThreatLib_funcs[#ThreatLib_funcs + 1] = function()
 
 	function Paladin:ClassInit()
 		-- Righteous Fury
-		for _, id in ipairs(HolyDamageIDs) do
-			self.BuffHandlers[id] = self.RighteousFury
+		for i = 1, #HolyDamageIDs do
+			self.AbilityHandlers[HolyDamageIDs[i]] = self.RighteousFury
 		end
 		HolyDamageIDs = nil
 

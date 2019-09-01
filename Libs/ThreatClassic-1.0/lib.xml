@@ -35,6 +35,7 @@
 	<Script file="ThreatNPCModuleCore.lua" />
 
 	<Script file="NPCModules\Azeroth\Azuregos.lua" />
+	<Script file="NPCModules\BlackwingLair\Nefarian.lua" />
 	<Script file="NPCModules\MoltenCore\Shazzrah.lua" />
 	<Script file="NPCModules\Naxxramas\Kelthuzad.lua" />
 	<Script file="NPCModules\Naxxramas\Noth.lua" />
@@ -44,7 +45,6 @@
 	<Script file="NPCModules\BlackTemple\Illidan.lua" />
 	<Script file="NPCModules\BlackTemple\Supremus.lua" />
 	<Script file="NPCModules\BlackTemple\Council.lua" />
-	<Script file="NPCModules\BlackwingLair\Nefarian.lua" />
 	<Script file="NPCModules\CoilfangReservoir\SerpentshrineCavern\Hydross.lua" />
 	<Script file="NPCModules\CoilfangReservoir\SerpentshrineCavern\Leotheras.lua" />
 	<Script file="NPCModules\CoilfangReservoir\SerpentshrineCavern\Vashj.lua" />

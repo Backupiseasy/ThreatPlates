@@ -1,5 +1,5 @@
 local MAJOR_VERSION = "ThreatClassic-1.0"
-local MINOR_VERSION = 2
+local MINOR_VERSION = 3
 
 if MINOR_VERSION > _G.ThreatLib_MINOR_VERSION then _G.ThreatLib_MINOR_VERSION = MINOR_VERSION end
 
@@ -10,7 +10,7 @@ ThreatLib_funcs[#ThreatLib_funcs + 1] = function()
 -- Blizzard Combat Log constants, in case your addon loads before Blizzard_CombatLog or it's disabled by the user
 ---------------------------------------------------------------------------------------------------------------
 local bit_band = _G.bit.band
-local bit_bor  = _G.bit.bor
+local bit_bor = _G.bit.bor
 
 local COMBATLOG_OBJECT_AFFILIATION_MINE		= COMBATLOG_OBJECT_AFFILIATION_MINE		or 0x00000001
 local COMBATLOG_OBJECT_AFFILIATION_PARTY	= COMBATLOG_OBJECT_AFFILIATION_PARTY	or 0x00000002
@@ -339,41 +339,41 @@ function prototype:OnInitialize()
 	self.playerCastSpellIDs = {}
 
 	self.playerBuffSpellIDs = setmetatable({__owner = self}, {
-		__index = function(t, spellID)
+		__index = function(t, spellId)
 			for k, v in pairs(BuffModifiers) do
 				t[k] = k
-				if k == spellID then
+				if k == spellId then
 					return k
 				end
 			end
 
 			for k, v in pairs(t.__owner.BuffHandlers) do
 				t[k] = k
-				if k == spellID then
+				if k == spellId then
 					return k
 				end
 			end
-			t[spellID] = false
+			t[spellId] = false
 			return false
 		end
 	})
 
 	self.playerDebuffSpellIDs = setmetatable({__owner = self}, {
-		__index = function(t, spellID)
+		__index = function(t, spellId)
 			for k, v in pairs(DebuffModifiers) do
 				t[k] = k
-				if k == spellID then
+				if k == spellId then
 					return k
 				end
 			end
 
 			for k, v in pairs(t.__owner.DebuffHandlers) do
 				t[k] = k
-				if k == spellID then
+				if k == spellId then
 					return k
 				end
 			end
-			t[spellID] = false
+			t[spellId] = false
 			return false
 		end
 	})
@@ -490,22 +490,19 @@ local REACTION_ATTACKABLE = bit_bor(COMBATLOG_OBJECT_REACTION_HOSTILE, COMBATLOG
 local FAKE_HOSTILE = bit_bor(COMBATLOG_OBJECT_AFFILIATION_OUTSIDER, COMBATLOG_OBJECT_REACTION_NEUTRAL, COMBATLOG_OBJECT_CONTROL_NPC, COMBATLOG_OBJECT_TYPE_NPC)
 
 local cleuHandlers = {}
-function cleuHandlers:SWING_DAMAGE(timestamp, subEvent, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags,
-				   amount, overkill, school, resisted, blocked, absorbed, critical, glancing, crushing, isOffHand)
+function cleuHandlers:SWING_DAMAGE(timestamp, subEvent, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, amount, overkill, school, resisted, blocked, absorbed, critical, glancing, crushing, isOffHand)
 	if bit_band(sourceFlags, self.unitTypeFilter) == self.unitTypeFilter and bit_band(destFlags, COMBATLOG_OBJECT_CONTROL_PLAYER) == 0 then
 		self:parseDamage(destGUID, amount, 0, MELEE, school, critical, subEvent, isOffHand)
 	end
 end
 
-function cleuHandlers:RANGE_DAMAGE(timestamp, subEvent, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags,
-				   spellId, spellName, spellSchool, amount, _, _, _, _, _, critical)
+function cleuHandlers:RANGE_DAMAGE(timestamp, subEvent, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, spellId, spellName, spellSchool, amount, _, _, _, _, _, critical)
 	if bit_band(sourceFlags, self.unitTypeFilter) == self.unitTypeFilter and bit_band(destFlags, COMBATLOG_OBJECT_CONTROL_PLAYER) == 0 then
 		self:parseDamage(destGUID, amount, 0, spellName, spellSchool, critical, subEvent)
 	end
 end
 
-function cleuHandlers:SPELL_DAMAGE(timestamp, subEvent, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags,
-				   spellId, spellName, spellSchool, amount, overkill, school, resisted, blocked, absorbed, critical, glancing, crushing, isOffHand)
+function cleuHandlers:SPELL_DAMAGE(timestamp, subEvent, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, spellId, spellName, spellSchool, amount, overkill, school, resisted, blocked, absorbed, critical, glancing, crushing, isOffHand)
 	if bit_band(sourceFlags, self.unitTypeFilter) == self.unitTypeFilter and bit_band(destFlags, COMBATLOG_OBJECT_CONTROL_PLAYER) == 0 then
 		self:parseDamage(destGUID, amount, spellId, spellName, spellSchool, critical, subEvent)
 	elseif sourceGUID == destGUID and self.SpellReflectSources[sourceGUID] then
@@ -514,8 +511,7 @@ function cleuHandlers:SPELL_DAMAGE(timestamp, subEvent, hideCaster, sourceGUID, 
 	end
 end
 
-function cleuHandlers:SPELL_PERIODIC_DAMAGE(timestamp, subEvent, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags,
-					    spellId, spellName, spellSchool, amount, overkill, school, resisted, blocked, absorbed, critical, glancing, crushing, isOffHand)
+function cleuHandlers:SPELL_PERIODIC_DAMAGE(timestamp, subEvent, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, spellId, spellName, spellSchool, amount, overkill, school, resisted, blocked, absorbed, critical, glancing, crushing, isOffHand)
 	if bit_band(sourceFlags, self.unitTypeFilter) == self.unitTypeFilter and bit_band(destFlags, COMBATLOG_OBJECT_CONTROL_PLAYER) == 0 then
 		self:parseDamage(destGUID, amount, spellId, spellName, spellSchool, critical, subEvent)
 	end
@@ -533,7 +529,7 @@ function cleuHandlers:SPELL_HEAL(timestamp, subEvent, hideCaster, sourceGUID, so
 	if bit_band(sourceFlags, self.unitTypeFilter) == self.unitTypeFilter then
 		local max_potential_heal = UnitHealthMax(destName) - UnitHealth(destName)
 		local effective_heal = math_min(max_potential_heal, amount)
-		if UnitHealthMax(destName) == 0 then		-- They aren't in our party so we can't really get overheal for them
+		if UnitHealthMax(destName) == 0 then -- They aren't in our party so we can't really get overheal for them
 			effective_heal = amount
 		end
 		self:parseHeal(destGUID, destName, effective_heal, spellId, spellName, spellSchool, critical)
@@ -541,8 +537,9 @@ function cleuHandlers:SPELL_HEAL(timestamp, subEvent, hideCaster, sourceGUID, so
 end
 cleuHandlers.SPELL_PERIODIC_HEAL = cleuHandlers.SPELL_HEAL
 
-function cleuHandlers:SPELL_MISSED(timestamp, subEvent, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags,
-				   spellId, spellName, spellSchool, missType)
+function cleuHandlers:SPELL_MISSED(timestamp, subEvent, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, spellId, spellName, spellSchool, missType)
+	-- spellId = ThreatLib.Classic and ThreatLib:GetSpellID(spellName, "player", auraType) or spellId
+	spellId = ThreatLib:GetSpellID(spellName, "player", auraType) or spellId
 	if bit_band(sourceFlags, self.unitTypeFilter) == self.unitTypeFilter and self.CastMissHandlers[spellId] then
 		self.CastMissHandlers[spellId](self, spellId, destGUID)
 	elseif bit_band(destFlags, self.unitTypeFilter) == self.unitTypeFilter and missType == "REFLECT" then
@@ -552,15 +549,13 @@ function cleuHandlers:SPELL_MISSED(timestamp, subEvent, hideCaster, sourceGUID, 
 	end
 end
 
-function cleuHandlers:DAMAGE_SHIELD(timestamp, subEvent, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags,
-				    spellId, spellName, spellSchool, amount, overkill, school, resisted, blocked, absorbed, critical, glancing, crushing, isOffHand)
+function cleuHandlers:DAMAGE_SHIELD(timestamp, subEvent, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, spellId, spellName, spellSchool, amount, overkill, school, resisted, blocked, absorbed, critical, glancing, crushing, isOffHand)
 	if bit_band(sourceFlags, self.unitTypeFilter) == self.unitTypeFilter then
 		self:parseDamage(destGUID, amount, spellId, spellName, spellSchool, critical, subEvent)
 	end
 end
 
-function cleuHandlers:SPELL_ENERGIZE(timestamp, subEvent, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags,
-				     spellId, spellName, spellSchool, amount, overEnergize, powerType)
+function cleuHandlers:SPELL_ENERGIZE(timestamp, subEvent, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, spellId, spellName, spellSchool, amount, overEnergize, powerType)
 	if bit_band(sourceFlags, self.unitTypeFilter) == self.unitTypeFilter then
 		self:parseGain(destGUID, destName, amount, spellId, spellName, overEnergize, powerType)
 	end
@@ -598,8 +593,7 @@ function cleuHandlers:SPELL_AURA_APPLIED(timestamp, subEvent, hideCaster, source
 	end
 end
 
-function cleuHandlers:SPELL_AURA_APPLIED_DOSE(timestamp, subEvent, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags,
-					      spellId, spellName, _, auraType)
+function cleuHandlers:SPELL_AURA_APPLIED_DOSE(timestamp, subEvent, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, spellId, spellName, _, auraType)
 	if bit_band(destFlags, COMBATLOG_OBJECT_REACTION_HOSTILE) == COMBATLOG_OBJECT_REACTION_HOSTILE and auraType == AURA_TYPE_DEBUFF then
 		-- spellId = ThreatLib.Classic and ThreatLib:GetSpellID(spellName, "target", auraType) or spellId
 		spellId = ThreatLib:GetSpellID(spellName, "target", auraType) or spellId
@@ -759,17 +753,46 @@ local rockbiterEnchants = {
 }
 
 function prototype:equipChanged(units)
-	if (units and not units.player) or ThreatLib.inCombat() then
+	if (units and not units.player) then
 		return
 	end
+
+	local _, _, _, mainHandEnchantID, _, _, _, offHandEnchantId = GetWeaponEnchantInfo()
+	local mainSpeed, offSpeed = UnitAttackSpeed("player")
+	if mainHandEnchantID then
+		for k, v in pairs(rockbiterEnchants) do
+			if mainHandEnchantID == k then
+				self.rockbiterMHVal = v and (v * mainSpeed) or 0
+				break
+			elseif offHandEnchantId ~= k then
+				self.rockbiterOHVal = 0
+			end
+		end
+	else
+		self.rockbiterMHVal = 0
+	end
+	if offHandEnchantId then
+		for k, v in pairs(rockbiterEnchants) do
+			if offHandEnchantId == k then
+				self.rockbiterOHVal = v and (v * offSpeed) or 0
+				break
+			elseif offHandEnchantId ~= k then
+				self.rockbiterOHVal = 0
+			end
+		end
+	else
+		self.rockbiterOHVal = 0
+	end
+
+	if ThreatLib.inCombat() then return end -- only check weapons above if in combat
+
 	for k in pairs(self.itemSetsWorn) do
 		self.itemSetsWorn[k] = nil
 	end
-	--self.totalThreatMods = nil
 
 	self.enchantMods = 1
 
-	--  Enchant Cloak - Subtlety: Decreases threat caused by 2%.
+	-- Enchant Cloak - Subtlety: Decreases threat caused by 2%.
 	local enchant = select(3, strsplit(":", GetInventoryItemLink("player", 15) or ""))
 
 	if tonumber(enchant) == 2621 then
@@ -781,23 +804,6 @@ function prototype:equipChanged(units)
 
 	if tonumber(enchant) == 2613 then
 		self.enchantMods = self.enchantMods + 0.02
-	end
-
-	local hasMainHandEnchant, _, _, mainHandEnchantID, hasOffHandEnchant, _, _, offHandEnchantId = GetWeaponEnchantInfo()
-	local mainSpeed, offSpeed = UnitAttackSpeed("player")
-	if not hasMainHandEnchant then
-		for k, v in pairs(rockbiterEnchants) do
-			if not hasMainHandEnchant and mainHandEnchantID == k then
-				self.rockbiterMHVal = v and (v * mainSpeed) or 0
-			end
-		end
-	end
-	if hasOffHandEnchant then
-		for k, v in pairs(rockbiterEnchants) do
-			if hasOffHandEnchant and offHandEnchantId == k then
-				self.rockbiterOHVal = v and (v * offSpeed) or 0
-			end
-		end
 	end
 
 	-- tonumber here to speed up with possible future trinkets
@@ -835,15 +841,15 @@ end
 -- the spell ID, yech!
 -- Metatables make this O(n) for subsequent lookups, so it sucks less, yay!
 ----------------------------------------------------------------------------------
-function prototype:calcBuffMods(action, spellID)
-	ThreatLib:Debug("Calculating buff mods, action is %s, spell ID is %s", action, spellID)
+function prototype:calcBuffMods(action, spellId)
+	ThreatLib:Debug("Calculating buff mods, action is %s, spell ID is %s", action, spellId)
 	self.buffThreatMultipliers = 1
 	local name, count, sid, id
 	for i = 1, 40 do
 		name, _, count, _, _, _, _, _, _, sid = UnitAura("player", i)
 		if not name then break end
 		id = self.playerBuffSpellIDs[sid]
-		if id and not (action == "lose" and id == spellID) then
+		if id and not (action == "lose" and id == spellId) then
 			local func = BuffModifiers[id] or self.BuffHandlers[id]
 			if func then
 				func(self, "exist", id, count)
@@ -854,15 +860,15 @@ function prototype:calcBuffMods(action, spellID)
 	self.totalThreatMods = nil
 end
 
-function prototype:calcDebuffMods(action, spellID)
-	ThreatLib:Debug("Calculating debuff mods, action is %s, spell ID is %s", action, spellID)
+function prototype:calcDebuffMods(action, spellId)
+	ThreatLib:Debug("Calculating debuff mods, action is %s, spell ID is %s", action, spellId)
 	self.debuffThreatMultipliers = 1
 	local name, count, sid, id
 	for i = 1, 40 do
 		name, _, count, _, _, _, _, _, _, sid = UnitAura("player", i, "HARMFUL")
 		if not name then break end
 		id = self.playerDebuffSpellIDs[sid]
-		if id and not (action == "lose" and id == spellID)  then
+		if id and not (action == "lose" and id == spellId) then
 			ThreatLib:Debug("Running action for spell ID %s (%s)", id, GetSpellInfo(id))
 			local func = DebuffModifiers[id] or self.DebuffHandlers[id]
 			if func then
@@ -893,35 +899,35 @@ end
 -- End buffs/debuffs
 ---------------------------------------------------------------------------
 
-function prototype:parseDamage(recipient, threat, spellID, skillName, element, isCrit, subEvent, isOffHand)
+function prototype:parseDamage(recipient, threat, spellId, spellName, spellSchool, isCrit, subEvent, isOffHand)
 
 	if isCrit then
-		if self.meleeCritReduction > 0 and element == SCHOOL_MASK_PHYSICAL then
+		if self.meleeCritReduction > 0 and spellSchool == SCHOOL_MASK_PHYSICAL then
 			threat = threat - self.meleeCritReduction
-		elseif self.spellCritReduction > 0 and element ~= SCHOOL_MASK_PHYSICAL then
+		elseif self.spellCritReduction > 0 and spellSchool ~= SCHOOL_MASK_PHYSICAL then
 			threat = threat - self.spellCritReduction
 		end
 	end
 
-	if skillName == MELEE and not isOffHand and self.rockbiterMHVal > 0 then
+	if spellName == MELEE and not isOffHand and self.rockbiterMHVal > 0 then
 		threat = threat + self.rockbiterMHVal
-	elseif skillName == MELEE and isOffHand and self.rockbiterMHVal > 0 then
+	elseif spellName == MELEE and isOffHand and self.rockbiterMHVal > 0 then
 		threat = threat + self.rockbiterOHVal
 	end
 
-	-- spellID = ThreatLib.Classic and ThreatLib:GetSpellID(skillName) or spellID
-	spellID = ThreatLib:GetSpellID(skillName) or spellID
+	-- spellId = ThreatLib.Classic and ThreatLib:GetSpellID(spellName) or spellId
+	spellId = ThreatLib:GetSpellID(spellName) or spellId
 
-	if spellID and spellID ~= 0 and subEvent ~= "SPELL_PERIODIC_DAMAGE" then
-		self:commitTransactionFor(recipient, spellID)
+	if spellId and spellId ~= 0 and subEvent ~= "SPELL_PERIODIC_DAMAGE" then
+		self:commitTransactionFor(recipient, spellId)
 	end
 
-	local handler = self.AbilityHandlers[spellID]
+	local handler = self.AbilityHandlers[spellId]
 	if handler then
 		threat = handler(self, threat, isCrit)
 	end
 
-	handler = self.schoolThreatMods[element]
+	handler = self.schoolThreatMods[spellSchool]
 	if handler then
 		threat = handler(self, threat)
 	end
@@ -929,7 +935,7 @@ function prototype:parseDamage(recipient, threat, spellID, skillName, element, i
 	self:AddTargetThreat(recipient, threat * self:threatMods())
 end
 
-function prototype:parseHeal(recipient, recipientName, amount, spellID, spellName, spellSchool, isCrit)
+function prototype:parseHeal(recipient, recipientName, amount, spellId, spellName, spellSchool, isCrit)
 	local unitID = recipientName
 	if not ThreatLib.inCombat() or not unitID or not UnitAffectingCombat(unitID) then
 		return
@@ -937,11 +943,11 @@ function prototype:parseHeal(recipient, recipientName, amount, spellID, spellNam
 
 	local threat = amount
 
-	-- spellID = ThreatLib.Classic and ThreatLib:GetSpellID(spellName) or spellID
-	spellID = ThreatLib:GetSpellID(spellName) or spellID
+	-- spellId = ThreatLib.Classic and ThreatLib:GetSpellID(spellName) or spellId
+	spellId = ThreatLib:GetSpellID(spellName) or spellId
 
-	if not self.ExemptGains[spellID] then
-		local handler = self.AbilityHandlers[spellID]
+	if not self.ExemptGains[spellId] then
+		local handler = self.AbilityHandlers[spellId]
 		if handler then
 			threat = handler(self, threat, isCrit)
 		end
@@ -958,7 +964,7 @@ function prototype:parseHeal(recipient, recipientName, amount, spellID, spellNam
 	end
 end
 
-function prototype:parseGain(recipient, recipientName, amount, spellID, spellName, overEnergize, powerType)
+function prototype:parseGain(recipient, recipientName, amount, spellId, spellName, overEnergize, powerType)
 	if not ThreatLib.inCombat() then
 		return
 	end
@@ -970,9 +976,9 @@ function prototype:parseGain(recipient, recipientName, amount, spellID, spellNam
 		return -- This can happen if a gain is procced on someone that is not in our party - for example, Blackheart MCs someone and benefits from a gain from that person.
 	end
 	local amount = math_min(maxgain, amount)
-	-- spellID = ThreatLib.Classic and ThreatLib:GetSpellID(spellName) or spellID
-	spellID = ThreatLib:GetSpellID(spellName) or spellID
-	if not self.ExemptGains[spellID] then
+	-- spellId = ThreatLib.Classic and ThreatLib:GetSpellID(spellName) or spellId
+	spellId = ThreatLib:GetSpellID(spellName) or spellId
+	if not self.ExemptGains[spellId] then
 		if powerType == SPELL_POWER_MANA then
 			self:AddThreat(amount * 0.5)
 		elseif powerType == SPELL_POWER_RAGE then
@@ -987,26 +993,26 @@ function prototype:parseGain(recipient, recipientName, amount, spellID, spellNam
 	end
 end
 
-function prototype:parseMiss(recipient, recipientName, spellID, spellName)
-	-- spellID = ThreatLib.Classic and ThreatLib:GetSpellID(spellName) or spellID
-	spellID = ThreatLib:GetSpellID(spellName) or spellID
-	self:rollbackTransaction(recipient, spellID)
+function prototype:parseMiss(recipient, recipientName, spellId, spellName)
+	-- spellId = ThreatLib.Classic and ThreatLib:GetSpellID(spellName) or spellId
+	spellId = ThreatLib:GetSpellID(spellName) or spellId
+	self:rollbackTransaction(recipient, spellId)
 end
 
-function prototype:parseCast(recipient, spellID, spellName)
-	-- spellID = ThreatLib.Classic and ThreatLib:GetSpellID(spellName) or spellID
-	spellID = ThreatLib:GetSpellID(spellName) or spellID
+function prototype:parseCast(recipient, spellId, spellName)
+	-- spellId = ThreatLib.Classic and ThreatLib:GetSpellID(spellName) or spellId
+	spellId = ThreatLib:GetSpellID(spellName) or spellId
 
 	if self.unitType == "pet" then
 		-- Pets don't get UNIT_SPELLCAST_SUCCEEDED, so we just parse their handlers here.
-		if self.CastLandedHandlers[spellID] then
-			self.CastLandedHandlers[spellID](self, spellID, recipient)
+		if self.CastLandedHandlers[spellId] then
+			self.CastLandedHandlers[spellId](self, spellId, recipient)
 		end
 	else
 		-- This is for things like Righteous Defense, when you want to take some action for a "land" message.
 		-- This can't be used in the general case because of things like Sunder, which don't always produce land messages on success.
-		if self.CastLandedHandlers[spellID] then
-			self.CastLandedHandlers[spellID](self, spellID, recipient)
+		if self.CastLandedHandlers[spellId] then
+			self.CastLandedHandlers[spellId](self, spellId, recipient)
 		end
 	end
 end
@@ -1100,35 +1106,35 @@ local function addTransactionOp(oplist, func, target)
 end
 
 -- Specific-target threat
-function prototype:AddTargetThreatTransactional(target, spellID, threat)
-	local t = self:getTransaction(target, spellID)
+function prototype:AddTargetThreatTransactional(target, spellId, threat)
+	local t = self:getTransaction(target, spellId)
 	addTransactionOp(t.ops, "AddTargetThreat", threat)
 end
 
 -- Specific-target threat
-function prototype:MultiplyTargetThreatTransactional(target, spellID, modifier)
-	local t = self:getTransaction(target, spellID)
+function prototype:MultiplyTargetThreatTransactional(target, spellId, modifier)
+	local t = self:getTransaction(target, spellId)
 	addTransactionOp(t.ops, "MultiplyTargetThreat", modifier)
 end
 
 -- Global threat, like heals, mana gain, buffs, etc
-function prototype:AddThreatTransactional(spellID, threat)
+function prototype:AddThreatTransactional(spellId, threat)
 	for k, v in pairs(self.targetThreat) do
-		local t = self:getTransaction(k, spellID)
+		local t = self:getTransaction(k, spellId)
 		addTransactionOp(t.ops, "AddTargetThreat", threat)
 	end
 end
 
-function prototype:MultiplyThreatTransactional(spellID, modifier)
+function prototype:MultiplyThreatTransactional(spellId, modifier)
 	for k, v in pairs(self.targetThreat) do
-		local t = self:getTransaction(k, spellID)
+		local t = self:getTransaction(k, spellId)
 		addTransactionOp(t.ops, "MultiplyTargetThreat", modifier)
 	end
 end
 
 -- Set your target's hate to a given value (Taunt effects, Feign Death minus resists)
-function prototype:SetTargetThreatTransactional(target, spellID, threat)
-	local t = self:getTransaction(target, spellID)
+function prototype:SetTargetThreatTransactional(target, spellId, threat)
+	local t = self:getTransaction(target, spellId)
 	addTransactionOp(t.ops, "SetTargetThreat", threat)
 end
 
@@ -1212,30 +1218,30 @@ prototype.ReduceAllThreat = prototype.MultiplyThreat
 ------------------------------------------------
 -- Spell transactions 
 ------------------------------------------------
-function prototype:UNIT_SPELLCAST_SUCCEEDED(event, castingUnit, castGUID, spellID)
+function prototype:UNIT_SPELLCAST_SUCCEEDED(event, castingUnit, castGUID, spellId)
 	if castingUnit ~= self.unitType then return end
 
 	-- Param 3 is a target, but we can't get a target from this event! Best-guess it, if you MUST have the target then do it in CastLandedHandlers
 	-- TODO: If we haven't interacted with this target before, then we won't get a target, which causes transactional junk to fail.
-	if self.CastHandlers[spellID] then
-		self.CastHandlers[spellID](self, spellID, UnitGUID("target"))
+	if self.CastHandlers[spellId] then
+		self.CastHandlers[spellId](self, spellId, UnitGUID("target"))
 	end
 end
 
-function prototype:startTransaction(recipient, spellID)
+function prototype:startTransaction(recipient, spellId)
 	--[[
 	if type("recipient") ~= "asdf" then
 		error(("Expecting string for recipient, got %s (%s), trace: %s"):format(type(recipient), recipient, debugstack()))
 	end	
 	]]--
-	local key = spellID .. "-" .. recipient
+	local key = spellId .. "-" .. recipient
 	local t = self.transactions[key]
 	if t then
 		self:commitTransaction(t)
 		self.transactions[key] = del(t)
 	end
 	local v = new()
-	v.spellID = spellID
+	v.spellId = spellId
 	v.target = recipient
 	v.time = GetTime()
 	v.ops = new()
@@ -1244,22 +1250,22 @@ function prototype:startTransaction(recipient, spellID)
 end
 
 -- Shifts the oldest entry off of the list and invalidates it
-function prototype:rollbackTransaction(recipient, spellID)
-	local transaction = self:getTransaction(recipient, spellID, true)
+function prototype:rollbackTransaction(recipient, spellId)
+	local transaction = self:getTransaction(recipient, spellId, true)
 	if not transaction then return end
 	self:deleteTransaction(transaction)
 end
 
-function prototype:getTransaction(target, spellID, dontStartNew)
-	local t = self.transactions[spellID .. "-" .. target]
+function prototype:getTransaction(target, spellId, dontStartNew)
+	local t = self.transactions[spellId .. "-" .. target]
 	if not t and not dontStartNew then
-		t = self:startTransaction(target, spellID)
+		t = self:startTransaction(target, spellId)
 	end
 	return t
 end
 
-function prototype:commitTransactionFor(target, spellID)
-	local t = self:getTransaction(target, spellID, true)
+function prototype:commitTransactionFor(target, spellId)
+	local t = self:getTransaction(target, spellId, true)
 	if not t then return end
 	self:commitTransaction(t)
 end
@@ -1275,7 +1281,7 @@ function prototype:commitTransaction(transaction)
 end
 
 function prototype:deleteTransaction(transaction)
-	local k = transaction.spellID .. "-" .. transaction.target
+	local k = transaction.spellId .. "-" .. transaction.target
 	if self.transactions[k] then
 		if self.transactions[k].ops then
 			self.transactions[k].ops = del(self.transactions[k].ops)
