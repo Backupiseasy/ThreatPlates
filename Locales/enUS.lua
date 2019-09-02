@@ -24,6 +24,7 @@ L["Determine your role (tank/dps/healing) automatically based on current stance 
 L["Sets your role to tanking."] = true
 L["Sets your role to DPS."] = true
 L["Role"] = true
+L["Because of side effects with Blizzard nameplates, this function is disabled in instances or when Blizzard nameplates are used for friendly or neutral/enemy units (see General - Visibility)."] = true
 
 ---------------------------------------------------------------------------------------------------
 -- String constants in the game

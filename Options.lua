@@ -3717,10 +3717,18 @@ local function CreateBlizzardSettings()
         inline = true,
         set = SetValue,
         get = GetValue,
+        disabled = function() return db.ShowFriendlyBlizzardNameplates or db.ShowEnemyBlizzardNameplates end,
         args = {
+          Description = {
+            type = "description",
+            order = 1,
+            name = L["Because of side effects with Blizzard nameplates, this function is disabled in instances or when Blizzard nameplates are used for friendly or neutral/enemy units (see General - Visibility)."],
+            hidden = function() return not db.ShowFriendlyBlizzardNameplates and not db.ShowEnemyBlizzardNameplates end,
+            width = "full",
+          },
           ToggleSync = {
             name = L["Healthbar Sync"],
-            order = 1,
+            order = 10,
             type = "toggle",
             desc = L["The size of the clickable area is always derived from the current size of the healthbar."],
             set = function(info, val)
@@ -3735,7 +3743,7 @@ local function CreateBlizzardSettings()
           },
           Width = {
             name = L["Width"],
-            order = 2,
+            order = 20,
             type = "range",
             min = 1,
             max = 500,
@@ -3753,7 +3761,7 @@ local function CreateBlizzardSettings()
           },
           Height = {
             name = L["Height"],
-            order = 3,
+            order = 30,
             type = "range",
             min = 1,
             max = 100,
@@ -3772,7 +3780,7 @@ local function CreateBlizzardSettings()
           ShowArea = {
             name = L["Configuration Mode"],
             type = "execute",
-            order = 4,
+            order = 40,
             desc = "Toggle a background showing the area of the clicable area.",
             func = function()
               Addon:ConfigClickableArea(true)

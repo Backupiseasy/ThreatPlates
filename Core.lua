@@ -251,31 +251,40 @@ end
 ---------------------------------------------------------------------------------------------------
 -- Copied from ElvUI:
 function Addon:SetBaseNamePlateSize()
-  local db = TidyPlatesThreat.db.profile.settings
+  local profile = TidyPlatesThreat.db.profile
 
-  local width = db.frame.width
-  local height = db.frame.height
-  if db.frame.SyncWithHealthbar then
-    -- this wont taint like NamePlateDriverFrame.SetBaseNamePlateSize
-    local zeroBasedScale = tonumber(GetCVar("NamePlateVerticalScale")) - 1.0
-    local horizontalScale = tonumber(GetCVar("NamePlateHorizontalScale"))
+  local isInstance, instanceType = IsInInstance()
+  isInstance = isInstance and (instanceType == "party" or instanceType == "raid")
 
-    width = (db.healthbar.width - 10) * horizontalScale
-    height = (db.healthbar.height + 35) * Lerp(1.0, 1.25, zeroBasedScale)
+  -- Classic has the same nameplate size for friendly and enemy units, so either set both or non at all (= set it to default values)
+  if not profile.ShowFriendlyBlizzardNameplates and not profile.ShowEnemyBlizzardNameplates and not isInstance then
+    local db = TidyPlatesThreat.db.profile.settings
 
-    db.frame.width = width
-    db.frame.height = height
-  end
+    local width = db.frame.width
+    local height = db.frame.height
+    if db.frame.SyncWithHealthbar then
+      -- this wont taint like NamePlateDriverFrame.SetBaseNamePlateSize
+      local zeroBasedScale = tonumber(GetCVar("NamePlateVerticalScale")) - 1.0
+      local horizontalScale = tonumber(GetCVar("NamePlateHorizontalScale"))
 
-  if not TidyPlatesThreat.db.profile.ShowFriendlyBlizzardNameplates then
+      width = (db.healthbar.width - 10) * horizontalScale
+      height = (db.healthbar.height + 35) * Lerp(1.0, 1.25, zeroBasedScale)
+
+      db.frame.width = width
+      db.frame.height = height
+    end
+
     C_NamePlate_SetNamePlateFriendlySize(width, height)
+    C_NamePlate_SetNamePlateEnemySize(width, height)
+
+    Addon:ConfigClickableArea(false)
+
+    --local clampedZeroBasedScale = Saturate(zeroBasedScale)
+    --C_NamePlate_SetNamePlateSelfSize(baseWidth * horizontalScale * Lerp(1.1, 1.0, clampedZeroBasedScale), baseHeight)
+  else
+    C_NamePlate_SetNamePlateFriendlySize(128, 32)
+    C_NamePlate_SetNamePlateEnemySize(128, 32)
   end
-  C_NamePlate_SetNamePlateEnemySize(width, height)
-
-  Addon:ConfigClickableArea(false)
-
-  --local clampedZeroBasedScale = Saturate(zeroBasedScale)
-  --C_NamePlate_SetNamePlateSelfSize(baseWidth * horizontalScale * Lerp(1.1, 1.0, clampedZeroBasedScale), baseHeight)
 end
 
 -- The OnInitialize() method of your addon object is called by AceAddon when the addon is first loaded
@@ -481,6 +490,10 @@ function TidyPlatesThreat:PLAYER_ENTERING_WORLD()
     -- reset to previous setting
     Addon.CVars:RestoreFromProfile("nameplateGlobalScale")
   end
+
+  -- Adjust clickable area if we are in an instance. Otherwise the scaling of friendly nameplates' healthbars will
+  -- be bugged
+  Addon:SetBaseNamePlateSize()
 end
 
 --function TidyPlatesThreat:PLAYER_LEAVING_WORLD()
