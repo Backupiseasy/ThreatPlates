@@ -2,7 +2,7 @@
 1.2.1
 ------------------------------------------------------
 * Fixed a bug where totems with a rank greater than 1 were not recognized as totems correctly [Comment #128, IM].
-* Fixed a bug where the castbar was shown on units that were not casting after a successful interrupt [Comment #115, TP#3895].
+* Fixed a bug where the castbar was shown on units that were not casting after a successful interrupt [Comment #115, #133, #147, TP#3895, TP#3903].
 * Updated incliuded library LibThreatClassic.
 
 ﻿------------------------------------------------------
