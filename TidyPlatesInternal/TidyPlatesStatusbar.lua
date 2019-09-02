@@ -306,7 +306,7 @@ function Addon:ConfigCastbar()
           if ShowOnUnit(plate.TPFrame.unit) then
             self:SetMinMaxValues(0, 100)
             self:SetValue(50)
-            visual.spellicon:SetTexture(GetSpellTexture(252616))
+            visual.spellicon:SetTexture(GetSpellTexture(116))
             visual.spelltext:SetText("Cosmic Beacon")
 
             self.Border:SetShown(plate.TPFrame.style.castborder.show)
