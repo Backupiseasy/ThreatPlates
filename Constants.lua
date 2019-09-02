@@ -989,8 +989,8 @@ ThreatPlates.DEFAULT_SETTINGS = {
         OverlayColor = RGB(0, 128, 255, 1),
       },
       castnostop = {
-        show = true,
-        ShowOverlay = true,
+        show = true, -- no longer used
+        ShowOverlay = false,
         ShowInterruptShield = false,
       },
       castborder = {
