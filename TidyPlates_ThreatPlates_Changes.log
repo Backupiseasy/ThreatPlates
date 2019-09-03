@@ -1,4 +1,9 @@
 ﻿﻿------------------------------------------------------
+1.2.2
+------------------------------------------------------
+* Fixed a bug where the castbar color after a successful interrupt was reset even if the interrupt information was still being shown.
+
+﻿------------------------------------------------------
 1.2.1
 ------------------------------------------------------
 * Fixed a bug where totems with a rank greater than 1 were not recognized as totems correctly [Comment #128, IM].

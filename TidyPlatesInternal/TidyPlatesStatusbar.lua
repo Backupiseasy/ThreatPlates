@@ -60,6 +60,7 @@ local function OnUpdateCastBar(self, elapsed)
   end
 
   self:Hide()
+  self:GetParent().unit.IsInterrupted = false
 end
 
 local function OnHideCastBar(self)

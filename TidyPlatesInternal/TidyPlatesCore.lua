@@ -13,7 +13,7 @@ local select, pairs, tostring  = select, pairs, tostring 			    -- Local functio
 
 -- WoW APIs
 local wipe = wipe
-local WorldFrame, UIParent, CreateFrame, GameFontNormal, UNKNOWNOBJECT, INTERRUPTED = WorldFrame, UIParent, CreateFrame, GameFontNormal, UNKNOWNOBJECT, INTERRUPTED
+local WorldFrame, UIParent, CreateFrame, INTERRUPTED = WorldFrame, UIParent, CreateFrame, INTERRUPTED
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local UnitName, UnitIsUnit, UnitReaction, UnitExists = UnitName, UnitIsUnit, UnitReaction, UnitExists
 local UnitClassification = UnitClassification
@@ -324,6 +324,7 @@ do
     Addon:UpdateUnitIdentity(unit, unitid)
 
     unit.name, _ = UnitName(unitid)
+    unit.IsInterrupted = false
 
     extended.stylename = ""
 
@@ -712,7 +713,7 @@ do
 	function OnStartCasting(plate, unitid, channeled)
     UpdateReferences(plate)
 
-		local castbar = extended.visual.castbar
+    local castbar = extended.visual.castbar
     if not extended:IsShown() or not style.castbar.show then
       castbar:Hide()
       return
@@ -729,7 +730,7 @@ do
       castbar.MaxValue = (endTime - startTime) / 1000
       castbar:SetMinMaxValues(0, castbar.MaxValue)
       castbar:SetValue(castbar.Value)
-		else
+    else
       name, _, icon, startTime, endTime, _, _, _, spellID = LibClassicCasterino:UnitCastingInfo(unitid)
       castbar.IsCasting = true
       castbar.IsChanneling = false
@@ -742,12 +743,12 @@ do
 
     --if isTradeSkill then return end
 
-		unit.isCasting = true
+    unit.isCasting = true
     unit.spellIsShielded = false -- Classic does not provide this information
     unit.spellInterruptible = not unit.spellIsShielded
 
-		visual.spelltext:SetText(name)
-		visual.spellicon:SetTexture(icon)
+    visual.spelltext:SetText(name)
+    visual.spellicon:SetTexture(icon)
     --visual.spellicon:SetDrawLayer("ARTWORK", 7)
 
     castbar:SetAllColors(Addon:SetCastbarColor(unit))
@@ -756,8 +757,8 @@ do
     UpdateIndicator_CustomScaleText()
     UpdatePlate_Transparency(extended, unit)
 
-		castbar:Show()
-	end
+    castbar:Show()
+  end
 
 	-- OnHideCastbar
 	function OnStopCasting(plate)
@@ -1150,6 +1151,8 @@ do
         unit.isCasting = false
         UpdateIndicator_CustomScale(extended, unit)
         UpdatePlate_Transparency(extended, unit)
+
+        unit.IsInterrupted = true
 
         -- OnStopCasting is hiding the castbar and may be triggered before or after SPELL_INTERRUPT
         -- So we have to show the castbar again or not hide it if the interrupt message should still be shown.
