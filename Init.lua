@@ -24,7 +24,8 @@ ThreatPlates.Media = LibStub("LibSharedMedia-3.0")
 Addon.LibCustomGlow = LibStub("LibCustomGlow-1.0")
 Addon.LibAceConfigDialog = LibStub("AceConfigDialog-3.0")
 Addon.LibThreatClassic = LibStub:GetLibrary("ThreatClassic-1.0")
-Addon.LibClassicCasterino = LibStub("LibClassicCasterino", true)
+Addon.LibClassicCasterino = LibStub("LibClassicCasterino-ThreatPlates")
+--Addon.LibClassicCasterino = LibStub("LibClassicCasterino")
 
 ---------------------------------------------------------------------------------------------------
 -- Define AceAddon TidyPlatesThreat

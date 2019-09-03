@@ -1119,7 +1119,7 @@ do
 		end
 	end
 
-  function Addon.UNIT_SPELLCAST_INTERRUPTED(event, unitid, sourceName)
+  function Addon.UNIT_SPELLCAST_INTERRUPTED(event, unitid, castGUID, spellID, interrupterName, interrupterGUID)
     if UnitIsUnit("player", unitid) or unitid == "target" or not ShowCastBars then return end
 
     local plate = GetNamePlateForUnit(unitid)
@@ -1127,13 +1127,13 @@ do
       if plate.TPFrame.style.castbar.show then
         UpdateReferences(plate)
 
-        sourceName = gsub(sourceName, "%-[^|]+", "") -- UnitName(sourceName) only works in groups
-        local _, class_id = GetPlayerInfoByGUID(unit.guid)
+        interrupterName = gsub(interrupterName, "%-[^|]+", "") -- UnitName(sourceName) only works in groups
+        local _, class_id = GetPlayerInfoByGUID(interrupterGUID)
         if class_id then
           --local color_str = (RAID_CLASS_COLORS[classId] and RAID_CLASS_COLORS[classId].colorStr) or ""
-          sourceName = "|c" .. RAID_CLASS_COLORS[class_id].colorStr .. sourceName .. "|r"
+          interrupterName = "|c" .. RAID_CLASS_COLORS[class_id].colorStr .. interrupterName .. "|r"
         end
-        visual.spelltext:SetText(INTERRUPTED .. " [" .. sourceName .. "]")
+        visual.spelltext:SetText(INTERRUPTED .. " [" .. interrupterName .. "]")
 
         local castbar = visual.castbar
         local _, max_val = castbar:GetMinMaxValues()
