@@ -723,6 +723,11 @@ do
 
     if channeled then
       name, _, icon, startTime, endTime, _, _, _, spellID = LibClassicCasterino:UnitChannelInfo(unitid)
+      if not startTime then
+        castbar:Hide()
+        return
+      end
+
       castbar.IsChanneling = true
       castbar.IsCasting = false
 
@@ -732,6 +737,11 @@ do
       castbar:SetValue(castbar.Value)
     else
       name, _, icon, startTime, endTime, _, _, _, spellID = LibClassicCasterino:UnitCastingInfo(unitid)
+      if not startTime then
+        castbar:Hide()
+        return
+      end
+
       castbar.IsCasting = true
       castbar.IsChanneling = false
 
