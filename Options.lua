@@ -4602,7 +4602,7 @@ local function CreateCustomNameplatesGroup()
       hidden = function() return TidyPlatesThreat.db.global.CustomNameplatesVersion == 1 end,
     },
     MigrateVersion1 = {
-      name = L["|cffFF0000Migrate Custom Nameplates Settings|r"],
+      name = L["|cffFFFFFFMigrate Custom Nameplates Settings|r"],
       order = 3,
       type = "execute",
       width = "full",
