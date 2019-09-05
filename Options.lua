@@ -234,15 +234,15 @@ local function SetCVarTPTP(info, value)
 end
 
 local function SetCVarBoolTPTP(info, value)
-  if InCombatLockdown() then
-    t.Print("We're unable to change this while in combat", true)
-  else
+  --if InCombatLockdown() then
+  --  t.Print("We're unable to change this while in combat", true)
+  --else
     if type(info) == "table" then
       info = info.arg
     end
     SetCVar(info, (value and 1) or 0)
     Addon:ForceUpdate()
-  end
+  --end
 end
 
 local function SyncGameSettings(info, val)
@@ -3917,6 +3917,16 @@ local function CreateBlizzardSettings()
             isPercent = true,
             desc = L["The inset from the bottom (in screen percent) that large nameplates are clamped to."],
             arg = "nameplateLargeBottomInset",
+          },
+          ClampTarget = {
+            name = L["Clamp Target Nameplate to Screen"],
+            order = 50,
+            type = "toggle",
+            width = "double",
+            set = SetCVarBoolTPTP,
+            get = GetCVarBoolTPTP,
+            desc = L["Clamps the target's nameplate to the edges of the screen, even if the target is off-screen."],
+            arg = "clampTargetNameplateToScreen",
           },
         },
       },
