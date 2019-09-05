@@ -2,6 +2,7 @@
 1.2.2
 ------------------------------------------------------
 * Fixed a bug where the castbar color after a successful interrupt was reset even if the interrupt information was still being shown.
+* Added Druids in Dire Bear Form and Paladins with Righteous Fury as tank roles to the threat system [Issue #3].
 
 ﻿------------------------------------------------------
 1.2.1

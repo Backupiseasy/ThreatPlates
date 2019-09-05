@@ -19,7 +19,7 @@ local UnitName, UnitIsUnit, UnitReaction, UnitExists = UnitName, UnitIsUnit, Uni
 local UnitClassification = UnitClassification
 local UnitLevel = UnitLevel
 local UnitIsPlayer = UnitIsPlayer
-local UnitClass = UnitClass
+local UnitClass, UnitBuff = UnitClass, UnitBuff
 local UnitGUID = UnitGUID
 local GetCreatureDifficultyColor = GetCreatureDifficultyColor
 local UnitSelectionColor = UnitSelectionColor
@@ -1211,6 +1211,24 @@ do
     end
   end
 
+  local RIGHTEOUS_FURY_SPELL_IDs = { 20468, 20469, 20470, 25780 }
+
+  -- Only registered for player unit
+  function CoreEvents:UNIT_AURA(unitid)
+    local _, name, spellId
+    for i = 1, 40 do
+      name , _, _, _, _, _, _, _, _, spellId = UnitBuff("player", i, "PLAYER")
+      if not name then
+        break
+      elseif spellId == 25780 then --RIGHTEOUS_FURY_SPELL_IDs[spellId] then
+        Addon.PlayerIsPaladinTank = true
+        return
+      end
+    end
+
+    Addon.PlayerIsPaladinTank = false
+  end
+
   -- The following events should not have worked before adjusting UnitSpellcastMidway
 --	CoreEvents.UNIT_SPELLCAST_DELAYED = UnitSpellcastMidway
 --	CoreEvents.UNIT_SPELLCAST_CHANNEL_UPDATE = UnitSpellcastMidway
@@ -1230,6 +1248,10 @@ do
 	TidyPlatesCore:SetFrameStrata("TOOLTIP") 	-- When parented to WorldFrame, causes OnUpdate handler to run close to last
 	TidyPlatesCore:SetScript("OnEvent", EventHandler)
 	for eventName in pairs(CoreEvents) do TidyPlatesCore:RegisterEvent(eventName) end
+
+  if Addon.PlayerClass == "PALADIN" then
+    TidyPlatesCore:RegisterUnitEvent("UNIT_AURA", "player")
+  end
 end
 
 ---------------------------------------------------------------------------------------------------------------------

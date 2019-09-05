@@ -16,6 +16,7 @@ local floor, select, unpack, type, min, pairs = floor, select, unpack, type, min
 local GetCVar, SetCVar = GetCVar, SetCVar
 local UnitClass, GetSpecialization = UnitClass, GetSpecialization
 local GetShapeshiftFormID = GetShapeshiftFormID
+local BEAR_FORM, DIRE_BEAR_FORM = BEAR_FORM, 8
 
 -- ThreatPlates APIs
 local L = ThreatPlates.L
@@ -28,14 +29,30 @@ local RGB = ThreatPlates.RGB
 
 -- Returns if the currently active spec is tank (true) or dps/heal (false)
 Addon.PlayerClass = select(2, UnitClass("player"))
-local PLAYER_ROLE_BY_SPEC = ThreatPlates.SPEC_ROLES[Addon.PlayerClass]
+
+-- Tanks are only Warriors in Defensive Stance or Druids in Bear form
+local PLAYER_IS_TANK_BY_CLASS = {
+  WARRIOR = function()
+    return GetShapeshiftFormID() == 18
+  end,
+  DRUID = function()
+    local form_index = GetShapeshiftFormID()
+    return form_index == BEAR_FORM or form_index == DIRE_BEAR_FORM
+  end,
+  PALADIN = function()
+    return Addon.PlayerIsPaladinTank
+  end,
+  DEFAULT = function()
+    return false
+  end,
+}
+
+local PlayerIsTankByClassFunction = PLAYER_IS_TANK_BY_CLASS[Addon.PlayerClass] or PLAYER_IS_TANK_BY_CLASS["DEFAULT"]
 
 function Addon:PlayerRoleIsTank()
   local db = TidyPlatesThreat.db
   if db.profile.optionRoleDetectionAutomatic then
-    -- Tanks are only Warriors in Defensive Stance or Druids in Bear form
-    local index = GetShapeshiftFormID()
-    return index == 5 or index == 18
+    return PlayerIsTankByClassFunction()
   else
     return db.char.spec[1]
   end
