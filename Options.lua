@@ -7555,7 +7555,7 @@ function TidyPlatesThreat:ProfChange()
     for k_c, v_c in pairs(CLASS_SORT_ORDER) do
       base.ClassIconWidget.args.Textures.args["Prev" .. k_c].image = path .. "ClassIconWidget\\" .. db.classWidget.theme .. "\\" .. CLASS_SORT_ORDER[k_c]
     end
-    base.QuestWidget.args.ModeIcon.args.Texture.args.Preview.image = path .. "QuestWidget\\" .. db.questWidget.IconTexture
+    --base.QuestWidget.args.ModeIcon.args.Texture.args.Preview.image = path .. "QuestWidget\\" .. db.questWidget.IconTexture
 
     local threat_path = path .. "ThreatWidget\\" .. db.threat.art.theme .. "\\"
     base = options.args.ThreatOptions.args.Textures.args.Options.args
