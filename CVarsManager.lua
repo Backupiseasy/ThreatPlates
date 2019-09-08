@@ -73,7 +73,7 @@ function CVars:Set(cvar, value)
 end
 
 function CVars:SetToDefault(cvar)
-  SetCVar(cvar, GetCVarDefault())
+  SetCVar(cvar, GetCVarDefault(cvar))
   TidyPlatesThreat.db.profile.CVarsBackup[cvar] = nil
 end
 
