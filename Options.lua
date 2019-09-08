@@ -4025,7 +4025,7 @@ local function CreateBlizzardSettings()
                 t.Print("We're unable to change this while in combat", true)
               else
                 local cvars = {
-                  "nameplateOtherTopInset", "nameplateOtherBottomInset", "nameplateLargeTopInset", "nameplateLargeBottomInset",
+                  "nameplateOtherTopInset", "nameplateOtherBottomInset", "nameplateLargeTopInset", "nameplateLargeBottomInset", "clampTargetNameplateToScreen",
                   "nameplateMotion", "nameplateMotionSpeed", "nameplateOverlapH", "nameplateOverlapV",
                   "nameplateMaxDistance", "nameplateTargetBehindMaxDistance",
                   -- "nameplateGlobalScale" -- Reset it to 1, if it get's somehow corrupted
