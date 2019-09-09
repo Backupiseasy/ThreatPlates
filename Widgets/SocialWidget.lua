@@ -31,6 +31,7 @@ local BNGetNumFriends, BNGetFriendInfo, BNGetToonInfo, BNGetFriendInfoByID = BNG
 local BNet_GetValidatedCharacterName = BNet_GetValidatedCharacterName
 local UnitName, GetRealmName, UnitFactionGroup = UnitName, GetRealmName, UnitFactionGroup
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
+local C_FriendList_ShowFriends, C_FriendList_GetNumOnlineFriends = C_FriendList.ShowFriends, C_FriendList.GetNumOnlineFriends
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
@@ -58,7 +59,7 @@ function Widget:FRIENDLIST_UPDATE()
 
 
   -- First check if there was actually a change to the friend list (event fires for other reasons too)
-  local _, friendsOnline = GetNumFriends()
+  local friendsOnline = C_FriendList_GetNumOnlineFriends()
 
   if ListFriendsSize ~= friendsOnline then
     -- Only wipe the friend list if a member went offline
@@ -239,7 +240,7 @@ function Widget:OnEnable()
     --Widget:RegisterEvent("BN_FRIEND_LIST_SIZE_CHANGED", EventHandler)
 
     --self:FRIENDLIST_UPDATE()
-    ShowFriends() -- Will fire FRIENDLIST_UPDATE
+    C_FriendList_ShowFriends() -- Will fire FRIENDLIST_UPDATE
     self:BN_CONNECTED()
     --self:GUILD_ROSTER_UPDATE() -- called automatically by game
   else
