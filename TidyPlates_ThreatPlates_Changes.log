@@ -3,6 +3,7 @@
 ------------------------------------------------------
 * Fixed a Lua error when Social widget was enabled because of some API changes regarding the friend list API [Comment #182].
 * Fixed a Lua error when resetting all CVars in Blizzard Settings to their default values [Comment #236].
+* Updated incliuded libraries LibClassicDurations (rev. 18), LibClassicCasterino (rev. 14).
 
 ﻿------------------------------------------------------
 1.2.2
@@ -20,7 +21,7 @@
 * Fixed a bug where the castbar was shown on units that were not casting after a successful interrupt [Comment #115, #133, #147, TP#3895, TP#3903].
 * Fixed a bug with the healthbar of Blizzdard default nameplate (when enabled, e.g., in instances for friendly units) when the healthbar size was changed and the sync with the clickable area of nameplates was enabled [Comment #141].
 * Fixed a bug with with the castbar where the interrupter of a cast was not shown in class colors [Comment #135].
-* Updated incliuded library LibThreatClassic-1.0 (rev. 4), LibClassicDurations (rev. 16), LibClassicCasterino (rev. 12).
+* Updated incliuded libraries LibThreatClassic-1.0 (rev. 4), LibClassicDurations (rev. 16), LibClassicCasterino (rev. 12).
 
 ﻿------------------------------------------------------
 1.2.0
