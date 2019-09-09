@@ -1,4 +1,10 @@
 ﻿﻿------------------------------------------------------
+1.2.3
+------------------------------------------------------
+* Fixed a Lua error when Social widget was enabled because of some API changes regarding the friend list API [Comment #182].
+* Fixed a Lua error when resetting all CVars in Blizzard Settings to their default values [Comment #236].
+
+﻿------------------------------------------------------
 1.2.2
 ------------------------------------------------------
 * Fixed a bug where the castbar color after a successful interrupt was reset even if the interrupt information was still being shown.
