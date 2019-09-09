@@ -724,6 +724,11 @@ do
 
     if channeled then
       name, text, texture, startTime, endTime, isTradeSkill, notInterruptible, spellID = UnitChannelInfo(unitid)
+      if not name then
+        castbar:Hide()
+        return
+      end
+
       castbar.IsChanneling = true
       castbar.IsCasting = false
 
@@ -733,6 +738,11 @@ do
       castbar:SetValue(castbar.Value)
 		else
       name, text, texture, startTime, endTime, isTradeSkill, castID, notInterruptible = UnitCastingInfo(unitid)
+      if not name then
+        castbar:Hide()
+        return
+      end
+
       castbar.IsCasting = true
       castbar.IsChanneling = false
 
