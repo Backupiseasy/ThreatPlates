@@ -92,30 +92,31 @@ function TidyPlatesThreat:ChatCommand(input)
 	TidyPlatesThreat:OpenOptions()
 end
 
-local function SearchDBForString(db, prefix, keyword)
-  for key, value in pairs(db) do
-    local search_text = prefix .. "." .. key
-    if type(value) == "table" then
-      SearchDBForString(db[key], search_text, keyword )
-    else
-      if string.match(string.lower(search_text), keyword) then
-        print (search_text, "=", value)
-      end
-    end
-  end
-end
-
-function TidyPlatesThreat:ChatCommand(input)
-	local cmd_list = {}
-	for w in input:gmatch("%S+") do cmd_list[#cmd_list + 1] = w end
-
-	local command = cmd_list[1]
-	if not command or command == "" then
-		TidyPlatesThreat:OpenOptions()
-	elseif command == "test" then
-		Addon.LibClassicCasterino:PrintDebug()
-	end
-end
+--local function SearchDBForString(db, prefix, keyword)
+--  for key, value in pairs(db) do
+--    local search_text = prefix .. "." .. key
+--    if type(value) == "table" then
+--      SearchDBForString(db[key], search_text, keyword )
+--    else
+--      if string.match(string.lower(search_text), keyword) then
+--        print (search_text, "=", value)
+--      end
+--    end
+--  end
+--end
+--
+--function TidyPlatesThreat:ChatCommand(input)
+--	local cmd_list = {}
+--	for w in input:gmatch("%S+") do cmd_list[#cmd_list + 1] = w end
+--
+--	local command = cmd_list[1]
+--	if not command or command == "" then
+--		TidyPlatesThreat:OpenOptions()
+--	elseif command == "test" then
+--		LibStub:GetLibrary("ThreatClassic-1.0"):PLAYER_ALIVE()
+--		print ("Dine")
+--	end
+--end
 
 -----------------------------------------------------
 -- External
