@@ -1,4 +1,9 @@
 ﻿﻿------------------------------------------------------
+1.2.4
+------------------------------------------------------
+* Updated incliuded libraries LibThreatClassic-1.0 (rev. 6).
+
+﻿------------------------------------------------------
 1.2.3
 ------------------------------------------------------
 * Fixed a Lua error when Social widget was enabled because of some API changes regarding the friend list API [Comment #182].

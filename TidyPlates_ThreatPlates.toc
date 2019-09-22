@@ -1,6 +1,6 @@
 ﻿## Interface: 11302
 ## Title: Threat Plates
-## Version: 1.2.3
+## Version: 1.2.4
 ## Notes: Threat-reactive nameplates.
 ## Notes-deDE: Bedrohungsreaktive Namensplaketten.
 ## Author: Suicidal Katt, Blacksalsify
