@@ -1,4 +1,12 @@
 ﻿------------------------------------------------------
+9.1.14
+------------------------------------------------------
+* Fixed a Lua error when Social widget was enabled because of some API changes regarding the friend list API [Comment TPC#182].
+* Fixed a Lua error when resetting all CVars in Blizzard Settings to their default values [Comment #236].
+* Fixed a bug with the healthbar of Blizzard default nameplate (when enabled, e.g., in instances for friendly units) when the healthbar size was changed and the sync with the clickable area of nameplates was enabled [Comment TPC#141].
+* Fixed a bug where the player pet's nameplate was only shown when Guardian nameplates were enabled (not pet nameplates) [E-Mail].
+
+------------------------------------------------------
 9.1.13
 ------------------------------------------------------
 * Custom nameplates no longer have a fixed number of slots. You can now add (or remove) as many custom nameplates as you want. Before you can use this feature, you have to migrate your current custom nameplates. It is highly recommended to backup the Threat Plates SavedVariables file before doing that! [Issue #322, #172 PM]
