@@ -1,6 +1,7 @@
 ﻿﻿------------------------------------------------------
 1.2.4
 ------------------------------------------------------
+* Fixed a bug where the player pet's nameplate was only shown when Guardian nameplates were enabled (not pet nameplates) [E-Mail].
 * Updated incliuded libraries LibThreatClassic-1.0 (rev. 6).
 
 ﻿------------------------------------------------------
