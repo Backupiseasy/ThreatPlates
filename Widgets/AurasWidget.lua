@@ -33,7 +33,6 @@ local Animations = Addon.Animations
 local Font = Addon.Font
 
 local LibClassicDurations = LibStub("LibClassicDurations")
-LibClassicDurations:Register("ThreatPlates")
 
 ---------------------------------------------------------------------------------------------------
 -- Aura Highlighting
@@ -1356,6 +1355,16 @@ local function UnitAuraEventHandler(widget_frame, event, unitid)
   end
 end
 
+local function UnitBuffEventHandler(event, unitid)
+  local plate = GetNamePlateForUnit(unitid)
+  if plate and plate.TPFrame.Active then
+    local widget_frame = plate.TPFrame.widgets.Auras
+    if widget_frame.Active then
+      widget_frame.Widget:UpdateIconGrid(widget_frame, widget_frame:GetParent().unit)
+    end
+  end
+end
+
 function Widget:PLAYER_TARGET_CHANGED()
   if not self.db.ShowTargetOnly then return end
 
@@ -1466,6 +1475,11 @@ function Widget:OnEnable()
   self:RegisterEvent("PLAYER_ENTERING_WORLD")
   -- LOSS_OF_CONTROL_ADDED
   -- LOSS_OF_CONTROL_UPDATE
+
+  -- Add duration handling from LibClassicDurations
+  LibClassicDurations:Register("ThreatPlates")
+  -- NOTE: Enemy buff tracking won't start until you register UNIT_BUFF
+  LibClassicDurations.RegisterCallback(TidyPlatesThreat, "UNIT_BUFF", UnitBuffEventHandler)
 end
 
 function Widget:OnDisable()
