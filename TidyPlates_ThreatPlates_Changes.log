@@ -1,3 +1,10 @@
+------------------------------------------------------
+1.2.5
+------------------------------------------------------
+* Enabled support for buffs again to the Auras widget [Comment #355].
+* Fixed a bug with the configuration mode of clickable area to respect WoW's internal nameplate scaling (controlled by CVars).
+* Updated included libraries LibClassicDurations (rev. 31), LibClassicCasterino (rev. 22).
+
 ﻿﻿------------------------------------------------------
 1.2.4
 ------------------------------------------------------
@@ -69,4 +76,3 @@
 1.0.0
 ------------------------------------------------------
 * Basic port of Threat Plates 9.1.13 to WoW Classic.
-
