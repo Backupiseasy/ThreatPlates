@@ -3,7 +3,9 @@
 ------------------------------------------------------
 * Enabled support for buffs again to the Auras widget [Comment #355].
 * Fixed a bug with the configuration mode of clickable area to respect WoW's internal nameplate scaling (controlled by CVars).
-* Updated included libraries LibClassicDurations (rev. 34), LibClassicCasterino (rev. 23).
+* Fixed a Lua error in Social widget because of a deprecated API usage [Issue #16, Comments TP#4053].
+* Updated included libraries LibClassicDurations (rev. 34), LibClassicCasterino (rev. 24).
+* Updated localizations for enES and esMX (thanks to Woopy).
 
 ﻿﻿------------------------------------------------------
 1.2.4

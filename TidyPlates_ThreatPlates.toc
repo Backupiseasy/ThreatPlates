@@ -3,6 +3,8 @@
 ## Version: 1.2.5
 ## Notes: Threat-reactive nameplates.
 ## Notes-deDE: Bedrohungsreaktive Namensplaketten.
+## Notes-esES: Placas Identificativas de Amenaza
+## Notes-esMX: Placas Identificativas de Amenaza
 ## Author: Suicidal Katt, Blacksalsify
 ## SavedVariables: ThreatPlatesDB
 ## RequiredDeps:
