@@ -7263,18 +7263,18 @@ local function CreateOptionsTable()
               width = "full",
               name = "deDE: Blacksalsify (original  author: Aideen@Perenolde/EU)"
             },
---						Translators2 = {
---							type = "description",
---							order = 5,
---							width = "full",
---							name = "esES: Need Translator!!"
---						},
---						Translators3 = {
---							type = "description",
---							order = 6,
---							width = "full",
---							name = "esMX: Need Translator!!"
---						},
+						Translators2 = {
+							type = "description",
+							order = 5,
+							width = "full",
+							name = "esES: Woopy"
+						},
+						Translators3 = {
+							type = "description",
+							order = 6,
+							width = "full",
+							name = "esMX: Woopy"
+						},
 --						Translators4 = {
 --							type = "description",
 --							order = 7,
