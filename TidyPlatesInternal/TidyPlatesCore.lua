@@ -1134,7 +1134,7 @@ do
     if UnitIsUnit("player", unitid) or unitid == "target" or not ShowCastBars then return end
 
     local plate = GetNamePlateForUnit(unitid)
-    if plate and plate.TPFrame.Active then
+    if plate and plate.TPFrame.Active and interrupterName then
       if plate.TPFrame.style.castbar.show then
         UpdateReferences(plate)
 
@@ -1513,7 +1513,7 @@ function Addon:ConfigClickableArea(toggle_show)
         local width, height = TidyPlatesThreat.db.profile.settings.frame.width, TidyPlatesThreat.db.profile.settings.frame.height
 
         local min_scale = tonumber(GetCVar("nameplateMinScale"))
-        local selected_scale = tonumber(GetCVar("nameplateSelectedScale"))
+        --local selected_scale = tonumber(GetCVar("nameplateSelectedScale"))
         local global_scale = tonumber(GetCVar("nameplateGlobalScale"))
         local current_scale = global_scale * min_scale
 

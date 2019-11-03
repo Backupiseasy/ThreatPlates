@@ -1,4 +1,9 @@
 ------------------------------------------------------
+1.2.6
+------------------------------------------------------
+* Fixed a Lua error with the castbar when a cast was interrupted in certain situations, e.g., while the unit died [Issue #17].
+
+------------------------------------------------------
 1.2.5
 ------------------------------------------------------
 * Enabled support for buffs again to the Auras widget [Comment #355].

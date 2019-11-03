@@ -136,7 +136,7 @@ local function CastStop(srcGUID, castType, suffix, interrupterName, interrupterG
         casters[srcGUID] = nil
         movecheckGUIDs[srcGUID] = nil
 
-        if suffix == "INTERRUPTED" then
+        if suffix == "INTERRUPTED" and interrupterName then
             -- srcGUID is dstGUID here (unit who was interrupted)
             -- UNIT_SPELLCAST_INTERRUPTED: "unitTarget", "castGUID", spellID
             FireToUnits("UNIT_SPELLCAST_INTERRUPTED", srcGUID, nil, currentCast[6], interrupterName, interrupterGUID)
@@ -224,7 +224,7 @@ function f:COMBAT_LOG_EVENT_UNFILTERED(event)
 
             CastStop(dstGUID, nil, "INTERRUPTED", srcName, srcGUID)
     elseif eventType == "UNIT_DIED" then
-            CastStop(dstGUID, nil, "INTERRUPTED")
+            CastStop(dstGUID, nil, "INTERRUPTED", srcName, srcGUID)
 
     elseif  eventType == "SPELL_AURA_APPLIED" or
             eventType == "SPELL_AURA_REFRESH" or
@@ -232,7 +232,7 @@ function f:COMBAT_LOG_EVENT_UNFILTERED(event)
     then
         if isSrcPlayer then
             if crowdControlAuras[spellName] then
-		CastStop(dstGUID, nil, "INTERRUPTED", srcName, srcGUID)
+		            CastStop(dstGUID, nil, "INTERRUPTED", srcName, srcGUID)
                 return
             end
 
@@ -734,6 +734,7 @@ do
 
         return nameplateGUIDtoUnit[guid]
     end
+
 
     f:SetScript("OnUpdate", function(self, elapsed)
         local guid, timeout = next(movecheckGUIDs)
