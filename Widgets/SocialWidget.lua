@@ -26,12 +26,12 @@ local Widget = Addon.Widgets:NewWidget("Social")
 -- WoW APIs
 local CreateFrame = CreateFrame
 local GetNumGuildMembers, GetGuildRosterInfo = GetNumGuildMembers, GetGuildRosterInfo
-local GetNumFriends, GetFriendInfo = GetNumFriends, GetFriendInfo
 local BNGetNumFriends, BNGetFriendInfo, BNGetToonInfo, BNGetFriendInfoByID = BNGetNumFriends, BNGetFriendInfo, BNGetToonInfo, BNGetFriendInfoByID
 local BNet_GetValidatedCharacterName = BNet_GetValidatedCharacterName
 local UnitName, GetRealmName, UnitFactionGroup = UnitName, GetRealmName, UnitFactionGroup
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local C_FriendList_ShowFriends, C_FriendList_GetNumOnlineFriends = C_FriendList.ShowFriends, C_FriendList.GetNumOnlineFriends
+local C_FriendList_GetFriendInfo = C_FriendList.GetFriendInfo
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
@@ -69,7 +69,7 @@ function Widget:FRIENDLIST_UPDATE()
 
     local no_friends = 0
     for i = 1, friendsOnline do
-      local name, _ = GetFriendInfo(i)
+      local name, _ = C_FriendList_GetFriendInfo(i)
       if name then
         ListFriends[name] = ICON_FRIEND
         no_friends = no_friends + 1

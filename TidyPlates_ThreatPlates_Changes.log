@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+9.1.15
+------------------------------------------------------
+* [Internal] Updated Social widget to use new Friend API (backport from Threat Plates Classic).
+
+------------------------------------------------------
 9.1.14
 ------------------------------------------------------
 * Fixed a Lua error when Social widget was enabled because of some API changes regarding the friend list API [Comment TPC#182].
