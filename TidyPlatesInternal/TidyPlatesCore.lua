@@ -1469,7 +1469,18 @@ function Addon:ConfigClickableArea(toggle_show)
         extended.Background:SetBackdropColor(0,0,0,.3)
         extended.Background:SetBackdropBorderColor(0, 0, 0, 0.8)
         extended.Background:SetPoint("CENTER", ConfigModePlate.UnitFrame, "CENTER")
-        extended.Background:SetSize(TidyPlatesThreat.db.profile.settings.frame.width, TidyPlatesThreat.db.profile.settings.frame.height)
+
+        local width, height = TidyPlatesThreat.db.profile.settings.frame.width, TidyPlatesThreat.db.profile.settings.frame.height
+
+        local min_scale = tonumber(GetCVar("nameplateMinScale"))
+        --local selected_scale = tonumber(GetCVar("nameplateSelectedScale"))
+        local global_scale = tonumber(GetCVar("nameplateGlobalScale"))
+        local current_scale = global_scale * min_scale
+
+        width = width * current_scale
+        height = height * current_scale
+
+        extended.Background:SetSize(width, height)
         extended.Background:Show()
 
         -- remove the config background if the nameplate is hidden to prevent it
