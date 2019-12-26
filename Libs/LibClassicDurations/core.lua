@@ -7,65 +7,19 @@ And additionally enemy buffs info.
 Usage example 1:
 -----------------
 
-    -- Simply get the expiration time and duration
+    -- Using UnitAura wrapper
+    local UnitAura = _G.UnitAura
 
-    local LibClassicDurations = LibStub("LibClassicDurations")
-    LibClassicDurations:Register("YourAddon") -- tell library it's being used and should start working
-
-    hooksecurefunc("CompactUnitFrame_UtilSetBuff", function(buffFrame, unit, index, filter)
-        local name, _, _, _, duration, expirationTime, unitCaster, _, _, spellId = UnitBuff(unit, index, filter);
-
-        local durationNew, expirationTimeNew = LibClassicDurations:GetAuraDurationByUnit(unit, spellId, unitCaster)
-        if duration == 0 and durationNew then
-            duration = durationNew
-            expirationTime = expirationTimeNew
-        end
-
-        local enabled = expirationTime and expirationTime ~= 0;
-        if enabled then
-            local startTime = expirationTime - duration;
-            CooldownFrame_Set(buffFrame.cooldown, startTime, duration, true);
-        else
-            CooldownFrame_Clear(buffFrame.cooldown);
-        end
-    end)
-
-Usage example 2:
------------------
-
-    -- Use library's UnitAura replacement function, that shows enemy buffs and
-    -- automatically tries to add duration to everything else
-
-    local LCD = LibStub("LibClassicDurations")
-    LCD:Register("YourAddon") -- tell library it's being used and should start working
-
-    local f = CreateFrame("frame", nil, UIParent)
-    f:RegisterUnitEvent("UNIT_AURA", "target")
-
-    local EventHandler = function(self, event, unit)
-        for i=1,100 do
-            local name, _, _, _, duration, expirationTime, _, _, _, spellId = LCD:UnitAura(unit, i, "HELPFUL")
-            if not name then break end
-            print(name, duration, expirationTime)
-        end
+    local LibClassicDurations = LibStub("LibClassicDurations", true)
+    if LibClassicDurations then
+        LibClassicDurations:Register("YourAddon")
+        UnitAura = LibClassicDurations.UnitAuraWrapper
     end
-
-    f:SetScript("OnEvent", EventHandler)
-
-    -- NOTE: Enemy buff tracking won't start until you register UNIT_BUFF
-    LCD.RegisterCallback(addon, "UNIT_BUFF", function(event, unit)
-        EventHandler(f, "UNIT_AURA", unit)
-    end)
-
-    -- Optional:
-    LCD.RegisterCallback(addon, "UNIT_BUFF_GAINED", function(event, unit, spellID)
-        print("Gained", GetSpellInfo(spellID))
-    end)
 
 --]================]
 if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then return end
 
-local MAJOR, MINOR = "LibClassicDurations", 34
+local MAJOR, MINOR = "LibClassicDurations", 44
 local lib = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end
 
@@ -90,8 +44,7 @@ local DRInfo = lib.DRInfo
 lib.buffCache = lib.buffCache or {}
 local buffCache = lib.buffCache
 
-lib.buffCacheValid = lib.buffCacheValid or {}
-local buffCacheValid = lib.buffCacheValid
+local buffCacheValid = {}
 
 lib.nameplateUnitMap = lib.nameplateUnitMap or {}
 local nameplateUnitMap = lib.nameplateUnitMap
@@ -113,6 +66,7 @@ local INFINITY = math.huge
 local PURGE_INTERVAL = 900
 local PURGE_THRESHOLD = 1800
 local UNKNOWN_AURA_DURATION = 3600 -- 60m
+local BUFF_CACHE_EXPIRATION_TIME = 40
 
 local CombatLogGetCurrentEventInfo = CombatLogGetCurrentEventInfo
 local UnitGUID = UnitGUID
@@ -122,7 +76,10 @@ local GetTime = GetTime
 local tinsert = table.insert
 local unpack = unpack
 local GetAuraDurationByUnitDirect
-local enableEnemyBuffTracking = false
+
+if lib.enableEnemyBuffTracking == nil then lib.enableEnemyBuffTracking = false end
+local enableEnemyBuffTracking = lib.enableEnemyBuffTracking
+
 local COMBATLOG_OBJECT_CONTROL_PLAYER = COMBATLOG_OBJECT_CONTROL_PLAYER
 
 f:SetScript("OnEvent", function(self, event, ...)
@@ -493,12 +450,7 @@ function f:COMBAT_LOG_EVENT_UNFILTERED(event)
     return self:CombatLogHandler(CombatLogGetCurrentEventInfo())
 end
 
-function f:CombatLogHandler(...)
-    local timestamp, eventType, hideCaster,
-    srcGUID, srcName, srcFlags, srcFlags2,
-    dstGUID, dstName, dstFlags, dstFlags2,
-    spellID, spellName, spellSchool, auraType = ...
-
+local function ProcIndirectRefresh(eventType, spellName, srcGUID, srcFlags, dstGUID, dstFlags, dstName)
     if indirectRefreshSpells[spellName] then
         local refreshTable = indirectRefreshSpells[spellName]
         if refreshTable.events[eventType] then
@@ -529,6 +481,16 @@ function f:CombatLogHandler(...)
             end
         end
     end
+end
+
+function f:CombatLogHandler(...)
+    local timestamp, eventType, hideCaster,
+    srcGUID, srcName, srcFlags, srcFlags2,
+    dstGUID, dstName, dstFlags, dstFlags2,
+    spellID, spellName, spellSchool, auraType = ...
+
+
+    ProcIndirectRefresh(eventType, spellName, srcGUID, srcFlags, dstGUID, dstFlags, dstName)
 
     if  eventType == "SPELL_MISSED" and
         bit_band(srcFlags, COMBATLOG_OBJECT_AFFILIATION_MINE) == COMBATLOG_OBJECT_AFFILIATION_MINE
@@ -562,9 +524,9 @@ function f:CombatLogHandler(...)
         local opts = spells[spellID]
 
         if not opts then
-            local npc_aura_duration = npc_spells[spellID]
-            if npc_aura_duration then
-                opts = { duration = npc_aura_duration }
+            local npcDurationForSpellName = npc_spells[spellID]
+            if npcDurationForSpellName then
+                opts = { duration = npcDurationForSpellName }
             -- elseif enableEnemyBuffTracking and not isDstFriendly and auraType == "BUFF" then
                 -- opts = { duration = 0 } -- it'll be accepted but as an indefinite aura
             end
@@ -671,7 +633,7 @@ local makeBuffInfo = function(spellID, applicationTable, dstGUID, srcGUID)
     end
     local now = GetTime()
     if expirationTime > now then
-        return { name, icon, 1, nil, duration, expirationTime, nil, nil, nil, spellID }
+        return { name, icon, 0, nil, duration, expirationTime, nil, nil, nil, spellID, false, false, false, false, 1 }
     end
 end
 
@@ -712,7 +674,7 @@ local function RegenerateBuffList(dstGUID)
     end
 
     buffCache[dstGUID] = buffs
-    buffCacheValid[dstGUID] = true
+    buffCacheValid[dstGUID] = GetTime() + BUFF_CACHE_EXPIRATION_TIME -- Expiration timestamp
 end
 
 local FillInDuration = function(unit, buffName, icon, count, debuffType, duration, expirationTime, caster, canStealOrPurge, nps, spellId, ...)
@@ -730,7 +692,8 @@ function lib.UnitAuraDirect(unit, index, filter)
     if enableEnemyBuffTracking and filter == "HELPFUL" and not UnitIsFriend("player", unit) and not UnitAura(unit, 1, filter) then
         local unitGUID = UnitGUID(unit)
         if not unitGUID then return end
-        if not buffCacheValid[unitGUID] then
+        local isValid = buffCacheValid[unitGUID]
+        if not isValid or isValid < GetTime() then
             RegenerateBuffList(unitGUID)
         end
 
@@ -767,28 +730,39 @@ function f:NAME_PLATE_UNIT_REMOVED(event, unit)
 end
 
 function callbacks.OnUsed()
-    enableEnemyBuffTracking = true
+    lib.enableEnemyBuffTracking = true
+    enableEnemyBuffTracking = lib.enableEnemyBuffTracking
     f:RegisterEvent("NAME_PLATE_UNIT_ADDED")
     f:RegisterEvent("NAME_PLATE_UNIT_REMOVED")
 end
 function callbacks.OnUnused()
-    enableEnemyBuffTracking = false
+    lib.enableEnemyBuffTracking = false
+    enableEnemyBuffTracking = lib.enableEnemyBuffTracking
     f:UnregisterEvent("NAME_PLATE_UNIT_ADDED")
     f:UnregisterEvent("NAME_PLATE_UNIT_REMOVED")
+end
+
+if next(callbacks.events) then
+    callbacks.OnUsed()
 end
 
 ---------------------------
 -- PUBLIC FUNCTIONS
 ---------------------------
-local function GetGUIDAuraTime(dstGUID, spellName, spellID, srcGUID, isStacking)
+local function GetGUIDAuraTime(dstGUID, spellName, spellID, srcGUID, isStacking, forcedNPCDuration)
     local guidTable = guids[dstGUID]
     if guidTable then
 
-        local lastRankID = spellNameToID[spellName]
+        local lastRankID = GetLastRankSpellID(spellName)
 
         local spellTable = guidTable[lastRankID]
         if spellTable then
             local applicationTable
+
+            -- Return when player spell and npc spell have the same name and the player spell is stacking
+            -- NPC spells are always assumed to not stack, so it won't find startTime
+            if forcedNPCDuration and spellTable.applications then return nil end
+
             if isStacking then
                 if srcGUID and spellTable.applications then
                     applicationTable = spellTable.applications[srcGUID]
@@ -800,9 +774,10 @@ local function GetGUIDAuraTime(dstGUID, spellName, spellID, srcGUID, isStacking)
             end
             if not applicationTable then return end
             local durationFunc, startTime, auraType, comboPoints = unpack(applicationTable)
-            local duration = cleanDuration(durationFunc, spellID, srcGUID, comboPoints)
+            local duration = forcedNPCDuration or cleanDuration(durationFunc, spellID, srcGUID, comboPoints)
             if duration == INFINITY then return nil end
             if not duration then return nil end
+            if not startTime then return nil end
             local mul = getDRMul(dstGUID, spellID)
             -- local mul = getDRMul(dstGUID, lastRankID)
             duration = duration * mul
@@ -832,11 +807,18 @@ end
 function lib.GetAuraDurationByUnitDirect(unit, spellID, casterUnit, spellName)
     assert(spellID, "spellID is nil")
     local opts = spells[spellID]
-    if not opts then return end
+    local isStacking
+    local npcDurationById
+    if opts then
+        isStacking = opts.stacking
+    else
+        npcDurationById = npc_spells[spellID]
+        if not npcDurationById then return end
+    end
     local dstGUID = UnitGUID(unit)
     local srcGUID = casterUnit and UnitGUID(casterUnit)
     if not spellName then spellName = GetSpellInfo(spellID) end
-    return GetGUIDAuraTime(dstGUID, spellName, spellID, srcGUID, opts.stacking)
+    return GetGUIDAuraTime(dstGUID, spellName, spellID, srcGUID, isStacking, npcDurationById)
 end
 GetAuraDurationByUnitDirect = lib.GetAuraDurationByUnitDirect
 
@@ -852,7 +834,7 @@ function lib:GetAuraDurationByGUID(dstGUID, spellID, srcGUID, spellName)
 end
 
 function lib:GetLastRankSpellIDByName(spellName)
-    return spellNameToID[spellName]
+    return GetLastRankSpellID(spellName)
 end
 
 -- Will not work for cp-based durations, KS and Rupture

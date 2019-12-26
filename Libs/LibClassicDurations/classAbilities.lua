@@ -1,7 +1,7 @@
 local lib = LibStub and LibStub("LibClassicDurations", true)
 if not lib then return end
 
-local Type, Version = "SpellTable", 40
+local Type, Version = "SpellTable", 50
 if lib:GetDataVersion(Type) >= Version then return end  -- older versions didn't have that function
 
 local Spell = lib.AddAura
@@ -44,6 +44,33 @@ if class == "MAGE" then
         condition = function(isMine) return isMine end,
         -- it'll refresg only from mages personal casts which is fine
         -- because if mage doesn't have imp scorch then he won't even see a Fire Vulnerability timer
+    }
+
+    lib.indirectRefreshSpells[GetSpellInfo(25304)] = { -- Frostbolt
+        events = {
+            ["SPELL_DAMAGE"] = true
+        },
+        targetSpellID = 12579, -- Winter's Chill
+        targetResistCheck = true,
+        condition = function(isMine) return isMine end,
+    }
+
+    lib.indirectRefreshSpells[GetSpellInfo(10161)] = { -- Cone of Cold
+        events = {
+            ["SPELL_DAMAGE"] = true
+        },
+        targetSpellID = 12579, -- Winter's Chill
+        targetResistCheck = true,
+        condition = function(isMine) return isMine end,
+    }
+
+    lib.indirectRefreshSpells[GetSpellInfo(10230)] = { -- Frost Nova
+        events = {
+            ["SPELL_DAMAGE"] = true
+        },
+        targetSpellID = 12579, -- Winter's Chill
+        targetResistCheck = true,
+        condition = function(isMine) return isMine end,
     }
 
     lib.indirectRefreshSpells[GetSpellInfo(10)] = { -- Blizzard
@@ -89,10 +116,12 @@ end
 -- GLOBAL
 ------------------
 
+Spell( 2479, { duration = 30 }) -- Honorless Target
 Spell(1604, { duration = 4 }) -- Common Daze
 Spell( 23605, { duration = 5 }) -- Nightfall (Axe) Proc
 Spell( 835, { duration = 3 }) -- Tidal Charm
 Spell( 11196, { duration = 60 }) -- Recently Bandaged
+Spell( 16928, { duration = 45 }) -- Armor Shatter, procced by Annihilator, axe weapon
 
 Spell({ 13099, 13138, 16566 }, {
     duration = function(spellID)
@@ -130,11 +159,14 @@ Spell( 12733, { duration = 30, type = "BUFF" }) -- Blacksmith trinket
 -- Spell( 15752, { duration = 10 }) -- Linken's Boomerang disarm
 Spell( 14530, { duration = 10, type = "BUFF" }) -- Nifty Stopwatch
 Spell( 13237, { duration = 3 }) -- Goblin Mortar trinket
+Spell( 21152, { duration = 3 }) -- Earthshaker, weapon proc
 Spell( 14253, { duration = 8, type = "BUFF" }) -- Black Husk Shield
 Spell( 9175, { duration = 15, type = "BUFF" }) -- Swift Boots
 Spell( 13141, { duration = 20, type = "BUFF" }) -- Gnomish Rocket Boots
 Spell( 8892, { duration = 20, type = "BUFF" }) -- Goblin Rocket Boots
 Spell( 9774, { duration = 5, type = "BUFF" }) -- Spider Belt & Ornate Mithril Boots
+Spell({ 746, 1159, 3267, 3268, 7926, 7927, 10838, 10839, 18608, 18610, 23567, 23568, 23569, 23696, 24412, 24413, 24414}, { duration = 8, type = "BUFF" }) -- First Aid
+
 
 -------------
 -- RACIALS
@@ -326,7 +358,7 @@ Spell( 2457 , { duration = INFINITY, type = "BUFF" }) -- Battle Stance
 Spell( 2458 , { duration = INFINITY, type = "BUFF" }) -- Berserker Stance
 Spell( 71 , { duration = INFINITY, type = "BUFF" }) -- Def Stance
 
-Spell( 12294, { duration = 10 }) -- Mortal Strike Healing Reduction
+Spell({ 12294, 21551, 21552, 21553 }, { duration = 10 }) -- Mortal Strike Healing Reduction
 
 Spell({72, 1671, 1672}, { duration = 6 }) -- Shield Bash
 Spell( 18498, { duration = 3 }) -- Improved Shield Bash
@@ -457,7 +489,8 @@ Spell({ 1943, 8639, 8640, 11273, 11274, 11275 }, { stacking = true,
         end
     end
 }) -- Rupture
--- SnD -- player-only, can skip
+
+Spell({ 5171, 6774 }, { duration = nil, type = "BUFF" }) -- SnD, to prevent fallback to incorrect db values
 
 Spell({ 2983, 8696, 11305 }, { duration = 15, type = "BUFF" }) -- Sprint
 Spell( 5277 ,{ duration = 15, type = "BUFF" }) -- Evasion
@@ -478,8 +511,12 @@ Spell( 14251 , { duration = 6 }) -- Riposte (disarm)
 ------------
 
 Spell({ 20707, 20762, 20763, 20764, 20765 }, { duration = 1800, type = "BUFF" }) -- Soulstone Resurrection
-Spell({ 687, 696, 706, 1086, 11733, 11734, 11735 }, { duration = 1800, type = "BUFF", castFilter = true }) -- Demon SKin/Armor
--- Spell({ 18791, 18789, 18792, 18790 }, { duration = 1800, type = "BUFF" })  -- Touch of Shadow, Burning Wish, Fel Energy, Fel Stamina
+Spell({ 687, 696 }, { duration = 1800, type = "BUFF", castFilter = true }) -- Demon SKin
+Spell({ 706, 1086, 11733, 11734, 11735 }, { duration = 1800, type = "BUFF", castFilter = true }) -- Demon Armor
+Spell({ 18791 }, { duration = 1800, type = "BUFF", castFilter = true })  -- Touch of Shadow
+Spell({ 18789 }, { duration = 1800, type = "BUFF", castFilter = true })  -- Burning Wish
+Spell({ 18792 }, { duration = 1800, type = "BUFF", castFilter = true })  -- Fel Energy
+Spell({ 18790 }, { duration = 1800, type = "BUFF", castFilter = true })  -- Fel Stamina
 
 --SKIPPING: Drain Life, Mana, Soul, Enslave, Health funnel, kilrog
 Spell( 24259 ,{ duration = 3 }) -- Spell Lock Silence
@@ -487,8 +524,10 @@ Spell({ 17767, 17850, 17851, 17852, 17853, 17854 }, { duration = 10 }) -- Consum
 Spell( 18118, { duration = 5 }) -- Aftermath Proc
 Spell({ 132, 2970, 11743 }, { duration = 600 }) -- Detect Invisibility
 Spell( 5697, { duration = 600 }) -- Unending Breath
--- Spell({ 17794, 17798, 17797, 17799, 17800 }, { duration = 12 }) -- Shadow Vulnerability (Imp Shadow Bolt)
--- SKIPPING: Amplify Curse
+if class == "WARLOCK" then
+    Spell({ 17794, 17798, 17797, 17799, 17800 }, { duration = 12 }) -- Shadow Vulnerability (Imp Shadow Bolt)
+end
+Spell({ 18288 }, { duration = 1800, type = "BUFF", castFilter = true })  -- Amplify Curse
 Spell({ 1714, 11719 }, { duration = 30 }) -- Curse of Tongues
 Spell({ 702, 1108, 6205, 7646, 11707, 11708 },{ duration = 120 }) -- Curse of Weakness
 Spell({ 17862, 17937 }, { duration = 300 }) -- Curse of Shadows
@@ -705,7 +744,7 @@ Spell({ 13165, 14318, 14319, 14320, 14321, 14322, 25296 }, { duration = INFINITY
 Spell( 5384, { duration = INFINITY, type = "BUFF" }) -- Feign Death (Will it work?)
 
 Spell({ 19506, 20905, 20906 }, { duration = 1800, type = "BUFF", castFilter = true }) -- Trueshot Aura
---SKIPPING: Frenzy
+Spell(19615, { duration = 8, type = "BUFF" }) -- Frenzy
 Spell({ 1130, 14323, 14324, 14325 }, { duration = 120 }) -- Hunter's Mark
 Spell(19263, { duration = 10, type = "BUFF" }) -- Deterrence
 Spell(3045, { duration = 15, type = "BUFF" }) -- Rapid Fire
@@ -750,6 +789,7 @@ Spell(19185, { duration = 5 }) -- Entrapment
 Spell(25999, { duration = 1 }) -- Boar Charge
 Spell(1002, { duration = 60 }) -- Eye of the Beast
 Spell(1539, { duration = 20 }) -- Feed Pet Effect
+Spell({ 136, 3111, 3661, 3662, 13542, 13543, 13544 }, { duration = 5, type = "BUFF" }) -- Mend Pet
 
 -------------
 -- MAGE
@@ -760,9 +800,10 @@ Spell( 12043, { duration = INFINITY, type = "BUFF" }) -- Presence of Mind
 Spell({ 1459, 1460, 1461, 10156, 10157 }, { duration = 1800, type = "BUFF", castFilter = true }) -- Arcane Intellect
 Spell( 23028, { duration = 3600, type = "BUFF", castFilter = true }) -- Arcane Brilliance
 Spell({ 6117, 22782, 22783 }, { duration = 1800, type = "BUFF", castFilter = true }) -- Mage Armor
-Spell({ 168, 7300, 7301, 7302, 7320, 10219, 10220 }, { duration = 1800, type = "BUFF", castFilter = true }) -- Frost/Ice Armor
+Spell({ 168, 7300, 7301 }, { duration = 1800, type = "BUFF", castFilter = true }) -- Frost Armor
+Spell({ 7302, 7320, 10219, 10220 }, { duration = 1800, type = "BUFF", castFilter = true }) -- Ice Armor
 
-Spell( 2855, { duration = 1800, type = "BUFF" }) -- Detect Magic
+Spell( 2855, { duration = 120, type = "BUFF" }) -- Detect Magic
 Spell( 130, { duration = 1800, type = "BUFF" }) -- Slow Fall
 
 Spell({ 133, 143, 145, 3140, 8400, 8401, 8402, 10148, 10149, 10150, 10151, 25306 }, {
@@ -807,6 +848,17 @@ Spell(22959, {
             return nil
         end
     end }) -- Fire Vulnerability
+end
+
+if class == "MAGE" then
+Spell(12579, {
+    duration = function(spellID, isSrcPlayer)
+        if Talent(11180, 28592, 28593, 28594, 28595) > 0 then
+            return 15
+        else
+            return nil
+        end
+    end }) -- Winter's Chill
 end
 
 Spell({ 11113, 13018, 13019, 13020, 13021 }, { duration = 6 }) -- Blast Wave
