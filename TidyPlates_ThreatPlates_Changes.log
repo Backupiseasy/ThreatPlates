@@ -1,7 +1,7 @@
 ------------------------------------------------------
 1.2.8
 ------------------------------------------------------
-* Fixed a Lua error with the castbar when a cast was interrupted while the unit died.
+* Fixed a Lua error with the castbar when a cast was interrupted while the unit died (again).
 * Updated included libraries threat library to LibThreatClassic2 (v2.07) (Issue #24).
 
 ------------------------------------------------------

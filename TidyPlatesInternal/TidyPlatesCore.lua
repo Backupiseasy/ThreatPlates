@@ -1135,7 +1135,7 @@ do
 
     local plate = GetNamePlateForUnit(unitid)
 
-    if plate and plate.TPFrame.Active then
+    if plate and plate.TPFrame.Active and interrupterName then
       if plate.TPFrame.style.castbar.show then
         UpdateReferences(plate)
 
