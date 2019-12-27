@@ -113,7 +113,7 @@ end
 --	if not command or command == "" then
 --		TidyPlatesThreat:OpenOptions()
 --	elseif command == "test" then
---		LibStub:GetLibrary("ThreatClassic-1.0"):PLAYER_ALIVE()
+--		LibStub:GetLibrary("LibThreatClassic2"):PLAYER_ALIVE()
 --		print ("Dine")
 --	end
 --end
