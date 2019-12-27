@@ -224,7 +224,7 @@ function f:COMBAT_LOG_EVENT_UNFILTERED(event)
 
             CastStop(dstGUID, nil, "INTERRUPTED", srcName, srcGUID)
     elseif eventType == "UNIT_DIED" then
-            CastStop(dstGUID, nil, "INTERRUPTED", srcName, srcGUID)
+            CastStop(dstGUID, nil, "INTERRUPTED") -- no srcName, srcGUID as there is no interrupt or stun that ends the cast
 
     elseif  eventType == "SPELL_AURA_APPLIED" or
             eventType == "SPELL_AURA_REFRESH" or
