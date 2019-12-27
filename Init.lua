@@ -23,7 +23,7 @@ ThreatPlates.L = LibStub("AceLocale-3.0"):GetLocale("TidyPlatesThreat")
 ThreatPlates.Media = LibStub("LibSharedMedia-3.0")
 Addon.LibCustomGlow = LibStub("LibCustomGlow-1.0")
 Addon.LibAceConfigDialog = LibStub("AceConfigDialog-3.0")
-Addon.LibThreatClassic = LibStub:GetLibrary("ThreatClassic-1.0")
+Addon.LibThreatClassic = LibStub:GetLibrary("LibThreatClassic2")
 Addon.LibClassicCasterino = LibStub("LibClassicCasterino-ThreatPlates")
 --Addon.LibClassicCasterino = LibStub("LibClassicCasterino")
 
