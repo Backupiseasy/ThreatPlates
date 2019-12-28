@@ -1,4 +1,9 @@
 ------------------------------------------------------
+1.2.9
+------------------------------------------------------
+* Updated included library LibClassicCasterino (rev. 29) and optimized its integration into Threat Plates.
+
+------------------------------------------------------
 1.2.8
 ------------------------------------------------------
 * Fixed a Lua error with the castbar when a cast was interrupted while the unit died (again).

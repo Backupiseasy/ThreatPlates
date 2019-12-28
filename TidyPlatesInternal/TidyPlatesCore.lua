@@ -1135,39 +1135,43 @@ do
 
     local plate = GetNamePlateForUnit(unitid)
 
-    if plate and plate.TPFrame.Active and interrupterName then
-      if plate.TPFrame.style.castbar.show then
-        UpdateReferences(plate)
+    if plate and plate.TPFrame.Active then
+      if interrupterName then
+        if plate.TPFrame.style.castbar.show then
+          UpdateReferences(plate)
 
-        interrupterName = gsub(interrupterName, "%-[^|]+", "") -- UnitName(sourceName) only works in groups
-        local _, class_id = GetPlayerInfoByGUID(interrupterGUID)
-        if class_id then
-          --local color_str = (RAID_CLASS_COLORS[classId] and RAID_CLASS_COLORS[classId].colorStr) or ""
-          interrupterName = "|c" .. RAID_CLASS_COLORS[class_id].colorStr .. interrupterName .. "|r"
+          interrupterName = gsub(interrupterName, "%-[^|]+", "") -- UnitName(sourceName) only works in groups
+          local _, class_id = GetPlayerInfoByGUID(interrupterGUID)
+          if class_id then
+            --local color_str = (RAID_CLASS_COLORS[classId] and RAID_CLASS_COLORS[classId].colorStr) or ""
+            interrupterName = "|c" .. RAID_CLASS_COLORS[class_id].colorStr .. interrupterName .. "|r"
+          end
+          visual.spelltext:SetText(INTERRUPTED .. " [" .. interrupterName .. "]")
+
+          local castbar = visual.castbar
+          local _, max_val = castbar:GetMinMaxValues()
+          castbar:SetValue(max_val)
+          castbar.Spark:Hide()
+
+          local color = TidyPlatesThreat.db.profile.castbarColorInterrupted
+          castbar:SetStatusBarColor(color.r, color.g, color.b, color.a)
+          castbar.FlashTime = CASTBAR_INTERRUPT_HOLD_TIME
+
+          -- Code from OnStopCasting
+          castbar.IsCasting = false
+          castbar.IsChanneling = false
+          unit.isCasting = false
+          UpdateIndicator_CustomScale(extended, unit)
+          UpdatePlate_Transparency(extended, unit)
+
+          unit.IsInterrupted = true
+
+          -- OnStopCasting is hiding the castbar and may be triggered before or after SPELL_INTERRUPT
+          -- So we have to show the castbar again or not hide it if the interrupt message should still be shown.
+          castbar:Show()
         end
-        visual.spelltext:SetText(INTERRUPTED .. " [" .. interrupterName .. "]")
-
-        local castbar = visual.castbar
-        local _, max_val = castbar:GetMinMaxValues()
-        castbar:SetValue(max_val)
-        castbar.Spark:Hide()
-
-        local color = TidyPlatesThreat.db.profile.castbarColorInterrupted
-        castbar:SetStatusBarColor(color.r, color.g, color.b, color.a)
-        castbar.FlashTime = CASTBAR_INTERRUPT_HOLD_TIME
-
-        -- Code from OnStopCasting
-        castbar.IsCasting = false
-        castbar.IsChanneling = false
-        unit.isCasting = false
-        UpdateIndicator_CustomScale(extended, unit)
-        UpdatePlate_Transparency(extended, unit)
-
-        unit.IsInterrupted = true
-
-        -- OnStopCasting is hiding the castbar and may be triggered before or after SPELL_INTERRUPT
-        -- So we have to show the castbar again or not hide it if the interrupt message should still be shown.
-        castbar:Show()
+      else
+        OnStopCasting(plate)
       end
     end
   end
