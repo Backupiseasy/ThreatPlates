@@ -1,6 +1,8 @@
 ------------------------------------------------------
 1.2.9
 ------------------------------------------------------
+* Set default for showing crowd control auras of enemy units to All (instead of Blizzard) as Blizzard's default nameplates don't shown any auras in Classic.
+* Updated crowd control auras for Auras widget for Classic [Comment TP#4120].
 * Updated included library LibClassicCasterino (rev. 29) and optimized its integration into Threat Plates.
 
 ------------------------------------------------------

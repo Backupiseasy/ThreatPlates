@@ -97,7 +97,8 @@ local PC_ROOT = 51          -- Mechanic: Rooted
 local PC_DAZE = 52
 local PC_GRIP = 53
 local PC_DISARM = 54        -- Apply Aura: Disarm
-local PC_DPUSHBACK = 55     -- Apply Aura: Disarm
+local PC_PUSHBACK = 55      -- Apply Aura: Disarm
+local PC_MODAGGRORANGE = 56 -- Apply Aura: Mod Aggro Range
 
 local CC_SILENCE = 101
 
@@ -338,6 +339,200 @@ Widget.CROWD_CONTROL_SPELLS = {
   [20549] = LOC_STUN,       -- War Stomp (Tauren)
   [260369] = PC_SNARE,      -- Arcane Pulse (Nightborne)
   [107079] = LOC_STUN,      -- Quaking Palm (Pandarian)
+
+  ---------------------------------------------------------------------------------------------------
+  -- Druid
+  ---------------------------------------------------------------------------------------------------
+
+  [5211] = LOC_STUN,                       -- Bash
+    [6798] = LOC_STUN,                       -- Rank 2
+    [8983] = LOC_STUN,                       -- Rank 3
+  [339] = PC_ROOT,                         -- Entangling Roots
+    [1062] = PC_ROOT,                        -- Rank 2
+    [5195] = PC_ROOT,                        -- Rank 3
+    [5196] = PC_ROOT,                        -- Rank 4
+    [9852] = PC_ROOT,                        -- Rank 5
+    [9853] = PC_ROOT,                        -- Rank 6
+  [19975] = PC_ROOT,                       -- Entangling Roots - Triggered By: Nature's Grasp
+    [19974] = PC_ROOT,                       -- Rank 2
+    [19973] = PC_ROOT,                       -- Rank 3
+    [19972] = PC_ROOT,                       -- Rank 4
+    [19971] = PC_ROOT,                       -- Rank 5
+    [19970] = PC_ROOT,                       -- Rank 6
+  [19675] = PC_ROOT,                       -- Feral Charge Effect - Triggered By: Feral Charge
+  [2637] = LOC_SLEEP,                      -- Hibernate
+    [18657] = LOC_SLEEP,                     -- Rank 2
+    [18658] = LOC_SLEEP,                     -- Rank 3
+  [9005] = LOC_STUN,                       -- Pounce
+    [9823] = LOC_STUN,                       -- Rank 2
+    [9827] = LOC_STUN,                       -- Rank 3
+  [2908] = PC_MODAGGRORANGE,               -- Soothe Animal
+    [8955] = PC_MODAGGRORANGE,               -- Rank 2
+    [9901] = PC_MODAGGRORANGE,               -- Rank 3
+  [16922] = LOC_STUN,                      -- Starfire Stun - Triggered By: Improved Starfire
+
+
+  ---------------------------------------------------------------------------------------------------
+  -- Hunter
+  ---------------------------------------------------------------------------------------------------
+
+  [25999] = PC_ROOT,                       -- Boar Charge - Triggered By: Charge
+  [7922] = LOC_STUN,                       -- Charge Stun - Triggered By: Charge
+  [5116] = PC_SNARE,                       -- Concussive Shot
+  [19306] = PC_ROOT,                       -- Counterattack
+    [20909] = PC_ROOT,                       -- Rank 2
+    [20910] = PC_ROOT,                       -- Rank 3
+  [19185] = PC_ROOT,                       -- Entrapment - Triggered By: Entrapment
+  [19410] = LOC_STUN,                      -- Improved Concussive Shot - Triggered By: Improved Concussive Shot
+  [19229] = PC_ROOT,                       -- Improved Wing Clip - Triggered By: Improved Wing Clip
+  [24394] = LOC_STUN,                      -- Intimidation - Triggered By: Intimidation
+  [1513] = LOC_FEAR,                       -- Scare Beast
+    [14326] = LOC_FEAR,                      -- Rank 2
+    [14327] = LOC_FEAR,                      -- Rank 3
+  [19503] = LOC_DISORIENT,                 -- Scatter Shot
+  [2974] = PC_SNARE,                       -- Wing Clip
+    [14267] = PC_SNARE,                      -- Rank 2
+    [14268] = PC_SNARE,                      -- Rank 3
+  [19386] = LOC_SLEEP,                     -- Wyvern Sting
+    [24132] = LOC_SLEEP,                     -- Rank 2
+    [24133] = LOC_SLEEP,                     -- Rank 3
+
+
+  ---------------------------------------------------------------------------------------------------
+  -- Mage
+  ---------------------------------------------------------------------------------------------------
+
+  [6136] = PC_SNARE,                       -- Chilled - Triggered By: Frost Armor
+  [7321] = PC_SNARE,                       -- Chilled - Triggered By: Ice Armor
+  [120] = PC_SNARE,                        -- Cone of Cold
+    [8492] = PC_SNARE,                       -- Rank 2
+    [10159] = PC_SNARE,                      -- Rank 3
+    [10160] = PC_SNARE,                      -- Rank 4
+    [10161] = PC_SNARE,                      -- Rank 5
+  [2139] = LOC_SLEEP,                      -- Counterspell
+  [18469] = LOC_SLEEP,                     -- Counterspell - Silenced - Triggered By: Improved Counterspell
+  [122] = PC_ROOT,                         -- Frost Nova
+    [865] = PC_ROOT,                         -- Rank 2
+    [6131] = PC_ROOT,                        -- Rank 3
+    [10230] = PC_ROOT,                       -- Rank 4
+  [11071] = PC_ROOT,                       -- Frostbite
+    [12496] = PC_ROOT,                       -- Rank 2
+    [12497] = PC_ROOT,                       -- Rank 3
+  [12355] = LOC_STUN,                      -- Impact - Triggered By: Impact
+  [28272] = LOC_POLYMORPH,                 -- Polymorph
+  [118] = LOC_POLYMORPH,                   -- Polymorph
+    [12824] = LOC_POLYMORPH,                 -- Rank 2
+    [12825] = LOC_POLYMORPH,                 -- Rank 3
+    [12826] = LOC_POLYMORPH,                 -- Rank 4
+  [28270] = LOC_POLYMORPH,                 -- Polymorph: Cow
+
+
+  ---------------------------------------------------------------------------------------------------
+  -- Paladin
+  ---------------------------------------------------------------------------------------------------
+
+  [853] = LOC_STUN,                        -- Hammer of Justice
+    [5588] = LOC_STUN,                       -- Rank 2
+    [5589] = LOC_STUN,                       -- Rank 3
+    [10308] = LOC_STUN,                      -- Rank 4
+  [20066] = LOC_INCAPACITATE,              -- Repentance
+  [20170] = LOC_STUN,                      -- Stun - Triggered By: Seal of Justice
+
+
+  ---------------------------------------------------------------------------------------------------
+  -- Priest
+  ---------------------------------------------------------------------------------------------------
+
+  [15269] = LOC_STUN,                      -- Blackout - Triggered By: Blackout
+  [605] = LOC_CHARM,                       -- Mind Control
+    [10911] = LOC_CHARM,                     -- Rank 2
+    [10912] = LOC_CHARM,                     -- Rank 3
+  [453] = PC_MODAGGRORANGE,                -- Mind Soothe
+    [8192] = PC_MODAGGRORANGE,               -- Rank 2
+    [10953] = PC_MODAGGRORANGE,              -- Rank 3
+  [8122] = LOC_FEAR,                       -- Psychic Scream
+    [8124] = LOC_FEAR,                       -- Rank 2
+    [10888] = LOC_FEAR,                      -- Rank 3
+    [10890] = LOC_FEAR,                      -- Rank 4
+  [9484] = LOC_INCAPACITATE,               -- Shackle Undead
+    [9485] = LOC_INCAPACITATE,               -- Rank 2
+    [10955] = LOC_INCAPACITATE,              -- Rank 3
+  [15487] = LOC_SLEEP,                     -- Silence
+
+
+  ---------------------------------------------------------------------------------------------------
+  -- Rogue
+  ---------------------------------------------------------------------------------------------------
+
+  [2094] = LOC_DISORIENT,                  -- Blind
+  [1833] = LOC_STUN,                       -- Cheap Shot
+  [1725] = LOC_DISORIENT,                  -- Distract
+  [1776] = LOC_INCAPACITATE,               -- Gouge
+    [1777] = LOC_INCAPACITATE,               -- Rank 2
+    [8629] = LOC_INCAPACITATE,               -- Rank 3
+    [11285] = LOC_INCAPACITATE,              -- Rank 4
+    [11286] = LOC_INCAPACITATE,              -- Rank 5
+  [18425] = LOC_SLEEP,                     -- Kick - Silenced - Triggered By: Improved Kick
+  [408] = LOC_STUN,                        -- Kidney Shot
+    [8643] = LOC_STUN,                       -- Rank 2
+  [5530] = LOC_STUN,                       -- Mace Stun Effect - Triggered By: Mace Specialization
+  [14251] = PC_DISARM,                     -- Riposte
+  [6770] = LOC_INCAPACITATE,               -- Sap
+    [2070] = LOC_INCAPACITATE,               -- Rank 2
+    [11297] = LOC_INCAPACITATE,              -- Rank 3
+
+
+  ---------------------------------------------------------------------------------------------------
+  -- Shaman
+  ---------------------------------------------------------------------------------------------------
+
+  [8056] = PC_SNARE,                       -- Frost Shock
+    [8058] = PC_SNARE,                       -- Rank 2
+    [10472] = PC_SNARE,                      -- Rank 3
+    [10473] = PC_SNARE,                      -- Rank 4
+
+
+  ---------------------------------------------------------------------------------------------------
+  -- Warlock
+  ---------------------------------------------------------------------------------------------------
+
+  [18118] = PC_SNARE,                      -- Aftermath - Triggered By: Aftermath
+  [710] = LOC_BANISH,                      -- Banish
+    [18647] = LOC_BANISH,                    -- Rank 2
+  [18223] = PC_SNARE,                      -- Curse of Exhaustion
+  [6789] = LOC_FEAR,                       -- Death Coil
+    [17925] = LOC_FEAR,                      -- Rank 2
+    [17926] = LOC_FEAR,                      -- Rank 3
+  [1098] = LOC_CHARM,                      -- Enslave Demon
+    [11725] = LOC_CHARM,                     -- Rank 2
+    [11726] = LOC_CHARM,                     -- Rank 3
+  [5782] = LOC_FEAR,                       -- Fear
+    [6213] = LOC_FEAR,                       -- Rank 2
+    [6215] = LOC_FEAR,                       -- Rank 3
+  [5484] = LOC_FEAR,                       -- Howl of Terror
+    [17928] = LOC_FEAR,                      -- Rank 2
+  [1122] = LOC_STUN,                       -- Inferno
+  [6358] = LOC_CHARM,                      -- Seduction
+  [24259] = LOC_SLEEP,                     -- Spell Lock - Triggered By: Spell Lock
+
+
+  ---------------------------------------------------------------------------------------------------
+  -- Warrior
+  ---------------------------------------------------------------------------------------------------
+
+  [12809] = LOC_STUN,                      -- Concussion Blow
+  [676] = PC_DISARM,                       -- Disarm
+  [1715] = PC_SNARE,                       -- Hamstring
+    [7372] = PC_SNARE,                       -- Rank 2
+    [7373] = PC_SNARE,                       -- Rank 3
+  [23694] = PC_ROOT,                       -- Improved Hamstring - Triggered By: Improved Hamstring
+  [20253] = LOC_STUN,                      -- Intercept Stun - Triggered By: Intercept
+    [20614] = LOC_STUN,                      -- Rank 2
+    [20615] = LOC_STUN,                      -- Rank 3
+  [5246] = LOC_FEAR,                       -- Intimidating Shout
+  [20511] = LOC_FEAR,                      -- Intimidating Shout - Triggered By: Intimidating Shout
+  [12798] = LOC_STUN,                      -- Revenge Stun - Triggered By: Improved Revenge
+  [18498] = LOC_SLEEP,                     -- Shield Bash - Silenced - Triggered By: Improved Shield Bash
 }
 
 ---------------------------------------------------------------------------------------------------
@@ -598,6 +793,14 @@ function Widget:UpdateUnitAuras(frame, unit, enabled_auras, enabled_cc, SpellFil
     -- ShowPesonal: Debuffs  that are shown on Blizzards nameplate, no matter who casted them (and
     -- ShowAll: Debuffs
     if not aura.name then break end
+
+    if string.find(aura.name, "Solarplexus") or string.find(aura.name, "Ausweiden") then
+      print (aura.name, "-", aura.spellid)
+      print (GetSpellInfo(aura.name))
+      print ((enabled_cc and self.CROWD_CONTROL_SPELLS[aura.spellid]))
+      print ("ShowAll: ", aura.ShowAll)
+      print ("ShowPersonal: ", aura.ShowPersonal)
+    end
 
     --aura.unit = unitid
     aura.Index = i
