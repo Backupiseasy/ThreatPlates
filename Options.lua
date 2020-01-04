@@ -3113,7 +3113,7 @@ local function CreateAurasWidgetOptions()
                   SetValueWidget(info, val)
                 end,
                 arg = { "AuraWidget", "CrowdControl", "ShowBlizzardForEnemy" },
-                disabled = function() return not db.AuraWidget.CrowdControl.ShowEnemy end,
+                disabled = function() return (not db.AuraWidget.CrowdControl.ShowEnemy) or Addon.CLASSIC end,
               },
             },
           },
