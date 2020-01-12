@@ -136,13 +136,13 @@ Widget.CROWD_CONTROL_SPELLS = {
   -- Frost
   [108194] = LOC_STUN,            -- Asphyxiate (Unholy/Frost, Blizzard)
   [207167] = LOC_DISORIENT,       -- Blinding Sleet (Talent, Blizzard)
-  --[204085] = PC_ROOT,             -- Deathchill (Honor)
-  --[204206] = PC_SNARE,            -- Chilled from Chill Streasek (Honor)
-  --[233395] = PC_ROOT,             -- Frozen Center (Honor)
-  --[279303] = PC_SNARE,            -- Frost Breath from Frostwyrm's Fury (Talent)
+  [204085] = PC_ROOT,             -- Deathchill (Honor)
+  [204206] = PC_SNARE,            -- Chilled from Chill Streasek (Honor)
+  [233395] = PC_ROOT,             -- Frozen Center (Honor)
+  [279303] = PC_SNARE,            -- Frost Breath from Frostwyrm's Fury (Talent)
   --[211793] = PC_SNARE,            -- Remorseless Winter - not shown because uptime to high
   -- Unholy
-  --[200646] = PC_SNARE,            -- Unholy Mutation (Honor)
+  [200646] = PC_SNARE,            -- Unholy Mutation (Honor)
 
   -- Demon Hunter
   [217832] = LOC_INCAPACITATE,     -- Imprison (Blizzard)
