@@ -1,7 +1,9 @@
 ﻿------------------------------------------------------
 9.1.15
 ------------------------------------------------------
-* [Internal] Updated Social widget to use new Friend API (backport from Threat Plates Classic).
+* Updated Social widget to use new Friend API (backport from Threat Plates Classic).
+* Updated localizations for enES and esMX (thanks to Woopy).
+* Updated TOC version for Patch 8.3.
 
 ------------------------------------------------------
 9.1.14
