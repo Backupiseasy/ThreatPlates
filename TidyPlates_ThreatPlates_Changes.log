@@ -4,6 +4,7 @@
 * Set default for showing crowd control auras of enemy units to All (instead of Blizzard) as Blizzard's default nameplates don't shown any auras in Classic.
 * Updated crowd control auras for Auras widget for Classic [Comment TP#4120].
 * Updated included library LibClassicCasterino (rev. 29) and optimized its integration into Threat Plates.
+* Updated localizations for enES and esMX (thanks to Woopy).
 
 ------------------------------------------------------
 1.2.8
@@ -29,7 +30,6 @@
 * Fixed a bug with the configuration mode of clickable area to respect WoW's internal nameplate scaling (controlled by CVars).
 * Fixed a Lua error in Social widget because of a deprecated API usage [Issue #16, Comments TP#4053].
 * Updated included libraries LibClassicDurations (rev. 34), LibClassicCasterino (rev. 24).
-* Updated localizations for enES and esMX (thanks to Woopy).
 
 ﻿﻿------------------------------------------------------
 1.2.4
