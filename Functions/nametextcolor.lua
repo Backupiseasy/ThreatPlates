@@ -7,7 +7,6 @@ local ThreatPlates = Addon.ThreatPlates
 
 -- WoW APIs
 local UnitIsConnected = UnitIsConnected
-local RAID_CLASS_COLORS = RAID_CLASS_COLORS
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
@@ -84,7 +83,7 @@ function Addon:SetNameColor(unit)
         end
       end
 
-      color =  RAID_CLASS_COLORS[unit.class]
+      color = db.Colors.Classes[unit.class]
       return color.r, color.g, color.b
     end
 

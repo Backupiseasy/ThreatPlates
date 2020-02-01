@@ -2,6 +2,7 @@
 9.1.16
 ------------------------------------------------------
 * Fixed a bug where the castbar was shown on units that were not casting after a successful interrupt [Comment #4023, #4059, #4062, #4074, Issue #384, #393].
+* Added an option to change class colors (see General - Colors in the options) [Comment TPC#106, TPC#114, TPC#249, TPC#251, TPC#258, #4085].
 
 ------------------------------------------------------
 9.1.15

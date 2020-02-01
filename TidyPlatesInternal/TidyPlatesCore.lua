@@ -1137,11 +1137,11 @@ do
 
         local castbar = visual.castbar
         if castbar:IsShown() then
+          local db = TidyPlatesThreat.db.profile
           sourceName = gsub(sourceName, "%-[^|]+", "") -- UnitName(sourceName) only works in groups
           local _, class_id = GetPlayerInfoByGUID(sourceGUID)
           if class_id then
-            --local color_str = (RAID_CLASS_COLORS[classId] and RAID_CLASS_COLORS[classId].colorStr) or ""
-            sourceName = "|c" .. RAID_CLASS_COLORS[class_id].colorStr .. sourceName .. "|r"
+            sourceName = "|c" .. db.Colors.Classes[class_id].colorStr .. sourceName .. "|r"
           end
           visual.spelltext:SetText(INTERRUPTED .. " [" .. sourceName .. "]")
 
@@ -1149,7 +1149,7 @@ do
           castbar:SetValue(max_val)
           castbar.Spark:Hide()
 
-          local color = TidyPlatesThreat.db.profile.castbarColorInterrupted
+          local color = db.castbarColorInterrupted
           castbar:SetStatusBarColor(color.r, color.g, color.b, color.a)
           castbar.FlashTime = CASTBAR_INTERRUPT_HOLD_TIME
 

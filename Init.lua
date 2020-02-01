@@ -43,6 +43,12 @@ ThreatPlates.RGB = function(red, green, blue, alpha)
 	return color
 end
 
+ThreatPlates.RGB_WITH_HEX = function(red, green, blue, alpha)
+	local color = ThreatPlates.RGB(red, green, blue, alpha)
+	color.colorStr = CreateColor(color.r, color.g, color.b, color.a):GenerateHexColor()
+	return color
+end
+
 ThreatPlates.RGB_P = function(red, green, blue, alpha)
 	return { r = red, g = green, b = blue, a = alpha}
 end

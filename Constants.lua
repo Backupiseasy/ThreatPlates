@@ -9,8 +9,7 @@ local ThreatPlates = Addon.ThreatPlates
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
 local L = ThreatPlates.L
-local RGB = ThreatPlates.RGB
-local RGB_P = ThreatPlates.RGB_P
+local RGB, RGB_P, RGB_WITH_HEX = ThreatPlates.RGB, ThreatPlates.RGB_P, ThreatPlates.RGB_WITH_HEX
 local HEX2RGB = ThreatPlates.HEX2RGB
 
 ---------------------------------------------------------------------------------------------------
@@ -468,6 +467,22 @@ ThreatPlates.DEFAULT_SETTINGS = {
       TappedUnit = RGB(110, 110, 110, 1),	       -- grey
       DisconnectedUnit = RGB(128, 128, 128, 1),  -- dray, darker than tapped color
       UnfriendlyFaction = RGB(255, 153, 51, 1),  -- brown/orange for unfriendly, hostile, non-attackable units (unit reaction = 3)
+    },
+    Colors = {
+      Classes = {
+        DEATHKNIGHT = RGB_WITH_HEX(C_ClassColor.GetClassColor("DEATHKNIGHT"):GetRGBAsBytes()),
+        DEMONHUNTER = RGB_WITH_HEX(C_ClassColor.GetClassColor("DEMONHUNTER"):GetRGBAsBytes()),
+        DRUID = RGB_WITH_HEX(C_ClassColor.GetClassColor("DRUID"):GetRGBAsBytes()),
+        HUNTER = RGB_WITH_HEX(C_ClassColor.GetClassColor("HUNTER"):GetRGBAsBytes()),
+        MAGE = RGB_WITH_HEX(C_ClassColor.GetClassColor("MAGE"):GetRGBAsBytes()),
+        MONK = RGB_WITH_HEX(C_ClassColor.GetClassColor("MONK"):GetRGBAsBytes()),
+        PALADIN = RGB_WITH_HEX(C_ClassColor.GetClassColor("PALADIN"):GetRGBAsBytes()),
+        PRIEST = RGB_WITH_HEX(C_ClassColor.GetClassColor("PRIEST"):GetRGBAsBytes()),
+        ROGUE = RGB_WITH_HEX(C_ClassColor.GetClassColor("ROGUE"):GetRGBAsBytes()),
+        SHAMAN = RGB_WITH_HEX(C_ClassColor.GetClassColor("SHAMAN"):GetRGBAsBytes()),
+        WARLOCK = RGB_WITH_HEX(C_ClassColor.GetClassColor("WARLOCK"):GetRGBAsBytes()),
+        WARRIOR = RGB_WITH_HEX(C_ClassColor.GetClassColor("WARRIOR"):GetRGBAsBytes()),
+      }
     },
     text = {
       amount = false, -- old default: true,

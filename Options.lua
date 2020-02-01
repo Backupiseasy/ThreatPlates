@@ -24,6 +24,7 @@ local UnitsExists, UnitName = UnitsExists, UnitName
 
 -- ThreatPlates APIs
 local LibStub = LibStub
+local RGB_WITH_HEX = t.RGB_WITH_HEX
 local L = t.L
 
 local PATH_ART = t.Art
@@ -1069,64 +1070,6 @@ local function CreateRaidMarksOptions()
         },
       },
       Layout = GetLayoutEntryTheme(10, "raidicon", true),
-      Coloring = {
-        name = L["Colors"],
-        order = 20,
-        type = "group",
-        inline = true,
-        get = GetColor,
-        set = SetColor,
-        args = {
-          STAR = {
-            type = "color",
-            order = 30,
-            name = RAID_TARGET_1,
-            arg = { "settings", "raidicon", "hpMarked", "STAR" },
-          },
-          CIRCLE = {
-            type = "color",
-            order = 31,
-            name = RAID_TARGET_2,
-            arg = { "settings", "raidicon", "hpMarked", "CIRCLE" },
-          },
-          DIAMOND = {
-            type = "color",
-            order = 32,
-            name = RAID_TARGET_3,
-            arg = { "settings", "raidicon", "hpMarked", "DIAMOND" },
-          },
-          TRIANGLE = {
-            type = "color",
-            order = 33,
-            name = RAID_TARGET_4,
-            arg = { "settings", "raidicon", "hpMarked", "TRIANGLE" },
-          },
-          MOON = {
-            type = "color",
-            order = 34,
-            name = RAID_TARGET_5,
-            arg = { "settings", "raidicon", "hpMarked", "MOON" },
-          },
-          SQUARE = {
-            type = "color",
-            order = 35,
-            name = RAID_TARGET_6,
-            arg = { "settings", "raidicon", "hpMarked", "SQUARE" },
-          },
-          CROSS = {
-            type = "color",
-            order = 36,
-            name = RAID_TARGET_7,
-            arg = { "settings", "raidicon", "hpMarked", "CROSS" },
-          },
-          SKULL = {
-            type = "color",
-            order = 37,
-            name = RAID_TARGET_8,
-            arg = { "settings", "raidicon", "hpMarked", "SKULL" },
-          },
-        },
-      },
     },
   }
 
@@ -4038,6 +3981,155 @@ local function CreateBlizzardSettings()
   return entry
 end
 
+local function CreateColorsSettings()
+  local entry = {
+    name = L["Colors"],
+    order = 35,
+    type = "group",
+    get = GetColor,
+    set = SetColor,
+    args = {
+      ReactionColors = {
+        name = L["Reaction"],
+        order = 10,
+        type = "group",
+        inline = true,
+        args = {
+          FriendlyColorNPC = { name = L["Friendly NPCs"], order = 10, type = "color", arg = { "ColorByReaction", "FriendlyNPC", }, },
+          FriendlyColorPlayer = { name = L["Friendly Players"], order = 20, type = "color", arg = { "ColorByReaction", "FriendlyPlayer" }, },
+          EnemyColorNPC = { name = L["Hostile NPCs"], order = 30, type = "color", arg = { "ColorByReaction", "HostileNPC" }, },
+          EnemyColorPlayer = { name = L["Hostile Players"], order = 40, type = "color", arg = { "ColorByReaction", "HostilePlayer" }, },
+          UnfriendlyFactionCalor = { name = L["Unfriendly"], order = 50, type = "color", arg = { "ColorByReaction", "UnfriendlyFaction" }, },
+          NeutralColor = { name = L["Neutral"], order = 60, type = "color", arg = { "ColorByReaction", "NeutralUnit" }, },
+          Spacer1 = GetSpacerEntry(65),
+          TappedUnitColor = { name = L["Tapped"], order = 70, type = "color", arg = { "ColorByReaction", "TappedUnit" }, },
+          DisconnectedUnitColor = { name = L["Disconnected"], order = 80, type = "color", arg = { "ColorByReaction", "DisconnectedUnit" }, },
+          Spacer2 = GetSpacerEntry(85),
+          Reset = {
+            name = L["Reset to Defaults"],
+            type = "execute",
+            order = 90,
+            width = "full",
+            func = function()
+              for name, color in pairs(db.ColorByReaction) do
+                db.ColorByReaction[name] = t.CopyTable(t.DEFAULT_SETTINGS.profile.ColorByReaction[name])
+              end
+              Addon:ForceUpdate()
+            end,
+          },
+        },
+      },
+      ClassColors = {
+        name = L["Class"],
+        order = 20,
+        type = "group",
+        inline = true,
+        args = {
+          Spacer = GetSpacerEntry(50),
+          Reset = {
+            name = L["Reset to Defaults"],
+            type = "execute",
+            order = 60,
+            width = "full",
+            func = function()
+              for name, color in pairs(t.DEFAULT_SETTINGS.profile.Colors.Classes) do
+                db.Colors.Classes[name] = t.CopyTable(color)
+              end
+              Addon:ForceUpdate()
+            end,
+          },
+        },
+      },
+      TargetMarkerColors = {
+        name = L["Target Marker"],
+        order = 30,
+        type = "group",
+        inline = true,
+        args = {
+          STAR = {
+            type = "color",
+            order = 30,
+            name = RAID_TARGET_1,
+            arg = { "settings", "raidicon", "hpMarked", "STAR" },
+          },
+          CIRCLE = {
+            type = "color",
+            order = 31,
+            name = RAID_TARGET_2,
+            arg = { "settings", "raidicon", "hpMarked", "CIRCLE" },
+          },
+          DIAMOND = {
+            type = "color",
+            order = 32,
+            name = RAID_TARGET_3,
+            arg = { "settings", "raidicon", "hpMarked", "DIAMOND" },
+          },
+          TRIANGLE = {
+            type = "color",
+            order = 33,
+            name = RAID_TARGET_4,
+            arg = { "settings", "raidicon", "hpMarked", "TRIANGLE" },
+          },
+          MOON = {
+            type = "color",
+            order = 34,
+            name = RAID_TARGET_5,
+            arg = { "settings", "raidicon", "hpMarked", "MOON" },
+          },
+          SQUARE = {
+            type = "color",
+            order = 35,
+            name = RAID_TARGET_6,
+            arg = { "settings", "raidicon", "hpMarked", "SQUARE" },
+          },
+          CROSS = {
+            type = "color",
+            order = 36,
+            name = RAID_TARGET_7,
+            arg = { "settings", "raidicon", "hpMarked", "CROSS" },
+          },
+          SKULL = {
+            type = "color",
+            order = 37,
+            name = RAID_TARGET_8,
+            arg = { "settings", "raidicon", "hpMarked", "SKULL" },
+          },
+          Reset = {
+            name = L["Reset to Defaults"],
+            type = "execute",
+            order = 50,
+            width = "full",
+            func = function()
+              for name, color in pairs(t.DEFAULT_SETTINGS.profile.settings.raidicon.hpMarked) do
+                db.settings.raidicon.hpMarked[name] = t.CopyTable(color)
+              end
+              Addon:ForceUpdate()
+            end,
+          },
+        },
+      },
+    },
+  }
+
+  local i = 1
+  for class_name, color in pairs(t.DEFAULT_SETTINGS.profile.Colors.Classes) do
+    entry.args.ClassColors.args[class_name] = {
+      name = LOCALIZED_CLASS_NAMES_MALE[class_name],
+      type = "color",
+      order = 10 + i,
+      set = function(info, r, g, b)
+        db.Colors.Classes[class_name] = RGB_WITH_HEX(r * 255, g * 255, b * 255)
+        Addon:ForceUpdate()
+      end,
+      arg = { "Colors", "Classes", class_name },
+      hidden = function() return not C_ClassColor.GetClassColor(class_name) end
+    }
+    i = i + 1
+  end
+
+  return entry
+end
+
 local function CreateAutomationSettings()
   -- Small nameplates: in combat, out of instances, ...
   -- show names or show them automatically, complicated, lots of CVars
@@ -5361,74 +5453,6 @@ local function CreateOptionsTable()
                         NeutralColor = { name = L["Neutral Units"], order = 60, type = "color", arg = { "ColorByReaction", "NeutralUnit" }, },
                       },
                     },
-                    RaidMark = {
-                      name = L["Color by Target Mark"],
-                      order = 40,
-                      type = "group",
-                      inline = true,
-                      get = GetColor,
-                      set = SetColor,
-                      args = {
-                        EnableRaidMarks = {
-                          name = L["Additionally color the healthbar based on the target mark if the unit is marked."],
-                          order = 1,
-                          type = "toggle",
-                          width = "full",
-                          set = SetValue,
-                          get = GetValue,
-                          arg = { "settings", "raidicon", "hpColor" },
-                        },
-                        Header = { name = L["Colors"], type = "header", order = 20, },
-                        STAR = {
-                          type = "color",
-                          order = 30,
-                          name = RAID_TARGET_1,
-                          arg = { "settings", "raidicon", "hpMarked", "STAR" },
-                        },
-                        CIRCLE = {
-                          type = "color",
-                          order = 31,
-                          name = RAID_TARGET_2,
-                          arg = { "settings", "raidicon", "hpMarked", "CIRCLE" },
-                        },
-                        DIAMOND = {
-                          type = "color",
-                          order = 32,
-                          name = RAID_TARGET_3,
-                          arg = { "settings", "raidicon", "hpMarked", "DIAMOND" },
-                        },
-                        TRIANGLE = {
-                          type = "color",
-                          order = 33,
-                          name = RAID_TARGET_4,
-                          arg = { "settings", "raidicon", "hpMarked", "TRIANGLE" },
-                        },
-                        MOON = {
-                          type = "color",
-                          order = 34,
-                          name = RAID_TARGET_5,
-                          arg = { "settings", "raidicon", "hpMarked", "MOON" },
-                        },
-                        SQUARE = {
-                          type = "color",
-                          order = 35,
-                          name = RAID_TARGET_6,
-                          arg = { "settings", "raidicon", "hpMarked", "SQUARE" },
-                        },
-                        CROSS = {
-                          type = "color",
-                          order = 36,
-                          name = RAID_TARGET_7,
-                          arg = { "settings", "raidicon", "hpMarked", "CROSS" },
-                        },
-                        SKULL = {
-                          type = "color",
-                          order = 37,
-                          name = RAID_TARGET_8,
-                          arg = { "settings", "raidicon", "hpMarked", "SKULL" },
-                        },
-                      },
-                    },
                   },
                 },
                 ThreatColors = {
@@ -5638,6 +5662,7 @@ local function CreateOptionsTable()
               },
             },
             CastBarSettings = CreateCastbarOptions(),
+            Colors = CreateColorsSettings(),
             Transparency = {
               name = L["Transparency"],
               type = "group",
