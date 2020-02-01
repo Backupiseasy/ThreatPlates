@@ -6,6 +6,7 @@
 ------------------------------------------------------
 9.1.15
 ------------------------------------------------------
+* Fixed a bug with the healthbar of Blizzard default nameplate (when enabled, e.g., in instances for friendly units) when the healthbar size was changed and the sync with the clickable area of nameplates was enabled [Comment TPC#141].
 * Updated Social widget to use new Friend API (backport from Threat Plates Classic).
 * Updated localizations for enES and esMX (thanks to Woopy).
 * Updated TOC version for Patch 8.3.
