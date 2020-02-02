@@ -265,10 +265,30 @@ function Addon:SetBaseNamePlateSize()
     db.frame.height = height
   end
 
-  if not TidyPlatesThreat.db.profile.ShowFriendlyBlizzardNameplates then
+  -- Set to default values if Blizzard nameplates are enabled or in an instance (for friendly players)
+  local isInstance, instanceType = IsInInstance()
+  isInstance = isInstance and (instanceType == "party" or instanceType == "raid")
+
+  db = TidyPlatesThreat.db.profile
+  if db.ShowFriendlyBlizzardNameplates or isInstance then
+    if NamePlateDriverFrame:IsUsingLargerNamePlateStyle() then
+      C_NamePlate_SetNamePlateFriendlySize(154, 64)
+    else
+      C_NamePlate_SetNamePlateFriendlySize(110, 45)
+    end
+  else
     C_NamePlate_SetNamePlateFriendlySize(width, height)
   end
-  C_NamePlate_SetNamePlateEnemySize(width, height)
+
+  if db.ShowEnemyBlizzardNameplates then
+    if NamePlateDriverFrame:IsUsingLargerNamePlateStyle() then
+      C_NamePlate_SetNamePlateEnemySize(154, 64)
+    else
+      C_NamePlate_SetNamePlateEnemySize(110, 45)
+    end
+  else
+    C_NamePlate_SetNamePlateEnemySize(width, height)
+  end
 
   Addon:ConfigClickableArea(false)
 
@@ -310,6 +330,7 @@ function TidyPlatesThreat:OnInitialize()
 end
 
 local function SetCVarHook(name, value, c)
+  -- Used as detection for switching between small and large nameplates
   if name == "NamePlateVerticalScale" then
     local db = TidyPlatesThreat.db.profile.Automation
     local isInstance, instanceType = IsInInstance()
@@ -320,6 +341,8 @@ local function SetCVarHook(name, value, c)
     elseif db.SmallPlatesInInstances and isInstance then
       Addon.CVars:Set("nameplateGlobalScale", 0.4)
     end
+
+    Addon:SetBaseNamePlateSize()
   end
 end
 
@@ -457,6 +480,10 @@ function TidyPlatesThreat:PLAYER_ENTERING_WORLD()
     -- reset to previous setting
     Addon.CVars:RestoreFromProfile("nameplateGlobalScale")
   end
+
+  -- Adjust clickable area if we are in an instance. Otherwise the scaling of friendly nameplates' healthbars will
+  -- be bugged
+  Addon:SetBaseNamePlateSize()
 end
 
 --function TidyPlatesThreat:PLAYER_LEAVING_WORLD()
