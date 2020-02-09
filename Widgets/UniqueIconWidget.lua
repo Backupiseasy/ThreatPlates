@@ -9,6 +9,9 @@ local Widget = Addon.Widgets:NewWidget("UniqueIcon")
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
 
+-- Lua APIs
+local type = type
+
 -- WoW APIs
 local CreateFrame = CreateFrame
 
@@ -70,7 +73,14 @@ function Widget:OnUnitAdded(widget_frame, unit)
 
 	-- Updates based on settings
 	widget_frame:SetSize(db.scale, db.scale)
-	widget_frame.Icon:SetTexture(unique_setting.icon)
+
+  local icon_texture = unique_setting.icon
+
+  if type(icon_texture) == "string" and icon_texture:sub(-4) == ".blp" then
+	  widget_frame.Icon:SetTexture("Interface\\Icons\\" .. unique_setting.icon)
+  else
+    widget_frame.Icon:SetTexture(icon_texture)
+  end
 
 	widget_frame:Show()
 end

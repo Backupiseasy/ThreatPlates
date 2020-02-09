@@ -10,7 +10,7 @@ local pairs = pairs
 
 -- WoW APIs
 local InCombatLockdown = InCombatLockdown
-local UnitPlayerControlled = UnitPlayerControlled
+local UnitPlayerControlled, UnitIsUnit = UnitPlayerControlled, UnitIsUnit
 local UnitIsOtherPlayersPet = UnitIsOtherPlayersPet
 local UnitIsBattlePet = UnitIsBattlePet
 local UnitCanAttack = UnitCanAttack
@@ -99,7 +99,7 @@ local function GetUnitType(unit)
     unit_class = "Player"
   elseif unit.TotemSettings then
     unit_class = "Totem"
-  elseif UnitIsOtherPlayersPet(unit.unitid) then -- player pets are also considered guardians, so this check has priority
+  elseif UnitIsOtherPlayersPet(unit.unitid) or UnitIsUnit(unit.unitid, "pet") then -- player pets are also considered guardians, so this check has priority
     unit_class = "Pet"
   elseif UnitPlayerControlled(unit.unitid) then
     unit_class = "Guardian"

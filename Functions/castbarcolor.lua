@@ -14,7 +14,11 @@ function Addon:SetCastbarColor(unit)
 	local db = TidyPlatesThreat.db.profile
 
 	local c
-	if unit.spellIsShielded then
+	-- Because of this ordering, IsInterrupted must be set to false when a new cast is cast. Otherwise
+  -- the interrupt color may be shown for a cast
+	if unit.IsInterrupted then
+		c = db.castbarColorInterrupted
+	elseif unit.spellIsShielded then
 		c = db.castbarColorShield
 	else
 		c = db.castbarColor

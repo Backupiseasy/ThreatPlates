@@ -18,6 +18,7 @@ local IsInInstance = IsInInstance
 local GetCVar, IsAddOnLoaded = GetCVar, IsAddOnLoaded
 local GetNamePlates, GetNamePlateForUnit = C_NamePlate.GetNamePlates, C_NamePlate.GetNamePlateForUnit
 local C_NamePlate_SetNamePlateFriendlySize, C_NamePlate_SetNamePlateEnemySize, Lerp =  C_NamePlate.SetNamePlateFriendlySize, C_NamePlate.SetNamePlateEnemySize, Lerp
+local C_Timer_After = C_Timer.After
 local NamePlateDriverFrame = NamePlateDriverFrame
 local UnitClass, GetNumSpecializations, GetSpecializationInfo = UnitClass, GetNumSpecializations, GetSpecializationInfo
 
@@ -25,8 +26,13 @@ local UnitClass, GetNumSpecializations, GetSpecializationInfo = UnitClass, GetNu
 local TidyPlatesThreat = TidyPlatesThreat
 local LibStub = LibStub
 local L = ThreatPlates.L
+local LSM = ThreatPlates.Media
 local Meta = Addon.Meta
 
+---------------------------------------------------------------------------------------------------
+-- Local variables
+---------------------------------------------------------------------------------------------------
+local LSMUpdateTimer
 ---------------------------------------------------------------------------------------------------
 -- Global configs and funtions
 ---------------------------------------------------------------------------------------------------
@@ -174,10 +180,30 @@ function Addon:SetBaseNamePlateSize()
     db.frame.height = height
   end
 
-  if not TidyPlatesThreat.db.profile.ShowFriendlyBlizzardNameplates then
+  -- Set to default values if Blizzard nameplates are enabled or in an instance (for friendly players)
+  local isInstance, instanceType = IsInInstance()
+  isInstance = isInstance and (instanceType == "party" or instanceType == "raid")
+
+  db = TidyPlatesThreat.db.profile
+  if db.ShowFriendlyBlizzardNameplates or isInstance then
+    if NamePlateDriverFrame:IsUsingLargerNamePlateStyle() then
+      C_NamePlate_SetNamePlateFriendlySize(154, 64)
+    else
+      C_NamePlate_SetNamePlateFriendlySize(110, 45)
+    end
+  else
     C_NamePlate_SetNamePlateFriendlySize(width, height)
   end
-  C_NamePlate_SetNamePlateEnemySize(width, height)
+
+  if db.ShowEnemyBlizzardNameplates then
+    if NamePlateDriverFrame:IsUsingLargerNamePlateStyle() then
+      C_NamePlate_SetNamePlateEnemySize(154, 64)
+    else
+      C_NamePlate_SetNamePlateEnemySize(110, 45)
+    end
+  else
+    C_NamePlate_SetNamePlateEnemySize(width, height)
+  end
 
   Addon:ConfigClickableArea(false)
 
@@ -200,6 +226,9 @@ function TidyPlatesThreat:OnInitialize()
   local db = LibStub('AceDB-3.0'):New('ThreatPlatesDB', defaults, 'Default')
   self.db = db
 
+  -- Change defaults if deprecated custom nameplates are used (not yet migrated)
+  Addon.SetDefaultsForCustomNameplates()
+
   local RegisterCallback = db.RegisterCallback
   RegisterCallback(self, 'OnProfileChanged', 'ProfChange')
   RegisterCallback(self, 'OnProfileCopied', 'ProfChange')
@@ -216,6 +245,7 @@ function TidyPlatesThreat:OnInitialize()
 end
 
 local function SetCVarHook(name, value, c)
+  -- Used as detection for switching between small and large nameplates
   if name == "NamePlateVerticalScale" then
     local db = TidyPlatesThreat.db.profile.Automation
     local isInstance, instanceType = IsInInstance()
@@ -226,6 +256,8 @@ local function SetCVarHook(name, value, c)
     elseif db.SmallPlatesInInstances and isInstance then
       Addon.CVars:Set("nameplateGlobalScale", 0.4)
     end
+
+    Addon:SetBaseNamePlateSize()
   end
 end
 
@@ -240,6 +272,10 @@ function TidyPlatesThreat:OnEnable()
 
   TidyPlatesThreat:ReloadTheme()
 
+  -- Register callbacks at LSM, so that we can refresh everything if additional media is added after TP is loaded
+  -- Register this callback after ReloadTheme as media will be updated there anyway
+  LSM.RegisterCallback(self, "LibSharedMedia_SetGlobal", "MediaUpdate" )
+  LSM.RegisterCallback(self, "LibSharedMedia_Registered", "MediaUpdate" )
   -- Get updates for changes regarding: Large Nameplates
   hooksecurefunc("SetCVar", SetCVarHook)
 
@@ -252,6 +288,24 @@ function TidyPlatesThreat:OnDisable()
 
   -- Reset all CVars to its initial values
   -- Addon.CVars:RestoreAllFromProfile()
+end
+
+-- Register callbacks at LSM, so that we can refresh everything if additional media is added after TP is loaded
+function TidyPlatesThreat.MediaUpdate(addon_name, name, mediatype, key)
+  if mediatype ~= LSM.MediaType.SOUND and not LSMUpdateTimer then
+    LSMUpdateTimer = true
+
+    -- Delay the update for one second to avoid firering this several times when multiple media are registered by another addon
+    C_Timer_After(1, function()
+      LSMUpdateTimer = nil
+      -- Basically, ReloadTheme but without CVar and some other stuff
+      Addon:SetThemes(TidyPlatesThreat)
+      -- no media used: Addon:UpdateConfigurationStatusText()
+      -- no media used: Addon:InitializeCustomNameplates()
+      Addon.Widgets:InitializeAllWidgets()
+      Addon:ForceUpdate()
+    end)
+  end
 end
 
 -----------------------------------------------------------------------------------

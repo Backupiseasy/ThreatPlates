@@ -15,7 +15,6 @@ local UnitReaction, UnitCanAttack, UnitAffectingCombat = UnitReaction, UnitCanAt
 local UnitIsPlayer, UnitPlayerControlled = UnitIsPlayer, UnitPlayerControlled
 local UnitThreatSituation, UnitIsUnit, UnitExists, UnitGroupRolesAssigned = UnitThreatSituation, UnitIsUnit, UnitExists, UnitGroupRolesAssigned
 local IsInInstance = IsInInstance
-local RAID_CLASS_COLORS = RAID_CLASS_COLORS
 local GetNamePlates, GetNamePlateForUnit = C_NamePlate.GetNamePlates, C_NamePlate.GetNamePlateForUnit
 
 -- ThreatPlates APIs
@@ -251,7 +250,7 @@ local function GetColorByClass(unit, plate_style)
 
   if unit.type == "PLAYER" then
     if unit.reaction == "HOSTILE" then
-      color = RAID_CLASS_COLORS[unit.class]
+      color = SettingsBase.Colors.Classes[unit.class]
     elseif unit.reaction == "FRIENDLY" then
       local db_social = SettingsBase.socialWidget
       if db_social.ShowFriendColor and Addon:IsFriend(unit, plate_style) then
@@ -259,7 +258,7 @@ local function GetColorByClass(unit, plate_style)
       elseif db_social.ShowGuildmateColor and Addon:IsGuildmate(unit, plate_style) then
         color = db_social.GuildmateColor
       else
-        color = RAID_CLASS_COLORS[unit.class]
+        color = SettingsBase.Colors.Classes[unit.class]
       end
     end
   end

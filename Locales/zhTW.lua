@@ -168,12 +168,24 @@ This is your first time using Threat Plates and you are a(n):
 這是你第一次使用威力血條，你是：
 |r|cff]=]
 L["|cff89f559You are currently in your "] = "|cff89f559你目前是 "
+L[ [=[|cffFF0000DELETE CUSTOM NAMEPLATE|r
+Are you sure you want to delete the selected custom nameplate?]=] ] = "|cffFF0000刪除自訂血條Ir是否確定要刪除選擇的自訂血條?"
 L["|cffff0000DPS/Healing|r"] = "|cffff0000DPS/治療|r"
 L["|cffff0000dpsing / healing|r"] = "|cffff0000輸出 / 治療|r"
 L["|cffff0000High Threat|r"] = "|cffff0000高仇恨|r"
 L["|cffff0000IMPORTANT: Enabling this feature changes console variables (CVARs) which will change the appearance of default Blizzard nameplates. Disabling this feature will reset these CVARs to the original value they had when you enabled this feature.|r"] = "|cffff0000重要: 啟用這個功能會更改遊戲參數 (CVAR)，同時也會影響遊戲內建血條的外觀。停用這個功能時會將遊戲參數恢復成啟用前的原始數值。|r"
 L["|cffff0000IMPORTANT: Enabling this feature changes console variables (CVars) which will change the appearance of default Blizzard nameplates. Disabling this feature will reset these CVars to the original value they had when you enabled this feature.|r"] = "|cffff0000重要: 啟用這個功能會更改遊戲參數 (CVars)，同時也會影響遊戲內建血條的外觀。停用這個功能時會將遊戲參數恢復成啟用前的原始數值。|r"
 L["|cffff0000Low Threat|r"] = "|cffff0000低仇恨|r"
+L["|cffFF0000Migrate Custom Nameplates Settings|r"] = "|cffFF0000轉移自訂血條設定|r"
+L["|cffFF0000Migrate Custom Nameplates|r"] = "|cffFF0000轉移自訂血條|r"
+L[ [=[|cffFF0000MIGRATE CUSTOM NAMEPLATES|r
+Migration should only delete deprecated default custom nameplates and re-order the remaining ones. Nevertheless, it is highly advised to backup your settings (the SavedVariables file TidyPlates_ThreatPlates.lua) in case something goes wrong.
+
+Are you sure you want to migrate your custom nameplates?]=] ] = "|cffFF0000轉移自訂血條|r 轉移的過程應該只會刪除已被捨棄的預設自訂血條，然後重新排序剩餘的血條。不過，還是強烈建議你先自行備份設定檔 (在 SavedVariables 資料夾內的 TidyPlates_ThreatPlates.lua) 以便在發生問題時可供回復。是否確定要轉移你的自訂血條?"
+L[ [=[|cffFF0000NOTE|r
+Migration should only delete deprecated default custom nameplates and re-order the remaining ones. Nevertheless, it is highly advised to backup your settings (the SavedVariables file TidyPlates_ThreatPlates.lua) in case something goes wrong.
+
+Are you sure you want to migrate your custom nameplates?]=] ] = "|cffFF0000注意|r 轉移的過程應該只會刪除已被捨棄的預設自訂血條，然後重新排序剩餘的血條。不過，還是強烈建議你先自行備份設定檔 (在 SavedVariables 資料夾內的 TidyPlates_ThreatPlates.lua) 以便在發生問題時可供回復。是否確定要轉移你的自訂血條?"
 L["|cffffff00Medium Threat|r"] = "|cffffff00中仇恨|r"
 L["|cffffffffGeneral Settings|r"] = "|cffffffff一般設定|r"
 L["|cffffffffLow Threat|r"] = "|cffffffff低仇恨|r"
@@ -373,6 +385,7 @@ L["Define base scale settings for various unit types. Only one of these settings
 L["Define if threat feedback should be shown for various units based on their type or status."] = "設定是否要依據各種單位的類型和狀態來顯示仇恨值的提醒。"
 L["Defines the movement/collision model for nameplates."] = "血條的移動/排列方式。"
 L["Deformed Fanatic"] = "畸形的狂熱者"
+L["Delete"] = "刪除"
 L["Determine your role (tank/dps/healing) automatically based on current spec."] = "自動依據當前的專精決定角色類型 (坦克/傷害/治療)。"
 L["Disable"] = "停用"
 L["Disable Custom Alpha"] = "停用自訂透明度"
@@ -462,6 +475,7 @@ L["Enemy NPCs"] = "敵方 NPC"
 L["Enemy Players"] = "敵方玩家"
 L["Enemy Status Text"] = "敵方狀態文字"
 L["Enemy Units"] = "敵方單位"
+L["Enter an icons name (with the *.blp ending), a spell ID or a full icon path (using '\\' to separate directory folders)."] = "輸入圖示名稱 ( 以 .blp 結尾的副檔名 )、法術 ID 或圖示的完整路徑 ( 使用 '\\' 來作為資料夾分隔符號)"
 L["Everything"] = "全部"
 L["Faction Icon"] = "陣營圖示"
 L["Fading"] = "淡出"
@@ -663,6 +677,7 @@ L["Neutral NPCs"] = "中立 NPC"
 L["Neutral Units"] = "中立單位"
 L["Neutral Units & Minions"] = "中立單位 & 僕從"
 L["Neutral Units & Minions & Status"] = "中立單位 & 小怪 & 狀態"
+L["New"] = "新增"
 L["No"] = "否"
 L["No Outline, Monochrome"] = "沒有外框、單色"
 L["No Target"] = "沒有目標"
@@ -1137,5 +1152,6 @@ L["X"] = "水平"
 L["Y"] = "垂直"
 L["Yes"] = "是"
 L["You can access the "] = "要使用 "
+L["You cannot delete General Settings, only custom nameplates entries."] = "無法刪除一般設定，只能刪除自訂血條。"
 L["You currently have two nameplate addons enabled: |cff89F559Threat Plates|r and |cff89F559%s|r. Please disable one of these, otherwise two overlapping nameplates will be shown for units."] = "目前啟用了兩個血條插件: |cff89F559威力血條 (Threat Plates)|r 和 |cff89F559%s|r。請停用其中一個血條插件，否則會重複出現兩個疊在一起的血條。"
 L["Your own quests that you have to complete."] = "自己的、必須由你來完成的任務。"

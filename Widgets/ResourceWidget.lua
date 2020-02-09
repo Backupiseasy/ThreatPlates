@@ -192,9 +192,12 @@ function Widget:Create()
 
     widget_frame.Text = widget_frame:CreateFontString(nil, "OVERLAY")
 
-    widget_frame.Bar = CreateFrame("StatusBar", nil, widget_frame)
-    widget_frame.Bar:SetFrameLevel(widget_frame:GetFrameLevel())
-    widget_frame.Bar:SetMinMaxValues(0, 100)
+    local bar = CreateFrame("StatusBar", nil, widget_frame)
+    bar:SetFrameLevel(widget_frame:GetFrameLevel())
+    bar:SetMinMaxValues(0, 100)
+    widget_frame.Bar = bar
+
+    widget_frame.Background = bar:CreateTexture(nil, "BACKGROUND")
 
     widget_frame.Border = CreateFrame("Frame", nil, widget_frame.Bar)
     widget_frame.Border:SetFrameLevel(widget_frame:GetFrameLevel())
@@ -264,26 +267,24 @@ function Widget:OnTargetUnitAdded(tp_frame, unit)
   widget_frame:ClearAllPoints()
   widget_frame:SetPoint("CENTER", widget_frame:GetParent(), db.x, db.y)
 
-  local bar = widget_frame.Bar
   if db.ShowBar then
-    bar:SetStatusBarColor(self.BarColorRed, self.BarColorGreen, self.BarColorBlue, 1)
+    widget_frame.Bar:SetStatusBarColor(self.BarColorRed, self.BarColorGreen, self.BarColorBlue, 1)
 
-    local border = widget_frame.Border
     if db.BackgroundUseForegroundColor then
-      border:SetBackdropColor(self.BarColorRed, self.BarColorGreen, self.BarColorBlue, 0.3)
+      widget_frame.Background:SetVertexColor(self.BarColorRed, self.BarColorGreen, self.BarColorBlue, 0.3)
     else
       local color = db.BackgroundColor
-      border:SetBackdropColor(color.r, color.g, color.b, color.a)
+      widget_frame.Background:SetVertexColor(color.r, color.g, color.b, color.a)
     end
 
     if db.BorderUseForegroundColor then
-      border:SetBackdropBorderColor(self.BarColorRed, self.BarColorGreen, self.BarColorBlue, 1)
+      widget_frame.Border:SetBackdropBorderColor(self.BarColorRed, self.BarColorGreen, self.BarColorBlue, 1)
     elseif db.BorderUseBackgroundColor then
       local color = db.BackgroundColor
-      border:SetBackdropBorderColor(color.r, color.g, color.b, color.a)
+      widget_frame.Border:SetBackdropBorderColor(color.r, color.g, color.b, color.a)
     else
       local color = db.BorderColor
-      border:SetBackdropBorderColor(color.r, color.g, color.b, color.a)
+      widget_frame.Border:SetBackdropBorderColor(color.r, color.g, color.b, color.a)
     end
   end
 
@@ -306,15 +307,20 @@ function Widget:UpdateLayout()
 
   local bar = widget_frame.Bar
   if db.ShowBar then
+    local bar_texture = ThreatPlates.Media:Fetch('statusbar', db.BarTexture)
+
     bar:SetAllPoints()
-    bar:SetStatusBarTexture(ThreatPlates.Media:Fetch('statusbar', db.BarTexture))
+    bar:SetStatusBarTexture(bar_texture)
+
+    local background = widget_frame.Background
+    background:SetTexture(bar_texture)
+    background:SetPoint("TOPLEFT", bar:GetStatusBarTexture(), "TOPRIGHT")
+    background:SetPoint("BOTTOMRIGHT", bar, "BOTTOMRIGHT")
 
     local border = widget_frame.Border
-    local bar_texture = ThreatPlates.Media:Fetch('statusbar', db.BarTexture)
-    local border_texture = ThreatPlates.Media:Fetch('border', db.BorderTexture)
     border:SetBackdrop({
-      bgFile = bar_texture,
-      edgeFile = border_texture,
+      --bgFile = bar_texture,
+      edgeFile = ThreatPlates.Media:Fetch('border', db.BorderTexture),
       edgeSize = db.BorderEdgeSize,
       insets = { left = 0, right = 0, top = 0, bottom = 0 }
     })

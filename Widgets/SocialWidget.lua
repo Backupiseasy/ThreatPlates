@@ -26,11 +26,12 @@ local Widget = Addon.Widgets:NewWidget("Social")
 -- WoW APIs
 local CreateFrame = CreateFrame
 local GetNumGuildMembers, GetGuildRosterInfo = GetNumGuildMembers, GetGuildRosterInfo
-local GetNumFriends, GetFriendInfo, ShowFriends = GetNumFriends, GetFriendInfo, ShowFriends
 local BNGetNumFriends, BNGetFriendInfo, BNGetToonInfo, BNGetFriendInfoByID = BNGetNumFriends, BNGetFriendInfo, BNGetToonInfo, BNGetFriendInfoByID
 local BNet_GetValidatedCharacterName = BNet_GetValidatedCharacterName
 local UnitName, GetRealmName, UnitFactionGroup = UnitName, GetRealmName, UnitFactionGroup
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
+local C_FriendList_ShowFriends, C_FriendList_GetNumOnlineFriends = C_FriendList.ShowFriends, C_FriendList.GetNumOnlineFriends
+local C_FriendList_GetFriendInfo = C_FriendList.GetFriendInfo
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
@@ -64,7 +65,7 @@ function Widget:FRIENDLIST_UPDATE()
 
 
   -- First check if there was actually a change to the friend list (event fires for other reasons too)
-  local _, friendsOnline = GetNumFriends()
+  local friendsOnline = C_FriendList_GetNumOnlineFriends()
 
   if ListFriendsSize ~= friendsOnline then
     -- Only wipe the friend list if a member went offline
@@ -74,7 +75,7 @@ function Widget:FRIENDLIST_UPDATE()
 
     local no_friends = 0
     for i = 1, friendsOnline do
-      local name, _ = GetFriendInfo(i)
+      local name, _ = C_FriendList_GetFriendInfo(i)
       if name then
         ListFriends[name] = ICON_FRIEND
         no_friends = no_friends + 1
@@ -240,7 +241,7 @@ function Widget:OnEnable()
   --Widget:SubscribeEvent("BN_FRIEND_LIST_SIZE_CHANGED", EventHandler)
 
   --self:FRIENDLIST_UPDATE()
-  ShowFriends() -- Will fire FRIENDLIST_UPDATE
+    C_FriendList_ShowFriends() -- Will fire FRIENDLIST_UPDATE
   self:BN_CONNECTED()
   --self:GUILD_ROSTER_UPDATE() -- called automatically by game
 end
