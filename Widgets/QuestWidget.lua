@@ -45,6 +45,47 @@ local QuestUnitsToUpdate = {}
 
 local IsQuestUnit -- Function
 
+-- Since patch 8.3, quest tooltips have a different format depending on the localization, it seems
+-- at least for kill quests
+local PARSER_QUEST_OBJECTIVE_BACKUP = function(text)
+  local current, goal, objective_name = string.match(text,"^(%d+)/(%d+)( .*)$")
+
+  if not objective_name then
+    objective_name, current, goal = string.match(text,"^(.*): (%d+)/(%d+)$")
+  end
+
+  return objective_name, current, goal
+end
+
+--local PARSER_QUEST_OBJECTIVE_LEFT = function(text)
+--  local current, goal, objective_name = string.match(text,"^(%d+)/(%d+)( .*)$")
+--  return objective_name, current, goal
+--end
+--
+--local PARSER_QUEST_OBJECTIVE_RIGHT = function(text)
+--  return string.match(text,"^(.*): (%d+)/(%d+)$")
+--end
+--
+--local STANDARD_QUEST_TARGET_PARSER = {
+--  -- Objective name: x/y
+--  deDE = PARSER_QUEST_OBJECTIVE_RIGHT,
+--  frFR = PARSER_QUEST_OBJECTIVE_RIGHT,
+--  ruRU = PARSER_QUEST_OBJECTIVE_RIGHT,
+--  itIT = PARSER_QUEST_OBJECTIVE_RIGHT,
+--  ptBR = PARSER_QUEST_OBJECTIVE_RIGHT,
+--
+--  -- x/y Objective name
+--  enUS = PARSER_QUEST_OBJECTIVE_LEFT,
+--  enGB = PARSER_QUEST_OBJECTIVE_LEFT,
+--  esES = PARSER_QUEST_OBJECTIVE_LEFT,
+--  esMX = PARSER_QUEST_OBJECTIVE_LEFT,
+--  koKR = PARSER_QUEST_OBJECTIVE_LEFT,
+--  zhTW = PARSER_QUEST_OBJECTIVE_LEFT,
+--  zhCN = PARSER_QUEST_OBJECTIVE_LEFT,
+--}
+--
+--local QuestTargetParser = STANDARD_QUEST_TARGET_PARSER[GetLocale()] or PARSER_QUEST_OBJECTIVE_BACKUP
+
 ---------------------------------------------------------------------------------------------------
 -- Update Hook to compensate for deleyed quest information update on unit tooltips
 ---------------------------------------------------------------------------------------------------
@@ -108,11 +149,12 @@ function IsQuestUnit(unit, create_watcher)
       if string.find(text, "%%") then
         objective_name, current, goal = string.match(text, "^(.*) %((%d+)%%%)$")
         objective_type = "area"
-        -- print (unit_name, "=> ", "Area: |" .. text .. "|",  string.match(text, "^(.*) %((%d+)%%%)$"))
+        --print (unit_name, "=> ", "Area: |" .. text .. "|",  string.match(text, "^(.*) %((%d+)%%%)$"))
       else
         -- Standard x/y /pe quest
-        objective_name, current, goal = string.match(text, "^(.*: )(%d+)/(%d+)$")
-        -- print (unit_name, "=> ", "Standard: |" .. text .. "|", string.match(text, "^(.*): (%d+)/(%d+)$"))
+        objective_name, current, goal = PARSER_QUEST_OBJECTIVE_BACKUP(text)
+        -- objective_name, current, goal = QuestTargetParser(text)
+        -- print (unit_name, "=> ", "Standard: |" .. text .. "|", objective_name, current, goal, "|")
       end
 
       if objective_name then
@@ -506,42 +548,42 @@ function Widget:UpdateFrame(widget_frame, unit)
   end
 end
 
---local function tablelength(T)
---  local count = 0
---  for _ in pairs(T) do count = count + 1 end
---  return count
---end
---
---function Addon:PrintQuests()
---  print ("Quests List:", tablelength(QuestIDs))
---  for quest_id, title in pairs(QuestIDs) do
---    local quest = QuestList[title]
---    if quest.objectives and tablelength(quest.objectives) > 0 then
---      print ("*", title .. " [ID:" .. tostring(quest_id) .. "]")
---      for name, val in pairs (quest.objectives) do
---        print ("  -", name ..":", val.current, "/", val.goal, "[" .. val.type .. "]")
---      end
---    end
---  end
---
---  -- Only plates of units that are quest units are stored in QuestUnitsToUpdate
---  for index, unitid in ipairs(QuestUnitsToUpdate) do
---    QuestUnitsToUpdate[index] = nil
---
---    local plate = GetNamePlateForUnit(unitid)
---    if plate and plate.TPFrame.Active then
---      local widget_frame = plate.TPFrame.widgets.Quest
---      self:UpdateFrame(widget_frame, plate.TPFrame.unit)
---    end
---
---    print ("Updating Quest Unit", unitid)
---  end
---
---  print ("QuestUnitsToUpdate:", tablelength(QuestUnitsToUpdate))
---
---  print ("Waiting for quest log updates for the following quests:")
---  for questID, title in pairs(QuestsToUpdate) do
---    local questIndex = GetQuestLogIndexByID(questID)
---    print ("  Quest:", title .. " [" .. tostring(questIndex) .. "]")
---  end
---end
+local function tablelength(T)
+  local count = 0
+  for _ in pairs(T) do count = count + 1 end
+  return count
+end
+
+function Addon:PrintQuests()
+  print ("Quests List:", tablelength(QuestIDs))
+  for quest_id, title in pairs(QuestIDs) do
+    local quest = QuestList[title]
+    if quest.objectives and tablelength(quest.objectives) > 0 then
+      print ("*", title .. " [ID:" .. tostring(quest_id) .. "]")
+      for name, val in pairs (quest.objectives) do
+        print ("  - |", name .."| :", val.current, "/", val.goal, "[" .. val.type .. "]")
+      end
+    end
+  end
+
+  -- Only plates of units that are quest units are stored in QuestUnitsToUpdate
+  for index, unitid in ipairs(QuestUnitsToUpdate) do
+    QuestUnitsToUpdate[index] = nil
+
+    local plate = GetNamePlateForUnit(unitid)
+    if plate and plate.TPFrame.Active then
+      local widget_frame = plate.TPFrame.widgets.Quest
+      self:UpdateFrame(widget_frame, plate.TPFrame.unit)
+    end
+
+    print ("Updating Quest Unit", unitid)
+  end
+
+  print ("QuestUnitsToUpdate:", tablelength(QuestUnitsToUpdate))
+
+  print ("Waiting for quest log updates for the following quests:")
+  for questID, title in pairs(QuestsToUpdate) do
+    local questIndex = GetQuestLogIndexByID(questID)
+    print ("  Quest:", title .. " [" .. tostring(questIndex) .. "]")
+  end
+end

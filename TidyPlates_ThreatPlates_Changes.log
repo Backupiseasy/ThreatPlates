@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+9.1.17
+------------------------------------------------------
+* Basic fix for quest objectives in tooltips having different formats because of localization.
+
+------------------------------------------------------
 9.1.16
 ------------------------------------------------------
 * Added an option to change class colors (see General - Colors in the options) [Comment TPC#106, TPC#114, TPC#249, TPC#251, TPC#258, #4085].

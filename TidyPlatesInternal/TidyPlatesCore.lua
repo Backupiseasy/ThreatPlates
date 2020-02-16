@@ -13,7 +13,7 @@ local select, pairs, tostring  = select, pairs, tostring 			    -- Local functio
 
 -- WoW APIs
 local wipe = wipe
-local WorldFrame, UIParent, CreateFrame, UNKNOWNOBJECT, INTERRUPTED = WorldFrame, UIParent, CreateFrame, UNKNOWNOBJECT, INTERRUPTED
+local WorldFrame, UIParent, CreateFrame, INTERRUPTED = WorldFrame, UIParent, CreateFrame, INTERRUPTED
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local UnitName, UnitIsUnit, UnitReaction, UnitExists = UnitName, UnitIsUnit, UnitReaction, UnitExists
 local UnitClassification = UnitClassification
