@@ -5,6 +5,7 @@
 * Added options to custom nameplate creation, e.g., to sort them or to change their order.
 * Fixed a bug where the castbar was shown on units that were not casting after a successful interrupt [Comment #4023, #4059, #4062, #4074, Issue #384, #393].
 * Fixed a bug with the healthbar of Blizzard default nameplate (when enabled, e.g., in instances for friendly units) when the healthbar size was changed and the sync with the clickable area of nameplates was enabled [Comment TPC#141].
+* Fixed the Quest widget which was not working since patch 8.2.5 as the format for quest information in tooltips was changed [Issue #375, #394, Comment #3971, #3976, #4005, #4014, #4015, #4033, #4052, #4090, #4114, #4142, #4168, E-Mails].
 
 ------------------------------------------------------
 9.1.15
