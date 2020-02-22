@@ -5,11 +5,9 @@
 * Added options to custom nameplate creation, e.g., to sort them or to change their order.
 * Set default for showing crowd control auras of enemy units to All (instead of Blizzard) as Blizzard's default nameplates don't shown any auras in Classic.
 * Updated crowd control auras for Auras widget for Classic [Comment TP#4120].
-* Updated included library LibClassicCasterino (rev. 29) and optimized its integration into Threat Plates.
 * Updated localizations for enES and esMX (thanks to Woopy).
+* Updated included library LibClassicCasterino (rev. 29) and optimized its integration into Threat Plates.
 * Upgrade integrated libraries (LibCustomGlow v1.0.3).
-
-* Fixed a bug with the healthbar of Blizzard default nameplate (when enabled, e.g., in instances for friendly units) when the healthbar size was changed and the sync with the clickable area of nameplates was enabled [Comment TPC#141].
 
 ------------------------------------------------------
 1.2.8
