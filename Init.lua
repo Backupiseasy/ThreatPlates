@@ -13,6 +13,7 @@ local ThreatPlates = Addon.ThreatPlates
 -- WoW APIs
 local UnitHealth, UnitHealthMax = UnitHealth, UnitHealthMax
 local UnitPlayerControlled = UnitPlayerControlled
+local RAID_CLASS_COLORS = RAID_CLASS_COLORS
 
 ---------------------------------------------------------------------------------------------------
 -- Libraries
@@ -53,6 +54,12 @@ end
 ThreatPlates.RGB = function(red, green, blue, alpha)
 	local color = { r = red/255, g = green/255, b = blue/255 }
 	if alpha then color.a = alpha end
+	return color
+end
+
+ThreatPlates.RGB_WITH_HEX = function(red, green, blue, alpha)
+	local color = ThreatPlates.RGB(red, green, blue, alpha)
+	color.colorStr = CreateColor(color.r, color.g, color.b, color.a):GenerateHexColor()
 	return color
 end
 

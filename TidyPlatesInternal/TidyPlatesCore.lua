@@ -37,7 +37,6 @@ local Widgets = Addon.Widgets
 local Animations = Addon.Animations
 local LibThreatClassic = Addon.LibThreatClassic
 local LibClassicCasterino = Addon.LibClassicCasterino
---local RMH_GetCreatureIDFromKey = RealMobHealth.GetCreatureIDFromKey
 
 -- Constants
 -- Raid Icon Reference
@@ -324,7 +323,9 @@ do
     Addon:UpdateUnitIdentity(unit, unitid)
 
     unit.name, _ = UnitName(unitid)
+    unit.isCasting = false
     unit.IsInterrupted = false
+    visual.castbar.FlashTime = 0  -- Set FlashTime to 0 so that the castbar is actually hidden (see statusbar OnHide hook function OnHideCastbar)
 
     extended.stylename = ""
 
@@ -754,7 +755,8 @@ do
     --if isTradeSkill then return end
 
     unit.isCasting = true
-    unit.spellIsShielded = false -- Classic does not provide this information
+    unit.IsInterrupted = false
+    unit.spellIsShielded = notInterruptible
     unit.spellInterruptible = not unit.spellIsShielded
 
     visual.spelltext:SetText(name)
@@ -793,6 +795,8 @@ do
     elseif LibClassicCasterino:UnitChannelInfo(unitid) then
       OnStartCasting(plate, unitid, true)
     else
+      -- It would be better to check for IsInterrupted here and not hide it if that is true
+      -- Not currently sure though, if that might work with the Hide() calls in OnStartCasting
       visual.castbar:Hide()
     end
   end
@@ -1083,7 +1087,7 @@ do
 	end
 
 	function Addon.UNIT_SPELLCAST_START(event, unitid)
-    if UnitIsUnit("player", unitid) or unitid == "target" or not ShowCastBars then return end
+    if unitid == "target" or UnitIsUnit("player", unitid) or not ShowCastBars then return end
 
     local plate = GetNamePlateForUnit(unitid)
 		if plate and plate.TPFrame.Active then
@@ -1092,7 +1096,7 @@ do
 	end
 
   function Addon.UnitSpellcastMidway(event, unitid)
-    if UnitIsUnit("player", unitid) or unitid == "target" or not ShowCastBars then return end
+    if unitid == "target" or UnitIsUnit("player", unitid) or not ShowCastBars then return end
 
     local plate = GetNamePlateForUnit(unitid)
     if plate then
@@ -1101,7 +1105,7 @@ do
    end
 
   function Addon.UNIT_SPELLCAST_STOP(event, unitid)
-    if UnitIsUnit("player", unitid) or unitid == "target" or not ShowCastBars then return end
+    if unitid == "target" or UnitIsUnit("player", unitid) or not ShowCastBars then return end
 
     -- plate can be nil, e.g., if unitid = player, combat ends and the player resource bar is already hidden
     -- when the cast stops (because it's not shown out of combat)
@@ -1112,7 +1116,7 @@ do
   end
 
 	function Addon.UNIT_SPELLCAST_CHANNEL_START(event, unitid)
-    if UnitIsUnit("player", unitid) or unitid == "target" or not ShowCastBars then return end
+    if unitid == "target" or UnitIsUnit("player", unitid) or not ShowCastBars then return end
 
 		local plate = GetNamePlateForUnit(unitid)
 		if plate and plate.TPFrame.Active then
@@ -1122,7 +1126,7 @@ do
 	end
 
 	function Addon.UNIT_SPELLCAST_CHANNEL_STOP(event, unitid)
-    if UnitIsUnit("player", unitid) or unitid == "target" or not ShowCastBars then return end
+    if unitid == "target" or UnitIsUnit("player", unitid) or not ShowCastBars then return end
 
     local plate = GetNamePlateForUnit(unitid)
     if plate and plate.TPFrame.Active then
@@ -1130,30 +1134,31 @@ do
 		end
 	end
 
-  function Addon.UNIT_SPELLCAST_INTERRUPTED(event, unitid, castGUID, spellID, interrupterName, interrupterGUID)
-    if UnitIsUnit("player", unitid) or unitid == "target" or not ShowCastBars then return end
+  function Addon.UNIT_SPELLCAST_INTERRUPTED(event, unitid, castGUID, spellID, sourceName, interrupterGUID)
+    if unitid == "target" or UnitIsUnit("player", unitid) or not ShowCastBars then return end
 
     local plate = GetNamePlateForUnit(unitid)
 
     if plate and plate.TPFrame.Active then
-      if interrupterName then
-        if plate.TPFrame.style.castbar.show then
-          UpdateReferences(plate)
+      if sourceName then
+        UpdateReferences(plate)
 
-          interrupterName = gsub(interrupterName, "%-[^|]+", "") -- UnitName(sourceName) only works in groups
+        local castbar = visual.castbar
+        if castbar:IsShown() then
+          local db = TidyPlatesThreat.db.profile
+
+          sourceName = gsub(sourceName, "%-[^|]+", "") -- UnitName(sourceName) only works in groups
           local _, class_id = GetPlayerInfoByGUID(interrupterGUID)
           if class_id then
-            --local color_str = (RAID_CLASS_COLORS[classId] and RAID_CLASS_COLORS[classId].colorStr) or ""
-            interrupterName = "|c" .. RAID_CLASS_COLORS[class_id].colorStr .. interrupterName .. "|r"
+            sourceName = "|c" .. db.Colors.Classes[class_id].colorStr .. sourceName .. "|r"
           end
-          visual.spelltext:SetText(INTERRUPTED .. " [" .. interrupterName .. "]")
+          visual.spelltext:SetText(INTERRUPTED .. " [" .. sourceName .. "]")
 
-          local castbar = visual.castbar
           local _, max_val = castbar:GetMinMaxValues()
           castbar:SetValue(max_val)
           castbar.Spark:Hide()
 
-          local color = TidyPlatesThreat.db.profile.castbarColorInterrupted
+          local color = db.castbarColorInterrupted
           castbar:SetStatusBarColor(color.r, color.g, color.b, color.a)
           castbar.FlashTime = CASTBAR_INTERRUPT_HOLD_TIME
 
@@ -1164,10 +1169,11 @@ do
           UpdateIndicator_CustomScale(extended, unit)
           UpdatePlate_Transparency(extended, unit)
 
+          -- I am assuming that OnStopCasting is called always when a cast is interrupted from
+          -- _STOP events
           unit.IsInterrupted = true
 
-          -- OnStopCasting is hiding the castbar and may be triggered before or after SPELL_INTERRUPT
-          -- So we have to show the castbar again or not hide it if the interrupt message should still be shown.
+          -- Should not be necessary any longer ... as OnStopCasting is not hiding the castbar anymore
           castbar:Show()
         end
       else
@@ -1249,8 +1255,11 @@ do
 --	CoreEvents.UNIT_SPELLCAST_CHANNEL_UPDATE = UnitSpellcastMidway
 	--CoreEvents.UNIT_SPELLCAST_INTERRUPTIBLE = UnitSpellcastMidway
 	--CoreEvents.UNIT_SPELLCAST_NOT_INTERRUPTIBLE = UnitSpellcastMidway
+  -- UNIT_SPELLCAST_SUCCEEDED
   -- UNIT_SPELLCAST_FAILED
-  -- UNIT_SPELLCAST_INTERRUPTED
+  -- UNIT_SPELLCAST_FAILED_QUIET
+  -- UNIT_SPELLCAST_INTERRUPTED - handled by COMBAT_LOG_EVENT_UNFILTERED / SPELL_INTERRUPT as it's the only way to find out the interruptorom
+  -- UNIT_SPELLCAST_SENT
 
 	CoreEvents.UNIT_LEVEL = UnitConditionChanged
 	--CoreEvents.UNIT_THREAT_SITUATION_UPDATE = UnitConditionChanged -- did not work anyway (no unitid)

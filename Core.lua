@@ -251,40 +251,38 @@ end
 ---------------------------------------------------------------------------------------------------
 -- Copied from ElvUI:
 function Addon:SetBaseNamePlateSize()
-  local profile = TidyPlatesThreat.db.profile
+  local db = TidyPlatesThreat.db.profile.settings
 
+  local width = db.frame.width
+  local height = db.frame.height
+  if db.frame.SyncWithHealthbar then
+    -- this wont taint like NamePlateDriverFrame.SetBaseNamePlateSize
+    local zeroBasedScale = tonumber(GetCVar("NamePlateVerticalScale")) - 1.0
+    local horizontalScale = tonumber(GetCVar("NamePlateHorizontalScale"))
+
+    width = (db.healthbar.width - 10) * horizontalScale
+    height = (db.healthbar.height + 35) * Lerp(1.0, 1.25, zeroBasedScale)
+
+    db.frame.width = width
+    db.frame.height = height
+  end
+
+  -- Set to default values if Blizzard nameplates are enabled or in an instance (for friendly players)
   local isInstance, instanceType = IsInInstance()
   isInstance = isInstance and (instanceType == "party" or instanceType == "raid")
 
+  db = TidyPlatesThreat.db.profile
   -- Classic has the same nameplate size for friendly and enemy units, so either set both or non at all (= set it to default values)
-  if not profile.ShowFriendlyBlizzardNameplates and not profile.ShowEnemyBlizzardNameplates and not isInstance then
-    local db = TidyPlatesThreat.db.profile.settings
-
-    local width = db.frame.width
-    local height = db.frame.height
-    if db.frame.SyncWithHealthbar then
-      -- this wont taint like NamePlateDriverFrame.SetBaseNamePlateSize
-      local zeroBasedScale = tonumber(GetCVar("NamePlateVerticalScale")) - 1.0
-      local horizontalScale = tonumber(GetCVar("NamePlateHorizontalScale"))
-
-      width = (db.healthbar.width - 10) * horizontalScale
-      height = (db.healthbar.height + 35) * Lerp(1.0, 1.25, zeroBasedScale)
-
-      db.frame.width = width
-      db.frame.height = height
-    end
-
-    C_NamePlate_SetNamePlateFriendlySize(width, height)
-    C_NamePlate_SetNamePlateEnemySize(width, height)
-
-    Addon:ConfigClickableArea(false)
-
-    --local clampedZeroBasedScale = Saturate(zeroBasedScale)
-    --C_NamePlate_SetNamePlateSelfSize(baseWidth * horizontalScale * Lerp(1.1, 1.0, clampedZeroBasedScale), baseHeight)
-  else
+  if not db.ShowFriendlyBlizzardNameplates and not db.ShowEnemyBlizzardNameplates and not isInstance then
+    -- Smaller nameplates are not available in Classic
     C_NamePlate_SetNamePlateFriendlySize(128, 32)
     C_NamePlate_SetNamePlateEnemySize(128, 32)
+  else
+    C_NamePlate_SetNamePlateFriendlySize(width, height)
+    C_NamePlate_SetNamePlateEnemySize(width, height)
   end
+
+  Addon:ConfigClickableArea(false)
 end
 
 -- The OnInitialize() method of your addon object is called by AceAddon when the addon is first loaded
@@ -334,12 +332,6 @@ function TidyPlatesThreat:OnInitialize()
   LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_CHANNEL_START", Addon.UNIT_SPELLCAST_CHANNEL_START)
   LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_CHANNEL_UPDATE", Addon.UnitSpellcastMidway) -- only for player
   LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_CHANNEL_STOP", Addon.UNIT_SPELLCAST_CHANNEL_STOP)
-
-  -- Add support for Real Mob Health
-  if IsAddOnLoaded("RealMobHealth") then
-    Addon.GetUnitHealth = RealMobHealth.GetUnitHealth
-    --RealMobHealth.RegisterAddOnEvent("HEALTH_UPDATE", Addon.RMH_HEALTH_UPDATE)
-  end
 end
 
 local function SetCVarHook(name, value, c)

@@ -8,9 +8,12 @@ local ThreatPlates = Addon.ThreatPlates
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
+
+-- WoW APIs
+local RAID_CLASS_COLORS = RAID_CLASS_COLORS
+
 local L = ThreatPlates.L
-local RGB = ThreatPlates.RGB
-local RGB_P = ThreatPlates.RGB_P
+local RGB, RGB_P, RGB_WITH_HEX = ThreatPlates.RGB, ThreatPlates.RGB_P, ThreatPlates.RGB_WITH_HEX
 local HEX2RGB = ThreatPlates.HEX2RGB
 
 ---------------------------------------------------------------------------------------------------
@@ -58,6 +61,17 @@ local MAP_FONT = {
 if MAP_FONT[locale] then
   Addon.DEFAULT_FONT = MAP_FONT[locale].DefaultFont
   Addon.DEFAULT_SMALL_FONT = MAP_FONT[locale].DefaultSmallFont
+end
+
+local function GetDefaultColorsForClasses()
+  local class_colors = {}
+
+  for i, class_name in ipairs(CLASS_SORT_ORDER) do
+    -- RAID_CLASS_COLORS[class_name] is not null even in Classic for unknown classes like MONK
+    class_colors[class_name] = ThreatPlates.RGB_WITH_HEX(RAID_CLASS_COLORS[class_name]:GetRGBAsBytes())
+  end
+
+  return class_colors
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -452,6 +466,9 @@ ThreatPlates.DEFAULT_SETTINGS = {
       TappedUnit = RGB(110, 110, 110, 1),	       -- grey
       DisconnectedUnit = RGB(128, 128, 128, 1),  -- dray, darker than tapped color
       UnfriendlyFaction = RGB(255, 153, 51, 1),  -- brown/orange for unfriendly, hostile, non-attackable units (unit reaction = 3)
+    },
+    Colors = {
+      Classes = GetDefaultColorsForClasses()
     },
     text = {
       amount = false, -- old default: true,

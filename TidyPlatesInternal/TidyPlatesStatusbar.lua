@@ -64,8 +64,8 @@ local function OnUpdateCastBar(self, elapsed)
 end
 
 local function OnHideCastBar(self)
-  -- OnStopCasting is hiding the castbar and may be triggered before or after SPELL_INTERRUPT
-  -- So we have to show the castbar again or not hide it if the interrupt message should still be shown.
+  -- OnUpdateCastMidway is hiding the castbar if the unit is no longer casting
+  -- So we have to show the castbar again
   if self.FlashTime > 0 then
     self:Show()
   end

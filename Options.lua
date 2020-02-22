@@ -16,7 +16,7 @@ local select = select
 local type = type
 
 -- WoW APIs
-local CLASS_SORT_ORDER = CLASS_SORT_ORDER
+local CLASS_SORT_ORDER, LOCALIZED_CLASS_NAMES_MALE = CLASS_SORT_ORDER, LOCALIZED_CLASS_NAMES_MALE
 local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
 local SetCVar, GetCVar, GetCVarBool = SetCVar, GetCVar, GetCVarBool
 local GetSpellInfo = GetSpellInfo
@@ -24,6 +24,7 @@ local UnitsExists, UnitName = UnitsExists, UnitName
 
 -- ThreatPlates APIs
 local LibStub = LibStub
+local RGB_WITH_HEX = t.RGB_WITH_HEX
 local L = t.L
 
 local PATH_ART = t.Art
@@ -126,7 +127,8 @@ local AURA_STYLE = {
 -- local reference to current profile
 local db
 -- table for storing the options dialog
-local options = nil
+local options
+local clipboard
 
 -- Functions
 
@@ -1069,64 +1071,6 @@ local function CreateRaidMarksOptions()
         },
       },
       Layout = GetLayoutEntryTheme(10, "raidicon", true),
-      Coloring = {
-        name = L["Colors"],
-        order = 20,
-        type = "group",
-        inline = true,
-        get = GetColor,
-        set = SetColor,
-        args = {
-          STAR = {
-            type = "color",
-            order = 30,
-            name = RAID_TARGET_1,
-            arg = { "settings", "raidicon", "hpMarked", "STAR" },
-          },
-          CIRCLE = {
-            type = "color",
-            order = 31,
-            name = RAID_TARGET_2,
-            arg = { "settings", "raidicon", "hpMarked", "CIRCLE" },
-          },
-          DIAMOND = {
-            type = "color",
-            order = 32,
-            name = RAID_TARGET_3,
-            arg = { "settings", "raidicon", "hpMarked", "DIAMOND" },
-          },
-          TRIANGLE = {
-            type = "color",
-            order = 33,
-            name = RAID_TARGET_4,
-            arg = { "settings", "raidicon", "hpMarked", "TRIANGLE" },
-          },
-          MOON = {
-            type = "color",
-            order = 34,
-            name = RAID_TARGET_5,
-            arg = { "settings", "raidicon", "hpMarked", "MOON" },
-          },
-          SQUARE = {
-            type = "color",
-            order = 35,
-            name = RAID_TARGET_6,
-            arg = { "settings", "raidicon", "hpMarked", "SQUARE" },
-          },
-          CROSS = {
-            type = "color",
-            order = 36,
-            name = RAID_TARGET_7,
-            arg = { "settings", "raidicon", "hpMarked", "CROSS" },
-          },
-          SKULL = {
-            type = "color",
-            order = 37,
-            name = RAID_TARGET_8,
-            arg = { "settings", "raidicon", "hpMarked", "SKULL" },
-          },
-        },
-      },
     },
   }
 
@@ -4056,6 +4000,157 @@ local function CreateBlizzardSettings()
   return entry
 end
 
+local function CreateColorsSettings()
+  local entry = {
+    name = L["Colors"],
+    order = 35,
+    type = "group",
+    get = GetColor,
+    set = SetColor,
+    args = {
+      ReactionColors = {
+        name = L["Reaction"],
+        order = 10,
+        type = "group",
+        inline = true,
+        args = {
+          FriendlyColorNPC = { name = L["Friendly NPCs"], order = 10, type = "color", arg = { "ColorByReaction", "FriendlyNPC", }, },
+          FriendlyColorPlayer = { name = L["Friendly Players"], order = 20, type = "color", arg = { "ColorByReaction", "FriendlyPlayer" }, },
+          EnemyColorNPC = { name = L["Hostile NPCs"], order = 30, type = "color", arg = { "ColorByReaction", "HostileNPC" }, },
+          EnemyColorPlayer = { name = L["Hostile Players"], order = 40, type = "color", arg = { "ColorByReaction", "HostilePlayer" }, },
+          UnfriendlyFactionCalor = { name = L["Unfriendly"], order = 50, type = "color", arg = { "ColorByReaction", "UnfriendlyFaction" }, },
+          NeutralColor = { name = L["Neutral"], order = 60, type = "color", arg = { "ColorByReaction", "NeutralUnit" }, },
+          Spacer1 = GetSpacerEntry(65),
+          TappedUnitColor = { name = L["Tapped"], order = 70, type = "color", arg = { "ColorByReaction", "TappedUnit" }, },
+          DisconnectedUnitColor = { name = L["Disconnected"], order = 80, type = "color", arg = { "ColorByReaction", "DisconnectedUnit" }, },
+          Spacer2 = GetSpacerEntry(85),
+          Reset = {
+            name = L["Reset to Defaults"],
+            type = "execute",
+            order = 90,
+            width = "full",
+            func = function()
+              for name, color in pairs(db.ColorByReaction) do
+                db.ColorByReaction[name] = t.CopyTable(t.DEFAULT_SETTINGS.profile.ColorByReaction[name])
+              end
+              Addon:ForceUpdate()
+            end,
+          },
+        },
+      },
+      ClassColors = {
+        name = L["Class"],
+        order = 20,
+        type = "group",
+        inline = true,
+        args = {
+          Spacer = GetSpacerEntry(50),
+          Reset = {
+            name = L["Reset to Defaults"],
+            type = "execute",
+            order = 60,
+            width = "full",
+            func = function()
+              for name, color in pairs(t.DEFAULT_SETTINGS.profile.Colors.Classes) do
+                db.Colors.Classes[name] = t.CopyTable(color)
+              end
+              Addon:ForceUpdate()
+            end,
+          },
+        },
+      },
+      TargetMarkerColors = {
+        name = L["Target Marker"],
+        order = 30,
+        type = "group",
+        inline = true,
+        args = {
+          STAR = {
+            type = "color",
+            order = 30,
+            name = RAID_TARGET_1,
+            arg = { "settings", "raidicon", "hpMarked", "STAR" },
+          },
+          CIRCLE = {
+            type = "color",
+            order = 31,
+            name = RAID_TARGET_2,
+            arg = { "settings", "raidicon", "hpMarked", "CIRCLE" },
+          },
+          DIAMOND = {
+            type = "color",
+            order = 32,
+            name = RAID_TARGET_3,
+            arg = { "settings", "raidicon", "hpMarked", "DIAMOND" },
+          },
+          TRIANGLE = {
+            type = "color",
+            order = 33,
+            name = RAID_TARGET_4,
+            arg = { "settings", "raidicon", "hpMarked", "TRIANGLE" },
+          },
+          MOON = {
+            type = "color",
+            order = 34,
+            name = RAID_TARGET_5,
+            arg = { "settings", "raidicon", "hpMarked", "MOON" },
+          },
+          SQUARE = {
+            type = "color",
+            order = 35,
+            name = RAID_TARGET_6,
+            arg = { "settings", "raidicon", "hpMarked", "SQUARE" },
+          },
+          CROSS = {
+            type = "color",
+            order = 36,
+            name = RAID_TARGET_7,
+            arg = { "settings", "raidicon", "hpMarked", "CROSS" },
+          },
+          SKULL = {
+            type = "color",
+            order = 37,
+            name = RAID_TARGET_8,
+            arg = { "settings", "raidicon", "hpMarked", "SKULL" },
+          },
+          Reset = {
+            name = L["Reset to Defaults"],
+            type = "execute",
+            order = 50,
+            width = "full",
+            func = function()
+              for name, color in pairs(t.DEFAULT_SETTINGS.profile.settings.raidicon.hpMarked) do
+                db.settings.raidicon.hpMarked[name] = t.CopyTable(color)
+              end
+              Addon:ForceUpdate()
+            end,
+          },
+        },
+      },
+    },
+  }
+
+  local i = 1
+  for class_name, _ in pairs(t.DEFAULT_SETTINGS.profile.Colors.Classes) do
+    -- LOCALIZED_CLASS_NAMES_MALE is not defined for unknown classes (for Classic version)
+    if LOCALIZED_CLASS_NAMES_MALE[class_name] then
+      entry.args.ClassColors.args[class_name] = {
+        name = LOCALIZED_CLASS_NAMES_MALE[class_name],
+        type = "color",
+        order = 10 + i,
+        set = function(info, r, g, b)
+          db.Colors.Classes[class_name] = RGB_WITH_HEX(r * 255, g * 255, b * 255)
+          Addon:ForceUpdate()
+        end,
+        arg = { "Colors", "Classes", class_name },
+      }
+      i = i + 1
+    end
+  end
+
+  return entry
+end
+
 local function CreateAutomationSettings()
   -- Small nameplates: in combat, out of instances, ...
   -- show names or show them automatically, complicated, lots of CVars
@@ -4491,16 +4586,16 @@ local function CreateWidgetOptions()
     type = "group",
     order = 40,
     args = {
-      --ArenaWidget = CreateArenaWidgetOptions(),
+      ArenaWidget = CreateArenaWidgetOptions(),
       AurasWidget = CreateAurasWidgetOptions(),
       BossModsWidget = CreateBossModsWidgetOptions(),
       ClassIconWidget = CreateClassIconsWidgetOptions(),
       ComboPointsWidget = CreateComboPointsWidgetOptions(),
       ResourceWidget = CreateResourceWidgetOptions(),
       SocialWidget = CreateSocialWidgetOptions(),
-      --StealthWidget = CreateStealthWidgetOptions(),
+      StealthWidget = CreateStealthWidgetOptions(),
       TargetArtWidget = CreateTargetArtWidgetOptions(),
-      --QuestWidget = CreateQuestWidgetOptions(),
+      QuestWidget = CreateQuestWidgetOptions(),
       HealerTrackerWidget = CreateHealerTrackerWidgetOptions(),
     },
   }
@@ -4551,6 +4646,343 @@ local function CreateSpecRoles()
   return result
 end
 
+local function CreateCustomNameplateEntry(index)
+  local entry = {
+    name = "#" .. index .. ". " .. db.uniqueSettings[index].name,
+    type = "group",
+    order = 40 + index,
+    args = {
+      Header = {
+        name = db.uniqueSettings[index].name,
+        type = "header",
+        order = 0,
+      },
+      Name = {
+        name = L["Set Name"],
+        order = 1,
+        type = "group",
+        inline = true,
+        args = {
+          SetName = {
+            name = db.uniqueSettings[index].name,
+            type = "input",
+            order = 1,
+            width = "full",
+            set = function(info, val)
+              SetValue(info, val)
+              options.args.Custom.args["#" .. index].name = "#" .. index .. ". " .. val
+              options.args.Custom.args["#" .. index].args.Header.name = val
+              options.args.Custom.args["#" .. index].args.Name.args.SetName.name = val
+              UpdateSpecial()
+            end,
+            arg = { "uniqueSettings", index, "name" },
+          },
+          TargetButton = {
+            name = L["Use Target's Name"],
+            type = "execute",
+            order = 2,
+            width = "single",
+            func = function()
+              if UnitExists("target") then
+                local target = UnitName("target")
+                db.uniqueSettings[index].name = target
+                options.args.Custom.args["#" .. index].name = "#" .. index .. ". " .. target
+                options.args.Custom.args["#" .. index].args.Header.name = target
+                options.args.Custom.args["#" .. index].args.Name.args.SetName.name = target
+                UpdateSpecial()
+              else
+                t.Print(L["No target found."])
+              end
+            end,
+          },
+          Copy = {
+            name = L["Copy"],
+            order = 5,
+            type = "execute",
+            func = function()
+              clipboard = {}
+              clipboard = t.CopyTable(db.uniqueSettings[index])
+              t.Print(L["Copied!"])
+            end,
+          },
+          Paste = {
+            name = L["Paste"],
+            order = 6,
+            type = "execute",
+            func = function()
+              if type(clipboard) == "table" and clipboard.name then
+                db.uniqueSettings[index] = t.CopyTable(clipboard)
+                t.Print(L["Pasted!"])
+              else
+                t.Print(L["Nothing to paste!"])
+              end
+              options.args.Custom.args["#" .. index].name = "#" .. index .. ". " .. db.uniqueSettings[index].name
+              options.args.Custom.args["#" .. index].args.Header.name = db.uniqueSettings[index].name
+              options.args.Custom.args["#" .. index].args.Name.args.SetName.name = db.uniqueSettings[index].name
+              local spell_id = db.uniqueSettings[index].SpellID
+              if spell_id then
+                local _, _, icon = GetSpellInfo(spell_id)
+                options.args.Custom.args["#" .. index].args.Icon.args.Icon.image = icon
+              else
+                local icon_path = db.uniqueSettings[index].icon
+                if icon_path:sub(-4) == ".blp" then
+                  options.args.Custom.args["#" .. index].args.Icon.args.Icon.image = "Interface\\Icons\\" .. icon_path
+                else
+                  options.args.Custom.args["#" .. index].args.Icon.args.Icon.image = icon_path
+                end
+              end
+              UpdateSpecial()
+              clipboard = nil
+            end,
+          },
+        },
+      },
+      Enable = {
+        name = L["Nameplate Style"],
+        type = "group",
+        inline = true,
+        order = 10,
+        args = {
+          UseStyle = {
+            name = L["Enable"],
+            order = 1,
+            type = "toggle",
+            desc = L["This option allows you to control whether custom settings for nameplate style, color, transparency and scaling should be used for this nameplate."],
+            arg = { "uniqueSettings", index, "useStyle" },
+          },
+          HeadlineView = {
+            name = L["Healthbar View"],
+            order = 20,
+            type = "toggle",
+            disabled = function() return not db.uniqueSettings[index].useStyle end,
+            set = function(info, val) if val then db.uniqueSettings[index].ShowHeadlineView = false; SetValue(info, val) end end,
+            arg = { "uniqueSettings", index, "showNameplate" },
+          },
+          HealthbarView = {
+            name = L["Headline View"],
+            order = 30,
+            type = "toggle",
+            disabled = function() return not db.uniqueSettings[index].useStyle end,
+            set = function(info, val) if val then db.uniqueSettings[index].showNameplate = false; SetValue(info, val) end end,
+            arg = { "uniqueSettings", index, "ShowHeadlineView" },
+          },
+          HideNameplate = {
+            name = L["Hide Nameplate"],
+            order = 40,
+            type = "toggle",
+            desc = L["Disables nameplates (healthbar and name) for the units of this type and only shows an icon (if enabled)."],
+            disabled = function() return not db.uniqueSettings[index].useStyle end,
+            set = function(info, val)
+              if val then
+                db.uniqueSettings[index].showNameplate = false;
+                db.uniqueSettings[index].ShowHeadlineView = false;
+                Addon:ForceUpdate()
+              end
+            end,
+            get = function(info) return not(db.uniqueSettings[index].showNameplate or db.uniqueSettings[index].ShowHeadlineView) end,
+          },
+        },
+      },
+      Appearance = {
+        name = L["Appearance"],
+        type = "group",
+        order = 30,
+        inline = true,
+        disabled = function() return not db.uniqueSettings[index].useStyle end,
+        args = {
+          CustomColor = {
+            name = L["Custom Color"],
+            order = 1,
+            type = "toggle",
+            desc = L["Define a custom color for this nameplate and overwrite any other color settings."],
+            arg = { "uniqueSettings", index, "useColor" },
+          },
+          ColorSetting = {
+            name = L["Color"],
+            order = 2,
+            type = "color",
+            disabled = function() return not db.uniqueSettings[index].useStyle or not db.uniqueSettings[index].useColor end,
+            get = GetColor,
+            set = SetColor,
+            arg = { "uniqueSettings", index, "color" },
+          },
+          --            ColorThreatSystem = {
+          --              name = L["Use Threat Coloring"],
+          --              order = 3,
+          --              type = "toggle",
+          --              desc = L["In combat, use coloring based on threat level as configured in the threat system. The custom color is only used out of combat."],
+          --              disabled = function() return not db.uniqueSettings[k_c].useStyle or not db.uniqueSettings[k_c].useColor end,
+          --              arg = {"uniqueSettings", k_c, "UseThreatColor"},
+          --            },
+          UseRaidMarked = {
+            name = L["Color by Target Mark"],
+            order = 4,
+            type = "toggle",
+            desc = L["Additionally color the nameplate's healthbar or name based on the target mark if the unit is marked."],
+            disabled = function() return not db.uniqueSettings[index].useStyle or not db.uniqueSettings[index].useColor end,
+            arg = { "uniqueSettings", index, "allowMarked" },
+          },
+          Spacer1 = GetSpacerEntry(10),
+          CustomAlpha = {
+            name = L["Custom Transparency"],
+            order = 11,
+            type = "toggle",
+            desc = L["Define a custom transparency for this nameplate and overwrite any other transparency settings."],
+            set = function(info, val) SetValue(info, not val) end,
+            get = function(info) return not GetValue(info) end,
+            arg = { "uniqueSettings", index, "overrideAlpha" },
+          },
+          AlphaSetting = GetTransparencyEntryDefault(12, { "uniqueSettings", index, "alpha" }, function() return not db.uniqueSettings[index].useStyle or db.uniqueSettings[index].overrideAlpha end),
+          --            AlphaThreatSystem = {
+          --              name = L["Use Threat Alpha"],
+          --              order = 13,
+          --              type = "toggle",
+          --              desc = L["In combat, use alpha based on threat level as configured in the threat system. The custom alpha is only used out of combat."],
+          --              disabled = function() return not db.uniqueSettings[k_c].useStyle or db.uniqueSettings[k_c].overrideAlpha end,
+          --              arg = {"uniqueSettings", k_c, "UseThreatColor"},
+          --            },
+          Spacer2 = GetSpacerEntry(14),
+          CustomScale = {
+            name = L["Custom Scale"],
+            order = 21,
+            type = "toggle",
+            desc = L["Define a custom scaling for this nameplate and overwrite any other scaling settings."],
+            set = function(info, val) SetValue(info, not val) end,
+            get = function(info) return not GetValue(info) end,
+            arg = { "uniqueSettings", index, "overrideScale" },
+          },
+          ScaleSetting = GetScaleEntryDefault(22, { "uniqueSettings", index, "scale" }, function() return not db.uniqueSettings[index].useStyle or db.uniqueSettings[index].overrideScale end),
+          --            ScaleThreatSystem = {
+          --              name = L["Use Threat Scale"],
+          --              order = 23,
+          --              type = "toggle",
+          --              desc = L["In combat, use scaling based on threat level as configured in the threat system. The custom scale is only used out of combat."],
+          --              disabled = function() return not db.uniqueSettings[k_c].useStyle or db.uniqueSettings[k_c].overrideScale end,
+          --              arg = {"uniqueSettings", k_c, "UseThreatColor"},
+          --            },
+          --            Spacer3 = GetSpacerEntry(24),
+          Header = { type = "header", order = 24, name = "Threat Options", },
+          ThreatGlow = {
+            name = L["Threat Glow"],
+            order = 31,
+            type = "toggle",
+            desc = L["Shows a glow based on threat level around the nameplate's healthbar (in combat)."],
+            disabled = function() return not db.uniqueSettings[index].useStyle end,
+            arg = { "uniqueSettings", index, "UseThreatGlow"},
+          },
+          ThreatSystem = {
+            name = L["Enable Threat System"],
+            order = 32,
+            type = "toggle",
+            desc = L["In combat, use coloring, transparency, and scaling based on threat level as configured in the threat system. Custom settings are only used out of combat."],
+            disabled = function() return not db.uniqueSettings[index].useStyle end,
+            arg = { "uniqueSettings", index, "UseThreatColor"},
+          },
+        },
+      },
+      Icon = {
+        name = L["Icon"],
+        type = "group",
+        order = 40,
+        inline = true,
+        disabled = function() return not db.uniqueWidget.ON end,
+        args = {
+          Enable = {
+            name = L["Enable"],
+            type = "toggle",
+            order = 1,
+            desc = L["This option allows you to control whether the custom icon is hidden or shown on this nameplate."],
+            descStyle = "inline",
+            width = "full",
+            arg = { "uniqueSettings", index, "showIcon" }
+          },
+          Icon = {
+            name = L["Preview"],
+            type = "execute",
+            width = "full",
+            disabled = function() return not db.uniqueSettings[index].showIcon or not db.uniqueWidget.ON end,
+            order = 2,
+            image = function()
+              local spell_id = db.uniqueSettings[index].SpellID
+              if spell_id then
+                local _, _, icon = GetSpellInfo(spell_id)
+                return icon
+              else
+                local icon_path = db.uniqueSettings[index].icon
+                if icon_path:sub(-4) == ".blp" then
+                  return "Interface\\Icons\\" .. icon_path
+                else
+                  return icon_path
+                end
+              end
+            end,
+            imageWidth = 64,
+            imageHeight = 64,
+          },
+          Description = {
+            type = "description",
+            order = 3,
+            name = L["Enter an icons name (with the *.blp ending), a spell ID or a full icon path (using '\\' to separate directory folders)."],
+            width = "full",
+          },
+          SetIcon = {
+            name = L["Set Icon"],
+            type = "input",
+            order = 4,
+            disabled = function() return not db.uniqueSettings[index].showIcon or not db.uniqueWidget.ON end,
+            width = "full",
+            set = function(info, val)
+              local spell_id = tonumber(val)
+              if spell_id then -- no string, so val should be a spell ID
+                local _, _, icon = GetSpellInfo(spell_id)
+                if icon then
+                  db.uniqueSettings[index].SpellID = spell_id
+                  val = select(3, GetSpellInfo(spell_id))
+                else
+                  t.Print("Invalid spell ID for custom nameplate icon: " .. val, true)
+                  db.uniqueSettings[index].SpellID = nil
+                end
+              else
+                db.uniqueSettings[index].SpellID = nil
+              end
+              -- Either store the path to the icon or the icon ID
+              SetValue(info, val)
+              if val then
+                if val:sub(-4) == ".blp" then
+                  options.args.Custom.args["#" .. index].args.Icon.args.Icon.image = "Interface\\Icons\\" .. val
+                else
+                  options.args.Custom.args["#" .. index].args.Icon.args.Icon.image = val
+                end
+              else
+                options.args.Custom.args["#" .. index].args.Icon.args.Icon.image = "Interface\\Icons\\Temp"
+              end
+              UpdateSpecial()
+            end,
+            get = function(info)
+              local spell_id = db.uniqueSettings[index].SpellID
+              if spell_id then
+                return tostring(spell_id)
+              else
+                return GetValue(info)
+              end
+            end,
+            arg = { "uniqueSettings", index, "icon" },
+          },
+        },
+      },
+    },
+  }
+
+  return entry
+end
+
+local function UpdateCustomNameplateSlots(...)
+  local slots = {...}
+  for _, slot_no in pairs(slots) do
+    options.args.Custom.args["#" .. slot_no] = CreateCustomNameplateEntry(slot_no)
+  end
+end
+
 local function CreateCustomNameplatesGroup()
   local entry = {
     NewSlot = {
@@ -4558,10 +4990,15 @@ local function CreateCustomNameplatesGroup()
       order = 1,
       type = "execute",
       width = "half",
+      desc = L["Insert a new custom nameplate slot after the currently selected slot."],
       func = function(info)
-        local slot_no = #db.uniqueSettings + 1
-        local unique_unit = db.uniqueSettings[slot_no]
-        unique_unit.name = ""
+        local statustable = Addon.LibAceConfigDialog:GetStatusTable(t.ADDON_NAME, { "Custom" })
+        local selected = statustable.groups.selected
+
+        -- If slot_no is nil, General Settings is selected currently.
+        local slot_no = (tonumber(selected:match("#(.*)")) or 0) + 1
+        table.insert(db.uniqueSettings, slot_no, t.CopyTable(t.DEFAULT_SETTINGS.profile.uniqueSettings["**"]))
+        db.uniqueSettings[slot_no].name = ""
 
         options.args.Custom.args = CreateCustomNameplatesGroup()
         UpdateSpecial()
@@ -4579,7 +5016,7 @@ local function CreateCustomNameplatesGroup()
         local statustable = Addon.LibAceConfigDialog:GetStatusTable(t.ADDON_NAME, { "Custom" })
         local selected = statustable.groups.selected
 
-        local slot_no = selected:match("#(.*)")
+        local slot_no = tonumber(selected:match("#(.*)"))
         if slot_no then
           table.remove(db.uniqueSettings, slot_no)
 
@@ -4601,9 +5038,91 @@ local function CreateCustomNameplatesGroup()
       end,
       hidden = function() return TidyPlatesThreat.db.global.CustomNameplatesVersion == 1 end,
     },
+    MoveUp = {
+      name = L["Move Up"],
+      order = 3,
+      type = "execute",
+      --width = "half",
+      func = function()
+        local statustable = Addon.LibAceConfigDialog:GetStatusTable(t.ADDON_NAME, { "Custom" })
+        local selected = statustable.groups.selected
+
+        local slot_no = tonumber(selected:match("#(.*)"))
+        if slot_no then
+          -- Don't move up the first entry
+          if slot_no > 1 then
+            db.uniqueSettings[slot_no], db.uniqueSettings[slot_no - 1] = db.uniqueSettings[slot_no - 1], db.uniqueSettings[slot_no]
+
+            UpdateCustomNameplateSlots(slot_no, slot_no - 1)
+
+            Addon.LibAceConfigDialog:SelectGroup(t.ADDON_NAME, "Custom", "#" ..  (slot_no - 1))
+          end
+        end
+      end,
+      hidden = function() return TidyPlatesThreat.db.global.CustomNameplatesVersion == 1 end,
+    },
+    MoveDown = {
+      name = L["Move Down"],
+      order = 4,
+      type = "execute",
+      --width = "half",
+      func = function()
+        local statustable = Addon.LibAceConfigDialog:GetStatusTable(t.ADDON_NAME, { "Custom" })
+        local selected = statustable.groups.selected
+
+        local slot_no = tonumber(selected:match("#(.*)"))
+        if slot_no then
+          -- Don't move down the last entry
+          if slot_no <  #db.uniqueSettings then
+            db.uniqueSettings[slot_no], db.uniqueSettings[slot_no + 1] = db.uniqueSettings[slot_no + 1], db.uniqueSettings[slot_no]
+
+            UpdateCustomNameplateSlots(slot_no, slot_no + 1)
+
+            Addon.LibAceConfigDialog:SelectGroup(t.ADDON_NAME, "Custom", "#" ..  (slot_no + 1))
+          end
+        end
+      end,
+      hidden = function() return TidyPlatesThreat.db.global.CustomNameplatesVersion == 1 end,
+    },
+    SortAsc = {
+      name = L["Sort A-Z"],
+      order = 5,
+      type = "execute",
+      func = function()
+        local statustable = Addon.LibAceConfigDialog:GetStatusTable(t.ADDON_NAME, { "Custom" })
+        local selected = statustable.groups.selected
+        local slot_no = tonumber(selected:match("#(.*)"))
+
+        table.sort(db.uniqueSettings, function(a, b) return a.name < b.name end)
+
+        options.args.Custom.args = CreateCustomNameplatesGroup()
+        UpdateSpecial()
+
+        --Addon.LibAceConfigDialog:SelectGroup(t.ADDON_NAME, "Custom", "#" ..  slot_no)
+      end,
+      hidden = function() return TidyPlatesThreat.db.global.CustomNameplatesVersion == 1 end,
+    },
+    SortDesc = {
+      name = L["Sort Z-A"],
+      order = 6,
+      type = "execute",
+      func = function()
+        local statustable = Addon.LibAceConfigDialog:GetStatusTable(t.ADDON_NAME, { "Custom" })
+        local selected = statustable.groups.selected
+        local slot_no = tonumber(selected:match("#(.*)"))
+
+        table.sort(db.uniqueSettings, function(a, b) return a.name > b.name end)
+
+        options.args.Custom.args = CreateCustomNameplatesGroup()
+        UpdateSpecial()
+
+        --Addon.LibAceConfigDialog:SelectGroup(t.ADDON_NAME, "Custom", "#" ..  slot_no)
+      end,
+      hidden = function() return TidyPlatesThreat.db.global.CustomNameplatesVersion == 1 end,
+    },
     MigrateVersion1 = {
       name = L["|cffFFFFFFMigrate Custom Nameplates Settings|r"],
-      order = 3,
+      order = 20,
       type = "execute",
       width = "full",
       func = function()
@@ -4615,11 +5134,11 @@ local function CreateCustomNameplatesGroup()
       confirm = function(info) return L["|cffFF0000NOTE|r\nMigration should only delete deprecated default custom nameplates and re-order the remaining ones. Nevertheless, it is highly advised to backup your settings (the SavedVariables file TidyPlates_ThreatPlates.lua) in case something goes wrong.\n\nAre you sure you want to migrate your custom nameplates?"] end,
       hidden = function() return TidyPlatesThreat.db.global.CustomNameplatesVersion > 1 end,
     },
-    Spacer1 = GetSpacerEntry(3),
+    Spacer1 = GetSpacerEntry(25),
     GeneralSettings = {
       name = L["|cffffffffGeneral Settings|r"],
       type = "group",
-      order = 10,
+      order = 30,
       args = {
         Icon = {
           name = L["Icon"],
@@ -4652,335 +5171,9 @@ local function CreateCustomNameplatesGroup()
     },
   }
 
-  local clipboard = nil;
-
   for index, unique_unit in pairs(db.uniqueSettings) do
     if type(index) == "number" and unique_unit.name and unique_unit.name ~= "<Enter name here>" then
-      entry["#" .. index] = {
-        name = "#" .. index .. ". " .. db.uniqueSettings[index].name,
-        type = "group",
-        order = 30 + index,
-        args = {
-          Header = {
-            name = db.uniqueSettings[index].name,
-            type = "header",
-            order = 0,
-          },
-          Name = {
-            name = L["Set Name"],
-            order = 1,
-            type = "group",
-            inline = true,
-            args = {
-              SetName = {
-                name = db.uniqueSettings[index].name,
-                type = "input",
-                order = 1,
-                width = "full",
-                set = function(info, val)
-                  SetValue(info, val)
-                  options.args.Custom.args["#" .. index].name = "#" .. index .. ". " .. val
-                  options.args.Custom.args["#" .. index].args.Header.name = val
-                  options.args.Custom.args["#" .. index].args.Name.args.SetName.name = val
-                  UpdateSpecial()
-                end,
-                arg = { "uniqueSettings", index, "name" },
-              },
-              TargetButton = {
-                name = L["Use Target's Name"],
-                type = "execute",
-                order = 2,
-                width = "single",
-                func = function()
-                  if UnitExists("target") then
-                    local target = UnitName("target")
-                    db.uniqueSettings[index].name = target
-                    options.args.Custom.args["#" .. index].name = "#" .. index .. ". " .. target
-                    options.args.Custom.args["#" .. index].args.Header.name = target
-                    options.args.Custom.args["#" .. index].args.Name.args.SetName.name = target
-                    UpdateSpecial()
-                  else
-                    t.Print(L["No target found."])
-                  end
-                end,
-              },
-              Copy = {
-                name = L["Copy"],
-                order = 5,
-                type = "execute",
-                func = function()
-                  clipboard = {}
-                  clipboard = t.CopyTable(db.uniqueSettings[index])
-                  t.Print(L["Copied!"])
-                end,
-              },
-              Paste = {
-                name = L["Paste"],
-                order = 6,
-                type = "execute",
-                func = function()
-                  if type(clipboard) == "table" and clipboard.name then
-                    db.uniqueSettings[index] = t.CopyTable(clipboard)
-                    t.Print(L["Pasted!"])
-                  else
-                    t.Print(L["Nothing to paste!"])
-                  end
-                  options.args.Custom.args["#" .. index].name = "#" .. index .. ". " .. db.uniqueSettings[index].name
-                  options.args.Custom.args["#" .. index].args.Header.name = db.uniqueSettings[index].name
-                  options.args.Custom.args["#" .. index].args.Name.args.SetName.name = db.uniqueSettings[index].name
-                  local spell_id = db.uniqueSettings[index].SpellID
-                  if spell_id then
-                    local _, _, icon = GetSpellInfo(spell_id)
-                    options.args.Custom.args["#" .. index].args.Icon.args.Icon.image = icon
-                  else
-                    local icon_path = db.uniqueSettings[index].icon
-                    if icon_path:sub(-4) == ".blp" then
-                      options.args.Custom.args["#" .. index].args.Icon.args.Icon.image = "Interface\\Icons\\" .. icon_path
-                    else
-                      options.args.Custom.args["#" .. index].args.Icon.args.Icon.image = icon_path
-                    end
-                  end
-                  UpdateSpecial()
-                  clipboard = nil
-                end,
-              },
-            },
-          },
-          Enable = {
-            name = L["Nameplate Style"],
-            type = "group",
-            inline = true,
-            order = 10,
-            args = {
-              UseStyle = {
-                name = L["Enable"],
-                order = 1,
-                type = "toggle",
-                desc = L["This option allows you to control whether custom settings for nameplate style, color, transparency and scaling should be used for this nameplate."],
-                arg = { "uniqueSettings", index, "useStyle" },
-              },
-              HeadlineView = {
-                name = L["Healthbar View"],
-                order = 20,
-                type = "toggle",
-                disabled = function() return not db.uniqueSettings[index].useStyle end,
-                set = function(info, val) if val then db.uniqueSettings[index].ShowHeadlineView = false; SetValue(info, val) end end,
-                arg = { "uniqueSettings", index, "showNameplate" },
-              },
-              HealthbarView = {
-                name = L["Headline View"],
-                order = 30,
-                type = "toggle",
-                disabled = function() return not db.uniqueSettings[index].useStyle end,
-                set = function(info, val) if val then db.uniqueSettings[index].showNameplate = false; SetValue(info, val) end end,
-                arg = { "uniqueSettings", index, "ShowHeadlineView" },
-              },
-              HideNameplate = {
-                name = L["Hide Nameplate"],
-                order = 40,
-                type = "toggle",
-                desc = L["Disables nameplates (healthbar and name) for the units of this type and only shows an icon (if enabled)."],
-                disabled = function() return not db.uniqueSettings[index].useStyle end,
-                set = function(info, val)
-                  if val then
-                    db.uniqueSettings[index].showNameplate = false;
-                    db.uniqueSettings[index].ShowHeadlineView = false;
-                    Addon:ForceUpdate()
-                  end
-                end,
-                get = function(info) return not(db.uniqueSettings[index].showNameplate or db.uniqueSettings[index].ShowHeadlineView) end,
-              },
-            },
-          },
-          Appearance = {
-            name = L["Appearance"],
-            type = "group",
-            order = 30,
-            inline = true,
-            disabled = function() return not db.uniqueSettings[index].useStyle end,
-            args = {
-              CustomColor = {
-                name = L["Custom Color"],
-                order = 1,
-                type = "toggle",
-                desc = L["Define a custom color for this nameplate and overwrite any other color settings."],
-                arg = { "uniqueSettings", index, "useColor" },
-              },
-              ColorSetting = {
-                name = L["Color"],
-                order = 2,
-                type = "color",
-                disabled = function() return not db.uniqueSettings[index].useStyle or not db.uniqueSettings[index].useColor end,
-                get = GetColor,
-                set = SetColor,
-                arg = { "uniqueSettings", index, "color" },
-              },
-              --            ColorThreatSystem = {
-              --              name = L["Use Threat Coloring"],
-              --              order = 3,
-              --              type = "toggle",
-              --              desc = L["In combat, use coloring based on threat level as configured in the threat system. The custom color is only used out of combat."],
-              --              disabled = function() return not db.uniqueSettings[k_c].useStyle or not db.uniqueSettings[k_c].useColor end,
-              --              arg = {"uniqueSettings", k_c, "UseThreatColor"},
-              --            },
-              UseRaidMarked = {
-                name = L["Color by Target Mark"],
-                order = 4,
-                type = "toggle",
-                desc = L["Additionally color the nameplate's healthbar or name based on the target mark if the unit is marked."],
-                disabled = function() return not db.uniqueSettings[index].useStyle or not db.uniqueSettings[index].useColor end,
-                arg = { "uniqueSettings", index, "allowMarked" },
-              },
-              Spacer1 = GetSpacerEntry(10),
-              CustomAlpha = {
-                name = L["Custom Transparency"],
-                order = 11,
-                type = "toggle",
-                desc = L["Define a custom transparency for this nameplate and overwrite any other transparency settings."],
-                set = function(info, val) SetValue(info, not val) end,
-                get = function(info) return not GetValue(info) end,
-                arg = { "uniqueSettings", index, "overrideAlpha" },
-              },
-              AlphaSetting = GetTransparencyEntryDefault(12, { "uniqueSettings", index, "alpha" }, function() return not db.uniqueSettings[index].useStyle or db.uniqueSettings[index].overrideAlpha end),
-              --            AlphaThreatSystem = {
-              --              name = L["Use Threat Alpha"],
-              --              order = 13,
-              --              type = "toggle",
-              --              desc = L["In combat, use alpha based on threat level as configured in the threat system. The custom alpha is only used out of combat."],
-              --              disabled = function() return not db.uniqueSettings[k_c].useStyle or db.uniqueSettings[k_c].overrideAlpha end,
-              --              arg = {"uniqueSettings", k_c, "UseThreatColor"},
-              --            },
-              Spacer2 = GetSpacerEntry(14),
-              CustomScale = {
-                name = L["Custom Scale"],
-                order = 21,
-                type = "toggle",
-                desc = L["Define a custom scaling for this nameplate and overwrite any other scaling settings."],
-                set = function(info, val) SetValue(info, not val) end,
-                get = function(info) return not GetValue(info) end,
-                arg = { "uniqueSettings", index, "overrideScale" },
-              },
-              ScaleSetting = GetScaleEntryDefault(22, { "uniqueSettings", index, "scale" }, function() return not db.uniqueSettings[index].useStyle or db.uniqueSettings[index].overrideScale end),
-              --            ScaleThreatSystem = {
-              --              name = L["Use Threat Scale"],
-              --              order = 23,
-              --              type = "toggle",
-              --              desc = L["In combat, use scaling based on threat level as configured in the threat system. The custom scale is only used out of combat."],
-              --              disabled = function() return not db.uniqueSettings[k_c].useStyle or db.uniqueSettings[k_c].overrideScale end,
-              --              arg = {"uniqueSettings", k_c, "UseThreatColor"},
-              --            },
-              --            Spacer3 = GetSpacerEntry(24),
-              Header = { type = "header", order = 24, name = "Threat Options", },
-              ThreatGlow = {
-                name = L["Threat Glow"],
-                order = 31,
-                type = "toggle",
-                desc = L["Shows a glow based on threat level around the nameplate's healthbar (in combat)."],
-                disabled = function() return not db.uniqueSettings[index].useStyle end,
-                arg = { "uniqueSettings", index, "UseThreatGlow"},
-              },
-              ThreatSystem = {
-                name = L["Enable Threat System"],
-                order = 32,
-                type = "toggle",
-                desc = L["In combat, use coloring, transparency, and scaling based on threat level as configured in the threat system. Custom settings are only used out of combat."],
-                disabled = function() return not db.uniqueSettings[index].useStyle end,
-                arg = { "uniqueSettings", index, "UseThreatColor"},
-              },
-            },
-          },
-          Icon = {
-            name = L["Icon"],
-            type = "group",
-            order = 40,
-            inline = true,
-            disabled = function() return not db.uniqueWidget.ON end,
-            args = {
-              Enable = {
-                name = L["Enable"],
-                type = "toggle",
-                order = 1,
-                desc = L["This option allows you to control whether the custom icon is hidden or shown on this nameplate."],
-                descStyle = "inline",
-                width = "full",
-                arg = { "uniqueSettings", index, "showIcon" }
-              },
-              Icon = {
-                name = L["Preview"],
-                type = "execute",
-                width = "full",
-                disabled = function() return not db.uniqueSettings[index].showIcon or not db.uniqueWidget.ON end,
-                order = 2,
-                image = function()
-                  local spell_id = db.uniqueSettings[index].SpellID
-                  if spell_id then
-                    local _, _, icon = GetSpellInfo(spell_id)
-                    return icon
-                  else
-                    local icon_path = db.uniqueSettings[index].icon
-                    if icon_path:sub(-4) == ".blp" then
-                      return "Interface\\Icons\\" .. icon_path
-                    else
-                      return icon_path
-                    end
-                  end
-                end,
-                imageWidth = 64,
-                imageHeight = 64,
-              },
-              Description = {
-                type = "description",
-                order = 3,
-                name = L["Enter an icons name (with the *.blp ending), a spell ID or a full icon path (using '\\' to separate directory folders)."],
-                width = "full",
-              },
-              SetIcon = {
-                name = L["Set Icon"],
-                type = "input",
-                order = 4,
-                disabled = function() return not db.uniqueSettings[index].showIcon or not db.uniqueWidget.ON end,
-                width = "full",
-                set = function(info, val)
-                  local spell_id = tonumber(val)
-                  if spell_id then -- no string, so val should be a spell ID
-                    local _, _, icon = GetSpellInfo(spell_id)
-                    if icon then
-                      db.uniqueSettings[index].SpellID = spell_id
-                      val = select(3, GetSpellInfo(spell_id))
-                    else
-                      t.Print("Invalid spell ID for custom nameplate icon: " .. val, true)
-                      db.uniqueSettings[index].SpellID = nil
-                    end
-                  else
-                    db.uniqueSettings[index].SpellID = nil
-                  end
-                  -- Either store the path to the icon or the icon ID
-                  SetValue(info, val)
-                  if val then
-                    if val:sub(-4) == ".blp" then
-                      options.args.Custom.args["#" .. index].args.Icon.args.Icon.image = "Interface\\Icons\\" .. val
-                    else
-                      options.args.Custom.args["#" .. index].args.Icon.args.Icon.image = val
-                    end
-                  else
-                    options.args.Custom.args["#" .. index].args.Icon.args.Icon.image = "Interface\\Icons\\Temp"
-                  end
-                  UpdateSpecial()
-                end,
-                get = function(info)
-                  local spell_id = db.uniqueSettings[index].SpellID
-                  if spell_id then
-                    return tostring(spell_id)
-                  else
-                    return GetValue(info)
-                  end
-                end,
-                arg = { "uniqueSettings", index, "icon" },
-              },
-            },
-          },
-        },
-      }
+      entry["#" .. index] = CreateCustomNameplateEntry(index)
     end
   end
 
@@ -5365,74 +5558,6 @@ local function CreateOptionsTable()
                         NeutralColor = { name = L["Neutral Units"], order = 60, type = "color", arg = { "ColorByReaction", "NeutralUnit" }, },
                       },
                     },
-                    RaidMark = {
-                      name = L["Color by Target Mark"],
-                      order = 40,
-                      type = "group",
-                      inline = true,
-                      get = GetColor,
-                      set = SetColor,
-                      args = {
-                        EnableRaidMarks = {
-                          name = L["Additionally color the healthbar based on the target mark if the unit is marked."],
-                          order = 1,
-                          type = "toggle",
-                          width = "full",
-                          set = SetValue,
-                          get = GetValue,
-                          arg = { "settings", "raidicon", "hpColor" },
-                        },
-                        Header = { name = L["Colors"], type = "header", order = 20, },
-                        STAR = {
-                          type = "color",
-                          order = 30,
-                          name = RAID_TARGET_1,
-                          arg = { "settings", "raidicon", "hpMarked", "STAR" },
-                        },
-                        CIRCLE = {
-                          type = "color",
-                          order = 31,
-                          name = RAID_TARGET_2,
-                          arg = { "settings", "raidicon", "hpMarked", "CIRCLE" },
-                        },
-                        DIAMOND = {
-                          type = "color",
-                          order = 32,
-                          name = RAID_TARGET_3,
-                          arg = { "settings", "raidicon", "hpMarked", "DIAMOND" },
-                        },
-                        TRIANGLE = {
-                          type = "color",
-                          order = 33,
-                          name = RAID_TARGET_4,
-                          arg = { "settings", "raidicon", "hpMarked", "TRIANGLE" },
-                        },
-                        MOON = {
-                          type = "color",
-                          order = 34,
-                          name = RAID_TARGET_5,
-                          arg = { "settings", "raidicon", "hpMarked", "MOON" },
-                        },
-                        SQUARE = {
-                          type = "color",
-                          order = 35,
-                          name = RAID_TARGET_6,
-                          arg = { "settings", "raidicon", "hpMarked", "SQUARE" },
-                        },
-                        CROSS = {
-                          type = "color",
-                          order = 36,
-                          name = RAID_TARGET_7,
-                          arg = { "settings", "raidicon", "hpMarked", "CROSS" },
-                        },
-                        SKULL = {
-                          type = "color",
-                          order = 37,
-                          name = RAID_TARGET_8,
-                          arg = { "settings", "raidicon", "hpMarked", "SKULL" },
-                        },
-                      },
-                    },
                   },
                 },
                 ThreatColors = {
@@ -5642,6 +5767,7 @@ local function CreateOptionsTable()
               },
             },
             CastBarSettings = CreateCastbarOptions(),
+            Colors = CreateColorsSettings(),
             Transparency = {
               name = L["Transparency"],
               type = "group",
@@ -7263,18 +7389,18 @@ local function CreateOptionsTable()
               width = "full",
               name = "deDE: Blacksalsify (original  author: Aideen@Perenolde/EU)"
             },
-						Translators2 = {
-							type = "description",
-							order = 5,
-							width = "full",
-							name = "esES: Woopy"
-						},
-						Translators3 = {
-							type = "description",
-							order = 6,
-							width = "full",
-							name = "esMX: Woopy"
-						},
+            Translators2 = {
+              type = "description",
+              order = 5,
+              width = "full",
+              name = "esES: Woopy"
+            },
+            Translators3 = {
+              type = "description",
+              order = 6,
+              width = "full",
+              name = "esMX: Woopy"
+            },
 --						Translators4 = {
 --							type = "description",
 --							order = 7,

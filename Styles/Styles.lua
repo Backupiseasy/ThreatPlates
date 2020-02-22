@@ -7,7 +7,7 @@ local ThreatPlates = Addon.ThreatPlates
 
 -- WoW APIs
 local InCombatLockdown = InCombatLockdown
-local UnitPlayerControlled = UnitPlayerControlled
+local UnitPlayerControlled, UnitIsUnit = UnitPlayerControlled, UnitIsUnit
 local UnitIsOtherPlayersPet = UnitIsOtherPlayersPet
 local UnitIsBattlePet = UnitIsBattlePet
 local UnitCanAttack, UnitIsTapDenied = UnitCanAttack, UnitIsTapDenied
