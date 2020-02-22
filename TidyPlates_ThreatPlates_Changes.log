@@ -1,6 +1,11 @@
 ﻿------------------------------------------------------
 9.1.17
 ------------------------------------------------------
+* Backported bufixes and optimizations from Threat Plates Classic to the Retail version.
+
+------------------------------------------------------
+9.1.17
+------------------------------------------------------
 * Basic fix for quest objectives in tooltips having different formats because of localization.
 
 ------------------------------------------------------
