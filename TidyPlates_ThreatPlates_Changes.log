@@ -2,6 +2,7 @@
 9.1.17
 ------------------------------------------------------
 * Backported bufixes and optimizations from Threat Plates Classic to the Retail version.
+* Fixed a bug with quest objective detection and optimized it.
 
 ------------------------------------------------------
 9.1.17
