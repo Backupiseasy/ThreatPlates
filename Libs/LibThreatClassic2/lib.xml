@@ -2,6 +2,15 @@
 ..\FrameXML\UI.xsd">
 
 
+	<Script file="Libs\LibStub\LibStub.lua"/>
+	<Script file="Libs\CallbackHandler-1.0\CallbackHandler-1.0.lua"/>
+	<Include file="Libs\AceAddon-3.0\AceAddon-3.0.xml"/>
+	<Include file="Libs\AceBucket-3.0\AceBucket-3.0.xml"/>
+	<Include file="Libs\AceComm-3.0\AceComm-3.0.xml"/>
+	<Include file="Libs\AceEvent-3.0\AceEvent-3.0.xml"/>
+	<Include file="Libs\AceTimer-3.0\AceTimer-3.0.xml"/>
+	<Include file="Libs\AceSerializer-3.0\AceSerializer-3.0.xml"/>
+
 	<Script file="LibThreatClassic2.lua" />
 
 	<Script file="ThreatClassModuleCore.lua" />
@@ -25,6 +34,7 @@
 	<Script file="NPCModules\MoltenCore\Trash.lua" />
 	<Script file="NPCModules\MoltenCore\Shazzrah.lua" />
 	<Script file="NPCModules\MoltenCore\Ragnaros.lua" />
+	<Script file="NPCModules\BlackwingLair\BroodlordLashlayer.lua" />
 	<Script file="NPCModules\BlackwingLair\Firemaw.lua" />
 	<Script file="NPCModules\BlackwingLair\Flamegor.lua" />
 	<Script file="NPCModules\BlackwingLair\Ebonroc.lua" />

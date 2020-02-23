@@ -1,4 +1,4 @@
-# LibThreatClassic2
+# LibThreatClassic2 [!["Open Issues"](https://img.shields.io/github/issues-raw/dfherr/LibThreatClassic2.svg)](https://github.com/dfherr/LibThreatClassic2/issues)
 
 Successor project for [https://github.com/EsreverWoW/LibThreatClassic](https://github.com/EsreverWoW/LibThreatClassic)
 
@@ -22,6 +22,17 @@ local _UnitDetailedThreatSituation = function (unit, mob)
 end
 ```
 
+## Embedding LibThreatClassic2 with packager
+
+Please make sure to only automatically embed the latest tag into your AddOn. I won't guarantee the latest commit in master always being a release candidate, especially in regards to version bumps.
+
+Your `.pkgmeta` config for LibThreatClassic2 should look similar to this:
+
+```
+Libs/LibThreatClassic2: 
+  url: git://github.com/dfherr/LibThreatClassic2.git
+  tag: latest
+```
 
 ## Added fixes
 

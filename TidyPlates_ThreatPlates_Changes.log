@@ -7,7 +7,7 @@
 * Updated crowd control auras for Auras widget for Classic [Comment TP#4120].
 * Updated localizations for enES and esMX (thanks to Woopy).
 * Updated included library LibClassicCasterino (rev. 29) and optimized its integration into Threat Plates.
-* Upgrade integrated libraries (LibCustomGlow v1.0.3).
+* Upgrade integrated libraries (LibCustomGlow v1.0.3, LibThreatClassic2 v2.11)
 
 ------------------------------------------------------
 1.2.8
