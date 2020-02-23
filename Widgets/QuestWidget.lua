@@ -39,11 +39,53 @@ local ICON_PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\QuestWid
 ---------------------------------------------------------------------------------------------------
 local QuestLogNotComplete = true
 local QuestUpdatePending = false
-local QuestAcceptedUpdatePending = false
+local QuestAcceptedUpdatePending = true
+local FirstPOIUpateAfterLogin = true
 local QuestList, QuestIDs, QuestsToUpdate = {}, {}, {}
 local QuestUnitsToUpdate = {}
 
 local IsQuestUnit -- Function
+
+-- Since patch 8.3, quest tooltips have a different format depending on the localization, it seems
+-- at least for kill quests
+local PARSER_QUEST_OBJECTIVE_BACKUP = function(text)
+  local current, goal, objective_name = string.match(text,"^(%d+)/(%d+)( .*)$")
+
+  if not objective_name then
+    objective_name, current, goal = string.match(text,"^(.*: )(%d+)/(%d+)$")
+  end
+
+  return objective_name, current, goal
+end
+
+local QUEST_OBJECTIVE_PARSER_LEFT = function(text)
+  local current, goal, objective_name = string.match(text,"^(%d+)/(%d+)( .*)$")
+  return objective_name, current, goal
+end
+
+local QUEST_OBJECTIVE_PARSER_RIGHT = function(text)
+  return string.match(text,"^(.*: )(%d+)/(%d+)$")
+end
+
+local STANDARD_QUEST_OBJECTIVE_PARSER = {
+  -- x/y Objective
+  enUS = QUEST_OBJECTIVE_PARSER_LEFT,
+  -- enGB = enGB clients return enUS
+  esMX = QUEST_OBJECTIVE_PARSER_LEFT,
+  ptBR = QUEST_OBJECTIVE_PARSER_LEFT,
+  itIT = QUEST_OBJECTIVE_PARSER_LEFT,
+  koKR = QUEST_OBJECTIVE_PARSER_LEFT,
+  zhTW = QUEST_OBJECTIVE_PARSER_LEFT,
+  zhCN = QUEST_OBJECTIVE_PARSER_LEFT,
+
+  -- Objective: x/y
+  deDE = QUEST_OBJECTIVE_PARSER_RIGHT,
+  frFR = QUEST_OBJECTIVE_PARSER_RIGHT,
+  esES = QUEST_OBJECTIVE_PARSER_RIGHT,
+  ruRU = QUEST_OBJECTIVE_PARSER_RIGHT,
+}
+
+local QuestObjectiveParser = STANDARD_QUEST_OBJECTIVE_PARSER[GetLocale()] or PARSER_QUEST_OBJECTIVE_BACKUP
 
 ---------------------------------------------------------------------------------------------------
 -- Update Hook to compensate for deleyed quest information update on unit tooltips
@@ -108,11 +150,11 @@ function IsQuestUnit(unit, create_watcher)
       if string.find(text, "%%") then
         objective_name, current, goal = string.match(text, "^(.*) %((%d+)%%%)$")
         objective_type = "area"
-        -- print (unit_name, "=> ", "Area: |" .. text .. "|",  string.match(text, "^(.*) %((%d+)%%%)$"))
+        --print (unit_name, "=> ", "Area: |" .. text .. "|",  string.match(text, "^(.*) %((%d+)%%%)$"))
       else
         -- Standard x/y /pe quest
-        objective_name, current, goal = string.match(text, "^(.*: )(%d+)/(%d+)$")
-        -- print (unit_name, "=> ", "Standard: |" .. text .. "|", string.match(text, "^(.*): (%d+)/(%d+)$"))
+        objective_name, current, goal = QuestObjectiveParser(text)
+        --print (unit_name, "=> ", "Standard: |" .. text .. "|", objective_name, current, goal, "|")
       end
 
       if objective_name then
@@ -127,7 +169,6 @@ function IsQuestUnit(unit, create_watcher)
         -- Note: "progressbar" type quest (area quest) progress cannot get via the API, so for this tooltips
         -- must be used. That's also the reason why their progress is not cached.
         local Quests = QuestList
-        -- print ("Goal:", quest_title, objective_name, current, goal)
         if Quests[quest_title] then
           local quest_objective = Quests[quest_title].objectives[objective_name]
           if quest_objective then
@@ -201,10 +242,12 @@ function Widget:CreateQuest(questID, questIndex)
       -- Does not make sense to add "progressbar" type quests here as there progress is not updated via QUEST_WATCH_UPDATE
       if text and objectiveType ~= "progressbar" then
         local objectiveName = string.gsub(text, "(%d+)/(%d+)", "")
-
         -- Normally, the quest objective should come before the :, but while the QUEST_LOG_UPDATE events (after login/reload)
         -- GetQuestObjectiveInfo just returns nil as text
+
+        -- It does seem that this is no longer necessary
         QuestLogNotComplete = QuestLogNotComplete or (objectiveName == " : ")
+        -- assert (objectiveName ~= " : ", "Error: " ..  objectiveName)
 
         --only want to track quests in this format
         if numRequired and numRequired > 1 then
@@ -270,7 +313,7 @@ end
 ---------------------------------------------------------------------------------------------------
 
 function Widget:PLAYER_ENTERING_WORLD()
-	self:UpdateAllFramesAndNameplateColor()
+  self:UpdateAllFramesAndNameplateColor()
 end
 
 function Widget:QUEST_WATCH_UPDATE(questIndex)
@@ -306,6 +349,7 @@ function Widget:QUEST_LOG_UPDATE()
     self:UpdateAllFramesAndNameplateColor()
   end
 
+  -- It does seem that this is no longer necessary
   if QuestLogNotComplete then
     QuestLogNotComplete = false
     self:GenerateQuestCache()
@@ -318,12 +362,25 @@ function Widget:QUEST_ACCEPTED(questIndex, questID)
 end
 
 function Widget:QUEST_POI_UPDATE()
-  -- print ("QUEST_POI_UPDATE: ", QuestAcceptedUpdatePending)
   if QuestAcceptedUpdatePending then
+    -- After login, sometimes the quest list is empty when the widget is loaded.
+    -- So, update the internal quest list after the first POI update after login.
+    -- At that point, the quest list is available
+    if FirstPOIUpateAfterLogin then
+      FirstPOIUpateAfterLogin = false
+      -- The following should be an alternative as QUEST_LOG_UPDATE seems to be fired after QUEST_POI_UPDATE in every case
+      -- QuestLogNotComplete = true
+      self:GenerateQuestCache()
+    end
+
     self:UpdateAllFramesAndNameplateColor()
     QuestAcceptedUpdatePending = false
   end
 end
+
+--function Widget:QUEST_DATA_LOAD_RESULT(questID, success)
+--  print ("QUEST_DATA_LOAD_RESULT", questID, success)
+--end
 
 function Widget:QUEST_REMOVED(quest_id)
   local quest_title = QuestIDs[quest_id]
@@ -405,14 +462,14 @@ function Widget:OnEnable()
   self:RegisterEvent("PLAYER_ENTERING_WORLD")
 
   self:RegisterEvent("QUEST_ACCEPTED")
-  -- This event fires whenever the player turns in a quest, whether automatically with a Task-type quest
+  -- QUEST_REMOVED fires whenever the player turns in a quest, whether automatically with a Task-type quest
   -- (Bonus Objectives/World Quests), or by pressing the Complete button in a quest dialog window.
   -- also handles abandon quest
   self:RegisterEvent("QUEST_REMOVED")
   self:RegisterEvent("QUEST_WATCH_UPDATE")
-
   self:RegisterEvent("QUEST_LOG_UPDATE")
   self:RegisterEvent("QUEST_POI_UPDATE")
+  -- self:RegisterEvent("QUEST_DATA_LOAD_RESULT")
   self:RegisterUnitEvent("UNIT_QUEST_LOG_CHANGED", "player")
 
   -- Handle in-combat situations:
@@ -506,42 +563,42 @@ function Widget:UpdateFrame(widget_frame, unit)
   end
 end
 
---local function tablelength(T)
---  local count = 0
---  for _ in pairs(T) do count = count + 1 end
---  return count
---end
---
---function Addon:PrintQuests()
---  print ("Quests List:", tablelength(QuestIDs))
---  for quest_id, title in pairs(QuestIDs) do
---    local quest = QuestList[title]
---    if quest.objectives and tablelength(quest.objectives) > 0 then
---      print ("*", title .. " [ID:" .. tostring(quest_id) .. "]")
---      for name, val in pairs (quest.objectives) do
---        print ("  -", name ..":", val.current, "/", val.goal, "[" .. val.type .. "]")
---      end
---    end
---  end
---
---  -- Only plates of units that are quest units are stored in QuestUnitsToUpdate
---  for index, unitid in ipairs(QuestUnitsToUpdate) do
---    QuestUnitsToUpdate[index] = nil
---
---    local plate = GetNamePlateForUnit(unitid)
---    if plate and plate.TPFrame.Active then
---      local widget_frame = plate.TPFrame.widgets.Quest
---      self:UpdateFrame(widget_frame, plate.TPFrame.unit)
---    end
---
---    print ("Updating Quest Unit", unitid)
---  end
---
---  print ("QuestUnitsToUpdate:", tablelength(QuestUnitsToUpdate))
---
---  print ("Waiting for quest log updates for the following quests:")
---  for questID, title in pairs(QuestsToUpdate) do
---    local questIndex = GetQuestLogIndexByID(questID)
---    print ("  Quest:", title .. " [" .. tostring(questIndex) .. "]")
---  end
---end
+local function tablelength(T)
+  local count = 0
+  for _ in pairs(T) do count = count + 1 end
+  return count
+end
+
+function Addon:PrintQuests()
+  print ("Quests List:", tablelength(QuestIDs))
+  for quest_id, title in pairs(QuestIDs) do
+    local quest = QuestList[title]
+    if quest.objectives and tablelength(quest.objectives) > 0 then
+      print ("*", title .. " [ID:" .. tostring(quest_id) .. "]")
+      for name, val in pairs (quest.objectives) do
+        print ("  - |" .. name .."| :", val.current, "/", val.goal, "[" .. val.type .. "]")
+      end
+    end
+  end
+
+  -- Only plates of units that are quest units are stored in QuestUnitsToUpdate
+  for index, unitid in ipairs(QuestUnitsToUpdate) do
+    QuestUnitsToUpdate[index] = nil
+
+    local plate = GetNamePlateForUnit(unitid)
+    if plate and plate.TPFrame.Active then
+      local widget_frame = plate.TPFrame.widgets.Quest
+      self:UpdateFrame(widget_frame, plate.TPFrame.unit)
+    end
+
+    print ("Updating Quest Unit", unitid)
+  end
+
+  print ("QuestUnitsToUpdate:", tablelength(QuestUnitsToUpdate))
+
+  print ("Waiting for quest log updates for the following quests:")
+  for questID, title in pairs(QuestsToUpdate) do
+    local questIndex = GetQuestLogIndexByID(questID)
+    print ("  Quest:", title .. " [" .. tostring(questIndex) .. "]")
+  end
+end

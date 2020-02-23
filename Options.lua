@@ -3796,7 +3796,7 @@ local function CreateBlizzardSettings()
             order = 10,
             type = "range",
             min = 0,
-            max = 20,
+            max = (Addon.CLASSIC and 20) or 100,
             step = 1,
             width = "double",
             desc = L["The max distance to show nameplates."],
