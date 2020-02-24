@@ -1,5 +1,5 @@
 ------------------------------------------------------
-1.2.9
+1.3.0
 ------------------------------------------------------
 * Added an option to change class colors (see General - Colors in the options) [Comment TPC#106, TPC#114, TPC#249, TPC#251, TPC#258, #4085].
 * Added options to custom nameplate creation, e.g., to sort them or to change their order.

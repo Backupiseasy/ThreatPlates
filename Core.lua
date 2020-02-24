@@ -274,12 +274,12 @@ function Addon:SetBaseNamePlateSize()
   db = TidyPlatesThreat.db.profile
   -- Classic has the same nameplate size for friendly and enemy units, so either set both or non at all (= set it to default values)
   if not db.ShowFriendlyBlizzardNameplates and not db.ShowEnemyBlizzardNameplates and not isInstance then
+    C_NamePlate_SetNamePlateFriendlySize(width, height)
+    C_NamePlate_SetNamePlateEnemySize(width, height)
+  else
     -- Smaller nameplates are not available in Classic
     C_NamePlate_SetNamePlateFriendlySize(128, 32)
     C_NamePlate_SetNamePlateEnemySize(128, 32)
-  else
-    C_NamePlate_SetNamePlateFriendlySize(width, height)
-    C_NamePlate_SetNamePlateEnemySize(width, height)
   end
 
   Addon:ConfigClickableArea(false)
