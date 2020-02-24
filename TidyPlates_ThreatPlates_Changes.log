@@ -1,8 +1,8 @@
 ﻿------------------------------------------------------
-9.1.17
+9.1.18
 ------------------------------------------------------
-* Backported bufixes and optimizations from Threat Plates Classic to the Retail version.
-* Fixed a bug with quest objective detection and optimized it.
+* Backported bufixes and optimizations from Threat Plates Classic to Retail version.
+* Fixed a bug with quest objective detection and optimized tooltip scanning for Quest widget.
 
 ------------------------------------------------------
 9.1.17
