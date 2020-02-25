@@ -58,6 +58,17 @@ if MAP_FONT[locale] then
   Addon.DEFAULT_SMALL_FONT = MAP_FONT[locale].DefaultSmallFont
 end
 
+local function GetDefaultColorsForClasses()
+  local class_colors = {}
+
+  for i, class_name in ipairs(CLASS_SORT_ORDER) do
+    -- RAID_CLASS_COLORS[class_name] is not null even in Classic for unknown classes like MONK
+    class_colors[class_name] = ThreatPlates.RGB_WITH_HEX(RAID_CLASS_COLORS[class_name]:GetRGBAsBytes())
+  end
+
+  return class_colors
+end
+
 ---------------------------------------------------------------------------------------------------
 -- Global contstants for various stuff
 ---------------------------------------------------------------------------------------------------
@@ -487,20 +498,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
       High = RGB_P(1, 1, 0),
     },
     Colors = {
-      Classes = {
-        DEATHKNIGHT = RGB_WITH_HEX(C_ClassColor.GetClassColor("DEATHKNIGHT"):GetRGBAsBytes()),
-        DEMONHUNTER = RGB_WITH_HEX(C_ClassColor.GetClassColor("DEMONHUNTER"):GetRGBAsBytes()),
-        DRUID = RGB_WITH_HEX(C_ClassColor.GetClassColor("DRUID"):GetRGBAsBytes()),
-        HUNTER = RGB_WITH_HEX(C_ClassColor.GetClassColor("HUNTER"):GetRGBAsBytes()),
-        MAGE = RGB_WITH_HEX(C_ClassColor.GetClassColor("MAGE"):GetRGBAsBytes()),
-        MONK = RGB_WITH_HEX(C_ClassColor.GetClassColor("MONK"):GetRGBAsBytes()),
-        PALADIN = RGB_WITH_HEX(C_ClassColor.GetClassColor("PALADIN"):GetRGBAsBytes()),
-        PRIEST = RGB_WITH_HEX(C_ClassColor.GetClassColor("PRIEST"):GetRGBAsBytes()),
-        ROGUE = RGB_WITH_HEX(C_ClassColor.GetClassColor("ROGUE"):GetRGBAsBytes()),
-        SHAMAN = RGB_WITH_HEX(C_ClassColor.GetClassColor("SHAMAN"):GetRGBAsBytes()),
-        WARLOCK = RGB_WITH_HEX(C_ClassColor.GetClassColor("WARLOCK"):GetRGBAsBytes()),
-        WARRIOR = RGB_WITH_HEX(C_ClassColor.GetClassColor("WARRIOR"):GetRGBAsBytes()),
-      }
+      Classes = GetDefaultColorsForClasses()
     },
     text = {
       amount = false, -- old default: true,

@@ -16,7 +16,7 @@ local select = select
 local type = type
 
 -- WoW APIs
-local CLASS_SORT_ORDER = CLASS_SORT_ORDER
+local CLASS_SORT_ORDER, LOCALIZED_CLASS_NAMES_MALE = CLASS_SORT_ORDER, LOCALIZED_CLASS_NAMES_MALE
 local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
 local GetCVar, GetCVarBool = GetCVar, GetCVarBool
 local GetSpellInfo = GetSpellInfo
@@ -1280,11 +1280,11 @@ local function CreateComboPointsWidgetOptions()
             type = "select",
             order = 10,
             values = {
-              DEATHKNIGHT = L["Death Knight"],
+              DEATHKNIGHT = (not Addon.CLASSIC and L["Death Knight"]) or nil,
               DRUID = L["Druid"],
               MAGE = L["Arcane Mage"],
-              MONK = L["Windwalker Monk"],
-              PALADIN = L["Retribution Paladin"],
+              MONK = (not Addon.CLASSIC and L["Windwalker Monk"]) or nil,
+              PALADIN = (not Addon.CLASSIC and L["Retribution Paladin"]) or nil,
               ROGUE = L["Rogue"],
               WARLOCK = L["Warlock"],
             },
@@ -1432,6 +1432,7 @@ local function CreateArenaWidgetOptions()
     name = L["Arena"],
     type = "group",
     order = 10,
+    hidden = function() return Addon.CLASSIC end,
     args = {
       Enable = GetEnableEntry(L["Enable Arena Widget"], L["This widget shows various icons (orbs and numbers) on enemy nameplates in arenas for easier differentiation."], "arenaWidget", false),
       Orbs = {
@@ -1626,6 +1627,7 @@ end
     name = L["Quest"],
     order = 100,
     type = "group",
+    hidden = function() return Addon.CLASSIC end,
     args = {
       Enable = GetEnableEntry(L["Enable Quest Widget"], L["This widget shows a quest icon above unit nameplates or colors the nameplate healthbar of units that are involved with any of your current quests."], "questWidget", true),
       Visibility = { type = "group",	order = 10,	name = L["Visibility"], inline = true,
@@ -1714,6 +1716,7 @@ local function CreateStealthWidgetOptions()
     name = L["Stealth"],
     order = 80,
     type = "group",
+    hidden = function() return Addon.CLASSIC end,
     args = {
       Enable = GetEnableEntry(L["Enable Stealth Widget"], L["This widget shows a stealth icon on nameplates of units that can detect stealth."], "stealthWidget", true),
       Layout = {
@@ -3045,7 +3048,7 @@ local function CreateAurasWidgetOptions()
                   SetValue(info, val)
                 end,
                 arg = { "AuraWidget", "CrowdControl", "ShowBlizzardForEnemy" },
-                disabled = function() return not db.AuraWidget.CrowdControl.ShowEnemy end,
+                disabled = function() return not db.AuraWidget.CrowdControl.ShowEnemy or Addon.CLASSIC end,
               },
             },
           },
@@ -3644,10 +3647,18 @@ local function CreateBlizzardSettings()
         type = "group",
         inline = true,
         get = GetValue,
+        disabled = function() return Addon.CLASSIC and (db.ShowFriendlyBlizzardNameplates or db.ShowEnemyBlizzardNameplates) end,
         args = {
+          Description = {
+            type = "description",
+            order = 1,
+            name = L["Because of side effects with Blizzard nameplates, this function is disabled in instances or when Blizzard nameplates are used for friendly or neutral/enemy units (see General - Visibility)."],
+            hidden = function() return not Addon.CLASSIC or (not db.ShowFriendlyBlizzardNameplates and not db.ShowEnemyBlizzardNameplates) end,
+            width = "full",
+          },
           ToggleSync = {
             name = L["Healthbar Sync"],
-            order = 1,
+            order = 10,
             type = "toggle",
             desc = L["The size of the clickable area is always derived from the current size of the healthbar."],
             set = function(info, val)
@@ -3662,7 +3673,7 @@ local function CreateBlizzardSettings()
           },
           Width = {
             name = L["Width"],
-            order = 2,
+            order = 20,
             type = "range",
             min = 1,
             max = 500,
@@ -3680,7 +3691,7 @@ local function CreateBlizzardSettings()
           },
           Height = {
             name = L["Height"],
-            order = 3,
+            order = 30,
             type = "range",
             min = 1,
             max = 100,
@@ -3699,7 +3710,7 @@ local function CreateBlizzardSettings()
           ShowArea = {
             name = L["Configuration Mode"],
             type = "execute",
-            order = 4,
+            order = 40,
             desc = "Toggle a background showing the area of the clicable area.",
             func = function()
               Addon:ConfigClickableArea(true)
@@ -3768,7 +3779,7 @@ local function CreateBlizzardSettings()
             order = 10,
             type = "range",
             min = 0,
-            max = 100,
+            max = (Addon.CLASSIC and 20) or 100,
             step = 1,
             width = "double",
             desc = L["The max distance to show nameplates."],
@@ -3837,6 +3848,17 @@ local function CreateBlizzardSettings()
             desc = L["The inset from the bottom (in screen percent) that large nameplates are clamped to."],
             arg = "nameplateLargeBottomInset",
           },
+          ClampTarget = {
+            name = L["Clamp Target Nameplate to Screen"],
+            order = 50,
+            type = "toggle",
+            width = "double",
+            set = SetCVarBoolTPTP,
+            get = GetCVarBoolTPTP,
+            desc = L["Clamps the target's nameplate to the edges of the screen, even if the target is off-screen."],
+            arg = "clampTargetNameplateToScreen",
+            hidden = function() return not Addon.CLASSIC end,
+          },
         },
       },
       PersonalNameplate = {
@@ -3844,7 +3866,7 @@ local function CreateBlizzardSettings()
         order = 45,
         type = "group",
         inline = true,
-        get = GetValue,
+        hidden = function() return Addon.CLASSIC end,
         args = {
           HideBuffs = {
             type = "toggle",
@@ -3894,6 +3916,9 @@ local function CreateBlizzardSettings()
                   "nameplateMaxDistance", "nameplateTargetBehindMaxDistance",
                   -- "nameplateGlobalScale" -- Reset it to 1, if it get's somehow corrupted
                 }
+                if Addon.CLASSIC then
+                  cvars[#cvars + 1] = "clampTargetNameplateToScreen"
+                end
                 for k, v in pairs(cvars) do
                   Addon.CVars:SetToDefault(v)
                 end
@@ -4051,19 +4076,21 @@ local function CreateColorsSettings()
   }
 
   local i = 1
-  for class_name, color in pairs(t.DEFAULT_SETTINGS.profile.Colors.Classes) do
-    entry.args.ClassColors.args[class_name] = {
-      name = LOCALIZED_CLASS_NAMES_MALE[class_name],
-      type = "color",
-      order = 10 + i,
-      set = function(info, r, g, b)
-        db.Colors.Classes[class_name] = RGB_WITH_HEX(r * 255, g * 255, b * 255)
-        Addon:ForceUpdate()
-      end,
-      arg = { "Colors", "Classes", class_name },
-      hidden = function() return not C_ClassColor.GetClassColor(class_name) end
-    }
-    i = i + 1
+  for class_name, _ in pairs(t.DEFAULT_SETTINGS.profile.Colors.Classes) do
+    -- LOCALIZED_CLASS_NAMES_MALE is not defined for unknown classes (for Classic version)
+    if LOCALIZED_CLASS_NAMES_MALE[class_name] then
+      entry.args.ClassColors.args[class_name] = {
+        name = LOCALIZED_CLASS_NAMES_MALE[class_name],
+        type = "color",
+        order = 10 + i,
+        set = function(info, r, g, b)
+          db.Colors.Classes[class_name] = RGB_WITH_HEX(r * 255, g * 255, b * 255)
+          Addon:ForceUpdate()
+        end,
+        arg = { "Colors", "Classes", class_name },
+      }
+      i = i + 1
+    end
   end
 
   return entry
@@ -4498,7 +4525,50 @@ local function CreateWidgetOptions()
   return options
 end
 
-local function CreateSpecRoles()
+local function CreateSpecRolesClassic()
+  -- Create a list of specs for the player's class
+  local result = {
+    Automatic_Spec_Detection = {
+      name = L["Determine your role (tank/dps/healing) automatically based on current stance (Warrior) or form (Druid)."],
+      type = "toggle",
+      width = "full",
+      order = 1,
+      arg = { "optionRoleDetectionAutomatic" }
+    },
+    SpecGroup = {
+      name = " ",
+      type = "group",
+      inline = true,
+      order = 3,
+      args = {
+        Tank = {
+          name = L["Tank"],
+          type = "toggle",
+          order = 1,
+          desc = L["Sets your role to tanking."],
+          get = function()
+            return TidyPlatesThreat.db.char.spec[1]
+          end,
+          set = function() TidyPlatesThreat.db.char.spec[1] = true; Addon:ForceUpdate() end,
+        },
+        DPS = {
+          name = L["DPS/Healing"],
+          type = "toggle",
+          order = 2,
+          desc = L["Sets your role to DPS."],
+          get = function()
+            return not TidyPlatesThreat.db.char.spec[1]
+          end,
+          set = function() TidyPlatesThreat.db.char.spec[1] = false; Addon:ForceUpdate() end,
+        },
+      }
+    }
+  }
+
+  return result
+end
+
+local function CreateSpecRolesRetail()
   -- Create a list of specs for the player's class
   local result = {
     Automatic_Spec_Detection = {
@@ -5167,12 +5237,14 @@ local function CreateOptionsTable()
                       order = 29,
                       type = "toggle",
                       arg = { "settings", "healthbar", "ShowHealAbsorbs" },
+                      hidden = function() return Addon.CLASSIC end,
                     },
                     ShowAbsorbs = {
                       name = L["Absorbs"],
                       order = 30,
                       type = "toggle",
                       arg = { "settings", "healthbar", "ShowAbsorbs" },
+                      hidden = function() return Addon.CLASSIC end,
                     },
                     ShowMouseoverHighlight = {
                       type = "toggle",
@@ -5291,6 +5363,7 @@ local function CreateOptionsTable()
                       order = 90,
                       type = "group",
                       inline = true,
+                      hidden = function() return Addon.CLASSIC end,
                       args = {
                         AbsorbColor = {
                           name = L["Color"],
@@ -6290,6 +6363,7 @@ local function CreateOptionsTable()
                       },
                     },
                     Placement = GetPlacementEntryNew(60, { "StatusText", "NameMode" } ),
+                  hidden = function() return Addon.CLASSIC end,
                   },
                 },
               },
@@ -7018,12 +7092,12 @@ local function CreateOptionsTable()
               },
             },
             DualSpec = {
-              name = L["Spec Roles"],
+              name = L["Roles"],
               type = "group",
               desc = L["Set the roles your specs represent."],
               disabled = function() return not db.threat.ON end,
               order = 5,
-              args = CreateSpecRoles(),
+              args = (Addon.CLASSIC and CreateSpecRolesClassic()) or CreateSpecRolesRetail(),
             },
             Textures = {
               name = L["Textures"],
@@ -7464,7 +7538,10 @@ function TidyPlatesThreat:ProfChange()
     for k_c, v_c in pairs(CLASS_SORT_ORDER) do
       base.ClassIconWidget.args.Textures.args["Prev" .. k_c].image = path .. "ClassIconWidget\\" .. db.classWidget.theme .. "\\" .. CLASS_SORT_ORDER[k_c]
     end
-    base.QuestWidget.args.ModeIcon.args.Texture.args.Preview.image = path .. "QuestWidget\\" .. db.questWidget.IconTexture
+
+    if not Addon.CLASSIC then
+      base.QuestWidget.args.ModeIcon.args.Texture.args.Preview.image = path .. "QuestWidget\\" .. db.questWidget.IconTexture
+    end
 
     local threat_path = path .. "ThreatWidget\\" .. db.threat.art.theme .. "\\"
     base = options.args.ThreatOptions.args.Textures.args.Options.args

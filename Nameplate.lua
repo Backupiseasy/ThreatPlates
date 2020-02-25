@@ -11,7 +11,7 @@ local max, gsub, tonumber, math_abs = math.max, string.gsub, tonumber, math.abs
 
 -- WoW APIs
 local wipe = wipe
-local WorldFrame, UIParent, CreateFrame, UNKNOWNOBJECT, INTERRUPTED = WorldFrame, UIParent, CreateFrame, UNKNOWNOBJECT, INTERRUPTED
+local WorldFrame, UIParent, CreateFrame, INTERRUPTED = WorldFrame, UIParent, CreateFrame, INTERRUPTED
 local UnitName, UnitReaction, UnitClassification, UnitLevel, UnitClass = UnitName, UnitReaction, UnitClassification, UnitLevel, UnitClass
 local UnitGUID, UnitEffectiveLevel, UnitSelectionColor, UnitThreatSituation =UnitGUID, UnitEffectiveLevel, UnitSelectionColor, UnitThreatSituation
 local UnitHealth, UnitHealthMax, UnitAffectingCombat, UnitIsTapDenied = UnitHealth, UnitHealthMax, UnitAffectingCombat, UnitIsTapDenied

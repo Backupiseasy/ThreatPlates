@@ -14,7 +14,7 @@ local Widget = Addon.Widgets:NewWidget("Quest")
 local string, tonumber, next, pairs, ipairs = string, tonumber, next, pairs, ipairs
 
 -- WoW APIs
-local WorldFrame, CreateFrame = WorldFrame, CreateFrame
+local _G, WorldFrame, CreateFrame = _G, WorldFrame, CreateFrame
 local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
 local UnitName, UnitIsUnit, UnitDetailedThreatSituation = UnitName, UnitIsUnit, UnitDetailedThreatSituation
 local GetNumQuestLeaderBoards, GetQuestObjectiveInfo, GetQuestLogTitle, GetNumQuestLogEntries, GetQuestLogIndexByID = GetNumQuestLeaderBoards, GetQuestObjectiveInfo, GetQuestLogTitle, GetNumQuestLogEntries, GetQuestLogIndexByID
@@ -39,10 +39,53 @@ local Settings
 local HideInCombat
 local QuestLogNotComplete = true
 local QuestUpdatePending = false
+local QuestAcceptedUpdatePending = true
+local FirstPOIUpateAfterLogin = true
 local QuestList, QuestIDs, QuestsToUpdate = {}, {}, {}
 --local QuestUnitsToUpdate = {}
 
 local IsQuestUnit -- Function
+
+-- Since patch 8.3, quest tooltips have a different format depending on the localization, it seems
+-- at least for kill quests
+local PARSER_QUEST_OBJECTIVE_BACKUP = function(text)
+  local current, goal, objective_name = string.match(text,"^(%d+)/(%d+)( .*)$")
+
+  if not objective_name then
+    objective_name, current, goal = string.match(text,"^(.*: )(%d+)/(%d+)$")
+  end
+
+  return objective_name, current, goal
+end
+
+local QUEST_OBJECTIVE_PARSER_LEFT = function(text)
+  local current, goal, objective_name = string.match(text,"^(%d+)/(%d+)( .*)$")
+  return objective_name, current, goal
+end
+
+local QUEST_OBJECTIVE_PARSER_RIGHT = function(text)
+  return string.match(text,"^(.*: )(%d+)/(%d+)$")
+end
+
+local STANDARD_QUEST_OBJECTIVE_PARSER = {
+  -- x/y Objective
+  enUS = QUEST_OBJECTIVE_PARSER_LEFT,
+  -- enGB = enGB clients return enUS
+  esMX = QUEST_OBJECTIVE_PARSER_LEFT,
+  ptBR = QUEST_OBJECTIVE_PARSER_LEFT,
+  itIT = QUEST_OBJECTIVE_PARSER_LEFT,
+  koKR = QUEST_OBJECTIVE_PARSER_LEFT,
+  zhTW = QUEST_OBJECTIVE_PARSER_LEFT,
+  zhCN = QUEST_OBJECTIVE_PARSER_LEFT,
+
+  -- Objective: x/y
+  deDE = QUEST_OBJECTIVE_PARSER_RIGHT,
+  frFR = QUEST_OBJECTIVE_PARSER_RIGHT,
+  esES = QUEST_OBJECTIVE_PARSER_RIGHT,
+  ruRU = QUEST_OBJECTIVE_PARSER_RIGHT,
+}
+
+local QuestObjectiveParser = STANDARD_QUEST_OBJECTIVE_PARSER[GetLocale()] or PARSER_QUEST_OBJECTIVE_BACKUP
 
 ---------------------------------------------------------------------------------------------------
 -- Update Hook to compensate for deleyed quest information update on unit tooltips
@@ -65,109 +108,83 @@ end
 ---------------------------------------------------------------------------------------------------
 
 function IsQuestUnit(unit, create_watcher)
-  local quest_area = false
-  local quest_player = false
-  local quest_group = false
-  local quest_title = false
-  local currentProgress = false
+  if not unit.unitid then return false, false, nil end
+
+  local quest_title
+  -- local unit_name
+  local quest_player = true
+  local quest_progress = false
 
   -- Read quest information from tooltip. Thanks to Kib: QuestMobs AddOn by Tosaido.
-  if unit.unitid then
-    TooltipFrame:SetOwner(WorldFrame, "ANCHOR_NONE")
-    --tooltip_frame:SetUnit(unitid)
-    TooltipFrame:SetHyperlink("unit:" .. unit.guid)
+  TooltipFrame:SetOwner(WorldFrame, "ANCHOR_NONE")
+  --TooltipFrame:SetUnit(unitid)
+  TooltipFrame:SetHyperlink("unit:" .. unit.guid)
 
-    for i = 3, TooltipFrame:NumLines() do
-      local line = _G["ThreatPlates_TooltipTextLeft" .. i]
-      local text = line:GetText()
-      local text_r, text_g, text_b = line:GetTextColor()
+  for i = 3, TooltipFrame:NumLines() do
+    local line = _G["ThreatPlates_TooltipTextLeft" .. i]
+    local text = line:GetText()
+    local text_r, text_g, text_b = line:GetTextColor()
 
-      if text_r > 0.99 and text_g > 0.82 and text_b == 0 then --quest header
-        quest_area = true
-        quest_title = text
+    -- print ("Line: |" .. text .. "|")
+    -- print ("  => ", text_r, text_g, text_b)
+    if text_r > 0.99 and text_g > 0.82 and text_b == 0 then
+      -- A line with this color is either the quest title or a player name (if on a group quest, but always after the quest title)
+      if quest_title then
+        quest_player = (text == PlayerName)
+        -- unit_name = text
       else
-        local unit_name, progress = string.match(text, "^ ([^ ]-) ?%- (.+)$")
-        local area_progress = string.match(text, "(%d+)%%$")
+        quest_title = text
+      end
+    elseif quest_title and quest_player then
+      local objective_name, current, goal
+      local objective_type = false
 
-        if progress or area_progress then
-          quest_area = nil
+      -- Check if area / progress quest
+      if string.find(text, "%%") then
+        objective_name, current, goal = string.match(text, "^(.*) %((%d+)%%%)$")
+        objective_type = "area"
+        --print (unit_name, "=> ", "Area: |" .. text .. "|",  string.match(text, "^(.*) %((%d+)%%%)$"))
+      else
+        -- Standard x/y /pe quest
+        objective_name, current, goal = QuestObjectiveParser(text)
+        --print (unit_name, "=> ", "Standard: |" .. text .. "|", objective_name, current, goal, "|")
+      end
 
-          if unit_name then
-            local current, goal
-            local objectiveName
-            local objType = false
+      if objective_name then
+        current = tonumber(current)
 
-            if area_progress then
-              current = area_progress
-              goal = 100
-              objType = "area"
-            else
-              current, goal = string.match(progress, "(%d+)/(%d+)") --use these as a fallback if the cache is empty
-              current = tonumber(current)
-              goal = tonumber(goal)
+        if objective_type then
+          goal = 100
+        else
+          goal = tonumber(goal)
+        end
 
-              objectiveName = string.gsub(progress, "(%d+)/(%d+)", "")
-            end
-
-            local Quests = QuestList
-
-            -- Tooltips do not update right away, so fetch current and goal from the cache (which is from the api)
-            -- Note: "progressbar" type quest (area quest) progress cannot get via the API, so for this tooltips
-            -- must be used. That's also the reason why their progress is not cached.
-            if Quests[quest_title] then
-              if objectiveName == " : " then
-                local plate = GetNamePlateForUnit(unit.unitid)
-                if plate then
-                  local widget_frame = plate.TPFrame.widgets.Quest
-
-                  widget_frame.WatchTooltip = true
-                  if create_watcher then
-                    widget_frame:SetScript("OnUpdate", WatchforQuestUpdateOnTooltip)
-                  end
-                end
-              elseif Quests[quest_title].objectives[objectiveName] then
-                local obj = Quests[quest_title].objectives[objectiveName]
-
-                current = obj.current
-                goal = obj.goal
-                objType = obj.type
-              end
-            end
-
-            -- A unit may be target of more than one quest, the quest indicator should be show if at least one quest is not completed.
-            if current and goal then
-              if (current ~= goal) then
-                if (unit_name == "" or unit_name == PlayerName) then
-                  quest_player = true
-                else
-                  quest_group = true
-                end
-
-                currentProgress = {
-                  ['current'] = current,
-                  ['goal'] = goal,
-                  ['type'] = objType
-                }
-
-                break
-              end
-            else
-              if (unit_name == "" or unit_name == PlayerName) then
-                quest_player = true
-              else
-                quest_group = true
-              end
-              break
-            end
+        -- Note: "progressbar" type quest (area quest) progress cannot get via the API, so for this tooltips
+        -- must be used. That's also the reason why their progress is not cached.
+        local Quests = QuestList
+        if Quests[quest_title] then
+          local quest_objective = Quests[quest_title].objectives[objective_name]
+          if quest_objective then
+            current = quest_objective.current
+            goal = quest_objective.goal
+            objective_type = quest_objective.type
           end
+        end
+
+        -- A unit may be target of more than one quest, the quest indicator should be show if at least one quest is not completed.
+        if current and goal then
+          if (current ~= goal) then
+            return true, 1, { current = current, goal = goal, type = objective_type }
+          end
+        else
+          -- Line after quest title with quest information, so we can stop here
+          return false
         end
       end
     end
   end
 
-  local quest_type = ((quest_player or quest_area) and 1) or false -- disabling group quests: or (quest_group and 2)
-
-  return quest_type ~= false, quest_type, currentProgress
+  return false
 end
 
 function Addon:IsPlayerQuestUnit(unit)
@@ -216,10 +233,12 @@ function Widget:CreateQuest(questID, questIndex)
       -- Does not make sense to add "progressbar" type quests here as there progress is not updated via QUEST_WATCH_UPDATE
       if text and objectiveType ~= "progressbar" then
         local objectiveName = string.gsub(text, "(%d+)/(%d+)", "")
-
         -- Normally, the quest objective should come before the :, but while the QUEST_LOG_UPDATE events (after login/reload)
         -- GetQuestObjectiveInfo just returns nil as text
+
+        -- It does seem that this is no longer necessary
         QuestLogNotComplete = QuestLogNotComplete or (objectiveName == " : ")
+        -- assert (objectiveName ~= " : ", "Error: " ..  objectiveName)
 
         --only want to track quests in this format
         if numRequired and numRequired > 1 then
@@ -338,6 +357,7 @@ function Widget:QUEST_LOG_UPDATE()
     self:UpdateAllFramesWithPublish("SituationalColorUpdate")
   end
 
+  -- It does seem that this is no longer necessary
   if QuestLogNotComplete then
     QuestLogNotComplete = false
     self:GenerateQuestCache()
@@ -346,10 +366,29 @@ end
 
 function Widget:QUEST_ACCEPTED(questIndex, questID)
   self:AddQuestCacheEntry(questIndex)
-
-  -- Re-scan all nameplates for new quest information
-  self:UpdateAllFramesWithPublish("SituationalColorUpdate")
+  QuestAcceptedUpdatePending = true
 end
+
+function Widget:QUEST_POI_UPDATE()
+  if QuestAcceptedUpdatePending then
+    -- After login, sometimes the quest list is empty when the widget is loaded.
+    -- So, update the internal quest list after the first POI update after login.
+    -- At that point, the quest list is available
+    if FirstPOIUpateAfterLogin then
+      FirstPOIUpateAfterLogin = false
+      -- The following should be an alternative as QUEST_LOG_UPDATE seems to be fired after QUEST_POI_UPDATE in every case
+      -- QuestLogNotComplete = true
+      self:GenerateQuestCache()
+    end
+
+    self:UpdateAllFramesWithPublish("SituationalColorUpdate")
+    QuestAcceptedUpdatePending = false
+  end
+end
+
+--function Widget:QUEST_DATA_LOAD_RESULT(questID, success)
+--  print ("QUEST_DATA_LOAD_RESULT", questID, success)
+--end
 
 function Widget:QUEST_REMOVED(quest_id)
   local quest_title = QuestIDs[quest_id]
@@ -364,15 +403,15 @@ function Widget:QUEST_REMOVED(quest_id)
   self:UpdateAllFramesWithPublish("SituationalColorUpdate")
 end
 
-function Widget:PLAYER_REGEN_ENABLED()
-  InCombat = false
+function Widget:PLAYER_REGEN_DISABLED()
+  InCombat = true
   if TidyPlatesThreat.db.profile.questWidget.HideInCombat then
     Widget:RefreshCombatVisisbility()
   end
 end
 
-function Widget:PLAYER_REGEN_DISABLED()
-  InCombat = true
+function Widget:PLAYER_REGEN_ENABLED()
+  InCombat = false
   if TidyPlatesThreat.db.profile.questWidget.HideInCombat then
     Widget:RefreshCombatVisisbility()
   end
@@ -431,13 +470,14 @@ function Widget:OnEnable()
   -- self:SubscribeEvent("PLAYER_ENTERING_WORLD") -- Disabled as nameplates are not yet created when this event fires
 
   self:SubscribeEvent("QUEST_ACCEPTED")
-  -- This event fires whenever the player turns in a quest, whether automatically with a Task-type quest
+  -- QUEST_REMOVED fires whenever the player turns in a quest, whether automatically with a Task-type quest
   -- (Bonus Objectives/World Quests), or by pressing the Complete button in a quest dialog window.
   -- also handles abandon quest
   self:SubscribeEvent("QUEST_REMOVED")
   self:SubscribeEvent("QUEST_WATCH_UPDATE")
-
   self:SubscribeEvent("QUEST_LOG_UPDATE")
+  self:SubscribeEvent("QUEST_POI_UPDATE")
+  -- self:RegisterEvent("QUEST_DATA_LOAD_RESULT")
   self:SubscribeUnitEvent("UNIT_QUEST_LOG_CHANGED", "player")
 
   -- Handle in-combat situations:
@@ -491,7 +531,6 @@ function Widget:UpdateFrame(widget_frame, unit)
     --NOTE: skip showing for quests that have 1 of something, as WoW uses this for things like events eg "Push back the alliance 0/1"
     if db.ShowProgress and current and current.goal > 1 then
       local text
-
       if current.type == "area" then
         text = current.current .. '%'
 
@@ -544,16 +583,15 @@ end
 --  for _ in pairs(T) do count = count + 1 end
 --  return count
 --end
---
---
---function Addon:PrintQuests()
+
+-- function Addon:PrintQuests()
 --  print ("Quests List:", tablelength(QuestIDs))
 --  for quest_id, title in pairs(QuestIDs) do
 --    local quest = QuestList[title]
 --    if quest.objectives and tablelength(quest.objectives) > 0 then
 --      print ("*", title .. " [ID:" .. tostring(quest_id) .. "]")
 --      for name, val in pairs (quest.objectives) do
---        print ("  -", name ..":", val.current, "/", val.goal, "[" .. val.type .. "]")
+--        print ("  - |" .. name .."| :", val.current, "/", val.goal, "[" .. val.type .. "]")
 --      end
 --    end
 --  end
