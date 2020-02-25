@@ -109,7 +109,7 @@ Addon.RGB_P = function(red, green, blue, alpha)
 end
 
 Addon.RGB_WITH_HEX = function(red, green, blue, alpha)
-	local color = ThreatPlates.RGB(red, green, blue, alpha)
+	local color = Addon.RGB(red, green, blue, alpha)
 	color.colorStr = CreateColor(color.r, color.g, color.b, color.a):GenerateHexColor()
 	return color
 end

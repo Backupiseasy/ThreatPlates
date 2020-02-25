@@ -1433,7 +1433,7 @@ local function GetValueOrDefault(old_value, default_value)
 end
 
 Addon.MigrationCustomNameplatesV1 = function()
-  local defaults = ThreatPlates.CopyTable(TidyPlatesThreat.db.defaults)
+  local defaults = Addon.CopyTable(TidyPlatesThreat.db.defaults)
   TidyPlatesThreat.db:RegisterDefaults({})
 
   -- Set default to empty so that new defaul values don't impact the migration
@@ -1487,7 +1487,7 @@ Addon.MigrationCustomNameplatesV1 = function()
     end
   end
 
-  defaults.profile.uniqueSettings = ThreatPlates.CopyTable(ThreatPlates.DEFAULT_SETTINGS.profile.uniqueSettings)
+  defaults.profile.uniqueSettings = Addon.CopyTable(ThreatPlates.DEFAULT_SETTINGS.profile.uniqueSettings)
   TidyPlatesThreat.db:RegisterDefaults(defaults)
   TidyPlatesThreat.db.global.CustomNameplatesVersion = 2
 end
@@ -1495,7 +1495,7 @@ end
 Addon.SetDefaultsForCustomNameplates = function()
   if TidyPlatesThreat.db.global.CustomNameplatesVersion > 1 then return end
 
-  local defaults = ThreatPlates.CopyTable(TidyPlatesThreat.db.defaults)
+  local defaults = Addon.CopyTable(TidyPlatesThreat.db.defaults)
   defaults.profile.uniqueSettings = DEPRECATED_UNIQUE_SETTINGS
   TidyPlatesThreat.db:RegisterDefaults(defaults)
 end

@@ -24,7 +24,7 @@ local UnitName = UnitName
 
 -- ThreatPlates APIs
 local LibStub = LibStub
-local RGB_WITH_HEX = t.RGB_WITH_HEX
+local RGB_WITH_HEX = Addon.RGB_WITH_HEX
 local L = t.L
 local ConcatTables = Addon.ConcatTables
 local Meta = Addon.Meta
@@ -3478,7 +3478,7 @@ local function CreateVisibilitySettings()
             type = "toggle",
             width = "full",
             set = function(info, val)
-              info = t.CopyTable(info)
+              info = Addon.CopyTable(info)
               Addon:CallbackWhenOoC(function()
                 SetValue(info, val)
                 Addon:SetBaseNamePlateSize() -- adjust clickable area if switching from Blizzard plates to Threat Plate plates
@@ -3497,7 +3497,7 @@ local function CreateVisibilitySettings()
             type = "toggle",
             width = "full",
             set = function(info, val)
-              info = t.CopyTable(info)
+              info = Addon.CopyTable(info)
               Addon:CallbackWhenOoC(function()
                 SetValue(info, val)
                 Addon:SetBaseNamePlateSize() -- adjust clickable area if switching from Blizzard plates to Threat Plate plates
@@ -3976,7 +3976,7 @@ local function CreateColorsSettings()
             width = "full",
             func = function()
               for name, color in pairs(db.ColorByReaction) do
-                db.ColorByReaction[name] = t.CopyTable(t.DEFAULT_SETTINGS.profile.ColorByReaction[name])
+                db.ColorByReaction[name] = Addon.CopyTable(t.DEFAULT_SETTINGS.profile.ColorByReaction[name])
               end
               Addon:ForceUpdate()
             end,
@@ -3997,7 +3997,7 @@ local function CreateColorsSettings()
             width = "full",
             func = function()
               for name, color in pairs(t.DEFAULT_SETTINGS.profile.Colors.Classes) do
-                db.Colors.Classes[name] = t.CopyTable(color)
+                db.Colors.Classes[name] = Addon.CopyTable(color)
               end
               Addon:ForceUpdate()
             end,
@@ -4065,7 +4065,7 @@ local function CreateColorsSettings()
             width = "full",
             func = function()
               for name, color in pairs(t.DEFAULT_SETTINGS.profile.settings.raidicon.hpMarked) do
-                db.settings.raidicon.hpMarked[name] = t.CopyTable(color)
+                db.settings.raidicon.hpMarked[name] = Addon.CopyTable(color)
               end
               Addon:ForceUpdate()
             end,
@@ -4678,7 +4678,7 @@ local function CreateCustomNameplateEntry(index)
             type = "execute",
             func = function()
               clipboard = {}
-              clipboard = t.CopyTable(db.uniqueSettings[index])
+              clipboard = Addon.CopyTable(db.uniqueSettings[index])
               t.Print(L["Copied!"])
             end,
           },
@@ -4688,7 +4688,7 @@ local function CreateCustomNameplateEntry(index)
             type = "execute",
             func = function()
               if type(clipboard) == "table" and clipboard.name then
-                db.uniqueSettings[index] = t.CopyTable(clipboard)
+                db.uniqueSettings[index] = Addon.CopyTable(clipboard)
                 t.Print(L["Pasted!"])
               else
                 t.Print(L["Nothing to paste!"])
@@ -4974,7 +4974,7 @@ local function CreateCustomNameplatesGroup()
 
         -- If slot_no is nil, General Settings is selected currently.
         local slot_no = (tonumber(selected:match("#(.*)")) or 0) + 1
-        table.insert(db.uniqueSettings, slot_no, t.CopyTable(t.DEFAULT_SETTINGS.profile.uniqueSettings["**"]))
+        table.insert(db.uniqueSettings, slot_no, Addon.CopyTable(t.DEFAULT_SETTINGS.profile.uniqueSettings["**"]))
         db.uniqueSettings[slot_no].name = ""
 
         options.args.Custom.args = CreateCustomNameplatesGroup()
