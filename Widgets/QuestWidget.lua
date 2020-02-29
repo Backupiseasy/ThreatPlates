@@ -146,6 +146,10 @@ function IsQuestUnit(unit, create_watcher)
       local objective_name, current, goal
       local objective_type = false
 
+      -- Set quest_title to false again, otherwise a second quest in the tooltip will not be found (first if statement will
+      -- check for quest_player only as quest_title is still set to the first quest
+      quest_title = false
+
       -- Check if area / progress quest
       if string.find(text, "%%") then
         objective_name, current, goal = string.match(text, "^(.*) %((%d+)%%%)$")

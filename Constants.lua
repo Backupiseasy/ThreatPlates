@@ -64,7 +64,7 @@ local function GetDefaultColorsForClasses()
 
   for i, class_name in ipairs(CLASS_SORT_ORDER) do
     -- RAID_CLASS_COLORS[class_name] is not null even in Classic for unknown classes like MONK
-    class_colors[class_name] = ThreatPlates.RGB_WITH_HEX(RAID_CLASS_COLORS[class_name]:GetRGBAsBytes())
+    class_colors[class_name] = RGB_WITH_HEX(RAID_CLASS_COLORS[class_name]:GetRGBAsBytes())
   end
 
   return class_colors
