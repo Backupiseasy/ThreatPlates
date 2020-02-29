@@ -2,6 +2,7 @@
 9.1.19
 ------------------------------------------------------
 * Fixed a bug in Quest widget where the quest indicator was not shown if the first of several quests in a unit's tooltip was completed.
+* Fixed a bug in Quest widget where the area (progress-based) quests were not detected correctly in scenarios.
 
 ------------------------------------------------------
 9.1.18

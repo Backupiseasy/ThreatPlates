@@ -152,9 +152,9 @@ function IsQuestUnit(unit, create_watcher)
 
       -- Check if area / progress quest
       if string.find(text, "%%") then
-        objective_name, current, goal = string.match(text, "^(.*) %((%d+)%%%)$")
+        objective_name, current, goal = string.match(text, "^(.*) %(?(%d+)%%%)?$")
         objective_type = "area"
-        --print (unit_name, "=> ", "Area: |" .. text .. "|",  string.match(text, "^(.*) %((%d+)%%%)$"))
+        --print (unit_name, "=> ", "Area: |" .. text .. "|", objective_name, current, goal)
       else
         -- Standard x/y /pe quest
         objective_name, current, goal = QuestObjectiveParser(text)
