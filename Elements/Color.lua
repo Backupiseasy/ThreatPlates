@@ -29,6 +29,8 @@ local REACTION_REFERENCE = {
   NEUTRAL = { NPC = "NeutralUnit", PLAYER = "NeutralUnit",	},
 }
 
+local TRANPARENT_COLOR = Addon.RGB(0, 0, 0, 0)
+
 ---------------------------------------------------------------------------------------------------
 -- Local variables
 ---------------------------------------------------------------------------------------------------
@@ -124,30 +126,21 @@ local NAME_COLOR_FUNCTIONS = {
 -- Functions to set color for healthbar, name, and status text
 ---------------------------------------------------------------------------------------------------
 
-local function UpdatePlateColors(tp_frame)
-  local fg_color
+local function UpdatePlateColorsOld(tp_frame)
+  local color
 
   if tp_frame.style.healthbar.show then
-    fg_color = tp_frame:GetHealthbarColor()
+    local healthbar = tp_frame.visual.Healthbar
 
-    -- TODO: Caching of colors does not work currently
-    --if fg_color.r ~= current_color.r or fg_color.g ~= current_color.g or fg_color.b ~= current_color.b or fg_color.a ~= current_color.a then
-    --if fg_color ~= tp_frame.CurrentHealthbarColor then
-      local bg_color
-      if Settings.BackgroundUseForegroundColor then
-        bg_color = fg_color
-      else
-        bg_color = Settings.BackgroundColor
-      end
+    color = tp_frame:GetHealthbarColor()
+    healthbar:SetStatusBarColor(color.r, color.g, color.b, 1)
 
-      local healthbar = tp_frame.visual.Healthbar
-      healthbar:SetStatusBarColor(fg_color.r, fg_color.g, fg_color.b, 1)
-      healthbar.Border:SetBackdropColor(bg_color.r, bg_color.g, bg_color.b, 1 - Settings.BackgroundOpacity)
-      --tp_frame.CurrentHealthbarColor = fg_color
-    --end
+    if not Settings.BackgroundUseForegroundColor then
+      color = Settings.BackgroundColor
+    end
+
+    healthbar.Background:SetVertexColor(color.r, color.g, color.b, 1 - Settings.BackgroundOpacity)
   end
-
-  fg_color = tp_frame:GetNameColor()
 
   --    if fg_color == nil then
   --      local unit = tp_frame.unit
@@ -157,15 +150,47 @@ local function UpdatePlateColors(tp_frame)
   --      fg_color = RGB_P(255, 255, 255)
   --    end
 
-  -- Only update the color and fire the event if there's actually a change in color
-  --if fg_color ~= tp_frame.CurrentNameColor then
-  if SettingsName[tp_frame.PlateStyle].Enabled then
-    tp_frame.visual.NameText:SetTextColor(fg_color.r, fg_color.g, fg_color.b)
-  end
-  PublishEvent("NameColorUpdate", tp_frame, fg_color)
+  color = tp_frame:GetNameColor()
 
-  --tp_frame.CurrentNameColor = fg_color
-  --end
+  -- Only update the color and fire the event if there's actually a change in color
+  if SettingsName[tp_frame.PlateStyle].Enabled then
+    tp_frame.visual.NameText:SetTextColor(color.r, color.g, color.b)
+  end
+  PublishEvent("NameColorUpdate", tp_frame, color)
+end
+
+local function UpdatePlateColors(tp_frame)
+  local color, current_color
+
+  if tp_frame.style.healthbar.show then
+    color = tp_frame:GetHealthbarColor()
+    current_color = tp_frame.CurrentHealthbarColor or TRANPARENT_COLOR
+
+    if color.r ~= current_color.r or color.g ~= current_color.g or color.b ~= current_color.b or color.a ~= current_color.a then
+      local healthbar = tp_frame.visual.Healthbar
+      healthbar:SetStatusBarColor(color.r, color.g, color.b, 1)
+      tp_frame.CurrentHealthbarColor = color
+
+      if not Settings.BackgroundUseForegroundColor then
+        color = Settings.BackgroundColor
+      end
+
+      healthbar.Background:SetVertexColor(color.r, color.g, color.b, 1 - Settings.BackgroundOpacity)
+    end
+  end
+
+  -- Only update the color and fire the event if there's actually a change in color
+  color = tp_frame:GetNameColor()
+  current_color = tp_frame.CurrentNameColor or TRANPARENT_COLOR
+
+  if color.r ~= current_color.r or color.g ~= current_color.g or color.b ~= current_color.b or color.a ~= current_color.a then
+    if SettingsName[tp_frame.PlateStyle].Enabled then
+      tp_frame.visual.NameText:SetTextColor(color.r, color.g, color.b)
+    end
+    PublishEvent("NameColorUpdate", tp_frame, color)
+
+    tp_frame.CurrentNameColor = color
+  end
 end
 
 ---------------------------------------------------------------------------------------------------

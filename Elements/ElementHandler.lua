@@ -45,7 +45,7 @@ function ElementHandler.Created(frame)
   for i = 1, #ElementsPriority do
     ElementsPriority[i].Created(frame)
   end
- end
+end
 
 function ElementHandler.UnitAdded(frame)
   local element

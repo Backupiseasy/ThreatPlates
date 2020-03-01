@@ -8,39 +8,97 @@ local ADDON_NAME, Addon = ...
 ---------------------------------------------------------------------------------------------------
 
 -- Lua APIs
-local pairs, next = pairs, next
+local pairs, next, floor, abs = pairs, next, floor, abs
 
 -- WoW APIs
 local CreateFrame, UIParent = CreateFrame, UIParent
 
 -- ThreatPlates APIs
-
 local Animations = Addon.Animations
 
-Animations.FLASH_DURATION = 0.4
+---------------------------------------------------------------------------------------------------
+-- Local variables
+---------------------------------------------------------------------------------------------------
+local ShowPlateDuration, HidePlateDuration, FadeToDuration, ScaleToDuration, FlashDuration
+local HidePlateFadeOut, HidePlateScaleDown
+
+---------------------------------------------------------------------------------------------------
+-- Cached configuration settings (for performance reasons)
+---------------------------------------------------------------------------------------------------
+local Settings
 
 ---------------------------------------------------------------------------------------------------
 -- Animation Function (OnUpdate on a frame)
 ---------------------------------------------------------------------------------------------------
 
+local function SetPlateScale(frame, scale)
+  frame:SetScale(scale) -- poor man's scale ...
+
+  --local style = frame.style.healthbar
+  --local width, height = style.width, style.height
+  --
+  --frame:SetSize(floor(width * scale), floor(height * scale))
+  --
+  --local bar = frame.visual.Healthbar
+  --bar:SetSize(floor(width * scale), floor(height * scale))
+
+  --local bar = frame.visual.Castbar
+  --width = floor(width * scale)
+  --height = floor(height * scale)
+  --bar:SetSize(floor(width * scale), floor(height * scale)
+end
+
 local AnimationFrame = CreateFrame("Frame", "ThreatPlatesAnimation", UIParent)
-local PlatesToWatch = {}
+local AnimatedFrames = {}
 
 local function AnimationOnUpdate(self, elapsed)
-  for frame, info in pairs(PlatesToWatch) do
-    --if info.Type == "Alpha" then
-      info.FadeTimer = info.FadeTimer + elapsed
+  for frame, _ in pairs(AnimatedFrames) do
+    local animation_on_frame = false
 
-      if info.FadeTimer < info.Duration then
-        frame:SetAlpha((info.FadeTimer / info.Duration) * (info.TargetAlpha - info.StartAlpha) + info.StartAlpha)
-      else
-        frame:SetAlpha(info.TargetAlpha)
-        PlatesToWatch[frame] = nil
+    if frame:IsShown() then
+      local animation = frame.FadeAnimation
+      if animation and animation.Playing then
+        animation.Timer = animation.Timer + elapsed
+
+        if animation.Timer < animation.Duration then
+          -- perform animation
+          frame:SetAlpha((animation.Timer / animation.Duration) * (animation.TargetAlpha - animation.StartAlpha) + animation.StartAlpha)
+          animation_on_frame = true
+        else
+          -- animation has ended
+          frame:SetAlpha(animation.TargetAlpha)
+          animation.Playing = nil
+        end
+
+        --if not frame.Active then
+        --  print ("  Alpha:", frame.unit.name, "=>", frame:GetAlpha())
+        --end
       end
-    --end
+
+      animation = frame.ScaleAnimation
+      if animation and animation.Playing then
+        animation.Timer = animation.Timer + elapsed
+
+        if animation.Timer < animation.Duration then
+          -- perform animation
+          --frame:SetScale((animation.Timer / animation.Duration) * (animation.TargetScale - animation.StartScale) + animation.StartScale)
+          local scale = (animation.Timer / animation.Duration) * (animation.TargetScale - animation.StartScale) + animation.StartScale
+          SetPlateScale(frame, scale)
+          animation_on_frame = true
+        else
+          -- animation has ended
+          SetPlateScale(frame, animation.TargetScale)
+          animation.Playing = nil
+        end
+      end
+    end
+
+    if not animation_on_frame then
+      AnimatedFrames[frame] = nil
+    end
   end
 
-  if not next(PlatesToWatch) then
+  if not next(AnimatedFrames) then
     AnimationFrame:Hide()
   end
 end
@@ -77,13 +135,14 @@ function Animations:CreateFlashLoop(frame)
   end)
 end
 
-function Animations:Flash(frame, duration)
+function Animations:Flash(frame)
   if not frame.FlashAnimation then
     self:CreateFlashLoop(frame)
   end
 
   local animation = frame.FlashAnimation
   if not animation.Playing then
+    local duration = FlashDuration
     animation.FadeIn:SetDuration(duration)
     animation.FadeOut:SetDuration(duration)
     animation:Play()
@@ -99,99 +158,119 @@ function Animations:StopFlash(frame)
   end
 end
 
---function Animations:CreateFadeIn(frame)
---  frame.FadeInAnimation = frame:CreateAnimationGroup("FadeIn")
---  frame.FadeInAnimation.FadeIn = frame.FadeInAnimation:CreateAnimation("ALPHA", "FadeIn")
---
---  frame.FadeInAnimation:SetScript("OnFinished", function(self, requested)
---    self:Stop()
---    self.Playing = nil
---    frame:SetAlpha(self.TargetAlpha)
---
---    -- Workaround: Re-set the backdrop color for the healthbar, so that the correct alpha value is applied
---    -- Otherwise, the backdrop's alpha is set to 1 for some unknown reason.
---    local backdrop = frame.visual.healthbar.Background
---    backdrop:SetVertexColor(backdrop:GetVertexColor())
---    backdrop = frame.visual.threatborder
---    if backdrop:IsShown() then
---      backdrop:SetBackdropBorderColor(backdrop:GetBackdropBorderColor())
---    end
---  end)
---
---  frame.FadeInAnimation:SetScript("OnUpdate", function(self, elapsed)
---    -- Workaround: Re-set the backdrop color for the healthbar, so that the correct alpha value is applied
---    -- Otherwise, the backdrop's alpha is set to 1 for some unknown reason.
---    local backdrop = frame.visual.healthbar.Background
---    backdrop:SetVertexColor(backdrop:GetVertexColor())
---    backdrop = frame.visual.threatborder
---    if backdrop:IsShown() then
---      backdrop:SetBackdropBorderColor(backdrop:GetBackdropBorderColor())
---    end
---  end)
---end
+function Animations:ShowPlate(frame, target_alpha)
+  local current_alpha = frame:GetAlpha()
+  if floor(abs(current_alpha - target_alpha) * 100) < 1 then return end
 
---function Animations:FadeIn(frame, target_alpha, duration)
---  if not frame.FadeInAnimation then
---    self:CreateFadeIn(frame, target_alpha)
---  end
---
---  local animation = frame.FadeInAnimation
---  if not frame.Playing then
---    animation.FadeIn:SetFromAlpha(frame:GetAlpha())
---    animation.FadeIn:SetToAlpha(target_alpha)
---    animation.FadeIn:SetDuration(duration)
---    animation:Play()
---    animation.Playing = true
---    animation.TargetAlpha = target_alpha
---  end
---end
---
---function Animations:StopFadeIn(frame)
---  local animation = frame.FadeInAnimation
---  if animation and animation.Playing then
---
---    local r, g, b, a = frame.visual.healthbar.Background:GetVertexColor()
---    if frame.unit.isTarget then
---      print (GetTime(), "Vor Stop: a =>", a)
---    end
---
---    animation:Pause()
---
---    local r, g, b, a = frame.visual.healthbar.Background:GetVertexColor()
---    if frame.unit.isTarget then
---      print (GetTime(), "Nach Stop: a =>", a)
---    end
---
---    frame:SetAlpha(animation.TargetAlpha)
---    --frame:SetAlpha(frame.CurrentAlpha)
---    animation.Playing = nil
---  end
---end
+  frame.FadeAnimation = frame.FadeAnimation or {}
 
-function Animations:FadePlate(frame, target_alpha, duration)
-  --local current_alpha = frame:GetAlpha()
-  --if floor(abs(current_alpha - target_alpha) * 100) < 1 then return end
+  local animation = frame.FadeAnimation
+  animation.StartAlpha = current_alpha
+  animation.TargetAlpha = target_alpha
+  animation.Duration = ShowPlateDuration
+  animation.Timer = 0
+  animation.Playing = true
 
-  local info = PlatesToWatch[frame]
-  if not info then
-    info = {}
-    PlatesToWatch[frame] = info
-  end
+  AnimatedFrames[frame] = true
+  AnimationFrame:Show()
+end
 
-  --info.Type = "Alpha"
-  info.StartAlpha = frame:GetAlpha()
-  info.TargetAlpha = target_alpha
-  info.Duration = duration
-  info.FadeTimer = 0
+function Animations:FadePlate(frame, target_alpha)
+  -- local current_alpha = frame:GetAlpha()
+  -- This check is done before this function is called - maybe not ideal
+  -- if floor(abs(current_alpha - target_alpha) * 100) < 1 then return end
 
+  frame.FadeAnimation = frame.FadeAnimation or {}
+
+  local animation = frame.FadeAnimation
+  animation.StartAlpha = frame:GetAlpha()
+  animation.TargetAlpha = target_alpha
+  animation.Duration = FadeToDuration
+  animation.Timer = 0
+  animation.Playing = true
+
+  AnimatedFrames[frame] = true
   AnimationFrame:Show()
 end
 
 function Animations:StopFade(frame)
-  local info = PlatesToWatch[frame]
-  if info then
-    -- frame:SetAlpha(info.TargetAlpha)
-    -- frame:SetScale(info.TargetScale)
-    PlatesToWatch[frame] = nil
+  --frame:SetAlpha(frame.FadeAnimation.TargetAlpha)
+  frame.FadeAnimation.Playing = nil
+end
+
+function Animations:ScalePlate(frame, target_scale)
+  local current_scale = frame:GetScale()
+  if floor(abs(current_scale - target_scale) * 100) < 1 then return end
+
+  frame.ScaleAnimation = frame.ScaleAnimation or {}
+
+  local animation = frame.ScaleAnimation
+  animation.StartScale = current_scale
+  animation.TargetScale = target_scale
+  animation.Duration = abs(current_scale - target_scale) * ScaleToDuration
+  --print ("Scaled Duration:", current_scale, target_scale, "=>", abs(current_scale - target_scale), "=",animation.Duration)
+  animation.Timer = 0
+  animation.Playing = true
+
+  AnimatedFrames[frame] = true
+  AnimationFrame:Show()
+end
+
+function Animations:StopScale(frame)
+  if frame.ScaleAnimation then
+    --frame.SetScale(frame.ScaleAnimation.TargetScale)
+    --SetPlateScale(frame, frame.ScaleAnimation.TargetScale)
+    frame.ScaleAnimation.Playing = nil
   end
+end
+
+function Animations:HidePlate(frame)
+
+  --print ("Hide Plate:", frame.unit.name)
+
+  local show_animation = false
+
+  if Settings.HidePlateFadeOut then
+    frame.FadeAnimation = frame.FadeAnimation or {}
+
+    local animation = frame.FadeAnimation
+    animation.StartAlpha = frame:GetAlpha()
+    animation.TargetAlpha = 0.01
+    animation.Duration = HidePlateDuration
+    animation.Timer = 0
+    animation.Playing = true
+
+    show_animation = true
+  end
+
+  if Settings.HidePlateScaleDown then
+    frame.ScaleAnimation = frame.ScaleAnimation or {}
+
+    local animation = frame.ScaleAnimation
+    animation.StartScale = frame:GetScale()
+    animation.TargetScale = 0.3
+    animation.Duration = HidePlateDuration
+    animation.Timer = 0
+    animation.Playing = true
+
+    show_animation = true
+  end
+
+  -- Frame is hidden immediately (no scale animation) or after the animation ends
+  if show_animation then
+    AnimatedFrames[frame] = true
+    AnimationFrame:Show()
+  end
+end
+
+function Animations:UpdateSettings()
+  Settings = TidyPlatesThreat.db.profile.Animations
+
+  ShowPlateDuration = Settings.ShowPlateDuration
+  HidePlateDuration = Settings.HidePlateDuration
+  HidePlateFadeOut = Settings.HidePlateFadeOut
+  HidePlateScaleDown = Settings.HidePlateScaleDown
+  FadeToDuration = Settings.FadeToDuration
+  ScaleToDuration = Settings.ScaleToDuration
+  FlashDuration = Settings.FlashDuration
 end

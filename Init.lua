@@ -39,6 +39,8 @@ TidyPlatesThreat = LibStub("AceAddon-3.0"):NewAddon("TidyPlatesThreat", "AceCons
 TidyPlatesThreatDBM = true
 
 Addon.Animations = {}
+Addon.Scaling = {}
+Addon.Transparency = {}
 
 --------------------------------------------------------------------------------------------------
 -- General Functions

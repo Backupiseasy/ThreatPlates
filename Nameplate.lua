@@ -16,32 +16,35 @@ local UnitName, UnitReaction, UnitClassification, UnitLevel, UnitClass = UnitNam
 local UnitGUID, UnitEffectiveLevel, UnitSelectionColor, UnitThreatSituation =UnitGUID, UnitEffectiveLevel, UnitSelectionColor, UnitThreatSituation
 local UnitHealth, UnitHealthMax, UnitAffectingCombat, UnitIsTapDenied = UnitHealth, UnitHealthMax, UnitAffectingCombat, UnitIsTapDenied
 local UnitChannelInfo, UnitCastingInfo, UnitPlayerControlled = UnitChannelInfo, UnitCastingInfo, UnitPlayerControlled
-local UnitIsUnit, UnitIsPlayer, UnitExists = UnitIsUnit, UnitIsPlayer, UnitExists
+local UnitIsUnit, UnitIsPlayer = UnitIsUnit, UnitIsPlayer
 local GetCreatureDifficultyColor, GetRaidTargetIndex = GetCreatureDifficultyColor, GetRaidTargetIndex
-local GetTime, GetCVar, Lerp, CombatLogGetCurrentEventInfo = GetTime, GetCVar, Lerp, CombatLogGetCurrentEventInfo
+local GetTime, GetCVar, CombatLogGetCurrentEventInfo = GetTime, GetCVar, CombatLogGetCurrentEventInfo
 local GetSpecialization, GetSpecializationInfo = GetSpecialization, GetSpecializationInfo
 local GetNamePlates, GetNamePlateForUnit = C_NamePlate.GetNamePlates, C_NamePlate.GetNamePlateForUnit
 local GetPlayerInfoByGUID, RAID_CLASS_COLORS = GetPlayerInfoByGUID, RAID_CLASS_COLORS
+local IsInInstance, InCombatLockdown = IsInInstance, InCombatLockdown
+local NamePlateDriverFrame = NamePlateDriverFrame
+local SetCVar = SetCVar
 
 -- ThreatPlates APIs
-local ThreatPlates = Addon.ThreatPlates
 local TidyPlatesThreat = TidyPlatesThreat
-local Widgets = Addon.Widgets
+local ThreatPlates = Addon.ThreatPlates
+local L = ThreatPlates.L
+local Widgets, Animations, Scaling, Transparency = Addon.Widgets, Addon.Animations, Addon.Scaling, Addon.Transparency
 local RegisterEvent, UnregisterEvent = Addon.EventService.RegisterEvent, Addon.EventService.UnregisterEvent
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
 local ElementsCreated, ElementsUnitAdded, ElementsUnitRemoved = Addon.Elements.Created, Addon.Elements.UnitAdded, Addon.Elements.UnitRemoved
 local ElementsUpdateStyle, ElementsUpdateSettings = Addon.Elements.UpdateStyle, Addon.Elements.UpdateSettings
 
+
 -- Constants
 local CASTBAR_INTERRUPT_HOLD_TIME = Addon.CASTBAR_INTERRUPT_HOLD_TIME
-local PLATE_FADE_IN_TIME = Addon.PLATE_FADE_IN_TIME
 local THREAT_REFERENCE = Addon.THREAT_REFERENCE
 
 ---------------------------------------------------------------------------------------------------
 -- Local variables
 ---------------------------------------------------------------------------------------------------
 --local PlateOnUpdateQueue = {}
-
 local LastTargetPlate
 
 -- External references to internal data
@@ -52,18 +55,10 @@ local PlatesByGUID = Addon.PlatesByGUID
 ---------------------------------------------------------------------------------------------------
 -- Cached configuration settings (for performance reasons)
 ---------------------------------------------------------------------------------------------------
-local SettingsEnabledFading
-local SettingsOccludedAlpha, SettingsEnabledOccludedAlpha
 local SettingsShowEnemyBlizzardNameplates, SettingsShowFriendlyBlizzardNameplates
-local ShowCastBars
-
--- Cached CVARs (updated on every PLAYER_ENTERING_WORLD event
-local CVAR_NameplateOccludedAlphaMult
-
----------------------------------------------------------------------------------------------------------------------
--- Core Function Declaration
----------------------------------------------------------------------------------------------------------------------
-local UpdatePlate_SetAlpha, UpdatePlate_SetAlphaOnUpdate, UpdatePlate_Transparency
+local ShowCastBars, PersonalNameplateHideBuffs
+-- Cached CVARs
+local AnimateHideNameplate, CVAR_nameplateMinAlpha, CVAR_nameplateMinScale
 
 ---------------------------------------------------------------------------------------------------------------------
 --  Initialize unit data after NAME_PLATE_UNIT_ADDED and update it
@@ -367,13 +362,10 @@ local function OnShowNameplate(plate, unitid)
   -- Initialize unit data for which there are no events when players enters world or that
   -- do not change over the nameplate lifetime
   InitializeUnit(unit, unitid)
-  --ElementsUnitData(tp_frame)
 
   tp_frame.stylename = ""
-
-  tp_frame.IsOccluded = false
-  tp_frame.CurrentAlpha = nil
-  tp_frame:SetAlpha(0)
+  tp_frame.IsShowing = true
+  tp_frame.IsHidden = false
   tp_frame.visual.Castbar.FlashTime = 0  -- Set FlashTime to 0 so that the castbar is actually hidden (see statusbar OnHide hook function OnHideCastbar)
 
   -- Update LastTargetPlate as target units may leave the screen, lose their nameplate and
@@ -386,92 +378,18 @@ local function OnShowNameplate(plate, unitid)
   PlatesByGUID[unit.guid] = plate
 
   -- Initialized nameplate style
-  UpdateNameplateStyle(plate, unitid)
   Addon.InitializeStyle(tp_frame)
-
   -- Initialize scale and transparency
-  tp_frame:SetScale(Addon.UIScale * Addon:SetScale(tp_frame.unit))
-  UpdatePlate_Transparency(tp_frame, unit)
-
+  Transparency:Initialize(tp_frame)
+  Scaling:Initialize(tp_frame)
   ElementsUnitAdded(tp_frame)
+
+  UpdateNameplateStyle(plate, unitid)
 
   -- Call this after the plate is shown as OnStartCasting checks if the plate is shown; if not, the castbar is hidden and
   -- nothing is updated
   OnUpdateCastMidway(tp_frame, unitid)
-end
 
----------------------------------------------------------------------------------------------------------------------
--- Nameplate Transparency:
----------------------------------------------------------------------------------------------------------------------
-
-local function UpdatePlate_SetAlphaWithFading(tp_frame, unit)
-  local target_alpha = Addon:GetAlpha(unit)
-
-  if target_alpha ~= tp_frame.CurrentAlpha then
-    Addon.Animations:StopFadeIn(tp_frame)
-    Addon.Animations:FadeIn(tp_frame, target_alpha, PLATE_FADE_IN_TIME)
-    tp_frame.CurrentAlpha = target_alpha
-  end
-end
-
-local function UpdatePlate_SetAlphaNoFading(tp_frame, unit)
-  local target_alpha = Addon:GetAlpha(unit)
-
-  if target_alpha ~= tp_frame.CurrentAlpha then
-    tp_frame:SetAlpha(target_alpha)
-    tp_frame.CurrentAlpha = target_alpha
-  end
-end
-
-local	function UpdatePlate_SetAlphaWithOcclusion(tp_frame, unit)
-  if not tp_frame:IsShown() or (tp_frame.IsOccluded and not unit.isTarget) then
-    return
-  end
-
-  UpdatePlate_SetAlpha(tp_frame, unit)
-end
-
-local function UpdatePlate_SetAlphaWithFadingOcclusionOnUpdate(tp_frame, unit)
-  local target_alpha
-
-  local plate_alpha = tp_frame.Parent:GetAlpha()
-  if plate_alpha < (CVAR_NameplateOccludedAlphaMult + 0.05) then
-    tp_frame.IsOccluded = true
-    target_alpha = SettingsOccludedAlpha
-  elseif tp_frame.IsOccluded or not tp_frame.CurrentAlpha then
-    tp_frame.IsOccluded = false
-    target_alpha = Addon:GetAlpha(unit)
-  end
-
-  if target_alpha and target_alpha ~= tp_frame.CurrentAlpha then
-    Addon.Animations:StopFadeIn(tp_frame)
-
-    if tp_frame.IsOccluded then
-      tp_frame:SetAlpha(target_alpha)
-    else
-      Addon.Animations:FadeIn(tp_frame, target_alpha, PLATE_FADE_IN_TIME)
-    end
-
-    tp_frame.CurrentAlpha = target_alpha
-  end
-end
-
-local function UpdatePlate_SetAlphaNoFadingOcclusionOnUpdate(tp_frame, unit)
-  local target_alpha
-
-  local plate_alpha = tp_frame.Parent:GetAlpha()
-  if plate_alpha < (CVAR_NameplateOccludedAlphaMult + 0.05) then
-    tp_frame.IsOccluded = true
-    target_alpha = SettingsOccludedAlpha
-  elseif tp_frame.IsOccluded or not tp_frame.CurrentAlpha then
-    tp_frame.IsOccluded = false
-    target_alpha = Addon:GetAlpha(unit)
-  end
-
-  if target_alpha and target_alpha ~= tp_frame.CurrentAlpha then
-    tp_frame:SetAlpha(target_alpha)
-    tp_frame.CurrentAlpha = target_alpha
-  end
 end
 
 --------------------------------------------------------------------------------------------------------------
@@ -566,31 +484,14 @@ function Addon:UpdateSettings()
   --wipe(PlateOnUpdateQueue)
 
   ElementsUpdateSettings()
-
-  CVAR_NameplateOccludedAlphaMult = tonumber(GetCVar("nameplateOccludedAlphaMult"))
+  Transparency:UpdateSettings()
+  Scaling:UpdateSettings()
+  Animations:UpdateSettings()
 
   local db = TidyPlatesThreat.db.profile
 
   SettingsShowFriendlyBlizzardNameplates = db.ShowFriendlyBlizzardNameplates
   SettingsShowEnemyBlizzardNameplates = db.ShowEnemyBlizzardNameplates
-
-  if db.Transparency.Fading then
-    UpdatePlate_SetAlpha = UpdatePlate_SetAlphaWithFading
-    UpdatePlate_SetAlphaOnUpdate = UpdatePlate_SetAlphaWithFadingOcclusionOnUpdate
-  else
-    UpdatePlate_SetAlpha = UpdatePlate_SetAlphaNoFading
-    UpdatePlate_SetAlphaOnUpdate = UpdatePlate_SetAlphaNoFadingOcclusionOnUpdate
-  end
-
-  SettingsEnabledOccludedAlpha = db.nameplate.toggle.OccludedUnits
-  SettingsOccludedAlpha = db.nameplate.alpha.OccludedUnits
-
-  if SettingsEnabledOccludedAlpha then
-    UpdatePlate_Transparency = UpdatePlate_SetAlphaWithOcclusion
-    --PlateOnUpdateQueue[#PlateOnUpdateQueue + 1] = UpdatePlate_SetAlphaOnUpdate
-  else
-    UpdatePlate_Transparency = UpdatePlate_SetAlpha
-  end
 
   if TidyPlatesThreat.db.profile.settings.castnostop.ShowInterruptSource then
     RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
@@ -598,7 +499,16 @@ function Addon:UpdateSettings()
     UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
   end
 
+  if db.Animations.HidePlateDuration > 0 and (db.Animations.HidePlateFadeOut or db.Animations.HidePlateScaleDown) then
+    AnimateHideNameplate = true
+    CVAR_nameplateMinScale = tonumber(GetCVar("nameplateMinScale"))
+    CVAR_nameplateMinAlpha = tonumber(GetCVar("nameplateMinAlpha"))
+  else
+    AnimateHideNameplate = false
+  end
+
   ShowCastBars = db.settings.castbar.show or db.settings.castbar.ShowInHeadlineView
+  PersonalNameplateHideBuffs = db.PersonalNameplate.HideBuffs
 
   self:ACTIVE_TALENT_GROUP_CHANGED() -- to update the player's role
 end
@@ -631,11 +541,6 @@ end
 ---------------------------------------------------------------------------------------------------------------------
 -- Handling of WoW events
 ---------------------------------------------------------------------------------------------------------------------
-
-local IsInInstance, InCombatLockdown = IsInInstance, InCombatLockdown
-local NamePlateDriverFrame = NamePlateDriverFrame
-local SetCVar = SetCVar
-local L = ThreatPlates.L
 
 local TaskQueueOoC = {}
 
@@ -734,15 +639,11 @@ local function FrameOnShow(UnitFrame)
     UnitFrame:Hide()
   end
 
-  local db = TidyPlatesThreat.db.profile
-
   -- Skip the personal resource bar of the player character, don't unhook scripts as nameplates, even the personal
   -- resource bar, get re-used
   if UnitIsUnit(UnitFrame.unit, "player") then -- or: ns.PlayerNameplate == GetNamePlateForUnit(UnitFrame.unit)
-    if db.PersonalNameplate.HideBuffs then
+    if PersonalNameplateHideBuffs then
       UnitFrame.BuffFrame:Hide()
-      --      else
-      --        UnitFrame.BuffFrame:Show()
     end
     return
   end
@@ -757,6 +658,8 @@ end
 
 -- Frame: self = plate
 local function FrameOnUpdate(plate, elapsed)
+  -- Skip nameplates not handled by TP: Blizzard default plates (if configured) and the personal nameplate
+  -- if not plate.TPFrame.Active then return end
   local unitid = plate.UnitFrame.unit
   if unitid and UnitIsUnit(unitid, "player") then
     return
@@ -769,8 +672,35 @@ local function FrameOnUpdate(plate, elapsed)
   --      PlateOnUpdateQueue[i](plate, tp_frame.unit)
   --    end
 
-  if SettingsEnabledOccludedAlpha then
-    UpdatePlate_SetAlphaOnUpdate(tp_frame, tp_frame.unit)
+  Transparency:SetOccludedTransparency(tp_frame)
+
+  --local scale = plate:GetScale()
+  --local alpha = plate:GetAlpha()
+
+  --if scale ~= plate.PreviousScale then
+  --  plate.Time = (plate.Time and plate.Time + elapsed) or 0
+  --  print (tp_frame.unit.name, "=> [" .. tostring(plate.Time) .. "] Alpha =", alpha, "  ---  Scale:", scale)
+  --  plate.PreviousScale = scale
+  --end
+
+  -- TODO: Think about moving this part of the code to Animations
+  if AnimateHideNameplate then
+    -- Phase-out nameplates that will be hidden (e.g., the unit died)
+    -- Heuristic for determining of the nameplate is displayed (scaling up) or hidden (scaling down)
+    -- The first time the plate's scale passes the min scale, it should be fully displayed.
+    if plate:GetScale() < CVAR_nameplateMinScale then -- plate alpha already used (and adjusted) for occlusion detection
+      -- or plate:GetAlpha() < CVAR_nameplateMinAlpha then
+      if not tp_frame.IsShowing and not tp_frame.IsHidden then
+        Animations:HidePlate(tp_frame)
+        tp_frame.IsHidden = true
+      end
+    else
+      tp_frame.IsShowing = false
+    end
+  end
+
+  if plate:GetScale() >= CVAR_nameplateMinScale then -- plate alpha already used (and adjusted) for occlusion detection
+    tp_frame.IsShowing = false
   end
 end
 
@@ -897,14 +827,13 @@ function Addon:NAME_PLATE_UNIT_REMOVED(unitid)
   local tp_frame = plate.TPFrame
 
   tp_frame.Active = false
+  tp_frame.IsHiding = nil
 
   -- Update LastTargetPlate as target units may leave the screen, lose their nameplate and
   -- get a new one when the enter the screen again
   if tp_frame.unit.isTarget then
     LastTargetPlate = nil
   end
-
-  tp_frame:Hide()
 
   PlatesByUnit[unitid] = nil
   if tp_frame.unit.guid then -- maybe hide directly after create with unit added?
@@ -915,9 +844,6 @@ function Addon:NAME_PLATE_UNIT_REMOVED(unitid)
   Widgets:OnUnitRemoved(tp_frame, tp_frame.unit)
 
   wipe(tp_frame.unit)
-
-  -- Remove anything from the function queue
-  plate.UpdateMe = false
 end
 
 function Addon:UNIT_NAME_UPDATE(unitid)
@@ -995,7 +921,7 @@ function Addon:UNIT_THREAT_LIST_UPDATE(unitid)
     if threat_status == nil then
       unit.ThreatStatus = nil
       PublishEvent("ThreatUpdate", tp_frame, unit)
-    elseif threat_status ~= unit.ThreatStatus then
+    else --if threat_status ~= unit.ThreatStatus then
       unit.ThreatStatus = threat_status
       unit.ThreatLevel = THREAT_REFERENCE[threat_status]
       unit.InCombat = UnitAffectingCombat(unitid)

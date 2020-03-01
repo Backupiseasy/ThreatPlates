@@ -73,7 +73,6 @@ end
 -- Global contstants for various stuff
 ---------------------------------------------------------------------------------------------------
 Addon.ON_UPDATE_INTERVAL = 0.25 -- minimum number of seconds between each update of a frame for OnUpdate handlers
-Addon.PLATE_FADE_IN_TIME = 0.5
 Addon.CASTBAR_INTERRUPT_HOLD_TIME = 1
 
 Addon.UIScale = 1
@@ -1280,8 +1279,16 @@ ThreatPlates.DEFAULT_SETTINGS = {
         OccludedUnits        = 0,
       },
     },
-    Transparency = {
-      Fadeing = true,
-    },
+    Animations = {
+      ShowPlateDuration = 0.3, -- Blizzard: 0.3
+      HidePlateDuration = 0.3, -- Blizzard: 0.3
+      HidePlateFadeOut = true,
+      HidePlateScaleDown = true,
+      FadeToDuration = 0.15,   -- Blizzard: 0.25
+      FadeInOccludedUnits = true,
+      FadeOutOccludedUnits = true,
+      ScaleToDuration = 0.15,  -- Blizzard: 0.25
+      FlashDuration = 0.4,
+    }
   }
 }

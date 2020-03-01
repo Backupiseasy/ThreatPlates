@@ -89,7 +89,7 @@ end
 
 local function SetAllColors(self, rBar, gBar, bBar, aBar, rBackdrop, gBackdrop, bBackdrop, aBackdrop)
   self:SetStatusBarColor(rBar or 1, gBar or 1, bBar or 1, aBar or 1)
-  self.Border:SetBackdropColor(rBackdrop or 1, gBackdrop or 1, bBackdrop or 1, aBackdrop or 1)
+  self.Background:SetVertexColor(rBackdrop or 1, gBackdrop or 1, bBackdrop or 1, aBackdrop or 1)
 end
 
 local function SetFormat(self, show)
@@ -124,6 +124,7 @@ function Element.Created(tp_frame)
   castbar:Hide()
 
   castbar.Border = CreateFrame("Frame", nil, castbar)
+  castbar.Background = castbar:CreateTexture(nil, "BACKGROUND")
   castbar.InterruptBorder = CreateFrame("Frame", nil, castbar)
   castbar.Overlay = CreateFrame("Frame", nil, castbar)
 
@@ -197,13 +198,17 @@ function Element.UpdateStyle(tp_frame, style)
     castbar:ClearAllPoints()
     castbar:SetPoint(castbar_style.anchor, tp_frame, castbar_style.anchor, castbar_style.x + target_offset_x, castbar_style.y + target_offset_y)
 
+    local background = castbar.Background
+    background:SetTexture(castbar_style.backdrop)
+    background:SetPoint("TOPLEFT", castbar:GetStatusBarTexture(), "TOPRIGHT")
+    background:SetPoint("BOTTOMRIGHT", castbar, "BOTTOMRIGHT")
+
     local offset = castborder_style.offset
     local border = castbar.Border
     border:ClearAllPoints()
     border:SetPoint("TOPLEFT", castbar, "TOPLEFT", - offset, offset)
     border:SetPoint("BOTTOMRIGHT", castbar, "BOTTOMRIGHT", offset, - offset)
     border:SetBackdrop({
-      bgFile = castbar_style.backdrop,
       edgeFile = castborder_style.texture,
       edgeSize = castborder_style.edgesize,
       insets = { left = offset, right = offset, top = offset, bottom = offset },

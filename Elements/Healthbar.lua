@@ -219,6 +219,8 @@ function Element.Created(tp_frame)
   border:SetBackdropBorderColor(0, 0, 0, 1)
   healthbar.Border = border
 
+  healthbar.Background = healthbar:CreateTexture(nil, "BACKGROUND")
+
   local absorbs = healthbar:CreateTexture(nil, "BORDER", -6)
   absorbs.Overlay = healthbar:CreateTexture(nil, "OVERLAY", 0)
   absorbs.Overlay:SetTexture("Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\Striped_Texture.tga", true, true)
@@ -271,6 +273,14 @@ function Element.UnitAdded(tp_frame)
 
   healthbar:SetMinMaxValues(0, unit.healthmax)
   healthbar:SetValue(unit.health)
+
+  if unit.healthmax == unit.health then
+    healthbar.Background:Hide()
+  else
+    healthbar.Background:SetSize(healthbar:GetWidth() * (1 - (unit.health / unit.healthmax)), healthbar:GetHeight())
+    healthbar.Background:Show()
+  end
+
   UpdateAbsorbs(tp_frame)
 end
 
@@ -293,6 +303,11 @@ function Element.UpdateStyle(tp_frame, style, plate_style)
   healthbar:SetSize(healthbar_style.width, healthbar_style.height)
   healthbar:ClearAllPoints()
   healthbar:SetPoint(healthbar_style.anchor, tp_frame, healthbar_style.anchor, healthbar_style.x, healthbar_style.y)
+
+  local background = healthbar.Background
+  background:SetTexture(ThreatPlates.Media:Fetch('statusbar', Settings.backdrop, true))
+  background:SetPoint("TOPLEFT", healthbar:GetStatusBarTexture(), "TOPRIGHT")
+  background:SetPoint("BOTTOMRIGHT", healthbar, "BOTTOMRIGHT")
 
   healthbar.HealAbsorb:SetTexture(healthbar_style.texture, true, false)
 
@@ -323,7 +338,6 @@ function Element.UpdateSettings()
   Settings = TidyPlatesThreat.db.profile.settings.healthbar
 
   local db = TidyPlatesThreat.db.profile.settings.healthborder
-  BorderBackdrop.bgFile = ThreatPlates.Media:Fetch('statusbar', Settings.backdrop, true)
   BorderBackdrop.edgeFile = (db.show and ThreatPlates.Art .. db.texture) or nil
   BorderBackdrop.edgeSize = db.EdgeSize
   BorderBackdrop.insets.left = db.Offset
@@ -335,7 +349,7 @@ end
 --function Element.UpdateFrame()
 --end
 
-local function UnitHealthbarUpdate(unitid)
+local function UnitMaxHealthUpdate(unitid)
   local tp_frame = PlatesByUnit[unitid]
   if tp_frame and tp_frame.Active then
     local healthbar = tp_frame.visual.Healthbar
@@ -344,13 +358,25 @@ local function UnitHealthbarUpdate(unitid)
       local unit = tp_frame.unit
       healthbar:SetMinMaxValues(0, unit.healthmax)
       healthbar:SetValue(unit.health)
+      UpdateAbsorbs(tp_frame)
+    end
+  end
+end
 
+local function UnitHealthbarUpdate(unitid)
+  local tp_frame = PlatesByUnit[unitid]
+  if tp_frame and tp_frame.Active then
+    local healthbar = tp_frame.visual.Healthbar
+
+    if healthbar:IsShown() then
+      local unit = tp_frame.unit
+      healthbar:SetValue(unit.health)
       UpdateAbsorbs(tp_frame)
     end
   end
 end
 
 SubscribeEvent(Element, "UNIT_HEALTH_FREQUENT", UnitHealthbarUpdate)
-SubscribeEvent(Element, "UNIT_MAXHEALTH", UnitHealthbarUpdate)
+SubscribeEvent(Element, "UNIT_MAXHEALTH", UnitMaxHealthUpdate)
 SubscribeEvent(Element, "UNIT_ABSORB_AMOUNT_CHANGED", UnitHealthbarUpdate)
 SubscribeEvent(Element, "UNIT_HEAL_ABSORB_AMOUNT_CHANGED", UnitHealthbarUpdate)

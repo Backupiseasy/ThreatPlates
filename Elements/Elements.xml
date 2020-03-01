@@ -16,4 +16,5 @@
     <Script file="TargetMarker.lua"/>
     <Script file="Classification.lua"/>
     <Script file="Level.lua"/>
+<!--    <Script file="TestElement.lua"/>-->
 </Ui>

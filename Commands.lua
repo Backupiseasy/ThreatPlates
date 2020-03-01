@@ -234,23 +234,22 @@ function TidyPlatesThreat:ChatCommandDebug(cmd_list)
     local unitid = unit.unitid
 
     local beginTime = debugprofilestop()
-    for i = 1, 100 do
+    for i = 1, 1000 do
       --
-      Addon.GetSituationalColorHealthbar(unit, plate.TPFrame.PlateStyle)
-      Addon.GetSituationalColorName(unit, plate.TPFrame.PlateStyle)
+      Addon.TestColorNormal(plate.TPFrame)
       --
     end
     local timeUsed = debugprofilestop()  -beginTime
-    print("Both: "..timeUsed)
+    print("Normal: "..timeUsed)
 
     local beginTime = debugprofilestop()
-    for i = 1, 100 do
+    for i = 1, 1000 do
       --
-      Addon.GetSituationalColorCombined(unit, plate.TPFrame.PlateStyle)
+      Addon.TestColorNormalOpt(plate.TPFrame)
       --
     end
     local timeUsed = debugprofilestop()  -beginTime
-    print("One : "..timeUsed)
+    print("Opt : "..timeUsed)
   elseif command == "heuristic" then
     local plate = C_NamePlate.GetNamePlateForUnit("target")
     if not plate then return end
@@ -268,44 +267,23 @@ function TidyPlatesThreat:ChatCommandDebug(cmd_list)
     --Addon:ShowThreatFeedback(unit,true)
     --Addon:GetThreatColor(unit, unit.style, TidyPlatesThreat.db.profile.threat.UseThreatTable, true)
     --Addon:SetThreatColor(unit, true)
-  elseif command == "mouse" then
+  elseif command == "test" then
     local plate = C_NamePlate.GetNamePlateForUnit("target")
     if not plate then return end
     local unit = plate.TPFrame.unit
 
-    local frame = plate.TPFrame
-
-    print ("FadeIn:", frame:GetAlpha(), "=>", target_alpha)
-    print ("  Healthbar:", frame.visual.Healthbar:GetAlpha())
-    print ("  Border:", frame.visual.Healthbar.Border:GetAlpha())
-    print ("  Backdrop:", frame.visual.Healthbar.Border:GetBackdropColor())
+    plate.PreviousScale = 0
+    plate.Time = 0
   elseif command == "quest" then
 		Addon:PrintQuests()
-	elseif command == "fadein" then
-    local plate = C_NamePlate.GetNamePlateForUnit("target")
+	elseif command == "anim" then
+    local plate = C_NamePlate.GetNamePlateForUnit("mouseover")
     if not plate then return end
-    local frame, unit = plate.TPFrame, plate.TPFrame.unit
+    local unit = plate.TPFrame.unit
 
-    Addon.Animations:Fade(frame, 1, 5)
-  elseif command == "fadeout" then
-    local plate = C_NamePlate.GetNamePlateForUnit("target")
-    if not plate then return end
-    local frame, unit = plate.TPFrame, plate.TPFrame.unit
-
-    Addon.Animations:Fade(frame, 0.1, 5)
-  elseif command == "scale" then
-    local plate = C_NamePlate.GetNamePlateForUnit("target")
-    if not plate then return end
-    local frame, unit = plate.TPFrame, plate.TPFrame.unit
-
-    Addon.Animations:Scale(frame, cmd_list[2], 1)
-  elseif command == "stop" then
-    local plate = C_NamePlate.GetNamePlateForUnit("target")
-    if not plate then return end
-    local frame, unit = plate.TPFrame, plate.TPFrame.unit
-
-    Addon.Animations:Stop(frame)
-	elseif command == "migrate" then
+    Addon.Animations:CreateShrink(plate.TPFrame)
+    Addon.Animations:Shrink(plate.TPFrame, 2, 5)
+  elseif command == "migrate" then
 		Addon.MigrateDatabase(cmd_list[2])
   elseif command == "role" then
 

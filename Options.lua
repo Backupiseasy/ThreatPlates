@@ -1,5 +1,4 @@
 local ADDON_NAME, Addon = ...
-local t = Addon.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -24,13 +23,14 @@ local UnitName = UnitName
 
 -- ThreatPlates APIs
 local LibStub = LibStub
+local ThreatPlates = Addon.ThreatPlates
 local RGB_WITH_HEX = Addon.RGB_WITH_HEX
-local L = t.L
+local L = ThreatPlates.L
 local ConcatTables = Addon.ConcatTables
 local Meta = Addon.Meta
 local F = Addon.FlattenTable
 
-local PATH_ART = t.Art
+local PATH_ART = ThreatPlates.Art
 
 -- local TidyPlatesThreat = LibStub("AceAddon-3.0"):GetAddon("TidyPlatesThreat");
 local TidyPlatesThreat = TidyPlatesThreat
@@ -304,7 +304,7 @@ local function UpdateCustomNameplates() -- Need to add a way to update options t
 end
 
 local function CheckIfValueExists(arg_prefix, ...)
-  local db = t.DEFAULT_SETTINGS.profile
+  local db = ThreatPlates.DEFAULT_SETTINGS.profile
 
   local arg = F(arg_prefix, ...)
   for i = 1, #arg do
@@ -316,7 +316,7 @@ end
 
 local function SyncGameSettings(info, val)
   if InCombatLockdown() then
-    t.Print("We're unable to change this while in combat", true)
+    ThreatPlates.Print("We're unable to change this while in combat", true)
   else
     SetValue(info, val)
     TidyPlatesThreat:PLAYER_REGEN_ENABLED()
@@ -325,7 +325,7 @@ end
 
 local function SyncGameSettingsWorld(info, val)
   if InCombatLockdown() then
-    t.Print("We're unable to change this while in combat", true)
+    ThreatPlates.Print("We're unable to change this while in combat", true)
   else
     SetValue(info, val)
     local isInstance, instanceType = IsInInstance()
@@ -935,14 +935,14 @@ local function GetPlacementEntryNew(pos, arg_prefix)
         type = "select",
         order = 40,
         name = L["Horizontal Align"],
-        values = t.AlignH,
+        values = ThreatPlates.AlignH,
         arg = F(arg_prefix, "Font", "HorizontalAlignment")
       },
       AlignY = {
         type = "select",
         order = 50,
         name = L["Vertical Align"],
-        values = t.AlignV,
+        values = ThreatPlates.AlignV,
         arg = F(arg_prefix, "Font", "VerticalAlignment")
       },
       X = {
@@ -1557,14 +1557,14 @@ local function CreateArenaWidgetOptions()
                 type = "select",
                 order = 40,
                 name = L["Horizontal Align"],
-                values = t.AlignH,
+                values = ThreatPlates.AlignH,
                 arg = { "arenaWidget", "NumberText", "Font", "HorizontalAlignment" },
               },
               AlignY = {
                 type = "select",
                 order = 50,
                 name = L["Vertical Align"],
-                values = t.AlignV,
+                values = ThreatPlates.AlignV,
                 arg = { "arenaWidget", "NumberText", "Font", "VerticalAlignment" },
               },
             },
@@ -3201,14 +3201,14 @@ local function CreateAurasWidgetOptions()
                     type = "select",
                     order = 40,
                     name = L["Horizontal Align"],
-                    values = t.AlignH,
+                    values = ThreatPlates.AlignH,
                     arg = { "AuraWidget", "ModeIcon", "Duration", "Font", "HorizontalAlignment" },
                   },
                   AlignY = {
                     type = "select",
                     order = 50,
                     name = L["Vertical Align"],
-                    values = t.AlignV,
+                    values = ThreatPlates.AlignV,
                     arg = { "AuraWidget", "ModeIcon", "Duration", "Font", "VerticalAlignment" },
                   },
                 },
@@ -3267,14 +3267,14 @@ local function CreateAurasWidgetOptions()
                     type = "select",
                     order = 40,
                     name = L["Horizontal Align"],
-                    values = t.AlignH,
+                    values = ThreatPlates.AlignH,
                     arg = { "AuraWidget", "ModeIcon", "StackCount", "Font", "HorizontalAlignment" },
                   },
                   AlignY = {
                     type = "select",
                     order = 50,
                     name = L["Vertical Align"],
-                    values = t.AlignV,
+                    values = ThreatPlates.AlignV,
                     arg = { "AuraWidget", "ModeIcon", "StackCount", "Font", "VerticalAlignment" },
                   },
                 },
@@ -3545,7 +3545,7 @@ local function CreateVisibilitySettings()
             type = "toggle",
             width = "double",
             desc = L["Enable nameplate clickthrough for friendly units."],
-            set = function(info, val) t.SetNamePlateClickThrough(val, db.NamePlateEnemyClickThrough) end,
+            set = function(info, val) ThreatPlates.SetNamePlateClickThrough(val, db.NamePlateEnemyClickThrough) end,
             -- return in-game value for clickthrough as config values may be wrong because of in-combat restrictions when changing them
             get = function(info) return C_NamePlate.GetNamePlateFriendlyClickThrough() end,
             arg = { "NamePlateFriendlyClickThrough" },
@@ -3556,7 +3556,7 @@ local function CreateVisibilitySettings()
             type = "toggle",
             width = "double",
             desc = L["Enable nameplate clickthrough for enemy units."],
-            set = function(info, val) t.SetNamePlateClickThrough(db.NamePlateFriendlyClickThrough, val) end,
+            set = function(info, val) ThreatPlates.SetNamePlateClickThrough(db.NamePlateFriendlyClickThrough, val) end,
             -- return in-game value for clickthrough as config values may be wrong because of in-combat restrictions when changing them
             get = function(info) return C_NamePlate.GetNamePlateEnemyClickThrough() end,
             arg = { "NamePlateEnemyClickThrough" },
@@ -3663,7 +3663,7 @@ local function CreateBlizzardSettings()
             desc = L["The size of the clickable area is always derived from the current size of the healthbar."],
             set = function(info, val)
               if InCombatLockdown() then
-                t.Print("We're unable to change this while in combat", true)
+                ThreatPlates.Print("We're unable to change this while in combat", true)
               else
                 SetValue(info, val)
                 Addon:SetBaseNamePlateSize()
@@ -3680,7 +3680,7 @@ local function CreateBlizzardSettings()
             step = 1,
             set = function(info, val)
               if InCombatLockdown() then
-                t.Print("We're unable to change this while in combat", true)
+                ThreatPlates.Print("We're unable to change this while in combat", true)
               else
                 SetValue(info, val)
                 Addon:SetBaseNamePlateSize()
@@ -3698,7 +3698,7 @@ local function CreateBlizzardSettings()
             step = 1,
             set = function(info, val)
               if InCombatLockdown() then
-                t.Print("We're unable to change this while in combat", true)
+                ThreatPlates.Print("We're unable to change this while in combat", true)
               else
                 SetValue(info, val)
                 Addon:SetBaseNamePlateSize()
@@ -3908,7 +3908,7 @@ local function CreateBlizzardSettings()
             width = "double",
             func = function()
               if InCombatLockdown() then
-                t.Print("We're unable to change this while in combat", true)
+                ThreatPlates.Print("We're unable to change this while in combat", true)
               else
                 local cvars = {
                   "nameplateOtherTopInset", "nameplateOtherBottomInset", "nameplateLargeTopInset", "nameplateLargeBottomInset",
@@ -3976,7 +3976,7 @@ local function CreateColorsSettings()
             width = "full",
             func = function()
               for name, color in pairs(db.ColorByReaction) do
-                db.ColorByReaction[name] = Addon.CopyTable(t.DEFAULT_SETTINGS.profile.ColorByReaction[name])
+                db.ColorByReaction[name] = Addon.CopyTable(ThreatPlates.DEFAULT_SETTINGS.profile.ColorByReaction[name])
               end
               Addon:ForceUpdate()
             end,
@@ -3996,7 +3996,7 @@ local function CreateColorsSettings()
             order = 60,
             width = "full",
             func = function()
-              for name, color in pairs(t.DEFAULT_SETTINGS.profile.Colors.Classes) do
+              for name, color in pairs(ThreatPlates.DEFAULT_SETTINGS.profile.Colors.Classes) do
                 db.Colors.Classes[name] = Addon.CopyTable(color)
               end
               Addon:ForceUpdate()
@@ -4064,7 +4064,7 @@ local function CreateColorsSettings()
             order = 50,
             width = "full",
             func = function()
-              for name, color in pairs(t.DEFAULT_SETTINGS.profile.settings.raidicon.hpMarked) do
+              for name, color in pairs(ThreatPlates.DEFAULT_SETTINGS.profile.settings.raidicon.hpMarked) do
                 db.settings.raidicon.hpMarked[name] = Addon.CopyTable(color)
               end
               Addon:ForceUpdate()
@@ -4076,7 +4076,7 @@ local function CreateColorsSettings()
   }
 
   local i = 1
-  for class_name, _ in pairs(t.DEFAULT_SETTINGS.profile.Colors.Classes) do
+  for class_name, _ in pairs(ThreatPlates.DEFAULT_SETTINGS.profile.Colors.Classes) do
     -- LOCALIZED_CLASS_NAMES_MALE is not defined for unknown classes (for Classic version)
     if LOCALIZED_CLASS_NAMES_MALE[class_name] then
       entry.args.ClassColors.args[class_name] = {
@@ -4116,7 +4116,7 @@ local function CreateAutomationSettings()
             order = 10,
             type = "select",
             width = "double",
-            values = t.AUTOMATION,
+            values = ThreatPlates.AUTOMATION,
             set = SyncGameSettings,
             arg = { "Automation", "FriendlyUnits" },
           },
@@ -4125,7 +4125,7 @@ local function CreateAutomationSettings()
             order = 20,
             type = "select",
             width = "double",
-            values = t.AUTOMATION,
+            values = ThreatPlates.AUTOMATION,
             set = SyncGameSettings,
             arg = { "Automation", "EnemyUnits" },
           },
@@ -4400,7 +4400,7 @@ local function CreateCastbarOptions()
                 type = "select",
                 width = "double",
                 order = 110,
-                values = t.AlignH,
+                values = ThreatPlates.AlignH,
                 arg = { "settings", "spelltext", "align" },
               },
               AlignV = {
@@ -4408,7 +4408,7 @@ local function CreateCastbarOptions()
                 type = "select",
                 width = "double",
                 order = 120,
-                values = t.AlignV,
+                values = ThreatPlates.AlignV,
                 arg = { "settings", "spelltext", "vertical" },
               },
             },
@@ -4500,6 +4500,149 @@ local function CreateCastbarOptions()
   }
 
   return entry
+end
+
+local function CreateAnimationsOptions()
+  local options = {
+    name = L["Animations"],
+    type = "group",
+    order = 55,
+    args = {
+      FadeNameplates = {
+        name = L["Showing Nameplates"],
+        type = "group",
+        order = 10,
+        inline = true,
+        args = {
+          Header = {
+            name = L["Enable the fade-in animation when a nameplate is displayed by setting the duration to a value greater than 0 (maximum is 1). Disable it by setting the duration to 0. The default duration is shown in the duration option's tooltip."],
+            order = 1,
+            type = "description",
+            width = "full",
+          },
+          FadeIn = {
+            name = L["Fade-In Duration"],
+            order = 10,
+            type = "range",
+            min = 0,
+            max = 5,
+            step = 0.01,
+            desc = L["Duration (in seconds) for fading in a nameplate when it is displayed. Default duration is "] .. tostring(ThreatPlates.DEFAULT_SETTINGS.profile.Animations.FadeInDuration) .. L["."],
+            arg = { "Animations", "ShowPlateDuration" },
+          },
+        },
+      },
+      HideNameplates = {
+        name = L["Hiding Nameplates"],
+        type = "group",
+        order = 20,
+        inline = true,
+        args = {
+          Header = {
+            name = L["Enable the fade-out or scale-down animation when a nameplate is hidden by setting the duration to a value greater than 0 (maximum is 1). Disable it by setting the duration to 0. The default duration is shown in the duration option's tooltip."],
+            order = 1,
+            type = "description",
+            width = "full",
+          },
+          Duration = {
+            name = L["Duration"],
+            order = 10,
+            type = "range",
+            min = 0,
+            max = 1,
+            step = 0.01,
+            desc = L["Duration (in seconds) of the animation for fading out and scaling down a nameplate when it is hidden. Default duration is "] .. tostring(ThreatPlates.DEFAULT_SETTINGS.profile.Animations.FadeOutDuration) .. L["."],
+            arg = { "Animations", "HidePlateDuration" },
+          },
+          Fading = {
+            type = "toggle",
+            order = 20,
+            name = "Fade-Out",
+            desc = L["Show a fade-out animation when a nameplate is hidden."],
+            arg = { "Animations", "HidePlateFadeOut" },
+            disabled = function() return db.Animations.HidePlateDuration <= 0 end,
+          },
+          Scaling = {
+            type = "toggle",
+            order = 30,
+            name = "Scale-Down",
+            desc = L["Show a scale-down animation when a nameplate is hidden."],
+            arg = { "Animations", "HidePlateScaleDown" },
+            disabled = function() return db.Animations.HidePlateDuration <= 0 end,
+          },
+        },
+      },
+      TransparencyScaling = {
+        name = L["Nameplate Transparency & Scaling"],
+        type = "group",
+        order = 30,
+        inline = true,
+        args = {
+          Header = {
+            name = L["Enable the fading or scaling animation when a nameplate changes it's transparency or scaling by setting the duration to a value greater than 0 (maximum is 1). Disable it by setting the duration to 0. The default duration is shown in the duration option's tooltip."],
+            order = 1,
+            type = "description",
+            width = "full",
+          },
+          FadeTo = {
+            name = L["Fading Duration"],
+            order = 10,
+            type = "range",
+            min = 0,
+            max = 1,
+            step = 0.01,
+            desc = L["Duration (in seconds) for fading in or out a nameplate when its transparency is changed. Default duration is "] .. tostring(ThreatPlates.DEFAULT_SETTINGS.profile.Animations.FadeInDuration) .. L["."],
+            arg = { "Animations", "FadeToDuration" },
+          },
+          FadeInOccludedUnits = {
+            type = "toggle",
+            order = 20,
+            name = "Occluded Fade-In",
+            desc = L["Show a fade-in animation when an occluded nameplate gets displayed again."],
+            arg = { "Animations", "FadeInOccludedUnits" },
+            disabled = function() return db.Animations.FadeToDuration <= 0 end,
+          },
+          FadeOutOccludedUnits = {
+            type = "toggle",
+            order = 30,
+            name = "Occluded Fade-Out",
+            desc = L["Show a fade-out animation when an occluded nameplate gets hidden or faded-out."],
+            arg = { "Animations", "FadeOutOccludedUnits" },
+            disabled = function() return db.Animations.FadeToDuration <= 0 end,
+          },
+          Spacer1 = GetSpacerEntry(35),
+          ScaleTo = {
+            name = L["Scaling Duration"],
+            order = 40,
+            type = "range",
+            min = 0,
+            max = 1,
+            step = 0.01,
+            desc = L["Duration (in seconds) for scaling up or down a nameplate when its size is changed. Default duration is "] .. tostring(ThreatPlates.DEFAULT_SETTINGS.profile.Animations.ScaleToDuration) .. L["."],
+            arg = { "Animations", "ScaleToDuration" },
+          },
+        },
+      },
+      FlashingAuras = {
+        name = L["Aura Flashing"],
+        type = "group",
+        order = 40,
+        inline = true,
+        args = {
+          ScaleTo = {
+            name = L["Flash Time"],
+            order = 10,
+            type = "range",
+            min = 0,
+            max = 1,
+            step = 0.1,
+            arg = { "Animations", "FlashDuration" },
+          },
+        },
+      },
+    },
+  }
+  return options
 end
 
 local function CreateWidgetOptions()
@@ -4668,7 +4811,7 @@ local function CreateCustomNameplateEntry(index)
                 options.args.Custom.args["#" .. index].args.Name.args.SetName.name = target
                 UpdateCustomNameplates()
               else
-                t.Print(L["No target found."])
+                ThreatPlates.Print(L["No target found."])
               end
             end,
           },
@@ -4679,7 +4822,7 @@ local function CreateCustomNameplateEntry(index)
             func = function()
               clipboard = {}
               clipboard = Addon.CopyTable(db.uniqueSettings[index])
-              t.Print(L["Copied!"])
+              ThreatPlates.Print(L["Copied!"])
             end,
           },
           Paste = {
@@ -4689,9 +4832,9 @@ local function CreateCustomNameplateEntry(index)
             func = function()
               if type(clipboard) == "table" and clipboard.name then
                 db.uniqueSettings[index] = Addon.CopyTable(clipboard)
-                t.Print(L["Pasted!"])
+                ThreatPlates.Print(L["Pasted!"])
               else
-                t.Print(L["Nothing to paste!"])
+                ThreatPlates.Print(L["Nothing to paste!"])
               end
               options.args.Custom.args["#" .. index].name = "#" .. index .. ". " .. db.uniqueSettings[index].name
               options.args.Custom.args["#" .. index].args.Header.name = db.uniqueSettings[index].name
@@ -4916,7 +5059,7 @@ local function CreateCustomNameplateEntry(index)
                   db.uniqueSettings[index].SpellID = spell_id
                   val = select(3, GetSpellInfo(spell_id))
                 else
-                  t.Print("Invalid spell ID for custom nameplate icon: " .. val, true)
+                  ThreatPlates.Print("Invalid spell ID for custom nameplate icon: " .. val, true)
                   db.uniqueSettings[index].SpellID = nil
                 end
               else
@@ -4969,18 +5112,18 @@ local function CreateCustomNameplatesGroup()
       width = "half",
       desc = L["Insert a new custom nameplate slot after the currently selected slot."],
       func = function(info)
-        local statustable = Addon.LibAceConfigDialog:GetStatusTable(t.ADDON_NAME, { "Custom" })
+        local statustable = Addon.LibAceConfigDialog:GetStatusTable(ThreatPlates.ADDON_NAME, { "Custom" })
         local selected = statustable.groups.selected
 
         -- If slot_no is nil, General Settings is selected currently.
         local slot_no = (tonumber(selected:match("#(.*)")) or 0) + 1
-        table.insert(db.uniqueSettings, slot_no, Addon.CopyTable(t.DEFAULT_SETTINGS.profile.uniqueSettings["**"]))
+        table.insert(db.uniqueSettings, slot_no, Addon.CopyTable(ThreatPlates.DEFAULT_SETTINGS.profile.uniqueSettings["**"]))
         db.uniqueSettings[slot_no].name = ""
 
         options.args.Custom.args = CreateCustomNameplatesGroup()
         UpdateCustomNameplates()
 
-        Addon.LibAceConfigDialog:SelectGroup(t.ADDON_NAME, "Custom", "#" ..  slot_no)
+        Addon.LibAceConfigDialog:SelectGroup(ThreatPlates.ADDON_NAME, "Custom", "#" ..  slot_no)
       end,
       hidden = function() return TidyPlatesThreat.db.global.CustomNameplatesVersion == 1 end,
     },
@@ -4990,7 +5133,7 @@ local function CreateCustomNameplatesGroup()
       type = "execute",
       width = "half",
       func = function()
-        local statustable = Addon.LibAceConfigDialog:GetStatusTable(t.ADDON_NAME, { "Custom" })
+        local statustable = Addon.LibAceConfigDialog:GetStatusTable(ThreatPlates.ADDON_NAME, { "Custom" })
         local selected = statustable.groups.selected
 
         local slot_no = tonumber(selected:match("#(.*)"))
@@ -5002,14 +5145,14 @@ local function CreateCustomNameplatesGroup()
         end
       end,
       confirm = function(info)
-        local statustable = Addon.LibAceConfigDialog:GetStatusTable(t.ADDON_NAME, { "Custom" })
+        local statustable = Addon.LibAceConfigDialog:GetStatusTable(ThreatPlates.ADDON_NAME, { "Custom" })
         local selected = statustable.groups.selected
         local slot_no = selected:match("#(.*)")
 
         if slot_no then
           return L["|cffFF0000DELETE CUSTOM NAMEPLATE|r\nAre you sure you want to delete the selected custom nameplate?"]
         else
-          t.Print(L["You cannot delete General Settings, only custom nameplates entries."], true)
+          ThreatPlates.Print(L["You cannot delete General Settings, only custom nameplates entries."], true)
           return false
         end
       end,
@@ -5021,7 +5164,7 @@ local function CreateCustomNameplatesGroup()
       type = "execute",
       --width = "half",
       func = function()
-        local statustable = Addon.LibAceConfigDialog:GetStatusTable(t.ADDON_NAME, { "Custom" })
+        local statustable = Addon.LibAceConfigDialog:GetStatusTable(ThreatPlates.ADDON_NAME, { "Custom" })
         local selected = statustable.groups.selected
 
         local slot_no = tonumber(selected:match("#(.*)"))
@@ -5032,7 +5175,7 @@ local function CreateCustomNameplatesGroup()
 
             UpdateCustomNameplateSlots(slot_no, slot_no - 1)
 
-            Addon.LibAceConfigDialog:SelectGroup(t.ADDON_NAME, "Custom", "#" ..  (slot_no - 1))
+            Addon.LibAceConfigDialog:SelectGroup(ThreatPlates.ADDON_NAME, "Custom", "#" ..  (slot_no - 1))
           end
         end
       end,
@@ -5044,7 +5187,7 @@ local function CreateCustomNameplatesGroup()
       type = "execute",
       --width = "half",
       func = function()
-        local statustable = Addon.LibAceConfigDialog:GetStatusTable(t.ADDON_NAME, { "Custom" })
+        local statustable = Addon.LibAceConfigDialog:GetStatusTable(ThreatPlates.ADDON_NAME, { "Custom" })
         local selected = statustable.groups.selected
 
         local slot_no = tonumber(selected:match("#(.*)"))
@@ -5055,7 +5198,7 @@ local function CreateCustomNameplatesGroup()
 
             UpdateCustomNameplateSlots(slot_no, slot_no + 1)
 
-            Addon.LibAceConfigDialog:SelectGroup(t.ADDON_NAME, "Custom", "#" ..  (slot_no + 1))
+            Addon.LibAceConfigDialog:SelectGroup(ThreatPlates.ADDON_NAME, "Custom", "#" ..  (slot_no + 1))
           end
         end
       end,
@@ -5066,7 +5209,7 @@ local function CreateCustomNameplatesGroup()
       order = 5,
       type = "execute",
       func = function()
-        local statustable = Addon.LibAceConfigDialog:GetStatusTable(t.ADDON_NAME, { "Custom" })
+        local statustable = Addon.LibAceConfigDialog:GetStatusTable(ThreatPlates.ADDON_NAME, { "Custom" })
         local selected = statustable.groups.selected
         local slot_no = tonumber(selected:match("#(.*)"))
 
@@ -5075,7 +5218,7 @@ local function CreateCustomNameplatesGroup()
         options.args.Custom.args = CreateCustomNameplatesGroup()
         UpdateCustomNameplates()
 
-        --Addon.LibAceConfigDialog:SelectGroup(t.ADDON_NAME, "Custom", "#" ..  slot_no)
+        --Addon.LibAceConfigDialog:SelectGroup(ThreatPlates.ADDON_NAME, "Custom", "#" ..  slot_no)
       end,
       hidden = function() return TidyPlatesThreat.db.global.CustomNameplatesVersion == 1 end,
     },
@@ -5084,7 +5227,7 @@ local function CreateCustomNameplatesGroup()
       order = 6,
       type = "execute",
       func = function()
-        local statustable = Addon.LibAceConfigDialog:GetStatusTable(t.ADDON_NAME, { "Custom" })
+        local statustable = Addon.LibAceConfigDialog:GetStatusTable(ThreatPlates.ADDON_NAME, { "Custom" })
         local selected = statustable.groups.selected
         local slot_no = tonumber(selected:match("#(.*)"))
 
@@ -5093,7 +5236,7 @@ local function CreateCustomNameplatesGroup()
         options.args.Custom.args = CreateCustomNameplatesGroup()
         UpdateCustomNameplates()
 
-        --Addon.LibAceConfigDialog:SelectGroup(t.ADDON_NAME, "Custom", "#" ..  slot_no)
+        --Addon.LibAceConfigDialog:SelectGroup(ThreatPlates.ADDON_NAME, "Custom", "#" ..  slot_no)
       end,
       hidden = function() return TidyPlatesThreat.db.global.CustomNameplatesVersion == 1 end,
     },
@@ -5197,9 +5340,9 @@ local function CreateOptionsTable()
                       set = function(info, val)
                         TidyPlatesThreat.db.global.DefaultsVersion = val
                         if val == "CLASSIC" then
-                          t.SwitchToDefaultSettingsV1()
+                          ThreatPlates.SwitchToDefaultSettingsV1()
                         else -- val == "SMOOTH"
-                          t.SwitchToCurrentDefaultSettings()
+                          ThreatPlates.SwitchToCurrentDefaultSettings()
                         end
                         TidyPlatesThreat:ReloadTheme()
                       end,
@@ -5216,7 +5359,7 @@ local function CreateOptionsTable()
                     Width = GetRangeEntry(L["Bar Width"], 10, { "settings", "healthbar", "width" }, 5, 500,
                       function(info, val)
                         if InCombatLockdown() then
-                          t.Print("We're unable to change this while in combat", true)
+                          ThreatPlates.Print("We're unable to change this while in combat", true)
                         else
                           SetValue(info, val)
                           Addon:SetBaseNamePlateSize()
@@ -5225,7 +5368,7 @@ local function CreateOptionsTable()
                     Height = GetRangeEntry(L["Bar Height"], 20, {"settings", "healthbar", "height" }, 1, 100,
                       function(info, val)
                         if InCombatLockdown() then
-                          t.Print("We're unable to change this while in combat", true)
+                          ThreatPlates.Print("We're unable to change this while in combat", true)
                         else
                           SetValue(info, val)
                           Addon:SetBaseNamePlateSize()
@@ -5424,14 +5567,14 @@ local function CreateOptionsTable()
                       name = L["Friendly Healthbar Color"],
                       order = 10,
                       type = "select",
-                      values = t.FRIENDLY_HEALTHBAR_COLOR,
+                      values = ThreatPlates.FRIENDLY_HEALTHBAR_COLOR,
                       arg = { "Healthbar", "FriendlyUnitMode" }
                     },
                     EnemyColor = {
                       name = L["Enemy Healthbar Color"],
                       order = 20,
                       type = "select",
-                      values = t.ENEMY_HEALTHBAR_COLOR,
+                      values = ThreatPlates.ENEMY_HEALTHBAR_COLOR,
                       arg = { "Healthbar", "EnemyUnitMode" }
                     },
                     EnableRaidMarks = {
@@ -5665,22 +5808,6 @@ local function CreateOptionsTable()
               type = "group",
               order = 40,
               args = {
-                Fading = {
-                  name = L["Fading"],
-                  type = "group",
-                  order = 5,
-                  inline = true,
-                  args = {
-                    Enable = {
-                      type = "toggle",
-                      order = 10,
-                      name = "Enable Fade-In",
-                      desc = L["This option allows you to control whether nameplates should fade in when displayed."],
-                      width = "full",
-                      arg = { "Transparency", "Fading" },
-                    },
-                  },
-                },
                 Situational = {
                   name = L["Situational Transparency"],
                   type = "group",
@@ -5966,6 +6093,7 @@ local function CreateOptionsTable()
                 },
               },
             },
+            Animations = CreateAnimationsOptions(),
             Name = {
               name = L["Name"],
               type = "group",
@@ -6018,7 +6146,7 @@ local function CreateOptionsTable()
                           name = L["Friendly Name Color"],
                           order = 10,
                           type = "select",
-                          values = t.FRIENDLY_NAME_COLOR,
+                          values = ThreatPlates.FRIENDLY_NAME_COLOR,
                           arg = { "Name", "HealthbarMode", "FriendlyUnitMode" }
                         },
                         FriendlyColorCustom = GetColorEntry(L["Custom Color"], 20, { "Name", "HealthbarMode", "FriendlyTextColor" }),
@@ -6026,7 +6154,7 @@ local function CreateOptionsTable()
                           name = L["Enemy Name Color"],
                           order = 30,
                           type = "select",
-                          values = t.ENEMY_NAME_COLOR,
+                          values = ThreatPlates.ENEMY_NAME_COLOR,
                           arg = { "Name", "HealthbarMode", "EnemyUnitMode" }
                         },
                         EnemyColorCustom = GetColorEntry(L["Custom Color"], 40, { "Name", "HealthbarMode", "EnemyTextColor" }),
@@ -6061,7 +6189,7 @@ local function CreateOptionsTable()
                           name = L["Friendly Names Color"],
                           order = 10,
                           type = "select",
-                          values = t.FRIENDLY_NAME_COLOR,
+                          values = ThreatPlates.FRIENDLY_NAME_COLOR,
                           arg = { "Name", "NameMode", "FriendlyUnitMode" }
                         },
                         FriendlyColorCustom = GetColorEntry(L["Custom Color"], 20, {  "Name", "NameMode", "FriendlyTextColor" }),
@@ -6069,7 +6197,7 @@ local function CreateOptionsTable()
                           name = L["Enemy Name Color"],
                           order = 30,
                           type = "select",
-                          values = t.ENEMY_NAME_COLOR,
+                          values = ThreatPlates.ENEMY_NAME_COLOR,
                           arg = { "Name", "NameMode", "EnemyUnitMode" }
                         },
                         EnemyColorCustom = GetColorEntry(L["Custom Color"], 40, { "Name", "NameMode", "EnemyTextColor" }),
@@ -6184,6 +6312,7 @@ local function CreateOptionsTable()
                       order = 35,
                       type = "group",
                       inline = true,
+                      hidden = function() return Addon.CLASSIC end,
                       args = {
                         EnableAmount = {
                           name = L["Amount"],
@@ -6222,7 +6351,7 @@ local function CreateOptionsTable()
                       name = L["Friendly Status Text"],
                       order = 10,
                       type = "select",
-                      values = t.FRIENDLY_SUBTEXT,
+                      values = ThreatPlates.FRIENDLY_SUBTEXT,
                       arg = { "StatusText", "HealthbarMode", "FriendlySubtext"}
                     },
                     Spacer1 = { name = "", order = 15, type = "description", width = "half", },
@@ -6230,7 +6359,7 @@ local function CreateOptionsTable()
                       name = L["Enemy Status Text"],
                       order = 20,
                       type = "select",
-                      values = t.ENEMY_SUBTEXT,
+                      values = ThreatPlates.ENEMY_SUBTEXT,
                       arg = { "StatusText", "HealthbarMode", "EnemySubtext"}
                     },
                     Spacer2 = GetSpacerEntry(30),
@@ -6290,7 +6419,7 @@ local function CreateOptionsTable()
                       name = L["Friendly Custom Text"],
                       order = 10,
                       type = "select",
-                      values = t.FRIENDLY_SUBTEXT,
+                      values = ThreatPlates.FRIENDLY_SUBTEXT,
                       arg = { "StatusText", "NameMode", "FriendlySubtext"}
                     },
                     Spacer1 = { name = "", order = 15, type = "description", width = "half", },
@@ -6298,7 +6427,7 @@ local function CreateOptionsTable()
                       name = L["Enemy Custom Text"],
                       order = 20,
                       type = "select",
-                      values = t.ENEMY_SUBTEXT,
+                      values = ThreatPlates.ENEMY_SUBTEXT,
                       arg = { "StatusText", "NameMode", "EnemySubtext"}
                     },
                     Spacer2 = GetSpacerEntry(25),
@@ -6363,7 +6492,6 @@ local function CreateOptionsTable()
                       },
                     },
                     Placement = GetPlacementEntryNew(60, { "StatusText", "NameMode" } ),
-                  hidden = function() return Addon.CLASSIC end,
                   },
                 },
               },
@@ -6405,14 +6533,14 @@ local function CreateOptionsTable()
                       name = L["Horizontal Align"],
                       type = "select",
                       order = 3,
-                      values = t.AlignH,
+                      values = ThreatPlates.AlignH,
                       arg = { "settings", "level", "align" },
                     },
                     AlignV = {
                       name = L["Vertical Align"],
                       type = "select",
                       order = 4,
-                      values = t.AlignV,
+                      values = ThreatPlates.AlignV,
                       arg = { "settings", "level", "vertical" },
                     },
                   },
@@ -7570,14 +7698,14 @@ function TidyPlatesThreat:OpenOptions()
     -- Addon:ForceUpdate()
 
     -- Setup options dialog
-    LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable(t.ADDON_NAME, options)
-    Addon.LibAceConfigDialog:SetDefaultSize(t.ADDON_NAME, 1000, 640)
+    LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable(ThreatPlates.ADDON_NAME, options)
+    Addon.LibAceConfigDialog:SetDefaultSize(ThreatPlates.ADDON_NAME, 1000, 640)
   end
 
-  LibStub("AceConfigDialog-3.0"):Open(t.ADDON_NAME);
+  LibStub("AceConfigDialog-3.0"):Open(ThreatPlates.ADDON_NAME);
 end
 
 -----------------------------------------------------
 -- External
 -----------------------------------------------------
-t.GetInterfaceOptionsTable = GetInterfaceOptionsTable
+ThreatPlates.GetInterfaceOptionsTable = GetInterfaceOptionsTable

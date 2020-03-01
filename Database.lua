@@ -1322,6 +1322,7 @@ local ENTRIES_TO_RENAME = {
     { Deprecated = { "settings", "name", "vertical" }, New = { "Name", "HealthbarMode", "Font", "VerticalAlignment" }, },
     { Deprecated = { "settings", "name", "width" }, New = { "Name", "HealthbarMode", "Font", "Width" }, },
     { Deprecated = { "settings", "name", "height" }, New = { "Name", "HealthbarMode", "Font", "Height" }, },
+    { Deprecated = { "Transparency", "Fadeing" }, New = { "Animations", "EnableFading" }, },
     -- Others
     { Deprecated = { "HeadlineView", "ShowTargetHighlight" }, New = { "targetWidget", "ShowInHeadlineView" }, },
   },

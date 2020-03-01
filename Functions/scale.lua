@@ -12,6 +12,8 @@ local UnitExists = UnitExists
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
+local Animations = Addon.Animations
+local Scaling = Addon.Scaling
 local GetThreatLevel = Addon.GetThreatLevel
 local PlatesByUnit = Addon.PlatesByUnit
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
@@ -19,6 +21,12 @@ local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventSe
 ---------------------------------------------------------------------------------------------------
 -- Local variables
 ---------------------------------------------------------------------------------------------------
+local ScalePlate
+
+---------------------------------------------------------------------------------------------------
+-- Cached configuration settings (for performance reasons)
+---------------------------------------------------------------------------------------------------
+local Settings
 
 ---------------------------------------------------------------------------------------------------
 -- Element code
@@ -170,8 +178,8 @@ local SCALE_FUNCTIONS = {
 	["NameOnly-Unique"] = ScaleUniqueNameOnly,
 }
 
-function Addon:SetScale(unit)
-  local scale = SCALE_FUNCTIONS[unit.style](unit, unit.style)
+local function GetScale(unit)
+	local scale = SCALE_FUNCTIONS[unit.style](unit, unit.style)
 
 	if scale == nil then
 		local db = TidyPlatesThreat.db.profile.threat
@@ -195,12 +203,35 @@ function Addon:SetScale(unit)
 	return scale
 end
 
+function Scaling:Initialize(frame)
+	Animations:StopScale(frame)
+	frame:SetScale(Addon.UIScale * GetScale(frame.unit))
+end
+
+local function ScalePlateWithAnimation(frame, scale)
+	Animations:ScalePlate(frame, scale)
+end
+
+local function ScalePlateWithoutAnimation(frame, scale)
+	frame:SetScale(scale)
+end
+
+function Scaling:UpdateSettings()
+	Settings = TidyPlatesThreat.db.profile.Animations
+
+	if Settings.ScaleToDuration > 0 then
+		ScalePlate = ScalePlateWithAnimation
+	else
+		ScalePlate = ScalePlateWithoutAnimation
+	end
+end
+
 ---------------------------------------------------------------------------------------------------
 -- React to events that could change the nameplate scale/size
 ---------------------------------------------------------------------------------------------------
 
 local function SituationalEvent(tp_frame)
-  tp_frame:SetScale(Addon.UIScale * Addon:SetScale(tp_frame.unit))
+	ScalePlate(tp_frame, Addon.UIScale * GetScale(tp_frame.unit))
 end
 
 -- Update the target unit and all non-target units
@@ -208,14 +239,14 @@ local function TargetGained(tp_frame)
   local ui_scale = Addon.UIScale
 
   -- Update the nameplate of the current target unit
-  tp_frame:SetScale(ui_scale * Addon:SetScale(tp_frame.unit))
+	ScalePlate(tp_frame, ui_scale * GetScale(tp_frame.unit))
 
   local db = TidyPlatesThreat.db.profile.nameplate
   if db.toggle.NonTargetS then
     -- Update all non-target units
     for _, frame in pairs(PlatesByUnit) do
       if not frame.unit.isTarget and frame.Active then
-        frame:SetScale(ui_scale * Addon:SetScale(frame.unit))
+				ScalePlate(frame, ui_scale * GetScale(frame.unit))
       end
     end
   end
@@ -226,14 +257,14 @@ local function TargetLost(tp_frame)
   local ui_scale = Addon.UIScale
 
   -- Update the nameplate of the unit that lost the target
-  tp_frame:SetScale(ui_scale * Addon:SetScale(tp_frame.unit))
+	ScalePlate(tp_frame, ui_scale * GetScale(tp_frame.unit))
 
   if UnitExists("target") then return end
 
   -- Update all units as there is no target now (except the unit that lost the target as it was already updated above
   for _, frame in pairs(PlatesByUnit) do
     if frame ~= tp_frame and frame.Active then
-      frame:SetScale(ui_scale * Addon:SetScale(frame.unit))
+			ScalePlate(frame, ui_scale * GetScale(frame.unit))
     end
   end
 end
