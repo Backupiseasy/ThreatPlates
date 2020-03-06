@@ -5013,6 +5013,7 @@ local function CreateCustomNameplateEntry(index)
               -- Either store the path to the icon or the icon ID
               SetValue(info, val)
               if val then
+                val = tostring(val)
                 if val:sub(-4) == ".blp" then
                   options.args.Custom.args["#" .. index].args.Icon.args.Icon.image = "Interface\\Icons\\" .. val
                 else
