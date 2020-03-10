@@ -3,6 +3,7 @@
 ------------------------------------------------------
 * Added off-tank detection based on party assignments again (thanks veyn8 for that).
 * Fixed a Lua error that could occur if other addons changed WoW's internal class colors (RAID_CLASS_COLORS) in an incorrect way [IM].
+* Fixed a Lua error in custom nameplates when entering a spell ID to set the icon for the custom nameplate.
 
 ------------------------------------------------------
 1.3.0
