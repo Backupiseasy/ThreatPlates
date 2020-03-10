@@ -13,6 +13,8 @@ local abs = abs
 local UnitIsConnected, UnitReaction, UnitCanAttack, UnitAffectingCombat = UnitIsConnected, UnitReaction, UnitCanAttack, UnitAffectingCombat
 local UnitIsPlayer, UnitPlayerControlled = UnitIsPlayer, UnitPlayerControlled
 local UnitIsUnit, UnitExists = UnitIsUnit, UnitExists
+local GetPartyAssignment = GetPartyAssignment
+local RAID_CLASS_COLORS = RAID_CLASS_COLORS
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
@@ -100,7 +102,7 @@ local function GetThreatSituation(unit, style, enable_off_tank)
         if target_threat_situation > 1 then
           -- Target unit does tank unit, so check if target unit is a tank or an tank-like pet/guardian
           --if ("TANK" == UnitGroupRolesAssigned(target_unit) and not UnitIsUnit("player", target_unit)) or UnitIsUnit(target_unit, "pet") or IsOffTankCreature(target_unit) then
-          if UnitIsUnit(target_unit, "pet") or IsOffTankCreature(target_unit) then
+          if (GetPartyAssignment("MAINTANK", target_unit) and not UnitIsUnit("player", target_unit)) or UnitIsUnit(target_unit, "pet") or IsOffTankCreature(target_unit) then
             unit.IsOfftanked = true
           else
             -- Reset "unit.IsOfftanked"
