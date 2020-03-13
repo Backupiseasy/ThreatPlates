@@ -35,7 +35,7 @@ end
 local SetJustify = Font.SetJustify
 
 function Font:UpdateTextFont(font, db)
-  font:SetFont(ThreatPlates.Media:Fetch('font', db.Typeface), db.Size, db.flags)
+  font:SetFont(Addon.LSM:Fetch('font', db.Typeface), db.Size, db.flags)
 
   if db.Shadow then
     font:SetShadowOffset(1, -1)

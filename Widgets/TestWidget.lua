@@ -34,7 +34,7 @@ local function UpdateSettings(frame)
   local db = TidyPlatesThreat.db.profile.TestWidget
 
   frame:SetSize(db.BarWidth, db.BarHeight)
-  frame:SetStatusBarTexture(ThreatPlates.Media:Fetch('statusbar', db.BarTexture))
+  frame:SetStatusBarTexture(Addon.LSM:Fetch('statusbar', db.BarTexture))
   frame:SetScale(db.Scale)
   frame:SetMinMaxValues(0, 100)
   frame:SetValue(50)
@@ -45,8 +45,8 @@ local function UpdateSettings(frame)
   frame.Border:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", db.Offset, -db.Offset)
 
   frame.Border:SetBackdrop({
-    bgFile = ThreatPlates.Media:Fetch('statusbar', db.BorderBackground),
-    edgeFile = ThreatPlates.Media:Fetch('border', db.BorderTexture),
+    bgFile = Addon.LSM:Fetch('statusbar', db.BorderBackground),
+    edgeFile = Addon.LSM:Fetch('border', db.BorderTexture),
     edgeSize = db.EdgeSize,
     insets = { left = db.Inset, right = db.Inset, top = db.Inset, bottom = db.Inset },
   })

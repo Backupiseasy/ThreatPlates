@@ -2,7 +2,7 @@ local ADDON_NAME, Addon = ...
 local ThreatPlates = Addon.ThreatPlates
 
 local ART_PATH = ThreatPlates.Art
-local MEDIA_PATH = ThreatPlates.Media
+local MEDIA_PATH = Addon.LSM
 local EMPTY_TEXTURE = ART_PATH.."Empty"
 
 -------------------------------------------------------------------------------------
@@ -64,8 +64,8 @@ local function Create(self,name)
     },
 
     castbar = {
-      texture = ThreatPlates.Media:Fetch('statusbar', db.castbar.texture),
-      backdrop = (db.castbar.ShowInHeadlineView and ThreatPlates.Media:Fetch('statusbar', db.castbar.backdrop, true)) or EMPTY_TEXTURE,
+      texture = Addon.LSM:Fetch('statusbar', db.castbar.texture),
+      backdrop = (db.castbar.ShowInHeadlineView and Addon.LSM:Fetch('statusbar', db.castbar.backdrop, true)) or EMPTY_TEXTURE,
       width = db.castbar.width,
       height = db.castbar.height,
       x = db.castbar.x_hv,
@@ -100,7 +100,7 @@ local function Create(self,name)
     },
 
     spelltext = {
-      typeface = ThreatPlates.Media:Fetch('font', db.spelltext.typeface),
+      typeface = Addon.LSM:Fetch('font', db.spelltext.typeface),
       size = db.spelltext.size,
       width = db.spelltext.width,
       height = db.spelltext.height,

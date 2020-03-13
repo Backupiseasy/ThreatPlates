@@ -289,7 +289,7 @@ local function UpdateStyle(tp_frame, style, stylename)
 --  if not tp_frame.TestBackground then
 --    tp_frame.TestBackground = tp_frame:CreateTexture(nil, "BACKGROUND")
 --    tp_frame.TestBackground:SetAllPoints(tp_frame)
---    tp_frame.TestBackground:SetTexture(ThreatPlates.Media:Fetch('statusbar', TidyPlatesThreat.db.profile.AuraWidget.BackgroundTexture))
+--    tp_frame.TestBackground:SetTexture(Addon.LSM:Fetch('statusbar', TidyPlatesThreat.db.profile.AuraWidget.BackgroundTexture))
 --    tp_frame.TestBackground:SetVertexColor(0,0,0,0.5)
 --  end
 end

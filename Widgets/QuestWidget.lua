@@ -575,7 +575,7 @@ function Widget:UpdateSettings()
   Settings = TidyPlatesThreat.db.profile.questWidget
 
   HideInCombat = Settings.HideInCombat
-  Font = ThreatPlates.Media:Fetch('font', Settings.Font)
+  Font = Addon.LSM:Fetch('font', Settings.Font)
 end
 
 --local function tablelength(T)

@@ -10,7 +10,7 @@ local ThreatPlates = Addon.ThreatPlates
 -- WoW APIs
 
 -- ThreatPlates APIs
-local Media = ThreatPlates.Media
+local Media = Addon.LSM
 --local koKR, ruRU, zhCN, zhTW, western = Media.LOCALE_BIT_koKR, Media.LOCALE_BIT_ruRU, Media.LOCALE_BIT_zhCN, Media.LOCALE_BIT_zhTW, Media.LOCALE_BIT_western
 
 ThreatPlates.Art = "Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\"

@@ -83,7 +83,7 @@ local function Create(self,name)
 		},
 
 		level = {
-			typeface =						t.Media:Fetch('font', db.level.typeface),
+			typeface =						Addon.LSM:Fetch('font', db.level.typeface),
 			size = db.level.size,
 			width = db.level.width,
 			height = db.level.height,
@@ -98,7 +98,7 @@ local function Create(self,name)
 		},
 
 		spelltext = {
-			typeface =						t.Media:Fetch('font', db.spelltext.typeface),
+			typeface =						Addon.LSM:Fetch('font', db.spelltext.typeface),
 			size = db.spelltext.size,
 			width = db.spelltext.width,
 			height = db.spelltext.height,

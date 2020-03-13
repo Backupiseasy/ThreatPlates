@@ -305,7 +305,7 @@ function Element.UpdateStyle(tp_frame, style, plate_style)
   healthbar:SetPoint(healthbar_style.anchor, tp_frame, healthbar_style.anchor, healthbar_style.x, healthbar_style.y)
 
   local background = healthbar.Background
-  background:SetTexture(ThreatPlates.Media:Fetch('statusbar', Settings.backdrop, true))
+  background:SetTexture(Addon.LSM:Fetch('statusbar', Settings.backdrop, true))
   background:SetPoint("TOPLEFT", healthbar:GetStatusBarTexture(), "TOPRIGHT")
   background:SetPoint("BOTTOMRIGHT", healthbar, "BOTTOMRIGHT")
 
@@ -320,7 +320,7 @@ function Element.UpdateStyle(tp_frame, style, plate_style)
   -- Absorbs
   local absorbs = healthbar.Absorbs
   if Settings.ShowAbsorbs then
-    absorbs:SetTexture(ThreatPlates.Media:Fetch('statusbar', Settings.texture), true, false)
+    absorbs:SetTexture(Addon.LSM:Fetch('statusbar', Settings.texture), true, false)
     local color = Settings.AbsorbColor
     absorbs:SetVertexColor(color.r, color.g, color.b, color.a)
     color = Settings.OverlayColor

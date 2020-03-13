@@ -1233,7 +1233,7 @@ end
 
 function Widget:CreateAuraFrameBarMode(parent)
   local db = self.db_bar
-  local font = ThreatPlates.Media:Fetch('font', db.Font)
+  local font = Addon.LSM:Fetch('font', db.Font)
 
   -- frame is probably not necessary, should be ok do add everything to the statusbar frame
   local frame = CreateFrame("Frame", nil, parent)
@@ -1290,7 +1290,7 @@ function Widget:UpdateAuraFrameBarMode(frame)
   end
 
   db = self.db_bar
-  local font = ThreatPlates.Media:Fetch('font', db.Font)
+  local font = Addon.LSM:Fetch('font', db.Font)
 
   -- width and position calculations
   local frame_width = db.BarWidth
@@ -1299,7 +1299,7 @@ function Widget:UpdateAuraFrameBarMode(frame)
   end
   frame:SetSize(frame_width, db.BarHeight)
 
-  frame.Background:SetTexture(ThreatPlates.Media:Fetch('statusbar', db.BackgroundTexture))
+  frame.Background:SetTexture(Addon.LSM:Fetch('statusbar', db.BackgroundTexture))
   frame.Background:SetVertexColor(db.BackgroundColor.r, db.BackgroundColor.g, db.BackgroundColor.b, db.BackgroundColor.a)
 
   frame.LabelText:SetPoint("LEFT", frame.Statusbar, "LEFT", db.LabelTextIndent, 0)
@@ -1360,7 +1360,7 @@ function Widget:UpdateAuraFrameBarMode(frame)
 
   frame.Statusbar:SetSize(db.BarWidth, db.BarHeight)
   --    frame.Statusbar:SetWidth(db.BarWidth)
-  frame.Statusbar:SetStatusBarTexture(ThreatPlates.Media:Fetch('statusbar', db.Texture))
+  frame.Statusbar:SetStatusBarTexture(Addon.LSM:Fetch('statusbar', db.Texture))
   frame.Statusbar:GetStatusBarTexture():SetHorizTile(false)
   frame.Statusbar:GetStatusBarTexture():SetVertTile(false)
 --    frame.Statusbar:Show()
