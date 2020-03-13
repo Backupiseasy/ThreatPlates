@@ -25,7 +25,7 @@ local UnitClass, GetNumSpecializations, GetSpecializationInfo = UnitClass, GetNu
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
 local LibStub = LibStub
-local L = ThreatPlates.L
+local L = Addon.L
 local LSM = Addon.LSM
 local Meta = Addon.Meta
 

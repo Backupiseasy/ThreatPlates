@@ -29,7 +29,7 @@ local SetCVar = SetCVar
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
 local ThreatPlates = Addon.ThreatPlates
-local L = ThreatPlates.L
+local L = Addon.L
 local Widgets, Animations, Scaling, Transparency = Addon.Widgets, Addon.Animations, Addon.Scaling, Addon.Transparency
 local RegisterEvent, UnregisterEvent = Addon.EventService.RegisterEvent, Addon.EventService.UnregisterEvent
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish

@@ -10,7 +10,7 @@ local DEBUG = true
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
-local L = TP.L
+local L = Addon.L
 
 local function toggleDPS()
   if TidyPlatesThreat.db.profile.optionRoleDetectionAutomatic then

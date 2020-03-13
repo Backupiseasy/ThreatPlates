@@ -4,7 +4,7 @@
 
 local RGB = Addon.RGB
 local RGB_P = Addon.RGB_P
-local L = ThreatPlates.L
+local L = Addon.L
 
 local function GetTotemSettings()
 end

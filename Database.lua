@@ -17,7 +17,7 @@ local GetCVar, SetCVar = GetCVar, SetCVar
 local UnitClass, GetSpecialization = UnitClass, GetSpecialization
 
 -- ThreatPlates APIs
-local L = ThreatPlates.L
+local L = Addon.L
 local TidyPlatesThreat = TidyPlatesThreat
 local RGB = Addon.RGB
 

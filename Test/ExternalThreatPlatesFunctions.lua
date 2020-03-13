@@ -15,7 +15,7 @@ Addon.RGB_P = function(red, green, blue, alpha)
   return { r = red, g = green, b = blue, a = alpha}
 end
 
-ThreatPlates.L = {}
+Addon.L = {}
 
 ThreatPlates.IsFriend = function(unit)
   return unit.Test_IsFriend

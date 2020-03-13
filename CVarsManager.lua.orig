@@ -13,7 +13,7 @@ local SetCVar, GetCVar, GetCVarDefault = SetCVar, GetCVar, GetCVarDefault
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
-local L = ThreatPlates.L
+local L = Addon.L
 
 Addon.CVars = {}
 
