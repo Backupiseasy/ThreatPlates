@@ -2848,7 +2848,7 @@ local function CreateAurasWidgetOptions()
                 name = L["Disable"],
                 order = 210,
                 type = "toggle",
-                desc = L["Do not show buffs with umlimited duration."],
+                desc = L["Do not show buffs with unlimited duration."],
                 arg = { "AuraWidget", "Buffs", "HideUnlimitedDuration" },
                 disabled = function() return not db.AuraWidget.Buffs.ShowEnemy end
               },
