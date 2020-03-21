@@ -180,7 +180,7 @@ function Addon:UnitStyle_NameDependent(unit)
 
   local totem_settings
   local unique_settings = db.uniqueSettings.map[unit.name]
-  if unique_settings and unique_settings.useStyle then
+  if unique_settings and unique_settings.useStyle and unique_settings.Enable.UnitReaction[unit.reaction] then
     plate_style = (unique_settings.showNameplate and "unique") or (unique_settings.ShowHeadlineView and "NameOnly-Unique") or "etotem"
   else
     local totem_id = TOTEMS[unit.name]

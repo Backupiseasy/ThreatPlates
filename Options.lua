@@ -4803,18 +4803,58 @@ local function CreateCustomNameplateEntry(index)
         },
       },
       Enable = {
+        name = L["Enable"],
+        type = "group",
+        inline = true,
+        order = 5,
+        args = {
+          Disable = {
+            name = L["Never"],
+            order = 10,
+            type = "toggle",
+            desc = L["This option allows you to control whether custom settings for nameplate style, color, transparency and scaling should be used for this nameplate."],
+            set = function(info, val) SetValue(info, not val) end,
+            get = function(info) return not GetValue(info) end,
+            arg = { "uniqueSettings", index, "useStyle" },
+          },
+          Spacer1 = GetSpacerEntry(15),
+          FriendlyUnits = {
+            name = L["Friendly Units"],
+            order = 20,
+            type = "toggle",
+            desc = L["Enable this custom nameplate for friendly units"],
+            set = function(info, val)
+              db.uniqueSettings[index].Enable.UnitReaction["FRIENDLY"] = val
+              Addon:ForceUpdate()
+            end,
+            get = function(info)
+              return db.uniqueSettings[index].Enable.UnitReaction["FRIENDLY"]
+            end,
+            disabled = function() return not db.uniqueSettings[index].useStyle end,
+          },
+          EnemyUnits = {
+            name = L["Enemy Units"],
+            order = 30,
+            type = "toggle",
+            desc = L["Enable this custom nameplate for neutral and hostile units"],
+            set = function(info, val)
+              db.uniqueSettings[index].Enable.UnitReaction["HOSTILE"] = val
+              db.uniqueSettings[index].Enable.UnitReaction["NEUTRAL"] = val
+              Addon:ForceUpdate()
+            end,
+            get = function(info)
+              return db.uniqueSettings[index].Enable.UnitReaction["HOSTILE"]
+            end,
+            disabled = function() return not db.uniqueSettings[index].useStyle end,
+          },
+        },
+      },
+      NameplateStyle = {
         name = L["Nameplate Style"],
         type = "group",
         inline = true,
         order = 10,
         args = {
-          UseStyle = {
-            name = L["Enable"],
-            order = 1,
-            type = "toggle",
-            desc = L["This option allows you to control whether custom settings for nameplate style, color, transparency and scaling should be used for this nameplate."],
-            arg = { "uniqueSettings", index, "useStyle" },
-          },
           HeadlineView = {
             name = L["Healthbar View"],
             order = 20,
@@ -4835,6 +4875,7 @@ local function CreateCustomNameplateEntry(index)
             name = L["Hide Nameplate"],
             order = 40,
             type = "toggle",
+            width = "double",
             desc = L["Disables nameplates (healthbar and name) for the units of this type and only shows an icon (if enabled)."],
             disabled = function() return not db.uniqueSettings[index].useStyle end,
             set = function(info, val)
@@ -5222,7 +5263,6 @@ local function CreateCustomNameplatesGroup()
               name = L["Enable"],
               order = 10,
               type = "toggle",
-              width = "half",
               set = function(info, val)
                 SetValuePlain(info, val);
                 Addon.Widgets:InitializeWidget("UniqueIcon")

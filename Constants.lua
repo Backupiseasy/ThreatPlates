@@ -969,6 +969,13 @@ ThreatPlates.DEFAULT_SETTINGS = {
         name = "<Enter name here>",
         showNameplate = true,
         ShowHeadlineView = false,
+        Enable = {
+          UnitReaction = {
+            FRIENDLY = true,
+            NEUTRAL = true,
+            HOSTILE = true,
+          },
+        },
         showIcon = true,
         useStyle = true,
         useColor = true,
