@@ -28,8 +28,8 @@ function Widget:Create(tp_frame)
 
   -- Custom Code
   --------------------------------------
-  widget_frame:SetFrameLevel(tp_frame:GetFrameLevel() + 7)
-  widget_frame.Icon = widget_frame:CreateTexture(nil, "OVERLAY")
+  widget_frame:SetFrameLevel(tp_frame:GetFrameLevel() + 14)
+  widget_frame.Icon = widget_frame:CreateTexture(nil, "ARTWORK")
   widget_frame.Icon:SetAllPoints(widget_frame)
   --------------------------------------
   -- End Custom Code
@@ -83,4 +83,11 @@ function Widget:OnUnitAdded(widget_frame, unit)
   end
 
 	widget_frame:Show()
+end
+
+function Addon.UpdateCustomStyleIcon(tp_frame, unit)
+  local widget_frame = tp_frame.widgets.UniqueIcon
+  if widget_frame and widget_frame.Active then
+    Widget:OnUnitAdded(widget_frame, unit)
+  end
 end

@@ -31,6 +31,8 @@ local LibCustomGlow = Addon.LibCustomGlow
 local TidyPlatesThreat = TidyPlatesThreat
 local Animations = Addon.Animations
 local Font = Addon.Font
+local UpdateCustomStyleAfterAuraTrigger = Addon.UpdateCustomStyleAfterAuraTrigger
+local UnitStyle_AuraDependent = Addon.UnitStyle_AuraDependent
 
 ---------------------------------------------------------------------------------------------------
 -- Aura Highlighting
@@ -787,6 +789,8 @@ function Widget:UpdateUnitAuras(frame, unit, enabled_auras, enabled_cc, SpellFil
   local aura, show_aura
   local aura_count = 1
   local isCastByPlayer
+  local CustomStyleAuraTrigger = false
+
   for i = 1, 40 do
     show_aura = false
 
@@ -802,6 +806,11 @@ function Widget:UpdateUnitAuras(frame, unit, enabled_auras, enabled_cc, SpellFil
     -- ShowPesonal: Debuffs  that are shown on Blizzards nameplate, no matter who casted them (and
     -- ShowAll: Debuffs
     if not aura.name then break end
+
+    if Addon.ActiveAuraTriggers then
+      -- Do this to prevent calls to UnitStyle_AuraDependent after a aura trigger was found already
+      CustomStyleAuraTrigger = CustomStyleAuraTrigger or UnitStyle_AuraDependent(unit, aura.spellid, aura.name)
+    end
 
     --aura.unit = unitid
     aura.Index = i
@@ -929,7 +938,6 @@ function Widget:UpdateUnitAuras(frame, unit, enabled_auras, enabled_cc, SpellFil
       aura_frame_list_cc[i]:Hide()
     end
   end
-
 end
 
 function Widget:UpdatePositionAuraGrid(frame, y_offset)
@@ -971,6 +979,9 @@ function Widget:UpdateIconGrid(widget_frame, unit)
     self.CurrentTarget = widget_frame
   end
 
+  local old_CustomStyleAura = unit.CustomStyleAura
+  unit.CustomStyleAura = false
+
   local enabled_cc
   local unit_is_friendly = UnitReaction(unitid, "player") > 4
   if unit_is_friendly then -- friendly or better
@@ -983,6 +994,12 @@ function Widget:UpdateIconGrid(widget_frame, unit)
 
     self:UpdateUnitAuras(widget_frame.Debuffs, unit, db.Debuffs.ShowEnemy, enabled_cc, self.FilterEnemyDebuffsBySpell, self.FilterEnemyCrowdControlBySpell, db.Debuffs.FilterMode)
     self:UpdateUnitAuras(widget_frame.Buffs, unit, db.Buffs.ShowEnemy, false, self.FilterEnemyBuffsBySpell, self.FilterEnemyCrowdControlBySpell, db.Buffs.FilterMode)
+  end
+
+  -- Set the style if a aura trigger for a custom nameplate was found or the aura trigger
+  -- is no longer there
+  if unit.CustomStyleAura or old_CustomStyleAura then
+    UpdateCustomStyleAfterAuraTrigger(unit)
   end
 
   local buffs_active, debuffs_active, cc_active = widget_frame.Buffs.ActiveAuras > 0, widget_frame.Debuffs.ActiveAuras > 0, widget_frame.CrowdControl.ActiveAuras > 0

@@ -248,6 +248,8 @@ end
 do
 	-- CheckNameplateStyle
 	local function CheckNameplateStyle()
+    local old_custom_style = unit.CustomPlateSettings
+
     stylename = Addon:SetStyle(unit)
     extended.style = activetheme[stylename]
 
@@ -259,9 +261,18 @@ do
 			unit.style = stylename
 
       Addon:CreateExtensions(extended, unit.unitid, stylename)
-      -- TOOD: optimimze that - call OnUnitAdded only when the plate is initialized the first time for a unit, not if only the style changes
       Widgets:OnUnitAdded(extended, unit)
-      --Addon:WidgetsModeChanged(extended, unit)
+    else
+      -- Update the unique icon widget and style may be the same, but a different trigger might be active, e.g.,
+      -- if two aura triggers fired
+      if (stylename == "unique" or stylename == "NameOnly-Unique") and unit.CustomPlateSettings ~= old_custom_style then
+        Addon.UpdateCustomStyleIcon(extended, unit)
+      end
+
+--      local unique_icon_widget = Widgets.Widgets.UniqueIcon
+--      if (stylename == "unique" or stylename == "NameOnly-Unique") and unit.CustomPlateSettings ~= old_custom_style and unique_icon_widget then
+--        unique_icon_widget:OnUnitAdded(extended.widgets.UniqueIcon, unit)
+--      end
     end
 	end
 
@@ -340,7 +351,7 @@ do
     PlatesByGUID[unit.guid] = plate
 
     Addon:UpdateUnitContext(unit, unitid)
-    Addon:UnitStyle_NameDependent(unit)
+    Addon.UnitStyle_NameDependent(unit)
     ProcessUnitChanges()
 
 		Addon:UpdateExtensions(extended, unit.unitid, stylename)
@@ -513,6 +524,11 @@ function Addon:UpdateIndicatorNameplateColor(tp_frame)
   if visual.name:IsShown() then
     visual.name:SetTextColor(Addon:SetNameColor(tp_frame.unit))
   end
+end
+
+function Addon.UpdateCustomStyleAfterAuraTrigger(unit)
+  UpdateReferences(GetNamePlateForUnit(unit.unitid))
+  ProcessUnitChanges()
 end
 
 ---------------------------------------------------------------------------------------------------------------------
@@ -740,7 +756,7 @@ do
       castbar:SetMinMaxValues(0, castbar.MaxValue)
       castbar:SetValue(castbar.Value)
 		else
-      name, text, texture, startTime, endTime, isTradeSkill, castID, notInterruptible = UnitCastingInfo(unitid)
+      name, text, texture, startTime, endTime, isTradeSkill, castID, notInterruptible, spellID = UnitCastingInfo(unitid)
       if not name then
         castbar:Hide()
         return
@@ -769,8 +785,13 @@ do
     castbar:SetAllColors(Addon:SetCastbarColor(unit))
     castbar:SetFormat(unit.spellIsShielded)
 
-    UpdateIndicator_CustomScaleText()
-    UpdatePlate_Transparency(extended, unit)
+    local plate_style = Addon.ActiveCastTriggers and Addon.UnitStyle_CastDependent(unit, spellID, name)
+    if plate_style and plate_style ~= extended.stylename then
+      ProcessUnitChanges()
+    else
+      UpdateIndicator_CustomScaleText()
+      UpdatePlate_Transparency(extended, unit)
+    end
 
 		castbar:Show()
 	end
@@ -784,9 +805,13 @@ do
     castbar.IsChanneling = false
     unit.isCasting = false
 
-		--UpdateIndicator_CustomScaleText()
-    UpdateIndicator_CustomScale(extended, unit)
-    UpdatePlate_Transparency(extended, unit)
+    if unit.CustomStyleCast then
+      unit.CustomStyleCast = false
+      ProcessUnitChanges()
+    else
+      UpdateIndicator_CustomScale(extended, unit)
+      UpdatePlate_Transparency(extended, unit)
+    end
 	end
 
 	function OnUpdateCastMidway(plate, unitid)
@@ -969,8 +994,8 @@ do
       unit.name, _ = UnitName(unitid)
 
       --Addon:UnitStyle_UnitType(extended, unit)
-      local plate_style = Addon:UnitStyle_NameDependent(unit)
-      if plate_style ~= extended.stylename then
+      local plate_style = Addon.UnitStyle_NameDependent(unit)
+      if plate_style and plate_style ~= extended.stylename then
         -- Totem or Custom Nameplate
         ProcessUnitChanges()
       else

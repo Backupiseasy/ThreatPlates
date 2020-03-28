@@ -12,6 +12,7 @@ local UnitIsOtherPlayersPet = UnitIsOtherPlayersPet
 local UnitIsBattlePet = UnitIsBattlePet
 local UnitCanAttack, UnitIsTapDenied = UnitCanAttack, UnitIsTapDenied
 
+-- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
 local TOTEMS = Addon.TOTEMS
 local GetUnitVisibility = ThreatPlates.GetUnitVisibility
@@ -173,7 +174,7 @@ end
 -- Check if a unit is a totem or a custom nameplates (e.g., after UNIT_NAME_UPDATE)
 -- Depends on:
 --   * unit.name
-function Addon:UnitStyle_NameDependent(unit)
+function Addon.UnitStyle_NameDependent(unit)
   local plate_style
 
   local db = TidyPlatesThreat.db.profile
@@ -201,6 +202,41 @@ function Addon:UnitStyle_NameDependent(unit)
   return plate_style
 end
 
+local UnitStyle_NameDependent = Addon.UnitStyle_NameDependent
+
+function Addon.UnitStyle_AuraDependent(unit, aura_id, aura_name)
+  local plate_style
+
+  local unique_settings = Addon.Cache.CustomNameplates[aura_id] or Addon.Cache.CustomNameplates[aura_name]
+  if unique_settings and unique_settings.useStyle and unique_settings.Enable.UnitReaction[unit.reaction] then
+    plate_style = (unique_settings.showNameplate and "unique") or (unique_settings.ShowHeadlineView and "NameOnly-Unique") or "etotem"
+
+    -- As this is called for every aura on a unit, never set it to false (overwriting a previous true value)
+    if plate_style then
+      unit.CustomStyleAura = plate_style
+      unit.CustomPlateSettingsAura = unique_settings
+    end
+  end
+
+  return plate_style
+end
+
+function Addon.UnitStyle_CastDependent(unit, spell_id, spell_name)
+  local plate_style
+
+  local unique_settings = Addon.Cache.CustomNameplates[spell_id] or Addon.Cache.CustomNameplates[spell_name]
+  if unique_settings and unique_settings.useStyle and unique_settings.Enable.UnitReaction[unit.reaction] then
+    plate_style = (unique_settings.showNameplate and "unique") or (unique_settings.ShowHeadlineView and "NameOnly-Unique") or "etotem"
+
+    if plate_style then
+      unit.CustomStyleCast = plate_style
+      unit.CustomPlateSettingsCast = unique_settings
+    end
+  end
+
+  return plate_style
+end
+
 -- Depends on:
 --   * unit.reaction
 --   * unit.name
@@ -222,7 +258,16 @@ function Addon:SetStyle(unit)
   end
 
   -- Check if custom nameplate should be used for the unit:
-  local style = Addon:UnitStyle_NameDependent(unit) or (headline_view and "NameOnly")
+  local style
+  if unit.CustomStyleCast then
+    style = unit.CustomStyleCast
+    unit.CustomPlateSettings = unit.CustomPlateSettingsCast
+  elseif unit.CustomStyleAura then
+    style = unit.CustomStyleAura
+    unit.CustomPlateSettings = unit.CustomPlateSettingsAura
+  else
+    style = UnitStyle_NameDependent(unit) or (headline_view and "NameOnly")
+  end
 
   --if not style and unit.reaction ~= "FRIENDLY" then
   if not style and Addon:ShowThreatFeedback(unit) then

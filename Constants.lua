@@ -967,9 +967,23 @@ ThreatPlates.DEFAULT_SETTINGS = {
       map = {},
       ["**"] = {
         name = "<Enter name here>",
+        Trigger = {
+          Type = "Name",
+          -- Not yet used, for migration later on:
+          --          Name = {
+          --            Name = "<Enter name here>",
+          --          },
+          Aura = {
+            AuraID = nil,
+          },
+          Cast = {
+            SpellID = nil,
+          },
+        },
         showNameplate = true,
         ShowHeadlineView = false,
         Enable = {
+          Never = false,
           UnitReaction = {
             FRIENDLY = true,
             NEUTRAL = true,
@@ -984,7 +998,8 @@ ThreatPlates.DEFAULT_SETTINGS = {
         allowMarked = true,
         overrideScale = false,
         overrideAlpha = false,
-        icon = (Addon.CLASSIC and "Spell_nature_spiritwolf.blp") or "spell_shadow_shadowfiend.blp",
+        UseAutomaticIcon = true,
+        icon = "INV_Misc_QuestionMark.blp",
         scale = 1,
         alpha = 1,
         color = {

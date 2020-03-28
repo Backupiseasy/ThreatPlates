@@ -78,8 +78,25 @@ local DEPRECATED_UNIQUE_SETTINGS = {
   map = {},
   ["**"] = {
     name = "<Enter name here>",
+    Trigger = {
+      Type = "Name",
+      Aura = {
+        AuraID = nil,
+      },
+      Cast = {
+        SpellID = nil,
+      },
+    },
     showNameplate = true,
     ShowHeadlineView = false,
+    Enable = {
+      Never = false,
+      UnitReaction = {
+        FRIENDLY = true,
+        NEUTRAL = true,
+        HOSTILE = true,
+      },
+    },
     showIcon = true,
     useStyle = true,
     useColor = true,
@@ -88,6 +105,7 @@ local DEPRECATED_UNIQUE_SETTINGS = {
     allowMarked = true,
     overrideScale = false,
     overrideAlpha = false,
+    UseAutomaticIcon = true,
     icon = "",
     scale = 1,
     alpha = 1,
@@ -1286,6 +1304,24 @@ Addon.SetDefaultsForCustomNameplates = function()
   TidyPlatesThreat.db:RegisterDefaults(defaults)
 end
 
+local function MigrationAddAutomaticIcon(profile_name, profile)
+  for profile_name, profile in pairs(TidyPlatesThreat.db.profiles) do
+    if DatabaseEntryExists(profile, { "uniqueSettings" }) then
+      local settings = profile.uniqueSettings
+
+      for i, unique_unit in pairs(settings) do
+        if i ~= "map" then
+          -- Set automatic icon detection for all existing custom nameplates to false
+          unique_unit.UseAutomaticIcon = false
+          unique_unit.icon = GetValueOrDefault(unique_unit.icon, (Addon.CLASSIC and "Spell_nature_spiritwolf.blp") or "spell_shadow_shadowfiend.blp")
+        end
+      end
+    end
+  end
+end
+
+Addon.Migration = MigrationAddAutomaticIcon
+
 ---- Settings in the SavedVariables file that should be migrated and/or deleted
 local DEPRECATED_SETTINGS = {
 --  NamesColor = { MigrateNamesColor, },                        -- settings.name.color
@@ -1315,6 +1351,7 @@ local DEPRECATED_SETTINGS = {
   ThreatDetection = { MigrationThreatDetection, "9.1.3" },  -- (changed in 9.1.0)
   -- hideNonCombat = { "threat", "hideNonCombat" },        -- (removed in ...)
   -- nonCombat = { "threat", "nonCombat" },                -- (removed in 9.1.0)
+  AddAutomaticIcon = { MigrationAddAutomaticIcon , "9.2.0" },
 }
 
 local function MigrateDatabase(current_version)
