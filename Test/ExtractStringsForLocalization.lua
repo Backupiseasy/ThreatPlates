@@ -1,8 +1,8 @@
 -- Lua implementation of PHP scandir function
 --local TPTP_DIRECTORY = [[C:\Games\World of Warcraft\_retail_\Interface\AddOns\TidyPlates_ThreatPlates]]
-local TPTP_DIRECTORY = [[D:\Games\World of Warcraft - Test\_retail_\Interface\AddOns\TidyPlates_ThreatPlates]]
+--local TPTP_DIRECTORY = [[D:\Games\World of Warcraft - Test\_retail_\Interface\AddOns\TidyPlates_ThreatPlates]]
 --local TPTP_DIRECTORY = [[D:\Games\World of Warcraft - Dev\_retail_\Interface\AddOns\TidyPlates_ThreatPlates]]
---local TPTP_DIRECTORY = [[D:\Games\World of Warcraft - Int\_retail_\Interface\AddOns\TidyPlates_ThreatPlates]]
+local TPTP_DIRECTORY = [[D:\Games\World of Warcraft - Int\_retail_\Interface\AddOns\TidyPlates_ThreatPlates]]
 local IGNORE_LIST = {
   TPTP_DIRECTORY .. [[\Libs]],
   TPTP_DIRECTORY ..[[\Locales]]

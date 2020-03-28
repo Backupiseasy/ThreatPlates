@@ -5,3 +5,4 @@
 * Added new triggers for custom nameplates additionally to a unit's name: auras and casts [Comment #4202, #766, #1284, #1988, #2010, #723, #1438, #1462, #1506, #1679, Issue #170, E-Mail, IM].
 * Added an option to disable a custom nameplate and never show it.
 * Added an option "Automatic Icon" to derive the custom nameplate's icon from the spell/aura ID or name used as trigger.
+* Added an option to import/export all configuration settings of Threat Plates (thanks to Kungfumoo).

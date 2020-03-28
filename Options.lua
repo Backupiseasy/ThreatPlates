@@ -21,6 +21,7 @@ local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
 local SetCVar, GetCVar, GetCVarBool = SetCVar, GetCVar, GetCVarBool
 local GetSpellInfo = GetSpellInfo
 local UnitsExists, UnitName = UnitsExists, UnitName
+local GameTooltip = GameTooltip
 
 -- ThreatPlates APIs
 local LibStub = LibStub
@@ -131,6 +132,163 @@ local options
 local clipboard
 
 -- Functions
+
+local _, Addon = ...
+local t = Addon.ThreatPlates
+
+---------------------------------------------------------------------------------------------------
+-- Imported functions and constants
+---------------------------------------------------------------------------------------------------
+
+-- cache copyFrame if used multiple times
+local copyFrame = nil
+
+local function CreateCopyFrame()
+  local AceGUI = LibStub("AceGUI-3.0")
+
+  local frame = AceGUI:Create("Frame")
+  frame:SetTitle(L["Import/Export Profile"])
+  frame:SetCallback("OnEscapePressed", function()
+    frame:Hide()
+  end)
+  frame:SetLayout("fill")
+
+  local editBox = AceGUI:Create("MultiLineEditBox")
+  editBox:SetFullWidth(true)
+  editBox.button:Hide()
+  editBox.label:SetText(L["Paste Threat Plates profile string into the box and then close the window"])
+
+  frame:AddChild(editBox)
+  frame.editBox = editBox
+
+  function frame:OpenExport(text)
+    --NOTE: options are closed and re-opened around the copyframe so the state of the profile is always reflected in that window
+    Addon.LibAceConfigDialog:Close(t.ADDON_NAME)
+    GameTooltip:Hide()
+
+    local editBox = self.editBox
+
+    editBox:SetMaxLetters(0)
+    editBox.editBox:SetScript("OnChar", function() editBox:SetText(text); editBox:HighlightText(); end)
+    editBox.editBox:SetScript("OnMouseUp", function() editBox:HighlightText(); end)
+    editBox.label:Hide()
+    editBox:SetText(text)
+    editBox:HighlightText()
+
+    self:SetCallback("OnClose", function()
+      Addon.LibAceConfigDialog:Open(t.ADDON_NAME)
+    end)
+
+    self:Show()
+    editBox:SetFocus()
+  end
+
+  function frame:OpenImport(onImportHandler)
+    Addon.LibAceConfigDialog:Close(t.ADDON_NAME)
+    GameTooltip:Hide()
+
+    local editBox = self.editBox
+
+    editBox:SetMaxLetters(0)
+    editBox.editBox:SetScript("OnChar", nil)
+    editBox.editBox:SetScript("OnMouseUp", nil)
+    editBox.label:Show()
+    editBox:SetText("")
+
+    self:SetCallback("OnClose", function()
+      onImportHandler(editBox:GetText())
+      Addon.LibAceConfigDialog:Open(t.ADDON_NAME)
+    end)
+
+    self:Show()
+    editBox:SetFocus()
+  end
+
+  return frame
+end
+
+local function ShowCopyFrame(mode, modeArg)
+  local Serializer = LibStub:GetLibrary("AceSerializer-3.0")
+  local LibDeflate = LibStub:GetLibrary("LibDeflate")
+
+  -- show the appropriate frames
+  if copyFrame == nil then
+    copyFrame = CreateCopyFrame()
+  end
+
+  if mode == "export" then
+    local serialized = Serializer:Serialize(modeArg)
+    local compressed = LibDeflate:CompressDeflate(serialized)
+
+    copyFrame:OpenExport(LibDeflate:EncodeForPrint(compressed))
+  else
+    local function ImportHandler(encoded)
+      --window opened by mistake etc, just ignore it
+      if string.len(encoded) == 0 then
+        return
+      end
+
+      local errorMsg = L["Something went wrong importing your profile, please check the import string."]
+      local decoded = LibDeflate:DecodeForPrint(encoded)
+
+      if not decoded then
+        t.Print(errorMsg, true)
+        return
+      end
+
+      local decompressed = LibDeflate:DecompressDeflate(decoded)
+
+      if not decompressed then
+        t.Print(errorMsg, true)
+        return
+      end
+
+      local success, deserialized = Serializer:Deserialize(decompressed)
+
+      if not success then
+        t.Print(errorMsg, true)
+        return
+      end
+
+      --apply imported profile as a new profile
+      TidyPlatesThreat.db:SetProfile(L["Imported Profile"]) --will create a new profile
+
+      --[[
+        NOTE: using merge as there appears to be an observer that writes changes to the savedvariables.
+        using assignment (profile = deserialized) removes this functionality which means the imported profile is never saved.
+      ]]--
+
+      Addon.MergeIntoTable(TidyPlatesThreat.db.profile, deserialized)
+      Addon:ForceUpdate()
+    end
+
+    copyFrame:OpenImport(ImportHandler)
+  end
+end
+
+local function AddImportExportOptions(profileOptions)
+  profileOptions.args.exportimportdesc = {
+    order = 90,
+    type = "description",
+    name = "\n" .. L["Import and export profiles that can be shared with other players"],
+  }
+
+  profileOptions.args.exportprofile = {
+    order = 95,
+    type = "execute",
+    name = L["Export current profile"],
+    desc = L["Export the current profile into text that can be pasted by another user"],
+    func = function() ShowCopyFrame("export", TidyPlatesThreat.db.profile) end
+  }
+
+  profileOptions.args.importprofile = {
+    order = 100,
+    type = "execute",
+    name = L["Import a profile"],
+    desc = L["Import a profile from another user"],
+    func = function() ShowCopyFrame("import") end
+  }
+end
 
 local function GetSpellName(number)
   local n = GetSpellInfo(number)
@@ -7876,6 +8034,8 @@ local function CreateOptionsTable()
 
   options.args.profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(TidyPlatesThreat.db)
   options.args.profiles.order = 10000;
+
+  AddImportExportOptions(options.args.profiles);
 end
 
 local function GetInterfaceOptionsTable()
