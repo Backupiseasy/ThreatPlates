@@ -24,14 +24,17 @@ local UnitsExists, UnitName = UnitsExists, UnitName
 local GameTooltip = GameTooltip
 
 -- ThreatPlates APIs
+local TidyPlatesThreat = TidyPlatesThreat
 local LibStub = LibStub
 local RGB_WITH_HEX = t.RGB_WITH_HEX
 local L = t.L
 
-local PATH_ART = t.Art
+-- Import some libraries
+local LibAceGUI = LibStub("AceGUI-3.0")
+local LibAceSerializer = LibStub:GetLibrary("AceSerializer-3.0")
+local LibDeflate = LibStub:GetLibrary("LibDeflate")
 
--- local TidyPlatesThreat = LibStub("AceAddon-3.0"):GetAddon("TidyPlatesThreat");
-local TidyPlatesThreat = TidyPlatesThreat
+local PATH_ART = t.Art
 
 local UNIT_TYPES = {
   {
@@ -131,29 +134,22 @@ local db
 local options
 local clipboard
 
--- Functions
-
-local _, Addon = ...
-local t = Addon.ThreatPlates
-
 ---------------------------------------------------------------------------------------------------
--- Imported functions and constants
+-- Importing and exporting settings and custom nameplates.
 ---------------------------------------------------------------------------------------------------
 
 -- cache copyFrame if used multiple times
 local copyFrame = nil
 
 local function CreateCopyFrame()
-  local AceGUI = LibStub("AceGUI-3.0")
-
-  local frame = AceGUI:Create("Frame")
+  local frame = LibAceGUI:Create("Frame")
   frame:SetTitle(L["Import/Export Profile"])
   frame:SetCallback("OnEscapePressed", function()
     frame:Hide()
   end)
   frame:SetLayout("fill")
 
-  local editBox = AceGUI:Create("MultiLineEditBox")
+  local editBox = LibAceGUI:Create("MultiLineEditBox")
   editBox:SetFullWidth(true)
   editBox.button:Hide()
   editBox.label:SetText(L["Paste Threat Plates profile string into the box and then close the window"])
@@ -208,16 +204,13 @@ local function CreateCopyFrame()
 end
 
 local function ShowCopyFrame(mode, modeArg)
-  local Serializer = LibStub:GetLibrary("AceSerializer-3.0")
-  local LibDeflate = LibStub:GetLibrary("LibDeflate")
-
   -- show the appropriate frames
   if copyFrame == nil then
     copyFrame = CreateCopyFrame()
   end
 
   if mode == "export" then
-    local serialized = Serializer:Serialize(modeArg)
+    local serialized = LibAceSerializer:Serialize(modeArg)
     local compressed = LibDeflate:CompressDeflate(serialized)
 
     copyFrame:OpenExport(LibDeflate:EncodeForPrint(compressed))
@@ -243,7 +236,7 @@ local function ShowCopyFrame(mode, modeArg)
         return
       end
 
-      local success, deserialized = Serializer:Deserialize(decompressed)
+      local success, deserialized = LibAceSerializer:Deserialize(decompressed)
 
       if not success then
         t.Print(errorMsg, true)
@@ -289,6 +282,10 @@ local function AddImportExportOptions(profileOptions)
     func = function() ShowCopyFrame("import") end
   }
 end
+
+---------------------------------------------------------------------------------------------------
+-- Imported functions and constants
+---------------------------------------------------------------------------------------------------
 
 local function GetSpellName(number)
   local n = GetSpellInfo(number)
@@ -8033,9 +8030,9 @@ local function CreateOptionsTable()
   UpdateSpecial()
 
   options.args.profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(TidyPlatesThreat.db)
-  options.args.profiles.order = 10000;
+  options.args.profiles.order = 10000
 
-  AddImportExportOptions(options.args.profiles);
+  AddImportExportOptions(options.args.profiles)
 end
 
 local function GetInterfaceOptionsTable()
