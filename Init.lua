@@ -151,6 +151,24 @@ Addon.ConcatTables = function(base_table, table_to_concat)
 	return concat_result
 end
 
+Addon.CheckTableStructure = function(reference_structure, table_to_check)
+	if table_to_check == nil then
+		return false
+	end
+
+	for k,v in pairs(reference_structure) do
+		if type(v) == "table" then
+			if not Addon.CheckTableStructure(reference_structure[k], table_to_check[k]) then
+				return false
+			end
+		elseif table_to_check[k] == nil then
+				return false
+		end
+	end
+
+	return true
+end
+
 --------------------------------------------------------------------------------------------------
 -- Some functions to fix TidyPlates bugs
 ---------------------------------------------------------------------------------------------------

@@ -140,16 +140,9 @@ function TidyPlatesThreat:ChatCommand(input)
   elseif command == "quest" then
 		Addon:PrintQuests()
 	elseif command == "test" then
-		local settings = TidyPlatesThreat.db.profile.uniqueSettings
-
-		local i = 0
-		for k, v in pairs(settings) do
-			i = i + 1
-			print (i, "=>", k, "=", v, " => ", v and v.name and v.name)
-			if type(i) == "number" and v.name and v.name ~= "<Enter name here>" then
-				print ("  => Custom")
-			end
-		end
+		local unique_unit = TP.CopyTable(TidyPlatesThreat.db.profile.uniqueSettings[1])
+	unique_unit.UseAutomaticIcon = nil
+		print (Addon.CheckTableStructure(TP.DEFAULT_SETTINGS.profile.uniqueSettings["**"], unique_unit))
 	elseif command == "migrate" then
 		local profile_table = TidyPlatesThreat.db.profiles
 		for profile_name, profile in pairs(profile_table) do

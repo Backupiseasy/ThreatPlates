@@ -138,10 +138,10 @@ local clipboard
 -- Importing and exporting settings and custom nameplates.
 ---------------------------------------------------------------------------------------------------
 
--- cache copyFrame if used multiple times
-local copyFrame = nil
+-- cache ImportExportFrame if used multiple times
+local ImportExportFrame = nil
 
-local function CreateCopyFrame()
+local function CreateImportExportFrame()
   local frame = LibAceGUI:Create("Frame")
   frame:SetTitle(L["Import/Export Profile"])
   frame:SetCallback("OnEscapePressed", function()
@@ -152,13 +152,13 @@ local function CreateCopyFrame()
   local editBox = LibAceGUI:Create("MultiLineEditBox")
   editBox:SetFullWidth(true)
   editBox.button:Hide()
-  editBox.label:SetText(L["Paste Threat Plates profile string into the box and then close the window"])
+  editBox.label:SetText(L["Paste the Threat Plates profile string into the text field below and then close the window"])
 
   frame:AddChild(editBox)
   frame.editBox = editBox
 
   function frame:OpenExport(text)
-    --NOTE: options are closed and re-opened around the copyframe so the state of the profile is always reflected in that window
+    --NOTE: options are closed and re-opened around the ImportExportFrame so the state of the profile is always reflected in that window
     Addon.LibAceConfigDialog:Close(t.ADDON_NAME)
     GameTooltip:Hide()
 
@@ -203,59 +203,64 @@ local function CreateCopyFrame()
   return frame
 end
 
-local function ShowCopyFrame(mode, modeArg)
-  -- show the appropriate frames
-  if copyFrame == nil then
-    copyFrame = CreateCopyFrame()
+local function ImportStringData(encoded)
+  --window opened by mistake etc, just ignore it
+  if string.len(encoded) == 0 then
+    return
   end
+
+  local errorMsg = L["Something went wrong with importing your profile. Please check the import string."]
+  local decoded = LibDeflate:DecodeForPrint(encoded)
+
+  if not decoded then
+    t.Print(errorMsg, true)
+    return
+  end
+
+  local decompressed = LibDeflate:DecompressDeflate(decoded)
+
+  if not decompressed then
+    t.Print(errorMsg, true)
+    return
+  end
+
+  local success, deserialized = LibAceSerializer:Deserialize(decompressed)
+
+  if not success then
+    t.Print(errorMsg, true)
+    return
+  end
+
+  return success, deserialized
+end
+
+local function ShowImportExportFrame(mode, modeArg)
+  ImportExportFrame = ImportExportFrame or CreateImportExportFrame()
 
   if mode == "export" then
     local serialized = LibAceSerializer:Serialize(modeArg)
     local compressed = LibDeflate:CompressDeflate(serialized)
 
-    copyFrame:OpenExport(LibDeflate:EncodeForPrint(compressed))
+    ImportExportFrame:OpenExport(LibDeflate:EncodeForPrint(compressed))
   else
     local function ImportHandler(encoded)
-      --window opened by mistake etc, just ignore it
-      if string.len(encoded) == 0 then
-        return
+      local success, deserialized = ImportStringData(encoded)
+
+      if success then
+        --apply imported profile as a new profile
+        TidyPlatesThreat.db:SetProfile(L["Imported Profile"]) --will create a new profile
+
+        --[[
+          NOTE: using merge as there appears to be an observer that writes changes to the savedvariables.
+          using assignment (profile = deserialized) removes this functionality which means the imported profile is never saved.
+        ]]--
+
+        Addon.MergeIntoTable(TidyPlatesThreat.db.profile, deserialized)
+        Addon:ForceUpdate()
       end
-
-      local errorMsg = L["Something went wrong importing your profile, please check the import string."]
-      local decoded = LibDeflate:DecodeForPrint(encoded)
-
-      if not decoded then
-        t.Print(errorMsg, true)
-        return
-      end
-
-      local decompressed = LibDeflate:DecompressDeflate(decoded)
-
-      if not decompressed then
-        t.Print(errorMsg, true)
-        return
-      end
-
-      local success, deserialized = LibAceSerializer:Deserialize(decompressed)
-
-      if not success then
-        t.Print(errorMsg, true)
-        return
-      end
-
-      --apply imported profile as a new profile
-      TidyPlatesThreat.db:SetProfile(L["Imported Profile"]) --will create a new profile
-
-      --[[
-        NOTE: using merge as there appears to be an observer that writes changes to the savedvariables.
-        using assignment (profile = deserialized) removes this functionality which means the imported profile is never saved.
-      ]]--
-
-      Addon.MergeIntoTable(TidyPlatesThreat.db.profile, deserialized)
-      Addon:ForceUpdate()
     end
 
-    copyFrame:OpenImport(ImportHandler)
+    ImportExportFrame:OpenImport(ImportHandler)
   end
 end
 
@@ -263,23 +268,23 @@ local function AddImportExportOptions(profileOptions)
   profileOptions.args.exportimportdesc = {
     order = 90,
     type = "description",
-    name = "\n" .. L["Import and export profiles that can be shared with other players"],
+    name = "\n" .. L["Import and export profiles that can be shared with other players."],
   }
 
   profileOptions.args.exportprofile = {
     order = 95,
     type = "execute",
     name = L["Export current profile"],
-    desc = L["Export the current profile into text that can be pasted by another user"],
-    func = function() ShowCopyFrame("export", TidyPlatesThreat.db.profile) end
+    desc = L["Export the current profile into a string that can be imported by other users."],
+    func = function() ShowImportExportFrame("export", TidyPlatesThreat.db.profile) end
   }
 
   profileOptions.args.importprofile = {
     order = 100,
     type = "execute",
     name = L["Import a profile"],
-    desc = L["Import a profile from another user"],
-    func = function() ShowCopyFrame("import") end
+    desc = L["Import a profile from a import string from another user."],
+    func = function() ShowImportExportFrame("import") end
   }
 end
 
@@ -4878,7 +4883,18 @@ local function CreateSpecRolesRetail()
   return result
 end
 
-local function GetNameForCustomPlate(index)
+local function CustomPlateGetTrigger(custom_plate, trigger_type)
+  trigger_type = trigger_type or custom_plate.Trigger.Type
+  if trigger_type == "Name" then
+    return custom_plate.name
+  elseif trigger_type == "Aura" then
+    return custom_plate.Trigger.Aura.AuraID
+  else -- if trigger_type == "Cast" then
+    return custom_plate.Trigger.Cast.SpellID
+  end
+end
+
+local function CustomPlateGetHeaderName(index)
   local trigger_type = db.uniqueSettings[index].Trigger.Type
   if trigger_type == "Name" then
     return db.uniqueSettings[index].name
@@ -4889,7 +4905,15 @@ local function GetNameForCustomPlate(index)
   end
 end
 
-local function GetIconForCustomPlate(index)
+local function CustomPlateGetSlotName(index)
+  local name = "#" .. index .. ". " .. CustomPlateGetHeaderName(index)
+  if db.uniqueSettings[index].Enable.Never then
+    name = "|cffA0A0A0" .. name .. "|r"
+  end
+  return name
+end
+
+local function CustomPlateGetIcon(index)
   local _, icon
 
   if db.uniqueSettings[index].UseAutomaticIcon then
@@ -4914,7 +4938,7 @@ local function GetIconForCustomPlate(index)
   return icon
 end
 
-local function SetCustomPlateIcon(index, icon_location)
+local function CustomPlateSetIcon(index, icon_location)
   local _, icon
 
   if db.uniqueSettings[index].UseAutomaticIcon then
@@ -4946,20 +4970,22 @@ local function SetCustomPlateIcon(index, icon_location)
   end
 
   db.uniqueSettings[index].icon = icon
-  options.args.Custom.args["#" .. index].args.Icon.args.Icon.image = GetIconForCustomPlate(index)
+  options.args.Custom.args["#" .. index].args.Icon.args.Icon.image = CustomPlateGetIcon(index)
 
   UpdateSpecial()
 end
 
-local function GetCustomNameplateName(index)
-  local name = "#" .. index .. ". " .. GetNameForCustomPlate(index)
-  if db.uniqueSettings[index].Enable.Never then
-    name = "|cffA0A0A0" .. name .. "|r"
-  end
-  return name
-end
-
 StaticPopupDialogs["TriggerAlreadyExists"] = {
+  preferredIndex = STATICPOPUP_NUMDIALOGS,
+  text = L["A custom nameplate with this trigger is already defined: %s. You cannot use two custom nameplates with the same trigger."],
+  button1 = OKAY,
+  timeout = 0,
+  whileDead = 1,
+  hideOnEscape = 1,
+  OnAccept = function(self, _, _) end,
+}
+
+StaticPopupDialogs["ImportedTriggerAlreadyExists"] = {
   preferredIndex = STATICPOPUP_NUMDIALOGS,
   text = L["A custom nameplate with this trigger is already defined: %s. You cannot define two custom nameplates with the same trigger."],
   button1 = OKAY,
@@ -4969,40 +4995,48 @@ StaticPopupDialogs["TriggerAlreadyExists"] = {
   OnAccept = function(self, _, _) end,
 }
 
-local function UpdateCustomPlateEntry(info, val, index)
+local function CustomPlateCheckForExistingTrigger(trigger_type, trigger_value, show_error_msg)
   -- Check if here is already another custom nameplate with the same trigger:
   local trigger_already_used
-
-  local trigger_type = db.uniqueSettings[index].Trigger.Type
   if trigger_type == "Name" then
-    trigger_already_used = db.uniqueSettings.map[val]
+    trigger_already_used = db.uniqueSettings.map[trigger_value]
   else
-    trigger_already_used = Addon.Cache.CustomNameplates[val]
+    trigger_already_used = Addon.Cache.CustomNameplates[trigger_value]
   end
 
-  if trigger_already_used and not db.uniqueSettings[index].Enable.Never then
-    --t.Print(L["A custom nameplate with this trigger is already defined: "] .. val .. L[". You cannot define two custom nameplates with the same trigger."], true)
-    StaticPopup_Show("TriggerAlreadyExists", val)
-  else
-    if info then
-      SetValue(info, val)
-    end
+  local check_ok = trigger_value == nil or trigger_value == "" or (trigger_already_used and trigger_already_used.Enable.Never)
 
-    options.args.Custom.args["#" .. index].name = GetCustomNameplateName(index)
-    options.args.Custom.args["#" .. index].args.Header.name = GetNameForCustomPlate(index)
+  if not check_ok and show_error_msg then
+    StaticPopup_Show("TriggerAlreadyExists", trigger_value)
+  end
 
-    SetCustomPlateIcon(index)
+  return check_ok
+end
+
+local function CustomPlateUpdateEntry(index)
+  options.args.Custom.args["#" .. index].name = CustomPlateGetSlotName(index)
+  options.args.Custom.args["#" .. index].args.Header.name = CustomPlateGetHeaderName(index)
+
+  CustomPlateSetIcon(index)
+end
+
+local function CustomPlateCheckAndUpdateEntry(info, val, index)
+  -- Check if here is already another custom nameplate with the same trigger:
+  local trigger_type = db.uniqueSettings[index].Trigger.Type
+  if CustomPlateCheckForExistingTrigger(trigger_type, val, true) then
+    SetValue(info, val)
+    CustomPlateUpdateEntry(index)
   end
 end
 
 local function CreateCustomNameplateEntry(index)
   local entry = {
-    name = function() return GetCustomNameplateName(index) end,
+    name = function() return CustomPlateGetSlotName(index) end,
     type = "group",
     order = 40 + index,
     args = {
       Header = {
-        name = GetNameForCustomPlate(index),
+        name = CustomPlateGetHeaderName(index),
         type = "header",
         order = 0,
       },
@@ -5017,7 +5051,13 @@ local function CreateCustomNameplateEntry(index)
             type = "select",
             order = 10,
             values = { Name = L["Name"], Aura = L["Aura"], Cast = L["Cast"], },
-            set = function(info, val) UpdateCustomPlateEntry(info, val, index) end,
+            set = function(info, val)
+              local trigger_value = CustomPlateGetTrigger(db.uniqueSettings[index], val)
+              if CustomPlateCheckForExistingTrigger(val, trigger_value, true) then
+                SetValue(info, val)
+                CustomPlateUpdateEntry(index)
+              end
+            end,
             arg = { "uniqueSettings", index, "Trigger", "Type" },
             -- Available only for custom nameplates with version >= 2
             desc = function()
@@ -5036,7 +5076,7 @@ local function CreateCustomNameplateEntry(index)
             type = "input",
             order = 20,
             width = 3,
-            set = function(info, val) UpdateCustomPlateEntry(info, val, index) end,
+            set = function(info, val) CustomPlateCheckAndUpdateEntry(info, val, index) end,
             arg = { "uniqueSettings", index, "name" },
             hidden = function() return db.uniqueSettings[index].Trigger.Type ~= "Name" end,
           },
@@ -5047,9 +5087,12 @@ local function CreateCustomNameplateEntry(index)
             width = "single",
             func = function()
               if UnitExists("target") then
-                local target = UnitName("target")
-                db.uniqueSettings[index].name = target
-                UpdateCustomPlateEntry(nil, nil, index)
+                local trigger_type = db.uniqueSettings[index].Trigger.Type -- "Name"
+                local trigger_value = UnitName("target")
+                if CustomPlateCheckForExistingTrigger(trigger_type, trigger_value, true) then
+                  db.uniqueSettings[index].name = UnitName("target")
+                  CustomPlateUpdateEntry(index)
+                end
               else
                 t.Print(L["No target found."])
               end
@@ -5063,7 +5106,7 @@ local function CreateCustomNameplateEntry(index)
             order = 20,
             width = "full",
             desc = L["Apply the custom settings to a nameplate when a particular aura is present on the unit."],
-            set = function(info, val) UpdateCustomPlateEntry(info, tonumber(val) or val, index) end,
+            set = function(info, val) CustomPlateCheckAndUpdateEntry(info, tonumber(val) or val, index) end,
             get = function(info)
               return tostring(GetValue(info) or "")
             end,
@@ -5085,7 +5128,7 @@ local function CreateCustomNameplateEntry(index)
             order = 20,
             width = "full",
             desc = L["Apply the custom settings to a nameplate when a particular spell is cast by the unit."],
-            set = function(info, val) UpdateCustomPlateEntry(info, tonumber(val) or val, index) end,
+            set = function(info, val) CustomPlateCheckAndUpdateEntry(info, tonumber(val) or val, index) end,
             get = function(info)
               return tostring(GetValue(info) or "")
             end,
@@ -5107,11 +5150,15 @@ local function CreateCustomNameplateEntry(index)
             type = "execute",
             func = function()
               -- Check for valid content could be better
-              if type(clipboard) == "table" and db.uniqueSettings[index].Trigger then
-                db.uniqueSettings[index] = t.CopyTable(clipboard)
-                t.Print(L["Pasted!"])
-                UpdateCustomPlateEntry(nil, nil, index)
-                clipboard = nil
+              if type(clipboard) == "table" and clipboard.Trigger then
+                local trigger_type = clipboard.Trigger.Type
+                local trigger_value = CustomPlateGetTrigger(clipboard)
+                if CustomPlateCheckForExistingTrigger(trigger_type, trigger_value, true) then
+                  db.uniqueSettings[index] = t.CopyTable(clipboard)
+                  t.Print(L["Pasted!"])
+                  CustomPlateUpdateEntry(index)
+                  clipboard = nil
+                end
               else
                 t.Print(L["Nothing to paste!"])
               end
@@ -5131,7 +5178,7 @@ local function CreateCustomNameplateEntry(index)
             type = "toggle",
             set = function(info, val)
               SetValue(info, val)
-              UpdateCustomPlateEntry(nil, nil, index)
+              CustomPlateUpdateEntry(nil, nil, index)
               UpdateSpecial()
             end,
             arg = { "uniqueSettings", index, "Enable", "Never" },
@@ -5323,7 +5370,7 @@ local function CreateCustomNameplateEntry(index)
             order = 2,
             set = function(info, val)
               SetValue(info, val)
-              SetCustomPlateIcon(index)
+              CustomPlateSetIcon(index)
             end,
             arg = { "uniqueSettings", index, "UseAutomaticIcon" },
             desc = L["Find a suitable icon base on aura/spell ID or aura/spell name. This does not work for name-based custom nameplates."],
@@ -5336,7 +5383,7 @@ local function CreateCustomNameplateEntry(index)
             width = "full",
             disabled = function() return not db.uniqueSettings[index].showIcon or not db.uniqueWidget.ON end,
             order = 4,
-            image = function() return GetIconForCustomPlate(index) end,
+            image = function() return CustomPlateGetIcon(index) end,
             imageWidth = 64,
             imageHeight = 64,
           },
@@ -5353,7 +5400,7 @@ local function CreateCustomNameplateEntry(index)
             order = 6,
             disabled = function() return not db.uniqueSettings[index].showIcon or not db.uniqueWidget.ON end,
             width = "full",
-            set = function(info, val) SetCustomPlateIcon(index, val) end,
+            set = function(info, val) CustomPlateSetIcon(index, val) end,
             get = function(info)
               local val = db.uniqueSettings[index].SpellID
               if not val then
@@ -5539,7 +5586,7 @@ local function CreateCustomNameplatesGroup()
         Icon = {
           name = L["Icon"],
           type = "group",
-          order = 20,
+          order = 10,
           inline = true,
           args = {
             Help = {
@@ -5560,6 +5607,77 @@ local function CreateCustomNameplatesGroup()
             },
             Size = GetSizeEntryDefault(10, "uniqueWidget"),
             Placement = GetPlacementEntryWidget(30, "uniqueWidget", true),
+          },
+        },
+        ImportExport = {
+          name = L["Exchange"],
+          type = "group",
+          order = 20,
+          inline = true,
+          args = {
+            Export = {
+              name = L["Export Custom Nameplates"],
+              order = 10,
+              width = "double",
+              type = "execute",
+              desc = L["Export all custom nameplate settings as string."],
+              func = function()
+                local export_data = {
+                  Version = t.Meta("version"),
+                  PlateSettings = t.CopyTable(db.uniqueSettings)
+                }
+                -- Delete cached data from settings table
+                export_data.PlateSettings.map = nil
+                ShowImportExportFrame("export", export_data)
+              end,
+            },
+            Import = {
+              name = L["Import Custom Nameplates"],
+              order = 20,
+              width = "double",
+              type = "execute",
+              desc = L["Import custom nameplate settings from a string. The custom namneplates will be added to your current custom nameplates."],
+              func = function()
+                ImportExportFrame = ImportExportFrame or CreateImportExportFrame()
+
+                local function ImportHandler(encoded)
+                  local success, import_data = ImportStringData(encoded)
+
+                  if success then
+--                    if import_data.Version ~= t.Meta("version") then
+--                    local import_custom_plates =
+--                      t.Print(L["The import string contains custom nameplate settings from an outdated Threat Plates version. Importing only works with data exported from the same Threat Plates version as you are using."], true)
+--                      return
+--                    end
+
+                    local slot_no = #db.uniqueSettings
+                    for i = 1, #import_data.PlateSettings do
+                      local unique_settings = import_data.PlateSettings[i]
+
+                      local trigger_type = unique_settings.Trigger.Type
+                      local trigger_value = CustomPlateGetTrigger(unique_settings)
+
+                      if not unique_settings.Enable.Never and not CustomPlateCheckForExistingTrigger(trigger_type, trigger_value) then
+                        t.Print(L["A custom nameplate with this trigger already exists: "] .. trigger_value .. L[". You cannot use two custom nameplates with the same trigger.The imported custom nameplate will be disabled."], true)
+                        unique_settings.Enable.Never = true
+                      end
+
+                      -- Check that the custom nameplate settings has the correct format (of the current TP version)
+                      if not Addon.CheckTableStructure(t.DEFAULT_SETTINGS.profile.uniqueSettings["**"], unique_settings) then
+                        t.Print(L["The import string contains invaled custom nameplate settings and cannot be imported. Verify that the import string was generated from the same Threat Plates version that you are using."], true)
+                      end
+
+                      table.insert(db.uniqueSettings, slot_no + 1, unique_settings)
+                    end
+
+                    options.args.Custom.args = CreateCustomNameplatesGroup()
+                    UpdateSpecial()
+                  end
+                end
+
+                ImportExportFrame:OpenImport(ImportHandler)
+              end,
+            },
           },
         },
       },
