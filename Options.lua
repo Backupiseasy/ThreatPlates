@@ -274,7 +274,7 @@ local function AddImportExportOptions(profileOptions)
   profileOptions.args.exportprofile = {
     order = 95,
     type = "execute",
-    name = L["Export current profile"],
+    name = L["Export profile"],
     desc = L["Export the current profile into a string that can be imported by other players."],
     func = function() ShowImportExportFrame("export", TidyPlatesThreat.db.profile) end
   }
@@ -282,7 +282,7 @@ local function AddImportExportOptions(profileOptions)
   profileOptions.args.importprofile = {
     order = 100,
     type = "execute",
-    name = L["Import a profile"],
+    name = L["Import profile"],
     desc = L["Import a profile from another player from an import string."],
     func = function() ShowImportExportFrame("import") end
   }
