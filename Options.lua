@@ -209,7 +209,7 @@ local function ImportStringData(encoded)
     return
   end
 
-  local errorMsg = L["Something went wrong with importing your profile. Please check the import string."]
+  local errorMsg = L["Something went wrong with importing the profile. Please check the import string."]
   local decoded = LibDeflate:DecodeForPrint(encoded)
 
   if not decoded then
@@ -268,14 +268,14 @@ local function AddImportExportOptions(profileOptions)
   profileOptions.args.exportimportdesc = {
     order = 90,
     type = "description",
-    name = "\n" .. L["Import and export profiles that can be shared with other players."],
+    name = "\n" .. L["Import and export profiles to share them with other players."],
   }
 
   profileOptions.args.exportprofile = {
     order = 95,
     type = "execute",
     name = L["Export current profile"],
-    desc = L["Export the current profile into a string that can be imported by other users."],
+    desc = L["Export the current profile into a string that can be imported by other players."],
     func = function() ShowImportExportFrame("export", TidyPlatesThreat.db.profile) end
   }
 
@@ -283,7 +283,7 @@ local function AddImportExportOptions(profileOptions)
     order = 100,
     type = "execute",
     name = L["Import a profile"],
-    desc = L["Import a profile from a import string from another user."],
+    desc = L["Import a profile from another player from an import string."],
     func = function() ShowImportExportFrame("import") end
   }
 end
@@ -4977,17 +4977,7 @@ end
 
 StaticPopupDialogs["TriggerAlreadyExists"] = {
   preferredIndex = STATICPOPUP_NUMDIALOGS,
-  text = L["A custom nameplate with this trigger is already defined: %s. You cannot use two custom nameplates with the same trigger."],
-  button1 = OKAY,
-  timeout = 0,
-  whileDead = 1,
-  hideOnEscape = 1,
-  OnAccept = function(self, _, _) end,
-}
-
-StaticPopupDialogs["ImportedTriggerAlreadyExists"] = {
-  preferredIndex = STATICPOPUP_NUMDIALOGS,
-  text = L["A custom nameplate with this trigger is already defined: %s. You cannot define two custom nameplates with the same trigger."],
+  text = L["A custom nameplate with this trigger already exists: %s. You cannot use two custom nameplates with the same trigger."],
   button1 = OKAY,
   timeout = 0,
   whileDead = 1,
@@ -5062,7 +5052,7 @@ local function CreateCustomNameplateEntry(index)
             -- Available only for custom nameplates with version >= 2
             desc = function()
               if TidyPlatesThreat.db.global.CustomNameplatesVersion == 1 then
-                return L["This option is disabled as you are still using legacy custom nameplates. Migrate your custom nameplates to the new version (using the Migration button at the top) to enable this option."]
+                return L["This option is disabled as you are still using the obsolete custom nameplates format. Migrate your custom nameplates to the new format (using the Migration button at the top) to enable this option."]
               else
                 return nil
               end
@@ -5658,13 +5648,13 @@ local function CreateCustomNameplatesGroup()
                       local trigger_value = CustomPlateGetTrigger(unique_settings)
 
                       if not unique_settings.Enable.Never and not CustomPlateCheckForExistingTrigger(trigger_type, trigger_value) then
-                        t.Print(L["A custom nameplate with this trigger already exists: "] .. trigger_value .. L[". You cannot use two custom nameplates with the same trigger.The imported custom nameplate will be disabled."], true)
+                        t.Print(L["A custom nameplate with this trigger already exists: "] .. trigger_value .. L[". You cannot use two custom nameplates with the same trigger. The imported custom nameplate will be disabled."], true)
                         unique_settings.Enable.Never = true
                       end
 
                       -- Check that the custom nameplate settings has the correct format (of the current TP version)
                       if not Addon.CheckTableStructure(t.DEFAULT_SETTINGS.profile.uniqueSettings["**"], unique_settings) then
-                        t.Print(L["The import string contains invaled custom nameplate settings and cannot be imported. Verify that the import string was generated from the same Threat Plates version that you are using."], true)
+                        t.Print(L["The import string contains invalid custom nameplate settings and cannot be imported. Verify that the import string was generated from the same Threat Plates version that you are using."], true)
                       end
 
                       table.insert(db.uniqueSettings, slot_no + 1, unique_settings)
