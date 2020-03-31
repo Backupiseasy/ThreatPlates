@@ -4994,7 +4994,7 @@ local function CustomPlateCheckForExistingTrigger(trigger_type, trigger_value, s
     trigger_already_used = Addon.Cache.CustomNameplates[trigger_value]
   end
 
-  local check_ok = trigger_value == nil or trigger_value == "" or (trigger_already_used and trigger_already_used.Enable.Never)
+  local check_ok = trigger_value == nil or trigger_value == "" or trigger_already_used == nil or (trigger_value ~= nil and trigger_already_used.Enable.Never)
 
   if not check_ok and show_error_msg then
     StaticPopup_Show("TriggerAlreadyExists", trigger_value)
