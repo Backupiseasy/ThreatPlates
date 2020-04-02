@@ -22,6 +22,7 @@ ThreatPlates.L = LibStub("AceLocale-3.0"):GetLocale("TidyPlatesThreat")
 ThreatPlates.Media = LibStub("LibSharedMedia-3.0")
 Addon.LibCustomGlow = LibStub("LibCustomGlow-1.0")
 Addon.LibAceConfigDialog = LibStub("AceConfigDialog-3.0")
+Addon.LibAceConfigRegistry = LibStub("AceConfigRegistry-3.0")
 
 ---------------------------------------------------------------------------------------------------
 -- Define AceAddon TidyPlatesThreat
@@ -139,6 +140,17 @@ Addon.MergeIntoTable = function(target, source)
       target[k] = v
     end
   end
+end
+
+Addon.MergeDefaultsIntoTable = function(target, defaults)
+	for k,v in pairs(defaults) do
+		if type(v) == "table" then
+			target[k] = target[k] or {}
+			Addon.MergeDefaultsIntoTable(target[k], v)
+		else
+			target[k] = target[k] or v
+		end
+	end
 end
 
 Addon.ConcatTables = function(base_table, table_to_concat)

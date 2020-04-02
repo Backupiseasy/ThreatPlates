@@ -74,7 +74,7 @@ local function SetNamePlateClickThrough(friendly, enemy)
 --  end
 end
 
-local DEPRECATED_UNIQUE_SETTINGS = {
+Addon.LEGACY_CUSTOM_NAMEPLATES = {
   map = {},
   ["**"] = {
     name = "<Enter name here>",
@@ -105,7 +105,7 @@ local DEPRECATED_UNIQUE_SETTINGS = {
     allowMarked = true,
     overrideScale = false,
     overrideAlpha = false,
-    UseAutomaticIcon = true,
+    UseAutomaticIcon = false,
     icon = "",
     scale = 1,
     alpha = 1,
@@ -1260,7 +1260,7 @@ Addon.MigrationCustomNameplatesV1 = function()
       local slot_counter = 0
       for index, unique_unit in pairs(custom_plates_to_keep) do
         -- As default values are now different, copy the deprecated slots default value
-        local deprecated_settings = DEPRECATED_UNIQUE_SETTINGS[index] or DEPRECATED_UNIQUE_SETTINGS["**"]
+        local deprecated_settings = Addon.LEGACY_CUSTOM_NAMEPLATES[index] or Addon.LEGACY_CUSTOM_NAMEPLATES["**"]
 
         unique_unit.showNameplate = GetValueOrDefault(unique_unit.showNameplate, deprecated_settings.showNameplate)
         unique_unit.ShowHeadlineView = GetValueOrDefault(unique_unit.ShowHeadlineView, deprecated_settings.ShowHeadlineView)
@@ -1300,7 +1300,7 @@ Addon.SetDefaultsForCustomNameplates = function()
   if TidyPlatesThreat.db.global.CustomNameplatesVersion > 1 then return end
 
   local defaults = ThreatPlates.CopyTable(TidyPlatesThreat.db.defaults)
-  defaults.profile.uniqueSettings = DEPRECATED_UNIQUE_SETTINGS
+  defaults.profile.uniqueSettings = Addon.LEGACY_CUSTOM_NAMEPLATES
   TidyPlatesThreat.db:RegisterDefaults(defaults)
 end
 

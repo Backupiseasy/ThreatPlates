@@ -89,7 +89,22 @@ SlashCmdList["TPTPVERBOSE"] = TPTPVERBOSE
 
 -- Command: /tptp
 function TidyPlatesThreat:ChatCommand(input)
-	TidyPlatesThreat:OpenOptions()
+	local cmd_list = {}
+	for w in input:gmatch("%S+") do cmd_list[#cmd_list + 1] = w end
+
+	local command = cmd_list[1]
+	if not command or command == "" then
+		TidyPlatesThreat:OpenOptions()
+	elseif input == "legacy-custom-plates" then
+		Addon.RestoreLegacyCustomNameplates()
+	elseif input == "test" then
+		local custom_plates = TidyPlatesThreat.db.profile.uniqueSettings
+		--local custom_plates = Addon.LEGACY_CUSTOM_NAMEPLATES
+		for i = 1, #custom_plates do
+			print (i, type(i), custom_plates[i].name)
+			print (i, "=>", custom_plates[i], custom_plates[i].name)
+		end
+	end
 end
 
 --local function SearchDBForString(db, prefix, keyword)

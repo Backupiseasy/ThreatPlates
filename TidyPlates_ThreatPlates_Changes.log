@@ -1,4 +1,10 @@
 ﻿------------------------------------------------------
+9.2.0-Beta2
+------------------------------------------------------
+* Added command line option "legacy-custom-plates" to add (legacy) default custom nameplates that are deleted when migrating custom nameplates to the current format [Comment #3950, #3959, Issue #379].
+* Fixed a bug in the custom nameplate import where custom nameplates were imported in the reversed order.
+
+------------------------------------------------------
 9.2.0-Beta1
 ------------------------------------------------------
 * Added an option to enable a custom nameplate only for friendly or hostile units [IM].

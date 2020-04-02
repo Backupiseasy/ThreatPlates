@@ -5657,7 +5657,7 @@ local function CreateCustomNameplatesGroup()
                         t.Print(L["The import string contains invalid custom nameplate settings and cannot be imported. Verify that the import string was generated from the same Threat Plates version that you are using."], true)
                       end
 
-                      table.insert(db.uniqueSettings, slot_no + 1, unique_settings)
+                      table.insert(db.uniqueSettings, slot_no + i, unique_settings)
                     end
 
                     options.args.Custom.args = CreateCustomNameplatesGroup()
@@ -8212,6 +8212,10 @@ function TidyPlatesThreat:ProfChange()
   TidyPlatesThreat:ReloadTheme()
 end
 
+function TidyPlatesThreat:ConfigTableChanged(...)
+  options.args.Custom.args = CreateCustomNameplatesGroup()
+end
+
 function TidyPlatesThreat:OpenOptions()
   db = self.db.profile
 
@@ -8223,11 +8227,48 @@ function TidyPlatesThreat:OpenOptions()
     Addon:ForceUpdate()
 
     -- Setup options dialog
-    LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable(t.ADDON_NAME, options)
+    Addon.LibAceConfigRegistry:RegisterOptionsTable(t.ADDON_NAME, options)
+    Addon.LibAceConfigRegistry.RegisterCallback(self, "ConfigTableChange", "ConfigTableChanged")
     Addon.LibAceConfigDialog:SetDefaultSize(t.ADDON_NAME, 1000, 640)
   end
 
-  LibStub("AceConfigDialog-3.0"):Open(t.ADDON_NAME);
+  Addon.LibAceConfigDialog:Open(t.ADDON_NAME);
+end
+
+function Addon.RestoreLegacyCustomNameplates()
+  if TidyPlatesThreat.db.global.CustomNameplatesVersion == 1 then
+    t.Print(L["You need to convert your custom nameplates to the current format before you can add legacy custom nameplates."], true)
+  else
+    local legacy_custom_nameplates = {}
+
+    for i, v in ipairs(Addon.LEGACY_CUSTOM_NAMEPLATES) do
+      legacy_custom_nameplates[i] = t.CopyTable(v)
+      Addon.MergeDefaultsIntoTable(legacy_custom_nameplates[i], Addon.LEGACY_CUSTOM_NAMEPLATES["**"])
+    end
+
+    local custom_plates = TidyPlatesThreat.db.profile.uniqueSettings
+    local max_slot_no = #custom_plates
+
+    local index = 1
+    for _, legacy_custom_plate in pairs(legacy_custom_nameplates) do
+      local trigger_value = legacy_custom_plate.name
+
+      -- Only need to check for double name trigger as legacy custom nameplates only have these kind of triggers
+      local trigger_already_used = custom_plates.map[trigger_value]
+      if trigger_already_used == nil or (trigger_value ~= nil and trigger_already_used.Enable.Never) then
+        local error_msg = L["Adding legacy custom nameplate for %s ..."]:gsub("%%s", trigger_value)
+        t.Print(error_msg)
+        table.insert(custom_plates, max_slot_no + index, legacy_custom_plate)
+        index = index + 1
+      else
+        local error_msg = L["Legacy custom nameplate %s already exists. Skipping it."]:gsub("%%s", trigger_value)
+        t.Print(error_msg, true)
+      end
+    end
+
+    Addon.LibAceConfigRegistry:NotifyChange(t.ADDON_NAME)
+    UpdateSpecial()
+  end
 end
 
 -----------------------------------------------------
