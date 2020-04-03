@@ -5168,7 +5168,7 @@ local function CreateCustomNameplateEntry(index)
             type = "toggle",
             set = function(info, val)
               SetValue(info, val)
-              CustomPlateUpdateEntry(nil, nil, index)
+              CustomPlateUpdateEntry(index)
               UpdateSpecial()
             end,
             arg = { "uniqueSettings", index, "Enable", "Never" },
