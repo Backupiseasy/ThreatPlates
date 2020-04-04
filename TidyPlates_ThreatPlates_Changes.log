@@ -7,6 +7,7 @@
 * Fixed a bug in the custom nameplate import where custom nameplates were imported in the reversed order.
 * Fixed a bug in the code detection duplicate triggers when creating or changing custom nameplates.
 * Fixed a bug with aura and cast triggers in situations where the nameplate style did not show auras or casts (and triggers did not work because of that).
+* Fixed a bug where selection mark jumped to first entry in the custom nameplates list after deleting the last slot.
 
 ------------------------------------------------------
 9.2.0-Beta1

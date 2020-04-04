@@ -5555,6 +5555,8 @@ local function CreateCustomNameplatesGroup()
 
           options.args.Custom.args = CreateCustomNameplatesGroup()
           UpdateSpecial()
+
+          Addon.LibAceConfigDialog:SelectGroup(t.ADDON_NAME, "Custom", "#" ..  math.min(slot_no, #db.uniqueSettings))
         end
       end,
       confirm = function(info)
