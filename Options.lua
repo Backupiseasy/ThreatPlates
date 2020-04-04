@@ -291,6 +291,7 @@ end
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------
 
 local function GetSpellName(number)
   local n = GetSpellInfo(number)
@@ -4963,18 +4964,25 @@ local function CustomPlateSetIcon(index, icon_location)
   elseif not icon_location then
     icon = db.uniqueSettings[index].icon
   else
+    db.uniqueSettings[index].SpellID = nil
+    db.uniqueSettings[index].SpellName = nil
+
     local spell_id = tonumber(icon_location)
     if spell_id then -- no string, so val should be a spell ID
       _, _, icon = GetSpellInfo(spell_id)
       if icon then
         db.uniqueSettings[index].SpellID = spell_id
       else
-        db.uniqueSettings[index].SpellID = nil
+        icon = spell_id
         t.Print("Invalid spell ID for custom nameplate icon: " .. icon_location, true)
       end
     else
-      db.uniqueSettings[index].SpellID = nil
-      icon = tostring(icon_location)
+      icon_location = tostring(icon_location)
+      _, _, icon = GetSpellInfo(icon_location)
+      if icon then
+        db.uniqueSettings[index].SpellName = icon_location
+      end
+      icon = icon or icon_location
     end
   end
 
@@ -5475,7 +5483,7 @@ local function CreateCustomNameplateEntry(index)
           Description = {
             type = "description",
             order = 5,
-            name = L["Enter an icons name (with the *.blp ending), a spell ID or a full icon path (using '\\' to separate directory folders)."],
+            name = L["Enter an icons name (with the *.blp ending), a spell ID, a spell name or a full icon path (using '\\' to separate directory folders)."],
             width = "full",
             hidden = function() return db.uniqueSettings[index].UseAutomaticIcon end
           },
@@ -5487,10 +5495,7 @@ local function CreateCustomNameplateEntry(index)
             width = "full",
             set = function(info, val) CustomPlateSetIcon(index, val) end,
             get = function(info)
-              local val = db.uniqueSettings[index].SpellID
-              if not val then
-                val = GetValue(info)
-              end
+              local val = db.uniqueSettings[index].SpellID or db.uniqueSettings[index].SpellName or GetValue(info)
               return tostring(val)
             end,
             arg = { "uniqueSettings", index, "icon" },
