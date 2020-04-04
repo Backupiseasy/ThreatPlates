@@ -256,7 +256,7 @@ local function ShowImportExportFrame(mode, modeArg)
         ]]--
 
         Addon.MergeIntoTable(TidyPlatesThreat.db.profile, deserialized)
-        Addon:ForceUpdate()
+        TidyPlatesThreat:ProfChange()
       end
     end
 

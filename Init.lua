@@ -135,6 +135,7 @@ end
 Addon.MergeIntoTable = function(target, source)
   for k,v in pairs(source) do
     if type(v) == "table" then
+			target[k] = target[k] or {}
       Addon.MergeIntoTable(target[k], v)
     else
       target[k] = v
