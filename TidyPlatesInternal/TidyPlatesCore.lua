@@ -733,67 +733,67 @@ do
 	function OnStartCasting(plate, unitid, channeled)
     UpdateReferences(plate)
 
-		local castbar = extended.visual.castbar
-    if not extended:IsShown() or not style.castbar.show then
+    local castbar = extended.visual.castbar
+    if not extended:IsShown() then
       castbar:Hide()
       return
     end
 
-    local name, text, texture, startTime, endTime, isTradeSkill, castID, notInterruptible, spellID
-
+    local name, text, texture, startTime, endTime, isTradeSkill, notInterruptible, spellID
     if channeled then
       name, text, texture, startTime, endTime, isTradeSkill, notInterruptible, spellID = UnitChannelInfo(unitid)
-      if not name then
-        castbar:Hide()
-        return
-      end
-
-      castbar.IsChanneling = true
-      castbar.IsCasting = false
-
       castbar.Value = (endTime / 1000) - GetTime()
-      castbar.MaxValue = (endTime - startTime) / 1000
-      castbar:SetMinMaxValues(0, castbar.MaxValue)
-      castbar:SetValue(castbar.Value)
 		else
-      name, text, texture, startTime, endTime, isTradeSkill, castID, notInterruptible, spellID = UnitCastingInfo(unitid)
-      if not name then
-        castbar:Hide()
-        return
-      end
-
-      castbar.IsCasting = true
-      castbar.IsChanneling = false
-
+      name, text, texture, startTime, endTime, isTradeSkill, _, notInterruptible, spellID = UnitCastingInfo(unitid)
       castbar.Value = GetTime() - (startTime / 1000)
-      castbar.MaxValue = (endTime - startTime) / 1000
-      castbar:SetMinMaxValues(0, castbar.MaxValue)
-      castbar:SetValue(castbar.Value)
     end
 
-		if isTradeSkill then return end
-
-		unit.isCasting = true
-    unit.IsInterrupted = false
-    unit.spellIsShielded = notInterruptible
-		unit.spellInterruptible = not unit.spellIsShielded
-
-		visual.spelltext:SetText(text)
-		visual.spellicon:SetTexture(texture)
-    --visual.spellicon:SetDrawLayer("ARTWORK", 7)
-
-    castbar:SetAllColors(Addon:SetCastbarColor(unit))
-    castbar:SetFormat(unit.spellIsShielded)
+    if not name or isTradeSkill then
+      castbar:Hide()
+      return
+    end
 
     local plate_style = Addon.ActiveCastTriggers and Addon.UnitStyle_CastDependent(unit, spellID, name)
-    if plate_style and plate_style ~= extended.stylename then
+
+    -- Abort here as casts can now switch nameplate styles (e.g,. from headline to healthbar view
+    if not (style.castbar.show or plate_style) then
+      castbar:Hide()
+      return
+    end
+
+    unit.isCasting = true
+    unit.IsInterrupted = false
+    unit.spellIsShielded = notInterruptible
+		unit.spellInterruptible = not notInterruptible
+
+    --if plate_style and plate_style ~= extended.stylename then
+    if plate_style ~= extended.stylename then
       ProcessUnitChanges()
     else
       UpdateIndicator_CustomScaleText()
       UpdatePlate_Transparency(extended, unit)
     end
 
-		castbar:Show()
+    -- Custom nameplates might trigger cause of a cast, but still stay in a style that does not
+    -- show the castbar
+    if not style.castbar.show then
+      castbar:Hide()
+      return
+    end
+
+    visual.spelltext:SetText(text)
+		visual.spellicon:SetTexture(texture)
+
+    castbar.IsCasting = not channeled
+    castbar.IsChanneling = channeled
+
+    castbar.MaxValue = (endTime - startTime) / 1000
+    castbar:SetMinMaxValues(0, castbar.MaxValue)
+    castbar:SetValue(castbar.Value)
+    castbar:SetAllColors(Addon:SetCastbarColor(unit))
+    castbar:SetFormat(unit.spellIsShielded)
+
+    castbar:Show()
 	end
 
 	-- OnHideCastbar
