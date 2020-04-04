@@ -302,19 +302,25 @@ function Addon:InitializeCustomNameplates()
 
   Addon.ActiveAuraTriggers = false
   Addon.ActiveCastTriggers = false
+  Addon.UseUniqueWidget = db.uniqueWidget.ON
+
   db.uniqueSettings.map = {}
   Addon.Cache.CustomNameplates = {}
 
-  for i, unique_unit in pairs(db.uniqueSettings) do
-    if i ~= "map" and not unique_unit.Enable.Never then
-      if unique_unit.Trigger.Type == "Name" and unique_unit.name and unique_unit.name ~= "<Enter name here>" then
-        db.uniqueSettings.map[unique_unit.name] = unique_unit
-      elseif unique_unit.Trigger.Type == "Aura" and unique_unit.Trigger.Aura.AuraID then
+  for i, custom_plate in pairs(db.uniqueSettings) do
+    if i ~= "map" and not custom_plate.Enable.Never then
+      if custom_plate.Trigger.Type == "Name" and custom_plate.name and custom_plate.name ~= "<Enter name here>" then
+        db.uniqueSettings.map[custom_plate.name] = custom_plate
+      elseif custom_plate.Trigger.Type == "Aura" and custom_plate.Trigger.Aura.AuraID then
         Addon.ActiveAuraTriggers = true
-        Addon.Cache.CustomNameplates[unique_unit.Trigger.Aura.AuraID] = unique_unit
-      elseif unique_unit.Trigger.Type == "Cast" and unique_unit.Trigger.Cast.SpellID then
+        Addon.Cache.CustomNameplates[custom_plate.Trigger.Aura.AuraID] = custom_plate
+      elseif custom_plate.Trigger.Type == "Cast" and custom_plate.Trigger.Cast.SpellID then
         Addon.ActiveCastTriggers = true
-        Addon.Cache.CustomNameplates[unique_unit.Trigger.Cast.SpellID] = unique_unit
+        Addon.Cache.CustomNameplates[custom_plate.Trigger.Cast.SpellID] = custom_plate
+      end
+
+      if custom_plate.Effects.Glow.Type ~= "None" then
+        Addon.UseUniqueWidget = true
       end
     end
   end
@@ -562,7 +568,14 @@ local MAP_OPTION_TO_WIDGET = {
 
 local function SetValueWidget(info, val)
   SetValuePlain(info, val)
-  Addon.Widgets:UpdateSettings(MAP_OPTION_TO_WIDGET[info[2]])
+  local widget_name
+  if info[1] == "Custom" then
+    widget_name = "UniqueIcon"
+  else
+    widget_name = MAP_OPTION_TO_WIDGET[info[2]]
+  end
+
+  Addon.Widgets:UpdateSettings(widget_name)
 end
 
 local function SetColorWidget(info, r, g, b, a)
@@ -5200,6 +5213,7 @@ local function CreateCustomNameplateEntry(index)
               end
 
               CustomPlateUpdateEntry(index)
+              Addon.Widgets:UpdateSettings("UniqueIcon")
             end,
             arg = { "uniqueSettings", index, "Enable", "Never" },
           },
@@ -5211,6 +5225,7 @@ local function CreateCustomNameplateEntry(index)
             desc = L["Enable this custom nameplate for friendly units"],
             set = function(info, val)
               db.uniqueSettings[index].Enable.UnitReaction["FRIENDLY"] = val
+              Addon.Widgets:UpdateSettings("UniqueIcon")
               Addon:ForceUpdate()
             end,
             get = function(info)
@@ -5225,6 +5240,7 @@ local function CreateCustomNameplateEntry(index)
             set = function(info, val)
               db.uniqueSettings[index].Enable.UnitReaction["HOSTILE"] = val
               db.uniqueSettings[index].Enable.UnitReaction["NEUTRAL"] = val
+              Addon.Widgets:UpdateSettings("UniqueIcon")
               Addon:ForceUpdate()
             end,
             get = function(info)
@@ -5354,17 +5370,66 @@ local function CreateCustomNameplateEntry(index)
           --              arg = {"uniqueSettings", k_c, "UseThreatColor"},
           --            },
           --            Spacer3 = GetSpacerEntry(24),
-          Header = { type = "header", order = 24, name = "Threat Options", },
+          HeaderGlow = { type = "header", order = 30, name = "Highlight Glow", },
+          --          EnableGlow = {
+          --            name = L["Glow"],
+          --            type = "toggle",
+          --            order = 41,
+          --            desc = L["Shows a glow effect on the healthbar of this custom nameplate."],
+          --            arg = { "uniqueSettings", index, "Effects", "Highlight", "Enabled"},
+          --          },
+          GlowFrame = {
+            name = L["Glow Frame"],
+            type = "select",
+            order = 31,
+            values = Addon.CUSTOM_PLATES_GLOW_FRAMES,
+            desc = L["Shows a glow effect on this custom nameplate."],
+            set = SetValueWidget,
+            arg = { "uniqueSettings", index, "Effects", "Glow", "Frame"},
+          },
+          GlowType = {
+            name = L["Glow Type"],
+            type = "select",
+            values = Addon.GLOW_TYPES,
+            order = 32,
+            set = SetValueWidget,
+            arg = { "uniqueSettings", index, "Effects", "Glow", "Type"},
+          },
+          GlowColorEnable = {
+            name = L["Glow Color"],
+            type = "toggle",
+            order = 33,
+            set = SetValueWidget,
+            arg = { "uniqueSettings", index, "Effects", "Glow", "CustomColor"},
+          },
+          GlowColor = {
+            name = L["Color"],
+            type = "color",
+            order = 34,
+            hasAlpha = true,
+            set = function(info, r, g, b, a)
+              local color = db.uniqueSettings[index].Effects.Glow.Color
+              color[1], color[2], color[3], color[4] = r, g, b, a
+
+              Addon.Widgets:UpdateSettings("UniqueIcon")
+            end,
+            get = function(info)
+              local color = db.uniqueSettings[index].Effects.Glow.Color
+              return unpack(color)
+            end,
+            arg = { "uniqueSettings", index, "Effects", "Glow", "Color"},
+          },
+          HeaderThreat = { type = "header", order = 40, name = "Threat Options", },
           ThreatGlow = {
             name = L["Threat Glow"],
-            order = 31,
+            order = 41,
             type = "toggle",
             desc = L["Shows a glow based on threat level around the nameplate's healthbar (in combat)."],
             arg = { "uniqueSettings", index, "UseThreatGlow"},
           },
           ThreatSystem = {
             name = L["Enable Threat System"],
-            order = 32,
+            order = 42,
             type = "toggle",
             desc = L["In combat, use coloring, transparency, and scaling based on threat level as configured in the threat system. Custom settings are only used out of combat."],
             arg = { "uniqueSettings", index, "UseThreatColor"},

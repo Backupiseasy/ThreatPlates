@@ -37,12 +37,7 @@ local UnitStyle_AuraDependent = Addon.UnitStyle_AuraDependent
 ---------------------------------------------------------------------------------------------------
 -- Aura Highlighting
 ---------------------------------------------------------------------------------------------------
-
-local CUSTOM_GLOW_FUNCTIONS = {
-  Button = { "ButtonGlow_Start", "ButtonGlow_Stop", 8 },
-  Pixel = { "PixelGlow_Start", "PixelGlow_Stop", 3 },
-  AutoCast = { "AutoCastGlow_Start", "AutoCastGlow_Stop", 4 },
-}
+local CUSTOM_GLOW_FUNCTIONS = Addon.CUSTOM_GLOW_FUNCTIONS
 
 ---------------------------------------------------------------------------------------------------
 -- Auras Widget Functions
