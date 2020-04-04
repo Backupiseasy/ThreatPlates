@@ -4976,7 +4976,7 @@ local function CustomPlateSetIcon(index, icon_location)
 end
 
 StaticPopupDialogs["TriggerAlreadyExists"] = {
-  preferredIndex = STATICPOPUP_NUMDIALOGS,
+  preferredIndex = 3,
   text = L["A custom nameplate with this trigger already exists: %s. You cannot use two custom nameplates with the same trigger."],
   button1 = OKAY,
   timeout = 0,
@@ -4985,18 +4985,36 @@ StaticPopupDialogs["TriggerAlreadyExists"] = {
   OnAccept = function(self, _, _) end,
 }
 
-local function CustomPlateCheckForExistingTrigger(trigger_type, trigger_value, show_error_msg)
-  -- Check if here is already another custom nameplate with the same trigger:
-  local trigger_already_used
-  if trigger_type == "Name" then
-    trigger_already_used = db.uniqueSettings.map[trigger_value]
-  else
-    trigger_already_used = Addon.Cache.CustomNameplates[trigger_value]
+StaticPopupDialogs["TriggerAlreadyExistsDisablingIt"] = {
+  preferredIndex = 3,
+  text = L["A custom nameplate with this trigger already exists: %s. You cannot use two custom nameplates with th same trigger. The current custom nameplate was therefore disabled."],
+  button1 = OKAY,
+  timeout = 0,
+  whileDead = 1,
+  hideOnEscape = 1,
+  OnAccept = function(self, _, _) end,
+}
+
+local function CustomPlateCheckIfTriggerIsUnique(trigger_type, trigger_value, selected_plate)
+  if trigger_value == nil or trigger_value == "" then
+    return true
   end
 
-  local check_ok = trigger_value == nil or trigger_value == "" or trigger_already_used == nil or (trigger_value ~= nil and trigger_already_used.Enable.Never)
+  -- Check if here is already another custom nameplate with the same trigger:
+  local custom_plate
+  if trigger_type == "Name" then
+    custom_plate = db.uniqueSettings.map[trigger_value]
+  else
+    custom_plate = Addon.Cache.CustomNameplates[trigger_value]
+  end
 
-  if not check_ok and show_error_msg then
+  return custom_plate == nil or custom_plate.Enable.Never or selected_plate.Enable.Never or custom_plate == selected_plate
+end
+
+local function CustomPlateCheckIfTriggerIsUniqueWithErrorMessage(trigger_type, trigger_value, selected_plate)
+  local check_ok = CustomPlateCheckIfTriggerIsUnique(trigger_type, trigger_value, selected_plate)
+
+  if not check_ok then
     StaticPopup_Show("TriggerAlreadyExists", trigger_value)
   end
 
@@ -5007,13 +5025,14 @@ local function CustomPlateUpdateEntry(index)
   options.args.Custom.args["#" .. index].name = CustomPlateGetSlotName(index)
   options.args.Custom.args["#" .. index].args.Header.name = CustomPlateGetHeaderName(index)
 
-  CustomPlateSetIcon(index)
+  CustomPlateSetIcon(index) -- Executes UpdateSpecial()
 end
 
 local function CustomPlateCheckAndUpdateEntry(info, val, index)
+  local selected_plate = db.uniqueSettings[index]
   -- Check if here is already another custom nameplate with the same trigger:
-  local trigger_type = db.uniqueSettings[index].Trigger.Type
-  if CustomPlateCheckForExistingTrigger(trigger_type, val, true) then
+  local trigger_type = selected_plate.Trigger.Type
+  if CustomPlateCheckIfTriggerIsUniqueWithErrorMessage(trigger_type, val, selected_plate) then
     SetValue(info, val)
     CustomPlateUpdateEntry(index)
   end
@@ -5042,11 +5061,15 @@ local function CreateCustomNameplateEntry(index)
             order = 10,
             values = { Name = L["Name"], Aura = L["Aura"], Cast = L["Cast"], },
             set = function(info, val)
+              -- If the uses switches to a trigger that is already in use, the current custom nameplate
+              -- is disabled (otherwise, if we would not switch to it, the user could not change it at all.
               local trigger_value = CustomPlateGetTrigger(db.uniqueSettings[index], val)
-              if CustomPlateCheckForExistingTrigger(val, trigger_value, true) then
-                SetValue(info, val)
-                CustomPlateUpdateEntry(index)
+              if not CustomPlateCheckIfTriggerIsUnique(val, trigger_value, db.uniqueSettings[index]) then
+                StaticPopup_Show("TriggerAlreadyExistsDisablingIt", trigger_value)
+                db.uniqueSettings[index].Enable.Never = true
               end
+              db.uniqueSettings[index].Trigger.Type = val
+              CustomPlateUpdateEntry(index)
             end,
             arg = { "uniqueSettings", index, "Trigger", "Type" },
             -- Available only for custom nameplates with version >= 2
@@ -5079,8 +5102,8 @@ local function CreateCustomNameplateEntry(index)
               if UnitExists("target") then
                 local trigger_type = db.uniqueSettings[index].Trigger.Type -- "Name"
                 local trigger_value = UnitName("target")
-                if CustomPlateCheckForExistingTrigger(trigger_type, trigger_value, true) then
-                  db.uniqueSettings[index].name = UnitName("target")
+                if CustomPlateCheckIfTriggerIsUniqueWithErrorMessage(trigger_type, trigger_value, db.uniqueSettings[index]) then
+                  db.uniqueSettings[index].name = trigger_value
                   CustomPlateUpdateEntry(index)
                 end
               else
@@ -5143,9 +5166,8 @@ local function CreateCustomNameplateEntry(index)
               if type(clipboard) == "table" and clipboard.Trigger then
                 local trigger_type = clipboard.Trigger.Type
                 local trigger_value = CustomPlateGetTrigger(clipboard)
-                if CustomPlateCheckForExistingTrigger(trigger_type, trigger_value, true) then
+                if CustomPlateCheckIfTriggerIsUniqueWithErrorMessage(trigger_type, trigger_value, clipboard) then
                   db.uniqueSettings[index] = t.CopyTable(clipboard)
-                  t.Print(L["Pasted!"])
                   CustomPlateUpdateEntry(index)
                   clipboard = nil
                 end
@@ -5167,9 +5189,17 @@ local function CreateCustomNameplateEntry(index)
             order = 10,
             type = "toggle",
             set = function(info, val)
-              SetValue(info, val)
+              local trigger_type = db.uniqueSettings[index].Trigger.Type
+              local trigger_value = CustomPlateGetTrigger(db.uniqueSettings[index])
+
+              -- Update never before check for unique trigger, otherwise it would use the old Never value
+              db.uniqueSettings[index].Enable.Never = val
+              if not CustomPlateCheckIfTriggerIsUnique(trigger_type, trigger_value, db.uniqueSettings[index]) then
+                StaticPopup_Show("TriggerAlreadyExistsDisablingIt", trigger_value)
+                db.uniqueSettings[index].Enable.Never = true
+              end
+
               CustomPlateUpdateEntry(index)
-              UpdateSpecial()
             end,
             arg = { "uniqueSettings", index, "Enable", "Never" },
           },
@@ -5647,7 +5677,7 @@ local function CreateCustomNameplatesGroup()
                       local trigger_type = unique_settings.Trigger.Type
                       local trigger_value = CustomPlateGetTrigger(unique_settings)
 
-                      if not unique_settings.Enable.Never and not CustomPlateCheckForExistingTrigger(trigger_type, trigger_value) then
+                      if not CustomPlateCheckIfTriggerIsUnique(trigger_type, trigger_value, unique_settings) then
                         t.Print(L["A custom nameplate with this trigger already exists: "] .. trigger_value .. L[". You cannot use two custom nameplates with the same trigger. The imported custom nameplate will be disabled."], true)
                         unique_settings.Enable.Never = true
                       end
