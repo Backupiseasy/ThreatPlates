@@ -211,8 +211,10 @@ do
 		-- TextFrame
     visual.name = textframe:CreateFontString(nil, "ARTWORK", 0)
 		visual.name:SetFont("Fonts\\FRIZQT__.TTF", 11)
-		visual.customtext = textframe:CreateFontString(nil, "ARTWORK", -1)
+    visual.name:SetWordWrap(false) -- otherwise text is wrapped when plate is scaled down
+    visual.customtext = textframe:CreateFontString(nil, "ARTWORK", -1)
 		visual.customtext:SetFont("Fonts\\FRIZQT__.TTF", 11)
+    visual.customtext:SetWordWrap(false) -- otherwise text is wrapped when plate is scaled down
 		visual.level = textframe:CreateFontString(nil, "ARTWORK", -2)
 		visual.level:SetFont("Fonts\\FRIZQT__.TTF", 11)
 
@@ -221,7 +223,7 @@ do
 		visual.spellicon = castbar.Overlay:CreateTexture(nil, "ARTWORK", 7)
 		visual.spelltext = castbar.Overlay:CreateFontString(nil, "OVERLAY")
 		visual.spelltext:SetFont("Fonts\\FRIZQT__.TTF", 11)
-    visual.spelltext:SetWordWrap(false)
+    visual.spelltext:SetWordWrap(false) -- otherwise text is wrapped when plate is scaled down
 
     visual.Highlight = Addon:Element_Mouseover_Create(extended)
 

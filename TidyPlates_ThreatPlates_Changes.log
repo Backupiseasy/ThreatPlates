@@ -10,6 +10,7 @@
 * Fixed a bug where selection mark jumped to first entry in the custom nameplates list after deleting the last slot.
 * Fixed a Lua error when importing a profile caused by non-existing tables in the settings data structure.
 * Fixed a bug when importing a profile where the settings from the new profile were not actually applied.
+* Fixed a bug with name text being wrapped when nameplates where scaled down enough.
 
 ------------------------------------------------------
 9.2.0-Beta1
