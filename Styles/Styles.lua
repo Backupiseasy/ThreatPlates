@@ -11,6 +11,7 @@ local UnitPlayerControlled, UnitIsUnit = UnitPlayerControlled, UnitIsUnit
 local UnitIsOtherPlayersPet = UnitIsOtherPlayersPet
 local UnitIsBattlePet = UnitIsBattlePet
 local UnitCanAttack, UnitIsTapDenied = UnitCanAttack, UnitIsTapDenied
+local GetSpellInfo = GetSpellInfo
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
@@ -217,6 +218,9 @@ function Addon.UnitStyle_AuraDependent(unit, aura_id, aura_name)
     if plate_style then
       unit.CustomStyleAura = plate_style
       unit.CustomPlateSettingsAura = unique_settings
+
+      local _, _, icon = GetSpellInfo(aura_id)
+      unique_settings.AutomaticIcon = icon
     end
   end
 
@@ -233,6 +237,9 @@ function Addon.UnitStyle_CastDependent(unit, spell_id, spell_name)
     if plate_style then
       unit.CustomStyleCast = plate_style
       unit.CustomPlateSettingsCast = unique_settings
+
+      local _, _, icon = GetSpellInfo(spell_id)
+      unique_settings.AutomaticIcon = icon
     end
   end
 
