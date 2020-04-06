@@ -10,6 +10,9 @@ local ThreatPlates = Addon.ThreatPlates
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
 
+-- Lua APIs
+local string = string
+
 local UnitPlayerControlled = UnitPlayerControlled
 
 ---------------------------------------------------------------------------------------------------
@@ -33,7 +36,11 @@ TidyPlatesThreatDBM = true
 
 Addon.Animations = {}
 Addon.Cache = {
-	CustomNameplates = {}
+	CustomPlateTriggers = {
+		Name = {},
+		Aura = {},
+		Cast = {}
+	}
 }
 
 --------------------------------------------------------------------------------------------------
@@ -180,6 +187,15 @@ Addon.CheckTableStructure = function(reference_structure, table_to_check)
 	end
 
 	return true
+end
+
+Addon.Split = function(split_string)
+	local result = {}
+	for entry in string.gmatch(split_string, "[^;]+") do
+		result[#result + 1] = entry:gsub("^%s*(.-)%s*$", "%1")
+	end
+
+	return result
 end
 
 --------------------------------------------------------------------------------------------------

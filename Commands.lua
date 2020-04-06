@@ -98,11 +98,16 @@ function TidyPlatesThreat:ChatCommand(input)
 	elseif input == "legacy-custom-plates" then
 		Addon.RestoreLegacyCustomNameplates()
 	elseif input == "test" then
-		local custom_plates = TidyPlatesThreat.db.profile.uniqueSettings
-		--local custom_plates = Addon.LEGACY_CUSTOM_NAMEPLATES
-		for i = 1, #custom_plates do
-			print (i, type(i), custom_plates[i].name)
-			print (i, "=>", custom_plates[i], custom_plates[i].name)
+		local profile_table = TidyPlatesThreat.db.profiles
+		for profile_name, profile in pairs(profile_table) do
+			local settings = profile.uniqueSettings
+			for index, unique_unit in pairs(settings) do
+				if not unique_unit.Trigger then
+					-- Don't change entries map and ["**"]
+					print (index, "-------------------------------------------------")
+					TP.DEBUG_PRINT_TABLE(unique_unit)
+				end
+			end
 		end
 	end
 end

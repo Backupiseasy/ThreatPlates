@@ -16,6 +16,7 @@ local UnitCanAttack, UnitIsTapDenied = UnitCanAttack, UnitIsTapDenied
 local TidyPlatesThreat = TidyPlatesThreat
 local TOTEMS = Addon.TOTEMS
 local GetUnitVisibility = ThreatPlates.GetUnitVisibility
+local NameTriggers, AuraTriggers, CastTriggers = Addon.Cache.CustomPlateTriggers.Name, Addon.Cache.CustomPlateTriggers.Aura, Addon.Cache.CustomPlateTriggers.Cast
 
 ---------------------------------------------------------------------------------------------------
 -- Helper functions for styles and functions
@@ -180,7 +181,8 @@ function Addon.UnitStyle_NameDependent(unit)
   local db = TidyPlatesThreat.db.profile
 
   local totem_settings
-  local unique_settings = db.uniqueSettings.map[unit.name]
+  local unique_settings = NameTriggers[unit.name]
+
   if unique_settings and unique_settings.useStyle and unique_settings.Enable.UnitReaction[unit.reaction] then
     plate_style = (unique_settings.showNameplate and "unique") or (unique_settings.ShowHeadlineView and "NameOnly-Unique") or "etotem"
   else
@@ -207,7 +209,7 @@ local UnitStyle_NameDependent = Addon.UnitStyle_NameDependent
 function Addon.UnitStyle_AuraDependent(unit, aura_id, aura_name)
   local plate_style
 
-  local unique_settings = Addon.Cache.CustomNameplates[aura_id] or Addon.Cache.CustomNameplates[aura_name]
+  local unique_settings = AuraTriggers[aura_id] or AuraTriggers[aura_name]
   if unique_settings and unique_settings.useStyle and unique_settings.Enable.UnitReaction[unit.reaction] then
     plate_style = (unique_settings.showNameplate and "unique") or (unique_settings.ShowHeadlineView and "NameOnly-Unique") or "etotem"
 
@@ -224,7 +226,7 @@ end
 function Addon.UnitStyle_CastDependent(unit, spell_id, spell_name)
   local plate_style
 
-  local unique_settings = Addon.Cache.CustomNameplates[spell_id] or Addon.Cache.CustomNameplates[spell_name]
+  local unique_settings = CastTriggers[spell_id] or CastTriggers[spell_name]
   if unique_settings and unique_settings.useStyle and unique_settings.Enable.UnitReaction[unit.reaction] then
     plate_style = (unique_settings.showNameplate and "unique") or (unique_settings.ShowHeadlineView and "NameOnly-Unique") or "etotem"
 

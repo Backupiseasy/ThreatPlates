@@ -8,7 +8,7 @@ local t = Addon.ThreatPlates
 -- Lua APIs
 local abs = abs
 local pairs = pairs
-local ipairs = ipairs
+local ipairs, next = ipairs, next
 local string = string
 local table = table
 local tonumber, tostring = tonumber, tostring
@@ -16,6 +16,7 @@ local select = select
 local type = type
 
 -- WoW APIs
+local wipe = wipe
 local CLASS_SORT_ORDER, LOCALIZED_CLASS_NAMES_MALE = CLASS_SORT_ORDER, LOCALIZED_CLASS_NAMES_MALE
 local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
 local SetCVar, GetCVar, GetCVarBool = SetCVar, GetCVar, GetCVarBool
@@ -305,19 +306,18 @@ function Addon:InitializeCustomNameplates()
   Addon.ActiveCastTriggers = false
   Addon.UseUniqueWidget = db.uniqueWidget.ON
 
-  db.uniqueSettings.map = {}
-  Addon.Cache.CustomNameplates = {}
+  -- Use wipe to keep references intact
+  wipe(Addon.Cache.CustomPlateTriggers.Name)
+  wipe(Addon.Cache.CustomPlateTriggers.Aura)
+  wipe(Addon.Cache.CustomPlateTriggers.Cast)
 
   for i, custom_plate in pairs(db.uniqueSettings) do
     if i ~= "map" and not custom_plate.Enable.Never then
-      if custom_plate.Trigger.Type == "Name" and custom_plate.name and custom_plate.name ~= "<Enter name here>" then
-        db.uniqueSettings.map[custom_plate.name] = custom_plate
-      elseif custom_plate.Trigger.Type == "Aura" and custom_plate.Trigger.Aura.AuraID then
-        Addon.ActiveAuraTriggers = true
-        Addon.Cache.CustomNameplates[custom_plate.Trigger.Aura.AuraID] = custom_plate
-      elseif custom_plate.Trigger.Type == "Cast" and custom_plate.Trigger.Cast.SpellID then
-        Addon.ActiveCastTriggers = true
-        Addon.Cache.CustomNameplates[custom_plate.Trigger.Cast.SpellID] = custom_plate
+      local trigger_type = custom_plate.Trigger.Type
+      local trigger_list = custom_plate.Trigger[trigger_type].AsArray
+
+      for _, trigger in ipairs(trigger_list) do
+        Addon.Cache.CustomPlateTriggers[trigger_type][trigger] = custom_plate
       end
 
       if custom_plate.Effects.Glow.Type ~= "None" then
@@ -325,6 +325,10 @@ function Addon:InitializeCustomNameplates()
       end
     end
   end
+
+  -- Signal that there are active aura or cast triggers
+  Addon.ActiveAuraTriggers = next(Addon.Cache.CustomPlateTriggers.Aura) ~= nil
+  Addon.ActiveCastTriggers = next(Addon.Cache.CustomPlateTriggers.Cast) ~= nil
 end
 
 local function UpdateSpecial() -- Need to add a way to update options table.
@@ -4897,26 +4901,10 @@ local function CreateSpecRolesRetail()
   return result
 end
 
-local function CustomPlateGetTrigger(custom_plate, trigger_type)
-  trigger_type = trigger_type or custom_plate.Trigger.Type
-  if trigger_type == "Name" then
-    return custom_plate.name
-  elseif trigger_type == "Aura" then
-    return custom_plate.Trigger.Aura.AuraID
-  else -- if trigger_type == "Cast" then
-    return custom_plate.Trigger.Cast.SpellID
-  end
-end
-
 local function CustomPlateGetHeaderName(index)
   local trigger_type = db.uniqueSettings[index].Trigger.Type
-  if trigger_type == "Name" then
-    return db.uniqueSettings[index].name
-  elseif trigger_type == "Aura" then
-    return "Aura: " .. (db.uniqueSettings[index].Trigger.Aura.AuraID or "")
-  else
-    return "Cast: " .. (db.uniqueSettings[index].Trigger.Cast.SpellID or "")
-  end
+  local prefix = (trigger_type == "Aura" and "Aura: ") or (trigger_type == "Cast" and "Cast: ") or ""
+  return prefix .. (db.uniqueSettings[index].Trigger[trigger_type].Input or "")
 end
 
 local function CustomPlateGetSlotName(index)
@@ -4955,23 +4943,20 @@ end
 local function CustomPlateSetIcon(index, icon_location)
   local _, icon
 
-  if db.uniqueSettings[index].UseAutomaticIcon then
-    if db.uniqueSettings[index].Trigger.Type == "Aura" then
-      _, _, icon = GetSpellInfo(db.uniqueSettings[index].Trigger.Aura.AuraID)
-    elseif db.uniqueSettings[index].Trigger.Type == "Cast" then
-      _, _, icon = GetSpellInfo(db.uniqueSettings[index].Trigger.Cast.SpellID)
-    end
+  local custom_plate = db.uniqueSettings[index]
+  if custom_plate.UseAutomaticIcon then
+    _, _, icon = GetSpellInfo(custom_plate.Trigger[custom_plate.Trigger.Type].AsArray[1])
   elseif not icon_location then
-    icon = db.uniqueSettings[index].icon
+    icon = custom_plate.icon
   else
-    db.uniqueSettings[index].SpellID = nil
-    db.uniqueSettings[index].SpellName = nil
+    custom_plate.SpellID = nil
+    custom_plate.SpellName = nil
 
     local spell_id = tonumber(icon_location)
     if spell_id then -- no string, so val should be a spell ID
       _, _, icon = GetSpellInfo(spell_id)
       if icon then
-        db.uniqueSettings[index].SpellID = spell_id
+        custom_plate.SpellID = spell_id
       else
         icon = spell_id
         t.Print("Invalid spell ID for custom nameplate icon: " .. icon_location, true)
@@ -4980,7 +4965,7 @@ local function CustomPlateSetIcon(index, icon_location)
       icon_location = tostring(icon_location)
       _, _, icon = GetSpellInfo(icon_location)
       if icon then
-        db.uniqueSettings[index].SpellName = icon_location
+        custom_plate.SpellName = icon_location
       end
       icon = icon or icon_location
     end
@@ -4990,7 +4975,7 @@ local function CustomPlateSetIcon(index, icon_location)
     icon = "INV_Misc_QuestionMark.blp"
   end
 
-  db.uniqueSettings[index].icon = icon
+  custom_plate.icon = icon
   options.args.Custom.args["#" .. index].args.Icon.args.Icon.image = CustomPlateGetIcon(index)
 
   UpdateSpecial()
@@ -4998,7 +4983,7 @@ end
 
 StaticPopupDialogs["TriggerAlreadyExists"] = {
   preferredIndex = 3,
-  text = L["A custom nameplate with this trigger already exists: %s. You cannot use two custom nameplates with the same trigger."],
+  text = L["A custom nameplate with these triggers already exists: %s. You cannot use two custom nameplates with the same trigger."],
   button1 = OKAY,
   timeout = 0,
   whileDead = 1,
@@ -5008,7 +4993,7 @@ StaticPopupDialogs["TriggerAlreadyExists"] = {
 
 StaticPopupDialogs["TriggerAlreadyExistsDisablingIt"] = {
   preferredIndex = 3,
-  text = L["A custom nameplate with this trigger already exists: %s. You cannot use two custom nameplates with th same trigger. The current custom nameplate was therefore disabled."],
+  text = L["A custom nameplate with these triggers already exists: %s. You cannot use two custom nameplates with th same trigger. The current custom nameplate was therefore disabled."],
   button1 = OKAY,
   timeout = 0,
   whileDead = 1,
@@ -5016,27 +5001,29 @@ StaticPopupDialogs["TriggerAlreadyExistsDisablingIt"] = {
   OnAccept = function(self, _, _) end,
 }
 
-local function CustomPlateCheckIfTriggerIsUnique(trigger_type, trigger_value, selected_plate)
-  if trigger_value == nil or trigger_value == "" then
-    return true
+local function CustomPlateCheckIfTriggerIsUnique(trigger_type, triggers, selected_plate)
+  local duplicate_triggers = {}
+
+  for i, trigger_value in ipairs(triggers) do
+    if trigger_value ~= nil and trigger_value ~= "" then
+      -- Check if here is already another custom nameplate with the same trigger:
+      local custom_plate = Addon.Cache.CustomPlateTriggers[trigger_type][trigger_value]
+
+      if not (custom_plate == nil or custom_plate.Enable.Never or selected_plate.Enable.Never or custom_plate == selected_plate) then
+        duplicate_triggers[#duplicate_triggers + 1] = trigger_value
+      end
+    end
   end
 
-  -- Check if here is already another custom nameplate with the same trigger:
-  local custom_plate
-  if trigger_type == "Name" then
-    custom_plate = db.uniqueSettings.map[trigger_value]
-  else
-    custom_plate = Addon.Cache.CustomNameplates[trigger_value]
-  end
 
-  return custom_plate == nil or custom_plate.Enable.Never or selected_plate.Enable.Never or custom_plate == selected_plate
+  return #duplicate_triggers == 0, duplicate_triggers
 end
 
-local function CustomPlateCheckIfTriggerIsUniqueWithErrorMessage(trigger_type, trigger_value, selected_plate)
-  local check_ok = CustomPlateCheckIfTriggerIsUnique(trigger_type, trigger_value, selected_plate)
+local function CustomPlateCheckIfTriggerIsUniqueWithErrorMessage(trigger_type, triggers, selected_plate)
+  local check_ok, duplicate_triggers = CustomPlateCheckIfTriggerIsUnique(trigger_type, triggers, selected_plate)
 
   if not check_ok then
-    StaticPopup_Show("TriggerAlreadyExists", trigger_value)
+    StaticPopup_Show("TriggerAlreadyExists", table.concat(duplicate_triggers, "; "))
   end
 
   return check_ok
@@ -5050,11 +5037,14 @@ local function CustomPlateUpdateEntry(index)
 end
 
 local function CustomPlateCheckAndUpdateEntry(info, val, index)
+  local triggers = Addon.Split(val)
+
   local selected_plate = db.uniqueSettings[index]
   -- Check if here is already another custom nameplate with the same trigger:
   local trigger_type = selected_plate.Trigger.Type
-  if CustomPlateCheckIfTriggerIsUniqueWithErrorMessage(trigger_type, val, selected_plate) then
-    SetValue(info, val)
+  if CustomPlateCheckIfTriggerIsUniqueWithErrorMessage(trigger_type, triggers, selected_plate) then
+    db.uniqueSettings[index].Trigger[trigger_type].Input = val
+    db.uniqueSettings[index].Trigger[trigger_type].AsArray = triggers
     CustomPlateUpdateEntry(index)
   end
 end
@@ -5065,10 +5055,39 @@ local function CreateCustomNameplateEntry(index)
     type = "group",
     order = 40 + index,
     args = {
+      --Spacer2 = GetSpacerEntry(90),
+      Copy = {
+        name = L["Copy"],
+        order = 1,
+        type = "execute",
+        func = function()
+          clipboard = t.CopyTable(db.uniqueSettings[index])
+        end,
+      },
+      Paste = {
+        name = L["Paste"],
+        order = 2,
+        type = "execute",
+        func = function()
+          -- Check for valid content could be better
+          if type(clipboard) == "table" and clipboard.Trigger then
+            local trigger_type = clipboard.Trigger.Type
+            local triggers = (clipboard).Trigger[trigger_type].AsArray
+            local check_ok = CustomPlateCheckIfTriggerIsUniqueWithErrorMessage(trigger_type, triggers, clipboard)
+            if check_ok then
+              db.uniqueSettings[index] = t.CopyTable(clipboard)
+              CustomPlateUpdateEntry(index)
+              clipboard = nil
+            end
+          else
+            t.Print(L["Nothing to paste!"])
+          end
+        end,
+      },
       Header = {
         name = CustomPlateGetHeaderName(index),
         type = "header",
-        order = 0,
+        order = 9,
       },
       Trigger = {
         name = L["Trigger"],
@@ -5084,9 +5103,10 @@ local function CreateCustomNameplateEntry(index)
             set = function(info, val)
               -- If the uses switches to a trigger that is already in use, the current custom nameplate
               -- is disabled (otherwise, if we would not switch to it, the user could not change it at all.
-              local trigger_value = CustomPlateGetTrigger(db.uniqueSettings[index], val)
-              if not CustomPlateCheckIfTriggerIsUnique(val, trigger_value, db.uniqueSettings[index]) then
-                StaticPopup_Show("TriggerAlreadyExistsDisablingIt", trigger_value)
+              local triggers = db.uniqueSettings[index].Trigger[val].AsArray
+              local check_ok, duplicate_triggers = CustomPlateCheckIfTriggerIsUnique(val, triggers, db.uniqueSettings[index])
+              if not check_ok then
+                StaticPopup_Show("TriggerAlreadyExistsDisablingIt", duplicate_triggers)
                 db.uniqueSettings[index].Enable.Never = true
               end
               db.uniqueSettings[index].Trigger.Type = val
@@ -5106,12 +5126,15 @@ local function CreateCustomNameplateEntry(index)
           Spacer1 = GetSpacerEntry(15),
           -- Name Trigger
           NameTrigger = {
-            name = L["Name"],
+            name = L["Names"],
             type = "input",
             order = 20,
             width = 3,
+            desc = L["Apply these custom settings to the nameplate of a unit with a particular name. You can add multiple entries separated by a semicolon."],
             set = function(info, val) CustomPlateCheckAndUpdateEntry(info, val, index) end,
-            arg = { "uniqueSettings", index, "name" },
+            get = function(info)
+              return db.uniqueSettings[index].Trigger["Name"].Input or ""
+            end,
             hidden = function() return db.uniqueSettings[index].Trigger.Type ~= "Name" end,
           },
           TargetButton = {
@@ -5121,10 +5144,12 @@ local function CreateCustomNameplateEntry(index)
             width = "single",
             func = function()
               if UnitExists("target") then
-                local trigger_type = db.uniqueSettings[index].Trigger.Type -- "Name"
-                local trigger_value = UnitName("target")
-                if CustomPlateCheckIfTriggerIsUniqueWithErrorMessage(trigger_type, trigger_value, db.uniqueSettings[index]) then
-                  db.uniqueSettings[index].name = trigger_value
+                local target_unit = UnitName("target")
+                local triggers = { target_unit }
+                local check_ok = CustomPlateCheckIfTriggerIsUniqueWithErrorMessage("Name", triggers, db.uniqueSettings[index])
+                if check_ok then
+                  db.uniqueSettings[index].Trigger["Name"].Input = target_unit
+                  db.uniqueSettings[index].Trigger["Name"].AsArray = triggers
                   CustomPlateUpdateEntry(index)
                 end
               else
@@ -5135,16 +5160,15 @@ local function CreateCustomNameplateEntry(index)
           },
           -- Aura Trigger
           AuraTrigger = {
-            name = L["Aura (Name or ID)"],
+            name = L["Auras (Name or ID)"],
             type = "input",
             order = 20,
             width = "full",
-            desc = L["Apply the custom settings to a nameplate when a particular aura is present on the unit."],
+            desc = L["Apply these custom settings to the nameplate when a particular aura is present on the unit. You can add multiple entries separated by a semicolon."],
             set = function(info, val) CustomPlateCheckAndUpdateEntry(info, tonumber(val) or val, index) end,
             get = function(info)
-              return tostring(GetValue(info) or "")
+              return tostring(db.uniqueSettings[index].Trigger["Aura"].Input or "")
             end,
-            arg = { "uniqueSettings", index, "Trigger", "Aura", "AuraID" },
             disabled = function() return not db.AuraWidget.ON and not db.AuraWidget.ShowInHeadlineView end,
             hidden = function() return db.uniqueSettings[index].Trigger.Type ~= "Aura" end,
           },
@@ -5157,45 +5181,16 @@ local function CreateCustomNameplateEntry(index)
           },
           -- Cast Trigger
           CastTrigger = {
-            name = L["Spell (Name or ID)"],
+            name = L["Spells (Name or ID)"],
             type = "input",
             order = 20,
             width = "full",
-            desc = L["Apply the custom settings to a nameplate when a particular spell is cast by the unit."],
+            desc = L["Apply these custom settings to a nameplate when a particular spell is cast by the unit. You can add multiple entries separated by a semicolon"],
             set = function(info, val) CustomPlateCheckAndUpdateEntry(info, tonumber(val) or val, index) end,
             get = function(info)
-              return tostring(GetValue(info) or "")
+              return tostring(db.uniqueSettings[index].Trigger["Cast"].Input or "")
             end,
-            arg = { "uniqueSettings", index, "Trigger", "Cast", "SpellID" },
             hidden = function() return db.uniqueSettings[index].Trigger.Type ~= "Cast" end,
-          },
-          Spacer2 = GetSpacerEntry(90),
-          Copy = {
-            name = L["Copy"],
-            order = 100,
-            type = "execute",
-            func = function()
-              clipboard = t.CopyTable(db.uniqueSettings[index])
-            end,
-          },
-          Paste = {
-            name = L["Paste"],
-            order = 110,
-            type = "execute",
-            func = function()
-              -- Check for valid content could be better
-              if type(clipboard) == "table" and clipboard.Trigger then
-                local trigger_type = clipboard.Trigger.Type
-                local trigger_value = CustomPlateGetTrigger(clipboard)
-                if CustomPlateCheckIfTriggerIsUniqueWithErrorMessage(trigger_type, trigger_value, clipboard) then
-                  db.uniqueSettings[index] = t.CopyTable(clipboard)
-                  CustomPlateUpdateEntry(index)
-                  clipboard = nil
-                end
-              else
-                t.Print(L["Nothing to paste!"])
-              end
-            end,
           },
         },
       },
@@ -5211,17 +5206,18 @@ local function CreateCustomNameplateEntry(index)
             type = "toggle",
             set = function(info, val)
               local trigger_type = db.uniqueSettings[index].Trigger.Type
-              local trigger_value = CustomPlateGetTrigger(db.uniqueSettings[index])
+              local triggers = db.uniqueSettings[index].Trigger[trigger_type].AsArray
 
               -- Update never before check for unique trigger, otherwise it would use the old Never value
               db.uniqueSettings[index].Enable.Never = val
-              if not CustomPlateCheckIfTriggerIsUnique(trigger_type, trigger_value, db.uniqueSettings[index]) then
-                StaticPopup_Show("TriggerAlreadyExistsDisablingIt", trigger_value)
+
+              local check_ok, duplicate_triggers = CustomPlateCheckIfTriggerIsUnique(trigger_type, triggers, db.uniqueSettings[index])
+              if not check_ok then
+                StaticPopup_Show("TriggerAlreadyExistsDisablingIt", table.concat(duplicate_triggers, "; "))
                 db.uniqueSettings[index].Enable.Never = true
               end
 
               CustomPlateUpdateEntry(index)
-              Addon.Widgets:UpdateSettings("UniqueIcon")
             end,
             arg = { "uniqueSettings", index, "Enable", "Never" },
           },
@@ -5233,7 +5229,6 @@ local function CreateCustomNameplateEntry(index)
             desc = L["Enable this custom nameplate for friendly units"],
             set = function(info, val)
               db.uniqueSettings[index].Enable.UnitReaction["FRIENDLY"] = val
-              Addon.Widgets:UpdateSettings("UniqueIcon")
               Addon:ForceUpdate()
             end,
             get = function(info)
@@ -5248,7 +5243,6 @@ local function CreateCustomNameplateEntry(index)
             set = function(info, val)
               db.uniqueSettings[index].Enable.UnitReaction["HOSTILE"] = val
               db.uniqueSettings[index].Enable.UnitReaction["NEUTRAL"] = val
-              Addon.Widgets:UpdateSettings("UniqueIcon")
               Addon:ForceUpdate()
             end,
             get = function(info)
@@ -5466,7 +5460,7 @@ local function CreateCustomNameplateEntry(index)
               CustomPlateSetIcon(index)
             end,
             arg = { "uniqueSettings", index, "UseAutomaticIcon" },
-            desc = L["Find a suitable icon base on aura/spell ID or aura/spell name. This does not work for name-based custom nameplates."],
+            desc = L["Find a suitable icon base on aura/spell ID or aura/spell name. This does not work for name-based custom nameplates. If the custom nameplate has several triggers, only the first one is used to find an icon."],
             hidden = function() return TidyPlatesThreat.db.global.CustomNameplatesVersion == 1 end,
           },
           Spacer1 = GetSpacerEntry(3),
@@ -5531,7 +5525,7 @@ local function CreateCustomNameplatesGroup()
         -- If slot_no is nil, General Settings is selected currently.
         local slot_no = (tonumber(selected:match("#(.*)")) or 0) + 1
         table.insert(db.uniqueSettings, slot_no, t.CopyTable(t.DEFAULT_SETTINGS.profile.uniqueSettings["**"]))
-        db.uniqueSettings[slot_no].name = ""
+        db.uniqueSettings[slot_no].Trigger.Name.Input = ""
 
         options.args.Custom.args = CreateCustomNameplatesGroup()
         UpdateSpecial()
@@ -5628,7 +5622,11 @@ local function CreateCustomNameplatesGroup()
         local selected = statustable.groups.selected
         local slot_no = tonumber(selected:match("#(.*)"))
 
-        table.sort(db.uniqueSettings, function(a, b) return a.name < b.name end)
+        table.sort(db.uniqueSettings, function(a, b)
+          local a_key = a.Trigger[a.Trigger.Type].Input
+          local b_key = b.Trigger[b.Trigger.Type].Input
+          return a_key < b_key
+        end)
 
         options.args.Custom.args = CreateCustomNameplatesGroup()
         UpdateSpecial()
@@ -5646,7 +5644,11 @@ local function CreateCustomNameplatesGroup()
         local selected = statustable.groups.selected
         local slot_no = tonumber(selected:match("#(.*)"))
 
-        table.sort(db.uniqueSettings, function(a, b) return a.name > b.name end)
+        table.sort(db.uniqueSettings, function(a, b)
+          local a_key = a.Trigger[a.Trigger.Type].Input
+          local b_key = b.Trigger[b.Trigger.Type].Input
+          return a_key > b_key
+        end)
 
         options.args.Custom.args = CreateCustomNameplatesGroup()
         UpdateSpecial()
@@ -5716,10 +5718,10 @@ local function CreateCustomNameplatesGroup()
               func = function()
                 local export_data = {
                   Version = t.Meta("version"),
-                  PlateSettings = t.CopyTable(db.uniqueSettings)
+                  CustomStyles = t.CopyTable(db.uniqueSettings)
                 }
                 -- Delete cached data from settings table
-                export_data.PlateSettings.map = nil
+                export_data.CustomStyles.map = nil
                 ShowImportExportFrame("export", export_data)
               end,
             },
@@ -5743,14 +5745,15 @@ local function CreateCustomNameplatesGroup()
 --                    end
 
                     local slot_no = #db.uniqueSettings
-                    for i = 1, #import_data.PlateSettings do
-                      local unique_settings = import_data.PlateSettings[i]
+                    for i = 1, #import_data.CustomStyles do
+                      local unique_settings = import_data.CustomStyles[i]
 
                       local trigger_type = unique_settings.Trigger.Type
-                      local trigger_value = CustomPlateGetTrigger(unique_settings)
+                      local triggers = unique_settings.Trigger[trigger_type].AsArray
 
-                      if not CustomPlateCheckIfTriggerIsUnique(trigger_type, trigger_value, unique_settings) then
-                        t.Print(L["A custom nameplate with this trigger already exists: "] .. trigger_value .. L[". You cannot use two custom nameplates with the same trigger. The imported custom nameplate will be disabled."], true)
+                      local check_ok, duplicate_triggers = CustomPlateCheckIfTriggerIsUnique(trigger_type, triggers, unique_settings)
+                      if not check_ok then
+                        t.Print(L["A custom nameplate with this trigger already exists: "] .. table.concat(duplicate_triggers, "; ") .. L[". You cannot use two custom nameplates with the same trigger. The imported custom nameplate will be disabled."], true)
                         unique_settings.Enable.Never = true
                       end
 
@@ -5777,7 +5780,7 @@ local function CreateCustomNameplatesGroup()
   }
 
   for index, unique_unit in pairs(db.uniqueSettings) do
-    if type(index) == "number" and unique_unit.name and unique_unit.name ~= "<Enter name here>" then
+    if type(index) == "number" and unique_unit.Trigger.Name.Input and unique_unit.Trigger.Name.Input ~= "<Enter name here>" then
       entry["#" .. index] = CreateCustomNameplateEntry(index)
     end
   end
@@ -8341,25 +8344,26 @@ function Addon.RestoreLegacyCustomNameplates()
   if TidyPlatesThreat.db.global.CustomNameplatesVersion == 1 then
     t.Print(L["You need to convert your custom nameplates to the current format before you can add legacy custom nameplates."], true)
   else
-    local legacy_custom_nameplates = {}
+    local legacy_custom_plates = {}
 
     for i, v in ipairs(Addon.LEGACY_CUSTOM_NAMEPLATES) do
-      legacy_custom_nameplates[i] = t.CopyTable(v)
-      Addon.MergeDefaultsIntoTable(legacy_custom_nameplates[i], Addon.LEGACY_CUSTOM_NAMEPLATES["**"])
+      legacy_custom_plates[i] = t.CopyTable(v)
+      Addon.MergeDefaultsIntoTable(legacy_custom_plates[i], Addon.LEGACY_CUSTOM_NAMEPLATES["**"])
     end
 
     local custom_plates = TidyPlatesThreat.db.profile.uniqueSettings
     local max_slot_no = #custom_plates
 
     local index = 1
-    for _, legacy_custom_plate in pairs(legacy_custom_nameplates) do
-      local trigger_value = legacy_custom_plate.name
-
+    for _, legacy_custom_plate in pairs(legacy_custom_plates) do
       -- Only need to check for double name trigger as legacy custom nameplates only have these kind of triggers
-      local trigger_already_used = custom_plates.map[trigger_value]
-      if trigger_already_used == nil or (trigger_value ~= nil and trigger_already_used.Enable.Never) then
+      local trigger_value = legacy_custom_plate.Trigger.Name.Input
+      local trigger_already_used = Addon.Cache.CustomPlateTriggers.Name[trigger_value]
+
+      if trigger_already_used == nil or trigger_already_used.Enable.Never then
         local error_msg = L["Adding legacy custom nameplate for %s ..."]:gsub("%%s", trigger_value)
         t.Print(error_msg)
+
         table.insert(custom_plates, max_slot_no + index, legacy_custom_plate)
         index = index + 1
       else

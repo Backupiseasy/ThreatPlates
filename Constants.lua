@@ -977,20 +977,20 @@ ThreatPlates.DEFAULT_SETTINGS = {
     },
     totemSettings = GetDefaultTotemSettings(),
     uniqueSettings = {
-      map = {},
       ["**"] = {
-        name = "<Enter name here>",
         Trigger = {
           Type = "Name",
-          -- Not yet used, for migration later on:
-          --          Name = {
-          --            Name = "<Enter name here>",
-          --          },
+          Name = {
+            Input = "<Enter name here>",
+            AsArray = {},
+          },
           Aura = {
-            AuraID = nil,
+            Input = nil,
+            AsArray = {},
           },
           Cast = {
-            SpellID = nil,
+            Input = nil,
+            AsArray = {}
           },
         },
         Effects = {
