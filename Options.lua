@@ -235,34 +235,59 @@ local function ImportStringData(encoded)
   return success, deserialized
 end
 
-local function ShowImportExportFrame(mode, modeArg)
+local function ShowExportFrame(modeArg)
   ImportExportFrame = ImportExportFrame or CreateImportExportFrame()
 
-  if mode == "export" then
-    local serialized = LibAceSerializer:Serialize(modeArg)
-    local compressed = LibDeflate:CompressDeflate(serialized)
+  local serialized = LibAceSerializer:Serialize(modeArg)
+  local compressed = LibDeflate:CompressDeflate(serialized)
 
-    ImportExportFrame:OpenExport(LibDeflate:EncodeForPrint(compressed))
-  else
-    local function ImportHandler(encoded)
-      local success, deserialized = ImportStringData(encoded)
+  ImportExportFrame:OpenExport(LibDeflate:EncodeForPrint(compressed))
+end
 
-      if success then
-        --apply imported profile as a new profile
-        TidyPlatesThreat.db:SetProfile(L["Imported Profile"]) --will create a new profile
+local function ShowImportFrame()
+  ImportExportFrame = ImportExportFrame or CreateImportExportFrame()
+
+  local function ImportHandler(encoded)
+    local success, import_data = ImportStringData(encoded)
+
+    if success then
+      if not import_data.Version or not import_data.Profile and not import_data.ProfileName or type (import_data.ProfileName) ~= "string" then
+        t.Print(L["The import string has an unknown format and cannot be imported. Verify that the import string was generated from the same Threat Plates version that you are using currently."], true)
+      elseif import_data.Version ~= t.Meta("version") then
+        t.Print(L["The import string contains custom nameplate settings from an incombatible Threat Plates version. Importing only works with data exported from the same Threat Plates version as you are using."], true)
+      else
+        local imported_profile_name = import_data.ProfileName
+
+        local imported_profile_no = 1
+        while TidyPlatesThreat.db.profiles[imported_profile_name] do
+          imported_profile_name = import_data.ProfileName .. " (" .. tostring(imported_profile_no) .. ")"
+          imported_profile_no = imported_profile_no + 1
+        end
+--        for profile_name, profile in pairs(TidyPlatesThreat.db.profiles) do
+--          local no = profile_name:match("^" .. import_data.ProfileName .. " %((%d+)%)$") or (profile_name == import_data.ProfileName and 0)
+--          if tonumber(no) and tonumber(no) >= imported_profile_no then
+--            imported_profile_no = tonumber(no) + 1
+--          end
+--        end
+--        local imported_profile_name = import_data.ProfileName .. ((imported_profile_no == 0 and "") or (" (" .. tostring(imported_profile_no) .. ")"))
+
+        -- Apply imported profile as a new profile
+        TidyPlatesThreat.db:SetProfile(imported_profile_name) --will create a new profile
 
         --[[
           NOTE: using merge as there appears to be an observer that writes changes to the savedvariables.
           using assignment (profile = deserialized) removes this functionality which means the imported profile is never saved.
         ]]--
 
-        Addon.MergeIntoTable(TidyPlatesThreat.db.profile, deserialized)
+        Addon.MergeIntoTable(TidyPlatesThreat.db.profile, import_data.Profile)
         TidyPlatesThreat:ProfChange()
       end
+    else
+      t.Print(L["The import string has an unknown format and cannot be imported. Verify that the import string was generated from the same Threat Plates version that you are using currently."], true)
     end
-
-    ImportExportFrame:OpenImport(ImportHandler)
   end
+
+  ImportExportFrame:OpenImport(ImportHandler)
 end
 
 local function AddImportExportOptions(profileOptions)
@@ -277,7 +302,15 @@ local function AddImportExportOptions(profileOptions)
     type = "execute",
     name = L["Export profile"],
     desc = L["Export the current profile into a string that can be imported by other players."],
-    func = function() ShowImportExportFrame("export", TidyPlatesThreat.db.profile) end
+    func = function()
+      local export_data = {
+        Version = t.Meta("version"),
+        ProfileName = TidyPlatesThreat.db:GetCurrentProfile(),
+        Profile = TidyPlatesThreat.db.profile
+      }
+
+      ShowExportFrame(export_data)
+    end
   }
 
   profileOptions.args.importprofile = {
@@ -285,7 +318,7 @@ local function AddImportExportOptions(profileOptions)
     type = "execute",
     name = L["Import profile"],
     desc = L["Import a profile from another player from an import string."],
-    func = function() ShowImportExportFrame("import") end
+    func = function() ShowImportFrame() end
   }
 end
 
@@ -5084,6 +5117,19 @@ local function CreateCustomNameplateEntry(index)
           end
         end,
       },
+      Export = {
+        name = L["Export"],
+        order = 3,
+        type = "execute",
+        func = function()
+          local export_data = {
+            Version = t.Meta("version"),
+            CustomStyles = { db.uniqueSettings[index] }
+          }
+
+          ShowExportFrame(export_data)
+        end,
+      },
       Header = {
         name = CustomPlateGetHeaderName(index),
         type = "header",
@@ -5460,7 +5506,7 @@ local function CreateCustomNameplateEntry(index)
               CustomPlateSetIcon(index)
             end,
             arg = { "uniqueSettings", index, "UseAutomaticIcon" },
-            desc = L["Find a suitable icon base on aura/spell ID or aura/spell name. This does not work for name-based custom nameplates. If the custom nameplate has several triggers, only the first one is used to find an icon."],
+            desc = L["Find a suitable icon based on the current trigger. For Name trigger, the preview does not work. For multi-value triggers, the preview always is the icon of the first trigger entered."],
             hidden = function() return TidyPlatesThreat.db.global.CustomNameplatesVersion == 1 end,
           },
           Spacer1 = GetSpacerEntry(3),
@@ -5623,8 +5669,8 @@ local function CreateCustomNameplatesGroup()
         local slot_no = tonumber(selected:match("#(.*)"))
 
         table.sort(db.uniqueSettings, function(a, b)
-          local a_key = a.Trigger[a.Trigger.Type].Input
-          local b_key = b.Trigger[b.Trigger.Type].Input
+          local a_key = a.Trigger.Type .. a.Trigger[a.Trigger.Type].Input
+          local b_key = b.Trigger.Type .. b.Trigger[b.Trigger.Type].Input
           return a_key < b_key
         end)
 
@@ -5645,8 +5691,8 @@ local function CreateCustomNameplatesGroup()
         local slot_no = tonumber(selected:match("#(.*)"))
 
         table.sort(db.uniqueSettings, function(a, b)
-          local a_key = a.Trigger[a.Trigger.Type].Input
-          local b_key = b.Trigger[b.Trigger.Type].Input
+          local a_key = a.Trigger.Type .. a.Trigger[a.Trigger.Type].Input
+          local b_key = b.Trigger.Type .. b.Trigger[b.Trigger.Type].Input
           return a_key > b_key
         end)
 
@@ -5718,11 +5764,12 @@ local function CreateCustomNameplatesGroup()
               func = function()
                 local export_data = {
                   Version = t.Meta("version"),
-                  CustomStyles = t.CopyTable(db.uniqueSettings)
+                  CustomStyles = t.CopyTable(db.uniqueSettings) -- copy it as .map is removed afterwards
                 }
                 -- Delete cached data from settings table
                 export_data.CustomStyles.map = nil
-                ShowImportExportFrame("export", export_data)
+
+                ShowExportFrame(export_data)
               end,
             },
             Import = {
@@ -5738,35 +5785,43 @@ local function CreateCustomNameplatesGroup()
                   local success, import_data = ImportStringData(encoded)
 
                   if success then
---                    if import_data.Version ~= t.Meta("version") then
---                    local import_custom_plates =
---                      t.Print(L["The import string contains custom nameplate settings from an outdated Threat Plates version. Importing only works with data exported from the same Threat Plates version as you are using."], true)
---                      return
---                    end
+                    if not import_data.Version or not import_data.CustomStyles then
+                      t.Print(L["The import string has an invalied format and cannot be imported. Verify that the import string was generated from the same Threat Plates version that you are using currently."], true)
+                    elseif import_data.Version ~= t.Meta("version") then
+                      t.Print(L["The import string contains custom nameplate settings from an incombatible Threat Plates version. Importing only works with data exported from the same Threat Plates version as you are using."], true)
+                    else
+                      for i, custom_style  in ipairs (import_data.CustomStyles) do
+                        -- Check that the custom nameplate settings has the correct format (of the current TP version)
+--                        if not Addon.CheckTableStructure(t.DEFAULT_SETTINGS.profile.uniqueSettings["**"], custom_style) then
+--                          t.Print(L["The import string has an invalied format and cannot be imported. Verify that the import string was generated from the same Threat Plates version that you are using currently."], true)
+--                          t.DEBUG_PRINT_TABLE(custom_style)
+--                          success = false
+--                          break
+--                        else
+                          local trigger_type = custom_style.Trigger.Type
+                          local triggers = custom_style.Trigger[trigger_type].AsArray
 
-                    local slot_no = #db.uniqueSettings
-                    for i = 1, #import_data.CustomStyles do
-                      local unique_settings = import_data.CustomStyles[i]
-
-                      local trigger_type = unique_settings.Trigger.Type
-                      local triggers = unique_settings.Trigger[trigger_type].AsArray
-
-                      local check_ok, duplicate_triggers = CustomPlateCheckIfTriggerIsUnique(trigger_type, triggers, unique_settings)
-                      if not check_ok then
-                        t.Print(L["A custom nameplate with this trigger already exists: "] .. table.concat(duplicate_triggers, "; ") .. L[". You cannot use two custom nameplates with the same trigger. The imported custom nameplate will be disabled."], true)
-                        unique_settings.Enable.Never = true
+                          local check_ok, duplicate_triggers = CustomPlateCheckIfTriggerIsUnique(trigger_type, triggers, custom_style)
+                          if not check_ok then
+                            t.Print(L["A custom nameplate with this trigger already exists: "] .. table.concat(duplicate_triggers, "; ") .. L[". You cannot use two custom nameplates with the same trigger. The imported custom nameplate will be disabled."], true)
+                            custom_style.Enable.Never = true
+                          end
+--                        end
                       end
 
-                      -- Check that the custom nameplate settings has the correct format (of the current TP version)
-                      if not Addon.CheckTableStructure(t.DEFAULT_SETTINGS.profile.uniqueSettings["**"], unique_settings) then
-                        t.Print(L["The import string contains invalid custom nameplate settings and cannot be imported. Verify that the import string was generated from the same Threat Plates version that you are using."], true)
-                      end
+                      -- Only insert custom styles if all have a valid format (format checking is currently not implemented/not working
+                      if success then
+                        local slot_no = #db.uniqueSettings
+                        for i, custom_style  in ipairs (import_data.CustomStyles) do
+                          table.insert(db.uniqueSettings, slot_no + i, custom_style)
+                        end
 
-                      table.insert(db.uniqueSettings, slot_no + i, unique_settings)
+                        options.args.Custom.args = CreateCustomNameplatesGroup()
+                        UpdateSpecial()
+                      end
                     end
-
-                    options.args.Custom.args = CreateCustomNameplatesGroup()
-                    UpdateSpecial()
+                  else
+                    t.Print(L["The import string has an unknown format and cannot be imported. Verify that the import string was generated from the same Threat Plates version that you are using currently."], true)
                   end
                 end
 

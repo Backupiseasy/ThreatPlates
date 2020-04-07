@@ -88,7 +88,7 @@ Addon.LEGACY_CUSTOM_NAMEPLATES = {
       },
       Cast = {
         Input = nil,
-        AsArray = {}
+        AsArray = {},
       },
     },
     Effects = {
@@ -1410,6 +1410,75 @@ local function MigrateDatabase(current_version)
 end
 
 Addon.MigrateDatabase = MigrateDatabase
+
+-----------------------------------------------------
+-- Schema validation and other check functions for the settings file
+-----------------------------------------------------
+
+--local CUSTOM_STYLE_SCHEMA_VERSIONS = {
+--  V3 = {
+--    Trigger = {
+--      Type = "string",
+--      Name = {
+--        Input = "string",
+--        AsArray = { "string" },
+--      },
+--      Aura = {
+--        Input = "string",
+--        AsArray = { "string" },
+--      },
+--      Cast = {
+--        Input = "string",
+--        AsArray = { "string" },
+--      },
+--    },
+--    Effects = {
+--      Glow = {
+--        Frame = "string",
+--        Type = "string",
+--        CustomColor = "boolean",
+--        Color = { "number" },
+--      },
+--    },
+--    showNameplate = "boolean",
+--    ShowHeadlineView = "boolean",
+--    Enable = {
+--      Never = "boolean",
+--      UnitReaction = {
+--        FRIENDLY = "boolean",
+--        NEUTRAL = "boolean",
+--        HOSTILE = "boolean",
+--      },
+--    },
+--    showIcon = "boolean",
+--    useStyle = "boolean",
+--    useColor = "boolean",
+--    UseThreatColor = "boolean",
+--    UseThreatGlow = "boolean",
+--    allowMarked = "boolean",
+--    overrideScale = "boolean",
+--    overrideAlpha = "boolean",
+--    UseAutomaticIcon = "boolean",
+--    icon = "number;string",
+--    SpellID = "number",
+--    SpellName = "string",
+--    scale = "number",
+--    alpha = "number",
+--    color = {
+--      r = "number",
+--      g = "number",
+--      b = "number"
+--    },
+--  },
+--}
+--
+--local VERSION_TO_CUSTOM_STYLE_SCHEMA_MAPPING = {
+--  ["9.2.0"] = CUSTOM_STYLE_SCHEMA_VERSIONS.V3
+--}
+--
+--Addon.CheckCustomStyleSchema = function(custom_style, version)
+--  ThreatPlates.DEBUG_PRINT_TABLE(custom_style)
+--end
 
 -----------------------------------------------------
 -- External

@@ -177,12 +177,12 @@ Addon.CheckTableStructure = function(reference_structure, table_to_check)
 	end
 
 	for k,v in pairs(reference_structure) do
-		if type(v) == "table" then
-			if not Addon.CheckTableStructure(reference_structure[k], table_to_check[k]) then
+		if table_to_check[k] == nil or type(table_to_check[k]) ~= type(v) then
+			return false
+		elseif type(v) == "table" then
+			if not Addon.CheckTableStructure(v, table_to_check[k]) then
 				return false
 			end
-		elseif table_to_check[k] == nil then
-				return false
 		end
 	end
 

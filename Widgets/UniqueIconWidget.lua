@@ -90,20 +90,21 @@ function Widget:OnUnitAdded(widget_frame, unit)
     widget_frame:SetSize(db.scale, db.scale)
 
     local icon_texture = unique_setting.icon
+    local icon = widget_frame.Icon
     if unique_setting.UseAutomaticIcon then
       if unique_setting.Trigger.Type == "Name" then
-        SetPortraitTexture(widget_frame.Icon, unit.unitid)
-        --widget_frame.Icon:SetTexCoord(0.15, 0.85, 0.15, 0.85)
+        SetPortraitTexture(icon, unit.unitid)
+        icon:SetTexCoord(0.15, 0.85, 0.15, 0.85)
       else
-        widget_frame.Icon:SetTexture(unique_setting.AutomaticIcon or icon_texture)
-        --widget_frame.Icon:SetTexCoord(0, 1, 0, 1)
+        icon:SetTexture(unique_setting.AutomaticIcon or icon_texture)
+        icon:SetTexCoord(0, 1, 0, 1)
       end
     elseif type(icon_texture) == "string" and icon_texture:sub(-4) == ".blp" then
-      widget_frame.Icon:SetTexture("Interface\\Icons\\" .. unique_setting.icon)
-      --widget_frame.Icon:SetTexCoord(0, 1, 0, 1)
+      icon:SetTexture("Interface\\Icons\\" .. unique_setting.icon)
+      icon:SetTexCoord(0, 1, 0, 1)
     else
-      widget_frame.Icon:SetTexture(icon_texture)
-      --widget_frame.Icon:SetTexCoord(0, 1, 0, 1)
+      icon:SetTexture(icon_texture)
+      icon:SetTexCoord(0, 1, 0, 1)
     end
 
     widget_frame.Icon:Show()
