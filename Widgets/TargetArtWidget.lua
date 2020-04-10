@@ -4,8 +4,8 @@
 local ADDON_NAME, Addon = ...
 local ThreatPlates = Addon.ThreatPlates
 
-local Widget = Addon.Widgets:NewTargetWidget("TargetArt")
 local FocusWidget = Addon.Widgets:NewFocusWidget("Focus")
+local Widget = Addon.Widgets:NewTargetWidget("TargetArt")
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -128,6 +128,19 @@ local UPDATE_TEXTURE_FUNCTIONS = {
   threat_glow = UpdateBorderTexture,
 }
 
+local FRAME_LEVEL_BY_TEXTURE = {
+  arrow_down = 14,
+  arrows = 14,
+  arrows_legacy = 14,
+  bubble = 14,
+  crescent = 14,
+  default = 6,
+  glow = 4,
+  squarethn = 6,
+  threat_glow = 4,
+}
+
+
 local function GetHeadlineViewHeight(db)
   return abs(max(db.name.y, db.customtext.y) - min(db.name.y, db.customtext.y)) + (db.name.size + db.customtext.size) / 2
 end
@@ -207,7 +220,7 @@ function Widget:OnTargetUnitAdded(tp_frame, unit)
 
   if self:EnabledForStyle(unit.style, unit) then
     widget_frame:SetParent(tp_frame)
-    widget_frame:SetFrameLevel(tp_frame:GetFrameLevel() + ((Settings.theme == "glow" and -1) or 7))
+    widget_frame:SetFrameLevel(tp_frame:GetFrameLevel() + FRAME_LEVEL_BY_TEXTURE[Settings.theme])
     widget_frame:ClearAllPoints()
     widget_frame:SetAllPoints(tp_frame.visual.healthbar)
 
@@ -330,7 +343,7 @@ function FocusWidget:OnFocusUnitAdded(tp_frame, unit)
 
   if self:EnabledForStyle(unit.style, unit) then
     widget_frame:SetParent(tp_frame)
-    widget_frame:SetFrameLevel(tp_frame:GetFrameLevel() + ((FocusSettings.theme == "glow" and -1) or 7))
+    widget_frame:SetFrameLevel(tp_frame:GetFrameLevel() + FRAME_LEVEL_BY_TEXTURE[FocusSettings.theme])
     widget_frame:ClearAllPoints()
     widget_frame:SetAllPoints(tp_frame.visual.healthbar)
 

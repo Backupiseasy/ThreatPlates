@@ -9,6 +9,7 @@
 * Added an option to show the remaining time of a cast on the nameplate's castbar [Comment #695, #1530, #1907, #4077, IM, Issue #374, #399].
 * Fixed and changed sorting so that custom styles for nameplates are not sorted by trigger type first.
 * Fixed some update bugs in Target widget configuration.
+* Fixed a Lua error that occured when disabling the castbar configuration mode when the nameplate on which it was used was no longer visible.
 
 ------------------------------------------------------
 9.2.0-Beta2

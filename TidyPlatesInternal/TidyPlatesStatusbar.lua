@@ -228,6 +228,7 @@ function Addon:CreateCastbar(parent)
   frame.Border:SetFrameLevel(frame:GetFrameLevel())
   -- frame.InterruptBorder:SetFrameLevel(frame:GetFrameLevel())
   -- frame.Overlay:SetFrameLevel(parent:GetFrameLevel() + 1)
+  frame.Overlay:SetFrameLevel(frame:GetFrameLevel())
 
   frame.InterruptOverlay = frame.Overlay:CreateTexture(nil, "BORDER", 0)
   frame.InterruptShield = frame.Overlay:CreateTexture(nil, "ARTWORK", -8)
@@ -375,6 +376,8 @@ function Addon:ConfigCastbar()
     castbar:Hide()
     EnabledConfigMode = false
 
-    Addon:ForceUpdateOnNameplate(ConfigModePlate)
+    if ConfigModePlate and ConfigModePlate.TPFrame.Active then
+      Addon:ForceUpdateOnNameplate(ConfigModePlate)
+    end
   end
 end
