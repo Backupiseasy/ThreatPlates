@@ -325,7 +325,6 @@ end
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
----------------------------------------------------------------------------------------------------
 
 local function GetSpellName(number)
   local n = GetSpellInfo(number)
@@ -601,6 +600,7 @@ local MAP_OPTION_TO_WIDGET = {
   ResourceWidget = "Resource",
   AurasWidget = "Auras",
   TargetArtWidget = "TargetArt",
+  FocusWidget = "Focus",
   ArenaWidget = "Arena",
 }
 
@@ -1950,11 +1950,11 @@ end
 
 local function CreateTargetArtWidgetOptions()
   local options = {
-    name = L["Target Highlight"],
+    name = L["Target"],
     type = "group",
     order = 90,
     args = {
-      Enable = GetEnableEntry(L["Enable Target Highlight Widget"], L["This widget highlights the nameplate of your current target by showing a border around the healthbar and by coloring the nameplate's healtbar and/or name with a custom color."], "targetWidget", false, function(info, val) SetValuePlain(info, val); Addon.Widgets:InitializeWidget("TargetArt") end),
+      Enable = GetEnableEntry(L["Enable Target Widget"], L["This widget highlights the nameplate of your current target by showing a border around the healthbar and by coloring the nameplate's healtbar and/or name with a custom color."], "targetWidget", false, function(info, val) SetValuePlain(info, val); Addon.Widgets:InitializeWidget("TargetArt") end),
       Texture = {
         name = L["Texture"],
         order = 10,
@@ -1966,8 +1966,8 @@ local function CreateTargetArtWidgetOptions()
             order = 10,
             type = "execute",
             image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\TargetArtWidget\\" .. db.targetWidget.theme,
-            imageWidth = 128,
-            imageHeight = 32,
+            imageWidth = 64,
+            imageHeight = 64,
           },
           Select = {
             name = L["Style"],
@@ -1977,7 +1977,11 @@ local function CreateTargetArtWidgetOptions()
               SetValueWidget(info, val)
               options.args.Widgets.args.TargetArtWidget.args.Texture.args.Preview.image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\TargetArtWidget\\" .. db.targetWidget.theme;
             end,
-            values = { default = "Default", squarethin = "Thin Square", arrows = "Arrows", crescent = "Crescent", bubble = "Bubble" },
+            values = {
+              default = L["Default"], squarethin = L["Thin Square"], threat_glow = L["Threat Glow"], arrows = L["Arrow"],
+              arrow_down = L["Down Arrow"], crescent = L["Crescent"], bubble = L["Bubble"], arrows_legacy = L["Arrow (Legacy)"],
+              glow = L["Glow"],
+            },
             arg = { "targetWidget", "theme" },
           },
           Color = {
@@ -1992,6 +1996,47 @@ local function CreateTargetArtWidgetOptions()
           },
         },
       },
+      Layout = {
+        name = L["Layout"],
+        order = 15,
+        type = "group",
+        inline = true,
+        args = {
+          Size = {
+            name = L["Size"],
+            order = 10,
+            type = "range",
+            max = 64,
+            min = 1,
+            step = 1,
+            isPercent = false,
+            set = SetValueWidget,
+            arg = { "targetWidget", "Size" },
+          },
+          X = {
+            name = L["Horizontal Offset"],
+            order = 20,
+            type = "range",
+            max = 120,
+            min = -120,
+            step = 1,
+            isPercent = false,
+            set = SetValueWidget,
+            arg = { "targetWidget", "HorizontalOffset" },
+          },
+          Y = {
+            name = L["Vertical Offset"],
+            order = 30,
+            type = "range",
+            max = 120,
+            min = -120,
+            step = 1,
+            isPercent = false,
+            set = SetValueWidget,
+            arg = { "targetWidget", "VerticalOffset" },
+          },
+        },
+      },
       TargetColor = {
         name = L["Nameplate Color"],
         order = 20,
@@ -2003,7 +2048,7 @@ local function CreateTargetArtWidgetOptions()
             order = 10,
             type = "color",
             get = GetColor,
-            set = SetColorWidget,
+            set = SetColor,
             arg = {"targetWidget", "HPBarColor"},
           },
           EnableHealthbar = {
@@ -2019,6 +2064,132 @@ local function CreateTargetArtWidgetOptions()
             order = 30,
             type = "toggle",
             arg = {"targetWidget", "ModeNames"},
+          },
+        },
+      },
+    },
+  }
+
+  return options
+end
+
+local function CreateFocusWidgetOptions()
+  local options = {
+    name = L["Focus"],
+    type = "group",
+    order = 95,
+    args = {
+      Enable = GetEnableEntry(L["Enable Focus Widget"], L["This widget highlights the nameplate of your current focus target by showing a border around the healthbar and by coloring the nameplate's healtbar and/or name with a custom color."], "FocusWidget", false, function(info, val) SetValuePlain(info, val); Addon.Widgets:InitializeWidget("Focus") end),
+      Texture = {
+        name = L["Texture"],
+        order = 10,
+        type = "group",
+        inline = true,
+        args = {
+          Preview = {
+            name = L["Preview"],
+            order = 10,
+            order = 10,
+            type = "execute",
+            image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\TargetArtWidget\\" .. db.FocusWidget.theme,
+            imageWidth = 64,
+            imageHeight = 64,
+          },
+          Select = {
+            name = L["Style"],
+            type = "select",
+            order = 20,
+            set = function(info, val)
+              SetValueWidget(info, val)
+              options.args.Widgets.args.FocusWidget.args.Texture.args.Preview.image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\TargetArtWidget\\" .. db.FocusWidget.theme;
+            end,
+            values = {
+              default = L["Default"], squarethin = L["Thin Square"], threat_glow = L["Threat Glow"], arrows = L["Arrow"],
+              arrow_down = L["Down Arrow"], crescent = L["Crescent"], bubble = L["Bubble"], arrows_legacy = L["Arrow (Legacy)"],
+              glow = L["Glow"],
+            },
+            arg = { "FocusWidget", "theme" },
+          },
+          Color = {
+            name = L["Color"],
+            type = "color",
+            order = 30,
+            width = "half",
+            get = GetColorAlpha,
+            set = SetColorAlphaWidget,
+            hasAlpha = true,
+            arg = { "FocusWidget" },
+          },
+        },
+      },
+      Layout = {
+        name = L["Layout"],
+        order = 15,
+        type = "group",
+        inline = true,
+        args = {
+          Size = {
+            name = L["Size"],
+            order = 10,
+            type = "range",
+            max = 64,
+            min = 1,
+            step = 1,
+            isPercent = false,
+            set = SetValueWidget,
+            arg = { "FocusWidget", "Size" },
+          },
+          X = {
+            name = L["Horizontal Offset"],
+            order = 20,
+            type = "range",
+            max = 120,
+            min = -120,
+            step = 1,
+            isPercent = false,
+            set = SetValueWidget,
+            arg = { "FocusWidget", "HorizontalOffset" },
+          },
+          Y = {
+            name = L["Vertical Offset"],
+            order = 30,
+            type = "range",
+            max = 120,
+            min = -120,
+            step = 1,
+            isPercent = false,
+            set = SetValueWidget,
+            arg = { "FocusWidget", "VerticalOffset" },
+          },
+        },
+      },
+      TargetColor = {
+        name = L["Nameplate Color"],
+        order = 20,
+        type = "group",
+        inline = true,
+        args = {
+          TargetColor = {
+            name = L["Color"],
+            order = 10,
+            type = "color",
+            get = GetColor,
+            set = SetColor,
+            arg = {"FocusWidget", "HPBarColor"},
+          },
+          EnableHealthbar = {
+            name = L["Healthbar"],
+            desc = L["Use a custom color for the healthbar of your current focus target."],
+            order = 20,
+            type = "toggle",
+            arg = {"FocusWidget", "ModeHPBar"},
+          },
+          EnableName = {
+            name = L["Name"],
+            desc = L["Use a custom color for the name of your current focus target (in healthbar view and in headline view)."],
+            order = 30,
+            type = "toggle",
+            arg = {"FocusWidget", "ModeNames"},
           },
         },
       },
@@ -4825,8 +4996,9 @@ local function CreateWidgetOptions()
       ResourceWidget = CreateResourceWidgetOptions(),
       SocialWidget = CreateSocialWidgetOptions(),
       StealthWidget = CreateStealthWidgetOptions(),
-      TargetArtWidget = CreateTargetArtWidgetOptions(),
-      QuestWidget = CreateQuestWidgetOptions(),
+      TargetArtWidget = CreateTargetArtWidgetOptions(), -- 90
+      FocusWidget = CreateFocusWidgetOptions(),         -- 95
+      QuestWidget = CreateQuestWidgetOptions(),         -- 100
       HealerTrackerWidget = CreateHealerTrackerWidgetOptions(),
     },
   }
@@ -6396,6 +6568,16 @@ local function CreateOptionsTable()
                             Addon.Widgets:UpdateSettings("TargetArt")
                           end,
                         },
+                        FocusHighlight = {
+                          name = L["Show Focus"],
+                          order = 15,
+                          type = "toggle",
+                          arg = { "HeadlineView", "ShowFocusHighlight" },
+                          set = function(info, val)
+                            SetValuePlain(info, val)
+                            Addon.Widgets:UpdateSettings("Focus")
+                          end,
+                        },
                         TargetMouseoverHighlight = {
                           name = L["Show Mouseover"],
                           order = 20,
@@ -7279,115 +7461,8 @@ local function CreateOptionsTable()
 --              type = "group",
 --              order = 1000,
 --              set = SetThemeValue,
---              hidden = true,
+--              hidden = false,
 --              args = {
---                HealthHeaderBorder = { name = "Healthbar Border", type = "header", order = 10, },
---                HealthBorder = {
---                  type = "select",
---                  order = 20,
---                  name = "Border",
---                  dialogControl = "LSM30_Border",
---                  values = AceGUIWidgetLSMlists.border,
---                  arg = { "settings", "healthborder", "texture" },
---                },
---                HealthBorderEdgeSize = {
---                  name = "Edge Size",
---                  order = 30,
---                  type = "range",
---                  min = 0, max = 32, step = 0.5,
---                  set = SetThemeValue,
---                  arg = { "settings", "healthborder", "EdgeSize" },
---                },
---                HealthBorderOffset = {
---                  name = "Offset",
---                  order = 40,
---                  type = "range",
---                  min = -16, max = 16, step = 0.5,
---                  set = SetThemeValue,
---                  arg = { "settings", "healthborder", "Offset" },
---                },
---                EliteHeaderBorder = { name = L["Elite Border"], type = "header", order = 110, },
---                EliteBorder = {
---                  type = "select",
---                  order = 120,
---                  name = "Elite Border",
---                  values = { TP_EliteBorder_Default = "Default", TP_EliteBorder_Thin = "Thin" },
---                  arg = { "settings", "elitehealthborder", "texture" }
---                },
---                EliteBorderEdgeSize = {
---                  name = "Edge Size",
---                  order = 130,
---                  type = "range",
---                  min = 0, max = 32, step = 0.5,
---                  set = SetThemeValue,
---                  arg = { "settings", "elitehealthborder", "EdgeSize" },
---                },
---                EliteBorderOffset = {
---                  name = "Offset",
---                  order = 140,
---                  type = "range",
---                  min = -16, max = 16, step = 0.5,
---                  set = SetThemeValue,
---                  arg = { "settings", "elitehealthborder", "Offset" },
---                },
---                TargetHeaderBorder = { name = "Target Border", type = "header", order = 210, },
---                TargetBorder = {
---                  type = "select",
---                  order = 220,
---                  name = "Target Border",
---                  values = { default = "Default", squarethin = "Thin Square" },
---                  arg = { "targetWidget", "theme" },
---                },
---                TargetBorderEdgeSize = {
---                  name = "Edge Size",
---                  order = 230,
---                  type = "range",
---                  min = 0, max = 32, step = 1,
---                  set = SetThemeValue,
---                  arg = { "targetWidget", "EdgeSize" },
---                },
---                TargetBorderOffset = {
---                  name = "Offset",
---                  order = 240,
---                  type = "range",
---                  min = -16, max = 16, step = 0.5,
---                  set = SetThemeValue,
---                  arg = { "targetWidget", "Offset" },
---                },
---                MouseoverHeaderBorder = { name = "Mouseover Border", type = "header", order = 310, },
---                MouseoverBorderEdgeSize = {
---                  name = L["Edge Size"],
---                  order = 330,
---                  type = "range",
---                  min = 0, max = 32, step = 0.5,
---                  set = SetThemeValue,
---                  arg = { "settings", "highlight", "EdgeSize" },
---                },
---                MouseoverBorderOffset = {
---                  name = "Offset",
---                  order = 340,
---                  type = "range",
---                  min = -16, max = 16, step = 0.5,
---                  set = SetThemeValue,
---                  arg = { "settings", "highlight", "Offset" },
---                },
---                ThreatHeaderBorder = { name = "Threat Glow Border", type = "header", order = 410, },
---                ThreatBorderEdgeSize = {
---                  name = "Edge Size",
---                  order = 430,
---                  type = "range",
---                  min = 0, max = 32, step = 0.5,
---                  set = SetThemeValue,
---                  arg = { "settings", "threatborder", "EdgeSize" },
---                },
---                ThreatBorderOffset = {
---                  name = "Offset",
---                  order = 440,
---                  type = "range",
---                  min = -16, max = 16, step = 0.5,
---                  set = SetThemeValue,
---                  arg = { "settings", "threatborder", "Offset" },
---                },
 --                TestHeaderBorder = { name = "Test Widget", type = "header", order = 500, },
 --                Width = GetRangeEntry("Bar Width", 501, { "TestWidget", "BarWidth" }, 5, 500),
 --                Height = GetRangeEntry("Bar Height", 502, { "TestWidget", "BarHeight" }, 1, 100),

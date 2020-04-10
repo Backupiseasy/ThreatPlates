@@ -2,9 +2,12 @@
 9.2.0-Beta3
 ------------------------------------------------------
 * Extended triggers for custom styles for nameplates so that you now can add multiple entries (names, auras, casts) separated by a semicolon.
+* Added a widget to highlight the focus target similar to how you can highlight the target unit [E-Mail, Comment #4140].
 * Improved automatic icon detection for custom styles for nameplates, e.g., a custom style with Name trigger now can show the unit's portrait as icon.
 * Improved error handling when importing profiles or custom styles for nameplates.
+* Added new styles for target highlighting (like a down arrow or glow borders).
 * Fixed and changed sorting so that custom styles for nameplates are not sorted by trigger type first.
+* Fixed some update bugs in Target widget configuration.
 
 ------------------------------------------------------
 9.2.0-Beta2

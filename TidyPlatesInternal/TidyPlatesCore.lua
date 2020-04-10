@@ -61,7 +61,7 @@ local PLATE_FADE_IN_TIME = Addon.PLATE_FADE_IN_TIME
 local PlatesCreated, PlatesVisible, PlatesByUnit, PlatesByGUID = {}, {}, {}, {}
 local nameplate, extended, visual			    	-- Temp/Local References
 local unit, unitcache, style, stylename 	  -- Temp/Local References
-local LastTargetPlate
+local LastTargetPlate, LastFocusPlate
 local ShowCastBars = true
 local EMPTY_TEXTURE = "Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\Empty"
 local UpdateAll = false
@@ -468,6 +468,7 @@ end
 function Addon:UpdateUnitContext(unit, unitid)
   unit.isMouseover = UnitIsUnit("mouseover", unitid)
   unit.isTarget = UnitIsUnit("target", unitid) -- required here for config changes which reset all plates without calling TARGET_CHANGED, MOUSEOVER, ...
+  unit.IsFocus = UnitIsUnit("focus", unitid) -- required here for config changes which reset all plates without calling TARGET_CHANGED, MOUSEOVER, ...
 
   Addon:UpdateUnitCondition(unit, unitid)	-- This updates a bunch of properties
 end
@@ -619,7 +620,8 @@ do
 	-- UpdateIndicator_HealthBar: Updates the value on the health bar
 	function UpdateIndicator_HealthBar()
 		visual.healthbar:SetMinMaxValues(0, unit.healthmax)
-		visual.healthbar:SetValue(unit.health)
+		--visual.healthbar:SetValue(unit.health)
+    visual.healthbar:SetValue(unit.health)
   end
 
 	function UpdateIndicator_Name()
@@ -1048,6 +1050,24 @@ do
 
     SetUpdateAll()
 	end
+
+  function CoreEvents:PLAYER_FOCUS_CHANGED()
+    local extended
+    if LastTargetPlate and LastTargetPlate.TPFrame.Active then
+      LastTargetPlate.TPFrame.unit.IsFocus = false
+      LastTargetPlate = nil
+      -- Update mouseover, if the mouse was hovering over the targeted unit
+      CoreEvents:UPDATE_MOUSEOVER_UNIT()
+    end
+
+    local plate = GetNamePlateForUnit("focus")
+    if plate and plate.TPFrame.Active then
+      plate.TPFrame.unit.IsFocus = true
+      LastTargetPlate = plate
+    end
+
+    SetUpdateAll()
+  end
 
   function CoreEvents:UPDATE_MOUSEOVER_UNIT()
     if UnitIsUnit("mouseover", "player") then return end

@@ -258,6 +258,8 @@ function Addon:SetHealthbarColor(unit)
   local c
   if unit.isTarget and db.targetWidget.ModeHPBar then
     c = db.targetWidget.HPBarColor
+  elseif unit.IsFocus and db.FocusWidget.ModeHPBar then
+    c = db.FocusWidget.HPBarColor
   elseif style == "unique" then
     -- Custom nameplate style defined for unit (does not work for totems right now)
     if unit.isMarked and unique_setting.allowMarked then
