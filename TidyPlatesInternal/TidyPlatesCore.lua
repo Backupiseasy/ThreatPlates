@@ -1463,8 +1463,8 @@ do
     visual.spelltext:ClearAllPoints()
     --visual.spellicon:ClearAllPoints()
 
+    local db = TidyPlatesThreat.db.profile.settings.castbar
     if UnitIsUnit("target", unit.unitid) then
-      local db = TidyPlatesThreat.db.profile.settings.castbar
       SetObjectAnchor(visual.castbar, style.castbar.anchor or "CENTER", extended, style.castbar.x + db.x_target or 0, style.castbar.y + db.y_target or 0)
       SetObjectAnchor(visual.spelltext, style.spelltext.anchor or "CENTER", extended, style.spelltext.x + db.x_target or 0, style.spelltext.y + db.y_target or 0)
       --SetObjectAnchor(visual.spellicon, style.spellicon.anchor or "CENTER", extended, style.spellicon.x + db.x_target or 0, style.spellicon.y + db.y_target or 0)
@@ -1473,6 +1473,15 @@ do
       SetObjectAnchor(visual.spelltext, style.spelltext.anchor or "CENTER", extended, style.spelltext.x or 0, style.spelltext.y or 0)
       --SetObjectAnchor(visual.spellicon, style.spellicon.anchor or "CENTER", extended, style.spellicon.x or 0, style.spellicon.y or 0)
     end
+
+    -- Remaining cast time
+    SetObjectFont(visual.castbar.casttime, style.spelltext.typeface, style.spelltext.size, style.spelltext.flags)
+    SetObjectShadow(visual.castbar.casttime, style.spelltext.shadow)
+    SetObjectJustify(visual.castbar.casttime, db.CastTimeText.Font.HorizontalAlignment, db.CastTimeText.Font.VerticalAlignment)
+    visual.castbar.casttime:SetSize(visual.castbar:GetSize())
+    visual.castbar.casttime:ClearAllPoints()
+    visual.castbar.casttime:SetPoint("CENTER", visual.castbar, "CENTER", db.CastTimeText.HorizontalOffset, db.CastTimeText.VerticalOffset)
+    visual.castbar.casttime:SetShown(db.ShowCastTime)
 
     -- Hide Stuff
     if style.eliteicon and style.eliteicon.show then

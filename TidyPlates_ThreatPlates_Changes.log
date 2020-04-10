@@ -6,6 +6,7 @@
 * Improved automatic icon detection for custom styles for nameplates, e.g., a custom style with Name trigger now can show the unit's portrait as icon.
 * Improved error handling when importing profiles or custom styles for nameplates.
 * Added new styles for target highlighting (like a down arrow or glow borders).
+* Added an option to show the remaining time of a cast on the nameplate's castbar [Comment #695, #1530, #1907, #4077, IM, Issue #374, #399].
 * Fixed and changed sorting so that custom styles for nameplates are not sorted by trigger type first.
 * Fixed some update bugs in Target widget configuration.
 

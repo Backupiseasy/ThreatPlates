@@ -1120,6 +1120,15 @@ ThreatPlates.DEFAULT_SETTINGS = {
         show = true,
         ShowInHeadlineView = false,
         ShowSpark = true,
+        ShowCastTime = true,
+        CastTimeText = {
+          HorizontalOffset = -2,
+          VerticalOffset = 0,
+          Font = {
+            HorizontalAlignment = "RIGHT",
+            VerticalAlignment = "CENTER",
+          },
+        },
       },
       name = { -- Names for Healthbar View
         show = true,

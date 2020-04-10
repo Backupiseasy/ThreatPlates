@@ -4706,6 +4706,13 @@ local function CreateCastbarOptions()
             desc = L["This option allows you to control whether a spell's name is hidden or shown on castbars."],
             arg = { "settings", "spelltext", "show" },
           },
+          EnableCastTime = {
+            name = L["Cast Time"],
+            order = 35,
+            type = "toggle",
+            desc = L["This option allows you to control whether a cast's remaining cast time is hidden or shown on castbars."],
+            arg = { "settings", "castbar", "ShowCastTime" },
+          },
           EnableSpellIcon = {
             name = L["Spell Icon"],
             order = 40,
@@ -4867,7 +4874,7 @@ local function CreateCastbarOptions()
         args = {
           Size = GetSizeEntry(L["Spell Icon Size"], 10, { "settings", "spellicon", "scale" }),
           Font = GetFontEntry(L["Spell Text"], 20, "spelltext"),
-          Align = {
+          AlignSpellText = {
             name = L["Spell Text Alignment"],
             order = 30,
             type = "group",
@@ -4892,6 +4899,30 @@ local function CreateCastbarOptions()
             },
           },
           Boundaries = GetBoundariesEntryName(L["Spell Text Boundaries"], 40, "spelltext"),
+          AlignCastTime = {
+            name = L["Cast Text Alignment"],
+            order = 50,
+            type = "group",
+            inline = true,
+            args = {
+              AlignH = {
+                name = L["Horizontal Align"],
+                type = "select",
+                width = "double",
+                order = 1,
+                values = t.AlignH,
+                arg = { "settings", "castbar", "CastTimeText", "Font", "HorizontalAlignment" },
+              },
+              AlignV = {
+                name = L["Vertical Align"],
+                type = "select",
+                width = "double",
+                order = 2,
+                values = t.AlignV,
+                arg = { "settings", "castbar", "CastTimeText", "Font", "VerticalAlignment" },
+              },
+            },
+          },
         },
       },
       Placement = {
@@ -4955,6 +4986,16 @@ local function CreateCastbarOptions()
               Spelltext_Y_HB = GetPlacementEntry(L["Healthbar View Y"], 70, { "settings", "spelltext", "y" }),
               Spelltext_X_Names = GetPlacementEntry(L["Headline View X"], 80, { "settings", "spelltext", "x_hv" }),
               Spelltext_Y_Names = GetPlacementEntry(L["Headline View Y"], 90, { "settings", "spelltext", "y_hv" }),
+            },
+          },
+          CastTime = {
+            name = L["Cast Time"],
+            order = 40,
+            type = "group",
+            inline = true,
+            args = {
+              OffsetX = GetPlacementEntry(L["Offset X"], 1, { "settings", "castbar", "CastTimeText", "HorizontalOffset" } ),
+              OffsetY = GetPlacementEntry(L["Offset Y"], 2, { "settings", "castbar", "CastTimeText", "VerticalOffset" } ),
             },
           },
         },
