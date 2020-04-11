@@ -1950,7 +1950,7 @@ end
 
 local function CreateTargetArtWidgetOptions()
   local options = {
-    name = L["Target"],
+    name = L["Target Hightlight"],
     type = "group",
     order = 90,
     args = {
@@ -2075,9 +2075,9 @@ end
 
 local function CreateFocusWidgetOptions()
   local options = {
-    name = L["Focus"],
+    name = L["Focus Highlight"],
     type = "group",
-    order = 95,
+    order = 55,
     args = {
       Enable = GetEnableEntry(L["Enable Focus Widget"], L["This widget highlights the nameplate of your current focus target by showing a border around the healthbar and by coloring the nameplate's healtbar and/or name with a custom color."], "FocusWidget", false, function(info, val) SetValuePlain(info, val); Addon.Widgets:InitializeWidget("Focus") end),
       Texture = {
@@ -5034,12 +5034,12 @@ local function CreateWidgetOptions()
       BossModsWidget = CreateBossModsWidgetOptions(),
       ClassIconWidget = CreateClassIconsWidgetOptions(),
       ComboPointsWidget = CreateComboPointsWidgetOptions(),
+      FocusWidget = CreateFocusWidgetOptions(),
       ResourceWidget = CreateResourceWidgetOptions(),
       SocialWidget = CreateSocialWidgetOptions(),
       StealthWidget = CreateStealthWidgetOptions(),
-      TargetArtWidget = CreateTargetArtWidgetOptions(), -- 90
-      FocusWidget = CreateFocusWidgetOptions(),         -- 95
-      QuestWidget = CreateQuestWidgetOptions(),         -- 100
+      TargetArtWidget = CreateTargetArtWidgetOptions(),
+      QuestWidget = CreateQuestWidgetOptions(),
       HealerTrackerWidget = CreateHealerTrackerWidgetOptions(),
     },
   }
