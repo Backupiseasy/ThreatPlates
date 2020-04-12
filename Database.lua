@@ -1257,22 +1257,22 @@ Addon.MigrationCustomNameplatesV1 = function()
   -- Set default to empty so that new defaul values don't impact the migration
   for profile_name, profile in pairs(TidyPlatesThreat.db.profiles) do
     if DatabaseEntryExists(profile, { "uniqueSettings" }) then
-      local settings = profile.uniqueSettings
-
+      local custom_styles = profile.uniqueSettings
       local custom_plates_to_keep = {}
-      for index, unique_unit in pairs(settings) do
+
+      for index, unique_unit in pairs(custom_styles) do
         -- Don't change entries map and ["**"]
         if type(index) == "number" then
           -- Trigger.Type must be Name as before migration (in V1) that's the only trigger type available
-          if unique_unit.Trigger and unique_unit.Trigger.Name and unique_unit.Trigger.Name.Input ~= "<Enter name here>" then
+          if DatabaseEntryExists(unique_unit, { "Trigger", "Name", "Input" }) and unique_unit.Trigger.Name.Input ~= "<Enter name here>" then
+            -- and unique_unit.Trigger.Name.Input ~= nil
             custom_plates_to_keep[index] = unique_unit
           end
-
-          settings[index] = nil
         end
+
+        custom_styles[index] = nil
       end
 
-      local slot_counter = 0
       for index, unique_unit in pairs(custom_plates_to_keep) do
         -- As default values are now different, copy the deprecated slots default value
         local deprecated_settings = Addon.LEGACY_CUSTOM_NAMEPLATES[index] or Addon.LEGACY_CUSTOM_NAMEPLATES["**"]
@@ -1291,6 +1291,7 @@ Addon.MigrationCustomNameplatesV1 = function()
         -- Replace the old Threat Plates internal icons with the WoW original ones
         --unique_unit.icon = GetValueOrDefault(DEPRECATED_ICON_DEFAULTS[unique_unit.icon] or unique_unit.icon, DEPRECATED_ICON_DEFAULTS[deprecated_settings.icon])
         unique_unit.icon = GetValueOrDefault(unique_unit.icon, deprecated_settings.icon)
+        unique_unit.UseAutomaticIcon = GetValueOrDefault(unique_unit.UseAutomaticIcon, deprecated_settings.UseAutomaticIcon)
         unique_unit.SpellID = GetValueOrDefault(unique_unit.SpellID, deprecated_settings.SpellID)
         unique_unit.scale = GetValueOrDefault(unique_unit.scale, deprecated_settings.scale)
         unique_unit.alpha = GetValueOrDefault(unique_unit.alpha, deprecated_settings.alpha)
@@ -1300,9 +1301,7 @@ Addon.MigrationCustomNameplatesV1 = function()
         unique_unit.color.g = GetValueOrDefault(unique_unit.color.g, deprecated_settings.color.g)
         unique_unit.color.b = GetValueOrDefault(unique_unit.color.b, deprecated_settings.color.b)
 
-        -- #settings + 1 does not work here as settings also has entries for map, ** which interfere with #
-        slot_counter = slot_counter + 1
-        settings[slot_counter] = unique_unit
+        custom_styles[#custom_styles + 1] = unique_unit
       end
     end
   end
@@ -1320,24 +1319,24 @@ Addon.SetDefaultsForCustomNameplates = function()
   TidyPlatesThreat.db:RegisterDefaults(defaults)
 end
 
-local function MigrationCustomPlatesV3(profile_name, profile)
-  for profile_name, profile in pairs(TidyPlatesThreat.db.profiles) do
-    if DatabaseEntryExists(profile, { "uniqueSettings" }) then
-      local settings = profile.uniqueSettings
+local function MigrateCustomStylesToV3(profile_name, profile)
+  -- if TidyPlatesThreat.db.global.CustomNameplatesVersion > 2 then return end
 
-      settings.map = nil
+  if DatabaseEntryExists(profile, { "uniqueSettings" }) then
+    local custom_styles = profile.uniqueSettings
 
-      for index, unique_unit in pairs(settings) do
-        unique_unit.Trigger = unique_unit.Trigger or {}
-        unique_unit.Trigger.Type = "Name"
+    custom_styles.map = nil
 
-        unique_unit.Trigger.Name = unique_unit.Trigger.Name or {}
+    for index, unique_unit in pairs(custom_styles) do
+      unique_unit.Trigger = unique_unit.Trigger or {}
+      unique_unit.Trigger.Name = unique_unit.Trigger.Name or {}
 
-        if unique_unit.name and unique_unit.name ~= "Enter Name Here" then
-          unique_unit.Trigger.Name.Input = unique_unit.name
-          unique_unit.Trigger.Name.AsArray = { unique_unit.Trigger.Name.Input }
-          --unique_unit.Trigger.Name.Input = GetValueOrDefault(unique_unit.name, nil)
-        end
+      if unique_unit.name and unique_unit.name ~= "<Enter name here>" and (unique_unit.Trigger.Name.Input == nil or unique_unit.Trigger.Name.Input == "<Enter name here>") and (unique_unit.Trigger.Type == nil or unique_unit.Trigger.Type == "Name") then
+        unique_unit.Trigger.Type = "Name" -- should not be necessary as it is the default value
+        unique_unit.Trigger.Name.Input = unique_unit.name
+        unique_unit.Trigger.Name.AsArray = { unique_unit.Trigger.Name.Input }
+
+        --unique_unit.name = nil
 
         -- Set automatic icon detection for all existing custom nameplates to false
         unique_unit.UseAutomaticIcon = false
@@ -1347,7 +1346,7 @@ local function MigrationCustomPlatesV3(profile_name, profile)
   end
 end
 
-Addon.MigrationCustomPlatesV3 = MigrationCustomPlatesV3
+Addon.MigrationCustomPlatesV3 = MigrateCustomStylesToV3
 
 -- Settings in the SavedVariables file that should be migrated and/or deleted
 local DEPRECATED_SETTINGS = {
@@ -1378,7 +1377,8 @@ local DEPRECATED_SETTINGS = {
   ThreatDetection = { MigrationThreatDetection, "9.1.3" },  -- (changed in 9.1.0)
   -- hideNonCombat = { "threat", "hideNonCombat" },        -- (removed in ...)
   -- nonCombat = { "threat", "nonCombat" },                -- (removed in 9.1.0)
-  MigrationCustomPlatesV3 = { MigrationCustomPlatesV3 , "9.2.0" },
+  -- MigrationCustomPlatesV3 = { MigrateCustomStylesToV3, "9.2.1", function() TidyPlatesThreat.db.global.CustomNameplatesVersion = 3 end },
+  MigrationCustomPlatesV3 = { MigrateCustomStylesToV3, "9.2.1" },
 }
 
 local function MigrateDatabase(current_version)
@@ -1399,6 +1399,12 @@ local function MigrateDatabase(current_version)
           action(profile_name, profile)
         end
       end
+
+      -- Postprocessing, if necessary
+--      action = entry[3]
+--      if action and type(action) == "function" then
+--        action()
+--      end
     else
       -- iterate over all profiles and delete the old config entry
       --TidyPlatesThreat.db.global.MigrationLog[key] = "DELETED"
