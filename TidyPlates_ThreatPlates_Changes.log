@@ -10,6 +10,7 @@
 * Fixed and changed sorting so that custom styles for nameplates are not sorted by trigger type first.
 * Fixed some update bugs in Target widget configuration.
 * Fixed a Lua error that occured when disabling the castbar configuration mode when the nameplate on which it was used was no longer visible.
+* Fixed a Lua error in Quest widget that occured when enabling the Quest widget because of an non-initialized font.
 
 ------------------------------------------------------
 9.2.0-Beta2
