@@ -94,7 +94,8 @@ function Widget:OnUnitAdded(widget_frame, unit)
     if unique_setting.UseAutomaticIcon then
       if unique_setting.Trigger.Type == "Name" then
         SetPortraitTexture(icon, unit.unitid)
-        icon:SetTexCoord(0.15, 0.85, 0.15, 0.85)
+        icon:SetTexCoord(0.14644660941, 0.85355339059, 0.14644660941, 0.85355339059)
+        --icon:SetTexCoord(0.15, 0.85, 0.15, 0.85)
       else
         icon:SetTexture(unique_setting.AutomaticIcon or icon_texture)
         icon:SetTexCoord(0, 1, 0, 1)
