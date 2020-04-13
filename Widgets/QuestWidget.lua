@@ -459,8 +459,6 @@ function Widget:IsEnabled()
 end
 
 function Widget:OnEnable()
-  Font = ThreatPlates.Media:Fetch('font', TidyPlatesThreat.db.profile.questWidget.Font)
-
   self:GenerateQuestCache()
 
   self:RegisterEvent("PLAYER_ENTERING_WORLD")
@@ -571,6 +569,12 @@ local function tablelength(T)
   local count = 0
   for _ in pairs(T) do count = count + 1 end
   return count
+end
+
+-- Load settings from the configuration which are shared across all aura widgets
+-- used (for each widget) in UpdateWidgetConfig
+function Widget:UpdateSettings()
+  Font = ThreatPlates.Media:Fetch('font', TidyPlatesThreat.db.profile.questWidget.Font)
 end
 
 function Addon:PrintQuests()

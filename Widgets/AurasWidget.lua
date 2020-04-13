@@ -1,5 +1,4 @@
 ---------------------------------------------------------------------------------------------------
----------------------------------------------------------------------------------------------------
 -- Auras Widget
 ---------------------------------------------------------------------------------------------------
 local ADDON_NAME, Addon = ...
@@ -31,18 +30,15 @@ local LibCustomGlow = Addon.LibCustomGlow
 local TidyPlatesThreat = TidyPlatesThreat
 local Animations = Addon.Animations
 local Font = Addon.Font
+local UpdateCustomStyleAfterAuraTrigger = Addon.UpdateCustomStyleAfterAuraTrigger
+local UnitStyle_AuraDependent = Addon.UnitStyle_AuraDependent
 
 local LibClassicDurations = LibStub("LibClassicDurations")
 
 ---------------------------------------------------------------------------------------------------
 -- Aura Highlighting
 ---------------------------------------------------------------------------------------------------
-
-local CUSTOM_GLOW_FUNCTIONS = {
-  Button = { "ButtonGlow_Start", "ButtonGlow_Stop", 8 },
-  Pixel = { "PixelGlow_Start", "PixelGlow_Stop", 3 },
-  AutoCast = { "AutoCastGlow_Start", "AutoCastGlow_Stop", 4 },
-}
+local CUSTOM_GLOW_FUNCTIONS = Addon.CUSTOM_GLOW_FUNCTIONS
 
 ---------------------------------------------------------------------------------------------------
 -- Auras Widget Functions
@@ -983,9 +979,9 @@ function Widget:UpdateUnitAuras(frame, unit, enabled_auras, enabled_cc, SpellFil
   local aura, show_aura
   local aura_count = 1
   local isCastByPlayer
-  for i = 1, 40 do
-    show_aura = false
+  local CustomStyleAuraTrigger = false
 
+  for i = 1, 40 do
     -- Auras are evaluated by an external function - pre-filtering before the icon grid is populated
     UnitAuraList[aura_count] = UnitAuraList[aura_count] or {}
     aura = UnitAuraList[aura_count]
@@ -1003,38 +999,51 @@ function Widget:UpdateUnitAuras(frame, unit, enabled_auras, enabled_cc, SpellFil
     -- ShowAll: Debuffs
     if not aura.name then break end
 
-    --aura.unit = unitid
-    aura.Index = i
-    aura.effect = effect
-    aura.ShowAll = aura.ShowAll
-    aura.CrowdControl = (enabled_cc and self.CROWD_CONTROL_SPELLS[aura.spellid])
-    aura.CastByPlayer = (aura.caster == "player" or aura.caster == "pet" or aura.caster == "vehicle")
-
-    -- Store Order/Priority
-    if aura.CrowdControl then
-      show_aura = SpellFilterCC(self, db.CrowdControl, aura, AuraFilterFunctionCC)
-
-      -- Show crowd control auras that are not shown in Blizard mode as normal debuffs
-      if not show_aura and enabled_auras then
-        aura.CrowdControl = false
-        show_aura = SpellFilter(self, db_auras, aura, AuraFilterFunction)
-      end
-    elseif enabled_auras then
-      show_aura = SpellFilter(self, db_auras, aura, AuraFilterFunction, unit)
-
-      --      if show_aura and effect == "HELPFUL" and unit.reaction ~= "FRIENDLY" then
-      --        unit.HasUnlimitedAuras = unit.HasUnlimitedAuras or (aura.duration <= 0)
-      --        show_aura = self:FilterEnemyBuffsBySpellDynamic(db_auras, aura, unit)
-      --      end
+    if Addon.ActiveAuraTriggers then
+      -- Do this to prevent calls to UnitStyle_AuraDependent after a aura trigger was found already
+      CustomStyleAuraTrigger = CustomStyleAuraTrigger or UnitStyle_AuraDependent(unit, aura.spellid, aura.name)
     end
 
-    if show_aura then
-      aura.color = self:GetColorForAura(aura)
-      aura.priority = GetAuraPriority(aura)
+    -- Workaround or hack, currently, for making aura-triggered custom nameplates work even on nameplates that do
+    -- not show auras currently without a big overhead
+    if not widget_frame.HideAuras then
+      show_aura = false
 
-      aura_count = aura_count + 1
+      --aura.unit = unitid
+      aura.Index = i
+      aura.effect = effect
+      aura.ShowAll = aura.ShowAll
+      aura.CrowdControl = (enabled_cc and self.CROWD_CONTROL_SPELLS[aura.spellid])
+      aura.CastByPlayer = (aura.caster == "player" or aura.caster == "pet" or aura.caster == "vehicle")
+
+      -- Store Order/Priority
+      if aura.CrowdControl then
+        show_aura = SpellFilterCC(self, db.CrowdControl, aura, AuraFilterFunctionCC)
+
+        -- Show crowd control auras that are not shown in Blizard mode as normal debuffs
+        if not show_aura and enabled_auras then
+          aura.CrowdControl = false
+          show_aura = SpellFilter(self, db_auras, aura, AuraFilterFunction)
+        end
+      elseif enabled_auras then
+        show_aura = SpellFilter(self, db_auras, aura, AuraFilterFunction, unit)
+
+        --      if show_aura and effect == "HELPFUL" and unit.reaction ~= "FRIENDLY" then
+        --        unit.HasUnlimitedAuras = unit.HasUnlimitedAuras or (aura.duration <= 0)
+        --        show_aura = self:FilterEnemyBuffsBySpellDynamic(db_auras, aura, unit)
+        --      end
+      end
+
+      if show_aura then
+        aura.color = self:GetColorForAura(aura)
+        aura.priority = GetAuraPriority(aura)
+
+        aura_count = aura_count + 1
+      end
     end
   end
+
+  if widget_frame.HideAuras then return end
 
   -- Sort all auras
   if sort_order == "None" then
@@ -1129,7 +1138,6 @@ function Widget:UpdateUnitAuras(frame, unit, enabled_auras, enabled_cc, SpellFil
       aura_frame_list_cc[i]:Hide()
     end
   end
-
 end
 
 function Widget:UpdatePositionAuraGrid(frame, y_offset)
@@ -1162,14 +1170,21 @@ function Widget:UpdateIconGrid(widget_frame, unit)
   local db = self.db
   local unitid = unit.unitid
 
+  local unit_is_target
   if db.ShowTargetOnly then
-    if not UnitIsUnit("target", unitid) then
+    unit_is_target = UnitIsUnit("target", unitid)
+    if unit_is_target then
+      self.CurrentTarget = widget_frame
+    elseif not Addon.ActiveAuraTriggers then
+      -- Continue with aura scanning for non-target units if there are aura triggers that might change the nameplates style
       widget_frame:Hide()
       return
     end
-
-    self.CurrentTarget = widget_frame
   end
+
+  local old_CustomStyleAura = unit.CustomStyleAura
+  unit.CustomStyleAura = false
+  widget_frame.HideAuras = not widget_frame.Active or (db.ShowTargetOnly and not unit.isTarget)
 
   local enabled_cc
   local unit_is_friendly = UnitReaction(unitid, "player") > 4
@@ -1183,6 +1198,17 @@ function Widget:UpdateIconGrid(widget_frame, unit)
 
     self:UpdateUnitAuras(widget_frame.Debuffs, unit, db.Debuffs.ShowEnemy, enabled_cc, self.FilterEnemyDebuffsBySpell, self.FilterEnemyCrowdControlBySpell, db.Debuffs.FilterMode)
     self:UpdateUnitAuras(widget_frame.Buffs, unit, db.Buffs.ShowEnemy, false, self.FilterEnemyBuffsBySpell, self.FilterEnemyCrowdControlBySpell, db.Buffs.FilterMode)
+  end
+
+  -- Set the style if a aura trigger for a custom nameplate was found or the aura trigger
+  -- is no longer there
+  if unit.CustomStyleAura or old_CustomStyleAura then
+    UpdateCustomStyleAfterAuraTrigger(unit)
+  end
+
+  if widget_frame.HideAuras then
+    widget_frame:Hide()
+    return
   end
 
   local buffs_active, debuffs_active, cc_active = widget_frame.Buffs.ActiveAuras > 0, widget_frame.Debuffs.ActiveAuras > 0, widget_frame.CrowdControl.ActiveAuras > 0
@@ -1895,9 +1921,9 @@ end
 
 function Widget:EnabledForStyle(style, unit)
   if (style == "NameOnly" or style == "NameOnly-Unique") then
-    return self.db.ShowInHeadlineView
+    return self.db.ShowInHeadlineView or Addon.ActiveAuraTriggers
   elseif style ~= "etotem" then
-    return self.db.ON
+    return self.db.ON or Addon.ActiveAuraTriggers
   end
 end
 

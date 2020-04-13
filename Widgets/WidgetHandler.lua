@@ -14,11 +14,15 @@ local pairs, next = pairs, next
 
 -- ThreatPlates APIs
 
-local WidgetHandler = Addon.Widgets
-WidgetHandler.Widgets = {}
-WidgetHandler.EnabledWidgets = {}
-WidgetHandler.EnabledTargetWidgets = {}
-WidgetHandler.RegisteredEventsByWidget = {}
+local WidgetHandler = {
+  Widgets = {},
+  EnabledWidgets = {},
+  EnabledTargetWidgets = {},
+  EnabledFocusWidget = nil,
+  RegisteredEventsByWidget = {}
+}
+
+Addon.Widgets = WidgetHandler
 
 ---------------------------------------------------------------------------------------------------
 -- Event handling stuff
@@ -204,6 +208,14 @@ function WidgetHandler:NewTargetWidget(widget_name)
   return widget
 end
 
+function WidgetHandler:NewFocusWidget(widget_name)
+  local widget = self:NewWidget(widget_name)
+
+  widget.FocusOnly = true
+
+  return widget
+end
+
 function WidgetHandler:InitializeWidget(widget_name)
   local widget = self.Widgets[widget_name]
 
@@ -233,6 +245,9 @@ function WidgetHandler:EnableWidget(widget_name)
   local widget = self.Widgets[widget_name]
   if widget.TargetOnly then
     self.EnabledTargetWidgets[widget_name] = widget
+    widget:Create()
+  elseif widget.FocusOnly then
+    self.EnabledFocusWidget = widget
     widget:Create()
   else
     self.EnabledWidgets[widget_name] = widget
@@ -280,6 +295,11 @@ function WidgetHandler:DisableWidget(widget_name)
 
     widget:OnDisable()
     widget:OnTargetUnitRemoved()
+  elseif widget.FocusOnly then
+    self.EnabledFocusWidget = nil
+
+    widget:OnDisable()
+    widget:OnFocusUnitRemoved()
   else
     local widget = self.EnabledWidgets[widget_name]
 
@@ -311,6 +331,8 @@ function WidgetHandler:OnUnitAdded(tp_frame, unit)
     for _, widget in pairs(self.EnabledTargetWidgets) do
       widget:OnTargetUnitAdded(tp_frame, unit)
     end
+  elseif unit.IsFocus and self.EnabledFocusWidget then
+    self.EnabledFocusWidget:OnFocusUnitAdded(tp_frame, unit)
   end
 
   for widget_name, widget in pairs(self.EnabledWidgets) do
@@ -349,6 +371,8 @@ function WidgetHandler:OnUnitRemoved(tp_frame, unit)
     for _, widget in pairs(self.EnabledTargetWidgets) do
       widget:OnTargetUnitRemoved()
     end
+  elseif unit.IsFocus and self.EnabledFocusWidget then
+    self.EnabledFocusWidget:OnFocusUnitRemoved()
   end
 
   local plate_widgets = tp_frame.widgets

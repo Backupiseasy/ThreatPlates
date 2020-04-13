@@ -59,7 +59,7 @@ local PLATE_FADE_IN_TIME = Addon.PLATE_FADE_IN_TIME
 local PlatesCreated, PlatesVisible, PlatesByUnit, PlatesByGUID = {}, {}, {}, {}
 local nameplate, extended, visual			    	-- Temp/Local References
 local unit, unitcache, style, stylename 	  -- Temp/Local References
-local LastTargetPlate
+local LastTargetPlate, LastFocusPlate
 local ShowCastBars = true
 local EMPTY_TEXTURE = "Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\Empty"
 local UpdateAll = false
@@ -209,8 +209,10 @@ do
 		-- TextFrame
     visual.name = textframe:CreateFontString(nil, "ARTWORK", 0)
 		visual.name:SetFont("Fonts\\FRIZQT__.TTF", 11)
-		visual.customtext = textframe:CreateFontString(nil, "ARTWORK", -1)
+    visual.name:SetWordWrap(false) -- otherwise text is wrapped when plate is scaled down
+    visual.customtext = textframe:CreateFontString(nil, "ARTWORK", -1)
 		visual.customtext:SetFont("Fonts\\FRIZQT__.TTF", 11)
+    visual.customtext:SetWordWrap(false) -- otherwise text is wrapped when plate is scaled down
 		visual.level = textframe:CreateFontString(nil, "ARTWORK", -2)
 		visual.level:SetFont("Fonts\\FRIZQT__.TTF", 11)
 
@@ -219,7 +221,7 @@ do
 		visual.spellicon = castbar.Overlay:CreateTexture(nil, "ARTWORK", 7)
 		visual.spelltext = castbar.Overlay:CreateFontString(nil, "OVERLAY")
 		visual.spelltext:SetFont("Fonts\\FRIZQT__.TTF", 11)
-    visual.spelltext:SetWordWrap(false)
+    visual.spelltext:SetWordWrap(false) -- otherwise text is wrapped when plate is scaled down
 
     visual.Highlight = Addon:Element_Mouseover_Create(extended)
 
@@ -246,6 +248,8 @@ end
 do
 	-- CheckNameplateStyle
 	local function CheckNameplateStyle()
+    local old_custom_style = unit.CustomPlateSettings
+
     stylename = Addon:SetStyle(unit)
     extended.style = activetheme[stylename]
 
@@ -257,9 +261,18 @@ do
 			unit.style = stylename
 
       --Addon:CreateExtensions(extended, unit.unitid, stylename)
-      -- TOOD: optimimze that - call OnUnitAdded only when the plate is initialized the first time for a unit, not if only the style changes
       Widgets:OnUnitAdded(extended, unit)
-      --Addon:WidgetsModeChanged(extended, unit)
+    else
+      -- Update the unique icon widget and style may be the same, but a different trigger might be active, e.g.,
+      -- if two aura triggers fired
+      if (stylename == "unique" or stylename == "NameOnly-Unique") and unit.CustomPlateSettings ~= old_custom_style then
+        Addon.UpdateCustomStyleIcon(extended, unit)
+      end
+
+--      local unique_icon_widget = Widgets.Widgets.UniqueIcon
+--      if (stylename == "unique" or stylename == "NameOnly-Unique") and unit.CustomPlateSettings ~= old_custom_style and unique_icon_widget then
+--        unique_icon_widget:OnUnitAdded(extended.widgets.UniqueIcon, unit)
+--      end
     end
 	end
 
@@ -338,7 +351,7 @@ do
     PlatesByGUID[unit.guid] = plate
 
     Addon:UpdateUnitContext(unit, unitid)
-    Addon:UnitStyle_NameDependent(unit)
+    Addon.UnitStyle_NameDependent(unit)
     ProcessUnitChanges()
 
 		--Addon:UpdateExtensions(extended, unit.unitid, stylename)
@@ -453,6 +466,7 @@ end
 function Addon:UpdateUnitContext(unit, unitid)
   unit.isMouseover = UnitIsUnit("mouseover", unitid)
   unit.isTarget = UnitIsUnit("target", unitid) -- required here for config changes which reset all plates without calling TARGET_CHANGED, MOUSEOVER, ...
+  unit.IsFocus = UnitIsUnit("focus", unitid) -- required here for config changes which reset all plates without calling TARGET_CHANGED, MOUSEOVER, ...
 
   Addon:UpdateUnitCondition(unit, unitid)	-- This updates a bunch of properties
 end
@@ -510,6 +524,11 @@ function Addon:UpdateIndicatorNameplateColor(tp_frame)
   if visual.name:IsShown() then
     visual.name:SetTextColor(Addon:SetNameColor(tp_frame.unit))
   end
+end
+
+function Addon.UpdateCustomStyleAfterAuraTrigger(unit)
+  UpdateReferences(GetNamePlateForUnit(unit.unitid))
+  ProcessUnitChanges()
 end
 
 ---------------------------------------------------------------------------------------------------------------------
@@ -715,59 +734,64 @@ do
     UpdateReferences(plate)
 
     local castbar = extended.visual.castbar
-    if not extended:IsShown() or not style.castbar.show then
+    if not extended:IsShown() then
       castbar:Hide()
       return
     end
 
-    local name, icon, startTime, endTime, spellID
+    local text, texture, startTime, endTime, spellID
 
     if channeled then
-      name, _, icon, startTime, endTime, _, _, _, spellID = LibClassicCasterino:UnitChannelInfo(unitid)
-      if not startTime then
-        castbar:Hide()
-        return
-      end
-
-      castbar.IsChanneling = true
-      castbar.IsCasting = false
-
+      text, _, texture, startTime, endTime, _, _, _, spellID = LibClassicCasterino:UnitChannelInfo(unitid)
       castbar.Value = (endTime / 1000) - GetTime()
-      castbar.MaxValue = (endTime - startTime) / 1000
-      castbar:SetMinMaxValues(0, castbar.MaxValue)
-      castbar:SetValue(castbar.Value)
     else
-      name, _, icon, startTime, endTime, _, _, _, spellID = LibClassicCasterino:UnitCastingInfo(unitid)
-      if not startTime then
-        castbar:Hide()
-        return
-      end
-
-      castbar.IsCasting = true
-      castbar.IsChanneling = false
-
-      castbar.Value = GetTime() - (startTime / 1000)
-      castbar.MaxValue = (endTime - startTime) / 1000
-      castbar:SetMinMaxValues(0, castbar.MaxValue)
-      castbar:SetValue(castbar.Value)
+      text, _, texture, startTime, endTime, _, _, _, spellID = LibClassicCasterino:UnitCastingInfo(unitid)
     end
 
-    --if isTradeSkill then return end
+    -- if not text or isTradeSkill then
+    --   castbar:Hide()
+    --   return
+    -- end
+
+    local plate_style = Addon.ActiveCastTriggers and Addon.UnitStyle_CastDependent(unit, spellID, text)
+
+    -- Abort here as casts can now switch nameplate styles (e.g,. from headline to healthbar view
+    if not (style.castbar.show or plate_style) then
+      castbar:Hide()
+      return
+    end
 
     unit.isCasting = true
     unit.IsInterrupted = false
-    unit.spellIsShielded = notInterruptible
-    unit.spellInterruptible = not unit.spellIsShielded
+    -- unit.spellIsShielded = notInterruptible
+		-- unit.spellInterruptible = not notInterruptible
 
-    visual.spelltext:SetText(name)
-    visual.spellicon:SetTexture(icon)
-    --visual.spellicon:SetDrawLayer("ARTWORK", 7)
+    --if plate_style and plate_style ~= extended.stylename then
+    if plate_style ~= extended.stylename then
+      ProcessUnitChanges()
+    else
+      UpdateIndicator_CustomScaleText()
+      UpdatePlate_Transparency(extended, unit)
+    end
 
+    -- Custom nameplates might trigger cause of a cast, but still stay in a style that does not
+    -- show the castbar
+    if not style.castbar.show then
+      castbar:Hide()
+      return
+    end
+
+    visual.spelltext:SetText(text)
+    visual.spellicon:SetTexture(texture)
+
+    castbar.IsCasting = not channeled
+    castbar.IsChanneling = channeled
+
+    castbar.MaxValue = (endTime - startTime) / 1000
+    castbar:SetMinMaxValues(0, castbar.MaxValue)
+    castbar:SetValue(castbar.Value)
     castbar:SetAllColors(Addon:SetCastbarColor(unit))
     castbar:SetFormat(unit.spellIsShielded)
-
-    UpdateIndicator_CustomScaleText()
-    UpdatePlate_Transparency(extended, unit)
 
     castbar:Show()
   end
@@ -781,10 +805,14 @@ do
     castbar.IsChanneling = false
     unit.isCasting = false
 
-    --UpdateIndicator_CustomScaleText()
-    UpdateIndicator_CustomScale(extended, unit)
-    UpdatePlate_Transparency(extended, unit)
-  end
+    if unit.CustomStyleCast then
+      unit.CustomStyleCast = false
+      ProcessUnitChanges()
+    else
+      UpdateIndicator_CustomScale(extended, unit)
+      UpdatePlate_Transparency(extended, unit)
+    end
+	end
 
 	function OnUpdateCastMidway(plate, unitid)
     if not ShowCastBars then return end
@@ -955,8 +983,8 @@ do
       unit.name, _ = UnitName(unitid)
 
       --Addon:UnitStyle_UnitType(extended, unit)
-      local plate_style = Addon:UnitStyle_NameDependent(unit)
-      if plate_style ~= extended.stylename then
+      local plate_style = Addon.UnitStyle_NameDependent(unit)
+      if plate_style and plate_style ~= extended.stylename then
         -- Totem or Custom Nameplate
         ProcessUnitChanges()
       else
@@ -1007,6 +1035,24 @@ do
 
     SetUpdateAll()
 	end
+
+  function CoreEvents:PLAYER_FOCUS_CHANGED()
+    local extended
+    if LastTargetPlate and LastTargetPlate.TPFrame.Active then
+      LastTargetPlate.TPFrame.unit.IsFocus = false
+      LastTargetPlate = nil
+      -- Update mouseover, if the mouse was hovering over the targeted unit
+      CoreEvents:UPDATE_MOUSEOVER_UNIT()
+    end
+
+    local plate = GetNamePlateForUnit("focus")
+    if plate and plate.TPFrame.Active then
+      plate.TPFrame.unit.IsFocus = true
+      LastTargetPlate = plate
+    end
+
+    SetUpdateAll()
+  end
 
   function CoreEvents:UPDATE_MOUSEOVER_UNIT()
     if UnitIsUnit("mouseover", "player") then return end
@@ -1452,8 +1498,8 @@ do
     visual.spelltext:ClearAllPoints()
     --visual.spellicon:ClearAllPoints()
 
+    local db = TidyPlatesThreat.db.profile.settings.castbar
     if UnitIsUnit("target", unit.unitid) then
-      local db = TidyPlatesThreat.db.profile.settings.castbar
       SetObjectAnchor(visual.castbar, style.castbar.anchor or "CENTER", extended, style.castbar.x + db.x_target or 0, style.castbar.y + db.y_target or 0)
       SetObjectAnchor(visual.spelltext, style.spelltext.anchor or "CENTER", extended, style.spelltext.x + db.x_target or 0, style.spelltext.y + db.y_target or 0)
       --SetObjectAnchor(visual.spellicon, style.spellicon.anchor or "CENTER", extended, style.spellicon.x + db.x_target or 0, style.spellicon.y + db.y_target or 0)
@@ -1462,6 +1508,15 @@ do
       SetObjectAnchor(visual.spelltext, style.spelltext.anchor or "CENTER", extended, style.spelltext.x or 0, style.spelltext.y or 0)
       --SetObjectAnchor(visual.spellicon, style.spellicon.anchor or "CENTER", extended, style.spellicon.x or 0, style.spellicon.y or 0)
     end
+
+    -- Remaining cast time
+    SetObjectFont(visual.castbar.casttime, style.spelltext.typeface, style.spelltext.size, style.spelltext.flags)
+    SetObjectShadow(visual.castbar.casttime, style.spelltext.shadow)
+    SetObjectJustify(visual.castbar.casttime, db.CastTimeText.Font.HorizontalAlignment, db.CastTimeText.Font.VerticalAlignment)
+    visual.castbar.casttime:SetSize(visual.castbar:GetSize())
+    visual.castbar.casttime:ClearAllPoints()
+    visual.castbar.casttime:SetPoint("CENTER", visual.castbar, "CENTER", db.CastTimeText.HorizontalOffset, db.CastTimeText.VerticalOffset)
+    visual.castbar.casttime:SetShown(db.ShowCastTime)
 
     -- Hide Stuff
     if style.eliteicon and style.eliteicon.show then

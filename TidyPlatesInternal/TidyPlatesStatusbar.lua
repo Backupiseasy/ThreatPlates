@@ -5,6 +5,9 @@ local ThreatPlates = Addon.ThreatPlates
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
 
+-- Lua APIs
+local ceil = ceil
+
 -- WoW APIs
 local CreateFrame = CreateFrame
 local GetSpellTexture = GetSpellTexture
@@ -40,6 +43,7 @@ local function OnUpdateCastBar(self, elapsed)
     local value, max_value = self.Value, self.MaxValue
     if value < max_value then
       self:SetValue(value)
+      self.casttime:SetText(ceil(10 * value) / 10)
       self.Spark:SetPoint("CENTER", self, "LEFT", (value / max_value) * self:GetWidth(), 0)
       return
     end
@@ -51,6 +55,7 @@ local function OnUpdateCastBar(self, elapsed)
     local value = self.Value
     if value > 0 then
       self:SetValue(value)
+      self.casttime:SetText(ceil(10 * value) / 10)
       self.Spark:SetPoint("CENTER", self, "LEFT", (value / self.MaxValue) * self:GetWidth(), 0)
       return
     end
@@ -223,6 +228,7 @@ function Addon:CreateCastbar(parent)
   frame.Border:SetFrameLevel(frame:GetFrameLevel())
   -- frame.InterruptBorder:SetFrameLevel(frame:GetFrameLevel())
   -- frame.Overlay:SetFrameLevel(parent:GetFrameLevel() + 1)
+  frame.Overlay:SetFrameLevel(frame:GetFrameLevel())
 
   frame.InterruptOverlay = frame.Overlay:CreateTexture(nil, "BORDER", 0)
   frame.InterruptShield = frame.Overlay:CreateTexture(nil, "ARTWORK", -8)
@@ -248,6 +254,12 @@ function Addon:CreateCastbar(parent)
   spark:SetTexture(ART_PATH .. "Spark")
   spark:SetBlendMode("ADD")
   frame.Spark = spark
+
+  -- Remaining cast time
+  frame.casttime = frame.Overlay:CreateFontString(nil, "OVERLAY")
+  frame.casttime:SetFont("Fonts\\FRIZQT__.TTF", 11)
+  frame.casttime:SetAllPoints(frame)
+  frame.casttime:SetJustifyH("RIGHT")
 
 --  frame.Flash = frame:CreateAnimationGroup()
 --  local anim = frame.Flash:CreateAnimation("Alpha")
@@ -305,19 +317,23 @@ function Addon:ConfigCastbar()
 
         castbar:SetScript("OnUpdate", function(self, elapsed)
           if ShowOnUnit(plate.TPFrame.unit) then
+            local db = TidyPlatesThreat.db.profile.settings
+
             self:SetMinMaxValues(0, 100)
             self:SetValue(50)
             visual.spellicon:SetTexture(GetSpellTexture(116))
             visual.spelltext:SetText("Cosmic Beacon")
+            self.casttime:SetText(3.5)
 
             self.Border:SetShown(plate.TPFrame.style.castborder.show)
             self:SetFormat(plate.TPFrame.style.castnostop.show)
-            self.InterruptShield:SetShown(TidyPlatesThreat.db.profile.settings.castnostop.ShowInterruptShield)
+            self.InterruptShield:SetShown(db.castnostop.ShowInterruptShield)
 
             self.Spark:SetSize(3, self:GetHeight() + 1)
             self.Spark:SetPoint("CENTER", self, "LEFT", 0.5 * self:GetWidth(), 0)
 
             visual.spelltext:SetShown(plate.TPFrame.style.spelltext.show)
+            visual.castbar.casttime:SetShown(db.castbar.ShowCastTime)
             visual.spellicon:SetShown(plate.TPFrame.style.spellicon.show)
             self:Show()
           else
@@ -328,6 +344,7 @@ function Addon:ConfigCastbar()
             self.InterruptShield:Hide()
             self.Spark:Hide()
             visual.spelltext:Hide()
+            visual.castbar.casttime:Hide()
             visual.spellicon:Hide()
           end
         end)
@@ -359,6 +376,8 @@ function Addon:ConfigCastbar()
     castbar:Hide()
     EnabledConfigMode = false
 
-    Addon:ForceUpdateOnNameplate(ConfigModePlate)
+    if ConfigModePlate and ConfigModePlate.TPFrame.Active then
+      Addon:ForceUpdateOnNameplate(ConfigModePlate)
+    end
   end
 end

@@ -144,6 +144,19 @@ Addon.GLOW_TYPES = {
   AutoCast = L["Auto-Cast"],
 }
 
+Addon.CUSTOM_GLOW_FUNCTIONS = {
+  Button = { "ButtonGlow_Start", "ButtonGlow_Stop", 8 },
+  Pixel = { "PixelGlow_Start", "PixelGlow_Stop", 3 },
+  AutoCast = { "AutoCastGlow_Start", "AutoCastGlow_Stop", 4 },
+}
+
+Addon.CUSTOM_PLATES_GLOW_FRAMES = {
+  None = L["None"],
+  Healthbar = L["Healthbar"],
+  Castbar = L["Castbar"],
+  Icon = L["Icon"],
+}
+
 ----------------------------------------------------------------------------------------------------
 -- Paths
 ---------------------------------------------------------------------------------------------------
@@ -388,6 +401,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
       -- blizzFadingAlpha = 1, -- removed in 8.5.1
       useScaling = false,
       ShowTargetHighlight = true,
+      ShowFocusHighlight = true,
       ShowMouseoverHighlight = true,
       ForceHealthbarOnTarget = false,
       ForceOutOfCombat = false,
@@ -734,6 +748,23 @@ ThreatPlates.DEFAULT_SETTINGS = {
       ModeHPBar = false,
       ModeNames = false,
       HPBarColor = RGB(255, 0, 255), -- Magenta / Fuchsia
+      Size = 32,
+      HorizontalOffset = 8,
+      VerticalOffset = 0,
+    },
+    FocusWidget = {
+      ON = true,
+      theme = "arrow_down",
+      r = 0,
+      g = 0.8,
+      b = 0.8,
+      a = 1,
+      ModeHPBar = false,
+      ModeNames = false,
+      HPBarColor = RGB(0, 204, 204),
+      Size = 38,
+      HorizontalOffset = 0,
+      VerticalOffset = 12,
     },
     threatWidget = {
       ON = false,
@@ -948,11 +979,40 @@ ThreatPlates.DEFAULT_SETTINGS = {
     },
     totemSettings = GetDefaultTotemSettings(),
     uniqueSettings = {
-      map = {},
       ["**"] = {
-        name = "<Enter name here>",
+        Trigger = {
+          Type = "Name",
+          Name = {
+            Input = "<Enter name here>",
+            AsArray = {},
+          },
+          Aura = {
+            Input = nil,
+            AsArray = {},
+          },
+          Cast = {
+            Input = nil,
+            AsArray = {}
+          },
+        },
+        Effects = {
+          Glow = {
+            Frame = "None",
+            Type = "Pixel",
+            CustomColor = false,
+            Color = { 0.95, 0.95, 0.32, 1 },
+          },
+        },
         showNameplate = true,
         ShowHeadlineView = false,
+        Enable = {
+          Never = false,
+          UnitReaction = {
+            FRIENDLY = true,
+            NEUTRAL = true,
+            HOSTILE = true,
+          },
+        },
         showIcon = true,
         useStyle = true,
         useColor = true,
@@ -961,7 +1021,10 @@ ThreatPlates.DEFAULT_SETTINGS = {
         allowMarked = true,
         overrideScale = false,
         overrideAlpha = false,
-        icon = (Addon.CLASSIC and "Spell_nature_spiritwolf.blp") or "spell_shadow_shadowfiend.blp",
+        UseAutomaticIcon = true,
+        icon = "INV_Misc_QuestionMark.blp",
+        -- SpellID = nil,
+        -- SpellName = nil,
         scale = 1,
         alpha = 1,
         color = {
@@ -1041,6 +1104,15 @@ ThreatPlates.DEFAULT_SETTINGS = {
         show = true,
         ShowInHeadlineView = false,
         ShowSpark = true,
+        ShowCastTime = true,
+        CastTimeText = {
+          HorizontalOffset = -2,
+          VerticalOffset = 0,
+          Font = {
+            HorizontalAlignment = "RIGHT",
+            VerticalAlignment = "CENTER",
+          },
+        },
       },
       name = { -- Names for Healthbar View
         show = true,
@@ -1111,7 +1183,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
         y = -15,  -- old default: -13
         x_hv = 0,
         y_hv = -20,  -- old default: -13
-        align = "CENTER",
+        align = "LEFT",
         vertical = "CENTER",
         shadow = true,
         flags = "NONE",

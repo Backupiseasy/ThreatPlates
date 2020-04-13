@@ -12,6 +12,9 @@ local ThreatPlates = Addon.ThreatPlates
 
 -- WoW APIs
 local UnitHealth, UnitHealthMax = UnitHealth, UnitHealthMax
+-- Lua APIs
+local string = string
+
 local UnitPlayerControlled = UnitPlayerControlled
 local RAID_CLASS_COLORS = RAID_CLASS_COLORS
 
@@ -19,11 +22,11 @@ local RAID_CLASS_COLORS = RAID_CLASS_COLORS
 -- Libraries
 ---------------------------------------------------------------------------------------------------
 local LibStub = LibStub
-
 ThreatPlates.L = LibStub("AceLocale-3.0"):GetLocale("TidyPlatesThreat")
 ThreatPlates.Media = LibStub("LibSharedMedia-3.0")
 Addon.LibCustomGlow = LibStub("LibCustomGlow-1.0")
 Addon.LibAceConfigDialog = LibStub("AceConfigDialog-3.0")
+Addon.LibAceConfigRegistry = LibStub("AceConfigRegistry-3.0")
 Addon.LibThreatClassic = LibStub:GetLibrary("LibThreatClassic2")
 Addon.LibClassicCasterino = LibStub("LibClassicCasterino-ThreatPlates")
 --Addon.LibClassicCasterino = LibStub("LibClassicCasterino")
@@ -36,15 +39,17 @@ TidyPlatesThreat = LibStub("AceAddon-3.0"):NewAddon("TidyPlatesThreat", "AceCons
 TidyPlatesThreatDBM = true
 
 Addon.Animations = {}
-Addon.Widgets = {}
+Addon.Cache = {
+	CustomPlateTriggers = {
+		Name = {},
+		Aura = {},
+		Cast = {}
+	}
+}
 
 --------------------------------------------------------------------------------------------------
 -- Functions to abstract from the presence of certain addons
 ---------------------------------------------------------------------------------------------------
-
-function Addon.GetUnitHealth(unitid)
-	return UnitHealth(unitid) or 0, UnitHealthMax(unitid) or 1
-end
 
 --------------------------------------------------------------------------------------------------
 -- General Functions
@@ -145,11 +150,23 @@ end
 Addon.MergeIntoTable = function(target, source)
   for k,v in pairs(source) do
     if type(v) == "table" then
+			target[k] = target[k] or {}
       Addon.MergeIntoTable(target[k], v)
     else
       target[k] = v
     end
   end
+end
+
+Addon.MergeDefaultsIntoTable = function(target, defaults)
+	for k,v in pairs(defaults) do
+		if type(v) == "table" then
+			target[k] = target[k] or {}
+			Addon.MergeDefaultsIntoTable(target[k], v)
+		else
+			target[k] = target[k] or v
+		end
+	end
 end
 
 Addon.ConcatTables = function(base_table, table_to_concat)
@@ -160,6 +177,33 @@ Addon.ConcatTables = function(base_table, table_to_concat)
 	end
 
 	return concat_result
+end
+
+Addon.CheckTableStructure = function(reference_structure, table_to_check)
+	if table_to_check == nil then
+		return false
+	end
+
+	for k,v in pairs(reference_structure) do
+		if table_to_check[k] == nil or type(table_to_check[k]) ~= type(v) then
+			return false
+		elseif type(v) == "table" then
+			if not Addon.CheckTableStructure(v, table_to_check[k]) then
+				return false
+			end
+		end
+	end
+
+	return true
+end
+
+Addon.Split = function(split_string)
+	local result = {}
+	for entry in string.gmatch(split_string, "[^;]+") do
+		result[#result + 1] = entry:gsub("^%s*(.-)%s*$", "%1")
+	end
+
+	return result
 end
 
 --------------------------------------------------------------------------------------------------
