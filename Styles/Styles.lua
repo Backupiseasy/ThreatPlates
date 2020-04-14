@@ -18,6 +18,7 @@ local TidyPlatesThreat = TidyPlatesThreat
 local TOTEMS = Addon.TOTEMS
 local GetUnitVisibility = ThreatPlates.GetUnitVisibility
 local NameTriggers, AuraTriggers, CastTriggers = Addon.Cache.CustomPlateTriggers.Name, Addon.Cache.CustomPlateTriggers.Aura, Addon.Cache.CustomPlateTriggers.Cast
+local NameWildcardTriggers, TriggerWildcardTests = Addon.Cache.CustomPlateTriggers.NameWildcard, Addon.Cache.TriggerWildcardTests
 
 ---------------------------------------------------------------------------------------------------
 -- Helper functions for styles and functions
@@ -186,7 +187,29 @@ function Addon.UnitStyle_NameDependent(unit)
 
   if unique_settings and unique_settings.useStyle and unique_settings.Enable.UnitReaction[unit.reaction] then
     plate_style = (unique_settings.showNameplate and "unique") or (unique_settings.ShowHeadlineView and "NameOnly-Unique") or "etotem"
-  else
+  elseif Addon.ActiveWildcardTriggers and unit.type == "NPC" then
+    local unit_test = TriggerWildcardTests[unit.name]
+
+    if unit_test == nil then
+      for i = 1, #NameWildcardTriggers do
+        local trigger = NameWildcardTriggers[i]
+        --print ("Name Wildcard: ", unit.name, "=>", trigger[1], unit.name:find(trigger[1]))
+        if unit.name:find(trigger[1]) then
+          unique_settings = trigger[2]
+          plate_style = (unique_settings.showNameplate and "unique") or (unique_settings.ShowHeadlineView and "NameOnly-Unique") or "etotem"
+          break
+        end
+      end
+
+      TriggerWildcardTests[unit.name] = (plate_style and { plate_style, unique_settings }) or false
+    elseif unit_test ~= false then
+      plate_style = unit_test[1]
+      unique_settings = unit_test[2]
+    end
+  end
+
+  if not plate_style then
+    -- Check for totem
     local totem_id = TOTEMS[unit.name]
     if totem_id then
       totem_settings = db.totemSettings[totem_id]

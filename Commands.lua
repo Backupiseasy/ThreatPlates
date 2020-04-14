@@ -125,6 +125,8 @@ function TidyPlatesThreat:ChatCommand(input)
 			TP.Print("|cff89F559Threat Plates|r: Searching settings:", true)
 			SearchDBForString(TidyPlatesThreat.db.profile, "<Profile>", string.lower(cmd_list[2]))
 			SearchDBForString(TidyPlatesThreat.db.global, "<Profile>", string.lower(cmd_list[2]))
+		elseif command == "cache" then
+			Addon.DebugPrintCaches()
 		elseif command == "custom-styles" then
 			for k, v in pairs(TidyPlatesThreat.db.profile.uniqueSettings) do
 				print ("Style:", k, "=>", v.Trigger.Type, " - ", v.Trigger[v.Trigger.Type].Input or "nil" )

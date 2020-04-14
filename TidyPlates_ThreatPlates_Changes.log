@@ -1,7 +1,10 @@
 ﻿------------------------------------------------------
 9.2.0-Beta4
 ------------------------------------------------------
+* Extended the Name trigger for custom styles for nameplates to also support the wildcard character *.
 * Spell name is now anchored directly to the castbar which simplifies the configuration of its placement.
+* Fixed layering of interrupt overlay which was wrong after adding cast time text.
+* Fixed a bug with focus unit not set/removed correctly in all situations.
 
 ------------------------------------------------------
 9.2.0-Beta3
@@ -41,7 +44,7 @@
 * Added an option to import/export all configuration settings of Threat Plates (thanks to Kungfumoo for the patch, Comment #1582).
 * Added an option to import/export all custom nameplate settings of Threat Plates [Comment #852]
 
-﻿------------------------------------------------------
+------------------------------------------------------
 9.1.20
 ------------------------------------------------------
 * Fixed a Lua error in custom nameplates when entering a spell ID to set the icon for the custom nameplate.

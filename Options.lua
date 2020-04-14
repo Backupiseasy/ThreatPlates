@@ -336,12 +336,16 @@ function Addon:InitializeCustomNameplates()
 
   Addon.ActiveAuraTriggers = false
   Addon.ActiveCastTriggers = false
+  Addon.ActiveWildcardTriggers = false
   Addon.UseUniqueWidget = db.uniqueWidget.ON
 
   -- Use wipe to keep references intact
-  wipe(Addon.Cache.CustomPlateTriggers.Name)
-  wipe(Addon.Cache.CustomPlateTriggers.Aura)
-  wipe(Addon.Cache.CustomPlateTriggers.Cast)
+  local custom_style_triggers = Addon.Cache.CustomPlateTriggers
+  wipe(custom_style_triggers.Name)
+  wipe(custom_style_triggers.NameWildcard)
+  wipe(custom_style_triggers.Aura)
+  wipe(custom_style_triggers.Cast)
+  wipe(Addon.Cache.TriggerWildcardTests)
 
   for _, custom_plate in ipairs(db.uniqueSettings) do
     if not custom_plate.Enable.Never then
@@ -349,7 +353,12 @@ function Addon:InitializeCustomNameplates()
       local trigger_list = custom_plate.Trigger[trigger_type].AsArray
 
       for _, trigger in ipairs(trigger_list) do
-        Addon.Cache.CustomPlateTriggers[trigger_type][trigger] = custom_plate
+        if trigger_type == "Name" and string.find(trigger, "%*") then
+          local wildcard_trigger = string.gsub(trigger, "%*", ".*")
+          custom_style_triggers.NameWildcard[#custom_style_triggers.NameWildcard + 1] = { wildcard_trigger, custom_plate }
+        else
+          custom_style_triggers[trigger_type][trigger] = custom_plate
+        end
       end
 
       if custom_plate.Effects.Glow.Type ~= "None" then
@@ -359,8 +368,9 @@ function Addon:InitializeCustomNameplates()
   end
 
   -- Signal that there are active aura or cast triggers
-  Addon.ActiveAuraTriggers = next(Addon.Cache.CustomPlateTriggers.Aura) ~= nil
-  Addon.ActiveCastTriggers = next(Addon.Cache.CustomPlateTriggers.Cast) ~= nil
+  Addon.ActiveAuraTriggers = next(custom_style_triggers.Aura) ~= nil
+  Addon.ActiveCastTriggers = next(custom_style_triggers.Cast) ~= nil
+  Addon.ActiveWildcardTriggers = next(custom_style_triggers.NameWildcard) ~= nil
 end
 
 local function UpdateSpecial() -- Need to add a way to update options table.
@@ -5368,8 +5378,16 @@ local function CreateCustomNameplateEntry(index)
             type = "input",
             order = 20,
             width = 3,
-            desc = L["Apply these custom settings to the nameplate of a unit with a particular name. You can add multiple entries separated by a semicolon."],
-            set = function(info, val) CustomPlateCheckAndUpdateEntry(info, val, index) end,
+            desc = L["Apply these custom settings to the nameplate of a unit with a particular name. You can add multiple entries separated by a semicolon. You can use use * as wildcard character."],
+            set = function(info, val)
+              -- Only * should be allowed
+              local position, _ = string.find(val, "[().%%+–?%[%]^$]")
+              if position then
+                t.Print(L["Illegal character used in Name trigger at position: "] .. tostring(position), true)
+              else
+                CustomPlateCheckAndUpdateEntry(info, val, index)
+              end
+            end,
             get = function(info)
               return db.uniqueSettings[index].Trigger["Name"].Input or ""
             end,

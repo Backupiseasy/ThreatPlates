@@ -19,8 +19,6 @@ local UnitPlayerControlled = UnitPlayerControlled
 -- Libraries
 ---------------------------------------------------------------------------------------------------
 local LibStub = LibStub
-
-local LibStub = LibStub
 ThreatPlates.L = LibStub("AceLocale-3.0"):GetLocale("TidyPlatesThreat")
 ThreatPlates.Media = LibStub("LibSharedMedia-3.0")
 Addon.LibCustomGlow = LibStub("LibCustomGlow-1.0")
@@ -36,8 +34,10 @@ TidyPlatesThreatDBM = true
 
 Addon.Animations = {}
 Addon.Cache = {
+	TriggerWildcardTests = {},
 	CustomPlateTriggers = {
 		Name = {},
+		NameWildcard = {},
 		Aura = {},
 		Cast = {}
 	}
@@ -324,6 +324,13 @@ local function DEBUG_AURA_LIST(data)
 		end
 	end
 	ThreatPlates.DEBUG("Aura List = [ " .. res .. " ]")
+end
+
+Addon.DebugPrintCaches = function()
+	print ("Wildcard Unit Test Cache:")
+	for k, v in pairs(Addon.Cache.TriggerWildcardTests) do
+		print ("  " .. k .. ":", v)
+	end
 end
 
 ---------------------------------------------------------------------------------------------------
