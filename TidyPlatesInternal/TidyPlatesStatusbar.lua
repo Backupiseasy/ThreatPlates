@@ -55,7 +55,7 @@ local function OnUpdateCastBar(self, elapsed)
     local value = self.Value
     if value > 0 then
       self:SetValue(value)
-      self.casttime:SetText(string_format("%.1f", self.MaxValue - value))
+      self.casttime:SetText(string_format("%.1f", value))
       self.Spark:SetPoint("CENTER", self, "LEFT", (value / self.MaxValue) * self:GetWidth(), 0)
       return
     end
@@ -228,7 +228,6 @@ function Addon:CreateCastbar(parent)
   frame.Border:SetFrameLevel(frame:GetFrameLevel())
   -- frame.InterruptBorder:SetFrameLevel(frame:GetFrameLevel())
   -- frame.Overlay:SetFrameLevel(parent:GetFrameLevel() + 1)
-  frame.Overlay:SetFrameLevel(frame:GetFrameLevel())
 
   frame.InterruptOverlay = frame.Overlay:CreateTexture(nil, "BORDER", 0)
   frame.InterruptShield = frame.Overlay:CreateTexture(nil, "ARTWORK", -8)
