@@ -6,7 +6,7 @@ local ThreatPlates = Addon.ThreatPlates
 ---------------------------------------------------------------------------------------------------
 
 -- Lua APIs
-local ceil = ceil
+local ceil, string_format = ceil, string.format
 
 -- WoW APIs
 local CreateFrame = CreateFrame
@@ -43,7 +43,7 @@ local function OnUpdateCastBar(self, elapsed)
     local value, max_value = self.Value, self.MaxValue
     if value < max_value then
       self:SetValue(value)
-      self.casttime:SetText(ceil(10 * value) / 10)
+      self.casttime:SetText(string_format("%.1f", max_value - value))
       self.Spark:SetPoint("CENTER", self, "LEFT", (value / max_value) * self:GetWidth(), 0)
       return
     end
@@ -55,7 +55,7 @@ local function OnUpdateCastBar(self, elapsed)
     local value = self.Value
     if value > 0 then
       self:SetValue(value)
-      self.casttime:SetText(ceil(10 * value) / 10)
+      self.casttime:SetText(string_format("%.1f", self.MaxValue - value))
       self.Spark:SetPoint("CENTER", self, "LEFT", (value / self.MaxValue) * self:GetWidth(), 0)
       return
     end

@@ -163,15 +163,17 @@ function Widget:UpdateSettings()
     -- widget_frame could be nil if the widget as disabled and is enabled as part of a profile switch
     -- For these frames, UpdateAuraWidgetLayout will be called anyway when the widget is initalized
     -- (which happens after the settings update)
-    if widget_frame and tp_frame.Active then
+    if widget_frame then
       LibCustomGlow["ButtonGlow_Stop"](widget_frame.Highlight)
       LibCustomGlow["PixelGlow_Stop"](widget_frame.Highlight)
       LibCustomGlow["AutoCastGlow_Stop"](widget_frame.Highlight)
 
-      -- Update the style as custom nameplates might have been changed and some units no longer
-      -- may be unique
-      Addon:SetStyle(widget_frame.unit)
-      self:OnUnitAdded(widget_frame, widget_frame.unit)
+      if widget_frame.Active then
+        -- Update the style as custom nameplates might have been changed and some units no longer
+        -- may be unique
+        Addon:SetStyle(widget_frame.unit)
+        self:OnUnitAdded(widget_frame, widget_frame.unit)
+      end
     end
   end
 end

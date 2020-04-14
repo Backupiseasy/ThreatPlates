@@ -1046,22 +1046,24 @@ do
     SetUpdateAll()
 	end
 
-  function CoreEvents:PLAYER_FOCUS_CHANGED()
-    local extended
-    if LastTargetPlate and LastTargetPlate.TPFrame.Active then
-      LastTargetPlate.TPFrame.unit.IsFocus = false
-      LastTargetPlate = nil
-      -- Update mouseover, if the mouse was hovering over the targeted unit
-      CoreEvents:UPDATE_MOUSEOVER_UNIT()
-    end
+  if not Addon.CLASSIC then
+    function CoreEvents:PLAYER_FOCUS_CHANGED()
+      local extended
+      if LastTargetPlate and LastTargetPlate.TPFrame.Active then
+        LastTargetPlate.TPFrame.unit.IsFocus = false
+        LastTargetPlate = nil
+        -- Update mouseover, if the mouse was hovering over the targeted unit
+        CoreEvents:UPDATE_MOUSEOVER_UNIT()
+      end
 
-    local plate = GetNamePlateForUnit("focus")
-    if plate and plate.TPFrame.Active then
-      plate.TPFrame.unit.IsFocus = true
-      LastTargetPlate = plate
-    end
+      local plate = GetNamePlateForUnit("focus")
+      if plate and plate.TPFrame.Active then
+        plate.TPFrame.unit.IsFocus = true
+        LastTargetPlate = plate
+      end
 
-    SetUpdateAll()
+      SetUpdateAll()
+    end
   end
 
   function CoreEvents:UPDATE_MOUSEOVER_UNIT()
@@ -1216,28 +1218,30 @@ do
     Addon:ForceUpdate()
 	end
 
-	function CoreEvents:UNIT_ABSORB_AMOUNT_CHANGED(unitid)
-		local plate = GetNamePlateForUnit(unitid)
+  if not Addon.CLASSIC then
+    function CoreEvents:UNIT_ABSORB_AMOUNT_CHANGED(unitid)
+      local plate = GetNamePlateForUnit(unitid)
 
-		if plate and plate.TPFrame.Active then
-      local tp_frame = plate.TPFrame
-      local unit = tp_frame.unit
-      local unitid  = unit.unitid
+      if plate and plate.TPFrame.Active then
+        local tp_frame = plate.TPFrame
+        local unit = tp_frame.unit
+        local unitid  = unit.unitid
 
-      -- As this does not use OnUpdate with OnHealthUpdate, we have to update this values here
-      unit.health = UnitHealth(unit.unitid) or 0
-      unit.healthmax = UnitHealthMax(unit.unitid) or 1
+        -- As this does not use OnUpdate with OnHealthUpdate, we have to update this values here
+        unit.health = UnitHealth(unit.unitid) or 0
+        unit.healthmax = UnitHealthMax(unit.unitid) or 1
 
-			Addon:UpdateExtensions(tp_frame, unitid, tp_frame.stylename)
-      UpdateIndicator_CustomText(tp_frame)
-		end
-  end
+        Addon:UpdateExtensions(tp_frame, unitid, tp_frame.stylename)
+        UpdateIndicator_CustomText(tp_frame)
+      end
+    end
 
-  function CoreEvents:UNIT_HEAL_ABSORB_AMOUNT_CHANGED(unitid)
-    local plate = GetNamePlateForUnit(unitid)
+    function CoreEvents:UNIT_HEAL_ABSORB_AMOUNT_CHANGED(unitid)
+      local plate = GetNamePlateForUnit(unitid)
 
-    if plate and plate.TPFrame.Active then
-      Addon:UpdateExtensions(plate.TPFrame, unitid, plate.TPFrame.stylename)
+      if plate and plate.TPFrame.Active then
+        Addon:UpdateExtensions(plate.TPFrame, unitid, plate.TPFrame.stylename)
+      end
     end
   end
 

@@ -125,6 +125,10 @@ function TidyPlatesThreat:ChatCommand(input)
 			TP.Print("|cff89F559Threat Plates|r: Searching settings:", true)
 			SearchDBForString(TidyPlatesThreat.db.profile, "<Profile>", string.lower(cmd_list[2]))
 			SearchDBForString(TidyPlatesThreat.db.global, "<Profile>", string.lower(cmd_list[2]))
+		elseif command == "custom-styles" then
+			for k, v in pairs(TidyPlatesThreat.db.profile.uniqueSettings) do
+				print ("Style:", k, "=>", v.Trigger.Type, " - ", v.Trigger[v.Trigger.Type].Input or "nil" )
+			end
 		else
 			TidyPlatesThreat:ChatCommandDebug(cmd_list)
 		end
@@ -142,6 +146,30 @@ function TidyPlatesThreat:ChatCommandDebug(cmd_list)
 		--Addon:PrintEventService()
 	elseif command == "quest" then
 		Addon:PrintQuests()
+	elseif command == "cleanup-custom-styles" then
+		local input = TidyPlatesThreat.db.profile.uniqueSettings
+		for i = #input, 1 , -1 do
+			local custom_style = input[i]
+			print (i, type(i), custom_style.Trigger.Type, custom_style.Trigger.Name.Input)
+			if custom_style.Trigger.Type == "Name" and custom_style.Trigger.Name.Input == "<Enter name here>" then
+				table.remove(input, i)
+				print ("Removing", i)
+			end
+		end
+	elseif command == "import" then
+		local custom_style = {
+			Trigger = {
+				Type = "Name",
+				Name = {
+					Input = "Wurzebrumpf",
+					AsArray = { "Wurzebrumpf" },
+				}
+			},
+			UseAutomaticIcon = false,
+			icon = false,
+		}
+		local imported_custom_style = Addon.ImportCustomStyle(custom_style)
+		TP.DEBUG_PRINT_TABLE(imported_custom_style)
 	elseif command == "unit" then
 		local plate = C_NamePlate.GetNamePlateForUnit("target")
 		if not plate then return end

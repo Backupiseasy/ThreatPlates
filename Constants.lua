@@ -1003,11 +1003,11 @@ ThreatPlates.DEFAULT_SETTINGS = {
             AsArray = {},
           },
           Aura = {
-            Input = nil,
+            Input = "",
             AsArray = {},
           },
           Cast = {
-            Input = nil,
+            Input = "",
             AsArray = {}
           },
         },

@@ -1896,7 +1896,7 @@ function Widget:UpdateSettings()
     -- (which happens after the settings update)
     if widget_frame then
       self:UpdateAuraWidgetLayout(widget_frame)
-      if tp_frame.Active then -- equals: plate is visible, i.e., show currently
+      if widget_frame.Active then -- equals: plate is visible and auras are used
         self:OnUnitAdded(widget_frame, widget_frame.unit)
       end
     end

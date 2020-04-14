@@ -83,11 +83,11 @@ Addon.LEGACY_CUSTOM_NAMEPLATES = {
         AsArray = {},
       },
       Aura = {
-        Input = nil,
+        Input = "",
         AsArray = {},
       },
       Cast = {
-        Input = nil,
+        Input = "",
         AsArray = {},
       },
     },
@@ -1421,62 +1421,10 @@ Addon.MigrateDatabase = MigrateDatabase
 -- Schema validation and other check functions for the settings file
 -----------------------------------------------------
 
---local CUSTOM_STYLE_SCHEMA_VERSIONS = {
---  V3 = {
---    Trigger = {
---      Type = "string",
---      Name = {
---        Input = "string",
---        AsArray = { "string" },
---      },
---      Aura = {
---        Input = "string",
---        AsArray = { "string" },
---      },
---      Cast = {
---        Input = "string",
---        AsArray = { "string" },
---      },
---    },
---    Effects = {
---      Glow = {
---        Frame = "string",
---        Type = "string",
---        CustomColor = "boolean",
---        Color = { "number" },
---      },
---    },
---    showNameplate = "boolean",
---    ShowHeadlineView = "boolean",
---    Enable = {
---      Never = "boolean",
---      UnitReaction = {
---        FRIENDLY = "boolean",
---        NEUTRAL = "boolean",
---        HOSTILE = "boolean",
---      },
---    },
---    showIcon = "boolean",
---    useStyle = "boolean",
---    useColor = "boolean",
---    UseThreatColor = "boolean",
---    UseThreatGlow = "boolean",
---    allowMarked = "boolean",
---    overrideScale = "boolean",
---    overrideAlpha = "boolean",
---    UseAutomaticIcon = "boolean",
---    icon = "number;string",
---    SpellID = "number",
---    SpellName = "string",
---    scale = "number",
---    alpha = "number",
---    color = {
---      r = "number",
---      g = "number",
---      b = "number"
---    },
---  },
---}
+local CUSTOM_STYLE_TYPE_CHECK = {
+  icon = { number = true, string = true }
+}
+
 --
 --local VERSION_TO_CUSTOM_STYLE_SCHEMA_MAPPING = {
 --  ["9.2.0"] = CUSTOM_STYLE_SCHEMA_VERSIONS.V3
@@ -1485,6 +1433,49 @@ Addon.MigrateDatabase = MigrateDatabase
 --Addon.CheckCustomStyleSchema = function(custom_style, version)
 --  ThreatPlates.DEBUG_PRINT_TABLE(custom_style)
 --end
+
+-- Updates existing entries in custom style with the corresponding value from the
+-- update-from custom style
+-- In an entry in update-from custom style does not exist in custom style, it's ignored
+local function UpdateFromCustomStyle(custom_style, update_from_custom_style)
+  for key, current_value in pairs(custom_style) do
+    local update_from_value = update_from_custom_style[key]
+
+    if update_from_value ~= nil then
+      if type(current_value) == "table" then
+        -- If entry in update-from custom style is not a table as well, ignore it
+        if type(update_from_value) == "table" then
+          UpdateFromCustomStyle(current_value, update_from_value)
+        end
+      else
+        local type_is_ok
+
+        local multi_type_entry = CUSTOM_STYLE_TYPE_CHECK[key]
+        if multi_type_entry then
+          type_is_ok = multi_type_entry[type(update_from_value)] ~= nil
+        else
+          type_is_ok = type(current_value) == type(update_from_value)
+        end
+
+        if type_is_ok then
+          custom_style[key] = update_from_value
+        end
+      end
+    end
+  end
+end
+
+Addon.ImportCustomStyle = function(imported_custom_style)
+  local custom_style = ThreatPlates.CopyTable(ThreatPlates.DEFAULT_SETTINGS.profile.uniqueSettings["**"])
+  UpdateFromCustomStyle(custom_style, imported_custom_style)
+
+  -- Verfiy that the imported custom_style is consistent
+  custom_style.Trigger.Name.AsArray = Addon.Split(custom_style.Trigger.Name.Input)
+  custom_style.Trigger.Aura.AsArray = Addon.Split(custom_style.Trigger.Aura.Input)
+  custom_style.Trigger.Cast.AsArray = Addon.Split(custom_style.Trigger.Cast.Input)
+
+  return custom_style
+end
 
 -----------------------------------------------------
 -- External

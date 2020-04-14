@@ -254,7 +254,7 @@ local function ShowImportFrame()
       if not import_data.Version or not import_data.Profile and not import_data.ProfileName or type (import_data.ProfileName) ~= "string" then
         t.Print(L["The import string has an unknown format and cannot be imported. Verify that the import string was generated from the same Threat Plates version that you are using currently."], true)
       elseif import_data.Version ~= t.Meta("version") then
-        t.Print(L["The import string contains custom nameplate settings from an incombatible Threat Plates version. Importing only works with data exported from the same Threat Plates version as you are using."], true)
+        t.Print(L["The import string contains a profile from an incombatible Threat Plates version. Importing only works with data exported from the same Threat Plates version as you are using."], true)
       else
         local imported_profile_name = import_data.ProfileName
 
@@ -343,8 +343,8 @@ function Addon:InitializeCustomNameplates()
   wipe(Addon.Cache.CustomPlateTriggers.Aura)
   wipe(Addon.Cache.CustomPlateTriggers.Cast)
 
-  for i, custom_plate in pairs(db.uniqueSettings) do
-    if i ~= "map" and not custom_plate.Enable.Never then
+  for _, custom_plate in ipairs(db.uniqueSettings) do
+    if not custom_plate.Enable.Never then
       local trigger_type = custom_plate.Trigger.Type
       local trigger_list = custom_plate.Trigger[trigger_type].AsArray
 
@@ -2078,6 +2078,7 @@ local function CreateFocusWidgetOptions()
     name = L["Focus Highlight"],
     type = "group",
     order = 55,
+    hidden = function() return Addon.CLASSIC end,
     args = {
       Enable = GetEnableEntry(L["Enable Focus Widget"], L["This widget highlights the nameplate of your current focus target by showing a border around the healthbar and by coloring the nameplate's healtbar and/or name with a custom color."], "FocusWidget", false, function(info, val) SetValuePlain(info, val); Addon.Widgets:InitializeWidget("Focus") end),
       Texture = {
@@ -5860,8 +5861,8 @@ local function CreateCustomNameplatesGroup()
         local slot_no = tonumber(selected:match("#(.*)"))
 
         table.sort(db.uniqueSettings, function(a, b)
-          local a_key = a.Trigger.Type .. a.Trigger[a.Trigger.Type].Input
-          local b_key = b.Trigger.Type .. b.Trigger[b.Trigger.Type].Input
+          local a_key = a.Trigger.Type .. a.Trigger[a.Trigger.Type].Input .. tostring(a.Enable.Never)
+          local b_key = b.Trigger.Type .. b.Trigger[b.Trigger.Type].Input .. tostring(b.Enable.Never)
           return a_key < b_key
         end)
 
@@ -5882,8 +5883,8 @@ local function CreateCustomNameplatesGroup()
         local slot_no = tonumber(selected:match("#(.*)"))
 
         table.sort(db.uniqueSettings, function(a, b)
-          local a_key = a.Trigger.Type .. a.Trigger[a.Trigger.Type].Input
-          local b_key = b.Trigger.Type .. b.Trigger[b.Trigger.Type].Input
+          local b_key = b.Trigger.Type .. b.Trigger[b.Trigger.Type].Input .. tostring(b.Enable.Never)
+          local a_key = a.Trigger.Type .. a.Trigger[a.Trigger.Type].Input .. tostring(a.Enable.Never)
           return a_key > b_key
         end)
 
@@ -5981,29 +5982,29 @@ local function CreateCustomNameplatesGroup()
                     elseif import_data.Version ~= t.Meta("version") then
                       t.Print(L["The import string contains custom nameplate settings from an incombatible Threat Plates version. Importing only works with data exported from the same Threat Plates version as you are using."], true)
                     else
-                      for i, custom_style  in ipairs (import_data.CustomStyles) do
-                        -- Check that the custom nameplate settings has the correct format (of the current TP version)
---                        if not Addon.CheckTableStructure(t.DEFAULT_SETTINGS.profile.uniqueSettings["**"], custom_style) then
---                          t.Print(L["The import string has an invalied format and cannot be imported. Verify that the import string was generated from the same Threat Plates version that you are using currently."], true)
---                          t.DEBUG_PRINT_TABLE(custom_style)
---                          success = false
---                          break
---                        else
-                          local trigger_type = custom_style.Trigger.Type
-                          local triggers = custom_style.Trigger[trigger_type].AsArray
+                      local imported_custom_styles  = {}
 
-                          local check_ok, duplicate_triggers = CustomPlateCheckIfTriggerIsUnique(trigger_type, triggers, custom_style)
-                          if not check_ok then
-                            t.Print(L["A custom nameplate with this trigger already exists: "] .. table.concat(duplicate_triggers, "; ") .. L[". You cannot use two custom nameplates with the same trigger. The imported custom nameplate will be disabled."], true)
-                            custom_style.Enable.Never = true
-                          end
---                        end
+                      for i, custom_style  in ipairs (import_data.CustomStyles) do
+                        -- Import all values from the custom style as long the are valid entries with the correct type
+                        -- based on the default custom style "**"
+                        custom_style = Addon.ImportCustomStyle(custom_style)  -- replace the original imported custom style with the merged one
+
+                        local trigger_type = custom_style.Trigger.Type
+                        local triggers = custom_style.Trigger[trigger_type].AsArray
+
+                        local check_ok, duplicate_triggers = CustomPlateCheckIfTriggerIsUnique(trigger_type, triggers, custom_style)
+                        if not check_ok then
+                          t.Print(L["A custom nameplate with this trigger already exists: "] .. table.concat(duplicate_triggers, "; ") .. L[". You cannot use two custom nameplates with the same trigger. The imported custom nameplate will be disabled."], true)
+                          custom_style.Enable.Never = true
+                        end
+
+                        imported_custom_styles[#imported_custom_styles + 1] = custom_style
                       end
 
                       -- Only insert custom styles if all have a valid format (format checking is currently not implemented/not working
                       if success then
                         local slot_no = #db.uniqueSettings
-                        for i, custom_style  in ipairs (import_data.CustomStyles) do
+                        for i, custom_style  in ipairs (imported_custom_styles) do
                           table.insert(db.uniqueSettings, slot_no + i, custom_style)
                         end
 
@@ -6025,10 +6026,8 @@ local function CreateCustomNameplatesGroup()
     },
   }
 
-  for index, unique_unit in pairs(db.uniqueSettings) do
-    if type(index) == "number" and unique_unit.Trigger.Name.Input and unique_unit.Trigger.Name.Input ~= "<Enter name here>" then
-      entry["#" .. index] = CreateCustomNameplateEntry(index)
-    end
+  for index, unique_unit in ipairs(db.uniqueSettings) do
+    entry["#" .. index] = CreateCustomNameplateEntry(index)
   end
 
   return entry
@@ -6596,6 +6595,7 @@ local function CreateOptionsTable()
                             SetValuePlain(info, val)
                             Addon.Widgets:UpdateSettings("Focus")
                           end,
+                          hidden = function() return Addon.CLASSIC end,
                         },
                         TargetMouseoverHighlight = {
                           name = L["Show Mouseover"],
@@ -8504,7 +8504,7 @@ function Addon.RestoreLegacyCustomNameplates()
     local max_slot_no = #custom_plates
 
     local index = 1
-    for _, legacy_custom_plate in pairs(legacy_custom_plates) do
+    for _, legacy_custom_plate in ipairs(legacy_custom_plates) do
       -- Only need to check for double name trigger as legacy custom nameplates only have these kind of triggers
       local trigger_value = legacy_custom_plate.Trigger.Name.Input
       local trigger_already_used = Addon.Cache.CustomPlateTriggers.Name[trigger_value]
