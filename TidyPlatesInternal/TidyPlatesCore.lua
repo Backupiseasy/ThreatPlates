@@ -621,7 +621,6 @@ do
 	-- UpdateIndicator_HealthBar: Updates the value on the health bar
 	function UpdateIndicator_HealthBar()
 		visual.healthbar:SetMinMaxValues(0, unit.healthmax)
-		--visual.healthbar:SetValue(unit.health)
     visual.healthbar:SetValue(unit.health)
   end
 
@@ -1049,9 +1048,9 @@ do
   if not Addon.CLASSIC then
     function CoreEvents:PLAYER_FOCUS_CHANGED()
       local extended
-      if LastTargetPlate and LastTargetPlate.TPFrame.Active then
-        LastTargetPlate.TPFrame.unit.IsFocus = false
-        LastTargetPlate = nil
+      if LastFocusPlate and LastFocusPlate.TPFrame.Active then
+        LastFocusPlate.TPFrame.unit.IsFocus = false
+        LastFocusPlate = nil
         -- Update mouseover, if the mouse was hovering over the targeted unit
         CoreEvents:UPDATE_MOUSEOVER_UNIT()
       end
@@ -1059,7 +1058,7 @@ do
       local plate = GetNamePlateForUnit("focus")
       if plate and plate.TPFrame.Active then
         plate.TPFrame.unit.IsFocus = true
-        LastTargetPlate = plate
+        LastFocusPlate = plate
       end
 
       SetUpdateAll()
