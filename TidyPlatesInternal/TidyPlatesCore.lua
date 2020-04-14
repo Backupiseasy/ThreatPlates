@@ -223,6 +223,7 @@ do
 		visual.spellicon = castbar.Overlay:CreateTexture(nil, "ARTWORK", 7)
 		visual.spelltext = castbar.Overlay:CreateFontString(nil, "OVERLAY")
 		visual.spelltext:SetFont("Fonts\\FRIZQT__.TTF", 11)
+    visual.spelltext:SetAllPoints(castbar)
     visual.spelltext:SetWordWrap(false) -- otherwise text is wrapped when plate is scaled down
 
     visual.Highlight = Addon:Element_Mouseover_Create(extended)
@@ -1012,16 +1013,13 @@ do
 
   function CoreEvents:PLAYER_TARGET_CHANGED()
     -- Target Castbar Offset
-    local visual, style, extended
+    local castbar, style, extended
     if LastTargetPlate and LastTargetPlate.TPFrame.Active then
       extended = LastTargetPlate.TPFrame
-      visual = extended.visual
+      castbar = extended.visual.castbar
       style = extended.style
-      visual.castbar:ClearAllPoints()
-      visual.spelltext:ClearAllPoints()
-      visual.castbar:SetPoint(style.castbar.anchor or "CENTER", extended, style.castbar.x or 0, style.castbar.y or 0)
-      visual.spelltext:SetPoint(style.spelltext.anchor or "CENTER", extended, style.spelltext.x or 0, style.spelltext.y or 0)
-      --visual.spellicon:SetPoint(style.spellicon.anchor or "CENTER", extended, style.spellicon.x or 0, style.spellicon.y or 0)
+      castbar:ClearAllPoints()
+      castbar:SetPoint(style.castbar.anchor or "CENTER", extended, style.castbar.x or 0, style.castbar.y or 0)
 
       LastTargetPlate = nil
 
@@ -1034,14 +1032,11 @@ do
     --if plate and plate.TPFrame and plate.TPFrame.stylename ~= "" then
     if plate and plate.TPFrame.Active then
       extended = plate.TPFrame
-      visual = extended.visual
+      castbar = extended.visual.castbar
       style = extended.style
-      visual.castbar:ClearAllPoints()
-      visual.spelltext:ClearAllPoints()
+      castbar:ClearAllPoints()
       local db = TidyPlatesThreat.db.profile.settings.castbar
-      visual.castbar:SetPoint(style.castbar.anchor or "CENTER", extended, style.castbar.x + db.x_target or 0, style.castbar.y + db.y_target or 0)
-      visual.spelltext:SetPoint(style.spelltext.anchor or "CENTER", extended, style.spelltext.x + db.x_target or 0, style.spelltext.y + db.y_target or 0)
-      --visual.spellicon:SetPoint(style.spellicon.anchor or "CENTER", extended, style.spellicon.x + db.x_target or 0, style.spellicon.y + db.y_target or 0)
+      castbar:SetPoint(style.castbar.anchor or "CENTER", extended, style.castbar.x + db.x_target or 0, style.castbar.y + db.y_target or 0)
 
       LastTargetPlate = plate
 
@@ -1368,7 +1363,8 @@ do
 	end
 
 	-- Style Groups
-	local fontgroup = {"name", "level", "spelltext", "customtext"}
+	local fontgroup = {"name", "level", "customtext"}
+  -- "spelltext",
 
 	local anchorgroup = {
 		"name",  "spelltext", "customtext", "level", "spellicon", "raidicon", "skullicon"
@@ -1460,24 +1456,25 @@ do
     end
 
     visual.castbar:ClearAllPoints()
-    visual.spelltext:ClearAllPoints()
-    --visual.spellicon:ClearAllPoints()
 
     local db = TidyPlatesThreat.db.profile.settings.castbar
     if UnitIsUnit("target", unit.unitid) then
       SetObjectAnchor(visual.castbar, style.castbar.anchor or "CENTER", extended, style.castbar.x + db.x_target or 0, style.castbar.y + db.y_target or 0)
-      SetObjectAnchor(visual.spelltext, style.spelltext.anchor or "CENTER", extended, style.spelltext.x + db.x_target or 0, style.spelltext.y + db.y_target or 0)
-      --SetObjectAnchor(visual.spellicon, style.spellicon.anchor or "CENTER", extended, style.spellicon.x + db.x_target or 0, style.spellicon.y + db.y_target or 0)
     else
       SetObjectAnchor(visual.castbar, style.castbar.anchor or "CENTER", extended, style.castbar.x or 0, style.castbar.y or 0)
-      SetObjectAnchor(visual.spelltext, style.spelltext.anchor or "CENTER", extended, style.spelltext.x or 0, style.spelltext.y or 0)
-      --SetObjectAnchor(visual.spellicon, style.spellicon.anchor or "CENTER", extended, style.spellicon.x or 0, style.spellicon.y or 0)
     end
+
+    -- Spell name
+    SetFontGroupObject(visual.spelltext, style.spelltext)
+    visual.spelltext:SetSize(visual.castbar:GetSize())
+    visual.spelltext:ClearAllPoints()
+    visual.spelltext:SetPoint("CENTER", visual.castbar, "CENTER", db.SpellNameText.HorizontalOffset, db.SpellNameText.VerticalOffset)
+    visual.spelltext:SetShown(style.spelltext.show)
 
     -- Remaining cast time
     SetObjectFont(visual.castbar.casttime, style.spelltext.typeface, style.spelltext.size, style.spelltext.flags)
-    SetObjectShadow(visual.castbar.casttime, style.spelltext.shadow)
     SetObjectJustify(visual.castbar.casttime, db.CastTimeText.Font.HorizontalAlignment, db.CastTimeText.Font.VerticalAlignment)
+    SetObjectShadow(visual.castbar.casttime, style.spelltext.shadow)
     visual.castbar.casttime:SetSize(visual.castbar:GetSize())
     visual.castbar.casttime:ClearAllPoints()
     visual.castbar.casttime:SetPoint("CENTER", visual.castbar, "CENTER", db.CastTimeText.HorizontalOffset, db.CastTimeText.VerticalOffset)

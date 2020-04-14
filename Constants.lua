@@ -1121,6 +1121,10 @@ ThreatPlates.DEFAULT_SETTINGS = {
         ShowInHeadlineView = false,
         ShowSpark = true,
         ShowCastTime = true,
+        SpellNameText = {
+          HorizontalOffset = 2,
+          VerticalOffset = 0,
+        },
         CastTimeText = {
           HorizontalOffset = -2,
           VerticalOffset = 0,
