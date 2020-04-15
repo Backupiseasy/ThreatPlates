@@ -80,15 +80,15 @@ Addon.LEGACY_CUSTOM_NAMEPLATES = {
       Type = "Name",
       Name = {
         Input = "<Enter name here>",
-        AsArray = {},
+        AsArray = {}, -- Generated after entering Input with Addon.Split
       },
       Aura = {
         Input = "",
-        AsArray = {},
+        AsArray = {}, -- Generated after entering Input with Addon.Split
       },
       Cast = {
         Input = "",
-        AsArray = {},
+        AsArray = {}, -- Generated after entering Input with Addon.Split
       },
     },
     Effects = {
@@ -117,16 +117,17 @@ Addon.LEGACY_CUSTOM_NAMEPLATES = {
     allowMarked = true,
     overrideScale = false,
     overrideAlpha = false,
-    UseAutomaticIcon = false,
-    icon = "",
-    -- SpellID = nil,
-    -- SpellName = nil,
+    UseAutomaticIcon = false, -- Default: true
+    -- AutomaticIcon = "number",
+    icon = "",                -- Default: "INV_Misc_QuestionMark.blp"
+    -- SpellID = "number",
+    -- SpellName = "string",
     scale = 1,
     alpha = 1,
     color = {
       r = 1,
       g = 1,
-      b = 1
+      b = 1,
     },
   },
   [1] = {
@@ -1422,7 +1423,11 @@ Addon.MigrateDatabase = MigrateDatabase
 -----------------------------------------------------
 
 local CUSTOM_STYLE_TYPE_CHECK = {
-  icon = { number = true, string = true }
+  icon = { number = true, string = true },
+  -- Not part of default values, dynamically inserted
+  AutomaticIcon = { number = true },
+  SpellID = { number = true },
+  SpellName = { number = true },
 }
 
 --
@@ -1450,9 +1455,9 @@ local function UpdateFromCustomStyle(custom_style, update_from_custom_style)
       else
         local type_is_ok
 
-        local multi_type_entry = CUSTOM_STYLE_TYPE_CHECK[key]
-        if multi_type_entry then
-          type_is_ok = multi_type_entry[type(update_from_value)] ~= nil
+        local valid_types = CUSTOM_STYLE_TYPE_CHECK[key]
+        if valid_types then
+          type_is_ok = valid_types[type(update_from_value)]
         else
           type_is_ok = type(current_value) == type(update_from_value)
         end
@@ -1465,14 +1470,27 @@ local function UpdateFromCustomStyle(custom_style, update_from_custom_style)
   end
 end
 
+local function UpdateRuntimeValueFromCustomStyle(custom_style, imported_custom_style, key)
+  local valid_types = CUSTOM_STYLE_TYPE_CHECK[key]
+  if valid_types and valid_types[type(imported_custom_style[key])] then
+    custom_style[key] = imported_custom_style[key]
+  end
+end
+
 Addon.ImportCustomStyle = function(imported_custom_style)
   local custom_style = ThreatPlates.CopyTable(ThreatPlates.DEFAULT_SETTINGS.profile.uniqueSettings["**"])
+
   UpdateFromCustomStyle(custom_style, imported_custom_style)
 
-  -- Verfiy that the imported custom_style is consistent
+  -- Generate the AsArray version of the input, so that the imported custom_style is consistent (it should be, but
+  -- just to be safe)
   custom_style.Trigger.Name.AsArray = Addon.Split(custom_style.Trigger.Name.Input)
   custom_style.Trigger.Aura.AsArray = Addon.Split(custom_style.Trigger.Aura.Input)
   custom_style.Trigger.Cast.AsArray = Addon.Split(custom_style.Trigger.Cast.Input)
+
+  -- No need to import AutomaticIcon as it is set/overwritten, when a aura or cast trigger are detected
+  UpdateRuntimeValueFromCustomStyle(custom_style, imported_custom_style, "SpellID")
+  UpdateRuntimeValueFromCustomStyle(custom_style, imported_custom_style, "SpellName")
 
   return custom_style
 end

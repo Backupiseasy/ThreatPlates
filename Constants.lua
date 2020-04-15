@@ -1000,15 +1000,15 @@ ThreatPlates.DEFAULT_SETTINGS = {
           Type = "Name",
           Name = {
             Input = "<Enter name here>",
-            AsArray = {},
+            AsArray = {}, -- Generated after entering Input with Addon.Split
           },
           Aura = {
             Input = "",
-            AsArray = {},
+            AsArray = {}, -- Generated after entering Input with Addon.Split
           },
           Cast = {
             Input = "",
-            AsArray = {}
+            AsArray = {}, -- Generated after entering Input with Addon.Split
           },
         },
         Effects = {
@@ -1038,9 +1038,10 @@ ThreatPlates.DEFAULT_SETTINGS = {
         overrideScale = false,
         overrideAlpha = false,
         UseAutomaticIcon = true,
+        -- AutomaticIcon = "number",
         icon = "INV_Misc_QuestionMark.blp",
-        -- SpellID = nil,
-        -- SpellName = nil,
+        -- SpellID = "number",
+        -- SpellName = "string",
         scale = 1,
         alpha = 1,
         color = {

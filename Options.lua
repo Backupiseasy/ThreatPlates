@@ -347,21 +347,21 @@ function Addon:InitializeCustomNameplates()
   wipe(custom_style_triggers.Cast)
   wipe(Addon.Cache.TriggerWildcardTests)
 
-  for _, custom_plate in ipairs(db.uniqueSettings) do
-    if not custom_plate.Enable.Never then
-      local trigger_type = custom_plate.Trigger.Type
-      local trigger_list = custom_plate.Trigger[trigger_type].AsArray
+  for index, custom_style in pairs(db.uniqueSettings) do
+    if type(index) == "number" and custom_style.Trigger.Name.Input ~= "<Enter name here>" and not custom_style.Enable.Never then
+      local trigger_type = custom_style.Trigger.Type
+      local trigger_list = custom_style.Trigger[trigger_type].AsArray
 
       for _, trigger in ipairs(trigger_list) do
         if trigger_type == "Name" and string.find(trigger, "%*") then
           local wildcard_trigger = string.gsub(trigger, "%*", ".*")
-          custom_style_triggers.NameWildcard[#custom_style_triggers.NameWildcard + 1] = { wildcard_trigger, custom_plate }
+          custom_style_triggers.NameWildcard[#custom_style_triggers.NameWildcard + 1] = { wildcard_trigger, custom_style }
         else
-          custom_style_triggers[trigger_type][trigger] = custom_plate
+          custom_style_triggers[trigger_type][trigger] = custom_style
         end
       end
 
-      if custom_plate.Effects.Glow.Type ~= "None" then
+      if custom_style.Effects.Glow.Type ~= "None" then
         Addon.UseUniqueWidget = true
       end
     end
@@ -5193,7 +5193,7 @@ local function CustomPlateSetIcon(index, icon_location)
       if icon then
         custom_plate.SpellID = spell_id
       else
-        icon = spell_id
+        icon = spell_id -- Set icon to spell_id == icon_location, so that the value gets stored
         t.Print("Invalid spell ID for custom nameplate icon: " .. icon_location, true)
       end
     else
@@ -5331,6 +5331,7 @@ local function CreateCustomNameplateEntry(index)
 
           ShowExportFrame(export_data)
         end,
+        disabled = function() return TidyPlatesThreat.db.global.CustomNameplatesVersion == 1 end,
       },
       Header = {
         name = CustomPlateGetHeaderName(index),
@@ -5964,7 +5965,15 @@ local function CreateCustomNameplatesGroup()
           type = "group",
           order = 20,
           inline = true,
+          disabled = function() return TidyPlatesThreat.db.global.CustomNameplatesVersion == 1 end,
           args = {
+            VersionWarning = {
+              type = "description",
+              order = 1,
+              width = "full",
+              name = L["|cffFF0000This option is disabled as you are still using the obsolete custom nameplates format. Migrate your custom nameplates to the new format (using the Migration button at the top) to enable this option.|r"],
+              hidden = function() return TidyPlatesThreat.db.global.CustomNameplatesVersion > 1 end,
+            },
             Export = {
               name = L["Export Custom Nameplates"],
               order = 10,
@@ -5995,10 +6004,12 @@ local function CreateCustomNameplatesGroup()
                   local success, import_data = ImportStringData(encoded)
 
                   if success then
+                    if import_data.Version ~= t.Meta("version") then
+                      t.Print(L["The import string contains custom nameplate settings from an different Threat Plates version as you are using. Some settings from the imported custom nameplates might be lost."], true)
+                    end
+
                     if not import_data.Version or not import_data.CustomStyles then
                       t.Print(L["The import string has an invalied format and cannot be imported. Verify that the import string was generated from the same Threat Plates version that you are using currently."], true)
-                    elseif import_data.Version ~= t.Meta("version") then
-                      t.Print(L["The import string contains custom nameplate settings from an incombatible Threat Plates version. Importing only works with data exported from the same Threat Plates version as you are using."], true)
                     else
                       local imported_custom_styles  = {}
 
@@ -6044,8 +6055,12 @@ local function CreateCustomNameplatesGroup()
     },
   }
 
-  for index, unique_unit in ipairs(db.uniqueSettings) do
-    entry["#" .. index] = CreateCustomNameplateEntry(index)
+  -- Use pairs as iterater as the table is in a somewhat invalid format (non-iteratable with ipairs) as long as the
+  -- custom styles have not been migrated to V2
+  for index, custom_style in pairs(db.uniqueSettings) do
+    if type(index) == "number" and custom_style.Trigger.Name.Input ~= "<Enter name here>"  then
+      entry["#" .. index] = CreateCustomNameplateEntry(index)
+    end
   end
 
   return entry
