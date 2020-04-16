@@ -84,7 +84,7 @@ SlashCmdList["TPTPVERBOSE"] = TPTPVERBOSE
 local function PrintHelp()
 	TP.Print(L["Usage: /tptp [options]"], true)
 	TP.Print(L["options:"], true)
-	TP.Print(L["  legacy-custom-plates    Adds (legacy) default custom nameplates that are deleted when migrating custom nameplates to the current format"], true)
+	TP.Print(L["  legacy-custom-styles    Adds (legacy) default custom styles for nameplates that are deleted when migrating custom nameplates to the current format"], true)
 	TP.Print(L["  help                    Prints this help message"], true)
 	TP.Print(L["  <no option>             Displays options dialog"], true)
 	TP.Print(L["Additional chat commands:"], true)
@@ -118,8 +118,14 @@ function TidyPlatesThreat:ChatCommand(input)
 		TidyPlatesThreat:OpenOptions()
 	elseif input == "help" then
 		PrintHelp()
-	elseif input == "legacy-custom-plates" then
+	elseif input == "legacy-custom-styles" then
 		Addon.RestoreLegacyCustomNameplates()
+	elseif input == "toggle-view	-friendly-units" then
+		TidyPlatesThreat:ToggleNameplateModeFriendlyUnits()
+	elseif input == "toggle-view-neutral-units" then
+		TidyPlatesThreat:ToggleNameplateModeNeutralUnits()
+	elseif input == "toggle-view-enemy-units" then
+		TidyPlatesThreat:ToggleNameplateModeEnemyUnits()
 	elseif DEBUG then
 		if command == "searchdb" then
 			TP.Print("|cff89F559Threat Plates|r: Searching settings:", true)
@@ -164,11 +170,13 @@ function TidyPlatesThreat:ChatCommandDebug(cmd_list)
 				Type = "Name",
 				Name = {
 					Input = "Wurzebrumpf",
-					AsArray = { "Wurzebrumpf" },
+					AsArray = { "fsadfsd" },
 				}
 			},
 			UseAutomaticIcon = false,
 			icon = false,
+			XYZ = true,
+			SpellID = 234234,
 		}
 		local imported_custom_style = Addon.ImportCustomStyle(custom_style)
 		TP.DEBUG_PRINT_TABLE(imported_custom_style)
