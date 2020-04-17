@@ -670,10 +670,16 @@ do
 	-- UpdateIndicator_EliteIcon: Updates the border overlay art and threat glow to Elite or Non-Elite art
 	function UpdateIndicator_EliteIcon()
     if unit.isRare then
-      visual.eliteicon:SetVertexColor(0.8, 0.8, 0.8)
       visual.eliteicon:SetShown(style.eliteicon.show)
-      visual.eliteborder:SetBackdropBorderColor(0.8, 0.8, 0.8)
       visual.eliteborder:SetShown(style.eliteborder.show)
+
+      if unit.isElite then
+        visual.eliteicon:SetVertexColor(0.804, 0.498, 0.196)
+        visual.eliteborder:SetBackdropBorderColor(0.804, 0.498, 0.196)
+      else
+        visual.eliteicon:SetVertexColor(0.8, 0.8, 0.8)
+        visual.eliteborder:SetBackdropBorderColor(0.8, 0.8, 0.8)
+      end
     elseif unit.isElite then
       visual.eliteicon:SetVertexColor(1, 0.85, 0)
       visual.eliteicon:SetShown(style.eliteicon.show)

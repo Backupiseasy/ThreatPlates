@@ -7469,12 +7469,12 @@ local function CreateOptionsTable()
                       type = "select",
                       order = 10,
                       name = L["Icon Style"],
-                      --Blizzard Dragon <- TARGETINGFRAME\\Nameplates.png
                       values = { default = "Default", stddragon = "Blizzard Dragon", skullandcross = "Skull and Crossbones" },
                       set = function(info, val)
                         SetThemeValue(info, val)
                         options.args.NameplateSettings.args.EliteIcon.args.Texture.args.PreviewRare.image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\EliteArtWidget\\" .. val
                         options.args.NameplateSettings.args.EliteIcon.args.Texture.args.PreviewElite.image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\EliteArtWidget\\" .. "elite-" .. val
+                        options.args.NameplateSettings.args.EliteIcon.args.Texture.args.PreviewRareElite.image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\EliteArtWidget\\" .. "rareelite-" .. val
                         Addon:ForceUpdate()
                       end,
                       arg = { "settings", "eliteicon", "theme" },
@@ -7490,6 +7490,12 @@ local function CreateOptionsTable()
                       type = "execute",
                       order = 30,
                       image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\EliteArtWidget\\" .. "elite-" .. db.settings.eliteicon.theme,
+                    },
+                    PreviewRareElite = {
+                      name = L["Preview Rare Elite"],
+                      type = "execute",
+                      order = 40,
+                      image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\EliteArtWidget\\" .. "rareelite-" .. db.settings.eliteicon.theme,
                     },
                   },
                 },
@@ -8471,6 +8477,7 @@ function TidyPlatesThreat:ProfChange()
   if options then
     options.args.NameplateSettings.args.EliteIcon.args.Texture.args.PreviewRare.image = path .. "EliteArtWidget\\" .. db.settings.eliteicon.theme
     options.args.NameplateSettings.args.EliteIcon.args.Texture.args.PreviewElite.image = path .. "EliteArtWidget\\" .. "elite-" .. db.settings.eliteicon.theme
+    options.args.NameplateSettings.args.EliteIcon.args.Texture.args.PreviewElite.image = path .. "EliteArtWidget\\" .. "rareelite-" .. db.settings.eliteicon.theme
 
     local base = options.args.Widgets.args
     base.TargetArtWidget.args.Texture.args.Preview.image = path .. "TargetArtWidget\\" .. db.targetWidget.theme;

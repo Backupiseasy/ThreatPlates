@@ -137,6 +137,10 @@ function TidyPlatesThreat:ChatCommand(input)
 			for k, v in pairs(TidyPlatesThreat.db.profile.uniqueSettings) do
 				print ("Style:", k, "=>", v.Trigger.Type, " - ", v.Trigger[v.Trigger.Type].Input or "nil" )
 			end
+		elseif command == "unit" then
+			local plate = C_NamePlate.GetNamePlateForUnit("target")
+			if not plate then return end
+			TP.DEBUG_PRINT_UNIT(plate.TPFrame.unit, true)
 		else
 			TidyPlatesThreat:ChatCommandDebug(cmd_list)
 		end
@@ -180,14 +184,6 @@ function TidyPlatesThreat:ChatCommandDebug(cmd_list)
 		}
 		local imported_custom_style = Addon.ImportCustomStyle(custom_style)
 		TP.DEBUG_PRINT_TABLE(imported_custom_style)
-	elseif command == "unit" then
-		local plate = C_NamePlate.GetNamePlateForUnit("target")
-		if not plate then return end
-		local unit = plate.TPFrame.unit
-
-		TP.DEBUG_PRINT_UNIT(unit, true)
-    local type, zero, server_id, instance_id, zone_uid, npc_id, spawn_uid = strsplit("-", unit.guid)
-    print ("GUID:", type, zero, server_id, instance_id, zone_uid, npc_id, spawn_uid)
 	elseif command == "migrate" then
 		local profile_table = TidyPlatesThreat.db.profiles
 
