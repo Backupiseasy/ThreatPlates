@@ -2,7 +2,7 @@
 9.2.0-Beta4
 ------------------------------------------------------
 * Extended the Name trigger for custom styles for nameplates to also support the wildcard character *.
-* The indicator icon for rare and elite mobs now shows a seperate color for rare-elite mobs to make them more distinguishable.
+* The indicator icon for rare and elite mobs now shows a seperate color for rare-elite mobs to make them more distinguishable [GH Issue #199].
 * Spell name is now anchored directly to the castbar which simplifies the configuration of its placement.
 * Fixed layering of interrupt overlay which was wrong after adding cast time text.
 * Fixed a bug with focus unit not set/removed correctly in all situations.
