@@ -640,7 +640,7 @@ do
 		if unit.level < 0 then
       visual.level:SetText("")
 		else
-      visual.level:SetText(unit.level)
+      visual.level:SetText((unit.isElite and "+" or "") .. unit.level)
     end
 
     visual.level:SetTextColor(unit.levelcolorRed, unit.levelcolorGreen, unit.levelcolorBlue)

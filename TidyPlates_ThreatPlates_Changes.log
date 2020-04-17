@@ -6,6 +6,7 @@
 * Spell name is now anchored directly to the castbar which simplifies the configuration of its placement.
 * Fixed layering of interrupt overlay which was wrong after adding cast time text.
 * Fixed a bug with focus unit not set/removed correctly in all situations.
+* Fixed a bug in Quest widget regarding quests with multiple quest objectives on the same unit were remaining objectives were ignored when the first objective was completed.
 
 ------------------------------------------------------
 9.2.0-Beta3

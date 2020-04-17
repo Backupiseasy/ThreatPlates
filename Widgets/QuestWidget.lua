@@ -118,9 +118,9 @@ function IsQuestUnit(unit, create_watcher)
   if not unit.unitid then return false, false, nil end
 
   local quest_title
-  -- local unit_name
-  local quest_player = true
+  -- local quest_player = true
   local quest_progress = false
+  local quest_title_found = false
 
   -- Read quest information from tooltip. Thanks to Kib: QuestMobs AddOn by Tosaido.
   TooltipFrame:SetOwner(WorldFrame, "ANCHOR_NONE")
@@ -132,33 +132,34 @@ function IsQuestUnit(unit, create_watcher)
     local text = line:GetText()
     local text_r, text_g, text_b = line:GetTextColor()
 
-    -- print ("Line: |" .. text .. "|")
-    -- print ("  => ", text_r, text_g, text_b)
     if text_r > 0.99 and text_g > 0.82 and text_b == 0 then
       -- A line with this color is either the quest title or a player name (if on a group quest, but always after the quest title)
-      if quest_title then
-        quest_player = (text == PlayerName)
-        -- unit_name = text
-      else
+      -- if quest_title_found then
+      --   quest_player = (text == PlayerName)
+      -- else
+      if not quest_title_found then
+        quest_title_found = true
         quest_title = text
       end
-    elseif quest_title and quest_player then
+    elseif quest_title then
       local objective_name, current, goal
       local objective_type = false
 
-      -- Set quest_title to false again, otherwise a second quest in the tooltip will not be found (first if statement will
+      -- The for loop will be left (break) if no quest title/player name (yellow lines) or quest objective (with progress/goal) are found
+      -- any more
+      -- Set quest_title_found to false again, otherwise a second quest in the tooltip will not be found (first if statement will
       -- check for quest_player only as quest_title is still set to the first quest
-      quest_title = false
+      quest_title_found = false
 
       -- Check if area / progress quest
       if string.find(text, "%%") then
         objective_name, current, goal = string.match(text, "^(.*) %(?(%d+)%%%)?$")
         objective_type = "area"
-        --print (unit_name, "=> ", "Area: |" .. text .. "|", objective_name, current, goal)
+        --print ("  ", unit.name, "=> ", "Area: <" .. text .. ">", objective_name, current, goal)
       else
         -- Standard x/y /pe quest
         objective_name, current, goal = QuestObjectiveParser(text)
-        --print (unit_name, "=> ", "Standard: |" .. text .. "|", objective_name, current, goal, "|")
+        --print ("  ", unit.name, "=> ", "Standard: <" .. text .. ">", objective_name, current, goal, "|")
       end
 
       if objective_name then
