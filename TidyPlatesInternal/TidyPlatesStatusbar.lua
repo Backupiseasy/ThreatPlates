@@ -60,6 +60,7 @@ local function OnUpdateCastBar(self, elapsed)
       return
     end
   elseif (self.FlashTime > 0) then
+    self.casttime:SetText("")
     self.FlashTime = self.FlashTime - elapsed
     return
   end

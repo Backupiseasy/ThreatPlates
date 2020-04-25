@@ -2,6 +2,7 @@
 9.2.0-Beta5
 ------------------------------------------------------
 * Re-added configuration options for spell name width and height for better handling of long spell names or interrupt information. [Comment #4374]
+* Fixed a bug where remaining cast time was shown when a spell was interrupted and interrupted information was shown.
 
 ------------------------------------------------------
 9.2.0-Beta4
