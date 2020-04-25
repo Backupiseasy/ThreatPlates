@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+9.2.0-Beta5
+------------------------------------------------------
+* Re-added configuration options for spell name width and height for better handling of long spell names or interrupt information. [Comment #4374]
+
+------------------------------------------------------
 9.2.0-Beta4
 ------------------------------------------------------
 * Extended the Name trigger for custom styles for nameplates to also support the wildcard character *.

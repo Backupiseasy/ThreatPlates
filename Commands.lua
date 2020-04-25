@@ -120,12 +120,12 @@ function TidyPlatesThreat:ChatCommand(input)
 		PrintHelp()
 	elseif input == "legacy-custom-styles" then
 		Addon.RestoreLegacyCustomNameplates()
-	elseif input == "toggle-view	-friendly-units" then
-		TidyPlatesThreat:ToggleNameplateModeFriendlyUnits()
-	elseif input == "toggle-view-neutral-units" then
-		TidyPlatesThreat:ToggleNameplateModeNeutralUnits()
-	elseif input == "toggle-view-enemy-units" then
-		TidyPlatesThreat:ToggleNameplateModeEnemyUnits()
+--	elseif input == "toggle-view-friendly-units" then
+--		TidyPlatesThreat:ToggleNameplateModeFriendlyUnits()
+--	elseif input == "toggle-view-neutral-units" then
+--		TidyPlatesThreat:ToggleNameplateModeNeutralUnits()
+--	elseif input == "toggle-view-enemy-units" then
+--		TidyPlatesThreat:ToggleNameplateModeEnemyUnits()
 	elseif DEBUG then
 		if command == "searchdb" then
 			TP.Print("|cff89F559Threat Plates|r: Searching settings:", true)

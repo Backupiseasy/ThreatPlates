@@ -1242,6 +1242,12 @@ local function GetBoundariesEntryName(name, pos, widget_info, func_disabled)
   return entry
 end
 
+local function GetBoundariesEntryNormalWidth(name, pos, widget_info, func_disabled)
+  local entry = GetBoundariesEntry(pos, widget_info, func_disabled)
+  entry.args.Width.width = nil
+  entry.args.Height.width = nil
+  return entry
+end
 
 local function AddLayoutOptions(args, pos, widget_info)
   args.Sizing = GetSizeEntryDefault(pos, widget_info)
@@ -4907,9 +4913,9 @@ local function CreateCastbarOptions()
               },
               OffsetX = GetPlacementEntry(L["Offset X"], 3, { "settings", "castbar", "SpellNameText", "HorizontalOffset" } ),
               OffsetY = GetPlacementEntry(L["Offset Y"], 4, { "settings", "castbar", "SpellNameText", "VerticalOffset" } ),
+              Boundaries = GetBoundariesEntryNormalWidth(L["Spell Text Boundaries"], 5, "spelltext"),
             },
           },
-          -- Boundaries = GetBoundariesEntryName(L["Spell Text Boundaries"], 40, "spelltext"),
           AlignCastTime = {
             name = L["Cast Text Alignment"],
             order = 50,

@@ -223,7 +223,6 @@ do
 		visual.spellicon = castbar.Overlay:CreateTexture(nil, "ARTWORK", 7)
 		visual.spelltext = castbar.Overlay:CreateFontString(nil, "OVERLAY")
 		visual.spelltext:SetFont("Fonts\\FRIZQT__.TTF", 11)
-    visual.spelltext:SetAllPoints(castbar)
     visual.spelltext:SetWordWrap(false) -- otherwise text is wrapped when plate is scaled down
 
     visual.Highlight = Addon:Element_Mouseover_Create(extended)
@@ -1475,7 +1474,7 @@ do
 
     -- Spell name
     SetFontGroupObject(visual.spelltext, style.spelltext)
-    visual.spelltext:SetSize(visual.castbar:GetSize())
+    SetObjectShape(visual.spelltext, style.spelltext.width, style.spelltext.height)
     visual.spelltext:ClearAllPoints()
     visual.spelltext:SetPoint("CENTER", visual.castbar, "CENTER", db.SpellNameText.HorizontalOffset, db.SpellNameText.VerticalOffset)
     visual.spelltext:SetShown(style.spelltext.show)

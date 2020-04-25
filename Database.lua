@@ -503,8 +503,6 @@ local function GetDefaultSettingsV1(defaults)
   db.settings.customtext.y = 1
   db.settings.spelltext.typeface = "Accidental Presidency"
   db.settings.spelltext.size = 12
-  db.settings.spelltext.y = -13
-  db.settings.spelltext.y_hv = -13
   db.settings.eliteicon.x = 64
   db.settings.eliteicon.y = 9
   db.settings.skullicon.x = 55
@@ -971,7 +969,32 @@ local function MigrateCustomStylesToV3(profile_name, profile)
   end
 end
 
-Addon.MigrationCustomPlatesV3 = MigrateCustomStylesToV3
+local function MigrateSpelltextPosition(profile_name, profile)
+  if DatabaseEntryExists(profile, { "settings", "spelltext" } ) then
+    local default_profile = ThreatPlates.DEFAULT_SETTINGS.profile
+
+    profile.settings = profile.settings or {}
+    profile.settings.castbar = profile.settings.castbar or {}
+    profile.settings.castbar.SpellNameText = profile.settings.castbar.SpellNameText or {}
+
+    if DatabaseEntryExists(profile, { "settings", "spelltext", "x" } ) then
+      profile.settings.castbar.SpellNameText.HorizontalOffset = profile.settings.spelltext.x - 2
+      profile.settings.spelltext = profile.settings.spelltext or {}
+      profile.settings.spelltext.align = SetValueOrDefault(profile.settings.spelltext.align, "CENTER")
+    end
+
+    if DatabaseEntryExists(profile, { "settings", "spelltext", "y" } ) then
+      profile.settings.castbar.SpellNameText.VerticalOffset = profile.settings.spelltext.y + 15
+      profile.settings.spelltext = profile.settings.spelltext or {}
+      profile.settings.spelltext.vertical = SetValueOrDefault(profile.settings.spelltext.vertical, "CENTER")
+    end
+
+    DatabaseEntryDelete(profile, { "settings", "spelltext", "x" })
+    DatabaseEntryDelete(profile, { "settings", "spelltext", "y" })
+    DatabaseEntryDelete(profile, { "settings", "spelltext", "x_hv" })
+    DatabaseEntryDelete(profile, { "settings", "spelltext", "y_hv" })
+  end
+end
 
 -- Settings in the SavedVariables file that should be migrated and/or deleted
 local DEPRECATED_SETTINGS = {
@@ -1004,11 +1027,14 @@ local DEPRECATED_SETTINGS = {
   -- nonCombat = { "threat", "nonCombat" },                -- (removed in 9.1.0)
   -- MigrationCustomPlatesV3 = { MigrateCustomStylesToV3, "9.2.1", function() TidyPlatesThreat.db.global.CustomNameplatesVersion = 3 end },
   MigrationCustomPlatesV3 = { MigrateCustomStylesToV3, "9.2.1" },
+  SpelltextPosition = { MigrateSpelltextPosition, "9.2.0", NoDefaultProfile = true },
 }
 
 local function MigrateDatabase(current_version)
   TidyPlatesThreat.db.global.MigrationLog = nil
   --TidyPlatesThreat.db.global.MigrationLog = {}
+
+  local defaults
 
   local profile_table = TidyPlatesThreat.db.profiles
   for key, entry in pairs(DEPRECATED_SETTINGS) do
@@ -1018,6 +1044,11 @@ local function MigrateDatabase(current_version)
       local max_version = entry[2]
       if not max_version or CurrentVersionIsOlderThan(current_version, max_version) then
 
+        if entry.NoDefaultProfile then
+          defaults = ThreatPlates.CopyTable(TidyPlatesThreat.db.defaults)
+          TidyPlatesThreat.db:RegisterDefaults({})
+        end
+
         -- iterate over all profiles and migrate values
         --TidyPlatesThreat.db.global.MigrationLog[key] = "Migration" .. (max_version and ( " because " .. current_version .. " < " .. max_version) or "")
         for profile_name, profile in pairs(profile_table) do
@@ -1026,10 +1057,14 @@ local function MigrateDatabase(current_version)
       end
 
       -- Postprocessing, if necessary
---      action = entry[3]
---      if action and type(action) == "function" then
---        action()
---      end
+      -- action = entry[3]
+      -- if action and type(action) == "function" then
+      --   action()
+      -- end
+
+      if entry.NoDefaultProfile then
+        TidyPlatesThreat.db:RegisterDefaults(defaults)
+      end
     else
       -- iterate over all profiles and delete the old config entry
       --TidyPlatesThreat.db.global.MigrationLog[key] = "DELETED"
