@@ -4917,7 +4917,7 @@ local function CreateCastbarOptions()
             },
           },
           AlignCastTime = {
-            name = L["Cast Text Alignment"],
+            name = L["Cast Time Alignment"],
             order = 50,
             type = "group",
             inline = true,
@@ -5234,7 +5234,7 @@ StaticPopupDialogs["TriggerAlreadyExists"] = {
 
 StaticPopupDialogs["TriggerAlreadyExistsDisablingIt"] = {
   preferredIndex = 3,
-  text = L["A custom nameplate with these triggers already exists: %s. You cannot use two custom nameplates with th same trigger. The current custom nameplate was therefore disabled."],
+  text = L["A custom nameplate with these triggers already exists: %s. You cannot use two custom nameplates with the same trigger. The current custom nameplate was therefore disabled."],
   button1 = OKAY,
   timeout = 0,
   whileDead = 1,
@@ -5740,7 +5740,7 @@ local function CreateCustomNameplateEntry(index)
           Description = {
             type = "description",
             order = 5,
-            name = L["Enter an icons name (with the *.blp ending), a spell ID, a spell name or a full icon path (using '\\' to separate directory folders)."],
+            name = L["Enter an icon's name (with the *.blp ending), a spell ID, a spell name or a full icon path (using '\\' to separate directory folders)."],
             width = "full",
             hidden = function() return db.uniqueSettings[index].UseAutomaticIcon end
           },
@@ -6015,7 +6015,7 @@ local function CreateCustomNameplatesGroup()
                     end
 
                     if not import_data.Version or not import_data.CustomStyles then
-                      t.Print(L["The import string has an invalied format and cannot be imported. Verify that the import string was generated from the same Threat Plates version that you are using currently."], true)
+                      t.Print(L["The import string has an invalid format and cannot be imported. Verify that the import string was generated from the same Threat Plates version that you are using currently."], true)
                     else
                       local imported_custom_styles  = {}
 
