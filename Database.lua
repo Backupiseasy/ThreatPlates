@@ -1034,7 +1034,6 @@ local function MigrateDatabase(current_version)
   TidyPlatesThreat.db.global.MigrationLog = nil
   --TidyPlatesThreat.db.global.MigrationLog = {}
 
-  local defaults
 
   local profile_table = TidyPlatesThreat.db.profiles
   for key, entry in pairs(DEPRECATED_SETTINGS) do
@@ -1043,7 +1042,7 @@ local function MigrateDatabase(current_version)
     if type(action) == "function" then
       local max_version = entry[2]
       if not max_version or CurrentVersionIsOlderThan(current_version, max_version) then
-
+        local defaults
         if entry.NoDefaultProfile then
           defaults = ThreatPlates.CopyTable(TidyPlatesThreat.db.defaults)
           TidyPlatesThreat.db:RegisterDefaults({})
@@ -1054,6 +1053,10 @@ local function MigrateDatabase(current_version)
         for profile_name, profile in pairs(profile_table) do
           action(profile_name, profile)
         end
+
+        if entry.NoDefaultProfile then
+          TidyPlatesThreat.db:RegisterDefaults(defaults)
+        end
       end
 
       -- Postprocessing, if necessary
@@ -1061,10 +1064,6 @@ local function MigrateDatabase(current_version)
       -- if action and type(action) == "function" then
       --   action()
       -- end
-
-      if entry.NoDefaultProfile then
-        TidyPlatesThreat.db:RegisterDefaults(defaults)
-      end
     else
       -- iterate over all profiles and delete the old config entry
       --TidyPlatesThreat.db.global.MigrationLog[key] = "DELETED"

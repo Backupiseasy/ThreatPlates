@@ -1,4 +1,10 @@
 ﻿------------------------------------------------------
+9.2.0-Beta6
+------------------------------------------------------
+* Fixed a Lua error that occured when upgrading to to a new version because of an error in settings migration [Issue #407].
+* Updated localizations for deDE and zhTW.
+
+------------------------------------------------------
 9.2.0-Beta5
 ------------------------------------------------------
 * Re-added configuration options for spell name width and height for better handling of long spell names or interrupt information. [Comment #4374]
