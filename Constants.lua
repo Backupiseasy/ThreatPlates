@@ -157,6 +157,19 @@ Addon.CUSTOM_PLATES_GLOW_FRAMES = {
   Icon = L["Icon"],
 }
 
+Addon.TARGET_TEXTURES = {
+  default = L["Default"],
+  squarethin = L["Thin Square"],
+  arrows = L["Arrow"],
+  arrow_down = L["Down Arrow"],
+  arrow_less_than = L["Less-Than Arrow"],
+  glow = L["Glow"],
+  threat_glow = L["Threat Glow"],
+  crescent = L["Crescent"],
+  bubble = L["Bubble"],
+  arrows_legacy = L["Arrow (Legacy)"],
+}
+
 ----------------------------------------------------------------------------------------------------
 -- Paths
 ---------------------------------------------------------------------------------------------------

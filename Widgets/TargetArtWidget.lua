@@ -117,29 +117,30 @@ local function UpdateCenterTexture(db, widget_frame, texture_frame)
 end
 
 local UPDATE_TEXTURE_FUNCTIONS = {
-  arrow_down = UpdateCenterTexture,
+  default = UpdateBorderTexture,
+  squarethin = UpdateBorderTexture,
   arrows = UpdateSideTexture,
+  arrow_down = UpdateCenterTexture,
+  arrow_less_than = UpdateSideTexture,
+  glow = UpdateBorderTexture,
+  threat_glow = UpdateBorderTexture,
   arrows_legacy = UpdateSideTexture,
   bubble = UpdateSideTexture,
   crescent = UpdateSideTexture,
-  default = UpdateBorderTexture,
-  glow = UpdateBorderTexture,
-  squarethin = UpdateBorderTexture,
-  threat_glow = UpdateBorderTexture,
 }
 
 local FRAME_LEVEL_BY_TEXTURE = {
-  arrow_down = 14,
+  default = 6,
+  squarethin = 6,
   arrows = 14,
+  arrow_down = 14,
+  arrow_less_than = 14,
+  glow = 4,
+  threat_glow = 4,
   arrows_legacy = 14,
   bubble = 14,
   crescent = 14,
-  default = 6,
-  glow = 4,
-  squarethn = 6,
-  threat_glow = 4,
 }
-
 
 local function GetHeadlineViewHeight(db)
   return abs(max(db.name.y, db.customtext.y) - min(db.name.y, db.customtext.y)) + (db.name.size + db.customtext.size) / 2

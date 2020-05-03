@@ -1,4 +1,10 @@
 ﻿------------------------------------------------------
+9.2.0-Beta7
+------------------------------------------------------
+* Added new texture for target highlight texture Arrow.
+* Fixed a bug with depratecated settings for target highlight textures from previous beta versions.
+
+------------------------------------------------------
 9.2.0-Beta6
 ------------------------------------------------------
 * Fixed a Lua error that occured when upgrading to to a new version because of an error in settings migration [Issue #407].

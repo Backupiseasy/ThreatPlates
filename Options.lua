@@ -1993,11 +1993,7 @@ local function CreateTargetArtWidgetOptions()
               SetValueWidget(info, val)
               options.args.Widgets.args.TargetArtWidget.args.Texture.args.Preview.image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\TargetArtWidget\\" .. db.targetWidget.theme;
             end,
-            values = {
-              default = L["Default"], squarethin = L["Thin Square"], threat_glow = L["Threat Glow"], arrows = L["Arrow"],
-              arrow_down = L["Down Arrow"], crescent = L["Crescent"], bubble = L["Bubble"], arrows_legacy = L["Arrow (Legacy)"],
-              glow = L["Glow"],
-            },
+            values = Addon.TARGET_TEXTURES,
             arg = { "targetWidget", "theme" },
           },
           Color = {
@@ -2120,11 +2116,7 @@ local function CreateFocusWidgetOptions()
               SetValueWidget(info, val)
               options.args.Widgets.args.FocusWidget.args.Texture.args.Preview.image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\TargetArtWidget\\" .. db.FocusWidget.theme;
             end,
-            values = {
-              default = L["Default"], squarethin = L["Thin Square"], threat_glow = L["Threat Glow"], arrows = L["Arrow"],
-              arrow_down = L["Down Arrow"], crescent = L["Crescent"], bubble = L["Bubble"], arrows_legacy = L["Arrow (Legacy)"],
-              glow = L["Glow"],
-            },
+            values = Addon.TARGET_TEXTURES,
             arg = { "FocusWidget", "theme" },
           },
           Color = {

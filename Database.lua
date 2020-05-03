@@ -996,21 +996,35 @@ local function MigrateSpelltextPosition(profile_name, profile)
   end
 end
 
+local function FixTargetFocusTexture(profile_name, profile)
+  if DatabaseEntryExists(profile, { "targetWidget", "theme" } ) then
+    if not Addon.TARGET_TEXTURES[profile.targetWidget.theme] then
+      profile.targetWidget.theme = ThreatPlates.DEFAULT_SETTINGS.profile.targetWidget.theme
+    end
+  end
+
+  if DatabaseEntryExists(profile, { "FocusWidget", "theme" } ) then
+    if not Addon.TARGET_TEXTURES[profile.FocusWidget.theme] then
+      profile.FocusWidget.theme = ThreatPlates.DEFAULT_SETTINGS.profile.FocusWidget.theme
+    end
+  end
+end
+
 -- Settings in the SavedVariables file that should be migrated and/or deleted
 local DEPRECATED_SETTINGS = {
---  NamesColor = { MigrateNamesColor, },                        -- settings.name.color
---  CustomTextShow = { MigrateCustomTextShow, },                -- settings.customtext.show
---  BlizzFadeA = { MigrationBlizzFadeA, },                      -- blizzFadeA.toggle and blizzFadeA.amount
---  TargetScale = { MigrationTargetScale, "8.5.0" },            -- nameplate.scale.Target/NoTarget
---  --AuraWidget = { MigrateAuraWidget, "8.6.0" },              -- disabled until someone requests it
---  AlphaFeatures = { "alphaFeatures" },
---  AlphaFeatureHeadlineView = { "alphaFeatureHeadlineView" },
---  AlphaFeatureAuraWidget2= { "alphaFeatureAuraWidget2" },
---  AlphaFriendlyNameOnly = { "alphaFriendlyNameOnly" },
---  HVBlizzFarding = { "HeadlineView", "blizzFading" },         -- (removed in 8.5.1)
---  HVBlizzFadingAlpha = { "HeadlineView", "blizzFadingAlpha"}, -- (removed in 8.5.1)
---  HVNameWidth = { "HeadlineView", "name", "width" },          -- (removed in 8.5.0)
---  HVNameHeight = { "HeadlineView", "name", "height" },        -- (removed in 8.5.0)
+  --  NamesColor = { MigrateNamesColor, },                        -- settings.name.color
+  --  CustomTextShow = { MigrateCustomTextShow, },                -- settings.customtext.show
+  --  BlizzFadeA = { MigrationBlizzFadeA, },                      -- blizzFadeA.toggle and blizzFadeA.amount
+  --  TargetScale = { MigrationTargetScale, "8.5.0" },            -- nameplate.scale.Target/NoTarget
+  --  --AuraWidget = { MigrateAuraWidget, "8.6.0" },              -- disabled until someone requests it
+  --  AlphaFeatures = { "alphaFeatures" },
+  --  AlphaFeatureHeadlineView = { "alphaFeatureHeadlineView" },
+  --  AlphaFeatureAuraWidget2= { "alphaFeatureAuraWidget2" },
+  --  AlphaFriendlyNameOnly = { "alphaFriendlyNameOnly" },
+  --  HVBlizzFarding = { "HeadlineView", "blizzFading" },         -- (removed in 8.5.1)
+  --  HVBlizzFadingAlpha = { "HeadlineView", "blizzFadingAlpha"}, -- (removed in 8.5.1)
+  --  HVNameWidth = { "HeadlineView", "name", "width" },          -- (removed in 8.5.0)
+  --  HVNameHeight = { "HeadlineView", "name", "height" },        -- (removed in 8.5.0)
   DebuffWidget = { "debuffWidget" },                          -- (removed in 8.6.0)
   OldSettings = { "OldSettings" },                            -- (removed in 8.7.0)
   CastbarColoring = { MigrateCastbarColoring },              -- (removed in 8.7.0)
@@ -1028,12 +1042,12 @@ local DEPRECATED_SETTINGS = {
   -- MigrationCustomPlatesV3 = { MigrateCustomStylesToV3, "9.2.1", function() TidyPlatesThreat.db.global.CustomNameplatesVersion = 3 end },
   MigrationCustomPlatesV3 = { MigrateCustomStylesToV3, "9.2.1" },
   SpelltextPosition = { MigrateSpelltextPosition, "9.2.0", NoDefaultProfile = true },
+  FixTargetFocusTexture = { FixTargetFocusTexture, NoDefaultProfile = true },
 }
 
 local function MigrateDatabase(current_version)
   TidyPlatesThreat.db.global.MigrationLog = nil
   --TidyPlatesThreat.db.global.MigrationLog = {}
-
 
   local profile_table = TidyPlatesThreat.db.profiles
   for key, entry in pairs(DEPRECATED_SETTINGS) do

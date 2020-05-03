@@ -133,14 +133,12 @@ function TidyPlatesThreat:ChatCommand(input)
 			SearchDBForString(TidyPlatesThreat.db.global, "<Profile>", string.lower(cmd_list[2]))
 		elseif command == "cache" then
 			Addon.DebugPrintCaches()
-		elseif command == "custom-styles" then
-			for k, v in pairs(TidyPlatesThreat.db.profile.uniqueSettings) do
-				print ("Style:", k, "=>", v.Trigger.Type, " - ", v.Trigger[v.Trigger.Type].Input or "nil" )
-			end
 		elseif command == "unit" then
 			local plate = C_NamePlate.GetNamePlateForUnit("target")
 			if not plate then return end
 			TP.DEBUG_PRINT_UNIT(plate.TPFrame.unit, true)
+		elseif command == "migrate" then
+			Addon.MigrateDatabase(TP.Meta("version"))
 		else
 			TidyPlatesThreat:ChatCommandDebug(cmd_list)
 		end
@@ -158,6 +156,10 @@ function TidyPlatesThreat:ChatCommandDebug(cmd_list)
 		--Addon:PrintEventService()
 	elseif command == "quest" then
 		Addon:PrintQuests()
+	elseif command == "custom-styles" then
+		for k, v in pairs(TidyPlatesThreat.db.profile.uniqueSettings) do
+			print ("Style:", k, "=>", v.Trigger.Type, " - ", v.Trigger[v.Trigger.Type].Input or "nil" )
+		end
 	elseif command == "cleanup-custom-styles" then
 		local input = TidyPlatesThreat.db.profile.uniqueSettings
 		for i = #input, 1 , -1 do
@@ -184,12 +186,7 @@ function TidyPlatesThreat:ChatCommandDebug(cmd_list)
 		}
 		local imported_custom_style = Addon.ImportCustomStyle(custom_style)
 		TP.DEBUG_PRINT_TABLE(imported_custom_style)
-	elseif command == "migrate" then
-		local profile_table = TidyPlatesThreat.db.profiles
 
-		for profile_name, profile in pairs(profile_table) do
-			Addon.MigrationCustomPlatesV3(profile_name, profile)
-		end
   elseif command == "heuristic" then
     local plate = C_NamePlate.GetNamePlateForUnit("target")
     if not plate then return end
@@ -219,9 +216,9 @@ function TidyPlatesThreat:ChatCommandDebug(cmd_list)
 		DBM.Nameplate:Show(true, UnitGUID("target"), 255824, nil, nil, nil, true, {0.5, 0, 0.55, 0.75})
 	elseif command == "dbm2" then
 		DBM.Nameplate:Hide(true, UnitGUID("target"), 255824, nil, nil, nil, true, {0.5, 0, 0.55, 0.75})
---	else
---		TP.Print(L["Unknown option: "] .. input, true)
---		PrintHelp()
+	else
+		TP.Print(L["Unknown option: "] .. input, true)
+		PrintHelp()
 	end
 end
 
