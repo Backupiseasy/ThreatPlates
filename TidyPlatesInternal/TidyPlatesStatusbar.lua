@@ -219,7 +219,7 @@ function Addon:CreateCastbar(parent)
   local frame = CreateFrame("StatusBar", nil, parent)
   frame:Hide()
 
-  frame:SetFrameLevel(parent:GetFrameLevel() + 4)
+  frame:SetFrameLevel(parent:GetFrameLevel() + 3)
 
   frame.Border = CreateFrame("Frame", nil, frame)
   frame.Background = frame:CreateTexture(nil, "BACKGROUND")
