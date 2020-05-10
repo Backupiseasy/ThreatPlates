@@ -1567,7 +1567,7 @@ function Widget:UpdateAuraWidgetLayout(widget_frame)
   end
 
   if self.db.FrameOrder == "HEALTHBAR_AURAS" then
-    widget_frame:SetFrameLevel(widget_frame:GetParent():GetFrameLevel() + 3)
+    widget_frame:SetFrameLevel(widget_frame:GetParent():GetFrameLevel() + 2)
   else
     widget_frame:SetFrameLevel(widget_frame:GetParent():GetFrameLevel() + 9)
   end

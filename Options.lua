@@ -2335,7 +2335,6 @@ local function CreateResourceWidgetOptions()
           ShowEnemyNPCs = {
             name = L["Enemy NPCs"],
             order = 30,
-            order = 30,
             type = "toggle",
             arg = { "ResourceWidget", "ShowEnemyNPC" },
           },

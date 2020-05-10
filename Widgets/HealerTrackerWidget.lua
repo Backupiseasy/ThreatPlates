@@ -54,7 +54,6 @@ local HEALER_SPELLS = {
 
   -- Shaman
   ---------
-  [17116] = "SHAMAN", -- Nature's Swiftness
   [16190] = "SHAMAN", -- Mana Tide Totem
   [61295] = "SHAMAN", -- Riptide
   [5394] = "SHAMAN", -- Healing Stream Totem

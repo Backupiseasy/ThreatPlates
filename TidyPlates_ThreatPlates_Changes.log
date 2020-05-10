@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+9.2.0-Beta8
+------------------------------------------------------
+Fixed a bug with layering of glow target highlights by changing the layer of some nameplate elements [Issue #409].
+
+------------------------------------------------------
 9.2.0-Beta7
 ------------------------------------------------------
 * Added new texture for target highlight texture Arrow.
