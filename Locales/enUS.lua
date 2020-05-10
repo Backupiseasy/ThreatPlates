@@ -392,6 +392,7 @@ L["Layout"] = true
 L["Left"] = true
 L["Left-to-right"] = true
 L["Legacy custom nameplate %s already exists. Skipping it."] = true
+L["Less-Than Arrow"] = true
 L["Level Text"] = true
 L["Level"] = true
 L["Lich King"] = true
