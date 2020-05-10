@@ -1170,7 +1170,6 @@ ThreatPlates.DEFAULT_SETTINGS = {
       level = {
         typeface = Addon.DEFAULT_FONT, -- old default: "Accidental Presidency",
         size = 9, -- old default: 12,
-        size = 9, -- old default: 12,
         width = 20,
         height = 10, -- old default: 14,
         x = 49, -- old default: 50,
@@ -1306,7 +1305,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
     },
     threat = {
       ON = true,
-      marked = false,
+      -- marked = false, -- not used at all, removed in 9.2.0
       -- nonCombat = true, -- removed in 9.1.3
       UseThreatTable = true,
       UseHeuristicInInstances = false,
