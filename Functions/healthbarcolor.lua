@@ -10,8 +10,8 @@ local floor = floor
 local abs = abs
 
 -- WoW APIs
-local UnitIsConnected, UnitReaction, UnitCanAttack, UnitAffectingCombat = UnitIsConnected, UnitReaction, UnitCanAttack, UnitAffectingCombat
-local UnitHealth, UnitHealthMax, UnitIsPlayer, UnitPlayerControlled = UnitHealth, UnitHealthMax, UnitIsPlayer, UnitPlayerControlled
+local UnitIsConnected, UnitReaction, UnitCanAttack = UnitIsConnected, UnitReaction, UnitCanAttack
+local UnitIsPlayer, UnitPlayerControlled = UnitIsPlayer, UnitPlayerControlled
 local UnitThreatSituation, UnitIsUnit, UnitExists, UnitGroupRolesAssigned = UnitThreatSituation, UnitIsUnit, UnitExists, UnitGroupRolesAssigned
 local IsInInstance = IsInInstance
 
@@ -23,6 +23,11 @@ local RGB_P = ThreatPlates.RGB_P
 local IsFriend
 local IsGuildmate
 local ShowQuestUnit
+
+local _G =_G
+-- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
+-- List them here for Mikk's FindGlobals script
+-- GLOBALS: UnitAffectingCombat, UnitHealth, UnitHealthMax
 
 local reference = {
   FRIENDLY = { NPC = "FriendlyNPC", PLAYER = "FriendlyPlayer", },
@@ -129,13 +134,13 @@ function Addon:GetThreatColor(unit, style, use_threat_table)
   if use_threat_table then
     if IsInInstance() and db.threat.UseHeuristicInInstances then
       -- Use threat detection heuristic in instance
-      on_threat_table = UnitAffectingCombat(unit.unitid)
+      on_threat_table = _G.UnitAffectingCombat(unit.unitid)
     else
       on_threat_table = Addon:OnThreatTable(unit)
     end
   else
     -- Use threat detection heuristic
-    on_threat_table = UnitAffectingCombat(unit.unitid)
+    on_threat_table = _G.UnitAffectingCombat(unit.unitid)
   end
 
   if on_threat_table then
@@ -160,7 +165,7 @@ end
 local function GetColorByHealthDeficit(unit)
   local db = TidyPlatesThreat.db.profile
 
-  local pct = (UnitHealth(unit.unitid) or 0) / (UnitHealthMax(unit.unitid) or 1)
+  local pct = (_G.UnitHealth(unit.unitid) or 0) / (_G.UnitHealthMax(unit.unitid) or 1)
   local r, g, b = CS:GetSmudgeColorRGB(db.aHPbarColor, db.bHPbarColor, pct)
   return RGB_P(r, g, b, 1)
 end

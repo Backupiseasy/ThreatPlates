@@ -8,6 +8,7 @@ Fixed a bug with layering of glow target highlights by changing the layer of som
 ------------------------------------------------------
 * Added new texture for target highlight texture Arrow.
 * Fixed a bug with depratecated settings for target highlight textures from previous beta versions.
+* Fixed some potential issues with WoW API calls. 
 
 ------------------------------------------------------
 9.2.0-Beta6

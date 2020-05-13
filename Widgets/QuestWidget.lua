@@ -14,7 +14,7 @@ local Widget = Addon.Widgets:NewWidget("Quest")
 local string, tonumber, next, pairs, ipairs = string, tonumber, next, pairs, ipairs
 
 -- WoW APIs
-local _G, WorldFrame, CreateFrame = _G, WorldFrame, CreateFrame
+local WorldFrame = WorldFrame
 local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
 local UnitName, UnitIsUnit, UnitDetailedThreatSituation = UnitName, UnitIsUnit, UnitDetailedThreatSituation
 local GetNumQuestLeaderBoards, GetQuestObjectiveInfo, GetQuestLogTitle, GetNumQuestLogEntries, GetQuestLogIndexByID = GetNumQuestLeaderBoards, GetQuestObjectiveInfo, GetQuestLogTitle, GetNumQuestLogEntries, GetQuestLogIndexByID
@@ -23,6 +23,11 @@ local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
 local ON_UPDATE_INTERVAL = Addon.ON_UPDATE_PER_FRAME
+
+local _G =_G
+-- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
+-- List them here for Mikk's FindGlobals script
+-- GLOBALS: CreateFrame
 
 local InCombat = false
 local TooltipFrame = CreateFrame("GameTooltip", "ThreatPlates_Tooltip", nil, "GameTooltipTemplate")
@@ -431,7 +436,7 @@ function Widget:Create(tp_frame)
   local db = TidyPlatesThreat.db.profile.questWidget
 
   -- Required Widget Code
-  local widget_frame = CreateFrame("Frame", nil, tp_frame)
+  local widget_frame = _G.CreateFrame("Frame", nil, tp_frame)
   widget_frame:Hide()
 
   -- Custom Code

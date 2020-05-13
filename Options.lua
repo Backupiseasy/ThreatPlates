@@ -19,8 +19,7 @@ local type = type
 local wipe = wipe
 local CLASS_SORT_ORDER, LOCALIZED_CLASS_NAMES_MALE = CLASS_SORT_ORDER, LOCALIZED_CLASS_NAMES_MALE
 local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
-local SetCVar, GetCVar, GetCVarBool = SetCVar, GetCVar, GetCVarBool
-local GetSpellInfo = GetSpellInfo
+local GetCVar, GetCVarBool = GetCVar, GetCVarBool
 local UnitsExists, UnitName = UnitsExists, UnitName
 local GameTooltip = GameTooltip
 
@@ -29,6 +28,11 @@ local TidyPlatesThreat = TidyPlatesThreat
 local LibStub = LibStub
 local RGB_WITH_HEX = t.RGB_WITH_HEX
 local L = t.L
+
+local _G =_G
+-- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
+-- List them here for Mikk's FindGlobals script
+-- GLOBALS: GetSpellInfo, SetCVar
 
 -- Import some libraries
 local LibAceGUI = LibStub("AceGUI-3.0")
@@ -2101,7 +2105,6 @@ local function CreateFocusWidgetOptions()
         args = {
           Preview = {
             name = L["Preview"],
-            order = 10,
             order = 10,
             type = "execute",
             image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\TargetArtWidget\\" .. db.FocusWidget.theme,

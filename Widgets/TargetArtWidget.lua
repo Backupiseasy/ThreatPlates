@@ -12,11 +12,15 @@ local Widget = Addon.Widgets:NewTargetWidget("TargetArt")
 ---------------------------------------------------------------------------------------------------
 
 -- WoW APIs
-local CreateFrame = CreateFrame
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
+
+local _G =_G
+-- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
+-- List them here for Mikk's FindGlobals script
+-- GLOBALS: CreateFrame
 
 local ART_PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\TargetArtWidget\\"
 local BACKDROP = {
@@ -178,12 +182,12 @@ end
 
 function Widget:Create()
   if not WidgetFrame then
-    local widget_frame = CreateFrame("Frame", nil)
+    local widget_frame = _G.CreateFrame("Frame", nil)
     widget_frame:Hide()
 
     WidgetFrame = widget_frame
 
-    local healthbar_mode_frame = CreateFrame("Frame", nil, widget_frame)
+    local healthbar_mode_frame = _G.CreateFrame("Frame", nil, widget_frame)
     healthbar_mode_frame:SetFrameLevel(widget_frame:GetFrameLevel())
     healthbar_mode_frame.LeftTexture = widget_frame:CreateTexture(nil, "BACKGROUND", 0)
     healthbar_mode_frame.RightTexture = widget_frame:CreateTexture(nil, "BACKGROUND", 0)
@@ -301,12 +305,12 @@ end
 
 function FocusWidget:Create()
   if not FocusWidgetFrame then
-    local widget_frame = CreateFrame("Frame", nil)
+    local widget_frame = _G.CreateFrame("Frame", nil)
     widget_frame:Hide()
 
     FocusWidgetFrame = widget_frame
 
-    local healthbar_mode_frame = CreateFrame("Frame", nil, widget_frame)
+    local healthbar_mode_frame = _G.CreateFrame("Frame", nil, widget_frame)
     healthbar_mode_frame:SetFrameLevel(widget_frame:GetFrameLevel())
     healthbar_mode_frame.LeftTexture = widget_frame:CreateTexture(nil, "BACKGROUND", 0)
     healthbar_mode_frame.RightTexture = widget_frame:CreateTexture(nil, "BACKGROUND", 0)

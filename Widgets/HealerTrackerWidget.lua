@@ -11,12 +11,16 @@ local Widget = Addon.Widgets:NewWidget("HealerTracker")
 
 -- WoW APIs
 local GetTime = GetTime
-local CreateFrame = CreateFrame
 local RequestBattlefieldScoreData, GetNumBattlefieldScores = RequestBattlefieldScoreData, GetNumBattlefieldScores
 local CombatLogGetCurrentEventInfo = CombatLogGetCurrentEventInfo
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
+
+local _G =_G
+-- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
+-- List them here for Mikk's FindGlobals script
+-- GLOBALS: CreateFrame
 
 local PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\HealerTrackerWidget\\"
 local HEALER_SPECS = {
@@ -204,7 +208,7 @@ end
 
 function Widget:Create(tp_frame)
   -- Required Widget Code
-  local frame = CreateFrame("Frame", nil, tp_frame)
+  local frame = _G.CreateFrame("Frame", nil, tp_frame)
   frame:Hide()
 
   -- Custom Code III

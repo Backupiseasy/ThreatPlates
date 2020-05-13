@@ -11,15 +11,18 @@ local Widget = Addon.Widgets:NewWidget("Threat")
 ---------------------------------------------------------------------------------------------------
 
 -- WoW APIs
-local CreateFrame, UNKNOWNOBJECT = CreateFrame, UNKNOWNOBJECT
-local UnitIsUnit, UnitThreatSituation, UnitName = UnitIsUnit, UnitThreatSituation, UnitName
+local UnitIsUnit = UnitIsUnit
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local GetRaidTargetIndex = GetRaidTargetIndex
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
 local GetThreatSituation = Addon.GetThreatSituation
-local NameTriggers = Addon.Cache.CustomPlateTriggers.Name
+
+local _G =_G
+-- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
+-- List them here for Mikk's FindGlobals script
+-- GLOBALS: CreateFrame
 
 local PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ThreatWidget\\"
 local THREAT_REFERENCE = {
@@ -60,7 +63,7 @@ end
 
 function Widget:Create(tp_frame)
   -- Required Widget Code
-  local widget_frame = CreateFrame("Frame", nil, tp_frame)
+  local widget_frame = _G.CreateFrame("Frame", nil, tp_frame)
   widget_frame:Hide()
 
   -- Custom Code

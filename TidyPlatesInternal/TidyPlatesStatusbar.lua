@@ -9,12 +9,16 @@ local ThreatPlates = Addon.ThreatPlates
 local ceil, string_format = ceil, string.format
 
 -- WoW APIs
-local CreateFrame = CreateFrame
 local GetSpellTexture = GetSpellTexture
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
+
+local _G =_G
+-- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
+-- List them here for Mikk's FindGlobals script
+-- GLOBALS: CreateFrame
 
 local ART_PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Artwork\\"
 local EMPTY_TEXTURE = ART_PATH .. "Empty"
@@ -125,15 +129,15 @@ local function SetEliteBorder(self, texture)
 end
 
 function Addon:CreateHealthbar(parent)
-	local frame = CreateFrame("StatusBar", nil, parent)
+	local frame = _G.CreateFrame("StatusBar", nil, parent)
   --frame:Hide()
 
   frame:SetFrameLevel(parent:GetFrameLevel() + 5)
 
-  frame.Border = CreateFrame("Frame", nil, frame)
+  frame.Border = _G.CreateFrame("Frame", nil, frame)
   frame.Background = frame:CreateTexture(nil, "BACKGROUND")
-  frame.EliteBorder = CreateFrame("Frame", nil, frame)
-  frame.ThreatBorder = CreateFrame("Frame", nil, frame)
+  frame.EliteBorder = _G.CreateFrame("Frame", nil, frame)
+  frame.ThreatBorder = _G.CreateFrame("Frame", nil, frame)
 
   frame.Border:SetFrameLevel(frame:GetFrameLevel())
   frame.EliteBorder:SetFrameLevel(frame:GetFrameLevel() + 1)
@@ -216,15 +220,15 @@ local function SetStatusBarBackdropCastbar(self, backdrop_texture, edge_texture,
 end
 
 function Addon:CreateCastbar(parent)
-  local frame = CreateFrame("StatusBar", nil, parent)
+  local frame = _G.CreateFrame("StatusBar", nil, parent)
   frame:Hide()
 
   frame:SetFrameLevel(parent:GetFrameLevel() + 3)
 
-  frame.Border = CreateFrame("Frame", nil, frame)
+  frame.Border = _G.CreateFrame("Frame", nil, frame)
   frame.Background = frame:CreateTexture(nil, "BACKGROUND")
-  frame.InterruptBorder = CreateFrame("Frame", nil, frame)
-  frame.Overlay = CreateFrame("Frame", nil, frame)
+  frame.InterruptBorder = _G.CreateFrame("Frame", nil, frame)
+  frame.Overlay = _G.CreateFrame("Frame", nil, frame)
 
   frame.Border:SetFrameLevel(frame:GetFrameLevel())
   -- frame.InterruptBorder:SetFrameLevel(frame:GetFrameLevel())

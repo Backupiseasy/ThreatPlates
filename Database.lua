@@ -10,16 +10,22 @@ local ThreatPlates = Addon.ThreatPlates
 ---------------------------------------------------------------------------------------------------
 
 -- Lua APIs
-local floor, select, unpack, type, min, pairs = floor, select, unpack, type, min, pairs
+local floor, select, unpack, type, pairs = floor, select, unpack, type, pairs
+local math_min = math.min
 
 -- WoW APIs
-local GetCVar, SetCVar = GetCVar, SetCVar
-local UnitClass, GetSpecialization = UnitClass, GetSpecialization
+local GetCVar = GetCVar
+local UnitClass = UnitClass
 
 -- ThreatPlates APIs
 local L = ThreatPlates.L
 local TidyPlatesThreat = TidyPlatesThreat
 local RGB = ThreatPlates.RGB
+
+local _G =_G
+-- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
+-- List them here for Mikk's FindGlobals script
+-- GLOBALS: GetSpecialization
 
 ---------------------------------------------------------------------------------------------------
 -- Global functions for accessing the configuration
@@ -32,9 +38,9 @@ local PLAYER_ROLE_BY_SPEC = ThreatPlates.SPEC_ROLES[Addon.PlayerClass]
 function Addon:PlayerRoleIsTank()
   local db = TidyPlatesThreat.db
   if db.profile.optionRoleDetectionAutomatic then
-    return PLAYER_ROLE_BY_SPEC[GetSpecialization()] or false
+    return PLAYER_ROLE_BY_SPEC[_G.GetSpecialization()] or false
   else
-    return db.char.spec[GetSpecialization()]
+    return db.char.spec[_G.GetSpecialization()]
   end
 end
 
@@ -43,7 +49,7 @@ function TidyPlatesThreat:SetRole(value,index)
   if index then
     self.db.char.spec[index] = value
   else
-    self.db.char.spec[GetSpecialization()] = value
+    self.db.char.spec[_G.GetSpecialization()] = value
   end
 end
 
@@ -622,7 +628,7 @@ local function MigrationBlizzFadeA(profile_name, profile)
       local db = profile.nameplate.alpha
       local amount = profile.blizzFadeA.amount
       if amount <= 0 then
-        db.NonTarget = min(1, 1 + amount)
+        db.NonTarget = math_min(1, 1 + amount)
       end
     end
 

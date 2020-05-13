@@ -15,12 +15,15 @@ local type = type
 local pairs = pairs
 
 -- WoW APIs
-local CreateFrame = CreateFrame
-local SetPortraitTexture = SetPortraitTexture
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
 local LibCustomGlow = Addon.LibCustomGlow
+
+local _G =_G
+-- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
+-- List them here for Mikk's FindGlobals script
+-- GLOBALS: CreateFrame, SetPortraitTexture
 
 local DefaultGlowColor
 
@@ -31,7 +34,7 @@ local CUSTOM_GLOW_FUNCTIONS = Addon.CUSTOM_GLOW_FUNCTIONS
 ---------------------------------------------------------------------------------------------------
 function Widget:Create(tp_frame)
   -- Required Widget Code
-  local widget_frame = CreateFrame("Frame", nil, tp_frame)
+  local widget_frame = _G.CreateFrame("Frame", nil, tp_frame)
   widget_frame:Hide()
 
   -- Custom Code
@@ -40,7 +43,7 @@ function Widget:Create(tp_frame)
   widget_frame.Icon = widget_frame:CreateTexture(nil, "ARTWORK")
   widget_frame.Icon:SetAllPoints(widget_frame)
 
-  widget_frame.Highlight = CreateFrame("Frame", nil, widget_frame)
+  widget_frame.Highlight = _G.CreateFrame("Frame", nil, widget_frame)
   widget_frame.Highlight:SetFrameLevel(tp_frame:GetFrameLevel() + 15)
   --------------------------------------
   -- End Custom Code
@@ -93,7 +96,7 @@ function Widget:OnUnitAdded(widget_frame, unit)
     local icon = widget_frame.Icon
     if unique_setting.UseAutomaticIcon then
       if unique_setting.Trigger.Type == "Name" then
-        SetPortraitTexture(icon, unit.unitid)
+        _G.SetPortraitTexture(icon, unit.unitid)
         icon:SetTexCoord(0.14644660941, 0.85355339059, 0.14644660941, 0.85355339059)
         --icon:SetTexCoord(0.15, 0.85, 0.15, 0.85)
       else

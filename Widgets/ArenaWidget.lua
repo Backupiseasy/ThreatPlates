@@ -13,8 +13,7 @@ local Widget = Addon.Widgets:NewWidget("Arena")
 local pairs = pairs
 
 -- WoW APIs
-local CreateFrame = CreateFrame
-local GetNumArenaOpponents, UnitGUID, UnitReaction = GetNumArenaOpponents, UnitGUID, UnitReaction
+local GetNumArenaOpponents, UnitReaction = GetNumArenaOpponents, UnitReaction
 local IsInInstance, IsInBrawl = IsInInstance, C_PvP.IsInBrawl
 
 -- ThreatPlates APIs
@@ -25,6 +24,11 @@ local PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ArenaWidget\\
 local ICON_TEXTURE = PATH .. "BG"
 local InArena = false
 local ArenaID = {}
+
+local _G =_G
+-- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
+-- List them here for Mikk's FindGlobals script
+-- GLOBALS: CreateFrame, UnitGUID
 
 ---------------------------------------------------------------------------------------------------
 -- Cached configuration settings
@@ -37,8 +41,8 @@ local Settings
 
 local function GetArenaOpponents()
 	for i = 1, GetNumArenaOpponents() do
-		local player_guid = UnitGUID("arena" .. i)
-		local pet_guid = UnitGUID("arenapet" .. i)
+		local player_guid = _G.UnitGUID("arena" .. i)
+		local pet_guid = _G.UnitGUID("arenapet" .. i)
 
     if player_guid and not ArenaID[player_guid] then
       ArenaID[player_guid] = i
@@ -66,7 +70,7 @@ end
 
 function Widget:Create(tp_frame)
   -- Required Widget Code
-  local widget_frame = CreateFrame("Frame", nil, tp_frame)
+  local widget_frame = _G.CreateFrame("Frame", nil, tp_frame)
   widget_frame:Hide()
 
   -- Custom Code

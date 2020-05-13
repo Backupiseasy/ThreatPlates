@@ -10,8 +10,7 @@ local InCombatLockdown = InCombatLockdown
 local UnitPlayerControlled, UnitIsUnit = UnitPlayerControlled, UnitIsUnit
 local UnitIsOtherPlayersPet = UnitIsOtherPlayersPet
 local UnitIsBattlePet = UnitIsBattlePet
-local UnitCanAttack, UnitIsTapDenied = UnitCanAttack, UnitIsTapDenied
-local GetSpellInfo = GetSpellInfo
+local UnitCanAttack = UnitCanAttack
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
@@ -19,6 +18,11 @@ local TOTEMS = Addon.TOTEMS
 local GetUnitVisibility = ThreatPlates.GetUnitVisibility
 local NameTriggers, AuraTriggers, CastTriggers = Addon.Cache.CustomPlateTriggers.Name, Addon.Cache.CustomPlateTriggers.Aura, Addon.Cache.CustomPlateTriggers.Cast
 local NameWildcardTriggers, TriggerWildcardTests = Addon.Cache.CustomPlateTriggers.NameWildcard, Addon.Cache.TriggerWildcardTests
+
+local _G =_G
+-- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
+-- List them here for Mikk's FindGlobals script
+-- GLOBALS: GetSpellInfo, UnitIsTapDenied
 
 ---------------------------------------------------------------------------------------------------
 -- Helper functions for styles and functions
@@ -103,7 +107,7 @@ local function GetUnitType(unit)
     unit.TP_DetailedUnitType = (unit.isBoss and "Boss") or (unit.isElite and "Elite") or unit.TP_DetailedUnitType
   end
 
-  if UnitIsTapDenied(unit.unitid) then
+  if _G.UnitIsTapDenied(unit.unitid) then
     unit.TP_DetailedUnitType = "Tapped"
   end
 
@@ -118,7 +122,7 @@ local function ShowUnit(unit)
 
   if not show then return false end
 
-  local e, b, t = (unit.isElite or unit.isRare), unit.isBoss, UnitIsTapDenied(unit.unitid)
+  local e, b, t = (unit.isElite or unit.isRare), unit.isBoss, _G.UnitIsTapDenied(unit.unitid)
   local db_base = TidyPlatesThreat.db.profile
   local db = db_base.Visibility
 
@@ -242,7 +246,7 @@ function Addon.UnitStyle_AuraDependent(unit, aura_id, aura_name)
       unit.CustomStyleAura = plate_style
       unit.CustomPlateSettingsAura = unique_settings
 
-      local _, _, icon = GetSpellInfo(aura_id)
+      local _, _, icon = _G.GetSpellInfo(aura_id)
       unique_settings.AutomaticIcon = icon
     end
   end
@@ -261,7 +265,7 @@ function Addon.UnitStyle_CastDependent(unit, spell_id, spell_name)
       unit.CustomStyleCast = plate_style
       unit.CustomPlateSettingsCast = unique_settings
 
-      local _, _, icon = GetSpellInfo(spell_id)
+      local _, _, icon = _G.GetSpellInfo(spell_id)
       unique_settings.AutomaticIcon = icon
     end
   end

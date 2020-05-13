@@ -6,14 +6,19 @@ local ThreatPlates = Addon.ThreatPlates
 ---------------------------------------------------------------------------------------------------
 
 -- Lua APIs
-local pairs, tonumber, tostring = pairs, tonumber, tostring
+local tostring = tostring
 
 -- WoW APIs
-local SetCVar, GetCVar, GetCVarDefault = SetCVar, GetCVar, GetCVarDefault
+local GetCVar, GetCVarDefault = GetCVar, GetCVarDefault
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
 local L = ThreatPlates.L
+
+local _G =_G
+-- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
+-- List them here for Mikk's FindGlobals script
+-- GLOBALS: SetCVar
 
 Addon.CVars = {}
 
@@ -65,7 +70,7 @@ local function SetConsoleVariable(cvar, value)
     db[cvar] = current_value
   end
 
-  SetCVar(cvar, value)
+  _G.SetCVar(cvar, value)
 end
 
 function CVars:Set(cvar, value)
@@ -73,7 +78,7 @@ function CVars:Set(cvar, value)
 end
 
 function CVars:SetToDefault(cvar)
-  SetCVar(cvar, GetCVarDefault(cvar))
+  _G.SetCVar(cvar, GetCVarDefault(cvar))
   TidyPlatesThreat.db.profile.CVarsBackup[cvar] = nil
 end
 
@@ -81,7 +86,7 @@ function CVars:RestoreFromProfile(cvar)
   local db = TidyPlatesThreat.db.profile.CVarsBackup
 
   if db[cvar] then
-    SetCVar(cvar, db[cvar])
+    _G.SetCVar(cvar, db[cvar])
     db[cvar] = nil
   end
 end
@@ -90,7 +95,7 @@ end
 --  local db = TidyPlatesThreat.db.profile.CVarsBackup
 --
 --  for cvar, value in pairs(db) do
---    SetCVar(cvar, value)
+--    _G.SetCVar(cvar, value)
 --    db[cvar] = nil
 --  end
 --end
@@ -126,11 +131,11 @@ end
 function CVars:SetToDefaultProtected(cvar)
   if COMBAT_PROTECTED[cvar] then
     Addon:CallbackWhenOoC(function()
-      SetCVar(cvar, GetCVarDefault())
+      _G.SetCVar(cvar, GetCVarDefault())
       TidyPlatesThreat.db.profile.CVarsBackup[cvar] = nil
     end, L["Unable to change the following console variable while in combat: "] .. cvar .. ". ")
   else
-    SetCVar(cvar, GetCVarDefault())
+    _G.SetCVar(cvar, GetCVarDefault())
     TidyPlatesThreat.db.profile.CVarsBackup[cvar] = nil
   end
 end
@@ -138,10 +143,10 @@ end
 function CVars:OverwriteProtected(cvar, value)
   if COMBAT_PROTECTED[cvar] then
     Addon:CallbackWhenOoC(function()
-      SetCVar(cvar, value)
+      _G.SetCVar(cvar, value)
     end, L["Unable to change the following console variable while in combat: "] .. cvar .. ". ")
   else
-    SetCVar(cvar, value)
+    _G.SetCVar(cvar, value)
   end
 end
 

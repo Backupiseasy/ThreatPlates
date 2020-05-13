@@ -13,24 +13,17 @@ local select, pairs, tostring  = select, pairs, tostring 			    -- Local functio
 
 -- WoW APIs
 local wipe = wipe
-local WorldFrame, UIParent, CreateFrame, INTERRUPTED = WorldFrame, UIParent, CreateFrame, INTERRUPTED
+local WorldFrame, UIParent, INTERRUPTED = WorldFrame, UIParent, INTERRUPTED
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local UnitName, UnitIsUnit, UnitReaction, UnitExists = UnitName, UnitIsUnit, UnitReaction, UnitExists
-local UnitClassification = UnitClassification
-local UnitLevel = UnitLevel
 local UnitIsPlayer = UnitIsPlayer
 local UnitClass = UnitClass
-local UnitGUID = UnitGUID
 local UnitEffectiveLevel = UnitEffectiveLevel
 local GetCreatureDifficultyColor = GetCreatureDifficultyColor
-local UnitSelectionColor = UnitSelectionColor
-local UnitHealth, UnitHealthMax = UnitHealth, UnitHealthMax
 local UnitThreatSituation = UnitThreatSituation
-local UnitAffectingCombat = UnitAffectingCombat
 local GetRaidTargetIndex = GetRaidTargetIndex
-local UnitIsTapDenied = UnitIsTapDenied
 local GetTime = GetTime
-local UnitChannelInfo, UnitCastingInfo = UnitChannelInfo, UnitCastingInfo
+local UnitChannelInfo  = UnitChannelInfo
 local UnitPlayerControlled = UnitPlayerControlled
 local GetCVar, Lerp, CombatLogGetCurrentEventInfo = GetCVar, Lerp, CombatLogGetCurrentEventInfo
 local GetPlayerInfoByGUID, RAID_CLASS_COLORS = GetPlayerInfoByGUID, RAID_CLASS_COLORS
@@ -39,6 +32,11 @@ local GetPlayerInfoByGUID, RAID_CLASS_COLORS = GetPlayerInfoByGUID, RAID_CLASS_C
 local TidyPlatesThreat = TidyPlatesThreat
 local Widgets = Addon.Widgets
 local Animations = Addon.Animations
+
+local _G =_G
+-- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
+-- List them here for Mikk's FindGlobals script
+-- GLOBALS: CreateFrame, UnitAffectingCombat, UnitCastingInfo, UnitClassification, UnitGUID, UnitHealth, UnitHealthMax, UnitIsTapDenied, UnitLevel, UnitSelectionColor
 
 -- Constants
 -- Raid Icon Reference
@@ -170,7 +168,7 @@ do
 
 	function OnNewNameplate(plate)
     -- Parent could be: WorldFrame, UIParent, plate
-    local extended = CreateFrame("Frame",  "ThreatPlatesFrame" .. plate:GetName(), WorldFrame)
+    local extended = _G.CreateFrame("Frame",  "ThreatPlatesFrame" .. plate:GetName(), WorldFrame)
     extended:Hide()
 
     extended:SetFrameStrata("BACKGROUND")
@@ -188,7 +186,7 @@ do
     -- Status Bars
     local castbar = Addon:CreateCastbar(extended)
     local healthbar = Addon:CreateHealthbar(extended)
-    local textframe = CreateFrame("Frame", nil, extended)
+    local textframe = _G.CreateFrame("Frame", nil, extended)
 
 		textframe:SetAllPoints()
     textframe:SetFrameLevel(extended:GetFrameLevel() + 6)
@@ -442,14 +440,14 @@ local ThreatReference = {
 --------------------------------------------------------
 function Addon:UpdateUnitIdentity(unit, unitid)
   unit.unitid = unitid
-  unit.guid = UnitGUID(unitid)
+  unit.guid = _G.UnitGUID(unitid)
 
-  unit.classification = UnitClassification(unitid)
+  unit.classification = _G.UnitClassification(unitid)
   unit.isElite = EliteReference[unit.classification] or false
   unit.isRare = RareReference[unit.classification] or false
   unit.isMini = unit.classification == "minus"
 
-  unit.isBoss = UnitLevel(unitid) == -1
+  unit.isBoss = _G.UnitLevel(unitid) == -1
   if unit.isBoss then
     unit.classification = "boss"
   end
@@ -480,7 +478,7 @@ function Addon:UpdateUnitCondition(unit, unitid)
   local c = GetCreatureDifficultyColor(unit.level)
   unit.levelcolorRed, unit.levelcolorGreen, unit.levelcolorBlue = c.r, c.g, c.b
 
-  unit.red, unit.green, unit.blue = UnitSelectionColor(unitid)
+  unit.red, unit.green, unit.blue = _G.UnitSelectionColor(unitid)
 
   unit.reaction = GetReactionByColor(unit.red, unit.green, unit.blue) or "HOSTILE"
   -- Enemy players turn to neutral, e.g., when mounting a flight path mount, so fix reaction in that situations
@@ -488,12 +486,12 @@ function Addon:UpdateUnitCondition(unit, unitid)
     unit.reaction = "HOSTILE"
   end
 
-  unit.health = UnitHealth(unitid) or 0
-  unit.healthmax = UnitHealthMax(unitid) or 1
+  unit.health = _G.UnitHealth(unitid) or 0
+  unit.healthmax = _G.UnitHealthMax(unitid) or 1
 
   unit.threatValue = UnitThreatSituation("player", unitid) or 0
   unit.threatSituation = ThreatReference[unit.threatValue]
-  unit.isInCombat = UnitAffectingCombat(unitid)
+  unit.isInCombat = _G.UnitAffectingCombat(unitid)
 
   local raidIconIndex = GetRaidTargetIndex(unitid)
 
@@ -504,7 +502,7 @@ function Addon:UpdateUnitCondition(unit, unitid)
     unit.isMarked = false
   end
 
-  unit.isTapped = UnitIsTapDenied(unitid)
+  unit.isTapped = _G.UnitIsTapDenied(unitid)
 end
 
 ---------------------------------------------------------------------------------------------------------------------
@@ -753,7 +751,7 @@ do
       name, text, texture, startTime, endTime, isTradeSkill, notInterruptible, spellID = UnitChannelInfo(unitid)
       castbar.Value = (endTime / 1000) - GetTime()
 		else
-      name, text, texture, startTime, endTime, isTradeSkill, _, notInterruptible, spellID = UnitCastingInfo(unitid)
+      name, text, texture, startTime, endTime, isTradeSkill, _, notInterruptible, spellID = _G.UnitCastingInfo(unitid)
       castbar.Value = GetTime() - (startTime / 1000)
     end
 
@@ -827,7 +825,7 @@ do
 		if not ShowCastBars then return end
 
 		-- Check to see if there's a spell being cast
-		if UnitCastingInfo(unitid) then
+		if _G.UnitCastingInfo(unitid) then
       OnStartCasting(plate, unitid, false)
     elseif UnitChannelInfo(unitid) then
       OnStartCasting(plate, unitid, true)
@@ -1120,7 +1118,7 @@ do
         --Addon:UpdateUnitCondition(unit, unitid)
         --        unit.threatValue = UnitThreatSituation("player", unitid) or 0
         --        unit.threatSituation = ThreatReference[unit.threatValue]
-        --        unit.isInCombat = UnitAffectingCombat(unitid)
+        --        unit.isInCombat = _G.UnitAffectingCombat(unitid)
         --ProcessUnitChanges()
         --OnUpdateCastMidway(nameplate, unit.unitid)
       end
@@ -1232,8 +1230,8 @@ do
         local unitid  = unit.unitid
 
         -- As this does not use OnUpdate with OnHealthUpdate, we have to update this values here
-        unit.health = UnitHealth(unit.unitid) or 0
-        unit.healthmax = UnitHealthMax(unit.unitid) or 1
+        unit.health = _G.UnitHealth(unit.unitid) or 0
+        unit.healthmax = _G.UnitHealthMax(unit.unitid) or 1
 
         Addon:UpdateExtensions(tp_frame, unitid, tp_frame.stylename)
         UpdateIndicator_CustomText(tp_frame)
@@ -1538,7 +1536,7 @@ function Addon:ConfigClickableArea(toggle_show)
         local extended = ConfigModePlate.TPFrame
 
         -- Draw background to show for clickable area
-        extended.Background = CreateFrame("Frame", nil, plate)
+        extended.Background = _G.CreateFrame("Frame", nil, plate)
         extended.Background:SetBackdrop({
           bgFile = ThreatPlates.Art .. "TP_WhiteSquare.tga",
           edgeFile = ThreatPlates.Art .. "TP_WhiteSquare.tga",

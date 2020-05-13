@@ -5,11 +5,16 @@ local ThreatPlates = Addon.ThreatPlates
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
 local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
-local UnitIsConnected, UnitAffectingCombat = UnitIsConnected, UnitAffectingCombat
+local UnitIsConnected = UnitIsConnected
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
 local RGB = ThreatPlates.RGB
+
+local _G =_G
+-- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
+-- List them here for Mikk's FindGlobals script
+-- GLOBALS: UnitAffectingCombat
 
 local COLOR_TRANSPARENT = RGB(0, 0, 0, 0) -- opaque
 
@@ -18,12 +23,12 @@ local function ShowThreatGlow(unit)
 
   if db.ShowThreatGlowOnAttackedUnitsOnly then
     if IsInInstance() and db.threat.UseHeuristicInInstances then
-      return UnitAffectingCombat(unit.unitid)
+      return _G.UnitAffectingCombat(unit.unitid)
     else
       return Addon:OnThreatTable(unit)
     end
   else
-    return UnitAffectingCombat(unit.unitid)
+    return _G.UnitAffectingCombat(unit.unitid)
   end
 end
 

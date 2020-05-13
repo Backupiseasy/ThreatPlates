@@ -1,14 +1,17 @@
-local ADDON_NAME, NAMESPACE = ...
-local ThreatPlates = NAMESPACE.ThreatPlates
-
 ------------------------------
 -- Elite Art Overlay Widget --
 ------------------------------
+local ADDON_NAME, NAMESPACE = ...
+local ThreatPlates = NAMESPACE.ThreatPlates
+
+local _G =_G
+-- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
+-- List them here for Mikk's FindGlobals script
+-- GLOBALS: CreateFrame, UnitGUID
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
-local UnitGUID = UnitGUID
 
 -- local WidgetList = {}
 
@@ -90,7 +93,7 @@ local function UpdateWidgetContext(frame, unit)
 
 	-- Custom Code II
 	--------------------------------------
-	if UnitGUID("target") == guid then
+	if _G.UnitGUID("target") == guid then
 		UpdateWidgetFrame(frame, unit)
 	else
 		frame:_Hide()
@@ -109,7 +112,7 @@ end
 
 local function CreateWidgetFrame(parent)
 	-- Required Widget Code
-	local frame = CreateFrame("Frame", nil, parent)
+	local frame = _G.CreateFrame("Frame", nil, parent)
 	frame:Hide()
 
 	-- Custom Code III

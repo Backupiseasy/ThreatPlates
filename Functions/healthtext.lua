@@ -6,10 +6,9 @@ local ThreatPlates = Addon.ThreatPlates
 ---------------------------------------------------------------------------------------------------
 local UnitIsPlayer = UnitIsPlayer
 local UnitPlayerControlled = UnitPlayerControlled
-local UnitExists, UnitHealth, UnitHealthMax = UnitExists, UnitHealth, UnitHealthMax
-local UnitName, UnitGetTotalAbsorbs = UnitName, UnitGetTotalAbsorbs
+local UnitExists = UnitExists
+local UnitName = UnitName
 local UNIT_LEVEL_TEMPLATE = UNIT_LEVEL_TEMPLATE
-local UnitClassification = UnitClassification
 local GetGuildInfo = GetGuildInfo
 local UnitName = UnitName
 
@@ -23,6 +22,11 @@ local TidyPlatesThreat = TidyPlatesThreat
 local RGB = ThreatPlates.RGB
 local RGB_P = ThreatPlates.RGB_P
 local GetColorByHealthDeficit = ThreatPlates.GetColorByHealthDeficit
+
+local _G =_G
+-- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
+-- List them here for Mikk's FindGlobals script
+-- GLOBALS: UnitClassification, UnitGetTotalAbsorbs
 
 ---------------------------------------------------------------------------------------------------
 -- Functions for subtext from TidyPlates
@@ -148,7 +152,7 @@ local function GetUnitSubtitle(unit)
 end
 
 local function GetLevelDescription(unit)
-	local classification = UnitClassification(unit.unitid)
+	local classification = _G.UnitClassification(unit.unitid)
 	local description
 
 	if classification == "worldboss" then
@@ -180,7 +184,7 @@ local function DummyFunction() return nil, COLOR_ROLE end
 local function TextHealthPercentColored(unit)
   local text_health, text_absorbs, color = "", "", COLOR_ROLE
 
-  local absorbs_amount = UnitGetTotalAbsorbs(unit.unitid) or 0
+  local absorbs_amount = _G.UnitGetTotalAbsorbs(unit.unitid) or 0
   if ShowAbsorbs and absorbs_amount > 0 then
     if Settings.AbsorbsAmount then
       if Settings.AbsorbsShorten then
