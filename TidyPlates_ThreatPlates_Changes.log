@@ -1,74 +1,29 @@
 ﻿------------------------------------------------------
-9.2.0-Beta8
+9.2.0
 ------------------------------------------------------
-* Fixed a bug with layering of glow target highlights by changing the layer of some nameplate elements [Issue #409].
-* Fixed some potential issues with WoW API calls.
-
-------------------------------------------------------
-9.2.0-Beta7
-------------------------------------------------------
-* Added new texture for target highlight texture Arrow.
-* Fixed a bug with depratecated settings for target highlight textures from previous beta versions.
-
-------------------------------------------------------
-9.2.0-Beta6
-------------------------------------------------------
-* Fixed a Lua error that occured when upgrading to to a new version because of an error in settings migration [Issue #407].
-* Updated localizations for deDE and zhTW.
-
-------------------------------------------------------
-9.2.0-Beta5
-------------------------------------------------------
-* Re-added configuration options for spell name width and height for better handling of long spell names or interrupt information. [Comment #4374]
-* Fixed a bug where remaining cast time was shown when a spell was interrupted and interrupted information was shown.
-
-------------------------------------------------------
-9.2.0-Beta4
-------------------------------------------------------
-* Extended the Name trigger for custom styles for nameplates to also support the wildcard character *.
-* The indicator icon for rare and elite mobs now shows a seperate color for rare-elite mobs to make them more distinguishable [GH Issue #199].
-* Spell name is now anchored directly to the castbar which simplifies the configuration of its placement.
-* Fixed layering of interrupt overlay which was wrong after adding cast time text.
-* Fixed a bug with focus unit not set/removed correctly in all situations.
-* Fixed a bug in Quest widget regarding quests with multiple quest objectives on the same unit were remaining objectives were ignored when the first objective was completed.
-
-------------------------------------------------------
-9.2.0-Beta3
-------------------------------------------------------
-* Extended triggers for custom styles for nameplates so that you now can add multiple entries (names, auras, casts) separated by a semicolon.
-* Added a widget to highlight the focus target similar to how you can highlight the target unit [E-Mail, Comment #4140].
-* Improved automatic icon detection for custom styles for nameplates, e.g., a custom style with Name trigger now can show the unit's portrait as icon.
-* Improved error handling when importing profiles or custom styles for nameplates.
-* Added new styles for target highlighting (like a down arrow or glow borders).
-* Added an option to show the remaining time of a cast on the nameplate's castbar [Comment #695, #1530, #1907, #4077, IM, Issue #374, #399].
-* Fixed and changed sorting so that custom styles for nameplates are not sorted by trigger type first.
-* Fixed some update bugs in Target widget configuration.
-* Fixed a Lua error that occured when disabling the castbar configuration mode when the nameplate on which it was used was no longer visible.
-* Fixed a Lua error in Quest widget that occured when enabling the Quest widget because of an non-initialized font.
-
-------------------------------------------------------
-9.2.0-Beta2
-------------------------------------------------------
-* Added command line option "legacy-custom-plates" to add (legacy) default custom nameplates that are deleted when migrating custom nameplates to the current format [Comment #3950, #3959, Issue #379].
-* Added the option to show a glow effect for custom nameplates on healthbar, castbar or icon.
-* Added an option for custom nameplates to set the icon based on a spell name (must be in the player's spell book).
-* Fixed a bug in the custom nameplate import where custom nameplates were imported in the reversed order.
-* Fixed a bug in the code detection duplicate triggers when creating or changing custom nameplates.
-* Fixed a bug with aura and cast triggers in situations where the nameplate style did not show auras or casts (and triggers did not work because of that).
-* Fixed a bug where selection mark jumped to first entry in the custom nameplates list after deleting the last slot.
-* Fixed a Lua error when importing a profile caused by non-existing tables in the settings data structure.
-* Fixed a bug when importing a profile where the settings from the new profile were not actually applied.
-* Fixed a bug with name text being wrapped when nameplates where scaled down enough.
-
-------------------------------------------------------
-9.2.0-Beta1
-------------------------------------------------------
-* Added an option to enable a custom nameplate only for friendly or hostile units [IM].
-* Added new triggers for custom nameplates additionally to a unit's name: auras and casts [Comment #4202, #766, #1284, #1988, #2010, #723, #1438, #1462, #1506, #1679, Issue #170, E-Mail, IM].
-* Added an option to disable a custom nameplate and never show it.
+* Added new triggers for custom nameplate styles additionally to a unit's name: auras and casts [Comment #4202, #766, #1284, #1988, #2010, #723, #1438, #1462, #1506, #1679, Issue #170, E-Mail, IM].
+* Extended triggers for custom nameplate styles so that you now can add multiple entries (names, auras, casts) separated by a semicolon.
+* Extended the Name trigger for custom nameplate styles to also support the wildcard character *.
+* Added the option to show a glow effect for custom nameplate styles on healthbar, castbar or icon.
+* Added an option to enable custom nameplate styles only for friendly or hostile units [IM].
+* Added an option to disable a custom nameplate style and never show it.
 * Added an option "Automatic Icon" to derive the custom nameplate's icon from the spell/aura ID or name used as trigger.
-* Added an option to import/export all configuration settings of Threat Plates (thanks to Kungfumoo for the patch, Comment #1582).
-* Added an option to import/export all custom nameplate settings of Threat Plates [Comment #852]
+* Added an option for custom nameplate styles to set the icon based on a spell name (must be in the player's spell book).
+* Added an option to import/export a individual profile with all its settings (thanks to Kungfumoo for the patch, Comment #1582).
+* Added an option to import/export all or individual custom nameplate styles [Comment #852]
+* Added command line option "legacy-custom-plates" to add (legacy) default custom nameplate styles that are deleted when migrating custom nameplates to the current format [Comment #3950, #3959, Issue #379].
+* Added new styles for target highlighting (like a down arrow or glow borders).
+* Added a widget to highlight the focus target similar to how you can highlight the target unit [E-Mail, Comment #4140].
+* Added an option to show the remaining time of a cast on the nameplate's castbar [Comment #695, #1530, #1907, #4077, IM, Issue #374, #399].
+* The indicator icon for rare and elite mobs now shows a separate color for rare-elite mobs to make them more distinguishable [GH Issue #199].
+* Spell name is now anchored directly to the castbar which simplifies the configuration of its placement.
+* Fixed a bug where selection mark jumped to first entry in the custom nameplates list after deleting the last slot.
+* Fixed a bug with name text being wrapped when nameplates where scaled down enough.
+* Fixed a Lua error that occurred when disabling the castbar configuration mode when the nameplate on which it was used was no longer visible.
+* Fixed a Lua error in Quest widget that occurred when enabling the Quest widget because of an non-initialized font.
+* Fixed a bug in Quest widget regarding quests with multiple quest objectives on the same unit were remaining objectives were ignored when the first objective was completed.
+* Fixed some potential issues with WoW API calls.
+* Updated localizations for deDE and zhTW.
 
 ------------------------------------------------------
 9.1.20
