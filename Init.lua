@@ -40,8 +40,10 @@ TidyPlatesThreatDBM = true
 
 Addon.Animations = {}
 Addon.Cache = {
+	TriggerWildcardTests = {},
 	CustomPlateTriggers = {
 		Name = {},
+		NameWildcard = {},
 		Aura = {},
 		Cast = {}
 	}
@@ -332,6 +334,13 @@ local function DEBUG_AURA_LIST(data)
 		end
 	end
 	ThreatPlates.DEBUG("Aura List = [ " .. res .. " ]")
+end
+
+Addon.DebugPrintCaches = function()
+	print ("Wildcard Unit Test Cache:")
+	for k, v in pairs(Addon.Cache.TriggerWildcardTests) do
+		print ("  " .. k .. ":", v)
+	end
 end
 
 ---------------------------------------------------------------------------------------------------

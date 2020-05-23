@@ -10,7 +10,7 @@ local floor = floor
 local abs = abs
 
 -- WoW APIs
-local UnitIsConnected, UnitReaction, UnitCanAttack, UnitAffectingCombat = UnitIsConnected, UnitReaction, UnitCanAttack, UnitAffectingCombat
+local UnitIsConnected, UnitReaction, UnitCanAttack = UnitIsConnected, UnitReaction, UnitCanAttack
 local UnitIsPlayer, UnitPlayerControlled = UnitIsPlayer, UnitPlayerControlled
 local UnitIsUnit, UnitExists = UnitIsUnit, UnitExists
 local GetPartyAssignment = GetPartyAssignment
@@ -25,6 +25,11 @@ local IsFriend
 local IsGuildmate
 local LibThreatClassic = Addon.LibThreatClassic
 --local ShowQuestUnit
+
+local _G =_G
+-- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
+-- List them here for Mikk's FindGlobals script
+-- GLOBALS: UnitAffectingCombat, UnitHealth, UnitHealthMax
 
 local reference = {
   FRIENDLY = { NPC = "FriendlyNPC", PLAYER = "FriendlyPlayer", },
@@ -129,7 +134,7 @@ function Addon:GetThreatColor(unit, style, use_threat_table)
   local color
 
   -- Use threat detection heuristic
-  local on_threat_table = UnitAffectingCombat(unit.unitid)
+  local on_threat_table = _G.UnitAffectingCombat(unit.unitid)
 
   -- local on_threat_table
   --  if use_threat_table then

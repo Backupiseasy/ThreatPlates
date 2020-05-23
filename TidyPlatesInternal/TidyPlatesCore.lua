@@ -13,19 +13,13 @@ local select, pairs, tostring  = select, pairs, tostring 			    -- Local functio
 
 -- WoW APIs
 local wipe = wipe
-local WorldFrame, UIParent, CreateFrame, INTERRUPTED = WorldFrame, UIParent, CreateFrame, INTERRUPTED
+local WorldFrame, UIParent, INTERRUPTED = WorldFrame, UIParent, INTERRUPTED
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local UnitName, UnitIsUnit, UnitReaction, UnitExists = UnitName, UnitIsUnit, UnitReaction, UnitExists
-local UnitClassification = UnitClassification
-local UnitLevel = UnitLevel
 local UnitIsPlayer = UnitIsPlayer
 local UnitClass, UnitBuff = UnitClass, UnitBuff
-local UnitGUID = UnitGUID
 local GetCreatureDifficultyColor = GetCreatureDifficultyColor
-local UnitSelectionColor = UnitSelectionColor
-local UnitAffectingCombat = UnitAffectingCombat
 local GetRaidTargetIndex = GetRaidTargetIndex
-local UnitIsTapDenied = UnitIsTapDenied
 local GetTime = GetTime
 local UnitPlayerControlled = UnitPlayerControlled
 local GetCVar, Lerp, CombatLogGetCurrentEventInfo = GetCVar, Lerp, CombatLogGetCurrentEventInfo
@@ -37,6 +31,11 @@ local Widgets = Addon.Widgets
 local Animations = Addon.Animations
 local LibThreatClassic = Addon.LibThreatClassic
 local LibClassicCasterino = Addon.LibClassicCasterino
+
+local _G =_G
+-- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
+-- List them here for Mikk's FindGlobals script
+-- GLOBALS: CreateFrame, UnitAffectingCombat, UnitCastingInfo, UnitClassification, UnitGUID, UnitHealth, UnitHealthMax, UnitIsTapDenied, UnitLevel, UnitSelectionColor
 
 -- Constants
 -- Raid Icon Reference
@@ -168,7 +167,7 @@ do
 
 	function OnNewNameplate(plate)
     -- Parent could be: WorldFrame, UIParent, plate
-    local extended = CreateFrame("Frame",  "ThreatPlatesFrame" .. plate:GetName():gsub("NamePlate", "Plate"), WorldFrame)
+    local extended = _G.CreateFrame("Frame",  "ThreatPlatesFrame" .. plate:GetName():gsub("NamePlate", "Plate"), WorldFrame)
     extended:Hide()
 
     extended:SetFrameStrata("BACKGROUND")
@@ -186,7 +185,7 @@ do
     -- Status Bars
     local castbar = Addon:CreateCastbar(extended)
     local healthbar = Addon:CreateHealthbar(extended)
-    local textframe = CreateFrame("Frame", nil, extended)
+    local textframe = _G.CreateFrame("Frame", nil, extended)
 
 		textframe:SetAllPoints()
     textframe:SetFrameLevel(extended:GetFrameLevel() + 6)
@@ -440,14 +439,14 @@ local ThreatReference = {
 --------------------------------------------------------
 function Addon:UpdateUnitIdentity(unit, unitid)
   unit.unitid = unitid
-  unit.guid = UnitGUID(unitid)
+  unit.guid = _G.UnitGUID(unitid)
 
-  unit.classification = UnitClassification(unitid)
+  unit.classification = _G.UnitClassification(unitid)
   unit.isElite = EliteReference[unit.classification] or false
   unit.isRare = RareReference[unit.classification] or false
   unit.isMini = unit.classification == "minus"
 
-  unit.isBoss = UnitLevel(unitid) == -1
+  unit.isBoss = _G.UnitLevel(unitid) == -1
   if unit.isBoss then
     unit.classification = "boss"
   end
@@ -473,12 +472,12 @@ end
 
 -- UpdateUnitCondition: High volatility data
 function Addon:UpdateUnitCondition(unit, unitid)
-  unit.level = UnitLevel(unitid)
+  unit.level = _G.UnitLevel(unitid)
 
   local c = GetCreatureDifficultyColor(unit.level)
   unit.levelcolorRed, unit.levelcolorGreen, unit.levelcolorBlue = c.r, c.g, c.b
 
-  unit.red, unit.green, unit.blue = UnitSelectionColor(unitid)
+  unit.red, unit.green, unit.blue = _G.UnitSelectionColor(unitid)
 
   unit.reaction = GetReactionByColor(unit.red, unit.green, unit.blue) or "HOSTILE"
   -- Enemy players turn to neutral, e.g., when mounting a flight path mount, so fix reaction in that situations
@@ -486,11 +485,12 @@ function Addon:UpdateUnitCondition(unit, unitid)
     unit.reaction = "HOSTILE"
   end
 
-  unit.health, unit.healthmax = Addon.GetUnitHealth(unitid)
+  unit.health = _G.UnitHealth(unitid) or 0
+  unit.healthmax = _G.UnitHealthMax(unitid) or 1
 
   unit.threatValue = LibThreatClassic:UnitThreatSituation("player", unitid) or 0
   unit.threatSituation = ThreatReference[unit.threatValue]
-  unit.isInCombat = UnitAffectingCombat(unitid)
+  unit.isInCombat = _G.UnitAffectingCombat(unitid)
 
   local raidIconIndex = GetRaidTargetIndex(unitid)
 
@@ -501,7 +501,7 @@ function Addon:UpdateUnitCondition(unit, unitid)
     unit.isMarked = false
   end
 
-  unit.isTapped = UnitIsTapDenied(unitid)
+  unit.isTapped = _G.UnitIsTapDenied(unitid)
 end
 
 ---------------------------------------------------------------------------------------------------------------------
@@ -636,7 +636,7 @@ do
 		if unit.level < 0 then
       visual.level:SetText("")
 		else
-      visual.level:SetText(unit.level)
+      visual.level:SetText((unit.isElite and "+" or "") .. unit.level)
     end
 
     visual.level:SetTextColor(unit.levelcolorRed, unit.levelcolorGreen, unit.levelcolorBlue)
@@ -666,10 +666,16 @@ do
 	-- UpdateIndicator_EliteIcon: Updates the border overlay art and threat glow to Elite or Non-Elite art
 	function UpdateIndicator_EliteIcon()
     if unit.isRare then
-      visual.eliteicon:SetVertexColor(0.8, 0.8, 0.8)
       visual.eliteicon:SetShown(style.eliteicon.show)
-      visual.eliteborder:SetBackdropBorderColor(0.8, 0.8, 0.8)
       visual.eliteborder:SetShown(style.eliteborder.show)
+
+      if unit.isElite then
+        visual.eliteicon:SetVertexColor(0.804, 0.498, 0.196)
+        visual.eliteborder:SetBackdropBorderColor(0.804, 0.498, 0.196)
+      else
+        visual.eliteicon:SetVertexColor(0.8, 0.8, 0.8)
+        visual.eliteborder:SetBackdropBorderColor(0.8, 0.8, 0.8)
+      end
     elseif unit.isElite then
       visual.eliteicon:SetVertexColor(1, 0.85, 0)
       visual.eliteicon:SetShown(style.eliteicon.show)
@@ -997,16 +1003,13 @@ do
 
   function CoreEvents:PLAYER_TARGET_CHANGED()
     -- Target Castbar Offset
-    local visual, style, extended
+    local castbar, style, extended
     if LastTargetPlate and LastTargetPlate.TPFrame.Active then
       extended = LastTargetPlate.TPFrame
-      visual = extended.visual
+      castbar = extended.visual.castbar
       style = extended.style
-      visual.castbar:ClearAllPoints()
-      visual.spelltext:ClearAllPoints()
-      visual.castbar:SetPoint(style.castbar.anchor or "CENTER", extended, style.castbar.x or 0, style.castbar.y or 0)
-      visual.spelltext:SetPoint(style.spelltext.anchor or "CENTER", extended, style.spelltext.x or 0, style.spelltext.y or 0)
-      --visual.spellicon:SetPoint(style.spellicon.anchor or "CENTER", extended, style.spellicon.x or 0, style.spellicon.y or 0)
+      castbar:ClearAllPoints()
+      castbar:SetPoint(style.castbar.anchor or "CENTER", extended, style.castbar.x or 0, style.castbar.y or 0)
 
       LastTargetPlate = nil
 
@@ -1019,14 +1022,11 @@ do
     --if plate and plate.TPFrame and plate.TPFrame.stylename ~= "" then
     if plate and plate.TPFrame.Active then
       extended = plate.TPFrame
-      visual = extended.visual
+      castbar = extended.visual.castbar
       style = extended.style
-      visual.castbar:ClearAllPoints()
-      visual.spelltext:ClearAllPoints()
+      castbar:ClearAllPoints()
       local db = TidyPlatesThreat.db.profile.settings.castbar
-      visual.castbar:SetPoint(style.castbar.anchor or "CENTER", extended, style.castbar.x + db.x_target or 0, style.castbar.y + db.y_target or 0)
-      visual.spelltext:SetPoint(style.spelltext.anchor or "CENTER", extended, style.spelltext.x + db.x_target or 0, style.spelltext.y + db.y_target or 0)
-      --visual.spellicon:SetPoint(style.spellicon.anchor or "CENTER", extended, style.spellicon.x + db.x_target or 0, style.spellicon.y + db.y_target or 0)
+      castbar:SetPoint(style.castbar.anchor or "CENTER", extended, style.castbar.x + db.x_target or 0, style.castbar.y + db.y_target or 0)
 
       LastTargetPlate = plate
 
@@ -1036,22 +1036,24 @@ do
     SetUpdateAll()
 	end
 
-  function CoreEvents:PLAYER_FOCUS_CHANGED()
-    local extended
-    if LastTargetPlate and LastTargetPlate.TPFrame.Active then
-      LastTargetPlate.TPFrame.unit.IsFocus = false
-      LastTargetPlate = nil
-      -- Update mouseover, if the mouse was hovering over the targeted unit
-      CoreEvents:UPDATE_MOUSEOVER_UNIT()
-    end
+  if not Addon.CLASSIC then
+    function CoreEvents:PLAYER_FOCUS_CHANGED()
+      local extended
+      if LastFocusPlate and LastFocusPlate.TPFrame.Active then
+        LastFocusPlate.TPFrame.unit.IsFocus = false
+        LastFocusPlate = nil
+        -- Update mouseover, if the mouse was hovering over the targeted unit
+        CoreEvents:UPDATE_MOUSEOVER_UNIT()
+      end
 
-    local plate = GetNamePlateForUnit("focus")
-    if plate and plate.TPFrame.Active then
-      plate.TPFrame.unit.IsFocus = true
-      LastTargetPlate = plate
-    end
+      local plate = GetNamePlateForUnit("focus")
+      if plate and plate.TPFrame.Active then
+        plate.TPFrame.unit.IsFocus = true
+        LastFocusPlate = plate
+      end
 
-    SetUpdateAll()
+      SetUpdateAll()
+    end
   end
 
   function CoreEvents:UPDATE_MOUSEOVER_UNIT()
@@ -1117,7 +1119,7 @@ do
         --Addon:UpdateUnitCondition(unit, unitid)
         --        unit.threatValue = UnitThreatSituation("player", unitid) or 0
         --        unit.threatSituation = ThreatReference[unit.threatValue]
-        --        unit.isInCombat = UnitAffectingCombat(unitid)
+        --        unit.isInCombat = _G.UnitAffectingCombat(unitid)
         --ProcessUnitChanges()
         --OnUpdateCastMidway(nameplate, unit.unitid)
       end
@@ -1238,28 +1240,32 @@ do
     Addon:ForceUpdate()
 	end
 
-	--function CoreEvents:UNIT_ABSORB_AMOUNT_CHANGED(unitid)
-	--	local plate = GetNamePlateForUnit(unitid)
-  --
+  if not Addon.CLASSIC then
+    function CoreEvents:UNIT_ABSORB_AMOUNT_CHANGED(unitid)
+      local plate = GetNamePlateForUnit(unitid)
 	--	if plate and plate.TPFrame.Active then
-  --    local tp_frame = plate.TPFrame
-  --    local unit = tp_frame.unit
-  --    local unitid  = unit.unitid
-  --
+      if plate and plate.TPFrame.Active then
+        local tp_frame = plate.TPFrame
+        local unit = tp_frame.unit
+        local unitid  = unit.unitid
   --    -- As this does not use OnUpdate with OnHealthUpdate, we have to update this values here
-  --    unit.health = UnitHealth(unit.unitid) or 0
-  --    unit.healthmax = UnitHealthMax(unit.unitid) or 1
-  --
+        -- As this does not use OnUpdate with OnHealthUpdate, we have to update this values here
+        unit.health = _G.UnitHealth(unit.unitid) or 0
+        unit.healthmax = _G.UnitHealthMax(unit.unitid) or 1
 	--		Addon:UpdateExtensions(tp_frame, unitid, tp_frame.stylename)
-  --    UpdateIndicator_CustomText(tp_frame)
-	--	end
-  --end
+        Addon:UpdateExtensions(tp_frame, unitid, tp_frame.stylename)
+        UpdateIndicator_CustomText(tp_frame)
+      end
+    end
 
-  --function CoreEvents:UNIT_HEAL_ABSORB_AMOUNT_CHANGED(unitid)
-  --  local plate = GetNamePlateForUnit(unitid)
-  --
-  --  if plate and plate.TPFrame.Active then
-  --    Addon:UpdateExtensions(plate.TPFrame, unitid, plate.TPFrame.stylename)
+    function CoreEvents:UNIT_HEAL_ABSORB_AMOUNT_CHANGED(unitid)
+      local plate = GetNamePlateForUnit(unitid)
+
+      if plate and plate.TPFrame.Active then
+        Addon:UpdateExtensions(plate.TPFrame, unitid, plate.TPFrame.stylename)
+      end
+    end
+  end
   --  end
   --end
 
@@ -1403,7 +1409,8 @@ do
 	end
 
 	-- Style Groups
-	local fontgroup = {"name", "level", "spelltext", "customtext"}
+	local fontgroup = {"name", "level", "customtext"}
+  -- "spelltext",
 
 	local anchorgroup = {
 		"name",  "spelltext", "customtext", "level", "spellicon", "raidicon", "skullicon"
@@ -1495,24 +1502,25 @@ do
     end
 
     visual.castbar:ClearAllPoints()
-    visual.spelltext:ClearAllPoints()
-    --visual.spellicon:ClearAllPoints()
 
     local db = TidyPlatesThreat.db.profile.settings.castbar
     if UnitIsUnit("target", unit.unitid) then
       SetObjectAnchor(visual.castbar, style.castbar.anchor or "CENTER", extended, style.castbar.x + db.x_target or 0, style.castbar.y + db.y_target or 0)
-      SetObjectAnchor(visual.spelltext, style.spelltext.anchor or "CENTER", extended, style.spelltext.x + db.x_target or 0, style.spelltext.y + db.y_target or 0)
-      --SetObjectAnchor(visual.spellicon, style.spellicon.anchor or "CENTER", extended, style.spellicon.x + db.x_target or 0, style.spellicon.y + db.y_target or 0)
     else
       SetObjectAnchor(visual.castbar, style.castbar.anchor or "CENTER", extended, style.castbar.x or 0, style.castbar.y or 0)
-      SetObjectAnchor(visual.spelltext, style.spelltext.anchor or "CENTER", extended, style.spelltext.x or 0, style.spelltext.y or 0)
-      --SetObjectAnchor(visual.spellicon, style.spellicon.anchor or "CENTER", extended, style.spellicon.x or 0, style.spellicon.y or 0)
     end
+
+    -- Spell name
+    SetFontGroupObject(visual.spelltext, style.spelltext)
+    SetObjectShape(visual.spelltext, style.spelltext.width, style.spelltext.height)
+    visual.spelltext:ClearAllPoints()
+    visual.spelltext:SetPoint("CENTER", visual.castbar, "CENTER", db.SpellNameText.HorizontalOffset, db.SpellNameText.VerticalOffset)
+    visual.spelltext:SetShown(style.spelltext.show)
 
     -- Remaining cast time
     SetObjectFont(visual.castbar.casttime, style.spelltext.typeface, style.spelltext.size, style.spelltext.flags)
-    SetObjectShadow(visual.castbar.casttime, style.spelltext.shadow)
     SetObjectJustify(visual.castbar.casttime, db.CastTimeText.Font.HorizontalAlignment, db.CastTimeText.Font.VerticalAlignment)
+    SetObjectShadow(visual.castbar.casttime, style.spelltext.shadow)
     visual.castbar.casttime:SetSize(visual.castbar:GetSize())
     visual.castbar.casttime:ClearAllPoints()
     visual.castbar.casttime:SetPoint("CENTER", visual.castbar, "CENTER", db.CastTimeText.HorizontalOffset, db.CastTimeText.VerticalOffset)
@@ -1568,7 +1576,7 @@ function Addon:ConfigClickableArea(toggle_show)
         local extended = ConfigModePlate.TPFrame
 
         -- Draw background to show for clickable area
-        extended.Background = CreateFrame("Frame", nil, plate)
+        extended.Background = _G.CreateFrame("Frame", nil, plate)
         extended.Background:SetBackdrop({
           bgFile = ThreatPlates.Art .. "TP_WhiteSquare.tga",
           edgeFile = ThreatPlates.Art .. "TP_WhiteSquare.tga",

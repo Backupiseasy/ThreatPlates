@@ -6,12 +6,16 @@ local ThreatPlates = Addon.ThreatPlates
 ---------------------------------------------------------------------------------------------------
 
 -- Lua APIs
-local CreateFrame = CreateFrame
 
 -- WoW APIs
 local UnitExists, UnitIsUnit = UnitExists, UnitIsUnit
 
 -- ThreatPlates APIs
+
+local _G =_G
+-- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
+-- List them here for Mikk's FindGlobals script
+-- GLOBALS: CreateFrame
 
 local OFFSET_HIGHLIGHT = 1
 local ART_PATH = ThreatPlates.Art
@@ -60,12 +64,12 @@ function Addon:Element_Mouseover_Configure(frame, style_highlight)
 end
 
 function Addon:Element_Mouseover_Create(parent)
-  local frame = CreateFrame("Frame", nil, parent)
+  local frame = _G.CreateFrame("Frame", nil, parent)
   frame:SetFrameLevel(parent:GetFrameLevel() + 1)
 
   -- Highlight for healthbar
   local healthbar = parent.visual.healthbar
-  frame.Highlight = CreateFrame("Frame", nil, healthbar)
+  frame.Highlight = _G.CreateFrame("Frame", nil, healthbar)
   frame.Highlight:SetPoint("TOPLEFT", healthbar, "TOPLEFT", - OFFSET_HIGHLIGHT, OFFSET_HIGHLIGHT)
   frame.Highlight:SetPoint("BOTTOMRIGHT", healthbar, "BOTTOMRIGHT", OFFSET_HIGHLIGHT, - OFFSET_HIGHLIGHT)
   frame.Highlight:SetBackdrop({

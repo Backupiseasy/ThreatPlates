@@ -18,10 +18,9 @@ local sort = sort
 local tonumber = tonumber
 
 -- WoW APIs
-local CreateFrame, GetFramerate = CreateFrame, GetFramerate
+local GetFramerate = GetFramerate
 local DebuffTypeColor = DebuffTypeColor
 local UnitAura, UnitIsUnit, UnitReaction = UnitAura, UnitIsUnit, UnitReaction
-local UnitAffectingCombat = UnitAffectingCombat
 local GetNamePlates, GetNamePlateForUnit = C_NamePlate.GetNamePlates, C_NamePlate.GetNamePlateForUnit
 local IsInInstance = IsInInstance
 
@@ -34,6 +33,11 @@ local UpdateCustomStyleAfterAuraTrigger = Addon.UpdateCustomStyleAfterAuraTrigge
 local UnitStyle_AuraDependent = Addon.UnitStyle_AuraDependent
 
 local LibClassicDurations = LibStub("LibClassicDurations")
+
+local _G =_G
+-- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
+-- List them here for Mikk's FindGlobals script
+-- GLOBALS: CreateFrame, UnitAffectingCombat
 
 ---------------------------------------------------------------------------------------------------
 -- Aura Highlighting
@@ -1264,7 +1268,7 @@ local function CreateCooldown(parent)
   -- When the cooldown shares the frameLevel of its parent, the icon texture can sometimes render
   -- ontop of it. So it looks like it's not drawing a cooldown but it's just hidden by the icon.
 
-  local cooldown_frame = CreateFrame("Cooldown", nil, parent, "ThreatPlatesAuraWidgetCooldown")
+  local cooldown_frame = _G.CreateFrame("Cooldown", nil, parent, "ThreatPlatesAuraWidgetCooldown")
   cooldown_frame:SetAllPoints(parent.Icon)
   cooldown_frame:SetReverse(true)
   cooldown_frame:SetHideCountdownNumbers(true)
@@ -1319,22 +1323,22 @@ end
 function Widget:CreateAuraFrameIconMode(parent)
   local db = self.db_icon
 
-  local frame = CreateFrame("Frame", nil, parent)
+  local frame = _G.CreateFrame("Frame", nil, parent)
   frame:SetFrameLevel(parent:GetFrameLevel())
 
   frame.Icon = frame:CreateTexture(nil, "ARTWORK", 0)
-  frame.Border = CreateFrame("Frame", nil, frame)
+  frame.Border = _G.CreateFrame("Frame", nil, frame)
   frame.Border:SetFrameLevel(parent:GetFrameLevel())
   frame.Cooldown = CreateCooldown(frame)
 
-  frame.Highlight = CreateFrame("Frame", nil, frame)
+  frame.Highlight = _G.CreateFrame("Frame", nil, frame)
   frame.Highlight:SetFrameLevel(parent:GetFrameLevel())
   frame.Highlight:SetPoint("CENTER")
 
   -- Use a seperate frame for text elements as a) using frame as parent results in the text being shown below
   -- the cooldown frame and b) using the cooldown frame results in the text not being visible if there is no
   -- cooldown (i.e., duration and expiration are nil which is true for auras with unlimited duration)
-  local text_frame = CreateFrame("Frame", nil, frame)
+  local text_frame = _G.CreateFrame("Frame", nil, frame)
   text_frame:SetFrameLevel(parent:GetFrameLevel() + 9) -- +9 as the glow is set to +8 by LibCustomGlow
   text_frame:SetAllPoints(frame.Icon)
   frame.Stacks = text_frame:CreateFontString(nil, "OVERLAY")
@@ -1464,17 +1468,17 @@ function Widget:CreateAuraFrameBarMode(parent)
   local font = ThreatPlates.Media:Fetch('font', db.Font)
 
   -- frame is probably not necessary, should be ok do add everything to the statusbar frame
-  local frame = CreateFrame("Frame", nil, parent)
+  local frame = _G.CreateFrame("Frame", nil, parent)
   frame:SetFrameLevel(parent:GetFrameLevel())
 
-  frame.Statusbar = CreateFrame("StatusBar", nil, frame)
+  frame.Statusbar = _G.CreateFrame("StatusBar", nil, frame)
   frame.Statusbar:SetFrameLevel(parent:GetFrameLevel())
   frame.Statusbar:SetMinMaxValues(0, 100)
 
   frame.Background = frame.Statusbar:CreateTexture(nil, "BACKGROUND", 0)
   frame.Background:SetAllPoints()
 
-  frame.Highlight = CreateFrame("Frame", nil, frame)
+  frame.Highlight = _G.CreateFrame("Frame", nil, frame)
   frame.Highlight:SetFrameLevel(parent:GetFrameLevel())
 
   frame.Icon = frame:CreateTexture(nil, "OVERLAY", 1)
@@ -1767,7 +1771,7 @@ function Widget:UpdateAuraWidgetLayout(widget_frame)
   end
 
   if self.db.FrameOrder == "HEALTHBAR_AURAS" then
-    widget_frame:SetFrameLevel(widget_frame:GetParent():GetFrameLevel() + 3)
+    widget_frame:SetFrameLevel(widget_frame:GetParent():GetFrameLevel() + 2)
   else
     widget_frame:SetFrameLevel(widget_frame:GetParent():GetFrameLevel() + 9)
   end
@@ -1825,7 +1829,7 @@ function Widget:PLAYER_REGEN_ENABLED()
       local unit = frame.unit
 
       if widget_frame.Active and unit.HasUnlimitedAuras then
-        unit.isInCombat = UnitAffectingCombat(unit.unitid)
+        unit.isInCombat = _G.UnitAffectingCombat(unit.unitid)
         self:UpdateIconGrid(widget_frame, unit)
       end
     end
@@ -1840,7 +1844,7 @@ function Widget:PLAYER_REGEN_DISABLED()
     local unit = plate.TPFrame.unit
 
     if widget_frame.Active and unit.HasUnlimitedAuras then
-      unit.isInCombat = UnitAffectingCombat(unit.unitid)
+      unit.isInCombat = _G.UnitAffectingCombat(unit.unitid)
       self:UpdateIconGrid(widget_frame, unit)
     end
   end
@@ -1857,7 +1861,7 @@ end
 
 function Widget:Create(tp_frame)
   -- Required Widget Code
-  local widget_frame = CreateFrame("Frame", nil, tp_frame)
+  local widget_frame = _G.CreateFrame("Frame", nil, tp_frame)
   widget_frame:Hide()
 
   -- Custom Code
@@ -1865,17 +1869,17 @@ function Widget:Create(tp_frame)
   widget_frame:SetSize(10, 10)
   widget_frame:SetPoint("CENTER", tp_frame, "CENTER")
 
-  widget_frame.Debuffs = CreateFrame("Frame", nil, widget_frame)
+  widget_frame.Debuffs = _G.CreateFrame("Frame", nil, widget_frame)
   widget_frame.Debuffs.AuraFrames = {}
   widget_frame.Debuffs.ActiveAuras = 0
   widget_frame.Debuffs.Filter = "HARMFUL"
 
-  widget_frame.Buffs = CreateFrame("Frame", nil, widget_frame)
+  widget_frame.Buffs = _G.CreateFrame("Frame", nil, widget_frame)
   widget_frame.Buffs.AuraFrames = {}
   widget_frame.Buffs.ActiveAuras = 0
   widget_frame.Buffs.Filter = "HELPFUL"
 
-  widget_frame.CrowdControl = CreateFrame("Frame", nil, widget_frame)
+  widget_frame.CrowdControl = _G.CreateFrame("Frame", nil, widget_frame)
   widget_frame.CrowdControl.AuraFrames = {}
   widget_frame.CrowdControl.ActiveAuras = 0
   widget_frame.CrowdControl.Filter = "HARMFUL"
@@ -2111,7 +2115,7 @@ function Widget:UpdateSettings()
     -- (which happens after the settings update)
     if widget_frame then
       self:UpdateAuraWidgetLayout(widget_frame)
-      if tp_frame.Active then -- equals: plate is visible, i.e., show currently
+      if widget_frame.Active then -- equals: plate is visible and auras are used
         self:OnUnitAdded(widget_frame, widget_frame.unit)
       end
     end

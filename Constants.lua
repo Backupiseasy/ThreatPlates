@@ -157,6 +157,19 @@ Addon.CUSTOM_PLATES_GLOW_FRAMES = {
   Icon = L["Icon"],
 }
 
+Addon.TARGET_TEXTURES = {
+  default = L["Default"],
+  squarethin = L["Thin Square"],
+  arrows = L["Arrow"],
+  arrow_down = L["Down Arrow"],
+  arrow_less_than = L["Less-Than Arrow"],
+  glow = L["Glow"],
+  threat_glow = L["Threat Glow"],
+  crescent = L["Crescent"],
+  bubble = L["Bubble"],
+  arrows_legacy = L["Arrow (Legacy)"],
+}
+
 ----------------------------------------------------------------------------------------------------
 -- Paths
 ---------------------------------------------------------------------------------------------------
@@ -984,15 +997,15 @@ ThreatPlates.DEFAULT_SETTINGS = {
           Type = "Name",
           Name = {
             Input = "<Enter name here>",
-            AsArray = {},
+            AsArray = {}, -- Generated after entering Input with Addon.Split
           },
           Aura = {
-            Input = nil,
-            AsArray = {},
+            Input = "",
+            AsArray = {}, -- Generated after entering Input with Addon.Split
           },
           Cast = {
-            Input = nil,
-            AsArray = {}
+            Input = "",
+            AsArray = {}, -- Generated after entering Input with Addon.Split
           },
         },
         Effects = {
@@ -1022,9 +1035,10 @@ ThreatPlates.DEFAULT_SETTINGS = {
         overrideScale = false,
         overrideAlpha = false,
         UseAutomaticIcon = true,
+        -- AutomaticIcon = "number",
         icon = "INV_Misc_QuestionMark.blp",
-        -- SpellID = nil,
-        -- SpellName = nil,
+        -- SpellID = "number",
+        -- SpellName = "string",
         scale = 1,
         alpha = 1,
         color = {
@@ -1105,6 +1119,10 @@ ThreatPlates.DEFAULT_SETTINGS = {
         ShowInHeadlineView = false,
         ShowSpark = true,
         ShowCastTime = true,
+        SpellNameText = {
+          HorizontalOffset = 2,
+          VerticalOffset = 0,
+        },
         CastTimeText = {
           HorizontalOffset = -2,
           VerticalOffset = 0,
@@ -1135,7 +1153,6 @@ ThreatPlates.DEFAULT_SETTINGS = {
       },
       level = {
         typeface = Addon.DEFAULT_FONT, -- old default: "Accidental Presidency",
-        size = 9, -- old default: 12,
         size = 9, -- old default: 12,
         width = 20,
         height = 10, -- old default: 14,
@@ -1177,12 +1194,12 @@ ThreatPlates.DEFAULT_SETTINGS = {
       spelltext = {
         typeface = Addon.DEFAULT_FONT, -- old default: "Accidental Presidency",
         size = 8,  -- old default: 12
-        width = 110,
+        width = 120,
         height = 14,
-        x = 0,
-        y = -15,  -- old default: -13
-        x_hv = 0,
-        y_hv = -20,  -- old default: -13
+        -- x = 0,       -- Removed in 9.2.0
+        -- y = -15,     -- Removed in 9.2.0 -- old default: -13
+        -- x_hv = 0,    -- Removed in 9.2.0
+        -- y_hv = -20,  -- Removed in 9.2.0 -- old default: -13
         align = "LEFT",
         vertical = "CENTER",
         shadow = true,
@@ -1272,7 +1289,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
     },
     threat = {
       ON = true,
-      marked = false,
+      -- marked = false, -- not used at all, removed in 9.2.0
       -- nonCombat = true, -- removed in 9.1.3
       UseThreatTable = true,
       UseHeuristicInInstances = false,

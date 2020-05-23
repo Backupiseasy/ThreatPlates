@@ -8,12 +8,15 @@ local ThreatPlates = Addon.ThreatPlates
 -- Lua APIs
 
 -- WoW APIs
-local UnitGetTotalAbsorbs, UnitGetTotalHealAbsorbs = UnitGetTotalAbsorbs, UnitGetTotalHealAbsorbs
-local UnitHealth = UnitHealth
-local UnitHealthMax = UnitHealthMax
+local UnitGetTotalHealAbsorbs = UnitGetTotalHealAbsorbs
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
+
+local _G =_G
+-- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
+-- List them here for Mikk's FindGlobals script
+-- GLOBALS: UnitGetTotalAbsorbs, UnitHealth, UnitHealthMax
 
 ---------------------------------------------------------------------------------------------------
 -- Extensions to the TidyPlates UI elements
@@ -107,10 +110,10 @@ function Addon:UpdateExtensions(tp_frame, unitid, style)
   end
 
   -- Code for absorb calculation see CompactUnitFrame.lua
-  local health = UnitHealth(unitid) or 0
-  local health_max = UnitHealthMax(unitid) or 0
+  local health = _G.UnitHealth(unitid) or 0
+  local health_max = _G.UnitHealthMax(unitid) or 0
   local heal_absorb = UnitGetTotalHealAbsorbs(unitid) or 0
-  local absorb = UnitGetTotalAbsorbs(unitid) or 0
+  local absorb = _G.UnitGetTotalAbsorbs(unitid) or 0
 
   -- heal_absorb = 0.25 * UnitHealth(unitid)
   -- absorb = UnitHealthMax(unitid) * 0.3 -- REMOVE

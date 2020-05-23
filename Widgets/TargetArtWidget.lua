@@ -4,7 +4,7 @@
 local ADDON_NAME, Addon = ...
 local ThreatPlates = Addon.ThreatPlates
 
-local FocusWidget = Addon.Widgets:NewFocusWidget("Focus")
+local FocusWidget = (not Addon.CLASSIC and Addon.Widgets:NewFocusWidget("Focus")) or {}
 local Widget = Addon.Widgets:NewTargetWidget("TargetArt")
 
 ---------------------------------------------------------------------------------------------------
@@ -12,11 +12,15 @@ local Widget = Addon.Widgets:NewTargetWidget("TargetArt")
 ---------------------------------------------------------------------------------------------------
 
 -- WoW APIs
-local CreateFrame = CreateFrame
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
+
+local _G =_G
+-- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
+-- List them here for Mikk's FindGlobals script
+-- GLOBALS: CreateFrame
 
 local ART_PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\TargetArtWidget\\"
 local BACKDROP = {
@@ -117,29 +121,30 @@ local function UpdateCenterTexture(db, widget_frame, texture_frame)
 end
 
 local UPDATE_TEXTURE_FUNCTIONS = {
-  arrow_down = UpdateCenterTexture,
+  default = UpdateBorderTexture,
+  squarethin = UpdateBorderTexture,
   arrows = UpdateSideTexture,
+  arrow_down = UpdateCenterTexture,
+  arrow_less_than = UpdateSideTexture,
+  glow = UpdateBorderTexture,
+  threat_glow = UpdateBorderTexture,
   arrows_legacy = UpdateSideTexture,
   bubble = UpdateSideTexture,
   crescent = UpdateSideTexture,
-  default = UpdateBorderTexture,
-  glow = UpdateBorderTexture,
-  squarethin = UpdateBorderTexture,
-  threat_glow = UpdateBorderTexture,
 }
 
 local FRAME_LEVEL_BY_TEXTURE = {
-  arrow_down = 14,
+  default = 6,
+  squarethin = 6,
   arrows = 14,
+  arrow_down = 14,
+  arrow_less_than = 14,
+  glow = 4,
+  threat_glow = 4,
   arrows_legacy = 14,
   bubble = 14,
   crescent = 14,
-  default = 6,
-  glow = 4,
-  squarethn = 6,
-  threat_glow = 4,
 }
-
 
 local function GetHeadlineViewHeight(db)
   return abs(max(db.name.y, db.customtext.y) - min(db.name.y, db.customtext.y)) + (db.name.size + db.customtext.size) / 2
@@ -177,12 +182,12 @@ end
 
 function Widget:Create()
   if not WidgetFrame then
-    local widget_frame = CreateFrame("Frame", nil)
+    local widget_frame = _G.CreateFrame("Frame", nil)
     widget_frame:Hide()
 
     WidgetFrame = widget_frame
 
-    local healthbar_mode_frame = CreateFrame("Frame", nil, widget_frame)
+    local healthbar_mode_frame = _G.CreateFrame("Frame", nil, widget_frame)
     healthbar_mode_frame:SetFrameLevel(widget_frame:GetFrameLevel())
     healthbar_mode_frame.LeftTexture = widget_frame:CreateTexture(nil, "BACKGROUND", 0)
     healthbar_mode_frame.RightTexture = widget_frame:CreateTexture(nil, "BACKGROUND", 0)
@@ -300,12 +305,12 @@ end
 
 function FocusWidget:Create()
   if not FocusWidgetFrame then
-    local widget_frame = CreateFrame("Frame", nil)
+    local widget_frame = _G.CreateFrame("Frame", nil)
     widget_frame:Hide()
 
     FocusWidgetFrame = widget_frame
 
-    local healthbar_mode_frame = CreateFrame("Frame", nil, widget_frame)
+    local healthbar_mode_frame = _G.CreateFrame("Frame", nil, widget_frame)
     healthbar_mode_frame:SetFrameLevel(widget_frame:GetFrameLevel())
     healthbar_mode_frame.LeftTexture = widget_frame:CreateTexture(nil, "BACKGROUND", 0)
     healthbar_mode_frame.RightTexture = widget_frame:CreateTexture(nil, "BACKGROUND", 0)

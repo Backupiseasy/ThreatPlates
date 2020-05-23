@@ -11,10 +11,9 @@ local ADDON_NAME, Addon = ...
 local pairs, next = pairs, next
 
 -- WoW APIs
-local CreateFrame, UIParent = CreateFrame, UIParent
+local UIParent = UIParent
 
 -- ThreatPlates APIs
-
 local Animations = Addon.Animations
 
 Animations.FLASH_DURATION = 0.4

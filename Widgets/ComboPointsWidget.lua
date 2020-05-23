@@ -17,10 +17,10 @@ local floor = floor
 local sort = sort
 
 -- WoW APIs
-local CreateFrame, GetTime = CreateFrame, GetTime
+local GetTime = GetTime
 local UnitClass, UnitCanAttack = UnitClass, UnitCanAttack
 local UnitPower, UnitPowerMax, GetRuneCooldown = UnitPower, UnitPowerMax, GetRuneCooldown
-local GetSpecialization, GetShapeshiftFormID = GetSpecialization, GetShapeshiftFormID
+local GetShapeshiftFormID = GetShapeshiftFormID
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
 
@@ -28,6 +28,11 @@ local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
 local TidyPlatesThreat = TidyPlatesThreat
 local RGB = Addon.ThreatPlates.RGB
 local Font = Addon.Font
+
+local _G =_G
+-- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
+-- List them here for Mikk's FindGlobals script
+-- GLOBALS: CreateFrame, GetSpecialization
 
 local UPDATE_INTERVAL = Addon.ON_UPDATE_INTERVAL
 
@@ -466,7 +471,7 @@ end
 
 function Widget:Create()
   if not self.WidgetFrame then
-    local widget_frame = CreateFrame("Frame", nil)
+    local widget_frame = _G.CreateFrame("Frame", nil)
     widget_frame:Hide()
 
     self.WidgetFrame = widget_frame

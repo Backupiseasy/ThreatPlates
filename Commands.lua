@@ -6,7 +6,7 @@ local TP = Addon.ThreatPlates
 ---------------------------------------------------------------------------------------------------
 local L = TP.L
 
-local DEBUG = true
+local DEBUG = TP.Meta("version"):find("Alpha") or TP.Meta("version"):find("Beta")
 
 local function toggleDPS()
 	TidyPlatesThreat:SetRole(false)
@@ -84,7 +84,7 @@ SlashCmdList["TPTPVERBOSE"] = TPTPVERBOSE
 local function PrintHelp()
 	TP.Print(L["Usage: /tptp [options]"], true)
 	TP.Print(L["options:"], true)
-	TP.Print(L["  legacy-custom-plates    Adds (legacy) default custom nameplates that are deleted when migrating custom nameplates to the current format"], true)
+	TP.Print(L["  legacy-custom-styles    Adds (legacy) default custom styles for nameplates that are deleted when migrating custom nameplates to the current format"], true)
 	TP.Print(L["  help                    Prints this help message"], true)
 	TP.Print(L["  <no option>             Displays options dialog"], true)
 	TP.Print(L["Additional chat commands:"], true)
@@ -118,13 +118,27 @@ function TidyPlatesThreat:ChatCommand(input)
 		TidyPlatesThreat:OpenOptions()
 	elseif input == "help" then
 		PrintHelp()
-	elseif input == "legacy-custom-plates" then
+	elseif input == "legacy-custom-styles" then
 		Addon.RestoreLegacyCustomNameplates()
+--	elseif input == "toggle-view-friendly-units" then
+--		TidyPlatesThreat:ToggleNameplateModeFriendlyUnits()
+--	elseif input == "toggle-view-neutral-units" then
+--		TidyPlatesThreat:ToggleNameplateModeNeutralUnits()
+--	elseif input == "toggle-view-enemy-units" then
+--		TidyPlatesThreat:ToggleNameplateModeEnemyUnits()
 	elseif DEBUG then
 		if command == "searchdb" then
 			TP.Print("|cff89F559Threat Plates|r: Searching settings:", true)
 			SearchDBForString(TidyPlatesThreat.db.profile, "<Profile>", string.lower(cmd_list[2]))
 			SearchDBForString(TidyPlatesThreat.db.global, "<Profile>", string.lower(cmd_list[2]))
+		elseif command == "cache" then
+			Addon.DebugPrintCaches()
+		elseif command == "unit" then
+			local plate = C_NamePlate.GetNamePlateForUnit("target")
+			if not plate then return end
+			TP.DEBUG_PRINT_UNIT(plate.TPFrame.unit, true)
+		elseif command == "migrate" then
+			Addon.MigrateDatabase(TP.Meta("version"))
 		else
 			TidyPlatesThreat:ChatCommandDebug(cmd_list)
 		end
@@ -142,20 +156,37 @@ function TidyPlatesThreat:ChatCommandDebug(cmd_list)
 		--Addon:PrintEventService()
 	elseif command == "quest" then
 		Addon:PrintQuests()
-	elseif command == "unit" then
-		local plate = C_NamePlate.GetNamePlateForUnit("target")
-		if not plate then return end
-		local unit = plate.TPFrame.unit
-
-		TP.DEBUG_PRINT_UNIT(unit, true)
-    local type, zero, server_id, instance_id, zone_uid, npc_id, spawn_uid = strsplit("-", unit.guid)
-    print ("GUID:", type, zero, server_id, instance_id, zone_uid, npc_id, spawn_uid)
-	elseif command == "migrate" then
-		local profile_table = TidyPlatesThreat.db.profiles
-
-		for profile_name, profile in pairs(profile_table) do
-			Addon.MigrationCustomPlatesV3(profile_name, profile)
+	elseif command == "custom-styles" then
+		for k, v in pairs(TidyPlatesThreat.db.profile.uniqueSettings) do
+			print ("Style:", k, "=>", v.Trigger.Type, " - ", v.Trigger[v.Trigger.Type].Input or "nil" )
 		end
+	elseif command == "cleanup-custom-styles" then
+		local input = TidyPlatesThreat.db.profile.uniqueSettings
+		for i = #input, 1 , -1 do
+			local custom_style = input[i]
+			print (i, type(i), custom_style.Trigger.Type, custom_style.Trigger.Name.Input)
+			if custom_style.Trigger.Type == "Name" and custom_style.Trigger.Name.Input == "<Enter name here>" then
+				table.remove(input, i)
+				print ("Removing", i)
+			end
+		end
+	elseif command == "import" then
+		local custom_style = {
+			Trigger = {
+				Type = "Name",
+				Name = {
+					Input = "Wurzebrumpf",
+					AsArray = { "fsadfsd" },
+				}
+			},
+			UseAutomaticIcon = false,
+			icon = false,
+			XYZ = true,
+			SpellID = 234234,
+		}
+		local imported_custom_style = Addon.ImportCustomStyle(custom_style)
+		TP.DEBUG_PRINT_TABLE(imported_custom_style)
+
   elseif command == "heuristic" then
     local plate = C_NamePlate.GetNamePlateForUnit("target")
     if not plate then return end
@@ -185,9 +216,9 @@ function TidyPlatesThreat:ChatCommandDebug(cmd_list)
 		DBM.Nameplate:Show(true, UnitGUID("target"), 255824, nil, nil, nil, true, {0.5, 0, 0.55, 0.75})
 	elseif command == "dbm2" then
 		DBM.Nameplate:Hide(true, UnitGUID("target"), 255824, nil, nil, nil, true, {0.5, 0, 0.55, 0.75})
---	else
---		TP.Print(L["Unknown option: "] .. input, true)
---		PrintHelp()
+	else
+		TP.Print(L["Unknown option: "] .. input, true)
+		PrintHelp()
 	end
 end
 

@@ -12,8 +12,8 @@ local tonumber, pairs = tonumber, pairs
 local SetNamePlateFriendlyClickThrough = C_NamePlate.SetNamePlateFriendlyClickThrough
 local SetNamePlateEnemyClickThrough = C_NamePlate.SetNamePlateEnemyClickThrough
 local UnitName, IsInInstance, InCombatLockdown = UnitName, IsInInstance, InCombatLockdown
-local GetCVar, SetCVar, IsAddOnLoaded = GetCVar, SetCVar, IsAddOnLoaded
-local C_NamePlate_SetNamePlateFriendlySize, C_NamePlate_SetNamePlateEnemySize, Lerp =  C_NamePlate.SetNamePlateFriendlySize, C_NamePlate.SetNamePlateEnemySize, Lerp
+local GetCVar, IsAddOnLoaded = GetCVar, IsAddOnLoaded
+local C_NamePlate, Lerp =  C_NamePlate, Lerp
 local C_Timer_After = C_Timer.After
 local NamePlateDriverFrame = NamePlateDriverFrame
 
@@ -24,6 +24,11 @@ local LSM = t.Media
 local L = t.L
 local LibThreatClassic = Addon.LibThreatClassic
 local LibClassicCasterino = Addon.LibClassicCasterino
+
+local _G =_G
+-- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
+-- List them here for Mikk's FindGlobals script
+-- GLOBALS: SetCVar
 
 ---------------------------------------------------------------------------------------------------
 -- Local variables
@@ -274,12 +279,12 @@ function Addon:SetBaseNamePlateSize()
   db = TidyPlatesThreat.db.profile
   -- Classic has the same nameplate size for friendly and enemy units, so either set both or non at all (= set it to default values)
   if not db.ShowFriendlyBlizzardNameplates and not db.ShowEnemyBlizzardNameplates and not isInstance then
-    C_NamePlate_SetNamePlateFriendlySize(width, height)
-    C_NamePlate_SetNamePlateEnemySize(width, height)
+    C_NamePlate.SetNamePlateFriendlySize(width, height)
+    C_NamePlate.SetNamePlateEnemySize(width, height)
   else
     -- Smaller nameplates are not available in Classic
-    C_NamePlate_SetNamePlateFriendlySize(128, 32)
-    C_NamePlate_SetNamePlateEnemySize(128, 32)
+    C_NamePlate.SetNamePlateFriendlySize(128, 32)
+    C_NamePlate.SetNamePlateEnemySize(128, 32)
   end
 
   Addon:ConfigClickableArea(false)
@@ -526,10 +531,10 @@ function TidyPlatesThreat:PLAYER_REGEN_ENABLED()
 
   -- Dont't use automation for friendly nameplates if in an instance and Hide Friendly Nameplates is enabled
   if db.FriendlyUnits ~= "NONE" and not (isInstance and db.HideFriendlyUnitsInInstances) then
-    SetCVar("nameplateShowFriends", (db.FriendlyUnits == "SHOW_COMBAT" and 0) or 1)
+    _G.SetCVar("nameplateShowFriends", (db.FriendlyUnits == "SHOW_COMBAT" and 0) or 1)
   end
   if db.EnemyUnits ~= "NONE" then
-    SetCVar("nameplateShowEnemies", (db.EnemyUnits == "SHOW_COMBAT" and 0) or 1)
+    _G.SetCVar("nameplateShowEnemies", (db.EnemyUnits == "SHOW_COMBAT" and 0) or 1)
   end
 end
 
@@ -540,8 +545,8 @@ function TidyPlatesThreat:PLAYER_REGEN_DISABLED()
 
   -- Dont't use automation for friendly nameplates if in an instance and Hide Friendly Nameplates is enabled
   if db.FriendlyUnits ~= "NONE" and not (isInstance and db.HideFriendlyUnitsInInstances) then
-    SetCVar("nameplateShowFriends", (db.FriendlyUnits == "SHOW_COMBAT" and 1) or 0)
+    _G.SetCVar("nameplateShowFriends", (db.FriendlyUnits == "SHOW_COMBAT" and 1) or 0)
   end  if db.EnemyUnits ~= "NONE" then
-    SetCVar("nameplateShowEnemies", (db.EnemyUnits == "SHOW_COMBAT" and 1) or 0)
+    _G.SetCVar("nameplateShowEnemies", (db.EnemyUnits == "SHOW_COMBAT" and 1) or 0)
   end
 end
