@@ -1,4 +1,10 @@
 ﻿------------------------------------------------------
+9.2.1
+------------------------------------------------------
+* Fixed a bug where threat textures where are never shown although the player is in combat [IM].
+* Fixed German localization of help text for chat commands.
+
+------------------------------------------------------
 9.2.0
 ------------------------------------------------------
 * Added new triggers for custom nameplate styles additionally to a unit's name: auras and casts [Comment #4202, #766, #1284, #1988, #2010, #723, #1438, #1462, #1506, #1679, #1461, Issue #170, E-Mail, IM].

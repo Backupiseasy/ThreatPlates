@@ -128,8 +128,9 @@ function Widget:UpdateFrame(widget_frame, unit)
     return
   end
 
+  -- unique_setting.useStyle is already checked when setting the style of the nameplate (to custom)
   local unique_setting = unit.CustomPlateSettings
-  if not unique_setting or not unique_setting.UseThreatColor then
+  if unique_setting and not unique_setting.UseThreatColor then
     widget_frame:Hide()
     return
   end
