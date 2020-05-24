@@ -1046,7 +1046,7 @@ local DEPRECATED_SETTINGS = {
   -- hideNonCombat = { "threat", "hideNonCombat" },        -- (removed in ...)
   -- nonCombat = { "threat", "nonCombat" },                -- (removed in 9.1.0)
   -- MigrationCustomPlatesV3 = { MigrateCustomStylesToV3, "9.2.1", function() TidyPlatesThreat.db.global.CustomNameplatesVersion = 3 end },
-  MigrationCustomPlatesV3 = { MigrateCustomStylesToV3, "9.2.1" },
+  MigrationCustomPlatesV3 = { MigrateCustomStylesToV3, "9.2.2" },
   SpelltextPosition = { MigrateSpelltextPosition, "9.2.0", NoDefaultProfile = true },
   FixTargetFocusTexture = { FixTargetFocusTexture, NoDefaultProfile = true },
 }
