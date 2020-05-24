@@ -1,8 +1,10 @@
 ﻿## Interface: 80300
 ## Title: Threat Plates
-## Version: 9.2.0
+## Version: 9.3.0-Beta1
 ## Notes: Threat-reactive nameplates.
 ## Notes-deDE: Bedrohungsreaktive Namensplaketten.
+## Notes-esES: Placas Identificativas de Amenaza
+## Notes-esMX: Placas Identificativas de Amenaza
 ## Author: Suicidal Katt, Blacksalsify
 ## SavedVariables: ThreatPlatesDB
 ## RequiredDeps:
@@ -10,6 +12,7 @@
 ## X-Website: https://wow.curseforge.com/projects/tidy-plates-threat-plates
 ## X-License: GNU General Public License
 ## X-Credits: danltiger (for Tidy Plates), Tosaido (for quest handling code from QuestMobs)
+## X-Curse-Project-ID: 21217
 
 Libs\Libs.xml
 Locales\Locales.xml

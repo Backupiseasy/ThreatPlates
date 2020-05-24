@@ -11,74 +11,35 @@ set WOW_INT_PATH=D:\Games\World of Warcraft - Int\_retail_
 set WOW_PLAIN=F:\Games\World of Warcraft Plain\_retail_
 
 set TP_PATH=F:\Eigene Dateien\Dokumente\WoW\ThreatPlates\Releases
-set TP_PACKAGE=%TP_PATH%\ThreatPlates_%version%.zip
+set RELEASE_FILENAME=ThreatPlates_%version%.zip
+set CLASSIC_RELEASE_FILENAME=ThreatPlatesClassic_%version%.zip
 
 
 if "%command%"=="package" (CALL :Package)
-if "%command%"=="plain" (CALL :Install-to-Plain)
-if "%command%"=="int" (CALL :Install-to-Integration)
+if "%command%"=="package-classic" (CALL :PackageClassic)
 if "%command%"=="help" (CALL :Print-Help)
-if "%command%"=="release" (CALL :Zip-Release)
-if "%command%"=="test" (CALL :Zip-Test)
 if "%command%"=="" (CALL :Print-Help)
 EXIT /B
 
-:Zip-Release
-set TP_SOURCE=%WOW_PATH%\Interface\Addons\TidyPlates_ThreatPlates
-set CMD=%ZIP_EXE% a -xr@exclude.lst "%TP_PACKAGE%" "%TP_SOURCE%"
-echo Packaging: %CMD%
-%CMD%
-EXIT /B %ERRORLEVEL%
-
-:Zip-Test
-set TP_TEST_SOURCE=%WOW_TEST_PATH%\Interface\Addons\TidyPlates_ThreatPlates
-set CMD=%ZIP_EXE% a -xr@exclude.lst "%TP_PACKAGE%" "%TP_TEST_SOURCE%"
-echo Packaging: %CMD%
-%CMD%
-EXIT /B %ERRORLEVEL%
-
-
 :Package
 set SOURCE=%BATCH_DIR%
-set CMD=%ZIP_EXE% a -xr@exclude.lst "%TP_PACKAGE%" "%SOURCE%"
-echo Packaging %SOURCE% to ThreatPlates_%version%.zip
+set CMD=%ZIP_EXE% a -xr@exclude.lst "%TP_PATH%\%RELEASE_FILENAME%" "%SOURCE%"
+echo Packaging %SOURCE% to %RELEASE_FILENAME%
 %CMD% > nul
 EXIT /B %ERRORLEVEL%
 
-:Install-to-Plain
+:PackageClassic
 set SOURCE=%BATCH_DIR%
-set TP_PACKAGE=%TP_PATH%\ThreatPlates_plain.zip
-DEL /S /Q "%TP_PACKAGE%" 2> nul > nul
-@echo Package Source: %SOURCE%
-%ZIP_EXE% a -xr@exclude.lst "%TP_PACKAGE%" "%SOURCE%" > nul
-@echo Removing exiting installation in PLAIN environment: %WOW_PLAIN%\Interface\AddOns\TidyPlates_ThreatPlates
-RMDIR /S /Q "%WOW_PLAIN%\Interface\AddOns\TidyPlates_ThreatPlates" 2> nul
-@echo Removing exiting SavedVariables in PLAIN environment: %WOW_PLAIN%\WTF
-DEL /S /Q /F "%WOW_PLAIN%\WTF\TidyPlates_ThreatPlates*.*" 2> nul
-@echo Installing package to PLAIN environment %WOW_PLAIN%
-%ZIP_EXE% x -o"%WOW_PLAIN%\Interface\AddOns" "%TP_PACKAGE%" > nul
-DEL /S /Q /Q "%TP_PACKAGE%" > nul
-EXIT /B %ERRORLEVEL%
-
-:Install-to-Integration
-set SOURCE=%BATCH_DIR%
-set TP_PACKAGE=%TP_PATH%\ThreatPlates_integration.zip
-DEL /S /Q "%TP_PACKAGE%" 2> nul > nul
-@echo Package Source: %SOURCE%
-%ZIP_EXE% a -xr@exclude.lst "%TP_PACKAGE%" "%SOURCE%" > nul
-@echo Removing exiting installation in INTEGRATION environment: %WOW_INT%\Interface\AddOns\TidyPlates_ThreatPlates
-RMDIR /S /Q "%WOW_INT%\Interface\AddOns\TidyPlates_ThreatPlates" 2> nul
-@echo Installing package to INTEGRATION environment %WOW_INT%
-%ZIP_EXE% x -o"%WOW_INT%\Interface\AddOns" "%TP_PACKAGE%" > nul
-DEL /S /Q /Q "%TP_PACKAGE%" > nul
+set CMD=%ZIP_EXE% a -xr@exclude.lst "%TP_PATH%\%CLASSIC_RELEASE_FILENAME%" "%SOURCE%"
+echo Packaging %SOURCE% to %CLASSIC_RELEASE_FILENAME%
+%CMD% > nul
 EXIT /B %ERRORLEVEL%
 
 :Print-Help
 @echo on
 @echo Usage: zip.bat ^<options^>
-@echo   package ^<version^>      Create a new version package based on the the current ThreatPlates directory
-@echo   plain                  Package up the current ThreatPlates directory and install it to the PLAIN environment
-@echo   int                    Package up the current ThreatPlates directory and install it to the INTEGRATION environment
-@echo   help                   Print this help message
+@echo   package ^<version^>           Create a new version package based on the the current ThreatPlates directory
+@echo   package-classic ^<version^>   Create a new version package based on the the current ThreatPlates directory
+@echo   help                          Print this help message
 @echo off
 EXIT /B %ERRORLEVEL%

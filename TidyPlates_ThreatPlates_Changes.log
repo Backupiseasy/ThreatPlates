@@ -1,4 +1,14 @@
 ﻿------------------------------------------------------
+9.3.0-Beta1
+------------------------------------------------------
+* Consolidated Retail and Classic version of Threat Plates into one single version.
+
+------------------------------------------------------
+9.2.1
+------------------------------------------------------
+* Fixed some bugs in the German localization.
+
+------------------------------------------------------
 9.2.0
 ------------------------------------------------------
 * Added new triggers for custom nameplate styles additionally to a unit's name: auras and casts [Comment #4202, #766, #1284, #1988, #2010, #723, #1438, #1462, #1506, #1679, #1461, Issue #170, E-Mail, IM].

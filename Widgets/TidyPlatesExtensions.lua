@@ -31,7 +31,7 @@ local IGNORED_STYLES = {
   empty= true,
 }
 
-function Addon:CreateExtensions(tp_frame)
+local function CreateExtensions(tp_frame)
   local visual = tp_frame.visual
 
   -- Fix layering of TidyPlates
@@ -59,9 +59,9 @@ function Addon:CreateExtensions(tp_frame)
       absorbbar.overlay:SetTexture("Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\Striped_Texture.tga", true, true)
       absorbbar.overlay:SetHorizTile(true)
       --absorbbar.tileSize = 64
---      absorbbar.overlay:SetTexture("Interface\\RaidFrame\\Shield-Overlay", true, true);	--Tile both vertically and horizontally
---      absorbbar.overlay:SetHorizTile(true)
---      absorbbar.tileSize = 32
+      --      absorbbar.overlay:SetTexture("Interface\\RaidFrame\\Shield-Overlay", true, true);	--Tile both vertically and horizontally
+      --      absorbbar.overlay:SetHorizTile(true)
+      --      absorbbar.tileSize = 32
       absorbbar.overlay:Hide()
 
       local absorbglow = healthbar:CreateTexture(nil, "OVERLAY", 7)
@@ -88,7 +88,7 @@ function Addon:CreateExtensions(tp_frame)
   end
 end
 
-function Addon:UpdateExtensions(tp_frame, unitid, style)
+local function UpdateExtensions(tp_frame, unitid, style)
   local visual = tp_frame.visual
   local absorbbar = visual.absorbbar
   local healthbar = visual.healthbar
@@ -248,4 +248,12 @@ function Addon:UpdateExtensions(tp_frame, unitid, style)
     absorbbar.glow:Hide()
     absorbbar:Hide()
   end
+end
+
+if Addon.CLASSIC then
+  Addon.CreateExtensions = function() end
+  Addon.UpdateExtensions = function() end
+else
+  Addon.CreateExtensions = CreateExtensions
+  Addon.UpdateExtensions = UpdateExtensions
 end

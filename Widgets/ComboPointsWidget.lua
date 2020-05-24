@@ -181,7 +181,7 @@ Widget.TextureCoordinates = {}
 Widget.Colors = {}
 Widget.ShowInShapeshiftForm = true
 
-local ActiveSpec
+local ActiveSpec = 1 -- WoW Clasic only knows one spec, so set default to 1 which is never changed as ACTIVE_TALENT_GROUP_CHANGED is never fired
 local RuneCooldowns = { 0, 0, 0, 0, 0, 0 }
 
 ---------------------------------------------------------------------------------------------------
@@ -193,18 +193,35 @@ local DeathKnightSpecColor, ShowRuneCooldown
 -- Combo Points Widget Functions
 ---------------------------------------------------------------------------------------------------
 
-function Widget:DetermineUnitPower()
-  local _, player_class = UnitClass("player")
-  local player_spec_no = _G.GetSpecialization()
+if Addon.CLASSIC then
+  function Widget:DetermineUnitPower()
+    local _, player_class = UnitClass("player")
+    local power_type = UNIT_POWER[player_class]
 
-  local power_type = UNIT_POWER[player_class] and (UNIT_POWER[player_class][player_spec_no] or UNIT_POWER[player_class])
+    if power_type and power_type.Name then
+      self.PowerType = power_type.PowerType
+      self.UnitPowerMax = UnitPowerMax("player", self.PowerType)
+    else
+      self.PowerType = nil
+      self.UnitPowerMax = 0
+    end
+  end
+else
+  function Widget:DetermineUnitPower()
+    local _, player_class = UnitClass("player")
 
-  if power_type and power_type.Name then
-    self.PowerType = power_type.PowerType
-    self.UnitPowerMax = UnitPowerMax("player", self.PowerType)
-  else
-    self.PowerType = nil
-    self.UnitPowerMax = 0
+    local power_type = UNIT_POWER[player_class]
+    if power_type then
+      power_type = power_type[ActiveSpec] or power_type
+    end
+
+    if power_type and power_type.Name then
+      self.PowerType = power_type.PowerType
+      self.UnitPowerMax = UnitPowerMax("player", self.PowerType)
+    else
+      self.PowerType = nil
+      self.UnitPowerMax = 0
+    end
   end
 end
 
@@ -407,7 +424,7 @@ end
 function Widget:IsEnabled()
   local enabled = self.db.ON or self.db.ShowInHeadlineView
 
-  if enabled then
+  if enabled and not Addon.CLASSIC then
     -- Register ACTIVE_TALENT_GROUP_CHANGED here otherwise it won't be registerd when an spec is active that does not have combo points.
     -- If you then switch to a spec with talent points, the widget won't be enabled.
     self:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
@@ -438,6 +455,7 @@ function Widget:OnEnable()
     self:RegisterEvent("UPDATE_SHAPESHIFT_FORM")
     self.ShowInShapeshiftForm = (GetShapeshiftFormID() == 1)
   elseif player_class == "DEATHKNIGHT" then
+    -- Never registered for Classic, as there is no Death Knight class
     self:RegisterEvent("RUNE_POWER_UPDATE", EventHandler)
   end
 
@@ -451,7 +469,10 @@ function Widget:OnDisable()
   self:UnregisterEvent("UNIT_POWER_UPDATE")
   self:UnregisterEvent("UNIT_DISPLAYPOWER")
   self:UnregisterEvent("UNIT_MAXPOWER")
-  self:UnregisterEvent("RUNE_POWER_UPDATE")
+
+  if not Addon.CLASSIC then
+    self:UnregisterEvent("RUNE_POWER_UPDATE")
+  end
 
   self.WidgetFrame:Hide()
   self.WidgetFrame:SetParent(nil)
@@ -522,7 +543,7 @@ end
 function Widget:UpdateTexture(texture, texture_path, cp_no)
   if self.db.Style == "Blizzard" then
     if type(texture_path) == "table" then
-      local texture_data = texture_path[_G.GetSpecialization()]
+      local texture_data = texture_path[ActiveSpec]
       texture:SetAtlas(texture_data.Atlas)
       texture:SetAlpha(texture_data.Alpha or 1)
       texture:SetDesaturated(texture_data.Desaturation) -- nil means no desaturation
@@ -596,7 +617,7 @@ function Widget:UpdateSettings()
 
   if player_class == "DEATHKNIGHT" then
     self.UpdateUnitPower = self.UpdateRunicPower
-    DeathKnightSpecColor = DEATHKNIGHT_COLORS[_G.GetSpecialization()]
+    DeathKnightSpecColor = DEATHKNIGHT_COLORS[ActiveSpec]
     ShowRuneCooldown = self.db.RuneCooldown.Show
   else
     self.UpdateUnitPower = self.UpdateComboPoints

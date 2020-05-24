@@ -32,10 +32,17 @@ local Font = Addon.Font
 local UpdateCustomStyleAfterAuraTrigger = Addon.UpdateCustomStyleAfterAuraTrigger
 local UnitStyle_AuraDependent = Addon.UnitStyle_AuraDependent
 
+local LibClassicDurations
+
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
 -- List them here for Mikk's FindGlobals script
 -- GLOBALS: CreateFrame, UnitAffectingCombat
+
+if Addon.CLASSIC then
+  LibClassicDurations = LibStub("LibClassicDurations")
+  UnitAura = function(...) LibClassicDurations:UnitAura(...) end
+end
 
 ---------------------------------------------------------------------------------------------------
 -- Aura Highlighting
@@ -95,7 +102,7 @@ local PC_ROOT = 51          -- Mechanic: Rooted
 local PC_DAZE = 52
 local PC_GRIP = 53
 local PC_DISARM = 54        -- Apply Aura: Disarm
-local PC_DPUSHBACK = 55     -- Apply Aura: Disarm
+local PC_PUSHBACK = 55      -- Apply Aura: Disarm
 local PC_MODAGGRORANGE = 56 -- Apply Aura: Mod Aggro Range
 
 local CC_SILENCE = 101
@@ -1589,6 +1596,17 @@ local function UnitAuraEventHandler(widget_frame, event, unitid)
   end
 end
 
+-- For Classic: LibClassicDurations
+local function UnitBuffEventHandler(event, unitid)
+  local plate = GetNamePlateForUnit(unitid)
+  if plate and plate.TPFrame.Active then
+    local widget_frame = plate.TPFrame.widgets.Auras
+    if widget_frame.Active then
+      widget_frame.Widget:UpdateIconGrid(widget_frame, widget_frame:GetParent().unit)
+    end
+  end
+end
+
 function Widget:PLAYER_TARGET_CHANGED()
   if not self.db.ShowTargetOnly then return end
 
@@ -1699,6 +1717,13 @@ function Widget:OnEnable()
   self:RegisterEvent("PLAYER_ENTERING_WORLD")
   -- LOSS_OF_CONTROL_ADDED
   -- LOSS_OF_CONTROL_UPDATE
+
+  if Addon.CLASSIC then
+    -- Add duration handling from LibClassicDurations
+    LibClassicDurations:Register("ThreatPlates")
+    -- NOTE: Enemy buff tracking won't start until you register UNIT_BUFF
+    LibClassicDurations.RegisterCallback(TidyPlatesThreat, "UNIT_BUFF", UnitBuffEventHandler)
+  end
 end
 
 function Widget:OnDisable()

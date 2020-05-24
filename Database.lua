@@ -33,23 +33,62 @@ local _G =_G
 
 -- Returns if the currently active spec is tank (true) or dps/heal (false)
 Addon.PlayerClass = select(2, UnitClass("player"))
-local PLAYER_ROLE_BY_SPEC = ThreatPlates.SPEC_ROLES[Addon.PlayerClass]
 
-function Addon:PlayerRoleIsTank()
-  local db = TidyPlatesThreat.db
-  if db.profile.optionRoleDetectionAutomatic then
-    return PLAYER_ROLE_BY_SPEC[_G.GetSpecialization()] or false
-  else
-    return db.char.spec[_G.GetSpecialization()]
+if Addon.CLASSIC then
+  local GetShapeshiftFormID = GetShapeshiftFormID
+  local BEAR_FORM, DIRE_BEAR_FORM = BEAR_FORM, 8
+
+  -- Tanks are only Warriors in Defensive Stance or Druids in Bear form
+  local PLAYER_IS_TANK_BY_CLASS = {
+    WARRIOR = function()
+      return GetShapeshiftFormID() == 18
+    end,
+    DRUID = function()
+      local form_index = GetShapeshiftFormID()
+      return form_index == BEAR_FORM or form_index == DIRE_BEAR_FORM
+    end,
+    PALADIN = function()
+      return Addon.PlayerIsPaladinTank
+    end,
+    DEFAULT = function()
+      return false
+    end,
+  }
+
+  local PlayerIsTankByClassFunction = PLAYER_IS_TANK_BY_CLASS[Addon.PlayerClass] or PLAYER_IS_TANK_BY_CLASS["DEFAULT"]
+
+  function Addon:PlayerRoleIsTank()
+    local db = TidyPlatesThreat.db
+    if db.profile.optionRoleDetectionAutomatic then
+      return PlayerIsTankByClassFunction()
+    else
+      return db.char.spec[1]
+    end
   end
-end
 
--- Sets the role of the index spec or the active spec to tank (value = true) or dps/healing
-function TidyPlatesThreat:SetRole(value,index)
-  if index then
-    self.db.char.spec[index] = value
-  else
-    self.db.char.spec[_G.GetSpecialization()] = value
+  -- Sets the role of the index spec or the active spec to tank (value = true) or dps/healing
+  function TidyPlatesThreat:SetRole(value)
+    self.db.char.spec[1] = value
+  end
+else
+  local PLAYER_ROLE_BY_SPEC = ThreatPlates.SPEC_ROLES[Addon.PlayerClass]
+
+  function Addon:PlayerRoleIsTank()
+    local db = TidyPlatesThreat.db
+    if db.profile.optionRoleDetectionAutomatic then
+      return PLAYER_ROLE_BY_SPEC[_G.GetSpecialization()] or false
+    else
+      return db.char.spec[_G.GetSpecialization()]
+    end
+  end
+
+  -- Sets the role of the index spec or the active spec to tank (value = true) or dps/healing
+  function TidyPlatesThreat:SetRole(value,index)
+    if index then
+      self.db.char.spec[index] = value
+    else
+      self.db.char.spec[_G.GetSpecialization()] = value
+    end
   end
 end
 
@@ -1031,23 +1070,23 @@ local DEPRECATED_SETTINGS = {
   --  HVBlizzFadingAlpha = { "HeadlineView", "blizzFadingAlpha"}, -- (removed in 8.5.1)
   --  HVNameWidth = { "HeadlineView", "name", "width" },          -- (removed in 8.5.0)
   --  HVNameHeight = { "HeadlineView", "name", "height" },        -- (removed in 8.5.0)
-  DebuffWidget = { "debuffWidget" },                          -- (removed in 8.6.0)
-  OldSettings = { "OldSettings" },                            -- (removed in 8.7.0)
-  CastbarColoring = { MigrateCastbarColoring },              -- (removed in 8.7.0)
-  TotemSettings = { MigrationTotemSettings, "8.7.0" },        -- (changed in 8.7.0)
-  Borders = { MigrateBorderTextures, "8.7.0" },               -- (changed in 8.7.0)
-  UniqueSettingsList = { "uniqueSettings", "list" },          -- (removed in 8.7.0, cleanup added in 8.7.1)
-  Auras = { MigrationAurasSettings, "9.0.0" },                -- (changed in 9.0.0)
-  AurasFix = { MigrationAurasSettingsFix },                   -- (changed in 9.0.4 and 9.0.9)
-  MigrationComboPointsWidget = { MigrationComboPointsWidget, "9.1.0" },  -- (changed in 9.1.0)
-  ForceFriendlyInCombatEx = { MigrationForceFriendlyInCombat }, -- (changed in 9.1.0)
-  HeadlineViewEnableToggle = { "HeadlineView", "ON" },        -- (removed in 9.1.0)
-  ThreatDetection = { MigrationThreatDetection, "9.1.3" },  -- (changed in 9.1.0)
-  -- hideNonCombat = { "threat", "hideNonCombat" },        -- (removed in ...)
-  -- nonCombat = { "threat", "nonCombat" },                -- (removed in 9.1.0)
+  DebuffWidget = { "debuffWidget" },                                                                -- (removed in 8.6.0)
+  OldSettings = { "OldSettings" },                                                                  -- (removed in 8.7.0)
+  CastbarColoring = { MigrateCastbarColoring },                                                     -- (removed in 8.7.0)
+  TotemSettings = (Addon.CLASSIC and nil) or { MigrationTotemSettings, "8.7.0" },                   -- (changed in 8.7.0)
+  Borders = (Addon.CLASSIC and nil) or { MigrateBorderTextures, "8.7.0" },                          -- (changed in 8.7.0)
+  UniqueSettingsList = { "uniqueSettings", "list" },                                                -- (removed in 8.7.0, cleanup added in 8.7.1)
+  Auras = (Addon.CLASSIC and nil) or { MigrationAurasSettings, "9.0.0" },                           -- (changed in 9.0.0)
+  AurasFix = { MigrationAurasSettingsFix },                                                         -- (changed in 9.0.4 and 9.0.9)
+  MigrationComboPointsWidget = (Addon.CLASSIC and nil) or { MigrationComboPointsWidget, "9.1.0" },  -- (changed in 9.1.0)
+  ForceFriendlyInCombatEx = { MigrationForceFriendlyInCombat },                                     -- (changed in 9.1.0)
+  HeadlineViewEnableToggle = { "HeadlineView", "ON" },                                              -- (removed in 9.1.0)
+  ThreatDetection = (Addon.CLASSIC and nil) or { MigrationThreatDetection, "9.1.3" },               -- (changed in 9.1.0)
+  -- hideNonCombat = { "threat", "hideNonCombat" },                                                    -- (removed in ...)
+  -- nonCombat = { "threat", "nonCombat" },                                                            -- (removed in 9.1.0)
   -- MigrationCustomPlatesV3 = { MigrateCustomStylesToV3, "9.2.1", function() TidyPlatesThreat.db.global.CustomNameplatesVersion = 3 end },
-  MigrationCustomPlatesV3 = { MigrateCustomStylesToV3, "9.2.1" },
-  SpelltextPosition = { MigrateSpelltextPosition, "9.2.0", NoDefaultProfile = true },
+  MigrationCustomPlatesV3 = { MigrateCustomStylesToV3, (Addon.CLASSIC and "1.4.0") or "9.2.1" },
+  SpelltextPosition = { MigrateSpelltextPosition, (Addon.CLASSIC and "1.4.0") or "9.2.0", NoDefaultProfile = true },
   FixTargetFocusTexture = { FixTargetFocusTexture, NoDefaultProfile = true },
 }
 

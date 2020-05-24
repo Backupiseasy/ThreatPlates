@@ -8405,7 +8405,7 @@ local function CreateOptionsTable()
               type = "execute",
               width = "full",
               order = 0,
-              image = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\TotemIconWidget\\" .. db.totemSettings[totem_info.ID].Style .. "\\" .. totem_info.ID,
+              image = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\TotemIconWidget\\" .. db.totemSettings[totem_info.ID].Style .. "\\" .. totem_info.Icon,
             },
             Style = {
               name = "",
@@ -8414,7 +8414,7 @@ local function CreateOptionsTable()
               width = "full",
               set = function(info, val)
                 SetValue(info, val)
-                options.args.Totems.args[totem_info.Name].args.Textures.args.Icon.image = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\TotemIconWidget\\" .. db.totemSettings[totem_info.ID].Style .. "\\" .. totem_info.ID;
+                options.args.Totems.args[totem_info.Name].args.Textures.args.Icon.image = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\TotemIconWidget\\" .. db.totemSettings[totem_info.ID].Style .. "\\" .. totem_info.Icon;
               end,
               values = { normal = "Normal", special = "Special" },
               arg = { "totemSettings", totem_info.ID, "Style" },
@@ -8497,7 +8497,7 @@ function TidyPlatesThreat:ProfChange()
     base.PrevHigh.image = threat_path .. "LOW"
 
     for _, totem_info in pairs(Addon.TotemInformation) do
-      options.args.Totems.args[totem_info.Name].args.Textures.args.Icon.image = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\TotemIconWidget\\" .. db.totemSettings[totem_info.ID].Style .. "\\" .. totem_info.ID
+      options.args.Totems.args[totem_info.Name].args.Textures.args.Icon.image = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\TotemIconWidget\\" .. db.totemSettings[totem_info.ID].Style .. "\\" .. totem_info.Icon
     end
 
     options.args.Custom.args = CreateCustomNameplatesGroup()

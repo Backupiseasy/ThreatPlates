@@ -325,8 +325,8 @@ function Addon:ConfigCastbar()
 
             self:SetMinMaxValues(0, 100)
             self:SetValue(50)
-            visual.spellicon:SetTexture(GetSpellTexture(252616))
-            visual.spelltext:SetText("Cosmic Beacon")
+            visual.spellicon:SetTexture(GetSpellTexture(116))
+            visual.spelltext:SetText("Frostbolt")
             self.casttime:SetText(3.5)
 
             self.Border:SetShown(plate.TPFrame.style.castborder.show)

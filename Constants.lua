@@ -30,8 +30,6 @@ _G["BINDING_NAME_" .. "THREATPLATES_NAMEPLATE_MODE_FOR_FRIENDLY_UNITS"] = L["Tog
 _G["BINDING_NAME_" .. "THREATPLATES_NAMEPLATE_MODE_FOR_NEUTRAL_UNITS"] = L["Toggle Neutral Headline View"]
 _G["BINDING_NAME_" .. "THREATPLATES_NAMEPLATE_MODE_FOR_ENEMY_UNITS"] = L["Toggle Enemy Headline View"]
 
-Addon.CLASSIC = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
-
 ---------------------------------------------------------------------------------------------------
 -- Color and font definitions
 ---------------------------------------------------------------------------------------------------
@@ -187,12 +185,12 @@ Addon.AurasFilterMode = {
 }
 
 ThreatPlates.SPEC_ROLES = {
-  DEATHKNIGHT = { true, false, false },
-  DEMONHUNTER = { false, true },
-  DRUID 			= { false, false, true, false },
+  DEATHKNIGHT = (Addon.CLASSIC and nil) or { true, false, false },
+  DEMONHUNTER = (Addon.CLASSIC and nil) or { false, true },
+  DRUID 			= (Addon.CLASSIC and { false, true, true }) or { false, false, true, false },
   HUNTER			= { false, false, false },
   MAGE				= { false, false, false },
-  MONK 				= { true, false, false },
+  MONK 				= (Addon.CLASSIC and nil) or { true, false, false },
   PALADIN 		= { false, true, false },
   PRIEST			= { false, false, false },
   ROGUE				= { false, false, false },
@@ -251,7 +249,7 @@ ThreatPlates.FRIENDLY_SUBTEXT = {
 -- Totem data - define it one time for the whole addon
 -------------------------------------------------------------------------------
 
-local TOTEM_DATA = {
+local TOTEM_DATA_RETAIL = {
   -- Baseline Totems
   { SpellID = 192058, ID = "B1", GroupColor = "8A2BE2"},		-- Capacitor Totem (ex-Lightning Surge Totem, baseline since 8.0.1)
 
@@ -291,38 +289,66 @@ local TOTEM_DATA = {
   --{ SpellID = 192058, ID = "N3", GroupColor = "4c9900"},		-- Lightning  Surge Totem (renamed to Capacitator Totem in patch 8.0.1)
 }
 
+local TOTEM_DATA_CLASSIC = {
+  -- Earth Totems
+  { SpellID = 25361,   ID = "E1", GroupColor = "8B4513", Ranks = 5, Icon ="spell_nature_earthbindtotem", },	  -- Strength of Earth Totem
+  { SpellID = 10408,   ID = "E2", GroupColor = "8B4513", Ranks = 6, },	  -- Stoneskin Totem
+  { SpellID = 10428,   ID = "E3", GroupColor = "8B4513", Ranks = 6, },	  -- Stoneclaw Totem
+  { SpellID = 2484,    ID = "E4", GroupColor = "8B4513", },           	  -- Earthbind Totem
+  { SpellID = 8143,    ID = "E5", GroupColor = "8B4513", },	              -- Tremor Totem
+
+  -- Fire Totems
+  { SpellID = 10438, ID = "F1", GroupColor = "ff8f8f", Ranks = 6, Icon ="spell_fire_searingtotem", }, 	  -- Searing Totem
+  { SpellID = 10479, ID = "F2", GroupColor = "ff8f8f", Ranks = 3, }, 	  -- Frost Resistance Totem
+  { SpellID = 11315, ID = "F3", GroupColor = "ff8f8f", Ranks = 5, }, 	  -- Fire Nova Totem
+  { SpellID = 10587, ID = "F4", GroupColor = "ff8f8f", Ranks = 4, }, 	  -- Magma Totem
+  { SpellID = 16387, ID = "F5", GroupColor = "ff8f8f", Ranks = 4, }, 	  -- Flametongue Totem
+
+  -- Air Totems
+  { SpellID = 25359,  ID = "A1", GroupColor = "ffb31f", Ranks = 3, },		-- Grace of Air Totem
+  { SpellID = 10601,  ID = "A2", GroupColor = "ffb31f", Ranks = 3, },		-- Nature Resistance Totem
+  { SpellID = 15112,  ID = "A3", GroupColor = "ffb31f", Ranks = 3, },		-- Windwall Totem
+  { SpellID = 10614,  ID = "A4", GroupColor = "ffb31f", Ranks = 3, },		-- Windfury Totem
+  { SpellID = 8177,   ID = "A5", GroupColor = "ffb31f", },          		-- Grounding Totem
+  { SpellID = 6495,   ID = "A6", GroupColor = "ffb31f", },		          -- Sentry Totem
+  { SpellID = 25908,  ID = "A7", GroupColor = "ffb31f", },		          -- Tranquil Air Totem
+
+  -- Water Totems
+  { SpellID = 10463,  ID = "W1", GroupColor = "b8d1ff", Ranks = 5, },		-- Healing Stream Totem
+  { SpellID = 10497,  ID = "W2", GroupColor = "b8d1ff", Ranks = 4, },		-- Mana Spring Totem
+  { SpellID = 10538,  ID = "W3", GroupColor = "b8d1ff", Ranks = 3, },		-- Fire Resistance Totem
+  { SpellID = 17359,  ID = "W4", GroupColor = "b8d1ff", Ranks = 3, },		-- Mana Tide Totem
+  { SpellID = 8170,   ID = "W5", GroupColor = "b8d1ff", },		          -- Disease Cleansing Totem
+  { SpellID = 8166,   ID = "W6", GroupColor = "b8d1ff", },        		  -- Poison Cleansing Totem
+}
+
+local TOTEM_DATA = (Addon.CLASSIC and TOTEM_DATA_CLASSIC) or TOTEM_DATA_RETAIL
+local TOTEM_RANKS_CLASSIC = { " II", " III", " IV", " V", " VI" }
+
 function Addon:InitializeTotemInformation()
-  for i, totem_data in ipairs(TOTEM_DATA) do
-    local name = GetSpellInfo(totem_data.SpellID) or UNKNOWNOBJECT
+  for _, totem_data in ipairs(TOTEM_DATA) do
+    local name = GetSpellInfo(totem_data.SpellID)
+    if name then
+      totem_data.Name = name
+      totem_data.Color = RGB(HEX2RGB(totem_data.GroupColor))
+      totem_data.SortKey = totem_data.ID:sub(1, 1) .. name
+      totem_data.Style = "normal"
+      totem_data.ShowNameplate = true
+      totem_data.ShowHPColor = true
+      totem_data.ShowIcon = true
+      totem_data.Icon = totem_data.Icon or totem_data.ID -- Use ID as legacy version until all totem info is migrated properly
 
-    totem_data.Name = name
-    totem_data.Color = RGB(HEX2RGB(totem_data.GroupColor))
-    totem_data.SortKey = totem_data.ID:sub(1, 1) .. name
-    totem_data.Style = "normal"
-    totem_data.ShowNameplate = true
-    totem_data.ShowHPColor = true
-    totem_data.ShowIcon = true
+      Addon.TotemInformation[name] = totem_data
+      Addon.TOTEMS[name] = totem_data.ID
 
-    Addon.TotemInformation[name] = totem_data
-    Addon.TOTEMS[name] = totem_data.ID
+      -- Add totem ranks for WoW Classic
+      if Addon.CLASSIC then
+        for rank = 1, (totem_data.Ranks or 1) - 1  do
+          Addon.TOTEMS[name .. TOTEM_RANKS_CLASSIC[rank]] = totem_data.ID
+        end
+      end
+    end
   end
-
---  local test_name = "Hochexarch Turalyon"
---  local id = "P4"
---  Addon.TotemInformation[test_name] = {
---    Name = test_name,
---    SpellID = 204336,
---    Icon = id,
---    ID = id,
---    SortKey = id:sub(1, 1) .. test_name,
---    Style = "normal",
---    Color = RGB(HEX2RGB("2b76ff")),
---    GroupColor = "2b76ff",
---    ShowNameplate = true,
---    ShowHPColor = true,
---    ShowIcon = true,
---  }
---  Addon.TOTEMS[test_name] = id
 end
 
 local function GetDefaultTotemSettings()
@@ -361,6 +387,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
         role = "",
       },
     },
+    -- Still using table here for compatibility with non-classic version of Threat Plates, although only [1] is used in classic.
     spec = {
       [1] = false,
       [2] = false,
@@ -675,8 +702,8 @@ ThreatPlates.DEFAULT_SETTINGS = {
         ShowDispellable = true,
         ShowBoss = true,
         ShowEnemy = true,
-        ShowAllEnemy = false,
-        ShowBlizzardForEnemy = true,
+        ShowAllEnemy = (Addon.CLASSIC and true) or false,
+        ShowBlizzardForEnemy = (Addon.CLASSIC and false) or true,
         Scale = 2.0,
         FilterMode = "blacklist",
         FilterBySpell = {},
@@ -1107,8 +1134,8 @@ ThreatPlates.DEFAULT_SETTINGS = {
         OverlayColor = RGB(0, 128, 255, 1),
       },
       castnostop = {
-        show = true,
-        ShowOverlay = true,
+        show = true, -- no longer used
+        ShowOverlay = (Addon.CLASSIC and false) or true,
         ShowInterruptShield = false,
       },
       castborder = {

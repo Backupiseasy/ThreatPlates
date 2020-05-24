@@ -13,7 +13,10 @@ local ThreatPlates = Addon.ThreatPlates
 -- Lua APIs
 local string = string
 
+-- WoW APIs
 local UnitPlayerControlled = UnitPlayerControlled
+
+Addon.CLASSIC = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
 
 ---------------------------------------------------------------------------------------------------
 -- Libraries
@@ -24,6 +27,12 @@ ThreatPlates.Media = LibStub("LibSharedMedia-3.0")
 Addon.LibCustomGlow = LibStub("LibCustomGlow-1.0")
 Addon.LibAceConfigDialog = LibStub("AceConfigDialog-3.0")
 Addon.LibAceConfigRegistry = LibStub("AceConfigRegistry-3.0")
+
+if Addon.CLASSIC then
+	Addon.LibThreatClassic = LibStub:GetLibrary("LibThreatClassic2")
+	Addon.LibClassicCasterino = LibStub("LibClassicCasterino-ThreatPlates")
+	--Addon.LibClassicCasterino = LibStub("LibClassicCasterino")
+end
 
 ---------------------------------------------------------------------------------------------------
 -- Define AceAddon TidyPlatesThreat

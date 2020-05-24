@@ -202,16 +202,19 @@ function TidyPlatesThreat:CheckForFirstStartUp()
 
   if not self.db.char.welcome then
     self.db.char.welcome = true
-    local Welcome = L["|cff89f559Welcome to |r|cff89f559Threat Plates!\nThis is your first time using Threat Plates and you are a(n):\n|r|cff"]..t.HCC[Addon.PlayerClass]..self:SpecName().." "..UnitClass("player").."|r|cff89F559.|r\n"
 
-    -- initialize roles for all available specs (level > 10) or set to default (dps/healing)
-    for index=1, GetNumSpecializations() do
-      local id, spec_name, description, icon, background, role = GetSpecializationInfo(index)
-      self:SetRole(t.SPEC_ROLES[Addon.PlayerClass][index], index)
+    if not Addon.CLASSIC then
+      local Welcome = L["|cff89f559Welcome to |r|cff89f559Threat Plates!\nThis is your first time using Threat Plates and you are a(n):\n|r|cff"]..t.HCC[Addon.PlayerClass]..self:SpecName().." "..UnitClass("player").."|r|cff89F559.|r\n"
+
+      -- initialize roles for all available specs (level > 10) or set to default (dps/healing)
+      for index=1, GetNumSpecializations() do
+        local id, spec_name, description, icon, background, role = GetSpecializationInfo(index)
+        self:SetRole(t.SPEC_ROLES[Addon.PlayerClass][index], index)
+      end
+
+      t.Print(Welcome..L["|cff89f559You are currently in your "]..self:RoleText()..L["|cff89f559 role.|r"])
+      t.Print(L["|cff89f559Additional options can be found by typing |r'/tptp'|cff89F559.|r"])
     end
-
-    t.Print(Welcome..L["|cff89f559You are currently in your "]..self:RoleText()..L["|cff89f559 role.|r"])
-    t.Print(L["|cff89f559Additional options can be found by typing |r'/tptp'|cff89F559.|r"])
 
     local new_version = tostring(t.Meta("version"))
     if db.version ~= "" and db.version ~= new_version then
@@ -275,24 +278,36 @@ function Addon:SetBaseNamePlateSize()
   isInstance = isInstance and (instanceType == "party" or instanceType == "raid")
 
   db = TidyPlatesThreat.db.profile
-  if db.ShowFriendlyBlizzardNameplates or isInstance then
-    if NamePlateDriverFrame:IsUsingLargerNamePlateStyle() then
-      C_NamePlate.SetNamePlateFriendlySize(154, 64)
+  if Addon.CLASSIC then
+    -- Classic has the same nameplate size for friendly and enemy units, so either set both or non at all (= set it to default values)
+    if not db.ShowFriendlyBlizzardNameplates and not db.ShowEnemyBlizzardNameplates and not isInstance then
+      C_NamePlate.SetNamePlateFriendlySize(width, height)
+      C_NamePlate.SetNamePlateEnemySize(width, height)
     else
-      C_NamePlate.SetNamePlateFriendlySize(110, 45)
+      -- Smaller nameplates are not available in Classic
+      C_NamePlate.SetNamePlateFriendlySize(128, 32)
+      C_NamePlate.SetNamePlateEnemySize(128, 32)
     end
   else
-    C_NamePlate.SetNamePlateFriendlySize(width, height)
-  end
+    if db.ShowFriendlyBlizzardNameplates or isInstance then
+      if NamePlateDriverFrame:IsUsingLargerNamePlateStyle() then
+        C_NamePlate.SetNamePlateFriendlySize(154, 64)
+      else
+        C_NamePlate.SetNamePlateFriendlySize(110, 45)
+      end
+    else
+      C_NamePlate.SetNamePlateFriendlySize(width, height)
+    end
 
-  if db.ShowEnemyBlizzardNameplates then
-    if NamePlateDriverFrame:IsUsingLargerNamePlateStyle() then
-      C_NamePlate.SetNamePlateEnemySize(154, 64)
+    if db.ShowEnemyBlizzardNameplates then
+      if NamePlateDriverFrame:IsUsingLargerNamePlateStyle() then
+        C_NamePlate.SetNamePlateEnemySize(154, 64)
+      else
+        C_NamePlate.SetNamePlateEnemySize(110, 45)
+      end
     else
-      C_NamePlate.SetNamePlateEnemySize(110, 45)
+      C_NamePlate.SetNamePlateEnemySize(width, height)
     end
-  else
-    C_NamePlate.SetNamePlateEnemySize(width, height)
   end
 
   Addon:ConfigClickableArea(false)
@@ -332,6 +347,27 @@ function TidyPlatesThreat:OnInitialize()
 
   -- Setup chat commands
   self:RegisterChatCommand("tptp", "ChatCommand")
+
+  if Addon.CLASSIC then
+    local LibThreatClassic = Addon.LibThreatClassic
+    local LibClassicCasterino = Addon.LibClassicCasterino
+
+    -- Register callbacks for threat library
+    LibThreatClassic.RegisterCallback(self, "Activate", Addon.UNIT_THREAT_LIST_UPDATE)
+    LibThreatClassic.RegisterCallback(self, "Deactivate", Addon.UNIT_THREAT_LIST_UPDATE)
+    LibThreatClassic.RegisterCallback(self, "ThreatUpdated", Addon.UNIT_THREAT_LIST_UPDATE)
+    LibThreatClassic:RequestActiveOnSolo(true)
+
+    -- Register callsbacks for spellcasting library
+    LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_START", Addon.UNIT_SPELLCAST_START)
+    LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_DELAYED", Addon.UnitSpellcastMidway) -- only for player
+    LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_STOP", Addon.UNIT_SPELLCAST_STOP)
+    LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_FAILED", Addon.UNIT_SPELLCAST_STOP)
+    LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_INTERRUPTED", Addon.UNIT_SPELLCAST_INTERRUPTED)
+    LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_CHANNEL_START", Addon.UNIT_SPELLCAST_CHANNEL_START)
+    LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_CHANNEL_UPDATE", Addon.UnitSpellcastMidway) -- only for player
+    LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_CHANNEL_STOP", Addon.UNIT_SPELLCAST_CHANNEL_STOP)
+  end
 end
 
 local function SetCVarHook(name, value, c)
@@ -360,7 +396,9 @@ function TidyPlatesThreat:OnEnable()
   TidyPlatesThreat:CheckForFirstStartUp()
   TidyPlatesThreat:CheckForIncompatibleAddons()
 
-  Addon.CVars:OverwriteBoolProtected("nameplateResourceOnTarget", self.db.profile.PersonalNameplate.ShowResourceOnTarget)
+  if not Addon.CLASSIC then
+    Addon.CVars:OverwriteBoolProtected("nameplateResourceOnTarget", self.db.profile.PersonalNameplate.ShowResourceOnTarget)
+  end
 
   TidyPlatesThreat:ReloadTheme()
 
@@ -462,11 +500,12 @@ function TidyPlatesThreat:PLAYER_ENTERING_WORLD()
   -- SetCVar("ShowClassColorInNameplate", 1)
 
   local db = self.db.profile.questWidget
-  if db.ON or db.ShowInHeadlineView then
-    Addon.CVars:Set("showQuestTrackingTooltips", 1)
-    --SetCVar("showQuestTrackingTooltips", 1)
-  else
-    Addon.CVars:RestoreFromProfile("showQuestTrackingTooltips")
+  if not Addon.CLASSIC then
+    if db.ON or db.ShowInHeadlineView then
+      Addon.CVars:Set("showQuestTrackingTooltips", 1)
+    else
+      Addon.CVars:RestoreFromProfile("showQuestTrackingTooltips")
+    end
   end
 
   db = self.db.profile.Automation

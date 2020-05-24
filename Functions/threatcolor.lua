@@ -11,6 +11,8 @@ local UnitIsConnected = UnitIsConnected
 local TidyPlatesThreat = TidyPlatesThreat
 local RGB = ThreatPlates.RGB
 
+local ShowThreatGlow
+
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
 -- List them here for Mikk's FindGlobals script
@@ -18,17 +20,27 @@ local _G =_G
 
 local COLOR_TRANSPARENT = RGB(0, 0, 0, 0) -- opaque
 
-local function ShowThreatGlow(unit)
-  local db = TidyPlatesThreat.db.profile
+---------------------------------------------------------------------------------------------------
+-- Wrapper functions for WoW Classic
+---------------------------------------------------------------------------------------------------
 
-  if db.ShowThreatGlowOnAttackedUnitsOnly then
-    if IsInInstance() and db.threat.UseHeuristicInInstances then
-      return _G.UnitAffectingCombat(unit.unitid)
-    else
-      return Addon:OnThreatTable(unit)
-    end
-  else
+if Addon.CLASSIC then
+  ShowThreatGlow = function(unit)
     return _G.UnitAffectingCombat(unit.unitid)
+  end
+else
+  ShowThreatGlow = function(unit)
+    local db = TidyPlatesThreat.db.profile
+
+    if db.ShowThreatGlowOnAttackedUnitsOnly then
+      if IsInInstance() and db.threat.UseHeuristicInInstances then
+        return _G.UnitAffectingCombat(unit.unitid)
+      else
+        return Addon:OnThreatTable(unit)
+      end
+    else
+      return _G.UnitAffectingCombat(unit.unitid)
+    end
   end
 end
 
@@ -55,10 +67,10 @@ function Addon:SetThreatColor(unit)
     -- is already in combat, but not yet on the mob's threat table for a sec or so.
     if db.threat.ON and db.threat.useHPColor then
       if style == "dps" or style == "tank" then
-        color = Addon:GetThreatColor(unit, style, db.ShowThreatGlowOnAttackedUnitsOnly)
+        color = Addon:GetThreatColor(unit, style, db.ShowThreatGlowOnAttackedUnitsOnly) -- ShowThreatGlowOnAttackedUnitsOnly is ignored in WoW Classic
       end
     elseif InCombatLockdown() and (style == "normal" or style == "dps" or style == "tank") then
-      color = Addon:GetThreatColor(unit, style, db.ShowThreatGlowOnAttackedUnitsOnly)
+      color = Addon:GetThreatColor(unit, style, db.ShowThreatGlowOnAttackedUnitsOnly)   -- ShowThreatGlowOnAttackedUnitsOnly is ignored in WoW Classic
     end
   end
 
