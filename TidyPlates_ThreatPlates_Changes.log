@@ -1,7 +1,7 @@
 ﻿------------------------------------------------------
 9.2.0
 ------------------------------------------------------
-* Added new triggers for custom nameplate styles additionally to a unit's name: auras and casts [Comment #4202, #766, #1284, #1988, #2010, #723, #1438, #1462, #1506, #1679, Issue #170, E-Mail, IM].
+* Added new triggers for custom nameplate styles additionally to a unit's name: auras and casts [Comment #4202, #766, #1284, #1988, #2010, #723, #1438, #1462, #1506, #1679, #1461, Issue #170, E-Mail, IM].
 * Extended triggers for custom nameplate styles so that you now can add multiple entries (names, auras, casts) separated by a semicolon.
 * Extended the Name trigger for custom nameplate styles to also support the wildcard character *.
 * Added the option to show a glow effect for custom nameplate styles on healthbar, castbar or icon.
