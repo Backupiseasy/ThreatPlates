@@ -15,4 +15,7 @@
 <Include file="LibCustomGlow-1.0\LibCustomGlow-1.0.xml"/>
 <Include file="AceSerializer-3.0\AceSerializer-3.0.xml"/>
 <Script file="LibDeflate\LibDeflate.lua"/>
+<Include file="LibThreatClassic2\lib.xml"/>
+<Script file="LibClassicCasterino\LibClassicCasterino.lua"/>
+<Include file="LibClassicDurations\LibClassicDurations.xml"/>
 </Ui>
