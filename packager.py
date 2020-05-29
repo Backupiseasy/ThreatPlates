@@ -154,7 +154,7 @@ def create_package(wow_version):
                 f.write(libs_file_content)
                 f.close()
             if not args.package_dir:
-                exit(0)
+                return
         elif not args.package_dir:
             return
 
