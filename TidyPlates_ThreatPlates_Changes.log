@@ -1,7 +1,27 @@
-------------------------------------------------------
+﻿------------------------------------------------------
 1.4.0
 ------------------------------------------------------
-Merge 9.2 into Classic version
+* Port of Threat Plates v9.2.1 (Retail) into Classic version.
+    * Added new triggers for custom nameplate styles additionally to a unit's name: auras and casts [Comment #4202, #766, #1284, #1988, #2010, #723, #1438, #1462, #1506, #1679, #1461, Issue #170, E-Mail, IM].
+    * Extended triggers for custom nameplate styles so that you now can add multiple entries (names, auras, casts) separated by a semicolon.
+    * Extended the Name trigger for custom nameplate styles to also support the wildcard character *.
+    * Added the option to show a glow effect for custom nameplate styles on healthbar, castbar or icon.
+    * Added an option to enable custom nameplate styles only for friendly or hostile units [IM].
+    * Added an option to disable a custom nameplate style and never show it.
+    * Added an option "Automatic Icon" to derive the custom nameplate's icon from the spell/aura ID or name used as trigger.
+    * Added an option for custom nameplate styles to set the icon based on a spell name (must be in the player's spell book).
+    * Added an option to import/export a individual profile with all its settings (thanks to Kungfumoo for the patch, Comment #1582).
+    * Added an option to import/export all or individual custom nameplate styles [Comment #852]
+    * Added command line option "legacy-custom-plates" to add (legacy) default custom nameplate styles that are deleted when migrating custom nameplates to the current format [Comment #3950, #3959, Issue #379].
+    * Added new styles for target highlighting (like a down arrow or glow borders).
+    * Added an option to show the remaining time of a cast on the nameplate's castbar [Comment #695, #1530, #1907, #4077, IM, Issue #374, #399].
+    * The indicator icon for rare and elite mobs now shows a separate color for rare-elite mobs to make them more distinguishable [GH Issue #199].
+    * Spell name is now anchored directly to the castbar which simplifies the configuration of its placement.
+    * Fixed a bug where selection mark jumped to first entry in the custom nameplates list after deleting the last slot.
+    * Fixed a bug with name text being wrapped when nameplates where scaled down enough.
+    * Fixed a Lua error that occurred when disabling the castbar configuration mode when the nameplate on which it was used was no longer visible.
+    * Fixed some potential issues with WoW API calls.
+    * Updated localizations for deDE and zhTW.
 
 ------------------------------------------------------
 1.3.1
