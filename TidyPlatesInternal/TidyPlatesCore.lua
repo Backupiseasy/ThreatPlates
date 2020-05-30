@@ -230,7 +230,7 @@ do
     extended.widgets = {}
 
 		--Addon:CreateExtensions(extended)
-    Addon.Widgets:OnPlateCreated(extended)
+    Widgets:OnPlateCreated(extended)
 
     -- Allocate Tables
     extended.style = {}

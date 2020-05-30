@@ -14,15 +14,13 @@ local pairs, next = pairs, next
 
 -- ThreatPlates APIs
 
-local WidgetHandler = {
-  Widgets = {},
-  EnabledWidgets = {},
-  EnabledTargetWidgets = {},
-  EnabledFocusWidget = nil,
-  RegisteredEventsByWidget = {}
-}
+local WidgetHandler = Addon.Widgets
 
-Addon.Widgets = WidgetHandler
+WidgetHandler.Widgets = {}
+WidgetHandler.EnabledWidgets = {}
+WidgetHandler.EnabledTargetWidgets = {}
+WidgetHandler.EnabledFocusWidget = nil
+WidgetHandler.RegisteredEventsByWidget = {}
 
 ---------------------------------------------------------------------------------------------------
 -- Event handling stuff

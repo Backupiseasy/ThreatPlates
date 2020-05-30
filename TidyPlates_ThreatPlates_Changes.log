@@ -22,6 +22,7 @@
     * Fixed a Lua error that occurred when disabling the castbar configuration mode when the nameplate on which it was used was no longer visible.
     * Fixed some potential issues with WoW API calls.
     * Updated localizations for deDE and zhTW.
+* Fixed a bug with widget handling that could result in widgets not being shown properly (like Target Highlight).
 
 ------------------------------------------------------
 1.3.1
