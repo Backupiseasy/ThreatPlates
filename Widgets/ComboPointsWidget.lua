@@ -16,10 +16,10 @@ local floor = floor
 local sort = sort
 
 -- WoW APIs
-local CreateFrame, GetTime = CreateFrame, GetTime
+local GetTime = GetTime
 local UnitClass, UnitCanAttack = UnitClass, UnitCanAttack
 local UnitPower, UnitPowerMax, GetRuneCooldown = UnitPower, UnitPowerMax, GetRuneCooldown
-local GetSpecialization, GetShapeshiftFormID = GetSpecialization, GetShapeshiftFormID
+local GetShapeshiftFormID = GetShapeshiftFormID
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
 
@@ -27,6 +27,11 @@ local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
 local TidyPlatesThreat = TidyPlatesThreat
 local RGB = Addon.RGB
 local Font = Addon.Font
+
+local _G =_G
+-- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
+-- List them here for Mikk's FindGlobals script
+-- GLOBALS: CreateFrame, GetSpecialization
 
 local UPDATE_INTERVAL = Addon.ON_UPDATE_INTERVAL
 
@@ -191,7 +196,7 @@ local DeathKnightSpecColor, ShowRuneCooldown
 
 function Widget:DetermineUnitPower()
   local _, player_class = UnitClass("player")
-  local player_spec_no = GetSpecialization()
+  local player_spec_no = _G.GetSpecialization()
 
   local power_type = UNIT_POWER[player_class] and (UNIT_POWER[player_class][player_spec_no] or UNIT_POWER[player_class])
 
@@ -338,7 +343,7 @@ end
 function Widget:ACTIVE_TALENT_GROUP_CHANGED(...)
   -- ACTIVE_TALENT_GROUP_CHANGED fires twice, so prevent that InitializeWidget is called twice (does not hurt,
   -- but is not necesary either
-  local current_spec = GetSpecialization()
+  local current_spec = _G.GetSpecialization()
   if ActiveSpec ~= current_spec then
     -- Player switched to a spec that has combo points
     self.WidgetHandler:InitializeWidget("ComboPoints")
@@ -473,7 +478,7 @@ end
 
 function Widget:Create()
   if not WidgetFrame then
-    local widget_frame = CreateFrame("Frame", nil)
+    local widget_frame = _G.CreateFrame("Frame", nil)
     widget_frame:Hide()
 
     WidgetFrame = widget_frame
@@ -525,7 +530,7 @@ end
 function Widget:UpdateTexture(texture, texture_path, cp_no)
   if self.db.Style == "Blizzard" then
     if type(texture_path) == "table" then
-      local texture_data = texture_path[GetSpecialization()]
+      local texture_data = texture_path[_G.GetSpecialization()]
       texture:SetAtlas(texture_data.Atlas)
       texture:SetAlpha(texture_data.Alpha or 1)
       texture:SetDesaturated(texture_data.Desaturation) -- nil means no desaturation
@@ -599,7 +604,7 @@ function Widget:UpdateSettings()
 
   if player_class == "DEATHKNIGHT" then
     self.UpdateUnitPower = self.UpdateRunicPower
-    DeathKnightSpecColor = DEATHKNIGHT_COLORS[GetSpecialization()]
+    DeathKnightSpecColor = DEATHKNIGHT_COLORS[_G.GetSpecialization()]
     ShowRuneCooldown = self.db.RuneCooldown.Show
   else
     self.UpdateUnitPower = self.UpdateComboPoints

@@ -7,21 +7,23 @@ local ADDON_NAME, Addon = ...
 -- Lua APIs
 local abs = abs
 local pairs = pairs
-local ipairs = ipairs
+local ipairs, next = ipairs, next
 local string = string
 local table = table
-local tonumber = tonumber
+local tonumber, tostring = tonumber, tostring
 local select = select
 local type = type
 
 -- WoW APIs
+local wipe = wipe
 local CLASS_SORT_ORDER, LOCALIZED_CLASS_NAMES_MALE = CLASS_SORT_ORDER, LOCALIZED_CLASS_NAMES_MALE
 local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
 local GetCVar, GetCVarBool = GetCVar, GetCVarBool
-local GetSpellInfo = GetSpellInfo
 local UnitName = UnitName
+local GameTooltip = GameTooltip
 
 -- ThreatPlates APIs
+local TidyPlatesThreat = TidyPlatesThreat
 local LibStub = LibStub
 local ThreatPlates = Addon.ThreatPlates
 local RGB_WITH_HEX = Addon.RGB_WITH_HEX
@@ -32,8 +34,15 @@ local F = Addon.FlattenTable
 
 local PATH_ART = ThreatPlates.Art
 
--- local TidyPlatesThreat = LibStub("AceAddon-3.0"):GetAddon("TidyPlatesThreat");
-local TidyPlatesThreat = TidyPlatesThreat
+local _G =_G
+-- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
+-- List them here for Mikk's FindGlobals script
+-- GLOBALS: GetSpellInfo, SetCVar
+
+-- Import some libraries
+local LibAceGUI = LibStub("AceGUI-3.0")
+local LibAceSerializer = LibStub:GetLibrary("AceSerializer-3.0")
+local LibDeflate = LibStub:GetLibrary("LibDeflate")
 
 local UNIT_TYPES = {
   {
@@ -146,10 +155,198 @@ local WIDGET_INFO = {
   socialWidget = { Name = "Social", UpdateSettings = true, PublishEvent = "ClassColorUpdate" },
   stealthWidget = { Name = "Stealth", UpdateSettings = false, },
   targetWidget = { Name = "TargetArt", UpdateSettings = true, UpdateAllSettings = true, PublishEvent = "SituationalColorUpdate" },
+  FocusWidget = { Name = "Focus", UpdateSettings = true, UpdateAllSettings = true, PublishEvent = "SituationalColorUpdate" },
   threat = { Name = "Threat", UpdateSettings = false, }, -- ThreatWidget
   totemWidget = { Name = "TotemIcon", UpdateSettings = false, },
   uniqueWidget = { Name = "UniqueIcon", UpdateSettings = false, },
 }
+
+---------------------------------------------------------------------------------------------------
+-- Importing and exporting settings and custom nameplates.
+---------------------------------------------------------------------------------------------------
+
+-- cache ImportExportFrame if used multiple times
+local ImportExportFrame = nil
+
+local function CreateImportExportFrame()
+  local frame = LibAceGUI:Create("Frame")
+  frame:SetTitle(L["Import/Export Profile"])
+  frame:SetCallback("OnEscapePressed", function()
+    frame:Hide()
+  end)
+  frame:SetLayout("fill")
+
+  local editBox = LibAceGUI:Create("MultiLineEditBox")
+  editBox:SetFullWidth(true)
+  editBox.button:Hide()
+  editBox.label:SetText(L["Paste the Threat Plates profile string into the text field below and then close the window"])
+
+  frame:AddChild(editBox)
+  frame.editBox = editBox
+
+  function frame:OpenExport(text)
+    --NOTE: options are closed and re-opened around the ImportExportFrame so the state of the profile is always reflected in that window
+    Addon.LibAceConfigDialog:Close(ThreatPlates.ADDON_NAME)
+    GameTooltip:Hide()
+
+    local editBox = self.editBox
+
+    editBox:SetMaxLetters(0)
+    editBox.editBox:SetScript("OnChar", function() editBox:SetText(text); editBox:HighlightText(); end)
+    editBox.editBox:SetScript("OnMouseUp", function() editBox:HighlightText(); end)
+    editBox.label:Hide()
+    editBox:SetText(text)
+    editBox:HighlightText()
+
+    self:SetCallback("OnClose", function()
+      Addon.LibAceConfigDialog:Open(ThreatPlates.ADDON_NAME)
+    end)
+
+    self:Show()
+    editBox:SetFocus()
+  end
+
+  function frame:OpenImport(onImportHandler)
+    Addon.LibAceConfigDialog:Close(ThreatPlates.ADDON_NAME)
+    GameTooltip:Hide()
+
+    local editBox = self.editBox
+
+    editBox:SetMaxLetters(0)
+    editBox.editBox:SetScript("OnChar", nil)
+    editBox.editBox:SetScript("OnMouseUp", nil)
+    editBox.label:Show()
+    editBox:SetText("")
+
+    self:SetCallback("OnClose", function()
+      onImportHandler(editBox:GetText())
+      Addon.LibAceConfigDialog:Open(ThreatPlates.ADDON_NAME)
+    end)
+
+    self:Show()
+    editBox:SetFocus()
+  end
+
+  return frame
+end
+
+local function ImportStringData(encoded)
+  --window opened by mistake etc, just ignore it
+  if string.len(encoded) == 0 then
+    return
+  end
+
+  local errorMsg = L["Something went wrong with importing the profile. Please check the import string."]
+  local decoded = LibDeflate:DecodeForPrint(encoded)
+
+  if not decoded then
+    ThreatPlates.Print(errorMsg, true)
+    return
+  end
+
+  local decompressed = LibDeflate:DecompressDeflate(decoded)
+
+  if not decompressed then
+    ThreatPlates.Print(errorMsg, true)
+    return
+  end
+
+  local success, deserialized = LibAceSerializer:Deserialize(decompressed)
+
+  if not success then
+    ThreatPlates.Print(errorMsg, true)
+    return
+  end
+
+  return success, deserialized
+end
+
+local function ShowExportFrame(modeArg)
+  ImportExportFrame = ImportExportFrame or CreateImportExportFrame()
+
+  local serialized = LibAceSerializer:Serialize(modeArg)
+  local compressed = LibDeflate:CompressDeflate(serialized)
+
+  ImportExportFrame:OpenExport(LibDeflate:EncodeForPrint(compressed))
+end
+
+local function ShowImportFrame()
+  ImportExportFrame = ImportExportFrame or CreateImportExportFrame()
+
+  local function ImportHandler(encoded)
+    local success, import_data = ImportStringData(encoded)
+
+    if success then
+      if not import_data.Version or not import_data.Profile and not import_data.ProfileName or type (import_data.ProfileName) ~= "string" then
+        ThreatPlates.Print(L["The import string has an unknown format and cannot be imported. Verify that the import string was generated from the same Threat Plates version that you are using currently."], true)
+      elseif import_data.Version ~= ThreatPlates.Meta("version") then
+        ThreatPlates.Print(L["The import string contains a profile from an incombatible Threat Plates version. Importing only works with data exported from the same Threat Plates version as you are using."], true)
+      else
+        local imported_profile_name = import_data.ProfileName
+
+        local imported_profile_no = 1
+        while TidyPlatesThreat.db.profiles[imported_profile_name] do
+          imported_profile_name = import_data.ProfileName .. " (" .. tostring(imported_profile_no) .. ")"
+          imported_profile_no = imported_profile_no + 1
+        end
+--        for profile_name, profile in pairs(TidyPlatesThreat.db.profiles) do
+--          local no = profile_name:match("^" .. import_data.ProfileName .. " %((%d+)%)$") or (profile_name == import_data.ProfileName and 0)
+--          if tonumber(no) and tonumber(no) >= imported_profile_no then
+--            imported_profile_no = tonumber(no) + 1
+--          end
+--        end
+--        local imported_profile_name = import_data.ProfileName .. ((imported_profile_no == 0 and "") or (" (" .. tostring(imported_profile_no) .. ")"))
+
+        -- Apply imported profile as a new profile
+        TidyPlatesThreat.db:SetProfile(imported_profile_name) --will create a new profile
+
+        --[[
+          NOTE: using merge as there appears to be an observer that writes changes to the savedvariables.
+          using assignment (profile = deserialized) removes this functionality which means the imported profile is never saved.
+        ]]--
+
+        Addon.MergeIntoTable(TidyPlatesThreat.db.profile, import_data.Profile)
+        TidyPlatesThreat:ProfChange()
+      end
+    else
+      ThreatPlates.Print(L["The import string has an unknown format and cannot be imported. Verify that the import string was generated from the same Threat Plates version that you are using currently."], true)
+    end
+  end
+
+  ImportExportFrame:OpenImport(ImportHandler)
+end
+
+local function AddImportExportOptions(profileOptions)
+  profileOptions.args.exportimportdesc = {
+    order = 90,
+    type = "description",
+    name = "\n" .. L["Import and export profiles to share them with other players."],
+  }
+
+  profileOptions.args.exportprofile = {
+    order = 95,
+    type = "execute",
+    name = L["Export profile"],
+    desc = L["Export the current profile into a string that can be imported by other players."],
+    func = function()
+      local export_data = {
+        Version = ThreatPlates.Meta("version"),
+        ProfileName = TidyPlatesThreat.db:GetCurrentProfile(),
+        Profile = TidyPlatesThreat.db.profile
+      }
+
+      ShowExportFrame(export_data)
+    end
+  }
+
+  profileOptions.args.importprofile = {
+    order = 100,
+    type = "execute",
+    name = L["Import profile"],
+    desc = L["Import a profile from another player from an import string."],
+    func = function() ShowImportFrame() end
+  }
+end
 
 ---------------------------------------------------------------------------------------------------
 -- Setter Functions
@@ -190,6 +387,8 @@ local function SetValue(info, ...)
   local widget_info_key = info.arg[1]
   if widget_info_key == "HeadlineView" and info.arg[2] == "ShowTargetHighlight" then
     widget_info_key = "targetWidget"
+  elseif widget_info_key == "Custom" then
+    widget_info_key = "UniqueIcon"
   end
 
   local widget_info = WIDGET_INFO[widget_info_key]
@@ -288,18 +487,56 @@ end
 -- Functions
 ---------------------------------------------------------------------------------------------------
 
+---------------------------------------------------------------------------------------------------
+-- Imported functions and constants
+---------------------------------------------------------------------------------------------------
+
 function Addon:InitializeCustomNameplates()
   local db = TidyPlatesThreat.db.profile
-  db.uniqueSettings.map = {}
-  for i, unique_unit in pairs(db.uniqueSettings) do
-    if unique_unit.name and unique_unit.name ~= "" then
-      db.uniqueSettings.map[unique_unit.name] = unique_unit
+
+  Addon.ActiveAuraTriggers = false
+  Addon.ActiveCastTriggers = false
+  Addon.ActiveWildcardTriggers = false
+  Addon.UseUniqueWidget = db.uniqueWidget.ON
+
+  -- Use wipe to keep references intact
+  local custom_style_triggers = Addon.Cache.CustomPlateTriggers
+  wipe(custom_style_triggers.Name)
+  wipe(custom_style_triggers.NameWildcard)
+  wipe(custom_style_triggers.Aura)
+  wipe(custom_style_triggers.Cast)
+  wipe(Addon.Cache.TriggerWildcardTests)
+
+  for index, custom_style in pairs(db.uniqueSettings) do
+    if type(index) == "number" and custom_style.Trigger.Name.Input ~= "<Enter name here>" and not custom_style.Enable.Never then
+      local trigger_type = custom_style.Trigger.Type
+      local trigger_list = custom_style.Trigger[trigger_type].AsArray
+
+      for _, trigger in ipairs(trigger_list) do
+        if trigger_type == "Name" and string.find(trigger, "%*") then
+          local wildcard_trigger = string.gsub(trigger, "%*", ".*")
+          custom_style_triggers.NameWildcard[#custom_style_triggers.NameWildcard + 1] = { wildcard_trigger, custom_style }
+        else
+          custom_style_triggers[trigger_type][trigger] = custom_style
+        end
+      end
+
+      if custom_style.Effects.Glow.Type ~= "None" then
+        Addon.UseUniqueWidget = true
+      end
     end
   end
+
+  -- Signal that there are active aura or cast triggers
+  Addon.ActiveAuraTriggers = next(custom_style_triggers.Aura) ~= nil
+  Addon.ActiveCastTriggers = next(custom_style_triggers.Cast) ~= nil
+  Addon.ActiveWildcardTriggers = next(custom_style_triggers.NameWildcard) ~= nil
 end
 
-local function UpdateCustomNameplates() -- Need to add a way to update options table.
+local function UpdateSpecial() -- Need to add a way to update options table.
   Addon:InitializeCustomNameplates()
+  -- Update widgets as well as at least some of them use custom nameplate settings
+  Addon.Widgets:InitializeAllWidgets()
   Addon:ForceUpdate()
 end
 
@@ -1021,6 +1258,13 @@ end
 local function GetBoundariesEntryName(name, pos, widget_info, func_disabled)
   local entry = GetBoundariesEntry(pos, widget_info, func_disabled)
   entry.name = name
+  return entry
+end
+
+local function GetBoundariesEntryNormalWidth(name, pos, widget_info, func_disabled)
+  local entry = GetBoundariesEntry(pos, widget_info, func_disabled)
+  entry.args.Width.width = nil
+  entry.args.Height.width = nil
   return entry
 end
 
@@ -1755,11 +1999,11 @@ end
 
 local function CreateTargetArtWidgetOptions()
   local options = {
-    name = L["Target Highlight"],
+    name = L["Target Hightlight"],
     type = "group",
     order = 90,
     args = {
-      Enable = GetEnableEntry(L["Enable Target Highlight Widget"], L["This widget highlights the nameplate of your current target by showing a border around the healthbar and by coloring the nameplate's healtbar and/or name with a custom color."], "targetWidget", false),
+      Enable = GetEnableEntry(L["Enable Target Widget"], L["This widget highlights the nameplate of your current target by showing a border around the healthbar and by coloring the nameplate's healtbar and/or name with a custom color."], "targetWidget", false, function(info, val) SetValuePlain(info, val); Addon.Widgets:InitializeWidget("TargetArt") end),
       Texture = {
         name = L["Texture"],
         order = 10,
@@ -1771,8 +2015,8 @@ local function CreateTargetArtWidgetOptions()
             order = 10,
             type = "execute",
             image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\TargetArtWidget\\" .. db.targetWidget.theme,
-            imageWidth = 128,
-            imageHeight = 32,
+            imageWidth = 64,
+            imageHeight = 64,
           },
           Select = {
             name = L["Style"],
@@ -1782,7 +2026,7 @@ local function CreateTargetArtWidgetOptions()
               SetValue(info, val)
               options.args.Widgets.args.TargetArtWidget.args.Texture.args.Preview.image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\TargetArtWidget\\" .. db.targetWidget.theme;
             end,
-            values = { default = "Default", squarethin = "Thin Square", arrows = "Arrows", crescent = "Crescent", bubble = "Bubble" },
+            values = Addon.TARGET_TEXTURES,
             arg = { "targetWidget", "theme" },
           },
           Color = {
@@ -1792,6 +2036,47 @@ local function CreateTargetArtWidgetOptions()
             width = "half",
             hasAlpha = true,
             arg = { "targetWidget" },
+          },
+        },
+      },
+      Layout = {
+        name = L["Layout"],
+        order = 15,
+        type = "group",
+        inline = true,
+        args = {
+          Size = {
+            name = L["Size"],
+            order = 10,
+            type = "range",
+            max = 64,
+            min = 1,
+            step = 1,
+            isPercent = false,
+            set = SetValueWidget,
+            arg = { "targetWidget", "Size" },
+          },
+          X = {
+            name = L["Horizontal Offset"],
+            order = 20,
+            type = "range",
+            max = 120,
+            min = -120,
+            step = 1,
+            isPercent = false,
+            set = SetValueWidget,
+            arg = { "targetWidget", "HorizontalOffset" },
+          },
+          Y = {
+            name = L["Vertical Offset"],
+            order = 30,
+            type = "range",
+            max = 120,
+            min = -120,
+            step = 1,
+            isPercent = false,
+            set = SetValueWidget,
+            arg = { "targetWidget", "VerticalOffset" },
           },
         },
       },
@@ -1820,6 +2105,128 @@ local function CreateTargetArtWidgetOptions()
             order = 30,
             type = "toggle",
             arg = {"targetWidget", "ModeNames"},
+          },
+        },
+      },
+    },
+  }
+
+  return options
+end
+
+local function CreateFocusWidgetOptions()
+  local options = {
+    name = L["Focus Highlight"],
+    type = "group",
+    order = 55,
+    hidden = function() return Addon.CLASSIC end,
+    args = {
+      Enable = GetEnableEntry(L["Enable Focus Widget"], L["This widget highlights the nameplate of your current focus target by showing a border around the healthbar and by coloring the nameplate's healtbar and/or name with a custom color."], "FocusWidget", false, function(info, val) SetValuePlain(info, val); Addon.Widgets:InitializeWidget("Focus") end),
+      Texture = {
+        name = L["Texture"],
+        order = 10,
+        type = "group",
+        inline = true,
+        args = {
+          Preview = {
+            name = L["Preview"],
+            order = 10,
+            type = "execute",
+            image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\TargetArtWidget\\" .. db.FocusWidget.theme,
+            imageWidth = 64,
+            imageHeight = 64,
+          },
+          Select = {
+            name = L["Style"],
+            type = "select",
+            order = 20,
+            set = function(info, val)
+              SetValueWidget(info, val)
+              options.args.Widgets.args.FocusWidget.args.Texture.args.Preview.image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\TargetArtWidget\\" .. db.FocusWidget.theme;
+            end,
+            values = Addon.TARGET_TEXTURES,
+            arg = { "FocusWidget", "theme" },
+          },
+          Color = {
+            name = L["Color"],
+            type = "color",
+            order = 30,
+            width = "half",
+            get = GetColorAlpha,
+            set = SetColorAlphaWidget,
+            hasAlpha = true,
+            arg = { "FocusWidget" },
+          },
+        },
+      },
+      Layout = {
+        name = L["Layout"],
+        order = 15,
+        type = "group",
+        inline = true,
+        args = {
+          Size = {
+            name = L["Size"],
+            order = 10,
+            type = "range",
+            max = 64,
+            min = 1,
+            step = 1,
+            isPercent = false,
+            set = SetValueWidget,
+            arg = { "FocusWidget", "Size" },
+          },
+          X = {
+            name = L["Horizontal Offset"],
+            order = 20,
+            type = "range",
+            max = 120,
+            min = -120,
+            step = 1,
+            isPercent = false,
+            set = SetValueWidget,
+            arg = { "FocusWidget", "HorizontalOffset" },
+          },
+          Y = {
+            name = L["Vertical Offset"],
+            order = 30,
+            type = "range",
+            max = 120,
+            min = -120,
+            step = 1,
+            isPercent = false,
+            set = SetValueWidget,
+            arg = { "FocusWidget", "VerticalOffset" },
+          },
+        },
+      },
+      TargetColor = {
+        name = L["Nameplate Color"],
+        order = 20,
+        type = "group",
+        inline = true,
+        args = {
+          TargetColor = {
+            name = L["Color"],
+            order = 10,
+            type = "color",
+            get = GetColor,
+            set = SetColor,
+            arg = {"FocusWidget", "HPBarColor"},
+          },
+          EnableHealthbar = {
+            name = L["Healthbar"],
+            desc = L["Use a custom color for the healthbar of your current focus target."],
+            order = 20,
+            type = "toggle",
+            arg = {"FocusWidget", "ModeHPBar"},
+          },
+          EnableName = {
+            name = L["Name"],
+            desc = L["Use a custom color for the name of your current focus target (in healthbar view and in headline view)."],
+            order = 30,
+            type = "toggle",
+            arg = {"FocusWidget", "ModeNames"},
           },
         },
       },
@@ -1948,7 +2355,6 @@ local function CreateResourceWidgetOptions()
           },
           ShowEnemyNPCs = {
             name = L["Enemy NPCs"],
-            order = 30,
             order = 30,
             type = "toggle",
             arg = { "ResourceWidget", "ShowEnemyNPC" },
@@ -2836,7 +3242,7 @@ local function CreateAurasWidgetOptions()
                 name = L["Disable"],
                 order = 210,
                 type = "toggle",
-                desc = L["Do not show buffs with umlimited duration."],
+                desc = L["Do not show buffs with unlimited duration."],
                 arg = { "AuraWidget", "Buffs", "HideUnlimitedDuration" },
                 disabled = function() return not db.AuraWidget.Buffs.ShowEnemy end
               },
@@ -4230,6 +4636,13 @@ local function CreateCastbarOptions()
             desc = L["This option allows you to control whether a spell's name is hidden or shown on castbars."],
             arg = { "settings", "spelltext", "show" },
           },
+          EnableCastTime = {
+            name = L["Cast Time"],
+            order = 35,
+            type = "toggle",
+            desc = L["This option allows you to control whether a cast's remaining cast time is hidden or shown on castbars."],
+            arg = { "settings", "castbar", "ShowCastTime" },
+          },
           EnableSpellIcon = {
             name = L["Spell Icon"],
             order = 40,
@@ -4389,7 +4802,7 @@ local function CreateCastbarOptions()
         args = {
           Size = GetSizeEntry(L["Spell Icon Size"], 10, { "settings", "spellicon", "scale" }),
           Font = GetFontEntry(L["Spell Text"], 20, "spelltext"),
-          Align = {
+          AlignSpellText = {
             name = L["Spell Text Alignment"],
             order = 30,
             type = "group",
@@ -4398,22 +4811,46 @@ local function CreateCastbarOptions()
               AlignH = {
                 name = L["Horizontal Align"],
                 type = "select",
-                width = "double",
-                order = 110,
+                order = 1,
                 values = ThreatPlates.AlignH,
                 arg = { "settings", "spelltext", "align" },
               },
               AlignV = {
                 name = L["Vertical Align"],
                 type = "select",
-                width = "double",
-                order = 120,
+                order = 2,
                 values = ThreatPlates.AlignV,
                 arg = { "settings", "spelltext", "vertical" },
               },
+              OffsetX = GetPlacementEntry(L["Offset X"], 3, { "settings", "castbar", "SpellNameText", "HorizontalOffset" } ),
+              OffsetY = GetPlacementEntry(L["Offset Y"], 4, { "settings", "castbar", "SpellNameText", "VerticalOffset" } ),
+              Boundaries = GetBoundariesEntryNormalWidth(L["Spell Text Boundaries"], 5, "spelltext"),
             },
           },
-          Boundaries = GetBoundariesEntryName(L["Spell Text Boundaries"], 40, "spelltext"),
+          AlignCastTime = {
+            name = L["Cast Time Alignment"],
+            order = 50,
+            type = "group",
+            inline = true,
+            args = {
+              AlignH = {
+                name = L["Horizontal Align"],
+                type = "select",
+                order = 1,
+                values = ThreatPlates.AlignH,
+                arg = { "settings", "castbar", "CastTimeText", "Font", "HorizontalAlignment" },
+              },
+              AlignV = {
+                name = L["Vertical Align"],
+                type = "select",
+                order = 2,
+                values = ThreatPlates.AlignV,
+                arg = { "settings", "castbar", "CastTimeText", "Font", "VerticalAlignment" },
+              },
+              OffsetX = GetPlacementEntry(L["Offset X"], 3, { "settings", "castbar", "CastTimeText", "HorizontalOffset" } ),
+              OffsetY = GetPlacementEntry(L["Offset Y"], 4, { "settings", "castbar", "CastTimeText", "VerticalOffset" } ),
+            },
+          },
         },
       },
       Placement = {
@@ -4463,18 +4900,6 @@ local function CreateCastbarOptions()
               Spellicon_Y_HB = GetPlacementEntry(L["Healthbar View Y"], 160, { "settings", "spellicon", "y" }),
               Spellicon_X_Names = GetPlacementEntry(L["Headline View X"], 170, { "settings", "spellicon", "x_hv" }),
               Spellicon_Y_Names = GetPlacementEntry(L["Headline View Y"], 180, { "settings", "spellicon", "y_hv" }),
-            },
-          },
-          Spelltext = {
-            name = L["Spell Text"],
-            order = 30,
-            type = "group",
-            inline = true,
-            args = {
-              Spelltext_X_HB = GetPlacementEntry(L["Healthbar View X"], 60, { "settings", "spelltext", "x" }),
-              Spelltext_Y_HB = GetPlacementEntry(L["Healthbar View Y"], 70, { "settings", "spelltext", "y" }),
-              Spelltext_X_Names = GetPlacementEntry(L["Headline View X"], 80, { "settings", "spelltext", "x_hv" }),
-              Spelltext_Y_Names = GetPlacementEntry(L["Headline View Y"], 90, { "settings", "spelltext", "y_hv" }),
             },
           },
         },
@@ -4656,6 +5081,7 @@ local function CreateWidgetOptions()
       BossModsWidget = CreateBossModsWidgetOptions(),
       ClassIconWidget = CreateClassIconWidgetOptions(),
       ComboPointsWidget = CreateComboPointsWidgetOptions(),
+      FocusWidget = CreateFocusWidgetOptions(),
       ResourceWidget = CreateResourceWidgetOptions(),
       SocialWidget = CreateSocialWidgetOptions(),
       StealthWidget = CreateStealthWidgetOptions(),
@@ -4766,106 +5192,387 @@ local function CreateSpecRolesRetail()
   return result
 end
 
+local function CustomPlateGetHeaderName(index)
+  local trigger_type = db.uniqueSettings[index].Trigger.Type
+  local prefix = (trigger_type == "Aura" and "Aura: ") or (trigger_type == "Cast" and "Cast: ") or ""
+  return prefix .. (db.uniqueSettings[index].Trigger[trigger_type].Input or "")
+end
+
+local function CustomPlateGetSlotName(index)
+  local name = "#" .. index .. ". " .. CustomPlateGetHeaderName(index)
+  if db.uniqueSettings[index].Enable.Never then
+    name = "|cffA0A0A0" .. name .. "|r"
+  end
+  return name
+end
+
+local function CustomPlateGetIcon(index)
+  local _, icon
+
+  if db.uniqueSettings[index].UseAutomaticIcon then
+    icon = db.uniqueSettings[index].icon
+  else
+    local spell_id = db.uniqueSettings[index].SpellID
+    if spell_id then
+      _, _, icon = GetSpellInfo(spell_id)
+    else
+      icon = db.uniqueSettings[index].icon
+      if type(icon) == "string" and not icon:find("\\") and not icon:sub(-4) == ".blp" then
+        -- Maybe a spell name
+        _, _, icon = GetSpellInfo(icon)
+      end
+    end
+  end
+
+  if type(icon) == "string" and icon:sub(-4) == ".blp" then
+    icon = "Interface\\Icons\\" .. icon
+  end
+
+  return icon
+end
+
+local function CustomPlateSetIcon(index, icon_location)
+  local _, icon
+
+  local custom_plate = db.uniqueSettings[index]
+  if custom_plate.UseAutomaticIcon then
+    _, _, icon = GetSpellInfo(custom_plate.Trigger[custom_plate.Trigger.Type].AsArray[1])
+  elseif not icon_location then
+    icon = custom_plate.icon
+  else
+    custom_plate.SpellID = nil
+    custom_plate.SpellName = nil
+
+    local spell_id = tonumber(icon_location)
+    if spell_id then -- no string, so val should be a spell ID
+      _, _, icon = GetSpellInfo(spell_id)
+      if icon then
+        custom_plate.SpellID = spell_id
+      else
+        icon = spell_id -- Set icon to spell_id == icon_location, so that the value gets stored
+        t.Print("Invalid spell ID for custom nameplate icon: " .. icon_location, true)
+      end
+    else
+      icon_location = tostring(icon_location)
+      _, _, icon = GetSpellInfo(icon_location)
+      if icon then
+        custom_plate.SpellName = icon_location
+      end
+      icon = icon or icon_location
+    end
+  end
+
+  if not icon or (type(icon) == "string" and icon:len() == 0) then
+    icon = "INV_Misc_QuestionMark.blp"
+  end
+
+  custom_plate.icon = icon
+  options.args.Custom.args["#" .. index].args.Icon.args.Icon.image = CustomPlateGetIcon(index)
+
+  UpdateSpecial()
+end
+
+StaticPopupDialogs["TriggerAlreadyExists"] = {
+  preferredIndex = 3,
+  text = L["A custom nameplate with these triggers already exists: %s. You cannot use two custom nameplates with the same trigger."],
+  button1 = OKAY,
+  timeout = 0,
+  whileDead = 1,
+  hideOnEscape = 1,
+  OnAccept = function(self, _, _) end,
+}
+
+StaticPopupDialogs["TriggerAlreadyExistsDisablingIt"] = {
+  preferredIndex = 3,
+  text = L["A custom nameplate with these triggers already exists: %s. You cannot use two custom nameplates with the same trigger. The current custom nameplate was therefore disabled."],
+  button1 = OKAY,
+  timeout = 0,
+  whileDead = 1,
+  hideOnEscape = 1,
+  OnAccept = function(self, _, _) end,
+}
+
+local function CustomPlateCheckIfTriggerIsUnique(trigger_type, triggers, selected_plate)
+  local duplicate_triggers = {}
+
+  for i, trigger_value in ipairs(triggers) do
+    if trigger_value ~= nil and trigger_value ~= "" then
+      -- Check if here is already another custom nameplate with the same trigger:
+      local custom_plate = Addon.Cache.CustomPlateTriggers[trigger_type][trigger_value]
+
+      if not (custom_plate == nil or custom_plate.Enable.Never or selected_plate.Enable.Never or custom_plate == selected_plate) then
+        duplicate_triggers[#duplicate_triggers + 1] = trigger_value
+      end
+    end
+  end
+
+
+  return #duplicate_triggers == 0, duplicate_triggers
+end
+
+local function CustomPlateCheckIfTriggerIsUniqueWithErrorMessage(trigger_type, triggers, selected_plate)
+  local check_ok, duplicate_triggers = CustomPlateCheckIfTriggerIsUnique(trigger_type, triggers, selected_plate)
+
+  if not check_ok then
+    StaticPopup_Show("TriggerAlreadyExists", table.concat(duplicate_triggers, "; "))
+  end
+
+  return check_ok
+end
+
+local function CustomPlateUpdateEntry(index)
+  options.args.Custom.args["#" .. index].name = CustomPlateGetSlotName(index)
+  options.args.Custom.args["#" .. index].args.Header.name = CustomPlateGetHeaderName(index)
+
+  CustomPlateSetIcon(index) -- Executes UpdateSpecial()
+end
+
+local function CustomPlateCheckAndUpdateEntry(info, val, index)
+  local triggers = Addon.Split(val)
+
+  local selected_plate = db.uniqueSettings[index]
+  -- Check if here is already another custom nameplate with the same trigger:
+  local trigger_type = selected_plate.Trigger.Type
+  if CustomPlateCheckIfTriggerIsUniqueWithErrorMessage(trigger_type, triggers, selected_plate) then
+    db.uniqueSettings[index].Trigger[trigger_type].Input = val
+    db.uniqueSettings[index].Trigger[trigger_type].AsArray = triggers
+    CustomPlateUpdateEntry(index)
+  end
+end
+
 local function CreateCustomNameplateEntry(index)
   local entry = {
-    name = "#" .. index .. ". " .. db.uniqueSettings[index].name,
+    name = function() return CustomPlateGetSlotName(index) end,
     type = "group",
     order = 40 + index,
     args = {
-      Header = {
-        name = db.uniqueSettings[index].name,
-        type = "header",
-        order = 0,
-      },
-      Name = {
-        name = L["Set Name"],
+      --Spacer2 = GetSpacerEntry(90),
+      Copy = {
+        name = L["Copy"],
         order = 1,
+        type = "execute",
+        func = function()
+          clipboard = t.CopyTable(db.uniqueSettings[index])
+        end,
+      },
+      Paste = {
+        name = L["Paste"],
+        order = 2,
+        type = "execute",
+        func = function()
+          -- Check for valid content could be better
+          if type(clipboard) == "table" and clipboard.Trigger then
+            local trigger_type = clipboard.Trigger.Type
+            local triggers = (clipboard).Trigger[trigger_type].AsArray
+            local check_ok = CustomPlateCheckIfTriggerIsUniqueWithErrorMessage(trigger_type, triggers, clipboard)
+            if check_ok then
+              db.uniqueSettings[index] = t.CopyTable(clipboard)
+              CustomPlateUpdateEntry(index)
+              clipboard = nil
+            end
+          else
+            t.Print(L["Nothing to paste!"])
+          end
+        end,
+      },
+      Export = {
+        name = L["Export"],
+        order = 3,
+        type = "execute",
+        func = function()
+          local export_data = {
+            Version = t.Meta("version"),
+            CustomStyles = { db.uniqueSettings[index] }
+          }
+
+          ShowExportFrame(export_data)
+        end,
+        disabled = function() return TidyPlatesThreat.db.global.CustomNameplatesVersion == 1 end,
+      },
+      Header = {
+        name = CustomPlateGetHeaderName(index),
+        type = "header",
+        order = 9,
+      },
+      Trigger = {
+        name = L["Trigger"],
+        order = 10,
         type = "group",
         inline = true,
         args = {
-          SetName = {
-            name = db.uniqueSettings[index].name,
-            type = "input",
-            order = 1,
-            width = "full",
+          TriggerType = {
+            name = L["Type"],
+            type = "select",
+            order = 10,
+            values = { Name = L["Name"], Aura = L["Aura"], Cast = L["Cast"], },
             set = function(info, val)
-              SetValue(info, val)
-              options.args.Custom.args["#" .. index].name = "#" .. index .. ". " .. val
-              options.args.Custom.args["#" .. index].args.Header.name = val
-              options.args.Custom.args["#" .. index].args.Name.args.SetName.name = val
-              UpdateCustomNameplates()
+              -- If the uses switches to a trigger that is already in use, the current custom nameplate
+              -- is disabled (otherwise, if we would not switch to it, the user could not change it at all.
+              local triggers = db.uniqueSettings[index].Trigger[val].AsArray
+              local check_ok, duplicate_triggers = CustomPlateCheckIfTriggerIsUnique(val, triggers, db.uniqueSettings[index])
+              if not check_ok then
+                StaticPopup_Show("TriggerAlreadyExistsDisablingIt", duplicate_triggers)
+                db.uniqueSettings[index].Enable.Never = true
+              end
+              db.uniqueSettings[index].Trigger.Type = val
+              CustomPlateUpdateEntry(index)
             end,
-            arg = { "uniqueSettings", index, "name" },
+            arg = { "uniqueSettings", index, "Trigger", "Type" },
+            -- Available only for custom nameplates with version >= 2
+            desc = function()
+              if TidyPlatesThreat.db.global.CustomNameplatesVersion == 1 then
+                return L["This option is disabled as you are still using the obsolete custom nameplates format. Migrate your custom nameplates to the new format (using the Migration button at the top) to enable this option."]
+              else
+                return nil
+              end
+            end,
+            disabled = function() return TidyPlatesThreat.db.global.CustomNameplatesVersion == 1 end,
+          },
+          Spacer1 = GetSpacerEntry(15),
+          -- Name Trigger
+          NameTrigger = {
+            name = L["Names"],
+            type = "input",
+            order = 20,
+            width = 3,
+            desc = L["Apply these custom settings to the nameplate of a unit with a particular name. You can add multiple entries separated by a semicolon. You can use use * as wildcard character."],
+            set = function(info, val)
+              -- Only * should be allowed
+              local position, _ = string.find(val, "[().%%+–?%[%]^$]")
+              if position then
+                t.Print(L["Illegal character used in Name trigger at position: "] .. tostring(position), true)
+              else
+                CustomPlateCheckAndUpdateEntry(info, val, index)
+              end
+            end,
+            get = function(info)
+              return db.uniqueSettings[index].Trigger["Name"].Input or ""
+            end,
+            hidden = function() return db.uniqueSettings[index].Trigger.Type ~= "Name" end,
           },
           TargetButton = {
             name = L["Use Target's Name"],
             type = "execute",
-            order = 2,
+            order = 30,
             width = "single",
             func = function()
               if UnitExists("target") then
-                local target = UnitName("target")
-                db.uniqueSettings[index].name = target
-                options.args.Custom.args["#" .. index].name = "#" .. index .. ". " .. target
-                options.args.Custom.args["#" .. index].args.Header.name = target
-                options.args.Custom.args["#" .. index].args.Name.args.SetName.name = target
-                UpdateCustomNameplates()
+                local target_unit = UnitName("target")
+                local triggers = { target_unit }
+                local check_ok = CustomPlateCheckIfTriggerIsUniqueWithErrorMessage("Name", triggers, db.uniqueSettings[index])
+                if check_ok then
+                  db.uniqueSettings[index].Trigger["Name"].Input = target_unit
+                  db.uniqueSettings[index].Trigger["Name"].AsArray = triggers
+                  CustomPlateUpdateEntry(index)
+                end
               else
                 ThreatPlates.Print(L["No target found."])
               end
             end,
+            hidden = function() return db.uniqueSettings[index].Trigger.Type ~= "Name" end,
           },
-          Copy = {
-            name = L["Copy"],
-            order = 5,
-            type = "execute",
-            func = function()
-              clipboard = {}
-              clipboard = Addon.CopyTable(db.uniqueSettings[index])
-              ThreatPlates.Print(L["Copied!"])
+          -- Aura Trigger
+          AuraTrigger = {
+            name = L["Auras (Name or ID)"],
+            type = "input",
+            order = 20,
+            width = "full",
+            desc = L["Apply these custom settings to the nameplate when a particular aura is present on the unit. You can add multiple entries separated by a semicolon."],
+            set = function(info, val) CustomPlateCheckAndUpdateEntry(info, tonumber(val) or val, index) end,
+            get = function(info)
+              return tostring(db.uniqueSettings[index].Trigger["Aura"].Input or "")
             end,
+            disabled = function() return not db.AuraWidget.ON and not db.AuraWidget.ShowInHeadlineView end,
+            hidden = function() return db.uniqueSettings[index].Trigger.Type ~= "Aura" end,
           },
-          Paste = {
-            name = L["Paste"],
-            order = 6,
-            type = "execute",
-            func = function()
-              if type(clipboard) == "table" and clipboard.name then
-                db.uniqueSettings[index] = Addon.CopyTable(clipboard)
-                ThreatPlates.Print(L["Pasted!"])
-              else
-                ThreatPlates.Print(L["Nothing to paste!"])
-              end
-              options.args.Custom.args["#" .. index].name = "#" .. index .. ". " .. db.uniqueSettings[index].name
-              options.args.Custom.args["#" .. index].args.Header.name = db.uniqueSettings[index].name
-              options.args.Custom.args["#" .. index].args.Name.args.SetName.name = db.uniqueSettings[index].name
-              local spell_id = db.uniqueSettings[index].SpellID
-              if spell_id then
-                local _, _, icon = GetSpellInfo(spell_id)
-                options.args.Custom.args["#" .. index].args.Icon.args.Icon.image = icon
-              else
-                local icon_path = db.uniqueSettings[index].icon
-                if icon_path:sub(-4) == ".blp" then
-                  options.args.Custom.args["#" .. index].args.Icon.args.Icon.image = "Interface\\Icons\\" .. icon_path
-                else
-                  options.args.Custom.args["#" .. index].args.Icon.args.Icon.image = icon_path
-                end
-              end
-              UpdateCustomNameplates()
-              clipboard = nil
+          AuraWidgetWarning = {
+            type = "description",
+            order = 30,
+            width = "full",
+            name = L["|cffFF0000The Auras widget must be enabled (see Widgets - Auras) to use auras as trigger for custom nameplates.|r"],
+            hidden = function() return (db.uniqueSettings[index].Trigger.Type ~= "Aura") or (db.uniqueSettings[index].Trigger.Type == "Aura" and (db.AuraWidget.ON or db.AuraWidget.ShowInHeadlineView)) end,
+          },
+          -- Cast Trigger
+          CastTrigger = {
+            name = L["Spells (Name or ID)"],
+            type = "input",
+            order = 20,
+            width = "full",
+            desc = L["Apply these custom settings to a nameplate when a particular spell is cast by the unit. You can add multiple entries separated by a semicolon"],
+            set = function(info, val) CustomPlateCheckAndUpdateEntry(info, tonumber(val) or val, index) end,
+            get = function(info)
+              return tostring(db.uniqueSettings[index].Trigger["Cast"].Input or "")
             end,
+            hidden = function() return db.uniqueSettings[index].Trigger.Type ~= "Cast" end,
           },
         },
       },
       Enable = {
+        name = L["Enable"],
+        type = "group",
+        inline = true,
+        order = 20,
+        args = {
+          Disable = {
+            name = L["Never"],
+            order = 10,
+            type = "toggle",
+            set = function(info, val)
+              local trigger_type = db.uniqueSettings[index].Trigger.Type
+              local triggers = db.uniqueSettings[index].Trigger[trigger_type].AsArray
+
+              -- Update never before check for unique trigger, otherwise it would use the old Never value
+              db.uniqueSettings[index].Enable.Never = val
+
+              local check_ok, duplicate_triggers = CustomPlateCheckIfTriggerIsUnique(trigger_type, triggers, db.uniqueSettings[index])
+              if not check_ok then
+                StaticPopup_Show("TriggerAlreadyExistsDisablingIt", table.concat(duplicate_triggers, "; "))
+                db.uniqueSettings[index].Enable.Never = true
+              end
+
+              CustomPlateUpdateEntry(index)
+            end,
+            arg = { "uniqueSettings", index, "Enable", "Never" },
+          },
+          Spacer1 = GetSpacerEntry(15),
+          FriendlyUnits = {
+            name = L["Friendly Units"],
+            order = 20,
+            type = "toggle",
+            desc = L["Enable this custom nameplate for friendly units"],
+            set = function(info, val)
+              db.uniqueSettings[index].Enable.UnitReaction["FRIENDLY"] = val
+              Addon:ForceUpdate()
+            end,
+            get = function(info)
+              return db.uniqueSettings[index].Enable.UnitReaction["FRIENDLY"]
+            end,
+          },
+          EnemyUnits = {
+            name = L["Enemy Units"],
+            order = 30,
+            type = "toggle",
+            desc = L["Enable this custom nameplate for neutral and hostile units"],
+            set = function(info, val)
+              db.uniqueSettings[index].Enable.UnitReaction["HOSTILE"] = val
+              db.uniqueSettings[index].Enable.UnitReaction["NEUTRAL"] = val
+              Addon:ForceUpdate()
+            end,
+            get = function(info)
+              return db.uniqueSettings[index].Enable.UnitReaction["HOSTILE"]
+            end,
+          },
+        },
+      },
+      NameplateStyle = {
         name = L["Nameplate Style"],
         type = "group",
         inline = true,
-        order = 10,
+        order = 30,
         args = {
           UseStyle = {
             name = L["Enable"],
-            order = 1,
+            order = 10,
             type = "toggle",
             desc = L["This option allows you to control whether custom settings for nameplate style, color, transparency and scaling should be used for this nameplate."],
             arg = { "uniqueSettings", index, "useStyle" },
@@ -4874,7 +5581,6 @@ local function CreateCustomNameplateEntry(index)
             name = L["Healthbar View"],
             order = 20,
             type = "toggle",
-            disabled = function() return not db.uniqueSettings[index].useStyle end,
             set = function(info, val) if val then db.uniqueSettings[index].ShowHeadlineView = false; SetValue(info, val) end end,
             arg = { "uniqueSettings", index, "showNameplate" },
           },
@@ -4882,7 +5588,6 @@ local function CreateCustomNameplateEntry(index)
             name = L["Headline View"],
             order = 30,
             type = "toggle",
-            disabled = function() return not db.uniqueSettings[index].useStyle end,
             set = function(info, val) if val then db.uniqueSettings[index].showNameplate = false; SetValue(info, val) end end,
             arg = { "uniqueSettings", index, "ShowHeadlineView" },
           },
@@ -4890,8 +5595,8 @@ local function CreateCustomNameplateEntry(index)
             name = L["Hide Nameplate"],
             order = 40,
             type = "toggle",
+            width = "double",
             desc = L["Disables nameplates (healthbar and name) for the units of this type and only shows an icon (if enabled)."],
-            disabled = function() return not db.uniqueSettings[index].useStyle end,
             set = function(info, val)
               if val then
                 db.uniqueSettings[index].showNameplate = false;
@@ -4906,9 +5611,8 @@ local function CreateCustomNameplateEntry(index)
       Appearance = {
         name = L["Appearance"],
         type = "group",
-        order = 30,
+        order = 40,
         inline = true,
-        disabled = function() return not db.uniqueSettings[index].useStyle end,
         args = {
           CustomColor = {
             name = L["Custom Color"],
@@ -4921,7 +5625,7 @@ local function CreateCustomNameplateEntry(index)
             name = L["Color"],
             order = 2,
             type = "color",
-            disabled = function() return not db.uniqueSettings[index].useStyle or not db.uniqueSettings[index].useColor end,
+            disabled = function() return not db.uniqueSettings[index].useColor end,
             get = GetColor,
             set = SetColor,
             arg = { "uniqueSettings", index, "color" },
@@ -4939,7 +5643,7 @@ local function CreateCustomNameplateEntry(index)
             order = 4,
             type = "toggle",
             desc = L["Additionally color the nameplate's healthbar or name based on the target mark if the unit is marked."],
-            disabled = function() return not db.uniqueSettings[index].useStyle or not db.uniqueSettings[index].useColor end,
+            disabled = function() return not db.uniqueSettings[index].useColor end,
             arg = { "uniqueSettings", index, "allowMarked" },
           },
           Spacer1 = GetSpacerEntry(10),
@@ -4952,7 +5656,7 @@ local function CreateCustomNameplateEntry(index)
             get = function(info) return not GetValue(info) end,
             arg = { "uniqueSettings", index, "overrideAlpha" },
           },
-          AlphaSetting = GetTransparencyEntryDefault(12, { "uniqueSettings", index, "alpha" }, function() return not db.uniqueSettings[index].useStyle or db.uniqueSettings[index].overrideAlpha end),
+          AlphaSetting = GetTransparencyEntryDefault(12, { "uniqueSettings", index, "alpha" }, function() return db.uniqueSettings[index].overrideAlpha end),
           --            AlphaThreatSystem = {
           --              name = L["Use Threat Alpha"],
           --              order = 13,
@@ -4971,7 +5675,7 @@ local function CreateCustomNameplateEntry(index)
             get = function(info) return not GetValue(info) end,
             arg = { "uniqueSettings", index, "overrideScale" },
           },
-          ScaleSetting = GetScaleEntryDefault(22, { "uniqueSettings", index, "scale" }, function() return not db.uniqueSettings[index].useStyle or db.uniqueSettings[index].overrideScale end),
+          ScaleSetting = GetScaleEntryDefault(22, { "uniqueSettings", index, "scale" }, function() return db.uniqueSettings[index].overrideScale end),
           --            ScaleThreatSystem = {
           --              name = L["Use Threat Scale"],
           --              order = 23,
@@ -4981,21 +5685,68 @@ local function CreateCustomNameplateEntry(index)
           --              arg = {"uniqueSettings", k_c, "UseThreatColor"},
           --            },
           --            Spacer3 = GetSpacerEntry(24),
-          Header = { type = "header", order = 24, name = "Threat Options", },
+          HeaderGlow = { type = "header", order = 30, name = "Highlight Glow", },
+          --          EnableGlow = {
+          --            name = L["Glow"],
+          --            type = "toggle",
+          --            order = 41,
+          --            desc = L["Shows a glow effect on the healthbar of this custom nameplate."],
+          --            arg = { "uniqueSettings", index, "Effects", "Highlight", "Enabled"},
+          --          },
+          GlowFrame = {
+            name = L["Glow Frame"],
+            type = "select",
+            order = 31,
+            values = Addon.CUSTOM_PLATES_GLOW_FRAMES,
+            desc = L["Shows a glow effect on this custom nameplate."],
+            set = SetValueWidget,
+            arg = { "uniqueSettings", index, "Effects", "Glow", "Frame"},
+          },
+          GlowType = {
+            name = L["Glow Type"],
+            type = "select",
+            values = Addon.GLOW_TYPES,
+            order = 32,
+            set = SetValueWidget,
+            arg = { "uniqueSettings", index, "Effects", "Glow", "Type"},
+          },
+          GlowColorEnable = {
+            name = L["Glow Color"],
+            type = "toggle",
+            order = 33,
+            set = SetValueWidget,
+            arg = { "uniqueSettings", index, "Effects", "Glow", "CustomColor"},
+          },
+          GlowColor = {
+            name = L["Color"],
+            type = "color",
+            order = 34,
+            hasAlpha = true,
+            set = function(info, r, g, b, a)
+              local color = db.uniqueSettings[index].Effects.Glow.Color
+              color[1], color[2], color[3], color[4] = r, g, b, a
+
+              Addon.Widgets:UpdateSettings("UniqueIcon")
+            end,
+            get = function(info)
+              local color = db.uniqueSettings[index].Effects.Glow.Color
+              return unpack(color)
+            end,
+            arg = { "uniqueSettings", index, "Effects", "Glow", "Color"},
+          },
+          HeaderThreat = { type = "header", order = 40, name = "Threat Options", },
           ThreatGlow = {
             name = L["Threat Glow"],
-            order = 31,
+            order = 41,
             type = "toggle",
             desc = L["Shows a glow based on threat level around the nameplate's healthbar (in combat)."],
-            disabled = function() return not db.uniqueSettings[index].useStyle end,
             arg = { "uniqueSettings", index, "UseThreatGlow"},
           },
           ThreatSystem = {
             name = L["Enable Threat System"],
-            order = 32,
+            order = 42,
             type = "toggle",
             desc = L["In combat, use coloring, transparency, and scaling based on threat level as configured in the threat system. Custom settings are only used out of combat."],
-            disabled = function() return not db.uniqueSettings[index].useStyle end,
             arg = { "uniqueSettings", index, "UseThreatColor"},
           },
         },
@@ -5003,90 +5754,59 @@ local function CreateCustomNameplateEntry(index)
       Icon = {
         name = L["Icon"],
         type = "group",
-        order = 40,
+        order = 50,
         inline = true,
-        disabled = function() return not db.uniqueWidget.ON end,
         args = {
           Enable = {
             name = L["Enable"],
             type = "toggle",
             order = 1,
             desc = L["This option allows you to control whether the custom icon is hidden or shown on this nameplate."],
-            descStyle = "inline",
-            width = "full",
             arg = { "uniqueSettings", index, "showIcon" }
           },
+          AutomaticIcon = {
+            name = L["Automatic Icon"],
+            type = "toggle",
+            order = 2,
+            set = function(info, val)
+              SetValue(info, val)
+              CustomPlateSetIcon(index)
+            end,
+            arg = { "uniqueSettings", index, "UseAutomaticIcon" },
+            desc = L["Find a suitable icon based on the current trigger. For Name trigger, the preview does not work. For multi-value triggers, the preview always is the icon of the first trigger entered."],
+            hidden = function() return TidyPlatesThreat.db.global.CustomNameplatesVersion == 1 end,
+          },
+          Spacer1 = GetSpacerEntry(3),
           Icon = {
             name = L["Preview"],
             type = "execute",
             width = "full",
             disabled = function() return not db.uniqueSettings[index].showIcon or not db.uniqueWidget.ON end,
-            order = 2,
-            image = function()
-              local spell_id = db.uniqueSettings[index].SpellID
-              if spell_id then
-                local _, _, icon = GetSpellInfo(spell_id)
-                return icon
-              else
-                local icon_path = db.uniqueSettings[index].icon
-                if icon_path:sub(-4) == ".blp" then
-                  return "Interface\\Icons\\" .. icon_path
-                else
-                  return icon_path
-                end
-              end
-            end,
+            order = 4,
+            image = function() return CustomPlateGetIcon(index) end,
             imageWidth = 64,
             imageHeight = 64,
           },
           Description = {
             type = "description",
-            order = 3,
-            name = L["Enter an icons name (with the *.blp ending), a spell ID or a full icon path (using '\\' to separate directory folders)."],
+            order = 5,
+            name = L["Enter an icon's name (with the *.blp ending), a spell ID, a spell name or a full icon path (using '\\' to separate directory folders)."],
             width = "full",
+            hidden = function() return db.uniqueSettings[index].UseAutomaticIcon end
           },
           SetIcon = {
             name = L["Set Icon"],
             type = "input",
-            order = 4,
+            order = 6,
             disabled = function() return not db.uniqueSettings[index].showIcon or not db.uniqueWidget.ON end,
             width = "full",
-            set = function(info, val)
-              local spell_id = tonumber(val)
-              if spell_id then -- no string, so val should be a spell ID
-                local _, _, icon = GetSpellInfo(spell_id)
-                if icon then
-                  db.uniqueSettings[index].SpellID = spell_id
-                  val = select(3, GetSpellInfo(spell_id))
-                else
-                  ThreatPlates.Print("Invalid spell ID for custom nameplate icon: " .. val, true)
-                  db.uniqueSettings[index].SpellID = nil
-                end
-              else
-                db.uniqueSettings[index].SpellID = nil
-              end
-              -- Either store the path to the icon or the icon ID
-              SetValue(info, val)
-              if val then
-                if val:sub(-4) == ".blp" then
-                  options.args.Custom.args["#" .. index].args.Icon.args.Icon.image = "Interface\\Icons\\" .. val
-                else
-                  options.args.Custom.args["#" .. index].args.Icon.args.Icon.image = val
-                end
-              else
-                options.args.Custom.args["#" .. index].args.Icon.args.Icon.image = "Interface\\Icons\\Temp"
-              end
-              UpdateCustomNameplates()
-            end,
+            set = function(info, val) CustomPlateSetIcon(index, val) end,
             get = function(info)
-              local spell_id = db.uniqueSettings[index].SpellID
-              if spell_id then
-                return tostring(spell_id)
-              else
-                return GetValue(info)
-              end
+              local val = db.uniqueSettings[index].SpellID or db.uniqueSettings[index].SpellName or GetValue(info)
+              return tostring(val)
             end,
             arg = { "uniqueSettings", index, "icon" },
+            hidden = function() return db.uniqueSettings[index].UseAutomaticIcon end
           },
         },
       },
@@ -5118,7 +5838,7 @@ local function CreateCustomNameplatesGroup()
         -- If slot_no is nil, General Settings is selected currently.
         local slot_no = (tonumber(selected:match("#(.*)")) or 0) + 1
         table.insert(db.uniqueSettings, slot_no, Addon.CopyTable(ThreatPlates.DEFAULT_SETTINGS.profile.uniqueSettings["**"]))
-        db.uniqueSettings[slot_no].name = ""
+        db.uniqueSettings[slot_no].Trigger.Name.Input = ""
 
         options.args.Custom.args = CreateCustomNameplatesGroup()
         UpdateCustomNameplates()
@@ -5142,6 +5862,8 @@ local function CreateCustomNameplatesGroup()
 
           options.args.Custom.args = CreateCustomNameplatesGroup()
           UpdateCustomNameplates()
+
+          Addon.LibAceConfigDialog:SelectGroup(t.ADDON_NAME, "Custom", "#" ..  math.min(slot_no, #db.uniqueSettings))
         end
       end,
       confirm = function(info)
@@ -5213,7 +5935,11 @@ local function CreateCustomNameplatesGroup()
         local selected = statustable.groups.selected
         local slot_no = tonumber(selected:match("#(.*)"))
 
-        table.sort(db.uniqueSettings, function(a, b) return a.name < b.name end)
+        table.sort(db.uniqueSettings, function(a, b)
+          local a_key = a.Trigger.Type .. a.Trigger[a.Trigger.Type].Input .. tostring(a.Enable.Never)
+          local b_key = b.Trigger.Type .. b.Trigger[b.Trigger.Type].Input .. tostring(b.Enable.Never)
+          return a_key < b_key
+        end)
 
         options.args.Custom.args = CreateCustomNameplatesGroup()
         UpdateCustomNameplates()
@@ -5231,7 +5957,11 @@ local function CreateCustomNameplatesGroup()
         local selected = statustable.groups.selected
         local slot_no = tonumber(selected:match("#(.*)"))
 
-        table.sort(db.uniqueSettings, function(a, b) return a.name > b.name end)
+        table.sort(db.uniqueSettings, function(a, b)
+          local b_key = b.Trigger.Type .. b.Trigger[b.Trigger.Type].Input .. tostring(b.Enable.Never)
+          local a_key = a.Trigger.Type .. a.Trigger[a.Trigger.Type].Input .. tostring(a.Enable.Never)
+          return a_key > b_key
+        end)
 
         options.args.Custom.args = CreateCustomNameplatesGroup()
         UpdateCustomNameplates()
@@ -5263,7 +5993,7 @@ local function CreateCustomNameplatesGroup()
         Icon = {
           name = L["Icon"],
           type = "group",
-          order = 20,
+          order = 10,
           inline = true,
           args = {
             Help = {
@@ -5276,7 +6006,6 @@ local function CreateCustomNameplatesGroup()
               name = L["Enable"],
               order = 10,
               type = "toggle",
-              width = "half",
               set = function(info, val)
                 SetValuePlain(info, val);
                 Addon.Widgets:InitializeWidget("UniqueIcon")
@@ -5287,12 +6016,105 @@ local function CreateCustomNameplatesGroup()
             Placement = GetPlacementEntryWidget(30, "uniqueWidget", true),
           },
         },
+        ImportExport = {
+          name = L["Exchange"],
+          type = "group",
+          order = 20,
+          inline = true,
+          disabled = function() return TidyPlatesThreat.db.global.CustomNameplatesVersion == 1 end,
+          args = {
+            VersionWarning = {
+              type = "description",
+              order = 1,
+              width = "full",
+              name = L["|cffFF0000This option is disabled as you are still using the obsolete custom nameplates format. Migrate your custom nameplates to the new format (using the Migration button at the top) to enable this option.|r"],
+              hidden = function() return TidyPlatesThreat.db.global.CustomNameplatesVersion > 1 end,
+            },
+            Export = {
+              name = L["Export Custom Nameplates"],
+              order = 10,
+              width = "double",
+              type = "execute",
+              desc = L["Export all custom nameplate settings as string."],
+              func = function()
+                local export_data = {
+                  Version = t.Meta("version"),
+                  CustomStyles = t.CopyTable(db.uniqueSettings) -- copy it as .map is removed afterwards
+                }
+                -- Delete cached data from settings table
+                export_data.CustomStyles.map = nil
+
+                ShowExportFrame(export_data)
+              end,
+            },
+            Import = {
+              name = L["Import Custom Nameplates"],
+              order = 20,
+              width = "double",
+              type = "execute",
+              desc = L["Import custom nameplate settings from a string. The custom namneplates will be added to your current custom nameplates."],
+              func = function()
+                ImportExportFrame = ImportExportFrame or CreateImportExportFrame()
+
+                local function ImportHandler(encoded)
+                  local success, import_data = ImportStringData(encoded)
+
+                  if success then
+                    if import_data.Version ~= t.Meta("version") then
+                      t.Print(L["The import string contains custom nameplate settings from an different Threat Plates version as you are using. Some settings from the imported custom nameplates might be lost."], true)
+                    end
+
+                    if not import_data.Version or not import_data.CustomStyles then
+                      t.Print(L["The import string has an invalid format and cannot be imported. Verify that the import string was generated from the same Threat Plates version that you are using currently."], true)
+                    else
+                      local imported_custom_styles  = {}
+
+                      for i, custom_style  in ipairs (import_data.CustomStyles) do
+                        -- Import all values from the custom style as long the are valid entries with the correct type
+                        -- based on the default custom style "**"
+                        custom_style = Addon.ImportCustomStyle(custom_style)  -- replace the original imported custom style with the merged one
+
+                        local trigger_type = custom_style.Trigger.Type
+                        local triggers = custom_style.Trigger[trigger_type].AsArray
+
+                        local check_ok, duplicate_triggers = CustomPlateCheckIfTriggerIsUnique(trigger_type, triggers, custom_style)
+                        if not check_ok then
+                          t.Print(L["A custom nameplate with this trigger already exists: "] .. table.concat(duplicate_triggers, "; ") .. L[". You cannot use two custom nameplates with the same trigger. The imported custom nameplate will be disabled."], true)
+                          custom_style.Enable.Never = true
+                        end
+
+                        imported_custom_styles[#imported_custom_styles + 1] = custom_style
+                      end
+
+                      -- Only insert custom styles if all have a valid format (format checking is currently not implemented/not working
+                      if success then
+                        local slot_no = #db.uniqueSettings
+                        for i, custom_style  in ipairs (imported_custom_styles) do
+                          table.insert(db.uniqueSettings, slot_no + i, custom_style)
+                        end
+
+                        options.args.Custom.args = CreateCustomNameplatesGroup()
+                        UpdateSpecial()
+                      end
+                    end
+                  else
+                    t.Print(L["The import string has an unknown format and cannot be imported. Verify that the import string was generated from the same Threat Plates version that you are using currently."], true)
+                  end
+                end
+
+                ImportExportFrame:OpenImport(ImportHandler)
+              end,
+            },
+          },
+        },
       },
     },
   }
 
-  for index, unique_unit in pairs(db.uniqueSettings) do
-    if type(index) == "number" and unique_unit.name and unique_unit.name ~= "<Enter name here>" then
+  -- Use pairs as iterater as the table is in a somewhat invalid format (non-iteratable with ipairs) as long as the
+  -- custom styles have not been migrated to V2
+  for index, custom_style in pairs(db.uniqueSettings) do
+    if type(index) == "number" and custom_style.Trigger.Name.Input ~= "<Enter name here>"  then
       entry["#" .. index] = CreateCustomNameplateEntry(index)
     end
   end
@@ -5765,6 +6587,17 @@ local function CreateOptionsTable()
                           order = 10,
                           type = "toggle",
                           arg = { "targetWidget", "ShowInHeadlineView" },
+                        },
+                        FocusHighlight = {
+                          name = L["Show Focus"],
+                          order = 15,
+                          type = "toggle",
+                          arg = { "HeadlineView", "ShowFocusHighlight" },
+                          set = function(info, val)
+                            SetValuePlain(info, val)
+                            Addon.Widgets:UpdateSettings("Focus")
+                          end,
+                          hidden = function() return Addon.CLASSIC end,
                         },
                         TargetMouseoverHighlight = {
                           name = L["Show Mouseover"],
@@ -6565,12 +7398,12 @@ local function CreateOptionsTable()
                       type = "select",
                       order = 10,
                       name = L["Icon Style"],
-                      --Blizzard Dragon <- TARGETINGFRAME\\Nameplates.png
                       values = { default = "Default", stddragon = "Blizzard Dragon", skullandcross = "Skull and Crossbones" },
                       set = function(info, val)
                         SetValue(info, val)
                         options.args.NameplateSettings.args.EliteIcon.args.Texture.args.PreviewRare.image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\EliteArtWidget\\" .. val
                         options.args.NameplateSettings.args.EliteIcon.args.Texture.args.PreviewElite.image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\EliteArtWidget\\" .. "elite-" .. val
+                        options.args.NameplateSettings.args.EliteIcon.args.Texture.args.PreviewRareElite.image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\EliteArtWidget\\" .. "rareelite-" .. val
                       end,
                       arg = { "settings", "eliteicon", "theme" },
                     },
@@ -6585,6 +7418,12 @@ local function CreateOptionsTable()
                       type = "execute",
                       order = 30,
                       image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\EliteArtWidget\\" .. "elite-" .. db.settings.eliteicon.theme,
+                    },
+                    PreviewRareElite = {
+                      name = L["Preview Rare Elite"],
+                      type = "execute",
+                      order = 40,
+                      image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\EliteArtWidget\\" .. "rareelite-" .. db.settings.eliteicon.theme,
                     },
                   },
                 },
@@ -6607,115 +7446,8 @@ local function CreateOptionsTable()
 --              type = "group",
 --              order = 1000,
 --              set = SetThemeValue,
---              hidden = true,
+--              hidden = false,
 --              args = {
---                HealthHeaderBorder = { name = "Healthbar Border", type = "header", order = 10, },
---                HealthBorder = {
---                  type = "select",
---                  order = 20,
---                  name = "Border",
---                  dialogControl = "LSM30_Border",
---                  values = AceGUIWidgetLSMlists.border,
---                  arg = { "settings", "healthborder", "texture" },
---                },
---                HealthBorderEdgeSize = {
---                  name = "Edge Size",
---                  order = 30,
---                  type = "range",
---                  min = 0, max = 32, step = 0.5,
---                  set = SetThemeValue,
---                  arg = { "settings", "healthborder", "EdgeSize" },
---                },
---                HealthBorderOffset = {
---                  name = "Offset",
---                  order = 40,
---                  type = "range",
---                  min = -16, max = 16, step = 0.5,
---                  set = SetThemeValue,
---                  arg = { "settings", "healthborder", "Offset" },
---                },
---                EliteHeaderBorder = { name = L["Elite Border"], type = "header", order = 110, },
---                EliteBorder = {
---                  type = "select",
---                  order = 120,
---                  name = "Elite Border",
---                  values = { TP_EliteBorder_Default = "Default", TP_EliteBorder_Thin = "Thin" },
---                  arg = { "settings", "elitehealthborder", "texture" }
---                },
---                EliteBorderEdgeSize = {
---                  name = "Edge Size",
---                  order = 130,
---                  type = "range",
---                  min = 0, max = 32, step = 0.5,
---                  set = SetThemeValue,
---                  arg = { "settings", "elitehealthborder", "EdgeSize" },
---                },
---                EliteBorderOffset = {
---                  name = "Offset",
---                  order = 140,
---                  type = "range",
---                  min = -16, max = 16, step = 0.5,
---                  set = SetThemeValue,
---                  arg = { "settings", "elitehealthborder", "Offset" },
---                },
---                TargetHeaderBorder = { name = "Target Border", type = "header", order = 210, },
---                TargetBorder = {
---                  type = "select",
---                  order = 220,
---                  name = "Target Border",
---                  values = { default = "Default", squarethin = "Thin Square" },
---                  arg = { "targetWidget", "theme" },
---                },
---                TargetBorderEdgeSize = {
---                  name = "Edge Size",
---                  order = 230,
---                  type = "range",
---                  min = 0, max = 32, step = 1,
---                  set = SetThemeValue,
---                  arg = { "targetWidget", "EdgeSize" },
---                },
---                TargetBorderOffset = {
---                  name = "Offset",
---                  order = 240,
---                  type = "range",
---                  min = -16, max = 16, step = 0.5,
---                  set = SetThemeValue,
---                  arg = { "targetWidget", "Offset" },
---                },
---                MouseoverHeaderBorder = { name = "Mouseover Border", type = "header", order = 310, },
---                MouseoverBorderEdgeSize = {
---                  name = L["Edge Size"],
---                  order = 330,
---                  type = "range",
---                  min = 0, max = 32, step = 0.5,
---                  set = SetThemeValue,
---                  arg = { "settings", "highlight", "EdgeSize" },
---                },
---                MouseoverBorderOffset = {
---                  name = "Offset",
---                  order = 340,
---                  type = "range",
---                  min = -16, max = 16, step = 0.5,
---                  set = SetThemeValue,
---                  arg = { "settings", "highlight", "Offset" },
---                },
---                ThreatHeaderBorder = { name = "Threat Glow Border", type = "header", order = 410, },
---                ThreatBorderEdgeSize = {
---                  name = "Edge Size",
---                  order = 430,
---                  type = "range",
---                  min = 0, max = 32, step = 0.5,
---                  set = SetThemeValue,
---                  arg = { "settings", "threatborder", "EdgeSize" },
---                },
---                ThreatBorderOffset = {
---                  name = "Offset",
---                  order = 440,
---                  type = "range",
---                  min = -16, max = 16, step = 0.5,
---                  set = SetThemeValue,
---                  arg = { "settings", "threatborder", "Offset" },
---                },
 --                TestHeaderBorder = { name = "Test Widget", type = "header", order = 500, },
 --                Width = GetRangeEntry("Bar Width", 501, { "TestWidget", "BarWidth" }, 5, 500),
 --                Height = GetRangeEntry("Bar Height", 502, { "TestWidget", "BarHeight" }, 1, 100),
@@ -7617,6 +8349,8 @@ local function CreateOptionsTable()
   options.args.Custom.args = CreateCustomNameplatesGroup()
   options.args.profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(TidyPlatesThreat.db)
   options.args.profiles.order = 10000
+
+  AddImportExportOptions(options.args.profiles)
 end
 
 local function GetInterfaceOptionsTable()
@@ -7660,6 +8394,7 @@ function TidyPlatesThreat:ProfChange()
   if options then
     options.args.NameplateSettings.args.EliteIcon.args.Texture.args.PreviewRare.image = path .. "EliteArtWidget\\" .. db.settings.eliteicon.theme
     options.args.NameplateSettings.args.EliteIcon.args.Texture.args.PreviewElite.image = path .. "EliteArtWidget\\" .. "elite-" .. db.settings.eliteicon.theme
+    options.args.NameplateSettings.args.EliteIcon.args.Texture.args.PreviewElite.image = path .. "EliteArtWidget\\" .. "rareelite-" .. db.settings.eliteicon.theme
 
     local base = options.args.Widgets.args
     base.TargetArtWidget.args.Texture.args.Preview.image = path .. "TargetArtWidget\\" .. db.targetWidget.theme;
@@ -7686,6 +8421,10 @@ function TidyPlatesThreat:ProfChange()
   end
 end
 
+function TidyPlatesThreat:ConfigTableChanged(...)
+  options.args.Custom.args = CreateCustomNameplatesGroup()
+end
+
 function TidyPlatesThreat:OpenOptions()
   db = self.db.profile
 
@@ -7698,11 +8437,49 @@ function TidyPlatesThreat:OpenOptions()
     -- Addon:ForceUpdate()
 
     -- Setup options dialog
-    LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable(ThreatPlates.ADDON_NAME, options)
+    Addon.LibAceConfigRegistry:RegisterOptionsTable(ThreatPlates.ADDON_NAME, options)
+    Addon.LibAceConfigRegistry.RegisterCallback(self, "ConfigTableChange", "ConfigTableChanged")
     Addon.LibAceConfigDialog:SetDefaultSize(ThreatPlates.ADDON_NAME, 1000, 640)
   end
 
-  LibStub("AceConfigDialog-3.0"):Open(ThreatPlates.ADDON_NAME);
+  Addon.LibAceConfigDialog:Open(ThreatPlates.ADDON_NAME);
+end
+
+function Addon.RestoreLegacyCustomNameplates()
+  if TidyPlatesThreat.db.global.CustomNameplatesVersion == 1 then
+    ThreatPlates.Print(L["You need to convert your custom nameplates to the current format before you can add legacy custom nameplates."], true)
+  else
+    local legacy_custom_plates = {}
+
+    for i, v in ipairs(Addon.LEGACY_CUSTOM_NAMEPLATES) do
+      legacy_custom_plates[i] = ThreatPlates.CopyTable(v)
+      Addon.MergeDefaultsIntoTable(legacy_custom_plates[i], Addon.LEGACY_CUSTOM_NAMEPLATES["**"])
+    end
+
+    local custom_plates = TidyPlatesThreat.db.profile.uniqueSettings
+    local max_slot_no = #custom_plates
+
+    local index = 1
+    for _, legacy_custom_plate in ipairs(legacy_custom_plates) do
+      -- Only need to check for double name trigger as legacy custom nameplates only have these kind of triggers
+      local trigger_value = legacy_custom_plate.Trigger.Name.Input
+      local trigger_already_used = Addon.Cache.CustomPlateTriggers.Name[trigger_value]
+
+      if trigger_already_used == nil or trigger_already_used.Enable.Never then
+        local error_msg = L["Adding legacy custom nameplate for %s ..."]:gsub("%%s", trigger_value)
+        ThreatPlates.Print(error_msg)
+
+        table.insert(custom_plates, max_slot_no + index, legacy_custom_plate)
+        index = index + 1
+      else
+        local error_msg = L["Legacy custom nameplate %s already exists. Skipping it."]:gsub("%%s", trigger_value)
+        ThreatPlates.Print(error_msg, true)
+      end
+    end
+
+    Addon.LibAceConfigRegistry:NotifyChange(t.ADDON_NAME)
+    UpdateSpecial()
+  end
 end
 
 -----------------------------------------------------

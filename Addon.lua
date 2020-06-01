@@ -16,8 +16,8 @@ local SetNamePlateFriendlyClickThrough = C_NamePlate.SetNamePlateFriendlyClickTh
 local SetNamePlateEnemyClickThrough = C_NamePlate.SetNamePlateEnemyClickThrough
 local IsInInstance = IsInInstance
 local GetCVar, IsAddOnLoaded = GetCVar, IsAddOnLoaded
-local GetNamePlates, GetNamePlateForUnit = C_NamePlate.GetNamePlates, C_NamePlate.GetNamePlateForUnit
-local C_NamePlate_SetNamePlateFriendlySize, C_NamePlate_SetNamePlateEnemySize, Lerp =  C_NamePlate.SetNamePlateFriendlySize, C_NamePlate.SetNamePlateEnemySize, Lerp
+local GetNamePlates = C_NamePlate.GetNamePlates
+local C_NamePlate, Lerp =  C_NamePlate, Lerp
 local C_Timer_After = C_Timer.After
 local NamePlateDriverFrame = NamePlateDriverFrame
 local UnitClass, GetNumSpecializations, GetSpecializationInfo = UnitClass, GetNumSpecializations, GetSpecializationInfo
@@ -28,6 +28,11 @@ local LibStub = LibStub
 local L = Addon.L
 local LSM = Addon.LSM
 local Meta = Addon.Meta
+
+local _G =_G
+-- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
+-- List them here for Mikk's FindGlobals script
+-- GLOBALS:
 
 ---------------------------------------------------------------------------------------------------
 -- Local variables
@@ -187,22 +192,22 @@ function Addon:SetBaseNamePlateSize()
   db = TidyPlatesThreat.db.profile
   if db.ShowFriendlyBlizzardNameplates or isInstance then
     if NamePlateDriverFrame:IsUsingLargerNamePlateStyle() then
-      C_NamePlate_SetNamePlateFriendlySize(154, 64)
+      C_NamePlate.SetNamePlateFriendlySize(154, 64)
     else
-      C_NamePlate_SetNamePlateFriendlySize(110, 45)
+      C_NamePlate.SetNamePlateFriendlySize(110, 45)
     end
   else
-    C_NamePlate_SetNamePlateFriendlySize(width, height)
+    C_NamePlate.SetNamePlateFriendlySize(width, height)
   end
 
   if db.ShowEnemyBlizzardNameplates then
     if NamePlateDriverFrame:IsUsingLargerNamePlateStyle() then
-      C_NamePlate_SetNamePlateEnemySize(154, 64)
+      C_NamePlate.SetNamePlateEnemySize(154, 64)
     else
-      C_NamePlate_SetNamePlateEnemySize(110, 45)
+      C_NamePlate.SetNamePlateEnemySize(110, 45)
     end
   else
-    C_NamePlate_SetNamePlateEnemySize(width, height)
+    C_NamePlate.SetNamePlateEnemySize(width, height)
   end
 
   Addon:ConfigClickableArea(false)

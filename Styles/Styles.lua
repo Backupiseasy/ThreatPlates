@@ -22,6 +22,13 @@ local TOTEMS = Addon.TOTEMS
 local GetUnitVisibility = ThreatPlates.GetUnitVisibility
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
 local ActiveTheme = Addon.Theme
+local NameTriggers, AuraTriggers, CastTriggers = Addon.Cache.CustomPlateTriggers.Name, Addon.Cache.CustomPlateTriggers.Aura, Addon.Cache.CustomPlateTriggers.Cast
+local NameWildcardTriggers, TriggerWildcardTests = Addon.Cache.CustomPlateTriggers.NameWildcard, Addon.Cache.TriggerWildcardTests
+
+local _G =_G
+-- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
+-- List them here for Mikk's FindGlobals script
+-- GLOBALS: GetSpellInfo, UnitIsTapDenied
 
 ---------------------------------------------------------------------------------------------------
 -- Local variables
@@ -189,16 +196,39 @@ end
 -- Check if a unit is a totem or a custom nameplates (e.g., after UNIT_NAME_UPDATE)
 -- Depends on:
 --   * unit.name
-local function UnitStyle_NameDependent(unit)
+function Addon.UnitStyle_NameDependent(unit)
   local plate_style
 
   local db = TidyPlatesThreat.db.profile
 
   local totem_settings
-  local unique_settings = db.uniqueSettings.map[unit.name]
-  if unique_settings and unique_settings.useStyle then
+  local unique_settings = NameTriggers[unit.name]
+
+  if unique_settings and unique_settings.useStyle and unique_settings.Enable.UnitReaction[unit.reaction] then
     plate_style = (unique_settings.showNameplate and "unique") or (unique_settings.ShowHeadlineView and "NameOnly-Unique") or "etotem"
-  else
+  elseif Addon.ActiveWildcardTriggers and unit.type == "NPC" then
+    local unit_test = TriggerWildcardTests[unit.name]
+
+    if unit_test == nil then
+      for i = 1, #NameWildcardTriggers do
+        local trigger = NameWildcardTriggers[i]
+        --print ("Name Wildcard: ", unit.name, "=>", trigger[1], unit.name:find(trigger[1]))
+        if unit.name:find(trigger[1]) then
+          unique_settings = trigger[2]
+          plate_style = (unique_settings.showNameplate and "unique") or (unique_settings.ShowHeadlineView and "NameOnly-Unique") or "etotem"
+          break
+        end
+      end
+
+      TriggerWildcardTests[unit.name] = (plate_style and { plate_style, unique_settings }) or false
+    elseif unit_test ~= false then
+      plate_style = unit_test[1]
+      unique_settings = unit_test[2]
+    end
+  end
+
+  if not plate_style then
+    -- Check for totem
     local totem_id = TOTEMS[unit.name]
     if totem_id then
       totem_settings = db.totemSettings[totem_id]
@@ -213,6 +243,47 @@ local function UnitStyle_NameDependent(unit)
   -- Set these values to nil if not custom nameplate or totem
   unit.CustomPlateSettings = unique_settings
   unit.TotemSettings = totem_settings
+
+  return plate_style
+end
+
+local UnitStyle_NameDependent = Addon.UnitStyle_NameDependent
+
+function Addon.UnitStyle_AuraDependent(unit, aura_id, aura_name)
+  local plate_style
+
+  local unique_settings = AuraTriggers[aura_id] or AuraTriggers[aura_name]
+  if unique_settings and unique_settings.useStyle and unique_settings.Enable.UnitReaction[unit.reaction] then
+    plate_style = (unique_settings.showNameplate and "unique") or (unique_settings.ShowHeadlineView and "NameOnly-Unique") or "etotem"
+
+    -- As this is called for every aura on a unit, never set it to false (overwriting a previous true value)
+    if plate_style then
+      unit.CustomStyleAura = plate_style
+      unit.CustomPlateSettingsAura = unique_settings
+
+      local _, _, icon = _G.GetSpellInfo(aura_id)
+      unique_settings.AutomaticIcon = icon
+    end
+  end
+
+  return plate_style
+end
+
+function Addon.UnitStyle_CastDependent(unit, spell_id, spell_name)
+  local plate_style
+
+  local unique_settings = CastTriggers[spell_id] or CastTriggers[spell_name]
+  if unique_settings and unique_settings.useStyle and unique_settings.Enable.UnitReaction[unit.reaction] then
+    plate_style = (unique_settings.showNameplate and "unique") or (unique_settings.ShowHeadlineView and "NameOnly-Unique") or "etotem"
+
+    if plate_style then
+      unit.CustomStyleCast = plate_style
+      unit.CustomPlateSettingsCast = unique_settings
+
+      local _, _, icon = _G.GetSpellInfo(spell_id)
+      unique_settings.AutomaticIcon = icon
+    end
+  end
 
   return plate_style
 end
@@ -238,7 +309,16 @@ function Addon:SetStyle(unit)
   end
 
   -- Check if custom nameplate should be used for the unit:
-  local style = UnitStyle_NameDependent(unit) or (headline_view and "NameOnly")
+  local style
+  if unit.CustomStyleCast then
+    style = unit.CustomStyleCast
+    unit.CustomPlateSettings = unit.CustomPlateSettingsCast
+  elseif unit.CustomStyleAura then
+    style = unit.CustomStyleAura
+    unit.CustomPlateSettings = unit.CustomPlateSettingsAura
+  else
+    style = UnitStyle_NameDependent(unit) or (headline_view and "NameOnly")
+  end
 
   --if not style and unit.reaction ~= "FRIENDLY" then
   if not style and Addon:ShowThreatFeedback(unit) then
@@ -265,6 +345,7 @@ local NAMEPLATE_MODE_BY_THEME = {
 local function CheckNameplateStyle(tp_frame)
   local unit = tp_frame.unit
 
+  local old_custom_style = unit.CustomPlateSettings
   local stylename = Addon:SetStyle(unit)
 
   if tp_frame.stylename ~= stylename then
@@ -276,6 +357,11 @@ local function CheckNameplateStyle(tp_frame)
     unit.style = stylename
 
     PublishEvent("StyleUpdate", tp_frame, style, stylename)
+  elseif (stylename == "unique" or stylename == "NameOnly-Unique") and unit.CustomPlateSettings ~= old_custom_style then
+    -- Update the unique icon widget and style may be the same, but a different trigger might be active, e.g.,
+    -- if two aura triggers fired
+      Addon.UpdateCustomStyleIcon(tp_frame, unit)
+      PublishEvent("StyleUpdate", tp_frame, ActiveTheme[stylename], stylename)
   end
 end
 
@@ -313,6 +399,7 @@ Addon.InitializeStyle = CheckNameplateStyle
 
 SubscribeEvent(Element, "FactionUpdate", CheckNameplateStyle)
 SubscribeEvent(Element, "ThreatUpdate", CheckNameplateStyle)
+SubscribeEvent(Element, "CustomStyleUpdate", CheckNameplateStyle)
 SubscribeEvent(Element, "UNIT_NAME_UPDATE", UNIT_NAME_UPDATE)
 SubscribeEvent(Element, "PLAYER_REGEN_ENABLED", EnteringOrLeavingCombat)
 SubscribeEvent(Element, "PLAYER_REGEN_DISABLED", EnteringOrLeavingCombat)

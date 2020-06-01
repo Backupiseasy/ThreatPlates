@@ -12,10 +12,15 @@ local strsplit, pairs = strsplit, pairs
 
 -- WoW APIs
 local IsInInstance = IsInInstance
-local UnitReaction, UnitGUID, UnitAffectingCombat = UnitReaction, UnitGUID, UnitAffectingCombat
+local UnitReaction = UnitReaction
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
+
+local _G =_G
+-- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
+-- List them here for Mikk's FindGlobals script
+-- GLOBALS: UnitAffectingCombat, UnitGUID
 
 local CLASSIFICATION_MAPPING = {
   ["boss"] = "Boss",
@@ -51,7 +56,7 @@ local OFFTANK_PETS = {
 -- Black Ox Statue of monks is: Creature with id 61146
 -- Treants of druids is: Creature with id 103822
 function Addon.IsOffTankCreature(unitid)
-  local guid = UnitGUID(unitid)
+  local guid = _G.UnitGUID(unitid)
 
   if not guid then return false end
 
@@ -115,12 +120,12 @@ function Addon:ShowThreatFeedback(unit)
   if Settings.toggle[GetUnitClassification(unit)] then
     if Settings.UseThreatTable then
       if isInstance and Settings.UseHeuristicInInstances then
-        return UnitAffectingCombat(unit.unitid)
+        return _G.UnitAffectingCombat(unit.unitid)
       else
         return Addon:OnThreatTable(unit)
       end
     else
-      return UnitAffectingCombat(unit.unitid)
+      return _G.UnitAffectingCombat(unit.unitid)
     end
   end
 

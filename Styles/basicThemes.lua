@@ -97,8 +97,6 @@ local function Create(self,name)
       size = db.spelltext.size,
       width = db.spelltext.width,
       height = db.spelltext.height,
-      x = db.spelltext.x,
-      y = db.spelltext.y,
       align = db.spelltext.align,
       anchor = "CENTER",
       vertical = db.spelltext.vertical,

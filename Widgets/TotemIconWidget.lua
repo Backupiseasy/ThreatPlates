@@ -10,10 +10,14 @@ local Widget = Addon.Widgets:NewWidget("TotemIcon")
 ---------------------------------------------------------------------------------------------------
 
 -- WoW APIs
-local CreateFrame = CreateFrame
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
+
+local _G =_G
+-- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
+-- List them here for Mikk's FindGlobals script
+-- GLOBALS: CreateFrame
 
 local PATH = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\TotemIconWidget\\"
 
@@ -23,7 +27,7 @@ local PATH = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\TotemIconWidg
 
 function Widget:Create(tp_frame)
 	-- Required Widget Code
-	local widget_frame = CreateFrame("Frame", nil, tp_frame)
+	local widget_frame = _G.CreateFrame("Frame", nil, tp_frame)
 	widget_frame:Hide()
 
 	-- Custom Code

@@ -43,7 +43,7 @@ function Element.UnitAdded(tp_frame)
   if unit_level < 0 then
     level_text:SetText("")
   else
-    level_text:SetText(unit_level)
+    level_text:SetText((unit.isElite and "+" or "") .. unit.level)
   end
 
   local color = unit.LevelColor

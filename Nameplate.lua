@@ -11,11 +11,10 @@ local max, gsub, tonumber, math_abs = math.max, string.gsub, tonumber, math.abs
 
 -- WoW APIs
 local wipe = wipe
-local WorldFrame, UIParent, CreateFrame, INTERRUPTED = WorldFrame, UIParent, CreateFrame, INTERRUPTED
-local UnitName, UnitReaction, UnitClassification, UnitLevel, UnitClass = UnitName, UnitReaction, UnitClassification, UnitLevel, UnitClass
-local UnitGUID, UnitEffectiveLevel, UnitSelectionColor, UnitThreatSituation =UnitGUID, UnitEffectiveLevel, UnitSelectionColor, UnitThreatSituation
-local UnitHealth, UnitHealthMax, UnitAffectingCombat, UnitIsTapDenied = UnitHealth, UnitHealthMax, UnitAffectingCombat, UnitIsTapDenied
-local UnitChannelInfo, UnitCastingInfo, UnitPlayerControlled = UnitChannelInfo, UnitCastingInfo, UnitPlayerControlled
+local WorldFrame, UIParent, INTERRUPTED = WorldFrame, UIParent, INTERRUPTED
+local UnitName, UnitReaction, UnitClass = UnitName, UnitReaction, UnitClass
+local UnitEffectiveLevel, UnitThreatSituation = UnitEffectiveLevel, UnitThreatSituation
+local UnitChannelInfo, UnitPlayerControlled = UnitChannelInfo, UnitPlayerControlled
 local UnitIsUnit, UnitIsPlayer = UnitIsUnit, UnitIsPlayer
 local GetCreatureDifficultyColor, GetRaidTargetIndex = GetCreatureDifficultyColor, GetRaidTargetIndex
 local GetTime, GetCVar, CombatLogGetCurrentEventInfo = GetTime, GetCVar, CombatLogGetCurrentEventInfo
@@ -24,7 +23,6 @@ local GetNamePlates, GetNamePlateForUnit = C_NamePlate.GetNamePlates, C_NamePlat
 local GetPlayerInfoByGUID, RAID_CLASS_COLORS = GetPlayerInfoByGUID, RAID_CLASS_COLORS
 local IsInInstance, InCombatLockdown = IsInInstance, InCombatLockdown
 local NamePlateDriverFrame = NamePlateDriverFrame
-local SetCVar = SetCVar
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
@@ -36,6 +34,10 @@ local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventSe
 local ElementsCreated, ElementsUnitAdded, ElementsUnitRemoved = Addon.Elements.Created, Addon.Elements.UnitAdded, Addon.Elements.UnitRemoved
 local ElementsUpdateStyle, ElementsUpdateSettings = Addon.Elements.UpdateStyle, Addon.Elements.UpdateSettings
 
+local _G =_G
+-- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
+-- List them here for Mikk's FindGlobals script
+-- GLOBALS: CreateFrame, UnitAffectingCombat, UnitCastingInfo, UnitClassification, UnitGUID, UnitHealth, UnitHealthMax, UnitIsTapDenied, UnitLevel, UnitSelectionColor
 
 -- Constants
 local CASTBAR_INTERRUPT_HOLD_TIME = Addon.CASTBAR_INTERRUPT_HOLD_TIME
@@ -45,7 +47,7 @@ local THREAT_REFERENCE = Addon.THREAT_REFERENCE
 -- Local variables
 ---------------------------------------------------------------------------------------------------
 --local PlateOnUpdateQueue = {}
-local LastTargetPlate
+local LastTargetPlate, LastFocusPlate
 
 -- External references to internal data
 local PlatesCreated = Addon.PlatesCreated
@@ -115,7 +117,7 @@ local function UpdateUnitLevel(unit, unitid)
 end
 
 local function UpdateUnitReaction(unit, unitid)
-  unit.red, unit.green, unit.blue = UnitSelectionColor(unitid)
+  unit.red, unit.green, unit.blue = _G.UnitSelectionColor(unitid)
   unit.reaction = GetReactionByColor(unit.red, unit.green, unit.blue) or "HOSTILE"
 
   -- Enemy players turn to neutral, e.g., when mounting a flight path mount, so fix reaction in that situations
@@ -123,17 +125,17 @@ local function UpdateUnitReaction(unit, unitid)
     unit.reaction = "HOSTILE"
   end
 
-  unit.IsTapDenied = UnitIsTapDenied(unitid)
+  unit.IsTapDenied = _G.UnitIsTapDenied(unitid)
 end
 
 local function InitializeUnit(unit, unitid)
   -- Unit data that does not change after nameplate creation
   unit.unitid = unitid
-  unit.guid = UnitGUID(unitid)
+  unit.guid = _G.UnitGUID(unitid)
 
-  unit.isBoss = UnitLevel(unitid) == -1
+  unit.isBoss = _G.UnitLevel(unitid) == -1
 
-  unit.classification = (unit.isBoss and "boss") or UnitClassification(unitid)
+  unit.classification = (unit.isBoss and "boss") or _G.UnitClassification(unitid)
   unit.isElite = ELITE_REFERENCE[unit.classification] or false
   unit.isRare = RARE_REFERENCE[unit.classification] or false
   unit.isMini = (unit.classification == "minus")
@@ -152,8 +154,8 @@ local function InitializeUnit(unit, unitid)
   unit.name = UnitName(unitid)
 
   -- Health and Absorbs => UNIT_HEALTH_FREQUENT, UNIT_MAXHEALTH & UNIT_ABSORB_AMOUNT_CHANGED
-  unit.health = UnitHealth(unitid) or 0
-  unit.healthmax = UnitHealthMax(unitid) or 1
+  unit.health = _G.UnitHealth(unitid) or 0
+  unit.healthmax = _G.UnitHealthMax(unitid) or 1
   -- unit.Absorbs = UnitGetTotalAbsorbs(unitid) or 0
 
   -- Casting => UNIT_SPELLCAST_*
@@ -161,15 +163,16 @@ local function InitializeUnit(unit, unitid)
   unit.isCasting = false
   unit.IsInterrupted = false
 
-  -- Target and Mouseover => PLAYER_TARGET_CHANGED, UPDATE_MOUSEOVER_UNIT
+  -- Target, Focus, and Mouseover => PLAYER_TARGET_CHANGED, UPDATE_MOUSEOVER_UNIT, PLAYER_FOCUS_CHANGED
   unit.isTarget = UnitIsUnit("target", unitid)
+  unit.IsFocus = UnitIsUnit("focus", unitid) -- required here for config changes which reset all plates without calling TARGET_CHANGED, MOUSEOVER, ...
   unit.isMouseover = UnitIsUnit("mouseover", unitid)
 
   -- Threat and Combat => UNIT_THREAT_LIST_UPDATE
   local threat_status = UnitThreatSituation("player", unitid)
   unit.ThreatStatus = threat_status
   unit.ThreatLevel = THREAT_REFERENCE[threat_status]
-  unit.InCombat = UnitAffectingCombat(unitid)
+  unit.InCombat = _G.UnitAffectingCombat(unitid)
 
   -- Target Mark => RAID_TARGET_UPDATE
   unit.TargetMarker = RAID_ICON_LIST[GetRaidTargetIndex(unitid)]
@@ -190,53 +193,63 @@ local function OnStartCasting(tp_frame, unitid, channeled)
   local unit, visual, style = tp_frame.unit, tp_frame.visual, tp_frame.style
 
   local castbar = tp_frame.visual.Castbar
-  if not tp_frame:IsShown() or not style.castbar.show then
+  if not tp_frame:IsShown() then
     castbar:Hide()
     return
   end
 
-  local name, text, texture, startTime, endTime, isTradeSkill, castID, notInterruptible, spellID
-
+  local name, text, texture, startTime, endTime, isTradeSkill, notInterruptible, spellID
   if channeled then
     name, text, texture, startTime, endTime, isTradeSkill, notInterruptible, spellID = UnitChannelInfo(unitid)
-    if not name then
-      castbar:Hide()
-      return
-    end
-
-    castbar.IsChanneling = true
-    castbar.IsCasting = false
-
     castbar.Value = (endTime / 1000) - GetTime()
-    castbar.MaxValue = (endTime - startTime) / 1000
-    castbar:SetMinMaxValues(0, castbar.MaxValue)
-    castbar:SetValue(castbar.Value)
   else
-    name, text, texture, startTime, endTime, isTradeSkill, castID, notInterruptible = UnitCastingInfo(unitid)
-    if not name then
-      castbar:Hide()
-      return
-    end
-
-    castbar.IsCasting = true
-    castbar.IsChanneling = false
-
+    name, text, texture, startTime, endTime, isTradeSkill, _, notInterruptible, spellID = _G.UnitCastingInfo(unitid)
     castbar.Value = GetTime() - (startTime / 1000)
-    castbar.MaxValue = (endTime - startTime) / 1000
-    castbar:SetMinMaxValues(0, castbar.MaxValue)
-    castbar:SetValue(castbar.Value)
   end
 
-  if isTradeSkill then return end
+  if not name or isTradeSkill then
+    castbar:Hide()
+    return
+  end
+
+  if not name or isTradeSkill then
+    castbar:Hide()
+    return
+  end
+
+  local plate_style = Addon.ActiveCastTriggers and Addon.UnitStyle_CastDependent(unit, spellID, name)
+
+  -- Abort here as casts can now switch nameplate styles (e.g,. from headline to healthbar view
+  if not (style.castbar.show or plate_style) then
+    castbar:Hide()
+    return
+  end
 
   unit.isCasting = true
   unit.IsInterrupted = false
   unit.spellIsShielded = notInterruptible
 
+  --if plate_style and plate_style ~= extended.stylename then
+  if plate_style ~= tp_frame.stylename then
+    PublishEvent("CustomStyleUpdate", tp_frame)
+  end
+
+  -- Custom nameplates might trigger cause of a cast, but still stay in a style that does not
+  -- show the castbar
+  if not style.castbar.show then
+    castbar:Hide()
+    return
+  end
+
   visual.SpellText:SetText(text)
   visual.SpellIcon:SetTexture(texture)
-  --visual.SpellIcon:SetDrawLayer("ARTWORK", 7)
 
+  castbar.IsCasting = not channeled
+  castbar.IsChanneling = channeled
+
+  castbar.MaxValue = (endTime - startTime) / 1000
+  castbar:SetMinMaxValues(0, castbar.MaxValue)
+  castbar:SetValue(castbar.Value)
   castbar:SetAllColors(Addon:SetCastbarColor(unit))
   castbar:SetFormat(unit.spellIsShielded)
 
@@ -252,7 +265,7 @@ local function OnUpdateCastMidway(tp_frame, unitid)
   if not ShowCastBars then return end
 
   -- Check to see if there's a spell being cast
-  if UnitCastingInfo(unitid) then
+  if _G.UnitCastingInfo(unitid) then
     OnStartCasting(tp_frame, unitid, false)
   elseif UnitChannelInfo(unitid) then
     OnStartCasting(tp_frame, unitid, true)
@@ -326,7 +339,7 @@ Addon.UpdateNameplateStyle = UpdateNameplateStyle
 
 local	function OnNewNameplate(plate)
   -- Parent could be: WorldFrame, UIParent, plate
-  local tp_frame = CreateFrame("Frame",  "ThreatPlatesFrame" .. plate:GetName(), WorldFrame)
+  local tp_frame = _G.CreateFrame("Frame",  "ThreatPlatesFrame" .. plate:GetName(), WorldFrame)
   tp_frame:Hide()
   tp_frame:SetFrameStrata("BACKGROUND")
   tp_frame:EnableMouse(false)
@@ -337,7 +350,7 @@ local	function OnNewNameplate(plate)
   tp_frame.visual = {}
 
   -- Status Bars
-  local textframe = CreateFrame("Frame", nil, tp_frame)
+  local textframe = _G.CreateFrame("Frame", nil, tp_frame)
   textframe:SetAllPoints()
   textframe:SetFrameLevel(tp_frame:GetFrameLevel() + 6)
   tp_frame.visual.textframe = textframe
@@ -431,7 +444,7 @@ function Addon:ConfigClickableArea(toggle_show)
         local tp_frame = ConfigModePlate.TPFrame
 
         -- Draw background to show for clickable area
-        tp_frame.Background = CreateFrame("Frame", nil, ConfigModePlate)
+        tp_frame.Background = _G.CreateFrame("Frame", nil, ConfigModePlate)
         tp_frame.Background:SetBackdrop({
           bgFile = ThreatPlates.Art .. "TP_WhiteSquare.tga",
           edgeFile = ThreatPlates.Art .. "TP_WhiteSquare.tga",
@@ -556,7 +569,7 @@ local ENABLED_EVENTS = {
   "NAME_PLATE_UNIT_REMOVED",
 
   "PLAYER_TARGET_CHANGED",
-  --PLAYER_FOCUS_CHANGED = ..., -- no idea why we shoul listen for this event
+  "PLAYER_FOCUS_CHANGED",
   UPDATE_MOUSEOVER_UNIT = Addon.Elements.GetElement("MouseoverHighlight").UPDATE_MOUSEOVER_UNIT,
   "RAID_TARGET_UPDATE",
 
@@ -725,7 +738,7 @@ function Addon:PLAYER_ENTERING_WORLD(initialLogin, reloadingUI)
   local db = TidyPlatesThreat.db.profile.questWidget
   if db.ON or db.ShowInHeadlineView then
     self.CVars:Set("showQuestTrackingTooltips", 1)
-    --SetCVar("showQuestTrackingTooltips", 1)
+    --_G.SetCVar("showQuestTrackingTooltips", 1)
   else
     self.CVars:RestoreFromProfile("showQuestTrackingTooltips")
   end
@@ -766,9 +779,9 @@ function Addon:PLAYER_REGEN_ENABLED()
   --  local db = TidyPlatesThreat.db.profile.threat
   --  -- Required for threat/aggro detection
   --  if db.ON and (GetCVar("threatWarning") ~= 3) then
-  --    SetCVar("threatWarning", 3)
+  --    _G.SetCVar("threatWarning", 3)
   --  elseif not db.ON and (GetCVar("threatWarning") ~= 0) then
-  --    SetCVar("threatWarning", 0)
+  --    _G.SetCVar("threatWarning", 0)
   --  end
 
   local db = TidyPlatesThreat.db.profile.Automation
@@ -776,10 +789,10 @@ function Addon:PLAYER_REGEN_ENABLED()
 
   -- Dont't use automation for friendly nameplates if in an instance and Hide Friendly Nameplates is enabled
   if db.FriendlyUnits ~= "NONE" and not (isInstance and db.HideFriendlyUnitsInInstances) then
-    SetCVar("nameplateShowFriends", (db.FriendlyUnits == "SHOW_COMBAT" and 0) or 1)
+    _G.SetCVar("nameplateShowFriends", (db.FriendlyUnits == "SHOW_COMBAT" and 0) or 1)
   end
   if db.EnemyUnits ~= "NONE" then
-    SetCVar("nameplateShowEnemies", (db.EnemyUnits == "SHOW_COMBAT" and 0) or 1)
+    _G.SetCVar("nameplateShowEnemies", (db.EnemyUnits == "SHOW_COMBAT" and 0) or 1)
   end
 end
 
@@ -790,11 +803,11 @@ function Addon:PLAYER_REGEN_DISABLED()
 
   -- Dont't use automation for friendly nameplates if in an instance and Hide Friendly Nameplates is enabled
   if db.FriendlyUnits ~= "NONE" and not (isInstance and db.HideFriendlyUnitsInInstances) then
-    SetCVar("nameplateShowFriends", (db.FriendlyUnits == "SHOW_COMBAT" and 1) or 0)
+    _G.SetCVar("nameplateShowFriends", (db.FriendlyUnits == "SHOW_COMBAT" and 1) or 0)
   end
 
   if db.EnemyUnits ~= "NONE" then
-    SetCVar("nameplateShowEnemies", (db.EnemyUnits == "SHOW_COMBAT" and 1) or 0)
+    _G.SetCVar("nameplateShowEnemies", (db.EnemyUnits == "SHOW_COMBAT" and 1) or 0)
   end
 end
 
@@ -872,6 +885,22 @@ function Addon:PLAYER_TARGET_CHANGED()
     end
 end
 
+function Addon:PLAYER_FOCUS_CHANGED()
+  if LastFocusPlate and LastFocusPlate.Active then
+    LastFocusPlate.unit.IsFocus = false
+    PublishEvent("FocusLost", LastTargetPlate)
+
+    LastFocusPlate = nil
+  end
+
+  local plate = GetNamePlateForUnit("focus")
+  if plate and plate.TPFrame.Active then
+    LastFocusPlate = plate.TPFrame
+
+    LastFocusPlate.unit.IsFocus = true
+    PublishEvent("FocusGained", LastTargetPlate)
+  end
+end
 
 function Addon:RAID_TARGET_UPDATE()
   for unitid, tp_frame in pairs(PlatesByUnit) do
@@ -889,8 +918,8 @@ function Addon:UNIT_HEALTH_FREQUENT(unitid)
   if tp_frame and tp_frame.Active then
     local unit = tp_frame.unit
 
-    unit.health = UnitHealth(unitid) or 0
-    unit.healthmax = UnitHealthMax(unitid) or 1
+    unit.health = _G.UnitHealth(unitid) or 0
+    unit.healthmax = _G.UnitHealthMax(unitid) or 1
   end
 end
 
@@ -899,8 +928,8 @@ function Addon:UNIT_MAXHEALTH(unitid)
   if tp_frame and tp_frame.Active then
     local unit = tp_frame.unit
 
-    unit.health = UnitHealth(unitid) or 0
-    unit.healthmax = UnitHealthMax(unitid) or 1
+    unit.health = _G.UnitHealth(unitid) or 0
+    unit.healthmax = _G.UnitHealthMax(unitid) or 1
   end
 end
 
@@ -924,7 +953,7 @@ function Addon:UNIT_THREAT_LIST_UPDATE(unitid)
     else --if threat_status ~= unit.ThreatStatus then
       unit.ThreatStatus = threat_status
       unit.ThreatLevel = THREAT_REFERENCE[threat_status]
-      unit.InCombat = UnitAffectingCombat(unitid)
+      unit.InCombat = _G.UnitAffectingCombat(unitid)
       PublishEvent("ThreatUpdate", tp_frame, unit)
     end
   end

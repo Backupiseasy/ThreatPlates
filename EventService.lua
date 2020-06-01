@@ -91,6 +91,8 @@ local INTERNAL_EVENTS = {
   TargetMarkerUpdate = true,  -- Parameters: tp_frame
   TargetGained = true,        -- Parameters: tp_frame
   TargetLost = true,          -- Parameters: tp_frame
+  FocusGained = true,         -- Parameters: tp_frame
+  FocusLost = true,           -- Parameters: tp_frame
   -- Payload:
   --   tp_frame: Frame (table), Nilable = false
   FactionUpdate = true,
@@ -111,6 +113,10 @@ local INTERNAL_EVENTS = {
   --   Fired when the class color of a unit must be re-evaluated
   --   Event(frame)
   ClassColorUpdate = true,
+  -- Event: CustomStyleUpdate
+  --   Fires when a nameplate should apply a custom style
+  --   Event(frame)
+  CustomStyleUpdate = true
 }
 
 ---------------------------------------------------------------------------------------------------

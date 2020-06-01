@@ -8,15 +8,18 @@ local ADDON_NAME, Addon = ...
 ---------------------------------------------------------------------------------------------------
 
 -- WoW APIs
-local CreateFrame = CreateFrame
-local UnitHealth, UnitHealthMax = UnitHealth, UnitHealthMax
-local UnitGetTotalAbsorbs, UnitGetTotalHealAbsorbs = UnitGetTotalAbsorbs, UnitGetTotalHealAbsorbs
+local UnitGetTotalHealAbsorbs = UnitGetTotalHealAbsorbs
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
 local ThreatPlates = Addon.ThreatPlates
 local PlatesByUnit = Addon.PlatesByUnit
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
+
+local _G =_G
+-- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
+-- List them here for Mikk's FindGlobals script
+-- GLOBALS: CreateFrame, UnitHealth, UnitHealthMax, UnitGetTotalAbsorbs
 
 local IGNORED_STYLES = {
   NameOnly = true,
@@ -65,10 +68,10 @@ local function UpdateAbsorbs(tp_frame)
 
   local unitid = tp_frame.unit.unitid
   -- Code for absorb calculation see CompactUnitFrame.lua
-  local health = UnitHealth(unitid) or 0
-  local health_max = UnitHealthMax(unitid) or 0
+  local health = _G.UnitHealth(unitid) or 0
+  local health_max = _G.UnitHealthMax(unitid) or 0
   local heal_absorb = UnitGetTotalHealAbsorbs(unitid) or 0
-  local absorb = UnitGetTotalAbsorbs(unitid) or 0
+  local absorb = _G.UnitGetTotalAbsorbs(unitid) or 0
 
   -- heal_absorb = 0.25 * UnitHealth(unitid)
   -- absorb = UnitHealthMax(unitid) * 0.3 -- REMOVE
@@ -209,11 +212,11 @@ end
 
 -- Called in processing event: NAME_PLATE_CREATED
 function Element.Created(tp_frame)
-  local healthbar = CreateFrame("StatusBar", nil, tp_frame)
+  local healthbar = _G.CreateFrame("StatusBar", nil, tp_frame)
   healthbar:SetFrameLevel(tp_frame:GetFrameLevel() + 5)
   --healthbar:Hide()
 
-  local border = CreateFrame("Frame", nil, healthbar)
+  local border = _G.CreateFrame("Frame", nil, healthbar)
   border:SetFrameLevel(healthbar:GetFrameLevel())
   border:SetBackdrop(BorderBackdrop)
   border:SetBackdropBorderColor(0, 0, 0, 1)

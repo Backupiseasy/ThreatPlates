@@ -1,20 +1,26 @@
-local ADDON_NAME, NAMESPACE = ...
-local ThreatPlates = NAMESPACE.ThreatPlates
+---------------------------------------------------------------------------------------------------
+-- Test Widget
+---------------------------------------------------------------------------------------------------
+local ADDON_NAME, Addon = ...
+local ThreatPlates = Addon.ThreatPlates
 
------------------------
--- Widget for Testing--
------------------------
+local Widget = Addon.Widgets:NewWidget("Test")
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
+local WidgetFrame
 
 ---------------------------------------------------------------------------------------------------
 -- Threat Plates functions
 ---------------------------------------------------------------------------------------------------
 
-local function enabled()
+function Widget:IsEnabled()
   return TidyPlatesThreat.db.profile.TestWidget.ON
+end
+
+function Widget:EnabledForStyle(style, unit)
+  return not (style == "NameOnly" or style == "NameOnly-Unique" or style == "etotem")
 end
 
 -- hides/destroys all widgets of this type created by Threat Plates
@@ -30,88 +36,45 @@ end
 -- Widget Functions for TidyPlates
 ---------------------------------------------------------------------------------------------------
 
-local function UpdateSettings(frame)
+function Widget:OnUnitAdded(widget_frame, unit)
+  widget_frame:Show()
+
   local db = TidyPlatesThreat.db.profile.TestWidget
 
-  frame:SetSize(db.BarWidth, db.BarHeight)
-  frame:SetStatusBarTexture(Addon.LSM:Fetch('statusbar', db.BarTexture))
-  frame:SetScale(db.Scale)
-  frame:SetMinMaxValues(0, 100)
-  frame:SetValue(50)
-  frame:SetStatusBarColor(0, 1, 0)
+  widget_frame:ClearAllPoints()
+  widget_frame:SetPoint("CENTER", widget_frame:GetParent(), "CENTER", 0, 50)
+  widget_frame:SetSize(db.BarWidth, db.BarHeight)
+  widget_frame:SetStatusBarTexture(ThreatPlates.Media:Fetch('statusbar', db.BarTexture))
+  widget_frame:SetScale(db.Scale)
+  widget_frame:SetMinMaxValues(0, 100)
+  widget_frame:SetValue(50)
+  widget_frame:SetStatusBarColor(0, 1, 0)
 
-  frame.Border:ClearAllPoints()
-  frame.Border:SetPoint("TOPLEFT", frame, "TOPLEFT", -db.Offset, db.Offset)
-  frame.Border:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", db.Offset, -db.Offset)
+  widget_frame.Border:ClearAllPoints()
+  widget_frame.Border:SetPoint("TOPLEFT", widget_frame, "TOPLEFT", -db.Offset, db.Offset)
+  widget_frame.Border:SetPoint("BOTTOMRIGHT", widget_frame, "BOTTOMRIGHT", db.Offset, -db.Offset)
 
-  frame.Border:SetBackdrop({
+  widget_frame.Border:SetBackdrop({
     bgFile = Addon.LSM:Fetch('statusbar', db.BorderBackground),
-    edgeFile = Addon.LSM:Fetch('border', db.BorderTexture),
+    edgeFile = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\TargetArtWidget\\glow", --ThreatPlates.Media:Fetch('border', db.BorderTexture),
     edgeSize = db.EdgeSize,
     insets = { left = db.Inset, right = db.Inset, top = db.Inset, bottom = db.Inset },
   })
 
-  frame.Border:SetBackdropColor(1, 1, 1, 0.7)
-  frame.Border:SetBackdropBorderColor(1, 0, 0, 1)
+  widget_frame.Border:SetBackdropColor(1, 1, 1, 0.7)
+  widget_frame.Border:SetBackdropBorderColor(1, 0, 0, 1)
 end
 
-local function UpdateWidgetFrame(frame, unit)
-  frame:Show()
-end
-
--- Context
-local function UpdateWidgetContext(frame, unit)
-  local guid = unit.guid
-  frame.guid = guid
-
-  -- Add to Widget List
-  -- if guid then
-  -- 	WidgetList[guid] = frame
-  -- end
-
-  -- Custom Code II
-  --------------------------------------
-  if UnitGUID("target") == guid then
-    UpdateWidgetFrame(frame, unit)
-  else
-    frame:_Hide()
-  end
-  --------------------------------------
-  -- End Custom Code
-end
-
-local function ClearWidgetContext(frame)
-  local guid = frame.guid
-  if guid then
-    -- WidgetList[guid] = nil
-    frame.guid = nil
-  end
-end
-
-local function CreateWidgetFrame(parent)
+function Widget:Create(tp_frame)
   -- Required Widget Code
-  local frame = CreateFrame("StatusBar", nil, parent)
-  frame:Hide()
+  local widget_frame = CreateFrame("StatusBar", nil, tp_frame)
+  widget_frame:Hide()
 
-  -- Custom Code III
-  --------------------------------------
-  frame:SetPoint("Center", parent, "TOP", 0, 10)
+  widget_frame:SetPoint("Center", tp_frame, "TOP", 0, 10)
 
-  frame.Border = CreateFrame("Frame", nil, frame)
-  frame:SetFrameLevel(parent:GetFrameLevel())
-  frame.Border:SetFrameLevel(frame:GetFrameLevel())
+  widget_frame.Border = CreateFrame("Frame", nil, widget_frame)
+  widget_frame:SetFrameLevel(tp_frame:GetFrameLevel())
+  widget_frame.Border:SetFrameLevel(widget_frame:GetFrameLevel())
 
-  UpdateSettings(frame)
-  frame.UpdateConfig = UpdateSettings
-  --------------------------------------
-  -- End Custom Code
-
-  -- Required Widget Code
-  frame.UpdateContext = UpdateWidgetContext
-  frame.Update = UpdateWidgetFrame
-  frame._Hide = frame.Hide
-  frame.Hide = function() ClearWidgetContext(frame); frame:_Hide()
-  end
-
-  return frame
+  return widget_frame
 end

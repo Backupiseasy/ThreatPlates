@@ -64,8 +64,13 @@ function Element.UnitAdded(tp_frame)
   local unit, visual = tp_frame.unit, tp_frame.visual
 
   if unit.isRare then
-    visual.EliteIcon:SetVertexColor(0.8, 0.8, 0.8)
-    visual.EliteBorder:SetBackdropBorderColor(0.8, 0.8, 0.8)
+    if unit.isElite then
+      visual.EliteIcon:SetVertexColor(0.804, 0.498, 0.196)
+      visual.EliteBorder:SetBackdropBorderColor(0.804, 0.498, 0.196)
+    else
+      visual.EliteIcon:SetVertexColor(0.8, 0.8, 0.8)
+      visual.EliteBorder:SetBackdropBorderColor(0.8, 0.8, 0.8)
+    end
   elseif unit.isElite then
     visual.EliteIcon:SetVertexColor(1, 0.85, 0)
     visual.EliteBorder:SetBackdropBorderColor(1, 0.85, 0, 1)

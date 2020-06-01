@@ -7,6 +7,9 @@ local ADDON_NAME, Addon = ...
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
 
+-- Lua APIs
+local string_format = string.format
+
 -- WoW APIs
 local CreateFrame = CreateFrame
 local GetSpellTexture = GetSpellTexture
@@ -46,6 +49,7 @@ local function OnUpdate(self, elapsed)
     local value, max_value = self.Value, self.MaxValue
     if value < max_value then
       self:SetValue(value)
+      self.CastTime:SetText(string_format("%.1f", max_value - value))
       self.Spark:SetPoint("CENTER", self, "LEFT", (value / max_value) * self:GetWidth(), 0)
       return
     end
@@ -57,10 +61,12 @@ local function OnUpdate(self, elapsed)
     local value = self.Value
     if value > 0 then
       self:SetValue(value)
+      self.CastTime:SetText(string_format("%.1f", value))
       self.Spark:SetPoint("CENTER", self, "LEFT", (value / self.MaxValue) * self:GetWidth(), 0)
       return
     end
   elseif (self.FlashTime > 0) then
+    self.CastTime:SetText("")
     self.FlashTime = self.FlashTime - elapsed
     return
   end
@@ -120,7 +126,7 @@ end
 -- Called in processing event: NAME_PLATE_CREATED
 function Element.Created(tp_frame)
   local castbar = CreateFrame("StatusBar", nil, tp_frame)
-  castbar:SetFrameLevel(tp_frame:GetFrameLevel() + 4)
+  castbar:SetFrameLevel(tp_frame:GetFrameLevel() + 3)
   castbar:Hide()
 
   castbar.Border = CreateFrame("Frame", nil, castbar)
@@ -130,7 +136,7 @@ function Element.Created(tp_frame)
 
   castbar.Border:SetFrameLevel(castbar:GetFrameLevel())
   -- frame.InterruptBorder:SetFrameLevel(frame:GetFrameLevel())
-  -- frame.Overlay:SetFrameLevel(parent:GetFrameLevel() + 1)
+  --castbar.Overlay:SetFrameLevel(castbar:GetFrameLevel())
 
   castbar.InterruptOverlay = castbar.Overlay:CreateTexture(nil, "BORDER", 0)
   castbar.InterruptShield = castbar.Overlay:CreateTexture(nil, "ARTWORK", -8)
@@ -154,6 +160,13 @@ function Element.Created(tp_frame)
   castbar.Spark = spark
 
   local spell_text = castbar.Overlay:CreateFontString(nil, "OVERLAY")
+  spell_text:SetWordWrap(false) -- otherwise text is wrapped when plate is scaled down
+
+  -- Remaining cast time
+  castbar.CastTime = castbar.Overlay:CreateFontString(nil, "OVERLAY")
+  castbar.CastTime:SetFont("Fonts\\FRIZQT__.TTF", 11)
+  castbar.CastTime:SetAllPoints(castbar)
+  castbar.CastTime:SetJustifyH("RIGHT")
 
   castbar.IsCasting = false
   castbar.IsChanneling = false
@@ -230,6 +243,8 @@ function Element.UpdateStyle(tp_frame, style)
 
   local spell_text, spell_text_style = tp_frame.visual.SpellText, style.spelltext
 
+  local db = TidyPlatesThreat.db.profile.settings.castbar
+
   -- At least font must be set as otherwise it results in a Lua error when UnitAdded with SetText is called
   spell_text:SetFont(spell_text_style.typeface, spell_text_style.size, spell_text_style.flags)
 
@@ -243,13 +258,35 @@ function Element.UpdateStyle(tp_frame, style)
     end
 
     spell_text:ClearAllPoints()
-    spell_text:SetPoint(spell_text_style.anchor, tp_frame, spell_text_style.anchor, spell_text_style.x + target_offset_x, spell_text_style.y + target_offset_y)
+    spell_text:SetSize(spell_text_style.width, spell_text_style.height)
+    spell_text:SetPoint(spell_text_style.anchor, tp_frame, spell_text_style.anchor, db.SpellNameText.HorizontalOffset + target_offset_x, db.SpellNameText.HorizontalOffset + target_offset_y)
 
     spell_text:SetWordWrap(false)
 
     spell_text:Show()
   else
       spell_text:Hide()
+  end
+
+  local cast_time = castbar.CastTime
+
+  cast_time:SetFont(spell_text_style.typeface, spell_text_style.size, spell_text_style.flags)
+  if db.ShowCastTime then
+    SetFontJustify(cast_time, db.CastTimeText.Font.HorizontalAlignment, db.CastTimeText.Font.VerticalAlignment)
+    if spell_text_style.shadow then
+      cast_time:SetShadowColor(0,0,0, 1)
+      cast_time:SetShadowOffset(1, -1)
+    else
+      cast_time:SetShadowColor(0,0,0,0)
+    end
+
+    cast_time:ClearAllPoints()
+    cast_time:SetSize(castbar:GetSize())
+    cast_time:SetPoint("CENTER", castbar, "CENTER", db.CastTimeText.HorizontalOffset, db.CastTimeText.VerticalOffset)
+
+    cast_time:Show()
+  else
+    cast_time:Hide()
   end
 end
 
@@ -269,9 +306,6 @@ local function TargetUpdate(tp_frame)
 
   castbar:ClearAllPoints()
   castbar:SetPoint(castbar_style.anchor, tp_frame, castbar_style.anchor, castbar_style.x + target_offset_x, castbar_style.y + target_offset_y)
-
-  spell_text:ClearAllPoints()
-  spell_text:SetPoint(spell_text_style.anchor, tp_frame, spell_text_style.anchor, spell_text_style.x + target_offset_x, spell_text_style.y + target_offset_y)
 end
 
 SubscribeEvent(Element, "TargetGained", TargetUpdate)
@@ -305,19 +339,23 @@ function Addon:ConfigCastbar()
 
         castbar:SetScript("OnUpdate", function(self, elapsed)
           if ShowOnUnit(plate.TPFrame.unit) then
+            local db = TidyPlatesThreat.db.profile.settings
+
             self:SetMinMaxValues(0, 100)
             self:SetValue(50)
             visual.SpellIcon:SetTexture(GetSpellTexture(252616))
             visual.SpellText:SetText("Cosmic Beacon")
+            self.CastTime:SetText(3.5)
 
             self.Border:SetShown(plate.TPFrame.style.castborder.show)
             self:SetFormat(plate.TPFrame.style.castnostop.show)
-            self.InterruptShield:SetShown(TidyPlatesThreat.db.profile.settings.castnostop.ShowInterruptShield)
+            self.InterruptShield:SetShown(db.castnostop.ShowInterruptShield)
 
             self.Spark:SetSize(3, self:GetHeight() + 1)
             self.Spark:SetPoint("CENTER", self, "LEFT", 0.5 * self:GetWidth(), 0)
 
             visual.SpellText:SetShown(plate.TPFrame.style.spelltext.show)
+            self.CastTime:SetShown(db.castbar.ShowCastTime)
             visual.SpellIcon:SetShown(plate.TPFrame.style.spellicon.show)
             self:Show()
           else
@@ -328,6 +366,7 @@ function Addon:ConfigCastbar()
             self.InterruptShield:Hide()
             self.Spark:Hide()
             visual.SpellText:Hide()
+            self.CastTime:Hide()
             visual.SpellIcon:Hide()
           end
         end)
@@ -358,6 +397,8 @@ function Addon:ConfigCastbar()
     castbar:Hide()
     EnabledConfigMode = false
 
-    Addon:ForceUpdateOnNameplate(ConfigModePlate)
+    if ConfigModePlate and ConfigModePlate.TPFrame.Active then
+      Addon:ForceUpdateOnNameplate(ConfigModePlate)
+    end
   end
 end

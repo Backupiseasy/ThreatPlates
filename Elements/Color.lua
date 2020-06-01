@@ -11,7 +11,7 @@ local ADDON_NAME, Addon = ...
 local abs, floor, ceil, pairs = abs, floor, ceil, pairs
 
 -- WoW APIs
-local UnitReaction, UnitCanAttack, UnitAffectingCombat = UnitReaction, UnitCanAttack, UnitAffectingCombat
+local UnitReaction, UnitCanAttack = UnitReaction, UnitCanAttack
 local UnitIsPlayer, UnitPlayerControlled = UnitIsPlayer, UnitPlayerControlled
 local UnitThreatSituation, UnitIsUnit, UnitExists, UnitGroupRolesAssigned = UnitThreatSituation, UnitIsUnit, UnitExists, UnitGroupRolesAssigned
 local IsInInstance = IsInInstance
@@ -22,6 +22,11 @@ local IsOffTankCreature = Addon.IsOffTankCreature
 local TidyPlatesThreat = TidyPlatesThreat
 local SubscribeEvent, PublishEvent,  UnsubscribeEvent = Addon.EventService.Subscribe, Addon.EventService.Publish, Addon.EventService.Unsubscribe
 local RGB_P = Addon.RGB_P
+
+local _G =_G
+-- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
+-- List them here for Mikk's FindGlobals script
+-- GLOBALS: UnitAffectingCombat
 
 local REACTION_REFERENCE = {
   FRIENDLY = { NPC = "FriendlyNPC", PLAYER = "FriendlyPlayer", },
@@ -376,13 +381,13 @@ function Addon:GetThreatColor(unit, style, use_threat_table)
   if use_threat_table then
     if IsInInstance() and db.threat.UseHeuristicInInstances then
       -- Use threat detection heuristic in instance
-      on_threat_table = UnitAffectingCombat(unit.unitid)
+      on_threat_table = _G.UnitAffectingCombat(unit.unitid)
     else
       on_threat_table = Addon:OnThreatTable(unit)
     end
   else
     -- Use threat detection heuristic
-    on_threat_table = UnitAffectingCombat(unit.unitid)
+    on_threat_table = _G.UnitAffectingCombat(unit.unitid)
   end
 
   if on_threat_table then
@@ -479,6 +484,9 @@ local function GetSituationalColor(unit, plate_style)
     -- NameModeSettings.HealthbarMode.UseTargetColoring = SettingsBase.targetWidget.ModeHPBar
     healthbar_color = NameModeSettings.HealthbarMode.UseTargetColoring and SettingsBase.targetWidget.HPBarColor
     name_color = mode_settings.UseTargetColoring and SettingsBase.targetWidget.HPBarColor
+  elseif unit.IsFocus then
+    healthbar_color = NameModeSettings.HealthbarMode.UseFocusColoring and SettingsBase.FocusWidget.HPBarColor
+    name_color = mode_settings.UseFocusColoring and SettingsBase.FocusWidget.HPBarColor
   end
 
   if not healthbar_color then
@@ -678,8 +686,10 @@ function Element.UpdateSettings()
   ColorByHealth = SettingsBase.ColorByHealth
 
   NameModeSettings.HealthbarMode.UseTargetColoring = SettingsBase.targetWidget.ModeNames
+  NameModeSettings.HealthbarMode.UseFocusColoring = SettingsBase.FocusWidget.ModeNames
   NameModeSettings.HealthbarMode.UseRaidMarkColoring = SettingsName.HealthbarMode.UseRaidMarkColoring
   NameModeSettings.NameMode.UseTargetColoring = SettingsBase.targetWidget.ModeNames
+  NameModeSettings.NameMode.UseFocusColoring = SettingsBase.FocusWidget.ModeNames
   NameModeSettings.NameMode.UseRaidMarkColoring = SettingsName.NameMode.UseRaidMarkColoring
 
   for style, settings in pairs(TidyPlatesThreat.db.profile.settings) do
@@ -710,6 +720,8 @@ function Element.UpdateSettings()
   --SubscribeEvent(Element, "UNIT_HEALTH_FREQUENT", UNIT_HEALTH_FREQUENT)
   SubscribeEvent(Element, "TargetGained", SituationalColorUpdate)
   SubscribeEvent(Element, "TargetLost", SituationalColorUpdate)
+  SubscribeEvent(Element, "FocusGained", SituationalColorUpdate)
+  SubscribeEvent(Element, "FocusLost", SituationalColorUpdate)
   SubscribeEvent(Element, "TargetMarkerUpdate", SituationalColorUpdate)
   SubscribeEvent(Element, "FactionUpdate", FactionUpdate) -- Updates on faction information for units
   SubscribeEvent(Element, "SituationalColorUpdate", SituationalColorUpdate) -- Updates on e.g., quest information or target status for units

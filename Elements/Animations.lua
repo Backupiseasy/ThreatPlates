@@ -11,7 +11,7 @@ local ADDON_NAME, Addon = ...
 local pairs, next, floor, abs = pairs, next, floor, abs
 
 -- WoW APIs
-local CreateFrame, UIParent = CreateFrame, UIParent
+local UIParent = UIParent
 
 -- ThreatPlates APIs
 local Animations = Addon.Animations
@@ -194,8 +194,10 @@ function Animations:FadePlate(frame, target_alpha)
 end
 
 function Animations:StopFade(frame)
+  if frame.FadeAnimation then
   --frame:SetAlpha(frame.FadeAnimation.TargetAlpha)
-  frame.FadeAnimation.Playing = nil
+    frame.FadeAnimation.Playing = nil
+  end
 end
 
 function Animations:ScalePlate(frame, target_scale)

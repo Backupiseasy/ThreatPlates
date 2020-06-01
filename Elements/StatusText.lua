@@ -12,7 +12,7 @@ local _G, gsub, ceil, format, string = _G, gsub, ceil, format, string
 
 -- WoW APIs
 local UnitIsPlayer, UnitPlayerControlled, UnitExists = UnitIsPlayer, UnitPlayerControlled, UnitExists
-local UnitName, UnitGetTotalAbsorbs, UnitClassification = UnitName, UnitGetTotalAbsorbs, UnitClassification
+local UnitName = UnitName
 local UNIT_LEVEL_TEMPLATE = UNIT_LEVEL_TEMPLATE
 local GetGuildInfo = GetGuildInfo
 
@@ -22,6 +22,11 @@ local PlatesByUnit = Addon.PlatesByUnit
 local SubscribeEvent, PublishEvent,  UnsubscribeEvent = Addon.EventService.Subscribe, Addon.EventService.Publish, Addon.EventService.Unsubscribe
 local RGB = Addon.RGB
 local Font = Addon.Font
+
+local _G =_G
+-- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
+-- List them here for Mikk's FindGlobals script
+-- GLOBALS: UnitClassification, UnitGetTotalAbsorbs
 
 local COLOR_ROLE = RGB(255, 255, 255, .7)
 local COLOR_GUILD = RGB(178, 178, 229, .7)
@@ -170,7 +175,7 @@ end
 
 -- Level
 local function GetLevelDescription(unit)
-  local classification = UnitClassification(unit.unitid)
+  local classification = _G.UnitClassification(unit.unitid)
   local description
 
   if classification == "worldboss" then
@@ -200,7 +205,7 @@ end
 local function TextHealthPercentColored(unit)
   local text_health, text_absorbs, color = "", "", COLOR_ROLE
 
-  local absorbs_amount = UnitGetTotalAbsorbs(unit.unitid) or 0
+  local absorbs_amount = _G.UnitGetTotalAbsorbs(unit.unitid) or 0
   if ShowAbsorbs and absorbs_amount > 0 then
     if Settings.AbsorbsAmount then
       if Settings.AbsorbsShorten then
@@ -389,6 +394,7 @@ function Element.Created(tp_frame)
   local status_text = tp_frame.visual.textframe:CreateFontString(nil, "ARTWORK", -1)
   -- At least font must be set as otherwise it results in a Lua error when UnitAdded with SetText is called
   status_text:SetFont("Fonts\\FRIZQT__.TTF", 11)
+  status_text:SetWordWrap(false) -- otherwise text is wrapped when plate is scaled down
 
   tp_frame.visual.StatusText = status_text
 end

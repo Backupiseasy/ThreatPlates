@@ -9,7 +9,6 @@ local ThreatPlates = Addon.ThreatPlates
 ---------------------------------------------------------------------------------------------------
 
 -- Lua APIs
-local CreateFrame = CreateFrame
 
 -- WoW APIs
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
@@ -18,6 +17,11 @@ local UnitIsUnit = UnitIsUnit
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
+
+local _G =_G
+-- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
+-- List them here for Mikk's FindGlobals script
+-- GLOBALS: CreateFrame
 
 local OFFSET_HIGHLIGHT = 1
 local ART_PATH = ThreatPlates.Art
@@ -33,7 +37,7 @@ local BACKDROP = {
 ---------------------------------------------------------------------------------------------------
 local TargetHighlightDisabled
 
-local MouseoverHighlightFrame = CreateFrame("Frame", nil)
+local MouseoverHighlightFrame = _G.CreateFrame("Frame", nil)
 local CurrentMouseoverPlate
 local CurrentMouseoverUnitID
 
@@ -81,7 +85,7 @@ MouseoverHighlightFrame:Hide()
 function Element.Created(tp_frame)
   -- Highlight for healthbar
   local healthbar = tp_frame.visual.Healthbar
-  healthbar.Highlight = CreateFrame("Frame", nil, healthbar)
+  healthbar.Highlight = _G.CreateFrame("Frame", nil, healthbar)
   healthbar.Highlight:SetPoint("TOPLEFT", healthbar, "TOPLEFT", - OFFSET_HIGHLIGHT, OFFSET_HIGHLIGHT)
   healthbar.Highlight:SetPoint("BOTTOMRIGHT", healthbar, "BOTTOMRIGHT", OFFSET_HIGHLIGHT, - OFFSET_HIGHLIGHT)
   healthbar.Highlight:SetBackdrop(BACKDROP)
@@ -158,3 +162,4 @@ function Element.UPDATE_MOUSEOVER_UNIT()
 end
 
 SubscribeEvent(Element, "PLAYER_TARGET_CHANGED", Element.UPDATE_MOUSEOVER_UNIT)
+--SubscribeEvent(Element, "PLAYER_FOCUS_CHANGED", Element.UPDATE_MOUSEOVER_UNIT)

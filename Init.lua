@@ -20,16 +20,17 @@ local ThreatPlates = Addon.ThreatPlates
 -- Lua APIs
 local next, setmetatable, getmetatable = next, setmetatable, getmetatable
 local ipairs, type, insert = ipairs, type, table.insert
+local string = string
 
 ---------------------------------------------------------------------------------------------------
 -- Libraries
 ---------------------------------------------------------------------------------------------------
 local LibStub = LibStub
-
 Addon.L = LibStub("AceLocale-3.0"):GetLocale("TidyPlatesThreat")
 Addon.LSM = LibStub("LibSharedMedia-3.0")
 Addon.LibCustomGlow = LibStub("LibCustomGlow-1.0")
 Addon.LibAceConfigDialog = LibStub("AceConfigDialog-3.0")
+Addon.LibAceConfigRegistry = LibStub("AceConfigRegistry-3.0")
 
 ---------------------------------------------------------------------------------------------------
 -- Define AceAddon TidyPlatesThreat
@@ -41,6 +42,15 @@ TidyPlatesThreatDBM = true
 Addon.Animations = {}
 Addon.Scaling = {}
 Addon.Transparency = {}
+Addon.Cache = {
+	TriggerWildcardTests = {},
+	CustomPlateTriggers = {
+		Name = {},
+		NameWildcard = {},
+		Aura = {},
+		Cast = {}
+	}
+}
 
 --------------------------------------------------------------------------------------------------
 -- General Functions
@@ -116,8 +126,15 @@ Addon.RGB_WITH_HEX = function(red, green, blue, alpha)
 	return color
 end
 
-Addon.RGB_UNPACK = function(color)
-  return color.r, color.g, color.b, color.a or 1
+Addon.MergeDefaultsIntoTable = function(target, defaults)
+	for k,v in pairs(defaults) do
+		if type(v) == "table" then
+			target[k] = target[k] or {}
+			Addon.MergeDefaultsIntoTable(target[k], v)
+		else
+			target[k] = target[k] or v
+		end
+	end
 end
 
 -- thanks to https://github.com/Perkovec/colorise-lua
@@ -129,6 +146,33 @@ end
 Addon.ClassColorAsHex = function(class)
   local str = RAID_CLASS_COLORS[class].colorStr;
   return gsub(str, "(ff)", "", 1)
+end
+
+Addon.CheckTableStructure = function(reference_structure, table_to_check)
+	if table_to_check == nil then
+		return false
+	end
+
+	for k,v in pairs(reference_structure) do
+		if table_to_check[k] == nil or type(table_to_check[k]) ~= type(v) then
+			return false
+		elseif type(v) == "table" then
+			if not Addon.CheckTableStructure(v, table_to_check[k]) then
+				return false
+			end
+		end
+	end
+
+	return true
+end
+
+Addon.Split = function(split_string)
+	local result = {}
+	for entry in string.gmatch(split_string, "[^;]+") do
+		result[#result + 1] = entry:gsub("^%s*(.-)%s*$", "%1")
+	end
+
+	return result
 end
 
 --------------------------------------------------------------------------------------------------
@@ -165,13 +209,14 @@ Addon.CopyTable = DeepCopyTable
 --end
 
 Addon.MergeIntoTable = function(target, source)
-  for k,v in pairs(source) do
-    if type(v) == "table" then
-      Addon.MergeIntoTable(target[k], v)
-    else
-      target[k] = v
-    end
-  end
+	for k,v in pairs(source) do
+		if type(v) == "table" then
+			target[k] = target[k] or {}
+			Addon.MergeIntoTable(target[k], v)
+		else
+			target[k] = v
+		end
+	end
 end
 
 Addon.ConcatTables = function(base_table, table_to_concat)
@@ -210,4 +255,11 @@ Addon.FlattenTable = function(arr, ...)
 	end
 
 	return result
+end
+
+Addon.DebugPrintCaches = function()
+	print ("Wildcard Unit Test Cache:")
+	for k, v in pairs(Addon.Cache.TriggerWildcardTests) do
+		print ("  " .. k .. ":", v)
+	end
 end

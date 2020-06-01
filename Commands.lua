@@ -4,13 +4,9 @@ local TP = Addon.ThreatPlates
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
-
-local DEBUG = true
-
----------------------------------------------------------------------------------------------------
--- Imported functions and constants
----------------------------------------------------------------------------------------------------
 local L = Addon.L
+
+local DEBUG = Addon.Meta("version"):find("Alpha") or Addon.Meta("version"):find("Beta")
 
 local function toggleDPS()
   if TidyPlatesThreat.db.profile.optionRoleDetectionAutomatic then
@@ -89,13 +85,19 @@ end
 SLASH_TPTPVERBOSE1 = "/tptpverbose"
 SlashCmdList["TPTPVERBOSE"] = TPTPVERBOSE
 
---local function PrintHelp()
---	t.Print(L["Usage: /tptp [options]"], true)
---	t.Print(L["options:"], true)
-----	t.Print(L["  update-profiles    Migrates deprecated settings in your configuration"], true)
---	t.Print(L["  help               Prints this help message"], true)
---	t.Print(L["  <no option>        Displays options dialog"], true)
---end
+local function PrintHelp()
+	TP.Print(L["Usage: /tptp [options]"], true)
+	TP.Print(L["options:"], true)
+	TP.Print(L["  legacy-custom-styles    Adds (legacy) default custom styles for nameplates that are deleted when migrating custom nameplates to the current format"], true)
+	TP.Print(L["  help                    Prints this help message"], true)
+	TP.Print(L["  <no option>             Displays options dialog"], true)
+	TP.Print(L["Additional chat commands:"], true)
+	TP.Print(L["  /tptpverbose   Toggles addon feedback text"], true)
+	TP.Print(L["  /tptptoggle    Toggle Role from one to the other"], true)
+	TP.Print(L["  /tptpdps       Toggles DPS/Healing threat plates"], true)
+	TP.Print(L["  /tptptank      Toggles Tank threat plates"], true)
+	TP.Print(L["  /tptpol        Toggles nameplate overlapping"], true)
+end
 
 local function SearchDBForString(db, prefix, keyword)
   for key, value in pairs(db) do
@@ -112,26 +114,50 @@ end
 
 -- Command: /tptp
 function TidyPlatesThreat:ChatCommand(input)
-  local cmd_list = {}
-  for w in input:gmatch("%S+") do cmd_list[#cmd_list + 1] = w end
+	local cmd_list = {}
+	for w in input:gmatch("%S+") do cmd_list[#cmd_list + 1] = w end
 
-  local command = cmd_list[1]
-  if not command or command == "" then
-    TidyPlatesThreat:OpenOptions()
-  elseif DEBUG then
-    if command == "prune" then
-      TP.Print("|cff89F559Threat Plates|r: Pruning deprecated data from addon settings ...", true)
-      Addon:DeleteDeprecatedSettings()
-    elseif input == "event" then
-      TP.Print("|cff89F559Threat Plates|r: Event publishing overview:", true)
-      Addon:PrintEventService()
-    elseif command == "searchdb" then
-      TP.Print("|cff89F559Threat Plates|r: Searching settings:", true)
-      SearchDBForString(TidyPlatesThreat.db.profile, "<Profile>", string.lower(cmd_list[2]))
-    else
-      TidyPlatesThreat:ChatCommandDebug(cmd_list)
-    end
-  end
+	local command = cmd_list[1]
+	if not command or command == "" then
+		TidyPlatesThreat:OpenOptions()
+	elseif input == "help" then
+		PrintHelp()
+	elseif input == "legacy-custom-styles" then
+		Addon.RestoreLegacyCustomNameplates()
+		--	elseif input == "toggle-view-friendly-units" then
+		--		TidyPlatesThreat:ToggleNameplateModeFriendlyUnits()
+		--	elseif input == "toggle-view-neutral-units" then
+		--		TidyPlatesThreat:ToggleNameplateModeNeutralUnits()
+		--	elseif input == "toggle-view-enemy-units" then
+		--		TidyPlatesThreat:ToggleNameplateModeEnemyUnits()
+	elseif DEBUG then
+		if command == "searchdb" then
+			TP.Print("|cff89F559Threat Plates|r: Searching settings:", true)
+			SearchDBForString(TidyPlatesThreat.db.profile, "<Profile>", string.lower(cmd_list[2]))
+			SearchDBForString(TidyPlatesThreat.db.global, "<Profile>", string.lower(cmd_list[2]))
+		elseif command == "unit" then
+			local plate = C_NamePlate.GetNamePlateForUnit("target")
+			if not plate then return end
+			TP.DEBUG_PRINT_UNIT(plate.TPFrame.unit, true)
+		elseif command == "migrate" and cmd_list[2] then
+			Addon.MigrateDatabase(cmd_list[2])
+		elseif command == "prune" then
+			TP.Print("|cff89F559Threat Plates|r: Pruning deprecated data from addon settings ...", true)
+			Addon:DeleteDeprecatedSettings()
+		elseif input == "event" then
+			TP.Print("|cff89F559Threat Plates|r: Event publishing overview:", true)
+			Addon:PrintEventService()
+		elseif command == "quest" then
+			Addon:PrintQuests()
+		elseif command == "cache" then
+			Addon.DebugPrintCaches()
+		else
+			TidyPlatesThreat:ChatCommandDebug(cmd_list)
+		end
+	else
+		TP.Print(L["Unknown option: "] .. input, true)
+		PrintHelp()
+	end
 end
 
 function TidyPlatesThreat:ChatCommandDebug(cmd_list)
@@ -274,8 +300,6 @@ function TidyPlatesThreat:ChatCommandDebug(cmd_list)
 
     plate.PreviousScale = 0
     plate.Time = 0
-  elseif command == "quest" then
-		Addon:PrintQuests()
 	elseif command == "anim" then
     local plate = C_NamePlate.GetNamePlateForUnit("mouseover")
     if not plate then return end

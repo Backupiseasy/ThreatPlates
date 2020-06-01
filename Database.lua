@@ -13,13 +13,17 @@ local ThreatPlates = Addon.ThreatPlates
 local floor, select, unpack, type, min, pairs = floor, select, unpack, type, min, pairs
 
 -- WoW APIs
-local GetCVar, SetCVar = GetCVar, SetCVar
-local UnitClass, GetSpecialization = UnitClass, GetSpecialization
+local GetCVar = GetCVar
 
 -- ThreatPlates APIs
 local L = Addon.L
 local TidyPlatesThreat = TidyPlatesThreat
 local RGB = Addon.RGB
+
+local _G =_G
+-- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
+-- List them here for Mikk's FindGlobals script
+-- GLOBALS:
 
 ---------------------------------------------------------------------------------------------------
 -- Global functions for accessing the configuration
@@ -48,12 +52,41 @@ local function SetNamePlateClickThrough(friendly, enemy)
   end, L["Nameplate clickthrough cannot be changed while in combat."])
 end
 
-local DEPRECATED_UNIQUE_SETTINGS = {
-  map = {},
+Addon.LEGACY_CUSTOM_NAMEPLATES = {
   ["**"] = {
-    name = "<Enter name here>",
+    Trigger = {
+      Type = "Name",
+      Name = {
+        Input = "<Enter name here>",
+        AsArray = {}, -- Generated after entering Input with Addon.Split
+      },
+      Aura = {
+        Input = "",
+        AsArray = {}, -- Generated after entering Input with Addon.Split
+      },
+      Cast = {
+        Input = "",
+        AsArray = {}, -- Generated after entering Input with Addon.Split
+      },
+    },
+    Effects = {
+      Glow = {
+        Frame = "None",
+        Type = "Pixel",
+        CustomColor = false,
+        Color = { 0.95, 0.95, 0.32, 1 },
+      },
+    },
     showNameplate = true,
     ShowHeadlineView = false,
+    Enable = {
+      Never = false,
+      UnitReaction = {
+        FRIENDLY = true,
+        NEUTRAL = true,
+        HOSTILE = true,
+      },
+    },
     showIcon = true,
     useStyle = true,
     useColor = true,
@@ -62,30 +95,23 @@ local DEPRECATED_UNIQUE_SETTINGS = {
     allowMarked = true,
     overrideScale = false,
     overrideAlpha = false,
-    icon = "",
+    UseAutomaticIcon = false, -- Default: true
+    -- AutomaticIcon = "number",
+    icon = "",                -- Default: "INV_Misc_QuestionMark.blp"
+    -- SpellID = "number",
+    -- SpellName = "string",
     scale = 1,
     alpha = 1,
     color = {
       r = 1,
       g = 1,
-      b = 1
+      b = 1,
     },
   },
   [1] = {
-    name = L["Shadow Fiend"],
-    showNameplate = true,
-    ShowHeadlineView = false,
-    showIcon = true,
-    useStyle = true,
-    useColor = true,
-    UseThreatColor = false,
-    UseThreatGlow = false,
-    allowMarked = true,
-    overrideScale = false,
-    overrideAlpha = false,
+    Trigger = { Type = "Name"; Name = { Input = L["Shadow Fiend"], AsArray = { L["Shadow Fiend"] } } },
     icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U1",
     scale = 0.45,
-    alpha = 1,
     color = {
       r = 0.61,
       g = 0.40,
@@ -93,20 +119,9 @@ local DEPRECATED_UNIQUE_SETTINGS = {
     },
   },
   [2] = {
-    name = L["Spirit Wolf"],
-    showNameplate = true,
-    ShowHeadlineView = false,
-    showIcon = true,
-    useStyle = true,
-    useColor = true,
-    UseThreatColor = false,
-    UseThreatGlow = false,
-    allowMarked = true,
-    overrideScale = false,
-    overrideAlpha = false,
+    Trigger = { Type = "Name"; Name = { Input = L["Spirit Wolf"], AsArray = { L["Spirit Wolf"] } } },
     icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U2",
     scale = 0.45,
-    alpha = 1,
     color = {
       r = 0.32,
       g = 0.7,
@@ -114,20 +129,9 @@ local DEPRECATED_UNIQUE_SETTINGS = {
     },
   },
   [3] = {
-    name = L["Ebon Gargoyle"],
-    showNameplate = true,
-    ShowHeadlineView = false,
-    showIcon = true,
-    useStyle = true,
-    useColor = true,
-    UseThreatColor = false,
-    UseThreatGlow = false,
-    allowMarked = true,
-    overrideScale = false,
-    overrideAlpha = false,
+    Trigger = { Type = "Name"; Name = { Input = L["Ebon Gargoyle"], AsArray = { L["Ebon Gargoyle"] } } },
     icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U3",
     scale = 0.45,
-    alpha = 1,
     color = {
       r = 1,
       g = 0.71,
@@ -135,20 +139,9 @@ local DEPRECATED_UNIQUE_SETTINGS = {
     },
   },
   [4] = {
-    name = L["Water Elemental"],
-    showNameplate = true,
-    ShowHeadlineView = false,
-    showIcon = true,
-    useStyle = true,
-    useColor = true,
-    UseThreatColor = false,
-    UseThreatGlow = false,
-    allowMarked = true,
-    overrideScale = false,
-    overrideAlpha = false,
+    Trigger = { Type = "Name"; Name = { Input = L["Water Elemental"], AsArray = { L["Water Elemental"] } } },
     icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U4",
     scale = 0.45,
-    alpha = 1,
     color = {
       r = 0.33,
       g = 0.72,
@@ -156,20 +149,9 @@ local DEPRECATED_UNIQUE_SETTINGS = {
     },
   },
   [5] = {
-    name = L["Treant"],
-    showNameplate = true,
-    ShowHeadlineView = false,
-    showIcon = true,
-    useStyle = true,
-    useColor = true,
-    UseThreatColor = false,
-    UseThreatGlow = false,
-    allowMarked = true,
-    overrideScale = false,
-    overrideAlpha = false,
+    Trigger = { Type = "Name"; Name = { Input = L["Treant"], AsArray = { L["Treant"] } } },
     icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U5",
     scale = 0.45,
-    alpha = 1,
     color = {
       r = 1,
       g = 0.71,
@@ -177,20 +159,9 @@ local DEPRECATED_UNIQUE_SETTINGS = {
     },
   },
   [6] = {
-    name = L["Viper"],
-    showNameplate = true,
-    ShowHeadlineView = false,
-    showIcon = true,
-    useStyle = true,
-    useColor = true,
-    UseThreatColor = false,
-    UseThreatGlow = false,
-    allowMarked = true,
-    overrideScale = false,
-    overrideAlpha = false,
+    Trigger = { Type = "Name"; Name = { Input = L["Viper"], AsArray = { L["Viper"] } } },
     icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U6",
     scale = 0.45,
-    alpha = 1,
     color = {
       r = 0.39,
       g = 1,
@@ -198,20 +169,9 @@ local DEPRECATED_UNIQUE_SETTINGS = {
     },
   },
   [7] = {
-    name = L["Venomous Snake"],
-    showNameplate = true,
-    ShowHeadlineView = false,
-    showIcon = true,
-    useStyle = true,
-    useColor = true,
-    UseThreatColor = false,
-    UseThreatGlow = false,
-    allowMarked = true,
-    overrideScale = false,
-    overrideAlpha = false,
+    Trigger = { Type = "Name"; Name = { Input = L["Venomous Snake"], AsArray = { L["Venomous Snake"] } } },
     icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U6",
     scale = 0.45,
-    alpha = 1,
     color = {
       r = 0.75,
       g = 0,
@@ -219,20 +179,9 @@ local DEPRECATED_UNIQUE_SETTINGS = {
     },
   },
   [8] = {
-    name = L["Army of the Dead Ghoul"],
-    showNameplate = true,
-    ShowHeadlineView = false,
-    showIcon = true,
-    useStyle = true,
-    useColor = true,
-    UseThreatColor = false,
-    UseThreatGlow = false,
-    allowMarked = true,
-    overrideScale = false,
-    overrideAlpha = false,
+    Trigger = { Type = "Name"; Name = { Input = L["Army of the Dead Ghoul"], AsArray = { L["Army of the Dead Ghoul"] } } },
     icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U7",
     scale = 0.45,
-    alpha = 1,
     color = {
       r = 0.87,
       g = 0.78,
@@ -240,20 +189,8 @@ local DEPRECATED_UNIQUE_SETTINGS = {
     },
   },
   [9] = {
-    name = L["Shadowy Apparition"],
-    showNameplate = true,
-    ShowHeadlineView = false,
-    showIcon = true,
-    useStyle = true,
-    useColor = true,
-    UseThreatColor = false,
-    UseThreatGlow = false,
-    allowMarked = true,
-    overrideScale = false,
-    overrideAlpha = false,
+    Trigger = { Type = "Name"; Name = { Input = L["Shadowy Apparition"], AsArray = { L["Shadowy Apparition"] } } },
     icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U8",
-    scale = 1,
-    alpha = 1,
     color = {
       r = 0.62,
       g = 0.19,
@@ -261,20 +198,8 @@ local DEPRECATED_UNIQUE_SETTINGS = {
     },
   },
   [10] = {
-    name = L["Shambling Horror"],
-    showNameplate = true,
-    ShowHeadlineView = false,
-    showIcon = true,
-    useStyle = true,
-    useColor = true,
-    UseThreatColor = false,
-    UseThreatGlow = false,
-    allowMarked = true,
-    overrideScale = false,
-    overrideAlpha = false,
+    Trigger = { Type = "Name"; Name = { Input = L["Shambling Horror"], AsArray = { L["Shambling Horror"] } } },
     icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U9",
-    scale = 1,
-    alpha = 1,
     color = {
       r = 0.69,
       g = 0.26,
@@ -282,20 +207,9 @@ local DEPRECATED_UNIQUE_SETTINGS = {
     },
   },
   [11] = {
-    name = L["Web Wrap"],
-    showNameplate = true,
-    ShowHeadlineView = false,
-    showIcon = true,
-    useStyle = true,
-    useColor = true,
-    UseThreatColor = false,
-    UseThreatGlow = false,
-    allowMarked = true,
-    overrideScale = false,
-    overrideAlpha = false,
+    Trigger = { Type = "Name"; Name = { Input = L["Web Wrap"], AsArray = { L["Web Wrap"] } } },
     icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U10",
     scale = 0.75,
-    alpha = 1,
     color = {
       r = 1,
       g = 0.39,
@@ -303,20 +217,8 @@ local DEPRECATED_UNIQUE_SETTINGS = {
     },
   },
   [12] = {
-    name = L["Immortal Guardian"],
-    showNameplate = true,
-    ShowHeadlineView = false,
-    showIcon = true,
-    useStyle = true,
-    useColor = true,
-    UseThreatColor = false,
-    UseThreatGlow = false,
-    allowMarked = true,
-    overrideScale = false,
-    overrideAlpha = false,
+    Trigger = { Type = "Name"; Name = { Input = L["Immortal Guardian"], AsArray = { L["Immortal Guardian"] } } },
     icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U11",
-    scale = 1,
-    alpha = 1,
     color = {
       r = 0.33,
       g = 0.33,
@@ -324,20 +226,8 @@ local DEPRECATED_UNIQUE_SETTINGS = {
     },
   },
   [13] = {
-    name = L["Marked Immortal Guardian"],
-    showNameplate = true,
-    ShowHeadlineView = false,
-    showIcon = true,
-    useStyle = true,
-    useColor = true,
-    UseThreatColor = false,
-    UseThreatGlow = false,
-    allowMarked = true,
-    overrideScale = false,
-    overrideAlpha = false,
+    Trigger = { Type = "Name"; Name = { Input = L["Marked Immortal Guardian"], AsArray = { L["Marked Immortal Guardian"] } } },
     icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U12",
-    scale = 1,
-    alpha = 1,
     color = {
       r = 0.75,
       g = 0,
@@ -345,20 +235,8 @@ local DEPRECATED_UNIQUE_SETTINGS = {
     },
   },
   [14] = {
-    name = L["Empowered Adherent"],
-    showNameplate = true,
-    ShowHeadlineView = false,
-    showIcon = true,
-    useStyle = true,
-    useColor = true,
-    UseThreatColor = false,
-    UseThreatGlow = false,
-    allowMarked = true,
-    overrideScale = false,
-    overrideAlpha = false,
+    Trigger = { Type = "Name"; Name = { Input = L["Empowered Adherent"], AsArray = { L["Empowered Adherent"] } } },
     icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U13",
-    scale = 1,
-    alpha = 1,
     color = {
       r = 0.29,
       g = 0.11,
@@ -366,20 +244,8 @@ local DEPRECATED_UNIQUE_SETTINGS = {
     },
   },
   [15] = {
-    name = L["Deformed Fanatic"],
-    showNameplate = true,
-    ShowHeadlineView = false,
-    showIcon = true,
-    useStyle = true,
-    useColor = true,
-    UseThreatColor = false,
-    UseThreatGlow = false,
-    allowMarked = true,
-    overrideScale = false,
-    overrideAlpha = false,
+    Trigger = { Type = "Name"; Name = { Input = L["Deformed Fanatic"], AsArray = { L["Deformed Fanatic"] } } },
     icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U14",
-    scale = 1,
-    alpha = 1,
     color = {
       r = 0.55,
       g = 0.7,
@@ -387,20 +253,8 @@ local DEPRECATED_UNIQUE_SETTINGS = {
     },
   },
   [16] = {
-    name = L["Reanimated Adherent"],
-    showNameplate = true,
-    ShowHeadlineView = false,
-    showIcon = true,
-    useStyle = true,
-    useColor = true,
-    UseThreatColor = false,
-    UseThreatGlow = false,
-    allowMarked = true,
-    overrideScale = false,
-    overrideAlpha = false,
+    Trigger = { Type = "Name"; Name = { Input = L["Reanimated Adherent"], AsArray = { L["Reanimated Adherent"] } } },
     icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U15",
-    scale = 1,
-    alpha = 1,
     color = {
       r = 1,
       g = 0.88,
@@ -408,20 +262,8 @@ local DEPRECATED_UNIQUE_SETTINGS = {
     },
   },
   [17] = {
-    name = L["Reanimated Fanatic"],
-    showNameplate = true,
-    ShowHeadlineView = false,
-    showIcon = true,
-    useStyle = true,
-    useColor = true,
-    UseThreatColor = false,
-    UseThreatGlow = false,
-    allowMarked = true,
-    overrideScale = false,
-    overrideAlpha = false,
+    Trigger = { Type = "Name"; Name = { Input = L["Reanimated Fanatic"], AsArray = { L["Reanimated Fanatic"] } } },
     icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U15",
-    scale = 1,
-    alpha = 1,
     color = {
       r = 1,
       g = 0.88,
@@ -429,42 +271,14 @@ local DEPRECATED_UNIQUE_SETTINGS = {
     },
   },
   [18] = {
-    name = L["Bone Spike"],
-    showNameplate = true,
-    ShowHeadlineView = false,
-    showIcon = true,
-    useStyle = true,
-    useColor = true,
-    UseThreatColor = false,
-    UseThreatGlow = false,
-    allowMarked = true,
-    overrideScale = false,
-    overrideAlpha = false,
+    Trigger = { Type = "Name"; Name = { Input = L["Bone Spike"], AsArray = { L["Bone Spike"] } } },
     icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U16",
-    scale = 1,
-    alpha = 1,
-    color = {
-      r = 1,
-      g = 1,
-      b = 1
-    },
   },
   [19] = {
-    name = L["Onyxian Whelp"],
+    Trigger = { Type = "Name"; Name = { Input = L["Onyxian Whelp"], AsArray = { L["Onyxian Whelp"] } } },
     showNameplate = false,
     ShowHealthbarView = true,
-    ShowHeadlineView = false,
-    showIcon = true,
-    useStyle = true,
-    useColor = true,
-    UseThreatColor = false,
-    UseThreatGlow = false,
-    allowMarked = true,
-    overrideScale = false,
-    overrideAlpha = false,
     icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U17",
-    scale = 1,
-    alpha = 1,
     color = {
       r = 0.33,
       g = 0.28,
@@ -472,20 +286,8 @@ local DEPRECATED_UNIQUE_SETTINGS = {
     },
   },
   [20] = {
-    name = L["Gas Cloud"],
-    showNameplate = true,
-    ShowHeadlineView = false,
-    showIcon = true,
-    useStyle = true,
-    useColor = true,
-    UseThreatColor = false,
-    UseThreatGlow = false,
-    allowMarked = true,
-    overrideScale = false,
-    overrideAlpha = false,
+    Trigger = { Type = "Name"; Name = { Input = L["Gas Cloud"], AsArray = { L["Gas Cloud"] } } },
     icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U18",
-    scale = 1,
-    alpha = 1,
     color = {
       r = 0.96,
       g = 0.56,
@@ -493,20 +295,8 @@ local DEPRECATED_UNIQUE_SETTINGS = {
     },
   },
   [21] = {
-    name = L["Volatile Ooze"],
-    showNameplate = true,
-    ShowHeadlineView = false,
-    showIcon = true,
-    useStyle = true,
-    useColor = true,
-    UseThreatColor = false,
-    UseThreatGlow = false,
-    allowMarked = true,
-    overrideScale = false,
-    overrideAlpha = false,
+    Trigger = { Type = "Name"; Name = { Input = L["Volatile Ooze"], AsArray = { L["Volatile Ooze"] } } },
     icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U19",
-    scale = 1,
-    alpha = 1,
     color = {
       r = 0.36,
       g = 0.95,
@@ -514,20 +304,8 @@ local DEPRECATED_UNIQUE_SETTINGS = {
     },
   },
   [22] = {
-    name = L["Darnavan"],
-    showNameplate = true,
-    ShowHeadlineView = false,
-    showIcon = true,
-    useStyle = true,
-    useColor = true,
-    UseThreatColor = false,
-    UseThreatGlow = false,
-    allowMarked = true,
-    overrideScale = false,
-    overrideAlpha = false,
+    Trigger = { Type = "Name"; Name = { Input = L["Darnavan"], AsArray = { L["Darnavan"] } } },
     icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U20",
-    scale = 1,
-    alpha = 1,
     color = {
       r = 0.78,
       g = 0.61,
@@ -535,20 +313,8 @@ local DEPRECATED_UNIQUE_SETTINGS = {
     },
   },
   [23] = {
-    name = L["Val'kyr Shadowguard"],
-    showNameplate = true,
-    ShowHeadlineView = false,
-    showIcon = true,
-    useStyle = true,
-    useColor = true,
-    UseThreatColor = false,
-    UseThreatGlow = false,
-    allowMarked = true,
-    overrideScale = false,
-    overrideAlpha = false,
+    Trigger = { Type = "Name"; Name = { Input = L["Val'kyr Shadowguard"], AsArray = { L["Val'kyr Shadowguard"] } } },
     icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U21",
-    scale = 1,
-    alpha = 1,
     color = {
       r = 0.47,
       g = 0.89,
@@ -556,20 +322,8 @@ local DEPRECATED_UNIQUE_SETTINGS = {
     },
   },
   [24] = {
-    name = L["Kinetic Bomb"],
-    showNameplate = true,
-    ShowHeadlineView = false,
-    showIcon = true,
-    useStyle = true,
-    useColor = true,
-    UseThreatColor = false,
-    UseThreatGlow = false,
-    allowMarked = true,
-    overrideScale = false,
-    overrideAlpha = false,
+    Trigger = { Type = "Name"; Name = { Input = L["Kinetic Bomb"], AsArray = { L["Kinetic Bomb"] } } },
     icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U22",
-    scale = 1,
-    alpha = 1,
     color = {
       r = 0.91,
       g = 0.71,
@@ -577,20 +331,8 @@ local DEPRECATED_UNIQUE_SETTINGS = {
     },
   },
   [25] = {
-    name = L["Lich King"],
-    showNameplate = true,
-    ShowHeadlineView = false,
-    showIcon = true,
-    useStyle = true,
-    useColor = true,
-    UseThreatColor = false,
-    UseThreatGlow = false,
-    allowMarked = true,
-    overrideScale = false,
-    overrideAlpha = false,
+    Trigger = { Type = "Name"; Name = { Input = L["Lich King"], AsArray = { L["Lich King"] } } },
     icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U23",
-    scale = 1,
-    alpha = 1,
     color = {
       r = 0.77,
       g = 0.12,
@@ -598,20 +340,8 @@ local DEPRECATED_UNIQUE_SETTINGS = {
     },
   },
   [26] = {
-    name = L["Raging Spirit"],
-    showNameplate = true,
-    ShowHeadlineView = false,
-    showIcon = true,
-    useStyle = true,
-    useColor = true,
-    UseThreatColor = false,
-    UseThreatGlow = false,
-    allowMarked = true,
-    overrideScale = false,
-    overrideAlpha = false,
+    Trigger = { Type = "Name"; Name = { Input = L["Raging Spirit"], AsArray = { L["Raging Spirit"] } } },
     icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U24",
-    scale = 1,
-    alpha = 1,
     color = {
       r = 0.77,
       g = 0.27,
@@ -619,20 +349,10 @@ local DEPRECATED_UNIQUE_SETTINGS = {
     },
   },
   [27] = {
-    name = L["Drudge Ghoul"],
-    showNameplate = true,
-    ShowHeadlineView = false,
+    Trigger = { Type = "Name"; Name = { Input = L["Drudge Ghoul"], AsArray = { L["Drudge Ghoul"] } } },
     showIcon = false,
-    useStyle = true,
-    useColor = true,
-    UseThreatColor = false,
-    UseThreatGlow = false,
-    allowMarked = true,
-    overrideScale = false,
-    overrideAlpha = false,
     icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U25",
     scale = 0.85,
-    alpha = 1,
     color = {
       r = 0.43,
       g = 0.43,
@@ -640,20 +360,8 @@ local DEPRECATED_UNIQUE_SETTINGS = {
     },
   },
   [28] = {
-    name = L["Living Inferno"],
-    showNameplate = true,
-    ShowHeadlineView = false,
-    showIcon = true,
-    useStyle = true,
-    useColor = true,
-    UseThreatColor = false,
-    UseThreatGlow = false,
-    allowMarked = true,
-    overrideScale = false,
-    overrideAlpha = false,
+    Trigger = { Type = "Name"; Name = { Input = L["Living Inferno"], AsArray = { L["Living Inferno"] } } },
     icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U27",
-    scale = 1,
-    alpha = 1,
     color = {
       r = 0,
       g = 1,
@@ -661,17 +369,8 @@ local DEPRECATED_UNIQUE_SETTINGS = {
     },
   },
   [29] = {
-    name = L["Living Ember"],
-    showNameplate = true,
-    ShowHeadlineView = false,
+    Trigger = { Type = "Name"; Name = { Input = L["Living Ember"], AsArray = { L["Living Ember"] } } },
     showIcon = false,
-    useStyle = true,
-    useColor = true,
-    UseThreatColor = false,
-    UseThreatGlow = false,
-    allowMarked = true,
-    overrideScale = false,
-    overrideAlpha = false,
     icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U28",
     scale = 0.60,
     alpha = 0.75,
@@ -682,42 +381,16 @@ local DEPRECATED_UNIQUE_SETTINGS = {
     },
   },
   [30] = {
-    name = L["Fanged Pit Viper"],
+    Trigger = { Type = "Name"; Name = { Input = L["Fanged Pit Viper"], AsArray = { L["Fanged Pit Viper"] } } },
     showNameplate = false,
     ShowHealthbarView = true,
-    ShowHeadlineView = false,
     showIcon = false,
-    useStyle = true,
-    useColor = true,
-    UseThreatColor = false,
-    UseThreatGlow = false,
-    allowMarked = true,
-    overrideScale = false,
-    overrideAlpha = false,
-    icon = "",
     scale = 0,
     alpha = 0,
-    color = {
-      r = 1,
-      g = 1,
-      b = 1
-    },
   },
   [31] = {
-    name = L["Canal Crab"],
-    showNameplate = true,
-    ShowHeadlineView = false,
-    showIcon = true,
-    useStyle = true,
-    useColor = true,
-    UseThreatColor = false,
-    UseThreatGlow = false,
-    allowMarked = true,
-    overrideScale = false,
-    overrideAlpha = false,
+    Trigger = { Type = "Name"; Name = { Input = L["Canal Crab"], AsArray = { L["Canal Crab"] } } },
     icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U29",
-    scale = 1,
-    alpha = 1,
     color = {
       r = 0,
       g = 1,
@@ -725,20 +398,8 @@ local DEPRECATED_UNIQUE_SETTINGS = {
     },
   },
   [32] = {
-    name = L["Muddy Crawfish"],
-    showNameplate = true,
-    ShowHeadlineView = false,
-    showIcon = true,
-    useStyle = true,
-    useColor = true,
-    UseThreatColor = false,
-    UseThreatGlow = false,
-    allowMarked = true,
-    overrideScale = false,
-    overrideAlpha = false,
+    Trigger = { Type = "Name"; Name = { Input = L["Muddy Crawfish"], AsArray = { L["Muddy Crawfish"] } } },
     icon = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\UniqueIconWidget\\U30",
-    scale = 1,
-    alpha = 1,
     color = {
       r = 0.96,
       g = 0.36,
@@ -822,8 +483,6 @@ local function GetDefaultSettingsV1(defaults)
   db.StatusText.HealthbarMode.Font.VerticalOffset = 1
   db.settings.spelltext.typeface = "Accidental Presidency"
   db.settings.spelltext.size = 12
-  db.settings.spelltext.y = -13
-  db.settings.spelltext.y_hv = -13
   db.settings.eliteicon.x = 64
   db.settings.eliteicon.y = 9
   db.settings.skullicon.x = 55
@@ -978,7 +637,7 @@ end
 --      local db = profile.nameplate.alpha
 --      local amount = profile.blizzFadeA.amount
 --      if amount <= 0 then
---        db.NonTarget = min(1, 1 + amount)
+--        db.NonTarget = math_min(1, 1 + amount)
 --      end
 --    end
 --
@@ -1178,12 +837,88 @@ end
 --  end
 --end
 
+local function GetValueOrDefault(old_value, default_value)
+  if old_value ~= nil then
+    return old_value
+  else
+    return default_value
+  end
+end
+
 local function MigrationForceFriendlyInCombat(profile_name, profile)
   if DatabaseEntryExists(profile, { "HeadlineView" }) then
     if profile.HeadlineView.ForceFriendlyInCombat == true then
       profile.HeadlineView.ForceFriendlyInCombat = "NAME"
     elseif profile.HeadlineView.ForceFriendlyInCombat == false then
       profile.HeadlineView.ForceFriendlyInCombat = "NONE"
+    end
+  end
+end
+
+local function MigrateCustomStylesToV3(profile_name, profile)
+  -- if TidyPlatesThreat.db.global.CustomNameplatesVersion > 2 then return end
+
+  if DatabaseEntryExists(profile, { "uniqueSettings" }) then
+    local custom_styles = profile.uniqueSettings
+
+    custom_styles.map = nil
+
+    for index, unique_unit in pairs(custom_styles) do
+      unique_unit.Trigger = unique_unit.Trigger or {}
+      unique_unit.Trigger.Name = unique_unit.Trigger.Name or {}
+
+      if unique_unit.name and unique_unit.name ~= "<Enter name here>" and (unique_unit.Trigger.Name.Input == nil or unique_unit.Trigger.Name.Input == "<Enter name here>") and (unique_unit.Trigger.Type == nil or unique_unit.Trigger.Type == "Name") then
+        unique_unit.Trigger.Type = "Name" -- should not be necessary as it is the default value
+        unique_unit.Trigger.Name.Input = unique_unit.name
+        unique_unit.Trigger.Name.AsArray = { unique_unit.Trigger.Name.Input }
+
+        --unique_unit.name = nil
+
+        -- Set automatic icon detection for all existing custom nameplates to false
+        unique_unit.UseAutomaticIcon = false
+        unique_unit.icon = GetValueOrDefault(unique_unit.icon, (Addon.CLASSIC and "Spell_nature_spiritwolf.blp") or "spell_shadow_shadowfiend.blp")
+      end
+    end
+  end
+end
+
+local function MigrateSpelltextPosition(profile_name, profile)
+  if DatabaseEntryExists(profile, { "settings", "spelltext" } ) then
+    local default_profile = ThreatPlates.DEFAULT_SETTINGS.profile
+
+    profile.settings = profile.settings or {}
+    profile.settings.castbar = profile.settings.castbar or {}
+    profile.settings.castbar.SpellNameText = profile.settings.castbar.SpellNameText or {}
+
+    if DatabaseEntryExists(profile, { "settings", "spelltext", "x" } ) then
+      profile.settings.castbar.SpellNameText.HorizontalOffset = profile.settings.spelltext.x - 2
+      profile.settings.spelltext = profile.settings.spelltext or {}
+      profile.settings.spelltext.align = GetValueOrDefault(profile.settings.spelltext.align, "CENTER")
+    end
+
+    if DatabaseEntryExists(profile, { "settings", "spelltext", "y" } ) then
+      profile.settings.castbar.SpellNameText.VerticalOffset = profile.settings.spelltext.y + 15
+      profile.settings.spelltext = profile.settings.spelltext or {}
+      profile.settings.spelltext.vertical = GetValueOrDefault(profile.settings.spelltext.vertical, "CENTER")
+    end
+
+    DatabaseEntryDelete(profile, { "settings", "spelltext", "x" })
+    DatabaseEntryDelete(profile, { "settings", "spelltext", "y" })
+    DatabaseEntryDelete(profile, { "settings", "spelltext", "x_hv" })
+    DatabaseEntryDelete(profile, { "settings", "spelltext", "y_hv" })
+  end
+end
+
+local function FixTargetFocusTexture(profile_name, profile)
+  if DatabaseEntryExists(profile, { "targetWidget", "theme" } ) then
+    if not Addon.TARGET_TEXTURES[profile.targetWidget.theme] then
+      profile.targetWidget.theme = ThreatPlates.DEFAULT_SETTINGS.profile.targetWidget.theme
+    end
+  end
+
+  if DatabaseEntryExists(profile, { "FocusWidget", "theme" } ) then
+    if not Addon.TARGET_TEXTURES[profile.FocusWidget.theme] then
+      profile.FocusWidget.theme = ThreatPlates.DEFAULT_SETTINGS.profile.FocusWidget.theme
     end
   end
 end
@@ -1208,6 +943,13 @@ local MIGRATION_FUNCTIONS = {
     MigrationForceFriendlyInCombat,
   },
   ["9.2.0"] = {
+    SpelltextPosition = { MigrateSpelltextPosition, NoDefaultProfile = true },
+    FixTargetFocusTexture = { FixTargetFocusTexture, NoDefaultProfile = true },
+  },
+  ["9.2.2"] = {
+    MigrationCustomPlatesV3 = { MigrateCustomStylesToV3},
+  },
+  ["10.0.0"] = {
     -- MigrateDeprecatedSettingsEntries, -- TODO
   },
 }
@@ -1268,7 +1010,7 @@ local ENTRIES_TO_RENAME = {
   ["9.1.3"] = {
     { Deprecated = { "threat", "nonCombat" }, New = { "threat", "UseThreatTable" }, },
   },
-  ["9.2.0"] = {
+  ["10.0.0"] = {
     -- Color settings for healthbar and name
     { Deprecated = { "settings", "healthbar", "BackgroundUseForegroundColor" }, New = { "Healthbar", "BackgroundUseForegroundColor" }, },
     { Deprecated = { "settings", "healthbar", "BackgroundOpacity" }, New = { "Healthbar", "BackgroundOpacity" }, },
@@ -1325,6 +1067,7 @@ local ENTRIES_TO_RENAME = {
     { Deprecated = { "Transparency", "Fadeing" }, New = { "Animations", "EnableFading" }, },
     -- Others
     { Deprecated = { "HeadlineView", "ShowTargetHighlight" }, New = { "targetWidget", "ShowInHeadlineView" }, },
+    { Deprecated = { "HeadlineView", "ShowFocusHighlight" }, New = { "FocusWidget", "ShowInHeadlineView" }, },
   },
 }
 
@@ -1333,12 +1076,37 @@ local function ExecuteMigrationFunctions(current_version)
 
   for max_version, entries in pairs(MIGRATION_FUNCTIONS) do
     if CurrentVersionIsLowerThan(current_version, max_version) then
-      for key, migration_function in pairs(entries) do
+      for key, migration_info in pairs(entries) do
+        local migration_function, no_default_profile
+
+        if type(migration_info) == "table" then
+          no_default_profile = migration_info.NoDefaultProfile
+          migration_function = migration_info[1]
+        else
+          migration_function = migration_info
+        end
+
+        local defaults
+        if no_default_profile then
+          defaults = ThreatPlates.CopyTable(TidyPlatesThreat.db.defaults)
+          TidyPlatesThreat.db:RegisterDefaults({})
+        end
+
         -- iterate over all profiles and migrate values
         --TidyPlatesThreat.db.global.MigrationLog[key] = "Migration" .. (max_version and ( " because " .. current_version .. " < " .. max_version) or "")
         for profile_name, profile in pairs(profile_table) do
           migration_function(profile_name, profile)
         end
+
+        if no_default_profile then
+          TidyPlatesThreat.db:RegisterDefaults(defaults)
+        end
+
+        -- Postprocessing, if necessary
+        -- action = entry[3]
+        -- if action and type(action) == "function" then
+        --   action()
+        -- end
       end
     end
   end
@@ -1425,40 +1193,34 @@ local function DeleteEntry(current_entry, default_entry, path)
   end
 end
 
-local function GetValueOrDefault(old_value, default_value)
-  if old_value ~= nil then
-    return old_value
-  else
-    return default_value
-  end
-end
-
 Addon.MigrationCustomNameplatesV1 = function()
-  local defaults = Addon.CopyTable(TidyPlatesThreat.db.defaults)
+  local defaults = ThreatPlates.CopyTable(TidyPlatesThreat.db.defaults)
   TidyPlatesThreat.db:RegisterDefaults({})
 
   -- Set default to empty so that new defaul values don't impact the migration
   for profile_name, profile in pairs(TidyPlatesThreat.db.profiles) do
     if DatabaseEntryExists(profile, { "uniqueSettings" }) then
-      local settings = profile.uniqueSettings
-
+      local custom_styles = profile.uniqueSettings
       local custom_plates_to_keep = {}
-      for index, unique_unit in pairs(settings) do
+
+      for index, unique_unit in pairs(custom_styles) do
         -- Don't change entries map and ["**"]
         if type(index) == "number" then
-          if unique_unit.name and unique_unit.name ~= "<Enter name here>" then
+          -- Trigger.Type must be Name as before migration (in V1) that's the only trigger type available
+          if DatabaseEntryExists(unique_unit, { "Trigger", "Name", "Input" }) and unique_unit.Trigger.Name.Input ~= "<Enter name here>" then
+            -- and unique_unit.Trigger.Name.Input ~= nil
             custom_plates_to_keep[index] = unique_unit
           end
-
-          settings[index] = nil
         end
+
+        custom_styles[index] = nil
       end
 
-      local slot_counter = 0
       for index, unique_unit in pairs(custom_plates_to_keep) do
         -- As default values are now different, copy the deprecated slots default value
-        local deprecated_settings = DEPRECATED_UNIQUE_SETTINGS[index] or DEPRECATED_UNIQUE_SETTINGS["**"]
+        local deprecated_settings = Addon.LEGACY_CUSTOM_NAMEPLATES[index] or Addon.LEGACY_CUSTOM_NAMEPLATES["**"]
 
+        -- Name trigger is already migrated properly when loading 9.2.0 the very first time
         unique_unit.showNameplate = GetValueOrDefault(unique_unit.showNameplate, deprecated_settings.showNameplate)
         unique_unit.ShowHeadlineView = GetValueOrDefault(unique_unit.ShowHeadlineView, deprecated_settings.ShowHeadlineView)
         unique_unit.showIcon = GetValueOrDefault(unique_unit.showIcon, deprecated_settings.showIcon)
@@ -1472,6 +1234,7 @@ Addon.MigrationCustomNameplatesV1 = function()
         -- Replace the old Threat Plates internal icons with the WoW original ones
         --unique_unit.icon = GetValueOrDefault(DEPRECATED_ICON_DEFAULTS[unique_unit.icon] or unique_unit.icon, DEPRECATED_ICON_DEFAULTS[deprecated_settings.icon])
         unique_unit.icon = GetValueOrDefault(unique_unit.icon, deprecated_settings.icon)
+        unique_unit.UseAutomaticIcon = GetValueOrDefault(unique_unit.UseAutomaticIcon, deprecated_settings.UseAutomaticIcon)
         unique_unit.SpellID = GetValueOrDefault(unique_unit.SpellID, deprecated_settings.SpellID)
         unique_unit.scale = GetValueOrDefault(unique_unit.scale, deprecated_settings.scale)
         unique_unit.alpha = GetValueOrDefault(unique_unit.alpha, deprecated_settings.alpha)
@@ -1481,14 +1244,12 @@ Addon.MigrationCustomNameplatesV1 = function()
         unique_unit.color.g = GetValueOrDefault(unique_unit.color.g, deprecated_settings.color.g)
         unique_unit.color.b = GetValueOrDefault(unique_unit.color.b, deprecated_settings.color.b)
 
-        -- #settings + 1 does not work here as settings also has entries for map, ** which interfere with #
-        slot_counter = slot_counter + 1
-        settings[slot_counter] = unique_unit
+        custom_styles[#custom_styles + 1] = unique_unit
       end
     end
   end
 
-  defaults.profile.uniqueSettings = Addon.CopyTable(ThreatPlates.DEFAULT_SETTINGS.profile.uniqueSettings)
+  defaults.profile.uniqueSettings = ThreatPlates.CopyTable(ThreatPlates.DEFAULT_SETTINGS.profile.uniqueSettings)
   TidyPlatesThreat.db:RegisterDefaults(defaults)
   TidyPlatesThreat.db.global.CustomNameplatesVersion = 2
 end
@@ -1497,7 +1258,7 @@ Addon.SetDefaultsForCustomNameplates = function()
   if TidyPlatesThreat.db.global.CustomNameplatesVersion > 1 then return end
 
   local defaults = Addon.CopyTable(TidyPlatesThreat.db.defaults)
-  defaults.profile.uniqueSettings = DEPRECATED_UNIQUE_SETTINGS
+  defaults.profile.uniqueSettings = Addon.LEGACY_CUSTOM_NAMEPLATES
   TidyPlatesThreat.db:RegisterDefaults(defaults)
 end
 
@@ -1508,6 +1269,83 @@ function Addon:DeleteDeprecatedSettings()
     ThreatPlates.Print(L["  Profile: "] .. profile_name, true)
     DeleteEntry(profile, ThreatPlates.DEFAULT_SETTINGS.profile, "")
   end
+end
+
+-----------------------------------------------------
+-- Schema validation and other check functions for the settings file
+-----------------------------------------------------
+
+local CUSTOM_STYLE_TYPE_CHECK = {
+  icon = { number = true, string = true },
+  -- Not part of default values, dynamically inserted
+  AutomaticIcon = { number = true },
+  SpellID = { number = true },
+  SpellName = { number = true },
+}
+
+--
+--local VERSION_TO_CUSTOM_STYLE_SCHEMA_MAPPING = {
+--  ["9.2.0"] = CUSTOM_STYLE_SCHEMA_VERSIONS.V3
+--}
+--
+--Addon.CheckCustomStyleSchema = function(custom_style, version)
+--  ThreatPlates.DEBUG_PRINT_TABLE(custom_style)
+--end
+
+-- Updates existing entries in custom style with the corresponding value from the
+-- update-from custom style
+-- In an entry in update-from custom style does not exist in custom style, it's ignored
+local function UpdateFromCustomStyle(custom_style, update_from_custom_style)
+  for key, current_value in pairs(custom_style) do
+    local update_from_value = update_from_custom_style[key]
+
+    if update_from_value ~= nil then
+      if type(current_value) == "table" then
+        -- If entry in update-from custom style is not a table as well, ignore it
+        if type(update_from_value) == "table" then
+          UpdateFromCustomStyle(current_value, update_from_value)
+        end
+      else
+        local type_is_ok
+
+        local valid_types = CUSTOM_STYLE_TYPE_CHECK[key]
+        if valid_types then
+          type_is_ok = valid_types[type(update_from_value)]
+        else
+          type_is_ok = type(current_value) == type(update_from_value)
+        end
+
+        if type_is_ok then
+          custom_style[key] = update_from_value
+        end
+      end
+    end
+  end
+end
+
+local function UpdateRuntimeValueFromCustomStyle(custom_style, imported_custom_style, key)
+  local valid_types = CUSTOM_STYLE_TYPE_CHECK[key]
+  if valid_types and valid_types[type(imported_custom_style[key])] then
+    custom_style[key] = imported_custom_style[key]
+  end
+end
+
+Addon.ImportCustomStyle = function(imported_custom_style)
+  local custom_style = ThreatPlates.CopyTable(ThreatPlates.DEFAULT_SETTINGS.profile.uniqueSettings["**"])
+
+  UpdateFromCustomStyle(custom_style, imported_custom_style)
+
+  -- Generate the AsArray version of the input, so that the imported custom_style is consistent (it should be, but
+  -- just to be safe)
+  custom_style.Trigger.Name.AsArray = Addon.Split(custom_style.Trigger.Name.Input)
+  custom_style.Trigger.Aura.AsArray = Addon.Split(custom_style.Trigger.Aura.Input)
+  custom_style.Trigger.Cast.AsArray = Addon.Split(custom_style.Trigger.Cast.Input)
+
+  -- No need to import AutomaticIcon as it is set/overwritten, when a aura or cast trigger are detected
+  UpdateRuntimeValueFromCustomStyle(custom_style, imported_custom_style, "SpellID")
+  UpdateRuntimeValueFromCustomStyle(custom_style, imported_custom_style, "SpellName")
+
+  return custom_style
 end
 
 -----------------------------------------------------

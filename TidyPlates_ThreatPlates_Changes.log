@@ -1,4 +1,49 @@
 ﻿------------------------------------------------------
+9.2.1
+------------------------------------------------------
+* Fixed a bug where threat textures where are never shown although the player is in combat [IM].
+* Fixed German localization of help text for chat commands.
+
+------------------------------------------------------
+9.2.0
+------------------------------------------------------
+* Added new triggers for custom nameplate styles additionally to a unit's name: auras and casts [Comment #4202, #766, #1284, #1988, #2010, #723, #1438, #1462, #1506, #1679, #1461, Issue #170, E-Mail, IM].
+* Extended triggers for custom nameplate styles so that you now can add multiple entries (names, auras, casts) separated by a semicolon.
+* Extended the Name trigger for custom nameplate styles to also support the wildcard character *.
+* Added the option to show a glow effect for custom nameplate styles on healthbar, castbar or icon.
+* Added an option to enable custom nameplate styles only for friendly or hostile units [IM].
+* Added an option to disable a custom nameplate style and never show it.
+* Added an option "Automatic Icon" to derive the custom nameplate's icon from the spell/aura ID or name used as trigger.
+* Added an option for custom nameplate styles to set the icon based on a spell name (must be in the player's spell book).
+* Added an option to import/export a individual profile with all its settings (thanks to Kungfumoo for the patch, Comment #1582).
+* Added an option to import/export all or individual custom nameplate styles [Comment #852]
+* Added command line option "legacy-custom-plates" to add (legacy) default custom nameplate styles that are deleted when migrating custom nameplates to the current format [Comment #3950, #3959, Issue #379].
+* Added new styles for target highlighting (like a down arrow or glow borders).
+* Added a widget to highlight the focus target similar to how you can highlight the target unit [E-Mail, Comment #4140].
+* Added an option to show the remaining time of a cast on the nameplate's castbar [Comment #695, #1530, #1907, #4077, IM, Issue #374, #399].
+* The indicator icon for rare and elite mobs now shows a separate color for rare-elite mobs to make them more distinguishable [GH Issue #199].
+* Spell name is now anchored directly to the castbar which simplifies the configuration of its placement.
+* Fixed a bug where selection mark jumped to first entry in the custom nameplates list after deleting the last slot.
+* Fixed a bug with name text being wrapped when nameplates where scaled down enough.
+* Fixed a Lua error that occurred when disabling the castbar configuration mode when the nameplate on which it was used was no longer visible.
+* Fixed a Lua error in Quest widget that occurred when enabling the Quest widget because of an non-initialized font.
+* Fixed a bug in Quest widget regarding quests with multiple quest objectives on the same unit were remaining objectives were ignored when the first objective was completed.
+* Fixed some potential issues with WoW API calls.
+* Updated localizations for deDE and zhTW.
+
+------------------------------------------------------
+9.1.20
+------------------------------------------------------
+* Fixed a Lua error in custom nameplates when entering a spell ID to set the icon for the custom nameplate.
+* Fixed a Lua error that could occur if other addons changed WoW's internal class colors (RAID_CLASS_COLORS) in an inconsistent way [IM].
+
+------------------------------------------------------
+9.1.19
+------------------------------------------------------
+* Fixed a bug in Quest widget where the quest indicator was not shown if the first of several quests in a unit's tooltip was completed.
+* Fixed a bug in Quest widget where the area (progress-based) quests were not detected correctly in scenarios.
+
+------------------------------------------------------
 9.1.18
 ------------------------------------------------------
 * Backported bufixes and optimizations from Threat Plates Classic to Retail version.

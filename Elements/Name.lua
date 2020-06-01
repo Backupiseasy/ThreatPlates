@@ -41,6 +41,7 @@ function Element.Created(tp_frame)
   local name_text = tp_frame.visual.textframe:CreateFontString(nil, "ARTWORK", 0)
   -- At least font must be set as otherwise it results in a Lua error when UnitAdded with SetText is called
   name_text:SetFont("Fonts\\FRIZQT__.TTF", 11)
+  name_text:SetWordWrap(false) -- otherwise text is wrapped when plate is scaled down
 
   tp_frame.visual.NameText = name_text
 end

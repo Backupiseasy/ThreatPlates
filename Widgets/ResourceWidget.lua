@@ -15,15 +15,19 @@ local format = format
 local ceil = ceil
 
 -- WoW APIs
-local CreateFrame = CreateFrame
 local UnitReaction,UnitIsUnit = UnitReaction, UnitIsUnit
-local UnitPower, UnitPowerMax, UnitPowerType = UnitPower, UnitPowerMax, UnitPowerType
+local UnitPower, UnitPowerMax = UnitPower, UnitPowerMax
 local PowerBarColor = PowerBarColor
 local SPELL_POWER_MANA = SPELL_POWER_MANA
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
+
+local _G =_G
+-- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
+-- List them here for Mikk's FindGlobals script
+-- GLOBALS: CreateFrame, UnitPowerType
 
 local WidgetFrame
 
@@ -108,7 +112,7 @@ Widget.POWER_FUNCTIONS = {
 function Widget:SetTargetPowerType(widget_frame)
   -- The code to determine the power type could be moved to OnUnitAdded, but then code is necessary to determine when
   -- the power type on the unit changes (e.g., a druid that shapeshifts). Mabe there's even bosses that do that?!?
-  local powerType, powerToken, altR, altG, altB = UnitPowerType("target")
+  local powerType, powerToken, altR, altG, altB = _G.UnitPowerType("target")
 
   local db = self.db
   local power_func = self.POWER_FUNCTIONS[powerToken]
@@ -185,21 +189,21 @@ end
 
 function Widget:Create()
   if not WidgetFrame then
-    local widget_frame = CreateFrame("Frame", nil)
+    local widget_frame = _G.CreateFrame("Frame", nil)
     widget_frame:Hide()
 
     WidgetFrame = widget_frame
 
     widget_frame.Text = widget_frame:CreateFontString(nil, "OVERLAY")
 
-    local bar = CreateFrame("StatusBar", nil, widget_frame)
+    local bar = _G.CreateFrame("StatusBar", nil, widget_frame)
     bar:SetFrameLevel(widget_frame:GetFrameLevel())
     bar:SetMinMaxValues(0, 100)
     widget_frame.Bar = bar
 
     widget_frame.Background = bar:CreateTexture(nil, "BACKGROUND")
 
-    widget_frame.Border = CreateFrame("Frame", nil, widget_frame.Bar)
+    widget_frame.Border = _G.CreateFrame("Frame", nil, widget_frame.Bar)
     widget_frame.Border:SetFrameLevel(widget_frame:GetFrameLevel())
 
     self:UpdateLayout()

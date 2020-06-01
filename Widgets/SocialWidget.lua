@@ -24,9 +24,8 @@ local Widget = Addon.Widgets:NewWidget("Social")
 -- Lua APIs
 
 -- WoW APIs
-local CreateFrame = CreateFrame
 local GetNumGuildMembers, GetGuildRosterInfo = GetNumGuildMembers, GetGuildRosterInfo
-local BNGetNumFriends, BNGetFriendInfo, BNGetToonInfo, BNGetFriendInfoByID = BNGetNumFriends, BNGetFriendInfo, BNGetToonInfo, BNGetFriendInfoByID
+local BNGetFriendInfo, BNGetToonInfo, BNGetFriendInfoByID = BNGetFriendInfo, BNGetToonInfo, BNGetFriendInfoByID
 local BNet_GetValidatedCharacterName = BNet_GetValidatedCharacterName
 local UnitName, GetRealmName, UnitFactionGroup = UnitName, GetRealmName, UnitFactionGroup
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
@@ -46,6 +45,11 @@ local ListGuildMembers = {}
 local ListFriends = {}
 local ListBnetFriends = {}
 local ListGuildMembersSize, ListFriendsSize, ListBnetFriendsSize = 0, 0, 0
+
+local _G =_G
+-- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
+-- List them here for Mikk's FindGlobals script
+-- GLOBALS: BNGetNumFriends
 
 ---------------------------------------------------------------------------------------------------
 -- Cached configuration settings
@@ -117,7 +121,7 @@ function Widget:GUILD_ROSTER_UPDATE()
 end
 
 function Widget:BN_CONNECTED()
-  local _, BnetOnline = BNGetNumFriends()
+  local _, BnetOnline = _G.BNGetNumFriends()
   if ListBnetFriendsSize ~= BnetOnline then
     -- Only wipe the Bnet friend list if a member went offline
     if BnetOnline < ListBnetFriendsSize then
@@ -211,7 +215,7 @@ end
 
 function Widget:Create(tp_frame)
   -- Required Widget Code
-  local widget_frame = CreateFrame("Frame", nil, tp_frame)
+  local widget_frame = _G.CreateFrame("Frame", nil, tp_frame)
   widget_frame:Hide()
 
   -- Custom Code III
