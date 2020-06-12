@@ -4,8 +4,8 @@ to how your nameplates react and look. It also offers some unique features that 
 I've spent a considerable amount of time improving this addon and any comments or concerns about this addon are appreciated. I'm
 always looking for ways to improve this addon.
 
-- Addon Homepage on Curse: https://mods.curse.com/addons/wow/tidy-plates-threat-plates
-- Addon Development Homepage on Curseforge: https://wow.curseforge.com/projects/tidy-plates-threat-plates
+- Addon Homepage on Curseforge: https://wow.curseforge.com/projects/tidy-plates-threat-plates
+- Sourcecode Repository at Github: https://github.com/Backupiseasy/ThreatPlates
 
 # Development Information
 - Versioning of Releases

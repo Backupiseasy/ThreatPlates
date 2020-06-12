@@ -17,6 +17,7 @@
     * Added an option to show the remaining time of a cast on the nameplate's castbar [Comment #695, #1530, #1907, #4077, IM, Issue #374, #399].
     * The indicator icon for rare and elite mobs now shows a separate color for rare-elite mobs to make them more distinguishable [GH Issue #199].
     * Spell name is now anchored directly to the castbar which simplifies the configuration of its placement.
+    * Changed default for level text width and horizontal offset as very long level texts (e.g., "+100") where shown with ellipsis.
     * Fixed a bug where selection mark jumped to first entry in the custom nameplates list after deleting the last slot.
     * Fixed a bug with name text being wrapped when nameplates where scaled down enough.
     * Fixed a Lua error that occurred when disabling the castbar configuration mode when the nameplate on which it was used was no longer visible.
