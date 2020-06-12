@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+1.4.1
+------------------------------------------------------
+* Fixed a bug where a unit's castbar was not shown in all situations when the unit casted a spell [Comment TPC#558].
+
+------------------------------------------------------
 1.4.0
 ------------------------------------------------------
 * Port of Threat Plates v9.2.2 (Retail) into Classic version.
