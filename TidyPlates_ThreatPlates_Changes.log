@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+9.2.2
+------------------------------------------------------
+* Changed default for level text width and horizontal offset as very long level texts (e.g., "+100") where shown with ellipsis.
+
+------------------------------------------------------
 9.2.1
 ------------------------------------------------------
 * Fixed a bug where threat textures where are never shown although the player is in combat [IM].
