@@ -146,7 +146,15 @@ def create_package(wow_version):
     # Create instantiated files from templates and save them
 
     if args.initialize:
-        if wow_version == args.initialize:
+        initialize_version = ""
+        working_dir = os.getcwd()
+        if "_retail_" in working_dir:
+            initialize_version = "Retail"
+        elif "_classic_" in working_dir:
+            initialize_version = "Classic"
+
+        if wow_version == initialize_version:
+            print("Initializing local installation for WoW " + initialize_version)
             with open(TOC_FILE, 'w') as f:
                 f.write(toc_file_content)
                 f.close()
@@ -213,7 +221,7 @@ def create_package(wow_version):
 parser = argparse.ArgumentParser(description="Create a package for a new release of Threat Plates for Retail an Classic WoW.")
 #parser.add_argument("version", help="The version number for the new release.")
 parser.add_argument("--package-dir", help="The directory into which the package should be saved.")
-parser.add_argument("--initialize", choices=["Retail", "Classic"], help="Instantiates all-template-based addon files for the selected WoW version, so that WoW can load the addon from this directory successfully.")
+parser.add_argument("--initialize", action="store_true", help="Instantiates all-template-based addon files for the selected WoW version, so that WoW can load the addon from this directory successfully.")
 # parser.add_argument("--upload", action="store_true", help="Upload new release packages to CurseForge.")
 args = parser.parse_args()
 
