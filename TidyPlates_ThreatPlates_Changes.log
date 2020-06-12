@@ -4,9 +4,15 @@
 * Consolidated Retail and Classic version of Threat Plates into one single version.
 
 ------------------------------------------------------
+9.2.2
+------------------------------------------------------
+* Changed default for level text width and horizontal offset as very long level texts (e.g., "+100") where shown with ellipsis.
+
+------------------------------------------------------	2
 9.2.1
 ------------------------------------------------------
-* Fixed some bugs in the German localization.
+* Fixed a bug where threat textures where are never shown although the player is in combat [IM].
+* Fixed German localization of help text for chat commands.
 
 ------------------------------------------------------
 9.2.0
@@ -110,7 +116,7 @@
 * Fixed a Lua error when changing certain settings related to the healthbar size in combat. This settings can only be changed out of combat now.
 * Fixed a bug in Auras widget where some debuffs were displayed twice when changing the aura type filter for crowd-control auras (e.g., from All to Blizzard) in the options.
 
-﻿------------------------------------------------------
+------------------------------------------------------
 9.1.10
 ------------------------------------------------------
 * Fixed a bug with Combo Points widget not properly being shown on the target unit's nameplate after entering a timewalking dungeon [Comment #1994].
