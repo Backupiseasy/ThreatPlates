@@ -986,6 +986,12 @@ do
     wipe(frame.unit)
     wipe(frame.unitcache)
 
+    --frame.style = nil
+    -- Set stylename to nil as CheckNameplateStyle compares the new style with the previous style.
+    -- In both are unique, the nameplate is not updated to the correct custom style, but uses the
+    -- previous one, I think
+    frame.stylename = nil
+
     -- Remove anything from the function queue
     frame.UpdateMe = false
   end
