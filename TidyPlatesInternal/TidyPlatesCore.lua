@@ -54,11 +54,25 @@ if Addon.CLASSIC then
 
   UnitChannelInfo = function(...)
     local text, _, texture, startTime, endTime, _, _, _, spellID = LibClassicCasterino:UnitChannelInfo(...)
+
+    -- With LibClassicCasterino, startTime is nil sometimes which means that no casting information
+    -- is available
+    if not startTime then
+      text = nil
+    end
+
     return text, text, texture, startTime, endTime, false, false, spellID
   end
 
   UnitCastingInfo = function(...)
     local text, _, texture, startTime, endTime, _, _, _, spellID = LibClassicCasterino:UnitCastingInfo(...)
+
+    -- With LibClassicCasterino, startTime is nil sometimes which means that no casting information
+    -- is available
+    if not startTime then
+      text = nil
+    end
+
     return text, text, texture, startTime, endTime, false, nil, false, spellID
   end
 
