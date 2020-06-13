@@ -312,7 +312,7 @@ local CROWD_CONTROL_SPELLS_RETAIL = {
   [132168] = LOC_STUN,      -- Shockwave (Blizzard)
   [118000] = LOC_STUN,      -- Dragon Roar (Talent, Blizzard)
   -- [6343] = PC_SNARE,        -- Thunder Clap
-  [199042] = LOC_STUN,      -- Thunderstruck (PvP, Blizzard)
+  -- [199042] = LOC_STUN,      -- Thunderstruck (PvP, Blizzard) -- Removed as CC as its uptime is to high.
   [199085] = LOC_STUN,      -- Warpath (PvP, Blizzard)
 
   ---------------------------------------------------------------------------------------------------
