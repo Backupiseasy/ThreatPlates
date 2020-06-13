@@ -1,4 +1,10 @@
 ﻿------------------------------------------------------
+9.2.3
+------------------------------------------------------
+* Removed Thunderstruck (PvP talent) from crowd-control auras list as its uptime is too high. It's shown as a normal debuff now [Comment #4568].
+* Fixed a bug with Copy&Paste of a custom nameplate style where pasting was not possible because it would create a duplicate custom nameplate style [Comment TPC#560].
+
+------------------------------------------------------
 9.2.2
 ------------------------------------------------------
 * Changed default for level text width and horizontal offset as very long level texts (e.g., "+100") where shown with ellipsis.
