@@ -5297,6 +5297,12 @@ local function CreateCustomNameplateEntry(index)
         type = "execute",
         func = function()
           clipboard = t.CopyTable(db.uniqueSettings[index])
+
+          -- Clean trigger settings as it does not make sense to duplicate them (would create a error message and prevent pasting)
+          local copy_trigger = clipboard.Trigger
+          clipboard.Trigger = t.CopyTable(t.DEFAULT_SETTINGS.profile.uniqueSettings["**"].Trigger)
+          clipboard.Trigger.Name.Input = ""
+          clipboard.Trigger.Type = copy_trigger.Type
         end,
       },
       Paste = {
