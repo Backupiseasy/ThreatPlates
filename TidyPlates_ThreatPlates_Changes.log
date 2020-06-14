@@ -4,6 +4,13 @@
 * Consolidated Retail and Classic version of Threat Plates into one single version.
 
 ------------------------------------------------------
+9.2.3
+------------------------------------------------------
+* Removed Thunderstruck (PvP talent) from crowd-control auras list as its uptime is too high. It's shown as a normal debuff now [Comment #4568].
+* Fixed a bug with Copy&Paste of a custom nameplate style where pasting was not possible because it would create a duplicate custom nameplate style [Comment TPC#560].
+* Fixed a bug with Auras where auras where shown although auras were disabled when aura triggers for custom nameplate styles were used.
+
+------------------------------------------------------
 9.2.2
 ------------------------------------------------------
 * Changed default for level text width and horizontal offset as very long level texts (e.g., "+100") where shown with ellipsis.
@@ -155,7 +162,7 @@
 * Added an option to the Boss Mods widget to show tracking lines between player and active nameplate auras.
 * Improved offtank detection of the threat system (thanks to cremor for reporting the issue and helping fixing it) [Issue #331].
 
-﻿------------------------------------------------------
+------------------------------------------------------
 9.1.4
 ------------------------------------------------------
 * Added an option to Auras widget to highlight auras that can be stolen or purged [PR #100, Comment #1707, #1251, #1405, Issue #338].
