@@ -560,6 +560,7 @@ local PLayerIsInInstance = false
 local HideOmniCC, ShowDuration
 local AuraHighlightEnabled, AuraHighlightStart, AuraHighlightStop, AuraHighlightStopPrevious, AuraHighlightOffset
 local AuraHighlightColor = { 0, 0, 0, 0 }
+local EnabledForStyle = {}
 
 ---------------------------------------------------------------------------------------------------
 -- OnUpdate code - updates the auras remaining uptime and stacks and hides them after they expired
@@ -988,7 +989,7 @@ function Widget:UpdateIconGrid(widget_frame, unit)
 
   local old_CustomStyleAura = unit.CustomStyleAura
   unit.CustomStyleAura = false
-  widget_frame.HideAuras = not widget_frame.Active or (db.ShowTargetOnly and not unit.isTarget)
+  widget_frame.HideAuras = not EnabledForStyle[unit.style] or (db.ShowTargetOnly and not unit.isTarget)
 
   local enabled_cc
   local unit_is_friendly = UnitReaction(unitid, "player") > 4
@@ -1891,6 +1892,16 @@ function Widget:UpdateSettings()
   AuraHighlightColor[2] = color.g
   AuraHighlightColor[3] = color.b
   AuraHighlightColor[4] = color.a
+
+  EnabledForStyle["NameOnly"] = self.db.ShowInHeadlineView
+  EnabledForStyle["NameOnly-Unique"] = self.db.ShowInHeadlineView
+  EnabledForStyle["dps"] = self.db.ON
+  EnabledForStyle["tank"] = self.db.ON
+  EnabledForStyle["normal"] = self.db.ON
+  EnabledForStyle["totem"] = self.db.ON
+  EnabledForStyle["unique"] = self.db.ON
+  EnabledForStyle["etotem"] = false
+  EnabledForStyle["empty"] = false
 
   for plate, tp_frame in pairs(Addon.PlatesCreated) do
     local widget_frame = tp_frame.widgets.Auras
