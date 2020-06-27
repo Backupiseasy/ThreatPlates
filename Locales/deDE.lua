@@ -424,7 +424,7 @@ L["If checked, threat feedback will only be shown in instances (dungeons, raids,
 L["If enabled, the truncated health text will be localized, i.e. local metric unit symbols (like k for thousands) will be used."] = "Wenn eingeschaltet, wird der verkürzte Gesundheitstext lokalisiert, d.h. es werden lokale metrische Einheitensymbole (wie k für Tausend) verwendet."
 L["Ignore Marked Units"] = "Markierte Einheiten ignorieren"
 L["Ignore UI Scale"] = "UI-Skalierung ignorieren"
-L["Illegal character used in Name trigger at position: "] = "Ungültiges Zeichen in einem namensbasierten Auslöser an folgender Stelle verwendet:"
+L["Illegal character used in Name trigger at position: "] = "Ungültiges Zeichen in einem namensbasierten Auslöser an folgender Stelle verwendet: "
 L["Immortal Guardian"] = "Unvergängliche Wache"
 L["Import a profile"] = "Ein Profil importieren"
 L["Import a profile from a import string from another user."] = "Das Profil eines anderen Benutzers aus einer Zeichenkette importieren."
