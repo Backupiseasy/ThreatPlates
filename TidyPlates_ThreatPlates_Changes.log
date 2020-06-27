@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+9.2.4
+------------------------------------------------------
+* Fixed a bug with the check for illegal characters in a Name trigger for custom nameplate styles [Comment #4585].
+
+------------------------------------------------------
 9.2.3
 ------------------------------------------------------
 * Removed Thunderstruck (PvP talent) from crowd-control auras list as its uptime is too high. It's shown as a normal debuff now [Comment #4568].
