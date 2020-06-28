@@ -5387,7 +5387,7 @@ local function CreateCustomNameplateEntry(index)
             width = 3,
             desc = L["Apply these custom settings to the nameplate of a unit with a particular name. You can add multiple entries separated by a semicolon. You can use use * as wildcard character."],
             set = function(info, val)
-              -- Only * should be allowed
+              -- Only * should be allowed, so check for other magic characters: ( ) . % + - ? [ ^ $
               local position, _ = string.find(val, "[%(%)%.%%%+%-%?%[%]%^%$]")
               if position then
                 t.Print(L["Illegal character used in Name trigger at position: "] .. tostring(position), true)
