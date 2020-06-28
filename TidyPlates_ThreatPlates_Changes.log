@@ -1,4 +1,10 @@
 ﻿------------------------------------------------------
+1.4.3
+------------------------------------------------------
+* Fixed a bug with the check for illegal characters in a Name trigger for custom nameplate styles [Comment #4585].
+* Added a new mob that can detect stealth to the Stealth widget.
+
+------------------------------------------------------
 1.4.2
 ------------------------------------------------------
 * Fixed a bug with Copy&Paste of a custom nameplate style where pasting was not possible because it would create a duplicate custom nameplate style [Comment TPC#560].
