@@ -3,6 +3,12 @@
 ------------------------------------------------------
 * Consolidated Retail and Classic version of Threat Plates into one single version.
 
+﻿------------------------------------------------------
+9.2.4
+------------------------------------------------------
+* Fixed a bug with the check for illegal characters in a Name trigger for custom nameplate styles [Comment #4585].
+* Added a new mob that can detect stealth to the Stealth widget.
+
 ------------------------------------------------------
 9.2.3
 ------------------------------------------------------
