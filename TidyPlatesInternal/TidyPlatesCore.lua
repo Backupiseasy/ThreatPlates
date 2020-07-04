@@ -751,6 +751,12 @@ do
       castbar.Value = (endTime / 1000) - GetTime()
     else
       text, _, texture, startTime, endTime, _, _, _, spellID = LibClassicCasterino:UnitCastingInfo(unitid)
+
+      if not startTime or isTradeSkill then
+        castbar:Hide()
+        return
+      end
+
       castbar.Value = GetTime() - (startTime / 1000)
     end
 

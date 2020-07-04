@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+1.4.4
+------------------------------------------------------
+* Fixed a Lua error with the castbar that occurred because of some information about the cast was not provided [Comment TPC#580].
+
+------------------------------------------------------
 1.4.3
 ------------------------------------------------------
 * Fixed a bug with the check for illegal characters in a Name trigger for custom nameplate styles [Comment #4585].
