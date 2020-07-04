@@ -1919,6 +1919,7 @@ end
 
 function Widget:OnDisable()
   self:UnregisterAllEvents()
+  LibClassicDurations.UnregisterCallback(TidyPlatesThreat, "UNIT_BUFF")
   for plate, _ in pairs(Addon.PlatesVisible) do
     plate.TPFrame.widgets.Auras:UnregisterAllEvents()
   end

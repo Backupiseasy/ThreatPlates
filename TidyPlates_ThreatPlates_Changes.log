@@ -1,6 +1,7 @@
 ﻿------------------------------------------------------
 1.4.4
 ------------------------------------------------------
+* Fixed a Lua error with LibClassicDurations that occurred when disabling the Auras widget.
 * Fixed a Lua error with the castbar that occurred because of some information about the cast was not provided [Comment TPC#580].
 
 ------------------------------------------------------
