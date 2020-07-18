@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+1.4.5
+------------------------------------------------------
+* Threat-based functions now use WoW Classic's internal Threat API that was enabled with Patch 1.13.5 [Comment TPC#589, TPC#596, Issue TPC#35].
+
+------------------------------------------------------
 1.4.4
 ------------------------------------------------------
 * Updated TOC version for Patch 1.13.5.

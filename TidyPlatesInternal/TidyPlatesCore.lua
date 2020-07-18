@@ -19,6 +19,7 @@ local UnitName, UnitIsUnit, UnitReaction, UnitExists = UnitName, UnitIsUnit, Uni
 local UnitIsPlayer = UnitIsPlayer
 local UnitClass, UnitBuff = UnitClass, UnitBuff
 local GetCreatureDifficultyColor = GetCreatureDifficultyColor
+local UnitThreatSituation = UnitThreatSituation
 local GetRaidTargetIndex = GetRaidTargetIndex
 local GetTime = GetTime
 local UnitPlayerControlled = UnitPlayerControlled
@@ -29,7 +30,6 @@ local GetPlayerInfoByGUID, RAID_CLASS_COLORS = GetPlayerInfoByGUID, RAID_CLASS_C
 local TidyPlatesThreat = TidyPlatesThreat
 local Widgets = Addon.Widgets
 local Animations = Addon.Animations
-local LibThreatClassic = Addon.LibThreatClassic
 local LibClassicCasterino = Addon.LibClassicCasterino
 
 local _G =_G
@@ -488,7 +488,7 @@ function Addon:UpdateUnitCondition(unit, unitid)
   unit.health = _G.UnitHealth(unitid) or 0
   unit.healthmax = _G.UnitHealthMax(unitid) or 1
 
-  unit.threatValue = LibThreatClassic:UnitThreatSituation("player", unitid) or 0
+  unit.threatValue = UnitThreatSituation("player", unitid) or 0
   unit.threatSituation = ThreatReference[unit.threatValue]
   unit.isInCombat = _G.UnitAffectingCombat(unitid)
 
@@ -1110,16 +1110,14 @@ do
   --  end
   --end
 
-  -- LibThreatClassic - Event: ThreatUpdated
-  function Addon.UNIT_THREAT_LIST_UPDATE(lib_name, unit_guid, target_guid, threat)
-    local plate = PlatesByGUID[target_guid]
-    if plate then
-      local unitid = plate.TPFrame.unit.unitid
-      if not unitid or unitid == "player" or unitid == "target" then return end
+  local function UNIT_THREAT_LIST_UPDATE(unitid)
+    if unitid == "player" or unitid == "target" then return end
+    local plate = PlatesByUnit[unitid]
 
+    if plate then
       --local threat_value = UnitThreatSituation("player", unitid) or 0
       --if threat_value ~= plate.TPFrame.unit.threatValue then
-      if (LibThreatClassic:UnitThreatSituation("player", unitid) or 0) ~= plate.TPFrame.unit.threatValue then
+      if (UnitThreatSituation("player", unitid) or 0) ~= plate.TPFrame.unit.threatValue then
 
         --OnHealthUpdate(plate)
 
@@ -1326,9 +1324,9 @@ do
   -- UNIT_SPELLCAST_SENT
 
 	CoreEvents.UNIT_LEVEL = UnitConditionChanged
-	--CoreEvents.UNIT_THREAT_SITUATION_UPDATE = UnitConditionChanged -- did not work anyway (no unitid)
   CoreEvents.RAID_TARGET_UPDATE = WorldConditionChanged
 	--CoreEvents.PLAYER_FOCUS_CHANGED = WorldConditionChanged
+  CoreEvents.UNIT_THREAT_LIST_UPDATE = UNIT_THREAT_LIST_UPDATE
 	CoreEvents.PLAYER_CONTROL_LOST = WorldConditionChanged
 	CoreEvents.PLAYER_CONTROL_GAINED = WorldConditionChanged
 

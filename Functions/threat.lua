@@ -7,12 +7,12 @@ local ADDON_NAME, Addon = ...
 local string, strsplit = string, strsplit
 
 -- WoW APIs
+local UnitThreatSituation = UnitThreatSituation
 local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
 local UnitReaction  = UnitReaction
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
-local LibThreatClassic = Addon.LibThreatClassic
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -70,10 +70,7 @@ function Addon:OnThreatTable(unit)
   --  return threatStatus ~= nil
 
   -- nil means player is not on unit's threat table - more acurate, but slower reaction time than the above solution
-  -- return UnitThreatSituation("player", unit.unitid) ~= nil
-
-  local _, _, scaledPercent, _, threatValue = LibThreatClassic:UnitDetailedThreatSituation("player", unit.unitid)
-  return scaledPercent and scaledPercent > 0
+  return UnitThreatSituation("player", unit.unitid) ~= nil
 end
 
 --toggle = {

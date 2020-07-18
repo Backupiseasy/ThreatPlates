@@ -12,7 +12,7 @@ local abs = abs
 -- WoW APIs
 local UnitIsConnected, UnitReaction, UnitCanAttack = UnitIsConnected, UnitReaction, UnitCanAttack
 local UnitIsPlayer, UnitPlayerControlled = UnitIsPlayer, UnitPlayerControlled
-local UnitIsUnit, UnitExists = UnitIsUnit, UnitExists
+local UnitThreatSituation, UnitIsUnit, UnitExists = UnitThreatSituation, UnitIsUnit, UnitExists
 local GetPartyAssignment = GetPartyAssignment
 local RAID_CLASS_COLORS = RAID_CLASS_COLORS
 
@@ -23,7 +23,6 @@ local TOTEMS = Addon.TOTEMS
 local RGB_P = ThreatPlates.RGB_P
 local IsFriend
 local IsGuildmate
-local LibThreatClassic = Addon.LibThreatClassic
 --local ShowQuestUnit
 
 local _G =_G
@@ -67,7 +66,7 @@ function CS:GetSmudgeColorRGB(colorA, colorB, perc)
 end
 
 local function GetThreatSituation(unit, style, enable_off_tank)
-  local threat_status = LibThreatClassic:UnitThreatSituation("player", unit.unitid)
+  local threat_status = UnitThreatSituation("player", unit.unitid)
 
   local threat_situation, other_player_has_aggro
   if threat_status then
@@ -103,7 +102,7 @@ local function GetThreatSituation(unit, style, enable_off_tank)
     -- Player does not tank the unit, so check if it is off-tanked:
     if UnitExists(target_unit) then
       if UnitIsPlayer(target_unit) or UnitPlayerControlled(target_unit) then
-        local target_threat_situation = LibThreatClassic:UnitThreatSituation(target_unit, unit.unitid) or 0
+        local target_threat_situation = UnitThreatSituation(target_unit, unit.unitid) or 0
         if target_threat_situation > 1 then
           -- Target unit does tank unit, so check if target unit is a tank or an tank-like pet/guardian
           --if ("TANK" == UnitGroupRolesAssigned(target_unit) and not UnitIsUnit("player", target_unit)) or UnitIsUnit(target_unit, "pet") or IsOffTankCreature(target_unit) then

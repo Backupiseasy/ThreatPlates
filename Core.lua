@@ -22,7 +22,6 @@ local TidyPlatesThreat = TidyPlatesThreat
 local LibStub = LibStub
 local LSM = t.Media
 local L = t.L
-local LibThreatClassic = Addon.LibThreatClassic
 local LibClassicCasterino = Addon.LibClassicCasterino
 
 local _G =_G
@@ -321,12 +320,6 @@ function TidyPlatesThreat:OnInitialize()
 
   -- Setup chat commands
   self:RegisterChatCommand("tptp", "ChatCommand")
-
-  -- Register callbacks for threat library
-  LibThreatClassic.RegisterCallback(self, "Activate", Addon.UNIT_THREAT_LIST_UPDATE)
-  LibThreatClassic.RegisterCallback(self, "Deactivate", Addon.UNIT_THREAT_LIST_UPDATE)
-  LibThreatClassic.RegisterCallback(self, "ThreatUpdated", Addon.UNIT_THREAT_LIST_UPDATE)
-  LibThreatClassic:RequestActiveOnSolo(true)
 
   -- Register callsbacks for spellcasting library
   LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_START", Addon.UNIT_SPELLCAST_START)
