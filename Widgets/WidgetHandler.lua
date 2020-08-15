@@ -237,18 +237,17 @@ function WidgetHandler:InitializeAllWidgets()
 end
 
 function WidgetHandler:EnableWidget(widget_name)
-  -- Enable widgets only once
-  if self.EnabledTargetWidgets[widget_name] or self.EnabledWidgets[widget_name] then
-    return
-  end
-
   local widget = self.Widgets[widget_name]
   if widget.TargetOnly then
-    self.EnabledTargetWidgets[widget_name] = widget
-    widget:Create()
+    if not self.EnabledTargetWidgets[widget_name] then
+      self.EnabledTargetWidgets[widget_name] = widget
+      widget:Create()
+    end
   elseif widget.FocusOnly then
-    self.EnabledFocusWidget = widget
-    widget:Create()
+    if not self.EnabledFocusWidget then
+      self.EnabledFocusWidget = widget
+      widget:Create()
+    end
   else
     self.EnabledWidgets[widget_name] = widget
 
@@ -284,12 +283,13 @@ function WidgetHandler:EnableWidget(widget_name)
 end
 
 function WidgetHandler:DisableWidget(widget_name)
-  -- Disable widgets only once
-  if not (self.EnabledTargetWidgets[widget_name] or self.EnabledWidgets[widget_name]) then
+  local widget = self.Widgets[widget_name]
+
+  -- Disable widgets only if they are enabled
+  if not (self.EnabledTargetWidgets[widget_name] or self.EnabledWidgets[widget_name] or self.EnabledFocusWidget == widget) then
     return
   end
 
-  local widget = self.Widgets[widget_name]
   if widget.TargetOnly then
     self.EnabledTargetWidgets[widget_name] = nil
 
@@ -331,7 +331,9 @@ function WidgetHandler:OnUnitAdded(tp_frame, unit)
     for _, widget in pairs(self.EnabledTargetWidgets) do
       widget:OnTargetUnitAdded(tp_frame, unit)
     end
-  elseif unit.IsFocus and self.EnabledFocusWidget then
+  end
+
+  if unit.IsFocus and self.EnabledFocusWidget then
     self.EnabledFocusWidget:OnFocusUnitAdded(tp_frame, unit)
   end
 

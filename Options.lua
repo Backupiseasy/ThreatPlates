@@ -6622,7 +6622,7 @@ local function CreateOptionsTable()
                           arg = { "HeadlineView", "ShowTargetHighlight" },
                           set = function(info, val)
                             SetValuePlain(info, val)
-                            Addon.Widgets:UpdateSettings("TargetArt")
+                            Addon.Widgets:InitializeWidget("TargetArt")
                           end,
                         },
                         FocusHighlight = {
@@ -6632,7 +6632,7 @@ local function CreateOptionsTable()
                           arg = { "HeadlineView", "ShowFocusHighlight" },
                           set = function(info, val)
                             SetValuePlain(info, val)
-                            Addon.Widgets:UpdateSettings("Focus")
+                            Addon.Widgets:InitializeWidget("Focus")
                           end,
                           hidden = function() return Addon.CLASSIC end,
                         },
