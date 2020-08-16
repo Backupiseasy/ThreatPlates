@@ -4,6 +4,7 @@
 * Consolidated Retail and Classic version of Threat Plates into one single version.
 * Fixed a bug where enabling/disabling widgets only took effect after reloading the UI.
 * Fixed a bug with Focus widget where an incorrect artwork was shown when switching between healthbar and headline view.
+* Added a new widget to show the experience bar of certain followers. Currently only works for Nazjatar bodybuards [Comment #3775, #3728, #4190].
 
 ------------------------------------------------------
 9.2.4
@@ -23,7 +24,7 @@
 ------------------------------------------------------
 * Changed default for level text width and horizontal offset as very long level texts (e.g., "+100") where shown with ellipsis.
 
-------------------------------------------------------	2
+------------------------------------------------------
 9.2.1
 ------------------------------------------------------
 * Fixed a bug where threat textures where are never shown although the player is in combat [IM].

@@ -1017,6 +1017,73 @@ ThreatPlates.DEFAULT_SETTINGS = {
       --ShowTrackingLine = true, -- Removed in 9.1.9
       --TrackingLineThickness = 4  -- Removed in 9.1.9
     },
+    ExperienceWidget = {
+      ON = true,
+      ShowInHeadlineView = true,
+      ShowOnlyMine = false,
+      Height = 10,
+      Width = 120,
+      -- Appearance
+      Texture = "Smooth",
+      Color = RGB(247, 214, 0, 1),
+      BorderTexture = "ThreatPlatesBorder",
+      BorderEdgeSize = 2,
+      BorderOffset = 2,
+      BorderInset = 0,
+      BackgroundUseForegroundColor = false,
+      BackgroundColor = RGB(0, 0, 0, 0.3),
+      BorderUseForegroundColor = false,
+      BorderUseBackgroundColor = false,
+      BorderColor = RGB(0, 0, 0, 1),
+      -- Positioning
+      HealthbarMode = {
+        Anchor = "BOTTOM",
+        InsideAnchor = false,
+        HorizontalOffset = 0,
+        VerticalOffset = -10,
+      },
+      NameMode = {
+        Anchor = "BOTTOM",
+        InsideAnchor = false,
+        HorizontalOffset = 0,
+        VerticalOffset = -10,
+      },
+      -- Texts
+      RankText = {
+        Show = true,
+        Anchor = "LEFT",
+        InsideAnchor = true,
+        HorizontalOffset = 1,
+        VerticalOffset = 0,
+        Font = {
+          Typeface = Addon.DEFAULT_FONT,
+          Size = 9,
+          Transparency = 1,
+          Color = RGB(255, 255, 255),
+          flags = "NONE",
+          Shadow = true,
+          HorizontalAlignment = "LEFT",
+          VerticalAlignment = "CENTER",
+        }
+      },
+      ExperienceText = {
+        Show = true,
+        Anchor = "RIGHT",
+        InsideAnchor = true,
+        HorizontalOffset = -1,
+        VerticalOffset = 0,
+        Font = {
+          Typeface = Addon.DEFAULT_FONT,
+          Size = 9,
+          Transparency = 1,
+          Color = RGB(255, 255, 255),
+          flags = "NONE",
+          Shadow = true,
+          HorizontalAlignment = "RIGHT",
+          VerticalAlignment = "CENTER",
+        }
+      },
+    },
 --    TestWidget = {
 --      ON = true,
 --      BarWidth = 120,

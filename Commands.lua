@@ -139,6 +139,19 @@ function TidyPlatesThreat:ChatCommand(input)
 			TP.DEBUG_PRINT_UNIT(plate.TPFrame.unit, true)
 		elseif command == "migrate" then
 			Addon.MigrateDatabase(TP.Meta("version"))
+		elseif command == "guid" then
+			local plate = C_NamePlate.GetNamePlateForUnit("target")
+			if not plate then return end
+
+			local guid = UnitGUID(plate.TPFrame.unit.unitid)
+			local _, _,  _, _, _, npc_id = strsplit("-", guid)
+
+			print("NPC-ID:", npc_id, "=>", guid)
+
+			local widgets = C_UIWidgetManager.GetAllWidgetsBySetID(C_UIWidgetManager.GetPowerBarWidgetSetID())
+			for i, w in pairs(widgets) do
+				print (i, w)
+			end
 		else
 			TidyPlatesThreat:ChatCommandDebug(cmd_list)
 		end

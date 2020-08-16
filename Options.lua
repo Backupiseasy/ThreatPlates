@@ -395,9 +395,31 @@ local function GetValue(info)
 end
 
 local function CheckIfValueExists(widget_info, setting)
-  local info = { arg = Addon.ConcatTables(widget_info, setting) }
+  local value = TidyPlatesThreat.db.profile
+  local keys = Addon.ConcatTables(widget_info, setting)
 
-  return GetValue(info) ~= nil
+  for index = 1, #keys do
+    if not value then
+      return true
+    else
+      value = value[keys[index]]
+    end
+  end
+
+  return value ~= nil
+end
+
+local function AddIfSettingExists(entry) -- endwidget_info, setting)
+  local value = TidyPlatesThreat.db.profile
+  for index, key in ipairs(entry.arg) do
+    if value ~= nil then
+      value = value[key]
+    else
+      break
+    end
+  end
+
+  return (value ~= nil and entry) or nil
 end
 
 local function SetValuePlain(info, value)
@@ -616,6 +638,7 @@ local MAP_OPTION_TO_WIDGET = {
   TargetArtWidget = "TargetArt",
   FocusWidget = "Focus",
   ArenaWidget = "Arena",
+  ExperienceWidget = "Experience",
 }
 
 local function SetValueWidget(info, val)
@@ -1219,6 +1242,236 @@ local function GetFontEntryDefault(name, pos, widget_info, func_disabled)
   return entry
 end
 
+--local function AddPositioningOptions(entry, pos, widget_info)
+--  entry.Anchor = {
+--    type = "select",
+--    order = pos + 0,
+--    name = L["Position"],
+--    values = Addon.ANCHOR_POINT,
+--    arg = Addon.ConcatTables(widget_info, { "Anchor" }),
+--  }
+--  entry.InsideAnchor = {
+--    type = "toggle",
+--    order = pos + 1,
+--    name = L["Inside"],
+--    width = "half",
+--    arg = Addon.ConcatTables(widget_info, { "InsideAnchor" }),
+--  }
+--  entry.X = {
+--    type = "range",
+--    order = pos + 2,
+--    name = L["Horizontal Offset"],
+--    max = 120,
+--    min = -120,
+--    step = 1,
+--    isPercent = false,
+--    arg = Addon.ConcatTables(widget_info, { "HorizontalOffset" }),
+--  }
+--  entry.Y = {
+--    type = "range",
+--    order = pos + 3,
+--    name = L["Vertical Offset"],
+--    max = 120,
+--    min = -120,
+--    step = 1,
+--    isPercent = false,
+--    arg = Addon.ConcatTables(widget_info, { "VerticalOffset" }),
+--  }
+--  entry.AlignX = {
+--    type = "select",
+--    order = pos + 4,
+--    name = L["Horizontal Align"],
+--    values = t.AlignH,
+--    arg = Addon.ConcatTables(widget_info, { "Font", "HorizontalAlignment" }),
+--  }
+--  entry.AlignY = {
+--    type = "select",
+--    order = pos + 5,
+--    name = L["Vertical Align"],
+--    values = t.AlignV,
+--    arg = Addon.ConcatTables(widget_info, { "Font", "VerticalAlignment" }),
+--  }
+--end
+
+local function GetFontPositioningEntry(pos, widget_info)
+  local entry = {
+    type = "group",
+    order = pos,
+    name = L["Positioning"],
+    inline = true,
+    args = {
+      Anchor = {
+        type = "select",
+        order = 10,
+        name = L["Anchor"],
+        values = Addon.ANCHOR_POINT,
+        arg = Addon.ConcatTables(widget_info, { "Anchor" }),
+      },
+      InsideAnchor = {
+        type = "toggle",
+        order = 20,
+        name = L["Inside"],
+        width = "half",
+        arg = Addon.ConcatTables(widget_info, { "InsideAnchor" }),
+      },
+      X = {
+        type = "range",
+        order = 30,
+        name = L["Horizontal Offset"],
+        max = 120,
+        min = -120,
+        step = 1,
+        isPercent = false,
+        arg = Addon.ConcatTables(widget_info, { "HorizontalOffset" }),
+      },
+      Y = {
+        type = "range",
+        order = 40,
+        name = L["Vertical Offset"],
+        max = 120,
+        min = -120,
+        step = 1,
+        isPercent = false,
+        arg = Addon.ConcatTables(widget_info, { "VerticalOffset" }),
+      },
+      -- Horizontal and vertical alignment are only used for positioning entries for texts
+      AlignX = AddIfSettingExists({
+        type = "select",
+        order = 50,
+        name = L["Horizontal Align"],
+        values = t.AlignH,
+        arg = Addon.ConcatTables(widget_info, { "Font", "HorizontalAlignment" }),
+      }),
+      AlignY = AddIfSettingExists({
+        type = "select",
+        order = 60,
+        name = L["Vertical Align"],
+        values = t.AlignV,
+        arg = Addon.ConcatTables(widget_info, { "Font", "VerticalAlignment" }),
+      }),
+    }
+  }
+  return entry
+end
+
+local function GetFramePositioningEntry(pos, widget_info)
+  local entry = {
+    type = "group",
+    order = pos,
+    name = L["Positioning"],
+    inline = true,
+    args = {
+      HealthbarMode = {
+        type = "group",
+        order = 10,
+        name = L["Healthbar View"],
+        inline = true,
+        args = {
+          Anchor = {
+            type = "select",
+            order = 10,
+            name = L["Anchor"],
+            values = Addon.ANCHOR_POINT,
+            arg = Addon.ConcatTables(widget_info, { "HealthbarMode", "Anchor" }),
+          },
+          InsideAnchor = {
+            type = "toggle",
+            order = 20,
+            name = L["Inside"],
+            width = "half",
+            arg = Addon.ConcatTables(widget_info, { "HealthbarMode", "InsideAnchor" }),
+          },
+          X = {
+            type = "range",
+            order = 30,
+            name = L["Horizontal Offset"],
+            max = 120,
+            min = -120,
+            step = 1,
+            isPercent = false,
+            arg = Addon.ConcatTables(widget_info, { "HealthbarMode", "HorizontalOffset" }),
+          },
+          Y = {
+            type = "range",
+            order = 40,
+            name = L["Vertical Offset"],
+            max = 120,
+            min = -120,
+            step = 1,
+            isPercent = false,
+            arg = Addon.ConcatTables(widget_info, { "HealthbarMode", "VerticalOffset" }),
+          },
+        },
+      },
+      NameMode = AddIfSettingExists({
+        type = "group",
+        order = 20,
+        name = L["Headline View"],
+        inline = true,
+        arg = Addon.ConcatTables(widget_info, { "NameMode" }),
+        args = {
+          Anchor = {
+            type = "select",
+            order = 10,
+            name = L["Anchor"],
+            values = Addon.ANCHOR_POINT,
+            arg = Addon.ConcatTables(widget_info, { "NameMode", "Anchor" }),
+          },
+          InsideAnchor = {
+            type = "toggle",
+            order = 20,
+            name = L["Inside"],
+            width = "half",
+            arg = Addon.ConcatTables(widget_info, { "NameMode", "InsideAnchor" }),
+          },
+          X = {
+            type = "range",
+            order = 30,
+            name = L["Horizontal Offset"],
+            max = 120,
+            min = -120,
+            step = 1,
+            isPercent = false,
+            arg = Addon.ConcatTables(widget_info, { "NameMode", "HorizontalOffset" }),
+          },
+          Y = {
+            type = "range",
+            order = 40,
+            name = L["Vertical Offset"],
+            max = 120,
+            min = -120,
+            step = 1,
+            isPercent = false,
+            arg = Addon.ConcatTables(widget_info, { "NameMode", "VerticalOffset" }),
+          },
+        },
+      }),
+    },
+  }
+  return entry
+end
+
+local function GetTextEntry(name, pos, widget_info)
+  local entry = {
+    type = "group",
+    order = pos,
+    name = name,
+    inline = false,
+    args = {
+      Show = {
+        name = L["Show Text"],
+        order = 1,
+        type = "toggle",
+        arg = Addon.ConcatTables(widget_info, { "Show" }),
+      },
+      Spacer1 = GetSpacerEntry(2),
+      Positioning = GetFontPositioningEntry(10, widget_info),
+      Font = GetFontEntryDefault(L["Font"], 20, widget_info),
+    },
+  }
+  return entry
+end
+
 local function GetBoundariesEntry(pos, widget_info, func_disabled)
   local entry = {
     name = L["Text Boundaries"],
@@ -1719,7 +1972,7 @@ local function CreateArenaWidgetOptions()
             arg = {"arenaWidget", "HideName"},
           },
           Font = GetFontEntryDefault(L["Font"], 30, { "arenaWidget", "NumberText" }),
-          Placement = {
+          Positioning = {
             type = "group",
             order = 35,
             name = L["Placement"],
@@ -1728,7 +1981,7 @@ local function CreateArenaWidgetOptions()
               Anchor = {
                 type = "select",
                 order = 10,
-                name = L["Anchor Point"],
+                name = L["Position"],
                 values = Addon.ANCHOR_POINT,
                 arg = { "arenaWidget", "NumberText", "Anchor" }
               },
@@ -2083,6 +2336,218 @@ local function CreateTargetArtWidgetOptions()
           },
         },
       },
+    },
+  }
+
+  return options
+end
+
+local function CreateExperienceWidgetOptions()
+  -- Appearance: Size, Texture + Border
+  -- Positioning
+  -- Tab Rank, Tab Exp mit Font-Settings + Positioning
+  local options = {
+    name = L["Experience"],
+    type = "group",
+    order = 54,
+    childGroups = "tab",
+    hidden = function() return Addon.CLASSIC end,
+    set = SetValueWidget,
+    args = {
+      Enable = GetEnableEntry(
+        L["Enable Experience Widget"],
+        L["This widget shows an experience bar for player followers or pets."], "ExperienceWidget",
+        true,
+        function(info, val) SetValuePlain(info, val); Addon.Widgets:InitializeWidget("Experience") end
+      ),
+      Filter = {
+        name = L["Show For"],
+        order = 10,
+        type = "group",
+        inline = true,
+        args = {
+          OnlyMine = {
+            name = L["Only Mine"],
+            order = 10,
+            type = "toggle",
+            arg = { "ExperienceWidget", "ShowOnlyMine" },
+          },
+        },
+      },
+      Appearance = {
+        name = L["Appearance"],
+        order = 20,
+        type = "group",
+        inline = false,
+        args = {
+          Appearance = {
+            name = L["Bar Style"],
+            order = 10,
+            type = "group",
+            inline = true,
+            args = {
+              BarTexture = {
+                name = L["Foreground Texture"],
+                order = 10,
+                type = "select",
+                dialogControl = "LSM30_Statusbar",
+                values = AceGUIWidgetLSMlists.statusbar,
+                arg = { "ExperienceWidget", "Texture" },
+              },
+              BarColor = {
+                name = L["Color"],
+                type = "color",
+                order = 15,
+                get = GetColorAlpha,
+                set = SetColorAlphaWidget,
+                hasAlpha = true,
+                arg = {"ExperienceWidget", "Color"},
+              },
+              BarWidth = { name = L["Bar Width"], order = 20, type = "range", min = 1, max = 500, step = 1, arg = { "ExperienceWidget", "Width" }, },
+              BarHeight = { name = L["Bar Height"], order = 30, type = "range", min = 1, max = 500, step = 1, arg = { "ExperienceWidget", "Height" }, },
+              Spacer0 = GetSpacerEntry(70),
+              BorderTexture = {
+                name = L["Bar Border"],
+                order = 80,
+                type = "select",
+                dialogControl = "LSM30_Border",
+                values = AceGUIWidgetLSMlists.border,
+                arg = { "ExperienceWidget", "BorderTexture" },
+              },
+              BorderEdgeSize = {
+                name = L["Edge Size"],
+                order = 90,
+                type = "range",
+                min = 0, max = 32, step = 1,
+                arg = { "ExperienceWidget", "BorderEdgeSize" },
+              },
+              BorderOffset = {
+                name = L["Offset"],
+                order = 100,
+                type = "range",
+                min = -16, max = 16, step = 1,
+                arg = { "ExperienceWidget", "BorderOffset" },
+              },
+              BorderOffset = {
+                name = L["Inset"],
+                order = 110,
+                type = "range",
+                min = -16, max = 16, step = 1,
+                arg = { "ExperienceWidget", "BorderInset" },
+              },
+              Spacer1 = GetSpacerEntry(200),
+              BGColorText = {
+                type = "description",
+                order = 210,
+                width = "single",
+                name = L["Background Color:"],
+              },
+              BGColorForegroundToggle = {
+                name = L["Same as Foreground"],
+                order = 220,
+                type = "toggle",
+                desc = L["Use the healthbar's foreground color also for the background."],
+                arg = { "ExperienceWidget", "BackgroundUseForegroundColor" },
+              },
+              BGColorCustomToggle = {
+                name = L["Custom"],
+                order = 230,
+                type = "toggle",
+                width = "half",
+                desc = L["Use a custom color for the healtbar's background."],
+                set = function(info, val) SetValueWidget(info, not val) end,
+                get = function(info, val) return not GetValue(info, val) end,
+                arg = { "ExperienceWidget", "BackgroundUseForegroundColor" },
+              },
+              BGColorCustom = {
+                name = L["Color"],
+                type = "color",
+                order = 235,
+                get = GetColorAlpha,
+                set = SetColorAlphaWidget,
+                hasAlpha = true,
+                arg = {"ExperienceWidget", "BackgroundColor"},
+                width = "half",
+              },
+              Spacer2 = GetSpacerEntry(300),
+              BorderolorText = {
+                type = "description",
+                order = 310,
+                width = "single",
+                name = L["Border Color:"],
+              },
+              BorderColorForegroundToggle = {
+                name = L["Same as Foreground"],
+                order = 320,
+                type = "toggle",
+                desc = L["Use the healthbar's foreground color also for the border."],
+                set = function(info, val)
+                  if val then
+                    db.ExperienceWidget.BorderUseBackgroundColor = false
+                    SetValueWidget(info, val)
+                  else
+                    db.ExperienceWidget.BorderUseBackgroundColor = false
+                    SetValueWidget(info, val)
+                  end
+                end,
+                arg = { "ExperienceWidget", "BorderUseForegroundColor" },
+              },
+              BorderColorBackgroundToggle = {
+                name = L["Same as Background"],
+                order = 325,
+                type = "toggle",
+                desc = L["Use the healthbar's background color also for the border."],
+                set = function(info, val)
+                  if val then
+                    db.ExperienceWidget.BorderUseForegroundColor = false
+                    SetValueWidget(info, val)
+                  else
+                    db.ExperienceWidget.BorderUseForegroundColor = false
+                    SetValueWidget(info, val)
+                  end
+                end,
+                arg = { "ExperienceWidget", "BorderUseBackgroundColor" },
+              },
+              BorderColorCustomToggle = {
+                name = L["Custom"],
+                order = 330,
+                type = "toggle",
+                width = "half",
+                desc = L["Use a custom color for the healtbar's border."],
+                set = function(info, val)
+                  db.ExperienceWidget.BorderUseForegroundColor = false
+                  db.ExperienceWidget.BorderUseBackgroundColor = false
+                  Addon:ForceUpdate()
+                end,
+                get = function(info, val)
+                  return not (db.ExperienceWidget.BorderUseForegroundColor or db.ExperienceWidget.BorderUseBackgroundColor)
+                end,
+              },
+              BorderColorCustom = {
+                name = L["Color"],
+                type = "color",
+                order = 335,
+                get = GetColorAlpha,
+                set = SetColorAlphaWidget,
+                hasAlpha = true,
+                arg = {"ExperienceWidget", "BorderColor"},
+                width = "half",
+              },
+            },
+          },
+        },
+      },
+      Layout = {
+        name = L["Layout"],
+        order = 30,
+        type = "group",
+        inline = false,
+        args = {
+          Positioning = GetFramePositioningEntry(20, { "ExperienceWidget" }),
+        },
+      },
+      RankText = GetTextEntry(L["Rank Text"], 40, { "ExperienceWidget", "RankText" }),
+      ExpText = GetTextEntry(L["Experience Text"], 50, { "ExperienceWidget", "ExperienceText" }),
     },
   }
 
@@ -5023,6 +5488,7 @@ local function CreateWidgetOptions()
       BossModsWidget = CreateBossModsWidgetOptions(),
       ClassIconWidget = CreateClassIconsWidgetOptions(),
       ComboPointsWidget = CreateComboPointsWidgetOptions(),
+      ExperienceWidget = CreateExperienceWidgetOptions(),
       FocusWidget = CreateFocusWidgetOptions(),
       ResourceWidget = CreateResourceWidgetOptions(),
       SocialWidget = CreateSocialWidgetOptions(),
