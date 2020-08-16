@@ -58,6 +58,8 @@ local DETECTION_AURAS = {
 local DETECTION_UNITS = {
   -- Legion
   ["109229"] = true, -- Nightfallen Construct (Suramar)
+  ["111354"] = true, -- Taintheart Befouler
+  ["111528"] = true, -- Deathroot Ancient
   -- Battle for Azeroth
   ["148483"] = true, -- Ancestral Avenger (Battle of Dazar'alor)
   ["148488"] = true, -- Unliving Augur (Battle of Dazar'alor)
