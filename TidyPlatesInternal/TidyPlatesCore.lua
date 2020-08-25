@@ -34,6 +34,7 @@ local Widgets = Addon.Widgets
 local Animations = Addon.Animations
 local LibThreatClassic = Addon.LibThreatClassic
 local LibClassicCasterino = Addon.LibClassicCasterino
+local BackdropTemplate = Addon.BackdropTemplate
 
 local GetNameForNameplate
 local UnitCastingInfo
@@ -1119,7 +1120,7 @@ do
     end
   end
 
-  function CoreEvents:UNIT_HEALTH_FREQUENT(unitid)
+  function CoreEvents:UNIT_HEALTH(unitid)
     local plate = GetNamePlateForUnit(unitid)
 
     if plate and plate.TPFrame.Active then
@@ -1686,7 +1687,7 @@ function Addon:ConfigClickableArea(toggle_show)
         local extended = ConfigModePlate.TPFrame
 
         -- Draw background to show for clickable area
-        extended.Background = _G.CreateFrame("Frame", nil, plate)
+        extended.Background = _G.CreateFrame("Frame", nil, extended, BackdropTemplate)
         extended.Background:SetBackdrop({
           bgFile = ThreatPlates.Art .. "TP_WhiteSquare.tga",
           edgeFile = ThreatPlates.Art .. "TP_WhiteSquare.tga",

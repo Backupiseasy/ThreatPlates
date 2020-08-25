@@ -150,6 +150,8 @@ def create_package(wow_version):
         working_dir = os.getcwd()
         if "_retail_" in working_dir:
             initialize_version = "Retail"
+        elif "_ptr_" in working_dir:
+            initialize_version = "Retail"
         elif "_classic_" in working_dir:
             initialize_version = "Classic"
 

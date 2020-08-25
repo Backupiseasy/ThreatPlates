@@ -17,7 +17,12 @@ local string, tonumber, next, pairs, ipairs = string, tonumber, next, pairs, ipa
 local WorldFrame = WorldFrame
 local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
 local UnitName, UnitIsUnit, UnitDetailedThreatSituation = UnitName, UnitIsUnit, UnitDetailedThreatSituation
-local GetNumQuestLeaderBoards, GetQuestObjectiveInfo, GetQuestLogTitle, GetNumQuestLogEntries, GetQuestLogIndexByID = GetNumQuestLeaderBoards, GetQuestObjectiveInfo, GetQuestLogTitle, GetNumQuestLogEntries, GetQuestLogIndexByID
+
+local GetQuestObjectives, GetQuestInfo = C_QuestLog.GetQuestObjectives, C_QuestLog.GetInfo
+local GetQuestLogTitle, GetNumQuestLogEntries = C_QuestLog.GetQuestLogTitle, C_QuestLog.GetNumQuestLogEntries
+
+local GetQuestLogIndexByID = GetQuestLogIndexByID
+
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 
 -- ThreatPlates APIs
@@ -243,10 +248,11 @@ function Widget:CreateQuest(questID, questIndex)
   }
 
   function Quest:UpdateObjectives()
-    local objectives = GetNumQuestLeaderBoards(self.index)
+    local objectives = GetQuestObjectives(self.id)
 
-    for objIndex = 1, objectives do
-      local text, objectiveType, finished, numFulfilled, numRequired = GetQuestObjectiveInfo(self.id, objIndex, false)
+    local text, objectiveType, finished, numFulfilled, numRequired
+    for objIndex = 1, #objectives do
+      text, objectiveType, numFulfilled, numRequired = objectives.text, objectives.type, objectives.numFulfilled, objectives.numRequired
 
       -- Occasionally the game will return nil text, this happens when some world quests/bonus area quests finish (the objective no longer exists)
       -- Does not make sense to add "progressbar" type quests here as there progress is not updated via QUEST_WATCH_UPDATE
@@ -282,15 +288,14 @@ function Widget:CreateQuest(questID, questIndex)
 end
 
 function Widget:AddQuestCacheEntry(questIndex)
-  local title, _, _, isHeader, _, _, _, questID = GetQuestLogTitle(questIndex)
+  local info = GetQuestInfo(questIndex)
 
-  if not isHeader and title then --ignore quest log headers
-    local quest = Widget:CreateQuest(questID, questIndex)
+  if info and not info.isHeader and info.title then --ignore quest log headers
+    local quest = Widget:CreateQuest(info.questID, questIndex)
 
     quest:UpdateObjectives()
-
-    QuestList[title] = quest
-    QuestIDs[questID] = title --so it can be found by remove
+    QuestList[info.title] = quest
+    QuestIDs[info.questID] = info.title --so it can be found by remove
   end
 end
 
@@ -327,13 +332,12 @@ function Widget:PLAYER_ENTERING_WORLD()
 end
 
 function Widget:QUEST_WATCH_UPDATE(questIndex)
-  local title, _, _, _, _, _, _, questID = GetQuestLogTitle(questIndex)
-
-  if not title then
+  local info = GetQuestInfo(questIndex)
+  if not info or not info.title then
     return
   end
 
-  QuestsToUpdate[questID] = title
+  QuestsToUpdate[info.id] = info.title
 end
 
 function Widget:UNIT_QUEST_LOG_CHANGED(...)

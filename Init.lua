@@ -34,6 +34,8 @@ if Addon.CLASSIC then
 	--Addon.LibClassicCasterino = LibStub("LibClassicCasterino")
 end
 
+Addon.BackdropTemplate = BackdropTemplateMixin and "BackdropTemplate"
+
 ---------------------------------------------------------------------------------------------------
 -- Define AceAddon TidyPlatesThreat
 ---------------------------------------------------------------------------------------------------

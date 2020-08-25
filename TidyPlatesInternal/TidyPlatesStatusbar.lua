@@ -14,6 +14,7 @@ local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
+local BackdropTemplate = Addon.BackdropTemplate
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -134,10 +135,10 @@ function Addon:CreateHealthbar(parent)
 
   frame:SetFrameLevel(parent:GetFrameLevel() + 5)
 
-  frame.Border = _G.CreateFrame("Frame", nil, frame)
+  frame.Border = _G.CreateFrame("Frame", nil, frame, BackdropTemplate)
   frame.Background = frame:CreateTexture(nil, "BACKGROUND")
-  frame.EliteBorder = _G.CreateFrame("Frame", nil, frame)
-  frame.ThreatBorder = _G.CreateFrame("Frame", nil, frame)
+  frame.EliteBorder = _G.CreateFrame("Frame", nil, frame, BackdropTemplate)
+  frame.ThreatBorder = _G.CreateFrame("Frame", nil, frame, BackdropTemplate)
 
   frame.Border:SetFrameLevel(frame:GetFrameLevel())
   frame.EliteBorder:SetFrameLevel(frame:GetFrameLevel() + 1)
@@ -225,9 +226,9 @@ function Addon:CreateCastbar(parent)
 
   frame:SetFrameLevel(parent:GetFrameLevel() + 3)
 
-  frame.Border = _G.CreateFrame("Frame", nil, frame)
+  frame.Border = _G.CreateFrame("Frame", nil, frame, BackdropTemplate)
   frame.Background = frame:CreateTexture(nil, "BACKGROUND")
-  frame.InterruptBorder = _G.CreateFrame("Frame", nil, frame)
+  frame.InterruptBorder = _G.CreateFrame("Frame", nil, frame, BackdropTemplate)
   frame.Overlay = _G.CreateFrame("Frame", nil, frame)
 
   frame.Border:SetFrameLevel(frame:GetFrameLevel())
