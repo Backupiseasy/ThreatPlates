@@ -1253,7 +1253,7 @@ function Widget:UpdateAuraInformationIconMode(frame) -- texture, duration, expir
   end
 
   if AuraHighlightEnabled then
-    if frame.AuraStealOrPurge or true then
+    if frame.AuraStealOrPurge then
       AuraHighlightStart(frame.Highlight, AuraHighlightColor, 0)
     else
       AuraHighlightStop(frame.Highlight)
