@@ -1242,6 +1242,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
             VerticalAlignment = "CENTER",
           },
         },
+        FrameOrder = "HealthbarOverCastbar",
       },
       name = { -- Names for Healthbar View
         show = true,

@@ -134,16 +134,16 @@ local UPDATE_TEXTURE_FUNCTIONS = {
 }
 
 local FRAME_LEVEL_BY_TEXTURE = {
-  default = 6,
-  squarethin = 6,
-  arrows = 14,
-  arrow_down = 14,
-  arrow_less_than = 14,
-  glow = 4,
-  threat_glow = 4,
-  arrows_legacy = 14,
-  bubble = 14,
-  crescent = 14,
+  default = 1,
+  squarethin = 1,
+  arrows = 9,
+  arrow_down = 9,
+  arrow_less_than = 9,
+  glow = -1,
+  threat_glow = -1,
+  arrows_legacy = 9,
+  bubble = 9,
+  crescent = 9,
 }
 
 local function GetHeadlineViewHeight(db)
@@ -224,10 +224,11 @@ function Widget:OnTargetUnitAdded(tp_frame, unit)
   local widget_frame = WidgetFrame
 
   if self:EnabledForStyle(unit.style, unit) then
+    local healthbar = tp_frame.visual.healthbar
     widget_frame:SetParent(tp_frame)
-    widget_frame:SetFrameLevel(tp_frame:GetFrameLevel() + FRAME_LEVEL_BY_TEXTURE[Settings.theme])
+    widget_frame:SetFrameLevel(healthbar:GetFrameLevel() + FRAME_LEVEL_BY_TEXTURE[Settings.theme])
     widget_frame:ClearAllPoints()
-    widget_frame:SetAllPoints(tp_frame.visual.healthbar)
+    widget_frame:SetAllPoints(healthbar)
 
     local healthbar_mode_frame = widget_frame.HealthbarMode
     if unit.style == "NameOnly" or unit.style == "NameOnly-Unique" then

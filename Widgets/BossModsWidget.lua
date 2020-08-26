@@ -267,7 +267,7 @@ function Widget:Create(tp_frame)
 
   -- Custom Code
   --------------------------------------
-  widget_frame:SetFrameLevel(tp_frame:GetFrameLevel() + 1)
+  widget_frame:SetFrameLevel(tp_frame:GetFrameLevel())
   widget_frame.Auras = {}
   widget_frame.AurasNo = 0
 

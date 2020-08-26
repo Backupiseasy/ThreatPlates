@@ -5,6 +5,7 @@
 * Fixed a bug where enabling/disabling widgets only took effect after reloading the UI.
 * Fixed a bug with Focus widget where an incorrect artwork was shown when switching between healthbar and headline view.
 * Added a new widget to show the experience bar of certain follower [Comment #3775, #3728, #4190, #4402, #4447, #4699, Issue GitHub #202].
+* Added an option to show the castbar above or below the healthbar [Comment #4486, #4461, #4631, PM].
 
 ------------------------------------------------------
 9.2.4

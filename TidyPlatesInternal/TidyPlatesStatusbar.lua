@@ -128,6 +128,23 @@ local function SetEliteBorder(self, texture)
   --self.EliteBorder:SetBackdropBorderColor(1, 0.85, 0, 1)
 end
 
+local function UpdateLayoutHealthbar(self, db, style)
+  local healthbar_style, healthborder_style = style.healthbar, style.healthborder
+
+  SetHealthBarTexture(self, healthbar_style)
+  self:SetStatusBarBackdrop(healthbar_style.backdrop, healthborder_style.texture, healthborder_style.edgesize, healthborder_style.offset)
+  self:SetShown(healthborder_style.show)
+  SetEliteBorder(self, style.eliteborder.texture)
+
+  local tp_frame = self:GetParent()
+  if db.FrameOrder == "HealthbarOverCastbar" then
+    self:SetFrameLevel(tp_frame:GetFrameLevel() + 5)
+  else
+    self:SetFrameLevel(tp_frame:GetFrameLevel() + 4)
+  end
+  tp_frame.visual.textframe:SetFrameLevel(self:GetFrameLevel())
+end
+
 function Addon:CreateHealthbar(parent)
 	local frame = _G.CreateFrame("StatusBar", nil, parent)
   --frame:Hide()
@@ -153,11 +170,8 @@ function Addon:CreateHealthbar(parent)
   frame.ThreatBorder:SetBackdropBorderColor(0, 0, 0, 0) -- Transparent color as default
 
 	frame.SetAllColors = SetAllColors
-  frame.SetTexCoord = function() end
-	frame.SetBackdropTexCoord = function() end
-	frame.SetHealthBarTexture = SetHealthBarTexture
   frame.SetStatusBarBackdrop = SetStatusBarBackdropHealthbar
-  frame.SetEliteBorder = SetEliteBorder
+  frame.UpdateLayout = UpdateLayoutHealthbar
 
   local healabsorb_bar = frame:CreateTexture(nil, "OVERLAY", 0)
   healabsorb_bar:SetVertexColor(0, 0, 0)
@@ -219,20 +233,31 @@ local function SetStatusBarBackdropCastbar(self, backdrop_texture, edge_texture,
   self.InterruptBorder:SetBackdropBorderColor(1, 0, 0, 1)
 end
 
+local function UpdateLayoutCastbar(self, db, style)
+  local castbar_style, castborder_style = style.castbar, style.castborder
+
+  self:SetStatusBarTexture(castbar_style.texture or EMPTY_TEXTURE)
+  self:SetStatusBarBackdrop(castborder_style.backdrop, castborder_style.texture, castborder_style.edgesize, castborder_style.offset)
+  self.Border:SetShown(castborder_style.show)
+
+  if db.FrameOrder == "HealthbarOverCastbar" then
+    self:SetFrameLevel(self:GetParent():GetFrameLevel() + 2)
+  else
+    self:SetFrameLevel(self:GetParent():GetFrameLevel() + 5)
+  end
+  self.Border:SetFrameLevel(self:GetFrameLevel())
+  --self.InterruptBorder:SetFrameLevel(self:GetFrameLevel())
+  --self.Overlay:SetFrameLevel(self:GetFrameLevel())
+end
+
 function Addon:CreateCastbar(parent)
   local frame = _G.CreateFrame("StatusBar", nil, parent)
   frame:Hide()
-
-  frame:SetFrameLevel(parent:GetFrameLevel() + 3)
 
   frame.Border = _G.CreateFrame("Frame", nil, frame)
   frame.Background = frame:CreateTexture(nil, "BACKGROUND")
   frame.InterruptBorder = _G.CreateFrame("Frame", nil, frame)
   frame.Overlay = _G.CreateFrame("Frame", nil, frame)
-
-  frame.Border:SetFrameLevel(frame:GetFrameLevel())
-  -- frame.InterruptBorder:SetFrameLevel(frame:GetFrameLevel())
-  -- frame.Overlay:SetFrameLevel(parent:GetFrameLevel() + 1)
 
   frame.InterruptOverlay = frame.Overlay:CreateTexture(nil, "BORDER", 0)
   frame.InterruptShield = frame.Overlay:CreateTexture(nil, "ARTWORK", -8)
@@ -246,11 +271,9 @@ function Addon:CreateCastbar(parent)
   frame.InterruptShield:SetPoint("CENTER", frame, "LEFT")
 
   frame.SetAllColors = SetAllColors
-  frame.SetTexCoord = function() end
-  frame.SetBackdropTexCoord = function() end
   frame.SetStatusBarBackdrop = SetStatusBarBackdropCastbar
-  frame.SetEliteBorder = SetEliteBorder
   frame.SetFormat = SetFormat
+  frame.UpdateLayout = UpdateLayoutCastbar
 
   frame:SetStatusBarColor(1, 0.8, 0)
 
@@ -260,7 +283,7 @@ function Addon:CreateCastbar(parent)
   frame.Spark = spark
 
   -- Remaining cast time
-  frame.casttime = frame.Overlay:CreateFontString(nil, "OVERLAY")
+  frame.casttime = frame.Overlay:CreateFontString(nil, "ARTWORK")
   frame.casttime:SetFont("Fonts\\FRIZQT__.TTF", 11)
   frame.casttime:SetAllPoints(frame)
   frame.casttime:SetJustifyH("RIGHT")

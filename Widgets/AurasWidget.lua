@@ -49,6 +49,24 @@ end
 ---------------------------------------------------------------------------------------------------
 local CUSTOM_GLOW_FUNCTIONS = Addon.CUSTOM_GLOW_FUNCTIONS
 
+local function Wrapper_ButtonGlow_Start(frame, color, framelevel)
+  LibCustomGlow.ButtonGlow_Start(frame, color, nil, framelevel)
+end
+
+local function Wrapper_PixelGlow_Start(frame, color, framelevel)
+  LibCustomGlow.PixelGlow_Start(frame, color, nil, nil, nil, nil, nil, nil, nil, nil, framelevel)
+end
+
+local function Wrapper_AutoCastGlow_Start(frame, color, framelevel)
+  LibCustomGlow.AutoCastGlow_Start(frame, color, nil, nil, nil, nil, nil, nil, framelevel)
+end
+
+local CUSTOM_GLOW_WRAPPER_FUNCTIONS = {
+  ButtonGlow_Start = Wrapper_ButtonGlow_Start,
+  PixelGlow_Start = Wrapper_PixelGlow_Start,
+  AutoCastGlow_Start = Wrapper_AutoCastGlow_Start,
+}
+
 ---------------------------------------------------------------------------------------------------
 -- Auras Widget Functions
 ---------------------------------------------------------------------------------------------------
@@ -1147,7 +1165,7 @@ function Widget:CreateAuraFrameIconMode(parent)
   -- the cooldown frame and b) using the cooldown frame results in the text not being visible if there is no
   -- cooldown (i.e., duration and expiration are nil which is true for auras with unlimited duration)
   local text_frame = _G.CreateFrame("Frame", nil, frame)
-  text_frame:SetFrameLevel(parent:GetFrameLevel() + 9) -- +9 as the glow is set to +8 by LibCustomGlow
+  text_frame:SetFrameLevel(parent:GetFrameLevel())
   text_frame:SetAllPoints(frame.Icon)
   frame.Stacks = text_frame:CreateFontString(nil, "OVERLAY")
   frame.TimeLeft = text_frame:CreateFontString(nil, "OVERLAY")
@@ -1235,8 +1253,8 @@ function Widget:UpdateAuraInformationIconMode(frame) -- texture, duration, expir
   end
 
   if AuraHighlightEnabled then
-    if frame.AuraStealOrPurge then
-      AuraHighlightStart(frame.Highlight, AuraHighlightColor)
+    if frame.AuraStealOrPurge or true then
+      AuraHighlightStart(frame.Highlight, AuraHighlightColor, 0)
     else
       AuraHighlightStop(frame.Highlight)
     end
@@ -1435,7 +1453,7 @@ function Widget:UpdateAuraInformationBarMode(frame) -- texture, duration, expira
 
   if AuraHighlightEnabled then
     if frame.AuraStealOrPurge then
-      AuraHighlightStart(frame.Highlight, AuraHighlightColor)
+      AuraHighlightStart(frame.Highlight, AuraHighlightColor, 0)
     else
       AuraHighlightStop(frame.Highlight)
     end
@@ -1579,7 +1597,7 @@ function Widget:UpdateAuraWidgetLayout(widget_frame)
   end
 
   if self.db.FrameOrder == "HEALTHBAR_AURAS" then
-    widget_frame:SetFrameLevel(widget_frame:GetParent():GetFrameLevel() + 2)
+    widget_frame:SetFrameLevel(widget_frame:GetParent():GetFrameLevel() + 1)
   else
     widget_frame:SetFrameLevel(widget_frame:GetParent():GetFrameLevel() + 9)
   end
@@ -1907,7 +1925,8 @@ function Widget:UpdateSettings()
 
   -- Highlighting
   AuraHighlightEnabled = self.db.Highlight.Enabled
-  AuraHighlightStart = LibCustomGlow[CUSTOM_GLOW_FUNCTIONS[self.db.Highlight.Type][1]]
+  local glow_function = CUSTOM_GLOW_FUNCTIONS[self.db.Highlight.Type][1]
+  AuraHighlightStart = CUSTOM_GLOW_WRAPPER_FUNCTIONS[glow_function] or LibCustomGlow[glow_function]
   AuraHighlightStopPrevious = AuraHighlightStop or LibCustomGlow.PixelGlow_Stop
   AuraHighlightStop = LibCustomGlow[CUSTOM_GLOW_FUNCTIONS[self.db.Highlight.Type][2]]
   AuraHighlightOffset = CUSTOM_GLOW_FUNCTIONS[self.db.Highlight.Type][3]

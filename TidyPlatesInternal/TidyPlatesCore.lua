@@ -234,9 +234,7 @@ do
     local textframe = _G.CreateFrame("Frame", nil, extended)
 
 		textframe:SetAllPoints()
-    textframe:SetFrameLevel(extended:GetFrameLevel() + 6)
 
-    --extended.widgetParent = widgetParent
 		visual.healthbar = healthbar
 		visual.castbar = castbar
     visual.textframe = textframe
@@ -262,9 +260,8 @@ do
 		visual.level:SetFont("Fonts\\FRIZQT__.TTF", 11)
 
 		-- Cast Bar Frame - Highest Frame
-		visual.castborder = castbar.Border
-		visual.spellicon = castbar.Overlay:CreateTexture(nil, "ARTWORK", 7)
-		visual.spelltext = castbar.Overlay:CreateFontString(nil, "OVERLAY")
+		visual.spellicon = castbar.Overlay:CreateTexture(nil, "OVERLAY")
+		visual.spelltext = castbar.Overlay:CreateFontString(nil, "ARTWORK")
 		visual.spelltext:SetFont("Fonts\\FRIZQT__.TTF", 11)
     visual.spelltext:SetWordWrap(false) -- otherwise text is wrapped when plate is scaled down
 
@@ -838,6 +835,7 @@ do
 
     visual.spelltext:SetText(text)
 		visual.spellicon:SetTexture(texture)
+    visual.spellicon:SetDrawLayer("OVERLAY")
 
     castbar.IsCasting = not channeled
     castbar.IsChanneling = channeled
@@ -1571,18 +1569,15 @@ do
       SetFontGroupObject(object, objectstyle)
     end
 
+    local db = TidyPlatesThreat.db.profile.settings.castbar
+
     -- Healthbar
 		SetAnchorGroupObject(visual.healthbar, style.healthbar, extended)
-		visual.healthbar:SetHealthBarTexture(style.healthbar)
-		visual.healthbar:SetStatusBarBackdrop(style.healthbar.backdrop, style.healthborder.texture, style.healthborder.edgesize, style.healthborder.offset)
-		visual.healthborder:SetShown(style.healthborder.show)
-    visual.healthbar:SetEliteBorder(style.eliteborder.texture)
+    visual.healthbar:UpdateLayout(db, style)
 
     -- Castbar
     SetAnchorGroupObject(visual.castbar, style.castbar, extended)
-    visual.castbar:SetStatusBarTexture(style.castbar.texture or EMPTY_TEXTURE)
-    visual.castbar:SetStatusBarBackdrop(style.castbar.backdrop, style.castborder.texture, style.castborder.edgesize, style.castborder.offset)
-    visual.castborder:SetShown(style.castborder.show)
+    visual.castbar:UpdateLayout(db, style)
     -- Set castbar color here otherwise it may be shown sometimes with non-initialized backdrop color (white)
     if visual.castbar:IsShown() then
       visual.castbar:SetAllColors(Addon:SetCastbarColor(unit))
@@ -1616,7 +1611,6 @@ do
 
     visual.castbar:ClearAllPoints()
 
-    local db = TidyPlatesThreat.db.profile.settings.castbar
     if UnitIsUnit("target", unit.unitid) then
       SetObjectAnchor(visual.castbar, style.castbar.anchor or "CENTER", extended, style.castbar.x + db.x_target or 0, style.castbar.y + db.y_target or 0)
     else

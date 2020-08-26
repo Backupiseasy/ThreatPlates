@@ -5365,6 +5365,13 @@ local function CreateCastbarOptions()
         type = "group",
         inline = true,
         args = {
+          Layering = {
+            name = L["Frame Order"],
+            order = 5,
+            type = "select",
+            values = { HealthbarOverCastbar = L["Healthbar, Castbar"], CastbarOverHealthbar = L["Castbar, Healthbar"] },
+            arg = { "settings", "castbar", "FrameOrder" },
+          },
           Size = GetSizeEntry(L["Spell Icon Size"], 10, { "settings", "spellicon", "scale" }),
           Font = GetFontEntry(L["Spell Text"], 20, "spelltext"),
           AlignSpellText = {
