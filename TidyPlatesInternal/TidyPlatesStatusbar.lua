@@ -237,7 +237,7 @@ local function UpdateLayoutCastbar(self, db, style)
   local castbar_style, castborder_style = style.castbar, style.castborder
 
   self:SetStatusBarTexture(castbar_style.texture or EMPTY_TEXTURE)
-  self:SetStatusBarBackdrop(castborder_style.backdrop, castborder_style.texture, castborder_style.edgesize, castborder_style.offset)
+  self:SetStatusBarBackdrop(castbar_style.backdrop, castborder_style.texture, castborder_style.edgesize, castborder_style.offset)
   self.Border:SetShown(castborder_style.show)
 
   if db.FrameOrder == "HealthbarOverCastbar" then
@@ -288,7 +288,7 @@ function Addon:CreateCastbar(parent)
   frame.casttime:SetAllPoints(frame)
   frame.casttime:SetJustifyH("RIGHT")
 
---  frame.Flash = frame:CreateAnimationGroup()
+  --  frame.Flash = frame:CreateAnimationGroup()
 --  local anim = frame.Flash:CreateAnimation("Alpha")
 --  anim:SetOrder(1)
 --  anim:SetFromAlpha(1)
