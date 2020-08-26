@@ -1018,23 +1018,24 @@ ThreatPlates.DEFAULT_SETTINGS = {
       --TrackingLineThickness = 4  -- Removed in 9.1.9
     },
     ExperienceWidget = {
-      ON = true,
-      ShowInHeadlineView = true,
-      ShowOnlyMine = false,
+      ON = false,
+      ShowInHeadlineView = false,
       Height = 10,
       Width = 120,
       -- Appearance
       Texture = "Smooth",
-      Color = RGB(247, 214, 0, 1),
       BorderTexture = "ThreatPlatesBorder",
       BorderEdgeSize = 2,
       BorderOffset = 2,
       BorderInset = 0,
+      BarForegroundColor = RGB(247, 214, 0, 1),
+      BarBackgroundColor = RGB(0, 0, 0, 0.3),
+      BarBackgroundUseForegroundColor = false,
+      BackgroundColor = RGB(0, 0, 0, 0), -- Fully transparent
       BackgroundUseForegroundColor = false,
-      BackgroundColor = RGB(0, 0, 0, 0.3),
-      BorderUseForegroundColor = false,
-      BorderUseBackgroundColor = false,
       BorderColor = RGB(0, 0, 0, 1),
+      BorderUseBarForegroundColor = false,
+      BorderUseBackgroundColor = false,
       -- Positioning
       HealthbarMode = {
         Anchor = "BOTTOM",

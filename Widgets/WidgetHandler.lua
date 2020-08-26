@@ -373,7 +373,9 @@ function WidgetHandler:OnUnitRemoved(tp_frame, unit)
     for _, widget in pairs(self.EnabledTargetWidgets) do
       widget:OnTargetUnitRemoved()
     end
-  elseif unit.IsFocus and self.EnabledFocusWidget then
+  end
+
+  if unit.IsFocus and self.EnabledFocusWidget then
     self.EnabledFocusWidget:OnFocusUnitRemoved()
   end
 
@@ -384,7 +386,7 @@ function WidgetHandler:OnUnitRemoved(tp_frame, unit)
     widget_frame:Hide()
 
     if widget.OnUnitRemoved then
-      widget:OnUnitRemoved(widget_frame)
+      widget:OnUnitRemoved(widget_frame, unit)
     end
   end
 end

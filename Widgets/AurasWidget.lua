@@ -1760,7 +1760,7 @@ function Widget:OnUnitAdded(widget_frame, unit)
   self:UpdateIconGrid(widget_frame, unit)
 end
 
-function Widget:OnUnitRemoved(widget_frame)
+function Widget:OnUnitRemoved(widget_frame, unit)
   widget_frame:UnregisterAllEvents()
 end
 

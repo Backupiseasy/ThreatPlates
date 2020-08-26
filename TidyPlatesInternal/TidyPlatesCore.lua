@@ -12,7 +12,7 @@ local max, gsub, tonumber = math.max, string.gsub, tonumber
 local select, pairs, tostring  = select, pairs, tostring 			    -- Local function copy
 
 -- WoW APIs
-local wipe = wipe
+local wipe, strsplit = wipe, strsplit
 local WorldFrame, UIParent, INTERRUPTED = WorldFrame, UIParent, INTERRUPTED
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local UnitName, UnitIsUnit, UnitReaction, UnitExists = UnitName, UnitIsUnit, UnitReaction, UnitExists
@@ -504,6 +504,9 @@ function Addon:UpdateUnitIdentity(unit, unitid)
   else
     unit.class = ""
     unit.type = "NPC"
+
+    local _, _, _, _, _, npc_id = strsplit("-", unit.guid or "")
+    unit.NPCID = npc_id
   end
 end
 

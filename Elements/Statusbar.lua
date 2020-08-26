@@ -49,10 +49,10 @@ local function UpdateSettings(self, db)
 
   local border = self.Border
 
-  local backdrop = border:GetBackdrop() or {}
+  local backdrop = border:GetBackdrop() or { insets = {} }
+  backdrop.bgFile = LSM:Fetch('statusbar', texture)
   backdrop.edgeFile = LSM:Fetch('border', db.BorderTexture)
   backdrop.edgeSize = db.BorderEdgeSize
-  backdrop.insets = backdrop.insets or {}
   backdrop.insets.left = db.BorderInset
   backdrop.insets.right = db.BorderInset
   backdrop.insets.top = db.BorderInset
@@ -62,23 +62,34 @@ local function UpdateSettings(self, db)
   border:SetPoint("TOPLEFT", self, "TOPLEFT", - db.BorderOffset, db.BorderOffset)
   border:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", db.BorderOffset, - db.BorderOffset)
 
-  local color = db.Color
-  self:SetStatusBarColor(color.r, color.g, color.b, color.a)
+  local bar_foreground_color = db.BarForegroundColor
+  self:SetStatusBarColor(bar_foreground_color.r, bar_foreground_color.g, bar_foreground_color.b, bar_foreground_color.a)
 
-  if db.BackgroundUseForegroundColor then
-    self.Background:SetVertexColor(color.r, color.g, color.b, 0.3)
+  if db.BarBackgroundUseForegroundColor then
+    self.Background:SetVertexColor(bar_foreground_color.r, bar_foreground_color.g, bar_foreground_color.b, 0.3)
   else
-    color = db.BackgroundColor
+    local color = db.BarBackgroundColor
     self.Background:SetVertexColor(color.r, color.g, color.b, color.a)
   end
 
-  if db.BorderUseForegroundColor then
-    border:SetBackdropBorderColor(color.r, color.g, color.b, 1)
-  elseif db.BorderUseBackgroundColor then
-    color = db.BackgroundColor
-    border:SetBackdropBorderColor(color.r, color.g, color.b, color.a)
+  if db.BackgroundUseForegroundColor then
+    border:SetBackdropColor(bar_foreground_color.r, bar_foreground_color.g, bar_foreground_color.b, 0.3)
   else
-    color = db.BorderColor
+    local color = db.BackgroundColor
+    border:SetBackdropColor(color.r, color.g, color.b, color.a)
+  end
+
+  if db.BorderUseBarForegroundColor then
+    border:SetBackdropBorderColor(bar_foreground_color.r, bar_foreground_color.g, bar_foreground_color.b, 1)
+  elseif db.BorderUseBackgroundColor then
+    if db.BackgroundUseForegroundColor then
+      border:SetBackdropBorderColor(bar_foreground_color.r, bar_foreground_color.g, bar_foreground_color.b, 1)
+    else
+      local color = db.BackgroundColor
+      border:SetBackdropBorderColor(color.r, color.g, color.b, color.a)
+    end
+  else
+    local color = db.BorderColor
     border:SetBackdropBorderColor(color.r, color.g, color.b, color.a)
   end
 
@@ -96,14 +107,19 @@ end
 local function UpdatePositioning(self, unit, db)
   db = db[MODE_FOR_STYLE[unit.style]]
 
-  local anchor = db.Anchor or "CENTER"
   self:ClearAllPoints()
+  self.Background:ClearAllPoints()
+
+  local anchor = db.Anchor or "CENTER"
   if db.InsideAnchor == false then
     local anchor_point_text = ANCHOR_POINT_TEXT[anchor]
     self:SetPoint(anchor_point_text[2], self:GetParent(), anchor_point_text[1], db.HorizontalOffset or 0, db.VerticalOffset or 0)
   else -- db.InsideAnchor not defined in settings or true
     self:SetPoint(anchor, self:GetParent(), anchor, db.HorizontalOffset or 0, db.VerticalOffset or 0)
   end
+
+  self.Background:SetPoint("TOPLEFT", self:GetStatusBarTexture(), "TOPRIGHT")
+  self.Background:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT")
 end
 
 function Addon.CreateStatusbar(parent)
@@ -112,8 +128,7 @@ function Addon.CreateStatusbar(parent)
   statusbar:SetFrameLevel(parent:GetFrameLevel())
   statusbar:SetMinMaxValues(0, 100)
 
-  statusbar.Background = statusbar:CreateTexture(nil, "BACKGROUND")
-  statusbar.Background:SetAllPoints(statusbar)
+  statusbar.Background = statusbar:CreateTexture(nil, "Artwork")
 
   statusbar.Border = _G.CreateFrame("Frame", nil, statusbar)
   statusbar.Border:SetFrameLevel(statusbar:GetFrameLevel())

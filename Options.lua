@@ -2343,9 +2343,6 @@ local function CreateTargetArtWidgetOptions()
 end
 
 local function CreateExperienceWidgetOptions()
-  -- Appearance: Size, Texture + Border
-  -- Positioning
-  -- Tab Rank, Tab Exp mit Font-Settings + Positioning
   local options = {
     name = L["Experience"],
     type = "group",
@@ -2360,20 +2357,6 @@ local function CreateExperienceWidgetOptions()
         true,
         function(info, val) SetValuePlain(info, val); Addon.Widgets:InitializeWidget("Experience") end
       ),
-      Filter = {
-        name = L["Show For"],
-        order = 10,
-        type = "group",
-        inline = true,
-        args = {
-          OnlyMine = {
-            name = L["Only Mine"],
-            order = 10,
-            type = "toggle",
-            arg = { "ExperienceWidget", "ShowOnlyMine" },
-          },
-        },
-      },
       Appearance = {
         name = L["Appearance"],
         order = 20,
@@ -2395,20 +2378,53 @@ local function CreateExperienceWidgetOptions()
                 arg = { "ExperienceWidget", "Texture" },
               },
               BarColor = {
-                name = L["Color"],
+                name = L["Bar Foreground Color"],
                 type = "color",
-                order = 15,
+                order = 20,
                 get = GetColorAlpha,
                 set = SetColorAlphaWidget,
                 hasAlpha = true,
-                arg = {"ExperienceWidget", "Color"},
+                arg = {"ExperienceWidget", "BarForegroundColor"},
               },
-              BarWidth = { name = L["Bar Width"], order = 20, type = "range", min = 1, max = 500, step = 1, arg = { "ExperienceWidget", "Width" }, },
-              BarHeight = { name = L["Bar Height"], order = 30, type = "range", min = 1, max = 500, step = 1, arg = { "ExperienceWidget", "Height" }, },
-              Spacer0 = GetSpacerEntry(70),
+              BarWidth = { name = L["Bar Width"], order = 30, type = "range", min = 1, max = 500, step = 1, arg = { "ExperienceWidget", "Width" }, },
+              BarHeight = { name = L["Bar Height"], order = 40, type = "range", min = 1, max = 500, step = 1, arg = { "ExperienceWidget", "Height" }, },
+              Spacer15 = GetSpacerEntry(50),
+              BarBackgroundColorText = {
+                type = "description",
+                order = 60,
+                width = "single",
+                name = L["Bar Background Color:"],
+              },
+              BarBackgroundColorForegroundToggle = {
+                name = L["Same as Bar Foreground"],
+                order = 70,
+                type = "toggle",
+                desc = L["Use the bar foreground color also for the bar background."],
+                arg = { "ExperienceWidget", "BarBackgroundUseForegroundColor" },
+              },
+              BarBackgroundColorCustomToggle = {
+                name = L["Custom"],
+                order = 80,
+                type = "toggle",
+                desc = L["Use a custom color for the bar background."],
+                set = function(info, val) SetValueWidget(info, not val) end,
+                get = function(info, val) return not GetValue(info, val) end,
+                arg = { "ExperienceWidget", "BarBackgroundUseForegroundColor" },
+              },
+              BarBackgroundColorCustom = {
+                name = L["Color"],
+                type = "color",
+                order = 90,
+                get = GetColorAlpha,
+                set = SetColorAlphaWidget,
+                hasAlpha = true,
+                arg = {"ExperienceWidget", "BarBackgroundColor"},
+                disabled = function() return db.ExperienceWidget.BarBackgroundUseForegroundColor end
+              },
+              Header2 = { type = "header", order = 100, name = L["Border"], },
               BorderTexture = {
                 name = L["Bar Border"],
-                order = 80,
+                order = 110,
                 type = "select",
                 dialogControl = "LSM30_Border",
                 values = AceGUIWidgetLSMlists.border,
@@ -2416,71 +2432,70 @@ local function CreateExperienceWidgetOptions()
               },
               BorderEdgeSize = {
                 name = L["Edge Size"],
-                order = 90,
+                order = 120,
                 type = "range",
                 min = 0, max = 32, step = 1,
                 arg = { "ExperienceWidget", "BorderEdgeSize" },
               },
               BorderOffset = {
                 name = L["Offset"],
-                order = 100,
+                order = 130,
                 type = "range",
                 min = -16, max = 16, step = 1,
                 arg = { "ExperienceWidget", "BorderOffset" },
               },
-              BorderOffset = {
+              BorderInset = {
                 name = L["Inset"],
-                order = 110,
+                order = 140,
                 type = "range",
                 min = -16, max = 16, step = 1,
                 arg = { "ExperienceWidget", "BorderInset" },
               },
-              Spacer1 = GetSpacerEntry(200),
-              BGColorText = {
+              Spacer3 = GetSpacerEntry(200),
+              BackgroundColorText = {
                 type = "description",
                 order = 210,
                 width = "single",
                 name = L["Background Color:"],
               },
-              BGColorForegroundToggle = {
-                name = L["Same as Foreground"],
+              BackgroundColorForegroundToggle = {
+                name = L["Same as Bar Foreground"],
                 order = 220,
                 type = "toggle",
-                desc = L["Use the healthbar's foreground color also for the background."],
+                desc = L["Use the bar foreground color also for the background."],
                 arg = { "ExperienceWidget", "BackgroundUseForegroundColor" },
               },
-              BGColorCustomToggle = {
+              BackgroundColorCustomToggle = {
                 name = L["Custom"],
                 order = 230,
                 type = "toggle",
-                width = "half",
-                desc = L["Use a custom color for the healtbar's background."],
+                desc = L["Use a custom color for the background."],
                 set = function(info, val) SetValueWidget(info, not val) end,
                 get = function(info, val) return not GetValue(info, val) end,
                 arg = { "ExperienceWidget", "BackgroundUseForegroundColor" },
               },
-              BGColorCustom = {
+              BackgroundColorCustom = {
                 name = L["Color"],
                 type = "color",
-                order = 235,
+                order = 240,
                 get = GetColorAlpha,
                 set = SetColorAlphaWidget,
                 hasAlpha = true,
                 arg = {"ExperienceWidget", "BackgroundColor"},
-                width = "half",
+                disabled = function() return db.ExperienceWidget.BackgroundUseForegroundColor end
               },
-              Spacer2 = GetSpacerEntry(300),
-              BorderolorText = {
+              Spacer4 = GetSpacerEntry(300),
+              BorderColorText = {
                 type = "description",
                 order = 310,
                 width = "single",
                 name = L["Border Color:"],
               },
-              BorderColorForegroundToggle = {
-                name = L["Same as Foreground"],
+              BorderColorBarForegroundToggle = {
+                name = L["Same as Bar Foreground"],
                 order = 320,
                 type = "toggle",
-                desc = L["Use the healthbar's foreground color also for the border."],
+                desc = L["Use the bar foreground color also for the border."],
                 set = function(info, val)
                   if val then
                     db.ExperienceWidget.BorderUseBackgroundColor = false
@@ -2490,19 +2505,19 @@ local function CreateExperienceWidgetOptions()
                     SetValueWidget(info, val)
                   end
                 end,
-                arg = { "ExperienceWidget", "BorderUseForegroundColor" },
+                arg = { "ExperienceWidget", "BorderUseBarForegroundColor" },
               },
               BorderColorBackgroundToggle = {
                 name = L["Same as Background"],
-                order = 325,
+                order = 340,
                 type = "toggle",
-                desc = L["Use the healthbar's background color also for the border."],
+                desc = L["Use the background color also for the border."],
                 set = function(info, val)
                   if val then
-                    db.ExperienceWidget.BorderUseForegroundColor = false
+                    db.ExperienceWidget.BorderUseBarForegroundColor = false
                     SetValueWidget(info, val)
                   else
-                    db.ExperienceWidget.BorderUseForegroundColor = false
+                    db.ExperienceWidget.BorderUseBarForegroundColor = false
                     SetValueWidget(info, val)
                   end
                 end,
@@ -2510,28 +2525,30 @@ local function CreateExperienceWidgetOptions()
               },
               BorderColorCustomToggle = {
                 name = L["Custom"],
-                order = 330,
+                order = 360,
                 type = "toggle",
                 width = "half",
-                desc = L["Use a custom color for the healtbar's border."],
+                desc = L["Use a custom color for the bar's border."],
                 set = function(info, val)
-                  db.ExperienceWidget.BorderUseForegroundColor = false
+                  db.ExperienceWidget.BorderUseBarForegroundColor = false
                   db.ExperienceWidget.BorderUseBackgroundColor = false
-                  Addon:ForceUpdate()
+                  SetValueWidget(info, db.ExperienceWidget.BorderColor) -- Trigger widget update
                 end,
                 get = function(info, val)
-                  return not (db.ExperienceWidget.BorderUseForegroundColor or db.ExperienceWidget.BorderUseBackgroundColor)
+                  return not (db.ExperienceWidget.BorderUseBarForegroundColor or db.ExperienceWidget.BorderUseBackgroundColor)
                 end,
+                arg = {"ExperienceWidget", "BorderColor"},
               },
               BorderColorCustom = {
                 name = L["Color"],
+                order = 370,
                 type = "color",
-                order = 335,
+                width = "half",
                 get = GetColorAlpha,
                 set = SetColorAlphaWidget,
                 hasAlpha = true,
                 arg = {"ExperienceWidget", "BorderColor"},
-                width = "half",
+                disabled = function() return db.ExperienceWidget.BorderUseBarForegroundColor or db.ExperienceWidget.BorderUseBackgroundColor end
               },
             },
           },

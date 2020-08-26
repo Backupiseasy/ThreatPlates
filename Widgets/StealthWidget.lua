@@ -109,12 +109,12 @@ end
 function Widget:OnUnitAdded(widget_frame, unit)
   local name, spell_id
 
-  local _, _,  _, _, _, npc_id, _ = strsplit("-", unit.guid)
-  if DETECTION_UNITS[npc_id] then
-    name = npc_id
+  if DETECTION_UNITS[unit.NPCID] then
+    name = unit.NPCID
   else
     local DETECTION_AURAS, UnitBuff = DETECTION_AURAS, UnitBuff
     local unitid = unit.unitid
+    local name, _
     for i = 1, 40 do
       name, _, _, _, _, _, _, _, _, spell_id = UnitBuff(unitid, i)
       if not name or DETECTION_AURAS[spell_id] then
