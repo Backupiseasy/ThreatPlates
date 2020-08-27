@@ -134,8 +134,8 @@ local UPDATE_TEXTURE_FUNCTIONS = {
 }
 
 local FRAME_LEVEL_BY_TEXTURE = {
-  default = 1,
-  squarethin = 1,
+  default = 0,
+  squarethin = 0,
   arrows = 9,
   arrow_down = 9,
   arrow_less_than = 9,
