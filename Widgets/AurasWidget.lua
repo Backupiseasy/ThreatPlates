@@ -641,11 +641,11 @@ function Widget:GetColorForAura(aura)
 	end
 end
 
-local function FilterAll(show_aura, spellfound, is_mine, show_only_mine)
+local function FilterNone(show_aura, spellfound, is_mine, show_only_mine)
   return show_aura
 end
 
-local function FilterWhitelist(show_aura, spellfound, is_mine, show_only_mine)
+local function FilterAllowlist(show_aura, spellfound, is_mine, show_only_mine)
   if spellfound == "All" then
     return show_aura
   elseif spellfound == true then
@@ -657,7 +657,7 @@ local function FilterWhitelist(show_aura, spellfound, is_mine, show_only_mine)
   return false
 end
 
-local function FilterBlacklist(show_aura, spellfound, is_mine, show_only_mine)
+local function FilterBlocklist(show_aura, spellfound, is_mine, show_only_mine)
   -- blacklist all auras, i.e., default is show all auras (no matter who casted it)
   --   spellfound = true or All - blacklist this aura (from all casters)
   --   spellfound = My          - blacklist only my aura
@@ -676,9 +676,12 @@ local function FilterBlacklist(show_aura, spellfound, is_mine, show_only_mine)
 end
 
 Widget.FILTER_FUNCTIONS = {
-  all = FilterAll,
-  blacklist = FilterBlacklist,
-  whitelist = FilterWhitelist,
+  all = FilterNone,
+  blacklist = FilterBlocklist,
+  whitelist = FilterAllowlist,
+  None = FilterNone,
+  Block = FilterBlocklist,
+  Allow = FilterAllowlist,
 }
 
 function Widget:FilterFriendlyDebuffsBySpell(db, aura, AuraFilterFunction)

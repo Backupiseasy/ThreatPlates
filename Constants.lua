@@ -179,9 +179,9 @@ ThreatPlates.Widgets = "Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\Wid
 ---------------------------------------------------------------------------------------------------
 
 Addon.AurasFilterMode = {
-  ["whitelist"] = L["White List"],
-  ["blacklist"] = L["Black List"],
-  ["all"] = L["All Auras"],
+  Allow = L["Allow"],
+  Block = L["Block"],
+  None = L["None"],
 }
 
 ThreatPlates.SPEC_ROLES = {
@@ -664,7 +664,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
         ShowOnlyMine = true,
         ShowBlizzardForEnemy = false,
         Scale = 1.0,
-        FilterMode = "blacklist",
+        FilterMode = "Block",
         FilterBySpell = {},
         FilterByType = {
           --[1] = true, -- Removed in 8.8.0
@@ -692,7 +692,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
         ShowUnlimitedOnBosses = true,
         HideUnlimitedDuration = false,
         Scale = 1.5,
-        FilterMode = "blacklist",
+        FilterMode = "Block",
         FilterBySpell = {},
       },
       CrowdControl = {
@@ -705,7 +705,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
         ShowAllEnemy = (Addon.CLASSIC and true) or false,
         ShowBlizzardForEnemy = (Addon.CLASSIC and false) or true,
         Scale = 2.0,
-        FilterMode = "blacklist",
+        FilterMode = "Block",
         FilterBySpell = {},
       },
       ModeIcon = {
