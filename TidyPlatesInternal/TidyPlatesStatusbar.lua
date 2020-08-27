@@ -14,6 +14,7 @@ local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
+local Font = Addon.Font
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -198,6 +199,12 @@ function Addon:CreateHealthbar(parent)
 	return frame
 end
 
+--local function SetAllColorsCastbar(self, rBar, gBar, bBar, aBar, rBackdrop, gBackdrop, bBackdrop, aBackdrop)
+--  --SetAllColors(self, rBar, gBar, bBar, aBar, rBackdrop, gBackdrop, bBackdrop, aBackdrop)
+--  self:SetStatusBarColor(rBar or 1, gBar or 1, bBar or 1, aBar or 1)
+--  self.Background:SetVertexColor(rBackdrop or 1, gBackdrop or 1, bBackdrop or 1, aBackdrop or 1)
+--end
+
 local function SetFormat(self, show)
   local db = TidyPlatesThreat.db.profile.settings
 
@@ -248,6 +255,12 @@ local function UpdateLayoutCastbar(self, db, style)
   self.Border:SetFrameLevel(self:GetFrameLevel())
   --self.InterruptBorder:SetFrameLevel(self:GetFrameLevel())
   --self.Overlay:SetFrameLevel(self:GetFrameLevel())
+
+  Font:UpdateText(self, self.CastTarget, db.CastTarget)
+
+  local width, height = self:GetSize()
+  self.CastTarget:SetSize(width, height)
+  self.CastTarget:SetShown(db.CastTarget.Show)
 end
 
 function Addon:CreateCastbar(parent)
@@ -260,7 +273,7 @@ function Addon:CreateCastbar(parent)
   frame.Overlay = _G.CreateFrame("Frame", nil, frame)
 
   frame.InterruptOverlay = frame.Overlay:CreateTexture(nil, "BORDER", 0)
-  frame.InterruptShield = frame.Overlay:CreateTexture(nil, "ARTWORK", -8)
+  frame.InterruptShield = frame.Overlay:CreateTexture(nil, "OVERLAY")
 
   frame.InterruptOverlay:SetTexture(ART_PATH .. "Striped_Texture")
   frame.InterruptOverlay:SetAllPoints(frame)
@@ -287,6 +300,9 @@ function Addon:CreateCastbar(parent)
   frame.casttime:SetFont("Fonts\\FRIZQT__.TTF", 11)
   frame.casttime:SetAllPoints(frame)
   frame.casttime:SetJustifyH("RIGHT")
+
+  frame.CastTarget = frame:CreateFontString(nil, "ARTWORK")
+  frame.CastTarget:SetFont("Fonts\\FRIZQT__.TTF", 11)
 
   --  frame.Flash = frame:CreateAnimationGroup()
 --  local anim = frame.Flash:CreateAnimation("Alpha")
@@ -351,6 +367,7 @@ function Addon:ConfigCastbar()
             visual.spellicon:SetTexture(GetSpellTexture(116))
             visual.spelltext:SetText("Frostbolt")
             self.casttime:SetText(3.5)
+            self.CastTarget:SetText("Temple Guard")
 
             self.Border:SetShown(plate.TPFrame.style.castborder.show)
             self:SetFormat(plate.TPFrame.style.castnostop.show)
@@ -362,6 +379,7 @@ function Addon:ConfigCastbar()
             visual.spelltext:SetShown(plate.TPFrame.style.spelltext.show)
             visual.castbar.casttime:SetShown(db.castbar.ShowCastTime)
             visual.spellicon:SetShown(plate.TPFrame.style.spellicon.show)
+            self.CastTarget:SetShown(db.castbar.CastTarget.Show)
             self:Show()
           else
             self:SetValue(0) -- don't use self:_Hide() here, otherwise OnUpdate will never be called again
@@ -373,6 +391,7 @@ function Addon:ConfigCastbar()
             visual.spelltext:Hide()
             visual.castbar.casttime:Hide()
             visual.spellicon:Hide()
+            self.CastTarget:Hide()
           end
         end)
 

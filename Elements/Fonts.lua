@@ -35,6 +35,11 @@ function Font:UpdateTextFont(font, db)
 
   font:SetJustifyH(db.HorizontalAlignment or "CENTER")
   font:SetJustifyV(db.VerticalAlignment or "CENTER")
+
+  -- Set text to nil to enforce text string update, otherwise updates to justification will not take effect
+  local text = font:GetText()
+  font:SetText(nil)
+  font:SetText(text)
 end
 
 function Font:UpdateText(parent, font, db)

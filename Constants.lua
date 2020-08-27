@@ -1243,6 +1243,23 @@ ThreatPlates.DEFAULT_SETTINGS = {
           },
         },
         FrameOrder = "HealthbarOverCastbar",
+        CastTarget = {
+          Show = true,
+          Anchor = "BOTTOM",
+          InsideAnchor = false,
+          HorizontalOffset = 0,
+          VerticalOffset = -2,
+          Font = {
+            Typeface = Addon.DEFAULT_FONT,
+            Size = 8,
+            Transparency = 1,
+            Color = RGB(255, 255, 255),
+            flags = "NONE",
+            Shadow = true,
+            HorizontalAlignment = "RIGHT",
+            VerticalAlignment = "TOP",
+          }
+        },
       },
       name = { -- Names for Healthbar View
         show = true,

@@ -836,6 +836,8 @@ do
     visual.spelltext:SetText(text)
 		visual.spellicon:SetTexture(texture)
     visual.spellicon:SetDrawLayer("OVERLAY")
+    local target_unit = unit.unitid .. "target"
+    castbar.CastTarget:SetText(UnitName(target_unit))
 
     castbar.IsCasting = not channeled
     castbar.IsChanneling = channeled
