@@ -2614,7 +2614,7 @@ local function CreateFocusWidgetOptions()
             order = 20,
             set = function(info, val)
               SetValueWidget(info, val)
-              options.args.Widgets.args.FocusWidget.args.Texture.args.Preview.image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\TargetArtWidget\\" .. db.FocusWidget.theme;
+              options.args.Widgets.args.FocusWidget.args.Texture.args.Preview.image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\TargetArtWidget\\" .. db.FocusWidget.theme
             end,
             values = Addon.TARGET_TEXTURES,
             arg = { "FocusWidget", "theme" },

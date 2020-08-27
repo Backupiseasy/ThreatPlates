@@ -250,13 +250,13 @@ do
     visual.eliteicon = textframe:CreateTexture(nil, "ARTWORK", 1)
 
 		-- TextFrame
-    visual.name = textframe:CreateFontString(nil, "ARTWORK", 0)
+    visual.name = textframe:CreateFontString(nil, "OVERLAY", 0)
 		visual.name:SetFont("Fonts\\FRIZQT__.TTF", 11)
     visual.name:SetWordWrap(false) -- otherwise text is wrapped when plate is scaled down
-    visual.customtext = textframe:CreateFontString(nil, "ARTWORK", -1)
+    visual.customtext = textframe:CreateFontString(nil, "OVERLAY", -1)
 		visual.customtext:SetFont("Fonts\\FRIZQT__.TTF", 11)
     visual.customtext:SetWordWrap(false) -- otherwise text is wrapped when plate is scaled down
-		visual.level = textframe:CreateFontString(nil, "ARTWORK", -2)
+		visual.level = textframe:CreateFontString(nil, "OVERLAY", -2)
 		visual.level:SetFont("Fonts\\FRIZQT__.TTF", 11)
 
 		-- Cast Bar Frame - Highest Frame

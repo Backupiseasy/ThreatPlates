@@ -88,6 +88,7 @@ local function UpdateSideTexture(db, widget_frame, texture_frame)
 
   left_texture:SetTexture(ART_PATH .. db.theme)
   left_texture:SetTexCoord(0, 1, 0, 1)
+  left_texture:SetDrawLayer("BACKGROUND", 0)
   left_texture:SetVertexColor(db.r, db.g, db.b, db.a)
   left_texture:SetSize(db.Size, db.Size)
   left_texture:ClearAllPoints()
@@ -110,10 +111,27 @@ local function UpdateCenterTexture(db, widget_frame, texture_frame)
 
   left_texture:SetTexture(ART_PATH .. db.theme)
   left_texture:SetTexCoord(0, 1, 0, 1)
+  left_texture:SetDrawLayer("BACKGROUND", 0)
   left_texture:SetVertexColor(db.r, db.g, db.b, db.a)
   left_texture:SetSize(db.Size, db.Size)
   left_texture:ClearAllPoints()
   left_texture:SetPoint("CENTER", widget_frame, "CENTER", db.HorizontalOffset, db.VerticalOffset)
+
+  left_texture:Show()
+  right_texture:Hide()
+  texture_frame:SetBackdrop(nil)
+end
+
+local function UpdateOverlayTexture(db, widget_frame, texture_frame)
+  local left_texture, right_texture = texture_frame.LeftTexture, texture_frame.RightTexture
+
+  left_texture:SetTexture("Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\TargetArtWidget\\" .. db.theme)
+  left_texture:SetTexCoord(0, 1, 0.4375, 0.5625)
+  -- Show target texture above focus texture
+  left_texture:SetDrawLayer("OVERLAY", (widget_frame == WidgetFrame and -5) or -8)
+  left_texture:SetVertexColor(db.r, db.g, db.b, db.a)
+  left_texture:ClearAllPoints()
+  left_texture:SetAllPoints(widget_frame)
 
   left_texture:Show()
   right_texture:Hide()
@@ -131,6 +149,7 @@ local UPDATE_TEXTURE_FUNCTIONS = {
   arrows_legacy = UpdateSideTexture,
   bubble = UpdateSideTexture,
   crescent = UpdateSideTexture,
+  Stripes = UpdateOverlayTexture,
 }
 
 local FRAME_LEVEL_BY_TEXTURE = {
@@ -144,6 +163,7 @@ local FRAME_LEVEL_BY_TEXTURE = {
   arrows_legacy = 9,
   bubble = 9,
   crescent = 9,
+  Stripes = 0,
 }
 
 local function GetHeadlineViewHeight(db)
@@ -236,6 +256,8 @@ function Widget:OnTargetUnitAdded(tp_frame, unit)
       healthbar_mode_frame.RightTexture:Hide()
       healthbar_mode_frame:Hide()
 
+      --local db = Settings
+      --widget_frame.NameModeTexture:SetVertexColor(db.r, db.g, db.b, db.a)
       widget_frame.NameModeTexture:Show()
     else
       if ShowBorder then
@@ -245,7 +267,7 @@ function Widget:OnTargetUnitAdded(tp_frame, unit)
       else
         healthbar_mode_frame:Hide()
         healthbar_mode_frame.LeftTexture:Show()
-        healthbar_mode_frame.RightTexture:SetShown(UpdateTexture ~= UpdateCenterTexture)
+        healthbar_mode_frame.RightTexture:SetShown(UpdateTexture == UpdateSideTexture)
       end
 
       widget_frame.NameModeTexture:Hide()
@@ -278,7 +300,7 @@ function Widget:UpdateSettings()
   NameModeOffsetY = GetTargetTextureY(SettingsHV)
 
   UpdateTexture = UPDATE_TEXTURE_FUNCTIONS[Settings.theme]
-  ShowBorder = UpdateTexture ~= UpdateSideTexture and UpdateTexture ~= UpdateCenterTexture
+  ShowBorder = (UpdateTexture == UpdateBorderTexture)
 
   -- Update the widget if it was already created (not true for immediately after Reload UI or if it was never enabled
   -- in this since last Reload UI)
@@ -348,10 +370,11 @@ function FocusWidget:OnFocusUnitAdded(tp_frame, unit)
   local widget_frame = FocusWidgetFrame
 
   if self:EnabledForStyle(unit.style, unit) then
+    local healthbar = tp_frame.visual.healthbar
     widget_frame:SetParent(tp_frame)
-    widget_frame:SetFrameLevel(tp_frame:GetFrameLevel() + FRAME_LEVEL_BY_TEXTURE[FocusSettings.theme])
+    widget_frame:SetFrameLevel(healthbar:GetFrameLevel() + FRAME_LEVEL_BY_TEXTURE[FocusSettings.theme])
     widget_frame:ClearAllPoints()
-    widget_frame:SetAllPoints(tp_frame.visual.healthbar)
+    widget_frame:SetAllPoints(healthbar)
 
     local healthbar_mode_frame = widget_frame.HealthbarMode
     if unit.style == "NameOnly" or unit.style == "NameOnly-Unique" then
@@ -370,7 +393,7 @@ function FocusWidget:OnFocusUnitAdded(tp_frame, unit)
       else
         healthbar_mode_frame:Hide()
         healthbar_mode_frame.LeftTexture:Show()
-        healthbar_mode_frame.RightTexture:SetShown(FocusUpdateTexture ~= UpdateCenterTexture)
+        healthbar_mode_frame.RightTexture:SetShown(FocusUpdateTexture == UpdateSideTexture)
       end
 
       widget_frame.NameModeTexture:Hide()
@@ -390,6 +413,7 @@ end
 function FocusWidget:UpdateLayout()
   local widget_frame = FocusWidgetFrame
 
+  print("Update Focus Layout")
   FocusUpdateTexture(FocusSettings, widget_frame, widget_frame.HealthbarMode)
   widget_frame.NameModeTexture:SetSize(128, 32 * GetHeadlineViewHeight(FocusSettingsHV) / 18)
   widget_frame.NameModeTexture:SetPoint("CENTER", widget_frame, "CENTER", FocusNameModeOffsetX, FocusNameModeOffsetY)
@@ -403,7 +427,7 @@ function FocusWidget:UpdateSettings()
   FocusNameModeOffsetY = GetTargetTextureY(FocusSettingsHV)
 
   FocusUpdateTexture = UPDATE_TEXTURE_FUNCTIONS[FocusSettings.theme]
-  FocusShowBorder = FocusUpdateTexture ~= UpdateSideTexture and FocusUpdateTexture ~= UpdateCenterTexture
+  FocusShowBorder = (FocusUpdateTexture == UpdateBorderTexture)
 
   -- Update the widget if it was already created (not true for immediately after Reload UI or if it was never enabled
   -- in this since last Reload UI)

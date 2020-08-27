@@ -166,6 +166,7 @@ Addon.TARGET_TEXTURES = {
   crescent = L["Crescent"],
   bubble = L["Bubble"],
   arrows_legacy = L["Arrow (Legacy)"],
+  Stripes = L["Stripes"]
 }
 
 ----------------------------------------------------------------------------------------------------
