@@ -1055,6 +1055,25 @@ local function FixTargetFocusTexture(profile_name, profile)
   end
 end
 
+local function RenameFilterMode(profile_name, profile)
+  local FilterModeMapping = {
+    whitelist = "Allow",
+    blacklist = "Block",
+    all = "None",
+  }
+
+  -- Part after or is just a fail-save, should never be called (as code is only executed once, after 9.3.0).
+  if DatabaseEntryExists(profile, { "AuraWidget", "Debuffs", "FilterMode" } ) then
+    profile.AuraWidget.Debuffs.FilterMode = FilterModeMapping[profile.AuraWidget.Debuffs.FilterMode] or profile.AuraWidget.Debuffs.FilterMode
+  end
+  if DatabaseEntryExists(profile, { "AuraWidget", "Buffs", "FilterMode" } ) then
+    profile.AuraWidget.Buffs.FilterMode = FilterModeMapping[profile.AuraWidget.Buffs.FilterMode] or profile.AuraWidget.Buffs.FilterMode
+  end
+  if DatabaseEntryExists(profile, { "AuraWidget", "CrowdControl", "FilterMode" } ) then
+    profile.AuraWidget.CrowdControl.FilterMode = FilterModeMapping[profile.AuraWidget.CrowdControl.FilterMode] or profile.AuraWidget.CrowdControl.FilterMode
+  end
+end
+
 -- Settings in the SavedVariables file that should be migrated and/or deleted
 local DEPRECATED_SETTINGS = {
   --  NamesColor = { MigrateNamesColor, },                        -- settings.name.color
@@ -1088,6 +1107,7 @@ local DEPRECATED_SETTINGS = {
   MigrationCustomPlatesV3 = { MigrateCustomStylesToV3, (Addon.CLASSIC and "1.4.0") or "9.2.2" },
   SpelltextPosition = { MigrateSpelltextPosition, (Addon.CLASSIC and "1.4.0") or "9.2.0", NoDefaultProfile = true },
   FixTargetFocusTexture = { FixTargetFocusTexture, NoDefaultProfile = true },
+  RenameFilterMode = { RenameFilterMode, NoDefaultProfile = true, "9.3.0"},
 }
 
 local function MigrateDatabase(current_version)
