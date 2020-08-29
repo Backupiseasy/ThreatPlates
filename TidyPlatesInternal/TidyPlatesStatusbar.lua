@@ -143,36 +143,41 @@ local function UpdateLayoutHealthbar(self, db, style)
   else
     self:SetFrameLevel(tp_frame:GetFrameLevel() + 4)
   end
+  self.ThreatBorder:SetFrameLevel(self:GetFrameLevel() - 2)
   tp_frame.visual.textframe:SetFrameLevel(self:GetFrameLevel())
 
-  Font:UpdateText(self, self.TargetOfTarget, db.healthbar.TargetOfTarget)
+  Font:UpdateText(self, self.TargetUnit, db.healthbar.TargetUnit)
 
   local width, height = self:GetSize()
-  self.TargetOfTarget:SetSize(width, height)
-  print ("Update:", db.healthbar.TargetOfTarget.Show, self.TargetOfTarget:GetText())
-  self.TargetOfTarget:SetShown(self.TargetOfTarget:GetText() ~= nil)
+  self.TargetUnit:SetSize(width, height)
+  self.TargetUnit:SetShown(self.TargetUnit:GetText() ~= nil)
 end
 
-local function SetTargetOfTarget(self, name)
-  local target_of_target = self.TargetOfTarget
+local function ShowTargetUnit(self, target_of_target_name, class_name)
+  local target_of_target = self.TargetUnit
 
-  if name then
-    target_of_target:SetText(name)
+  if target_of_target_name then
+    target_of_target:SetText("|cffffffff[|r " .. target_of_target_name .. " |cffffffff]|r")
+    target_of_target.ClassName = class_name
+    target_of_target:Show()
   end
 
-  local db = TidyPlatesThreat.db.profile.settings.healthbar.TargetOfTarget
-  if db.UseNameplateColor then
-    local r, g, b
-    if self:IsShown() then
-      r, g, b = self:GetStatusBarColor()
+  -- Update the color if the element is shown
+  if target_of_target:IsShown() then
+    local db = TidyPlatesThreat.db.profile.settings.healthbar.TargetUnit
+    if db.UseClassColor and target_of_target.ClassName then
+      local color = TidyPlatesThreat.db.profile.Colors.Classes[target_of_target.ClassName]
+      target_of_target:SetTextColor(color.r, color.g, color.b)
     else
-      r, g, b = self:GetParent().visual.name:GetTextColor()
+      local color = db.CustomColor
+      target_of_target:SetTextColor(color.r, color.g, color.b)
     end
-    target_of_target:SetTextColor(r, g, b)
-  else
-    local color = db.CustomColor
-    target_of_target:SetTextColor(color.r, color.g, color.b)
   end
+end
+
+local function HideTargetUnit(self)
+  self.TargetUnit:SetText(nil)
+  self.TargetUnit:Hide()
 end
 
 function Addon:CreateHealthbar(parent)
@@ -202,7 +207,8 @@ function Addon:CreateHealthbar(parent)
 	frame.SetAllColors = SetAllColors
   frame.SetStatusBarBackdrop = SetStatusBarBackdropHealthbar
   frame.UpdateLayout = UpdateLayoutHealthbar
-  frame.SetTargetOfTarget = SetTargetOfTarget
+  frame.ShowTargetUnit = ShowTargetUnit
+  frame.HideTargetUnit = HideTargetUnit
 
   local healabsorb_bar = frame:CreateTexture(nil, "OVERLAY", 0)
   healabsorb_bar:SetVertexColor(0, 0, 0)
@@ -225,8 +231,8 @@ function Addon:CreateHealthbar(parent)
   frame.HealAbsorb = healabsorb_bar
   frame.HealAbsorbGlow = healabsorb_glow
 
-  frame.TargetOfTarget = frame:CreateFontString(nil, "ARTWORK")
-  frame.TargetOfTarget:SetFont("Fonts\\FRIZQT__.TTF", 11)
+  frame.TargetUnit = frame:CreateFontString(nil, "ARTWORK")
+  frame.TargetUnit:SetFont("Fonts\\FRIZQT__.TTF", 11)
 
 	--frame:SetScript("OnSizeChanged", OnSizeChanged)
 	return frame

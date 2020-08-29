@@ -1201,6 +1201,27 @@ ThreatPlates.DEFAULT_SETTINGS = {
         AlwaysFullAbsorb = false,
         OverlayTexture = true,
         OverlayColor = RGB(0, 128, 255, 1),
+        TargetUnit = {
+          Show = true,
+          CustomColor = RGB(255, 255, 255),
+          UseClassColor = true,
+          ShowOnlyForTarget = false,
+          -- Layout
+          Anchor = "RIGHT",
+          InsideAnchor = false,
+          HorizontalOffset = 30,
+          VerticalOffset = 0,
+          Font = {
+            Typeface = Addon.DEFAULT_FONT,
+            Size = 9,
+            Transparency = 1,
+            --Color = RGB(255, 255, 255),
+            flags = "NONE",
+            Shadow = true,
+            HorizontalAlignment = "LEFT",
+            VerticalAlignment = "CENTER",
+          }
+        },
       },
       castnostop = {
         show = true, -- no longer used

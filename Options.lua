@@ -1166,15 +1166,6 @@ end
 local function GetFontEntryDefault(name, pos, widget_info, func_disabled)
   widget_info = Addon.ConcatTables(widget_info, { "Font" } )
 
-  -- Check if certain configuration options should be shown:
-  local entry_transparency, entry_color
-  if CheckIfValueExists(widget_info, { "Transparency" } ) then
-    entry_transparency = GetTransparencyEntryDefault(30, Addon.ConcatTables(widget_info, { "Transparency" }) )
-  end
-  if CheckIfValueExists(widget_info, { "Color" } ) then
-    entry_color = GetColorEntry(L["Color"], 40, Addon.ConcatTables(widget_info, { "Color" }) )
-  end
-
   local entry = {
     type = "group",
     order = pos,
@@ -1200,8 +1191,8 @@ local function GetFontEntryDefault(name, pos, widget_info, func_disabled)
         step = 1,
         isPercent = false,
       },
-      Transparency = entry_transparency,
-      Color = entry_color,
+      Transparency = AddIfSettingExists(GetTransparencyEntryDefault(30, Addon.ConcatTables(widget_info, { "Transparency" }) )),
+      Color = AddIfSettingExists(GetColorEntry(L["Color"], 40, Addon.ConcatTables(widget_info, { "Color" }))),
       Spacer = GetSpacerEntry(100),
       Outline = {
         name = L["Outline"],
@@ -1245,68 +1236,17 @@ local function GetFontEntryDefault(name, pos, widget_info, func_disabled)
     },
   }
 
-  if entry_color then
+  if entry.args.Color then
     entry.args.Color.set = SetColorWidget
     entry.args.Color.width = "half"
   end
 
-  if entry_transparency then
+  if entry.args.Transparency then
     entry.args.Transparency.set = function(info, val) SetValueWidget(info, abs(val - 1)) end
   end
 
   return entry
 end
-
---local function AddPositioningOptions(entry, pos, widget_info)
---  entry.Anchor = {
---    type = "select",
---    order = pos + 0,
---    name = L["Position"],
---    values = Addon.ANCHOR_POINT,
---    arg = Addon.ConcatTables(widget_info, { "Anchor" }),
---  }
---  entry.InsideAnchor = {
---    type = "toggle",
---    order = pos + 1,
---    name = L["Inside"],
---    width = "half",
---    arg = Addon.ConcatTables(widget_info, { "InsideAnchor" }),
---  }
---  entry.X = {
---    type = "range",
---    order = pos + 2,
---    name = L["Horizontal Offset"],
---    max = 120,
---    min = -120,
---    step = 1,
---    isPercent = false,
---    arg = Addon.ConcatTables(widget_info, { "HorizontalOffset" }),
---  }
---  entry.Y = {
---    type = "range",
---    order = pos + 3,
---    name = L["Vertical Offset"],
---    max = 120,
---    min = -120,
---    step = 1,
---    isPercent = false,
---    arg = Addon.ConcatTables(widget_info, { "VerticalOffset" }),
---  }
---  entry.AlignX = {
---    type = "select",
---    order = pos + 4,
---    name = L["Horizontal Align"],
---    values = t.AlignH,
---    arg = Addon.ConcatTables(widget_info, { "Font", "HorizontalAlignment" }),
---  }
---  entry.AlignY = {
---    type = "select",
---    order = pos + 5,
---    name = L["Vertical Align"],
---    values = t.AlignV,
---    arg = Addon.ConcatTables(widget_info, { "Font", "VerticalAlignment" }),
---  }
---end
 
 local function GetFontPositioningEntry(pos, widget_info)
   local entry = {
@@ -1474,7 +1414,7 @@ local function GetTextEntry(name, pos, widget_info)
     inline = false,
     args = {
       Show = {
-        name = L["Show Text"],
+        name = L["Enable Text"],
         order = 1,
         type = "toggle",
         arg = Addon.ConcatTables(widget_info, { "Show" }),
@@ -5145,6 +5085,507 @@ local function CreateAutomationSettings()
   return entry
 end
 
+local function CreateHealthbarOptions()
+  local entry = {
+    name = L["Healthbar View"],
+    type = "group",
+    inline = false,
+    childGroups = "tab",
+    order = 20,
+    args = {
+      Appearance = {
+        name = L["Appearance"],
+        order = 10,
+        type = "group",
+        inline = false,
+        args = {
+          Design = {
+            name = L["Default Settings (All Profiles)"],
+            type = "group",
+            inline = true,
+            order = 10,
+            args = {
+              HealthBarTexture = {
+                name = L["Look and Feel"],
+                order = 1,
+                type = "select",
+                desc = L["Changes the default settings to the selected design. Some of your custom settings may get overwritten if you switch back and forth.."],
+                values = { CLASSIC = "Classic", SMOOTH = "Smooth" } ,
+                set = function(info, val)
+                  TidyPlatesThreat.db.global.DefaultsVersion = val
+                  if val == "CLASSIC" then
+                    t.SwitchToDefaultSettingsV1()
+                  else -- val == "SMOOTH"
+                    t.SwitchToCurrentDefaultSettings()
+                  end
+                  TidyPlatesThreat:ReloadTheme()
+                end,
+                get = function(info) return TidyPlatesThreat.db.global.DefaultsVersion end,
+              },
+            },
+          },
+          Format = {
+            name = L["Format"],
+            order = 20,
+            type = "group",
+            inline = true,
+            set = SetThemeValue,
+            args = {
+              Width = GetRangeEntry(L["Bar Width"], 10, { "settings", "healthbar", "width" }, 5, 500,
+                function(info, val)
+                  if InCombatLockdown() then
+                    t.Print("We're unable to change this while in combat", true)
+                  else
+                    SetThemeValue(info, val)
+                    Addon:SetBaseNamePlateSize()
+                  end
+                end),
+              Height = GetRangeEntry(L["Bar Height"], 20, {"settings", "healthbar", "height" }, 1, 100,
+                function(info, val)
+                  if InCombatLockdown() then
+                    t.Print("We're unable to change this while in combat", true)
+                  else
+                    SetThemeValue(info, val)
+                    Addon:SetBaseNamePlateSize()
+                  end
+                end),
+              Spacer1 = GetSpacerEntry(25),
+              ShowHealAbsorbs = {
+                name = L["Heal Absorbs"],
+                order = 29,
+                type = "toggle",
+                arg = { "settings", "healthbar", "ShowHealAbsorbs" },
+                hidden = function() return Addon.CLASSIC end,
+              },
+              ShowAbsorbs = {
+                name = L["Absorbs"],
+                order = 30,
+                type = "toggle",
+                arg = { "settings", "healthbar", "ShowAbsorbs" },
+                hidden = function() return Addon.CLASSIC end,
+              },
+              ShowMouseoverHighlight = {
+                type = "toggle",
+                order = 40,
+                name = L["Mouseover"],
+                set = SetThemeValue,
+                arg = { "settings", "highlight", "show" },
+              },
+              ShowBorder = {
+                type = "toggle",
+                order = 50,
+                name = L["Border"],
+                set = SetThemeValue,
+                arg = { "settings", "healthborder", "show" },
+              },
+              ShowEliteBorder = {
+                type = "toggle",
+                order = 60,
+                name = L["Elite Border"],
+                arg = { "settings", "elitehealthborder", "show" },
+              },
+            }
+          },
+          HealthBarGroup = {
+            name = L["Textures"],
+            type = "group",
+            inline = true,
+            order = 30,
+            args = {
+              HealthBarTexture = {
+                name = L["Foreground"],
+                type = "select",
+                order = 10,
+                dialogControl = "LSM30_Statusbar",
+                values = AceGUIWidgetLSMlists.statusbar,
+                set = SetThemeValue,
+                arg = { "settings", "healthbar", "texture" },
+              },
+              BGTexture = {
+                name = L["Background"],
+                type = "select",
+                order = 20,
+                dialogControl = "LSM30_Statusbar",
+                values = AceGUIWidgetLSMlists.statusbar,
+                set = SetThemeValue,
+                arg = { "settings", "healthbar", "backdrop" },
+              },
+              HealthBorder = {
+                type = "select",
+                order = 25,
+                name = L["Border"],
+                set = function(info, val)
+                  if val == "TP_Border_Default" then
+                    db.settings.healthborder.EdgeSize = 2
+                    db.settings.healthborder.Offset = 2
+                  else
+                    db.settings.healthborder.EdgeSize = 1
+                    db.settings.healthborder.Offset = 1
+                  end
+                  SetThemeValue(info, val)
+                end,
+                values = { TP_Border_Default = "Default", TP_Border_Thin = "Thin" },
+                arg = { "settings", "healthborder", "texture" },
+              },
+              EliteBorder = {
+                type = "select",
+                order = 26,
+                name = L["Elite Border"],
+                values = { TP_EliteBorder_Default = "Default", TP_EliteBorder_Thin = "Thin" },
+                set = SetThemeValue,
+                arg = { "settings", "elitehealthborder", "texture" }
+              },
+              Spacer1 = GetSpacerEntry(30),
+              BGColorText = {
+                type = "description",
+                order = 40,
+                width = "single",
+                name = L["Background Color:"],
+              },
+              BGColorForegroundToggle = {
+                name = L["Same as Foreground"],
+                order = 50,
+                type = "toggle",
+                desc = L["Use the healthbar's foreground color also for the background."],
+                set = SetThemeValue,
+                arg = { "settings", "healthbar", "BackgroundUseForegroundColor" },
+              },
+              BGColorCustomToggle = {
+                name = L["Custom"],
+                order = 60,
+                type = "toggle",
+                width = "half",
+                desc = L["Use a custom color for the healtbar's background."],
+                set = function(info, val)
+                  SetThemeValue(info, not val)
+                end,
+                get = function(info, val)
+                  return not GetValue(info, val)
+                end,
+                arg = { "settings", "healthbar", "BackgroundUseForegroundColor" },
+              },
+              BGColorCustom = {
+                name = L["Color"],
+                order = 70,
+                type = "color",
+                get = GetColor, set = SetColor, arg = {"settings", "healthbar", "BackgroundColor"},
+                width = "half",
+                disabled = function() return db.settings.healthbar.BackgroundUseForegroundColor end,
+              },
+              BackgroundOpacity = {
+                name = L["Background Transparency"],
+                order = 80,
+                type = "range",
+                min = 0,
+                max = 1,
+                step = 0.01,
+                isPercent = true,
+                arg = { "settings", "healthbar", "BackgroundOpacity" },
+              },
+              AbsorbGroup = {
+                name = L["Absorbs"],
+                order = 90,
+                type = "group",
+                inline = true,
+                hidden = function() return Addon.CLASSIC end,
+                args = {
+                  AbsorbColor = {
+                    name = L["Color"],
+                    order = 110,
+                    type = "color",
+                    get = GetColorAlpha,
+                    set = SetColorAlpha,
+                    hasAlpha = true,
+                    arg = { "settings", "healthbar", "AbsorbColor" },
+                  },
+                  AlwaysFullAbsorb = {
+                    name = L["Full Absorbs"],
+                    order = 120,
+                    type = "toggle",
+                    desc = L["Always shows the full amount of absorbs on a unit. In overabsorb situations, the absorbs bar ist shifted to the left."],
+                    arg = { "settings", "healthbar", "AlwaysFullAbsorb" },
+                  },
+                  OverlayTexture = {
+                    name = L["Striped Texture"],
+                    order = 130,
+                    type = "toggle",
+                    desc = L["Use a striped texture for the absorbs overlay. Always enabled if full absorbs are shown."],
+                    get = function(info) return GetValue(info) or db.settings.healthbar.AlwaysFullAbsorb end,
+                    disabled = function() return db.settings.healthbar.AlwaysFullAbsorb end,
+                    arg = { "settings", "healthbar", "OverlayTexture" },
+                  },
+                  OverlayColor = {
+                    name = L["Striped Texture Color"],
+                    order = 140,
+                    type = "color",
+                    get = GetColorAlpha,
+                    set = SetColorAlpha,
+                    hasAlpha = true,
+                    arg = { "settings", "healthbar", "OverlayColor" },
+                  },
+                },
+              },
+            },
+          },
+          ShowByStatus = {
+            name = L["Force View By Status"],
+            order = 40,
+            type = "group",
+            inline = true,
+            args = {
+              ModeOnTarget = {
+                name = L["On Target"],
+                order = 1,
+                type = "toggle",
+                width = "double",
+                arg = { "HeadlineView", "ForceHealthbarOnTarget" }
+              },
+            }
+          },
+        },
+      },
+      Layout = {
+        name = L["Layout"],
+        type = "group",
+        inline = false,
+        order = 20,
+        args = {
+          Placement = {
+            name = L["Placement"],
+            type = "group",
+            inline = true,
+            order = 20,
+            args = {
+              Warning = {
+                type = "description",
+                order = 1,
+                name = L["Changing these settings will alter the placement of the nameplates, however the mouseover area does not follow. |cffff0000Use with caution!|r"],
+              },
+              OffsetX = {
+                name = L["Offset X"],
+                type = "range",
+                min = -60,
+                max = 60,
+                step = 1,
+                order = 2,
+                set = SetThemeValue,
+                arg = { "settings", "frame", "x" },
+              },
+              Offsety = {
+                name = L["Offset Y"],
+                type = "range",
+                min = -60,
+                max = 60,
+                step = 1,
+                order = 3,
+                set = SetThemeValue,
+                arg = { "settings", "frame", "y" },
+              },
+            },
+          },
+        },
+      },
+      ColorSettings = {
+        name = L["Coloring"],
+        type = "group",
+        inline = false,
+        order = 30,
+        args = {
+          General = {
+            name = L["General Colors"],
+            order = 10,
+            type = "group",
+            inline = true,
+            get = GetColor,
+            set = SetColor,
+            args = {
+              TappedColor = { name = L["Tapped Units"], order = 1, type = "color", arg = { "ColorByReaction", "TappedUnit" }, },
+              DCedColor = { name = L["Disconnected Units"], order = 2, type = "color", arg = { "ColorByReaction", "DisconnectedUnit" }, },
+            },
+          },
+          HPAmount = {
+            name = L["Color by Health"],
+            order = 20,
+            type = "group",
+            inline = true,
+            args = {
+              ColorByHPLevel = {
+                name = L["Change the color depending on the amount of health points the nameplate shows."],
+                order = 10,
+                type = "toggle",
+                width = "full",
+                arg = { "healthColorChange" },
+              },
+              Header = { name = L["Colors"], type = "header", order = 20, },
+              ColorLow = {
+                name = "Low Color",
+                order = 30,
+                type = "color",
+                desc = "",
+                descStyle = "inline",
+                get = GetColor,
+                set = SetColor,
+                arg = { "aHPbarColor" },
+              },
+              ColorHigh = {
+                name = "High Color",
+                order = 40,
+                type = "color",
+                desc = "",
+                descStyle = "inline",
+                get = GetColor,
+                set = SetColor,
+                arg = { "bHPbarColor" },
+              },
+            },
+          },
+          ClassColors = {
+            name = L["Color By Class"],
+            order = 30,
+            type = "group",
+            disabled = function() return db.healthColorChange end,
+            inline = true,
+            args = {
+              Enable = {
+                name = L["Color Healthbar By Enemy Class"],
+                order = 1,
+                type = "toggle",
+                descStyle = "inline",
+                width = "double",
+                arg = { "allowClass" }
+              },
+              FriendlyClass = {
+                name = L["Color Healthbar By Friendly Class"],
+                order = 2,
+                type = "toggle",
+                descStyle = "inline",
+                width = "double",
+                arg = { "friendlyClass" },
+              },
+            },
+          },
+          Reaction = {
+            order = 20,
+            name = L["Color by Reaction"],
+            type = "group",
+            inline = true,
+            get = GetColor,
+            set = SetColor,
+            args = {
+              ColorByReaction = {
+                name = L["Change the color depending on the reaction of the unit (friendly, hostile, neutral)."],
+                type = "toggle",
+                width = "full",
+                order = 1,
+                arg = { "healthColorChange" }, -- false, if Color by Reaction (customColor), true if Color by Health
+                get = function(info) return not GetValue(info) end,
+                set = function(info, val) SetValue(info, not val) end,
+              },
+              Header = { name = L["Colors"], type = "header", order = 10, },
+              FriendlyColorNPC = { name = L["Friendly NPCs"], order = 20, type = "color", arg = { "ColorByReaction", "FriendlyNPC", }, },
+              FriendlyColorPlayer = { name = L["Friendly Players"], order = 30, type = "color", arg = { "ColorByReaction", "FriendlyPlayer" }, },
+              EnemyColorNPC = { name = L["Hostile NPCs"], order = 40, type = "color", arg = { "ColorByReaction", "HostileNPC" }, },
+              EnemyColorPlayer = { name = L["Hostile Players"], order = 50, type = "color", arg = { "ColorByReaction", "HostilePlayer" }, },
+              NeutralColor = { name = L["Neutral Units"], order = 60, type = "color", arg = { "ColorByReaction", "NeutralUnit" }, },
+            },
+          },
+        },
+      },
+      ThreatColors = {
+        name = L["Warning Glow for Threat"],
+        order = 40,
+        type = "group",
+        get = GetColorAlpha,
+        set = SetColorAlpha,
+        inline = false,
+        args = {
+          ThreatGlow = {
+            type = "toggle",
+            order = 1,
+            name = L["Enable"],
+            get = GetValue,
+            set = SetThemeValue,
+            arg = { "settings", "threatborder", "show" },
+          },
+          OnlyAttackedUnits = {
+            type = "toggle",
+            order = 2,
+            name = L["Threat Detection Heuristic"],
+            desc = L["Use a heuristic instead of a mob's threat table to detect if you are in combat with a mob (see Threat System - General Settings for a more detailed explanation)."],
+            width = "double",
+            set = function(info, val) SetValue(info, not val) end,
+            get = function(info) return not GetValue(info) end,
+            arg = { "ShowThreatGlowOnAttackedUnitsOnly" },
+          },
+          Header = { name = L["Colors"], type = "header", order = 10, },
+          Low = {
+            name = L["|cffffffffLow Threat|r"],
+            type = "color",
+            order = 20,
+            arg = { "settings", "normal", "threatcolor", "LOW" },
+            hasAlpha = true,
+          },
+          Med = {
+            name = L["|cffffff00Medium Threat|r"],
+            type = "color",
+            order = 30,
+            arg = { "settings", "normal", "threatcolor", "MEDIUM" },
+            hasAlpha = true,
+          },
+          High = {
+            name = L["|cffff0000High Threat|r"],
+            type = "color",
+            order = 40,
+            arg = { "settings", "normal", "threatcolor", "HIGH" },
+            hasAlpha = true,
+          },
+        },
+      },
+      TargetUnitText = GetTextEntry(L["Target"], 50, { "settings", "healthbar", "TargetUnit" }),
+    },
+  }
+
+  entry.args.TargetUnitText.args.Showing = {
+    name = L["Show For"],
+    order = 5,
+    type = "group",
+    inline = true,
+    args = {
+      OnlyForTarget = {
+        name = L["Only for Target"],
+        order = 10,
+        type = "toggle",
+        arg = { "settings", "healthbar", "TargetUnit", "ShowOnlyForTarget" },
+      },
+    },
+  }
+
+  entry.args.TargetUnitText.args.Coloring = {
+    name = L["Coloring"],
+    order = 30,
+    type = "group",
+    inline = true,
+    args = {
+      ColorCustom = {
+        name = L["Color"],
+        order = 10,
+        type = "color",
+        get = GetColor,
+        set = SetColor,
+        arg = { "settings", "healthbar", "TargetUnit", "CustomColor" },
+      },
+      ClassColor = {
+        name = L["Class Color for Players"],
+        order = 20,
+        type = "toggle",
+        arg = { "settings", "healthbar", "TargetUnit", "UseClassColor" },
+      },
+    },
+  }
+
+  return entry
+end
+
 local function CreateCastbarOptions()
   local entry = {
     name = L["Castbar"],
@@ -6623,482 +7064,34 @@ local function CreateOptionsTable()
           args = {
             GeneralSettings = CreateVisibilitySettings(),
             AutomationSettings = CreateAutomationSettings(),
-            HealthBarView = {
-              name = L["Healthbar View"],
-              type = "group",
-              inline = false,
-              order = 20,
-              args = {
-                Design = {
-                  name = L["Default Settings (All Profiles)"],
-                  type = "group",
-                  inline = true,
-                  order = 1,
-                  args = {
-                    HealthBarTexture = {
-                      name = L["Look and Feel"],
-                      order = 1,
-                      type = "select",
-                      desc = L["Changes the default settings to the selected design. Some of your custom settings may get overwritten if you switch back and forth.."],
-                      values = { CLASSIC = "Classic", SMOOTH = "Smooth" } ,
-                      set = function(info, val)
-                        TidyPlatesThreat.db.global.DefaultsVersion = val
-                        if val == "CLASSIC" then
-                          t.SwitchToDefaultSettingsV1()
-                        else -- val == "SMOOTH"
-                          t.SwitchToCurrentDefaultSettings()
-                        end
-                        TidyPlatesThreat:ReloadTheme()
-                      end,
-                      get = function(info) return TidyPlatesThreat.db.global.DefaultsVersion end,
-                    },
-                  },
-                },
-                Format = {
-                  name = L["Format"],
-                  order = 5,
-                  type = "group",
-                  inline = true,
-                  set = SetThemeValue,
-                  args = {
-                    Width = GetRangeEntry(L["Bar Width"], 10, { "settings", "healthbar", "width" }, 5, 500,
-                      function(info, val)
-                        if InCombatLockdown() then
-                          t.Print("We're unable to change this while in combat", true)
-                        else
-                          SetThemeValue(info, val)
-                          Addon:SetBaseNamePlateSize()
-                        end
-                      end),
-                    Height = GetRangeEntry(L["Bar Height"], 20, {"settings", "healthbar", "height" }, 1, 100,
-                      function(info, val)
-                        if InCombatLockdown() then
-                          t.Print("We're unable to change this while in combat", true)
-                        else
-                          SetThemeValue(info, val)
-                          Addon:SetBaseNamePlateSize()
-                        end
-                      end),
-                    Spacer1 = GetSpacerEntry(25),
-                    ShowHealAbsorbs = {
-                      name = L["Heal Absorbs"],
-                      order = 29,
-                      type = "toggle",
-                      arg = { "settings", "healthbar", "ShowHealAbsorbs" },
-                      hidden = function() return Addon.CLASSIC end,
-                    },
-                    ShowAbsorbs = {
-                      name = L["Absorbs"],
-                      order = 30,
-                      type = "toggle",
-                      arg = { "settings", "healthbar", "ShowAbsorbs" },
-                      hidden = function() return Addon.CLASSIC end,
-                    },
-                    ShowMouseoverHighlight = {
-                      type = "toggle",
-                      order = 40,
-                      name = L["Mouseover"],
-                      set = SetThemeValue,
-                      arg = { "settings", "highlight", "show" },
-                    },
-                    ShowBorder = {
-                      type = "toggle",
-                      order = 50,
-                      name = L["Border"],
-                      set = SetThemeValue,
-                      arg = { "settings", "healthborder", "show" },
-                    },
-                    ShowEliteBorder = {
-                      type = "toggle",
-                      order = 60,
-                      name = L["Elite Border"],
-                      arg = { "settings", "elitehealthborder", "show" },
-                    },
-                  }
-                },
-                HealthBarGroup = {
-                  name = L["Textures"],
-                  type = "group",
-                  inline = true,
-                  order = 10,
-                  args = {
-                    HealthBarTexture = {
-                      name = L["Foreground"],
-                      type = "select",
-                      order = 10,
-                      dialogControl = "LSM30_Statusbar",
-                      values = AceGUIWidgetLSMlists.statusbar,
-                      set = SetThemeValue,
-                      arg = { "settings", "healthbar", "texture" },
-                    },
-                    BGTexture = {
-                      name = L["Background"],
-                      type = "select",
-                      order = 20,
-                      dialogControl = "LSM30_Statusbar",
-                      values = AceGUIWidgetLSMlists.statusbar,
-                      set = SetThemeValue,
-                      arg = { "settings", "healthbar", "backdrop" },
-                    },
-                    HealthBorder = {
-                      type = "select",
-                      order = 25,
-                      name = L["Border"],
-                      set = function(info, val)
-                        if val == "TP_Border_Default" then
-                          db.settings.healthborder.EdgeSize = 2
-                          db.settings.healthborder.Offset = 2
-                        else
-                          db.settings.healthborder.EdgeSize = 1
-                          db.settings.healthborder.Offset = 1
-                        end
-                        SetThemeValue(info, val)
-                      end,
-                      values = { TP_Border_Default = "Default", TP_Border_Thin = "Thin" },
-                      arg = { "settings", "healthborder", "texture" },
-                    },
-                    EliteBorder = {
-                      type = "select",
-                      order = 26,
-                      name = L["Elite Border"],
-                      values = { TP_EliteBorder_Default = "Default", TP_EliteBorder_Thin = "Thin" },
-                      set = SetThemeValue,
-                      arg = { "settings", "elitehealthborder", "texture" }
-                    },
-                    Spacer1 = GetSpacerEntry(30),
-                    BGColorText = {
-                      type = "description",
-                      order = 40,
-                      width = "single",
-                      name = L["Background Color:"],
-                    },
-                    BGColorForegroundToggle = {
-                      name = L["Same as Foreground"],
-                      order = 50,
-                      type = "toggle",
-                      desc = L["Use the healthbar's foreground color also for the background."],
-                      set = SetThemeValue,
-                      arg = { "settings", "healthbar", "BackgroundUseForegroundColor" },
-                    },
-                    BGColorCustomToggle = {
-                      name = L["Custom"],
-                      order = 60,
-                      type = "toggle",
-                      width = "half",
-                      desc = L["Use a custom color for the healtbar's background."],
-                      set = function(info, val)
-                        SetThemeValue(info, not val)
-                      end,
-                      get = function(info, val)
-                        return not GetValue(info, val)
-                      end,
-                      arg = { "settings", "healthbar", "BackgroundUseForegroundColor" },
-                    },
-                    BGColorCustom = {
-                      name = L["Color"],
-                      order = 70,
-                      type = "color",
-                      get = GetColor, set = SetColor, arg = {"settings", "healthbar", "BackgroundColor"},
-                      width = "half",
-                      disabled = function() return db.settings.healthbar.BackgroundUseForegroundColor end,
-                    },
-                    BackgroundOpacity = {
-                      name = L["Background Transparency"],
-                      order = 80,
-                      type = "range",
-                      min = 0,
-                      max = 1,
-                      step = 0.01,
-                      isPercent = true,
-                      arg = { "settings", "healthbar", "BackgroundOpacity" },
-                    },
-                    AbsorbGroup = {
-                      name = L["Absorbs"],
-                      order = 90,
-                      type = "group",
-                      inline = true,
-                      hidden = function() return Addon.CLASSIC end,
-                      args = {
-                        AbsorbColor = {
-                          name = L["Color"],
-                          order = 110,
-                          type = "color",
-                          get = GetColorAlpha,
-                          set = SetColorAlpha,
-                          hasAlpha = true,
-                          arg = { "settings", "healthbar", "AbsorbColor" },
-                        },
-                        AlwaysFullAbsorb = {
-                          name = L["Full Absorbs"],
-                          order = 120,
-                          type = "toggle",
-                          desc = L["Always shows the full amount of absorbs on a unit. In overabsorb situations, the absorbs bar ist shifted to the left."],
-                          arg = { "settings", "healthbar", "AlwaysFullAbsorb" },
-                        },
-                        OverlayTexture = {
-                          name = L["Striped Texture"],
-                          order = 130,
-                          type = "toggle",
-                          desc = L["Use a striped texture for the absorbs overlay. Always enabled if full absorbs are shown."],
-                          get = function(info) return GetValue(info) or db.settings.healthbar.AlwaysFullAbsorb end,
-                          disabled = function() return db.settings.healthbar.AlwaysFullAbsorb end,
-                          arg = { "settings", "healthbar", "OverlayTexture" },
-                        },
-                        OverlayColor = {
-                          name = L["Striped Texture Color"],
-                          order = 140,
-                          type = "color",
-                          get = GetColorAlpha,
-                          set = SetColorAlpha,
-                          hasAlpha = true,
-                          arg = { "settings", "healthbar", "OverlayColor" },
-                        },
-                      },
-                    },
-                  },
-                },
-                ShowByStatus = {
-                  name = L["Force View By Status"],
-                  order = 15,
-                  type = "group",
-                  inline = true,
-                  args = {
-                    ModeOnTarget = {
-                      name = L["On Target"],
-                      order = 1,
-                      type = "toggle",
-                      width = "double",
-                      arg = { "HeadlineView", "ForceHealthbarOnTarget" }
-                    },
-                  }
-                },
-                ColorSettings = {
-                  name = L["Coloring"],
-                  type = "group",
-                  inline = true,
-                  order = 20,
-                  args = {
-                    General = {
-                      name = L["General Colors"],
-                      order = 10,
-                      type = "group",
-                      inline = true,
-                      get = GetColor,
-                      set = SetColor,
-                      args = {
-                        TappedColor = { name = L["Tapped Units"], order = 1, type = "color", arg = { "ColorByReaction", "TappedUnit" }, },
-                        DCedColor = { name = L["Disconnected Units"], order = 2, type = "color", arg = { "ColorByReaction", "DisconnectedUnit" }, },
-                      },
-                    },
-                    HPAmount = {
-                      name = L["Color by Health"],
-                      order = 20,
-                      type = "group",
-                      inline = true,
-                      args = {
-                        ColorByHPLevel = {
-                          name = L["Change the color depending on the amount of health points the nameplate shows."],
-                          order = 10,
-                          type = "toggle",
-                          width = "full",
-                          arg = { "healthColorChange" },
-                        },
-                        Header = { name = L["Colors"], type = "header", order = 20, },
-                        ColorLow = {
-                          name = "Low Color",
-                          order = 30,
-                          type = "color",
-                          desc = "",
-                          descStyle = "inline",
-                          get = GetColor,
-                          set = SetColor,
-                          arg = { "aHPbarColor" },
-                        },
-                        ColorHigh = {
-                          name = "High Color",
-                          order = 40,
-                          type = "color",
-                          desc = "",
-                          descStyle = "inline",
-                          get = GetColor,
-                          set = SetColor,
-                          arg = { "bHPbarColor" },
-                        },
-                      },
-                    },
-                    ClassColors = {
-                      name = L["Color By Class"],
-                      order = 30,
-                      type = "group",
-                      disabled = function() return db.healthColorChange end,
-                      inline = true,
-                      args = {
-                        Enable = {
-                          name = L["Color Healthbar By Enemy Class"],
-                          order = 1,
-                          type = "toggle",
-                          descStyle = "inline",
-                          width = "double",
-                          arg = { "allowClass" }
-                        },
-                        FriendlyClass = {
-                          name = L["Color Healthbar By Friendly Class"],
-                          order = 2,
-                          type = "toggle",
-                          descStyle = "inline",
-                          width = "double",
-                          arg = { "friendlyClass" },
-                        },
---                        FriendlyCaching = {
---                          name = L["Friendly Caching"],
---                          order = 3,
---                          type = "toggle",
---                          desc = L["This allows you to save friendly player class information between play sessions or nameplates going off the screen. |cffff0000(Uses more memory)"],
---                          descStyle = "inline",
---                          width = "full",
---                          arg = { "cacheClass" },
---                        },
-                      },
-                    },
-                    Reaction = {
-                      order = 20,
-                      name = L["Color by Reaction"],
-                      type = "group",
-                      inline = true,
-                      get = GetColor,
-                      set = SetColor,
-                      args = {
-                        ColorByReaction = {
-                          name = L["Change the color depending on the reaction of the unit (friendly, hostile, neutral)."],
-                          type = "toggle",
-                          width = "full",
-                          order = 1,
-                          arg = { "healthColorChange" }, -- false, if Color by Reaction (customColor), true if Color by Health
-                          get = function(info) return not GetValue(info) end,
-                          set = function(info, val) SetValue(info, not val) end,
-                        },
-                        Header = { name = L["Colors"], type = "header", order = 10, },
-                        FriendlyColorNPC = { name = L["Friendly NPCs"], order = 20, type = "color", arg = { "ColorByReaction", "FriendlyNPC", }, },
-                        FriendlyColorPlayer = { name = L["Friendly Players"], order = 30, type = "color", arg = { "ColorByReaction", "FriendlyPlayer" }, },
-                        EnemyColorNPC = { name = L["Hostile NPCs"], order = 40, type = "color", arg = { "ColorByReaction", "HostileNPC" }, },
-                        EnemyColorPlayer = { name = L["Hostile Players"], order = 50, type = "color", arg = { "ColorByReaction", "HostilePlayer" }, },
-                        NeutralColor = { name = L["Neutral Units"], order = 60, type = "color", arg = { "ColorByReaction", "NeutralUnit" }, },
-                      },
-                    },
-                  },
-                },
-                ThreatColors = {
-                  name = L["Warning Glow for Threat"],
-                  order = 30,
-                  type = "group",
-                  get = GetColorAlpha,
-                  set = SetColorAlpha,
-                  inline = true,
-                  args = {
-                    ThreatGlow = {
-                      type = "toggle",
-                      order = 1,
-                      name = L["Enable"],
-                      get = GetValue,
-                      set = SetThemeValue,
-                      arg = { "settings", "threatborder", "show" },
-                    },
-                    OnlyAttackedUnits = {
-                      type = "toggle",
-                      order = 2,
-                      name = L["Threat Detection Heuristic"],
-                      desc = L["Use a heuristic instead of a mob's threat table to detect if you are in combat with a mob (see Threat System - General Settings for a more detailed explanation)."],
-                      width = "double",
-                      set = function(info, val) SetValue(info, not val) end,
-                      get = function(info) return not GetValue(info) end,
-                      arg = { "ShowThreatGlowOnAttackedUnitsOnly" },
-                    },
-                    Header = { name = L["Colors"], type = "header", order = 10, },
-                    Low = {
-                      name = L["|cffffffffLow Threat|r"],
-                      type = "color",
-                      order = 20,
-                      arg = { "settings", "normal", "threatcolor", "LOW" },
-                      hasAlpha = true,
-                    },
-                    Med = {
-                      name = L["|cffffff00Medium Threat|r"],
-                      type = "color",
-                      order = 30,
-                      arg = { "settings", "normal", "threatcolor", "MEDIUM" },
-                      hasAlpha = true,
-                    },
-                    High = {
-                      name = L["|cffff0000High Threat|r"],
-                      type = "color",
-                      order = 40,
-                      arg = { "settings", "normal", "threatcolor", "HIGH" },
-                      hasAlpha = true,
-                    },
-                  },
-                },
-                Placement = {
-                  name = L["Placement"],
-                  type = "group",
-                  inline = true,
-                  order = 40,
-                  args = {
-                    Warning = {
-                      type = "description",
-                      order = 1,
-                      name = L["Changing these settings will alter the placement of the nameplates, however the mouseover area does not follow. |cffff0000Use with caution!|r"],
-                    },
-                    OffsetX = {
-                      name = L["Offset X"],
-                      type = "range",
-                      min = -60,
-                      max = 60,
-                      step = 1,
-                      order = 2,
-                      set = SetThemeValue,
-                      arg = { "settings", "frame", "x" },
-                    },
-                    Offsety = {
-                      name = L["Offset Y"],
-                      type = "range",
-                      min = -60,
-                      max = 60,
-                      step = 1,
-                      order = 3,
-                      set = SetThemeValue,
-                      arg = { "settings", "frame", "y" },
-                    },
-                  },
-                },
-              },
-            },
+            HealthBarView = CreateHealthbarOptions(),
             HeadlineViewSettings = {
               name = L["Headline View"],
               type = "group",
               inline = false,
               order = 25,
               args = {
---                Enable = {
---                  name = L["Enable"],
---                  order = 5,
---                  type = "group",
---                  inline = true,
---                  args = {
---                    Header = {
---                      name = L["This option allows you to control whether headline view (text-only) is enabled for nameplates."],
---                      order = 1,
---                      type = "description",
---                      width = "full",
---                    },
---                    Enable = {
---                      name = L["Enable Headline View (Text-Only)"],
---                      order = 2,
---                      type = "toggle",
---                      width = "double",
---                      arg = { "HeadlineView", "ON" },
---                    },
---                  },
---                },
+                --                Enable = {
+                --                  name = L["Enable"],
+                --                  order = 5,
+                --                  type = "group",
+                --                  inline = true,
+                --                  args = {
+                --                    Header = {
+                --                      name = L["This option allows you to control whether headline view (text-only) is enabled for nameplates."],
+                --                      order = 1,
+                --                      type = "description",
+                --                      width = "full",
+                --                    },
+                --                    Enable = {
+                --                      name = L["Enable Headline View (Text-Only)"],
+                --                      order = 2,
+                --                      type = "toggle",
+                --                      width = "double",
+                --                      arg = { "HeadlineView", "ON" },
+                --                    },
+                --                  },
+                --                },
                 ShowByUnitType = {
                   name = L["Show By Unit Type"],
                   order = 10,
@@ -7112,20 +7105,20 @@ local function CreateOptionsTable()
                   type = "group",
                   inline = true,
                   args = {
---                    ModeOoC = {
---                      name = L["Out of Combat"],
---                      order = 1,
---                      type = "toggle",
---                      width = "double",
---                      arg = { "HeadlineView", "ForceOutOfCombat" }
---                    },
---                    ModeFriendlyInCombat = {
---                      name = L["On Friendly Units in Combat"],
---                      order = 2,
---                      type = "toggle",
---                      width = "double",
---                      arg = { "HeadlineView", "ForceFriendlyInCombat" }
---                    },
+                    --                    ModeOoC = {
+                    --                      name = L["Out of Combat"],
+                    --                      order = 1,
+                    --                      type = "toggle",
+                    --                      width = "double",
+                    --                      arg = { "HeadlineView", "ForceOutOfCombat" }
+                    --                    },
+                    --                    ModeFriendlyInCombat = {
+                    --                      name = L["On Friendly Units in Combat"],
+                    --                      order = 2,
+                    --                      type = "toggle",
+                    --                      width = "double",
+                    --                      arg = { "HeadlineView", "ForceFriendlyInCombat" }
+                    --                    },
                     ModeCNA = {
                       name = L["On Enemy Units You Cannot Attack"],
                       order = 3,

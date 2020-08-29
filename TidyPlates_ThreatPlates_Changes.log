@@ -6,6 +6,7 @@
 * Added an option to show the castbar above or below the healthbar [Comment #4486, #4461, #4631, PM].
 * Added an option to show the current target's name on the castbar [Comment #4474, #4495, #4616].
 * Added a striped overlay texture to Target/Focus Highlight widget [Comment #4458].
+* Added a feature to show the name of the unit that is currently targeted on the nameplate [Issue TPC#15, Comment TPC#446, #TPC579].
 * Fixed a bug where enabling/disabling widgets only took effect after reloading the UI.
 * Fixed a bug with Focus widget where an incorrect artwork was shown when switching between healthbar and headline view.
 * Renamed filter modes for Auras widget to None, Allow, and Block.

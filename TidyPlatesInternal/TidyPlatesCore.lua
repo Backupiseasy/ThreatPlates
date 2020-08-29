@@ -117,6 +117,7 @@ local CVAR_NameplateOccludedAlphaMult
 local SettingsEnabledFading
 local SettingsOccludedAlpha, SettingsEnabledOccludedAlpha
 local SettingsShowEnemyBlizzardNameplates, SettingsShowFriendlyBlizzardNameplates
+local SettingsTargetUnitHide, SettingsShowOnlyForTarget
 
 -- External references to internal data
 Addon.PlatesCreated = PlatesCreated
@@ -393,9 +394,6 @@ do
     PlatesByUnit[unitid] = plate
     PlatesByGUID[unit.guid] = plate
 
---    visual.healthbar.TargetOfTarget:SetText(nil)
---    visual.healthbar.TargetOfTarget:Hide()
-
     Addon:UpdateUnitContext(unit, unitid)
     Addon.UnitStyle_NameDependent(unit)
     ProcessUnitChanges()
@@ -578,10 +576,8 @@ function Addon:UpdateIndicatorNameplateColor(tp_frame)
     visual.name:SetTextColor(Addon:SetNameColor(tp_frame.unit))
   end
 
-  -- Update target of target
-  if healthbar.TargetOfTarget:IsShown() then
-    healthbar:SetTargetOfTarget()
-  end
+  -- Update nameplate's target unit's color
+  healthbar:ShowTargetUnit()
 end
 
 function Addon.UpdateCustomStyleAfterAuraTrigger(unit)
@@ -1082,6 +1078,9 @@ do
 
       -- Update mouseover, if the mouse was hovering over the targeted unit
       extended.unit.isTarget = false
+      if SettingsShowOnlyForTarget then
+        extended.visual.healthbar:HideTargetUnit()
+      end
       CoreEvents:UPDATE_MOUSEOVER_UNIT()
     end
 
@@ -1098,35 +1097,35 @@ do
       LastTargetPlate = plate
 
       extended.unit.isTarget = true
+      UNIT_TARGET("UNIT_TARGET", extended.unit.unitid)
     end
 
     SetUpdateAll()
 	end
 
   UNIT_TARGET = function(event, unitid)
-    if unitid == "player" or unitid == "target" then return end
+    if SettingsTargetUnitHide or unitid == "player" or unitid == "target" then return end
 
     local plate = GetNamePlateForUnit(unitid)
     if plate and plate.TPFrame.Active then
-      local tp_frame = plate.TPFrame
-      local healthbar = tp_frame.visual.healthbar
+      local healthbar = plate.TPFrame.visual.healthbar
+
+      if SettingsShowOnlyForTarget and not UnitIsUnit("target", unitid) then
+        healthbar:HideTargetUnit()
+        return
+      end
 
       local target_of_target_name = UnitName(unitid .. "target")
-
-      print ("UNIT_TARGET:",tp_frame.unit.name, "=>", unitid, target_of_target_name)
       if target_of_target_name then
-        print ("Showing")
-        healthbar:SetTargetOfTarget("[ " .. target_of_target_name .. " ]")
-        healthbar.TargetOfTarget:Show()
+        local _, class_name = UnitClass(unitid .. "target")
+        healthbar:ShowTargetUnit(target_of_target_name, class_name)
       else
-        print ("Hiding")
-        healthbar.TargetOfTarget:SetText(nil)
-        healthbar.TargetOfTarget:Hide()
+        healthbar:HideTargetUnit()
       end
     end
   end
 
-  local function PLAYER_FOCUS_CHANGED()
+  local function PLAYER_FOCUS_CHANGED(event)
     local extended
     if LastFocusPlate and LastFocusPlate.TPFrame.Active then
       LastFocusPlate.TPFrame.unit.IsFocus = false
@@ -1186,13 +1185,16 @@ do
       if (UnitThreatSituation("player", unitid) or 0) ~= plate.TPFrame.unit.threatValue then
         plate.UpdateMe = true
       end
+
+      -- UNIT_TARGET does not update correctly, so use this in in-combat situations as a work-around
+      UNIT_TARGET("UNIT_TARGET", unitid)
     end
   end
 
-  local function UNIT_THREAT_LIST_UPDATE(unitid)
+  local function UNIT_THREAT_LIST_UPDATE(event, unitid)
     if unitid == "player" or unitid == "target" then return end
-    local plate = PlatesByUnit[unitid]
 
+    local plate = PlatesByUnit[unitid]
     if plate then
       --local threat_value = UnitThreatSituation("player", unitid) or 0
       --if threat_value ~= plate.TPFrame.unit.threatValue then
@@ -1212,6 +1214,9 @@ do
         --ProcessUnitChanges()
         --OnUpdateCastMidway(nameplate, unit.unitid)
       end
+
+      -- UNIT_TARGET does not update correctly, so use this in in-combat situations as a work-around
+      UNIT_TARGET("UNIT_TARGET", unitid)
     end
   end
 
@@ -1287,9 +1292,9 @@ do
           local db = TidyPlatesThreat.db.profile
 
           sourceName = gsub(sourceName, "%-[^|]+", "") -- UnitName(sourceName) only works in groups
-          local _, class_id = GetPlayerInfoByGUID(interrupterGUID)
-          if class_id then
-            sourceName = "|c" .. db.Colors.Classes[class_id].colorStr .. sourceName .. "|r"
+          local _, class_name = GetPlayerInfoByGUID(interrupterGUID)
+          if class_name then
+            sourceName = "|c" .. db.Colors.Classes[class_name].colorStr .. sourceName .. "|r"
           end
           visual.spelltext:SetText(INTERRUPTED .. " [" .. sourceName .. "]")
 
@@ -1334,9 +1339,9 @@ do
         if castbar:IsShown() then
           local db = TidyPlatesThreat.db.profile
           sourceName = gsub(sourceName, "%-[^|]+", "") -- UnitName(sourceName) only works in groups
-          local _, class_id = GetPlayerInfoByGUID(sourceGUID)
-          if class_id then
-            sourceName = "|c" .. db.Colors.Classes[class_id].colorStr .. sourceName .. "|r"
+          local _, class_name = GetPlayerInfoByGUID(sourceGUID)
+          if class_name then
+            sourceName = "|c" .. db.Colors.Classes[class_name].colorStr .. sourceName .. "|r"
           end
           visual.spelltext:SetText(INTERRUPTED .. " [" .. sourceName .. "]")
 
@@ -1369,7 +1374,7 @@ do
     Addon:ForceUpdate()
 	end
 
-  local function UNIT_ABSORB_AMOUNT_CHANGED(unitid)
+  local function UNIT_ABSORB_AMOUNT_CHANGED(event, unitid)
     local plate = GetNamePlateForUnit(unitid)
 
     if plate and plate.TPFrame.Active then
@@ -1386,7 +1391,7 @@ do
     end
   end
 
-  local function UNIT_HEAL_ABSORB_AMOUNT_CHANGED(unitid)
+  local function UNIT_HEAL_ABSORB_AMOUNT_CHANGED(event, unitid)
     local plate = GetNamePlateForUnit(unitid)
 
     if plate and plate.TPFrame.Active then
@@ -1411,7 +1416,7 @@ do
 
   -- Only registered for player unit
   --local RIGHTEOUS_FURY_SPELL_IDs = { 20468, 20469, 20470, 25780 }
-  local function UNIT_AURA(unitid)
+  local function UNIT_AURA(event, unitid)
     local _, name, spellId
     for i = 1, 40 do
       name , _, _, _, _, _, _, _, _, spellId = _G.UnitBuff("player", i, "PLAYER")
@@ -1803,10 +1808,12 @@ function Addon:ForceUpdate()
     UpdatePlate_Transparency = UpdatePlate_SetAlpha
   end
 
-  if db.settings.healthbar.TargetOfTarget.Show then
-    TidyPlatesCore:RegisterEvent("UNIT_TARGET")
-  else
+  SettingsTargetUnitHide = not db.settings.healthbar.TargetUnit.Show
+  SettingsShowOnlyForTarget = db.settings.healthbar.TargetUnit.ShowOnlyForTarget
+  if SettingsTargetUnitHide then
     TidyPlatesCore:UnregisterEvent("UNIT_TARGET")
+  else
+    TidyPlatesCore:RegisterEvent("UNIT_TARGET")
   end
 
   for plate in pairs(self.PlatesVisible) do
