@@ -1198,6 +1198,7 @@ function Widget:UpdateAuraFrameIconMode(frame)
   end
 
   db = self.db_icon
+
   -- Icon
   frame:SetSize(db.IconWidth, db.IconHeight)
   frame.Icon:SetAllPoints(frame)
@@ -1588,7 +1589,7 @@ function Widget:CreateAuraGrid(frame)
 end
 
 -- Initialize the aura grid layout, don't update auras themselves as not unitid know at this point
-function Widget:UpdateAuraWidgetLayout(widget_frame)
+function Widget:UpdateLayout(widget_frame)
   self:CreateAuraGrid(widget_frame.Buffs)
   self:CreateAuraGrid(widget_frame.Debuffs)
   self:CreateAuraGrid(widget_frame.CrowdControl)
@@ -1716,7 +1717,7 @@ function Widget:Create(tp_frame)
 
   widget_frame.Widget = self
 
-  self:UpdateAuraWidgetLayout(widget_frame)
+  self:UpdateLayout(widget_frame)
 
   widget_frame:SetScript("OnEvent", UnitAuraEventHandler)
   widget_frame:HookScript("OnShow", OnShowHookScript)
@@ -1949,20 +1950,4 @@ function Widget:UpdateSettings()
   EnabledForStyle["unique"] = self.db.ON
   EnabledForStyle["etotem"] = false
   EnabledForStyle["empty"] = false
-
-  for plate, tp_frame in pairs(Addon.PlatesCreated) do
-    local widget_frame = tp_frame.widgets.Auras
-
-    -- widget_frame could be nil if the widget as disabled and is enabled as part of a profile switch
-    -- For these frames, UpdateAuraWidgetLayout will be called anyway when the widget is initalized
-    -- (which happens after the settings update)
-    if widget_frame then
-      self:UpdateAuraWidgetLayout(widget_frame)
-      if widget_frame.Active then -- equals: plate is visible and auras are used
-        self:OnUnitAdded(widget_frame, widget_frame.unit)
-      end
-    end
-  end
-
-  --Addon:ForceUpdate()
 end

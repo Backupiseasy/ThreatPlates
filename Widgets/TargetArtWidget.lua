@@ -223,7 +223,8 @@ function Widget:Create()
 end
 
 function Widget:IsEnabled()
-  return Settings.ON or SettingsHV.ShowTargetHighlight
+  local db = TidyPlatesThreat.db.profile
+  return db.targetWidget.ON or db.HeadlineView.ShowTargetHighlight
 end
 
 function Widget:OnEnable()
@@ -349,7 +350,8 @@ function FocusWidget:Create()
 end
 
 function FocusWidget:IsEnabled()
-  return FocusSettings.ON or FocusSettingsHV.ShowFocusHighlight
+  local db = TidyPlatesThreat.db.profile
+  return db.FocusWidget.ON or db.HeadlineView.ShowFocusHighlight
 end
 
 function FocusWidget:OnEnable()
@@ -413,7 +415,6 @@ end
 function FocusWidget:UpdateLayout()
   local widget_frame = FocusWidgetFrame
 
-  print("Update Focus Layout")
   FocusUpdateTexture(FocusSettings, widget_frame, widget_frame.HealthbarMode)
   widget_frame.NameModeTexture:SetSize(128, 32 * GetHeadlineViewHeight(FocusSettingsHV) / 18)
   widget_frame.NameModeTexture:SetPoint("CENTER", widget_frame, "CENTER", FocusNameModeOffsetX, FocusNameModeOffsetY)

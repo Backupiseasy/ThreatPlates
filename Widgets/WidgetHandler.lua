@@ -219,11 +219,8 @@ end
 function WidgetHandler:InitializeWidget(widget_name)
   local widget = self.Widgets[widget_name]
 
-  if widget.UpdateSettings then
-    widget:UpdateSettings()
-  end
-
   if widget:IsEnabled() then
+    self:UpdateSettings(widget_name)
     self:EnableWidget(widget_name)
   else
     self:DisableWidget(widget_name)
@@ -307,8 +304,11 @@ function WidgetHandler:DisableWidget(widget_name)
       self.EnabledWidgets[widget_name] = nil
 
       widget:OnDisable()
-      for plate, _ in pairs(Addon.PlatesVisible) do
-        plate.TPFrame.widgets[widget_name]:Hide()
+
+      for _, tp_frame in pairs(Addon.PlatesCreated) do
+        local widget_frame = tp_frame.widgets[widget_name]
+        widget_frame.Active = false
+        widget_frame:Hide()
       end
     end
   end
@@ -394,7 +394,33 @@ end
 function WidgetHandler:UpdateSettings(widget_name)
   local widget = self.Widgets[widget_name]
 
-  widget:UpdateSettings()
+  if widget.UpdateSettings then
+    widget:UpdateSettings()
+  end
+
+  if not (widget.TargetOnly or widget.FocusOnly) then
+    self:UpdateLayoutOfAllPlates(widget)
+  end
+end
+
+function WidgetHandler:UpdateLayoutOfAllPlates(widget)
+  for _, tp_frame in pairs(Addon.PlatesCreated) do
+    local widget_frame = tp_frame.widgets[widget.Name]
+
+    -- widget_frame could be nil if the widget as disabled and is enabled as part of a profile switch
+    -- For these frames, UpdateAuraWidgetLayout will be called anyway when the widget is initalized
+    -- (which happens after the settings update)
+    if widget_frame then
+      if widget.UpdateLayout then
+        widget:UpdateLayout(widget_frame)
+      end
+
+      -- plate is visible and widget is active, i.e., shown currently
+      if tp_frame.Active and widget_frame.Active then
+        widget:OnUnitAdded(widget_frame, widget_frame.unit)
+      end
+    end
+  end
 end
 
 --function Addon:WidgetsOnUpdate(tp_frame, unit)

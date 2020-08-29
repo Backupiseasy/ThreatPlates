@@ -102,7 +102,8 @@ function Widget:UPDATE_UI_WIDGET(widget_info)
 end
 
 function Widget:IsEnabled()
-  return Settings.ON or Settings.ShowInHeadlineView
+  local db = TidyPlatesThreat.db.profile.ExperienceWidget
+  return db.ON or db.ShowInHeadlineView
 end
 
 function Widget:OnEnable()
@@ -180,20 +181,4 @@ function Widget:UpdateSettings()
   EnabledForStyle["normal"] = Settings.ON
   EnabledForStyle["totem"] = Settings.ON
   EnabledForStyle["unique"] = Settings.ON
-
-  for _, tp_frame in pairs(Addon.PlatesCreated) do
-    local widget_frame = tp_frame.widgets[Widget.Name]
-
-    -- Update the layout of all nameplates that were created as they might be re-used later. For that case, the layout
-    -- must be up to date.
-    -- widget_frame could be nil if the widget as disabled and is enabled as part of a profile switch
-    if widget_frame then
-      self:UpdateLayout(widget_frame)
-      -- Also, update all currently shown nameplates as it is not guarnanteed that ForceUpdate() is called to
-      -- trigger an update via OnUnitAdded
-      if widget_frame.Active then
-        self:OnUnitAdded(widget_frame, widget_frame.unit)
-      end
-    end
-  end
 end

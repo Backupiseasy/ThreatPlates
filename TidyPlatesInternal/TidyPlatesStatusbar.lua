@@ -138,12 +138,41 @@ local function UpdateLayoutHealthbar(self, db, style)
   SetEliteBorder(self, style.eliteborder.texture)
 
   local tp_frame = self:GetParent()
-  if db.FrameOrder == "HealthbarOverCastbar" then
+  if db.castbar.FrameOrder == "HealthbarOverCastbar" then
     self:SetFrameLevel(tp_frame:GetFrameLevel() + 5)
   else
     self:SetFrameLevel(tp_frame:GetFrameLevel() + 4)
   end
   tp_frame.visual.textframe:SetFrameLevel(self:GetFrameLevel())
+
+  Font:UpdateText(self, self.TargetOfTarget, db.healthbar.TargetOfTarget)
+
+  local width, height = self:GetSize()
+  self.TargetOfTarget:SetSize(width, height)
+  print ("Update:", db.healthbar.TargetOfTarget.Show, self.TargetOfTarget:GetText())
+  self.TargetOfTarget:SetShown(self.TargetOfTarget:GetText() ~= nil)
+end
+
+local function SetTargetOfTarget(self, name)
+  local target_of_target = self.TargetOfTarget
+
+  if name then
+    target_of_target:SetText(name)
+  end
+
+  local db = TidyPlatesThreat.db.profile.settings.healthbar.TargetOfTarget
+  if db.UseNameplateColor then
+    local r, g, b
+    if self:IsShown() then
+      r, g, b = self:GetStatusBarColor()
+    else
+      r, g, b = self:GetParent().visual.name:GetTextColor()
+    end
+    target_of_target:SetTextColor(r, g, b)
+  else
+    local color = db.CustomColor
+    target_of_target:SetTextColor(color.r, color.g, color.b)
+  end
 end
 
 function Addon:CreateHealthbar(parent)
@@ -173,6 +202,7 @@ function Addon:CreateHealthbar(parent)
 	frame.SetAllColors = SetAllColors
   frame.SetStatusBarBackdrop = SetStatusBarBackdropHealthbar
   frame.UpdateLayout = UpdateLayoutHealthbar
+  frame.SetTargetOfTarget = SetTargetOfTarget
 
   local healabsorb_bar = frame:CreateTexture(nil, "OVERLAY", 0)
   healabsorb_bar:SetVertexColor(0, 0, 0)
@@ -194,6 +224,9 @@ function Addon:CreateHealthbar(parent)
 
   frame.HealAbsorb = healabsorb_bar
   frame.HealAbsorbGlow = healabsorb_glow
+
+  frame.TargetOfTarget = frame:CreateFontString(nil, "ARTWORK")
+  frame.TargetOfTarget:SetFont("Fonts\\FRIZQT__.TTF", 11)
 
 	--frame:SetScript("OnSizeChanged", OnSizeChanged)
 	return frame
@@ -247,7 +280,7 @@ local function UpdateLayoutCastbar(self, db, style)
   self:SetStatusBarBackdrop(castbar_style.backdrop, castborder_style.texture, castborder_style.edgesize, castborder_style.offset)
   self.Border:SetShown(castborder_style.show)
 
-  if db.FrameOrder == "HealthbarOverCastbar" then
+  if db.castbar.FrameOrder == "HealthbarOverCastbar" then
     self:SetFrameLevel(self:GetParent():GetFrameLevel() + 2)
   else
     self:SetFrameLevel(self:GetParent():GetFrameLevel() + 5)
@@ -256,11 +289,11 @@ local function UpdateLayoutCastbar(self, db, style)
   --self.InterruptBorder:SetFrameLevel(self:GetFrameLevel())
   --self.Overlay:SetFrameLevel(self:GetFrameLevel())
 
-  Font:UpdateText(self, self.CastTarget, db.CastTarget)
+  Font:UpdateText(self, self.CastTarget, db.castbar.CastTarget)
 
   local width, height = self:GetSize()
   self.CastTarget:SetSize(width, height)
-  self.CastTarget:SetShown(db.CastTarget.Show)
+  self.CastTarget:SetShown(db.castbar.CastTarget.Show)
 end
 
 function Addon:CreateCastbar(parent)

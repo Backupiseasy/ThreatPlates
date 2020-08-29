@@ -153,6 +153,7 @@ local OnUpdateCasting, OnStartCasting, OnStopCasting, OnUpdateCastMidway
 -- Event Functions
 local OnNewNameplate, OnShowNameplate, OnUpdateNameplate, OnResetNameplate
 local OnHealthUpdate, ProcessUnitChanges
+local UNIT_TARGET
 
 -- Main Loop
 local OnUpdate
@@ -392,6 +393,9 @@ do
     PlatesByUnit[unitid] = plate
     PlatesByGUID[unit.guid] = plate
 
+--    visual.healthbar.TargetOfTarget:SetText(nil)
+--    visual.healthbar.TargetOfTarget:Hide()
+
     Addon:UpdateUnitContext(unit, unitid)
     Addon.UnitStyle_NameDependent(unit)
     ProcessUnitChanges()
@@ -399,6 +403,8 @@ do
 		Addon.UpdateExtensions(extended, unit.unitid, stylename)
 
     Addon:UpdateNameplateStyle(nameplate, unitid)
+
+    UNIT_TARGET("UNIT_TARGET", unitid) -- requires tp_frame.Active, which is set in UpdateNameplateStyle
 
     -- Call this after the plate is shown as OnStartCasting checks if the plate is shown; if not, the castbar is hidden and
     -- nothing is updated
@@ -557,9 +563,10 @@ end
 -- Update the health bar and name coloring, if needed
 function Addon:UpdateIndicatorNameplateColor(tp_frame)
   local visual = tp_frame.visual
+  local healthbar = visual.healthbar
 
-  if visual.healthbar:IsShown() then
-    visual.healthbar:SetAllColors(Addon:SetHealthbarColor(tp_frame.unit))
+  if healthbar:IsShown() then
+    healthbar:SetAllColors(Addon:SetHealthbarColor(tp_frame.unit))
 
     -- Updates warning glow for threat
     if visual.threatborder:IsShown() then
@@ -569,6 +576,11 @@ function Addon:UpdateIndicatorNameplateColor(tp_frame)
 
   if visual.name:IsShown() then
     visual.name:SetTextColor(Addon:SetNameColor(tp_frame.unit))
+  end
+
+  -- Update target of target
+  if healthbar.TargetOfTarget:IsShown() then
+    healthbar:SetTargetOfTarget()
   end
 end
 
@@ -1091,6 +1103,29 @@ do
     SetUpdateAll()
 	end
 
+  UNIT_TARGET = function(event, unitid)
+    if unitid == "player" or unitid == "target" then return end
+
+    local plate = GetNamePlateForUnit(unitid)
+    if plate and plate.TPFrame.Active then
+      local tp_frame = plate.TPFrame
+      local healthbar = tp_frame.visual.healthbar
+
+      local target_of_target_name = UnitName(unitid .. "target")
+
+      print ("UNIT_TARGET:",tp_frame.unit.name, "=>", unitid, target_of_target_name)
+      if target_of_target_name then
+        print ("Showing")
+        healthbar:SetTargetOfTarget("[ " .. target_of_target_name .. " ]")
+        healthbar.TargetOfTarget:Show()
+      else
+        print ("Hiding")
+        healthbar.TargetOfTarget:SetText(nil)
+        healthbar.TargetOfTarget:Hide()
+      end
+    end
+  end
+
   local function PLAYER_FOCUS_CHANGED()
     local extended
     if LastFocusPlate and LastFocusPlate.TPFrame.Active then
@@ -1435,6 +1470,8 @@ do
 	TidyPlatesCore:SetScript("OnEvent", EventHandler)
 	for eventName in pairs(CoreEvents) do TidyPlatesCore:RegisterEvent(eventName) end
 
+  CoreEvents.UNIT_TARGET = UNIT_TARGET
+
   -- Do this after events are registered, otherwise UNIT_AURA would be registered as a general event, not only as
   -- an unit event.
   if Addon.CLASSIC and Addon.PlayerClass == "PALADIN" then
@@ -1571,7 +1608,7 @@ do
       SetFontGroupObject(object, objectstyle)
     end
 
-    local db = TidyPlatesThreat.db.profile.settings.castbar
+    local db = TidyPlatesThreat.db.profile.settings
 
     -- Healthbar
 		SetAnchorGroupObject(visual.healthbar, style.healthbar, extended)
@@ -1611,8 +1648,9 @@ do
       visual.raidicon:Hide()
     end
 
-    visual.castbar:ClearAllPoints()
+    db = TidyPlatesThreat.db.profile.settings.castbar
 
+    visual.castbar:ClearAllPoints()
     if UnitIsUnit("target", unit.unitid) then
       SetObjectAnchor(visual.castbar, style.castbar.anchor or "CENTER", extended, style.castbar.x + db.x_target or 0, style.castbar.y + db.y_target or 0)
     else
@@ -1763,6 +1801,12 @@ function Addon:ForceUpdate()
     PlateOnUpdateQueue[#PlateOnUpdateQueue + 1] = UpdatePlate_SetAlphaOnUpdate
   else
     UpdatePlate_Transparency = UpdatePlate_SetAlpha
+  end
+
+  if db.settings.healthbar.TargetOfTarget.Show then
+    TidyPlatesCore:RegisterEvent("UNIT_TARGET")
+  else
+    TidyPlatesCore:UnregisterEvent("UNIT_TARGET")
   end
 
   for plate in pairs(self.PlatesVisible) do

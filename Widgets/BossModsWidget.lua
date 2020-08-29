@@ -280,7 +280,8 @@ function Widget:Create(tp_frame)
 end
 
 function Widget:IsEnabled()
-  return TidyPlatesThreat.db.profile.BossModsWidget.ON or TidyPlatesThreat.db.profile.BossModsWidget.ShowInHeadlineView
+  local db = TidyPlatesThreat.db.profile.BossModsWidget
+  return db.ON or db.ShowInHeadlineView
 end
 
 function Widget:OnEnable()

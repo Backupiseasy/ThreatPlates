@@ -422,7 +422,8 @@ end
 ---------------------------------------------------------------------------------------------------
 
 function Widget:IsEnabled()
-  local enabled = self.db.ON or self.db.ShowInHeadlineView
+  local db = TidyPlatesThreat.db.profile.ComboPoints
+  local enabled = db.ON or db.ShowInHeadlineView
 
   if enabled and not Addon.CLASSIC then
     -- Register ACTIVE_TALENT_GROUP_CHANGED here otherwise it won't be registerd when an spec is active that does not have combo points.

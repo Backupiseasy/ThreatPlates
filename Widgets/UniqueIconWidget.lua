@@ -153,30 +153,22 @@ function Addon.UpdateCustomStyleIcon(tp_frame, unit)
   end
 end
 
+function Widget:UpdateLayout(widget_frame)
+  LibCustomGlow["ButtonGlow_Stop"](widget_frame.Highlight)
+  LibCustomGlow["PixelGlow_Stop"](widget_frame.Highlight)
+  LibCustomGlow["AutoCastGlow_Stop"](widget_frame.Highlight)
+
+  -- Update the style as custom nameplates might have been changed and some units no longer
+  -- may be unique
+  if widget_frame:GetParent().Active and widget_frame.Active then
+    Addon:SetStyle(widget_frame.unit)
+  end
+end
+
 -- Load settings from the configuration which are shared across all aura widgets
 -- used (for each widget) in UpdateWidgetConfig
 function Widget:UpdateSettings()
   self.db = TidyPlatesThreat.db.profile.uniqueWidget
 
   DefaultGlowColor = ThreatPlates.DEFAULT_SETTINGS.profile.uniqueSettings["**"].Effects.Glow.Color
-
-  for _, tp_frame in pairs(Addon.PlatesCreated) do
-    local widget_frame = tp_frame.widgets.UniqueIcon
-
-    -- widget_frame could be nil if the widget as disabled and is enabled as part of a profile switch
-    -- For these frames, UpdateAuraWidgetLayout will be called anyway when the widget is initalized
-    -- (which happens after the settings update)
-    if widget_frame then
-      LibCustomGlow["ButtonGlow_Stop"](widget_frame.Highlight)
-      LibCustomGlow["PixelGlow_Stop"](widget_frame.Highlight)
-      LibCustomGlow["AutoCastGlow_Stop"](widget_frame.Highlight)
-
-      if widget_frame.Active then
-        -- Update the style as custom nameplates might have been changed and some units no longer
-        -- may be unique
-        Addon:SetStyle(widget_frame.unit)
-        self:OnUnitAdded(widget_frame, widget_frame.unit)
-      end
-    end
-  end
 end

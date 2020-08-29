@@ -230,7 +230,8 @@ function Widget:Create(tp_frame)
 end
 
 function Widget:IsEnabled()
-  return TidyPlatesThreat.db.profile.socialWidget.ON or TidyPlatesThreat.db.profile.socialWidget.ShowInHeadlineView
+  local db = TidyPlatesThreat.db.profile.socialWidget
+  return db.ON or db.ShowInHeadlineView
 end
 
 function Widget:OnEnable()
