@@ -65,6 +65,7 @@ local DETECTION_UNITS = {
   ["148488"] = true, -- Unliving Augur (Battle of Dazar'alor)
   ["122984"] = true, -- Dazar'ai Colossus (Atal'Dazar)
   ["154459"] = true, -- Horde Vanguard
+  ["151945"] = true, -- Scavenging Dunerunner
 }
 
 ---------------------------------------------------------------------------------------------------
