@@ -139,8 +139,6 @@ function Widget:OnUnitAdded(widget_frame, unit)
   MapUIWidgetToExperienceWidget[widget_id] = widget_frame
   local current_xp, max_xp, rank = GetNPCExperience(widget_id)
 
-  print ("Adding:", unit.unitid .. "_" .. widget_id, unit.name)
-
   widget_frame:SetMinMaxValues(0, max_xp)
   widget_frame:SetValue(current_xp)
 
