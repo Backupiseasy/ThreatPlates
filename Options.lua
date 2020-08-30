@@ -639,6 +639,7 @@ local MAP_OPTION_TO_WIDGET = {
   FocusWidget = "Focus",
   ArenaWidget = "Arena",
   ExperienceWidget = "Experience",
+  ThreatPercentage = "Threat"
 }
 
 local function GetWidgetName(info)
@@ -671,7 +672,7 @@ local function SetColorWidget(info, r, g, b, a)
   end
   DB[keys[#keys]].r, DB[keys[#keys]].g, DB[keys[#keys]].b = r, g, b
 
-    local widget_name = GetWidgetName(info)
+  local widget_name = GetWidgetName(info)
   if widget_name then
     Addon.Widgets:UpdateSettings(widget_name)
   else
@@ -687,7 +688,12 @@ local function SetColorAlphaWidget(info, r, g, b, a)
   end
   DB[keys[#keys]].r, DB[keys[#keys]].g, DB[keys[#keys]].b, DB[keys[#keys]].a = r, g, b, a
 
-  Addon.Widgets:UpdateSettings(MAP_OPTION_TO_WIDGET[info[2]])
+  local widget_name = GetWidgetName(info)
+  if widget_name then
+    Addon.Widgets:UpdateSettings(widget_name)
+  else
+    Addon:ForceUpdate()
+  end
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -6052,6 +6058,48 @@ local function CreateSpecRolesClassic()
   return result
 end
 
+local function CreateThreatPercentageOptions()
+  local entry = GetTextEntry(L["Percentage"], 60, { "threatWidget", "ThreatPercentage" })
+
+  entry.disabled = function() return not db.threat.ON end
+  entry.set = SetValueWidget
+
+  entry.args.Coloring = {
+    name = L["Coloring"],
+    order = 30,
+    type = "group",
+    inline = true,
+    set = SetValueWidget,
+    args = {
+      UseThreatColorToggle = {
+        name = L["Use Threat Color"],
+        order = 70,
+        type = "toggle",
+        arg = { "threatWidget", "ThreatPercentage", "UseThreatColor" },
+      },
+      CustomColorToggle = {
+        name = L["Custom"],
+        order = 80,
+        type = "toggle",
+        set = function(info, val) SetValueWidget(info, not val) end,
+        get = function(info, val) return not GetValue(info, val) end,
+        arg = { "threatWidget", "ThreatPercentage", "UseThreatColor" },
+      },
+      CustomColor = {
+        name = L["Color"],
+        type = "color",
+        order = 90,
+        get = GetColor,
+        set = SetColorWidget,
+        hasAlpha = true,
+        arg = { "threatWidget", "ThreatPercentage", "CustomColor"},
+        disabled = function() return db.threatWidget.ThreatPercentage.UseThreatColor end
+      },
+    },
+  }
+  return entry
+end
+
 local function CreateSpecRolesRetail()
   -- Create a list of specs for the player's class
   local result = {
@@ -8120,7 +8168,7 @@ local function CreateOptionsTable()
             GeneralSettings = {
               name = L["General Settings"],
               type = "group",
-              order = 0,
+              order = 10,
               disabled = function() return not db.threat.ON end,
               args = {
                 ByUnitType = {
@@ -8241,12 +8289,87 @@ local function CreateOptionsTable()
                 },
               },
             },
+            Scale = {
+              name = L["Scale"],
+              type = "group",
+              desc = L["Set scale settings for different threat levels."],
+              disabled = function() return not db.threat.ON end,
+              order = 20,
+              args = {
+                Enable = {
+                  name = L["Enable Threat Scale"],
+                  type = "group",
+                  inline = true,
+                  order = 0,
+                  args = {
+                    Enable = {
+                      type = "toggle",
+                      name = L["Enable"],
+                      desc = L["This option allows you to control whether threat affects the scale of nameplates."],
+                      descStyle = "inline",
+                      width = "full",
+                      order = 2,
+                      arg = { "threat", "useScale" }
+                    },
+                  },
+                },
+                Tank = {
+                  name = L["|cff00ff00Tank|r"],
+                  type = "group",
+                  inline = true,
+                  order = 1,
+                  disabled = function() return not db.threat.useScale end,
+                  args = {
+                    Low = GetScaleEntryThreat(L["|cffff0000Low Threat|r"], 1, { "threat", "tank", "scale", "LOW" }),
+                    Med = GetScaleEntryThreat(L["|cffffff00Medium Threat|r"], 2, { "threat", "tank", "scale", "MEDIUM" }),
+                    High = GetScaleEntryThreat(L["|cff00ff00High Threat|r"], 3, { "threat", "tank", "scale", "HIGH" }),
+                    OffTank = GetScaleEntryThreat(L["|cff0faac8Off-Tank|r"], 4, { "threat", "tank", "scale", "OFFTANK" }),
+                  },
+                },
+                DPS = {
+                  name = L["|cffff0000DPS/Healing|r"],
+                  type = "group",
+                  inline = true,
+                  order = 2,
+                  disabled = function() return not db.threat.useScale end,
+                  args = {
+                    Low = GetScaleEntryThreat(L["|cff00ff00Low Threat|r"], 1, { "threat", "dps", "scale", "LOW" }),
+                    Med = GetScaleEntryThreat(L["|cffffff00Medium Threat|r"], 2, { "threat", "dps", "scale", "MEDIUM" }),
+                    High = GetScaleEntryThreat(L["|cffff0000High Threat|r"], 3, { "threat", "dps", "scale", "HIGH" }),
+                  },
+                },
+                Marked = {
+                  name = L["Additional Adjustments"],
+                  type = "group",
+                  inline = true,
+                  order = 3,
+                  disabled = function() return not db.threat.useScale end,
+                  args = {
+                    DisableSituational = {
+                      name = L["Disable threat scale for target marked, mouseover or casting units."],
+                      type = "toggle",
+                      order = 10,
+                      width = "full",
+                      desc = L["This setting will disable threat scale for target marked, mouseover or casting units and instead use the general scale settings."],
+                      arg = { "threat", "marked", "scale" }
+                    },
+                    AbsoluteThreatScale = {
+                      name = L["Use threat scale as additive scale and add or substract it from the general scale settings."],
+                      order = 20,
+                      type = "toggle",
+                      width = "full",
+                      arg = { "threat", "AdditiveScale" },
+                    },
+                  },
+                },
+              },
+            },
             Alpha = {
               name = L["Transparency"],
               type = "group",
               desc = L["Set transparency settings for different threat levels."],
               disabled = function() return not db.threat.ON end,
-              order = 1,
+              order = 30,
               args = {
                 Enable = {
                   name = L["Enable Threat Transparency"],
@@ -8316,261 +8439,10 @@ local function CreateOptionsTable()
                 },
               },
             },
-            Scale = {
-              name = L["Scale"],
-              type = "group",
-              desc = L["Set scale settings for different threat levels."],
-              disabled = function() return not db.threat.ON end,
-              order = 1,
-              args = {
-                Enable = {
-                  name = L["Enable Threat Scale"],
-                  type = "group",
-                  inline = true,
-                  order = 0,
-                  args = {
-                    Enable = {
-                      type = "toggle",
-                      name = L["Enable"],
-                      desc = L["This option allows you to control whether threat affects the scale of nameplates."],
-                      descStyle = "inline",
-                      width = "full",
-                      order = 2,
-                      arg = { "threat", "useScale" }
-                    },
-                  },
-                },
-                Tank = {
-                  name = L["|cff00ff00Tank|r"],
-                  type = "group",
-                  inline = true,
-                  order = 1,
-                  disabled = function() return not db.threat.useScale end,
-                  args = {
-                    Low = GetScaleEntryThreat(L["|cffff0000Low Threat|r"], 1, { "threat", "tank", "scale", "LOW" }),
-                    Med = GetScaleEntryThreat(L["|cffffff00Medium Threat|r"], 2, { "threat", "tank", "scale", "MEDIUM" }),
-                    High = GetScaleEntryThreat(L["|cff00ff00High Threat|r"], 3, { "threat", "tank", "scale", "HIGH" }),
-                    OffTank = GetScaleEntryThreat(L["|cff0faac8Off-Tank|r"], 4, { "threat", "tank", "scale", "OFFTANK" }),
-                  },
-                },
-                DPS = {
-                  name = L["|cffff0000DPS/Healing|r"],
-                  type = "group",
-                  inline = true,
-                  order = 2,
-                  disabled = function() return not db.threat.useScale end,
-                  args = {
-                    Low = GetScaleEntryThreat(L["|cff00ff00Low Threat|r"], 1, { "threat", "dps", "scale", "LOW" }),
-                    Med = GetScaleEntryThreat(L["|cffffff00Medium Threat|r"], 2, { "threat", "dps", "scale", "MEDIUM" }),
-                    High = GetScaleEntryThreat(L["|cffff0000High Threat|r"], 3, { "threat", "dps", "scale", "HIGH" }),
-                  },
-                },
-                Marked = {
-                  name = L["Additional Adjustments"],
-                  type = "group",
-                  inline = true,
-                  order = 3,
-                  disabled = function() return not db.threat.useScale end,
-                  args = {
-                    DisableSituational = {
-                      name = L["Disable threat scale for target marked, mouseover or casting units."],
-                      type = "toggle",
-                      order = 10,
-                      width = "full",
-                      desc = L["This setting will disable threat scale for target marked, mouseover or casting units and instead use the general scale settings."],
-                      arg = { "threat", "marked", "scale" }
-                    },
-                    AbsoluteThreatScale = {
-                      name = L["Use threat scale as additive scale and add or substract it from the general scale settings."],
-                      order = 20,
-                      type = "toggle",
-                      width = "full",
-                      arg = { "threat", "AdditiveScale" },
-                    },
-                  },
-                },
---                TypeSpecific = {
---                  name = L["Additional Adjustments"],
---                  type = "group",
---                  inline = true,
---                  order = 4,
---                  disabled = function() if db.threat.useScale then return false else return true end end,
---                  args = {
---                    Toggle = {
---                      name = L["Enable Adjustments"],
---                      order = 1,
---                      type = "toggle",
---                      width = "full",
---                      desc = L["This will allow you to add additional scaling changes to specific mob types."],
---                      descStyle = "inline",
---                      arg = { "threat", "useType" }
---                    },
---                    AdditionalSliders = {
---                      name = L["Additional Adjustments"],
---                      type = "group",
---                      order = 3,
---                      inline = true,
---                      disabled = function() if not db.threat.useType or not db.threat.useScale then return true else return false end end,
---                      args = {
---                        Mini = {
---                          name = L["Minor"],
---                          order = 0.5,
---                          type = "range",
---                          width = "double",
---                          arg = { "threat", "scaleType", "Minus" },
---                          min = -0.5,
---                          max = 0.5,
---                          step = 0.01,
---                          isPercent = true,
---                        },
---                        NormalNeutral = {
---                          name = PLAYER_DIFFICULTY1 .. " & " .. COMBATLOG_FILTER_STRING_NEUTRAL_UNITS,
---                          order = 1,
---                          type = "range",
---                          width = "double",
---                          arg = { "threat", "scaleType", "Normal" },
---                          min = -0.5,
---                          max = 0.5,
---                          step = 0.01,
---                          isPercent = true,
---                        },
---                        Elite = {
---                          name = ELITE,
---                          order = 2,
---                          type = "range",
---                          width = "double",
---                          arg = { "threat", "scaleType", "Elite" },
---                          min = -0.5,
---                          max = 0.5,
---                          step = 0.01,
---                          isPercent = true,
---                        },
---                        Boss = {
---                          name = BOSS,
---                          order = 3,
---                          type = "range",
---                          width = "double",
---                          arg = { "threat", "scaleType", "Boss" },
---                          min = -0.5,
---                          max = 0.5,
---                          step = 0.01,
---                          isPercent = true,
---                        },
---                      },
---                    },
---                  },
---                },
-              },
-            },
-            Coloring = {
-              name = L["Coloring"],
-              type = "group",
-              order = 4,
-              get = GetColorAlpha,
-              set = SetColorAlpha,
-              disabled = function() return not db.threat.ON end,
-              args = {
-                Toggles = {
-                  name = L["Enable Threat Coloring of Healthbar"],
-                  order = 1,
-                  type = "group",
-                  inline = true,
-                  args = {
-                    UseHPColor = {
-                      name = L["Enable"],
-                      type = "toggle",
-                      order = 1,
-                      desc = L["This option allows you to control whether threat affects the healthbar color of nameplates."],
-                      get = GetValue,
-                      set = SetValue,
-                      descStyle = "inline",
-                      width = "full",
-                      arg = { "threat", "useHPColor" }
-                    },
-                  },
-                },
-                Tank = {
-                  name = L["|cff00ff00Tank|r"],
-                  type = "group",
-                  inline = true,
-                  order = 2,
-                  --disabled = function() if db.threat.useHPColor then return false else return true end end,
-                  args = {
-                    Low = {
-                      name = L["|cffff0000Low Threat|r"],
-                      type = "color",
-                      order = 1,
-                      arg = { "settings", "tank", "threatcolor", "LOW" },
-                      hasAlpha = true,
-                    },
-                    Med = {
-                      name = L["|cffffff00Medium Threat|r"],
-                      type = "color",
-                      order = 2,
-                      arg = { "settings", "tank", "threatcolor", "MEDIUM" },
-                      hasAlpha = true,
-                    },
-                    High = {
-                      name = L["|cff00ff00High Threat|r"],
-                      type = "color",
-                      order = 3,
-                      arg = { "settings", "tank", "threatcolor", "HIGH" },
-                      hasAlpha = true,
-                    },
-                    OffTank = {
-                      name = L["|cff0faac8Off-Tank|r"],
-                      type = "color",
-                      order = 5,
-                      arg = { "settings", "tank", "threatcolor", "OFFTANK" },
-                      hasAlpha = true,
-                      disabled = function() return not db.threat.toggle.OffTank end
-                    },
-                  },
-                },
-                DPS = {
-                  name = L["|cffff0000DPS/Healing|r"],
-                  type = "group",
-                  inline = true,
-                  order = 3,
-                  --disabled = function() if db.threat.useHPColor then return false else return true end end,
-                  args = {
-                    Low = {
-                      name = L["|cff00ff00Low Threat|r"],
-                      type = "color",
-                      order = 1,
-                      arg = { "settings", "dps", "threatcolor", "LOW" },
-                      hasAlpha = true,
-                    },
-                    Med = {
-                      name = L["|cffffff00Medium Threat|r"],
-                      type = "color",
-                      order = 2,
-                      arg = { "settings", "dps", "threatcolor", "MEDIUM" },
-                      hasAlpha = true,
-                    },
-                    High = {
-                      name = L["|cffff0000High Threat|r"],
-                      type = "color",
-                      order = 3,
-                      arg = { "settings", "dps", "threatcolor", "HIGH" },
-                      hasAlpha = true,
-                    },
-                  },
-                },
-              },
-            },
-            DualSpec = {
-              name = L["Roles"],
-              type = "group",
-              desc = L["Set the roles your specs represent."],
-              disabled = function() return not db.threat.ON end,
-              order = 5,
-              args = (Addon.CLASSIC and CreateSpecRolesClassic()) or CreateSpecRolesRetail(),
-            },
             Textures = {
               name = L["Textures"],
               type = "group",
-              order = 3,
+              order = 40,
               desc = L["Set threat textures and their coloring options here."],
               disabled = function() return not db.threat.ON end,
               args = {
@@ -8680,6 +8552,112 @@ local function CreateOptionsTable()
                   },
                 },
               },
+            },
+            Coloring = {
+              name = L["Coloring"],
+              type = "group",
+              order = 50,
+              get = GetColorAlpha,
+              set = SetColorAlpha,
+              disabled = function() return not db.threat.ON end,
+              args = {
+                Toggles = {
+                  name = L["Enable Threat Coloring of Healthbar"],
+                  order = 1,
+                  type = "group",
+                  inline = true,
+                  args = {
+                    UseHPColor = {
+                      name = L["Enable"],
+                      type = "toggle",
+                      order = 1,
+                      desc = L["This option allows you to control whether threat affects the healthbar color of nameplates."],
+                      get = GetValue,
+                      set = SetValue,
+                      descStyle = "inline",
+                      width = "full",
+                      arg = { "threat", "useHPColor" }
+                    },
+                  },
+                },
+                Tank = {
+                  name = L["|cff00ff00Tank|r"],
+                  type = "group",
+                  inline = true,
+                  order = 2,
+                  --disabled = function() if db.threat.useHPColor then return false else return true end end,
+                  args = {
+                    Low = {
+                      name = L["|cffff0000Low Threat|r"],
+                      type = "color",
+                      order = 1,
+                      arg = { "settings", "tank", "threatcolor", "LOW" },
+                      hasAlpha = true,
+                    },
+                    Med = {
+                      name = L["|cffffff00Medium Threat|r"],
+                      type = "color",
+                      order = 2,
+                      arg = { "settings", "tank", "threatcolor", "MEDIUM" },
+                      hasAlpha = true,
+                    },
+                    High = {
+                      name = L["|cff00ff00High Threat|r"],
+                      type = "color",
+                      order = 3,
+                      arg = { "settings", "tank", "threatcolor", "HIGH" },
+                      hasAlpha = true,
+                    },
+                    OffTank = {
+                      name = L["|cff0faac8Off-Tank|r"],
+                      type = "color",
+                      order = 5,
+                      arg = { "settings", "tank", "threatcolor", "OFFTANK" },
+                      hasAlpha = true,
+                      disabled = function() return not db.threat.toggle.OffTank end
+                    },
+                  },
+                },
+                DPS = {
+                  name = L["|cffff0000DPS/Healing|r"],
+                  type = "group",
+                  inline = true,
+                  order = 3,
+                  --disabled = function() if db.threat.useHPColor then return false else return true end end,
+                  args = {
+                    Low = {
+                      name = L["|cff00ff00Low Threat|r"],
+                      type = "color",
+                      order = 1,
+                      arg = { "settings", "dps", "threatcolor", "LOW" },
+                      hasAlpha = true,
+                    },
+                    Med = {
+                      name = L["|cffffff00Medium Threat|r"],
+                      type = "color",
+                      order = 2,
+                      arg = { "settings", "dps", "threatcolor", "MEDIUM" },
+                      hasAlpha = true,
+                    },
+                    High = {
+                      name = L["|cffff0000High Threat|r"],
+                      type = "color",
+                      order = 3,
+                      arg = { "settings", "dps", "threatcolor", "HIGH" },
+                      hasAlpha = true,
+                    },
+                  },
+                },
+              },
+            },
+            ThreatPercentage = CreateThreatPercentageOptions(),
+            DualSpec = {
+              name = L["Roles"],
+              type = "group",
+              desc = L["Set the roles your specs represent."],
+              disabled = function() return not db.threat.ON end,
+              order = 70,
+              args = (Addon.CLASSIC and CreateSpecRolesClassic()) or CreateSpecRolesRetail(),
             },
           },
         },

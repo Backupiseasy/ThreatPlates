@@ -828,6 +828,26 @@ ThreatPlates.DEFAULT_SETTINGS = {
       x = 0,
       y = 26,
       anchor = "CENTER",
+      ThreatPercentage = {
+        Show = true,
+        CustomColor = RGB(255, 255, 255),
+        UseThreatColor = true,
+        -- Layout
+        Anchor = "LEFT",
+        InsideAnchor = false,
+        HorizontalOffset = -2,
+        VerticalOffset = 0,
+        Font = {
+          Typeface = Addon.DEFAULT_FONT,
+          Size = 9,
+          Transparency = 1,
+          --Color = RGB(255, 255, 255),
+          flags = "OUTLINE",
+          Shadow = true,
+          HorizontalAlignment = "RIGHT",
+          VerticalAlignment = "CENTER",
+        }
+      },
     },
     tankedWidget = {
       ON = false,
