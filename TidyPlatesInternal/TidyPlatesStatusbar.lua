@@ -165,13 +165,13 @@ local function ShowTargetUnit(self, target_of_target_name, class_name)
   -- Update the color if the element is shown
   if target_of_target:IsShown() then
     local db = TidyPlatesThreat.db.profile.settings.healthbar.TargetUnit
+    local color
     if db.UseClassColor and target_of_target.ClassName then
-      local color = TidyPlatesThreat.db.profile.Colors.Classes[target_of_target.ClassName]
-      target_of_target:SetTextColor(color.r, color.g, color.b)
+      color = TidyPlatesThreat.db.profile.Colors.Classes[target_of_target.ClassName]
     else
-      local color = db.CustomColor
-      target_of_target:SetTextColor(color.r, color.g, color.b)
+      color = db.CustomColor
     end
+    target_of_target:SetTextColor(color.r, color.g, color.b)
   end
 end
 
