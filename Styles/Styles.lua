@@ -186,6 +186,14 @@ function Addon:GetThreatStyle(unit)
   return "normal"
 end
 
+local function GetStyleForPlate(custom_style)
+  -- If a name trigger style is found with useStyle == false, that means that it's active, but only the icon will be shown.
+  if custom_style.useStyle then
+    return (custom_style.showNameplate and "unique") or (custom_style.ShowHeadlineView and "NameOnly-Unique") or "etotem"
+  end
+  --return nil
+end
+
 -- Check if a unit is a totem or a custom nameplates (e.g., after UNIT_NAME_UPDATE)
 -- Depends on:
 --   * unit.name
@@ -197,26 +205,41 @@ function Addon.UnitStyle_NameDependent(unit)
   local totem_settings
   local unique_settings = NameTriggers[unit.name]
 
-  if unique_settings and unique_settings.useStyle and unique_settings.Enable.UnitReaction[unit.reaction] then
-    plate_style = (unique_settings.showNameplate and "unique") or (unique_settings.ShowHeadlineView and "NameOnly-Unique") or "etotem"
+  if unique_settings and unique_settings.Enable.UnitReaction[unit.reaction] then
+    plate_style = GetStyleForPlate(unique_settings)
   elseif Addon.ActiveWildcardTriggers and unit.type == "NPC" then
-    local unit_test = TriggerWildcardTests[unit.name]
+    local cached_custom_style = TriggerWildcardTests[unit.name]
 
-    if unit_test == nil then
+    if cached_custom_style == nil then
+      cached_custom_style = false
+
+      local trigger
       for i = 1, #NameWildcardTriggers do
-        local trigger = NameWildcardTriggers[i]
+        trigger = NameWildcardTriggers[i]
         --print ("Name Wildcard: ", unit.name, "=>", trigger[1], unit.name:find(trigger[1]))
         if unit.name:find(trigger[1]) then
-          unique_settings = trigger[2]
-          plate_style = (unique_settings.showNameplate and "unique") or (unique_settings.ShowHeadlineView and "NameOnly-Unique") or "etotem"
-          break
+
+          -- Static checks (based on not changing criterien (like unit type).
+          if trigger[2].Enable.UnitReaction[unit.reaction] then
+            unique_settings = trigger[2]
+            plate_style = GetStyleForPlate(unique_settings)
+
+            cached_custom_style = {
+              Style = plate_style,
+              CustomStyle = unique_settings
+            }
+
+            -- Breaking here without plate_style being set means that only the icon part will be used from the custom style
+            break
+          end
         end
       end
 
-      TriggerWildcardTests[unit.name] = (plate_style and { plate_style, unique_settings }) or false
-    elseif unit_test ~= false then
-      plate_style = unit_test[1]
-      unique_settings = unit_test[2]
+      -- Add custom style, if one was found, or false if there is no custom style for this unit
+      TriggerWildcardTests[unit.name] = cached_custom_style
+    elseif cached_custom_style ~= false then
+      unique_settings = cached_custom_style.CustomStyle
+      plate_style = cached_custom_style.Style
     end
   end
 

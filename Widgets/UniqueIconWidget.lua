@@ -63,7 +63,7 @@ end
 --end
 
 function Widget:EnabledForStyle(style, unit)
-  return (style == "unique" or style == "NameOnly-Unique" or style == "etotem")
+  return style ~= "empty" -- (style == "unique" or style == "NameOnly-Unique" or style == "etotem")
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -83,7 +83,7 @@ function Widget:OnUnitAdded(widget_frame, unit)
 
   local show_icon = self.db.ON and unique_setting.showIcon
   if show_icon then
-    if unit.style == "NameOnly-Unique" then
+    if unit.style == "NameOnly" or unit.style == "NameOnly-Unique" then
       widget_frame:SetPoint("CENTER", widget_frame:GetParent(), db.x_hv, db.y_hv)
     else
       widget_frame:SetPoint("CENTER", widget_frame:GetParent(), db.x, db.y)

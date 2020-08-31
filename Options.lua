@@ -6510,10 +6510,10 @@ local function CreateCustomNameplateEntry(index)
             name = L["Friendly Units"],
             order = 20,
             type = "toggle",
-            desc = L["Enable this custom nameplate for friendly units"],
+            desc = L["Enable this custom nameplate for friendly units."],
             set = function(info, val)
               db.uniqueSettings[index].Enable.UnitReaction["FRIENDLY"] = val
-              Addon:ForceUpdate()
+              UpdateSpecial()
             end,
             get = function(info)
               return db.uniqueSettings[index].Enable.UnitReaction["FRIENDLY"]
@@ -6523,11 +6523,11 @@ local function CreateCustomNameplateEntry(index)
             name = L["Enemy Units"],
             order = 30,
             type = "toggle",
-            desc = L["Enable this custom nameplate for neutral and hostile units"],
+            desc = L["Enable this custom nameplate for neutral and hostile units."],
             set = function(info, val)
               db.uniqueSettings[index].Enable.UnitReaction["HOSTILE"] = val
               db.uniqueSettings[index].Enable.UnitReaction["NEUTRAL"] = val
-              Addon:ForceUpdate()
+              UpdateSpecial()
             end,
             get = function(info)
               return db.uniqueSettings[index].Enable.UnitReaction["HOSTILE"]
@@ -6546,20 +6546,21 @@ local function CreateCustomNameplateEntry(index)
             order = 10,
             type = "toggle",
             desc = L["This option allows you to control whether custom settings for nameplate style, color, transparency and scaling should be used for this nameplate."],
+            set = function(info, val) SetValuePlain(info, val); UpdateSpecial() end,
             arg = { "uniqueSettings", index, "useStyle" },
           },
           HeadlineView = {
             name = L["Healthbar View"],
             order = 20,
             type = "toggle",
-            set = function(info, val) if val then db.uniqueSettings[index].ShowHeadlineView = false; SetValue(info, val) end end,
+            set = function(info, val) if val then db.uniqueSettings[index].ShowHeadlineView = false; SetValuePlain(info, val); UpdateSpecial() end end,
             arg = { "uniqueSettings", index, "showNameplate" },
           },
           HealthbarView = {
             name = L["Headline View"],
             order = 30,
             type = "toggle",
-            set = function(info, val) if val then db.uniqueSettings[index].showNameplate = false; SetValue(info, val) end end,
+            set = function(info, val) if val then db.uniqueSettings[index].showNameplate = false; SetValuePlain(info, val); UpdateSpecial() end end,
             arg = { "uniqueSettings", index, "ShowHeadlineView" },
           },
           HideNameplate = {
@@ -6572,7 +6573,7 @@ local function CreateCustomNameplateEntry(index)
               if val then
                 db.uniqueSettings[index].showNameplate = false;
                 db.uniqueSettings[index].ShowHeadlineView = false;
-                Addon:ForceUpdate()
+                UpdateSpecial()
               end
             end,
             get = function(info) return not(db.uniqueSettings[index].showNameplate or db.uniqueSettings[index].ShowHeadlineView) end,
