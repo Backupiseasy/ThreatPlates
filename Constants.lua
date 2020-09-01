@@ -395,7 +395,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
     },
   },
   profile = {
-    cache = {},
+    -- cache = {}, - removed in 9.3.0
     -- OldSetting = true, - removed in 8.7.0
     verbose = false,
     -- blizzFadeA = { -- removed in 8.5.1

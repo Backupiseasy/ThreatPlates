@@ -1108,6 +1108,7 @@ local DEPRECATED_SETTINGS = {
   SpelltextPosition = { MigrateSpelltextPosition, (Addon.CLASSIC and "1.4.0") or "9.2.0", NoDefaultProfile = true },
   FixTargetFocusTexture = { FixTargetFocusTexture, NoDefaultProfile = true },
   RenameFilterMode = { RenameFilterMode, NoDefaultProfile = true, "9.3.0"},
+  RemoveCacheFromProfile = { "cache" },
 }
 
 local function MigrateDatabase(current_version)
