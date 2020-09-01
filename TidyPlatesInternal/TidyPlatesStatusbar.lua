@@ -11,6 +11,7 @@ local ceil, string_format = ceil, string.format
 -- WoW APIs
 local GetSpellTexture = GetSpellTexture
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
+local InCombatLockdown = InCombatLockdown
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
@@ -38,6 +39,11 @@ local ELITE_BACKDROP = {
     offset = 1.1,
   }
 }
+
+---------------------------------------------------------------------------------------------------
+-- Cached configuration settings
+---------------------------------------------------------------------------------------------------
+local SettingsTargetUnit
 
 ------------------------------------------------------------------------------------------------------------
 
@@ -151,11 +157,17 @@ local function UpdateLayoutHealthbar(self, db, style)
   local width, height = self:GetSize()
   self.TargetUnit:SetSize(width, height)
   self.TargetUnit:SetShown(self.TargetUnit:GetText() ~= nil)
+
+  SettingsTargetUnit = db.healthbar.TargetUnit
 end
 
 local function ShowTargetUnit(self, target_of_target_name, class_name)
-  local target_of_target = self.TargetUnit
+  if SettingsTargetUnit.ShowOnlyInCombat and not InCombatLockdown() then
+    self:HideTargetUnit()
+    return
+  end
 
+  local target_of_target = self.TargetUnit
   if target_of_target_name then
     target_of_target:SetText("|cffffffff[|r " .. target_of_target_name .. " |cffffffff]|r")
     target_of_target.ClassName = class_name
@@ -164,12 +176,11 @@ local function ShowTargetUnit(self, target_of_target_name, class_name)
 
   -- Update the color if the element is shown
   if target_of_target:IsShown() then
-    local db = TidyPlatesThreat.db.profile.settings.healthbar.TargetUnit
     local color
-    if db.UseClassColor and target_of_target.ClassName then
+    if SettingsTargetUnit.UseClassColor and target_of_target.ClassName then
       color = TidyPlatesThreat.db.profile.Colors.Classes[target_of_target.ClassName]
     else
-      color = db.CustomColor
+      color = SettingsTargetUnit.CustomColor
     end
     target_of_target:SetTextColor(color.r, color.g, color.b)
   end

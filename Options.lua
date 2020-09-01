@@ -5589,14 +5589,20 @@ local function CreateHealthbarOptions()
   }
 
   entry.args.TargetUnitText.args.Showing = {
-    name = L["Show For"],
+    name = L["Show"],
     order = 5,
     type = "group",
     inline = true,
     args = {
+      OnlyInCombat = {
+        name = L["Only In Combat"],
+        order = 10,
+        type = "toggle",
+        arg = { "settings", "healthbar", "TargetUnit", "ShowOnlyInCombat" },
+      },
       OnlyForTarget = {
         name = L["Only for Target"],
-        order = 10,
+        order = 20,
         type = "toggle",
         arg = { "settings", "healthbar", "TargetUnit", "ShowOnlyForTarget" },
       },

@@ -1231,6 +1231,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
           Show = true,
           CustomColor = RGB(255, 255, 255),
           UseClassColor = true,
+          ShowOnlyInCombat = true,
           ShowOnlyForTarget = false,
           -- Layout
           Anchor = "RIGHT",
