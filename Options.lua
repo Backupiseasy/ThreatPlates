@@ -18,7 +18,7 @@ local type = type
 -- WoW APIs
 local wipe = wipe
 local CLASS_SORT_ORDER, LOCALIZED_CLASS_NAMES_MALE = CLASS_SORT_ORDER, LOCALIZED_CLASS_NAMES_MALE
-local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
+local InCombatLockdown, IsInInstance, GetInstanceInfo = InCombatLockdown, IsInInstance, GetInstanceInfo
 local GetCVar, GetCVarBool = GetCVar, GetCVarBool
 local UnitsExists, UnitName = UnitsExists, UnitName
 local GameTooltip = GameTooltip
@@ -335,6 +335,17 @@ local function GetSpellName(number)
   return n
 end
 
+function Addon.UpdateStylesForCurrentInstance()
+  local style_caches = Addon.Cache.Styles
+  wipe(style_caches.ForCurrentInstance)
+
+  -- Update custom styles for this instance
+  if IsInInstance() then
+    local _, _, _, _, _, _, _, instance_id = GetInstanceInfo()
+    Addon.MergeIntoTable(style_caches.ForCurrentInstance, style_caches.PerInstance[tostring(instance_id)])
+  end
+end
+
 function Addon:InitializeCustomNameplates()
   local db = TidyPlatesThreat.db.profile
 
@@ -350,6 +361,10 @@ function Addon:InitializeCustomNameplates()
   wipe(custom_style_triggers.Aura)
   wipe(custom_style_triggers.Cast)
   wipe(Addon.Cache.TriggerWildcardTests)
+
+  local styles_cache = Addon.Cache.Styles
+  wipe(styles_cache.ForAllInstances)
+  wipe(styles_cache.PerInstance)
 
   for index, custom_style in pairs(db.uniqueSettings) do
     if type(index) == "number" and custom_style.Trigger.Name.Input ~= "<Enter name here>" and not custom_style.Enable.Never then
@@ -368,6 +383,26 @@ function Addon:InitializeCustomNameplates()
       if custom_style.Effects.Glow.Type ~= "None" then
         Addon.UseUniqueWidget = true
       end
+
+      -- Add the style to instance-based caches for faster access
+      if custom_style.Enable.InInstances then
+        if custom_style.Enable.InstanceIDs.Enabled then
+
+          local instance_ids = {}
+          for instance_id in string.gmatch(custom_style.Enable.InstanceIDs.IDs, '([^,]+)') do
+            instance_id = instance_id:gsub("^%s*(.-)%s*$", "%1")
+            instance_ids[#instance_ids + 1] = instance_id
+          end
+
+          -- Add this custom style to the instance-specific custom style hash table
+          for _, instance_id in ipairs(instance_ids) do
+            styles_cache.PerInstance[instance_id] = styles_cache.PerInstance[instance_id] or {}
+            styles_cache.PerInstance[instance_id][custom_style] = true
+          end
+        else
+          styles_cache.ForAllInstances[custom_style] = true
+        end
+      end
     end
   end
 
@@ -375,6 +410,8 @@ function Addon:InitializeCustomNameplates()
   Addon.ActiveAuraTriggers = next(custom_style_triggers.Aura) ~= nil
   Addon.ActiveCastTriggers = next(custom_style_triggers.Cast) ~= nil
   Addon.ActiveWildcardTriggers = next(custom_style_triggers.NameWildcard) ~= nil
+
+  Addon.UpdateStylesForCurrentInstance()
 end
 
 local function UpdateSpecial() -- Need to add a way to update options table.
@@ -6532,6 +6569,45 @@ local function CreateCustomNameplateEntry(index)
             get = function(info)
               return db.uniqueSettings[index].Enable.UnitReaction["HOSTILE"]
             end,
+          },
+          Spacer2 = GetSpacerEntry(35),
+          OutOfInstances = {
+            name = L["Out Of Instances"],
+            order = 40,
+            type = "toggle",
+            desc = L["Enable this custom nameplate out of instances (in the wider game world)."],
+            set = function(info, val) SetValuePlain(info, val); UpdateSpecial() end,
+            arg = { "uniqueSettings", index, "Enable", "OutOfInstances" },
+          },
+          InInstances = {
+            name = L["In Instances"],
+            order = 50,
+            type = "toggle",
+            desc = L["Enable this custom nameplate in instances."],
+            set = function(info, val) SetValuePlain(info, val); UpdateSpecial() end,
+            arg = { "uniqueSettings", index, "Enable", "InInstances" },
+          },
+          Spacer3 = GetSpacerEntry(55),
+          ZoneIDEnable = {
+            name = L["Instance IDs"],
+            order = 60,
+            type = "toggle",
+            set = function(info, val) SetValuePlain(info, val); UpdateSpecial() end,
+            arg = { "uniqueSettings", index, "Enable", "InstanceIDs", "Enabled" },
+            disabled = function() return not db.uniqueSettings[index].Enable.InInstances end,
+          },
+          ZoneIDInput = {
+            name = L["Instance IDs"],
+            type = "input",
+            order = 70,
+            width = "double",
+            desc = function ()
+              local instance_name, _, _, _, _, _, _, instance_id = GetInstanceInfo()
+              return L["|cffFFD100Current Instance:|r\n"] .. instance_name .. ": " ..  instance_id .. L["\n\nSupports multiple entries, separated by commas."]
+            end,
+            set = function(info, val) SetValuePlain(info, val); UpdateSpecial() end,
+            arg = { "uniqueSettings", index, "Enable", "InstanceIDs", "IDs" },
+            disabled = function() return not db.uniqueSettings[index].Enable.InInstances or not db.uniqueSettings[index].Enable.InstanceIDs.Enabled end,
           },
         },
       },

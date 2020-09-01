@@ -1157,6 +1157,12 @@ ThreatPlates.DEFAULT_SETTINGS = {
             NEUTRAL = true,
             HOSTILE = true,
           },
+          OutOfInstances = true,
+          InInstances = true,
+          InstanceIDs = {
+            Enabled = false,
+            IDs = "",
+          }
         },
         showIcon = true,
         useStyle = true,

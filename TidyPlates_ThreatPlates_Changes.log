@@ -8,6 +8,7 @@
 * Added a striped overlay texture to Target/Focus Highlight widget [Comment #4458].
 * Added a feature to show the name of the unit that is currently targeted on the nameplate [Issue TPC#15, Comment TPC#446, #TPC579].
 * Added an option to show the current amount of threat as a percentage [Comment TPC#540, TPC#533, E-Mail].
+* Added options to enable/disable custom styles for nameplates based based on being inside or outside of instances [Issue #363, #185].
 * Fixed a bug where enabling/disabling widgets only took effect after reloading the UI.
 * Fixed a bug with Focus widget where an incorrect artwork was shown when switching between healthbar and headline view.
 * Fixed a bug with custom styles for nameplates where the icon was not shown when the appearance (scaling, transparency, ...) was disabled.

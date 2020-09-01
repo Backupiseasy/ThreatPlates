@@ -49,6 +49,11 @@ Addon.Cache = {
 		NameWildcard = {},
 		Aura = {},
 		Cast = {},
+	},
+	Styles = {
+		ForAllInstances = {},
+		PerInstance = {},
+		ForCurrentInstance = {},
 	}
 }
 

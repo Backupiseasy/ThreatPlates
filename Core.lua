@@ -525,6 +525,9 @@ function TidyPlatesThreat:PLAYER_ENTERING_WORLD()
     Addon.CVars:RestoreFromProfile("nameplateGlobalScale")
   end
 
+  -- Update custom styles for the current instance
+  Addon.UpdateStylesForCurrentInstance()
+
   -- Adjust clickable area if we are in an instance. Otherwise the scaling of friendly nameplates' healthbars will
   -- be bugged
   Addon:SetBaseNamePlateSize()
