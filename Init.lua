@@ -48,7 +48,7 @@ Addon.Cache = {
 		Name = {},
 		NameWildcard = {},
 		Aura = {},
-		Cast = {}
+		Cast = {},
 	}
 }
 
@@ -149,6 +149,8 @@ ThreatPlates.CopyTable = function(input)
 end
 
 Addon.MergeIntoTable = function(target, source)
+	if source == nil then return end
+
   for k,v in pairs(source) do
     if type(v) == "table" then
 			target[k] = target[k] or {}
@@ -253,13 +255,13 @@ local function DEBUG_PRINT_TABLE(data)
       if (type(data)=="table") then
         for pos,val in pairs(data) do
           if (type(val)=="table") then
-            ThreatPlates.DEBUG (indent.."["..pos.."] => "..tostring(data).." {")
+            ThreatPlates.DEBUG (indent.."["..tostring(pos).."] => "..tostring(data).." {")
             sub_print_r(val,indent..string.rep(" ",string.len(pos)+8))
             ThreatPlates.DEBUG (indent..string.rep(" ",string.len(pos)+6).."}")
           elseif (type(val)=="string") then
-            ThreatPlates.DEBUG (indent.."["..pos..'] => "'..val..'"')
+            ThreatPlates.DEBUG (indent.."["..tostring(pos)..'] => "'..val..'"')
           else
-            ThreatPlates.DEBUG (indent.."["..pos.."] => "..tostring(val))
+            ThreatPlates.DEBUG (indent.."["..tostring(pos).."] => "..tostring(val))
           end
         end
       else
