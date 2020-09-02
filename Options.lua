@@ -257,33 +257,28 @@ local function ShowImportFrame()
     if success then
       if not import_data.Version or not import_data.Profile and not import_data.ProfileName or type (import_data.ProfileName) ~= "string" then
         t.Print(L["The import string has an unknown format and cannot be imported. Verify that the import string was generated from the same Threat Plates version that you are using currently."], true)
-      elseif import_data.Version ~= t.Meta("version") then
-        t.Print(L["The import string contains a profile from an incombatible Threat Plates version. Importing only works with data exported from the same Threat Plates version as you are using."], true)
       else
+        if import_data.Version ~= t.Meta("version") then
+          t.Print(L["The import string contains a profile from an different Threat Plates version. The profile will still be imported (and migrated as far as possible), but some settings from the imported profile might be lost."], true)
+        end
+
         local imported_profile_name = import_data.ProfileName
 
+        -- Adjust the profile name if there is a name conflict:
         local imported_profile_no = 1
         while TidyPlatesThreat.db.profiles[imported_profile_name] do
           imported_profile_name = import_data.ProfileName .. " (" .. tostring(imported_profile_no) .. ")"
           imported_profile_no = imported_profile_no + 1
         end
---        for profile_name, profile in pairs(TidyPlatesThreat.db.profiles) do
---          local no = profile_name:match("^" .. import_data.ProfileName .. " %((%d+)%)$") or (profile_name == import_data.ProfileName and 0)
---          if tonumber(no) and tonumber(no) >= imported_profile_no then
---            imported_profile_no = tonumber(no) + 1
---          end
---        end
---        local imported_profile_name = import_data.ProfileName .. ((imported_profile_no == 0 and "") or (" (" .. tostring(imported_profile_no) .. ")"))
+        --        for profile_name, profile in pairs(TidyPlatesThreat.db.profiles) do
+        --          local no = profile_name:match("^" .. import_data.ProfileName .. " %((%d+)%)$") or (profile_name == import_data.ProfileName and 0)
+        --          if tonumber(no) and tonumber(no) >= imported_profile_no then
+        --            imported_profile_no = tonumber(no) + 1
+        --          end
+        --        end
+        --        local imported_profile_name = import_data.ProfileName .. ((imported_profile_no == 0 and "") or (" (" .. tostring(imported_profile_no) .. ")"))
 
-        -- Apply imported profile as a new profile
-        TidyPlatesThreat.db:SetProfile(imported_profile_name) --will create a new profile
-
-        --[[
-          NOTE: using merge as there appears to be an observer that writes changes to the savedvariables.
-          using assignment (profile = deserialized) removes this functionality which means the imported profile is never saved.
-        ]]--
-
-        Addon.MergeIntoTable(TidyPlatesThreat.db.profile, import_data.Profile)
+        Addon.ImportProfile(import_data.Profile, imported_profile_name, import_data.Version)
         TidyPlatesThreat:ProfChange()
       end
     else
@@ -7115,13 +7110,13 @@ local function CreateCustomNameplatesGroup()
                   local success, import_data = ImportStringData(encoded)
 
                   if success then
-                    if import_data.Version ~= t.Meta("version") then
-                      t.Print(L["The import string contains custom nameplate settings from an different Threat Plates version as you are using. Some settings from the imported custom nameplates might be lost."], true)
-                    end
-
                     if not import_data.Version or not import_data.CustomStyles then
                       t.Print(L["The import string has an invalid format and cannot be imported. Verify that the import string was generated from the same Threat Plates version that you are using currently."], true)
                     else
+                      if import_data.Version ~= t.Meta("version") then
+                        t.Print(L["The import string contains custom nameplate settings from a different Threat Plates version. The custom nameplates will still be imported (and migrated as far as possible), but some settings from the imported custom nameplates might be lost."], true)
+                      end
+
                       local imported_custom_styles  = {}
 
                       for i, custom_style  in ipairs (import_data.CustomStyles) do

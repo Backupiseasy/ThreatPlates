@@ -1160,14 +1160,6 @@ Addon.MigrateDatabase = MigrateDatabase
 -- Schema validation and other check functions for the settings file
 -----------------------------------------------------
 
-local CUSTOM_STYLE_TYPE_CHECK = {
-  icon = { number = true, string = true },
-  -- Not part of default values, dynamically inserted
-  AutomaticIcon = { number = true },
-  SpellID = { number = true },
-  SpellName = { number = true },
-}
-
 --
 --local VERSION_TO_CUSTOM_STYLE_SCHEMA_MAPPING = {
 --  ["9.2.0"] = CUSTOM_STYLE_SCHEMA_VERSIONS.V3
@@ -1176,6 +1168,53 @@ local CUSTOM_STYLE_TYPE_CHECK = {
 --Addon.CheckCustomStyleSchema = function(custom_style, version)
 --  ThreatPlates.DEBUG_PRINT_TABLE(custom_style)
 --end
+
+local SETTINGS_TYPE_CHECK = {
+  icon = { number = true, string = true },
+  -- Not part of default values, dynamically inserted
+  AutomaticIcon = { number = true },
+  SpellID = { number = true },
+  SpellName = { number = true },
+}
+
+local CUSTOM_STYLE_TYPE_CHECK = {
+  icon = { number = true, string = true },
+  -- Not part of default values, dynamically inserted
+  AutomaticIcon = { number = true },
+  SpellID = { number = true },
+  SpellName = { number = true },
+}
+
+-- Updates existing entries in current settings  with the corresponding values from the
+-- update-from settings
+-- If an entry in update-from settings does not exist in the current settings, it's ignored
+local function UpdateFromSettings(current_settings, update_from_settings)
+  for key, current_value in pairs(current_settings) do
+    local update_from_value = update_from_settings[key]
+
+    if update_from_value ~= nil then
+      if type(current_value) == "table" then
+        -- If entry in update-from custom style is not a table as well, ignore it
+        if type(update_from_value) == "table" then
+          UpdateFromSettings(current_value, update_from_value)
+        end
+      else
+        local type_is_ok
+
+        local valid_types = SETTINGS_TYPE_CHECK[key]
+        if valid_types then
+          type_is_ok = valid_types[type(update_from_value)]
+        else
+          type_is_ok = (type(current_value) == type(update_from_value))
+        end
+
+        if type_is_ok then
+          current_settings[key] = update_from_value
+        end
+      end
+    end
+  end
+end
 
 -- Updates existing entries in custom style with the corresponding value from the
 -- update-from custom style
@@ -1231,6 +1270,56 @@ Addon.ImportCustomStyle = function(imported_custom_style)
   UpdateRuntimeValueFromCustomStyle(custom_style, imported_custom_style, "SpellName")
 
   return custom_style
+end
+
+local function MigrateProfile(profile, profile_name, profile_version)
+  for key, entry in pairs(DEPRECATED_SETTINGS) do
+    local action = entry[1]
+
+    if type(action) == "function" then
+      local max_version = entry[2]
+      if not max_version or CurrentVersionIsOlderThan(profile_version, max_version) then
+        action(profile_name, profile)
+      end
+
+      -- Postprocessing, if necessary
+      -- action = entry[3]
+      -- if action and type(action) == "function" then
+      --   action()
+      -- end
+    else
+      DatabaseEntryDelete(profile, entry)
+    end
+  end
+end
+
+Addon.ImportProfile = function(profile, profile_name, profile_version)
+  -- Migrate the profile to the current version
+  -- Using pcall here to catch errors in the migration code - should not happen, but still ...
+  local migration_successful, return_value = pcall(MigrateProfile, profile, profile_name, profile_version)
+  if not migration_successful then
+    ThreatPlates.Print(L["Failed to migrate the imported profile to the current settings format because of an internal error. Please report this issue at the Threat Plates homepage at CurseForge: "] .. return_value, true)
+  else
+    -- Create a new profile with default settings:
+    TidyPlatesThreat.db:SetProfile(profile_name) --will create a new profile
+
+    -- Custom styles must be handled seperately
+    local custom_styles = ThreatPlates.CopyTable(profile.uniqueSettings)
+    for index, _ in pairs(profile.uniqueSettings) do
+      table.remove(profile.uniqueSettings, index)
+    end
+
+    -- Merge the migrated profile to import into this new profile
+    UpdateFromSettings(TidyPlatesThreat.db.profile, profile)
+
+    -- Now merge back the custom styles
+    for index, imported_custom_style in pairs(custom_styles) do
+      -- Import all values from the custom style as long the are valid entries with the correct type
+      -- based on the default custom style "**"
+      local custom_style = Addon.ImportCustomStyle(imported_custom_style)
+      table.insert(TidyPlatesThreat.db.profile.uniqueSettings, index, custom_style)
+    end
+  end
 end
 
 -----------------------------------------------------
