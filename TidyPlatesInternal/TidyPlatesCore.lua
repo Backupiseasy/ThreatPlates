@@ -247,23 +247,24 @@ do
     visual.eliteborder = healthbar.EliteBorder
 
     -- Parented to Extended - Middle Frame
-    visual.raidicon = textframe:CreateTexture(nil, "ARTWORK", 5)
-    visual.skullicon = textframe:CreateTexture(nil, "ARTWORK", 2)
-    visual.eliteicon = textframe:CreateTexture(nil, "ARTWORK", 1)
+    visual.raidicon = textframe:CreateTexture(nil, "OVERLAY", nil, 7)
+    visual.eliteicon = healthbar:CreateTexture(nil, "OVERLAY", nil, 1)
+    visual.skullicon = healthbar:CreateTexture(nil, "OVERLAY", nil, 2)
 
 		-- TextFrame
-    visual.name = textframe:CreateFontString(nil, "OVERLAY", 0)
+    visual.name = textframe:CreateFontString(nil, "ARTWORK")
 		visual.name:SetFont("Fonts\\FRIZQT__.TTF", 11)
     visual.name:SetWordWrap(false) -- otherwise text is wrapped when plate is scaled down
-    visual.customtext = textframe:CreateFontString(nil, "OVERLAY", -1)
+    visual.customtext = textframe:CreateFontString(nil, "ARTWORK")
 		visual.customtext:SetFont("Fonts\\FRIZQT__.TTF", 11)
     visual.customtext:SetWordWrap(false) -- otherwise text is wrapped when plate is scaled down
-		visual.level = textframe:CreateFontString(nil, "OVERLAY", -2)
+		-- Level text is not shown in headline view, so anchoring it to the healthbar is ok
+    visual.level = healthbar:CreateFontString(nil, "ARTWORK")
 		visual.level:SetFont("Fonts\\FRIZQT__.TTF", 11)
 
 		-- Cast Bar Frame - Highest Frame
-		visual.spellicon = castbar.Overlay:CreateTexture(nil, "OVERLAY")
-		visual.spelltext = castbar.Overlay:CreateFontString(nil, "ARTWORK")
+		visual.spellicon = castbar:CreateTexture(nil, "OVERLAY", nil, 7)
+		visual.spelltext = castbar:CreateFontString(nil, "ARTWORK")
 		visual.spelltext:SetFont("Fonts\\FRIZQT__.TTF", 11)
     visual.spelltext:SetWordWrap(false) -- otherwise text is wrapped when plate is scaled down
 
@@ -843,7 +844,6 @@ do
 
     visual.spelltext:SetText(text)
 		visual.spellicon:SetTexture(texture)
-    visual.spellicon:SetDrawLayer("OVERLAY")
     local target_unit = unit.unitid .. "target"
     castbar.CastTarget:SetText(UnitName(target_unit))
 
@@ -1646,7 +1646,6 @@ do
     -- Raid Icon Texture
 		if style.raidicon and style.raidicon.texture then
 			visual.raidicon:SetTexture(style.raidicon.texture)
-      visual.raidicon:SetDrawLayer("ARTWORK", 5)
     end
     -- TOODO: does not really work with ForceUpdate() as isMarked is not set there (no call to UpdateUnitCondition)
     if not unit.isMarked then

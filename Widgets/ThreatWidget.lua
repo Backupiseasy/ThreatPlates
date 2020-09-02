@@ -96,8 +96,8 @@ function Widget:Create(tp_frame)
   -- Custom Code
   --------------------------------------
   widget_frame:SetFrameLevel(tp_frame:GetFrameLevel() + 7)
-  widget_frame.LeftTexture = widget_frame:CreateTexture(nil, "OVERLAY", 6)
-  widget_frame.RightTexture = widget_frame:CreateTexture(nil, "OVERLAY", 6)
+  widget_frame.LeftTexture = widget_frame:CreateTexture(nil, "ARTWORK")
+  widget_frame.RightTexture = widget_frame:CreateTexture(nil, "ARTWORK")
   widget_frame.RightTexture:SetPoint("LEFT", tp_frame.visual.healthbar, "RIGHT", 4, 0)
   widget_frame.RightTexture:SetSize(64, 64)
 

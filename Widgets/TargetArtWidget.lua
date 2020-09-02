@@ -88,7 +88,6 @@ local function UpdateSideTexture(db, widget_frame, texture_frame)
 
   left_texture:SetTexture(ART_PATH .. db.theme)
   left_texture:SetTexCoord(0, 1, 0, 1)
-  left_texture:SetDrawLayer("BACKGROUND", 0)
   left_texture:SetVertexColor(db.r, db.g, db.b, db.a)
   left_texture:SetSize(db.Size, db.Size)
   left_texture:ClearAllPoints()
@@ -111,7 +110,6 @@ local function UpdateCenterTexture(db, widget_frame, texture_frame)
 
   left_texture:SetTexture(ART_PATH .. db.theme)
   left_texture:SetTexCoord(0, 1, 0, 1)
-  left_texture:SetDrawLayer("BACKGROUND", 0)
   left_texture:SetVertexColor(db.r, db.g, db.b, db.a)
   left_texture:SetSize(db.Size, db.Size)
   left_texture:ClearAllPoints()
@@ -128,7 +126,6 @@ local function UpdateOverlayTexture(db, widget_frame, texture_frame)
   left_texture:SetTexture("Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\TargetArtWidget\\" .. db.theme)
   left_texture:SetTexCoord(0, 1, 0.4375, 0.5625)
   -- Show target texture above focus texture
-  left_texture:SetDrawLayer("OVERLAY", (widget_frame == WidgetFrame and -5) or -8)
   left_texture:SetVertexColor(db.r, db.g, db.b, db.a)
   left_texture:ClearAllPoints()
   left_texture:SetAllPoints(widget_frame)
@@ -155,14 +152,14 @@ local UPDATE_TEXTURE_FUNCTIONS = {
 local FRAME_LEVEL_BY_TEXTURE = {
   default = 0,
   squarethin = 0,
-  arrows = 9,
-  arrow_down = 9,
-  arrow_less_than = 9,
-  glow = -1,
-  threat_glow = -1,
-  arrows_legacy = 9,
-  bubble = 9,
-  crescent = 9,
+  arrows = 6,
+  arrow_down = 6,
+  arrow_less_than = 6,
+  glow = -2,
+  threat_glow = -2,
+  arrows_legacy = 6,
+  bubble = 6,
+  crescent = 6,
   Stripes = 0,
 }
 
@@ -209,11 +206,11 @@ function Widget:Create()
 
     local healthbar_mode_frame = _G.CreateFrame("Frame", nil, widget_frame)
     healthbar_mode_frame:SetFrameLevel(widget_frame:GetFrameLevel())
-    healthbar_mode_frame.LeftTexture = widget_frame:CreateTexture(nil, "BACKGROUND", 0)
-    healthbar_mode_frame.RightTexture = widget_frame:CreateTexture(nil, "BACKGROUND", 0)
+    healthbar_mode_frame.LeftTexture = widget_frame:CreateTexture(nil, "ARTWORK", nil, (widget_frame == WidgetFrame and 7) or -6)
+    healthbar_mode_frame.RightTexture = widget_frame:CreateTexture(nil, "ARTOWKR", nil, 0)
     widget_frame.HealthbarMode = healthbar_mode_frame
 
-    widget_frame.NameModeTexture = widget_frame:CreateTexture(nil, "BACKGROUND", 0)
+    widget_frame.NameModeTexture = widget_frame:CreateTexture(nil, "BACKGROUND", nil, 0)
     widget_frame.NameModeTexture:SetTexture(ThreatPlates.Art .. "Target")
 
     self:UpdateLayout()
@@ -336,11 +333,11 @@ function FocusWidget:Create()
 
     local healthbar_mode_frame = _G.CreateFrame("Frame", nil, widget_frame)
     healthbar_mode_frame:SetFrameLevel(widget_frame:GetFrameLevel())
-    healthbar_mode_frame.LeftTexture = widget_frame:CreateTexture(nil, "BACKGROUND", 0)
-    healthbar_mode_frame.RightTexture = widget_frame:CreateTexture(nil, "BACKGROUND", 0)
+    healthbar_mode_frame.LeftTexture = widget_frame:CreateTexture(nil, "BACKGROUND", nil, 0)
+    healthbar_mode_frame.RightTexture = widget_frame:CreateTexture(nil, "BACKGROUND", nil, 0)
     widget_frame.HealthbarMode = healthbar_mode_frame
 
-    widget_frame.NameModeTexture = widget_frame:CreateTexture(nil, "BACKGROUND", 0)
+    widget_frame.NameModeTexture = widget_frame:CreateTexture(nil, "BACKGROUND", nil, 0)
     widget_frame.NameModeTexture:SetTexture(ThreatPlates.Art .. "Target")
 
     self:UpdateLayout()

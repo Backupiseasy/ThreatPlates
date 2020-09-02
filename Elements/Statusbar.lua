@@ -128,7 +128,7 @@ function Addon.CreateStatusbar(parent)
   statusbar:SetFrameLevel(parent:GetFrameLevel())
   statusbar:SetMinMaxValues(0, 100)
 
-  statusbar.Background = statusbar:CreateTexture(nil, "Artwork")
+  statusbar.Background = statusbar:CreateTexture(nil, "ARTWORK")
 
   statusbar.Border = _G.CreateFrame("Frame", nil, statusbar)
   statusbar.Border:SetFrameLevel(statusbar:GetFrameLevel())

@@ -144,13 +144,18 @@ local function UpdateLayoutHealthbar(self, db, style)
   SetEliteBorder(self, style.eliteborder.texture)
 
   local tp_frame = self:GetParent()
+  local frame_level
   if db.castbar.FrameOrder == "HealthbarOverCastbar" then
-    self:SetFrameLevel(tp_frame:GetFrameLevel() + 5)
+    frame_level = tp_frame:GetFrameLevel() + 5
   else
-    self:SetFrameLevel(tp_frame:GetFrameLevel() + 4)
+    frame_level = tp_frame:GetFrameLevel() + 4
   end
-  self.ThreatBorder:SetFrameLevel(self:GetFrameLevel() - 2)
-  tp_frame.visual.textframe:SetFrameLevel(self:GetFrameLevel())
+  self:SetFrameLevel(frame_level)
+  self.EliteBorder:SetFrameLevel(frame_level)
+  self.Border:SetFrameLevel(frame_level - 1)
+  self.ThreatBorder:SetFrameLevel(frame_level - 1)
+
+  tp_frame.visual.textframe:SetFrameLevel(frame_level)
 
   Font:UpdateText(self, self.TargetUnit, db.healthbar.TargetUnit)
 
@@ -193,18 +198,11 @@ end
 
 function Addon:CreateHealthbar(parent)
 	local frame = _G.CreateFrame("StatusBar", nil, parent)
-  --frame:Hide()
 
-  frame:SetFrameLevel(parent:GetFrameLevel() + 5)
-
+  frame.Background = frame:CreateTexture(nil, "ARTWORK")
   frame.Border = _G.CreateFrame("Frame", nil, frame)
-  frame.Background = frame:CreateTexture(nil, "BACKGROUND")
   frame.EliteBorder = _G.CreateFrame("Frame", nil, frame)
   frame.ThreatBorder = _G.CreateFrame("Frame", nil, frame)
-
-  frame.Border:SetFrameLevel(frame:GetFrameLevel())
-  frame.EliteBorder:SetFrameLevel(frame:GetFrameLevel() + 1)
-  frame.ThreatBorder:SetFrameLevel(frame:GetFrameLevel())
 
   frame.ThreatBorder:SetPoint("TOPLEFT", frame, "TOPLEFT", - OFFSET_THREAT, OFFSET_THREAT)
   frame.ThreatBorder:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", OFFSET_THREAT, - OFFSET_THREAT)
@@ -221,11 +219,11 @@ function Addon:CreateHealthbar(parent)
   frame.ShowTargetUnit = ShowTargetUnit
   frame.HideTargetUnit = HideTargetUnit
 
-  local healabsorb_bar = frame:CreateTexture(nil, "OVERLAY", 0)
+  local healabsorb_bar = frame:CreateTexture(nil, "ARTWORK", nil, 2)
   healabsorb_bar:SetVertexColor(0, 0, 0)
   healabsorb_bar:SetAlpha(0.5)
 
-  local healabsorb_glow = frame:CreateTexture(nil, "OVERLAY", 7)
+  local healabsorb_glow = frame:CreateTexture(nil, "ARTWORK", nil, 4)
   healabsorb_glow:SetTexture([[Interface\RaidFrame\Absorb-Overabsorb]])
   healabsorb_glow:SetBlendMode("ADD")
   healabsorb_glow:SetWidth(8)
@@ -233,16 +231,16 @@ function Addon:CreateHealthbar(parent)
   healabsorb_glow:SetPoint("TOPRIGHT", frame, "TOPLEFT", 2, 0)
   healabsorb_glow:Hide()
 
-  frame.HealAbsorbLeftShadow = frame:CreateTexture(nil, "OVERLAY", 4)
+  frame.HealAbsorbLeftShadow = frame:CreateTexture(nil, "ARTWORK", nil, 3)
   frame.HealAbsorbLeftShadow:SetTexture([[Interface\RaidFrame\Absorb-Edge]])
-  frame.HealAbsorbRightShadow = frame:CreateTexture(nil, "OVERLAY", 4)
+  frame.HealAbsorbRightShadow = frame:CreateTexture(nil, "ARTWORK", nil, 3)
   frame.HealAbsorbRightShadow:SetTexture([[Interface\RaidFrame\Absorb-Edge]])
   frame.HealAbsorbRightShadow:SetTexCoord(1, 0, 0, 1) -- reverse texture (right to left)
 
   frame.HealAbsorb = healabsorb_bar
   frame.HealAbsorbGlow = healabsorb_glow
 
-  frame.TargetUnit = frame:CreateFontString(nil, "ARTWORK")
+  frame.TargetUnit = frame:CreateFontString(nil, "OVERLAY")
   frame.TargetUnit:SetFont("Fonts\\FRIZQT__.TTF", 11)
 
 	--frame:SetScript("OnSizeChanged", OnSizeChanged)
@@ -297,14 +295,15 @@ local function UpdateLayoutCastbar(self, db, style)
   self:SetStatusBarBackdrop(castbar_style.backdrop, castborder_style.texture, castborder_style.edgesize, castborder_style.offset)
   self.Border:SetShown(castborder_style.show)
 
+  local frame_level
   if db.castbar.FrameOrder == "HealthbarOverCastbar" then
-    self:SetFrameLevel(self:GetParent():GetFrameLevel() + 2)
+    frame_level = self:GetParent():GetFrameLevel() + 2
   else
-    self:SetFrameLevel(self:GetParent():GetFrameLevel() + 5)
+    frame_level = self:GetParent():GetFrameLevel() + 5
   end
-  self.Border:SetFrameLevel(self:GetFrameLevel())
-  --self.InterruptBorder:SetFrameLevel(self:GetFrameLevel())
-  --self.Overlay:SetFrameLevel(self:GetFrameLevel())
+  self:SetFrameLevel(frame_level)
+  self.Border:SetFrameLevel(frame_level)
+  self.InterruptBorder:SetFrameLevel(frame_level)
 
   Font:UpdateText(self, self.CastTarget, db.castbar.CastTarget)
 
@@ -318,41 +317,42 @@ function Addon:CreateCastbar(parent)
   frame:Hide()
 
   frame.Border = _G.CreateFrame("Frame", nil, frame)
-  frame.Background = frame:CreateTexture(nil, "BACKGROUND")
+  frame.Background = frame:CreateTexture(nil, "ARTWORK")
   frame.InterruptBorder = _G.CreateFrame("Frame", nil, frame)
-  frame.Overlay = _G.CreateFrame("Frame", nil, frame)
 
-  frame.InterruptOverlay = frame.Overlay:CreateTexture(nil, "BORDER", 0)
-  frame.InterruptShield = frame.Overlay:CreateTexture(nil, "OVERLAY")
+  local overlay = frame:CreateTexture(nil, "ARTWORK", nil, 2)
+  overlay:SetTexture(ART_PATH .. "Striped_Texture")
+  overlay:SetAllPoints(frame)
+  overlay:SetVertexColor(1, 0, 0, 1)
+  frame.InterruptOverlay = overlay
 
-  frame.InterruptOverlay:SetTexture(ART_PATH .. "Striped_Texture")
-  frame.InterruptOverlay:SetAllPoints(frame)
-  frame.InterruptOverlay:SetVertexColor(1, 0, 0, 1)
-
+  local shield = frame:CreateTexture(nil, "OVERLAY", nil, 0)
   --frame.InterruptShield:SetAtlas("nameplates-InterruptShield", true)
-  frame.InterruptShield:SetTexture(ART_PATH .. "Interrupt_Shield")
-  frame.InterruptShield:SetPoint("CENTER", frame, "LEFT")
+  shield:SetTexture(ART_PATH .. "Interrupt_Shield")
+  shield:SetPoint("CENTER", frame, "LEFT")
+  frame.InterruptShield = shield
+
+  local spark = frame:CreateTexture(nil, "ARTWORK", nil, 1)
+  spark:SetTexture(ART_PATH .. "Spark")
+  spark:SetBlendMode("ADD")
+  frame.Spark = spark
+
+  frame:SetStatusBarColor(1, 0.8, 0)
+
+  -- Remaining cast time
+  local casttime = frame:CreateFontString(nil, "ARTWORK")
+  casttime:SetFont("Fonts\\FRIZQT__.TTF", 11)
+  casttime:SetAllPoints(frame)
+  casttime:SetJustifyH("RIGHT")
+  frame.casttime = casttime
+
+  frame.CastTarget = frame:CreateFontString(nil, "ARTWORK")
+  frame.CastTarget:SetFont("Fonts\\FRIZQT__.TTF", 11)
 
   frame.SetAllColors = SetAllColors
   frame.SetStatusBarBackdrop = SetStatusBarBackdropCastbar
   frame.SetFormat = SetFormat
   frame.UpdateLayout = UpdateLayoutCastbar
-
-  frame:SetStatusBarColor(1, 0.8, 0)
-
-  local spark = frame:CreateTexture(nil, "OVERLAY", 7)
-  spark:SetTexture(ART_PATH .. "Spark")
-  spark:SetBlendMode("ADD")
-  frame.Spark = spark
-
-  -- Remaining cast time
-  frame.casttime = frame.Overlay:CreateFontString(nil, "ARTWORK")
-  frame.casttime:SetFont("Fonts\\FRIZQT__.TTF", 11)
-  frame.casttime:SetAllPoints(frame)
-  frame.casttime:SetJustifyH("RIGHT")
-
-  frame.CastTarget = frame:CreateFontString(nil, "ARTWORK")
-  frame.CastTarget:SetFont("Fonts\\FRIZQT__.TTF", 11)
 
   --  frame.Flash = frame:CreateAnimationGroup()
 --  local anim = frame.Flash:CreateAnimation("Alpha")

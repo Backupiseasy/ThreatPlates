@@ -74,7 +74,7 @@ local function UpdateAuraTexture(frame, aura, index)
 end
 
 local function CreateAuraTexture(frame, index)
-  local aura = frame:CreateTexture(nil, "OVERLAY", -8)
+  local aura = frame:CreateTexture(nil, "ARTWORK")
   local time = frame:CreateFontString(nil, "OVERLAY") -- Duration Text
 
   time:SetJustifyH("CENTER")

@@ -1155,7 +1155,7 @@ function Widget:CreateAuraFrameIconMode(parent)
   local frame = _G.CreateFrame("Frame", nil, parent)
   frame:SetFrameLevel(parent:GetFrameLevel())
 
-  frame.Icon = frame:CreateTexture(nil, "ARTWORK", 0)
+  frame.Icon = frame:CreateTexture(nil, "ARTWORK", nil, 0)
   frame.Border = _G.CreateFrame("Frame", nil, frame)
   frame.Border:SetFrameLevel(parent:GetFrameLevel())
   frame.Cooldown = CreateCooldown(frame)
@@ -1305,13 +1305,13 @@ function Widget:CreateAuraFrameBarMode(parent)
   frame.Statusbar:SetFrameLevel(parent:GetFrameLevel())
   frame.Statusbar:SetMinMaxValues(0, 100)
 
-  frame.Background = frame.Statusbar:CreateTexture(nil, "BACKGROUND", 0)
+  frame.Background = frame.Statusbar:CreateTexture(nil, "BACKGROUND", nil, 0)
   frame.Background:SetAllPoints()
 
   frame.Highlight = _G.CreateFrame("Frame", nil, frame)
   frame.Highlight:SetFrameLevel(parent:GetFrameLevel())
 
-  frame.Icon = frame:CreateTexture(nil, "OVERLAY", 1)
+  frame.Icon = frame:CreateTexture(nil, "OVERLAY", nil, 1)
   frame.Stacks = frame.Statusbar:CreateFontString(nil, "OVERLAY")
 
   frame.LabelText = frame.Statusbar:CreateFontString(nil, "OVERLAY")
