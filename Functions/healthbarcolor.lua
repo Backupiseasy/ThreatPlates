@@ -26,8 +26,6 @@ local IsFriend
 local IsGuildmate
 local ShowQuestUnit
 
-local LibThreatClassic = Addon.LibThreatClassic
-
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
 -- List them here for Mikk's FindGlobals script
@@ -38,8 +36,6 @@ local _G =_G
 ---------------------------------------------------------------------------------------------------
 
 if Addon.CLASSIC then
-  UnitThreatSituation = function(...) return LibThreatClassic:UnitThreatSituation(...) end
-
   UnitGroupRolesAssigned = function(target_unit)
     return (GetPartyAssignment("MAINTANK", target_unit) and "TANK") or "NONE"
   end

@@ -349,14 +349,7 @@ function TidyPlatesThreat:OnInitialize()
   self:RegisterChatCommand("tptp", "ChatCommand")
 
   if Addon.CLASSIC then
-    local LibThreatClassic = Addon.LibThreatClassic
     local LibClassicCasterino = Addon.LibClassicCasterino
-
-    -- Register callbacks for threat library
-    LibThreatClassic.RegisterCallback(self, "Activate", Addon.UNIT_THREAT_LIST_UPDATE)
-    LibThreatClassic.RegisterCallback(self, "Deactivate", Addon.UNIT_THREAT_LIST_UPDATE)
-    LibThreatClassic.RegisterCallback(self, "ThreatUpdated", Addon.UNIT_THREAT_LIST_UPDATE)
-    LibThreatClassic:RequestActiveOnSolo(true)
 
     -- Register callsbacks for spellcasting library
     LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_START", Addon.UNIT_SPELLCAST_START)

@@ -66,6 +66,8 @@ local DETECTION_UNITS = {
   ["122984"] = true, -- Dazar'ai Colossus (Atal'Dazar)
   ["154459"] = true, -- Horde Vanguard
   ["151945"] = true, -- Scavenging Dunerunner
+  -- ["159425"] = true, -- Occult Shadowmender
+  -- ["161416"] = true, -- Aqir Shadowcrafter
 }
 
 ---------------------------------------------------------------------------------------------------

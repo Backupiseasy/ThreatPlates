@@ -29,7 +29,6 @@ Addon.LibAceConfigDialog = LibStub("AceConfigDialog-3.0")
 Addon.LibAceConfigRegistry = LibStub("AceConfigRegistry-3.0")
 
 if Addon.CLASSIC then
-	Addon.LibThreatClassic = LibStub:GetLibrary("LibThreatClassic2")
 	Addon.LibClassicCasterino = LibStub("LibClassicCasterino-ThreatPlates")
 	--Addon.LibClassicCasterino = LibStub("LibClassicCasterino")
 end
