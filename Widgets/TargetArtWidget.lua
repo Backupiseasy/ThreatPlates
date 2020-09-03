@@ -300,6 +300,9 @@ function Widget:UpdateSettings()
   UpdateTexture = UPDATE_TEXTURE_FUNCTIONS[Settings.theme]
   ShowBorder = (UpdateTexture == UpdateBorderTexture)
 
+  -- Update mouseover settings as they depend on target highlight being shown or not
+  Addon.Element_Mouseover_UpdateSettings()
+
   -- Update the widget if it was already created (not true for immediately after Reload UI or if it was never enabled
   -- in this since last Reload UI)
   if WidgetFrame then

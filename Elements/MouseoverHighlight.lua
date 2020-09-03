@@ -21,6 +21,14 @@ local OFFSET_HIGHLIGHT = 1
 local ART_PATH = ThreatPlates.Art
 
 ---------------------------------------------------------------------------------------------------
+-- Cached configuration settings
+---------------------------------------------------------------------------------------------------
+local TargetHighlightEnabledForStyle = {
+  etotem = false,
+  empty = false
+}
+
+------------------------------------------------------------------------------------------------------
 -- Element code
 ---------------------------------------------------------------------------------------------------
 
@@ -39,8 +47,8 @@ end
 
 function Addon:Element_Mouseover_Update(tp_frame)
   -- Don't show highlight for target units or if it's disabled
-  if tp_frame.unit.isTarget or not tp_frame.style.highlight.show then
-    -- frame.Highlight and frame.Highlight are alwways hidden by default, don't show them on targeted units
+  if (tp_frame.unit.isTarget and TargetHighlightEnabledForStyle[tp_frame.unit.style]) or not tp_frame.style.highlight.show then
+    -- frame.Highlight and frame.Highlight are always hidden by default, don't show them on targeted units
     -- but show the frame so that the OnUpdateHighlight function is called when the mouse curser leaves the
     -- unit
     tp_frame.visual.Highlight:Show()
@@ -61,6 +69,17 @@ end
 function Addon:Element_Mouseover_Configure(frame, style_highlight)
   -- TODO: Move this to Create as the texture is not changed in Threat Plates
   frame.NameHighlight:SetTexture(style_highlight.texture)
+end
+
+function Addon.Element_Mouseover_UpdateSettings()
+  local db = TidyPlatesThreat.db.profile
+  TargetHighlightEnabledForStyle["NameOnly"] = db.HeadlineView.ShowTargetHighlight
+  TargetHighlightEnabledForStyle["NameOnly-Unique"] = db.HeadlineView.ShowTargetHighlight
+  TargetHighlightEnabledForStyle["dps"] = db.targetWidget.ON
+  TargetHighlightEnabledForStyle["tank"] = db.targetWidget.ON
+  TargetHighlightEnabledForStyle["normal"] = db.targetWidget.ON
+  TargetHighlightEnabledForStyle["totem"] = db.targetWidget.ON
+  TargetHighlightEnabledForStyle["unique"] = db.targetWidget.ON
 end
 
 function Addon:Element_Mouseover_Create(parent)
