@@ -142,12 +142,6 @@ Addon.GLOW_TYPES = {
   AutoCast = L["Auto-Cast"],
 }
 
-Addon.CUSTOM_GLOW_FUNCTIONS = {
-  Button = { "ButtonGlow_Start", "ButtonGlow_Stop", 8 },
-  Pixel = { "PixelGlow_Start", "PixelGlow_Stop", 3 },
-  AutoCast = { "AutoCastGlow_Start", "AutoCastGlow_Stop", 4 },
-}
-
 Addon.CUSTOM_PLATES_GLOW_FRAMES = {
   None = L["None"],
   Healthbar = L["Healthbar"],

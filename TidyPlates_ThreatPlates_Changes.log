@@ -18,6 +18,7 @@
 * Fixed a bug where nameplates with a custom style were not updated after a settings change.
 * Fixed a bug with Name trigger for custom styles for nameplates where units with the character "." in their name could not be added.
 * Fixed a bug with mouseover highlight not shown on the current target unit when target highlight was disabled.
+* Fixed a bug where the the glow effect on custom styles for nameplates with Cast trigger was not shown [Comment #4675].
 * Reworked layering of all graphical elements as part of the castbar over healthbar feature integration.
 * Renamed filter modes for Auras widget to None, Allow, and Block.
 

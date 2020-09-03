@@ -19,6 +19,7 @@ local pairs = pairs
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
 local LibCustomGlow = Addon.LibCustomGlow
+local CUSTOM_GLOW_WRAPPER_FUNCTIONS = Addon.CUSTOM_GLOW_WRAPPER_FUNCTIONS
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -125,20 +126,23 @@ function Widget:OnUnitAdded(widget_frame, unit)
   end
 
   local anchor_frame
+  local style = widget_frame:GetParent().style
   local visual = widget_frame:GetParent().visual
-  if glow_frame == "Healthbar" and visual.healthbar:IsShown() then
+  if glow_frame == "Healthbar" and style.healthbar.show then
     anchor_frame = visual.healthbar.Border
-  elseif glow_frame == "Castbar" and visual.castbar:IsShown() then
+  elseif glow_frame == "Castbar" and style.castbar.show then
     anchor_frame = visual.castbar.Border
   elseif glow_frame == "Icon" and show_icon then
     anchor_frame = widget_frame
   end
 
   if anchor_frame then
+    widget_frame.Highlight:ClearAllPoints()
     widget_frame.Highlight:SetAllPoints(anchor_frame)
 
-    -- Highlighting: PixelGlow_Start(r,color,N,frequency,length,th,xOffset,yOffset,border,key,frameLevel)
-    LibCustomGlow[CUSTOM_GLOW_FUNCTIONS[glow_highlight.Type][1]](widget_frame.Highlight, (glow_highlight.CustomColor and glow_highlight.Color) or DefaultGlowColor)
+    local color = (glow_highlight.CustomColor and glow_highlight.Color) or DefaultGlowColor
+    local highlight_start = CUSTOM_GLOW_WRAPPER_FUNCTIONS[CUSTOM_GLOW_FUNCTIONS[glow_highlight.Type][1]]
+    highlight_start(widget_frame.Highlight, color, 0)
 
     widget_frame.Highlight:Show()
   else
