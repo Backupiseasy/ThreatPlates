@@ -139,6 +139,8 @@ local db
 local options
 local clipboard
 
+local CreateCustomNameplateEntry
+
 ---------------------------------------------------------------------------------------------------
 -- Importing and exporting settings and custom nameplates.
 ---------------------------------------------------------------------------------------------------
@@ -6343,16 +6345,54 @@ local function CustomPlateCheckAndUpdateEntry(info, val, index)
   end
 end
 
-local function CreateCustomNameplateEntry(index)
+local function UpdateCustomNameplateSlots()
+  local entry = options.args.Custom.args
+
+  -- Use pairs as iterater as the table is in a somewhat invalid format (non-iteratable with ipairs) as long as the
+  -- custom styles have not been migrated to V2
+  for index, custom_style in pairs(db.uniqueSettings) do
+    if type(index) == "number" and custom_style.Trigger.Name.Input ~= "<Enter name here>"  then
+      entry["#" .. index] = CreateCustomNameplateEntry(index)
+    end
+  end
+
+  UpdateSpecial()
+end
+
+CreateCustomNameplateEntry = function(index)
   local entry = {
     name = function() return CustomPlateGetSlotName(index) end,
     type = "group",
     order = 40 + index,
     args = {
-      --Spacer2 = GetSpacerEntry(90),
+      Duplicate = {
+        name = L["Duplicate"],
+        order = 1,
+        type = "execute",
+        func = function()
+          local duplicated_style = t.CopyTable(db.uniqueSettings[index])
+
+          -- Clean trigger settings as it does not make sense to duplicate them (would create a error message and prevent pasting)
+          local copy_trigger = duplicated_style.Trigger
+          duplicated_style.Trigger = t.CopyTable(t.DEFAULT_SETTINGS.profile.uniqueSettings["**"].Trigger)
+          duplicated_style.Trigger.Name.Input = ""
+          duplicated_style.Trigger.Type = copy_trigger.Type
+
+          -- Insert new style at position after the style that was duplicated
+          local statustable = Addon.LibAceConfigDialog:GetStatusTable(t.ADDON_NAME, { "Custom" })
+          local selected = statustable.groups.selected
+
+          -- If slot_no is nil, General Settings is selected currently.
+          local slot_no = (tonumber(selected:match("#(.*)")) or 0) + 1
+          table.insert(db.uniqueSettings, slot_no, duplicated_style)
+
+          UpdateCustomNameplateSlots()
+          Addon.LibAceConfigDialog:SelectGroup(t.ADDON_NAME, "Custom", "#" ..  slot_no)
+        end,
+      },
       Copy = {
         name = L["Copy"],
-        order = 1,
+        order = 2,
         type = "execute",
         func = function()
           clipboard = t.CopyTable(db.uniqueSettings[index])
@@ -6366,7 +6406,7 @@ local function CreateCustomNameplateEntry(index)
       },
       Paste = {
         name = L["Paste"],
-        order = 2,
+        order = 3,
         type = "execute",
         func = function()
           -- Check for valid content could be better
@@ -6386,7 +6426,7 @@ local function CreateCustomNameplateEntry(index)
       },
       Export = {
         name = L["Export"],
-        order = 3,
+        order = 4,
         type = "execute",
         func = function()
           local export_data = {
