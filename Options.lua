@@ -6564,117 +6564,109 @@ CreateCustomNameplateEntry = function(index)
         inline = false,
         order = 20,
         args = {
-          Enable = {
-            name = " ",
-            type = "group",
-            inline = true,
+          Disable = {
+            name = L["Never"],
+            order = 10,
+            type = "toggle",
+            set = function(info, val)
+              local trigger_type = db.uniqueSettings[index].Trigger.Type
+              local triggers = db.uniqueSettings[index].Trigger[trigger_type].AsArray
+
+              -- Update never before check for unique trigger, otherwise it would use the old Never value
+              db.uniqueSettings[index].Enable.Never = val
+
+              local check_ok, duplicate_triggers = CustomPlateCheckIfTriggerIsUnique(trigger_type, triggers, db.uniqueSettings[index])
+              if not check_ok then
+                StaticPopup_Show("TriggerAlreadyExistsDisablingIt", table.concat(duplicate_triggers, "; "))
+                db.uniqueSettings[index].Enable.Never = true
+              end
+
+              CustomPlateUpdateEntry(index)
+            end,
+            arg = { "uniqueSettings", index, "Enable", "Never" },
+          },
+          Spacer1 = GetSpacerEntry(15),
+          FriendlyUnits = {
+            name = L["Friendly Units"],
             order = 20,
-            args = {
-              Disable = {
-                name = L["Never"],
-                order = 10,
-                type = "toggle",
-                set = function(info, val)
-                  local trigger_type = db.uniqueSettings[index].Trigger.Type
-                  local triggers = db.uniqueSettings[index].Trigger[trigger_type].AsArray
-
-                  -- Update never before check for unique trigger, otherwise it would use the old Never value
-                  db.uniqueSettings[index].Enable.Never = val
-
-                  local check_ok, duplicate_triggers = CustomPlateCheckIfTriggerIsUnique(trigger_type, triggers, db.uniqueSettings[index])
-                  if not check_ok then
-                    StaticPopup_Show("TriggerAlreadyExistsDisablingIt", table.concat(duplicate_triggers, "; "))
-                    db.uniqueSettings[index].Enable.Never = true
-                  end
-
-                  CustomPlateUpdateEntry(index)
-                end,
-                arg = { "uniqueSettings", index, "Enable", "Never" },
-              },
-              Spacer1 = GetSpacerEntry(15),
-              FriendlyUnits = {
-                name = L["Friendly Units"],
-                order = 20,
-                type = "toggle",
-                desc = L["Enable this custom nameplate for friendly units."],
-                set = function(info, val)
-                  db.uniqueSettings[index].Enable.UnitReaction["FRIENDLY"] = val
-                  UpdateSpecial()
-                end,
-                get = function(info)
-                  return db.uniqueSettings[index].Enable.UnitReaction["FRIENDLY"]
-                end,
-              },
-              EnemyUnits = {
-                name = L["Enemy Units"],
-                order = 30,
-                type = "toggle",
-                desc = L["Enable this custom nameplate for neutral and hostile units."],
-                set = function(info, val)
-                  db.uniqueSettings[index].Enable.UnitReaction["HOSTILE"] = val
-                  db.uniqueSettings[index].Enable.UnitReaction["NEUTRAL"] = val
-                  UpdateSpecial()
-                end,
-                get = function(info)
-                  return db.uniqueSettings[index].Enable.UnitReaction["HOSTILE"]
-                end,
-              },
-              Spacer2 = GetSpacerEntry(35),
-              OutOfInstances = {
-                name = L["Out Of Instances"],
-                order = 40,
-                type = "toggle",
-                desc = L["Enable this custom nameplate out of instances (in the wider game world)."],
-                set = function(info, val)
-                  SetValuePlain(info, val);
-                  UpdateSpecial()
-                end,
-                arg = { "uniqueSettings", index, "Enable", "OutOfInstances" },
-              },
-              InInstances = {
-                name = L["In Instances"],
-                order = 50,
-                type = "toggle",
-                desc = L["Enable this custom nameplate in instances."],
-                set = function(info, val)
-                  SetValuePlain(info, val);
-                  UpdateSpecial()
-                end,
-                arg = { "uniqueSettings", index, "Enable", "InInstances" },
-              },
-              Spacer3 = GetSpacerEntry(55),
-              ZoneIDEnable = {
-                name = L["Instance IDs"],
-                order = 60,
-                type = "toggle",
-                set = function(info, val)
-                  SetValuePlain(info, val);
-                  UpdateSpecial()
-                end,
-                arg = { "uniqueSettings", index, "Enable", "InstanceIDs", "Enabled" },
-                disabled = function()
-                  return not db.uniqueSettings[index].Enable.InInstances
-                end,
-              },
-              ZoneIDInput = {
-                name = L["Instance IDs"],
-                type = "input",
-                order = 70,
-                width = "double",
-                desc = function()
-                  local instance_name, _, _, _, _, _, _, instance_id = GetInstanceInfo()
-                  return L["|cffFFD100Current Instance:|r\n"] .. instance_name .. ": " .. instance_id .. L["\n\nSupports multiple entries, separated by commas."]
-                end,
-                set = function(info, val)
-                  SetValuePlain(info, val);
-                  UpdateSpecial()
-                end,
-                arg = { "uniqueSettings", index, "Enable", "InstanceIDs", "IDs" },
-                disabled = function()
-                  return not db.uniqueSettings[index].Enable.InInstances or not db.uniqueSettings[index].Enable.InstanceIDs.Enabled
-                end,
-              },
-            },
+            type = "toggle",
+            desc = L["Enable this custom nameplate for friendly units."],
+            set = function(info, val)
+              db.uniqueSettings[index].Enable.UnitReaction["FRIENDLY"] = val
+              UpdateSpecial()
+            end,
+            get = function(info)
+              return db.uniqueSettings[index].Enable.UnitReaction["FRIENDLY"]
+            end,
+          },
+          EnemyUnits = {
+            name = L["Enemy Units"],
+            order = 30,
+            type = "toggle",
+            desc = L["Enable this custom nameplate for neutral and hostile units."],
+            set = function(info, val)
+              db.uniqueSettings[index].Enable.UnitReaction["HOSTILE"] = val
+              db.uniqueSettings[index].Enable.UnitReaction["NEUTRAL"] = val
+              UpdateSpecial()
+            end,
+            get = function(info)
+              return db.uniqueSettings[index].Enable.UnitReaction["HOSTILE"]
+            end,
+          },
+          Spacer2 = GetSpacerEntry(35),
+          OutOfInstances = {
+            name = L["Out Of Instances"],
+            order = 40,
+            type = "toggle",
+            desc = L["Enable this custom nameplate out of instances (in the wider game world)."],
+            set = function(info, val)
+              SetValuePlain(info, val);
+              UpdateSpecial()
+            end,
+            arg = { "uniqueSettings", index, "Enable", "OutOfInstances" },
+          },
+          InInstances = {
+            name = L["In Instances"],
+            order = 50,
+            type = "toggle",
+            desc = L["Enable this custom nameplate in instances."],
+            set = function(info, val)
+              SetValuePlain(info, val);
+              UpdateSpecial()
+            end,
+            arg = { "uniqueSettings", index, "Enable", "InInstances" },
+          },
+          Spacer3 = GetSpacerEntry(55),
+          ZoneIDEnable = {
+            name = L["Instance IDs"],
+            order = 60,
+            type = "toggle",
+            set = function(info, val)
+              SetValuePlain(info, val);
+              UpdateSpecial()
+            end,
+            arg = { "uniqueSettings", index, "Enable", "InstanceIDs", "Enabled" },
+            disabled = function()
+              return not db.uniqueSettings[index].Enable.InInstances
+            end,
+          },
+          ZoneIDInput = {
+            name = L["Instance IDs"],
+            type = "input",
+            order = 70,
+            width = "double",
+            desc = function()
+              local instance_name, _, _, _, _, _, _, instance_id = GetInstanceInfo()
+              return L["|cffFFD100Current Instance:|r\n"] .. instance_name .. ": " .. instance_id .. L["\n\nSupports multiple entries, separated by commas."]
+            end,
+            set = function(info, val)
+              SetValuePlain(info, val);
+              UpdateSpecial()
+            end,
+            arg = { "uniqueSettings", index, "Enable", "InstanceIDs", "IDs" },
+            disabled = function()
+              return not db.uniqueSettings[index].Enable.InInstances or not db.uniqueSettings[index].Enable.InstanceIDs.Enabled
+            end,
           },
         },
       },
