@@ -829,7 +829,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
         -- Layout
         Anchor = "LEFT",
         InsideAnchor = false,
-        HorizontalOffset = -2,
+        HorizontalOffset = -6,
         VerticalOffset = 0,
         Font = {
           Typeface = Addon.DEFAULT_FONT,
