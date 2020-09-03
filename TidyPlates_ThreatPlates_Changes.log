@@ -22,6 +22,7 @@
 * Fixed a bug where multiple, overlapping glow effects where shown on a custom style nameplate [Comment #4675].
 * Reworked layering of all graphical elements as part of the castbar over healthbar feature integration.
 * Renamed filter modes for Auras widget to None, Allow, and Block.
+* Upgrade integrated libraries (LibClassicCasterino rev. 33, LibClassicDurations v.1.64, LibDeflate v1.0.2, LibSharedMedia v.8.2.0-r113)
 
 ------------------------------------------------------
 9.2.4
