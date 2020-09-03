@@ -465,7 +465,8 @@ function Widget:Create(tp_frame)
 end
 
 function Widget:IsEnabled()
-  return TidyPlatesThreat.db.profile.questWidget.ON or TidyPlatesThreat.db.profile.questWidget.ShowInHeadlineView
+  local db = TidyPlatesThreat.db.profile.questWidget
+  return db.ON or db.ShowInHeadlineView
 end
 
 function Widget:OnEnable()

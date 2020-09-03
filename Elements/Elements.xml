@@ -3,4 +3,5 @@
     <Script file="Animations.lua"/>
     <Script file="MouseoverHighlight.lua"/>
     <Script file="Fonts.lua"/>
+    <Script file="Statusbar.lua"/>
 </Ui>

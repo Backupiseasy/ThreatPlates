@@ -11,10 +11,12 @@ local ceil, string_format = ceil, string.format
 -- WoW APIs
 local GetSpellTexture = GetSpellTexture
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
+local InCombatLockdown = InCombatLockdown
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
 local BackdropTemplate = Addon.BackdropTemplate
+local Font = Addon.Font
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -38,6 +40,11 @@ local ELITE_BACKDROP = {
     offset = 1.1,
   }
 }
+
+---------------------------------------------------------------------------------------------------
+-- Cached configuration settings
+---------------------------------------------------------------------------------------------------
+local SettingsTargetUnit
 
 ------------------------------------------------------------------------------------------------------------
 
@@ -129,20 +136,74 @@ local function SetEliteBorder(self, texture)
   --self.EliteBorder:SetBackdropBorderColor(1, 0.85, 0, 1)
 end
 
+local function UpdateLayoutHealthbar(self, db, style)
+  local healthbar_style, healthborder_style = style.healthbar, style.healthborder
+
+  SetHealthBarTexture(self, healthbar_style)
+  self:SetStatusBarBackdrop(healthbar_style.backdrop, healthborder_style.texture, healthborder_style.edgesize, healthborder_style.offset)
+  self:SetShown(healthborder_style.show)
+  SetEliteBorder(self, style.eliteborder.texture)
+
+  local tp_frame = self:GetParent()
+  local frame_level
+  if db.castbar.FrameOrder == "HealthbarOverCastbar" then
+    frame_level = tp_frame:GetFrameLevel() + 5
+  else
+    frame_level = tp_frame:GetFrameLevel() + 4
+  end
+  self:SetFrameLevel(frame_level)
+  self.EliteBorder:SetFrameLevel(frame_level)
+  self.Border:SetFrameLevel(frame_level - 1)
+  self.ThreatBorder:SetFrameLevel(frame_level - 1)
+
+  tp_frame.visual.textframe:SetFrameLevel(frame_level)
+
+  Font:UpdateText(self, self.TargetUnit, db.healthbar.TargetUnit)
+
+  local width, height = self:GetSize()
+  self.TargetUnit:SetSize(width, height)
+  self.TargetUnit:SetShown(self.TargetUnit:GetText() ~= nil)
+
+  SettingsTargetUnit = db.healthbar.TargetUnit
+end
+
+local function ShowTargetUnit(self, target_of_target_name, class_name)
+  if SettingsTargetUnit.ShowOnlyInCombat and not InCombatLockdown() then
+    self:HideTargetUnit()
+    return
+  end
+
+  local target_of_target = self.TargetUnit
+  if target_of_target_name then
+    target_of_target:SetText("|cffffffff[|r " .. target_of_target_name .. " |cffffffff]|r")
+    target_of_target.ClassName = class_name
+    target_of_target:Show()
+  end
+
+  -- Update the color if the element is shown
+  if target_of_target:IsShown() then
+    local color
+    if SettingsTargetUnit.UseClassColor and target_of_target.ClassName then
+      color = TidyPlatesThreat.db.profile.Colors.Classes[target_of_target.ClassName]
+    else
+      color = SettingsTargetUnit.CustomColor
+    end
+    target_of_target:SetTextColor(color.r, color.g, color.b)
+  end
+end
+
+local function HideTargetUnit(self)
+  self.TargetUnit:SetText(nil)
+  self.TargetUnit:Hide()
+end
+
 function Addon:CreateHealthbar(parent)
 	local frame = _G.CreateFrame("StatusBar", nil, parent)
-  --frame:Hide()
 
-  frame:SetFrameLevel(parent:GetFrameLevel() + 5)
-
+  frame.Background = frame:CreateTexture(nil, "ARTWORK")
   frame.Border = _G.CreateFrame("Frame", nil, frame, BackdropTemplate)
-  frame.Background = frame:CreateTexture(nil, "BACKGROUND")
   frame.EliteBorder = _G.CreateFrame("Frame", nil, frame, BackdropTemplate)
   frame.ThreatBorder = _G.CreateFrame("Frame", nil, frame, BackdropTemplate)
-
-  frame.Border:SetFrameLevel(frame:GetFrameLevel())
-  frame.EliteBorder:SetFrameLevel(frame:GetFrameLevel() + 1)
-  frame.ThreatBorder:SetFrameLevel(frame:GetFrameLevel())
 
   frame.ThreatBorder:SetPoint("TOPLEFT", frame, "TOPLEFT", - OFFSET_THREAT, OFFSET_THREAT)
   frame.ThreatBorder:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", OFFSET_THREAT, - OFFSET_THREAT)
@@ -154,17 +215,16 @@ function Addon:CreateHealthbar(parent)
   frame.ThreatBorder:SetBackdropBorderColor(0, 0, 0, 0) -- Transparent color as default
 
 	frame.SetAllColors = SetAllColors
-  frame.SetTexCoord = function() end
-	frame.SetBackdropTexCoord = function() end
-	frame.SetHealthBarTexture = SetHealthBarTexture
   frame.SetStatusBarBackdrop = SetStatusBarBackdropHealthbar
-  frame.SetEliteBorder = SetEliteBorder
+  frame.UpdateLayout = UpdateLayoutHealthbar
+  frame.ShowTargetUnit = ShowTargetUnit
+  frame.HideTargetUnit = HideTargetUnit
 
-  local healabsorb_bar = frame:CreateTexture(nil, "OVERLAY", 0)
+  local healabsorb_bar = frame:CreateTexture(nil, "ARTWORK", nil, 2)
   healabsorb_bar:SetVertexColor(0, 0, 0)
   healabsorb_bar:SetAlpha(0.5)
 
-  local healabsorb_glow = frame:CreateTexture(nil, "OVERLAY", 7)
+  local healabsorb_glow = frame:CreateTexture(nil, "ARTWORK", nil, 4)
   healabsorb_glow:SetTexture([[Interface\RaidFrame\Absorb-Overabsorb]])
   healabsorb_glow:SetBlendMode("ADD")
   healabsorb_glow:SetWidth(8)
@@ -172,18 +232,27 @@ function Addon:CreateHealthbar(parent)
   healabsorb_glow:SetPoint("TOPRIGHT", frame, "TOPLEFT", 2, 0)
   healabsorb_glow:Hide()
 
-  frame.HealAbsorbLeftShadow = frame:CreateTexture(nil, "OVERLAY", 4)
+  frame.HealAbsorbLeftShadow = frame:CreateTexture(nil, "ARTWORK", nil, 3)
   frame.HealAbsorbLeftShadow:SetTexture([[Interface\RaidFrame\Absorb-Edge]])
-  frame.HealAbsorbRightShadow = frame:CreateTexture(nil, "OVERLAY", 4)
+  frame.HealAbsorbRightShadow = frame:CreateTexture(nil, "ARTWORK", nil, 3)
   frame.HealAbsorbRightShadow:SetTexture([[Interface\RaidFrame\Absorb-Edge]])
   frame.HealAbsorbRightShadow:SetTexCoord(1, 0, 0, 1) -- reverse texture (right to left)
 
   frame.HealAbsorb = healabsorb_bar
   frame.HealAbsorbGlow = healabsorb_glow
 
+  frame.TargetUnit = frame:CreateFontString(nil, "OVERLAY")
+  frame.TargetUnit:SetFont("Fonts\\FRIZQT__.TTF", 11)
+
 	--frame:SetScript("OnSizeChanged", OnSizeChanged)
 	return frame
 end
+
+--local function SetAllColorsCastbar(self, rBar, gBar, bBar, aBar, rBackdrop, gBackdrop, bBackdrop, aBackdrop)
+--  --SetAllColors(self, rBar, gBar, bBar, aBar, rBackdrop, gBackdrop, bBackdrop, aBackdrop)
+--  self:SetStatusBarColor(rBar or 1, gBar or 1, bBar or 1, aBar or 1)
+--  self.Background:SetVertexColor(rBackdrop or 1, gBackdrop or 1, bBackdrop or 1, aBackdrop or 1)
+--end
 
 local function SetFormat(self, show)
   local db = TidyPlatesThreat.db.profile.settings
@@ -220,53 +289,73 @@ local function SetStatusBarBackdropCastbar(self, backdrop_texture, edge_texture,
   self.InterruptBorder:SetBackdropBorderColor(1, 0, 0, 1)
 end
 
+local function UpdateLayoutCastbar(self, db, style)
+  local castbar_style, castborder_style = style.castbar, style.castborder
+
+  self:SetStatusBarTexture(castbar_style.texture or EMPTY_TEXTURE)
+  self:SetStatusBarBackdrop(castbar_style.backdrop, castborder_style.texture, castborder_style.edgesize, castborder_style.offset)
+  self.Border:SetShown(castborder_style.show)
+
+  local frame_level
+  if db.castbar.FrameOrder == "HealthbarOverCastbar" then
+    frame_level = self:GetParent():GetFrameLevel() + 2
+  else
+    frame_level = self:GetParent():GetFrameLevel() + 5
+  end
+  self:SetFrameLevel(frame_level)
+  self.Border:SetFrameLevel(frame_level)
+  self.InterruptBorder:SetFrameLevel(frame_level)
+
+  Font:UpdateText(self, self.CastTarget, db.castbar.CastTarget)
+
+  local width, height = self:GetSize()
+  self.CastTarget:SetSize(width, height)
+  self.CastTarget:SetShown(db.castbar.CastTarget.Show)
+end
+
 function Addon:CreateCastbar(parent)
   local frame = _G.CreateFrame("StatusBar", nil, parent)
   frame:Hide()
 
-  frame:SetFrameLevel(parent:GetFrameLevel() + 3)
-
   frame.Border = _G.CreateFrame("Frame", nil, frame, BackdropTemplate)
-  frame.Background = frame:CreateTexture(nil, "BACKGROUND")
+  frame.Background = frame:CreateTexture(nil, "ARTWORK")
   frame.InterruptBorder = _G.CreateFrame("Frame", nil, frame, BackdropTemplate)
-  frame.Overlay = _G.CreateFrame("Frame", nil, frame)
 
-  frame.Border:SetFrameLevel(frame:GetFrameLevel())
-  -- frame.InterruptBorder:SetFrameLevel(frame:GetFrameLevel())
-  -- frame.Overlay:SetFrameLevel(parent:GetFrameLevel() + 1)
+  local overlay = frame:CreateTexture(nil, "ARTWORK", nil, 2)
+  overlay:SetTexture(ART_PATH .. "Striped_Texture")
+  overlay:SetAllPoints(frame)
+  overlay:SetVertexColor(1, 0, 0, 1)
+  frame.InterruptOverlay = overlay
 
-  frame.InterruptOverlay = frame.Overlay:CreateTexture(nil, "BORDER", 0)
-  frame.InterruptShield = frame.Overlay:CreateTexture(nil, "ARTWORK", -8)
-
-  frame.InterruptOverlay:SetTexture(ART_PATH .. "Striped_Texture")
-  frame.InterruptOverlay:SetAllPoints(frame)
-  frame.InterruptOverlay:SetVertexColor(1, 0, 0, 1)
-
+  local shield = frame:CreateTexture(nil, "OVERLAY", nil, 0)
   --frame.InterruptShield:SetAtlas("nameplates-InterruptShield", true)
-  frame.InterruptShield:SetTexture(ART_PATH .. "Interrupt_Shield")
-  frame.InterruptShield:SetPoint("CENTER", frame, "LEFT")
+  shield:SetTexture(ART_PATH .. "Interrupt_Shield")
+  shield:SetPoint("CENTER", frame, "LEFT")
+  frame.InterruptShield = shield
 
-  frame.SetAllColors = SetAllColors
-  frame.SetTexCoord = function() end
-  frame.SetBackdropTexCoord = function() end
-  frame.SetStatusBarBackdrop = SetStatusBarBackdropCastbar
-  frame.SetEliteBorder = SetEliteBorder
-  frame.SetFormat = SetFormat
-
-  frame:SetStatusBarColor(1, 0.8, 0)
-
-  local spark = frame:CreateTexture(nil, "OVERLAY", 7)
+  local spark = frame:CreateTexture(nil, "ARTWORK", nil, 1)
   spark:SetTexture(ART_PATH .. "Spark")
   spark:SetBlendMode("ADD")
   frame.Spark = spark
 
-  -- Remaining cast time
-  frame.casttime = frame.Overlay:CreateFontString(nil, "OVERLAY")
-  frame.casttime:SetFont("Fonts\\FRIZQT__.TTF", 11)
-  frame.casttime:SetAllPoints(frame)
-  frame.casttime:SetJustifyH("RIGHT")
+  frame:SetStatusBarColor(1, 0.8, 0)
 
---  frame.Flash = frame:CreateAnimationGroup()
+  -- Remaining cast time
+  local casttime = frame:CreateFontString(nil, "ARTWORK")
+  casttime:SetFont("Fonts\\FRIZQT__.TTF", 11)
+  casttime:SetAllPoints(frame)
+  casttime:SetJustifyH("RIGHT")
+  frame.casttime = casttime
+
+  frame.CastTarget = frame:CreateFontString(nil, "ARTWORK")
+  frame.CastTarget:SetFont("Fonts\\FRIZQT__.TTF", 11)
+
+  frame.SetAllColors = SetAllColors
+  frame.SetStatusBarBackdrop = SetStatusBarBackdropCastbar
+  frame.SetFormat = SetFormat
+  frame.UpdateLayout = UpdateLayoutCastbar
+
+  --  frame.Flash = frame:CreateAnimationGroup()
 --  local anim = frame.Flash:CreateAnimation("Alpha")
 --  anim:SetOrder(1)
 --  anim:SetFromAlpha(1)
@@ -329,6 +418,7 @@ function Addon:ConfigCastbar()
             visual.spellicon:SetTexture(GetSpellTexture(116))
             visual.spelltext:SetText("Frostbolt")
             self.casttime:SetText(3.5)
+            self.CastTarget:SetText("Temple Guard")
 
             self.Border:SetShown(plate.TPFrame.style.castborder.show)
             self:SetFormat(plate.TPFrame.style.castnostop.show)
@@ -340,6 +430,7 @@ function Addon:ConfigCastbar()
             visual.spelltext:SetShown(plate.TPFrame.style.spelltext.show)
             visual.castbar.casttime:SetShown(db.castbar.ShowCastTime)
             visual.spellicon:SetShown(plate.TPFrame.style.spellicon.show)
+            self.CastTarget:SetShown(db.castbar.CastTarget.Show)
             self:Show()
           else
             self:SetValue(0) -- don't use self:_Hide() here, otherwise OnUpdate will never be called again
@@ -351,6 +442,7 @@ function Addon:ConfigCastbar()
             visual.spelltext:Hide()
             visual.castbar.casttime:Hide()
             visual.spellicon:Hide()
+            self.CastTarget:Hide()
           end
         end)
 

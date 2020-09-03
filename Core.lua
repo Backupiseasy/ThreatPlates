@@ -72,7 +72,7 @@ local EVENTS = {
 
   "PLAYER_ENTERING_WORLD",
   "PLAYER_LOGIN",
-  "PLAYER_LOGOUT",
+  --"PLAYER_LOGOUT",
   "PLAYER_REGEN_ENABLED",
   "PLAYER_REGEN_DISABLED",
 
@@ -525,6 +525,9 @@ function TidyPlatesThreat:PLAYER_ENTERING_WORLD()
     Addon.CVars:RestoreFromProfile("nameplateGlobalScale")
   end
 
+  -- Update custom styles for the current instance
+  Addon.UpdateStylesForCurrentInstance()
+
   -- Adjust clickable area if we are in an instance. Otherwise the scaling of friendly nameplates' healthbars will
   -- be bugged
   Addon:SetBaseNamePlateSize()
@@ -534,16 +537,13 @@ end
 --end
 
 function TidyPlatesThreat:PLAYER_LOGIN(...)
-  self.db.profile.cache = {}
-
   if self.db.char.welcome then
     t.Print(L["|cff89f559Threat Plates:|r Welcome back |cff"]..t.HCC[Addon.PlayerClass]..UnitName("player").."|r!!")
   end
 end
 
-function TidyPlatesThreat:PLAYER_LOGOUT(...)
-  self.db.profile.cache = {}
-end
+--function TidyPlatesThreat:PLAYER_LOGOUT(...)
+--end
 
 -- Fires when the player leaves combat status
 -- Syncs addon settings with game settings in case changes weren't possible during startup, reload

@@ -56,9 +56,16 @@ local DETECTION_AURAS = {
 }
 
 local DETECTION_UNITS = {
+  -- Legion
+  ["109229"] = true, -- Nightfallen Construct (Suramar)
+  ["111354"] = true, -- Taintheart Befouler
+  ["111528"] = true, -- Deathroot Ancient
+  -- Battle for Azeroth
   ["148483"] = true, -- Ancestral Avenger (Battle of Dazar'alor)
   ["148488"] = true, -- Unliving Augur (Battle of Dazar'alor)
   ["122984"] = true, -- Dazar'ai Colossus (Atal'Dazar)
+  ["154459"] = true, -- Horde Vanguard
+  ["151945"] = true, -- Scavenging Dunerunner
 }
 
 ---------------------------------------------------------------------------------------------------
@@ -87,7 +94,8 @@ function Widget:Create(tp_frame)
 end
 
 function Widget:IsEnabled()
-  return TidyPlatesThreat.db.profile.stealthWidget.ON or TidyPlatesThreat.db.profile.stealthWidget.ShowInHeadlineView
+  local db = TidyPlatesThreat.db.profile.stealthWidget
+  return db.ON or db.ShowInHeadlineView
 end
 
 function Widget:EnabledForStyle(style, unit)
@@ -103,12 +111,12 @@ end
 function Widget:OnUnitAdded(widget_frame, unit)
   local name, spell_id
 
-  local _, _,  _, _, _, npc_id, _ = strsplit("-", unit.guid)
-  if DETECTION_UNITS[npc_id] then
-    name = npc_id
+  if DETECTION_UNITS[unit.NPCID] then
+    name = unit.NPCID
   else
     local DETECTION_AURAS, UnitBuff = DETECTION_AURAS, UnitBuff
     local unitid = unit.unitid
+    local name, _
     for i = 1, 40 do
       name, _, _, _, _, _, _, _, _, spell_id = UnitBuff(unitid, i)
       if not name or DETECTION_AURAS[spell_id] then

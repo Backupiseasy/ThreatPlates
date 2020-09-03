@@ -422,7 +422,8 @@ end
 ---------------------------------------------------------------------------------------------------
 
 function Widget:IsEnabled()
-  local enabled = self.db.ON or self.db.ShowInHeadlineView
+  local db = TidyPlatesThreat.db.profile.ComboPoints
+  local enabled = db.ON or db.ShowInHeadlineView
 
   if enabled and not Addon.CLASSIC then
     -- Register ACTIVE_TALENT_GROUP_CHANGED here otherwise it won't be registerd when an spec is active that does not have combo points.
@@ -579,14 +580,14 @@ function Widget:UpdateLayout()
   local show_rune_cooldown = player_class == "DEATHKNIGHT" and ShowRuneCooldown
 
   for i = 1, self.UnitPowerMax do
-    widget_frame.ComboPoints[i] = widget_frame.ComboPoints[i] or widget_frame:CreateTexture(nil, "BACKGROUND")
+    widget_frame.ComboPoints[i] = widget_frame.ComboPoints[i] or widget_frame:CreateTexture(nil, "ARTWORK", nil, 0)
     self:UpdateTexture(widget_frame.ComboPoints[i], self.Texture, i)
 
-    widget_frame.ComboPointsOff[i] = widget_frame.ComboPointsOff[i] or widget_frame:CreateTexture(nil, "ARTWORK")
+    widget_frame.ComboPointsOff[i] = widget_frame.ComboPointsOff[i] or widget_frame:CreateTexture(nil, "ARTWORK", nil, 1)
     self:UpdateTexture(widget_frame.ComboPointsOff[i], self.TextureOff, i)
 
     if show_rune_cooldown then
-      local time_text = widget_frame.ComboPointsOff[i].Time or widget_frame:CreateFontString(nil, "ARTWORK", 0)
+      local time_text = widget_frame.ComboPointsOff[i].Time or widget_frame:CreateFontString(nil, "ARTWORK")
       widget_frame.ComboPointsOff[i].Time = time_text
 
       Font:UpdateText(widget_frame.ComboPointsOff[i], time_text, db.RuneCooldown)

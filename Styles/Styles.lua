@@ -6,7 +6,7 @@ local ThreatPlates = Addon.ThreatPlates
 ---------------------------------------------------------------------------------------------------
 
 -- WoW APIs
-local InCombatLockdown = InCombatLockdown
+local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
 local UnitPlayerControlled, UnitIsUnit = UnitPlayerControlled, UnitIsUnit
 local UnitIsOtherPlayersPet = UnitIsOtherPlayersPet
 local UnitIsBattlePet = UnitIsBattlePet
@@ -18,6 +18,7 @@ local TOTEMS = Addon.TOTEMS
 local GetUnitVisibility = ThreatPlates.GetUnitVisibility
 local NameTriggers, AuraTriggers, CastTriggers = Addon.Cache.CustomPlateTriggers.Name, Addon.Cache.CustomPlateTriggers.Aura, Addon.Cache.CustomPlateTriggers.Cast
 local NameWildcardTriggers, TriggerWildcardTests = Addon.Cache.CustomPlateTriggers.NameWildcard, Addon.Cache.TriggerWildcardTests
+local CustomStylesForAllInstances, CustomStylesForCurrentInstance = Addon.Cache.Styles.ForAllInstances, Addon.Cache.Styles.ForCurrentInstance
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -186,6 +187,14 @@ function Addon:GetThreatStyle(unit)
   return "normal"
 end
 
+local function GetStyleForPlate(custom_style)
+  -- If a name trigger style is found with useStyle == false, that means that it's active, but only the icon will be shown.
+  if custom_style.useStyle then
+    return (custom_style.showNameplate and "unique") or (custom_style.ShowHeadlineView and "NameOnly-Unique") or "etotem"
+  end
+  --return nil
+end
+
 -- Check if a unit is a totem or a custom nameplates (e.g., after UNIT_NAME_UPDATE)
 -- Depends on:
 --   * unit.name
@@ -197,26 +206,41 @@ function Addon.UnitStyle_NameDependent(unit)
   local totem_settings
   local unique_settings = NameTriggers[unit.name]
 
-  if unique_settings and unique_settings.useStyle and unique_settings.Enable.UnitReaction[unit.reaction] then
-    plate_style = (unique_settings.showNameplate and "unique") or (unique_settings.ShowHeadlineView and "NameOnly-Unique") or "etotem"
+  if unique_settings and unique_settings.Enable.UnitReaction[unit.reaction] then
+    plate_style = GetStyleForPlate(unique_settings)
   elseif Addon.ActiveWildcardTriggers and unit.type == "NPC" then
-    local unit_test = TriggerWildcardTests[unit.name]
+    local cached_custom_style = TriggerWildcardTests[unit.name]
 
-    if unit_test == nil then
+    if cached_custom_style == nil then
+      cached_custom_style = false
+
+      local trigger
       for i = 1, #NameWildcardTriggers do
-        local trigger = NameWildcardTriggers[i]
+        trigger = NameWildcardTriggers[i]
         --print ("Name Wildcard: ", unit.name, "=>", trigger[1], unit.name:find(trigger[1]))
         if unit.name:find(trigger[1]) then
-          unique_settings = trigger[2]
-          plate_style = (unique_settings.showNameplate and "unique") or (unique_settings.ShowHeadlineView and "NameOnly-Unique") or "etotem"
-          break
+
+          -- Static checks (based on not changing criterien (like unit type).
+          if trigger[2].Enable.UnitReaction[unit.reaction] then
+            unique_settings = trigger[2]
+            plate_style = GetStyleForPlate(unique_settings)
+
+            cached_custom_style = {
+              Style = plate_style,
+              CustomStyle = unique_settings
+            }
+
+            -- Breaking here without plate_style being set means that only the icon part will be used from the custom style
+            break
+          end
         end
       end
 
-      TriggerWildcardTests[unit.name] = (plate_style and { plate_style, unique_settings }) or false
-    elseif unit_test ~= false then
-      plate_style = unit_test[1]
-      unique_settings = unit_test[2]
+      -- Add custom style, if one was found, or false if there is no custom style for this unit
+      TriggerWildcardTests[unit.name] = cached_custom_style
+    elseif cached_custom_style ~= false then
+      unique_settings = cached_custom_style.CustomStyle
+      plate_style = cached_custom_style.Style
     end
   end
 
@@ -232,6 +256,11 @@ function Addon.UnitStyle_NameDependent(unit)
       end
     end
   end
+
+  -- Conditions:
+  --   * unique_setting == nil: No custom style found
+  --   * unique_setting ~= nil: Custom style found, active
+  --   * plate_style == nil: Appearance part of style will not be used, only icon will be shown (if unique_setting ~= nil)
 
   -- Set these values to nil if not custom nameplate or totem
   unit.CustomPlateSettings = unique_settings
@@ -281,19 +310,6 @@ function Addon.UnitStyle_CastDependent(unit, spell_id, spell_name)
   return plate_style
 end
 
--- Depends on:
---   * unit.reaction
---   * unit.name
---   * unit.type
---   * unit.classification
---   * unit.isBoss, isRare, isElite, isMini
---   * unit.isTapped
---   * UnitReaction
---   * UnitThreatSituation
---   * UnitIsTapDenied
---   * UnitIsOtherPlayersPet
---   * UnitPlayerControlled
---   ...
 function Addon:SetStyle(unit)
   local show, headline_view = ShowUnit(unit)
 
@@ -311,6 +327,24 @@ function Addon:SetStyle(unit)
     unit.CustomPlateSettings = unit.CustomPlateSettingsAura
   else
     style = UnitStyle_NameDependent(unit) or (headline_view and "NameOnly")
+  end
+
+  -- Dynamic enable checks for custom styles
+  -- Only check it once if custom style is used for multiple mobs
+  -- only check it once when entering a dungeon, not on every style change
+  -- Array by instance ID and all enabled styles?
+  local custom_style = unit.CustomPlateSettings
+  if custom_style then
+    if IsInInstance() then
+      if not CustomStylesForAllInstances[custom_style] and not CustomStylesForCurrentInstance[custom_style] then
+      -- Without cache: if not custom_style.Enable.Instances or (custom_style.Enable.InstanceIDs.Enable and not CustomStylesForCurrentInstance[custom_style]) then
+        style = nil
+        unit.CustomPlateSettings = nil
+      end
+    elseif not custom_style.Enable.OutOfInstances then
+      style = nil
+      unit.CustomPlateSettings = nil
+    end
   end
 
   --if not style and unit.reaction ~= "FRIENDLY" then

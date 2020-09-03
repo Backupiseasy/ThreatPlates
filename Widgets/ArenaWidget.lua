@@ -82,7 +82,7 @@ function Widget:Create(tp_frame)
   widget_frame.Icon:SetAllPoints(widget_frame)
   widget_frame.Icon:SetTexture(ICON_TEXTURE)
 
-  widget_frame.NumText = widget_frame:CreateFontString(nil, "ARTWORK", 0)
+  widget_frame.NumText = widget_frame:CreateFontString(nil, "ARTWORK")
 
   self:UpdateLayout(widget_frame)
   --------------------------------------
@@ -161,18 +161,4 @@ end
 
 function Widget:UpdateSettings()
   Settings = TidyPlatesThreat.db.profile.arenaWidget
-
-  for _, tp_frame in pairs(Addon.PlatesCreated) do
-    local widget_frame = tp_frame.widgets.Arena
-
-    -- widget_frame could be nil if the widget as disabled and is enabled as part of a profile switch
-    -- For these frames, UpdateAuraWidgetLayout will be called anyway when the widget is initalized
-    -- (which happens after the settings update)
-    if widget_frame then
-      self:UpdateLayout(widget_frame)
-      if widget_frame.Active then -- equals: plate is visible and widget is active, i.e., show currently
-        self:OnUnitAdded(widget_frame, widget_frame.unit)
-      end
-    end
-  end
 end

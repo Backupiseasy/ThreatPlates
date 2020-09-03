@@ -79,7 +79,7 @@ function Addon:Element_Mouseover_Create(parent)
   })
   frame.Highlight:SetBackdropBorderColor(1, 1, 1, 1)
 
-  frame.HighlightTexture = frame.Highlight:CreateTexture(nil, "ARTWORK", 0)
+  frame.HighlightTexture = frame.Highlight:CreateTexture(nil, "ARTWORK", nil, 0)
   frame.HighlightTexture:SetTexture(ART_PATH .. "TP_HealthBar_Highlight")
   frame.HighlightTexture:SetBlendMode("ADD")
   frame.HighlightTexture:SetAllPoints(healthbar)

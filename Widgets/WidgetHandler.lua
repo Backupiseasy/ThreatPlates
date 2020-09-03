@@ -219,11 +219,8 @@ end
 function WidgetHandler:InitializeWidget(widget_name)
   local widget = self.Widgets[widget_name]
 
-  if widget.UpdateSettings then
-    widget:UpdateSettings()
-  end
-
   if widget:IsEnabled() then
+    self:UpdateSettings(widget_name)
     self:EnableWidget(widget_name)
   else
     self:DisableWidget(widget_name)
@@ -237,18 +234,17 @@ function WidgetHandler:InitializeAllWidgets()
 end
 
 function WidgetHandler:EnableWidget(widget_name)
-  -- Enable widgets only once
-  if self.EnabledTargetWidgets[widget_name] or self.EnabledWidgets[widget_name] then
-    return
-  end
-
   local widget = self.Widgets[widget_name]
   if widget.TargetOnly then
-    self.EnabledTargetWidgets[widget_name] = widget
-    widget:Create()
+    if not self.EnabledTargetWidgets[widget_name] then
+      self.EnabledTargetWidgets[widget_name] = widget
+      widget:Create()
+    end
   elseif widget.FocusOnly then
-    self.EnabledFocusWidget = widget
-    widget:Create()
+    if not self.EnabledFocusWidget then
+      self.EnabledFocusWidget = widget
+      widget:Create()
+    end
   else
     self.EnabledWidgets[widget_name] = widget
 
@@ -284,12 +280,13 @@ function WidgetHandler:EnableWidget(widget_name)
 end
 
 function WidgetHandler:DisableWidget(widget_name)
-  -- Disable widgets only once
-  if not (self.EnabledTargetWidgets[widget_name] or self.EnabledWidgets[widget_name]) then
+  local widget = self.Widgets[widget_name]
+
+  -- Disable widgets only if they are enabled
+  if not (self.EnabledTargetWidgets[widget_name] or self.EnabledWidgets[widget_name] or self.EnabledFocusWidget == widget) then
     return
   end
 
-  local widget = self.Widgets[widget_name]
   if widget.TargetOnly then
     self.EnabledTargetWidgets[widget_name] = nil
 
@@ -307,8 +304,11 @@ function WidgetHandler:DisableWidget(widget_name)
       self.EnabledWidgets[widget_name] = nil
 
       widget:OnDisable()
-      for plate, _ in pairs(Addon.PlatesVisible) do
-        plate.TPFrame.widgets[widget_name]:Hide()
+
+      for _, tp_frame in pairs(Addon.PlatesCreated) do
+        local widget_frame = tp_frame.widgets[widget_name]
+        widget_frame.Active = false
+        widget_frame:Hide()
       end
     end
   end
@@ -331,7 +331,9 @@ function WidgetHandler:OnUnitAdded(tp_frame, unit)
     for _, widget in pairs(self.EnabledTargetWidgets) do
       widget:OnTargetUnitAdded(tp_frame, unit)
     end
-  elseif unit.IsFocus and self.EnabledFocusWidget then
+  end
+
+  if unit.IsFocus and self.EnabledFocusWidget then
     self.EnabledFocusWidget:OnFocusUnitAdded(tp_frame, unit)
   end
 
@@ -371,7 +373,9 @@ function WidgetHandler:OnUnitRemoved(tp_frame, unit)
     for _, widget in pairs(self.EnabledTargetWidgets) do
       widget:OnTargetUnitRemoved()
     end
-  elseif unit.IsFocus and self.EnabledFocusWidget then
+  end
+
+  if unit.IsFocus and self.EnabledFocusWidget then
     self.EnabledFocusWidget:OnFocusUnitRemoved()
   end
 
@@ -382,7 +386,7 @@ function WidgetHandler:OnUnitRemoved(tp_frame, unit)
     widget_frame:Hide()
 
     if widget.OnUnitRemoved then
-      widget:OnUnitRemoved(widget_frame)
+      widget:OnUnitRemoved(widget_frame, unit)
     end
   end
 end
@@ -390,7 +394,33 @@ end
 function WidgetHandler:UpdateSettings(widget_name)
   local widget = self.Widgets[widget_name]
 
-  widget:UpdateSettings()
+  if widget.UpdateSettings then
+    widget:UpdateSettings()
+  end
+
+  if not (widget.TargetOnly or widget.FocusOnly) then
+    self:UpdateLayoutOfAllPlates(widget)
+  end
+end
+
+function WidgetHandler:UpdateLayoutOfAllPlates(widget)
+  for _, tp_frame in pairs(Addon.PlatesCreated) do
+    local widget_frame = tp_frame.widgets[widget.Name]
+
+    -- widget_frame could be nil if the widget as disabled and is enabled as part of a profile switch
+    -- For these frames, UpdateAuraWidgetLayout will be called anyway when the widget is initalized
+    -- (which happens after the settings update)
+    if widget_frame then
+      if widget.UpdateLayout then
+        widget:UpdateLayout(widget_frame)
+      end
+
+      -- plate is visible and widget is active, i.e., shown currently
+      if tp_frame.Active and widget_frame.Active then
+        widget:OnUnitAdded(widget_frame, widget_frame.unit)
+      end
+    end
+  end
 end
 
 --function Addon:WidgetsOnUpdate(tp_frame, unit)

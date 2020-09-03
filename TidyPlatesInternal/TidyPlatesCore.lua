@@ -12,7 +12,7 @@ local max, gsub, tonumber = math.max, string.gsub, tonumber
 local select, pairs, tostring  = select, pairs, tostring 			    -- Local function copy
 
 -- WoW APIs
-local wipe = wipe
+local wipe, strsplit = wipe, strsplit
 local WorldFrame, UIParent, INTERRUPTED = WorldFrame, UIParent, INTERRUPTED
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local UnitName, UnitIsUnit, UnitReaction, UnitExists = UnitName, UnitIsUnit, UnitReaction, UnitExists
@@ -118,6 +118,7 @@ local CVAR_NameplateOccludedAlphaMult
 local SettingsEnabledFading
 local SettingsOccludedAlpha, SettingsEnabledOccludedAlpha
 local SettingsShowEnemyBlizzardNameplates, SettingsShowFriendlyBlizzardNameplates
+local SettingsTargetUnitHide, SettingsShowOnlyForTarget
 
 -- External references to internal data
 Addon.PlatesCreated = PlatesCreated
@@ -154,6 +155,7 @@ local OnUpdateCasting, OnStartCasting, OnStopCasting, OnUpdateCastMidway
 -- Event Functions
 local OnNewNameplate, OnShowNameplate, OnUpdateNameplate, OnResetNameplate
 local OnHealthUpdate, ProcessUnitChanges
+local UNIT_TARGET
 
 -- Main Loop
 local OnUpdate
@@ -235,9 +237,7 @@ do
     local textframe = _G.CreateFrame("Frame", nil, extended)
 
 		textframe:SetAllPoints()
-    textframe:SetFrameLevel(extended:GetFrameLevel() + 6)
 
-    --extended.widgetParent = widgetParent
 		visual.healthbar = healthbar
 		visual.castbar = castbar
     visual.textframe = textframe
@@ -248,24 +248,24 @@ do
     visual.eliteborder = healthbar.EliteBorder
 
     -- Parented to Extended - Middle Frame
-    visual.raidicon = textframe:CreateTexture(nil, "ARTWORK", 5)
-    visual.skullicon = textframe:CreateTexture(nil, "ARTWORK", 2)
-    visual.eliteicon = textframe:CreateTexture(nil, "ARTWORK", 1)
+    visual.raidicon = textframe:CreateTexture(nil, "OVERLAY", nil, 7)
+    visual.eliteicon = healthbar:CreateTexture(nil, "OVERLAY", nil, 1)
+    visual.skullicon = healthbar:CreateTexture(nil, "OVERLAY", nil, 2)
 
 		-- TextFrame
-    visual.name = textframe:CreateFontString(nil, "ARTWORK", 0)
+    visual.name = textframe:CreateFontString(nil, "ARTWORK")
 		visual.name:SetFont("Fonts\\FRIZQT__.TTF", 11)
     visual.name:SetWordWrap(false) -- otherwise text is wrapped when plate is scaled down
-    visual.customtext = textframe:CreateFontString(nil, "ARTWORK", -1)
+    visual.customtext = textframe:CreateFontString(nil, "ARTWORK")
 		visual.customtext:SetFont("Fonts\\FRIZQT__.TTF", 11)
     visual.customtext:SetWordWrap(false) -- otherwise text is wrapped when plate is scaled down
-		visual.level = textframe:CreateFontString(nil, "ARTWORK", -2)
+		-- Level text is not shown in headline view, so anchoring it to the healthbar is ok
+    visual.level = healthbar:CreateFontString(nil, "ARTWORK")
 		visual.level:SetFont("Fonts\\FRIZQT__.TTF", 11)
 
 		-- Cast Bar Frame - Highest Frame
-		visual.castborder = castbar.Border
-		visual.spellicon = castbar.Overlay:CreateTexture(nil, "ARTWORK", 7)
-		visual.spelltext = castbar.Overlay:CreateFontString(nil, "OVERLAY")
+		visual.spellicon = castbar:CreateTexture(nil, "OVERLAY", nil, 7)
+		visual.spelltext = castbar:CreateFontString(nil, "ARTWORK")
 		visual.spelltext:SetFont("Fonts\\FRIZQT__.TTF", 11)
     visual.spelltext:SetWordWrap(false) -- otherwise text is wrapped when plate is scaled down
 
@@ -404,6 +404,8 @@ do
 
     Addon:UpdateNameplateStyle(nameplate, unitid)
 
+    UNIT_TARGET("UNIT_TARGET", unitid) -- requires tp_frame.Active, which is set in UpdateNameplateStyle
+
     -- Call this after the plate is shown as OnStartCasting checks if the plate is shown; if not, the castbar is hidden and
     -- nothing is updated
     OnUpdateCastMidway(plate, unitid)
@@ -505,6 +507,9 @@ function Addon:UpdateUnitIdentity(unit, unitid)
   else
     unit.class = ""
     unit.type = "NPC"
+
+    local _, _, _, _, _, npc_id = strsplit("-", unit.guid or "")
+    unit.NPCID = npc_id
   end
 end
 
@@ -558,9 +563,10 @@ end
 -- Update the health bar and name coloring, if needed
 function Addon:UpdateIndicatorNameplateColor(tp_frame)
   local visual = tp_frame.visual
+  local healthbar = visual.healthbar
 
-  if visual.healthbar:IsShown() then
-    visual.healthbar:SetAllColors(Addon:SetHealthbarColor(tp_frame.unit))
+  if healthbar:IsShown() then
+    healthbar:SetAllColors(Addon:SetHealthbarColor(tp_frame.unit))
 
     -- Updates warning glow for threat
     if visual.threatborder:IsShown() then
@@ -571,6 +577,9 @@ function Addon:UpdateIndicatorNameplateColor(tp_frame)
   if visual.name:IsShown() then
     visual.name:SetTextColor(Addon:SetNameColor(tp_frame.unit))
   end
+
+  -- Update nameplate's target unit's color
+  healthbar:ShowTargetUnit()
 end
 
 function Addon.UpdateCustomStyleAfterAuraTrigger(unit)
@@ -836,6 +845,8 @@ do
 
     visual.spelltext:SetText(text)
 		visual.spellicon:SetTexture(texture)
+    local target_unit = unit.unitid .. "target"
+    castbar.CastTarget:SetText(UnitName(target_unit))
 
     castbar.IsCasting = not channeled
     castbar.IsChanneling = channeled
@@ -1068,6 +1079,9 @@ do
 
       -- Update mouseover, if the mouse was hovering over the targeted unit
       extended.unit.isTarget = false
+      if SettingsShowOnlyForTarget then
+        extended.visual.healthbar:HideTargetUnit()
+      end
       CoreEvents:UPDATE_MOUSEOVER_UNIT()
     end
 
@@ -1084,12 +1098,35 @@ do
       LastTargetPlate = plate
 
       extended.unit.isTarget = true
+      UNIT_TARGET("UNIT_TARGET", extended.unit.unitid)
     end
 
     SetUpdateAll()
 	end
 
-  local function PLAYER_FOCUS_CHANGED()
+  UNIT_TARGET = function(event, unitid)
+    if SettingsTargetUnitHide or unitid == "player" or unitid == "target" then return end
+
+    local plate = GetNamePlateForUnit(unitid)
+    if plate and plate.TPFrame.Active then
+      local healthbar = plate.TPFrame.visual.healthbar
+
+      if SettingsShowOnlyForTarget and not UnitIsUnit("target", unitid) then
+        healthbar:HideTargetUnit()
+        return
+      end
+
+      local target_of_target_name = UnitName(unitid .. "target")
+      if target_of_target_name then
+        local _, class_name = UnitClass(unitid .. "target")
+        healthbar:ShowTargetUnit(target_of_target_name, class_name)
+      else
+        healthbar:HideTargetUnit()
+      end
+    end
+  end
+
+  local function PLAYER_FOCUS_CHANGED(event)
     local extended
     if LastFocusPlate and LastFocusPlate.TPFrame.Active then
       LastFocusPlate.TPFrame.unit.IsFocus = false
@@ -1149,13 +1186,16 @@ do
       if (UnitThreatSituation("player", unitid) or 0) ~= plate.TPFrame.unit.threatValue then
         plate.UpdateMe = true
       end
+
+      -- UNIT_TARGET does not update correctly, so use this in in-combat situations as a work-around
+      UNIT_TARGET("UNIT_TARGET", unitid)
     end
   end
 
-  local function UNIT_THREAT_LIST_UPDATE(unitid)
+  local function UNIT_THREAT_LIST_UPDATE(event, unitid)
     if unitid == "player" or unitid == "target" then return end
-    local plate = PlatesByUnit[unitid]
 
+    local plate = PlatesByUnit[unitid]
     if plate then
       --local threat_value = UnitThreatSituation("player", unitid) or 0
       --if threat_value ~= plate.TPFrame.unit.threatValue then
@@ -1175,6 +1215,9 @@ do
         --ProcessUnitChanges()
         --OnUpdateCastMidway(nameplate, unit.unitid)
       end
+
+      -- UNIT_TARGET does not update correctly, so use this in in-combat situations as a work-around
+      UNIT_TARGET("UNIT_TARGET", unitid)
     end
   end
 
@@ -1250,9 +1293,9 @@ do
           local db = TidyPlatesThreat.db.profile
 
           sourceName = gsub(sourceName, "%-[^|]+", "") -- UnitName(sourceName) only works in groups
-          local _, class_id = GetPlayerInfoByGUID(interrupterGUID)
-          if class_id then
-            sourceName = "|c" .. db.Colors.Classes[class_id].colorStr .. sourceName .. "|r"
+          local _, class_name = GetPlayerInfoByGUID(interrupterGUID)
+          if class_name then
+            sourceName = "|c" .. db.Colors.Classes[class_name].colorStr .. sourceName .. "|r"
           end
           visual.spelltext:SetText(INTERRUPTED .. " [" .. sourceName .. "]")
 
@@ -1297,9 +1340,9 @@ do
         if castbar:IsShown() then
           local db = TidyPlatesThreat.db.profile
           sourceName = gsub(sourceName, "%-[^|]+", "") -- UnitName(sourceName) only works in groups
-          local _, class_id = GetPlayerInfoByGUID(sourceGUID)
-          if class_id then
-            sourceName = "|c" .. db.Colors.Classes[class_id].colorStr .. sourceName .. "|r"
+          local _, class_name = GetPlayerInfoByGUID(sourceGUID)
+          if class_name then
+            sourceName = "|c" .. db.Colors.Classes[class_name].colorStr .. sourceName .. "|r"
           end
           visual.spelltext:SetText(INTERRUPTED .. " [" .. sourceName .. "]")
 
@@ -1332,7 +1375,7 @@ do
     Addon:ForceUpdate()
 	end
 
-  local function UNIT_ABSORB_AMOUNT_CHANGED(unitid)
+  local function UNIT_ABSORB_AMOUNT_CHANGED(event, unitid)
     local plate = GetNamePlateForUnit(unitid)
 
     if plate and plate.TPFrame.Active then
@@ -1349,7 +1392,7 @@ do
     end
   end
 
-  local function UNIT_HEAL_ABSORB_AMOUNT_CHANGED(unitid)
+  local function UNIT_HEAL_ABSORB_AMOUNT_CHANGED(event, unitid)
     local plate = GetNamePlateForUnit(unitid)
 
     if plate and plate.TPFrame.Active then
@@ -1374,7 +1417,7 @@ do
 
   -- Only registered for player unit
   --local RIGHTEOUS_FURY_SPELL_IDs = { 20468, 20469, 20470, 25780 }
-  local function UNIT_AURA(unitid)
+  local function UNIT_AURA(event, unitid)
     local _, name, spellId
     for i = 1, 40 do
       name , _, _, _, _, _, _, _, _, spellId = _G.UnitBuff("player", i, "PLAYER")
@@ -1432,6 +1475,8 @@ do
 	TidyPlatesCore:SetFrameStrata("TOOLTIP") 	-- When parented to WorldFrame, causes OnUpdate handler to run close to last
 	TidyPlatesCore:SetScript("OnEvent", EventHandler)
 	for eventName in pairs(CoreEvents) do TidyPlatesCore:RegisterEvent(eventName) end
+
+  CoreEvents.UNIT_TARGET = UNIT_TARGET
 
   -- Do this after events are registered, otherwise UNIT_AURA would be registered as a general event, not only as
   -- an unit event.
@@ -1569,18 +1614,15 @@ do
       SetFontGroupObject(object, objectstyle)
     end
 
+    local db = TidyPlatesThreat.db.profile.settings
+
     -- Healthbar
 		SetAnchorGroupObject(visual.healthbar, style.healthbar, extended)
-		visual.healthbar:SetHealthBarTexture(style.healthbar)
-		visual.healthbar:SetStatusBarBackdrop(style.healthbar.backdrop, style.healthborder.texture, style.healthborder.edgesize, style.healthborder.offset)
-		visual.healthborder:SetShown(style.healthborder.show)
-    visual.healthbar:SetEliteBorder(style.eliteborder.texture)
+    visual.healthbar:UpdateLayout(db, style)
 
     -- Castbar
     SetAnchorGroupObject(visual.castbar, style.castbar, extended)
-    visual.castbar:SetStatusBarTexture(style.castbar.texture or EMPTY_TEXTURE)
-    visual.castbar:SetStatusBarBackdrop(style.castbar.backdrop, style.castborder.texture, style.castborder.edgesize, style.castborder.offset)
-    visual.castborder:SetShown(style.castborder.show)
+    visual.castbar:UpdateLayout(db, style)
     -- Set castbar color here otherwise it may be shown sometimes with non-initialized backdrop color (white)
     if visual.castbar:IsShown() then
       visual.castbar:SetAllColors(Addon:SetCastbarColor(unit))
@@ -1605,16 +1647,15 @@ do
     -- Raid Icon Texture
 		if style.raidicon and style.raidicon.texture then
 			visual.raidicon:SetTexture(style.raidicon.texture)
-      visual.raidicon:SetDrawLayer("ARTWORK", 5)
     end
     -- TOODO: does not really work with ForceUpdate() as isMarked is not set there (no call to UpdateUnitCondition)
     if not unit.isMarked then
       visual.raidicon:Hide()
     end
 
-    visual.castbar:ClearAllPoints()
+    db = TidyPlatesThreat.db.profile.settings.castbar
 
-    local db = TidyPlatesThreat.db.profile.settings.castbar
+    visual.castbar:ClearAllPoints()
     if UnitIsUnit("target", unit.unitid) then
       SetObjectAnchor(visual.castbar, style.castbar.anchor or "CENTER", extended, style.castbar.x + db.x_target or 0, style.castbar.y + db.y_target or 0)
     else
@@ -1765,6 +1806,14 @@ function Addon:ForceUpdate()
     PlateOnUpdateQueue[#PlateOnUpdateQueue + 1] = UpdatePlate_SetAlphaOnUpdate
   else
     UpdatePlate_Transparency = UpdatePlate_SetAlpha
+  end
+
+  SettingsTargetUnitHide = not db.settings.healthbar.TargetUnit.Show
+  SettingsShowOnlyForTarget = db.settings.healthbar.TargetUnit.ShowOnlyForTarget
+  if SettingsTargetUnitHide then
+    TidyPlatesCore:UnregisterEvent("UNIT_TARGET")
+  else
+    TidyPlatesCore:RegisterEvent("UNIT_TARGET")
   end
 
   for plate in pairs(self.PlatesVisible) do

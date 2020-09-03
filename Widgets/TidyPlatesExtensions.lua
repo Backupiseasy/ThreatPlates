@@ -52,10 +52,10 @@ local function CreateExtensions(tp_frame)
   if ENABLE_ABSORB then
     -- check if absorbbar and glow are created at the samel level as healthbar
     if not absorbbar then
-      absorbbar = healthbar:CreateTexture(nil, "BORDER", -6)
+      absorbbar = healthbar:CreateTexture(nil, "ARTWORK", nil, 2)
       absorbbar:Hide()
 
-      absorbbar.overlay = healthbar:CreateTexture(nil, "OVERLAY", 0)
+      absorbbar.overlay = healthbar:CreateTexture(nil, "ARTWORK", nil, 3)
       absorbbar.overlay:SetTexture("Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\Striped_Texture.tga", true, true)
       absorbbar.overlay:SetHorizTile(true)
       --absorbbar.tileSize = 64
@@ -64,7 +64,7 @@ local function CreateExtensions(tp_frame)
       --      absorbbar.tileSize = 32
       absorbbar.overlay:Hide()
 
-      local absorbglow = healthbar:CreateTexture(nil, "OVERLAY", 7)
+      local absorbglow = healthbar:CreateTexture(nil, "ARTWORK", nil, 4)
       absorbglow:SetTexture("Interface\\RaidFrame\\Shield-Overshield")
       absorbglow:SetBlendMode("ADD")
       absorbglow:SetWidth(8)
@@ -115,9 +115,9 @@ local function UpdateExtensions(tp_frame, unitid, style)
   local heal_absorb = UnitGetTotalHealAbsorbs(unitid) or 0
   local absorb = _G.UnitGetTotalAbsorbs(unitid) or 0
 
-  -- heal_absorb = 0.25 * UnitHealth(unitid)
-  -- absorb = UnitHealthMax(unitid) * 0.3 -- REMOVE
-  -- health = health_max * 0.75 -- REMOVE
+  -- heal_absorb = 0.2 * UnitHealth(unitid)
+  -- absorb = health_max * 0.3
+  -- health = health_max * 0.5
   -- visual.healthbar:SetValue(health)
 
   local db = TidyPlatesThreat.db.profile.settings.healthbar

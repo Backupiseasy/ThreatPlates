@@ -50,6 +50,24 @@ end
 ---------------------------------------------------------------------------------------------------
 local CUSTOM_GLOW_FUNCTIONS = Addon.CUSTOM_GLOW_FUNCTIONS
 
+local function Wrapper_ButtonGlow_Start(frame, color, framelevel)
+  LibCustomGlow.ButtonGlow_Start(frame, color, nil, framelevel)
+end
+
+local function Wrapper_PixelGlow_Start(frame, color, framelevel)
+  LibCustomGlow.PixelGlow_Start(frame, color, nil, nil, nil, nil, nil, nil, nil, nil, framelevel)
+end
+
+local function Wrapper_AutoCastGlow_Start(frame, color, framelevel)
+  LibCustomGlow.AutoCastGlow_Start(frame, color, nil, nil, nil, nil, nil, nil, framelevel)
+end
+
+local CUSTOM_GLOW_WRAPPER_FUNCTIONS = {
+  ButtonGlow_Start = Wrapper_ButtonGlow_Start,
+  PixelGlow_Start = Wrapper_PixelGlow_Start,
+  AutoCastGlow_Start = Wrapper_AutoCastGlow_Start,
+}
+
 ---------------------------------------------------------------------------------------------------
 -- Auras Widget Functions
 ---------------------------------------------------------------------------------------------------
@@ -624,11 +642,11 @@ function Widget:GetColorForAura(aura)
 	end
 end
 
-local function FilterAll(show_aura, spellfound, is_mine, show_only_mine)
+local function FilterNone(show_aura, spellfound, is_mine, show_only_mine)
   return show_aura
 end
 
-local function FilterWhitelist(show_aura, spellfound, is_mine, show_only_mine)
+local function FilterAllowlist(show_aura, spellfound, is_mine, show_only_mine)
   if spellfound == "All" then
     return show_aura
   elseif spellfound == true then
@@ -640,7 +658,7 @@ local function FilterWhitelist(show_aura, spellfound, is_mine, show_only_mine)
   return false
 end
 
-local function FilterBlacklist(show_aura, spellfound, is_mine, show_only_mine)
+local function FilterBlocklist(show_aura, spellfound, is_mine, show_only_mine)
   -- blacklist all auras, i.e., default is show all auras (no matter who casted it)
   --   spellfound = true or All - blacklist this aura (from all casters)
   --   spellfound = My          - blacklist only my aura
@@ -659,9 +677,12 @@ local function FilterBlacklist(show_aura, spellfound, is_mine, show_only_mine)
 end
 
 Widget.FILTER_FUNCTIONS = {
-  all = FilterAll,
-  blacklist = FilterBlacklist,
-  whitelist = FilterWhitelist,
+  all = FilterNone,
+  blacklist = FilterBlocklist,
+  whitelist = FilterAllowlist,
+  None = FilterNone,
+  Block = FilterBlocklist,
+  Allow = FilterAllowlist,
 }
 
 function Widget:FilterFriendlyDebuffsBySpell(db, aura, AuraFilterFunction)
@@ -1135,7 +1156,7 @@ function Widget:CreateAuraFrameIconMode(parent)
   local frame = _G.CreateFrame("Frame", nil, parent)
   frame:SetFrameLevel(parent:GetFrameLevel())
 
-  frame.Icon = frame:CreateTexture(nil, "ARTWORK", 0)
+  frame.Icon = frame:CreateTexture(nil, "ARTWORK", nil, 0)
   frame.Border = _G.CreateFrame("Frame", nil, frame, BackdropTemplate)
   frame.Border:SetFrameLevel(parent:GetFrameLevel())
   frame.Cooldown = CreateCooldown(frame)
@@ -1148,7 +1169,7 @@ function Widget:CreateAuraFrameIconMode(parent)
   -- the cooldown frame and b) using the cooldown frame results in the text not being visible if there is no
   -- cooldown (i.e., duration and expiration are nil which is true for auras with unlimited duration)
   local text_frame = _G.CreateFrame("Frame", nil, frame)
-  text_frame:SetFrameLevel(parent:GetFrameLevel() + 9) -- +9 as the glow is set to +8 by LibCustomGlow
+  text_frame:SetFrameLevel(parent:GetFrameLevel())
   text_frame:SetAllPoints(frame.Icon)
   frame.Stacks = text_frame:CreateFontString(nil, "OVERLAY")
   frame.TimeLeft = text_frame:CreateFontString(nil, "OVERLAY")
@@ -1178,6 +1199,7 @@ function Widget:UpdateAuraFrameIconMode(frame)
   end
 
   db = self.db_icon
+
   -- Icon
   frame:SetSize(db.IconWidth, db.IconHeight)
   frame.Icon:SetAllPoints(frame)
@@ -1237,7 +1259,7 @@ function Widget:UpdateAuraInformationIconMode(frame) -- texture, duration, expir
 
   if AuraHighlightEnabled then
     if frame.AuraStealOrPurge then
-      AuraHighlightStart(frame.Highlight, AuraHighlightColor)
+      AuraHighlightStart(frame.Highlight, AuraHighlightColor, 0)
     else
       AuraHighlightStop(frame.Highlight)
     end
@@ -1284,13 +1306,13 @@ function Widget:CreateAuraFrameBarMode(parent)
   frame.Statusbar:SetFrameLevel(parent:GetFrameLevel())
   frame.Statusbar:SetMinMaxValues(0, 100)
 
-  frame.Background = frame.Statusbar:CreateTexture(nil, "BACKGROUND", 0)
+  frame.Background = frame.Statusbar:CreateTexture(nil, "BACKGROUND", nil, 0)
   frame.Background:SetAllPoints()
 
   frame.Highlight = _G.CreateFrame("Frame", nil, frame)
   frame.Highlight:SetFrameLevel(parent:GetFrameLevel())
 
-  frame.Icon = frame:CreateTexture(nil, "OVERLAY", 1)
+  frame.Icon = frame:CreateTexture(nil, "OVERLAY", nil, 1)
   frame.Stacks = frame.Statusbar:CreateFontString(nil, "OVERLAY")
 
   frame.LabelText = frame.Statusbar:CreateFontString(nil, "OVERLAY")
@@ -1436,7 +1458,7 @@ function Widget:UpdateAuraInformationBarMode(frame) -- texture, duration, expira
 
   if AuraHighlightEnabled then
     if frame.AuraStealOrPurge then
-      AuraHighlightStart(frame.Highlight, AuraHighlightColor)
+      AuraHighlightStart(frame.Highlight, AuraHighlightColor, 0)
     else
       AuraHighlightStop(frame.Highlight)
     end
@@ -1568,7 +1590,7 @@ function Widget:CreateAuraGrid(frame)
 end
 
 -- Initialize the aura grid layout, don't update auras themselves as not unitid know at this point
-function Widget:UpdateAuraWidgetLayout(widget_frame)
+function Widget:UpdateLayout(widget_frame)
   self:CreateAuraGrid(widget_frame.Buffs)
   self:CreateAuraGrid(widget_frame.Debuffs)
   self:CreateAuraGrid(widget_frame.CrowdControl)
@@ -1580,7 +1602,7 @@ function Widget:UpdateAuraWidgetLayout(widget_frame)
   end
 
   if self.db.FrameOrder == "HEALTHBAR_AURAS" then
-    widget_frame:SetFrameLevel(widget_frame:GetParent():GetFrameLevel() + 2)
+    widget_frame:SetFrameLevel(widget_frame:GetParent():GetFrameLevel() + 1)
   else
     widget_frame:SetFrameLevel(widget_frame:GetParent():GetFrameLevel() + 9)
   end
@@ -1696,7 +1718,7 @@ function Widget:Create(tp_frame)
 
   widget_frame.Widget = self
 
-  self:UpdateAuraWidgetLayout(widget_frame)
+  self:UpdateLayout(widget_frame)
 
   widget_frame:SetScript("OnEvent", UnitAuraEventHandler)
   widget_frame:HookScript("OnShow", OnShowHookScript)
@@ -1761,7 +1783,7 @@ function Widget:OnUnitAdded(widget_frame, unit)
   self:UpdateIconGrid(widget_frame, unit)
 end
 
-function Widget:OnUnitRemoved(widget_frame)
+function Widget:OnUnitRemoved(widget_frame, unit)
   widget_frame:UnregisterAllEvents()
 end
 
@@ -1908,7 +1930,8 @@ function Widget:UpdateSettings()
 
   -- Highlighting
   AuraHighlightEnabled = self.db.Highlight.Enabled
-  AuraHighlightStart = LibCustomGlow[CUSTOM_GLOW_FUNCTIONS[self.db.Highlight.Type][1]]
+  local glow_function = CUSTOM_GLOW_FUNCTIONS[self.db.Highlight.Type][1]
+  AuraHighlightStart = CUSTOM_GLOW_WRAPPER_FUNCTIONS[glow_function] or LibCustomGlow[glow_function]
   AuraHighlightStopPrevious = AuraHighlightStop or LibCustomGlow.PixelGlow_Stop
   AuraHighlightStop = LibCustomGlow[CUSTOM_GLOW_FUNCTIONS[self.db.Highlight.Type][2]]
   AuraHighlightOffset = CUSTOM_GLOW_FUNCTIONS[self.db.Highlight.Type][3]
@@ -1928,20 +1951,4 @@ function Widget:UpdateSettings()
   EnabledForStyle["unique"] = self.db.ON
   EnabledForStyle["etotem"] = false
   EnabledForStyle["empty"] = false
-
-  for plate, tp_frame in pairs(Addon.PlatesCreated) do
-    local widget_frame = tp_frame.widgets.Auras
-
-    -- widget_frame could be nil if the widget as disabled and is enabled as part of a profile switch
-    -- For these frames, UpdateAuraWidgetLayout will be called anyway when the widget is initalized
-    -- (which happens after the settings update)
-    if widget_frame then
-      self:UpdateAuraWidgetLayout(widget_frame)
-      if widget_frame.Active then -- equals: plate is visible and auras are used
-        self:OnUnitAdded(widget_frame, widget_frame.unit)
-      end
-    end
-  end
-
-  --Addon:ForceUpdate()
 end

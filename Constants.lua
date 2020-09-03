@@ -166,6 +166,7 @@ Addon.TARGET_TEXTURES = {
   crescent = L["Crescent"],
   bubble = L["Bubble"],
   arrows_legacy = L["Arrow (Legacy)"],
+  Stripes = L["Stripes"]
 }
 
 ----------------------------------------------------------------------------------------------------
@@ -179,9 +180,9 @@ ThreatPlates.Widgets = "Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\Wid
 ---------------------------------------------------------------------------------------------------
 
 Addon.AurasFilterMode = {
-  ["whitelist"] = L["White List"],
-  ["blacklist"] = L["Black List"],
-  ["all"] = L["All Auras"],
+  Allow = L["Allow"],
+  Block = L["Block"],
+  None = L["None"],
 }
 
 ThreatPlates.SPEC_ROLES = {
@@ -394,7 +395,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
     },
   },
   profile = {
-    cache = {},
+    -- cache = {}, - removed in 9.3.0
     -- OldSetting = true, - removed in 8.7.0
     verbose = false,
     -- blizzFadeA = { -- removed in 8.5.1
@@ -664,7 +665,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
         ShowOnlyMine = true,
         ShowBlizzardForEnemy = false,
         Scale = 1.0,
-        FilterMode = "blacklist",
+        FilterMode = "Block",
         FilterBySpell = {},
         FilterByType = {
           --[1] = true, -- Removed in 8.8.0
@@ -692,7 +693,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
         ShowUnlimitedOnBosses = true,
         HideUnlimitedDuration = false,
         Scale = 1.5,
-        FilterMode = "blacklist",
+        FilterMode = "Block",
         FilterBySpell = {},
       },
       CrowdControl = {
@@ -705,7 +706,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
         ShowAllEnemy = (Addon.CLASSIC and true) or false,
         ShowBlizzardForEnemy = (Addon.CLASSIC and false) or true,
         Scale = 2.0,
-        FilterMode = "blacklist",
+        FilterMode = "Block",
         FilterBySpell = {},
       },
       ModeIcon = {
@@ -827,6 +828,26 @@ ThreatPlates.DEFAULT_SETTINGS = {
       x = 0,
       y = 26,
       anchor = "CENTER",
+      ThreatPercentage = {
+        Show = true,
+        CustomColor = RGB(255, 255, 255),
+        UseThreatColor = true,
+        -- Layout
+        Anchor = "LEFT",
+        InsideAnchor = false,
+        HorizontalOffset = -2,
+        VerticalOffset = 0,
+        Font = {
+          Typeface = Addon.DEFAULT_FONT,
+          Size = 9,
+          Transparency = 1,
+          --Color = RGB(255, 255, 255),
+          flags = "OUTLINE",
+          Shadow = true,
+          HorizontalAlignment = "RIGHT",
+          VerticalAlignment = "CENTER",
+        }
+      },
     },
     tankedWidget = {
       ON = false,
@@ -1017,6 +1038,74 @@ ThreatPlates.DEFAULT_SETTINGS = {
       --ShowTrackingLine = true, -- Removed in 9.1.9
       --TrackingLineThickness = 4  -- Removed in 9.1.9
     },
+    ExperienceWidget = {
+      ON = false,
+      ShowInHeadlineView = false,
+      Height = 10,
+      Width = 120,
+      -- Appearance
+      Texture = "Smooth",
+      BorderTexture = "ThreatPlatesBorder",
+      BorderEdgeSize = 2,
+      BorderOffset = 2,
+      BorderInset = 0,
+      BarForegroundColor = RGB(247, 214, 0, 1),
+      BarBackgroundColor = RGB(0, 0, 0, 0.3),
+      BarBackgroundUseForegroundColor = false,
+      BackgroundColor = RGB(0, 0, 0, 0), -- Fully transparent
+      BackgroundUseForegroundColor = false,
+      BorderColor = RGB(0, 0, 0, 1),
+      BorderUseBarForegroundColor = false,
+      BorderUseBackgroundColor = false,
+      -- Positioning
+      HealthbarMode = {
+        Anchor = "BOTTOM",
+        InsideAnchor = false,
+        HorizontalOffset = 0,
+        VerticalOffset = -10,
+      },
+      NameMode = {
+        Anchor = "BOTTOM",
+        InsideAnchor = false,
+        HorizontalOffset = 0,
+        VerticalOffset = -10,
+      },
+      -- Texts
+      RankText = {
+        Show = true,
+        Anchor = "LEFT",
+        InsideAnchor = true,
+        HorizontalOffset = 1,
+        VerticalOffset = 0,
+        Font = {
+          Typeface = Addon.DEFAULT_FONT,
+          Size = 9,
+          Transparency = 1,
+          Color = RGB(255, 255, 255),
+          flags = "NONE",
+          Shadow = true,
+          HorizontalAlignment = "LEFT",
+          VerticalAlignment = "CENTER",
+        }
+      },
+      ExperienceText = {
+        Show = true,
+        Anchor = "RIGHT",
+        InsideAnchor = true,
+        HorizontalOffset = -1,
+        VerticalOffset = 0,
+        Font = {
+          Typeface = Addon.DEFAULT_FONT,
+          Size = 9,
+          Transparency = 1,
+          Color = RGB(255, 255, 255),
+          flags = "NONE",
+          Shadow = true,
+          HorizontalAlignment = "RIGHT",
+          VerticalAlignment = "CENTER",
+        }
+      },
+    },
 --    TestWidget = {
 --      ON = true,
 --      BarWidth = 120,
@@ -1068,6 +1157,12 @@ ThreatPlates.DEFAULT_SETTINGS = {
             NEUTRAL = true,
             HOSTILE = true,
           },
+          OutOfInstances = true,
+          InInstances = true,
+          InstanceIDs = {
+            Enabled = false,
+            IDs = "",
+          }
         },
         showIcon = true,
         useStyle = true,
@@ -1132,6 +1227,28 @@ ThreatPlates.DEFAULT_SETTINGS = {
         AlwaysFullAbsorb = false,
         OverlayTexture = true,
         OverlayColor = RGB(0, 128, 255, 1),
+        TargetUnit = {
+          Show = true,
+          CustomColor = RGB(255, 255, 255),
+          UseClassColor = true,
+          ShowOnlyInCombat = true,
+          ShowOnlyForTarget = false,
+          -- Layout
+          Anchor = "RIGHT",
+          InsideAnchor = false,
+          HorizontalOffset = 30,
+          VerticalOffset = 0,
+          Font = {
+            Typeface = Addon.DEFAULT_FONT,
+            Size = 9,
+            Transparency = 1,
+            --Color = RGB(255, 255, 255),
+            flags = "NONE",
+            Shadow = true,
+            HorizontalAlignment = "LEFT",
+            VerticalAlignment = "CENTER",
+          }
+        },
       },
       castnostop = {
         show = true, -- no longer used
@@ -1173,6 +1290,24 @@ ThreatPlates.DEFAULT_SETTINGS = {
             HorizontalAlignment = "RIGHT",
             VerticalAlignment = "CENTER",
           },
+        },
+        FrameOrder = "HealthbarOverCastbar",
+        CastTarget = {
+          Show = true,
+          Anchor = "BOTTOM",
+          InsideAnchor = false,
+          HorizontalOffset = 0,
+          VerticalOffset = -2,
+          Font = {
+            Typeface = Addon.DEFAULT_FONT,
+            Size = 8,
+            Transparency = 1,
+            Color = RGB(255, 255, 255),
+            flags = "NONE",
+            Shadow = true,
+            HorizontalAlignment = "RIGHT",
+            VerticalAlignment = "TOP",
+          }
         },
       },
       name = { -- Names for Healthbar View
