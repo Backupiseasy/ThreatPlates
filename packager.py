@@ -229,7 +229,8 @@ args = parser.parse_args()
 # -- Create packages for Retail and Classic
 # ---------------------------------------------------------------------------------------------------
 
-create_package("Retail")
-create_package("Classic")
+if args.package_dir or args.initialize:
+    create_package("Retail")
+    create_package("Classic")
 
 
