@@ -1733,7 +1733,7 @@ local function CreateComboPointsWidgetOptions()
               DRUID = L["Druid"],
               MAGE = L["Arcane Mage"],
               MONK = (not Addon.CLASSIC and L["Windwalker Monk"]) or nil,
-              PALADIN = (not Addon.CLASSIC and L["Retribution Paladin"]) or nil,
+              PALADIN = (not Addon.CLASSIC and L["Paladin"]) or nil,
               ROGUE = L["Rogue"],
               WARLOCK = L["Warlock"],
             },

@@ -66,10 +66,8 @@ local UNIT_POWER = {
     }
   },
   PALADIN = {
-    [3] = {
-      PowerType = Enum.PowerType.HolyPower,
-      Name = "HOLY_POWER",
-    }
+    PowerType = Enum.PowerType.HolyPower,
+    Name = "HOLY_POWER",
   },
   ROGUE = {
     PowerType = Enum.PowerType.ComboPoints,
