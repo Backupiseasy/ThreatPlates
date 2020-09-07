@@ -96,7 +96,6 @@ end
 function Widget:UPDATE_UI_WIDGET(widget_info)
   local widget_frame = MapUIWidgetToExperienceWidget[widget_info.widgetID]
   if widget_frame and widget_frame:IsShown() then
-    print ("Updating: ", widget_info.widgetID)
     self:OnUnitAdded(widget_frame, widget_frame.unit)
   end
 end
