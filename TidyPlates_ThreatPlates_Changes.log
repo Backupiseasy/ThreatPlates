@@ -1,7 +1,12 @@
 ﻿------------------------------------------------------
+9.3.0-Beta2
+------------------------------------------------------
+* Fixed a bug with the clickable area being to small when small Blizzard nameplates and Healthbar Sync were enabled [Comment #4548].
+
+------------------------------------------------------
 9.3.0-Beta1
 ------------------------------------------------------
-* Consolidated Retail and Classic version of Threat Plates into one single version.
+* Consolidated Retail and Classic version of Threat Plates into one single sourcecode version.
 * Added a new widget to show the experience bar of certain follower [Comment #3775, #3728, #4190, #4402, #4447, #4699, Issue GitHub #202].
 * Added an option to show the castbar above or below the healthbar [Comment #4486, #4461, #4631, Issue TPC#32, PM].
 * Added an option to show the current target's name on the castbar [Comment #4474, #4495, #4616].
