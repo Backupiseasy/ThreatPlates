@@ -32,7 +32,6 @@ local GetPlayerInfoByGUID, RAID_CLASS_COLORS = GetPlayerInfoByGUID, RAID_CLASS_C
 local TidyPlatesThreat = TidyPlatesThreat
 local Widgets = Addon.Widgets
 local Animations = Addon.Animations
-local LibThreatClassic = Addon.LibThreatClassic
 local LibClassicCasterino = Addon.LibClassicCasterino
 local BackdropTemplate = Addon.BackdropTemplate
 
@@ -51,7 +50,6 @@ local _G =_G
 if Addon.CLASSIC then
   GetNameForNameplate = function(plate) return plate:GetName():gsub("NamePlate", "Plate") end
   UnitEffectiveLevel = function(...) return _G.UnitLevel(...) end
-  UnitThreatSituation = function(...) return LibThreatClassic:UnitThreatSituation(...) end
 
   UnitChannelInfo = function(...)
     local text, _, texture, startTime, endTime, _, _, _, spellID = LibClassicCasterino:UnitChannelInfo(...)
@@ -76,8 +74,6 @@ if Addon.CLASSIC then
 
     return text, text, texture, startTime, endTime, false, nil, false, spellID
   end
-
-  UnitThreatSituation = function(...) return LibThreatClassic:UnitThreatSituation(...) end
 else
   GetNameForNameplate = function(plate) return plate:GetName() end
 
@@ -1175,24 +1171,7 @@ do
     end
   end
 
-  -- LibThreatClassic - Event: ThreatUpdated
-  function Addon.UNIT_THREAT_LIST_UPDATE(lib_name, unit_guid, target_guid, threat)
-    local plate = PlatesByGUID[target_guid]
-    if plate then
-      local unitid = plate.TPFrame.unit.unitid
-
-      if not unitid or unitid == "player" or unitid == "target" then return end
-
-      if (UnitThreatSituation("player", unitid) or 0) ~= plate.TPFrame.unit.threatValue then
-        plate.UpdateMe = true
-      end
-
-      -- UNIT_TARGET does not update correctly, so use this in in-combat situations as a work-around
-      UNIT_TARGET("UNIT_TARGET", unitid)
-    end
-  end
-
-  local function UNIT_THREAT_LIST_UPDATE(event, unitid)
+  function CoreEvents:UNIT_THREAT_LIST_UPDATE(unitid)
     if unitid == "player" or unitid == "target" then return end
 
     local plate = PlatesByUnit[unitid]
@@ -1462,7 +1441,6 @@ do
     CoreEvents.UNIT_ABSORB_AMOUNT_CHANGED = UNIT_ABSORB_AMOUNT_CHANGED
     CoreEvents.UNIT_HEAL_ABSORB_AMOUNT_CHANGED = UNIT_HEAL_ABSORB_AMOUNT_CHANGED
     CoreEvents.PLAYER_FOCUS_CHANGED = PLAYER_FOCUS_CHANGED
-    CoreEvents.UNIT_THREAT_LIST_UPDATE = UNIT_THREAT_LIST_UPDATE
   end
 
 	CoreEvents.UNIT_LEVEL = UnitConditionChanged

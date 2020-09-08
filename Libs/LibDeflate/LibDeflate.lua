@@ -1,12 +1,12 @@
 --[[--
-LibDeflate 1.0.1-release <br>
+LibDeflate 1.0.2-release <br>
 Pure Lua compressor and decompressor with high compression ratio using
 DEFLATE/zlib format.
 
 @file LibDeflate.lua
 @author Haoqian He (Github: SafeteeWoW; World of Warcraft: Safetyy-Illidan(US))
-@copyright LibDeflate <2018-2019> Haoqian He
-@license GNU LESSER GENERAL PUBLIC LICENSE Version 3 or later
+@copyright LibDeflate <2018-2020> Haoqian He
+@license zlib License
 
 This library is implemented according to the following specifications. <br>
 Report a bug if LibDeflate is not fully compliant with those specs. <br>
@@ -19,7 +19,7 @@ https://tools.ietf.org/html/rfc1950 <br>
 This library requires Lua 5.1/5.2/5.3/5.4 interpreter or LuaJIT v2.0+. <br>
 This library does not have any dependencies. <br>
 Note at the time of this release, Lua 5.4 final is not released yet. <br>
-For Lua 5.4, This library is tested with its first beta version. <br>
+For Lua 5.4, This library is tested with its rc6 version. <br>
 <br>
 This file "LibDeflate.lua" is the only source file of
 the library. <br>
@@ -28,18 +28,26 @@ https://github.com/safeteeWow/LibDeflate/issues
 ]]
 
 --[[
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-any later version.
+zlib License
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Lesser General Public License for more details.
+(C) 2018-2020 Haoqian He
 
-You should have received a copy of the GNU Lesser General Public License
-along with this program.  If not, see https://www.gnu.org/licenses/.
+This software is provided 'as-is', without any express or implied
+warranty.  In no event will the authors be held liable for any damages
+arising from the use of this software.
+
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it
+freely, subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not
+   claim that you wrote the original software. If you use this software
+   in a product, an acknowledgment in the product documentation would be
+   appreciated but is not required.
+2. Altered source versions must be plainly marked as such, and must not be
+   misrepresented as being the original software.
+3. This notice may not be removed or altered from any source distribution.
+
 
 Credits and Disclaimer:
 The following projects are used to the help to test the correctness
@@ -68,9 +76,9 @@ licenses shall be comply when used.
 --[[
 	Curseforge auto-packaging replacements:
 
-	Project Date: 2019-11-23T19:12:27Z
-	Project Hash: 21ca927770daca746f8659ee8c429c7971f573cc
-	Project Version: 1.0.1-release
+	Project Date: 2020-06-26T15:11:26Z
+	Project Hash: c19f978f053ebd22950eb6f1df4445677a4b0160
+	Project Version: 1.0.2-release
 --]]
 
 local LibDeflate
@@ -84,18 +92,22 @@ do
 	-- 3. _MINOR
 
 	-- version to store the official version of LibDeflate
-	local _VERSION = "1.0.1-release"
+	local _VERSION = "1.0.2-release"
 
 	-- When MAJOR is changed, I should name it as LibDeflate2
 	local _MAJOR = "LibDeflate"
 
 	-- Update this whenever a new version, for LibStub version registration.
-	local _MINOR = 2
+	-- 0 : v0.x
+	-- 1 : v1.0.0
+	-- 2 : v1.0.1
+	-- 3 : v1.0.2
+	local _MINOR = 3
 
 	local _COPYRIGHT =
 	"LibDeflate ".._VERSION
-	.." Copyright (C) 2018-2019 Haoqian He."
-	.." License LGPLv3+: GNU Lesser General Public License version 3 or later"
+	.." Copyright (C) 2018-2020 Haoqian He."
+	.." Licensed under the zlib License"
 
 	-- Register in the World of Warcraft library "LibStub" if detected.
 	if LibStub then
@@ -1221,6 +1233,8 @@ local function GetBlockLZ77Result(level, string_table, hash_tables, block_start,
 		end
 	end
 
+	local dict_string_len_plus3 = dict_string_len + 3
+
 	hash = (string_table[block_start-offset] or 0)*256
 		+ (string_table[block_start+1-offset] or 0)
 
@@ -1251,6 +1265,7 @@ local function GetBlockLZ77Result(level, string_table, hash_tables, block_start,
 	-- because I think this is easier for me to maintain it.
 	while (index <= index_end) do
 		local string_table_index = index - offset
+		local offset_minus_three = offset - 3
 		prev_len = cur_len
 		prev_dist = cur_dist
 		cur_len = 0
@@ -1288,6 +1303,11 @@ local function GetBlockLZ77Result(level, string_table, hash_tables, block_start,
 				(config_use_lazy and prev_len >= config_good_prev_length)
 				and config_good_hash_chain or config_max_hash_chain
 
+			local max_len_minus_one = block_end - index
+			max_len_minus_one = (max_len_minus_one >= 257) and 257 or max_len_minus_one
+			max_len_minus_one = max_len_minus_one + string_table_index
+			local string_table_index_plus_three = string_table_index + 3
+
 			while chain_index >= 1 and depth > 0 do
 				local prev = cur_chain[chain_index]
 
@@ -1295,35 +1315,26 @@ local function GetBlockLZ77Result(level, string_table, hash_tables, block_start,
 					break
 				end
 				if prev < index then
-					local j = 3
+					local sj = string_table_index_plus_three
 
 					if prev >= -257 then
-						local prev_table_index = prev-offset
-						-- NOTE for author:
-						-- j < 258 and index + j <= block_end
-						-- This is the right condition
-						while (j < 258 and index + j <= block_end) do
-							if (string_table[prev_table_index+j]
-								== string_table[string_table_index+j]) then
-								j = j + 1
-							else
-								break
-							end
+						local pj = prev - offset_minus_three
+						while (sj <= max_len_minus_one
+								and string_table[pj]
+								== string_table[sj]) do
+							sj = sj + 1
+							pj = pj + 1
 						end
 					else
-						local prev_table_index = dict_string_len+prev
-						-- NOTE for author:
-						-- j < 258 and index + j <= block_end
-						-- This is the right condition
-						while (j < 258 and index + j <= block_end) do
-							if (dict_string_table[prev_table_index+j]
-								== string_table[string_table_index+j]) then
-								j = j + 1
-							else
-								break
-							end
+						local pj = dict_string_len_plus3 + prev
+						while (sj <= max_len_minus_one
+								and dict_string_table[pj]
+								== string_table[sj]) do
+							sj = sj + 1
+							pj = pj + 1
 						end
 					end
+					local j = sj - string_table_index
 					if j > cur_len then
 						cur_len = j
 						cur_dist = index - prev

@@ -19,15 +19,17 @@ local pairs = pairs
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
 local LibCustomGlow = Addon.LibCustomGlow
+local CUSTOM_GLOW_FUNCTIONS, CUSTOM_GLOW_WRAPPER_FUNCTIONS = Addon.CUSTOM_GLOW_FUNCTIONS, Addon.CUSTOM_GLOW_WRAPPER_FUNCTIONS
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
 -- List them here for Mikk's FindGlobals script
 -- GLOBALS: CreateFrame, SetPortraitTexture
 
+---------------------------------------------------------------------------------------------------
+-- Cached configuration settings
+---------------------------------------------------------------------------------------------------
 local DefaultGlowColor
-
-local CUSTOM_GLOW_FUNCTIONS = Addon.CUSTOM_GLOW_FUNCTIONS
 
 ---------------------------------------------------------------------------------------------------
 -- Widget functions for creation and update
@@ -45,6 +47,8 @@ function Widget:Create(tp_frame)
 
   widget_frame.Highlight = _G.CreateFrame("Frame", nil, widget_frame)
   widget_frame.Highlight:SetFrameLevel(tp_frame:GetFrameLevel() + 15)
+
+  widget_frame.HighlightStop = LibCustomGlow.PixelGlow_Stop
   --------------------------------------
   -- End Custom Code
 
@@ -125,23 +129,33 @@ function Widget:OnUnitAdded(widget_frame, unit)
   end
 
   local anchor_frame
+  local style = widget_frame:GetParent().style
   local visual = widget_frame:GetParent().visual
-  if glow_frame == "Healthbar" and visual.healthbar:IsShown() then
+  if glow_frame == "Healthbar" and style.healthbar.show then
     anchor_frame = visual.healthbar.Border
-  elseif glow_frame == "Castbar" and visual.castbar:IsShown() then
+  elseif glow_frame == "Castbar" and style.castbar.show then
     anchor_frame = visual.castbar.Border
   elseif glow_frame == "Icon" and show_icon then
     anchor_frame = widget_frame
   end
 
   if anchor_frame then
+    widget_frame.Highlight:ClearAllPoints()
     widget_frame.Highlight:SetAllPoints(anchor_frame)
+    widget_frame.Highlight:SetFrameLevel((anchor_frame:GetFrameLevel()))
 
-    -- Highlighting: PixelGlow_Start(r,color,N,frequency,length,th,xOffset,yOffset,border,key,frameLevel)
-    LibCustomGlow[CUSTOM_GLOW_FUNCTIONS[glow_highlight.Type][1]](widget_frame.Highlight, (glow_highlight.CustomColor and glow_highlight.Color) or DefaultGlowColor)
+    -- Stop the previously shown glow effect
+    widget_frame.HighlightStop(widget_frame.Highlight)
+
+    local color = (glow_highlight.CustomColor and glow_highlight.Color) or DefaultGlowColor
+    local highlight_start = CUSTOM_GLOW_WRAPPER_FUNCTIONS[CUSTOM_GLOW_FUNCTIONS[glow_highlight.Type][1]]
+    highlight_start(widget_frame.Highlight, color, 0)
+
+    widget_frame.HighlightStop = LibCustomGlow[CUSTOM_GLOW_FUNCTIONS[glow_highlight.Type][2]]
 
     widget_frame.Highlight:Show()
   else
+    widget_frame.HighlightStop(widget_frame.Highlight)
     widget_frame.Highlight:Hide()
   end
 end
@@ -154,6 +168,7 @@ function Addon.UpdateCustomStyleIcon(tp_frame, unit)
 end
 
 function Widget:UpdateLayout(widget_frame)
+  -- As there can be several custom styles with different glow effects be active on a unit, we have to stop all here
   LibCustomGlow["ButtonGlow_Stop"](widget_frame.Highlight)
   LibCustomGlow["PixelGlow_Stop"](widget_frame.Highlight)
   LibCustomGlow["AutoCastGlow_Stop"](widget_frame.Highlight)

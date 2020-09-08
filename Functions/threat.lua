@@ -13,7 +13,6 @@ local UnitReaction  = UnitReaction
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
-local LibThreatClassic = Addon.LibThreatClassic
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -66,19 +65,12 @@ function Addon.IsOffTankCreature(unitid)
   return is_off_tank
 end
 
-if Addon.CLASSIC then
-  function Addon:OnThreatTable(unit)
-    local _, _, scaledPercent, _, threatValue = LibThreatClassic:UnitDetailedThreatSituation("player", unit.unitid)
-    return scaledPercent and scaledPercent > 0
-  end
-else
-  function Addon:OnThreatTable(unit)
-    --  local _, threatStatus = UnitDetailedThreatSituation("player", unit.unitid)
-    --  return threatStatus ~= nil
+function Addon:OnThreatTable(unit)
+  --  local _, threatStatus = UnitDetailedThreatSituation("player", unit.unitid)
+  --  return threatStatus ~= nil
 
-    -- nil means player is not on unit's threat table - more acurate, but slower reaction time than the above solution
-    return UnitThreatSituation("player", unit.unitid) ~= nil
-  end
+  -- nil means player is not on unit's threat table - more acurate, but slower reaction time than the above solution
+  return UnitThreatSituation("player", unit.unitid) ~= nil
 end
 
 --toggle = {

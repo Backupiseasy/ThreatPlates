@@ -21,7 +21,6 @@
     <Include file="LibCustomGlow-1.0\LibCustomGlow-1.0.xml"/>
     <Script file="LibDeflate\LibDeflate.lua"/>
     <!--@classic@
-    <Include file="LibThreatClassic2\lib.xml"/>
     <Script file="LibClassicCasterino\LibClassicCasterino.lua"/>
     <Include file="LibClassicDurations\LibClassicDurations.xml"/>
     @end-classic@-->

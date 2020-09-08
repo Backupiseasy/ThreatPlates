@@ -1,7 +1,8 @@
-## Interface: 11303
+## Interface: 11305
 ## Title: LibClassicDurations
-## Version: 1.56
+## Version: 1.64
 ## Author: d87
+## SavedVariables: LCD_Data, LCD_GUIDAccess
 
 ## X-Curse-Project-ID: 323800
 

@@ -208,7 +208,7 @@ function Widget:Create()
     local healthbar_mode_frame = _G.CreateFrame("Frame", nil, widget_frame, BackdropTemplate)
     healthbar_mode_frame:SetFrameLevel(widget_frame:GetFrameLevel())
     healthbar_mode_frame.LeftTexture = widget_frame:CreateTexture(nil, "ARTWORK", nil, (widget_frame == WidgetFrame and 7) or -6)
-    healthbar_mode_frame.RightTexture = widget_frame:CreateTexture(nil, "ARTOWKR", nil, 0)
+    healthbar_mode_frame.RightTexture = widget_frame:CreateTexture(nil, "ARTWORK", nil, 0)
     widget_frame.HealthbarMode = healthbar_mode_frame
 
     widget_frame.NameModeTexture = widget_frame:CreateTexture(nil, "BACKGROUND", nil, 0)
@@ -300,6 +300,9 @@ function Widget:UpdateSettings()
 
   UpdateTexture = UPDATE_TEXTURE_FUNCTIONS[Settings.theme]
   ShowBorder = (UpdateTexture == UpdateBorderTexture)
+
+  -- Update mouseover settings as they depend on target highlight being shown or not
+  Addon.Element_Mouseover_UpdateSettings()
 
   -- Update the widget if it was already created (not true for immediately after Reload UI or if it was never enabled
   -- in this since last Reload UI)

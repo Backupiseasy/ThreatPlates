@@ -262,9 +262,13 @@ function Addon:SetBaseNamePlateSize()
   local width = db.frame.width
   local height = db.frame.height
   if db.frame.SyncWithHealthbar then
-    -- this wont taint like NamePlateDriverFrame.SetBaseNamePlateSize
-    local zeroBasedScale = tonumber(GetCVar("NamePlateVerticalScale")) - 1.0
-    local horizontalScale = tonumber(GetCVar("NamePlateHorizontalScale"))
+    -- this wont taint like NamePlateDriverFrame:SetBaseNamePlateSize
+
+    -- The default size of Threat Plates healthbars is based on large nameplates with these defaults:
+    --   NamePlateVerticalScale = 1.7
+    --   NamePlateVerticalScale = 1.4
+    local zeroBasedScale = 0.7  -- tonumber(GetCVar("NamePlateVerticalScale")) - 1.0
+    local horizontalScale = 1.4 -- tonumber(GetCVar("NamePlateVerticalScale"))
 
     width = (db.healthbar.width - 10) * horizontalScale
     height = (db.healthbar.height + 35) * Lerp(1.0, 1.25, zeroBasedScale)
@@ -312,6 +316,7 @@ function Addon:SetBaseNamePlateSize()
 
   Addon:ConfigClickableArea(false)
 
+  -- For personal nameplate:
   --local clampedZeroBasedScale = Saturate(zeroBasedScale)
   --C_NamePlate_SetNamePlateSelfSize(baseWidth * horizontalScale * Lerp(1.1, 1.0, clampedZeroBasedScale), baseHeight)
 end
@@ -349,14 +354,7 @@ function TidyPlatesThreat:OnInitialize()
   self:RegisterChatCommand("tptp", "ChatCommand")
 
   if Addon.CLASSIC then
-    local LibThreatClassic = Addon.LibThreatClassic
     local LibClassicCasterino = Addon.LibClassicCasterino
-
-    -- Register callbacks for threat library
-    LibThreatClassic.RegisterCallback(self, "Activate", Addon.UNIT_THREAT_LIST_UPDATE)
-    LibThreatClassic.RegisterCallback(self, "Deactivate", Addon.UNIT_THREAT_LIST_UPDATE)
-    LibThreatClassic.RegisterCallback(self, "ThreatUpdated", Addon.UNIT_THREAT_LIST_UPDATE)
-    LibThreatClassic:RequestActiveOnSolo(true)
 
     -- Register callsbacks for spellcasting library
     LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_START", Addon.UNIT_SPELLCAST_START)

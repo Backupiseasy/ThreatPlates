@@ -29,7 +29,6 @@ Addon.LibAceConfigDialog = LibStub("AceConfigDialog-3.0")
 Addon.LibAceConfigRegistry = LibStub("AceConfigRegistry-3.0")
 
 if Addon.CLASSIC then
-	Addon.LibThreatClassic = LibStub:GetLibrary("LibThreatClassic2")
 	Addon.LibClassicCasterino = LibStub("LibClassicCasterino-ThreatPlates")
 	--Addon.LibClassicCasterino = LibStub("LibClassicCasterino")
 end
@@ -57,6 +56,34 @@ Addon.Cache = {
 		PerInstance = {},
 		ForCurrentInstance = {},
 	}
+}
+
+---------------------------------------------------------------------------------------------------
+-- Aura Highlighting
+---------------------------------------------------------------------------------------------------
+local LibCustomGlow = Addon.LibCustomGlow
+local function Wrapper_ButtonGlow_Start(frame, color, framelevel)
+	LibCustomGlow.ButtonGlow_Start(frame, color, nil, framelevel)
+end
+
+local function Wrapper_PixelGlow_Start(frame, color, framelevel)
+	LibCustomGlow.PixelGlow_Start(frame, color, nil, nil, nil, nil, nil, nil, nil, nil, framelevel)
+end
+
+local function Wrapper_AutoCastGlow_Start(frame, color, framelevel)
+	LibCustomGlow.AutoCastGlow_Start(frame, color, nil, nil, nil, nil, nil, nil, framelevel)
+end
+
+Addon.CUSTOM_GLOW_FUNCTIONS = {
+	Button = { "ButtonGlow_Start", "ButtonGlow_Stop", 8 },
+	Pixel = { "PixelGlow_Start", "PixelGlow_Stop", 3 },
+	AutoCast = { "AutoCastGlow_Start", "AutoCastGlow_Stop", 4 },
+}
+
+Addon.CUSTOM_GLOW_WRAPPER_FUNCTIONS = {
+	ButtonGlow_Start = Wrapper_ButtonGlow_Start,
+	PixelGlow_Start = Wrapper_PixelGlow_Start,
+	AutoCastGlow_Start = Wrapper_AutoCastGlow_Start,
 }
 
 --------------------------------------------------------------------------------------------------

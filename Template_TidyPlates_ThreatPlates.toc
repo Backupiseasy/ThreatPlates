@@ -2,11 +2,11 @@
 ## Interface: 90001
 #@end-retail@
 #@classic@
-## Interface: 11304
+## Interface: 11305
 #@end-classic@
 
 ## Title: Threat Plates
-## Version: 10.0.0-Beta1
+## Version: 10.0.0-Beta2
 ## Notes: Threat-reactive nameplates.
 ## Notes-deDE: Bedrohungsreaktive Namensplaketten.
 ## Notes-esES: Placas Identificativas de Amenaza
@@ -20,7 +20,7 @@
 #@end-retail@
 #@classic@
 ## RequiredDeps:
-## OptionalDeps: Ace3, AceGUI-3.0-SharedMediaWidgets, LibSharedMedia-3.0, LibCustomGlow-1.0, LibDeflate, LibClassicDurations, LibThreatClassic2
+## OptionalDeps: Ace3, AceGUI-3.0-SharedMediaWidgets, LibSharedMedia-3.0, LibCustomGlow-1.0, LibDeflate, LibClassicDurations
 #@end-classic@
 
 ## X-Website: https://wow.curseforge.com/projects/tidy-plates-threat-plates

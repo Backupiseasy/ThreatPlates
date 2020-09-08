@@ -31,6 +31,7 @@ local Animations = Addon.Animations
 local Font = Addon.Font
 local UpdateCustomStyleAfterAuraTrigger = Addon.UpdateCustomStyleAfterAuraTrigger
 local UnitStyle_AuraDependent = Addon.UnitStyle_AuraDependent
+local CUSTOM_GLOW_FUNCTIONS, CUSTOM_GLOW_WRAPPER_FUNCTIONS = Addon.CUSTOM_GLOW_FUNCTIONS, Addon.CUSTOM_GLOW_WRAPPER_FUNCTIONS
 local BackdropTemplate = Addon.BackdropTemplate
 
 local LibClassicDurations
@@ -44,29 +45,6 @@ if Addon.CLASSIC then
   LibClassicDurations = LibStub("LibClassicDurations")
   UnitAura = function(...) LibClassicDurations:UnitAura(...) end
 end
-
----------------------------------------------------------------------------------------------------
--- Aura Highlighting
----------------------------------------------------------------------------------------------------
-local CUSTOM_GLOW_FUNCTIONS = Addon.CUSTOM_GLOW_FUNCTIONS
-
-local function Wrapper_ButtonGlow_Start(frame, color, framelevel)
-  LibCustomGlow.ButtonGlow_Start(frame, color, nil, framelevel)
-end
-
-local function Wrapper_PixelGlow_Start(frame, color, framelevel)
-  LibCustomGlow.PixelGlow_Start(frame, color, nil, nil, nil, nil, nil, nil, nil, nil, framelevel)
-end
-
-local function Wrapper_AutoCastGlow_Start(frame, color, framelevel)
-  LibCustomGlow.AutoCastGlow_Start(frame, color, nil, nil, nil, nil, nil, nil, framelevel)
-end
-
-local CUSTOM_GLOW_WRAPPER_FUNCTIONS = {
-  ButtonGlow_Start = Wrapper_ButtonGlow_Start,
-  PixelGlow_Start = Wrapper_PixelGlow_Start,
-  AutoCastGlow_Start = Wrapper_AutoCastGlow_Start,
-}
 
 ---------------------------------------------------------------------------------------------------
 -- Auras Widget Functions
@@ -1752,6 +1730,9 @@ end
 
 function Widget:OnDisable()
   self:UnregisterAllEvents()
+  if Addon.CLASSIC then
+    LibClassicDurations.UnregisterCallback(TidyPlatesThreat, "UNIT_BUFF")
+  end
   for plate, _ in pairs(Addon.PlatesVisible) do
     plate.TPFrame.widgets.Auras:UnregisterAllEvents()
   end

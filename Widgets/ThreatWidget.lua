@@ -22,7 +22,6 @@ local GetRaidTargetIndex = GetRaidTargetIndex
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
 local GetThreatSituation = Addon.GetThreatSituation
-local LibThreatClassic = Addon.LibThreatClassic
 local PlatesByGUID = Addon.PlatesByGUID
 local Font = Addon.Font
 
@@ -65,21 +64,6 @@ function Widget:UNIT_THREAT_LIST_UPDATE(unitid)
   end
 end
 
-local function UNIT_THREAT_LIST_UPDATE_CLASSIC(lib_name, unit_guid, target_guid, threat)
-  local plate = PlatesByGUID[target_guid]
-  if plate then
-    local unitid = plate.TPFrame.unit.unitid
-    if not unitid or unitid == "player" or UnitIsUnit("player", unitid) then return end
-
-    if plate.TPFrame.Active then
-      local widget_frame = plate.TPFrame.widgets.Threat
-      if widget_frame.Active then
-        Widget:UpdateFrame(widget_frame, plate.TPFrame.unit)
-      end
-    end
-  end
-end
-
 function Widget:RAID_TARGET_UPDATE()
   self:UpdateAllFrames()
 end
@@ -116,20 +100,12 @@ function Widget:IsEnabled()
 end
 
 function Widget:OnEnable()
-  if Addon.CLASSIC then
-    LibThreatClassic.RegisterCallback(TidyPlatesThreat, "ThreatUpdated", UNIT_THREAT_LIST_UPDATE_CLASSIC)
-  else
-    self:RegisterEvent("UNIT_THREAT_LIST_UPDATE")
-  end
+  self:RegisterEvent("UNIT_THREAT_LIST_UPDATE")
   self:RegisterEvent("RAID_TARGET_UPDATE")
 end
 
 function Widget:OnDisable()
-  if Addon.CLASSIC then
-    LibThreatClassic.UnregisterCallback(TidyPlatesThreat, "ThreatUpdated")
-  else
-    self:UnregisterEvent("UNIT_THREAT_LIST_UPDATE")
-  end
+  self:UnregisterEvent("UNIT_THREAT_LIST_UPDATE")
   self:UnregisterEvent("RAID_TARGET_UPDATE")
 end
 

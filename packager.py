@@ -1,6 +1,6 @@
 import argparse
 import re
-from zipfile import ZipFile
+import zipfile
 import os
 
 # ---------------------------------------------------------------------------------------------------
@@ -177,7 +177,7 @@ def create_package(wow_version):
 
     package_file_name = args.package_dir + "\\" + package_name + "_" + version_no + ".zip"
 
-    package_file = ZipFile(package_file_name, "w")
+    package_file = zipfile.ZipFile(package_file_name, "w", compression=zipfile.ZIP_DEFLATED, allowZip64=True, compresslevel=9)
     zip_dir(".", package_file, ignore_dir=IGNORE_DIR+ignore_lib_dirs, ignore_file=IGNORE_FILE, ignore_ext=IGNORE_EXT)
 
     # Add TOC file to package
@@ -231,7 +231,8 @@ args = parser.parse_args()
 # -- Create packages for Retail and Classic
 # ---------------------------------------------------------------------------------------------------
 
-create_package("Retail")
-create_package("Classic")
+if args.package_dir or args.initialize:
+    create_package("Retail")
+    create_package("Classic")
 
 

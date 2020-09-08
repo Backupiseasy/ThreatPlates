@@ -1,7 +1,12 @@
 ﻿------------------------------------------------------
+9.3.0-Beta2
+------------------------------------------------------
+* Fixed a bug with the clickable area being to small when small Blizzard nameplates and Healthbar Sync were enabled [Comment #4548].
+
+------------------------------------------------------
 9.3.0-Beta1
 ------------------------------------------------------
-* Consolidated Retail and Classic version of Threat Plates into one single version.
+* Consolidated Retail and Classic version of Threat Plates into one single sourcecode version.
 * Added a new widget to show the experience bar of certain follower [Comment #3775, #3728, #4190, #4402, #4447, #4699, Issue GitHub #202].
 * Added an option to show the castbar above or below the healthbar [Comment #4486, #4461, #4631, Issue TPC#32, PM].
 * Added an option to show the current target's name on the castbar [Comment #4474, #4495, #4616].
@@ -9,6 +14,7 @@
 * Added a feature to show the name of the unit that is currently targeted on the nameplate [Issue TPC#15, Comment TPC#446, #TPC579].
 * Added an option to show the current amount of threat as a percentage [Comment TPC#540, TPC#533, E-Mail].
 * Added options to enable/disable custom styles for nameplates based based on being inside or outside of instances [Issue #363, #185].
+* Added an option to duplicate existing custom styles for nameplates [Comment TPC#562].
 * Improved importing profiles and custom styles for nameplates - now also exports from older Threat Plates versions can be imported.
 * Fixed a bug where enabling/disabling widgets only took effect after reloading the UI.
 * Fixed a bug with Focus widget where an incorrect artwork was shown when switching between healthbar and headline view.
@@ -16,8 +22,12 @@
 * Fixed a bug with custom styles for nameplates where styles where not enabled/disabled for friendly or enemy units correctly.
 * Fixed a bug where nameplates with a custom style were not updated after a settings change.
 * Fixed a bug with Name trigger for custom styles for nameplates where units with the character "." in their name could not be added.
+* Fixed a bug with mouseover highlight not shown on the current target unit when target highlight was disabled.
+* Fixed a bug where the the glow effect on custom styles for nameplates with Cast trigger was not shown [Comment #4675].
+* Fixed a bug where multiple, overlapping glow effects where shown on a custom style nameplate [Comment #4675].
 * Reworked layering of all graphical elements as part of the castbar over healthbar feature integration.
 * Renamed filter modes for Auras widget to None, Allow, and Block.
+* Upgrade integrated libraries (LibClassicCasterino rev. 33, LibClassicDurations v.1.64, LibDeflate v1.0.2, LibSharedMedia v.8.2.0-r113)
 
 ------------------------------------------------------
 9.2.4
