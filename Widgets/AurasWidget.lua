@@ -42,7 +42,7 @@ local _G =_G
 
 if Addon.CLASSIC then
   LibClassicDurations = LibStub("LibClassicDurations")
-  UnitAura = function(...) LibClassicDurations:UnitAura(...) end
+  UnitAura = LibClassicDurations.UnitAuraWithBuffs
 end
 
 ---------------------------------------------------------------------------------------------------

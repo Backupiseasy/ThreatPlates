@@ -3,6 +3,7 @@
 ------------------------------------------------------
 * Fixed a bug with the clickable area being to small when small Blizzard nameplates and Healthbar Sync were enabled [Comment #4548].
 * Fixed a Lua error that occurs when clicking on Custom Nameplates - Appearance when still using the old custom nameplates format.
+* Fixed a bug in Auras widget where auras were not tracked at all because of a API change in LibClassicDurations [Comment #609, IM].
 
 ------------------------------------------------------
 9.3.0-Beta1
