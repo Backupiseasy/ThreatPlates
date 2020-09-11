@@ -4379,9 +4379,7 @@ local function CreateVisibilitySettings()
               Addon:CallbackWhenOoC(function()
                 SetValue(info, val)
                 Addon:SetBaseNamePlateSize() -- adjust clickable area if switching from Blizzard plates to Threat Plate plates
-                for plate, unitid in pairs(Addon.PlatesVisible) do
-                  Addon:UpdateNameplateStyle(plate, unitid)
-                end
+                Addon:ForceUpdate(true)
               end, L["Unable to change a setting while in combat."])
             end,
             get = GetValue,
@@ -4398,9 +4396,7 @@ local function CreateVisibilitySettings()
               Addon:CallbackWhenOoC(function()
                 SetValue(info, val)
                 Addon:SetBaseNamePlateSize() -- adjust clickable area if switching from Blizzard plates to Threat Plate plates
-                for plate, unitid in pairs(Addon.PlatesVisible) do
-                  Addon:UpdateNameplateStyle(plate, unitid)
-                end
+                Addon:ForceUpdate(true)
               end, L["Unable to change a setting while in combat."])
             end,
             get = GetValue,
