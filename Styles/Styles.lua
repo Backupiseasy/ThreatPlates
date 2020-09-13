@@ -43,6 +43,15 @@ local REACTION_MAPPING = {
   NEUTRAL = "Neutral",
 }
 
+local INSTANCE_TYPES = {
+  none = false,
+  pvp = false,
+  arena = false,
+  party = true,
+  raid = true,
+  scenario = true,
+}
+
 -- Mapping necessary - to removed it, config settings must be changed/migrated
 -- Visibility        Scale / Alpha                  Threat System
 local MAP_UNIT_TYPE_TO_TP_TYPE = {
@@ -335,7 +344,8 @@ function Addon:SetStyle(unit)
   -- Array by instance ID and all enabled styles?
   local custom_style = unit.CustomPlateSettings
   if custom_style then
-    if IsInInstance() then
+    local _, instance_type = IsInInstance()
+    if INSTANCE_TYPES[instance_type] then
       if not CustomStylesForAllInstances[custom_style] and not CustomStylesForCurrentInstance[custom_style] then
       -- Without cache: if not custom_style.Enable.Instances or (custom_style.Enable.InstanceIDs.Enable and not CustomStylesForCurrentInstance[custom_style]) then
         style = nil
