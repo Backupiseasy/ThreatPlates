@@ -5,6 +5,7 @@
 * Fixed a Lua error that occurs when clicking on Custom Nameplates - Appearance when still using the old custom nameplates format.
 * Fixed a bug in Auras widget where auras were not tracked at all because of a API change in LibClassicDurations [Comment #609, IM].
 * Fixed a bug with widgets being initialized and updated properly when switching between Blizzard nameplates and Threat Plates (without reloading the UI).
+* Fixed a bug where automatic icon for custom styles for nameplates was not shown correctly because of delayed portrait updates.
 * Updated the icon for Blizzard Battle.net Friends in the Social widget.
 * Restricted instance-based custom styles for nameplates to dungeons and raids.
 

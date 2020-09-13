@@ -15,6 +15,7 @@ local type = type
 local pairs = pairs
 
 -- WoW APIs
+local PlatesByUnit = Addon.PlatesByUnit
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
@@ -59,12 +60,32 @@ function Widget:IsEnabled()
   return Addon.UseUniqueWidget -- self.ON is also checked when scanning all custom nameplates
 end
 
---function Widget:UNIT_NAME_UPDATE()
---end
---
---function Widget:OnEnable()
---  self:RegisterEvent("UNIT_NAME_UPDATE")
---end
+-- Especially when entering an instance, the portrait might not yet be loaded, when OnUnitAdded is called.
+-- So, we have to listen for this event to update it when the portrait is available.
+function Widget:UNIT_PORTRAIT_UPDATE(unitid)
+  if unitid == "player" or unitid == "target" then return end
+
+  local plate = PlatesByUnit[unitid]
+  if plate then
+    local tp_frame = plate.TPFrame
+    local unique_setting = tp_frame.unit.CustomPlateSettings
+    if unique_setting and self.db.ON and unique_setting.showIcon and unique_setting.UseAutomaticIcon then
+      local icon = tp_frame.widgets.UniqueIcon.Icon
+      _G.SetPortraitTexture(icon, unitid)
+      icon:SetTexCoord(0.14644660941, 0.85355339059, 0.14644660941, 0.85355339059)
+    end
+  end
+end
+
+
+function Widget:OnEnable()
+  self:RegisterEvent("UNIT_PORTRAIT_UPDATE")
+end
+
+function Widget:OnDisable()
+  self:UnregisterEvent("UNIT_PORTRAIT_UPDATE")
+end
+
 
 function Widget:EnabledForStyle(style, unit)
   return style ~= "empty" -- (style == "unique" or style == "NameOnly-Unique" or style == "etotem")
@@ -87,6 +108,7 @@ function Widget:OnUnitAdded(widget_frame, unit)
 
   local show_icon = self.db.ON and unique_setting.showIcon
   if show_icon then
+    widget_frame:ClearAllPoints()
     if unit.style == "NameOnly" or unit.style == "NameOnly-Unique" then
       widget_frame:SetPoint("CENTER", widget_frame:GetParent(), db.x_hv, db.y_hv)
     else
@@ -115,7 +137,7 @@ function Widget:OnUnitAdded(widget_frame, unit)
       icon:SetTexCoord(0, 1, 0, 1)
     end
 
-    widget_frame.Icon:Show()
+    icon:Show()
   else
     widget_frame.Icon:Hide()
   end
