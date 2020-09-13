@@ -53,6 +53,7 @@ local DETECTION_AURAS = {
   -- Battle for Azeroth
   [230368] = true, -- Detector
   [248705] = true, -- Detector
+  [311928] = true, -- Sight Beyond Sight
 }
 
 local DETECTION_UNITS = {
@@ -67,7 +68,14 @@ local DETECTION_UNITS = {
   ["154459"] = true, -- Horde Vanguard
   ["151945"] = true, -- Scavenging Dunerunner
   -- ["159425"] = true, -- Occult Shadowmender
-  -- ["161416"] = true, -- Aqir Shadowcrafter
+  ["159303"] = true, -- Monstrous Behemoth
+  ["159320"] = true, -- Amathet
+  ["161416"] = true, -- Aqir Shadowcrafter
+  ["162534"] = true, -- Anubisath Sentinel
+  ["162508"] = true, -- Anubisath Sentinel
+  ["162417"] = true, -- Anubisath Sentinel
+  ["161571"] = true, -- Anubisath Sentinel
+  ["159219"] = true, -- Umbral Seer
 }
 
 ---------------------------------------------------------------------------------------------------
