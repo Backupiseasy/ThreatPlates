@@ -146,7 +146,7 @@ function TidyPlatesThreat:ChatCommand(input)
 			local guid = UnitGUID(plate.TPFrame.unit.unitid)
 			local _, _,  _, _, _, npc_id = strsplit("-", guid)
 
-			print("NPC-ID:", npc_id, "=>", guid)
+			print(plate.TPFrame.unit.name, " => NPC-ID:", npc_id, "=>", guid)
 
 			local widgets = C_UIWidgetManager.GetAllWidgetsBySetID(C_UIWidgetManager.GetPowerBarWidgetSetID())
 			for i, w in pairs(widgets) do
