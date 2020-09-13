@@ -398,7 +398,7 @@ do
 
 		Addon.UpdateExtensions(extended, unit.unitid, stylename)
 
-    Addon:UpdateNameplateStyle(nameplate, unitid)
+    Addon:UpdateNameplateStyle(plate, unitid)
 
     UNIT_TARGET("UNIT_TARGET", unitid) -- requires tp_frame.Active, which is set in UpdateNameplateStyle
 
@@ -1756,7 +1756,7 @@ end
 function Addon:DisableCastBars() ShowCastBars = false end
 function Addon:EnableCastBars() ShowCastBars = true end
 
-function Addon:ForceUpdate()
+function Addon:ForceUpdate(all_visible_plates)
   wipe(PlateOnUpdateQueue)
 
   Addon:UpdateConfigurationStatusText()
@@ -1795,7 +1795,7 @@ function Addon:ForceUpdate()
   end
 
   for plate in pairs(self.PlatesVisible) do
-    if plate.TPFrame.Active then
+    if plate.TPFrame.Active or all_visible_plates then
       OnResetNameplate(plate)
     end
   end

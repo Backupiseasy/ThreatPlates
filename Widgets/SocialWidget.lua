@@ -25,8 +25,8 @@ local Widget = Addon.Widgets:NewWidget("Social")
 
 -- WoW APIs
 local GetNumGuildMembers, GetGuildRosterInfo = GetNumGuildMembers, GetGuildRosterInfo
-local BNGetFriendInfo, BNGetToonInfo, BNGetFriendInfoByID = BNGetFriendInfo, BNGetToonInfo, BNGetFriendInfoByID
-local BNet_GetValidatedCharacterName = BNet_GetValidatedCharacterName
+local BNET_CLIENT_WOW = BNET_CLIENT_WOW
+local GetFriendAccountInfo, GetGameAccountInfoByID = C_BattleNet.GetFriendAccountInfo, C_BattleNet.GetGameAccountInfoByID
 local UnitName, GetRealmName, UnitFactionGroup = UnitName, GetRealmName, UnitFactionGroup
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local C_FriendList_ShowFriends, C_FriendList_GetNumOnlineFriends = C_FriendList.ShowFriends, C_FriendList.GetNumOnlineFriends
@@ -37,7 +37,8 @@ local TidyPlatesThreat = TidyPlatesThreat
 local PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\SocialWidget\\"
 local ICON_FRIEND = PATH .. "friendicon"
 local ICON_GUILDMATE = PATH .. "guildicon"
-local ICON_BNET_FRIEND = "Interface\\FriendsFrame\\PlusManz-BattleNet"
+--local ICON_BNET_FRIEND = "Interface\\FriendsFrame\\PlusManz-BattleNet"
+local ICON_BNET_FRIEND = PATH .. "BattleNetFriend"
 local ICON_FACTION_HORDE = PATH .. "hordeicon" -- "Interface\\ICONS\\inv_bannerpvp_01"
 local ICON_FACTION_ALLIANCE = PATH .. "allianceicon" -- "Interface\\ICONS\\inv_bannerpvp_02",
 
@@ -54,6 +55,10 @@ local _G =_G
 ---------------------------------------------------------------------------------------------------
 -- Social Widget Functions
 ---------------------------------------------------------------------------------------------------
+
+local function GetFullName(character_name, realm)
+  return character_name .. "-" .. (realm or GetRealmName())
+end
 
 function Widget:FRIENDLIST_UPDATE()
 --  local plate = C_NamePlate.GetNamePlateForUnit("target")
@@ -123,10 +128,11 @@ function Widget:BN_CONNECTED()
     end
 
     for i = 1, BnetOnline do
-      local _, _, _, _, toonID, client, isOnline, _, _, _, _, _, _, _ = BNGetFriendInfo(i)
-      if isOnline and toonID and client == "WoW" then
-        local _, name = BNGetToonInfo(toonID)
-        ListBnetFriends[name] = ICON_BNET_FRIEND
+      local account_info = GetFriendAccountInfo(i)
+      local game_account_info = account_info.gameAccountInfo
+
+      if game_account_info.isOnline and game_account_info.clientProgram == BNET_CLIENT_WOW and game_account_info.characterName then
+        ListBnetFriends[GetFullName(game_account_info.characterName, game_account_info.realmName)] = ICON_BNET_FRIEND
       end
     end
 
@@ -136,48 +142,22 @@ function Widget:BN_CONNECTED()
   end
 end
 
-function Widget:BN_FRIEND_TOON_ONLINE(toon_id)
-  local _, name = BNGetToonInfo(toon_id)
-  ListBnetFriends[name] = ICON_BNET_FRIEND
+function Widget:BN_FRIEND_ACCOUNT_ONLINE(friend_id, _)
+  local game_account_info = GetGameAccountInfoByID(friend_id)
 
-  self:UpdateAllFramesAndNameplateColor()
-end
-
-function Widget:BN_FRIEND_TOON_OFFLINE(toon_id)
-  local _, name = BNGetToonInfo(toon_id)
-  ListBnetFriends[name] = nil
-
-  self:UpdateAllFramesAndNameplateColor()
-end
-
-function Widget:BN_FRIEND_ACCOUNT_ONLINE(presence_id)
-  local bnetIDAccount, accountName, battle_tag, isBattleTag, character_name, bnetIDGameAccount, client = BNGetFriendInfoByID(presence_id)
-
-  -- don't display a the friend if we didn't get the data in time or the are not logged in into WoW
-  --if not accountName or client ~= "BNET_CLIENT_WOW" then	return end
-
-  if (battle_tag) then
-    character_name = BNet_GetValidatedCharacterName(character_name, battle_tag, client) or ""
+  if game_account_info and game_account_info.isOnline and game_account_info.clientProgram == BNET_CLIENT_WOW and game_account_info.characterName then
+    ListBnetFriends[GetFullName(game_account_info.characterName, game_account_info.realmName)] = ICON_BNET_FRIEND
+    self:UpdateAllFramesAndNameplateColor()
   end
-
-  ListBnetFriends[character_name] = ICON_BNET_FRIEND
-
-  self:UpdateAllFramesAndNameplateColor()
 end
 
-function Widget:BN_FRIEND_ACCOUNT_OFFLINE(presence_id)
-  local bnetIDAccount, accountName, battle_tag, isBattleTag, character_name, bnetIDGameAccount, client = BNGetFriendInfoByID(presence_id)
+function Widget:BN_FRIEND_ACCOUNT_OFFLINE(friend_id, _)
+  local game_account_info = GetGameAccountInfoByID(friend_id)
 
-  -- don't display a the friend if we didn't get the data in time or the are not logged in into WoW
-  --if not accountName or client ~= "BNET_CLIENT_WOW" then	return end
-
-  if (battle_tag) then
-    character_name = BNet_GetValidatedCharacterName(character_name, battle_tag, client) or ""
+  if game_account_info and game_account_info.isOnline and game_account_info.clientProgram == BNET_CLIENT_WOW and game_account_info.characterName then
+    ListBnetFriends[GetFullName(game_account_info.characterName, game_account_info.realmName)] = nil
+    self:UpdateAllFramesAndNameplateColor()
   end
-
-  ListBnetFriends[character_name] = nil
-
-  self:UpdateAllFramesAndNameplateColor()
 end
 
 function Widget:UNIT_NAME_UPDATE(unitid)
@@ -188,7 +168,7 @@ function Widget:UNIT_NAME_UPDATE(unitid)
     if widget_frame.Active then
       local unit = plate.TPFrame.unit
       local name, realm = UnitName(unitid)
-      unit.fullname = name .. "-" .. (realm or GetRealmName())
+      unit.fullname = GetFullName(name, realm)
 
       self:OnUnitAdded(widget_frame, unit)
     end

@@ -2348,7 +2348,7 @@ local function CreateExperienceWidgetOptions()
     args = {
       Enable = GetEnableEntry(
         L["Enable Experience Widget"],
-        L["This widget shows an experience bar for player followers or pets."], "ExperienceWidget",
+        L["This widget shows an experience bar for player followers."], "ExperienceWidget",
         true,
         function(info, val) SetValuePlain(info, val); Addon.Widgets:InitializeWidget("Experience") end
       ),
@@ -4379,9 +4379,7 @@ local function CreateVisibilitySettings()
               Addon:CallbackWhenOoC(function()
                 SetValue(info, val)
                 Addon:SetBaseNamePlateSize() -- adjust clickable area if switching from Blizzard plates to Threat Plate plates
-                for plate, unitid in pairs(Addon.PlatesVisible) do
-                  Addon:UpdateNameplateStyle(plate, unitid)
-                end
+                Addon:ForceUpdate(true)
               end, L["Unable to change a setting while in combat."])
             end,
             get = GetValue,
@@ -4398,9 +4396,7 @@ local function CreateVisibilitySettings()
               Addon:CallbackWhenOoC(function()
                 SetValue(info, val)
                 Addon:SetBaseNamePlateSize() -- adjust clickable area if switching from Blizzard plates to Threat Plate plates
-                for plate, unitid in pairs(Addon.PlatesVisible) do
-                  Addon:UpdateNameplateStyle(plate, unitid)
-                end
+                Addon:ForceUpdate(true)
               end, L["Unable to change a setting while in combat."])
             end,
             get = GetValue,
@@ -6657,7 +6653,7 @@ CreateCustomNameplateEntry = function(index)
             width = "double",
             desc = function()
               local instance_name, _, _, _, _, _, _, instance_id = GetInstanceInfo()
-              return L["|cffFFD100Current Instance:|r\n"] .. instance_name .. ": " .. instance_id .. L["\n\nSupports multiple entries, separated by commas."]
+              return L["|cffFFD100Current Instance:|r"] .. "\n" .. instance_name .. ": " .. instance_id .. "\n\n" .. L["Supports multiple entries, separated by commas."]
             end,
             set = function(info, val)
               SetValuePlain(info, val);
@@ -6808,7 +6804,7 @@ CreateCustomNameplateEntry = function(index)
             },
           },
           Glow = {
-            name = L["Highlight Glow"],
+            name = L["Highlight"],
             type = "group",
             order = 30,
             inline = true,

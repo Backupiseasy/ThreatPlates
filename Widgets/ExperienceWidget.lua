@@ -19,7 +19,6 @@ local UnitPlayerControlled, UnitIsOwnerOrControllerOfUnit = UnitPlayerControlled
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
 local ANCHOR_POINT_TEXT = Addon.ANCHOR_POINT_TEXT
-local PlatesByUnit = Addon.PlatesByUnit
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
