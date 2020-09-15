@@ -8,6 +8,7 @@
 * Fixed a bug where automatic icon for custom styles for nameplates was not shown correctly because of delayed portrait updates.
 * Updated the icon for Blizzard Battle.net Friends in the Social widget.
 * Restricted instance-based custom styles for nameplates to dungeons and raids.
+* Updated localizations for German, Traditional Chinese, Spanish, and Latin American Spanish (thanks to sugymaylis for the Spanish translations).
 
 ------------------------------------------------------
 9.3.0-Beta1
