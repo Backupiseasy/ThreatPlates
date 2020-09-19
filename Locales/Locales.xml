@@ -4,7 +4,6 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 
     <Script file="enUS.lua"/>
     <Script file="deDE.lua"/>
-    <Script file="koKR.lua"/>
     <Script file="zhTW.lua"/>
     <Script file="zhCN.lua"/>
     <Script file="esES.lua"/>
@@ -12,6 +11,7 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 
     <!-- <Script file="enGB.lua"/> -->
     <!-- The european english client is enGB, but AceLocale automatically loads the enUS entries for enGB -->
+    <!--<Script file="koKR.lua"/>-->
     <!--<Script file="frFR.lua"/>-->
     <!--<Script file="ruRU.lua"/>-->
 </Ui>

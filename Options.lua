@@ -8858,13 +8858,13 @@ local function CreateOptionsTable()
               type = "description",
               order = 5,
               width = "full",
-              name = "esES: Woopy"
+              name = "esES: sugymaylis, Woopy"
             },
             Translators3 = {
               type = "description",
               order = 6,
               width = "full",
-              name = "esMX: Woopy"
+              name = "esMX: sugymaylis, Woopy"
             },
 --						Translators4 = {
 --							type = "description",
