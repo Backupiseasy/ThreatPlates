@@ -1137,6 +1137,7 @@ function Widget:CreateAuraFrameIconMode(parent)
   frame.Border = _G.CreateFrame("Frame", nil, frame)
   frame.Border:SetFrameLevel(parent:GetFrameLevel())
   frame.Cooldown = CreateCooldown(frame)
+  frame.Cooldown:SetFrameLevel(parent:GetFrameLevel())
 
   frame.Highlight = _G.CreateFrame("Frame", nil, frame)
   frame.Highlight:SetFrameLevel(parent:GetFrameLevel())
@@ -1304,6 +1305,7 @@ function Widget:CreateAuraFrameBarMode(parent)
   frame.TimeText:SetShadowOffset(1, -1)
 
   frame.Cooldown = CreateCooldown(frame)
+  frame.Cooldown:SetFrameLevel(parent:GetFrameLevel())
 
   frame:Hide()
 

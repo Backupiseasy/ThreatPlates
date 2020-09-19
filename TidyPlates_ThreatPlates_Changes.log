@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+9.3.0-Beta3
+------------------------------------------------------
+* Fixed a bug with the Auras widget where only a green overlay texture was shown instead of the cooldown spiral [IM].
+
+------------------------------------------------------
 9.3.0-Beta2
 ------------------------------------------------------
 * Fixed a bug with the clickable area being to small when small Blizzard nameplates and Healthbar Sync were enabled [Comment #4548].

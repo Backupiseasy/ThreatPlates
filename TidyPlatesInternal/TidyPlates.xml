@@ -5,7 +5,7 @@
         <SwipeTexture>
             <Color r="0" g="0" b="0" a="0.8"/>
         </SwipeTexture>
-        <EdgeTexture file="Interface\Addons\TidyPlates_ThreatPlates\TidyPlatesInternal\Artwork\Edge"/>
+        <EdgeTexture file="Interface\Addons\TidyPlates_ThreatPlates\Artwork\Edge"/>
     </Cooldown>
 
     <Script file="TidyPlatesStatusbar.lua"/>
