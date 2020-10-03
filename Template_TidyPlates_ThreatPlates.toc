@@ -1,5 +1,5 @@
 ﻿#@retail@
-## Interface: 90001
+## Interface: 90002
 #@end-retail@
 #@classic@
 ## Interface: 11305

@@ -1,7 +1,7 @@
-import argparse
 import re
 import zipfile
 import os
+import click
 
 # ---------------------------------------------------------------------------------------------------
 # -- Constants
@@ -137,36 +137,11 @@ def create_libs_xml_file(wow_version):
 
 
 # ZIP package for WoW version
-def create_package(wow_version):
+def create_package(wow_version, package_dir):
     #packager_path = os.path.dirname(os.path.realpath(__file__))
 
     toc_file_content, version_no = create_toc_file(wow_version)
     libs_file_content, ignore_lib_dirs = create_libs_xml_file(wow_version)
-
-    # Create instantiated files from templates and save them
-
-    if args.initialize:
-        initialize_version = ""
-        working_dir = os.getcwd()
-        if "_retail_" in working_dir:
-            initialize_version = "Retail"
-        elif "_ptr_" in working_dir:
-            initialize_version = "Retail"
-        elif "_classic_" in working_dir:
-            initialize_version = "Classic"
-
-        if wow_version == initialize_version:
-            print("Initializing local installation for WoW " + initialize_version)
-            with open(TOC_FILE, 'w') as f:
-                f.write(toc_file_content)
-                f.close()
-            with open(LIBS_XML_FILE, 'w') as f:
-                f.write(libs_file_content)
-                f.close()
-            if not args.package_dir:
-                return
-        elif not args.package_dir:
-            return
 
     # ---------------------------------------------------------------------------------------------------
     # -- Zip Packages
@@ -175,7 +150,7 @@ def create_package(wow_version):
     if wow_version == "Classic":
         package_name += wow_version
 
-    package_file_name = args.package_dir + "\\" + package_name + "_" + version_no + ".zip"
+    package_file_name = package_dir + "\\" + package_name + "_" + version_no + ".zip"
 
     package_file = zipfile.ZipFile(package_file_name, "w", compression=zipfile.ZIP_DEFLATED, allowZip64=True, compresslevel=9)
     zip_dir(".", package_file, ignore_dir=IGNORE_DIR+ignore_lib_dirs, ignore_file=IGNORE_FILE, ignore_ext=IGNORE_EXT)
@@ -186,6 +161,40 @@ def create_package(wow_version):
     package_file.writestr(SOURCE_DIR + "\\" + LIBS_XML_FILE, libs_file_content)
 
     package_file.close()
+
+# ---------------------------------------------------------------------------------------------------
+# -- ...
+# ---------------------------------------------------------------------------------------------------
+
+
+def get_wow_version():
+    working_dir = os.getcwd()
+    if "_retail_" in working_dir:
+        return "Retail"
+    if "_beta_" in working_dir:
+        return "Retail"
+    elif "_classic_" in working_dir:
+        return "Classic"
+    else:
+        print("Unknown working directory. Exiting ...")
+        exit(-1)
+
+
+def template_is_out_of_date(file, template_file):
+    if not os.path.exists(file):
+        return True
+    else:
+        last_modified_file = os.path.getmtime(file)
+        last_modified_template_file = os.path.getmtime(template_file)
+
+        return last_modified_file <= last_modified_template_file
+
+
+def write_to_file(file, content):
+    with open(file, 'w') as f:
+        f.write(content)
+        f.close()
+
 
 # ---------------------------------------------------------------------------------------------------
 # -- Upload packages to CurseForge
@@ -220,19 +229,31 @@ def create_package(wow_version):
 # -- Argument Parser
 # ---------------------------------------------------------------------------------------------------
 
-parser = argparse.ArgumentParser(description="Create a package for a new release of Threat Plates for Retail an Classic WoW.")
-#parser.add_argument("version", help="The version number for the new release.")
-parser.add_argument("--package-dir", help="The directory into which the package should be saved.")
-parser.add_argument("--initialize", action="store_true", help="Instantiates all-template-based addon files for the selected WoW version, so that WoW can load the addon from this directory successfully.")
-# parser.add_argument("--upload", action="store_true", help="Upload new release packages to CurseForge.")
-args = parser.parse_args()
+@click.command()
+@click.option('--package-dir', type=str, help='Create release versions of Threat Plates in the specified directory.')
+def packager_main(package_dir):
+    """Create a package for a new release of Threat Plates for Retail an Classic WoW."""
+    wow_version = get_wow_version()
+    print("WoW version:", wow_version)
 
-# ---------------------------------------------------------------------------------------------------
-# -- Create packages for Retail and Classic
-# ---------------------------------------------------------------------------------------------------
+    # If TOC file is out of date or does not exists, create it:
+    if template_is_out_of_date(TOC_FILE, TEMPLATE_TOC_FILE):
+        print("TOC file is outdated ... updating it!")
+        file_content, version_no = create_toc_file(wow_version)
+        write_to_file(TOC_FILE, file_content)
 
-if args.package_dir or args.initialize:
-    create_package("Retail")
-    create_package("Classic")
+    # If TOC file is out of date or does not exists, create it:
+    if template_is_out_of_date(LIBS_XML_FILE, TEMPLATE_LIBS_XML_FILE):
+        print("Libs.xml file is outdated ... updating it!")
+        file_content, version_no = create_toc_file(wow_version)
+        write_to_file(LIBS_XML_FILE, file_content)
 
+    # ---------------------------------------------------------------------------------------------------
+    # -- Create packages for Retail and Classic
+    # ---------------------------------------------------------------------------------------------------
+    if package_dir:
+        create_package("Retail", package_dir)
+        create_package("Classic", package_dir)
 
+if __name__ == '__main__':
+    packager_main()

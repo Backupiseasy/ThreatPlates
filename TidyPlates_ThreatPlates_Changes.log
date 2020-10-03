@@ -2,6 +2,7 @@
 9.3.0-Beta3
 ------------------------------------------------------
 * Fixed a bug with the Auras widget where only a green overlay texture was shown instead of the cooldown spiral [IM].
+* Fixed a Lua error that occured when the castbar API was called on units not casting (e.g., when a nameplate was shown the first time) [Issue #37].
 
 ------------------------------------------------------
 9.3.0-Beta2

@@ -60,7 +60,7 @@ if Addon.CLASSIC then
       text = nil
     end
 
-    return text, text, texture, startTime, endTime, false, false, spellID
+    return text, text, texture, startTime or 0, endTime or 0, false, false, spellID
   end
 
   UnitCastingInfo = function(...)
@@ -72,7 +72,7 @@ if Addon.CLASSIC then
       text = nil
     end
 
-    return text, text, texture, startTime, endTime, false, nil, false, spellID
+    return text, text, texture, startTime or 0, endTime or 0, false, nil, false, spellID
   end
 else
   GetNameForNameplate = function(plate) return plate:GetName() end
