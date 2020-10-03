@@ -1134,7 +1134,7 @@ function Widget:CreateAuraFrameIconMode(parent)
   local frame = _G.CreateFrame("Frame", nil, parent)
   frame:SetFrameLevel(parent:GetFrameLevel())
 
-  frame.Icon = frame:CreateTexture(nil, "ARTWORK", nil, 0)
+  frame.Icon = frame:CreateTexture(nil, "ARTWORK", nil, -5)
   frame.Border = _G.CreateFrame("Frame", nil, frame, BackdropTemplate)
   frame.Border:SetFrameLevel(parent:GetFrameLevel())
   frame.Cooldown = CreateCooldown(frame)
@@ -1291,7 +1291,7 @@ function Widget:CreateAuraFrameBarMode(parent)
   frame.Highlight = _G.CreateFrame("Frame", nil, frame)
   frame.Highlight:SetFrameLevel(parent:GetFrameLevel())
 
-  frame.Icon = frame:CreateTexture(nil, "OVERLAY", nil, 1)
+  frame.Icon = frame:CreateTexture(nil, "ARTWORK", nil, -5)
   frame.Stacks = frame.Statusbar:CreateFontString(nil, "OVERLAY")
 
   frame.LabelText = frame.Statusbar:CreateFontString(nil, "OVERLAY")
@@ -1581,14 +1581,16 @@ function Widget:UpdateLayout(widget_frame)
     widget_frame:SetScript("OnUpdate", nil)
   end
 
+  local frame_level
   if self.db.FrameOrder == "HEALTHBAR_AURAS" then
-    widget_frame:SetFrameLevel(widget_frame:GetParent():GetFrameLevel() + 1)
+    frame_level = widget_frame:GetParent():GetFrameLevel() + 1
   else
-    widget_frame:SetFrameLevel(widget_frame:GetParent():GetFrameLevel() + 9)
+    frame_level = widget_frame:GetParent():GetFrameLevel() + 9
   end
-  widget_frame.Buffs:SetFrameLevel(widget_frame:GetFrameLevel())
-  widget_frame.Debuffs:SetFrameLevel(widget_frame:GetFrameLevel())
-  widget_frame.CrowdControl:SetFrameLevel(widget_frame:GetFrameLevel())
+  widget_frame:SetFrameLevel(frame_level)
+  widget_frame.Buffs:SetFrameLevel(frame_level)
+  widget_frame.Debuffs:SetFrameLevel(frame_level)
+  widget_frame.CrowdControl:SetFrameLevel(frame_level)
 end
 
 local function UnitAuraEventHandler(widget_frame, event, unitid)
