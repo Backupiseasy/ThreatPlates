@@ -243,7 +243,7 @@ def packager_main(package_dir):
     # If TOC file is out of date or does not exists, create it:
     if template_is_out_of_date(LIBS_XML_FILE, TEMPLATE_LIBS_XML_FILE):
         print("Libs.xml file is outdated ... updating it!")
-        file_content, version_no = create_toc_file(wow_version)
+        file_content, version_no = create_libs_xml_file(wow_version)
         write_to_file(LIBS_XML_FILE, file_content)
 
     # ---------------------------------------------------------------------------------------------------
