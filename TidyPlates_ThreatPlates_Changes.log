@@ -1,7 +1,6 @@
 ﻿------------------------------------------------------
 9.3.0
 ------------------------------------------------------
-* Fixed a Lua error that occurred when the castbar API was called on units not casting (e.g., when a nameplate was shown the first time) [Issue #37].
 * Consolidated Retail and Classic version of Threat Plates into one single sourcecode version.
 * Added a new widget to show the experience bar of certain follower [Comment #3775, #3728, #4190, #4402, #4447, #4699, Issue GitHub #202].
 * Added an option to show the castbar above or below the healthbar [Comment #4486, #4461, #4631, Issue TPC#32, PM].
