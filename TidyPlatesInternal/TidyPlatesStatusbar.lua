@@ -157,13 +157,14 @@ local function UpdateLayoutHealthbar(self, db, style)
 
   tp_frame.visual.textframe:SetFrameLevel(frame_level)
 
-  Font:UpdateText(self, self.TargetUnit, db.healthbar.TargetUnit)
+  local db_target_unit = db.healthbar.TargetUnit
+  Font:UpdateText(self, self.TargetUnit, db_target_unit)
 
   local width, height = self:GetSize()
   self.TargetUnit:SetSize(width, height)
-  self.TargetUnit:SetShown(self.TargetUnit:GetText() ~= nil)
+  self.TargetUnit:SetShown(self.TargetUnit:GetText() ~= nil and db_target_unit.Show)
 
-  SettingsTargetUnit = db.healthbar.TargetUnit
+  SettingsTargetUnit = db_target_unit
 end
 
 local function ShowTargetUnit(self, target_of_target_name, class_name)
