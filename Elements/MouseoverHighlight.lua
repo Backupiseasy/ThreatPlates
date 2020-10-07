@@ -84,12 +84,14 @@ end
 
 function Addon:Element_Mouseover_Create(parent)
   local frame = _G.CreateFrame("Frame", nil, parent)
-  frame:SetFrameLevel(parent:GetFrameLevel() + 1)
+
+  local healthbar = parent.visual.healthbar
+  local frame_level = healthbar:GetFrameLevel()
+  frame:SetFrameLevel(frame_level)
 
   -- Highlight for healthbar
-  local healthbar = parent.visual.healthbar
   frame.Highlight = _G.CreateFrame("Frame", nil, healthbar)
-  frame.Highlight:SetFrameLevel(parent:GetFrameLevel() + 1)
+  frame.Highlight:SetFrameLevel(frame_level)
   frame.Highlight:SetPoint("TOPLEFT", healthbar, "TOPLEFT", - OFFSET_HIGHLIGHT, OFFSET_HIGHLIGHT)
   frame.Highlight:SetPoint("BOTTOMRIGHT", healthbar, "BOTTOMRIGHT", OFFSET_HIGHLIGHT, - OFFSET_HIGHLIGHT)
   frame.Highlight:SetBackdrop({
@@ -102,7 +104,7 @@ function Addon:Element_Mouseover_Create(parent)
   frame.HighlightTexture:SetTexture(ART_PATH .. "TP_HealthBar_Highlight")
   frame.HighlightTexture:SetBlendMode("ADD")
   frame.HighlightTexture:SetAllPoints(healthbar)
-  --frame.HighlightTexture:SetVertexColor(1,0,0,1)
+  --frame.HighlightTexture:SetVertexColor(1, 0, 0,1) -- Color it for testing purposes
 
   -- Highlight for name
   frame.NameHighlight = frame:CreateTexture(nil, "ARTWORK") -- required for Headline View
