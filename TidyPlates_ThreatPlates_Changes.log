@@ -1,6 +1,7 @@
 ﻿------------------------------------------------------
 9.3.1
 ------------------------------------------------------
+* The display of the unit that is currently being targeted is now off by default.
 * Fixed a bug with the mouseover highlight shown on the wrong layer (above elite/skull icon) [Comment #4796].
 * Fixed a bug with the mouseover highlight not shown in headline view.
 * Fixed a bug where enabling/disabling the display of the unit that is currently being targeted did not take effect immediately.
