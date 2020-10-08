@@ -212,7 +212,7 @@ else
 
     local power_type = UNIT_POWER[player_class]
     if power_type then
-      power_type = power_type[ActiveSpec] or power_type
+      power_type = power_type[_G.GetSpecialization()] or power_type
     end
 
     if power_type and power_type.Name then
@@ -459,6 +459,8 @@ function Widget:OnEnable()
     -- Never registered for Classic, as there is no Death Knight class
     self:RegisterEvent("RUNE_POWER_UPDATE", EventHandler)
   end
+
+  ActiveSpec = _G.GetSpecialization()
 
   -- self:RegisterUnitEvent("UNIT_POWER_FREQUENT", "player", EventHandler)
   -- self:RegisterUnitEvent("UNIT_FLAGS", "player", EventHandler)
