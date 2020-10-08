@@ -5,6 +5,7 @@
 * Fixed a bug with the mouseover highlight shown on the wrong layer (above elite/skull icon) [Comment #4796].
 * Fixed a bug with the mouseover highlight not shown in headline view.
 * Fixed a bug where enabling/disabling the display of the unit that is currently being targeted did not take effect immediately.
+* Fixed a bug where combo points where not shown for Windwalker Monks, Arcane Magers and Retribution Paladins [Issue #425, Comment #4819].
 
 ------------------------------------------------------
 9.3.0
