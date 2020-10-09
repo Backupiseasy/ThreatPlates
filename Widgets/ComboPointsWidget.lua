@@ -460,8 +460,6 @@ function Widget:OnEnable()
     self:RegisterEvent("RUNE_POWER_UPDATE", EventHandler)
   end
 
-  ActiveSpec = _G.GetSpecialization()
-
   -- self:RegisterUnitEvent("UNIT_POWER_FREQUENT", "player", EventHandler)
   -- self:RegisterUnitEvent("UNIT_FLAGS", "player", EventHandler)
 end

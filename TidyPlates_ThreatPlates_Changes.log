@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+9.3.2
+------------------------------------------------------
+* Fixed a Lua error in Combo Points widget because of an API call not supported in WoW Classic [Issue TPC#38, Comment TPC#640].
+
+------------------------------------------------------
 9.3.1
 ------------------------------------------------------
 * The display of the unit that is currently being targeted is now off by default.
