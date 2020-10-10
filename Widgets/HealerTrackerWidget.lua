@@ -38,13 +38,13 @@ local HEALER_SPELLS = {
   [88684] = "PRIEST", -- Holy Word: Serenity
   [88685] = "PRIEST", -- Holy Word: Sanctuary
   [89485] = "PRIEST", -- Inner Focus
-  [10060] = "PRIEST", -- Power Infusion
   [33206] = "PRIEST", -- Pain Suppression
   [62618] = "PRIEST", -- Power Word: Barrier
   [724] = "PRIEST", -- Lightwell
   [14751] = "PRIEST", -- Chakra
   [34861] = "PRIEST", -- Circle of Healing
   [47788] = "PRIEST", -- Guardian Spirit
+  [33076] = "PRIEST", -- Prayer of Mending
 
   -- Druid (The affinity traits on the other specs makes this difficult)
   ---------
@@ -60,11 +60,12 @@ local HEALER_SPELLS = {
   ---------
   [16190] = "SHAMAN", -- Mana Tide Totem
   [61295] = "SHAMAN", -- Riptide
-  [5394] = "SHAMAN", -- Healing Stream Totem
-  [1064] = "SHAMAN", -- Chain Heal
   [77130] = "SHAMAN", -- Purify Spirit
   [77472] = "SHAMAN", -- Healing Wave
   [98008] = "SHAMAN", -- Spirit Link Totem
+  [52127] = "SHAMAN", -- Water Shield
+  [73920] = "SHAMAN", -- Healing Rain
+  [108280] = "SHAMAN", -- Healing Tide Totem
 
   -- Paladin
   ----------
@@ -82,7 +83,6 @@ local HEALER_SPELLS = {
   [115310] = "MONK", -- Revival
   [116680] = "MONK", -- Thunder Focus Tea
   [116849] = "MONK", -- Life Cocoon
-  [116995] = "MONK", -- Surging mist
   [119611] = "MONK", -- Renewing mist
   [132120] = "MONK", -- Envelopping Mist
 }

@@ -220,7 +220,7 @@ def create_package(wow_version):
 # -- Argument Parser
 # ---------------------------------------------------------------------------------------------------
 
-parser = argparse.ArgumentParser(description="Create a package for a new release of Threat Plates for Retail an Classic WoW.")
+parser = argparse.ArgumentParser(description="Create a package for a new release of Threat Plates for Retail and Classic WoW.")
 #parser.add_argument("version", help="The version number for the new release.")
 parser.add_argument("--package-dir", help="The directory into which the package should be saved.")
 parser.add_argument("--initialize", action="store_true", help="Instantiates all-template-based addon files for the selected WoW version, so that WoW can load the addon from this directory successfully.")
