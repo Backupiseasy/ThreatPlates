@@ -248,9 +248,10 @@ function Widget:CreateQuest(questID, questIndex)
   function Quest:UpdateObjectives()
     local objectives = GetQuestObjectives(self.id)
 
-    local text, objectiveType, finished, numFulfilled, numRequired
+    local objective, text, objectiveType, finished, numFulfilled, numRequired
     for objIndex = 1, #objectives do
-      text, objectiveType, numFulfilled, numRequired = objectives[objIndex].text, objectives[objIndex].type, objectives[objIndex].numFulfilled, objectives[objIndex].numRequired
+      objective = objectives[objIndex]
+      text, objectiveType, numFulfilled, numRequired = objective.text, objective.type, objective.numFulfilled, objective.numRequired
 
       -- Occasionally the game will return nil text, this happens when some world quests/bonus area quests finish (the objective no longer exists)
       -- Does not make sense to add "progressbar" type quests here as there progress is not updated via QUEST_WATCH_UPDATE
