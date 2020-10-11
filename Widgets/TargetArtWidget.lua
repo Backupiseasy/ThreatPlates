@@ -336,8 +336,8 @@ function FocusWidget:Create()
 
     local healthbar_mode_frame = _G.CreateFrame("Frame", nil, widget_frame)
     healthbar_mode_frame:SetFrameLevel(widget_frame:GetFrameLevel())
-    healthbar_mode_frame.LeftTexture = widget_frame:CreateTexture(nil, "BACKGROUND", nil, 0)
-    healthbar_mode_frame.RightTexture = widget_frame:CreateTexture(nil, "BACKGROUND", nil, 0)
+    healthbar_mode_frame.LeftTexture = widget_frame:CreateTexture(nil, "ARTWORK", nil, (widget_frame == FocusWidgetFrame and 7) or -6)
+    healthbar_mode_frame.RightTexture = widget_frame:CreateTexture(nil, "ARTWORK", nil, 0)
     widget_frame.HealthbarMode = healthbar_mode_frame
 
     widget_frame.NameModeTexture = widget_frame:CreateTexture(nil, "BACKGROUND", nil, 0)
