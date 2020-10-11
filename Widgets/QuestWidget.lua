@@ -18,10 +18,8 @@ local WorldFrame = WorldFrame
 local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
 local UnitName, UnitIsUnit, UnitDetailedThreatSituation = UnitName, UnitIsUnit, UnitDetailedThreatSituation
 
-local GetQuestObjectives, GetQuestInfo = C_QuestLog.GetQuestObjectives, C_QuestLog.GetInfo
+local GetQuestObjectives, GetQuestInfo, GetQuestLogIndex = C_QuestLog.GetQuestObjectives, C_QuestLog.GetInfo, C_QuestLog.GetLogIndexForQuestID
 local GetQuestLogTitle, GetNumQuestLogEntries = C_QuestLog.GetQuestLogTitle, C_QuestLog.GetNumQuestLogEntries
-
-local GetQuestLogIndexByID = GetQuestLogIndexByID
 
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 
@@ -330,13 +328,15 @@ function Widget:PLAYER_ENTERING_WORLD()
   self:UpdateAllFramesAndNameplateColor()
 end
 
-function Widget:QUEST_WATCH_UPDATE(questIndex)
+function Widget:QUEST_WATCH_UPDATE(questID)
+  local questIndex = GetQuestLogIndex(questID)
   local info = GetQuestInfo(questIndex)
+
   if not info or not info.title then
     return
   end
 
-  QuestsToUpdate[info.id] = info.title
+  QuestsToUpdate[questID] = info.title
 end
 
 function Widget:UNIT_QUEST_LOG_CHANGED(...)
@@ -352,7 +352,7 @@ function Widget:QUEST_LOG_UPDATE()
     -- Update the cached quest progress (for non-progressbar quests) after QUEST_WATCH_UPDATE
     local QuestsToUpdate = QuestsToUpdate
     for questID, title in pairs(QuestsToUpdate) do
-      local questIndex = GetQuestLogIndexByID(questID)
+      local questIndex = GetQuestLogIndex(questID)
 
       self:UpdateQuestCacheEntry(questIndex, title)
       QuestsToUpdate[questID] = nil
@@ -616,7 +616,7 @@ function Addon:PrintQuests()
 
   print ("Waiting for quest log updates for the following quests:")
   for questID, title in pairs(QuestsToUpdate) do
-    local questIndex = GetQuestLogIndexByID(questID)
+    local questIndex = GetQuestLogIndex(questID)
     print ("  Quest:", title .. " [" .. tostring(questIndex) .. "]")
   end
 end
