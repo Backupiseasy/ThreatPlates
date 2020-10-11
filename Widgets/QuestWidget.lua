@@ -252,14 +252,13 @@ function Widget:CreateQuest(questID, questIndex)
 
     local text, objectiveType, finished, numFulfilled, numRequired
     for objIndex = 1, #objectives do
-      text, objectiveType, numFulfilled, numRequired = objectives.text, objectives.type, objectives.numFulfilled, objectives.numRequired
+      text, objectiveType, numFulfilled, numRequired = objectives[objIndex].text, objectives[objIndex].type, objectives[objIndex].numFulfilled, objectives[objIndex].numRequired
 
       -- Occasionally the game will return nil text, this happens when some world quests/bonus area quests finish (the objective no longer exists)
       -- Does not make sense to add "progressbar" type quests here as there progress is not updated via QUEST_WATCH_UPDATE
       if text and objectiveType ~= "progressbar" then
         local objectiveName = string.gsub(text, "(%d+)/(%d+)", "")
         -- Normally, the quest objective should come before the :, but while the QUEST_LOG_UPDATE events (after login/reload)
-        -- GetQuestObjectiveInfo just returns nil as text
 
         -- It does seem that this is no longer necessary
         QuestLogNotComplete = QuestLogNotComplete or (objectiveName == " : ")
