@@ -153,8 +153,11 @@ function Widget:OnUnitAdded(widget_frame, unit)
   local anchor_frame
   local style = widget_frame:GetParent().style
   local visual = widget_frame:GetParent().visual
+  local frame_level_offset = 0
   if glow_frame == "Healthbar" and style.healthbar.show then
     anchor_frame = visual.healthbar.Border
+    -- For healthbar, the Border glow should be shown above the healthbar (border is -1 framelevel)
+    frame_level_offset = (glow_highlight.Type == "Button" and 1) or 0
   elseif glow_frame == "Castbar" and style.castbar.show then
     anchor_frame = visual.castbar.Border
   elseif glow_frame == "Icon" and show_icon then
@@ -171,7 +174,7 @@ function Widget:OnUnitAdded(widget_frame, unit)
 
     local color = (glow_highlight.CustomColor and glow_highlight.Color) or DefaultGlowColor
     local highlight_start = CUSTOM_GLOW_WRAPPER_FUNCTIONS[CUSTOM_GLOW_FUNCTIONS[glow_highlight.Type][1]]
-    highlight_start(widget_frame.Highlight, color, 0)
+    highlight_start(widget_frame.Highlight, color, frame_level_offset)
 
     widget_frame.HighlightStop = LibCustomGlow[CUSTOM_GLOW_FUNCTIONS[glow_highlight.Type][2]]
 
