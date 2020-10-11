@@ -44,8 +44,47 @@ local BACKDROP = {
     edgeFile = ART_PATH .. "glow_border",
     edgeSize = 10,
     offset = 5,
-    insets = { left = 5, right = 5, top = 5, bottom = 5 }
+    inset = 5,
   },
+}
+
+local ADJUST_BORDER_FOR_SMALL_HEALTHBAR = {
+  threat_glow = {
+    [9] = { edgeSize = 9, offset = 5, },
+    [8] = { edgeSize = 9, offset = 5, },
+    [7] = { edgeSize = 7, offset = 4, },
+    [6] = { edgeSize = 7, offset = 4, },
+    [5] = { edgeSize = 5, offset = 3, },
+    [4] = { edgeSize = 5, offset = 3, },
+    [3] = { edgeSize = 2, offset = 2, },
+    [2] = { edgeSize = 2, offset = 2, },
+    [1] = { edgeSize = 2, offset = 2, },
+  },
+  glow = {
+    [9] = { edgeSize = 9, offset = 5, },
+    [8] = { edgeSize = 9, offset = 5, },
+    [7] = { edgeSize = 7, offset = 4, },
+    [6] = { edgeSize = 7, offset = 4, },
+    [5] = { edgeSize = 5, offset = 3, },
+    [4] = { edgeSize = 5, offset = 3, },
+    [3] = { edgeSize = 2, offset = 2, },
+    [2] = { edgeSize = 2, offset = 2, },
+    [1] = { edgeSize = 2, offset = 2, inset = 2},
+  },
+}
+
+local FRAME_LEVEL_BY_TEXTURE = {
+  default = 0,
+  squarethin = 0,
+  arrows = 6,
+  arrow_down = 6,
+  arrow_less_than = 6,
+  glow = -2,
+  threat_glow = -2,
+  arrows_legacy = 6,
+  bubble = 6,
+  crescent = 6,
+  Stripes = 0,
 }
 
 ---------------------------------------------------------------------------------------------------
@@ -63,16 +102,30 @@ local FocusUpdateTexture, FocusShowBorder, FocusNameModeOffsetX, FocusNameModeOf
 -- Common functions for target and focus widget
 ---------------------------------------------------------------------------------------------------
 
-local function UpdateBorderTexture(db, widget_frame, texture_frame)
+local  function UpdateBorderTexture(db, widget_frame, texture_frame)
   local backdrop = BACKDROP[db.theme]
+
+  local offset = backdrop.offset
+  local edge_size = backdrop.edgeSize
+  local inset = backdrop.inset or 0
+
+  local border_settings_adjustment = ADJUST_BORDER_FOR_SMALL_HEALTHBAR[db.theme]
+  if border_settings_adjustment  then
+    local border_settings = border_settings_adjustment[TidyPlatesThreat.db.profile.settings.healthbar.height]
+    if border_settings then
+      edge_size = border_settings.edgeSize
+      offset = border_settings.offset
+      inset = border_settings.inset or inset
+    end
+  end
+
   texture_frame:SetBackdrop({
     bgFile = backdrop.bgFile,
     edgeFile = backdrop.edgeFile,
-    edgeSize = backdrop.edgeSize,
-    insets = backdrop.insets or { left = 0, right = 0, top = 0, bottom = 0 }
+    edgeSize = edge_size,
+    insets = { left = inset, right = inset, top = inset, bottom = inset }
   })
 
-  local offset = backdrop.offset
   texture_frame:SetPoint("TOPLEFT", widget_frame, "TOPLEFT", - offset, offset)
   texture_frame:SetPoint("BOTTOMRIGHT", widget_frame, "BOTTOMRIGHT", offset, - offset)
 
@@ -125,7 +178,6 @@ local function UpdateOverlayTexture(db, widget_frame, texture_frame)
 
   left_texture:SetTexture("Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\TargetArtWidget\\" .. db.theme)
   left_texture:SetTexCoord(0, 1, 0.4375, 0.5625)
-  -- Show target texture above focus texture
   left_texture:SetVertexColor(db.r, db.g, db.b, db.a)
   left_texture:ClearAllPoints()
   left_texture:SetAllPoints(widget_frame)
@@ -147,20 +199,6 @@ local UPDATE_TEXTURE_FUNCTIONS = {
   bubble = UpdateSideTexture,
   crescent = UpdateSideTexture,
   Stripes = UpdateOverlayTexture,
-}
-
-local FRAME_LEVEL_BY_TEXTURE = {
-  default = 0,
-  squarethin = 0,
-  arrows = 6,
-  arrow_down = 6,
-  arrow_less_than = 6,
-  glow = -2,
-  threat_glow = -2,
-  arrows_legacy = 6,
-  bubble = 6,
-  crescent = 6,
-  Stripes = 0,
 }
 
 local function GetHeadlineViewHeight(db)

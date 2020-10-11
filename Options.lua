@@ -5183,6 +5183,8 @@ local function CreateHealthbarOptions()
                   else
                     SetThemeValue(info, val)
                     Addon:SetBaseNamePlateSize()
+                    -- Update Target Art widget because of border adjustments for small healthbar heights
+                    Addon.Widgets:UpdateSettings("TargetArt")
                   end
                 end),
               Spacer1 = GetSpacerEntry(25),
