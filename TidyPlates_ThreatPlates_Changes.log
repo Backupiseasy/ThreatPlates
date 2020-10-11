@@ -1,7 +1,7 @@
 ﻿------------------------------------------------------
 9.3.3
 ------------------------------------------------------
-* Fixed a bug with settings migration in the Classic version which resulted in settings being overwritten with default values [Comment TPC#631].
+* Fixed a bug with settings migration in the Classic version which resulted in settings being overwritten with default values [Comment TPC#631, TPC#650].
 * Fixed a bug with custom styles for nameplates where the Button highlight glow was shown under the healthbar, not above it [Comment #4845].
 * Fixed a bug with the Focus Highlight where the Stripes texture was not shown reliably [Comment #4832].
 * Fixed a graphical bug with Target/Focus highlight borders Glow and Threat Glow when used with small healthbar heights (< 9) [IM].
