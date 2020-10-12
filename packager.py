@@ -171,7 +171,9 @@ def get_wow_version():
     working_dir = os.getcwd()
     if "_retail_" in working_dir:
         return "Retail"
-    if "_beta_" in working_dir:
+    elif "_beta_" in working_dir:
+        return "Retail"
+    elif "_ptr_" in working_dir:
         return "Retail"
     elif "_classic_" in working_dir:
         return "Classic"
