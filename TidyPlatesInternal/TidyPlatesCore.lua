@@ -60,7 +60,7 @@ if Addon.CLASSIC then
       text = nil
     end
 
-    return text, text, texture, startTime, endTime, false, false, spellID
+    return text, text, texture, startTime or 0, endTime or 0, false, false, spellID
   end
 
   UnitCastingInfo = function(...)
@@ -72,7 +72,7 @@ if Addon.CLASSIC then
       text = nil
     end
 
-    return text, text, texture, startTime, endTime, false, nil, false, spellID
+    return text, text, texture, startTime or 0, endTime or 0, false, nil, false, spellID
   end
 else
   GetNameForNameplate = function(plate) return plate:GetName() end
@@ -982,17 +982,31 @@ do
     CoreEvents[event](event, ...)
   end
 
+  local function NamePlateDriverFrame_AcquireUnitFrame(_, plate)
+    if not plate.UnitFrame.ThreatPlates then
+      plate.UnitFrame.ThreatPlates = true
+      plate.UnitFrame:HookScript("OnShow", FrameOnShow)
+    end
+  end
+
+  function CoreEvents:PLAYER_LOGIN()
+    -- Fix for Blizzard default plates being shown at random times
+    if NamePlateDriverFrame and NamePlateDriverFrame.AcquireUnitFrame then
+      hooksecurefunc(NamePlateDriverFrame, "AcquireUnitFrame", NamePlateDriverFrame_AcquireUnitFrame)
+    end
+  end
+
   function CoreEvents:PLAYER_ENTERING_WORLD()
 		TidyPlatesCore:SetScript("OnUpdate", OnUpdate)
+
   end
 
 	function CoreEvents:NAME_PLATE_CREATED(plate)
     OnNewNameplate(plate)
 
-    if plate.UnitFrame then -- not plate.TPFrame.onShowHooked then
-      plate.UnitFrame:HookScript("OnShow", FrameOnShow)
-      -- TODO: Idea from ElvUI, I think
-      -- plate.TPFrame.onShowHooked = true
+    -- NamePlateDriverFrame.AcquireUnitFrame is not used in Classic
+    if Addon.CLASSIC and plate.UnitFrame then
+      NamePlateDriverFrame_AcquireUnitFrame(nil, plate)
     end
 
     plate:HookScript('OnHide', FrameOnHide)

@@ -210,7 +210,7 @@ else
 
     local power_type = UNIT_POWER[player_class]
     if power_type then
-      power_type = power_type[ActiveSpec] or power_type
+      power_type = power_type[_G.GetSpecialization()] or power_type
     end
 
     if power_type and power_type.Name then

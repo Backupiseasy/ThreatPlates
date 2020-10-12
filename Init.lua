@@ -35,6 +35,20 @@ end
 
 Addon.BackdropTemplate = BackdropTemplateMixin and "BackdropTemplate"
 
+-- Use this once SetBackdrop backwards compatibility is removed
+--if BackdropTemplateMixin then -- Shadowlands
+--	Addon.BackdropTemplate = "BackdropTemplate"
+--
+--	Addon.SetBackdrop = function(frame, backdrop)
+--		frame.backdropInfo = backdrop
+--		frame:ApplyBackdrop()
+--	end
+--else
+--	Addon.SetBackdrop = function(frame, backdrop)
+--		frame:SetBackdrop(backdrop)
+--	end
+--end
+
 ---------------------------------------------------------------------------------------------------
 -- Define AceAddon TidyPlatesThreat
 ---------------------------------------------------------------------------------------------------

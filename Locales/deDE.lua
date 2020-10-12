@@ -36,6 +36,26 @@ Blacksalsify
 L[ [=[
 
 Supports multiple entries, separated by commas.]=] ] = "Unterstützt mehrere Einträge, die durch Kommata getrennt sind."
+L[ [=[
+
+Feel free to email me at |cff00ff00threatplates@gmail.com|r
+
+--
+
+Blacksalsify
+
+(Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=] ] = [=[
+
+Du kannst mich gerne per E-Mail erreichen unter |cff00ff00threatplates@gmail.com|r
+
+--
+
+Blacksalsify
+
+(Ursprünglicher Autor: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=]
+L[ [=[
+
+Supports multiple entries, separated by commas.]=] ] = "Unterstützt mehrere Einträge, die durch Kommata getrennt sind."
 L[". You cannot use two custom nameplates with the same trigger. The imported custom nameplate will be disabled."] = ". Du kannst nicht zwei benutzerdefinierte Namensplaketten mit dem gleichen Auslöser verwenden. Die importierte benutzerdefinierte Namensplakette wird deaktiviert."
 L[". You cannot use two custom nameplates with the same trigger.The imported custom nameplate will be disabled."] = ". Du kannst nicht zwei benutzerdefinierte Namensplaketten mit dem selben Auslöser verwendet. Die importierte benutzerdefinierte Namensplakette wird deaktiviert."
 L["|cff00ff00High Threat|r"] = "|cff00ff00Hohe Bedrohung|r"
@@ -55,7 +75,15 @@ This is your first time using Threat Plates and you are a(n):
 |r|cff]=] ] = [=[|cff89f559Willkommen bei |r|cff89f559Threat Plates!
 Du benutzt Threat Plates das erste Mal und du bist ein(n):
 |r|cff]=]
+L[ [=[|cff89f559Welcome to |r|cff89f559Threat Plates!
+This is your first time using Threat Plates and you are a(n):
+|r|cff]=] ] = [=[|cff89f559Willkommen bei |r|cff89f559Threat Plates!
+Du benutzt Threat Plates das erste Mal und du bist ein(n):
+|r|cff]=]
 L["|cff89f559You are currently in your "] = "|cff89f559Du bist derzeit in Deiner "
+L[ [=[|cffFF0000DELETE CUSTOM NAMEPLATE|r
+Are you sure you want to delete the selected custom nameplate?]=] ] = [=[|cffFF0000LÖSCHE DIE BENUTZERDEFINIERTE NAMENSPLAKETTE|r
+Bist du sicher, dass du die ausgewählte benutzerdefinierte Namensplakette löschen möchtest?]=]
 L[ [=[|cffFF0000DELETE CUSTOM NAMEPLATE|r
 Are you sure you want to delete the selected custom nameplate?]=] ] = [=[|cffFF0000LÖSCHE DIE BENUTZERDEFINIERTE NAMENSPLAKETTE|r
 Bist du sicher, dass du die ausgewählte benutzerdefinierte Namensplakette löschen möchtest?]=]
@@ -71,9 +99,17 @@ Migration should only delete deprecated default custom nameplates and re-order t
 Are you sure you want to migrate your custom nameplates?]=] ] = [=[|cffFF0000HINWEIS|r
 Die Migration sollte nur veraltete, standardmäßig bereitgestellte benutzerdefinierte Namensplaketten löschen und die verbleibenden neu anordnen. Dennoch ist es ratsam, deine Einstellungen zu sichern (in der SavedVariables-Datei TidyPlates_ThreatPlates.lua), falls etwas schief geht.
 Bist du sicher, dass du deine benutzerdefinierten Namensplaketten migrieren möchtest?]=]
+L[ [=[|cffFF0000NOTE|r
+Migration should only delete deprecated default custom nameplates and re-order the remaining ones. Nevertheless, it is highly advised to backup your settings (the SavedVariables file TidyPlates_ThreatPlates.lua) in case something goes wrong.
+
+Are you sure you want to migrate your custom nameplates?]=] ] = [=[|cffFF0000HINWEIS|r
+Die Migration sollte nur veraltete, standardmäßig bereitgestellte benutzerdefinierte Namensplaketten löschen und die verbleibenden neu anordnen. Dennoch ist es ratsam, deine Einstellungen zu sichern (in der SavedVariables-Datei TidyPlates_ThreatPlates.lua), falls etwas schief geht.
+Bist du sicher, dass du deine benutzerdefinierten Namensplaketten migrieren möchtest?]=]
 L["|cffFF0000The Auras widget must be enabled (see Widgets - Auras) to use auras as trigger for custom nameplates.|r"] = "|cffFF0000Das Auren-Widget muss eingeschaltet sein, damit Auren als Auslöser für benutzerdefinierte Namensplaketten verwendet werden können (siehe Widgets - Auren).|r"
 L["|cffFF0000This option is disabled as you are still using the obsolete custom nameplates format. Migrate your custom nameplates to the new format (using the Migration button at the top) to enable this option.|r"] = "|cffFF0000Diese Option ist nicht verfügbar, da du immer noch das veraltete Format für benutzerdefinierte Namensplaketten verwendest. Migriere deine benutzerdefinierten Namensplaketten zuerst auf das neue Format, damit diese Option verfügbar wird (verwende dazu den Button Migration weiter oben).|r"
 L["|cffFFD100Current Instance:|r"] = "|cffFFD100Aktuelle Instanz:|r"
+L[ [=[|cffFFD100Current Instance:|r
+]=] ] = "|cffFFD100Aktuelle Instanz:|r"
 L[ [=[|cffFFD100Current Instance:|r
 ]=] ] = "|cffFFD100Aktuelle Instanz:|r"
 L["|cffffff00Medium Threat|r"] = "|cffffff00Mitllere Bedrohung|r"
@@ -205,11 +241,16 @@ L["Change the transparency of nameplates in certain situations, overwriting all 
 L["Changes the default settings to the selected design. Some of your custom settings may get overwritten if you switch back and forth.."] = "Legt das ausgewählte Design als deine Standardeinstellungen fest. Einige deiner benutzerdefinierten Einstellungen werden möglicherweise überschrieben, wenn du mehrmals hin und her wechselst."
 L["Changing these options may interfere with other nameplate addons or Blizzard default nameplates as console variables (CVars) are changed."] = "Eine Änderung dieser Einstellungen kann sich auf andere Namensplaketten-Addons oder die Standard-Namensplaketten von Blizzard auswirken, da Console-Variablen (CVars) geändert werden."
 L["Changing these settings will alter the placement of the nameplates, however the mouseover area does not follow. |cffff0000Use with caution!|r"] = "Änderungen an dieser Einstellung wird die Platzierung der Namensplatten verschieben, die Mouseover-Informationen werden dem aber nicht folgen. |cffff0000Vorsicht im Gebrauch!|r"
-L["Clamp Target Nameplate to Screen"] = "Namensplakette am Bildschirmrand festklemmen"
+L["Clamp Target Nameplate to Screen"] = "Namensplakette des Ziels am Bildschirmrand festklemmen"
 L["Clamps the target's nameplate to the edges of the screen, even if the target is off-screen."] = "Klemmt die Namensplakette des Ziels am Bildschirmrand fest, auch wenn sich das Ziel außerhalb des Sichtbereichs befindet."
 L["Class"] = "Klasse"
 L["Class Color for Players"] = "Klassenfarben für Spieler"
 L["Class Icon"] = "Klassensymbol"
+L[ [=[Clear and easy to use threat-reactive nameplates.
+
+Current version: ]=] ] = [=[Einfach zu benutzende bedrohungsreaktive Namensplaketten.
+
+Aktuelle Version: ]=]
 L[ [=[Clear and easy to use threat-reactive nameplates.
 
 Current version: ]=] ] = [=[Einfach zu benutzende bedrohungsreaktive Namensplaketten.
