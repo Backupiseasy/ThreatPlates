@@ -1,12 +1,12 @@
 ﻿#@retail@
-## Interface: 90002
+## Interface: 90001
 #@end-retail@
 #@classic@
 ## Interface: 11305
 #@end-classic@
 
 ## Title: Threat Plates
-## Version: 10.0.0-Beta4
+## Version: 10.0.0
 ## Notes: Threat-reactive nameplates.
 ## Notes-deDE: Bedrohungsreaktive Namensplaketten.
 ## Notes-esES: Placas Identificativas de Amenaza
