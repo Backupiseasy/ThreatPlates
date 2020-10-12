@@ -232,7 +232,7 @@ def write_to_file(file, content):
 @click.command()
 @click.option('--package-dir', type=str, help='Create release versions of Threat Plates in the specified directory.')
 def packager_main(package_dir):
-    """Create a package for a new release of Threat Plates for Retail an Classic WoW."""
+    """Create a package for a new release of Threat Plates for Retail and Classic WoW."""
     wow_version = get_wow_version()
     print("WoW version:", wow_version)
 
