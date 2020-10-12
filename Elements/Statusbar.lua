@@ -13,6 +13,7 @@ local ipairs = ipairs
 local LSM = Addon.ThreatPlates.Media
 local Font = Addon.Font
 local ANCHOR_POINT_TEXT = Addon.ANCHOR_POINT_TEXT
+local BackdropTemplate = Addon.BackdropTemplate
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -47,18 +48,19 @@ local function UpdateSettings(self, db)
   self:SetStatusBarTexture(texture)
   self.Background:SetTexture(texture)
 
+  self.Border:SetBackdrop({
+    bgFile = LSM:Fetch('statusbar', texture),
+    edgeFile = LSM:Fetch('border', db.BorderTexture),
+    edgeSize = db.BorderEdgeSize,
+    insets = {
+      left = db.BorderInset,
+      right = db.BorderInset,
+      top = db.BorderInset,
+      bottom = db.BorderInset,
+    }
+  })
+
   local border = self.Border
-
-  local backdrop = border:GetBackdrop() or { insets = {} }
-  backdrop.bgFile = LSM:Fetch('statusbar', texture)
-  backdrop.edgeFile = LSM:Fetch('border', db.BorderTexture)
-  backdrop.edgeSize = db.BorderEdgeSize
-  backdrop.insets.left = db.BorderInset
-  backdrop.insets.right = db.BorderInset
-  backdrop.insets.top = db.BorderInset
-  backdrop.insets.bottom = db.BorderInset
-  border:SetBackdrop(backdrop)
-
   border:SetPoint("TOPLEFT", self, "TOPLEFT", - db.BorderOffset, db.BorderOffset)
   border:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", db.BorderOffset, - db.BorderOffset)
 
@@ -130,7 +132,7 @@ function Addon.CreateStatusbar(parent)
 
   statusbar.Background = statusbar:CreateTexture(nil, "ARTWORK")
 
-  statusbar.Border = _G.CreateFrame("Frame", nil, statusbar)
+  statusbar.Border = _G.CreateFrame("Frame", nil, statusbar, BackdropTemplate)
   statusbar.Border:SetFrameLevel(statusbar:GetFrameLevel())
 
   statusbar.UpdateSettings = UpdateSettings
