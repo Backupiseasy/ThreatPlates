@@ -160,7 +160,7 @@ function Widget:OnUnitAdded(widget_frame, unit)
 end
 
 function Widget:OnUnitRemoved(tp_frame, unit)
-  MapUIWidgetToExperienceWidget[unit.unitid] = nil
+  MapUIWidgetToExperienceWidget[unit.unitid or ""] = nil
 end
 
 function Widget:UpdateLayout(widget_frame)
