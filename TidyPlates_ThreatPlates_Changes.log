@@ -2,6 +2,7 @@
 10.0.0 - Release for Shadowlands Pre-Patch
 ------------------------------------------------------
 * Updated Threat Plates for Shadowlands Pre-Patch and updated nameplate code due to changes to WoW API.
+* Updated integrated libraries to Ace3 r1241.
 
 ------------------------------------------------------
 9.3.3
