@@ -949,7 +949,8 @@ Addon.MigrationCustomNameplatesV1 = function()
 
       for index, unique_unit in pairs(custom_plates_to_keep) do
         -- As default values are now different, copy the deprecated slots default value
-        local deprecated_settings = Addon.LEGACY_CUSTOM_NAMEPLATES[index] or Addon.LEGACY_CUSTOM_NAMEPLATES["**"]
+        local deprecated_settings = ThreatPlates.CopyTable(Addon.LEGACY_CUSTOM_NAMEPLATES["**"])
+        Addon.MergeIntoTable(deprecated_settings, Addon.LEGACY_CUSTOM_NAMEPLATES[index])
 
         -- Name trigger is already migrated properly when loading 9.2.0 the very first time
         unique_unit.showNameplate = GetValueOrDefault(unique_unit.showNameplate, deprecated_settings.showNameplate)

@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+10.0.1
+------------------------------------------------------
+* Fixed a Lua error when migrating deprecated default nameplates to the new format.
+
+------------------------------------------------------
 10.0.0 - Release for Shadowlands Pre-Patch
 ------------------------------------------------------
 * Updated Threat Plates for Shadowlands Pre-Patch and updated nameplate code due to changes to WoW API.
