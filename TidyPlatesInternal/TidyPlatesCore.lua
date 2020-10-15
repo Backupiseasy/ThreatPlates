@@ -983,9 +983,10 @@ do
   end
 
   local function NamePlateDriverFrame_AcquireUnitFrame(_, plate)
-    if not plate.UnitFrame.ThreatPlates then
-      plate.UnitFrame.ThreatPlates = true
-      plate.UnitFrame:HookScript("OnShow", FrameOnShow)
+    local unit_frame = plate.UnitFrame
+    if not unit_frame:IsForbidden() and not unit_frame.ThreatPlates then
+      unit_frame.ThreatPlates = true
+      unit_frame:HookScript("OnShow", FrameOnShow)
     end
   end
 
