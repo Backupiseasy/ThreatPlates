@@ -2,7 +2,8 @@
 10.0.1
 ------------------------------------------------------
 * Fixed a Lua error when migrating deprecated default nameplates to the new format.
-* Fixed a Lua error that occured when Blizzard default plates were shown (e.g., for friendly units when entering an instance in a group) [Issue #429].
+* Fixed a Lua error that occurred when Blizzard default plates were shown (e.g., for friendly units when entering an instance in a group) [Issue #429].
+* Fixed a Lua error that occurred when CVar NamePlateVerticalScale was changed will in combat [Issue #430].
 
 ------------------------------------------------------
 10.0.0 - Release for Shadowlands Pre-Patch

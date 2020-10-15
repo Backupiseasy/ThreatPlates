@@ -381,7 +381,7 @@ local function SetCVarHook(name, value, c)
       Addon.CVars:Set("nameplateGlobalScale", 0.4)
     end
 
-    Addon:SetBaseNamePlateSize()
+    Addon:CallbackWhenOoC(function() Addon:SetBaseNamePlateSize() end)
   end
 end
 
