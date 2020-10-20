@@ -2,6 +2,7 @@
 10.0.2
 ------------------------------------------------------
 * Fixed a bug with delayed health update in the Classic Version because of a change in how health update events were processed [Comment TPC#658, TPC#661, TPC#668, TPC#670, #4880, #4873].
+* Fixed a Lua error with Quest widget that could occur when the a (delayed) quest log update was processed for a quest no longer existing [Issue #236, Comment #4876, #4875].
 
 ------------------------------------------------------
 10.0.1
@@ -255,7 +256,7 @@
 * Fixed a bug with the spell text not truncated correctly when too long, but wrapped into multiple lines.
 * Fixed a bug in Resources widget where the resource bar was shown for friendly players although only enabled for enemy players.
 
-﻿------------------------------------------------------
+------------------------------------------------------
 9.1.2
 ------------------------------------------------------
 * Fixed a bug with Combo Points widget that prevented the widget from working in arenas and battlegrounds [#Comment 1795].

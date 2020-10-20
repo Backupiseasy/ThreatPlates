@@ -286,14 +286,16 @@ function Widget:CreateQuest(questID, questIndex)
 end
 
 function Widget:AddQuestCacheEntry(questIndex)
-  local info = GetQuestInfo(questIndex)
+  if questIndex then
+    local info = GetQuestInfo(questIndex)
 
-  if info and not info.isHeader and info.title then --ignore quest log headers
-    local quest = Widget:CreateQuest(info.questID, questIndex)
+    if info and not info.isHeader and info.title then --ignore quest log headers
+      local quest = Widget:CreateQuest(info.questID, questIndex)
 
-    quest:UpdateObjectives()
-    QuestList[info.title] = quest
-    QuestIDs[info.questID] = info.title --so it can be found by remove
+      quest:UpdateObjectives()
+      QuestList[info.title] = quest
+      QuestIDs[info.questID] = info.title --so it can be found by remove
+    end
   end
 end
 
