@@ -1168,7 +1168,7 @@ do
     end
   end
 
-  function CoreEvents:UNIT_HEALTH(unitid)
+  local function UNIT_HEALTH(event, unitid)
     local plate = GetNamePlateForUnit(unitid)
 
     if plate and plate.TPFrame.Active then
@@ -1436,6 +1436,7 @@ do
     Addon.UNIT_SPELLCAST_CHANNEL_START = UNIT_SPELLCAST_CHANNEL_START
     Addon.UNIT_SPELLCAST_CHANNEL_STOP = UNIT_SPELLCAST_CHANNEL_STOP
     Addon.UnitSpellcastMidway = UnitSpellcastMidway
+    CoreEvents.UNIT_HEALTH_FREQUENT = UNIT_HEALTH
   else
     -- The following events should not have worked before adjusting UnitSpellcastMidway
     CoreEvents.UNIT_SPELLCAST_START = UNIT_SPELLCAST_START
@@ -1456,6 +1457,8 @@ do
     CoreEvents.UNIT_ABSORB_AMOUNT_CHANGED = UNIT_ABSORB_AMOUNT_CHANGED
     CoreEvents.UNIT_HEAL_ABSORB_AMOUNT_CHANGED = UNIT_HEAL_ABSORB_AMOUNT_CHANGED
     CoreEvents.PLAYER_FOCUS_CHANGED = PLAYER_FOCUS_CHANGED
+    -- UNIT_HEALTH_FREQUENT no longer supported in Retail since 9.0.1
+    CoreEvents.UNIT_HEALTH = UNIT_HEALTH
   end
 
 	CoreEvents.UNIT_LEVEL = UnitConditionChanged
