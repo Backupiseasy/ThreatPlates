@@ -6,7 +6,7 @@
 #@end-classic@
 
 ## Title: Threat Plates
-## Version: 10.0.2
+## Version: 10.0.3
 ## Notes: Threat-reactive nameplates.
 ## Notes-deDE: Bedrohungsreaktive Namensplaketten.
 ## Notes-esES: Placas Identificativas de Amenaza
