@@ -16,6 +16,7 @@ local pairs = pairs
 
 -- WoW APIs
 local PlatesByUnit = Addon.PlatesByUnit
+local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
@@ -65,14 +66,16 @@ end
 function Widget:UNIT_PORTRAIT_UPDATE(unitid)
   if unitid == "player" or unitid == "target" then return end
 
-  local plate = PlatesByUnit[unitid]
-  if plate then
-    local tp_frame = plate.TPFrame
-    local unique_setting = tp_frame.unit.CustomPlateSettings
-    if unique_setting and self.db.ON and unique_setting.showIcon and unique_setting.UseAutomaticIcon then
-      local icon = tp_frame.widgets.UniqueIcon.Icon
-      _G.SetPortraitTexture(icon, unitid)
-      icon:SetTexCoord(0.14644660941, 0.85355339059, 0.14644660941, 0.85355339059)
+  local plate = GetNamePlateForUnit(unitid)
+  if plate and plate.TPFrame.Active then
+    local widget_frame = plate.TPFrame.widgets.UniqueIcon
+    if widget_frame.Active then
+      local unique_setting = plate.TPFrame.unit.CustomPlateSettings
+      if unique_setting and self.db.ON and unique_setting.showIcon and unique_setting.UseAutomaticIcon then
+        local icon = widget_frame.Icon
+        _G.SetPortraitTexture(icon, unitid)
+        icon:SetTexCoord(0.14644660941, 0.85355339059, 0.14644660941, 0.85355339059)
+      end
     end
   end
 end
