@@ -247,7 +247,7 @@ function TidyPlatesThreat:CheckForIncompatibleAddons()
   if IsAddOnLoaded("Plater") then
     StaticPopup_Show("IncompatibleAddon", "Plater Nameplates")
   end
-  if IsAddOnLoaded("SpartanUI") and SUI.DB.EnabledComponents.Nameplates then
+  if IsAddOnLoaded("SpartanUI") and SUI:IsModuleEnabled("Nameplates") then
     StaticPopup_Show("IncompatibleAddon", "SpartanUI Nameplates")
   end
 end
