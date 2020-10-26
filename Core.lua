@@ -241,13 +241,14 @@ function TidyPlatesThreat:CheckForIncompatibleAddons()
   if IsAddOnLoaded("Kui_Nameplates") then
     StaticPopup_Show("IncompatibleAddon", "KuiNameplates")
   end
-  if IsAddOnLoaded("ElvUI") and ElvUI[1].private.nameplates.enable then
+  if IsAddOnLoaded("ElvUI") and ElvUI[1] and ElvUI[1].private and ElvUI[1].private.nameplates and ElvUI[1].private.nameplates.enable then
+  --if IsAddOnLoaded("ElvUI") and ElvUI[1].private.nameplates.enable then
     StaticPopup_Show("IncompatibleAddon", "ElvUI Nameplates")
   end
   if IsAddOnLoaded("Plater") then
     StaticPopup_Show("IncompatibleAddon", "Plater Nameplates")
   end
-  if IsAddOnLoaded("SpartanUI") and SUI:IsModuleEnabled("Nameplates") then
+  if IsAddOnLoaded("SpartanUI") and SUI.IsModuleEnabled and SUI:IsModuleEnabled("Nameplates") then
     StaticPopup_Show("IncompatibleAddon", "SpartanUI Nameplates")
   end
 end
