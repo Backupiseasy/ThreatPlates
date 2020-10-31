@@ -179,7 +179,8 @@ Widget.TextureCoordinates = {}
 Widget.Colors = {}
 Widget.ShowInShapeshiftForm = true
 
-local ActiveSpec = 1 -- WoW Clasic only knows one spec, so set default to 1 which is never changed as ACTIVE_TALENT_GROUP_CHANGED is never fired
+-- WoW Clasic only knows one spec, so set default to 1 which is never changed as ACTIVE_TALENT_GROUP_CHANGED is never fired
+local ActiveSpec = 1
 local RuneCooldowns = { 0, 0, 0, 0, 0, 0 }
 
 ---------------------------------------------------------------------------------------------------
@@ -305,8 +306,10 @@ function Widget:UpdateRunicPower(widget_frame)
     cp_texture_off = widget_frame.ComboPointsOff[rune_id]
 
     if rune_id <= ready_runes_no then
-      cp_color = color[rune_id]
-      cp_texture:SetVertexColor(cp_color.r, cp_color.g, cp_color.b)
+      if self.db.Style ~= "Blizzard" then
+        cp_color = color[rune_id]
+        cp_texture:SetVertexColor(cp_color.r, cp_color.g, cp_color.b)
+      end
       cp_texture:Show()
       cp_texture_off:Hide()
 
@@ -360,8 +363,8 @@ function Widget:ACTIVE_TALENT_GROUP_CHANGED(...)
   local current_spec = _G.GetSpecialization()
   if ActiveSpec ~= current_spec then
     -- Player switched to a spec that has combo points
-    self.WidgetHandler:InitializeWidget("ComboPoints")
     ActiveSpec = current_spec
+    self.WidgetHandler:InitializeWidget("ComboPoints")
   end
 end
 
@@ -545,6 +548,7 @@ function Widget:UpdateTexture(texture, texture_path, cp_no)
       local texture_data = texture_path[ActiveSpec]
       texture:SetAtlas(texture_data.Atlas)
       texture:SetAlpha(texture_data.Alpha or 1)
+      texture:SetVertexColor(1, 1, 1)
       texture:SetDesaturated(texture_data.Desaturation) -- nil means no desaturation
     else
       texture:SetAtlas(texture_path)
@@ -613,6 +617,10 @@ function Widget:UpdateSettings()
   -- Update widget variables, only dependent from settings and static information (like player's class)
   local _, player_class = UnitClass("player")
   local texture_info = TEXTURE_INFO[self.db.Style][player_class] or TEXTURE_INFO[self.db.Style]
+
+  if not Addon.CLASSIC then
+    ActiveSpec = _G.GetSpecialization()
+  end
 
   if player_class == "DEATHKNIGHT" then
     self.UpdateUnitPower = self.UpdateRunicPower
