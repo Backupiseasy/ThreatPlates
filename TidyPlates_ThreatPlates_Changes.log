@@ -1,7 +1,7 @@
 ﻿------------------------------------------------------
 10.0.4
 ------------------------------------------------------
-* Fixed a bug Combo Points widget where Death Knight runes where not shown in the correct color when style Blizzard was used [Comment #4894].
+* Fixed a bug Combo Points widget where Death Knight runes where not shown in the correct color when style Blizzard was used [Comment #4894, #4954].
 * Upgrade integrated libraries (LibCustomGlow v1.0.3-1-g6261295-alpha).
 
 ------------------------------------------------------
