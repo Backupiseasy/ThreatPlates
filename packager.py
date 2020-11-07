@@ -160,6 +160,8 @@ def create_package(wow_version, package_dir):
     # Add Libs.xml file to package
     package_file.writestr(SOURCE_DIR + "\\" + LIBS_XML_FILE, libs_file_content)
 
+    print("=> Created package file " + package_file_name)
+
     package_file.close()
 
 # ---------------------------------------------------------------------------------------------------
