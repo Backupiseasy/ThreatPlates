@@ -152,6 +152,9 @@ function Widget:UpdateFrame(widget_frame, unit)
     return
   end
 
+  local width, height = widget_frame:GetSize()
+  widget_frame.Percentage:SetSize(width, height)
+
   -- As the widget is enabled, textures or percentages must be enabled.
   local style = (Addon:PlayerRoleIsTank() and "tank") or "dps"
   local threat_situation = GetThreatSituation(unit, style, db.toggle.OffTank)
@@ -209,8 +212,6 @@ function Widget:UpdateLayout(widget_frame)
   widget_frame:SetAllPoints(widget_frame:GetParent())
 
   Font:UpdateText(widget_frame, widget_frame.Percentage, Settings.ThreatPercentage)
-  local width, height = widget_frame:GetSize()
-  widget_frame.Percentage:SetSize(width, height)
 end
 
 function Widget:UpdateSettings()
