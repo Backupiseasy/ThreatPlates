@@ -15,6 +15,7 @@
 ------------------------------------------------------
 * Fixed a bug with delayed health update in the Classic Version because of a change in how health update events were processed [Comment TPC#658, TPC#661, TPC#668, TPC#670, #4880, #4873].
 * Fixed a Lua error with Quest widget that could occur when the a (delayed) quest log update was processed for a quest no longer existing [Issue #236, Comment #4876, #4875].
+* Fixed a bug with Social widget where Battle.net Friends were not correctly recognized in Classic WoW.
 
 ------------------------------------------------------
 10.0.1
