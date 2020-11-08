@@ -208,15 +208,14 @@ end
 -- Depends on:
 --   * unit.name
 function Addon.UnitStyle_NameDependent(unit)
-  local plate_style
-
   local db = TidyPlatesThreat.db.profile
 
-  local totem_settings
-  local unique_settings = NameTriggers[unit.name]
+  local plate_style, custom_style, totem_settings
 
-  if unique_settings and unique_settings.Enable.UnitReaction[unit.reaction] then
-    plate_style = GetStyleForPlate(unique_settings)
+  local name_custom_style = NameTriggers[unit.name]
+  if name_custom_style and name_custom_style.Enable.UnitReaction[unit.reaction] then
+    custom_style = name_custom_style
+    plate_style = GetStyleForPlate(custom_style)
   elseif Addon.ActiveWildcardTriggers and unit.type == "NPC" then
     local cached_custom_style = TriggerWildcardTests[unit.name]
 
@@ -231,12 +230,12 @@ function Addon.UnitStyle_NameDependent(unit)
 
           -- Static checks (based on not changing criterien (like unit type).
           if trigger[2].Enable.UnitReaction[unit.reaction] then
-            unique_settings = trigger[2]
-            plate_style = GetStyleForPlate(unique_settings)
+            custom_style = trigger[2]
+            plate_style = GetStyleForPlate(custom_style)
 
             cached_custom_style = {
               Style = plate_style,
-              CustomStyle = unique_settings
+              CustomStyle = custom_style
             }
 
             -- Breaking here without plate_style being set means that only the icon part will be used from the custom style
@@ -248,7 +247,7 @@ function Addon.UnitStyle_NameDependent(unit)
       -- Add custom style, if one was found, or false if there is no custom style for this unit
       TriggerWildcardTests[unit.name] = cached_custom_style
     elseif cached_custom_style ~= false then
-      unique_settings = cached_custom_style.CustomStyle
+      custom_style = cached_custom_style.CustomStyle
       plate_style = cached_custom_style.Style
     end
   end
@@ -267,12 +266,12 @@ function Addon.UnitStyle_NameDependent(unit)
   end
 
   -- Conditions:
-  --   * unique_setting == nil: No custom style found
-  --   * unique_setting ~= nil: Custom style found, active
-  --   * plate_style == nil: Appearance part of style will not be used, only icon will be shown (if unique_setting ~= nil)
+  --   * custom_style == nil: No custom style found
+  --   * custom_style ~= nil: Custom style found, active
+  --   * plate_style == nil: Appearance part of style will not be used, only icon will be shown (if custom_style ~= nil)
 
   -- Set these values to nil if not custom nameplate or totem
-  unit.CustomPlateSettings = unique_settings
+  unit.CustomPlateSettings = custom_style
   unit.TotemSettings = totem_settings
 
   return plate_style

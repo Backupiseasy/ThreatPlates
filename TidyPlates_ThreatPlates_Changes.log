@@ -1,4 +1,16 @@
 ﻿------------------------------------------------------
+10.0.4
+------------------------------------------------------
+* Fixed a bug Combo Points widget where Death Knight runes where not shown in the correct color when style Blizzard was used [Comment #4894, #4954, PM, Issue #440].
+* Upgrade integrated libraries (LibCustomGlow v1.0.3-1-g6261295-alpha).
+
+------------------------------------------------------
+10.0.3
+------------------------------------------------------
+* Fixed a bug with custom styles for nameplates where the custom style icon was not enabled/disabled for friendly or enemy units correctly.
+* Fixed a Lua error that occurred with SpartanUI when checking if SpartanUI nameplates are enabled [Issue #437, #436, #431, Comment #4931].
+
+------------------------------------------------------
 10.0.2
 ------------------------------------------------------
 * Fixed a bug with delayed health update in the Classic Version because of a change in how health update events were processed [Comment TPC#658, TPC#661, TPC#668, TPC#670, #4880, #4873].

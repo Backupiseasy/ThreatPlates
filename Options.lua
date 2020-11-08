@@ -6343,18 +6343,24 @@ local function CustomPlateCheckAndUpdateEntry(info, val, index)
   end
 end
 
-local function UpdateCustomNameplateSlots()
+local function UpdateCustomNameplateSlots(...)
   local entry = options.args.Custom.args
+  if ... then
+    -- Use pairs as iterater as the table is in a somewhat invalid format (non-iteratable with ipairs) as long as the
+    -- custom styles have not been migrated to V2
+    for index, custom_style in pairs(db.uniqueSettings) do
+      if type(index) == "number" and custom_style.Trigger.Name.Input ~= "<Enter name here>"  then
+        entry["#" .. index] = CreateCustomNameplateEntry(index)
+      end
+    end
 
-  -- Use pairs as iterater as the table is in a somewhat invalid format (non-iteratable with ipairs) as long as the
-  -- custom styles have not been migrated to V2
-  for index, custom_style in pairs(db.uniqueSettings) do
-    if type(index) == "number" and custom_style.Trigger.Name.Input ~= "<Enter name here>"  then
-      entry["#" .. index] = CreateCustomNameplateEntry(index)
+    UpdateSpecial()
+  else
+    local slots = {...}
+    for _, slot_no in pairs(slots) do
+      entry["#" .. slot_no] = CreateCustomNameplateEntry(slot_no)
     end
   end
-
-  UpdateSpecial()
 end
 
 CreateCustomNameplateEntry = function(index)
@@ -6943,13 +6949,6 @@ CreateCustomNameplateEntry = function(index)
   }
 
   return entry
-end
-
-local function UpdateCustomNameplateSlots(...)
-  local slots = {...}
-  for _, slot_no in pairs(slots) do
-    options.args.Custom.args["#" .. slot_no] = CreateCustomNameplateEntry(slot_no)
-  end
 end
 
 local function CreateCustomNameplatesGroup()
