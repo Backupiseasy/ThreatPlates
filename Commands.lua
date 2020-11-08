@@ -170,7 +170,7 @@ function TidyPlatesThreat:ChatCommandDebug(cmd_list)
 	elseif command == "quest" then
 		Addon:PrintQuests()
 	elseif command == "social" then
-		Addon.PringFriendlist()
+		Addon.PrintFriendlist()
  	elseif command == "custom-styles" then
 		for k, v in pairs(TidyPlatesThreat.db.profile.uniqueSettings) do
 			print ("Style:", k, "=>", v.Trigger.Type, " - ", v.Trigger[v.Trigger.Type].Input or "nil" )
