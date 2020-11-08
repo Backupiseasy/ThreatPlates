@@ -232,7 +232,7 @@ function TidyPlatesThreat:ChatCommandDebug(cmd_list)
 	elseif command == "dbm2" then
 		DBM.Nameplate:Hide(true, UnitGUID("target"), 255824, nil, nil, nil, true, {0.5, 0, 0.55, 0.75})
 	else
-		TP.Print(L["Unknown option: "] .. input, true)
+		TP.Print(L["Unknown option: "] .. command, true)
 		PrintHelp()
 	end
 end
