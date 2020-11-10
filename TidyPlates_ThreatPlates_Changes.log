@@ -4,7 +4,7 @@
 * Fixed a bug Combo Points widget where Death Knight runes where not shown in the correct color when style Blizzard was used [Comment #4894, #4954, PM, Issue #440].
 * Fixed a bug with threat percentage text where the alignment was incorrect when a nameplate was initially shown [Comment #4983].
 * Fixed a bug with Social widget where Battle.net Friends were not correctly recognized in Classic WoW.
-* Upgrade integrated libraries (LibCustomGlow v1.0.3-1-g6261295-alpha).
+* Upgrade integrated libraries (LibCustomGlow v1.0.3-1-g6261295-alpha) [Comment #4873].
 
 ------------------------------------------------------
 10.0.3
@@ -15,7 +15,7 @@
 ------------------------------------------------------
 10.0.2
 ------------------------------------------------------
-* Fixed a bug with delayed health update in the Classic Version because of a change in how health update events were processed [Comment TPC#658, TPC#661, TPC#668, TPC#670, #4880, #4873].
+* Fixed a bug with delayed health update in the Classic Version because of a change in how health update events were processed [Comment TPC#658, TPC#661, TPC#668, TPC#670, #4880].
 * Fixed a Lua error with Quest widget that could occur when the a (delayed) quest log update was processed for a quest no longer existing [Issue #236, Comment #4876, #4875].
 
 ------------------------------------------------------
