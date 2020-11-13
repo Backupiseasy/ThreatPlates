@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+10.0.5
+------------------------------------------------------
+* Fixed a Lua error with Quest widget that could occur when the a (delayed) quest log update was processed for a quest no longer existing.
+
+------------------------------------------------------
 10.0.4
 ------------------------------------------------------
 * Fixed a bug Combo Points widget where Death Knight runes where not shown in the correct color when style Blizzard was used [Comment #4894, #4954, PM, Issue #440].

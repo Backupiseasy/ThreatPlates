@@ -333,13 +333,12 @@ end
 
 function Widget:QUEST_WATCH_UPDATE(questID)
   local questIndex = GetQuestLogIndex(questID)
-  local info = GetQuestInfo(questIndex)
-
-  if not info or not info.title then
-    return
+  if questIndex then
+    local info = GetQuestInfo(questIndex)
+    if info and info.title then
+      QuestsToUpdate[questID] = info.title
+    end
   end
-
-  QuestsToUpdate[questID] = info.title
 end
 
 function Widget:UNIT_QUEST_LOG_CHANGED(...)
