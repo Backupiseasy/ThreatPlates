@@ -43,7 +43,11 @@ if Addon.CLASSIC then
 
   GetFriendAccountInfo = function(friend_index)
     local _, _, battle_tag, _, character_name, bnet_id_game_account, client, is_online = BNGetFriendInfo(friend_index)
-    local _, _, _, realm = BNGetGameAccountInfo(bnet_id_game_account)
+
+    local realm
+    if bnet_id_game_account then
+      _, _, _, realm = BNGetGameAccountInfo(bnet_id_game_account)
+    end
 
     local game_account_info = AccountInfo.gameAccountInfo
     game_account_info.isOnline = is_online
@@ -56,7 +60,11 @@ if Addon.CLASSIC then
 
   GetGameAccountInfoByID = function(friend_index)
     local bnetIDAccount, accountName, battle_tag, isBattleTag, character_name, bnet_id_game_account, client, is_online = BNGetFriendInfoByID(friend_index)
-    local _, _, _, realm = BNGetGameAccountInfo(bnet_id_game_account)
+
+    local _, realm
+    if bnet_id_game_account then
+      _, _, _, realm = BNGetGameAccountInfo(bnet_id_game_account)
+    end
 
     local game_account_info = AccountInfo.gameAccountInfo
     game_account_info.isOnline = is_online
