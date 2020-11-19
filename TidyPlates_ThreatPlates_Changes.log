@@ -4,6 +4,7 @@
 * Fixed a Lua error with Quest widget that could occur when the a (delayed) quest log update was processed for a quest no longer existing.
 * Shaman's Prime Earth Elemental is now recognized as off-tank [Issue #445].
 * Fixed a Lua error in Social widget related to Battle.net friend list updates [Comment TPC#687].
+* Updated TOC version.
 
 ------------------------------------------------------
 10.0.4
