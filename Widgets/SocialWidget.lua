@@ -31,54 +31,6 @@ local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local C_FriendList_ShowFriends, C_FriendList_GetNumOnlineFriends = C_FriendList.ShowFriends, C_FriendList.GetNumOnlineFriends
 local C_FriendList_GetFriendInfo = C_FriendList.GetFriendInfo
 
-local BNGetFriendInfo, BNGetFriendInfoByID, BNGetGameAccountInfo = BNGetFriendInfo, BNGetFriendInfoByID, BNGetGameAccountInfo -- For Classic
-local GetFriendAccountInfo, GetGameAccountInfoByID -- For Retail
---if not Addon.CLASSIC then
---  GetFriendAccountInfo, GetGameAccountInfoByID = C_BattleNet.GetFriendAccountInfo, C_BattleNet.GetGameAccountInfoByID
---end
-if Addon.CLASSIC then
-  local AccountInfo = {
-    gameAccountInfo = {}
-  }
-
-  GetFriendAccountInfo = function(friend_index)
-    local _, _, battle_tag, _, character_name, bnet_id_game_account, client, is_online = BNGetFriendInfo(friend_index)
-
-    local realm
-    if bnet_id_game_account then
-      _, _, _, realm = BNGetGameAccountInfo(bnet_id_game_account)
-    end
-
-    local game_account_info = AccountInfo.gameAccountInfo
-    game_account_info.isOnline = is_online
-    game_account_info.clientProgram = client
-    game_account_info.characterName = character_name
-    game_account_info.realmName = realm
-
-    return AccountInfo
-  end
-
-  GetGameAccountInfoByID = function(friend_index)
-    local bnetIDAccount, accountName, battle_tag, isBattleTag, character_name, bnet_id_game_account, client, is_online = BNGetFriendInfoByID(friend_index)
-
-    local _, realm
-    if bnet_id_game_account then
-      _, _, _, realm = BNGetGameAccountInfo(bnet_id_game_account)
-    end
-
-    local game_account_info = AccountInfo.gameAccountInfo
-    game_account_info.isOnline = is_online
-    game_account_info.clientProgram = client
-    game_account_info.characterName = character_name
-    game_account_info.realmName = realm
-
-    return AccountInfo.gameAccountInfo
-  end
-else
-  GetFriendAccountInfo, GetGameAccountInfoByID = C_BattleNet.GetFriendAccountInfo, C_BattleNet.GetGameAccountInfoByID
-end
-
-
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
 local PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\SocialWidget\\"
@@ -97,7 +49,52 @@ local ListGuildMembersSize, ListFriendsSize, ListBnetFriendsSize = 0, 0, 0
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
 -- List them here for Mikk's FindGlobals script
--- GLOBALS: BNGetNumFriends
+-- GLOBALS: BNGetNumFriends, BNGetGameAccountInfo
+
+local BNGetFriendInfo, BNGetFriendInfoByID = BNGetFriendInfo, BNGetFriendInfoByID -- For Classic
+local GetFriendAccountInfo, GetGameAccountInfoByID -- For Retail
+
+if Addon.CLASSIC then
+  local AccountInfo = {
+    gameAccountInfo = {}
+  }
+
+  GetFriendAccountInfo = function(friend_index)
+    local _, _, battle_tag, _, character_name, bnet_id_game_account, client, is_online = BNGetFriendInfo(friend_index)
+
+    local realm
+    if bnet_id_game_account then
+      _, _, _, realm = _G.BNGetGameAccountInfo(bnet_id_game_account)
+    end
+
+    local game_account_info = AccountInfo.gameAccountInfo
+    game_account_info.isOnline = is_online
+    game_account_info.clientProgram = client
+    game_account_info.characterName = character_name
+    game_account_info.realmName = realm
+
+    return AccountInfo
+  end
+
+  GetGameAccountInfoByID = function(friend_index)
+    local bnetIDAccount, accountName, battle_tag, isBattleTag, character_name, bnet_id_game_account, client, is_online = BNGetFriendInfoByID(friend_index)
+
+    local _, realm
+    if bnet_id_game_account then
+      _, _, _, realm = _G.BNGetGameAccountInfo(bnet_id_game_account)
+    end
+
+    local game_account_info = AccountInfo.gameAccountInfo
+    game_account_info.isOnline = is_online
+    game_account_info.clientProgram = client
+    game_account_info.characterName = character_name
+    game_account_info.realmName = realm
+
+    return AccountInfo.gameAccountInfo
+  end
+else
+  GetFriendAccountInfo, GetGameAccountInfoByID = C_BattleNet.GetFriendAccountInfo, C_BattleNet.GetGameAccountInfoByID
+end
 
 ---------------------------------------------------------------------------------------------------
 -- Social Widget Functions
