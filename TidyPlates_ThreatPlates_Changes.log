@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+10.0.6
+------------------------------------------------------
+* Fixed a bug where the reaction color of unfriendly, non-attackable hostile units was not correct (red instead of brown).
+
+------------------------------------------------------
 10.0.5
 ------------------------------------------------------
 * Fixed a Lua error with Quest widget that could occur when the a (delayed) quest log update was processed for a quest no longer existing.

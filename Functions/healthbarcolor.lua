@@ -233,7 +233,7 @@ end
 local function GetColorByReaction(unit)
   local db = TidyPlatesThreat.db.profile.ColorByReaction
 
-  if unit.type == "NPC" and not UnitCanAttack("player", unit.unitid) and UnitReaction("player", unit.unitid) == 3 then
+  if unit.type == "NPC" and not UnitCanAttack("player", unit.unitid) and UnitReaction("player", unit.unitid) <= 3 then
     -- 1/2 is same color (red), 4 is neutral (yellow),5-8 is same color (green)
     return db.UnfriendlyFaction
     --return FACTION_BAR_COLORS[3]
