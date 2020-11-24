@@ -6197,7 +6197,7 @@ end
 
 local function CustomPlateGetHeaderName(index)
   local trigger_type = db.uniqueSettings[index].Trigger.Type
-  local prefix = (trigger_type == "Aura" and "Aura: ") or (trigger_type == "Cast" and "Cast: ") or ""
+  local prefix = (trigger_type == "Aura" and L["Aura: "]) or (trigger_type == "Cast" and L["Cast: "]) or ""
   return prefix .. (db.uniqueSettings[index].Trigger[trigger_type].Input or "")
 end
 
