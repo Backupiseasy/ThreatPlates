@@ -233,10 +233,14 @@ end
 local function GetColorByReaction(unit)
   local db = TidyPlatesThreat.db.profile.ColorByReaction
 
-  if unit.type == "NPC" and not UnitCanAttack("player", unit.unitid) and UnitReaction("player", unit.unitid) <= 3 then
-    -- 1/2 is same color (red), 4 is neutral (yellow),5-8 is same color (green)
+--  if unit.type == "NPC" and not UnitCanAttack("player", unit.unitid) and UnitReaction("player", unit.unitid) <= 3 then
+--    -- 1/2 is same color (red), 4 is neutral (yellow),5-8 is same color (green)
+--    return db.UnfriendlyFaction
+--    --return FACTION_BAR_COLORS[3]
+  -- Handle non-attackable units with brown healtbars - currently, I know no better way to detect this.
+  if unit.type == "NPC"  and not UnitCanAttack("player", unit.unitid) and
+    unit.blue < 0.1 and unit.green > 0.5 and unit.green < 0.6 and unit.red > 0.9 then
     return db.UnfriendlyFaction
-    --return FACTION_BAR_COLORS[3]
   end
 
   return db[reference[unit.reaction][unit.type]]
