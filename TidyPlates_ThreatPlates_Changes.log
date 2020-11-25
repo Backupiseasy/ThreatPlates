@@ -3,7 +3,7 @@
 ------------------------------------------------------
 * Fixed a bug where the reaction color of unfriendly, non-attackable hostile units was not correct (red instead of brown).
 * Added support for special-purpose nameplates used for some quests in Shadowlands [Comment #5049, #5052, #5054, #5039, Issue #447].
-* Improved coloring of non-attackable, unfriendly units (brown healtbars).
+* Improved coloring of non-attackable, unfriendly units (brown healthbars).
 * Fixed a bug in Quest widget where quest information was not correctly detected from tooltips.
 * Fixed some missing translations.
 
