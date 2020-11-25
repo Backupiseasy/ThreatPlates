@@ -27,6 +27,7 @@ local UnitChannelInfo  = UnitChannelInfo
 local UnitPlayerControlled = UnitPlayerControlled
 local GetCVar, Lerp, CombatLogGetCurrentEventInfo = GetCVar, Lerp, CombatLogGetCurrentEventInfo
 local GetPlayerInfoByGUID, RAID_CLASS_COLORS = GetPlayerInfoByGUID, RAID_CLASS_COLORS
+local UnitNameplateShowsWidgetsOnly = UnitNameplateShowsWidgetsOnly
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
@@ -915,26 +916,35 @@ do
 	end
 
   local function FrameOnShow(UnitFrame)
+    local unitid = UnitFrame.unit
+
     -- Hide nameplates that have not yet an unit added
-    if not UnitFrame.unit then
+    if not unitid then
       UnitFrame:Hide()
+      return
+    end
+
+    if UnitNameplateShowsWidgetsOnly(unitid) then
+      -- Don't show ThreatPlates for widget-only nameplates (since Shadowlands)
+      return
     end
 
     local db = TidyPlatesThreat.db.profile
 
     -- Skip the personal resource bar of the player character, don't unhook scripts as nameplates, even the personal
     -- resource bar, get re-used
-    if UnitIsUnit(UnitFrame.unit, "player") then -- or: ns.PlayerNameplate == GetNamePlateForUnit(UnitFrame.unit)
+    if UnitIsUnit(unitid, "player") then -- or: ns.PlayerNameplate == GetNamePlateForUnit(UnitFrame.unit)
       if db.PersonalNameplate.HideBuffs then
         UnitFrame.BuffFrame:Hide()
---      else
---        UnitFrame.BuffFrame:Show()
+      --      else
+      --        UnitFrame.BuffFrame:Show()
       end
+      -- Just an else with the part below should work also
       return
     end
 
     -- Hide ThreatPlates nameplates if Blizzard nameplates should be shown for friendly units
-    if UnitReaction(UnitFrame.unit, "player") > 4 then
+    if UnitReaction(unitid, "player") > 4 then
       UnitFrame:SetShown(SettingsShowFriendlyBlizzardNameplates)
     else
       UnitFrame:SetShown(SettingsShowEnemyBlizzardNameplates)
@@ -1020,7 +1030,7 @@ do
 	function CoreEvents:NAME_PLATE_UNIT_ADDED(unitid)
     -- Player's personal resource bar is currently not handled by Threat Plates
     -- OnShowNameplate is not called on it, therefore plate.TPFrame.Active is nil
-    if UnitIsUnit("player", unitid) then return end
+    if UnitIsUnit("player", unitid) or UnitNameplateShowsWidgetsOnly(unitid) then return end
 
     OnShowNameplate(GetNamePlateForUnit(unitid), unitid)
 	end

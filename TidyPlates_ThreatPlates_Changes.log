@@ -2,6 +2,7 @@
 10.0.6
 ------------------------------------------------------
 * Fixed a bug where the reaction color of unfriendly, non-attackable hostile units was not correct (red instead of brown).
+* Added support for special-purpose nameplates used for some quests in Shadowlands [Comment #5049, #5052, #5054, #5039].
 * Fixed some missing translations.
 
 ------------------------------------------------------
