@@ -75,6 +75,9 @@ if Addon.CLASSIC then
 
     return text, text, texture, startTime or 0, endTime or 0, false, nil, false, spellID
   end
+
+  -- Not available in Classic, introduced in patch 9.0.1
+  UnitNameplateShowsWidgetsOnly = function() return false end
 else
   GetNameForNameplate = function(plate) return plate:GetName() end
 
