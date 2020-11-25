@@ -56,7 +56,9 @@ local IsQuestUnit -- Function
 
 -- Since patch 8.3, quest tooltips have a different format depending on the localization, it seems
 -- at least for kill quests
-local PARSER_QUEST_OBJECTIVE_BACKUP = function(text)
+-- In Shadowlands, it seems that the format is randomly changed, at least for German, so check for
+-- everything as a backup
+local QUEST_OBJECTIVE_PARSER_LEFT = function(text)
   local current, goal, objective_name = string.match(text,"^(%d+)/(%d+)( .*)$")
 
   if not objective_name then
@@ -66,13 +68,16 @@ local PARSER_QUEST_OBJECTIVE_BACKUP = function(text)
   return objective_name, current, goal
 end
 
-local QUEST_OBJECTIVE_PARSER_LEFT = function(text)
-  local current, goal, objective_name = string.match(text,"^(%d+)/(%d+)( .*)$")
-  return objective_name, current, goal
-end
-
 local QUEST_OBJECTIVE_PARSER_RIGHT = function(text)
-  return string.match(text,"^(.*: )(%d+)/(%d+)$")
+  -- Quest objective: Versucht, zu kommunizieren: 0/1
+  local objective_name, current, goal = string.match(text,"^(.*: )(%d+)/(%d+)$")
+
+  if not objective_name then
+    -- Quest objective: 0/1 Besucht die Halle der Kuriositäten
+    current, goal, objective_name = string.match(text,"^(%d+)/(%d+)( .*)$")
+  end
+
+  return objective_name, current, goal
 end
 
 local STANDARD_QUEST_OBJECTIVE_PARSER = {
@@ -93,7 +98,7 @@ local STANDARD_QUEST_OBJECTIVE_PARSER = {
   ruRU = QUEST_OBJECTIVE_PARSER_RIGHT,
 }
 
-local QuestObjectiveParser = STANDARD_QUEST_OBJECTIVE_PARSER[GetLocale()] or PARSER_QUEST_OBJECTIVE_BACKUP
+local QuestObjectiveParser = STANDARD_QUEST_OBJECTIVE_PARSER[GetLocale()] or QUEST_OBJECTIVE_PARSER_LEFT
 
 ---------------------------------------------------------------------------------------------------
 -- Update Hook to compensate for deleyed quest information update on unit tooltips
@@ -250,6 +255,7 @@ function Widget:CreateQuest(questID, questIndex)
 
     local objective, text, objectiveType, finished, numFulfilled, numRequired
     for objIndex = 1, #objectives do
+      --ThreatPlates.DEBUG_PRINT_TABLE(objective)
       objective = objectives[objIndex]
       text, objectiveType, numFulfilled, numRequired = objective.text, objective.type, objective.numFulfilled, objective.numRequired
 
@@ -264,7 +270,8 @@ function Widget:CreateQuest(questID, questIndex)
         -- assert (objectiveName ~= " : ", "Error: " ..  objectiveName)
 
         --only want to track quests in this format
-        if numRequired and numRequired > 1 then
+        -- numRequired > 1 prevents quest like "...: 0/1" from being tracked - not sure why it was/is here
+        if numRequired and numRequired >= 1 then
           if self.objectives[objectiveName] then
             local obj = self.objectives[objectiveName]
 
@@ -288,8 +295,8 @@ end
 function Widget:AddQuestCacheEntry(questIndex)
   if questIndex then
     local info = GetQuestInfo(questIndex)
-
-    if info and not info.isHeader and info.title then --ignore quest log headers
+    --ThreatPlates.DEBUG_PRINT_TABLE(info)
+    if info and info.title and not info.isHidden and not info.isHeader then --ignore quest log headers
       local quest = Widget:CreateQuest(info.questID, questIndex)
 
       quest:UpdateObjectives()
@@ -593,7 +600,7 @@ function Addon:PrintQuests()
   print ("Quests List:", tablelength(QuestIDs))
   for quest_id, title in pairs(QuestIDs) do
     local quest = QuestList[title]
-    if quest.objectives and tablelength(quest.objectives) > 0 then
+    if quest.objectives then --and tablelength(quest.objectives) > 0 then
       print ("*", title .. " [ID:" .. tostring(quest_id) .. "]")
       for name, val in pairs (quest.objectives) do
         print ("  - |" .. name .."| :", val.current, "/", val.goal, "[" .. val.type .. "]")
