@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+10.0.7
+------------------------------------------------------
+* Updated list of stealth-detecting mobs.
+
+------------------------------------------------------
 10.0.6
 ------------------------------------------------------
 * Fixed a bug where the reaction color of unfriendly, non-attackable hostile units was not correct (red instead of brown).

@@ -78,6 +78,9 @@ local DETECTION_UNITS = {
   ["159219"] = true, -- Umbral Seer
   -- Shadowlands
   ["165349"] = true, -- Animated Corpsehound
+  ["164563"] = true, -- Vicious Gargon
+  ["152708"] = true, -- Mawsworn Seeker
+  ["163524"] = true, -- Kyrian Dark-Praetor
 }
 
 ---------------------------------------------------------------------------------------------------
