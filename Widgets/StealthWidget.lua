@@ -81,6 +81,11 @@ local DETECTION_UNITS = {
   ["164563"] = true, -- Vicious Gargon
   ["152708"] = true, -- Mawsworn Seeker
   ["163524"] = true, -- Kyrian Dark-Praetor
+  ["173051"] = true, -- Suppressor Xelors
+  ["171422"] = true, -- Arch-Suppressor Laguas
+  ["151127"] = true, -- Lord of Torment
+  ["152905"] = true, -- Tower Sentinel
+  ["155828"] = true, -- Runecarved Colossus
 }
 
 ---------------------------------------------------------------------------------------------------
