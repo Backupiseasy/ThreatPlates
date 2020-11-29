@@ -18,9 +18,10 @@ local WorldFrame = WorldFrame
 local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
 local UnitName, UnitIsUnit, UnitDetailedThreatSituation = UnitName, UnitIsUnit, UnitDetailedThreatSituation
 
-local GetQuestObjectives, GetQuestInfo, GetQuestLogIndex = C_QuestLog.GetQuestObjectives, C_QuestLog.GetInfo, C_QuestLog.GetLogIndexForQuestID
+local RequestLoadQuestByID = C_QuestLog.RequestLoadQuestByID
+local GetQuestObjectives, GetQuestInfo = C_QuestLog.GetQuestObjectives, C_QuestLog.GetInfo
+local GetQuestIDForLogIndex, GetLogIndexForQuestID = C_QuestLog.GetQuestIDForLogIndex, C_QuestLog.GetLogIndexForQuestID
 local GetQuestLogTitle, GetNumQuestLogEntries = C_QuestLog.GetQuestLogTitle, C_QuestLog.GetNumQuestLogEntries
-
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 
 -- ThreatPlates APIs
@@ -46,10 +47,10 @@ local ICON_PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\QuestWid
 -- Local variables
 ---------------------------------------------------------------------------------------------------
 local QuestLogNotComplete = true
-local QuestUpdatePending = false
-local QuestAcceptedUpdatePending = true
+local UnitQuestLogChanged = false
+--local QuestAcceptedUpdatePending = true
 local FirstPOIUpateAfterLogin = true
-local QuestList, QuestIDs, QuestsToUpdate = {}, {}, {}
+local QuestByTitle, QuestByID, QuestsToUpdate = {}, {}, {}
 local QuestUnitsToUpdate = {}
 
 local IsQuestUnit -- Function
@@ -99,29 +100,6 @@ local STANDARD_QUEST_OBJECTIVE_PARSER = {
 }
 
 local QuestObjectiveParser = STANDARD_QUEST_OBJECTIVE_PARSER[GetLocale()] or QUEST_OBJECTIVE_PARSER_LEFT
-
----------------------------------------------------------------------------------------------------
--- Update Hook to compensate for deleyed quest information update on unit tooltips
----------------------------------------------------------------------------------------------------
-local function WatchforQuestUpdateOnTooltip(self, elapsed)
-  -- Update the number of seconds since the last update
-  self.TimeSinceLastUpdate = (self.TimeSinceLastUpdate or 0) + elapsed
-
-  if self.TimeSinceLastUpdate >= ON_UPDATE_INTERVAL then
-    self.TimeSinceLastUpdate = 0
-
-    -- Rest watch list and check again
-    self.WatchTooltip = nil
-    IsQuestUnit(self.unit)
-
-    if not self.WatchTooltip then
-      self.WatchTooltip = nil
-      self:SetScript("OnUpdate", nil)
-
-      Widget:UpdateFrame(self, self.unit) -- Calls IsQuestUnit again, but right now no way to not do that
-    end
-  end
-end
 
 ---------------------------------------------------------------------------------------------------
 -- Quest Functions
@@ -186,14 +164,16 @@ function IsQuestUnit(unit, create_watcher)
 
         -- Note: "progressbar" type quest (area quest) progress cannot get via the API, so for this tooltips
         -- must be used. That's also the reason why their progress is not cached.
-        local Quests = QuestList
-        if Quests[quest_title] then
-          local quest_objective = Quests[quest_title].objectives[objective_name]
+        local quest = QuestByTitle[quest_title]
+        if quest then
+          local quest_objective = quest.objectives[objective_name]
           if quest_objective then
             current = quest_objective.current
             goal = quest_objective.goal
             objective_type = quest_objective.type
           end
+        --else
+        --  print ("<< Quest No Cached >> =>", quest_title)
         end
 
         -- A unit may be target of more than one quest, the quest indicator should be show if at least one quest is not completed.
@@ -243,90 +223,82 @@ end
 
 ThreatPlates.ShowQuestUnit = ShowQuestUnitHealthbar
 
-function Widget:CreateQuest(questID, questIndex)
-  local Quest = {
-    ["id"] = questID,
-    ["index"] = questIndex,
-    ["objectives"] = {}
-  }
+local function CacheQuestObjectives(quest)
+  local objectives = GetQuestObjectives(quest.id)
 
-  function Quest:UpdateObjectives()
-    local objectives = GetQuestObjectives(self.id)
+  local objective, text, objectiveType, finished, numFulfilled, numRequired
+  for objIndex = 1, #objectives do
+    --ThreatPlates.DEBUG_PRINT_TABLE(objective)
+    objective = objectives[objIndex]
+    text, objectiveType, numFulfilled, numRequired = objective.text, objective.type, objective.numFulfilled, objective.numRequired
 
-    local objective, text, objectiveType, finished, numFulfilled, numRequired
-    for objIndex = 1, #objectives do
-      --ThreatPlates.DEBUG_PRINT_TABLE(objective)
-      objective = objectives[objIndex]
-      text, objectiveType, numFulfilled, numRequired = objective.text, objective.type, objective.numFulfilled, objective.numRequired
+    -- Occasionally the game will return nil text, this happens when some world quests/bonus area quests finish (the objective no longer exists)
+    -- Does not make sense to add "progressbar" type quests here as there progress is not updated via QUEST_WATCH_UPDATE
+    if text and objectiveType ~= "progressbar" then
+      local objectiveName = string.gsub(text, "(%d+)/(%d+)", "")
+      -- Normally, the quest objective should come before the :, but while the QUEST_LOG_UPDATE events (after login/reload)
 
-      -- Occasionally the game will return nil text, this happens when some world quests/bonus area quests finish (the objective no longer exists)
-      -- Does not make sense to add "progressbar" type quests here as there progress is not updated via QUEST_WATCH_UPDATE
-      if text and objectiveType ~= "progressbar" then
-        local objectiveName = string.gsub(text, "(%d+)/(%d+)", "")
-        -- Normally, the quest objective should come before the :, but while the QUEST_LOG_UPDATE events (after login/reload)
+      -- It does seem that this is no longer necessary
+      QuestLogNotComplete = QuestLogNotComplete or (objectiveName == " : ")
+      -- assert (objectiveName ~= " : ", "Error: " ..  objectiveName)
 
-        -- It does seem that this is no longer necessary
-        QuestLogNotComplete = QuestLogNotComplete or (objectiveName == " : ")
-        -- assert (objectiveName ~= " : ", "Error: " ..  objectiveName)
+      --only want to track quests in this format
+      -- numRequired > 1 prevents quest like "...: 0/1" from being tracked - not sure why it was/is here
+      if numRequired and numRequired >= 1 then
+        if quest.objectives[objectiveName] then
+          local obj = quest.objectives[objectiveName]
 
-        --only want to track quests in this format
-        -- numRequired > 1 prevents quest like "...: 0/1" from being tracked - not sure why it was/is here
-        if numRequired and numRequired >= 1 then
-          if self.objectives[objectiveName] then
-            local obj = self.objectives[objectiveName]
-
-            obj.current = numFulfilled
-            obj.goal = numRequired
-          else --new objective
-            self.objectives[objectiveName] = {
-              ["type"] = objectiveType,
-              ["current"] = numFulfilled,
-              ["goal"] = numRequired
-            }
-          end
+          obj.current = numFulfilled
+          obj.goal = numRequired
+        else --new objective
+          quest.objectives[objectiveName] = {
+            ["type"] = objectiveType,
+            ["current"] = numFulfilled,
+            ["goal"] = numRequired
+          }
         end
       end
     end
   end
-
-  return Quest
 end
 
-function Widget:AddQuestCacheEntry(questIndex)
-  if questIndex then
-    local info = GetQuestInfo(questIndex)
-    --ThreatPlates.DEBUG_PRINT_TABLE(info)
-    if info and info.title and not info.isHidden and not info.isHeader then --ignore quest log headers
-      local quest = Widget:CreateQuest(info.questID, questIndex)
+local function CacheQuestByQuestLogIndex(quest_log_index, quest_id)
+  if quest_log_index then
+    local quest_info = GetQuestInfo(quest_log_index)
+    if quest_info then
+      -- Ignore certain quests that need not to be tracked
+      -- quest_info.isOnMap => would need to scan quest log when entering new areas
+      if quest_info.title and not quest_info.isHeader then
+        local quest = {
+          id = quest_info.questID,
+          objectives = {},
+        }
 
-      quest:UpdateObjectives()
-      QuestList[info.title] = quest
-      QuestIDs[info.questID] = info.title --so it can be found by remove
+        --print ("  => Found information for quest", quest_info.questID)
+        QuestByID[quest_info.questID] = quest_info.title -- So it can be found by remove
+        QuestByTitle[quest_info.title] = quest
+
+        CacheQuestObjectives(quest)
+      end
+    else
+      QuestByID[quest_id] = "UpdatePending"
     end
   end
 end
 
-function Widget:UpdateQuestCacheEntry(questIndex, title)
-  if not QuestList[title] then --for whatever reason it doesn't exist, so just add it
-    self:AddQuestCacheEntry(questIndex)
-    return
+local function CacheQuestByQuestID(quest_id)
+  if quest_id then
+    local quest_log_index = GetLogIndexForQuestID(quest_id)
+    CacheQuestByQuestLogIndex(quest_log_index, quest_id)
   end
-
-  --update Objectives
-  local quest = QuestList[title]
-
-  quest:UpdateObjectives()
-  quest.index = questIndex
 end
 
 function Widget:GenerateQuestCache()
-  local entries = GetNumQuestLogEntries()
+  QuestByTitle = {}
+  QuestByID = {}
 
-  QuestList = {}
-  QuestIDs = {}
-
-  for questIndex = 1, entries do
-    self:AddQuestCacheEntry(questIndex)
+  for quest_log_index = 1, GetNumQuestLogEntries() do
+    CacheQuestByQuestLogIndex(quest_log_index)
   end
 end
 
@@ -334,37 +306,60 @@ end
 -- Event Watcher Code for Quest Widget
 ---------------------------------------------------------------------------------------------------
 
-function Widget:PLAYER_ENTERING_WORLD()
-  self:UpdateAllFramesAndNameplateColor()
-end
+function Widget:QUEST_ACCEPTED(quest_id)
 
-function Widget:QUEST_WATCH_UPDATE(questID)
-  local questIndex = GetQuestLogIndex(questID)
-  if questIndex then
-    local info = GetQuestInfo(questIndex)
-    if info and info.title then
-      QuestsToUpdate[questID] = info.title
-    end
+  CacheQuestByQuestID(quest_id)
+  if QuestByID[quest_id] == "UpdatePending" then
+    --print ("QUEST_ACCEPTED:", quest_id)
+    --print ("  => Requesting quest information")
+    RequestLoadQuestByID(quest_id)
+    -- QuestAcceptedUpdatePending = true
   end
 end
 
-function Widget:UNIT_QUEST_LOG_CHANGED(...)
-  QuestUpdatePending = true
+--function Widget:QUEST_AUTOCOMPLETE(quest_id)
+--  print ("QUEST_AUTOCOMPLETE:", quest_id)
+--end
+--
+--function Widget:QUEST_COMPLETE(quest_id)
+--  print ("QUEST_COMPLETE:", quest_id)
+--end
+
+function Widget:QUEST_DATA_LOAD_RESULT(quest_id, success)
+  if success and QuestByID[quest_id] == "UpdatePending" then
+    --print ("QUEST_DATA_LOAD_RESULT:", quest_id, success)
+    --print ("  => Loading delayed quest information")
+    CacheQuestByQuestID(quest_id)
+    self:UpdateAllFramesAndNameplateColor()
+  end
 end
 
+--function Widget:QUEST_DETAIL(questStartItemID)
+--  print ("QUEST_DETAIL:", questStartItemID)
+--end
+--
+--function Widget:QUEST_LOG_CRITERIA_UPDATE(questID, specificTreeID, description, numFulfilled, numRequired)
+--  print ("QUEST_LOG_CRITERIA_UPDATE:", questID, specificTreeID, description, numFulfilled, numRequired)
+--end
+
 function Widget:QUEST_LOG_UPDATE()
-  -- QuestUpdatePending being true means that UNIT_QUEST_LOG_CHANGED was fired (possibly several times)
+  -- UnitQuestLogChanged being true means that UNIT_QUEST_LOG_CHANGED was fired (possibly several times)
   -- So there should be quest progress => update all plates with the current progress.
-  if QuestUpdatePending then
-    QuestUpdatePending = false
+  if UnitQuestLogChanged then
+    --print ("QUEST_LOG_UPDATE => UnitQuestLogChanged")
+    UnitQuestLogChanged = false
 
     -- Update the cached quest progress (for non-progressbar quests) after QUEST_WATCH_UPDATE
-    local QuestsToUpdate = QuestsToUpdate
-    for questID, title in pairs(QuestsToUpdate) do
-      local questIndex = GetQuestLogIndex(questID)
+    for quest_id, title in pairs(QuestsToUpdate) do
+      local quest = QuestByTitle[title]
+      if quest then
+        CacheQuestObjectives(quest)
+      else
+        -- For whatever reason it doesn't exist, so just add it
+        CacheQuestByQuestID(quest_id)
+      end
 
-      self:UpdateQuestCacheEntry(questIndex, title)
-      QuestsToUpdate[questID] = nil
+      QuestsToUpdate[quest_id] = nil
     end
 
     -- We need to do this to update all progressbar quests - their quest progress cannot be cached
@@ -378,42 +373,77 @@ function Widget:QUEST_LOG_UPDATE()
   end
 end
 
-function Widget:QUEST_ACCEPTED(questIndex, questID)
-  self:AddQuestCacheEntry(questIndex)
-  QuestAcceptedUpdatePending = true
-end
-
-function Widget:QUEST_POI_UPDATE()
-  if QuestAcceptedUpdatePending then
-    -- After login, sometimes the quest list is empty when the widget is loaded.
-    -- So, update the internal quest list after the first POI update after login.
-    -- At that point, the quest list is available
-    if FirstPOIUpateAfterLogin then
-      FirstPOIUpateAfterLogin = false
-      -- The following should be an alternative as QUEST_LOG_UPDATE seems to be fired after QUEST_POI_UPDATE in every case
-      -- QuestLogNotComplete = true
-      self:GenerateQuestCache()
-    end
-
-    self:UpdateAllFramesAndNameplateColor()
-    QuestAcceptedUpdatePending = false
-  end
-end
-
---function Widget:QUEST_DATA_LOAD_RESULT(questID, success)
---  print ("QUEST_DATA_LOAD_RESULT", questID, success)
+--function Widget:QUEST_POI_UPDATE()
+--  print ("QUEST_POI_UPDATE:")
+--  if QuestAcceptedUpdatePending then
+--    -- After login, sometimes the quest list is empty when the widget is loaded.
+--    -- So, update the internal quest list after the first POI update after login.
+--    -- At that point, the quest list is available
+--    if FirstPOIUpateAfterLogin then
+--      FirstPOIUpateAfterLogin = false
+--      -- The following should be an alternative as QUEST_LOG_UPDATE seems to be fired after QUEST_POI_UPDATE in every case
+--      -- QuestLogNotComplete = true
+--      self:GenerateQuestCache()
+--    end
+--
+--    self:UpdateAllFramesAndNameplateColor()
+--    QuestAcceptedUpdatePending = false
+--  end
 --end
 
-function Widget:QUEST_REMOVED(quest_id)
-  local quest_title = QuestIDs[quest_id]
+function Widget:QUEST_REMOVED(quest_id, _)
+  --print ("QUEST_REMOVED:", quest_id)
 
-  --clean up cache
+  -- Clean up cache
+  local quest_title = QuestByID[quest_id]
+
+  QuestByID[quest_id] = nil
+  QuestsToUpdate[quest_id] = nil
+
+  -- Plates only need to be updated if the quest was actually tracked
   if quest_title then
-    QuestIDs[quest_id] = nil
-    QuestList[quest_title] = nil
-    QuestsToUpdate[quest_id] = nil
+    QuestByTitle[quest_title] = nil
+    self:UpdateAllFramesAndNameplateColor()
   end
+end
 
+--function Widget:QUEST_TURNED_IN(questID, xpReward, moneyReward)
+--  print ("QUEST_TURNED_IN:", questID, xpReward, moneyReward)
+--end
+--
+--function Widget:QUEST_WATCH_LIST_CHANGED(questID, added)
+--  print ("QUEST_WATCH_LIST_CHANGED:", questID, added)
+--end
+
+function Widget:QUEST_WATCH_UPDATE(quest_id)
+  --print ("QUEST_WATCH_UPDATE:", quest_id)
+  local quest_log_index = GetLogIndexForQuestID(quest_id)
+  if quest_log_index then
+    local info = GetQuestInfo(quest_log_index)
+    if info and info.title then
+      QuestsToUpdate[quest_id] = info.title
+    end
+  end
+end
+
+--function Widget:QUESTLINE_UPDATE(requestRequired)
+--end
+
+--function Widget:WORLD_QUEST_COMPLETED_BY_SPELL(questID)
+--  print ("QUEST_WATCH_LIST_CHANGED:", questID)
+--end
+
+function Widget:UNIT_QUEST_LOG_CHANGED(unitid)
+  --if unitid ~= "player" then
+  --  print ("UNIT_QUEST_LOG_CHANGED:", unitid)
+  --end
+
+  if unitid == "player" then
+    UnitQuestLogChanged = true
+  end
+end
+
+function Widget:PLAYER_ENTERING_WORLD()
   self:UpdateAllFramesAndNameplateColor()
 end
 
@@ -480,18 +510,26 @@ end
 function Widget:OnEnable()
   self:GenerateQuestCache()
 
-  self:RegisterEvent("PLAYER_ENTERING_WORLD")
-
   self:RegisterEvent("QUEST_ACCEPTED")
+  --self:RegisterEvent("QUEST_AUTOCOMPLETE")
+  --self:RegisterEvent("QUEST_COMPLETE")
+  self:RegisterEvent("QUEST_DATA_LOAD_RESULT")
+  --self:RegisterEvent("QUEST_DETAIL")
+  --self:RegisterEvent("QUEST_LOG_CRITERIA_UPDATE")
+  self:RegisterEvent("QUEST_LOG_UPDATE")
+  --self:RegisterEvent("QUEST_POI_UPDATE")
   -- QUEST_REMOVED fires whenever the player turns in a quest, whether automatically with a Task-type quest
   -- (Bonus Objectives/World Quests), or by pressing the Complete button in a quest dialog window.
   -- also handles abandon quest
   self:RegisterEvent("QUEST_REMOVED")
+  --self:RegisterEvent("QUEST_TURNED_IN")
+  --self:RegisterEvent("QUEST_WATCH_LIST_CHANGED")
   self:RegisterEvent("QUEST_WATCH_UPDATE")
-  self:RegisterEvent("QUEST_LOG_UPDATE")
-  self:RegisterEvent("QUEST_POI_UPDATE")
-  -- self:RegisterEvent("QUEST_DATA_LOAD_RESULT")
+  --self:RegisterEvent("QUESTLINE_UPDATE")
+  --self:RegisterEvent("WORLD_QUEST_COMPLETED_BY_SPELL")
   self:RegisterUnitEvent("UNIT_QUEST_LOG_CHANGED", "player")
+
+  self:RegisterEvent("PLAYER_ENTERING_WORLD")
 
   -- Handle in-combat situations:
   self:RegisterEvent("PLAYER_REGEN_ENABLED")
@@ -596,36 +634,51 @@ function Widget:UpdateSettings()
   Font = ThreatPlates.Media:Fetch('font', TidyPlatesThreat.db.profile.questWidget.Font)
 end
 
-function Addon:PrintQuests()
-  print ("Quests List:", tablelength(QuestIDs))
-  for quest_id, title in pairs(QuestIDs) do
-    local quest = QuestList[title]
-    if quest.objectives then --and tablelength(quest.objectives) > 0 then
-      print ("*", title .. " [ID:" .. tostring(quest_id) .. "]")
-      for name, val in pairs (quest.objectives) do
-        print ("  - |" .. name .."| :", val.current, "/", val.goal, "[" .. val.type .. "]")
+function Addon:PrintQuests(quest_id)
+  if quest_id then
+    quest_id = tonumber(quest_id) or 0
+    local quest_log_index = GetLogIndexForQuestID(quest_id)
+    print ("Quest" .. tostring(quest_id) .. ": Log-Nr =", quest_log_index)
+    if quest_log_index then
+      local quest_info = GetQuestInfo(quest_log_index)
+      if quest_info then
+        ThreatPlates.DEBUG_PRINT_TABLE(quest_info)
+
+        local objectives = GetQuestObjectives(quest_id)
+        ThreatPlates.DEBUG_PRINT_TABLE(objectives)
       end
     end
-  end
-
-  -- Only plates of units that are quest units are stored in QuestUnitsToUpdate
-  for index, unitid in ipairs(QuestUnitsToUpdate) do
-    QuestUnitsToUpdate[index] = nil
-
-    local plate = GetNamePlateForUnit(unitid)
-    if plate and plate.TPFrame.Active then
-      local widget_frame = plate.TPFrame.widgets.Quest
-      self:UpdateFrame(widget_frame, plate.TPFrame.unit)
+  else
+    print ("Quests List:", tablelength(QuestByID))
+    for quest_id, title in pairs(QuestByID) do
+      local quest = QuestByTitle[title]
+      if quest.objectives then --and tablelength(quest.objectives) > 0 then
+        print ("*", title .. " [ID:" .. tostring(quest_id) .. "]")
+        for name, val in pairs (quest.objectives) do
+          print ("  - |" .. name .."| :", val.current, "/", val.goal, "[" .. val.type .. "]")
+        end
+      end
     end
 
-    print ("Updating Quest Unit", unitid)
-  end
+    -- Only plates of units that are quest units are stored in QuestUnitsToUpdate
+    for index, unitid in ipairs(QuestUnitsToUpdate) do
+      QuestUnitsToUpdate[index] = nil
 
-  print ("QuestUnitsToUpdate:", tablelength(QuestUnitsToUpdate))
+      local plate = GetNamePlateForUnit(unitid)
+      if plate and plate.TPFrame.Active then
+        local widget_frame = plate.TPFrame.widgets.Quest
+        self:UpdateFrame(widget_frame, plate.TPFrame.unit)
+      end
 
-  print ("Waiting for quest log updates for the following quests:")
-  for questID, title in pairs(QuestsToUpdate) do
-    local questIndex = GetQuestLogIndex(questID)
-    print ("  Quest:", title .. " [" .. tostring(questIndex) .. "]")
+      print ("Updating Quest Unit", unitid)
+    end
+
+    print ("QuestUnitsToUpdate:", tablelength(QuestUnitsToUpdate))
+
+    print ("Waiting for quest log updates for the following quests:")
+    for questID, title in pairs(QuestsToUpdate) do
+      local questIndex = GetLogIndexForQuestID(questID)
+      print ("  Quest:", title .. " [" .. tostring(questIndex) .. "]")
+    end
   end
 end

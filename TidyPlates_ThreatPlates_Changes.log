@@ -1,6 +1,7 @@
 ﻿------------------------------------------------------
 10.0.7
 ------------------------------------------------------
+* Fixed a bug with Quest widget not showing the correct quest status [Issue #450, Comment #5065].
 * Updated list of stealth-detecting mobs.
 
 ------------------------------------------------------

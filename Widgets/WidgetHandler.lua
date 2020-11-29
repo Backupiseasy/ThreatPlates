@@ -30,6 +30,10 @@ Addon.Widgets = WidgetHandler
 local function EventHandler(self, event, ...)
   local widgets = WidgetHandler.RegisteredEventsByWidget[event]
 
+--  if string.find(event, "QUEST") then
+--    print(event, "=>", ...)
+--  end
+
   if widgets then
     for widget, func in pairs(widgets) do
       if func == true then

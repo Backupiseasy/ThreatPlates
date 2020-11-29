@@ -168,7 +168,7 @@ function TidyPlatesThreat:ChatCommandDebug(cmd_list)
 		--TP.Print("|cff89F559Threat Plates|r: Event publishing overview:", true)
 		--Addon:PrintEventService()
 	elseif command == "quest" then
-		Addon:PrintQuests()
+		Addon:PrintQuests(cmd_list[2])
 	elseif command == "social" then
 		Addon.PrintFriendlist()
  	elseif command == "custom-styles" then
