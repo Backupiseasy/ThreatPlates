@@ -1,6 +1,7 @@
 ﻿------------------------------------------------------
 10.0.8
 ------------------------------------------------------
+* Fixed a Lua error that occurred when occlusion transparency was enabled and a special nameplate was shown [Issue GitHub #249, Issue #449].
 * Updated list of stealth-detecting mobs.
 
 ------------------------------------------------------

@@ -962,19 +962,19 @@ do
     if plate.TimeSinceLastUpdate >= ON_UPDATE_INTERVAL then
       plate.TimeSinceLastUpdate = 0
 
-      local unitid = plate.UnitFrame.unit
-      if unitid and UnitIsUnit(unitid, "player") then
+      local tp_frame = plate.TPFrame
+      if not tp_frame.Active or UnitIsUnit(plate.UnitFrame.unit or "", "player") then
         return
       end
 
-      plate.TPFrame:SetFrameLevel(plate:GetFrameLevel() * 10)
+      tp_frame:SetFrameLevel(plate:GetFrameLevel() * 10)
 
 --    for i = 1, #PlateOnUpdateQueue do
 --      PlateOnUpdateQueue[i](plate, plate.TPFrame.unit)
 --    end
 
       if SettingsEnabledOccludedAlpha then
-        UpdatePlate_SetAlphaOnUpdate(plate.TPFrame, plate.TPFrame.unit)
+        UpdatePlate_SetAlphaOnUpdate(tp_frame, tp_frame.unit)
       end
     end
   end
