@@ -86,6 +86,7 @@ local DETECTION_UNITS = {
   ["151127"] = true, -- Lord of Torment
   ["152905"] = true, -- Tower Sentinel
   ["155828"] = true, -- Runecarved Colossus
+  ["157322"] = true, -- Lord of Locks
 }
 
 ---------------------------------------------------------------------------------------------------
