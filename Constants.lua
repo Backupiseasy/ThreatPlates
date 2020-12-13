@@ -908,6 +908,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
           [4] = RGB(255, 105, 0),
           [5] = RGB(255, 0, 0),
           [6] = RGB(255, 0, 0),
+          Animacharge = RGB(0, 221, 225),
         },
         WARLOCK = {
           [1] = RGB(148, 130, 201),

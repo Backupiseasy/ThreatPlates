@@ -34,19 +34,6 @@ local _G =_G
 -- List them here for Mikk's FindGlobals script
 -- GLOBALS: CreateFrame, GetSpecialization
 
-
---local animapoint = random(5)
---local acounter = 0
---GetUnitChargedPowerPoints = function()
---  acounter = acounter + 1
---  if acounter > 10  then
---    animapoint = random(6) - 1
---    acounter = 0
---  end
---
---  return { animapoint }
---end
-
 local UPDATE_INTERVAL = Addon.ON_UPDATE_INTERVAL
 
 local WATCH_POWER_TYPES = {
@@ -695,14 +682,13 @@ function Widget:UpdateSettings()
     self.UpdateUnitPower = self.UpdateRunicPower
     DeathKnightSpecColor = DEATHKNIGHT_COLORS[ActiveSpec]
     ShowRuneCooldown = self.db.RuneCooldown.Show
-  elseif player_class == "ROGUE" and IsSpellKnown(323560) or true then
+  elseif player_class == "ROGUE" and IsUsableSpell(323560) then
     -- Check for spell Echoing Reprimand
+    print ("Enabling Echoing Reprimand")
     self.UpdateUnitPower = self.UpdateComboPointsRogueAnimacharge
   else
     self.UpdateUnitPower = self.UpdateComboPoints
   end
-  print ("IsUsableSpell(323560):", IsSpellKnown(323560))
-  print ("Echoing Reprimand:", self.UpdateUnitPower == self.UpdateComboPointsRogueAnimacharge)
 
   self.TexCoord = texture_info.TexCoord
   self.IconWidth = texture_info.IconWidth

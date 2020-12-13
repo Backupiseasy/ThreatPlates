@@ -33,6 +33,7 @@ local _G =_G
 
 -- Returns if the currently active spec is tank (true) or dps/heal (false)
 Addon.PlayerClass = select(2, UnitClass("player"))
+Addon.PlayerName = select(1, UnitName("player"))
 
 if Addon.CLASSIC then
   local GetShapeshiftFormID = GetShapeshiftFormID
