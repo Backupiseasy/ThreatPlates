@@ -57,11 +57,11 @@ if Addon.CLASSIC then
 
     -- With LibClassicCasterino, startTime is nil sometimes which means that no casting information
     -- is available
-    if not startTime then
+    if not startTime or not endTime then
       text = nil
     end
 
-    return text, text, texture, startTime or 0, endTime or 0, false, false, spellID
+    return text, text, texture, startTime, endTime, false, false, spellID
   end
 
   UnitCastingInfo = function(...)
@@ -69,11 +69,11 @@ if Addon.CLASSIC then
 
     -- With LibClassicCasterino, startTime is nil sometimes which means that no casting information
     -- is available
-    if not startTime then
+    if not startTime or not endTime then
       text = nil
     end
 
-    return text, text, texture, startTime or 0, endTime or 0, false, nil, false, spellID
+    return text, text, texture, startTime, endTime, false, nil, false, spellID
   end
 
   -- Not available in Classic, introduced in patch 9.0.1
@@ -804,10 +804,8 @@ do
     local name, text, texture, startTime, endTime, isTradeSkill, notInterruptible, spellID
     if channeled then
       name, text, texture, startTime, endTime, isTradeSkill, notInterruptible, spellID = UnitChannelInfo(unitid)
-      castbar.Value = (endTime / 1000) - GetTime()
 		else
       name, text, texture, startTime, endTime, isTradeSkill, _, notInterruptible, spellID = UnitCastingInfo(unitid)
-      castbar.Value = GetTime() - (startTime / 1000)
     end
 
     if not name or isTradeSkill then
@@ -851,6 +849,15 @@ do
     castbar.IsCasting = not channeled
     castbar.IsChanneling = channeled
 
+    -- Sometimes startTime/endTime are nil (even in Retail). Not sure if name is always nil is this case as well, just to be sure here
+    -- I think this should not be necessary, name should be nil in this case, but not sure.
+    endTime = endTime or 0
+    startTime = startTime or 0
+    if channeled then
+      castbar.Value = (endTime / 1000) - GetTime()
+    else
+      castbar.Value = GetTime() - (startTime / 1000)
+    end
     castbar.MaxValue = (endTime - startTime) / 1000
     castbar:SetMinMaxValues(0, castbar.MaxValue)
     castbar:SetValue(castbar.Value)
