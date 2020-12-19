@@ -28,6 +28,7 @@ local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
 local TidyPlatesThreat = TidyPlatesThreat
 local RGB = Addon.ThreatPlates.RGB
 local Font = Addon.Font
+local PlayerClass = Addon.PlayerClass
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -201,8 +202,7 @@ local DeathKnightSpecColor, ShowRuneCooldown
 
 if Addon.CLASSIC then
   function Widget:DetermineUnitPower()
-    local _, player_class = UnitClass("player")
-    local power_type = UNIT_POWER[player_class]
+    local power_type = UNIT_POWER[PlayerClass]
 
     if power_type and power_type.Name then
       self.PowerType = power_type.PowerType
@@ -215,9 +215,7 @@ if Addon.CLASSIC then
   GetUnitChargedPowerPoints = function(...) return nil end
 else
   function Widget:DetermineUnitPower()
-    local _, player_class = UnitClass("player")
-
-    local power_type = UNIT_POWER[player_class]
+    local power_type = UNIT_POWER[PlayerClass]
     if power_type then
       power_type = power_type[_G.GetSpecialization()] or power_type
     end
@@ -521,11 +519,10 @@ function Widget:OnEnable()
   self:RegisterUnitEvent("UNIT_MAXPOWER", "player")
   self:RegisterUnitEvent("UNIT_POWER_POINT_CHARGE", "player", EventHandler)
 
-  local _, player_class = UnitClass("player")
-  if player_class == "DRUID" then
+  if PlayerClass == "DRUID" then
     self:RegisterEvent("UPDATE_SHAPESHIFT_FORM")
     self.ShowInShapeshiftForm = (GetShapeshiftFormID() == 1)
-  elseif player_class == "DEATHKNIGHT" then
+  elseif PlayerClass == "DEATHKNIGHT" then
     -- Never registered for Classic, as there is no Death Knight class
     self:RegisterEvent("RUNE_POWER_UPDATE", EventHandler)
   end
@@ -647,8 +644,7 @@ function Widget:UpdateLayout()
   widget_frame:SetHeight(scaledIconHeight)
   widget_frame:SetWidth((scaledIconWidth * self.UnitPowerMax) + ((self.UnitPowerMax - 1) * scaledSpacing))
 
-  local _, player_class = UnitClass("player")
-  local show_rune_cooldown = player_class == "DEATHKNIGHT" and ShowRuneCooldown
+  local show_rune_cooldown = (PlayerClass == "DEATHKNIGHT") and ShowRuneCooldown
 
   for i = 1, self.UnitPowerMax do
     widget_frame.ComboPoints[i] = widget_frame.ComboPoints[i] or widget_frame:CreateTexture(nil, "ARTWORK", nil, 0)
@@ -684,23 +680,28 @@ function Widget:UpdateSettings()
   if not self.PowerType then return end
 
   -- Update widget variables, only dependent from settings and static information (like player's class)
-  local _, player_class = UnitClass("player")
-  local texture_info = TEXTURE_INFO[self.db.Style][player_class] or TEXTURE_INFO[self.db.Style]
+  local texture_info = TEXTURE_INFO[self.db.Style][PlayerClass] or TEXTURE_INFO[self.db.Style]
 
   if not Addon.CLASSIC then
     ActiveSpec = _G.GetSpecialization()
   end
 
-  if player_class == "DEATHKNIGHT" then
+  if PlayerClass == "DEATHKNIGHT" then
     self.UpdateUnitPower = self.UpdateRunicPower
     DeathKnightSpecColor = DEATHKNIGHT_COLORS[ActiveSpec]
     ShowRuneCooldown = self.db.RuneCooldown.Show
-  elseif player_class == "ROGUE" and IsSpellKnown(323560) then
-    -- Check for spell Echoing Reprimand
-    self.UpdateUnitPower = self.UpdateComboPointsRogueAnimacharge
+  elseif PlayerClass == "ROGUE" then
+    -- Check for spell Echoing Reprimand: (IDs) 312954, 323547, 323560, 323558, 323559
+    local name = GetSpellInfo(323560) -- Get localized name for Echoing Reprimand
+    if GetSpellInfo(name) then
+      self.UpdateUnitPower = self.UpdateComboPointsRogueAnimacharge
+    else
+      self.UpdateUnitPower = self.UpdateComboPoints
+    end
   else
     self.UpdateUnitPower = self.UpdateComboPoints
   end
+  --print ("Echoing Reprimand:", self.UpdateUnitPower == self.UpdateComboPointsRogueAnimacharge)
 
   self.TexCoord = texture_info.TexCoord
   self.IconWidth = texture_info.IconWidth
@@ -708,7 +709,7 @@ function Widget:UpdateSettings()
   self.Texture = texture_info.Texture
   self.TextureOff = texture_info.TextureOff
 
-  local colors = self.db.ColorBySpec[player_class]
+  local colors = self.db.ColorBySpec[PlayerClass]
   for current_cp = 1, #colors do
     for cp_no = 1, #colors do
 
@@ -723,7 +724,7 @@ function Widget:UpdateSettings()
     end
   end
 
-  if player_class == "ROGUE" then
+  if PlayerClass == "ROGUE" then
     self.Colors.AnimaCharge = colors.Animacharge
   end
 

@@ -3,12 +3,14 @@
 ------------------------------------------------------
 * Fixed a Lua error with the castbar when the WoW API does return incomplete information [Comment #5167].
 * Fixed Curse references for Classic version in TOC file [Comment TPC#697].
+* Fixed a bug in the Combo Points widget where the anima-charged combo point (Kyrian rogue spell Echoing Reprimand) was not shown in all situations [IM].
+* Adjusted textures for anima-charged combo point for better visibility.
 
 ------------------------------------------------------
 10.0.8-Beta1
 ------------------------------------------------------
 * Fixed a Lua error that occurred when occlusion transparency was enabled and a special nameplate was shown [Issue GitHub #249, Issue #449].
-* Added support for Kyrian rogue spell Echoing Reprimand to Combo Points widget [Comment #5088, #5092, #5123, #5141, #5097, Issue #455].
+* Added support for Kyrian rogue spell Echoing Reprimand to Combo Points widget [Comment #5088, #5092, #5123, #5141, #5097, #5176, #5175, Issue #455].
 * Fixed an error in Quest widget where the quest progress was not updated properly when in a group [Comment #5097, #5122, #5066].
 * Updated list of stealth-detecting mobs.
 
