@@ -17,16 +17,18 @@
 #@retail@
 ## RequiredDeps:
 ## OptionalDeps: Ace3, AceGUI-3.0-SharedMediaWidgets, LibSharedMedia-3.0, LibCustomGlow-1.0, LibDeflate
+## X-Website: https://wow.curseforge.com/projects/tidy-plates-threat-plates
+## X-Curse-Project-ID: 21217
 #@end-retail@
 #@classic@
 ## RequiredDeps:
 ## OptionalDeps: Ace3, AceGUI-3.0-SharedMediaWidgets, LibSharedMedia-3.0, LibCustomGlow-1.0, LibDeflate, LibClassicDurations
+## X-Website: https://wow.curseforge.com/projects/threat-plates-classic
+## X-Curse-Project-ID: 338498
 #@end-classic@
 
-## X-Website: https://wow.curseforge.com/projects/tidy-plates-threat-plates
 ## X-License: GNU General Public License
 ## X-Credits: danltiger (for Tidy Plates), Tosaido (for quest handling code from QuestMobs)
-## X-Curse-Project-ID: 21217
 
 Libs\Libs.xml
 Locales\Locales.xml
