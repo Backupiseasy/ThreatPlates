@@ -2,6 +2,7 @@
 10.0.8-Beta2
 ------------------------------------------------------
 * Fixed a Lua error with the castbar when the WoW API does return incomplete information [Comment #5167].
+* Fixed Curse references for Classic version in TOC file [Comment TPC#697].
 
 ------------------------------------------------------
 10.0.8-Beta1
