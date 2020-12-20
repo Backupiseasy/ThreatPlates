@@ -119,7 +119,7 @@
      inkscape:document-rotation="0"
      inkscape:window-maximized="1"
      inkscape:window-y="-8"
-     inkscape:window-x="5112"
+     inkscape:window-x="2552"
      inkscape:window-height="1377"
      inkscape:window-width="2560"
      units="px"
@@ -157,8 +157,8 @@
      inkscape:groupmode="layer"
      inkscape:label="Ebene 1">
     <ellipse
-       inkscape:export-ydpi="96"
-       inkscape:export-xdpi="96"
+       inkscape:export-ydpi="49.189999"
+       inkscape:export-xdpi="49.189999"
        ry="14.431582"
        rx="14.431593"
        transform="matrix(0.86493711,-0.18108676,0.17982438,0.87100908,-44.41486,38.616592)"
@@ -167,13 +167,17 @@
        id="path819"
        style="opacity:1;vector-effect:none;fill:url(#radialGradient6554);fill-opacity:1;stroke:#000000;stroke-width:4.47673416;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:10.40999985;stroke-opacity:1;filter:url(#filter6588)" />
     <path
-       style="fill:url(#radialGradient850);fill-opacity:1;stroke:#000000;stroke-width:4.58214503;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:normal;filter:url(#filter1036)"
+       style="fill:url(#radialGradient850);fill-opacity:1;stroke:#000000;stroke-width:5.72768129;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:normal;filter:url(#filter1036)"
        d="M -0.26458317,318.14458 C 34.13125,283.74875 34.13125,283.74875 34.13125,283.74875"
        id="path842"
-       transform="matrix(0.57871633,0,0,0.57613143,7.1337372,106.68182)" />
+       transform="matrix(0.57871633,0,0,0.57613143,7.1337372,106.68182)"
+       inkscape:export-xdpi="49.189999"
+       inkscape:export-ydpi="49.189999" />
     <path
-       style="fill:none;stroke:#000000;stroke-width:2.64583333;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;filter:url(#filter1032)"
+       style="fill:none;stroke:#000000;stroke-width:3.30729167;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;filter:url(#filter1032)"
        d="M 7.6729172,270.80624 C 26.19375,289.32707 26.19375,289.32707 26.19375,289.32707"
-       id="path840" />
+       id="path840"
+       inkscape:export-xdpi="49.189999"
+       inkscape:export-ydpi="49.189999" />
   </g>
 </svg>
