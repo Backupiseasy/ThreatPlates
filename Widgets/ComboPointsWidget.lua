@@ -212,7 +212,6 @@ if Addon.CLASSIC then
       self.UnitPowerMax = 0
     end
   end
-  GetUnitChargedPowerPoints = function(...) return nil end
 else
   function Widget:DetermineUnitPower()
     local power_type = UNIT_POWER[PlayerClass]
