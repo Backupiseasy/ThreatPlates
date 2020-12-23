@@ -517,7 +517,9 @@ function Widget:OnEnable()
   self:RegisterUnitEvent("UNIT_POWER_UPDATE", "player", EventHandler)
   self:RegisterUnitEvent("UNIT_DISPLAYPOWER", "player", EventHandler)
   self:RegisterUnitEvent("UNIT_MAXPOWER", "player")
-  self:RegisterUnitEvent("UNIT_POWER_POINT_CHARGE", "player", EventHandler)
+  if not Addon.CLASSIC then
+    self:RegisterUnitEvent("UNIT_POWER_POINT_CHARGE", "player", EventHandler)
+  end
 
   if PlayerClass == "DRUID" then
     self:RegisterEvent("UPDATE_SHAPESHIFT_FORM")
