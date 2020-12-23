@@ -8,6 +8,7 @@
 * Fixed a bug in Quest widget where the quest progress was not updated properly when in a group [Comment #5097, #5122, #5066].
 * Fixed Curse references for Classic version in TOC file [Comment TPC#697].
 * Updated list of stealth-detecting mobs.
+* Updated TOC version for WoW Classic.
 
 ------------------------------------------------------
 10.0.7
