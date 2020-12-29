@@ -7134,6 +7134,21 @@ local function CreateCustomNameplatesGroup()
       type = "group",
       order = 30,
       args = {
+		General = {
+          name = L["General"],
+          type = "group",
+          order = 1,
+          inline = true,
+          args = {
+			Override = {
+				name = L["Override General Hide Settings"],
+				type = "toggle",
+				order = 1,
+				desc = 'Toggle this option if you want the custom nameplates to be able to override general settings (e.g. the "Hide Nameplate" settings)',
+				arg = { "uniqueWidget", "override" }
+			},
+          },
+        },
         Icon = {
           name = L["Icon"],
           type = "group",

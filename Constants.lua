@@ -279,9 +279,7 @@ local TOTEM_DATA_RETAIL = {
   { SpellID = 204330, ID = "P2", GroupColor = "2b76ff"},	  -- Skyfury Totem
   { SpellID = 204336, ID = "P4", GroupColor = "2b76ff"},	  -- Grounding Totem
 
-  --{ SpellID = 204332, ID = "P3", GroupColor = "2b76ff"},	  -- Windfury Totem (removed in patch 8.0.1)p
   --{ SpellID = 196932, ID = "N6", GroupColor = "4c9900"},		-- Voodoo Totem (removed in patch 8.0.1)
-  --{ SpellID = 192058, ID = "N3", GroupColor = "4c9900"},		-- Lightning  Surge Totem (renamed to Capacitator Totem in patch 8.0.1)
 }
 
 local TOTEM_DATA_CLASSIC = {
@@ -771,6 +769,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
     },
     uniqueWidget = {
       ON = true,
+      override = true,
       scale = 22, -- old default: 35,
       x = 0,
       y = 30, -- old default:  24,

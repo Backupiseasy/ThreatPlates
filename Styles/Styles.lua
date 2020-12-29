@@ -321,21 +321,33 @@ end
 function Addon:SetStyle(unit)
   local show, headline_view = ShowUnit(unit)
 
-  if not show then
-    return "empty", nil
-  end
+  local db_base = TidyPlatesThreat.db.profile
+  local db = db_base.uniqueWidget
 
+  if not db.override then
+	  if not show then
+		return "empty", nil
+	  end
+  end
+  
   -- Check if custom nameplate should be used for the unit:
   local style
   if unit.CustomStyleCast then
-    style = unit.CustomStyleCast
-    unit.CustomPlateSettings = unit.CustomPlateSettingsCast
+	style = unit.CustomStyleCast
+	unit.CustomPlateSettings = unit.CustomPlateSettingsCast
   elseif unit.CustomStyleAura then
-    style = unit.CustomStyleAura
-    unit.CustomPlateSettings = unit.CustomPlateSettingsAura
+	style = unit.CustomStyleAura
+	unit.CustomPlateSettings = unit.CustomPlateSettingsAura
   else
-    style = UnitStyle_NameDependent(unit) or (headline_view and "NameOnly")
+	style = UnitStyle_NameDependent(unit) or (headline_view and "NameOnly")
   end
+	  
+  if db.override then
+	if not show and not (style ~= nil and not (type(style) == string and (style == "unique"))) then
+		return "empty", nil
+	end
+  end
+	
 
   -- Dynamic enable checks for custom styles
   -- Only check it once if custom style is used for multiple mobs
