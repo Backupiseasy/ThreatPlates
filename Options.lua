@@ -4431,6 +4431,7 @@ local function CreateVisibilitySettings()
           HideElite = { name = L["Rares & Elites"], order = 2, type = "toggle", arg = { "Visibility", "HideElite" }, },
           HideBoss = { name = L["Bosses"], order = 3, type = "toggle", arg = { "Visibility", "HideBoss" }, },
           HideTapped = { name = L["Tapped Units"], order = 4, type = "toggle", arg = { "Visibility", "HideTapped" }, },
+		  HideGuardian = { name = L["Guardian Units"], order = 5, type = "toggle", arg = { "Visibility", "HideGuardian" }, },
           ModeHideFriendlyInCombat = {
             name = L["Friendly Units in Combat"],
             order = 10,

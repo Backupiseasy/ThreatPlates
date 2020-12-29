@@ -140,11 +140,11 @@ local function ShowUnit(unit)
 
   if not show then return false end
 
-  local e, b, t = (unit.isElite or unit.isRare), unit.isBoss, _G.UnitIsTapDenied(unit.unitid)
+  local e, b, t, g = (unit.isElite or unit.isRare), unit.isBoss, _G.UnitIsTapDenied(unit.unitid), (not UnitIsPlayer(unit.unitid) and UnitPlayerControlled(unit.unitid) and not UnitIsOtherPlayersPet(unit.unitid))
   local db_base = TidyPlatesThreat.db.profile
   local db = db_base.Visibility
 
-  if (e and db.HideElite) or (b and db.HideBoss) or (t and db.HideTapped) then
+  if (e and db.HideElite) or (b and db.HideBoss) or (t and db.HideTapped) or (g and db.HideGuardian) then
     return false
   elseif db.HideNormal and not (e or b) then
     return false

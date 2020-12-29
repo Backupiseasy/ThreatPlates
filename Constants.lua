@@ -496,6 +496,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
       HideElite = false,
       HideTapped = false,
       HideFriendlyInCombat = false,
+      HideGuardian = false,
     },
     castbarColor = {
       -- toggle = true, -- removed in 8.7.0
