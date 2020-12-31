@@ -343,12 +343,38 @@ function Addon.UpdateStylesForCurrentInstance()
   end
 end
 
+local TRIGGER_TYPE_TO_NAME_PREFIX = {
+  Aura = L["Aura: "],
+  Cast = L["Cast: "],
+  Name = "",
+  Script = L["Script"],
+}
+
+function Addon.CustomPlateGetHeaderName(index)
+  local custom_style
+
+  if type(index) == "table" then
+    custom_style = index
+  else
+    custom_style = TidyPlatesThreat.db.profile.uniqueSettings[index]
+  end
+
+  local custom_style_name = custom_style.Name
+  if custom_style_name == "" then
+    local trigger_type = custom_style.Trigger.Type
+    custom_style_name = TRIGGER_TYPE_TO_NAME_PREFIX[trigger_type] .. (custom_style.Trigger[trigger_type].Input or "")
+  end
+
+  return custom_style_name
+end
+
 function Addon:InitializeCustomNameplates()
   local db = TidyPlatesThreat.db.profile
 
   Addon.ActiveAuraTriggers = false
   Addon.ActiveCastTriggers = false
   Addon.ActiveWildcardTriggers = false
+  Addon.ActiveScriptTrigger = false
   Addon.UseUniqueWidget = db.uniqueWidget.ON
 
   -- Use wipe to keep references intact
@@ -357,6 +383,7 @@ function Addon:InitializeCustomNameplates()
   wipe(custom_style_triggers.NameWildcard)
   wipe(custom_style_triggers.Aura)
   wipe(custom_style_triggers.Cast)
+  wipe(custom_style_triggers.Script)
   wipe(Addon.Cache.TriggerWildcardTests)
 
   local styles_cache = Addon.Cache.Styles
@@ -368,12 +395,18 @@ function Addon:InitializeCustomNameplates()
       local trigger_type = custom_style.Trigger.Type
       local trigger_list = custom_style.Trigger[trigger_type].AsArray
 
-      for _, trigger in ipairs(trigger_list) do
-        if trigger_type == "Name" and string.find(trigger, "%*") then
-          local wildcard_trigger = string.gsub(trigger, "%*", ".*")
-          custom_style_triggers.NameWildcard[#custom_style_triggers.NameWildcard + 1] = { wildcard_trigger, custom_style }
-        else
-          custom_style_triggers[trigger_type][trigger] = custom_style
+      if trigger_type == "Script" or next(custom_style.Scripts.Code) ~= nil then
+        custom_style_triggers.Script[#custom_style_triggers.Script + 1] = custom_style
+      end
+
+      if trigger_type ~= "Script" then
+        for _, trigger in ipairs(trigger_list) do
+          if trigger_type == "Name" and string.find(trigger, "%*") then
+            local wildcard_trigger = string.gsub(trigger, "%*", ".*")
+            custom_style_triggers.NameWildcard[#custom_style_triggers.NameWildcard + 1] = { wildcard_trigger, custom_style }
+          elseif trigger_type ~= "Script" then
+            custom_style_triggers[trigger_type][trigger] = custom_style
+          end
         end
       end
 
@@ -407,7 +440,7 @@ function Addon:InitializeCustomNameplates()
   Addon.ActiveAuraTriggers = next(custom_style_triggers.Aura) ~= nil
   Addon.ActiveCastTriggers = next(custom_style_triggers.Cast) ~= nil
   Addon.ActiveWildcardTriggers = next(custom_style_triggers.NameWildcard) ~= nil
-
+  Addon.ActiveScriptTrigger = next(custom_style_triggers.Script) ~= nil
   Addon.UpdateStylesForCurrentInstance()
 end
 
@@ -6210,14 +6243,8 @@ local function CreateSpecRolesRetail()
   return result
 end
 
-local function CustomPlateGetHeaderName(index)
-  local trigger_type = db.uniqueSettings[index].Trigger.Type
-  local prefix = (trigger_type == "Aura" and L["Aura: "]) or (trigger_type == "Cast" and L["Cast: "]) or ""
-  return prefix .. (db.uniqueSettings[index].Trigger[trigger_type].Input or "")
-end
-
 local function CustomPlateGetSlotName(index)
-  local name = "#" .. index .. ". " .. CustomPlateGetHeaderName(index)
+  local name = "#" .. index .. ". " .. Addon.CustomPlateGetHeaderName(index)
   if db.uniqueSettings[index].Enable.Never then
     name = "|cffA0A0A0" .. name .. "|r"
   end
@@ -6313,6 +6340,10 @@ StaticPopupDialogs["TriggerAlreadyExistsDisablingIt"] = {
 local function CustomPlateCheckIfTriggerIsUnique(trigger_type, triggers, selected_plate)
   local duplicate_triggers = {}
 
+  if trigger_type == "Script" then
+    return true, duplicate_triggers
+  end
+
   for i, trigger_value in ipairs(triggers) do
     if trigger_value ~= nil and trigger_value ~= "" then
       -- Check if here is already another custom nameplate with the same trigger:
@@ -6340,7 +6371,7 @@ end
 
 local function CustomPlateUpdateEntry(index)
   options.args.Custom.args["#" .. index].name = CustomPlateGetSlotName(index)
-  options.args.Custom.args["#" .. index].args.Header.name = CustomPlateGetHeaderName(index)
+  options.args.Custom.args["#" .. index].args.Header.name = Addon.CustomPlateGetHeaderName(index)
 
   CustomPlateSetIcon(index) -- Executes UpdateSpecial()
 end
@@ -6356,6 +6387,20 @@ local function CustomPlateCheckAndUpdateEntry(info, val, index)
     db.uniqueSettings[index].Trigger[trigger_type].AsArray = triggers
     CustomPlateUpdateEntry(index)
   end
+end
+
+local function CustomPlateGetExampleForEventScript(custom_style, event)
+  local script_function
+  if event == "WoWEvent" then
+    script_function = custom_style.Scripts.Code[custom_style.Scripts.Event]
+    if script_function == "" then
+      script_function = Addon.WIDGET_EVENTS[event].FunctionExample
+    end
+  else
+    script_function = custom_style.Scripts.Code[event] or Addon.WIDGET_EVENTS[event].FunctionExample
+  end
+
+  return script_function
 end
 
 local function UpdateCustomNameplateSlots(...)
@@ -6459,7 +6504,7 @@ CreateCustomNameplateEntry = function(index)
         disabled = function() return TidyPlatesThreat.db.global.CustomNameplatesVersion == 1 end,
       },
       Header = {
-        name = CustomPlateGetHeaderName(index),
+        name = Addon.CustomPlateGetHeaderName(index),
         type = "header",
         order = 9,
       },
@@ -6473,7 +6518,7 @@ CreateCustomNameplateEntry = function(index)
             name = L["Type"],
             type = "select",
             order = 10,
-            values = { Name = L["Name"], Aura = L["Aura"], Cast = L["Cast"], },
+            values = { Name = L["Name"], Aura = L["Aura"], Cast = L["Cast"], Script = L["Script"]},
             set = function(info, val)
               -- If the uses switches to a trigger that is already in use, the current custom nameplate
               -- is disabled (otherwise, if we would not switch to it, the user could not change it at all.
@@ -6574,6 +6619,17 @@ CreateCustomNameplateEntry = function(index)
               return tostring(db.uniqueSettings[index].Trigger["Cast"].Input or "")
             end,
             hidden = function() return db.uniqueSettings[index].Trigger.Type ~= "Cast" end,
+          },
+          NameOfCustomStyle = {
+            name = L["Name"],
+            type = "input",
+            order = 40,
+            width = "full",
+            set = function(info, val)
+              SetValue(info, val)
+              CustomPlateUpdateEntry(index)
+            end,
+            arg = { "uniqueSettings", index, "Name" },
           },
         },
       },
@@ -6957,6 +7013,223 @@ CreateCustomNameplateEntry = function(index)
             end,
             arg = { "uniqueSettings", index, "icon" },
             hidden = function() return db.uniqueSettings[index].UseAutomaticIcon end
+          },
+        },
+      },
+      Events = {
+        name = L["Scripts"],
+        order = 60,
+        type = "group",
+        width = "full",
+        inline = false,
+        args = {
+          WidgetType = {
+            name = L["Type"],
+            order = 10,
+            type = "select",
+            values = { Standard = L["Standard"], TargetOnly = L["Target Only"], FocusOnly = L["Focus Only"], },
+            arg = { "uniqueSettings", index, "Scripts", "Type" },
+          },
+          WidgetFunction = {
+            name = L["Function"],
+            order = 20,
+            type = "select",
+            values = function()
+              local script_functions = t.CopyTable(Addon.SCRIPT_FUNCTIONS[db.uniqueSettings[index].Scripts.Type])
+
+              for key, function_name in pairs(script_functions) do
+                if key == "WoWEvent" then
+                  if script_functions[key] == nil then
+                    script_functions[key] = "|cffFF0000" .. function_name .. "|r"
+                  end
+                elseif not db.uniqueSettings[index].Scripts.Code[function_name] then
+                  script_functions[key] = "|cffFF0000" .. function_name .. "|r"
+                end
+              end
+
+              return script_functions
+            end,
+            arg = { "uniqueSettings", index, "Scripts", "Function" },
+          },
+          WoWEventName = {
+            name = L["Event Name"],
+            order = 30,
+            type = "input",
+            width = "double",
+            set = function(info, val)
+              if not Addon.WIDGET_EVENTS[val] then
+                SetValue(info, string.upper(val))
+                db.uniqueSettings[index].Scripts.Code[val] = ""
+              end
+            end,
+            get = function(info)
+              local wow_event
+              if db.uniqueSettings[index].Scripts.Function == "WoWEvent" then
+                wow_event = db.uniqueSettings[index].Scripts.Event
+                if not db.uniqueSettings[index].Scripts.Code[wow_event] then
+                  wow_event = nil
+                  -- Script for event was deleted
+                  for event, _ in pairs(db.uniqueSettings[index].Scripts.Code) do
+                    if not Addon.WIDGET_EVENTS[event] then
+                      wow_event = event
+                      break
+                    end
+                  end
+                  -- Set (WoW) event to the first non-internal event or to nil
+                  db.uniqueSettings[index].Scripts.Event = wow_event
+                end
+              end
+              return wow_event
+            end,
+            arg = { "uniqueSettings", index, "Scripts", "Event" },
+            disabled = function() return db.uniqueSettings[index].Scripts.Function ~= "WoWEvent" end,
+          },
+          Spacer1 = GetSpacerEntry(40),
+          Spacer2 =  { name = "", order = 41, type = "description", width = "double", },
+          WoWEventWithScript = {
+            name = L["Events with Script"],
+            order = 50,
+            type = "select",
+            width = "double",
+            values = function()
+              local events_with_scripts = {}
+              for event, script in pairs(db.uniqueSettings[index].Scripts.Code) do
+                if not Addon.WIDGET_EVENTS[event] then
+                  events_with_scripts[event] = event
+                end
+              end
+              return events_with_scripts
+            end,
+            arg = { "uniqueSettings", index, "Scripts", "Event" },
+            disabled = function() return db.uniqueSettings[index].Scripts.Function ~= "WoWEvent" end,
+          },
+          Spacer3 = GetSpacerEntry(55),
+          Script = {
+            name = L["Script"],
+            order = 60,
+            type = "input",
+            multiline = 12,
+            width = "full",
+            set = function(info, val)
+              local script_event
+              if db.uniqueSettings[index].Scripts.Function == "WoWEvent" then
+                script_event = db.uniqueSettings[index].Scripts.Event
+              else
+                script_event = db.uniqueSettings[index].Scripts.Function
+              end
+
+              -- Delete the event from the list
+              if val == "" then
+                val = nil
+              end
+              db.uniqueSettings[index].Scripts.Code[script_event] = val
+
+              Addon:InitializeCustomNameplates()
+              Addon.Widgets:UpdateSettings("Script")
+            end,
+            get = function(info)
+              return CustomPlateGetExampleForEventScript(db.uniqueSettings[index], db.uniqueSettings[index].Scripts.Function)
+            end,
+          },
+          Extend = {
+            name = L["Extend"],
+            order = 61,
+            type = "execute",
+            width = "half",
+            func = function(info)
+              if not Addon.ScriptEditor then
+                local frame = LibAceGUI:Create("Window")
+                frame:SetTitle(L["Threat Plates Script Editor"])
+                frame:SetCallback("OnClose", function(widget) frame:_Cancel() end)
+                frame:SetLayout("fill")
+                Addon.ScriptEditor = frame
+
+                local group = LibAceGUI:Create("InlineGroup");
+                group.frame:SetParent(frame.frame)
+                group.frame:SetPoint("BOTTOMRIGHT", frame.frame, "BOTTOMRIGHT", -17, 12)
+                group.frame:SetPoint("TOPLEFT", frame.frame, "TOPLEFT", 17, -10)
+                group:SetLayout("fill")
+                frame:AddChild(group)
+
+                local editor = LibAceGUI:Create("MultiLineEditBox")
+                editor:SetWidth(400)
+                editor.button:Hide()
+                editor:SetFullWidth(true)
+                editor.frame:SetFrameStrata("FULLSCREEN")
+                editor:SetLabel("")
+                group:AddChild(editor)
+                editor.frame:SetClipsChildren(true)
+                frame.Editor = editor
+
+                IndentationLib.enable(editor.editBox)
+
+                local cancel_button = CreateFrame("Button", nil, group.frame, "UIPanelButtonTemplate")
+                cancel_button:SetScript("OnClick", function() frame:_Cancel() end)
+                cancel_button:SetPoint("BOTTOMRIGHT", -27, 13);
+                cancel_button:SetFrameLevel(cancel_button:GetFrameLevel() + 1)
+                cancel_button:SetHeight(20);
+                cancel_button:SetWidth(100);
+                cancel_button:SetText(L["Cancel"]);
+
+                local close_button = CreateFrame("Button", nil, group.frame, "UIPanelButtonTemplate")
+                close_button:SetScript("OnClick", function() frame:_Done() end)
+                close_button:SetPoint("RIGHT", cancel_button, "LEFT", -10, 0)
+                close_button:SetFrameLevel(close_button:GetFrameLevel() + 1)
+                close_button:SetHeight(20);
+                close_button:SetWidth(100);
+                close_button:SetText(L["Done"]);
+
+                -- CTRL + S saves and closes, ESC cancels and closes
+                editor.editBox:HookScript("OnKeyDown", function(_, key)
+                  if IsControlKeyDown() and key == "S" then
+                    frame:_Done()
+                  end
+                  if key == "ESCAPE" then
+                    frame:_Cancel()
+                  end
+                end)
+
+                function frame._Cancel(self)
+                  frame:Hide()
+                  Addon.LibAceConfigDialog:Open(t.ADDON_NAME)
+                end
+
+                function frame._Done(self)
+                  local script_event
+                  if db.uniqueSettings[index].Scripts.Function == "WoWEvent" then
+                    script_event = db.uniqueSettings[index].Scripts.Event
+                  else
+                    script_event = db.uniqueSettings[index].Scripts.Function
+                  end
+
+                  -- Delete the event from the list
+                  local val = Addon.ScriptEditor.Editor:GetText()
+                  if val == "" then
+                    val = nil
+                  end
+                  db.uniqueSettings[index].Scripts.Code[script_event] = val
+
+                  Addon:InitializeCustomNameplates()
+                  Addon.Widgets:UpdateSettings("Script")
+
+                  frame:Hide()
+                  Addon.LibAceConfigDialog:Open(t.ADDON_NAME)
+                end
+              end
+
+              local label
+              if db.uniqueSettings[index].Scripts.Function == "WoWEvent" then
+                label = "WoW Event: " .. db.uniqueSettings[index].Scripts.Event
+              else
+                label = "Event: " .. db.uniqueSettings[index].Scripts.Function
+              end
+              Addon.ScriptEditor.Editor:SetLabel(label)
+
+              Addon.ScriptEditor.Editor:SetText(CustomPlateGetExampleForEventScript(db.uniqueSettings[index], db.uniqueSettings[index].Scripts.Function))
+
+              Addon.LibAceConfigDialog:Close(t.ADDON_NAME)
+              Addon.ScriptEditor:Show()
+            end,
           },
         },
       },
@@ -9207,7 +9480,7 @@ function TidyPlatesThreat:OpenOptions()
     Addon.LibAceConfigDialog:SetDefaultSize(t.ADDON_NAME, 1000, 640)
   end
 
-  Addon.LibAceConfigDialog:Open(t.ADDON_NAME);
+  Addon.LibAceConfigDialog:Open(t.ADDON_NAME)
 end
 
 function Addon.RestoreLegacyCustomNameplates()

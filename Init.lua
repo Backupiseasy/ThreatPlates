@@ -64,6 +64,7 @@ Addon.Cache = {
 		NameWildcard = {},
 		Aura = {},
 		Cast = {},
+		Script = {},
 	},
 	Styles = {
 		ForAllInstances = {},
@@ -287,6 +288,31 @@ end
 --------------------------------------------------------------------------------------------------
 -- Debug Functions
 ---------------------------------------------------------------------------------------------------
+
+Addon.PrintMessage = function(channel, ...)
+	--local verbose = TidyPlatesThreat.db.profile.verbose
+	if channel == "DEBUG" and Addon.DEBUG then
+		print("|cff89F559TP|r - |cff0000ff" .. channel .. "|r:", ...)
+	elseif channel == "ERROR" then
+		print("|cff89F559TP|r - |cffff0000" .. channel .. "|r:", ...)
+	elseif channel == "WARNING" then
+		print("|cff89F559TP|r - |cffff8000" .. channel .. "|r:", ...)
+	else
+		print("|cff89F559TP|r:", channel, ...)
+	end
+end
+
+Addon.PrintDebugMessage = function(...)
+	Addon.PrintMessage("DEBUG", ...)
+end
+
+Addon.PrintErrorMessage = function(...)
+	Addon.PrintMessage("ERROR", ...)
+end
+
+Addon.PrintWarningMessage = function(...)
+	Addon.PrintMessage("WARNING", ...)
+end
 
 local function DEBUG(...)
   print (ThreatPlates.Meta("titleshort") .. "-Debug:", ...)

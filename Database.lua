@@ -122,6 +122,7 @@ end
 
 Addon.LEGACY_CUSTOM_NAMEPLATES = {
   ["**"] = {
+    Name = "",
     Trigger = {
       Type = "Name",
       Name = {
@@ -136,6 +137,11 @@ Addon.LEGACY_CUSTOM_NAMEPLATES = {
         Input = "",
         AsArray = {}, -- Generated after entering Input with Addon.Split
       },
+      Script = {
+        -- Only here to avoid Lua errors without adding to may checks for this particular trigger
+        Input = "",
+        AsArray = {}, -- Generated after entering Input with Addon.Split
+      }
     },
     Effects = {
       Glow = {
@@ -181,6 +187,12 @@ Addon.LEGACY_CUSTOM_NAMEPLATES = {
       g = 1,
       b = 1,
     },
+    Scripts = {
+      Type = "Standard",
+      Function = "OnUnitAdded",
+      Event = "",
+      Code = {},
+    }
   },
   [1] = {
     Trigger = { Type = "Name"; Name = { Input = L["Shadow Fiend"], AsArray = { L["Shadow Fiend"] } } },
@@ -1233,8 +1245,13 @@ local function UpdateFromCustomStyle(custom_style, update_from_custom_style)
 
     if update_from_value ~= nil then
       if type(current_value) == "table" then
-        -- If entry in update-from custom style is not a table as well, ignore it
-        if type(update_from_value) == "table" then
+        if key == "Code" then
+          -- Script code array is empty in default settings, so UpdateFromCustomStyle does not work here
+          for event, script_code in pairs(update_from_value) do
+            custom_style.Code[event] = update_from_value[event]
+          end
+        elseif type(update_from_value) == "table" then
+          -- If entry in update-from custom style is not a table as well, ignore it
           UpdateFromCustomStyle(current_value, update_from_value)
         end
       else
@@ -1272,6 +1289,7 @@ Addon.ImportCustomStyle = function(imported_custom_style)
   custom_style.Trigger.Name.AsArray = Addon.Split(custom_style.Trigger.Name.Input)
   custom_style.Trigger.Aura.AsArray = Addon.Split(custom_style.Trigger.Aura.Input)
   custom_style.Trigger.Cast.AsArray = Addon.Split(custom_style.Trigger.Cast.Input)
+  -- Script Input and AsArray don't have any valuable information
 
   -- No need to import AutomaticIcon as it is set/overwritten, when a aura or cast trigger are detected
   UpdateRuntimeValueFromCustomStyle(custom_style, imported_custom_style, "SpellID")

@@ -1120,6 +1120,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
     totemSettings = GetDefaultTotemSettings(),
     uniqueSettings = {
       ["**"] = {
+        Name = "",
         Trigger = {
           Type = "Name",
           Name = {
@@ -1134,6 +1135,11 @@ ThreatPlates.DEFAULT_SETTINGS = {
             Input = "",
             AsArray = {}, -- Generated after entering Input with Addon.Split
           },
+          Script = {
+            -- Only here to avoid Lua errors without adding to may checks for this particular trigger
+            Input = "",
+            AsArray = {}, -- Generated after entering Input with Addon.Split
+          }
         },
         Effects = {
           Glow = {
@@ -1179,6 +1185,12 @@ ThreatPlates.DEFAULT_SETTINGS = {
           g = 1,
           b = 1,
         },
+        Scripts = {
+          Type = "Standard",
+          Function = "OnUnitAdded",
+          Event = "",
+          Code = {},
+        }
       },
     },
     CVarsBackup = {}, -- Backup for CVars that should be restored when TP is disabled

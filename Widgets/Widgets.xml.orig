@@ -17,8 +17,11 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 <Script file="ResourceWidget.lua"/>
 <Script file="BossModsWidget.lua"/>
 <Script file="HealerTrackerWidget.lua"/>
+<<<<<<< Updated upstream
 <Script file="ExperienceWidget.lua"/>
+=======
 <Script file="ScriptWidget.lua"/>
+>>>>>>> Stashed changes
 
 <!-- Just for testing -->
 <!--<Script file="TestWidget.lua"/>-->
