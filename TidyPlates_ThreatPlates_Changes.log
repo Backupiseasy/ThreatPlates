@@ -1,6 +1,7 @@
 ﻿------------------------------------------------------
 10.0.9
 ------------------------------------------------------
+* Fixed a Lua error for Auras widget when the aura icon was disabled in bar mode [Issue GitHub #247].
 * Fixed a bug with Name trigger for custom styles for nameplates where units with the character "-" in their name could not be added [Issue GitHub #250].
 * Updated Shaman totems - added Windfury Totem [Comment #5218].
 
