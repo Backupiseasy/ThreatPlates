@@ -492,9 +492,9 @@ ThreatPlates.DEFAULT_SETTINGS = {
       HideNormal = false,
       HideBoss = false,
       HideElite = false,
+      HideGuardian = false,
       HideTapped = false,
       HideFriendlyInCombat = false,
-      HideGuardian = false,
     },
     castbarColor = {
       -- toggle = true, -- removed in 8.7.0
@@ -769,7 +769,6 @@ ThreatPlates.DEFAULT_SETTINGS = {
     },
     uniqueWidget = {
       ON = true,
-      override = true,
       scale = 22, -- old default: 35,
       x = 0,
       y = 30, -- old default:  24,
