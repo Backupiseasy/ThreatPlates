@@ -7,7 +7,7 @@ local ThreatPlates = Addon.ThreatPlates
 
 -- WoW APIs
 local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
-local UnitPlayerControlled, UnitIsUnit = UnitPlayerControlled, UnitIsUnit
+local UnitIsPlayer, UnitPlayerControlled, UnitIsUnit = UnitIsPlayer, UnitPlayerControlled, UnitIsUnit
 local UnitIsOtherPlayersPet = UnitIsOtherPlayersPet
 local UnitIsBattlePet = UnitIsBattlePet
 local UnitCanAttack = UnitCanAttack
@@ -138,21 +138,21 @@ local function ShowUnit(unit)
   local unit_type = GetUnitType(unit)
   local show, headline_view = GetUnitVisibility(unit_type)
 
-  if not show then return false end
+  if not show then return false, false end
 
-  local e, b, t = (unit.isElite or unit.isRare), unit.isBoss, _G.UnitIsTapDenied(unit.unitid)
+  local e, b = (unit.isElite or unit.isRare), unit.isBoss
   local db_base = TidyPlatesThreat.db.profile
   local db = db_base.Visibility
 
-  if (e and db.HideElite) or (b and db.HideBoss) or (t and db.HideTapped) then
-    return false
+  if (e and db.HideElite) or (b and db.HideBoss) or (unit.TP_DetailedUnitType == "Tapped" and db.HideTapped) or (unit.TP_DetailedUnitType == "Guardian" and db.HideGuardian) then
+    return false, nil
   elseif db.HideNormal and not (e or b) then
-    return false
+    return false, nil
   elseif UnitIsBattlePet(unit.unitid) then
     -- TODO: add configuration option for enable/disable
-    return false
+    return false, nil
   elseif db.HideFriendlyInCombat and unit.reaction == "FRIENDLY" and InCombatLockdown() then
-    return false
+    return false, nil
   end
 
 --  if full_unit_type == "EnemyNPC" then
@@ -321,10 +321,6 @@ end
 function Addon:SetStyle(unit)
   local show, headline_view = ShowUnit(unit)
 
-  if not show then
-    return "empty", nil
-  end
-
   -- Check if custom nameplate should be used for the unit:
   local style
   if unit.CustomStyleCast then
@@ -334,9 +330,9 @@ function Addon:SetStyle(unit)
     style = unit.CustomStyleAura
     unit.CustomPlateSettings = unit.CustomPlateSettingsAura
   else
-    style = UnitStyle_NameDependent(unit) or (headline_view and "NameOnly")
+  	style = UnitStyle_NameDependent(unit) or (headline_view and "NameOnly")
   end
-
+	  
   -- Dynamic enable checks for custom styles
   -- Only check it once if custom style is used for multiple mobs
   -- only check it once when entering a dungeon, not on every style change
@@ -356,7 +352,12 @@ function Addon:SetStyle(unit)
     end
   end
 
-  --if not style and unit.reaction ~= "FRIENDLY" then
+  -- headline_view == nil  (and not show) means that the unit should be hidden (Visibility - Hide Nameplates)
+  --if not show and headline_view == nil and not (style == "unique" or style == "NameOnly-Unique") then
+  if not (show or headline_view ~= nil or style == "unique" or style == "NameOnly-Unique") then
+    return "empty", nil
+  end
+
   if not style and Addon:ShowThreatFeedback(unit) then
     -- could call GetThreatStyle here, but that would at a tiny overhead
     -- style tank/dps only used for hostile (enemy, neutral) NPCs
