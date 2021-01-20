@@ -508,16 +508,17 @@ function TidyPlatesThreat:PLAYER_ENTERING_WORLD()
   end
 
   db = self.db.profile.Automation
-  local isInstance, instanceType = IsInInstance()
+  local isInstance, instance_type = IsInInstance()
+  isInstance = isInstance and (instance_type == "party" or instance_type == "raid")
 
-  if db.HideFriendlyUnitsInInstances and isInstance then
+  if isInstance and db.HideFriendlyUnitsInInstances then
     Addon.CVars:Set("nameplateShowFriends", 0)
   else
     -- reset to previous setting
     Addon.CVars:RestoreFromProfile("nameplateShowFriends")
   end
 
-  if db.SmallPlatesInInstances and NamePlateDriverFrame:IsUsingLargerNamePlateStyle() and isInstance then
+  if isInstance and db.SmallPlatesInInstances and NamePlateDriverFrame:IsUsingLargerNamePlateStyle() then
     Addon.CVars:Set("nameplateGlobalScale", 0.4)
   else
     -- reset to previous setting
