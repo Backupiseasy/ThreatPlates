@@ -138,21 +138,21 @@ local function ShowUnit(unit)
   local unit_type = GetUnitType(unit)
   local show, headline_view = GetUnitVisibility(unit_type)
 
-  if not show then return false, false end
+  if not show then return false, false, headline_view end
 
   local e, b = (unit.isElite or unit.isRare), unit.isBoss
   local db_base = TidyPlatesThreat.db.profile
   local db = db_base.Visibility
 
   if (e and db.HideElite) or (b and db.HideBoss) or (unit.TP_DetailedUnitType == "Tapped" and db.HideTapped) or (unit.TP_DetailedUnitType == "Guardian" and db.HideGuardian) then
-    return false, nil
+    return show, true, headline_view
   elseif db.HideNormal and not (e or b) then
-    return false, nil
+    return show, true, headline_view
   elseif UnitIsBattlePet(unit.unitid) then
     -- TODO: add configuration option for enable/disable
-    return false, nil
+    return show, true, headline_view
   elseif db.HideFriendlyInCombat and unit.reaction == "FRIENDLY" and InCombatLockdown() then
-    return false, nil
+    return show, true, headline_view
   end
 
 --  if full_unit_type == "EnemyNPC" then
@@ -183,7 +183,7 @@ local function ShowUnit(unit)
     end
   end
 
-  return show, headline_view
+  return show, false, headline_view
 end
 
 -- Returns style based on threat (currently checks for in combat, should not do hat)
@@ -319,7 +319,12 @@ function Addon.UnitStyle_CastDependent(unit, spell_id, spell_name)
 end
 
 function Addon:SetStyle(unit)
-  local show, headline_view = ShowUnit(unit)
+  local show, hide_unit_type, headline_view = ShowUnit(unit)
+
+  -- Nameplate is disabled in General - Visibility
+  if not show then
+    return "empty", nil
+  end
 
   -- Check if custom nameplate should be used for the unit:
   local style
@@ -352,9 +357,8 @@ function Addon:SetStyle(unit)
     end
   end
 
-  -- headline_view == nil  (and not show) means that the unit should be hidden (Visibility - Hide Nameplates)
-  --if not show and headline_view == nil and not (style == "unique" or style == "NameOnly-Unique") then
-  if not (show or headline_view ~= nil or style == "unique" or style == "NameOnly-Unique") then
+  -- Hidden nameplates might be shown if a custom style is defined for them (Visibility - Hide Nameplates)
+  if hide_unit_type and style ~= "unique" and style ~= "NameOnly-Unique" then
     return "empty", nil
   end
 
