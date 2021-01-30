@@ -915,13 +915,16 @@ local function GetScaleEntry(name, pos, setting, func_disabled, min_value, max_v
     order = pos,
     type = "range",
     step = 0.05,
-    min = min_value,
-    max = max_value,
+    softMin = min_value,
+    softMax = max_value,
+    min = -4.7,
+    max = 5.0,
     isPercent = true,
     arg = setting,
     disabled = func_disabled,
   }
   return entry
+
 end
 
 local function GetScaleEntryDefault(pos, setting, func_disabled)
