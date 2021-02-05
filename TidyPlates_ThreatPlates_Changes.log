@@ -5,6 +5,7 @@
 * Enabled custom styles for nameplates to override the settings under General - Hidden Nameplates (e.g., to show a Guardian unit with a custom style while Guardian units are hidden in general) [Pull Request #253].
 * Increased the maximum scale values to 500% (by entering the value directly into the input field) [Issue #468].
 * Added a feature to hide units of type Guardian [Pull Request #253].
+* Added an option to disable the warning that is shown when another nameplate addons is enabled besides Threat Plates [Comment #4273, #5379, IM].
 
 ------------------------------------------------------
 10.0.9

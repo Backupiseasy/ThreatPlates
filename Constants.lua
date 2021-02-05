@@ -388,6 +388,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
     },
   },
   profile = {
+    CheckForIncompatibleAddons = true,
     -- cache = {}, - removed in 9.3.0
     -- OldSetting = true, - removed in 8.7.0
     verbose = false,
@@ -399,7 +400,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
       toggle  = true,
       amount = -0.3
     },
-    tidyplatesFade = false,
+    -- tidyplatesFade = false, -- removed in 10.1.0 as it was no longer used
     healthColorChange = false,
     customColor =  false,
     allowClass = true, -- old default: false,
