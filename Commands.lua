@@ -116,15 +116,15 @@ function TidyPlatesThreat:ChatCommand(input)
 	local command = cmd_list[1]
 	if not command or command == "" then
 		TidyPlatesThreat:OpenOptions()
-	elseif input == "help" then
+	elseif command == "help" then
 		PrintHelp()
-	elseif input == "legacy-custom-styles" then
+	elseif command == "legacy-custom-styles" then
 		Addon.RestoreLegacyCustomNameplates()
---	elseif input == "toggle-view-friendly-units" then
+--	elseif command == "toggle-view-friendly-units" then
 --		TidyPlatesThreat:ToggleNameplateModeFriendlyUnits()
---	elseif input == "toggle-view-neutral-units" then
+--	elseif command == "toggle-view-neutral-units" then
 --		TidyPlatesThreat:ToggleNameplateModeNeutralUnits()
---	elseif input == "toggle-view-enemy-units" then
+--	elseif command == "toggle-view-enemy-units" then
 --		TidyPlatesThreat:ToggleNameplateModeEnemyUnits()
 	elseif DEBUG then
 		if command == "searchdb" then
