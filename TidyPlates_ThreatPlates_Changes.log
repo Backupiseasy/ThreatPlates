@@ -1,7 +1,7 @@
 ﻿------------------------------------------------------
 10.1.0
 ------------------------------------------------------
-* Added support for custom status texts using LibDogTag, e.g., use "[]" to show health percentage with one decimal (91.2%) [Comment #4776, #827, #3825, #5282, Issue #283].
+* Added support for custom status texts using LibDogTag, e.g., use "[PercentHP]" to show health percentage with one decimal (91.2%) [Comment #4776, #827, #3825, #5282, Issue #283].
 * Added support for spec-based profiles which allows you to select and automatically activate a profile based on your active specialization [Comment #899, #4278, #5290, E-Mail].
 * Restricted automation features Small Blizzard Nameplates and Hide Friendly Nameplates to dungeons and raids only (no longer arenas) [IM].
 * Enabled custom styles for nameplates to override the settings under General - Hidden Nameplates (e.g., to show a Guardian unit with a custom style while Guardian units are hidden in general) [Pull Request #253].
