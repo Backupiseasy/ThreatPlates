@@ -9171,6 +9171,11 @@ local function CreateOptionsTable()
   options.args.profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(TidyPlatesThreat.db)
   options.args.profiles.order = 10000
 
+  -- Add dual-spec support
+  local LibDualSpec = LibStub("LibDualSpec-1.0", true)
+  LibDualSpec:EnhanceDatabase(TidyPlatesThreat.db, t.ADDON_NAME)
+  LibDualSpec:EnhanceOptions(options.args.profiles, TidyPlatesThreat.db)
+
   AddImportExportOptions(options.args.profiles)
 end
 
