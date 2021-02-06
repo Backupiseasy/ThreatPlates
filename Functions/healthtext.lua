@@ -331,31 +331,53 @@ local SUBTEXT_FUNCTIONS =
 --
 ---------------------------------------------------------------------------------------------------
 
-function Addon:SetCustomText(unit)
+local function GetStatusTextSettings(unit)
   local style = unit.style
 
-	local db = TidyPlatesThreat.db.profile
-	if style == "NameOnly" or style == "NameOnly-Unique" then
-		db = db.HeadlineView
-	else
-		db = db.settings.customtext
-	end
+  local db = TidyPlatesThreat.db.profile
+  if style == "NameOnly" or style == "NameOnly-Unique" then
+    db = db.HeadlineView
+  else
+    db = db.settings.customtext
+  end
 
-	local customtext = (unit.reaction == "FRIENDLY" and db.FriendlySubtext) or db.EnemySubtext
+  local status_text_function = (unit.reaction == "FRIENDLY" and db.FriendlySubtext) or db.EnemySubtext
 
-	if customtext == "NONE" then return nil, COLOR_ROLE end
+  return db, status_text_function
+end
 
-	local func = SUBTEXT_FUNCTIONS[customtext]
-	local subtext, color = func(unit)
+function Addon.SetCustomText(tp_frame, unit)
+  -- Set Special-Case Regions
+  if not tp_frame.style.customtext.show then return end
 
-	if db.SubtextColorUseHeadline then
-		return subtext, Addon:SetNameColor(unit)
-	elseif db.SubtextColorUseSpecific then
-		return subtext, color.r, color.g, color.b, color.a
-	end
+  local db, status_text_function = GetStatusTextSettings(unit)
+  -- if status_text_function == CUSTOM, status text is handled by LibDogTag
+  if status_text_function == "NONE" then
+    return nil, COLOR_ROLE
+  elseif status_text_function ~= "CUSTOM" then
+    local func = SUBTEXT_FUNCTIONS[status_text_function]
+    local subtext, color = func(unit)
 
-	local color = db.SubtextColor
-	return subtext, color.r, color.g, color.b, color.a
+    if db.SubtextColorUseHeadline then
+      color.r, color.g, color.b, color.a = Addon:SetNameColor(unit)
+    elseif not db.SubtextColorUseSpecific then
+      color = db.SubtextColor
+    end
+
+    local customtext = tp_frame.visual.customtext
+    customtext:SetText(subtext or "")
+    customtext:SetTextColor(color.r or 1, color.g or 1, color.b or 1, color.a or 1)
+  end
+end
+
+function Addon.UpdateStyleForStatusText(tp_frame, unit)
+  local db, status_text_function = GetStatusTextSettings(unit)
+  if status_text_function == "CUSTOM" then
+    local custom_dog_tag_text = (unit.reaction == "FRIENDLY" and db.FriendlySubtextCustom) or db.EnemySubtextCustom
+    Addon.LibDogTag:AddFontString(tp_frame.visual.customtext, tp_frame, custom_dog_tag_text, "Unit", { unit = unit.unitid })
+  else
+    Addon.LibDogTag:RemoveFontString(tp_frame.visual.customtext)
+  end
 end
 
 function Addon:UpdateConfigurationStatusText()

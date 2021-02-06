@@ -35,6 +35,24 @@ end
 
 Addon.BackdropTemplate = BackdropTemplateMixin and "BackdropTemplate"
 
+Addon.LibDogTag = LibStub("LibDogTag-3.0", true)
+LibStub("LibDogTag-Unit-3.0", true)
+
+local LibDogTagNameplateExtension = function(self, key)
+	if key:sub(1, #"nameplate") == "nameplate" then
+		self[key] = true
+		return true
+	end
+end
+
+-- Insert nameplate unitids as legitimate units for LibDogTag-Unit-3.0
+setmetatable(Addon.LibDogTag.IsLegitimateUnit, {
+	__index = LibDogTagNameplateExtension
+})
+setmetatable(Addon.LibDogTag.IsNormalUnit, {
+	__index = LibDogTagNameplateExtension
+})
+
 -- Use this once SetBackdrop backwards compatibility is removed
 --if BackdropTemplateMixin then -- Shadowlands
 --	Addon.BackdropTemplate = "BackdropTemplate"

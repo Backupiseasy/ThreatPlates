@@ -7886,18 +7886,45 @@ local function CreateOptionsTable()
                       name = L["Friendly Status Text"],
                       order = 10,
                       type = "select",
+                      width = "double",
                       values = t.FRIENDLY_SUBTEXT,
                       arg = { "settings", "customtext", "FriendlySubtext"}
                     },
-                    Spacer1 = { name = "", order = 15, type = "description", width = "half", },
                     EnemySubtext = {
                       name = L["Enemy Status Text"],
                       order = 20,
                       type = "select",
+                      width = "double",
                       values = t.ENEMY_SUBTEXT,
                       arg = { "settings", "customtext", "EnemySubtext"}
                     },
-                    Spacer2 = GetSpacerEntry(30),
+                    Spacer2 = GetSpacerEntry(25),
+                    FriendlySubtextCustom = {
+                      name = L["Custom Friendly Status Text"],
+                      type = "input",
+                      order = 30,
+                      width = "double",
+                      hidden = function() return db.settings.customtext.FriendlySubtext ~= "CUSTOM" end,
+                      arg = { "settings", "customtext", "FriendlySubtextCustom" },
+                      desc = L["Define a custom status text using LibDogTag markup language.\n\nType /dogtag for tag info.\n\nRemember to press ENTER after filling out this box or it will not save."],
+                    },
+                    SpacerBlock = {
+                      name = "",
+                      order = 30,
+                      type = "description",
+                      width = "double",
+                      hidden = function() return db.settings.customtext.EnemySubtext ~= "CUSTOM" or db.settings.customtext.FriendlySubtext == "CUSTOM" end,
+                    },
+                    EnemySubtextCustom = {
+                      name = L["Custom Enemy Status Text"],
+                      type = "input",
+                      order = 31,
+                      width = "double",
+                      hidden = function() return db.settings.customtext.EnemySubtext ~= "CUSTOM" end,
+                      arg = { "settings", "customtext", "EnemySubtextCustom"},
+                      desc = L["Define a custom status text using LibDogTag markup language.\n\nType /dogtag for tag info.\n\nRemember to press ENTER after filling out this box or it will not save."],
+                    },
+                    Spacer3 = GetSpacerEntry(35),
                     SubtextColor = {
                       name = L["Color"],
                       order = 40,
@@ -7963,21 +7990,46 @@ local function CreateOptionsTable()
                   inline = true,
                   args = {
                     FriendlySubtext = {
-                      name = L["Friendly Custom Text"],
+                      name = L["Friendly Status Text"],
                       order = 10,
                       type = "select",
+                      width = "double",
                       values = t.FRIENDLY_SUBTEXT,
-                      arg = {"HeadlineView", "FriendlySubtext"}
+                      arg = { "HeadlineView", "FriendlySubtext"}
                     },
-                    Spacer1 = { name = "", order = 15, type = "description", width = "half", },
                     EnemySubtext = {
-                      name = L["Enemy Custom Text"],
+                      name = L["Enemy Status Text"],
                       order = 20,
                       type = "select",
+                      width = "double",
                       values = t.ENEMY_SUBTEXT,
-                      arg = {"HeadlineView", "EnemySubtext"}
+                      arg = { "HeadlineView", "EnemySubtext"}
                     },
                     Spacer2 = GetSpacerEntry(25),
+                    FriendlySubtextCustom = {
+                      name = L["Custom Friendly Status Text"],
+                      type = "input",
+                      order = 30,
+                      width = "double",
+                      hidden = function() return db.HeadlineView.FriendlySubtext ~= "CUSTOM" end,
+                      arg = { "HeadlineView", "FriendlySubtextCustom"}
+                    },
+                    SpacerBlock = {
+                      name = "",
+                      order = 30,
+                      type = "description",
+                      width = "double",
+                      hidden = function() return db.HeadlineView.EnemySubtext ~= "CUSTOM" or db.HeadlineView.FriendlySubtext == "CUSTOM" end,
+                    },
+                    EnemySubtextCustom = {
+                      name = L["Custom Enemy Status Text"],
+                      type = "input",
+                      order = 31,
+                      width = "double",
+                      hidden = function() return db.HeadlineView.EnemySubtext ~= "CUSTOM" end,
+                      arg = { "HeadlineView", "EnemySubtextCustom"}
+                    },
+                    Spacer3 = GetSpacerEntry(35),
                     SubtextColor = {
                       name = L["Color"],
                       order = 40,

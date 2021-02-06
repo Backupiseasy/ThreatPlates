@@ -1,0 +1,14 @@
+## Interface: 90002
+## LoadOnDemand: 1
+## Title: Lib: DogTag-3.0
+## Notes: A library to provide a markup syntax
+## Author: ckknight
+## eMail: ckknight@gmail.com
+## Version: 1.0
+## X-Category: Library
+## X-Credit: Shefki, Parnic, Andrew Scott
+## X-Compatible-With: 11305
+## OptionalDeps:
+
+LibStub\LibStub.lua
+lib.xml

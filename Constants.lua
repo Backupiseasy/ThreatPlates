@@ -227,6 +227,7 @@ ThreatPlates.ENEMY_SUBTEXT = {
   ROLE_GUILD_LEVEL = L["NPC Role, Guild, or Level"],
   LEVEL = L["Level"],
   ALL = L["Everything"],
+  CUSTOM = L["Custom"],
 }
 
 -- "NPC Role, Guild, or Quest", "Quest"
@@ -238,6 +239,7 @@ ThreatPlates.FRIENDLY_SUBTEXT = {
   ROLE_GUILD_LEVEL = L["NPC Role, Guild, or Level"],
   LEVEL = L["Level"],
   ALL = L["Everything"],
+  CUSTOM = L["Custom"],
 }
 
 -------------------------------------------------------------------------------
@@ -469,7 +471,9 @@ ThreatPlates.DEFAULT_SETTINGS = {
       SubtextColor =  RGB(255, 255, 255, 1),
       --
       EnemySubtext = "ROLE_GUILD_LEVEL",
+      EnemySubtextCustom = "",
       FriendlySubtext = "ROLE_GUILD",
+      FriendlySubtextCustom = "",
     },
     Visibility = {
       --				showNameplates = true,
@@ -1360,7 +1364,9 @@ ThreatPlates.DEFAULT_SETTINGS = {
         flags = "NONE",
         --
         FriendlySubtext = "HEALTH",
+        FriendlySubtextCustom = "",
         EnemySubtext = "HEALTH",
+        EnemySubtextCustom = "",
         SubtextColorUseHeadline = false,
         SubtextColorUseSpecific = false,
         SubtextColor =  RGB(255, 255, 255, 1),

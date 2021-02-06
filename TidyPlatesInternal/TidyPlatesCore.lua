@@ -146,7 +146,7 @@ local UpdateStyle
 local UpdatePlate_SetAlpha, UpdatePlate_SetAlphaOnUpdate
 local UpdatePlate_Transparency
 
-local UpdateIndicator_CustomText, UpdateIndicator_CustomScale, UpdateIndicator_CustomScaleText, UpdateIndicator_Standard
+local UpdateIndicator_CustomScale, UpdateIndicator_CustomScaleText, UpdateIndicator_Standard
 local UpdateIndicator_Level, UpdateIndicator_RaidIcon
 local UpdateIndicator_EliteIcon, UpdateIndicator_Name
 local UpdateIndicator_HealthBar
@@ -302,9 +302,9 @@ do
 		style = extended.style
 
 		if style and (extended.stylename ~= stylename) then
+      extended.stylename = stylename
+      unit.style = stylename
       UpdateStyle()
-			extended.stylename = stylename
-			unit.style = stylename
 
       Addon.CreateExtensions(extended, unit.unitid, stylename)
       Widgets:OnUnitAdded(extended, unit)
@@ -767,29 +767,10 @@ do
     if unit.health then
 			-- Scale
       extended:SetScale(Addon.UIScale * Addon:SetScale(unit))
-
-			-- Set Special-Case Regions
-			if style.customtext.show then
-        local text, r, g, b, a = Addon:SetCustomText(unit)
-        visual.customtext:SetText( text or "")
-        visual.customtext:SetTextColor(r or 1, g or 1, b or 1, a or 1)
-			end
-
+      Addon.SetCustomText(extended, unit)
       Addon:UpdateIndicatorNameplateColor(extended)
 		end
 	end
-
-  function UpdateIndicator_CustomText(tp_frame)
-    local style = tp_frame.style.customtext
-    local unit = tp_frame.unit
-    local customtext = tp_frame.visual.customtext
-
-    if style.show then
-      local text, r, g, b, a = Addon:SetCustomText(unit)
-      customtext:SetText( text or "")
-      customtext:SetTextColor(r or 1, g or 1, b or 1, a or 1)
-    end
-  end
 
 	-- OnShowCastbar
 	function OnStartCasting(plate, unitid, channeled)
@@ -1091,7 +1072,8 @@ do
       else
         -- just update the name
         UpdateIndicator_Name()
-        UpdateIndicator_CustomText(extended) -- if it's an NPC, subtitle is saved by name, change that to guid/unitid
+        -- if it's an NPC, subtitle is saved by name, change that to guid/unitid
+        Addon.SetCustomText(extended, extended.unit)
       end
     end
   end
@@ -1402,7 +1384,7 @@ do
       unit.healthmax = _G.UnitHealthMax(unit.unitid) or 1
 
       Addon.UpdateExtensions(tp_frame, unitid, tp_frame.stylename)
-      UpdateIndicator_CustomText(tp_frame)
+      Addon.SetCustomText(tp_frame, unit)
     end
   end
 
@@ -1694,6 +1676,8 @@ do
     visual.castbar.casttime:SetPoint("CENTER", visual.castbar, "CENTER", db.CastTimeText.HorizontalOffset, db.CastTimeText.VerticalOffset)
     visual.castbar.casttime:SetShown(db.ShowCastTime)
 
+    Addon.UpdateStyleForStatusText(extended, unit)
+
     -- Hide Stuff
     if style.eliteicon and style.eliteicon.show then
       SetAnchorGroupObject(visual.eliteicon, style.eliteicon, extended)
@@ -1831,6 +1815,23 @@ function Addon:ForceUpdate(all_visible_plates)
   else
     TidyPlatesCore:RegisterEvent("UNIT_TARGET")
   end
+
+  -- Load LibDogTag only if used (not sure if necessary performance-wise):
+--  local db = ((unit.style == "NameOnly" or unit.style == "NameOnly-Unique") and TidyPlatesThreat.db.profile.HeadlineView) or TidyPlatesThreat.db.profile.settings.customtext
+--  local customtext = (unit.reaction == "FRIENDLY" and db.FriendlySubtext) or db.EnemySubtext
+--  if not Addon.LibDogTag and TidyPlatesThreat.db.profile.HeadlineView.FriendlySubtext == "CUSTOM" or TidyPlatesThreat.db.profile.HeadlineView.EnemySubtext == "CUSTOM" or
+--    TidyPlatesThreat.db.profile.settings.customtext.FriendlySubtext == "CUSTOM" or TidyPlatesThreat.db.profile.settings.customtext.EnemySubtext == "CUSTOM"
+--  then
+--    Addon.LibDogTag = LibStub("LibDogTag-3.0", true)
+--    LibStub("LibDogTag-Unit-3.0", true)
+--
+--    local LibDogTagNameplateExtension = function(self, key)
+--      if key:sub(1, #"nameplate") == "nameplate" then
+--        self[key] = true
+--        return true
+--      end
+--    end
+--  end
 
   for plate in pairs(self.PlatesVisible) do
     if plate.TPFrame.Active or all_visible_plates then

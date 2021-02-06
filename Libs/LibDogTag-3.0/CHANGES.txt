@@ -1,0 +1,23 @@
+tag 810268438aab132f0ca7d2f88577a7da7bdd0512 v90000.2
+Author:	Parnic <parnic@parnic.com>
+Date:	Sun Nov 29 11:55:00 2020 -0600
+
+Tagging as v90000.2
+-----BEGIN PGP SIGNATURE-----
+
+iQEzBAABCAAdFiEE0A2fAU9k/Q1rnkadTZ3tKV9Cz1UFAl/D4HQACgkQTZ3tKV9C
+z1WB3wf/XGryMGMG74KxeP7ZqafoIbJJrGQuV3IWeQNDifRLR0lJfy55kYR6k5Bd
+qZraGTXEVFa4lpiB9G5+0uK137MIwR8ZJs0rt61pkfiaAXnLL8uBSHxcv/jHQmCI
+uSDrOsUBVPqJptQf4/d2qteeRiuS7YMZOWmztqGF4oN+CjmkoE10SI4d/r8W8OTu
+wKXyfhPzyPHKh1WZCsNcH5snXCo+dCDMGOmaFWLhOCV1/OYQlJnYYx5lAQx3bLes
+l/W6uzyaFrQYsINauyWA7rWglUPpXPzRmeXh3PTl8ppHhirrzjKmtouqakD6U3QH
+oHYrt3yqnFnMRh1bzyRREI6fega0Ng==
+=E0O7
+-----END PGP SIGNATURE-----
+
+commit 7f5d5e91127500170896a4d48281a33cd7198b9e
+Author: Parnic <parnic@parnic.com>
+Date:   Sun Nov 29 11:54:24 2020 -0600
+
+    Update TOC, add community packager github action
+

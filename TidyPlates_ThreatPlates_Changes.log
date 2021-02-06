@@ -1,6 +1,7 @@
 ﻿------------------------------------------------------
 10.1.0
 ------------------------------------------------------
+* Added support for custom status texts using LibDogTag, e.g., use "[]" to show health percentage with one decimal (91.2%) [Comment #4776, #827, #3825, #5282, Issue #283].
 * Restricted automation features Small Blizzard Nameplates and Hide Friendly Nameplates to dungeons and raids only (no longer arenas) [IM].
 * Enabled custom styles for nameplates to override the settings under General - Hidden Nameplates (e.g., to show a Guardian unit with a custom style while Guardian units are hidden in general) [Pull Request #253].
 * Increased the maximum scale values to 500% (by entering the value directly into the input field) [Issue #468].
