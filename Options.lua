@@ -4393,11 +4393,11 @@ local function CreateVisibilitySettings()
             type = "toggle",
             width = "full",
             set = function(info, val)
-              info = t.CopyTable(info)
               Addon:CallbackWhenOoC(function()
-                SetValue(info, val)
+                -- Not using SetValue here as it would require to upvalue info which results in an error
+                db.ShowFriendlyBlizzardNameplates = val
                 Addon:SetBaseNamePlateSize() -- adjust clickable area if switching from Blizzard plates to Threat Plate plates
-                Addon:ForceUpdate(true)
+                Addon:ForceUpdate()
               end, L["Unable to change a setting while in combat."])
             end,
             get = GetValue,
@@ -4410,11 +4410,11 @@ local function CreateVisibilitySettings()
             type = "toggle",
             width = "full",
             set = function(info, val)
-              info = t.CopyTable(info)
               Addon:CallbackWhenOoC(function()
-                SetValue(info, val)
+                -- Not using SetValue here as it would require to upvalue info (I think) which results in an error
+                db.ShowEnemyBlizzardNameplates = val
                 Addon:SetBaseNamePlateSize() -- adjust clickable area if switching from Blizzard plates to Threat Plate plates
-                Addon:ForceUpdate(true)
+                Addon:ForceUpdate()
               end, L["Unable to change a setting while in combat."])
             end,
             get = GetValue,

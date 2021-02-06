@@ -1778,7 +1778,7 @@ end
 function Addon:DisableCastBars() ShowCastBars = false end
 function Addon:EnableCastBars() ShowCastBars = true end
 
-function Addon:ForceUpdate(all_visible_plates)
+function Addon:ForceUpdate()
   wipe(PlateOnUpdateQueue)
 
   Addon:UpdateConfigurationStatusText()
@@ -1833,8 +1833,14 @@ function Addon:ForceUpdate(all_visible_plates)
 --    end
 --  end
 
-  for plate in pairs(self.PlatesVisible) do
-    if plate.TPFrame.Active or all_visible_plates then
+  for plate, unitid in pairs(self.PlatesVisible) do
+    -- If Blizzard default plates are enabled (which means that these nameplates are not active), we need
+    -- to check if they are enabled, so that Active is set correctly and plates are updated shown correctly.
+    if not plate.TPFrame.Active then
+      Addon:UpdateNameplateStyle(plate, unitid)
+    end
+
+    if plate.TPFrame.Active then
       OnResetNameplate(plate)
     end
   end
