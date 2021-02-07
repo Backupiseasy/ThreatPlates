@@ -4434,7 +4434,7 @@ local function CreateVisibilitySettings()
           HideElite = { name = L["Rares & Elites"], order = 2, type = "toggle", arg = { "Visibility", "HideElite" }, },
           HideBoss = { name = L["Bosses"], order = 3, type = "toggle", arg = { "Visibility", "HideBoss" }, },
           HideTapped = { name = L["Tapped Units"], order = 4, type = "toggle", arg = { "Visibility", "HideTapped" }, },
-		      HideGuardian = { name = L["Guardian Units"], order = 5, type = "toggle", arg = { "Visibility", "HideGuardian" }, },
+		      HideGuardian = { name = L["Guardians"], order = 5, type = "toggle", arg = { "Visibility", "HideGuardian" }, },
           Spacer1 = GetSpacerEntry(9),
           ModeHideFriendlyInCombat = {
             name = L["Friendly Units in Combat"],
@@ -9171,10 +9171,12 @@ local function CreateOptionsTable()
   options.args.profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(TidyPlatesThreat.db)
   options.args.profiles.order = 10000
 
-  -- Add dual-spec support
-  local LibDualSpec = LibStub("LibDualSpec-1.0", true)
-  LibDualSpec:EnhanceDatabase(TidyPlatesThreat.db, t.ADDON_NAME)
-  LibDualSpec:EnhanceOptions(options.args.profiles, TidyPlatesThreat.db)
+  if not Addon.CLASSIC then
+    -- Add dual-spec support
+    local LibDualSpec = LibStub("LibDualSpec-1.0", true)
+    LibDualSpec:EnhanceDatabase(TidyPlatesThreat.db, t.ADDON_NAME)
+    LibDualSpec:EnhanceOptions(options.args.profiles, TidyPlatesThreat.db)
+  end
 
   AddImportExportOptions(options.args.profiles)
 end
