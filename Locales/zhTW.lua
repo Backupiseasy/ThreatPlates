@@ -1,7 +1,6 @@
 ﻿local L = LibStub("AceLocale-3.0"):NewLocale("TidyPlatesThreat", "zhTW", false)
 if not L then return end
 
-L = L or {}
 L["  /tptpdps       Toggles DPS/Healing threat plates"] = "/tptpdps 切換顯示 DPS/治療仇恨系統的血條"
 L["  /tptpol        Toggles nameplate overlapping"] = "/tptpol 切換開關血條重疊"
 L["  /tptptank      Toggles Tank threat plates"] = "/tptptank 切換顯示坦克仇恨值系統的血條"
@@ -12,6 +11,8 @@ L["  <no option>        Displays options dialog"] = "  <沒有選項>        顯
 L["  help                    Prints this help message"] = "help 顯示此說明訊息"
 L["  help               Prints this help message"] = "  help              顯示說明訊息"
 L["  legacy-custom-styles    Adds (legacy) default custom styles for nameplates that are deleted when migrating custom nameplates to the current format"] = "'傳統自訂樣式' 會幫轉移自訂血條到新格式時所刪除的血條加入預設的自訂樣式。"
+--[[Translation missing --]]
+L["  profile <name>          Switch the current profile to <name>"] = "  profile <name>          Switch the current profile to <name>"
 L["  update-profiles    Migrates deprecated settings in your configuration"] = "  update-profiles   更新設定檔內已移除的設定選項"
 L[" options by typing: /tptp"] = " 的設定選項請輸入： /tptp"
 L[" The change will be applied after you leave combat."] = "將會在戰鬥結束後會套用變更。"
@@ -69,8 +70,12 @@ L["|cff89f559Additional options can be found by typing |r'/tptp'|cff89F559.|r"] 
 L["|cff89f559Threat Plates:|r Welcome back |cff"] = "|cff89f559威力血條：|r 歡迎回來 |cff"
 L["|cff89F559Threat Plates|r is no longer a theme of |cff89F559TidyPlates|r, but a standalone addon that does no longer require TidyPlates. Please disable one of these, otherwise two overlapping nameplates will be shown for units."] = "|cff89F559威力血條 (Threat Plates)|r 已經不再是 |cff89F559Tidy 血條 (TidyPlates)|r 的外觀主題，而是獨立運作的插件，不再需要和 Tidy 血條一起使用。請載入其中一個血條插件即可，否則會同時顯示兩個重疊的血條。"
 L["|cff89F559Threat Plates|r: DPS switch detected, you are now in your |cffff0000dpsing / healing|r role."] = "|cff89F559威力血條|r：偵測到切換成 DPS，現在是 |cffff0000輸出 / 治療|r 角色。"
+--[[Translation missing --]]
+L["|cff89F559Threat Plates|r: No profile specified"] = "|cff89F559Threat Plates|r: No profile specified"
 L["|cff89F559Threat Plates|r: Role toggle not supported because automatic role detection is enabled."] = "|cff89F559威力血條|r：不支援切換角色，因為已經啟用自動偵測角色。"
 L["|cff89F559Threat Plates|r: Tank switch detected, you are now in your |cff00ff00tanking|r role."] = "|cff89F559威力血條|r：偵測到切換成坦克，現在是 |cffff0000坦克|r 角色。"
+--[[Translation missing --]]
+L["|cff89F559Threat Plates|r: Unknown profile: "] = "|cff89F559Threat Plates|r: Unknown profile: "
 L[ [=[|cff89f559Welcome to |r|cff89f559Threat Plates!
 This is your first time using Threat Plates and you are a(n):
 |r|cff]=] ] = [=[|cff89f559歡迎使用 |r|cff89f559Threat Plates 威力血條!
@@ -157,6 +162,8 @@ L["Always shows the full amount of absorbs on a unit. In overabsorb situations, 
 L["Amount"] = "數值"
 L["Anchor"] = "對齊"
 L["Anchor Point"] = "對齊點"
+--[[Translation missing --]]
+L["Animacharge"] = "Animacharge"
 L["Appearance"] = "外觀"
 L["Apply the custom settings to a nameplate when a particular aura is present on the unit."] = "單位有特定光環時，將自訂的設定套用到血條。"
 L["Apply the custom settings to a nameplate when a particular spell is cast by the unit."] = "單位施放特定法術時，將自訂的設定套用到血條。"
@@ -284,6 +291,10 @@ L["Crowd Control"] = "控場"
 L["Curse"] = "詛咒"
 L["Custom"] = "自訂"
 L["Custom Color"] = "自訂顏色"
+--[[Translation missing --]]
+L["Custom Enemy Status Text"] = "Custom Enemy Status Text"
+--[[Translation missing --]]
+L["Custom Friendly Status Text"] = "Custom Friendly Status Text"
 L["Custom Nameplates"] = "自訂血條"
 L["Custom Scale"] = "自訂縮放大小"
 L["Custom Transparency"] = "自訂透明"
@@ -297,6 +308,16 @@ L["Default Settings (All Profiles)"] = "預設的設定 (所有設定檔)"
 L["Deficit"] = "失血量"
 L["Define a custom color for this nameplate and overwrite any other color settings."] = "設定這個血條的自訂顏色，並且取代其他所有的顏色設定。"
 L["Define a custom scaling for this nameplate and overwrite any other scaling settings."] = "設定這個血條的自訂縮放大小，並且取代其他所有的縮放大小設定。"
+--[[Translation missing --]]
+L[ [=[Define a custom status text using LibDogTag markup language.
+
+Type /dogtag for tag info.
+
+Remember to press ENTER after filling out this box or it will not save.]=] ] = [=[Define a custom status text using LibDogTag markup language.
+
+Type /dogtag for tag info.
+
+Remember to press ENTER after filling out this box or it will not save.]=]
 L["Define a custom transparency for this nameplate and overwrite any other transparency settings."] = "自訂這個血條的透明度，並且取代其他所有透明度的設定。"
 L["Define base alpha settings for various unit types. Only one of these settings is applied to a unit at the same time, i.e., they are mutually exclusive."] = "設定多種單位類型的基礎透明度。一次只會套用一種設定到單位，也就是說，它們不會同時套用。"
 L["Define base scale settings for various unit types. Only one of these settings is applied to a unit at the same time, i.e., they are mutually exclusive."] = "設定多種單位類型的基礎縮放大小。一次只會套用一種設定到單位，也就是說，它們不會同時套用。"
@@ -324,6 +345,8 @@ L["Distance"] = "視野距離"
 L["Do not show buffs with umlimited duration."] = "不要顯示沒有時間限制的增益效果。"
 L["Do not show buffs with unlimited duration."] = "不要顯示沒有時間限制的增益效果。"
 L["Do not sort auras."] = "不要排序光環。"
+--[[Translation missing --]]
+L["Don't Ask Again"] = "Don't Ask Again"
 L["Down Arrow"] = "向下箭頭"
 L["DPS/Healing"] = "DPS/治療"
 L["Drudge Ghoul"] = "苦工食屍鬼"
@@ -433,6 +456,8 @@ L["Glow"] = "發光"
 L["Glow Color"] = "發光顏色"
 L["Glow Frame"] = "發光框架"
 L["Glow Type"] = "發光類型"
+--[[Translation missing --]]
+L["Guardian Units"] = "Guardian Units"
 L["Guardians"] = "守護者"
 L["Headline View"] = "名字檢視"
 L["Headline View Out of Combat"] = "非戰鬥中使用名字檢視"
@@ -818,6 +843,8 @@ L["Target Only"] = "只有當前目標"
 L["Target-based Scale"] = "依據目標的縮放大小"
 L["Target-based Transparency"] = "依據目標的透明度"
 L["Text Boundaries"] = "文字範圍"
+--[[Translation missing --]]
+L["Text Format"] = "Text Format"
 L["Text Height"] = "文字高度"
 L["Text Width"] = "文字寬度"
 L["Texture"] = "材質"

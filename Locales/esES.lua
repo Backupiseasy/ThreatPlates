@@ -11,6 +11,8 @@ L["  <no option>        Displays options dialog"] = "  <no hay opcion>        Mu
 L["  help                    Prints this help message"] = "ayuda Imprime este mensaje de ayuda"
 L["  help               Prints this help message"] = "  ayuda               Imprime un mensaje de ayuda"
 L["  legacy-custom-styles    Adds (legacy) default custom styles for nameplates that are deleted when migrating custom nameplates to the current format"] = "legacy-custom-styles Agrega estilos personalizados predeterminados (heredados) para placas identificativas que se eliminan al migrar placas identificativas personalizadas al formato actual"
+--[[Translation missing --]]
+L["  profile <name>          Switch the current profile to <name>"] = "  profile <name>          Switch the current profile to <name>"
 L["  update-profiles    Migrates deprecated settings in your configuration"] = "  actualizar perfiles    Migra configuraciones obsoletas en su configuración"
 L[" options by typing: /tptp"] = " opciones por escribir: /tptp"
 L[" The change will be applied after you leave combat."] = " El cambio se aplicará después de que abandones el combate."
@@ -68,8 +70,12 @@ L["|cff89f559Additional options can be found by typing |r'/tptp'|cff89F559.|r"] 
 L["|cff89f559Threat Plates:|r Welcome back |cff"] = "|cff89f559Threat Plates:|r Bienvenido de vuelta |cff"
 L["|cff89F559Threat Plates|r is no longer a theme of |cff89F559TidyPlates|r, but a standalone addon that does no longer require TidyPlates. Please disable one of these, otherwise two overlapping nameplates will be shown for units."] = "|cff89F559Threat Plates|r ya no es un tema de |cff89F559TidyPlates|r, pero un addon independiente que ya no requiere TidyPlates. Deshabilite uno de estos, de lo contrario, se mostrarán dos placas superpuestas para las unidades."
 L["|cff89F559Threat Plates|r: DPS switch detected, you are now in your |cffff0000dpsing / healing|r role."] = "|cff89F559Threat Plates|r: Cambio de DPS detectado, estás en rol |cffff0000dps / sanación|r."
+--[[Translation missing --]]
+L["|cff89F559Threat Plates|r: No profile specified"] = "|cff89F559Threat Plates|r: No profile specified"
 L["|cff89F559Threat Plates|r: Role toggle not supported because automatic role detection is enabled."] = "|cff89F559Threat Plates|r: El cambio de roles no es compatible porque la detección automática de roles está habilitada."
 L["|cff89F559Threat Plates|r: Tank switch detected, you are now in your |cff00ff00tanking|r role."] = "|cff89F559Threat Plates|r: Cambio de tanque detectado, estás en rol |cff00ff00tanque|r."
+--[[Translation missing --]]
+L["|cff89F559Threat Plates|r: Unknown profile: "] = "|cff89F559Threat Plates|r: Unknown profile: "
 L[ [=[|cff89f559Welcome to |r|cff89f559Threat Plates!
 This is your first time using Threat Plates and you are a(n):
 |r|cff]=] ] = [=[|cff89f559Bienvenido a |r|cff89f559Threat Plates!
@@ -156,6 +162,8 @@ L["Always shows the full amount of absorbs on a unit. In overabsorb situations, 
 L["Amount"] = "Cantidad"
 L["Anchor"] = "Ancla"
 L["Anchor Point"] = "Punto de Anclar"
+--[[Translation missing --]]
+L["Animacharge"] = "Animacharge"
 L["Appearance"] = "Apariencia"
 L["Apply the custom settings to a nameplate when a particular aura is present on the unit."] = "Aplica la configuración personalizada a una placa identificativa cuando un aura particular esté presente en la unidad."
 L["Apply the custom settings to a nameplate when a particular spell is cast by the unit."] = "Aplica la configuración personalizada a una placa identificativa cuando la unidad lanza un hechizo en particular."
@@ -178,6 +186,7 @@ L["Art Options"] = "Opciones de Arte"
 L["Aura"] = "Aura"
 L["Aura (Name or ID)"] = "Aura (Nombre o ID)"
 L["Aura Icon"] = "Icono de Aura"
+L["Aura: "] = "Aura:"
 L["Auras"] = "Auras"
 L["Auras (Name or ID)"] = "Auras (Nombre o ID)"
 L["Auras, Healthbar"] = "Auras, Barra de Salud"
@@ -229,6 +238,7 @@ L["Cast Target"] = "Objetivo de lanzamiento"
 L["Cast Text Alignment"] = "Alineación de texto de lanzamiento"
 L["Cast Time"] = "Tiempo de lanzamiento"
 L["Cast Time Alignment"] = "Alineación del tiempo de lanzamiento"
+L["Cast: "] = "Lanzamiento:"
 L["Castbar"] = "Barra de Lanzamiento"
 L["Castbar, Healthbar"] = "Barra de lanzamiento, Barra de salud"
 L["Center"] = "Centro"
@@ -285,6 +295,10 @@ L["Crowd Control"] = "Control de Masas"
 L["Curse"] = "Maldición"
 L["Custom"] = "Personalizado"
 L["Custom Color"] = "Color Personalizado"
+--[[Translation missing --]]
+L["Custom Enemy Status Text"] = "Custom Enemy Status Text"
+--[[Translation missing --]]
+L["Custom Friendly Status Text"] = "Custom Friendly Status Text"
 L["Custom Nameplates"] = "Placas Identificativas Personalizadas"
 L["Custom Scale"] = "Escala personalizada"
 L["Custom Transparency"] = "Transparencia personalizada"
@@ -298,6 +312,16 @@ L["Default Settings (All Profiles)"] = "Configuración Predeterminada (Todos los
 L["Deficit"] = "Déficit"
 L["Define a custom color for this nameplate and overwrite any other color settings."] = "Defina un color personalizado para esta placa identificativa y sobrescriba cualquier otra configuración de color."
 L["Define a custom scaling for this nameplate and overwrite any other scaling settings."] = "Defina una escala personalizada para esta placa identificativa y sobrescriba cualquier otra configuración de escala."
+--[[Translation missing --]]
+L[ [=[Define a custom status text using LibDogTag markup language.
+
+Type /dogtag for tag info.
+
+Remember to press ENTER after filling out this box or it will not save.]=] ] = [=[Define a custom status text using LibDogTag markup language.
+
+Type /dogtag for tag info.
+
+Remember to press ENTER after filling out this box or it will not save.]=]
 L["Define a custom transparency for this nameplate and overwrite any other transparency settings."] = "Defina una transparencia personalizada para esta placa identificativa y sobrescriba cualquier otra configuración de transparencia."
 L["Define base alpha settings for various unit types. Only one of these settings is applied to a unit at the same time, i.e., they are mutually exclusive."] = "Define la configuración alfa base para varios tipos de unidades. Solo una de estas configuraciones se aplica a una unidad al mismo tiempo, es decir, son mutuamente excluyentes."
 L["Define base scale settings for various unit types. Only one of these settings is applied to a unit at the same time, i.e., they are mutually exclusive."] = "Define configuraciones de escala base para varios tipos de unidades. Solo una de estas configuraciones se aplica a una unidad al mismo tiempo, es decir, son mutuamente excluyentes."
@@ -325,6 +349,8 @@ L["Distance"] = "Distancia"
 L["Do not show buffs with umlimited duration."] = "No muestra buffs con duración ilimitada"
 L["Do not show buffs with unlimited duration."] = "No muestra beneficios con duración ilimitada."
 L["Do not sort auras."] = "No ordena auras"
+--[[Translation missing --]]
+L["Don't Ask Again"] = "Don't Ask Again"
 L["Down Arrow"] = "Flecha hacia abajo"
 L["DPS/Healing"] = "DPS/Sanación"
 L["Drudge Ghoul"] = "Bracero necrófago"
@@ -434,6 +460,8 @@ L["Glow"] = "Brillo"
 L["Glow Color"] = "Color de Brillo"
 L["Glow Frame"] = "Marco resplandor"
 L["Glow Type"] = "Tipo de Brillo"
+--[[Translation missing --]]
+L["Guardian Units"] = "Guardian Units"
 L["Guardians"] = "Guardianes"
 L["Headline View"] = "Vista de Título"
 L["Headline View Out of Combat"] = "Vista de Título fuera de combate"
@@ -616,6 +644,7 @@ L["Out Of Instances"] = "Fuera de estancias"
 L["Outline"] = "Contorno"
 L["Outline, Monochrome"] = "Contorno, Monocromático"
 L["Overlapping"] = "Superposición"
+L["Paladin"] = "Paladín"
 L["Paste"] = "Pegar"
 L["Paste the Threat Plates profile string into the text field below and then close the window"] = "Pega la cadena de perfil de Threat Plates en la entrada de texto a continuación y luego cierra la ventana"
 L["Pasted!"] = "¡Pegado!"
@@ -818,6 +847,8 @@ L["Target Only"] = "Solo objetivo"
 L["Target-based Scale"] = "Escala basada en objetivo"
 L["Target-based Transparency"] = "Transparencia Basada en Objetivo"
 L["Text Boundaries"] = "Límites de Texto"
+--[[Translation missing --]]
+L["Text Format"] = "Text Format"
 L["Text Height"] = "Altura de Texto"
 L["Text Width"] = "Anchura de Texto"
 L["Texture"] = "Textura"
