@@ -84,6 +84,7 @@ SlashCmdList["TPTPVERBOSE"] = TPTPVERBOSE
 local function PrintHelp()
 	TP.Print(L["Usage: /tptp [options]"], true)
 	TP.Print(L["options:"], true)
+	TP.Print(L["  profile <name>          Switch the current profile to <name>"], true)
 	TP.Print(L["  legacy-custom-styles    Adds (legacy) default custom styles for nameplates that are deleted when migrating custom nameplates to the current format"], true)
 	TP.Print(L["  help                    Prints this help message"], true)
 	TP.Print(L["  <no option>             Displays options dialog"], true)
@@ -116,16 +117,28 @@ function TidyPlatesThreat:ChatCommand(input)
 	local command = cmd_list[1]
 	if not command or command == "" then
 		TidyPlatesThreat:OpenOptions()
-	elseif input == "help" then
+	elseif command == "help" then
 		PrintHelp()
-	elseif input == "legacy-custom-styles" then
+	elseif command == "legacy-custom-styles" then
 		Addon.RestoreLegacyCustomNameplates()
-	elseif input == "toggle-view-friendly-units" then
-		TidyPlatesThreat:ToggleNameplateModeFriendlyUnits()
-	elseif input == "toggle-view-neutral-units" then
-		TidyPlatesThreat:ToggleNameplateModeNeutralUnits()
-	elseif input == "toggle-view-enemy-units" then
-		TidyPlatesThreat:ToggleNameplateModeEnemyUnits()
+	elseif command == "profile" then
+		local profile_name = cmd_list[2]
+		if profile_name and profile_name ~= "" then
+			-- Check if profile exists
+			if TidyPlatesThreat.db.profiles[profile_name] then
+				TidyPlatesThreat.db:SetProfile(profile_name)
+			else
+				TP.Print(L["|cff89F559Threat Plates|r: Unknown profile: "] .. profile_name, true)
+			end
+		else
+			TP.Print(L["|cff89F559Threat Plates|r: No profile specified"], true)
+		end
+--	elseif command == "toggle-view-friendly-units" then
+--		TidyPlatesThreat:ToggleNameplateModeFriendlyUnits()
+--	elseif command == "toggle-view-neutral-units" then
+--		TidyPlatesThreat:ToggleNameplateModeNeutralUnits()
+--	elseif command == "toggle-view-enemy-units" then
+--		TidyPlatesThreat:ToggleNameplateModeEnemyUnits()
 	elseif DEBUG then
 		if command == "searchdb" then
 			TP.Print("|cff89F559Threat Plates|r: Searching settings:", true)

@@ -1,0 +1,15 @@
+## Interface: 90002
+## LoadOnDemand: 1
+## Title: Lib: DogTag-Unit-3.0
+## Notes: A library to provide unit-oriented tags to LibDogTag-3.0
+## Author: ckknight
+## eMail: ckknight@gmail.com
+## Version: 1.0
+## X-Category: Library
+## X-Credits: Shefki, Parnic, Andrew Scott, cybeloras
+## X-Compatible-With: 11305
+## X-Curse-Project-ID: 14282
+## Dependencies: LibDogTag-3.0
+## OptionalDeps: LibDruidMana-1.0, RangeCheck-1.0, LibTalentQuery-1.0
+
+lib.xml

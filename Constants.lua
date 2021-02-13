@@ -227,6 +227,7 @@ ThreatPlates.ENEMY_SUBTEXT = {
   ROLE_GUILD_LEVEL = L["NPC Role, Guild, or Level"],
   LEVEL = L["Level"],
   ALL = L["Everything"],
+  CUSTOM = L["Custom"],
 }
 
 -- "NPC Role, Guild, or Quest", "Quest"
@@ -238,6 +239,7 @@ ThreatPlates.FRIENDLY_SUBTEXT = {
   ROLE_GUILD_LEVEL = L["NPC Role, Guild, or Level"],
   LEVEL = L["Level"],
   ALL = L["Everything"],
+  CUSTOM = L["Custom"],
 }
 
 -------------------------------------------------------------------------------
@@ -281,7 +283,6 @@ local TOTEM_DATA_RETAIL = {
   { SpellID = 204336, ID = "P4", GroupColor = "2b76ff"},	  -- Grounding Totem
 
   --{ SpellID = 196932, ID = "N6", GroupColor = "4c9900"},		-- Voodoo Totem (removed in patch 8.0.1)
-  --{ SpellID = 192058, ID = "N3", GroupColor = "4c9900"},		-- Lightning  Surge Totem (renamed to Capacitator Totem in patch 8.0.1)
 }
 
 local TOTEM_DATA_CLASSIC = {
@@ -389,6 +390,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
     },
   },
   profile = {
+    CheckForIncompatibleAddons = true,
     -- cache = {}, - removed in 9.3.0
     -- OldSetting = true, - removed in 8.7.0
     verbose = false,
@@ -400,7 +402,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
       toggle  = true,
       amount = -0.3
     },
-    tidyplatesFade = false,
+    -- tidyplatesFade = false, -- removed in 10.1.0 as it was no longer used
     healthColorChange = false,
     customColor =  false,
     allowClass = true, -- old default: false,
@@ -469,7 +471,9 @@ ThreatPlates.DEFAULT_SETTINGS = {
       SubtextColor =  RGB(255, 255, 255, 1),
       --
       EnemySubtext = "ROLE_GUILD_LEVEL",
+      EnemySubtextCustom = "",
       FriendlySubtext = "ROLE_GUILD",
+      FriendlySubtextCustom = "",
     },
     Visibility = {
       --				showNameplates = true,
@@ -494,6 +498,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
       HideNormal = false,
       HideBoss = false,
       HideElite = false,
+      HideGuardian = false,
       HideTapped = false,
       HideFriendlyInCombat = false,
     },
@@ -1371,7 +1376,9 @@ ThreatPlates.DEFAULT_SETTINGS = {
         flags = "NONE",
         --
         FriendlySubtext = "HEALTH",
+        FriendlySubtextCustom = "",
         EnemySubtext = "HEALTH",
+        EnemySubtextCustom = "",
         SubtextColorUseHeadline = false,
         SubtextColorUseSpecific = false,
         SubtextColor =  RGB(255, 255, 255, 1),

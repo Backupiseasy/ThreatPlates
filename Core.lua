@@ -151,10 +151,14 @@ StaticPopupDialogs["IncompatibleAddon"] = {
   text = "|cffFFA500" .. t.Meta("title") .. " Warning|r \n---------------------------------------\n" ..
     L["You currently have two nameplate addons enabled: |cff89F559Threat Plates|r and |cff89F559%s|r. Please disable one of these, otherwise two overlapping nameplates will be shown for units."],
   button1 = OKAY,
+  button2 = L["Don't Ask Again"],
   timeout = 0,
   whileDead = 1,
   hideOnEscape = 1,
   OnAccept = function(self, _, _) end,
+  OnCancel = function(self, _, _)
+    TidyPlatesThreat.db.profile.CheckForIncompatibleAddons = false
+  end,
 }
 
 function TidyPlatesThreat:ReloadTheme()
@@ -235,21 +239,23 @@ end
 function TidyPlatesThreat:CheckForIncompatibleAddons()
   -- Check for other active nameplate addons which may create all kinds of errors and doesn't make
   -- sense anyway:
-  if IsAddOnLoaded("TidyPlates") then
-    StaticPopup_Show("TidyPlatesEnabled", "TidyPlates")
-  end
-  if IsAddOnLoaded("Kui_Nameplates") then
-    StaticPopup_Show("IncompatibleAddon", "KuiNameplates")
-  end
-  if IsAddOnLoaded("ElvUI") and ElvUI[1] and ElvUI[1].private and ElvUI[1].private.nameplates and ElvUI[1].private.nameplates.enable then
-  --if IsAddOnLoaded("ElvUI") and ElvUI[1].private.nameplates.enable then
-    StaticPopup_Show("IncompatibleAddon", "ElvUI Nameplates")
-  end
-  if IsAddOnLoaded("Plater") then
-    StaticPopup_Show("IncompatibleAddon", "Plater Nameplates")
-  end
-  if IsAddOnLoaded("SpartanUI") and SUI.IsModuleEnabled and SUI:IsModuleEnabled("Nameplates") then
-    StaticPopup_Show("IncompatibleAddon", "SpartanUI Nameplates")
+  if TidyPlatesThreat.db.profile.CheckForIncompatibleAddons then
+    if IsAddOnLoaded("TidyPlates") then
+      StaticPopup_Show("TidyPlatesEnabled", "TidyPlates")
+    end
+    if IsAddOnLoaded("Kui_Nameplates") then
+      StaticPopup_Show("IncompatibleAddon", "KuiNameplates")
+    end
+    if IsAddOnLoaded("ElvUI") and ElvUI[1] and ElvUI[1].private and ElvUI[1].private.nameplates and ElvUI[1].private.nameplates.enable then
+    --if IsAddOnLoaded("ElvUI") and ElvUI[1].private.nameplates.enable then
+      StaticPopup_Show("IncompatibleAddon", "ElvUI Nameplates")
+    end
+    if IsAddOnLoaded("Plater") then
+      StaticPopup_Show("IncompatibleAddon", "Plater Nameplates")
+    end
+    if IsAddOnLoaded("SpartanUI") and SUI.IsModuleEnabled and SUI:IsModuleEnabled("Nameplates") then
+      StaticPopup_Show("IncompatibleAddon", "SpartanUI Nameplates")
+    end
   end
 end
 
@@ -508,16 +514,17 @@ function TidyPlatesThreat:PLAYER_ENTERING_WORLD()
   end
 
   db = self.db.profile.Automation
-  local isInstance, instanceType = IsInInstance()
+  local isInstance, instance_type = IsInInstance()
+  isInstance = isInstance and (instance_type == "party" or instance_type == "raid")
 
-  if db.HideFriendlyUnitsInInstances and isInstance then
+  if isInstance and db.HideFriendlyUnitsInInstances then
     Addon.CVars:Set("nameplateShowFriends", 0)
   else
     -- reset to previous setting
     Addon.CVars:RestoreFromProfile("nameplateShowFriends")
   end
 
-  if db.SmallPlatesInInstances and NamePlateDriverFrame:IsUsingLargerNamePlateStyle() and isInstance then
+  if isInstance and db.SmallPlatesInInstances and NamePlateDriverFrame:IsUsingLargerNamePlateStyle() then
     Addon.CVars:Set("nameplateGlobalScale", 0.4)
   else
     -- reset to previous setting

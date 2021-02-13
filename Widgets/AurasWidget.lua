@@ -1365,10 +1365,7 @@ function Widget:UpdateAuraFrameBarMode(frame)
       frame.Statusbar:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 0, 0)
     end
     frame.Stacks:SetPoint("CENTER", frame.Icon, "CENTER")
-    --frame.Stacks:SetAllPoints(frame.Icon)
-    --frame.Stacks:SetSize(db.BarHeight, db.BarHeight)
     frame.Stacks:SetJustifyH("CENTER")
-    frame.Stacks:SetFont(font, db.FontSize, "OUTLINE")
     frame.Stacks:SetShadowOffset(1, -1)
     frame.Stacks:SetShadowColor(0,0,0,1)
     frame.Stacks:SetTextColor(db.FontColor.r, db.FontColor.g, db.FontColor.b)
@@ -1380,6 +1377,8 @@ function Widget:UpdateAuraFrameBarMode(frame)
     frame.Statusbar:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 0, 0)
     frame.Icon:Hide()
   end
+  -- Always set the font as the stack text is set to "" when not enabled (maybe hiding it would be better)
+  frame.Stacks:SetFont(font, db.FontSize, "OUTLINE")
 
   AuraHighlightStopPrevious(frame.Highlight)
   if AuraHighlightEnabled then
@@ -1420,15 +1419,18 @@ function Widget:UpdateAuraInformationBarMode(frame) -- texture, duration, expira
   -- Expiration
   self:UpdateWidgetTime(frame, expiration, duration)
 
-  if db.ShowStackCount and stacks > 1 then
-    if HideOmniCC then
-      frame.Stacks:SetText(stacks)
-    else
-      frame.Stacks:SetText("")
+  if stacks > 1 and db.ShowStackCount then
+    -- Stacks are either shown on the icon or as postfix to the aura name when
+    -- a) OmniCC is enabled (which shows the CD on the icon) or the icon is disabled
+    if not db.ModeBar.ShowIcon or not HideOmniCC then
+      frame.Stacks:Hide()
       frame.AuraName = frame.AuraName .. " (" .. stacks .. ")"
+    else
+      frame.Stacks:SetText(stacks)
+      frame.Stacks:Show()
     end
   else
-    frame.Stacks:SetText("")
+    frame.Stacks:Hide()
   end
 
   -- Icon
