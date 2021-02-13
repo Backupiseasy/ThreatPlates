@@ -140,34 +140,7 @@ function TidyPlatesThreat:ChatCommand(input)
 --	elseif command == "toggle-view-enemy-units" then
 --		TidyPlatesThreat:ToggleNameplateModeEnemyUnits()
 	elseif DEBUG then
-		if command == "searchdb" then
-			TP.Print("|cff89F559Threat Plates|r: Searching settings:", true)
-			SearchDBForString(TidyPlatesThreat.db.profile, "<Profile>", string.lower(cmd_list[2]))
-			SearchDBForString(TidyPlatesThreat.db.global, "<Profile>", string.lower(cmd_list[2]))
-		elseif command == "cache" then
-			Addon.DebugPrintCaches()
-		elseif command == "unit" then
-			local plate = C_NamePlate.GetNamePlateForUnit("target")
-			if not plate then return end
-			TP.DEBUG_PRINT_UNIT(plate.TPFrame.unit, true)
-		elseif command == "migrate" then
-			Addon.MigrateDatabase(TP.Meta("version"))
-		elseif command == "guid" then
-			local plate = C_NamePlate.GetNamePlateForUnit("target")
-			if not plate then return end
-
-			local guid = UnitGUID(plate.TPFrame.unit.unitid)
-			local _, _,  _, _, _, npc_id = strsplit("-", guid)
-
-			print(plate.TPFrame.unit.name, " => NPC-ID:", npc_id, "=>", guid)
-
-			local widgets = C_UIWidgetManager.GetAllWidgetsBySetID(C_UIWidgetManager.GetPowerBarWidgetSetID())
-			for i, w in pairs(widgets) do
-				print (i, w)
-			end
-		else
-			TidyPlatesThreat:ChatCommandDebug(cmd_list)
-		end
+		TidyPlatesThreat:ChatCommandDebug(cmd_list)
 	else
 		TP.Print(L["Unknown option: "] .. input, true)
 		PrintHelp()
@@ -177,7 +150,32 @@ end
 function TidyPlatesThreat:ChatCommandDebug(cmd_list)
 	local command = cmd_list[1]
 
-	if command == "event" then
+	if command == "searchdb" then
+		TP.Print("|cff89F559Threat Plates|r: Searching settings:", true)
+		SearchDBForString(TidyPlatesThreat.db.profile, "<Profile>", string.lower(cmd_list[2]))
+		SearchDBForString(TidyPlatesThreat.db.global, "<Profile>", string.lower(cmd_list[2]))
+	elseif command == "cache" then
+		Addon.DebugPrintCaches()
+	elseif command == "unit" then
+		local plate = C_NamePlate.GetNamePlateForUnit("target")
+		if not plate then return end
+		TP.DEBUG_PRINT_UNIT(plate.TPFrame.unit, true)
+	elseif command == "migrate" then
+		Addon.MigrateDatabase(TP.Meta("version"))
+	elseif command == "guid" then
+		local plate = C_NamePlate.GetNamePlateForUnit("target")
+		if not plate then return end
+
+		local guid = UnitGUID(plate.TPFrame.unit.unitid)
+		local _, _,  _, _, _, npc_id = strsplit("-", guid)
+
+		print(plate.TPFrame.unit.name, " => NPC-ID:", npc_id, "=>", guid)
+
+		local widgets = C_UIWidgetManager.GetAllWidgetsBySetID(C_UIWidgetManager.GetPowerBarWidgetSetID())
+		for i, w in pairs(widgets) do
+			print (i, w)
+		end
+	elseif command == "event" then
 		--TP.Print("|cff89F559Threat Plates|r: Event publishing overview:", true)
 		--Addon:PrintEventService()
 	elseif command == "quest" then
