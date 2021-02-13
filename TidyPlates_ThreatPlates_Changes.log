@@ -10,6 +10,7 @@
 * Added an option to disable the warning that is shown when another nameplate addons is enabled besides Threat Plates [Comment #4273, #5379, IM].
 * Added a chat command to switch the current profile [Comment #4689, #5382].
 * Fixed a bug where Blizzard default nameplates were not enabled or disabled properly when switching profiles.
+* Upgrade integrated libraries (LibSharedMedia v9.0.0, AceGUI-3.0-SharedMediaWidgets r65-release, LibClassicCasterino r36).
 
 ------------------------------------------------------
 10.0.9
