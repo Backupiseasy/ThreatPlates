@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+10.1.1
+------------------------------------------------------
+* Fixed a Lua error with nameplate integration into LibDogTag [Comment #5415, TPC#701].
+
+------------------------------------------------------
 10.1.0
 ------------------------------------------------------
 * Added support for custom status texts using LibDogTag, e.g., use "[PercentHP]" to show health percentage with one decimal (91.2%) [Comment #4776, #827, #3825, #5282, Issue #283].

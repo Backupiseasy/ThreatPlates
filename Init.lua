@@ -39,7 +39,7 @@ Addon.LibDogTag = LibStub("LibDogTag-3.0", true)
 LibStub("LibDogTag-Unit-3.0", true)
 
 local LibDogTagNameplateExtension = function(self, key)
-	if key:sub(1, #"nameplate") == "nameplate" then
+	if key and key:sub(1, #"nameplate") == "nameplate" then
 		self[key] = true
 		return true
 	end
