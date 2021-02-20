@@ -1,4 +1,10 @@
 ﻿------------------------------------------------------
+10.1.2
+------------------------------------------------------
+* Fixed a bug where an incorrect custom text could be shown when NONE was selected [Comment #5419].
+* Fixed a bug with LibDogTag integration that caused other addons using LibDogTag to no longer work correctly (still a workaround) [GitHub #265, Comment #5423, #5419].
+
+------------------------------------------------------
 10.1.1
 ------------------------------------------------------
 * Fixed a Lua error with nameplate integration into LibDogTag [Comment #5415, TPC#701].

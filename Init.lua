@@ -27,6 +27,8 @@ ThreatPlates.Media = LibStub("LibSharedMedia-3.0")
 Addon.LibCustomGlow = LibStub("LibCustomGlow-1.0")
 Addon.LibAceConfigDialog = LibStub("AceConfigDialog-3.0")
 Addon.LibAceConfigRegistry = LibStub("AceConfigRegistry-3.0")
+--Addon.LibDogTag = LibStub("LibDogTag-3.0", true)
+--LibStub("LibDogTag-Unit-3.0", true)
 
 if Addon.CLASSIC then
 	Addon.LibClassicCasterino = LibStub("LibClassicCasterino-ThreatPlates")
@@ -34,24 +36,6 @@ if Addon.CLASSIC then
 end
 
 Addon.BackdropTemplate = BackdropTemplateMixin and "BackdropTemplate"
-
-Addon.LibDogTag = LibStub("LibDogTag-3.0", true)
-LibStub("LibDogTag-Unit-3.0", true)
-
-local LibDogTagNameplateExtension = function(self, key)
-	if key and key:sub(1, #"nameplate") == "nameplate" then
-		self[key] = true
-		return true
-	end
-end
-
--- Insert nameplate unitids as legitimate units for LibDogTag-Unit-3.0
-setmetatable(Addon.LibDogTag.IsLegitimateUnit, {
-	__index = LibDogTagNameplateExtension
-})
-setmetatable(Addon.LibDogTag.IsNormalUnit, {
-	__index = LibDogTagNameplateExtension
-})
 
 -- Use this once SetBackdrop backwards compatibility is removed
 --if BackdropTemplateMixin then -- Shadowlands
