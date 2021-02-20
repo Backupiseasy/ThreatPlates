@@ -1778,6 +1778,8 @@ end
 function Addon:DisableCastBars() ShowCastBars = false end
 function Addon:EnableCastBars() ShowCastBars = true end
 
+local LibDogTagIndexFunction
+
 function Addon:ForceUpdate()
   wipe(PlateOnUpdateQueue)
 
@@ -1816,35 +1818,36 @@ function Addon:ForceUpdate()
     TidyPlatesCore:RegisterEvent("UNIT_TARGET")
   end
 
-  -- Add LibDogTagSupport
-  if (TidyPlatesThreat.db.profile.HeadlineView.FriendlySubtext == "CUSTOM" or
-    TidyPlatesThreat.db.profile.HeadlineView.EnemySubtext == "CUSTOM" or
-    TidyPlatesThreat.db.profile.settings.customtext.FriendlySubtext == "CUSTOM" or
-    TidyPlatesThreat.db.profile.settings.customtext.EnemySubtext == "CUSTOM") and not Addon.LibDogTag then
+  -- Enable or disable LibDogTagSupport based on custom status text being actually used
+  if db.HeadlineView.FriendlySubtext == "CUSTOM" or db.HeadlineView.EnemySubtext == "CUSTOM" or db.settings.customtext.FriendlySubtext == "CUSTOM" or db.settings.customtext.EnemySubtext == "CUSTOM" then
+    if not Addon.LibDogTag then
+      Addon.LibDogTag = LibStub("LibDogTag-3.0", true)
+      LibStub("LibDogTag-Unit-3.0", true)
 
-    Addon.LibDogTag = LibStub("LibDogTag-3.0", true)
-    LibStub("LibDogTag-Unit-3.0", true)
-
-    -- Insert nameplate unitids as legitimate units for LibDogTag-Unit-3.0
-    -- Replate metatable of LibDogTag-Unit
+      -- Insert nameplate unitids as legitimate units for LibDogTag-Unit-3.0
+      -- Replate metatable of LibDogTag-Unit
+      LibDogTagIndexFunction = Addon.LibDogTag.IsLegitimateUnit.__index
+      local type = type
+      setmetatable(Addon.LibDogTag.IsLegitimateUnit, {
+        __index = function(self, key)
+          if type(key) == "string" and key:sub(1, #"nameplate") == "nameplate" then
+            Addon.LibDogTag.IsNormalUnit[key] = true
+            self[key] = true
+            return true
+          end
+          return LibDogTagIndexFunction(self, key)
+        end})
+    end
+  elseif Addon.LibDogTag then
     setmetatable(Addon.LibDogTag.IsLegitimateUnit, {
-      __index = function(self, key)
-        if type(key) ~= "string" then
-          return false
-        end
-        --if key:sub(1, #"nameplate") == "nameplate" then
-        if key:sub(1, #"nameplate") == "nameplate" then
-          Addon.LibDogTag.IsNormalUnit[key] = true
-          self[key] = true
-          return self[key]
-        elseif key:match("target$") then
-          self[key] = self[key:sub(1, -7)]
-          return self[key]
-        end
-        self[key] = false
-        return false
-      end
+      __index = LibDogTagIndexFunction
     })
+    for key, _ in pairs(Addon.LibDogTag.IsNormalUnit) do
+      if key:sub(1, #"nameplate") == "nameplate" then
+        Addon.LibDogTag.IsNormalUnit[key] = nil
+      end
+    end
+    Addon.LibDogTag = nil
   end
 
   for plate, unitid in pairs(self.PlatesVisible) do
