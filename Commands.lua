@@ -86,6 +86,7 @@ local function PrintHelp()
 	TP.Print(L["options:"], true)
 	TP.Print(L["  profile <name>          Switch the current profile to <name>"], true)
 	TP.Print(L["  legacy-custom-styles    Adds (legacy) default custom styles for nameplates that are deleted when migrating custom nameplates to the current format"], true)
+	TP.Print(L["  toggle-scripting        Enable or disable scripting support (for beta testing)"], true)
 	TP.Print(L["  help                    Prints this help message"], true)
 	TP.Print(L["  <no option>             Displays options dialog"], true)
 	TP.Print(L["Additional chat commands:"], true)
@@ -133,6 +134,15 @@ function TidyPlatesThreat:ChatCommand(input)
 		else
 			TP.Print(L["|cff89F559Threat Plates|r: No profile specified"], true)
 		end
+	elseif input == "toggle-scripting" then
+		TidyPlatesThreat.db.global.ScriptingIsEnabled = not TidyPlatesThreat.db.global.ScriptingIsEnabled
+		if TidyPlatesThreat.db.global.ScriptingIsEnabled then
+			TP.Print(L["Scriping for custom styles for nameplates is now |cff00ff00enabled!|r."])
+		else
+			TP.Print(L["Scriping for custom styles for nameplates is now |cffff0000disabled!|r."])
+		end
+		Addon.UpdateCustomStyles()
+		TidyPlatesThreat:ConfigTableChanged()
 --	elseif command == "toggle-view-friendly-units" then
 --		TidyPlatesThreat:ToggleNameplateModeFriendlyUnits()
 --	elseif command == "toggle-view-neutral-units" then

@@ -139,7 +139,7 @@ local db
 local options
 local clipboard
 
-local CreateCustomNameplateEntry
+local CreateCustomNameplateEntry, CreateCustomNameplatesGroup
 
 ---------------------------------------------------------------------------------------------------
 -- Importing and exporting settings and custom nameplates.
@@ -385,7 +385,7 @@ function Addon:InitializeCustomNameplates()
   wipe(styles_cache.PerInstance)
 
   for index, custom_style in pairs(db.uniqueSettings) do
-    if type(index) == "number" and custom_style.Trigger.Name.Input ~= "<Enter name here>" and not custom_style.Enable.Never then
+    if type(index) == "number" and custom_style.Trigger.Name.Input ~= "<Enter name here>" and not custom_style.Enable.Never and (custom_style.Trigger.Type ~= "Script" or TidyPlatesThreat.db.global.ScriptingIsEnabled) then
       local trigger_type = custom_style.Trigger.Type
       local trigger_list = custom_style.Trigger[trigger_type].AsArray
 
@@ -444,6 +444,8 @@ local function UpdateSpecial() -- Need to add a way to update options table.
   Addon.Widgets:InitializeAllWidgets()
   Addon:ForceUpdate()
 end
+
+Addon.UpdateCustomStyles = UpdateSpecial
 
 local function GetValue(info)
   local DB = TidyPlatesThreat.db.profile
@@ -6405,20 +6407,12 @@ end
 local function UpdateCustomNameplateSlots(...)
   local entry = options.args.Custom.args
   if ... then
-    -- Use pairs as iterater as the table is in a somewhat invalid format (non-iteratable with ipairs) as long as the
-    -- custom styles have not been migrated to V2
-    for index, custom_style in pairs(db.uniqueSettings) do
-      if type(index) == "number" and custom_style.Trigger.Name.Input ~= "<Enter name here>"  then
-        entry["#" .. index] = CreateCustomNameplateEntry(index)
-      end
-    end
-
-    UpdateSpecial()
-  else
     local slots = {...}
     for _, slot_no in pairs(slots) do
       entry["#" .. slot_no] = CreateCustomNameplateEntry(slot_no)
     end
+  else
+    CreateCustomNameplatesGroup()
   end
 end
 
@@ -6517,7 +6511,7 @@ CreateCustomNameplateEntry = function(index)
             name = L["Type"],
             type = "select",
             order = 10,
-            values = { Name = L["Name"], Aura = L["Aura"], Cast = L["Cast"], Script = L["Script"]},
+            values = { Name = L["Name"], Aura = L["Aura"], Cast = L["Cast"], Script = (TidyPlatesThreat.db.global.ScriptingIsEnabled and L["Script"]) or nil },
             set = function(info, val)
               -- If the uses switches to a trigger that is already in use, the current custom nameplate
               -- is disabled (otherwise, if we would not switch to it, the user could not change it at all.
@@ -7015,12 +7009,13 @@ CreateCustomNameplateEntry = function(index)
           },
         },
       },
-      Events = {
+      Script = {
         name = L["Scripts"],
         order = 60,
         type = "group",
         width = "full",
         inline = false,
+        hidden = function() return not TidyPlatesThreat.db.global.ScriptingIsEnabled end,
         args = {
           WidgetType = {
             name = L["Type"],
@@ -7039,10 +7034,10 @@ CreateCustomNameplateEntry = function(index)
               for key, function_name in pairs(script_functions) do
                 if key == "WoWEvent" then
                   if script_functions[key] == nil then
-                    script_functions[key] = "|cffFF0000" .. function_name .. "|r"
+                    script_functions[key] = "|cff666666" .. function_name .. "|r"
                   end
                 elseif not db.uniqueSettings[index].Scripts.Code[function_name] then
-                  script_functions[key] = "|cffFF0000" .. function_name .. "|r"
+                  script_functions[key] = "|cff666666" .. function_name .. "|r"
                 end
               end
 
@@ -7238,7 +7233,7 @@ CreateCustomNameplateEntry = function(index)
   return entry
 end
 
-local function CreateCustomNameplatesGroup()
+CreateCustomNameplatesGroup = function()
   local entry = {
     NewSlot = {
       name = L["New"],
@@ -7255,9 +7250,7 @@ local function CreateCustomNameplatesGroup()
         table.insert(db.uniqueSettings, slot_no, t.CopyTable(t.DEFAULT_SETTINGS.profile.uniqueSettings["**"]))
         db.uniqueSettings[slot_no].Trigger.Name.Input = ""
 
-        options.args.Custom.args = CreateCustomNameplatesGroup()
-        UpdateSpecial()
-
+        CreateCustomNameplatesGroup()
         Addon.LibAceConfigDialog:SelectGroup(t.ADDON_NAME, "Custom", "#" ..  slot_no)
       end,
       hidden = function() return TidyPlatesThreat.db.global.CustomNameplatesVersion == 1 end,
@@ -7275,9 +7268,7 @@ local function CreateCustomNameplatesGroup()
         if slot_no then
           table.remove(db.uniqueSettings, slot_no)
 
-          options.args.Custom.args = CreateCustomNameplatesGroup()
-          UpdateSpecial()
-
+          CreateCustomNameplatesGroup()
           Addon.LibAceConfigDialog:SelectGroup(t.ADDON_NAME, "Custom", "#" ..  math.min(slot_no, #db.uniqueSettings))
         end
       end,
@@ -7356,9 +7347,7 @@ local function CreateCustomNameplatesGroup()
           return a_key < b_key
         end)
 
-        options.args.Custom.args = CreateCustomNameplatesGroup()
-        UpdateSpecial()
-
+        CreateCustomNameplatesGroup()
         --Addon.LibAceConfigDialog:SelectGroup(t.ADDON_NAME, "Custom", "#" ..  slot_no)
       end,
       hidden = function() return TidyPlatesThreat.db.global.CustomNameplatesVersion == 1 end,
@@ -7378,9 +7367,7 @@ local function CreateCustomNameplatesGroup()
           return a_key > b_key
         end)
 
-        options.args.Custom.args = CreateCustomNameplatesGroup()
-        UpdateSpecial()
-
+        CreateCustomNameplatesGroup()
         --Addon.LibAceConfigDialog:SelectGroup(t.ADDON_NAME, "Custom", "#" ..  slot_no)
       end,
       hidden = function() return TidyPlatesThreat.db.global.CustomNameplatesVersion == 1 end,
@@ -7393,8 +7380,7 @@ local function CreateCustomNameplatesGroup()
       func = function()
         Addon.MigrationCustomNameplatesV1()
 
-        options.args.Custom.args = CreateCustomNameplatesGroup()
-        UpdateSpecial()
+        CreateCustomNameplatesGroup()
       end,
       confirm = function(info) return L["|cffFF0000NOTE|r\nMigration should only delete deprecated default custom nameplates and re-order the remaining ones. Nevertheless, it is highly advised to backup your settings (the SavedVariables file TidyPlates_ThreatPlates.lua) in case something goes wrong.\n\nAre you sure you want to migrate your custom nameplates?"] end,
       hidden = function() return TidyPlatesThreat.db.global.CustomNameplatesVersion > 1 end,
@@ -7508,8 +7494,7 @@ local function CreateCustomNameplatesGroup()
                           table.insert(db.uniqueSettings, slot_no + i, custom_style)
                         end
 
-                        options.args.Custom.args = CreateCustomNameplatesGroup()
-                        UpdateSpecial()
+                        CreateCustomNameplatesGroup()
                       end
                     end
                   else
@@ -7526,15 +7511,18 @@ local function CreateCustomNameplatesGroup()
     },
   }
 
+
   -- Use pairs as iterater as the table is in a somewhat invalid format (non-iteratable with ipairs) as long as the
   -- custom styles have not been migrated to V2
   for index, custom_style in pairs(db.uniqueSettings) do
-    if type(index) == "number" and custom_style.Trigger.Name.Input ~= "<Enter name here>"  then
+    if type(index) == "number" and custom_style.Trigger.Name.Input ~= "<Enter name here>" and
+      (custom_style.Trigger.Type ~= "Script" or TidyPlatesThreat.db.global.ScriptingIsEnabled) then
       entry["#" .. index] = CreateCustomNameplateEntry(index)
     end
   end
 
-  return entry
+  options.args.Custom.args = entry
+  UpdateSpecial()
 end
 
 -- Return the Options table
@@ -9449,8 +9437,7 @@ local function CreateOptionsTable()
 
   options.args.Totems.args = TotemOpts;
 
-  options.args.Custom.args = CreateCustomNameplatesGroup()
-  UpdateSpecial()
+  CreateCustomNameplatesGroup()
 
   options.args.profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(TidyPlatesThreat.db)
   options.args.profiles.order = 10000
@@ -9529,14 +9516,14 @@ function TidyPlatesThreat:ProfChange()
       options.args.Totems.args[totem_info.Name].args.Textures.args.Icon.image = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\TotemIconWidget\\" .. db.totemSettings[totem_info.ID].Style .. "\\" .. totem_info.Icon
     end
 
-    options.args.Custom.args = CreateCustomNameplatesGroup()
+    CreateCustomNameplatesGroup()
   end
 
   TidyPlatesThreat:ReloadTheme()
 end
 
 function TidyPlatesThreat:ConfigTableChanged(...)
-  options.args.Custom.args = CreateCustomNameplatesGroup()
+  CreateCustomNameplatesGroup()
 end
 
 function TidyPlatesThreat:OpenOptions()

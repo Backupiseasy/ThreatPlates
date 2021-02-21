@@ -370,6 +370,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
     version = "",
     DefaultsVersion = "SMOOTH",
     CustomNameplatesVersion = 1,
+    ScriptingIsEnabled = false,
   },
   char = {
     welcome = false,

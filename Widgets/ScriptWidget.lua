@@ -378,7 +378,7 @@ local function OnUpdate(widget_frame, elapsed)
 end
 
 function Widget:IsEnabled()
-  local is_enabled = Addon.ActiveScriptTrigger
+  local is_enabled = Addon.ActiveScriptTrigger and TidyPlatesThreat.db.global.ScriptingIsEnabled
 
   if is_enabled then
     ProcessEvent("IsEnabled")
