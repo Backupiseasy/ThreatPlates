@@ -6346,6 +6346,10 @@ end
 
 local function CustomPlateCheckAndUpdateEntry(info, val, index)
   local triggers = Addon.Split(val)
+  -- Convert spell or aura IDs to numerical values, otherwise they won't be recognized
+  for i, trigger in ipairs(triggers) do
+    triggers[i] = tonumber(trigger) or trigger
+  end
 
   local selected_plate = db.uniqueSettings[index]
   -- Check if here is already another custom nameplate with the same trigger:
