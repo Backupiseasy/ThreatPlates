@@ -72,7 +72,7 @@ L["|cff89F559Threat Plates|r: DPS switch detected, you are now in your |cffff000
 L["|cff89F559Threat Plates|r: No profile specified"] = "|cff89F559Threat Plates|r: Kein Profil angegeben"
 L["|cff89F559Threat Plates|r: Role toggle not supported because automatic role detection is enabled."] = "|cff89F559Threat Plates|r: Rollenwechsel nicht möglich, da die automatische Rollenermittlung eingeschaltet ist."
 L["|cff89F559Threat Plates|r: Tank switch detected, you are now in your |cff00ff00tanking|r role."] = "|cff89F559Threat Plates|r: Wechsel auf Tank festgestellt, du bist jetzt in Deiner |cff00ff00Tank|r -Rolle."
-L["|cff89F559Threat Plates|r: Unknown profile: "] = "|cff89F559Threat Plates|r: Unbekanntes Profil:"
+L["|cff89F559Threat Plates|r: Unknown profile: "] = "|cff89F559Threat Plates|r: Unbekanntes Profil: "
 L[ [=[|cff89f559Welcome to |r|cff89f559Threat Plates!
 This is your first time using Threat Plates and you are a(n):
 |r|cff]=] ] = [=[|cff89f559Willkommen bei |r|cff89f559Threat Plates!
