@@ -6379,6 +6379,10 @@ end
 
 local function CustomPlateCheckAndUpdateEntry(info, val, index)
   local triggers = Addon.Split(val)
+  -- Convert spell or aura IDs to numerical values, otherwise they won't be recognized
+  for i, trigger in ipairs(triggers) do
+    triggers[i] = tonumber(trigger) or trigger
+  end
 
   local selected_plate = db.uniqueSettings[index]
   -- Check if here is already another custom nameplate with the same trigger:
@@ -7813,8 +7817,6 @@ local function CreateOptionsTable()
                       order = 10,
                       type = "toggle",
                       set = function(info, value)
-                        info = t.CopyTable(info)
-
                         Addon:CallbackWhenOoC(function()
                           if value then
                             Addon:SetCVarsForOcclusionDetection()
@@ -7824,7 +7826,8 @@ local function CreateOptionsTable()
                             Addon.CVars:RestoreFromProfile("nameplateSelectedAlpha")
                             Addon.CVars:RestoreFromProfile("nameplateOccludedAlphaMult")
                           end
-                          SetValue(info, value)
+                          db.nameplate.toggle.OccludedUnits = value
+                          Addon:ForceUpdate()
                         end, L["Unable to change transparency for occluded units while in combat."])
                       end,
                       arg = { "nameplate", "toggle", "OccludedUnits" },
