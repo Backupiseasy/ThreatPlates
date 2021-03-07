@@ -27,8 +27,6 @@ ThreatPlates.Media = LibStub("LibSharedMedia-3.0")
 Addon.LibCustomGlow = LibStub("LibCustomGlow-1.0")
 Addon.LibAceConfigDialog = LibStub("AceConfigDialog-3.0")
 Addon.LibAceConfigRegistry = LibStub("AceConfigRegistry-3.0")
---Addon.LibDogTag = LibStub("LibDogTag-3.0", true)
---LibStub("LibDogTag-Unit-3.0", true)
 
 if Addon.CLASSIC then
 	Addon.LibClassicCasterino = LibStub("LibClassicCasterino-ThreatPlates")
