@@ -405,6 +405,7 @@ function TidyPlatesThreat:OnEnable()
     Addon.CVars:OverwriteBoolProtected("nameplateResourceOnTarget", self.db.profile.PersonalNameplate.ShowResourceOnTarget)
   end
 
+  Addon.LoadOnDemandLibraries()
   TidyPlatesThreat:ReloadTheme()
 
   -- Register callbacks at LSM, so that we can refresh everything if additional media is added after TP is loaded

@@ -16,6 +16,8 @@ local string = string
 -- WoW APIs
 local UnitPlayerControlled = UnitPlayerControlled
 
+-- ThreatPlates APIs
+
 Addon.CLASSIC = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
 
 ---------------------------------------------------------------------------------------------------
@@ -34,6 +36,8 @@ if Addon.CLASSIC then
 end
 
 Addon.BackdropTemplate = BackdropTemplateMixin and "BackdropTemplate"
+
+local L = ThreatPlates.L
 
 -- Use this once SetBackdrop backwards compatibility is removed
 --if BackdropTemplateMixin then -- Shadowlands
@@ -103,6 +107,28 @@ Addon.CUSTOM_GLOW_WRAPPER_FUNCTIONS = {
 --------------------------------------------------------------------------------------------------
 -- General Functions
 ---------------------------------------------------------------------------------------------------
+
+Addon.LoadOnDemandLibraries = function()
+	local db = TidyPlatesThreat.db.profile
+
+	-- Enable or disable LibDogTagSupport based on custom status text being actually used
+	if db.HeadlineView.FriendlySubtext == "CUSTOM" or db.HeadlineView.EnemySubtext == "CUSTOM" or db.settings.customtext.FriendlySubtext == "CUSTOM" or db.settings.customtext.EnemySubtext == "CUSTOM" then
+		if Addon.LibDogTag == nil then
+			LoadAddOn("LibDogTag-3.0")
+			Addon.LibDogTag = LibStub("LibDogTag-3.0", true)
+			if not Addon.LibDogTag then
+				Addon.LibDogTag = false
+				ThreatPlates.Print(L["Custom status text requires LibDogTag-3.0 to function."], true)
+			else
+				LoadAddOn("LibDogTag-Unit-3.0")
+				if not LibStub("LibDogTag-Unit-3.0", true) then
+					Addon.LibDogTag = false
+					ThreatPlates.Print(L["Custom status text requires LibDogTag-Unit-3.0 to function."], true)
+				end
+			end
+		end
+	end
+end
 
 -- Create a percentage-based WoW color based on integer values from 0 to 255 with optional alpha value
 ThreatPlates.RGB = function(red, green, blue, alpha)

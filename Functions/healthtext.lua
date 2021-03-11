@@ -373,11 +373,13 @@ function Addon.SetCustomText(tp_frame, unit)
 end
 
 function Addon.UpdateStyleForStatusText(tp_frame, unit)
+  if not Addon.LibDogTag then return end
+
   local db, status_text_function = GetStatusTextSettings(unit)
   if status_text_function == "CUSTOM" then
     local custom_dog_tag_text = (unit.reaction == "FRIENDLY" and db.FriendlySubtextCustom) or db.EnemySubtextCustom
     Addon.LibDogTag:AddFontString(tp_frame.visual.customtext, tp_frame, custom_dog_tag_text, "Unit", { unit = unit.unitid })
-  elseif Addon.LibDogTag then
+  else
     Addon.LibDogTag:RemoveFontString(tp_frame.visual.customtext)
   end
 end

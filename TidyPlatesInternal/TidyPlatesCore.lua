@@ -1816,14 +1816,6 @@ function Addon:ForceUpdate()
     TidyPlatesCore:RegisterEvent("UNIT_TARGET")
   end
 
-  -- Enable or disable LibDogTagSupport based on custom status text being actually used
-  if db.HeadlineView.FriendlySubtext == "CUSTOM" or db.HeadlineView.EnemySubtext == "CUSTOM" or db.settings.customtext.FriendlySubtext == "CUSTOM" or db.settings.customtext.EnemySubtext == "CUSTOM" then
-    if not Addon.LibDogTag then
-      Addon.LibDogTag = LibStub("LibDogTag-3.0")
-      LibStub("LibDogTag-Unit-3.0")
-    end
-  end
-
   for plate, unitid in pairs(self.PlatesVisible) do
     -- If Blizzard default plates are enabled (which means that these nameplates are not active), we need
     -- to check if they are enabled, so that Active is set correctly and plates are updated shown correctly.
