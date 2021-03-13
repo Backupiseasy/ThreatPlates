@@ -121,9 +121,12 @@ Addon.LoadOnDemandLibraries = function()
 				ThreatPlates.Print(L["Custom status text requires LibDogTag-3.0 to function."], true)
 			else
 				LoadAddOn("LibDogTag-Unit-3.0")
-				if not LibStub("LibDogTag-Unit-3.0", true) then
+			  if not  LibStub("LibDogTag-Unit-3.0", true) then
 					Addon.LibDogTag = false
 					ThreatPlates.Print(L["Custom status text requires LibDogTag-Unit-3.0 to function."], true)
+				elseif not Addon.LibDogTag.IsLegitimateUnit["nameplate1"] then
+					Addon.LibDogTag = false
+					ThreatPlates.Print(L["Your version of LibDogTag-Unit-3.0 does not support nameplates. You need to install at least v90000.3 of LibDogTag-Unit-3.0."], true)
 				end
 			end
 		end

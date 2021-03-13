@@ -350,12 +350,12 @@ function Addon.SetCustomText(tp_frame, unit)
   -- Set Special-Case Regions
   if not tp_frame.style.customtext.show then return end
 
+  local customtext = tp_frame.visual.customtext
+
   local db, status_text_function = GetStatusTextSettings(unit)
-  -- if status_text_function == CUSTOM, status text is handled by LibDogTag
   if status_text_function == "NONE" then
-    local customtext = tp_frame.visual.customtext
     customtext:SetText("")
-    customtext:SetTextColor(COLOR_ROLE.r, COLOR_ROLE.g, COLOR_ROLE.b, COLOR_ROLE.a)
+    customtext:SetTextColor(COLOR_ROLE.r, COLOR_ROLE.g, COLOR_ROLE.b, COLOR_ROLE.a) -- This should not be necessary ...
   elseif status_text_function ~= "CUSTOM" then
     local func = SUBTEXT_FUNCTIONS[status_text_function]
     local subtext, color = func(unit)
@@ -366,9 +366,10 @@ function Addon.SetCustomText(tp_frame, unit)
       color = db.SubtextColor
     end
 
-    local customtext = tp_frame.visual.customtext
     customtext:SetText(subtext or "")
     customtext:SetTextColor(color.r or 1, color.g or 1, color.b or 1, color.a or 1)
+  elseif not Addon.LibDogTag then -- status_text_function == "CUSTOM"
+    customtext:SetText("")
   end
 end
 
