@@ -2,6 +2,8 @@
 10.1.5
 ------------------------------------------------------
 * Fixed a bug where stealth detection auras where not properly detected in Stealth widget [Comment #5464].
+* Libraries LibDogTag and LibDogTag-Unit must now be installed separately! They are no longer embedded into Threat Plates. Both addons are now only loaded when custom status text is actually used. This avoids a Lua error in LDT that occurred even when custom status text was not used [Issue #478, TPC#39, GitHub #267, Comment #5490].
+* Updated TOC version for for Patch 9.0.5.
 
 ------------------------------------------------------
 10.1.4
