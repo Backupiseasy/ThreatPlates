@@ -301,6 +301,7 @@ local CROWD_CONTROL_SPELLS_RETAIL = {
   [196364] = CC_SILENCE,      -- Unstable Affliction, silence effect after dispell of Unstable Affliction
   [213688] = LOC_STUN,        -- Fel Cleave aura from Call Fel Lord (Honor)
   [233582] = PC_SNARE,        -- Entrenched in Flame
+  [5484] = LOC_FEAR,          -- Howl of Terror
 
   ---------------------------------------------------------------------------------------------------
   -- Warrior
