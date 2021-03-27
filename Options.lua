@@ -389,7 +389,8 @@ function Addon:InitializeCustomNameplates()
       local trigger_type = custom_style.Trigger.Type
       local trigger_list = custom_style.Trigger[trigger_type].AsArray
 
-      if trigger_type == "Script" or next(custom_style.Scripts.Code) ~= nil then
+      -- Custom styles with scripting can either be of type Script or of another type, but with a script attached
+      if trigger_type == "Script" or next(custom_style.Scripts.Code.Functions) ~= nil or next(custom_style.Scripts.Code.Events) ~= nil then
         custom_style_triggers.Script[#custom_style_triggers.Script + 1] = custom_style
       end
 
@@ -6397,12 +6398,12 @@ end
 local function CustomPlateGetExampleForEventScript(custom_style, event)
   local script_function
   if event == "WoWEvent" then
-    script_function = custom_style.Scripts.Code[custom_style.Scripts.Event]
+    script_function = custom_style.Scripts.Code.Events[custom_style.Scripts.Event]
     if script_function == "" then
       script_function = Addon.WIDGET_EVENTS[event].FunctionExample
     end
   else
-    script_function = custom_style.Scripts.Code[event] or Addon.WIDGET_EVENTS[event].FunctionExample
+    script_function = custom_style.Scripts.Code.Functions[event] or Addon.WIDGET_EVENTS[event].FunctionExample
   end
 
   return script_function
@@ -7036,13 +7037,16 @@ CreateCustomNameplateEntry = function(index)
               local script_functions = t.CopyTable(Addon.SCRIPT_FUNCTIONS[db.uniqueSettings[index].Scripts.Type])
 
               for key, function_name in pairs(script_functions) do
+                local color = "ffffff"
                 if key == "WoWEvent" then
-                  if script_functions[key] == nil then
-                    script_functions[key] = "|cff666666" .. function_name .. "|r"
+                  -- If no WoW event is defined, color the entry in grey
+                  if next(db.uniqueSettings[index].Scripts.Code.Events) then
+                    color = "00ff00"
                   end
-                elseif not db.uniqueSettings[index].Scripts.Code[function_name] then
-                  script_functions[key] = "|cff666666" .. function_name .. "|r"
+                elseif db.uniqueSettings[index].Scripts.Code.Functions[function_name] then
+                  color = "00ff00"
                 end
+                script_functions[key] = "|cff" .. color .. function_name .. "|r"
               end
 
               return script_functions
@@ -7055,24 +7059,20 @@ CreateCustomNameplateEntry = function(index)
             type = "input",
             width = "double",
             set = function(info, val)
-              if not Addon.WIDGET_EVENTS[val] then
-                SetValue(info, string.upper(val))
-                db.uniqueSettings[index].Scripts.Code[val] = ""
+              if val ~= "" then
+                val = string.upper(val)
+                if not db.uniqueSettings[index].Scripts.Code.Events[val] then
+                  db.uniqueSettings[index].Scripts.Code.Events[val] = ""
+                end
               end
+              SetValue(info, val)
             end,
             get = function(info)
               local wow_event
               if db.uniqueSettings[index].Scripts.Function == "WoWEvent" then
                 wow_event = db.uniqueSettings[index].Scripts.Event
-                if not db.uniqueSettings[index].Scripts.Code[wow_event] then
-                  wow_event = nil
-                  -- Script for event was deleted
-                  for event, _ in pairs(db.uniqueSettings[index].Scripts.Code) do
-                    if not Addon.WIDGET_EVENTS[event] then
-                      wow_event = event
-                      break
-                    end
-                  end
+                if not db.uniqueSettings[index].Scripts.Code.Events[wow_event] then
+                  -- Script for event was deleted, so switch to another event (if available) as function still is WoWEvent
                   -- Set (WoW) event to the first non-internal event or to nil
                   db.uniqueSettings[index].Scripts.Event = wow_event
                 end
@@ -7091,10 +7091,8 @@ CreateCustomNameplateEntry = function(index)
             width = "double",
             values = function()
               local events_with_scripts = {}
-              for event, script in pairs(db.uniqueSettings[index].Scripts.Code) do
-                if not Addon.WIDGET_EVENTS[event] then
-                  events_with_scripts[event] = event
-                end
+              for event, script in pairs(db.uniqueSettings[index].Scripts.Code.Events) do
+                events_with_scripts[event] = event
               end
               return events_with_scripts
             end,
@@ -7109,18 +7107,21 @@ CreateCustomNameplateEntry = function(index)
             multiline = 12,
             width = "full",
             set = function(info, val)
-              local script_event
-              if db.uniqueSettings[index].Scripts.Function == "WoWEvent" then
-                script_event = db.uniqueSettings[index].Scripts.Event
-              else
-                script_event = db.uniqueSettings[index].Scripts.Function
-              end
-
               -- Delete the event from the list
-              if val == "" then
+              if val and val:gsub("^%s*(.-)%s*$", "%1"):len() == 0 then
                 val = nil
               end
-              db.uniqueSettings[index].Scripts.Code[script_event] = val
+
+              if db.uniqueSettings[index].Scripts.Function == "WoWEvent" then
+                db.uniqueSettings[index].Scripts.Code.Events[db.uniqueSettings[index].Scripts.Event] = val
+              else
+                db.uniqueSettings[index].Scripts.Code.Functions[db.uniqueSettings[index].Scripts.Function] = val
+              end
+
+              -- Empty input field and drop down showing the current event (as it was deleted)
+              if not val then
+                db.uniqueSettings[index].Scripts.Event = nil
+              end
 
               Addon:InitializeCustomNameplates()
               Addon.Widgets:UpdateSettings("Script")
@@ -7193,19 +7194,22 @@ CreateCustomNameplateEntry = function(index)
                 end
 
                 function frame._Done(self)
-                  local script_event
-                  if db.uniqueSettings[index].Scripts.Function == "WoWEvent" then
-                    script_event = db.uniqueSettings[index].Scripts.Event
-                  else
-                    script_event = db.uniqueSettings[index].Scripts.Function
-                  end
-
                   -- Delete the event from the list
                   local val = Addon.ScriptEditor.Editor:GetText()
-                  if val == "" then
+                  if val and val:gsub("^%s*(.-)%s*$", "%1"):len() == 0 then
                     val = nil
                   end
-                  db.uniqueSettings[index].Scripts.Code[script_event] = val
+
+                  if db.uniqueSettings[index].Scripts.Function == "WoWEvent" then
+                    db.uniqueSettings[index].Scripts.Code.Events[db.uniqueSettings[index].Scripts.Event] = val
+                  else
+                    db.uniqueSettings[index].Scripts.Code.Functions[db.uniqueSettings[index].Scripts.Function] = val
+                  end
+
+                  -- Empty input field and drop down showing the current event (as it was deleted)
+                  if not val then
+                    db.uniqueSettings[index].Scripts.Event = nil
+                  end
 
                   Addon:InitializeCustomNameplates()
                   Addon.Widgets:UpdateSettings("Script")

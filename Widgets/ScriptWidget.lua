@@ -58,96 +58,112 @@ Addon.SCRIPT_FUNCTIONS = {
 Addon.WIDGET_EVENTS = {
   IsEnabled = {
     FunctionExample = [[
+-- Example for function IsEnabled:
 function()
   -- Return false or nil, to disable the script, e.g., when it should be only active on a certain class
 end]]
   },
   OnEnable = {
     FunctionExample = [[
+-- Example for function OnEnable:
 function()
   --
 end]]
   },
   OnDisable = {
     FunctionExample = [[
+-- Example for function OnDisable:
 function()
   --
 end]]
   },
   EnabledForStyle = {
     FunctionExample = [[
+-- Example for function EnabledForStyle:
 function(style_name, unit)
   -- return not (style == "NameOnly" or style == "NameOnly-Unique" or style == "etotem")
 end]]
   },
   Create = {
     FunctionExample = [[
+-- Example for function Create:
 function(widget_frame)
   -- ...
 end]]
   },
   UpdateFrame = {
     FunctionExample = [[
+-- Example for function UpdateFrame:
 function(widget_frame, unit)
   -- ...
 end]]
   },
   UpdateSettings = {
     FunctionExample = [[
+-- Example for function UpdateSettings:
 function()
   -- ...
 end]]
   },
   UpdateLayout = {
     FunctionExample = [[
+-- Example for function UpdateLayout:
 function()
   -- ...
 end]]
   },
   OnUnitAdded = {
     FunctionExample = [[
+-- Example for function OnUnitAdded:
 function(widget_frame, unit)
   -- ...
 end]]
   },
   OnUnitRemoved = {
     FunctionExample = [[
+-- Example for function OnUnitRemoved:
 function(widget_frame, unit)
   -- ...
 end]]
   },
   OnTargetUnitAdded = {
     FunctionExample = [[
+-- Example for function OnTargetUnitAdded:
 function(tp_frame, unit)
   -- ...
 end]]
   },
   OnTargetUnitRemoved = {
     FunctionExample = [[
+-- Example for function OnTargetUnitRemoved:
 function()
   -- ...
 end]]
   },
   OnFocusUnitAdded = {
     FunctionExample = [[
+-- Example for function OnFocusUnitAdded:
 function(tp_frame, unit)
   -- ...
 end]]
   },
   OnFocusUnitRemoved = {
     FunctionExample = [[
+-- Example for function OnFocusUnitRemoved:
 function()
   -- ...
 end]]
   },
   OnUpdate = {
     FunctionExample = [[
+-- Example for function OnUpdate:
 function(tp_frame)
   -- ...
 end]]
   },
   WoWEvent = {
     FunctionExample = [[
+-- Example for processing a WoW event:
 function(...)
   -- Do some event processing
 end]]
@@ -159,7 +175,7 @@ end]]
 ---------------------------------------------------------------------------------------------------
 
 local ScriptEnvironmentByStyle = {}
-local CurrentScriptEnvironment
+--local CurrentScriptEnvironment
 
 -- Blocked functions and tables for WoW or Lua - thanks to WeakAuras
 local BlockedFunctions = {
@@ -290,18 +306,18 @@ function EnvironmentGetGlobal(k)
   return ScriptEnvironment[k]
 end
 
-function Addon.ActiveScriptEnvironment(custom_style)
-  local script_environment = ScriptEnvironmentByStyle[custom_style]
-
-  if not script_environment then
-    script_environment = {}
-    ScriptEnvironmentByStyle[custom_style] = script_environment
-  end
-
-  script_environment.CustomStyle = custom_style
-
-  CurrentScriptEnvironment = script_environment
-end
+--function Addon.ActiveScriptEnvironment(custom_style)
+--  local script_environment = ScriptEnvironmentByStyle[custom_style]
+--
+--  if not script_environment then
+--    script_environment = {}
+--    ScriptEnvironmentByStyle[custom_style] = script_environment
+--  end
+--
+--  script_environment.Style = custom_style
+--
+--  CurrentScriptEnvironment = script_environment
+--end
 
 local function GetScriptEnvironment(custom_style)
   local script_environment = ScriptEnvironmentByStyle[custom_style]
@@ -393,11 +409,9 @@ end
 
 function Widget:OnDisable()
   for _, custom_style in ipairs(Addon.Cache.CustomPlateTriggers.Script) do
-    for event, _ in pairs(custom_style.Scripts.Code) do
-      if not Addon.WIDGET_EVENTS[event] then
-        --print ("Unregistering:", event)
-        self:UnregisterEvent(event)
-      end
+    for event, _ in pairs(custom_style.Scripts.Code.Events) do
+      --print ("Unregistering:", event)
+      self:UnregisterEvent(event)
     end
   end
 
@@ -551,29 +565,36 @@ function Widget:UpdateSettings()
     --PrintDebugMessage("Reloading Script Style:", i, "=>", Addon.CustomPlateGetHeaderName(custom_style))
     EnabledForStyle[custom_style] = EnabledForStyle[custom_style] or {}
 
-    for event, script in pairs(custom_style.Scripts.Code) do
+    -- Register scripting events
+    for event, script in pairs(custom_style.Scripts.Code.Functions) do
       --PrintDebugMessage("=> Event:", event)
       -- Don't add OnUnitAdded for target/focus-based scripts
-      local tp_function = Addon.WIDGET_EVENTS[event]
-      if script and script ~= "" and not tp_function or (tp_function and Addon.SCRIPT_FUNCTIONS[custom_style.Scripts.Type][event]) then
+      if script and script ~= "" and Addon.SCRIPT_FUNCTIONS[custom_style.Scripts.Type][event] then
         local func = Addon.LoadScript(script, custom_style, event)
         if func then
-          if tp_function then
-            if custom_style.Trigger.Type == "Script" then
-              ScriptsForAllPlates[custom_style] = ScriptsForAllPlates[custom_style] or {}
-              ScriptsForAllPlates[custom_style][event] = func
-            else
-              ScriptsByCustomStyle[custom_style] = ScriptsByCustomStyle[custom_style] or {}
-              ScriptsByCustomStyle[custom_style][event] = func
-            end
-
-            on_update_script_used = on_update_script_used or event == "OnUpdate"
+          if custom_style.Trigger.Type == "Script" then
+            ScriptsForAllPlates[custom_style] = ScriptsForAllPlates[custom_style] or {}
+            ScriptsForAllPlates[custom_style][event] = func
           else
-            ScriptsForWoWEvents[event] = ScriptsForWoWEvents[event] or {}
-            ScriptsForWoWEvents[event][custom_style] = func
-            if not pcall(self.RegisterEvent, self, event, HandleWoWEvent) then
-              Addon.PrintErrorMessage(string_format(L["Attempt to register script for unknown WoW event \"%s\""], event))
-            end
+            ScriptsByCustomStyle[custom_style] = ScriptsByCustomStyle[custom_style] or {}
+            ScriptsByCustomStyle[custom_style][event] = func
+          end
+
+          on_update_script_used = on_update_script_used or event == "OnUpdate"
+        end
+      end
+    end
+
+    -- Register WoW events
+    for event, script in pairs(custom_style.Scripts.Code.Events) do
+      --PrintDebugMessage("=> WoW Event:", event)
+      if script and script ~= "" then
+        local func = Addon.LoadScript(script, custom_style, event)
+        if func then
+          ScriptsForWoWEvents[event] = ScriptsForWoWEvents[event] or {}
+          ScriptsForWoWEvents[event][custom_style] = func
+          if not pcall(self.RegisterEvent, self, event, HandleWoWEvent) then
+            Addon.PrintErrorMessage(string_format(L["Attempt to register script for unknown WoW event \"%s\""], event))
           end
         end
       end

@@ -1195,7 +1195,10 @@ ThreatPlates.DEFAULT_SETTINGS = {
           Type = "Standard",
           Function = "OnUnitAdded",
           Event = "",
-          Code = {},
+          Code = {
+            Functions = {},
+            Events = {},
+          },
         }
       },
     },

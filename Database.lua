@@ -191,7 +191,10 @@ Addon.LEGACY_CUSTOM_NAMEPLATES = {
       Type = "Standard",
       Function = "OnUnitAdded",
       Event = "",
-      Code = {},
+      Code = {
+        Functions = {},
+        Events = {},
+      },
     }
   },
   [1] = {
