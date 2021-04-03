@@ -1,4 +1,5 @@
 local _, Addon = ...
+local _, Addon = ...
 local t = Addon.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------
@@ -6402,6 +6403,8 @@ local function CustomPlateGetExampleForEventScript(custom_style, event)
     if script_function == "" then
       script_function = Addon.WIDGET_EVENTS[event].FunctionExample
     end
+  elseif event == "Legacy" then
+    script_function = custom_style.Scripts.Code.Legacy
   else
     script_function = custom_style.Scripts.Code.Functions[event] or Addon.WIDGET_EVENTS[event].FunctionExample
   end
@@ -7020,7 +7023,7 @@ CreateCustomNameplateEntry = function(index)
         type = "group",
         width = "full",
         inline = false,
-        hidden = function() return not TidyPlatesThreat.db.global.ScriptingIsEnabled end,
+        hidden = function() return not TidyPlatesThreat.db.global.ScriptingIsEnabled or TidyPlatesThreat.db.global.CustomNameplatesVersion == 1 end,
         args = {
           WidgetType = {
             name = L["Type"],
@@ -7034,19 +7037,24 @@ CreateCustomNameplateEntry = function(index)
             order = 20,
             type = "select",
             values = function()
-              local script_functions = t.CopyTable(Addon.SCRIPT_FUNCTIONS[db.uniqueSettings[index].Scripts.Type])
+              local custom_style = db.uniqueSettings[index]
+              local script_functions = t.CopyTable(Addon.SCRIPT_FUNCTIONS[custom_style.Scripts.Type])
 
               for key, function_name in pairs(script_functions) do
                 local color = "ffffff"
                 if key == "WoWEvent" then
                   -- If no WoW event is defined, color the entry in grey
-                  if next(db.uniqueSettings[index].Scripts.Code.Events) then
+                  if next(custom_style.Scripts.Code.Events) then
                     color = "00ff00"
                   end
-                elseif db.uniqueSettings[index].Scripts.Code.Functions[function_name] then
+                elseif custom_style.Scripts.Code.Functions[function_name] then
                   color = "00ff00"
                 end
                 script_functions[key] = "|cff" .. color .. function_name .. "|r"
+              end
+
+              if custom_style.Scripts.Code.Legacy ~= "" then
+                script_functions.Legacy = "|cffff0000Legacy Code|r"
               end
 
               return script_functions
@@ -7090,14 +7098,14 @@ CreateCustomNameplateEntry = function(index)
             type = "select",
             width = "double",
             values = function()
-              local events_with_scripts = {}
+              local events_with_scripts = { }
               for event, script in pairs(db.uniqueSettings[index].Scripts.Code.Events) do
                 events_with_scripts[event] = event
               end
               return events_with_scripts
             end,
             arg = { "uniqueSettings", index, "Scripts", "Event" },
-            disabled = function() return db.uniqueSettings[index].Scripts.Function ~= "WoWEvent" end,
+            disabled = function() return db.uniqueSettings[index].Scripts.Function ~= "WoWEvent" or not next(db.uniqueSettings[index].Scripts.Code.Events) end,
           },
           Spacer3 = GetSpacerEntry(55),
           Script = {
@@ -7112,15 +7120,18 @@ CreateCustomNameplateEntry = function(index)
                 val = nil
               end
 
-              if db.uniqueSettings[index].Scripts.Function == "WoWEvent" then
-                db.uniqueSettings[index].Scripts.Code.Events[db.uniqueSettings[index].Scripts.Event] = val
+              local custom_style = db.uniqueSettings[index]
+              if custom_style.Scripts.Function == "WoWEvent" then
+                custom_style.Scripts.Code.Events[custom_style.Scripts.Event] = val
+              elseif custom_style.Scripts.Function == "Legacy" then
+                custom_style.Scripts.Code.Legacy = val
               else
-                db.uniqueSettings[index].Scripts.Code.Functions[db.uniqueSettings[index].Scripts.Function] = val
+                custom_style.Scripts.Code.Functions[custom_style.Scripts.Function] = val
               end
 
               -- Empty input field and drop down showing the current event (as it was deleted)
               if not val then
-                db.uniqueSettings[index].Scripts.Event = nil
+                custom_style.Scripts.Event = nil
               end
 
               Addon:InitializeCustomNameplates()

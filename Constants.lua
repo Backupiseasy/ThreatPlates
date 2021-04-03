@@ -370,7 +370,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
     version = "",
     DefaultsVersion = "SMOOTH",
     CustomNameplatesVersion = 1,
-    ScriptingIsEnabled = false,
+    ScriptingIsEnabled = true,
   },
   char = {
     welcome = false,
@@ -1198,6 +1198,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
           Code = {
             Functions = {},
             Events = {},
+            Legacy = ""
           },
         }
       },

@@ -194,6 +194,7 @@ Addon.LEGACY_CUSTOM_NAMEPLATES = {
       Code = {
         Functions = {},
         Events = {},
+        Legacy = {}
       },
     }
   },
@@ -608,27 +609,24 @@ end
 -- The version number must have a pattern like a.b.c; the rest of string (e.g., "Beta1" is ignored)
 -- everything else (e.g., older version numbers) is set to 0
 local function VersionToNumber(version)
-  --  local len, v1, v2, v3, v4
-  --  _, len, v1, v2 = version:find("(%d+)%.(%d+)")
-  --  if len then
-  --    version = version:sub(len + 1)
-  --    _, len, v3 = version:find("%.(%d+)")
-  --    if len then
-  --      version = version:sub(len + 1)
-  --      _, len, v4 = version:find("%.(%d+)")
-  --    end
-  --  end
-  --
-  --  return floor(v1 * 1e9 + v2 * 1e6 + v3 * 1e3 + v4)
-
   local v1, v2, v3 = version:match("(%d+)%.(%d+)%.(%d+)")
   v1, v2, v3 = v1 or 0, v2 or 0, v3 or 0
 
-  return floor(v1 * 1e6 + v2 * 1e3 + v3)
+  local v_alpha = version:match("Alpha(%d+)") or 0
+  local v_beta = version:match("Beta(%d+)") or 0
+
+  return floor(v1 * 1e6 + v2 * 1e3 + v3), floor(v_beta * 1e3 + v_alpha)
 end
 
 local function CurrentVersionIsOlderThan(current_version, max_version)
-  return VersionToNumber(current_version) < VersionToNumber(max_version)
+  local current_version_no, current_version_test = VersionToNumber(current_version)
+  local max_version_no, max_version_test = VersionToNumber(max_version)
+
+  if current_version_no == max_version_no then
+    return current_version_test < max_version_test
+  else
+    return current_version_no < max_version_no
+  end
 end
 
 local function DatabaseEntryExists(db, keys)
@@ -1097,6 +1095,27 @@ local function RenameFilterMode(profile_name, profile)
   end
 end
 
+local function MigrateCustomStyles(profile_name, profile)
+  if DatabaseEntryExists(profile, { "uniqueSettings" }) then
+    local custom_styles = profile.uniqueSettings
+
+    custom_styles.map = nil
+
+    for index, imported_custom_style in pairs(custom_styles) do
+      -- Import all values from the custom style as long the are valid entries with the correct type
+      -- based on the default custom style "**"
+      local custom_style = Addon.ImportCustomStyle(imported_custom_style)
+      custom_styles[index] = custom_style
+
+
+      -- If there is no WoW event after the migration, set the currently selected event to nil
+      if not next(custom_style.Scripts.Code.Events) then
+        custom_style.Scripts.Event = ""
+      end
+    end
+  end
+end
+
 -- Settings in the SavedVariables file that should be migrated and/or deleted
 local DEPRECATED_SETTINGS = {
   --  NamesColor = { MigrateNamesColor, },                        -- settings.name.color
@@ -1132,6 +1151,7 @@ local DEPRECATED_SETTINGS = {
   FixTargetFocusTexture = { FixTargetFocusTexture, NoDefaultProfile = true },
   RenameFilterMode = { RenameFilterMode, NoDefaultProfile = true, "9.3.0"},
   RemoveCacheFromProfile = { "cache" },
+  MigrateCustomStyles = { MigrateCustomStyles, NoDefaultProfile = true, "10.2.0-Beta1"},
 }
 
 local function MigrateDatabase(current_version)
@@ -1249,9 +1269,25 @@ local function UpdateFromCustomStyle(custom_style, update_from_custom_style)
     if update_from_value ~= nil then
       if type(current_value) == "table" then
         if key == "Code" then
+          -- First copy any legacy code that already exists. New legacy code is appended.
+          custom_style.Code.Legacy = update_from_value.Legacy or ""
+          update_from_value.Legacy = nil
+
           -- Script code array is empty in default settings, so UpdateFromCustomStyle does not work here
-          for event, script_code in pairs(update_from_value) do
-            custom_style.Code[event] = update_from_value[event]
+          for event_type, value in pairs(update_from_value) do
+            if event_type == "Functions" then
+              for event, script_code in pairs(value) do
+                if Addon.SCRIPT_FUNCTIONS.Standard[event] or Addon.SCRIPT_FUNCTIONS.TargetOnly[event] or Addon.SCRIPT_FUNCTIONS.FocusOnly[event] then
+                  custom_style.Code.Functions[event] = script_code
+                else
+                  custom_style.Code.Legacy = custom_style.Code.Legacy .. "-- " .. event .. ":\n" .. script_code .. "\n\n"
+                end
+              end
+            elseif event_type == "Events" then
+              Addon.MergeIntoTable(custom_style.Code[event_type], value)
+            else
+              custom_style.Code.Legacy = custom_style.Code.Legacy .. "-- " .. event_type .. ":\n" .. value .. "\n\n"
+            end
           end
         elseif type(update_from_value) == "table" then
           -- If entry in update-from custom style is not a table as well, ignore it
