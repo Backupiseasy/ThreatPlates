@@ -7053,11 +7053,23 @@ CreateCustomNameplateEntry = function(index)
                 script_functions[key] = "|cff" .. color .. function_name .. "|r"
               end
 
-              if custom_style.Scripts.Code.Legacy ~= "" then
+              if custom_style.Scripts.Code.Legacy and custom_style.Scripts.Code.Legacy ~= "" then
                 script_functions.Legacy = "|cffff0000Legacy Code|r"
               end
 
               return script_functions
+            end,
+            get = function(info)
+              local val = GetValue(info)
+              local values = info.option.values()
+
+              -- If the current value is no longer valid (LegacyCode removed or type switch), change it to some valid value
+              if not values[val] then
+                val = t.DEFAULT_SETTINGS.profile.uniqueSettings["**"].Scripts.Function
+                db.uniqueSettings[index].Scripts.Function = val
+              end
+
+              return val
             end,
             arg = { "uniqueSettings", index, "Scripts", "Function" },
           },
@@ -7211,15 +7223,18 @@ CreateCustomNameplateEntry = function(index)
                     val = nil
                   end
 
-                  if db.uniqueSettings[index].Scripts.Function == "WoWEvent" then
-                    db.uniqueSettings[index].Scripts.Code.Events[db.uniqueSettings[index].Scripts.Event] = val
+                  local custom_style = db.uniqueSettings[index]
+                  if custom_style.Scripts.Function == "WoWEvent" then
+                    custom_style.Scripts.Code.Events[custom_style.Scripts.Event] = val
+                  elseif custom_style.Scripts.Function == "Legacy" then
+                    custom_style.Scripts.Code.Legacy = val
                   else
-                    db.uniqueSettings[index].Scripts.Code.Functions[db.uniqueSettings[index].Scripts.Function] = val
+                    custom_style.Scripts.Code.Functions[custom_style.Scripts.Function] = val
                   end
 
                   -- Empty input field and drop down showing the current event (as it was deleted)
                   if not val then
-                    db.uniqueSettings[index].Scripts.Event = nil
+                    custom_style.Scripts.Event = nil
                   end
 
                   Addon:InitializeCustomNameplates()
