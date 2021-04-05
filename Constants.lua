@@ -1193,7 +1193,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
         },
         Scripts = {
           Type = "Standard",
-          Function = "OnUnitAdded",
+          Function = "Create",
           Event = "",
           Code = {
             Functions = {},
