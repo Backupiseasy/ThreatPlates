@@ -401,7 +401,9 @@ function TidyPlatesThreat:OnEnable()
   TidyPlatesThreat:CheckForFirstStartUp()
   TidyPlatesThreat:CheckForIncompatibleAddons()
 
-  if not Addon.CLASSIC then
+  if Addon.CLASSIC then
+    Addon.LibClassicDurations = LibStub("LibClassicDurations")
+  else
     Addon.CVars:OverwriteBoolProtected("nameplateResourceOnTarget", self.db.profile.PersonalNameplate.ShowResourceOnTarget)
   end
 

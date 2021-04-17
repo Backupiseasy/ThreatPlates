@@ -2,6 +2,7 @@
 10.1.6
 ------------------------------------------------------
 * Aura for Howl of Terror (Warlock) is now correctly recognized as crowd-control aura [Comment #5507].
+* Fixed a bug with aura durations not being shown when a newer version of LibClassicDurations was available than the embedded one [Comment #5538, #5540].
 
 ------------------------------------------------------
 10.1.5
