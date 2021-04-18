@@ -25,15 +25,6 @@ Addon.CLASSIC = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
 ---------------------------------------------------------------------------------------------------
 local LibStub = LibStub
 ThreatPlates.L = LibStub("AceLocale-3.0"):GetLocale("TidyPlatesThreat")
-ThreatPlates.Media = LibStub("LibSharedMedia-3.0")
-Addon.LibCustomGlow = LibStub("LibCustomGlow-1.0")
-Addon.LibAceConfigDialog = LibStub("AceConfigDialog-3.0")
-Addon.LibAceConfigRegistry = LibStub("AceConfigRegistry-3.0")
-
-if Addon.CLASSIC then
-	Addon.LibClassicCasterino = LibStub("LibClassicCasterino-ThreatPlates")
-	--Addon.LibClassicCasterino = LibStub("LibClassicCasterino")
-end
 
 Addon.BackdropTemplate = BackdropTemplateMixin and "BackdropTemplate"
 
@@ -79,17 +70,16 @@ Addon.Cache = {
 ---------------------------------------------------------------------------------------------------
 -- Aura Highlighting
 ---------------------------------------------------------------------------------------------------
-local LibCustomGlow = Addon.LibCustomGlow
 local function Wrapper_ButtonGlow_Start(frame, color, framelevel)
-	LibCustomGlow.ButtonGlow_Start(frame, color, nil, framelevel)
+	Addon.LibCustomGlow.ButtonGlow_Start(frame, color, nil, framelevel)
 end
 
 local function Wrapper_PixelGlow_Start(frame, color, framelevel)
-	LibCustomGlow.PixelGlow_Start(frame, color, nil, nil, nil, nil, nil, nil, nil, nil, framelevel)
+	Addon.LibCustomGlow.PixelGlow_Start(frame, color, nil, nil, nil, nil, nil, nil, nil, nil, framelevel)
 end
 
 local function Wrapper_AutoCastGlow_Start(frame, color, framelevel)
-	LibCustomGlow.AutoCastGlow_Start(frame, color, nil, nil, nil, nil, nil, nil, framelevel)
+	Addon.LibCustomGlow.AutoCastGlow_Start(frame, color, nil, nil, nil, nil, nil, nil, framelevel)
 end
 
 Addon.CUSTOM_GLOW_FUNCTIONS = {

@@ -76,7 +76,7 @@ local function CreateExtensions(tp_frame)
       visual.absorbbar = absorbbar
     end
 
-    absorbbar:SetTexture(ThreatPlates.Media:Fetch('statusbar', db.texture), true, false)
+    absorbbar:SetTexture(Addon.LibSharedMedia:Fetch('statusbar', db.texture), true, false)
     local color = db.AbsorbColor
     absorbbar:SetVertexColor(color.r, color.g, color.b, color.a)
     color = db.OverlayColor

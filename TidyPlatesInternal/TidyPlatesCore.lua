@@ -33,7 +33,6 @@ local UnitNameplateShowsWidgetsOnly = UnitNameplateShowsWidgetsOnly
 local TidyPlatesThreat = TidyPlatesThreat
 local Widgets = Addon.Widgets
 local Animations = Addon.Animations
-local LibClassicCasterino = Addon.LibClassicCasterino
 local BackdropTemplate = Addon.BackdropTemplate
 
 local GetNameForNameplate
@@ -53,7 +52,7 @@ if Addon.CLASSIC then
   UnitEffectiveLevel = function(...) return _G.UnitLevel(...) end
 
   UnitChannelInfo = function(...)
-    local text, _, texture, startTime, endTime, _, _, _, spellID = LibClassicCasterino:UnitChannelInfo(...)
+    local text, _, texture, startTime, endTime, _, _, _, spellID = Addon.LibClassicCasterino:UnitChannelInfo(...)
 
     -- With LibClassicCasterino, startTime is nil sometimes which means that no casting information
     -- is available
@@ -65,7 +64,7 @@ if Addon.CLASSIC then
   end
 
   UnitCastingInfo = function(...)
-    local text, _, texture, startTime, endTime, _, _, _, spellID = LibClassicCasterino:UnitCastingInfo(...)
+    local text, _, texture, startTime, endTime, _, _, _, spellID = Addon.LibClassicCasterino:UnitCastingInfo(...)
 
     -- With LibClassicCasterino, startTime is nil sometimes which means that no casting information
     -- is available
@@ -1587,7 +1586,7 @@ do
 --    if not extended.TestBackground then
 --      extended.TestBackground = extended:CreateTexture(nil, "BACKGROUND")
 --      extended.TestBackground:SetAllPoints(extended)
---      extended.TestBackground:SetTexture(ThreatPlates.Media:Fetch('statusbar', TidyPlatesThreat.db.profile.AuraWidget.BackgroundTexture))
+--      extended.TestBackground:SetTexture(Addon.LibSharedMedia:Fetch('statusbar', TidyPlatesThreat.db.profile.AuraWidget.BackgroundTexture))
 --      extended.TestBackground:SetVertexColor(0,0,0,0.5)
 --    end
 

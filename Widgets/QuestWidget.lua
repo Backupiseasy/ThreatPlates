@@ -655,7 +655,7 @@ end
 -- Load settings from the configuration which are shared across all aura widgets
 -- used (for each widget) in UpdateWidgetConfig
 function Widget:UpdateSettings()
-  Font = ThreatPlates.Media:Fetch('font', TidyPlatesThreat.db.profile.questWidget.Font)
+  Font = Addon.LibSharedMedia:Fetch('font', TidyPlatesThreat.db.profile.questWidget.Font)
 end
 
 function Addon:PrintQuests(command)

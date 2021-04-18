@@ -20,7 +20,6 @@ local NamePlateDriverFrame = NamePlateDriverFrame
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
 local LibStub = LibStub
-local LSM = t.Media
 local L = t.L
 
 local _G =_G
@@ -346,6 +345,29 @@ function TidyPlatesThreat:OnInitialize()
   -- Change defaults if deprecated custom nameplates are used (not yet migrated)
   Addon.SetDefaultsForCustomNameplates()
 
+  Addon.LibAceConfigDialog = LibStub("AceConfigDialog-3.0")
+  Addon.LibAceConfigRegistry = LibStub("AceConfigRegistry-3.0")
+  Addon.LibSharedMedia = LibStub("LibSharedMedia-3.0")
+  Addon.LibCustomGlow = LibStub("LibCustomGlow-1.0")
+
+  if Addon.CLASSIC then
+    Addon.LibClassicDurations = LibStub("LibClassicDurations")
+
+    Addon.LibClassicCasterino = LibStub("LibClassicCasterino-ThreatPlates")
+    --Addon.LibClassicCasterino = LibStub("LibClassicCasterino")
+    -- Register callsbacks for spellcasting library
+    Addon.LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_START", Addon.UNIT_SPELLCAST_START)
+    Addon.LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_DELAYED", Addon.UnitSpellcastMidway) -- only for player
+    Addon.LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_STOP", Addon.UNIT_SPELLCAST_STOP)
+    Addon.LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_FAILED", Addon.UNIT_SPELLCAST_STOP)
+    Addon.LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_INTERRUPTED", Addon.UNIT_SPELLCAST_INTERRUPTED)
+    Addon.LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_CHANNEL_START", Addon.UNIT_SPELLCAST_CHANNEL_START)
+    Addon.LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_CHANNEL_UPDATE", Addon.UnitSpellcastMidway) -- only for player
+    Addon.LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_CHANNEL_STOP", Addon.UNIT_SPELLCAST_CHANNEL_STOP)
+  end
+
+  Addon.LoadOnDemandLibraries()
+
   local RegisterCallback = db.RegisterCallback
   RegisterCallback(self, 'OnProfileChanged', 'ProfChange')
   RegisterCallback(self, 'OnProfileCopied', 'ProfChange')
@@ -355,24 +377,10 @@ function TidyPlatesThreat:OnInitialize()
   local app_name = t.ADDON_NAME
   local dialog_name = app_name .. " Dialog"
   LibStub("AceConfig-3.0"):RegisterOptionsTable(dialog_name, t.GetInterfaceOptionsTable())
-  LibStub("AceConfigDialog-3.0"):AddToBlizOptions(dialog_name, t.ADDON_NAME)
+  Addon.LibAceConfigDialog:AddToBlizOptions(dialog_name, t.ADDON_NAME)
 
   -- Setup chat commands
   self:RegisterChatCommand("tptp", "ChatCommand")
-
-  if Addon.CLASSIC then
-    local LibClassicCasterino = Addon.LibClassicCasterino
-
-    -- Register callsbacks for spellcasting library
-    LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_START", Addon.UNIT_SPELLCAST_START)
-    LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_DELAYED", Addon.UnitSpellcastMidway) -- only for player
-    LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_STOP", Addon.UNIT_SPELLCAST_STOP)
-    LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_FAILED", Addon.UNIT_SPELLCAST_STOP)
-    LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_INTERRUPTED", Addon.UNIT_SPELLCAST_INTERRUPTED)
-    LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_CHANNEL_START", Addon.UNIT_SPELLCAST_CHANNEL_START)
-    LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_CHANNEL_UPDATE", Addon.UnitSpellcastMidway) -- only for player
-    LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_CHANNEL_STOP", Addon.UNIT_SPELLCAST_CHANNEL_STOP)
-  end
 end
 
 local function SetCVarHook(name, value, c)
@@ -401,19 +409,18 @@ function TidyPlatesThreat:OnEnable()
   TidyPlatesThreat:CheckForFirstStartUp()
   TidyPlatesThreat:CheckForIncompatibleAddons()
 
-  if Addon.CLASSIC then
-    Addon.LibClassicDurations = LibStub("LibClassicDurations")
-  else
+  if not Addon.CLASSIC then
     Addon.CVars:OverwriteBoolProtected("nameplateResourceOnTarget", self.db.profile.PersonalNameplate.ShowResourceOnTarget)
   end
 
   Addon.LoadOnDemandLibraries()
+
   TidyPlatesThreat:ReloadTheme()
 
   -- Register callbacks at LSM, so that we can refresh everything if additional media is added after TP is loaded
   -- Register this callback after ReloadTheme as media will be updated there anyway
-  LSM.RegisterCallback(self, "LibSharedMedia_SetGlobal", "MediaUpdate" )
-  LSM.RegisterCallback(self, "LibSharedMedia_Registered", "MediaUpdate" )
+  Addon.LibSharedMedia.RegisterCallback(self, "LibSharedMedia_SetGlobal", "MediaUpdate" )
+  Addon.LibSharedMedia.RegisterCallback(self, "LibSharedMedia_Registered", "MediaUpdate" )
 
   -- Get updates for changes regarding: Large Nameplates
   hooksecurefunc("SetCVar", SetCVarHook)
@@ -442,7 +449,7 @@ end
 
 -- Register callbacks at LSM, so that we can refresh everything if additional media is added after TP is loaded
 function TidyPlatesThreat.MediaUpdate(addon_name, name, mediatype, key)
-  if mediatype ~= LSM.MediaType.SOUND and not LSMUpdateTimer then
+  if mediatype ~= Addon.LibSharedMedia.MediaType.SOUND and not LSMUpdateTimer then
     LSMUpdateTimer = true
 
     -- Delay the update for one second to avoid firering this several times when multiple media are registered by another addon
