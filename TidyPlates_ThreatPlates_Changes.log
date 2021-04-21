@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+10.1.7
+------------------------------------------------------
+* Fixed a Lua error that occured sometimes when friendly pets turn into neutral pets when losing or giving up control over them (e.g., in quests) [Issue #480, TPC#40].
+
+------------------------------------------------------
 10.1.6
 ------------------------------------------------------
 * Aura for Howl of Terror (Warlock) is now correctly recognized as crowd-control aura [Comment #5507].
