@@ -1113,6 +1113,8 @@ local DEPRECATED_SETTINGS = {
   FixTargetFocusTexture = { FixTargetFocusTexture, NoDefaultProfile = true },
   RenameFilterMode = { RenameFilterMode, NoDefaultProfile = true, "9.3.0"},
   RemoveCacheFromProfile = { "cache" },
+  RemoveSmallPlatesInInstances = { "Automation", "SmallPlatesInInstances" },
+  RemoveCVarNameplateGlobalScale = { "CVarsBackup", "nameplateGlobalScale" },
 }
 
 local function MigrateDatabase(current_version)

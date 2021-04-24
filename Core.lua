@@ -383,23 +383,6 @@ function TidyPlatesThreat:OnInitialize()
   self:RegisterChatCommand("tptp", "ChatCommand")
 end
 
-local function SetCVarHook(name, value, c)
-  -- Used as detection for switching between small and large nameplates
-  if name == "NamePlateVerticalScale" then
-    local db = TidyPlatesThreat.db.profile.Automation
-    local isInstance, instanceType = IsInInstance()
-
-    if not NamePlateDriverFrame:IsUsingLargerNamePlateStyle() then
-      -- reset to previous setting
-      Addon.CVars:RestoreFromProfile("nameplateGlobalScale")
-    elseif db.SmallPlatesInInstances and isInstance then
-      Addon.CVars:Set("nameplateGlobalScale", 0.4)
-    end
-
-    Addon:CallbackWhenOoC(function() Addon:SetBaseNamePlateSize() end)
-  end
-end
-
 -- The OnEnable() and OnDisable() methods of your addon object are called by AceAddon when your addon is
 -- enabled/disabled by the user. Unlike OnInitialize(), this may occur multiple times without the entire
 -- UI being reloaded.
@@ -421,9 +404,6 @@ function TidyPlatesThreat:OnEnable()
   -- Register this callback after ReloadTheme as media will be updated there anyway
   Addon.LibSharedMedia.RegisterCallback(self, "LibSharedMedia_SetGlobal", "MediaUpdate" )
   Addon.LibSharedMedia.RegisterCallback(self, "LibSharedMedia_Registered", "MediaUpdate" )
-
-  -- Get updates for changes regarding: Large Nameplates
-  hooksecurefunc("SetCVar", SetCVarHook)
 
   EnableEvents()
 end
@@ -532,13 +512,6 @@ function TidyPlatesThreat:PLAYER_ENTERING_WORLD()
   else
     -- reset to previous setting
     Addon.CVars:RestoreFromProfile("nameplateShowFriends")
-  end
-
-  if isInstance and db.SmallPlatesInInstances and NamePlateDriverFrame:IsUsingLargerNamePlateStyle() then
-    Addon.CVars:Set("nameplateGlobalScale", 0.4)
-  else
-    -- reset to previous setting
-    Addon.CVars:RestoreFromProfile("nameplateGlobalScale")
   end
 
   -- Update custom styles for the current instance

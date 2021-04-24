@@ -5111,14 +5111,6 @@ local function CreateAutomationSettings()
         inline = true,
         set = SyncGameSettingsWorld,
         args = {
-          SmallNameplates = {
-            name = L["Small Blizzard Nameplates"],
-            order = 50,
-            type = "toggle",
-            width = "double",
-            desc = L["Reduce the size of the Blizzard's default large nameplates in instances to 50%."],
-            arg = { "Automation", "SmallPlatesInInstances" },
-          },
           HideFriendlyInInstances = {
             name = L["Hide Friendly Nameplates"],
             order = 60,

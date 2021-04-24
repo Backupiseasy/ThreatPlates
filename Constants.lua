@@ -420,7 +420,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
     Automation = {
       FriendlyUnits = "NONE",
       EnemyUnits = "NONE",
-      SmallPlatesInInstances = false,
+      -- SmallPlatesInInstances = false, -- Removed in 10.1.7
       HideFriendlyUnitsInInstances = false,
     },
     Scale = {
