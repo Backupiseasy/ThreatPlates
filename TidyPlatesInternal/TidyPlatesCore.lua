@@ -1411,14 +1411,14 @@ do
   end
 
   -- Only registered for player unit
-  --local RIGHTEOUS_FURY_SPELL_IDs = { 20468, 20469, 20470, 25780 }
+  local RIGHTEOUS_FURY_SPELL_IDs = { [20468] = true, [20469] = true, [20470] = true, [25780] = true }
   local function UNIT_AURA(event, unitid)
     local _, name, spellId
     for i = 1, 40 do
       name , _, _, _, _, _, _, _, _, spellId = _G.UnitBuff("player", i, "PLAYER")
       if not name then
         break
-      elseif spellId == 25780 then --RIGHTEOUS_FURY_SPELL_IDs[spellId] then
+      elseif RIGHTEOUS_FURY_SPELL_IDs[spellId] then
         Addon.PlayerIsPaladinTank = true
         return
       end
@@ -1480,6 +1480,8 @@ do
   if Addon.CLASSIC and Addon.PlayerClass == "PALADIN" then
     CoreEvents.UNIT_AURA = UNIT_AURA
     TidyPlatesCore:RegisterUnitEvent("UNIT_AURA", "player")
+    -- UNIT_AURA does not seem to be fired after login (even when buffs are active)
+    UNIT_AURA()
   end
 end
 

@@ -51,6 +51,10 @@ TidyPlatesThreat = LibStub("AceAddon-3.0"):NewAddon("TidyPlatesThreat", "AceCons
 -- Global for DBM to differentiate between Threat Plates and Tidy Plates: Threat
 TidyPlatesThreatDBM = true
 
+-- Returns if the currently active spec is tank (true) or dps/heal (false)
+Addon.PlayerClass = select(2, UnitClass("player"))
+Addon.PlayerName = select(1, UnitName("player"))
+
 Addon.Animations = {}
 Addon.Cache = {
 	TriggerWildcardTests = {},

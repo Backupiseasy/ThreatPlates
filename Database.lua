@@ -31,10 +31,6 @@ local _G =_G
 -- Global functions for accessing the configuration
 ---------------------------------------------------------------------------------------------------
 
--- Returns if the currently active spec is tank (true) or dps/heal (false)
-Addon.PlayerClass = select(2, UnitClass("player"))
-Addon.PlayerName = select(1, UnitName("player"))
-
 if Addon.CLASSIC then
   local GetShapeshiftFormID = GetShapeshiftFormID
   local BEAR_FORM, DIRE_BEAR_FORM = BEAR_FORM, 8
