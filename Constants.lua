@@ -613,7 +613,9 @@ ThreatPlates.DEFAULT_SETTINGS = {
       level = 1,
       alpha = 1,
       anchor = "RIGHT",
-      ShowInHeadlineView = false
+      ShowInHeadlineView = false,
+      x_hv = 0,
+      y_hv = 16,
     },
     AuraWidget = {
       ON = true,

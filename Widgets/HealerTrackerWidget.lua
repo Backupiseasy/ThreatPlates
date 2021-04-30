@@ -257,7 +257,12 @@ function Widget:OnUnitAdded(widget_frame, unit)
   RequestBgScoreData()
   ResolveName(unit)
 
-  widget_frame:SetPoint(db.anchor, widget_frame:GetParent(), db.x, db.y)
+  if unit.style == "NameOnly" or unit.style == "NameOnly-Unique" then
+    widget_frame:SetPoint(db.anchor, widget_frame:GetParent(), db.x_hv, db.y_hv)
+  else
+    widget_frame:SetPoint(db.anchor, widget_frame:GetParent(), db.x, db.y)
+  end
+
   widget_frame.Icon:SetTexture(PATH .. "healer")
 
   if IsHealer(unit.guid) then --show it
