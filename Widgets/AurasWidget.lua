@@ -219,6 +219,7 @@ local CROWD_CONTROL_SPELLS_RETAIL = {
   -- [205273] = PC_SNARE,       -- Wake of Ashes - from Artefact weapon
   [255937] = PC_SNARE,          -- Wake of Ashes - Talent
   [183218] = PC_SNARE,          -- Hand of Hindrance
+  [10326] = LOC_FEAR,           -- Turn Evil
 
   ---------------------------------------------------------------------------------------------------
   -- Priest

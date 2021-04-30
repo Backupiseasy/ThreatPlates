@@ -5,6 +5,7 @@
 * Fixed a Lua error that occured sometimes when friendly pets turn into neutral pets when losing or giving up control over them (e.g., in quests) [Issue #480, TPC#40].
 * Fixed a bug with tank role detection for Paladins as the aura Righteous Fury was not detected properly [Issue TPC#41].
 * Fixed a bug with Healer Tracker where the position settings for headline view where not applied [GitHub #283].
+* Aura for Turn Evil (Paladin) is now correctly recognized as crowd-control aura [Issue #485].
 * Upgrade integrated libraries (LibClassicDurations v1.69).
 
 ------------------------------------------------------
