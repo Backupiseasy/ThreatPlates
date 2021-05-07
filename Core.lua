@@ -207,7 +207,7 @@ function TidyPlatesThreat:CheckForFirstStartUp()
   if not self.db.char.welcome then
     self.db.char.welcome = true
 
-    if not Addon.CLASSIC then
+    if not Addon.CLASSIC and not Addon.IS_TBC_CLASSIC then
       local Welcome = L["|cff89f559Welcome to |r|cff89f559Threat Plates!\nThis is your first time using Threat Plates and you are a(n):\n|r|cff"]..t.HCC[Addon.PlayerClass]..self:SpecName().." "..UnitClass("player").."|r|cff89F559.|r\n"
 
       -- initialize roles for all available specs (level > 10) or set to default (dps/healing)
@@ -289,7 +289,7 @@ function Addon:SetBaseNamePlateSize()
   isInstance = isInstance and (instanceType == "party" or instanceType == "raid")
 
   db = TidyPlatesThreat.db.profile
-  if Addon.CLASSIC then
+  if Addon.CLASSIC or Addon.IS_TBC_CLASSIC then
     -- Classic has the same nameplate size for friendly and enemy units, so either set both or non at all (= set it to default values)
     if not db.ShowFriendlyBlizzardNameplates and not db.ShowEnemyBlizzardNameplates and not isInstance then
       C_NamePlate.SetNamePlateFriendlySize(width, height)
@@ -401,7 +401,7 @@ function TidyPlatesThreat:OnEnable()
   TidyPlatesThreat:CheckForFirstStartUp()
   TidyPlatesThreat:CheckForIncompatibleAddons()
 
-  if not Addon.CLASSIC then
+  if not (Addon.CLASSIC or Addon.IS_TBC_CLASSIC) then
     Addon.CVars:OverwriteBoolProtected("nameplateResourceOnTarget", self.db.profile.PersonalNameplate.ShowResourceOnTarget)
   end
 
@@ -506,7 +506,7 @@ function TidyPlatesThreat:PLAYER_ENTERING_WORLD()
   -- SetCVar("ShowClassColorInNameplate", 1)
 
   local db = self.db.profile.questWidget
-  if not Addon.CLASSIC then
+  if not (Addon.CLASSIC or Addon.IS_TBC_CLASSIC) then
     if db.ON or db.ShowInHeadlineView then
       Addon.CVars:Set("showQuestTrackingTooltips", 1)
     else

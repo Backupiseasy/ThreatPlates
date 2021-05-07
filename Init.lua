@@ -19,6 +19,9 @@ local UnitPlayerControlled = UnitPlayerControlled
 -- ThreatPlates APIs
 
 Addon.CLASSIC = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
+Addon.IS_CLASSIC = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
+Addon.IS_TBC_CLASSIC = (WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC)
+Addon.IS_MAINLINE = (WOW_PROJECT_ID == WOW_PROJECT_MAINLINE)
 
 ---------------------------------------------------------------------------------------------------
 -- Libraries

@@ -31,11 +31,7 @@ local _G =_G
 -- Global functions for accessing the configuration
 ---------------------------------------------------------------------------------------------------
 
--- Returns if the currently active spec is tank (true) or dps/heal (false)
-Addon.PlayerClass = select(2, UnitClass("player"))
-Addon.PlayerName = select(1, UnitName("player"))
-
-if Addon.CLASSIC then
+if Addon.CLASSIC or Addon.IS_TBC_CLASSIC then
   local GetShapeshiftFormID = GetShapeshiftFormID
   local BEAR_FORM, DIRE_BEAR_FORM = BEAR_FORM, 8
 
@@ -1116,6 +1112,34 @@ local function MigrateCustomStyles(profile_name, profile)
   end
 end
 
+local function DisableShowBlizzardAurasForClassic(profile_name, profile)
+  if DatabaseEntryExists(profile, { "AuraWidget", "Debuffs", } ) then
+    if profile.AuraWidget.Debuffs.ShowBlizzardForFriendly then
+      profile.AuraWidget.Debuffs.ShowAllFriendly = true
+      profile.AuraWidget.Debuffs.ShowBlizzardForFriendly = false
+      profile.AuraWidget.Debuffs.ShowDispellable = false
+      profile.AuraWidget.Debuffs.ShowBoss = false
+    end
+
+    if profile.AuraWidget.Debuffs.ShowBlizzardForEnemy then
+      profile.AuraWidget.Debuffs.ShowOnlyMine = true
+    end
+  end
+  if DatabaseEntryExists(profile, { "AuraWidget", "CrowdControl", } ) then
+    if profile.AuraWidget.CrowdControl.ShowBlizzardForFriendly then
+      profile.AuraWidget.CrowdControl.ShowAllFriendly = true
+      profile.AuraWidget.CrowdControl.ShowBlizzardForFriendly = false
+      profile.AuraWidget.CrowdControl.ShowDispellable = false
+      profile.AuraWidget.CrowdControl.ShowBoss = false
+    end
+
+    if profile.AuraWidget.CrowdControl.ShowBlizzardForEnemy then
+      profile.AuraWidget.CrowdControl.ShowAllEnemy = true
+      profile.AuraWidget.CrowdControl.ShowBlizzardForEnemy = false
+    end
+  end
+end
+
 -- Settings in the SavedVariables file that should be migrated and/or deleted
 local DEPRECATED_SETTINGS = {
   --  NamesColor = { MigrateNamesColor, },                        -- settings.name.color
@@ -1152,6 +1176,7 @@ local DEPRECATED_SETTINGS = {
   RenameFilterMode = { RenameFilterMode, NoDefaultProfile = true, "9.3.0"},
   RemoveCacheFromProfile = { "cache" },
   MigrateCustomStyles = { MigrateCustomStyles, NoDefaultProfile = true, "10.2.0-Beta1"},
+  DisableShowBlizzardAurasForClassic = ((Addon.CLASSIC or Addon.IS_TBC_CLASSIC) and { DisableShowBlizzardAurasForClassic, "10.2.0" }) or nil,
 }
 
 local function MigrateDatabase(current_version)

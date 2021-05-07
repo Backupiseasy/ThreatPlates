@@ -390,7 +390,7 @@ function Addon:UpdateConfigurationStatusText()
 
   Truncate = (Settings.LocalizedUnitSymbol and TruncateEastAsian) or TruncateWestern
 
-  if Addon.CLASSIC then
+  if Addon.CLASSIC or Addon.IS_TBC_CLASSIC then
     ShowAbsorbs = false
   else
     ShowAbsorbs = Settings.AbsorbsAmount or Settings.AbsorbsPercentage

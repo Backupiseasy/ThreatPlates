@@ -78,6 +78,25 @@ if Addon.CLASSIC then
 
   -- Not available in Classic, introduced in patch 9.0.1
   UnitNameplateShowsWidgetsOnly = function() return false end
+elseif Addon.IS_TBC_CLASSIC then
+  GetNameForNameplate = function(plate) return plate:GetName() end
+  UnitEffectiveLevel = function(...) return _G.UnitLevel(...) end
+
+  -- name, text, texture, startTime, endTime, isTradeSkill, notInterruptible, spellID
+  UnitChannelInfo = function(...)
+    local name, text, texture, startTime, endTime, isTradeSkill, spellID = _G.UnitChannelInfo(...)
+    return name, text, texture, startTime, endTime, isTradeSkill, false, spellID
+  end
+
+  -- name, text, texture, startTime, endTime, isTradeSkill, _, notInterruptible, spellID
+  UnitCastingInfo = function(...)
+    -- In BC Classic, UnitCastingInfo does not return notInterruptible
+    local name, text, texture, startTime, endTime, isTradeSkill, spellID = _G.UnitCastingInfo(...)
+    return name, text, texture, startTime, endTime, isTradeSkill, nil, false, spellID
+  end
+
+  -- Not available in BC Classic, introduced in patch 9.0.1
+  UnitNameplateShowsWidgetsOnly = function() return false end
 else
   GetNameForNameplate = function(plate) return plate:GetName() end
 
@@ -1007,7 +1026,7 @@ do
     OnNewNameplate(plate)
 
     -- NamePlateDriverFrame.AcquireUnitFrame is not used in Classic
-    if Addon.CLASSIC and plate.UnitFrame then
+    if (Addon.CLASSIC or Addon.IS_TBC_CLASSIC) and plate.UnitFrame then
       NamePlateDriverFrame_AcquireUnitFrame(nil, plate)
     end
 
@@ -1448,19 +1467,23 @@ do
 
     CoreEvents.UNIT_SPELLCAST_DELAYED = UnitSpellcastMidway
     CoreEvents.UNIT_SPELLCAST_CHANNEL_UPDATE = UnitSpellcastMidway
-    CoreEvents.UNIT_SPELLCAST_INTERRUPTIBLE = UnitSpellcastMidway
-    CoreEvents.UNIT_SPELLCAST_NOT_INTERRUPTIBLE = UnitSpellcastMidway
     -- UNIT_SPELLCAST_SUCCEEDED
     -- UNIT_SPELLCAST_FAILED
     -- UNIT_SPELLCAST_FAILED_QUIET
     -- UNIT_SPELLCAST_INTERRUPTED - handled by COMBAT_LOG_EVENT_UNFILTERED / SPELL_INTERRUPT as it's the only way to find out the interruptorom
     -- UNIT_SPELLCAST_SENT
 
-    CoreEvents.UNIT_ABSORB_AMOUNT_CHANGED = UNIT_ABSORB_AMOUNT_CHANGED
-    CoreEvents.UNIT_HEAL_ABSORB_AMOUNT_CHANGED = UNIT_HEAL_ABSORB_AMOUNT_CHANGED
     CoreEvents.PLAYER_FOCUS_CHANGED = PLAYER_FOCUS_CHANGED
     -- UNIT_HEALTH_FREQUENT no longer supported in Retail since 9.0.1
     CoreEvents.UNIT_HEALTH = UNIT_HEALTH
+
+    if Addon.IS_MAINLINE then
+      CoreEvents.UNIT_SPELLCAST_INTERRUPTIBLE = UnitSpellcastMidway
+      CoreEvents.UNIT_SPELLCAST_NOT_INTERRUPTIBLE = UnitSpellcastMidway
+
+      CoreEvents.UNIT_ABSORB_AMOUNT_CHANGED = UNIT_ABSORB_AMOUNT_CHANGED
+      CoreEvents.UNIT_HEAL_ABSORB_AMOUNT_CHANGED = UNIT_HEAL_ABSORB_AMOUNT_CHANGED
+    end
   end
 
 	CoreEvents.UNIT_LEVEL = UnitConditionChanged

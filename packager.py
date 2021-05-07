@@ -17,14 +17,15 @@ TEMPLATE_LIBS_XML_FILE = os.path.split(LIBS_XML_FILE)[0] + "\\Template_" + os.pa
 
 IGNORE_DIR = [".git", ".idea", "Source", "Test"]
 IGNORE_FILE = [".gitignore", "README.md", "packager.py", "TidyPlates_ThreatPlates.iml", "UsedColors", "exclude.lst",
-               # Ignore this files because they are replaced with Classic/Retail specific versions:
+               # Ignore this files because they are replaced with Classic/Mainline specific versions:
                TOC_FILE, TEMPLATE_TOC_FILE, ".\\" + LIBS_XML_FILE, ".\\" + TEMPLATE_LIBS_XML_FILE]
 IGNORE_EXT = [".bat", ".txt", ".db", ".zip",
               ".bmp", ".gif", ".jpg", ".png", ".psd", "*.tif", ".xcf"]
 
 EXCLUDE_TAGS_BY_VERSION = {
-    "Retail": "classic",
-    "Classic": "retail",
+    "Classic":    { "tbc-classic" , "mainline" },
+    "TBCClassic": { "classic"    , "mainline" },
+    "Mainline":     { "classic"    , "tbc-classic" },
 }
 
 # ---------------------------------------------------------------------------------------------------
@@ -99,13 +100,14 @@ def create_toc_file(wow_version):
 
     # Remove parts that don't belong to the version that is packaged from TOC file
     version_tag = wow_version.lower()
-    exclude_tag = EXCLUDE_TAGS_BY_VERSION[wow_version]
+    exclude_tags = EXCLUDE_TAGS_BY_VERSION[wow_version]
 
     toc_file_content = re.sub(r"#@" + version_tag + "@[^\n]*\n", "", toc_file_content)
     toc_file_content = re.sub(r"#@end-" + version_tag + "@[^\n]*\n", "", toc_file_content)
-    toc_file_content = re.sub(r"#@" + exclude_tag + "@\n[^@]*#@end-" + exclude_tag + "@\n", "", toc_file_content)
-    # Replace @VERSION@ parameter in TOC file
-    # toc_file_content = re.sub(r"@VERSION@", args.version, toc_file_content)
+    for exclude_tag in exclude_tags:
+        toc_file_content = re.sub(r"#@" + exclude_tag + "@\n[^@]*#@end-" + exclude_tag + "@\n", "", toc_file_content)
+        # Replace @VERSION@ parameter in TOC file
+        # toc_file_content = re.sub(r"@VERSION@", args.version, toc_file_content)
 
     return toc_file_content, version_no
 
@@ -117,21 +119,22 @@ def create_libs_xml_file(wow_version):
     libs_file_content = "".join(libs_file_content)
 
     version_tag = wow_version.lower()
-    exclude_tag = EXCLUDE_TAGS_BY_VERSION[wow_version]
-
-    ignore_lib_dirs = []
-    m = re.search("@" + exclude_tag + "@([^@]*)@end-" + exclude_tag + "@", libs_file_content, re.MULTILINE)
-    if m:
-        for line in m.group(1).split("\n"):
-            m_lib = re.match("\s*<(Include|Script) file=\"(.*)\"/>", line)
-            if m_lib:
-                lib_dir = os.path.dirname(m_lib.group(2))
-                ignore_lib_dirs.append(lib_dir)
+    exclude_tags = EXCLUDE_TAGS_BY_VERSION[wow_version]
 
     # Remove parts that don't belong to the version that is packaged from TOC file
     libs_file_content = re.sub(r"@" + version_tag + "@", "-->", libs_file_content)
     libs_file_content = re.sub(r"@end-" + version_tag + "@", "<!--", libs_file_content)
-    libs_file_content = re.sub(r"@" + exclude_tag + "@\n[^@]*@end-" + exclude_tag + "@", "", libs_file_content)
+
+    for exclude_tag in exclude_tags:
+        ignore_lib_dirs = []
+        m = re.search("@" + exclude_tag + "@([^@]*)@end-" + exclude_tag + "@", libs_file_content, re.MULTILINE)
+        if m:
+            for line in m.group(1).split("\n"):
+                m_lib = re.match("\s*<(Include|Script) file=\"(.*)\"/>", line)
+                if m_lib:
+                    lib_dir = os.path.dirname(m_lib.group(2))
+                    ignore_lib_dirs.append(lib_dir)
+        libs_file_content = re.sub(r"@" + exclude_tag + "@\n[^@]*@end-" + exclude_tag + "@", "", libs_file_content)
 
     return libs_file_content, ignore_lib_dirs
 
@@ -147,8 +150,8 @@ def create_package(wow_version, package_dir):
     # -- Zip Packages
     # ---------------------------------------------------------------------------------------------------
     package_name = "ThreatPlates"
-    if wow_version == "Classic":
-        package_name += wow_version
+    if wow_version == "Classic" or wow_version == "TBCClassic":
+        package_name += "-" + wow_version
 
     package_file_name = package_dir + "\\" + package_name + "_" + version_no + ".zip"
 
@@ -172,13 +175,15 @@ def create_package(wow_version, package_dir):
 def get_wow_version():
     working_dir = os.getcwd()
     if "_retail_" in working_dir:
-        return "Retail"
-    elif "_beta_" in working_dir:
-        return "Retail"
-    elif "_ptr_" in working_dir:
-        return "Retail"
+        return "Mainline"
+    elif "_classic_beta_" in working_dir:
+        return "TBCClassic"
     elif "_classic_" in working_dir:
         return "Classic"
+    elif "_ptr_" in working_dir:
+        return "Mainline"
+    elif "_beta_" in working_dir:
+        return "Mainline"
     else:
         print("Unknown working directory. Exiting ...")
         exit(-1)
@@ -199,36 +204,6 @@ def write_to_file(file, content):
         f.write(content)
         f.close()
 
-
-# ---------------------------------------------------------------------------------------------------
-# -- Upload packages to CurseForge
-# ---------------------------------------------------------------------------------------------------
-
-# # POST: /api/projects//upload-file
-# PROJECT_UPLOAD_FILE = {
-#     # Can be HTML or markdown if changelogType is set.
-#     "changelog": "A string describing changes.",
-#     # Optional: defaults to text
-#     "changelogType": ["text", "html", "markdown"],
-#     # Optional: A friendly display name used on the site if provided.
-#     "displayName": "Foo",
-#     # Optional: The parent file of this file.
-#     "parentFileID": 42,
-#     # A list of supported game versions, see the Game Versions API for details. Not supported if parentFileID is provided.
-#     "gameVersions": [157, 158],
-#     # One of "alpha", "beta", "release".
-#     "releaseType": "alpha",
-#     # Optional: An array of project relations by slug and type of dependency for inclusion in your project.
-#     "relations": {
-#         "projects": [{
-#             # Slug of related plugin.
-#            "slug": "mantle",
-#             # Choose one
-#            "type": ["embeddedLibrary", "incompatible", "optionalDependency", "requiredDependency", "tool"]
-#         }]
-#     }
-# }
-
 # ---------------------------------------------------------------------------------------------------
 # -- Argument Parser
 # ---------------------------------------------------------------------------------------------------
@@ -236,7 +211,7 @@ def write_to_file(file, content):
 @click.command()
 @click.option('--package-dir', type=str, help='Create release versions of Threat Plates in the specified directory.')
 def packager_main(package_dir):
-    """Create a package for a new release of Threat Plates for Retail and Classic WoW."""
+    """Create a package for a new release of Threat Plates for Mainline and Classic and TBC Classic WoW."""
     wow_version = get_wow_version()
     print("WoW version:", wow_version)
 
@@ -253,11 +228,12 @@ def packager_main(package_dir):
         write_to_file(LIBS_XML_FILE, file_content)
 
     # ---------------------------------------------------------------------------------------------------
-    # -- Create packages for Retail and Classic
+    # -- Create packages for Mainline and Classic
     # ---------------------------------------------------------------------------------------------------
     if package_dir:
-        create_package("Retail", package_dir)
+        create_package("Mainline", package_dir)
         create_package("Classic", package_dir)
+        create_package("TBCClassic", package_dir)
 
 if __name__ == '__main__':
     packager_main()

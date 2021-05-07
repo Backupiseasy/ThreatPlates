@@ -23,7 +23,10 @@
 
     <!--@retail@
     <Include file="LibDualSpec-1.0\LibDualSpec-1.0.lua"/>
-    @end-reail@-->
+    @end-retail@-->
+
+    <!--@bc-classic@
+    @end-bc-classic@-->
 
     <!--@classic@
     <Script file="LibClassicCasterino\LibClassicCasterino.lua"/>

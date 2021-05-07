@@ -1,4 +1,5 @@
 ﻿------------------------------------------------------
-10.2.0-Beta1
+10.2.0-Beta2
 ------------------------------------------------------
+* Added support for WoW TBC Classic.
 * Added a new type of custom style for nameplates "Script" that allows you to extend the functionality of Threat Plates with custom Lua scripts.

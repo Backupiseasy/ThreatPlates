@@ -29,7 +29,7 @@ local _G =_G
 -- Wrapper functions for WoW Classic
 ---------------------------------------------------------------------------------------------------
 
-if Addon.CLASSIC then
+if Addon.CLASSIC or Addon.IS_TBC_CLASSIC then
   UnitIsBattlePet = function(...) return false end
 end
 
