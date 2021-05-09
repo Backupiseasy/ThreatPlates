@@ -24,7 +24,7 @@ local COLOR_TRANSPARENT = RGB(0, 0, 0, 0) -- opaque
 -- Wrapper functions for WoW Classic
 ---------------------------------------------------------------------------------------------------
 
-if Addon.CLASSIC then
+if Addon.IS_CLASSIC then
   ShowThreatGlow = function(unit)
     return _G.UnitAffectingCombat(unit.unitid)
   end

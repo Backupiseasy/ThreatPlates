@@ -4,7 +4,7 @@
 local ADDON_NAME, Addon = ...
 local ThreatPlates = Addon.ThreatPlates
 
-local FocusWidget = (not Addon.CLASSIC and Addon.Widgets:NewFocusWidget("Focus")) or {}
+local FocusWidget = (not Addon.IS_CLASSIC and Addon.Widgets:NewFocusWidget("Focus")) or {}
 local Widget = Addon.Widgets:NewTargetWidget("TargetArt")
 
 ---------------------------------------------------------------------------------------------------

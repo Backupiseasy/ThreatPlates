@@ -18,7 +18,7 @@ local UnitPlayerControlled = UnitPlayerControlled
 
 -- ThreatPlates APIs
 
-Addon.CLASSIC = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
+Addon.IS_CLASSIC = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
 Addon.IS_CLASSIC = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
 Addon.IS_TBC_CLASSIC = (WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC)
 Addon.IS_MAINLINE = (WOW_PROJECT_ID == WOW_PROJECT_MAINLINE)
@@ -33,7 +33,7 @@ Addon.LibCustomGlow = LibStub("LibCustomGlow-1.0")
 Addon.LibAceConfigDialog = LibStub("AceConfigDialog-3.0")
 Addon.LibAceConfigRegistry = LibStub("AceConfigRegistry-3.0")
 
-if Addon.CLASSIC then
+if Addon.IS_CLASSIC then
 	Addon.LibClassicCasterino = LibStub("LibClassicCasterino-ThreatPlates")
 	--Addon.LibClassicCasterino = LibStub("LibClassicCasterino")
 end

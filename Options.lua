@@ -1765,11 +1765,11 @@ local function CreateComboPointsWidgetOptions()
             type = "select",
             order = 10,
             values = {
-              DEATHKNIGHT = ((not Addon.CLASSIC and not Addon.IS_TBC_CLASSIC) and L["Death Knight"]) or nil,
+              DEATHKNIGHT = ((not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC) and L["Death Knight"]) or nil,
               DRUID = L["Druid"],
               MAGE = L["Arcane Mage"],
-              MONK = ((not Addon.CLASSIC and not Addon.IS_TBC_CLASSIC) and L["Windwalker Monk"]) or nil,
-              PALADIN = ((not Addon.CLASSIC and not Addon.IS_TBC_CLASSIC) and L["Paladin"]) or nil,
+              MONK = ((not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC) and L["Windwalker Monk"]) or nil,
+              PALADIN = ((not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC) and L["Paladin"]) or nil,
               ROGUE = L["Rogue"],
               WARLOCK = L["Warlock"],
             },
@@ -1933,7 +1933,7 @@ local function CreateArenaWidgetOptions()
     type = "group",
     order = 10,
     set = SetValueWidget,
-    hidden = function() return Addon.CLASSIC end,
+    hidden = function() return Addon.IS_CLASSIC end,
     args = {
       Enable = GetEnableEntry(L["Enable Arena Widget"], L["This widget shows various icons (orbs and numbers) on enemy nameplates in arenas for easier differentiation."], "arenaWidget", false, function(info, val) SetValuePlain(info, val); Addon.Widgets:InitializeWidget("Arena") end),
       Orbs = {
@@ -2132,7 +2132,7 @@ end
     name = L["Quest"],
     order = 100,
     type = "group",
-    hidden = function() return Addon.CLASSIC or Addon.IS_TBC_CLASSIC end,
+    hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC end,
     args = {
       Enable = GetEnableEntry(L["Enable Quest Widget"], L["This widget shows a quest icon above unit nameplates or colors the nameplate healthbar of units that are involved with any of your current quests."], "questWidget", true,
         function(info, val)
@@ -2228,7 +2228,7 @@ local function CreateStealthWidgetOptions()
     name = L["Stealth"],
     order = 80,
     type = "group",
-    hidden = function() return Addon.CLASSIC end,
+    hidden = function() return Addon.IS_CLASSIC end,
     args = {
       Enable = GetEnableEntry(L["Enable Stealth Widget"], L["This widget shows a stealth icon on nameplates of units that can detect stealth."], "stealthWidget", true, function(info, val) SetValuePlain(info, val); Addon.Widgets:InitializeWidget("Stealth") end),
       Layout = {
@@ -2392,7 +2392,7 @@ local function CreateExperienceWidgetOptions()
     type = "group",
     order = 54,
     childGroups = "tab",
-    hidden = function() return Addon.CLASSIC or Addon.IS_TBC_CLASSIC end,
+    hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC end,
     set = SetValueWidget,
     args = {
       Enable = GetEnableEntry(
@@ -2620,7 +2620,7 @@ local function CreateFocusWidgetOptions()
     name = L["Focus Highlight"],
     type = "group",
     order = 55,
-    hidden = function() return Addon.CLASSIC end,
+    hidden = function() return Addon.IS_CLASSIC end,
     args = {
       Enable = GetEnableEntry(L["Enable Focus Widget"], L["This widget highlights the nameplate of your current focus target by showing a border around the healthbar and by coloring the nameplate's healtbar and/or name with a custom color."], "FocusWidget", false, function(info, val) SetValuePlain(info, val); Addon.Widgets:InitializeWidget("Focus") end),
       Texture = {
@@ -3447,7 +3447,7 @@ local function CreateAurasWidgetOptions()
                 end,
                 arg = { "AuraWidget", "Debuffs", "ShowBlizzardForFriendly" },
                 disabled = function() return not db.AuraWidget.Debuffs.ShowFriendly end,
-                hidden = function() return Addon.CLASSIC or Addon.IS_TBC_CLASSIC end
+                hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC end
               },
               Dispellable = {
                 name = L["Dispellable"],
@@ -3593,7 +3593,7 @@ local function CreateAurasWidgetOptions()
                 end,
                 arg = { "AuraWidget", "Debuffs", "ShowBlizzardForEnemy" },
                 disabled = function() return not db.AuraWidget.Debuffs.ShowEnemy end,
-                hidden = function() return Addon.CLASSIC or Addon.IS_TBC_CLASSIC end
+                hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC end
               },
             },
           },
@@ -3926,7 +3926,7 @@ local function CreateAurasWidgetOptions()
                 end,
                 arg = { "AuraWidget", "CrowdControl", "ShowBlizzardForFriendly" },
                 disabled = function() return not db.AuraWidget.CrowdControl.ShowFriendly end,
-                hidden = function() return Addon.CLASSIC or Addon.IS_TBC_CLASSIC end
+                hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC end
               },
               Dispellable = {
                 name = L["Dispellable"],
@@ -3982,7 +3982,7 @@ local function CreateAurasWidgetOptions()
                 end,
                 arg = { "AuraWidget", "CrowdControl", "ShowAllEnemy" },
                 disabled = function() return not db.AuraWidget.CrowdControl.ShowEnemy end,
-                --hidden = function() return Addon.CLASSIC or Addon.IS_TBC_CLASSIC end
+                hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC end
               },
               Blizzard = {
                 name = L["Blizzard"],
@@ -3996,7 +3996,7 @@ local function CreateAurasWidgetOptions()
                 end,
                 arg = { "AuraWidget", "CrowdControl", "ShowBlizzardForEnemy" },
                 disabled = function() return not db.AuraWidget.CrowdControl.ShowEnemy end,
-                --hidden = function() return Addon.CLASSIC or Addon.IS_TBC_CLASSIC end
+                hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC end
               },
             },
           },
@@ -4598,13 +4598,13 @@ local function CreateBlizzardSettings()
         inline = true,
         set = SetValue,
         get = GetValue,
-        disabled = function() return (Addon.CLASSIC or Addon.IS_TBC_CLASSIC) and (db.ShowFriendlyBlizzardNameplates or db.ShowEnemyBlizzardNameplates) end,
+        disabled = function() return (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC) and (db.ShowFriendlyBlizzardNameplates or db.ShowEnemyBlizzardNameplates) end,
         args = {
           Description = {
             type = "description",
             order = 1,
             name = L["Because of side effects with Blizzard nameplates, this function is disabled in instances or when Blizzard nameplates are used for friendly or neutral/enemy units (see General - Visibility)."],
-            hidden = function() return not Addon.CLASSIC or not Addon.IS_TBC_CLASSIC or (not db.ShowFriendlyBlizzardNameplates and not db.ShowEnemyBlizzardNameplates) end,
+            hidden = function() return not Addon.IS_CLASSIC or not Addon.IS_TBC_CLASSIC or (not db.ShowFriendlyBlizzardNameplates and not db.ShowEnemyBlizzardNameplates) end,
             width = "full",
           },
           ToggleSync = {
@@ -4730,7 +4730,7 @@ local function CreateBlizzardSettings()
             order = 10,
             type = "range",
             min = 0,
-            max = ((Addon.CLASSIC or Addon.IS_TBC_CLASSIC) and 20) or 100,
+            max = ((Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC) and 20) or 100,
             step = 1,
             width = "double",
             desc = L["The max distance to show nameplates."],
@@ -4808,7 +4808,7 @@ local function CreateBlizzardSettings()
             get = GetCVarBoolTPTP,
             desc = L["Clamps the target's nameplate to the edges of the screen, even if the target is off-screen."],
             arg = "clampTargetNameplateToScreen",
-            hidden = function() return not Addon.CLASSIC end,
+            hidden = function() return not Addon.IS_CLASSIC end,
           },
         },
       },
@@ -4861,7 +4861,7 @@ local function CreateBlizzardSettings()
         order = 45,
         type = "group",
         inline = true,
-        hidden = function() return Addon.CLASSIC or Addon.IS_TBC_CLASSIC end,
+        hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC end,
         args = {
           HideBuffs = {
             type = "toggle",
@@ -4913,7 +4913,7 @@ local function CreateBlizzardSettings()
                   "nameplateMaxDistance", "nameplateTargetBehindMaxDistance",
                   -- "nameplateGlobalScale" -- Reset it to 1, if it get's somehow corrupted
                 }
-                if Addon.CLASSIC then
+                if Addon.IS_CLASSIC then
                   cvars[#cvars + 1] = "clampTargetNameplateToScreen"
                 end
                 for k, v in pairs(cvars) do
@@ -5249,14 +5249,14 @@ local function CreateHealthbarOptions()
                 order = 29,
                 type = "toggle",
                 arg = { "settings", "healthbar", "ShowHealAbsorbs" },
-                hidden = function() return Addon.CLASSIC or Addon.IS_TBC_CLASSIC end,
+                hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC end,
               },
               ShowAbsorbs = {
                 name = L["Absorbs"],
                 order = 30,
                 type = "toggle",
                 arg = { "settings", "healthbar", "ShowAbsorbs" },
-                hidden = function() return Addon.CLASSIC or Addon.IS_TBC_CLASSIC end,
+                hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC end,
               },
               ShowMouseoverHighlight = {
                 type = "toggle",
@@ -5381,7 +5381,7 @@ local function CreateHealthbarOptions()
                 order = 90,
                 type = "group",
                 inline = true,
-                hidden = function() return Addon.CLASSIC or Addon.IS_TBC_CLASSIC end,
+                hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC end,
                 args = {
                   AbsorbColor = {
                     name = L["Color"],
@@ -5795,14 +5795,14 @@ local function CreateCastbarOptions()
                 type = "toggle",
                 disabled = function() return not db.settings.castborder.show end,
                 arg = { "settings", "castnostop", "ShowOverlay" },
-                hidden = function() return Addon.CLASSIC or Addon.IS_TBC_CLASSIC end,
+                hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC end,
               },
               EnableInterruptShield = {
                 name = L["Interrupt Shield"],
                 order = 70,
                 type = "toggle",
                 arg = { "settings", "castnostop", "ShowInterruptShield" },
-                hidden = function() return Addon.CLASSIC or Addon.IS_TBC_CLASSIC end,
+                hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC end,
               },
               CastTarget = {
                 name = L["Cast Target"],
@@ -7642,7 +7642,7 @@ local function CreateOptionsTable()
                             SetValuePlain(info, val)
                             Addon.Widgets:InitializeWidget("Focus")
                           end,
-                          hidden = function() return Addon.CLASSIC end,
+                          hidden = function() return Addon.IS_CLASSIC end,
                         },
                         TargetMouseoverHighlight = {
                           name = L["Show Mouseover"],
@@ -8454,7 +8454,7 @@ local function CreateOptionsTable()
                       type = "group",
                       inline = true,
                       set = SetThemeValue,
-                      hidden = function() return Addon.CLASSIC or Addon.IS_TBC_CLASSIC end,
+                      hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC end,
                       args = {
                         EnableAmount = {
                           name = L["Amount"],
@@ -9176,7 +9176,7 @@ local function CreateOptionsTable()
               desc = L["Set the roles your specs represent."],
               disabled = function() return not db.threat.ON end,
               order = 70,
-              args = ((Addon.CLASSIC or Addon.IS_TBC_CLASSIC) and CreateSpecRolesClassic()) or CreateSpecRolesRetail(),
+              args = ((Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC) and CreateSpecRolesClassic()) or CreateSpecRolesRetail(),
             },
           },
         },
@@ -9460,7 +9460,7 @@ local function CreateOptionsTable()
   options.args.profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(TidyPlatesThreat.db)
   options.args.profiles.order = 10000
 
-  if not Addon.CLASSIC and not Addon.IS_TBC_CLASSIC then
+  if not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC then
     -- Add dual-spec support
     local LibDualSpec = LibStub("LibDualSpec-1.0", true)
     LibDualSpec:EnhanceDatabase(TidyPlatesThreat.db, t.ADDON_NAME)
@@ -9519,7 +9519,7 @@ function TidyPlatesThreat:ProfChange()
       base.ClassIconWidget.args.Textures.args["Prev" .. k_c].image = path .. "ClassIconWidget\\" .. db.classWidget.theme .. "\\" .. CLASS_SORT_ORDER[k_c]
     end
 
-    if not Addon.CLASSIC and not Addon.IS_TBC_CLASSIC then
+    if not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC then
       base.QuestWidget.args.ModeIcon.args.Texture.args.Preview.image = path .. "QuestWidget\\" .. db.questWidget.IconTexture
     end
 

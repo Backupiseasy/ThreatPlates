@@ -35,7 +35,7 @@ local _G =_G
 -- Wrapper functions for WoW Classic
 ---------------------------------------------------------------------------------------------------
 
-if Addon.CLASSIC or Addon.IS_TBC_CLASSIC then
+if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC then
   UnitGroupRolesAssigned = function(target_unit)
     return (GetPartyAssignment("MAINTANK", target_unit) and "TANK") or "NONE"
   end
@@ -145,7 +145,7 @@ local function GetThreatSituation(unit, style, enable_off_tank)
   return threat_situation
 end
 
-if Addon.CLASSIC then
+if Addon.IS_CLASSIC then
   function Addon:GetThreatColor(unit, style)
     local db = TidyPlatesThreat.db.profile
 

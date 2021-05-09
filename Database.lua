@@ -35,7 +35,7 @@ local _G =_G
 Addon.PlayerClass = select(2, UnitClass("player"))
 Addon.PlayerName = select(1, UnitName("player"))
 
-if Addon.CLASSIC or Addon.IS_TBC_CLASSIC then
+if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC then
   local GetShapeshiftFormID = GetShapeshiftFormID
   local BEAR_FORM, DIRE_BEAR_FORM = BEAR_FORM, 8
 
@@ -1013,7 +1013,7 @@ local function MigrateCustomStylesToV3(profile_name, profile)
 
         -- Set automatic icon detection for all existing custom nameplates to false
         unique_unit.UseAutomaticIcon = false
-        unique_unit.icon = GetValueOrDefault(unique_unit.icon, (Addon.CLASSIC and "Spell_nature_spiritwolf.blp") or "spell_shadow_shadowfiend.blp")
+        unique_unit.icon = GetValueOrDefault(unique_unit.icon, (Addon.IS_CLASSIC and "Spell_nature_spiritwolf.blp") or "spell_shadow_shadowfiend.blp")
       end
     end
   end
@@ -1145,25 +1145,25 @@ local DEPRECATED_SETTINGS = {
   { "debuffWidget" },                                                                -- (removed in 8.6.0)
   { "OldSettings" },                                                                  -- (removed in 8.7.0)
   { MigrateCastbarColoring },                                                     -- (removed in 8.7.0)
-  (not Addon.CLASSIC and { MigrationTotemSettings, "8.7.0" }) or nil,               -- (changed in 8.7.0)
-  (not Addon.CLASSIC and { MigrateBorderTextures, "8.7.0" }) or nil,                       -- (changed in 8.7.0)
+  (not Addon.IS_CLASSIC and { MigrationTotemSettings, "8.7.0" }) or nil,               -- (changed in 8.7.0)
+  (not Addon.IS_CLASSIC and { MigrateBorderTextures, "8.7.0" }) or nil,                       -- (changed in 8.7.0)
   { "uniqueSettings", "list" },                                                -- (removed in 8.7.0, cleanup added in 8.7.1)
-  (not Addon.CLASSIC and { MigrationAurasSettings, "9.0.0" }) or nil,                        -- (changed in 9.0.0)
+  (not Addon.IS_CLASSIC and { MigrationAurasSettings, "9.0.0" }) or nil,                        -- (changed in 9.0.0)
   { MigrationAurasSettingsFix },                                                         -- (changed in 9.0.4 and 9.0.9)
-  (not Addon.CLASSIC and { MigrationComboPointsWidget, "9.1.0" }) or nil,  -- (changed in 9.1.0)
+  (not Addon.IS_CLASSIC and { MigrationComboPointsWidget, "9.1.0" }) or nil,  -- (changed in 9.1.0)
   { MigrationForceFriendlyInCombat },                                     -- (changed in 9.1.0)
   { "HeadlineView", "ON" },                                              -- (removed in 9.1.0)
-  (not Addon.CLASSIC and { MigrationThreatDetection, "9.1.3" }) or nil,               -- (changed in 9.1.0)
+  (not Addon.IS_CLASSIC and { MigrationThreatDetection, "9.1.3" }) or nil,               -- (changed in 9.1.0)
   -- { "threat", "hideNonCombat" },                                                    -- (removed in ...)
   -- { "threat", "nonCombat" },                                                            -- (removed in 9.1.0)
-  { MigrateCustomStylesToV3, (Addon.CLASSIC and "1.4.0") or "9.2.2" },
-  { MigrateSpelltextPosition, (Addon.CLASSIC and "1.4.0") or "9.2.0", NoDefaultProfile = true },
+  { MigrateCustomStylesToV3, (Addon.IS_CLASSIC and "1.4.0") or "9.2.2" },
+  { MigrateSpelltextPosition, (Addon.IS_CLASSIC and "1.4.0") or "9.2.0", NoDefaultProfile = true },
   { FixTargetFocusTexture, NoDefaultProfile = true },
   { RenameFilterMode, NoDefaultProfile = true, "9.3.0"},
   { "cache" },
-  { MigrationCustomPlatesV1, NoDefaultProfile = true, "10.2.0-Beta3"},
-  { MigrateCustomStyles, NoDefaultProfile = true, "10.2.0-Beta3", CleanupDatabase = true },
-  ((Addon.CLASSIC or Addon.IS_TBC_CLASSIC) and { DisableShowBlizzardAurasForClassic, "10.2.0" }) or nil,
+  { MigrationCustomPlatesV1, NoDefaultProfile = true, "10.2.0"},
+  { MigrateCustomStyles, NoDefaultProfile = true, "10.2.0", CleanupDatabase = true },
+  ((Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC) and { DisableShowBlizzardAurasForClassic, "10.2.0" }) or nil,
 }
 
 local function MigrateDatabase(current_version)

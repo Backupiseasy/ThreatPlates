@@ -48,7 +48,7 @@ local _G =_G
 -- Wrapper functions for WoW Classic
 ---------------------------------------------------------------------------------------------------
 
-if Addon.CLASSIC then
+if Addon.IS_CLASSIC then
   GetNameForNameplate = function(plate) return plate:GetName():gsub("NamePlate", "Plate") end
   UnitEffectiveLevel = function(...) return _G.UnitLevel(...) end
 
@@ -1024,7 +1024,7 @@ do
     OnNewNameplate(plate)
 
     -- NamePlateDriverFrame.AcquireUnitFrame is not used in Classic
-    if (Addon.CLASSIC or Addon.IS_TBC_CLASSIC) and plate.UnitFrame then
+    if (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC) and plate.UnitFrame then
       NamePlateDriverFrame_AcquireUnitFrame(nil, plate)
     end
 
@@ -1449,7 +1449,7 @@ do
   --    if unitid == "target" or UnitIsUnit("player", unitid) or not ShowCastBars then return end
   --  end
 
-  if Addon.CLASSIC then
+  if Addon.IS_CLASSIC then
     Addon.UNIT_SPELLCAST_START = UNIT_SPELLCAST_START
     Addon.UNIT_SPELLCAST_STOP = UNIT_SPELLCAST_STOP
     Addon.UNIT_SPELLCAST_CHANNEL_START = UNIT_SPELLCAST_CHANNEL_START
@@ -1499,7 +1499,7 @@ do
 
   -- Do this after events are registered, otherwise UNIT_AURA would be registered as a general event, not only as
   -- an unit event.
-  if Addon.CLASSIC and Addon.PlayerClass == "PALADIN" then
+  if Addon.IS_CLASSIC and Addon.PlayerClass == "PALADIN" then
     CoreEvents.UNIT_AURA = UNIT_AURA
     TidyPlatesCore:RegisterUnitEvent("UNIT_AURA", "player")
   end

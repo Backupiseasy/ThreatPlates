@@ -200,7 +200,7 @@ local DeathKnightSpecColor, ShowRuneCooldown
 -- Combo Points Widget Functions
 ---------------------------------------------------------------------------------------------------
 
-if Addon.CLASSIC or Addon.IS_TBC_CLASSIC then
+if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC then
   function Widget:DetermineUnitPower()
     local power_type = UNIT_POWER[PlayerClass]
 
@@ -491,7 +491,7 @@ function Widget:IsEnabled()
   local db = TidyPlatesThreat.db.profile.ComboPoints
   local enabled = db.ON or db.ShowInHeadlineView
 
-  if enabled and not (Addon.CLASSIC or Addon.IS_TBC_CLASSIC) then
+  if enabled and not (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC) then
     -- Register ACTIVE_TALENT_GROUP_CHANGED here otherwise it won't be registered when an spec is active that does not have combo points.
     -- If you then switch to a spec with talent points, the widget won't be enabled.
     self:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
@@ -516,7 +516,7 @@ function Widget:OnEnable()
   self:RegisterUnitEvent("UNIT_POWER_UPDATE", "player", EventHandler)
   self:RegisterUnitEvent("UNIT_DISPLAYPOWER", "player", EventHandler)
   self:RegisterUnitEvent("UNIT_MAXPOWER", "player")
-  if not (Addon.CLASSIC or Addon.IS_TBC_CLASSIC) then
+  if not (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC) then
     self:RegisterUnitEvent("UNIT_POWER_POINT_CHARGE", "player", EventHandler)
   end
 
@@ -539,7 +539,7 @@ function Widget:OnDisable()
   self:UnregisterEvent("UNIT_DISPLAYPOWER")
   self:UnregisterEvent("UNIT_MAXPOWER")
 
-  if not (Addon.CLASSIC or Addon.IS_TBC_CLASSIC) then
+  if not (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC) then
     self:UnregisterEvent("RUNE_POWER_UPDATE")
   end
 
@@ -683,7 +683,7 @@ function Widget:UpdateSettings()
   -- Update widget variables, only dependent from settings and static information (like player's class)
   local texture_info = TEXTURE_INFO[self.db.Style][PlayerClass] or TEXTURE_INFO[self.db.Style]
 
-  if not (Addon.CLASSIC or Addon.IS_TBC_CLASSIC) then
+  if not (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC) then
     ActiveSpec = _G.GetSpecialization()
   end
 

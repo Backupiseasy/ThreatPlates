@@ -186,7 +186,7 @@ local DeathKnightSpecColor, ShowRuneCooldown
 -- Combo Points Widget Functions
 ---------------------------------------------------------------------------------------------------
 
-if Addon.CLASSIC then
+if Addon.IS_CLASSIC then
   function Widget:DetermineUnitPower()
     local _, player_class = UnitClass("player")
     local power_type = UNIT_POWER[player_class]
@@ -481,7 +481,7 @@ function Widget:IsEnabled()
   local db = TidyPlatesThreat.db.profile.ComboPoints
   local enabled = db.ON or db.ShowInHeadlineView
 
-  if enabled and not Addon.CLASSIC then
+  if enabled and not Addon.IS_CLASSIC then
     -- Register ACTIVE_TALENT_GROUP_CHANGED here otherwise it won't be registerd when an spec is active that does not have combo points.
     -- If you then switch to a spec with talent points, the widget won't be enabled.
     self:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
@@ -528,7 +528,7 @@ function Widget:OnDisable()
   self:UnregisterEvent("UNIT_DISPLAYPOWER")
   self:UnregisterEvent("UNIT_MAXPOWER")
 
-  if not Addon.CLASSIC then
+  if not Addon.IS_CLASSIC then
     self:UnregisterEvent("RUNE_POWER_UPDATE")
   end
 
@@ -674,7 +674,7 @@ function Widget:UpdateSettings()
   local _, player_class = UnitClass("player")
   local texture_info = TEXTURE_INFO[self.db.Style][player_class] or TEXTURE_INFO[self.db.Style]
 
-  if not Addon.CLASSIC then
+  if not Addon.IS_CLASSIC then
     ActiveSpec = _G.GetSpecialization()
   end
 

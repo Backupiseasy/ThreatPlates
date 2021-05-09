@@ -195,7 +195,7 @@ ThreatPlates.SPEC_ROLES = {
   WARRIOR			= { false, false, true },
 }
 
---if not Addon.CLASSIC and not Addon.IS_TBC_CLASSIC then
+--if not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC then
 --  ThreatPlates.SPEC_ROLES.DEATHKNIGHT = { true, false, false }
 --  ThreatPlates.SPEC_ROLES.DEMONHUNTER = { false, true }
 --  ThreatPlates.SPEC_ROLES.DRUID 			= { false, false, true, false }
@@ -363,7 +363,7 @@ local TOTEM_DATA_CLASSIC = {
   { SpellID = 8166,   ID = "W6", GroupColor = "b8d1ff", },        		  -- Poison Cleansing Totem
 }
 
-local TOTEM_DATA = (Addon.CLASSIC and TOTEM_DATA_CLASSIC) or (Addon.IS_TBC_CLASSIC and TOTEM_DATA_BC_CLASSIC) or TOTEM_DATA_RETAIL
+local TOTEM_DATA = (Addon.IS_CLASSIC and TOTEM_DATA_CLASSIC) or (Addon.IS_TBC_CLASSIC and TOTEM_DATA_BC_CLASSIC) or TOTEM_DATA_RETAIL
 local TOTEM_RANKS_CLASSIC = { " II", " III", " IV", " V", " VI", " VII", " VIII", " IX" }
 
 function Addon:InitializeTotemInformation()
@@ -383,7 +383,7 @@ function Addon:InitializeTotemInformation()
       Addon.TOTEMS[name] = totem_data.ID
 
       -- Add totem ranks for WoW Classic
-      if Addon.CLASSIC or Addon.IS_TBC_CLASSIC then
+      if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC then
         for rank = 1, (totem_data.Ranks or 1) - 1  do
           Addon.TOTEMS[name .. TOTEM_RANKS_CLASSIC[rank]] = totem_data.ID
         end
@@ -415,7 +415,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
     version = "",
     DefaultsVersion = "SMOOTH",
     CustomNameplatesVersion = 1,
-    ScriptingIsEnabled = true,
+    ScriptingIsEnabled = false,
   },
   char = {
     welcome = false,
