@@ -117,7 +117,7 @@ local CVAR_NameplateOccludedAlphaMult
 -- Cached database settings
 local SettingsEnabledFading
 local SettingsOccludedAlpha, SettingsEnabledOccludedAlpha
-local SettingsShowEnemyBlizzardNameplates, SettingsShowFriendlyBlizzardNameplates
+local SettingsShowEnemyBlizzardNameplates, SettingsShowFriendlyBlizzardNameplates, SettingsHideBuffsOnPersonalNameplate
 local SettingsTargetUnitHide, SettingsShowOnlyForTarget
 
 -- External references to internal data
@@ -920,12 +920,10 @@ do
       return
     end
 
-    local db = TidyPlatesThreat.db.profile
-
     -- Skip the personal resource bar of the player character, don't unhook scripts as nameplates, even the personal
     -- resource bar, get re-used
     if UnitIsUnit(unitid, "player") then -- or: ns.PlayerNameplate == GetNamePlateForUnit(UnitFrame.unit)
-      if db.PersonalNameplate.HideBuffs then
+      if SettingsHideBuffsOnPersonalNameplate then
         UnitFrame.BuffFrame:Hide()
       --      else
       --        UnitFrame.BuffFrame:Show()
@@ -1789,6 +1787,7 @@ function Addon:ForceUpdate()
 
   SettingsShowFriendlyBlizzardNameplates = db.ShowFriendlyBlizzardNameplates
   SettingsShowEnemyBlizzardNameplates = db.ShowEnemyBlizzardNameplates
+  SettingsHideBuffsOnPersonalNameplate = db.PersonalNameplate.HideBuffs
 
   if db.Transparency.Fading then
     UpdatePlate_SetAlpha = UpdatePlate_SetAlphaWithFading
