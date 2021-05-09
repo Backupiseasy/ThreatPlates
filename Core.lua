@@ -343,9 +343,6 @@ function TidyPlatesThreat:OnInitialize()
   local db = LibStub('AceDB-3.0'):New('ThreatPlatesDB', defaults, 'Default')
   self.db = db
 
-  -- Change defaults if deprecated custom nameplates are used (not yet migrated)
-  Addon.SetDefaultsForCustomNameplates()
-
   local RegisterCallback = db.RegisterCallback
   RegisterCallback(self, 'OnProfileChanged', 'ProfChange')
   RegisterCallback(self, 'OnProfileCopied', 'ProfChange')

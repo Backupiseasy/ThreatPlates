@@ -31,6 +31,10 @@ local _G =_G
 -- Global functions for accessing the configuration
 ---------------------------------------------------------------------------------------------------
 
+-- Returns if the currently active spec is tank (true) or dps/heal (false)
+Addon.PlayerClass = select(2, UnitClass("player"))
+Addon.PlayerName = select(1, UnitName("player"))
+
 if Addon.CLASSIC or Addon.IS_TBC_CLASSIC then
   local GetShapeshiftFormID = GetShapeshiftFormID
   local BEAR_FORM, DIRE_BEAR_FORM = BEAR_FORM, 8
@@ -934,74 +938,60 @@ local function GetValueOrDefault(old_value, default_value)
   end
 end
 
-Addon.MigrationCustomNameplatesV1 = function()
-  local defaults = ThreatPlates.CopyTable(TidyPlatesThreat.db.defaults)
-  TidyPlatesThreat.db:RegisterDefaults({})
+local function MigrationCustomPlatesV1(profile_name, profile)
+  -- This migration function is called with an empty default profile, so CustomNameplatesVersion is nil if it is still the default value (1)
+  if TidyPlatesThreat.db.global.CustomNameplatesVersion then return end
 
-  -- Set default to empty so that new defaul values don't impact the migration
-  for profile_name, profile in pairs(TidyPlatesThreat.db.profiles) do
-    if DatabaseEntryExists(profile, { "uniqueSettings" }) then
-      local custom_styles = profile.uniqueSettings
-      local custom_plates_to_keep = {}
+  if DatabaseEntryExists(profile, { "uniqueSettings" }) then
+    local custom_styles = profile.uniqueSettings
+    local custom_plates_to_keep = {}
 
-      for index, unique_unit in pairs(custom_styles) do
-        -- Don't change entries map and ["**"]
-        if type(index) == "number" then
-          -- Trigger.Type must be Name as before migration (in V1) that's the only trigger type available
-          if DatabaseEntryExists(unique_unit, { "Trigger", "Name", "Input" }) and unique_unit.Trigger.Name.Input ~= "<Enter name here>" then
-            -- and unique_unit.Trigger.Name.Input ~= nil
-            custom_plates_to_keep[index] = unique_unit
-          end
+    for index, unique_unit in pairs(custom_styles) do
+
+      -- Don't change entries map and ["**"]
+      if type(index) == "number" then
+        -- Trigger.Type must be Name as before migration (in V1) that's the only trigger type available
+        if DatabaseEntryExists(unique_unit, { "Trigger", "Name", "Input" }) and unique_unit.Trigger.Name.Input ~= "<Enter name here>" then
+          -- and unique_unit.Trigger.Name.Input ~= nil
+          custom_plates_to_keep[index] = unique_unit
         end
-
-        custom_styles[index] = nil
       end
 
-      for index, unique_unit in pairs(custom_plates_to_keep) do
-        -- As default values are now different, copy the deprecated slots default value
-        local deprecated_settings = ThreatPlates.CopyTable(Addon.LEGACY_CUSTOM_NAMEPLATES["**"])
-        Addon.MergeIntoTable(deprecated_settings, Addon.LEGACY_CUSTOM_NAMEPLATES[index])
+      custom_styles[index] = nil
+    end
 
-        -- Name trigger is already migrated properly when loading 9.2.0 the very first time
-        unique_unit.showNameplate = GetValueOrDefault(unique_unit.showNameplate, deprecated_settings.showNameplate)
-        unique_unit.ShowHeadlineView = GetValueOrDefault(unique_unit.ShowHeadlineView, deprecated_settings.ShowHeadlineView)
-        unique_unit.showIcon = GetValueOrDefault(unique_unit.showIcon, deprecated_settings.showIcon)
-        unique_unit.useStyle = GetValueOrDefault(unique_unit.useStyle, deprecated_settings.useStyle)
-        unique_unit.useColor = GetValueOrDefault(unique_unit.useColor, deprecated_settings.useColor)
-        unique_unit.UseThreatColor = GetValueOrDefault(unique_unit.UseThreatColor, deprecated_settings.UseThreatColor)
-        unique_unit.UseThreatGlow = GetValueOrDefault(unique_unit.UseThreatGlow, deprecated_settings.UseThreatGlow)
-        unique_unit.allowMarked = GetValueOrDefault(unique_unit.allowMarked, deprecated_settings.allowMarked)
-        unique_unit.overrideScale = GetValueOrDefault(unique_unit.overrideScale, deprecated_settings.overrideScale)
-        unique_unit.overrideAlpha = GetValueOrDefault(unique_unit.overrideAlpha, deprecated_settings.overrideAlpha)
-        -- Replace the old Threat Plates internal icons with the WoW original ones
-        --unique_unit.icon = GetValueOrDefault(DEPRECATED_ICON_DEFAULTS[unique_unit.icon] or unique_unit.icon, DEPRECATED_ICON_DEFAULTS[deprecated_settings.icon])
-        unique_unit.icon = GetValueOrDefault(unique_unit.icon, deprecated_settings.icon)
-        unique_unit.UseAutomaticIcon = GetValueOrDefault(unique_unit.UseAutomaticIcon, deprecated_settings.UseAutomaticIcon)
-        unique_unit.SpellID = GetValueOrDefault(unique_unit.SpellID, deprecated_settings.SpellID)
-        unique_unit.scale = GetValueOrDefault(unique_unit.scale, deprecated_settings.scale)
-        unique_unit.alpha = GetValueOrDefault(unique_unit.alpha, deprecated_settings.alpha)
+    for index, unique_unit in pairs(custom_plates_to_keep) do
+      -- As default values are now different, copy the deprecated slots default value
+      local deprecated_settings = ThreatPlates.CopyTable(Addon.LEGACY_CUSTOM_NAMEPLATES["**"])
+      Addon.MergeIntoTable(deprecated_settings, Addon.LEGACY_CUSTOM_NAMEPLATES[index])
 
-        unique_unit.color = GetValueOrDefault(unique_unit.color, {})
-        unique_unit.color.r = GetValueOrDefault(unique_unit.color.r, deprecated_settings.color.r)
-        unique_unit.color.g = GetValueOrDefault(unique_unit.color.g, deprecated_settings.color.g)
-        unique_unit.color.b = GetValueOrDefault(unique_unit.color.b, deprecated_settings.color.b)
+      -- Name trigger is already migrated properly when loading 9.2.0 the very first time
+      unique_unit.showNameplate = GetValueOrDefault(unique_unit.showNameplate, deprecated_settings.showNameplate)
+      unique_unit.ShowHeadlineView = GetValueOrDefault(unique_unit.ShowHeadlineView, deprecated_settings.ShowHeadlineView)
+      unique_unit.showIcon = GetValueOrDefault(unique_unit.showIcon, deprecated_settings.showIcon)
+      unique_unit.useStyle = GetValueOrDefault(unique_unit.useStyle, deprecated_settings.useStyle)
+      unique_unit.useColor = GetValueOrDefault(unique_unit.useColor, deprecated_settings.useColor)
+      unique_unit.UseThreatColor = GetValueOrDefault(unique_unit.UseThreatColor, deprecated_settings.UseThreatColor)
+      unique_unit.UseThreatGlow = GetValueOrDefault(unique_unit.UseThreatGlow, deprecated_settings.UseThreatGlow)
+      unique_unit.allowMarked = GetValueOrDefault(unique_unit.allowMarked, deprecated_settings.allowMarked)
+      unique_unit.overrideScale = GetValueOrDefault(unique_unit.overrideScale, deprecated_settings.overrideScale)
+      unique_unit.overrideAlpha = GetValueOrDefault(unique_unit.overrideAlpha, deprecated_settings.overrideAlpha)
+      -- Replace the old Threat Plates internal icons with the WoW original ones
+      --unique_unit.icon = GetValueOrDefault(DEPRECATED_ICON_DEFAULTS[unique_unit.icon] or unique_unit.icon, DEPRECATED_ICON_DEFAULTS[deprecated_settings.icon])
+      unique_unit.icon = GetValueOrDefault(unique_unit.icon, deprecated_settings.icon)
+      unique_unit.UseAutomaticIcon = GetValueOrDefault(unique_unit.UseAutomaticIcon, deprecated_settings.UseAutomaticIcon)
+      unique_unit.SpellID = GetValueOrDefault(unique_unit.SpellID, deprecated_settings.SpellID)
+      unique_unit.scale = GetValueOrDefault(unique_unit.scale, deprecated_settings.scale)
+      unique_unit.alpha = GetValueOrDefault(unique_unit.alpha, deprecated_settings.alpha)
 
-        custom_styles[#custom_styles + 1] = unique_unit
-      end
+      unique_unit.color = GetValueOrDefault(unique_unit.color, {})
+      unique_unit.color.r = GetValueOrDefault(unique_unit.color.r, deprecated_settings.color.r)
+      unique_unit.color.g = GetValueOrDefault(unique_unit.color.g, deprecated_settings.color.g)
+      unique_unit.color.b = GetValueOrDefault(unique_unit.color.b, deprecated_settings.color.b)
+
+      custom_styles[#custom_styles + 1] = unique_unit
     end
   end
-
-  defaults.profile.uniqueSettings = ThreatPlates.CopyTable(ThreatPlates.DEFAULT_SETTINGS.profile.uniqueSettings)
-  TidyPlatesThreat.db:RegisterDefaults(defaults)
-  TidyPlatesThreat.db.global.CustomNameplatesVersion = 2
-end
-
-Addon.SetDefaultsForCustomNameplates = function()
-  if TidyPlatesThreat.db.global.CustomNameplatesVersion > 1 then return end
-
-  local defaults = ThreatPlates.CopyTable(TidyPlatesThreat.db.defaults)
-  defaults.profile.uniqueSettings = Addon.LEGACY_CUSTOM_NAMEPLATES
-  TidyPlatesThreat.db:RegisterDefaults(defaults)
 end
 
 local function MigrateCustomStylesToV3(profile_name, profile)
@@ -1020,8 +1010,6 @@ local function MigrateCustomStylesToV3(profile_name, profile)
         unique_unit.Trigger.Type = "Name" -- should not be necessary as it is the default value
         unique_unit.Trigger.Name.Input = unique_unit.name
         unique_unit.Trigger.Name.AsArray = { unique_unit.Trigger.Name.Input }
-
-        --unique_unit.name = nil
 
         -- Set automatic icon detection for all existing custom nameplates to false
         unique_unit.UseAutomaticIcon = false
@@ -1103,7 +1091,6 @@ local function MigrateCustomStyles(profile_name, profile)
       local custom_style = Addon.ImportCustomStyle(imported_custom_style)
       custom_styles[index] = custom_style
 
-
       -- If there is no WoW event after the migration, set the currently selected event to nil
       if not next(custom_style.Scripts.Code.Events) then
         custom_style.Scripts.Event = ""
@@ -1155,36 +1142,37 @@ local DEPRECATED_SETTINGS = {
   --  HVBlizzFadingAlpha = { "HeadlineView", "blizzFadingAlpha"}, -- (removed in 8.5.1)
   --  HVNameWidth = { "HeadlineView", "name", "width" },          -- (removed in 8.5.0)
   --  HVNameHeight = { "HeadlineView", "name", "height" },        -- (removed in 8.5.0)
-  DebuffWidget = { "debuffWidget" },                                                                -- (removed in 8.6.0)
-  OldSettings = { "OldSettings" },                                                                  -- (removed in 8.7.0)
-  CastbarColoring = { MigrateCastbarColoring },                                                     -- (removed in 8.7.0)
-  TotemSettings = (not Addon.CLASSIC and { MigrationTotemSettings, "8.7.0" }) or nil,               -- (changed in 8.7.0)
-  Borders = (not Addon.CLASSIC and { MigrateBorderTextures, "8.7.0" }) or nil,                       -- (changed in 8.7.0)
-  UniqueSettingsList = { "uniqueSettings", "list" },                                                -- (removed in 8.7.0, cleanup added in 8.7.1)
-  Auras = (not Addon.CLASSIC and { MigrationAurasSettings, "9.0.0" }) or nil,                        -- (changed in 9.0.0)
-  AurasFix = { MigrationAurasSettingsFix },                                                         -- (changed in 9.0.4 and 9.0.9)
-  MigrationComboPointsWidget = (not Addon.CLASSIC and { MigrationComboPointsWidget, "9.1.0" }) or nil,  -- (changed in 9.1.0)
-  ForceFriendlyInCombatEx = { MigrationForceFriendlyInCombat },                                     -- (changed in 9.1.0)
-  HeadlineViewEnableToggle = { "HeadlineView", "ON" },                                              -- (removed in 9.1.0)
-  ThreatDetection = (not Addon.CLASSIC and { MigrationThreatDetection, "9.1.3" }) or nil,               -- (changed in 9.1.0)
-  -- hideNonCombat = { "threat", "hideNonCombat" },                                                    -- (removed in ...)
-  -- nonCombat = { "threat", "nonCombat" },                                                            -- (removed in 9.1.0)
-  -- MigrationCustomPlatesV3 = { MigrateCustomStylesToV3, "9.2.1", function() TidyPlatesThreat.db.global.CustomNameplatesVersion = 3 end },
-  MigrationCustomPlatesV3 = { MigrateCustomStylesToV3, (Addon.CLASSIC and "1.4.0") or "9.2.2" },
-  SpelltextPosition = { MigrateSpelltextPosition, (Addon.CLASSIC and "1.4.0") or "9.2.0", NoDefaultProfile = true },
-  FixTargetFocusTexture = { FixTargetFocusTexture, NoDefaultProfile = true },
-  RenameFilterMode = { RenameFilterMode, NoDefaultProfile = true, "9.3.0"},
-  RemoveCacheFromProfile = { "cache" },
-  MigrateCustomStyles = { MigrateCustomStyles, NoDefaultProfile = true, "10.2.0-Beta1"},
-  DisableShowBlizzardAurasForClassic = ((Addon.CLASSIC or Addon.IS_TBC_CLASSIC) and { DisableShowBlizzardAurasForClassic, "10.2.0" }) or nil,
+  { "debuffWidget" },                                                                -- (removed in 8.6.0)
+  { "OldSettings" },                                                                  -- (removed in 8.7.0)
+  { MigrateCastbarColoring },                                                     -- (removed in 8.7.0)
+  (not Addon.CLASSIC and { MigrationTotemSettings, "8.7.0" }) or nil,               -- (changed in 8.7.0)
+  (not Addon.CLASSIC and { MigrateBorderTextures, "8.7.0" }) or nil,                       -- (changed in 8.7.0)
+  { "uniqueSettings", "list" },                                                -- (removed in 8.7.0, cleanup added in 8.7.1)
+  (not Addon.CLASSIC and { MigrationAurasSettings, "9.0.0" }) or nil,                        -- (changed in 9.0.0)
+  { MigrationAurasSettingsFix },                                                         -- (changed in 9.0.4 and 9.0.9)
+  (not Addon.CLASSIC and { MigrationComboPointsWidget, "9.1.0" }) or nil,  -- (changed in 9.1.0)
+  { MigrationForceFriendlyInCombat },                                     -- (changed in 9.1.0)
+  { "HeadlineView", "ON" },                                              -- (removed in 9.1.0)
+  (not Addon.CLASSIC and { MigrationThreatDetection, "9.1.3" }) or nil,               -- (changed in 9.1.0)
+  -- { "threat", "hideNonCombat" },                                                    -- (removed in ...)
+  -- { "threat", "nonCombat" },                                                            -- (removed in 9.1.0)
+  { MigrateCustomStylesToV3, (Addon.CLASSIC and "1.4.0") or "9.2.2" },
+  { MigrateSpelltextPosition, (Addon.CLASSIC and "1.4.0") or "9.2.0", NoDefaultProfile = true },
+  { FixTargetFocusTexture, NoDefaultProfile = true },
+  { RenameFilterMode, NoDefaultProfile = true, "9.3.0"},
+  { "cache" },
+  { MigrationCustomPlatesV1, NoDefaultProfile = true, "10.2.0-Beta3"},
+  { MigrateCustomStyles, NoDefaultProfile = true, "10.2.0-Beta3", CleanupDatabase = true },
+  ((Addon.CLASSIC or Addon.IS_TBC_CLASSIC) and { DisableShowBlizzardAurasForClassic, "10.2.0" }) or nil,
 }
 
 local function MigrateDatabase(current_version)
   TidyPlatesThreat.db.global.MigrationLog = nil
   --TidyPlatesThreat.db.global.MigrationLog = {}
 
+  local cleanup_database_after_migration = false
   local profile_table = TidyPlatesThreat.db.profiles
-  for key, entry in pairs(DEPRECATED_SETTINGS) do
+  for index, entry in ipairs(DEPRECATED_SETTINGS) do
     local action = entry[1]
 
     if type(action) == "function" then
@@ -1192,7 +1180,7 @@ local function MigrateDatabase(current_version)
       if not max_version or CurrentVersionIsOlderThan(current_version, max_version) then
         local defaults
         if entry.NoDefaultProfile then
-          defaults = ThreatPlates.CopyTable(TidyPlatesThreat.db.defaults)
+          defaults = ThreatPlates.CopyTable(TidyPlatesThreat.db.defaults) -- Should move that before the for loop
           TidyPlatesThreat.db:RegisterDefaults({})
         end
 
@@ -1205,6 +1193,8 @@ local function MigrateDatabase(current_version)
         if entry.NoDefaultProfile then
           TidyPlatesThreat.db:RegisterDefaults(defaults)
         end
+
+        cleanup_database_after_migration = cleanup_database_after_migration or entry.CleanupDatabase
       end
 
       -- Postprocessing, if necessary
@@ -1219,6 +1209,15 @@ local function MigrateDatabase(current_version)
         DatabaseEntryDelete(profile, entry)
       end
     end
+  end
+
+  -- Switch through all profiles to cleanup configuration (removing settings with default values from the file)
+  if cleanup_database_after_migration then
+    local current_profile = TidyPlatesThreat.db:GetCurrentProfile()
+    for profile_name, profile in pairs(profile_table) do
+      TidyPlatesThreat.db:SetProfile(profile_name)
+    end
+    TidyPlatesThreat.db:SetProfile(current_profile)
   end
 end
 

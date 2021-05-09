@@ -170,8 +170,12 @@ function TidyPlatesThreat:ChatCommandDebug(cmd_list)
 		local plate = C_NamePlate.GetNamePlateForUnit("target")
 		if not plate then return end
 		TP.DEBUG_PRINT_UNIT(plate.TPFrame.unit, true)
-	elseif command == "migrate" then
-		Addon.MigrateDatabase(TP.Meta("version"))
+	--elseif command == "migrate" then
+	--	Addon.TestMigration()
+	--	Addon.MigrateDatabase(TP.Meta("version"))
+	elseif command == "print-custom-styles" then
+		TP.DEBUG_PRINT_TABLE(TidyPlatesThreat.db.profile.uniqueSettings)
+		--Addon.MigrateDatabase(TP.Meta("version"))
 	elseif command == "guid" then
 		local plate = C_NamePlate.GetNamePlateForUnit("target")
 		if not plate then return end

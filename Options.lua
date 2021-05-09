@@ -6509,7 +6509,6 @@ CreateCustomNameplateEntry = function(index)
 
           ShowExportFrame(export_data)
         end,
-        disabled = function() return TidyPlatesThreat.db.global.CustomNameplatesVersion == 1 end,
       },
       Header = {
         name = Addon.CustomPlateGetHeaderName(index),
@@ -6540,15 +6539,6 @@ CreateCustomNameplateEntry = function(index)
               CustomPlateUpdateEntry(index)
             end,
             arg = { "uniqueSettings", index, "Trigger", "Type" },
-            -- Available only for custom nameplates with version >= 2
-            desc = function()
-              if TidyPlatesThreat.db.global.CustomNameplatesVersion == 1 then
-                return L["This option is disabled as you are still using the obsolete custom nameplates format. Migrate your custom nameplates to the new format (using the Migration button at the top) to enable this option."]
-              else
-                return nil
-              end
-            end,
-            disabled = function() return TidyPlatesThreat.db.global.CustomNameplatesVersion == 1 end,
           },
           Spacer1 = GetSpacerEntry(15),
           -- Name Trigger
@@ -6988,7 +6978,6 @@ CreateCustomNameplateEntry = function(index)
             end,
             arg = { "uniqueSettings", index, "UseAutomaticIcon" },
             desc = L["Find a suitable icon based on the current trigger. For Name trigger, the preview does not work. For multi-value triggers, the preview always is the icon of the first trigger entered."],
-            hidden = function() return TidyPlatesThreat.db.global.CustomNameplatesVersion == 1 end,
           },
           Spacer1 = GetSpacerEntry(3),
           Icon = {
@@ -7030,7 +7019,7 @@ CreateCustomNameplateEntry = function(index)
         type = "group",
         width = "full",
         inline = false,
-        hidden = function() return not TidyPlatesThreat.db.global.ScriptingIsEnabled or TidyPlatesThreat.db.global.CustomNameplatesVersion == 1 end,
+        hidden = function() return not TidyPlatesThreat.db.global.ScriptingIsEnabled end,
         args = {
           WidgetType = {
             name = L["Type"],
@@ -7060,11 +7049,23 @@ CreateCustomNameplateEntry = function(index)
                 script_functions[key] = "|cff" .. color .. function_name .. "|r"
               end
 
-              if custom_style.Scripts.Code.Legacy ~= "" then
+              if custom_style.Scripts.Code.Legacy and custom_style.Scripts.Code.Legacy ~= "" then
                 script_functions.Legacy = "|cffff0000Legacy Code|r"
               end
 
               return script_functions
+            end,
+            get = function(info)
+              local val = GetValue(info)
+              local values = info.option.values()
+
+              -- If the current value is no longer valid (LegacyCode removed or type switch), change it to some valid value
+              if not values[val] then
+                val = t.DEFAULT_SETTINGS.profile.uniqueSettings["**"].Scripts.Function
+                db.uniqueSettings[index].Scripts.Function = val
+              end
+
+              return val
             end,
             arg = { "uniqueSettings", index, "Scripts", "Function" },
           },
@@ -7218,15 +7219,18 @@ CreateCustomNameplateEntry = function(index)
                     val = nil
                   end
 
-                  if db.uniqueSettings[index].Scripts.Function == "WoWEvent" then
-                    db.uniqueSettings[index].Scripts.Code.Events[db.uniqueSettings[index].Scripts.Event] = val
+                  local custom_style = db.uniqueSettings[index]
+                  if custom_style.Scripts.Function == "WoWEvent" then
+                    custom_style.Scripts.Code.Events[custom_style.Scripts.Event] = val
+                  elseif custom_style.Scripts.Function == "Legacy" then
+                    custom_style.Scripts.Code.Legacy = val
                   else
-                    db.uniqueSettings[index].Scripts.Code.Functions[db.uniqueSettings[index].Scripts.Function] = val
+                    custom_style.Scripts.Code.Functions[custom_style.Scripts.Function] = val
                   end
 
                   -- Empty input field and drop down showing the current event (as it was deleted)
                   if not val then
-                    db.uniqueSettings[index].Scripts.Event = nil
+                    custom_style.Scripts.Event = nil
                   end
 
                   Addon:InitializeCustomNameplates()
@@ -7279,7 +7283,6 @@ CreateCustomNameplatesGroup = function()
         CreateCustomNameplatesGroup()
         Addon.LibAceConfigDialog:SelectGroup(t.ADDON_NAME, "Custom", "#" ..  slot_no)
       end,
-      hidden = function() return TidyPlatesThreat.db.global.CustomNameplatesVersion == 1 end,
     },
     DeleteSlot = {
       name = L["Delete"],
@@ -7310,7 +7313,6 @@ CreateCustomNameplatesGroup = function()
           return false
         end
       end,
-      hidden = function() return TidyPlatesThreat.db.global.CustomNameplatesVersion == 1 end,
     },
     MoveUp = {
       name = L["Move Up"],
@@ -7333,7 +7335,6 @@ CreateCustomNameplatesGroup = function()
           end
         end
       end,
-      hidden = function() return TidyPlatesThreat.db.global.CustomNameplatesVersion == 1 end,
     },
     MoveDown = {
       name = L["Move Down"],
@@ -7356,7 +7357,6 @@ CreateCustomNameplatesGroup = function()
           end
         end
       end,
-      hidden = function() return TidyPlatesThreat.db.global.CustomNameplatesVersion == 1 end,
     },
     SortAsc = {
       name = L["Sort A-Z"],
@@ -7376,7 +7376,6 @@ CreateCustomNameplatesGroup = function()
         CreateCustomNameplatesGroup()
         --Addon.LibAceConfigDialog:SelectGroup(t.ADDON_NAME, "Custom", "#" ..  slot_no)
       end,
-      hidden = function() return TidyPlatesThreat.db.global.CustomNameplatesVersion == 1 end,
     },
     SortDesc = {
       name = L["Sort Z-A"],
@@ -7396,20 +7395,6 @@ CreateCustomNameplatesGroup = function()
         CreateCustomNameplatesGroup()
         --Addon.LibAceConfigDialog:SelectGroup(t.ADDON_NAME, "Custom", "#" ..  slot_no)
       end,
-      hidden = function() return TidyPlatesThreat.db.global.CustomNameplatesVersion == 1 end,
-    },
-    MigrateVersion1 = {
-      name = L["|cffFFFFFFMigrate Custom Nameplates Settings|r"],
-      order = 20,
-      type = "execute",
-      width = "full",
-      func = function()
-        Addon.MigrationCustomNameplatesV1()
-
-        CreateCustomNameplatesGroup()
-      end,
-      confirm = function(info) return L["|cffFF0000NOTE|r\nMigration should only delete deprecated default custom nameplates and re-order the remaining ones. Nevertheless, it is highly advised to backup your settings (the SavedVariables file TidyPlates_ThreatPlates.lua) in case something goes wrong.\n\nAre you sure you want to migrate your custom nameplates?"] end,
-      hidden = function() return TidyPlatesThreat.db.global.CustomNameplatesVersion > 1 end,
     },
     Spacer1 = GetSpacerEntry(25),
     GeneralSettings = {
@@ -7448,15 +7433,7 @@ CreateCustomNameplatesGroup = function()
           type = "group",
           order = 20,
           inline = true,
-          disabled = function() return TidyPlatesThreat.db.global.CustomNameplatesVersion == 1 end,
           args = {
-            VersionWarning = {
-              type = "description",
-              order = 1,
-              width = "full",
-              name = L["|cffFF0000This option is disabled as you are still using the obsolete custom nameplates format. Migrate your custom nameplates to the new format (using the Migration button at the top) to enable this option.|r"],
-              hidden = function() return TidyPlatesThreat.db.global.CustomNameplatesVersion > 1 end,
-            },
             Export = {
               name = L["Export Custom Nameplates"],
               order = 10,
@@ -9587,40 +9564,36 @@ function TidyPlatesThreat:OpenOptions()
 end
 
 function Addon.RestoreLegacyCustomNameplates()
-  if TidyPlatesThreat.db.global.CustomNameplatesVersion == 1 then
-    t.Print(L["You need to convert your custom nameplates to the current format before you can add legacy custom nameplates."], true)
-  else
-    local legacy_custom_plates = {}
+  local legacy_custom_plates = {}
 
-    for i, v in ipairs(Addon.LEGACY_CUSTOM_NAMEPLATES) do
-      legacy_custom_plates[i] = t.CopyTable(v)
-      Addon.MergeDefaultsIntoTable(legacy_custom_plates[i], Addon.LEGACY_CUSTOM_NAMEPLATES["**"])
-    end
-
-    local custom_plates = TidyPlatesThreat.db.profile.uniqueSettings
-    local max_slot_no = #custom_plates
-
-    local index = 1
-    for _, legacy_custom_plate in ipairs(legacy_custom_plates) do
-      -- Only need to check for double name trigger as legacy custom nameplates only have these kind of triggers
-      local trigger_value = legacy_custom_plate.Trigger.Name.Input
-      local trigger_already_used = Addon.Cache.CustomPlateTriggers.Name[trigger_value]
-
-      if trigger_already_used == nil or trigger_already_used.Enable.Never then
-        local error_msg = L["Adding legacy custom nameplate for %s ..."]:gsub("%%s", trigger_value)
-        t.Print(error_msg)
-
-        table.insert(custom_plates, max_slot_no + index, legacy_custom_plate)
-        index = index + 1
-      else
-        local error_msg = L["Legacy custom nameplate %s already exists. Skipping it."]:gsub("%%s", trigger_value)
-        t.Print(error_msg, true)
-      end
-    end
-
-    Addon.LibAceConfigRegistry:NotifyChange(t.ADDON_NAME)
-    UpdateSpecial()
+  for i, v in ipairs(Addon.LEGACY_CUSTOM_NAMEPLATES) do
+    legacy_custom_plates[i] = t.CopyTable(v)
+    Addon.MergeDefaultsIntoTable(legacy_custom_plates[i], Addon.LEGACY_CUSTOM_NAMEPLATES["**"])
   end
+
+  local custom_plates = TidyPlatesThreat.db.profile.uniqueSettings
+  local max_slot_no = #custom_plates
+
+  local index = 1
+  for _, legacy_custom_plate in ipairs(legacy_custom_plates) do
+    -- Only need to check for double name trigger as legacy custom nameplates only have these kind of triggers
+    local trigger_value = legacy_custom_plate.Trigger.Name.Input
+    local trigger_already_used = Addon.Cache.CustomPlateTriggers.Name[trigger_value]
+
+    if trigger_already_used == nil or trigger_already_used.Enable.Never then
+      local error_msg = L["Adding legacy custom nameplate for %s ..."]:gsub("%%s", trigger_value)
+      t.Print(error_msg)
+
+      table.insert(custom_plates, max_slot_no + index, legacy_custom_plate)
+      index = index + 1
+    else
+      local error_msg = L["Legacy custom nameplate %s already exists. Skipping it."]:gsub("%%s", trigger_value)
+      t.Print(error_msg, true)
+    end
+  end
+
+  Addon.LibAceConfigRegistry:NotifyChange(t.ADDON_NAME)
+  UpdateSpecial()
 end
 
 -----------------------------------------------------
