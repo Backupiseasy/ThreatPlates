@@ -21,12 +21,12 @@
     <Script file="LibDeflate\LibDeflate.lua"/>
     <Script file="ForAllIndentsAndPurposes\indent.lua"/>
 
-    <!--@retail@
+    <!--@mainline@
     <Include file="LibDualSpec-1.0\LibDualSpec-1.0.lua"/>
-    @end-retail@-->
+    @end-mainline@-->
 
-    <!--@bc-classic@
-    @end-bc-classic@-->
+    <!--@tbc-classic@
+    @end-tbc-classic@-->
 
     <!--@classic@
     <Script file="LibClassicCasterino\LibClassicCasterino.lua"/>

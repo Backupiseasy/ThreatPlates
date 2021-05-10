@@ -23,9 +23,9 @@ IGNORE_EXT = [".bat", ".txt", ".db", ".zip",
               ".bmp", ".gif", ".jpg", ".png", ".psd", "*.tif", ".xcf"]
 
 EXCLUDE_TAGS_BY_VERSION = {
-    "Classic":    { "tbc-classic" , "mainline" },
-    "TBCClassic": { "classic"    , "mainline" },
-    "Mainline":     { "classic"    , "tbc-classic" },
+    "Classic":    { "tbc-classic", "mainline" },
+    "TBC-Classic": { "classic", "mainline" },
+    "Mainline":     { "classic", "tbc-classic" },
 }
 
 # ---------------------------------------------------------------------------------------------------
@@ -100,6 +100,7 @@ def create_toc_file(wow_version):
 
     # Remove parts that don't belong to the version that is packaged from TOC file
     version_tag = wow_version.lower()
+    print (version_tag)
     exclude_tags = EXCLUDE_TAGS_BY_VERSION[wow_version]
 
     toc_file_content = re.sub(r"#@" + version_tag + "@[^\n]*\n", "", toc_file_content)
@@ -150,10 +151,10 @@ def create_package(wow_version, package_dir):
     # -- Zip Packages
     # ---------------------------------------------------------------------------------------------------
     package_name = "ThreatPlates"
-    if wow_version == "Classic" or wow_version == "TBCClassic":
+    if wow_version == "Classic" or wow_version == "TBC-Classic":
         package_name += "-" + wow_version
 
-    package_file_name = package_dir + "\\" + package_name + "_" + version_no + ".zip"
+    package_file_name = package_dir + "\\" + package_name + "-" + version_no + ".zip"
 
     package_file = zipfile.ZipFile(package_file_name, "w", compression=zipfile.ZIP_DEFLATED, allowZip64=True, compresslevel=9)
     zip_dir(".", package_file, ignore_dir=IGNORE_DIR+ignore_lib_dirs, ignore_file=IGNORE_FILE, ignore_ext=IGNORE_EXT)
@@ -177,7 +178,7 @@ def get_wow_version():
     if "_retail_" in working_dir:
         return "Mainline"
     elif "_classic_beta_" in working_dir:
-        return "TBCClassic"
+        return "TBC-Classic"
     elif "_classic_" in working_dir:
         return "Classic"
     elif "_ptr_" in working_dir:
@@ -233,7 +234,7 @@ def packager_main(package_dir):
     if package_dir:
         create_package("Mainline", package_dir)
         create_package("Classic", package_dir)
-        create_package("TBCClassic", package_dir)
+        create_package("TBC-Classic", package_dir)
 
 if __name__ == '__main__':
     packager_main()
