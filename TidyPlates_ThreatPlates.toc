@@ -1,12 +1,10 @@
-﻿#@retail@
 ## Interface: 90005
-#@end-retail@
-#@classic@
-## Interface: 11306
-#@end-classic@
+## Interface-Retail: 90005
+## Interface-Classic: 11307
+## Interface-BC: 20501
 
 ## Title: Threat Plates
-## Version: 10.2.0-Beta3
+## Version: @project-version@
 ## Notes: Threat-reactive nameplates.
 ## Notes-deDE: Bedrohungsreaktive Namensplaketten.
 ## Notes-esES: Placas Identificativas de Amenaza
@@ -14,20 +12,19 @@
 ## Author: Suicidal Katt, Blacksalsify
 ## SavedVariables: ThreatPlatesDB
 
-#@retail@
 ## RequiredDeps:
+#@version-retail@
 ## OptionalDeps: Ace3, AceGUI-3.0-SharedMediaWidgets, LibSharedMedia-3.0, LibCustomGlow-1.0, LibDeflate, LibDualSpec-1.0
 ## X-Embeds: Ace3, AceGUI-3.0-SharedMediaWidgets, LibSharedMedia-3.0, LibCustomGlow-1.0, LibDeflate, LibDualSpec-1.0
 ## X-Website: https://wow.curseforge.com/projects/tidy-plates-threat-plates
 ## X-Curse-Project-ID: 21217
-#@end-retail@
-#@classic@
-## RequiredDeps:
+#@end-version-retail@
+#@version-classic@
 ## OptionalDeps: Ace3, AceGUI-3.0-SharedMediaWidgets, LibSharedMedia-3.0, LibCustomGlow-1.0, LibDeflate, LibDualSpec-1.0, LibClassicDurations
 ## X-Embeds: Ace3, AceGUI-3.0-SharedMediaWidgets, LibSharedMedia-3.0, LibCustomGlow-1.0, LibDeflate, LibDualSpec-1.0, LibClassicDurations
 ## X-Website: https://wow.curseforge.com/projects/threat-plates-classic
 ## X-Curse-Project-ID: 338498
-#@end-classic@
+#@end-version-classic@
 
 ## X-License: GNU General Public License
 ## X-Credits: danltiger (for Tidy Plates), Tosaido (for quest handling code from QuestMobs)
