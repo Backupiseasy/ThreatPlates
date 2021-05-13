@@ -19,17 +19,18 @@
     <Include file="AceGUI-3.0-SharedMediaWidgets\widget.xml"/>
     <Include file="LibCustomGlow-1.0\LibCustomGlow-1.0.xml"/>
     <Script file="LibDeflate\LibDeflate.lua"/>
+
     <Script file="ForAllIndentsAndPurposes\indent.lua"/>
 
-    <!--@mainline@
+    <!--@version-retail@-->
     <Include file="LibDualSpec-1.0\LibDualSpec-1.0.lua"/>
-    @end-mainline@-->
+    <!--@end-version-retail@-->
 
-    <!--@tbc-classic@
-    @end-tbc-classic@-->
+    <!--@version-bc@-->
+    <!--@version-bc@-->
 
-    <!--@classic@
+    <!--@version-classic@-->
     <Script file="LibClassicCasterino\LibClassicCasterino.lua"/>
     <Include file="LibClassicDurations\LibClassicDurations.xml"/>
-    @end-classic@-->
+    <!--@end-version-classic@-->
 </Ui>
