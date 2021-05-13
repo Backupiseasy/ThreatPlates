@@ -4730,7 +4730,7 @@ local function CreateBlizzardSettings()
             order = 10,
             type = "range",
             min = 0,
-            max = ((Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC) and 20) or 100,
+            max = (Addon.IS_CLASSIC  and 20) or (Addon.IS_TBC_CLASSIC and 41) or 100,
             step = 1,
             width = "double",
             desc = L["The max distance to show nameplates."],
