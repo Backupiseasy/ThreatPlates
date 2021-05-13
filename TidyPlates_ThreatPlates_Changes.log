@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+10.1.8
+------------------------------------------------------
+* Updated integrated libraries (LibClassicCasterino r37).
+
+------------------------------------------------------
 10.1.7
 ------------------------------------------------------
 * Removed option Automation - Small Blizzard Nameplates as - with its current implementation - it also reduces the clickable area of enemy nameplates in instances. Currently, I don't know any better way to implement this feature [Issue GitHub#281].
