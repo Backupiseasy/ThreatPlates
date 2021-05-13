@@ -145,48 +145,30 @@ local function GetThreatSituation(unit, style, enable_off_tank)
   return threat_situation
 end
 
-if Addon.CLASSIC then
-  function Addon:GetThreatColor(unit, style)
-    local db = TidyPlatesThreat.db.profile
+function Addon:GetThreatColor(unit, style, use_threat_table)
+  local db = TidyPlatesThreat.db.profile
 
-    local color
+  local color
 
-    -- Use threat detection heuristic
-    local on_threat_table = _G.UnitAffectingCombat(unit.unitid)
-
-    if on_threat_table then
-      color = db.settings[style].threatcolor[GetThreatSituation(unit, style, db.threat.toggle.OffTank)]
-    end
-
-    return color
-  end
-else
-  function Addon:GetThreatColor(unit, style, use_threat_table)
-    local db = TidyPlatesThreat.db.profile
-
-    local color
-
-    local on_threat_table
-    if use_threat_table then
-      if IsInInstance() and db.threat.UseHeuristicInInstances then
-        -- Use threat detection heuristic in instance
-        on_threat_table = _G.UnitAffectingCombat(unit.unitid)
-      else
-        on_threat_table = Addon:OnThreatTable(unit)
-      end
-    else
-      -- Use threat detection heuristic
+  local on_threat_table
+  if use_threat_table then
+    if IsInInstance() and db.threat.UseHeuristicInInstances then
+      -- Use threat detection heuristic in instance
       on_threat_table = _G.UnitAffectingCombat(unit.unitid)
+    else
+      on_threat_table = Addon:OnThreatTable(unit)
     end
-
-    if on_threat_table then
-      color = db.settings[style].threatcolor[GetThreatSituation(unit, style, db.threat.toggle.OffTank)]
-    end
-
-    return color
+  else
+    -- Use threat detection heuristic
+    on_threat_table = _G.UnitAffectingCombat(unit.unitid)
   end
-end
 
+  if on_threat_table then
+    color = db.settings[style].threatcolor[GetThreatSituation(unit, style, db.threat.toggle.OffTank)]
+  end
+
+  return color
+end
 
 -- Threat System is OP, player is in combat, style is tank or dps
 local function GetColorByThreat(unit, style)
@@ -194,7 +176,7 @@ local function GetColorByThreat(unit, style)
   local c
 
   if (db.threat.ON and db.threat.useHPColor and (style == "dps" or style == "tank")) then
-    c = Addon:GetThreatColor(unit, style, db.threat.UseThreatTable)  -- UseThreatTable is ignored in WoW Classic
+    c = Addon:GetThreatColor(unit, style, db.threat.UseThreatTable)
   end
 
   return c

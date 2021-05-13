@@ -1,6 +1,7 @@
 ﻿------------------------------------------------------
 10.1.8
 ------------------------------------------------------
+* Fixed a bug in WoW Classic where threat on mobs was not determined based on the mob's threat table.
 * Updated integrated libraries (LibClassicCasterino r37).
 
 ------------------------------------------------------
