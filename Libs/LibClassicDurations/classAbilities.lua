@@ -1,7 +1,7 @@
 local lib = LibStub and LibStub("LibClassicDurations", true)
 if not lib then return end
 
-local Type, Version = "SpellTable", 66
+local Type, Version = "SpellTable", 71
 if lib:GetDataVersion(Type) >= Version then return end  -- older versions didn't have that function
 
 local Spell = lib.AddAura
@@ -185,6 +185,11 @@ end
 -- GLOBAL
 ------------------
 
+-- World Buffs incl. Chronoboon IDs
+Spell({ 355363, 22888 }, { duration = 7200 }) -- Rallying Cry of the Dragonslayer
+Spell({ 355365, 24425 }, { duration = 7200 }) -- Spirit of Zandalar
+Spell({ 355366, 16609 }, { duration = 3600 }) -- Warchief's Blessing
+
 Spell( 2479, { duration = 30 }) -- Honorless Target
 Spell(1604, { duration = 4 }) -- Common Daze
 Spell( 23605, { duration = 5 }) -- Nightfall (Axe) Proc
@@ -267,7 +272,7 @@ Spell( 14751, { duration = INFINITY, type = "BUFF", buffType = "Magic" }) -- Inn
 Spell({ 1243, 1244, 1245, 2791, 10937, 10938 }, { duration = 1800, type = "BUFF", castFilter = true, buffType = "Magic" }) -- Power Word: Fortitude
 Spell({ 21562, 21564 }, { duration = 3600, type = "BUFF", castFilter = true, buffType = "Magic" }) -- Prayer of Fortitude
 Spell({ 976, 10957, 10958 }, { duration = 600, type = "BUFF", castFilter = true, buffType = "Magic" }) -- Shadow Protection
-Spell( 27683, { duration = 600, type = "BUFF", castFilter = true, buffType = "Magic" }) -- Prayer of Shadow Protection
+Spell( 27683, { duration = 1200, type = "BUFF", castFilter = true, buffType = "Magic" }) -- Prayer of Shadow Protection
 Spell({ 14752, 14818, 14819, 27841 }, { duration = 1800, type = "BUFF", castFilter = true, buffType = "Magic" }) -- Divine Spirit
 Spell( 27681, { duration = 3600, type = "BUFF", castFilter = true, buffType = "Magic" }) -- Prayer of Spirit
 

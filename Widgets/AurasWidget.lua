@@ -25,7 +25,6 @@ local GetNamePlates, GetNamePlateForUnit = C_NamePlate.GetNamePlates, C_NamePlat
 local IsInInstance = IsInInstance
 
 -- ThreatPlates APIs
-local LibCustomGlow = Addon.LibCustomGlow
 local TidyPlatesThreat = TidyPlatesThreat
 local Animations = Addon.Animations
 local Font = Addon.Font
@@ -34,17 +33,10 @@ local UnitStyle_AuraDependent = Addon.UnitStyle_AuraDependent
 local CUSTOM_GLOW_FUNCTIONS, CUSTOM_GLOW_WRAPPER_FUNCTIONS = Addon.CUSTOM_GLOW_FUNCTIONS, Addon.CUSTOM_GLOW_WRAPPER_FUNCTIONS
 local BackdropTemplate = Addon.BackdropTemplate
 
-local LibClassicDurations
-
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
 -- List them here for Mikk's FindGlobals script
 -- GLOBALS: CreateFrame, UnitAffectingCombat
-
-if Addon.CLASSIC then
-  LibClassicDurations = LibStub("LibClassicDurations")
-  UnitAura = LibClassicDurations.UnitAuraWithBuffs
-end
 
 ---------------------------------------------------------------------------------------------------
 -- Auras Widget Functions
@@ -227,6 +219,7 @@ local CROWD_CONTROL_SPELLS_RETAIL = {
   -- [205273] = PC_SNARE,       -- Wake of Ashes - from Artefact weapon
   [255937] = PC_SNARE,          -- Wake of Ashes - Talent
   [183218] = PC_SNARE,          -- Hand of Hindrance
+  [10326] = LOC_FEAR,           -- Turn Evil
 
   ---------------------------------------------------------------------------------------------------
   -- Priest
@@ -301,6 +294,7 @@ local CROWD_CONTROL_SPELLS_RETAIL = {
   [196364] = CC_SILENCE,      -- Unstable Affliction, silence effect after dispell of Unstable Affliction
   [213688] = LOC_STUN,        -- Fel Cleave aura from Call Fel Lord (Honor)
   [233582] = PC_SNARE,        -- Entrenched in Flame
+  [5484] = LOC_FEAR,          -- Howl of Terror
 
   ---------------------------------------------------------------------------------------------------
   -- Warrior
@@ -1275,7 +1269,7 @@ end
 
 function Widget:CreateAuraFrameBarMode(parent)
   local db = self.db_bar
-  local font = ThreatPlates.Media:Fetch('font', db.Font)
+  local font = Addon.LibSharedMedia:Fetch('font', db.Font)
 
   -- frame is probably not necessary, should be ok do add everything to the statusbar frame
   local frame = _G.CreateFrame("Frame", nil, parent)
@@ -1333,7 +1327,7 @@ function Widget:UpdateAuraFrameBarMode(frame)
   end
 
   db = self.db_bar
-  local font = ThreatPlates.Media:Fetch('font', db.Font)
+  local font = Addon.LibSharedMedia:Fetch('font', db.Font)
 
   -- width and position calculations
   local frame_width = db.BarWidth
@@ -1342,7 +1336,7 @@ function Widget:UpdateAuraFrameBarMode(frame)
   end
   frame:SetSize(frame_width, db.BarHeight)
 
-  frame.Background:SetTexture(ThreatPlates.Media:Fetch('statusbar', db.BackgroundTexture))
+  frame.Background:SetTexture(Addon.LibSharedMedia:Fetch('statusbar', db.BackgroundTexture))
   frame.Background:SetVertexColor(db.BackgroundColor.r, db.BackgroundColor.g, db.BackgroundColor.b, db.BackgroundColor.a)
 
   frame.LabelText:SetPoint("LEFT", frame.Statusbar, "LEFT", db.LabelTextIndent, 0)
@@ -1402,7 +1396,7 @@ function Widget:UpdateAuraFrameBarMode(frame)
 
   frame.Statusbar:SetSize(db.BarWidth, db.BarHeight)
   --    frame.Statusbar:SetWidth(db.BarWidth)
-  frame.Statusbar:SetStatusBarTexture(ThreatPlates.Media:Fetch('statusbar', db.Texture))
+  frame.Statusbar:SetStatusBarTexture(Addon.LibSharedMedia:Fetch('statusbar', db.Texture))
   frame.Statusbar:GetStatusBarTexture():SetHorizTile(false)
   frame.Statusbar:GetStatusBarTexture():SetVertTile(false)
 --    frame.Statusbar:Show()
@@ -1727,17 +1721,19 @@ function Widget:OnEnable()
   -- LOSS_OF_CONTROL_UPDATE
 
   if Addon.CLASSIC then
+    UnitAura = Addon.LibClassicDurations.UnitAuraWithBuffs
+
     -- Add duration handling from LibClassicDurations
-    LibClassicDurations:Register("ThreatPlates")
+    Addon.LibClassicDurations:Register("ThreatPlates")
     -- NOTE: Enemy buff tracking won't start until you register UNIT_BUFF
-    LibClassicDurations.RegisterCallback(TidyPlatesThreat, "UNIT_BUFF", UnitBuffEventHandler)
+    Addon.LibClassicDurations.RegisterCallback(TidyPlatesThreat, "UNIT_BUFF", UnitBuffEventHandler)
   end
 end
 
 function Widget:OnDisable()
   self:UnregisterAllEvents()
   if Addon.CLASSIC then
-    LibClassicDurations.UnregisterCallback(TidyPlatesThreat, "UNIT_BUFF")
+    Addon.LibClassicDurations.UnregisterCallback(TidyPlatesThreat, "UNIT_BUFF")
   end
   for plate, _ in pairs(Addon.PlatesVisible) do
     plate.TPFrame.widgets.Auras:UnregisterAllEvents()
@@ -1918,9 +1914,9 @@ function Widget:UpdateSettings()
   -- Highlighting
   AuraHighlightEnabled = self.db.Highlight.Enabled
   local glow_function = CUSTOM_GLOW_FUNCTIONS[self.db.Highlight.Type][1]
-  AuraHighlightStart = CUSTOM_GLOW_WRAPPER_FUNCTIONS[glow_function] or LibCustomGlow[glow_function]
-  AuraHighlightStopPrevious = AuraHighlightStop or LibCustomGlow.PixelGlow_Stop
-  AuraHighlightStop = LibCustomGlow[CUSTOM_GLOW_FUNCTIONS[self.db.Highlight.Type][2]]
+  AuraHighlightStart = CUSTOM_GLOW_WRAPPER_FUNCTIONS[glow_function] or Addon.LibCustomGlow[glow_function]
+  AuraHighlightStopPrevious = AuraHighlightStop or Addon.LibCustomGlow.PixelGlow_Stop
+  AuraHighlightStop = Addon.LibCustomGlow[CUSTOM_GLOW_FUNCTIONS[self.db.Highlight.Type][2]]
   AuraHighlightOffset = CUSTOM_GLOW_FUNCTIONS[self.db.Highlight.Type][3]
 
   local color = (self.db.Highlight.CustomColor and self.db.Highlight.Color) or ThreatPlates.DEFAULT_SETTINGS.profile.AuraWidget.Highlight.Color
