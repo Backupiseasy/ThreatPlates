@@ -45,6 +45,8 @@ manual-changelog:
   filename: CHANGELOG.md
   markup-type: markdown
 
+wowi-convert-changelog: yes
+
 ignore:
   - .git
   - .idea
