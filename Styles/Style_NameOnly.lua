@@ -2,7 +2,6 @@ local ADDON_NAME, Addon = ...
 local ThreatPlates = Addon.ThreatPlates
 
 local ART_PATH = ThreatPlates.Art
-local MEDIA_PATH = ThreatPlates.Media
 local EMPTY_TEXTURE = ART_PATH.."Empty"
 
 -------------------------------------------------------------------------------------
@@ -69,8 +68,8 @@ local function Create(self,name)
     },
 
     castbar = {
-      texture = ThreatPlates.Media:Fetch('statusbar', db.castbar.texture),
-      backdrop = (db.castbar.ShowInHeadlineView and ThreatPlates.Media:Fetch('statusbar', db.castbar.backdrop, true)) or EMPTY_TEXTURE,
+      texture = Addon.LibSharedMedia:Fetch('statusbar', db.castbar.texture),
+      backdrop = (db.castbar.ShowInHeadlineView and Addon.LibSharedMedia:Fetch('statusbar', db.castbar.backdrop, true)) or EMPTY_TEXTURE,
       width = db.castbar.width,
       height = db.castbar.height,
       x = db.castbar.x_hv,
@@ -91,7 +90,7 @@ local function Create(self,name)
     },
 
     name = {
-      typeface = MEDIA_PATH:Fetch('font', db.name.typeface),
+      typeface = Addon.LibSharedMedia:Fetch('font', db.name.typeface),
       size = dbprofile.HeadlineView.name.size,
       width = db.name.width, -- use same as for healthbar view
       height = db.name.height, -- use same as for healthbar view
@@ -106,7 +105,7 @@ local function Create(self,name)
     },
 
     level = {
-      typeface = MEDIA_PATH:Fetch('font', db.level.typeface),
+      typeface = Addon.LibSharedMedia:Fetch('font', db.level.typeface),
       size = db.level.size,
       width = db.level.width,
       height = db.level.height,
@@ -120,7 +119,7 @@ local function Create(self,name)
     },
 
     customtext = {
-      typeface = MEDIA_PATH:Fetch('font', db.name.typeface),
+      typeface = Addon.LibSharedMedia:Fetch('font', db.name.typeface),
       size = dbprofile.HeadlineView.customtext.size,
       width = db.customtext.width, -- use same as for healthbar view
       height = db.customtext.height, -- use same as for healthbar view
@@ -135,7 +134,7 @@ local function Create(self,name)
     },
 
     spelltext = {
-      typeface = ThreatPlates.Media:Fetch('font', db.spelltext.typeface),
+      typeface = Addon.LibSharedMedia:Fetch('font', db.spelltext.typeface),
       size = db.spelltext.size,
       width = db.spelltext.width,
       height = db.spelltext.height,

@@ -68,7 +68,7 @@ local function UpdateAuraTexture(frame, aura, index)
 
   -- Duration Text
   local color = ConfigDB.FontColor
-  aura.Time:SetFont(ThreatPlates.Media:Fetch('font', ConfigDB.Font), ConfigDB.FontSize)
+  aura.Time:SetFont(Addon.LibSharedMedia:Fetch('font', ConfigDB.Font), ConfigDB.FontSize)
   aura.Time:SetAllPoints(aura)
   aura.Time:SetTextColor(color.r, color.g, color.b)
 end

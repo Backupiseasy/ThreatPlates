@@ -33,7 +33,6 @@ local UnitNameplateShowsWidgetsOnly = UnitNameplateShowsWidgetsOnly
 local TidyPlatesThreat = TidyPlatesThreat
 local Widgets = Addon.Widgets
 local Animations = Addon.Animations
-local LibClassicCasterino = Addon.LibClassicCasterino
 local BackdropTemplate = Addon.BackdropTemplate
 
 local GetNameForNameplate
@@ -53,7 +52,7 @@ if Addon.IS_CLASSIC then
   UnitEffectiveLevel = function(...) return _G.UnitLevel(...) end
 
   UnitChannelInfo = function(...)
-    local text, _, texture, startTime, endTime, _, _, _, spellID = LibClassicCasterino:UnitChannelInfo(...)
+    local text, _, texture, startTime, endTime, _, _, _, spellID = Addon.LibClassicCasterino:UnitChannelInfo(...)
 
     -- With LibClassicCasterino, startTime is nil sometimes which means that no casting information
     -- is available
@@ -65,7 +64,7 @@ if Addon.IS_CLASSIC then
   end
 
   UnitCastingInfo = function(...)
-    local text, _, texture, startTime, endTime, _, _, _, spellID = LibClassicCasterino:UnitCastingInfo(...)
+    local text, _, texture, startTime, endTime, _, _, _, spellID = Addon.LibClassicCasterino:UnitCastingInfo(...)
 
     -- With LibClassicCasterino, startTime is nil sometimes which means that no casting information
     -- is available
@@ -1429,14 +1428,14 @@ do
   end
 
   -- Only registered for player unit
-  --local RIGHTEOUS_FURY_SPELL_IDs = { 20468, 20469, 20470, 25780 }
+  local RIGHTEOUS_FURY_SPELL_IDs = { [20468] = true, [20469] = true, [20470] = true, [25780] = true }
   local function UNIT_AURA(event, unitid)
     local _, name, spellId
     for i = 1, 40 do
       name , _, _, _, _, _, _, _, _, spellId = _G.UnitBuff("player", i, "PLAYER")
       if not name then
         break
-      elseif spellId == 25780 then --RIGHTEOUS_FURY_SPELL_IDs[spellId] then
+      elseif RIGHTEOUS_FURY_SPELL_IDs[spellId] then
         Addon.PlayerIsPaladinTank = true
         return
       end
@@ -1502,6 +1501,8 @@ do
   if Addon.IS_CLASSIC and Addon.PlayerClass == "PALADIN" then
     CoreEvents.UNIT_AURA = UNIT_AURA
     TidyPlatesCore:RegisterUnitEvent("UNIT_AURA", "player")
+    -- UNIT_AURA does not seem to be fired after login (even when buffs are active)
+    UNIT_AURA()
   end
 end
 
@@ -1608,7 +1609,7 @@ do
 --    if not extended.TestBackground then
 --      extended.TestBackground = extended:CreateTexture(nil, "BACKGROUND")
 --      extended.TestBackground:SetAllPoints(extended)
---      extended.TestBackground:SetTexture(ThreatPlates.Media:Fetch('statusbar', TidyPlatesThreat.db.profile.AuraWidget.BackgroundTexture))
+--      extended.TestBackground:SetTexture(Addon.LibSharedMedia:Fetch('statusbar', TidyPlatesThreat.db.profile.AuraWidget.BackgroundTexture))
 --      extended.TestBackground:SetVertexColor(0,0,0,0.5)
 --    end
 

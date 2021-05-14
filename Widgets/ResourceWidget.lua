@@ -310,7 +310,7 @@ function Widget:UpdateLayout()
 
   local bar = widget_frame.Bar
   if db.ShowBar then
-    local bar_texture = ThreatPlates.Media:Fetch('statusbar', db.BarTexture)
+    local bar_texture = Addon.LibSharedMedia:Fetch('statusbar', db.BarTexture)
 
     bar:SetAllPoints()
     bar:SetStatusBarTexture(bar_texture)
@@ -323,7 +323,7 @@ function Widget:UpdateLayout()
     local border = widget_frame.Border
     border:SetBackdrop({
       --bgFile = bar_texture,
-      edgeFile = ThreatPlates.Media:Fetch('border', db.BorderTexture),
+      edgeFile = Addon.LibSharedMedia:Fetch('border', db.BorderTexture),
       edgeSize = db.BorderEdgeSize,
       insets = { left = 0, right = 0, top = 0, bottom = 0 }
     })
@@ -337,7 +337,7 @@ function Widget:UpdateLayout()
   if db.ShowText then
     text:SetAllPoints()
 
-    text:SetFont(ThreatPlates.Media:Fetch('font', db.Font), db.FontSize)
+    text:SetFont(Addon.LibSharedMedia:Fetch('font', db.Font), db.FontSize)
     text:SetJustifyH("CENTER")
     text:SetShadowOffset(1, -1)
     text:SetMaxLines(1)

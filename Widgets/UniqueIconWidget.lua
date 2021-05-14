@@ -20,7 +20,6 @@ local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
-local LibCustomGlow = Addon.LibCustomGlow
 local CUSTOM_GLOW_FUNCTIONS, CUSTOM_GLOW_WRAPPER_FUNCTIONS = Addon.CUSTOM_GLOW_FUNCTIONS, Addon.CUSTOM_GLOW_WRAPPER_FUNCTIONS
 
 local _G =_G
@@ -50,7 +49,7 @@ function Widget:Create(tp_frame)
   widget_frame.Highlight = _G.CreateFrame("Frame", nil, widget_frame)
   widget_frame.Highlight:SetFrameLevel(tp_frame:GetFrameLevel() + 15)
 
-  widget_frame.HighlightStop = LibCustomGlow.PixelGlow_Stop
+  widget_frame.HighlightStop = Addon.LibCustomGlow.PixelGlow_Stop
   --------------------------------------
   -- End Custom Code
 
@@ -179,7 +178,7 @@ function Widget:OnUnitAdded(widget_frame, unit)
     local highlight_start = CUSTOM_GLOW_WRAPPER_FUNCTIONS[CUSTOM_GLOW_FUNCTIONS[glow_highlight.Type][1]]
     highlight_start(widget_frame.Highlight, color, frame_level_offset)
 
-    widget_frame.HighlightStop = LibCustomGlow[CUSTOM_GLOW_FUNCTIONS[glow_highlight.Type][2]]
+    widget_frame.HighlightStop = Addon.LibCustomGlow[CUSTOM_GLOW_FUNCTIONS[glow_highlight.Type][2]]
 
     widget_frame.Highlight:Show()
   else
@@ -197,9 +196,9 @@ end
 
 function Widget:UpdateLayout(widget_frame)
   -- As there can be several custom styles with different glow effects be active on a unit, we have to stop all here
-  LibCustomGlow["ButtonGlow_Stop"](widget_frame.Highlight)
-  LibCustomGlow["PixelGlow_Stop"](widget_frame.Highlight)
-  LibCustomGlow["AutoCastGlow_Stop"](widget_frame.Highlight)
+  Addon.LibCustomGlow["ButtonGlow_Stop"](widget_frame.Highlight)
+  Addon.LibCustomGlow["PixelGlow_Stop"](widget_frame.Highlight)
+  Addon.LibCustomGlow["AutoCastGlow_Stop"](widget_frame.Highlight)
 
   -- Update the style as custom nameplates might have been changed and some units no longer
   -- may be unique

@@ -88,7 +88,7 @@ local function Create(self,name)
 		},
 
 		name = {
-			typeface =						t.Media:Fetch('font', db.name.typeface),
+			typeface =						Addon.LibSharedMedia:Fetch('font', db.name.typeface),
 			size = db.name.size,
 			width = db.name.width,
 			height = db.name.height,
@@ -103,7 +103,7 @@ local function Create(self,name)
 		},
 
 		level = {
-			typeface =						t.Media:Fetch('font', db.level.typeface),
+			typeface =						Addon.LibSharedMedia:Fetch('font', db.level.typeface),
 			size = db.level.size,
 			width = db.level.width,
 			height = db.level.height,
@@ -118,7 +118,7 @@ local function Create(self,name)
 		},
 
 		customtext = {
-			typeface =						t.Media:Fetch('font', db.customtext.typeface),
+			typeface =						Addon.LibSharedMedia:Fetch('font', db.customtext.typeface),
 			size = db.customtext.size,
 			width = db.customtext.width,
 			height = db.customtext.height,
@@ -133,7 +133,7 @@ local function Create(self,name)
 		},
 
 		spelltext = {
-			typeface =						t.Media:Fetch('font', db.spelltext.typeface),
+			typeface =						Addon.LibSharedMedia:Fetch('font', db.spelltext.typeface),
 			size = db.spelltext.size,
 			width = db.spelltext.width,
 			height = db.spelltext.height,

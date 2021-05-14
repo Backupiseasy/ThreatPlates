@@ -68,7 +68,8 @@ local MAP_UNIT_TYPE_TO_TP_TYPE = {
   EnemyMinus       = "Minus", --                   = Minus
   NeutralNPC       = "Neutral", --                 = Neutral
   NeutralGuardian  = "Guardian",
-  NeutralMinus     = "Minus" --                    = Minus
+  NeutralMinus     = "Minus", --                    = Minus
+  NeutralPet       = "Pet",      -- Sometimes, friendly pets turn into neutral pets when you lose control over them (e.g., in quests).
   --                  Tapped                       = Tapped
 }
 

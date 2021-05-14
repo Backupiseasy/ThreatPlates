@@ -31,10 +31,6 @@ local _G =_G
 -- Global functions for accessing the configuration
 ---------------------------------------------------------------------------------------------------
 
--- Returns if the currently active spec is tank (true) or dps/heal (false)
-Addon.PlayerClass = select(2, UnitClass("player"))
-Addon.PlayerName = select(1, UnitName("player"))
-
 if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC then
   local GetShapeshiftFormID = GetShapeshiftFormID
   local BEAR_FORM, DIRE_BEAR_FORM = BEAR_FORM, 8
@@ -1161,6 +1157,8 @@ local DEPRECATED_SETTINGS = {
   { FixTargetFocusTexture, NoDefaultProfile = true },
   { RenameFilterMode, NoDefaultProfile = true, "9.3.0"},
   { "cache" },
+  { "Automation", "SmallPlatesInInstances" }, -- Removed in 10.1.8
+  { "CVarsBackup", "nameplateGlobalScale" },  -- Removed in 10.1.8
   { MigrationCustomPlatesV1, NoDefaultProfile = true, "10.2.0"},
   { MigrateCustomStyles, NoDefaultProfile = true, "10.2.0", CleanupDatabase = true },
   ((Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC) and { DisableShowBlizzardAurasForClassic, "10.2.0" }) or nil,

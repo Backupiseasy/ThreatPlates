@@ -11,8 +11,6 @@ local UnitIsConnected = UnitIsConnected
 local TidyPlatesThreat = TidyPlatesThreat
 local RGB = ThreatPlates.RGB
 
-local ShowThreatGlow
-
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
 -- List them here for Mikk's FindGlobals script
@@ -24,23 +22,17 @@ local COLOR_TRANSPARENT = RGB(0, 0, 0, 0) -- opaque
 -- Wrapper functions for WoW Classic
 ---------------------------------------------------------------------------------------------------
 
-if Addon.IS_CLASSIC then
-  ShowThreatGlow = function(unit)
-    return _G.UnitAffectingCombat(unit.unitid)
-  end
-else
-  ShowThreatGlow = function(unit)
-    local db = TidyPlatesThreat.db.profile
+local function ShowThreatGlow(unit)
+  local db = TidyPlatesThreat.db.profile
 
-    if db.ShowThreatGlowOnAttackedUnitsOnly then
-      if IsInInstance() and db.threat.UseHeuristicInInstances then
-        return _G.UnitAffectingCombat(unit.unitid)
-      else
-        return Addon:OnThreatTable(unit)
-      end
-    else
+  if db.ShowThreatGlowOnAttackedUnitsOnly then
+    if IsInInstance() and db.threat.UseHeuristicInInstances then
       return _G.UnitAffectingCombat(unit.unitid)
+    else
+      return Addon:OnThreatTable(unit)
     end
+  else
+    return _G.UnitAffectingCombat(unit.unitid)
   end
 end
 

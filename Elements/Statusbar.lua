@@ -10,7 +10,6 @@ local ipairs = ipairs
 -- WoW APIs
 
 -- ThreatPlates APIs
-local LSM = Addon.ThreatPlates.Media
 local Font = Addon.Font
 local ANCHOR_POINT_TEXT = Addon.ANCHOR_POINT_TEXT
 local BackdropTemplate = Addon.BackdropTemplate
@@ -44,13 +43,13 @@ end
 local function UpdateSettings(self, db)
   self:SetSize(db.Width, db.Height)
 
-  local texture = LSM:Fetch('statusbar', db.Texture)
+  local texture = Addon.LibSharedMedia:Fetch('statusbar', db.Texture)
   self:SetStatusBarTexture(texture)
   self.Background:SetTexture(texture)
 
   self.Border:SetBackdrop({
-    bgFile = LSM:Fetch('statusbar', texture),
-    edgeFile = LSM:Fetch('border', db.BorderTexture),
+    bgFile = Addon.LibSharedMedia:Fetch('statusbar', texture),
+    edgeFile = Addon.LibSharedMedia:Fetch('border', db.BorderTexture),
     edgeSize = db.BorderEdgeSize,
     insets = {
       left = db.BorderInset,
