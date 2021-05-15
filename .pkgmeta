@@ -50,15 +50,14 @@ wowi-convert-changelog: yes
 ignore:
   - .git
   - .idea
+  - TidyPlates_ThreatPlates.iml
+  - .release
   - Source
   - Test
   - .gitignore
   - .env
   - .pkgmeta
   - README.md
-  - packager.py
-  - exclude.lst
-  - Template_TidyPlates_ThreatPlates.toc
-  - Libs/Template_Libs.xml
+  - CHANGELOG.md
 
 move-folders:
