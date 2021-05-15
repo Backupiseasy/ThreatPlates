@@ -26,8 +26,8 @@
     <Include file="LibDualSpec-1.0\LibDualSpec-1.0.lua"/>
     <!--@end-version-retail@-->
 
-    <!--@version-bc@-->
-    <!--@version-bc@-->
+    <!--@version-bcc@-->
+    <!--@version-bcc@-->
 
     <!--@version-classic@-->
     <Script file="LibClassicCasterino\LibClassicCasterino.lua"/>
