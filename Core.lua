@@ -347,7 +347,7 @@ function TidyPlatesThreat:OnInitialize()
   Addon.LibSharedMedia = LibStub("LibSharedMedia-3.0")
   Addon.LibCustomGlow = LibStub("LibCustomGlow-1.0")
 
-  if Addon.CLASSIC then
+  if Addon.IS_CLASSIC then
     Addon.LibClassicDurations = LibStub("LibClassicDurations")
 
     Addon.LibClassicCasterino = LibStub("LibClassicCasterino-ThreatPlates")
