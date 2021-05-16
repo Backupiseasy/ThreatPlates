@@ -351,7 +351,6 @@ function TidyPlatesThreat:OnInitialize()
     Addon.LibClassicDurations = LibStub("LibClassicDurations")
 
     Addon.LibClassicCasterino = LibStub("LibClassicCasterino-ThreatPlates")
-    --Addon.LibClassicCasterino = LibStub("LibClassicCasterino")
     -- Register callsbacks for spellcasting library
     Addon.LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_START", Addon.UNIT_SPELLCAST_START)
     Addon.LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_DELAYED", Addon.UnitSpellcastMidway) -- only for player
