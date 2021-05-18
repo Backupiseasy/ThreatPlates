@@ -8040,6 +8040,21 @@ local function CreateOptionsTable()
                         AlignV = { name = L["Vertical Align"], type = "select", order = 5, values = t.AlignV, set = SetThemeValue, arg = { "settings", "name", "vertical" }, },
                       },
                     },
+                    Abbreviation = {
+                      name = L["Name Abbreviation"],
+                      order = 60,
+                      type = "group",
+                      inline = true,
+                      args = {
+                        EnemyNameAbbreviation = {
+                          name = L["Enemy Name Abbreviation"],
+                          order = 10,
+                          type = "select",
+                          values = t.ENEMY_NAME_ABBREVIATION,
+                          arg = { "settings", "name", "EnemyNameAbbreviation" },
+                        },
+                      },
+                    },
                   },
                 },
                 HeadlineView = {

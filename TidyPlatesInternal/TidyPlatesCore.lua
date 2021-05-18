@@ -695,7 +695,7 @@ do
   end
 
 	function UpdateIndicator_Name()
-		visual.name:SetText(unit.name)
+		visual.name:SetText(Addon:SetNameText(unit))
     visual.name:SetTextColor(Addon:SetNameColor(unit))
 	end
 
