@@ -25,7 +25,6 @@ local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
 
 -- ThreatPlates APIs
-local TidyPlatesThreat = TidyPlatesThreat
 local RGB = Addon.ThreatPlates.RGB
 local Font = Addon.Font
 local PlayerClass = Addon.PlayerClass
@@ -488,7 +487,7 @@ end
 ---------------------------------------------------------------------------------------------------
 
 function Widget:IsEnabled()
-  local db = TidyPlatesThreat.db.profile.ComboPoints
+  local db = Addon.db.profile.ComboPoints
   local enabled = db.ON or db.ShowInHeadlineView
 
   if enabled and not (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC) then
@@ -673,7 +672,7 @@ function Widget:UpdateLayout()
 end
 
 function Widget:UpdateSettings()
-  self.db = TidyPlatesThreat.db.profile.ComboPoints
+  self.db = Addon.db.profile.ComboPoints
 
   self:DetermineUnitPower()
 

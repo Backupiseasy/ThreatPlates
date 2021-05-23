@@ -19,7 +19,6 @@ local PlatesByUnit = Addon.PlatesByUnit
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 
 -- ThreatPlates APIs
-local TidyPlatesThreat = TidyPlatesThreat
 local CUSTOM_GLOW_FUNCTIONS, CUSTOM_GLOW_WRAPPER_FUNCTIONS = Addon.CUSTOM_GLOW_FUNCTIONS, Addon.CUSTOM_GLOW_WRAPPER_FUNCTIONS
 
 local _G =_G
@@ -210,7 +209,7 @@ end
 -- Load settings from the configuration which are shared across all aura widgets
 -- used (for each widget) in UpdateWidgetConfig
 function Widget:UpdateSettings()
-  self.db = TidyPlatesThreat.db.profile.uniqueWidget
+  self.db = Addon.db.profile.uniqueWidget
 
   DefaultGlowColor = ThreatPlates.DEFAULT_SETTINGS.profile.uniqueSettings["**"].Effects.Glow.Color
 end

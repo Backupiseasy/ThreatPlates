@@ -17,7 +17,6 @@ local GetStatusBarWidgetVisualizationInfo = C_UIWidgetManager.GetStatusBarWidget
 local UnitPlayerControlled, UnitIsOwnerOrControllerOfUnit = UnitPlayerControlled, UnitIsOwnerOrControllerOfUnit
 
 -- ThreatPlates APIs
-local TidyPlatesThreat = TidyPlatesThreat
 local ANCHOR_POINT_TEXT = Addon.ANCHOR_POINT_TEXT
 
 local _G =_G
@@ -100,7 +99,7 @@ function Widget:UPDATE_UI_WIDGET(widget_info)
 end
 
 function Widget:IsEnabled()
-  local db = TidyPlatesThreat.db.profile.ExperienceWidget
+  local db = Addon.db.profile.ExperienceWidget
   return db.ON or db.ShowInHeadlineView
 end
 
@@ -168,7 +167,7 @@ function Widget:UpdateLayout(widget_frame)
 end
 
 function Widget:UpdateSettings()
-  Settings = TidyPlatesThreat.db.profile.ExperienceWidget
+  Settings = Addon.db.profile.ExperienceWidget
 
   EnabledForStyle["NameOnly"] = Settings.ShowInHeadlineView
   EnabledForStyle["NameOnly-Unique"] = Settings.ShowInHeadlineView

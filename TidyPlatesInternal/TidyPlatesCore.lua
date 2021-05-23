@@ -30,7 +30,6 @@ local GetPlayerInfoByGUID, RAID_CLASS_COLORS = GetPlayerInfoByGUID, RAID_CLASS_C
 local UnitNameplateShowsWidgetsOnly = UnitNameplateShowsWidgetsOnly
 
 -- ThreatPlates APIs
-local TidyPlatesThreat = TidyPlatesThreat
 local Widgets = Addon.Widgets
 local Animations = Addon.Animations
 local BackdropTemplate = Addon.BackdropTemplate
@@ -1121,7 +1120,7 @@ do
       castbar = extended.visual.castbar
       style = extended.style
       castbar:ClearAllPoints()
-      local db = TidyPlatesThreat.db.profile.settings.castbar
+      local db = Addon.db.profile.settings.castbar
       castbar:SetPoint(style.castbar.anchor or "CENTER", extended, style.castbar.x + db.x_target or 0, style.castbar.y + db.y_target or 0)
 
       LastTargetPlate = plate
@@ -1302,7 +1301,7 @@ do
 
         local castbar = visual.castbar
         if castbar:IsShown() then
-          local db = TidyPlatesThreat.db.profile
+          local db = Addon.db.profile
 
           sourceName = gsub(sourceName, "%-[^|]+", "") -- UnitName(sourceName) only works in groups
           local _, class_name = GetPlayerInfoByGUID(interrupterGUID)
@@ -1350,7 +1349,7 @@ do
 
         local castbar = visual.castbar
         if castbar:IsShown() then
-          local db = TidyPlatesThreat.db.profile
+          local db = Addon.db.profile
           sourceName = gsub(sourceName, "%-[^|]+", "") -- UnitName(sourceName) only works in groups
           local _, class_name = GetPlayerInfoByGUID(sourceGUID)
           if class_name then
@@ -1609,7 +1608,7 @@ do
 --    if not extended.TestBackground then
 --      extended.TestBackground = extended:CreateTexture(nil, "BACKGROUND")
 --      extended.TestBackground:SetAllPoints(extended)
---      extended.TestBackground:SetTexture(Addon.LibSharedMedia:Fetch('statusbar', TidyPlatesThreat.db.profile.AuraWidget.BackgroundTexture))
+--      extended.TestBackground:SetTexture(Addon.LibSharedMedia:Fetch('statusbar', Addon.db.profile.AuraWidget.BackgroundTexture))
 --      extended.TestBackground:SetVertexColor(0,0,0,0.5)
 --    end
 
@@ -1634,7 +1633,7 @@ do
       SetFontGroupObject(object, objectstyle)
     end
 
-    local db = TidyPlatesThreat.db.profile.settings
+    local db = Addon.db.profile.settings
 
     -- Healthbar
 		SetAnchorGroupObject(visual.healthbar, style.healthbar, extended)
@@ -1673,7 +1672,7 @@ do
       visual.raidicon:Hide()
     end
 
-    db = TidyPlatesThreat.db.profile.settings.castbar
+    db = Addon.db.profile.settings.castbar
 
     visual.castbar:ClearAllPoints()
     if UnitIsUnit("target", unit.unitid) then
@@ -1717,7 +1716,7 @@ end
 
 -- Blizzard default nameplates always have the same size, no matter what the UI scale actually is
 function Addon:UIScaleChanged()
-  local db = TidyPlatesThreat.db.profile.Scale
+  local db = Addon.db.profile.Scale
   if db.IgnoreUIScale then
     self.UIScale = 1  -- Code for anchoring TPFrame to WorldFrame/Blizzard nameplate instead of UIParent
     --self.UIScale = 1 / UIParent:GetEffectiveScale()
@@ -1761,7 +1760,7 @@ function Addon:ConfigClickableArea(toggle_show)
         extended.Background:SetBackdropBorderColor(0, 0, 0, 0.8)
         extended.Background:SetPoint("CENTER", ConfigModePlate.UnitFrame, "CENTER")
 
-        local width, height = TidyPlatesThreat.db.profile.settings.frame.width, TidyPlatesThreat.db.profile.settings.frame.height
+        local width, height = Addon.db.profile.settings.frame.width, Addon.db.profile.settings.frame.height
 
         local min_scale = tonumber(GetCVar("nameplateMinScale"))
         --local selected_scale = tonumber(GetCVar("nameplateSelectedScale"))
@@ -1789,7 +1788,7 @@ function Addon:ConfigClickableArea(toggle_show)
   elseif ConfigModePlate then
     local background = ConfigModePlate.TPFrame.Background
     background:SetPoint("CENTER", ConfigModePlate.UnitFrame, "CENTER")
-    background:SetSize(TidyPlatesThreat.db.profile.settings.frame.width, TidyPlatesThreat.db.profile.settings.frame.height)
+    background:SetSize(Addon.db.profile.settings.frame.width, Addon.db.profile.settings.frame.height)
   end
 end
 
@@ -1807,7 +1806,7 @@ function Addon:ForceUpdate()
 
   CVAR_NameplateOccludedAlphaMult = tonumber(GetCVar("nameplateOccludedAlphaMult"))
 
-  local db = TidyPlatesThreat.db.profile
+  local db = Addon.db.profile
 
   SettingsShowFriendlyBlizzardNameplates = db.ShowFriendlyBlizzardNameplates
   SettingsShowEnemyBlizzardNameplates = db.ShowEnemyBlizzardNameplates

@@ -22,7 +22,6 @@ local SPELL_POWER_MANA = SPELL_POWER_MANA
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 
 -- ThreatPlates APIs
-local TidyPlatesThreat = TidyPlatesThreat
 local BackdropTemplate = Addon.BackdropTemplate
 
 local _G =_G
@@ -212,7 +211,7 @@ function Widget:Create()
 end
 
 function Widget:IsEnabled()
-  return TidyPlatesThreat.db.profile.ResourceWidget.ON
+  return Addon.db.profile.ResourceWidget.ON
 end
 
 -- EVENT: UNIT_POWER_UPDATE: "unitID", "powerType"
@@ -350,7 +349,7 @@ function Widget:UpdateLayout()
 end
 
 function Widget:UpdateSettings()
-  self.db = TidyPlatesThreat.db.profile.ResourceWidget
+  self.db = Addon.db.profile.ResourceWidget
 
   -- Update the widget if it was already created (not true for immediately after Reload UI or if it was never enabled
   -- in this since last Reload UI)

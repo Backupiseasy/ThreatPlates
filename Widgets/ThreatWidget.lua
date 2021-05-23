@@ -20,7 +20,6 @@ local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local GetRaidTargetIndex = GetRaidTargetIndex
 
 -- ThreatPlates APIs
-local TidyPlatesThreat = TidyPlatesThreat
 local GetThreatSituation = Addon.GetThreatSituation
 local PlatesByGUID = Addon.PlatesByGUID
 local Font = Addon.Font
@@ -96,7 +95,7 @@ function Widget:Create(tp_frame)
 end
 
 function Widget:IsEnabled()
-  return TidyPlatesThreat.db.profile.threat.art.ON or TidyPlatesThreat.db.profile.threatWidget.ThreatPercentage.Show
+  return Addon.db.profile.threat.art.ON or Addon.db.profile.threatWidget.ThreatPercentage.Show
 end
 
 function Widget:OnEnable()
@@ -115,7 +114,7 @@ function Widget:EnabledForStyle(style, unit)
 end
 
 function Widget:OnUnitAdded(widget_frame, unit)
-  local db = TidyPlatesThreat.db.profile.threat.art
+  local db = Addon.db.profile.threat.art
 
   if db.theme == "bar" then
     widget_frame.LeftTexture:ClearAllPoints()
@@ -138,7 +137,7 @@ function Widget:OnUnitAdded(widget_frame, unit)
 end
 
 function Widget:UpdateFrame(widget_frame, unit)
-  local db = TidyPlatesThreat.db.profile.threat
+  local db = Addon.db.profile.threat
 
   if not Addon:ShowThreatFeedback(unit) then
     widget_frame:Hide()
@@ -215,7 +214,7 @@ function Widget:UpdateLayout(widget_frame)
 end
 
 function Widget:UpdateSettings()
-  Settings = TidyPlatesThreat.db.profile.threatWidget
-  SettingsArt = TidyPlatesThreat.db.profile.threat.art
-  ThreatColors = TidyPlatesThreat.db.profile.settings
+  Settings = Addon.db.profile.threatWidget
+  SettingsArt = Addon.db.profile.threat.art
+  ThreatColors = Addon.db.profile.settings
 end

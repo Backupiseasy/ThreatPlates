@@ -8,9 +8,9 @@ local EMPTY_TEXTURE = ART_PATH.."Empty"
 -- Style: Text-Only for Headline-View
 -------------------------------------------------------------------------------------
 
-local function Create(self,name)
-  local db = self.db.profile.settings
-  local dbprofile = self.db.profile
+local function Create(name)
+  local dbprofile = Addon.db.profile
+  local db = dbprofile.settings
   local theme = {
 
     frame = {

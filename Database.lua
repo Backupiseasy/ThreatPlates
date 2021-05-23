@@ -19,7 +19,6 @@ local UnitClass = UnitClass
 
 -- ThreatPlates APIs
 local L = ThreatPlates.L
-local TidyPlatesThreat = TidyPlatesThreat
 local RGB = ThreatPlates.RGB
 
 local _G =_G
@@ -55,7 +54,7 @@ if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC then
   local PlayerIsTankByClassFunction = PLAYER_IS_TANK_BY_CLASS[Addon.PlayerClass] or PLAYER_IS_TANK_BY_CLASS["DEFAULT"]
 
   function Addon:PlayerRoleIsTank()
-    local db = TidyPlatesThreat.db
+    local db = Addon.db
     if db.profile.optionRoleDetectionAutomatic then
       return PlayerIsTankByClassFunction()
     else
@@ -64,14 +63,14 @@ if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC then
   end
 
   -- Sets the role of the index spec or the active spec to tank (value = true) or dps/healing
-  function TidyPlatesThreat:SetRole(value)
-    self.db.char.spec[1] = value
+  function Addon:SetRole(value)
+    Addon.db.char.spec[1] = value
   end
 else
   local PLAYER_ROLE_BY_SPEC = ThreatPlates.SPEC_ROLES[Addon.PlayerClass]
 
   function Addon:PlayerRoleIsTank()
-    local db = TidyPlatesThreat.db
+    local db = Addon.db
     if db.profile.optionRoleDetectionAutomatic then
       return PLAYER_ROLE_BY_SPEC[_G.GetSpecialization()] or false
     else
@@ -80,19 +79,19 @@ else
   end
 
   -- Sets the role of the index spec or the active spec to tank (value = true) or dps/healing
-  function TidyPlatesThreat:SetRole(value,index)
+  function Addon:SetRole(value,index)
     if index then
-      self.db.char.spec[index] = value
+      Addon.db.char.spec[index] = value
     else
-      self.db.char.spec[_G.GetSpecialization()] = value
+      Addon.db.char.spec[_G.GetSpecialization()] = value
     end
   end
 end
 
 local function GetUnitVisibility(full_unit_type)
-  local unit_visibility = TidyPlatesThreat.db.profile.Visibility[full_unit_type]
+  local unit_visibility = Addon.db.profile.Visibility[full_unit_type]
 
-  -- assert (TidyPlatesThreat.db.profile.Visibility[full_unit_type], "missing unit type: ".. full_unit_type)
+  -- assert (Addon.db.profile.Visibility[full_unit_type], "missing unit type: ".. full_unit_type)
 
   local show = unit_visibility.Show
   if type(show) ~= "boolean" then
@@ -106,7 +105,7 @@ local function SetNamePlateClickThrough(friendly, enemy)
 --  if InCombatLockdown() then
 --    ThreatPlates.Print(L["Nameplate clickthrough cannot be changed while in combat."], true)
 --  else
-    local db = TidyPlatesThreat.db.profile
+    local db = Addon.db.profile
     db.NamePlateFriendlyClickThrough = friendly
     db.NamePlateEnemyClickThrough = enemy
     Addon:CallbackWhenOoC(function()
@@ -578,7 +577,7 @@ local function GetDefaultSettingsV1(defaults)
 end
 
 local function SwitchToDefaultSettingsV1()
-  local db = TidyPlatesThreat.db
+  local db = Addon.db
   local current_profile = db:GetCurrentProfile()
 
   db:SetProfile("_ThreatPlatesInternal")
@@ -591,7 +590,7 @@ local function SwitchToDefaultSettingsV1()
 end
 
 local function SwitchToCurrentDefaultSettings()
-  local db = TidyPlatesThreat.db
+  local db = Addon.db
   local current_profile = db:GetCurrentProfile()
 
   db:SetProfile("_ThreatPlatesInternal")
@@ -936,7 +935,7 @@ end
 
 local function MigrationCustomPlatesV1(profile_name, profile)
   -- This migration function is called with an empty default profile, so CustomNameplatesVersion is nil if it is still the default value (1)
-  if TidyPlatesThreat.db.global.CustomNameplatesVersion then return end
+  if Addon.db.global.CustomNameplatesVersion then return end
 
   if DatabaseEntryExists(profile, { "uniqueSettings" }) then
     local custom_styles = profile.uniqueSettings
@@ -991,7 +990,7 @@ local function MigrationCustomPlatesV1(profile_name, profile)
 end
 
 local function MigrateCustomStylesToV3(profile_name, profile)
-  -- if TidyPlatesThreat.db.global.CustomNameplatesVersion > 2 then return end
+  -- if Addon.db.global.CustomNameplatesVersion > 2 then return end
 
   if DatabaseEntryExists(profile, { "uniqueSettings" }) then
     local custom_styles = profile.uniqueSettings
@@ -1165,11 +1164,11 @@ local DEPRECATED_SETTINGS = {
 }
 
 local function MigrateDatabase(current_version)
-  TidyPlatesThreat.db.global.MigrationLog = nil
-  --TidyPlatesThreat.db.global.MigrationLog = {}
+  Addon.db.global.MigrationLog = nil
+  --Addon.db.global.MigrationLog = {}
 
   local cleanup_database_after_migration = false
-  local profile_table = TidyPlatesThreat.db.profiles
+  local profile_table = Addon.db.profiles
   for index, entry in ipairs(DEPRECATED_SETTINGS) do
     local action = entry[1]
 
@@ -1178,18 +1177,18 @@ local function MigrateDatabase(current_version)
       if not max_version or CurrentVersionIsOlderThan(current_version, max_version) then
         local defaults
         if entry.NoDefaultProfile then
-          defaults = ThreatPlates.CopyTable(TidyPlatesThreat.db.defaults) -- Should move that before the for loop
-          TidyPlatesThreat.db:RegisterDefaults({})
+          defaults = ThreatPlates.CopyTable(Addon.db.defaults) -- Should move that before the for loop
+          Addon.db:RegisterDefaults({})
         end
 
         -- iterate over all profiles and migrate values
-        --TidyPlatesThreat.db.global.MigrationLog[key] = "Migration" .. (max_version and ( " because " .. current_version .. " < " .. max_version) or "")
+        --Addon.db.global.MigrationLog[key] = "Migration" .. (max_version and ( " because " .. current_version .. " < " .. max_version) or "")
         for profile_name, profile in pairs(profile_table) do
           action(profile_name, profile)
         end
 
         if entry.NoDefaultProfile then
-          TidyPlatesThreat.db:RegisterDefaults(defaults)
+          Addon.db:RegisterDefaults(defaults)
         end
 
         cleanup_database_after_migration = cleanup_database_after_migration or entry.CleanupDatabase
@@ -1202,7 +1201,7 @@ local function MigrateDatabase(current_version)
       -- end
     else
       -- iterate over all profiles and delete the old config entry
-      --TidyPlatesThreat.db.global.MigrationLog[key] = "DELETED"
+      --Addon.db.global.MigrationLog[key] = "DELETED"
       for profile_name, profile in pairs(profile_table) do
         DatabaseEntryDelete(profile, entry)
       end
@@ -1211,11 +1210,11 @@ local function MigrateDatabase(current_version)
 
   -- Switch through all profiles to cleanup configuration (removing settings with default values from the file)
   if cleanup_database_after_migration then
-    local current_profile = TidyPlatesThreat.db:GetCurrentProfile()
+    local current_profile = Addon.db:GetCurrentProfile()
     for profile_name, profile in pairs(profile_table) do
-      TidyPlatesThreat.db:SetProfile(profile_name)
+      Addon.db:SetProfile(profile_name)
     end
-    TidyPlatesThreat.db:SetProfile(current_profile)
+    Addon.db:SetProfile(current_profile)
   end
 end
 
@@ -1388,7 +1387,7 @@ Addon.ImportProfile = function(profile, profile_name, profile_version)
     ThreatPlates.Print(L["Failed to migrate the imported profile to the current settings format because of an internal error. Please report this issue at the Threat Plates homepage at CurseForge: "] .. return_value, true)
   else
     -- Create a new profile with default settings:
-    TidyPlatesThreat.db:SetProfile(profile_name) --will create a new profile
+    Addon.db:SetProfile(profile_name) --will create a new profile
 
     -- Custom styles must be handled seperately
     local custom_styles = ThreatPlates.CopyTable(profile.uniqueSettings)
@@ -1397,14 +1396,14 @@ Addon.ImportProfile = function(profile, profile_name, profile_version)
     end
 
     -- Merge the migrated profile to import into this new profile
-    UpdateFromSettings(TidyPlatesThreat.db.profile, profile)
+    UpdateFromSettings(Addon.db.profile, profile)
 
     -- Now merge back the custom styles
     for index, imported_custom_style in pairs(custom_styles) do
       -- Import all values from the custom style as long the are valid entries with the correct type
       -- based on the default custom style "**"
       local custom_style = Addon.ImportCustomStyle(imported_custom_style)
-      table.insert(TidyPlatesThreat.db.profile.uniqueSettings, index, custom_style)
+      table.insert(Addon.db.profile.uniqueSettings, index, custom_style)
     end
   end
 end

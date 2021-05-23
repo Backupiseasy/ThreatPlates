@@ -1965,7 +1965,7 @@ function Widget:Create(tp_frame)
 end
 
 function Widget:IsEnabled()
-  self.db = TidyPlatesThreat.db.profile.AuraWidget
+  self.db = Addon.db.profile.AuraWidget
   return self.db.ON or self.db.ShowInHeadlineView
 end
 
@@ -2068,7 +2068,7 @@ local function ParseFilter(filter_by_spell)
 end
 
 function Widget:ParseSpellFilters()
-  self.db = TidyPlatesThreat.db.profile.AuraWidget
+  self.db = Addon.db.profile.AuraWidget
 
   self.AuraFilterBuffs = ParseFilter(self.db.Buffs.FilterBySpell)
   self.AuraFilterDebuffs = ParseFilter(self.db.Debuffs.FilterBySpell)
@@ -2150,7 +2150,7 @@ end
 -- Load settings from the configuration which are shared across all aura widgets
 -- used (for each widget) in UpdateWidgetConfig
 function Widget:UpdateSettings()
-  self.db = TidyPlatesThreat.db.profile.AuraWidget
+  self.db = Addon.db.profile.AuraWidget
 
   self.IconMode = not self.db.ModeBar.Enabled
   if self.IconMode then

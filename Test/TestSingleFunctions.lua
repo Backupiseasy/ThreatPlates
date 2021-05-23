@@ -44,8 +44,8 @@ local TEST_UNIT = {
 
 
 function GetConfig(config_no)
-  TidyPlatesThreat.db.profile.socialWidget.ShowFriendColor = true
-  TidyPlatesThreat.db.profile.socialWidget.ShowGuildmateColor = true
+  Addon.db.profile.socialWidget.ShowFriendColor = true
+  Addon.db.profile.socialWidget.ShowGuildmateColor = true
   if config_no == 1 then
     return TEST_UNIT[config_no]
   elseif config_no == 2 then
@@ -86,7 +86,7 @@ function GetColorByReaction_8_5_0(unit)
   local unit_type = unit.type
   local unit_id = unit.unitid
 
-  local db = TidyPlatesThreat.db.profile
+  local db = Addon.db.profile
   local db_color = db.ColorByReaction
 
   local color
@@ -122,7 +122,7 @@ function GetColorByReaction_8_5_0(unit)
 end
 
 function GetColorByReaction_Test(unit)
-  local db = TidyPlatesThreat.db.profile
+  local db = Addon.db.profile
   local db_color = db.ColorByReaction
 
   local color
@@ -157,7 +157,7 @@ end
 --  local unit_type = unit.type
 --  local unit_id = unit.unitid
 --
---  local db = TidyPlatesThreat.db.profile
+--  local db = Addon.db.profile
 --  local db_color = db.ColorByReaction
 --
 --  local color

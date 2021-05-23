@@ -18,7 +18,6 @@ local IsInInstance = IsInInstance
 local GetPartyAssignment = GetPartyAssignment
 
 -- ThreatPlates APIs
-local TidyPlatesThreat = TidyPlatesThreat
 local IsOffTankCreature = Addon.IsOffTankCreature
 local TOTEMS = Addon.TOTEMS
 local RGB_P = ThreatPlates.RGB_P
@@ -146,7 +145,7 @@ local function GetThreatSituation(unit, style, enable_off_tank)
 end
 
 function Addon:GetThreatColor(unit, style, use_threat_table)
-  local db = TidyPlatesThreat.db.profile
+  local db = Addon.db.profile
 
   local color
 
@@ -172,7 +171,7 @@ end
 
 -- Threat System is OP, player is in combat, style is tank or dps
 local function GetColorByThreat(unit, style)
-  local db = TidyPlatesThreat.db.profile
+  local db = Addon.db.profile
   local c
 
   if (db.threat.ON and db.threat.useHPColor and (style == "dps" or style == "tank")) then
@@ -183,7 +182,7 @@ local function GetColorByThreat(unit, style)
 end
 
 local function GetColorByHealthDeficit(unit)
-  local db = TidyPlatesThreat.db.profile
+  local db = Addon.db.profile
 
   local pct = (_G.UnitHealth(unit.unitid) or 0) / (_G.UnitHealthMax(unit.unitid) or 1)
   local r, g, b = CS:GetSmudgeColorRGB(db.aHPbarColor, db.bHPbarColor, pct)
@@ -191,7 +190,7 @@ local function GetColorByHealthDeficit(unit)
 end
 
 local function GetColorByClass(unit)
-  local db = TidyPlatesThreat.db.profile
+  local db = Addon.db.profile
 
   local c
   if unit.type == "PLAYER" then
@@ -213,7 +212,7 @@ local function GetColorByClass(unit)
 end
 
 local function GetColorByReaction(unit)
-  local db = TidyPlatesThreat.db.profile.ColorByReaction
+  local db = Addon.db.profile.ColorByReaction
 
 --  if unit.type == "NPC" and not UnitCanAttack("player", unit.unitid) and UnitReaction("player", unit.unitid) <= 3 then
 --    -- 1/2 is same color (red), 4 is neutral (yellow),5-8 is same color (green)
@@ -229,7 +228,7 @@ local function GetColorByReaction(unit)
 end
 
 --local function GetColorByReaction(unit)
---  local db = TidyPlatesThreat.db.profile
+--  local db = Addon.db.profile
 --  local db_color = db.ColorByReaction
 --
 --  local color
@@ -281,7 +280,7 @@ function Addon:SetHealthbarColor(unit)
   IsFriend = IsFriend or ThreatPlates.IsFriend
   IsGuildmate = IsGuildmate or ThreatPlates.IsGuildmate
 
-  local db = TidyPlatesThreat.db.profile
+  local db = Addon.db.profile
   local db_color = db.ColorByReaction
 
   local c

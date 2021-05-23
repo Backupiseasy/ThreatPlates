@@ -8,7 +8,6 @@ local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
 local UnitIsConnected = UnitIsConnected
 
 -- ThreatPlates APIs
-local TidyPlatesThreat = TidyPlatesThreat
 local RGB = ThreatPlates.RGB
 
 local _G =_G
@@ -23,7 +22,7 @@ local COLOR_TRANSPARENT = RGB(0, 0, 0, 0) -- opaque
 ---------------------------------------------------------------------------------------------------
 
 local function ShowThreatGlow(unit)
-  local db = TidyPlatesThreat.db.profile
+  local db = Addon.db.profile
 
   if db.ShowThreatGlowOnAttackedUnitsOnly then
     if IsInInstance() and db.threat.UseHeuristicInInstances then
@@ -39,7 +38,7 @@ end
 function Addon:SetThreatColor(unit)
   local color
 
-  local db = TidyPlatesThreat.db.profile
+  local db = Addon.db.profile
   if not UnitIsConnected(unit.unitid) and ShowThreatGlow(unit) then
     color = db.ColorByReaction.DisconnectedUnit
   elseif unit.isTapped and ShowThreatGlow(unit) then

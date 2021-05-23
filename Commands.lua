@@ -9,9 +9,9 @@ local L = TP.L
 local DEBUG = TP.Meta("version"):find("Alpha") or TP.Meta("version"):find("Beta")
 
 local function toggleDPS()
-	TidyPlatesThreat:SetRole(false)
-	TidyPlatesThreat.db.profile.threat.ON = true
-	if TidyPlatesThreat.db.profile.verbose then
+	Addon:SetRole(false)
+	Addon.db.profile.threat.ON = true
+	if Addon.db.profile.verbose then
 		TP.Print(L["-->>|cffff0000DPS Plates Enabled|r<<--"])
 		TP.Print(L["|cff89F559Threat Plates|r: DPS switch detected, you are now in your |cffff0000dpsing / healing|r role."])
 	end
@@ -19,9 +19,9 @@ local function toggleDPS()
 end
 
 local function toggleTANK()
-	TidyPlatesThreat:SetRole(true)
-	TidyPlatesThreat.db.profile.threat.ON = true
-	if TidyPlatesThreat.db.profile.verbose then
+	Addon:SetRole(true)
+	Addon.db.profile.threat.ON = true
+	if Addon.db.profile.verbose then
 		TP.Print(L["-->>|cff00ff00Tank Plates Enabled|r<<--"])
 		TP.Print(L["|cff89F559Threat Plates|r: Tank switch detected, you are now in your |cff00ff00tanking|r role."])
 	end
@@ -34,7 +34,7 @@ SLASH_TPTPTANK1 = "/tptptank"
 SlashCmdList["TPTPTANK"] = toggleTANK
 
 local function TPTPTOGGLE()
-	if (TidyPlatesThreat.db.profile.optionRoleDetectionAutomatic and TidyPlatesThreat.db.profile.verbose) then
+	if (Addon.db.profile.optionRoleDetectionAutomatic and Addon.db.profile.verbose) then
 		TP.Print(L["|cff89F559Threat Plates|r: Role toggle not supported because automatic role detection is enabled."])
 	else
 		if Addon:PlayerRoleIsTank() then
@@ -70,12 +70,12 @@ SLASH_TPTPOVERLAP1 = "/tptpol"
 SlashCmdList["TPTPOVERLAP"] = TPTPOVERLAP
 
 local function TPTPVERBOSE()
-	if TidyPlatesThreat.db.profile.verbose then
+	if Addon.db.profile.verbose then
 		TP.Print(L["-->>Threat Plates verbose is now |cffff0000OFF!|r<<-- shhh!!"])
 	else
 		TP.Print(L["-->>Threat Plates verbose is now |cff00ff00ON!|r<<--"], true)
 	end
-	TidyPlatesThreat.db.profile.verbose = not TidyPlatesThreat.db.profile.verbose
+	Addon.db.profile.verbose = not Addon.db.profile.verbose
 end
 
 SLASH_TPTPVERBOSE1 = "/tptpverbose"
@@ -110,71 +110,24 @@ local function SearchDBForString(db, prefix, keyword)
 	end
 end
 
--- Command: /tptp
-function TidyPlatesThreat:ChatCommand(input)
-	local cmd_list = {}
-	for w in input:gmatch("%S+") do cmd_list[#cmd_list + 1] = w end
-
-	local command = cmd_list[1]
-	if not command or command == "" then
-		TidyPlatesThreat:OpenOptions()
-	elseif command == "help" then
-		PrintHelp()
-	elseif command == "legacy-custom-styles" then
-		Addon.RestoreLegacyCustomNameplates()
-	elseif command == "profile" then
-		local profile_name = cmd_list[2]
-		if profile_name and profile_name ~= "" then
-			-- Check if profile exists
-			if TidyPlatesThreat.db.profiles[profile_name] then
-				TidyPlatesThreat.db:SetProfile(profile_name)
-			else
-				TP.Print(L["|cff89F559Threat Plates|r: Unknown profile: "] .. profile_name, true)
-			end
-		else
-			TP.Print(L["|cff89F559Threat Plates|r: No profile specified"], true)
-		end
-	elseif input == "toggle-scripting" then
-		TidyPlatesThreat.db.global.ScriptingIsEnabled = not TidyPlatesThreat.db.global.ScriptingIsEnabled
-		if TidyPlatesThreat.db.global.ScriptingIsEnabled then
-			TP.Print(L["Scriping for custom styles for nameplates is now |cff00ff00enabled!|r."])
-		else
-			TP.Print(L["Scriping for custom styles for nameplates is now |cffff0000disabled!|r."])
-		end
-		Addon.UpdateCustomStyles()
-		TidyPlatesThreat:ConfigTableChanged()
---	elseif command == "toggle-view-friendly-units" then
---		TidyPlatesThreat:ToggleNameplateModeFriendlyUnits()
---	elseif command == "toggle-view-neutral-units" then
---		TidyPlatesThreat:ToggleNameplateModeNeutralUnits()
---	elseif command == "toggle-view-enemy-units" then
---		TidyPlatesThreat:ToggleNameplateModeEnemyUnits()
-	elseif DEBUG then
-		TidyPlatesThreat:ChatCommandDebug(cmd_list)
-	else
-		TP.Print(L["Unknown option: "] .. input, true)
-		PrintHelp()
-	end
-end
-
-function TidyPlatesThreat:ChatCommandDebug(cmd_list)
+local function ChatCommandDebug(cmd_list)
 	local command = cmd_list[1]
 
 	if command == "searchdb" then
 		TP.Print("|cff89F559Threat Plates|r: Searching settings:", true)
-		SearchDBForString(TidyPlatesThreat.db.profile, "<Profile>", string.lower(cmd_list[2]))
-		SearchDBForString(TidyPlatesThreat.db.global, "<Profile>", string.lower(cmd_list[2]))
+		SearchDBForString(Addon.db.profile, "<Profile>", string.lower(cmd_list[2]))
+		SearchDBForString(Addon.db.global, "<Profile>", string.lower(cmd_list[2]))
 	elseif command == "cache" then
 		Addon.DebugPrintCaches()
 	elseif command == "unit" then
 		local plate = C_NamePlate.GetNamePlateForUnit("target")
 		if not plate then return end
 		TP.DEBUG_PRINT_UNIT(plate.TPFrame.unit, true)
-	--elseif command == "migrate" then
-	--	Addon.TestMigration()
-	--	Addon.MigrateDatabase(TP.Meta("version"))
+		--elseif command == "migrate" then
+		--	Addon.TestMigration()
+		--	Addon.MigrateDatabase(TP.Meta("version"))
 	elseif command == "print-custom-styles" then
-		TP.DEBUG_PRINT_TABLE(TidyPlatesThreat.db.profile.uniqueSettings)
+		TP.DEBUG_PRINT_TABLE(Addon.db.profile.uniqueSettings)
 		--Addon.MigrateDatabase(TP.Meta("version"))
 	elseif command == "guid" then
 		local plate = C_NamePlate.GetNamePlateForUnit("target")
@@ -196,12 +149,12 @@ function TidyPlatesThreat:ChatCommandDebug(cmd_list)
 		Addon:PrintQuests(cmd_list[2])
 	elseif command == "social" then
 		Addon.PrintFriendlist()
- 	elseif command == "custom-styles" then
-		for k, v in pairs(TidyPlatesThreat.db.profile.uniqueSettings) do
+	elseif command == "custom-styles" then
+		for k, v in pairs(Addon.db.profile.uniqueSettings) do
 			print ("Style:", k, "=>", v.Trigger.Type, " - ", v.Trigger[v.Trigger.Type].Input or "nil" )
 		end
 	elseif command == "cleanup-custom-styles" then
-		local input = TidyPlatesThreat.db.profile.uniqueSettings
+		local input = Addon.db.profile.uniqueSettings
 		for i = #input, 1 , -1 do
 			local custom_style = input[i]
 			print (i, type(i), custom_style.Trigger.Type, custom_style.Trigger.Name.Input)
@@ -227,27 +180,27 @@ function TidyPlatesThreat:ChatCommandDebug(cmd_list)
 		local imported_custom_style = Addon.ImportCustomStyle(custom_style)
 		TP.DEBUG_PRINT_TABLE(imported_custom_style)
 
-  elseif command == "heuristic" then
-    local plate = C_NamePlate.GetNamePlateForUnit("target")
-    if not plate then return end
-    local unit = plate.TPFrame.unit
+	elseif command == "heuristic" then
+		local plate = C_NamePlate.GetNamePlateForUnit("target")
+		if not plate then return end
+		local unit = plate.TPFrame.unit
 
-    Addon.GetColorByThreat(unit, unit.style, true)
+		Addon.GetColorByThreat(unit, unit.style, true)
 
 		--print (unit.name, "- InCombatThreat =", unit.InCombatThreat)
 
-		--    print ("Use Threat Table:", TidyPlatesThreat.db.profile.threat.UseThreatTable)
-    --    print ("Use Heuristic in Instances:", TidyPlatesThreat.db.profile.threat.UseHeuristicInInstances)
+		--    print ("Use Threat Table:", Addon.db.profile.threat.UseThreatTable)
+		--    print ("Use Heuristic in Instances:", Addon.db.profile.threat.UseHeuristicInInstances)
 
-    --print ("InCombat:", InCombatLockdown())
+		--print ("InCombat:", InCombatLockdown())
 
-    --Addon:ShowThreatFeedback(unit,true)
-    --Addon:GetThreatColor(unit, unit.style, TidyPlatesThreat.db.profile.threat.UseThreatTable, true)
-    --Addon:SetThreatColor(unit, true)
+		--Addon:ShowThreatFeedback(unit,true)
+		--Addon:GetThreatColor(unit, unit.style, Addon.db.profile.threat.UseThreatTable, true)
+		--Addon:SetThreatColor(unit, true)
 	elseif command == "test" then
---		local unique_unit = TP.CopyTable(TidyPlatesThreat.db.profile.uniqueSettings[1])
---		unique_unit.UseAutomaticIcon = nil
---		print (Addon.CheckTableStructure(TP.DEFAULT_SETTINGS.profile.uniqueSettings["**"], unique_unit))
+		--		local unique_unit = TP.CopyTable(Addon.db.profile.uniqueSettings[1])
+		--		unique_unit.UseAutomaticIcon = nil
+		--		print (Addon.CheckTableStructure(TP.DEFAULT_SETTINGS.profile.uniqueSettings["**"], unique_unit))
 		print ("9.1.20 < 9.2.0-Beta1:", Addon.CurrentVersionIsOlderThan("9.1.20", "9.2.0-Beta1"))
 		print ("9.2.0-Beta1 < 9.1.20:", Addon.CurrentVersionIsOlderThan("9.2.0-Beta1", "9.1.20"))
 		print ("9.2.0-Beta2 < 9.2.0-Beta1:", Addon.CurrentVersionIsOlderThan("9.2.0-Beta2", "9.2.0-Beta1"))
@@ -258,6 +211,53 @@ function TidyPlatesThreat:ChatCommandDebug(cmd_list)
 		DBM.Nameplate:Hide(true, UnitGUID("target"), 255824, nil, nil, nil, true, {0.5, 0, 0.55, 0.75})
 	else
 		TP.Print(L["Unknown option: "] .. command, true)
+		PrintHelp()
+	end
+end
+
+-- Command: /tptp
+function TidyPlatesThreat:ChatCommand(input)
+	local cmd_list = {}
+	for w in input:gmatch("%S+") do cmd_list[#cmd_list + 1] = w end
+
+	local command = cmd_list[1]
+	if not command or command == "" then
+		Addon:OpenOptions()
+	elseif command == "help" then
+		PrintHelp()
+	elseif command == "legacy-custom-styles" then
+		Addon.RestoreLegacyCustomNameplates()
+	elseif command == "profile" then
+		local profile_name = cmd_list[2]
+		if profile_name and profile_name ~= "" then
+			-- Check if profile exists
+			if Addon.db.profiles[profile_name] then
+				Addon.db:SetProfile(profile_name)
+			else
+				TP.Print(L["|cff89F559Threat Plates|r: Unknown profile: "] .. profile_name, true)
+			end
+		else
+			TP.Print(L["|cff89F559Threat Plates|r: No profile specified"], true)
+		end
+	elseif input == "toggle-scripting" then
+		Addon.db.global.ScriptingIsEnabled = not Addon.db.global.ScriptingIsEnabled
+		if Addon.db.global.ScriptingIsEnabled then
+			TP.Print(L["Scriping for custom styles for nameplates is now |cff00ff00enabled!|r."])
+		else
+			TP.Print(L["Scriping for custom styles for nameplates is now |cffff0000disabled!|r."])
+		end
+		Addon.UpdateCustomStyles()
+		Addon:ConfigTableChanged()
+--	elseif command == "toggle-view-friendly-units" then
+--		TidyPlatesThreat:ToggleNameplateModeFriendlyUnits()
+--	elseif command == "toggle-view-neutral-units" then
+--		TidyPlatesThreat:ToggleNameplateModeNeutralUnits()
+--	elseif command == "toggle-view-enemy-units" then
+--		TidyPlatesThreat:ToggleNameplateModeEnemyUnits()
+	elseif DEBUG then
+		ChatCommandDebug(cmd_list)
+	else
+		TP.Print(L["Unknown option: "] .. input, true)
 		PrintHelp()
 	end
 end

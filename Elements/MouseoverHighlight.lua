@@ -73,7 +73,7 @@ function Addon:Element_Mouseover_Configure(frame, style_highlight)
 end
 
 function Addon.Element_Mouseover_UpdateSettings()
-  local db = TidyPlatesThreat.db.profile
+  local db = Addon.db.profile
   TargetHighlightEnabledForStyle["NameOnly"] = db.HeadlineView.ShowTargetHighlight
   TargetHighlightEnabledForStyle["NameOnly-Unique"] = db.HeadlineView.ShowTargetHighlight
   TargetHighlightEnabledForStyle["dps"] = db.targetWidget.ON

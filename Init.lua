@@ -105,7 +105,7 @@ Addon.CUSTOM_GLOW_WRAPPER_FUNCTIONS = {
 ---------------------------------------------------------------------------------------------------
 
 Addon.LoadOnDemandLibraries = function()
-	local db = TidyPlatesThreat.db.profile
+	local db = Addon.db.profile
 
 	-- Enable or disable LibDogTagSupport based on custom status text being actually used
 	if db.HeadlineView.FriendlySubtext == "CUSTOM" or db.HeadlineView.EnemySubtext == "CUSTOM" or db.settings.customtext.FriendlySubtext == "CUSTOM" or db.settings.customtext.EnemySubtext == "CUSTOM" then
@@ -314,7 +314,7 @@ end
 ---------------------------------------------------------------------------------------------------
 
 Addon.PrintMessage = function(channel, ...)
-	--local verbose = TidyPlatesThreat.db.profile.verbose
+	--local verbose = Addon.db.profile.verbose
 	if channel == "DEBUG" and Addon.DEBUG then
 		print("|cff89F559TP|r - |cff0000ff" .. channel .. "|r:", ...)
 	elseif channel == "ERROR" then
@@ -399,9 +399,9 @@ local function DEBUG_PRINT_UNIT(unit, full_info)
 		DEBUG("    UnitThreatSituation = ", UnitThreatSituation("player", unit.unitid))
 		DEBUG("    Target Unit = ", UnitExists(unit.unitid .. "target"))
 		if unit.style == "unique" then
-			DEBUG("    GetThreatSituation(Unique) = ", Addon.GetThreatSituation(unit, unit.style, TidyPlatesThreat.db.profile.threat.toggle.OffTank))
+			DEBUG("    GetThreatSituation(Unique) = ", Addon.GetThreatSituation(unit, unit.style, Addon.db.profile.threat.toggle.OffTank))
 		else
-			DEBUG("    GetThreatSituation = ", Addon.GetThreatSituation(unit, Addon:GetThreatStyle(unit), TidyPlatesThreat.db.profile.threat.toggle.OffTank))
+			DEBUG("    GetThreatSituation = ", Addon.GetThreatSituation(unit, Addon:GetThreatStyle(unit), Addon.db.profile.threat.toggle.OffTank))
 		end
   else
     DEBUG("  <no unit id>")

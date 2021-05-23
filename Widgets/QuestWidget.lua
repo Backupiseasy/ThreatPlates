@@ -28,8 +28,6 @@ local GetQuestLogTitle, GetNumQuestLogEntries = C_QuestLog.GetQuestLogTitle, C_Q
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 
 -- ThreatPlates APIs
-local TidyPlatesThreat = TidyPlatesThreat
-local ON_UPDATE_INTERVAL = Addon.ON_UPDATE_PER_FRAME
 local PlayerName = Addon.PlayerName
 
 local _G =_G
@@ -192,7 +190,7 @@ function Addon:IsPlayerQuestUnit(unit)
 end
 
 local function ShowQuestUnit(unit)
-  local db = TidyPlatesThreat.db.profile.questWidget
+  local db = Addon.db.profile.questWidget
 
   if IsInInstance() and db.HideInInstance then
     return false
@@ -211,7 +209,7 @@ local function ShowQuestUnit(unit)
 end
 
 local function ShowQuestUnitHealthbar(unit)
-  local db = TidyPlatesThreat.db.profile.questWidget
+  local db = Addon.db.profile.questWidget
   return db.ON and db.ModeHPBar and ShowQuestUnit(unit)
 end
 
@@ -493,7 +491,7 @@ end
 ---------------------------------------------------------------------------------------------------
 
 function Widget:Create(tp_frame)
-  local db = TidyPlatesThreat.db.profile.questWidget
+  local db = Addon.db.profile.questWidget
 
   -- Required Widget Code
   local widget_frame = _G.CreateFrame("Frame", nil, tp_frame)
@@ -521,7 +519,7 @@ function Widget:Create(tp_frame)
 end
 
 function Widget:IsEnabled()
-  local db = TidyPlatesThreat.db.profile.questWidget
+  local db = Addon.db.profile.questWidget
   return db.ON or db.ShowInHeadlineView
 end
 
@@ -566,14 +564,14 @@ end
 
 function Widget:EnabledForStyle(style, unit)
   if (style == "NameOnly" or style == "NameOnly-Unique") then
-    return TidyPlatesThreat.db.profile.questWidget.ShowInHeadlineView
+    return Addon.db.profile.questWidget.ShowInHeadlineView
   elseif style ~= "etotem" then
-    return TidyPlatesThreat.db.profile.questWidget.ON
+    return Addon.db.profile.questWidget.ON
   end
 end
 
 function Widget:OnUnitAdded(widget_frame, unit)
-  local db = TidyPlatesThreat.db.profile.questWidget
+  local db = Addon.db.profile.questWidget
   widget_frame:SetSize(db.scale, db.scale)
   widget_frame:SetAlpha(db.alpha)
 
@@ -589,7 +587,7 @@ end
 function Widget:UpdateFrame(widget_frame, unit)
   local show, quest_type, current = IsQuestUnit(unit, true)
 
-  local db = TidyPlatesThreat.db.profile.questWidget
+  local db = Addon.db.profile.questWidget
   if show and db.ModeIcon and ShowQuestUnit(unit) then
 
     -- Updates based on settings / unit style
@@ -655,7 +653,7 @@ end
 -- Load settings from the configuration which are shared across all aura widgets
 -- used (for each widget) in UpdateWidgetConfig
 function Widget:UpdateSettings()
-  Font = Addon.LibSharedMedia:Fetch('font', TidyPlatesThreat.db.profile.questWidget.Font)
+  Font = Addon.LibSharedMedia:Fetch('font', Addon.db.profile.questWidget.Font)
 end
 
 function Addon:PrintQuests(command)

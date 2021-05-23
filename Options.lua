@@ -263,11 +263,11 @@ local function ShowImportFrame()
 
         -- Adjust the profile name if there is a name conflict:
         local imported_profile_no = 1
-        while TidyPlatesThreat.db.profiles[imported_profile_name] do
+        while Addon.db.profiles[imported_profile_name] do
           imported_profile_name = import_data.ProfileName .. " (" .. tostring(imported_profile_no) .. ")"
           imported_profile_no = imported_profile_no + 1
         end
-        --        for profile_name, profile in pairs(TidyPlatesThreat.db.profiles) do
+        --        for profile_name, profile in pairs(Addon.db.profiles) do
         --          local no = profile_name:match("^" .. import_data.ProfileName .. " %((%d+)%)$") or (profile_name == import_data.ProfileName and 0)
         --          if tonumber(no) and tonumber(no) >= imported_profile_no then
         --            imported_profile_no = tonumber(no) + 1
@@ -276,7 +276,7 @@ local function ShowImportFrame()
         --        local imported_profile_name = import_data.ProfileName .. ((imported_profile_no == 0 and "") or (" (" .. tostring(imported_profile_no) .. ")"))
 
         Addon.ImportProfile(import_data.Profile, imported_profile_name, import_data.Version)
-        TidyPlatesThreat:ProfChange()
+        Addon:ProfChange()
       end
     else
       t.Print(L["The import string has an unknown format and cannot be imported. Verify that the import string was generated from the same Threat Plates version that you are using currently."], true)
@@ -301,8 +301,8 @@ local function AddImportExportOptions(profileOptions)
     func = function()
       local export_data = {
         Version = t.Meta("version"),
-        ProfileName = TidyPlatesThreat.db:GetCurrentProfile(),
-        Profile = TidyPlatesThreat.db.profile
+        ProfileName = Addon.db:GetCurrentProfile(),
+        Profile = Addon.db.profile
       }
 
       ShowExportFrame(export_data)
@@ -351,7 +351,7 @@ function Addon.CustomPlateGetHeaderName(index)
   if type(index) == "table" then
     custom_style = index
   else
-    custom_style = TidyPlatesThreat.db.profile.uniqueSettings[index]
+    custom_style = Addon.db.profile.uniqueSettings[index]
   end
 
   local custom_style_name = custom_style.Name
@@ -364,7 +364,7 @@ function Addon.CustomPlateGetHeaderName(index)
 end
 
 function Addon:InitializeCustomNameplates()
-  local db = TidyPlatesThreat.db.profile
+  local db = Addon.db.profile
 
   Addon.ActiveAuraTriggers = false
   Addon.ActiveCastTriggers = false
@@ -386,7 +386,7 @@ function Addon:InitializeCustomNameplates()
   wipe(styles_cache.PerInstance)
 
   for index, custom_style in pairs(db.uniqueSettings) do
-    if type(index) == "number" and custom_style.Trigger.Name.Input ~= "<Enter name here>" and not custom_style.Enable.Never and (custom_style.Trigger.Type ~= "Script" or TidyPlatesThreat.db.global.ScriptingIsEnabled) then
+    if type(index) == "number" and custom_style.Trigger.Name.Input ~= "<Enter name here>" and not custom_style.Enable.Never and (custom_style.Trigger.Type ~= "Script" or Addon.db.global.ScriptingIsEnabled) then
       local trigger_type = custom_style.Trigger.Type
       local trigger_list = custom_style.Trigger[trigger_type].AsArray
 
@@ -450,7 +450,7 @@ end
 Addon.UpdateCustomStyles = UpdateSpecial
 
 local function GetValue(info)
-  local DB = TidyPlatesThreat.db.profile
+  local DB = Addon.db.profile
   local value = DB
   local keys = info.arg
   for index = 1, #keys do
@@ -460,7 +460,7 @@ local function GetValue(info)
 end
 
 local function CheckIfValueExists(widget_info, setting)
-  local value = TidyPlatesThreat.db.profile
+  local value = Addon.db.profile
   local keys = Addon.ConcatTables(widget_info, setting)
 
   for index = 1, #keys do
@@ -475,7 +475,7 @@ local function CheckIfValueExists(widget_info, setting)
 end
 
 local function AddIfSettingExists(entry) -- endwidget_info, setting)
-  local value = TidyPlatesThreat.db.profile
+  local value = Addon.db.profile
   for index, key in ipairs(entry.arg) do
     if value ~= nil then
       value = value[key]
@@ -490,7 +490,7 @@ end
 local function SetValuePlain(info, value)
   -- info: table with path to setting in options dialog, that was changed
   -- info.arg: table with parameter arg from options definition
-  local DB = TidyPlatesThreat.db.profile
+  local DB = Addon.db.profile
   local keys = info.arg
   for index = 1, #keys - 1 do
     DB = DB[keys[index]]
@@ -515,7 +515,7 @@ local function GetSelectValue(info)
 end
 
 local function GetValueChar(info)
-  local DB = TidyPlatesThreat.db.char
+  local DB = Addon.db.char
   local value = DB
   local keys = info.arg
   for index = 1, #keys do
@@ -525,7 +525,7 @@ local function GetValueChar(info)
 end
 
 local function SetValueChar(info, value)
-  local DB = TidyPlatesThreat.db.char
+  local DB = Addon.db.char
   local keys = info.arg
   for index = 1, #keys - 1 do
     DB = DB[keys[index]]
@@ -586,7 +586,7 @@ end
 -- Colors
 
 local function GetColor(info)
-  local DB = TidyPlatesThreat.db.profile
+  local DB = Addon.db.profile
   local value = DB
   local keys = info.arg
   for index = 1, #keys do
@@ -596,7 +596,7 @@ local function GetColor(info)
 end
 
 local function SetColor(info, r, g, b)
-  local DB = TidyPlatesThreat.db.profile
+  local DB = Addon.db.profile
   local keys = info.arg
   for index = 1, #keys - 1 do
     DB = DB[keys[index]]
@@ -606,7 +606,7 @@ local function SetColor(info, r, g, b)
 end
 
 local function GetColorAlpha(info)
-  local DB = TidyPlatesThreat.db.profile
+  local DB = Addon.db.profile
   local value = DB
   local keys = info.arg
   for index = 1, #keys do
@@ -616,7 +616,7 @@ local function GetColorAlpha(info)
 end
 
 local function SetColorAlpha(info, r, g, b, a)
-  local DB = TidyPlatesThreat.db.profile
+  local DB = Addon.db.profile
   local keys = info.arg
   for index = 1, #keys - 1 do
     DB = DB[keys[index]]
@@ -627,7 +627,7 @@ end
 
 local function GetUnitVisibilitySetting(info)
   local unit_type = info.arg
-  local unit_visibility = TidyPlatesThreat.db.profile.Visibility[unit_type].Show
+  local unit_visibility = Addon.db.profile.Visibility[unit_type].Show
 
   if type(unit_visibility)  ~= "boolean" then
     unit_visibility = GetCVarBool(unit_visibility)
@@ -638,7 +638,7 @@ end
 
 local function SetUnitVisibilitySetting(info, value)
   local unit_type = info.arg
-  local unit_visibility = TidyPlatesThreat.db.profile.Visibility[unit_type]
+  local unit_visibility = Addon.db.profile.Visibility[unit_type]
 
   if type(unit_visibility.Show) == "boolean" then
     unit_visibility.Show = value
@@ -652,7 +652,7 @@ end
 
 local function SetThemeValue(info, val)
   SetValuePlain(info, val)
-  Addon:SetThemes(TidyPlatesThreat)
+  Addon:SetThemes()
 
   -- Update TargetArt widget as it depends on some settings of customtext and name
   if info.arg[1] == "HeadlineView" and (info.arg[2] == "customtext" or info.arg[2] == "name") and (info.arg[3] == "y" or info.arg[3] == "size") then
@@ -730,7 +730,7 @@ local function SetValueWidget(info, val)
 end
 
 local function SetColorWidget(info, r, g, b, a)
-  local DB = TidyPlatesThreat.db.profile
+  local DB = Addon.db.profile
   local keys = info.arg
   for index = 1, #keys - 1 do
     DB = DB[keys[index]]
@@ -746,7 +746,7 @@ local function SetColorWidget(info, r, g, b, a)
 end
 
 local function SetColorAlphaWidget(info, r, g, b, a)
-  local DB = TidyPlatesThreat.db.profile
+  local DB = Addon.db.profile
   local keys = info.arg
   for index = 1, #keys - 1 do
     DB = DB[keys[index]]
@@ -5196,15 +5196,15 @@ local function CreateHealthbarOptions()
                 desc = L["Changes the default settings to the selected design. Some of your custom settings may get overwritten if you switch back and forth.."],
                 values = { CLASSIC = "Classic", SMOOTH = "Smooth" } ,
                 set = function(info, val)
-                  TidyPlatesThreat.db.global.DefaultsVersion = val
+                  Addon.db.global.DefaultsVersion = val
                   if val == "CLASSIC" then
                     t.SwitchToDefaultSettingsV1()
                   else -- val == "SMOOTH"
                     t.SwitchToCurrentDefaultSettings()
                   end
-                  TidyPlatesThreat:ReloadTheme()
+                  Addon:ReloadTheme()
                 end,
-                get = function(info) return TidyPlatesThreat.db.global.DefaultsVersion end,
+                get = function(info) return Addon.db.global.DefaultsVersion end,
               },
             },
           },
@@ -6125,9 +6125,9 @@ local function CreateSpecRolesClassic()
           order = 1,
           desc = L["Sets your role to tanking."],
           get = function()
-            return TidyPlatesThreat.db.char.spec[1]
+            return Addon.db.char.spec[1]
           end,
-          set = function() TidyPlatesThreat.db.char.spec[1] = true; Addon:ForceUpdate() end,
+          set = function() Addon.db.char.spec[1] = true; Addon:ForceUpdate() end,
         },
         DPS = {
           name = L["DPS/Healing"],
@@ -6135,9 +6135,9 @@ local function CreateSpecRolesClassic()
           order = 2,
           desc = L["Sets your role to DPS."],
           get = function()
-            return not TidyPlatesThreat.db.char.spec[1]
+            return not Addon.db.char.spec[1]
           end,
-          set = function() TidyPlatesThreat.db.char.spec[1] = false; Addon:ForceUpdate() end,
+          set = function() Addon.db.char.spec[1] = false; Addon:ForceUpdate() end,
         },
       }
     }
@@ -6214,7 +6214,7 @@ local function CreateSpecRolesRetail()
       type = "group",
       inline = true,
       order = index + 2,
-      disabled = function() return TidyPlatesThreat.db.profile.optionRoleDetectionAutomatic end,
+      disabled = function() return Addon.db.profile.optionRoleDetectionAutomatic end,
       args = {
         Tank = {
           name = L["Tank"],
@@ -6222,10 +6222,10 @@ local function CreateSpecRolesRetail()
           order = 1,
           desc = L["Sets your spec "] .. spec_name .. L[" to tanking."],
           get = function()
-            local spec = TidyPlatesThreat.db.char.spec[index]
+            local spec = Addon.db.char.spec[index]
             return (spec == nil and role == "TANK") or spec
           end,
-          set = function() TidyPlatesThreat.db.char.spec[index] = true; Addon:ForceUpdate() end,
+          set = function() Addon.db.char.spec[index] = true; Addon:ForceUpdate() end,
         },
         DPS = {
           name = L["DPS/Healing"],
@@ -6233,10 +6233,10 @@ local function CreateSpecRolesRetail()
           order = 2,
           desc = L["Sets your spec "] .. spec_name .. L[" to DPS."],
           get = function()
-            local spec = TidyPlatesThreat.db.char.spec[index]
+            local spec = Addon.db.char.spec[index]
             return (spec == nil and role ~= "TANK") or not spec
           end,
-          set = function() TidyPlatesThreat.db.char.spec[index] = false; Addon:ForceUpdate() end,
+          set = function() Addon.db.char.spec[index] = false; Addon:ForceUpdate() end,
         },
       },
     }
@@ -6517,7 +6517,7 @@ CreateCustomNameplateEntry = function(index)
             name = L["Type"],
             type = "select",
             order = 10,
-            values = { Name = L["Name"], Aura = L["Aura"], Cast = L["Cast"], Script = (TidyPlatesThreat.db.global.ScriptingIsEnabled and L["Script"]) or nil },
+            values = { Name = L["Name"], Aura = L["Aura"], Cast = L["Cast"], Script = (Addon.db.global.ScriptingIsEnabled and L["Script"]) or nil },
             set = function(info, val)
               -- If the uses switches to a trigger that is already in use, the current custom nameplate
               -- is disabled (otherwise, if we would not switch to it, the user could not change it at all.
@@ -7011,7 +7011,7 @@ CreateCustomNameplateEntry = function(index)
         type = "group",
         width = "full",
         inline = false,
-        hidden = function() return not TidyPlatesThreat.db.global.ScriptingIsEnabled end,
+        hidden = function() return not Addon.db.global.ScriptingIsEnabled end,
         args = {
           WidgetType = {
             name = L["Type"],
@@ -7511,7 +7511,7 @@ CreateCustomNameplatesGroup = function()
   -- custom styles have not been migrated to V2
   for index, custom_style in pairs(db.uniqueSettings) do
     if type(index) == "number" and custom_style.Trigger.Name.Input ~= "<Enter name here>" and
-      (custom_style.Trigger.Type ~= "Script" or TidyPlatesThreat.db.global.ScriptingIsEnabled) then
+      (custom_style.Trigger.Type ~= "Script" or Addon.db.global.ScriptingIsEnabled) then
       entry["#" .. index] = CreateCustomNameplateEntry(index)
     end
   end
@@ -8194,7 +8194,7 @@ local function CreateOptionsTable()
                           order = 10,
                           type = "toggle",
                           set = function(info, val)
-                            TidyPlatesThreat.db.profile.settings.customtext.SubtextColorUseSpecific = false
+                            Addon.db.profile.settings.customtext.SubtextColorUseSpecific = false
                             SetValue(info, true)
                           end,
                           arg = { "settings", "customtext", "SubtextColorUseHeadline" },
@@ -8205,7 +8205,7 @@ local function CreateOptionsTable()
                           type = "toggle",
                           arg = { "settings", "customtext", "SubtextColorUseSpecific" },
                           set = function(info, val)
-                            TidyPlatesThreat.db.profile.settings.customtext.SubtextColorUseHeadline = false
+                            Addon.db.profile.settings.customtext.SubtextColorUseHeadline = false
                             SetValue(info, true)
                           end,
                         },
@@ -8215,14 +8215,14 @@ local function CreateOptionsTable()
                           type = "toggle",
                           width = "half",
                           set = function(info, val)
-                            TidyPlatesThreat.db.profile.settings.customtext.SubtextColorUseHeadline = false
-                            TidyPlatesThreat.db.profile.settings.customtext.SubtextColorUseSpecific = false
+                            Addon.db.profile.settings.customtext.SubtextColorUseHeadline = false
+                            Addon.db.profile.settings.customtext.SubtextColorUseSpecific = false
                             Addon:ForceUpdate()
                           end,
-                          get = function(info) return not (TidyPlatesThreat.db.profile.settings.customtext.SubtextColorUseHeadline or TidyPlatesThreat.db.profile.settings.customtext.SubtextColorUseSpecific) end,
+                          get = function(info) return not (Addon.db.profile.settings.customtext.SubtextColorUseHeadline or Addon.db.profile.settings.customtext.SubtextColorUseSpecific) end,
                         },
                         SubtextColorCustomColor = GetColorAlphaEntry(35, { "settings", "customtext", "SubtextColor" },
-                          function() return (TidyPlatesThreat.db.profile.settings.customtext.SubtextColorUseHeadline or TidyPlatesThreat.db.profile.settings.customtext.SubtextColorUseSpecific) end ),
+                          function() return (Addon.db.profile.settings.customtext.SubtextColorUseHeadline or Addon.db.profile.settings.customtext.SubtextColorUseSpecific) end ),
                       },
                     },
                     Font = GetFontEntryTheme(50, "customtext"),
@@ -8308,7 +8308,7 @@ local function CreateOptionsTable()
                           type = "toggle",
                           arg = { "HeadlineView", "SubtextColorUseHeadline" },
                           set = function(info, val)
-                            TidyPlatesThreat.db.profile.HeadlineView.SubtextColorUseSpecific = false
+                            Addon.db.profile.HeadlineView.SubtextColorUseSpecific = false
                             SetValue(info, true)
                           end,
                         },
@@ -8318,7 +8318,7 @@ local function CreateOptionsTable()
                           type = "toggle",
                           arg = { "HeadlineView", "SubtextColorUseSpecific" },
                           set = function(info, val)
-                            TidyPlatesThreat.db.profile.HeadlineView.SubtextColorUseHeadline = false
+                            Addon.db.profile.HeadlineView.SubtextColorUseHeadline = false
                             SetValue(info, true)
                           end,
                         },
@@ -8328,14 +8328,14 @@ local function CreateOptionsTable()
                           type = "toggle",
                           width = "half",
                           set = function(info, val)
-                            TidyPlatesThreat.db.profile.HeadlineView.SubtextColorUseHeadline = false
-                            TidyPlatesThreat.db.profile.HeadlineView.SubtextColorUseSpecific = false
+                            Addon.db.profile.HeadlineView.SubtextColorUseHeadline = false
+                            Addon.db.profile.HeadlineView.SubtextColorUseSpecific = false
                             Addon:ForceUpdate()
                           end,
-                          get = function(info) return not (TidyPlatesThreat.db.profile.HeadlineView.SubtextColorUseHeadline or TidyPlatesThreat.db.profile.HeadlineView.SubtextColorUseSpecific) end,
+                          get = function(info) return not (Addon.db.profile.HeadlineView.SubtextColorUseHeadline or Addon.db.profile.HeadlineView.SubtextColorUseSpecific) end,
                         },
                         SubtextColorCustomColor = GetColorAlphaEntry(35, { "HeadlineView", "SubtextColor" },
-                          function() return (TidyPlatesThreat.db.profile.HeadlineView.SubtextColorUseHeadline or TidyPlatesThreat.db.profile.HeadlineView.SubtextColorUseSpecific) end ),
+                          function() return (Addon.db.profile.HeadlineView.SubtextColorUseHeadline or Addon.db.profile.HeadlineView.SubtextColorUseSpecific) end ),
                       },
                     },
                     -- Font = GetFontEntry(50, { "HeadlineView", "name" } ),
@@ -9449,14 +9449,14 @@ local function CreateOptionsTable()
 
   CreateCustomNameplatesGroup()
 
-  options.args.profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(TidyPlatesThreat.db)
+  options.args.profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(Addon.db)
   options.args.profiles.order = 10000
 
   if not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC then
     -- Add dual-spec support
     local LibDualSpec = LibStub("LibDualSpec-1.0", true)
-    LibDualSpec:EnhanceDatabase(TidyPlatesThreat.db, t.ADDON_NAME)
-    LibDualSpec:EnhanceOptions(options.args.profiles, TidyPlatesThreat.db)
+    LibDualSpec:EnhanceDatabase(Addon.db, t.ADDON_NAME)
+    LibDualSpec:EnhanceOptions(options.args.profiles, Addon.db)
   end
 
   AddImportExportOptions(options.args.profiles)
@@ -9481,7 +9481,7 @@ local function GetInterfaceOptionsTable()
         imageWidth = 256,
         imageHeight = 32,
         func = function()
-          TidyPlatesThreat:OpenOptions()
+          Addon:OpenOptions()
         end,
         order = 20,
       },
@@ -9491,8 +9491,8 @@ local function GetInterfaceOptionsTable()
   return interface_options
 end
 
-function TidyPlatesThreat:ProfChange()
-  db = self.db.profile
+function Addon:ProfChange()
+  db = Addon.db.profile
 
   Addon:InitializeCustomNameplates()
 
@@ -9529,15 +9529,15 @@ function TidyPlatesThreat:ProfChange()
     CreateCustomNameplatesGroup()
   end
 
-  TidyPlatesThreat:ReloadTheme()
+  Addon:ReloadTheme()
 end
 
-function TidyPlatesThreat:ConfigTableChanged(...)
+function Addon:ConfigTableChanged(...)
   CreateCustomNameplatesGroup()
 end
 
-function TidyPlatesThreat:OpenOptions()
-  db = self.db.profile
+function Addon:OpenOptions()
+  db = Addon.db.profile
 
   HideUIPanel(InterfaceOptionsFrame)
   HideUIPanel(GameMenuFrame)
@@ -9548,7 +9548,7 @@ function TidyPlatesThreat:OpenOptions()
 
     -- Setup options dialog
     Addon.LibAceConfigRegistry:RegisterOptionsTable(t.ADDON_NAME, options)
-    Addon.LibAceConfigRegistry.RegisterCallback(self, "ConfigTableChange", "ConfigTableChanged")
+    Addon.LibAceConfigRegistry.RegisterCallback(Addon, "ConfigTableChange", "ConfigTableChanged")
     Addon.LibAceConfigDialog:SetDefaultSize(t.ADDON_NAME, 1000, 640)
   end
 
@@ -9563,7 +9563,7 @@ function Addon.RestoreLegacyCustomNameplates()
     Addon.MergeDefaultsIntoTable(legacy_custom_plates[i], Addon.LEGACY_CUSTOM_NAMEPLATES["**"])
   end
 
-  local custom_plates = TidyPlatesThreat.db.profile.uniqueSettings
+  local custom_plates = Addon.db.profile.uniqueSettings
   local max_slot_no = #custom_plates
 
   local index = 1

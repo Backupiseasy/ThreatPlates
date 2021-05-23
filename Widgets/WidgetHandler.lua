@@ -347,7 +347,7 @@ function WidgetHandler:OnUnitAdded(tp_frame, unit)
     -- I think it could happen that a nameplate was created, then a widget is enabled, and afterwise the unit is
     -- added to the nameplate, i.e., InitializedWidgets is called.
     --    if plate_widgets[widget_name] == nil then
-    --      TidyPlatesThreat.db.global.Unit = tp_frame
+    --      Addon.db.global.Unit = tp_frame
     --    end
     --    assert (plate_widgets[widget_name] ~= nil, "Uninitialized widget found: " .. widget_name .. " for unit " .. unit.name .. " (" .. tp_frame:GetName() .. ")")
 

@@ -13,7 +13,6 @@ local UnitIsBattlePet = UnitIsBattlePet
 local UnitCanAttack = UnitCanAttack
 
 -- ThreatPlates APIs
-local TidyPlatesThreat = TidyPlatesThreat
 local TOTEMS = Addon.TOTEMS
 local GetUnitVisibility = ThreatPlates.GetUnitVisibility
 local NameTriggers, AuraTriggers, CastTriggers = Addon.Cache.CustomPlateTriggers.Name, Addon.Cache.CustomPlateTriggers.Aura, Addon.Cache.CustomPlateTriggers.Cast
@@ -142,7 +141,7 @@ local function ShowUnit(unit)
   if not show then return false, false, headline_view end
 
   local e, b = (unit.isElite or unit.isRare), unit.isBoss
-  local db_base = TidyPlatesThreat.db.profile
+  local db_base = Addon.db.profile
   local db = db_base.Visibility
 
   if (e and db.HideElite) or (b and db.HideBoss) or (unit.TP_DetailedUnitType == "Tapped" and db.HideTapped) or (unit.TP_DetailedUnitType == "Guardian" and db.HideGuardian) then
@@ -209,7 +208,7 @@ end
 -- Depends on:
 --   * unit.name
 function Addon.UnitStyle_NameDependent(unit)
-  local db = TidyPlatesThreat.db.profile
+  local db = Addon.db.profile
 
   local plate_style, custom_style, totem_settings
 

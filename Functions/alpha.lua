@@ -11,7 +11,6 @@ local ThreatPlates = Addon.ThreatPlates
 local UnitExists = UnitExists
 
 -- ThreatPlates APIs
-local TidyPlatesThreat = TidyPlatesThreat
 local GetThreatSituation = Addon.GetThreatSituation
 
 ---------------------------------------------------------------------------------------------------
@@ -19,7 +18,7 @@ local GetThreatSituation = Addon.GetThreatSituation
 ---------------------------------------------------------------------------------------------------
 
 local function TransparencySituational(unit)
-	local db = TidyPlatesThreat.db.profile.nameplate
+	local db = Addon.db.profile.nameplate
 
 	-- Do checks for situational transparency settings:
 	if unit.isMarked and db.toggle.MarkedA then
@@ -49,7 +48,7 @@ local function TransparencyGeneral(unit)
   end
 
 	-- Do checks for target settings:
-	local db = TidyPlatesThreat.db.profile.nameplate
+	local db = Addon.db.profile.nameplate
 
   local target_alpha
 	if UnitExists("target") then
@@ -76,7 +75,7 @@ local function TransparencyGeneral(unit)
 end
 
 local function TransparencyThreat(unit, style)
-	local db = TidyPlatesThreat.db.profile.threat
+	local db = Addon.db.profile.threat
 
 	if not db.useAlpha then
 		return TransparencyGeneral(unit)
@@ -122,7 +121,7 @@ local function AlphaUniqueNameOnly(unit)
 	local unique_setting = unit.CustomPlateSettings
 
   if unique_setting.overrideAlpha then
-    local db = TidyPlatesThreat.db.profile.HeadlineView
+    local db = Addon.db.profile.HeadlineView
     if db.useAlpha then
 			return AlphaNormal(unit)
     end
@@ -140,7 +139,7 @@ local function TransparencyEmpty(unit)
 end
 
 local function TransparencyNameOnly(unit)
-	local db = TidyPlatesThreat.db.profile.HeadlineView
+	local db = Addon.db.profile.HeadlineView
 
 	if db.useAlpha then
     return AlphaNormal(unit)
