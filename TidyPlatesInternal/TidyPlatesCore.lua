@@ -1471,8 +1471,6 @@ do
     -- UNIT_SPELLCAST_SENT
 
     CoreEvents.PLAYER_FOCUS_CHANGED = PLAYER_FOCUS_CHANGED
-    -- UNIT_HEALTH_FREQUENT no longer supported in Retail since 9.0.1
-    CoreEvents.UNIT_HEALTH = UNIT_HEALTH
 
     if Addon.IS_MAINLINE then
       CoreEvents.UNIT_SPELLCAST_INTERRUPTIBLE = UnitSpellcastMidway
@@ -1480,6 +1478,11 @@ do
 
       CoreEvents.UNIT_ABSORB_AMOUNT_CHANGED = UNIT_ABSORB_AMOUNT_CHANGED
       CoreEvents.UNIT_HEAL_ABSORB_AMOUNT_CHANGED = UNIT_HEAL_ABSORB_AMOUNT_CHANGED
+
+      -- UNIT_HEALTH_FREQUENT no longer supported in Retail since 9.0.1
+      CoreEvents.UNIT_HEALTH = UNIT_HEALTH
+    else
+      CoreEvents.UNIT_HEALTH_FREQUENT = UNIT_HEALTH
     end
   end
 
