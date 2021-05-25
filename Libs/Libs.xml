@@ -27,7 +27,7 @@
     <!--@end-version-retail@-->
 
     <!--@version-bcc@-->
-    <!--@version-bcc@-->
+    <!--@end-version-bcc@-->
 
     <!--@version-classic@-->
     <Script file="LibClassicCasterino\LibClassicCasterino.lua"/>
