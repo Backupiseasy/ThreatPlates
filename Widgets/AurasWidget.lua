@@ -913,33 +913,99 @@ Widget.FILTER_FUNCTIONS = {
   Allow = FilterAllowlist,
 }
 
-function Widget:FilterFriendlyDebuffsBySpell(db, aura, AuraFilterFunction)
-  local show_aura = db.ShowAllFriendly or
-                    (db.ShowBlizzardForFriendly and (aura.ShowAll or (aura.ShowPersonal and aura.CastByPlayer))) or
-                    (db.ShowDispellable and aura.StealOrPurge) or
-                    (db.ShowBoss and aura.BossDebuff) or
-                    (aura.type and db.FilterByType[self.AURA_TYPE[aura.type]])
+if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC then
+  -- ShowBlizzard... is not supported in Classic
+  function Widget:FilterFriendlyDebuffsBySpell(db, aura, AuraFilterFunction)
+    local show_aura = db.ShowAllFriendly or
+      -- (db.ShowBlizzardForFriendly and (aura.ShowAll or (aura.ShowPersonal and aura.CastByPlayer))) or
+      (db.ShowDispellable and aura.StealOrPurge) or
+      (db.ShowBoss and aura.BossDebuff) or
+      (aura.type and db.FilterByType[self.AURA_TYPE[aura.type]])
 
-  local spellfound = self.AuraFilterDebuffs[aura.name] or self.AuraFilterDebuffs[aura.spellid]
+    local spellfound = self.AuraFilterDebuffs[aura.name] or self.AuraFilterDebuffs[aura.spellid]
 
-  return AuraFilterFunction(show_aura, spellfound, aura.CastByPlayer)
-end
+    return AuraFilterFunction(show_aura, spellfound, aura.CastByPlayer)
+  end
 
-function Widget:FilterEnemyDebuffsBySpell(db, aura, AuraFilterFunction)
-  local show_aura = db.ShowAllEnemy or
-                    (db.ShowOnlyMine and aura.CastByPlayer) or
-                    (db.ShowBlizzardForEnemy and (aura.ShowAll or (aura.ShowPersonal and aura.CastByPlayer)))
+  function Widget:FilterEnemyDebuffsBySpell(db, aura, AuraFilterFunction)
+    local show_aura = db.ShowAllEnemy or
+      (db.ShowOnlyMine and aura.CastByPlayer) --or
+      -- (db.ShowBlizzardForEnemy and (aura.ShowAll or (aura.ShowPersonal and aura.CastByPlayer)))
 
-  local spellfound = self.AuraFilterDebuffs[aura.name] or self.AuraFilterDebuffs[aura.spellid]
+    local spellfound = self.AuraFilterDebuffs[aura.name] or self.AuraFilterDebuffs[aura.spellid]
 
-  return AuraFilterFunction(show_aura, spellfound, aura.CastByPlayer, db.ShowOnlyMine)
+    return AuraFilterFunction(show_aura, spellfound, aura.CastByPlayer, db.ShowOnlyMine)
+  end
+
+  function Widget:FilterFriendlyCrowdControlBySpell(db, aura, AuraFilterFunction)
+    local show_aura = db.ShowAllFriendly or
+      --(db.ShowBlizzardForFriendly and (aura.ShowAll or (aura.ShowPersonal and aura.CastByPlayer))) or
+      (db.ShowDispellable and aura.StealOrPurge) or
+      (db.ShowBoss and aura.BossDebuff)
+
+    local spellfound = self.AuraFilterCrowdControl[aura.name] or self.AuraFilterCrowdControl[aura.spellid]
+
+    return AuraFilterFunction(show_aura, spellfound, aura.CastByPlayer)
+  end
+
+  function Widget:FilterEnemyCrowdControlBySpell(db, aura, AuraFilterFunction)
+    local show_aura = true
+      --db.ShowAllEnemy or
+      --(db.ShowBlizzardForEnemy and (aura.ShowAll or (aura.ShowPersonal and aura.CastByPlayer)))
+
+    local spellfound = self.AuraFilterCrowdControl[aura.name] or self.AuraFilterCrowdControl[aura.spellid]
+
+    return AuraFilterFunction(show_aura, spellfound, aura.CastByPlayer)
+  end
+else
+  function Widget:FilterFriendlyDebuffsBySpell(db, aura, AuraFilterFunction)
+    local show_aura = db.ShowAllFriendly or
+                      (db.ShowBlizzardForFriendly and (aura.ShowAll or (aura.ShowPersonal and aura.CastByPlayer))) or
+                      (db.ShowDispellable and aura.StealOrPurge) or
+                      (db.ShowBoss and aura.BossDebuff) or
+                      (aura.type and db.FilterByType[self.AURA_TYPE[aura.type]])
+
+    local spellfound = self.AuraFilterDebuffs[aura.name] or self.AuraFilterDebuffs[aura.spellid]
+
+    return AuraFilterFunction(show_aura, spellfound, aura.CastByPlayer)
+  end
+
+  function Widget:FilterEnemyDebuffsBySpell(db, aura, AuraFilterFunction)
+    local show_aura = db.ShowAllEnemy or
+                      (db.ShowOnlyMine and aura.CastByPlayer) or
+                      (db.ShowBlizzardForEnemy and (aura.ShowAll or (aura.ShowPersonal and aura.CastByPlayer)))
+
+    local spellfound = self.AuraFilterDebuffs[aura.name] or self.AuraFilterDebuffs[aura.spellid]
+
+    return AuraFilterFunction(show_aura, spellfound, aura.CastByPlayer, db.ShowOnlyMine)
+  end
+
+  function Widget:FilterFriendlyCrowdControlBySpell(db, aura, AuraFilterFunction)
+    local show_aura = db.ShowAllFriendly or
+                      (db.ShowBlizzardForFriendly and (aura.ShowAll or (aura.ShowPersonal and aura.CastByPlayer))) or
+                      (db.ShowDispellable and aura.StealOrPurge) or
+                      (db.ShowBoss and aura.BossDebuff)
+
+    local spellfound = self.AuraFilterCrowdControl[aura.name] or self.AuraFilterCrowdControl[aura.spellid]
+
+    return AuraFilterFunction(show_aura, spellfound, aura.CastByPlayer)
+  end
+
+  function Widget:FilterEnemyCrowdControlBySpell(db, aura, AuraFilterFunction)
+    local show_aura = db.ShowAllEnemy or
+                      (db.ShowBlizzardForEnemy and (aura.ShowAll or (aura.ShowPersonal and aura.CastByPlayer)))
+
+    local spellfound = self.AuraFilterCrowdControl[aura.name] or self.AuraFilterCrowdControl[aura.spellid]
+
+    return AuraFilterFunction(show_aura, spellfound, aura.CastByPlayer)
+  end
 end
 
 function Widget:FilterFriendlyBuffsBySpell(db, aura, AuraFilterFunction, unit)
   local show_aura = db.ShowAllFriendly or
-                    (db.ShowOnFriendlyNPCs and unit.type == "NPC") or
-                    (db.ShowOnlyMine and aura.CastByPlayer) or
-                    (db.ShowPlayerCanApply and aura.PlayerCanApply)
+    (db.ShowOnFriendlyNPCs and unit.type == "NPC") or
+    (db.ShowOnlyMine and aura.CastByPlayer) or
+    (db.ShowPlayerCanApply and aura.PlayerCanApply)
 
   local spellfound = self.AuraFilterBuffs[aura.name] or self.AuraFilterBuffs[aura.spellid]
 
@@ -952,7 +1018,7 @@ function Widget:FilterEnemyBuffsBySpell(db, aura, AuraFilterFunction, unit)
     show_aura = false
   else
     show_aura = db.ShowAllEnemy or (db.ShowOnEnemyNPCs and unit.type == "NPC") or (db.ShowDispellable and aura.StealOrPurge) or
-                (aura.type == "Magic" and db.ShowMagic)
+      (aura.type == "Magic" and db.ShowMagic)
   end
 
   --  local show_aura = db.ShowAllEnemy or (db.ShowOnEnemyNPCs and unit.type == "NPC") or (db.ShowDispellable and aura.StealOrPurge)
@@ -964,33 +1030,13 @@ function Widget:FilterEnemyBuffsBySpell(db, aura, AuraFilterFunction, unit)
   -- the "Show Unlimited Buffs" settings
   if show_aura and (aura.duration <= 0) then
     show_aura =  db.ShowUnlimitedAlways or
-                (db.ShowUnlimitedInCombat and unit.isInCombat) or
-                (db.ShowUnlimitedInInstances and PLayerIsInInstance) or
-                (db.ShowUnlimitedOnBosses and unit.IsBossOrRare)
+      (db.ShowUnlimitedInCombat and unit.isInCombat) or
+      (db.ShowUnlimitedInInstances and PLayerIsInInstance) or
+      (db.ShowUnlimitedOnBosses and unit.IsBossOrRare)
     unit.HasUnlimitedAuras = true
   end
 
   return show_aura
-end
-
-function Widget:FilterFriendlyCrowdControlBySpell(db, aura, AuraFilterFunction)
-  local show_aura = db.ShowAllFriendly or
-                    (db.ShowBlizzardForFriendly and (aura.ShowAll or (aura.ShowPersonal and aura.CastByPlayer))) or
-                    (db.ShowDispellable and aura.StealOrPurge) or
-                    (db.ShowBoss and aura.BossDebuff)
-
-  local spellfound = self.AuraFilterCrowdControl[aura.name] or self.AuraFilterCrowdControl[aura.spellid]
-
-  return AuraFilterFunction(show_aura, spellfound, aura.CastByPlayer)
-end
-
-function Widget:FilterEnemyCrowdControlBySpell(db, aura, AuraFilterFunction)
-  local show_aura = db.ShowAllEnemy or
-                    (db.ShowBlizzardForEnemy and (aura.ShowAll or (aura.ShowPersonal and aura.CastByPlayer)))
-
-  local spellfound = self.AuraFilterCrowdControl[aura.name] or self.AuraFilterCrowdControl[aura.spellid]
-
-  return AuraFilterFunction(show_aura, spellfound, aura.CastByPlayer)
 end
 
 Widget.AuraSortFunctionAtoZ = function(a, b)
