@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+10.2.2 (2021-05-27)
+------------------------------------------------------
+* Fixed a bug with tank role detection for Paladins as it was not active in the TBC version [Issue #493].
+
+------------------------------------------------------
 10.2.1 (2021-05-24)
 ------------------------------------------------------
 * Fixed a bug with delayed health update in the TBC Classic Version because of a change in how health update events were processed [Comment TBC#742, #5992, Issue #490].

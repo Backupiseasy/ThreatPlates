@@ -1501,7 +1501,7 @@ do
 
   -- Do this after events are registered, otherwise UNIT_AURA would be registered as a general event, not only as
   -- an unit event.
-  if Addon.IS_CLASSIC and Addon.PlayerClass == "PALADIN" then
+  if (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC) and Addon.PlayerClass == "PALADIN" then
     CoreEvents.UNIT_AURA = UNIT_AURA
     TidyPlatesCore:RegisterUnitEvent("UNIT_AURA", "player")
     -- UNIT_AURA does not seem to be fired after login (even when buffs are active)
