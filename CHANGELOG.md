@@ -1,4 +1,4 @@
-# 10.2.2 (2021-05-27)
+# 10.2.3 (2021-06-xx)
 
-* Fixed a bug with tank role detection for Paladins as it was not active in the TBC version [Issue #493].
+* Fixed a bug in WoW Classic and TBC Classic where non-target units were not visible when occlusion detection was enabled and a target was selected (related to newly introduced CVar nameplateNotSelectedAlpha) [Comment #5623].
 

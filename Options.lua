@@ -20,7 +20,7 @@ local type = type
 local wipe = wipe
 local CLASS_SORT_ORDER, LOCALIZED_CLASS_NAMES_MALE = CLASS_SORT_ORDER, LOCALIZED_CLASS_NAMES_MALE
 local InCombatLockdown, IsInInstance, GetInstanceInfo = InCombatLockdown, IsInInstance, GetInstanceInfo
-local GetCVar, GetCVarBool = GetCVar, GetCVarBool
+local GetCVar, GetCVarBool, GetCVarDefault = GetCVar, GetCVarBool, GetCVarDefault
 local UnitsExists, UnitName = UnitsExists, UnitName
 local GameTooltip = GameTooltip
 
@@ -770,16 +770,22 @@ function Addon:SetCVarsForOcclusionDetection()
   Addon.CVars:Set("nameplateMaxAlpha", 1)
 
   -- Create enough separation between occluded and not occluded nameplates, even for targeted units
-  local occluded_alpha_mult = tonumber(GetCVar("nameplateOccludedAlphaMult"))
+  local occluded_alpha_mult = tonumber(GetCVar("nameplateOccludedAlphaMult")) or tonumber(GetCVarDefault("nameplateOccludedAlphaMult"))
   if occluded_alpha_mult > 0.9  then
     occluded_alpha_mult = 0.9
     Addon.CVars:Set("nameplateOccludedAlphaMult", occluded_alpha_mult)
   end
 
-  local selected_alpha =  tonumber(GetCVar("nameplateSelectedAlpha"))
+  local selected_alpha =  tonumber(GetCVar("nameplateSelectedAlpha")) or tonumber(GetCVarDefault("nameplateSelectedAlpha"))
   if not selected_alpha or (selected_alpha < occluded_alpha_mult + 0.1) then
     selected_alpha = occluded_alpha_mult + 0.1
     Addon.CVars:Set("nameplateSelectedAlpha", selected_alpha)
+  end
+
+  local not_selected_alpha =  tonumber(GetCVar("nameplateNotSelectedAlpha")) or tonumber(GetCVarDefault("nameplateNotSelectedAlpha"))
+  if not not_selected_alpha or (not_selected_alpha < occluded_alpha_mult + 0.1) then
+    not_selected_alpha = occluded_alpha_mult + 0.1
+    Addon.CVars:Set("nameplateNotSelectedAlpha", not_selected_alpha)
   end
 end
 
