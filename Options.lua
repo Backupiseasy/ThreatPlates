@@ -9538,15 +9538,8 @@ function TidyPlatesThreat:ProfChange()
   TidyPlatesThreat:ReloadTheme()
 end
 
-function TidyPlatesThreat:ConfigTableChanged(...)
-  CreateCustomNameplatesGroup()
-end
-
-function TidyPlatesThreat:OpenOptions()
-  db = self.db.profile
-
-  HideUIPanel(InterfaceOptionsFrame)
-  HideUIPanel(GameMenuFrame)
+local function RegisterOptionsTable()
+  db = TidyPlatesThreat.db.profile
 
   if not options then
     CreateOptionsTable()
@@ -9554,10 +9547,21 @@ function TidyPlatesThreat:OpenOptions()
 
     -- Setup options dialog
     Addon.LibAceConfigRegistry:RegisterOptionsTable(t.ADDON_NAME, options)
-    Addon.LibAceConfigRegistry.RegisterCallback(self, "ConfigTableChange", "ConfigTableChanged")
+    Addon.LibAceConfigRegistry.RegisterCallback(TidyPlatesThreat, "ConfigTableChange", "ConfigTableChanged")
     Addon.LibAceConfigDialog:SetDefaultSize(t.ADDON_NAME, 1000, 640)
   end
+end
 
+function TidyPlatesThreat:ConfigTableChanged(...)
+  RegisterOptionsTable()
+  CreateCustomNameplatesGroup()
+end
+
+function TidyPlatesThreat:OpenOptions()
+  HideUIPanel(InterfaceOptionsFrame)
+  HideUIPanel(GameMenuFrame)
+
+  RegisterOptionsTable()
   Addon.LibAceConfigDialog:Open(t.ADDON_NAME)
 end
 
