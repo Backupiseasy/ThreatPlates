@@ -1,4 +1,14 @@
 ﻿------------------------------------------------------
+10.2.3 (2021-06-xx)
+------------------------------------------------------
+* Fixed a bug in WoW Classic and TBC Classic where non-target units were not visible when occlusion detection was enabled and a target was selected (related to newly introduced CVar nameplateNotSelectedAlpha) [Comment #5623]. Occlusion detection does not work when a target is selected in Classic, see https://github.com/Stanzilla/WoWUIBugs/issues/134.
+
+------------------------------------------------------
+10.2.2 (2021-05-27)
+------------------------------------------------------
+* Fixed a bug with tank role detection for Paladins as it was not active in the TBC version [Issue #493].
+
+------------------------------------------------------
 10.2.1 (2021-05-24)
 ------------------------------------------------------
 * Fixed a bug with delayed health update in the TBC Classic Version because of a change in how health update events were processed [Comment TBC#742, #5992, Issue #490].

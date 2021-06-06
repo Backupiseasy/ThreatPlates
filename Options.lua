@@ -20,7 +20,7 @@ local type = type
 local wipe = wipe
 local CLASS_SORT_ORDER, LOCALIZED_CLASS_NAMES_MALE = CLASS_SORT_ORDER, LOCALIZED_CLASS_NAMES_MALE
 local InCombatLockdown, IsInInstance, GetInstanceInfo = InCombatLockdown, IsInInstance, GetInstanceInfo
-local GetCVar, GetCVarBool = GetCVar, GetCVarBool
+local GetCVar, GetCVarBool, GetCVarDefault = GetCVar, GetCVarBool, GetCVarDefault
 local UnitsExists, UnitName = UnitsExists, UnitName
 local GameTooltip = GameTooltip
 
@@ -770,16 +770,25 @@ function Addon:SetCVarsForOcclusionDetection()
   Addon.CVars:Set("nameplateMaxAlpha", 1)
 
   -- Create enough separation between occluded and not occluded nameplates, even for targeted units
-  local occluded_alpha_mult = tonumber(GetCVar("nameplateOccludedAlphaMult"))
+  local occluded_alpha_mult = tonumber(GetCVar("nameplateOccludedAlphaMult")) or tonumber(GetCVarDefault("nameplateOccludedAlphaMult"))
   if occluded_alpha_mult > 0.9  then
     occluded_alpha_mult = 0.9
     Addon.CVars:Set("nameplateOccludedAlphaMult", occluded_alpha_mult)
   end
 
-  local selected_alpha =  tonumber(GetCVar("nameplateSelectedAlpha"))
+  local selected_alpha =  tonumber(GetCVar("nameplateSelectedAlpha")) or tonumber(GetCVarDefault("nameplateSelectedAlpha"))
   if not selected_alpha or (selected_alpha < occluded_alpha_mult + 0.1) then
     selected_alpha = occluded_alpha_mult + 0.1
     Addon.CVars:Set("nameplateSelectedAlpha", selected_alpha)
+  end
+
+  -- Occlusion detection does not work when a target is selected in Classic, see https://github.com/Stanzilla/WoWUIBugs/issues/134
+  if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC then
+    local not_selected_alpha =  tonumber(GetCVar("nameplateNotSelectedAlpha")) or tonumber(GetCVarDefault("nameplateNotSelectedAlpha"))
+    if not not_selected_alpha or (not_selected_alpha < occluded_alpha_mult + 0.1) then
+      not_selected_alpha = occluded_alpha_mult + 0.1
+      Addon.CVars:Set("nameplateNotSelectedAlpha", not_selected_alpha)
+    end
   end
 end
 
@@ -7815,6 +7824,7 @@ local function CreateOptionsTable()
                             Addon.CVars:RestoreFromProfile("nameplateMinAlpha")
                             Addon.CVars:RestoreFromProfile("nameplateMaxAlpha")
                             Addon.CVars:RestoreFromProfile("nameplateSelectedAlpha")
+                            Addon.CVars:RestoreFromProfile("nameplateNotSelectedAlpha")
                             Addon.CVars:RestoreFromProfile("nameplateOccludedAlphaMult")
                           end
                           db.nameplate.toggle.OccludedUnits = value
@@ -9532,15 +9542,8 @@ function Addon:ProfChange()
   Addon:ReloadTheme()
 end
 
-function Addon:ConfigTableChanged(...)
-  CreateCustomNameplatesGroup()
-end
-
-function Addon:OpenOptions()
-  db = Addon.db.profile
-
-  HideUIPanel(InterfaceOptionsFrame)
-  HideUIPanel(GameMenuFrame)
+local function RegisterOptionsTable()
+  db = TidyPlatesThreat.db.profile
 
   if not options then
     CreateOptionsTable()
@@ -9548,10 +9551,21 @@ function Addon:OpenOptions()
 
     -- Setup options dialog
     Addon.LibAceConfigRegistry:RegisterOptionsTable(t.ADDON_NAME, options)
-    Addon.LibAceConfigRegistry.RegisterCallback(Addon, "ConfigTableChange", "ConfigTableChanged")
+    Addon.LibAceConfigRegistry.RegisterCallback(TidyPlatesThreat, "ConfigTableChange", "ConfigTableChanged")
     Addon.LibAceConfigDialog:SetDefaultSize(t.ADDON_NAME, 1000, 640)
   end
+end
 
+function TidyPlatesThreat:ConfigTableChanged(...)
+  RegisterOptionsTable()
+  CreateCustomNameplatesGroup()
+end
+
+function TidyPlatesThreat:OpenOptions()
+  HideUIPanel(InterfaceOptionsFrame)
+  HideUIPanel(GameMenuFrame)
+
+  RegisterOptionsTable()
   Addon.LibAceConfigDialog:Open(t.ADDON_NAME)
 end
 

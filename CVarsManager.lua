@@ -38,6 +38,7 @@ local COMBAT_PROTECTED = {
   nameplateOverlapV = true,
   nameplateResourceOnTarget = true,
   nameplateSelectedAlpha = true,
+  nameplateNotSelectedAlpha = true,
   nameplateTargetBehindMaxDistance = true,
   -- Nameplate CVars
   nameplateShowAll = true,
