@@ -782,10 +782,13 @@ function Addon:SetCVarsForOcclusionDetection()
     Addon.CVars:Set("nameplateSelectedAlpha", selected_alpha)
   end
 
-  local not_selected_alpha =  tonumber(GetCVar("nameplateNotSelectedAlpha")) or tonumber(GetCVarDefault("nameplateNotSelectedAlpha"))
-  if not not_selected_alpha or (not_selected_alpha < occluded_alpha_mult + 0.1) then
-    not_selected_alpha = occluded_alpha_mult + 0.1
-    Addon.CVars:Set("nameplateNotSelectedAlpha", not_selected_alpha)
+  -- Occlusion detection does not work when a target is selected in Classic, see https://github.com/Stanzilla/WoWUIBugs/issues/134
+  if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC then
+    local not_selected_alpha =  tonumber(GetCVar("nameplateNotSelectedAlpha")) or tonumber(GetCVarDefault("nameplateNotSelectedAlpha"))
+    if not not_selected_alpha or (not_selected_alpha < occluded_alpha_mult + 0.1) then
+      not_selected_alpha = occluded_alpha_mult + 0.1
+      Addon.CVars:Set("nameplateNotSelectedAlpha", not_selected_alpha)
+    end
   end
 end
 
@@ -7821,6 +7824,7 @@ local function CreateOptionsTable()
                             Addon.CVars:RestoreFromProfile("nameplateMinAlpha")
                             Addon.CVars:RestoreFromProfile("nameplateMaxAlpha")
                             Addon.CVars:RestoreFromProfile("nameplateSelectedAlpha")
+                            Addon.CVars:RestoreFromProfile("nameplateNotSelectedAlpha")
                             Addon.CVars:RestoreFromProfile("nameplateOccludedAlphaMult")
                           end
                           db.nameplate.toggle.OccludedUnits = value
