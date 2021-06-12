@@ -59,5 +59,8 @@ ignore:
   - .pkgmeta
   - README.md
   - CHANGELOG.md
+  - TidyPlates_ThreatPlates-Mainline.toc
+  - TidyPlates_ThreatPlates-Classic.toc
+  - TidyPlates_ThreatPlates-BCC.toc
 
 move-folders:
