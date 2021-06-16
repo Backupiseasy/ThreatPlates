@@ -115,7 +115,7 @@ L[ [=[|cffFFD100Current Instance:|r
 ]=] ] = "|cffFFD100Aktuelle Instanz:|r"
 L[ [=[|cffFFD100Current Instance:|r
 ]=] ] = "|cffFFD100Aktuelle Instanz:|r"
-L["|cffffff00Medium Threat|r"] = "|cffffff00Mitllere Bedrohung|r"
+L["|cffffff00Medium Threat|r"] = "|cffffff00Mittlere Bedrohung|r"
 L["|cffffffffGeneral Settings|r"] = "|cffffffffAllgemeine Einstellungen|r"
 L["|cffffffffLow Threat|r"] = "|cffffffffNiedrige Bedrohung|r"
 L["|cffFFFFFFMigrate Custom Nameplates Settings|r"] = "|cffFFFFFFMigriere die Einstellungen für benutzerdefinierte Namensplaketten|r"
