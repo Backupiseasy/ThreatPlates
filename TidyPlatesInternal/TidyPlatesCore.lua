@@ -391,6 +391,11 @@ do
       plate.TPFrame:Show()
       plate.TPFrame.Active = true
     end
+
+    --local show_plate = (UnitReaction(unitid, "player") > 4 and SettingsShowFriendlyBlizzardNameplates) or SettingsShowEnemyBlizzardNameplates
+    --plate.UnitFrame:SetShown(show_plate)
+    --plate.TPFrame:SetShown(not show_plate)
+    --plate.TPFrame.Active = not show_plate
   end
 
 	-- OnShowNameplate
@@ -447,7 +452,7 @@ do
     UpdateReferences(plate)
 
     Addon:UpdateUnitCondition(unit, unitid)
-		ProcessUnitChanges()
+    ProcessUnitChanges()
     OnUpdateCastMidway(nameplate, unit.unitid)
 
     -- Fix a bug where the overlay for non-interruptible casts was shown even for interruptible casts when entering combat while the unit was already casting
@@ -637,7 +642,6 @@ local	function UpdatePlate_SetAlphaWithOcclusion(tp_frame, unit)
   UpdatePlate_SetAlpha(tp_frame, unit)
 end
 
-
 local function UpdatePlate_SetAlphaWithFadingOcclusionOnUpdate(tp_frame, unit)
   local target_alpha
 
@@ -686,6 +690,12 @@ end
 ---------------------------------------------------------------------------------------------------------------------
 -- Nameplate Updating:
 ---------------------------------------------------------------------------------------------------------------------
+
+--local function UpdateHealth(tp_frame, unit)
+--  local healthbar = tp_frame.visual
+--  healthbar:SetMinMaxValues(0, unit.healthmax)
+--  healthbar:SetValue(unit.health)
+--end
 
 do
 	-- UpdateIndicator_HealthBar: Updates the value on the health bar
@@ -1189,9 +1199,26 @@ do
   local function UNIT_HEALTH(event, unitid)
     local plate = GetNamePlateForUnit(unitid)
 
-    if plate and plate.TPFrame.Active then
-      OnHealthUpdate(plate)
-      Addon.UpdateExtensions(plate.TPFrame, unitid, plate.TPFrame.stylename)
+    local tp_frame = plate and plate.TPFrame -- or nil, false if plate == nil
+    if tp_frame then
+      --local unit = tp_frame.unit
+      --unit.health = _G.UnitHealth(unitid) or 0
+      --unit.healthmax = _G.UnitHealthMax(unitid) or 1
+      --
+      --UpdateHealth(tp_frame, unit)
+      -- UpdateIndicator_CustomScaleText() -- Health text
+
+      --if not tp_frame.Active then
+      --  print ("UNIT_HEALTH on non-active nameplate:", tp_frame.unit.name)
+      --end
+
+      --if tp_frame.Active then
+      --if tp_frame:IsShown() then
+      local visual = tp_frame.visual
+      if visual.healthbar:IsShown() or visual.customtext:IsShown() then
+        OnHealthUpdate(plate)
+        Addon.UpdateExtensions(plate.TPFrame, unitid, plate.TPFrame.stylename)
+      end
     end
 	end
 
@@ -1422,6 +1449,8 @@ do
       if plate and plate.TPFrame.Active then
         UpdateReferences(plate)
         Addon:UpdateUnitCondition(unit, unitid)
+        -- If Blizzard-style nameplates are used, we also need to check if TP plates are disabled/enabled now
+        Addon:UpdateNameplateStyle(plate, unitid)
         ProcessUnitChanges()
       end
     end
