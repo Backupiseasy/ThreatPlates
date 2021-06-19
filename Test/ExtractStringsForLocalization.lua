@@ -1,11 +1,16 @@
 -- Lua implementation of PHP scandir function
 --local TPTP_DIRECTORY = [[C:\Games\World of Warcraft\_retail_\Interface\AddOns\TidyPlates_ThreatPlates]]
-local TPTP_DIRECTORY = [[G:\World of Warcraft\_retail_\Interface\AddOns\TidyPlates_ThreatPlates]]
+local TPTP_DIRECTORY = [[G:\World of Warcraft\_classic_\Interface\AddOns\TidyPlates_ThreatPlates]]
 --local TPTP_DIRECTORY = [[D:\Games\World of Warcraft - Dev\_retail_\Interface\AddOns\TidyPlates_ThreatPlates]]
 --local TPTP_DIRECTORY = [[D:\Games\World of Warcraft - Int\_retail_\Interface\AddOns\TidyPlates_ThreatPlates]]
 local IGNORE_LIST = {
+  TPTP_DIRECTORY .. [[\.git]],
+  TPTP_DIRECTORY .. [[\.idea]],
+  TPTP_DIRECTORY .. [[\.release]],
   TPTP_DIRECTORY .. [[\Libs]],
-  TPTP_DIRECTORY ..[[\Locales]]
+  TPTP_DIRECTORY .. [[\Locales]],
+  TPTP_DIRECTORY .. [[\Source]],
+  TPTP_DIRECTORY .. [[\Test]],
 }
 
 function string.ends(String,End)
@@ -53,7 +58,13 @@ do
 
   for i=1, #file_list do
     if string.ends(file_list[i], ".lua") and
-       not string.starts(file_list[i], IGNORE_LIST[1]) and not string.starts(file_list[i], IGNORE_LIST[2]) then
+      not string.starts(file_list[i], IGNORE_LIST[1]) and
+      not string.starts(file_list[i], IGNORE_LIST[2]) and
+      not string.starts(file_list[i], IGNORE_LIST[3]) and
+      not string.starts(file_list[i], IGNORE_LIST[4]) and
+      not string.starts(file_list[i], IGNORE_LIST[5]) and
+      not string.starts(file_list[i], IGNORE_LIST[6]) and
+      not string.starts(file_list[i], IGNORE_LIST[7]) then
 
       local lines_in_file = lines_from(file_list[i])
       for line=1, #lines_in_file do

@@ -594,7 +594,7 @@ function Widget:UpdateSettings()
           ScriptsForWoWEvents[event] = ScriptsForWoWEvents[event] or {}
           ScriptsForWoWEvents[event][custom_style] = func
           if not pcall(self.RegisterEvent, self, event, HandleWoWEvent) then
-            Addon.PrintErrorMessage(string_format(L["Attempt to register script for unknown WoW event \"%s\""], event))
+            Addon.PrintErrorMessage(string_format(L["Attempt to register script for unknown WoW event '%s'"], event))
           end
         end
       end
