@@ -403,7 +403,9 @@ local CROWD_CONTROL_SPELLS_TBC_CLASSIC = {
     [24132] = LOC_SLEEP,                     -- Rank 2
     [24133] = LOC_SLEEP,                     -- Rank 3
     [27068] = LOC_SLEEP,                     -- Rank 4
-
+  [3355] = LOC_INCAPACITATE,               -- Freezing Trap Effect
+    [14308] = LOC_SLEEP,                     -- Rank 2
+    [14309] = LOC_SLEEP,                     -- Rank 3
 
   ---------------------------------------------------------------------------------------------------
   -- Mage
@@ -642,6 +644,9 @@ local CROWD_CONTROL_SPELLS_CLASSIC = {
   [19386] = LOC_SLEEP,                     -- Wyvern Sting
     [24132] = LOC_SLEEP,                     -- Rank 2
     [24133] = LOC_SLEEP,                     -- Rank 3
+  [3355] = LOC_INCAPACITATE,               -- Freezing Trap Effect
+  [14308] = LOC_SLEEP,                     -- Rank 2
+  [14309] = LOC_SLEEP,                     -- Rank 3
 
 
   ---------------------------------------------------------------------------------------------------
