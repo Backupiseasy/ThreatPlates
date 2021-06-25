@@ -691,12 +691,6 @@ end
 -- Nameplate Updating:
 ---------------------------------------------------------------------------------------------------------------------
 
---local function UpdateHealth(tp_frame, unit)
---  local healthbar = tp_frame.visual
---  healthbar:SetMinMaxValues(0, unit.healthmax)
---  healthbar:SetValue(unit.health)
---end
-
 do
 	-- UpdateIndicator_HealthBar: Updates the value on the health bar
 	function UpdateIndicator_HealthBar()
@@ -1026,7 +1020,6 @@ do
 
   function CoreEvents:PLAYER_ENTERING_WORLD()
 		TidyPlatesCore:SetScript("OnUpdate", OnUpdate)
-
   end
 
 	function CoreEvents:NAME_PLATE_CREATED(plate)
@@ -1201,13 +1194,6 @@ do
 
     local tp_frame = plate and plate.TPFrame -- or nil, false if plate == nil
     if tp_frame then
-      --local unit = tp_frame.unit
-      --unit.health = _G.UnitHealth(unitid) or 0
-      --unit.healthmax = _G.UnitHealthMax(unitid) or 1
-      --
-      --UpdateHealth(tp_frame, unit)
-      -- UpdateIndicator_CustomScaleText() -- Health text
-
       --if not tp_frame.Active then
       --  print ("UNIT_HEALTH on non-active nameplate:", tp_frame.unit.name)
       --end
