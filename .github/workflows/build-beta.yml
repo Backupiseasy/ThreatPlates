@@ -2,9 +2,7 @@
 name: Package and release alpha and beta version
 
 on:
-  push:
-    branches:
-      - "devel/**"
+  create:
     tags:
       - "**-beta**"
       - "**-alpha**"
