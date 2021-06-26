@@ -4,10 +4,12 @@ name: Package and release alpha and beta version
 on:
   push:
     branches:
-      - "devel/**"
+      - master
+      - main
     tags:
-      - "**-beta**"
-      - "**-alpha**"
+      - "[0-9]+.[0-9]+.[0-9]+"
+      #- "!**-beta**"
+      #- "!**-alpha**"
 
 jobs:
   build:
@@ -32,8 +34,8 @@ jobs:
           args: -e -l -n "ThreatPlates-{project-version}{classic}"
         env:
           CF_API_KEY: ${{ secrets.CF_API_KEY }}
-          #GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
-          #WOWI_API_TOKEN: ${{ secrets.WOWI_API_TOKEN }}
+          GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
+          WOWI_API_TOKEN: ${{ secrets.WOWI_API_TOKEN }}
 
       - name: Create Classic Package
         uses: BigWigsMods/packager@master
@@ -41,8 +43,8 @@ jobs:
           args: -e -l -n "ThreatPlates-{project-version}{classic}" -g classic
         env:
           CF_API_KEY: ${{ secrets.CF_API_KEY }}
-          #GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
-          #WOWI_API_TOKEN: ${{ secrets.WOWI_API_TOKEN }}
+          GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
+          WOWI_API_TOKEN: ${{ secrets.WOWI_API_TOKEN }}
 
       - name: Create BCC Package
         uses: BigWigsMods/packager@master
@@ -50,8 +52,8 @@ jobs:
           args: -e -l -n "ThreatPlates-{project-version}{classic}" -g bcc
         env:
           CF_API_KEY: ${{ secrets.CF_API_KEY }}
-          #GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
-          #WOWI_API_TOKEN: ${{ secrets.WOWI_API_TOKEN }}
+          GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
+          WOWI_API_TOKEN: ${{ secrets.WOWI_API_TOKEN }}
 
 #      - name: Send Status to Discord
 #        uses: nebularg/actions-discord-webhook@v1
