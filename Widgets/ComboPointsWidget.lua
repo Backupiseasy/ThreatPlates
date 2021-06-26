@@ -18,7 +18,7 @@ local sort = sort
 -- WoW APIs
 local GetTime = GetTime
 local UnitClass, UnitCanAttack = UnitClass, UnitCanAttack
-local UnitPower, UnitPowerMax, GetRuneCooldown = UnitPower, UnitPowerMax, GetRuneCooldown
+local UnitPower, UnitPowerMax, GetRuneCooldown, GetComboPoints = UnitPower, UnitPowerMax, GetRuneCooldown, GetComboPoints
 local GetUnitChargedPowerPoints = GetUnitChargedPowerPoints
 local GetShapeshiftFormID = GetShapeshiftFormID
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
@@ -201,6 +201,13 @@ local DeathKnightSpecColor, ShowRuneCooldown
 ---------------------------------------------------------------------------------------------------
 
 if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC then
+  -- This should not be necessary as in Classic only Rogues and Druids had combo points
+  if Addon.PlayerClass == "ROGUE" or Addon.PlayerClass == "DRUID" then
+    UnitPower = function(unitToken , powerType)
+      return GetComboPoints("player", "target")
+    end
+  end
+
   function Widget:DetermineUnitPower()
     local power_type = UNIT_POWER[PlayerClass]
 
