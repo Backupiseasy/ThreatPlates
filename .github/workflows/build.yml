@@ -1,5 +1,5 @@
 # description of this workflow, can be anything you want
-name: Package and release alpha and beta version
+name: Package and release version 
 
 on:
   # push:
@@ -9,8 +9,8 @@ on:
   create:
     tags:
       - "[0-9]+.[0-9]+.[0-9]+"
-      #- "!**-beta**"
-      #- "!**-alpha**"
+      - "!**-beta**"
+      - "!**-alpha**"
 
 jobs:
   build:
