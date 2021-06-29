@@ -1,10 +1,10 @@
-## Interface: 90005
-## Interface-Retail: 90005
+## Interface: 90100
+## Interface-Retail: 90100
 ## Interface-Classic: 11307
 ## Interface-BCC: 20501
 
 ## Title: Threat Plates
-## Version: @project-version@
+## Version: @project-version6@
 ## Notes: Threat-reactive nameplates.
 ## Notes-deDE: Bedrohungsreaktive Namensplaketten.
 ## Notes-esES: Placas Identificativas de Amenaza
