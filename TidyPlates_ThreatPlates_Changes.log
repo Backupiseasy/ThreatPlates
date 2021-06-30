@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+10.2.5 (2021-06-xx)
+------------------------------------------------------
+* Fixed a typo in TOC file which caused the addon version not being set correctly. 
+
+------------------------------------------------------
 10.2.4 (2021-06-29)
 ------------------------------------------------------
 * Fixed a bug where health information on healthbar and status text was not updated immediately (only after targeting the unit) [GH-290, Comment #5581, #5588, #5648, #5651, IM]

@@ -4,7 +4,7 @@
 ## Interface-BCC: 20501
 
 ## Title: Threat Plates
-## Version: @project-version6@
+## Version: @project-version@
 ## Notes: Threat-reactive nameplates.
 ## Notes-deDE: Bedrohungsreaktive Namensplaketten.
 ## Notes-esES: Placas Identificativas de Amenaza
