@@ -1,6 +1,7 @@
 ﻿------------------------------------------------------
-10.2.5 (2021-06-xx)
+10.2.5 (2021-07-02)
 ------------------------------------------------------
+* Fixed a Lua error that occurred when the personal nameplate was enabled and the player entered combat [Issue #495, Comment #5709, #5704].
 * Fixed a typo in TOC file which caused the addon version not being set correctly. 
 
 ------------------------------------------------------
@@ -469,7 +470,7 @@
 * Aura for Imprison (Demon Hunter) is now correctly recognized as crowd-control auras when the PvP talent Detainment was selected [Comment #1602].
 * Auras for Sin and Punishment (Priest) and Unstable Affliction silence effect (Warlock) are now correctly recognized as crowd-control auras.
 
-﻿------------------------------------------------------
+------------------------------------------------------
 9.0.18
 ------------------------------------------------------
 * All auras for Demon Hunter, Rogues, Hunter, Death Knight, Paladin, Priest, Shaman, Monk, and Druid are now correctly recognized as crowd-control auras [Comment #1560, #1556, #1541].

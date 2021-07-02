@@ -1190,8 +1190,9 @@ do
   end
 
   local function UNIT_HEALTH(event, unitid)
-    local plate = GetNamePlateForUnit(unitid)
+    if unitid == "target" or UnitIsUnit("player", unitid) then return end
 
+    local plate = GetNamePlateForUnit(unitid)
     local tp_frame = plate and plate.TPFrame -- or nil, false if plate == nil
     if tp_frame then
       --if not tp_frame.Active then
@@ -1209,8 +1210,9 @@ do
 	end
 
   function CoreEvents:UNIT_MAXHEALTH(unitid)
-    local plate = GetNamePlateForUnit(unitid)
+    if unitid == "target" or UnitIsUnit("player", unitid) then return end
 
+    local plate = GetNamePlateForUnit(unitid)
     if plate and plate.TPFrame.Active then
       OnHealthUpdate(plate)
       Addon.UpdateExtensions(plate.TPFrame, unitid, plate.TPFrame.stylename)
