@@ -1,0 +1,38 @@
+name: Upload phrase keys for translation to CurseForge
+
+on:
+   push:
+     branches:
+       - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # we first have to clone the AddOn project, this is a required step
+      - name: Clone project
+        uses: actions/checkout@v1
+        # note: checkout@v2 breaks git history, so generating a changelog and
+        # file naming for non-tagged builds will not work properly
+
+      - name: Install Lua
+        uses: leafo/gh-actions-lua@v8.0.0
+          
+      - name: Install Luarocks
+        uses: leafo/gh-actions-luarocks@v4
+      
+      - name: Install LuaFileSystem
+        run: luarocks install luafilesystem
+        
+      - name: Extract phrase keys (strings that have to be translated) from lua files
+        run: lua Source/ExtractPhraseKeysForLocalization.lua .
+
+      # - name: Output
+      #   run: echo "::set-output name=export::$(cat ./phrase_keys_export_file.txt)\n"
+      #   id: run_tests
+
+      - name: Update CurseForge Translations
+        run: bash Source/import_localization_phrase_keys.sh
+        env:
+          GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
