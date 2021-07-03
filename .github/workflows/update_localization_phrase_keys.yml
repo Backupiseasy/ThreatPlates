@@ -35,4 +35,4 @@ jobs:
       - name: Update CurseForge Translations
         run: bash Source/import_localization_phrase_keys.sh
         env:
-          GITHUB_OAUTH: ${{ secrets.CF_API_KEY }}
+          CF_API_KEY: ${{ secrets.CF_API_KEY }}
