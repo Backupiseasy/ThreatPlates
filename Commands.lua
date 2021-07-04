@@ -6,7 +6,7 @@ local TP = Addon.ThreatPlates
 ---------------------------------------------------------------------------------------------------
 local L = TP.L
 
-local DEBUG = TP.Meta("version"):find("Alpha") or TP.Meta("version"):find("Beta")
+local DEBUG = TP.Meta("version") == "@project-version@"
 
 local function toggleDPS()
 	TidyPlatesThreat:SetRole(false)
@@ -256,6 +256,16 @@ function TidyPlatesThreat:ChatCommandDebug(cmd_list)
 		DBM.Nameplate:Show(true, UnitGUID("target"), 255824, nil, nil, nil, true, {0.5, 0, 0.55, 0.75})
 	elseif command == "dbm2" then
 		DBM.Nameplate:Hide(true, UnitGUID("target"), 255824, nil, nil, nil, true, {0.5, 0, 0.55, 0.75})
+	elseif command == "valid" then
+		print ("Plates Created:")
+		for plate, tp_frame in pairs(Addon.PlatesCreated) do
+			print (tp_frame.unit and tp_frame.unit.name or "<Undefined>", "=> Active:", tp_frame.Active, "- Shown:", tp_frame:IsShown(), tp_frame.visual.healthbar:IsShown(), tp_frame.visual.customtext:IsShown())
+			if not (tp_frame.unit and tp_frame.unit.name) then
+				if plate == C_NamePlate.GetNamePlateForUnit("player") then
+					print ("  =>Player")
+				end
+			end
+		end
 	else
 		TP.Print(L["Unknown option: "] .. command, true)
 		PrintHelp()
