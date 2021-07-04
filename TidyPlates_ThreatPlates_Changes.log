@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+10.2.6 (2021-07-xx)
+------------------------------------------------------
+* Fixed an inconsistency with nameplate visibility where the target unit's nameplate was shown with Blizzard default nameplates, but not with Threat Plates [Issue #494].
+
+------------------------------------------------------
 10.2.5 (2021-07-02)
 ------------------------------------------------------
 * Fixed a Lua error that occurred when the personal nameplate was enabled and the player entered combat [Issue #495, Comment #5709, #5704].

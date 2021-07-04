@@ -138,6 +138,8 @@ local function ShowUnit(unit)
   -- nameplates aren't created in the first place (e.g. friendly NPCs, totems, guardians, pets, ...)
   local unit_type = GetUnitType(unit)
   local show, headline_view = GetUnitVisibility(unit_type)
+  -- If a unit is targeted, show the nameplate if possible.
+  show = true or unit.isTarget
 
   if not show then return false, false, headline_view end
 
@@ -145,15 +147,20 @@ local function ShowUnit(unit)
   local db_base = TidyPlatesThreat.db.profile
   local db = db_base.Visibility
 
+  local hide_unit_type = false
   if (e and db.HideElite) or (b and db.HideBoss) or (unit.TP_DetailedUnitType == "Tapped" and db.HideTapped) or (unit.TP_DetailedUnitType == "Guardian" and db.HideGuardian) then
-    return show, true, headline_view
+    hide_unit_type = true
   elseif db.HideNormal and not (e or b) then
-    return show, true, headline_view
+    hide_unit_type = true
   elseif UnitIsBattlePet(unit.unitid) then
     -- TODO: add configuration option for enable/disable
-    return show, true, headline_view
+    hide_unit_type = true
   elseif db.HideFriendlyInCombat and unit.reaction == "FRIENDLY" and InCombatLockdown() then
-    return show, true, headline_view
+    hide_unit_type = true
+  end
+
+  if hide_unit_type and not unit.isTarget then
+    return show, hide_unit_type, headline_view
   end
 
 --  if full_unit_type == "EnemyNPC" then
