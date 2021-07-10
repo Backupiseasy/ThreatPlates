@@ -252,6 +252,15 @@ function TidyPlatesThreat:ChatCommandDebug(cmd_list)
 		print ("9.2.0-Beta1 < 9.1.20:", Addon.CurrentVersionIsOlderThan("9.2.0-Beta1", "9.1.20"))
 		print ("9.2.0-Beta2 < 9.2.0-Beta1:", Addon.CurrentVersionIsOlderThan("9.2.0-Beta2", "9.2.0-Beta1"))
 		print ("9.2.0-Beta1 < 9.2.0-Beta2:", Addon.CurrentVersionIsOlderThan("9.2.0-Beta1", "9.2.0-Beta2"))
+	elseif command == "reaction" then
+    local plate = C_NamePlate.GetNamePlateForUnit("target")
+    if not plate then return end
+    local unit = plate.TPFrame.unit
+
+		print("Name:", unit.name)
+		print("  Reaction:", unit.reaction)
+		print("  UnitReaction:", UnitReaction("player", "target"))
+    print("  CanAttack = ", UnitCanAttack("player", "target"))
 	elseif command == "dbm1" then
 		DBM.Nameplate:Show(true, UnitGUID("target"), 255824, nil, nil, nil, true, {0.5, 0, 0.55, 0.75})
 	elseif command == "dbm2" then

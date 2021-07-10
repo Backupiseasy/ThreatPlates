@@ -478,13 +478,29 @@ end
 ---------------------------------------------------------------------------------------------------------------------
 local RaidIconList = { "STAR", "CIRCLE", "DIAMOND", "TRIANGLE", "MOON", "SQUARE", "CROSS", "SKULL" }
 
+local MAP_UNIT_REACTION = {
+  [1] = "HOSTILE",
+  [2] = "HOSTILE",
+  [3] = "HOSTILE",
+  [4] = "NEUTRAL",
+  [5] = "FRIENDLY",
+  [6] = "FRIENDLY",
+  [7] = "FRIENDLY",
+  [8] = "FRIENDLY",
+}
+
 -- GetUnitReaction: Determines the reaction, and type of unit from the health bar color
 local function GetReactionByColor(red, green, blue)
   if red < .1 then 	-- Friendly
     return "FRIENDLY"
   elseif red > .5 then
-    if green > .9 then return "NEUTRAL"
-    else return "HOSTILE" end
+    if green > .9 then
+      return "NEUTRAL"
+    else
+      return "HOSTILE"
+    end
+  else
+    return "HOSTILE"
   end
 end
 
@@ -554,7 +570,7 @@ function Addon:UpdateUnitCondition(unit, unitid)
 
   unit.red, unit.green, unit.blue = _G.UnitSelectionColor(unitid)
 
-  unit.reaction = GetReactionByColor(unit.red, unit.green, unit.blue) or "HOSTILE"
+  unit.reaction = MAP_UNIT_REACTION[UnitReaction("player", unitid)] or GetReactionByColor(unit.red, unit.green, unit.blue)
   -- Enemy players turn to neutral, e.g., when mounting a flight path mount, so fix reaction in that situations
   if unit.reaction == "NEUTRAL" and (unit.type == "PLAYER" or UnitPlayerControlled(unitid)) then
     unit.reaction = "HOSTILE"
