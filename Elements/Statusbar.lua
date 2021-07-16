@@ -11,8 +11,8 @@ local ipairs = ipairs
 
 -- ThreatPlates APIs
 local Font = Addon.Font
-local ANCHOR_POINT_TEXT = Addon.ANCHOR_POINT_TEXT
 local BackdropTemplate = Addon.BackdropTemplate
+local MODE_FOR_STYLE, ANCHOR_POINT_TEXT = Addon.MODE_FOR_STYLE, Addon.ANCHOR_POINT_TEXT
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -22,16 +22,6 @@ local _G =_G
 ---------------------------------------------------------------------------------------------------
 -- Methods of class Statusbar
 ---------------------------------------------------------------------------------------------------
-
-local MODE_FOR_STYLE = {
-  dps = "HealthbarMode",
-  tank = "HealthbarMode",
-  normal = "HealthbarMode",
-  totem = "HealthbarMode",
-  unique = "HealthbarMode",
-  NameOnly = "NameMode",
-  ["NameOnly-Unique"] = "NameMode",
-}
 
 local function AddTextArea(self, text_area)
   self.TextAreas[#self.TextAreas + 1] = text_area

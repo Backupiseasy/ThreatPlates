@@ -6,7 +6,7 @@ local TP = Addon.ThreatPlates
 ---------------------------------------------------------------------------------------------------
 local L = TP.L
 
-local DEBUG = TP.Meta("version"):find("Alpha") or TP.Meta("version"):find("Beta")
+local DEBUG = true --TP.Meta("version"):find("Alpha") or TP.Meta("version"):find("Beta")
 
 local function toggleDPS()
 	Addon:SetRole(false)
@@ -129,6 +129,8 @@ local function ChatCommandDebug(cmd_list)
 	elseif command == "print-custom-styles" then
 		TP.DEBUG_PRINT_TABLE(Addon.db.profile.uniqueSettings)
 		--Addon.MigrateDatabase(TP.Meta("version"))
+	elseif command == "migrate" then
+		Addon.TestMigrateDatabase("MigrateAurasWidgetV2")
 	elseif command == "guid" then
 		local plate = C_NamePlate.GetNamePlateForUnit("target")
 		if not plate then return end
@@ -247,18 +249,18 @@ function TidyPlatesThreat:ChatCommand(input)
 			TP.Print(L["Scriping for custom styles for nameplates is now |cffff0000disabled!|r."])
 		end
 		Addon.UpdateCustomStyles()
-		Addon:ConfigTableChanged()
+		TidyPlatesThreat:ConfigTableChanged()
 --	elseif command == "toggle-view-friendly-units" then
 --		TidyPlatesThreat:ToggleNameplateModeFriendlyUnits()
 --	elseif command == "toggle-view-neutral-units" then
 --		TidyPlatesThreat:ToggleNameplateModeNeutralUnits()
 --	elseif command == "toggle-view-enemy-units" then
 --		TidyPlatesThreat:ToggleNameplateModeEnemyUnits()
-	elseif DEBUG then
+	else --if DEBUG then
 		ChatCommandDebug(cmd_list)
-	else
-		TP.Print(L["Unknown option: "] .. input, true)
-		PrintHelp()
+	--else
+	--	TP.Print(L["Unknown option: "] .. input, true)
+	--	PrintHelp()
 	end
 end
 

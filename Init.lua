@@ -387,7 +387,9 @@ local function DEBUG_PRINT_UNIT(unit, full_info)
     --		DEBUG("  isFriend = ", TidyPlatesUtilityInternal.IsFriend(unit.name))
     --		DEBUG("  isGuildmate = ", TidyPlatesUtilityInternal.IsGuildmate(unit.name))
     DEBUG("  IsOtherPlayersPet = ", UnitIsOtherPlayersPet(unit))
-    DEBUG("  IsBattlePet = ", UnitIsBattlePet(unit.unitid))
+    if not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC then
+			DEBUG("  IsBattlePet = ", UnitIsBattlePet(unit.unitid))
+		end
     DEBUG("  PlayerControlled = ", UnitPlayerControlled(unit.unitid))
     DEBUG("  CanAttack = ", UnitCanAttack("player", unit.unitid))
     DEBUG("  Reaction = ", UnitReaction("player", unit.unitid))
