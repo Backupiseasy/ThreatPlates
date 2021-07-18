@@ -250,6 +250,12 @@ ThreatPlates.FRIENDLY_SUBTEXT = {
   CUSTOM = L["Custom"],
 }
 
+ThreatPlates.ENEMY_NAME_ABBREVIATION = {
+    FULL = L["Full Name"],
+    INITIALS = L["Initials"],
+    LAST = L["Last Word"],
+}
+
 -------------------------------------------------------------------------------
 -- Totem data - define it one time for the whole addon
 -------------------------------------------------------------------------------
@@ -1392,6 +1398,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
         FriendlyTextColorMode = "CUSTOM",
         FriendlyTextColor = RGB(255, 255, 255),
         UseRaidMarkColoring = false,
+        EnemyNameAbbreviation = "FULL",
       },
       level = {
         typeface = Addon.DEFAULT_FONT, -- old default: "Accidental Presidency",
