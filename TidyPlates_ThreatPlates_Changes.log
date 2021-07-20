@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+10.2.7 (2021-07-20)
+------------------------------------------------------
+* Fixed a bug with unit visibility not being applied correctly [Issue #5768, #5765].
+
+------------------------------------------------------
 10.2.6 (2021-07-18)
 ------------------------------------------------------
 * Fixed an inconsistency with nameplate visibility where the target unit's nameplate was shown with Blizzard default nameplates, but not with Threat Plates [Issue #494].

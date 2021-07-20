@@ -139,7 +139,7 @@ local function ShowUnit(unit)
   local unit_type = GetUnitType(unit)
   local show, headline_view = GetUnitVisibility(unit_type)
   -- If a unit is targeted, show the nameplate if possible.
-  show = true or unit.isTarget
+  show = show or unit.isTarget
 
   if not show then return false, false, headline_view end
 
