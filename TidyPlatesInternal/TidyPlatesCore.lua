@@ -570,7 +570,7 @@ function Addon:UpdateUnitCondition(unit, unitid)
 
   unit.red, unit.green, unit.blue = _G.UnitSelectionColor(unitid)
 
-  unit.reaction = MAP_UNIT_REACTION[UnitReaction("player", unitid)] or GetReactionByColor(unit.red, unit.green, unit.blue)
+  unit.reaction = MAP_UNIT_REACTION[UnitReaction(unitid, "player")] or GetReactionByColor(unit.red, unit.green, unit.blue)
   -- Enemy players turn to neutral, e.g., when mounting a flight path mount, so fix reaction in that situations
   if unit.reaction == "NEUTRAL" and (unit.type == "PLAYER" or UnitPlayerControlled(unitid)) then
     unit.reaction = "HOSTILE"

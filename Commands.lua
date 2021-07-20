@@ -259,9 +259,12 @@ function TidyPlatesThreat:ChatCommandDebug(cmd_list)
 
 		print("Name:", unit.name)
 		print("  Reaction:", unit.reaction)
-		print("  UnitReaction:", UnitReaction("player", "target"))
-    print("  CanAttack = ", UnitCanAttack("player", "target"))
-	elseif command == "dbm1" then
+		print("    UnitReaction:", UnitReaction("target", "player"))
+    print("    UnitCanAttack = ", UnitCanAttack("target", "player"))
+    print("    UnitIsFriend = ", UnitIsFriend("target", "player"))
+    print("    UnitSelectionType = ", UnitSelectionType("target"))
+    print("    UnitSelectionColor = ", UnitSelectionColor("target"))
+		elseif command == "dbm1" then
 		DBM.Nameplate:Show(true, UnitGUID("target"), 255824, nil, nil, nil, true, {0.5, 0, 0.55, 0.75})
 	elseif command == "dbm2" then
 		DBM.Nameplate:Hide(true, UnitGUID("target"), 255824, nil, nil, nil, true, {0.5, 0, 0.55, 0.75})
