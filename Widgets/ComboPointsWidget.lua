@@ -520,10 +520,18 @@ end
 function Widget:OnEnable()
   self:RegisterEvent("PLAYER_ENTERING_WORLD")
   self:RegisterEvent("PLAYER_TARGET_CHANGED")
-  self:RegisterUnitEvent("UNIT_POWER_UPDATE", "player", EventHandler)
-  self:RegisterUnitEvent("UNIT_DISPLAYPOWER", "player", EventHandler)
+  --self:RegisterUnitEvent("UNIT_POWER_UPDATE", "player", EventHandler)
+  --self:RegisterUnitEvent("UNIT_DISPLAYPOWER", "player", EventHandler)
   self:RegisterUnitEvent("UNIT_MAXPOWER", "player")
-  if not (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC) then
+  --   self:RegisterUnitEvent("UNIT_POWER_POINT_CHARGE", "player", EventHandler)
+  -- if not (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC) then
+  -- end
+  
+  if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC then
+    self:RegisterUnitEvent("UNIT_POWER_FREQUENT", "player", EventHandler)
+  else
+    self:RegisterUnitEvent("UNIT_POWER_UPDATE", "player", EventHandler)
+    self:RegisterUnitEvent("UNIT_DISPLAYPOWER", "player", EventHandler)
     self:RegisterUnitEvent("UNIT_POWER_POINT_CHARGE", "player", EventHandler)
   end
 
@@ -535,17 +543,19 @@ function Widget:OnEnable()
     self:RegisterEvent("RUNE_POWER_UPDATE", EventHandler)
   end
 
-  -- self:RegisterUnitEvent("UNIT_POWER_FREQUENT", "player", EventHandler)
   -- self:RegisterUnitEvent("UNIT_FLAGS", "player", EventHandler)
 end
 
 function Widget:OnDisable()
   self:UnregisterEvent("PLAYER_ENTERING_WORLD")
   self:UnregisterEvent("PLAYER_TARGET_CHANGED")
+  self:UnregisterEvent("UNIT_MAXPOWER")
+  self:UnregisterEvent("UNIT_POWER_FREQUENT")
   self:UnregisterEvent("UNIT_POWER_UPDATE")
   self:UnregisterEvent("UNIT_DISPLAYPOWER")
-  self:UnregisterEvent("UNIT_MAXPOWER")
+  self:UnregisterEvent("UNIT_POWER_POINT_CHARGE")
 
+  self:UnregisterEvent("UPDATE_SHAPESHIFT_FORM")
   if not (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC) then
     self:UnregisterEvent("RUNE_POWER_UPDATE")
   end
