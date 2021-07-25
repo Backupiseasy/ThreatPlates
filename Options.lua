@@ -9555,9 +9555,11 @@ local function RegisterOptionsTable()
   end
 end
 
-function TidyPlatesThreat:ConfigTableChanged(...)
-  RegisterOptionsTable()
-  CreateCustomNameplatesGroup()
+function TidyPlatesThreat:ConfigTableChanged(event, app_name)
+  if app_name == t.ADDON_NAME then
+    RegisterOptionsTable()
+    CreateCustomNameplatesGroup()
+  end
 end
 
 function TidyPlatesThreat:OpenOptions()
