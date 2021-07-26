@@ -9543,7 +9543,7 @@ function Addon:ProfChange()
 end
 
 local function RegisterOptionsTable()
-  db = TidyPlatesThreat.db.profile
+  db = Addon.db.profile
 
   if not options then
     CreateOptionsTable()
@@ -9561,7 +9561,7 @@ function TidyPlatesThreat:ConfigTableChanged(...)
   CreateCustomNameplatesGroup()
 end
 
-function TidyPlatesThreat:OpenOptions()
+function Addon:OpenOptions()
   HideUIPanel(InterfaceOptionsFrame)
   HideUIPanel(GameMenuFrame)
 
