@@ -250,6 +250,13 @@ ThreatPlates.FRIENDLY_SUBTEXT = {
   CUSTOM = L["Custom"],
 }
 
+Addon.THREAT_PERCENTAGE_TYPE = {
+  SCALED_PERCENTAGE = L["Scaled Percentage"],
+  RAW_PERCENTAGE = L["Raw Percentage"],
+  DETAILED_PERCENTAGE = L["Detailed Percentage"],
+  DETAILED_VALUE = L["Detailed Value"],
+}
+
 -------------------------------------------------------------------------------
 -- Totem data - define it one time for the whole addon
 -------------------------------------------------------------------------------
@@ -879,6 +886,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
         Show = true,
         CustomColor = RGB(255, 255, 255),
         UseThreatColor = true,
+        Type = Addon.THREAT_PERCENTAGE_TYPE.SCALED,
         -- Layout
         Anchor = "LEFT",
         InsideAnchor = false,

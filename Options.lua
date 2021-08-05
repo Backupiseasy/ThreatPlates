@@ -1,5 +1,4 @@
 local _, Addon = ...
-local _, Addon = ...
 local t = Addon.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------
@@ -6160,6 +6159,37 @@ local function CreateThreatPercentageOptions()
 
   entry.disabled = function() return not db.threat.ON end
   entry.set = SetValueWidget
+
+  entry.args.PercentageType = {
+    name = L["Percentage Type"],
+    order = 10,
+    type = "select",
+    values = Addon.THREAT_PERCENTAGE_TYPE,
+    style = "radio",
+    desc = L["Show the player's threat percentage against the enemy unit."],
+    arg = { "threatWidget", "ThreatPercentage", "Type" },
+  }
+      --ScaledPercentage = {
+      --  name = L["Scaled Percentage"],
+      --  type = "toggle",
+      --  order = 10,
+      --  desc = L["Show the player's threat percentage against the enemy unit."],
+      --  arg = { "threatWidget", "ThreatPercentage", "ThreatPercentage" },
+      --},
+      --RawPercentage = {
+      --  name = L["Raw Percentage"],
+      --  type = "toggle",
+      --  order = 20,
+      --  desc = L["Show the player's threat percentage against the enemy unit relative to the threat of enemy unit's primary target."],
+      --  arg = { "threatWidget", "ThreatPercentage", "ThreatPercentage" },
+      --},
+      --DetailedPercentage = {
+      --  name = L["Detailed Percentage"],
+      --  type = "toggle",
+      --  order = 30,
+      --  desc = L["Show the player's total threat value on the enemy unit."],
+      --  arg = { "threatWidget", "ThreatPercentage", "ThreatPercentage" },
+      --},
 
   entry.args.Coloring = {
     name = L["Coloring"],

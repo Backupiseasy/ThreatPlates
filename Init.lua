@@ -11,7 +11,7 @@ local ThreatPlates = Addon.ThreatPlates
 ---------------------------------------------------------------------------------------------------
 
 -- Lua APIs
-local string = string
+local string, format = string, format
 
 -- WoW APIs
 local UnitPlayerControlled = UnitPlayerControlled
@@ -128,6 +128,19 @@ Addon.LoadOnDemandLibraries = function()
 		end
 	end
 end
+
+Addon.Truncate = function(value)
+	local abs_value = (value > 0 and value) or (-1 * value)
+
+	if abs_value >= 1e6 then
+		return format("%.1fm", value / 1e6)
+	elseif abs_value >= 1e4 then
+		return format("%.1fk", value / 1e3)
+	else
+		return value
+	end
+end
+
 
 -- Create a percentage-based WoW color based on integer values from 0 to 255 with optional alpha value
 ThreatPlates.RGB = function(red, green, blue, alpha)

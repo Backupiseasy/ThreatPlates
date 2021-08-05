@@ -18,10 +18,10 @@ local string_format = string.format
 local UnitIsUnit, UnitDetailedThreatSituation = UnitIsUnit, UnitDetailedThreatSituation
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local GetRaidTargetIndex = GetRaidTargetIndex
+local IsInRaid, GetNumGroupMembers, GetNumSubgroupMembers = IsInRaid, GetNumGroupMembers, GetNumSubgroupMembers
 
 -- ThreatPlates APIs
 local GetThreatSituation = Addon.GetThreatSituation
-local PlatesByGUID = Addon.PlatesByGUID
 local Font = Addon.Font
 
 local _G =_G
@@ -136,6 +136,112 @@ function Widget:OnUnitAdded(widget_frame, unit)
   self:UpdateFrame(widget_frame, unit)
 end
 
+local function GetDetailedThreatPercentage(unitid)
+  local is_tanking, status, scaled_percentage, _, threat_value = UnitDetailedThreatSituation("player", unitid)
+  if status == nil then return nil, nil end
+
+  local threat_diff = 0
+  print("Tanking:", is_tanking)
+  if is_tanking then
+    -- Determine threat diff by finding the next highest raid/party member threat
+    local group_type = IsInRaid() and "raid" or "party"
+    local num_group_members = (group_type == "raid" and GetNumGroupMembers()) or GetNumSubgroupMembers()
+    
+    local top_other_threat
+    local index_str, scaled_percentage_other, _
+    for i = 1, num_group_members do
+      index_str = tostring(i)
+      _, _, scaled_percentage_other, _, _ = UnitDetailedThreatSituation(group_type .. index_str, unitid)
+      if scaled_percentage_other and scaled_percentage_other > top_other_threat then
+        top_other_threat = scaled_percentage_other
+      end
+
+      _, _, scaled_percentage_other, _, _ = UnitDetailedThreatSituation(group_type .."pet" .. index_str, unitid)
+      if scaled_percentage_other and scaled_percentage_other > top_other_threat then
+        top_other_threat = scaled_percentage_other
+      end
+    end
+
+    if top_other_threat then
+      threat_diff = scaled_percentage - top_other_threat
+    end
+  else
+    -- Determine raw threat deficit by scaled % of target threat
+    if threat_value == 0 or scaled_percentage == 0 then
+      threat_diff = 0
+    else
+      threat_diff = scaled_percentage
+    end
+  end
+
+  -- Show threat delta if non-zero
+  local percentage_text = string_format("%.0f%%", threat_diff)
+  if threat_diff > 0 then
+    percentage_text = "+" .. percentage_text
+  end
+
+  return status, percentage_text
+end
+
+local function GetDetailedThreatValue(unitid)
+  local is_tanking, status, scaled_percentage, _, threat_value = UnitDetailedThreatSituation("player", unitid)
+  if status == nil then return nil, nil end
+
+  local threat_diff = 0
+  if is_tanking then
+    -- Determine threat diff by finding the next highest raid/party member threat
+    local group_type = IsInRaid() and "raid" or "party"
+    local num_group_members = (group_type == "raid" and GetNumGroupMembers()) or GetNumSubgroupMembers()
+    
+    local top_other_threat
+    local index_str, threat_value_other, _
+    for i = 1, num_group_members do
+      index_str = tostring(i)
+      _, _, _, _, threat_value_other = UnitDetailedThreatSituation(group_type .. index_str, unitid)
+      if threat_value_other and threat_value_other > top_other_threat then
+        top_other_threat = threat_value_other
+      end
+
+      _, _, _, _, threat_value_other = UnitDetailedThreatSituation(group_type .."pet" .. index_str, unitid)
+      if threat_value_other and threat_value_other > top_other_threat then
+        top_other_threat = threat_value_other
+      end
+    end
+
+    if top_other_threat then
+      threat_diff = threat_value - top_other_threat
+    end
+  else
+    -- Determine raw threat deficit by scaled <% of target threat
+    if threat_value == 0 or scaled_percentage == 0 then
+      threat_diff = 0
+    else
+      threat_diff = threat_value - threat_value / (scaled_percentage / 100)
+    end
+  end
+
+  -- Show threat delta if non-zero
+  local percentage_text = Addon.Truncate(threat_diff)
+  if threat_diff > 0 then
+    percentage_text = "+" .. percentage_text
+  end
+
+  return status, percentage_text
+end
+
+local THREAT_DETAILS_FUNTIONS = {
+  SCALED_PERCENTAGE = function(unitid)
+    local _, status, scaled_percentage, _, _ = UnitDetailedThreatSituation("player", unitid)
+    return status, string_format("%.0f%%", scaled_percentage)
+  end,
+  RAW_PERCENTAGE = function(unitid)
+    local _, status, _, raw_percentage, _ = UnitDetailedThreatSituation("player", unitid)
+    return status, string_format("%.0f%%", raw_percentage)
+  end,
+  DETAILED_PERCENTAGE = GetDetailedThreatPercentage,
+  DETAILED_VALUE = GetDetailedThreatValue,
+}
+
 function Widget:UpdateFrame(widget_frame, unit)
   local db = Addon.db.profile.threat
 
@@ -182,10 +288,11 @@ function Widget:UpdateFrame(widget_frame, unit)
     widget_frame.RightTexture:Hide()
   end
 
-  if Settings.ThreatPercentage.Show then
-    local _, _, scaledPercentage, _, _ = UnitDetailedThreatSituation("player", unit.unitid)
-    if scaledPercentage then
-      widget_frame.Percentage:SetText(string_format("%.0f%%", scaledPercentage))
+  local db_threat_situation = Settings.ThreatPercentage
+  if db_threat_situation.Show then
+    local status, percentage_text = THREAT_DETAILS_FUNTIONS[db_threat_situation.Type](unit.unitid)
+    if status ~= nil then
+      widget_frame.Percentage:SetText(percentage_text)
 
       local color
       if Settings.ThreatPercentage.UseThreatColor then
