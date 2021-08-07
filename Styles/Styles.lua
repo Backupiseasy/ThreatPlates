@@ -60,17 +60,19 @@ local MAP_UNIT_TYPE_TO_TP_TYPE = {
   FriendlyTotem    = "Totem",
   FriendlyGuardian = "Guardian",
   FriendlyPet      = "Pet",
+  FriendlyMinus    = "Minus",    -- Not sure if they exist ... but to be sure and avoid Lua errors
   EnemyPlayer      = "EnemyPlayer",
   EnemyNPC         = "EnemyNPC", -- / Boss / Elite = Normal / Boss / Elite
   EnemyTotem       = "Totem",
   EnemyGuardian    = "Guardian",
   EnemyPet         = "Pet",
-  EnemyMinus       = "Minus", --                   = Minus
-  NeutralNPC       = "Neutral", --                 = Neutral
+  EnemyMinus       = "Minus",
+  NeutralNPC       = "Neutral",
+  NeutralTotem     = "Totem",    -- When players are mind-controled, their totems turn neutral it seems (at least in Classic): https://www.curseforge.com/wow/addons/tidy-plates-threat-plates/issues/506
   NeutralGuardian  = "Guardian",
-  NeutralMinus     = "Minus", --                    = Minus
   NeutralPet       = "Pet",      -- Sometimes, friendly pets turn into neutral pets when you lose control over them (e.g., in quests).
-  --                  Tapped                       = Tapped
+  NeutralMinus     = "Minus",
+  --                  Tapped
 }
 
 --local function GetUnitType(unit)
