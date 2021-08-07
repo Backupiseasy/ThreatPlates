@@ -283,14 +283,16 @@ function Widget:UpdateComboPointsRogueAnimacharge(widget_frame)
     local cp_texture, cp_texture_off, cp_color
 
     local charged_points = GetUnitChargedPowerPoints("player")
-    -- there's only going to be 1 max (WoW source code)
-    local charged_index = charged_points and charged_points[1]
+    -- for i = 1, #charged_points do
+    --   widget_frame.ComboPoints[charged_points[i].MarkAsCharged = true
+    -- end
 
     for i = 1, self.UnitPowerMax do
       cp_texture = widget_frame.ComboPoints[i]
       cp_texture_off = widget_frame.ComboPointsOff[i]
 
-      if i == charged_index then
+      local point_is_chared = charged_points and tContains(charged_points, i)
+      if point_is_chared then
         cp_texture.IsCharged = true
         if self.db.Style == "Blizzard" then
           cp_texture:SetAtlas("ClassOverlay-ComboPoint-Kyrian")
@@ -328,6 +330,8 @@ function Widget:UpdateComboPointsRogueAnimacharge(widget_frame)
       end
     end
   end
+
+  --cp_texture.MarkAsCharged = false
 end
 
 local function OnUpdateWidget(widget_frame, elapsed)
