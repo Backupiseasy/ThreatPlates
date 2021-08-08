@@ -51,8 +51,7 @@ do_export() {
   esac
 
   sed -i '1d' "$output_file"
-
-  if [ "$lang" = "usUS" ]; then
+  if [ "$lang" = "enUS" ]; then
     sed_command='1ilocal L = LibStub("AceLocale-3.0"):NewLocale("TidyPlatesThreat", "'$lang'", true, true)\nif not L then return end\n'
   else
     sed_command='1ilocal L = LibStub("AceLocale-3.0"):NewLocale("TidyPlatesThreat", "'$lang'", false)\nif not L then return end\n'
