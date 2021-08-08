@@ -12,12 +12,19 @@ fi
 [ -z "$cf_token" ] && cf_token=$CF_API_KEY
 
 declare -A locale_files=(
-  #["enUS"]="enUS.lua"
   ["deDE"]="deDE.lua"
+  ["enUS"]="enUS.lua"
+  ["esES"]="esES.lua"
+  ["esMX"]="esMX.lua"
   ["zhTW"]="zhTW.lua"
-  #["zhCN"]="zhCN.lua"
-  #["esES"]="esES.lua"
-  #["esMX"]="esMX.lua"
+  ["zhCN"]="zhCN.lua"
+  # Languages below are not really maintained
+  ["frFR"]="frFR.lua"
+  ["koKR"]="koKR.lua"
+  ["ruRU"]="ruRU.lua"
+  ["itIT"]="itIT.lua"
+  ["ptBR"]="ptBR.lua"
+  ["ruRU"]="ruRU.lua"
 )
 
 tempfile=$( mktemp )

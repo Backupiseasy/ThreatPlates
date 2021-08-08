@@ -1,4 +1,4 @@
-﻿local L = LibStub("AceLocale-3.0"):NewLocale("TidyPlatesThreat", "zhTW", false)
+local L = LibStub("AceLocale-3.0"):NewLocale("TidyPlatesThreat", "zhTW", false)
 if not L then return end
 
 L["  /tptpdps       Toggles DPS/Healing threat plates"] = "/tptpdps 切換顯示 DPS/治療仇恨系統的血條"
@@ -15,6 +15,20 @@ L[" options by typing: /tptp"] = " 的設定選項請輸入： /tptp"
 L[" The change will be applied after you leave combat."] = "將會在戰鬥結束後會套用變更。"
 L[" to DPS."] = " 為傷害輸出。"
 L[" to tanking."] = " 為坦克。"
+--[[Translation missing --]]
+L[ [=[
+
+--
+
+Backupiseasy
+
+(Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=] ] = [=[
+
+--
+
+Backupiseasy
+
+(Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=]
 L[ [=[
 
 Feel free to email me at |cff00ff00threatplates@gmail.com|r
@@ -484,8 +498,9 @@ L["Max Health"] = "最大血量"
 L["Medium Threat"] = "中仇恨值"
 L["Min Alpha"] = "最小透明度"
 L["Mine"] = "我的"
-L["Minions & By Status"] = "小怪 & 狀態"
-L["Minor"] = "小怪"
+L["Minions & By Status"] = "僕從 & 狀態"
+L["Minor"] = "僕從"
+L["Minuss"] = "僕從"
 L["Mode"] = "模式"
 L["Mono"] = "單色"
 L["Motion & Overlap"] = "移動 & 重疊"
@@ -521,6 +536,7 @@ L["Nothing to paste!"] = "沒有內容可供貼上!"
 L["NPC Role"] = "NPC 角色"
 L["NPC Role, Guild"] = "NPC 角色、公會"
 L["NPC Role, Guild, or Level"] = "NPC 角色、公會或等級"
+L["NPCs"] = "NPC"
 L["Occluded Units"] = "被擋住的單位"
 L["Off Combo Point"] = "尚未獲得的連擊點數"
 L["Offset"] = "位置"
@@ -560,6 +576,7 @@ L["Pets"] = "寵物"
 L["Pixel"] = "像素"
 L["Pixel-Perfect UI"] = "完全符合螢幕像素"
 L["Placement"] = "位置"
+L["Players"] = "玩家"
 L["Poison"] = "中毒"
 L["Position"] = "位置"
 L["Positioning"] = "對齊位置"
@@ -647,9 +664,11 @@ L["Show debuffs that were applied by you."] = "顯示你施放的減益效果。
 L["Show debuffs that where applied by bosses."] = "顯示首領施放的減益效果。"
 L["Show debuffs that you can dispell."] = "顯示你可以驅散的減益效果。"
 L["Show Enemy Nameplates (ALT-V)"] = "顯示敵方血條 (ALT-V)"
+L["Show Enemy Units"] = "顯示敵方單位"
 L["Show Focus"] = "顯示專注目標"
 L["Show For"] = "顯示"
 L["Show Friendly Nameplates (SHIFT-V)"] = "顯示友方血條 (SHIFT-V)"
+L["Show Friendly Units"] = "顯示友方單位"
 L["Show Health Text"] = "顯示血量文字"
 L["Show Icon for Rares & Elites"] = "顯示稀有怪 & 精英怪圖示"
 L["Show Icon to the Left"] = "圖示顯示在左側"
@@ -660,6 +679,7 @@ L["Show Mouseover"] = "顯示滑鼠指向"
 L["Show Name Text"] = "顯示名字文字"
 L["Show Nameplate"] = "顯示血條"
 L["Show nameplates at all times."] = "任何時候都要顯示血條。"
+L["Show Neutral Units"] = "顯示中立單位"
 L["Show Number"] = "顯示數字"
 L["Show Orb"] = "顯示圓球"
 L["Show shadow with text."] = "顯示文字陰影"

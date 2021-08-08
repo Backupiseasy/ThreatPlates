@@ -1,4 +1,4 @@
-﻿local L = LibStub("AceLocale-3.0"):NewLocale("TidyPlatesThreat", "esMX", false)
+local L = LibStub("AceLocale-3.0"):NewLocale("TidyPlatesThreat", "esMX", false)
 if not L then return end
 
 L["  /tptpdps       Toggles DPS/Healing threat plates"] = "/tptpdps Alterna placas de amenaza de DPS/Sanación"
@@ -17,6 +17,20 @@ L[" options by typing: /tptp"] = " opciones por escribir: /tptp"
 L[" The change will be applied after you leave combat."] = " El cambio se aplicará después de que abandones el combate."
 L[" to DPS."] = " a DPS."
 L[" to tanking."] = " a tanque"
+--[[Translation missing --]]
+L[ [=[
+
+--
+
+Backupiseasy
+
+(Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=] ] = [=[
+
+--
+
+Backupiseasy
+
+(Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=]
 L[ [=[
 
 Feel free to email me at |cff00ff00threatplates@gmail.com|r
@@ -509,6 +523,8 @@ L["Min Alpha"] = "Alfa Mínima"
 L["Mine"] = "Mío"
 L["Minions & By Status"] = "Esbirros y Por Estado"
 L["Minor"] = "Menor"
+--[[Translation missing --]]
+L["Minuss"] = "Minors"
 L["Mode"] = "Modo"
 L["Mono"] = "Mono"
 L["Motion & Overlap"] = "Movimiento y Superposición"
@@ -544,6 +560,8 @@ L["Nothing to paste!"] = "¡Nada que pegar!"
 L["NPC Role"] = "Rol PNJ"
 L["NPC Role, Guild"] = "Rol PNJ, Hermandad"
 L["NPC Role, Guild, or Level"] = "Rol PNJ, Hermandad, o Nivel"
+--[[Translation missing --]]
+L["NPCs"] = "NPCs"
 L["Occluded Units"] = "Unidades Ocluidas"
 L["Off Combo Point"] = "No Punto de Combate"
 L["Offset"] = "Compensación"
@@ -583,6 +601,8 @@ L["Pets"] = "Mascotas"
 L["Pixel"] = "Píxel"
 L["Pixel-Perfect UI"] = "IU Píxel-Perfecto"
 L["Placement"] = "Colocación"
+--[[Translation missing --]]
+L["Players"] = "Players"
 L["Poison"] = "Veneno"
 L["Position"] = "Posición"
 L["Positioning"] = "Posicionamiento"
@@ -674,9 +694,13 @@ L["Show debuffs that were applied by you."] = "Muestra debuffs que usted aplicó
 L["Show debuffs that where applied by bosses."] = "Muestra debuffs que fueron aplicados por los jefes."
 L["Show debuffs that you can dispell."] = "Muestra debuffs que puedes disipar."
 L["Show Enemy Nameplates (ALT-V)"] = "Mostrar placas identificativas de enemigos (ALT-V)"
+--[[Translation missing --]]
+L["Show Enemy Units"] = "Show Enemy Units"
 L["Show Focus"] = "Mostrar enfoque"
 L["Show For"] = "Mostrar Para"
 L["Show Friendly Nameplates (SHIFT-V)"] = "Mostrar placas identificativas de aliados (SHIFT-V)"
+--[[Translation missing --]]
+L["Show Friendly Units"] = "Show Friendly Units"
 L["Show Health Text"] = "Mostrar Texto de Salud"
 L["Show Icon for Rares & Elites"] = "Mostrar Icono para Raros y Élites"
 L["Show Icon to the Left"] = "Mostrar Icono a la Izquierda"
@@ -687,6 +711,8 @@ L["Show Mouseover"] = "Mostrar Sobre Ratón"
 L["Show Name Text"] = "Mostrar Texto de Nombre"
 L["Show Nameplate"] = "Mostrar Placa Identificativa"
 L["Show nameplates at all times."] = "Muestra placas identificativas en todo momento."
+--[[Translation missing --]]
+L["Show Neutral Units"] = "Show Neutral Units"
 L["Show Number"] = "Mostrar Número"
 L["Show Orb"] = "Mostrar Orbe"
 L["Show shadow with text."] = "Muestra sombra con texto."

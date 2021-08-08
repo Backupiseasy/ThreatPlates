@@ -1,4 +1,4 @@
-﻿local L = LibStub("AceLocale-3.0"):NewLocale("TidyPlatesThreat", "deDE", false)
+local L = LibStub("AceLocale-3.0"):NewLocale("TidyPlatesThreat", "deDE", false)
 if not L then return end
 
 L["  /tptpdps       Toggles DPS/Healing threat plates"] = "  /tptpdps       Schaltet auf Threat Plates für DPS/Heal um."
@@ -15,6 +15,17 @@ L[" options by typing: /tptp"] = " über die Eingabe von /tptp erreicht werden"
 L[" The change will be applied after you leave combat."] = "Die Einstellung wird nach Verlassen des Kampfes angepasst werden."
 L[" to DPS."] = " auf Schadensausteiler fest."
 L[" to tanking."] = " auf Tank fest."
+L[ [=[
+
+--
+
+Backupiseasy
+
+(Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=] ] = [=[--
+
+Blacksalsify
+
+(Ursprünglicher Autor: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=]
 L[ [=[
 
 Feel free to email me at |cff00ff00threatplates@gmail.com|r
@@ -483,6 +494,7 @@ L["Min Alpha"] = "Minimaler Alphawert"
 L["Mine"] = "Eigene"
 L["Minions & By Status"] = "Diener & auf Basis Status"
 L["Minor"] = "Trivial"
+L["Minuss"] = "Trivial"
 L["Mode"] = "Modus"
 L["Mono"] = "Mono"
 L["Motion & Overlap"] = "Bewegung & Überlappung"
@@ -518,6 +530,7 @@ L["Nothing to paste!"] = "Nichts zum einfügen!"
 L["NPC Role"] = "NPC-Rolle"
 L["NPC Role, Guild"] = "NPC-Rolle, Gilde"
 L["NPC Role, Guild, or Level"] = "NPC-Rolle, Gilde oder Stufe"
+L["NPCs"] = "NPCs"
 L["Occluded Units"] = "Verdeckte Einheiten"
 L["Off Combo Point"] = "Inaktive Combopunkte"
 L["Offset"] = "Versatz"
@@ -557,6 +570,7 @@ L["Pets"] = "Begleiter"
 L["Pixel"] = "Pixel"
 L["Pixel-Perfect UI"] = "Pixelperfektes UI"
 L["Placement"] = "Platzierung"
+L["Players"] = "Spieler"
 L["Poison"] = "Gift"
 L["Position"] = "Position"
 L["Positioning"] = "Positionierung"
@@ -644,9 +658,11 @@ L["Show debuffs that were applied by you."] = "Zeige Debuffs an, die von dir ang
 L["Show debuffs that where applied by bosses."] = "Zeige Debuffs an, die von Bossen angewendet wurden."
 L["Show debuffs that you can dispell."] = "Zeige Schwächungszauber an, die du bannen kannst"
 L["Show Enemy Nameplates (ALT-V)"] = "Namensplaketten von gegnerischen Einheiten anzeigen (ALT-V)"
+L["Show Enemy Units"] = "Gegnerische Einheiten anzeigen"
 L["Show Focus"] = "Fokus anzeigen"
 L["Show For"] = "Anzeigen für"
 L["Show Friendly Nameplates (SHIFT-V)"] = "Namensplaketten von verbündeten Einheiten anzeigen (SHIFT-V)"
+L["Show Friendly Units"] = "Freundliche Einheiten anzeigen"
 L["Show Health Text"] = "Gesundheitstext anzeigen"
 L["Show Icon for Rares & Elites"] = "Elite- & Rare-Symbol anzeigen"
 L["Show Icon to the Left"] = "Symbole von links nach rechts anzeigen"
@@ -657,6 +673,7 @@ L["Show Mouseover"] = "Mouseover anzeigen"
 L["Show Name Text"] = "Namenstext anzeigen"
 L["Show Nameplate"] = "Namensplakette anzeigen"
 L["Show nameplates at all times."] = "Namensplaketten immer anzeigen"
+L["Show Neutral Units"] = "Neutrale Einheiten anzeigen"
 L["Show Number"] = "Nummer anzeigen"
 L["Show Orb"] = "Kugel anzeigen"
 L["Show shadow with text."] = "Text mit Schatten anzeigen."
