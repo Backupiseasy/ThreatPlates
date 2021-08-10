@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+10.2.11 (2021-07-10)
+------------------------------------------------------
+* Fixed a Lua error that occured because of incorrectly initialized Localization [Comment #5837].
+
+------------------------------------------------------
 10.2.10 (2021-07-08)
 ------------------------------------------------------
 * Added support for anima-charged combo points from new covenant legendary "Resouding Clarity" [Issue #508, Comment #5813, #5821].
