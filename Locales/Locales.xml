@@ -14,4 +14,6 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/
     <!--<Script file="koKR.lua"/>-->
     <!--<Script file="frFR.lua"/>-->
     <!--<Script file="ruRU.lua"/>-->
+    <!--<Script file="itIT.lua"/>-->
+    <!--<Script file="ptBR.lua"/>-->
 </Ui>

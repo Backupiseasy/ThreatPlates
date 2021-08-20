@@ -18,7 +18,7 @@ local sort = sort
 -- WoW APIs
 local GetTime = GetTime
 local UnitClass, UnitCanAttack = UnitClass, UnitCanAttack
-local UnitPower, UnitPowerMax, GetRuneCooldown = UnitPower, UnitPowerMax, GetRuneCooldown
+local UnitPower, UnitPowerMax, GetRuneCooldown, GetComboPoints = UnitPower, UnitPowerMax, GetRuneCooldown, GetComboPoints
 local GetUnitChargedPowerPoints = GetUnitChargedPowerPoints
 local GetShapeshiftFormID = GetShapeshiftFormID
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
@@ -200,6 +200,13 @@ local DeathKnightSpecColor, ShowRuneCooldown
 ---------------------------------------------------------------------------------------------------
 
 if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC then
+  -- This should not be necessary as in Classic only Rogues and Druids had combo points
+  if Addon.PlayerClass == "ROGUE" or Addon.PlayerClass == "DRUID" then
+    UnitPower = function(unitToken , powerType)
+      return GetComboPoints("player", "target")
+    end
+  end
+
   function Widget:DetermineUnitPower()
     local power_type = UNIT_POWER[PlayerClass]
 
@@ -275,14 +282,16 @@ function Widget:UpdateComboPointsRogueAnimacharge(widget_frame)
     local cp_texture, cp_texture_off, cp_color
 
     local charged_points = GetUnitChargedPowerPoints("player")
-    -- there's only going to be 1 max (WoW source code)
-    local charged_index = charged_points and charged_points[1]
+    -- for i = 1, #charged_points do
+    --   widget_frame.ComboPoints[charged_points[i].MarkAsCharged = true
+    -- end
 
     for i = 1, self.UnitPowerMax do
       cp_texture = widget_frame.ComboPoints[i]
       cp_texture_off = widget_frame.ComboPointsOff[i]
 
-      if i == charged_index then
+      local point_is_chared = charged_points and tContains(charged_points, i)
+      if point_is_chared then
         cp_texture.IsCharged = true
         if self.db.Style == "Blizzard" then
           cp_texture:SetAtlas("ClassOverlay-ComboPoint-Kyrian")
@@ -320,6 +329,8 @@ function Widget:UpdateComboPointsRogueAnimacharge(widget_frame)
       end
     end
   end
+
+  --cp_texture.MarkAsCharged = false
 end
 
 local function OnUpdateWidget(widget_frame, elapsed)
@@ -512,10 +523,13 @@ end
 function Widget:OnEnable()
   self:RegisterEvent("PLAYER_ENTERING_WORLD")
   self:RegisterEvent("PLAYER_TARGET_CHANGED")
-  self:RegisterUnitEvent("UNIT_POWER_UPDATE", "player", EventHandler)
-  self:RegisterUnitEvent("UNIT_DISPLAYPOWER", "player", EventHandler)
   self:RegisterUnitEvent("UNIT_MAXPOWER", "player")
-  if not (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC) then
+  
+  if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC then
+    self:RegisterUnitEvent("UNIT_POWER_FREQUENT", "player", EventHandler)
+  else
+    self:RegisterUnitEvent("UNIT_POWER_UPDATE", "player", EventHandler)
+    self:RegisterUnitEvent("UNIT_DISPLAYPOWER", "player", EventHandler)
     self:RegisterUnitEvent("UNIT_POWER_POINT_CHARGE", "player", EventHandler)
   end
 
@@ -527,17 +541,23 @@ function Widget:OnEnable()
     self:RegisterEvent("RUNE_POWER_UPDATE", EventHandler)
   end
 
-  -- self:RegisterUnitEvent("UNIT_POWER_FREQUENT", "player", EventHandler)
   -- self:RegisterUnitEvent("UNIT_FLAGS", "player", EventHandler)
 end
 
 function Widget:OnDisable()
   self:UnregisterEvent("PLAYER_ENTERING_WORLD")
   self:UnregisterEvent("PLAYER_TARGET_CHANGED")
-  self:UnregisterEvent("UNIT_POWER_UPDATE")
-  self:UnregisterEvent("UNIT_DISPLAYPOWER")
   self:UnregisterEvent("UNIT_MAXPOWER")
+  
+  if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC then
+    self:UnregisterEvent("UNIT_POWER_FREQUENT")
+  else
+    self:UnregisterEvent("UNIT_POWER_UPDATE")
+    self:UnregisterEvent("UNIT_DISPLAYPOWER")
+    self:UnregisterEvent("UNIT_POWER_POINT_CHARGE")
+  end
 
+  self:UnregisterEvent("UPDATE_SHAPESHIFT_FORM")
   if not (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC) then
     self:UnregisterEvent("RUNE_POWER_UPDATE")
   end

@@ -362,6 +362,7 @@ local CROWD_CONTROL_SPELLS_TBC_CLASSIC = {
     [19970] = PC_ROOT,                       -- Rank 6
     [27010] = PC_ROOT,                       -- Rank 7
   [19675] = PC_ROOT,                       -- Feral Charge Effect - Triggered By: Feral Charge
+  [45334] = PC_ROOT,                       -- Feral Charge Effect - Triggered By: Feral Charge
   [2637] = LOC_SLEEP,                      -- Hibernate
     [18657] = LOC_SLEEP,                     -- Rank 2
     [18658] = LOC_SLEEP,                     -- Rank 3
@@ -403,7 +404,9 @@ local CROWD_CONTROL_SPELLS_TBC_CLASSIC = {
     [24132] = LOC_SLEEP,                     -- Rank 2
     [24133] = LOC_SLEEP,                     -- Rank 3
     [27068] = LOC_SLEEP,                     -- Rank 4
-
+  [3355] = LOC_INCAPACITATE,               -- Freezing Trap Effect
+    [14308] = LOC_SLEEP,                     -- Rank 2
+    [14309] = LOC_SLEEP,                     -- Rank 3
 
   ---------------------------------------------------------------------------------------------------
   -- Mage
@@ -583,6 +586,11 @@ local CROWD_CONTROL_SPELLS_TBC_CLASSIC = {
   -- Racial Traits
   ---------------------------------------------------------------------------------------------------
   [20549] = LOC_STUN,       -- War Stomp (Tauren)
+
+  ---------------------------------------------------------------------------------------------------
+  -- Weapons & Items
+  ---------------------------------------------------------------------------------------------------
+  [34510] = LOC_STUN,       -- Deep Thunder and Stormherald (Weapon)
 }
 
 local CROWD_CONTROL_SPELLS_CLASSIC = {
@@ -642,6 +650,9 @@ local CROWD_CONTROL_SPELLS_CLASSIC = {
   [19386] = LOC_SLEEP,                     -- Wyvern Sting
     [24132] = LOC_SLEEP,                     -- Rank 2
     [24133] = LOC_SLEEP,                     -- Rank 3
+  [3355] = LOC_INCAPACITATE,               -- Freezing Trap Effect
+  [14308] = LOC_SLEEP,                     -- Rank 2
+  [14309] = LOC_SLEEP,                     -- Rank 3
 
 
   ---------------------------------------------------------------------------------------------------

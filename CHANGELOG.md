@@ -1,7 +1,3 @@
-# 10.2.3 (2021-06-xx)
+# @project-version@ (@build-time@)
 
-* Fixed a bug in WoW Classic and TBC Classic where non-target units were not visible when occlusion detection was
-  enabled and a target was selected (related to newly introduced CVar nameplateNotSelectedAlpha) [Comment #5623].
-  Occlusion detection does not work when a target is selected in Classic,
-  see https://github.com/Stanzilla/WoWUIBugs/issues/134.
-
+* Fixed a Lua error that occured because of incorrectly initialized Localization [Comment #5837].

@@ -1,5 +1,4 @@
 local _, Addon = ...
-local _, Addon = ...
 local t = Addon.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------
@@ -9206,7 +9205,7 @@ local function CreateOptionsTable()
               type = "description",
               order = 2,
               width = "full",
-              name = L["Clear and easy to use threat-reactive nameplates.\n\nCurrent version: "] .. GetAddOnMetadata("TidyPlates_ThreatPlates", "version") .. L["\n\nFeel free to email me at |cff00ff00threatplates@gmail.com|r\n\n--\n\nBlacksalsify\n\n(Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)"],
+              name = L["Clear and easy to use threat-reactive nameplates.\n\nCurrent version: "] .. GetAddOnMetadata("TidyPlates_ThreatPlates", "version") .. L["\n\n--\n\nBackupiseasy\n\n(Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)"],
             },
             Header1 = {
               order = 3,
@@ -9237,12 +9236,12 @@ local function CreateOptionsTable()
 --							width = "full",
 --							name = "frFR: Need Translator!!"
 --						},
-            Translators5 = {
-              type = "description",
-              order = 8,
-              width = "full",
-              name = "koKR: yuk6196 (CurseForge)"
-            },
+            -- Translators5 = {
+            --   type = "description",
+            --   order = 8,
+            --   width = "full",
+            --   name = "koKR: yuk6196 (CurseForge)"
+            -- },
 --						Translators6 = {
 --							type = "description",
 --							order = 9,
@@ -9556,9 +9555,11 @@ local function RegisterOptionsTable()
   end
 end
 
-function TidyPlatesThreat:ConfigTableChanged(...)
-  RegisterOptionsTable()
-  CreateCustomNameplatesGroup()
+function TidyPlatesThreat:ConfigTableChanged(event, app_name)
+  if app_name == t.ADDON_NAME then
+    RegisterOptionsTable()
+    CreateCustomNameplatesGroup()
+  end
 end
 
 function Addon:OpenOptions()
