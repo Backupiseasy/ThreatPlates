@@ -4965,22 +4965,53 @@ local function CreateColorsSettings()
         inline = true,
         args = {
           FriendlyColorNPC = { name = L["Friendly NPCs"], order = 10, type = "color", arg = { "ColorByReaction", "FriendlyNPC", }, },
-          FriendlyColorPlayer = { name = L["Friendly Players"], order = 20, type = "color", arg = { "ColorByReaction", "FriendlyPlayer" }, },
+          --FriendlyColorPlayer = { name = L["Friendly Players"], order = 20, type = "color", arg = { "ColorByReaction", "FriendlyPlayer" }, },
           EnemyColorNPC = { name = L["Hostile NPCs"], order = 30, type = "color", arg = { "ColorByReaction", "HostileNPC" }, },
-          EnemyColorPlayer = { name = L["Hostile Players"], order = 40, type = "color", arg = { "ColorByReaction", "HostilePlayer" }, },
+          --EnemyColorPlayer = { name = L["Hostile Players"], order = 40, type = "color", arg = { "ColorByReaction", "HostilePlayer" }, },
           UnfriendlyFactionCalor = { name = L["Unfriendly"], order = 50, type = "color", arg = { "ColorByReaction", "UnfriendlyFaction" }, },
           NeutralColor = { name = L["Neutral"], order = 60, type = "color", arg = { "ColorByReaction", "NeutralUnit" }, },
           Spacer1 = GetSpacerEntry(65),
           TappedUnitColor = { name = L["Tapped"], order = 70, type = "color", arg = { "ColorByReaction", "TappedUnit" }, },
           DisconnectedUnitColor = { name = L["Disconnected"], order = 80, type = "color", arg = { "ColorByReaction", "DisconnectedUnit" }, },
-          Spacer2 = GetSpacerEntry(85),
+          HeaderPvP = { 
+            name = L["Players"], 
+            type = "header",
+            order = 85,
+          },
+          PlayerPvPOffSelfPvPOff = { 
+            name = L["PvP Off"], 
+            order = 90, type = "color", 
+            arg = { "ColorByReaction", "FriendlyPlayer" }, 
+            desc = L["The (friendly or hostile) player is not flagged for PvP or the player is in a sanctuary."],
+          },
+          FriendlyOn = { 
+            name = L["Friendly PvP On"], 
+            order = 100, 
+            type = "color", 
+            arg = { "ColorByReaction", "FriendlyPlayerPvPOn" }, 
+            desc = L["The player is friendly to you, and flagged for PvP."],
+          },
+          HostileOnSelfOff = { 
+            name = L["Hostile PvP On - Self Off"], 
+            order = 110, 
+            type = "color", 
+            arg = { "ColorByReaction", "HostilePlayerPvPOnSelfPvPOff" }, 
+            desc = L["The player is hostile, and flagged for PvP, but you are not."],
+          },
+          HostileOnSelfOn = {
+            name = L["Hostile PvP On - Self On"], 
+            order = 120, 
+            type = "color", 
+            arg = { "ColorByReaction", "HostilePlayer" }, 
+            desc = L["Both you and the other player are flagged for PvP."],          },
+         Spacer3 = GetSpacerEntry(195),
           Reset = {
             name = L["Reset to Defaults"],
             type = "execute",
-            order = 90,
+            order = 200,
             width = "full",
             func = function()
-              for name, color in pairs(db.ColorByReaction) do
+              for name, _ in pairs(t.DEFAULT_SETTINGS.profile.ColorByReaction) do
                 db.ColorByReaction[name] = t.CopyTable(t.DEFAULT_SETTINGS.profile.ColorByReaction[name])
               end
               Addon:ForceUpdate()

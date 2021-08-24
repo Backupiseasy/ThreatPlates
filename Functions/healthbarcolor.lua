@@ -20,7 +20,7 @@ local GetPartyAssignment = GetPartyAssignment
 -- ThreatPlates APIs
 local IsOffTankCreature = Addon.IsOffTankCreature
 local TOTEMS = Addon.TOTEMS
-local RGB_P = ThreatPlates.RGB_P
+local RGB, RGB_P = ThreatPlates.RGB, ThreatPlates.RGB_P
 local IsFriend
 local IsGuildmate
 local ShowQuestUnit
@@ -47,10 +47,55 @@ end
 --
 ---------------------------------------------------------------------------------------------------
 
-local reference = {
-  FRIENDLY = { NPC = "FriendlyNPC", PLAYER = "FriendlyPlayer", },
-  HOSTILE = {	NPC = "HostileNPC", PLAYER = "HostilePlayer", },
-  NEUTRAL = { NPC = "NeutralUnit", PLAYER = "NeutralUnit",	},
+local UNIT_COLOR_MAP = {
+  FRIENDLY = { 
+    NPC = "FriendlyNPC", 
+    PLAYER = { 
+      -- Unit PvP - Friendly Player
+      [true] = {
+        -- Player Character PvP
+        [true] = "FriendlyPlayerPvPOn", 
+        [false] = "FriendlyPlayerPvPOn",
+      },
+      [false] = {
+        -- Player Character PvP
+        [true] = "FriendlyPlayer",
+        [false] = "FriendlyPlayer",
+      },
+    },
+  },
+  HOSTILE = {	
+    NPC = "HostileNPC", 
+    PLAYER = {
+      -- Unit PvP Hostile Player
+      [true] = {
+        -- Player Character PvP
+        [true] = "HostilePlayer",
+        [false] = "HostilePlayerPvPOnSelfPvPOff",
+      },
+      [false] = {
+        -- Player Character PvP
+        [true] = "FriendlyPlayer",
+        [false] = "FriendlyPlayer",
+      },
+    },
+  },
+  NEUTRAL = { 
+    NPC = "NeutralUnit", 
+    PLAYER = {
+      -- Unit PvP
+      [true] = {
+        -- Player Character PvP
+        [true] = "NeutralUnit",
+        [false] = "NeutralUnit",
+      },
+      [false] = {
+        -- Player Character PvP
+        [true] = "NeutralUnit",
+        [false] = "NeutralUnit",
+      },
+    },
+  }
 }
 
 local CS = CreateFrame("ColorSelect")
@@ -214,17 +259,34 @@ end
 local function GetColorByReaction(unit)
   local db = Addon.db.profile.ColorByReaction
 
---  if unit.type == "NPC" and not UnitCanAttack("player", unit.unitid) and UnitReaction("player", unit.unitid) <= 3 then
---    -- 1/2 is same color (red), 4 is neutral (yellow),5-8 is same color (green)
---    return db.UnfriendlyFaction
---    --return FACTION_BAR_COLORS[3]
-  -- Handle non-attackable units with brown healtbars - currently, I know no better way to detect this.
-  if unit.type == "NPC"  and not UnitCanAttack("player", unit.unitid) and
-    unit.blue < 0.1 and unit.green > 0.5 and unit.green < 0.6 and unit.red > 0.9 then
-    return db.UnfriendlyFaction
+  -- local UnitPlayerControlled = function(...) return true end
+  -- local UnitIsPVP = function(...) 
+  --   if ... == "player" then return false else return true end
+  -- end
+  -- local UnitCanAttack = function(...) return true end
+
+  -- unit.type, unit.reaction = "PLAYER", "HOSTILE"
+  -- unit_can_attack = true
+  -- unit.blue, unit.green, unit.red = 0, 0.55, 1
+
+  -- PvP coloring based on: https://wowpedia.fandom.com/wiki/PvP_flag
+  -- Coloring for pets is the same as for the player controlling the pet
+  local unit_type = (UnitPlayerControlled(unit.unitid) and "PLAYER") or unit.type
+  local color
+  if unit_type == "PLAYER" then
+    local unit_is_pvp = UnitIsPVP(unit.unitid) or false
+    local player_is_pvp = UnitIsPVP("player") or false
+    -- Currenty only works for PLAYER, not pets
+    color = db[UNIT_COLOR_MAP[unit.reaction][unit_type][unit_is_pvp][player_is_pvp]]
+  -- unit.type == "NPC" (without pets)
+  elseif not UnitCanAttack("player", unit.unitid) and unit.blue < 0.1 and unit.green > 0.5 and unit.green < 0.6 and unit.red > 0.9 then
+    -- Handle non-attackable units with brown healtbars - currently, I know no better way to detect this.
+    color = db.UnfriendlyFaction
+  else
+    color = db[UNIT_COLOR_MAP[unit.reaction][unit_type]]
   end
 
-  return db[reference[unit.reaction][unit.type]]
+  return color
 end
 
 --local function GetColorByReaction(unit)

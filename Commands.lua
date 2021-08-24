@@ -215,8 +215,11 @@ local function ChatCommandDebug(cmd_list)
 		print("    UnitReaction:", UnitReaction("target", "player"))
     print("    UnitCanAttack = ", UnitCanAttack("target", "player"))
     print("    UnitIsFriend = ", UnitIsFriend("target", "player"))
-    print("    UnitSelectionType = ", UnitSelectionType("target"))
-    print("    UnitSelectionColor = ", UnitSelectionColor("target"))
+		print("    UnitSelectionColor = ", UnitSelectionColor("target"))
+		print("    UnitIsPVP = ", UnitIsPVP("target"))
+		if not Addon.IS_TBC_CLASSIC and not Addon.IS_CLASSIC then
+			print("    UnitSelectionType = ", UnitSelectionType("target"))
+		end
 		elseif command == "dbm1" then
 		DBM.Nameplate:Show(true, UnitGUID("target"), 255824, nil, nil, nil, true, {0.5, 0, 0.55, 0.75})
 	elseif command == "dbm2" then
