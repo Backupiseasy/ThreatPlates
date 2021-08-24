@@ -1,10 +1,10 @@
 # description of this workflow, can be anything you want
-name: Package and release alpha and beta version
+name: Package and release alpha version
 
 on:
   push:
     tags:
-      - "**-beta**"
+      - "**-alpha**"
 
 jobs:
   build:
@@ -28,7 +28,7 @@ jobs:
         with:
           args: -e -l -n "ThreatPlates-{project-version}{classic}"
         env:
-          CF_API_KEY: ${{ secrets.CF_API_KEY }}
+          #CF_API_KEY: ${{ secrets.CF_API_KEY }}
           GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
           #WOWI_API_TOKEN: ${{ secrets.WOWI_API_TOKEN }}
 
@@ -37,7 +37,7 @@ jobs:
         with:
           args: -e -l -n "ThreatPlates-{project-version}{classic}" -g classic
         env:
-          CF_API_KEY: ${{ secrets.CF_API_KEY }}
+          #CF_API_KEY: ${{ secrets.CF_API_KEY }}
           GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
           #WOWI_API_TOKEN: ${{ secrets.WOWI_API_TOKEN }}
 
@@ -46,7 +46,7 @@ jobs:
         with:
           args: -e -l -n "ThreatPlates-{project-version}{classic}" -g bcc
         env:
-          CF_API_KEY: ${{ secrets.CF_API_KEY }}
+          #CF_API_KEY: ${{ secrets.CF_API_KEY }}
           GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
           #WOWI_API_TOKEN: ${{ secrets.WOWI_API_TOKEN }}
 
