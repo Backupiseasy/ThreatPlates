@@ -1,7 +1,3 @@
 # 10.2.3 (2021-06-xx)
 
-* Fixed a bug in WoW Classic and TBC Classic where non-target units were not visible when occlusion detection was
-  enabled and a target was selected (related to newly introduced CVar nameplateNotSelectedAlpha) [Comment #5623].
-  Occlusion detection does not work when a target is selected in Classic,
-  see https://github.com/Stanzilla/WoWUIBugs/issues/134.
-
+* Appearance and layout for buffs, debuffs, and crowd control can now be configured indivually for Auras widget.
