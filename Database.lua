@@ -539,7 +539,9 @@ local function GetDefaultSettingsV1(defaults)
   db.optionRoleDetectionAutomatic = false
   --db.HeadlineView.width = 116
   db.text.amount = true
-  db.AuraWidget.ModeBar.Texture = "Aluminium"
+  db.AuraWidget.Buffs.ModeBar.Texture = "Aluminium"
+  db.AuraWidget.Debuffs.ModeBar.Texture = "Aluminium"
+  db.AuraWidget.CrowdControl.ModeBar.Texture = "Aluminium"
   db.uniqueWidget.scale = 35
   db.uniqueWidget.y = 24
   db.questWidget.ON = false
@@ -642,6 +644,14 @@ local function DatabaseEntryDelete(db, keys)
     end
   end
   db[keys[#keys]] = nil
+end
+
+local function GetValueOrDefault(old_value, default_value)
+  if old_value ~= nil then
+    return old_value
+  else
+    return default_value
+  end
 end
 
 local function MigrateNamesColor(profile_name, profile)
@@ -892,26 +902,18 @@ local function MigrationForceFriendlyInCombat(profile_name, profile)
   end
 end
 
-local function SetValueOrDefault(old_value, default_value)
-  if old_value ~= nil then
-    return old_value
-  else
-    return default_value
-  end
-end
-
 local function MigrationComboPointsWidget(profile_name, profile)
   if DatabaseEntryExists(profile, { "comboWidget" }) then
     profile.ComboPoints = profile.ComboPoints or {}
 
     local default_profile = ThreatPlates.DEFAULT_SETTINGS.profile.ComboPoints
-    profile.ComboPoints.ON = SetValueOrDefault(profile.comboWidget.ON, default_profile.ON)
-    profile.ComboPoints.Scale = SetValueOrDefault(profile.comboWidget.scale, default_profile.Scale)
-    profile.ComboPoints.x = SetValueOrDefault(profile.comboWidget.x, default_profile.x)
-    profile.ComboPoints.y = SetValueOrDefault(profile.comboWidget.y, default_profile.y)
-    profile.ComboPoints.x_hv = SetValueOrDefault(profile.comboWidget.x_hv, default_profile.x_hv)
-    profile.ComboPoints.y_hv = SetValueOrDefault(profile.comboWidget.y_hv, default_profile.y_hv)
-    profile.ComboPoints.ShowInHeadlineView = SetValueOrDefault(profile.comboWidget.ShowInHeadlineView, default_profile.ShowInHeadlineView)
+    profile.ComboPoints.ON = GetValueOrDefault(profile.comboWidget.ON, default_profile.ON)
+    profile.ComboPoints.Scale = GetValueOrDefault(profile.comboWidget.scale, default_profile.Scale)
+    profile.ComboPoints.x = GetValueOrDefault(profile.comboWidget.x, default_profile.x)
+    profile.ComboPoints.y = GetValueOrDefault(profile.comboWidget.y, default_profile.y)
+    profile.ComboPoints.x_hv = GetValueOrDefault(profile.comboWidget.x_hv, default_profile.x_hv)
+    profile.ComboPoints.y_hv = GetValueOrDefault(profile.comboWidget.y_hv, default_profile.y_hv)
+    profile.ComboPoints.ShowInHeadlineView = GetValueOrDefault(profile.comboWidget.ShowInHeadlineView, default_profile.ShowInHeadlineView)
 
     DatabaseEntryDelete(profile, { "comboWidget" })
   end
@@ -920,16 +922,8 @@ end
 local function MigrationThreatDetection(profile_name, profile)
   if DatabaseEntryExists(profile, { "threat", "nonCombat" }) then
     local default_profile = ThreatPlates.DEFAULT_SETTINGS.profile.threat
-    profile.threat.UseThreatTable = SetValueOrDefault(profile.threat.nonCombat, default_profile.UseThreatTable)
+    profile.threat.UseThreatTable = GetValueOrDefault(profile.threat.nonCombat, default_profile.UseThreatTable)
     --DatabaseEntryDelete(profile, { "threat", "nonCombat" })
-  end
-end
-
-local function GetValueOrDefault(old_value, default_value)
-  if old_value ~= nil then
-    return old_value
-  else
-    return default_value
   end
 end
 
@@ -1025,13 +1019,13 @@ local function MigrateSpelltextPosition(profile_name, profile)
     if DatabaseEntryExists(profile, { "settings", "spelltext", "x" } ) then
       profile.settings.castbar.SpellNameText.HorizontalOffset = profile.settings.spelltext.x - 2
       profile.settings.spelltext = profile.settings.spelltext or {}
-      profile.settings.spelltext.align = SetValueOrDefault(profile.settings.spelltext.align, "CENTER")
+      profile.settings.spelltext.align = GetValueOrDefault(profile.settings.spelltext.align, "CENTER")
     end
 
     if DatabaseEntryExists(profile, { "settings", "spelltext", "y" } ) then
       profile.settings.castbar.SpellNameText.VerticalOffset = profile.settings.spelltext.y + 15
       profile.settings.spelltext = profile.settings.spelltext or {}
-      profile.settings.spelltext.vertical = SetValueOrDefault(profile.settings.spelltext.vertical, "CENTER")
+      profile.settings.spelltext.vertical = GetValueOrDefault(profile.settings.spelltext.vertical, "CENTER")
     end
 
     DatabaseEntryDelete(profile, { "settings", "spelltext", "x" })
@@ -1122,6 +1116,128 @@ local function DisableShowBlizzardAurasForClassic(profile_name, profile)
   end
 end
 
+local function MigrateAurasWidgetV2(_, profile)
+  local default_profile = ThreatPlates.DEFAULT_SETTINGS.profile
+
+  local function MigrateFontSettings(aura_type, font_area)
+    local profile_aura_type_modebar = profile.AuraWidget[aura_type].ModeBar
+    local default_profile_modebar = default_profile.AuraWidget[aura_type].ModeBar
+
+    profile_aura_type_modebar[font_area] = profile_aura_type_modebar[font_area] or {}
+    profile_aura_type_modebar[font_area].Font = profile_aura_type_modebar[font_area].Font or {}
+
+    profile_aura_type_modebar[font_area].Font.Typeface = GetValueOrDefault(profile.AuraWidget.ModeBar.Font, default_profile_modebar[font_area].Font.Typeface)
+    if aura_type ~= "CrowdControl" then
+      profile_aura_type_modebar[font_area].Font.Size = GetValueOrDefault(profile.AuraWidget.ModeBar.FontSize, default_profile_modebar[font_area].Font.Size)
+      profile_aura_type_modebar[font_area].Font.Color = GetValueOrDefault(profile.AuraWidget.ModeBar.FontColor, default_profile_modebar[font_area].Font.Color)
+    end
+  end
+
+  local function MigrateAuraTypeEntry(aura_type)
+    --if DatabaseEntryExists(profile, { "AuraWidget", aura_type} ) then
+    local default_profile_aura_type = default_profile.AuraWidget[aura_type]
+    local profile_aura_type = profile.AuraWidget[aura_type]
+    local profile_aura_widget = profile.AuraWidget
+
+    profile_aura_type.ModeIcon = profile_aura_type.ModeIcon or {}
+    profile_aura_type.ModeBar = profile_aura_type.ModeBar or {}
+    -- For the CrowdControl area, only migrate some selected settings, as most settings for icon/bar mode are meant for buffs/debuffs
+    if aura_type ~= "CrowdControl" then
+      profile_aura_type.AlignmentV = GetValueOrDefault(profile_aura_widget.AlignmentV, default_profile_aura_type.AlignmentV)
+      profile_aura_type.AlignmentH = GetValueOrDefault(profile_aura_widget.AlignmentH, default_profile_aura_type.AlignmentH)
+      profile_aura_type.CenterAuras = GetValueOrDefault(profile_aura_widget.CenterAuras, default_profile_aura_type.CenterAuras)
+
+      Addon.MergeIntoTable(profile_aura_type.ModeIcon, profile_aura_widget.ModeIcon)
+      Addon.MergeIntoTable(profile_aura_type.ModeBar, profile_aura_widget.ModeBar)
+    end
+
+    if profile_aura_type.Scale then
+      profile_aura_type.ModeIcon.Style = "custom" -- If scale was changed, style must be custom so that the custom icon size is used
+      profile_aura_type.ModeIcon.IconWidth = profile_aura_type.Scale * default_profile_aura_type.ModeIcon.IconWidth
+      profile_aura_type.ModeIcon.IconHeight = profile_aura_type.Scale * default_profile_aura_type.ModeIcon.IconHeight
+    end
+
+    if DatabaseEntryExists(profile, { "AuraWidget", "ModeBar"} ) then
+      MigrateFontSettings(aura_type, "Label")
+      MigrateFontSettings(aura_type, "Duration")
+      MigrateFontSettings(aura_type, "StackCount")
+
+      if aura_type ~= "CrowdControl" then
+        profile_aura_type.ModeBar.Label.HorizontalOffset = GetValueOrDefault(profile_aura_widget.ModeBar.LabelTextIndent, default_profile_aura_type.ModeBar.Label.HorizontalOffset)
+        profile_aura_type.ModeBar.Duration.HorizontalOffset = GetValueOrDefault(profile_aura_widget.ModeBar.TimeTextIndent, default_profile_aura_type.ModeBar.Duration.HorizontalOffset)
+      end
+    end
+    --end
+  end
+
+  if DatabaseEntryExists(profile, { "AuraWidget", } ) then
+    profile.AuraWidget.Buffs = profile.AuraWidget.Buffs or {}
+    profile.AuraWidget.Debuffs = profile.AuraWidget.Debuffs or {}
+    profile.AuraWidget.CrowdControl = profile.AuraWidget.CrowdControl or {}
+
+    profile.AuraWidget.Debuffs.HealthbarMode = profile.AuraWidget.Debuffs.HealthbarMode or {}
+    profile.AuraWidget.Debuffs.NameMode = profile.AuraWidget.Debuffs.NameMode or {}
+
+    profile.AuraWidget.Debuffs.HealthbarMode.HorizontalOffset = GetValueOrDefault(profile.AuraWidget.x, default_profile.AuraWidget.Debuffs.HealthbarMode.HorizontalOffset)
+    profile.AuraWidget.Debuffs.HealthbarMode.VerticalOffset = GetValueOrDefault(profile.AuraWidget.y, default_profile.AuraWidget.Debuffs.HealthbarMode.VerticalOffset)
+    profile.AuraWidget.Debuffs.HealthbarMode.Anchor = GetValueOrDefault(profile.AuraWidget.anchor, default_profile.AuraWidget.Debuffs.HealthbarMode.Anchor)
+    profile.AuraWidget.Debuffs.NameMode.HorizontalOffset = GetValueOrDefault(profile.AuraWidget.x, default_profile.AuraWidget.Debuffs.NameMode.HorizontalOffset)
+    profile.AuraWidget.Debuffs.NameMode.VerticalOffset = GetValueOrDefault(profile.AuraWidget.y, default_profile.AuraWidget.Debuffs.NameMode.VerticalOffset)
+    profile.AuraWidget.Debuffs.NameMode.Anchor = GetValueOrDefault(profile.AuraWidget.anchor, default_profile.AuraWidget.Debuffs.NameMode.Anchor)
+
+    profile.AuraWidget.Buffs.ModeBar = profile.AuraWidget.Buffs.ModeBar or {}
+    profile.AuraWidget.Debuffs.ModeBar = profile.AuraWidget.Debuffs.ModeBar or {}
+    profile.AuraWidget.CrowdControl.ModeBar = profile.AuraWidget.CrowdControl.ModeBar or {}
+
+    MigrateAuraTypeEntry("Buffs")
+    MigrateAuraTypeEntry("Debuffs")
+    MigrateAuraTypeEntry("CrowdControl")
+
+    if DatabaseEntryExists(profile, { "AuraWidget", "ModeBar"} ) then
+      profile.AuraWidget.Buffs.ModeBar.Enabled = GetValueOrDefault(profile.AuraWidget.ModeBar.Enabled, default_profile.AuraWidget.Buffs.ModeBar.Enabled)
+      profile.AuraWidget.Debuffs.ModeBar.Enabled = GetValueOrDefault(profile.AuraWidget.ModeBar.Enabled, default_profile.AuraWidget.Debuffs.ModeBar.Enabled)
+    end
+
+    DatabaseEntryDelete(profile, { "AuraWidget", "x" })
+    DatabaseEntryDelete(profile, { "AuraWidget", "y" })
+    DatabaseEntryDelete(profile, { "AuraWidget", "x_hv" }) -- never used
+    DatabaseEntryDelete(profile, { "AuraWidget", "y_hv" }) -- never used
+    DatabaseEntryDelete(profile, { "AuraWidget", "anchor" })
+    DatabaseEntryDelete(profile, { "AuraWidget", "AlignmentH" })
+    DatabaseEntryDelete(profile, { "AuraWidget", "AlignmentV" })
+    DatabaseEntryDelete(profile, { "AuraWidget", "CenterAuras" })
+
+    DatabaseEntryDelete(profile, { "AuraWidget", "Buffs", "Scale" })
+    DatabaseEntryDelete(profile, { "AuraWidget", "Debuffs", "Scale" })
+    DatabaseEntryDelete(profile, { "AuraWidget", "CrowdControl", "Scale" })
+
+    DatabaseEntryDelete(profile, { "AuraWidget", "ModeIcon" })
+    DatabaseEntryDelete(profile, { "AuraWidget", "ModeBar" })
+  end
+end
+
+local TEST_FUNCTIONS = {
+  MigrateAurasWidgetV2 = MigrateAurasWidgetV2
+}
+
+Addon.TestMigrateDatabase = function(migration_function)
+  local profile_table = Addon.db.profiles
+  local current_profile = Addon.db:GetCurrentProfile()
+
+  local defaults = ThreatPlates.CopyTable(Addon.db.defaults)
+  Addon.db:RegisterDefaults({})
+
+  TEST_FUNCTIONS[migration_function](current_profile, Addon.db.profiles[current_profile])
+
+  Addon.db:RegisterDefaults(defaults)
+
+  -- Cleanup database - remove default values from SavedVariables
+  for profile_name, profile in pairs(profile_table) do
+    Addon.db:SetProfile(profile_name)
+  end
+  Addon.db:SetProfile(current_profile)
+end
+
 -- Settings in the SavedVariables file that should be migrated and/or deleted
 local DEPRECATED_SETTINGS = {
   --  NamesColor = { MigrateNamesColor, },                        -- settings.name.color
@@ -1161,6 +1277,8 @@ local DEPRECATED_SETTINGS = {
   { MigrationCustomPlatesV1, NoDefaultProfile = true, "10.2.0"},
   { MigrateCustomStyles, NoDefaultProfile = true, "10.2.0", CleanupDatabase = true },
   ((Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC) and { DisableShowBlizzardAurasForClassic, "10.2.1" }) or nil,
+  { MigrateAurasWidgetV2, NoDefaultProfile = true },  --, "10.3.0" },
+  { "AuraWidget", "scale" },  -- Removed in 10.3.0
 }
 
 local function MigrateDatabase(current_version)

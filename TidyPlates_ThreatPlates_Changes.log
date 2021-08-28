@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+10.3.0 (2021-xx-xx)
+------------------------------------------------------
+* Appearance and layout for buffs, debuffs, and crowd control can now be configured indivually for Auras widget.
+
+------------------------------------------------------
 10.2.11 (2021-07-10)
 ------------------------------------------------------
 * Fixed a Lua error that occured because of incorrectly initialized Localization [Comment #5837].

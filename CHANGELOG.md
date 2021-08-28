@@ -1,3 +1,3 @@
 # @project-version@ (@build-time@)
 
-* Fixed a Lua error that occured because of incorrectly initialized Localization [Comment #5837].
+* Appearance and layout for buffs, debuffs, and crowd control can now be configured indivually for Auras widget.
