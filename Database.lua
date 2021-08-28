@@ -609,8 +609,8 @@ local function VersionToNumber(version)
   local v1, v2, v3 = version:match("(%d+)%.(%d+)%.(%d+)")
   v1, v2, v3 = v1 or 0, v2 or 0, v3 or 0
 
-  local v_alpha = version:match("Alpha(%d+)") or 0
-  local v_beta = version:match("Beta(%d+)") or 0
+  local v_alpha = version:match("alpha(%d+)") or 255
+  local v_beta = version:match("beta(%d+)") or 255
 
   return floor(v1 * 1e6 + v2 * 1e3 + v3), floor(v_beta * 1e3 + v_alpha)
 end
@@ -625,6 +625,7 @@ local function CurrentVersionIsOlderThan(current_version, max_version)
     return current_version_no < max_version_no
   end
 end
+Addon.CurrentVersionIsOlderThan = CurrentVersionIsOlderThan
 
 local function DatabaseEntryExists(db, keys)
   for index = 1, #keys do
@@ -1253,20 +1254,20 @@ local DEPRECATED_SETTINGS = {
   --  HVBlizzFadingAlpha = { "HeadlineView", "blizzFadingAlpha"}, -- (removed in 8.5.1)
   --  HVNameWidth = { "HeadlineView", "name", "width" },          -- (removed in 8.5.0)
   --  HVNameHeight = { "HeadlineView", "name", "height" },        -- (removed in 8.5.0)
-  { "debuffWidget" },                                                                -- (removed in 8.6.0)
-  { "OldSettings" },                                                                  -- (removed in 8.7.0)
-  { MigrateCastbarColoring },                                                     -- (removed in 8.7.0)
-  (not Addon.IS_CLASSIC and { MigrationTotemSettings, "8.7.0" }) or nil,               -- (changed in 8.7.0)
-  (not Addon.IS_CLASSIC and { MigrateBorderTextures, "8.7.0" }) or nil,                       -- (changed in 8.7.0)
-  { "uniqueSettings", "list" },                                                -- (removed in 8.7.0, cleanup added in 8.7.1)
-  (not Addon.IS_CLASSIC and { MigrationAurasSettings, "9.0.0" }) or nil,                        -- (changed in 9.0.0)
-  { MigrationAurasSettingsFix },                                                         -- (changed in 9.0.4 and 9.0.9)
-  (not Addon.IS_CLASSIC and { MigrationComboPointsWidget, "9.1.0" }) or nil,  -- (changed in 9.1.0)
+  { "debuffWidget" },                                                     -- (removed in 8.6.0)
+  { "OldSettings" },                                                      -- (removed in 8.7.0)
+  { MigrateCastbarColoring },                                             -- (removed in 8.7.0)
+  { MigrationTotemSettings, "8.7.0", Version = not Addon.IS_CLASSIC },    -- (changed in 8.7.0)
+  { MigrateBorderTextures, "8.7.0", Version = not Addon.IS_CLASSIC },   -- (changed in 8.7.0)
+  { "uniqueSettings", "list" },                                           -- (removed in 8.7.0, cleanup added in 8.7.1)
+  { MigrationAurasSettings, "9.0.0", Version = not Addon.IS_CLASSIC },    -- (changed in 9.0.0)
+  { MigrationAurasSettingsFix },                                          -- (changed in 9.0.4 and 9.0.9)
+  { MigrationComboPointsWidget, "9.1.0", Version = not Addon.IS_CLASSIC },-- (changed in 9.1.0)
   { MigrationForceFriendlyInCombat },                                     -- (changed in 9.1.0)
-  { "HeadlineView", "ON" },                                              -- (removed in 9.1.0)
-  (not Addon.IS_CLASSIC and { MigrationThreatDetection, "9.1.3" }) or nil,               -- (changed in 9.1.0)
-  -- { "threat", "hideNonCombat" },                                                    -- (removed in ...)
-  -- { "threat", "nonCombat" },                                                            -- (removed in 9.1.0)
+  { "HeadlineView", "ON" },                                               -- (removed in 9.1.0)
+  { MigrationThreatDetection, "9.1.3", Version = not Addon.IS_CLASSIC },  -- (changed in 9.1.0)
+  -- { "threat", "hideNonCombat" },                                       -- (removed in ...)
+  -- { "threat", "nonCombat" },                                           -- (removed in 9.1.0)
   { MigrateCustomStylesToV3, (Addon.IS_CLASSIC and "1.4.0") or "9.2.2" },
   { MigrateSpelltextPosition, (Addon.IS_CLASSIC and "1.4.0") or "9.2.0", NoDefaultProfile = true },
   { FixTargetFocusTexture, NoDefaultProfile = true },
@@ -1276,8 +1277,8 @@ local DEPRECATED_SETTINGS = {
   { "CVarsBackup", "nameplateGlobalScale" },  -- Removed in 10.1.8
   { MigrationCustomPlatesV1, NoDefaultProfile = true, "10.2.0"},
   { MigrateCustomStyles, NoDefaultProfile = true, "10.2.0", CleanupDatabase = true },
-  ((Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC) and { DisableShowBlizzardAurasForClassic, "10.2.1" }) or nil,
-  { MigrateAurasWidgetV2, NoDefaultProfile = true },  --, "10.3.0" },
+  { DisableShowBlizzardAurasForClassic, "10.2.1", Version = (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC) },
+  { MigrateAurasWidgetV2, "10.3.0-beta2", NoDefaultProfile = true , CleanupDatabase = true },
   { "AuraWidget", "scale" },  -- Removed in 10.3.0
 }
 
@@ -1291,32 +1292,34 @@ local function MigrateDatabase(current_version)
     local action = entry[1]
 
     if type(action) == "function" then
-      local max_version = entry[2]
-      if not max_version or CurrentVersionIsOlderThan(current_version, max_version) then
-        local defaults
-        if entry.NoDefaultProfile then
-          defaults = ThreatPlates.CopyTable(Addon.db.defaults) -- Should move that before the for loop
-          Addon.db:RegisterDefaults({})
+      if entry.Version == nil or entry.Version == true then
+        local max_version = entry[2]
+        if not max_version or CurrentVersionIsOlderThan(current_version, max_version) or action == MigrateAurasWidgetV2 then
+          local defaults
+          if entry.NoDefaultProfile then
+            defaults = ThreatPlates.CopyTable(Addon.db.defaults) -- Should move that before the for loop
+            Addon.db:RegisterDefaults({})
+          end
+
+          -- iterate over all profiles and migrate values
+          --Addon.db.global.MigrationLog[key] = "Migration" .. (max_version and ( " because " .. current_version .. " < " .. max_version) or "")
+          for profile_name, profile in pairs(profile_table) do
+            action(profile_name, profile)
+          end
+
+          if entry.NoDefaultProfile then
+            Addon.db:RegisterDefaults(defaults)
+          end
+
+          cleanup_database_after_migration = cleanup_database_after_migration or entry.CleanupDatabase
         end
 
-        -- iterate over all profiles and migrate values
-        --Addon.db.global.MigrationLog[key] = "Migration" .. (max_version and ( " because " .. current_version .. " < " .. max_version) or "")
-        for profile_name, profile in pairs(profile_table) do
-          action(profile_name, profile)
-        end
-
-        if entry.NoDefaultProfile then
-          Addon.db:RegisterDefaults(defaults)
-        end
-
-        cleanup_database_after_migration = cleanup_database_after_migration or entry.CleanupDatabase
+        -- Postprocessing, if necessary
+        -- action = entry[3]
+        -- if action and type(action) == "function" then
+        --   action()
+        -- end
       end
-
-      -- Postprocessing, if necessary
-      -- action = entry[3]
-      -- if action and type(action) == "function" then
-      --   action()
-      -- end
     else
       -- iterate over all profiles and delete the old config entry
       --Addon.db.global.MigrationLog[key] = "DELETED"
@@ -1325,7 +1328,7 @@ local function MigrateDatabase(current_version)
       end
     end
   end
-
+  
   -- Switch through all profiles to cleanup configuration (removing settings with default values from the file)
   if cleanup_database_after_migration then
     local current_profile = Addon.db:GetCurrentProfile()

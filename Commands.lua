@@ -203,10 +203,10 @@ local function ChatCommandDebug(cmd_list)
 		--		local unique_unit = TP.CopyTable(Addon.db.profile.uniqueSettings[1])
 		--		unique_unit.UseAutomaticIcon = nil
 		--		print (Addon.CheckTableStructure(TP.DEFAULT_SETTINGS.profile.uniqueSettings["**"], unique_unit))
-		print ("9.1.20 < 9.2.0-Beta1:", Addon.CurrentVersionIsOlderThan("9.1.20", "9.2.0-Beta1"))
-		print ("9.2.0-Beta1 < 9.1.20:", Addon.CurrentVersionIsOlderThan("9.2.0-Beta1", "9.1.20"))
-		print ("9.2.0-Beta2 < 9.2.0-Beta1:", Addon.CurrentVersionIsOlderThan("9.2.0-Beta2", "9.2.0-Beta1"))
-		print ("9.2.0-Beta1 < 9.2.0-Beta2:", Addon.CurrentVersionIsOlderThan("9.2.0-Beta1", "9.2.0-Beta2"))
+		print ("10.2.11 < 10.3.0:", Addon.CurrentVersionIsOlderThan("10.2.11", "10.3.0"))
+		print ("10.2.11 < 10.3.0-beta2:", Addon.CurrentVersionIsOlderThan("10.2.11", "10.3.0-beta2"))
+		print ("10.3.0-beta2 < 9.3.0:", Addon.CurrentVersionIsOlderThan("10.3.0-beta2", "10.3.0"))
+		print ("10.3.0-beta2 < 10.3.0-beta3:", Addon.CurrentVersionIsOlderThan("10.3.0-beta2", "10.3.0-beta3"))
 	elseif command == "reaction" then
     local plate = C_NamePlate.GetNamePlateForUnit("target")
     if not plate then return end
