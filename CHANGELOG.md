@@ -1,3 +1,3 @@
 # @project-version@ (@build-time@)
 
-* Fixed a Lua error that occured because of incorrectly initialized Localization [Comment #5837].
+* Updated TOC version for for TBC Classic Patch 2.5.2.

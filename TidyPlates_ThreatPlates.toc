@@ -1,7 +1,7 @@
 ## Interface: 90100
 ## Interface-Retail: 90100
 ## Interface-Classic: 11307
-## Interface-BCC: 20501
+## Interface-BCC: 20502
 
 ## Title: Threat Plates
 ## Version: @project-version@
