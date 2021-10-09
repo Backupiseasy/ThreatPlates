@@ -1,6 +1,7 @@
 ﻿------------------------------------------------------
-10.2.12 (2021-09-03)
+10.2.12 (2021-09-10)
 ------------------------------------------------------
+* Fixed a Lua error that occured sometimes when friendly pets/totems/guardians turn neutral, e.g. when losing or giving up control over them [Issue #511].
 * Updated TOC version for for TBC Classic Patch 2.5.2.
 
 ------------------------------------------------------

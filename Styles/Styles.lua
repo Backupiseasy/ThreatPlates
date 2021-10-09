@@ -75,6 +75,12 @@ local MAP_UNIT_TYPE_TO_TP_TYPE = {
   --                  Tapped
 }
 
+local MAP_UNSUPPORTED_UNIT_TYPES = {
+  NeutralTotem     = "FriendlyTotem",    -- When players are mind-controled, their totems turn neutral it seems (at least in Classic): https://www.curseforge.com/wow/addons/tidy-plates-threat-plates/issues/506
+  NeutralGuardian  = "FriendlyGuardian",
+  NeutralPet       = "FriendlyPet",      -- Sometimes, friendly pets turn into neutral pets when you lose control over them (e.g., in quests).
+}
+
 --local function GetUnitType(unit)
 --  local faction = REACTION_MAPPING[unit.reaction]
 --  local unit_class
@@ -139,7 +145,11 @@ local function ShowUnit(unit)
   -- If nameplate visibility is controlled by Wow itself (configured via CVars), this function is never used as
   -- nameplates aren't created in the first place (e.g. friendly NPCs, totems, guardians, pets, ...)
   local unit_type = GetUnitType(unit)
-  local show, headline_view = GetUnitVisibility(unit_type)
+
+  -- Sometimes, friendly pets or totems turn into neutral when you lose control over them (e.g., in quests or
+  -- when players are mind-controled). So map unknown neutral types (totems, pets, guardians) to friendly ones
+  local show, headline_view = GetUnitVisibility(MAP_UNSUPPORTED_UNIT_TYPES[unit_type] or unit_type)
+
   -- If a unit is targeted, show the nameplate if possible.
   show = show or unit.isTarget
 
