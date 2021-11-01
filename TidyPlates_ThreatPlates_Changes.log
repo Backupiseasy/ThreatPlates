@@ -2,6 +2,7 @@
 10.2.12 (2021-11-01)
 ------------------------------------------------------
 * Updated TOC version for for Classic Patch 1.14.0.
+* Updated integrated libraries to Ace3 r1252 to fix a Lua error related to a change in the WoW Interface Options API [GH-309, GH-310].
 
 ------------------------------------------------------
 10.2.12 (2021-10-23)
