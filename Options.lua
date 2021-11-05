@@ -6327,10 +6327,50 @@ local function CreateSpecRolesClassic()
 end
 
 local function CreateThreatPercentageOptions()
-  local entry = GetTextEntry(L["Percentage"], 60, { "threatWidget", "ThreatPercentage" })
+  local entry = GetTextEntry(L["Value"], 60, { "threatWidget", "ThreatPercentage" })
 
   entry.disabled = function() return not db.threat.ON end
   entry.set = SetValueWidget
+
+  entry.args.ValueType = {
+    name = L["Value Type"],
+    order = 5,
+    type = "select",
+    values = Addon.THREAT_VALUE_TYPE,
+    style = "radio",
+    desc = L["Show the player's threat percentage (scaled or raw) or threat delta to the second player on the threat table (percentage or threat value) against the enemy unit."],
+    arg = { "threatWidget", "ThreatPercentage", "Type" },
+  }
+
+  entry.args.SecondPlayersName = {
+    name = L["Second Player's Name"],
+    type = "toggle",
+    order = 6,
+    width = "full",
+    desc = L["In delta mode, show the name of the player who is second in the enemy unit's threat table."],
+    arg = { "threatWidget", "ThreatPercentage", "SecondPlayersName" },
+  }
+      --ScaledPercentage = {
+      --  name = L["Scaled Percentage"],
+      --  type = "toggle",
+      --  order = 10,
+      --  desc = L["Show the player's threat percentage against the enemy unit."],
+      --  arg = { "threatWidget", "ThreatPercentage", "ThreatPercentage" },
+      --},
+      --RawPercentage = {
+      --  name = L["Raw Percentage"],
+      --  type = "toggle",
+      --  order = 20,
+      --  desc = L["Show the player's threat percentage against the enemy unit relative to the threat of enemy unit's primary target."],
+      --  arg = { "threatWidget", "ThreatPercentage", "ThreatPercentage" },
+      --},
+      --DetailedPercentage = {
+      --  name = L["Detailed Percentage"],
+      --  type = "toggle",
+      --  order = 30,
+      --  desc = L["Show the player's total threat value on the enemy unit."],
+      --  arg = { "threatWidget", "ThreatPercentage", "ThreatPercentage" },
+      --},
 
   entry.args.Coloring = {
     name = L["Coloring"],
@@ -9722,7 +9762,7 @@ local function RegisterOptionsTable()
 
     -- Setup options dialog
     Addon.LibAceConfigRegistry:RegisterOptionsTable(t.ADDON_NAME, options)
-    Addon.LibAceConfigRegistry.RegisterCallback(TidyPlatesThreat, "ConfigTableChange", "ConfigTableChanged")
+    --Addon.LibAceConfigRegistry.RegisterCallback(TidyPlatesThreat, "ConfigTableChange", "ConfigTableChanged")
     Addon.LibAceConfigDialog:SetDefaultSize(t.ADDON_NAME, 1000, 640)
   end
 end
