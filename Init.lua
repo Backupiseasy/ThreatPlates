@@ -282,6 +282,16 @@ Addon.Split = function(split_string)
 	return result
 end
 
+Addon.SplitByWhitespace = function(split_string)
+	local parts = {}
+
+	for w in split_string:gmatch("%S+") do
+		parts[#parts + 1] = w
+	end
+
+	return parts, #parts
+end
+
 --------------------------------------------------------------------------------------------------
 -- Some functions to fix TidyPlates bugs
 ---------------------------------------------------------------------------------------------------

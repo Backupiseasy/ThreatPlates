@@ -112,8 +112,7 @@ end
 
 -- Command: /tptp
 function TidyPlatesThreat:ChatCommand(input)
-	local cmd_list = {}
-	for w in input:gmatch("%S+") do cmd_list[#cmd_list + 1] = w end
+	local cmd_list = Addon.SplitByWhitespace(input)
 
 	local command = cmd_list[1]
 	if not command or command == "" then

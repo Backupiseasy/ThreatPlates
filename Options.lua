@@ -8041,17 +8041,24 @@ local function CreateOptionsTable()
                       },
                     },
                     Abbreviation = {
-                      name = L["Name Abbreviation"],
+                      name = L["Abbreviation"],
                       order = 60,
                       type = "group",
                       inline = true,
                       args = {
-                        EnemyNameAbbreviation = {
-                          name = L["Enemy Name Abbreviation"],
+                        NameAbbreviationForEnemyUnits = {
+                          name = L["Enemy Units"],
                           order = 10,
                           type = "select",
-                          values = t.ENEMY_NAME_ABBREVIATION,
-                          arg = { "settings", "name", "EnemyNameAbbreviation" },
+                          values = t.NAME_ABBREVIATION,
+                          arg = { "settings", "name", "AbbreviationForEnemyUnits" },
+                        },
+                        NameAbbreviationForFriendlyUnits = {
+                          name = L["Friendly Units"],
+                          order = 10,
+                          type = "select",
+                          values = t.NAME_ABBREVIATION,
+                          arg = { "settings", "name", "AbbreviationForFriendlyUnits" },
                         },
                       },
                     },

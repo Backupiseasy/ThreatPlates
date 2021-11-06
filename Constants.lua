@@ -250,7 +250,7 @@ ThreatPlates.FRIENDLY_SUBTEXT = {
   CUSTOM = L["Custom"],
 }
 
-ThreatPlates.ENEMY_NAME_ABBREVIATION = {
+ThreatPlates.NAME_ABBREVIATION = {
     FULL = L["Full Name"],
     INITIALS = L["Initials"],
     LAST = L["Last Word"],
@@ -1398,7 +1398,8 @@ ThreatPlates.DEFAULT_SETTINGS = {
         FriendlyTextColorMode = "CUSTOM",
         FriendlyTextColor = RGB(255, 255, 255),
         UseRaidMarkColoring = false,
-        EnemyNameAbbreviation = "FULL",
+        AbbreviationForEnemyUnits = "FULL",
+        AbbreviationForFriendlyUnits = "FULL",
       },
       level = {
         typeface = Addon.DEFAULT_FONT, -- old default: "Accidental Presidency",
