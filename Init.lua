@@ -141,6 +141,9 @@ Addon.Truncate = function(value)
 	end
 end
 
+--------------------------------------------------------------------------------------------------
+-- Utils: Handling of colors
+---------------------------------------------------------------------------------------------------
 
 -- Create a percentage-based WoW color based on integer values from 0 to 255 with optional alpha value
 ThreatPlates.RGB = function(red, green, blue, alpha)
@@ -168,6 +171,18 @@ ThreatPlates.HEX2RGB = function (hex)
   hex = hex:gsub("#","")
   return tonumber("0x"..hex:sub(1,2)), tonumber("0x"..hex:sub(3,4)), tonumber("0x"..hex:sub(5,6))
 end
+
+Addon.ColorByClass = function(class_name, text)
+	if class_name then
+		return "|c" .. Addon.db.profile.Colors.Classes[class_name].colorStr .. text .. "|r"
+	else
+		return text
+	end
+end
+
+--------------------------------------------------------------------------------------------------
+-- 
+---------------------------------------------------------------------------------------------------
 
 ThreatPlates.Update = function()
 	Addon:ForceUpdate()
