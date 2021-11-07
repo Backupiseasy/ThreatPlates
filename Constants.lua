@@ -250,6 +250,13 @@ ThreatPlates.FRIENDLY_SUBTEXT = {
   CUSTOM = L["Custom"],
 }
 
+Addon.THREAT_VALUE_TYPE = {
+  SCALED_PERCENTAGE = L["Scaled Percentage"],
+  RAW_PERCENTAGE = L["Raw Percentage"],
+  DETAILED_PERCENTAGE = L["Scaled Percentage Delta"],
+  DETAILED_VALUE = L["Threat Value Delta"],
+}
+
 ThreatPlates.NAME_ABBREVIATION = {
     FULL = L["Full Name"],
     INITIALS = L["Initials"],
