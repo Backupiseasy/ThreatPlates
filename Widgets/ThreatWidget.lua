@@ -196,19 +196,22 @@ local function GetDetailedThreatValue(unitid, db_threat_value)
   local second_unit_threat_diff = 0
   if is_tanking then
     -- Determine threat diff by finding the next highest raid/party member threat
-    local group_type = IsInRaid() and "raid" or "party"
+    local group_type = (IsInRaid() and "raid") or "party"
     local num_group_members = (group_type == "raid" and GetNumGroupMembers()) or GetNumSubgroupMembers()
 
     local second_unit_by_threat
     local second_unit_threat_value = 0
-    for i = 1, num_group_members do      
+    for i = 1, num_group_members do   
       local index_str = tostring(i)
       local group_unit_id = group_type .. index_str
-
-      local _, _, _, _, group_unit_threat_value = UnitDetailedThreatSituation(group_unit_id, unitid)
-      if group_unit_threat_value and group_unit_threat_value > second_unit_threat_value then
-        second_unit_threat_value = group_unit_threat_value
-        second_unit_by_threat = group_unit_id
+      
+      -- Only compare player's threat values to other group memebers, not to the player itself (in raid with GetNumGroupMembers)
+      if not UnitIsUnit("player", group_unit_id) then
+        local _, _, _, _, group_unit_threat_value = UnitDetailedThreatSituation(group_unit_id, unitid)
+        if group_unit_threat_value and group_unit_threat_value > second_unit_threat_value then
+          second_unit_threat_value = group_unit_threat_value
+          second_unit_by_threat = group_unit_id
+        end
       end
 
       group_unit_id = group_type .."pet" .. index_str
