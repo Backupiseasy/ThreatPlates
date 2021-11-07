@@ -18,7 +18,7 @@ local string_format = string.format
 local UnitIsUnit, UnitDetailedThreatSituation = UnitIsUnit, UnitDetailedThreatSituation
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local GetRaidTargetIndex = GetRaidTargetIndex
-local IsInRaid, GetNumGroupMembers, GetNumSubgroupMembers = IsInRaid, GetNumGroupMembers, GetNumSubgroupMembers
+local IsInGroup, IsInRaid, GetNumGroupMembers, GetNumSubgroupMembers = IsInGroup, IsInRaid, GetNumGroupMembers, GetNumSubgroupMembers
 
 -- ThreatPlates APIs
 local GetThreatSituation = Addon.GetThreatSituation
@@ -301,7 +301,7 @@ function Widget:UpdateFrame(widget_frame, unit)
   end
 
   local db_threat_value = Settings.ThreatPercentage
-  if db_threat_value.Show then
+  if db_threat_value.Show and (not db_threat_value.OnlyInGroups or IsInGroup()) then
     local status, percentage_text = ThreatDetailsFunction(unit.unitid, db_threat_value)
     if status ~= nil then
       widget_frame.Percentage:SetText(percentage_text)

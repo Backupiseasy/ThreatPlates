@@ -1187,6 +1187,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
         UseThreatColor = true,
         Type = Addon.THREAT_VALUE_TYPE.SCALED,
         SecondPlayersName = true,
+        OnlyInGroups = true,
         -- Layout
         Anchor = "LEFT",
         InsideAnchor = false,

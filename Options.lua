@@ -6346,10 +6346,17 @@ local function CreateThreatPercentageOptions()
     name = L["Second Player's Name"],
     type = "toggle",
     order = 6,
-    width = "full",
     desc = L["In delta mode, show the name of the player who is second in the enemy unit's threat table."],
     arg = { "threatWidget", "ThreatPercentage", "SecondPlayersName" },
   }
+
+  entry.args.OnlyInGroups = {
+    name = L["Only in Groups"],
+    type = "toggle",
+    order = 7,
+    arg = { "threatWidget", "ThreatPercentage", "OnlyInGroups" },
+  }
+
       --ScaledPercentage = {
       --  name = L["Scaled Percentage"],
       --  type = "toggle",
