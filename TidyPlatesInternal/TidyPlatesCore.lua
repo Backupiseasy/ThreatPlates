@@ -30,7 +30,6 @@ local GetPlayerInfoByGUID, RAID_CLASS_COLORS = GetPlayerInfoByGUID, RAID_CLASS_C
 local UnitNameplateShowsWidgetsOnly = UnitNameplateShowsWidgetsOnly
 
 -- ThreatPlates APIs
-local TidyPlatesThreat = TidyPlatesThreat
 local Widgets = Addon.Widgets
 local Animations = Addon.Animations
 local BackdropTemplate = Addon.BackdropTemplate
@@ -391,6 +390,11 @@ do
       plate.TPFrame:Show()
       plate.TPFrame.Active = true
     end
+
+    --local show_plate = (UnitReaction(unitid, "player") > 4 and SettingsShowFriendlyBlizzardNameplates) or SettingsShowEnemyBlizzardNameplates
+    --plate.UnitFrame:SetShown(show_plate)
+    --plate.TPFrame:SetShown(not show_plate)
+    --plate.TPFrame.Active = not show_plate
   end
 
 	-- OnShowNameplate
@@ -447,7 +451,7 @@ do
     UpdateReferences(plate)
 
     Addon:UpdateUnitCondition(unit, unitid)
-		ProcessUnitChanges()
+    ProcessUnitChanges()
     OnUpdateCastMidway(nameplate, unit.unitid)
 
     -- Fix a bug where the overlay for non-interruptible casts was shown even for interruptible casts when entering combat while the unit was already casting
@@ -473,13 +477,29 @@ end
 ---------------------------------------------------------------------------------------------------------------------
 local RaidIconList = { "STAR", "CIRCLE", "DIAMOND", "TRIANGLE", "MOON", "SQUARE", "CROSS", "SKULL" }
 
+local MAP_UNIT_REACTION = {
+  [1] = "HOSTILE",
+  [2] = "HOSTILE",
+  [3] = "HOSTILE",
+  [4] = "NEUTRAL",
+  [5] = "FRIENDLY",
+  [6] = "FRIENDLY",
+  [7] = "FRIENDLY",
+  [8] = "FRIENDLY",
+}
+
 -- GetUnitReaction: Determines the reaction, and type of unit from the health bar color
 local function GetReactionByColor(red, green, blue)
   if red < .1 then 	-- Friendly
     return "FRIENDLY"
   elseif red > .5 then
-    if green > .9 then return "NEUTRAL"
-    else return "HOSTILE" end
+    if green > .9 then
+      return "NEUTRAL"
+    else
+      return "HOSTILE"
+    end
+  else
+    return "HOSTILE"
   end
 end
 
@@ -549,7 +569,7 @@ function Addon:UpdateUnitCondition(unit, unitid)
 
   unit.red, unit.green, unit.blue = _G.UnitSelectionColor(unitid)
 
-  unit.reaction = GetReactionByColor(unit.red, unit.green, unit.blue) or "HOSTILE"
+  unit.reaction = MAP_UNIT_REACTION[UnitReaction(unitid, "player")] or GetReactionByColor(unit.red, unit.green, unit.blue)
   -- Enemy players turn to neutral, e.g., when mounting a flight path mount, so fix reaction in that situations
   if unit.reaction == "NEUTRAL" and (unit.type == "PLAYER" or UnitPlayerControlled(unitid)) then
     unit.reaction = "HOSTILE"
@@ -636,7 +656,6 @@ local	function UpdatePlate_SetAlphaWithOcclusion(tp_frame, unit)
 
   UpdatePlate_SetAlpha(tp_frame, unit)
 end
-
 
 local function UpdatePlate_SetAlphaWithFadingOcclusionOnUpdate(tp_frame, unit)
   local target_alpha
@@ -842,8 +861,10 @@ do
 
     visual.spelltext:SetText(text)
 		visual.spellicon:SetTexture(texture)
+
     local target_unit = unit.unitid .. "target"
-    castbar.CastTarget:SetText(UnitName(target_unit))
+    local _, class_name = UnitClass(target_unit)
+    castbar.CastTarget:SetText(Addon.ColorByClass(class_name, UnitName(target_unit)))
 
     castbar.IsCasting = not channeled
     castbar.IsChanneling = channeled
@@ -1016,7 +1037,6 @@ do
 
   function CoreEvents:PLAYER_ENTERING_WORLD()
 		TidyPlatesCore:SetScript("OnUpdate", OnUpdate)
-
   end
 
 	function CoreEvents:NAME_PLATE_CREATED(plate)
@@ -1071,7 +1091,8 @@ do
   end
 
   function CoreEvents:UNIT_NAME_UPDATE(unitid)
-    if UnitIsUnit("player", unitid) then return end -- Skip personal resource bar
+    -- Skip special unitids (they are updated via their nameplate unitid) and personal nameplate
+    if unitid == "target" or UnitIsUnit("player", unitid) then return end
 
     local plate = GetNamePlateForUnit(unitid) -- can plate ever be nil here?
 
@@ -1121,7 +1142,7 @@ do
       castbar = extended.visual.castbar
       style = extended.style
       castbar:ClearAllPoints()
-      local db = TidyPlatesThreat.db.profile.settings.castbar
+      local db = Addon.db.profile.settings.castbar
       castbar:SetPoint(style.castbar.anchor or "CENTER", extended, style.castbar.x + db.x_target or 0, style.castbar.y + db.y_target or 0)
 
       LastTargetPlate = plate
@@ -1134,7 +1155,8 @@ do
 	end
 
   UNIT_TARGET = function(event, unitid)
-    if SettingsTargetUnitHide or unitid == "player" or unitid == "target" then return end
+    -- Skip special unit ids (which are updated with their nameplate unit id anyway) and personal nameplate
+    if SettingsTargetUnitHide or unitid == "target" or UnitIsUnit("player", unitid) then return end
 
     local plate = GetNamePlateForUnit(unitid)
     if plate and plate.TPFrame.Active then
@@ -1187,17 +1209,37 @@ do
   end
 
   local function UNIT_HEALTH(event, unitid)
-    local plate = GetNamePlateForUnit(unitid)
+    -- Skip special unitids (they are updated via their nameplate unitid) and personal nameplate
+    if unitid == "target" or UnitIsUnit("player", unitid) then return end
 
-    if plate and plate.TPFrame.Active then
-      OnHealthUpdate(plate)
-      Addon.UpdateExtensions(plate.TPFrame, unitid, plate.TPFrame.stylename)
+    local plate = GetNamePlateForUnit(unitid)
+    local tp_frame = plate and plate.TPFrame -- or nil, false if plate == nil
+    if tp_frame then
+      --if not tp_frame.Active then
+      --  print ("UNIT_HEALTH on non-active nameplate:", tp_frame.unit.name)
+      --end
+
+      --if tp_frame.Active then
+      --if tp_frame:IsShown() then
+      local visual = tp_frame.visual
+      if tp_frame.Active or (tp_frame:IsShown() and (visual.healthbar:IsShown() or visual.customtext:IsShown())) then
+        OnHealthUpdate(plate)
+        Addon.UpdateExtensions(plate.TPFrame, unitid, plate.TPFrame.stylename)
+      end
     end
+
+    --local tp_frame = plate and plate.TPFrame -- or nil, false if plate == nil
+    --if tp_frame and tp_frame.Active then
+    --  OnHealthUpdate(plate)
+    --  Addon.UpdateExtensions(plate.TPFrame, unitid, plate.TPFrame.stylename)
+    --end
 	end
 
   function CoreEvents:UNIT_MAXHEALTH(unitid)
-    local plate = GetNamePlateForUnit(unitid)
+    -- Skip special unitids (they are updated via their nameplate unitid) and personal nameplate
+    if unitid == "target" or UnitIsUnit("player", unitid) then return end
 
+    local plate = GetNamePlateForUnit(unitid)
     if plate and plate.TPFrame.Active then
       OnHealthUpdate(plate)
       Addon.UpdateExtensions(plate.TPFrame, unitid, plate.TPFrame.stylename)
@@ -1205,7 +1247,8 @@ do
   end
 
   function CoreEvents:UNIT_THREAT_LIST_UPDATE(unitid)
-    if unitid == "player" or unitid == "target" then return end
+    -- Skip special unitids (they are updated via their nameplate unitid) and personal nameplate
+    if unitid == "target" or UnitIsUnit("player", unitid) then return end
 
     local plate = PlatesByUnit[unitid]
     if plate then
@@ -1242,6 +1285,7 @@ do
 	end
 
 	local function UNIT_SPELLCAST_START(event, unitid, ...)
+    -- Skip special unitids (they are updated via their nameplate unitid) and personal nameplate
     if unitid == "target" or UnitIsUnit("player", unitid) or not ShowCastBars then return end
 
     local plate = GetNamePlateForUnit(unitid)
@@ -1252,6 +1296,7 @@ do
 
   -- Update spell currently being cast
   local function UnitSpellcastMidway(event, unitid, ...)
+    -- Skip special unitids (they are updated via their nameplate unitid) and personal nameplate
     if unitid == "target" or UnitIsUnit("player", unitid) or not ShowCastBars then return end
 
     local plate = GetNamePlateForUnit(unitid)
@@ -1262,6 +1307,7 @@ do
   end
 
   local function UNIT_SPELLCAST_STOP(event, unitid, ...)
+    -- Skip special unitids (they are updated via their nameplate unitid) and personal nameplate
     if unitid == "target" or UnitIsUnit("player", unitid) or not ShowCastBars then return end
 
     -- plate can be nil, e.g., if unitid = player, combat ends and the player resource bar is already hidden
@@ -1273,6 +1319,7 @@ do
   end
 
   local function UNIT_SPELLCAST_CHANNEL_START(event, unitid, ...)
+    -- Skip special unitids (they are updated via their nameplate unitid) and personal nameplate
     if unitid == "target" or UnitIsUnit("player", unitid) or not ShowCastBars then return end
 
 		local plate = GetNamePlateForUnit(unitid)
@@ -1283,6 +1330,7 @@ do
 	end
 
   local function UNIT_SPELLCAST_CHANNEL_STOP(event, unitid, ...)
+    -- Skip special unitids (they are updated via their nameplate unitid) and personal nameplate
     if unitid == "target" or UnitIsUnit("player", unitid) or not ShowCastBars then return end
 
 		local plate = GetNamePlateForUnit(unitid)
@@ -1292,6 +1340,7 @@ do
 	end
 
   function Addon.UNIT_SPELLCAST_INTERRUPTED(event, unitid, castGUID, spellID, sourceName, interrupterGUID)
+    -- Skip special unitids (they are updated via their nameplate unitid) and personal nameplate
     if unitid == "target" or UnitIsUnit("player", unitid) or not ShowCastBars then return end
 
     local plate = GetNamePlateForUnit(unitid)
@@ -1302,14 +1351,11 @@ do
 
         local castbar = visual.castbar
         if castbar:IsShown() then
-          local db = TidyPlatesThreat.db.profile
+          local db = Addon.db.profile
 
           sourceName = gsub(sourceName, "%-[^|]+", "") -- UnitName(sourceName) only works in groups
           local _, class_name = GetPlayerInfoByGUID(interrupterGUID)
-          if class_name then
-            sourceName = "|c" .. db.Colors.Classes[class_name].colorStr .. sourceName .. "|r"
-          end
-          visual.spelltext:SetText(INTERRUPTED .. " [" .. sourceName .. "]")
+          visual.spelltext:SetText(INTERRUPTED .. " [" .. Addon.ColorByClass(class_name, sourceName) .. "]")
 
           local _, max_val = castbar:GetMinMaxValues()
           castbar:SetValue(max_val)
@@ -1350,13 +1396,10 @@ do
 
         local castbar = visual.castbar
         if castbar:IsShown() then
-          local db = TidyPlatesThreat.db.profile
+          local db = Addon.db.profile
           sourceName = gsub(sourceName, "%-[^|]+", "") -- UnitName(sourceName) only works in groups
           local _, class_name = GetPlayerInfoByGUID(sourceGUID)
-          if class_name then
-            sourceName = "|c" .. db.Colors.Classes[class_name].colorStr .. sourceName .. "|r"
-          end
-          visual.spelltext:SetText(INTERRUPTED .. " [" .. sourceName .. "]")
+          visual.spelltext:SetText(INTERRUPTED .. " [" .. Addon.ColorByClass(class_name, sourceName) .. "]")
 
           local _, max_val = castbar:GetMinMaxValues()
           castbar:SetValue(max_val)
@@ -1388,8 +1431,10 @@ do
 	end
 
   local function UNIT_ABSORB_AMOUNT_CHANGED(event, unitid)
-    local plate = GetNamePlateForUnit(unitid)
+    -- Skip special unitids (they are updated via their nameplate unitid) and personal nameplate
+    if unitid == "target" or UnitIsUnit("player", unitid) then return end
 
+    local plate = GetNamePlateForUnit(unitid)
     if plate and plate.TPFrame.Active then
       local tp_frame = plate.TPFrame
       local unit = tp_frame.unit
@@ -1405,8 +1450,10 @@ do
   end
 
   local function UNIT_HEAL_ABSORB_AMOUNT_CHANGED(event, unitid)
-    local plate = GetNamePlateForUnit(unitid)
+    -- Skip special unitids (they are updated via their nameplate unitid) and personal nameplate
+    if unitid == "target" or UnitIsUnit("player", unitid) then return end
 
+    local plate = GetNamePlateForUnit(unitid)
     if plate and plate.TPFrame.Active then
       Addon.UpdateExtensions(plate.TPFrame, unitid, plate.TPFrame.stylename)
     end
@@ -1414,7 +1461,10 @@ do
 
   -- Update all elements that depend on the unit's reaction towards the player
   function CoreEvents:UNIT_FACTION(unitid)
-    if unitid == "player" then
+    -- Skip special unitids (they are updated via their nameplate unitid) and personal nameplate
+    if unitid == "target" then
+      return
+    elseif unitid == "player" then
       SetUpdateAll() -- Update all plates
     else
       -- Update just the unitid's plate
@@ -1422,6 +1472,8 @@ do
       if plate and plate.TPFrame.Active then
         UpdateReferences(plate)
         Addon:UpdateUnitCondition(unit, unitid)
+        -- If Blizzard-style nameplates are used, we also need to check if TP plates are disabled/enabled now
+        Addon:UpdateNameplateStyle(plate, unitid)
         ProcessUnitChanges()
       end
     end
@@ -1471,8 +1523,6 @@ do
     -- UNIT_SPELLCAST_SENT
 
     CoreEvents.PLAYER_FOCUS_CHANGED = PLAYER_FOCUS_CHANGED
-    -- UNIT_HEALTH_FREQUENT no longer supported in Retail since 9.0.1
-    CoreEvents.UNIT_HEALTH = UNIT_HEALTH
 
     if Addon.IS_MAINLINE then
       CoreEvents.UNIT_SPELLCAST_INTERRUPTIBLE = UnitSpellcastMidway
@@ -1480,6 +1530,11 @@ do
 
       CoreEvents.UNIT_ABSORB_AMOUNT_CHANGED = UNIT_ABSORB_AMOUNT_CHANGED
       CoreEvents.UNIT_HEAL_ABSORB_AMOUNT_CHANGED = UNIT_HEAL_ABSORB_AMOUNT_CHANGED
+
+      -- UNIT_HEALTH_FREQUENT no longer supported in Retail since 9.0.1
+      CoreEvents.UNIT_HEALTH = UNIT_HEALTH
+    else
+      CoreEvents.UNIT_HEALTH_FREQUENT = UNIT_HEALTH
     end
   end
 
@@ -1498,7 +1553,7 @@ do
 
   -- Do this after events are registered, otherwise UNIT_AURA would be registered as a general event, not only as
   -- an unit event.
-  if Addon.IS_CLASSIC and Addon.PlayerClass == "PALADIN" then
+  if (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC) and Addon.PlayerClass == "PALADIN" then
     CoreEvents.UNIT_AURA = UNIT_AURA
     TidyPlatesCore:RegisterUnitEvent("UNIT_AURA", "player")
     -- UNIT_AURA does not seem to be fired after login (even when buffs are active)
@@ -1609,7 +1664,7 @@ do
 --    if not extended.TestBackground then
 --      extended.TestBackground = extended:CreateTexture(nil, "BACKGROUND")
 --      extended.TestBackground:SetAllPoints(extended)
---      extended.TestBackground:SetTexture(Addon.LibSharedMedia:Fetch('statusbar', TidyPlatesThreat.db.profile.AuraWidget.BackgroundTexture))
+--      extended.TestBackground:SetTexture(Addon.LibSharedMedia:Fetch('statusbar', Addon.db.profile.AuraWidget.BackgroundTexture))
 --      extended.TestBackground:SetVertexColor(0,0,0,0.5)
 --    end
 
@@ -1634,7 +1689,7 @@ do
       SetFontGroupObject(object, objectstyle)
     end
 
-    local db = TidyPlatesThreat.db.profile.settings
+    local db = Addon.db.profile.settings
 
     -- Healthbar
 		SetAnchorGroupObject(visual.healthbar, style.healthbar, extended)
@@ -1673,7 +1728,7 @@ do
       visual.raidicon:Hide()
     end
 
-    db = TidyPlatesThreat.db.profile.settings.castbar
+    db = Addon.db.profile.settings.castbar
 
     visual.castbar:ClearAllPoints()
     if UnitIsUnit("target", unit.unitid) then
@@ -1717,7 +1772,7 @@ end
 
 -- Blizzard default nameplates always have the same size, no matter what the UI scale actually is
 function Addon:UIScaleChanged()
-  local db = TidyPlatesThreat.db.profile.Scale
+  local db = Addon.db.profile.Scale
   if db.IgnoreUIScale then
     self.UIScale = 1  -- Code for anchoring TPFrame to WorldFrame/Blizzard nameplate instead of UIParent
     --self.UIScale = 1 / UIParent:GetEffectiveScale()
@@ -1761,7 +1816,7 @@ function Addon:ConfigClickableArea(toggle_show)
         extended.Background:SetBackdropBorderColor(0, 0, 0, 0.8)
         extended.Background:SetPoint("CENTER", ConfigModePlate.UnitFrame, "CENTER")
 
-        local width, height = TidyPlatesThreat.db.profile.settings.frame.width, TidyPlatesThreat.db.profile.settings.frame.height
+        local width, height = Addon.db.profile.settings.frame.width, Addon.db.profile.settings.frame.height
 
         local min_scale = tonumber(GetCVar("nameplateMinScale"))
         --local selected_scale = tonumber(GetCVar("nameplateSelectedScale"))
@@ -1789,7 +1844,7 @@ function Addon:ConfigClickableArea(toggle_show)
   elseif ConfigModePlate then
     local background = ConfigModePlate.TPFrame.Background
     background:SetPoint("CENTER", ConfigModePlate.UnitFrame, "CENTER")
-    background:SetSize(TidyPlatesThreat.db.profile.settings.frame.width, TidyPlatesThreat.db.profile.settings.frame.height)
+    background:SetSize(Addon.db.profile.settings.frame.width, Addon.db.profile.settings.frame.height)
   end
 end
 
@@ -1807,7 +1862,7 @@ function Addon:ForceUpdate()
 
   CVAR_NameplateOccludedAlphaMult = tonumber(GetCVar("nameplateOccludedAlphaMult"))
 
-  local db = TidyPlatesThreat.db.profile
+  local db = Addon.db.profile
 
   SettingsShowFriendlyBlizzardNameplates = db.ShowFriendlyBlizzardNameplates
   SettingsShowEnemyBlizzardNameplates = db.ShowEnemyBlizzardNameplates

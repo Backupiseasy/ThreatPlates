@@ -11,7 +11,7 @@ local ThreatPlates = Addon.ThreatPlates
 ---------------------------------------------------------------------------------------------------
 
 -- Lua APIs
-local string = string
+local string, format = string, format
 
 -- WoW APIs
 local UnitPlayerControlled = UnitPlayerControlled
@@ -105,7 +105,7 @@ Addon.CUSTOM_GLOW_WRAPPER_FUNCTIONS = {
 ---------------------------------------------------------------------------------------------------
 
 Addon.LoadOnDemandLibraries = function()
-	local db = TidyPlatesThreat.db.profile
+	local db = Addon.db.profile
 
 	-- Enable or disable LibDogTagSupport based on custom status text being actually used
 	if db.HeadlineView.FriendlySubtext == "CUSTOM" or db.HeadlineView.EnemySubtext == "CUSTOM" or db.settings.customtext.FriendlySubtext == "CUSTOM" or db.settings.customtext.EnemySubtext == "CUSTOM" then
@@ -128,6 +128,22 @@ Addon.LoadOnDemandLibraries = function()
 		end
 	end
 end
+
+Addon.Truncate = function(value)
+	local abs_value = (value > 0 and value) or (-1 * value)
+
+	if abs_value >= 1e6 then
+		return format("%.1fm", value / 1e6)
+	elseif abs_value >= 1e4 then
+		return format("%.1fk", value / 1e3)
+	else
+		return value
+	end
+end
+
+--------------------------------------------------------------------------------------------------
+-- Utils: Handling of colors
+---------------------------------------------------------------------------------------------------
 
 -- Create a percentage-based WoW color based on integer values from 0 to 255 with optional alpha value
 ThreatPlates.RGB = function(red, green, blue, alpha)
@@ -155,6 +171,18 @@ ThreatPlates.HEX2RGB = function (hex)
   hex = hex:gsub("#","")
   return tonumber("0x"..hex:sub(1,2)), tonumber("0x"..hex:sub(3,4)), tonumber("0x"..hex:sub(5,6))
 end
+
+Addon.ColorByClass = function(class_name, text)
+	if class_name then
+		return "|c" .. Addon.db.profile.Colors.Classes[class_name].colorStr .. text .. "|r"
+	else
+		return text
+	end
+end
+
+--------------------------------------------------------------------------------------------------
+-- 
+---------------------------------------------------------------------------------------------------
 
 ThreatPlates.Update = function()
 	Addon:ForceUpdate()
@@ -324,7 +352,7 @@ end
 ---------------------------------------------------------------------------------------------------
 
 Addon.PrintMessage = function(channel, ...)
-	--local verbose = TidyPlatesThreat.db.profile.verbose
+	--local verbose = Addon.db.profile.verbose
 	if channel == "DEBUG" and Addon.DEBUG then
 		print("|cff89F559TP|r - |cff0000ff" .. channel .. "|r:", ...)
 	elseif channel == "ERROR" then
@@ -397,7 +425,9 @@ local function DEBUG_PRINT_UNIT(unit, full_info)
     --		DEBUG("  isFriend = ", TidyPlatesUtilityInternal.IsFriend(unit.name))
     --		DEBUG("  isGuildmate = ", TidyPlatesUtilityInternal.IsGuildmate(unit.name))
     DEBUG("  IsOtherPlayersPet = ", UnitIsOtherPlayersPet(unit))
-    DEBUG("  IsBattlePet = ", UnitIsBattlePet(unit.unitid))
+		if not Addon.IS_TBC_CLASSIC and not Addon.IS_CLASSIC then
+			DEBUG("  IsBattlePet = ", UnitIsBattlePet(unit.unitid))
+		end
     DEBUG("  PlayerControlled = ", UnitPlayerControlled(unit.unitid))
     DEBUG("  CanAttack = ", UnitCanAttack("player", unit.unitid))
     DEBUG("  Reaction = ", UnitReaction("player", unit.unitid))
@@ -409,9 +439,9 @@ local function DEBUG_PRINT_UNIT(unit, full_info)
 		DEBUG("    UnitThreatSituation = ", UnitThreatSituation("player", unit.unitid))
 		DEBUG("    Target Unit = ", UnitExists(unit.unitid .. "target"))
 		if unit.style == "unique" then
-			DEBUG("    GetThreatSituation(Unique) = ", Addon.GetThreatSituation(unit, unit.style, TidyPlatesThreat.db.profile.threat.toggle.OffTank))
+			DEBUG("    GetThreatSituation(Unique) = ", Addon.GetThreatSituation(unit, unit.style, Addon.db.profile.threat.toggle.OffTank))
 		else
-			DEBUG("    GetThreatSituation = ", Addon.GetThreatSituation(unit, Addon:GetThreatStyle(unit), TidyPlatesThreat.db.profile.threat.toggle.OffTank))
+			DEBUG("    GetThreatSituation = ", Addon.GetThreatSituation(unit, Addon:GetThreatStyle(unit), Addon.db.profile.threat.toggle.OffTank))
 		end
   else
     DEBUG("  <no unit id>")

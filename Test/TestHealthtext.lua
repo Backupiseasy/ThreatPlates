@@ -30,7 +30,7 @@ local function format(text_format, value)
 end
 
 local function Truncate(value)
-  if TidyPlatesThreat.db.profile.text.truncate then
+  if Addon.db.profile.text.truncate then
     if value >= 1e6 then
       return format('%.1fm', value / 1e6)
     elseif value >= 1e4 then
@@ -44,7 +44,7 @@ local function Truncate(value)
 end
 
 local function SetCustomText_Original(unit)
-  local db = TidyPlatesThreat.db.profile.text
+  local db = Addon.db.profile.text
   local S = TidyPlatesThreat.SetStyle(unit)
 
   -- Headline View (alpha feature) uses TidyPlatesHub config and functionality
@@ -94,7 +94,7 @@ local function SetCustomText_Original(unit)
 end
 
 local function SetCustomText_Testing(unit)
-  local db = TidyPlatesThreat.db.profile.text
+  local db = Addon.db.profile.text
   local S = TidyPlatesThreat.SetStyle(unit)
 
   -- Headline View (alpha feature) uses TidyPlatesHub config and functionality

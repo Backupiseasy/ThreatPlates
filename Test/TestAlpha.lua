@@ -154,15 +154,15 @@ local TEST_UNIT = {
   },
 }
 
---TidyPlatesThreat.db.profile.HeadlineView.useAlpha = false
+--Addon.db.profile.HeadlineView.useAlpha = false
 
 
 function GetConfig(config_no)
-  TidyPlatesThreat.db.profile.nameplate.toggle.MarkedA = true
-  TidyPlatesThreat.db.profile.nameplate.toggle.MouseoverUnitAlpha = true
-  TidyPlatesThreat.db.profile.nameplate.toggle.CastingUnitAlpha = true
-  TidyPlatesThreat.db.profile.nameplate.toggle.TargetA = true
-  TidyPlatesThreat.db.profile.blizzFadeA.toggle = false
+  Addon.db.profile.nameplate.toggle.MarkedA = true
+  Addon.db.profile.nameplate.toggle.MouseoverUnitAlpha = true
+  Addon.db.profile.nameplate.toggle.CastingUnitAlpha = true
+  Addon.db.profile.nameplate.toggle.TargetA = true
+  Addon.db.profile.blizzFadeA.toggle = false
   if config_no == 1 then
     return TEST_UNIT[config_no]
   elseif config_no == 2 then
@@ -174,14 +174,14 @@ function GetConfig(config_no)
   elseif config_no == 5 then
     return TEST_UNIT[config_no]
   elseif config_no == 6 then
-    TidyPlatesThreat.db.profile.threat.useAlpha = true
+    Addon.db.profile.threat.useAlpha = true
     return TEST_UNIT[config_no]
   elseif config_no == 7 then
-    TidyPlatesThreat.db.profile.threat.useAlpha = false
-    TidyPlatesThreat.db.profile.threat.marked.alpha = true
+    Addon.db.profile.threat.useAlpha = false
+    Addon.db.profile.threat.marked.alpha = true
     return TEST_UNIT[config_no]
   elseif config_no == 8 then
-    TidyPlatesThreat.db.profile.threat.marked.alpha = false
+    Addon.db.profile.threat.marked.alpha = false
     return TEST_UNIT[config_no]
   elseif config_no == 9 then
     return TEST_UNIT[config_no]
@@ -190,16 +190,16 @@ function GetConfig(config_no)
   elseif config_no == 11 then
     return TEST_UNIT[config_no]
   elseif config_no == 12 then
-    TidyPlatesThreat.db.profile.threat.useAlpha = true
+    Addon.db.profile.threat.useAlpha = true
     return TEST_UNIT[config_no]
   elseif config_no == 13 then
-    TidyPlatesThreat.db.profile.threat.useAlpha = false
+    Addon.db.profile.threat.useAlpha = false
     return TEST_UNIT[config_no]
   elseif config_no == 14 then
-    TidyPlatesThreat.db.profile.threat.useAlpha = true
+    Addon.db.profile.threat.useAlpha = true
     return TEST_UNIT[config_no]
   elseif config_no == 15 then
-    TidyPlatesThreat.db.profile.threat.useAlpha = false
+    Addon.db.profile.threat.useAlpha = false
     return TEST_UNIT[config_no]
   elseif config_no == 16 then
     return TEST_UNIT[config_no]
@@ -247,7 +247,7 @@ local SetStyle = TidyPlatesThreat.SetStyle
 local GetThreatStyle = ThreatPlates.GetThreatStyle
 
 local function TransparencySituational(unit)
-  local db = TidyPlatesThreat.db.profile.nameplate
+  local db = Addon.db.profile.nameplate
 
   if unit.isMarked and db.toggle.MarkedA then
     return db.alpha.Marked
@@ -266,7 +266,7 @@ local function TransparencySituational(unit)
 end
 
 local function TransparencyGeneral(unit)
-  local db = TidyPlatesThreat.db.profile.nameplate
+  local db = Addon.db.profile.nameplate
 
   -- Do checks for situational transparency settings:
   if unit.isMarked and db.toggle.MarkedA then
@@ -283,7 +283,7 @@ local function TransparencyGeneral(unit)
   end
 
   -- Do checks for target settings:
-  local db_blizz = TidyPlatesThreat.db.profile.blizzFadeA
+  local db_blizz = Addon.db.profile.blizzFadeA
   local target_exists = UnitExists("target")
   if target_exists then
     if unit.isTarget and db.toggle.TargetA then
@@ -300,7 +300,7 @@ local function TransparencyGeneral(unit)
 end
 
 local function TransparencyThreat(unit, style)
-  local db = TidyPlatesThreat.db.profile.threat
+  local db = Addon.db.profile.threat
 
   if not db.useAlpha then
     return TransparencyGeneral(unit)
@@ -345,7 +345,7 @@ local function AlphaNormal(unit, non_combat_transparency)
     return TransparencyThreat(unit, style)
   end
 
-  --  local db = TidyPlatesThreat.db.profile.threat
+  --  local db = Addon.db.profile.threat
   --	if InCombatLockdown() and db.ON and db.useAlpha then
   --		-- use general alpha, if threat scaling is disabled for marked units
   --		if unit.isMarked and db.marked.alpha then
@@ -377,7 +377,7 @@ local function AlphaUniqueNameOnly(unit)
   local unique_setting = GetUniqueNameplateSetting(unit)
 
   if unique_setting.overrideAlpha then
-    local db = TidyPlatesThreat.db.profile.HeadlineView
+    local db = Addon.db.profile.HeadlineView
     if db.useAlpha then
       return AlphaNormal(unit)
     end
@@ -395,7 +395,7 @@ local function TransparencyEmpty(unit)
 end
 
 local function TransparencyNameOnly(unit)
-  local db = TidyPlatesThreat.db.profile.HeadlineView
+  local db = Addon.db.profile.HeadlineView
 
   if db.useAlpha then
     return AlphaNormal(unit)
@@ -434,7 +434,7 @@ function SetAlpha_8_5_0(unit)
 end
 
 local function TransparencyGeneral_Test2(unit)
-  local db = TidyPlatesThreat.db.profile.nameplate
+  local db = Addon.db.profile.nameplate
 
   local tranparency = TransparencySituational(unit)
   if tranparency then
@@ -442,7 +442,7 @@ local function TransparencyGeneral_Test2(unit)
   end
 
   -- Do checks for target settings:
-  local db_blizz = TidyPlatesThreat.db.profile.blizzFadeA
+  local db_blizz = Addon.db.profile.blizzFadeA
   local target_exists = UnitExists("target")
   if target_exists then
     if unit.isTarget and db.toggle.TargetA then
@@ -459,7 +459,7 @@ local function TransparencyGeneral_Test2(unit)
 end
 
 local function TransparencyThreat_Test2(unit, style)
-  local db = TidyPlatesThreat.db.profile.threat
+  local db = Addon.db.profile.threat
 
   if not db.useAlpha then
     return TransparencyGeneral_Test2(unit)
@@ -504,7 +504,7 @@ local function AlphaUniqueNameOnly_Test2(unit)
   local unique_setting = GetUniqueNameplateSetting(unit)
 
   if unique_setting.overrideAlpha then
-    local db = TidyPlatesThreat.db.profile.HeadlineView
+    local db = Addon.db.profile.HeadlineView
     if db.useAlpha then
       return AlphaNormal_Test2(unit)
     end
@@ -518,7 +518,7 @@ local function AlphaUniqueNameOnly_Test2(unit)
 end
 
 local function TransparencyNameOnly_Test2(unit)
-  local db = TidyPlatesThreat.db.profile.HeadlineView
+  local db = Addon.db.profile.HeadlineView
 
   if db.useAlpha then
     return AlphaNormal_Test2(unit)
@@ -577,7 +577,7 @@ function SetAlpha_Test(unit)
     local unique_setting = GetUniqueNameplateSetting(unit)
 
     if unique_setting.overrideAlpha then
-      local db = TidyPlatesThreat.db.profile.HeadlineView
+      local db = Addon.db.profile.HeadlineView
       if db.useAlpha then
         style = ThreatPlates.GetThreatStyle(unit)
       else
@@ -590,7 +590,7 @@ function SetAlpha_Test(unit)
       return unique_setting.alpha
     end
   elseif style == "NameOnly" then
-    local db = TidyPlatesThreat.db.profile.HeadlineView
+    local db = Addon.db.profile.HeadlineView
     if db.useAlpha then
       style = ThreatPlates.GetThreatStyle(unit)
     else

@@ -19,7 +19,6 @@ local UnitClass = UnitClass
 
 -- ThreatPlates APIs
 local L = ThreatPlates.L
-local TidyPlatesThreat = TidyPlatesThreat
 local RGB = ThreatPlates.RGB
 
 local _G =_G
@@ -55,7 +54,7 @@ if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC then
   local PlayerIsTankByClassFunction = PLAYER_IS_TANK_BY_CLASS[Addon.PlayerClass] or PLAYER_IS_TANK_BY_CLASS["DEFAULT"]
 
   function Addon:PlayerRoleIsTank()
-    local db = TidyPlatesThreat.db
+    local db = Addon.db
     if db.profile.optionRoleDetectionAutomatic then
       return PlayerIsTankByClassFunction()
     else
@@ -64,14 +63,14 @@ if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC then
   end
 
   -- Sets the role of the index spec or the active spec to tank (value = true) or dps/healing
-  function TidyPlatesThreat:SetRole(value)
-    self.db.char.spec[1] = value
+  function Addon:SetRole(value)
+    Addon.db.char.spec[1] = value
   end
 else
   local PLAYER_ROLE_BY_SPEC = ThreatPlates.SPEC_ROLES[Addon.PlayerClass]
 
   function Addon:PlayerRoleIsTank()
-    local db = TidyPlatesThreat.db
+    local db = Addon.db
     if db.profile.optionRoleDetectionAutomatic then
       return PLAYER_ROLE_BY_SPEC[_G.GetSpecialization()] or false
     else
@@ -80,19 +79,19 @@ else
   end
 
   -- Sets the role of the index spec or the active spec to tank (value = true) or dps/healing
-  function TidyPlatesThreat:SetRole(value,index)
+  function Addon:SetRole(value,index)
     if index then
-      self.db.char.spec[index] = value
+      Addon.db.char.spec[index] = value
     else
-      self.db.char.spec[_G.GetSpecialization()] = value
+      Addon.db.char.spec[_G.GetSpecialization()] = value
     end
   end
 end
 
 local function GetUnitVisibility(full_unit_type)
-  local unit_visibility = TidyPlatesThreat.db.profile.Visibility[full_unit_type]
+  local unit_visibility = Addon.db.profile.Visibility[full_unit_type]
 
-  -- assert (TidyPlatesThreat.db.profile.Visibility[full_unit_type], "missing unit type: ".. full_unit_type)
+  -- assert (Addon.db.profile.Visibility[full_unit_type], "missing unit type: ".. full_unit_type)
 
   local show = unit_visibility.Show
   if type(show) ~= "boolean" then
@@ -106,7 +105,7 @@ local function SetNamePlateClickThrough(friendly, enemy)
 --  if InCombatLockdown() then
 --    ThreatPlates.Print(L["Nameplate clickthrough cannot be changed while in combat."], true)
 --  else
-    local db = TidyPlatesThreat.db.profile
+    local db = Addon.db.profile
     db.NamePlateFriendlyClickThrough = friendly
     db.NamePlateEnemyClickThrough = enemy
     Addon:CallbackWhenOoC(function()
@@ -540,7 +539,9 @@ local function GetDefaultSettingsV1(defaults)
   db.optionRoleDetectionAutomatic = false
   --db.HeadlineView.width = 116
   db.text.amount = true
-  db.AuraWidget.ModeBar.Texture = "Aluminium"
+  db.AuraWidget.Buffs.ModeBar.Texture = "Aluminium"
+  db.AuraWidget.Debuffs.ModeBar.Texture = "Aluminium"
+  db.AuraWidget.CrowdControl.ModeBar.Texture = "Aluminium"
   db.uniqueWidget.scale = 35
   db.uniqueWidget.y = 24
   db.questWidget.ON = false
@@ -578,7 +579,7 @@ local function GetDefaultSettingsV1(defaults)
 end
 
 local function SwitchToDefaultSettingsV1()
-  local db = TidyPlatesThreat.db
+  local db = Addon.db
   local current_profile = db:GetCurrentProfile()
 
   db:SetProfile("_ThreatPlatesInternal")
@@ -591,7 +592,7 @@ local function SwitchToDefaultSettingsV1()
 end
 
 local function SwitchToCurrentDefaultSettings()
-  local db = TidyPlatesThreat.db
+  local db = Addon.db
   local current_profile = db:GetCurrentProfile()
 
   db:SetProfile("_ThreatPlatesInternal")
@@ -608,8 +609,8 @@ local function VersionToNumber(version)
   local v1, v2, v3 = version:match("(%d+)%.(%d+)%.(%d+)")
   v1, v2, v3 = v1 or 0, v2 or 0, v3 or 0
 
-  local v_alpha = version:match("Alpha(%d+)") or 0
-  local v_beta = version:match("Beta(%d+)") or 0
+  local v_alpha = version:match("alpha(%d+)") or 255
+  local v_beta = version:match("beta(%d+)") or 255
 
   return floor(v1 * 1e6 + v2 * 1e3 + v3), floor(v_beta * 1e3 + v_alpha)
 end
@@ -624,6 +625,7 @@ local function CurrentVersionIsOlderThan(current_version, max_version)
     return current_version_no < max_version_no
   end
 end
+Addon.CurrentVersionIsOlderThan = CurrentVersionIsOlderThan
 
 local function DatabaseEntryExists(db, keys)
   for index = 1, #keys do
@@ -643,6 +645,14 @@ local function DatabaseEntryDelete(db, keys)
     end
   end
   db[keys[#keys]] = nil
+end
+
+local function GetValueOrDefault(old_value, default_value)
+  if old_value ~= nil then
+    return old_value
+  else
+    return default_value
+  end
 end
 
 local function MigrateNamesColor(profile_name, profile)
@@ -893,26 +903,18 @@ local function MigrationForceFriendlyInCombat(profile_name, profile)
   end
 end
 
-local function SetValueOrDefault(old_value, default_value)
-  if old_value ~= nil then
-    return old_value
-  else
-    return default_value
-  end
-end
-
 local function MigrationComboPointsWidget(profile_name, profile)
   if DatabaseEntryExists(profile, { "comboWidget" }) then
     profile.ComboPoints = profile.ComboPoints or {}
 
     local default_profile = ThreatPlates.DEFAULT_SETTINGS.profile.ComboPoints
-    profile.ComboPoints.ON = SetValueOrDefault(profile.comboWidget.ON, default_profile.ON)
-    profile.ComboPoints.Scale = SetValueOrDefault(profile.comboWidget.scale, default_profile.Scale)
-    profile.ComboPoints.x = SetValueOrDefault(profile.comboWidget.x, default_profile.x)
-    profile.ComboPoints.y = SetValueOrDefault(profile.comboWidget.y, default_profile.y)
-    profile.ComboPoints.x_hv = SetValueOrDefault(profile.comboWidget.x_hv, default_profile.x_hv)
-    profile.ComboPoints.y_hv = SetValueOrDefault(profile.comboWidget.y_hv, default_profile.y_hv)
-    profile.ComboPoints.ShowInHeadlineView = SetValueOrDefault(profile.comboWidget.ShowInHeadlineView, default_profile.ShowInHeadlineView)
+    profile.ComboPoints.ON = GetValueOrDefault(profile.comboWidget.ON, default_profile.ON)
+    profile.ComboPoints.Scale = GetValueOrDefault(profile.comboWidget.scale, default_profile.Scale)
+    profile.ComboPoints.x = GetValueOrDefault(profile.comboWidget.x, default_profile.x)
+    profile.ComboPoints.y = GetValueOrDefault(profile.comboWidget.y, default_profile.y)
+    profile.ComboPoints.x_hv = GetValueOrDefault(profile.comboWidget.x_hv, default_profile.x_hv)
+    profile.ComboPoints.y_hv = GetValueOrDefault(profile.comboWidget.y_hv, default_profile.y_hv)
+    profile.ComboPoints.ShowInHeadlineView = GetValueOrDefault(profile.comboWidget.ShowInHeadlineView, default_profile.ShowInHeadlineView)
 
     DatabaseEntryDelete(profile, { "comboWidget" })
   end
@@ -921,22 +923,14 @@ end
 local function MigrationThreatDetection(profile_name, profile)
   if DatabaseEntryExists(profile, { "threat", "nonCombat" }) then
     local default_profile = ThreatPlates.DEFAULT_SETTINGS.profile.threat
-    profile.threat.UseThreatTable = SetValueOrDefault(profile.threat.nonCombat, default_profile.UseThreatTable)
+    profile.threat.UseThreatTable = GetValueOrDefault(profile.threat.nonCombat, default_profile.UseThreatTable)
     --DatabaseEntryDelete(profile, { "threat", "nonCombat" })
-  end
-end
-
-local function GetValueOrDefault(old_value, default_value)
-  if old_value ~= nil then
-    return old_value
-  else
-    return default_value
   end
 end
 
 local function MigrationCustomPlatesV1(profile_name, profile)
   -- This migration function is called with an empty default profile, so CustomNameplatesVersion is nil if it is still the default value (1)
-  if TidyPlatesThreat.db.global.CustomNameplatesVersion then return end
+  if Addon.db.global.CustomNameplatesVersion then return end
 
   if DatabaseEntryExists(profile, { "uniqueSettings" }) then
     local custom_styles = profile.uniqueSettings
@@ -991,7 +985,7 @@ local function MigrationCustomPlatesV1(profile_name, profile)
 end
 
 local function MigrateCustomStylesToV3(profile_name, profile)
-  -- if TidyPlatesThreat.db.global.CustomNameplatesVersion > 2 then return end
+  -- if Addon.db.global.CustomNameplatesVersion > 2 then return end
 
   if DatabaseEntryExists(profile, { "uniqueSettings" }) then
     local custom_styles = profile.uniqueSettings
@@ -1026,13 +1020,13 @@ local function MigrateSpelltextPosition(profile_name, profile)
     if DatabaseEntryExists(profile, { "settings", "spelltext", "x" } ) then
       profile.settings.castbar.SpellNameText.HorizontalOffset = profile.settings.spelltext.x - 2
       profile.settings.spelltext = profile.settings.spelltext or {}
-      profile.settings.spelltext.align = SetValueOrDefault(profile.settings.spelltext.align, "CENTER")
+      profile.settings.spelltext.align = GetValueOrDefault(profile.settings.spelltext.align, "CENTER")
     end
 
     if DatabaseEntryExists(profile, { "settings", "spelltext", "y" } ) then
       profile.settings.castbar.SpellNameText.VerticalOffset = profile.settings.spelltext.y + 15
       profile.settings.spelltext = profile.settings.spelltext or {}
-      profile.settings.spelltext.vertical = SetValueOrDefault(profile.settings.spelltext.vertical, "CENTER")
+      profile.settings.spelltext.vertical = GetValueOrDefault(profile.settings.spelltext.vertical, "CENTER")
     end
 
     DatabaseEntryDelete(profile, { "settings", "spelltext", "x" })
@@ -1123,6 +1117,128 @@ local function DisableShowBlizzardAurasForClassic(profile_name, profile)
   end
 end
 
+local function MigrateAurasWidgetV2(_, profile)
+  local default_profile = ThreatPlates.DEFAULT_SETTINGS.profile
+
+  local function MigrateFontSettings(aura_type, font_area)
+    local profile_aura_type_modebar = profile.AuraWidget[aura_type].ModeBar
+    local default_profile_modebar = default_profile.AuraWidget[aura_type].ModeBar
+
+    profile_aura_type_modebar[font_area] = profile_aura_type_modebar[font_area] or {}
+    profile_aura_type_modebar[font_area].Font = profile_aura_type_modebar[font_area].Font or {}
+
+    profile_aura_type_modebar[font_area].Font.Typeface = GetValueOrDefault(profile.AuraWidget.ModeBar.Font, default_profile_modebar[font_area].Font.Typeface)
+    if aura_type ~= "CrowdControl" then
+      profile_aura_type_modebar[font_area].Font.Size = GetValueOrDefault(profile.AuraWidget.ModeBar.FontSize, default_profile_modebar[font_area].Font.Size)
+      profile_aura_type_modebar[font_area].Font.Color = GetValueOrDefault(profile.AuraWidget.ModeBar.FontColor, default_profile_modebar[font_area].Font.Color)
+    end
+  end
+
+  local function MigrateAuraTypeEntry(aura_type)
+    --if DatabaseEntryExists(profile, { "AuraWidget", aura_type} ) then
+    local default_profile_aura_type = default_profile.AuraWidget[aura_type]
+    local profile_aura_type = profile.AuraWidget[aura_type]
+    local profile_aura_widget = profile.AuraWidget
+
+    profile_aura_type.ModeIcon = profile_aura_type.ModeIcon or {}
+    profile_aura_type.ModeBar = profile_aura_type.ModeBar or {}
+    -- For the CrowdControl area, only migrate some selected settings, as most settings for icon/bar mode are meant for buffs/debuffs
+    if aura_type ~= "CrowdControl" then
+      profile_aura_type.AlignmentV = GetValueOrDefault(profile_aura_widget.AlignmentV, default_profile_aura_type.AlignmentV)
+      profile_aura_type.AlignmentH = GetValueOrDefault(profile_aura_widget.AlignmentH, default_profile_aura_type.AlignmentH)
+      profile_aura_type.CenterAuras = GetValueOrDefault(profile_aura_widget.CenterAuras, default_profile_aura_type.CenterAuras)
+
+      Addon.MergeIntoTable(profile_aura_type.ModeIcon, profile_aura_widget.ModeIcon)
+      Addon.MergeIntoTable(profile_aura_type.ModeBar, profile_aura_widget.ModeBar)
+    end
+
+    if profile_aura_type.Scale then
+      profile_aura_type.ModeIcon.Style = "custom" -- If scale was changed, style must be custom so that the custom icon size is used
+      profile_aura_type.ModeIcon.IconWidth = profile_aura_type.Scale * default_profile_aura_type.ModeIcon.IconWidth
+      profile_aura_type.ModeIcon.IconHeight = profile_aura_type.Scale * default_profile_aura_type.ModeIcon.IconHeight
+    end
+
+    if DatabaseEntryExists(profile, { "AuraWidget", "ModeBar"} ) then
+      MigrateFontSettings(aura_type, "Label")
+      MigrateFontSettings(aura_type, "Duration")
+      MigrateFontSettings(aura_type, "StackCount")
+
+      if aura_type ~= "CrowdControl" then
+        profile_aura_type.ModeBar.Label.HorizontalOffset = GetValueOrDefault(profile_aura_widget.ModeBar.LabelTextIndent, default_profile_aura_type.ModeBar.Label.HorizontalOffset)
+        profile_aura_type.ModeBar.Duration.HorizontalOffset = GetValueOrDefault(profile_aura_widget.ModeBar.TimeTextIndent, default_profile_aura_type.ModeBar.Duration.HorizontalOffset)
+      end
+    end
+    --end
+  end
+
+  if DatabaseEntryExists(profile, { "AuraWidget", } ) then
+    profile.AuraWidget.Buffs = profile.AuraWidget.Buffs or {}
+    profile.AuraWidget.Debuffs = profile.AuraWidget.Debuffs or {}
+    profile.AuraWidget.CrowdControl = profile.AuraWidget.CrowdControl or {}
+
+    profile.AuraWidget.Debuffs.HealthbarMode = profile.AuraWidget.Debuffs.HealthbarMode or {}
+    profile.AuraWidget.Debuffs.NameMode = profile.AuraWidget.Debuffs.NameMode or {}
+
+    profile.AuraWidget.Debuffs.HealthbarMode.HorizontalOffset = GetValueOrDefault(profile.AuraWidget.x, default_profile.AuraWidget.Debuffs.HealthbarMode.HorizontalOffset)
+    profile.AuraWidget.Debuffs.HealthbarMode.VerticalOffset = GetValueOrDefault(profile.AuraWidget.y, default_profile.AuraWidget.Debuffs.HealthbarMode.VerticalOffset)
+    profile.AuraWidget.Debuffs.HealthbarMode.Anchor = GetValueOrDefault(profile.AuraWidget.anchor, default_profile.AuraWidget.Debuffs.HealthbarMode.Anchor)
+    profile.AuraWidget.Debuffs.NameMode.HorizontalOffset = GetValueOrDefault(profile.AuraWidget.x, default_profile.AuraWidget.Debuffs.NameMode.HorizontalOffset)
+    profile.AuraWidget.Debuffs.NameMode.VerticalOffset = GetValueOrDefault(profile.AuraWidget.y, default_profile.AuraWidget.Debuffs.NameMode.VerticalOffset)
+    profile.AuraWidget.Debuffs.NameMode.Anchor = GetValueOrDefault(profile.AuraWidget.anchor, default_profile.AuraWidget.Debuffs.NameMode.Anchor)
+
+    profile.AuraWidget.Buffs.ModeBar = profile.AuraWidget.Buffs.ModeBar or {}
+    profile.AuraWidget.Debuffs.ModeBar = profile.AuraWidget.Debuffs.ModeBar or {}
+    profile.AuraWidget.CrowdControl.ModeBar = profile.AuraWidget.CrowdControl.ModeBar or {}
+
+    MigrateAuraTypeEntry("Buffs")
+    MigrateAuraTypeEntry("Debuffs")
+    MigrateAuraTypeEntry("CrowdControl")
+
+    if DatabaseEntryExists(profile, { "AuraWidget", "ModeBar"} ) then
+      profile.AuraWidget.Buffs.ModeBar.Enabled = GetValueOrDefault(profile.AuraWidget.ModeBar.Enabled, default_profile.AuraWidget.Buffs.ModeBar.Enabled)
+      profile.AuraWidget.Debuffs.ModeBar.Enabled = GetValueOrDefault(profile.AuraWidget.ModeBar.Enabled, default_profile.AuraWidget.Debuffs.ModeBar.Enabled)
+    end
+
+    DatabaseEntryDelete(profile, { "AuraWidget", "x" })
+    DatabaseEntryDelete(profile, { "AuraWidget", "y" })
+    DatabaseEntryDelete(profile, { "AuraWidget", "x_hv" }) -- never used
+    DatabaseEntryDelete(profile, { "AuraWidget", "y_hv" }) -- never used
+    DatabaseEntryDelete(profile, { "AuraWidget", "anchor" })
+    DatabaseEntryDelete(profile, { "AuraWidget", "AlignmentH" })
+    DatabaseEntryDelete(profile, { "AuraWidget", "AlignmentV" })
+    DatabaseEntryDelete(profile, { "AuraWidget", "CenterAuras" })
+
+    DatabaseEntryDelete(profile, { "AuraWidget", "Buffs", "Scale" })
+    DatabaseEntryDelete(profile, { "AuraWidget", "Debuffs", "Scale" })
+    DatabaseEntryDelete(profile, { "AuraWidget", "CrowdControl", "Scale" })
+
+    DatabaseEntryDelete(profile, { "AuraWidget", "ModeIcon" })
+    DatabaseEntryDelete(profile, { "AuraWidget", "ModeBar" })
+  end
+end
+
+local TEST_FUNCTIONS = {
+  MigrateAurasWidgetV2 = MigrateAurasWidgetV2
+}
+
+Addon.TestMigrateDatabase = function(migration_function)
+  local profile_table = Addon.db.profiles
+  local current_profile = Addon.db:GetCurrentProfile()
+
+  local defaults = ThreatPlates.CopyTable(Addon.db.defaults)
+  Addon.db:RegisterDefaults({})
+
+  TEST_FUNCTIONS[migration_function](current_profile, Addon.db.profiles[current_profile])
+
+  Addon.db:RegisterDefaults(defaults)
+
+  -- Cleanup database - remove default values from SavedVariables
+  for profile_name, profile in pairs(profile_table) do
+    Addon.db:SetProfile(profile_name)
+  end
+  Addon.db:SetProfile(current_profile)
+end
+
 -- Settings in the SavedVariables file that should be migrated and/or deleted
 local DEPRECATED_SETTINGS = {
   --  NamesColor = { MigrateNamesColor, },                        -- settings.name.color
@@ -1138,20 +1254,20 @@ local DEPRECATED_SETTINGS = {
   --  HVBlizzFadingAlpha = { "HeadlineView", "blizzFadingAlpha"}, -- (removed in 8.5.1)
   --  HVNameWidth = { "HeadlineView", "name", "width" },          -- (removed in 8.5.0)
   --  HVNameHeight = { "HeadlineView", "name", "height" },        -- (removed in 8.5.0)
-  { "debuffWidget" },                                                                -- (removed in 8.6.0)
-  { "OldSettings" },                                                                  -- (removed in 8.7.0)
-  { MigrateCastbarColoring },                                                     -- (removed in 8.7.0)
-  (not Addon.IS_CLASSIC and { MigrationTotemSettings, "8.7.0" }) or nil,               -- (changed in 8.7.0)
-  (not Addon.IS_CLASSIC and { MigrateBorderTextures, "8.7.0" }) or nil,                       -- (changed in 8.7.0)
-  { "uniqueSettings", "list" },                                                -- (removed in 8.7.0, cleanup added in 8.7.1)
-  (not Addon.IS_CLASSIC and { MigrationAurasSettings, "9.0.0" }) or nil,                        -- (changed in 9.0.0)
-  { MigrationAurasSettingsFix },                                                         -- (changed in 9.0.4 and 9.0.9)
-  (not Addon.IS_CLASSIC and { MigrationComboPointsWidget, "9.1.0" }) or nil,  -- (changed in 9.1.0)
+  { "debuffWidget" },                                                     -- (removed in 8.6.0)
+  { "OldSettings" },                                                      -- (removed in 8.7.0)
+  { MigrateCastbarColoring },                                             -- (removed in 8.7.0)
+  { MigrationTotemSettings, "8.7.0", Version = not Addon.IS_CLASSIC },    -- (changed in 8.7.0)
+  { MigrateBorderTextures, "8.7.0", Version = not Addon.IS_CLASSIC },   -- (changed in 8.7.0)
+  { "uniqueSettings", "list" },                                           -- (removed in 8.7.0, cleanup added in 8.7.1)
+  { MigrationAurasSettings, "9.0.0", Version = not Addon.IS_CLASSIC },    -- (changed in 9.0.0)
+  { MigrationAurasSettingsFix },                                          -- (changed in 9.0.4 and 9.0.9)
+  { MigrationComboPointsWidget, "9.1.0", Version = not Addon.IS_CLASSIC },-- (changed in 9.1.0)
   { MigrationForceFriendlyInCombat },                                     -- (changed in 9.1.0)
-  { "HeadlineView", "ON" },                                              -- (removed in 9.1.0)
-  (not Addon.IS_CLASSIC and { MigrationThreatDetection, "9.1.3" }) or nil,               -- (changed in 9.1.0)
-  -- { "threat", "hideNonCombat" },                                                    -- (removed in ...)
-  -- { "threat", "nonCombat" },                                                            -- (removed in 9.1.0)
+  { "HeadlineView", "ON" },                                               -- (removed in 9.1.0)
+  { MigrationThreatDetection, "9.1.3", Version = not Addon.IS_CLASSIC },  -- (changed in 9.1.0)
+  -- { "threat", "hideNonCombat" },                                       -- (removed in ...)
+  -- { "threat", "nonCombat" },                                           -- (removed in 9.1.0)
   { MigrateCustomStylesToV3, (Addon.IS_CLASSIC and "1.4.0") or "9.2.2" },
   { MigrateSpelltextPosition, (Addon.IS_CLASSIC and "1.4.0") or "9.2.0", NoDefaultProfile = true },
   { FixTargetFocusTexture, NoDefaultProfile = true },
@@ -1161,61 +1277,65 @@ local DEPRECATED_SETTINGS = {
   { "CVarsBackup", "nameplateGlobalScale" },  -- Removed in 10.1.8
   { MigrationCustomPlatesV1, NoDefaultProfile = true, "10.2.0"},
   { MigrateCustomStyles, NoDefaultProfile = true, "10.2.0", CleanupDatabase = true },
-  ((Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC) and { DisableShowBlizzardAurasForClassic, "10.2.0" }) or nil,
+  { DisableShowBlizzardAurasForClassic, "10.2.1", Version = (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC) },
+  { MigrateAurasWidgetV2, "10.3.0-beta2", NoDefaultProfile = true , CleanupDatabase = true },
+  { "AuraWidget", "scale" },  -- Removed in 10.3.0
 }
 
 local function MigrateDatabase(current_version)
-  TidyPlatesThreat.db.global.MigrationLog = nil
-  --TidyPlatesThreat.db.global.MigrationLog = {}
+  Addon.db.global.MigrationLog = nil
+  --Addon.db.global.MigrationLog = {}
 
   local cleanup_database_after_migration = false
-  local profile_table = TidyPlatesThreat.db.profiles
+  local profile_table = Addon.db.profiles
   for index, entry in ipairs(DEPRECATED_SETTINGS) do
     local action = entry[1]
 
     if type(action) == "function" then
-      local max_version = entry[2]
-      if not max_version or CurrentVersionIsOlderThan(current_version, max_version) then
-        local defaults
-        if entry.NoDefaultProfile then
-          defaults = ThreatPlates.CopyTable(TidyPlatesThreat.db.defaults) -- Should move that before the for loop
-          TidyPlatesThreat.db:RegisterDefaults({})
+      if entry.Version == nil or entry.Version == true then
+        local max_version = entry[2]
+        if not max_version or CurrentVersionIsOlderThan(current_version, max_version) or action == MigrateAurasWidgetV2 then
+          local defaults
+          if entry.NoDefaultProfile then
+            defaults = ThreatPlates.CopyTable(Addon.db.defaults) -- Should move that before the for loop
+            Addon.db:RegisterDefaults({})
+          end
+
+          -- iterate over all profiles and migrate values
+          --Addon.db.global.MigrationLog[key] = "Migration" .. (max_version and ( " because " .. current_version .. " < " .. max_version) or "")
+          for profile_name, profile in pairs(profile_table) do
+            action(profile_name, profile)
+          end
+
+          if entry.NoDefaultProfile then
+            Addon.db:RegisterDefaults(defaults)
+          end
+
+          cleanup_database_after_migration = cleanup_database_after_migration or entry.CleanupDatabase
         end
 
-        -- iterate over all profiles and migrate values
-        --TidyPlatesThreat.db.global.MigrationLog[key] = "Migration" .. (max_version and ( " because " .. current_version .. " < " .. max_version) or "")
-        for profile_name, profile in pairs(profile_table) do
-          action(profile_name, profile)
-        end
-
-        if entry.NoDefaultProfile then
-          TidyPlatesThreat.db:RegisterDefaults(defaults)
-        end
-
-        cleanup_database_after_migration = cleanup_database_after_migration or entry.CleanupDatabase
+        -- Postprocessing, if necessary
+        -- action = entry[3]
+        -- if action and type(action) == "function" then
+        --   action()
+        -- end
       end
-
-      -- Postprocessing, if necessary
-      -- action = entry[3]
-      -- if action and type(action) == "function" then
-      --   action()
-      -- end
     else
       -- iterate over all profiles and delete the old config entry
-      --TidyPlatesThreat.db.global.MigrationLog[key] = "DELETED"
+      --Addon.db.global.MigrationLog[key] = "DELETED"
       for profile_name, profile in pairs(profile_table) do
         DatabaseEntryDelete(profile, entry)
       end
     end
   end
-
+  
   -- Switch through all profiles to cleanup configuration (removing settings with default values from the file)
   if cleanup_database_after_migration then
-    local current_profile = TidyPlatesThreat.db:GetCurrentProfile()
+    local current_profile = Addon.db:GetCurrentProfile()
     for profile_name, profile in pairs(profile_table) do
-      TidyPlatesThreat.db:SetProfile(profile_name)
+      Addon.db:SetProfile(profile_name)
     end
-    TidyPlatesThreat.db:SetProfile(current_profile)
+    Addon.db:SetProfile(current_profile)
   end
 end
 
@@ -1388,7 +1508,7 @@ Addon.ImportProfile = function(profile, profile_name, profile_version)
     ThreatPlates.Print(L["Failed to migrate the imported profile to the current settings format because of an internal error. Please report this issue at the Threat Plates homepage at CurseForge: "] .. return_value, true)
   else
     -- Create a new profile with default settings:
-    TidyPlatesThreat.db:SetProfile(profile_name) --will create a new profile
+    Addon.db:SetProfile(profile_name) --will create a new profile
 
     -- Custom styles must be handled seperately
     local custom_styles = ThreatPlates.CopyTable(profile.uniqueSettings)
@@ -1397,14 +1517,14 @@ Addon.ImportProfile = function(profile, profile_name, profile_version)
     end
 
     -- Merge the migrated profile to import into this new profile
-    UpdateFromSettings(TidyPlatesThreat.db.profile, profile)
+    UpdateFromSettings(Addon.db.profile, profile)
 
     -- Now merge back the custom styles
     for index, imported_custom_style in pairs(custom_styles) do
       -- Import all values from the custom style as long the are valid entries with the correct type
       -- based on the default custom style "**"
       local custom_style = Addon.ImportCustomStyle(imported_custom_style)
-      table.insert(TidyPlatesThreat.db.profile.uniqueSettings, index, custom_style)
+      table.insert(Addon.db.profile.uniqueSettings, index, custom_style)
     end
   end
 end

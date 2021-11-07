@@ -1,6 +1,7 @@
-# 10.2.0 (2021-05-18)
+# @project-version@ (@build-time@)
 
-* Added basic support for WoW TBC Classic.
-* Custom styles for nameplates are now automatically migrated to the new format. Unmodified legacy custom styles are
-  removed as part of this migration. To add them back either use the command "/tptp legacy-custom-styles" or import them
-  from [here](https://github.com/Backupiseasy/ThreatPlates/wiki/Custom-Styles-for-Nameplates).
+* Appearance and layout for buffs, debuffs, and crowd control can now be configured indivually for Auras widget.
+* Player units are now colored based on their PvP flag similar to WoW default nameplates [Comment #5829].
+* Extended threat percentage to show raw or scaled threat percentage or the threat difference (value or percentage) to the second player in the mob's threat table [Issue GitHub#285].
+* The cast target's name will now be shown in class color if the target is a player [Issue #419, #465, Comment #4799, #504, #5445, #5491].
+* Added an option to show threat value only when in groups [Comment #4835].

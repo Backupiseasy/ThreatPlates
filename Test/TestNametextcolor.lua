@@ -94,18 +94,18 @@ function GetConfig(config_no)
   if config_no == 1 then
     return TEST_UNIT[config_no]
   elseif config_no == 2 then
-    TidyPlatesThreat.db.profile.HeadlineView.UseRaidMarkColoring = true
+    Addon.db.profile.HeadlineView.UseRaidMarkColoring = true
     return TEST_UNIT[config_no]
   elseif config_no == 3 then
     return TEST_UNIT[config_no]
   elseif config_no == 4 then
-    TidyPlatesThreat.db.profile.settings.name.FriendlyTextColorMode = "CUSTOM"
+    Addon.db.profile.settings.name.FriendlyTextColorMode = "CUSTOM"
     return TEST_UNIT[config_no]
   elseif config_no == 5 then
-    TidyPlatesThreat.db.profile.settings.name.FriendlyTextColorMode = "HEALTH"
+    Addon.db.profile.settings.name.FriendlyTextColorMode = "HEALTH"
     return TEST_UNIT[config_no]
   elseif config_no == 6 then
-    TidyPlatesThreat.db.profile.settings.name.FriendlyTextColorMode = "CLASS"
+    Addon.db.profile.settings.name.FriendlyTextColorMode = "CLASS"
     return TEST_UNIT[config_no]
   elseif config_no == 7 then
     return TEST_UNIT[config_no]
@@ -114,7 +114,7 @@ function GetConfig(config_no)
   elseif config_no == 9 then
     return TEST_UNIT[config_no]
   elseif config_no == 10 then
-    TidyPlatesThreat.db.profile.settings.name.FriendlyTextColorMode = "REACTION"
+    Addon.db.profile.settings.name.FriendlyTextColorMode = "REACTION"
     return TEST_UNIT[config_no]
   elseif config_no == 11 then
     return TEST_UNIT[config_no]
@@ -152,7 +152,7 @@ function SetNameColor_Test(unit)
   local style = unit.TP_Style or SetStyle(unit)
   local unique_setting = unit.TP_UniqueSetting or GetUniqueNameplateSetting(unit)
 
-  local db = TidyPlatesThreat.db.profile
+  local db = Addon.db.profile
   local db_mode = db.settings.name
   if style == "NameOnly" or style == "NameOnly-Unique" then
     db_mode = db.HeadlineView
@@ -246,7 +246,7 @@ function SetNameColor_New(unit)
   local style = unit.TP_Style or SetStyle(unit)
   local unique_setting = unit.TP_UniqueSetting or GetUniqueNameplateSetting(unit)
 
-  local db = TidyPlatesThreat.db.profile
+  local db = Addon.db.profile
   local db_mode = db.settings.name
   if style == "NameOnly" or style == "NameOnly-Unique" then
     db_mode = db.HeadlineView
@@ -340,7 +340,7 @@ function SetNameColor_8_4_2(unit)
   local style = unit.TP_Style or SetStyle(unit)
   local unique_style = unit.TP_UniqueSetting or GetUniqueNameplateSetting(unit)
 
-  local db = TidyPlatesThreat.db.profile
+  local db = Addon.db.profile
   -- 8.4.2: local style, unique_style = TidyPlatesThreat.SetStyle(unit)
 
   local color

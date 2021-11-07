@@ -21,7 +21,6 @@ local CreateFrame = CreateFrame
 local loadstring, setfenv = loadstring, setfenv
 
 -- ThreatPlates APIs
-local TidyPlatesThreat = TidyPlatesThreat
 local L = ThreatPlates.L
 local PrintDebugMessage = Addon.PrintDebugMessage
 
@@ -394,7 +393,7 @@ local function OnUpdate(widget_frame, elapsed)
 end
 
 function Widget:IsEnabled()
-  local is_enabled = Addon.ActiveScriptTrigger and TidyPlatesThreat.db.global.ScriptingIsEnabled
+  local is_enabled = Addon.ActiveScriptTrigger and Addon.db.global.ScriptingIsEnabled
 
   if is_enabled then
     ProcessEvent("IsEnabled")
@@ -550,7 +549,7 @@ end
 -- Load settings from the configuration which are shared across all aura widgets
 -- used (for each widget) in UpdateWidgetConfig
 function Widget:UpdateSettings()
-  self.CustomStyles = TidyPlatesThreat.db.profile.uniqueSettings
+  self.CustomStyles = Addon.db.profile.uniqueSettings
 
   ScriptsForAllPlates = {}
   ScriptsByCustomStyle = {}
@@ -594,7 +593,7 @@ function Widget:UpdateSettings()
           ScriptsForWoWEvents[event] = ScriptsForWoWEvents[event] or {}
           ScriptsForWoWEvents[event][custom_style] = func
           if not pcall(self.RegisterEvent, self, event, HandleWoWEvent) then
-            Addon.PrintErrorMessage(string_format(L["Attempt to register script for unknown WoW event \"%s\""], event))
+            Addon.PrintErrorMessage(string_format(L["Attempt to register script for unknown WoW event '%s'"], event))
           end
         end
       end

@@ -16,7 +16,7 @@ local WidgetFrame
 ---------------------------------------------------------------------------------------------------
 
 function Widget:IsEnabled()
-  return TidyPlatesThreat.db.profile.TestWidget.ON
+  return Addon.db.profile.TestWidget.ON
 end
 
 function Widget:EnabledForStyle(style, unit)
@@ -39,7 +39,7 @@ end
 function Widget:OnUnitAdded(widget_frame, unit)
   widget_frame:Show()
 
-  local db = TidyPlatesThreat.db.profile.TestWidget
+  local db = Addon.db.profile.TestWidget
 
   widget_frame:ClearAllPoints()
   widget_frame:SetPoint("CENTER", widget_frame:GetParent(), "CENTER", 0, 50)

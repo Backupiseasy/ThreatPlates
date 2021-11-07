@@ -1,5 +1,78 @@
 ﻿------------------------------------------------------
-10.2.0 (2021-05-18)
+10.3.0 (2021-xx-xx)
+------------------------------------------------------
+* Appearance and layout for buffs, debuffs, and crowd control can now be configured indivually for Auras widget.
+* Player units are now colored based on their PvP flag similar to WoW default nameplates [Comment #5829].
+* Extended threat percentage to show raw or scaled threat percentage or the threat difference (value or percentage) to the second player in the mob's threat table [Issue GitHub#285].
+* The cast target's name will now be shown in class color if the target is a player [Issue #419, #465, Comment #4799, #504, #5445, #5491].
+* Added an option to show threat value only when in groups [Comment #4835].
+ 
+------------------------------------------------------
+10.2.11 (2021-07-10)
+------------------------------------------------------
+* Fixed a Lua error that occured because of incorrectly initialized Localization [Comment #5837].
+
+------------------------------------------------------
+10.2.10 (2021-07-08)
+------------------------------------------------------
+* Added support for anima-charged combo points from new covenant legendary "Resouding Clarity" [Issue #508, Comment #5813, #5821].
+* Fixed a Lua error that occured when player totems turn into neutral totems (e.g., when the player is mind-controlled) [Issue #506, Comment #5814].
+
+------------------------------------------------------
+10.2.9 (2021-07-28)
+------------------------------------------------------
+* Fixed a lag/freeze issue when switching talents or specs that happened when the options dialog was opened at least once [Comment #5764].
+
+------------------------------------------------------
+10.2.8 (2021-07-24)
+------------------------------------------------------
+* Fixed a bug with Combo Points widget in TBC Classic where the first combo point after a target switch was not shown immediately [Comment #5757].
+
+------------------------------------------------------
+10.2.7 (2021-07-21)
+------------------------------------------------------
+* Fixed a bug with unit visibility not being applied correctly [Comment #5768, #5765].
+* Fixed a bug where hostile and neutral units where colored in the wrong color [Comment #5755, #5756, #5763, #5770, Issue #501].
+
+------------------------------------------------------
+10.2.6 (2021-07-18)
+------------------------------------------------------
+* Fixed an inconsistency with nameplate visibility where the target unit's nameplate was shown with Blizzard default nameplates, but not with Threat Plates [Issue #494].
+* Fixed a bug with friendly and enemy players reaction in sanctuary areas in WoW Classic [Issue #42, Comment #5730].
+* Stun from weapons Deep Thunder and Stormherald as well as Feral Charge Effect are now recognized as crowd-control aura [IM, Comment #5746].
+
+------------------------------------------------------
+10.2.5 (2021-07-02)
+------------------------------------------------------
+* Fixed a Lua error that occurred when the personal nameplate was enabled and the player entered combat [Issue #495, Comment #5709, #5704].
+* Fixed a typo in TOC file which caused the addon version not being set correctly. 
+
+------------------------------------------------------
+10.2.4 (2021-06-29)
+------------------------------------------------------
+* Fixed a bug where health information on healthbar and status text was not updated immediately (only after targeting the unit) [GH-290, Comment #5581, #5588, #5648, #5651, IM]
+* Fixed a bug in  Classic and TPC Classic where combo points from the previous target where shown on the new target when switching targets [Comment #5688].
+* Added Freezing Trap Effect from Hunter's Freezing Trap to the Auras widget as CC aura [Comment #756, #5694].
+* Updated localizations (GH-291).
+
+------------------------------------------------------
+10.2.3 (2021-06-12)
+------------------------------------------------------
+* Fixed a bug in WoW Classic and TBC Classic where non-target units were not visible when occlusion detection was enabled and a target was selected (related to newly introduced CVar nameplateNotSelectedAlpha) [Comment #5623]. Occlusion detection does not work when a target is selected in Classic, see https://github.com/Stanzilla/WoWUIBugs/issues/134.
+
+------------------------------------------------------
+10.2.2 (2021-05-27)
+------------------------------------------------------
+* Fixed a bug with tank role detection for Paladins as it was not active in the TBC version [Issue #493].
+
+------------------------------------------------------
+10.2.1 (2021-05-25)
+------------------------------------------------------
+* Fixed a bug with delayed health update in the TBC Classic Version because of a change in how health update events were processed [Comment TBC#742, #5992, Issue #490].
+* Fixed a bug with crowd-control auras being shown as debuff (e.g., with wrong size) [Comment #5589, TBC#744].
+
+------------------------------------------------------
+10.2.0 (2021-05-17)
 ------------------------------------------------------
 * Added basic support for WoW TBC Classic.
 * Custom styles for nameplates are now automatically migrated to the new format. Unmodified legacy custom styles are removed as part of this migration. To add them back either use the command "/tptp legacy-custom-styles" or import them from here https://github.com/Backupiseasy/ThreatPlates/wiki/Custom-Styles-for-Nameplates.
@@ -440,7 +513,7 @@
 * Aura for Imprison (Demon Hunter) is now correctly recognized as crowd-control auras when the PvP talent Detainment was selected [Comment #1602].
 * Auras for Sin and Punishment (Priest) and Unstable Affliction silence effect (Warlock) are now correctly recognized as crowd-control auras.
 
-﻿------------------------------------------------------
+------------------------------------------------------
 9.0.18
 ------------------------------------------------------
 * All auras for Demon Hunter, Rogues, Hunter, Death Knight, Paladin, Priest, Shaman, Monk, and Druid are now correctly recognized as crowd-control auras [Comment #1560, #1556, #1541].

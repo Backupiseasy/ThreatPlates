@@ -14,7 +14,6 @@ local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local InCombatLockdown = InCombatLockdown
 
 -- ThreatPlates APIs
-local TidyPlatesThreat = TidyPlatesThreat
 local BackdropTemplate = Addon.BackdropTemplate
 local Font = Addon.Font
 
@@ -185,7 +184,7 @@ local function ShowTargetUnit(self, target_of_target_name, class_name)
   if target_of_target:IsShown() then
     local color
     if SettingsTargetUnit.UseClassColor and target_of_target.ClassName then
-      color = TidyPlatesThreat.db.profile.Colors.Classes[target_of_target.ClassName]
+      color = Addon.db.profile.Colors.Classes[target_of_target.ClassName]
     else
       color = SettingsTargetUnit.CustomColor
     end
@@ -256,7 +255,7 @@ end
 --end
 
 local function SetFormat(self, show)
-  local db = TidyPlatesThreat.db.profile.settings
+  local db = Addon.db.profile.settings
 
   if show then
     self.InterruptShield:SetShown(db.castnostop.ShowInterruptShield)
@@ -392,7 +391,7 @@ local EnabledConfigMode = false
 local ConfigModePlate
 
 local function ShowOnUnit(unit)
-  local db = TidyPlatesThreat.db.profile.settings.castbar
+  local db = Addon.db.profile.settings.castbar
 
   local style = unit.style
   return style ~= "etotem" and style ~= "empty" and
@@ -412,7 +411,7 @@ function Addon:ConfigCastbar()
 
         castbar:SetScript("OnUpdate", function(self, elapsed)
           if ShowOnUnit(plate.TPFrame.unit) then
-            local db = TidyPlatesThreat.db.profile.settings
+            local db = Addon.db.profile.settings
 
             self:SetMinMaxValues(0, 100)
             self:SetValue(50)

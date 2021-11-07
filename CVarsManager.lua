@@ -12,7 +12,6 @@ local tostring = tostring
 local GetCVar, GetCVarDefault = GetCVar, GetCVarDefault
 
 -- ThreatPlates APIs
-local TidyPlatesThreat = TidyPlatesThreat
 local L = ThreatPlates.L
 
 local _G =_G
@@ -39,6 +38,7 @@ local COMBAT_PROTECTED = {
   nameplateOverlapV = true,
   nameplateResourceOnTarget = true,
   nameplateSelectedAlpha = true,
+  nameplateNotSelectedAlpha = true,
   nameplateTargetBehindMaxDistance = true,
   -- Nameplate CVars
   nameplateShowAll = true,
@@ -60,7 +60,7 @@ local function SetConsoleVariable(cvar, value)
   -- Store in settings to be able to restore it later, but don't overwrite an existing value unless the current value
   -- is different from the backup value and the new value TP wants to set. In that case, the CVars was changed since
   -- last login with TP by the player or another addon.
-  local db = TidyPlatesThreat.db.profile.CVarsBackup
+  local db = Addon.db.profile.CVarsBackup
 
   value = tostring(value) -- convert to string, otherwise the following comparisons would compare numbers with strings
   local current_value = GetCVar(cvar)
@@ -79,11 +79,11 @@ end
 
 function CVars:SetToDefault(cvar)
   _G.SetCVar(cvar, GetCVarDefault(cvar))
-  TidyPlatesThreat.db.profile.CVarsBackup[cvar] = nil
+  Addon.db.profile.CVarsBackup[cvar] = nil
 end
 
 function CVars:RestoreFromProfile(cvar)
-  local db = TidyPlatesThreat.db.profile.CVarsBackup
+  local db = Addon.db.profile.CVarsBackup
 
   if db[cvar] then
     _G.SetCVar(cvar, db[cvar])
@@ -92,7 +92,7 @@ function CVars:RestoreFromProfile(cvar)
 end
 
 --function CVars:RestoreAllFromProfile()
---  local db = TidyPlatesThreat.db.profile.CVarsBackup
+--  local db = Addon.db.profile.CVarsBackup
 --
 --  for cvar, value in pairs(db) do
 --    _G.SetCVar(cvar, value)
@@ -132,11 +132,11 @@ function CVars:SetToDefaultProtected(cvar)
   if COMBAT_PROTECTED[cvar] then
     Addon:CallbackWhenOoC(function()
       _G.SetCVar(cvar, GetCVarDefault())
-      TidyPlatesThreat.db.profile.CVarsBackup[cvar] = nil
+      Addon.db.profile.CVarsBackup[cvar] = nil
     end, L["Unable to change the following console variable while in combat: "] .. cvar .. ". ")
   else
     _G.SetCVar(cvar, GetCVarDefault())
-    TidyPlatesThreat.db.profile.CVarsBackup[cvar] = nil
+    Addon.db.profile.CVarsBackup[cvar] = nil
   end
 end
 

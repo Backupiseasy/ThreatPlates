@@ -4,8 +4,8 @@ local ThreatPlates = Addon.ThreatPlates
 local ART_PATH = ThreatPlates.Art
 local EMPTY_TEXTURE = ART_PATH.."Empty"
 
-local function Create(self,name)
-  local db = self.db.profile.settings
+local function Create(name)
+  local db = Addon.db.profile.settings
   local theme = {
 
     frame = {

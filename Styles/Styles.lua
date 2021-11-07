@@ -13,7 +13,6 @@ local UnitIsBattlePet = UnitIsBattlePet
 local UnitCanAttack = UnitCanAttack
 
 -- ThreatPlates APIs
-local TidyPlatesThreat = TidyPlatesThreat
 local TOTEMS = Addon.TOTEMS
 local GetUnitVisibility = ThreatPlates.GetUnitVisibility
 local NameTriggers, AuraTriggers, CastTriggers = Addon.Cache.CustomPlateTriggers.Name, Addon.Cache.CustomPlateTriggers.Aura, Addon.Cache.CustomPlateTriggers.Cast
@@ -60,17 +59,19 @@ local MAP_UNIT_TYPE_TO_TP_TYPE = {
   FriendlyTotem    = "Totem",
   FriendlyGuardian = "Guardian",
   FriendlyPet      = "Pet",
+  FriendlyMinus    = "Minus",    -- Not sure if they exist ... but to be sure and avoid Lua errors
   EnemyPlayer      = "EnemyPlayer",
   EnemyNPC         = "EnemyNPC", -- / Boss / Elite = Normal / Boss / Elite
   EnemyTotem       = "Totem",
   EnemyGuardian    = "Guardian",
   EnemyPet         = "Pet",
-  EnemyMinus       = "Minus", --                   = Minus
-  NeutralNPC       = "Neutral", --                 = Neutral
+  EnemyMinus       = "Minus",
+  NeutralNPC       = "Neutral",
+  NeutralTotem     = "Totem",    -- When players are mind-controled, their totems turn neutral it seems (at least in Classic): https://www.curseforge.com/wow/addons/tidy-plates-threat-plates/issues/506
   NeutralGuardian  = "Guardian",
-  NeutralMinus     = "Minus", --                    = Minus
   NeutralPet       = "Pet",      -- Sometimes, friendly pets turn into neutral pets when you lose control over them (e.g., in quests).
-  --                  Tapped                       = Tapped
+  NeutralMinus     = "Minus",
+  --                  Tapped
 }
 
 --local function GetUnitType(unit)
@@ -138,22 +139,29 @@ local function ShowUnit(unit)
   -- nameplates aren't created in the first place (e.g. friendly NPCs, totems, guardians, pets, ...)
   local unit_type = GetUnitType(unit)
   local show, headline_view = GetUnitVisibility(unit_type)
+  -- If a unit is targeted, show the nameplate if possible.
+  show = show or unit.isTarget
 
   if not show then return false, false, headline_view end
 
   local e, b = (unit.isElite or unit.isRare), unit.isBoss
-  local db_base = TidyPlatesThreat.db.profile
+  local db_base = Addon.db.profile
   local db = db_base.Visibility
 
+  local hide_unit_type = false
   if (e and db.HideElite) or (b and db.HideBoss) or (unit.TP_DetailedUnitType == "Tapped" and db.HideTapped) or (unit.TP_DetailedUnitType == "Guardian" and db.HideGuardian) then
-    return show, true, headline_view
+    hide_unit_type = true
   elseif db.HideNormal and not (e or b) then
-    return show, true, headline_view
+    hide_unit_type = true
   elseif UnitIsBattlePet(unit.unitid) then
     -- TODO: add configuration option for enable/disable
-    return show, true, headline_view
+    hide_unit_type = true
   elseif db.HideFriendlyInCombat and unit.reaction == "FRIENDLY" and InCombatLockdown() then
-    return show, true, headline_view
+    hide_unit_type = true
+  end
+
+  if hide_unit_type and not unit.isTarget then
+    return show, hide_unit_type, headline_view
   end
 
 --  if full_unit_type == "EnemyNPC" then
@@ -209,7 +217,7 @@ end
 -- Depends on:
 --   * unit.name
 function Addon.UnitStyle_NameDependent(unit)
-  local db = TidyPlatesThreat.db.profile
+  local db = Addon.db.profile
 
   local plate_style, custom_style, totem_settings
 

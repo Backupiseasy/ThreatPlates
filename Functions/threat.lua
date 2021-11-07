@@ -12,7 +12,6 @@ local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
 local UnitReaction  = UnitReaction
 
 -- ThreatPlates APIs
-local TidyPlatesThreat = TidyPlatesThreat
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -95,7 +94,7 @@ local function GetUnitClassification(unit)
 end
 
 function Addon:ShowThreatFeedback(unit)
-  local db = TidyPlatesThreat.db.profile.threat
+  local db = Addon.db.profile.threat
 
   if not InCombatLockdown() or unit.type == "PLAYER" or UnitReaction(unit.unitid, "player") > 4 or not db.ON then
     return false

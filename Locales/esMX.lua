@@ -1,4 +1,4 @@
-﻿local L = LibStub("AceLocale-3.0"):NewLocale("TidyPlatesThreat", "esMX", false)
+local L = LibStub("AceLocale-3.0"):NewLocale("TidyPlatesThreat", "esMX", false)
 if not L then return end
 
 L["  /tptpdps       Toggles DPS/Healing threat plates"] = "/tptpdps Alterna placas de amenaza de DPS/Sanación"
@@ -7,17 +7,30 @@ L["  /tptptank      Toggles Tank threat plates"] = "/tptptank Alterna las placas
 L["  /tptptoggle    Toggle Role from one to the other"] = "/tptptoggle Alterna el rol de uno a otro"
 L["  /tptpverbose   Toggles addon feedback text"] = "/tptpverbose Alterna el texto de comentarios del addon"
 L["  <no option>             Displays options dialog"] = "  <sin opción>        Muestra diálogo de opciones"
-L["  <no option>        Displays options dialog"] = "  <no hay opcion>        Muestra diálogo de opciones"
 L["  help                    Prints this help message"] = "ayuda Imprime este mensaje de ayuda"
-L["  help               Prints this help message"] = "  ayuda               Imprime un mensaje de ayuda"
 L["  legacy-custom-styles    Adds (legacy) default custom styles for nameplates that are deleted when migrating custom nameplates to the current format"] = "legacy-custom-styles Agrega estilos personalizados predeterminados (heredados) para placas identificativas que se eliminan al migrar placas identificativas personalizadas al formato actual"
 --[[Translation missing --]]
 L["  profile <name>          Switch the current profile to <name>"] = "  profile <name>          Switch the current profile to <name>"
-L["  update-profiles    Migrates deprecated settings in your configuration"] = "  actualizar perfiles    Migra configuraciones obsoletas en su configuración"
+--[[Translation missing --]]
+L["  toggle-scripting        Enable or disable scripting support (for beta testing)"] = "  toggle-scripting        Enable or disable scripting support (for beta testing)"
 L[" options by typing: /tptp"] = " opciones por escribir: /tptp"
 L[" The change will be applied after you leave combat."] = " El cambio se aplicará después de que abandones el combate."
 L[" to DPS."] = " a DPS."
 L[" to tanking."] = " a tanque"
+--[[Translation missing --]]
+L[ [=[
+
+--
+
+Backupiseasy
+
+(Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=] ] = [=[
+
+--
+
+Backupiseasy
+
+(Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=]
 L[ [=[
 
 Feel free to email me at |cff00ff00threatplates@gmail.com|r
@@ -35,31 +48,7 @@ No dude en enviarme un correo electrónico a |cff00ff00threatplates@gmail.com|r
 Blacksalsify
 
 (Autor original: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=]
-L[ [=[
-
-Supports multiple entries, separated by commas.]=] ] = "Admite múltiples entradas, separadas por comas."
-L[ [=[
-
-Feel free to email me at |cff00ff00threatplates@gmail.com|r
-
---
-
-Blacksalsify
-
-(Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=] ] = [=[
-
-No dude en enviarme un correo electrónico a |cff00ff00threatplates@gmail.com|r
-
---
-
-Blacksalsify
-
-(Autor original: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=]
-L[ [=[
-
-Supports multiple entries, separated by commas.]=] ] = "Admite múltiples entradas, separadas por comas."
 L[". You cannot use two custom nameplates with the same trigger. The imported custom nameplate will be disabled."] = ". No puede utilizar dos placas identificativas personalizadas con el mismo activador. La placa identificativa personalizada importada se desactivará."
-L[". You cannot use two custom nameplates with the same trigger.The imported custom nameplate will be disabled."] = ". No puede utilizar dos placas identificativas personalizadas con el mismo activador. La placa identificativa personalizada importada se desactivará."
 L["|cff00ff00High Threat|r"] = "|cff00ff00Alta Amenaza|r"
 L["|cff00ff00Low Threat|r"] = "|cff00ff00Baja Amenaza|r"
 L["|cff00ff00Tank|r"] = "|cff00ff00Tanque|r"
@@ -81,15 +70,7 @@ This is your first time using Threat Plates and you are a(n):
 |r|cff]=] ] = [=[|cff89f559Bienvenido a |r|cff89f559Threat Plates!
 Esta es la primera vez que usa Threat Plates y usted es un:
 |r|cff]=]
-L[ [=[|cff89f559Welcome to |r|cff89f559Threat Plates!
-This is your first time using Threat Plates and you are a(n):
-|r|cff]=] ] = [=[|cff89f559Bienvenido a |r|cff89f559Threat Plates!
-Esta es la primera vez que usa Threat Plates y usted es un:
-|r|cff]=]
 L["|cff89f559You are currently in your "] = "|cff89f559Actualmente estás en tu "
-L[ [=[|cffFF0000DELETE CUSTOM NAMEPLATE|r
-Are you sure you want to delete the selected custom nameplate?]=] ] = [=[|cffFF0000ELIMINAR PLACA IDENTIFICATIVA PERSONALIZADA|r
-¿Está seguro de que desea eliminar la placa identificativa personalizada seleccionada?]=]
 L[ [=[|cffFF0000DELETE CUSTOM NAMEPLATE|r
 Are you sure you want to delete the selected custom nameplate?]=] ] = [=[|cffFF0000ELIMINAR PLACA IDENTIFICATIVA PERSONALIZADA|r
 ¿Está seguro de que desea eliminar la placa identificativa personalizada seleccionada?]=]
@@ -98,32 +79,11 @@ L["|cffff0000dpsing / healing|r"] = "|cffff0000dps / sanación|r"
 L["|cffff0000High Threat|r"] = "|cffff0000Alta Amenaza|r"
 L["|cffff0000IMPORTANT: Enabling this feature changes console variables (CVars) which will change the appearance of default Blizzard nameplates. Disabling this feature will reset these CVars to the original value they had when you enabled this feature.|r"] = "|cffff0000IMPORTANTE: Habilitar esta función cambia las variables de la consola (CVars) que cambiarán la apariencia de las placas identificativas predeterminadas de Blizzard. Deshabilitar esta función restablecerá estos CVars al valor original que tenían cuando habilitó esta función.|r"
 L["|cffff0000Low Threat|r"] = "|cffff0000Baja Amenaza|r"
-L["|cffFF0000Migrate Custom Nameplates Settings|r"] = "|cffFF0000Migrar Configuración de Placas Identificativas Personalizada|r"
-L[ [=[|cffFF0000NOTE|r
-Migration should only delete deprecated default custom nameplates and re-order the remaining ones. Nevertheless, it is highly advised to backup your settings (the SavedVariables file TidyPlates_ThreatPlates.lua) in case something goes wrong.
-
-Are you sure you want to migrate your custom nameplates?]=] ] = [=[|cffFF0000NOTA|r
-La migración solo debe eliminar las placas personalizadas predeterminadas obsoletas y volver a ordenar las restantes. Sin embargo, se recomienda hacer una copia de seguridad de su configuración (el archivo SavedVariables TidyPlates_ThreatPlates.lua) en caso de que algo salga mal.
-
-¿Está seguro de que desea migrar sus placas identificativas personalizadas?]=]
-L[ [=[|cffFF0000NOTE|r
-Migration should only delete deprecated default custom nameplates and re-order the remaining ones. Nevertheless, it is highly advised to backup your settings (the SavedVariables file TidyPlates_ThreatPlates.lua) in case something goes wrong.
-
-Are you sure you want to migrate your custom nameplates?]=] ] = [=[|cffFF0000NOTA|r
-La migración solo debe eliminar las placas personalizadas predeterminadas obsoletas y volver a ordenar las restantes. Sin embargo, se recomienda hacer una copia de seguridad de su configuración (el archivo SavedVariables TidyPlates_ThreatPlates.lua) en caso de que algo salga mal.
-
-¿Está seguro de que desea migrar sus placas identificativas personalizadas?]=]
 L["|cffFF0000The Auras widget must be enabled (see Widgets - Auras) to use auras as trigger for custom nameplates.|r"] = "|cffFF0000El artilugio Auras debe estar habilitado (ver Artilugios - Auras) para usar auras como activador de placas identificativas personalizadas.|r"
-L["|cffFF0000This option is disabled as you are still using the obsolete custom nameplates format. Migrate your custom nameplates to the new format (using the Migration button at the top) to enable this option.|r"] = "|cffFF0000Esta opción está deshabilitada ya que todavía está utilizando el formato obsoleto de placas identificativas personalizadas. Migre sus placas identificativas personalizadas al nuevo formato (usando el botón Migración en la parte superior) para habilitar esta opción.|r"
 L["|cffFFD100Current Instance:|r"] = "|cffFFD100Estancia actual:|r"
-L[ [=[|cffFFD100Current Instance:|r
-]=] ] = "|cffFFD100Estancia actual:|r"
-L[ [=[|cffFFD100Current Instance:|r
-]=] ] = "|cffFFD100Estancia actual:|r"
 L["|cffffff00Medium Threat|r"] = "|cffffff00Media Amenaza|r"
 L["|cffffffffGeneral Settings|r"] = "|cffffffffConfiguración General|r"
 L["|cffffffffLow Threat|r"] = "|cffffffffBaja Amenaza|r"
-L["|cffFFFFFFMigrate Custom Nameplates Settings|r"] = "|cffFFFFFFMigrar la configuración de placas identificativas personalizadas|r"
 L["|cffffffffTotem Settings|r"] = "|cffffffffConfiguración de Tótem|r"
 L["-->>|cff00ff00Tank Plates Enabled|r<<--"] = "-->>|cff00ff00Placa Tanque Habilitada|r<<--"
 L["-->>|cffff0000DPS Plates Enabled|r<<--"] = "-->>|cffff0000Placa DPS Habilitada|r<<--"
@@ -131,13 +91,11 @@ L["-->>Nameplate Overlapping is now |cff00ff00ON!|r<<--"] = "-->>Superposición 
 L["-->>Nameplate Overlapping is now |cffff0000OFF!|r<<--"] = "-->>Superposición de Placa identificativa está |cffff0000Deshabilitada|r<<--"
 L["-->>Threat Plates verbose is now |cff00ff00ON!|r<<--"] = "-->>Placa de Amenaza detallada está |cff00ff00Habilitada|r<<--"
 L["-->>Threat Plates verbose is now |cffff0000OFF!|r<<-- shhh!!"] = "-->>Placa de Amenaza detallada está |cffff0000Deshabilitada|r<<--"
-L["A custom nameplate with these triggers already exists: %s. You cannot use two custom nameplates with th same trigger. The current custom nameplate was therefore disabled."] = "Ya existe una placa identificativa personalizada con estos activadores: %s. No puede utilizar dos placas identificativas personalizadas con el mismo activador. Por lo tanto, se deshabilitó la placa identificativa personalizada actual."
 L["A custom nameplate with these triggers already exists: %s. You cannot use two custom nameplates with the same trigger."] = "Ya existe una placa identificativa personalizada con estos activadores: %s. No puede utilizar dos placas identificativas personalizadas con el mismo activador."
 L["A custom nameplate with these triggers already exists: %s. You cannot use two custom nameplates with the same trigger. The current custom nameplate was therefore disabled."] = "Ya existe una placa identificativa personalizada con estos activadores: %s. No puede utilizar dos placas identificativas personalizadas con el mismo activador. Por lo tanto, se deshabilitó la placa identificativa personalizada actual."
 L["A custom nameplate with this trigger already exists: "] = "Ya existe una placa identificativa personalizada con este activador:"
-L["A custom nameplate with this trigger already exists: %s. You cannot use two custom nameplates with the same trigger."] = "Ya existe una placa identificativa personalizada con este activador: %s. No puede utilizar dos placas identificativas personalizadas con el mismo activador."
-L["A custom nameplate with this trigger is already defined: %s. You cannot define two custom nameplates with the same trigger."] = "Ya se ha definido una placa identificativa personalizada con este activador: %s. No puede definir dos placas identificativas personalizadas con el mismo activador."
-L["A custom nameplate with this trigger is already defined: %s. You cannot use two custom nameplates with the same trigger."] = "Ya se ha definido una placa identificativa personalizada con este activador: %s. No puede utilizar dos placas identificativas personalizadas con el mismo activador."
+--[[Translation missing --]]
+L["A script has overwritten the global '%s'. This might affect other scripts ."] = "A script has overwritten the global '%s'. This might affect other scripts ."
 L["A to Z"] = "A a Z"
 L["About"] = "Sobre"
 L["Absolut Transparency"] = "Transparencia"
@@ -148,11 +106,9 @@ L["Add thick black outline."] = "Añade contorno negro grueso."
 L["Adding legacy custom nameplate for %s ..."] = "Añadiendo placa identificativa personalizada legada para %s ..."
 L["Additional Adjustments"] = "Ajustes Adicionales"
 L["Additional chat commands:"] = "Comandos de chat adicionales:"
-L["Additionally color the healthbar based on the target mark if the unit is marked."] = "Colorear la barra de salud del objetivo si está marcado."
 L["Additionally color the name based on the target mark if the unit is marked."] = "Colorea el nombre del objetivo si está marcado."
 L["Additionally color the nameplate's healthbar or name based on the target mark if the unit is marked."] = "Colorear la barra de salud de la placa identificativa del objetivo si está marcado."
 L["All"] = "Todos"
-L["All Auras"] = "Todas las Auras"
 L["All on NPCs"] = "Todos los PNJs"
 L["Allow"] = "Permitir"
 L["Alpha"] = "Alfa"
@@ -165,8 +121,6 @@ L["Anchor Point"] = "Punto de Anclar"
 --[[Translation missing --]]
 L["Animacharge"] = "Animacharge"
 L["Appearance"] = "Apariencia"
-L["Apply the custom settings to a nameplate when a particular aura is present on the unit."] = "Aplica la configuración personalizada a una placa identificativa cuando un aura particular esté presente en la unidad."
-L["Apply the custom settings to a nameplate when a particular spell is cast by the unit."] = "Aplica la configuración personalizada a una placa identificativa cuando la unidad lanza un hechizo en particular."
 L["Apply these custom settings to a nameplate when a particular spell is cast by the unit. You can add multiple entries separated by a semicolon"] = "Aplica estos ajustes personalizados a una placa identificativa cuando la unidad lanza un hechizo en particular. Puede agregar varias entradas separadas por un punto y coma"
 L["Apply these custom settings to the nameplate of a unit with a particular name. You can add multiple entries separated by a semicolon. You can use use * as wildcard character."] = "Aplica estas configuraciones personalizadas a la placa identificativa de una unidad con un nombre particular. Puede agregar varias entradas separadas por un punto y coma. Puede utilizar use * como carácter comodín."
 L["Apply these custom settings to the nameplate when a particular aura is present on the unit. You can add multiple entries separated by a semicolon."] = "Aplica estos ajustes personalizados a la placa identificativa cuando haya un aura en particular en la unidad. Puede agregar varias entradas separadas por un punto y coma."
@@ -183,8 +137,9 @@ L["Army of the Dead Ghoul"] = "Ejército de muertos"
 L["Arrow"] = "Flecha"
 L["Arrow (Legacy)"] = "Flecha (legado)"
 L["Art Options"] = "Opciones de Arte"
+--[[Translation missing --]]
+L["Attempt to register script for unknown WoW event '%s'"] = "Attempt to register script for unknown WoW event '%s'"
 L["Aura"] = "Aura"
-L["Aura (Name or ID)"] = "Aura (Nombre o ID)"
 L["Aura Icon"] = "Icono de Aura"
 L["Aura: "] = "Aura:"
 L["Auras"] = "Auras"
@@ -207,7 +162,6 @@ L["Bar Mode"] = "Modo de Barra"
 L["Bar Style"] = "Estilo de barra"
 L["Bar Width"] = "Anchura de Barra"
 L["Because of side effects with Blizzard nameplates, this function is disabled in instances or when Blizzard nameplates are used for friendly or neutral/enemy units (see General - Visibility)."] = "Por razón de conflictos con las placas identificativas de Blizzard, esta función está deshabilitada en las mazmorras o cuando se utiliza las placas identificativas de Blizzard para unidades (ver General - Visibilidad)."
-L["Black List"] = "Lista Negra"
 L["Blizzard"] = "Blizzard"
 L["Blizzard Settings"] = "Configuración Blizzard"
 L["Block"] = "Bloquear"
@@ -233,9 +187,10 @@ L["By Health"] = "Por Salud"
 L["By Reaction"] = "Por Reacción"
 L["Can Apply"] = "Puede Aplicar"
 L["Canal Crab"] = "Cangrejo de canal"
+--[[Translation missing --]]
+L["Cancel"] = "Cancel"
 L["Cast"] = "Lanzamiento"
 L["Cast Target"] = "Objetivo de lanzamiento"
-L["Cast Text Alignment"] = "Alineación de texto de lanzamiento"
 L["Cast Time"] = "Tiempo de lanzamiento"
 L["Cast Time Alignment"] = "Alineación del tiempo de lanzamiento"
 L["Cast: "] = "Lanzamiento:"
@@ -263,11 +218,6 @@ L[ [=[Clear and easy to use threat-reactive nameplates.
 Current version: ]=] ] = [=[Placas identificativas claras y fáciles de usar que responden a amenazas.
 
 Versión actual: ]=]
-L[ [=[Clear and easy to use threat-reactive nameplates.
-
-Current version: ]=] ] = [=[Placas identificativas claras y fáciles de usar que responden a amenazas.
-
-Versión actual: ]=]
 L["Clickable Area"] = "Área en la que se Puede Hacer Clic"
 L["Color"] = "Color"
 L["Color By Class"] = "Colorear por Clase"
@@ -287,7 +237,6 @@ L["Combo Points"] = "Puntos de Combate"
 L["Configuration Mode"] = "Modo de Configuración"
 L["Controls the rate at which nameplate animates into their target locations [0.0-1.0]."] = "Controla la velocidad a la que se anima la placa identificativa en sus ubicaciones de destino [0.0-1.0]."
 L["Cooldown Spiral"] = "Espiral de Reutilización"
-L["Copied!"] = "¡Copiado!"
 L["Copy"] = "Copiar"
 L["Creation"] = "Creación"
 L["Crescent"] = "Creciente"
@@ -300,8 +249,10 @@ L["Custom Enemy Status Text"] = "Custom Enemy Status Text"
 --[[Translation missing --]]
 L["Custom Friendly Status Text"] = "Custom Friendly Status Text"
 L["Custom Nameplates"] = "Placas Identificativas Personalizadas"
-L["Custom Scale"] = "Escala personalizada"
-L["Custom Transparency"] = "Transparencia personalizada"
+--[[Translation missing --]]
+L["Custom status text requires LibDogTag-3.0 to function."] = "Custom status text requires LibDogTag-3.0 to function."
+--[[Translation missing --]]
+L["Custom status text requires LibDogTag-Unit-3.0 to function."] = "Custom status text requires LibDogTag-Unit-3.0 to function."
 L["Darnavan"] = "Darnavan"
 L["Death Knigh Rune Cooldown"] = "Reutilización de runas de caballeros de la muerte"
 L["Death Knight"] = "Caballero de la muerte"
@@ -346,9 +297,10 @@ L["Display health amount text."] = "Muestra texto de cantidad de salud"
 L["Display health percentage text."] = "Muestra texto de percentaje de salud"
 L["Display health text on units with full health."] = "Muestra texto de salud por unidades con salud completa."
 L["Distance"] = "Distancia"
-L["Do not show buffs with umlimited duration."] = "No muestra buffs con duración ilimitada"
 L["Do not show buffs with unlimited duration."] = "No muestra beneficios con duración ilimitada."
 L["Do not sort auras."] = "No ordena auras"
+--[[Translation missing --]]
+L["Done"] = "Done"
 --[[Translation missing --]]
 L["Don't Ask Again"] = "Don't Ask Again"
 L["Down Arrow"] = "Flecha hacia abajo"
@@ -362,7 +314,6 @@ L["Edge Size"] = "Tamaño de Borde"
 L["Elite Border"] = "Borde Élite"
 L["Empowered Adherent"] = "Partidario potenciado"
 L["Enable"] = "Habilitar"
-L["Enable Adjustments"] = "Habilitar ajustes"
 L["Enable Arena Widget"] = "Habilitar Artilugio de Arena"
 L["Enable Auras Widget"] = "Habilitar Artilugio de Auras"
 L["Enable Boss Mods Widget"] = "Habilitar Artilugio de Módulos de Jefes"
@@ -381,12 +332,9 @@ L["Enable Quest Widget"] = "Habilitar Artilugio de Misión"
 L["Enable Resource Widget"] = "Habilitar Artilugio de Recursos"
 L["Enable Social Widget"] = "Habilitar Artilugio Social"
 L["Enable Stealth Widget"] = "Habilitar Artilugio Sigilo"
-L["Enable Target Highlight Widget"] = "Habilitar Artilugio de Brillo de Objetivo"
 L["Enable Target Widget"] = "Habilitar el artilugio de objetivo"
 L["Enable Text"] = "Habilitar texto"
-L["Enable this custom nameplate for friendly units"] = "Habilita esta placa identificativa personalizada para unidades amistosas."
 L["Enable this custom nameplate for friendly units."] = "Habilita esta placa identificativa personalizada para unidades amistosas."
-L["Enable this custom nameplate for neutral and hostile units"] = "Habilita esta placa identificativa personalizada para unidades neutrales y hostiles."
 L["Enable this custom nameplate for neutral and hostile units."] = "Habilita esta placa identificativa personalizada para unidades neutrales y hostiles."
 L["Enable this custom nameplate in instances."] = "Habilita esta placa identificativa personalizada en estancias."
 L["Enable this custom nameplate out of instances (in the wider game world)."] = "Habilita esta placa identificativa personalizada fuera de las estancias (en el mundo del juego en general)."
@@ -397,40 +345,46 @@ L["Enable Threat System"] = "Habilitar Sistema de Amenaza"
 L["Enable Threat Textures"] = "Habilitar Texturas de Amenaza"
 L["Enable Threat Transparency"] = "Habilitar Transparencia de Amenaza"
 L["Enemy Casting"] = "Lanzamiento de Enemigo"
-L["Enemy Custom Text"] = "Texto de Enemigo Personalizado"
 L["Enemy Name Color"] = "Color de Nombre de Enemigo"
 L["Enemy NPCs"] = "PNJs Enemigos"
 L["Enemy Players"] = "Jugadores Enemigos"
 L["Enemy Status Text"] = "Texto del Estado de Enemigo"
 L["Enemy Units"] = "Unidades Enemigas"
-L["Enter an icons name (with the *.blp ending), a spell ID or a full icon path (using '\\' to separate directory folders)."] = "Ingrese el nombre de un icono (con el final * .blp), una identificación de hechizo o una ruta de icono completa (usando '\\' para separar las carpetas del directorio)."
 L["Enter an icon's name (with the *.blp ending), a spell ID, a spell name or a full icon path (using '\\' to separate directory folders)."] = "Ingresa el nombre de un icono (con la terminación *.blp), una ID de hechizo, un nombre de hechizo o una ruta completa del icono (usando '\\' para separar carpetas de directorio)."
-L["Enter an icons name (with the *.blp ending), a spell ID, a spell name or a full icon path (using '\\' to separate directory folders)."] = "Ingresa un nombre de icono (con la terminación * .blp), un ID de hechizo, un nombre de hechizo o una ruta de icono completa (usando '\\' para separar carpetas de directorio)."
+--[[Translation missing --]]
+L["Error in event script '%s' of custom style '%s': %s"] = "Error in event script '%s' of custom style '%s': %s"
+--[[Translation missing --]]
+L["Event Name"] = "Event Name"
+--[[Translation missing --]]
+L["Events with Script"] = "Events with Script"
 L["Everything"] = "Todos"
 L["Exchange"] = "Intercambiar"
 L["Experience"] = "Experiencia"
 L["Experience Text"] = "Texto de experiencia"
 L["Export"] = "Exportar"
 L["Export all custom nameplate settings as string."] = "Exporta todas las configuraciones personalizadas de la placa identificativa como cadena."
-L["Export current profile"] = "Exportar perfil actual"
 L["Export Custom Nameplates"] = "Exportar placas identificativas personalizadas"
 L["Export profile"] = "Exportar perfil"
 L["Export the current profile into a string that can be imported by other players."] = "Exporta el perfil actual a una cadena que otros jugadores puedan importar."
-L["Export the current profile into a string that can be imported by other users."] = "Exporta el perfil actual a una cadena que otros usuarios puedan importar."
+--[[Translation missing --]]
+L["Extend"] = "Extend"
 L["Faction Icon"] = "Icono de Facción"
 L["Fading"] = "Desvanecimiento"
 L["Failed to migrate the imported profile to the current settings format because of an internal error. Please report this issue at the Threat Plates homepage at CurseForge: "] = "No se pudo migrar el perfil importado al formato de configuración actual debido a un error interno. Informe este problema en la página de inicio de Threat Plates en CurseForge:"
 L["Fanged Pit Viper"] = "Víbora de foso con colmillos"
 L["Filter by Spell"] = "Filtrar por Hechizo"
 L["Filtered Auras"] = "Auras Filtradas"
-L["Find a suitable icon base on aura/spell ID or aura/spell name. This does not work for name-based custom nameplates."] = "Encuentra una base de iconos adecuada en el aura/ID de hechizo o el aura/nombre de hechizo. Esto no funciona para placas identificativas personalizadas basadas en nombres."
 L["Find a suitable icon based on the current trigger. For Name trigger, the preview does not work. For multi-value triggers, the preview always is the icon of the first trigger entered."] = "Busca un icono adecuado según el activador actual. Para el activador de nombre, la vista previa no funciona. Para los activadores de varios valores, la vista previa siempre es el icono del primer activador introducido."
 L["Five"] = "Cinco"
 L["Flash Time"] = "Tiempo de Destello"
 L["Flash When Expiring"] = "Destellar si expirando"
 L["Focus Highlight"] = "Resaltar foco"
+--[[Translation missing --]]
+L["Focus Only"] = "Focus Only"
 L["Font"] = "Fuente"
 L["Font Size"] = "Tamaño de Fuente"
+--[[Translation missing --]]
+L["Forbidden function or table called from script: %s"] = "Forbidden function or table called from script: %s"
 L["Force View By Status"] = "Forzar la Vista por Estado"
 L["Foreground"] = "Primer Plano"
 L["Foreground Texture"] = "Textura del Primer Plano"
@@ -438,9 +392,7 @@ L["Format"] = "Formatear"
 L["Four"] = "Cuatro"
 L["Frame Order"] = "Orden de Marcos"
 L["Friendly & Neutral Units"] = "Unidades Aliadas y Neutrales"
-L["Friendly Caching"] = "Caching de Aliado"
 L["Friendly Casting"] = "Lanzamiento de Aliado"
-L["Friendly Custom Text"] = "Texto Personalizado de Aliado"
 L["Friendly Name Color"] = "Color de Nombre de Aliado"
 L["Friendly Names Color"] = "Color de Nombres de Aliados"
 L["Friendly NPCs"] = "PNJs Aliados"
@@ -451,6 +403,8 @@ L["Friendly Units in Combat"] = "Unidades Aliadas en Combate"
 L["Friends & Guild Members"] = "Amigos y Miembros de Hermandad"
 L["Full Absorbs"] = "Absorbes Completos"
 L["Full Health"] = "Salud Completa"
+--[[Translation missing --]]
+L["Function"] = "Function"
 L["Gas Cloud"] = "Nube de gas"
 L["General"] = "General"
 L["General Colors"] = "Colores Generales"
@@ -460,8 +414,6 @@ L["Glow"] = "Brillo"
 L["Glow Color"] = "Color de Brillo"
 L["Glow Frame"] = "Marco resplandor"
 L["Glow Type"] = "Tipo de Brillo"
---[[Translation missing --]]
-L["Guardian Units"] = "Guardian Units"
 L["Guardians"] = "Guardianes"
 L["Headline View"] = "Vista de Título"
 L["Headline View Out of Combat"] = "Vista de Título fuera de combate"
@@ -495,7 +447,6 @@ L["Hide on Attacked Units"] = "Ocultar por Unidades Atacadas"
 L["Hide the Blizzard default nameplates for friendly units in instances."] = "Oculta las placas identificativas predeterminadas de Blizzard para unidades aliadas en instancias."
 L["High Threat"] = "Alta Amenaza"
 L["Highlight"] = "Brillar"
-L["Highlight Glow"] = "Resaltar resplandor"
 L["Highlight Mobs on Off-Tanks"] = "Brillar Mobs de Tanques Secundarios"
 L["Highlight Texture"] = "Brillar Textura"
 L["Horizontal Align"] = "Alinear Horizontal"
@@ -524,22 +475,15 @@ L["Ignore Marked Units"] = "Ignorar Unidades Marcadas"
 L["Ignore UI Scale"] = "Ignorar Escala de IU"
 L["Illegal character used in Name trigger at position: "] = "Carácter ilegal utilizado en el activador de nombre en la posición:"
 L["Immortal Guardian"] = "Guardián Inmortal"
-L["Import a profile"] = "Importar un perfil"
-L["Import a profile from a import string from another user."] = "Importa un perfil de una cadena de importación de otro usuario."
 L["Import a profile from another player from an import string."] = "Importa un perfil de otro jugador desde una cadena de importación."
-L["Import and export profiles that can be shared with other players."] = "Importa y exporta perfiles que se pueden compartir con otros jugadores."
 L["Import and export profiles to share them with other players."] = "Importa y exporta perfiles para compartirlos con otros jugadores."
 L["Import custom nameplate settings from a string. The custom namneplates will be added to your current custom nameplates."] = "Importa la configuración personalizada de la placa identificativa desde una cadena. Las placas identificativas personalizadas se agregarán a tus placas identificativas personalizadas actuales."
 L["Import Custom Nameplates"] = "Importar placas identificativas personalizadas"
 L["Import profile"] = "Importar perfil"
 L["Import/Export Profile"] = "Importar/Exportar perfil"
-L["Imported Profile"] = "Perfil importado"
 L["In Combat"] = "En Combate"
 L["In combat, always show all combo points no matter if they are on or off. Off combo points are shown greyed-out."] = "En combate, siempre muestra todos los puntos de combate, sin importar si están habilitados o no. Los puntos de combate deshabilitados se muestran atenuados."
-L["In combat, use alpha based on threat level as configured in the threat system. The custom alpha is only used out of combat."] = "En combate, usa alfa basado en el nivel de amenaza configurado en el sistema de amenaza. El alfa personalizado solo se usa fuera de combate."
-L["In combat, use coloring based on threat level as configured in the threat system. The custom color is only used out of combat."] = "En combate, usa el color basado en el nivel de amenaza configurado en el sistema de amenaza. El color personalizado solo se usa fuera de combate."
 L["In combat, use coloring, transparency, and scaling based on threat level as configured in the threat system. Custom settings are only used out of combat."] = "En combate, use colores, transparencias y escalas basadas en el nivel de amenaza configurado en el sistema de amenazas. La configuración personalizada solo se usa fuera de combate."
-L["In combat, use scaling based on threat level as configured in the threat system. The custom scale is only used out of combat."] = "En combate, usa la escala basada en el nivel de amenaza como está configurado en el sistema de amenaza. La escala personalizada solo se usa fuera de combate."
 L["In Instances"] = "En Instancias"
 L["Insert a new custom nameplate slot after the currently selected slot."] = "Inserta una nueva ranura de placa identificativa personalizada después de la ranura actualmente seleccionada."
 L["Inset"] = "Recuadro"
@@ -579,7 +523,8 @@ L["Min Alpha"] = "Alfa Mínima"
 L["Mine"] = "Mío"
 L["Minions & By Status"] = "Esbirros y Por Estado"
 L["Minor"] = "Menor"
-L["Minuss"] = "Menores"
+--[[Translation missing --]]
+L["Minuss"] = "Minors"
 L["Mode"] = "Modo"
 L["Mono"] = "Mono"
 L["Motion & Overlap"] = "Movimiento y Superposición"
@@ -615,7 +560,8 @@ L["Nothing to paste!"] = "¡Nada que pegar!"
 L["NPC Role"] = "Rol PNJ"
 L["NPC Role, Guild"] = "Rol PNJ, Hermandad"
 L["NPC Role, Guild, or Level"] = "Rol PNJ, Hermandad, o Nivel"
-L["NPCs"] = "PNJs"
+--[[Translation missing --]]
+L["NPCs"] = "NPCs"
 L["Occluded Units"] = "Unidades Ocluidas"
 L["Off Combo Point"] = "No Punto de Combate"
 L["Offset"] = "Compensación"
@@ -647,7 +593,6 @@ L["Overlapping"] = "Superposición"
 L["Paladin"] = "Paladín"
 L["Paste"] = "Pegar"
 L["Paste the Threat Plates profile string into the text field below and then close the window"] = "Pega la cadena de perfil de Threat Plates en la entrada de texto a continuación y luego cierra la ventana"
-L["Pasted!"] = "¡Pegado!"
 L["Percentage"] = "Porcentaje"
 L["Percentage amount for horizontal overlap of nameplates."] = "Cantidad porcentual para la superposición horizontal de las placas identificativas."
 L["Percentage amount for vertical overlap of nameplates."] = "Cantidad porcentual para la superposición vertical de las placas identificativas."
@@ -656,7 +601,8 @@ L["Pets"] = "Mascotas"
 L["Pixel"] = "Píxel"
 L["Pixel-Perfect UI"] = "IU Píxel-Perfecto"
 L["Placement"] = "Colocación"
-L["Players"] = "Jugadores"
+--[[Translation missing --]]
+L["Players"] = "Players"
 L["Poison"] = "Veneno"
 L["Position"] = "Posición"
 L["Positioning"] = "Posicionamiento"
@@ -673,7 +619,6 @@ L["Rares & Elites"] = "Raros y Élites"
 L["Reaction"] = "Reacción"
 L["Reanimated Adherent"] = "Partidario reanimado"
 L["Reanimated Fanatic"] = "Fanático reanimado"
-L["Reduce the size of the Blizzard's default large nameplates in instances to 50%."] = "Reduzca el tamaño de las placas identificativas grandes predeterminadas de Blizzard en instancias al 50%."
 L["Render font without antialiasing."] = "Renderiza fuente sin antialiasing."
 L["Reset"] = "Restablecer"
 L["Reset to Defaults"] = "Restablecer a Predeterminados"
@@ -681,13 +626,11 @@ L["Resource"] = "Recurso"
 L["Resource Bar"] = "Barra de Recurso"
 L["Resource Text"] = "Texto de Rescurso"
 L["Resources on Targets"] = "Recursos en Objetivos"
-L["Retribution Paladin"] = "Paladín Reprensión"
 L["Reverse"] = "Inverso"
 L["Reverse the sort order (e.g., \"A to Z\" becomes \"Z to A\")."] = "Invierta el orden de clasificación (por ejemplo, 'A a Z' se convierte en 'Z a A')."
 L["Right"] = "Derecho"
 L["Right-to-left"] = "Derecho a Izquierdo"
 L["Rogue"] = "Pícaro"
-L["Role"] = "Rol"
 L["Roles"] = "Rol"
 L["Row Limit"] = "Límite de Fila"
 L["Same as Background"] = "Igual que el Fondo"
@@ -695,8 +638,15 @@ L["Same as Bar Foreground"] = "Igual que el primer plano de la barra"
 L["Same as Foreground"] = "Igual que el Primer Plano"
 L["Same as Name"] = "Igual que el Nombre"
 L["Scale"] = "Escala"
+--[[Translation missing --]]
+L["Scriping for custom styles for nameplates is now |cff00ff00enabled!|r."] = "Scriping for custom styles for nameplates is now |cff00ff00enabled!|r."
+--[[Translation missing --]]
+L["Scriping for custom styles for nameplates is now |cffff0000disabled!|r."] = "Scriping for custom styles for nameplates is now |cffff0000disabled!|r."
+--[[Translation missing --]]
+L["Script"] = "Script"
+--[[Translation missing --]]
+L["Scripts"] = "Scripts"
 L["Set Icon"] = "Establecer Icono"
-L["Set Name"] = "Establecer Nombre"
 L["Set scale settings for different threat levels."] = "Establece ajustes de escala para diferentes niveles de amenaza."
 L["Set the roles your specs represent."] = "Establecer los roles que representan tus especializaciones."
 L["Set threat textures and their coloring options here."] = "Establece aquí las texturas de amenaza y sus opciones de coloración."
@@ -744,11 +694,13 @@ L["Show debuffs that were applied by you."] = "Muestra debuffs que usted aplicó
 L["Show debuffs that where applied by bosses."] = "Muestra debuffs que fueron aplicados por los jefes."
 L["Show debuffs that you can dispell."] = "Muestra debuffs que puedes disipar."
 L["Show Enemy Nameplates (ALT-V)"] = "Mostrar placas identificativas de enemigos (ALT-V)"
-L["Show Enemy Units"] = "Mostrar Unidades Enemigas"
+--[[Translation missing --]]
+L["Show Enemy Units"] = "Show Enemy Units"
 L["Show Focus"] = "Mostrar enfoque"
 L["Show For"] = "Mostrar Para"
 L["Show Friendly Nameplates (SHIFT-V)"] = "Mostrar placas identificativas de aliados (SHIFT-V)"
-L["Show Friendly Units"] = "Mostrar Unidades Aliadas"
+--[[Translation missing --]]
+L["Show Friendly Units"] = "Show Friendly Units"
 L["Show Health Text"] = "Mostrar Texto de Salud"
 L["Show Icon for Rares & Elites"] = "Mostrar Icono para Raros y Élites"
 L["Show Icon to the Left"] = "Mostrar Icono a la Izquierda"
@@ -759,7 +711,8 @@ L["Show Mouseover"] = "Mostrar Sobre Ratón"
 L["Show Name Text"] = "Mostrar Texto de Nombre"
 L["Show Nameplate"] = "Mostrar Placa Identificativa"
 L["Show nameplates at all times."] = "Muestra placas identificativas en todo momento."
-L["Show Neutral Units"] = "Mostrar Unidades Neutrales"
+--[[Translation missing --]]
+L["Show Neutral Units"] = "Show Neutral Units"
 L["Show Number"] = "Mostrar Número"
 L["Show Orb"] = "Mostrar Orbe"
 L["Show shadow with text."] = "Muestra sombra con texto."
@@ -778,7 +731,6 @@ L["Shows a border around the castbar of nameplates (requires /reload)."] = "Most
 L["Shows a faction icon next to the nameplate of players."] = "Muestra un icono de facción junto a la placa identificativa de los jugadores."
 L["Shows a glow based on threat level around the nameplate's healthbar (in combat)."] = "Muestra un brillo basado en el nivel de amenaza alrededor de la barra de salud de las placas identificativas (en combate)."
 L["Shows a glow effect on auras that you can steal or purge."] = "Muestra un efecto de brillo en las auras que puedes robar o purgar."
-L["Shows a glow effect on the healthbar of this custom nameplate."] = "Muestra un efecto de brillo en la barra de salud de esta placa identificativa personalizada."
 L["Shows a glow effect on this custom nameplate."] = "Muestra un efecto de brillo en esta placa identificativa personalizada."
 L["Shows an icon for friends and guild members next to the nameplate of players."] = "Mostrar un icono para amigos y miembros de la hermandad junto a la placa identificativa de los jugadores."
 L["Shows resource information for bosses and rares."] = "Muestra información de recursos para jefes y raros."
@@ -789,10 +741,7 @@ L["Six"] = "Seis"
 L["Size"] = "Tamaño"
 L["Skull"] = "Calavera"
 L["Skull Icon"] = "Icono de Calavera"
-L["Small Blizzard Nameplates"] = "Placas identificativas de Blizzard pequeñas"
 L["Social"] = "Social"
-L["Something went wrong with importing the profile. Please check the import string."] = "Se produjo un error al importar el perfil. Comprueba la cadena de importación."
-L["Something went wrong with importing your profile. Please check the import string."] = "Se produjo un error al importar tu perfil. Comprueba la cadena de importación."
 L["Sort A-Z"] = "Ordenar A-Z"
 L["Sort by overall duration in ascending order."] = "Ordena por duración total en orden ascendente."
 L["Sort by time left in ascending order."] = "Ordena por tiempo restante en orden ascendente."
@@ -801,17 +750,14 @@ L["Sort Order"] = "Orden de Clasificación"
 L["Sort Z-A"] = "Ordenar Z-A"
 L["Spacing"] = "Espaciado"
 L["Spark"] = "Chispa"
-L["Spec Roles"] = "Roles de Especialización"
 L["Special Effects"] = "Efectos Especiales"
 L["Specialization"] = "Especialización"
-L["Spell (Name or ID)"] = "Hechizos (Nombre o ID)"
 L["Spell Color:"] = "Color de Hechizo:"
 L["Spell Icon"] = "Icono de Hechizo"
 L["Spell Icon Size"] = "Tamaño del Icono de Hechizo"
 L["Spell Name"] = "Nombre del hechizo"
 L["Spell Name Alignment"] = "Alineación de nombres de hechizos"
 L["Spell Text"] = "Texto de Hechizo"
-L["Spell Text Alignment"] = "Alineamiento de Texto de Hechizo"
 L["Spell Text Boundaries"] = "Límites de Texto de Hechizo"
 L["Spells (Name or ID)"] = "Hechizos (Nombre o ID)"
 L["Spirit Wolf"] = "Espíritu de lobo"
@@ -819,6 +765,8 @@ L["Square"] = "Cuadrado"
 L["Squares"] = "Cuadrados"
 L["Stack Count"] = "Cuenta de pila"
 L["Stacking"] = "Pilando"
+--[[Translation missing --]]
+L["Standard"] = "Standard"
 L["Status & Environment"] = "Estado y Ambiente"
 L["Status Text"] = "Texto de Estado"
 L["Steal or Purge Glow"] = "Brillo de Robar o Purgar"
@@ -831,11 +779,12 @@ L["Supports multiple entries, separated by commas."] = "Admite múltiples entrad
 L["Swap By Reaction"] = "Intercambiar por reacción"
 L["Switch scale values for debuffs and buffs for friendly units."] = "Cambia valores de escala para debuffs y buffs para unidades aliadas."
 L["Symbol"] = "Símbolo"
+--[[Translation missing --]]
+L["Syntax error in event script '%s' of custom style '%s': %s"] = "Syntax error in event script '%s' of custom style '%s': %s"
 L["Tank"] = "Tanque"
 L["Tapped"] = "Golpeado"
 L["Tapped Units"] = "Unidades Golpeadas"
 L["Target"] = "Objetivo"
-L["Target Highlight"] = "Brillo de Objetivo"
 L["Target Hightlight"] = "Resaltado del objetivo"
 L["Target Marked"] = "Objetivo Marcado"
 L["Target Marked Units"] = "Unidades de Objetivo Marcadas"
@@ -847,22 +796,13 @@ L["Target Only"] = "Solo objetivo"
 L["Target-based Scale"] = "Escala basada en objetivo"
 L["Target-based Transparency"] = "Transparencia Basada en Objetivo"
 L["Text Boundaries"] = "Límites de Texto"
---[[Translation missing --]]
-L["Text Format"] = "Text Format"
 L["Text Height"] = "Altura de Texto"
 L["Text Width"] = "Anchura de Texto"
 L["Texture"] = "Textura"
 L["Textures"] = "Texturas"
-L["Textures & Colors"] = "Textura y Colores"
 L["The import string contains a profile from an different Threat Plates version. The profile will still be imported (and migrated as far as possible), but some settings from the imported profile might be lost."] = "La cadena de importación contiene un perfil de una versión diferente de Threat Plates. El perfil aún se importará (y se migrará en la medida de lo posible), pero es posible que se pierdan algunas configuraciones del perfil importado."
-L["The import string contains a profile from an incombatible Threat Plates version. Importing only works with data exported from the same Threat Plates version as you are using."] = "La cadena de importación contiene un perfil de una versión incombustible de Threat Plates. La importación solo funciona con datos exportados desde la misma versión de Threat Plates que estás utilizando."
 L["The import string contains custom nameplate settings from a different Threat Plates version. The custom nameplates will still be imported (and migrated as far as possible), but some settings from the imported custom nameplates might be lost."] = "La cadena de importación contiene configuraciones personalizadas de placa identificativa de una versión diferente de Threat Plates. Las placas identificativas personalizadas se seguirán importando (y migrando en la medida de lo posible), pero es posible que se pierdan algunas configuraciones de las placas identificativas personalizadas importadas."
-L["The import string contains custom nameplate settings from an different Threat Plates version as you are using. Some settings from the imported custom nameplates might be lost."] = "La cadena de importación contiene configuraciones personalizadas de placa identificativa de una versión de Threat Plates diferente a la que estás utilizando. Es posible que se pierdan algunos ajustes de las placas identificativas personalizadas importadas."
-L["The import string contains custom nameplate settings from an outdated Threat Plates version. Importing only works with data exported from the same Threat Plates version as you are using."] = "La cadena de importación contiene configuraciones personalizadas de placa identificativa de una versión obsoleta de Threat Plates. La importación solo funciona con datos exportados desde la misma versión de Threat Plates que estás utilizando."
-L["The import string contains invaled custom nameplate settings and cannot be imported. Verify that the import string was generated from the same Threat Plates version that you are using."] = "La cadena de importación contiene configuraciones de placa identificativa personalizadas invadidas y no se puede importar. Verifica que la cadena de importación se generó a partir de la misma versión de Threat Plates que estás utilizando."
-L["The import string contains invalid custom nameplate settings and cannot be imported. Verify that the import string was generated from the same Threat Plates version that you are using."] = "La cadena de importación contiene configuraciones de placa identificativa personalizadas no válidas y no se puede importar. Verifica que la cadena de importación se generó a partir de la misma versión de Threat Plates que estás utilizando."
 L["The import string has an invalid format and cannot be imported. Verify that the import string was generated from the same Threat Plates version that you are using currently."] = "La cadena de importación tiene un formato no válido y no se puede importar. Verifica que la cadena de importación se generó a partir de la misma versión de Threat Plates que estás utilizando actualmente."
-L["The import string has an invalied format and cannot be imported. Verify that the import string was generated from the same Threat Plates version that you are using currently."] = "La cadena de importación tiene un formato invalidado y no se puede importar. Verifica que la cadena de importación se generó a partir de la misma versión de Threat Plates que estás utilizando actualmente."
 L["The import string has an unknown format and cannot be imported. Verify that the import string was generated from the same Threat Plates version that you are using currently."] = "La cadena de importación tiene un formato desconocido y no se puede importar. Verifica que la cadena de importación se generó a partir de la misma versión de Threat Plates que estás utilizando actualmente."
 L["The inset from the bottom (in screen percent) that large nameplates are clamped to."] = "El recuadro desde la parte inferior (en porcentaje de pantalla) al que están sujetas las grandes placas identificativas."
 L["The inset from the bottom (in screen percent) that the non-self nameplates are clamped to."] = "El recuadro desde la parte inferior (en porcentaje de pantalla) al que están sujetas las placas identificativas que no son propias."
@@ -874,6 +814,8 @@ L["The max distance to show the target nameplate when the target is behind the c
 L["The minimum alpha of nameplates."] = "La alfa mínima de las placas identificativas."
 L["The scale of all nameplates if you have no target unit selected."] = "La escala de todas las placas identificativas si no tiene seleccionada ninguna unidad objetivo."
 L["The scale of non-target nameplates if a target unit is selected."] = "La escala de las placas identificativas que no son objetivo si se selecciona una unidad objetivo."
+--[[Translation missing --]]
+L["The script has overwritten the global '%s', this might affect other scripts ."] = "The script has overwritten the global '%s', this might affect other scripts ."
 L["The size of the clickable area is always derived from the current size of the healthbar."] = "El tamaño del área en la que se puede hacer clic siempre se deriva del tamaño actual de la barra de salud."
 L["The target nameplate's scale if a target unit is selected."] = "La escala de la placa identificativa del objetivo si se selecciona una unidad objetivo."
 L["The target nameplate's transparency if a target unit is selected."] = "La transparencia de la placa identificativa del objetivo si se selecciona una unidad objetivo."
@@ -887,7 +829,6 @@ L["Thick"] = "Grueso"
 L["Thick Outline"] = "Contorno Grueso"
 L["Thick Outline, Monochrome"] = "Contorno Grueso, Monocromático"
 L["Thin Square"] = "Cuadrado delgado"
-L["This allows you to save friendly player class information between play sessions or nameplates going off the screen. |cffff0000(Uses more memory)"] = "Esto le permite guardar información de aliadas de la clase de jugador entre sesiones de juego o placas identificativas que salen de la pantalla. |cffff0000 (Utiliza más memoria)"
 L["This lets you select the layout style of the auras widget."] = "Esto le permite seleccionar el estilo de diseño del artilugio de auras."
 L["This option allows you to control whether a cast's remaining cast time is hidden or shown on castbars."] = "Esta opción te permite controlar si el tiempo de lanzamiento restante de un lanzamiento se oculta o se muestra en las barras de lanzamiento."
 L["This option allows you to control whether a spell's icon is hidden or shown on castbars."] = "Esta opción te permite controlar si el icono de un hechizo está oculto o se muestra en las barras de lanzamiento."
@@ -905,8 +846,6 @@ L["This option allows you to control whether the skull icon for boss units is hi
 L["This option allows you to control whether threat affects the healthbar color of nameplates."] = "Esta opción le permite controlar si la amenaza afecta el color de la barra de salud de las placas identificativas."
 L["This option allows you to control whether threat affects the scale of nameplates."] = "Esta opción le permite controlar si la amenaza afecta la escala de las placas identificativas."
 L["This option allows you to control whether threat affects the transparency of nameplates."] = "Esta opción le permite controlar si la amenaza afecta la transparencia de las placas identificativas."
-L["This option is disabled as you are still using legacy custom nameplates. Migrate your custom nameplates to the new version (using the Migration button at the top) to enable this option."] = "Esta opción está deshabilitada porque todavía está usando placas identificativas personalizadas legadas. Migre sus placas identificativas personalizadas a la nueva versión (usando el botón Migración en la parte superior) para habilitar esta opción."
-L["This option is disabled as you are still using the obsolete custom nameplates format. Migrate your custom nameplates to the new format (using the Migration button at the top) to enable this option."] = "Esta opción está deshabilitada ya que todavía está utilizando el formato obsoleto de placas identificativas personalizadas. Migre sus placas identificativas personalizadas al nuevo formato (usando el botón Migración en la parte superior) para habilitar esta opción."
 L["This setting will disable threat scale for target marked, mouseover or casting units and instead use the general scale settings."] = "Esta configuración deshabilitará la escala de amenazas para las unidades marcadas como objetivo, pasar el ratón o lanzar y, en cambio, usará la configuración de escala general."
 L["This setting will disable threat transparency for target marked, mouseover or casting units and instead use the general transparency settings."] = "Esta configuración deshabilitará la transparencia de amenazas para las unidades marcadas con el objetivo, pasando el ratón o lanzando y en su lugar usará la configuración de transparencia general."
 L["This widget highlights the nameplate of your current focus target by showing a border around the healthbar and by coloring the nameplate's healtbar and/or name with a custom color."] = "Este widget resalta la placa identificativa de su objetivo de enfoque actual mostrando un borde alrededor de la barra de salud y coloreando la barra de salud y/o el nombre de la placa identificativa con un color personalizado."
@@ -915,7 +854,6 @@ L["This widget shows a class icon on the nameplates of players."] = "Este artilu
 L["This widget shows a quest icon above unit nameplates or colors the nameplate healthbar of units that are involved with any of your current quests."] = "Este artilugio muestra un icono de misión sobre las placas identificativas de la unidad o colorea la barra de salud de la placa identificativa de las unidades que participan en cualquiera de tus misiones actuales."
 L["This widget shows a stealth icon on nameplates of units that can detect stealth."] = "Este artilugio muestra un icono de sigilo en las placas identificativas de las unidades que pueden detectar el sigilo."
 L["This widget shows a unit's auras (buffs and debuffs) on its nameplate."] = "Este artilugio muestra las auras (buffs y debuffs) de una unidad en su placa identificativa."
-L["This widget shows an experience bar for player followers or pets."] = "Este artilugio muestra una barra de experiencia para los seguidores de los jugadores o las mascotas."
 L["This widget shows an experience bar for player followers."] = "Este artilugio muestra una barra de experiencia para los seguidores de los jugadores."
 L["This widget shows auras from boss mods on your nameplates (since patch 7.2, hostile nameplates only in instances and raids)."] = "Este artilugio muestra auras de mods de jefe en tus placas identificativas."
 L["This widget shows icons for friends, guild members, and faction on nameplates."] = "Este artilugio muestra iconos para amigos, miembros de hermandad y facciones en las placas identificativas."
@@ -923,7 +861,6 @@ L["This widget shows information about your target's resource on your target nam
 L["This widget shows players that are healers."] = "Este artilugio muestra jugadores que son sanadores."
 L["This widget shows various icons (orbs and numbers) on enemy nameplates in arenas for easier differentiation."] = "Este artilugio muestra varios íconos (orbes y números) en las placas identificativas del enemigo en arenas para una diferenciación más fácil."
 L["This widget shows your combo points on your target nameplate."] = "Este artilugio muestra sus puntos de combate en su placa identificativa de destino."
-L["This will allow you to add additional scaling changes to specific mob types."] = "Esto le permitirá agregar cambios de escala adicionales a tipos de mobs específicos."
 L["This will allow you to disable threat art on target marked units."] = "Esto te permitirá deshabilitar el arte de la amenaza en las unidades marcadas como objetivo."
 L["This will color the aura based on its type (poison, disease, magic, curse) - for Icon Mode the icon border is colored, for Bar Mode the bar itself."] = "Esto coloreará el aura según su tipo (veneno, enfermedad, magia, maldición): para el modo de icono, el borde del icono está coloreado, para el modo de barra, la barra misma."
 L["This will format text to a simpler format using M or K for millions and thousands. Disabling this will show exact absorbs amounts."] = "Esto formateará el texto a un formato más simple usando M o K para millones y miles. Deshabilitar esto mostrará cantidades exactas de absorción."
@@ -935,6 +872,8 @@ L["This will toggle the auras widget to show the cooldown spiral on auras."] = "
 L["Threat Detection"] = "Detección de Amenaza"
 L["Threat Detection Heuristic"] = "Heurística de detección de amenaza"
 L["Threat Glow"] = "Brillo de Amenaza"
+--[[Translation missing --]]
+L["Threat Plates Script Editor"] = "Threat Plates Script Editor"
 L["Threat System"] = "Sistema de Amenaza"
 L["Threat Table"] = "Tabla de Amenaza"
 L["Three"] = "Tres"
@@ -1003,10 +942,7 @@ L["Use the healthbar's background color also for the border."] = "Utiliza el col
 L["Use the healthbar's foreground color also for the background."] = "Utiliza el color de primer plano de la barra de salud también para el fondo."
 L["Use the healthbar's foreground color also for the border."] = "Utiliza el color de primer plano de la barra de salud también para el borde."
 L["Use the same color for all combo points shown."] = "Usa el mismo color para todos los puntos de combate que se muestran."
-L["Use Threat Alpha"] = "Utilizar Alfa de Amenaza"
 L["Use Threat Color"] = "Usar color de amenaza"
-L["Use Threat Coloring"] = "Utilizar Coloración de Amenaza"
-L["Use Threat Scale"] = "Utilizar Escala de Amenaza"
 L["Use threat scale as additive scale and add or substract it from the general scale settings."] = "Usar la escala de amenazas como escala aditiva y sume o reste de la configuración de escala general."
 L["Use threat transparency as additive transparency and add or substract it from the general transparency settings."] = "Usar la transparencia de amenazas como transparencia aditiva y sume o reste de la configuración de transparencia general."
 L["Use transparency settings of Healthbar View also for Headline View."] = "Utilizar la configuración de transparencia de la Vista de Barra de Salud también para la Vista de Título."
@@ -1026,7 +962,6 @@ L["Warning Glow for Threat"] = "Brillo de Advertencia para Amenaza"
 L["Water Elemental"] = "Elemental de agua"
 L["Web Wrap"] = "Envoltura de tela de araña"
 L["We're unable to change this while in combat"] = "No podemos cambiar esto mientras estás en combate"
-L["White List"] = "Lista Blanca"
 L["Wide"] = "Ancho"
 L["Widgets"] = "Artilugio"
 L["Width"] = "Anchura"
@@ -1036,5 +971,6 @@ L["Y"] = "Y"
 L["You can access the "] = "Puedes acceder las "
 L["You cannot delete General Settings, only custom nameplates entries."] = "No puede eliminar la Configuración general, solo las entradas de placas identificativas personalizadas."
 L["You currently have two nameplate addons enabled: |cff89F559Threat Plates|r and |cff89F559%s|r. Please disable one of these, otherwise two overlapping nameplates will be shown for units."] = "Actualmente tiene habilitados dos addons de placa identificativa: |cff89F559Threat Plates|r y |cff89F559%s|r. Deshabilite uno de estos, de lo contrario, se mostrarán dos placas superpuestas para las unidades."
-L["You need to convert your custom nameplates to the current format before you can add legacy custom nameplates."] = "Debe convertir tus placas identificativas personalizadas al formato actual antes de poder agregar placas identificativas personalizadas legadas."
 L["Your own quests that you have to complete."] = "Tus propias misiones que tienes que completar."
+--[[Translation missing --]]
+L["Your version of LibDogTag-Unit-3.0 does not support nameplates. You need to install at least v90000.3 of LibDogTag-Unit-3.0."] = "Your version of LibDogTag-Unit-3.0 does not support nameplates. You need to install at least v90000.3 of LibDogTag-Unit-3.0."

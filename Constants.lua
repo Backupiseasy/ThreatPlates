@@ -163,6 +163,16 @@ Addon.TARGET_TEXTURES = {
   Stripes = L["Stripes"]
 }
 
+Addon.MODE_FOR_STYLE = {
+  dps = "HealthbarMode",
+  tank = "HealthbarMode",
+  normal = "HealthbarMode",
+  totem = "HealthbarMode",
+  unique = "HealthbarMode",
+  NameOnly = "NameMode",
+  ["NameOnly-Unique"] = "NameMode",
+}
+
 ----------------------------------------------------------------------------------------------------
 -- Paths
 ---------------------------------------------------------------------------------------------------
@@ -593,14 +603,17 @@ ThreatPlates.DEFAULT_SETTINGS = {
 --      b = 1,
 --    },
     ColorByReaction = {
-      FriendlyPlayer = RGB(0, 0, 255),           -- blue
+      -- (Addon.IS_MAINLINE and RGB(128, 128, 255)) or 
+      FriendlyPlayer = RGB(0, 0, 255),           -- PlayerPvPOff, Mainline: purple, Classic: blue
       FriendlyNPC = RGB(0, 255, 0),              -- green
       HostileNPC = RGB(255, 0, 0),               -- red
-      HostilePlayer = RGB(255, 0, 0),            -- red
+      HostilePlayer = RGB(255, 0, 0),            -- HostilePlayerPvPOnSelfPvPOn, red - Opposite faction, they are PVP flagged and you are PVP flagged so they can attack you and vice versa.
       NeutralUnit = RGB(255, 255, 0),            -- yellow
       TappedUnit = RGB(110, 110, 110, 1),	       -- grey
       DisconnectedUnit = RGB(128, 128, 128, 1),  -- dray, darker than tapped color
       UnfriendlyFaction = RGB(255, 153, 51, 1),  -- brown/orange for unfriendly, hostile, non-attackable units (unit reaction = 3)
+      FriendlyPlayerPvPOn = RGB(0, 255, 0),              -- green - Same faction, PVP flagged
+      HostilePlayerPvPOnSelfPvPOff = RGB(255, 255, 0),   -- yellow - Opposite faction, they are PVP flagged but you are NOT PVP flagged so they can't attack you. You can attack them, though. (Which will immediately flag you)
     },
     Colors = {
       Classes = GetDefaultColorsForClasses()
@@ -678,19 +691,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
     },
     AuraWidget = {
       ON = true,
-      x = 0,
-      y = 16,
-      x_hv = 0,
-      y_hv = 16,
-      scale = 1, -- Removed in 8.8.0
-      FrameOrder = "HEALTHBAR_AURAS",
-      anchor = "TOP",
       ShowInHeadlineView = false,
-      -- ShowEnemy = true, -- Removed in 8.8.0
-      -- ShowFriendly = true, -- Removed in 8.8.0
-      -- FilterMode = "blacklistMine", -- Moved to Debuffs in 8.8.0
-      -- ShowDebuffsOnFriendly = false, -- Moved to Debuffs in 8.8.0
-      -- FilterBySpell = {}, -- Moved to Debuffs in 8.8.0
       ShowTargetOnly = false,
       ShowCooldownSpiral = false,
       ShowDuration = true,
@@ -708,10 +709,9 @@ ThreatPlates.DEFAULT_SETTINGS = {
       },
       SortOrder = "TimeLeft",
       SortReverse = false,
-      AlignmentH = "LEFT",
-      AlignmentV = "BOTTOM",
-      CenterAuras = true,
-      SwitchScaleByReaction = true,
+      FrameOrder = "HEALTHBAR_AURAS",
+      -- SwitchScaleByReaction = false, -- TODO: Remove or implement this feature
+      SwitchAreaByReaction = true,
       FlashWhenExpiring = false,
       FlashTime = 5,
       Debuffs = {
@@ -724,7 +724,6 @@ ThreatPlates.DEFAULT_SETTINGS = {
         ShowAllEnemy = false,
         ShowOnlyMine = true,
         ShowBlizzardForEnemy = false,
-        Scale = 1.0,
         FilterMode = "Block",
         FilterBySpell = {},
         FilterByType = {
@@ -734,6 +733,128 @@ ThreatPlates.DEFAULT_SETTINGS = {
           [3] = false,  -- Moved to Debuffs and negated meaning in 8.8.0
           [4] = false,  -- Moved to Debuffs and negated meaning in 8.8.0
           --[6] = true, -- Removed in 8.8.0
+        },
+        -- Positioning
+        AlignmentH = "LEFT",
+        AlignmentV = "BOTTOM",
+        CenterAuras = true,
+        AnchorTo = "Healthbar",
+        HealthbarMode = {
+          Anchor = "TOP",
+          InsideAnchor = false,
+          HorizontalOffset = 0,
+          VerticalOffset = 8,
+        },
+        NameMode = {
+          Anchor = "TOP",
+          InsideAnchor = false,
+          HorizontalOffset = 0,
+          VerticalOffset = 2,
+        },
+        ModeIcon = {
+          Style = "square",
+          IconWidth = 16.5,
+          IconHeight = 14.5,
+          ShowBorder = true,
+          Columns = 5,
+          Rows = 3,
+          ColumnSpacing = 5,
+          RowSpacing = 8,
+          MaxAuras = 10,
+          Duration = {
+            Anchor = "TOPRIGHT",
+            InsideAnchor = true,
+            HorizontalOffset = 0,
+            VerticalOffset = 6,
+            Font = {
+              Typeface = Addon.DEFAULT_SMALL_FONT,
+              Size = 10,
+              Transparency = 1,
+              Color = RGB(255, 255, 255),
+              flags = "OUTLINE",
+              Shadow = true,
+              HorizontalAlignment = "RIGHT",
+              VerticalAlignment = "CENTER",
+            }
+          },
+          StackCount = {
+            Anchor = "BOTTOMRIGHT",
+            InsideAnchor = true,
+            HorizontalOffset = 0,
+            VerticalOffset = -3,
+            Font = {
+              Typeface = Addon.DEFAULT_SMALL_FONT,
+              Size = 10,
+              Transparency = 1,
+              Color = RGB(255, 255, 255),
+              flags = "OUTLINE",
+              Shadow = true,
+              HorizontalAlignment = "RIGHT",
+              VerticalAlignment = "CENTER",
+            }
+          },
+        },
+        ModeBar = {
+          Enabled = false,
+          BarHeight = 14,
+          BarWidth = 100,
+          BarSpacing = 2,
+          MaxBars = 10,
+          Texture = "Smooth", -- old default: "Aluminium",
+          BackgroundTexture = "Smooth",
+          BackgroundColor = RGB(0, 0, 0, 0.3),
+          ShowIcon = true,
+          IconSpacing = 2,
+          IconAlignmentLeft = true,
+          -- Font
+          Label = {
+            Anchor = "LEFT",
+            InsideAnchor = true,
+            HorizontalOffset = 4,
+            VerticalOffset = 0,
+            Font = {
+              Typeface = Addon.DEFAULT_SMALL_FONT,
+              Size = 10,
+              Transparency = 1,
+              Color = RGB(255, 255, 255),
+              flags = "OUTLINE",
+              Shadow = true,
+              HorizontalAlignment = "LEFT",
+              VerticalAlignment = "CENTER",
+            },
+          },
+          Duration = {
+            Anchor = "RIGHT",
+            InsideAnchor = true,
+            HorizontalOffset = -4,
+            VerticalOffset = 0,
+            Font = {
+              Typeface = Addon.DEFAULT_SMALL_FONT,
+              Size = 10,
+              Transparency = 1,
+              Color = RGB(255, 255, 255),
+              flags = "OUTLINE",
+              Shadow = true,
+              HorizontalAlignment = "RIGHT",
+              VerticalAlignment = "CENTER",
+            },
+          },
+          StackCount = {
+            Anchor = "CENTER",
+            InsideAnchor = true,
+            HorizontalOffset = 0,
+            VerticalOffset = 0,
+            Font = {
+              Typeface = Addon.DEFAULT_SMALL_FONT,
+              Size = 10,
+              Transparency = 1,
+              Color = RGB(255, 255, 255),
+              flags = "OUTLINE",
+              Shadow = true,
+              HorizontalAlignment = "CENTER",
+              VerticalAlignment = "CENTER",
+            },
+          },
         },
       },
       Buffs = {
@@ -752,9 +873,130 @@ ThreatPlates.DEFAULT_SETTINGS = {
         ShowUnlimitedInInstances = true,
         ShowUnlimitedOnBosses = true,
         HideUnlimitedDuration = false,
-        Scale = 1.5,
         FilterMode = "Block",
         FilterBySpell = {},
+        -- Positioning
+        AlignmentH = "LEFT",
+        AlignmentV = "BOTTOM",
+        CenterAuras = true,
+        AnchorTo = "Debuffs",
+        HealthbarMode = {
+          Anchor = "TOP",
+          InsideAnchor = false,
+          HorizontalOffset = 0,
+          VerticalOffset = -10
+        },
+        NameMode = {
+          Anchor = "TOP",
+          InsideAnchor = false,
+          HorizontalOffset = 0,
+          VerticalOffset = -10,
+        },
+        ModeIcon = {
+          Style = "square",
+          IconWidth = 24,
+          IconHeight = 21,
+          ShowBorder = true,
+          Columns = 5,
+          Rows = 3,
+          ColumnSpacing = 5,
+          RowSpacing = 8,
+          MaxAuras = 10,
+          Duration = {
+            Anchor = "TOPRIGHT",
+            InsideAnchor = true,
+            HorizontalOffset = 0,
+            VerticalOffset = 6,
+            Font = {
+              Typeface = Addon.DEFAULT_SMALL_FONT,
+              Size = 10,
+              Transparency = 1,
+              Color = RGB(255, 255, 255),
+              flags = "OUTLINE",
+              Shadow = true,
+              HorizontalAlignment = "RIGHT",
+              VerticalAlignment = "CENTER",
+            }
+          },
+          StackCount = {
+            Anchor = "BOTTOMRIGHT",
+            InsideAnchor = true,
+            HorizontalOffset = 0,
+            VerticalOffset = -3,
+            Font = {
+              Typeface = Addon.DEFAULT_SMALL_FONT,
+              Size = 10,
+              Transparency = 1,
+              Color = RGB(255, 255, 255),
+              flags = "OUTLINE",
+              Shadow = true,
+              HorizontalAlignment = "RIGHT",
+              VerticalAlignment = "CENTER",
+            }
+          },
+        },
+        ModeBar = {
+          Enabled = false,
+          BarHeight = 14,
+          BarWidth = 100,
+          BarSpacing = 2,
+          MaxBars = 10,
+          Texture = "Smooth", -- old default: "Aluminium",
+          BackgroundTexture = "Smooth",
+          BackgroundColor = RGB(0, 0, 0, 0.3),
+          ShowIcon = true,
+          IconSpacing = 2,
+          IconAlignmentLeft = true,
+          -- Font
+          Label = {
+            Anchor = "LEFT",
+            InsideAnchor = true,
+            HorizontalOffset = 4,
+            VerticalOffset = 0,
+            Font = {
+              Typeface = Addon.DEFAULT_SMALL_FONT,
+              Size = 10,
+              Transparency = 1,
+              Color = RGB(255, 255, 255),
+              flags = "OUTLINE",
+              Shadow = true,
+              HorizontalAlignment = "LEFT",
+              VerticalAlignment = "CENTER",
+            },
+          },
+          Duration = {
+            Anchor = "RIGHT",
+            InsideAnchor = true,
+            HorizontalOffset = -4,
+            VerticalOffset = 0,
+            Font = {
+              Typeface = Addon.DEFAULT_SMALL_FONT,
+              Size = 10,
+              Transparency = 1,
+              Color = RGB(255, 255, 255),
+              flags = "OUTLINE",
+              Shadow = true,
+              HorizontalAlignment = "RIGHT",
+              VerticalAlignment = "CENTER",
+            },
+          },
+          StackCount = {
+            Anchor = "CENTER",
+            InsideAnchor = true,
+            HorizontalOffset = 0,
+            VerticalOffset = 0,
+            Font = {
+              Typeface = Addon.DEFAULT_SMALL_FONT,
+              Size = 10,
+              Transparency = 1,
+              Color = RGB(255, 255, 255),
+              flags = "OUTLINE",
+              Shadow = true,
+              HorizontalAlignment = "CENTER",
+              VerticalAlignment = "CENTER",
+            },
+          },
+        },
       },
       CrowdControl = {
         ShowFriendly = true,
@@ -765,73 +1007,130 @@ ThreatPlates.DEFAULT_SETTINGS = {
         ShowEnemy = true,
         ShowAllEnemy = false,
         ShowBlizzardForEnemy = true,
-        Scale = 2.0,
         FilterMode = "Block",
         FilterBySpell = {},
-      },
-      ModeIcon = {
-        Style = "square",
-        IconWidth = 16.5,
-        IconHeight = 14.5,
-        ShowBorder = true,
-        Columns = 5,
-        Rows = 3,
-        ColumnSpacing = 5,
-        RowSpacing = 8,
-        Duration = {
+        -- Positioning
+        AlignmentH = "LEFT",
+        AlignmentV = "BOTTOM",
+        CenterAuras = true,
+        AnchorTo = "Healthbar",
+        HealthbarMode = {
           Anchor = "RIGHT",
-          InsideAnchor = true,
-          HorizontalOffset = 0,
-          VerticalOffset = 8,
-          Font = {
-            Typeface = Addon.DEFAULT_SMALL_FONT,
-            Size = 10,
-            Transparency = 1,
-            Color = RGB(255, 255, 255),
-            flags = "OUTLINE",
-            Shadow = true,
-            HorizontalAlignment = "RIGHT",
-            VerticalAlignment = "CENTER",
-          }
+          InsideAnchor = false,
+          HorizontalOffset = 10,
+          VerticalOffset = 0,
         },
-        StackCount = {
+        NameMode = {
           Anchor = "RIGHT",
-          InsideAnchor = true,
-          HorizontalOffset = 0,
-          VerticalOffset = -6,
-          Font = {
-            Typeface = Addon.DEFAULT_SMALL_FONT,
-            Size = 10,
-            Transparency = 1,
-            Color = RGB(255, 255, 255),
-            flags = "OUTLINE",
-            Shadow = true,
-            HorizontalAlignment = "RIGHT",
-            VerticalAlignment = "CENTER",
-          }
+          InsideAnchor = false,
+          HorizontalOffset = 10,
+          VerticalOffset = 0,
         },
-      },
-      ModeBar = {
-        Enabled = false,
-        BarHeight = 14,
-        BarWidth = 100,
-        BarSpacing = 2,
-        MaxBars = 10,
-        Texture = "Smooth", -- old default: "Aluminium",
-        Font = Addon.DEFAULT_SMALL_FONT,
-        FontSize = 10,
-        FontColor = RGB(255, 255, 255),
-        LabelTextIndent = 4,
-        TimeTextIndent = 4,
-        BackgroundTexture = "Smooth",
-        BackgroundColor = RGB(0, 0, 0, 0.3),
-        -- BackgroundBorder = "ThreatPlatesBorder", -- not used
-        -- BackgroundBorderEdgeSize = 1, -- not used
-        -- BackgroundBorderInset = 1, -- not used
-        -- BackgroundBorderColor = RGB(0, 0, 0, 0.3), -- not used
-        ShowIcon = true,
-        IconSpacing = 2,
-        IconAlignmentLeft = true,
+        ModeIcon = {
+          Style = "square",
+          IconWidth = 32,
+          IconHeight = 32,
+          ShowBorder = true,
+          Columns = 2,
+          Rows = 1,
+          ColumnSpacing = 5,
+          RowSpacing = 8,
+          MaxAuras = 1,
+          Duration = {
+            Anchor = "CENTER",
+            InsideAnchor = true,
+            HorizontalOffset = 0,
+            VerticalOffset = 0,
+            Font = {
+              Typeface = Addon.DEFAULT_SMALL_FONT,
+              Size = 24,
+              Transparency = 1,
+              Color = RGB(255, 0, 0),
+              flags = "THICKOUTLINE",
+              Shadow = true,
+              HorizontalAlignment = "RIGHT",
+              VerticalAlignment = "CENTER",
+            }
+          },
+          StackCount = {
+            Anchor = "BOTTOMRIGHT",
+            InsideAnchor = true,
+            HorizontalOffset = 0,
+            VerticalOffset = -4,
+            Font = {
+              Typeface = Addon.DEFAULT_DEFAULT_SMALL_FONTFONT,
+              Size = 10,
+              Transparency = 1,
+              Color = RGB(255, 255, 255),
+              flags = "OUTLINE",
+              Shadow = true,
+              HorizontalAlignment = "RIGHT",
+              VerticalAlignment = "CENTER",
+            }
+          },
+        },
+        ModeBar = {
+          Enabled = false,
+          BarHeight = 26,
+          BarWidth = 100,
+          BarSpacing = 2,
+          MaxBars = 2,
+          Texture = "Smooth", -- old default: "Aluminium",
+          BackgroundTexture = "Smooth",
+          BackgroundColor = RGB(0, 0, 0, 0.3),
+          ShowIcon = true,
+          IconSpacing = 2,
+          IconAlignmentLeft = true,
+          -- Font
+          Label = {
+            Anchor = "LEFT",
+            InsideAnchor = true,
+            HorizontalOffset = 4,
+            VerticalOffset = 0,
+            Font = {
+              Typeface = Addon.DEFAULT_SMALL_FONT,
+              Size = 12,
+              Transparency = 1,
+              Color = RGB(255, 255, 255),
+              flags = "OUTLINE",
+              Shadow = true,
+              HorizontalAlignment = "LEFT",
+              VerticalAlignment = "CENTER",
+            },
+          },
+          Duration = {
+            Anchor = "RIGHT",
+            InsideAnchor = true,
+            HorizontalOffset = -4,
+            VerticalOffset = 0,
+            Font = {
+              Typeface = Addon.DEFAULT_SMALL_FONT,
+              Size = 12,
+              Transparency = 1,
+              Color = RGB(255, 0, 0),
+              flags = "OUTLINE",
+              Shadow = true,
+              HorizontalAlignment = "RIGHT",
+              VerticalAlignment = "CENTER",
+            },
+          },
+          StackCount = {
+            Anchor = "CENTER",
+            InsideAnchor = true,
+            HorizontalOffset = 0,
+            VerticalOffset = 0,
+            Font = {
+              Typeface = Addon.DEFAULT_SMALL_FONT,
+              Size = 18,
+              Transparency = 1,
+              Color = RGB(255, 255, 255),
+              flags = "OUTLINE",
+              Shadow = true,
+              HorizontalAlignment = "CENTER",
+              VerticalAlignment = "CENTER",
+            },
+          },
+        },
       },
     },
     uniqueWidget = {
@@ -892,6 +1191,9 @@ ThreatPlates.DEFAULT_SETTINGS = {
         Show = true,
         CustomColor = RGB(255, 255, 255),
         UseThreatColor = true,
+        Type = Addon.THREAT_VALUE_TYPE.SCALED,
+        SecondPlayersName = true,
+        OnlyInGroups = true,
         -- Layout
         Anchor = "LEFT",
         InsideAnchor = false,

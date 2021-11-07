@@ -11,7 +11,6 @@ local ThreatPlates = Addon.ThreatPlates
 local UnitGetTotalHealAbsorbs = UnitGetTotalHealAbsorbs
 
 -- ThreatPlates APIs
-local TidyPlatesThreat = TidyPlatesThreat
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -43,7 +42,7 @@ local function CreateExtensions(tp_frame)
   --visual.raidicon:SetDrawLayer("OVERLAY")
 
   --  Absorbs on healthbar
-  local db = TidyPlatesThreat.db.profile.settings.healthbar
+  local db = Addon.db.profile.settings.healthbar
   ENABLE_ABSORB = db.ShowAbsorbs
 
   local absorbbar = visual.absorbbar
@@ -120,7 +119,7 @@ local function UpdateExtensions(tp_frame, unitid, style)
   -- health = health_max * 0.5
   -- visual.healthbar:SetValue(health)
 
-  local db = TidyPlatesThreat.db.profile.settings.healthbar
+  local db = Addon.db.profile.settings.healthbar
 
   if db.ShowHealAbsorbs and heal_absorb > 0 then
     healthbar.HealAbsorbGlow:SetShown(heal_absorb > health)

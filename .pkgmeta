@@ -49,15 +49,18 @@ wowi-convert-changelog: yes
 
 ignore:
   - .git
+  - .github
   - .idea
-  - TidyPlates_ThreatPlates.iml
   - .release
+  - .env
+  - .gitignore
+  - .pkgmeta
   - Source
   - Test
-  - .gitignore
-  - .env
-  - .pkgmeta
   - README.md
-  - CHANGELOG.md
+  - TidyPlates_ThreatPlates.iml
+  - TidyPlates_ThreatPlates-Mainline.toc
+  - TidyPlates_ThreatPlates-Classic.toc
+  - TidyPlates_ThreatPlates-BCC.toc
 
 move-folders:

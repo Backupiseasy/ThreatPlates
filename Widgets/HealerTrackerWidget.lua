@@ -15,7 +15,6 @@ local RequestBattlefieldScoreData, GetNumBattlefieldScores = RequestBattlefieldS
 local CombatLogGetCurrentEventInfo = CombatLogGetCurrentEventInfo
 
 -- ThreatPlates APIs
-local TidyPlatesThreat = TidyPlatesThreat
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -101,7 +100,7 @@ local healerList = {
 ---------------------------------------------------------------------------------------------------
 
 local function UpdateSettings(frame)
-  local db = TidyPlatesThreat.db.profile.healerTracker
+  local db = Addon.db.profile.healerTracker
   local size = db.scale
   local alpha = db.alpha
 
@@ -223,7 +222,7 @@ function Widget:Create(tp_frame)
 end
 
 function Widget:IsEnabled()
-  local db = TidyPlatesThreat.db.profile.healerTracker
+  local db = Addon.db.profile.healerTracker
   return db.ON or db.ShowInHeadlineView
 end
 
@@ -237,14 +236,14 @@ function Widget:EnabledForStyle(style, unit)
   if unit.type ~= "PLAYER" then return false end
 
   if (style == "NameOnly" or style == "NameOnly-Unique") then
-    return TidyPlatesThreat.db.profile.healerTracker.ShowInHeadlineView
+    return Addon.db.profile.healerTracker.ShowInHeadlineView
   elseif style ~= "etotem" then
-    return TidyPlatesThreat.db.profile.healerTracker.ON
+    return Addon.db.profile.healerTracker.ON
   end
 end
 
 function Widget:OnUnitAdded(widget_frame, unit)
-  local db = TidyPlatesThreat.db.profile.healerTracker
+  local db = Addon.db.profile.healerTracker
 
   --Deathknights can be picked up as 'healers' thanks to Dark Simulacrum, so just ignore them.
   if unit.class == "DEATHKNIGHT" then

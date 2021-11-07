@@ -3,8 +3,8 @@ local t = Addon.ThreatPlates
 
 local EMPTY_TEXTURE = t.Art .. "Empty"
 
-local function Create(self,name)
-	local db = self.db.profile.settings
+local function Create(name)
+	local db = Addon.db.profile.settings
 	local theme = {
 
 		frame = {

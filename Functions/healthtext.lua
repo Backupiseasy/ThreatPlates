@@ -18,7 +18,6 @@ local ceil = ceil
 local format = format
 local string = string
 
-local TidyPlatesThreat = TidyPlatesThreat
 local RGB = ThreatPlates.RGB
 local RGB_P = ThreatPlates.RGB_P
 local GetColorByHealthDeficit = ThreatPlates.GetColorByHealthDeficit
@@ -51,7 +50,7 @@ local ShowHealth, ShowAbsorbs
 -- Determine correct number units: Western or East Asian Nations (CJK)
 ---------------------------------------------------------------------------------------------------
 local function TruncateWestern(value)
-  if not TidyPlatesThreat.db.profile.text.truncate then
+  if not Addon.db.profile.text.truncate then
     return value
   end
 
@@ -92,7 +91,7 @@ if MAP_LOCALE_TO_UNIT_SYMBOL[locale] then
   local Format_Unit_1B = "%.1f" .. MAP_LOCALE_TO_UNIT_SYMBOL[locale].Unit_1B
 
   TruncateEastAsian = function(value)
-    if not TidyPlatesThreat.db.profile.text.truncate then
+    if not Addon.db.profile.text.truncate then
       return value
     end
 
@@ -334,7 +333,7 @@ local SUBTEXT_FUNCTIONS =
 local function GetStatusTextSettings(unit)
   local style = unit.style
 
-  local db = TidyPlatesThreat.db.profile
+  local db = Addon.db.profile
   if style == "NameOnly" or style == "NameOnly-Unique" then
     db = db.HeadlineView
   else
@@ -386,7 +385,7 @@ function Addon.UpdateStyleForStatusText(tp_frame, unit)
 end
 
 function Addon:UpdateConfigurationStatusText()
-  Settings = TidyPlatesThreat.db.profile.text
+  Settings = Addon.db.profile.text
 
   Truncate = (Settings.LocalizedUnitSymbol and TruncateEastAsian) or TruncateWestern
 
