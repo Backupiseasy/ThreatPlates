@@ -5,3 +5,4 @@
 * Extended threat percentage to show raw or scaled threat percentage or the threat difference (value or percentage) to the second player in the mob's threat table [Issue GitHub#285].
 * The cast target's name will now be shown in class color if the target is a player [Issue #419, #465, Comment #4799, #504, #5445, #5491].
 * Added an option to show threat value only when in groups [Comment #4835].
+* Added an option to abbreviate unit names in healthbar view [GH-284, GH-270].
