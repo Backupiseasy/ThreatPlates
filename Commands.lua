@@ -110,7 +110,53 @@ local function SearchDBForString(db, prefix, keyword)
 	end
 end
 
-local function ChatCommandDebug(cmd_list)
+-- Command: /tptp
+function TidyPlatesThreat:ChatCommand(input)
+	local cmd_list = Addon.SplitByWhitespace(input)
+
+	local command = cmd_list[1]
+	if not command or command == "" then
+		Addon:OpenOptions()
+	elseif command == "help" then
+		PrintHelp()
+	elseif command == "legacy-custom-styles" then
+		Addon.RestoreLegacyCustomNameplates()
+	elseif command == "profile" then
+		local profile_name = cmd_list[2]
+		if profile_name and profile_name ~= "" then
+			-- Check if profile exists
+			if Addon.db.profiles[profile_name] then
+				Addon.db:SetProfile(profile_name)
+			else
+				TP.Print(L["|cff89F559Threat Plates|r: Unknown profile: "] .. profile_name, true)
+			end
+		else
+			TP.Print(L["|cff89F559Threat Plates|r: No profile specified"], true)
+		end
+	elseif input == "toggle-scripting" then
+		Addon.db.global.ScriptingIsEnabled = not Addon.db.global.ScriptingIsEnabled
+		if Addon.db.global.ScriptingIsEnabled then
+			TP.Print(L["Scriping for custom styles for nameplates is now |cff00ff00enabled!|r."])
+		else
+			TP.Print(L["Scriping for custom styles for nameplates is now |cffff0000disabled!|r."])
+		end
+		Addon.UpdateCustomStyles()
+		TidyPlatesThreat:ConfigTableChanged()
+--	elseif command == "toggle-view-friendly-units" then
+--		TidyPlatesThreat:ToggleNameplateModeFriendlyUnits()
+--	elseif command == "toggle-view-neutral-units" then
+--		TidyPlatesThreat:ToggleNameplateModeNeutralUnits()
+--	elseif command == "toggle-view-enemy-units" then
+--		TidyPlatesThreat:ToggleNameplateModeEnemyUnits()
+	else --if DEBUG then
+		ChatCommandDebug(cmd_list)
+	--else
+	--	TP.Print(L["Unknown option: "] .. input, true)
+	--	PrintHelp()
+	end
+end
+
+function TidyPlatesThreat:ChatCommandDebug(cmd_list)
 	local command = cmd_list[1]
 
 	if command == "searchdb" then
