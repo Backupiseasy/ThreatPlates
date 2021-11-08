@@ -41,7 +41,7 @@ function Addon:SetNameText(unit)
     return name
   end
 
-  local db = TidyPlatesThreat.db.profile.settings.name
+  local db = Addon.db.profile.settings.name
   local name_setting = (unit.reaction == "FRIENDLY" and db.AbbreviationForFriendlyUnits) or db.AbbreviationForEnemyUnits
 
   return NAME_ABBREVIATION_FUNCTION[name_setting](name)
