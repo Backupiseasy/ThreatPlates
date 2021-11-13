@@ -6,3 +6,4 @@
 * The cast target's name will now be shown in class color if the target is a player [Issue #419, #465, Comment #4799, #504, #5445, #5491].
 * Added an option to show threat value only when in groups [Comment #4835].
 * Added an option to abbreviate unit names in healthbar view [GH-284, GH-270].
+* Added an option to transliterate cyrillic letters in unit names and status texts [GH-300].

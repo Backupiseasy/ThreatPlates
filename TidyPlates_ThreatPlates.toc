@@ -36,6 +36,7 @@ Libs\Libs.xml
 Locales\Locales.xml
 
 Init.lua
+Localization.lua
 CVarsManager.lua
 Media.lua
 Constants.lua

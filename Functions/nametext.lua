@@ -5,8 +5,10 @@ local TidyPlatesThreat = TidyPlatesThreat
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
 local table_concat = table.concat
+local string_len = string.len
 
 local SplitByWhitespace = Addon.SplitByWhitespace
+local TransliterateCyrillicLetters = Addon.TransliterateCyrillicLetters
 
 ---------------------------------------------------------------------------------------------------
 -- 
@@ -36,12 +38,14 @@ function Addon:SetNameText(unit)
   local name = unit.name
   local style = unit.style
 
+  name = TransliterateCyrillicLetters(name)
+
   -- Full names in headline view
   if style == "NameOnly" or style == "NameOnly-Unique" then
     return name
   end
 
-  local db = Addon.db.profile.settings.name
+  local db = Addon.db.profile.settings.name  
   local name_setting = (unit.reaction == "FRIENDLY" and db.AbbreviationForFriendlyUnits) or db.AbbreviationForEnemyUnits
 
   return NAME_ABBREVIATION_FUNCTION[name_setting](name)

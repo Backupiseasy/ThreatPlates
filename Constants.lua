@@ -33,34 +33,6 @@ _G["BINDING_NAME_" .. "THREATPLATES_NAMEPLATE_MODE_FOR_ENEMY_UNITS"] = L["Toggle
 ---------------------------------------------------------------------------------------------------
 -- Color and font definitions
 ---------------------------------------------------------------------------------------------------
-Addon.DEFAULT_FONT = "Cabin"
-Addon.DEFAULT_SMALL_FONT = "Arial Narrow"
-
-local locale = GetLocale()
-local MAP_FONT = {
-  koKR = { -- Korrean
-    DefaultFont = "기본 글꼴",      -- "2002"
-    DefaultSmallFont = "기본 글꼴", -- "2002"
-  },
-  zhCN = { -- Simplified Chinese
-    DefaultFont = "默认",      -- "AR ZhongkaiGBK Medium"
-    DefaultSmallFont = "默认", -- "AR ZhongkaiGBK Medium"
-  },
-  zhTW = { -- Traditional Chinese
-    DefaultFont = "傷害數字",       -- "AR Kaiti Medium B5"
-    DefaultSmallFont = "傷害數字",  -- "AR Kaiti Medium B5"
-  },
-  ruRU = { -- Russian
-    DefaultFont = "Friz Quadrata TT", -- "FrizQuadrataCTT"
-    DefaultSmallFont = "Arial Narrow",
-  }
-}
-
-if MAP_FONT[locale] then
-  Addon.DEFAULT_FONT = MAP_FONT[locale].DefaultFont
-  Addon.DEFAULT_SMALL_FONT = MAP_FONT[locale].DefaultSmallFont
-end
-
 local function GetDefaultColorsForClasses()
   local class_colors = {}
 
@@ -1987,6 +1959,9 @@ ThreatPlates.DEFAULT_SETTINGS = {
     },
     Transparency = {
       Fadeing = true,
+    },
+    Localization = {
+      TransliterateCyrillicLetters = false,
     },
   }
 }

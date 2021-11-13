@@ -58,6 +58,7 @@ Addon.PlayerName = select(1, UnitName("player"))
 
 Addon.Animations = {}
 Addon.Cache = {
+	Texts = {},
 	TriggerWildcardTests = {},
 	CustomPlateTriggers = {
 		Name = {},

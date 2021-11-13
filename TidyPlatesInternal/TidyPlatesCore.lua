@@ -33,6 +33,7 @@ local UnitNameplateShowsWidgetsOnly = UnitNameplateShowsWidgetsOnly
 local Widgets = Addon.Widgets
 local Animations = Addon.Animations
 local BackdropTemplate = Addon.BackdropTemplate
+local TransliterateCyrillicLetters = Addon.TransliterateCyrillicLetters
 
 local GetNameForNameplate
 local UnitCastingInfo
@@ -862,9 +863,9 @@ do
     visual.spelltext:SetText(text)
 		visual.spellicon:SetTexture(texture)
 
-    local target_unit = unit.unitid .. "target"
-    local _, class_name = UnitClass(target_unit)
-    castbar.CastTarget:SetText(Addon.ColorByClass(class_name, UnitName(target_unit)))
+    local target_unit_name = UnitName(unit.unitid .. "target")
+    local _, class_name = UnitClass(target_unit_name)
+    castbar.CastTarget:SetText(Addon.ColorByClass(class_name, TransliterateCyrillicLetters(target_unit_name)))
 
     castbar.IsCasting = not channeled
     castbar.IsChanneling = channeled

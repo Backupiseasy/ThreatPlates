@@ -22,6 +22,7 @@ local RGB = ThreatPlates.RGB
 local RGB_P = ThreatPlates.RGB_P
 local GetColorByHealthDeficit = ThreatPlates.GetColorByHealthDeficit
 local UnitGetTotalAbsorbs
+local TransliterateCyrillicLetters = Addon.TransliterateCyrillicLetters
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -364,6 +365,8 @@ function Addon.SetCustomText(tp_frame, unit)
     elseif not db.SubtextColorUseSpecific then
       color = db.SubtextColor
     end
+
+    subtext = TransliterateCyrillicLetters(subtext)
 
     customtext:SetText(subtext or "")
     customtext:SetTextColor(color.r or 1, color.g or 1, color.b or 1, color.a or 1)

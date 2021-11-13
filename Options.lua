@@ -4668,6 +4668,50 @@ local function CreateVisibilitySettings()
   return args
 end
 
+local function CreateLocalizationSettings()
+  local entry = {
+    name = L["Localization"],
+    order = 135, 
+    type = "group",
+    inline = false,
+    args = {
+      Texts = {
+        name = L["Texts"],
+        order = 10, 
+        type = "group",
+        inline = true,
+        args = {
+          TransliterateCyrillicLetters = {
+            name = L["Transliterate Cyrillic Letters"],
+            order = 10,
+            type = "toggle",
+            width = "double",
+            arg = { "Localization", "TransliterateCyrillicLetters" },
+          },
+        },
+      },
+      Numbers = {
+        name = L["Numbers"],
+        order = 20, 
+        type = "group",
+        inline = true,
+        args = {
+          MetricUnitSymbols = {    
+            name = L["Metric Unit Symbols"],
+            type = "toggle",
+            order = 10,
+            width = "double",
+            desc = L["If enabled, the truncated health text will be localized, i.e. local metric unit symbols (like k for thousands) will be used."],
+            arg = { "text", "LocalizedUnitSymbol" }
+          },
+        },
+      },
+    },
+  }
+
+  return entry
+end
+
 local function CreateBlizzardSettings()
 -- nameplateGlobalScale
   -- rmove /tptp command for stacking, not-stacking nameplates
@@ -8853,6 +8897,7 @@ local function CreateOptionsTable()
               },
             },
             RaidMarks = CreateRaidMarksOptions(),
+            LocalizationSettings = CreateLocalizationSettings(),
             BlizzardSettings = CreateBlizzardSettings(),
 --            TestSettings = {
 --              name = "Test Settings",

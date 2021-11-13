@@ -16,6 +16,7 @@ local InCombatLockdown = InCombatLockdown
 -- ThreatPlates APIs
 local BackdropTemplate = Addon.BackdropTemplate
 local Font = Addon.Font
+local TransliterateCyrillicLetters = Addon.TransliterateCyrillicLetters
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -175,7 +176,7 @@ local function ShowTargetUnit(self, target_of_target_name, class_name)
 
   local target_of_target = self.TargetUnit
   if target_of_target_name then
-    target_of_target:SetText("|cffffffff[|r " .. target_of_target_name .. " |cffffffff]|r")
+    target_of_target:SetText("|cffffffff[|r " .. TransliterateCyrillicLetters(target_of_target_name) .. " |cffffffff]|r")
     target_of_target.ClassName = class_name
     target_of_target:Show()
   end
