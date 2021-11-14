@@ -1359,7 +1359,7 @@ do
 
           sourceName = gsub(sourceName, "%-[^|]+", "") -- UnitName(sourceName) only works in groups
           local _, class_name = GetPlayerInfoByGUID(interrupterGUID)
-          visual.spelltext:SetText(INTERRUPTED .. " [" .. Addon.ColorByClass(class_name, sourceName) .. "]")
+          visual.spelltext:SetText(INTERRUPTED .. " [" .. Addon.ColorByClass(class_name, TransliterateCyrillicLetters(sourceName)) .. "]")
 
           local _, max_val = castbar:GetMinMaxValues()
           castbar:SetValue(max_val)
@@ -1403,7 +1403,7 @@ do
           local db = Addon.db.profile
           sourceName = gsub(sourceName, "%-[^|]+", "") -- UnitName(sourceName) only works in groups
           local _, class_name = GetPlayerInfoByGUID(sourceGUID)
-          visual.spelltext:SetText(INTERRUPTED .. " [" .. Addon.ColorByClass(class_name, sourceName) .. "]")
+          visual.spelltext:SetText(INTERRUPTED .. " [" .. Addon.ColorByClass(class_name, TransliterateCyrillicLetters(sourceName)) .. "]")
 
           local _, max_val = castbar:GetMinMaxValues()
           castbar:SetValue(max_val)
