@@ -11,12 +11,26 @@ local SplitByWhitespace = Addon.SplitByWhitespace
 local TransliterateCyrillicLetters = Addon.TransliterateCyrillicLetters
 
 ---------------------------------------------------------------------------------------------------
--- 
+-- Functions for name text
 ---------------------------------------------------------------------------------------------------
 
-local NAME_ABBREVIATION_FUNCTION = {
-  FULL = function(unit_name) return unit_name end,
-  INITIALS = function(unit_name) 
+function Addon:SetNameText(unit)
+  local unit_name = unit.name
+  local style = unit.style
+
+  unit_name = TransliterateCyrillicLetters(unit_name)
+
+  -- Full names in headline view
+  if style == "NameOnly" or style == "NameOnly-Unique" then
+    return unit_name
+  end
+
+  local db = Addon.db.profile.settings.name  
+  local name_setting = (unit.reaction == "FRIENDLY" and db.AbbreviationForFriendlyUnits) or db.AbbreviationForEnemyUnits
+
+  if name_setting == "FULL" then
+    return unit_name
+  elseif name_setting == "INITIALS" then
     local parts, count = SplitByWhitespace(unit_name)
     local initials = {}
     for i, p in pairs(parts) do
@@ -27,26 +41,8 @@ local NAME_ABBREVIATION_FUNCTION = {
       end
     end
     return table_concat(initials, ". ")
-  end,
-  LAST = function(unit_name) 
+  else -- LAST
     local parts, count = SplitByWhitespace(unit_name)
     return parts[count]
-  end,
-}
-
-function Addon:SetNameText(unit)
-  local name = unit.name
-  local style = unit.style
-
-  name = TransliterateCyrillicLetters(name)
-
-  -- Full names in headline view
-  if style == "NameOnly" or style == "NameOnly-Unique" then
-    return name
   end
-
-  local db = Addon.db.profile.settings.name  
-  local name_setting = (unit.reaction == "FRIENDLY" and db.AbbreviationForFriendlyUnits) or db.AbbreviationForEnemyUnits
-
-  return NAME_ABBREVIATION_FUNCTION[name_setting](name)
 end
