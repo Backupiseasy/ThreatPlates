@@ -864,8 +864,11 @@ do
 		visual.spellicon:SetTexture(texture)
 
     local target_unit_name = UnitName(unit.unitid .. "target")
-    local _, class_name = UnitClass(target_unit_name)
-    castbar.CastTarget:SetText(Addon.ColorByClass(class_name, TransliterateCyrillicLetters(target_unit_name)))
+    -- There are situations when UnitName returns nil (OnHealthUpdate, hypothesis: health update when the unit died tiggers this, but then there is no target any more)
+    if target_unit_name then
+      local _, class_name = UnitClass(target_unit_name)
+      castbar.CastTarget:SetText(Addon.ColorByClass(class_name, TransliterateCyrillicLetters(target_unit_name)))
+    end
 
     castbar.IsCasting = not channeled
     castbar.IsChanneling = channeled
