@@ -1163,7 +1163,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
         Show = true,
         CustomColor = RGB(255, 255, 255),
         UseThreatColor = true,
-        Type = Addon.THREAT_VALUE_TYPE.SCALED,
+        Type = Addon.THREAT_VALUE_TYPE.SCALED_PERCENTAGE,
         SecondPlayersName = true,
         OnlyInGroups = true,
         -- Layout
