@@ -12,7 +12,6 @@ local UNIT_LEVEL_TEMPLATE = UNIT_LEVEL_TEMPLATE
 local GetGuildInfo = GetGuildInfo
 local UnitName = UnitName
 
-local _G = _G
 local gsub = gsub
 local ceil = ceil
 local format = format
@@ -23,6 +22,7 @@ local RGB_P = ThreatPlates.RGB_P
 local GetColorByHealthDeficit = ThreatPlates.GetColorByHealthDeficit
 local UnitGetTotalAbsorbs
 local TransliterateCyrillicLetters = Addon.TransliterateCyrillicLetters
+local L = ThreatPlates.L
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -157,22 +157,22 @@ local function GetLevelDescription(unit)
 	local description
 
 	if classification == "worldboss" then
-		description = "World Boss"
+		description = L["World Boss"]
 	else
 		if unit.level > 0 then
-      description = "Level " .. unit.level
+      description = L["Level "] .. unit.level
     else
-      description = "Level ??"
+      description = L["Level ??"]
     end
 
 		if unit.isRare then
 			if unit.isElite then
-				description = description .. " (Rare Elite)"
+				description = description .. L[" (Rare Elite)"]
 			else
-				description = description .. " (Rare)"
+				description = description .. L[" (Rare)"]
 			end
 		elseif unit.isElite then
-			description = description .. " (Elite)"
+			description = description .. L[" (Elite)"]
 		end
 	end
 
