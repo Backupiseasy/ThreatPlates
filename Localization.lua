@@ -51,12 +51,14 @@ local TRANSLITERATE_CHARS = {
 
 function Addon.TransliterateCyrillicLetters(text)
   if Addon.db.profile.Localization.TransliterateCyrillicLetters and text and text:len() > 1 then
-    local transliterated_text = TextCache[text]
+    local cache_entry = TextCache[text]
+
+    local transliterated_text = cache_entry.Transliteration
     if not transliterated_text then
       transliterated_text = text:gsub(' ', '  ')  -- Deals with spaces so that sub can work with cyrillic guild names that have spaces
       transliterated_text = transliterated_text:gsub("..", TRANSLITERATE_CHARS) -- '..' pattern matches a single cyrillic letter, or double space from above which gets replaced by single space
 
-      TextCache[text] = transliterated_text
+      cache_entry.Transliteration = transliterated_text
     end
 
     return transliterated_text

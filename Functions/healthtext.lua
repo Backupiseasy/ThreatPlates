@@ -273,7 +273,9 @@ local function TextRoleGuildLevel(unit)
 		-- color = RGB_P(unit.levelcolorRed, unit.levelcolorGreen, unit.levelcolorBlue, .70)
 	end
 
-	return description, color
+  description = TransliterateCyrillicLetters(description)
+
+  return description, color
 end
 
 local function TextRoleGuild(unit)
@@ -287,6 +289,8 @@ local function TextRoleGuild(unit)
     color = COLOR_GUILD
 	end
 
+  description = TransliterateCyrillicLetters(description)
+
 	return description, color
 end
 
@@ -298,6 +302,8 @@ local function TextNPCRole(unit)
 	if unit.type == "NPC" then
     description = GetUnitSubtitle(unit)
   end
+
+  description = TransliterateCyrillicLetters(description)
 
   return description, color
 end
@@ -365,8 +371,6 @@ function Addon.SetCustomText(tp_frame, unit)
     elseif not db.SubtextColorUseSpecific then
       color = db.SubtextColor
     end
-
-    subtext = TransliterateCyrillicLetters(subtext)
 
     customtext:SetText(subtext or "")
     customtext:SetTextColor(color.r or 1, color.g or 1, color.b or 1, color.a or 1)

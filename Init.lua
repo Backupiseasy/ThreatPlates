@@ -12,6 +12,7 @@ local ThreatPlates = Addon.ThreatPlates
 
 -- Lua APIs
 local string, format = string, format
+local rawset = rawset
 
 -- WoW APIs
 local UnitPlayerControlled = UnitPlayerControlled
@@ -56,9 +57,29 @@ TidyPlatesThreatDBM = true
 Addon.PlayerClass = select(2, UnitClass("player"))
 Addon.PlayerName = select(1, UnitName("player"))
 
+-- Cache (weak table) for memoizing expensive text functions (like abbreviation, tranliteration)
+local CacheCreateEntry = function(table, key)
+	local entry = {}
+	rawset(table, key, entry)
+	return entry
+end
+
+local CreateTextCache = function()
+	local text_cache = {}
+	setmetatable(text_cache, {
+		__mode = "kv",
+		__index = CacheCreateEntry,
+	})
+	return text_cache
+end
+
+---------------------------------------------------------------------------------------------------
+-- Caches to the reduce CPU load of expensive functions
+---------------------------------------------------------------------------------------------------
+
 Addon.Animations = {}
 Addon.Cache = {
-	Texts = {},
+	Texts = CreateTextCache(),
 	TriggerWildcardTests = {},
 	CustomPlateTriggers = {
 		Name = {},
