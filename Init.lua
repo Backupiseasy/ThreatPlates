@@ -151,18 +151,6 @@ Addon.LoadOnDemandLibraries = function()
 	end
 end
 
-Addon.Truncate = function(value)
-	local abs_value = (value > 0 and value) or (-1 * value)
-
-	if abs_value >= 1e6 then
-		return format("%.1fm", value / 1e6)
-	elseif abs_value >= 1e4 then
-		return format("%.1fk", value / 1e3)
-	else
-		return value
-	end
-end
-
 --------------------------------------------------------------------------------------------------
 -- Utils: Handling of colors
 ---------------------------------------------------------------------------------------------------

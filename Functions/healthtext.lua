@@ -4,6 +4,13 @@ local ThreatPlates = Addon.ThreatPlates
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
+
+-- Lua APIs
+local gsub = gsub
+local ceil = ceil
+local string = string
+
+-- WoW APIs
 local UnitIsPlayer = UnitIsPlayer
 local UnitPlayerControlled = UnitPlayerControlled
 local UnitExists = UnitExists
@@ -12,15 +19,11 @@ local UNIT_LEVEL_TEMPLATE = UNIT_LEVEL_TEMPLATE
 local GetGuildInfo = GetGuildInfo
 local UnitName = UnitName
 
-local gsub = gsub
-local ceil = ceil
-local format = format
-local string = string
-
+-- ThreatPlates APIs
 local RGB = ThreatPlates.RGB
 local RGB_P = ThreatPlates.RGB_P
 local GetColorByHealthDeficit = ThreatPlates.GetColorByHealthDeficit
-local UnitGetTotalAbsorbs
+local Truncate
 local TransliterateCyrillicLetters = Addon.TransliterateCyrillicLetters
 local L = ThreatPlates.L
 
@@ -46,67 +49,6 @@ TooltipScanner:SetOwner( WorldFrame, "ANCHOR_NONE" )
 ---------------------------------------------------------------------------------------------------
 local Settings
 local ShowHealth, ShowAbsorbs
-
----------------------------------------------------------------------------------------------------
--- Determine correct number units: Western or East Asian Nations (CJK)
----------------------------------------------------------------------------------------------------
-local function TruncateWestern(value)
-  if not Addon.db.profile.text.truncate then
-    return value
-  end
-
-  if value >= 1e6 then
-    return format("%.1fm", value / 1e6)
-  elseif value >= 1e4 then
-    return format("%.1fk", value / 1e3)
-  else
-    return value
-  end
-end
-
-local TruncateEastAsian = TruncateWestern
-local Truncate = TruncateWestern
-
-local MAP_LOCALE_TO_UNIT_SYMBOL = {
-  koKR = { -- Korrean
-    Unit_1K = "천",
-    Unit_10K = "만",
-    Unit_1B = "억",
-  },
-  zhCN = { -- Simplified Chinese
-    Unit_1K = "千",
-    Unit_10K = "万",
-    Unit_1B = "亿",
-  },
-  zhTW = { -- Traditional Chinese
-    Unit_1K = "千",
-    Unit_10K = "萬",
-    Unit_1B = "億",
-  },
-}
-
-local locale = GetLocale()
-if MAP_LOCALE_TO_UNIT_SYMBOL[locale] then
-  local Format_Unit_1K = "%.1f" .. MAP_LOCALE_TO_UNIT_SYMBOL[locale].Unit_1K
-  local Format_Unit_10K = "%.1f" .. MAP_LOCALE_TO_UNIT_SYMBOL[locale].Unit_10K
-  local Format_Unit_1B = "%.1f" .. MAP_LOCALE_TO_UNIT_SYMBOL[locale].Unit_1B
-
-  TruncateEastAsian = function(value)
-    if not Addon.db.profile.text.truncate then
-      return value
-    end
-
-    if value >= 1e8 then
-      return format(Format_Unit_1B, value / 1e8)
-    elseif value >= 1e4 then
-      return format(Format_Unit_10K, value / 1e4)
-    elseif value >= 1e3 then
-      return format(Format_Unit_1K, value / 1e3)
-    else
-      return value
-    end
-  end
-end
 
 local function GetUnitSubtitle(unit)
 	-- Bypass caching while in an instance
@@ -392,11 +334,15 @@ function Addon.UpdateStyleForStatusText(tp_frame, unit)
 end
 
 function Addon:UpdateConfigurationStatusText()
-  Settings = Addon.db.profile.text
+  Settings = self.db.profile.text
 
-  Truncate = (Settings.LocalizedUnitSymbol and TruncateEastAsian) or TruncateWestern
+  if Settings.truncate then
+    Truncate = self.Truncate
+  else
+    Truncate = function(value) return value end
+  end
 
-  if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC then
+  if self.IS_CLASSIC or self.IS_TBC_CLASSIC then
     ShowAbsorbs = false
   else
     ShowAbsorbs = Settings.AbsorbsAmount or Settings.AbsorbsPercentage

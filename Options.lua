@@ -12,7 +12,6 @@ local ipairs, next = ipairs, next
 local string = string
 local table = table
 local tonumber, tostring = tonumber, tostring
-local select = select
 local type = type
 
 -- WoW APIs

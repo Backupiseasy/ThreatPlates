@@ -1862,6 +1862,7 @@ function Addon:EnableCastBars() ShowCastBars = true end
 function Addon:ForceUpdate()
   wipe(PlateOnUpdateQueue)
 
+  Addon:UpdateConfigurationLocalization()
   Addon:UpdateConfigurationStatusText()
 
   CVAR_NameplateOccludedAlphaMult = tonumber(GetCVar("nameplateOccludedAlphaMult"))
