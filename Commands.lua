@@ -110,7 +110,7 @@ local function SearchDBForString(db, prefix, keyword)
 	end
 end
 
-function TidyPlatesThreat:ChatCommandDebug(cmd_list)
+local function ChatCommandDebug(cmd_list)
 	local command = cmd_list[1]
 
 	if command == "searchdb" then
