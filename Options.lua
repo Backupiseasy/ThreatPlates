@@ -483,22 +483,7 @@ local function GetValue(info)
   return value
 end
 
-local function CheckIfValueExists(widget_info, setting)
-  local value = Addon.db.profile
-  local keys = Addon.ConcatTables(widget_info, setting)
-
-  for index = 1, #keys do
-    if not value then
-      return true
-    else
-      value = value[keys[index]]
-    end
-  end
-
-  return value ~= nil
-end
-
-local function AddIfSettingExists(entry) -- endwidget_info, setting)
+local function AddIfSettingExists(entry)
   local value = Addon.db.profile
   for index, key in ipairs(entry.arg) do
     if value ~= nil then
@@ -1259,17 +1244,17 @@ local function GetFontEntry(name, pos, widget_info)
   return entry
 end
 
--- Syntax for settings:
---  Font = {
---    Typeface = Addon.DEFAULT_SMALL_FONT,
---    Size = 10,
---    Transparency = 1,
---    Color = RGB(255, 255, 255),
---    flags = "OUTLINE",
---    Shadow = true,
---    HorizontalAlignment = "CENTER",
---    VerticalAlignment = "CENTER",
---  },
+-- Options are shown based on the following settings:
+--   Font = {
+--     Typeface = Addon.DEFAULT_SMALL_FONT,
+--     Size = 10,
+--     Transparency = 1,
+--     Color = RGB(255, 255, 255),
+--     flags = "OUTLINE",
+--     Shadow = true,
+--     HorizontalAlignment = "CENTER",
+--     VerticalAlignment = "CENTER",
+--   },
 local function GetFontEntryDefault(name, pos, widget_info, func_disabled)
   widget_info = Addon.ConcatTables(widget_info, { "Font" } )
 
@@ -1513,7 +1498,20 @@ local function GetFramePositioningEntry(pos, widget_info)
   return entry
 end
 
+-- Options are shown based on the following settings:
+--   <Name> = {
+--     Show = true,
+--     Anchor = "BOTTOM",
+--     InsideAnchor = false,
+--     HorizontalOffset = 0,
+--     VerticalOffset = -2,
+--     AutoSizeing
+--     Width = 345,
+--     MaxLines = 4534,
+--   } 
 local function GetTextEntry(name, pos, widget_info)
+  local arg_auto_sizing = Addon.ConcatTables(widget_info, { "AutoSizing" })
+
   local entry = {
     type = "group",
     order = pos,
@@ -1529,8 +1527,49 @@ local function GetTextEntry(name, pos, widget_info)
       Spacer1 = GetSpacerEntry(2),
       Font = GetFontEntryDefault(L["Font"], 10, widget_info),
       Positioning = GetFontPositioningEntry(20, widget_info),
+      Boundaries = AddIfSettingExists({
+        name = L["Boundaries"],
+        order = 21,
+        type = "group",
+        inline = true,
+        arg = Addon.ConcatTables(widget_info, { "AutoSizing" }),
+        args = {
+          Description = {
+            type = "description",
+            order = 1,
+            name = L["These settings will define the space that text can be placed on the nameplate."],
+            width = "full",
+          },
+          AutoSizing = {
+            type = "toggle",
+            order = 10,
+            name = L["Auto Sizing"],
+            arg = arg_auto_sizing,
+          },
+          WordWrap = {
+            type = "toggle",
+            order = 20,
+            name = L["Word Wrap"],
+            arg = Addon.ConcatTables(widget_info, { "WordWrap" }),
+            disabled = function() return GetValue({ arg = arg_auto_sizing }) end,
+          },
+          Width = { 
+            type = "range", 
+            width = "double", 
+            order = 30, 
+            name = L["Width"], 
+            arg = Addon.ConcatTables(widget_info, { "Width" }),
+            max = 250, 
+            min = 20, 
+            step = 1, 
+            isPercent = false,
+            disabled = function() return GetValue({ arg = arg_auto_sizing }) end,
+          },
+        },
+      })
     },
   }
+
   return entry
 end
 
@@ -5893,6 +5932,7 @@ local function CreateHealthbarOptions()
         name = L["Class Color for Players"],
         order = 20,
         type = "toggle",
+        width = "double",
         arg = { "settings", "healthbar", "TargetUnit", "UseClassColor" },
       },
     },

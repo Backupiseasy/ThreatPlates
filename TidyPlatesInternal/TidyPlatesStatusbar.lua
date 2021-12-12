@@ -160,9 +160,7 @@ local function UpdateLayoutHealthbar(self, db, style)
 
   local db_target_unit = db.healthbar.TargetUnit
   Font:UpdateText(self, self.TargetUnit, db_target_unit)
-
-  local width, height = self:GetSize()
-  self.TargetUnit:SetSize(width, height)
+  Font:UpdateTextSize(self, self.TargetUnit, db_target_unit)
   self.TargetUnit:SetShown(self.TargetUnit:GetText() ~= nil and db_target_unit.Show)
 
   SettingsTargetUnit = db_target_unit
@@ -308,9 +306,8 @@ local function UpdateLayoutCastbar(self, db, style)
   self.InterruptBorder:SetFrameLevel(frame_level)
 
   Font:UpdateText(self, self.CastTarget, db.castbar.CastTarget)
+  Font:UpdateTextSize(self, self.CastTarget, db.castbar.CastTarget)
 
-  local width, height = self:GetSize()
-  self.CastTarget:SetSize(width, height)
   self.CastTarget:SetShown(db.castbar.CastTarget.Show)
 end
 

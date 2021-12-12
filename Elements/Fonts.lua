@@ -55,3 +55,15 @@ function Font:UpdateText(parent, font, db)
     font:SetPoint(anchor, parent, anchor, db.HorizontalOffset or 0, db.VerticalOffset or 0)
   end
 end
+
+function Font:UpdateTextSize(parent, font, db)
+  local width, height = parent:GetSize()
+  if db.AutoSizing == nil or db.AutoSizing then
+    font:SetSize(width, height)
+    font:SetWordWrap(false)
+  else
+    font:SetSize(db.Width, font:GetLineHeight() * font:GetMaxLines())
+    font:SetWordWrap(db.WordWrap)
+    font:SetNonSpaceWrap(true)
+  end
+end
