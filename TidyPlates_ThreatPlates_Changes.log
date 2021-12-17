@@ -11,6 +11,11 @@
 * Added an option limit text length and/or wrap text for cast target and target of target names [Comment #5070, #4816], 
 
 ------------------------------------------------------
+10.2.14 (2021-11-17)
+------------------------------------------------------
+* Updated Shaman totems - added Vesper Totem from Kyrian Covenant [GH-313].
+
+------------------------------------------------------
 10.2.13 (2021-11-01)
 ------------------------------------------------------
 * Updated TOC version for for Classic Patch 1.14.0.

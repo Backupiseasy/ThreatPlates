@@ -285,6 +285,9 @@ local TOTEM_DATA_RETAIL = {
   { SpellID = 204330, ID = "P2", GroupColor = "2b76ff"},	  -- Skyfury Totem
   { SpellID = 204336, ID = "P4", GroupColor = "2b76ff"},	  -- Grounding Totem
 
+  -- Totems from other sources
+  { SpellID = 324386, ID = "O1", GroupColor = "00FFFF", Icon = "ability_bastion_shaman" },	  -- Vesper Totem (Kyrian Covenant)
+
   --{ SpellID = 196932, ID = "N6", GroupColor = "4c9900"},		-- Voodoo Totem (removed in patch 8.0.1)
 }
 
