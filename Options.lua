@@ -6829,6 +6829,17 @@ CreateCustomNameplateEntry = function(index)
         type = "group",
         inline = false,
         args = {
+          NameOfCustomStyle = {
+            name = L["Name"],
+            type = "input",
+            order = 5,
+            width = "full",
+            set = function(info, val)
+              SetValue(info, val)
+              CustomPlateUpdateEntry(index)
+            end,
+            arg = { "uniqueSettings", index, "Name" },
+          },
           TriggerType = {
             name = L["Type"],
             type = "select",
@@ -6906,6 +6917,18 @@ CreateCustomNameplateEntry = function(index)
             disabled = function() return not db.AuraWidget.ON and not db.AuraWidget.ShowInHeadlineView end,
             hidden = function() return db.uniqueSettings[index].Trigger.Type ~= "Aura" end,
           },
+          AuraTriggerOnlyMine = {
+            name = L["Only Mine"],
+            type = "toggle",
+            order = 25,
+            set = function(info, val)
+              SetValuePlain(info, val);
+              UpdateSpecial()
+            end,
+            arg = { "uniqueSettings", index, "Trigger", "Aura", "ShowOnlyMine" },
+            disabled = function() return not db.AuraWidget.ON and not db.AuraWidget.ShowInHeadlineView end,
+            hidden = function() return db.uniqueSettings[index].Trigger.Type ~= "Aura" end,
+          },
           AuraWidgetWarning = {
             type = "description",
             order = 30,
@@ -6925,17 +6948,6 @@ CreateCustomNameplateEntry = function(index)
               return tostring(db.uniqueSettings[index].Trigger["Cast"].Input or "")
             end,
             hidden = function() return db.uniqueSettings[index].Trigger.Type ~= "Cast" end,
-          },
-          NameOfCustomStyle = {
-            name = L["Name"],
-            type = "input",
-            order = 40,
-            width = "full",
-            set = function(info, val)
-              SetValue(info, val)
-              CustomPlateUpdateEntry(index)
-            end,
-            arg = { "uniqueSettings", index, "Name" },
           },
         },
       },

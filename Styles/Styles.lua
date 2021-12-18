@@ -265,21 +265,26 @@ end
 
 local UnitStyle_NameDependent = Addon.UnitStyle_NameDependent
 
-function Addon.UnitStyle_AuraDependent(unit, aura_id, aura_name)
+function Addon.UnitStyle_AuraDependent(unit, aura_id, aura_name, aura_cast_by_player)
   local plate_style
 
   local unique_settings = AuraTriggers[aura_id] or AuraTriggers[aura_name]
-  if unique_settings and unique_settings.useStyle and unique_settings.Enable.UnitReaction[unit.reaction] then
-    plate_style = (unique_settings.showNameplate and "unique") or (unique_settings.ShowHeadlineView and "NameOnly-Unique") or "etotem"
 
-    -- As this is called for every aura on a unit, never set it to false (overwriting a previous true value)
-    if plate_style then
-      unit.CustomStyleAura = plate_style
-      unit.CustomPlateSettingsAura = unique_settings
 
-      local _, _, icon = _G.GetSpellInfo(aura_id)
-      unique_settings.AutomaticIcon = icon
-    end
+  if unique_settings and unique_settings.useStyle and 
+    unique_settings.Enable.UnitReaction[unit.reaction] and                 -- Check if enabled for unit's faction
+    (not unique_settings.Trigger.Aura.ShowOnlyMine or aura_cast_by_player) -- Check for show only my auras
+    then
+      plate_style = (unique_settings.showNameplate and "unique") or (unique_settings.ShowHeadlineView and "NameOnly-Unique") or "etotem"
+
+      -- As this is called for every aura on a unit, never set it to false (overwriting a previous true value)
+      if plate_style then
+        unit.CustomStyleAura = plate_style
+        unit.CustomPlateSettingsAura = unique_settings
+
+        local _, _, icon = _G.GetSpellInfo(aura_id)
+        unique_settings.AutomaticIcon = icon
+      end
   end
 
   return plate_style

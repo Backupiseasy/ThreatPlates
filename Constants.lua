@@ -1473,6 +1473,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
           Aura = {
             Input = "",
             AsArray = {}, -- Generated after entering Input with Addon.Split
+            ShowOnlyMine = false,
           },
           Cast = {
             Input = "",

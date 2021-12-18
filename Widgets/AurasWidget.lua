@@ -1085,43 +1085,43 @@ function Widget:UpdateUnitAuras(aura_grid_frame, unit, enabled_auras, enabled_cc
   local AuraFilterFunctionCC = self.FILTER_FUNCTIONS[db.CrowdControl.FilterMode]
   local GetAuraPriority = self.PRIORITY_FUNCTIONS[sort_order]
 
-  local aura, show_aura
   local aura_count = 1
-  local isCastByPlayer
   local CustomStyleAuraTrigger = false
 
   for i = 1, 40 do
     -- Auras are evaluated by an external function - pre-filtering before the icon grid is populated
     UnitAuraList[aura_count] = UnitAuraList[aura_count] or {}
-    aura = UnitAuraList[aura_count]
+    local aura = UnitAuraList[aura_count]
 
     -- TBC Classic, Retail:
     -- name, icon, count, debuffType, duration, expirationTime, source, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, castByPlayer, nameplateShowAll, timeMod, ...
+    local _
     aura.name, aura.texture, aura.stacks, aura.type, aura.duration, aura.expiration, aura.caster,
-      aura.StealOrPurge, aura.ShowPersonal, aura.spellid, aura.PlayerCanApply, aura.BossDebuff, isCastByPlayer, aura.ShowAll =
+      aura.StealOrPurge, aura.ShowPersonal, aura.spellid, aura.PlayerCanApply, aura.BossDebuff, _, aura.ShowAll =
       UnitAuraWrapper(unitid, i, effect)
 
     -- ShowPesonal: Debuffs  that are shown on Blizzards nameplate, no matter who casted them (and
     -- ShowAll: Debuffs
     if not aura.name then break end
 
+    -- CastByPlayer is also used by aura trigger custom styles (only my auras)
+    aura.CastByPlayer = (aura.caster == "player" or aura.caster == "pet" or aura.caster == "vehicle")
     if Addon.ActiveAuraTriggers then
       -- Do this to prevent calls to UnitStyle_AuraDependent after a aura trigger was found already
-      CustomStyleAuraTrigger = CustomStyleAuraTrigger or UnitStyle_AuraDependent(unit, aura.spellid, aura.name)
+      CustomStyleAuraTrigger = CustomStyleAuraTrigger or UnitStyle_AuraDependent(unit, aura.spellid, aura.name, aura.CastByPlayer)
     end
 
     -- Workaround or hack, currently, for making aura-triggered custom nameplates work even on nameplates that do
     -- not show auras currently without a big overhead
     if not widget_frame.HideAuras then
-      show_aura = false
+      local show_aura = false
 
       --aura.unit = unitidf
       aura.Index = i
       aura.effect = effect
       aura.ShowAll = aura.ShowAll
       aura.CrowdControl = (enabled_cc and self.CROWD_CONTROL_SPELLS[aura.spellid])
-      aura.CastByPlayer = (aura.caster == "player" or aura.caster == "pet" or aura.caster == "vehicle")
-
+      
       -- Store Order/Priority
       if aura.CrowdControl then
         show_aura = SpellFilterCC(self, db.CrowdControl, aura, AuraFilterFunctionCC)
@@ -1163,7 +1163,7 @@ function Widget:UpdateUnitAuras(aura_grid_frame, unit, enabled_auras, enabled_cc
       -- invalidate all entries after storedAuraCount
       -- if number of auras to show was decreased, remove any overflow aura frames
       local i = aura_count + 1
-      aura = UnitAuraList[i]
+      local aura = UnitAuraList[i]
       while aura do
         aura.priority = nil
         i = i + 1
@@ -1190,7 +1190,7 @@ function Widget:UpdateUnitAuras(aura_grid_frame, unit, enabled_auras, enabled_cc
     aura_count_cc = 0
     local aura_frame
     for index = index_start, index_end, index_step do
-      aura = UnitAuraList[index]
+      local aura = UnitAuraList[index]
 
       if aura.spellid and aura.expiration then
         if aura.CrowdControl then
