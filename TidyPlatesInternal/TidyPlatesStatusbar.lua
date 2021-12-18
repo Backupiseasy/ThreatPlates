@@ -166,17 +166,30 @@ local function UpdateLayoutHealthbar(self, db, style)
   SettingsTargetUnit = db_target_unit
 end
 
-local function ShowTargetUnit(self, target_of_target_name, class_name)
+local function ShowTargetUnit(self, unitid)
   if SettingsTargetUnit.ShowOnlyInCombat and not InCombatLockdown() then
     self:HideTargetUnit()
     return
   end
 
   local target_of_target = self.TargetUnit
-  if target_of_target_name then
-    target_of_target:SetText("|cffffffff[|r " .. TransliterateCyrillicLetters(target_of_target_name) .. " |cffffffff]|r")
-    target_of_target.ClassName = class_name
-    target_of_target:Show()
+  
+  -- If just the color should be updated, unitid will be nil
+  if unitid then
+    local target_of_target_unit = unitid .. "target"
+    if not SettingsTargetUnit.ShowNotMyself or not UnitIsUnit("player", target_of_target_unit) then
+      local target_of_target_name = UnitName(target_of_target_unit)
+      if target_of_target_name then
+        local _, class_name = UnitClass(target_of_target_unit)
+        target_of_target:SetText("|cffffffff[|r " .. TransliterateCyrillicLetters(target_of_target_name) .. " |cffffffff]|r")
+        target_of_target.ClassName = class_name
+        target_of_target:Show()
+      else
+        self:HideTargetUnit()
+      end
+    else
+      self:HideTargetUnit()
+    end
   end
 
   -- Update the color if the element is shown

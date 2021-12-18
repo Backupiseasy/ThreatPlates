@@ -5911,6 +5911,12 @@ local function CreateHealthbarOptions()
         type = "toggle",
         arg = { "settings", "healthbar", "TargetUnit", "ShowOnlyForTarget" },
       },
+      TargetNotMyself = {
+        name = L["Not Myself"],
+        order = 30,
+        type = "toggle",
+        arg = { "settings", "healthbar", "TargetUnit", "ShowNotMyself" },
+      },
     },
   }
 

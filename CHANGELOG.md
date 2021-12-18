@@ -8,3 +8,4 @@
 * Added an option to abbreviate unit names in healthbar view [GH-284, GH-270].
 * Added an option to transliterate cyrillic letters in unit names and status texts [GH-300].
 * Added an option limit text length and/or wrap text for cast target and target of target names [Comment #5070, #4816]
+* Added an option to show target of target only when it's not the player [Comment #4844].

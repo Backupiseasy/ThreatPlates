@@ -1171,13 +1171,7 @@ do
         return
       end
 
-      local target_of_target_name = UnitName(unitid .. "target")
-      if target_of_target_name then
-        local _, class_name = UnitClass(unitid .. "target")
-        healthbar:ShowTargetUnit(target_of_target_name, class_name)
-      else
-        healthbar:HideTargetUnit()
-      end
+      healthbar:ShowTargetUnit(unitid)
     end
   end
 

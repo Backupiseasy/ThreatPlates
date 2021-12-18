@@ -1587,6 +1587,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
           UseClassColor = true,
           ShowOnlyInCombat = true,
           ShowOnlyForTarget = false,
+          ShowNotMyself = true,
           -- Layout
           Anchor = "RIGHT",
           InsideAnchor = false,
