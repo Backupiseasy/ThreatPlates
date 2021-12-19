@@ -2339,7 +2339,7 @@ end
 
 local function CreateTargetArtWidgetOptions()
   local options = {
-    name = L["Target Hightlight"],
+    name = L["Target Highlight"],
     type = "group",
     order = 90,
     args = {
