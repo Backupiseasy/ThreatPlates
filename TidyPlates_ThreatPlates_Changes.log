@@ -1,7 +1,7 @@
 ﻿------------------------------------------------------
 10.3.0 (2021-12-xx)
 ------------------------------------------------------
-* Appearance and layout for buffs, debuffs, and crowd control can now be configured indivually for Auras widget.
+* Appearance and layout for buffs, debuffs, and crowd control can now be configured indivually for Auras widget [Comment #1302, #1246, #1830, #1883, #3886, #4167, #4637, #4760, #4960, #5034, #5131, #5346, #5418, #5448, #5562, #5793, TPC#754, Issue #465, IM].
 * Player units are now colored based on their PvP flag similar to WoW default nameplates [Comment #5829].
 * Extended threat percentage to show raw or scaled threat percentage or the threat difference (value or percentage) to the second player in the mob's threat table [Issue GitHub#285].
 * The cast target's name will now be shown in class color if the target is a player [Issue #419, #465, Comment #4799, #504, #5445, #5491].
