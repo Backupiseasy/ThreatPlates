@@ -138,7 +138,7 @@ function TidyPlatesThreat:ChatCommand(input)
 		elseif command == "unit" then
 			local plate = C_NamePlate.GetNamePlateForUnit("target")
 			if not plate then return end
-			TP.DEBUG_PRINT_UNIT(plate.TPFrame.unit, true)
+			Addon.Debug:PrintUnit(plate.TPFrame.unit, true)
 		elseif command == "migrate" and cmd_list[2] then
 			Addon.MigrateDatabase(cmd_list[2])
 		elseif command == "prune" then
@@ -151,6 +151,19 @@ function TidyPlatesThreat:ChatCommand(input)
 			Addon:PrintQuests()
 		elseif command == "cache" then
 			Addon.DebugPrintCaches()
+		elseif command == "guid" then
+			local plate = C_NamePlate.GetNamePlateForUnit("target")
+			if not plate then return end
+
+			local guid = UnitGUID(plate.TPFrame.unit.unitid)
+			local _, _,  _, _, _, npc_id = strsplit("-", guid)
+
+			print(plate.TPFrame.unit.name, " => NPC-ID:", npc_id, "=>", guid)
+
+			local widgets = C_UIWidgetManager.GetAllWidgetsBySetID(C_UIWidgetManager.GetPowerBarWidgetSetID())
+			for i, w in pairs(widgets) do
+				print (i, w)
+			end
 		else
 			TidyPlatesThreat:ChatCommandDebug(cmd_list)
 		end
@@ -162,13 +175,28 @@ end
 
 function TidyPlatesThreat:ChatCommandDebug(cmd_list)
 	local command = cmd_list[1]
-	if input == "combat" and DEBUG then
+	if command == "combat" and DEBUG then
 		local plate = C_NamePlate.GetNamePlateForUnit("target")
 		if not plate then return end
 
 		print ("In Combat:", IsInCombat())
 		print ("In Combat with Player:", UnitAffectingCombat("target", "player"))
-	elseif input == "debug" then
+	elseif command == "alpha" then
+		local plate = C_NamePlate.GetNamePlateForUnit("target")
+		if not plate then return end
+
+		local tp_frame = plate.TPFrame
+		local unit = tp_frame.unit
+
+		print("Plate:")
+		print("    Alpha:", plate:GetAlpha())
+		print("    Scale:", plate:GetScale())
+		print("Threat Plate:")
+		print("    Showing / Hiding:", tp_frame.IsShowing, "/", tp_frame.HidingScale)
+		print("    Alpha:", tp_frame:GetAlpha())
+		print("    CurrentAlpha:", tp_frame.CurrentAlpha)
+		print("    Scale:", tp_frame:GetScale())
+	elseif command == "debug" then
 		local plate = C_NamePlate.GetNamePlateForUnit("target")
 		if not plate then return end
 
@@ -183,7 +211,7 @@ function TidyPlatesThreat:ChatCommandDebug(cmd_list)
 		print ("Plate Style:", nameplate_style)
 		print ("Color Statusbar:", Addon.Debug:ColorToString(tp_frame.visual.Healthbar:GetStatusBarColor()))
 		print ("Color Border:", Addon.Debug:ColorToString(tp_frame.visual.Healthbar.Border:GetBackdropColor()))
-	elseif input == "plate" then
+	elseif command == "plate" then
 		local plate = C_NamePlate.GetNamePlateForUnit("target")
 		if not plate then return end
 
@@ -216,7 +244,7 @@ function TidyPlatesThreat:ChatCommandDebug(cmd_list)
 		if not plate then return end
 		local unit = plate.TPFrame.unit
 
-		TP.DEBUG_PRINT_UNIT(unit, true)
+		Addon.Debug:PrintUnit(unit, true)
     local type, zero, server_id, instance_id, zone_uid, npc_id, spawn_uid = strsplit("-", unit.guid)
     print ("GUID:", type, zero, server_id, instance_id, zone_uid, npc_id, spawn_uid)
   elseif command == "color" then

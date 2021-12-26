@@ -126,12 +126,14 @@ end
 function TidyPlatesThreat:CheckForFirstStartUp()
   local db = self.db.global
 
-  local spec_roles = self.db.char.spec
-  if #spec_roles ~= GetNumSpecializations() then
-    for i = 1, GetNumSpecializations() do
-      if spec_roles[i] == nil then
-        local _, _, _, _, role = GetSpecializationInfo(i)
-        spec_roles[i] = (role == "TANK" and true) or false
+  if not Addon.CLASSIC then
+    local spec_roles = self.db.char.spec
+    if #spec_roles ~= GetNumSpecializations() then
+      for i = 1, GetNumSpecializations() do
+        if spec_roles[i] == nil then
+          local _, _, _, _, role = GetSpecializationInfo(i)
+          spec_roles[i] = (role == "TANK" and true) or false
+        end
       end
     end
   end
@@ -174,9 +176,13 @@ function Addon:SetBaseNamePlateSize()
   local width = db.frame.width
   local height = db.frame.height
   if db.frame.SyncWithHealthbar then
-    -- this wont taint like NamePlateDriverFrame.SetBaseNamePlateSize
-    local zeroBasedScale = tonumber(GetCVar("NamePlateVerticalScale")) - 1.0
-    local horizontalScale = tonumber(GetCVar("NamePlateHorizontalScale"))
+    -- this wont taint like NamePlateDriverFrame:SetBaseNamePlateSize
+
+    -- The default size of Threat Plates healthbars is based on large nameplates with these defaults:
+    --   NamePlateVerticalScale = 1.7
+    --   NamePlateVerticalScale = 1.4
+    local zeroBasedScale = 0.7  -- tonumber(GetCVar("NamePlateVerticalScale")) - 1.0
+    local horizontalScale = 1.4 -- tonumber(GetCVar("NamePlateVerticalScale"))
 
     width = (db.healthbar.width - 10) * horizontalScale
     height = (db.healthbar.height + 35) * Lerp(1.0, 1.25, zeroBasedScale)
@@ -190,28 +196,41 @@ function Addon:SetBaseNamePlateSize()
   isInstance = isInstance and (instanceType == "party" or instanceType == "raid")
 
   db = TidyPlatesThreat.db.profile
-  if db.ShowFriendlyBlizzardNameplates or isInstance then
-    if NamePlateDriverFrame:IsUsingLargerNamePlateStyle() then
-      C_NamePlate.SetNamePlateFriendlySize(154, 64)
+  if Addon.CLASSIC then
+    -- Classic has the same nameplate size for friendly and enemy units, so either set both or non at all (= set it to default values)
+    if not db.ShowFriendlyBlizzardNameplates and not db.ShowEnemyBlizzardNameplates and not isInstance then
+      C_NamePlate.SetNamePlateFriendlySize(width, height)
+      C_NamePlate.SetNamePlateEnemySize(width, height)
     else
-      C_NamePlate.SetNamePlateFriendlySize(110, 45)
+      -- Smaller nameplates are not available in Classic
+      C_NamePlate.SetNamePlateFriendlySize(128, 32)
+      C_NamePlate.SetNamePlateEnemySize(128, 32)
     end
   else
-    C_NamePlate.SetNamePlateFriendlySize(width, height)
-  end
+    if db.ShowFriendlyBlizzardNameplates or isInstance then
+      if NamePlateDriverFrame:IsUsingLargerNamePlateStyle() then
+        C_NamePlate.SetNamePlateFriendlySize(154, 64)
+      else
+        C_NamePlate.SetNamePlateFriendlySize(110, 45)
+      end
+    else
+      C_NamePlate.SetNamePlateFriendlySize(width, height)
+    end
 
-  if db.ShowEnemyBlizzardNameplates then
-    if NamePlateDriverFrame:IsUsingLargerNamePlateStyle() then
-      C_NamePlate.SetNamePlateEnemySize(154, 64)
+    if db.ShowEnemyBlizzardNameplates then
+      if NamePlateDriverFrame:IsUsingLargerNamePlateStyle() then
+        C_NamePlate.SetNamePlateEnemySize(154, 64)
+      else
+        C_NamePlate.SetNamePlateEnemySize(110, 45)
+      end
     else
-      C_NamePlate.SetNamePlateEnemySize(110, 45)
+      C_NamePlate.SetNamePlateEnemySize(width, height)
     end
-  else
-    C_NamePlate.SetNamePlateEnemySize(width, height)
   end
 
   Addon:ConfigClickableArea(false)
 
+  -- For personal nameplate:
   --local clampedZeroBasedScale = Saturate(zeroBasedScale)
   --C_NamePlate_SetNamePlateSelfSize(baseWidth * horizontalScale * Lerp(1.1, 1.0, clampedZeroBasedScale), baseHeight)
 end
@@ -247,6 +266,20 @@ function TidyPlatesThreat:OnInitialize()
 
   -- Setup chat commands
   self:RegisterChatCommand("tptp", "ChatCommand")
+
+  if Addon.CLASSIC then
+    local LibClassicCasterino = Addon.LibClassicCasterino
+
+    -- Register callsbacks for spellcasting library
+    LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_START", Addon.UNIT_SPELLCAST_START)
+    LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_DELAYED", Addon.UnitSpellcastMidway) -- only for player
+    LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_STOP", Addon.UNIT_SPELLCAST_STOP)
+    LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_FAILED", Addon.UNIT_SPELLCAST_STOP)
+    LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_INTERRUPTED", Addon.UNIT_SPELLCAST_INTERRUPTED)
+    LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_CHANNEL_START", Addon.UNIT_SPELLCAST_CHANNEL_START)
+    LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_CHANNEL_UPDATE", Addon.UnitSpellcastMidway) -- only for player
+    LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_CHANNEL_STOP", Addon.UNIT_SPELLCAST_CHANNEL_STOP)
+  end
 end
 
 local function SetCVarHook(name, value, c)
@@ -262,7 +295,7 @@ local function SetCVarHook(name, value, c)
       Addon.CVars:Set("nameplateGlobalScale", 0.4)
     end
 
-    Addon:SetBaseNamePlateSize()
+    Addon:CallbackWhenOoC(function() Addon:SetBaseNamePlateSize() end)
   end
 end
 
@@ -275,6 +308,9 @@ function TidyPlatesThreat:OnEnable()
   TidyPlatesThreat:CheckForFirstStartUp()
   TidyPlatesThreat:CheckForIncompatibleAddons()
 
+  if not Addon.CLASSIC then
+    Addon.CVars:OverwriteBoolProtected("nameplateResourceOnTarget", self.db.profile.PersonalNameplate.ShowResourceOnTarget)
+  end
   TidyPlatesThreat:ReloadTheme()
 
   -- Register callbacks at LSM, so that we can refresh everything if additional media is added after TP is loaded

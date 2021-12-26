@@ -87,6 +87,12 @@ Addon.LEGACY_CUSTOM_NAMEPLATES = {
         HOSTILE = true,
       },
     },
+    OutOfInstances = true,
+    InInstances = true,
+    InstanceIDs = {
+      Enabled = false,
+      IDs = "",
+    },
     showIcon = true,
     useStyle = true,
     useColor = true,
@@ -923,6 +929,25 @@ local function FixTargetFocusTexture(profile_name, profile)
   end
 end
 
+local function RenameFilterMode(profile_name, profile)
+  local FilterModeMapping = {
+    whitelist = "Allow",
+    blacklist = "Block",
+    all = "None",
+  }
+
+  -- Part after or is just a fail-save, should never be called (as code is only executed once, after 9.3.0).
+  if DatabaseEntryExists(profile, { "AuraWidget", "Debuffs", "FilterMode" } ) then
+    profile.AuraWidget.Debuffs.FilterMode = FilterModeMapping[profile.AuraWidget.Debuffs.FilterMode] or profile.AuraWidget.Debuffs.FilterMode
+  end
+  if DatabaseEntryExists(profile, { "AuraWidget", "Buffs", "FilterMode" } ) then
+    profile.AuraWidget.Buffs.FilterMode = FilterModeMapping[profile.AuraWidget.Buffs.FilterMode] or profile.AuraWidget.Buffs.FilterMode
+  end
+  if DatabaseEntryExists(profile, { "AuraWidget", "CrowdControl", "FilterMode" } ) then
+    profile.AuraWidget.CrowdControl.FilterMode = FilterModeMapping[profile.AuraWidget.CrowdControl.FilterMode] or profile.AuraWidget.CrowdControl.FilterMode
+  end
+end
+
 ---------------------------------------------------------------------------------------------------
 -- Main migration function & settings
 ---------------------------------------------------------------------------------------------------
@@ -939,19 +964,24 @@ local MIGRATION_FUNCTIONS = {
 --  Borders = { MigrateBorderTextures, "8.7.0" },               -- (changed in 8.7.0)
 --  Auras = { MigrationAurasSettings, "9.0.0" },                -- (changed in 9.0.0)
 --  AurasFix = { MigrationAurasSettingsFix },                   -- (changed in 9.0.4 and 9.0.9)
+  ["1.4.0"] = {
+    MigrationCustomPlatesV3 = (Addon.CLASSIC and { MigrateCustomStylesToV3 }) or nil,
+    SpelltextPosition = (Addon.CLASSIC and { MigrateSpelltextPosition, NoDefaultProfile = true }) or nil,
+  },
   ["9.1.0"] = {
     MigrationForceFriendlyInCombat,
   },
   ["9.2.0"] = {
-    SpelltextPosition = { MigrateSpelltextPosition, NoDefaultProfile = true },
+    SpelltextPosition = (not Addon.CLASSIC and { MigrateSpelltextPosition, NoDefaultProfile = true }) or nil,
     FixTargetFocusTexture = { FixTargetFocusTexture, NoDefaultProfile = true },
   },
   ["9.2.2"] = {
-    MigrationCustomPlatesV3 = { MigrateCustomStylesToV3},
+    MigrationCustomPlatesV3 = (not Addon.CLASSIC and { MigrateCustomStylesToV3 }) or nil,
   },
-  ["10.0.0"] = {
-    -- MigrateDeprecatedSettingsEntries, -- TODO
+  ["9.3.0"] = {
+    RenameFilterMode = { RenameFilterMode, NoDefaultProfile = true },
   },
+  -- MigrateDeprecatedSettingsEntries, -- TODO
 }
 
 local ENTRIES_TO_DELETE = {
@@ -969,8 +999,6 @@ local ENTRIES_TO_DELETE = {
   },
   ["8.7.0"] = {
     { "debuffWidget" },
-  },
-  ["8.7.0"] = {
     { "uniqueSettings", "list" },
     { "OldSettings" },
   },
@@ -995,6 +1023,9 @@ local ENTRIES_TO_DELETE = {
     { "cacheClass", },
     { "customColor", },
   },
+  ["9.4.0"] = {
+    { "cache" },
+  }
 }
 
 local ENTRIES_TO_RENAME = {
@@ -1010,7 +1041,7 @@ local ENTRIES_TO_RENAME = {
   ["9.1.3"] = {
     { Deprecated = { "threat", "nonCombat" }, New = { "threat", "UseThreatTable" }, },
   },
-  ["10.0.0"] = {
+  ["9.4.0"] = {
     -- Color settings for healthbar and name
     { Deprecated = { "settings", "healthbar", "BackgroundUseForegroundColor" }, New = { "Healthbar", "BackgroundUseForegroundColor" }, },
     { Deprecated = { "settings", "healthbar", "BackgroundOpacity" }, New = { "Healthbar", "BackgroundOpacity" }, },
@@ -1068,6 +1099,7 @@ local ENTRIES_TO_RENAME = {
     -- Others
     { Deprecated = { "HeadlineView", "ShowTargetHighlight" }, New = { "targetWidget", "ShowInHeadlineView" }, },
     { Deprecated = { "HeadlineView", "ShowFocusHighlight" }, New = { "FocusWidget", "ShowInHeadlineView" }, },
+    { Deprecated = { "threatWidget", "ThreatPercentage" }, New = { "threat", "ThreatPercentage" }, },
   },
 }
 
@@ -1088,7 +1120,7 @@ local function ExecuteMigrationFunctions(current_version)
 
         local defaults
         if no_default_profile then
-          defaults = ThreatPlates.CopyTable(TidyPlatesThreat.db.defaults)
+          defaults = Addon.CopyTable(TidyPlatesThreat.db.defaults)
           TidyPlatesThreat.db:RegisterDefaults({})
         end
 
@@ -1112,6 +1144,52 @@ local function ExecuteMigrationFunctions(current_version)
   end
 end
 
+local function RenameEntriesInProfile(profile, profile_version)
+  for max_version, entries in pairs(ENTRIES_TO_RENAME) do
+    if CurrentVersionIsLowerThan(profile_version, max_version) then
+      for i = 1, #entries do
+        local deprecated_entry = entries[i].Deprecated
+        local new_entry = entries[i].New
+
+        local current_value = DatabaseEntryGetCurrentValue(profile, deprecated_entry)
+        if current_value ~= nil then
+          --print ("    " .. profile_name ..":", table.concat(deprecated_entry, "."), "=>", table.concat(new_entry, "."), "=", current_value)
+
+          -- Iterate to the new entry in the current profile
+          local value = profile
+          for index = 1, #new_entry - 1 do
+            local key = new_entry[index]
+            -- If value[key] does not exist, create an empty hash table
+            -- As the current entry is not the last one, it cannot be a leave, i.e., it must be a table
+            value[key] = value[key] or {}
+            value = value[key]
+          end
+
+          -- We only iterate to the next-to-last entry, as we need to overwrite it:
+          value[new_entry[#new_entry]] = current_value
+          -- And delete the deprecated entry
+          DatabaseEntryDelete(profile, deprecated_entry)
+        end
+      end
+    end
+  end
+end
+
+local function DeleteEntriesInProfile(profile, profile_version)
+  for max_version, entries in pairs(ENTRIES_TO_DELETE) do
+    if CurrentVersionIsLowerThan(profile_version, max_version) then
+      -- iterate over all profiles and delete the old config entry
+      --TidyPlatesThreat.db.global.MigrationLog[key] = "DELETED"
+      for i = 1, #entries do
+        if DatabaseEntryExists(profile, entries[i]) then
+          --print ("  " .. profile_name ..": Deleting", table.concat(entries[i], "."))
+          DatabaseEntryDelete(profile, entries[i])
+        end
+      end
+    end
+  end
+end
+
 function Addon.MigrateDatabase(current_version)
   TidyPlatesThreat.db.global.MigrationLog = nil
 
@@ -1119,54 +1197,9 @@ function Addon.MigrateDatabase(current_version)
 
   local profile_table = TidyPlatesThreat.db.profiles
 
-  for max_version, entries in pairs(ENTRIES_TO_RENAME) do
-    if CurrentVersionIsLowerThan(current_version, max_version) then
-
-      --print ("Migrating", max_version, "...")
-
-      for i = 1, #entries do
-        local deprecated_entry = entries[i].Deprecated
-        local new_entry = entries[i].New
-
-        -- Iterate over all profiles, copy the deprecated entry to the new entry and delete the deprecated entry
-        for profile_name, profile in pairs(profile_table) do
-          local current_value = DatabaseEntryGetCurrentValue(profile, deprecated_entry)
-          if current_value ~= nil then
-            --print ("    " .. profile_name ..":", table.concat(deprecated_entry, "."), "=>", table.concat(new_entry, "."), "=", current_value)
-
-            -- Iterate to the new entry in the current profile
-            local value = profile
-            for index = 1, #new_entry - 1 do
-              local key = new_entry[index]
-              -- If value[key] does not exist, create an empty hash table
-              -- As the current entry is not the last one, it cannot be a leave, i.e., it must be a table
-              value[key] = value[key] or {}
-              value = value[key]
-            end
-
-            -- We only iterate to the next-to-last entry, as we need to overwrite it:
-            value[new_entry[#new_entry]] = current_value
-            -- And delete the deprecated entry
-            DatabaseEntryDelete(profile, deprecated_entry)
-          end
-        end
-      end
-    end
-  end
-
-  for max_version, entries in pairs(ENTRIES_TO_DELETE) do
-    if CurrentVersionIsLowerThan(current_version, max_version) then
-      -- iterate over all profiles and delete the old config entry
-      --TidyPlatesThreat.db.global.MigrationLog[key] = "DELETED"
-      for i = 1, #entries do
-        for profile_name, profile in pairs(profile_table) do
-          if DatabaseEntryExists(profile, entries[i]) then
-            --print ("  " .. profile_name ..": Deleting", table.concat(entries[i], "."))
-            DatabaseEntryDelete(profile, entries[i])
-          end
-        end
-      end
-    end
+  for profile_name, profile in pairs(profile_table) do
+    RenameEntriesInProfile(profile, current_version)
+    DeleteEntriesInProfile(profile, current_version)
   end
 end
 
@@ -1194,7 +1227,7 @@ local function DeleteEntry(current_entry, default_entry, path)
 end
 
 Addon.MigrationCustomNameplatesV1 = function()
-  local defaults = ThreatPlates.CopyTable(TidyPlatesThreat.db.defaults)
+  local defaults = Addon.CopyTable(TidyPlatesThreat.db.defaults)
   TidyPlatesThreat.db:RegisterDefaults({})
 
   -- Set default to empty so that new defaul values don't impact the migration
@@ -1218,7 +1251,8 @@ Addon.MigrationCustomNameplatesV1 = function()
 
       for index, unique_unit in pairs(custom_plates_to_keep) do
         -- As default values are now different, copy the deprecated slots default value
-        local deprecated_settings = Addon.LEGACY_CUSTOM_NAMEPLATES[index] or Addon.LEGACY_CUSTOM_NAMEPLATES["**"]
+        local deprecated_settings = Addon.CopyTable(Addon.LEGACY_CUSTOM_NAMEPLATES["**"])
+        Addon.MergeIntoTable(deprecated_settings, Addon.LEGACY_CUSTOM_NAMEPLATES[index])
 
         -- Name trigger is already migrated properly when loading 9.2.0 the very first time
         unique_unit.showNameplate = GetValueOrDefault(unique_unit.showNameplate, deprecated_settings.showNameplate)
@@ -1249,7 +1283,7 @@ Addon.MigrationCustomNameplatesV1 = function()
     end
   end
 
-  defaults.profile.uniqueSettings = ThreatPlates.CopyTable(ThreatPlates.DEFAULT_SETTINGS.profile.uniqueSettings)
+  defaults.profile.uniqueSettings = Addon.CopyTable(ThreatPlates.DEFAULT_SETTINGS.profile.uniqueSettings)
   TidyPlatesThreat.db:RegisterDefaults(defaults)
   TidyPlatesThreat.db.global.CustomNameplatesVersion = 2
 end
@@ -1275,6 +1309,23 @@ end
 -- Schema validation and other check functions for the settings file
 -----------------------------------------------------
 
+--
+--local VERSION_TO_CUSTOM_STYLE_SCHEMA_MAPPING = {
+--  ["9.2.0"] = CUSTOM_STYLE_SCHEMA_VERSIONS.V3
+--}
+--
+--Addon.CheckCustomStyleSchema = function(custom_style, version)
+--  Addon.Debug:PrintTable(custom_style)
+--end
+
+local SETTINGS_TYPE_CHECK = {
+  icon = { number = true, string = true },
+  -- Not part of default values, dynamically inserted
+  AutomaticIcon = { number = true },
+  SpellID = { number = true },
+  SpellName = { number = true },
+}
+
 local CUSTOM_STYLE_TYPE_CHECK = {
   icon = { number = true, string = true },
   -- Not part of default values, dynamically inserted
@@ -1283,14 +1334,36 @@ local CUSTOM_STYLE_TYPE_CHECK = {
   SpellName = { number = true },
 }
 
---
---local VERSION_TO_CUSTOM_STYLE_SCHEMA_MAPPING = {
---  ["9.2.0"] = CUSTOM_STYLE_SCHEMA_VERSIONS.V3
---}
---
---Addon.CheckCustomStyleSchema = function(custom_style, version)
---  ThreatPlates.DEBUG_PRINT_TABLE(custom_style)
---end
+-- Updates existing entries in current settings  with the corresponding values from the
+-- update-from settings
+-- If an entry in update-from settings does not exist in the current settings, it's ignored
+local function UpdateFromSettings(current_settings, update_from_settings)
+  for key, current_value in pairs(current_settings) do
+    local update_from_value = update_from_settings[key]
+
+    if update_from_value ~= nil then
+      if type(current_value) == "table" then
+        -- If entry in update-from custom style is not a table as well, ignore it
+        if type(update_from_value) == "table" then
+          UpdateFromSettings(current_value, update_from_value)
+        end
+      else
+        local type_is_ok
+
+        local valid_types = SETTINGS_TYPE_CHECK[key]
+        if valid_types then
+          type_is_ok = valid_types[type(update_from_value)]
+        else
+          type_is_ok = (type(current_value) == type(update_from_value))
+        end
+
+        if type_is_ok then
+          current_settings[key] = update_from_value
+        end
+      end
+    end
+  end
+end
 
 -- Updates existing entries in custom style with the corresponding value from the
 -- update-from custom style
@@ -1331,7 +1404,7 @@ local function UpdateRuntimeValueFromCustomStyle(custom_style, imported_custom_s
 end
 
 Addon.ImportCustomStyle = function(imported_custom_style)
-  local custom_style = ThreatPlates.CopyTable(ThreatPlates.DEFAULT_SETTINGS.profile.uniqueSettings["**"])
+  local custom_style = Addon.CopyTable(ThreatPlates.DEFAULT_SETTINGS.profile.uniqueSettings["**"])
 
   UpdateFromCustomStyle(custom_style, imported_custom_style)
 
@@ -1346,6 +1419,55 @@ Addon.ImportCustomStyle = function(imported_custom_style)
   UpdateRuntimeValueFromCustomStyle(custom_style, imported_custom_style, "SpellName")
 
   return custom_style
+end
+
+local function MigrateProfile(profile, profile_name, profile_version)
+  for max_version, entries in pairs(MIGRATION_FUNCTIONS) do
+    if CurrentVersionIsLowerThan(profile_version, max_version) then
+      for key, migration_info in pairs(entries) do
+        local migration_function = (type(migration_info) == "table" and migration_info[1]) or migration_info
+        migration_function(profile_name, profile)
+
+        -- Postprocessing, if necessary
+        -- action = entry[3]
+        -- if action and type(action) == "function" then
+        --   action()
+        -- end
+      end
+    end
+  end
+
+  RenameEntriesInProfile(profile, profile_version)
+  DeleteEntriesInProfile(profile, profile_version)
+end
+
+Addon.ImportProfile = function(profile, profile_name, profile_version)
+  -- Migrate the profile to the current version
+  -- Using pcall here to catch errors in the migration code - should not happen, but still ...
+  local migration_successful, return_value = pcall(MigrateProfile, profile, profile_name, profile_version)
+  if not migration_successful then
+    ThreatPlates.Print(L["Failed to migrate the imported profile to the current settings format because of an internal error. Please report this issue at the Threat Plates homepage at CurseForge: "] .. return_value, true)
+  else
+    -- Create a new profile with default settings:
+    TidyPlatesThreat.db:SetProfile(profile_name) --will create a new profile
+
+    -- Custom styles must be handled seperately
+    local custom_styles = Addon.CopyTable(profile.uniqueSettings)
+    for index, _ in pairs(profile.uniqueSettings) do
+      table.remove(profile.uniqueSettings, index)
+    end
+
+    -- Merge the migrated profile to import into this new profile
+    UpdateFromSettings(TidyPlatesThreat.db.profile, profile)
+
+    -- Now merge back the custom styles
+    for index, imported_custom_style in pairs(custom_styles) do
+      -- Import all values from the custom style as long the are valid entries with the correct type
+      -- based on the default custom style "**"
+      local custom_style = Addon.ImportCustomStyle(imported_custom_style)
+      table.insert(TidyPlatesThreat.db.profile.uniqueSettings, index, custom_style)
+    end
+  end
 end
 
 -----------------------------------------------------

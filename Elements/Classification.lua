@@ -15,6 +15,7 @@ local CreateFrame = CreateFrame
 -- ThreatPlates APIs
 local ThreatPlates = Addon.ThreatPlates
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
+local BackdropTemplate = Addon.BackdropTemplate
 
 local ELITE_BACKDROP = {
   TP_EliteBorder_Default = {
@@ -44,14 +45,14 @@ local Element = Addon.Elements.NewElement("Classification")
 
 -- Called in processing event: NAME_PLATE_CREATED
 function Element.Created(tp_frame)
-  local textframe = tp_frame.visual.textframe
+  local healthbar = tp_frame.visual.Healthbar
 
-  local skull_icon = textframe:CreateTexture(nil, "ARTWORK", 2)
-  local elite_icon = textframe:CreateTexture(nil, "ARTWORK", 1)
+  local skull_icon = healthbar:CreateTexture(nil, "OVERLAY", nil, 2)
+  local elite_icon = healthbar:CreateTexture(nil, "OVERLAY", nil, 1)
   --local rareicon = textframe:CreateTexture(nil, "ARTWORK", 1)
 
   local healthbar = tp_frame.visual.Healthbar
-  local elite_border = CreateFrame("Frame", nil, healthbar)
+  local elite_border = CreateFrame("Frame", nil, healthbar, BackdropTemplate)
   elite_border:SetFrameLevel(healthbar:GetFrameLevel() + 1)
 
   tp_frame.visual.SkullIcon = skull_icon

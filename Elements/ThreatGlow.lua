@@ -18,6 +18,12 @@ local UnitIsConnected, UnitAffectingCombat = UnitIsConnected, UnitAffectingComba
 local TidyPlatesThreat = TidyPlatesThreat
 local RGB = Addon.RGB
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
+local BackdropTemplate = Addon.BackdropTemplate
+
+local _G =_G
+-- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
+-- List them here for Mikk's FindGlobals script
+-- GLOBALS: UnitAffectingCombat
 
 local OFFSET_THREAT = 7.5
 local ART_PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Artwork\\"
@@ -31,26 +37,36 @@ local COLOR_TRANSPARENT = RGB(0, 0, 0, 0) -- opaque
 ---------------------------------------------------------------------------------------------------
 -- Local variables
 ---------------------------------------------------------------------------------------------------
+local ShowThreatGlow
 local Settings
 local ShowOnAttackedUnitsOnly, UseHeuristicInInstances
 local ThreatColorWOThreatSystem, TappedColor
 
 ---------------------------------------------------------------------------------------------------
--- Local threat functions
+-- Wrapper functions for WoW Classic
 ---------------------------------------------------------------------------------------------------
 
-local function ShowThreatGlow(unit)
-  if ShowOnAttackedUnitsOnly then
-    if IsInInstance() and UseHeuristicInInstances then
-      return UnitAffectingCombat(unit.unitid)
+if Addon.CLASSIC then
+  ShowThreatGlow = function(unit)
+    return _G.UnitAffectingCombat(unit.unitid)
+  end
+else
+  ShowThreatGlow = function(unit)
+    if ShowOnAttackedUnitsOnly then
+      if IsInInstance() and UseHeuristicInInstances then
+        return _G.UnitAffectingCombat(unit.unitid)
+      else
+        return Addon:OnThreatTable(unit)
+      end
     else
-      return Addon:OnThreatTable(unit)
+      return _G.UnitAffectingCombat(unit.unitid)
     end
-  else
-    return UnitAffectingCombat(unit.unitid)
   end
 end
 
+---------------------------------------------------------------------------------------------------
+-- Local threat functions
+---------------------------------------------------------------------------------------------------
 local function GetThreatGlowColor(unit)
   local color
 
@@ -70,10 +86,10 @@ local function GetThreatGlowColor(unit)
     -- is already in combat, but not yet on the mob's threat table for a sec or so.
     if Settings.ON and Settings.useHPColor then
       if style == "dps" or style == "tank" then
-        color = Addon:GetThreatColor(unit, style, ShowOnAttackedUnitsOnly)
+        color = Addon:GetThreatColor(unit, style, ShowOnAttackedUnitsOnly) -- ShowThreatGlowOnAttackedUnitsOnly is ignored in WoW Classic
       end
     elseif InCombatLockdown() and (style == "normal" or style == "dps" or style == "tank") then
-      color = Addon:GetThreatColor(unit, style, ShowOnAttackedUnitsOnly)
+      color = Addon:GetThreatColor(unit, style, ShowOnAttackedUnitsOnly)   -- ShowThreatGlowOnAttackedUnitsOnly is ignored in WoW Classic
     end
   end
 
@@ -90,7 +106,7 @@ local Element = Addon.Elements.NewElement("ThreatGlow")
 
 -- Called in processing event: NAME_PLATE_CREATED
 function Element.Created(tp_frame)
-  local element_frame = CreateFrame("Frame", nil, tp_frame)
+  local element_frame = CreateFrame("Frame", nil, tp_frame, BackdropTemplate)
   element_frame:SetFrameLevel(tp_frame:GetFrameLevel())
 
   element_frame:SetPoint("TOPLEFT", tp_frame, "TOPLEFT", - OFFSET_THREAT, OFFSET_THREAT)

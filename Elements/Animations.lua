@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------------------------------
--- Arena Widget
+-- Animations
 ---------------------------------------------------------------------------------------------------
 local ADDON_NAME, Addon = ...
 
@@ -19,7 +19,8 @@ local Animations = Addon.Animations
 ---------------------------------------------------------------------------------------------------
 -- Local variables
 ---------------------------------------------------------------------------------------------------
-local ShowPlateDuration, HidePlateDuration, FadeToDuration, ScaleToDuration, FlashDuration
+-- ShowPlateDuration
+local HidePlateDuration, FadeToDuration, ScaleToDuration, FlashDuration
 local HidePlateFadeOut, HidePlateScaleDown
 
 ---------------------------------------------------------------------------------------------------
@@ -158,22 +159,22 @@ function Animations:StopFlash(frame)
   end
 end
 
-function Animations:ShowPlate(frame, target_alpha)
-  local current_alpha = frame:GetAlpha()
-  if floor(abs(current_alpha - target_alpha) * 100) < 1 then return end
+-- function Animations:ShowPlate(frame, target_alpha)
+--   local current_alpha = frame:GetAlpha()
+--   if floor(abs(current_alpha - target_alpha) * 100) < 1 then return end
 
-  frame.FadeAnimation = frame.FadeAnimation or {}
+--   frame.FadeAnimation = frame.FadeAnimation or {}
 
-  local animation = frame.FadeAnimation
-  animation.StartAlpha = current_alpha
-  animation.TargetAlpha = target_alpha
-  animation.Duration = ShowPlateDuration
-  animation.Timer = 0
-  animation.Playing = true
+--   local animation = frame.FadeAnimation
+--   animation.StartAlpha = current_alpha
+--   animation.TargetAlpha = target_alpha
+--   animation.Duration = ShowPlateDuration
+--   animation.Timer = 0
+--   animation.Playing = true
 
-  AnimatedFrames[frame] = true
-  AnimationFrame:Show()
-end
+--   AnimatedFrames[frame] = true
+--   AnimationFrame:Show()
+-- end
 
 function Animations:FadePlate(frame, target_alpha)
   -- local current_alpha = frame:GetAlpha()
@@ -268,7 +269,7 @@ end
 function Animations:UpdateSettings()
   Settings = TidyPlatesThreat.db.profile.Animations
 
-  ShowPlateDuration = Settings.ShowPlateDuration
+  -- ShowPlateDuration = Settings.ShowPlateDuration
   HidePlateDuration = Settings.HidePlateDuration
   HidePlateFadeOut = Settings.HidePlateFadeOut
   HidePlateScaleDown = Settings.HidePlateScaleDown

@@ -30,7 +30,7 @@ local Element = Addon.Elements.NewElement("SpellIcon")
 
 -- Called in processing event: NAME_PLATE_CREATED
 function Element.Created(tp_frame)
-  local spell_icon = tp_frame.visual.Castbar.Overlay:CreateTexture(nil, "ARTWORK", 7)
+  local spell_icon = tp_frame.visual.Castbar:CreateTexture(nil, "OVERLAY", nil, 7)
 
   tp_frame.visual.SpellIcon = spell_icon
 end

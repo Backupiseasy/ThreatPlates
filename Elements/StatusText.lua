@@ -205,28 +205,30 @@ end
 local function TextHealthPercentColored(unit)
   local text_health, text_absorbs, color = "", "", COLOR_ROLE
 
-  local absorbs_amount = _G.UnitGetTotalAbsorbs(unit.unitid) or 0
-  if ShowAbsorbs and absorbs_amount > 0 then
-    if Settings.AbsorbsAmount then
-      if Settings.AbsorbsShorten then
-        text_absorbs = Truncate(absorbs_amount)
-      else
-        text_absorbs = absorbs_amount
+  if ShowAbsorbs then
+    local absorbs_amount = _G.UnitGetTotalAbsorbs(unit.unitid) or 0
+    if absorbs_amount > 0 then
+      if Settings.AbsorbsAmount then
+        if Settings.AbsorbsShorten then
+          text_absorbs = Truncate(absorbs_amount)
+        else
+          text_absorbs = absorbs_amount
+        end
       end
-    end
 
-    if Settings.AbsorbsPercentage then
-      local absorbs_percentage = ceil(100 * absorbs_amount / unit.healthmax) .. "%"
+      if Settings.AbsorbsPercentage then
+        local absorbs_percentage = ceil(100 * absorbs_amount / unit.healthmax) .. "%"
 
-      if text_absorbs == "" then
-        text_absorbs = absorbs_percentage
-      else
-        text_absorbs = text_absorbs .. " - " .. absorbs_percentage
+        if text_absorbs == "" then
+          text_absorbs = absorbs_percentage
+        else
+          text_absorbs = text_absorbs .. " - " .. absorbs_percentage
+        end
       end
-    end
 
-    if text_absorbs ~= "" then
-      text_absorbs = "[" .. text_absorbs .. "]"
+      if text_absorbs ~= "" then
+        text_absorbs = "[" .. text_absorbs .. "]"
+      end
     end
   end
 
@@ -391,7 +393,7 @@ local Element = Addon.Elements.NewElement("StatusText")
 
 -- Called in processing event: NAME_PLATE_CREATED
 function Element.Created(tp_frame)
-  local status_text = tp_frame.visual.textframe:CreateFontString(nil, "ARTWORK", -1)
+  local status_text = tp_frame.visual.textframe:CreateFontString(nil, "ARTWORK")
   -- At least font must be set as otherwise it results in a Lua error when UnitAdded with SetText is called
   status_text:SetFont("Fonts\\FRIZQT__.TTF", 11)
   status_text:SetWordWrap(false) -- otherwise text is wrapped when plate is scaled down
@@ -461,7 +463,11 @@ function Element.UpdateSettings()
 
   Truncate = (Settings.LocalizedUnitSymbol and TruncateEastAsian) or TruncateWestern
 
-  ShowAbsorbs = Settings.AbsorbsAmount or Settings.AbsorbsPercentage
+  if Addon.CLASSIC then
+    ShowAbsorbs = false
+  else
+    ShowAbsorbs = Settings.AbsorbsAmount or Settings.AbsorbsPercentage
+  end
   ShowHealth = Settings.amount or Settings.percent
 
   StatusTextFunction["HealthbarMode"]["FRIENDLY"] = STATUS_TEXT_REFERENCE[SettingsStatusText.HealthbarMode.FriendlySubtext]
@@ -492,14 +498,24 @@ function Element.UpdateSettings()
     SettingsStatusText.HealthbarMode.EnemySubtext == "HEALTH" or SettingsStatusText.HealthbarMode.EnemySubtext == "ALL" or
     SettingsStatusText.NameMode.FriendlySubtext == "HEALTH" or SettingsStatusText.NameMode.FriendlySubtext == "ALL" or
     SettingsStatusText.NameMode.EnemySubtext == "HEALTH" or SettingsStatusText.NameMode.EnemySubtext == "ALL" then
-    SubscribeEvent(Element, "UNIT_HEALTH_FREQUENT", HealthUpdate)
-    SubscribeEvent(Element, "UNIT_MAXHEALTH", HealthUpdate)
-    SubscribeEvent(Element, "UNIT_ABSORB_AMOUNT_CHANGED", HealthUpdate)
 
+    if Addon.CLASSIC then
+      SubscribeEvent(Element, "UNIT_HEALTH_FREQUENT", HealthUpdate)
+    else
+      SubscribeEvent(Element, "UNIT_HEALTH", HealthUpdate)
+      SubscribeEvent(Element, "UNIT_ABSORB_AMOUNT_CHANGED", HealthUpdate)
+    end
+
+    SubscribeEvent(Element, "UNIT_MAXHEALTH", HealthUpdate)
   else
-    UnsubscribeEvent(Element, "UNIT_HEALTH_FREQUENT", HealthUpdate)
+    if Addon.CLASSIC then
+      UnsubscribeEvent(Element, "UNIT_HEALTH_FREQUENT", HealthUpdate)
+    else
+      UnsubscribeEvent(Element, "UNIT_HEALTH", HealthUpdate)
+      UnsubscribeEvent(Element, "UNIT_ABSORB_AMOUNT_CHANGED", HealthUpdate)
+    end
+
     UnsubscribeEvent(Element, "UNIT_MAXHEALTH", HealthUpdate)
-    UnsubscribeEvent(Element, "UNIT_ABSORB_AMOUNT_CHANGED", HealthUpdate)
   end
 
   -- Update TargetArt widget as it depends on some settings here

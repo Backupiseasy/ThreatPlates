@@ -56,10 +56,8 @@ end
 
 -- Called in processing event: NAME_PLATE_CREATED
 function Element.Created(tp_frame)
-  local target_marker = tp_frame.visual.textframe:CreateTexture(nil, "ARTWORK", 5)
+  local target_marker = tp_frame.visual.textframe:CreateTexture(nil, "OVERLAY", nil, 7)
   target_marker:SetTexture("Interface\\TargetingFrame\\UI-RaidTargetingIcons")
-  target_marker:SetDrawLayer("ARTWORK", 5)
-
   tp_frame.visual.TargetMarker = target_marker
 end
 

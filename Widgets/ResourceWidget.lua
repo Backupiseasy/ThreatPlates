@@ -23,6 +23,7 @@ local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
+local BackdropTemplate = Addon.BackdropTemplate
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -203,7 +204,7 @@ function Widget:Create()
 
     widget_frame.Background = bar:CreateTexture(nil, "BACKGROUND")
 
-    widget_frame.Border = _G.CreateFrame("Frame", nil, widget_frame.Bar)
+    widget_frame.Border = _G.CreateFrame("Frame", nil, widget_frame.Bar, BackdropTemplate)
     widget_frame.Border:SetFrameLevel(widget_frame:GetFrameLevel())
 
     self:UpdateLayout()
@@ -354,11 +355,11 @@ function Widget:UpdateSettings()
   self.db = TidyPlatesThreat.db.profile.ResourceWidget
 end
 
-function Widget:UpdateAllFramesAfterSettingsUpdate()
-  -- Update the widget if it was already created (not true for immediately after Reload UI or if it was never enabled
-  -- in this since last Reload UI)
-  if WidgetFrame then
-    self:UpdateLayout()
-    self:PLAYER_TARGET_CHANGED()
-  end
-end
+--function Widget:UpdateAllFramesAfterSettingsUpdate()
+--  -- Update the widget if it was already created (not true for immediately after Reload UI or if it was never enabled
+--  -- in this since last Reload UI)
+--  if WidgetFrame then
+--    self:UpdateLayout()
+--    self:PLAYER_TARGET_CHANGED()
+--  end
+--end

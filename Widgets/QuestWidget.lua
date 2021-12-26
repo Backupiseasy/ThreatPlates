@@ -4,7 +4,7 @@
 local ADDON_NAME, Addon = ...
 local ThreatPlates = Addon.ThreatPlates
 
-local Widget = Addon.Widgets:NewWidget("Quest")
+local Widget = (Addon.CLASSIC and {}) or Addon.Widgets:NewWidget("Quest")
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -17,7 +17,10 @@ local string, tonumber, next, pairs, ipairs = string, tonumber, next, pairs, ipa
 local WorldFrame = WorldFrame
 local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
 local UnitName, UnitIsUnit, UnitDetailedThreatSituation = UnitName, UnitIsUnit, UnitDetailedThreatSituation
-local GetNumQuestLeaderBoards, GetQuestObjectiveInfo, GetQuestLogTitle, GetNumQuestLogEntries, GetQuestLogIndexByID = GetNumQuestLeaderBoards, GetQuestObjectiveInfo, GetQuestLogTitle, GetNumQuestLogEntries, GetQuestLogIndexByID
+
+local GetQuestObjectives, GetQuestInfo, GetQuestLogIndex = C_QuestLog.GetQuestObjectives, C_QuestLog.GetInfo, C_QuestLog.GetLogIndexForQuestID
+local GetQuestLogTitle, GetNumQuestLogEntries = C_QuestLog.GetQuestLogTitle, C_QuestLog.GetNumQuestLogEntries
+
 local GetNamePlates, GetNamePlateForUnit = C_NamePlate.GetNamePlates, C_NamePlate.GetNamePlateForUnit
 
 -- ThreatPlates APIs
@@ -197,11 +200,6 @@ function IsQuestUnit(unit, create_watcher)
   return false
 end
 
-function Addon:IsPlayerQuestUnit(unit)
-  local show, quest_type = IsQuestUnit(unit)
-  return show and (quest_type == 1) -- don't show quest color for party member#s quest targets
-end
-
 local function ShowQuestUnit(unit)
   local db = TidyPlatesThreat.db.profile.questWidget
 
@@ -221,9 +219,19 @@ local function ShowQuestUnit(unit)
   return true
 end
 
-function Addon:ShowQuestUnit(unit)
-  local db = TidyPlatesThreat.db.profile.questWidget
-  return db.ON and db.ModeHPBar and ShowQuestUnit(unit)
+if Addon.CLASSIC then
+  function Addon:ShowQuestUnit(unit) return false end
+  function Addon:IsPlayerQuestUnit(unit) return false end
+else
+  function Addon:ShowQuestUnit(unit)
+    local db = TidyPlatesThreat.db.profile.questWidget
+    return db.ON and db.ModeHPBar and ShowQuestUnit(unit)
+  end
+
+  function Addon:IsPlayerQuestUnit(unit)
+    local show, quest_type = IsQuestUnit(unit)
+    return show and (quest_type == 1) -- don't show quest color for party member#s quest targets
+  end
 end
 
 function Widget:CreateQuest(questID, questIndex)
@@ -234,17 +242,18 @@ function Widget:CreateQuest(questID, questIndex)
   }
 
   function Quest:UpdateObjectives()
-    local objectives = GetNumQuestLeaderBoards(self.index)
+    local objectives = GetQuestObjectives(self.id)
 
-    for objIndex = 1, objectives do
-      local text, objectiveType, finished, numFulfilled, numRequired = GetQuestObjectiveInfo(self.id, objIndex, false)
+    local objective, text, objectiveType, finished, numFulfilled, numRequired
+    for objIndex = 1, #objectives do
+      objective = objectives[objIndex]
+      text, objectiveType, numFulfilled, numRequired = objective.text, objective.type, objective.numFulfilled, objective.numRequired
 
       -- Occasionally the game will return nil text, this happens when some world quests/bonus area quests finish (the objective no longer exists)
       -- Does not make sense to add "progressbar" type quests here as there progress is not updated via QUEST_WATCH_UPDATE
       if text and objectiveType ~= "progressbar" then
         local objectiveName = string.gsub(text, "(%d+)/(%d+)", "")
         -- Normally, the quest objective should come before the :, but while the QUEST_LOG_UPDATE events (after login/reload)
-        -- GetQuestObjectiveInfo just returns nil as text
 
         -- It does seem that this is no longer necessary
         QuestLogNotComplete = QuestLogNotComplete or (objectiveName == " : ")
@@ -273,15 +282,14 @@ function Widget:CreateQuest(questID, questIndex)
 end
 
 function Widget:AddQuestCacheEntry(questIndex)
-  local title, _, _, isHeader, _, _, _, questID = GetQuestLogTitle(questIndex)
+  local info = GetQuestInfo(questIndex)
 
-  if not isHeader and title then --ignore quest log headers
-    local quest = Widget:CreateQuest(questID, questIndex)
+  if info and not info.isHeader and info.title then --ignore quest log headers
+    local quest = Widget:CreateQuest(info.questID, questIndex)
 
     quest:UpdateObjectives()
-
-    QuestList[title] = quest
-    QuestIDs[questID] = title --so it can be found by remove
+    QuestList[info.title] = quest
+    QuestIDs[info.questID] = info.title --so it can be found by remove
   end
 end
 
@@ -331,14 +339,15 @@ function Widget:RefreshCombatVisisbility()
   end
 end
 
-function Widget:QUEST_WATCH_UPDATE(questIndex)
-  local title, _, _, _, _, _, _, questID = GetQuestLogTitle(questIndex)
+function Widget:QUEST_WATCH_UPDATE(questID)
+  local questIndex = GetQuestLogIndex(questID)
+  local info = GetQuestInfo(questIndex)
 
-  if not title then
+  if not info or not info.title then
     return
   end
 
-  QuestsToUpdate[questID] = title
+  QuestsToUpdate[questID] = info.title
 end
 
 function Widget:UNIT_QUEST_LOG_CHANGED(...)
@@ -354,7 +363,7 @@ function Widget:QUEST_LOG_UPDATE()
     -- Update the cached quest progress (for non-progressbar quests) after QUEST_WATCH_UPDATE
     local QuestsToUpdate = QuestsToUpdate
     for questID, title in pairs(QuestsToUpdate) do
-      local questIndex = GetQuestLogIndexByID(questID)
+      local questIndex = GetQuestLogIndex(questID)
 
       self:UpdateQuestCacheEntry(questIndex, title)
       QuestsToUpdate[questID] = nil
@@ -471,7 +480,8 @@ function Widget:Create(tp_frame)
 end
 
 function Widget:IsEnabled()
-  return TidyPlatesThreat.db.profile.questWidget.ON or TidyPlatesThreat.db.profile.questWidget.ShowInHeadlineView
+  local db = TidyPlatesThreat.db.profile.questWidget
+  return db.ON or db.ShowInHeadlineView
 end
 
 function Widget:OnEnable()
@@ -487,7 +497,7 @@ function Widget:OnEnable()
   self:SubscribeEvent("QUEST_WATCH_UPDATE")
   self:SubscribeEvent("QUEST_LOG_UPDATE")
   self:SubscribeEvent("QUEST_POI_UPDATE")
-  -- self:RegisterEvent("QUEST_DATA_LOAD_RESULT")
+  -- self:SubscribeEvent("QUEST_DATA_LOAD_RESULT")
   self:SubscribeUnitEvent("UNIT_QUEST_LOG_CHANGED", "player")
 
   -- Handle in-combat situations:
@@ -588,42 +598,42 @@ function Widget:UpdateSettings()
   Font = Addon.LSM:Fetch('font', Settings.Font)
 end
 
---local function tablelength(T)
---  local count = 0
---  for _ in pairs(T) do count = count + 1 end
---  return count
---end
+local function tablelength(T)
+  local count = 0
+  for _ in pairs(T) do count = count + 1 end
+  return count
+end
 
--- function Addon:PrintQuests()
---  print ("Quests List:", tablelength(QuestIDs))
---  for quest_id, title in pairs(QuestIDs) do
---    local quest = QuestList[title]
---    if quest.objectives and tablelength(quest.objectives) > 0 then
---      print ("*", title .. " [ID:" .. tostring(quest_id) .. "]")
---      for name, val in pairs (quest.objectives) do
---        print ("  - |" .. name .."| :", val.current, "/", val.goal, "[" .. val.type .. "]")
---      end
---    end
---  end
---
---  -- Only plates of units that are quest units are stored in QuestUnitsToUpdate
---  for index, unitid in ipairs(QuestUnitsToUpdate) do
---    QuestUnitsToUpdate[index] = nil
---
---    local plate = GetNamePlateForUnit(unitid)
---    if plate and plate.TPFrame.Active then
---      local widget_frame = plate.TPFrame.widgets.Quest
---      self:UpdateFrame(widget_frame, plate.TPFrame.unit)
---    end
---
---    print ("Updating Quest Unit", unitid)
---  end
---
---  print ("QuestUnitsToUpdate:", tablelength(QuestUnitsToUpdate))
---
---  print ("Waiting for quest log updates for the following quests:")
---  for questID, title in pairs(QuestsToUpdate) do
---    local questIndex = GetQuestLogIndexByID(questID)
---    print ("  Quest:", title .. " [" .. tostring(questIndex) .. "]")
---  end
---end
+function Addon:PrintQuests()
+  print ("Quests List:", tablelength(QuestIDs))
+  for quest_id, title in pairs(QuestIDs) do
+    local quest = QuestList[title]
+    if quest.objectives and tablelength(quest.objectives) > 0 then
+      print ("*", title .. " [ID:" .. tostring(quest_id) .. "]")
+      for name, val in pairs (quest.objectives) do
+        print ("  - |" .. name .."| :", val.current, "/", val.goal, "[" .. val.type .. "]")
+      end
+    end
+  end
+
+  -- Only plates of units that are quest units are stored in QuestUnitsToUpdate
+  for index, unitid in ipairs(QuestUnitsToUpdate) do
+    QuestUnitsToUpdate[index] = nil
+
+    local plate = GetNamePlateForUnit(unitid)
+    if plate and plate.TPFrame.Active then
+      local widget_frame = plate.TPFrame.widgets.Quest
+      self:UpdateFrame(widget_frame, plate.TPFrame.unit)
+    end
+
+    print ("Updating Quest Unit", unitid)
+  end
+
+  print ("QuestUnitsToUpdate:", tablelength(QuestUnitsToUpdate))
+
+  print ("Waiting for quest log updates for the following quests:")
+  for questID, title in pairs(QuestsToUpdate) do
+    local questIndex = GetQuestLogIndex(questID)
+    print ("  Quest:", title .. " [" .. tostring(questIndex) .. "]")
+  end
+end

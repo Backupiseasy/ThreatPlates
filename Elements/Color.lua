@@ -16,6 +16,8 @@ local UnitIsPlayer, UnitPlayerControlled = UnitIsPlayer, UnitPlayerControlled
 local UnitThreatSituation, UnitIsUnit, UnitExists, UnitGroupRolesAssigned = UnitThreatSituation, UnitIsUnit, UnitExists, UnitGroupRolesAssigned
 local IsInInstance = IsInInstance
 local GetNamePlates, GetNamePlateForUnit = C_NamePlate.GetNamePlates, C_NamePlate.GetNamePlateForUnit
+-- WoW Classic APIs:
+local GetPartyAssignment = GetPartyAssignment
 
 -- ThreatPlates APIs
 local IsOffTankCreature = Addon.IsOffTankCreature
@@ -35,6 +37,16 @@ local REACTION_REFERENCE = {
 }
 
 local TRANPARENT_COLOR = Addon.RGB(0, 0, 0, 0)
+
+---------------------------------------------------------------------------------------------------
+-- Wrapper functions for WoW Classic
+---------------------------------------------------------------------------------------------------
+
+if Addon.CLASSIC then
+  UnitGroupRolesAssigned = function(target_unit)
+    return (GetPartyAssignment("MAINTANK", target_unit) and "TANK") or "NONE"
+  end
+end
 
 ---------------------------------------------------------------------------------------------------
 -- Local variables
@@ -81,6 +93,7 @@ end
 
 local function GetUnitColorCustomPlate(tp_frame)
   local unit = tp_frame.unit
+
   return unit.SituationalColor or unit.CombatColor or unit.CustomColor
 end
 
@@ -168,7 +181,9 @@ local function UpdatePlateColors(tp_frame)
   local color, current_color
 
   if tp_frame.style.healthbar.show then
-    color = tp_frame:GetHealthbarColor()
+    -- When a nameplate is initalized, colors (e.g., unit.ReactionColor) are not yet defined, so GetHealthbarColor
+    -- returns nil
+    color = tp_frame:GetHealthbarColor() or TRANPARENT_COLOR
     current_color = tp_frame.CurrentHealthbarColor or TRANPARENT_COLOR
 
     if color.r ~= current_color.r or color.g ~= current_color.g or color.b ~= current_color.b or color.a ~= current_color.a then
@@ -300,6 +315,13 @@ local function GetCustomStyleColor(unit)
   local color
 
   local unique_setting = unit.CustomPlateSettings
+
+--  -- Threat System is should also be used for custom nameplate (in combat with thread system on)
+--  if unique_setting and not unique_setting.UseThreatColor then
+--    unit.CombatColor = nil
+--    return nil
+--  end
+
   if unique_setting and unique_setting.useColor then
     color = unique_setting.color
   else
@@ -581,7 +603,12 @@ function Element.UpdateStyle(tp_frame, style, plate_style)
     return
   end
 
+  --local color = (style == "unique") and GetCustomStyleColor(unit)
   local color = GetCustomStyleColor(unit)
+
+  -- As combat color is set to nil when a custom style is used, it has to be re-evaluated here
+  GetCombatColor(tp_frame.unit)
+
   if color then
     tp_frame.GetHealthbarColor = GetUnitColorCustomPlate
     tp_frame.GetNameColor = GetUnitColorCustomPlateName
@@ -590,9 +617,7 @@ function Element.UpdateStyle(tp_frame, style, plate_style)
     tp_frame.GetNameColor = NameColorFunctions[tp_frame.PlateStyle][unit.reaction]
   end
 
-  assert (tp_frame.GetHealthbarColor ~= nil and tp_frame.GetNameColor ~= nil,
-    "Color: Color function not initialized - Healthbar = " .. tostring(tp_frame.GetHealthbarColor) .. " / Name = " ..
-      tostring(tp_frame.GetNameColor) .. " (Style: " .. tp_frame.PlateStyle .. ")")
+  UpdatePlateColors(tp_frame)
 end
 
 local function UNIT_HEALTH(unitid)
@@ -712,9 +737,18 @@ function Element.UpdateSettings()
   if Settings.FriendlyUnitMode == "HEALTH" or Settings.EnemyUnitMode == "HEALTH" or
     SettingsName.HealthbarMode.FriendlyUnitMode == "HEALTH" or SettingsName.HealthbarMode.EnemyUnitMode == "HEALTH" or
     SettingsName.NameMode.FriendlyUnitMode == "HEALTH" or SettingsName.NameMode.EnemyUnitMode == "HEALTH" then
-    SubscribeEvent(Element, "UNIT_HEALTH", UNIT_HEALTH)
+
+    if Addon.CLASSIC then
+      SubscribeEvent(Element, "UNIT_HEALTH_FREQUENT", UNIT_HEALTH)
+    else
+      SubscribeEvent(Element, "UNIT_HEALTH", UNIT_HEALTH)
+    end
   else
-    UnsubscribeEvent(Element, "UNIT_HEALTH", UNIT_HEALTH)
+    if Addon.CLASSIC then
+      UnsubscribeEvent(Element, "UNIT_HEALTH_FREQUENT", UNIT_HEALTH)
+    else
+      UnsubscribeEvent(Element, "UNIT_HEALTH", UNIT_HEALTH)
+    end
   end
 
   --SubscribeEvent(Element, "UNIT_HEALTH_FREQUENT", UNIT_HEALTH_FREQUENT)

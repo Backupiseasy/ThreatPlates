@@ -197,12 +197,12 @@ local function UpdatePlate_SetAlphaWithFading(tp_frame, unit)
   end
 end
 
-local function UpdatePlate_InitializeAlphaWithFading(tp_frame, unit)
-  local target_alpha = GetTransparency(unit)
+-- local function UpdatePlate_InitializeAlphaWithFading(tp_frame, unit)
+--   local target_alpha = GetTransparency(unit)
 
-  Animations:ShowPlate(tp_frame, target_alpha)
-  --tp_frame.CurrentAlpha = target_alpha
-end
+--   Animations:ShowPlate(tp_frame, target_alpha)
+--   --tp_frame.CurrentAlpha = target_alpha
+-- end
 
 local function UpdatePlate_SetAlphaNoFading(tp_frame, unit)
   local target_alpha = GetTransparency(unit)
@@ -249,29 +249,6 @@ local function SetOccludedTransparencyWithFadingOnUpdate(self, frame)
       -- print ("Occlusiton Fade In:", frame.IsOccluded, target_alpha, frame.CurrentAlpha, "Showing: ", frame.IsShowing)
       Animations:FadePlate(frame, target_alpha)
     end
-
-    --if frame.IsOccluded then
-    --  if FadeOutOccludedUnitsIsEnabled then
-    --    print ("Gets Occluded - Fade-Out")
-    --    Animations:FadePlate(frame, target_alpha)
-    --  else
-    --    print ("Gets Occluded - SetAlpha")
-    --    Animations:StopFade(frame)
-    --    frame:SetAlpha(target_alpha)
-    --  end
-    --elseif unit_was_occluded then
-    --  if FadeInOccludedUnitsIsEnabled then
-    --    print ("Was Occluded - Fade-In")
-    --    Animations:FadePlate(frame, target_alpha)
-    --  else
-    --    print ("Was Occluded - SetAlpha")
-    --    Animations:StopFade(frame)
-    --    frame:SetAlpha(target_alpha)
-    --  end
-    --else
-    --  print ("Just fading")
-    --  Animations:FadePlate(frame, target_alpha)
-    --end
     frame.CurrentAlpha = target_alpha
   end
 end
@@ -297,7 +274,7 @@ local function SetOccludedTransparencyWithoutFadingOnUpdate(self, frame)
 end
 
 function Transparency:Initialize(frame)
-  --Animations:StopScale(frame)
+  Animations:StopFade(frame)
   frame:SetAlpha(0)
 
   frame.CurrentAlpha = nil
@@ -314,13 +291,14 @@ function Transparency:UpdateSettings()
 
   FadingIsEnabled = Settings.Animations.FadeToDuration > 0
 
+  UpdatePlate_InitializeAlpha = UpdatePlate_SetAlphaNoFading
   if FadingIsEnabled then
     UpdatePlate_SetAlpha = UpdatePlate_SetAlphaWithFading
-    UpdatePlate_InitializeAlpha = UpdatePlate_InitializeAlphaWithFading
+    --UpdatePlate_InitializeAlpha = UpdatePlate_InitializeAlphaWithFading
     Transparency.SetOccludedTransparency = SetOccludedTransparencyWithFadingOnUpdate
   else
     UpdatePlate_SetAlpha = UpdatePlate_SetAlphaNoFading
-    UpdatePlate_InitializeAlpha = UpdatePlate_SetAlphaNoFading
+    --UpdatePlate_InitializeAlpha = UpdatePlate_SetAlphaNoFading
     Transparency.SetOccludedTransparency = SetOccludedTransparencyWithoutFadingOnUpdate
   end
 

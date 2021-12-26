@@ -70,7 +70,7 @@ function Widget:OnUnitAdded(widget_frame, unit)
   -- not used: db[totem_id].ShowIcon
   widget_frame:SetPoint("CENTER", widget_frame:GetParent(), db.x, db.y)
   widget_frame:SetSize(db.scale, db.scale)
-  widget_frame.Icon:SetTexture(PATH .. totem_settings.Style .. "\\" .. totem_settings.ID)
+  widget_frame.Icon:SetTexture(PATH .. totem_settings.Style .. "\\" .. totem_settings.Icon)
 
   widget_frame:Show()
 end

@@ -74,7 +74,7 @@ local function UpdateAuraTexture(frame, aura, index)
 end
 
 local function CreateAuraTexture(frame, index)
-  local aura = frame:CreateTexture(nil, "OVERLAY", -8)
+  local aura = frame:CreateTexture(nil, "ARTWORK")
   local time = frame:CreateFontString(nil, "OVERLAY") -- Duration Text
 
   time:SetJustifyH("CENTER")
@@ -267,7 +267,7 @@ function Widget:Create(tp_frame)
 
   -- Custom Code
   --------------------------------------
-  widget_frame:SetFrameLevel(tp_frame:GetFrameLevel() + 1)
+  widget_frame:SetFrameLevel(tp_frame:GetFrameLevel())
   widget_frame.Auras = {}
   widget_frame.AurasNo = 0
 
@@ -280,7 +280,8 @@ function Widget:Create(tp_frame)
 end
 
 function Widget:IsEnabled()
-  return TidyPlatesThreat.db.profile.BossModsWidget.ON or TidyPlatesThreat.db.profile.BossModsWidget.ShowInHeadlineView
+  local db = TidyPlatesThreat.db.profile.BossModsWidget
+  return db.ON or db.ShowInHeadlineView
 end
 
 function Widget:OnEnable()

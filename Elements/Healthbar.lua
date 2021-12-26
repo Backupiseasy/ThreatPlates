@@ -8,13 +8,16 @@ local ADDON_NAME, Addon = ...
 ---------------------------------------------------------------------------------------------------
 
 -- WoW APIs
+local UnitIsUnit, UnitName, UnitClass = UnitIsUnit, UnitName, UnitClass
 local UnitGetTotalHealAbsorbs = UnitGetTotalHealAbsorbs
+local InCombatLockdown = InCombatLockdown
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
-local ThreatPlates = Addon.ThreatPlates
+local ThreatPlates, Font = Addon.ThreatPlates, Addon.Font
 local PlatesByUnit = Addon.PlatesByUnit
-local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
+local SubscribeEvent, UnsubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Unsubscribe, Addon.EventService.Publish
+local BackdropTemplate = Addon.BackdropTemplate
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -31,7 +34,7 @@ local IGNORED_STYLES = {
 ---------------------------------------------------------------------------------------------------
 -- Local variables
 ---------------------------------------------------------------------------------------------------
-local Settings
+local Settings, SettingsTargetUnit, SettingsTargetUnitHide, SettingsShowOnlyForTarget
 local BorderBackdrop = {
   bgFile = "",
   edgeFile = "",
@@ -206,6 +209,71 @@ local function UpdateAbsorbs(tp_frame)
   end
 end
 
+local function HideTargetUnit(healthbar)
+  healthbar.TargetUnit:SetText(nil)
+  healthbar.TargetUnit:Hide()
+end
+
+local function ShowTargetUnit(healthbar, target_of_target_name, class_name)
+  if SettingsTargetUnit.ShowOnlyInCombat and not InCombatLockdown() then
+    HideTargetUnit(healthbar)
+  else
+    local target_of_target = healthbar.TargetUnit
+    if target_of_target_name then
+      target_of_target:SetText("|cffffffff[|r " .. target_of_target_name .. " |cffffffff]|r")
+      target_of_target.ClassName = class_name
+      target_of_target:Show()
+    end
+
+    -- Update the color if the element is shown
+    if target_of_target:IsShown() then
+      local color
+      if SettingsTargetUnit.UseClassColor and target_of_target.ClassName then
+        color = TidyPlatesThreat.db.profile.Colors.Classes[target_of_target.ClassName]
+      else
+        color = SettingsTargetUnit.CustomColor
+      end
+      target_of_target:SetTextColor(color.r, color.g, color.b)
+    end
+  end
+end
+
+local function UpdateTargetUnit(healthbar, unitid)
+  if SettingsShowOnlyForTarget and not UnitIsUnit("target", unitid) then
+    HideTargetUnit(healthbar)
+  else
+    local target_of_target_name = UnitName(unitid .. "target")
+    if target_of_target_name then
+      local _, class_name = UnitClass(unitid .. "target")
+      ShowTargetUnit(healthbar, target_of_target_name, class_name)
+    else
+      HideTargetUnit(healthbar)
+    end
+  end
+end
+
+local function UNIT_TARGET(unitid)
+  if SettingsTargetUnitHide or unitid == "player" or unitid == "target" then return end
+
+  local tp_frame = PlatesByUnit[unitid]
+  if tp_frame and tp_frame.Active then
+    UpdateTargetUnit(tp_frame.visual.Healthbar, unitid)
+  end
+end
+
+local function UnitThreatUpdate(tp_frame, unit)
+  UNIT_TARGET(unit.unitid)
+end
+
+local function PlayerTargetGained(tp_frame)
+  UpdateTargetUnit(tp_frame.visual.Healthbar, tp_frame.unit.unitid)
+end
+
+local function PlayerTargetLost(tp_frame)
+  if SettingsShowOnlyForTarget then
+    HideTargetUnit(tp_frame.visual.Healthbar)
+  end
+end
 ---------------------------------------------------------------------------------------------------
 -- Core element code
 ---------------------------------------------------------------------------------------------------
@@ -216,16 +284,16 @@ function Element.Created(tp_frame)
   healthbar:SetFrameLevel(tp_frame:GetFrameLevel() + 5)
   --healthbar:Hide()
 
-  local border = _G.CreateFrame("Frame", nil, healthbar)
+  local border = _G.CreateFrame("Frame", nil, healthbar, BackdropTemplate)
   border:SetFrameLevel(healthbar:GetFrameLevel())
   border:SetBackdrop(BorderBackdrop)
   border:SetBackdropBorderColor(0, 0, 0, 1)
   healthbar.Border = border
 
-  healthbar.Background = healthbar:CreateTexture(nil, "BACKGROUND")
+  healthbar.Background = healthbar:CreateTexture(nil, "ARTWORK")
 
-  local absorbs = healthbar:CreateTexture(nil, "BORDER", -6)
-  absorbs.Overlay = healthbar:CreateTexture(nil, "OVERLAY", 0)
+  local absorbs = healthbar:CreateTexture(nil, "ARTWORK", nil, 2)
+  absorbs.Overlay = healthbar:CreateTexture(nil, "ARTWORK", nil, 3)
   absorbs.Overlay:SetTexture("Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\Striped_Texture.tga", true, true)
   absorbs.Overlay:SetHorizTile(true)
 
@@ -234,7 +302,7 @@ function Element.Created(tp_frame)
   --      absorbbar.overlay:SetHorizTile(true)
   --      absorbbar.tileSize = 32
 
-  local absorbs_spark = healthbar:CreateTexture(nil, "OVERLAY", 7)
+  local absorbs_spark = healthbar:CreateTexture(nil, "ARTWORK", nil, 4)
   absorbs_spark:SetTexture("Interface\\RaidFrame\\Shield-Overshield")
   absorbs_spark:SetBlendMode("ADD")
   absorbs_spark:SetWidth(8)
@@ -244,11 +312,11 @@ function Element.Created(tp_frame)
 
   healthbar.Absorbs = absorbs
 
-  local healabsorb_bar = healthbar:CreateTexture(nil, "OVERLAY", 0)
+  local healabsorb_bar = healthbar:CreateTexture(nil, "ARTWORK", nil, 2)
   healabsorb_bar:SetVertexColor(0, 0, 0)
   healabsorb_bar:SetAlpha(0.5)
 
-  local healabsorb_glow = healthbar:CreateTexture(nil, "OVERLAY", 7)
+  local healabsorb_glow = healthbar:CreateTexture(nil, "ARTWORK", nil, 4)
   healabsorb_glow:SetTexture([[Interface\RaidFrame\Absorb-Overabsorb]])
   healabsorb_glow:SetBlendMode("ADD")
   healabsorb_glow:SetWidth(8)
@@ -256,11 +324,14 @@ function Element.Created(tp_frame)
   healabsorb_glow:SetPoint("TOPRIGHT", healthbar, "TOPLEFT", 2, 0)
   healabsorb_glow:Hide()
 
-  healthbar.HealAbsorbLeftShadow = healthbar:CreateTexture(nil, "OVERLAY", 4)
+  healthbar.HealAbsorbLeftShadow = healthbar:CreateTexture(nil, "ARTWORK", nil, 3)
   healthbar.HealAbsorbLeftShadow:SetTexture([[Interface\RaidFrame\Absorb-Edge]])
-  healthbar.HealAbsorbRightShadow = healthbar:CreateTexture(nil, "OVERLAY", 4)
+  healthbar.HealAbsorbRightShadow = healthbar:CreateTexture(nil, "ARTWORK", nil, 3)
   healthbar.HealAbsorbRightShadow:SetTexture([[Interface\RaidFrame\Absorb-Edge]])
   healthbar.HealAbsorbRightShadow:SetTexCoord(1, 0, 0, 1) -- reverse texture (right to left)
+
+  healthbar.TargetUnit = healthbar:CreateFontString(nil, "OVERLAY")
+  healthbar.TargetUnit:SetFont("Fonts\\FRIZQT__.TTF", 11)
 
   healthbar.HealAbsorb = healabsorb_bar
   healthbar.HealAbsorbGlow = healabsorb_glow
@@ -285,6 +356,7 @@ function Element.UnitAdded(tp_frame)
   end
 
   UpdateAbsorbs(tp_frame)
+  UpdateTargetUnit(healthbar, unit.unitid)
 end
 
 -- Called in processing event: NAME_PLATE_UNIT_REMOVED
@@ -334,19 +406,26 @@ function Element.UpdateStyle(tp_frame, style, plate_style)
     absorbs.Spark:Hide()
   end
 
+  local db_target_unit = Settings.TargetUnit
+  Font:UpdateText(healthbar, healthbar.TargetUnit, db_target_unit)
+  local width, height = healthbar:GetSize()
+  healthbar.TargetUnit:SetSize(width, height)
+  healthbar.TargetUnit:SetShown(healthbar.TargetUnit:GetText() ~= nil and db_target_unit.Show)
+
+  local frame_level
+  if TidyPlatesThreat.db.profile.settings.castbar.FrameOrder == "HealthbarOverCastbar" then
+    frame_level = tp_frame:GetFrameLevel() + 5
+  else
+    frame_level = tp_frame:GetFrameLevel() + 4
+  end
+  healthbar:SetFrameLevel(frame_level)
+  border:SetFrameLevel(frame_level - 1)
+  tp_frame.visual.EliteBorder:SetFrameLevel(frame_level)
+  tp_frame.visual.ThreatGlow:SetFrameLevel(frame_level - 1)
+
+  tp_frame.visual.textframe:SetFrameLevel(frame_level)
+
   healthbar:Show()
-end
-
-function Element.UpdateSettings()
-  Settings = TidyPlatesThreat.db.profile.settings.healthbar
-
-  local db = TidyPlatesThreat.db.profile.settings.healthborder
-  BorderBackdrop.edgeFile = (db.show and ThreatPlates.Art .. db.texture) or nil
-  BorderBackdrop.edgeSize = db.EdgeSize
-  BorderBackdrop.insets.left = db.Offset
-  BorderBackdrop.insets.right = db.Offset
-  BorderBackdrop.insets.top = db.Offset
-  BorderBackdrop.insets.bottom = db.Offset
 end
 
 --function Element.UpdateFrame()
@@ -379,7 +458,39 @@ local function UnitHealthbarUpdate(unitid)
   end
 end
 
-SubscribeEvent(Element, "UNIT_HEALTH_FREQUENT", UnitHealthbarUpdate)
+function Element.UpdateSettings()
+  Settings = TidyPlatesThreat.db.profile.settings.healthbar
+
+  local db = TidyPlatesThreat.db.profile.settings.healthborder
+  BorderBackdrop.edgeFile = (db.show and ThreatPlates.Art .. db.texture) or nil
+  BorderBackdrop.edgeSize = db.EdgeSize
+  BorderBackdrop.insets.left = db.Offset
+  BorderBackdrop.insets.right = db.Offset
+  BorderBackdrop.insets.top = db.Offset
+  BorderBackdrop.insets.bottom = db.Offset
+
+  SettingsTargetUnit = Settings.TargetUnit
+  SettingsTargetUnitHide = not SettingsTargetUnit.Show
+  SettingsShowOnlyForTarget = SettingsTargetUnit.ShowOnlyForTarget
+
+  if SettingsTargetUnit.Show then
+    SubscribeEvent(Element, "UNIT_TARGET", UNIT_TARGET)
+    --SubscribeEvent(Element, "UNIT_THREAT_LIST_UPDATE", UnitThreatUpdate)
+    SubscribeEvent(Element, "ThreatUpdate", UnitThreatUpdate)
+    SubscribeEvent(Element, "TargetLost", PlayerTargetLost)
+    SubscribeEvent(Element, "TargetGained", PlayerTargetGained)
+  else
+    UnsubscribeEvent(Element, "UNIT_TARGET", UNIT_TARGET)
+    UnsubscribeEvent(Element, "ThreatUpdate", UnitThreatUpdate)
+  end
+end
+
 SubscribeEvent(Element, "UNIT_MAXHEALTH", UnitMaxHealthUpdate)
-SubscribeEvent(Element, "UNIT_ABSORB_AMOUNT_CHANGED", UnitHealthbarUpdate)
-SubscribeEvent(Element, "UNIT_HEAL_ABSORB_AMOUNT_CHANGED", UnitHealthbarUpdate)
+
+if Addon.CLASSIC then
+  SubscribeEvent(Element, "UNIT_HEALTH_FREQUENT", UnitHealthbarUpdate)
+else
+  SubscribeEvent(Element, "UNIT_HEALTH", UnitHealthbarUpdate)
+  SubscribeEvent(Element, "UNIT_ABSORB_AMOUNT_CHANGED", UnitHealthbarUpdate)
+  SubscribeEvent(Element, "UNIT_HEAL_ABSORB_AMOUNT_CHANGED", UnitHealthbarUpdate)
+end

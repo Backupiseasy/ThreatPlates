@@ -53,7 +53,8 @@ function Widget:Create(tp_frame)
 end
 
 function Widget:IsEnabled()
-  return TidyPlatesThreat.db.profile.classWidget.ON or TidyPlatesThreat.db.profile.classWidget.ShowInHeadlineView
+  local db = TidyPlatesThreat.db.profile.classWidget
+  return db.ON or db.ShowInHeadlineView
 end
 
 function Widget:EnabledForStyle(style, unit)

@@ -166,7 +166,7 @@ local function UnitAura(unitid, index, filter)
       filter = filter .. "_PLAYER"
     end
     local aura = target_unit[filter][index]
-    --DEBUG_PRINT_TABLE(target_unit)
+    --Addon.Debug:PrintTable(target_unit)
     if aura then
       return aura.name, aura.rank, aura.icon, aura.stacks, aura.auraType, aura.duration, aura.expiration, aura.caster, aura.isStealable , aura.nameplateShowPersonal , aura.spellid
     end

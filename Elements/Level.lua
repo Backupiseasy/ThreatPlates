@@ -29,7 +29,8 @@ local Element = Addon.Elements.NewElement("Level")
 
 -- Called in processing event: NAME_PLATE_CREATED
 function Element.Created(tp_frame)
-  local level_text = tp_frame.visual.textframe:CreateFontString(nil, "ARTWORK", -2)
+  -- Level text is not shown in headline view, so anchoring it to the healthbar is ok
+  local level_text = tp_frame.visual.Healthbar:CreateFontString(nil, "ARTWORK")
 
   tp_frame.visual.LevelText = level_text
 end

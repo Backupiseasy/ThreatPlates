@@ -15,6 +15,7 @@ local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local UnitIsUnit = UnitIsUnit
 
 -- ThreatPlates APIs
+local BackdropTemplate = Addon.BackdropTemplate
 local TidyPlatesThreat = TidyPlatesThreat
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
 
@@ -33,10 +34,16 @@ local BACKDROP = {
 }
 
 ---------------------------------------------------------------------------------------------------
+-- Cached configuration settings
+---------------------------------------------------------------------------------------------------
+local TargetHighlightEnabledForStyle = {
+  etotem = false,
+  empty = false
+}
+
+---------------------------------------------------------------------------------------------------
 -- Local variables
 ---------------------------------------------------------------------------------------------------
-local TargetHighlightDisabled
-
 local MouseoverHighlightFrame = _G.CreateFrame("Frame", nil)
 local CurrentMouseoverPlate
 local CurrentMouseoverUnitID
@@ -84,17 +91,20 @@ MouseoverHighlightFrame:Hide()
 -- Called in processing event: NAME_PLATE_CREATED
 function Element.Created(tp_frame)
   -- Highlight for healthbar
+
   local healthbar = tp_frame.visual.Healthbar
-  healthbar.Highlight = _G.CreateFrame("Frame", nil, healthbar)
+  healthbar.Highlight = _G.CreateFrame("Frame", nil, healthbar, BackdropTemplate)
+  healthbar.Highlight:SetFrameLevel(healthbar:GetFrameLevel())
   healthbar.Highlight:SetPoint("TOPLEFT", healthbar, "TOPLEFT", - OFFSET_HIGHLIGHT, OFFSET_HIGHLIGHT)
   healthbar.Highlight:SetPoint("BOTTOMRIGHT", healthbar, "BOTTOMRIGHT", OFFSET_HIGHLIGHT, - OFFSET_HIGHLIGHT)
   healthbar.Highlight:SetBackdrop(BACKDROP)
   healthbar.Highlight:SetBackdropBorderColor(1, 1, 1, 1)
 
-  healthbar.HighlightTexture = healthbar.Highlight:CreateTexture(nil, "ARTWORK", 0)
+  healthbar.HighlightTexture = healthbar.Highlight:CreateTexture(nil, "ARTWORK", nil, 0)
   healthbar.HighlightTexture:SetTexture(HEALTHBAR_STYLE_TEXTURE)
   healthbar.HighlightTexture:SetBlendMode("ADD")
   healthbar.HighlightTexture:SetAllPoints(healthbar)
+  --frame.HighlightTexture:SetVertexColor(1, 0, 0,1) -- Color it for testing purposes
 
   -- Highlight for name
   healthbar.NameHighlight = tp_frame:CreateTexture(nil, "ARTWORK") -- required for Headline View
@@ -132,11 +142,20 @@ function Element.UpdateStyle(tp_frame, style, plate_style)
     healthbar.Highlight:Hide()
   end
 
-  healthbar.MouseoverHighlight:SetShown(tp_frame.unit.isMouseover and style.highlight.show and (not tp_frame.unit.isTarget or TargetHighlightDisabled))
+  local unit = tp_frame.unit
+  healthbar.MouseoverHighlight:SetShown(unit.isMouseover and style.highlight.show and TargetHighlightEnabledForStyle[unit.style] and not unit.isTarget)
 end
 
 function Element.UpdateSettings()
-  TargetHighlightDisabled = not (TidyPlatesThreat.db.profile.targetWidget.ON or TidyPlatesThreat.db.profile.targetWidget.ShowInHeadlineView)
+  local db = TidyPlatesThreat.db.profile
+
+  TargetHighlightEnabledForStyle["NameOnly"] = db.HeadlineView.ShowTargetHighlight
+  TargetHighlightEnabledForStyle["NameOnly-Unique"] = db.HeadlineView.ShowTargetHighlight
+  TargetHighlightEnabledForStyle["dps"] = db.targetWidget.ON
+  TargetHighlightEnabledForStyle["tank"] = db.targetWidget.ON
+  TargetHighlightEnabledForStyle["normal"] = db.targetWidget.ON
+  TargetHighlightEnabledForStyle["totem"] = db.targetWidget.ON
+  TargetHighlightEnabledForStyle["unique"] = db.targetWidget.ON
 end
 
 -- Registered in Nameplate.lua
@@ -151,8 +170,9 @@ function Element.UPDATE_MOUSEOVER_UNIT()
   HideMouseoverHighlightFrame()
 
   local tp_frame = plate.TPFrame
-  tp_frame.unit.isMouseover = true
-  tp_frame.visual.Healthbar.MouseoverHighlight:SetShown(tp_frame.style.highlight.show and (not tp_frame.unit.isTarget or TargetHighlightDisabled))
+  local unit = tp_frame.unit
+  unit.isMouseover = true
+  tp_frame.visual.Healthbar.MouseoverHighlight:SetShown(tp_frame.style.highlight.show and TargetHighlightEnabledForStyle[unit.style] and not unit.isTarget)
 
   CurrentMouseoverUnitID = tp_frame.unit.unitid
   CurrentMouseoverPlate = tp_frame

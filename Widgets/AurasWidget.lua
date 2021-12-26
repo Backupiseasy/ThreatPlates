@@ -30,18 +30,21 @@ local LibCustomGlow = Addon.LibCustomGlow
 local TidyPlatesThreat = TidyPlatesThreat
 local Animations = Addon.Animations
 local Font = Addon.Font
-local UpdateCustomStyleAfterAuraTrigger = Addon.UpdateCustomStyleAfterAuraTrigger
 local UnitStyle_AuraDependent = Addon.UnitStyle_AuraDependent
+local CUSTOM_GLOW_FUNCTIONS, CUSTOM_GLOW_WRAPPER_FUNCTIONS = Addon.CUSTOM_GLOW_FUNCTIONS, Addon.CUSTOM_GLOW_WRAPPER_FUNCTIONS
+local BackdropTemplate = Addon.BackdropTemplate
+
+local LibClassicDurations
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
 -- List them here for Mikk's FindGlobals script
 -- GLOBALS: CreateFrame, UnitAffectingCombat
 
----------------------------------------------------------------------------------------------------
--- Aura Highlighting
----------------------------------------------------------------------------------------------------
-local CUSTOM_GLOW_FUNCTIONS = Addon.CUSTOM_GLOW_FUNCTIONS
+if Addon.CLASSIC then
+  LibClassicDurations = LibStub("LibClassicDurations")
+  UnitAura = LibClassicDurations.UnitAuraWithBuffs
+end
 
 ---------------------------------------------------------------------------------------------------
 -- Auras Widget Functions
@@ -95,7 +98,7 @@ local PC_ROOT = 51          -- Mechanic: Rooted
 local PC_DAZE = 52
 local PC_GRIP = 53
 local PC_DISARM = 54        -- Apply Aura: Disarm
-local PC_DPUSHBACK = 55     -- Apply Aura: Disarm
+local PC_PUSHBACK = 55      -- Apply Aura: Disarm
 local PC_MODAGGRORANGE = 56 -- Apply Aura: Mod Aggro Range
 
 local CC_SILENCE = 101
@@ -312,7 +315,7 @@ local CROWD_CONTROL_SPELLS_RETAIL = {
   [132168] = LOC_STUN,      -- Shockwave (Blizzard)
   [118000] = LOC_STUN,      -- Dragon Roar (Talent, Blizzard)
   -- [6343] = PC_SNARE,        -- Thunder Clap
-  [199042] = LOC_STUN,      -- Thunderstruck (PvP, Blizzard)
+  -- [199042] = LOC_STUN,      -- Thunderstruck (PvP, Blizzard) -- Removed as CC as its uptime is to high.
   [199085] = LOC_STUN,      -- Warpath (PvP, Blizzard)
 
   ---------------------------------------------------------------------------------------------------
@@ -560,6 +563,7 @@ local PLayerIsInInstance = false
 local HideOmniCC, ShowDuration
 local AuraHighlightEnabled, AuraHighlightStart, AuraHighlightStop, AuraHighlightStopPrevious, AuraHighlightOffset
 local AuraHighlightColor = { 0, 0, 0, 0 }
+local EnabledForStyle = {}
 
 ---------------------------------------------------------------------------------------------------
 -- OnUpdate code - updates the auras remaining uptime and stacks and hides them after they expired
@@ -615,11 +619,11 @@ function Widget:GetColorForAura(aura)
 	end
 end
 
-local function FilterAll(show_aura, spellfound, is_mine, show_only_mine)
+local function FilterNone(show_aura, spellfound, is_mine, show_only_mine)
   return show_aura
 end
 
-local function FilterWhitelist(show_aura, spellfound, is_mine, show_only_mine)
+local function FilterAllowlist(show_aura, spellfound, is_mine, show_only_mine)
   if spellfound == "All" then
     return show_aura
   elseif spellfound == true then
@@ -631,7 +635,7 @@ local function FilterWhitelist(show_aura, spellfound, is_mine, show_only_mine)
   return false
 end
 
-local function FilterBlacklist(show_aura, spellfound, is_mine, show_only_mine)
+local function FilterBlocklist(show_aura, spellfound, is_mine, show_only_mine)
   -- blacklist all auras, i.e., default is show all auras (no matter who casted it)
   --   spellfound = true or All - blacklist this aura (from all casters)
   --   spellfound = My          - blacklist only my aura
@@ -650,9 +654,12 @@ local function FilterBlacklist(show_aura, spellfound, is_mine, show_only_mine)
 end
 
 Widget.FILTER_FUNCTIONS = {
-  all = FilterAll,
-  blacklist = FilterBlacklist,
-  whitelist = FilterWhitelist,
+  all = FilterNone,
+  blacklist = FilterBlocklist,
+  whitelist = FilterAllowlist,
+  None = FilterNone,
+  Block = FilterBlocklist,
+  Allow = FilterAllowlist,
 }
 
 function Widget:FilterFriendlyDebuffsBySpell(db, aura, AuraFilterFunction)
@@ -988,7 +995,7 @@ function Widget:UpdateIconGrid(widget_frame, unit)
 
   local old_CustomStyleAura = unit.CustomStyleAura
   unit.CustomStyleAura = false
-  widget_frame.HideAuras = not widget_frame.Active or (db.ShowTargetOnly and not unit.isTarget)
+  widget_frame.HideAuras = not EnabledForStyle[unit.style] or (db.ShowTargetOnly and not unit.isTarget)
 
   local enabled_cc
   local unit_is_friendly = UnitReaction(unitid, "player") > 4
@@ -1126,10 +1133,11 @@ function Widget:CreateAuraFrameIconMode(parent)
   local frame = _G.CreateFrame("Frame", nil, parent)
   frame:SetFrameLevel(parent:GetFrameLevel())
 
-  frame.Icon = frame:CreateTexture(nil, "ARTWORK", 0)
-  frame.Border = _G.CreateFrame("Frame", nil, frame)
+  frame.Icon = frame:CreateTexture(nil, "ARTWORK", nil, -5)
+  frame.Border = _G.CreateFrame("Frame", nil, frame, BackdropTemplate)
   frame.Border:SetFrameLevel(parent:GetFrameLevel())
   frame.Cooldown = CreateCooldown(frame)
+  frame.Cooldown:SetFrameLevel(parent:GetFrameLevel())
 
   frame.Highlight = _G.CreateFrame("Frame", nil, frame)
   frame.Highlight:SetFrameLevel(parent:GetFrameLevel())
@@ -1139,7 +1147,7 @@ function Widget:CreateAuraFrameIconMode(parent)
   -- the cooldown frame and b) using the cooldown frame results in the text not being visible if there is no
   -- cooldown (i.e., duration and expiration are nil which is true for auras with unlimited duration)
   local text_frame = _G.CreateFrame("Frame", nil, frame)
-  text_frame:SetFrameLevel(parent:GetFrameLevel() + 9) -- +9 as the glow is set to +8 by LibCustomGlow
+  text_frame:SetFrameLevel(parent:GetFrameLevel())
   text_frame:SetAllPoints(frame.Icon)
   frame.Stacks = text_frame:CreateFontString(nil, "OVERLAY")
   frame.TimeLeft = text_frame:CreateFontString(nil, "OVERLAY")
@@ -1169,6 +1177,7 @@ function Widget:UpdateAuraFrameIconMode(frame)
   end
 
   db = self.db_icon
+
   -- Icon
   frame:SetSize(db.IconWidth, db.IconHeight)
   frame.Icon:SetAllPoints(frame)
@@ -1228,7 +1237,7 @@ function Widget:UpdateAuraInformationIconMode(frame) -- texture, duration, expir
 
   if AuraHighlightEnabled then
     if frame.AuraStealOrPurge then
-      AuraHighlightStart(frame.Highlight, AuraHighlightColor)
+      AuraHighlightStart(frame.Highlight, AuraHighlightColor, 0)
     else
       AuraHighlightStop(frame.Highlight)
     end
@@ -1275,13 +1284,13 @@ function Widget:CreateAuraFrameBarMode(parent)
   frame.Statusbar:SetFrameLevel(parent:GetFrameLevel())
   frame.Statusbar:SetMinMaxValues(0, 100)
 
-  frame.Background = frame.Statusbar:CreateTexture(nil, "BACKGROUND", 0)
+  frame.Background = frame.Statusbar:CreateTexture(nil, "BACKGROUND", nil, 0)
   frame.Background:SetAllPoints()
 
   frame.Highlight = _G.CreateFrame("Frame", nil, frame)
   frame.Highlight:SetFrameLevel(parent:GetFrameLevel())
 
-  frame.Icon = frame:CreateTexture(nil, "OVERLAY", 1)
+  frame.Icon = frame:CreateTexture(nil, "ARTWORK", nil, -5)
   frame.Stacks = frame.Statusbar:CreateFontString(nil, "OVERLAY")
 
   frame.LabelText = frame.Statusbar:CreateFontString(nil, "OVERLAY")
@@ -1296,6 +1305,7 @@ function Widget:CreateAuraFrameBarMode(parent)
   frame.TimeText:SetShadowOffset(1, -1)
 
   frame.Cooldown = CreateCooldown(frame)
+  frame.Cooldown:SetFrameLevel(parent:GetFrameLevel())
 
   frame:Hide()
 
@@ -1427,7 +1437,7 @@ function Widget:UpdateAuraInformationBarMode(frame) -- texture, duration, expira
 
   if AuraHighlightEnabled then
     if frame.AuraStealOrPurge then
-      AuraHighlightStart(frame.Highlight, AuraHighlightColor)
+      AuraHighlightStart(frame.Highlight, AuraHighlightColor, 0)
     else
       AuraHighlightStop(frame.Highlight)
     end
@@ -1570,14 +1580,16 @@ function Widget:UpdateLayout(widget_frame)
     widget_frame:SetScript("OnUpdate", nil)
   end
 
+  local frame_level
   if self.db.FrameOrder == "HEALTHBAR_AURAS" then
-    widget_frame:SetFrameLevel(widget_frame:GetParent():GetFrameLevel() + 2)
+    frame_level = widget_frame:GetParent():GetFrameLevel() + 1
   else
-    widget_frame:SetFrameLevel(widget_frame:GetParent():GetFrameLevel() + 9)
+    frame_level = widget_frame:GetParent():GetFrameLevel() + 9
   end
-  widget_frame.Buffs:SetFrameLevel(widget_frame:GetFrameLevel())
-  widget_frame.Debuffs:SetFrameLevel(widget_frame:GetFrameLevel())
-  widget_frame.CrowdControl:SetFrameLevel(widget_frame:GetFrameLevel())
+  widget_frame:SetFrameLevel(frame_level)
+  widget_frame.Buffs:SetFrameLevel(frame_level)
+  widget_frame.Debuffs:SetFrameLevel(frame_level)
+  widget_frame.CrowdControl:SetFrameLevel(frame_level)
 end
 
 local function UnitAuraEventHandler(widget_frame, event, unitid)
@@ -1586,6 +1598,17 @@ local function UnitAuraEventHandler(widget_frame, event, unitid)
 
   if widget_frame.Active then
     widget_frame.Widget:UpdateIconGrid(widget_frame, widget_frame:GetParent().unit)
+  end
+end
+
+-- For Classic: LibClassicDurations
+local function UnitBuffEventHandler(event, unitid)
+  local plate = GetNamePlateForUnit(unitid)
+  if plate and plate.TPFrame.Active then
+    local widget_frame = plate.TPFrame.widgets.Auras
+    if widget_frame.Active then
+      widget_frame.Widget:UpdateIconGrid(widget_frame, widget_frame:GetParent().unit)
+    end
   end
 end
 
@@ -1705,10 +1728,20 @@ function Widget:OnEnable()
   self:SubscribeEvent("PLAYER_ENTERING_WORLD")
   -- LOSS_OF_CONTROL_ADDED
   -- LOSS_OF_CONTROL_UPDATE
+
+  if Addon.CLASSIC then
+    -- Add duration handling from LibClassicDurations
+    LibClassicDurations:Register("ThreatPlates")
+    -- NOTE: Enemy buff tracking won't start until you register UNIT_BUFF
+    LibClassicDurations.RegisterCallback(TidyPlatesThreat, "UNIT_BUFF", UnitBuffEventHandler)
+  end
 end
 
 function Widget:OnDisable()
   self:UnsubscribeAllEvents()
+  if Addon.CLASSIC then
+    LibClassicDurations.UnregisterCallback(TidyPlatesThreat, "UNIT_BUFF")
+  end
   local frame
   for _, plate in pairs(GetNamePlates()) do
     frame = plate and plate.TPFrame
@@ -1744,7 +1777,7 @@ function Widget:OnUnitAdded(widget_frame, unit)
   self:UpdateIconGrid(widget_frame, unit)
 end
 
-function Widget:OnUnitRemoved(widget_frame)
+function Widget:OnUnitRemoved(widget_frame, unit)
   -- Unregister UNIT_AURA which was registerd by this frame - TODO: change this to SubscribeUnitEvent
   widget_frame:UnregisterAllEvents()
 end
@@ -1892,7 +1925,8 @@ function Widget:UpdateSettings()
 
   -- Highlighting
   AuraHighlightEnabled = self.db.Highlight.Enabled
-  AuraHighlightStart = LibCustomGlow[CUSTOM_GLOW_FUNCTIONS[self.db.Highlight.Type][1]]
+  local glow_function = CUSTOM_GLOW_FUNCTIONS[self.db.Highlight.Type][1]
+  AuraHighlightStart = CUSTOM_GLOW_WRAPPER_FUNCTIONS[glow_function] or LibCustomGlow[glow_function]
   AuraHighlightStopPrevious = AuraHighlightStop or LibCustomGlow.PixelGlow_Stop
   AuraHighlightStop = LibCustomGlow[CUSTOM_GLOW_FUNCTIONS[self.db.Highlight.Type][2]]
   AuraHighlightOffset = CUSTOM_GLOW_FUNCTIONS[self.db.Highlight.Type][3]
@@ -1902,4 +1936,14 @@ function Widget:UpdateSettings()
   AuraHighlightColor[2] = color.g
   AuraHighlightColor[3] = color.b
   AuraHighlightColor[4] = color.a
+
+  EnabledForStyle["NameOnly"] = self.db.ShowInHeadlineView
+  EnabledForStyle["NameOnly-Unique"] = self.db.ShowInHeadlineView
+  EnabledForStyle["dps"] = self.db.ON
+  EnabledForStyle["tank"] = self.db.ON
+  EnabledForStyle["normal"] = self.db.ON
+  EnabledForStyle["totem"] = self.db.ON
+  EnabledForStyle["unique"] = self.db.ON
+  EnabledForStyle["etotem"] = false
+  EnabledForStyle["empty"] = false
 end

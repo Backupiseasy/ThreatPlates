@@ -1,0 +1,53 @@
+﻿#@retail@
+## Interface: 90001
+#@end-retail@
+#@classic@
+## Interface: 11305
+#@end-classic@
+
+## Title: Threat Plates
+## Version: 11.0.0-Beta1
+## Notes: Threat-reactive nameplates.
+## Notes-deDE: Bedrohungsreaktive Namensplaketten.
+## Notes-esES: Placas Identificativas de Amenaza
+## Notes-esMX: Placas Identificativas de Amenaza
+## Author: Suicidal Katt, Blacksalsify
+## SavedVariables: ThreatPlatesDB
+
+#@retail@
+## RequiredDeps:
+## OptionalDeps: Ace3, AceGUI-3.0-SharedMediaWidgets, LibSharedMedia-3.0, LibCustomGlow-1.0, LibDeflate
+#@end-retail@
+#@classic@
+## RequiredDeps:
+## OptionalDeps: Ace3, AceGUI-3.0-SharedMediaWidgets, LibSharedMedia-3.0, LibCustomGlow-1.0, LibDeflate, LibClassicDurations
+#@end-classic@
+
+## X-Website: https://wow.curseforge.com/projects/tidy-plates-threat-plates
+## X-License: GNU General Public License
+## X-Credits: danltiger (for Tidy Plates), Tosaido (for quest handling code from QuestMobs)
+## X-Curse-Project-ID: 21217
+
+Libs\Libs.xml
+Locales\Locales.xml
+
+ThreatPlates.xml
+
+Init.lua
+Debug.lua
+EventService.lua
+CVarsManager.lua
+Media.lua
+Constants.lua
+Elements\Elements.xml
+Widgets\WidgetHandler.lua
+
+Nameplate.lua
+Database.lua
+Addon.lua
+Commands.lua
+Options.lua
+
+Styles\Styles.xml
+Functions\Functions.xml
+Widgets\Widgets.xml

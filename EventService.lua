@@ -194,11 +194,10 @@ function EventService.Publish(event, ...)
   local all_subscribers = SubscribersByEvent[event]
   if all_subscribers then
     for subscriber, func in pairs(all_subscribers) do
-      --print ("Publishing", event)
       if func == true then
         subscriber[event](subscriber, ...)
       else
-        func( ...)
+        func(...)
       end
     end
   end

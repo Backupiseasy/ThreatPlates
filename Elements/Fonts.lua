@@ -32,8 +32,6 @@ function Font.SetJustify(font_string, horz, vert)
   end
 end
 
-local SetJustify = Font.SetJustify
-
 function Font:UpdateTextFont(font, db)
   font:SetFont(Addon.LSM:Fetch('font', db.Typeface), db.Size, db.flags)
 
@@ -48,10 +46,7 @@ function Font:UpdateTextFont(font, db)
     font:SetTextColor(db.Color.r, db.Color.g, db.Color.b, db.Transparency or 1)
   end
 
-  SetJustify(font, db.HorizontalAlignment or "CENTER", db.VerticalAlignment or "CENTER")
-
---  font:SetJustifyH(db.HorizontalAlignment or "CENTER")
---  font:SetJustifyV(db.VerticalAlignment or "CENTER")
+  self.SetJustify(font, db.HorizontalAlignment or "CENTER", db.VerticalAlignment or "CENTER")
 end
 
 function Font:UpdateText(parent, font, db)

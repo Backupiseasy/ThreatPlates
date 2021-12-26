@@ -22,6 +22,8 @@ local next, setmetatable, getmetatable = next, setmetatable, getmetatable
 local ipairs, type, insert = ipairs, type, table.insert
 local string = string
 
+Addon.CLASSIC = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
+
 ---------------------------------------------------------------------------------------------------
 -- Libraries
 ---------------------------------------------------------------------------------------------------
@@ -31,6 +33,27 @@ Addon.LSM = LibStub("LibSharedMedia-3.0")
 Addon.LibCustomGlow = LibStub("LibCustomGlow-1.0")
 Addon.LibAceConfigDialog = LibStub("AceConfigDialog-3.0")
 Addon.LibAceConfigRegistry = LibStub("AceConfigRegistry-3.0")
+
+if Addon.CLASSIC then
+	Addon.LibClassicCasterino = LibStub("LibClassicCasterino-ThreatPlates")
+	--Addon.LibClassicCasterino = LibStub("LibClassicCasterino")
+end
+
+Addon.BackdropTemplate = BackdropTemplateMixin and "BackdropTemplate"
+
+-- Use this once SetBackdrop backwards compatibility is removed
+--if BackdropTemplateMixin then -- Shadowlands
+--	Addon.BackdropTemplate = "BackdropTemplate"
+--
+--	Addon.SetBackdrop = function(frame, backdrop)
+--		frame.backdropInfo = backdrop
+--		frame:ApplyBackdrop()
+--	end
+--else
+--	Addon.SetBackdrop = function(frame, backdrop)
+--		frame:SetBackdrop(backdrop)
+--	end
+--end
 
 ---------------------------------------------------------------------------------------------------
 -- Define AceAddon TidyPlatesThreat
@@ -48,8 +71,41 @@ Addon.Cache = {
 		Name = {},
 		NameWildcard = {},
 		Aura = {},
-		Cast = {}
+		Cast = {},
+	},
+		Styles = {
+		ForAllInstances = {},
+		PerInstance = {},
+		ForCurrentInstance = {},
 	}
+}
+
+---------------------------------------------------------------------------------------------------
+-- Aura Highlighting
+---------------------------------------------------------------------------------------------------
+local LibCustomGlow = Addon.LibCustomGlow
+local function Wrapper_ButtonGlow_Start(frame, color, framelevel)
+	LibCustomGlow.ButtonGlow_Start(frame, color, nil, framelevel)
+end
+
+local function Wrapper_PixelGlow_Start(frame, color, framelevel)
+	LibCustomGlow.PixelGlow_Start(frame, color, nil, nil, nil, nil, nil, nil, nil, nil, framelevel)
+end
+
+local function Wrapper_AutoCastGlow_Start(frame, color, framelevel)
+	LibCustomGlow.AutoCastGlow_Start(frame, color, nil, nil, nil, nil, nil, nil, framelevel)
+end
+
+Addon.CUSTOM_GLOW_FUNCTIONS = {
+	Button = { "ButtonGlow_Start", "ButtonGlow_Stop", 8 },
+	Pixel = { "PixelGlow_Start", "PixelGlow_Stop", 3 },
+	AutoCast = { "AutoCastGlow_Start", "AutoCastGlow_Stop", 4 },
+}
+
+Addon.CUSTOM_GLOW_WRAPPER_FUNCTIONS = {
+	ButtonGlow_Start = Wrapper_ButtonGlow_Start,
+	PixelGlow_Start = Wrapper_PixelGlow_Start,
+	AutoCastGlow_Start = Wrapper_AutoCastGlow_Start,
 }
 
 --------------------------------------------------------------------------------------------------
@@ -194,21 +250,23 @@ local function DeepCopyTable(orig)
 	return copy
 end
 
-Addon.CopyTable = DeepCopyTable
+--Addon.CopyTable = DeepCopyTable
 
---Addon.CopyTable = function(input)
---	local output = {}
---	for k,v in pairs(input) do
---		if type(v) == "table" then
---			output[k] = Addon.CopyTable(v)
---		else
---			output[k] = v
---		end
---	end
---	return output
---end
+Addon.CopyTable = function(input)
+	local output = {}
+	for k,v in pairs(input) do
+		if type(v) == "table" then
+			output[k] = Addon.CopyTable(v)
+		else
+			output[k] = v
+		end
+	end
+	return output
+end
 
 Addon.MergeIntoTable = function(target, source)
+	if source == nil then return end
+
 	for k,v in pairs(source) do
 		if type(v) == "table" then
 			target[k] = target[k] or {}

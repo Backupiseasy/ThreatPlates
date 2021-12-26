@@ -1,4 +1,83 @@
 ﻿------------------------------------------------------
+10.0.1
+------------------------------------------------------
+* Fixed a Lua error when migrating deprecated default nameplates to the new format.
+* Fixed a Lua error that occurred when Blizzard default plates were shown (e.g., for friendly units when entering an instance in a group) [Issue #429].
+* Fixed a Lua error that occurred when CVar NamePlateVerticalScale was changed will in combat [Issue #430].
+
+------------------------------------------------------
+10.0.0 - Release for Shadowlands Pre-Patch
+------------------------------------------------------
+* Updated Threat Plates for Shadowlands Pre-Patch and updated nameplate code due to changes to WoW API.
+* Updated integrated libraries to Ace3 r1241.
+
+------------------------------------------------------
+9.3.3
+------------------------------------------------------
+* Fixed a bug with settings migration in the Classic version which resulted in settings being overwritten with default values [Comment TPC#631, TPC#650].
+* Fixed a bug with custom styles for nameplates where the Button highlight glow was shown under the healthbar, not above it [Comment #4845].
+* Fixed a bug with the Focus Highlight where the Stripes texture was not shown reliably [Comment #4832].
+* Fixed a graphical bug with Target/Focus highlight borders Glow and Threat Glow when used with small healthbar heights (< 9) [IM].
+
+------------------------------------------------------
+9.3.2
+------------------------------------------------------
+* Fixed a Lua error in Combo Points widget because of an API call not supported in WoW Classic [Issue TPC#38, Comment TPC#640].
+
+------------------------------------------------------
+9.3.1
+------------------------------------------------------
+* The display of the unit that is currently being targeted is now off by default.
+* Fixed a bug with the mouseover highlight shown on the wrong layer (above elite/skull icon) [Comment #4796].
+* Fixed a bug with the mouseover highlight not shown in headline view.
+* Fixed a bug where enabling/disabling the display of the unit that is currently being targeted did not take effect immediately.
+* Fixed a bug where combo points were not shown for Windwalker Monks, Arcane Mages and Retribution Paladins [Issue #425, Comment #4819].
+
+------------------------------------------------------
+9.3.0
+------------------------------------------------------
+* Consolidated Retail and Classic version of Threat Plates into one single sourcecode version.
+* Added a new widget to show the experience bar of certain follower [Comment #3775, #3728, #4190, #4402, #4447, #4699, Issue GitHub #202].
+* Added an option to show the castbar above or below the healthbar [Comment #4486, #4461, #4631, Issue TPC#32, PM].
+* Added an option to show the current target's name on the castbar [Comment #4474, #4495, #4616].
+* Added a striped overlay texture to Target/Focus Highlight widget [Comment #4458].
+* Added a feature to show the name of the unit that is currently targeted on the nameplate [Issue TPC#15, Comment TPC#446, #TPC579].
+* Added an option to show the current amount of threat as a percentage [Comment TPC#540, TPC#533, E-Mail].
+* Added options to enable/disable custom styles for nameplates based based on being inside or outside of instances [Issue #363, #185].
+* Added an option to duplicate existing custom styles for nameplates [Comment TPC#562].
+* Improved importing profiles and custom styles for nameplates - now also exports from older Threat Plates versions can be imported.
+* Updated the icon for Blizzard Battle.net Friends in the Social widget.
+* Fixed a bug where enabling/disabling widgets only took effect after reloading the UI.
+* Fixed a bug with Focus widget where an incorrect artwork was shown when switching between healthbar and headline view.
+* Fixed a bug with custom styles for nameplates where the icon was not shown when the appearance (scaling, transparency, ...) was disabled.
+* Fixed a bug with custom styles for nameplates where styles where not enabled/disabled for friendly or enemy units correctly.
+* Fixed a bug where nameplates with a custom style were not updated after a settings change.
+* Fixed a bug with Name trigger for custom styles for nameplates where units with the character "." in their name could not be added.
+* Fixed a bug with mouseover highlight not shown on the current target unit when target highlight was disabled.
+* Fixed a bug where the the glow effect on custom styles for nameplates with Cast trigger was not shown [Comment #4675].
+* Fixed a bug where multiple, overlapping glow effects where shown on a custom style nameplate [Comment #4675].
+* Fixed a bug where automatic icon for custom styles for nameplates was not shown correctly because of delayed portrait updates.
+* Fixed a bug with widgets being initialized and updated properly when switching between Blizzard nameplates and Threat Plates (without reloading the UI).
+* Fixed a bug with the clickable area being to small when small Blizzard nameplates and Healthbar Sync were enabled [Comment #4548].
+* Reworked layering of all graphical elements as part of the castbar over healthbar feature integration.
+* Renamed filter modes for Auras widget to None, Allow, and Block.
+* Upgrade integrated libraries (LibClassicCasterino rev. 33, LibClassicDurations v.1.64, LibDeflate v1.0.2, LibSharedMedia v.8.2.0-r113)
+* Updated localizations for German, Traditional Chinese, Spanish, and Latin American Spanish (thanks to sugymaylis for the Spanish translations).
+
+------------------------------------------------------
+9.2.4
+------------------------------------------------------
+* Fixed a bug with the check for illegal characters in a Name trigger for custom nameplate styles [Comment #4585].
+* Added a new mob that can detect stealth to the Stealth widget.
+
+------------------------------------------------------
+9.2.3
+------------------------------------------------------
+* Removed Thunderstruck (PvP talent) from crowd-control auras list as its uptime is too high. It's shown as a normal debuff now [Comment #4568].
+* Fixed a bug with Copy&Paste of a custom nameplate style where pasting was not possible because it would create a duplicate custom nameplate style [Comment TPC#560].
+* Fixed a bug with Auras where auras where shown although auras were disabled when aura triggers for custom nameplate styles were used.
+
+------------------------------------------------------
 9.2.2
 ------------------------------------------------------
 * Changed default for level text width and horizontal offset as very long level texts (e.g., "+100") where shown with ellipsis.
@@ -111,7 +190,7 @@
 * Fixed a Lua error when changing certain settings related to the healthbar size in combat. This settings can only be changed out of combat now.
 * Fixed a bug in Auras widget where some debuffs were displayed twice when changing the aura type filter for crowd-control auras (e.g., from All to Blizzard) in the options.
 
-﻿------------------------------------------------------
+------------------------------------------------------
 9.1.10
 ------------------------------------------------------
 * Fixed a bug with Combo Points widget not properly being shown on the target unit's nameplate after entering a timewalking dungeon [Comment #1994].
@@ -150,14 +229,14 @@
 * Added an option to the Boss Mods widget to show tracking lines between player and active nameplate auras.
 * Improved offtank detection of the threat system (thanks to cremor for reporting the issue and helping fixing it) [Issue #331].
 
-﻿------------------------------------------------------
+------------------------------------------------------
 9.1.4
 ------------------------------------------------------
 * Added an option to Auras widget to highlight auras that can be stolen or purged [PR #100, Comment #1707, #1251, #1405, Issue #338].
 * Added some new mobs that can detect stealth to the Stealth widget.
 * Fixed a bug with Warning Glow for Threat not working when threat system as enabled, but threat coloring was disabled [Comment #1888].
 
-﻿------------------------------------------------------
+------------------------------------------------------
 9.1.3
 ------------------------------------------------------
 * Added heuristic threat detection to show threat feedback on mobs that do not have a threat table, especially in instances (e.g., snake adds on Merektha in Temple of Sethraliss or reaping mobs) [Comment #1790, #1811, E-Mail Request, Issue #331].
