@@ -639,52 +639,21 @@ local function FrameOnUpdate(plate, elapsed)
   if AnimateHideNameplate then
     if scale < CVAR_nameplateMinScale then
       if not tp_frame.HidingScale then
-        if tp_frame.unit.name == "Rok'kal" or tp_frame.unit.name == "Olivia" then
-          print("Hide Animate:", tp_frame.unit.name)
-        end
         Animations:HidePlate(tp_frame)
         tp_frame.HidingScale = scale + 0.01
       end
-  
+
       if scale < tp_frame.HidingScale then
-        if tp_frame.unit.name == "Rok'kal" or tp_frame.unit.name == "Olivia" then
-          print ("Hiding:", tp_frame.unit.name)
-        end
         tp_frame.HidingScale = scale
       elseif tp_frame.HidingScale ~= -1 then
         -- Scale down stoppted and reversed - plate is no longer hiding
         Transparency:Initialize(tp_frame)
         Scaling:Initialize(tp_frame)
         tp_frame.HidingScale = -1
-        if tp_frame.unit.name == "Rok'kal" or tp_frame.unit.name == "Olivia" then
-          print("Growing:", tp_frame.unit.name)
-        end
       end
     else -- scale >= CVAR_nameplateMinScale
       tp_frame.HidingScale = nil
     end
-
-    -- -- Phase-out nameplates that will be hidden (e.g., the unit died)
-    -- -- Heuristic for determining of the nameplate is displayed (scaling up) or hidden (scaling down)
-    -- -- The first time the plate's scale passes the min scale, it should be fully displayed.
-    -- if tp_frame.HidingScale and not tp_frame.IsShowing and scale > tp_frame.HidingScale then
-    --   -- Scale down stoppted and reversed - plate is no longer hiding
-    --   Transparency:Initialize(tp_frame)
-    --   Scaling:Initialize(tp_frame)
-    --   tp_frame.IsShowing = true
-    -- elseif scale < CVAR_nameplateMinScale then
-    --   if not tp_frame.IsShowing then
-    --     if not tp_frame.HidingScale then
-    --       print("Hide Animate:", tp_frame.unit.name)
-    --       Animations:HidePlate(tp_frame)
-    --     end
-    --     -- scale <= tp_frame.HidingScale as > is checked by above if clause
-    --     tp_frame.HidingScale = scale
-    --   end
-    -- else -- scale >= CVAR_nameplateMinScale
-    --   tp_frame.HidingScale = nil
-    --   tp_frame.IsShowing = nil
-    -- end
   end
 
   -- Do this after the hiding stuff, to correctly set the occluded transparency

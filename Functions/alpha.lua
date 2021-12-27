@@ -231,24 +231,40 @@ local function SetOccludedTransparencyWithFadingOnUpdate(self, frame)
   if plate_alpha < (CVAR_NameplateOccludedAlphaMult + 0.05) then
     frame.IsOccluded = true
     target_alpha = SettingsOccludedAlpha
+  -- elseif frame.IsOccluded or not frame.CurrentAlpha then
+    -- unit_was_occluded = frame.IsOccluded
+    -- frame.IsOccluded = false
+    -- target_alpha = GetTransparency(frame.unit)
+
+  -- plate_alpha >= (CVAR_NameplateOccludedAlphaMult + 0.05)
   elseif frame.IsOccluded then
     frame.IsOccluded = false
     unit_was_occluded = true
     target_alpha = GetTransparency(frame.unit)
-  elseif not frame.CurrentAlpha then
-    frame.IsOccluded = false
-    unit_was_occluded = false
-    target_alpha = GetTransparency(frame.unit)
+  -- elseif not frame.CurrentAlpha then
+  --   frame.IsOccluded = false
+  --   unit_was_occluded = false
+  --   target_alpha = GetTransparency(frame.unit)
   end
 
   if target_alpha and target_alpha ~= frame.CurrentAlpha then
     if (frame.IsOccluded and not FadeOutOccludedUnitsIsEnabled) or (unit_was_occluded and not FadeInOccludedUnitsIsEnabled) then
       Animations:StopFade(frame)
       frame:SetAlpha(target_alpha)
+      frame.IsShowing = false
+    elseif frame.IsShowing then
+      Animations:StopFade(frame)
+      frame:SetAlpha(target_alpha)
+
+      -- Disable showing only if plate is not occluded at least once
+      if unit_was_occluded then
+        frame.IsShowing = false
+      end
     else
-      -- print ("Occlusiton Fade In:", frame.IsOccluded, target_alpha, frame.CurrentAlpha, "Showing: ", frame.IsShowing)
       Animations:FadePlate(frame, target_alpha)
+      frame.IsShowing = false
     end
+
     frame.CurrentAlpha = target_alpha
   end
 end
@@ -279,9 +295,12 @@ function Transparency:Initialize(frame)
 
   frame.CurrentAlpha = nil
   frame.IsOccluded = false
+  frame.IsShowing = true
 
   -- Plate is not yet shown here and not yet occluded, so adjust the alpha with or without fading
   UpdatePlate_InitializeAlpha(frame, frame.unit)
+  -- Also initialize occlusion here to avoid a short flicker of the nameplate if occlusion is enabled
+  SetOccludedTransparencyWithoutFadingOnUpdate(Transparency, frame)
 end
 
 function Transparency:UpdateSettings()
@@ -333,6 +352,7 @@ local function SituationalEvent(tp_frame)
     end
 		tp_frame:SetAlpha(target_alpha)
 		tp_frame.CurrentAlpha = target_alpha
+    --tp_frame.IsShowing = false
 	end
 end
 

@@ -192,10 +192,11 @@ function TidyPlatesThreat:ChatCommandDebug(cmd_list)
 		print("    Alpha:", plate:GetAlpha())
 		print("    Scale:", plate:GetScale())
 		print("Threat Plate:")
-		print("    Showing / Hiding:", tp_frame.IsShowing, "/", tp_frame.HidingScale)
 		print("    Alpha:", tp_frame:GetAlpha())
-		print("    CurrentAlpha:", tp_frame.CurrentAlpha)
 		print("    Scale:", tp_frame:GetScale())
+		print("    CurrentAlpha:", tp_frame.CurrentAlpha)
+		print("    Hiding Scale:", tp_frame.HidingScale)
+		print("    IsShowing:", tp_frame.IsShowing)
 	elseif command == "debug" then
 		local plate = C_NamePlate.GetNamePlateForUnit("target")
 		if not plate then return end
