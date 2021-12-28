@@ -10,7 +10,7 @@ local ipairs = ipairs
 -- WoW APIs
 
 -- ThreatPlates APIs
-local LSM = Addon.ThreatPlates.Media
+local LSM = Addon.LSM
 local Font = Addon.Font
 local ANCHOR_POINT_TEXT = Addon.ANCHOR_POINT_TEXT
 local BackdropTemplate = Addon.BackdropTemplate
