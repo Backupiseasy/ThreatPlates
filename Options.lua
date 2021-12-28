@@ -5962,7 +5962,7 @@ local function CreateSpecRolesClassic()
 end
 
 local function CreateThreatPercentageOptions()
-  local entry = GetTextEntry(L["Percentage"], 60, { "threatWidget", "ThreatPercentage" })
+  local entry = GetTextEntry(L["Percentage"], 60, { "threat", "ThreatPercentage" })
 
   entry.disabled = function() return not db.threat.ON end
 
@@ -5976,7 +5976,7 @@ local function CreateThreatPercentageOptions()
         name = L["Use Threat Color"],
         order = 70,
         type = "toggle",
-        arg = { "threatWidget", "ThreatPercentage", "UseThreatColor" },
+        arg = { "threat", "ThreatPercentage", "UseThreatColor" },
       },
       CustomColorToggle = {
         name = L["Custom"],
@@ -5984,14 +5984,14 @@ local function CreateThreatPercentageOptions()
         type = "toggle",
         set = function(info, val) SetValue(info, not val) end,
         get = function(info, val) return not GetValue(info, val) end,
-        arg = { "threatWidget", "ThreatPercentage", "UseThreatColor" },
+        arg = { "threat", "ThreatPercentage", "UseThreatColor" },
       },
       CustomColor = {
         name = L["Color"],
         type = "color",
         order = 90,
-        arg = { "threatWidget", "ThreatPercentage", "CustomColor"},
-        disabled = function() return db.threatWidget.ThreatPercentage.UseThreatColor end
+        arg = { "threat", "ThreatPercentage", "CustomColor"},
+        disabled = function() return db.threat.ThreatPercentage.UseThreatColor end
       },
     },
   }
