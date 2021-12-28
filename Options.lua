@@ -416,6 +416,8 @@ local function SetValue(info, ...)
       if widget_info.PublishEvent then
         Addon:PublishToEachPlate(widget_info.PublishEvent)
       end
+    else
+      Addon:ForceUpdate()
     end
   else
     --print ("SetValue: Normal =>", info[2])
