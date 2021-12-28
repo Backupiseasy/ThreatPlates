@@ -17,8 +17,4 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 <Script file="BossModsWidget.lua"/>
 <Script file="HealerTrackerWidget.lua"/>
 <Script file="ExperienceWidget.lua"/>
-
-<!-- Just for testing -->
-<!--<Script file="TestWidget.lua"/>-->
-
 </Ui>
