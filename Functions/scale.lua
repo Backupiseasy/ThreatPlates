@@ -11,12 +11,13 @@ local pairs = pairs
 local UnitExists = UnitExists
 
 -- ThreatPlates APIs
-local TidyPlatesThreat = TidyPlatesThreat
-local Animations = Addon.Animations
-local Scaling = Addon.Scaling
+local TidyPlatesThreat, ThreatPlates = TidyPlatesThreat, Addon.ThreatPlates
+local L = Addon.L
+local Animations, Scaling = Addon.Animations, Addon.Scaling
 local GetThreatLevel = Addon.GetThreatLevel
 local PlatesByUnit = Addon.PlatesByUnit
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
+local Animations, Scaling, Transparency = Addon.Animations, Addon.Scaling, Addon.Transparency
 
 ---------------------------------------------------------------------------------------------------
 -- Local variables
@@ -27,6 +28,9 @@ local ScalePlate
 -- Cached configuration settings (for performance reasons)
 ---------------------------------------------------------------------------------------------------
 local Settings
+
+-- Cached CVARs
+local AnimateHideNameplate, CVAR_nameplateMinAlpha, CVAR_nameplateMinScale
 
 ---------------------------------------------------------------------------------------------------
 -- Element code
@@ -180,32 +184,12 @@ local SCALE_FUNCTIONS = {
 
 local function GetScale(unit)
 	local scale = SCALE_FUNCTIONS[unit.style](unit, unit.style)
-
-	if scale == nil then
-		local db = TidyPlatesThreat.db.profile.threat
-		print ("Scale: Function returned nil (style =", unit.style, ")")
-		print ("Toggle:", db.toggle.OffTank)
-		print ("GetThreatLevel:", GetThreatLevel(unit, unit.style, db.toggle.OffTank))
-		print ("Scale:", db[unit.style].scale[GetThreatLevel(unit, unit.style, db.toggle.OffTank)])
-		print ("Threat Status:", unit.ThreatStatus)
-		print ("Threat Level:", unit.ThreatLevel)
-
-		Addon.Debug:PrintUnit(unit, true)
-	end
-
-	assert (scale ~= nil)
-
 	-- scale may be set to 0 in the options dialog
 	if scale < 0.3 then
 		return 0.3
 	end
 
 	return scale
-end
-
-function Scaling:Initialize(frame)
-	Animations:StopScale(frame)
-	frame:SetScale(Addon.UIScale * GetScale(frame.unit))
 end
 
 local function ScalePlateWithAnimation(frame, scale)
@@ -216,6 +200,36 @@ local function ScalePlateWithoutAnimation(frame, scale)
 	frame:SetScale(scale)
 end
 
+function Scaling:Initialize(tp_frame)
+  tp_frame.HidingScale = nil
+
+	Animations:StopScale(tp_frame)
+	tp_frame:SetScale(Addon.UIScale * GetScale(tp_frame.unit))
+end
+
+function Scaling:HideNameplate(tp_frame)
+  if AnimateHideNameplate then
+		local scale = tp_frame.Parent:GetScale()
+    if scale < CVAR_nameplateMinScale then
+      if not tp_frame.HidingScale then
+        Animations:HidePlate(tp_frame)
+        tp_frame.HidingScale = scale + 0.01
+      end
+
+      if scale < tp_frame.HidingScale then
+        tp_frame.HidingScale = scale
+      elseif tp_frame.HidingScale ~= -1 then
+        -- Scale down stoppted and reversed - plate is no longer hiding
+        Transparency:Initialize(tp_frame)
+        Scaling:Initialize(tp_frame)
+        tp_frame.HidingScale = -1
+      end
+    else -- scale >= CVAR_nameplateMinScale
+      tp_frame.HidingScale = nil
+    end
+  end
+end
+
 function Scaling:UpdateSettings()
 	Settings = TidyPlatesThreat.db.profile.Animations
 
@@ -224,6 +238,23 @@ function Scaling:UpdateSettings()
 	else
 		ScalePlate = ScalePlateWithoutAnimation
 	end
+
+  if Settings.HidePlateDuration > 0 and (Settings.HidePlateFadeOut or Settings.HidePlateScaleDown) then
+    if Addon.CVars.InvalidCVarsForHidingNameplates() then
+      AnimateHideNameplate = false
+      ThreatPlates.Print(L["Animations for hiding nameplates are being disabled as certain console variables (CVars) related to nameplate scaling are set in a way to prevent this feature from working."], true)
+    else
+      AnimateHideNameplate = true
+      CVAR_nameplateMinScale = tonumber(GetCVar("nameplateMinScale")) * tonumber(GetCVar("nameplateGlobalScale"))
+      CVAR_nameplateMinAlpha = tonumber(GetCVar("nameplateMinAlpha"))
+    end
+  else
+    AnimateHideNameplate = false
+  end
+end
+
+function Scaling:HidingNameplatesIsEnabled()
+	return AnimateHideNameplate
 end
 
 ---------------------------------------------------------------------------------------------------

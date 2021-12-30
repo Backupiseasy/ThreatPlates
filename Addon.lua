@@ -102,13 +102,6 @@ function TidyPlatesThreat:ReloadTheme()
     SetNamePlateEnemyClickThrough(db.NamePlateEnemyClickThrough)
   end)
 
-  -- CVars setup for nameplates of occluded units
-  if TidyPlatesThreat.db.profile.nameplate.toggle.OccludedUnits then
-    Addon:CallbackWhenOoC(function()
-      Addon:SetCVarsForOcclusionDetection()
-    end)
-  end
-
   Addon.CVars:OverwriteBoolProtected("nameplateResourceOnTarget", self.db.profile.PersonalNameplate.ShowResourceOnTarget)
 
   local frame
@@ -282,23 +275,6 @@ function TidyPlatesThreat:OnInitialize()
   end
 end
 
-local function SetCVarHook(name, value, c)
-  -- Used as detection for switching between small and large nameplates
-  if name == "NamePlateVerticalScale" then
-    local db = TidyPlatesThreat.db.profile.Automation
-    local isInstance, instanceType = IsInInstance()
-
-    if not NamePlateDriverFrame:IsUsingLargerNamePlateStyle() then
-      -- reset to previous setting
-      Addon.CVars:RestoreFromProfile("nameplateGlobalScale")
-    elseif db.SmallPlatesInInstances and isInstance then
-      Addon.CVars:Set("nameplateGlobalScale", 0.4)
-    end
-
-    Addon:CallbackWhenOoC(function() Addon:SetBaseNamePlateSize() end)
-  end
-end
-
 -- The OnEnable() and OnDisable() methods of your addon object are called by AceAddon when your addon is
 -- enabled/disabled by the user. Unlike OnInitialize(), this may occur multiple times without the entire
 -- UI being reloaded.
@@ -317,9 +293,9 @@ function TidyPlatesThreat:OnEnable()
   -- Register this callback after ReloadTheme as media will be updated there anyway
   LSM.RegisterCallback(self, "LibSharedMedia_SetGlobal", "MediaUpdate" )
   LSM.RegisterCallback(self, "LibSharedMedia_Registered", "MediaUpdate" )
-  -- Get updates for changes regarding: Large Nameplates
-  hooksecurefunc("SetCVar", SetCVarHook)
 
+  -- Get updates for CVar changes (e.g, for large nameplates, nameplage scale and alpha)
+  Addon.CVars.RegisterCVarHook()
   Addon:EnableEvents()
 end
 

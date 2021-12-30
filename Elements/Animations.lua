@@ -70,10 +70,6 @@ local function AnimationOnUpdate(self, elapsed)
           frame:SetAlpha(animation.TargetAlpha)
           animation.Playing = nil
         end
-
-        --if not frame.Active then
-        --  print ("  Alpha:", frame.unit.name, "=>", frame:GetAlpha())
-        --end
       end
 
       animation = frame.ScaleAnimation
@@ -85,7 +81,7 @@ local function AnimationOnUpdate(self, elapsed)
           --frame:SetScale((animation.Timer / animation.Duration) * (animation.TargetScale - animation.StartScale) + animation.StartScale)
           local scale = (animation.Timer / animation.Duration) * (animation.TargetScale - animation.StartScale) + animation.StartScale
           SetPlateScale(frame, scale)
-          animation_on_frame = true
+          animation_on_frame = true                                   
         else
           -- animation has ended
           SetPlateScale(frame, animation.TargetScale)
@@ -228,9 +224,6 @@ function Animations:StopScale(frame)
 end
 
 function Animations:HidePlate(frame)
-
-  --print ("Hide Plate:", frame.unit.name)
-
   local show_animation = false
 
   if Settings.HidePlateFadeOut then

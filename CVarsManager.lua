@@ -10,9 +10,11 @@ local tostring = tostring
 
 -- WoW APIs
 local GetCVar, GetCVarDefault = GetCVar, GetCVarDefault
+local IsInInstance = IsInInstance
+local NamePlateDriverFrame = NamePlateDriverFrame
 
 -- ThreatPlates APIs
-local TidyPlatesThreat = TidyPlatesThreat
+local TidyPlatesThreat, ThreatPlates = TidyPlatesThreat, Addon.ThreatPlates
 local L = Addon.L
 
 local _G =_G
@@ -54,6 +56,18 @@ local COMBAT_PROTECTED = {
   nameplateShowFriendlyNPCs = true,
   nameplateShowFriendlyPets = true,
   nameplateShowFriendlyTotems = true,
+}
+
+local MONITORED_CVARS = {
+  NamePlateVerticalScale = true,
+  nameplateMinScale = true,
+  nameplateMaxScale = true,
+  nameplateLargerScale = true,
+  nameplateSelectedScale = true,
+  nameplateMinAlpha = true,
+  nameplateMaxAlpha = true,
+  nameplateOccludedAlphaMult = true,
+  nameplateSelectedAlpha = true,
 }
 
 local function SetConsoleVariable(cvar, value)
@@ -153,3 +167,110 @@ end
 function CVars:OverwriteBoolProtected(cvar, value)
   self:OverwriteProtected(cvar, (value and 1) or 0)
 end
+
+local function SetCVarHook(name, value, c)
+  if not MONITORED_CVARS[name] then return end
+
+  -- Used as detection for switching between small and large nameplates
+  if name == "NamePlateVerticalScale" then
+    local db = TidyPlatesThreat.db.profile.Automation
+    local isInstance, _ = IsInInstance()
+
+    if not NamePlateDriverFrame:IsUsingLargerNamePlateStyle() then
+      -- reset to previous setting
+      CVars:RestoreFromProfile("nameplateGlobalScale")
+    elseif db.SmallPlatesInInstances and isInstance then
+      CVars:Set("nameplateGlobalScale", 0.4)
+    end
+
+    Addon:CallbackWhenOoC(function() Addon:SetBaseNamePlateSize() end)
+  elseif name == "nameplateMinScale" or name == "nameplateMaxScale" or name == "nameplateLargerScale" or name == "nameplateSelectedScale" then
+    -- Update Hiding Nameplates only if something changed
+    local enabled = Addon.Scaling:HidingNameplatesIsEnabled()
+    local invalid = CVars.InvalidCVarsForHidingNameplates()
+    if (enabled and invalid) or (not enabled and not invalid) then
+      Addon.Scaling:UpdateSettings()
+      --Addon:ForceUpdate()
+    elseif invalid then
+      ThreatPlates.Print(L["Animations for hiding nameplates are being disabled as certain console variables (CVars) related to nameplate scaling are set in a way to prevent this feature from working."], true)
+    end
+  elseif name == "nameplateMinAlpha" or name == "nameplateMaxAlpha" or name == "nameplateOccludedAlphaMult" or name == "nameplateSelectedAlpha" then
+    local enabled = Addon.Transparency:OcclusionDetectionIsEnabled()
+    local invalid = CVars.InvalidCVarsForOcclusionDetection()
+    -- Update Hiding Nameplates only if something changed
+    if (enabled and invalid) or (not enabled and not invalid) then
+      Addon.Transparency:UpdateSettings()
+    --Addon:ForceUpdate()
+    elseif invalid then
+      ThreatPlates.Print(L["Transparency for occluded units is being disabled as certain console variables (CVars) related to nameplate transparency are set in a way to prevent this feature from working."], true)
+    end
+  end
+end
+
+function CVars.RegisterCVarHook()
+  -- Tracking of CVars based on code from AdvancedInterfaceOptions
+  --hooksecurefunc("SetCVar", SetCVarHook) -- /script SetCVar(cvar, value)
+  if C_CVar and C_CVar.SetCVar then
+    hooksecurefunc(C_CVar, "SetCVar", SetCVarHook) -- C_CVar.SetCVar(cvar, value)
+  end
+  hooksecurefunc("ConsoleExec", function(msg)
+    local cmd, cvar, value = msg:match("^(%S+)%s+(%S+)%s*(%S*)")
+    if cmd then
+      if cmd:lower() == 'set' then -- /console SET cvar value
+        SetCVarHook(cvar, value)
+      else -- /console cvar value
+        SetCVarHook(cmd, cvar)
+      end
+    end
+  end)
+end
+
+function CVars.InvalidCVarsForHidingNameplates()
+  local nameplateMinScale = tonumber(GetCVar("nameplateMinScale"))
+  local nameplateMaxScale = tonumber(GetCVar("nameplateMaxScale"))
+  local nameplateLargerScale = tonumber(GetCVar("nameplateLargerScale"))
+  local nameplateSelectedScale = tonumber(GetCVar("nameplateSelectedScale"))
+
+  return nameplateMinScale >= nameplateMaxScale or nameplateMinScale >= nameplateLargerScale or nameplateMinScale >= nameplateSelectedScale
+end
+
+function CVars.FixCVarsForHidingNameplates()
+  CVars.SetToDefault("nameplateMinScale")
+  CVars.SetToDefault("nameplateMaxScale")
+  CVars.SetToDefault("nameplateLargerScale")
+  CVars.SetToDefault("nameplateSelectedScale")
+end
+
+function CVars.InvalidCVarsForOcclusionDetection()
+  local nameplateMinAlpha = tonumber(GetCVar("nameplateMinAlpha"))
+  local nameplateMaxAlpha = tonumber(GetCVar("nameplateMaxAlpha"))
+  local nameplateOccludedAlphaMult = tonumber(GetCVar("nameplateOccludedAlphaMult"))
+  local nameplateSelectedAlpha = tonumber(GetCVar("nameplateSelectedAlpha"))
+
+  return nameplateMinAlpha ~= 1 or nameplateMaxAlpha ~= 1 or nameplateOccludedAlphaMult > 0.9 or nameplateSelectedAlpha ~= 1
+end
+
+function CVars.FixCVarsForOcclusionDetection()
+  _G.SetCVar("nameplateMinAlpha", 1)
+  CVars.SetToDefault("nameplateMaxAlpha")          -- Default: 1.0
+  CVars.SetToDefault("nameplateOccludedAlphaMult") -- Default: 0.4
+  CVars.SetToDefault("nameplateSelectedAlpha")     -- Default: 1.0
+
+  -- Legacy Code:
+  -- Addon.CVars:Set("nameplateMinAlpha", 1)
+  -- Addon.CVars:Set("nameplateMaxAlpha", 1)
+
+  -- -- Create enough separation between occluded and not occluded nameplates, even for targeted units
+  -- local occluded_alpha_mult = tonumber(GetCVar("nameplateOccludedAlphaMult"))
+  -- if occluded_alpha_mult > 0.9  then
+  --   occluded_alpha_mult = 0.9
+  --   Addon.CVars:Set("nameplateOccludedAlphaMult", occluded_alpha_mult)
+  -- end
+
+  -- local selected_alpha =  tonumber(GetCVar("nameplateSelectedAlpha"))
+  -- if not selected_alpha or (selected_alpha < occluded_alpha_mult + 0.1) then
+  --   selected_alpha = occluded_alpha_mult + 0.1
+  --   Addon.CVars:Set("nameplateSelectedAlpha", selected_alpha)
+  -- end
+end
+

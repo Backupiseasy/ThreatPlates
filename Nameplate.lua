@@ -64,8 +64,6 @@ local PlatesByGUID = Addon.PlatesByGUID
 ---------------------------------------------------------------------------------------------------
 local SettingsShowEnemyBlizzardNameplates, SettingsShowFriendlyBlizzardNameplates
 local ShowCastBars, PersonalNameplateHideBuffs
--- Cached CVARs
-local AnimateHideNameplate, CVAR_nameplateMinAlpha, CVAR_nameplateMinScale
 
 ---------------------------------------------------------------------------------------------------
 -- Wrapper functions for WoW Classic
@@ -403,7 +401,6 @@ local function OnShowNameplate(plate, unitid)
   InitializeUnit(unit, unitid)
 
   tp_frame.stylename = ""
-  tp_frame.HidingScale = nil
   tp_frame.visual.Castbar.FlashTime = 0  -- Set FlashTime to 0 so that the castbar is actually hidden (see statusbar OnHide hook function OnHideCastbar)
 
   -- Update LastTargetPlate as target units may leave the screen, lose their nameplate and
@@ -427,7 +424,6 @@ local function OnShowNameplate(plate, unitid)
   -- Call this after the plate is shown as OnStartCasting checks if the plate is shown; if not, the castbar is hidden and
   -- nothing is updated
   OnUpdateCastMidway(tp_frame, unitid)
-
 end
 
 --------------------------------------------------------------------------------------------------------------
@@ -531,18 +527,10 @@ function Addon:UpdateSettings()
   SettingsShowFriendlyBlizzardNameplates = db.ShowFriendlyBlizzardNameplates
   SettingsShowEnemyBlizzardNameplates = db.ShowEnemyBlizzardNameplates
 
-  if TidyPlatesThreat.db.profile.settings.castnostop.ShowInterruptSource then
+  if db.settings.castnostop.ShowInterruptSource then
     RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
   else
     UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-  end
-
-  if db.Animations.HidePlateDuration > 0 and (db.Animations.HidePlateFadeOut or db.Animations.HidePlateScaleDown) then
-    AnimateHideNameplate = true
-    CVAR_nameplateMinScale = tonumber(GetCVar("nameplateMinScale")) * tonumber(GetCVar("nameplateGlobalScale"))
-    CVAR_nameplateMinAlpha = tonumber(GetCVar("nameplateMinAlpha"))
-  else
-    AnimateHideNameplate = false
   end
 
   ShowCastBars = db.settings.castbar.show or db.settings.castbar.ShowInHeadlineView
@@ -632,30 +620,7 @@ local function FrameOnUpdate(plate, elapsed)
   --      PlateOnUpdateQueue[i](plate, tp_frame.unit)
   --    end
 
-  local scale = plate:GetScale()
-  --local alpha = plate:GetAlpha()
-
-  -- TODO: Think about moving this part of the code to Animations
-  if AnimateHideNameplate then
-    if scale < CVAR_nameplateMinScale then
-      if not tp_frame.HidingScale then
-        Animations:HidePlate(tp_frame)
-        tp_frame.HidingScale = scale + 0.01
-      end
-
-      if scale < tp_frame.HidingScale then
-        tp_frame.HidingScale = scale
-      elseif tp_frame.HidingScale ~= -1 then
-        -- Scale down stoppted and reversed - plate is no longer hiding
-        Transparency:Initialize(tp_frame)
-        Scaling:Initialize(tp_frame)
-        tp_frame.HidingScale = -1
-      end
-    else -- scale >= CVAR_nameplateMinScale
-      tp_frame.HidingScale = nil
-    end
-  end
-
+  Scaling:HideNameplate(tp_frame)
   -- Do this after the hiding stuff, to correctly set the occluded transparency
   Transparency:SetOccludedTransparency(tp_frame)
 end
@@ -803,8 +768,6 @@ function Addon:NAME_PLATE_UNIT_REMOVED(unitid)
   local tp_frame = plate.TPFrame
 
   tp_frame.Active = false
-  tp_frame.HidingScale = nil
-  tp_frame.IsShowing = nil
 
   -- Update LastTargetPlate as target units may leave the screen, lose their nameplate and
   -- get a new one when the enter the screen again

@@ -592,7 +592,7 @@ end
 
 local function SyncGameSettings(info, val)
   if InCombatLockdown() then
-    ThreatPlates.Print("We're unable to change this while in combat", true)
+    ThreatPlates.Print(L["We're unable to change this while in combat"], true)
   else
     SetValue(info, val)
     TidyPlatesThreat:PLAYER_REGEN_ENABLED()
@@ -601,7 +601,7 @@ end
 
 local function SyncGameSettingsWorld(info, val)
   if InCombatLockdown() then
-    ThreatPlates.Print("We're unable to change this while in combat", true)
+    ThreatPlates.Print(L["We're unable to change this while in combat"], true)
   else
     SetValue(info, val)
     local isInstance, instanceType = IsInInstance()
@@ -670,28 +670,6 @@ local function SetFontFlags(settings, flag, val)
     local outline = (GetFontFlags(settings, "Thick") and "THICKOUTLINE") or (GetFontFlags(settings, "Outline") and "OUTLINE") or "NONE"
     local mono = (val and ", MONOCHROME") or ""
     return outline .. mono
-  end
-end
-
----------------------------------------------------------------------------------------------------
--- Functions to create the options dialog
----------------------------------------------------------------------------------------------------
-
-function Addon:SetCVarsForOcclusionDetection()
-  Addon.CVars:Set("nameplateMinAlpha", 1)
-  Addon.CVars:Set("nameplateMaxAlpha", 1)
-
-  -- Create enough separation between occluded and not occluded nameplates, even for targeted units
-  local occluded_alpha_mult = tonumber(GetCVar("nameplateOccludedAlphaMult"))
-  if occluded_alpha_mult > 0.9  then
-    occluded_alpha_mult = 0.9
-    Addon.CVars:Set("nameplateOccludedAlphaMult", occluded_alpha_mult)
-  end
-
-  local selected_alpha =  tonumber(GetCVar("nameplateSelectedAlpha"))
-  if not selected_alpha or (selected_alpha < occluded_alpha_mult + 0.1) then
-    selected_alpha = occluded_alpha_mult + 0.1
-    Addon.CVars:Set("nameplateSelectedAlpha", selected_alpha)
   end
 end
 
@@ -4411,7 +4389,7 @@ local function CreateBlizzardSettings()
             desc = L["The size of the clickable area is always derived from the current size of the healthbar."],
             set = function(info, val)
               if InCombatLockdown() then
-                ThreatPlates.Print("We're unable to change this while in combat", true)
+                ThreatPlates.Print(L["We're unable to change this while in combat"], true)
               else
                 SetValue(info, val)
                 Addon:SetBaseNamePlateSize()
@@ -4428,7 +4406,7 @@ local function CreateBlizzardSettings()
             step = 1,
             set = function(info, val)
               if InCombatLockdown() then
-                ThreatPlates.Print("We're unable to change this while in combat", true)
+                ThreatPlates.Print(L["We're unable to change this while in combat"], true)
               else
                 SetValue(info, val)
                 Addon:SetBaseNamePlateSize()
@@ -4446,7 +4424,7 @@ local function CreateBlizzardSettings()
             step = 1,
             set = function(info, val)
               if InCombatLockdown() then
-                ThreatPlates.Print("We're unable to change this while in combat", true)
+                ThreatPlates.Print(L["We're unable to change this while in combat"], true)
               else
                 SetValue(info, val)
                 Addon:SetBaseNamePlateSize()
@@ -4656,7 +4634,7 @@ local function CreateBlizzardSettings()
             width = "double",
             func = function()
               if InCombatLockdown() then
-                ThreatPlates.Print("We're unable to change this while in combat", true)
+                ThreatPlates.Print(L["We're unable to change this while in combat"], true)
               else
                 local cvars = {
                   "nameplateOtherTopInset", "nameplateOtherBottomInset", "nameplateLargeTopInset", "nameplateLargeBottomInset",
@@ -4973,7 +4951,7 @@ local function CreateHealthbarOptions()
               Width = GetRangeEntry(L["Bar Width"], 10, { "settings", "healthbar", "width" }, 5, 500,
                 function(info, val)
                   if InCombatLockdown() then
-                    ThreatPlates.Print("We're unable to change this while in combat", true)
+                    ThreatPlates.Print(L["We're unable to change this while in combat"], true)
                   else
                     SetValue(info, val)
                     Addon:SetBaseNamePlateSize()
@@ -4982,7 +4960,7 @@ local function CreateHealthbarOptions()
               Height = GetRangeEntry(L["Bar Height"], 20, {"settings", "healthbar", "height" }, 1, 100,
                 function(info, val)
                   if InCombatLockdown() then
-                    ThreatPlates.Print("We're unable to change this while in combat", true)
+                    ThreatPlates.Print(L["We're unable to change this while in combat"], true)
                   else
                     SetValue(info, val)
                     Addon:SetBaseNamePlateSize()
@@ -5846,6 +5824,7 @@ local function CreateAnimationsOptions()
             step = 0.01,
             desc = L["Duration (in seconds) of the animation for fading out and scaling down a nameplate when it is hidden. Default duration is "] .. tostring(ThreatPlates.DEFAULT_SETTINGS.profile.Animations.FadeOutDuration) .. L["."],
             arg = { "Animations", "HidePlateDuration" },
+            disabled = function() return Addon.CVars.InvalidCVarsForHidingNameplates() end,
           },
           Fading = {
             type = "toggle",
@@ -5853,7 +5832,7 @@ local function CreateAnimationsOptions()
             name = "Fade-Out",
             desc = L["Show a fade-out animation when a nameplate is hidden."],
             arg = { "Animations", "HidePlateFadeOut" },
-            disabled = function() return db.Animations.HidePlateDuration <= 0 end,
+            disabled = function() return db.Animations.HidePlateDuration <= 0 or Addon.CVars.InvalidCVarsForHidingNameplates() end,
           },
           Scaling = {
             type = "toggle",
@@ -5861,14 +5840,30 @@ local function CreateAnimationsOptions()
             name = "Scale-Down",
             desc = L["Show a scale-down animation when a nameplate is hidden."],
             arg = { "Animations", "HidePlateScaleDown" },
-            disabled = function() return db.Animations.HidePlateDuration <= 0 end,
+            disabled = function() return db.Animations.HidePlateDuration <= 0 or Addon.CVars.InvalidCVarsForHidingNameplates() end,
           },
-          -- ImportantNotice = {
-          --   name = L["|cffff0000IMPORTANT: Enabling this feature changes console variables (CVars) which will change the appearance of default Blizzard nameplates. Disabling this feature will reset these CVars to the original value they had when you enabled this feature.|r"],
-          --   order = 40 ,
-          --   type = "description",
-          --   width = "full",
-          -- },
+          ImportantNotice = {
+            name = L["|cffff0000IMPORTANT: Currently, this feature is disabled as certain console variables (CVars) related to nameplate scaling are set in a way to prevent this feature from working. Clicking the button below will fix this and reset these CVars to their default values. This will change the appearance (scaling) of default Blizzard nameplates.|r"],
+            order = 40 ,
+            type = "description",
+            width = "full",
+            hidden = function() return not Addon.CVars.InvalidCVarsForHidingNameplates() end,
+          },
+          FixCVars = {
+            name = L["Fix Configuration Variables for Hiding Nameplates"],
+            type = "execute",
+            order = 50,
+            width = "full",
+            desc = L["This will reset all console variables (CVars) required for hiding nameplates to work to their default values."],
+            func = function()
+              Addon:CallbackWhenOoC(function() 
+                Addon.CVars.FixCVarsForHidingNameplates()
+                Addon.Scaling:UpdateSettings()
+                --Addon:ForceUpdate()
+              end, L["Unable to change CVars for hiding nameplates while in combat."])
+            end,
+            hidden = function() return not Addon.CVars.InvalidCVarsForHidingNameplates() end,
+          },
         },
       },
       FlashingAuras = {
@@ -6111,7 +6106,7 @@ local function CustomPlateSetIcon(index, icon_location)
         custom_plate.SpellID = spell_id
       else
         icon = spell_id -- Set icon to spell_id == icon_location, so that the value gets stored
-        ThreatPlates.Print("Invalid spell ID for custom nameplate icon: " .. icon_location, true)
+        ThreatPlates.Print(L["Invalid spell ID for custom nameplate icon: "] .. icon_location, true)
       end
     else
       icon_location = tostring(icon_location)
@@ -7317,34 +7312,36 @@ local function CreateOptionsTable()
                       type = "description",
                       width = "full",
                     },
-                    ImportantNotice = {
-                      name = L["|cffff0000IMPORTANT: Enabling this feature changes console variables (CVars) which will change the appearance of default Blizzard nameplates. Disabling this feature will reset these CVars to the original value they had when you enabled this feature.|r"],
-                      order = 1,
-                      type = "description",
-                      width = "full",
-                    },
                     OccludedUnitsEnable = {
                       name = L["Enable"],
                       order = 10,
                       type = "toggle",
-                      set = function(info, value)
-                        Addon:CallbackWhenOoC(function()
-                          if value then
-                            Addon:SetCVarsForOcclusionDetection()
-                          else
-                            Addon.CVars:RestoreFromProfile("nameplateMinAlpha")
-                            Addon.CVars:RestoreFromProfile("nameplateMaxAlpha")
-                            Addon.CVars:RestoreFromProfile("nameplateSelectedAlpha")
-                            Addon.CVars:RestoreFromProfile("nameplateOccludedAlphaMult")
-                          end
-                          -- Using SetValue here would require to make a copy of info (upvalue), very inefficient
-                          db.nameplate.toggle.OccludedUnits = value
-                          Addon:ForceUpdate()
-                        end, L["Unable to change transparency for occluded units while in combat."])
-                      end,
                       arg = { "nameplate", "toggle", "OccludedUnits" },
+                      disabled = function() return Addon.CVars.InvalidCVarsForOcclusionDetection() end,
                     },
                     OccludedUnitsAlpha = GetTransparencyEntryDefault(11, { "nameplate", "alpha", "OccludedUnits" }),
+                    ImportantNotice = {
+                      name = L["|cffff0000IMPORTANT: Currently, this feature is disabled as certain console variables (CVars) related to nameplate transparency are set in a way to prevent this feature from working. Clicking the button below will fix this and reset these CVars to their default values. This might change the appearance (transparency) of default Blizzard nameplates.|r"],
+                      order = 20 ,
+                      type = "description",
+                      width = "full",
+                      hidden = function() return not Addon.CVars.InvalidCVarsForOcclusionDetection() end,
+                    },
+                    FixCVars = {
+                      name = L["Fix Configuration Variables for Occluded Units"],
+                      type = "execute",
+                      order = 30,
+                      width = "full",
+                      desc = L["This will reset all console variables (CVars) required for transparency for occluded units to work to their default values."],
+                      func = function() 
+                        Addon:CallbackWhenOoC(function() 
+                          Addon.CVars.FixCVarsForOcclusionDetection()
+                          Addon.Transparency:UpdateSettings()
+                          --Addon:ForceUpdate()
+                        end, L["Unable to change CVars for transparency for occluded units while in combat."])
+                      end,
+                      hidden = function() return not Addon.CVars.InvalidCVarsForOcclusionDetection() end,
+                    },                    
                   },
                 },
                 NameplateAlpha = {

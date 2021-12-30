@@ -12,12 +12,14 @@ local UnitExists = UnitExists
 local GetCVar = GetCVar
 
 -- ThreatPlates APIs
-local TidyPlatesThreat = TidyPlatesThreat
+local TidyPlatesThreat, ThreatPlates = TidyPlatesThreat, Addon.ThreatPlates
 local Animations = Addon.Animations
 local Transparency = Addon.Transparency
 local GetThreatLevel = Addon.GetThreatLevel
 local PlatesByUnit = Addon.PlatesByUnit
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
+local L = Addon.L
+local ThreatPlates = Addon.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------
 -- Local variables
@@ -325,13 +327,23 @@ function Transparency:UpdateSettings()
   SettingsOccludedAlpha = Settings.nameplate.alpha.OccludedUnits
 
   if SettingsEnabledOccludedAlpha then
-    UpdatePlate_Transparency = UpdatePlate_SetAlphaWithOcclusion
+    if Addon.CVars.InvalidCVarsForOcclusionDetection() then
+      SettingsEnabledOccludedAlpha = false
+      UpdatePlate_Transparency = UpdatePlate_SetAlpha
+      ThreatPlates.Print(L["Transparency for occluded units is being disabled as certain console variables (CVars) related to nameplate transparency are set in a way to prevent this feature from working."], true)
+    else
+      UpdatePlate_Transparency = UpdatePlate_SetAlphaWithOcclusion
+    end
   else
     UpdatePlate_Transparency = UpdatePlate_SetAlpha
   end
 
   FadeInOccludedUnitsIsEnabled = Settings.Animations.FadeInOccludedUnits
   FadeOutOccludedUnitsIsEnabled = Settings.Animations.FadeOutOccludedUnits
+end
+
+function Transparency:OcclusionDetectionIsEnabled()
+	return SettingsEnabledOccludedAlpha
 end
 
 ---------------------------------------------------------------------------------------------------

@@ -181,8 +181,14 @@ function TidyPlatesThreat:ChatCommandDebug(cmd_list)
 
 		print ("In Combat:", IsInCombat())
 		print ("In Combat with Player:", UnitAffectingCombat("target", "player"))
+	elseif command == "reset" then
+		for _, tp_frame in pairs(Addon.PlatesCreated) do
+      tp_frame.HidingScale = nil
+      tp_frame.FadeAnimation = nil
+			tp_frame.ScaleAnimation = nil
+		end
 	elseif command == "alpha" then
-		local plate = C_NamePlate.GetNamePlateForUnit("target")
+		local plate = C_NamePlate.GetNamePlateForUnit("mouseover")
 		if not plate then return end
 
 		local tp_frame = plate.TPFrame
