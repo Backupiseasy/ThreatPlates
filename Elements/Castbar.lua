@@ -17,7 +17,6 @@ local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local UnitIsUnit = UnitIsUnit
 
 -- ThreatPlates APIs
-local TidyPlatesThreat = TidyPlatesThreat
 local ThreatPlates, Font = Addon.ThreatPlates, Addon.Font
 local SetFontJustify = Addon.Font.SetJustify
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
@@ -100,7 +99,7 @@ local function SetAllColors(self, rBar, gBar, bBar, aBar, rBackdrop, gBackdrop, 
 end
 
 local function SetFormat(self, show)
-  local db = TidyPlatesThreat.db.profile.settings
+  local db = Addon.db.profile.settings
 
   if show then
     self.InterruptShield:SetShown(db.castnostop.ShowInterruptShield)
@@ -193,7 +192,7 @@ end
 function Element.UpdateStyle(tp_frame, style)
   local unit = tp_frame.unit
 
-  local db = TidyPlatesThreat.db.profile.settings.castbar
+  local db = Addon.db.profile.settings.castbar
 
   local target_offset_x, target_offset_y = 0, 0
   if UnitIsUnit("target", unit.unitid) then
@@ -290,8 +289,8 @@ function Element.UpdateStyle(tp_frame, style)
   end
 
   Font:UpdateText(castbar, castbar.CastTarget, db.CastTarget)
-  local width, height = castbar:GetSize()
-  castbar.CastTarget:SetSize(width, height)
+  Font:UpdateTextSize(castbar, castbar.CastTarget, db.CastTarget)
+
   castbar.CastTarget:SetShown(db.CastTarget.Show)
 
   if db.FrameOrder == "HealthbarOverCastbar" then
@@ -313,7 +312,7 @@ local function TargetUpdate(tp_frame)
 
   local target_offset_x, target_offset_y = 0, 0
   if UnitIsUnit("target", tp_frame.unit.unitid) then
-    local db = TidyPlatesThreat.db.profile.settings.castbar
+    local db = Addon.db.profile.settings.castbar
     target_offset_x = db.x_target
     target_offset_y = db.y_target
   end
@@ -333,7 +332,7 @@ local EnabledConfigMode = false
 local ConfigModePlate
 
 local function ShowOnUnit(unit)
-  local db = TidyPlatesThreat.db.profile.settings.castbar
+  local db = Addon.db.profile.settings.castbar
 
   local style = unit.style
   return style ~= "etotem" and style ~= "empty" and
@@ -353,7 +352,7 @@ function Addon:ConfigCastbar()
 
         castbar:SetScript("OnUpdate", function(self, elapsed)
           if ShowOnUnit(plate.TPFrame.unit) then
-            local db = TidyPlatesThreat.db.profile.settings
+            local db = Addon.db.profile.settings
 
             self:SetMinMaxValues(0, 100)
             self:SetValue(50)

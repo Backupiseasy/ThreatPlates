@@ -6,12 +6,11 @@ local ThreatPlates = Addon.ThreatPlates
 -- WoW APIs
 
 -- ThreatPlates APIs
-local TidyPlatesThreat = TidyPlatesThreat
 
 function Addon:SetCastbarColor(unit)
 	if not unit.unitid then return end
 
-	local db = TidyPlatesThreat.db.profile
+	local db = Addon.db.profile
 
 	local c
 	-- Because of this ordering, IsInterrupted must be set to false when a new cast is cast. Otherwise

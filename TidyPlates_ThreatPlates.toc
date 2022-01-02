@@ -1,0 +1,58 @@
+## Interface: 90105
+## Interface-Retail: 90105
+## Interface-Classic: 11400
+## Interface-BCC: 20502
+
+## Title: Threat Plates
+## Version: @project-version@
+## Notes: Threat-reactive nameplates.
+## Notes-deDE: Bedrohungsreaktive Namensplaketten.
+## Notes-esES: Placas Identificativas de Amenaza
+## Notes-esMX: Placas Identificativas de Amenaza
+## Author: Suicidal Katt, Blacksalsify
+## SavedVariables: ThreatPlatesDB
+
+## RequiredDeps:
+#@version-retail@
+## OptionalDeps: Ace3, AceGUI-3.0-SharedMediaWidgets, LibSharedMedia-3.0, LibCustomGlow-1.0, LibDeflate, LibDualSpec-1.0
+## X-Embeds: Ace3, AceGUI-3.0-SharedMediaWidgets, LibSharedMedia-3.0, LibCustomGlow-1.0, LibDeflate, LibDualSpec-1.0
+#@end-version-retail@
+#@version-classic@
+## OptionalDeps: Ace3, AceGUI-3.0-SharedMediaWidgets, LibSharedMedia-3.0, LibCustomGlow-1.0, LibDeflate, LibClassicDurations
+## X-Embeds: Ace3, AceGUI-3.0-SharedMediaWidgets, LibSharedMedia-3.0, LibCustomGlow-1.0, LibDeflate, LibClassicDurations
+#@end-version-classic@
+#@version-bcc@
+## OptionalDeps: Ace3, AceGUI-3.0-SharedMediaWidgets, LibSharedMedia-3.0, LibCustomGlow-1.0, LibDeflate
+## X-Embeds: Ace3, AceGUI-3.0-SharedMediaWidgets, LibSharedMedia-3.0, LibCustomGlow-1.0, LibDeflate
+#@end-version-bcc@
+## X-Website: https://wow.curseforge.com/projects/tidy-plates-threat-plates
+## X-Curse-Project-ID: 21217
+## X-WoWI-ID: 15749
+
+## X-License: GNU General Public License
+## X-Credits: danltiger (for Tidy Plates), Tosaido (for quest handling code from QuestMobs)
+
+Libs\Libs.xml
+Locales\Locales.xml
+
+ThreatPlates.xml
+
+Init.lua
+Debug.lua
+Localization.lua
+EventService.lua
+CVarsManager.lua
+Media.lua
+Constants.lua
+Elements\Elements.xml
+Widgets\WidgetHandler.lua
+
+Nameplate.lua
+Database.lua
+Addon.lua
+Commands.lua
+Options.lua
+
+Styles\Styles.xml
+Functions\Functions.xml
+Widgets\Widgets.xml

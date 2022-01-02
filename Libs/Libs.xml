@@ -16,12 +16,21 @@
     <Include file="AceConfig-3.0\AceConfig-3.0.xml"/>
     <Include file="AceComm-3.0\AceComm-3.0.xml"/>
     <Include file="AceSerializer-3.0\AceSerializer-3.0.xml"/>
-
     <Include file="AceGUI-3.0-SharedMediaWidgets\widget.xml"/>
     <Include file="LibCustomGlow-1.0\LibCustomGlow-1.0.xml"/>
     <Script file="LibDeflate\LibDeflate.lua"/>
-    <!--@classic@
+
+    <Script file="ForAllIndentsAndPurposes\indent.lua"/>
+
+    <!--@version-retail@-->
+    <Include file="LibDualSpec-1.0\LibDualSpec-1.0.lua"/>
+    <!--@end-version-retail@-->
+
+    <!--@version-bcc@-->
+    <!--@end-version-bcc@-->
+
+    <!--@version-classic@-->
     <Script file="LibClassicCasterino\LibClassicCasterino.lua"/>
     <Include file="LibClassicDurations\LibClassicDurations.xml"/>
-    @end-classic@-->
+    <!--@end-version-classic@-->
 </Ui>

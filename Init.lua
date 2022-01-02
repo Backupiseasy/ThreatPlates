@@ -18,26 +18,21 @@ local ThreatPlates = Addon.ThreatPlates
 ---------------------------------------------------------------------------------------------------
 
 -- Lua APIs
-local next, setmetatable, getmetatable = next, setmetatable, getmetatable
+local next, setmetatable, getmetatable, rawset = next, setmetatable, getmetatable, rawset
 local ipairs, type, insert = ipairs, type, table.insert
-local string = string
+local string, format = string, format
 
-Addon.CLASSIC = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
+-- ThreatPlates APIs
+Addon.IS_CLASSIC = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
+Addon.IS_TBC_CLASSIC = (WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC)
+Addon.IS_MAINLINE = (WOW_PROJECT_ID == WOW_PROJECT_MAINLINE)
 
 ---------------------------------------------------------------------------------------------------
 -- Libraries
 ---------------------------------------------------------------------------------------------------
 local LibStub = LibStub
 Addon.L = LibStub("AceLocale-3.0"):GetLocale("TidyPlatesThreat")
-Addon.LSM = LibStub("LibSharedMedia-3.0")
-Addon.LibCustomGlow = LibStub("LibCustomGlow-1.0")
-Addon.LibAceConfigDialog = LibStub("AceConfigDialog-3.0")
-Addon.LibAceConfigRegistry = LibStub("AceConfigRegistry-3.0")
-
-if Addon.CLASSIC then
-	Addon.LibClassicCasterino = LibStub("LibClassicCasterino-ThreatPlates")
-	--Addon.LibClassicCasterino = LibStub("LibClassicCasterino")
-end
+local L = Addon.L
 
 Addon.BackdropTemplate = BackdropTemplateMixin and "BackdropTemplate"
 
@@ -62,16 +57,43 @@ TidyPlatesThreat = LibStub("AceAddon-3.0"):NewAddon("TidyPlatesThreat", "AceCons
 -- Global for DBM to differentiate between Threat Plates and Tidy Plates: Threat
 TidyPlatesThreatDBM = true
 
+-- Returns if the currently active spec is tank (true) or dps/heal (false)
+Addon.PlayerClass = select(2, UnitClass("player"))
+Addon.PlayerName = select(1, UnitName("player"))
+
+-- Cache (weak table) for memoizing expensive text functions (like abbreviation, tranliteration)
+local CacheCreateEntry = function(table, key)
+	local entry = {}
+	rawset(table, key, entry)
+	return entry
+end
+
+local CreateTextCache = function()
+	local text_cache = {}
+	setmetatable(text_cache, {
+		__mode = "kv",
+		__index = CacheCreateEntry,
+	})
+	return text_cache
+end
+
+---------------------------------------------------------------------------------------------------
+-- Caches to the reduce CPU load of expensive functions
+---------------------------------------------------------------------------------------------------
+
 Addon.Animations = {}
 Addon.Scaling = {}
 Addon.Transparency = {}
+Addon.Localization = {}
 Addon.Cache = {
+	Texts = CreateTextCache(),
 	TriggerWildcardTests = {},
 	CustomPlateTriggers = {
 		Name = {},
 		NameWildcard = {},
 		Aura = {},
 		Cast = {},
+		Script = {},
 	},
 		Styles = {
 		ForAllInstances = {},
@@ -83,17 +105,16 @@ Addon.Cache = {
 ---------------------------------------------------------------------------------------------------
 -- Aura Highlighting
 ---------------------------------------------------------------------------------------------------
-local LibCustomGlow = Addon.LibCustomGlow
 local function Wrapper_ButtonGlow_Start(frame, color, framelevel)
-	LibCustomGlow.ButtonGlow_Start(frame, color, nil, framelevel)
+	Addon.LibCustomGlow.ButtonGlow_Start(frame, color, nil, framelevel)
 end
 
 local function Wrapper_PixelGlow_Start(frame, color, framelevel)
-	LibCustomGlow.PixelGlow_Start(frame, color, nil, nil, nil, nil, nil, nil, nil, nil, framelevel)
+	Addon.LibCustomGlow.PixelGlow_Start(frame, color, nil, nil, nil, nil, nil, nil, nil, nil, framelevel)
 end
 
 local function Wrapper_AutoCastGlow_Start(frame, color, framelevel)
-	LibCustomGlow.AutoCastGlow_Start(frame, color, nil, nil, nil, nil, nil, nil, framelevel)
+	Addon.LibCustomGlow.AutoCastGlow_Start(frame, color, nil, nil, nil, nil, nil, nil, framelevel)
 end
 
 Addon.CUSTOM_GLOW_FUNCTIONS = {
@@ -110,6 +131,47 @@ Addon.CUSTOM_GLOW_WRAPPER_FUNCTIONS = {
 
 --------------------------------------------------------------------------------------------------
 -- General Functions
+---------------------------------------------------------------------------------------------------
+
+Addon.LoadOnDemandLibraries = function()
+	local db = Addon.db.profile.StatusText
+
+	-- Enable or disable LibDogTagSupport based on custom status text being actually used
+	if db.HealthbarMode.FriendlySubtext == "CUSTOM" or db.HealthbarMode.EnemySubtext == "CUSTOM" or db.NameMode.FriendlySubtext == "CUSTOM" or db.NameMode.EnemySubtext == "CUSTOM" then
+		if Addon.LibDogTag == nil then
+			LoadAddOn("LibDogTag-3.0")
+			Addon.LibDogTag = LibStub("LibDogTag-3.0", true)
+			if not Addon.LibDogTag then
+				Addon.LibDogTag = false
+				ThreatPlates.Print(L["Custom status text requires LibDogTag-3.0 to function."], true)
+			else
+				LoadAddOn("LibDogTag-Unit-3.0")
+			  if not LibStub("LibDogTag-Unit-3.0", true) then
+					Addon.LibDogTag = false
+					ThreatPlates.Print(L["Custom status text requires LibDogTag-Unit-3.0 to function."], true)
+				elseif not Addon.LibDogTag.IsLegitimateUnit or not Addon.LibDogTag.IsLegitimateUnit["nameplate1"] then
+					Addon.LibDogTag = false
+					ThreatPlates.Print(L["Your version of LibDogTag-Unit-3.0 does not support nameplates. You need to install at least v90000.3 of LibDogTag-Unit-3.0."], true)
+				end
+			end
+		end
+	end
+end
+
+--------------------------------------------------------------------------------------------------
+-- Utils: Handling of colors
+---------------------------------------------------------------------------------------------------
+
+Addon.ColorByClass = function(class_name, text)
+	if class_name then
+		return "|c" .. Addon.db.profile.Colors.Classes[class_name].colorStr .. text .. "|r"
+	else
+		return text
+	end
+end
+
+--------------------------------------------------------------------------------------------------
+-- 
 ---------------------------------------------------------------------------------------------------
 
 Addon.Meta = function(value)
@@ -231,6 +293,16 @@ Addon.Split = function(split_string)
 	return result
 end
 
+Addon.SplitByWhitespace = function(split_string)
+	local parts = {}
+
+	for w in split_string:gmatch("%S+") do
+		parts[#parts + 1] = w
+	end
+
+	return parts, #parts
+end
+
 --------------------------------------------------------------------------------------------------
 -- Functions for working with tables
 ---------------------------------------------------------------------------------------------------
@@ -250,7 +322,30 @@ local function DeepCopyTable(orig)
 	return copy
 end
 
---Addon.CopyTable = DeepCopyTable
+Addon.PrintMessage = function(channel, ...)
+	--local verbose = Addon.db.profile.verbose
+	if channel == "DEBUG" and Addon.DEBUG then
+		print("|cff89F559TP|r - |cff0000ff" .. channel .. "|r:", ...)
+	elseif channel == "ERROR" then
+		print("|cff89F559TP|r - |cffff0000" .. channel .. "|r:", ...)
+	elseif channel == "WARNING" then
+		print("|cff89F559TP|r - |cffff8000" .. channel .. "|r:", ...)
+	else
+		print("|cff89F559TP|r:", channel, ...)
+	end
+end
+
+Addon.PrintDebugMessage = function(...)
+	Addon.PrintMessage("DEBUG", ...)
+end
+
+Addon.PrintErrorMessage = function(...)
+	Addon.PrintMessage("ERROR", ...)
+end
+
+Addon.PrintWarningMessage = function(...)
+	Addon.PrintMessage("WARNING", ...)
+end
 
 Addon.CopyTable = function(input)
 	local output = {}
@@ -271,6 +366,8 @@ Addon.MergeIntoTable = function(target, source)
 		if type(v) == "table" then
 			target[k] = target[k] or {}
 			Addon.MergeIntoTable(target[k], v)
+		if not Addon.IS_TBC_CLASSIC and not Addon.IS_CLASSIC then
+		end
 		else
 			target[k] = v
 		end

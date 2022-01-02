@@ -15,7 +15,6 @@ local IsInInstance = IsInInstance
 local UnitReaction = UnitReaction
 
 -- ThreatPlates APIs
-local TidyPlatesThreat = TidyPlatesThreat
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -155,13 +154,13 @@ end
 --end
 
 function Element.UpdateSettings()
-  Settings = TidyPlatesThreat.db.profile.threat
+  Settings = Addon.db.profile.threat
 
-  ShowOnAttackedUnitsOnly = TidyPlatesThreat.db.profile.ShowThreatGlowOnAttackedUnitsOnly
+  ShowOnAttackedUnitsOnly = Addon.db.profile.ShowThreatGlowOnAttackedUnitsOnly
   ShowOffTank = Settings.toggle.OffTank
   ShowInstancesOnly = Settings.toggle.InstancesOnly
 
-  for style, settings in pairs(TidyPlatesThreat.db.profile.settings) do
+  for style, settings in pairs(Addon.db.profile.settings) do
     if settings.threatcolor then -- there are several subentries unter settings. Only use style subsettings like unique, normal, dps, ...
       ThreatColor[style] = settings.threatcolor
     end

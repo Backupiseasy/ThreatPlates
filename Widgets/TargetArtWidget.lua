@@ -4,8 +4,8 @@
 local ADDON_NAME, Addon = ...
 local ThreatPlates = Addon.ThreatPlates
 
+local FocusWidget = (not Addon.IS_CLASSIC and Addon.Widgets:NewFocusWidget("Focus")) or {}
 local Widget = Addon.Widgets:NewTargetWidget("TargetArt")
-local FocusWidget = (not Addon.CLASSIC and Addon.Widgets:NewFocusWidget("Focus")) or {}
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -18,7 +18,6 @@ local abs, max, min = abs, max, min
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 
 -- ThreatPlates APIs
-local TidyPlatesThreat = TidyPlatesThreat
 local BackdropTemplate = Addon.BackdropTemplate
 
 local _G =_G
@@ -117,7 +116,7 @@ local  function UpdateBorderTexture(db, widget_frame, texture_frame)
 
   local border_settings_adjustment = ADJUST_BORDER_FOR_SMALL_HEALTHBAR[db.theme]
   if border_settings_adjustment  then
-    local border_settings = border_settings_adjustment[TidyPlatesThreat.db.profile.settings.healthbar.height]
+    local border_settings = border_settings_adjustment[Addon.db.profile.settings.healthbar.height]
     if border_settings then
       edge_size = border_settings.edgeSize
       offset = border_settings.offset
@@ -264,13 +263,17 @@ function Widget:Create()
 end
 
 function Widget:IsEnabled()
-  local db = TidyPlatesThreat.db.profile.targetWidget
+  local db = Addon.db.profile.targetWidget
   return db.ON or db.ShowInHeadlineView
 end
 
 function Widget:OnEnable()
   self:SubscribeEvent("PLAYER_TARGET_CHANGED")
 end
+
+-- function Widget:OnDisable()
+--   self:UnsubscribeAllEvents()
+-- end
 
 function Widget:EnabledForStyle(style, unit)
   if (style == "NameOnly" or style == "NameOnly-Unique") then
@@ -331,13 +334,13 @@ function Widget:UpdateLayout()
   local widget_frame = WidgetFrame
 
   UpdateTexture(Settings, widget_frame, widget_frame.HealthbarMode)
-  local db = TidyPlatesThreat.db.profile
+  local db = Addon.db.profile
   widget_frame.NameModeTexture:SetSize(128, 32 * GetHeadlineViewHeight(db.Name.NameMode, db.StatusText.NameMode) / 18)
   widget_frame.NameModeTexture:SetPoint("CENTER", widget_frame, "CENTER", NameModeOffsetX, NameModeOffsetY)
 end
 
 function Widget:UpdateSettings()
-  local db = TidyPlatesThreat.db.profile
+  local db = Addon.db.profile
   Settings = db.targetWidget
 
   NameModeOffsetX = db.Name.NameMode.HorizontalOffset
@@ -397,13 +400,17 @@ function FocusWidget:Create()
 end
 
 function FocusWidget:IsEnabled()
-  local db = TidyPlatesThreat.db.profile.FocusWidget
+  local db = Addon.db.profile.FocusWidget
   return db.ON or db.ShowInHeadlineView
 end
 
 function FocusWidget:OnEnable()
   self:SubscribeEvent("PLAYER_FOCUS_CHANGED")
 end
+
+-- function Widget:OnDisable()
+--   self:UnsubscribeAllEvents()
+-- end
 
 function FocusWidget:EnabledForStyle(style, unit)
   if (style == "NameOnly" or style == "NameOnly-Unique") then
@@ -463,13 +470,13 @@ function FocusWidget:UpdateLayout()
   local widget_frame = FocusWidgetFrame
 
   FocusUpdateTexture(FocusSettings, widget_frame, widget_frame.HealthbarMode)
-  local db = TidyPlatesThreat.db.profile
+  local db = Addon.db.profile
   widget_frame.NameModeTexture:SetSize(128, 32 * GetHeadlineViewHeight(db.Name.NameMode, db.StatusText.NameMode) / 18)
   widget_frame.NameModeTexture:SetPoint("CENTER", widget_frame, "CENTER", FocusNameModeOffsetX, FocusNameModeOffsetY)
 end
 
 function FocusWidget:UpdateSettings()
-  local db = TidyPlatesThreat.db.profile
+  local db = Addon.db.profile
   FocusSettings = db.FocusWidget
 
   FocusNameModeOffsetX = db.Name.NameMode.HorizontalOffset

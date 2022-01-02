@@ -1,3 +1,5 @@
 .idea/
-TidyPlates_ThreatPlates.toc
-Libs/Libs.xml
+.release/
+.env
+.vscode/
+workspace.code-workspace

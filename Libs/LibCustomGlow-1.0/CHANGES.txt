@@ -1,12 +1,8 @@
-tag 648b01168be33c5ee2cebb19f893c13ed149f4d3 1.0.3
-Author:	Benjamin Staneck <staneck@gmail.com>
-Date:	Sat Aug 10 23:00:24 2019 +0200
+Changes since tag 1.0.3
 
-Tag as 1.0.3
+commit 62612955401de40bd23698302be9e1843e793b65
+Author: Infus <infus@squorn.de>
+Date:   Fri May 1 16:30:35 2020 +0200
 
-commit 6efc82df449dea8a78f7ab647c252afafc45c381
-Author: Benjamin Staneck <staneck@gmail.com>
-Date:   Sat Aug 10 23:00:12 2019 +0200
-
-    bump minor version
+    Fix PixelGlow being in the wrong place for one frame
 

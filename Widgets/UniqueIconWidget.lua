@@ -16,10 +16,9 @@ local pairs = pairs
 
 -- WoW APIs
 local PlatesByUnit = Addon.PlatesByUnit
+local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 
 -- ThreatPlates APIs
-local TidyPlatesThreat = TidyPlatesThreat
-local LibCustomGlow = Addon.LibCustomGlow
 local CUSTOM_GLOW_FUNCTIONS, CUSTOM_GLOW_WRAPPER_FUNCTIONS = Addon.CUSTOM_GLOW_FUNCTIONS, Addon.CUSTOM_GLOW_WRAPPER_FUNCTIONS
 
 local _G =_G
@@ -49,7 +48,7 @@ function Widget:Create(tp_frame)
   widget_frame.Highlight = _G.CreateFrame("Frame", nil, widget_frame)
   widget_frame.Highlight:SetFrameLevel(tp_frame:GetFrameLevel() + 15)
 
-  widget_frame.HighlightStop = LibCustomGlow.PixelGlow_Stop
+  widget_frame.HighlightStop = Addon.LibCustomGlow.PixelGlow_Stop
   --------------------------------------
   -- End Custom Code
 
@@ -65,13 +64,13 @@ end
 function Widget:UNIT_PORTRAIT_UPDATE(unitid)
   if unitid == "player" or unitid == "target" then return end
 
-  local plate = PlatesByUnit[unitid]
-  if plate then
-    local tp_frame = plate.TPFrame
-    if tp_frame and tp_frame.Active then
-      local unique_setting = tp_frame.unit.CustomPlateSettings
+  local plate = GetNamePlateForUnit(unitid)
+  if plate and plate.TPFrame.Active then
+    local widget_frame = plate.TPFrame.widgets.UniqueIcon
+    if widget_frame.Active then
+      local unique_setting = plate.TPFrame.unit.CustomPlateSettings
       if unique_setting and self.db.ON and unique_setting.showIcon and unique_setting.UseAutomaticIcon then
-        local icon = tp_frame.widgets.UniqueIcon.Icon
+        local icon = widget_frame.Icon
         _G.SetPortraitTexture(icon, unitid)
         icon:SetTexCoord(0.14644660941, 0.85355339059, 0.14644660941, 0.85355339059)
       end
@@ -84,10 +83,9 @@ function Widget:OnEnable()
   self:SubscribeEvent("UNIT_PORTRAIT_UPDATE")
 end
 
-function Widget:OnDisable()
-  self:UnsubscribeEvent("UNIT_PORTRAIT_UPDATE")
-end
-
+-- function Widget:OnDisable()
+--   self:UnsubscribeAllEvents()
+-- end
 
 function Widget:EnabledForStyle(style, unit)
   return style ~= "empty" -- (style == "unique" or style == "NameOnly-Unique" or style == "etotem")
@@ -178,7 +176,7 @@ function Widget:OnUnitAdded(widget_frame, unit)
     local highlight_start = CUSTOM_GLOW_WRAPPER_FUNCTIONS[CUSTOM_GLOW_FUNCTIONS[glow_highlight.Type][1]]
     highlight_start(widget_frame.Highlight, color, frame_level_offset)
 
-    widget_frame.HighlightStop = LibCustomGlow[CUSTOM_GLOW_FUNCTIONS[glow_highlight.Type][2]]
+    widget_frame.HighlightStop = Addon.LibCustomGlow[CUSTOM_GLOW_FUNCTIONS[glow_highlight.Type][2]]
 
     widget_frame.Highlight:Show()
   else
@@ -196,9 +194,9 @@ end
 
 function Widget:UpdateLayout(widget_frame)
   -- As there can be several custom styles with different glow effects be active on a unit, we have to stop all here
-  LibCustomGlow["ButtonGlow_Stop"](widget_frame.Highlight)
-  LibCustomGlow["PixelGlow_Stop"](widget_frame.Highlight)
-  LibCustomGlow["AutoCastGlow_Stop"](widget_frame.Highlight)
+  Addon.LibCustomGlow["ButtonGlow_Stop"](widget_frame.Highlight)
+  Addon.LibCustomGlow["PixelGlow_Stop"](widget_frame.Highlight)
+  Addon.LibCustomGlow["AutoCastGlow_Stop"](widget_frame.Highlight)
 
   -- Update the style as custom nameplates might have been changed and some units no longer
   -- may be unique
@@ -210,7 +208,7 @@ end
 -- Load settings from the configuration which are shared across all aura widgets
 -- used (for each widget) in UpdateWidgetConfig
 function Widget:UpdateSettings()
-  self.db = TidyPlatesThreat.db.profile.uniqueWidget
+  self.db = Addon.db.profile.uniqueWidget
 
   DefaultGlowColor = ThreatPlates.DEFAULT_SETTINGS.profile.uniqueSettings["**"].Effects.Glow.Color
 end

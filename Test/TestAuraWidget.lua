@@ -205,7 +205,7 @@ local function PolledHideIn(aura_frame)
 end
 
 local function GetColorForAura(aura)
-  local db = TidyPlatesThreat.db.profile.AuraWidget
+  local db = Addon.db.profile.AuraWidget
 
   local color
   if aura.effect == "HARMFUL" then
@@ -222,7 +222,7 @@ local function GetColorForAura(aura)
 end
 
 local function AuraFilterFunction(aura)
-  local db = TidyPlatesThreat.db.profile.AuraWidget
+  local db = Addon.db.profile.AuraWidget
   local isType, isShown
 
   if aura.reaction == AURA_TARGET_HOSTILE and db.ShowEnemy then
@@ -299,7 +299,7 @@ local function AuraSortFunction(a, b)
 
   if order ~= nil then return order end
 
-  local db = TidyPlatesThreat.db.profile.AuraWidget
+  local db = Addon.db.profile.AuraWidget
   if db.SortOrder == "AtoZ" then
     order = a.priority < b.priority
   else
@@ -322,7 +322,7 @@ local function AuraSortFunction(a, b)
 end
 
 local function AuraSortFunctionSimpleAtoZ(a, b)
-  local db = TidyPlatesThreat.db.profile.AuraWidget
+  local db = Addon.db.profile.AuraWidget
 
   if db.SortReverse then
     return a.priority > b.priority
@@ -342,7 +342,7 @@ local function AuraSortFunctionSimpleNum(a, b)
     order = a.priority < b.priority
   end
 
-  local db = TidyPlatesThreat.db.profile.AuraWidget
+  local db = Addon.db.profile.AuraWidget
   if db.SortReverse then
     order = not order
   end
@@ -380,7 +380,7 @@ local function AuraSortFunctionNum(a, b)
     order = a.priority < b.priority
   end
 
-  local sort_reverse = TidyPlatesThreat.db.profile.AuraWidget.SortReverse
+  local sort_reverse = Addon.db.profile.AuraWidget.SortReverse
   if sort_reverse then
     order = not order
   end
@@ -412,7 +412,7 @@ local function AuraSortFunctionAtoZ(a, b)
 
   order = a.priority > b.priority
 
-  local sort_reverse = TidyPlatesThreat.db.profile.AuraWidget.SortReverse
+  local sort_reverse = Addon.db.profile.AuraWidget.SortReverse
   if sort_reverse then
     order = not order
   end
@@ -498,7 +498,7 @@ local function UpdateIconGrid_NoSorting(frame, unitid)
 
   if aura_count > 0 then
 --    --ThreatPlates.DEBUG_AURA_LIST(UnitAuraList)
---    local sort_order = TidyPlatesThreat.db.profile.AuraWidget.SortOrder
+--    local sort_order = Addon.db.profile.AuraWidget.SortOrder
 --    if sort_order ~= "None" then
 --      if sort_order == "AtoZ" then
 --        sort(UnitAuraList, AuraSortFunctionAtoZ)
@@ -617,7 +617,7 @@ local function UpdateIconGrid_831(frame, unitid)
   local max_auras_no = min(aura_count, CONFIG_AURA_LIMIT)
 
   if aura_count > 0 then
-    local sort_order = TidyPlatesThreat.db.profile.AuraWidget.SortOrder
+    local sort_order = Addon.db.profile.AuraWidget.SortOrder
     if sort_order ~= "None" then
       if sort_order == "AtoZ" then
         sort(UnitAuraList, AuraSortFunctionAtoZ)
@@ -768,7 +768,7 @@ local function GetUnitAuras(UnitAuraList, unitReaction, unitid, filter)
   local start_index = #UnitAuraList
   local aura, aura_filter
 
-  local db = TidyPlatesThreat.db.profile.AuraWidget
+  local db = Addon.db.profile.AuraWidget
   local mode = db.FilterMode
   if mode == "whitelistMine" or mode == "blacklistMine" or mode == "allMine" then
     aura_filter = filter .. "|PLAYER"
@@ -811,7 +811,7 @@ local function GetUnitAuras(UnitAuraList, unitReaction, unitid, filter)
 end
 
 local function AuraSortFunctionAtoZ_Baseline(a, b)
-  local db = TidyPlatesThreat.db.profile.AuraWidget
+  local db = Addon.db.profile.AuraWidget
 
   if db.SortReverse then
     return a.priority > b.priority
@@ -831,7 +831,7 @@ local function AuraSortFunctionNum_Baseline(a, b)
     order = a.priority < b.priority
   end
 
-  local db = TidyPlatesThreat.db.profile.AuraWidget
+  local db = Addon.db.profile.AuraWidget
   if db.SortReverse then
     order = not order
   end
@@ -859,7 +859,7 @@ local function UpdateIconGrid_Baseline(frame, unitid)
   --  GetUnitAuras(UnitAuraList2, unitReaction, unitid, "HARMFUL")
   --  GetUnitAuras(UnitAuraList2, unitReaction, unitid, "HELPFUL")
 
-  local sort_order = TidyPlatesThreat.db.profile.AuraWidget.SortOrder
+  local sort_order = Addon.db.profile.AuraWidget.SortOrder
   if sort_order ~= "None" then
     UnitAuraList = {}
   end
@@ -1007,7 +1007,7 @@ local function UpdateIconGrid_Testing(frame, unitid)
   --  GetUnitAuras(UnitAuraList2, unitReaction, unitid, "HARMFUL")
   --  GetUnitAuras(UnitAuraList2, unitReaction, unitid, "HELPFUL")
 
-  local sort_order = TidyPlatesThreat.db.profile.AuraWidget.SortOrder
+  local sort_order = Addon.db.profile.AuraWidget.SortOrder
   if sort_order ~= "None" then
     UnitAuraList = {}
   end
@@ -1094,7 +1094,7 @@ local function UpdateIconGrid_Testing(frame, unitid)
 
     --local aura_info_list = frame.AuraInfos
     local index_start, index_end, index_step
-    if TidyPlatesThreat.db.profile.AuraWidget.SortReverse then
+    if Addon.db.profile.AuraWidget.SortReverse then
       index_start, index_end, index_step = max_auras_no, 1, -1
     else
       index_start, index_end, index_step = 1, max_auras_no, 1
@@ -1283,12 +1283,12 @@ for func = 1, #TEST_FUNCTIONS do
   for filter_mode = 1, #TEST_FILTERS do
     measure[func][filter_mode] = {}
 
-    TidyPlatesThreat.db.profile.AuraWidget.FilterMode = TEST_FILTERS[filter_mode]
+    Addon.db.profile.AuraWidget.FilterMode = TEST_FILTERS[filter_mode]
 
     for sort_mode = 1, #TEST_SORTING do
       measure[func][filter_mode][sort_mode] = {}
 
-      TidyPlatesThreat.db.profile.AuraWidget.SortOrder = TEST_SORTING[sort_mode]
+      Addon.db.profile.AuraWidget.SortOrder = TEST_SORTING[sort_mode]
 
       for iteration = 1, NO_ITERATIONS do
         units = {}

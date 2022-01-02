@@ -41,7 +41,7 @@ function GetConfig(config_no)
   elseif config_no == 2 then
     return TEST_UNIT[config_no]
   elseif config_no == 3 then
-    TidyPlatesThreat.db.profile.settings.healthbar.ShowAbsorbs = false
+    Addon.db.profile.settings.healthbar.ShowAbsorbs = false
     return TEST_UNIT[config_no]
   end
 end
@@ -60,7 +60,7 @@ local IGNORED_STYLES = {
 local visual, absorbbar
 
 local function CreateExtensions_Global_Test(extended)
-  local db = TidyPlatesThreat.db.profile.settings.healthbar
+  local db = Addon.db.profile.settings.healthbar
   ENABLE_ABSORB = db.ShowAbsorbs
 
   local visual = extended.visual
@@ -90,7 +90,7 @@ local function UpdateExtensions_Global_Test(extended, unitid, style)
 end
 
 local function CreateExtensions_Global(extended)
-  local db = TidyPlatesThreat.db.profile.settings.healthbar
+  local db = Addon.db.profile.settings.healthbar
   ENABLE_ABSORB = db.ShowAbsorbs
 
   local visual = extended.visual
@@ -120,7 +120,7 @@ local function UpdateExtensions_Global(extended, unitid, style)
 end
 
 local function CreateExtensions_DB(extended)
-  local db = TidyPlatesThreat.db.profile.settings.healthbar
+  local db = Addon.db.profile.settings.healthbar
   local visual = extended.visual
   local absorbbar = visual.absorbbar
 
@@ -137,7 +137,7 @@ local function CreateExtensions_DB(extended)
 end
 
 local function UpdateExtensions_DB(extended, unitid, style)
-  local db = TidyPlatesThreat.db.profile.settings.healthbar
+  local db = Addon.db.profile.settings.healthbar
   if not db.ShowAbsorbs then return end
 
   local visual = extended.visual
@@ -152,12 +152,12 @@ local function CreateExtensions_NoOpt(extended)
   local visual = extended.visual
   local absorbbar = visual.absorbbar
 
-  if TidyPlatesThreat.db.profile.settings.healthbar.ShowAbsorbs then
+  if Addon.db.profile.settings.healthbar.ShowAbsorbs then
     if not absorbbar then
       -- check if absorbbar and glow are created at the samel level as healthbar
       local healthbar = visual.healthbar
     else
-      local color = TidyPlatesThreat.db.profile.settings.healthbar.AbsorbColor
+      local color = Addon.db.profile.settings.healthbar.AbsorbColor
     end
   else
     -- do nothing
@@ -165,7 +165,7 @@ local function CreateExtensions_NoOpt(extended)
 end
 
 local function UpdateExtensions_NoOpt(extended, unitid, style)
-  if not TidyPlatesThreat.db.profile.settings.healthbar.ShowAbsorbs then return end
+  if not Addon.db.profile.settings.healthbar.ShowAbsorbs then return end
 
   local visual = extended.visual
   local absorbbar = visual.absorbbar

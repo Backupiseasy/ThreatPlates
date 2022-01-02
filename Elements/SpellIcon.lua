@@ -12,7 +12,6 @@ local ADDON_NAME, Addon = ...
 -- WoW APIs
 
 -- ThreatPlates APIs
-local TidyPlatesThreat = TidyPlatesThreat
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
 
 ---------------------------------------------------------------------------------------------------

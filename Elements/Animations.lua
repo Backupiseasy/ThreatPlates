@@ -260,7 +260,7 @@ function Animations:HidePlate(frame)
 end
 
 function Animations:UpdateSettings()
-  Settings = TidyPlatesThreat.db.profile.Animations
+  Settings = Addon.db.profile.Animations
 
   -- ShowPlateDuration = Settings.ShowPlateDuration
   HidePlateDuration = Settings.HidePlateDuration

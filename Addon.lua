@@ -26,7 +26,6 @@ local UnitClass, GetNumSpecializations, GetSpecializationInfo = UnitClass, GetNu
 local TidyPlatesThreat = TidyPlatesThreat
 local LibStub = LibStub
 local L = Addon.L
-local LSM = Addon.LSM
 local Meta = Addon.Meta
 
 local _G =_G
@@ -43,9 +42,10 @@ local LSMUpdateTimer
 ---------------------------------------------------------------------------------------------------
 
 Addon.PlayerClass = select(2, UnitClass("player"))
+Addon.PlayerName = select(1, UnitName("player"))
 
 ThreatPlates.Print = function(val,override)
-  local db = TidyPlatesThreat.db.profile
+  local db = Addon.db.profile
   if override or db.verbose then
     print(Meta("titleshort")..": "..val)
   end
@@ -75,15 +75,20 @@ StaticPopupDialogs["IncompatibleAddon"] = {
   text = "|cffFFA500" .. Meta("title") .. " Warning|r \n---------------------------------------\n" ..
     L["You currently have two nameplate addons enabled: |cff89F559Threat Plates|r and |cff89F559%s|r. Please disable one of these, otherwise two overlapping nameplates will be shown for units."],
   button1 = OKAY,
+  button2 = L["Don't Ask Again"],
   timeout = 0,
   whileDead = 1,
   hideOnEscape = 1,
   OnAccept = function(self, _, _) end,
+  OnCancel = function(self, _, _)
+    Addon.db.profile.CheckForIncompatibleAddons = false
+  end,
 }
 
-function TidyPlatesThreat:ReloadTheme()
+
+function Addon:ReloadTheme()
   -- Recreate all TidyPlates styles for ThreatPlates("normal", "dps", "tank", ...) - required, if theme style settings were changed
-  Addon:SetThemes(self)
+  Addon:SetThemes()
 
   -- Re-read all cached settings, ideally do not update any UI elements here
   Addon:InitializeCustomNameplates()
@@ -104,22 +109,16 @@ function TidyPlatesThreat:ReloadTheme()
 
   Addon.CVars:OverwriteBoolProtected("nameplateResourceOnTarget", self.db.profile.PersonalNameplate.ShowResourceOnTarget)
 
-  local frame
-  for _, plate in pairs(GetNamePlates()) do
-    frame = plate and plate.TPFrame
-    if frame and frame.Active then
-      Addon:UpdateNameplateStyle(plate, frame.unit.unitid)
-    end
-  end
+
 
   -- Update all UI elements (frames, textures, ...)
   Addon:UpdateAllPlates()
 end
 
-function TidyPlatesThreat:CheckForFirstStartUp()
+function Addon:CheckForFirstStartUp()
   local db = self.db.global
 
-  if not Addon.CLASSIC then
+  if not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC then
     local spec_roles = self.db.char.spec
     if #spec_roles ~= GetNumSpecializations() then
       for i = 1, GetNumSpecializations() do
@@ -139,23 +138,26 @@ function TidyPlatesThreat:CheckForFirstStartUp()
   db.version = new_version
 end
 
-function TidyPlatesThreat:CheckForIncompatibleAddons()
+function Addon:CheckForIncompatibleAddons()
   -- Check for other active nameplate addons which may create all kinds of errors and doesn't make
   -- sense anyway:
-  if IsAddOnLoaded("TidyPlates") then
-    StaticPopup_Show("TidyPlatesEnabled", "TidyPlates")
-  end
-  if IsAddOnLoaded("Kui_Nameplates") then
-    StaticPopup_Show("IncompatibleAddon", "KuiNameplates")
-  end
-  if IsAddOnLoaded("ElvUI") and ElvUI[1].private.nameplates.enable then
-    StaticPopup_Show("IncompatibleAddon", "ElvUI Nameplates")
-  end
-  if IsAddOnLoaded("Plater") then
-    StaticPopup_Show("IncompatibleAddon", "Plater Nameplates")
-  end
-  if IsAddOnLoaded("SpartanUI") and SUI.DB.EnabledComponents.Nameplates then
-    StaticPopup_Show("IncompatibleAddon", "SpartanUI Nameplates")
+  if Addon.db.profile.CheckForIncompatibleAddons then
+    if IsAddOnLoaded("TidyPlates") then
+      StaticPopup_Show("TidyPlatesEnabled", "TidyPlates")
+    end
+    if IsAddOnLoaded("Kui_Nameplates") then
+      StaticPopup_Show("IncompatibleAddon", "KuiNameplates")
+    end
+    if IsAddOnLoaded("ElvUI") and ElvUI[1] and ElvUI[1].private and ElvUI[1].private.nameplates and ElvUI[1].private.nameplates.enable then
+    --if IsAddOnLoaded("ElvUI") and ElvUI[1].private.nameplates.enable then
+      StaticPopup_Show("IncompatibleAddon", "ElvUI Nameplates")
+    end
+    if IsAddOnLoaded("Plater") then
+      StaticPopup_Show("IncompatibleAddon", "Plater Nameplates")
+    end
+    if IsAddOnLoaded("SpartanUI") and SUI.IsModuleEnabled and SUI:IsModuleEnabled("Nameplates") then
+      StaticPopup_Show("IncompatibleAddon", "SpartanUI Nameplates")
+    end
   end
 end
 
@@ -164,7 +166,7 @@ end
 ---------------------------------------------------------------------------------------------------
 -- Copied from ElvUI:
 function Addon:SetBaseNamePlateSize()
-  local db = TidyPlatesThreat.db.profile.settings
+  local db = Addon.db.profile.settings
 
   local width = db.frame.width
   local height = db.frame.height
@@ -188,8 +190,8 @@ function Addon:SetBaseNamePlateSize()
   local isInstance, instanceType = IsInInstance()
   isInstance = isInstance and (instanceType == "party" or instanceType == "raid")
 
-  db = TidyPlatesThreat.db.profile
-  if Addon.CLASSIC then
+  db = Addon.db.profile
+  if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC then
     -- Classic has the same nameplate size for friendly and enemy units, so either set both or non at all (= set it to default values)
     if not db.ShowFriendlyBlizzardNameplates and not db.ShowEnemyBlizzardNameplates and not isInstance then
       C_NamePlate.SetNamePlateFriendlySize(width, height)
@@ -241,38 +243,43 @@ function TidyPlatesThreat:OnInitialize()
   end
 
   local db = LibStub('AceDB-3.0'):New('ThreatPlatesDB', defaults, 'Default')
-  self.db = db
+  Addon.db = db
 
-  -- Change defaults if deprecated custom nameplates are used (not yet migrated)
-  Addon.SetDefaultsForCustomNameplates()
+  Addon.LibAceConfigDialog = LibStub("AceConfigDialog-3.0")
+  Addon.LibAceConfigRegistry = LibStub("AceConfigRegistry-3.0")
+  Addon.LibSharedMedia = LibStub("LibSharedMedia-3.0")
+  Addon.LibCustomGlow = LibStub("LibCustomGlow-1.0")
+
+  if Addon.IS_CLASSIC then
+    Addon.LibClassicDurations = LibStub("LibClassicDurations")
+
+    Addon.LibClassicCasterino = LibStub("LibClassicCasterino-ThreatPlates")
+    -- Register callsbacks for spellcasting library
+    Addon.LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_START", Addon.UNIT_SPELLCAST_START)
+    Addon.LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_DELAYED", Addon.UnitSpellcastMidway) -- only for player
+    Addon.LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_STOP", Addon.UNIT_SPELLCAST_STOP)
+    Addon.LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_FAILED", Addon.UNIT_SPELLCAST_STOP)
+    Addon.LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_INTERRUPTED", Addon.UNIT_SPELLCAST_INTERRUPTED)
+    Addon.LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_CHANNEL_START", Addon.UNIT_SPELLCAST_CHANNEL_START)
+    Addon.LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_CHANNEL_UPDATE", Addon.UnitSpellcastMidway) -- only for player
+    Addon.LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_CHANNEL_STOP", Addon.UNIT_SPELLCAST_CHANNEL_STOP)
+  end
+
+  Addon.LoadOnDemandLibraries()
 
   local RegisterCallback = db.RegisterCallback
-  RegisterCallback(self, 'OnProfileChanged', 'ProfChange')
-  RegisterCallback(self, 'OnProfileCopied', 'ProfChange')
-  RegisterCallback(self, 'OnProfileReset', 'ProfChange')
+  RegisterCallback(Addon, 'OnProfileChanged', 'ProfChange')
+  RegisterCallback(Addon, 'OnProfileCopied', 'ProfChange')
+  RegisterCallback(Addon, 'OnProfileReset', 'ProfChange')
 
   -- Setup Interface panel options
   local app_name = ThreatPlates.ADDON_NAME
   local dialog_name = app_name .. " Dialog"
   LibStub("AceConfig-3.0"):RegisterOptionsTable(dialog_name, ThreatPlates.GetInterfaceOptionsTable())
-  LibStub("AceConfigDialog-3.0"):AddToBlizOptions(dialog_name, ThreatPlates.ADDON_NAME)
+  Addon.LibAceConfigDialog:AddToBlizOptions(dialog_name, ThreatPlates.ADDON_NAME)
 
   -- Setup chat commands
   self:RegisterChatCommand("tptp", "ChatCommand")
-
-  if Addon.CLASSIC then
-    local LibClassicCasterino = Addon.LibClassicCasterino
-
-    -- Register callsbacks for spellcasting library
-    LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_START", Addon.UNIT_SPELLCAST_START)
-    LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_DELAYED", Addon.UnitSpellcastMidway) -- only for player
-    LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_STOP", Addon.UNIT_SPELLCAST_STOP)
-    LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_FAILED", Addon.UNIT_SPELLCAST_STOP)
-    LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_INTERRUPTED", Addon.UNIT_SPELLCAST_INTERRUPTED)
-    LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_CHANNEL_START", Addon.UNIT_SPELLCAST_CHANNEL_START)
-    LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_CHANNEL_UPDATE", Addon.UnitSpellcastMidway) -- only for player
-    LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_CHANNEL_STOP", Addon.UNIT_SPELLCAST_CHANNEL_STOP)
-  end
 end
 
 -- The OnEnable() and OnDisable() methods of your addon object are called by AceAddon when your addon is
@@ -281,18 +288,20 @@ end
 -- AceAddon function: Do more initialization here, that really enables the use of your addon.
 -- Register Events, Hook functions, Create Frames, Get information from the game that wasn't available in OnInitialize
 function TidyPlatesThreat:OnEnable()
-  TidyPlatesThreat:CheckForFirstStartUp()
-  TidyPlatesThreat:CheckForIncompatibleAddons()
+  Addon:CheckForFirstStartUp()
+  Addon:CheckForIncompatibleAddons()
 
-  if not Addon.CLASSIC then
-    Addon.CVars:OverwriteBoolProtected("nameplateResourceOnTarget", self.db.profile.PersonalNameplate.ShowResourceOnTarget)
+  if not (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC) then
+    Addon.CVars:OverwriteBoolProtected("nameplateResourceOnTarget", Addon.db.profile.PersonalNameplate.ShowResourceOnTarget)
   end
-  TidyPlatesThreat:ReloadTheme()
+
+  Addon.LoadOnDemandLibraries()
+  Addon:ReloadTheme()
 
   -- Register callbacks at LSM, so that we can refresh everything if additional media is added after TP is loaded
   -- Register this callback after ReloadTheme as media will be updated there anyway
-  LSM.RegisterCallback(self, "LibSharedMedia_SetGlobal", "MediaUpdate" )
-  LSM.RegisterCallback(self, "LibSharedMedia_Registered", "MediaUpdate" )
+  Addon.LibSharedMedia.RegisterCallback(Addon, "LibSharedMedia_SetGlobal", "MediaUpdate" )
+  Addon.LibSharedMedia.RegisterCallback(Addon, "LibSharedMedia_Registered", "MediaUpdate" )
 
   -- Get updates for CVar changes (e.g, for large nameplates, nameplage scale and alpha)
   Addon.CVars.RegisterCVarHook()
@@ -308,15 +317,15 @@ function TidyPlatesThreat:OnDisable()
 end
 
 -- Register callbacks at LSM, so that we can refresh everything if additional media is added after TP is loaded
-function TidyPlatesThreat.MediaUpdate(addon_name, name, mediatype, key)
-  if mediatype ~= LSM.MediaType.SOUND and not LSMUpdateTimer then
+function Addon.MediaUpdate(addon_name, name, mediatype, key)
+  if mediatype ~= Addon.LibSharedMedia.MediaType.SOUND and not LSMUpdateTimer then
     LSMUpdateTimer = true
 
     -- Delay the update for one second to avoid firering this several times when multiple media are registered by another addon
     C_Timer_After(1, function()
       LSMUpdateTimer = nil
       -- Basically, ReloadTheme but without CVar and some other stuff
-      Addon:SetThemes(TidyPlatesThreat)
+      Addon:SetThemes()
       -- no media used: Addon:UpdateConfigurationStatusText()
       -- no media used: Addon:InitializeCustomNameplates()
       Addon.Widgets:InitializeAllWidgets()
@@ -330,7 +339,7 @@ end
 -----------------------------------------------------------------------------------
 
 function TidyPlatesThreat:ToggleNameplateModeFriendlyUnits()
-  local db = TidyPlatesThreat.db.profile
+  local db = Addon.db.profile
 
   db.Visibility.FriendlyPlayer.UseHeadlineView = not db.Visibility.FriendlyPlayer.UseHeadlineView
   db.Visibility.FriendlyNPC.UseHeadlineView = not db.Visibility.FriendlyNPC.UseHeadlineView
@@ -343,7 +352,7 @@ function TidyPlatesThreat:ToggleNameplateModeFriendlyUnits()
 end
 
 function TidyPlatesThreat:ToggleNameplateModeNeutralUnits()
-  local db = TidyPlatesThreat.db.profile
+  local db = Addon.db.profile
 
   db.Visibility.NeutralNPC.UseHeadlineView = not db.Visibility.NeutralNPC.UseHeadlineView
   db.Visibility.NeutralMinus.UseHeadlineView = not db.Visibility.NeutralMinus.UseHeadlineView
@@ -352,7 +361,7 @@ function TidyPlatesThreat:ToggleNameplateModeNeutralUnits()
 end
 
 function TidyPlatesThreat:ToggleNameplateModeEnemyUnits()
-  local db = TidyPlatesThreat.db.profile
+  local db = Addon.db.profile
 
   db.Visibility.EnemyPlayer.UseHeadlineView = not db.Visibility.EnemyPlayer.UseHeadlineView
   db.Visibility.EnemyNPC.UseHeadlineView = not db.Visibility.EnemyNPC.UseHeadlineView

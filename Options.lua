@@ -11,14 +11,13 @@ local ipairs, next = ipairs, next
 local string = string
 local table = table
 local tonumber, tostring = tonumber, tostring
-local select = select
 local type = type
 
 -- WoW APIs
 local wipe = wipe
 local CLASS_SORT_ORDER, LOCALIZED_CLASS_NAMES_MALE = CLASS_SORT_ORDER, LOCALIZED_CLASS_NAMES_MALE
 local InCombatLockdown, IsInInstance, GetInstanceInfo = InCombatLockdown, IsInInstance, GetInstanceInfo
-local GetCVar, GetCVarBool = GetCVar, GetCVarBool
+local GetCVar, GetCVarBool, GetCVarDefault = GetCVar, GetCVarBool, GetCVarDefault
 local UnitName = UnitName
 local GameTooltip = GameTooltip
 
@@ -60,81 +59,107 @@ local UNIT_TYPES = {
 }
 
 local AURA_STYLE = {
-  wide = {
-    IconWidth = 26.5,
-    IconHeight = 14.5,
-    ShowBorder = true,
-    Duration = {
-      Anchor = "RIGHT",
-      InsideAnchor = true,
-      HorizontalOffset = -1,
-      VerticalOffset = 8,
-      Font = {
-        Typeface = Addon.DEFAULT_SMALL_FONT,
-        Size = 10,
-        Transparency = 1,
+  Debuffs = {
+    square = {
+      IconWidth = 16.5,
+      IconHeight = 14.5,
+      ShowBorder = true,
+      Duration = {
+        Anchor = "TOPRIGHT",
+        InsideAnchor = true,
+        HorizontalOffset = 0,
+        VerticalOffset = 6,
+        Font = {
+          Typeface = Addon.DEFAULT_SMALL_FONT,
+          Size = 10,
+          Transparency = 1,
         Color = Addon.RGB(255, 255, 255),
-        flags = "OUTLINE",
-        Shadow = true,
-        HorizontalAlignment = "RIGHT",
-        VerticalAlignment = "CENTER",
-      }
+          flags = "OUTLINE",
+          Shadow = true,
+          HorizontalAlignment = "RIGHT",
+          VerticalAlignment = "CENTER",
+        }
+      },
+      StackCount = {
+        Anchor = "BOTTOMRIGHT",
+        InsideAnchor = true,
+        HorizontalOffset = 0,
+        VerticalOffset = -3,
+        Font = {
+          Typeface = Addon.DEFAULT_SMALL_FONT,
+          Size = 10,
+          Transparency = 1,
+        Color = Addon.RGB(255, 255, 255),
+          flags = "OUTLINE",
+          Shadow = true,
+          HorizontalAlignment = "RIGHT",
+          VerticalAlignment = "CENTER",
+        }
+      },
     },
-    StackCount = {
-      Anchor = "RIGHT",
-      InsideAnchor = true,
-      HorizontalOffset = -1,
-      VerticalOffset = -6,
-      Font = {
-        Typeface = Addon.DEFAULT_SMALL_FONT,
-        Size = 10,
-        Transparency = 1,
-        Color = Addon.RGB(255, 255, 255),
-        flags = "OUTLINE",
-        Shadow = true,
-        HorizontalAlignment = "RIGHT",
-        VerticalAlignment = "CENTER",
-      }
+    wide = {
+      IconWidth = 26.5,
+      IconHeight = 14.5,
+      ShowBorder = true,
+      -- Stack count and duration are copied from square
     },
   },
-  square = {
-    IconWidth = 16.5,
-    IconHeight = 14.5,
-    ShowBorder = true,
-    Duration = {
-      Anchor = "RIGHT",
-      InsideAnchor = true,
-      HorizontalOffset = 0,
-      VerticalOffset = 8,
-      Font = {
-        Typeface = Addon.DEFAULT_SMALL_FONT,
-        Size = 10,
-        Transparency = 1,
-        Color = Addon.RGB(255, 255, 255),
-        flags = "OUTLINE",
-        Shadow = true,
-        HorizontalAlignment = "RIGHT",
-        VerticalAlignment = "CENTER",
-      }
+  CrowdControl = {
+    wide = {
+      IconWidth = 32,
+      IconHeight = 28,
+      ShowBorder = true,
+      -- Stack count and duration are copied from square
     },
-    StackCount = {
-      Anchor = "RIGHT",
-      InsideAnchor = true,
-      HorizontalOffset = 0,
-      VerticalOffset = -6,
-      Font = {
-        Typeface = Addon.DEFAULT_SMALL_FONT,
-        Size = 10,
-        Transparency = 1,
+    square = {
+      IconWidth = 32,
+      IconHeight = 32,
+      ShowBorder = true,
+      Duration = {
+        Anchor = "CENTER",
+        InsideAnchor = true,
+        HorizontalOffset = 0,
+        VerticalOffset = 0,
+        Font = {
+          Typeface = Addon.DEFAULT_SMALL_FONT,
+          Size = 24,
+          Transparency = 1,
         Color = Addon.RGB(255, 255, 255),
-        flags = "OUTLINE",
-        Shadow = true,
-        HorizontalAlignment = "RIGHT",
-        VerticalAlignment = "CENTER",
-      }
+          flags = "THICKOUTLINE",
+          Shadow = true,
+          HorizontalAlignment = "RIGHT",
+          VerticalAlignment = "CENTER",
+        }
+      },
+      StackCount = {
+        Anchor = "BOTTOMRIGHT",
+        InsideAnchor = true,
+        HorizontalOffset = 0,
+        VerticalOffset = -4,
+        Font = {
+          Typeface = Addon.DEFAULT_SMALL_FONT,
+          Size = 10,
+          Transparency = 1,
+        Color = Addon.RGB(255, 255, 255),
+          flags = "OUTLINE",
+          Shadow = true,
+          HorizontalAlignment = "RIGHT",
+          VerticalAlignment = "CENTER",
+        }
+      },
     },
-  }
+  },
 }
+
+AURA_STYLE.Debuffs.wide.Duration = Addon.CopyTable(AURA_STYLE.Debuffs.square.Duration)
+AURA_STYLE.Debuffs.wide.StackCount = Addon.CopyTable(AURA_STYLE.Debuffs.square.StackCount)
+AURA_STYLE.Buffs = Addon.CopyTable(AURA_STYLE.Debuffs)
+AURA_STYLE.Buffs.square.IconWidth = 24
+AURA_STYLE.Buffs.square.IconHeight = 21
+AURA_STYLE.Buffs.wide.IconWidth = 39
+AURA_STYLE.Buffs.wide.IconHeight = 21
+AURA_STYLE.CrowdControl.wide.Duration = Addon.CopyTable(AURA_STYLE.CrowdControl.square.Duration)
+AURA_STYLE.CrowdControl.wide.StackCount = Addon.CopyTable(AURA_STYLE.CrowdControl.square.StackCount)
 
 -- local reference to current profile
 local db
@@ -142,7 +167,7 @@ local db
 local options
 local clipboard
 
-local CreateCustomNameplateEntry
+local CreateCustomNameplateEntry, CreateCustomNameplatesGroup
 
 -- Key is key from options data structure for the widget, value is widget name as used in NewWidget
 local WIDGET_INFO = {
@@ -239,25 +264,19 @@ local function ImportStringData(encoded)
     return
   end
 
-  local errorMsg = L["Something went wrong with importing the profile. Please check the import string."]
   local decoded = LibDeflate:DecodeForPrint(encoded)
-
   if not decoded then
-    ThreatPlates.Print(errorMsg, true)
     return
   end
 
   local decompressed = LibDeflate:DecompressDeflate(decoded)
-
   if not decompressed then
-    ThreatPlates.Print(errorMsg, true)
     return
   end
 
   local success, deserialized = LibAceSerializer:Deserialize(decompressed)
 
   if not success then
-    ThreatPlates.Print(errorMsg, true)
     return
   end
 
@@ -291,11 +310,11 @@ local function ShowImportFrame()
 
         -- Adjust the profile name if there is a name conflict:
         local imported_profile_no = 1
-        while TidyPlatesThreat.db.profiles[imported_profile_name] do
+        while Addon.db.profiles[imported_profile_name] do
           imported_profile_name = import_data.ProfileName .. " (" .. tostring(imported_profile_no) .. ")"
           imported_profile_no = imported_profile_no + 1
         end
-        --        for profile_name, profile in pairs(TidyPlatesThreat.db.profiles) do
+        --        for profile_name, profile in pairs(Addon.db.profiles) do
         --          local no = profile_name:match("^" .. import_data.ProfileName .. " %((%d+)%)$") or (profile_name == import_data.ProfileName and 0)
         --          if tonumber(no) and tonumber(no) >= imported_profile_no then
         --            imported_profile_no = tonumber(no) + 1
@@ -304,7 +323,7 @@ local function ShowImportFrame()
         --        local imported_profile_name = import_data.ProfileName .. ((imported_profile_no == 0 and "") or (" (" .. tostring(imported_profile_no) .. ")"))
 
         Addon.ImportProfile(import_data.Profile, imported_profile_name, import_data.Version)
-        TidyPlatesThreat:ProfChange()
+        Addon:ProfChange()
       end
     else
       ThreatPlates.Print(L["The import string has an unknown format and cannot be imported. Verify that the import string was generated from the same Threat Plates version that you are using currently."], true)
@@ -329,8 +348,8 @@ local function AddImportExportOptions(profileOptions)
     func = function()
       local export_data = {
         Version = Meta("version"),
-        ProfileName = TidyPlatesThreat.db:GetCurrentProfile(),
-        Profile = TidyPlatesThreat.db.profile
+        ProfileName = Addon.db:GetCurrentProfile(),
+        Profile = Addon.db.profile
       }
 
       ShowExportFrame(export_data)
@@ -353,7 +372,7 @@ end
 -- info: table with path to setting in options dialog, that was changed
 -- info.arg: table with parameter arg from options definition
 local function SetValueGeneral(info, value)
-  local DB = TidyPlatesThreat.db.profile
+  local DB = Addon.db.profile
   local keys = info.arg
   for index = 1, #keys - 1 do
     DB = DB[keys[index]]
@@ -364,7 +383,7 @@ end
 
 -- a is set to 1 when hasAlpha is nil/false
 local function SetValueColor(info, r, g, b, a)
-  local DB = TidyPlatesThreat.db.profile
+  local DB = Addon.db.profile
   local keys = info.arg
   for index = 1, #keys - 1 do
     DB = DB[keys[index]]
@@ -424,7 +443,7 @@ local function SetValue(info, ...)
 
     if info.arg[1] == "settings" or (info.arg[1] == "HeadlineView" and (info.arg[2] == "name" or info.arg[2] == "ShowMouseoverHighlight")) then
       --print ("SetValue: Theme =>", info.arg[2])
-      Addon:SetThemes(TidyPlatesThreat)
+      Addon:SetThemes()
     end
 
     Addon:ForceUpdate()
@@ -444,7 +463,7 @@ end
 ---------------------------------------------------------------------------------------------------
 
 local function GetValueGeneral(info)
-  local value = TidyPlatesThreat.db.profile
+  local value = Addon.db.profile
   local keys = info.arg
 
   for index = 1, #keys do
@@ -455,7 +474,7 @@ local function GetValueGeneral(info)
 end
 
 local function GetValueColor(info)
-  local value = TidyPlatesThreat.db.profile
+  local value = Addon.db.profile
   local keys = info.arg
 
   for index = 1, #keys do
@@ -502,12 +521,38 @@ function Addon.UpdateStylesForCurrentInstance()
   end
 end
 
+local TRIGGER_TYPE_TO_NAME_PREFIX = {
+  Aura = L["Aura: "],
+  Cast = L["Cast: "],
+  Name = "",
+  Script = L["Script"],
+}
+
+function Addon.CustomPlateGetHeaderName(index)
+  local custom_style
+
+  if type(index) == "table" then
+    custom_style = index
+  else
+    custom_style = Addon.db.profile.uniqueSettings[index]
+  end
+
+  local custom_style_name = custom_style.Name
+  if custom_style_name == "" then
+    local trigger_type = custom_style.Trigger.Type
+    custom_style_name = TRIGGER_TYPE_TO_NAME_PREFIX[trigger_type] .. (custom_style.Trigger[trigger_type].Input or "")
+  end
+
+  return custom_style_name
+end
+
 function Addon:InitializeCustomNameplates()
-  local db = TidyPlatesThreat.db.profile
+  local db = Addon.db.profile
 
   Addon.ActiveAuraTriggers = false
   Addon.ActiveCastTriggers = false
   Addon.ActiveWildcardTriggers = false
+  Addon.ActiveScriptTrigger = false
   Addon.UseUniqueWidget = db.uniqueWidget.ON
 
   -- Use wipe to keep references intact
@@ -516,6 +561,7 @@ function Addon:InitializeCustomNameplates()
   wipe(custom_style_triggers.NameWildcard)
   wipe(custom_style_triggers.Aura)
   wipe(custom_style_triggers.Cast)
+  wipe(custom_style_triggers.Script)
   wipe(Addon.Cache.TriggerWildcardTests)
 
   local styles_cache = Addon.Cache.Styles
@@ -523,16 +569,23 @@ function Addon:InitializeCustomNameplates()
   wipe(styles_cache.PerInstance)
 
   for index, custom_style in pairs(db.uniqueSettings) do
-    if type(index) == "number" and custom_style.Trigger.Name.Input ~= "<Enter name here>" and not custom_style.Enable.Never then
+    if type(index) == "number" and custom_style.Trigger.Name.Input ~= "<Enter name here>" and not custom_style.Enable.Never and (custom_style.Trigger.Type ~= "Script" or Addon.db.global.ScriptingIsEnabled) then
       local trigger_type = custom_style.Trigger.Type
       local trigger_list = custom_style.Trigger[trigger_type].AsArray
 
-      for _, trigger in ipairs(trigger_list) do
-        if trigger_type == "Name" and string.find(trigger, "%*") then
-          local wildcard_trigger = string.gsub(trigger, "%*", ".*")
-          custom_style_triggers.NameWildcard[#custom_style_triggers.NameWildcard + 1] = { wildcard_trigger, custom_style }
-        else
-          custom_style_triggers[trigger_type][trigger] = custom_style
+      -- Custom styles with scripting can either be of type Script or of another type, but with a script attached
+      if trigger_type == "Script" or next(custom_style.Scripts.Code.Functions) ~= nil or next(custom_style.Scripts.Code.Events) ~= nil then
+        custom_style_triggers.Script[#custom_style_triggers.Script + 1] = custom_style
+      end
+
+      if trigger_type ~= "Script" then
+        for _, trigger in ipairs(trigger_list) do
+          if trigger_type == "Name" and string.find(trigger, "%*") then
+            local wildcard_trigger = string.gsub(trigger, "%*", ".*")
+            custom_style_triggers.NameWildcard[#custom_style_triggers.NameWildcard + 1] = { wildcard_trigger, custom_style }
+          elseif trigger_type ~= "Script" then
+            custom_style_triggers[trigger_type][trigger] = custom_style
+          end
         end
       end
 
@@ -566,7 +619,7 @@ function Addon:InitializeCustomNameplates()
   Addon.ActiveAuraTriggers = next(custom_style_triggers.Aura) ~= nil
   Addon.ActiveCastTriggers = next(custom_style_triggers.Cast) ~= nil
   Addon.ActiveWildcardTriggers = next(custom_style_triggers.NameWildcard) ~= nil
-
+  Addon.ActiveScriptTrigger = next(custom_style_triggers.Script) ~= nil
   Addon.UpdateStylesForCurrentInstance()
 end
 
@@ -576,6 +629,8 @@ local function UpdateSpecial() -- Need to add a way to update options table.
   Addon.Widgets:InitializeAllWidgets()
   Addon:ForceUpdate()
 end
+
+Addon.UpdateCustomStyles = UpdateSpecial
 
 local function AddIfSettingExists(entry)
   local value = ThreatPlates.DEFAULT_SETTINGS.profile
@@ -595,7 +650,7 @@ local function SyncGameSettings(info, val)
     ThreatPlates.Print(L["We're unable to change this while in combat"], true)
   else
     SetValue(info, val)
-    TidyPlatesThreat:PLAYER_REGEN_ENABLED()
+    Addon:PLAYER_REGEN_ENABLED()
   end
 end
 
@@ -606,7 +661,7 @@ local function SyncGameSettingsWorld(info, val)
     SetValue(info, val)
     local isInstance, instanceType = IsInInstance()
     if isInstance then
-      TidyPlatesThreat:PLAYER_ENTERING_WORLD()
+      Addon:PLAYER_ENTERING_WORLD()
     end
   end
 end
@@ -617,7 +672,7 @@ end
 
 local function GetUnitVisibilitySetting(info)
   local unit_type = info.arg
-  local show_unit = TidyPlatesThreat.db.profile.Visibility[unit_type].Show
+  local show_unit = Addon.db.profile.Visibility[unit_type].Show
 
   if type(show_unit) == "string" then
     show_unit = GetCVarBool(show_unit)
@@ -628,7 +683,7 @@ end
 
 local function SetUnitVisibilitySetting(info, value)
   local unit_type = info.arg
-  local unit_visibility = TidyPlatesThreat.db.profile.Visibility[unit_type]
+  local unit_visibility = Addon.db.profile.Visibility[unit_type]
 
   if type(unit_visibility.Show) == "string" then
     Addon.CVars:OverwriteProtected(unit_visibility.Show, (value and 1) or 0)
@@ -823,13 +878,16 @@ local function GetScaleEntry(name, pos, setting, func_disabled, min_value, max_v
     order = pos,
     type = "range",
     step = 0.05,
-    min = min_value,
-    max = max_value,
+    softMin = min_value,
+    softMax = max_value,
+    min = -4.7,
+    max = 5.0,
     isPercent = true,
     arg = setting,
     disabled = func_disabled,
   }
   return entry
+
 end
 
 local function GetScaleEntryDefault(pos, setting, func_disabled)
@@ -1077,17 +1135,17 @@ local function GetFontEntry(name, pos, widget_info)
   return entry
 end
 
--- Syntax for settings:
---  Font = {
---    Typeface = Addon.DEFAULT_SMALL_FONT,
---    Size = 10,
---    Transparency = 1,
---    Color = RGB(255, 255, 255),
---    flags = "OUTLINE",
---    Shadow = true,
---    HorizontalAlignment = "CENTER",
---    VerticalAlignment = "CENTER",
---  },
+-- Options are shown based on the following settings:
+--   Font = {
+--     Typeface = Addon.DEFAULT_SMALL_FONT,
+--     Size = 10,
+--     Transparency = 1,
+--     Color = RGB(255, 255, 255),
+--     flags = "OUTLINE",
+--     Shadow = true,
+--     HorizontalAlignment = "CENTER",
+--     VerticalAlignment = "CENTER",
+--   },
 local function GetFontEntryDefault(name, pos, widget_info)
   local arg_flags = F(widget_info, "Font", "flags")
 
@@ -1328,7 +1386,20 @@ local function GetFramePositioningEntry(pos, widget_info)
   return entry
 end
 
+-- Options are shown based on the following settings:
+--   <Name> = {
+--     Show = true,
+--     Anchor = "BOTTOM",
+--     InsideAnchor = false,
+--     HorizontalOffset = 0,
+--     VerticalOffset = -2,
+--     AutoSizeing
+--     Width = 345,
+--     MaxLines = 4534,
+--   } 
 local function GetTextEntry(name, pos, widget_info)
+  local arg_auto_sizing = Addon.ConcatTables(widget_info, { "AutoSizing" })
+
   local entry = {
     type = "group",
     order = pos,
@@ -1344,8 +1415,49 @@ local function GetTextEntry(name, pos, widget_info)
       Spacer1 = GetSpacerEntry(2),
       Font = GetFontEntryDefault(L["Font"], 10, widget_info),
       Positioning = GetFontPositioningEntry(20, widget_info),
+      Boundaries = AddIfSettingExists({
+        name = L["Boundaries"],
+        order = 21,
+        type = "group",
+        inline = true,
+        arg = Addon.ConcatTables(widget_info, { "AutoSizing" }),
+        args = {
+          Description = {
+            type = "description",
+            order = 1,
+            name = L["These settings will define the space that text can be placed on the nameplate."],
+            width = "full",
+          },
+          AutoSizing = {
+            type = "toggle",
+            order = 10,
+            name = L["Auto Sizing"],
+            arg = arg_auto_sizing,
+          },
+          WordWrap = {
+            type = "toggle",
+            order = 20,
+            name = L["Word Wrap"],
+            arg = Addon.ConcatTables(widget_info, { "WordWrap" }),
+            disabled = function() return GetValue({ arg = arg_auto_sizing }) end,
+          },
+          Width = { 
+            type = "range", 
+            width = "double", 
+            order = 30, 
+            name = L["Width"], 
+            arg = Addon.ConcatTables(widget_info, { "Width" }),
+            max = 250, 
+            min = 20, 
+            step = 1, 
+            isPercent = false,
+            disabled = function() return GetValue({ arg = arg_auto_sizing }) end,
+          },
+        },
+      })
     },
   }
+
   return entry
 end
 
@@ -1639,11 +1751,11 @@ local function CreateComboPointsWidgetOptions()
             type = "select",
             order = 10,
             values = {
-              DEATHKNIGHT = (not Addon.CLASSIC and L["Death Knight"]) or nil,
+              DEATHKNIGHT = ((not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC) and L["Death Knight"]) or nil,
               DRUID = L["Druid"],
               MAGE = L["Arcane Mage"],
-              MONK = (not Addon.CLASSIC and L["Windwalker Monk"]) or nil,
-              PALADIN = (not Addon.CLASSIC and L["Paladin"]) or nil,
+              MONK = ((not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC) and L["Windwalker Monk"]) or nil,
+              PALADIN = ((not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC) and L["Paladin"]) or nil,
               ROGUE = L["Rogue"],
               WARLOCK = L["Warlock"],
             },
@@ -1743,6 +1855,21 @@ local function CreateComboPointsWidgetOptions()
             hasAlpha = false,
             disabled = function() return #db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization] < 6 end
           },
+          ColorAnimacharge = {
+            name = L["Animacharge"],
+            type = "color",
+            order = 170,
+            get = function(info)
+              local color = db.ComboPoints.ColorBySpec.ROGUE.Animacharge or ThreatPlates.RGB(0, 0, 0)
+              return color.r, color.g, color.b
+            end,
+            set = function(info, r, g, b)
+              db.ComboPoints.ColorBySpec.ROGUE.Animacharge = ThreatPlates.RGB(r * 255, g * 255, b * 255)
+              Addon.Widgets:UpdateSettings("ComboPoints")
+            end,
+            hasAlpha = false,
+            hidden = function() return Addon.PlayerClass ~= "ROGUE" end
+          },
         },
       },
       Layout = {
@@ -1791,7 +1918,7 @@ local function CreateArenaWidgetOptions()
     name = L["Arena"],
     type = "group",
     order = 10,
-    hidden = function() return Addon.CLASSIC end,
+    hidden = function() return Addon.IS_CLASSIC end,
     args = {
       Enable = GetEnableEntry(L["Enable Arena Widget"], L["This widget shows various icons (orbs and numbers) on enemy nameplates in arenas for easier differentiation."], "arenaWidget", false),
       Orbs = {
@@ -1986,7 +2113,7 @@ end
     name = L["Quest"],
     order = 100,
     type = "group",
-    hidden = function() return Addon.CLASSIC end,
+    hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC end,
     args = {
       Enable = GetEnableEntry(L["Enable Quest Widget"], L["This widget shows a quest icon above unit nameplates or colors the nameplate healthbar of units that are involved with any of your current quests."], "questWidget", true),
       Visibility = { type = "group",	order = 10,	name = L["Visibility"], inline = true,
@@ -2075,7 +2202,7 @@ local function CreateStealthWidgetOptions()
     name = L["Stealth"],
     order = 80,
     type = "group",
-    hidden = function() return Addon.CLASSIC end,
+    hidden = function() return Addon.IS_CLASSIC end,
     args = {
       Enable = GetEnableEntry(L["Enable Stealth Widget"], L["This widget shows a stealth icon on nameplates of units that can detect stealth."], "stealthWidget", true),
       Layout = {
@@ -2232,7 +2359,7 @@ local function CreateExperienceWidgetOptions()
     type = "group",
     order = 54,
     childGroups = "tab",
-    hidden = function() return Addon.CLASSIC end,
+    hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC end,
     args = {
       Enable = GetEnableEntry(
         L["Enable Experience Widget"],
@@ -2450,7 +2577,7 @@ local function CreateFocusWidgetOptions()
     name = L["Focus Highlight"],
     type = "group",
     order = 55,
-    hidden = function() return Addon.CLASSIC end,
+    hidden = function() return Addon.IS_CLASSIC end,
     args = {
       Enable = GetEnableEntry(L["Enable Focus Widget"], L["This widget highlights the nameplate of your current focus target by showing a border around the healthbar and by coloring the nameplate's healtbar and/or name with a custom color."], "FocusWidget", false),
       Texture = {
@@ -2919,6 +3046,308 @@ local function CreateBossModsWidgetOptions()
   return entry
 end
 
+local function CreateAuraAreaLayoutOptions(pos, widget_info)
+  local options = {
+    name = L["Layout"],
+    type = "group",
+    order = pos,
+    inline = false,
+    args = {
+      Style = {
+        name = L["Style"],
+        order = 10,
+        type = "group",
+        inline = true,
+        args = {
+          IconMode = {
+            type = "toggle",
+            order = 10,
+            name = L["Icons"],
+            desc = L["Show auras as icons in a grid configuration."],
+            set = function(info, val) SetValue(info, false) end,
+            get = function(info) return not GetValue(info) end,
+            arg = { "AuraWidget", widget_info, "ModeBar", "Enabled" },
+          },
+          BarMode = {
+            type = "toggle",
+            order = 20,
+            name = L["Bars"],
+            desc = L["Show auras as bars (with optional icons)."],
+            set = function(info, val) SetValue(info, true) end,
+            get = function(info) return GetValue(info) end,
+            arg = { "AuraWidget", widget_info, "ModeBar", "Enabled" },
+          },
+        },
+      },
+      Alignment = {
+        name = L["Alignment"],
+        type = "group",
+        order = 20,
+        inline = true,
+        args = {
+          AlignmentH = {
+            name = L["Horizontal Alignment"],
+            order = 20,
+            type = "select",
+            values = { LEFT = L["Left-to-right"], RIGHT = L["Right-to-left"] },
+            arg = { "AuraWidget", widget_info, "AlignmentH" }
+          },
+          AlignmentV = {
+            name = L["Vertical Alignment"],
+            order = 30,
+            type = "select",
+            values = { BOTTOM = L["Bottom-to-top"], TOP = L["Top-to-bottom"] },
+            arg = { "AuraWidget", widget_info, "AlignmentV" }
+          },
+          CenterAuras = {
+            type = "toggle",
+            order = 40,
+            name = L["Center Auras"],
+            arg = { "AuraWidget", widget_info, "CenterAuras" },
+          },
+        },
+      },
+      Positioning = GetFramePositioningEntry(30, { "AuraWidget", widget_info }),
+    },
+  }
+
+  options.args.Positioning.args.AnchorTo = {
+    name = L["Anchor to"],
+    order = 1,
+    type = "select",
+    values = function()
+      local values = { Healthbar = L["Healthbar"], Buffs = L["Buffs"], Debuffs = L["Debuffs"], CrowdControl = L["Crowd Control"] }
+      -- Remove the aura area for which this options are created - cannot anchor to self
+      values[widget_info] = nil
+      return values
+    end,
+    arg = { "AuraWidget", widget_info, "AnchorTo" }
+  }
+
+  return options
+end
+
+local function CreateAuraAreaIconModeOptions(pos, widget_info)
+  local options = {
+    name = L["Icon Mode"],
+    type = "group",
+    order = pos,
+    inline = false,
+    args = {
+      Style = {
+        name = L["Style"],
+        order = 10,
+        type = "group",
+        inline = true,
+        args = {
+          Style = {
+            name = L["Icon Style"],
+            order = 10,
+            type = "select",
+            desc = L["This lets you select the layout style of the auras area."],
+            descStyle = "inline",
+            values = { wide = L["Wide"], square = L["Square"], custom = L["Custom"] },
+            set = function(info, val)
+              if val ~= "custom" then
+                Addon.MergeIntoTable(db.AuraWidget[widget_info].ModeIcon, AURA_STYLE[widget_info][val])
+              end
+              SetValue(info, val)
+            end,
+            arg = { "AuraWidget", widget_info, "ModeIcon", "Style" },
+          },
+          Spacer1 = GetSpacerEntry(30),
+          Columns = {
+            name = L["Column Limit"],
+            order = 40,
+            type = "range",
+            min = 1,
+            max = 8,
+            step = 1,
+            arg = { "AuraWidget", widget_info, "ModeIcon", "Columns" },
+          },
+          Rows = {
+            name = L["Row Limit"],
+            order = 50,
+            type = "range",
+            min = 1,
+            max = 10,
+            step = 1,
+            arg = { "AuraWidget", widget_info, "ModeIcon", "Rows" },
+          },
+          MaxAuras = {
+            type = "range",
+            order = 60,
+            name = L["Max Auras"],
+            min = 1,
+            max = 40,
+            step = 1,
+            isPercent = false,
+            arg = { "AuraWidget", widget_info, "ModeIcon", "MaxAuras" },
+          },
+          Spacer2 = GetSpacerEntry(70),
+          Width = GetSizeEntry(L["Icon Width"], 80, { "AuraWidget", widget_info, "ModeIcon", "IconWidth" },
+            function()
+              return db.AuraWidget[widget_info].ModeIcon.Style ~= "custom"
+            end),
+          Height = GetSizeEntry(L["Icon Height"], 90, { "AuraWidget", widget_info, "ModeIcon", "IconHeight" },
+            function()
+              return db.AuraWidget[widget_info].ModeIcon.Style ~= "custom"
+            end),
+          ColumnSpacing = {
+            name = L["Horizontal Spacing"],
+            order = 100,
+            type = "range",
+            min = 0,
+            max = 100,
+            step = 1,
+            arg = { "AuraWidget", widget_info, "ModeIcon", "ColumnSpacing" },
+            disabled = function()
+              return db.AuraWidget[widget_info].ModeIcon.Style ~= "custom"
+            end,
+          },
+          RowSpacing = {
+            name = L["Vertical Spacing"],
+            order = 110,
+            type = "range",
+            min = 0,
+            max = 100,
+            step = 1,
+            arg = { "AuraWidget", widget_info, "ModeIcon", "RowSpacing" },
+            disabled = function()
+              return db.AuraWidget[widget_info].ModeIcon.Style ~= "custom"
+            end,
+          },
+          Spacer3 = GetSpacerEntry(120),
+          ShowBorder = {
+            type = "toggle",
+            order = 130,
+            name = L["Border"],
+            arg = { "AuraWidget", widget_info, "ModeIcon", "ShowBorder" },
+            disabled = function() return db.AuraWidget[widget_info].ModeIcon.Style ~= "custom" end,
+          },
+        },
+      },
+      Duration = {
+        name = L["Duration"],
+        order = 30,
+        type = "group",
+        inline = true,
+        disabled = function() return db.AuraWidget[widget_info].ModeIcon.Style ~= "custom" end,
+        args = {
+          Font = GetFontEntryDefault(L["Font"], 10, { "AuraWidget", widget_info, "ModeIcon", "Duration" }),
+          Placement = GetFontPositioningEntry(20, { "AuraWidget", widget_info, "ModeIcon", "Duration" }),
+        },
+      },
+      StackCount = {
+        name = L["Stack Count"],
+        order = 40,
+        type = "group",
+        inline = true,
+        disabled = function() return db.AuraWidget[widget_info].ModeIcon.Style ~= "custom" end,
+        args = {
+          Font = GetFontEntryDefault(L["Font"], 10, { "AuraWidget", widget_info, "ModeIcon", "StackCount" }),
+          Placement = GetFontPositioningEntry(20, { "AuraWidget", widget_info, "ModeIcon", "StackCount" }),
+        },
+      },
+    },
+  }
+
+  return options
+end
+
+local function CreateAuraAreaBarModeOptions(pos, widget_info)
+  local options = {
+    name = L["Bar Mode"],
+    order = pos,
+    type = "group",
+    inline = false,
+    args = {
+      --Help = { type = "description", order = 0, width = "full", name = L["Show auras as bars (with optional icons)."], },
+      Format = {
+        name = L["Format"],
+        order = 30,
+        type = "group",
+        inline = true,
+        args = {
+          BarWidth = { name = L["Bar Width"], order = 10, type = "range", min = 1, max = 500, step = 1, arg = { "AuraWidget", widget_info, "ModeBar", "BarWidth" }, },
+          BarHeight = { name = L["Bar Height"], order = 20, type = "range", min = 1, max = 500, step = 1, arg = { "AuraWidget", widget_info, "ModeBar", "BarHeight" }, },
+          MaxBars = { name = L["Bar Limit"], order = 30, type = "range", min = 1, max = 20, step = 1, arg = { "AuraWidget", widget_info, "ModeBar", "MaxBars" }, },
+          BarSpacing = { name = L["Vertical Spacing"], order = 40, type = "range", min = 0, max = 100, step = 1, arg = { "AuraWidget", widget_info, "ModeBar", "BarSpacing" }, },
+          Spacer1 = GetSpacerEntry(55),
+          EnableIcon = { name = L["Symbol"], order = 60, type = "toggle", arg = { "AuraWidget", widget_info, "ModeBar", "ShowIcon" }, },
+          IconAlign = { name = L["On the left"], order = 70, type = "toggle", arg = { "AuraWidget", widget_info, "ModeBar", "IconAlignmentLeft" }, },
+          IconOffset = { name = L["Offset"], order = 80, type = "range", min = -100, max = 100, step = 1, arg = { "AuraWidget", widget_info, "ModeBar", "IconSpacing", }, },
+        },
+      },
+      BarStyle = {
+        name = L["Bar Style"],
+        order = 40,
+        type = "group",
+        inline = true,
+        args = {
+          BarTexture = {
+            name = L["Foreground Texture"],
+            order = 60,
+            type = "select",
+            dialogControl = "LSM30_Statusbar",
+            values = AceGUIWidgetLSMlists.statusbar,
+            arg = { "AuraWidget", widget_info, "ModeBar", "Texture" },
+          },
+          BackgroundTexture = {
+            name = L["Background Texture"],
+            order = 80,
+            type = "select",
+            dialogControl = "LSM30_Statusbar",
+            values = AceGUIWidgetLSMlists.statusbar,
+            arg = { "AuraWidget", widget_info, "ModeBar", "BackgroundTexture" },
+          },
+          BackgroundColor = {
+            name = L["Background Color"],
+            type = "color",
+            order = 90,
+            hasAlpha = true,
+            get = GetColorAlpha,
+            set = SetColorAlphaWidget,
+            arg = {"AuraWidget", widget_info, "ModeBar", "BackgroundColor"},
+          },
+        },
+      },
+      Label = {
+        name = L["Label"],
+        order = 70,
+        type = "group",
+        inline = true,
+        args = {
+          Font = GetFontEntryDefault(L["Font"], 10, { "AuraWidget", widget_info, "ModeBar", "Label" }),
+          Placement = GetFontPositioningEntry(20, { "AuraWidget", widget_info, "ModeBar", "Label" }),
+        },
+      },
+      Duration = {
+        name = L["Duration"],
+        order = 80,
+        type = "group",
+        inline = true,
+        args = {
+          Font = GetFontEntryDefault(L["Font"], 10, { "AuraWidget", widget_info, "ModeBar", "Duration" }),
+          Placement = GetFontPositioningEntry(20, { "AuraWidget", widget_info, "ModeBar", "Duration" }),
+        },
+      },
+      StackCount = {
+        name = L["Stack Count"],
+        order = 90,
+        type = "group",
+        inline = true,
+        args = {
+          Font = GetFontEntryDefault(L["Font"], 10, { "AuraWidget", widget_info, "ModeBar", "StackCount" }),
+          Placement = GetFontPositioningEntry(20, { "AuraWidget", widget_info, "ModeBar", "StackCount" }),
+        },
+      },
+    },
+  }
+
+  return options
+end
+
 local function CreateAurasWidgetOptions()
   local options = {
     name = L["Auras"],
@@ -2926,13 +3355,13 @@ local function CreateAurasWidgetOptions()
     childGroups = "tab",
     order = 25,
     args = {
-      Enable = GetEnableEntry(L["Enable Auras Widget"], L["This widget shows a unit's auras (buffs and debuffs) on its nameplate."], "AuraWidget", true),
-      Style = {
+      Appearance = {
         name = L["Appearance"],
         order = 10,
         type = "group",
         inline = false,
         args = {
+          Enable = GetEnableEntry(L["Enable Auras Widget"], L["This widget shows a unit's auras (buffs and debuffs) on its nameplate."], "AuraWidget"),
           Style = {
             type = "group",
             order = 10,
@@ -2959,7 +3388,9 @@ local function CreateAurasWidgetOptions()
                 order = 30,
                 desc = L["Show time left on auras that have a duration."],
                 arg = { "AuraWidget", "ShowDuration" },
-                disabled = function() return db.AuraWidget.ShowOmniCC end
+                disabled = function()
+                  return db.AuraWidget.ShowOmniCC
+                end
               },
               OmniCC = {
                 name = L["OmniCC"],
@@ -3001,14 +3432,14 @@ local function CreateAurasWidgetOptions()
                 name = L["Buff Color"],
                 type = "color",
                 order = 20,
-                arg = {"AuraWidget", "DefaultBuffColor"},
+                arg = { "AuraWidget", "DefaultBuffColor" },
                 hasAlpha = true,
               },
               DefaultDebuffColor = {
                 name = L["Debuff Color"],
                 type = "color",
                 order = 30,
-                arg = {"AuraWidget","DefaultDebuffColor"},
+                arg = { "AuraWidget", "DefaultDebuffColor" },
                 hasAlpha = true,
               },
               Spacer1 = GetSpacerEntry(35),
@@ -3036,7 +3467,7 @@ local function CreateAurasWidgetOptions()
                 name = L["Color"],
                 type = "color",
                 order = 70,
-                arg = {"AuraWidget", "Highlight", "Color" },
+                arg = { "AuraWidget", "Highlight", "Color" },
                 hasAlpha = true,
               },
             },
@@ -3048,14 +3479,14 @@ local function CreateAurasWidgetOptions()
             inline = true,
             args = {
               NoSorting = {
-                name = L["None"], type = "toggle",	order = 0,	 width = "half",
+                name = L["None"], type = "toggle", order = 0, width = "half",
                 desc = L["Do not sort auras."],
                 get = function(info) return db.AuraWidget.SortOrder == "None" end,
                 set = function(info, value) SetValue(info, "None") end,
                 arg = {"AuraWidget","SortOrder"},
               },
               AtoZ = {
-                name = L["A to Z"], type = "toggle",	order = 10, width = "half",
+                name = L["A to Z"], type = "toggle", order = 10, width = "half",
                 desc = L["Sort in ascending alphabetical order."],
                 get = function(info) return db.AuraWidget.SortOrder == "AtoZ" end,
                 set = function(info, value) SetValue(info, "AtoZ") end,
@@ -3076,14 +3507,14 @@ local function CreateAurasWidgetOptions()
                 arg = {"AuraWidget","SortOrder"},
               },
               Creation = {
-                name = L["Creation"], type = "toggle",	order = 40,	 width = "half",
+                name = L["Creation"], type = "toggle", order = 40, width = "half",
                 desc = L["Show auras in order created with oldest aura first."],
                 get = function(info) return db.AuraWidget.SortOrder == "Creation" end,
                 set = function(info, value) SetValue(info, "Creation") end,
                 arg = {"AuraWidget","SortOrder"},
               },
               ReverseOrder = {
-                name = L["Reverse"], type = "toggle",	order = 50,
+                name = L["Reverse"], type = "toggle", order = 50,
                 desc = L['Reverse the sort order (e.g., "A to Z" becomes "Z to A").'],
                 arg = { "AuraWidget", "SortReverse" }
               },
@@ -3102,57 +3533,36 @@ local function CreateAurasWidgetOptions()
                 values = { HEALTHBAR_AURAS = L["Healthbar, Auras"], AURAS_HEALTHBAR = L["Auras, Healthbar"] },
                 arg = { "AuraWidget", "FrameOrder" },
               },
-              Scale = {
-                name = L["Scale"],
-                type = "group",
-                inline = true,
-                order = 20,
-                args = {
-                  ScaleDebuffs = GetScaleEntry(L["Debuffs"], 10, { "AuraWidget", "Debuffs", "Scale", }),
-                  ScaleBuffs = GetScaleEntry(L["Buffs"], 20, { "AuraWidget", "Buffs", "Scale", }),
-                  ScaleCrowdControl = GetScaleEntry(L["Crowd Control"], 30, { "AuraWidget", "CrowdControl", "Scale", }),
-                  Reverse = {
-                    type = "toggle",
-                    order = 50,
-                    name = L["Swap By Reaction"],
-                    desc = L["Switch scale values for debuffs and buffs for friendly units."],
-                    arg = { "AuraWidget", "SwitchScaleByReaction" }
-                  }
-                },
-              },
-              Placement = {
-                name = L["Placement"],
-                type = "group",
-                inline = true,
-                order = 50,
-                args = {
-                  Anchor = { name = L["Anchor Point"], order = 20, type = "select", values = Addon.ANCHOR_POINT, arg = { "AuraWidget", "anchor" } },
-                  X = { name = L["Offset X"], order = 30, type = "range", min = -120, max = 120, step = 1, arg = { "AuraWidget", "x" }, },
-                  Y = { name = L["Offset Y"], order = 40, type = "range", min = -120, max = 120, step = 1, arg = { "AuraWidget", "y" }, },
-                  Spacer = GetSpacerEntry(50),
-                  AlignmentH = {
-                    name = L["Horizontal Alignment"],
-                    order = 60,
-                    type = "select",
-                    values = { LEFT = L["Left-to-right"], RIGHT = L["Right-to-left"] },
-                    arg = { "AuraWidget", "AlignmentH" }
-                  },
-                  AlignmentV = {
-                    name = L["Vertical Alignment"],
-                    order = 70,
-                    type = "select",
-                    values = { BOTTOM = L["Bottom-to-top"], TOP = L["Top-to-bottom"] },
-                    arg = { "AuraWidget", "AlignmentV" }
-                  },
-                  CenterAuras = {
-                    type = "toggle",
-                    order = 80,
-                    name = L["Center Auras"],
-                    arg = { "AuraWidget", "CenterAuras" },
-                  }
-                },
-              },
-            },
+              Spacer1 = GetSpacerEntry(15),
+              -- Reverse = {               
+              --   type = "toggle",
+              --   order = 20,
+              --   name = L["Swap Scale By Reaction"],
+              --   desc = L["Switch scale values for debuffs and buffs for friendly units."],
+              --   width = "double",
+              --   set = function(info, val)
+              --     if val then
+              --       db.AuraWidget.SwitchAreaByReaction = false
+              --     end
+              --     SetValue(info, val)
+              --   end,
+              --   arg = { "AuraWidget", "SwitchScaleByReaction" }
+              -- },
+              SwitchAuraAreaByReaction = {
+                type = "toggle",
+                order = 30,
+                name = L["Swap Area By Reaction"],
+                desc = L["Switch aura areas for buffs and debuffs for friendly units."],
+                width = "double",
+                set = function(info, val)
+                  if val then
+                    db.AuraWidget.SwitchScaleByReaction = false
+                  end
+                  SetValue(info, val)
+                end,
+                arg = { "AuraWidget", "SwitchAreaByReaction" }
+               }
+             },
           },
           SpecialEffects = {
             type = "group",
@@ -3175,242 +3585,25 @@ local function CreateAurasWidgetOptions()
                 softMax = 20,
                 isPercent = false,
                 arg = { "AuraWidget", "FlashTime" },
-                disabled = function() return not db.AuraWidget.FlashWhenExpiring end
+                disabled = function()
+                  return not db.AuraWidget.FlashWhenExpiring
+                end
               },
             },
           },
-        },
-      },
-      Debuffs = {
-        name = L["Debuffs"],
-        type = "group",
-        order = 20,
-        inline = false,
-        args = {
-          FriendlyUnits = {
-            name = L["Friendly Units"],
-            type = "group",
-            order = 15,
-            inline = true,
-            args = {
-              Show = {
-                name = L["Show Debuffs"],
-                order = 10,
-                type = "toggle",
-                arg = { "AuraWidget", "Debuffs", "ShowFriendly" },
-              },
-              ShowAll = {
-                name = L["All"],
-                order = 20,
-                type = "toggle",
-                desc = L["Show all debuffs on friendly units."],
-                set = function(info, val)
-                  local db = db.AuraWidget.Debuffs
-                  if db.ShowBlizzardForFriendly or db.ShowDispellable or db.ShowBoss or
-                    db.FilterByType[1] or db.FilterByType[2] or db.FilterByType[3] or db.FilterByType[4] then
-                    db.ShowBlizzardForFriendly = false
-                    db.ShowDispellable = false
-                    db.ShowBoss = false
-                    db.FilterByType[1] = false
-                    db.FilterByType[2] = false
-                    db.FilterByType[3] = false
-                    db.FilterByType[4] = false
-                    SetValue(info, val)
-                  end
-                end,
-                arg = { "AuraWidget", "Debuffs", "ShowAllFriendly" },
-                disabled = function() return not db.AuraWidget.Debuffs.ShowFriendly end
-              },
-              Blizzard = {
-                name = L["Blizzard"],
-                order = 25,
-                type = "toggle",
-                desc = L["Show debuffs that are shown on Blizzard's default nameplates."],
-                set = function(info, val)
-                  local db = db.AuraWidget.Debuffs
-                  db.ShowAllFriendly = not (val or db.ShowDispellable or db.ShowBoss or
-                  db.FilterByType[1] or db.FilterByType[2] or db.FilterByType[3] or db.FilterByType[4])
-                  SetValue(info, val)
-                end,
-                arg = { "AuraWidget", "Debuffs", "ShowBlizzardForFriendly" },
-                disabled = function() return not db.AuraWidget.Debuffs.ShowFriendly end,
-              },
-              Dispellable = {
-                name = L["Dispellable"],
-                order = 40,
-                type = "toggle",
-                desc = L["Show debuffs that you can dispell."],
-                set = function(info, val)
-                  local db = db.AuraWidget.Debuffs
-                  db.ShowAllFriendly = not (val or db.ShowBlizzardForFriendly or db.ShowBoss or
-                    db.FilterByType[1] or db.FilterByType[2] or db.FilterByType[3] or db.FilterByType[4])
-                  SetValue(info, val)
-                end,
-                arg = { "AuraWidget", "Debuffs", "ShowDispellable" },
-                disabled = function() return not db.AuraWidget.Debuffs.ShowFriendly end
-              },
-              Boss = {
-                name = L["Boss"],
-                order = 45,
-                type = "toggle",
-                desc = L["Show debuffs that where applied by bosses."],
-                set = function(info, val)
-                  local db = db.AuraWidget.Debuffs
-                  db.ShowAllFriendly = not (val or db.ShowBlizzardForFriendly or db.ShowDispellable or
-                    db.FilterByType[1] or db.FilterByType[2] or db.FilterByType[3] or db.FilterByType[4])
-                  SetValue(info, val)
-                end,
-                arg = { "AuraWidget", "Debuffs", "ShowBoss" },
-                disabled = function() return not db.AuraWidget.Debuffs.ShowFriendly end
-              },
-              DispelTypeH = {
-                name = L["Dispel Type"],
-                type = "header",
-                order = 50,
-              },
-              Curses = {
-                name = L["Curse"],
-                order = 60,
-                type = "toggle",
-                get = function(info) return db.AuraWidget.Debuffs.FilterByType[1] end,
-                set = function(info, val)
-                  local db = db.AuraWidget.Debuffs
-                  db.ShowAllFriendly = not (val or db.ShowBlizzardForFriendly or db.ShowDispellable or db.ShowBoss or
-                    db.FilterByType[2] or db.FilterByType[3] or db.FilterByType[4])
-                  db.FilterByType[1] = val
-                  Addon.Widgets:UpdateSettings("Auras")
-                end,
-                disabled = function() return not db.AuraWidget.Debuffs.ShowFriendly end,
-              },
-              Diseases = {
-                name = L["Disease"],
-                order = 70,
-                type = "toggle",
-                get = function(info) return db.AuraWidget.Debuffs.FilterByType[2] end,
-                set = function(info, val)
-                  local db = db.AuraWidget.Debuffs
-                  db.ShowAllFriendly = not (val or db.ShowBlizzardForFriendly or db.ShowDispellable or db.ShowBoss or
-                    db.FilterByType[1] or db.FilterByType[3] or db.FilterByType[4])
-                  db.FilterByType[2] = val
-                  Addon.Widgets:UpdateSettings("Auras")
-                end,
-                disabled = function() return not db.AuraWidget.Debuffs.ShowFriendly end,
-              },
-              Magics = {
-                name = L["Magic"],
-                order = 80,
-                type = "toggle",
-                get = function(info) return db.AuraWidget.Debuffs.FilterByType[3] end,
-                set = function(info, val)
-                  local db = db.AuraWidget.Debuffs
-                  db.ShowAllFriendly = not (val or db.ShowBlizzardForFriendly or db.ShowDispellable or db.ShowBoss or
-                    db.FilterByType[1] or db.FilterByType[2] or db.FilterByType[4])
-                  db.FilterByType[3] = val
-                  Addon.Widgets:UpdateSettings("Auras")
-                end,
-                disabled = function() return not db.AuraWidget.Debuffs.ShowFriendly end,
-              },
-              Poisons = {
-                name = L["Poison"],
-                order = 90,
-                type = "toggle",
-                get = function(info) return db.AuraWidget.Debuffs.FilterByType[4] end,
-                set = function(info, val)
-                  local db = db.AuraWidget.Debuffs
-                  db.ShowAllFriendly = not (val or db.ShowBlizzardForFriendly or db.ShowDispellable or db.ShowBoss or
-                    db.FilterByType[1] or db.FilterByType[2] or db.FilterByType[3])
-                  db.FilterByType[4] = val
-                  Addon.Widgets:UpdateSettings("Auras")
-                end,
-                disabled = function() return not db.AuraWidget.Debuffs.ShowFriendly end,
-              },
-            },
-          },
-          EnemyUnits = {
-            name = L["Enemy Units"],
-            type = "group",
-            order = 16,
-            inline = true,
-            args = {
-              ShowEnemy = {
-                name = L["Show Debuffs"],
-                order = 10,
-                type = "toggle",
-                arg = { "AuraWidget", "Debuffs", "ShowEnemy" }
-              },
-              ShowAll = {
-                name = L["All"],
-                order = 20,
-                type = "toggle",
-                desc = L["Show all debuffs on enemy units."],
-                set = function(info, val)
-                  local db = db.AuraWidget.Debuffs
-                  if db.ShowOnlyMine or db.ShowBlizzardForEnemy then
-                    db.ShowOnlyMine = false
-                    db.ShowBlizzardForEnemy = false
-                    SetValue(info, val)
-                  end
-                end,
-                arg = { "AuraWidget", "Debuffs", "ShowAllEnemy" },
-                disabled = function() return not db.AuraWidget.Debuffs.ShowEnemy end,
-              },
-              OnlyMine = {
-                name = L["Mine"],
-                order = 30,
-                type = "toggle",
-                desc = L["Show debuffs that were applied by you."],
-                set = function(info, val)
-                  local db = db.AuraWidget.Debuffs
-                  db.ShowAllEnemy = not (val or db.ShowBlizzardForEnemy)
-                  SetValue(info, val)
-                end,
-                arg = { "AuraWidget", "Debuffs", "ShowOnlyMine" },
-                disabled = function() return not db.AuraWidget.Debuffs.ShowEnemy end,
-              },
-              Blizzard = {
-                name = L["Blizzard"],
-                order = 40,
-                type = "toggle",
-                desc = L["Show debuffs that are shown on Blizzard's default nameplates."],
-                set = function(info, val)
-                  local db = db.AuraWidget.Debuffs
-                  db.ShowAllEnemy = not (val or db.ShowOnlyMine)
-                  SetValue(info, val)
-                end,
-                arg = { "AuraWidget", "Debuffs", "ShowBlizzardForEnemy" },
-                disabled = function() return not db.AuraWidget.Debuffs.ShowEnemy end,
-              },
-            },
-          },
-          SpellFilter = {
-            name = L["Filter by Spell"],
-            order = 50,
+          Config = {
+            name = L["Configuration Mode"],
+            order = 100,
             type = "group",
             inline = true,
             args = {
-              Mode = {
-                name = L["Mode"],
-                type = "select",
+              Toggle = {
+                name = L["Toggle"],
+                type = "execute",
                 order = 1,
-                width = "double",
-                values = Addon.AurasFilterMode,
-                set = function(info, val)
-                  db.AuraWidget.Debuffs.FilterMode = val
-                  Addon.Widgets:UpdateSettings("Auras")
-                end,
-                arg = { "AuraWidget", "Debuffs", "FilterMode" },
-              },
-              DebuffList = {
-                name = L["Filtered Auras"],
-                type = "input",
-                order = 2,
-                dialogControl = "MultiLineEditBox",
                 width = "full",
-                get = function(info) return Addon.TTS(db.AuraWidget.Debuffs.FilterBySpell) end,
-                set = function(info, v)
-                  local table = { strsplit("\n", v) };
-                  db.AuraWidget.Debuffs.FilterBySpell = table
-                  Addon.Widgets:UpdateSettings("Auras")
+                func = function()
+                  Addon.Widgets.Widgets.Auras:ToggleConfigurationMode()
                 end,
               },
             },
@@ -3420,248 +3613,534 @@ local function CreateAurasWidgetOptions()
       Buffs = {
         name = L["Buffs"],
         type = "group",
+        order = 20,
+        inline = false,
+        childGroups = "tab",
+        args = {
+          Filter = {
+            name = L["Filter"],
+            order = 10,
+            type = "group",
+            inline = false,
+            args = {
+              FriendlyUnits = {
+                name = L["Friendly Units"],
+                type = "group",
+                order = 10,
+                inline = true,
+                args = {
+                  Show = {
+                    name = L["Show Buffs"],
+                    order = 10,
+                    type = "toggle",
+                    arg = { "AuraWidget", "Buffs", "ShowFriendly" },
+                  },
+                  ShowAll = {
+                    name = L["All"],
+                    order = 20,
+                    type = "toggle",
+                    desc = L["Show all buffs on friendly units."],
+                    arg = { "AuraWidget", "Buffs", "ShowAllFriendly" },
+                    set = function(info, val)
+                      local db = db.AuraWidget.Buffs
+                      if db.ShowOnFriendlyNPCs or db.ShowOnlyMine or db.ShowPlayerCanApply then
+                        db.ShowOnFriendlyNPCs = false
+                        db.ShowOnlyMine = false
+                        db.ShowPlayerCanApply = false
+                    SetValue(info, val)
+                      end
+                    end,
+                    disabled = function()
+                      return not db.AuraWidget.Buffs.ShowFriendly
+                    end
+                  },
+                  NPCs = {
+                    name = L["All on NPCs"],
+                    order = 30,
+                    type = "toggle",
+                    desc = L["Show all buffs on NPCs."],
+                    set = function(info, val)
+                      local db = db.AuraWidget.Buffs
+                      db.ShowAllFriendly = not (val or db.ShowOnlyMine or db.ShowPlayerCanApply)
+                  SetValue(info, val)
+                    end,
+                    arg = { "AuraWidget", "Buffs", "ShowOnFriendlyNPCs" },
+                    disabled = function()
+                      return not db.AuraWidget.Buffs.ShowFriendly
+                    end
+                  },
+                  OnlyMine = {
+                    name = L["Mine"],
+                    order = 40,
+                    type = "toggle",
+                    desc = L["Show buffs that were applied by you."],
+                    set = function(info, val)
+                      local db = db.AuraWidget.Buffs
+                      db.ShowAllFriendly = not (db.ShowOnFriendlyNPCs or val or db.ShowPlayerCanApply)
+                  SetValue(info, val)
+                    end,
+                    arg = { "AuraWidget", "Buffs", "ShowOnlyMine" },
+                    disabled = function()
+                      return not db.AuraWidget.Buffs.ShowFriendly
+                    end
+                  },
+                  CanApply = {
+                    name = L["Can Apply"],
+                    order = 50,
+                    type = "toggle",
+                    desc = L["Show buffs that you can apply."],
+                    set = function(info, val)
+                      local db = db.AuraWidget.Buffs
+                      db.ShowAllFriendly = not (db.ShowOnFriendlyNPCs or db.ShowOnlyMine or val)
+                  SetValue(info, val)
+                    end,
+                    arg = { "AuraWidget", "Buffs", "ShowPlayerCanApply" },
+                    disabled = function()
+                      return not db.AuraWidget.Buffs.ShowFriendly
+                    end
+                  },
+                },
+              },
+              EnemyUnits = {
+                name = L["Enemy Units"],
+                type = "group",
+                order = 20,
+                inline = true,
+                args = {
+                  ShowEnemy = {
+                    name = L["Show Buffs"],
+                    order = 10,
+                    type = "toggle",
+                    arg = { "AuraWidget", "Buffs", "ShowEnemy" }
+                  },
+                  ShowAll = {
+                    name = L["All"],
+                    order = 20,
+                    type = "toggle",
+                    desc = L["Show all buffs on enemy units."],
+                    set = function(info, val)
+                      local db = db.AuraWidget.Buffs
+                      if val and not db.ShowAllEnemy then
+                        db.ShowOnEnemyNPCs = false
+                        db.ShowDispellable = false
+                        db.ShowMagic = false
+                    SetValue(info, val)
+                      end
+                    end,
+                    arg = { "AuraWidget", "Buffs", "ShowAllEnemy" },
+                    disabled = function()
+                      return not db.AuraWidget.Buffs.ShowEnemy
+                    end
+                  },
+                  NPCs = {
+                    name = L["All on NPCs"],
+                    order = 30,
+                    type = "toggle",
+                    desc = L["Show all buffs on NPCs."],
+                    set = function(info, val)
+                      local db = db.AuraWidget.Buffs
+                      db.ShowAllEnemy = not (val or db.ShowDispellable or db.ShowMagic)
+                  SetValue(info, val)
+                    end,
+                    arg = { "AuraWidget", "Buffs", "ShowOnEnemyNPCs" },
+                    disabled = function()
+                      return not db.AuraWidget.Buffs.ShowEnemy
+                    end
+                  },
+                  Dispellable = {
+                    name = L["Dispellable"],
+                    order = 50,
+                    type = "toggle",
+                    desc = L["Show buffs that you can dispell."],
+                    set = function(info, val)
+                      local db = db.AuraWidget.Buffs
+                      db.ShowAllEnemy = not (db.ShowOnEnemyNPCs or val or db.ShowMagic)
+                  SetValue(info, val)
+                    end,
+                    arg = { "AuraWidget", "Buffs", "ShowDispellable" },
+                    disabled = function()
+                      return not db.AuraWidget.Buffs.ShowEnemy
+                    end
+                  },
+                  Magics = {
+                    name = L["Magic"],
+                    order = 60,
+                    type = "toggle",
+                    desc = L["Show buffs of dispell type Magic."],
+                    set = function(info, val)
+                      local db = db.AuraWidget.Buffs
+                      db.ShowAllEnemy = not (db.ShowOnEnemyNPCs or db.ShowDispellable or val)
+                  SetValue(info, val)
+                    end,
+                    arg = { "AuraWidget", "Buffs", "ShowMagic" },
+                    disabled = function()
+                      return not db.AuraWidget.Buffs.ShowEnemy
+                    end
+                  },
+                  Header2 = { type = "header", order = 200, name = L["Unlimited Duration"], },
+                  UnlimitedDuration = {
+                    name = L["Disable"],
+                    order = 210,
+                    type = "toggle",
+                    desc = L["Do not show buffs with unlimited duration."],
+                    arg = { "AuraWidget", "Buffs", "HideUnlimitedDuration" },
+                    disabled = function()
+                      return not db.AuraWidget.Buffs.ShowEnemy
+                    end
+                  },
+                  Spacer1 = GetSpacerEntry(220),
+                  Always = {
+                    name = L["Show Always"],
+                    order = 230,
+                    type = "toggle",
+                    desc = L["Show buffs with unlimited duration in all situations (e.g., in and out of combat)."],
+                    set = function(info, val)
+                      local db = db.AuraWidget.Buffs
+                      if val and not db.ShowUnlimitedAlways then
+                        db.ShowUnlimitedInCombat = false
+                        db.ShowUnlimitedInInstances = false
+                        db.ShowUnlimitedOnBosses = false
+                    SetValue(info, val)
+                      end
+                    end,
+                    arg = { "AuraWidget", "Buffs", "ShowUnlimitedAlways" },
+                    disabled = function()
+                      return not db.AuraWidget.Buffs.ShowEnemy
+                    end
+                  },
+                  InCombat = {
+                    name = L["In Combat"],
+                    order = 240,
+                    type = "toggle",
+                    desc = L["Show unlimited buffs in combat."],
+                    set = function(info, val)
+                      local db = db.AuraWidget.Buffs
+                      db.ShowUnlimitedAlways = not (val or db.ShowUnlimitedInInstances or db.ShowUnlimitedOnBosses)
+                  SetValue(info, val)
+                    end,
+                    arg = { "AuraWidget", "Buffs", "ShowUnlimitedInCombat" },
+                    disabled = function()
+                      return not db.AuraWidget.Buffs.ShowEnemy
+                    end
+                  },
+                  InInstances = {
+                    name = L["In Instances"],
+                    order = 250,
+                    type = "toggle",
+                    desc = L["Show unlimited buffs in instances (e.g., dungeons or raids)."],
+                    set = function(info, val)
+                      local db = db.AuraWidget.Buffs
+                      db.ShowUnlimitedAlways = not (db.ShowUnlimitedInCombat or val or db.ShowUnlimitedOnBosses)
+                  SetValue(info, val)
+                    end,
+                    arg = { "AuraWidget", "Buffs", "ShowUnlimitedInInstances" },
+                    disabled = function()
+                      return not db.AuraWidget.Buffs.ShowEnemy
+                    end
+                  },
+                  OnBosses = {
+                    name = L["On Bosses & Rares"],
+                    order = 260,
+                    type = "toggle",
+                    desc = L["Show unlimited buffs on bosses and rares."],
+                    set = function(info, val)
+                      local db = db.AuraWidget.Buffs
+                      db.ShowUnlimitedAlways = not (db.ShowUnlimitedInCombat or db.ShowUnlimitedInInstances or val)
+                  SetValue(info, val)
+                    end,
+                    arg = { "AuraWidget", "Buffs", "ShowUnlimitedOnBosses" },
+                    disabled = function()
+                      return not db.AuraWidget.Buffs.ShowEnemy
+                    end
+                  },
+                },
+              },
+              SpellFilter = {
+                name = L["Filter by Spell"],
+                order = 50,
+                type = "group",
+                inline = true,
+                args = {
+                  Mode = {
+                    name = L["Mode"],
+                    type = "select",
+                    order = 1,
+                    width = "double",
+                    values = Addon.AurasFilterMode,
+                    set = function(info, val)
+                      db.AuraWidget.Buffs.FilterMode = val
+                      Addon.Widgets:UpdateSettings("Auras")
+                    end,
+                    arg = { "AuraWidget", "Buffs", "FilterMode" },
+                  },
+                  DebuffList = {
+                    name = L["Filtered Auras"],
+                    type = "input",
+                    order = 2,
+                    dialogControl = "MultiLineEditBox",
+                    width = "full",
+                    get = function(info)
+                      return Addon.TTS(db.AuraWidget.Buffs.FilterBySpell)
+                    end,
+                    set = function(info, v)
+                      local table = { strsplit("\n", v) };
+                      db.AuraWidget.Buffs.FilterBySpell = table
+                      Addon.Widgets:UpdateSettings("Auras")
+                    end,
+                  },
+                },
+              },
+            },
+          },
+          Layout = CreateAuraAreaLayoutOptions(20, "Buffs"),
+          IconMode = CreateAuraAreaIconModeOptions(40, "Buffs"),
+          BarMode = CreateAuraAreaBarModeOptions(50, "Buffs"),
+        },
+      },
+      Debuffs = {
+        name = L["Debuffs"],
+        type = "group",
         order = 30,
         inline = false,
+        childGroups = "tab",
         args = {
-          FriendlyUnits = {
-            name = L["Friendly Units"],
-            type = "group",
+          Filter = {
+            name = L["Filter"],
             order = 10,
-            inline = true,
-            args = {
-              Show = {
-                name = L["Show Buffs"],
-                order = 10,
-                type = "toggle",
-                arg = { "AuraWidget", "Buffs", "ShowFriendly" },
-              },
-              ShowAll = {
-                name = L["All"],
-                order = 20,
-                type = "toggle",
-                desc = L["Show all buffs on friendly units."],
-                arg = { "AuraWidget", "Buffs", "ShowAllFriendly" },
-                set = function(info, val)
-                  local db = db.AuraWidget.Buffs
-                  if db.ShowOnFriendlyNPCs or db.ShowOnlyMine or db.ShowPlayerCanApply then
-                    db.ShowOnFriendlyNPCs = false
-                    db.ShowOnlyMine = false
-                    db.ShowPlayerCanApply = false
-                    SetValue(info, val)
-                  end
-                end,
-                disabled = function() return not db.AuraWidget.Buffs.ShowFriendly end
-              },
-              NPCs = {
-                name = L["All on NPCs"],
-                order = 30,
-                type = "toggle",
-                desc = L["Show all buffs on NPCs."],
-                set = function(info, val)
-                  local db = db.AuraWidget.Buffs
-                  db.ShowAllFriendly = not (val or db.ShowOnlyMine or db.ShowPlayerCanApply)
-                  SetValue(info, val)
-                end,
-                arg = { "AuraWidget", "Buffs", "ShowOnFriendlyNPCs" },
-                disabled = function() return not db.AuraWidget.Buffs.ShowFriendly end
-              },
-              OnlyMine = {
-                name = L["Mine"],
-                order = 40,
-                type = "toggle",
-                desc = L["Show buffs that were applied by you."],
-                set = function(info, val)
-                  local db = db.AuraWidget.Buffs
-                  db.ShowAllFriendly = not (db.ShowOnFriendlyNPCs or val or db.ShowPlayerCanApply)
-                  SetValue(info, val)
-                end,
-                arg = { "AuraWidget", "Buffs", "ShowOnlyMine" },
-                disabled = function() return not db.AuraWidget.Buffs.ShowFriendly end
-              },
-              CanApply = {
-                name = L["Can Apply"],
-                order = 50,
-                type = "toggle",
-                desc = L["Show buffs that you can apply."],
-                set = function(info, val)
-                  local db = db.AuraWidget.Buffs
-                  db.ShowAllFriendly = not (db.ShowOnFriendlyNPCs or db.ShowOnlyMine or val)
-                  SetValue(info, val)
-                end,
-                arg = { "AuraWidget", "Buffs", "ShowPlayerCanApply" },
-                disabled = function() return not db.AuraWidget.Buffs.ShowFriendly end
-              },
-            },
-          },
-          EnemyUnits = {
-            name = L["Enemy Units"],
             type = "group",
-            order = 20,
-            inline = true,
+            inline = false,
             args = {
-              ShowEnemy = {
-                name = L["Show Buffs"],
-                order = 10,
-                type = "toggle",
-                arg = { "AuraWidget", "Buffs", "ShowEnemy" }
-              },
-              ShowAll = {
-                name = L["All"],
-                order = 20,
-                type = "toggle",
-                desc = L["Show all buffs on enemy units."],
-                set = function(info, val)
-                  local db = db.AuraWidget.Buffs
-                  if val and not db.ShowAllEnemy then
-                    db.ShowOnEnemyNPCs = false
-                    db.ShowDispellable = false
-                    db.ShowMagic = false
+              FriendlyUnits = {
+                name = L["Friendly Units"],
+                type = "group",
+                order = 15,
+                inline = true,
+                args = {
+                  Show = {
+                    name = L["Show Debuffs"],
+                    order = 10,
+                    type = "toggle",
+                    arg = { "AuraWidget", "Debuffs", "ShowFriendly" },
+                  },
+                  ShowAll = {
+                    name = L["All"],
+                    order = 20,
+                    type = "toggle",
+                    desc = L["Show all debuffs on friendly units."],
+                    set = function(info, val)
+                      local db = db.AuraWidget.Debuffs
+                      if db.ShowBlizzardForFriendly or db.ShowDispellable or db.ShowBoss or
+                        db.FilterByType[1] or db.FilterByType[2] or db.FilterByType[3] or db.FilterByType[4] then
+                        db.ShowBlizzardForFriendly = false
+                        db.ShowDispellable = false
+                        db.ShowBoss = false
                     SetValue(info, val)
-                  end
-                end,
-                arg = { "AuraWidget", "Buffs", "ShowAllEnemy" },
-                disabled = function() return not db.AuraWidget.Buffs.ShowEnemy end
-              },
-              NPCs = {
-                name = L["All on NPCs"],
-                order = 30,
-                type = "toggle",
-                desc = L["Show all buffs on NPCs."],
-                set = function(info, val)
-                  local db = db.AuraWidget.Buffs
-                  db.ShowAllEnemy = not (val or db.ShowDispellable or db.ShowMagic)
+                      end
+                    end,
+                    arg = { "AuraWidget", "Debuffs", "ShowAllFriendly" },
+                    disabled = function() return not db.AuraWidget.Debuffs.ShowFriendly end
+                  },
+                  Blizzard = {
+                    name = L["Blizzard"],
+                    order = 25,
+                    type = "toggle",
+                    desc = L["Show debuffs that are shown on Blizzard's default nameplates."],
+                    set = function(info, val)
+                      local db = db.AuraWidget.Debuffs
+                      db.ShowAllFriendly = not (val or db.ShowDispellable or db.ShowBoss or
+                        db.FilterByType[1] or db.FilterByType[2] or db.FilterByType[3] or db.FilterByType[4])
                   SetValue(info, val)
-                end,
-                arg = { "AuraWidget", "Buffs", "ShowOnEnemyNPCs" },
-                disabled = function() return not db.AuraWidget.Buffs.ShowEnemy end
+                    end,
+                    arg = { "AuraWidget", "Debuffs", "ShowBlizzardForFriendly" },
+                    disabled = function() return not db.AuraWidget.Debuffs.ShowFriendly end,
+                    hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC end
+                  },
+                  Dispellable = {
+                    name = L["Dispellable"],
+                    order = 40,
+                    type = "toggle",
+                    desc = L["Show debuffs that you can dispell."],
+                    set = function(info, val)
+                      local db = db.AuraWidget.Debuffs
+                      db.ShowAllFriendly = not (val or db.ShowBlizzardForFriendly or db.ShowBoss or
+                        db.FilterByType[1] or db.FilterByType[2] or db.FilterByType[3] or db.FilterByType[4])
+                  SetValue(info, val)
+                    end,
+                    arg = { "AuraWidget", "Debuffs", "ShowDispellable" },
+                    disabled = function() return not db.AuraWidget.Debuffs.ShowFriendly end
+                  },
+                  Boss = {
+                    name = L["Boss"],
+                    order = 45,
+                    type = "toggle",
+                    desc = L["Show debuffs that where applied by bosses."],
+                    set = function(info, val)
+                      local db = db.AuraWidget.Debuffs
+                      db.ShowAllFriendly = not (val or db.ShowBlizzardForFriendly or db.ShowDispellable or
+                        db.FilterByType[1] or db.FilterByType[2] or db.FilterByType[3] or db.FilterByType[4])
+                  SetValue(info, val)
+                    end,
+                    arg = { "AuraWidget", "Debuffs", "ShowBoss" },
+                    disabled = function() return not db.AuraWidget.Debuffs.ShowFriendly end
+                  },
+                  DispelTypeH = {
+                    name = L["Dispel Type"],
+                    type = "header",
+                    order = 50,
+                  },
+                  Curses = {
+                    name = L["Curse"],
+                    order = 60,
+                    type = "toggle",
+                    get = function(info) return db.AuraWidget.Debuffs.FilterByType[1] end,
+                    set = function(info, val)
+                      local db = db.AuraWidget.Debuffs
+                      db.ShowAllFriendly = not (val or db.ShowBlizzardForFriendly or db.ShowDispellable or db.ShowBoss or
+                        db.FilterByType[2] or db.FilterByType[3] or db.FilterByType[4])
+                      db.FilterByType[1] = val
+                      Addon.Widgets:UpdateSettings("Auras")
+                    end,
+                    disabled = function() return not db.AuraWidget.Debuffs.ShowFriendly end,
+                  },
+                  Diseases = {
+                    name = L["Disease"],
+                    order = 70,
+                    type = "toggle",
+                    get = function(info) return db.AuraWidget.Debuffs.FilterByType[2] end,
+                    set = function(info, val)
+                      local db = db.AuraWidget.Debuffs
+                      db.ShowAllFriendly = not (val or db.ShowBlizzardForFriendly or db.ShowDispellable or db.ShowBoss or
+                        db.FilterByType[1] or db.FilterByType[3] or db.FilterByType[4])
+                      db.FilterByType[2] = val
+                      Addon.Widgets:UpdateSettings("Auras")
+                    end,
+                    disabled = function() return not db.AuraWidget.Debuffs.ShowFriendly end,
+                  },
+                  Magics = {
+                    name = L["Magic"],
+                    order = 80,
+                    type = "toggle",
+                    get = function(info) return db.AuraWidget.Debuffs.FilterByType[3] end,
+                    set = function(info, val)
+                      local db = db.AuraWidget.Debuffs
+                      db.ShowAllFriendly = not (val or db.ShowBlizzardForFriendly or db.ShowDispellable or db.ShowBoss or
+                        db.FilterByType[1] or db.FilterByType[2] or db.FilterByType[4])
+                      db.FilterByType[3] = val
+                      Addon.Widgets:UpdateSettings("Auras")
+                    end,
+                    disabled = function() return not db.AuraWidget.Debuffs.ShowFriendly end,
+                  },
+                  Poisons = {
+                    name = L["Poison"],
+                    order = 90,
+                    type = "toggle",
+                    get = function(info) return db.AuraWidget.Debuffs.FilterByType[4] end,
+                    set = function(info, val)
+                      local db = db.AuraWidget.Debuffs
+                      db.ShowAllFriendly = not (val or db.ShowBlizzardForFriendly or db.ShowDispellable or db.ShowBoss or
+                        db.FilterByType[1] or db.FilterByType[2] or db.FilterByType[3])
+                      db.FilterByType[4] = val
+                      Addon.Widgets:UpdateSettings("Auras")
+                    end,
+                    disabled = function() return not db.AuraWidget.Debuffs.ShowFriendly end,
+                  },
+                },
               },
-              Dispellable = {
-                name = L["Dispellable"],
+              EnemyUnits = {
+                name = L["Enemy Units"],
+                type = "group",
+                order = 16,
+                inline = true,
+                args = {
+                  ShowEnemy = {
+                    name = L["Show Debuffs"],
+                    order = 10,
+                    type = "toggle",
+                    arg = { "AuraWidget", "Debuffs", "ShowEnemy" }
+                  },
+                  ShowAll = {
+                    name = L["All"],
+                    order = 20,
+                    type = "toggle",
+                    desc = L["Show all debuffs on enemy units."],
+                    set = function(info, val)
+                      local db = db.AuraWidget.Debuffs
+                      if db.ShowOnlyMine or db.ShowBlizzardForEnemy then
+                        db.ShowOnlyMine = false
+                        db.ShowBlizzardForEnemy = false
+                    SetValue(info, val)
+                      end
+                    end,
+                    arg = { "AuraWidget", "Debuffs", "ShowAllEnemy" },
+                    disabled = function() return not db.AuraWidget.Debuffs.ShowEnemy end,
+                  },
+                  OnlyMine = {
+                    name = L["Mine"],
+                    order = 30,
+                    type = "toggle",
+                    desc = L["Show debuffs that were applied by you."],
+                    set = function(info, val)
+                      local db = db.AuraWidget.Debuffs
+                      db.ShowAllEnemy = not (val or db.ShowBlizzardForEnemy)
+                      SetValue(info, val)
+                    end,
+                    arg = { "AuraWidget", "Debuffs", "ShowOnlyMine" },
+                    disabled = function() return not db.AuraWidget.Debuffs.ShowEnemy end,
+                  },
+                  Blizzard = {
+                    name = L["Blizzard"],
+                    order = 40,
+                    type = "toggle",
+                    desc = L["Show debuffs that are shown on Blizzard's default nameplates."],
+                    set = function(info, val)
+                      local db = db.AuraWidget.Debuffs
+                      db.ShowAllEnemy = not (val or db.ShowOnlyMine)
+                  SetValue(info, val)
+                    end,
+                    arg = { "AuraWidget", "Debuffs", "ShowBlizzardForEnemy" },
+                    disabled = function() return not db.AuraWidget.Debuffs.ShowEnemy end,
+                    hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC end
+                  },
+                },
+              },
+              SpellFilter = {
+                name = L["Filter by Spell"],
                 order = 50,
-                type = "toggle",
-                desc = L["Show buffs that you can dispell."],
-                set = function(info, val)
-                  local db = db.AuraWidget.Buffs
-                  db.ShowAllEnemy = not (db.ShowOnEnemyNPCs or val or db.ShowMagic)
-                  SetValue(info, val)
-                end,
-                arg = { "AuraWidget", "Buffs", "ShowDispellable" },
-                disabled = function() return not db.AuraWidget.Buffs.ShowEnemy end
-              },
-              Magics = {
-                name = L["Magic"],
-                order = 60,
-                type = "toggle",
-                desc = L["Show buffs of dispell type Magic."],
-                set = function(info, val)
-                  local db = db.AuraWidget.Buffs
-                  db.ShowAllEnemy = not (db.ShowOnEnemyNPCs or db.ShowDispellable or val)
-                  SetValue(info, val)
-                end,
-                arg = { "AuraWidget", "Buffs", "ShowMagic" },
-                disabled = function() return not db.AuraWidget.Buffs.ShowEnemy end
-              },
-              Header2 = { type = "header", order = 200, name = L["Unlimited Duration"], },
-              UnlimitedDuration = {
-                name = L["Disable"],
-                order = 210,
-                type = "toggle",
-                desc = L["Do not show buffs with unlimited duration."],
-                arg = { "AuraWidget", "Buffs", "HideUnlimitedDuration" },
-                disabled = function() return not db.AuraWidget.Buffs.ShowEnemy end
-              },
-              Spacer1 = GetSpacerEntry(220),
-              Always = {
-                name = L["Show Always"],
-                order = 230,
-                type = "toggle",
-                desc = L["Show buffs with unlimited duration in all situations (e.g., in and out of combat)."],
-                set = function(info, val)
-                  local db = db.AuraWidget.Buffs
-                  if val and not db.ShowUnlimitedAlways then
-                    db.ShowUnlimitedInCombat = false
-                    db.ShowUnlimitedInInstances = false
-                    db.ShowUnlimitedOnBosses = false
-                    SetValue(info, val)
-                  end
-                end,
-                arg = { "AuraWidget", "Buffs", "ShowUnlimitedAlways" },
-                disabled = function() return not db.AuraWidget.Buffs.ShowEnemy end
-              },
-              InCombat = {
-                name = L["In Combat"],
-                order = 240,
-                type = "toggle",
-                desc = L["Show unlimited buffs in combat."],
-                set = function(info, val)
-                  local db = db.AuraWidget.Buffs
-                  db.ShowUnlimitedAlways = not (val or db.ShowUnlimitedInInstances or db.ShowUnlimitedOnBosses)
-                  SetValue(info, val)
-                end,
-                arg = { "AuraWidget", "Buffs", "ShowUnlimitedInCombat" },
-                disabled = function() return not db.AuraWidget.Buffs.ShowEnemy end
-              },
-              InInstances = {
-                name = L["In Instances"],
-                order = 250,
-                type = "toggle",
-                desc = L["Show unlimited buffs in instances (e.g., dungeons or raids)."],
-                set = function(info, val)
-                  local db = db.AuraWidget.Buffs
-                  db.ShowUnlimitedAlways = not (db.ShowUnlimitedInCombat or val or db.ShowUnlimitedOnBosses)
-                  SetValue(info, val)
-                end,
-                arg = { "AuraWidget", "Buffs", "ShowUnlimitedInInstances" },
-                disabled = function() return not db.AuraWidget.Buffs.ShowEnemy end
-              },
-              OnBosses = {
-                name = L["On Bosses & Rares"],
-                order = 260,
-                type = "toggle",
-                desc = L["Show unlimited buffs on bosses and rares."],
-                set = function(info, val)
-                  local db = db.AuraWidget.Buffs
-                  db.ShowUnlimitedAlways = not (db.ShowUnlimitedInCombat or db.ShowUnlimitedInInstances or val)
-                  SetValue(info, val)
-                end,
-                arg = { "AuraWidget", "Buffs", "ShowUnlimitedOnBosses" },
-                disabled = function() return not db.AuraWidget.Buffs.ShowEnemy end
+                type = "group",
+                inline = true,
+                args = {
+                  Mode = {
+                    name = L["Mode"],
+                    type = "select",
+                    order = 1,
+                    width = "double",
+                    values = Addon.AurasFilterMode,
+                    set = function(info, val)
+                      db.AuraWidget.Debuffs.FilterMode = val
+                      Addon.Widgets:UpdateSettings("Auras")
+                    end,
+                    arg = { "AuraWidget", "Debuffs", "FilterMode" },
+                  },
+                  DebuffList = {
+                    name = L["Filtered Auras"],
+                    type = "input",
+                    order = 2,
+                    dialogControl = "MultiLineEditBox",
+                    width = "full",
+                    get = function(info) return Addon.TTS(db.AuraWidget.Debuffs.FilterBySpell) end,
+                    set = function(info, v)
+                      local table = { strsplit("\n", v) };
+                      db.AuraWidget.Debuffs.FilterBySpell = table
+                      Addon.Widgets:UpdateSettings("Auras")
+                    end,
+                  },
+                },
               },
             },
           },
-          SpellFilter = {
-            name = L["Filter by Spell"],
-            order = 50,
-            type = "group",
-            inline = true,
-            args = {
-              Mode = {
-                name = L["Mode"],
-                type = "select",
-                order = 1,
-                width = "double",
-                values = Addon.AurasFilterMode,
-                set = function(info, val)
-                  db.AuraWidget.Buffs.FilterMode = val
-                  Addon.Widgets:UpdateSettings("Auras")
-                end,
-                arg = { "AuraWidget", "Buffs", "FilterMode" },
-              },
-              DebuffList = {
-                name = L["Filtered Auras"],
-                type = "input",
-                order = 2,
-                dialogControl = "MultiLineEditBox",
-                width = "full",
-                get = function(info) return Addon.TTS(db.AuraWidget.Buffs.FilterBySpell) end,
-                set = function(info, v)
-                  local table = { strsplit("\n", v) };
-                  db.AuraWidget.Buffs.FilterBySpell = table
-                  Addon.Widgets:UpdateSettings("Auras")
-                end,
-              },
-            },
-          },
+          Layout = CreateAuraAreaLayoutOptions(20, "Debuffs"),
+          IconMode = CreateAuraAreaIconModeOptions(40, "Debuffs"),
+          BarMode = CreateAuraAreaBarModeOptions(50, "Debuffs"),
         },
       },
       CrowdControl = {
@@ -3669,423 +4148,167 @@ local function CreateAurasWidgetOptions()
         type = "group",
         order = 40,
         inline = false,
+        childGroups = "tab",
         args = {
-          FriendlyUnits = {
-            name = L["Friendly Units"],
-            type = "group",
+          Filter = {
+            name = L["Filter"],
             order = 10,
-            inline = true,
-            args = {
-              Show = {
-                name = L["Show Crowd Control"],
-                order = 10,
-                type = "toggle",
-                arg = { "AuraWidget", "CrowdControl", "ShowFriendly" },
-              },
-              ShowAll = {
-                name = L["All"],
-                order = 20,
-                type = "toggle",
-                desc = L["Show all crowd control auras on friendly units."],
-                set = function(info, val)
-                  local db = db.AuraWidget.CrowdControl
-                  if db.ShowBlizzardForFriendly or db.ShowDispellable or db.ShowBoss then
-                    db.ShowBlizzardForFriendly = false
-                    db.ShowDispellable = false
-                    db.ShowBoss = false
-                    SetValue(info, val)
-                  end
-                end,
-                arg = { "AuraWidget", "CrowdControl", "ShowAllFriendly" },
-                disabled = function() return not db.AuraWidget.CrowdControl.ShowFriendly end
-              },
-              Blizzard = {
-                name = L["Blizzard"],
-                order = 30,
-                type = "toggle",
-                desc = L["Show crowd control auras that are shown on Blizzard's default nameplates."],
-                set = function(info, val)
-                  local db = db.AuraWidget.CrowdControl
-                  db.ShowAllFriendly = not (val or db.ShowDispellable or db.ShowBoss)
-                  SetValue(info, val)
-                end,
-                arg = { "AuraWidget", "CrowdControl", "ShowBlizzardForFriendly" },
-                disabled = function() return not db.AuraWidget.CrowdControl.ShowFriendly end,
-              },
-              Dispellable = {
-                name = L["Dispellable"],
-                order = 40,
-                type = "toggle",
-                desc = L["Show crowd control auras that you can dispell."],
-                set = function(info, val)
-                  local db = db.AuraWidget.CrowdControl
-                  db.ShowAllFriendly = not (val or db.ShowBlizzardForFriendly or db.ShowBoss)
-                  SetValue(info, val)
-                end,
-                arg = { "AuraWidget", "CrowdControl", "ShowDispellable" },
-                disabled = function() return not db.AuraWidget.CrowdControl.ShowFriendly end
-              },
-              Boss = {
-                name = L["Boss"],
-                order = 50,
-                type = "toggle",
-                desc = L["Show crowd control auras that where applied by bosses."],
-                set = function(info, val)
-                  local db = db.AuraWidget.CrowdControl
-                  db.ShowAllFriendly = not (val or db.ShowBlizzardForFriendly or db.ShowDispellable)
-                  SetValue(info, val)
-                end,
-                arg = { "AuraWidget", "CrowdControl", "ShowBoss" },
-                disabled = function() return not db.AuraWidget.CrowdControl.ShowFriendly end
-              },
-            },
-          },
-          EnemyUnits = {
-            name = L["Enemy Units"],
             type = "group",
-            order = 20,
-            inline = true,
+            inline = false,
             args = {
-              ShowEnemy = {
-                name = L["Show Crowd Control"],
-                order = 10,
-                type = "toggle",
-                arg = { "AuraWidget", "CrowdControl", "ShowEnemy" }
-              },
-              ShowAll = {
-                name = L["All"],
-                order = 20,
-                type = "toggle",
-                desc = L["Show all crowd control auras on enemy units."],
-                set = function(info, val)
-                  local db = db.AuraWidget.CrowdControl
-                  if db.ShowBlizzardForEnemy then
-                    db.ShowBlizzardForEnemy = false
-                    SetValue(info, val)
-                  end
-                end,
-                arg = { "AuraWidget", "CrowdControl", "ShowAllEnemy" },
-                disabled = function() return not db.AuraWidget.CrowdControl.ShowEnemy end
-              },
-              Blizzard = {
-                name = L["Blizzard"],
-                order = 30,
-                type = "toggle",
-                desc = L["Show crowd control auras hat are shown on Blizzard's default nameplates."],
-                set = function(info, val)
-                  local db = db.AuraWidget.CrowdControl
-                  db.ShowAllEnemy = not (val)
-                  SetValue(info, val)
-                end,
-                arg = { "AuraWidget", "CrowdControl", "ShowBlizzardForEnemy" },
-                disabled = function() return not db.AuraWidget.CrowdControl.ShowEnemy or Addon.CLASSIC end,
-              },
-            },
-          },
-          SpellFilter = {
-            name = L["Filter by Spell"],
-            order = 50,
-            type = "group",
-            inline = true,
-            args = {
-              Mode = {
-                name = L["Mode"],
-                type = "select",
-                order = 1,
-                width = "double",
-                values = Addon.AurasFilterMode,
-                set = function(info, val)
-                  db.AuraWidget.CrowdControl.FilterMode = val
-                  Addon.Widgets:UpdateSettings("Auras")
-                end,
-                arg = { "AuraWidget", "CrowdControl", "FilterMode" },
-              },
-              DebuffList = {
-                name = L["Filtered Auras"],
-                type = "input",
-                order = 2,
-                dialogControl = "MultiLineEditBox",
-                width = "full",
-                get = function(info) return Addon.TTS(db.AuraWidget.CrowdControl.FilterBySpell) end,
-                set = function(info, v)
-                  local table = { strsplit("\n", v) };
-                  db.AuraWidget.CrowdControl.FilterBySpell = table
-                  Addon.Widgets:UpdateSettings("Auras")
-                end,
-              },
-            },
-          },
-        },
-      },
-      ModeIcon = {
-        name = L["Icon Mode"],
-        order = 50,
-        type = "group",
-        inline = false,
-        args = {
-          --Help = { type = "description", order = 0, width = "full", name = L["Show auras as icons in a grid configuration."], },
-          Enable = {
-            type = "toggle",
-            order = 10,
-            --name = L["Enable"],
-            name = L["Show auras as icons in a grid configuration."],
-            width = "full",
-            arg = { "AuraWidget", "ModeBar", "Enabled" },
-            set = function(info, val) SetValue(info, false) end,
-            get = function(info) return not GetValue(info) end,
-          },
-          Appearance = {
-            name = L["Appearance"],
-            order = 30,
-            type = "group",
-            inline = true,
-            args = {
-              Style = {
-                name = L["Icon Style"],
-                order = 10,
-                type = "select",
-                desc = L["This lets you select the layout style of the auras widget."],
-                descStyle = "inline",
-                values = { wide = L["Wide"], square = L["Square"] , custom = L["Custom"] },
-                set = function(info, val)
-                  if val ~= "custom" then
-                    Addon.MergeIntoTable(db.AuraWidget.ModeIcon, AURA_STYLE[val])
-                  end
-                  SetValue(info, val)
-                end,
-                arg = { "AuraWidget", "ModeIcon", "Style" },
-              },
-              Width = GetSizeEntry(L["Icon Width"], 20, { "AuraWidget", "ModeIcon", "IconWidth" }, function() return db.AuraWidget.ModeIcon.Style ~= "custom" end),
-              Height = GetSizeEntry(L["Icon Height"], 30, { "AuraWidget", "ModeIcon", "IconHeight" }, function() return db.AuraWidget.ModeIcon.Style ~= "custom" end),
-              Spacer1 = GetSpacerEntry(40),
-              ShowBorder = {
-                type = "toggle",
-                order = 50,
-                name = L["Border"],
-                disabled = function() return db.AuraWidget.ModeIcon.Style ~= "custom" end,
-                arg = { "AuraWidget", "ModeIcon", "ShowBorder" },
-              },
-            },
-          },
-          Layout = {
-            name = L["Layout"],
-            order = 30,
-            type = "group",
-            inline = true,
-            args = {
-              Columns = { name = L["Column Limit"], order = 20, type = "range", min = 1, max = 8, step = 1, arg = { "AuraWidget", "ModeIcon", "Columns" }, },
-              Rows = { name = L["Row Limit"], order = 30, type = "range", min = 1, max = 10, step = 1, arg = { "AuraWidget", "ModeIcon", "Rows" }, },
-              ColumnSpacing = { name = L["Horizontal Spacing"], order = 40, type = "range", min = 0, max = 100, step = 1, arg = { "AuraWidget", "ModeIcon", "ColumnSpacing" }, },
-              RowSpacing = { name = L["Vertical Spacing"], order = 50, type = "range", min = 0, max = 100, step = 1, arg = { "AuraWidget", "ModeIcon", "RowSpacing" }, },
-            },
-          },
-          Duration = {
-            name = L["Duration"],
-            order = 40,
-            type = "group",
-            inline = true,
-            disabled = function() return db.AuraWidget.ModeIcon.Style ~= "custom" end,
-            args = {
-              Font = GetFontEntryDefault(L["Font"], 10, { "AuraWidget", "ModeIcon", "Duration" }),
-              Placement = {
+              FriendlyUnits = {
+                name = L["Friendly Units"],
                 type = "group",
-                order = 20,
-                name = L["Placement"],
+                order = 10,
                 inline = true,
                 args = {
-                  Anchor = {
-                    type = "select",
+                  Show = {
+                    name = L["Show Crowd Control"],
                     order = 10,
-                    name = L["Position"],
-                    values = Addon.ANCHOR_POINT,
-                    arg = { "AuraWidget", "ModeIcon", "Duration", "Anchor" }
-                  },
-                  InsideAnchor = {
                     type = "toggle",
-                    order = 15,
-                    name = L["Inside"],
-                    width = "half",
-                    arg = { "AuraWidget", "ModeIcon", "Duration", "InsideAnchor" }
+                    arg = { "AuraWidget", "CrowdControl", "ShowFriendly" },
                   },
-                  X = {
-                    type = "range",
+                  ShowAll = {
+                    name = L["All"],
                     order = 20,
-                    name = L["Horizontal Offset"],
-                    max = 120,
-                    min = -120,
-                    step = 1,
-                    isPercent = false,
-                    arg = { "AuraWidget", "ModeIcon", "Duration", "HorizontalOffset" },
+                    type = "toggle",
+                    desc = L["Show all crowd control auras on friendly units."],
+                    set = function(info, val)
+                      local db = db.AuraWidget.CrowdControl
+                      if db.ShowBlizzardForFriendly or db.ShowDispellable or db.ShowBoss then
+                        db.ShowBlizzardForFriendly = false
+                        db.ShowDispellable = false
+                        db.ShowBoss = false
+                        SetValue(info, val)
+                      end
+                    end,
+                    arg = { "AuraWidget", "CrowdControl", "ShowAllFriendly" },
+                    disabled = function() return not db.AuraWidget.CrowdControl.ShowFriendly end
                   },
-                  Y = {
-                    type = "range",
+                  Blizzard = {
+                    name = L["Blizzard"],
                     order = 30,
-                    name = L["Vertical Offset"],
-                    max = 120,
-                    min = -120,
-                    step = 1,
-                    isPercent = false,
-                    arg = { "AuraWidget", "ModeIcon", "Duration", "VerticalOffset" },
+                    type = "toggle",
+                    desc = L["Show crowd control auras that are shown on Blizzard's default nameplates."],
+                    set = function(info, val)
+                      local db = db.AuraWidget.CrowdControl
+                      db.ShowAllFriendly = not (val or db.ShowDispellable or db.ShowBoss)
+                      SetValue(info, val)
+                    end,
+                    arg = { "AuraWidget", "CrowdControl", "ShowBlizzardForFriendly" },
+                    disabled = function() return not db.AuraWidget.CrowdControl.ShowFriendly end,
+                    hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC end
                   },
-                  AlignX = {
-                    type = "select",
+                  Dispellable = {
+                    name = L["Dispellable"],
                     order = 40,
-                    name = L["Horizontal Align"],
-                    values = ThreatPlates.AlignH,
-                    arg = { "AuraWidget", "ModeIcon", "Duration", "Font", "HorizontalAlignment" },
+                    type = "toggle",
+                    desc = L["Show crowd control auras that you can dispell."],
+                    set = function(info, val)
+                      local db = db.AuraWidget.CrowdControl
+                      db.ShowAllFriendly = not (val or db.ShowBlizzardForFriendly or db.ShowBoss)
+                      SetValue(info, val)
+                    end,
+                    arg = { "AuraWidget", "CrowdControl", "ShowDispellable" },
+                    disabled = function() return not db.AuraWidget.CrowdControl.ShowFriendly end
                   },
-                  AlignY = {
-                    type = "select",
+                  Boss = {
+                    name = L["Boss"],
                     order = 50,
-                    name = L["Vertical Align"],
-                    values = ThreatPlates.AlignV,
-                    arg = { "AuraWidget", "ModeIcon", "Duration", "Font", "VerticalAlignment" },
+                    type = "toggle",
+                    desc = L["Show crowd control auras that where applied by bosses."],
+                    set = function(info, val)
+                      local db = db.AuraWidget.CrowdControl
+                      db.ShowAllFriendly = not (val or db.ShowBlizzardForFriendly or db.ShowDispellable)
+                      SetValue(info, val)
+                    end,
+                    arg = { "AuraWidget", "CrowdControl", "ShowBoss" },
+                    disabled = function() return not db.AuraWidget.CrowdControl.ShowFriendly end
                   },
                 },
               },
-            },
-          },
-          StackCount = {
-            name = L["Stack Count"],
-            order = 50,
-            type = "group",
-            inline = true,
-            disabled = function() return db.AuraWidget.ModeIcon.Style ~= "custom" end,
-            args = {
-              Font = GetFontEntryDefault(L["Font"], 10, { "AuraWidget", "ModeIcon", "StackCount" }),
-              Placement = {
+              EnemyUnits = {
+                name = L["Enemy Units"],
                 type = "group",
                 order = 20,
-                name = L["Placement"],
                 inline = true,
                 args = {
-                  Anchor = {
-                    type = "select",
+                  ShowEnemy = {
+                    name = L["Show Crowd Control"],
                     order = 10,
-                    name = L["Anchor Point"],
-                    values = Addon.ANCHOR_POINT,
-                    arg = { "AuraWidget", "ModeIcon", "StackCount", "Anchor" }
-                  },
-                  InsideAnchor = {
                     type = "toggle",
-                    order = 15,
-                    name = L["Inside"],
-                    width = "half",
-                    arg = { "AuraWidget", "ModeIcon", "StackCount", "InsideAnchor" }
+                    arg = { "AuraWidget", "CrowdControl", "ShowEnemy" }
                   },
-                  X = {
-                    type = "range",
+                  ShowAll = {
+                    name = L["All"],
                     order = 20,
-                    name = L["Horizontal Offset"],
-                    max = 120,
-                    min = -120,
-                    step = 1,
-                    isPercent = false,
-                    arg = { "AuraWidget", "ModeIcon", "StackCount", "HorizontalOffset" },
+                    type = "toggle",
+                    desc = L["Show all crowd control auras on enemy units."],
+                    set = function(info, val)
+                      local db = db.AuraWidget.CrowdControl
+                      if db.ShowBlizzardForEnemy then
+                        db.ShowBlizzardForEnemy = false
+                        SetValue(info, val)
+                      end
+                    end,
+                    arg = { "AuraWidget", "CrowdControl", "ShowAllEnemy" },
+                    disabled = function() return not db.AuraWidget.CrowdControl.ShowEnemy end,
+                    hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC end
                   },
-                  Y = {
-                    type = "range",
+                  Blizzard = {
+                    name = L["Blizzard"],
                     order = 30,
-                    name = L["Vertical Offset"],
-                    max = 120,
-                    min = -120,
-                    step = 1,
-                    isPercent = false,
-                    arg = { "AuraWidget", "ModeIcon", "StackCount", "VerticalOffset" },
-                  },
-                  AlignX = {
-                    type = "select",
-                    order = 40,
-                    name = L["Horizontal Align"],
-                    values = ThreatPlates.AlignH,
-                    arg = { "AuraWidget", "ModeIcon", "StackCount", "Font", "HorizontalAlignment" },
-                  },
-                  AlignY = {
-                    type = "select",
-                    order = 50,
-                    name = L["Vertical Align"],
-                    values = ThreatPlates.AlignV,
-                    arg = { "AuraWidget", "ModeIcon", "StackCount", "Font", "VerticalAlignment" },
+                    type = "toggle",
+                    desc = L["Show crowd control auras hat are shown on Blizzard's default nameplates."],
+                    set = function(info, val)
+                      local db = db.AuraWidget.CrowdControl
+                      db.ShowAllEnemy = not (val)
+                      SetValue(info, val)
+                    end,
+                    arg = { "AuraWidget", "CrowdControl", "ShowBlizzardForEnemy" },
+                    disabled = function() return not db.AuraWidget.CrowdControl.ShowEnemy end,
+                    hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC end
                   },
                 },
               },
-            },
-          },
-        },
-      },
-      ModeBar = {
-        name = L["Bar Mode"],
-        order = 60,
-        type = "group",
-        inline = false,
-        args = {
-          --Help = { type = "description", order = 0, width = "full", name = L["Show auras as bars (with optional icons)."], },
-          Enable = {
-            type = "toggle",
-            order = 10,
-            --name = L["Enable"],
-            name = L["Show auras as bars (with optional icons)."],
-            width = "full",
-            set = function(info, val) SetValue(info, true) end,
-            arg = { "AuraWidget", "ModeBar", "Enabled" }
-          },
-          Appearance = {
-            name = L["Appearance"],
-            order = 30,
-            type = "group",
-            inline = true,
-            args = {
-              TextureConfig = {
-                name = L["Textures"],
-                order = 10,
+              SpellFilter = {
+                name = L["Filter by Spell"],
+                order = 50,
                 type = "group",
                 inline = true,
                 args = {
-                  BarTexture = { name = L["Foreground Texture"], order = 60, type = "select", dialogControl = "LSM30_Statusbar", values = AceGUIWidgetLSMlists.statusbar, arg = { "AuraWidget", "ModeBar", "Texture" }, },
-                  --Spacer2 = GetSpacerEntry(75),
-                  BackgroundTexture = { name = L["Background Texture"], order = 80, type = "select", dialogControl = "LSM30_Statusbar", values = AceGUIWidgetLSMlists.statusbar, arg = { "AuraWidget", "ModeBar", "BackgroundTexture" }, },
-                  BackgroundColor = {	name = L["Background Color"], type = "color",	order = 90, arg = {"AuraWidget","ModeBar", "BackgroundColor"},	hasAlpha = true, },
+                  Mode = {
+                    name = L["Mode"],
+                    type = "select",
+                    order = 1,
+                    width = "double",
+                    values = Addon.AurasFilterMode,
+                    set = function(info, val)
+                      db.AuraWidget.CrowdControl.FilterMode = val
+                      Addon.Widgets:UpdateSettings("Auras")
+                    end,
+                    arg = { "AuraWidget", "CrowdControl", "FilterMode" },
+                  },
+                  DebuffList = {
+                    name = L["Filtered Auras"],
+                    type = "input",
+                    order = 2,
+                    dialogControl = "MultiLineEditBox",
+                    width = "full",
+                    get = function(info) return Addon.TTS(db.AuraWidget.CrowdControl.FilterBySpell) end,
+                    set = function(info, v)
+                      local table = { strsplit("\n", v) };
+                      db.AuraWidget.CrowdControl.FilterBySpell = table
+                      Addon.Widgets:UpdateSettings("Auras")
+                    end,
+                  },
                 },
               },
-              FontConfig = {
-                name = L["Font"],
-                order = 20,
-                type = "group",
-                inline = true,
-                args = {
-                  Font = { name = L["Typeface"], type = "select", order = 10, dialogControl = "LSM30_Font", values = AceGUIWidgetLSMlists.font, arg = { "AuraWidget", "ModeBar", "Font" }, },
-                  FontSize = { name = L["Size"], order = 20, type = "range", min = 1, max = 36, step = 1, arg = { "AuraWidget", "ModeBar", "FontSize" }, },
-                  FontColor = {	name = L["Color"], type = "color",	order = 30,	arg = {"AuraWidget","ModeBar", "FontColor"},	hasAlpha = false, },
-                  Spacer1 = GetSpacerEntry(35),
-                  IndentLabel = { name = L["Label Text Offset"], order = 40, type = "range", min = -16, max = 16, step = 1, arg = { "AuraWidget", "ModeBar", "LabelTextIndent" }, },
-                  IndentTime = { name = L["Time Text Offset"], order = 50, type = "range", min = -16, max = 16, step = 1, arg = { "AuraWidget", "ModeBar", "TimeTextIndent" }, },
-                },
-              },
             },
           },
-          Layout = {
-            name = L["Layout"],
-            order = 60,
-            type = "group",
-            inline = true,
-            args = {
-              MaxBars = { name = L["Bar Limit"], order = 20, type = "range", min = 1, max = 20, step = 1, arg = { "AuraWidget", "ModeBar", "MaxBars" }, },
-              BarWidth = { name = L["Bar Width"], order = 30, type = "range", min = 1, max = 500, step = 1, arg = { "AuraWidget", "ModeBar", "BarWidth" }, },
-              BarHeight = { name = L["Bar Height"], order = 40, type = "range", min = 1, max = 500, step = 1, arg = { "AuraWidget", "ModeBar", "BarHeight" }, },
-              BarSpacing = { name = L["Vertical Spacing"], order = 50, type = "range", min = 0, max = 100, step = 1, arg = { "AuraWidget", "ModeBar", "BarSpacing" }, },
-            },
-          },
-          IconConfig = {
-            name = L["Icon"],
-            order = 50,
-            type = "group",
-            inline = true,
-            args = {
-              EnableIcon = { name = L["Enable"], order = 10, type = "toggle", arg = { "AuraWidget", "ModeBar", "ShowIcon" }, },
-              IconAlign = { name = L["Show Icon to the Left"], order = 20, type = "toggle", arg = { "AuraWidget", "ModeBar", "IconAlignmentLeft" }, },
-              IconOffset = { name = L["Offset"], order = 30, type = "range", min = -100, max = 100, step = 1, arg = { "AuraWidget", "ModeBar", "IconSpacing", }, },
-            },
-          },
+          Layout = CreateAuraAreaLayoutOptions(20, "CrowdControl"),
+          IconMode = CreateAuraAreaIconModeOptions(40, "CrowdControl"),
+          BarMode = CreateAuraAreaBarModeOptions(50, "CrowdControl"),
         },
       },
     },
@@ -4208,9 +4431,9 @@ local function CreateVisibilitySettings()
             type = "toggle",
             width = "full",
             set = function(info, val)
-              info = Addon.CopyTable(info)
               Addon:CallbackWhenOoC(function()
-                SetValue(info, val)
+                -- Not using SetValue here as it would require to upvalue info which results in an error
+                db.ShowFriendlyBlizzardNameplates = val
                 Addon:SetBaseNamePlateSize() -- adjust clickable area if switching from Blizzard plates to Threat Plate plates
                 Addon:ForceUpdate()
               end, L["Unable to change a setting while in combat."])
@@ -4225,9 +4448,9 @@ local function CreateVisibilitySettings()
             type = "toggle",
             width = "full",
             set = function(info, val)
-              info = Addon.CopyTable(info)
               Addon:CallbackWhenOoC(function()
-                SetValue(info, val)
+                -- Not using SetValue here as it would require to upvalue info (I think) which results in an error
+                db.ShowEnemyBlizzardNameplates = val
                 Addon:SetBaseNamePlateSize() -- adjust clickable area if switching from Blizzard plates to Threat Plate plates
                 Addon:ForceUpdate()
               end, L["Unable to change a setting while in combat."])
@@ -4249,6 +4472,8 @@ local function CreateVisibilitySettings()
           HideElite = { name = L["Rares & Elites"], order = 2, type = "toggle", arg = { "Visibility", "HideElite" }, },
           HideBoss = { name = L["Bosses"], order = 3, type = "toggle", arg = { "Visibility", "HideBoss" }, },
           HideTapped = { name = L["Tapped Units"], order = 4, type = "toggle", arg = { "Visibility", "HideTapped" }, },
+		      HideGuardian = { name = L["Guardians"], order = 5, type = "toggle", arg = { "Visibility", "HideGuardian" }, },
+          Spacer1 = GetSpacerEntry(9),
           ModeHideFriendlyInCombat = {
             name = L["Friendly Units in Combat"],
             order = 10,
@@ -4294,6 +4519,50 @@ local function CreateVisibilitySettings()
   CreateUnitGroupsVisibility(args.args, 20)
 
   return args
+end
+
+local function CreateLocalizationSettings()
+  local entry = {
+    name = L["Localization"],
+    order = 135, 
+    type = "group",
+    inline = false,
+    args = {
+      Texts = {
+        name = L["Texts"],
+        order = 10, 
+        type = "group",
+        inline = true,
+        args = {
+          TransliterateCyrillicLetters = {
+            name = L["Transliterate Cyrillic Letters"],
+            order = 10,
+            type = "toggle",
+            width = "double",
+            arg = { "Localization", "TransliterateCyrillicLetters" },
+          },
+        },
+      },
+      Numbers = {
+        name = L["Numbers"],
+        order = 20, 
+        type = "group",
+        inline = true,
+        args = {
+          MetricUnitSymbols = {    
+            name = L["Metric Unit Symbols"],
+            type = "toggle",
+            order = 10,
+            width = "double",
+            desc = L["If enabled, the truncated health text will be localized, i.e. local metric unit symbols (like k for thousands) will be used."],
+            arg = { "text", "LocalizedUnitSymbol" }
+          },
+        },
+      },
+    },
+  }
+
+  return entry
 end
 
 local function CreateBlizzardSettings()
@@ -4373,13 +4642,13 @@ local function CreateBlizzardSettings()
         type = "group",
         inline = true,
         get = GetValue,
-        disabled = function() return Addon.CLASSIC and (db.ShowFriendlyBlizzardNameplates or db.ShowEnemyBlizzardNameplates) end,
+        disabled = function() return (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC) and (db.ShowFriendlyBlizzardNameplates or db.ShowEnemyBlizzardNameplates) end,
         args = {
           Description = {
             type = "description",
             order = 1,
             name = L["Because of side effects with Blizzard nameplates, this function is disabled in instances or when Blizzard nameplates are used for friendly or neutral/enemy units (see General - Visibility)."],
-            hidden = function() return not Addon.CLASSIC or (not db.ShowFriendlyBlizzardNameplates and not db.ShowEnemyBlizzardNameplates) end,
+            hidden = function() return not Addon.IS_CLASSIC or not Addon.IS_TBC_CLASSIC or (not db.ShowFriendlyBlizzardNameplates and not db.ShowEnemyBlizzardNameplates) end,
             width = "full",
           },
           ToggleSync = {
@@ -4505,7 +4774,7 @@ local function CreateBlizzardSettings()
             order = 10,
             type = "range",
             min = 0,
-            max = (Addon.CLASSIC and 20) or 100,
+            max = (Addon.IS_CLASSIC  and 20) or (Addon.IS_TBC_CLASSIC and 41) or 100,
             step = 1,
             width = "double",
             desc = L["The max distance to show nameplates."],
@@ -4581,7 +4850,7 @@ local function CreateBlizzardSettings()
             width = "double",
             desc = L["Clamps the target's nameplate to the edges of the screen, even if the target is off-screen."],
             arg = "clampTargetNameplateToScreen",
-            hidden = function() return not Addon.CLASSIC end,
+            hidden = function() return not Addon.IS_CLASSIC end,
           },
         },
       },
@@ -4590,7 +4859,7 @@ local function CreateBlizzardSettings()
         order = 45,
         type = "group",
         inline = true,
-        hidden = function() return Addon.CLASSIC end,
+        hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC end,
         args = {
           HideBuffs = {
             type = "toggle",
@@ -4642,7 +4911,7 @@ local function CreateBlizzardSettings()
                   "nameplateMaxDistance", "nameplateTargetBehindMaxDistance",
                   -- "nameplateGlobalScale" -- Reset it to 1, if it get's somehow corrupted
                 }
-                if Addon.CLASSIC then
+                if Addon.IS_CLASSIC then
                   cvars[#cvars + 1] = "clampTargetNameplateToScreen"
                 end
                 for k, v in pairs(cvars) do
@@ -4684,22 +4953,53 @@ local function CreateColorsSettings()
         inline = true,
         args = {
           FriendlyColorNPC = { name = L["Friendly NPCs"], order = 10, type = "color", arg = { "ColorByReaction", "FriendlyNPC", }, },
-          FriendlyColorPlayer = { name = L["Friendly Players"], order = 20, type = "color", arg = { "ColorByReaction", "FriendlyPlayer" }, },
+          --FriendlyColorPlayer = { name = L["Friendly Players"], order = 20, type = "color", arg = { "ColorByReaction", "FriendlyPlayer" }, },
           EnemyColorNPC = { name = L["Hostile NPCs"], order = 30, type = "color", arg = { "ColorByReaction", "HostileNPC" }, },
-          EnemyColorPlayer = { name = L["Hostile Players"], order = 40, type = "color", arg = { "ColorByReaction", "HostilePlayer" }, },
+          --EnemyColorPlayer = { name = L["Hostile Players"], order = 40, type = "color", arg = { "ColorByReaction", "HostilePlayer" }, },
           UnfriendlyFactionCalor = { name = L["Unfriendly"], order = 50, type = "color", arg = { "ColorByReaction", "UnfriendlyFaction" }, },
           NeutralColor = { name = L["Neutral"], order = 60, type = "color", arg = { "ColorByReaction", "NeutralUnit" }, },
           Spacer1 = GetSpacerEntry(65),
           TappedUnitColor = { name = L["Tapped"], order = 70, type = "color", arg = { "ColorByReaction", "TappedUnit" }, },
           DisconnectedUnitColor = { name = L["Disconnected"], order = 80, type = "color", arg = { "ColorByReaction", "DisconnectedUnit" }, },
-          Spacer2 = GetSpacerEntry(85),
+          HeaderPvP = { 
+            name = L["Players"], 
+            type = "header",
+            order = 85,
+          },
+          PlayerPvPOffSelfPvPOff = { 
+            name = L["PvP Off"], 
+            order = 90, type = "color", 
+            arg = { "ColorByReaction", "FriendlyPlayer" }, 
+            desc = L["The (friendly or hostile) player is not flagged for PvP or the player is in a sanctuary."],
+          },
+          FriendlyOn = { 
+            name = L["Friendly PvP On"], 
+            order = 100, 
+            type = "color", 
+            arg = { "ColorByReaction", "FriendlyPlayerPvPOn" }, 
+            desc = L["The player is friendly to you, and flagged for PvP."],
+          },
+          HostileOnSelfOff = { 
+            name = L["Hostile PvP On - Self Off"], 
+            order = 110, 
+            type = "color", 
+            arg = { "ColorByReaction", "HostilePlayerPvPOnSelfPvPOff" }, 
+            desc = L["The player is hostile, and flagged for PvP, but you are not."],
+          },
+          HostileOnSelfOn = {
+            name = L["Hostile PvP On - Self On"], 
+            order = 120, 
+            type = "color", 
+            arg = { "ColorByReaction", "HostilePlayer" }, 
+            desc = L["Both you and the other player are flagged for PvP."],          },
+         Spacer3 = GetSpacerEntry(195),
           Reset = {
             name = L["Reset to Defaults"],
             type = "execute",
-            order = 90,
+            order = 200,
             width = "full",
             func = function()
-              for name, color in pairs(db.ColorByReaction) do
+              for name, _ in pairs(ThreatPlates.DEFAULT_SETTINGS.profile.ColorByReaction) do
                 db.ColorByReaction[name] = Addon.CopyTable(ThreatPlates.DEFAULT_SETTINGS.profile.ColorByReaction[name])
               end
               Addon:ForceUpdate()
@@ -4879,14 +5179,6 @@ local function CreateAutomationSettings()
         inline = true,
         set = SyncGameSettingsWorld,
         args = {
-          SmallNameplates = {
-            name = L["Small Blizzard Nameplates"],
-            order = 50,
-            type = "toggle",
-            width = "double",
-            desc = L["Reduce the size of the Blizzard's default large nameplates in instances to 50%."],
-            arg = { "Automation", "SmallPlatesInInstances" },
-          },
           HideFriendlyInInstances = {
             name = L["Hide Friendly Nameplates"],
             order = 60,
@@ -4930,15 +5222,15 @@ local function CreateHealthbarOptions()
                 desc = L["Changes the default settings to the selected design. Some of your custom settings may get overwritten if you switch back and forth.."],
                 values = { CLASSIC = "Classic", SMOOTH = "Smooth" } ,
                 set = function(info, val)
-                  TidyPlatesThreat.db.global.DefaultsVersion = val
+                  Addon.db.global.DefaultsVersion = val
                   if val == "CLASSIC" then
                     ThreatPlates.SwitchToDefaultSettingsV1()
                   else -- val == "SMOOTH"
                     ThreatPlates.SwitchToCurrentDefaultSettings()
                   end
-                  TidyPlatesThreat:ReloadTheme()
+                  Addon:ReloadTheme()
                 end,
-                get = function(info) return TidyPlatesThreat.db.global.DefaultsVersion end,
+                get = function(info) return Addon.db.global.DefaultsVersion end,
               },
             },
           },
@@ -4972,14 +5264,14 @@ local function CreateHealthbarOptions()
                 order = 29,
                 type = "toggle",
                 arg = { "settings", "healthbar", "ShowHealAbsorbs" },
-                hidden = function() return Addon.CLASSIC end,
+                hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC end,
               },
               ShowAbsorbs = {
                 name = L["Absorbs"],
                 order = 30,
                 type = "toggle",
                 arg = { "settings", "healthbar", "ShowAbsorbs" },
-                hidden = function() return Addon.CLASSIC end,
+                hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC end,
               },
               ShowMouseoverHighlight = {
                 type = "toggle",
@@ -5098,7 +5390,7 @@ local function CreateHealthbarOptions()
                 order = 90,
                 type = "group",
                 inline = true,
-                hidden = function() return Addon.CLASSIC end,
+                hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC end,
                 args = {
                   AbsorbColor = {
                     name = L["Color"],
@@ -5319,6 +5611,12 @@ local function CreateHealthbarOptions()
         type = "toggle",
         arg = { "settings", "healthbar", "TargetUnit", "ShowOnlyForTarget" },
       },
+      TargetNotMyself = {
+        name = L["Not Myself"],
+        order = 30,
+        type = "toggle",
+        arg = { "settings", "healthbar", "TargetUnit", "ShowNotMyself" },
+      },
     },
   }
 
@@ -5338,6 +5636,7 @@ local function CreateHealthbarOptions()
         name = L["Class Color for Players"],
         order = 20,
         type = "toggle",
+        width = "double",
         arg = { "settings", "healthbar", "TargetUnit", "UseClassColor" },
       },
     },
@@ -5437,12 +5736,14 @@ local function CreateCastbarOptions()
                 type = "toggle",
                 disabled = function() return not db.settings.castborder.show end,
                 arg = { "settings", "castnostop", "ShowOverlay" },
+                hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC end,
               },
               EnableInterruptShield = {
                 name = L["Interrupt Shield"],
                 order = 70,
                 type = "toggle",
                 arg = { "settings", "castnostop", "ShowInterruptShield" },
+                hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC end,
               },
               InterruptSource = {
                 name = L["Interrupt Source"],
@@ -5935,9 +6236,9 @@ local function CreateSpecRolesClassic()
           order = 1,
           desc = L["Sets your role to tanking."],
           get = function()
-            return TidyPlatesThreat.db.char.spec[1]
+            return Addon.db.char.spec[1]
           end,
-          set = function() TidyPlatesThreat.db.char.spec[1] = true; Addon:ForceUpdate() end,
+          set = function() Addon.db.char.spec[1] = true; Addon:ForceUpdate() end,
         },
         DPS = {
           name = L["DPS/Healing"],
@@ -5945,9 +6246,9 @@ local function CreateSpecRolesClassic()
           order = 2,
           desc = L["Sets your role to DPS."],
           get = function()
-            return not TidyPlatesThreat.db.char.spec[1]
+            return not Addon.db.char.spec[1]
           end,
-          set = function() TidyPlatesThreat.db.char.spec[1] = false; Addon:ForceUpdate() end,
+          set = function() Addon.db.char.spec[1] = false; Addon:ForceUpdate() end,
         },
       }
     }
@@ -5957,9 +6258,34 @@ local function CreateSpecRolesClassic()
 end
 
 local function CreateThreatPercentageOptions()
-  local entry = GetTextEntry(L["Percentage"], 60, { "threat", "ThreatPercentage" })
+  local entry = GetTextEntry(L["Value"], 60, { "threat", "ThreatPercentage" })
 
   entry.disabled = function() return not db.threat.ON end
+
+  entry.args.ValueType = {
+    name = L["Value Type"],
+    order = 5,
+    type = "select",
+    values = Addon.THREAT_VALUE_TYPE,
+    style = "radio",
+    desc = L["Show the player's threat percentage (scaled or raw) or threat delta to the second player on the threat table (percentage or threat value) against the enemy unit."],
+    arg = { "threat", "ThreatPercentage", "Type" },
+  }
+
+  entry.args.SecondPlayersName = {
+    name = L["Second Player's Name"],
+    type = "toggle",
+    order = 6,
+    desc = L["In delta mode, show the name of the player who is second in the enemy unit's threat table."],
+    arg = { "threat", "ThreatPercentage", "SecondPlayersName" },
+  }
+
+  entry.args.OnlyInGroups = {
+    name = L["Only in Groups"],
+    type = "toggle",
+    order = 7,
+    arg = { "threat", "ThreatPercentage", "OnlyInGroups" },
+  }
 
   entry.args.Coloring = {
     name = L["Coloring"],
@@ -6019,7 +6345,7 @@ local function CreateSpecRolesRetail()
       type = "group",
       inline = true,
       order = index + 2,
-      disabled = function() return TidyPlatesThreat.db.profile.optionRoleDetectionAutomatic end,
+      disabled = function() return Addon.db.profile.optionRoleDetectionAutomatic end,
       args = {
         Tank = {
           name = L["Tank"],
@@ -6027,9 +6353,10 @@ local function CreateSpecRolesRetail()
           order = 1,
           desc = L["Sets your spec "] .. spec_name .. L[" to tanking."],
           get = function(info)
-            return TidyPlatesThreat.db.char.spec[index]
+            local spec = Addon.db.char.spec[index]
+            return (spec == nil and role == "TANK") or spec
           end,
-          set = function(info, val) TidyPlatesThreat.db.char.spec[index] = true; Addon:ForceUpdate() end,
+          set = function(info, val) Addon.db.char.spec[index] = true; Addon:ForceUpdate() end,
         },
         DPS = {
           name = L["DPS/Healing"],
@@ -6037,9 +6364,10 @@ local function CreateSpecRolesRetail()
           order = 2,
           desc = L["Sets your spec "] .. spec_name .. L[" to DPS."],
           get = function(info)
-            return not TidyPlatesThreat.db.char.spec[index]
+            local spec = Addon.db.char.spec[index]
+            return (spec == nil and role ~= "TANK") or not spec
           end,
-          set = function(info, val) TidyPlatesThreat.db.char.spec[index] = false; Addon:ForceUpdate() end,
+          set = function() Addon.db.char.spec[index] = false; Addon:ForceUpdate() end,
         },
       },
     }
@@ -6048,14 +6376,8 @@ local function CreateSpecRolesRetail()
   return result
 end
 
-local function CustomPlateGetHeaderName(index)
-  local trigger_type = db.uniqueSettings[index].Trigger.Type
-  local prefix = (trigger_type == "Aura" and "Aura: ") or (trigger_type == "Cast" and "Cast: ") or ""
-  return prefix .. (db.uniqueSettings[index].Trigger[trigger_type].Input or "")
-end
-
 local function CustomPlateGetSlotName(index)
-  local name = "#" .. index .. ". " .. CustomPlateGetHeaderName(index)
+  local name = "#" .. index .. ". " .. Addon.CustomPlateGetHeaderName(index)
   if db.uniqueSettings[index].Enable.Never then
     name = "|cffA0A0A0" .. name .. "|r"
   end
@@ -6151,6 +6473,10 @@ StaticPopupDialogs["TriggerAlreadyExistsDisablingIt"] = {
 local function CustomPlateCheckIfTriggerIsUnique(trigger_type, triggers, selected_plate)
   local duplicate_triggers = {}
 
+  if trigger_type == "Script" then
+    return true, duplicate_triggers
+  end
+
   for i, trigger_value in ipairs(triggers) do
     if trigger_value ~= nil and trigger_value ~= "" then
       -- Check if here is already another custom nameplate with the same trigger:
@@ -6178,13 +6504,17 @@ end
 
 local function CustomPlateUpdateEntry(index)
   options.args.Custom.args["#" .. index].name = CustomPlateGetSlotName(index)
-  options.args.Custom.args["#" .. index].args.Header.name = CustomPlateGetHeaderName(index)
+  options.args.Custom.args["#" .. index].args.Header.name = Addon.CustomPlateGetHeaderName(index)
 
   CustomPlateSetIcon(index) -- Executes UpdateSpecial()
 end
 
 local function CustomPlateCheckAndUpdateEntry(info, val, index)
   local triggers = Addon.Split(val)
+  -- Convert spell or aura IDs to numerical values, otherwise they won't be recognized
+  for i, trigger in ipairs(triggers) do
+    triggers[i] = tonumber(trigger) or trigger
+  end
 
   local selected_plate = db.uniqueSettings[index]
   -- Check if here is already another custom nameplate with the same trigger:
@@ -6196,18 +6526,32 @@ local function CustomPlateCheckAndUpdateEntry(info, val, index)
   end
 end
 
-local function UpdateCustomNameplateSlots()
-  local entry = options.args.Custom.args
-
-  -- Use pairs as iterater as the table is in a somewhat invalid format (non-iteratable with ipairs) as long as the
-  -- custom styles have not been migrated to V2
-  for index, custom_style in pairs(db.uniqueSettings) do
-    if type(index) == "number" and custom_style.Trigger.Name.Input ~= "<Enter name here>"  then
-      entry["#" .. index] = CreateCustomNameplateEntry(index)
+local function CustomPlateGetExampleForEventScript(custom_style, event)
+  local script_function
+  if event == "WoWEvent" then
+    script_function = custom_style.Scripts.Code.Events[custom_style.Scripts.Event]
+    if script_function == "" then
+      script_function = Addon.WIDGET_EVENTS[event].FunctionExample
     end
+  elseif event == "Legacy" then
+    script_function = custom_style.Scripts.Code.Legacy
+  else
+    script_function = custom_style.Scripts.Code.Functions[event] or Addon.WIDGET_EVENTS[event].FunctionExample
   end
 
-  UpdateSpecial()
+  return script_function
+end
+
+local function UpdateCustomNameplateSlots(...)
+  local entry = options.args.Custom.args
+  if ... then
+    local slots = {...}
+    for _, slot_no in pairs(slots) do
+      entry["#" .. slot_no] = CreateCustomNameplateEntry(slot_no)
+    end
+  else
+    CreateCustomNameplatesGroup()
+  end
 end
 
 CreateCustomNameplateEntry = function(index)
@@ -6288,10 +6632,9 @@ CreateCustomNameplateEntry = function(index)
 
           ShowExportFrame(export_data)
         end,
-        disabled = function() return TidyPlatesThreat.db.global.CustomNameplatesVersion == 1 end,
       },
       Header = {
-        name = CustomPlateGetHeaderName(index),
+        name = Addon.CustomPlateGetHeaderName(index),
         type = "header",
         order = 9,
       },
@@ -6301,11 +6644,22 @@ CreateCustomNameplateEntry = function(index)
         type = "group",
         inline = false,
         args = {
+          NameOfCustomStyle = {
+            name = L["Name"],
+            type = "input",
+            order = 5,
+            width = "full",
+            set = function(info, val)
+              SetValue(info, val)
+              CustomPlateUpdateEntry(index)
+            end,
+            arg = { "uniqueSettings", index, "Name" },
+          },
           TriggerType = {
             name = L["Type"],
             type = "select",
             order = 10,
-            values = { Name = L["Name"], Aura = L["Aura"], Cast = L["Cast"], },
+            values = { Name = L["Name"], Aura = L["Aura"], Cast = L["Cast"], Script = (Addon.db.global.ScriptingIsEnabled and L["Script"]) or nil },
             set = function(info, val)
               -- If the uses switches to a trigger that is already in use, the current custom nameplate
               -- is disabled (otherwise, if we would not switch to it, the user could not change it at all.
@@ -6319,15 +6673,6 @@ CreateCustomNameplateEntry = function(index)
               CustomPlateUpdateEntry(index)
             end,
             arg = { "uniqueSettings", index, "Trigger", "Type" },
-            -- Available only for custom nameplates with version >= 2
-            desc = function()
-              if TidyPlatesThreat.db.global.CustomNameplatesVersion == 1 then
-                return L["This option is disabled as you are still using the obsolete custom nameplates format. Migrate your custom nameplates to the new format (using the Migration button at the top) to enable this option."]
-              else
-                return nil
-              end
-            end,
-            disabled = function() return TidyPlatesThreat.db.global.CustomNameplatesVersion == 1 end,
           },
           Spacer1 = GetSpacerEntry(15),
           -- Name Trigger
@@ -6338,9 +6683,9 @@ CreateCustomNameplateEntry = function(index)
             width = 3,
             desc = L["Apply these custom settings to the nameplate of a unit with a particular name. You can add multiple entries separated by a semicolon. You can use use * as wildcard character."],
             set = function(info, val)
-              -- Only "*" and "." should be allowed, so check for other magic characters: ( ) . % + - ? [ ^ $
+              -- Only "*" and "." should be allowed, so check for other magic characters: ( ) . % + ? [ ^ $
               -- "." is allowed as there a units names with this character
-              local position, _ = string.find(val, "[%(%)%%%+%-%?%[%]%^%$]")
+              local position, _ = string.find(val, "[%(%)%%%+%?%[%]%^%$]")
               if position then
                 ThreatPlates.Print(L["Illegal character used in Name trigger at position: "] .. tostring(position), true)
               else
@@ -6384,6 +6729,18 @@ CreateCustomNameplateEntry = function(index)
             get = function(info)
               return tostring(db.uniqueSettings[index].Trigger["Aura"].Input or "")
             end,
+            disabled = function() return not db.AuraWidget.ON and not db.AuraWidget.ShowInHeadlineView end,
+            hidden = function() return db.uniqueSettings[index].Trigger.Type ~= "Aura" end,
+          },
+          AuraTriggerOnlyMine = {
+            name = L["Only Mine"],
+            type = "toggle",
+            order = 25,
+            set = function(info, val)
+              SetValue(info, val);
+              UpdateSpecial()
+            end,
+            arg = { "uniqueSettings", index, "Trigger", "Aura", "ShowOnlyMine" },
             disabled = function() return not db.AuraWidget.ON and not db.AuraWidget.ShowInHeadlineView end,
             hidden = function() return db.uniqueSettings[index].Trigger.Type ~= "Aura" end,
           },
@@ -6751,7 +7108,6 @@ CreateCustomNameplateEntry = function(index)
             end,
             arg = { "uniqueSettings", index, "UseAutomaticIcon" },
             desc = L["Find a suitable icon based on the current trigger. For Name trigger, the preview does not work. For multi-value triggers, the preview always is the icon of the first trigger entered."],
-            hidden = function() return TidyPlatesThreat.db.global.CustomNameplatesVersion == 1 end,
           },
           Spacer1 = GetSpacerEntry(3),
           Icon = {
@@ -6787,20 +7143,257 @@ CreateCustomNameplateEntry = function(index)
           },
         },
       },
+      Script = {
+        name = L["Scripts"],
+        order = 60,
+        type = "group",
+        width = "full",
+        inline = false,
+        hidden = function() return not Addon.db.global.ScriptingIsEnabled end,
+        args = {
+          WidgetType = {
+            name = L["Type"],
+            order = 10,
+            type = "select",
+            values = { Standard = L["Standard"], TargetOnly = L["Target Only"], FocusOnly = L["Focus Only"], },
+            arg = { "uniqueSettings", index, "Scripts", "Type" },
+          },
+          WidgetFunction = {
+            name = L["Function"],
+            order = 20,
+            type = "select",
+            values = function()
+              local custom_style = db.uniqueSettings[index]
+              local script_functions = ThreatPlates.CopyTable(Addon.SCRIPT_FUNCTIONS[custom_style.Scripts.Type])
+
+              for key, function_name in pairs(script_functions) do
+                local color = "ffffff"
+                if key == "WoWEvent" then
+                  -- If no WoW event is defined, color the entry in grey
+                  if next(custom_style.Scripts.Code.Events) then
+                    color = "00ff00"
+                  end
+                elseif custom_style.Scripts.Code.Functions[function_name] then
+                  color = "00ff00"
+                end
+                script_functions[key] = "|cff" .. color .. function_name .. "|r"
+              end
+
+              if custom_style.Scripts.Code.Legacy and custom_style.Scripts.Code.Legacy ~= "" then
+                script_functions.Legacy = "|cffff0000Legacy Code|r"
+              end
+
+              return script_functions
+            end,
+            get = function(info)
+              local val = GetValue(info)
+              local values = info.option.values()
+
+              -- If the current value is no longer valid (LegacyCode removed or type switch), change it to some valid value
+              if not values[val] then
+                val = ThreatPlates.DEFAULT_SETTINGS.profile.uniqueSettings["**"].Scripts.Function
+                db.uniqueSettings[index].Scripts.Function = val
+              end
+
+              return val
+            end,
+            arg = { "uniqueSettings", index, "Scripts", "Function" },
+          },
+          WoWEventName = {
+            name = L["Event Name"],
+            order = 30,
+            type = "input",
+            width = "double",
+            set = function(info, val)
+              if val ~= "" then
+                val = string.upper(val)
+                if not db.uniqueSettings[index].Scripts.Code.Events[val] then
+                  db.uniqueSettings[index].Scripts.Code.Events[val] = ""
+                end
+              end
+              SetValue(info, val)
+            end,
+            get = function(info)
+              local wow_event
+              if db.uniqueSettings[index].Scripts.Function == "WoWEvent" then
+                wow_event = db.uniqueSettings[index].Scripts.Event
+                if not db.uniqueSettings[index].Scripts.Code.Events[wow_event] then
+                  -- Script for event was deleted, so switch to another event (if available) as function still is WoWEvent
+                  -- Set (WoW) event to the first non-internal event or to nil
+                  db.uniqueSettings[index].Scripts.Event = wow_event
+                end
+              end
+              return wow_event
+            end,
+            arg = { "uniqueSettings", index, "Scripts", "Event" },
+            disabled = function() return db.uniqueSettings[index].Scripts.Function ~= "WoWEvent" end,
+          },
+          Spacer1 = GetSpacerEntry(40),
+          Spacer2 =  { name = "", order = 41, type = "description", width = "double", },
+          WoWEventWithScript = {
+            name = L["Events with Script"],
+            order = 50,
+            type = "select",
+            width = "double",
+            values = function()
+              local events_with_scripts = { }
+              for event, script in pairs(db.uniqueSettings[index].Scripts.Code.Events) do
+                events_with_scripts[event] = event
+              end
+              return events_with_scripts
+            end,
+            arg = { "uniqueSettings", index, "Scripts", "Event" },
+            disabled = function() return db.uniqueSettings[index].Scripts.Function ~= "WoWEvent" or not next(db.uniqueSettings[index].Scripts.Code.Events) end,
+          },
+          Spacer3 = GetSpacerEntry(55),
+          Script = {
+            name = L["Script"],
+            order = 60,
+            type = "input",
+            multiline = 12,
+            width = "full",
+            set = function(info, val)
+              -- Delete the event from the list
+              if val and val:gsub("^%s*(.-)%s*$", "%1"):len() == 0 then
+                val = nil
+              end
+
+              local custom_style = db.uniqueSettings[index]
+              if custom_style.Scripts.Function == "WoWEvent" then
+                custom_style.Scripts.Code.Events[custom_style.Scripts.Event] = val
+              elseif custom_style.Scripts.Function == "Legacy" then
+                custom_style.Scripts.Code.Legacy = val
+              else
+                custom_style.Scripts.Code.Functions[custom_style.Scripts.Function] = val
+              end
+
+              -- Empty input field and drop down showing the current event (as it was deleted)
+              if not val then
+                custom_style.Scripts.Event = nil
+              end
+
+              Addon:InitializeCustomNameplates()
+              Addon.Widgets:UpdateSettings("Script")
+            end,
+            get = function(info)
+              return CustomPlateGetExampleForEventScript(db.uniqueSettings[index], db.uniqueSettings[index].Scripts.Function)
+            end,
+          },
+          Extend = {
+            name = L["Extend"],
+            order = 61,
+            type = "execute",
+            width = "half",
+            func = function(info)
+              if not Addon.ScriptEditor then
+                local frame = LibAceGUI:Create("Window")
+                frame:SetTitle(L["Threat Plates Script Editor"])
+                frame:SetCallback("OnClose", function(widget) frame:_Cancel() end)
+                frame:SetLayout("fill")
+                Addon.ScriptEditor = frame
+
+                local group = LibAceGUI:Create("InlineGroup");
+                group.frame:SetParent(frame.frame)
+                group.frame:SetPoint("BOTTOMRIGHT", frame.frame, "BOTTOMRIGHT", -17, 12)
+                group.frame:SetPoint("TOPLEFT", frame.frame, "TOPLEFT", 17, -10)
+                group:SetLayout("fill")
+                frame:AddChild(group)
+
+                local editor = LibAceGUI:Create("MultiLineEditBox")
+                editor:SetWidth(400)
+                editor.button:Hide()
+                editor:SetFullWidth(true)
+                editor.frame:SetFrameStrata("FULLSCREEN")
+                editor:SetLabel("")
+                group:AddChild(editor)
+                editor.frame:SetClipsChildren(true)
+                frame.Editor = editor
+
+                IndentationLib.enable(editor.editBox)
+
+                local cancel_button = CreateFrame("Button", nil, group.frame, "UIPanelButtonTemplate")
+                cancel_button:SetScript("OnClick", function() frame:_Cancel() end)
+                cancel_button:SetPoint("BOTTOMRIGHT", -27, 13);
+                cancel_button:SetFrameLevel(cancel_button:GetFrameLevel() + 1)
+                cancel_button:SetHeight(20);
+                cancel_button:SetWidth(100);
+                cancel_button:SetText(L["Cancel"]);
+
+                local close_button = CreateFrame("Button", nil, group.frame, "UIPanelButtonTemplate")
+                close_button:SetScript("OnClick", function() frame:_Done() end)
+                close_button:SetPoint("RIGHT", cancel_button, "LEFT", -10, 0)
+                close_button:SetFrameLevel(close_button:GetFrameLevel() + 1)
+                close_button:SetHeight(20);
+                close_button:SetWidth(100);
+                close_button:SetText(L["Done"]);
+
+                -- CTRL + S saves and closes, ESC cancels and closes
+                editor.editBox:HookScript("OnKeyDown", function(_, key)
+                  if IsControlKeyDown() and key == "S" then
+                    frame:_Done()
+                  end
+                  if key == "ESCAPE" then
+                    frame:_Cancel()
+                  end
+                end)
+
+                function frame._Cancel(self)
+                  frame:Hide()
+                  Addon.LibAceConfigDialog:Open(ThreatPlates.ADDON_NAME)
+                end
+
+                function frame._Done(self)
+                  -- Delete the event from the list
+                  local val = Addon.ScriptEditor.Editor:GetText()
+                  if val and val:gsub("^%s*(.-)%s*$", "%1"):len() == 0 then
+                    val = nil
+                  end
+
+                  local custom_style = db.uniqueSettings[index]
+                  if custom_style.Scripts.Function == "WoWEvent" then
+                    custom_style.Scripts.Code.Events[custom_style.Scripts.Event] = val
+                  elseif custom_style.Scripts.Function == "Legacy" then
+                    custom_style.Scripts.Code.Legacy = val
+                  else
+                    custom_style.Scripts.Code.Functions[custom_style.Scripts.Function] = val
+                  end
+
+                  -- Empty input field and drop down showing the current event (as it was deleted)
+                  if not val then
+                    custom_style.Scripts.Event = nil
+                  end
+
+                  Addon:InitializeCustomNameplates()
+                  Addon.Widgets:UpdateSettings("Script")
+
+                  frame:Hide()
+                  Addon.LibAceConfigDialog:Open(ThreatPlates.ADDON_NAME)
+                end
+              end
+
+              local label
+              if db.uniqueSettings[index].Scripts.Function == "WoWEvent" then
+                label = "WoW Event: " .. db.uniqueSettings[index].Scripts.Event
+              else
+                label = "Event: " .. db.uniqueSettings[index].Scripts.Function
+              end
+              Addon.ScriptEditor.Editor:SetLabel(label)
+
+              Addon.ScriptEditor.Editor:SetText(CustomPlateGetExampleForEventScript(db.uniqueSettings[index], db.uniqueSettings[index].Scripts.Function))
+
+              Addon.LibAceConfigDialog:Close(ThreatPlates.ADDON_NAME)
+              Addon.ScriptEditor:Show()
+            end,
+          },
+        },
+      },
     },
   }
 
   return entry
 end
 
-local function UpdateCustomNameplateSlots(...)
-  local slots = {...}
-  for _, slot_no in pairs(slots) do
-    options.args.Custom.args["#" .. slot_no] = CreateCustomNameplateEntry(slot_no)
-  end
-end
-
-local function CreateCustomNameplatesGroup()
+CreateCustomNameplatesGroup = function()
   local entry = {
     NewSlot = {
       name = L["New"],
@@ -6817,12 +7410,9 @@ local function CreateCustomNameplatesGroup()
         table.insert(db.uniqueSettings, slot_no, Addon.CopyTable(ThreatPlates.DEFAULT_SETTINGS.profile.uniqueSettings["**"]))
         db.uniqueSettings[slot_no].Trigger.Name.Input = ""
 
-        options.args.Custom.args = CreateCustomNameplatesGroup()
-        UpdateSpecial()
-
+        CreateCustomNameplatesGroup()
         Addon.LibAceConfigDialog:SelectGroup(ThreatPlates.ADDON_NAME, "Custom", "#" ..  slot_no)
       end,
-      hidden = function() return TidyPlatesThreat.db.global.CustomNameplatesVersion == 1 end,
     },
     DeleteSlot = {
       name = L["Delete"],
@@ -6837,9 +7427,7 @@ local function CreateCustomNameplatesGroup()
         if slot_no then
           table.remove(db.uniqueSettings, slot_no)
 
-          options.args.Custom.args = CreateCustomNameplatesGroup()
-          UpdateSpecial()
-
+          CreateCustomNameplatesGroup()
           Addon.LibAceConfigDialog:SelectGroup(ThreatPlates.ADDON_NAME, "Custom", "#" ..  math.min(slot_no, #db.uniqueSettings))
         end
       end,
@@ -6855,7 +7443,6 @@ local function CreateCustomNameplatesGroup()
           return false
         end
       end,
-      hidden = function() return TidyPlatesThreat.db.global.CustomNameplatesVersion == 1 end,
     },
     MoveUp = {
       name = L["Move Up"],
@@ -6878,7 +7465,6 @@ local function CreateCustomNameplatesGroup()
           end
         end
       end,
-      hidden = function() return TidyPlatesThreat.db.global.CustomNameplatesVersion == 1 end,
     },
     MoveDown = {
       name = L["Move Down"],
@@ -6901,7 +7487,6 @@ local function CreateCustomNameplatesGroup()
           end
         end
       end,
-      hidden = function() return TidyPlatesThreat.db.global.CustomNameplatesVersion == 1 end,
     },
     SortAsc = {
       name = L["Sort A-Z"],
@@ -6918,12 +7503,9 @@ local function CreateCustomNameplatesGroup()
           return a_key < b_key
         end)
 
-        options.args.Custom.args = CreateCustomNameplatesGroup()
-        UpdateSpecial()
-
+        CreateCustomNameplatesGroup()
         --Addon.LibAceConfigDialog:SelectGroup(ThreatPlates.ADDON_NAME, "Custom", "#" ..  slot_no)
       end,
-      hidden = function() return TidyPlatesThreat.db.global.CustomNameplatesVersion == 1 end,
     },
     SortDesc = {
       name = L["Sort Z-A"],
@@ -6940,26 +7522,9 @@ local function CreateCustomNameplatesGroup()
           return a_key > b_key
         end)
 
-        options.args.Custom.args = CreateCustomNameplatesGroup()
-        UpdateSpecial()
-
+        CreateCustomNameplatesGroup()
         --Addon.LibAceConfigDialog:SelectGroup(ThreatPlates.ADDON_NAME, "Custom", "#" ..  slot_no)
       end,
-      hidden = function() return TidyPlatesThreat.db.global.CustomNameplatesVersion == 1 end,
-    },
-    MigrateVersion1 = {
-      name = L["|cffFFFFFFMigrate Custom Nameplates Settings|r"],
-      order = 20,
-      type = "execute",
-      width = "full",
-      func = function()
-        Addon.MigrationCustomNameplatesV1()
-
-        options.args.Custom.args = CreateCustomNameplatesGroup()
-        UpdateSpecial()
-      end,
-      confirm = function(info) return L["|cffFF0000NOTE|r\nMigration should only delete deprecated default custom nameplates and re-order the remaining ones. Nevertheless, it is highly advised to backup your settings (the SavedVariables file TidyPlates_ThreatPlates.lua) in case something goes wrong.\n\nAre you sure you want to migrate your custom nameplates?"] end,
-      hidden = function() return TidyPlatesThreat.db.global.CustomNameplatesVersion > 1 end,
     },
     Spacer1 = GetSpacerEntry(25),
     GeneralSettings = {
@@ -6994,15 +7559,7 @@ local function CreateCustomNameplatesGroup()
           type = "group",
           order = 20,
           inline = true,
-          disabled = function() return TidyPlatesThreat.db.global.CustomNameplatesVersion == 1 end,
           args = {
-            VersionWarning = {
-              type = "description",
-              order = 1,
-              width = "full",
-              name = L["|cffFF0000This option is disabled as you are still using the obsolete custom nameplates format. Migrate your custom nameplates to the new format (using the Migration button at the top) to enable this option.|r"],
-              hidden = function() return TidyPlatesThreat.db.global.CustomNameplatesVersion > 1 end,
-            },
             Export = {
               name = L["Export Custom Nameplates"],
               order = 10,
@@ -7066,8 +7623,7 @@ local function CreateCustomNameplatesGroup()
                           table.insert(db.uniqueSettings, slot_no + i, custom_style)
                         end
 
-                        options.args.Custom.args = CreateCustomNameplatesGroup()
-                        UpdateSpecial()
+                        CreateCustomNameplatesGroup()
                       end
                     end
                   else
@@ -7084,15 +7640,18 @@ local function CreateCustomNameplatesGroup()
     },
   }
 
+
   -- Use pairs as iterater as the table is in a somewhat invalid format (non-iteratable with ipairs) as long as the
   -- custom styles have not been migrated to V2
   for index, custom_style in pairs(db.uniqueSettings) do
-    if type(index) == "number" and custom_style.Trigger.Name.Input ~= "<Enter name here>"  then
+    if type(index) == "number" and custom_style.Trigger.Name.Input ~= "<Enter name here>" and
+      (custom_style.Trigger.Type ~= "Script" or Addon.db.global.ScriptingIsEnabled) then
       entry["#" .. index] = CreateCustomNameplateEntry(index)
     end
   end
 
-  return entry
+  options.args.Custom.args = entry
+  UpdateSpecial()
 end
 
 -- Return the Options table
@@ -7166,7 +7725,7 @@ local function CreateOptionsTable()
                           order = 15,
                           type = "toggle",
                           arg = { "HeadlineView", "ShowFocusHighlight" },
-                          hidden = function() return Addon.CLASSIC end,
+                          hidden = function() return Addon.IS_CLASSIC end,
                         },
                         TargetMouseoverHighlight = {
                           name = L["Show Mouseover"],
@@ -7575,6 +8134,28 @@ local function CreateOptionsTable()
                     },
                     Font = GetFontEntryDefault(L["Name"], 20, { "Name", "HealthbarMode", } ),
                     Placement = GetFontPositioningEntry(30, { "Name", "HealthbarMode", }),
+                    Abbreviation = {
+                      name = L["Abbreviation"],
+                      order = 60,
+                      type = "group",
+                      inline = true,
+                      args = {
+                        NameAbbreviationForEnemyUnits = {
+                          name = L["Enemy Units"],
+                          order = 10,
+                          type = "select",
+                          values = ThreatPlates.NAME_ABBREVIATION,
+                          arg = { "Name", "HealthbarMode", "AbbreviationForEnemyUnits" },
+                        },
+                        NameAbbreviationForFriendlyUnits = {
+                          name = L["Friendly Units"],
+                          order = 10,
+                          type = "select",
+                          values = ThreatPlates.NAME_ABBREVIATION,
+                          arg = { "Name", "HealthbarMode", "AbbreviationForFriendlyUnits" },
+                        },
+                      },
+                    },
                   },
                 },
                 HeadlineView = {
@@ -7645,9 +8226,230 @@ local function CreateOptionsTable()
               childGroups = "tab",
               order = 70,
               args = {
-                TextSettings = {
-                  name = L["General"],
+                HealthbarView = {
+                  name = L["Healthbar View"],
                   order = 10,
+                  type = "group",
+                  inline = false,
+                  args = {
+                    FriendlySubtext = {
+                      name = L["Friendly Status Text"],
+                      order = 10,
+                      type = "select",
+                      width = "double",
+                      values = ThreatPlates.FRIENDLY_SUBTEXT,
+                      set = function(info, val)
+                        SetValue(info, val)
+                        Addon.LoadOnDemandLibraries()
+                      end,
+                      arg = { "StatusText", "HealthbarMode", "FriendlySubtext"}
+                    },
+                    EnemySubtext = {
+                      name = L["Enemy Status Text"],
+                      order = 20,
+                      type = "select",
+                      width = "double",
+                      values = ThreatPlates.ENEMY_SUBTEXT,
+                      set = function(info, val)
+                        SetValue(info, val)
+                        Addon.LoadOnDemandLibraries()
+                      end,
+                      arg = { "StatusText", "HealthbarMode", "EnemySubtext"}
+                    },
+                    Spacer2 = GetSpacerEntry(25),
+                    FriendlySubtextCustom = {
+                      name = L["Custom Friendly Status Text"],
+                      type = "input",
+                      order = 30,
+                      width = "double",
+                      arg = { "StatusText", "HealthbarMode", "FriendlySubtextCustom" },
+                      desc = L["Define a custom status text using LibDogTag markup language.\n\nType /dogtag for tag info.\n\nRemember to press ENTER after filling out this box or it will not save."],
+                      hidden = function() return db.StatusText.HealthbarMode.FriendlySubtext ~= "CUSTOM" end,
+                    },
+                    SpacerBlock = {
+                      name = "",
+                      order = 30,
+                      type = "description",
+                      width = "double",
+                      hidden = function() return db.StatusText.HealthbarMode.EnemySubtext ~= "CUSTOM" or db.StatusText.HealthbarMode.FriendlySubtext == "CUSTOM" end,
+                    },
+                    EnemySubtextCustom = {
+                      name = L["Custom Enemy Status Text"],
+                      type = "input",
+                      order = 31,
+                      width = "double",
+                      arg = { "StatusText", "HealthbarMode", "EnemySubtextCustom"},
+                      desc = L["Define a custom status text using LibDogTag markup language.\n\nType /dogtag for tag info.\n\nRemember to press ENTER after filling out this box or it will not save."],
+                      hidden = function() return db.StatusText.HealthbarMode.EnemySubtext ~= "CUSTOM" end,
+                    },
+                    Spacer3 = GetSpacerEntry(35),
+                    SubtextColor = {
+                      name = L["Color"],
+                      order = 40,
+                      type = "group",
+                      inline = true,
+                      args = {
+                        SubtextColorHeadline = {
+                          name = L["Same as Name"],
+                          order = 10,
+                          type = "toggle",
+                          set = function(info, val)
+                            Addon.db.profile.StatusText.HealthbarMode.SubtextColorUseSpecific = false
+                            SetValue(info, true)
+                          end,
+                          arg = { "StatusText", "HealthbarMode", "SubtextColorUseHeadline" },
+                        },
+                        SubtextColorSpecific = {
+                          name = L["Status Text"],
+                          order = 20,
+                          type = "toggle",
+                          arg = { "StatusText", "HealthbarMode", "SubtextColorUseSpecific" },
+                          set = function(info, val)
+                            Addon.db.profile.StatusText.HealthbarMode.SubtextColorUseHeadline = false
+                            SetValue(info, true)
+                          end,
+                        },
+                        SubtextColorCustom = {
+                          name = L["Custom"],
+                          order = 30,
+                          type = "toggle",
+                          width = "half",
+                          set = function(info, val)
+                            Addon.db.profile.StatusText.HealthbarMode.SubtextColorUseHeadline = false
+                            Addon.db.profile.StatusText.HealthbarMode.SubtextColorUseSpecific = false
+                            Addon:ForceUpdate()
+                          end,
+                          get = function(info) return not (Addon.db.profile.StatusText.HealthbarMode.SubtextColorUseHeadline or Addon.db.profile.StatusText.HealthbarMode.SubtextColorUseSpecific) end,
+                        },
+                        SubtextColorCustomColorAlpha = GetColorAlphaEntry(35, { "StatusText", "HealthbarMode", "SubtextColor" },
+                          function() return (Addon.db.profile.StatusText.HealthbarMode.SubtextColorUseHeadline or Addon.db.profile.StatusText.HealthbarMode.SubtextColorUseSpecific) end ),
+                      },
+                    },
+                    Font = GetFontEntryDefault(L["Font"], 50, { "StatusText", "HealthbarMode" }),
+                    Placement = GetFontPositioningEntry(60, { "StatusText", "HealthbarMode" } ),
+                  },
+                },
+                HeadlineView = {
+                  name = L["Headline View"],
+                  order = 20,
+                  type = "group",
+                  inline = false,
+                  args = {
+                    FriendlySubtext = {
+                      name = L["Friendly Status Text"],
+                      order = 10,
+                      type = "select",
+                      values = ThreatPlates.FRIENDLY_SUBTEXT,
+                      width = "double",
+                      set = function(info, val)
+                        SetValue(info, val)
+                        Addon.LoadOnDemandLibraries()
+                      end,
+                      arg = { "StatusText", "NameMode", "FriendlySubtext"}
+                    },
+                    EnemySubtext = {
+                      name = L["Enemy Status Text"],
+                      order = 20,
+                      type = "select",
+                      width = "double",
+                      values = ThreatPlates.ENEMY_SUBTEXT,
+                      set = function(info, val)
+                        SetValue(info, val)
+                        Addon.LoadOnDemandLibraries()
+                      end,
+                      arg = { "StatusText", "NameMode", "EnemySubtext"}
+                    },
+                    Spacer2 = GetSpacerEntry(25),
+                    FriendlySubtextCustom = {
+                      name = L["Custom Friendly Status Text"],
+                      type = "input",
+                      order = 30,
+                      width = "double",
+                      arg = { "StatusText", "NameMode", "FriendlySubtextCustom"},
+                      hidden = function() return db.StatusText.NameMode.FriendlySubtext ~= "CUSTOM" end,
+                    },
+                    SpacerBlock = {
+                      name = "",
+                      order = 30,
+                      type = "description",
+                      width = "double",
+                      hidden = function() return db.StatusText.NameMode.EnemySubtext ~= "CUSTOM" or db.StatusText.NameMode.FriendlySubtext == "CUSTOM" end,
+                    },
+                    EnemySubtextCustom = {
+                      name = L["Custom Enemy Status Text"],
+                      type = "input",
+                      order = 31,
+                      width = "double",
+                      arg = { "StatusText", "NameMode", "EnemySubtextCustom"},
+                      hidden = function() return db.StatusText.NameMode.EnemySubtext ~= "CUSTOM" end,
+                    },
+                    Spacer3 = GetSpacerEntry(35),
+                    SubtextColor = {
+                      name = L["Color"],
+                      order = 40,
+                      type = "group",
+                      inline = true,
+                      args = {
+                        SubtextColorHeadline = {
+                          name = L["Same as Name"],
+                          order = 10,
+                          type = "toggle",
+                          arg = { "StatusText", "NameMode", "SubtextColorUseHeadline" },
+                          set = function(info, val)
+                            Addon.db.profile.StatusText.NameMode.SubtextColorUseSpecific = false
+                            SetValue(info, true)
+                          end,
+                        },
+                        SubtextColorSpecific = {
+                          name = L["Status Text"],
+                          order = 20,
+                          type = "toggle",
+                          arg = { "StatusText", "NameMode", "SubtextColorUseSpecific" },
+                          set = function(info, val)
+                            Addon.db.profile.StatusText.NameMode.SubtextColorUseHeadline = false
+                            SetValue(info, true)
+                          end,
+                        },
+                        SubtextColorCustom = {
+                          name = L["Custom"],
+                          order = 30,
+                          type = "toggle",
+                          width = "half",
+                          set = function(info, val)
+                            Addon.db.profile.StatusText.NameMode.SubtextColorUseHeadline = false
+                            Addon.db.profile.StatusText.NameMode.SubtextColorUseSpecific = false
+                            Addon:ForceUpdate()
+                          end,
+                          get = function(info) return not (Addon.db.profile.StatusText.NameMode.SubtextColorUseHeadline or Addon.db.profile.StatusText.NameMode.SubtextColorUseSpecific) end,
+                        },
+                        SubtextColorCustomColorAlpha = GetColorAlphaEntry(35, { "StatusText", "NameMode", "SubtextColor" },
+                          function() return (Addon.db.profile.StatusText.NameMode.SubtextColorUseHeadline or Addon.db.profile.StatusText.NameMode.SubtextColorUseSpecific) end ),
+                      },
+                    },
+                    Font = {
+                      name = L["Font"],
+                      type = "group",
+                      inline = true,
+                      order = 50,
+                      args = {
+                        Size = {
+                          name = L["Size"],
+                          order = 20,
+                          type = "range",
+                          arg = {"StatusText", "NameMode", "Font", "Size" },
+                          max = 36,
+                          min = 6,
+                          step = 1,
+                          isPercent = false,
+                        },
+                      },
+                    },
+                    Placement = GetFontPositioningEntry(60, { "StatusText", "NameMode" } ),
+                  },
+                },
+                TextFormat = {
+                  name = L["General"],
+                  order = 30,
                   type = "group",
                   inline = false,
                   args = {
@@ -7702,13 +8504,13 @@ local function CreateOptionsTable()
                           desc = L["This will format text to a simpler format using M or K for millions and thousands. Disabling this will show exact health amounts."],
                           arg = { "text", "truncate" },
                         },
-                        UseLocalizedUnit = {
-                          name = L["Localization"],
-                          type = "toggle",
-                          order = 80,
-                          desc = L["If enabled, the truncated health text will be localized, i.e. local metric unit symbols (like k for thousands) will be used."],
-                          arg = { "text", "LocalizedUnitSymbol" }
-                        },
+                        -- UseLocalizedUnit = {
+                        --   name = L["Localization"],
+                        --   type = "toggle",
+                        --   order = 80,
+                        --   desc = L["If enabled, the truncated health text will be localized, i.e. local metric unit symbols (like k for thousands) will be used."],
+                        --   arg = { "text", "LocalizedUnitSymbol" }
+                        -- },
                       },
                     },
                     AbsorbsText = {
@@ -7716,7 +8518,7 @@ local function CreateOptionsTable()
                       order = 35,
                       type = "group",
                       inline = true,
-                      hidden = function() return Addon.CLASSIC end,
+                      hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC  end,
                       args = {
                         EnableAmount = {
                           name = L["Amount"],
@@ -7742,160 +8544,15 @@ local function CreateOptionsTable()
                         },
                       },
                     },
+                  },
+                },
+                Layout = {
+                  name = L["General"],
+                  order = 40,
+                  type = "group",
+                  inline = false,
+                  args = {
                     Boundaries = GetBoundariesEntryDefault(70, {"StatusText", "HealthbarMode", "Font" }),
-                  },
-                },
-                HealthbarView = {
-                  name = L["Healthbar View"],
-                  order = 20,
-                  type = "group",
-                  inline = false,
-                  args = {
-                    FriendlySubtext = {
-                      name = L["Friendly Status Text"],
-                      order = 10,
-                      type = "select",
-                      values = ThreatPlates.FRIENDLY_SUBTEXT,
-                      arg = { "StatusText", "HealthbarMode", "FriendlySubtext"}
-                    },
-                    Spacer1 = { name = "", order = 15, type = "description", width = "half", },
-                    EnemySubtext = {
-                      name = L["Enemy Status Text"],
-                      order = 20,
-                      type = "select",
-                      values = ThreatPlates.ENEMY_SUBTEXT,
-                      arg = { "StatusText", "HealthbarMode", "EnemySubtext"}
-                    },
-                    Spacer2 = GetSpacerEntry(30),
-                    SubtextColor = {
-                      name = L["Color"],
-                      order = 40,
-                      type = "group",
-                      inline = true,
-                      args = {
-                        SubtextColorHeadline = {
-                          name = L["Same as Name"],
-                          order = 10,
-                          type = "toggle",
-                          set = function(info, val)
-                            TidyPlatesThreat.db.profile.StatusText.HealthbarMode.SubtextColorUseSpecific = false
-                            SetValue(info, true)
-                          end,
-                          arg = { "StatusText", "HealthbarMode", "SubtextColorUseHeadline" },
-                        },
-                        SubtextColorSpecific = {
-                          name = L["Status Text"],
-                          order = 20,
-                          type = "toggle",
-                          arg = { "StatusText", "HealthbarMode", "SubtextColorUseSpecific" },
-                          set = function(info, val)
-                            TidyPlatesThreat.db.profile.StatusText.HealthbarMode.SubtextColorUseHeadline = false
-                            SetValue(info, true)
-                          end,
-                        },
-                        SubtextColorCustom = {
-                          name = L["Custom"],
-                          order = 30,
-                          type = "toggle",
-                          width = "half",
-                          set = function(info, val)
-                            TidyPlatesThreat.db.profile.StatusText.HealthbarMode.SubtextColorUseHeadline = false
-                            TidyPlatesThreat.db.profile.StatusText.HealthbarMode.SubtextColorUseSpecific = false
-                            Addon:ForceUpdate()
-                          end,
-                          get = function(info) return not (TidyPlatesThreat.db.profile.StatusText.HealthbarMode.SubtextColorUseHeadline or TidyPlatesThreat.db.profile.StatusText.HealthbarMode.SubtextColorUseSpecific) end,
-                        },
-                        SubtextColorCustomColorAlpha = GetColorAlphaEntry(35, { "StatusText", "HealthbarMode", "SubtextColor" },
-                          function() return (TidyPlatesThreat.db.profile.StatusText.HealthbarMode.SubtextColorUseHeadline or TidyPlatesThreat.db.profile.StatusText.HealthbarMode.SubtextColorUseSpecific) end ),
-                      },
-                    },
-                    Font = GetFontEntryDefault(L["Font"], 50, { "StatusText", "HealthbarMode" }),
-                    Placement = GetFontPositioningEntry(60, { "StatusText", "HealthbarMode" } ),
-                  },
-                },
-                HeadlineView = {
-                  name = L["Headline View"],
-                  order = 30,
-                  type = "group",
-                  inline = false,
-                  args = {
-                    FriendlySubtext = {
-                      name = L["Friendly Custom Text"],
-                      order = 10,
-                      type = "select",
-                      values = ThreatPlates.FRIENDLY_SUBTEXT,
-                      arg = { "StatusText", "NameMode", "FriendlySubtext"}
-                    },
-                    Spacer1 = { name = "", order = 15, type = "description", width = "half", },
-                    EnemySubtext = {
-                      name = L["Enemy Custom Text"],
-                      order = 20,
-                      type = "select",
-                      values = ThreatPlates.ENEMY_SUBTEXT,
-                      arg = { "StatusText", "NameMode", "EnemySubtext"}
-                    },
-                    Spacer2 = GetSpacerEntry(25),
-                    SubtextColor = {
-                      name = L["Color"],
-                      order = 40,
-                      type = "group",
-                      inline = true,
-                      args = {
-                        SubtextColorHeadline = {
-                          name = L["Same as Name"],
-                          order = 10,
-                          type = "toggle",
-                          arg = { "StatusText", "NameMode", "SubtextColorUseHeadline" },
-                          set = function(info, val)
-                            TidyPlatesThreat.db.profile.StatusText.NameMode.SubtextColorUseSpecific = false
-                            SetValue(info, true)
-                          end,
-                        },
-                        SubtextColorSpecific = {
-                          name = L["Status Text"],
-                          order = 20,
-                          type = "toggle",
-                          arg = { "StatusText", "NameMode", "SubtextColorUseSpecific" },
-                          set = function(info, val)
-                            TidyPlatesThreat.db.profile.StatusText.NameMode.SubtextColorUseHeadline = false
-                            SetValue(info, true)
-                          end,
-                        },
-                        SubtextColorCustom = {
-                          name = L["Custom"],
-                          order = 30,
-                          type = "toggle",
-                          width = "half",
-                          set = function(info, val)
-                            TidyPlatesThreat.db.profile.StatusText.NameMode.SubtextColorUseHeadline = false
-                            TidyPlatesThreat.db.profile.StatusText.NameMode.SubtextColorUseSpecific = false
-                            Addon:ForceUpdate()
-                          end,
-                          get = function(info) return not (TidyPlatesThreat.db.profile.StatusText.NameMode.SubtextColorUseHeadline or TidyPlatesThreat.db.profile.StatusText.NameMode.SubtextColorUseSpecific) end,
-                        },
-                        SubtextColorCustomColorAlpha = GetColorAlphaEntry(35, { "StatusText", "NameMode", "SubtextColor" },
-                          function() return (TidyPlatesThreat.db.profile.StatusText.NameMode.SubtextColorUseHeadline or TidyPlatesThreat.db.profile.StatusText.NameMode.SubtextColorUseSpecific) end ),
-                      },
-                    },
-                    Font = {
-                      name = L["Font"],
-                      type = "group",
-                      inline = true,
-                      order = 50,
-                      args = {
-                        Size = {
-                          name = L["Size"],
-                          order = 20,
-                          type = "range",
-                          arg = {"StatusText", "NameMode", "Font", "Size" },
-                          max = 36,
-                          min = 6,
-                          step = 1,
-                          isPercent = false,
-                        },
-                      },
-                    },
-                    Placement = GetFontPositioningEntry(60, { "StatusText", "NameMode" } ),
                   },
                 },
               },
@@ -8011,6 +8668,7 @@ local function CreateOptionsTable()
               },
             },
             RaidMarks = CreateRaidMarksOptions(),
+            LocalizationSettings = CreateLocalizationSettings(),
             BlizzardSettings = CreateBlizzardSettings(),
 --            TestSettings = {
 --              name = "Test Settings",
@@ -8574,7 +9232,7 @@ local function CreateOptionsTable()
               desc = L["Set the roles your specs represent."],
               disabled = function() return not db.threat.ON end,
               order = 70,
-              args = (Addon.CLASSIC and CreateSpecRolesClassic()) or CreateSpecRolesRetail(),
+              args = ((Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC) and CreateSpecRolesClassic()) or CreateSpecRolesRetail(),
             },
           },
         },
@@ -8602,7 +9260,7 @@ local function CreateOptionsTable()
               type = "description",
               order = 2,
               width = "full",
-              name = L["Clear and easy to use threat-reactive nameplates.\n\nCurrent version: "] .. GetAddOnMetadata("TidyPlates_ThreatPlates", "version") .. L["\n\nFeel free to email me at |cff00ff00threatplates@gmail.com|r\n\n--\n\nBlacksalsify\n\n(Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)"],
+              name = L["Clear and easy to use threat-reactive nameplates.\n\nCurrent version: "] .. GetAddOnMetadata("TidyPlates_ThreatPlates", "version") .. L["\n\n--\n\nBackupiseasy\n\n(Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)"],
             },
             Header1 = {
               order = 3,
@@ -8633,12 +9291,12 @@ local function CreateOptionsTable()
 --							width = "full",
 --							name = "frFR: Need Translator!!"
 --						},
-            Translators5 = {
-              type = "description",
-              order = 8,
-              width = "full",
-              name = "koKR: yuk6196 (CurseForge)"
-            },
+            -- Translators5 = {
+            --   type = "description",
+            --   order = 8,
+            --   width = "full",
+            --   name = "koKR: yuk6196 (CurseForge)"
+            -- },
 --						Translators6 = {
 --							type = "description",
 --							order = 9,
@@ -8849,9 +9507,16 @@ local function CreateOptionsTable()
 
   options.args.Totems.args = TotemOpts;
 
-  options.args.Custom.args = CreateCustomNameplatesGroup()
-  options.args.profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(TidyPlatesThreat.db)
+  CreateCustomNameplatesGroup()
+  options.args.profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(Addon.db)
   options.args.profiles.order = 10000
+
+  if not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC then
+    -- Add dual-spec support
+    local LibDualSpec = LibStub("LibDualSpec-1.0", true)
+    LibDualSpec:EnhanceDatabase(Addon.db, ThreatPlates.ADDON_NAME)
+    LibDualSpec:EnhanceOptions(options.args.profiles, Addon.db)
+  end
 
   AddImportExportOptions(options.args.profiles)
 end
@@ -8875,7 +9540,7 @@ local function GetInterfaceOptionsTable()
         imageWidth = 256,
         imageHeight = 32,
         func = function()
-          TidyPlatesThreat:OpenOptions()
+          Addon:OpenOptions()
         end,
         order = 20,
       },
@@ -8885,10 +9550,10 @@ local function GetInterfaceOptionsTable()
   return interface_options
 end
 
-function TidyPlatesThreat:ProfChange()
-  db = self.db.profile
+function Addon:ProfChange()
+  db = Addon.db.profile
 
-  TidyPlatesThreat:ReloadTheme()
+  Addon:ReloadTheme()
 
   -- Update preview icons: EliteArtWidget, TargetHighlightWidget, ClassIconWidget, QuestWidget, Threat Textures, Totem Icons, Custom Nameplate Icons
   local path = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\"
@@ -8905,7 +9570,7 @@ function TidyPlatesThreat:ProfChange()
       base.ClassIconWidget.args.Textures.args["Prev" .. k_c].image = path .. "ClassIconWidget\\" .. db.classWidget.theme .. "\\" .. CLASS_SORT_ORDER[k_c]
     end
 
-    if not Addon.CLASSIC then
+    if not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC then
       base.QuestWidget.args.ModeIcon.args.Texture.args.Preview.image = path .. "QuestWidget\\" .. db.questWidget.IconTexture
     end
 
@@ -8920,19 +9585,14 @@ function TidyPlatesThreat:ProfChange()
       options.args.Totems.args[totem_info.Name].args.Textures.args.Icon.image = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\TotemIconWidget\\" .. db.totemSettings[totem_info.ID].Style .. "\\" .. totem_info.Icon
     end
 
-    options.args.Custom.args = CreateCustomNameplatesGroup()
+    CreateCustomNameplatesGroup()
   end
+
+  Addon:ReloadTheme()
 end
 
-function TidyPlatesThreat:ConfigTableChanged(...)
-  options.args.Custom.args = CreateCustomNameplatesGroup()
-end
-
-function TidyPlatesThreat:OpenOptions()
-  db = self.db.profile
-
-  HideUIPanel(InterfaceOptionsFrame)
-  HideUIPanel(GameMenuFrame)
+local function RegisterOptionsTable()
+  db = Addon.db.profile
 
   if not options then
     CreateOptionsTable()
@@ -8941,48 +9601,57 @@ function TidyPlatesThreat:OpenOptions()
 
     -- Setup options dialog
     Addon.LibAceConfigRegistry:RegisterOptionsTable(ThreatPlates.ADDON_NAME, options)
-    Addon.LibAceConfigRegistry.RegisterCallback(self, "ConfigTableChange", "ConfigTableChanged")
+    --Addon.LibAceConfigRegistry.RegisterCallback(TidyPlatesThreat, "ConfigTableChange", "ConfigTableChanged")
     Addon.LibAceConfigDialog:SetDefaultSize(ThreatPlates.ADDON_NAME, 1000, 640)
   end
+end
 
-  Addon.LibAceConfigDialog:Open(ThreatPlates.ADDON_NAME);
+function TidyPlatesThreat:ConfigTableChanged(event, app_name)
+  if app_name == ThreatPlates.ADDON_NAME then
+    RegisterOptionsTable()
+    CreateCustomNameplatesGroup()
+  end
+end
+
+function Addon:OpenOptions()
+  HideUIPanel(InterfaceOptionsFrame)
+  HideUIPanel(GameMenuFrame)
+
+  RegisterOptionsTable()
+  Addon.LibAceConfigDialog:Open(ThreatPlates.ADDON_NAME)
 end
 
 function Addon.RestoreLegacyCustomNameplates()
-  if TidyPlatesThreat.db.global.CustomNameplatesVersion == 1 then
-    ThreatPlates.Print(L["You need to convert your custom nameplates to the current format before you can add legacy custom nameplates."], true)
-  else
-    local legacy_custom_plates = {}
+  local legacy_custom_plates = {}
 
-    for i, v in ipairs(Addon.LEGACY_CUSTOM_NAMEPLATES) do
-      legacy_custom_plates[i] = ThreatPlates.CopyTable(v)
-      Addon.MergeDefaultsIntoTable(legacy_custom_plates[i], Addon.LEGACY_CUSTOM_NAMEPLATES["**"])
-    end
+  for i, v in ipairs(Addon.LEGACY_CUSTOM_NAMEPLATES) do
+    legacy_custom_plates[i] = ThreatPlates.CopyTable(v)
+    Addon.MergeDefaultsIntoTable(legacy_custom_plates[i], Addon.LEGACY_CUSTOM_NAMEPLATES["**"])
+  end
 
-    local custom_plates = TidyPlatesThreat.db.profile.uniqueSettings
-    local max_slot_no = #custom_plates
+  local custom_plates = Addon.db.profile.uniqueSettings
+  local max_slot_no = #custom_plates
 
-    local index = 1
-    for _, legacy_custom_plate in ipairs(legacy_custom_plates) do
-      -- Only need to check for double name trigger as legacy custom nameplates only have these kind of triggers
-      local trigger_value = legacy_custom_plate.Trigger.Name.Input
-      local trigger_already_used = Addon.Cache.CustomPlateTriggers.Name[trigger_value]
+  local index = 1
+  for _, legacy_custom_plate in ipairs(legacy_custom_plates) do
+    -- Only need to check for double name trigger as legacy custom nameplates only have these kind of triggers
+    local trigger_value = legacy_custom_plate.Trigger.Name.Input
+    local trigger_already_used = Addon.Cache.CustomPlateTriggers.Name[trigger_value]
 
-      if trigger_already_used == nil or trigger_already_used.Enable.Never then
-        local error_msg = L["Adding legacy custom nameplate for %s ..."]:gsub("%%s", trigger_value)
+    if trigger_already_used == nil or trigger_already_used.Enable.Never then
+      local error_msg = L["Adding legacy custom nameplate for %s ..."]:gsub("%%s", trigger_value)
         ThreatPlates.Print(error_msg)
 
-        table.insert(custom_plates, max_slot_no + index, legacy_custom_plate)
-        index = index + 1
-      else
-        local error_msg = L["Legacy custom nameplate %s already exists. Skipping it."]:gsub("%%s", trigger_value)
+      table.insert(custom_plates, max_slot_no + index, legacy_custom_plate)
+      index = index + 1
+    else
+      local error_msg = L["Legacy custom nameplate %s already exists. Skipping it."]:gsub("%%s", trigger_value)
         ThreatPlates.Print(error_msg, true)
-      end
     end
+  end
 
     Addon.LibAceConfigRegistry:NotifyChange(ThreatPlates.ADDON_NAME)
-    UpdateSpecial()
-  end
+  UpdateSpecial()
 end
 
 -----------------------------------------------------

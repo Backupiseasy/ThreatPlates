@@ -1,7 +1,7 @@
 local ADDON_NAME, Addon = ...
 local ThreatPlates = Addon.ThreatPlates
 
-local Widget = (Addon.CLASSIC and {}) or Addon.Widgets:NewWidget("Experience")
+local Widget = (Addon.IS_CLASSIC and {}) or Addon.Widgets:NewWidget("Experience")
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -17,7 +17,6 @@ local GetStatusBarWidgetVisualizationInfo = C_UIWidgetManager.GetStatusBarWidget
 local UnitPlayerControlled, UnitIsOwnerOrControllerOfUnit = UnitPlayerControlled, UnitIsOwnerOrControllerOfUnit
 
 -- ThreatPlates APIs
-local TidyPlatesThreat = TidyPlatesThreat
 local ANCHOR_POINT_TEXT = Addon.ANCHOR_POINT_TEXT
 
 local _G =_G
@@ -100,7 +99,7 @@ function Widget:UPDATE_UI_WIDGET(widget_info)
 end
 
 function Widget:IsEnabled()
-  local db = TidyPlatesThreat.db.profile.ExperienceWidget
+  local db = Addon.db.profile.ExperienceWidget
   return db.ON or db.ShowInHeadlineView
 end
 
@@ -108,9 +107,9 @@ function Widget:OnEnable()
   self:SubscribeEvent("UPDATE_UI_WIDGET")
 end
 
-function Widget:OnDisable()
-  self:UnsubscribeEvent("UPDATE_UI_WIDGET")
-end
+-- function Widget:OnDisable()
+--   self:UnsubscribeAllEvents()
+-- end
 
 function Widget:EnabledForStyle(style, unit)
   return EnabledForStyle[style]
@@ -168,7 +167,7 @@ function Widget:UpdateLayout(widget_frame)
 end
 
 function Widget:UpdateSettings()
-  Settings = TidyPlatesThreat.db.profile.ExperienceWidget
+  Settings = Addon.db.profile.ExperienceWidget
 
   EnabledForStyle["NameOnly"] = Settings.ShowInHeadlineView
   EnabledForStyle["NameOnly-Unique"] = Settings.ShowInHeadlineView

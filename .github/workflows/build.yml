@@ -1,0 +1,64 @@
+# description of this workflow, can be anything you want
+name: Package and release version 
+
+on:
+  # push:
+  #   branches:
+  #     - master
+  #     - main
+  push:
+    tags:
+      - "[0-9]+.[0-9]+.[0-9]+"
+      - "!**-beta**"
+      - "!**-alpha**"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # we first have to clone the AddOn project, this is a required step
+      - name: Clone project
+        uses: actions/checkout@v1
+        # note: checkout@v2 breaks git history, so generating a changelog and
+        # file naming for non-tagged builds will not work properly
+
+      - name: Update Build Date in release changelog
+        run: sed -i "s/@build-time@/`date +%Y-%m-%d`/" CHANGELOG.md
+
+      - name: Update Build Date in release changelog
+        run: sed -i "s/@build-time@/`date +%Y-%m-%d`/" TidyPlates_ThreatPlates_Changes.log
+
+      - name: Create Mainline Package
+        uses: BigWigsMods/packager@master
+        with:
+          args: -e -l -n "ThreatPlates-{project-version}{classic}"
+        env:
+          CF_API_KEY: ${{ secrets.CF_API_KEY }}
+          GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
+          WOWI_API_TOKEN: ${{ secrets.WOWI_API_TOKEN }}
+
+      - name: Create Classic Package
+        uses: BigWigsMods/packager@master
+        with:
+          args: -e -l -n "ThreatPlates-{project-version}{classic}" -g classic
+        env:
+          CF_API_KEY: ${{ secrets.CF_API_KEY }}
+          GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
+          WOWI_API_TOKEN: ${{ secrets.WOWI_API_TOKEN }}
+
+      - name: Create BCC Package
+        uses: BigWigsMods/packager@master
+        with:
+          args: -e -l -n "ThreatPlates-{project-version}{classic}" -g bcc
+        env:
+          CF_API_KEY: ${{ secrets.CF_API_KEY }}
+          GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
+          WOWI_API_TOKEN: ${{ secrets.WOWI_API_TOKEN }}
+
+#      - name: Send Status to Discord
+#        uses: nebularg/actions-discord-webhook@v1
+#        with:
+#          webhook_url: ${{ secrets.WEBHOOK_URL }}
+#          status: ${{ job.status }}
+#        if: failure()

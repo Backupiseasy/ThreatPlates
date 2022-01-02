@@ -22,7 +22,6 @@ local SPELL_POWER_MANA = SPELL_POWER_MANA
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 
 -- ThreatPlates APIs
-local TidyPlatesThreat = TidyPlatesThreat
 local BackdropTemplate = Addon.BackdropTemplate
 
 local _G =_G
@@ -214,7 +213,7 @@ function Widget:Create()
 end
 
 function Widget:IsEnabled()
-  return TidyPlatesThreat.db.profile.ResourceWidget.ON
+  return Addon.db.profile.ResourceWidget.ON
 end
 
 -- EVENT: UNIT_POWER_UPDATE: "unitID", "powerType"
@@ -223,6 +222,10 @@ function Widget:OnEnable()
   self:SubscribeEvent("PLAYER_TARGET_CHANGED")
   -- Widget:SubscribeEvent("UNIT_DISPLAYPOWER") -- use this to determine power type changes on units
 end
+
+-- function Widget:OnDisable()
+--   self:UnsubscribeAllEvents()
+-- end
 
 function Widget:EnabledForStyle(style, unit)
   return not (style == "NameOnly" or style == "NameOnly-Unique" or style == "etotem")
@@ -312,7 +315,7 @@ function Widget:UpdateLayout()
 
   local bar = widget_frame.Bar
   if db.ShowBar then
-    local bar_texture = Addon.LSM:Fetch('statusbar', db.BarTexture)
+    local bar_texture = Addon.LibSharedMedia:Fetch('statusbar', db.BarTexture)
 
     bar:SetAllPoints()
     bar:SetStatusBarTexture(bar_texture)
@@ -325,7 +328,7 @@ function Widget:UpdateLayout()
     local border = widget_frame.Border
     border:SetBackdrop({
       --bgFile = bar_texture,
-      edgeFile = Addon.LSM:Fetch('border', db.BorderTexture),
+      edgeFile = Addon.LibSharedMedia:Fetch('border', db.BorderTexture),
       edgeSize = db.BorderEdgeSize,
       insets = { left = 0, right = 0, top = 0, bottom = 0 }
     })
@@ -339,7 +342,7 @@ function Widget:UpdateLayout()
   if db.ShowText then
     text:SetAllPoints()
 
-    text:SetFont(Addon.LSM:Fetch('font', db.Font), db.FontSize)
+    text:SetFont(Addon.LibSharedMedia:Fetch('font', db.Font), db.FontSize)
     text:SetJustifyH("CENTER")
     text:SetShadowOffset(1, -1)
     text:SetMaxLines(1)
@@ -352,7 +355,7 @@ function Widget:UpdateLayout()
 end
 
 function Widget:UpdateSettings()
-  self.db = TidyPlatesThreat.db.profile.ResourceWidget
+  self.db = Addon.db.profile.ResourceWidget
 end
 
 --function Widget:UpdateAllFramesAfterSettingsUpdate()

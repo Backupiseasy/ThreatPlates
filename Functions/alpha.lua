@@ -12,7 +12,7 @@ local UnitExists = UnitExists
 local GetCVar = GetCVar
 
 -- ThreatPlates APIs
-local TidyPlatesThreat, ThreatPlates = TidyPlatesThreat, Addon.ThreatPlates
+local ThreatPlates = Addon.ThreatPlates
 local Animations = Addon.Animations
 local Transparency = Addon.Transparency
 local GetThreatLevel = Addon.GetThreatLevel
@@ -44,7 +44,7 @@ local Element = "Transparency"
 ---------------------------------------------------------------------------------------------------
 
 local function TransparencySituational(unit)
-	local db = TidyPlatesThreat.db.profile.nameplate
+	local db = Addon.db.profile.nameplate
 
 	-- Do checks for situational transparency settings:
 	if unit.TargetMarker and db.toggle.MarkedA then
@@ -74,7 +74,7 @@ local function TransparencyGeneral(unit)
   end
 
 	-- Do checks for target settings:
-	local db = TidyPlatesThreat.db.profile.nameplate
+	local db = Addon.db.profile.nameplate
 
   local target_alpha
 	if UnitExists("target") then
@@ -100,7 +100,7 @@ local function TransparencyGeneral(unit)
 end
 
 local function TransparencyThreat(unit, style)
-	local db = TidyPlatesThreat.db.profile.threat
+	local db = Addon.db.profile.threat
 
 	if not db.useAlpha then
 		return TransparencyGeneral(unit)
@@ -147,7 +147,7 @@ local function AlphaUniqueNameOnly(unit)
 	local unique_setting = unit.CustomPlateSettings
 
   if unique_setting.overrideAlpha then
-    local db = TidyPlatesThreat.db.profile.HeadlineView
+    local db = Addon.db.profile.HeadlineView
     if db.useAlpha then
 			return AlphaNormal(unit)
     end
@@ -165,7 +165,7 @@ local function TransparencyEmpty(unit)
 end
 
 local function TransparencyNameOnly(unit)
-	local db = TidyPlatesThreat.db.profile.HeadlineView
+	local db = Addon.db.profile.HeadlineView
 
 	if db.useAlpha then
     return AlphaNormal(unit)
@@ -306,7 +306,7 @@ function Transparency:Initialize(frame)
 end
 
 function Transparency:UpdateSettings()
-  Settings = TidyPlatesThreat.db.profile
+  Settings = Addon.db.profile
 
   CVAR_NameplateOccludedAlphaMult = tonumber(GetCVar("nameplateOccludedAlphaMult"))
 
@@ -373,7 +373,7 @@ local function TargetGained(tp_frame)
   -- Update the nameplate of the current target unit
   SituationalEvent(tp_frame)
 
-  local db = TidyPlatesThreat.db.profile.nameplate
+  local db = Addon.db.profile.nameplate
   if db.toggle.NonTargetA then
     -- Update all non-target units
     for _, frame in pairs(PlatesByUnit) do

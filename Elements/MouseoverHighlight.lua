@@ -16,7 +16,6 @@ local UnitIsUnit = UnitIsUnit
 
 -- ThreatPlates APIs
 local BackdropTemplate = Addon.BackdropTemplate
-local TidyPlatesThreat = TidyPlatesThreat
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
 
 local _G =_G
@@ -147,7 +146,7 @@ function Element.UpdateStyle(tp_frame, style, plate_style)
 end
 
 function Element.UpdateSettings()
-  local db = TidyPlatesThreat.db.profile
+  local db = Addon.db.profile
 
   TargetHighlightEnabledForStyle["NameOnly"] = db.HeadlineView.ShowTargetHighlight
   TargetHighlightEnabledForStyle["NameOnly-Unique"] = db.HeadlineView.ShowTargetHighlight

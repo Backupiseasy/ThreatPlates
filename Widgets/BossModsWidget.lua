@@ -19,7 +19,6 @@ local GetTime = GetTime
 local tremove = tremove
 
 -- ThreatPlates APIs
-local TidyPlatesThreat = TidyPlatesThreat
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -40,7 +39,7 @@ local UPDATE_INTERVAL = 0.5
 ---------------------------------------------------------------------------------------------------
 
 local function AlignWidget(widget_frame)
-  local db = TidyPlatesThreat.db.profile.BossModsWidget
+  local db = Addon.db.profile.BossModsWidget
 
   local offset_x = 0
   if widget_frame.AurasNo > 1 then
@@ -68,7 +67,7 @@ local function UpdateAuraTexture(frame, aura, index)
 
   -- Duration Text
   local color = ConfigDB.FontColor
-  aura.Time:SetFont(Addon.LSM:Fetch('font', ConfigDB.Font), ConfigDB.FontSize)
+  aura.Time:SetFont(Addon.LibSharedMedia:Fetch('font', ConfigDB.Font), ConfigDB.FontSize)
   aura.Time:SetAllPoints(aura)
   aura.Time:SetTextColor(color.r, color.g, color.b)
 end
@@ -280,7 +279,7 @@ function Widget:Create(tp_frame)
 end
 
 function Widget:IsEnabled()
-  local db = TidyPlatesThreat.db.profile.BossModsWidget
+  local db = Addon.db.profile.BossModsWidget
   return db.ON or db.ShowInHeadlineView
 end
 
@@ -304,14 +303,14 @@ end
 
 function Widget:EnabledForStyle(style, unit)
   if (style == "NameOnly" or style == "NameOnly-Unique") then
-    return TidyPlatesThreat.db.profile.BossModsWidget.ShowInHeadlineView
+    return Addon.db.profile.BossModsWidget.ShowInHeadlineView
   elseif style ~= "etotem" then
-    return TidyPlatesThreat.db.profile.BossModsWidget.ON
+    return Addon.db.profile.BossModsWidget.ON
   end
 end
 
 function Widget:OnUnitAdded(widget_frame, unit)
-  ConfigDB = TidyPlatesThreat.db.profile.BossModsWidget
+  ConfigDB = Addon.db.profile.BossModsWidget
 
   if not EnabledByBossmod then
     widget_frame:Hide()
@@ -335,7 +334,7 @@ function Widget:OnUnitAdded(widget_frame, unit)
 end
 
 --function Widget:OnUpdateStyle(widget_frame, unit)
---  local db = TidyPlatesThreat.db.profile.BossModsWidget
+--  local db = Addon.db.profile.BossModsWidget
 --
 --  local offset_x = 0
 --  if widget_frame.AurasNo > 1 then

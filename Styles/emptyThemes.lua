@@ -3,8 +3,8 @@ local t = Addon.ThreatPlates
 
 local EMPTY_TEXTURE = t.Art .. "Empty"
 
-local function Create(self,name)
-	local db = self.db.profile.settings
+local function Create(name)
+	local db = Addon.db.profile.settings
 	local theme = {
 
 		frame = {
@@ -83,7 +83,7 @@ local function Create(self,name)
 		},
 
 		level = {
-			typeface =						Addon.LSM:Fetch('font', db.level.typeface),
+			typeface =						Addon.LibSharedMedia:Fetch('font', db.level.typeface),
 			size = db.level.size,
 			width = db.level.width,
 			height = db.level.height,
@@ -98,7 +98,7 @@ local function Create(self,name)
 		},
 
 		spelltext = {
-			typeface =						Addon.LSM:Fetch('font', db.spelltext.typeface),
+			typeface =						Addon.LibSharedMedia:Fetch('font', db.spelltext.typeface),
 			size = db.spelltext.size,
 			width = db.spelltext.width,
 			height = db.spelltext.height,

@@ -3,7 +3,7 @@
 ---------------------------------------------------------------------------------------------------
 local ADDON_NAME, Addon = ...
 
-local Widget = (Addon.CLASSIC and {}) or Addon.Widgets:NewWidget("Arena")
+local Widget = (Addon.IS_CLASSIC and {}) or Addon.Widgets:NewWidget("Arena")
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -17,7 +17,6 @@ local GetNumArenaOpponents, UnitReaction = GetNumArenaOpponents, UnitReaction
 local IsInInstance, IsInBrawl = IsInInstance, C_PvP.IsInBrawl
 
 -- ThreatPlates APIs
-local TidyPlatesThreat = TidyPlatesThreat
 local Font = Addon.Font
 
 local PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ArenaWidget\\"
@@ -92,7 +91,7 @@ function Widget:Create(tp_frame)
 end
 
 function Widget:IsEnabled()
-  return TidyPlatesThreat.db.profile.arenaWidget.ON
+  return Addon.db.profile.arenaWidget.ON
 end
 
 function Widget:OnEnable()
@@ -100,6 +99,10 @@ function Widget:OnEnable()
   --Widget:SubscribeEvent("ARENA_PREP_OPPONENT_SPECIALIZATIONS")
   --Widget:SubscribeEvent("ARENA_OPPONENT_UPDATE")
 end
+
+-- function Widget:OnDisable()
+--   self:UnsubscribeAllEvents()
+-- end
 
 function Widget:EnabledForStyle(style, unit)
   return UnitReaction(unit.unitid, "player") < 4 and not (style == "NameOnly" or style == "NameOnly-Unique" or style == "etotem")
@@ -133,7 +136,7 @@ function Widget:OnUnitAdded(widget_frame, unit)
 
   if Settings.HideName then
     widget_frame:GetParent().visual.Name:Hide()
-  elseif TidyPlatesThreat.db.profile.Name.HealthbarMode.Enabled then
+  elseif Addon.db.profile.Name.HealthbarMode.Enabled then
     widget_frame:GetParent().visual.Name:Show()
   end
 
@@ -160,5 +163,5 @@ function Widget:UpdateLayout(widget_frame)
 end
 
 function Widget:UpdateSettings()
-  Settings = TidyPlatesThreat.db.profile.arenaWidget
+  Settings = Addon.db.profile.arenaWidget
 end

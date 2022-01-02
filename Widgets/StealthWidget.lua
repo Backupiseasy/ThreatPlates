@@ -3,7 +3,7 @@
 ---------------------------------------------------------------------------------------------------
 local ADDON_NAME, Addon = ...
 
-local Widget = (Addon.CLASSIC and {}) or Addon.Widgets:NewWidget("Stealth")
+local Widget = (Addon.IS_CLASSIC and {}) or Addon.Widgets:NewWidget("Stealth")
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -16,7 +16,6 @@ local strsplit = strsplit
 local UnitReaction, UnitIsPlayer, UnitBuff = UnitReaction, UnitIsPlayer, UnitBuff
 
 -- ThreatPlates APIs
-local TidyPlatesThreat = TidyPlatesThreat
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -76,6 +75,24 @@ local DETECTION_UNITS = {
   ["162417"] = true, -- Anubisath Sentinel
   ["161571"] = true, -- Anubisath Sentinel
   ["159219"] = true, -- Umbral Seer
+  -- Shadowlands
+  ["165349"] = true, -- Animated Corpsehound
+  ["164563"] = true, -- Vicious Gargon
+  ["152708"] = true, -- Mawsworn Seeker
+  ["163524"] = true, -- Kyrian Dark-Praetor
+  ["173051"] = true, -- Suppressor Xelors
+  ["171422"] = true, -- Arch-Suppressor Laguas
+  ["151127"] = true, -- Lord of Torment
+  ["152905"] = true, -- Tower Sentinel
+  ["155828"] = true, -- Runecarved Colossus
+  ["157322"] = true, -- Lord of Locks
+  ["167331"] = true, -- Nascent Shade
+  ["151817"] = true, -- Deadsoul Devil
+  ["152656"] = true, -- Deadsoul Stalker
+  ["152898"] = true, -- Deadsoul Chorus
+  ["151818"] = true, -- Deadsoul Miscreation
+  ["175502"] = true, -- Grand Automaton
+  ["156244"] = true, -- Winged Automaton
 }
 
 ---------------------------------------------------------------------------------------------------
@@ -104,7 +121,7 @@ function Widget:Create(tp_frame)
 end
 
 function Widget:IsEnabled()
-  local db = TidyPlatesThreat.db.profile.stealthWidget
+  local db = Addon.db.profile.stealthWidget
   return db.ON or db.ShowInHeadlineView
 end
 
@@ -112,21 +129,20 @@ function Widget:EnabledForStyle(style, unit)
   if UnitReaction(unit.unitid, "player") > 4 or unit.type == "PLAYER" then return false end
 
   if (style == "NameOnly" or style == "NameOnly-Unique") then
-    return TidyPlatesThreat.db.profile.stealthWidget.ShowInHeadlineView
+    return Addon.db.profile.stealthWidget.ShowInHeadlineView
   elseif style ~= "etotem" then
-    return TidyPlatesThreat.db.profile.stealthWidget.ON
+    return Addon.db.profile.stealthWidget.ON
   end
 end
 
 function Widget:OnUnitAdded(widget_frame, unit)
-  local name, spell_id
+  local name, spell_id, _
 
   if DETECTION_UNITS[unit.NPCID] then
     name = unit.NPCID
   else
     local DETECTION_AURAS, UnitBuff = DETECTION_AURAS, UnitBuff
     local unitid = unit.unitid
-    local name, _
     for i = 1, 40 do
       name, _, _, _, _, _, _, _, _, spell_id = UnitBuff(unitid, i)
       if not name or DETECTION_AURAS[spell_id] then
@@ -140,7 +156,7 @@ function Widget:OnUnitAdded(widget_frame, unit)
     return
   end
 
-  local db = TidyPlatesThreat.db.profile.stealthWidget
+  local db = Addon.db.profile.stealthWidget
 
   -- Updates based on settings / unit style
   if unit.style == "NameOnly" or unit.style == "NameOnly-Unique" then
@@ -160,7 +176,7 @@ function Widget:OnUnitAdded(widget_frame, unit)
 end
 
 --function Widget:OnUpdateStyle(widget_frame, unit)
---  local db = TidyPlatesThreat.db.profile.stealthWidget
+--  local db = Addon.db.profile.stealthWidget
 --  -- Updates based on settings / unit style
 --  if unit.style == "NameOnly" or unit.style == "NameOnly-Unique" then
 --    widget_frame:SetPoint("CENTER", widget_frame:GetParent(), "CENTER", db.x_hv, db.y_hv)

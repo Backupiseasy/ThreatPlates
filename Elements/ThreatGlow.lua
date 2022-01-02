@@ -15,7 +15,6 @@ local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
 local UnitIsConnected, UnitAffectingCombat = UnitIsConnected, UnitAffectingCombat
 
 -- ThreatPlates APIs
-local TidyPlatesThreat = TidyPlatesThreat
 local RGB = Addon.RGB
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
 local BackdropTemplate = Addon.BackdropTemplate
@@ -46,21 +45,15 @@ local ThreatColorWOThreatSystem, TappedColor
 -- Wrapper functions for WoW Classic
 ---------------------------------------------------------------------------------------------------
 
-if Addon.CLASSIC then
-  ShowThreatGlow = function(unit)
-    return _G.UnitAffectingCombat(unit.unitid)
-  end
-else
-  ShowThreatGlow = function(unit)
-    if ShowOnAttackedUnitsOnly then
-      if IsInInstance() and UseHeuristicInInstances then
-        return _G.UnitAffectingCombat(unit.unitid)
-      else
-        return Addon:OnThreatTable(unit)
-      end
-    else
+local function ShowThreatGlow(unit)
+  if ShowOnAttackedUnitsOnly then
+    if IsInInstance() and UseHeuristicInInstances then
       return _G.UnitAffectingCombat(unit.unitid)
+    else
+      return Addon:OnThreatTable(unit)
     end
+  else
+    return _G.UnitAffectingCombat(unit.unitid)
   end
 end
 
@@ -155,7 +148,7 @@ function Element.ThreatUpdate(tp_frame, unit)
 end
 
 function Element.UpdateSettings()
-  local db = TidyPlatesThreat.db.profile
+  local db = Addon.db.profile
   Settings = db.threat
 
   ShowOnAttackedUnitsOnly = db.ShowThreatGlowOnAttackedUnitsOnly

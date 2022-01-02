@@ -11,7 +11,7 @@ local pairs = pairs
 local UnitExists = UnitExists
 
 -- ThreatPlates APIs
-local TidyPlatesThreat, ThreatPlates = TidyPlatesThreat, Addon.ThreatPlates
+local ThreatPlates = Addon.ThreatPlates
 local L = Addon.L
 local Animations, Scaling = Addon.Animations, Addon.Scaling
 local GetThreatLevel = Addon.GetThreatLevel
@@ -38,7 +38,7 @@ local AnimateHideNameplate, CVAR_nameplateMinAlpha, CVAR_nameplateMinScale
 local Element = "Scale"
 
 local function ScaleSituational(unit)
-	local db = TidyPlatesThreat.db.profile.nameplate
+	local db = Addon.db.profile.nameplate
 
 	-- Do checks for situational scale settings:
 	if unit.TargetMarker and db.toggle.MarkedS then
@@ -68,7 +68,7 @@ local function ScaleGeneral(unit)
 	end
 
 	-- Do checks for target settings:
-	local db = TidyPlatesThreat.db.profile.nameplate
+	local db = Addon.db.profile.nameplate
 
 	local target_scale
 	if UnitExists("target") then
@@ -96,7 +96,7 @@ local function ScaleGeneral(unit)
 end
 
 local function ScaleThreat(unit, style)
-	local db = TidyPlatesThreat.db.profile.threat
+	local db = Addon.db.profile.threat
 
 	if not db.useScale then
 		return ScaleGeneral(unit)
@@ -143,7 +143,7 @@ local function ScaleUniqueNameOnly(unit)
 	local unique_setting = unit.CustomPlateSettings
 
 	if unique_setting.overrideScale then
-		local db = TidyPlatesThreat.db.profile.HeadlineView
+		local db = Addon.db.profile.HeadlineView
 		if db.useScaling then
 			return ScaleNormal(unit)
 		end
@@ -161,7 +161,7 @@ local function ScaleEmpty(unit)
 end
 
 local function ScaleNameOnly(unit)
-	local db = TidyPlatesThreat.db.profile.HeadlineView
+	local db = Addon.db.profile.HeadlineView
 
 	if db.useScaling then
 		return ScaleNormal(unit)
@@ -231,7 +231,7 @@ function Scaling:HideNameplate(tp_frame)
 end
 
 function Scaling:UpdateSettings()
-	Settings = TidyPlatesThreat.db.profile.Animations
+	Settings = Addon.db.profile.Animations
 
 	if Settings.ScaleToDuration > 0 then
 		ScalePlate = ScalePlateWithAnimation
@@ -272,7 +272,7 @@ local function TargetGained(tp_frame)
   -- Update the nameplate of the current target unit
 	ScalePlate(tp_frame, ui_scale * GetScale(tp_frame.unit))
 
-  local db = TidyPlatesThreat.db.profile.nameplate
+  local db = Addon.db.profile.nameplate
   if db.toggle.NonTargetS then
     -- Update all non-target units
     for _, frame in pairs(PlatesByUnit) do

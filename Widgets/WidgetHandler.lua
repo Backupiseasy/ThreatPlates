@@ -370,7 +370,7 @@ function WidgetHandler:OnUnitAdded(tp_frame, unit)
     -- I think it could happen that a nameplate was created, then a widget is enabled, and afterwise the unit is
     -- added to the nameplate, i.e., InitializedWidgets is called.
     --    if plate_widgets[widget_name] == nil then
-    --      TidyPlatesThreat.db.global.Unit = tp_frame
+    --      Addon.db.global.Unit = tp_frame
     --    end
     --    assert (plate_widgets[widget_name] ~= nil, "Uninitialized widget found: " .. widget_name .. " for unit " .. unit.name .. " (" .. tp_frame:GetName() .. ")")
 
@@ -433,7 +433,6 @@ end
 function WidgetHandler:UpdateLayoutOfAllPlates(widget)
   for _, frame in pairs(Addon.PlatesCreated) do
     local widget_frame = frame.widgets[widget.Name]
-
     -- widget_frame could be nil if the widget as disabled and is enabled as part of a profile switch
     -- For these frames, UpdateAuraWidgetLayout will be called anyway when the widget is initalized
     -- (which happens after the settings update)
@@ -442,9 +441,16 @@ function WidgetHandler:UpdateLayoutOfAllPlates(widget)
         widget:UpdateLayout(widget_frame)
       end
 
-      -- plate is visible and widget is active, i.e., shown currently
-      if frame.Active and widget_frame.Active then
-        widget:OnUnitAdded(widget_frame, widget_frame.unit)
+      -- As we iterate over PlatesCreated - which is necessary to update the layout of currently not shown plates (but which
+      -- might be re-used later by the game) - we need only re-evaluate active frames to check if they are again
+      -- or no longer shown based on their style - after the settings change.
+      if frame.Active then
+        widget_frame.Active = frame.stylename ~= "empty" and widget:EnabledForStyle(frame.stylename, widget_frame.unit)  
+        if widget_frame.Active then
+          widget:OnUnitAdded(widget_frame, widget_frame.unit)
+        else
+          widget_frame:Hide()
+        end
       else
         widget_frame:Hide()
       end

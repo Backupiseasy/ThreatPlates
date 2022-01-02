@@ -1,5 +1,4 @@
 local ADDON_NAME, Addon = ...
-local ThreatPlates = Addon.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------
 -- Functions for changing and savely restoring CVars (mostly after login/logout/reload UI)
@@ -9,12 +8,12 @@ local ThreatPlates = Addon.ThreatPlates
 local tostring = tostring
 
 -- WoW APIs
-local GetCVar, GetCVarDefault = GetCVar, GetCVarDefault
+local SetCVar, GetCVar, GetCVarDefault = C_CVar.SetCVar, C_CVar.GetCVar, C_CVar.GetCVarDefault
 local IsInInstance = IsInInstance
 local NamePlateDriverFrame = NamePlateDriverFrame
 
 -- ThreatPlates APIs
-local TidyPlatesThreat, ThreatPlates = TidyPlatesThreat, Addon.ThreatPlates
+local ThreatPlates = Addon.ThreatPlates
 local L = Addon.L
 
 local _G =_G
@@ -41,6 +40,7 @@ local COMBAT_PROTECTED = {
   nameplateOverlapV = true,
   nameplateResourceOnTarget = true,
   nameplateSelectedAlpha = true,
+  nameplateNotSelectedAlpha = true,
   nameplateTargetBehindMaxDistance = true,
   -- Nameplate CVars
   nameplateShowAll = true,
@@ -74,7 +74,7 @@ local function SetConsoleVariable(cvar, value)
   -- Store in settings to be able to restore it later, but don't overwrite an existing value unless the current value
   -- is different from the backup value and the new value TP wants to set. In that case, the CVars was changed since
   -- last login with TP by the player or another addon.
-  local db = TidyPlatesThreat.db.profile.CVarsBackup
+  local db = Addon.db.profile.CVarsBackup
 
   value = tostring(value) -- convert to string, otherwise the following comparisons would compare numbers with strings
   local current_value = GetCVar(cvar)
@@ -84,7 +84,7 @@ local function SetConsoleVariable(cvar, value)
     db[cvar] = current_value
   end
 
-  _G.SetCVar(cvar, value)
+  SetCVar(cvar, value)
 end
 
 function CVars:Set(cvar, value)
@@ -92,24 +92,24 @@ function CVars:Set(cvar, value)
 end
 
 function CVars:SetToDefault(cvar)
-  _G.SetCVar(cvar, GetCVarDefault(cvar))
-  TidyPlatesThreat.db.profile.CVarsBackup[cvar] = nil
+  SetCVar(cvar, GetCVarDefault(cvar))
+  Addon.db.profile.CVarsBackup[cvar] = nil
 end
 
 function CVars:RestoreFromProfile(cvar)
-  local db = TidyPlatesThreat.db.profile.CVarsBackup
+  local db = Addon.db.profile.CVarsBackup
 
   if db[cvar] then
-    _G.SetCVar(cvar, db[cvar])
+    SetCVar(cvar, db[cvar])
     db[cvar] = nil
   end
 end
 
 --function CVars:RestoreAllFromProfile()
---  local db = TidyPlatesThreat.db.profile.CVarsBackup
+--  local db = Addon.db.profile.CVarsBackup
 --
 --  for cvar, value in pairs(db) do
---    _G.SetCVar(cvar, value)
+--    SetCVar(cvar, value)
 --    db[cvar] = nil
 --  end
 --end
@@ -145,22 +145,22 @@ end
 function CVars:SetToDefaultProtected(cvar)
   if COMBAT_PROTECTED[cvar] then
     Addon:CallbackWhenOoC(function()
-      _G.SetCVar(cvar, GetCVarDefault())
-      TidyPlatesThreat.db.profile.CVarsBackup[cvar] = nil
+      SetCVar(cvar, GetCVarDefault())
+      Addon.db.profile.CVarsBackup[cvar] = nil
     end, L["Unable to change the following console variable while in combat: "] .. cvar .. ". ")
   else
-    _G.SetCVar(cvar, GetCVarDefault())
-    TidyPlatesThreat.db.profile.CVarsBackup[cvar] = nil
+    SetCVar(cvar, GetCVarDefault())
+    Addon.db.profile.CVarsBackup[cvar] = nil
   end
 end
 
 function CVars:OverwriteProtected(cvar, value)
   if COMBAT_PROTECTED[cvar] then
     Addon:CallbackWhenOoC(function()
-      _G.SetCVar(cvar, value)
+      SetCVar(cvar, value)
     end, L["Unable to change the following console variable while in combat: "] .. cvar .. ". ")
   else
-    _G.SetCVar(cvar, value)
+    SetCVar(cvar, value)
   end
 end
 
@@ -173,7 +173,7 @@ local function SetCVarHook(name, value, c)
 
   -- Used as detection for switching between small and large nameplates
   if name == "NamePlateVerticalScale" then
-    local db = TidyPlatesThreat.db.profile.Automation
+    local db = Addon.db.profile.Automation
     local isInstance, _ = IsInInstance()
 
     if not NamePlateDriverFrame:IsUsingLargerNamePlateStyle() then
@@ -235,10 +235,10 @@ function CVars.InvalidCVarsForHidingNameplates()
 end
 
 function CVars.FixCVarsForHidingNameplates()
-  CVars.SetToDefault("nameplateMinScale")
-  CVars.SetToDefault("nameplateMaxScale")
-  CVars.SetToDefault("nameplateLargerScale")
-  CVars.SetToDefault("nameplateSelectedScale")
+  SetCVar("nameplateMinScale", 0.8)       -- Default: 0.8, (TBC) Classic: 1.0
+  SetCVar("nameplateMaxScale", 1.0)       -- Default: 1.0
+  SetCVar("nameplateLargerScale", 1.2)    -- Default: 1.2
+  SetCVar("nameplateSelectedScale", 1.2)  -- Default: 1.2, (TBC) Classic: 1.0
 end
 
 function CVars.InvalidCVarsForOcclusionDetection()
@@ -247,14 +247,27 @@ function CVars.InvalidCVarsForOcclusionDetection()
   local nameplateOccludedAlphaMult = tonumber(GetCVar("nameplateOccludedAlphaMult"))
   local nameplateSelectedAlpha = tonumber(GetCVar("nameplateSelectedAlpha"))
 
-  return nameplateMinAlpha ~= 1 or nameplateMaxAlpha ~= 1 or nameplateOccludedAlphaMult > 0.9 or nameplateSelectedAlpha ~= 1
+  local invalid = nameplateMinAlpha ~= 1 or nameplateMaxAlpha ~= 1 or nameplateOccludedAlphaMult > 0.9 or nameplateSelectedAlpha ~= 1
+
+  -- Occlusion detection does not work when a target is selected in Classic, see https://github.com/Stanzilla/WoWUIBugs/issues/134
+  if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC then
+    local nameplateNotSelectedAlpha = tonumber(GetCVar("nameplateNotSelectedAlpha"))
+    return invalid or nameplateNotSelectedAlpha ~= 1
+  end
+
+  return invalid
 end
 
 function CVars.FixCVarsForOcclusionDetection()
-  _G.SetCVar("nameplateMinAlpha", 1)
-  CVars.SetToDefault("nameplateMaxAlpha")          -- Default: 1.0
-  CVars.SetToDefault("nameplateOccludedAlphaMult") -- Default: 0.4
-  CVars.SetToDefault("nameplateSelectedAlpha")     -- Default: 1.0
+  SetCVar("nameplateMinAlpha", 1.0)          -- Default: 0.6, (TBC) Classic: 1.0
+  SetCVar("nameplateMaxAlpha", 1.0)          -- Default: 1.0
+  SetCVar("nameplateOccludedAlphaMult", 0.4) -- Default: 0.4, (TBC) Classic: 1.0
+  SetCVar("nameplateSelectedAlpha", 1.0)     -- Default: 1.0
+
+  -- Occlusion detection does not work when a target is selected in Classic, see https://github.com/Stanzilla/WoWUIBugs/issues/134
+  if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC then
+    SetCVar("nameplateNotSelectedAlpha", 1)  -- Default: 0.5
+  end
 
   -- Legacy Code:
   -- Addon.CVars:Set("nameplateMinAlpha", 1)

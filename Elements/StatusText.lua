@@ -8,7 +8,7 @@ local ADDON_NAME, Addon = ...
 ---------------------------------------------------------------------------------------------------
 
 -- Lua APIs
-local _G, gsub, ceil, format, string = _G, gsub, ceil, format, string
+local gsub, ceil, string = gsub, ceil, string
 
 -- WoW APIs
 local UnitIsPlayer, UnitPlayerControlled, UnitExists = UnitIsPlayer, UnitPlayerControlled, UnitExists
@@ -17,11 +17,12 @@ local UNIT_LEVEL_TEMPLATE = UNIT_LEVEL_TEMPLATE
 local GetGuildInfo = GetGuildInfo
 
 -- ThreatPlates APIs
-local TidyPlatesThreat = TidyPlatesThreat
 local PlatesByUnit = Addon.PlatesByUnit
 local SubscribeEvent, PublishEvent,  UnsubscribeEvent = Addon.EventService.Subscribe, Addon.EventService.Publish, Addon.EventService.Unsubscribe
 local RGB = Addon.RGB
 local Font = Addon.Font
+local L = Addon.L
+local TransliterateCyrillicLetters = Addon.Localization.TransliterateCyrillicLetters
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -35,9 +36,11 @@ local COLOR_GUILD = RGB(178, 178, 229, .7)
 -- Local variables
 ---------------------------------------------------------------------------------------------------
 local UnitSubtitles = {}
+local Truncate
+
 local ScannerName = "ThreatPlates_Tooltip_Subtext"
 local TooltipScanner = CreateFrame( "GameTooltip", ScannerName , nil, "GameTooltipTemplate" ) -- Tooltip name cannot be nil
-TooltipScanner:SetOwner( WorldFrame, "ANCHOR_NONE" )
+TooltipScanner:SetOwner(WorldFrame, "ANCHOR_NONE")
 
 ---------------------------------------------------------------------------------------------------
 -- Cached configuration settings
@@ -45,72 +48,14 @@ TooltipScanner:SetOwner( WorldFrame, "ANCHOR_NONE" )
 local Settings, SettingsStatusText
 local ModeSettings = {}
 local ShowHealth, ShowAbsorbs
-local StatusTextFunction = {
-  HealthbarMode = {},
-  NameMode = {}
+local StatusTextFunc = {
+  HealthbarMode = {
+    --FRIENDLY = {}, HOSTILE = {}, NEUTRAL = {}
+  },
+  NameMode = {
+    --FRIENDLY = {}, HOSTILE = {}, NEUTRAL = {}
+  }
 }
-
----------------------------------------------------------------------------------------------------
--- Correct localization of numbers: Western or East Asian Nations (CJK)
----------------------------------------------------------------------------------------------------
-
-local function TruncateWestern(value)
-  if not TidyPlatesThreat.db.profile.text.truncate then
-    return value
-  end
-
-  if value >= 1e6 then
-    return format("%.1fm", value / 1e6)
-  elseif value >= 1e4 then
-    return format("%.1fk", value / 1e3)
-  else
-    return value
-  end
-end
-
-local TruncateEastAsian = TruncateWestern
-local Truncate = TruncateWestern
-
-local MAP_LOCALE_TO_UNIT_SYMBOL = {
-  koKR = { -- Korrean
-    Unit_1K = "천",
-    Unit_10K = "만",
-    Unit_1B = "억",
-  },
-  zhCN = { -- Simplified Chinese
-    Unit_1K = "千",
-    Unit_10K = "万",
-    Unit_1B = "亿",
-  },
-  zhTW = { -- Traditional Chinese
-    Unit_1K = "千",
-    Unit_10K = "萬",
-    Unit_1B = "億",
-  },
-}
-
-local locale = GetLocale()
-if MAP_LOCALE_TO_UNIT_SYMBOL[locale] then
-  local Format_Unit_1K = "%.1f" .. MAP_LOCALE_TO_UNIT_SYMBOL[locale].Unit_1K
-  local Format_Unit_10K = "%.1f" .. MAP_LOCALE_TO_UNIT_SYMBOL[locale].Unit_10K
-  local Format_Unit_1B = "%.1f" .. MAP_LOCALE_TO_UNIT_SYMBOL[locale].Unit_1B
-
-  TruncateEastAsian = function(value)
-    if not TidyPlatesThreat.db.profile.text.truncate then
-      return value
-    end
-
-    if value >= 1e8 then
-      return format(Format_Unit_1B, value / 1e8)
-    elseif value >= 1e4 then
-      return format(Format_Unit_10K, value / 1e4)
-    elseif value >= 1e3 then
-      return format(Format_Unit_1K, value / 1e3)
-    else
-      return value
-    end
-  end
-end
 
 ---------------------------------------------------------------------------------------------------
 -- Status text generating functions
@@ -179,22 +124,22 @@ local function GetLevelDescription(unit)
   local description
 
   if classification == "worldboss" then
-    description = "World Boss"
+    description = L["World Boss"]
   else
     if unit.level > 0 then
-      description = "Level " .. unit.level
+      description = L["Level "] .. unit.level
     else
-      description = "Level ??"
+      description =  L["Level ??"]
     end
 
     if unit.isRare then
       if unit.isElite then
-        description = description .. " (Rare Elite)"
+        description = description .. L[" (Rare Elite)"]
       else
-        description = description .. " (Rare)"
+        description = description .. L[" (Rare)"]
       end
     elseif unit.isElite then
-      description = description .. " (Elite)"
+      description = description .. L[" (Elite)"]
     end
   end
 
@@ -203,7 +148,7 @@ end
 
 -- return ceil(100 * (unit.health / unit.healthmax)) .. "%", GetColorByHealthDeficit(unit)
 local function TextHealthPercentColored(unit)
-  local text_health, text_absorbs, color = "", "", COLOR_ROLE
+  local text_health, text_absorbs, color = "", "", GetRoleColor
 
   if ShowAbsorbs then
     local absorbs_amount = _G.UnitGetTotalAbsorbs(unit.unitid) or 0
@@ -291,6 +236,8 @@ local function TextRoleGuildLevel(unit)
     description, color = GetLevelDescription(unit)
   end
 
+  description = TransliterateCyrillicLetters(description)
+
   return description, color
 end
 
@@ -304,6 +251,8 @@ local function TextRoleGuild(unit)
     color = GetGuildColor
   end
 
+  description = TransliterateCyrillicLetters(description)
+
   return description, color
 end
 
@@ -314,6 +263,8 @@ local function TextNPCRole(unit)
   if unit.type == "NPC" then
     description, color = GetUnitSubtitle(unit)
   end
+
+  description = TransliterateCyrillicLetters(description)
 
   return description, color
 end
@@ -327,6 +278,12 @@ local function TextAll(unit)
   end
 end
 
+local function TextCustom(unit)
+  if not Addon.LibDogTag then
+    return "", GetRoleColor
+  end
+end
+
 local STATUS_TEXT_REFERENCE =
 {
   -- NONE , nil for this
@@ -336,51 +293,8 @@ local STATUS_TEXT_REFERENCE =
   ROLE_GUILD_LEVEL = TextRoleGuildLevel,
   LEVEL = GetLevelDescription,
   ALL = TextAll,
+  CUSTOM = TextCustom,
 }
-
----------------------------------------------------------------------------------------------------
---
----------------------------------------------------------------------------------------------------
-
-local function MAP(status_text_func)
-  for mode, func in pairs(STATUS_TEXT_REFERENCE) do
-    if func == status_text_func then
-      return mode
-    end
-  end
-  return "UNKOWN"
-end
-
-local function SetCustomText(tp_frame)
-  local unit = tp_frame.unit
-
-  local status_text, color
-
-  local status_text_func = StatusTextFunction[tp_frame.PlateStyle][unit.reaction]
-
-  if status_text_func then
-    local subtext, color_func = status_text_func(unit)
-
-    assert (color_func ~= nil, "StatusText: Color function is nil - Style: " .. tp_frame.PlateStyle .. " / Reaction: " .. unit.reaction ..
-      " / Function: " .. MAP(status_text_func))
-
-    if subtext then
-      status_text = subtext
-
-      local db = ModeSettings[tp_frame.PlateStyle]
-      if db.SubtextColorUseHeadline then
-        color = tp_frame:GetNameColor()
-      elseif db.SubtextColorUseSpecific then
-        color = color_func(unit)
-      else
-        color = db.SubtextColor
-      end
-    end
-  end
-
-  return status_text, color
-end
-
 
 ---------------------------------------------------------------------------------------------------
 -- Element code
@@ -401,15 +315,52 @@ function Element.Created(tp_frame)
   tp_frame.visual.StatusText = status_text
 end
 
+local function SetStatusText(tp_frame)
+  local unit = tp_frame.unit
+    
+  local status_text_func = StatusTextFunc[tp_frame.PlateStyle][unit.reaction]
+  local status_text, color
+  if status_text_func then
+    local subtext, color_func = status_text_func(unit)
+    if subtext then
+      status_text = subtext
+
+      local db = ModeSettings[tp_frame.PlateStyle]
+      if db.SubtextColorUseHeadline then
+        color = tp_frame:GetNameColor()
+      elseif db.SubtextColorUseSpecific then
+        color = color_func(unit)
+      else
+        color = db.SubtextColor
+      end
+    end
+  end
+
+  local status_text_frame = tp_frame.visual.StatusText
+  status_text_frame:SetText(status_text)
+  if status_text then
+    status_text_frame:SetTextColor(color.r, color.g, color.b, color.a)
+  end
+end
+
+local function StyleUpdate(tp_frame, style, stylename)
+  if Addon.LibDogTag then
+    local unit = tp_frame.unit
+
+    if StatusTextFunc[tp_frame.PlateStyle][unit.reaction] == TextCustom then 
+      local db = ModeSettings[tp_frame.PlateStyle]
+      local custom_dog_tag_text = (unit.reaction == "FRIENDLY" and db.FriendlySubtextCustom) or db.EnemySubtextCustom
+      Addon.LibDogTag:AddFontString(tp_frame.visual.StatusText, tp_frame, custom_dog_tag_text, "Unit", { unit = unit.unitid })
+    else
+      Addon.LibDogTag:RemoveFontString(tp_frame.visual.StatusText)
+    end
+  end
+end
+
 -- Called in processing event: NAME_PLATE_UNIT_ADDED
 function Element.UnitAdded(tp_frame)
-  local status_text = tp_frame.visual.StatusText
-
-  local text, color = SetCustomText(tp_frame)
-  status_text:SetText(text)
-  if text then
-    status_text:SetTextColor(color.r, color.g, color.b, color.a)
-  end
+  SetStatusText(tp_frame)
+  StyleUpdate(tp_frame, tp_frame.style, tp_frame.stylename)
 end
 
 -- Called in processing event: NAME_PLATE_UNIT_REMOVED
@@ -437,16 +388,16 @@ end
 local function StatusTextUpdateByUnit(unitid)
   local frame = PlatesByUnit[unitid]
   if frame and frame.Active and frame.PlateStyle ~= "None" then
-    Element.UnitAdded(frame)
+    SetStatusText(frame)
   end
 end
 
 local function HealthUpdate(unitid)
   local frame = PlatesByUnit[unitid]
   if frame and frame.Active and frame.PlateStyle ~= "None" then
-    local status_text_func = StatusTextFunction[frame.PlateStyle][frame.unit.reaction]
+    local status_text_func = StatusTextFunc[frame.PlateStyle][frame.unit.reaction]
     if status_text_func == TextHealthPercentColored or status_text_func == TextAll then
-      Element.UnitAdded(frame)
+      SetStatusText(frame)
     end
   end
 end
@@ -458,25 +409,29 @@ local function NameColorUpdate(tp_frame, color)
 end
 
 function Element.UpdateSettings()
-  Settings = TidyPlatesThreat.db.profile.text
-  SettingsStatusText = TidyPlatesThreat.db.profile.StatusText
+  Settings = Addon.db.profile.text
+  SettingsStatusText = Addon.db.profile.StatusText
 
-  Truncate = (Settings.LocalizedUnitSymbol and TruncateEastAsian) or TruncateWestern
+  if Settings.truncate then
+    Truncate = Addon.Truncate
+  else
+    Truncate = function(value) return value end
+  end
 
-  if Addon.CLASSIC then
+  if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC then
     ShowAbsorbs = false
   else
     ShowAbsorbs = Settings.AbsorbsAmount or Settings.AbsorbsPercentage
   end
   ShowHealth = Settings.amount or Settings.percent
 
-  StatusTextFunction["HealthbarMode"]["FRIENDLY"] = STATUS_TEXT_REFERENCE[SettingsStatusText.HealthbarMode.FriendlySubtext]
-  StatusTextFunction["HealthbarMode"]["HOSTILE"] = STATUS_TEXT_REFERENCE[SettingsStatusText.HealthbarMode.EnemySubtext]
-  StatusTextFunction["HealthbarMode"]["NEUTRAL"] = StatusTextFunction["HealthbarMode"]["HOSTILE"]
+  StatusTextFunc["HealthbarMode"]["FRIENDLY"] = STATUS_TEXT_REFERENCE[SettingsStatusText.HealthbarMode.FriendlySubtext]
+  StatusTextFunc["HealthbarMode"]["HOSTILE"] = STATUS_TEXT_REFERENCE[SettingsStatusText.HealthbarMode.EnemySubtext]
+  StatusTextFunc["HealthbarMode"]["NEUTRAL"] = StatusTextFunc["HealthbarMode"]["HOSTILE"]
 
-  StatusTextFunction["NameMode"]["FRIENDLY"] = STATUS_TEXT_REFERENCE[SettingsStatusText.NameMode.FriendlySubtext]
-  StatusTextFunction["NameMode"]["HOSTILE"] = STATUS_TEXT_REFERENCE[SettingsStatusText.NameMode.EnemySubtext]
-  StatusTextFunction["NameMode"]["NEUTRAL"] = StatusTextFunction["NameMode"]["HOSTILE"]
+  StatusTextFunc["NameMode"]["FRIENDLY"] = STATUS_TEXT_REFERENCE[SettingsStatusText.NameMode.FriendlySubtext]
+  StatusTextFunc["NameMode"]["HOSTILE"] = STATUS_TEXT_REFERENCE[SettingsStatusText.NameMode.EnemySubtext]
+  StatusTextFunc["NameMode"]["NEUTRAL"] = StatusTextFunc["NameMode"]["HOSTILE"]
 
   ModeSettings["HealthbarMode"] = SettingsStatusText.HealthbarMode
 
@@ -499,7 +454,7 @@ function Element.UpdateSettings()
     SettingsStatusText.NameMode.FriendlySubtext == "HEALTH" or SettingsStatusText.NameMode.FriendlySubtext == "ALL" or
     SettingsStatusText.NameMode.EnemySubtext == "HEALTH" or SettingsStatusText.NameMode.EnemySubtext == "ALL" then
 
-    if Addon.CLASSIC then
+    if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC then
       SubscribeEvent(Element, "UNIT_HEALTH_FREQUENT", HealthUpdate)
     else
       SubscribeEvent(Element, "UNIT_HEALTH", HealthUpdate)
@@ -508,7 +463,7 @@ function Element.UpdateSettings()
 
     SubscribeEvent(Element, "UNIT_MAXHEALTH", HealthUpdate)
   else
-    if Addon.CLASSIC then
+    if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC then
       UnsubscribeEvent(Element, "UNIT_HEALTH_FREQUENT", HealthUpdate)
     else
       UnsubscribeEvent(Element, "UNIT_HEALTH", HealthUpdate)
@@ -528,5 +483,7 @@ end
 
 SubscribeEvent(Element, "UNIT_NAME_UPDATE", StatusTextUpdateByUnit)
 SubscribeEvent(Element, "UNIT_LEVEL", StatusTextUpdateByUnit)
+--SubscribeEvent(Element, "StyleUpdate", StyleUpdate)
+
 -- For now: ignore Guild Roster events
 --SubscribeEvent(Element, "GUILD_ROSTER_UPDATE", StatusTextUpdateByUnit)

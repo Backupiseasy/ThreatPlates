@@ -10,10 +10,9 @@ local ipairs = ipairs
 -- WoW APIs
 
 -- ThreatPlates APIs
-local LSM = Addon.LSM
 local Font = Addon.Font
-local ANCHOR_POINT_TEXT = Addon.ANCHOR_POINT_TEXT
 local BackdropTemplate = Addon.BackdropTemplate
+local MODE_FOR_STYLE, ANCHOR_POINT_TEXT = Addon.MODE_FOR_STYLE, Addon.ANCHOR_POINT_TEXT
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -23,16 +22,6 @@ local _G =_G
 ---------------------------------------------------------------------------------------------------
 -- Methods of class Statusbar
 ---------------------------------------------------------------------------------------------------
-
-local MODE_FOR_STYLE = {
-  dps = "HealthbarMode",
-  tank = "HealthbarMode",
-  normal = "HealthbarMode",
-  totem = "HealthbarMode",
-  unique = "HealthbarMode",
-  NameOnly = "NameMode",
-  ["NameOnly-Unique"] = "NameMode",
-}
 
 local function AddTextArea(self, text_area)
   self.TextAreas[#self.TextAreas + 1] = text_area
@@ -44,13 +33,13 @@ end
 local function UpdateSettings(self, db)
   self:SetSize(db.Width, db.Height)
 
-  local texture = LSM:Fetch('statusbar', db.Texture)
+  local texture = Addon.LibSharedMedia:Fetch('statusbar', db.Texture)
   self:SetStatusBarTexture(texture)
   self.Background:SetTexture(texture)
 
   self.Border:SetBackdrop({
-    bgFile = LSM:Fetch('statusbar', texture),
-    edgeFile = LSM:Fetch('border', db.BorderTexture),
+    bgFile = Addon.LibSharedMedia:Fetch('statusbar', texture),
+    edgeFile = Addon.LibSharedMedia:Fetch('border', db.BorderTexture),
     edgeSize = db.BorderEdgeSize,
     insets = {
       left = db.BorderInset,

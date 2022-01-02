@@ -11,7 +11,7 @@ local ADDON_NAME, Addon = ...
 local abs, floor, ceil, pairs = abs, floor, ceil, pairs
 
 -- WoW APIs
-local UnitReaction, UnitCanAttack = UnitReaction, UnitCanAttack
+local UnitReaction, UnitCanAttack, UnitIsPVP = UnitReaction, UnitCanAttack, UnitIsPVP
 local UnitIsPlayer, UnitPlayerControlled = UnitIsPlayer, UnitPlayerControlled
 local UnitThreatSituation, UnitIsUnit, UnitExists, UnitGroupRolesAssigned = UnitThreatSituation, UnitIsUnit, UnitExists, UnitGroupRolesAssigned
 local IsInInstance = IsInInstance
@@ -21,7 +21,6 @@ local GetPartyAssignment = GetPartyAssignment
 
 -- ThreatPlates APIs
 local IsOffTankCreature = Addon.IsOffTankCreature
-local TidyPlatesThreat = TidyPlatesThreat
 local SubscribeEvent, PublishEvent,  UnsubscribeEvent = Addon.EventService.Subscribe, Addon.EventService.Publish, Addon.EventService.Unsubscribe
 local RGB_P = Addon.RGB_P
 
@@ -29,6 +28,24 @@ local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
 -- List them here for Mikk's FindGlobals script
 -- GLOBALS: UnitAffectingCombat
+
+---------------------------------------------------------------------------------------------------
+-- Wrapper functions for WoW Classic
+---------------------------------------------------------------------------------------------------
+
+if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC then
+  UnitGroupRolesAssigned = function(target_unit)
+    return (GetPartyAssignment("MAINTANK", target_unit) and "TANK") or "NONE"
+  end
+
+  -- Quest widget is not available in Classic
+  ShowQuestUnit = function(...) return false end
+end
+
+---------------------------------------------------------------------------------------------------
+-- Local variables
+---------------------------------------------------------------------------------------------------
+local ColorByHealthIsEnabled = false
 
 local REACTION_REFERENCE = {
   FRIENDLY = { NPC = "FriendlyNPC", PLAYER = "FriendlyPlayer", },
@@ -38,19 +55,56 @@ local REACTION_REFERENCE = {
 
 local TRANPARENT_COLOR = Addon.RGB(0, 0, 0, 0)
 
----------------------------------------------------------------------------------------------------
--- Wrapper functions for WoW Classic
----------------------------------------------------------------------------------------------------
-
-if Addon.CLASSIC then
-  UnitGroupRolesAssigned = function(target_unit)
-    return (GetPartyAssignment("MAINTANK", target_unit) and "TANK") or "NONE"
-  end
-end
-
----------------------------------------------------------------------------------------------------
--- Local variables
----------------------------------------------------------------------------------------------------
+local UNIT_COLOR_MAP = {
+  FRIENDLY = { 
+    NPC = "FriendlyNPC", 
+    PLAYER = { 
+      -- Unit PvP - Friendly Player
+      [true] = {
+        -- Player Character PvP
+        [true] = "FriendlyPlayerPvPOn", 
+        [false] = "FriendlyPlayerPvPOn",
+      },
+      [false] = {
+        -- Player Character PvP
+        [true] = "FriendlyPlayer",
+        [false] = "FriendlyPlayer",
+      },
+    },
+  },
+  HOSTILE = {	
+    NPC = "HostileNPC", 
+    PLAYER = {
+      -- Unit PvP Hostile Player
+      [true] = {
+        -- Player Character PvP
+        [true] = "HostilePlayer",
+        [false] = "HostilePlayerPvPOnSelfPvPOff",
+      },
+      [false] = {
+        -- Player Character PvP
+        [true] = "FriendlyPlayer",
+        [false] = "FriendlyPlayer",
+      },
+    },
+  },
+  NEUTRAL = { 
+    NPC = "NeutralUnit", 
+    PLAYER = {
+      -- Unit PvP
+      [true] = {
+        -- Player Character PvP
+        [true] = "NeutralUnit",
+        [false] = "NeutralUnit",
+      },
+      [false] = {
+        -- Player Character PvP
+        [true] = "NeutralUnit",
+        [false] = "NeutralUnit",
+      },
+    },
+  }
+}
 
 ---------------------------------------------------------------------------------------------------
 -- Cached configuration settings (for performance reasons)
@@ -200,7 +254,7 @@ local function UpdatePlateColors(tp_frame)
   end
 
   -- Only update the color and fire the event if there's actually a change in color
-  color = tp_frame:GetNameColor()
+  color = tp_frame:GetNameColor() or TRANPARENT_COLOR
   current_color = tp_frame.CurrentNameColor or TRANPARENT_COLOR
 
   if color.r ~= current_color.r or color.g ~= current_color.g or color.b ~= current_color.b or color.a ~= current_color.a then
@@ -277,17 +331,21 @@ Addon.GetColorByHealthDeficit = function(unit)
 end
 
 local function GetColorByReaction(unit)
-  local color
-
-  if unit.type == "NPC" and not UnitCanAttack("player", unit.unitid) and UnitReaction("player", unit.unitid) == 3 then
-    -- 1/2 is same color (red), 4 is neutral (yellow),5-8 is same color (green)
-    color = ColorByReaction.UnfriendlyFaction
-    --return FACTION_BAR_COLORS[3]
+  -- PvP coloring based on: https://wowpedia.fandom.com/wiki/PvP_flag
+  -- Coloring for pets is the same as for the player controlling the pet
+  local unit_type = (UnitPlayerControlled(unit.unitid) and "PLAYER") or unit.type
+  if unit_type == "PLAYER" then
+    local unit_is_pvp = UnitIsPVP(unit.unitid) or false
+    local player_is_pvp = UnitIsPVP("player") or false
+    -- Currenty only works for PLAYER, not pets
+    unit.ReactionColor = ColorByReaction[UNIT_COLOR_MAP[unit.reaction][unit_type][unit_is_pvp][player_is_pvp]]
+  -- unit.type == "NPC" (without pets)
+  elseif not UnitCanAttack("player", unit.unitid) and unit.blue < 0.1 and unit.green > 0.5 and unit.green < 0.6 and unit.red > 0.9 then
+    -- Handle non-attackable units with brown healtbars - currently, I know no better way to detect this.
+    unit.ReactionColor = ColorByReaction.UnfriendlyFaction
   else
-    color = ColorByReaction[REACTION_REFERENCE[unit.reaction][unit.type]]
+    unit.ReactionColor = ColorByReaction[UNIT_COLOR_MAP[unit.reaction][unit_type]]
   end
-
-  unit.ReactionColor = color
 end
 
 local function GetColorByClass(unit, plate_style)
@@ -396,7 +454,7 @@ local function GetThreatLevel(unit, style, enable_off_tank)
 end
 
 function Addon:GetThreatColor(unit, style, use_threat_table)
-  local db = TidyPlatesThreat.db.profile
+  local db = Addon.db.profile
 
   local color, on_threat_table
 
@@ -430,7 +488,7 @@ local function GetCombatColor(unit)
 
   local color
   if Addon:ShowThreatFeedback(unit) then
-    color = Addon:GetThreatColor(unit, Addon.PlayerRole, SettingsBase.threat.UseThreatTable)
+    color = Addon:GetThreatColor(unit, Addon.GetPlayerRole(), SettingsBase.threat.UseThreatTable)
   end
 
   unit.CombatColor = color
@@ -572,7 +630,8 @@ function Element.UnitAdded(tp_frame)
   GetSituationalColor(unit, tp_frame.PlateStyle)
 
   -- Not sure if this checks are 100% correct, might be just easier to initialize all colors anyway
-  if tp_frame.GetHealthbarColor == GetUnitColorByHealth or tp_frame.GetNameColor == GetUnitColorByHealthName or unit.CustomColor then
+  --if tp_frame.GetHealthbarColor == GetUnitColorByHealth or tp_frame.GetNameColor == GetUnitColorByHealthName or unit.CustomColor then
+  if ColorByHealthIsEnabled or unit.CustomColor then
     GetColorByHealth(unit)
   end
 
@@ -681,7 +740,7 @@ local function ClassColorUpdate(tp_frame)
 end
 
 function Element.UpdateSettings()
-  SettingsBase = TidyPlatesThreat.db.profile
+  SettingsBase = Addon.db.profile
   Settings = SettingsBase.Healthbar
   SettingsName = SettingsBase.Name
 
@@ -717,12 +776,11 @@ function Element.UpdateSettings()
   NameModeSettings.NameMode.UseFocusColoring = SettingsBase.FocusWidget.ModeNames
   NameModeSettings.NameMode.UseRaidMarkColoring = SettingsName.NameMode.UseRaidMarkColoring
 
-  for style, settings in pairs(TidyPlatesThreat.db.profile.settings) do
+  for style, settings in pairs(Addon.db.profile.settings) do
     if settings.threatcolor then -- there are several subentries unter settings. Only use style subsettings like unique, normal, dps, ...
       ThreatColor[style] = settings.threatcolor
     end
   end
-
 
   -- Subscribe/unsubscribe to events based on settings
   if SettingsBase.threat.ON and SettingsBase.threat.useHPColor and
@@ -734,24 +792,30 @@ function Element.UpdateSettings()
     UnsubscribeEvent(Element, "ThreatUpdate")
   end
 
+  local SettingsStatusText = Addon.db.profile.StatusText
   if Settings.FriendlyUnitMode == "HEALTH" or Settings.EnemyUnitMode == "HEALTH" or
     SettingsName.HealthbarMode.FriendlyUnitMode == "HEALTH" or SettingsName.HealthbarMode.EnemyUnitMode == "HEALTH" or
-    SettingsName.NameMode.FriendlyUnitMode == "HEALTH" or SettingsName.NameMode.EnemyUnitMode == "HEALTH" then
-
-    if Addon.CLASSIC then
+    SettingsName.NameMode.FriendlyUnitMode == "HEALTH" or SettingsName.NameMode.EnemyUnitMode == "HEALTH" or
+    SettingsStatusText.HealthbarMode.FriendlySubtext == "HEALTH" or SettingsStatusText.HealthbarMode.EnemySubtext == "HEALTH" or
+    SettingsStatusText.NameMode.FriendlySubtext == "HEALTH" or SettingsStatusText.NameMode.EnemySubtext == "HEALTH" then
+    
+    ColorByHealthIsEnabled = true
+    
+    if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC then
       SubscribeEvent(Element, "UNIT_HEALTH_FREQUENT", UNIT_HEALTH)
     else
       SubscribeEvent(Element, "UNIT_HEALTH", UNIT_HEALTH)
     end
   else
-    if Addon.CLASSIC then
+    ColorByHealthIsEnabled = false
+
+    if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC then
       UnsubscribeEvent(Element, "UNIT_HEALTH_FREQUENT", UNIT_HEALTH)
     else
       UnsubscribeEvent(Element, "UNIT_HEALTH", UNIT_HEALTH)
     end
   end
 
-  --SubscribeEvent(Element, "UNIT_HEALTH_FREQUENT", UNIT_HEALTH_FREQUENT)
   SubscribeEvent(Element, "TargetGained", SituationalColorUpdate)
   SubscribeEvent(Element, "TargetLost", SituationalColorUpdate)
   SubscribeEvent(Element, "FocusGained", SituationalColorUpdate)

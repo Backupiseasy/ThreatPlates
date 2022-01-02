@@ -2,16 +2,15 @@ local ADDON_NAME, Addon = ...
 local ThreatPlates = Addon.ThreatPlates
 
 local ART_PATH = ThreatPlates.Art
-local MEDIA_PATH = Addon.LSM
 local EMPTY_TEXTURE = ART_PATH.."Empty"
 
 -------------------------------------------------------------------------------------
 -- Style: Text-Only for Headline-View
 -------------------------------------------------------------------------------------
 
-local function Create(self,name)
-  local db = self.db.profile.settings
-  local dbprofile = self.db.profile
+local function Create(name)
+  local dbprofile = Addon.db.profile
+  local db = dbprofile.settings
   local theme = {
 
     frame = {
@@ -64,8 +63,8 @@ local function Create(self,name)
     },
 
     castbar = {
-      texture = Addon.LSM:Fetch('statusbar', db.castbar.texture),
-      backdrop = (db.castbar.ShowInHeadlineView and Addon.LSM:Fetch('statusbar', db.castbar.backdrop, true)) or EMPTY_TEXTURE,
+      texture = Addon.LibSharedMedia:Fetch('statusbar', db.castbar.texture),
+      backdrop = (db.castbar.ShowInHeadlineView and Addon.LibSharedMedia:Fetch('statusbar', db.castbar.backdrop, true)) or EMPTY_TEXTURE,
       width = db.castbar.width,
       height = db.castbar.height,
       x = db.castbar.x_hv,
@@ -86,7 +85,7 @@ local function Create(self,name)
     },
 
     level = {
-      typeface = MEDIA_PATH:Fetch('font', db.level.typeface),
+      typeface = Addon.LibSharedMedia:Fetch('font', db.level.typeface),
       size = db.level.size,
       width = db.level.width,
       height = db.level.height,
@@ -100,7 +99,7 @@ local function Create(self,name)
     },
 
     spelltext = {
-      typeface = Addon.LSM:Fetch('font', db.spelltext.typeface),
+      typeface = Addon.LibSharedMedia:Fetch('font', db.spelltext.typeface),
       size = db.spelltext.size,
       width = db.spelltext.width,
       height = db.spelltext.height,
