@@ -75,7 +75,7 @@ if Addon.IS_CLASSIC then
     return text, text, texture, startTime, endTime, false, nil, false, spellID
   end
 
-  -- Not available in Classic, introduced in patch 9.0.1
+  -- Not available in BC Classic, introduced in patch 9.0.1
   UnitNameplateShowsWidgetsOnly = function() return false end
 elseif Addon.IS_TBC_CLASSIC then
   GetNameForNameplate = function(plate) return plate:GetName() end
@@ -1856,6 +1856,8 @@ function Addon:EnableCastBars() ShowCastBars = true end
 function Addon:ForceUpdate()
   wipe(PlateOnUpdateQueue)
 
+  -- Clear cache for texts as e.g., abbreviation mode might have changed
+  wipe(Addon.Cache.Texts)
   Addon:UpdateConfigurationLocalization()
   Addon:UpdateConfigurationStatusText()
 
