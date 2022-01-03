@@ -265,12 +265,12 @@ function TidyPlatesThreat:ChatCommand(input)
 		else
 			TP.Print(L["|cff89F559Threat Plates|r: No profile specified"], true)
 		end
-	elseif input == "toggle-scripting" then
+	elseif command == "toggle-scripting" then
 		Addon.db.global.ScriptingIsEnabled = not Addon.db.global.ScriptingIsEnabled
 		if Addon.db.global.ScriptingIsEnabled then
-			TP.Print(L["Scriping for custom styles for nameplates is now |cff00ff00enabled!|r."])
+			TP.Print(L["Scriping for custom styles for nameplates is now |cff00ff00enabled!|r."], true)
 		else
-			TP.Print(L["Scriping for custom styles for nameplates is now |cffff0000disabled!|r."])
+			TP.Print(L["Scriping for custom styles for nameplates is now |cffff0000disabled!|r."], true)
 		end
 		Addon.UpdateCustomStyles()
 		TidyPlatesThreat:ConfigTableChanged()
@@ -280,11 +280,11 @@ function TidyPlatesThreat:ChatCommand(input)
 --		TidyPlatesThreat:ToggleNameplateModeNeutralUnits()
 --	elseif command == "toggle-view-enemy-units" then
 --		TidyPlatesThreat:ToggleNameplateModeEnemyUnits()
-	else --if DEBUG then
+	elseif DEBUG then
 		ChatCommandDebug(cmd_list)
-	--else
-	--	TP.Print(L["Unknown option: "] .. input, true)
-	--	PrintHelp()
+	else
+		TP.Print(L["Unknown option: "] .. command, true)
+		PrintHelp()
 	end
 end
 
