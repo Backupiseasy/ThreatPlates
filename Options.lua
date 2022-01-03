@@ -3715,20 +3715,20 @@ local function CreateAurasWidgetOptions()
                 arg = { "AuraWidget", "FrameOrder" },
               },
               Spacer1 = GetSpacerEntry(15),
-              Reverse = {               
-                type = "toggle",
-                order = 20,
-                name = L["Swap Scale By Reaction"],
-                desc = L["Switch scale values for debuffs and buffs for friendly units."],
-                width = "double",
-                set = function(info, val)
-                  if val then
-                    db.AuraWidget.SwitchAreaByReaction = false
-                  end
-                  SetValue(info, val)
-                end,
-                arg = { "AuraWidget", "SwitchScaleByReaction" }
-              },
+              -- Reverse = {               
+              --   type = "toggle",
+              --   order = 20,
+              --   name = L["Swap Scale By Reaction"],
+              --   desc = L["Switch scale values for debuffs and buffs for friendly units."],
+              --   width = "double",
+              --   set = function(info, val)
+              --     if val then
+              --       db.AuraWidget.SwitchAreaByReaction = false
+              --     end
+              --     SetValue(info, val)
+              --   end,
+              --   arg = { "AuraWidget", "SwitchScaleByReaction" }
+              -- },
               SwitchAuraAreaByReaction = {
                 type = "toggle",
                 order = 30,
