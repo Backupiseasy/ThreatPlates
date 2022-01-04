@@ -62,7 +62,7 @@ Widget.TEXTURE_BORDER = Addon.ADDON_DIRECTORY .. "Artwork\\squareline"
 -- urses a purple border, and physical debuffs a red border
 Widget.AURA_TYPE = { Curse = 1, Disease = 2, Magic = 3, Poison = 4, }
 
-Widget.FLASH_DURATION = Addon.Animations.FLASH_DURATION
+local FLASH_DURATION = Addon.Animations.FLASH_DURATION
 Widget.ANCHOR_POINT_SETPOINT = Addon.ANCHOR_POINT_SETPOINT
 Widget.PRIORITY_FUNCTIONS = {
   None = function(aura) return 0 end,
@@ -1854,7 +1854,7 @@ local function UpdateWidgetTimeIconMode(self, aura_frame, expiration, duration)
 
     local db_widget = self.db_widget
     if db_widget.FlashWhenExpiring and timeleft < db_widget.FlashTime then
-      Animations:Flash(aura_frame, aura_frame.FLASH_DURATION)
+      Animations:Flash(aura_frame, FLASH_DURATION)
     end
   end
 end
@@ -2053,13 +2053,13 @@ local function UpdateWidgetTimeBarMode(self, frame, expiration, duration)
       end
 
       if db.FlashWhenExpiring and timeleft < db.FlashTime then
-        Animations:Flash(frame, self.FLASH_DURATION)
+        Animations:Flash(frame, FLASH_DURATION)
       end
     else
       frame.TimeText:SetText("")
 
       if db.FlashWhenExpiring and timeleft < db.FlashTime then
-        Animations:Flash(frame, self.FLASH_DURATION)
+        Animations:Flash(frame, FLASH_DURATION)
       end
     end
 
@@ -2084,7 +2084,7 @@ local function UpdateWidgetTimeBarModeNoDuration(self, frame, expiration, durati
 
     local db = self.db_widget
     if db.FlashWhenExpiring and timeleft < db.FlashTime then
-      Animations:Flash(frame, self.FLASH_DURATION)
+      Animations:Flash(frame, FLASH_DURATION)
     end
 
     frame.Statusbar:SetValue(timeleft * 100 / duration)
