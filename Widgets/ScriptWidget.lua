@@ -22,7 +22,6 @@ local loadstring, setfenv = loadstring, setfenv
 
 -- ThreatPlates APIs
 local L = ThreatPlates.L
-local PrintDebugMessage = Addon.PrintDebugMessage
 
 local _G =_G
 
@@ -240,7 +239,7 @@ local OverwrittenFunctionsForScripts = {
 
 
 local function WarningForBlockedAccess(key)
-  Addon.PrintWarningMessage(string_format(L["Forbidden function or table called from script: %s"], key))
+  Addon.Logging.Warning(string_format(L["Forbidden function or table called from script: %s"], key))
 end
 
 local EnvironmentGetGlobal
@@ -294,7 +293,7 @@ local ScriptEnvironment =
     end,
     __newindex = function(table, key, value)
       if _G[key] then
-        Addon.PrintWarningMessage(string_format(L["A script has overwritten the global '%s'. This might affect other scripts ."], key))
+        Addon.Logging.Warning(string_format(L["A script has overwritten the global '%s'. This might affect other scripts ."], key))
       end
       rawset(table, key, value)
     end,
@@ -323,8 +322,41 @@ local function GetScriptEnvironment(custom_style)
 
   if not script_environment then
     script_environment = {
-      Environment = {
-        Style = custom_style,
+      ThreatPlates = {
+        Environment = {
+          Style = custom_style,
+          Profile = Addon.db.profile
+        },
+        API = {
+          Data = {
+            CrowdControlAuras = Addon.Widgets.Widgets.Auras.CROWD_CONTROL_SPELLS,
+            StealthDetectionAuras = Addon.Data.StealthDetectionAuras,
+            StealthDetectionUnits = Addon.Data.StealthDetectionUnits,
+            -- Totems = Addon.Data.Totems
+          },
+          --Init = {
+          --  InitTotemData = Addon.InitializeTotemInformation -- Not sure if this works ...
+          --},
+          Logging = {
+            Info = Addon.Logging.Info,
+            Warning = Addon.Logging.Warning,
+            Error = Addon.Logging.Error,
+            Debug = Addon.Logging.Debug,
+          },
+          Widgets = {
+            CreateStatusBar = Addon.CreateStatusbar,
+            -- CreateText = Addon.CreateText,
+          }
+          --Util = {
+            -- HEX2RGB
+            -- CopyTable
+            -- MergeIntoTable
+            -- ConcatTables
+            -- PrintTable
+          --},
+          --Debug = {}
+          -- LibCustomGlow?
+        },
       }
     }
     ScriptEnvironmentByStyle[custom_style] = script_environment
@@ -365,7 +397,7 @@ local function ProcessEvent(event, widget_frame, unit)
           --print ("Process Custom Style:", custom_style.Trigger.Type, custom_style.Trigger[custom_style.Trigger.Type].Input, event)
           local call_ok, return_value = pcall(func, widget_frame, unit)
           if not call_ok then
-            Addon.PrintErrorMessage(string_format(L["Error in event script '%s' of custom style '%s': %s"], event, Addon.CustomPlateGetHeaderName(custom_style), return_value))
+            Addon.Logging.Error(string_format(L["Error in event script '%s' of custom style '%s': %s"], event, Addon.CustomPlateGetHeaderName(custom_style), return_value))
           end
         end
       end
@@ -379,7 +411,7 @@ local function ProcessEvent(event, widget_frame, unit)
         --print ("Process Script Trigger:", event, widget_frame, unit)
         local call_ok, return_value = pcall(func, widget_frame, unit)
         if not call_ok then
-          Addon.PrintErrorMessage(string_format(L["Error in event script '%s' of custom style '%s': %s"], event, Addon.CustomPlateGetHeaderName(custom_style), return_value))
+          Addon.Logging.Error(string_format(L["Error in event script '%s' of custom style '%s': %s"], event, Addon.CustomPlateGetHeaderName(custom_style), return_value))
         end
       end
     end
@@ -435,7 +467,7 @@ function Widget:EnabledForStyle(style, unit)
       if call_ok then
         EnabledForStyle[custom_style][unit.unitid] = return_value == true
       else
-        Addon.PrintErrorMessage(string_format(L["Error in event script '%s' of custom style '%s': %s"], "EnabledForStyle", Addon.CustomPlateGetHeaderName(custom_style), return_value))
+        Addon.Logging.Error(string_format(L["Error in event script '%s' of custom style '%s': %s"], "EnabledForStyle", Addon.CustomPlateGetHeaderName(custom_style), return_value))
         EnabledForStyle[custom_style][unit.unitid] = false
       end
     else
@@ -451,7 +483,7 @@ function Widget:EnabledForStyle(style, unit)
       if call_ok then
         EnabledForStyle[custom_style][unit.unitid] = return_value == true
       else
-        Addon.PrintErrorMessage(string_format(L["Error in event script '%s' of custom style '%s': %s"], "EnabledForStyle", Addon.CustomPlateGetHeaderName(custom_style), return_value))
+        Addon.Logging.Error(string_format(L["Error in event script '%s' of custom style '%s': %s"], "EnabledForStyle", Addon.CustomPlateGetHeaderName(custom_style), return_value))
         EnabledForStyle[custom_style][unit.unitid] = false
       end
     else
@@ -540,7 +572,7 @@ local function HandleWoWEvent(event, ...)
     for custom_style, func in pairs(custom_styles) do
       local call_ok, error_message = pcall(func, ...)
       if not call_ok then
-        Addon.PrintErrorMessage(string_format(L["Error in event script '%s' of custom style '%s': %s"], event, Addon.CustomPlateGetHeaderName(custom_style), error_message))
+        Addon.Logging.Error(string_format(L["Error in event script '%s' of custom style '%s': %s"], event, Addon.CustomPlateGetHeaderName(custom_style), error_message))
       end
     end
   end
@@ -561,12 +593,12 @@ function Widget:UpdateSettings()
   local on_update_script_used = false
 
   for i, custom_style in ipairs(Addon.Cache.CustomPlateTriggers.Script) do
-    --PrintDebugMessage("Reloading Script Style:", i, "=>", Addon.CustomPlateGetHeaderName(custom_style))
+    --Addon.Logging.Debug("Reloading Script Style:", i, "=>", Addon.CustomPlateGetHeaderName(custom_style))
     EnabledForStyle[custom_style] = EnabledForStyle[custom_style] or {}
 
     -- Register scripting events
     for event, script in pairs(custom_style.Scripts.Code.Functions) do
-      --PrintDebugMessage("=> Event:", event)
+      --Addon.Logging.Debug("=> Event:", event)
       -- Don't add OnUnitAdded for target/focus-based scripts
       if script and script ~= "" and Addon.SCRIPT_FUNCTIONS[custom_style.Scripts.Type][event] then
         local func = Addon.LoadScript(script, custom_style, event)
@@ -586,14 +618,14 @@ function Widget:UpdateSettings()
 
     -- Register WoW events
     for event, script in pairs(custom_style.Scripts.Code.Events) do
-      --PrintDebugMessage("=> WoW Event:", event)
+      --Addon.Logging.Debug("=> WoW Event:", event)
       if script and script ~= "" then
         local func = Addon.LoadScript(script, custom_style, event)
         if func then
           ScriptsForWoWEvents[event] = ScriptsForWoWEvents[event] or {}
           ScriptsForWoWEvents[event][custom_style] = func
           if not pcall(self.RegisterEvent, self, event, HandleWoWEvent) then
-            Addon.PrintErrorMessage(string_format(L["Attempt to register script for unknown WoW event '%s'"], event))
+            Addon.Logging.Error(string_format(L["Attempt to register script for unknown WoW event \"%s\""], event))
           end
         end
       end
@@ -601,7 +633,7 @@ function Widget:UpdateSettings()
   end
 
   for custom_style, funcs_by_event in pairs(ScriptsForAllPlates) do
-    --PrintDebugMessage("All Plates:", Addon.CustomPlateGetHeaderName(custom_style))
+    --Addon.Logging.Debug("All Plates:", Addon.CustomPlateGetHeaderName(custom_style))
 
     -- Only load enabled scripts
     local script_is_enabled = true
@@ -611,19 +643,19 @@ function Widget:UpdateSettings()
       if call_ok then
         script_is_enabled = return_value
       else
-        Addon.PrintErrorMessage(string_format(L["Error in event script '%s' of custom style '%s': %s"], "IsEnabled", Addon.CustomPlateGetHeaderName(custom_style), return_value))
+        Addon.Logging.Error(string_format(L["Error in event script '%s' of custom style '%s': %s"], "IsEnabled", Addon.CustomPlateGetHeaderName(custom_style), return_value))
         script_is_enabled = false
       end
     end
 
-    --PrintDebugMessage("  =>", (script_is_enabled and "Enabled") or "Disabled")
+    --Addon.Logging.Debug("  =>", (script_is_enabled and "Enabled") or "Disabled")
 
     if script_is_enabled then
       local func = funcs_by_event.UpdateSettings
       if func then
         local call_ok, return_value = pcall(func)
         if not call_ok then
-          Addon.PrintErrorMessage(string_format(L["Error in event script '%s' of custom style '%s': %s"], "UpdateSettings", Addon.CustomPlateGetHeaderName(custom_style), return_value))
+          Addon.Logging.Error(string_format(L["Error in event script '%s' of custom style '%s': %s"], "UpdateSettings", Addon.CustomPlateGetHeaderName(custom_style), return_value))
         end
       end
     else
@@ -632,7 +664,7 @@ function Widget:UpdateSettings()
   end
 
   for custom_style, funcs_by_event in pairs(ScriptsByCustomStyle) do
-    --PrintDebugMessage ("By Custom Style Plates:", Addon.CustomPlateGetHeaderName(custom_style))
+    --Addon.Logging.Debug ("By Custom Style Plates:", Addon.CustomPlateGetHeaderName(custom_style))
 
     -- Only load enabled scripts
     local script_is_enabled = true
@@ -642,27 +674,27 @@ function Widget:UpdateSettings()
       if call_ok then
         script_is_enabled = return_value
       else
-        Addon.PrintErrorMessage(string_format(L["Error in event script '%s' of custom style '%s': %s"], "IsEnabled", Addon.CustomPlateGetHeaderName(custom_style), return_value))
+        Addon.Logging.Error(string_format(L["Error in event script '%s' of custom style '%s': %s"], "IsEnabled", Addon.CustomPlateGetHeaderName(custom_style), return_value))
         script_is_enabled = false
       end
     end
 
-    --PrintDebugMessage("  =>", (script_is_enabled and "Enabled") or "Disabled")
+    --Addon.Logging.Debug("  =>", (script_is_enabled and "Enabled") or "Disabled")
 
     local func = funcs_by_event.UpdateSettings
     if func then
       local call_ok, error_message = pcall(func)
       if not call_ok then
-        Addon.PrintErrorMessage(string_format(L["Error in event script '%s' of custom style '%s': %s"], "UpdateSettings", Addon.CustomPlateGetHeaderName(custom_style), return_value))
+        Addon.Logging.Error(string_format(L["Error in event script '%s' of custom style '%s': %s"], "UpdateSettings", Addon.CustomPlateGetHeaderName(custom_style), return_value))
       end
     end
   end
 
   if on_update_script_used then
-    --PrintDebugMessage("Enabling OnUpdate handling.")
+    --Addon.Logging.Debug("Enabling OnUpdate handling.")
     OnUpdateHandler:SetScript("OnUpdate", OnUpdate)
   else
-    --PrintDebugMessage("Disabling OnUpdate handling.")
+    --Addon.Logging.Debug("Disabling OnUpdate handling.")
     OnUpdateHandler:SetScript("OnUpdate", nil)
   end
 end
@@ -670,7 +702,7 @@ end
 local ScriptFunctionCache = {}
 
 function Addon.LoadScript(script_code, custom_style, event)
-  --PrintDebugMessage("Loading Script:", event)
+  --Addon.Logging.Debug("Loading Script:", event)
 
   local script_func = ScriptFunctionCache[script_code]
   if script_func then
@@ -679,7 +711,7 @@ function Addon.LoadScript(script_code, custom_style, event)
     --local info_header = "--[==[ Error in event script '" .. event .. "' of custom style '" .. (Addon.CustomPlateGetHeaderName(custom_style)) .. "' ]==] "
     local loaded_func, error_message = loadstring("return " .. script_code)
     if not loaded_func then
-      Addon.PrintErrorMessage(string_format(L["Syntax error in event script '%s' of custom style '%s': %s"], event, Addon.CustomPlateGetHeaderName(custom_style), error_message))
+      Addon.Logging.Error(string_format(L["Syntax error in event script '%s' of custom style '%s': %s"], event, Addon.CustomPlateGetHeaderName(custom_style), error_message))
     else
       setfenv(loaded_func, GetScriptEnvironment(custom_style))
 

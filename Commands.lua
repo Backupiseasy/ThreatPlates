@@ -7,7 +7,6 @@ local TP = Addon.ThreatPlates
 local L = TP.L
 
 local DEBUG = TP.Meta("version") == "@project-version@"
-
 local function toggleDPS()
 	Addon:SetRole(false)
 	Addon.db.profile.threat.ON = true
@@ -118,16 +117,16 @@ local function ChatCommandDebug(cmd_list)
 		SearchDBForString(Addon.db.profile, "<Profile>", string.lower(cmd_list[2]))
 		SearchDBForString(Addon.db.global, "<Profile>", string.lower(cmd_list[2]))
 	elseif command == "cache" then
-		Addon.DebugPrintCaches()
+		Addon.Debug.PrintCaches()
 	elseif command == "unit" then
 		local plate = C_NamePlate.GetNamePlateForUnit("target")
 		if not plate then return end
-		TP.DEBUG_PRINT_UNIT(plate.TPFrame.unit, true)
+		Addon.Debug.PrintUnit(plate.TPFrame.unit, true)
 		--elseif command == "migrate" then
 		--	Addon.TestMigration()
 		--	Addon.MigrateDatabase(TP.Meta("version"))
 	elseif command == "print-custom-styles" then
-		TP.DEBUG_PRINT_TABLE(Addon.db.profile.uniqueSettings)
+		Addon.Debug.PrintTable(Addon.db.profile.uniqueSettings)
 		--Addon.MigrateDatabase(TP.Meta("version"))
 	elseif command == "migrate" then
 		Addon.TestMigrateDatabase("MigrateAurasWidgetV2")
@@ -180,7 +179,7 @@ local function ChatCommandDebug(cmd_list)
 			SpellID = 234234,
 		}
 		local imported_custom_style = Addon.ImportCustomStyle(custom_style)
-		TP.DEBUG_PRINT_TABLE(imported_custom_style)
+		Addon.Debug.PrintTable(imported_custom_style)
 
 	elseif command == "heuristic" then
 		local plate = C_NamePlate.GetNamePlateForUnit("target")

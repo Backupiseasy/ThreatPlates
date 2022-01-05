@@ -664,10 +664,10 @@ function Addon:PrintQuests(command)
     if quest_log_index then
       local quest_info = GetQuestInfo(quest_log_index)
       if quest_info then
-        ThreatPlates.DEBUG_PRINT_TABLE(quest_info)
+        Addon.Debug.PrintTable(quest_info)
 
         local objectives = GetQuestObjectives(quest_id)
-        ThreatPlates.DEBUG_PRINT_TABLE(objectives)
+        Addon.Debug.PrintTable(objectives)
       end
     end
   elseif command == "tooltip" then

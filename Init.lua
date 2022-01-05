@@ -15,7 +15,6 @@ local string, format = string, format
 local rawset = rawset
 
 -- WoW APIs
-local UnitPlayerControlled = UnitPlayerControlled
 
 -- ThreatPlates APIs
 Addon.IS_CLASSIC = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
@@ -94,6 +93,10 @@ Addon.Cache = {
 		ForCurrentInstance = {},
 	}
 }
+-- Internal API
+Addon.Data = {}
+Addon.Logging = {}
+Addon.Debug = {}
 
 ---------------------------------------------------------------------------------------------------
 -- Aura Highlighting
@@ -191,12 +194,8 @@ Addon.ColorByClass = function(class_name, text)
 end
 
 --------------------------------------------------------------------------------------------------
--- 
+-- Utility functions
 ---------------------------------------------------------------------------------------------------
-
-ThreatPlates.Update = function()
-	Addon:ForceUpdate()
-end
 
 ThreatPlates.Meta = function(value)
 	local meta
@@ -331,37 +330,10 @@ Addon.SplitByWhitespace = function(split_string)
 end
 
 --------------------------------------------------------------------------------------------------
--- Some functions to fix TidyPlates bugs
+-- Logging Functions
 ---------------------------------------------------------------------------------------------------
 
-ThreatPlates.Dump = function(value, index)
-	if not IsAddOnLoaded("Blizzard_DebugTools") then
-		LoadAddOn("Blizzard_DebugTools")
-	end
-	local i
-	if index and type(index) == "number" then
-	  i = index
-	else
-	  i = 1
-	end
-	DevTools_Dump(value, i)
-end
-
--- With TidyPlates:
---local function FixUpdateUnitCondition(unit)
---	local unitid = unit.unitid
---
---	-- Enemy players turn to neutral, e.g., when mounting a flight path mount, so fix reaction in that situations
---	if unit.reaction == "NEUTRAL" and (unit.type == "PLAYER" or UnitPlayerControlled(unitid)) then
---		unit.reaction = "HOSTILE"
---	end
---end
-
---------------------------------------------------------------------------------------------------
--- Debug Functions
----------------------------------------------------------------------------------------------------
-
-Addon.PrintMessage = function(channel, ...)
+local function LogMessage(channel, ...)
 	--local verbose = Addon.db.profile.verbose
 	if channel == "DEBUG" and Addon.DEBUG then
 		print("|cff89F559TP|r - |cff0000ff" .. channel .. "|r:", ...)
@@ -370,139 +342,126 @@ Addon.PrintMessage = function(channel, ...)
 	elseif channel == "WARNING" then
 		print("|cff89F559TP|r - |cffff8000" .. channel .. "|r:", ...)
 	else
-		print("|cff89F559TP|r:", channel, ...)
+		print("|cff89F559TP|r:", channel .. ":", ...)
 	end
 end
 
-Addon.PrintDebugMessage = function(...)
-	Addon.PrintMessage("DEBUG", ...)
+Addon.Logging.Debug = function(...)
+	LogMessage("DEBUG", ...)
 end
 
-Addon.PrintErrorMessage = function(...)
-	Addon.PrintMessage("ERROR", ...)
+Addon.Logging.Error = function(...)
+	LogMessage("ERROR", ...)
 end
 
-Addon.PrintWarningMessage = function(...)
-	Addon.PrintMessage("WARNING", ...)
+Addon.Logging.Warning = function(...)
+	LogMessage("WARNING", ...)
 end
 
-local function DEBUG(...)
-  print (ThreatPlates.Meta("titleshort") .. "-Debug:", ...)
+Addon.Logging.Info = function(...)
+	LogMessage("INFO", ...)
 end
+
+--------------------------------------------------------------------------------------------------
+-- Debug functions
+---------------------------------------------------------------------------------------------------
 
 -- Function from: https://coronalabs.com/blog/2014/09/02/tutorial-printing-table-contents/
-local function DEBUG_PRINT_TABLE(data)
+Addon.Debug.PrintTable = function(data)
   local print_r_cache={}
   local function sub_print_r(data,indent)
     if (print_r_cache[tostring(data)]) then
-      ThreatPlates.DEBUG (indent.."*"..tostring(data))
+			Addon.Logging.Debug(indent.."*"..tostring(data))
     else
       print_r_cache[tostring(data)]=true
       if (type(data)=="table") then
         for pos,val in pairs(data) do
           if (type(val)=="table") then
-            ThreatPlates.DEBUG (indent.."["..tostring(pos).."] => "..tostring(data).." {")
+						Addon.Logging.Debug(indent.."["..tostring(pos).."] => "..tostring(data).." {")
             sub_print_r(val,indent..string.rep(" ",string.len(pos)+8))
-            ThreatPlates.DEBUG (indent..string.rep(" ",string.len(pos)+6).."}")
+						Addon.Logging.Debug(indent..string.rep(" ",string.len(pos)+6).."}")
           elseif (type(val)=="string") then
-            ThreatPlates.DEBUG (indent.."["..tostring(pos)..'] => "'..val..'"')
+						Addon.Logging.Debug(indent.."["..tostring(pos)..'] => "'..val..'"')
           else
-            ThreatPlates.DEBUG (indent.."["..tostring(pos).."] => "..tostring(val))
+						Addon.Logging.Debug(indent.."["..tostring(pos).."] => "..tostring(val))
           end
         end
       else
-        ThreatPlates.DEBUG (indent..tostring(data))
+				Addon.Logging.Debug(indent..tostring(data))
       end
     end
   end
   if (type(data)=="table") then
-    ThreatPlates.DEBUG (tostring(data).." {")
+		Addon.Logging.Debug(tostring(data).." {")
     sub_print_r(data,"  ")
-    ThreatPlates.DEBUG ("}")
+		Addon.Logging.Debug("}")
   else
     sub_print_r(data,"  ")
   end
 end
 
-local function DEBUG_PRINT_UNIT(unit, full_info)
-	DEBUG("Unit:", unit.name)
-	DEBUG("-------------------------------------------------------------")
+Addon.Debug.PrintUnit = function(unit, full_info)
+	Addon.Logging.Debug("Unit:", unit.name)
+	Addon.Logging.Debug("-------------------------------------------------------------")
 	for key, val in pairs(unit) do
-		DEBUG(key .. ":", val)
+		Addon.Logging.Debug(key .. ":", val)
   end
 
   if full_info and unit.unitid then
-    --		DEBUG("  isFriend = ", TidyPlatesUtilityInternal.IsFriend(unit.name))
-    --		DEBUG("  isGuildmate = ", TidyPlatesUtilityInternal.IsGuildmate(unit.name))
-    DEBUG("  IsOtherPlayersPet = ", UnitIsOtherPlayersPet(unit))
+    --		Addon.Logging.Debug("  isFriend = ", TidyPlatesUtilityInternal.IsFriend(unit.name))
+    --		Addon.Logging.Debug("  isGuildmate = ", TidyPlatesUtilityInternal.IsGuildmate(unit.name))
+    Addon.Logging.Debug("  IsOtherPlayersPet = ", UnitIsOtherPlayersPet(unit))
 		if not Addon.IS_TBC_CLASSIC and not Addon.IS_CLASSIC then
-			DEBUG("  IsBattlePet = ", UnitIsBattlePet(unit.unitid))
+			Addon.Logging.Debug("  IsBattlePet = ", UnitIsBattlePet(unit.unitid))
 		end
-    DEBUG("  PlayerControlled = ", UnitPlayerControlled(unit.unitid))
-    DEBUG("  CanAttack = ", UnitCanAttack("player", unit.unitid))
-    DEBUG("  Reaction = ", UnitReaction("player", unit.unitid))
+    Addon.Logging.Debug("  Reaction = ", UnitReaction("player", unit.unitid))
     local r, g, b, a = UnitSelectionColor(unit.unitid, true)
-    DEBUG("  SelectionColor: r =", ceil(r * 255), ", g =", ceil(g * 255), ", b =", ceil(b * 255), ", a =", ceil(a * 255))
-		DEBUG("  Threat ---------------------------------")
-		DEBUG("    UnitAffectingCombat = ", UnitAffectingCombat(unit.unitid))
-		DEBUG("    Addon:OnThreatTable = ", Addon:OnThreatTable(unit))
-		DEBUG("    UnitThreatSituation = ", UnitThreatSituation("player", unit.unitid))
-		DEBUG("    Target Unit = ", UnitExists(unit.unitid .. "target"))
+    Addon.Logging.Debug("  SelectionColor: r =", ceil(r * 255), ", g =", ceil(g * 255), ", b =", ceil(b * 255), ", a =", ceil(a * 255))
+		Addon.Logging.Debug("  Threat ---------------------------------")
+		Addon.Logging.Debug("    UnitAffectingCombat = ", UnitAffectingCombat(unit.unitid))
+		Addon.Logging.Debug("    Addon:OnThreatTable = ", Addon:OnThreatTable(unit))
+		Addon.Logging.Debug("    UnitThreatSituation = ", UnitThreatSituation("player", unit.unitid))
+		Addon.Logging.Debug("    Target Unit = ", UnitExists(unit.unitid .. "target"))
 		if unit.style == "unique" then
-			DEBUG("    GetThreatSituation(Unique) = ", Addon.GetThreatSituation(unit, unit.style, Addon.db.profile.threat.toggle.OffTank))
+			Addon.Logging.Debug("    GetThreatSituation(Unique) = ", Addon.GetThreatSituation(unit, unit.style, Addon.db.profile.threat.toggle.OffTank))
 		else
-			DEBUG("    GetThreatSituation = ", Addon.GetThreatSituation(unit, Addon:GetThreatStyle(unit), Addon.db.profile.threat.toggle.OffTank))
+			Addon.Logging.Debug("    GetThreatSituation = ", Addon.GetThreatSituation(unit, Addon:GetThreatStyle(unit), Addon.db.profile.threat.toggle.OffTank))
 		end
   else
-    DEBUG("  <no unit id>")
+    Addon.Logging.Debug("  <no unit id>")
   end
 
-  DEBUG("--------------------------------------------------------------")
+  Addon.Logging.Debug("--------------------------------------------------------------")
 end
 
 
-local function DEBUG_PRINT_TARGET(unit)
-  if unit.isTarget then
-		DEBUG_PRINT_UNIT(unit)
-  end
-end
+--local function DEBUG_PRINT_TARGET(unit)
+--  if unit.isTarget then
+--		DEBUG_PRINT_UNIT(unit)
+--  end
+--end
+--
+--local function DEBUG_AURA_LIST(data)
+--	local res = ""
+--	for pos,val in pairs(data) do
+--		local a = data[pos]
+--		if not a then
+--			res = res .. " nil"
+--		elseif not a.priority then
+--			res = res .. " nil(" .. a.name .. ")"
+--		else
+--			res = res .. a.name
+--		end
+--		if pos ~= #data then
+--			res = res .. " - "
+--		end
+--	end
+--	ThreatPlates.DEBUG("Aura List = [ " .. res .. " ]")
+--end
 
-local function DEBUG_AURA_LIST(data)
-	local res = ""
-	for pos,val in pairs(data) do
-		local a = data[pos]
-		if not a then
-			res = res .. " nil"
-		elseif not a.priority then
-			res = res .. " nil(" .. a.name .. ")"
-		else
-			res = res .. a.name
-		end
-		if pos ~= #data then
-			res = res .. " - "
-		end
-	end
-	ThreatPlates.DEBUG("Aura List = [ " .. res .. " ]")
-end
-
-Addon.DebugPrintCaches = function()
+Addon.Debug.PrintCaches = function()
 	print ("Wildcard Unit Test Cache:")
 	for k, v in pairs(Addon.Cache.TriggerWildcardTests) do
 		print ("  " .. k .. ":", v)
 	end
 end
-
----------------------------------------------------------------------------------------------------
--- Expoerted local functions
----------------------------------------------------------------------------------------------------
-
--- With TidyPlates:
---ThreatPlates.FixUpdateUnitCondition = FixUpdateUnitCondition
-
-ThreatPlates.DEBUG = DEBUG
-ThreatPlates.DEBUG_PRINT_TABLE = DEBUG_PRINT_TABLE
-ThreatPlates.DEBUG_PRINT_UNIT = DEBUG_PRINT_UNIT
-ThreatPlates.DEBUG_PRINT_TARGET = DEBUG_PRINT_TARGET
-ThreatPlates.DEBUG_AURA_LIST = DEBUG_AURA_LIST
-
-
