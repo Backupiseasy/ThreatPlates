@@ -139,15 +139,15 @@ Addon.LoadOnDemandLibraries = function()
 			Addon.LibDogTag = LibStub("LibDogTag-3.0", true)
 			if not Addon.LibDogTag then
 				Addon.LibDogTag = false
-				ThreatPlates.Print(L["Custom status text requires LibDogTag-3.0 to function."], true)
+				Addon.Logging.Error(L["Custom status text requires LibDogTag-3.0 to function."])
 			else
 				LoadAddOn("LibDogTag-Unit-3.0")
 			  if not LibStub("LibDogTag-Unit-3.0", true) then
 					Addon.LibDogTag = false
-					ThreatPlates.Print(L["Custom status text requires LibDogTag-Unit-3.0 to function."], true)
+					Addon.Logging.Error(L["Custom status text requires LibDogTag-Unit-3.0 to function."])
 				elseif not Addon.LibDogTag.IsLegitimateUnit or not Addon.LibDogTag.IsLegitimateUnit["nameplate1"] then
 					Addon.LibDogTag = false
-					ThreatPlates.Print(L["Your version of LibDogTag-Unit-3.0 does not support nameplates. You need to install at least v90000.3 of LibDogTag-Unit-3.0."], true)
+					Addon.Logging.Error(L["Your version of LibDogTag-Unit-3.0 does not support nameplates. You need to install at least v90000.3 of LibDogTag-Unit-3.0."])
 				end
 			end
 		end
@@ -334,15 +334,17 @@ end
 ---------------------------------------------------------------------------------------------------
 
 local function LogMessage(channel, ...)
-	--local verbose = Addon.db.profile.verbose
+	-- Meta("titleshort")
 	if channel == "DEBUG" and Addon.DEBUG then
 		print("|cff89F559TP|r - |cff0000ff" .. channel .. "|r:", ...)
 	elseif channel == "ERROR" then
 		print("|cff89F559TP|r - |cffff0000" .. channel .. "|r:", ...)
 	elseif channel == "WARNING" then
 		print("|cff89F559TP|r - |cffff8000" .. channel .. "|r:", ...)
-	else
+	elseif channel then
 		print("|cff89F559TP|r:", channel .. ":", ...)
+	else
+		print("|cff89F559TP|r:", ...)
 	end
 end
 
@@ -359,7 +361,13 @@ Addon.Logging.Warning = function(...)
 end
 
 Addon.Logging.Info = function(...)
-	LogMessage("INFO", ...)
+	if Addon.db.profile.verbose then
+		LogMessage(...)
+	end
+end
+
+Addon.Logging.Print = function(...)
+	LogMessage(...)
 end
 
 --------------------------------------------------------------------------------------------------

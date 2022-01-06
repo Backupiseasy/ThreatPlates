@@ -1836,7 +1836,7 @@ function Addon:ConfigClickableArea(toggle_show)
           ConfigModePlate = nil
         end)
       else
-        ThreatPlates.Print("Please select a target unit to enable configuration mode.", true)
+        Addon.Logging.Warning("Please select a target unit to enable configuration mode.")
       end
     end
   elseif ConfigModePlate then

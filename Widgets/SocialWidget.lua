@@ -367,15 +367,15 @@ end
 --end
 
 function Addon.PrintFriendlist()
-  print ("BNet Friends:")
+  Addon.Logging.Debug("BNet Friends:")
   local _, BnetOnline = _G.BNGetNumFriends()
   for i = 1, BnetOnline do
     local account_info = GetFriendAccountInfo(i)
     local game_account_info = account_info.gameAccountInfo
 
-    print ("  " .. tostring(i) .. ":", game_account_info.clientProgram, game_account_info.characterName, game_account_info.realmName, game_account_info.isOnline)
+    Addon.Logging.Debug("  " .. tostring(i) .. ":", game_account_info.clientProgram, game_account_info.characterName, game_account_info.realmName, game_account_info.isOnline)
     if game_account_info.isOnline and game_account_info.clientProgram == BNET_CLIENT_WOW and game_account_info.characterName then
-      print ("    => Add:", GetFullName(game_account_info.characterName, game_account_info.realmName))
+      Addon.Logging.Debug("    => Add:", GetFullName(game_account_info.characterName, game_account_info.realmName))
       ListBnetFriends[GetFullName(game_account_info.characterName, game_account_info.realmName)] = ICON_BNET_FRIEND
     end
   end

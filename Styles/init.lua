@@ -10,7 +10,7 @@ function Addon:RegisterTheme(name, create)
 			create = create
 		}
 	else
-		t.Print("Theme by the name of '"..name.."' already exists.")
+		Addon.Logging.Error("Theme by the name of '"..name.."' already exists.")
 	end
 end
 

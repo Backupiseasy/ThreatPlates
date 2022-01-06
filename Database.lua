@@ -103,7 +103,7 @@ end
 
 local function SetNamePlateClickThrough(friendly, enemy)
 --  if InCombatLockdown() then
---    ThreatPlates.Print(L["Nameplate clickthrough cannot be changed while in combat."], true)
+--    Addon.Logging.Info(L["Nameplate clickthrough cannot be changed while in combat."])
 --  else
     local db = Addon.db.profile
     db.NamePlateFriendlyClickThrough = friendly
@@ -1505,7 +1505,7 @@ Addon.ImportProfile = function(profile, profile_name, profile_version)
   -- Using pcall here to catch errors in the migration code - should not happen, but still ...
   local migration_successful, return_value = pcall(MigrateProfile, profile, profile_name, profile_version)
   if not migration_successful then
-    ThreatPlates.Print(L["Failed to migrate the imported profile to the current settings format because of an internal error. Please report this issue at the Threat Plates homepage at CurseForge: "] .. return_value, true)
+    Addon.Logging.Error(L["Failed to migrate the imported profile to the current settings format because of an internal error. Please report this issue at the Threat Plates homepage at CurseForge: "] .. return_value)
   else
     -- Create a new profile with default settings:
     Addon.db:SetProfile(profile_name) --will create a new profile

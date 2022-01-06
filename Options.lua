@@ -277,10 +277,10 @@ local function ShowImportFrame()
 
     if success then
       if not import_data.Version or not import_data.Profile and not import_data.ProfileName or type (import_data.ProfileName) ~= "string" then
-        t.Print(L["The import string has an unknown format and cannot be imported. Verify that the import string was generated from the same Threat Plates version that you are using currently."], true)
+        Addon.Logging.Error(L["The import string has an unknown format and cannot be imported. Verify that the import string was generated from the same Threat Plates version that you are using currently."])
       else
         if import_data.Version ~= t.Meta("version") then
-          t.Print(L["The import string contains a profile from an different Threat Plates version. The profile will still be imported (and migrated as far as possible), but some settings from the imported profile might be lost."], true)
+          Addon.Logging.Error(L["The import string contains a profile from an different Threat Plates version. The profile will still be imported (and migrated as far as possible), but some settings from the imported profile might be lost."])
         end
 
         local imported_profile_name = import_data.ProfileName
@@ -303,7 +303,7 @@ local function ShowImportFrame()
         Addon:ProfChange()
       end
     else
-      t.Print(L["The import string has an unknown format and cannot be imported. Verify that the import string was generated from the same Threat Plates version that you are using currently."], true)
+      Addon.Logging.Error(L["The import string has an unknown format and cannot be imported. Verify that the import string was generated from the same Threat Plates version that you are using currently."])
     end
   end
 
@@ -553,7 +553,7 @@ end
 
 local function SetCVarTPTP(info, value)
   if InCombatLockdown() then
-    t.Print("We're unable to change this while in combat", true)
+    Addon.Logging.Error(L["We're unable to change this while in combat"])
   else
     SetCVar(info.arg, value)
     Addon:ForceUpdate()
@@ -562,7 +562,7 @@ end
 
 local function SetCVarBoolTPTP(info, value)
   if InCombatLockdown() then
-    t.Print("We're unable to change this while in combat", true)
+    Addon.Logging.Error(L["We're unable to change this while in combat"])
   else
     if type(info) == "table" then
       info = info.arg
@@ -574,7 +574,7 @@ end
 
 local function SyncGameSettings(info, val)
   if InCombatLockdown() then
-    t.Print("We're unable to change this while in combat", true)
+    Addon.Logging.Error(L["We're unable to change this while in combat"])
   else
     SetValue(info, val)
     TidyPlatesThreat:PLAYER_REGEN_ENABLED()
@@ -583,7 +583,7 @@ end
 
 local function SyncGameSettingsWorld(info, val)
   if InCombatLockdown() then
-    t.Print("We're unable to change this while in combat", true)
+    Addon.Logging.Error(L["We're unable to change this while in combat"])
   else
     SetValue(info, val)
     local isInstance, instanceType = IsInInstance()
@@ -4845,7 +4845,7 @@ local function CreateBlizzardSettings()
             desc = L["The size of the clickable area is always derived from the current size of the healthbar."],
             set = function(info, val)
               if InCombatLockdown() then
-                t.Print("We're unable to change this while in combat", true)
+                Addon.Logging.Error(L["We're unable to change this while in combat"])
               else
                 SetValue(info, val)
                 Addon:SetBaseNamePlateSize()
@@ -4862,7 +4862,7 @@ local function CreateBlizzardSettings()
             step = 1,
             set = function(info, val)
               if InCombatLockdown() then
-                t.Print("We're unable to change this while in combat", true)
+                Addon.Logging.Error(L["We're unable to change this while in combat"])
               else
                 SetValue(info, val)
                 Addon:SetBaseNamePlateSize()
@@ -4880,7 +4880,7 @@ local function CreateBlizzardSettings()
             step = 1,
             set = function(info, val)
               if InCombatLockdown() then
-                t.Print("We're unable to change this while in combat", true)
+                Addon.Logging.Error(L["We're unable to change this while in combat"])
               else
                 SetValue(info, val)
                 Addon:SetBaseNamePlateSize()
@@ -5136,7 +5136,7 @@ local function CreateBlizzardSettings()
             width = "double",
             func = function()
               if InCombatLockdown() then
-                t.Print("We're unable to change this while in combat", true)
+                Addon.Logging.Error(L["We're unable to change this while in combat"])
               else
                 local cvars = {
                   "nameplateOtherTopInset", "nameplateOtherBottomInset", "nameplateLargeTopInset", "nameplateLargeBottomInset",
@@ -5480,7 +5480,7 @@ local function CreateHealthbarOptions()
               Width = GetRangeEntry(L["Bar Width"], 10, { "settings", "healthbar", "width" }, 5, 500,
                 function(info, val)
                   if InCombatLockdown() then
-                    t.Print("We're unable to change this while in combat", true)
+                    Addon.Logging.Error(L["We're unable to change this while in combat"])
                   else
                     SetThemeValue(info, val)
                     Addon:SetBaseNamePlateSize()
@@ -5489,7 +5489,7 @@ local function CreateHealthbarOptions()
               Height = GetRangeEntry(L["Bar Height"], 20, {"settings", "healthbar", "height" }, 1, 100,
                 function(info, val)
                   if InCombatLockdown() then
-                    t.Print("We're unable to change this while in combat", true)
+                    Addon.Logging.Error(L["We're unable to change this while in combat"])
                   else
                     SetThemeValue(info, val)
                     Addon:SetBaseNamePlateSize()
@@ -6613,7 +6613,7 @@ local function CustomPlateSetIcon(index, icon_location)
         custom_plate.SpellID = spell_id
       else
         icon = spell_id -- Set icon to spell_id == icon_location, so that the value gets stored
-        t.Print("Invalid spell ID for custom nameplate icon: " .. icon_location, true)
+        Addon.Logging.Error("Invalid spell ID for custom nameplate icon: " .. icon_location)
       end
     else
       icon_location = tostring(icon_location)
@@ -6801,7 +6801,7 @@ CreateCustomNameplateEntry = function(index)
               clipboard = nil
             end
           else
-            t.Print(L["Nothing to paste!"])
+            Addon.Logging.Warning(L["Nothing to paste!"])
           end
         end,
       },
@@ -6872,7 +6872,7 @@ CreateCustomNameplateEntry = function(index)
               -- "." is allowed as there a units names with this character
               local position, _ = string.find(val, "[%(%)%%%+%?%[%]%^%$]")
               if position then
-                t.Print(L["Illegal character used in Name trigger at position: "] .. tostring(position), true)
+                Addon.Logging.Error(L["Illegal character used in Name trigger at position: "] .. tostring(position))
               else
                 CustomPlateCheckAndUpdateEntry(info, val, index)
               end
@@ -6898,7 +6898,7 @@ CreateCustomNameplateEntry = function(index)
                   CustomPlateUpdateEntry(index)
                 end
               else
-                t.Print(L["No target found."])
+                Addon.Logging.Warning(L["No target found."])
               end
             end,
             hidden = function() return db.uniqueSettings[index].Trigger.Type ~= "Name" end,
@@ -7629,7 +7629,7 @@ CreateCustomNameplatesGroup = function()
         if slot_no then
           return L["|cffFF0000DELETE CUSTOM NAMEPLATE|r\nAre you sure you want to delete the selected custom nameplate?"]
         else
-          t.Print(L["You cannot delete General Settings, only custom nameplates entries."], true)
+          Addon.Logging.Warning(L["You cannot delete General Settings, only custom nameplates entries."])
           return false
         end
       end,
@@ -7785,10 +7785,10 @@ CreateCustomNameplatesGroup = function()
 
                   if success then
                     if not import_data.Version or not import_data.CustomStyles then
-                      t.Print(L["The import string has an invalid format and cannot be imported. Verify that the import string was generated from the same Threat Plates version that you are using currently."], true)
+                      Addon.Logging.Error(L["The import string has an invalid format and cannot be imported. Verify that the import string was generated from the same Threat Plates version that you are using currently."])
                     else
                       if import_data.Version ~= t.Meta("version") then
-                        t.Print(L["The import string contains custom nameplate settings from a different Threat Plates version. The custom nameplates will still be imported (and migrated as far as possible), but some settings from the imported custom nameplates might be lost."], true)
+                        Addon.Logging.Error(L["The import string contains custom nameplate settings from a different Threat Plates version. The custom nameplates will still be imported (and migrated as far as possible), but some settings from the imported custom nameplates might be lost."])
                       end
 
                       local imported_custom_styles  = {}
@@ -7803,7 +7803,7 @@ CreateCustomNameplatesGroup = function()
 
                         local check_ok, duplicate_triggers = CustomPlateCheckIfTriggerIsUnique(trigger_type, triggers, custom_style)
                         if not check_ok then
-                          t.Print(L["A custom nameplate with this trigger already exists: "] .. table.concat(duplicate_triggers, "; ") .. L[". You cannot use two custom nameplates with the same trigger. The imported custom nameplate will be disabled."], true)
+                          Addon.Logging.Error(L["A custom nameplate with this trigger already exists: "] .. table.concat(duplicate_triggers, "; ") .. L[". You cannot use two custom nameplates with the same trigger. The imported custom nameplate will be disabled."])
                           custom_style.Enable.Never = true
                         end
 
@@ -7821,7 +7821,7 @@ CreateCustomNameplatesGroup = function()
                       end
                     end
                   else
-                    t.Print(L["The import string has an unknown format and cannot be imported. Verify that the import string was generated from the same Threat Plates version that you are using currently."], true)
+                    Addon.Logging.Error(L["The import string has an unknown format and cannot be imported. Verify that the import string was generated from the same Threat Plates version that you are using currently."])
                   end
                 end
 
@@ -7834,7 +7834,6 @@ CreateCustomNameplatesGroup = function()
     },
   }
 
-
   -- Use pairs as iterater as the table is in a somewhat invalid format (non-iteratable with ipairs) as long as the
   -- custom styles have not been migrated to V2
   for index, custom_style in pairs(db.uniqueSettings) do
@@ -7846,6 +7845,177 @@ CreateCustomNameplatesGroup = function()
 
   options.args.Custom.args = entry
   UpdateSpecial()
+end
+
+local function CreateTotemOptions()
+  local options = {
+    name = L["Totems"],
+    type = "group",
+    childGroups = "list",
+    order = 50,
+    args = {
+      TotemSettings = {
+        name = L["|cffffffffTotem Settings|r"],
+        type = "group",
+        order = 0,
+        get = GetValue,
+        set = SetValue,
+        args = {
+          Toggles = {
+            name = L["Toggling"],
+            type = "group",
+            order = 1,
+            inline = true,
+            args = {
+              HideHealth = {
+                name = L["Hide Healthbars"],
+                type = "toggle",
+                order = 1,
+                width = "double",
+                arg = { "totemSettings", "hideHealthbar" },
+              },
+            },
+          },
+          Icon = {
+            name = L["Icon"],
+            type = "group",
+            order = 2,
+            inline = true,
+            args = {
+              Show = {
+                name = L["Enable"],
+                order = 5,
+                type = "toggle",
+                set = function(info, val) SetValuePlain(info, val); Addon.Widgets:InitializeWidget("TotemIcon") end,
+                arg = { "totemWidget", "ON" },
+              },
+              Size = GetSizeEntryDefault(10, "totemWidget"),
+              Offset = GetPlacementEntryWidget(30, "totemWidget"),
+            },
+          },
+          Alpha = {
+            name = L["Transparency"],
+            type = "group",
+            order = 3,
+            inline = true,
+            args = {
+              TotemAlpha = {
+                name = L["Totem Transparency"],
+                order = 1,
+                type = "range",
+                width = "full",
+                step = 0.05,
+                min = 0,
+                max = 1,
+                isPercent = true,
+                set = function(info, val) SetValue(info, abs(val - 1)) end,
+                get = function(info) return 1 - GetValue(info) end,
+                arg = { "nameplate", "alpha", "Totem" },
+              },
+            },
+          },
+          Scale = {
+            name = L["Scale"],
+            type = "group",
+            order = 4,
+            inline = true,
+            args = {
+              TotemScale = GetScaleEntryWidget(L["Totem Scale"], 1, { "nameplate", "scale", "Totem" }),
+            }
+          },
+        },
+      },
+    },
+  }
+
+  local totem_list = {}
+  local i = 1
+  for name, data in pairs(Addon.TotemInformation) do
+    totem_list[i] = data
+    i = i + 1
+  end
+
+  -- properly no longer possible if 7.3.5+ GetSpellInfo changes go live
+  table.sort(totem_list, function(a, b) return a.SortKey  < b.SortKey end)
+
+  for i, totem_info in ipairs(totem_list) do
+    options.args[totem_info.Name] = {
+      name = "|cff" .. totem_info.GroupColor .. totem_info.Name .. "|r",
+      type = "group",
+      order = i,
+      args = {
+        Header = {
+          name = "> |cff" .. totem_info.GroupColor .. totem_info.Name .. "|r <",
+          type = "header",
+          order = 0,
+        },
+        Enabled = {
+          name = L["Enable"],
+          type = "group",
+          inline = true,
+          order = 1,
+          args = {
+            Toggle = {
+              name = L["Show Nameplate"],
+              type = "toggle",
+              arg = { "totemSettings", totem_info.ID, "ShowNameplate" },
+            },
+          },
+        },
+        HealthColor = {
+          name = L["Health Coloring"],
+          type = "group",
+          order = 2,
+          inline = true,
+          args = {
+            Enable = {
+              name = L["Enable Custom Color"],
+              type = "toggle",
+              order = 1,
+              arg = { "totemSettings", totem_info.ID, "ShowHPColor" },
+            },
+            Color = {
+              name = L["Color"],
+              type = "color",
+              order = 2,
+              get = GetColor,
+              set = SetColor,
+              arg = { "totemSettings", totem_info.ID, "Color" },
+            },
+          },
+        },
+        Textures = {
+          name = L["Icon"],
+          type = "group",
+          order = 3,
+          inline = true,
+          args = {
+            Icon = {
+              name = "",
+              type = "execute",
+              width = "full",
+              order = 0,
+              image = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\TotemIconWidget\\" .. db.totemSettings[totem_info.ID].Style .. "\\" .. totem_info.Icon,
+            },
+            Style = {
+              name = "",
+              type = "select",
+              order = 1,
+              width = "full",
+              set = function(info, val)
+                SetValue(info, val)
+                options.args.Totems.args[totem_info.Name].args.Textures.args.Icon.image = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\TotemIconWidget\\" .. db.totemSettings[totem_info.ID].Style .. "\\" .. totem_info.Icon;
+              end,
+              values = { normal = "Normal", special = "Special" },
+              arg = { "totemSettings", totem_info.ID, "Style" },
+            },
+          },
+        },
+      },
+    }
+  end
+
+  return options
 end
 
 -- Return the Options table
@@ -9525,13 +9695,7 @@ local function CreateOptionsTable()
           },
         },
         Widgets = CreateWidgetOptions(),
-        Totems = {
-          name = L["Totems"],
-          type = "group",
-          childGroups = "list",
-          order = 50,
-          args = {},
-        },
+        Totems = CreateTotemOptions(),
         Custom = {
           name = L["Custom Nameplates"],
           type = "group",
@@ -9635,169 +9799,6 @@ local function CreateOptionsTable()
     ClassOpts_OrderCount = ClassOpts_OrderCount + 1
   end
   options.args.Widgets.args.ClassIconWidget.args.Textures.args = ClassOpts
-
-  local TotemOpts = {
-    TotemSettings = {
-      name = L["|cffffffffTotem Settings|r"],
-      type = "group",
-      order = 0,
-      get = GetValue,
-      set = SetValue,
-      args = {
-        Toggles = {
-          name = L["Toggling"],
-          type = "group",
-          order = 1,
-          inline = true,
-          args = {
-            HideHealth = {
-              name = L["Hide Healthbars"],
-              type = "toggle",
-              order = 1,
-              width = "double",
-              arg = { "totemSettings", "hideHealthbar" },
-            },
-          },
-        },
-        Icon = {
-          name = L["Icon"],
-          type = "group",
-          order = 2,
-          inline = true,
-          args = {
-            Show = {
-              name = L["Enable"],
-              order = 5,
-              type = "toggle",
-              set = function(info, val) SetValuePlain(info, val); Addon.Widgets:InitializeWidget("TotemIcon") end,
-              arg = { "totemWidget", "ON" },
-            },
-            Size = GetSizeEntryDefault(10, "totemWidget"),
-            Offset = GetPlacementEntryWidget(30, "totemWidget"),
-          },
-        },
-        Alpha = {
-          name = L["Transparency"],
-          type = "group",
-          order = 3,
-          inline = true,
-          args = {
-            TotemAlpha = {
-              name = L["Totem Transparency"],
-              order = 1,
-              type = "range",
-              width = "full",
-              step = 0.05,
-              min = 0,
-              max = 1,
-              isPercent = true,
-              set = function(info, val) SetValue(info, abs(val - 1)) end,
-              get = function(info) return 1 - GetValue(info) end,
-              arg = { "nameplate", "alpha", "Totem" },
-            },
-          },
-        },
-        Scale = {
-          name = L["Scale"],
-          type = "group",
-          order = 4,
-          inline = true,
-          args = {
-            TotemScale = GetScaleEntryWidget(L["Totem Scale"], 1, { "nameplate", "scale", "Totem" }),
-          }
-        },
-      },
-    },
-  };
-
-  local totem_list = {}
-  local i = 1
-  for name, data in pairs(Addon.TotemInformation) do
-    totem_list[i] = data
-    i = i + 1
-  end
-
-  -- properly no longer possible if 7.3.5+ GetSpellInfo changes go live
-  table.sort(totem_list, function(a, b) return a.SortKey  < b.SortKey end)
-
-  for i, totem_info in ipairs(totem_list) do
-    TotemOpts[totem_info.Name] = {
-      name = "|cff" .. totem_info.GroupColor .. totem_info.Name .. "|r",
-      type = "group",
-      order = i,
-      args = {
-        Header = {
-          name = "> |cff" .. totem_info.GroupColor .. totem_info.Name .. "|r <",
-          type = "header",
-          order = 0,
-        },
-        Enabled = {
-          name = L["Enable"],
-          type = "group",
-          inline = true,
-          order = 1,
-          args = {
-            Toggle = {
-              name = L["Show Nameplate"],
-              type = "toggle",
-              arg = { "totemSettings", totem_info.ID, "ShowNameplate" },
-            },
-          },
-        },
-        HealthColor = {
-          name = L["Health Coloring"],
-          type = "group",
-          order = 2,
-          inline = true,
-          args = {
-            Enable = {
-              name = L["Enable Custom Color"],
-              type = "toggle",
-              order = 1,
-              arg = { "totemSettings", totem_info.ID, "ShowHPColor" },
-            },
-            Color = {
-              name = L["Color"],
-              type = "color",
-              order = 2,
-              get = GetColor,
-              set = SetColor,
-              arg = { "totemSettings", totem_info.ID, "Color" },
-            },
-          },
-        },
-        Textures = {
-          name = L["Icon"],
-          type = "group",
-          order = 3,
-          inline = true,
-          args = {
-            Icon = {
-              name = "",
-              type = "execute",
-              width = "full",
-              order = 0,
-              image = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\TotemIconWidget\\" .. db.totemSettings[totem_info.ID].Style .. "\\" .. totem_info.Icon,
-            },
-            Style = {
-              name = "",
-              type = "select",
-              order = 1,
-              width = "full",
-              set = function(info, val)
-                SetValue(info, val)
-                options.args.Totems.args[totem_info.Name].args.Textures.args.Icon.image = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\TotemIconWidget\\" .. db.totemSettings[totem_info.ID].Style .. "\\" .. totem_info.Icon;
-              end,
-              values = { normal = "Normal", special = "Special" },
-              arg = { "totemSettings", totem_info.ID, "Style" },
-            },
-          },
-        },
-      },
-    }
-  end
-
-  options.args.Totems.args = TotemOpts;
 
   CreateCustomNameplatesGroup()
 
@@ -9932,13 +9933,13 @@ function Addon.RestoreLegacyCustomNameplates()
 
     if trigger_already_used == nil or trigger_already_used.Enable.Never then
       local error_msg = L["Adding legacy custom nameplate for %s ..."]:gsub("%%s", trigger_value)
-      t.Print(error_msg)
+      Addon.Logging.Error(error_msg)
 
       table.insert(custom_plates, max_slot_no + index, legacy_custom_plate)
       index = index + 1
     else
       local error_msg = L["Legacy custom nameplate %s already exists. Skipping it."]:gsub("%%s", trigger_value)
-      t.Print(error_msg, true)
+      Addon.Logging.Error(error_msg, true)
     end
   end
 

@@ -20,7 +20,7 @@ local NamePlateDriverFrame = NamePlateDriverFrame
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
 local LibStub = LibStub
-local L = t.L
+local L = Addon.ThreatPlates.L
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -36,13 +36,6 @@ local LSMUpdateTimer
 ---------------------------------------------------------------------------------------------------
 -- Global configs and funtions
 ---------------------------------------------------------------------------------------------------
-
-t.Print = function(val,override)
-  local db = Addon.db.profile
-  if override or db.verbose then
-    print(t.Meta("titleshort")..": "..val)
-  end
-end
 
 function Addon:SpecName()
   local _,name,_,_,_,role = GetSpecializationInfo(GetSpecialization(false,false,1),nil,false)
@@ -215,8 +208,8 @@ function Addon:CheckForFirstStartUp()
         Addon:SetRole(t.SPEC_ROLES[Addon.PlayerClass][index], index)
       end
 
-      t.Print(Welcome..L["|cff89f559You are currently in your "]..Addon:RoleText()..L["|cff89f559 role.|r"])
-      t.Print(L["|cff89f559Additional options can be found by typing |r'/tptp'|cff89F559.|r"])
+      Addon.Logging.Info(Welcome..L["|cff89f559You are currently in your "]..Addon:RoleText()..L["|cff89f559 role.|r"])
+      Addon.Logging.Info(L["|cff89f559Additional options can be found by typing |r'/tptp'|cff89F559.|r"])
     end
 
     local new_version = tostring(t.Meta("version"))
@@ -415,7 +408,7 @@ end
 function Addon:CallbackWhenOoC(func, msg)
   if InCombatLockdown() then
     if msg then
-      t.Print(msg .. L[" The change will be applied after you leave combat."], true)
+      Addon.Logging.Warning(msg .. L[" The change will be applied after you leave combat."])
     end
     task_queue_ooc[#task_queue_ooc + 1] = func
   else
@@ -523,7 +516,7 @@ end
 
 function TidyPlatesThreat:PLAYER_LOGIN(...)
   if Addon.db.char.welcome then
-    t.Print(L["|cff89f559Threat Plates:|r Welcome back |cff"]..t.HCC[Addon.PlayerClass]..UnitName("player").."|r!!")
+    Addon.Logging.Info(L["|cff89f559Threat Plates:|r Welcome back |cff"]..t.HCC[Addon.PlayerClass]..UnitName("player").."|r!!")
   end
 end
 

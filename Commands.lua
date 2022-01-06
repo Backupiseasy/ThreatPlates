@@ -1,18 +1,17 @@
 ﻿local ADDON_NAME, Addon = ...
-local TP = Addon.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
-local L = TP.L
+local L = Addon.ThreatPlates.L
 
-local DEBUG = TP.Meta("version") == "@project-version@"
+local DEBUG = Addon.ThreatPlates.Meta("version") == "@project-version@"
 local function toggleDPS()
 	Addon:SetRole(false)
 	Addon.db.profile.threat.ON = true
 	if Addon.db.profile.verbose then
-		TP.Print(L["-->>|cffff0000DPS Plates Enabled|r<<--"])
-		TP.Print(L["|cff89F559Threat Plates|r: DPS switch detected, you are now in your |cffff0000dpsing / healing|r role."])
+		Addon.Logging.Info(L["-->>|cffff0000DPS Plates Enabled|r<<--"])
+		Addon.Logging.Info(L["|cff89F559Threat Plates|r: DPS switch detected, you are now in your |cffff0000dpsing / healing|r role."])
 	end
 	Addon:ForceUpdate()
 end
@@ -21,8 +20,8 @@ local function toggleTANK()
 	Addon:SetRole(true)
 	Addon.db.profile.threat.ON = true
 	if Addon.db.profile.verbose then
-		TP.Print(L["-->>|cff00ff00Tank Plates Enabled|r<<--"])
-		TP.Print(L["|cff89F559Threat Plates|r: Tank switch detected, you are now in your |cff00ff00tanking|r role."])
+		Addon.Logging.Info(L["-->>|cff00ff00Tank Plates Enabled|r<<--"])
+		Addon.Logging.Info(L["|cff89F559Threat Plates|r: Tank switch detected, you are now in your |cff00ff00tanking|r role."])
 	end
 	Addon:ForceUpdate()
 end
@@ -34,7 +33,7 @@ SlashCmdList["TPTPTANK"] = toggleTANK
 
 local function TPTPTOGGLE()
 	if (Addon.db.profile.optionRoleDetectionAutomatic and Addon.db.profile.verbose) then
-		TP.Print(L["|cff89F559Threat Plates|r: Role toggle not supported because automatic role detection is enabled."])
+		Addon.Logging.Warning(L["|cff89F559Threat Plates|r: Role toggle not supported because automatic role detection is enabled."])
 	else
 		if Addon:PlayerRoleIsTank() then
 			toggleDPS()
@@ -50,17 +49,17 @@ SlashCmdList["TPTPTOGGLE"] = TPTPTOGGLE
 local function TPTPOVERLAP()
 	if GetCVar("nameplateMotion") == "0" then
 		if InCombatLockdown() then
-			TP.Print(L["We're unable to change this while in combat"])
+			Addon.Logging.Warning(L["We're unable to change this while in combat"])
 		else
 			SetCVar("nameplateMotion", 1)
-			TP.Print(L["-->>Nameplate Overlapping is now |cffff0000OFF!|r<<--"])
+			Addon.Logging.Info(L["-->>Nameplate Overlapping is now |cffff0000OFF!|r<<--"])
 		end
 	else
 		if InCombatLockdown() then
-			TP.Print(L["We're unable to change this while in combat"])
+			Addon.Logging.Warning(L["We're unable to change this while in combat"])
 		else
 			SetCVar("nameplateMotion", 0)
-			TP.Print(L["-->>Nameplate Overlapping is now |cff00ff00ON!|r<<--"])
+			Addon.Logging.Info(L["-->>Nameplate Overlapping is now |cff00ff00ON!|r<<--"])
 		end
 	end
 end
@@ -70,9 +69,9 @@ SlashCmdList["TPTPOVERLAP"] = TPTPOVERLAP
 
 local function TPTPVERBOSE()
 	if Addon.db.profile.verbose then
-		TP.Print(L["-->>Threat Plates verbose is now |cffff0000OFF!|r<<-- shhh!!"])
+		Addon.Logging.Info(L["-->>Threat Plates verbose is now |cffff0000OFF!|r<<-- shhh!!"])
 	else
-		TP.Print(L["-->>Threat Plates verbose is now |cff00ff00ON!|r<<--"], true)
+		Addon.Logging.Info(L["-->>Threat Plates verbose is now |cff00ff00ON!|r<<--"])
 	end
 	Addon.db.profile.verbose = not Addon.db.profile.verbose
 end
@@ -81,19 +80,19 @@ SLASH_TPTPVERBOSE1 = "/tptpverbose"
 SlashCmdList["TPTPVERBOSE"] = TPTPVERBOSE
 
 local function PrintHelp()
-	TP.Print(L["Usage: /tptp [options]"], true)
-	TP.Print(L["options:"], true)
-	TP.Print(L["  profile <name>          Switch the current profile to <name>"], true)
-	TP.Print(L["  legacy-custom-styles    Adds (legacy) default custom styles for nameplates that are deleted when migrating custom nameplates to the current format"], true)
-	TP.Print(L["  toggle-scripting        Enable or disable scripting support (for beta testing)"], true)
-	TP.Print(L["  help                    Prints this help message"], true)
-	TP.Print(L["  <no option>             Displays options dialog"], true)
-	TP.Print(L["Additional chat commands:"], true)
-	TP.Print(L["  /tptpverbose   Toggles addon feedback text"], true)
-	TP.Print(L["  /tptptoggle    Toggle Role from one to the other"], true)
-	TP.Print(L["  /tptpdps       Toggles DPS/Healing threat plates"], true)
-	TP.Print(L["  /tptptank      Toggles Tank threat plates"], true)
-	TP.Print(L["  /tptpol        Toggles nameplate overlapping"], true)
+	Addon.Logging.Print(L["Usage: /tptp [options]"])
+	Addon.Logging.Print(L["options:"])
+	Addon.Logging.Print(L["  profile <name>          Switch the current profile to <name>"])
+	Addon.Logging.Print(L["  legacy-custom-styles    Adds (legacy) default custom styles for nameplates that are deleted when migrating custom nameplates to the current format"])
+	Addon.Logging.Print(L["  toggle-scripting        Enable or disable scripting support (for beta testing)"])
+	Addon.Logging.Print(L["  help                    Prints this help message"])
+	Addon.Logging.Print(L["  <no option>             Displays options dialog"])
+	Addon.Logging.Print(L["Additional chat commands:"])
+	Addon.Logging.Print(L["  /tptpverbose   Toggles addon feedback text"])
+	Addon.Logging.Print(L["  /tptptoggle    Toggle Role from one to the other"])
+	Addon.Logging.Print(L["  /tptpdps       Toggles DPS/Healing threat plates"])
+	Addon.Logging.Print(L["  /tptptank      Toggles Tank threat plates"])
+	Addon.Logging.Print(L["  /tptpol        Toggles nameplate overlapping"])
 end
 
 local function SearchDBForString(db, prefix, keyword)
@@ -103,7 +102,7 @@ local function SearchDBForString(db, prefix, keyword)
 			SearchDBForString(db[key], search_text, keyword )
 		else
 			if string.match(string.lower(search_text), keyword) then
-				print (search_text, "=", value)
+				Addon.Logging.Print(search_text, "=", value)
 			end
 		end
 	end
@@ -113,7 +112,7 @@ local function ChatCommandDebug(cmd_list)
 	local command = cmd_list[1]
 
 	if command == "searchdb" then
-		TP.Print("|cff89F559Threat Plates|r: Searching settings:", true)
+		Addon.Logging.Print("|cff89F559Threat Plates|r: Searching settings:")
 		SearchDBForString(Addon.db.profile, "<Profile>", string.lower(cmd_list[2]))
 		SearchDBForString(Addon.db.global, "<Profile>", string.lower(cmd_list[2]))
 	elseif command == "cache" then
@@ -121,7 +120,7 @@ local function ChatCommandDebug(cmd_list)
 	elseif command == "unit" then
 		local plate = C_NamePlate.GetNamePlateForUnit("target")
 		if not plate then return end
-		Addon.Debug.PrintUnit(plate.TPFrame.unit, true)
+		Addon.Debug.PrintUnit(plate.TPFrame.unit)
 		--elseif command == "migrate" then
 		--	Addon.TestMigration()
 		--	Addon.MigrateDatabase(TP.Meta("version"))
@@ -144,7 +143,7 @@ local function ChatCommandDebug(cmd_list)
 			print (i, w)
 		end
 	elseif command == "event" then
-		--TP.Print("|cff89F559Threat Plates|r: Event publishing overview:", true)
+		--Addon.Logging.Info("|cff89F559Threat Plates|r: Event publishing overview:")
 		--Addon:PrintEventService()
 	elseif command == "quest" then
 		Addon:PrintQuests(cmd_list[2])
@@ -236,7 +235,7 @@ local function ChatCommandDebug(cmd_list)
 			end
 		end
 	else
-		TP.Print(L["Unknown option: "] .. command, true)
+		Addon.Logging.Error(L["Unknown option: "] .. command)
 		PrintHelp()
 	end
 end
@@ -259,17 +258,17 @@ function TidyPlatesThreat:ChatCommand(input)
 			if Addon.db.profiles[profile_name] then
 				Addon.db:SetProfile(profile_name)
 			else
-				TP.Print(L["|cff89F559Threat Plates|r: Unknown profile: "] .. profile_name, true)
+				Addon.Logging.Error(L["|cff89F559Threat Plates|r: Unknown profile: "] .. profile_name)
 			end
 		else
-			TP.Print(L["|cff89F559Threat Plates|r: No profile specified"], true)
+			Addon.Logging.Error(L["|cff89F559Threat Plates|r: No profile specified"])
 		end
 	elseif command == "toggle-scripting" then
 		Addon.db.global.ScriptingIsEnabled = not Addon.db.global.ScriptingIsEnabled
 		if Addon.db.global.ScriptingIsEnabled then
-			TP.Print(L["Scriping for custom styles for nameplates is now |cff00ff00enabled!|r."], true)
+			Addon.Logging.Info(L["Scriping for custom styles for nameplates is now |cff00ff00enabled!|r."])
 		else
-			TP.Print(L["Scriping for custom styles for nameplates is now |cffff0000disabled!|r."], true)
+			Addon.Logging.Info(L["Scriping for custom styles for nameplates is now |cffff0000disabled!|r."])
 		end
 		Addon.UpdateCustomStyles()
 		TidyPlatesThreat:ConfigTableChanged()
@@ -282,7 +281,7 @@ function TidyPlatesThreat:ChatCommand(input)
 	elseif DEBUG then
 		ChatCommandDebug(cmd_list)
 	else
-		TP.Print(L["Unknown option: "] .. command, true)
+		Addon.Logging.Error(L["Unknown option: "] .. command)
 		PrintHelp()
 	end
 end

@@ -363,7 +363,7 @@ function Addon:ConfigBossModsWidget()
 
       EnabledConfigMode = true
     else
-      ThreatPlates.Print("Please select a target unit to enable configuration mode.", true)
+      Addon.Logging.Warning("Please select a target unit to enable configuration mode.")
     end
   else
     BossMod_DisableHostileNameplates()
