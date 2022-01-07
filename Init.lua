@@ -102,6 +102,11 @@ Addon.Cache = {
 	}
 }
 
+-- Internal API
+Addon.Data = {}
+Addon.Logging = {}
+Addon.Debug = {}
+
 ---------------------------------------------------------------------------------------------------
 -- Aura Highlighting
 ---------------------------------------------------------------------------------------------------
@@ -143,15 +148,15 @@ Addon.LoadOnDemandLibraries = function()
 			Addon.LibDogTag = LibStub("LibDogTag-3.0", true)
 			if not Addon.LibDogTag then
 				Addon.LibDogTag = false
-				ThreatPlates.Print(L["Custom status text requires LibDogTag-3.0 to function."], true)
+				Addon.Logging.Error(L["Custom status text requires LibDogTag-3.0 to function."])
 			else
 				LoadAddOn("LibDogTag-Unit-3.0")
 			  if not LibStub("LibDogTag-Unit-3.0", true) then
 					Addon.LibDogTag = false
-					ThreatPlates.Print(L["Custom status text requires LibDogTag-Unit-3.0 to function."], true)
+					Addon.Logging.Error(L["Custom status text requires LibDogTag-Unit-3.0 to function."])
 				elseif not Addon.LibDogTag.IsLegitimateUnit or not Addon.LibDogTag.IsLegitimateUnit["nameplate1"] then
 					Addon.LibDogTag = false
-					ThreatPlates.Print(L["Your version of LibDogTag-Unit-3.0 does not support nameplates. You need to install at least v90000.3 of LibDogTag-Unit-3.0."], true)
+					Addon.Logging.Error(L["Your version of LibDogTag-Unit-3.0 does not support nameplates. You need to install at least v90000.3 of LibDogTag-Unit-3.0."])
 				end
 			end
 		end
@@ -162,6 +167,34 @@ end
 -- Utils: Handling of colors
 ---------------------------------------------------------------------------------------------------
 
+-- Create a percentage-based WoW color based on integer values from 0 to 255 with optional alpha value
+Addon.RGB = function(red, green, blue, alpha)
+  local color = { r = red/255, g = green/255, b = blue/255 }
+  if alpha then color.a = alpha end
+  return color
+end
+
+Addon.RGB_P = function(red, green, blue, alpha)
+  return { r = red, g = green, b = blue, a = alpha}
+end
+
+Addon.RGB_WITH_HEX = function(red, green, blue, alpha)
+	local color = Addon.RGB(red, green, blue, alpha)
+	color.colorStr = CreateColor(color.r, color.g, color.b, color.a):GenerateHexColor()
+	return color
+end
+
+-- thanks to https://github.com/Perkovec/colorise-lua
+Addon.HEX2RGB = function (hex)
+  hex = hex:gsub("#","")
+  return tonumber("0x"..hex:sub(1,2)), tonumber("0x"..hex:sub(3,4)), tonumber("0x"..hex:sub(5,6))
+end
+
+Addon.ClassColorAsHex = function(class)
+  local str = RAID_CLASS_COLORS[class].colorStr;
+  return gsub(str, "(ff)", "", 1)
+end
+
 Addon.ColorByClass = function(class_name, text)
 	if class_name then
 		return "|c" .. Addon.db.profile.Colors.Classes[class_name].colorStr .. text .. "|r"
@@ -171,8 +204,8 @@ Addon.ColorByClass = function(class_name, text)
 end
 
 --------------------------------------------------------------------------------------------------
--- 
----------------------------------------------------------------------------------------------------
+-- Utility functions
+--------------------------------------------------------------------------------------------------
 
 Addon.Meta = function(value)
 	local meta
@@ -184,13 +217,11 @@ Addon.Meta = function(value)
 	return meta or ""
 end
 
-do
-	ThreatPlates.HCC = {}
-	for i=1,#CLASS_SORT_ORDER do
-		local str = RAID_CLASS_COLORS[CLASS_SORT_ORDER[i]].colorStr;
-		local str = gsub(str,"(ff)","",1)
-		ThreatPlates.HCC[CLASS_SORT_ORDER[i]] = str;
-	end
+ThreatPlates.HCC = {}
+for i=1,#CLASS_SORT_ORDER do
+	local str = RAID_CLASS_COLORS[CLASS_SORT_ORDER[i]].colorStr;
+	local str = gsub(str,"(ff)","",1)
+	ThreatPlates.HCC[CLASS_SORT_ORDER[i]] = str;
 end
 
 -- Helper Functions
@@ -223,67 +254,6 @@ Addon.TTS = function(s)
 	return list
 end
 
---------------------------------------------------------------------------------------------------
--- Functions to work with colors
----------------------------------------------------------------------------------------------------
-
--- Create a percentage-based WoW color based on integer values from 0 to 255 with optional alpha value
-Addon.RGB = function(red, green, blue, alpha)
-  local color = { r = red/255, g = green/255, b = blue/255 }
-  if alpha then color.a = alpha end
-  return color
-end
-
-Addon.RGB_P = function(red, green, blue, alpha)
-  return { r = red, g = green, b = blue, a = alpha}
-end
-
-Addon.RGB_WITH_HEX = function(red, green, blue, alpha)
-	local color = Addon.RGB(red, green, blue, alpha)
-	color.colorStr = CreateColor(color.r, color.g, color.b, color.a):GenerateHexColor()
-	return color
-end
-
-Addon.MergeDefaultsIntoTable = function(target, defaults)
-	for k,v in pairs(defaults) do
-		if type(v) == "table" then
-			target[k] = target[k] or {}
-			Addon.MergeDefaultsIntoTable(target[k], v)
-		else
-			target[k] = target[k] or v
-		end
-	end
-end
-
--- thanks to https://github.com/Perkovec/colorise-lua
-Addon.HEX2RGB = function (hex)
-  hex = hex:gsub("#","")
-  return tonumber("0x"..hex:sub(1,2)), tonumber("0x"..hex:sub(3,4)), tonumber("0x"..hex:sub(5,6))
-end
-
-Addon.ClassColorAsHex = function(class)
-  local str = RAID_CLASS_COLORS[class].colorStr;
-  return gsub(str, "(ff)", "", 1)
-end
-
-Addon.CheckTableStructure = function(reference_structure, table_to_check)
-	if table_to_check == nil then
-		return false
-	end
-
-	for k,v in pairs(reference_structure) do
-		if table_to_check[k] == nil or type(table_to_check[k]) ~= type(v) then
-			return false
-		elseif type(v) == "table" then
-			if not Addon.CheckTableStructure(v, table_to_check[k]) then
-				return false
-			end
-		end
-	end
-
-	return true
-end
-
 Addon.Split = function(split_string)
 	local result = {}
 	for entry in string.gmatch(split_string, "[^;]+") do
@@ -304,6 +274,47 @@ Addon.SplitByWhitespace = function(split_string)
 end
 
 --------------------------------------------------------------------------------------------------
+-- Logging Functions
+---------------------------------------------------------------------------------------------------
+
+local function LogMessage(channel, ...)
+	-- Meta("titleshort")
+	if channel == "DEBUG" and Addon.DEBUG then
+		print("|cff89F559TP|r - |cff0000ff" .. channel .. "|r:", ...)
+	elseif channel == "ERROR" then
+		print("|cff89F559TP|r - |cffff0000" .. channel .. "|r:", ...)
+	elseif channel == "WARNING" then
+		print("|cff89F559TP|r - |cffff8000" .. channel .. "|r:", ...)
+	elseif channel then
+		print("|cff89F559TP|r:", channel .. ":", ...)
+	else
+		print("|cff89F559TP|r:", ...)
+	end
+end
+
+Addon.Logging.Debug = function(...)
+	LogMessage("DEBUG", ...)
+end
+
+Addon.Logging.Error = function(...)
+	LogMessage("ERROR", ...)
+end
+
+Addon.Logging.Warning = function(...)
+	LogMessage("WARNING", ...)
+end
+
+Addon.Logging.Info = function(...)
+	if Addon.db.profile.verbose then
+		LogMessage(...)
+	end
+end
+
+Addon.Logging.Print = function(...)
+	LogMessage(...)
+end
+
+--------------------------------------------------------------------------------------------------
 -- Functions for working with tables
 ---------------------------------------------------------------------------------------------------
 
@@ -320,31 +331,6 @@ local function DeepCopyTable(orig)
 		copy = orig
 	end
 	return copy
-end
-
-Addon.PrintMessage = function(channel, ...)
-	--local verbose = Addon.db.profile.verbose
-	if channel == "DEBUG" and Addon.DEBUG then
-		print("|cff89F559TP|r - |cff0000ff" .. channel .. "|r:", ...)
-	elseif channel == "ERROR" then
-		print("|cff89F559TP|r - |cffff0000" .. channel .. "|r:", ...)
-	elseif channel == "WARNING" then
-		print("|cff89F559TP|r - |cffff8000" .. channel .. "|r:", ...)
-	else
-		print("|cff89F559TP|r:", channel, ...)
-	end
-end
-
-Addon.PrintDebugMessage = function(...)
-	Addon.PrintMessage("DEBUG", ...)
-end
-
-Addon.PrintErrorMessage = function(...)
-	Addon.PrintMessage("ERROR", ...)
-end
-
-Addon.PrintWarningMessage = function(...)
-	Addon.PrintMessage("WARNING", ...)
 end
 
 Addon.CopyTable = function(input)
@@ -374,6 +360,17 @@ Addon.MergeIntoTable = function(target, source)
 	end
 end
 
+Addon.MergeDefaultsIntoTable = function(target, defaults)
+	for k,v in pairs(defaults) do
+		if type(v) == "table" then
+			target[k] = target[k] or {}
+			Addon.MergeDefaultsIntoTable(target[k], v)
+		else
+			target[k] = target[k] or v
+		end
+	end
+end
+
 Addon.ConcatTables = function(base_table, table_to_concat)
 	local concat_result = Addon.CopyTable(base_table)
 
@@ -384,11 +381,28 @@ Addon.ConcatTables = function(base_table, table_to_concat)
 	return concat_result
 end
 
+Addon.CheckTableStructure = function(reference_structure, table_to_check)
+	if table_to_check == nil then
+		return false
+	end
+
+	for k,v in pairs(reference_structure) do
+		if table_to_check[k] == nil or type(table_to_check[k]) ~= type(v) then
+			return false
+		elseif type(v) == "table" then
+			if not Addon.CheckTableStructure(v, table_to_check[k]) then
+				return false
+			end
+		end
+	end
+
+	return true
+end
+
 --
 -- Flattens a hierarchy of tables into a single array containing all
 -- of the values.
 --
-
 Addon.FlattenTable = function(arr, ...)
 	local result = {}
 

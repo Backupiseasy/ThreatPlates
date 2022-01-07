@@ -99,7 +99,7 @@ if MAP_LOCALE_TO_UNIT_SYMBOL[client_locale] then
   end
 end
 
-Addon.Truncate = TruncateEastAsian
+Addon.Truncate = TruncateWestern
 
 ---------------------------------------------------------------------------------------------------
 -- Transliteration

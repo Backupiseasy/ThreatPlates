@@ -44,17 +44,6 @@ local LSMUpdateTimer
 Addon.PlayerClass = select(2, UnitClass("player"))
 Addon.PlayerName = select(1, UnitName("player"))
 
-ThreatPlates.Print = function(val,override)
-  local db = Addon.db.profile
-  if override or db.verbose then
-    print(Meta("titleshort")..": "..val)
-  end
-end
-
----------------------------------------------------------------------------------------------------
--- Functions called by TidyPlates
----------------------------------------------------------------------------------------------------
-
 ------------------
 -- ADDON LOADED --
 ------------------

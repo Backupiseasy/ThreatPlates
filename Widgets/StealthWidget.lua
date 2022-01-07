@@ -95,6 +95,9 @@ local DETECTION_UNITS = {
   ["156244"] = true, -- Winged Automaton
 }
 
+Addon.Data.StealthDetectionAuras = DETECTION_AURAS
+Addon.Data.StealthDetectionUnits = DETECTION_UNITS
+
 ---------------------------------------------------------------------------------------------------
 -- Stealth Widget Functions
 ---------------------------------------------------------------------------------------------------

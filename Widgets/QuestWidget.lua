@@ -690,21 +690,21 @@ function Addon:PrintQuests(command)
   local quest_id = tonumber(command)
   if quest_id then
     local quest_log_index = GetLogIndexForQuestID(quest_id)
-    print ("Quest" .. tostring(quest_id) .. ": Log-Nr =", quest_log_index)
+    Addon.Logging.Debug("Quest" .. tostring(quest_id) .. ": Log-Nr =", quest_log_index)
     if quest_log_index then
       local quest_info = GetQuestInfo(quest_log_index)
       if quest_info then
-        ThreatPlates.DEBUG_PRINT_TABLE(quest_info)
+        Addon.Debug.PrintTable(quest_info)
 
         local objectives = GetQuestObjectives(quest_id)
-        ThreatPlates.DEBUG_PRINT_TABLE(objectives)
+        Addon.Debug.PrintTable(objectives)
       end
     end
   elseif command == "tooltip" then
     if not UnitExists("target") then return end
 
     for name, _ in pairs(GroupMembers) do
-      print("Character:", name)
+      Addon.Logging.Debug("Character:", name)
     end
 
     local quest_title
@@ -720,7 +720,7 @@ function Addon:PrintQuests(command)
       local text = line:GetText()
       local text_r, text_g, text_b = line:GetTextColor()
 
-      print("=== Line:", text)
+      Addon.Logging.Debug("=== Line:", text)
       if text_r > 0.99 and text_g > 0.82 and text_b == 0 then
         -- A line with this color is either the quest title or a player name (if on a group quest, but always after the quest title)
         -- if quest_title_found then
@@ -728,29 +728,29 @@ function Addon:PrintQuests(command)
         -- else
         if text == PlayerName then
           quest_progress_player = true
-          print("  Player:", text)
+          Addon.Logging.Debug("  Player:", text)
         elseif not GroupMembers[text] then
-          print("Quest:", text)
+          Addon.Logging.Debug("Quest:", text)
           quest_progress_player = true
           quest_title = text
         else
           quest_progress_player = false
-          print("  Character:", text)
+          Addon.Logging.Debug("  Character:", text)
         end
       elseif quest_progress_player then
         local objective_name, current, goal
         local objective_type = false
 
-        print ("    => Objective:", text)
+        Addon.Logging.Debug("    => Objective:", text)
         -- Check if area / progress quest
         if string.find(text, "%%") then
           objective_name, current, goal = string.match(text, "^(.*) %(?(%d+)%%%)?$")
           objective_type = "area"
-          print ("    => Area: <" .. text .. ">", objective_name, current, goal)
+          Addon.Logging.Debug("    => Area: <" .. text .. ">", objective_name, current, goal)
         else
           -- Standard x/y /pe quest
           objective_name, current, goal = QuestObjectiveParser(text)
-          print ("    => Standard: <" .. text .. ">", objective_name, current, goal)
+          Addon.Logging.Debug("    => Standard: <" .. text .. ">", objective_name, current, goal)
         end
 
         if objective_name then
@@ -775,32 +775,32 @@ function Addon:PrintQuests(command)
           -- A unit may be target of more than one quest, the quest indicator should be show if at least one quest is not completed.
           if current and goal then
             if current == goal then
-              print ("  => Finished!")
+              Addon.Logging.Debug("  => Finished!")
             end
           end
         end
       end
     end
   else
-    print ("Quests List:", tablelength(QuestByID))
+    Addon.Logging.Debug("Quests List:", tablelength(QuestByID))
     for quest_id, title in pairs(QuestByID) do
       if not command or string.find(title, command) then
         local quest = QuestByTitle[title]
         if quest.Objectives then --and tablelength(quest.objectives) > 0 then
-          print ("*", title .. " [ID:" .. tostring(quest_id) .. "]")
+          Addon.Logging.Debug("*", title .. " [ID:" .. tostring(quest_id) .. "]")
           for name, val in pairs (quest.Objectives) do
-            print ("  - |" .. name .."| :", val.numFulfilled, "/", val.numRequired, "[" .. val.type .. "]")
+            Addon.Logging.Debug("  - |" .. name .."| :", val.numFulfilled, "/", val.numRequired, "[" .. val.type .. "]")
           end
         end
       end
     end
 
-    print ("QuestUnitsToUpdate:", tablelength(QuestUnitsToUpdate))
+    Addon.Logging.Debug("QuestUnitsToUpdate:", tablelength(QuestUnitsToUpdate))
 
-    print ("Waiting for quest log updates for the following quests:")
+    Addon.Logging.Debug("Waiting for quest log updates for the following quests:")
     for questID, title in pairs(QuestsToUpdate) do
       local questIndex = GetLogIndexForQuestID(questID)
-      print ("  Quest:", title .. " [" .. tostring(questIndex) .. "]")
+      Addon.Logging.Debug("  Quest:", title .. " [" .. tostring(questIndex) .. "]")
     end
   end
 end

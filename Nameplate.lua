@@ -523,7 +523,7 @@ function Addon:ConfigClickableArea(toggle_show)
           ConfigModePlate = nil
         end)
       else
-        ThreatPlates.Print("Please select a target unit to enable configuration mode.", true)
+        Addon.Logging.Warning(L["Please select a target unit to enable configuration mode."])
       end
     end
   elseif ConfigModePlate then
@@ -606,7 +606,7 @@ local TaskQueueOoC = {}
 function Addon:CallbackWhenOoC(func, msg)
   if InCombatLockdown() then
     if msg then
-      ThreatPlates.Print(msg .. L[" The change will be applied after you leave combat."], true)
+      Addon.Logging.Warning(msg .. L[" The change will be applied after you leave combat."])
     end
     TaskQueueOoC[#TaskQueueOoC + 1] = func
   else

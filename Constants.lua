@@ -367,11 +367,11 @@ local TOTEM_DATA_CLASSIC = {
   { SpellID = 8166,   ID = "W6", GroupColor = "b8d1ff", },        		  -- Poison Cleansing Totem
 }
 
-local TOTEM_DATA = (Addon.IS_CLASSIC and TOTEM_DATA_CLASSIC) or (Addon.IS_TBC_CLASSIC and TOTEM_DATA_BC_CLASSIC) or TOTEM_DATA_RETAIL
+Addon.Data.Totems = (Addon.IS_CLASSIC and TOTEM_DATA_CLASSIC) or (Addon.IS_TBC_CLASSIC and TOTEM_DATA_BC_CLASSIC) or TOTEM_DATA_RETAIL
 local TOTEM_RANKS_CLASSIC = { " II", " III", " IV", " V", " VI", " VII", " VIII", " IX" }
 
 function Addon:InitializeTotemInformation()
-  for _, totem_data in ipairs(TOTEM_DATA) do
+  for _, totem_data in ipairs(Addon.Data.Totems) do
     local name = GetSpellInfo(totem_data.SpellID)
     if name then
       totem_data.Name = name

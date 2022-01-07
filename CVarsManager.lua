@@ -192,7 +192,7 @@ local function SetCVarHook(name, value, c)
       Addon.Scaling:UpdateSettings()
       --Addon:ForceUpdate()
     elseif invalid then
-      ThreatPlates.Print(L["Animations for hiding nameplates are being disabled as certain console variables (CVars) related to nameplate scaling are set in a way to prevent this feature from working."], true)
+      Addon.Logging.Warning(L["Animations for hiding nameplates are being disabled as certain console variables (CVars) related to nameplate scaling are set in a way to prevent this feature from working."], true)
     end
   elseif name == "nameplateMinAlpha" or name == "nameplateMaxAlpha" or name == "nameplateOccludedAlphaMult" or name == "nameplateSelectedAlpha" then
     local enabled = Addon.Transparency:OcclusionDetectionIsEnabled()
@@ -202,7 +202,7 @@ local function SetCVarHook(name, value, c)
       Addon.Transparency:UpdateSettings()
     --Addon:ForceUpdate()
     elseif invalid then
-      ThreatPlates.Print(L["Transparency for occluded units is being disabled as certain console variables (CVars) related to nameplate transparency are set in a way to prevent this feature from working."], true)
+      Addon.Logging.Warning(L["Transparency for occluded units is being disabled as certain console variables (CVars) related to nameplate transparency are set in a way to prevent this feature from working."], true)
     end
   end
 end
