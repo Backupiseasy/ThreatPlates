@@ -7654,7 +7654,7 @@ CreateCustomNameplatesGroup = function()
 end
 
 local function CreateTotemOptions()
-  local options = {
+  local entry = {
     name = L["Totems"],
     type = "group",
     childGroups = "list",
@@ -7664,8 +7664,6 @@ local function CreateTotemOptions()
         name = L["|cffffffffTotem Settings|r"],
         type = "group",
         order = 0,
-        get = GetValue,
-        set = SetValue,
         args = {
           Toggles = {
             name = L["Toggling"],
@@ -7692,7 +7690,7 @@ local function CreateTotemOptions()
                 name = L["Enable"],
                 order = 5,
                 type = "toggle",
-                set = function(info, val) SetValuePlain(info, val); Addon.Widgets:InitializeWidget("TotemIcon") end,
+                set = function(info, val) SetValue(info, val); Addon.Widgets:InitializeWidget("TotemIcon") end,
                 arg = { "totemWidget", "ON" },
               },
               Size = GetSizeEntryDefault(10, "totemWidget"),
@@ -7745,7 +7743,7 @@ local function CreateTotemOptions()
   table.sort(totem_list, function(a, b) return a.SortKey  < b.SortKey end)
 
   for i, totem_info in ipairs(totem_list) do
-    options.args[totem_info.Name] = {
+    entry.args[totem_info.Name] = {
       name = "|cff" .. totem_info.GroupColor .. totem_info.Name .. "|r",
       type = "group",
       order = i,
@@ -7784,8 +7782,6 @@ local function CreateTotemOptions()
               name = L["Color"],
               type = "color",
               order = 2,
-              get = GetColor,
-              set = SetColor,
               arg = { "totemSettings", totem_info.ID, "Color" },
             },
           },
@@ -7821,7 +7817,7 @@ local function CreateTotemOptions()
     }
   end
 
-  return options
+  return entry
 end
 
 -- Return the Options table
