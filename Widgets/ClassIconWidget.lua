@@ -20,12 +20,18 @@ local _G =_G
 -- GLOBALS: CreateFrame
 
 local PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ClassIconWidget\\"
--- local Masque = LibStub("Masque", true)
--- local group
+
+---------------------------------------------------------------------------------------------------
+-- Cached configuration settings
+---------------------------------------------------------------------------------------------------
 
 ---------------------------------------------------------------------------------------------------
 -- Widget functions for creation and update
 ---------------------------------------------------------------------------------------------------
+
+function Widget:OnEnable()
+  Addon.RegisterMasqueGroup(self, "Class Icon")
+end
 
 function Widget:Create(tp_frame)
   -- Required Widget Code
@@ -35,19 +41,11 @@ function Widget:Create(tp_frame)
   -- Custom Code III
   --------------------------------------
   widget_frame:SetFrameLevel(tp_frame:GetFrameLevel() + 7)
-  widget_frame.Icon = widget_frame:CreateTexture(nil, "OVERLAY")
-  widget_frame.Icon:SetAllPoints(widget_frame)
-
-  -- if Masque then
-  -- 	if not group then
-  --  		group = Masque:Group("TidyPlatesThreat")
-  -- 	end
-  -- 	--Masque:Register("TidyPlatesThreat", Reskin)
-  -- 	group:AddButton(frame)
-  -- end
-
+  widget_frame.Icon = Addon.CreateIcon(self, widget_frame)
+  widget_frame.Icon:SetAllPoints()
   --------------------------------------
   -- End Custom Code
+
   return widget_frame
 end
 
@@ -91,16 +89,8 @@ function Widget:OnUnitAdded(widget_frame, unit)
       widget_frame:SetPoint("CENTER", widget_frame:GetParent(), db.x, db.y)
     end
 
-    -- Updates based on settings
     widget_frame:SetSize(db.scale, db.scale)
-
-    -- Updates based on unit status
-    widget_frame.Icon:SetTexture(PATH .. db.theme .."\\" .. unit.class)
-
-    -- if Masque then
-    -- 	group = Masque:Group("TidyPlatesThreat")
-    -- 	group:ReSkin(frame)
-    -- end
+    widget_frame.Icon:SetIconTexture(PATH .. db.theme .."\\" .. unit.class)
 
     widget_frame:Show()
   else

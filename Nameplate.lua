@@ -542,7 +542,8 @@ function Addon:UpdateSettings()
   --wipe(PlateOnUpdateQueue)
 
   Addon.Localization:UpdateSettings()
-
+  Addon.UpdateMasqueSettings()
+  
   ElementsUpdateSettings()
   Transparency:UpdateSettings()
   Scaling:UpdateSettings()

@@ -4372,7 +4372,7 @@ local function CreateUnitGroupsVisibility(args, pos)
   end
 end
 
-local function CreateVisibilitySettings()
+local function CreateVisibilityTab()
   local args = {
     name = L["Visibility"],
     type = "group",
@@ -5120,6 +5120,75 @@ local function CreateColorsSettings()
   return entry
 end
 
+local function CreateAppearanceTab()
+  local entry = {
+    name = L["Appearance"],
+    order = 12,
+    type = "group",
+    args = {
+      Design = {
+        name = L["Default Design (All Profiles)"],
+        order = 10,
+        type = "group",
+        inline = true,
+        args = {
+          HealthBarTexture = {
+            name = L["Look and Feel"],
+            order = 1,
+            type = "select",
+            desc = L["Changes the default settings to the selected design. Some of your custom settings may get overwritten if you switch back and forth.."],
+            values = { CLASSIC = "Classic", SMOOTH = "Smooth" } ,
+            set = function(info, val)
+              Addon.db.global.DefaultsVersion = val
+              if val == "CLASSIC" then
+                ThreatPlates.SwitchToDefaultSettingsV1()
+              else -- val == "SMOOTH"
+                ThreatPlates.SwitchToCurrentDefaultSettings()
+              end
+              Addon:ReloadTheme()
+            end,
+            get = function(info) return Addon.db.global.DefaultsVersion end,
+          },
+        },
+      },
+      Icons = {
+        name = L["Icons"],
+        type = "group",
+        order = 20,
+        inline = true,
+        args = {
+          BorderlessStyle = {
+            name = L["Borderless"],
+            type = "toggle",
+            order = 20,
+            arg = { "Appearance", "UseBorderlessIcons" }
+          },
+          Masque = {
+            name = function() 
+              if Addon.LibMasque then
+                return L["Masque"]
+              else
+                return L["Masque (Not installed)"]
+              end
+            end,
+            type = "toggle",
+            order = 30,         
+            set = function(info, val)
+              Addon.db.profile.Appearance.UseMasque = val
+              ReloadUI()
+            end,
+            desc = L["If enabled, icons are skinned with Masque (requires UI reload)."],
+            arg = { "Appearance", "UseMasque" },
+            disabled = function() return not Addon.LibMasque end,
+          },         
+        },
+      },
+    },
+  }
+
+  return entry
+end
+
 local function CreateAutomationSettings()
   -- Small nameplates: in combat, out of instances, ...
   -- show names or show them automatically, complicated, lots of CVars
@@ -5209,31 +5278,6 @@ local function CreateHealthbarOptions()
         type = "group",
         inline = false,
         args = {
-          Design = {
-            name = L["Default Settings (All Profiles)"],
-            order = 10,
-            type = "group",
-            inline = true,
-            args = {
-              HealthBarTexture = {
-                name = L["Look and Feel"],
-                order = 1,
-                type = "select",
-                desc = L["Changes the default settings to the selected design. Some of your custom settings may get overwritten if you switch back and forth.."],
-                values = { CLASSIC = "Classic", SMOOTH = "Smooth" } ,
-                set = function(info, val)
-                  Addon.db.global.DefaultsVersion = val
-                  if val == "CLASSIC" then
-                    ThreatPlates.SwitchToDefaultSettingsV1()
-                  else -- val == "SMOOTH"
-                    ThreatPlates.SwitchToCurrentDefaultSettings()
-                  end
-                  Addon:ReloadTheme()
-                end,
-                get = function(info) return Addon.db.global.DefaultsVersion end,
-              },
-            },
-          },
           Format = {
             name = L["Format"],
             order = 20,
@@ -7101,7 +7145,7 @@ CreateCustomNameplateEntry = function(index)
           AutomaticIcon = {
             name = L["Automatic Icon"],
             type = "toggle",
-            order = 2,
+            order = 20,
             set = function(info, val)
               SetValue(info, val)
               CustomPlateSetIcon(index)
@@ -7109,20 +7153,26 @@ CreateCustomNameplateEntry = function(index)
             arg = { "uniqueSettings", index, "UseAutomaticIcon" },
             desc = L["Find a suitable icon based on the current trigger. For Name trigger, the preview does not work. For multi-value triggers, the preview always is the icon of the first trigger entered."],
           },
-          Spacer1 = GetSpacerEntry(3),
+          HighlightBorder = {
+            name = L["Highlight Border"],
+            type = "toggle",
+            order = 40,
+            arg = { "uniqueSettings", index, "ShowHighlightBorder" }
+          },         
+          Spacer1 = GetSpacerEntry(40),
           Icon = {
             name = L["Preview"],
             type = "execute",
             width = "full",
             disabled = function() return not db.uniqueSettings[index].showIcon or not db.uniqueWidget.ON end,
-            order = 4,
+            order = 50,
             image = function() return CustomPlateGetIcon(index) end,
             imageWidth = 64,
             imageHeight = 64,
           },
           Description = {
             type = "description",
-            order = 5,
+            order = 60,
             name = L["Enter an icon's name (with the *.blp ending), a spell ID, a spell name or a full icon path (using '\\' to separate directory folders)."],
             width = "full",
             hidden = function() return db.uniqueSettings[index].UseAutomaticIcon end
@@ -7130,7 +7180,7 @@ CreateCustomNameplateEntry = function(index)
           SetIcon = {
             name = L["Set Icon"],
             type = "input",
-            order = 6,
+            order = 70,
             disabled = function() return not db.uniqueSettings[index].showIcon or not db.uniqueWidget.ON end,
             width = "full",
             set = function(info, val) CustomPlateSetIcon(index, val) end,
@@ -7549,9 +7599,9 @@ CreateCustomNameplatesGroup = function()
               order = 10,
               type = "toggle",
               arg = { "uniqueWidget", "ON" }
-            },
+            },  
             Size = GetSizeEntryDefault(10, "uniqueWidget"),
-            Placement = GetPlacementEntryWidget(30, "uniqueWidget", true),
+            Placement = GetPlacementEntryWidget(20, "uniqueWidget", true),
           },
         },
         ImportExport = {
@@ -7808,7 +7858,7 @@ local function CreateTotemOptions()
                 SetValue(info, val)
                 options.args.Totems.args[totem_info.Name].args.Textures.args.Icon.image = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\TotemIconWidget\\" .. db.totemSettings[totem_info.ID].Style .. "\\" .. totem_info.Icon;
               end,
-              values = { normal = "Normal", special = "Special" },
+              values = { normal = L["Normal"], special = L["Special"] },
               arg = { "totemSettings", totem_info.ID, "Style" },
             },
           },
@@ -7837,7 +7887,8 @@ local function CreateOptionsTable()
           type = "group",
           order = 10,
           args = {
-            GeneralSettings = CreateVisibilitySettings(),
+            VisibilityTab = CreateVisibilityTab(),
+            AppearanceTab = CreateAppearanceTab(),
             AutomationSettings = CreateAutomationSettings(),
             HealthBarView = CreateHealthbarOptions(),
             HeadlineViewSettings = {
@@ -8406,7 +8457,7 @@ local function CreateOptionsTable()
                       values = ThreatPlates.FRIENDLY_SUBTEXT,
                       set = function(info, val)
                         SetValue(info, val)
-                        Addon.LoadOnDemandLibraries()
+                        Addon.LoadLibraryDogTag()
                       end,
                       arg = { "StatusText", "HealthbarMode", "FriendlySubtext"}
                     },
@@ -8418,7 +8469,7 @@ local function CreateOptionsTable()
                       values = ThreatPlates.ENEMY_SUBTEXT,
                       set = function(info, val)
                         SetValue(info, val)
-                        Addon.LoadOnDemandLibraries()
+                        Addon.LoadLibraryDogTag()
                       end,
                       arg = { "StatusText", "HealthbarMode", "EnemySubtext"}
                     },
@@ -8509,7 +8560,7 @@ local function CreateOptionsTable()
                       width = "double",
                       set = function(info, val)
                         SetValue(info, val)
-                        Addon.LoadOnDemandLibraries()
+                        Addon.LoadLibraryDogTag()
                       end,
                       arg = { "StatusText", "NameMode", "FriendlySubtext"}
                     },
@@ -8521,7 +8572,7 @@ local function CreateOptionsTable()
                       values = ThreatPlates.ENEMY_SUBTEXT,
                       set = function(info, val)
                         SetValue(info, val)
-                        Addon.LoadOnDemandLibraries()
+                        Addon.LoadLibraryDogTag()
                       end,
                       arg = { "StatusText", "NameMode", "EnemySubtext"}
                     },

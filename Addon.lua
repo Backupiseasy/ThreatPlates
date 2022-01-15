@@ -98,8 +98,6 @@ function Addon:ReloadTheme()
 
   Addon.CVars:OverwriteBoolProtected("nameplateResourceOnTarget", self.db.profile.PersonalNameplate.ShowResourceOnTarget)
 
-
-
   -- Update all UI elements (frames, textures, ...)
   Addon:UpdateAllPlates()
 end
@@ -219,6 +217,56 @@ function Addon:SetBaseNamePlateSize()
   --C_NamePlate_SetNamePlateSelfSize(baseWidth * horizontalScale * Lerp(1.1, 1.0, clampedZeroBasedScale), baseHeight)
 end
 
+-- Register callbacks at LSM, so that we can refresh everything if additional media is added after TP is loaded
+function Addon.MediaUpdate(addon_name, name, mediatype, key)
+  if mediatype ~= Addon.LibSharedMedia.MediaType.SOUND and not LSMUpdateTimer then
+    LSMUpdateTimer = true
+
+    -- Delay the update for one second to avoid firering this several times when multiple media are registered by another addon
+    C_Timer_After(1, function()
+      LSMUpdateTimer = nil
+      -- Basically, ReloadTheme but without CVar and some other stuff
+      Addon:SetThemes()
+      -- no media used: Addon:UpdateConfigurationStatusText()
+      -- no media used: Addon:InitializeCustomNameplates()
+      Addon.Widgets:InitializeAllWidgets()
+      Addon:ForceUpdate()
+    end)
+  end
+end
+
+function Addon.LoadLibraryDogTag()
+	local db = Addon.db.profile.StatusText
+
+	-- Enable or disable LibDogTagSupport based on custom status text being actually used
+	if db.HealthbarMode.FriendlySubtext == "CUSTOM" or db.HealthbarMode.EnemySubtext == "CUSTOM" or db.NameMode.FriendlySubtext == "CUSTOM" or db.NameMode.EnemySubtext == "CUSTOM" then
+		if Addon.LibDogTag == nil then
+			LoadAddOn("LibDogTag-3.0")
+			Addon.LibDogTag = LibStub("LibDogTag-3.0", true)
+			if not Addon.LibDogTag then
+				Addon.LibDogTag = false
+				Addon.Logging.Error(L["Custom status text requires LibDogTag-3.0 to function."])
+			else
+				LoadAddOn("LibDogTag-Unit-3.0")
+			  if not LibStub("LibDogTag-Unit-3.0", true) then
+					Addon.LibDogTag = false
+					Addon.Logging.Error(L["Custom status text requires LibDogTag-Unit-3.0 to function."])
+				elseif not Addon.LibDogTag.IsLegitimateUnit or not Addon.LibDogTag.IsLegitimateUnit["nameplate1"] then
+					Addon.LibDogTag = false
+					Addon.Logging.Error(L["Your version of LibDogTag-Unit-3.0 does not support nameplates. You need to install at least v90000.3 of LibDogTag-Unit-3.0."])
+				end
+			end
+		end
+	end
+end
+
+function Addon.LoadLibraryMasque()
+  local masque, masque_version = LibStub("Masque", true)
+  if masque then
+    Addon.LibMasque = masque
+  end
+end
+
 -- The OnInitialize() method of your addon object is called by AceAddon when the addon is first loaded
 -- by the game client. It's a good time to do things like restore saved settings (see the info on
 -- AceConfig for more notes about that).
@@ -254,7 +302,8 @@ function TidyPlatesThreat:OnInitialize()
     Addon.LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_CHANNEL_STOP", Addon.UNIT_SPELLCAST_CHANNEL_STOP)
   end
 
-  Addon.LoadOnDemandLibraries()
+  Addon.LoadLibraryMasque() -- Masque support
+  Addon.LoadLibraryDogTag()
 
   local RegisterCallback = db.RegisterCallback
   RegisterCallback(Addon, 'OnProfileChanged', 'ProfChange')
@@ -284,7 +333,6 @@ function TidyPlatesThreat:OnEnable()
     Addon.CVars:OverwriteBoolProtected("nameplateResourceOnTarget", Addon.db.profile.PersonalNameplate.ShowResourceOnTarget)
   end
 
-  Addon.LoadOnDemandLibraries()
   Addon:ReloadTheme()
 
   -- Register callbacks at LSM, so that we can refresh everything if additional media is added after TP is loaded
@@ -303,24 +351,6 @@ function TidyPlatesThreat:OnDisable()
 
   -- Reset all CVars to its initial values
   -- Addon.CVars:RestoreAllFromProfile()
-end
-
--- Register callbacks at LSM, so that we can refresh everything if additional media is added after TP is loaded
-function Addon.MediaUpdate(addon_name, name, mediatype, key)
-  if mediatype ~= Addon.LibSharedMedia.MediaType.SOUND and not LSMUpdateTimer then
-    LSMUpdateTimer = true
-
-    -- Delay the update for one second to avoid firering this several times when multiple media are registered by another addon
-    C_Timer_After(1, function()
-      LSMUpdateTimer = nil
-      -- Basically, ReloadTheme but without CVar and some other stuff
-      Addon:SetThemes()
-      -- no media used: Addon:UpdateConfigurationStatusText()
-      -- no media used: Addon:InitializeCustomNameplates()
-      Addon.Widgets:InitializeAllWidgets()
-      Addon:ForceUpdate()
-    end)
-  end
 end
 
 -----------------------------------------------------------------------------------
