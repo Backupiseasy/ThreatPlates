@@ -7848,7 +7848,7 @@ CreateCustomNameplatesGroup = function()
 end
 
 local function CreateTotemOptions()
-  local options = {
+  local entry = {
     name = L["Totems"],
     type = "group",
     childGroups = "list",
@@ -7939,7 +7939,7 @@ local function CreateTotemOptions()
   table.sort(totem_list, function(a, b) return a.SortKey  < b.SortKey end)
 
   for i, totem_info in ipairs(totem_list) do
-    options.args[totem_info.Name] = {
+    entry.args[totem_info.Name] = {
       name = "|cff" .. totem_info.GroupColor .. totem_info.Name .. "|r",
       type = "group",
       order = i,
@@ -8015,7 +8015,7 @@ local function CreateTotemOptions()
     }
   end
 
-  return options
+  return entry
 end
 
 -- Return the Options table
