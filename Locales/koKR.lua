@@ -21,6 +21,12 @@ L["  legacy-custom-styles    Adds (legacy) default custom styles for nameplates 
 L["  profile <name>          Switch the current profile to <name>"] = "  profile <name>          Switch the current profile to <name>"
 --[[Translation missing --]]
 L["  toggle-scripting        Enable or disable scripting support (for beta testing)"] = "  toggle-scripting        Enable or disable scripting support (for beta testing)"
+--[[Translation missing --]]
+L[" (Elite)"] = " (Elite)"
+--[[Translation missing --]]
+L[" (Rare Elite)"] = " (Rare Elite)"
+--[[Translation missing --]]
+L[" (Rare)"] = " (Rare)"
 L[" options by typing: /tptp"] = " 옵션을 열 수 있습니다: /tptp"
 L[" The change will be applied after you leave combat."] = "전투 종료 후 변경사항이 적용됩니다."
 L[" to DPS."] = "|1을;를; DPS로 설정합니다."
@@ -56,6 +62,24 @@ Blacksalsify
 
 (원 제작자: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=]
 --[[Translation missing --]]
+L[ [=[
+
+--
+
+Backupiseasy
+
+(Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=] ] = ""
+--[[Translation missing --]]
+L[ [=[
+
+Feel free to email me at |cff00ff00threatplates@gmail.com|r
+
+--
+
+Blacksalsify
+
+(Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=] ] = ""
+--[[Translation missing --]]
 L[". You cannot use two custom nameplates with the same trigger. The imported custom nameplate will be disabled."] = ". You cannot use two custom nameplates with the same trigger. The imported custom nameplate will be disabled."
 L["|cff00ff00High Threat|r"] = "|cff00ff00높은 위협 수준|r"
 L["|cff00ff00Low Threat|r"] = "|cff00ff00낮은 위협 수준|r"
@@ -79,11 +103,18 @@ This is your first time using Threat Plates and you are a(n):
 |r|cff]=] ] = [=[|cff89f559Welcome to |r|cff89f559Threat Plates!
 This is your first time using Threat Plates and you are a(n):
 |r|cff]=]
+--[[Translation missing --]]
+L[ [=[|cff89f559Welcome to |r|cff89f559Threat Plates!
+This is your first time using Threat Plates and you are a(n):
+|r|cff]=] ] = ""
 L["|cff89f559You are currently in your "] = "|cff89f559당신은 현재 "
 --[[Translation missing --]]
 L[ [=[|cffFF0000DELETE CUSTOM NAMEPLATE|r
 Are you sure you want to delete the selected custom nameplate?]=] ] = [=[|cffFF0000DELETE CUSTOM NAMEPLATE|r
 Are you sure you want to delete the selected custom nameplate?]=]
+--[[Translation missing --]]
+L[ [=[|cffFF0000DELETE CUSTOM NAMEPLATE|r
+Are you sure you want to delete the selected custom nameplate?]=] ] = ""
 L["|cffff0000DPS/Healing|r"] = "|cffff0000공격 전담/치유 전담|r"
 L["|cffff0000dpsing / healing|r"] = "|cffff0000공격 전담 / 치유 전담|r"
 L["|cffff0000High Threat|r"] = "|cffff0000높은 위협 수준|r"
@@ -113,6 +144,8 @@ L["A custom nameplate with this trigger already exists: "] = "A custom nameplate
 --[[Translation missing --]]
 L["A script has overwritten the global '%s'. This might affect other scripts ."] = "A script has overwritten the global '%s'. This might affect other scripts ."
 L["A to Z"] = "가나다 순"
+--[[Translation missing --]]
+L["Abbreviation"] = "Abbreviation"
 L["About"] = "정보"
 L["Absolut Transparency"] = "절대 투명도"
 L["Absorbs"] = "흡수"
@@ -126,6 +159,8 @@ L["Additional Adjustments"] = "추가 조정"
 L["Additional chat commands:"] = "Additional chat commands:"
 L["Additionally color the name based on the target mark if the unit is marked."] = "유닛에 징표가 있으면 대상 징표에 따라 이름의 색상을 바꿉니다."
 L["Additionally color the nameplate's healthbar or name based on the target mark if the unit is marked."] = "유닛에 징표가 있으면 대상 징표에 따라 이름표의 생명력바나 이름의 색상을 바꿉니다."
+--[[Translation missing --]]
+L["Alignment"] = "Alignment"
 L["All"] = "모두"
 L["All on NPCs"] = "모든 NPC"
 --[[Translation missing --]]
@@ -140,6 +175,8 @@ L["Amount"] = "Amount"
 --[[Translation missing --]]
 L["Anchor"] = "Anchor"
 L["Anchor Point"] = "고정 지점"
+--[[Translation missing --]]
+L["Anchor to"] = "Anchor to"
 --[[Translation missing --]]
 L["Animacharge"] = "Animacharge"
 L["Appearance"] = "모양"
@@ -167,6 +204,8 @@ L["Arrow"] = "Arrow"
 L["Arrow (Legacy)"] = "Arrow (Legacy)"
 L["Art Options"] = "미술 옵션"
 --[[Translation missing --]]
+L["Attempt to register script for unknown WoW event \"%s\""] = "Attempt to register script for unknown WoW event \"%s\""
+--[[Translation missing --]]
 L["Attempt to register script for unknown WoW event '%s'"] = "Attempt to register script for unknown WoW event '%s'"
 L["Aura"] = "효과"
 L["Aura Icon"] = "효과 아이콘"
@@ -174,6 +213,8 @@ L["Aura: "] = "효과:"
 L["Auras"] = "효과"
 L["Auras (Name or ID)"] = "효과 (이름 또는 ID)"
 L["Auras, Healthbar"] = "효과, 생명력바"
+--[[Translation missing --]]
+L["Auto Sizing"] = "Auto Sizing"
 L["Auto-Cast"] = "자동 시전"
 --[[Translation missing --]]
 L["Automatic Icon"] = "Automatic Icon"
@@ -192,6 +233,8 @@ L["Bar Mode"] = "바 모드"
 L["Bar Style"] = "바 스타일"
 L["Bar Width"] = "바 너비"
 --[[Translation missing --]]
+L["Bars"] = "Bars"
+--[[Translation missing --]]
 L["Because of side effects with Blizzard nameplates, this function is disabled in instances or when Blizzard nameplates are used for friendly or neutral/enemy units (see General - Visibility)."] = "Because of side effects with Blizzard nameplates, this function is disabled in instances or when Blizzard nameplates are used for friendly or neutral/enemy units (see General - Visibility)."
 L["Blizzard"] = "블리자드"
 L["Blizzard Settings"] = "블리자드 설정"
@@ -203,11 +246,15 @@ L["Border Color:"] = "테두리 색상:"
 L["Boss"] = "우두머리"
 L["Boss Mods"] = "우두머리 모듈"
 L["Bosses"] = "우두머리"
+--[[Translation missing --]]
+L["Both you and the other player are flagged for PvP."] = "Both you and the other player are flagged for PvP."
 L["Bottom"] = "아래"
 L["Bottom Inset"] = "하단 여백"
 L["Bottom Left"] = "왼쪽 아래"
 L["Bottom Right"] = "오른쪽 아래"
 L["Bottom-to-top"] = "아래에서 위로"
+--[[Translation missing --]]
+L["Boundaries"] = "Boundaries"
 --[[Translation missing --]]
 L["Bubble"] = "Bubble"
 L["Buff Color"] = "강화 효과 색상"
@@ -259,6 +306,10 @@ L[ [=[Clear and easy to use threat-reactive nameplates.
 Current version: ]=] ] = [=[Clear and easy to use threat-reactive nameplates.
 
 Current version: ]=]
+--[[Translation missing --]]
+L[ [=[Clear and easy to use threat-reactive nameplates.
+
+Current version: ]=] ] = ""
 L["Clickable Area"] = "선택 영역"
 L["Color"] = "색상"
 L["Color By Class"] = "직업 별 색상"
@@ -317,6 +368,12 @@ Remember to press ENTER after filling out this box or it will not save.]=] ] = [
 Type /dogtag for tag info.
 
 Remember to press ENTER after filling out this box or it will not save.]=]
+--[[Translation missing --]]
+L[ [=[Define a custom status text using LibDogTag markup language.
+
+Type /dogtag for tag info.
+
+Remember to press ENTER after filling out this box or it will not save.]=] ] = ""
 L["Define a custom transparency for this nameplate and overwrite any other transparency settings."] = "이 이름표에 사용자 설정 투명도를 정의하고 다른 모든 투명도 설정을 덮어씁니다."
 L["Define base alpha settings for various unit types. Only one of these settings is applied to a unit at the same time, i.e., they are mutually exclusive."] = "여러 유닛 유형들의 기본 투명도 설정을 정의합니다. 이 설정들 중 동시에 하나만 유닛에 적용됩니다, 즉, 상호 배타적입니다."
 L["Define base scale settings for various unit types. Only one of these settings is applied to a unit at the same time, i.e., they are mutually exclusive."] = "여러 유닛 유형들의 기본 크기 비율 설정을 정의합니다. 이 설정들 중 동시에 하나만 유닛에 적용됩니다, 즉, 상호 배타적입니다."
@@ -324,6 +381,8 @@ L["Define base scale settings for various unit types. Only one of these settings
 L["Defines the movement/collision model for nameplates."] = "Defines the movement/collision model for nameplates."
 L["Deformed Fanatic"] = "변형된 광신자"
 L["Delete"] = "삭제"
+--[[Translation missing --]]
+L["Detailed Percentage"] = "Detailed Percentage"
 L["Determine your role (tank/dps/healing) automatically based on current spec."] = "현재 전문화에 따라 자동으로 당신의 역할 (방어 전담/공격 전담/치유 전담)을 판단합니다."
 --[[Translation missing --]]
 L["Determine your role (tank/dps/healing) automatically based on current stance (Warrior) or form (Druid)."] = "Determine your role (tank/dps/healing) automatically based on current stance (Warrior) or form (Druid)."
@@ -440,6 +499,8 @@ L["Fading"] = "사라짐"
 --[[Translation missing --]]
 L["Failed to migrate the imported profile to the current settings format because of an internal error. Please report this issue at the Threat Plates homepage at CurseForge: "] = "Failed to migrate the imported profile to the current settings format because of an internal error. Please report this issue at the Threat Plates homepage at CurseForge: "
 L["Fanged Pit Viper"] = "송곳니 구덩이독사"
+--[[Translation missing --]]
+L["Filter"] = "Filter"
 L["Filter by Spell"] = "주문으로 필터"
 L["Filtered Auras"] = "필터링할 효과"
 --[[Translation missing --]]
@@ -470,6 +531,8 @@ L["Friendly Name Color"] = "아군 이름 색상"
 L["Friendly Names Color"] = "아군 이름 색상"
 L["Friendly NPCs"] = "우호적 NPC"
 L["Friendly Players"] = "우호적 플레이어"
+--[[Translation missing --]]
+L["Friendly PvP On"] = "Friendly PvP On"
 L["Friendly Status Text"] = "아군 상태 문자"
 L["Friendly Units"] = "우호적 유닛"
 L["Friendly Units in Combat"] = "전투 중 아군 유닛"
@@ -478,6 +541,8 @@ L["Friends & Guild Members"] = "친구 & 길드원"
 L["Full Absorbs"] = "Full Absorbs"
 --[[Translation missing --]]
 L["Full Health"] = "Full Health"
+--[[Translation missing --]]
+L["Full Name"] = "Full Name"
 --[[Translation missing --]]
 L["Function"] = "Function"
 L["Gas Cloud"] = "가스 구름"
@@ -542,12 +607,18 @@ L["Horizontal Overlap"] = "좌우 겹침"
 L["Horizontal Spacing"] = "가로 간격"
 L["Hostile NPCs"] = "적대적 NPC"
 L["Hostile Players"] = "적대적 플레이어"
+--[[Translation missing --]]
+L["Hostile PvP On - Self Off"] = "Hostile PvP On - Self Off"
+--[[Translation missing --]]
+L["Hostile PvP On - Self On"] = "Hostile PvP On - Self On"
 L["Hostile Units"] = "적대적"
 L["Icon"] = "아이콘"
 L["Icon Height"] = "아이콘 높이"
 L["Icon Mode"] = "아이콘 모드"
 L["Icon Style"] = "아이콘 스타일"
 L["Icon Width"] = "아이콘 너비"
+--[[Translation missing --]]
+L["Icons"] = "Icons"
 L["If checked, nameplates of mobs attacking another tank can be shown with different color, scale, and transparency."] = "선택하면 다른 방어 전담을 공격하는 몹의 이름표의 색상, 크기 비율, 그리고 투명도를 다르게 표시할 수 있습니다."
 L["If checked, threat feedback from boss level mobs will be shown."] = "선택하면 우두머리 레벨 몹의 위협 수준 피드백이 표시됩니다."
 L["If checked, threat feedback from elite and rare mobs will be shown."] = "선택하면 정예와 희귀 몹의 위협 수준 피드백이 표시됩니다."
@@ -578,7 +649,11 @@ L["In Combat"] = "전투 중"
 L["In combat, always show all combo points no matter if they are on or off. Off combo points are shown greyed-out."] = "In combat, always show all combo points no matter if they are on or off. Off combo points are shown greyed-out."
 L["In combat, use coloring, transparency, and scaling based on threat level as configured in the threat system. Custom settings are only used out of combat."] = "전투 중에 위협 수준 체제에서 구성된 위협 수준 단계에 따른 색상화, 투명도, 그리고 크기 비율 변경을 사용합니다. 사용자 설정은 비 전투 중에만 사용됩니다."
 --[[Translation missing --]]
+L["In delta mode, show the name of the player who is second in the enemy unit's threat table."] = "In delta mode, show the name of the player who is second in the enemy unit's threat table."
+--[[Translation missing --]]
 L["In Instances"] = "In Instances"
+--[[Translation missing --]]
+L["Initials"] = "Initials"
 --[[Translation missing --]]
 L["Insert a new custom nameplate slot after the currently selected slot."] = "Insert a new custom nameplate slot after the currently selected slot."
 --[[Translation missing --]]
@@ -593,11 +668,15 @@ L["Interrupt Shield"] = "차단 방패"
 L["Interruptable"] = "차단 가능"
 L["Interrupted"] = "차단함"
 L["Kinetic Bomb"] = "요동치는 폭탄"
+--[[Translation missing --]]
+L["Label"] = "Label"
 L["Label Text Offset"] = "라벨 문자 위치"
 --[[Translation missing --]]
 L["Large Bottom Inset"] = "Large Bottom Inset"
 --[[Translation missing --]]
 L["Large Top Inset"] = "Large Top Inset"
+--[[Translation missing --]]
+L["Last Word"] = "Last Word"
 L["Layout"] = "배치"
 L["Left"] = "왼쪽"
 L["Left-to-right"] = "왼쪽에서 오른쪽으로"
@@ -605,7 +684,11 @@ L["Left-to-right"] = "왼쪽에서 오른쪽으로"
 L["Legacy custom nameplate %s already exists. Skipping it."] = "Legacy custom nameplate %s already exists. Skipping it."
 --[[Translation missing --]]
 L["Less-Than Arrow"] = "Less-Than Arrow"
+--[[Translation missing --]]
+L["Level "] = "Level "
 L["Level"] = "레벨"
+--[[Translation missing --]]
+L["Level ??"] = "Level ??"
 L["Level Text"] = "레벨 문자"
 L["Lich King"] = "리치 왕"
 L["Living Ember"] = "살아있는 불씨"
@@ -619,11 +702,15 @@ L["Magic"] = "Magic"
 L["Marked Immortal Guardian"] = "표시된 불멸의 수호병"
 --[[Translation missing --]]
 L["Max Alpha"] = "Max Alpha"
+--[[Translation missing --]]
+L["Max Auras"] = "Max Auras"
 L["Max Distance"] = "최대 거리"
 --[[Translation missing --]]
 L["Max Distance Behind Camera"] = "Max Distance Behind Camera"
 L["Max Health"] = "최대 생명력"
 L["Medium Threat"] = "중간 위협 수준"
+--[[Translation missing --]]
+L["Metric Unit Symbols"] = "Metric Unit Symbols"
 --[[Translation missing --]]
 L["Min Alpha"] = "Min Alpha"
 L["Mine"] = "내것"
@@ -667,6 +754,8 @@ L["Non-Interruptable"] = "차단 불가"
 L["Non-Target"] = "비-대상"
 L["Normal Units"] = "일반 유닛"
 --[[Translation missing --]]
+L["Not Myself"] = "Not Myself"
+--[[Translation missing --]]
 L["Note"] = "Note"
 L["Nothing to paste!"] = "붙여넣기 할게 없습니다!"
 L["NPC Role"] = "NPC 역할"
@@ -674,6 +763,8 @@ L["NPC Role, Guild"] = "NPC 역할, 길드"
 L["NPC Role, Guild, or Level"] = "NPC 역할, 길드, 또는 레벨"
 --[[Translation missing --]]
 L["NPCs"] = "NPCs"
+--[[Translation missing --]]
+L["Numbers"] = "Numbers"
 --[[Translation missing --]]
 L["Occluded Units"] = "Occluded Units"
 --[[Translation missing --]]
@@ -693,13 +784,19 @@ L["On Enemy Units You Cannot Attack"] = "공격할 수 없는 적 유닛"
 L["On Friendly Units in Combat"] = "전투 중 아군 유닛"
 L["On Target"] = "대상"
 --[[Translation missing --]]
+L["On the left"] = "On the left"
+--[[Translation missing --]]
 L["One"] = "One"
 L["Only Alternate Power"] = "보조 마력만"
 --[[Translation missing --]]
 L["Only for Target"] = "Only for Target"
 --[[Translation missing --]]
 L["Only In Combat"] = "Only In Combat"
+--[[Translation missing --]]
+L["Only in Groups"] = "Only in Groups"
 L["Only in Instances"] = "인스턴스에서만"
+--[[Translation missing --]]
+L["Only Mine"] = "Only Mine"
 L["Onyxian Whelp"] = "오닉시아 새끼용"
 L["Open Blizzard Settings"] = "블리자드 설정 열기"
 L["Open Options"] = "옵션 열기"
@@ -736,6 +833,8 @@ L["Preview"] = "미리보기"
 L["Preview Elite"] = "정예 미리보기"
 L["Preview Rare"] = "희귀 미리보기"
 L["Preview Rare Elite"] = "희귀 정예 미리보기"
+--[[Translation missing --]]
+L["PvP Off"] = "PvP Off"
 L["Quest"] = "퀘스트"
 --[[Translation missing --]]
 L["Quest Progress"] = "Quest Progress"
@@ -744,6 +843,8 @@ L["Raging Spirit"] = "노여워하는 영혼"
 L["Rank Text"] = "Rank Text"
 L["Rares & Bosses"] = "희귀 & 우두머리"
 L["Rares & Elites"] = "희귀 & 정예"
+--[[Translation missing --]]
+L["Raw Percentage"] = "Raw Percentage"
 L["Reaction"] = "반응"
 L["Reanimated Adherent"] = "되살아난 신봉자"
 L["Reanimated Fanatic"] = "되살아난 광신자"
@@ -769,6 +870,10 @@ L["Same as Foreground"] = "전경과 동일"
 L["Same as Name"] = "이름과 동일"
 L["Scale"] = "크기 비율"
 --[[Translation missing --]]
+L["Scaled Percentage"] = "Scaled Percentage"
+--[[Translation missing --]]
+L["Scaled Percentage Delta"] = "Scaled Percentage Delta"
+--[[Translation missing --]]
 L["Scriping for custom styles for nameplates is now |cff00ff00enabled!|r."] = "Scriping for custom styles for nameplates is now |cff00ff00enabled!|r."
 --[[Translation missing --]]
 L["Scriping for custom styles for nameplates is now |cffff0000disabled!|r."] = "Scriping for custom styles for nameplates is now |cffff0000disabled!|r."
@@ -776,6 +881,8 @@ L["Scriping for custom styles for nameplates is now |cffff0000disabled!|r."] = "
 L["Script"] = "Script"
 --[[Translation missing --]]
 L["Scripts"] = "Scripts"
+--[[Translation missing --]]
+L["Second Player's Name"] = "Second Player's Name"
 L["Set Icon"] = "아이콘 설정"
 L["Set scale settings for different threat levels."] = "위협 수준 등급에 따라 크기 비율을 설정합니다."
 L["Set the roles your specs represent."] = "전문화에 맞는 역할을 설정합니다."
@@ -881,6 +988,14 @@ L["Show the amount you need to loot or kill"] = "Show the amount you need to loo
 L["Show the mouseover highlight on all units."] = "모든 유닛에 마우스오버 강조를 표시합니다."
 --[[Translation missing --]]
 L["Show the OmniCC cooldown count instead of the built-in duration text on auras."] = "Show the OmniCC cooldown count instead of the built-in duration text on auras."
+--[[Translation missing --]]
+L["Show the player's threat percentage (scaled or raw) or threat delta to the second player on the threat table (percentage or threat value) against the enemy unit."] = "Show the player's threat percentage (scaled or raw) or threat delta to the second player on the threat table (percentage or threat value) against the enemy unit."
+--[[Translation missing --]]
+L["Show the player's threat percentage against the enemy unit relative to the threat of enemy unit's primary target."] = "Show the player's threat percentage against the enemy unit relative to the threat of enemy unit's primary target."
+--[[Translation missing --]]
+L["Show the player's threat percentage against the enemy unit."] = "Show the player's threat percentage against the enemy unit."
+--[[Translation missing --]]
+L["Show the player's total threat value on the enemy unit."] = "Show the player's total threat value on the enemy unit."
 L["Show threat feedback based on unit type or status or environmental conditions."] = "위협 수준 피드백을 유닛 유형이나 상태 또는 환경 상황에 따라 표시합니다."
 --[[Translation missing --]]
 L["Show time left on auras that have a duration."] = "Show time left on auras that have a duration."
@@ -953,7 +1068,13 @@ L["Style"] = "스타일"
 --[[Translation missing --]]
 L["Supports multiple entries, separated by commas."] = "Supports multiple entries, separated by commas."
 --[[Translation missing --]]
+L["Swap Area By Reaction"] = "Swap Area By Reaction"
+--[[Translation missing --]]
 L["Swap By Reaction"] = "Swap By Reaction"
+--[[Translation missing --]]
+L["Swap Scale By Reaction"] = "Swap Scale By Reaction"
+--[[Translation missing --]]
+L["Switch aura areas for buffs and debuffs for friendly units."] = "Switch aura areas for buffs and debuffs for friendly units."
 --[[Translation missing --]]
 L["Switch scale values for debuffs and buffs for friendly units."] = "Switch scale values for debuffs and buffs for friendly units."
 L["Symbol"] = "상징"
@@ -964,6 +1085,8 @@ L["Tank"] = "방어 전담"
 L["Tapped"] = "Tapped"
 L["Tapped Units"] = "선점된 유닛"
 L["Target"] = "대상"
+--[[Translation missing --]]
+L["Target Highlight"] = "Target Highlight"
 L["Target Hightlight"] = "대상 강조"
 L["Target Marked"] = "징표 대상"
 L["Target Marked Units"] = "징표 지정된 유닛"
@@ -979,8 +1102,12 @@ L["Target-based Transparency"] = "대상 기반 투명도"
 L["Text Boundaries"] = "문자 경계"
 L["Text Height"] = "문자 높이"
 L["Text Width"] = "문자 너비"
+--[[Translation missing --]]
+L["Texts"] = "Texts"
 L["Texture"] = "텍스쳐"
 L["Textures"] = "텍스쳐"
+--[[Translation missing --]]
+L["The (friendly or hostile) player is not flagged for PvP or the player is in a sanctuary."] = "The (friendly or hostile) player is not flagged for PvP or the player is in a sanctuary."
 --[[Translation missing --]]
 L["The import string contains a profile from an different Threat Plates version. The profile will still be imported (and migrated as far as possible), but some settings from the imported profile might be lost."] = "The import string contains a profile from an different Threat Plates version. The profile will still be imported (and migrated as far as possible), but some settings from the imported profile might be lost."
 --[[Translation missing --]]
@@ -1005,6 +1132,10 @@ L["The max distance to show nameplates."] = "The max distance to show nameplates
 L["The max distance to show the target nameplate when the target is behind the camera."] = "The max distance to show the target nameplate when the target is behind the camera."
 --[[Translation missing --]]
 L["The minimum alpha of nameplates."] = "The minimum alpha of nameplates."
+--[[Translation missing --]]
+L["The player is friendly to you, and flagged for PvP."] = "The player is friendly to you, and flagged for PvP."
+--[[Translation missing --]]
+L["The player is hostile, and flagged for PvP, but you are not."] = "The player is hostile, and flagged for PvP, but you are not."
 L["The scale of all nameplates if you have no target unit selected."] = "대상 유닛을 선택하지 않았을 때 모든 이름표의 크기 비율입니다."
 L["The scale of non-target nameplates if a target unit is selected."] = "대상 유닛을 선택했을 때 비-대상 이름표의 크기 비율입니다."
 --[[Translation missing --]]
@@ -1018,12 +1149,16 @@ L["The transparency of non-target nameplates if a target unit is selected."] = "
 L["These options allow you to control whether target marker icons are hidden or shown on nameplates and whether a nameplate's healthbar (in healthbar view) or name (in headline view) are colored based on target markers."] = "이 옵션은 이름표에 대상 징표 아이콘을 숨기거나 표시하고 이름표의 생명력바 (생명력바 보기에서) 또는 이름 (헤드라인 보기에서)에 대상 징표에 따른 색상을 입힐 지 제어할 수 있게 해줍니다."
 L["These options allow you to control whether the castbar is hidden or shown on nameplates."] = "이 옵션은 이름표에 시전바를 숨기거나 표시하도록 제어할 수 있게 해줍니다."
 L["These options allow you to control which nameplates are visible within the game field while you play."] = "이 옵션은 플레이하는 동안 게임 영역 내에서 볼수 있는 이름표를 제어할 수 있게 해줍니다."
+--[[Translation missing --]]
+L["These settings will define the space that text can be placed on the nameplate."] = "These settings will define the space that text can be placed on the nameplate."
 L["These settings will define the space that text can be placed on the nameplate. Having too large a font and not enough height will cause the text to be not visible."] = "이름표 위에 위치할 수 있는 문자의 공간을 정의하는 설정입니다. 매우 큰 글꼴에 공간을 부족하게 설정하면 문자가 표시되지 않습니다."
 L["Thick"] = "두껍게"
 L["Thick Outline"] = "두꺼운 외곽선"
 L["Thick Outline, Monochrome"] = "두꺼운 외곽선, 모노크롬"
 --[[Translation missing --]]
 L["Thin Square"] = "Thin Square"
+--[[Translation missing --]]
+L["This lets you select the layout style of the auras area."] = "This lets you select the layout style of the auras area."
 --[[Translation missing --]]
 L["This lets you select the layout style of the auras widget."] = "This lets you select the layout style of the auras widget."
 --[[Translation missing --]]
@@ -1088,9 +1223,13 @@ L["Threat System"] = "위협 수준 체제"
 --[[Translation missing --]]
 L["Threat Table"] = "Threat Table"
 --[[Translation missing --]]
+L["Threat Value Delta"] = "Threat Value Delta"
+--[[Translation missing --]]
 L["Three"] = "Three"
 L["Time Left"] = "남은 시간"
 L["Time Text Offset"] = "시간 문자 위치"
+--[[Translation missing --]]
+L["Toggle"] = "Toggle"
 --[[Translation missing --]]
 L["Toggle Enemy Headline View"] = "Toggle Enemy Headline View"
 --[[Translation missing --]]
@@ -1108,6 +1247,8 @@ L["Top-to-bottom"] = "위에서 아래로"
 L["Totem Scale"] = "토템 크기 비율"
 L["Totem Transparency"] = "토템 투명도"
 L["Totems"] = "토템"
+--[[Translation missing --]]
+L["Transliterate Cyrillic Letters"] = "Transliterate Cyrillic Letters"
 L["Transparency"] = "투명도"
 L["Transparency & Scaling"] = "투명도 & 크기 비율 변경"
 L["Treant"] = "나무정령"
@@ -1186,6 +1327,10 @@ L["Use threat transparency as additive transparency and add or substract it from
 L["Use transparency settings of Healthbar View also for Headline View."] = "생명력바 보기의 투명도 설정을 헤드라인 보기에도 사용합니다."
 L["Uses the target-based transparency as absolute transparency and ignore unit base transparency."] = "대상 기반 투명도를 절대 투명도로 사용하고 유닛 기본 투명도를 무시합니다."
 L["Val'kyr Shadowguard"] = "발키르 어둠수호병"
+--[[Translation missing --]]
+L["Value"] = "Value"
+--[[Translation missing --]]
+L["Value Type"] = "Value Type"
 L["Venomous Snake"] = "독사"
 L["Vertical Align"] = "수직 정렬"
 L["Vertical Alignment"] = "세로 정렬"
@@ -1205,6 +1350,10 @@ L["Wide"] = "넓게"
 L["Widgets"] = "장치"
 L["Width"] = "너비"
 L["Windwalker Monk"] = "풍운 수도사"
+--[[Translation missing --]]
+L["Word Wrap"] = "Word Wrap"
+--[[Translation missing --]]
+L["World Boss"] = "World Boss"
 L["X"] = "X"
 L["Y"] = "Y"
 L["You can access the "] = "다음을 입력하여 "
