@@ -47,7 +47,7 @@ end
 ---------------------------------------------------------------------------------------------------
 
 local TruncateWestern = function(value)
-	local abs_value = (value > 0 and value) or (-1 * value)
+	local abs_value = (value >= 0 and value) or (-1 * value)
 
   if abs_value >= 1e6 then
     return format("%.1fm", abs_value / 1e6)
