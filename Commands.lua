@@ -197,7 +197,7 @@ local function ChatCommandDebug(cmd_list)
 		--Addon:ShowThreatFeedback(unit,true)
 		--Addon:GetThreatColor(unit, unit.style, Addon.db.profile.threat.UseThreatTable, true)
 		--Addon:SetThreatColor(unit, true)
-	elseif command == "test" then
+	elseif command == "version" then
 		--		local unique_unit = TP.CopyTable(Addon.db.profile.uniqueSettings[1])
 		--		unique_unit.UseAutomaticIcon = nil
 		--		print (Addon.CheckTableStructure(TP.DEFAULT_SETTINGS.profile.uniqueSettings["**"], unique_unit))
@@ -234,6 +234,12 @@ local function ChatCommandDebug(cmd_list)
 				end
 			end
 		end
+	elseif command == "test" then
+		print("34.345345345", Addon.Truncate(34.345345345))
+		print("-34.345345345", Addon.Truncate(-34.345345345))
+		print("-99", Addon.Truncate(-99))
+		print("9999.809986", Addon.Truncate(9999.809986))
+		print("-15554", Addon.Truncate(-15554))
 	else
 		Addon.Logging.Error(L["Unknown option: "] .. command)
 		PrintHelp()

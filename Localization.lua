@@ -50,11 +50,11 @@ local TruncateWestern = function(value)
 	local abs_value = (value >= 0 and value) or (-1 * value)
 
   if abs_value >= 1e6 then
-    return format("%.1fm", abs_value / 1e6)
+    return format("%.1fm", value / 1e6)
   elseif abs_value >= 1e4 then
-    return format("%.1fk", abs_value / 1e3)
+    return format("%.1fk", value / 1e3)
   else
-    return abs_value
+    return format("%i", value)
   end
 end
 
@@ -87,13 +87,13 @@ if MAP_LOCALE_TO_UNIT_SYMBOL[client_locale] then
     local abs_value = (value > 0 and value) or (-1 * value)
 
     if abs_value >= 1e8 then
-      return format(Format_Unit_1B, abs_value / 1e8)
+      return format(Format_Unit_1B, value / 1e8)
     elseif abs_value >= 1e4 then
-      return format(Format_Unit_10K, abs_value / 1e4)
+      return format(Format_Unit_10K, value / 1e4)
     elseif abs_value >= 1e3 then
-      return format(Format_Unit_1K, abs_value / 1e3)
+      return format(Format_Unit_1K, value / 1e3)
     else
-      return abs_value
+      return format("%i", value)
     end
   end
 end
