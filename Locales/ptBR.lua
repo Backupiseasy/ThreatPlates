@@ -491,6 +491,10 @@ L["Defines the movement/collision model for nameplates."] = "Defines the movemen
 L["Deformed Fanatic"] = "Deformed Fanatic"
 L["Delete"] = "Apagar"
 --[[Translation missing --]]
+L["Delta Percentage"] = "Delta Percentage"
+--[[Translation missing --]]
+L["Delta Threat Value"] = "Delta Threat Value"
+--[[Translation missing --]]
 L["Detailed Percentage"] = "Detailed Percentage"
 --[[Translation missing --]]
 L["Determine your role (tank/dps/healing) automatically based on current spec."] = "Determine your role (tank/dps/healing) automatically based on current spec."
@@ -1111,6 +1115,10 @@ L["Paste the Threat Plates profile string into the text field below and then clo
 --[[Translation missing --]]
 L["Percentage"] = "Percentage"
 --[[Translation missing --]]
+L["Percentage - Raw"] = "Percentage - Raw"
+--[[Translation missing --]]
+L["Percentage - Scaled"] = "Percentage - Scaled"
+--[[Translation missing --]]
 L["Percentage amount for horizontal overlap of nameplates."] = "Percentage amount for horizontal overlap of nameplates."
 --[[Translation missing --]]
 L["Percentage amount for vertical overlap of nameplates."] = "Percentage amount for vertical overlap of nameplates."
@@ -1208,6 +1216,8 @@ L["Scriping for custom styles for nameplates is now |cffff0000disabled!|r."] = "
 L["Script"] = "Script"
 --[[Translation missing --]]
 L["Scripts"] = "Scripts"
+--[[Translation missing --]]
+L["Second Player"] = "Second Player"
 --[[Translation missing --]]
 L["Second Player's Name"] = "Second Player's Name"
 --[[Translation missing --]]
@@ -1479,6 +1489,10 @@ L["Symbol"] = "Symbol"
 --[[Translation missing --]]
 L["Syntax error in event script '%s' of custom style '%s': %s"] = "Syntax error in event script '%s' of custom style '%s': %s"
 L["Tank"] = "Tanque"
+--[[Translation missing --]]
+L["Tank Scaled Percentage"] = "Tank Scaled Percentage"
+--[[Translation missing --]]
+L["Tank Threat Value"] = "Tank Threat Value"
 --[[Translation missing --]]
 L["Tapped"] = "Tapped"
 --[[Translation missing --]]

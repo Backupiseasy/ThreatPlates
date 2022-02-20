@@ -382,6 +382,10 @@ L["Defines the movement/collision model for nameplates."] = "Defines the movemen
 L["Deformed Fanatic"] = "변형된 광신자"
 L["Delete"] = "삭제"
 --[[Translation missing --]]
+L["Delta Percentage"] = "Delta Percentage"
+--[[Translation missing --]]
+L["Delta Threat Value"] = "Delta Threat Value"
+--[[Translation missing --]]
 L["Detailed Percentage"] = "Detailed Percentage"
 L["Determine your role (tank/dps/healing) automatically based on current spec."] = "현재 전문화에 따라 자동으로 당신의 역할 (방어 전담/공격 전담/치유 전담)을 판단합니다."
 --[[Translation missing --]]
@@ -814,6 +818,10 @@ L["Paste"] = "붙여넣기"
 --[[Translation missing --]]
 L["Paste the Threat Plates profile string into the text field below and then close the window"] = "Paste the Threat Plates profile string into the text field below and then close the window"
 L["Percentage"] = "백분율"
+--[[Translation missing --]]
+L["Percentage - Raw"] = "Percentage - Raw"
+--[[Translation missing --]]
+L["Percentage - Scaled"] = "Percentage - Scaled"
 L["Percentage amount for horizontal overlap of nameplates."] = "이름표의 좌우 겹침 비율입니다."
 L["Percentage amount for vertical overlap of nameplates."] = "이름표의 상하 겹침 비율입니다."
 L["Personal Nameplate"] = "개인 이름표"
@@ -881,6 +889,8 @@ L["Scriping for custom styles for nameplates is now |cffff0000disabled!|r."] = "
 L["Script"] = "Script"
 --[[Translation missing --]]
 L["Scripts"] = "Scripts"
+--[[Translation missing --]]
+L["Second Player"] = "Second Player"
 --[[Translation missing --]]
 L["Second Player's Name"] = "Second Player's Name"
 L["Set Icon"] = "아이콘 설정"
@@ -1081,6 +1091,10 @@ L["Symbol"] = "상징"
 --[[Translation missing --]]
 L["Syntax error in event script '%s' of custom style '%s': %s"] = "Syntax error in event script '%s' of custom style '%s': %s"
 L["Tank"] = "방어 전담"
+--[[Translation missing --]]
+L["Tank Scaled Percentage"] = "Tank Scaled Percentage"
+--[[Translation missing --]]
+L["Tank Threat Value"] = "Tank Threat Value"
 --[[Translation missing --]]
 L["Tapped"] = "Tapped"
 L["Tapped Units"] = "선점된 유닛"

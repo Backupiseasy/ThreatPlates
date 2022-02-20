@@ -320,6 +320,10 @@ L["Defines the movement/collision model for nameplates."] = "Define el modelo de
 L["Deformed Fanatic"] = "Fanático deformado"
 L["Delete"] = "Quitar"
 --[[Translation missing --]]
+L["Delta Percentage"] = "Delta Percentage"
+--[[Translation missing --]]
+L["Delta Threat Value"] = "Delta Threat Value"
+--[[Translation missing --]]
 L["Detailed Percentage"] = "Detailed Percentage"
 L["Determine your role (tank/dps/healing) automatically based on current spec."] = "Determine su función (tanque / dps / curación) automáticamente en función de las especificaciones actuales."
 L["Determine your role (tank/dps/healing) automatically based on current stance (Warrior) or form (Druid)."] = "Define tu rol (tanque/dps/sanación) automáticamente por tu actitud (Guerrero) o forma (Druida)."
@@ -663,6 +667,10 @@ L["Paladin"] = "Paladín"
 L["Paste"] = "Pegar"
 L["Paste the Threat Plates profile string into the text field below and then close the window"] = "Pega la cadena de perfil de Threat Plates en la entrada de texto a continuación y luego cierra la ventana"
 L["Percentage"] = "Porcentaje"
+--[[Translation missing --]]
+L["Percentage - Raw"] = "Percentage - Raw"
+--[[Translation missing --]]
+L["Percentage - Scaled"] = "Percentage - Scaled"
 L["Percentage amount for horizontal overlap of nameplates."] = "Cantidad porcentual para la superposición horizontal de las placas identificativas."
 L["Percentage amount for vertical overlap of nameplates."] = "Cantidad porcentual para la superposición vertical de las placas identificativas."
 L["Personal Nameplate"] = "Placa identificativa personal"
@@ -718,6 +726,8 @@ L["Scriping for custom styles for nameplates is now |cff00ff00enabled!|r."] = "L
 L["Scriping for custom styles for nameplates is now |cffff0000disabled!|r."] = "La creación de scripts para estilos personalizados para placas identificativas está ahora |cff00ff00deshabilitado!|r."
 L["Script"] = "Script"
 L["Scripts"] = "Scripts"
+--[[Translation missing --]]
+L["Second Player"] = "Second Player"
 --[[Translation missing --]]
 L["Second Player's Name"] = "Second Player's Name"
 L["Set Icon"] = "Establecer Icono"
@@ -865,6 +875,10 @@ L["Switch scale values for debuffs and buffs for friendly units."] = "Cambia val
 L["Symbol"] = "Símbolo"
 L["Syntax error in event script '%s' of custom style '%s': %s"] = "Error de sintaxis en el script de evento '%s' del estilo personalizado '%s': %s"
 L["Tank"] = "Tanque"
+--[[Translation missing --]]
+L["Tank Scaled Percentage"] = "Tank Scaled Percentage"
+--[[Translation missing --]]
+L["Tank Threat Value"] = "Tank Threat Value"
 L["Tapped"] = "Golpeado"
 L["Tapped Units"] = "Unidades Golpeadas"
 L["Target"] = "Objetivo"

@@ -336,6 +336,10 @@ L["Defines the movement/collision model for nameplates."] = "血條的移動/排
 L["Deformed Fanatic"] = "畸形的狂熱者"
 L["Delete"] = "刪除"
 --[[Translation missing --]]
+L["Delta Percentage"] = "Delta Percentage"
+--[[Translation missing --]]
+L["Delta Threat Value"] = "Delta Threat Value"
+--[[Translation missing --]]
 L["Detailed Percentage"] = "Detailed Percentage"
 L["Determine your role (tank/dps/healing) automatically based on current spec."] = "自動依據當前的專精決定角色類型 (坦克/傷害/治療)。"
 L["Determine your role (tank/dps/healing) automatically based on current stance (Warrior) or form (Druid)."] = "自動根據目前的姿勢 (戰士) 或形態 (德魯伊) 決定你的角色 (坦克/輸出/治療)"
@@ -679,6 +683,10 @@ L["Paladin"] = "聖騎士"
 L["Paste"] = "貼上"
 L["Paste the Threat Plates profile string into the text field below and then close the window"] = "在下方的文字區域內貼上威力血條的設定檔字串，然後關閉視窗。"
 L["Percentage"] = "百分比"
+--[[Translation missing --]]
+L["Percentage - Raw"] = "Percentage - Raw"
+--[[Translation missing --]]
+L["Percentage - Scaled"] = "Percentage - Scaled"
 L["Percentage amount for horizontal overlap of nameplates."] = "血條之間水平重疊距離的百分比。"
 L["Percentage amount for vertical overlap of nameplates."] = "血條之間垂直重疊距離的百分比。"
 L["Personal Nameplate"] = "個人資源條"
@@ -734,6 +742,8 @@ L["Scriping for custom styles for nameplates is now |cff00ff00enabled!|r."] = "�
 L["Scriping for custom styles for nameplates is now |cffff0000disabled!|r."] = "自訂血條樣式的程式碼現在|cff00ff00已停用!|。"
 L["Script"] = "程式碼"
 L["Scripts"] = "程式碼"
+--[[Translation missing --]]
+L["Second Player"] = "Second Player"
 --[[Translation missing --]]
 L["Second Player's Name"] = "Second Player's Name"
 L["Set Icon"] = "設定圖示"
@@ -881,6 +891,10 @@ L["Switch scale values for debuffs and buffs for friendly units."] = "友方單�
 L["Symbol"] = "符號"
 L["Syntax error in event script '%s' of custom style '%s': %s"] = "事件程式碼 '%s' 的語法錯誤，屬於自訂樣式 '%s': %s"
 L["Tank"] = "坦克"
+--[[Translation missing --]]
+L["Tank Scaled Percentage"] = "Tank Scaled Percentage"
+--[[Translation missing --]]
+L["Tank Threat Value"] = "Tank Threat Value"
 L["Tapped"] = "他人目標"
 L["Tapped Units"] = "他人目標單位"
 L["Target"] = "當前目標"
