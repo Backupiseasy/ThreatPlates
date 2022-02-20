@@ -15,7 +15,7 @@ local tostring = tostring
 local string_format = string.format
 
 -- WoW APIs
-local UnitIsUnit, UnitDetailedThreatSituation, UnitName = UnitIsUnit, UnitDetailedThreatSituation, UnitName
+local UnitIsUnit, UnitDetailedThreatSituation, UnitName, UnitClass = UnitIsUnit, UnitDetailedThreatSituation, UnitName, UnitClass
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local GetRaidTargetIndex = GetRaidTargetIndex
 local IsInGroup, IsInRaid, GetNumGroupMembers, GetNumSubgroupMembers = IsInGroup, IsInRaid, GetNumGroupMembers, GetNumSubgroupMembers
@@ -23,6 +23,7 @@ local IsInGroup, IsInRaid, GetNumGroupMembers, GetNumSubgroupMembers = IsInGroup
 -- ThreatPlates APIs
 local GetThreatSituation = Addon.GetThreatSituation
 local Font = Addon.Font
+local TransliterateCyrillicLetters = Addon.TransliterateCyrillicLetters
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -181,7 +182,7 @@ local function GetTopThreatUnitBesidesPlayer(unitid, threat_value_func)
 
   local top_threat_unit_name = ""
   if top_unitid and ShowSecondPlayersName then
-    top_threat_unit_name = UnitName(top_unitid) .. ": "
+    top_threat_unit_name = TransliterateCyrillicLetters(UnitName(top_unitid)) .. ": "
   end
 
   return top_unitid, top_threat_value, top_threat_unit_name

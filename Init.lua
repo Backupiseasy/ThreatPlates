@@ -15,6 +15,7 @@ local string, format = string, format
 local rawset = rawset
 
 -- WoW APIs
+local UnitClass = UnitClass
 
 -- ThreatPlates APIs
 Addon.IS_CLASSIC = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
@@ -192,6 +193,11 @@ Addon.ColorByClass = function(class_name, text)
 		return text
 	end
 end
+
+-- Addon.ColorByClassUnitID = function(unitid, text)
+-- 	local _, class_name = UnitClass(unitid)
+-- 	return Addon.ColorByClass(class_name, text)
+-- end
 
 --------------------------------------------------------------------------------------------------
 -- Utility functions
