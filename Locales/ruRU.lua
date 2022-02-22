@@ -1,10 +1,8 @@
 local L = LibStub("AceLocale-3.0"):NewLocale("TidyPlatesThreat", "ruRU", false)
 if not L then return end
 
---[[Translation missing --]]
-L["  /tptpdps       Toggles DPS/Healing threat plates"] = "  /tptpdps       Toggles DPS/Healing threat plates"
---[[Translation missing --]]
-L["  /tptpol        Toggles nameplate overlapping"] = "  /tptpol        Toggles nameplate overlapping"
+L["  /tptpdps       Toggles DPS/Healing threat plates"] = "/tptpdps переключение Урон/Лечение таблички с угрозами"
+L["  /tptpol        Toggles nameplate overlapping"] = "/tptpol переключить nameplates наложением"
 --[[Translation missing --]]
 L["  /tptptank      Toggles Tank threat plates"] = "  /tptptank      Toggles Tank threat plates"
 --[[Translation missing --]]
@@ -19,6 +17,12 @@ L["  help                    Prints this help message"] = "  help               
 L["  legacy-custom-styles    Adds (legacy) default custom styles for nameplates that are deleted when migrating custom nameplates to the current format"] = "  legacy-custom-styles    Adds (legacy) default custom styles for nameplates that are deleted when migrating custom nameplates to the current format"
 L["  profile <name>          Switch the current profile to <name>"] = "profile <name> Переключить текущий профиль на <name>"
 L["  toggle-scripting        Enable or disable scripting support (for beta testing)"] = "toggle-scripting Включение или отключение поддержки сценариев (для бета-тестирования)"
+--[[Translation missing --]]
+L[" (Elite)"] = " (Elite)"
+--[[Translation missing --]]
+L[" (Rare Elite)"] = " (Rare Elite)"
+--[[Translation missing --]]
+L[" (Rare)"] = " (Rare)"
 L[" options by typing: /tptp"] = "Для настроек введите: /tptp"
 L[" The change will be applied after you leave combat."] = "Это изменение будет применено после того, как вы выйдете из боя."
 L[" to DPS."] = "для нанесения урона."
@@ -47,6 +51,24 @@ Blacksalsify
 Blacksalsify
 
 (Автор оригинала: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=]
+--[[Translation missing --]]
+L[ [=[
+
+--
+
+Backupiseasy
+
+(Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=] ] = ""
+--[[Translation missing --]]
+L[ [=[
+
+Feel free to email me at |cff00ff00threatplates@gmail.com|r
+
+--
+
+Blacksalsify
+
+(Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=] ] = ""
 L[". You cannot use two custom nameplates with the same trigger. The imported custom nameplate will be disabled."] = ". Вы не можете использовать две пользовательские таблички с одним и тем же триггером. Импортированный персонализированный неймплейт будет отключен."
 L["|cff00ff00High Threat|r"] = "|cff00ff00Большая угроза|r"
 L["|cff00ff00Low Threat|r"] = "|cff00ff00Слабая угроза|r"
@@ -68,9 +90,16 @@ This is your first time using Threat Plates and you are a(n):
 Это ваш первый запуск Threat Plates! и вы(n):
 |r|cff
 ]=]
+--[[Translation missing --]]
+L[ [=[|cff89f559Welcome to |r|cff89f559Threat Plates!
+This is your first time using Threat Plates and you are a(n):
+|r|cff]=] ] = ""
 L["|cff89f559You are currently in your "] = "|cff89f559Вы в настоящее время в Вашем"
 L[ [=[|cffFF0000DELETE CUSTOM NAMEPLATE|r
 Are you sure you want to delete the selected custom nameplate?]=] ] = "|cffFF0000УДАЛИТЬ ПЕРСОНАЛИЗИРОВАННЫЙ НЕЙМПЛЕЙТ|r Вы действительно хотите удалить выбранный персонализированный неймплейт?"
+--[[Translation missing --]]
+L[ [=[|cffFF0000DELETE CUSTOM NAMEPLATE|r
+Are you sure you want to delete the selected custom nameplate?]=] ] = ""
 L["|cffff0000DPS/Healing|r"] = "|cffff0000Боец/Лекарь|r"
 L["|cffff0000dpsing / healing|r"] = "|cffff0000боец / лекарь|r"
 L["|cffff0000High Threat|r"] = "Высокая Угроза"
@@ -100,6 +129,8 @@ L["A custom nameplate with this trigger already exists: "] = "A custom nameplate
 --[[Translation missing --]]
 L["A script has overwritten the global '%s'. This might affect other scripts ."] = "A script has overwritten the global '%s'. This might affect other scripts ."
 L["A to Z"] = "А до Я"
+--[[Translation missing --]]
+L["Abbreviation"] = "Abbreviation"
 L["About"] = "О программе"
 L["Absolut Transparency"] = "Полная прозрачность"
 L["Absorbs"] = "Поглощение"
@@ -115,6 +146,8 @@ L["Additional chat commands:"] = "Additional chat commands:"
 L["Additionally color the name based on the target mark if the unit is marked."] = "Цвет имени цели соответствует цвету метки на цели."
 --[[Translation missing --]]
 L["Additionally color the nameplate's healthbar or name based on the target mark if the unit is marked."] = "Additionally color the nameplate's healthbar or name based on the target mark if the unit is marked."
+--[[Translation missing --]]
+L["Alignment"] = "Alignment"
 L["All"] = "Все"
 L["All on NPCs"] = "Всё на NPCs"
 L["Allow"] = "Разрешить"
@@ -126,6 +159,8 @@ L["Always shows the full amount of absorbs on a unit. In overabsorb situations, 
 L["Amount"] = "Количество"
 L["Anchor"] = "Якорь"
 L["Anchor Point"] = "Место привязки"
+--[[Translation missing --]]
+L["Anchor to"] = "Anchor to"
 --[[Translation missing --]]
 L["Animacharge"] = "Animacharge"
 L["Appearance"] = "Отображение"
@@ -151,6 +186,8 @@ L["Arrow"] = "Стрелка"
 L["Arrow (Legacy)"] = "Arrow (Legacy)"
 L["Art Options"] = "Настройки артефакта"
 --[[Translation missing --]]
+L["Attempt to register script for unknown WoW event \"%s\""] = "Attempt to register script for unknown WoW event \"%s\""
+--[[Translation missing --]]
 L["Attempt to register script for unknown WoW event '%s'"] = "Attempt to register script for unknown WoW event '%s'"
 L["Aura"] = "Аура"
 L["Aura Icon"] = "Значок ауры"
@@ -158,6 +195,8 @@ L["Aura: "] = "Аура:"
 L["Auras"] = "Ауры"
 L["Auras (Name or ID)"] = "Ауры (Имя или ИД)"
 L["Auras, Healthbar"] = "Ауры, Плашка здоровья"
+--[[Translation missing --]]
+L["Auto Sizing"] = "Auto Sizing"
 --[[Translation missing --]]
 L["Auto-Cast"] = "Auto-Cast"
 --[[Translation missing --]]
@@ -180,6 +219,8 @@ L["Bar Mode"] = "Режим рамки"
 L["Bar Style"] = "Bar Style"
 L["Bar Width"] = "Ширина рамки"
 --[[Translation missing --]]
+L["Bars"] = "Bars"
+--[[Translation missing --]]
 L["Because of side effects with Blizzard nameplates, this function is disabled in instances or when Blizzard nameplates are used for friendly or neutral/enemy units (see General - Visibility)."] = "Because of side effects with Blizzard nameplates, this function is disabled in instances or when Blizzard nameplates are used for friendly or neutral/enemy units (see General - Visibility)."
 L["Blizzard"] = "Blizzard"
 L["Blizzard Settings"] = "Настройки Blizzard"
@@ -190,11 +231,15 @@ L["Border Color:"] = "Цвет границы:"
 L["Boss"] = "Босс"
 L["Boss Mods"] = "Настройки Босса"
 L["Bosses"] = "Боссы"
+--[[Translation missing --]]
+L["Both you and the other player are flagged for PvP."] = "Both you and the other player are flagged for PvP."
 L["Bottom"] = "Низ"
 L["Bottom Inset"] = "Нижняя вставка"
 L["Bottom Left"] = "Снизу-слева"
 L["Bottom Right"] = "Снизу-справа"
 L["Bottom-to-top"] = "Снизу-вверх"
+--[[Translation missing --]]
+L["Boundaries"] = "Boundaries"
 --[[Translation missing --]]
 L["Bubble"] = "Bubble"
 L["Buff Color"] = "Цвет баффа"
@@ -245,6 +290,10 @@ L[ [=[Clear and easy to use threat-reactive nameplates.
 Current version: ]=] ] = [=[Clear and easy to use threat-reactive nameplates.
 
 Current version: ]=]
+--[[Translation missing --]]
+L[ [=[Clear and easy to use threat-reactive nameplates.
+
+Current version: ]=] ] = ""
 L["Clickable Area"] = "Область нажатия"
 L["Color"] = "Цвет"
 L["Color By Class"] = "Цвет по классу"
@@ -304,6 +353,12 @@ Type /dogtag for tag info.
 
 Remember to press ENTER after filling out this box or it will not save.]=]
 --[[Translation missing --]]
+L[ [=[Define a custom status text using LibDogTag markup language.
+
+Type /dogtag for tag info.
+
+Remember to press ENTER after filling out this box or it will not save.]=] ] = ""
+--[[Translation missing --]]
 L["Define a custom transparency for this nameplate and overwrite any other transparency settings."] = "Define a custom transparency for this nameplate and overwrite any other transparency settings."
 --[[Translation missing --]]
 L["Define base alpha settings for various unit types. Only one of these settings is applied to a unit at the same time, i.e., they are mutually exclusive."] = "Define base alpha settings for various unit types. Only one of these settings is applied to a unit at the same time, i.e., they are mutually exclusive."
@@ -313,6 +368,12 @@ L["Define base scale settings for various unit types. Only one of these settings
 L["Defines the movement/collision model for nameplates."] = "Defines the movement/collision model for nameplates."
 L["Deformed Fanatic"] = "Неправильно изменённый"
 L["Delete"] = "Удалить"
+--[[Translation missing --]]
+L["Delta Percentage"] = "Delta Percentage"
+--[[Translation missing --]]
+L["Delta Threat Value"] = "Delta Threat Value"
+--[[Translation missing --]]
+L["Detailed Percentage"] = "Detailed Percentage"
 L["Determine your role (tank/dps/healing) automatically based on current spec."] = "Определить свою роль (танк / боец / лекарь) автоматически на основе текущей специализации."
 --[[Translation missing --]]
 L["Determine your role (tank/dps/healing) automatically based on current stance (Warrior) or form (Druid)."] = "Determine your role (tank/dps/healing) automatically based on current stance (Warrior) or form (Druid)."
@@ -445,6 +506,8 @@ L["Fading"] = "Затухание"
 --[[Translation missing --]]
 L["Failed to migrate the imported profile to the current settings format because of an internal error. Please report this issue at the Threat Plates homepage at CurseForge: "] = "Failed to migrate the imported profile to the current settings format because of an internal error. Please report this issue at the Threat Plates homepage at CurseForge: "
 L["Fanged Pit Viper"] = "Fanged Pit Viper"
+--[[Translation missing --]]
+L["Filter"] = "Filter"
 L["Filter by Spell"] = "Фильтр по заклинанию"
 L["Filtered Auras"] = "Сортированные ауры"
 --[[Translation missing --]]
@@ -472,12 +535,16 @@ L["Friendly Name Color"] = "Дружественный цвет имени"
 L["Friendly Names Color"] = "Дружественные цвета имен"
 L["Friendly NPCs"] = "Дружественные NPCs"
 L["Friendly Players"] = "Дружественные игроки"
+--[[Translation missing --]]
+L["Friendly PvP On"] = "Friendly PvP On"
 L["Friendly Status Text"] = "Дружественные текстовый статус"
 L["Friendly Units"] = "Дружественная цель."
 L["Friendly Units in Combat"] = "Дружественные цели в бою."
 L["Friends & Guild Members"] = "Друзья & Гильдейские участники"
 L["Full Absorbs"] = "Полное поглощение"
 L["Full Health"] = "Полное здоровье"
+--[[Translation missing --]]
+L["Full Name"] = "Full Name"
 L["Function"] = "Функция"
 L["Gas Cloud"] = "Облако газа"
 L["General"] = "Общие"
@@ -550,6 +617,10 @@ L["Hostile NPCs"] = "Враждебные NPCs"
 --[[Translation missing --]]
 L["Hostile Players"] = "Hostile Players"
 --[[Translation missing --]]
+L["Hostile PvP On - Self Off"] = "Hostile PvP On - Self Off"
+--[[Translation missing --]]
+L["Hostile PvP On - Self On"] = "Hostile PvP On - Self On"
+--[[Translation missing --]]
 L["Hostile Units"] = "Hostile Units"
 L["Icon"] = "Значок"
 --[[Translation missing --]]
@@ -560,6 +631,8 @@ L["Icon Mode"] = "Icon Mode"
 L["Icon Style"] = "Icon Style"
 --[[Translation missing --]]
 L["Icon Width"] = "Icon Width"
+--[[Translation missing --]]
+L["Icons"] = "Icons"
 --[[Translation missing --]]
 L["If checked, nameplates of mobs attacking another tank can be shown with different color, scale, and transparency."] = "If checked, nameplates of mobs attacking another tank can be shown with different color, scale, and transparency."
 --[[Translation missing --]]
@@ -601,7 +674,11 @@ L["In combat, always show all combo points no matter if they are on or off. Off 
 --[[Translation missing --]]
 L["In combat, use coloring, transparency, and scaling based on threat level as configured in the threat system. Custom settings are only used out of combat."] = "In combat, use coloring, transparency, and scaling based on threat level as configured in the threat system. Custom settings are only used out of combat."
 --[[Translation missing --]]
+L["In delta mode, show the name of the player who is second in the enemy unit's threat table."] = "In delta mode, show the name of the player who is second in the enemy unit's threat table."
+--[[Translation missing --]]
 L["In Instances"] = "In Instances"
+--[[Translation missing --]]
+L["Initials"] = "Initials"
 --[[Translation missing --]]
 L["Insert a new custom nameplate slot after the currently selected slot."] = "Insert a new custom nameplate slot after the currently selected slot."
 --[[Translation missing --]]
@@ -624,11 +701,15 @@ L["Interruptable"] = "Interruptable"
 L["Interrupted"] = "Interrupted"
 L["Kinetic Bomb"] = "Kinetic Bomb"
 --[[Translation missing --]]
+L["Label"] = "Label"
+--[[Translation missing --]]
 L["Label Text Offset"] = "Label Text Offset"
 --[[Translation missing --]]
 L["Large Bottom Inset"] = "Large Bottom Inset"
 --[[Translation missing --]]
 L["Large Top Inset"] = "Large Top Inset"
+--[[Translation missing --]]
+L["Last Word"] = "Last Word"
 L["Layout"] = "Расположение"
 L["Left"] = "Слева"
 L["Left-to-right"] = "Слева-Направо"
@@ -636,7 +717,11 @@ L["Left-to-right"] = "Слева-Направо"
 L["Legacy custom nameplate %s already exists. Skipping it."] = "Legacy custom nameplate %s already exists. Skipping it."
 --[[Translation missing --]]
 L["Less-Than Arrow"] = "Less-Than Arrow"
+--[[Translation missing --]]
+L["Level "] = "Level "
 L["Level"] = "Уровень"
+--[[Translation missing --]]
+L["Level ??"] = "Level ??"
 L["Level Text"] = "Текст уровня"
 L["Lich King"] = "Lich King"
 L["Living Ember"] = "Living Ember"
@@ -650,12 +735,16 @@ L["Marked Immortal Guardian"] = "Marked Immortal Guardian"
 --[[Translation missing --]]
 L["Max Alpha"] = "Max Alpha"
 --[[Translation missing --]]
+L["Max Auras"] = "Max Auras"
+--[[Translation missing --]]
 L["Max Distance"] = "Max Distance"
 --[[Translation missing --]]
 L["Max Distance Behind Camera"] = "Max Distance Behind Camera"
 --[[Translation missing --]]
 L["Max Health"] = "Max Health"
 L["Medium Threat"] = "Средняя угроза"
+--[[Translation missing --]]
+L["Metric Unit Symbols"] = "Metric Unit Symbols"
 --[[Translation missing --]]
 L["Min Alpha"] = "Min Alpha"
 --[[Translation missing --]]
@@ -706,12 +795,16 @@ L["Non-Interruptable"] = "Non-Interruptable"
 --[[Translation missing --]]
 L["Non-Target"] = "Non-Target"
 L["Normal Units"] = "Обычная часть"
+--[[Translation missing --]]
+L["Not Myself"] = "Not Myself"
 L["Note"] = "Заметка"
 L["Nothing to paste!"] = "Нечего вставить!"
 L["NPC Role"] = "NPC Роли"
 L["NPC Role, Guild"] = "NPC Роли, Гильдия"
 L["NPC Role, Guild, or Level"] = "NPC Роли, Гильдия и Уровень"
 L["NPCs"] = "NPCs"
+--[[Translation missing --]]
+L["Numbers"] = "Numbers"
 --[[Translation missing --]]
 L["Occluded Units"] = "Occluded Units"
 --[[Translation missing --]]
@@ -733,6 +826,8 @@ L["On Enemy Units You Cannot Attack"] = "On Enemy Units You Cannot Attack"
 L["On Friendly Units in Combat"] = "On Friendly Units in Combat"
 --[[Translation missing --]]
 L["On Target"] = "On Target"
+--[[Translation missing --]]
+L["On the left"] = "On the left"
 L["One"] = "Один"
 L["Only Alternate Power"] = "Только альтернативная энергия"
 --[[Translation missing --]]
@@ -740,7 +835,11 @@ L["Only for Target"] = "Only for Target"
 --[[Translation missing --]]
 L["Only In Combat"] = "Only In Combat"
 --[[Translation missing --]]
+L["Only in Groups"] = "Only in Groups"
+--[[Translation missing --]]
 L["Only in Instances"] = "Only in Instances"
+--[[Translation missing --]]
+L["Only Mine"] = "Only Mine"
 L["Onyxian Whelp"] = "Onyxian Whelp"
 L["Open Blizzard Settings"] = "Открыть настройки Blizzard "
 L["Open Options"] = "Открыть параметры"
@@ -758,6 +857,10 @@ L["Paste"] = "Вставить"
 L["Paste the Threat Plates profile string into the text field below and then close the window"] = "Paste the Threat Plates profile string into the text field below and then close the window"
 --[[Translation missing --]]
 L["Percentage"] = "Percentage"
+--[[Translation missing --]]
+L["Percentage - Raw"] = "Percentage - Raw"
+--[[Translation missing --]]
+L["Percentage - Scaled"] = "Percentage - Scaled"
 --[[Translation missing --]]
 L["Percentage amount for horizontal overlap of nameplates."] = "Percentage amount for horizontal overlap of nameplates."
 --[[Translation missing --]]
@@ -781,6 +884,8 @@ L["Preview Elite"] = "Preview Elite"
 L["Preview Rare"] = "Preview Rare"
 --[[Translation missing --]]
 L["Preview Rare Elite"] = "Preview Rare Elite"
+--[[Translation missing --]]
+L["PvP Off"] = "PvP Off"
 L["Quest"] = "Задание"
 L["Quest Progress"] = "Прогресс задания"
 L["Raging Spirit"] = "Яростный дух"
@@ -788,6 +893,8 @@ L["Raging Spirit"] = "Яростный дух"
 L["Rank Text"] = "Rank Text"
 L["Rares & Bosses"] = "Редкие и боссы"
 L["Rares & Elites"] = "Редкие и элитные"
+--[[Translation missing --]]
+L["Raw Percentage"] = "Raw Percentage"
 L["Reaction"] = "Реакция"
 L["Reanimated Adherent"] = "Reanimated Adherent"
 L["Reanimated Fanatic"] = "Reanimated Fanatic"
@@ -816,6 +923,10 @@ L["Same as Foreground"] = "Также как на переднем плане"
 L["Same as Name"] = "Same as Name"
 L["Scale"] = "Масштаб"
 --[[Translation missing --]]
+L["Scaled Percentage"] = "Scaled Percentage"
+--[[Translation missing --]]
+L["Scaled Percentage Delta"] = "Scaled Percentage Delta"
+--[[Translation missing --]]
 L["Scriping for custom styles for nameplates is now |cff00ff00enabled!|r."] = "Scriping for custom styles for nameplates is now |cff00ff00enabled!|r."
 --[[Translation missing --]]
 L["Scriping for custom styles for nameplates is now |cffff0000disabled!|r."] = "Scriping for custom styles for nameplates is now |cffff0000disabled!|r."
@@ -823,6 +934,10 @@ L["Scriping for custom styles for nameplates is now |cffff0000disabled!|r."] = "
 L["Script"] = "Script"
 --[[Translation missing --]]
 L["Scripts"] = "Scripts"
+--[[Translation missing --]]
+L["Second Player"] = "Second Player"
+--[[Translation missing --]]
+L["Second Player's Name"] = "Second Player's Name"
 L["Set Icon"] = "Выбрать значок"
 L["Set scale settings for different threat levels."] = "Установить масштаб на основе разных уровней угрозы."
 L["Set the roles your specs represent."] = "Установить роль на основе вашей специализации."
@@ -844,23 +959,17 @@ L["Shorten"] = "Shorten"
 L["Show"] = "Показывать"
 --[[Translation missing --]]
 L["Show a tooltip when hovering above an aura."] = "Show a tooltip when hovering above an aura."
---[[Translation missing --]]
-L["Show all buffs on enemy units."] = "Show all buffs on enemy units."
---[[Translation missing --]]
-L["Show all buffs on friendly units."] = "Show all buffs on friendly units."
+L["Show all buffs on enemy units."] = "Показывать все баффы вражеских юнитов."
+L["Show all buffs on friendly units."] = "Показывать все баффы дружественных юнитов."
 L["Show all buffs on NPCs."] = "Показать все баффы на NPCs."
 --[[Translation missing --]]
 L["Show all crowd control auras on enemy units."] = "Show all crowd control auras on enemy units."
 --[[Translation missing --]]
 L["Show all crowd control auras on friendly units."] = "Show all crowd control auras on friendly units."
---[[Translation missing --]]
-L["Show all debuffs on enemy units."] = "Show all debuffs on enemy units."
---[[Translation missing --]]
-L["Show all debuffs on friendly units."] = "Show all debuffs on friendly units."
---[[Translation missing --]]
-L["Show All Nameplates (Friendly and Enemy Units) (CTRL-V)"] = "Show All Nameplates (Friendly and Enemy Units) (CTRL-V)"
---[[Translation missing --]]
-L["Show Always"] = "Show Always"
+L["Show all debuffs on enemy units."] = "Показывать все дебаффы на вражеских юнитах."
+L["Show all debuffs on friendly units."] = "Показывать все дебаффы на дружественных юнитах."
+L["Show All Nameplates (Friendly and Enemy Units) (CTRL-V)"] = "Показывать все Nameplates (Дружественных и Вражеских юнитов) (CTRL-V)"
+L["Show Always"] = "Показывать всегда"
 --[[Translation missing --]]
 L["Show an quest icon at the nameplate for quest mobs."] = "Show an quest icon at the nameplate for quest mobs."
 --[[Translation missing --]]
@@ -869,12 +978,9 @@ L["Show auras as bars (with optional icons)."] = "Show auras as bars (with optio
 L["Show auras as icons in a grid configuration."] = "Show auras as icons in a grid configuration."
 --[[Translation missing --]]
 L["Show auras in order created with oldest aura first."] = "Show auras in order created with oldest aura first."
---[[Translation missing --]]
-L["Show Blizzard Nameplates for Friendly Units"] = "Show Blizzard Nameplates for Friendly Units"
---[[Translation missing --]]
-L["Show Blizzard Nameplates for Neutral and Enemy Units"] = "Show Blizzard Nameplates for Neutral and Enemy Units"
---[[Translation missing --]]
-L["Show Buffs"] = "Show Buffs"
+L["Show Blizzard Nameplates for Friendly Units"] = "Показывать Blizzard Nameplates для дружественных юнитах."
+L["Show Blizzard Nameplates for Neutral and Enemy Units"] = "Показывать Blizzard Nameplates для дружественных юнитах и вражеских юнитов"
+L["Show Buffs"] = "Показывать баффы"
 --[[Translation missing --]]
 L["Show buffs of dispell type Magic."] = "Show buffs of dispell type Magic."
 --[[Translation missing --]]
@@ -885,7 +991,7 @@ L["Show buffs that you can apply."] = "Show buffs that you can apply."
 L["Show buffs that you can dispell."] = "Show buffs that you can dispell."
 --[[Translation missing --]]
 L["Show buffs with unlimited duration in all situations (e.g., in and out of combat)."] = "Show buffs with unlimited duration in all situations (e.g., in and out of combat)."
-L["Show By Unit Type"] = "Типы целей"
+L["Show By Unit Type"] = "Показывать типы целей"
 --[[Translation missing --]]
 L["Show Crowd Control"] = "Show Crowd Control"
 --[[Translation missing --]]
@@ -896,8 +1002,7 @@ L["Show crowd control auras that are shown on Blizzard's default nameplates."] =
 L["Show crowd control auras that where applied by bosses."] = "Show crowd control auras that where applied by bosses."
 --[[Translation missing --]]
 L["Show crowd control auras that you can dispell."] = "Show crowd control auras that you can dispell."
---[[Translation missing --]]
-L["Show Debuffs"] = "Show Debuffs"
+L["Show Debuffs"] = "Показывать дебаффы"
 --[[Translation missing --]]
 L["Show debuffs that are shown on Blizzard's default nameplates."] = "Show debuffs that are shown on Blizzard's default nameplates."
 --[[Translation missing --]]
@@ -908,18 +1013,14 @@ L["Show debuffs that where applied by bosses."] = "Show debuffs that where appli
 L["Show debuffs that you can dispell."] = "Show debuffs that you can dispell."
 --[[Translation missing --]]
 L["Show Enemy Nameplates (ALT-V)"] = "Show Enemy Nameplates (ALT-V)"
---[[Translation missing --]]
-L["Show Enemy Units"] = "Show Enemy Units"
+L["Show Enemy Units"] = "Показывать вражеские юниты"
 --[[Translation missing --]]
 L["Show Focus"] = "Show Focus"
 L["Show For"] = "Показать для"
---[[Translation missing --]]
-L["Show Friendly Nameplates (SHIFT-V)"] = "Show Friendly Nameplates (SHIFT-V)"
---[[Translation missing --]]
-L["Show Friendly Units"] = "Show Friendly Units"
-L["Show Health Text"] = "Отображать текст здоровья"
---[[Translation missing --]]
-L["Show Icon for Rares & Elites"] = "Show Icon for Rares & Elites"
+L["Show Friendly Nameplates (SHIFT-V)"] = "Показывать дружественные Nameplates (SHIFT-V)"
+L["Show Friendly Units"] = "Показывать дружественные цели"
+L["Show Health Text"] = "Показывать текст здоровья"
+L["Show Icon for Rares & Elites"] = "Показывать иконки для Рарников и Элиток"
 L["Show Icon to the Left"] = "Отображать значок слева"
 --[[Translation missing --]]
 L["Show in Headline View"] = "Show in Headline View"
@@ -930,27 +1031,30 @@ L["Show Level Text"] = "Отображать уровень"
 L["Show Mouseover"] = "Show Mouseover"
 L["Show Name Text"] = "Отображать текст имени"
 L["Show Nameplate"] = "Отображать плашки"
---[[Translation missing --]]
-L["Show nameplates at all times."] = "Show nameplates at all times."
---[[Translation missing --]]
-L["Show Neutral Units"] = "Show Neutral Units"
---[[Translation missing --]]
-L["Show Number"] = "Show Number"
---[[Translation missing --]]
-L["Show Orb"] = "Show Orb"
+L["Show nameplates at all times."] = "Показывать Nameplates все время."
+L["Show Neutral Units"] = "Показывать нейтральные юниты"
+L["Show Number"] = "Показывать номер"
+L["Show Orb"] = "Показывать сферу"
 --[[Translation missing --]]
 L["Show shadow with text."] = "Show shadow with text."
---[[Translation missing --]]
-L["Show Skull Icon"] = "Show Skull Icon"
+L["Show Skull Icon"] = "Показывать иконку черепа"
 --[[Translation missing --]]
 L["Show stack count on auras."] = "Show stack count on auras."
-L["Show Target"] = "Отображать цель"
+L["Show Target"] = "Показывать цель"
 --[[Translation missing --]]
 L["Show the amount you need to loot or kill"] = "Show the amount you need to loot or kill"
 --[[Translation missing --]]
 L["Show the mouseover highlight on all units."] = "Show the mouseover highlight on all units."
 --[[Translation missing --]]
 L["Show the OmniCC cooldown count instead of the built-in duration text on auras."] = "Show the OmniCC cooldown count instead of the built-in duration text on auras."
+--[[Translation missing --]]
+L["Show the player's threat percentage (scaled or raw) or threat delta to the second player on the threat table (percentage or threat value) against the enemy unit."] = "Show the player's threat percentage (scaled or raw) or threat delta to the second player on the threat table (percentage or threat value) against the enemy unit."
+--[[Translation missing --]]
+L["Show the player's threat percentage against the enemy unit relative to the threat of enemy unit's primary target."] = "Show the player's threat percentage against the enemy unit relative to the threat of enemy unit's primary target."
+--[[Translation missing --]]
+L["Show the player's threat percentage against the enemy unit."] = "Show the player's threat percentage against the enemy unit."
+--[[Translation missing --]]
+L["Show the player's total threat value on the enemy unit."] = "Show the player's total threat value on the enemy unit."
 --[[Translation missing --]]
 L["Show threat feedback based on unit type or status or environmental conditions."] = "Show threat feedback based on unit type or status or environmental conditions."
 --[[Translation missing --]]
@@ -1029,7 +1133,13 @@ L["Style"] = "Стиль"
 --[[Translation missing --]]
 L["Supports multiple entries, separated by commas."] = "Supports multiple entries, separated by commas."
 --[[Translation missing --]]
+L["Swap Area By Reaction"] = "Swap Area By Reaction"
+--[[Translation missing --]]
 L["Swap By Reaction"] = "Swap By Reaction"
+--[[Translation missing --]]
+L["Swap Scale By Reaction"] = "Swap Scale By Reaction"
+--[[Translation missing --]]
+L["Switch aura areas for buffs and debuffs for friendly units."] = "Switch aura areas for buffs and debuffs for friendly units."
 --[[Translation missing --]]
 L["Switch scale values for debuffs and buffs for friendly units."] = "Switch scale values for debuffs and buffs for friendly units."
 L["Symbol"] = "Символ"
@@ -1037,9 +1147,15 @@ L["Symbol"] = "Символ"
 L["Syntax error in event script '%s' of custom style '%s': %s"] = "Syntax error in event script '%s' of custom style '%s': %s"
 L["Tank"] = "Танк"
 --[[Translation missing --]]
+L["Tank Scaled Percentage"] = "Tank Scaled Percentage"
+--[[Translation missing --]]
+L["Tank Threat Value"] = "Tank Threat Value"
+--[[Translation missing --]]
 L["Tapped"] = "Tapped"
 L["Tapped Units"] = "Выбранная цель"
 L["Target"] = "Цель"
+--[[Translation missing --]]
+L["Target Highlight"] = "Target Highlight"
 --[[Translation missing --]]
 L["Target Hightlight"] = "Target Hightlight"
 --[[Translation missing --]]
@@ -1061,8 +1177,12 @@ L["Target-based Transparency"] = "Target-based Transparency"
 L["Text Boundaries"] = "Границы текста"
 L["Text Height"] = "Высота текста"
 L["Text Width"] = "Ширина текста"
+--[[Translation missing --]]
+L["Texts"] = "Texts"
 L["Texture"] = "Текстура"
 L["Textures"] = "Текстуры"
+--[[Translation missing --]]
+L["The (friendly or hostile) player is not flagged for PvP or the player is in a sanctuary."] = "The (friendly or hostile) player is not flagged for PvP or the player is in a sanctuary."
 --[[Translation missing --]]
 L["The import string contains a profile from an different Threat Plates version. The profile will still be imported (and migrated as far as possible), but some settings from the imported profile might be lost."] = "The import string contains a profile from an different Threat Plates version. The profile will still be imported (and migrated as far as possible), but some settings from the imported profile might be lost."
 --[[Translation missing --]]
@@ -1088,6 +1208,10 @@ L["The max distance to show the target nameplate when the target is behind the c
 --[[Translation missing --]]
 L["The minimum alpha of nameplates."] = "The minimum alpha of nameplates."
 --[[Translation missing --]]
+L["The player is friendly to you, and flagged for PvP."] = "The player is friendly to you, and flagged for PvP."
+--[[Translation missing --]]
+L["The player is hostile, and flagged for PvP, but you are not."] = "The player is hostile, and flagged for PvP, but you are not."
+--[[Translation missing --]]
 L["The scale of all nameplates if you have no target unit selected."] = "The scale of all nameplates if you have no target unit selected."
 --[[Translation missing --]]
 L["The scale of non-target nameplates if a target unit is selected."] = "The scale of non-target nameplates if a target unit is selected."
@@ -1110,6 +1234,8 @@ L["These options allow you to control whether the castbar is hidden or shown on 
 --[[Translation missing --]]
 L["These options allow you to control which nameplates are visible within the game field while you play."] = "These options allow you to control which nameplates are visible within the game field while you play."
 --[[Translation missing --]]
+L["These settings will define the space that text can be placed on the nameplate."] = "These settings will define the space that text can be placed on the nameplate."
+--[[Translation missing --]]
 L["These settings will define the space that text can be placed on the nameplate. Having too large a font and not enough height will cause the text to be not visible."] = "These settings will define the space that text can be placed on the nameplate. Having too large a font and not enough height will cause the text to be not visible."
 --[[Translation missing --]]
 L["Thick"] = "Thick"
@@ -1117,6 +1243,8 @@ L["Thick Outline"] = "Толстый контур"
 L["Thick Outline, Monochrome"] = "Толстый контур, монохромный"
 --[[Translation missing --]]
 L["Thin Square"] = "Thin Square"
+--[[Translation missing --]]
+L["This lets you select the layout style of the auras area."] = "This lets you select the layout style of the auras area."
 --[[Translation missing --]]
 L["This lets you select the layout style of the auras widget."] = "This lets you select the layout style of the auras widget."
 --[[Translation missing --]]
@@ -1199,18 +1327,20 @@ L["This will toggle the auras widget to show the cooldown spiral on auras."] = "
 L["Threat Detection"] = "Threat Detection"
 --[[Translation missing --]]
 L["Threat Detection Heuristic"] = "Threat Detection Heuristic"
---[[Translation missing --]]
-L["Threat Glow"] = "Threat Glow"
+L["Threat Glow"] = "Свечение угрозы"
 --[[Translation missing --]]
 L["Threat Plates Script Editor"] = "Threat Plates Script Editor"
 L["Threat System"] = "Система угрозы"
+L["Threat Table"] = "Таблица угроз"
 --[[Translation missing --]]
-L["Threat Table"] = "Threat Table"
+L["Threat Value Delta"] = "Threat Value Delta"
 L["Three"] = "Три"
 --[[Translation missing --]]
 L["Time Left"] = "Time Left"
 --[[Translation missing --]]
 L["Time Text Offset"] = "Time Text Offset"
+--[[Translation missing --]]
+L["Toggle"] = "Toggle"
 --[[Translation missing --]]
 L["Toggle Enemy Headline View"] = "Toggle Enemy Headline View"
 --[[Translation missing --]]
@@ -1227,13 +1357,12 @@ L["Top Left"] = "Вверх слева"
 L["Top Right"] = "Вверх справа"
 L["Top-to-bottom"] = "Сверху вниз"
 L["Totem Scale"] = "Масштаб тотема"
---[[Translation missing --]]
-L["Totem Transparency"] = "Totem Transparency"
+L["Totem Transparency"] = "Прозрачность тотема"
 L["Totems"] = "Тотемы"
 --[[Translation missing --]]
-L["Transparency"] = "Transparency"
---[[Translation missing --]]
-L["Transparency & Scaling"] = "Transparency & Scaling"
+L["Transliterate Cyrillic Letters"] = "Transliterate Cyrillic Letters"
+L["Transparency"] = "Прозрачность"
+L["Transparency & Scaling"] = "Прозрачность & Масштабирование "
 L["Treant"] = "Treant"
 --[[Translation missing --]]
 L["Trigger"] = "Trigger"
@@ -1334,38 +1463,36 @@ L["Use transparency settings of Healthbar View also for Headline View."] = "Use 
 --[[Translation missing --]]
 L["Uses the target-based transparency as absolute transparency and ignore unit base transparency."] = "Uses the target-based transparency as absolute transparency and ignore unit base transparency."
 L["Val'kyr Shadowguard"] = "Val'kyr Shadowguard"
+--[[Translation missing --]]
+L["Value"] = "Value"
+--[[Translation missing --]]
+L["Value Type"] = "Value Type"
 L["Venomous Snake"] = "Venomous Snake"
 L["Vertical Align"] = "Вертикальное выравнивание"
---[[Translation missing --]]
-L["Vertical Alignment"] = "Vertical Alignment"
---[[Translation missing --]]
-L["Vertical Offset"] = "Vertical Offset"
---[[Translation missing --]]
-L["Vertical Overlap"] = "Vertical Overlap"
---[[Translation missing --]]
-L["Vertical Spacing"] = "Vertical Spacing"
+L["Vertical Alignment"] = "Вертикальное выравнивание"
+L["Vertical Offset"] = "Вертикальное смещение"
+L["Vertical Overlap"] = "Вертикальное перекрытие"
+L["Vertical Spacing"] = "Вертикальное расстояние"
 L["Viper"] = "Змея"
 L["Visibility"] = "Отображение"
 L["Volatile Ooze"] = "Volatile Ooze"
 L["Warlock"] = "Варлок"
---[[Translation missing --]]
-L["Warning Glow for Threat"] = "Warning Glow for Threat"
+L["Warning Glow for Threat"] = "Предупреждающее свечение для угроз"
 L["Water Elemental"] = "Водный элементаль"
 L["Web Wrap"] = "Кокон"
---[[Translation missing --]]
-L["We're unable to change this while in combat"] = "We're unable to change this while in combat"
+L["We're unable to change this while in combat"] = "Вы не можете изменить это во время боя"
 L["Wide"] = "Ширина"
 L["Widgets"] = "Виджеты"
 L["Width"] = "Ширина"
 L["Windwalker Monk"] = "Танцующий с ветром монах "
+--[[Translation missing --]]
+L["Word Wrap"] = "Word Wrap"
+--[[Translation missing --]]
+L["World Boss"] = "World Boss"
 L["X"] = "X"
 L["Y"] = "Y"
 L["You can access the "] = "Вы можете получить доступ к"
---[[Translation missing --]]
-L["You cannot delete General Settings, only custom nameplates entries."] = "You cannot delete General Settings, only custom nameplates entries."
---[[Translation missing --]]
-L["You currently have two nameplate addons enabled: |cff89F559Threat Plates|r and |cff89F559%s|r. Please disable one of these, otherwise two overlapping nameplates will be shown for units."] = "You currently have two nameplate addons enabled: |cff89F559Threat Plates|r and |cff89F559%s|r. Please disable one of these, otherwise two overlapping nameplates will be shown for units."
---[[Translation missing --]]
-L["Your own quests that you have to complete."] = "Your own quests that you have to complete."
---[[Translation missing --]]
-L["Your version of LibDogTag-Unit-3.0 does not support nameplates. You need to install at least v90000.3 of LibDogTag-Unit-3.0."] = "Your version of LibDogTag-Unit-3.0 does not support nameplates. You need to install at least v90000.3 of LibDogTag-Unit-3.0."
+L["You cannot delete General Settings, only custom nameplates entries."] = "Ты не можешь удалить базовые настройки, только пользовательские nameplates записи."
+L["You currently have two nameplate addons enabled: |cff89F559Threat Plates|r and |cff89F559%s|r. Please disable one of these, otherwise two overlapping nameplates will be shown for units."] = "В настоящее время у вас включены 2 аддона на nameplates: |cff89F559Threat Plates|r и |cff89F559%s|r. Пожалуйста, отключите один из них, в противном случае два наложения nameplates будет показано для юнитов."
+L["Your own quests that you have to complete."] = "Ваши собственные задания, которые вы должны выполнить."
+L["Your version of LibDogTag-Unit-3.0 does not support nameplates. You need to install at least v90000.3 of LibDogTag-Unit-3.0."] = "Ваша версия LibDogTag-Unit-3.0 не поддерживает таблички с именами. Вам необходимо установить не менее v90000.3 LibDogTag-Unit-3.0."

@@ -13,6 +13,12 @@ L["  legacy-custom-styles    Adds (legacy) default custom styles for nameplates 
 L["  profile <name>          Switch the current profile to <name>"] = "  profile <name>          Switch the current profile to <name>"
 --[[Translation missing --]]
 L["  toggle-scripting        Enable or disable scripting support (for beta testing)"] = "  toggle-scripting        Enable or disable scripting support (for beta testing)"
+--[[Translation missing --]]
+L[" (Elite)"] = " (Elite)"
+--[[Translation missing --]]
+L[" (Rare Elite)"] = " (Rare Elite)"
+--[[Translation missing --]]
+L[" (Rare)"] = " (Rare)"
 L[" options by typing: /tptp"] = "选项通过输入：/tptp"
 L[" The change will be applied after you leave combat."] = "将会在战斗结束后套用更改。"
 L[" to DPS."] = "输出"
@@ -48,6 +54,24 @@ Blacksalsify
 Blacksalsify
 
 (最开始的作者: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=]
+--[[Translation missing --]]
+L[ [=[
+
+--
+
+Backupiseasy
+
+(Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=] ] = ""
+--[[Translation missing --]]
+L[ [=[
+
+Feel free to email me at |cff00ff00threatplates@gmail.com|r
+
+--
+
+Blacksalsify
+
+(Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=] ] = ""
 L[". You cannot use two custom nameplates with the same trigger. The imported custom nameplate will be disabled."] = "。同一个触发条件无法使用两个自订血条，导入的自订血条将会被停用。"
 L["|cff00ff00High Threat|r"] = "|cff00ff00高仇恨|r"
 L["|cff00ff00Low Threat|r"] = "|cff00ff00低仇恨|r"
@@ -70,11 +94,18 @@ This is your first time using Threat Plates and you are a(n):
 |r|cff]=] ] = [=[|cff89f559欢迎使用 |r|cff89f559Threat Plates!
 这是第一次使用Threat Plates，你是：
 |r|cff]=]
+--[[Translation missing --]]
+L[ [=[|cff89f559Welcome to |r|cff89f559Threat Plates!
+This is your first time using Threat Plates and you are a(n):
+|r|cff]=] ] = ""
 L["|cff89f559You are currently in your "] = "|cff89f559你目前在你的"
 --[[Translation missing --]]
 L[ [=[|cffFF0000DELETE CUSTOM NAMEPLATE|r
 Are you sure you want to delete the selected custom nameplate?]=] ] = [=[|cffFF0000DELETE CUSTOM NAMEPLATE|r
 Are you sure you want to delete the selected custom nameplate?]=]
+--[[Translation missing --]]
+L[ [=[|cffFF0000DELETE CUSTOM NAMEPLATE|r
+Are you sure you want to delete the selected custom nameplate?]=] ] = ""
 L["|cffff0000DPS/Healing|r"] = "|cffff0000输出/治疗|r"
 L["|cffff0000dpsing / healing|r"] = "|cffff0000输出 / 治疗|r"
 L["|cffff0000High Threat|r"] = "|cffff0000高仇恨|r"
@@ -105,6 +136,8 @@ L["A custom nameplate with this trigger already exists: "] = "A custom nameplate
 --[[Translation missing --]]
 L["A script has overwritten the global '%s'. This might affect other scripts ."] = "A script has overwritten the global '%s'. This might affect other scripts ."
 L["A to Z"] = "A 到Z"
+--[[Translation missing --]]
+L["Abbreviation"] = "Abbreviation"
 L["About"] = "关于"
 L["Absolut Transparency"] = "绝对透明度"
 L["Absorbs"] = "吸收盾"
@@ -118,6 +151,8 @@ L["Additional Adjustments"] = "额外调节"
 L["Additional chat commands:"] = "Additional chat commands:"
 L["Additionally color the name based on the target mark if the unit is marked."] = "单位有标记图示时，依据图示类型额外调整名字颜色。"
 L["Additionally color the nameplate's healthbar or name based on the target mark if the unit is marked."] = "单位有标记图示时，依据图示类型额外调整血条或名字颜色。"
+--[[Translation missing --]]
+L["Alignment"] = "Alignment"
 L["All"] = "全部"
 L["All on NPCs"] = "NPC 全部"
 --[[Translation missing --]]
@@ -133,6 +168,8 @@ L["Amount"] = "Amount"
 --[[Translation missing --]]
 L["Anchor"] = "Anchor"
 L["Anchor Point"] = "锚点"
+--[[Translation missing --]]
+L["Anchor to"] = "Anchor to"
 --[[Translation missing --]]
 L["Animacharge"] = "Animacharge"
 L["Appearance"] = "外观"
@@ -161,6 +198,8 @@ L["Arrow"] = "Arrow"
 L["Arrow (Legacy)"] = "Arrow (Legacy)"
 L["Art Options"] = "艺术设置"
 --[[Translation missing --]]
+L["Attempt to register script for unknown WoW event \"%s\""] = "Attempt to register script for unknown WoW event \"%s\""
+--[[Translation missing --]]
 L["Attempt to register script for unknown WoW event '%s'"] = "Attempt to register script for unknown WoW event '%s'"
 --[[Translation missing --]]
 L["Aura"] = "Aura"
@@ -171,6 +210,8 @@ L["Auras"] = "光环"
 --[[Translation missing --]]
 L["Auras (Name or ID)"] = "Auras (Name or ID)"
 L["Auras, Healthbar"] = "光环，血条"
+--[[Translation missing --]]
+L["Auto Sizing"] = "Auto Sizing"
 --[[Translation missing --]]
 L["Auto-Cast"] = "Auto-Cast"
 --[[Translation missing --]]
@@ -193,6 +234,8 @@ L["Bar Mode"] = "条的风格"
 L["Bar Style"] = "Bar Style"
 L["Bar Width"] = "条的宽度"
 --[[Translation missing --]]
+L["Bars"] = "Bars"
+--[[Translation missing --]]
 L["Because of side effects with Blizzard nameplates, this function is disabled in instances or when Blizzard nameplates are used for friendly or neutral/enemy units (see General - Visibility)."] = "Because of side effects with Blizzard nameplates, this function is disabled in instances or when Blizzard nameplates are used for friendly or neutral/enemy units (see General - Visibility)."
 L["Blizzard"] = "暴雪"
 L["Blizzard Settings"] = "暴雪设定"
@@ -204,11 +247,15 @@ L["Border Color:"] = "边框颜色："
 L["Boss"] = "首领"
 L["Boss Mods"] = "首领模块"
 L["Bosses"] = "首领"
+--[[Translation missing --]]
+L["Both you and the other player are flagged for PvP."] = "Both you and the other player are flagged for PvP."
 L["Bottom"] = "下"
 L["Bottom Inset"] = "下方间距"
 L["Bottom Left"] = "左下"
 L["Bottom Right"] = "右下"
 L["Bottom-to-top"] = "从下到上"
+--[[Translation missing --]]
+L["Boundaries"] = "Boundaries"
 --[[Translation missing --]]
 L["Bubble"] = "Bubble"
 L["Buff Color"] = "增益颜色"
@@ -265,6 +312,10 @@ L[ [=[Clear and easy to use threat-reactive nameplates.
 Current version: ]=] ] = [=[简单好用又清楚，能与仇恨值互动的血条。
 
 当前版本: ]=]
+--[[Translation missing --]]
+L[ [=[Clear and easy to use threat-reactive nameplates.
+
+Current version: ]=] ] = ""
 L["Clickable Area"] = "可点击区域"
 L["Color"] = "颜色"
 L["Color By Class"] = "职业颜色"
@@ -324,6 +375,12 @@ Remember to press ENTER after filling out this box or it will not save.]=] ] = [
 Type /dogtag for tag info.
 
 Remember to press ENTER after filling out this box or it will not save.]=]
+--[[Translation missing --]]
+L[ [=[Define a custom status text using LibDogTag markup language.
+
+Type /dogtag for tag info.
+
+Remember to press ENTER after filling out this box or it will not save.]=] ] = ""
 L["Define a custom transparency for this nameplate and overwrite any other transparency settings."] = "自订这个血条的透明度，并且取代其他所有透明度的设定。"
 L["Define base alpha settings for various unit types. Only one of these settings is applied to a unit at the same time, i.e., they are mutually exclusive."] = "设定多种单位类型的基础透明度。一次只会套用一种设定到单位，也就是说，它们不会同时套用。"
 L["Define base scale settings for various unit types. Only one of these settings is applied to a unit at the same time, i.e., they are mutually exclusive."] = "设定多种单位类型的基础缩放大小。一次只会套用一种设定到单位，也就是说，它们不会同时套用。"
@@ -331,6 +388,12 @@ L["Defines the movement/collision model for nameplates."] = "血条的移动/排
 L["Deformed Fanatic"] = "畸形的狂热者"
 --[[Translation missing --]]
 L["Delete"] = "Delete"
+--[[Translation missing --]]
+L["Delta Percentage"] = "Delta Percentage"
+--[[Translation missing --]]
+L["Delta Threat Value"] = "Delta Threat Value"
+--[[Translation missing --]]
+L["Detailed Percentage"] = "Detailed Percentage"
 L["Determine your role (tank/dps/healing) automatically based on current spec."] = "根据当前天赋自动切换你的角色(坦克/输出/治疗)"
 --[[Translation missing --]]
 L["Determine your role (tank/dps/healing) automatically based on current stance (Warrior) or form (Druid)."] = "Determine your role (tank/dps/healing) automatically based on current stance (Warrior) or form (Druid)."
@@ -450,6 +513,8 @@ L["Fading"] = "淡出"
 --[[Translation missing --]]
 L["Failed to migrate the imported profile to the current settings format because of an internal error. Please report this issue at the Threat Plates homepage at CurseForge: "] = "Failed to migrate the imported profile to the current settings format because of an internal error. Please report this issue at the Threat Plates homepage at CurseForge: "
 L["Fanged Pit Viper"] = "毒牙坑道蛇"
+--[[Translation missing --]]
+L["Filter"] = "Filter"
 L["Filter by Spell"] = "技能过滤"
 L["Filtered Auras"] = "过滤光环"
 --[[Translation missing --]]
@@ -477,12 +542,16 @@ L["Friendly Name Color"] = "友方名字颜色"
 L["Friendly Names Color"] = "友方名字颜色"
 L["Friendly NPCs"] = "友方 NPC"
 L["Friendly Players"] = "友方玩家"
+--[[Translation missing --]]
+L["Friendly PvP On"] = "Friendly PvP On"
 L["Friendly Status Text"] = "友方状态文字"
 L["Friendly Units"] = "友方单位"
 L["Friendly Units in Combat"] = "友方单位战斗中"
 L["Friends & Guild Members"] = "好友 & 公会成员"
 L["Full Absorbs"] = "完整吸收盾"
 L["Full Health"] = "满血"
+--[[Translation missing --]]
+L["Full Name"] = "Full Name"
 --[[Translation missing --]]
 L["Function"] = "Function"
 L["Gas Cloud"] = "毒气之云"
@@ -545,12 +614,18 @@ L["Horizontal Overlap"] = "水平重叠/间距"
 L["Horizontal Spacing"] = "水平间距"
 L["Hostile NPCs"] = "敌对npc"
 L["Hostile Players"] = "敌对玩家"
+--[[Translation missing --]]
+L["Hostile PvP On - Self Off"] = "Hostile PvP On - Self Off"
+--[[Translation missing --]]
+L["Hostile PvP On - Self On"] = "Hostile PvP On - Self On"
 L["Hostile Units"] = "敌对单位"
 L["Icon"] = "图标"
 L["Icon Height"] = "图标高度"
 L["Icon Mode"] = "图标风格"
 L["Icon Style"] = "图标样式"
 L["Icon Width"] = "图标宽度"
+--[[Translation missing --]]
+L["Icons"] = "Icons"
 L["If checked, nameplates of mobs attacking another tank can be shown with different color, scale, and transparency."] = "启动时，正在攻击另一名坦克的怪血条可以显示不同的颜色，缩放大小和透明度"
 L["If checked, threat feedback from boss level mobs will be shown."] = "启动时，首领级别的怪会显示仇恨系统的变化"
 L["If checked, threat feedback from elite and rare mobs will be shown."] = "启动时，精英和稀有级别的怪会显示仇恨系统的变化"
@@ -581,7 +656,11 @@ L["In Combat"] = "战斗中"
 --[[Translation missing --]]
 L["In combat, always show all combo points no matter if they are on or off. Off combo points are shown greyed-out."] = "In combat, always show all combo points no matter if they are on or off. Off combo points are shown greyed-out."
 L["In combat, use coloring, transparency, and scaling based on threat level as configured in the threat system. Custom settings are only used out of combat."] = "战斗中使用仇恨值系统中的设定，依据仇恨程度变化颜色、透明度和缩放大小。只有在非战斗中才使用自定义的设定。"
+--[[Translation missing --]]
+L["In delta mode, show the name of the player who is second in the enemy unit's threat table."] = "In delta mode, show the name of the player who is second in the enemy unit's threat table."
 L["In Instances"] = "副本内"
+--[[Translation missing --]]
+L["Initials"] = "Initials"
 --[[Translation missing --]]
 L["Insert a new custom nameplate slot after the currently selected slot."] = "Insert a new custom nameplate slot after the currently selected slot."
 --[[Translation missing --]]
@@ -596,9 +675,13 @@ L["Interrupt Shield"] = "无法打断盾牌图标"
 L["Interruptable"] = "可打断"
 L["Interrupted"] = "已打断"
 L["Kinetic Bomb"] = "动力炸弹"
+--[[Translation missing --]]
+L["Label"] = "Label"
 L["Label Text Offset"] = "标签文字偏移"
 L["Large Bottom Inset"] = "大型的下方间距"
 L["Large Top Inset"] = "大型的上方间距"
+--[[Translation missing --]]
+L["Last Word"] = "Last Word"
 L["Layout"] = "布局"
 L["Left"] = "左"
 L["Left-to-right"] = "从左到右"
@@ -606,7 +689,11 @@ L["Left-to-right"] = "从左到右"
 L["Legacy custom nameplate %s already exists. Skipping it."] = "Legacy custom nameplate %s already exists. Skipping it."
 --[[Translation missing --]]
 L["Less-Than Arrow"] = "Less-Than Arrow"
+--[[Translation missing --]]
+L["Level "] = "Level "
 L["Level"] = "等级"
+--[[Translation missing --]]
+L["Level ??"] = "Level ??"
 L["Level Text"] = "等级文字"
 L["Lich King"] = "巫妖王"
 L["Living Ember"] = "燃烧的余烬"
@@ -619,11 +706,15 @@ L["Magic"] = "魔法"
 L["Marked Immortal Guardian"] = "被标记的不朽守护者"
 --[[Translation missing --]]
 L["Max Alpha"] = "Max Alpha"
+--[[Translation missing --]]
+L["Max Auras"] = "Max Auras"
 L["Max Distance"] = "最远距离"
 L["Max Distance Behind Camera"] = "镜头后方的最远距离"
 --[[Translation missing --]]
 L["Max Health"] = "Max Health"
 L["Medium Threat"] = "一般仇恨"
+--[[Translation missing --]]
+L["Metric Unit Symbols"] = "Metric Unit Symbols"
 --[[Translation missing --]]
 L["Min Alpha"] = "Min Alpha"
 L["Mine"] = "我的"
@@ -668,6 +759,8 @@ L["None"] = "无"
 L["Non-Interruptable"] = "无法打断"
 L["Non-Target"] = "非当前目标"
 L["Normal Units"] = "普通单位"
+--[[Translation missing --]]
+L["Not Myself"] = "Not Myself"
 L["Note"] = "注意"
 L["Nothing to paste!"] = "无可粘贴内容！"
 L["NPC Role"] = "NPC 角色"
@@ -675,6 +768,8 @@ L["NPC Role, Guild"] = "NPC 角色、公会"
 L["NPC Role, Guild, or Level"] = "NPC 角色、公会或等级"
 --[[Translation missing --]]
 L["NPCs"] = "NPCs"
+--[[Translation missing --]]
+L["Numbers"] = "Numbers"
 L["Occluded Units"] = "被挡住的单位"
 --[[Translation missing --]]
 L["Off Combo Point"] = "Off Combo Point"
@@ -692,13 +787,19 @@ L["On Combo Point"] = "On Combo Point"
 L["On Enemy Units You Cannot Attack"] = "无法攻击的敌方单位"
 L["On Friendly Units in Combat"] = "战斗中的友方单位"
 L["On Target"] = "当前目标"
+--[[Translation missing --]]
+L["On the left"] = "On the left"
 L["One"] = "一"
 L["Only Alternate Power"] = "只有首领战特殊能量"
 --[[Translation missing --]]
 L["Only for Target"] = "Only for Target"
 --[[Translation missing --]]
 L["Only In Combat"] = "Only In Combat"
+--[[Translation missing --]]
+L["Only in Groups"] = "Only in Groups"
 L["Only in Instances"] = "只在副本内"
+--[[Translation missing --]]
+L["Only Mine"] = "Only Mine"
 L["Onyxian Whelp"] = "奥妮克希亚雏龙"
 L["Open Blizzard Settings"] = "打开Blizzard设置"
 L["Open Options"] = "开启设定选项"
@@ -717,6 +818,10 @@ L["Paste"] = "粘贴"
 --[[Translation missing --]]
 L["Paste the Threat Plates profile string into the text field below and then close the window"] = "Paste the Threat Plates profile string into the text field below and then close the window"
 L["Percentage"] = "百分比"
+--[[Translation missing --]]
+L["Percentage - Raw"] = "Percentage - Raw"
+--[[Translation missing --]]
+L["Percentage - Scaled"] = "Percentage - Scaled"
 L["Percentage amount for horizontal overlap of nameplates."] = "血条之间水平重叠距离的百分比。"
 L["Percentage amount for vertical overlap of nameplates."] = "血条之间垂直重叠距离的百分比。"
 L["Personal Nameplate"] = "个人资源条"
@@ -736,6 +841,8 @@ L["Preview Elite"] = "预览精英怪"
 L["Preview Rare"] = "预览稀有怪"
 --[[Translation missing --]]
 L["Preview Rare Elite"] = "Preview Rare Elite"
+--[[Translation missing --]]
+L["PvP Off"] = "PvP Off"
 L["Quest"] = "任务"
 L["Quest Progress"] = "任务进度"
 L["Raging Spirit"] = "暴怒的灵魂"
@@ -743,6 +850,8 @@ L["Raging Spirit"] = "暴怒的灵魂"
 L["Rank Text"] = "Rank Text"
 L["Rares & Bosses"] = "稀有怪 & 首领"
 L["Rares & Elites"] = "稀有怪 & 精英"
+--[[Translation missing --]]
+L["Raw Percentage"] = "Raw Percentage"
 --[[Translation missing --]]
 L["Reaction"] = "Reaction"
 L["Reanimated Adherent"] = "被复活的追随者"
@@ -770,6 +879,10 @@ L["Same as Foreground"] = "和前景相同"
 L["Same as Name"] = "和名字相同"
 L["Scale"] = "缩放"
 --[[Translation missing --]]
+L["Scaled Percentage"] = "Scaled Percentage"
+--[[Translation missing --]]
+L["Scaled Percentage Delta"] = "Scaled Percentage Delta"
+--[[Translation missing --]]
 L["Scriping for custom styles for nameplates is now |cff00ff00enabled!|r."] = "Scriping for custom styles for nameplates is now |cff00ff00enabled!|r."
 --[[Translation missing --]]
 L["Scriping for custom styles for nameplates is now |cffff0000disabled!|r."] = "Scriping for custom styles for nameplates is now |cffff0000disabled!|r."
@@ -777,6 +890,10 @@ L["Scriping for custom styles for nameplates is now |cffff0000disabled!|r."] = "
 L["Script"] = "Script"
 --[[Translation missing --]]
 L["Scripts"] = "Scripts"
+--[[Translation missing --]]
+L["Second Player"] = "Second Player"
+--[[Translation missing --]]
+L["Second Player's Name"] = "Second Player's Name"
 L["Set Icon"] = "设置图标"
 L["Set scale settings for different threat levels."] = "替不同的仇恨程度设定缩放大小。"
 L["Set the roles your specs represent."] = "设置你的角色天赋代表"
@@ -868,6 +985,14 @@ L["Show the amount you need to loot or kill"] = "Show the amount you need to loo
 L["Show the mouseover highlight on all units."] = "所有单位都要显示鼠标指向时的显著标示效果。"
 --[[Translation missing --]]
 L["Show the OmniCC cooldown count instead of the built-in duration text on auras."] = "Show the OmniCC cooldown count instead of the built-in duration text on auras."
+--[[Translation missing --]]
+L["Show the player's threat percentage (scaled or raw) or threat delta to the second player on the threat table (percentage or threat value) against the enemy unit."] = "Show the player's threat percentage (scaled or raw) or threat delta to the second player on the threat table (percentage or threat value) against the enemy unit."
+--[[Translation missing --]]
+L["Show the player's threat percentage against the enemy unit relative to the threat of enemy unit's primary target."] = "Show the player's threat percentage against the enemy unit relative to the threat of enemy unit's primary target."
+--[[Translation missing --]]
+L["Show the player's threat percentage against the enemy unit."] = "Show the player's threat percentage against the enemy unit."
+--[[Translation missing --]]
+L["Show the player's total threat value on the enemy unit."] = "Show the player's total threat value on the enemy unit."
 L["Show threat feedback based on unit type or status or environmental conditions."] = "根据单位类型、状态或环境条件显示仇恨系统的变化。"
 L["Show time left on auras that have a duration."] = "有持续时间的光环，显示剩余时间。"
 --[[Translation missing --]]
@@ -936,16 +1061,28 @@ L["Striped Texture Color"] = "条纹材质颜色"
 L["Stripes"] = "Stripes"
 L["Style"] = "样式"
 L["Supports multiple entries, separated by commas."] = "支持输入多个项目，使用逗号分隔。"
+--[[Translation missing --]]
+L["Swap Area By Reaction"] = "Swap Area By Reaction"
 L["Swap By Reaction"] = "依关系对调"
+--[[Translation missing --]]
+L["Swap Scale By Reaction"] = "Swap Scale By Reaction"
+--[[Translation missing --]]
+L["Switch aura areas for buffs and debuffs for friendly units."] = "Switch aura areas for buffs and debuffs for friendly units."
 L["Switch scale values for debuffs and buffs for friendly units."] = "友方单位对调增益和减益效果的缩放大小数值"
 L["Symbol"] = "符号"
 --[[Translation missing --]]
 L["Syntax error in event script '%s' of custom style '%s': %s"] = "Syntax error in event script '%s' of custom style '%s': %s"
 L["Tank"] = "坦克"
 --[[Translation missing --]]
+L["Tank Scaled Percentage"] = "Tank Scaled Percentage"
+--[[Translation missing --]]
+L["Tank Threat Value"] = "Tank Threat Value"
+--[[Translation missing --]]
 L["Tapped"] = "Tapped"
 L["Tapped Units"] = "无效单位"
 L["Target"] = "目标"
+--[[Translation missing --]]
+L["Target Highlight"] = "Target Highlight"
 --[[Translation missing --]]
 L["Target Hightlight"] = "Target Hightlight"
 L["Target Marked"] = "显著标示目标"
@@ -961,8 +1098,12 @@ L["Target-based Transparency"] = "依据目标的透明度"
 L["Text Boundaries"] = "文字边框"
 L["Text Height"] = "文字高亮"
 L["Text Width"] = "文字的宽度"
+--[[Translation missing --]]
+L["Texts"] = "Texts"
 L["Texture"] = "材质"
 L["Textures"] = "材质"
+--[[Translation missing --]]
+L["The (friendly or hostile) player is not flagged for PvP or the player is in a sanctuary."] = "The (friendly or hostile) player is not flagged for PvP or the player is in a sanctuary."
 --[[Translation missing --]]
 L["The import string contains a profile from an different Threat Plates version. The profile will still be imported (and migrated as far as possible), but some settings from the imported profile might be lost."] = "The import string contains a profile from an different Threat Plates version. The profile will still be imported (and migrated as far as possible), but some settings from the imported profile might be lost."
 --[[Translation missing --]]
@@ -979,6 +1120,10 @@ L["The max alpha of nameplates."] = "姓名版的最大透明度。"
 L["The max distance to show nameplates."] = "可以看见血条的最远距离。"
 L["The max distance to show the target nameplate when the target is behind the camera."] = "当目标在镜头后方时，显示目标血条的最远距离。"
 L["The minimum alpha of nameplates."] = "姓名版的最小透明度。"
+--[[Translation missing --]]
+L["The player is friendly to you, and flagged for PvP."] = "The player is friendly to you, and flagged for PvP."
+--[[Translation missing --]]
+L["The player is hostile, and flagged for PvP, but you are not."] = "The player is hostile, and flagged for PvP, but you are not."
 L["The scale of all nameplates if you have no target unit selected."] = "没有选取目标单位时，所有血条的缩放大小。"
 L["The scale of non-target nameplates if a target unit is selected."] = "有选取目标单位时，所有非当前目标血条的缩放大小。"
 --[[Translation missing --]]
@@ -991,12 +1136,16 @@ L["The transparency of non-target nameplates if a target unit is selected."] = "
 L["These options allow you to control whether target marker icons are hidden or shown on nameplates and whether a nameplate's healthbar (in healthbar view) or name (in headline view) are colored based on target markers."] = "这些选项可以控制是否要在血条上显示标记图标，以及血条（在血条检视时）和名字（在名字检视时）是否要依据标记图标变换颜色。"
 L["These options allow you to control whether the castbar is hidden or shown on nameplates."] = "这些选项可以控制是否要在血条上显示施法条。"
 L["These options allow you to control which nameplates are visible within the game field while you play."] = "这些选项可以控制要在游戏中看见哪些血条。"
+--[[Translation missing --]]
+L["These settings will define the space that text can be placed on the nameplate."] = "These settings will define the space that text can be placed on the nameplate."
 L["These settings will define the space that text can be placed on the nameplate. Having too large a font and not enough height will cause the text to be not visible."] = "这些选项会设定血条上面摆放文字的空间。文字太大而高度不够时会导致无法显示文字。"
 L["Thick"] = "粗"
 L["Thick Outline"] = "粗轮廓"
 L["Thick Outline, Monochrome"] = "粗轮廓，单色"
 --[[Translation missing --]]
 L["Thin Square"] = "Thin Square"
+--[[Translation missing --]]
+L["This lets you select the layout style of the auras area."] = "This lets you select the layout style of the auras area."
 L["This lets you select the layout style of the auras widget."] = "选择光环套件的版面配置风格。"
 --[[Translation missing --]]
 L["This option allows you to control whether a cast's remaining cast time is hidden or shown on castbars."] = "This option allows you to control whether a cast's remaining cast time is hidden or shown on castbars."
@@ -1052,9 +1201,13 @@ L["Threat Plates Script Editor"] = "Threat Plates Script Editor"
 L["Threat System"] = "仇恨系统"
 --[[Translation missing --]]
 L["Threat Table"] = "Threat Table"
+--[[Translation missing --]]
+L["Threat Value Delta"] = "Threat Value Delta"
 L["Three"] = "三"
 L["Time Left"] = "剩余时间"
 L["Time Text Offset"] = "时间文字偏移"
+--[[Translation missing --]]
+L["Toggle"] = "Toggle"
 --[[Translation missing --]]
 L["Toggle Enemy Headline View"] = "Toggle Enemy Headline View"
 --[[Translation missing --]]
@@ -1072,6 +1225,8 @@ L["Top-to-bottom"] = "从上到下"
 L["Totem Scale"] = "图腾缩放"
 L["Totem Transparency"] = "图腾透明度"
 L["Totems"] = "图腾"
+--[[Translation missing --]]
+L["Transliterate Cyrillic Letters"] = "Transliterate Cyrillic Letters"
 L["Transparency"] = "透明"
 L["Transparency & Scaling"] = "透明度 & 缩放大小"
 L["Treant"] = "树人"
@@ -1143,6 +1298,10 @@ L["Use threat transparency as additive transparency and add or substract it from
 L["Use transparency settings of Healthbar View also for Headline View."] = "血条检视的透明度设定也要套用到名字检视。"
 L["Uses the target-based transparency as absolute transparency and ignore unit base transparency."] = "只使用是否有选取目标的相关透明度设定，当作绝对透明度，忽略单位基础透明度。"
 L["Val'kyr Shadowguard"] = "瓦格里暗影戒卫者"
+--[[Translation missing --]]
+L["Value"] = "Value"
+--[[Translation missing --]]
+L["Value Type"] = "Value Type"
 L["Venomous Snake"] = "剧毒蛇"
 L["Vertical Align"] = "垂直定位"
 L["Vertical Alignment"] = "垂直对齐"
@@ -1161,6 +1320,10 @@ L["Wide"] = "宽大"
 L["Widgets"] = "组件"
 L["Width"] = "宽度"
 L["Windwalker Monk"] = "踏风武僧"
+--[[Translation missing --]]
+L["Word Wrap"] = "Word Wrap"
+--[[Translation missing --]]
+L["World Boss"] = "World Boss"
 L["X"] = "X轴"
 L["Y"] = "Y轴"
 L["You can access the "] = "你可以进入"

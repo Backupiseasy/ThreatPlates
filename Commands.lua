@@ -331,6 +331,12 @@ local function ChatCommandDebug(cmd_list)
 				end
 			end
 		end
+	elseif command == "test" then
+		print("34.345345345", Addon.Truncate(34.345345345))
+		print("-34.345345345", Addon.Truncate(-34.345345345))
+		print("-99", Addon.Truncate(-99))
+		print("9999.809986", Addon.Truncate(9999.809986))
+		print("-15554", Addon.Truncate(-15554))
 	elseif command == "role" then
 		local spec_roles = Addon.db.char.spec
 		for i, is_tank in pairs(spec_roles) do

@@ -21,6 +21,7 @@ local ThreatPlates = Addon.ThreatPlates
 local next, setmetatable, getmetatable, rawset = next, setmetatable, getmetatable, rawset
 local ipairs, type, insert = ipairs, type, table.insert
 local string, format = string, format
+local UnitClass = UnitClass
 
 -- ThreatPlates APIs
 Addon.IS_CLASSIC = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
@@ -177,6 +178,11 @@ Addon.ColorByClass = function(class_name, text)
 		return text
 	end
 end
+
+-- Addon.ColorByClassUnitID = function(unitid, text)
+-- 	local _, class_name = UnitClass(unitid)
+-- 	return Addon.ColorByClass(class_name, text)
+-- end
 
 --------------------------------------------------------------------------------------------------
 -- Utility functions

@@ -6317,7 +6317,7 @@ local function CreateThreatPercentageOptions()
   }
 
   entry.args.SecondPlayersName = {
-    name = L["Second Player's Name"],
+    name = L["Second Player"],
     type = "toggle",
     order = 6,
     desc = L["In delta mode, show the name of the player who is second in the enemy unit's threat table."],

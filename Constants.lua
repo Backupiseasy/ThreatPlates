@@ -239,10 +239,12 @@ ThreatPlates.FRIENDLY_SUBTEXT = {
 }
 
 Addon.THREAT_VALUE_TYPE = {
-  SCALED_PERCENTAGE = L["Scaled Percentage"],
-  RAW_PERCENTAGE = L["Raw Percentage"],
-  DETAILED_PERCENTAGE = L["Scaled Percentage Delta"],
-  DETAILED_VALUE = L["Threat Value Delta"],
+  SCALED_PERCENTAGE = L["Percentage - Scaled"],
+  RAW_PERCENTAGE = L["Percentage - Raw"],
+  TANK_PERCENTAGE = L["Tank Scaled Percentage"],
+  TANK_VALUE = L["Tank Threat Value"],
+  THREAT_VALUE_DELTA = L["Delta Threat Value"],
+  THREAT_PERCENTAGE_DELTA = L["Delta Percentage"],
 }
 
 ThreatPlates.NAME_ABBREVIATION = {

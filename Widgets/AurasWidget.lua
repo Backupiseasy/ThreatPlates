@@ -1059,13 +1059,14 @@ function Widget:UpdateUnitAuras(aura_grid_frame, unit, enabled_auras, enabled_cc
   --print (filter_mode, aura_grid.db.FilterMode)
 
   local aura_frames = aura_grid_frame.AuraFrames
-  if not (enabled_auras or enabled_cc) then
+  if not enabled_auras then
     aura_grid_frame.ActiveAuras = 0
     aura_grid:HideNonActiveAuras(aura_grid_frame)
     aura_grid_frame:Hide()
     return
   end
-
+  aura_grid_frame:Show()
+  
   local UnitAuraList = self.UnitAuraList
   local db = self.db
   -- Optimization for auras sorting
@@ -1845,7 +1846,7 @@ local function UpdateWidgetTimeIconMode(self, aura_frame, expiration, duration)
     aura_frame.TimeLeft:SetText("")
     Animations:StopFlash(aura_frame)
   else
-    local timeleft = expiration - GetTime()
+    local timeleft = expiration - GetTime()  
     if timeleft > 60 then
       aura_frame.TimeLeft:SetText(floor(timeleft/60).."m")
     else
@@ -2031,15 +2032,15 @@ local function UpdateAuraInformationBarMode(self, aura_frame) -- texture, durati
   aura_frame:Show()
 end
 
-local function UpdateWidgetTimeBarMode(self, frame, expiration, duration)
+local function UpdateWidgetTimeBarMode(self, aura_frame, expiration, duration)
   if duration == 0 then
-    frame.TimeText:SetText("")
-    frame.Statusbar:SetValue(100)
-    Animations:StopFlash(frame)
+    aura_frame.TimeText:SetText("")
+    aura_frame.Statusbar:SetValue(100)
+    Animations:StopFlash(aura_frame)
   elseif expiration == 0 then
-    frame.TimeText:SetText("")
-    frame.Statusbar:SetValue(0)
-    Animations:StopFlash(frame)
+    aura_frame.TimeText:SetText("")
+    aura_frame.Statusbar:SetValue(0)
+    Animations:StopFlash(aura_frame)
   else
     local db = self.db_widget
 
@@ -2047,47 +2048,47 @@ local function UpdateWidgetTimeBarMode(self, frame, expiration, duration)
 
     if db.ShowDuration then
       if timeleft > 60 then
-        frame.TimeText:SetText(floor(timeleft/60).."m")
+        aura_frame.TimeText:SetText(floor(timeleft/60).."m")
       else
-        frame.TimeText:SetText(floor(timeleft))
+        aura_frame.TimeText:SetText(floor(timeleft))
       end
 
       if db.FlashWhenExpiring and timeleft < db.FlashTime then
-        Animations:Flash(frame)
+        Animations:Flash(aura_frame)
       end
     else
-      frame.TimeText:SetText("")
+      aura_frame.TimeText:SetText("")
 
       if db.FlashWhenExpiring and timeleft < db.FlashTime then
-        Animations:Flash(frame)
+        Animations:Flash(aura_frame)
       end
     end
 
-    frame.Statusbar:SetValue(timeleft * 100 / duration)
+    aura_frame.Statusbar:SetValue(timeleft * 100 / duration)
   end
 end
 
-local function UpdateWidgetTimeBarModeNoDuration(self, frame, expiration, duration)
+local function UpdateWidgetTimeBarModeNoDuration(self, aura_frame, expiration, duration)
   if duration == 0 then
-    frame.Statusbar:SetValue(100)
-    Animations:StopFlash(frame)
+    aura_frame.Statusbar:SetValue(100)
+    Animations:StopFlash(aura_frame)
   elseif expiration == 0 then
-    frame.Statusbar:SetValue(0)
-    Animations:StopFlash(frame)
+    aura_frame.Statusbar:SetValue(0)
+    Animations:StopFlash(aura_frame)
   else
     local timeleft = expiration - GetTime()
     if timeleft > 60 then
-      frame.TimeText:SetText(floor(timeleft/60).."m")
+      aura_frame.TimeText:SetText(floor(timeleft/60).."m")
     else
-      frame.TimeText:SetText(floor(timeleft))
+      aura_frame.TimeText:SetText(floor(timeleft))
     end
 
     local db = self.db_widget
     if db.FlashWhenExpiring and timeleft < db.FlashTime then
-      Animations:Flash(frame)
+      Animations:Flash(aura_frame)
     end
 
-    frame.Statusbar:SetValue(timeleft * 100 / duration)
+    aura_frame.Statusbar:SetValue(timeleft * 100 / duration)
   end
 end
 
@@ -2386,11 +2387,11 @@ function Widget:UpdateSettings()
     self:UpdateSettingsBarMode(AURA_GRID_CROWDCONTROL)
   end
 
-  local buffs_size = (self.Buffs.IconMode and max(self.db.Buffs.ModeIcon.IconWidth, self.db.Buffs.ModeIcon.IconHeight)) or self.db.Buffs.ModeBar.BarHeight
-  local debuffs_size = (self.Debuffs.IconMode and max(self.db.Debuffs.ModeIcon.IconWidth, self.db.Debuffs.ModeIcon.IconHeight)) or self.db.Debuffs.ModeBar.BarHeight
+  -- local buffs_size = (self.Buffs.IconMode and max(self.db.Buffs.ModeIcon.IconWidth, self.db.Buffs.ModeIcon.IconHeight)) or self.db.Buffs.ModeBar.BarHeight
+  -- local debuffs_size = (self.Debuffs.IconMode and max(self.db.Debuffs.ModeIcon.IconWidth, self.db.Debuffs.ModeIcon.IconHeight)) or self.db.Debuffs.ModeBar.BarHeight
 
-  self.SwitchScaleBuffsFactor = debuffs_size/ buffs_size
-  self.SwitchScaleDebuffsFactor = buffs_size / debuffs_size
+  -- self.SwitchScaleBuffsFactor = debuffs_size/ buffs_size
+  -- self.SwitchScaleDebuffsFactor = buffs_size / debuffs_size
 
   self:ParseSpellFilters()
 
