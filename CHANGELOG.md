@@ -11,3 +11,4 @@
 * Added an option to show target of target only when it's not the player [Comment #4844].
 * Added an option to enable aura trigger for custom styles only for your own auras [Comment #4941, PM].
 * Fixed a bug where the chat command for enabling scripting was not working and as well as the error messsage for unknown commands was not properly shown.
+* Upgrade integrated libraries (LibClassicDurations v20210426, LibDualSpec v1.20).
