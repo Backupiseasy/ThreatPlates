@@ -30,7 +30,7 @@ jobs:
         run: sed -i "s/@build-time@/`date +%Y-%m-%d`/" TidyPlates_ThreatPlates_Changes.log
 
       - name: Create Mainline Package
-        uses: BigWigsMods/packager@master
+        uses: BigWigsMods/packager@v1
         with:
           args: -e -l -n "ThreatPlates-{project-version}{classic}"
         env:
