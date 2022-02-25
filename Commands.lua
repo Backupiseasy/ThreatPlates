@@ -128,7 +128,7 @@ local function ChatCommandDebug(cmd_list)
 		Addon.Debug.PrintTable(Addon.db.profile.uniqueSettings)
 		--Addon.MigrateDatabase(TP.Meta("version"))
 	elseif command == "migrate" then
-		Addon.TestMigrateDatabase("MigrateAurasWidgetV2")
+		Addon.TestMigrateDatabase("MigrateFixAurasCyclicAnchoring")
 	elseif command == "guid" then
 		local plate = C_NamePlate.GetNamePlateForUnit("target")
 		if not plate then return end

@@ -1217,20 +1217,45 @@ local function MigrateAurasWidgetV2(_, profile)
   end
 end
 
+local function MigrateFixAurasCyclicAnchoring(_, profile)
+  local buffs_anchor_to = ThreatPlates.DEFAULT_SETTINGS.profile.AuraWidget.Buffs.AnchorTo
+  local debuffs_anchor_to = ThreatPlates.DEFAULT_SETTINGS.profile.AuraWidget.Debuffs.AnchorTo
+  local cc_anchor_to = ThreatPlates.DEFAULT_SETTINGS.profile.AuraWidget.CrowdControl.AnchorTo
+
+  if DatabaseEntryExists(profile, { "AuraWidget", "Buffs", "AnchorTo" } ) then
+    buffs_anchor_to = profile.AuraWidget.Buffs.AnchorTo
+  end
+  if DatabaseEntryExists(profile, { "AuraWidget", "Debuffs", "AnchorTo" } ) then
+    debuffs_anchor_to = profile.AuraWidget.Debuffs.AnchorTo
+  end
+  if DatabaseEntryExists(profile, { "AuraWidget", "CrowdControl", "AnchorTo" } ) then
+    cc_anchor_to = profile.AuraWidget.CrowdControl.AnchorTo
+  end
+
+  -- Check for cyclic dependencies
+  if buffs_anchor_to == "Debuffs" and debuffs_anchor_to == "Buffs" then
+    profile.AuraWidget.Debuffs.AnchorTo = "Healthbar"
+  elseif buffs_anchor_to == "CrowdControl" and cc_anchor_to == "Buffs" then
+    profile.AuraWidget.Buffs.AnchorTo = "Healthbar"
+  elseif debuffs_anchor_to == "CrowdControl" and cc_anchor_to == "Debuffs" then
+    profile.AuraWidget.Debuffs.AnchorTo = "Healthbar"
+  end
+end
+
 local TEST_FUNCTIONS = {
-  MigrateAurasWidgetV2 = MigrateAurasWidgetV2
+  MigrateFixAurasCyclicAnchoring = MigrateFixAurasCyclicAnchoring
 }
 
 Addon.TestMigrateDatabase = function(migration_function)
   local profile_table = Addon.db.profiles
   local current_profile = Addon.db:GetCurrentProfile()
 
-  local defaults = ThreatPlates.CopyTable(Addon.db.defaults)
-  Addon.db:RegisterDefaults({})
+  -- local defaults = ThreatPlates.CopyTable(Addon.db.defaults)
+  -- Addon.db:RegisterDefaults({})
 
   TEST_FUNCTIONS[migration_function](current_profile, Addon.db.profiles[current_profile])
 
-  Addon.db:RegisterDefaults(defaults)
+  -- Addon.db:RegisterDefaults(defaults)
 
   -- Cleanup database - remove default values from SavedVariables
   for profile_name, profile in pairs(profile_table) do
@@ -1280,6 +1305,7 @@ local DEPRECATED_SETTINGS = {
   { DisableShowBlizzardAurasForClassic, "10.2.1", Version = (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC) },
   { MigrateAurasWidgetV2, "10.3.0-beta2", NoDefaultProfile = true , CleanupDatabase = true },
   { "AuraWidget", "scale" },  -- Removed in 10.3.0
+  { MigrateFixAurasCyclicAnchoring, "10.3.1", NoDefaultProfile = true , CleanupDatabase = true },
 }
 
 local function MigrateDatabase(current_version)
@@ -1294,7 +1320,7 @@ local function MigrateDatabase(current_version)
     if type(action) == "function" then
       if entry.Version == nil or entry.Version == true then
         local max_version = entry[2]
-        if not max_version or CurrentVersionIsOlderThan(current_version, max_version) or action == MigrateAurasWidgetV2 then
+        if not max_version or CurrentVersionIsOlderThan(current_version, max_version) then
           local defaults
           if entry.NoDefaultProfile then
             defaults = ThreatPlates.CopyTable(Addon.db.defaults) -- Should move that before the for loop
