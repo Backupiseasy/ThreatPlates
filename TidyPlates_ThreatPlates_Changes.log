@@ -1,5 +1,10 @@
 ﻿------------------------------------------------------
-10.3.0 (2021-12-22)
+10.3.1 (2022-02-25)
+------------------------------------------------------
+* Fixed a bug with CCs not being shown when debuffs are not enabled [Comment #5983].
+
+------------------------------------------------------
+10.3.0 (2022-02-23)
 ------------------------------------------------------
 * Appearance and layout for buffs, debuffs, and crowd control can now be configured indivually for Auras widget [Comment #1302, #1246, #1830, #1883, #3886, #4167, #4637, #4760, #4960, #5034, #5131, #5346, #5418, #5448, #5562, #5793, TPC#754, Issue #465, IM].
 * Player units are now colored based on their PvP flag similar to WoW default nameplates [Comment #5829].

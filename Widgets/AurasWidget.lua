@@ -1060,12 +1060,16 @@ function Widget:UpdateUnitAuras(aura_grid_frame, unit, enabled_auras, enabled_cc
   --print (filter_mode, aura_grid.db.FilterMode)
 
   local aura_frames = aura_grid_frame.AuraFrames
-  if not enabled_auras then
+  -- If debuffs are disabled, but CCs are enabled, we should just hide debuffs, but still process all auras to be able to show CC debuffs
+  if not (enabled_auras or enabled_cc) then 
     aura_grid_frame.ActiveAuras = 0
     aura_grid:HideNonActiveAuras(aura_grid_frame)
     aura_grid_frame:Hide()
+
     return
   end
+  -- Show the aura grid (for debuffs) as it might be hidden when the nameplate was, e.g., used for friendly units where debuffs&CCs are disabled, 
+  -- and then is re-used for enemy units where these are enabled.
   aura_grid_frame:Show()
   
   local UnitAuraList = self.UnitAuraList
