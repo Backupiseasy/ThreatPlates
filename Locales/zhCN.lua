@@ -72,6 +72,10 @@ Feel free to email me at |cff00ff00threatplates@gmail.com|r
 Blacksalsify
 
 (Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=] ] = ""
+--[[Translation missing --]]
+L["%s already anchored to %s"] = "%s already anchored to %s"
+--[[Translation missing --]]
+L["%s already anchored to %s."] = "%s already anchored to %s."
 L[". You cannot use two custom nameplates with the same trigger. The imported custom nameplate will be disabled."] = "。同一个触发条件无法使用两个自订血条，导入的自订血条将会被停用。"
 L["|cff00ff00High Threat|r"] = "|cff00ff00高仇恨|r"
 L["|cff00ff00Low Threat|r"] = "|cff00ff00低仇恨|r"
@@ -352,6 +356,8 @@ L["Custom Nameplates"] = "自定义姓名版"
 L["Custom status text requires LibDogTag-3.0 to function."] = "Custom status text requires LibDogTag-3.0 to function."
 --[[Translation missing --]]
 L["Custom status text requires LibDogTag-Unit-3.0 to function."] = "Custom status text requires LibDogTag-Unit-3.0 to function."
+--[[Translation missing --]]
+L["Cyclic anchoring of aura areas to each other is not possible."] = "Cyclic anchoring of aura areas to each other is not possible."
 L["Darnavan"] = "达尔纳文"
 --[[Translation missing --]]
 L["Death Knigh Rune Cooldown"] = "Death Knigh Rune Cooldown"

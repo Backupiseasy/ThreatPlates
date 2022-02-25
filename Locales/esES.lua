@@ -69,6 +69,10 @@ No dude en enviarme un correo electrónico a |cff00ff00threatplates@gmail.com|r
 Blacksalsify
 
 (Autor original: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=]
+--[[Translation missing --]]
+L["%s already anchored to %s"] = "%s already anchored to %s"
+--[[Translation missing --]]
+L["%s already anchored to %s."] = "%s already anchored to %s."
 L[". You cannot use two custom nameplates with the same trigger. The imported custom nameplate will be disabled."] = ". No puede utilizar dos placas identificativas personalizadas con el mismo activador. La placa identificativa personalizada importada se desactivará."
 L["|cff00ff00High Threat|r"] = "|cff00ff00Alta Amenaza|r"
 L["|cff00ff00Low Threat|r"] = "|cff00ff00Baja Amenaza|r"
@@ -293,6 +297,8 @@ L["Custom Friendly Status Text"] = "Texto de estado amigable personalizado"
 L["Custom Nameplates"] = "Placas Identificativas Personalizadas"
 L["Custom status text requires LibDogTag-3.0 to function."] = "El texto de estado personalizado requiere LibDogTag-3.0 para funcionar."
 L["Custom status text requires LibDogTag-Unit-3.0 to function."] = "El texto de estado personalizado requiere LibDogTag-Unit-3.0 para funcionar."
+--[[Translation missing --]]
+L["Cyclic anchoring of aura areas to each other is not possible."] = "Cyclic anchoring of aura areas to each other is not possible."
 L["Darnavan"] = "Darnavan"
 L["Death Knigh Rune Cooldown"] = "Reutilización de runas de caballeros de la muerte"
 L["Death Knight"] = "Caballero de la muerte"

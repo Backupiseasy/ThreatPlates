@@ -75,6 +75,8 @@ Du kannst mich gerne per E-Mail erreichen unter |cff00ff00threatplates@gmail.com
 Blacksalsify
 
 (Ursprünglicher Autor: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=]
+L["%s already anchored to %s"] = "%s ist bereits an %s verankert."
+L["%s already anchored to %s."] = "%s ist bereits an %s verankert."
 L[". You cannot use two custom nameplates with the same trigger. The imported custom nameplate will be disabled."] = ". Du kannst nicht zwei benutzerdefinierte Namensplaketten mit dem gleichen Auslöser verwenden. Die importierte benutzerdefinierte Namensplakette wird deaktiviert."
 L["|cff00ff00High Threat|r"] = "|cff00ff00Hohe Bedrohung|r"
 L["|cff00ff00Low Threat|r"] = "|cff00ff00Niedrige Bedrohung|r"
@@ -291,6 +293,7 @@ L["Custom Friendly Status Text"] = "Benutzerdefinierter Status-Text für Freunde
 L["Custom Nameplates"] = "Benutzerdefinierte Namensplaketten"
 L["Custom status text requires LibDogTag-3.0 to function."] = "Für die Verwendung von benutzerdefiniertem Status-Text ist LibDogTag-3.0 erforderlich."
 L["Custom status text requires LibDogTag-Unit-3.0 to function."] = "Für die Verwendung von benutzerdefiniertem Status-Text ist LibDogTag-Unit-3.0 erforderlich."
+L["Cyclic anchoring of aura areas to each other is not possible."] = "Eine zyklische Verankerung von Aurenbereichen ist nicht möglich."
 L["Darnavan"] = "Darnavan"
 L["Death Knigh Rune Cooldown"] = "Runen-Cooldown von Todesrittern"
 L["Death Knight"] = "Todesritter"
