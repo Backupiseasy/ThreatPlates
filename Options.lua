@@ -3256,7 +3256,7 @@ local function CreateAuraAreaLayoutOptions(pos, widget_info)
     end,
     set = function(info, val)
       if val ~= "Healthbar" and db.AuraWidget[val].AnchorTo == widget_info then
-        Addon.Logging.Error(L["Cyclic anchoring of aura areas to each other is not possible."], string.format(L["%s already anchored to %s"], val, widget_info))
+        Addon.Logging.Error(L["Cyclic anchoring of aura areas to each other is not possible."], string.format(L["%s already anchored to %s."], val, widget_info))
       else
         SetValueWidget(info, val)
       end
