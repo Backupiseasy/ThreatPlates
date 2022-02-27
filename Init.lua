@@ -415,7 +415,13 @@ Addon.Debug.PrintTable = function(data)
 end
 
 Addon.Debug.PrintUnit = function(unit, full_info)
+	local plate = C_NamePlate.GetNamePlateForUnit(unit.unitid)
+
 	Addon.Logging.Debug("Unit:", unit.name)
+	Addon.Logging.Debug("-------------------------------------------------------------")
+	Addon.Logging.Debug("  Show UnitFrame =", plate.UnitFrame:IsShown())
+	Addon.Logging.Debug("  Show TPFrame =", plate.TPFrame:IsShown())
+	Addon.Logging.Debug("  Active =", plate.TPFrame.Active)
 	Addon.Logging.Debug("-------------------------------------------------------------")
 	for key, val in pairs(unit) do
 		Addon.Logging.Debug(key .. ":", val)
@@ -426,6 +432,7 @@ Addon.Debug.PrintUnit = function(unit, full_info)
     --		Addon.Logging.Debug("  isGuildmate = ", TidyPlatesUtilityInternal.IsGuildmate(unit.name))
     Addon.Logging.Debug("  IsOtherPlayersPet = ", UnitIsOtherPlayersPet(unit))
 		if not Addon.IS_TBC_CLASSIC and not Addon.IS_CLASSIC then
+			Addon.Logging.Debug("  UnitNameplateShowsWidgetsOnly = ", UnitNameplateShowsWidgetsOnly(unit.unitid))
 			Addon.Logging.Debug("  IsBattlePet = ", UnitIsBattlePet(unit.unitid))
 		end
     Addon.Logging.Debug("  Reaction = ", UnitReaction("player", unit.unitid))
