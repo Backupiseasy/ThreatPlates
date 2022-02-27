@@ -1,3 +1,3 @@
 # @project-version@ (@build-time@)
 
-* Fixed a Lua error with Scaled and Raw Percentage threat value the occured when in combat with units, but not being on their threat table [Comment #6019]. 
+* Fixed a bug with an outdated cast target being shown when a nameplate was re-used on a casting unit.

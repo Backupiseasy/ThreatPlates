@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+10.3.3 (2022-02-27)
+------------------------------------------------------
+* Fixed a bug with an outdated cast target being shown when a nameplate was re-used on a casting unit.
+
+------------------------------------------------------
 10.3.2 (2022-02-27)
 ------------------------------------------------------
 * Fixed a Lua error with Scaled and Raw Percentage threat value the occured when in combat with units, but not being on their threat table [Comment #6019]. 

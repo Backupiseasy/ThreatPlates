@@ -868,6 +868,8 @@ do
     if target_unit_name then
       local _, class_name = UnitClass(target_unit_name)
       castbar.CastTarget:SetText(Addon.ColorByClass(class_name, TransliterateCyrillicLetters(target_unit_name)))
+    else
+      castbar.CastTarget:SetText(nil)
     end
 
     castbar.IsCasting = not channeled
