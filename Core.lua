@@ -226,6 +226,8 @@ function Addon:CheckForFirstStartUp()
     end
     db.version = new_version
   end
+
+  --t.MigrateDatabase(db.version)
 end
 
 function Addon:CheckForIncompatibleAddons()
@@ -494,9 +496,12 @@ function TidyPlatesThreat:PLAYER_ENTERING_WORLD()
 
   db = Addon.db.profile.Automation
   local isInstance, instance_type = IsInInstance()
-  isInstance = isInstance and (instance_type == "party" or instance_type == "raid")
 
-  if isInstance and db.HideFriendlyUnitsInInstances then
+  --Addon.IsInInstance = isInstance
+  Addon.IsInPvEInstance = isInstance and (instance_type == "party" or instance_type == "raid")
+  Addon.IsInPvPInstance = isInstance and (instance_type == "arena" or instance_type == "pvp")
+
+  if Addon.IsInPvEInstance and db.HideFriendlyUnitsInInstances then
     Addon.CVars:Set("nameplateShowFriends", 0)
   else
     -- reset to previous setting

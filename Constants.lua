@@ -591,6 +591,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
       UnfriendlyFaction = RGB(255, 153, 51, 1),  -- brown/orange for unfriendly, hostile, non-attackable units (unit reaction = 3)
       FriendlyPlayerPvPOn = RGB(0, 255, 0),              -- green - Same faction, PVP flagged
       HostilePlayerPvPOnSelfPvPOff = RGB(255, 255, 0),   -- yellow - Opposite faction, they are PVP flagged but you are NOT PVP flagged so they can't attack you. You can attack them, though. (Which will immediately flag you)
+      IgnorePvPStatus = false,
     },
     Colors = {
       Classes = GetDefaultColorsForClasses()
