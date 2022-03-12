@@ -428,17 +428,13 @@ Addon.Debug.PrintUnit = function(unit, full_info)
   end
 
   if full_info and unit.unitid then
-    --		Addon.Logging.Debug("  isFriend = ", TidyPlatesUtilityInternal.IsFriend(unit.name))
-    --		Addon.Logging.Debug("  isGuildmate = ", TidyPlatesUtilityInternal.IsGuildmate(unit.name))
-    Addon.Logging.Debug("  IsOtherPlayersPet = ", UnitIsOtherPlayersPet(unit))
 		if not Addon.IS_TBC_CLASSIC and not Addon.IS_CLASSIC then
 			Addon.Logging.Debug("  UnitNameplateShowsWidgetsOnly = ", UnitNameplateShowsWidgetsOnly(unit.unitid))
-			Addon.Logging.Debug("  IsBattlePet = ", UnitIsBattlePet(unit.unitid))
 		end
     Addon.Logging.Debug("  Reaction = ", UnitReaction("player", unit.unitid))
     local r, g, b, a = UnitSelectionColor(unit.unitid, true)
     Addon.Logging.Debug("  SelectionColor: r =", ceil(r * 255), ", g =", ceil(g * 255), ", b =", ceil(b * 255), ", a =", ceil(a * 255))
-		Addon.Logging.Debug("  Threat ---------------------------------")
+		Addon.Logging.Debug("  -- Threat ---------------------------------")
 		Addon.Logging.Debug("    UnitAffectingCombat = ", UnitAffectingCombat(unit.unitid))
 		Addon.Logging.Debug("    Addon:OnThreatTable = ", Addon:OnThreatTable(unit))
 		Addon.Logging.Debug("    UnitThreatSituation = ", UnitThreatSituation("player", unit.unitid))
@@ -448,7 +444,21 @@ Addon.Debug.PrintUnit = function(unit, full_info)
 		else
 			Addon.Logging.Debug("    GetThreatSituation = ", Addon.GetThreatSituation(unit, Addon:GetThreatStyle(unit), Addon.db.profile.threat.toggle.OffTank))
 		end
-  else
+		Addon.Logging.Debug("  -- Player Control ---------------------------------")
+		Addon.Logging.Debug("    UnitPlayerControlled =", UnitPlayerControlled(unit.unitid))
+		Addon.Logging.Debug("    Player is UnitIsOwnerOrControllerOfUnit =", UnitIsOwnerOrControllerOfUnit("player", unit.unitid))
+		Addon.Logging.Debug("    Player Pet =", UnitIsUnit(unit.unitid, "pet"))
+    Addon.Logging.Debug("    IsOtherPlayersPet =", UnitIsOtherPlayersPet(unit.unitid))
+		if not Addon.IS_TBC_CLASSIC and not Addon.IS_CLASSIC then
+			Addon.Logging.Debug("    IsBattlePet =", UnitIsBattlePet(unit.unitid))
+		end
+		Addon.Logging.Debug("  -- PvP ---------------------------------")
+		Addon.Logging.Debug("    PvP On =", UnitIsPVP(unit.unitid))
+		Addon.Logging.Debug("    PvP Sanctuary =", UnitIsPVPSanctuary(unit.unitid))
+
+    --		Addon.Logging.Debug("  isFriend = ", TidyPlatesUtilityInternal.IsFriend(unit.name))
+    --		Addon.Logging.Debug("  isGuildmate = ", TidyPlatesUtilityInternal.IsGuildmate(unit.name))
+	else
     Addon.Logging.Debug("  <no unit id>")
   end
 
