@@ -660,6 +660,8 @@ L["If enabled, the truncated health text will be localized, i.e. local metric un
 --[[Translation missing --]]
 L["Ignore Marked Units"] = "Ignore Marked Units"
 --[[Translation missing --]]
+L["Ignore PvP Status"] = "Ignore PvP Status"
+--[[Translation missing --]]
 L["Ignore UI Scale"] = "Ignore UI Scale"
 --[[Translation missing --]]
 L["Illegal character used in Name trigger at position: "] = "Illegal character used in Name trigger at position: "

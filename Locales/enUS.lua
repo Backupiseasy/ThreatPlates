@@ -507,6 +507,7 @@ L["If checked, threat feedback from tapped mobs will be shown regardless of unit
 L["If checked, threat feedback will only be shown in instances (dungeons, raids, arenas, battlegrounds), not in the open world."] = "If checked, threat feedback will only be shown in instances (dungeons, raids, arenas, battlegrounds), not in the open world."
 L["If enabled, the truncated health text will be localized, i.e. local metric unit symbols (like k for thousands) will be used."] = "If enabled, the truncated health text will be localized, i.e. local metric unit symbols (like k for thousands) will be used."
 L["Ignore Marked Units"] = "Ignore Marked Units"
+L["Ignore PvP Status"] = "Ignore PvP Status"
 L["Ignore UI Scale"] = "Ignore UI Scale"
 L["Illegal character used in Name trigger at position: "] = "Illegal character used in Name trigger at position: "
 L["Immortal Guardian"] = "Immortal Guardian"

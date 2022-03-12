@@ -642,6 +642,8 @@ L["If checked, threat feedback from tapped mobs will be shown regardless of unit
 L["If checked, threat feedback will only be shown in instances (dungeons, raids, arenas, battlegrounds), not in the open world."] = "启动时，只有在副本中 (5人本、团本、竞技场、战场) 才会显示仇恨值系统的变化，在野外不会。"
 L["If enabled, the truncated health text will be localized, i.e. local metric unit symbols (like k for thousands) will be used."] = "启动时，简短血量文字会使用中文数字单位 (万 或 亿)。"
 L["Ignore Marked Units"] = "忽略被标记的单位"
+--[[Translation missing --]]
+L["Ignore PvP Status"] = "Ignore PvP Status"
 L["Ignore UI Scale"] = "忽略ui缩放"
 --[[Translation missing --]]
 L["Illegal character used in Name trigger at position: "] = "Illegal character used in Name trigger at position: "

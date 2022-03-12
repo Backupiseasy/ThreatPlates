@@ -74,10 +74,8 @@ Blacksalsify
 
 Blacksalsify 
 (原作者: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=]
---[[Translation missing --]]
-L["%s already anchored to %s"] = "%s already anchored to %s"
---[[Translation missing --]]
-L["%s already anchored to %s."] = "%s already anchored to %s."
+L["%s already anchored to %s"] = "%s 已經對齊到 %s"
+L["%s already anchored to %s."] = "%s 已經對齊到 %s。"
 L[". You cannot use two custom nameplates with the same trigger. The imported custom nameplate will be disabled."] = "。同一個觸發條件無法使用兩個自訂血條，匯入的自訂血條將會被停用。"
 L["|cff00ff00High Threat|r"] = "|cff00ff00高仇恨|r"
 L["|cff00ff00Low Threat|r"] = "|cff00ff00低仇恨|r"
@@ -294,8 +292,7 @@ L["Custom Friendly Status Text"] = "自訂友方狀態文字"
 L["Custom Nameplates"] = "自訂血條"
 L["Custom status text requires LibDogTag-3.0 to function."] = "自訂狀態文字需要另外安裝 LibDogTag-3.0 才能使用。"
 L["Custom status text requires LibDogTag-Unit-3.0 to function."] = "自訂狀態文字需要另外安裝 LibDogTag-Unit-3.0 才能使用。"
---[[Translation missing --]]
-L["Cyclic anchoring of aura areas to each other is not possible."] = "Cyclic anchoring of aura areas to each other is not possible."
+L["Cyclic anchoring of aura areas to each other is not possible."] = "光環區域無法互相循環對齊。"
 L["Darnavan"] = "達納凡"
 L["Death Knigh Rune Cooldown"] = "死亡騎士符文冷卻"
 L["Death Knight"] = "死亡騎士"
@@ -523,6 +520,8 @@ L["If checked, threat feedback from tapped mobs will be shown regardless of unit
 L["If checked, threat feedback will only be shown in instances (dungeons, raids, arenas, battlegrounds), not in the open world."] = "啟用時，只有在副本中 (5人地城、團隊、競技場、戰場) 才會顯示仇恨值系統的變化，在野外不會。"
 L["If enabled, the truncated health text will be localized, i.e. local metric unit symbols (like k for thousands) will be used."] = "啟用時，簡短血量文字會使用中文單位 (萬 或 億)。"
 L["Ignore Marked Units"] = "忽略被標記圖示的單位"
+--[[Translation missing --]]
+L["Ignore PvP Status"] = "Ignore PvP Status"
 L["Ignore UI Scale"] = "忽略使用者介面縮放"
 L["Illegal character used in Name trigger at position: "] = "名字觸發中的這個位置有不可使用的字元:"
 L["Immortal Guardian"] = "不朽守護者"

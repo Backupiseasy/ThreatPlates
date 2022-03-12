@@ -641,6 +641,8 @@ L["If checked, threat feedback will only be shown in instances (dungeons, raids,
 L["If enabled, the truncated health text will be localized, i.e. local metric unit symbols (like k for thousands) will be used."] = "If enabled, the truncated health text will be localized, i.e. local metric unit symbols (like k for thousands) will be used."
 L["Ignore Marked Units"] = "징표 유닛 무시"
 --[[Translation missing --]]
+L["Ignore PvP Status"] = "Ignore PvP Status"
+--[[Translation missing --]]
 L["Ignore UI Scale"] = "Ignore UI Scale"
 --[[Translation missing --]]
 L["Illegal character used in Name trigger at position: "] = "Illegal character used in Name trigger at position: "
