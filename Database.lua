@@ -1232,6 +1232,11 @@ local function MigrateFixAurasCyclicAnchoring(_, profile)
     cc_anchor_to = profile.AuraWidget.CrowdControl.AnchorTo
   end
 
+  -- Should not be necessary, just to be sure
+  profile.AuraWidget = profile.AuraWidget or {}
+  profile.AuraWidget.Debuffs = profile.AuraWidget.Debuffs or {}
+  profile.AuraWidget.Buffs = profile.AuraWidget.Buffs or {}
+
   -- Check for cyclic dependencies
   if buffs_anchor_to == "Debuffs" and debuffs_anchor_to == "Buffs" then
     profile.AuraWidget.Debuffs.AnchorTo = "Healthbar"
