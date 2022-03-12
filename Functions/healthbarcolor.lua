@@ -259,22 +259,12 @@ end
 local function GetColorByReaction(unit)
   local db = Addon.db.profile.ColorByReaction
 
-  -- local UnitPlayerControlled = function(...) return true end
-  -- local UnitIsPVP = function(...) 
-  --   if ... == "player" then return false else return true end
-  -- end
-  -- local UnitCanAttack = function(...) return true end
-
-  -- unit.type, unit.reaction = "PLAYER", "HOSTILE"
-  -- unit_can_attack = true
-  -- unit.blue, unit.green, unit.red = 0, 0.55, 1
-
   -- PvP coloring based on: https://wowpedia.fandom.com/wiki/PvP_flag
   -- Coloring for pets is the same as for the player controlling the pet
   local unit_type = (UnitPlayerControlled(unit.unitid) and "PLAYER") or unit.type
   local color
+  -- * For players and their pets
   if unit_type == "PLAYER" then
-     -- Currenty only works for PLAYER, not pets
     if db.IgnorePvPStatus or Addon.IsInPvPInstance then
       color = (unit.reaction == "HOSTILE" and db.HostilePlayer) or db.FriendlyPlayer
     else
@@ -282,7 +272,7 @@ local function GetColorByReaction(unit)
       local player_is_pvp = UnitIsPVP("player") or false
       color = db[UNIT_COLOR_MAP[unit.reaction][unit_type][unit_is_pvp][player_is_pvp]]
     end
-  -- unit.type == "NPC" (without pets)
+  -- * From here: For NPCs (without pets)
   elseif not UnitCanAttack("player", unit.unitid) and unit.blue < 0.1 and unit.green > 0.5 and unit.green < 0.6 and unit.red > 0.9 then
     -- Handle non-attackable units with brown healtbars - currently, I know no better way to detect this.
     color = db.UnfriendlyFaction
