@@ -81,22 +81,44 @@ end
 function Debug:PrintUnit(unit, full_info)
   if not self.Enabled then return end
 
-  Addon.Logging.Debug("Unit:", unit.name)
-  Addon.Logging.Debug("-------------------------------------------------------------")
+	Addon.Logging.Debug("Unit:", unit.name)
+	Addon.Logging.Debug("-------------------------------------------------------------")
+	Addon.Logging.Debug("  Show UnitFrame =", plate.UnitFrame:IsShown())
+	Addon.Logging.Debug("  Show TPFrame =", plate.TPFrame:IsShown())
+	Addon.Logging.Debug("  Active =", plate.TPFrame.Active)
+	Addon.Logging.Debug("-------------------------------------------------------------")
   for key, val in pairs(unit) do
     Addon.Logging.Debug(key .. ":", val)
   end
 
   if full_info and unit.unitid then
-    --		DEBUG("  isFriend = ", Addon:IsFriend(unit.name))
-    --		DEBUG("  isGuildmate = ", Addon:IsGuildmate(unit.name))
-    Addon.Logging.Debug("  IsOtherPlayersPet = ", UnitIsOtherPlayersPet(unit))
-    Addon.Logging.Debug("  IsBattlePet = ", UnitIsBattlePet(unit.unitid))
-    Addon.Logging.Debug("  PlayerControlled = ", UnitPlayerControlled(unit.unitid))
-    Addon.Logging.Debug("  CanAttack = ", UnitCanAttack("player", unit.unitid))
+		if not Addon.IS_TBC_CLASSIC and not Addon.IS_CLASSIC then
+			Addon.Logging.Debug("  UnitNameplateShowsWidgetsOnly = ", UnitNameplateShowsWidgetsOnly(unit.unitid))
+		end
     Addon.Logging.Debug("  Reaction = ", UnitReaction("player", unit.unitid))
     local r, g, b, a = UnitSelectionColor(unit.unitid, true)
     Addon.Logging.Debug("  SelectionColor: r =", ceil(r * 255), ", g =", ceil(g * 255), ", b =", ceil(b * 255), ", a =", ceil(a * 255))
+		Addon.Logging.Debug("  -- Threat ---------------------------------")
+		Addon.Logging.Debug("    UnitAffectingCombat = ", UnitAffectingCombat(unit.unitid))
+		Addon.Logging.Debug("    Addon:OnThreatTable = ", Addon:OnThreatTable(unit))
+		Addon.Logging.Debug("    UnitThreatSituation = ", UnitThreatSituation("player", unit.unitid))
+		Addon.Logging.Debug("    Target Unit = ", UnitExists(unit.unitid .. "target"))
+		if unit.style == "unique" then
+			Addon.Logging.Debug("    GetThreatSituation(Unique) = ", Addon.GetThreatSituation(unit, unit.style, Addon.db.profile.threat.toggle.OffTank))
+		else
+			Addon.Logging.Debug("    GetThreatSituation = ", Addon.GetThreatSituation(unit, Addon:GetThreatStyle(unit), Addon.db.profile.threat.toggle.OffTank))
+		end
+		Addon.Logging.Debug("  -- Player Control ---------------------------------")
+		Addon.Logging.Debug("    UnitPlayerControlled =", UnitPlayerControlled(unit.unitid))
+		Addon.Logging.Debug("    Player is UnitIsOwnerOrControllerOfUnit =", UnitIsOwnerOrControllerOfUnit("player", unit.unitid))
+		Addon.Logging.Debug("    Player Pet =", UnitIsUnit(unit.unitid, "pet"))
+    Addon.Logging.Debug("    IsOtherPlayersPet =", UnitIsOtherPlayersPet(unit.unitid))
+		if not Addon.IS_TBC_CLASSIC and not Addon.IS_CLASSIC then
+			Addon.Logging.Debug("    IsBattlePet =", UnitIsBattlePet(unit.unitid))
+		end
+		Addon.Logging.Debug("  -- PvP ---------------------------------")
+		Addon.Logging.Debug("    PvP On =", UnitIsPVP(unit.unitid))
+		Addon.Logging.Debug("    PvP Sanctuary =", UnitIsPVPSanctuary(unit.unitid))
   else
     Addon.Logging.Debug("  <no unit id>")
   end

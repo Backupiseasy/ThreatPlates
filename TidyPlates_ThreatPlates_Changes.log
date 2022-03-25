@@ -1,5 +1,23 @@
 ﻿------------------------------------------------------
-10.3.0 (2021-12-xx)
+10.3.3 (2022-03-12)
+------------------------------------------------------
+* Fixed a bug with an outdated cast target being shown when a nameplate was re-used on a casting unit.
+* Added an option to ignore PvP status when coloring player units by reaction. Also, PvP status is ignored for coloring in arenas and battlegrounds [Comment #5996, #6059, Issue #526, #525].
+* Updated Shaman totems - added Static Field Totem [Comment #6065].
+
+------------------------------------------------------
+10.3.2 (2022-02-27)
+------------------------------------------------------
+* Fixed a Lua error with Scaled and Raw Percentage threat value the occured when in combat with units, but not being on their threat table [Comment #6019]. 
+
+------------------------------------------------------
+10.3.1 (2022-02-25)
+------------------------------------------------------
+* Fixed a bug with CCs not being shown when debuffs are not enabled [Comment #5983].
+* Fixed a Lua error when aura areas where anchored to each other in a cyclic way [Issue #520].
+
+------------------------------------------------------
+10.3.0 (2022-02-23)
 ------------------------------------------------------
 * Appearance and layout for buffs, debuffs, and crowd control can now be configured indivually for Auras widget [Comment #1302, #1246, #1830, #1883, #3886, #4167, #4637, #4760, #4960, #5034, #5131, #5346, #5418, #5448, #5562, #5793, TPC#754, Issue #465, IM].
 * Player units are now colored based on their PvP flag similar to WoW default nameplates [Comment #5829].

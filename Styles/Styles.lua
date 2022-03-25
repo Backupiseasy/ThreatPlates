@@ -96,6 +96,7 @@ local function GetUnitType(unit)
   elseif unit.TotemSettings then
     unit_class = "Totem"
   elseif UnitIsOtherPlayersPet(unit.unitid) or UnitIsUnit(unit.unitid, "pet") then -- player pets are also considered guardians, so this check has priority
+    -- ? Better to use UnitIsOwnerOrControllerOfUnit("player", unit.unitid) here?
     unit_class = "Pet"
   elseif UnitPlayerControlled(unit.unitid) then
     unit_class = "Guardian"

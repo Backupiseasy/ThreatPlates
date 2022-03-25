@@ -75,6 +75,8 @@ Du kannst mich gerne per E-Mail erreichen unter |cff00ff00threatplates@gmail.com
 Blacksalsify
 
 (Ursprünglicher Autor: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=]
+L["%s already anchored to %s"] = "%s ist bereits an %s verankert."
+L["%s already anchored to %s."] = "%s ist bereits an %s verankert."
 L[". You cannot use two custom nameplates with the same trigger. The imported custom nameplate will be disabled."] = ". Du kannst nicht zwei benutzerdefinierte Namensplaketten mit dem gleichen Auslöser verwenden. Die importierte benutzerdefinierte Namensplakette wird deaktiviert."
 L["|cff00ff00High Threat|r"] = "|cff00ff00Hohe Bedrohung|r"
 L["|cff00ff00Low Threat|r"] = "|cff00ff00Niedrige Bedrohung|r"
@@ -291,6 +293,7 @@ L["Custom Friendly Status Text"] = "Benutzerdefinierter Status-Text für Freunde
 L["Custom Nameplates"] = "Benutzerdefinierte Namensplaketten"
 L["Custom status text requires LibDogTag-3.0 to function."] = "Für die Verwendung von benutzerdefiniertem Status-Text ist LibDogTag-3.0 erforderlich."
 L["Custom status text requires LibDogTag-Unit-3.0 to function."] = "Für die Verwendung von benutzerdefiniertem Status-Text ist LibDogTag-Unit-3.0 erforderlich."
+L["Cyclic anchoring of aura areas to each other is not possible."] = "Eine zyklische Verankerung von Aurenbereichen ist nicht möglich."
 L["Darnavan"] = "Darnavan"
 L["Death Knigh Rune Cooldown"] = "Runen-Cooldown von Todesrittern"
 L["Death Knight"] = "Todesritter"
@@ -496,7 +499,7 @@ L["Horizontal Spacing"] = "Horizontaler Zwischenraum"
 L["Hostile NPCs"] = "Feindliche NPCs"
 L["Hostile Players"] = "Feindliche Spieler"
 L["Hostile PvP On - Self Off"] = "Feindliches PvP eingeschaltet - Selbst ausgeschaltet"
-L["Hostile PvP On - Self On"] = "Freundliches PvP eingeschaltet - Selbst eingeschaltet"
+L["Hostile PvP On - Self On"] = "Feindliches PvP eingeschaltet - Selbst eingeschaltet"
 L["Hostile Units"] = "Feindliche Einheiten"
 L["Icon"] = "Symbol"
 L["Icon Height"] = "Symbolhöhe"
@@ -514,6 +517,7 @@ L["If checked, threat feedback from tapped mobs will be shown regardless of unit
 L["If checked, threat feedback will only be shown in instances (dungeons, raids, arenas, battlegrounds), not in the open world."] = "Wenn ausgewählt, wird Bedrohungsfeedback nur in Instanzen angezeigt (Dungeons, Schlachtzüge, Arenen, Schlachtfelder), nicht in der freien Welt."
 L["If enabled, the truncated health text will be localized, i.e. local metric unit symbols (like k for thousands) will be used."] = "Wenn eingeschaltet, wird der verkürzte Gesundheitstext lokalisiert, d.h. es werden lokale metrische Einheitensymbole (wie k für Tausend) verwendet."
 L["Ignore Marked Units"] = "Markierte Einheiten ignorieren"
+L["Ignore PvP Status"] = "PvP-Status ignorieren"
 L["Ignore UI Scale"] = "UI-Skalierung ignorieren"
 L["Illegal character used in Name trigger at position: "] = "Ungültiges Zeichen in einem namensbasierten Auslöser an folgender Stelle verwendet: "
 L["Immortal Guardian"] = "Unvergängliche Wache"

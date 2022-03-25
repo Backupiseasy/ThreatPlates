@@ -69,6 +69,10 @@ Feel free to email me at |cff00ff00threatplates@gmail.com|r
 Blacksalsify
 
 (Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=] ] = ""
+--[[Translation missing --]]
+L["%s already anchored to %s"] = "%s already anchored to %s"
+--[[Translation missing --]]
+L["%s already anchored to %s."] = "%s already anchored to %s."
 L[". You cannot use two custom nameplates with the same trigger. The imported custom nameplate will be disabled."] = ". Вы не можете использовать две пользовательские таблички с одним и тем же триггером. Импортированный персонализированный неймплейт будет отключен."
 L["|cff00ff00High Threat|r"] = "|cff00ff00Большая угроза|r"
 L["|cff00ff00Low Threat|r"] = "|cff00ff00Слабая угроза|r"
@@ -329,6 +333,8 @@ L["Custom Nameplates"] = "Настройка Nameplates"
 L["Custom status text requires LibDogTag-3.0 to function."] = "Custom status text requires LibDogTag-3.0 to function."
 --[[Translation missing --]]
 L["Custom status text requires LibDogTag-Unit-3.0 to function."] = "Custom status text requires LibDogTag-Unit-3.0 to function."
+--[[Translation missing --]]
+L["Cyclic anchoring of aura areas to each other is not possible."] = "Cyclic anchoring of aura areas to each other is not possible."
 L["Darnavan"] = "Darnavan"
 L["Death Knigh Rune Cooldown"] = "Рыцарь смерти перезарядка рун"
 L["Death Knight"] = "Рыцарь смерти"
@@ -654,6 +660,8 @@ L["If enabled, the truncated health text will be localized, i.e. local metric un
 --[[Translation missing --]]
 L["Ignore Marked Units"] = "Ignore Marked Units"
 --[[Translation missing --]]
+L["Ignore PvP Status"] = "Ignore PvP Status"
+--[[Translation missing --]]
 L["Ignore UI Scale"] = "Ignore UI Scale"
 --[[Translation missing --]]
 L["Illegal character used in Name trigger at position: "] = "Illegal character used in Name trigger at position: "
@@ -790,8 +798,7 @@ L["No Outline, Monochrome"] = "Нет контура, монохромный"
 L["No Target"] = "Нет цели"
 L["No target found."] = "Цель не найдена."
 L["None"] = "нет"
---[[Translation missing --]]
-L["Non-Interruptable"] = "Non-Interruptable"
+L["Non-Interruptable"] = "Не прерываемое"
 --[[Translation missing --]]
 L["Non-Target"] = "Non-Target"
 L["Normal Units"] = "Обычная часть"

@@ -292,11 +292,19 @@ end
 local THREAT_DETAILS_FUNTIONS = {
   SCALED_PERCENTAGE = function(unitid)
     local _, status, scaled_percentage, _, _ = UnitDetailedThreatSituation("player", unitid)
-    return status, string_format("%.0f%%", scaled_percentage)
+    if status == nil then 
+      return nil, nil 
+    else
+      return status, string_format("%.0f%%", scaled_percentage)
+    end
   end,
   RAW_PERCENTAGE = function(unitid)
     local _, status, _, raw_percentage, _ = UnitDetailedThreatSituation("player", unitid)
-    return status, string_format("%.0f%%", raw_percentage)
+    if status == nil then 
+      return nil, nil 
+    else
+      return status, string_format("%.0f%%", raw_percentage)
+    end
   end,
   TANK_PERCENTAGE = GetTankThreatPercentage,
   TANK_VALUE = GetTankThreatValue,

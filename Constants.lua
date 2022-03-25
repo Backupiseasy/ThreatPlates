@@ -148,10 +148,10 @@ Addon.MODE_FOR_STYLE = {
 ---------------------------------------------------------------------------------------------------
 
 Addon.THREAT_REFERENCE = {
-  [0] = "LOW",
-  [1] = "MEDIUM",
-  [2] = "MEDIUM",
-  [3] = "HIGH",
+  [0] = "LOW",    -- not tanking, lower threat than tank.
+  [1] = "MEDIUM", -- not tanking, higher threat than tank.
+  [2] = "MEDIUM", -- insecurely tanking, another unit have higher threat but not tanking.
+  [3] = "HIGH",   -- securely tanking, highest threat
 }
 
 ----------------------------------------------------------------------------------------------------
@@ -292,6 +292,7 @@ local TOTEM_DATA_RETAIL = {
   { SpellID = 204331, ID = "P1", GroupColor = "2b76ff"},	  -- Counterstrike Totem
   { SpellID = 204330, ID = "P2", GroupColor = "2b76ff"},	  -- Skyfury Totem
   { SpellID = 204336, ID = "P4", GroupColor = "2b76ff"},	  -- Grounding Totem
+  { SpellID = 355580, ID = "P5", GroupColor = "2b76ff", Icon = "spell_shaman_stormtotem"},	  -- Static Field Totem
 
   -- Totems from other sources
   { SpellID = 324386, ID = "O1", GroupColor = "00FFFF", Icon = "ability_bastion_shaman" },	  -- Vesper Totem (Kyrian Covenant)
@@ -613,6 +614,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
       UnfriendlyFaction = RGB(255, 153, 51, 1),  -- brown/orange for unfriendly, hostile, non-attackable units (unit reaction = 3)
       FriendlyPlayerPvPOn = RGB(0, 255, 0),              -- green - Same faction, PVP flagged
       HostilePlayerPvPOnSelfPvPOff = RGB(255, 255, 0),   -- yellow - Opposite faction, they are PVP flagged but you are NOT PVP flagged so they can't attack you. You can attack them, though. (Which will immediately flag you)
+      IgnorePvPStatus = false,
     },
     ColorByHealth = {
       Low = RGB_P(0, 1, 0),

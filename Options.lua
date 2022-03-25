@@ -3121,6 +3121,13 @@ local function CreateAuraAreaLayoutOptions(pos, widget_info)
       values[widget_info] = nil
       return values
     end,
+    set = function(info, val)
+      if val ~= "Healthbar" and db.AuraWidget[val].AnchorTo == widget_info then
+        Addon.Logging.Error(L["Cyclic anchoring of aura areas to each other is not possible."], string.format(L["%s already anchored to %s."], val, widget_info))
+      else
+        SetValue(info, val)
+      end
+    end,
     arg = { "AuraWidget", widget_info, "AnchorTo" }
   }
 
@@ -4968,14 +4975,17 @@ local function CreateColorsSettings()
           },
           PlayerPvPOffSelfPvPOff = { 
             name = L["PvP Off"], 
-            order = 90, type = "color", 
+            order = 90, 
+            type = "color", 
             arg = { "ColorByReaction", "FriendlyPlayer" }, 
+            width = "double",
             desc = L["The (friendly or hostile) player is not flagged for PvP or the player is in a sanctuary."],
           },
           FriendlyOn = { 
             name = L["Friendly PvP On"], 
             order = 100, 
             type = "color", 
+            width = "double",
             arg = { "ColorByReaction", "FriendlyPlayerPvPOn" }, 
             desc = L["The player is friendly to you, and flagged for PvP."],
           },
@@ -4983,6 +4993,7 @@ local function CreateColorsSettings()
             name = L["Hostile PvP On - Self Off"], 
             order = 110, 
             type = "color", 
+            width = "double",
             arg = { "ColorByReaction", "HostilePlayerPvPOnSelfPvPOff" }, 
             desc = L["The player is hostile, and flagged for PvP, but you are not."],
           },
@@ -4990,6 +5001,7 @@ local function CreateColorsSettings()
             name = L["Hostile PvP On - Self On"], 
             order = 120, 
             type = "color", 
+            width = "double",
             arg = { "ColorByReaction", "HostilePlayer" }, 
             desc = L["Both you and the other player are flagged for PvP."],          },
          Spacer3 = GetSpacerEntry(195),
@@ -5552,9 +5564,16 @@ local function CreateHealthbarOptions()
                 values = ThreatPlates.ENEMY_HEALTHBAR_COLOR,
                 arg = { "Healthbar", "EnemyUnitMode" }
               },
+              Spacer1 = GetSpacerEntry(25),
+              IgnorePvPStatus = {
+                name = L["Ignore PvP Status"],
+                order = 30,
+                type = "toggle",
+                arg = { "ColorByReaction", "IgnorePvPStatus" },
+              },
               EnableRaidMarks = {
                 name = L["Additionally color the healthbar based on the target mark if the unit is marked."],
-                order = 30,
+                order = 40,
                 type = "toggle",
                 width = "full",
                 arg = { "Healthbar", "UseRaidMarkColoring" },
@@ -8313,7 +8332,7 @@ local function CreateOptionsTable()
                           type = "toggle",
                           width = "double",
                           arg = { "Name", "HealthbarMode", "Enabled" },
-                        },
+                        },w
                       },
                     },
                     Color = {

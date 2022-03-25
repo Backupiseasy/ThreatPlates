@@ -1158,6 +1158,36 @@ local function MigrateAurasWidgetV2(_, profile)
   end
 end
 
+local function MigrateFixAurasCyclicAnchoring(_, profile)
+  local buffs_anchor_to = ThreatPlates.DEFAULT_SETTINGS.profile.AuraWidget.Buffs.AnchorTo
+  local debuffs_anchor_to = ThreatPlates.DEFAULT_SETTINGS.profile.AuraWidget.Debuffs.AnchorTo
+  local cc_anchor_to = ThreatPlates.DEFAULT_SETTINGS.profile.AuraWidget.CrowdControl.AnchorTo
+
+  if DatabaseEntryExists(profile, { "AuraWidget", "Buffs", "AnchorTo" } ) then
+    buffs_anchor_to = profile.AuraWidget.Buffs.AnchorTo
+  end
+  if DatabaseEntryExists(profile, { "AuraWidget", "Debuffs", "AnchorTo" } ) then
+    debuffs_anchor_to = profile.AuraWidget.Debuffs.AnchorTo
+  end
+  if DatabaseEntryExists(profile, { "AuraWidget", "CrowdControl", "AnchorTo" } ) then
+    cc_anchor_to = profile.AuraWidget.CrowdControl.AnchorTo
+  end
+
+  -- Should not be necessary, just to be sure
+  profile.AuraWidget = profile.AuraWidget or {}
+  profile.AuraWidget.Debuffs = profile.AuraWidget.Debuffs or {}
+  profile.AuraWidget.Buffs = profile.AuraWidget.Buffs or {}
+
+  -- Check for cyclic dependencies
+  if buffs_anchor_to == "Debuffs" and debuffs_anchor_to == "Buffs" then
+    profile.AuraWidget.Debuffs.AnchorTo = "Healthbar"
+  elseif buffs_anchor_to == "CrowdControl" and cc_anchor_to == "Buffs" then
+    profile.AuraWidget.Buffs.AnchorTo = "Healthbar"
+  elseif debuffs_anchor_to == "CrowdControl" and cc_anchor_to == "Debuffs" then
+    profile.AuraWidget.Debuffs.AnchorTo = "Healthbar"
+  end
+end
+
 ---------------------------------------------------------------------------------------------------
 -- Main migration function & settings
 ---------------------------------------------------------------------------------------------------
@@ -1200,6 +1230,9 @@ local MIGRATION_FUNCTIONS = {
   },
   ["10.3.0-beta2"] = {
     MigrateAurasWidgetV2 = { NoDefaultProfile = true , CleanupDatabase = true },
+  },
+  ["10.3.1"] = {
+    MigrateFixAurasCyclicAnchoring = { NoDefaultProfile = true , CleanupDatabase = true },
   },
   -- MigrateDeprecatedSettingsEntries, -- TODO
 }

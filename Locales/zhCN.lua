@@ -72,6 +72,10 @@ Feel free to email me at |cff00ff00threatplates@gmail.com|r
 Blacksalsify
 
 (Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=] ] = ""
+--[[Translation missing --]]
+L["%s already anchored to %s"] = "%s already anchored to %s"
+--[[Translation missing --]]
+L["%s already anchored to %s."] = "%s already anchored to %s."
 L[". You cannot use two custom nameplates with the same trigger. The imported custom nameplate will be disabled."] = "。同一个触发条件无法使用两个自订血条，导入的自订血条将会被停用。"
 L["|cff00ff00High Threat|r"] = "|cff00ff00高仇恨|r"
 L["|cff00ff00Low Threat|r"] = "|cff00ff00低仇恨|r"
@@ -352,6 +356,8 @@ L["Custom Nameplates"] = "自定义姓名版"
 L["Custom status text requires LibDogTag-3.0 to function."] = "Custom status text requires LibDogTag-3.0 to function."
 --[[Translation missing --]]
 L["Custom status text requires LibDogTag-Unit-3.0 to function."] = "Custom status text requires LibDogTag-Unit-3.0 to function."
+--[[Translation missing --]]
+L["Cyclic anchoring of aura areas to each other is not possible."] = "Cyclic anchoring of aura areas to each other is not possible."
 L["Darnavan"] = "达尔纳文"
 --[[Translation missing --]]
 L["Death Knigh Rune Cooldown"] = "Death Knigh Rune Cooldown"
@@ -636,6 +642,8 @@ L["If checked, threat feedback from tapped mobs will be shown regardless of unit
 L["If checked, threat feedback will only be shown in instances (dungeons, raids, arenas, battlegrounds), not in the open world."] = "启动时，只有在副本中 (5人本、团本、竞技场、战场) 才会显示仇恨值系统的变化，在野外不会。"
 L["If enabled, the truncated health text will be localized, i.e. local metric unit symbols (like k for thousands) will be used."] = "启动时，简短血量文字会使用中文数字单位 (万 或 亿)。"
 L["Ignore Marked Units"] = "忽略被标记的单位"
+--[[Translation missing --]]
+L["Ignore PvP Status"] = "Ignore PvP Status"
 L["Ignore UI Scale"] = "忽略ui缩放"
 --[[Translation missing --]]
 L["Illegal character used in Name trigger at position: "] = "Illegal character used in Name trigger at position: "

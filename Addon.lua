@@ -123,6 +123,8 @@ function Addon:CheckForFirstStartUp()
     Addon.MigrateDatabase(db.version)
   end
   db.version = new_version
+
+  --t.MigrateDatabase(db.version)
 end
 
 function Addon:CheckForIncompatibleAddons()

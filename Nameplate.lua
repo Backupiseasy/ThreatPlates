@@ -292,6 +292,8 @@ local function OnStartCasting(tp_frame, unitid, channeled)
   if target_unit_name then
     local _, class_name = UnitClass(target_unit_name)
     castbar.CastTarget:SetText(Addon.ColorByClass(class_name, TransliterateCyrillicLetters(target_unit_name)))
+  else
+    castbar.CastTarget:SetText(nil)
   end
 
   castbar.IsCasting = not channeled
@@ -706,9 +708,12 @@ function Addon:PLAYER_ENTERING_WORLD(initialLogin, reloadingUI)
   -- This code must be executed every time the player enters a instance (dungeon, raid, ...)
   db = Addon.db.profile.Automation
   local isInstance, instance_type = IsInInstance()
-  isInstance = isInstance and (instance_type == "party" or instance_type == "raid")
 
-  if isInstance and db.HideFriendlyUnitsInInstances then
+  --Addon.IsInInstance = isInstance
+  Addon.IsInPvEInstance = isInstance and (instance_type == "party" or instance_type == "raid")
+  Addon.IsInPvPInstance = isInstance and (instance_type == "arena" or instance_type == "pvp")
+  
+  if Addon.IsInPvEInstance and db.HideFriendlyUnitsInInstances then
     Addon.CVars:Set("nameplateShowFriends", 0)
   else
     -- reset to previous setting
@@ -905,30 +910,30 @@ end
 
 function Addon:UNIT_THREAT_LIST_UPDATE(unitid)
   -- Special unitids (target, personal nameplate) are skipped as they are not added to PlatesByUnit in NAME_PLATE_UNIT_ADDED
-
   local tp_frame = PlatesByUnit[unitid]
+
   if tp_frame and tp_frame.Active then
     local threat_status = UnitThreatSituation("player", unitid)
 
     local unit = tp_frame.unit
-    --if threat_status == unit.ThreatStatus and UnitIsUnit("target", unitid) then
-    --  print ("Threat: No Update =>", threat_status, "=", unit.ThreatStatus)
-    --  print ("Threat: Level =>", unit.ThreatLevel)
-    --  print ("Threat: Offtanked =>", unit.IsOfftanked)
-    --  print ("Combat Color:", unit.CombatColor)
-    --end
-
     -- If threat_status is nil, unit is leaving combat
     if threat_status == nil then
       unit.ThreatStatus = nil
-      PublishEvent("ThreatUpdate", tp_frame, unit)
     else --if threat_status ~= unit.ThreatStatus then
       unit.ThreatStatus = threat_status
       unit.ThreatLevel = THREAT_REFERENCE[threat_status]
       unit.InCombat = _G.UnitAffectingCombat(unitid)
-      PublishEvent("ThreatUpdate", tp_frame, unit)
     end
-  end
+
+    PublishEvent("ThreatUpdate", tp_frame, unit)
+
+    if threat_status == unit.ThreatStatus and UnitIsUnit("target", unitid) then
+      print ("Threat: No Update =>", threat_status, "=", unit.ThreatStatus)
+      print ("Threat: Level =>", unit.ThreatLevel)
+      print ("Threat: Offtanked =>", unit.IsOfftanked)
+      print ("Combat Color:", unit.CombatColor)
+     end 
+   end
 end
 
 -- Update all elements that depend on the unit's reaction towards the player
