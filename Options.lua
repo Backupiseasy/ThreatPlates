@@ -27,6 +27,7 @@ local TidyPlatesThreat = TidyPlatesThreat
 local LibStub = LibStub
 local RGB_WITH_HEX = t.RGB_WITH_HEX
 local L = t.L
+local CVars = Addon.CVars
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -779,13 +780,13 @@ function Addon:SetCVarsForOcclusionDetection()
   Addon.CVars:Set("nameplateMaxAlpha", 1)
 
   -- Create enough separation between occluded and not occluded nameplates, even for targeted units
-  local occluded_alpha_mult = tonumber(GetCVar("nameplateOccludedAlphaMult")) or tonumber(GetCVarDefault("nameplateOccludedAlphaMult"))
+  local occluded_alpha_mult = CVars:GetAsNumber("nameplateOccludedAlphaMult")
   if occluded_alpha_mult > 0.9  then
     occluded_alpha_mult = 0.9
     Addon.CVars:Set("nameplateOccludedAlphaMult", occluded_alpha_mult)
   end
 
-  local selected_alpha =  tonumber(GetCVar("nameplateSelectedAlpha")) or tonumber(GetCVarDefault("nameplateSelectedAlpha"))
+  local selected_alpha =  CVars:GetAsNumber("nameplateSelectedAlpha")
   if not selected_alpha or (selected_alpha < occluded_alpha_mult + 0.1) then
     selected_alpha = occluded_alpha_mult + 0.1
     Addon.CVars:Set("nameplateSelectedAlpha", selected_alpha)
@@ -793,7 +794,7 @@ function Addon:SetCVarsForOcclusionDetection()
 
   -- Occlusion detection does not work when a target is selected in Classic, see https://github.com/Stanzilla/WoWUIBugs/issues/134
   if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC then
-    local not_selected_alpha =  tonumber(GetCVar("nameplateNotSelectedAlpha")) or tonumber(GetCVarDefault("nameplateNotSelectedAlpha"))
+    local not_selected_alpha =  CVars:GetAsNumber("nameplateNotSelectedAlpha")
     if not not_selected_alpha or (not_selected_alpha < occluded_alpha_mult + 0.1) then
       not_selected_alpha = occluded_alpha_mult + 0.1
       Addon.CVars:Set("nameplateNotSelectedAlpha", not_selected_alpha)

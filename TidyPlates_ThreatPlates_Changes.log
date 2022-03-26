@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+10.3.4 (2022-03-12)
+------------------------------------------------------
+* Fixed a Lua error when a numeric CVar has an invalid, i.e., non-numeric, value. In this case, the default value of the CVar will now be used to prevent the Lua error.
+
+------------------------------------------------------
 10.3.3 (2022-03-12)
 ------------------------------------------------------
 * Fixed a bug with an outdated cast target being shown when a nameplate was re-used on a casting unit.

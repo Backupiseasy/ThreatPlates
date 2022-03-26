@@ -6,7 +6,7 @@ local ThreatPlates = Addon.ThreatPlates
 ---------------------------------------------------------------------------------------------------
 
 -- Lua APIs
-local tostring = tostring
+local tostring, string_format = tostring, string.format
 
 -- WoW APIs
 local GetCVar, GetCVarDefault = GetCVar, GetCVarDefault
@@ -100,15 +100,17 @@ end
 --  end
 --end
 
---function CVars:GetAsNumber(cvar)
---  local value = tonumber(GetCVar(cvar))
---
---  if not value then
---    value = tonumber(GetCVarDefault(cvar))
---  end
---
---  return value
---end
+function CVars:GetAsNumber(cvar)
+  local value = GetCVar(cvar)
+  local numeric_value = tonumber(value)
+
+  if not numeric_value then
+    Addon.Logging.Warning(string_format(L["CVar \"%s\" has an invalid value: \"%s\". The value must be a number. Using the default value for this CVar instead."], cvar, value))
+    numeric_value = tonumber(GetCVarDefault(cvar))
+  end
+
+ return numeric_value
+end
 
 ---------------------------------------------------------------------------------------------------
 -- Set CVars in a safe way when in combat

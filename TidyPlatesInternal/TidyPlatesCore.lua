@@ -32,6 +32,7 @@ local UnitNameplateShowsWidgetsOnly = UnitNameplateShowsWidgetsOnly
 -- ThreatPlates APIs
 local Widgets = Addon.Widgets
 local Animations = Addon.Animations
+local CVars = Addon.CVars
 local BackdropTemplate = Addon.BackdropTemplate
 local TransliterateCyrillicLetters = Addon.TransliterateCyrillicLetters
 
@@ -1818,9 +1819,9 @@ function Addon:ConfigClickableArea(toggle_show)
 
         local width, height = Addon.db.profile.settings.frame.width, Addon.db.profile.settings.frame.height
 
-        local min_scale = tonumber(GetCVar("nameplateMinScale"))
-        --local selected_scale = tonumber(GetCVar("nameplateSelectedScale"))
-        local global_scale = tonumber(GetCVar("nameplateGlobalScale"))
+        local min_scale = CVars:GetAsNumber("nameplateMinScale")
+        --local selected_scale = CVars:GetAsNumber("nameplateSelectedScale")
+        local global_scale = CVars:GetAsNumber("nameplateGlobalScale")
         local current_scale = global_scale * min_scale
 
         width = width * current_scale
@@ -1863,7 +1864,7 @@ function Addon:ForceUpdate()
   Addon:UpdateConfigurationLocalization()
   Addon:UpdateConfigurationStatusText()
 
-  CVAR_NameplateOccludedAlphaMult = tonumber(GetCVar("nameplateOccludedAlphaMult"))
+  CVAR_NameplateOccludedAlphaMult = CVars:GetAsNumber("nameplateOccludedAlphaMult")
 
   local db = Addon.db.profile
 

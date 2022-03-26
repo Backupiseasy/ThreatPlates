@@ -1,5 +1,3 @@
 # @project-version@ (@build-time@)
 
-* Fixed a bug with an outdated cast target being shown when a nameplate was re-used on a casting unit.
-* Added an option to ignore PvP status when coloring player units by reaction. Also, PvP status is ignored for coloring in arenas and battlegrounds [Comment #5996, #6059, Issue #526, #525].
-* Updated Shaman totems - added Static Field Totem [Comment #6065].
+* Fixed a Lua error when a numeric CVar has an invalid, i.e., non-numeric, value. In this case, the default value of the CVar will now be used to prevent the Lua error.
