@@ -294,12 +294,16 @@ local function GetThreatValueDelta(unitid, db_threat_value)
 end
 
 local function GetThreatPercentageDelta(unitid, db_threat_value)
+  if not IsInGroup() then return nil, nil end
+
   local threat_value_text, threat_value_delta = GetThreatDelta(unitid, GetUnitThreatPercentage)
   return threat_value_delta ~= nil, threat_value_text .. string_format("%.0f%%", threat_value_delta)
 end
 
 local THREAT_DETAILS_FUNTIONS = {
   SCALED_PERCENTAGE = function(unitid)
+    if not IsInGroup() then return nil, nil end
+
     local _, status, scaled_percentage, _, _ = UnitDetailedThreatSituation("player", unitid)
     if status == nil then 
       return nil, nil 
@@ -308,6 +312,8 @@ local THREAT_DETAILS_FUNTIONS = {
     end
   end,
   RAW_PERCENTAGE = function(unitid)
+    if not IsInGroup() then return nil, nil end
+
     local _, status, _, raw_percentage, _ = UnitDetailedThreatSituation("player", unitid)
     if status == nil then 
       return nil, nil 

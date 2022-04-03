@@ -1,4 +1,3 @@
 # @project-version@ (@build-time@)
 
-* Fixed a Lua error when a numeric CVar has an invalid, i.e., non-numeric, value. In this case, the default value of the CVar will now be used to prevent the Lua error.
-* Updated TOC version for for TBC Classic Patch 2.5.4.
+* Disabled some threat value types when not in a group as their value is constant in this case and does not provide any valuable information.
