@@ -1,7 +1,8 @@
 ﻿------------------------------------------------------
-10.3.4 (2022-03-12)
+10.4.0 (2022-03-xx)
 ------------------------------------------------------
 * Fixed a Lua error when a numeric CVar has an invalid, i.e., non-numeric, value. In this case, the default value of the CVar will now be used to prevent the Lua error.
+* Integrated new UNIT_AURA processing optimizations to improve unit aura processing in encounters where many nameplates are on screen at once [Comment #6114]. 
 
 ------------------------------------------------------
 10.3.3 (2022-03-12)
