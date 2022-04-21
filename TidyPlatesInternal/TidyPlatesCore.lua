@@ -1863,6 +1863,7 @@ function Addon:ForceUpdate()
   wipe(Addon.Cache.Texts)
   Addon:UpdateConfigurationLocalization()
   Addon:UpdateConfigurationStatusText()
+  Addon.Font:UpdateConfiguration()
 
   CVAR_NameplateOccludedAlphaMult = CVars:GetAsNumber("nameplateOccludedAlphaMult")
 

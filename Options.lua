@@ -844,7 +844,7 @@ local function GetColorAlphaEntry(pos, setting, disabled_func)
     width = "half",
     arg = setting,
     get = GetColorAlpha,
-    set = SetColorAlpha,
+    set = "SetColorAlpha",
     hasAlpha = true,
     disabled = disabled_func
   }
@@ -1307,7 +1307,6 @@ local function GetFontEntryDefault(name, pos, widget_info, func_disabled)
         get = function(info) return GetFontFlags(Addon.ConcatTables(widget_info, { "flags" }), "Thick") end,
         arg = Addon.ConcatTables(widget_info, { "flags" }),
       },
-
       Mono = {
         name = L["Mono"],
         order = 103,
@@ -1336,6 +1335,131 @@ local function GetFontEntryDefault(name, pos, widget_info, func_disabled)
 
   if entry.args.Transparency then
     entry.args.Transparency.set = function(info, val) SetValueWidget(info, abs(val - 1)) end
+  end
+
+  return entry
+end
+
+-- Options are shown based on the following settings:
+--   Font = {
+--     Typeface = Addon.DEFAULT_SMALL_FONT,
+--     Size = 10,
+--     Transparency = 1,
+--     Color = RGB(255, 255, 255),
+--     flags = "OUTLINE",
+--     Shadow = true,
+--     ShadowColor = RGB(0, 0, 0, 1),
+--     ShadowHorizontalOffset = 1,
+--     ShadowVerticalOffset = -1,
+--     HorizontalAlignment = "CENTER",
+--     VerticalAlignment = "CENTER",
+--   },
+local function GetFontEntryHandler(name, pos, widget_info, func_disabled, func_handler)
+  widget_info = Addon.ConcatTables(widget_info, { "Font" } )
+  local func_set = func_handler.SetValue
+
+  local entry = {
+    type = "group",
+    order = pos,
+    name = name,
+    inline = true,
+    set = "SetValue",
+    disabled = func_disabled,
+    args = {
+      Font = {
+        name = L["Typeface"],
+        order = 10,
+        type = "select",
+        dialogControl = "LSM30_Font",
+        values = AceGUIWidgetLSMlists.font,
+        arg = Addon.ConcatTables(widget_info, { "Typeface" }),
+      },
+      Size = {
+        name = L["Font Size"],
+        order = 20,
+        type = "range",
+        arg = Addon.ConcatTables(widget_info, { "Size" }),
+        max = 36,
+        min = 6,
+        step = 1,
+        isPercent = false,
+      },
+      Transparency = AddIfSettingExists(GetTransparencyEntryDefault(30, Addon.ConcatTables(widget_info, { "Transparency" }) )),
+      Color = AddIfSettingExists(GetColorEntry(L["Color"], 40, Addon.ConcatTables(widget_info, { "Color" }))),
+      Spacer1 = GetSpacerEntry(100),
+      Outline = {
+        name = L["Outline"],
+        order = 101,
+        type = "toggle",
+        desc = L["Add black outline."],
+        width = "half",
+        set = function(info, val) func_set(func_handler, info, SetFontFlags(Addon.ConcatTables(widget_info, { "flags" }), "Outline", val)) end,
+        get = function(info) return GetFontFlags(Addon.ConcatTables(widget_info, { "flags" }), "Outline") end,
+        arg = Addon.ConcatTables(widget_info, { "flags" }),
+      },
+      Thick = {
+        name = L["Thick"],
+        order = 102,
+        type = "toggle",
+        desc = L["Add thick black outline."],
+        width = "half",
+        set = function(info, val) func_set(func_handler, info, SetFontFlags(Addon.ConcatTables(widget_info, { "flags" }), "Thick", val)) end,
+        get = function(info) return GetFontFlags(Addon.ConcatTables(widget_info, { "flags" }), "Thick") end,
+        arg = Addon.ConcatTables(widget_info, { "flags" }),
+      },
+      Mono = {
+        name = L["Mono"],
+        order = 103,
+        type = "toggle",
+        desc = L["Render font without antialiasing."],
+        width = "half",
+        set = function(info, val) func_set(func_handler, info, SetFontFlags(Addon.ConcatTables(widget_info, { "flags" }), "Mono", val)) end,
+        get = function(info) return GetFontFlags(Addon.ConcatTables(widget_info, { "flags" }), "Mono") end,
+        arg = Addon.ConcatTables(widget_info, { "flags" }),
+      },
+      Shadow = {
+        name = L["Shadow"],
+        order = 105,
+        type = "toggle",
+        desc = L["Show shadow with text."],
+        width = "half",
+        arg = Addon.ConcatTables(widget_info, { "Shadow" }),
+      },
+      ShadowColor = AddIfSettingExists(GetColorAlphaEntry(106, Addon.ConcatTables(widget_info, { "ShadowColor" }))),
+      ShadowXOffset = AddIfSettingExists({
+        type = "range",
+        order = 107,
+        name = L["Horizontal Offset"],
+        max = 15,
+        min = -15,
+        step = 1,
+        isPercent = false,
+        arg = Addon.ConcatTables(widget_info, { "ShadowHorizontalOffset" }),
+      }),
+      ShadowYOffset = AddIfSettingExists({
+        type = "range",
+        order = 108,
+        name = L["Vertical Offset"],
+        max = 15,
+        min = -15,
+        step = 1,
+        isPercent = false,
+        arg = Addon.ConcatTables(widget_info, { "ShadowVerticalOffset" }),
+      }),
+    },
+  }
+
+  if entry.args.Color then
+    entry.args.Color.set = "SetColor"
+    entry.args.Color.width = "half"
+  end
+
+  if entry.args.Transparency then
+    entry.args.Transparency.set = function(info, val) func_set(func_handler, info, abs(val - 1)) end
+  end
+
+  if entry.args.ShadowColor then
+    entry.args.Spacer2 = GetSpacerEntry(104)
   end
 
   return entry
@@ -4758,16 +4882,35 @@ local function CreateLocalizationSettings()
   return entry
 end
 
-local function CreateBlizzardSettings()
+local function CreateBlizzardNameplateSettings()
 -- nameplateGlobalScale
   -- rmove /tptp command for stacking, not-stacking nameplates
   -- don'T allow to change all cvar related values in Combat, either by using the correct CVarTPTP function
   -- or by disabling the options in this case
+  local func_handler = {
+    SetValue = function(self, info, val)
+      SetValuePlain(info, val)    
+      if Addon.db.profile.BlizzardNameplates.Names.Enabled then
+        Addon.Font:SetNamesFonts()
+      else
+        Addon.Font:ResetNamesFonts()
+      end
+    end,
+    SetColor = function(self, info, r, g, b) 
+      SetColor(info, r, g, b) 
+      Addon.Font:SetNamesFonts()
+    end,
+    SetColorAlpha = function(self, info, r, g, b, a) 
+      SetColorAlpha(info, r, g, b, a) 
+      Addon.Font:SetNamesFonts()
+    end,
+  }
 
   local entry = {
     name = L["Blizzard Settings"],
     order = 140,
     type = "group",
+    handler = func_handler,
     set = SetCVarTPTP,
     get = GetCVarTPTP,
     -- diable while in Combat - überprüfen
@@ -5131,6 +5274,42 @@ local function CreateBlizzardSettings()
           },
         },
       },
+      NamesFont = {
+        name = L["Names Font"],
+        order = 47,
+        type = "group",
+        inline = true,
+        set = "SetValue",
+        get = GetValue,
+        args = {
+          Notice = {
+            name = L["The font for unit names can only be changed if nameplates and names are be enabled for these units. Names can be enabled in \"Game Menu - Interface - Names\"."],
+            order = 1,
+            type = "description",
+            width = "full",
+          },
+          Enable = {
+            name = L["Enable"],
+            order = 2,
+            type = "toggle",
+            arg = { "BlizzardNameplates", "Names", "Enabled" },
+          },
+          ShowOnlyNames = {
+            name = L["Show Only Names"],
+            order = 10,
+            type = "toggle",
+            width = "double",
+            set = function(info, val)
+              SetCVarBoolTPTP(info, val)
+              ReloadUI()
+            end,
+            get = GetCVarBoolTPTP,
+            desc = L["Show only unit names and hide nameplate bars (requires /reload)."],
+            arg = "nameplateShowOnlyNames",            
+          },
+          Font = GetFontEntryHandler(L["Font"], 20, { "BlizzardNameplates", "Names" }, nil, func_handler)
+        },
+      },      
       Reset = {
         name = L["Reset"],
         order = 50,
@@ -5150,11 +5329,17 @@ local function CreateBlizzardSettings()
                   "nameplateOtherTopInset", "nameplateOtherBottomInset", "nameplateLargeTopInset", "nameplateLargeBottomInset",
                   "nameplateMotion", "nameplateMotionSpeed", "nameplateOverlapH", "nameplateOverlapV",
                   "nameplateMaxDistance", "nameplateTargetBehindMaxDistance",
+                  "nameplateShowOnlyNames", 
                   -- "nameplateGlobalScale" -- Reset it to 1, if it get's somehow corrupted
                 }
                 if Addon.IS_CLASSIC then
                   cvars[#cvars + 1] = "clampTargetNameplateToScreen"
                 end
+
+                if not (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC) then            
+                  cvars[#cvars + 1] = "nameplateResourceOnTarget"
+                end
+
                 for k, v in pairs(cvars) do
                   Addon.CVars:SetToDefault(v)
                 end
@@ -8081,12 +8266,16 @@ end
 
 -- Return the Options table
 local function CreateOptionsTable()
+  local func_handler = {
+    SetColorAlpha = function(self, info, r, g, b, a) SetColorAlpha(info, r, g, b, a) end,
+  }
+
   if not options then
     options = {
       name = GetAddOnMetadata("TidyPlates_ThreatPlates", "title"),
-      handler = TidyPlatesThreat,
       type = "group",
       childGroups = "tab",
+      handler = func_handler,
       get = GetValue,
       set = SetValue,
       args = {
@@ -9186,7 +9375,7 @@ local function CreateOptionsTable()
             },
             RaidMarks = CreateRaidMarksOptions(),
             LocalizationSettings = CreateLocalizationSettings(),
-            BlizzardSettings = CreateBlizzardSettings(),
+            BlizzardNameplateSettings = CreateBlizzardNameplateSettings(),
 --            TestSettings = {
 --              name = "Test Settings",
 --              type = "group",

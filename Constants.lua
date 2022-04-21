@@ -1464,6 +1464,20 @@ ThreatPlates.DEFAULT_SETTINGS = {
       HideBuffs = false,
       ShowResourceOnTarget = false,
     },
+    BlizzardNameplates = {
+      Names = {
+        Enabled = false,
+        Font = {
+          Typeface = Addon.DEFAULT_FONT,
+          Size = 10,
+          flags = "OUTLINE",
+          Shadow = true,
+          ShadowColor = RGB(0, 0, 0, 1),
+          ShadowHorizontalOffset = 1,
+          ShadowVerticalOffset = -1,
+        },
+      },
+    },
     totemSettings = GetDefaultTotemSettings(),
     uniqueSettings = {
       ["**"] = {

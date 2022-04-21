@@ -21,6 +21,7 @@ local NamePlateDriverFrame = NamePlateDriverFrame
 local TidyPlatesThreat = TidyPlatesThreat
 local LibStub = LibStub
 local L = Addon.ThreatPlates.L
+local CVars = Addon.CVars
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -514,6 +515,7 @@ function TidyPlatesThreat:PLAYER_ENTERING_WORLD()
   -- Adjust clickable area if we are in an instance. Otherwise the scaling of friendly nameplates' healthbars will
   -- be bugged
   Addon:SetBaseNamePlateSize()
+  Addon.Font:SetNamesFonts()
 end
 
 --function TidyPlatesThreat:PLAYER_LEAVING_WORLD()
