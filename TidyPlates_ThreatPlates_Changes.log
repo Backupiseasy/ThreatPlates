@@ -1,12 +1,19 @@
 ﻿------------------------------------------------------
-10.4.04 (2022-03-12)
+10.4.0 (2022-04-xx)
 ------------------------------------------------------
 * Added a feature to change the name font of Blizzard nameplates and hide the healthbar (to only show unit names), e.g., while in instances.
 
 ------------------------------------------------------
-10.3.4 (2022-03-12)
+10.3.5 (2022-04-22)
+------------------------------------------------------
+* Disabled some threat value types when not in a group as their value is constant in this case and does not provide any valuable information.
+* Updated TOC version for for Classic Patch 1.14.3.
+
+------------------------------------------------------
+10.3.4 (2022-03-28)
 ------------------------------------------------------
 * Fixed a Lua error when a numeric CVar has an invalid, i.e., non-numeric, value. In this case, the default value of the CVar will now be used to prevent the Lua error.
+* Updated TOC version for for TBC Classic Patch 2.5.4.
 
 ------------------------------------------------------
 10.3.3 (2022-03-12)
