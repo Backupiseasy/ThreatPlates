@@ -1,5 +1,5 @@
 ﻿------------------------------------------------------
-10.3.4 (2022-04-)
+10.3.5 (2022-04-22)
 ------------------------------------------------------
 * Disabled some threat value types when not in a group as their value is constant in this case and does not provide any valuable information.
 * Updated TOC version for for Classic Patch 1.14.3.
