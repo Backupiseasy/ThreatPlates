@@ -4882,7 +4882,7 @@ local function CreateLocalizationSettings()
   return entry
 end
 
-local function CreateBlizzardNameplateSettings()
+local function CreateBlizzardSettings()
 -- nameplateGlobalScale
   -- rmove /tptp command for stacking, not-stacking nameplates
   -- don'T allow to change all cvar related values in Combat, either by using the correct CVarTPTP function
@@ -4890,7 +4890,7 @@ local function CreateBlizzardNameplateSettings()
   local func_handler = {
     SetValue = function(self, info, val)
       SetValuePlain(info, val)    
-      if Addon.db.profile.BlizzardNameplates.Names.Enabled then
+      if Addon.db.profile.BlizzardSettings.Names.Enabled then
         Addon.Font:SetNamesFonts()
       else
         Addon.Font:ResetNamesFonts()
@@ -5292,7 +5292,7 @@ local function CreateBlizzardNameplateSettings()
             name = L["Enable"],
             order = 2,
             type = "toggle",
-            arg = { "BlizzardNameplates", "Names", "Enabled" },
+            arg = { "BlizzardSettings", "Names", "Enabled" },
           },
           ShowOnlyNames = {
             name = L["Show Only Names"],
@@ -5307,7 +5307,7 @@ local function CreateBlizzardNameplateSettings()
             desc = L["Show only unit names and hide nameplate bars (requires /reload)."],
             arg = "nameplateShowOnlyNames",            
           },
-          Font = GetFontEntryHandler(L["Font"], 20, { "BlizzardNameplates", "Names" }, nil, func_handler)
+          Font = GetFontEntryHandler(L["Font"], 20, { "BlizzardSettings", "Names" }, nil, func_handler)
         },
       },      
       Reset = {
@@ -9375,7 +9375,7 @@ local function CreateOptionsTable()
             },
             RaidMarks = CreateRaidMarksOptions(),
             LocalizationSettings = CreateLocalizationSettings(),
-            BlizzardNameplateSettings = CreateBlizzardNameplateSettings(),
+            BlizzardSettings = CreateBlizzardSettings(),
 --            TestSettings = {
 --              name = "Test Settings",
 --              type = "group",

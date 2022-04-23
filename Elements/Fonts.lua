@@ -114,7 +114,7 @@ local function UpdateSystemFont(obj, db)
 end
 
 function Font:SetNamesFonts()
-  local db = Addon.db.profile.BlizzardNameplates.Names
+  local db = Addon.db.profile.BlizzardSettings.Names
   if db.Enabled then
     db = db.Font
     UpdateSystemFont(SystemFont_NamePlate, db)
@@ -142,6 +142,6 @@ end
 
 function Font:UpdateConfiguration()
   if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC then
-    SettingsShowOnlyNames = GetCVarBool("nameplateShowOnlyNames") and Addon.db.profile.BlizzardNameplates.Names.Enabled
+    SettingsShowOnlyNames = GetCVarBool("nameplateShowOnlyNames") and Addon.db.profile.BlizzardSettings.Names.Enabled
   end
 end

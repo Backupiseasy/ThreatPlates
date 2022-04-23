@@ -1464,7 +1464,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
       HideBuffs = false,
       ShowResourceOnTarget = false,
     },
-    BlizzardNameplates = {
+    BlizzardSettings = {
       Names = {
         Enabled = false,
         Font = {
