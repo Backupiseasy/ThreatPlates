@@ -385,7 +385,7 @@ function TidyPlatesThreat:OnEnable()
   Addon:CheckForIncompatibleAddons()
 
   if not (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC) then
-    Addon.CVars:OverwriteBoolProtected("nameplateResourceOnTarget", Addon.db.profile.PersonalNameplate.ShowResourceOnTarget)
+    CVars:OverwriteBoolProtected("nameplateResourceOnTarget", Addon.db.profile.PersonalNameplate.ShowResourceOnTarget)
   end
 
   Addon.LoadOnDemandLibraries()
@@ -405,7 +405,7 @@ function TidyPlatesThreat:OnDisable()
   DisableEvents()
 
   -- Reset all CVars to its initial values
-  -- Addon.CVars:RestoreAllFromProfile()
+  -- CVars:RestoreAllFromProfile()
 end
 
 function Addon:CallbackWhenOoC(func, msg)
@@ -489,9 +489,9 @@ function TidyPlatesThreat:PLAYER_ENTERING_WORLD()
   local db = Addon.db.profile.questWidget
   if not (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC) then
     if db.ON or db.ShowInHeadlineView then
-      Addon.CVars:Set("showQuestTrackingTooltips", 1)
+      CVars:Set("showQuestTrackingTooltips", 1)
     else
-      Addon.CVars:RestoreFromProfile("showQuestTrackingTooltips")
+      CVars:RestoreFromProfile("showQuestTrackingTooltips")
     end
   end
 
@@ -502,11 +502,37 @@ function TidyPlatesThreat:PLAYER_ENTERING_WORLD()
   Addon.IsInPvEInstance = isInstance and (instance_type == "party" or instance_type == "raid")
   Addon.IsInPvPInstance = isInstance and (instance_type == "arena" or instance_type == "pvp")
 
-  if Addon.IsInPvEInstance and db.HideFriendlyUnitsInInstances then
-    Addon.CVars:Set("nameplateShowFriends", 0)
-  else
-    -- reset to previous setting
-    Addon.CVars:RestoreFromProfile("nameplateShowFriends")
+  if db.ShowFriendlyUnitsInInstances then
+    if Addon.IsInPvEInstance then
+      CVars:Set("nameplateShowFriends", 1)
+    else
+      -- Restore the value from before entering the instance
+      CVars:RestoreFromProfile("nameplateShowFriends")
+    end
+  elseif db.HideFriendlyUnitsInInstances then
+    if Addon.IsInPvEInstance then  
+      CVars:Set("nameplateShowFriends", 0)
+    else
+      -- Restore the value from before entering the instance
+      CVars:RestoreFromProfile("nameplateShowFriends")
+    end
+  end
+
+  if Addon.db.profile.BlizzardSettings.Names.ShowPlayersInInstances then
+    if Addon.IsInPvEInstance then  
+      CVars:Set("UnitNameFriendlyPlayerName", 1)
+      -- CVars:Set("UnitNameFriendlyPetName", 1)
+      -- CVars:Set("UnitNameFriendlyGuardianName", 1)
+      CVars:Set("UnitNameFriendlyTotemName", 1)
+      -- CVars:Set("UnitNameFriendlyMinionName", 1)
+    else
+      -- Restore the value from before entering the instance
+      CVars:RestoreFromProfile("UnitNameFriendlyPlayerName")
+      -- CVars:RestoreFromProfile("UnitNameFriendlyPetName")
+      -- CVars:RestoreFromProfile("UnitNameFriendlyGuardianName")
+      CVars:RestoreFromProfile("UnitNameFriendlyTotemName")
+      -- CVars:RestoreFromProfile("UnitNameFriendlyMinionName")
+    end  
   end
 
   -- Update custom styles for the current instance

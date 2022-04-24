@@ -4910,6 +4910,7 @@ local function CreateBlizzardSettings()
     name = L["Blizzard Settings"],
     order = 140,
     type = "group",
+    childGroups = "tab",
     handler = func_handler,
     set = SetCVarTPTP,
     get = GetCVarTPTP,
@@ -4927,395 +4928,6 @@ local function CreateBlizzardSettings()
             type = "description",
             width = "full",
           },
-        },
-      },
-      Resolution = {
-        name = L["UI Scale"],
-        order = 5,
-        type = "group",
-        inline = true,
-        args = {
-          UIScale = {
-            name = L["UI Scale"],
-            order = 10,
-            type = "range",
-            min = 0.64,
-            max = 1,
-            step = 0.01,
-            disabled = function() return db.Scale.IgnoreUIScale or db.Scale.PixelPerfectUI end,
-            arg = "uiScale",
-          },
-          IgnoreUIScale = {
-            name = L["Ignore UI Scale"],
-            order = 20,
-            type = "toggle",
-            set = function(info, val)
-              SetValuePlain(info, val)
-              db.Scale.PixelPerfectUI = not val and db.Scale.PixelPerfectUI
-              Addon:UIScaleChanged()
-              Addon:ForceUpdate()
-            end,
-            get = GetValue,
-            arg = { "Scale", "IgnoreUIScale" },
-          },
-          PixelPerfectUI = {
-            name = L["Pixel-Perfect UI"],
-            order = 30,
-            type = "toggle",
-            set = function(info, val)
-              SetValuePlain(info, val)
-              db.Scale.IgnoreUIScale = not val and db.Scale.IgnoreUIScale
-              Addon:UIScaleChanged()
-              Addon:ForceUpdate()
-            end,
-            get = GetValue,
-            arg = { "Scale", "PixelPerfectUI" },
-          },
-        },
-      },
-      Clickarea = {
-        name = L["Clickable Area"],
-        order = 10,
-        type = "group",
-        inline = true,
-        set = SetValue,
-        get = GetValue,
-        disabled = function() return (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC) and (db.ShowFriendlyBlizzardNameplates or db.ShowEnemyBlizzardNameplates) end,
-        args = {
-          Description = {
-            type = "description",
-            order = 1,
-            name = L["Because of side effects with Blizzard nameplates, this function is disabled in instances or when Blizzard nameplates are used for friendly or neutral/enemy units (see General - Visibility)."],
-            hidden = function() return not Addon.IS_CLASSIC or not Addon.IS_TBC_CLASSIC or (not db.ShowFriendlyBlizzardNameplates and not db.ShowEnemyBlizzardNameplates) end,
-            width = "full",
-          },
-          ToggleSync = {
-            name = L["Healthbar Sync"],
-            order = 10,
-            type = "toggle",
-            desc = L["The size of the clickable area is always derived from the current size of the healthbar."],
-            set = function(info, val)
-              if InCombatLockdown() then
-                Addon.Logging.Error(L["We're unable to change this while in combat"])
-              else
-                SetValue(info, val)
-                Addon:SetBaseNamePlateSize()
-              end
-            end,
-            arg = { "settings", "frame", "SyncWithHealthbar"},
-          },
-          Width = {
-            name = L["Width"],
-            order = 20,
-            type = "range",
-            min = 1,
-            max = 500,
-            step = 1,
-            set = function(info, val)
-              if InCombatLockdown() then
-                Addon.Logging.Error(L["We're unable to change this while in combat"])
-              else
-                SetValue(info, val)
-                Addon:SetBaseNamePlateSize()
-              end
-            end,
-            disabled = function() return db.settings.frame.SyncWithHealthbar end,
-            arg = { "settings", "frame", "width" },
-          },
-          Height = {
-            name = L["Height"],
-            order = 30,
-            type = "range",
-            min = 1,
-            max = 100,
-            step = 1,
-            set = function(info, val)
-              if InCombatLockdown() then
-                Addon.Logging.Error(L["We're unable to change this while in combat"])
-              else
-                SetValue(info, val)
-                Addon:SetBaseNamePlateSize()
-              end
-            end,
-            disabled = function() return db.settings.frame.SyncWithHealthbar end,
-            arg = { "settings", "frame", "height"},
-          },
-          ShowArea = {
-            name = L["Configuration Mode"],
-            type = "execute",
-            order = 40,
-            desc = "Toggle a background showing the area of the clicable area.",
-            func = function()
-              Addon:ConfigClickableArea(true)
-            end,
-          }
-        },
-      },
-      Motion = {
-        name = L["Motion & Overlap"],
-        order = 20,
-        type = "group",
-        inline = true,
-        args = {
-          Motion = {
-            name = L["Movement Model"],
-            order = 10,
-            type = "select",
-            desc = L["Defines the movement/collision model for nameplates."],
-            values = { Overlapping = L["Overlapping"], Stacking = L["Stacking"] },
-            set = function(info, value) SetCVarTPTP(info, (value == "Overlapping" and "0") or "1") end,
-            get = function(info) return (GetCVarBoolTPTP(info) and "Stacking") or "Overlapping" end,
-            arg = "nameplateMotion",
-          },
-          MotionSpeed = {
-            name = L["Motion Speed"],
-            order = 20,
-            type = "range",
-            min = 0,
-            max = 1,
-            step = 0.01,
-            desc = L["Controls the rate at which nameplate animates into their target locations [0.0-1.0]."],
-            arg = "nameplateMotionSpeed",
-          },
-          OverlapH = {
-            name = L["Horizontal Overlap"],
-            order = 30,
-            type = "range",
-            min = 0,
-            max = 1.5,
-            step = 0.01,
-            isPercent = true,
-            desc = L["Percentage amount for horizontal overlap of nameplates."],
-            arg = "nameplateOverlapH",
-          },
-          OverlapV = {
-            name = L["Vertical Overlap"],
-            order = 40,
-            type = "range",
-            min = 0,
-            max = 1.5,
-            step = 0.01,
-            isPercent = true,
-            desc = L["Percentage amount for vertical overlap of nameplates."],
-            arg = "nameplateOverlapV",
-          },
-        },
-      },
-      Distance = {
-        name = L["Distance"],
-        order = 30,
-        type = "group",
-        inline = true,
-        args = {
-          MaxDistance = {
-            name = L["Max Distance"],
-            order = 10,
-            type = "range",
-            min = 0,
-            max = (Addon.IS_CLASSIC  and 20) or (Addon.IS_TBC_CLASSIC and 41) or 100,
-            step = 1,
-            width = "double",
-            desc = L["The max distance to show nameplates."],
-            arg = "nameplateMaxDistance",
-          },
-          MaxDistanceBehindCam = {
-            name = L["Max Distance Behind Camera"],
-            order = 20,
-            type = "range",
-            min = 0,
-            max = 100,
-            step = 1,
-            width = "double",
-            desc = L["The max distance to show the target nameplate when the target is behind the camera."],
-            arg = "nameplateTargetBehindMaxDistance",
-          },
-        },
-      },
-      Insets = {
-        name = L["Insets"],
-        order = 40,
-        type = "group",
-        inline = true,
-        args = {
-          OtherTopInset = {
-            name = L["Top Inset"],
-            order = 10,
-            type = "range",
-            min = -0.2,
-            max = 0.3,
-            step = 0.01,
-            isPercent = true,
-            desc = L["The inset from the top (in screen percent) that the non-self nameplates are clamped to."],
-            arg = "nameplateOtherTopInset",
-          },
-          OtherBottomInset = {
-            name = L["Bottom Inset"],
-            order = 20,
-            type = "range",
-            min = -0.2,
-            max = 0.3,
-            step = 0.01,
-            isPercent = true,
-            desc = L["The inset from the bottom (in screen percent) that the non-self nameplates are clamped to."],
-            arg = "nameplateOtherBottomInset",
-          },
-          LargeTopInset = {
-            name = L["Large Top Inset"],
-            order = 30,
-            type = "range",
-            min = -0.2,
-            max = 0.3,
-            step = 0.01,
-            isPercent = true,
-            desc = L["The inset from the top (in screen percent) that large nameplates are clamped to."],
-            arg = "nameplateLargeTopInset",
-          },
-          LargeBottomInset = {
-            name = L["Large Bottom Inset"],
-            order = 40,
-            type = "range",
-            min = -0.2,
-            max = 0.3,
-            step = 0.01,
-            isPercent = true,
-            desc = L["The inset from the bottom (in screen percent) that large nameplates are clamped to."],
-            arg = "nameplateLargeBottomInset",
-          },
-          ClampTarget = {
-            name = L["Clamp Target Nameplate to Screen"],
-            order = 50,
-            type = "toggle",
-            width = "double",
-            set = SetCVarBoolTPTP,
-            get = GetCVarBoolTPTP,
-            desc = L["Clamps the target's nameplate to the edges of the screen, even if the target is off-screen."],
-            arg = "clampTargetNameplateToScreen",
-            hidden = function() return not Addon.IS_CLASSIC end,
-          },
-        },
-      },
---      Alpha = {
---        name = L["Alpha"],
---        order = 43,
---        type = "group",
---        inline = true,
---        args = {
---          OccludedUnits = {
---            name = L["Mult for Occluded Units"],
---            order = 10,
---            type = "range",
---            min = -10,
---            max = 10,
---            step = 0.01,
---            isPercent = false,
---            set = function(info, value) SetCVarTPTP(info, value); Addon:ForceUpdate() end,
---            desc = L["Alpha multiplier of nameplates for occluded units."],
---            arg = "nameplateOccludedAlphaMult",
---          },
---          MinAlpha = {
---            name = L["Min Alpha"],
---            order = 20,
---            type = "range",
---            min = 0,
---            max = 1,
---            step = 0.01,
---            isPercent = false,
---            set = function(info, value) SetCVarTPTP(info, value); Addon:ForceUpdate() end,
---            desc = L["The minimum alpha of nameplates."],
---            arg = "nameplateMinAlpha",
---          },
---          MaxAlpha = {
---            name = L["Max Alpha"],
---            order = 30,
---            type = "range",
---            min = 0,
---            max = 1,
---            step = 0.01,
---            isPercent = false,
---            set = function(info, value) SetCVarTPTP(info, value); Addon:ForceUpdate() end,
---            desc = L["The max alpha of nameplates."],
---            arg = "nameplateMaxAlpha",
---          },
---        },
---      },
-      PersonalNameplate = {
-        name = L["Personal Nameplate"],
-        order = 45,
-        type = "group",
-        inline = true,
-        hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC end,
-        args = {
-          HideBuffs = {
-            type = "toggle",
-            order = 10,
-            name = L["Hide Buffs"],
-            set = function(info, val)
-              db.PersonalNameplate.HideBuffs = val
-              local plate = C_NamePlate.GetNamePlateForUnit("player")
-              if plate and plate:IsShown() then
-                plate.UnitFrame.BuffFrame:SetShown(not val)
-              end
-            end,
-            get = GetValue,
-            arg = { "PersonalNameplate", "HideBuffs"},
-          },
-          ShowResources = {
-            type = "toggle",
-            order = 20,
-            name = L["Resources on Targets"],
-            desc = L["Enable this if you want to show Blizzards special resources above the target nameplate."],
-            width = "double",
-            set = function(info, val)
-              SetValuePlain(info, val)
-              Addon.CVars:OverwriteBoolProtected("nameplateResourceOnTarget", val)
-            end,
-            get = GetValue,
-            arg = { "PersonalNameplate", "ShowResourceOnTarget"},
-          },
-        },
-      },
-      NamesFont = {
-        name = L["Names Font"],
-        order = 47,
-        type = "group",
-        inline = true,
-        set = "SetValue",
-        get = GetValue,
-        args = {
-          Notice = {
-            name = L["The font for unit names can only be changed if nameplates and names are be enabled for these units. Names can be enabled in \"Game Menu - Interface - Names\"."],
-            order = 1,
-            type = "description",
-            width = "full",
-          },
-          Enable = {
-            name = L["Enable"],
-            order = 2,
-            type = "toggle",
-            arg = { "BlizzardSettings", "Names", "Enabled" },
-          },
-          ShowOnlyNames = {
-            name = L["Show Only Names"],
-            order = 10,
-            type = "toggle",
-            width = "double",
-            set = function(info, val)
-              SetCVarBoolTPTP(info, val)
-              ReloadUI()
-            end,
-            get = GetCVarBoolTPTP,
-            desc = L["Show only unit names and hide nameplate bars (requires /reload)."],
-            arg = "nameplateShowOnlyNames",            
-          },
-          Font = GetFontEntryHandler(L["Font"], 20, { "BlizzardSettings", "Names" }, nil, func_handler)
-        },
-      },      
-      Reset = {
-        name = L["Reset"],
-        order = 50,
-        type = "group",
-        inline = true,
-        args = {
           Reset = {
             name = L["Reset to Defaults"],
             order = 10,
@@ -5359,8 +4971,437 @@ local function CreateBlizzardSettings()
           },
         },
       },
+      -- Reset = {
+      --   name = L["Reset"],
+      --   order = 10,
+      --   type = "group",
+      --   inline = true,
+      --   args = {
+      --     Reset = {
+      --       name = L["Reset to Defaults"],
+      --       order = 10,
+      --       type = "execute",
+      --       width = "double",
+      --       func = function()
+      --         if InCombatLockdown() then
+      --           Addon.Logging.Error(L["We're unable to change this while in combat"])
+      --         else
+      --           local cvars = {
+      --             "nameplateOtherTopInset", "nameplateOtherBottomInset", "nameplateLargeTopInset", "nameplateLargeBottomInset",
+      --             "nameplateMotion", "nameplateMotionSpeed", "nameplateOverlapH", "nameplateOverlapV",
+      --             "nameplateMaxDistance", "nameplateTargetBehindMaxDistance",
+      --             "nameplateShowOnlyNames", 
+      --             -- "nameplateGlobalScale" -- Reset it to 1, if it get's somehow corrupted
+      --           }
+      --           if Addon.IS_CLASSIC then
+      --             cvars[#cvars + 1] = "clampTargetNameplateToScreen"
+      --           end
+
+      --           if not (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC) then            
+      --             cvars[#cvars + 1] = "nameplateResourceOnTarget"
+      --           end
+
+      --           for k, v in pairs(cvars) do
+      --             Addon.CVars:SetToDefault(v)
+      --           end
+      --           Addon:ForceUpdate()
+      --         end
+      --       end,
+      --     },
+      --     OpenBlizzardSettings = {
+      --       name = L["Open Blizzard Settings"],
+      --       order = 20,
+      --       type = "execute",
+      --       width = "double",
+      --       func = function()
+      --         InterfaceOptionsFrame_OpenToCategory(_G["InterfaceOptionsNamesPanel"])
+      --         Addon.LibAceConfigDialog:Close("Threat Plates");
+      --       end,
+      --     },
+      --   },
+      -- },      
+      Display = {
+        name = L["Display"],
+        order = 20,
+        type = "group",
+        inline = false,
+        args = {
+          Resolution = {
+            name = L["UI Scale"],
+            order = 5,
+            type = "group",
+            inline = true,
+            args = {
+              UIScale = {
+                name = L["UI Scale"],
+                order = 10,
+                type = "range",
+                min = 0.64,
+                max = 1,
+                step = 0.01,
+                disabled = function() return db.Scale.IgnoreUIScale or db.Scale.PixelPerfectUI end,
+                arg = "uiScale",
+              },
+              IgnoreUIScale = {
+                name = L["Ignore UI Scale"],
+                order = 20,
+                type = "toggle",
+                set = function(info, val)
+                  SetValuePlain(info, val)
+                  db.Scale.PixelPerfectUI = not val and db.Scale.PixelPerfectUI
+                  Addon:UIScaleChanged()
+                  Addon:ForceUpdate()
+                end,
+                get = GetValue,
+                arg = { "Scale", "IgnoreUIScale" },
+              },
+              PixelPerfectUI = {
+                name = L["Pixel-Perfect UI"],
+                order = 30,
+                type = "toggle",
+                set = function(info, val)
+                  SetValuePlain(info, val)
+                  db.Scale.IgnoreUIScale = not val and db.Scale.IgnoreUIScale
+                  Addon:UIScaleChanged()
+                  Addon:ForceUpdate()
+                end,
+                get = GetValue,
+                arg = { "Scale", "PixelPerfectUI" },
+              },
+            },
+          },
+        },
+      },
+      Nameplates = {
+        name = L["Nameplates"],
+        order = 30,
+        type = "group",
+        inline = false,
+        args = {
+          Clickarea = {
+            name = L["Clickable Area"],
+            order = 10,
+            type = "group",
+            inline = true,
+            set = SetValue,
+            get = GetValue,
+            disabled = function() return (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC) and (db.ShowFriendlyBlizzardNameplates or db.ShowEnemyBlizzardNameplates) end,
+            args = {
+              Description = {
+                type = "description",
+                order = 1,
+                name = L["Because of side effects with Blizzard nameplates, this function is disabled in instances or when Blizzard nameplates are used for friendly or neutral/enemy units (see General - Visibility)."],
+                hidden = function() return not Addon.IS_CLASSIC or not Addon.IS_TBC_CLASSIC or (not db.ShowFriendlyBlizzardNameplates and not db.ShowEnemyBlizzardNameplates) end,
+                width = "full",
+              },
+              ToggleSync = {
+                name = L["Healthbar Sync"],
+                order = 10,
+                type = "toggle",
+                desc = L["The size of the clickable area is always derived from the current size of the healthbar."],
+                set = function(info, val)
+                  if InCombatLockdown() then
+                    Addon.Logging.Error(L["We're unable to change this while in combat"])
+                  else
+                    SetValue(info, val)
+                    Addon:SetBaseNamePlateSize()
+                  end
+                end,
+                arg = { "settings", "frame", "SyncWithHealthbar"},
+              },
+              Width = {
+                name = L["Width"],
+                order = 20,
+                type = "range",
+                min = 1,
+                max = 500,
+                step = 1,
+                set = function(info, val)
+                  if InCombatLockdown() then
+                    Addon.Logging.Error(L["We're unable to change this while in combat"])
+                  else
+                    SetValue(info, val)
+                    Addon:SetBaseNamePlateSize()
+                  end
+                end,
+                disabled = function() return db.settings.frame.SyncWithHealthbar end,
+                arg = { "settings", "frame", "width" },
+              },
+              Height = {
+                name = L["Height"],
+                order = 30,
+                type = "range",
+                min = 1,
+                max = 100,
+                step = 1,
+                set = function(info, val)
+                  if InCombatLockdown() then
+                    Addon.Logging.Error(L["We're unable to change this while in combat"])
+                  else
+                    SetValue(info, val)
+                    Addon:SetBaseNamePlateSize()
+                  end
+                end,
+                disabled = function() return db.settings.frame.SyncWithHealthbar end,
+                arg = { "settings", "frame", "height"},
+              },
+              ShowArea = {
+                name = L["Configuration Mode"],
+                type = "execute",
+                order = 40,
+                desc = "Toggle a background showing the area of the clicable area.",
+                func = function()
+                  Addon:ConfigClickableArea(true)
+                end,
+              }
+            },
+          },
+          Motion = {
+            name = L["Motion & Overlap"],
+            order = 20,
+            type = "group",
+            inline = true,
+            args = {
+              Motion = {
+                name = L["Movement Model"],
+                order = 10,
+                type = "select",
+                desc = L["Defines the movement/collision model for nameplates."],
+                values = { Overlapping = L["Overlapping"], Stacking = L["Stacking"] },
+                set = function(info, value) SetCVarTPTP(info, (value == "Overlapping" and "0") or "1") end,
+                get = function(info) return (GetCVarBoolTPTP(info) and "Stacking") or "Overlapping" end,
+                arg = "nameplateMotion",
+              },
+              MotionSpeed = {
+                name = L["Motion Speed"],
+                order = 20,
+                type = "range",
+                min = 0,
+                max = 1,
+                step = 0.01,
+                desc = L["Controls the rate at which nameplate animates into their target locations [0.0-1.0]."],
+                arg = "nameplateMotionSpeed",
+              },
+              OverlapH = {
+                name = L["Horizontal Overlap"],
+                order = 30,
+                type = "range",
+                min = 0,
+                max = 1.5,
+                step = 0.01,
+                isPercent = true,
+                desc = L["Percentage amount for horizontal overlap of nameplates."],
+                arg = "nameplateOverlapH",
+              },
+              OverlapV = {
+                name = L["Vertical Overlap"],
+                order = 40,
+                type = "range",
+                min = 0,
+                max = 1.5,
+                step = 0.01,
+                isPercent = true,
+                desc = L["Percentage amount for vertical overlap of nameplates."],
+                arg = "nameplateOverlapV",
+              },
+            },
+          },
+          Distance = {
+            name = L["Distance"],
+            order = 30,
+            type = "group",
+            inline = true,
+            args = {
+              MaxDistance = {
+                name = L["Max Distance"],
+                order = 10,
+                type = "range",
+                min = 0,
+                max = (Addon.IS_CLASSIC  and 20) or (Addon.IS_TBC_CLASSIC and 41) or 100,
+                step = 1,
+                width = "double",
+                desc = L["The max distance to show nameplates."],
+                arg = "nameplateMaxDistance",
+              },
+              MaxDistanceBehindCam = {
+                name = L["Max Distance Behind Camera"],
+                order = 20,
+                type = "range",
+                min = 0,
+                max = 100,
+                step = 1,
+                width = "double",
+                desc = L["The max distance to show the target nameplate when the target is behind the camera."],
+                arg = "nameplateTargetBehindMaxDistance",
+              },
+            },
+          },
+          Insets = {
+            name = L["Insets"],
+            order = 40,
+            type = "group",
+            inline = true,
+            args = {
+              OtherTopInset = {
+                name = L["Top Inset"],
+                order = 10,
+                type = "range",
+                min = -0.2,
+                max = 0.3,
+                step = 0.01,
+                isPercent = true,
+                desc = L["The inset from the top (in screen percent) that the non-self nameplates are clamped to."],
+                arg = "nameplateOtherTopInset",
+              },
+              OtherBottomInset = {
+                name = L["Bottom Inset"],
+                order = 20,
+                type = "range",
+                min = -0.2,
+                max = 0.3,
+                step = 0.01,
+                isPercent = true,
+                desc = L["The inset from the bottom (in screen percent) that the non-self nameplates are clamped to."],
+                arg = "nameplateOtherBottomInset",
+              },
+              LargeTopInset = {
+                name = L["Large Top Inset"],
+                order = 30,
+                type = "range",
+                min = -0.2,
+                max = 0.3,
+                step = 0.01,
+                isPercent = true,
+                desc = L["The inset from the top (in screen percent) that large nameplates are clamped to."],
+                arg = "nameplateLargeTopInset",
+              },
+              LargeBottomInset = {
+                name = L["Large Bottom Inset"],
+                order = 40,
+                type = "range",
+                min = -0.2,
+                max = 0.3,
+                step = 0.01,
+                isPercent = true,
+                desc = L["The inset from the bottom (in screen percent) that large nameplates are clamped to."],
+                arg = "nameplateLargeBottomInset",
+              },
+              ClampTarget = {
+                name = L["Clamp Target Nameplate to Screen"],
+                order = 50,
+                type = "toggle",
+                width = "double",
+                set = SetCVarBoolTPTP,
+                get = GetCVarBoolTPTP,
+                desc = L["Clamps the target's nameplate to the edges of the screen, even if the target is off-screen."],
+                arg = "clampTargetNameplateToScreen",
+                hidden = function() return not Addon.IS_CLASSIC end,
+              },
+            },
+          },
+        },
+      },
+      PersonalNameplate = {
+        name = L["Personal Nameplate"],
+        order = 45,
+        type = "group",
+        inline = false,
+        hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC end,
+        args = {
+          HideBuffs = {
+            type = "toggle",
+            order = 10,
+            name = L["Hide Buffs"],
+            set = function(info, val)
+              db.PersonalNameplate.HideBuffs = val
+              local plate = C_NamePlate.GetNamePlateForUnit("player")
+              if plate and plate:IsShown() then
+                plate.UnitFrame.BuffFrame:SetShown(not val)
+              end
+            end,
+            get = GetValue,
+            arg = { "PersonalNameplate", "HideBuffs"},
+          },
+          ShowResources = {
+            type = "toggle",
+            order = 20,
+            name = L["Resources on Targets"],
+            desc = L["Enable this if you want to show Blizzards special resources above the target nameplate."],
+            width = "double",
+            set = function(info, val)
+              SetValuePlain(info, val)
+              Addon.CVars:OverwriteBoolProtected("nameplateResourceOnTarget", val)
+            end,
+            get = GetValue,
+            arg = { "PersonalNameplate", "ShowResourceOnTarget"},
+          },
+        },
+      },
+      Names = {
+        name = L["Names"],
+        order = 47,
+        type = "group",
+        inline = false,
+        set = "SetValue",
+        get = GetValue,
+        args = {
+          Show = {
+            name = L["Show"],
+            order = 10,
+            type = "group",
+            inline = true,
+            set = "SetValue",
+            get = GetValue,
+            args = {
+              ShowOnlyNames = {
+                name = L["Only Names"],
+                order = 30,
+                type = "toggle",
+                set = function(info, val)
+                  SetCVarBoolTPTP(info, val)
+                  ReloadUI()
+                end,
+                get = GetCVarBoolTPTP,
+                desc = L["Show only unit names and hide nameplate bars (requires /reload)."],
+                arg = "nameplateShowOnlyNames",            
+              },
+              DebuffsOnFriendly = {
+                name = L["Debuffs on Friendly"],
+                order = 40,
+                type = "toggle",
+                set = SetCVarBoolTPTP,
+                get = GetCVarBoolTPTP,
+                arg = "nameplateShowDebuffsOnFriendly",            
+              },
+              OnlyInInstances = {
+                type = "toggle",
+                name = L["Players in Instances"],
+                order = 50,
+                desc = L["Show friendly players' and totems' names in instances."],
+                arg = { "BlizzardSettings", "Names", "ShowPlayersInInstances" },
+              },
+            },
+          },
+          Font = GetFontEntryHandler(L["Font"], 20, { "BlizzardSettings", "Names" }, nil, func_handler)
+        },
+      },   
     },
     --  ["ShowNamePlateLoseAggroFlash"] = "When enabled, if you are a tank role and lose aggro, the nameplate with briefly flash.",
+  }
+
+  entry.args.Names.args.Font.args.Notice = {
+    name = L["The font for unit names can only be changed if nameplates and names are be enabled for these units. Names can be enabled in \"Game Menu - Interface - Names\"."],
+    order = 1,
+    type = "description",
+    width = "full",
+  }
+
+  entry.args.Names.args.Font.args.Enable = {
+    name = L["Enable"],
+    order = 2,
+    type = "toggle",
+    width = "full",
+    arg = { "BlizzardSettings", "Names", "Enabled" },
   }
 
   return entry
@@ -5613,11 +5654,31 @@ local function CreateAutomationSettings()
         inline = true,
         set = SyncGameSettingsWorld,
         args = {
-          HideFriendlyInInstances = {
-            name = L["Hide Friendly Nameplates"],
-            order = 60,
+          ShowFriendlyInInstances = {
+            name = L["Show Friendly Nameplates"],
+            order = 10,
             type = "toggle",
             width = "double",
+            set = function(info, val)
+              if val then
+                Addon.db.profile.Automation.HideFriendlyUnitsInInstances = false
+              end
+              SyncGameSettingsWorld(info, val)
+            end,
+            desc = L["Show the Blizzard default nameplates for friendly units in instances."],
+            arg = { "Automation", "ShowFriendlyUnitsInInstances" },
+          },
+          HideFriendlyInInstances = {
+            name = L["Hide Friendly Nameplates"],
+            order = 20,
+            type = "toggle",
+            width = "double",
+            set = function(info, val)
+              if val then
+                Addon.db.profile.Automation.ShowFriendlyUnitsInInstances = false
+              end
+              SyncGameSettingsWorld(info, val)
+            end,
             desc = L["Hide the Blizzard default nameplates for friendly units in instances."],
             arg = { "Automation", "HideFriendlyUnitsInInstances" },
           },

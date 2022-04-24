@@ -469,6 +469,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
       EnemyUnits = "NONE",
       -- SmallPlatesInInstances = false, -- Removed in 10.1.7
       HideFriendlyUnitsInInstances = false,
+      ShowFriendlyUnitsInInstances = false,
     },
     Scale = {
       IgnoreUIScale = true,
@@ -1467,6 +1468,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
     BlizzardSettings = {
       Names = {
         Enabled = false,
+        ShowPlayersInInstances = true,
         Font = {
           Typeface = Addon.DEFAULT_FONT,
           Size = 10,
