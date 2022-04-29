@@ -1247,6 +1247,23 @@ local function MigrateFixAurasCyclicAnchoring(_, profile)
   end
 end
 
+local function MigrateThreatValue(_, profile)
+  local default_profile = ThreatPlates.DEFAULT_SETTINGS.profile
+
+  if DatabaseEntryExists(profile, { "threatWidget", "ThreatPercentage" } ) then
+    profile.threatWidget.ThreatPercentage.ShowInGroups = GetValueOrDefault(profile.threatWidget.ThreatPercentage.OnlyInGroups, default_profile.threatWidget.ThreatPercentage.OnlyInGroups)
+    print (profile.threatWidget.ThreatPercentage.Show)
+    if profile.threatWidget.ThreatPercentage.Show == false then
+      profile.threatWidget.ThreatPercentage.ShowAlways = false -- is also the default value
+      profile.threatWidget.ThreatPercentage.ShowInGroups = false
+      profile.threatWidget.ThreatPercentage.ShowWithPet = false
+    end
+  end
+
+  DatabaseEntryDelete(profile, { "threatWidget", "ThreatPercentage", "Show" })
+  DatabaseEntryDelete(profile, { "threatWidget", "ThreatPercentage", "OnlyInGroups" })
+end
+
 local TEST_FUNCTIONS = {
   MigrateFixAurasCyclicAnchoring = MigrateFixAurasCyclicAnchoring
 }
@@ -1310,7 +1327,8 @@ local DEPRECATED_SETTINGS = {
   { DisableShowBlizzardAurasForClassic, "10.2.1", Version = (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC) },
   { MigrateAurasWidgetV2, "10.3.0-beta2", NoDefaultProfile = true , CleanupDatabase = true },
   { "AuraWidget", "scale" },  -- Removed in 10.3.0
-  { MigrateFixAurasCyclicAnchoring, "10.3.1", NoDefaultProfile = true , CleanupDatabase = true },
+  { MigrateFixAurasCyclicAnchoring, "10.3.1", NoDefaultProfile = true, CleanupDatabase = true },
+  { MigrateThreatValue, "10.3.6", NoDefaultProfile = true, CleanupDatabase = true },
 }
 
 local function MigrateDatabase(current_version)

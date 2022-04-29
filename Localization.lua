@@ -43,6 +43,26 @@ if MAP_FONT[client_locale] then
 end
 
 ---------------------------------------------------------------------------------------------------
+-- Totem names
+---------------------------------------------------------------------------------------------------
+
+local TOTEM_CREATURE_TYPE = {
+  enUS = "Totem",
+  deDE = "Totem",
+  esES = "Tótem",
+  esMX = "Totém",
+  frFR = "Totem",
+  itIT = "Totem",
+  ptBR = "Totem",
+  ruRU = "Тотем",
+  koKR = "토템",
+  zhCN = "图腾",
+  zhTW = "圖騰",
+}
+
+Addon.TotemCreatureType = TOTEM_CREATURE_TYPE[client_locale] or TOTEM_CREATURE_TYPE["enUS"]
+
+---------------------------------------------------------------------------------------------------
 -- Determine correct number units: Western or East Asian Nations (CJK)
 ---------------------------------------------------------------------------------------------------
 

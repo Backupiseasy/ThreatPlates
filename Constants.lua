@@ -1167,12 +1167,13 @@ ThreatPlates.DEFAULT_SETTINGS = {
       y = 26,
       anchor = "CENTER",
       ThreatPercentage = {
-        Show = true,
         CustomColor = RGB(255, 255, 255),
         UseThreatColor = true,
         Type = "SCALED_PERCENTAGE",
         SecondPlayersName = true,
-        OnlyInGroups = true,
+        ShowAlways = false,
+        ShowInGroups = true,
+        ShowWithPet = true,
         -- Layout
         Anchor = "LEFT",
         InsideAnchor = false,
