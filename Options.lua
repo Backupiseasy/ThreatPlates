@@ -1506,9 +1506,9 @@ end
 --     InsideAnchor = false,
 --     HorizontalOffset = 0,
 --     VerticalOffset = -2,
---     AutoSizeing
+--     AutoSizing = true,
+--     WordWrap
 --     Width = 345,
---     MaxLines = 4534,
 --   } 
 local function GetTextEntry(name, pos, widget_info)
   local arg_auto_sizing = Addon.ConcatTables(widget_info, { "AutoSizing" })
@@ -6477,91 +6477,121 @@ local function CreateSpecRolesClassic()
 end
 
 local function CreateThreatPercentageOptions()
-  local entry = GetTextEntry(L["Value"], 60, { "threatWidget", "ThreatPercentage" })
-
-  entry.disabled = function() return not db.threat.ON end
-  entry.set = SetValueWidget
-
-  entry.args.ValueType = {
-    name = L["Value Type"],
-    order = 5,
-    type = "select",
-    values = Addon.THREAT_VALUE_TYPE,
-    style = "radio",
-    desc = L["Show the player's threat percentage (scaled or raw) or threat delta to the second player on the threat table (percentage or threat value) against the enemy unit."],
-    arg = { "threatWidget", "ThreatPercentage", "Type" },
-  }
-
-  entry.args.SecondPlayersName = {
-    name = L["Second Player"],
-    type = "toggle",
-    order = 6,
-    desc = L["In delta mode, show the name of the player who is second in the enemy unit's threat table."],
-    arg = { "threatWidget", "ThreatPercentage", "SecondPlayersName" },
-  }
-
-  entry.args.OnlyInGroups = {
-    name = L["Only in Groups"],
-    type = "toggle",
-    order = 7,
-    arg = { "threatWidget", "ThreatPercentage", "OnlyInGroups" },
-  }
-
-      --ScaledPercentage = {
-      --  name = L["Scaled Percentage"],
-      --  type = "toggle",
-      --  order = 10,
-      --  desc = L["Show the player's threat percentage against the enemy unit."],
-      --  arg = { "threatWidget", "ThreatPercentage", "ThreatPercentage" },
-      --},
-      --RawPercentage = {
-      --  name = L["Raw Percentage"],
-      --  type = "toggle",
-      --  order = 20,
-      --  desc = L["Show the player's threat percentage against the enemy unit relative to the threat of enemy unit's primary target."],
-      --  arg = { "threatWidget", "ThreatPercentage", "ThreatPercentage" },
-      --},
-      --DetailedPercentage = {
-      --  name = L["Detailed Percentage"],
-      --  type = "toggle",
-      --  order = 30,
-      --  desc = L["Show the player's total threat value on the enemy unit."],
-      --  arg = { "threatWidget", "ThreatPercentage", "ThreatPercentage" },
-      --},
-
-  entry.args.Coloring = {
-    name = L["Coloring"],
-    order = 30,
+  local entry = {
+    name = L["Value"],
     type = "group",
-    inline = true,
+    inline = false,
+    order = 60,
     set = SetValueWidget,
-    args = {
-      UseThreatColorToggle = {
-        name = L["Use Threat Color"],
-        order = 70,
-        type = "toggle",
-        arg = { "threatWidget", "ThreatPercentage", "UseThreatColor" },
+    disabled = function() return not db.threat.ON end,
+    args = { 
+      Show = {
+        name = L["Show"],
+        type = "group",
+        inline = true,
+        order = 10,
+        args = { 
+          Always = {
+            name = L["Always"],
+            type = "toggle",
+            order = 10,
+            set = function(info, val)
+              if val then
+                db.threatWidget.ThreatPercentage.ShowInGroups = false
+                db.threatWidget.ThreatPercentage.ShowWithPet = false
+              end
+              SetValueWidget(info, val)
+            end,
+            arg = { "threatWidget", "ThreatPercentage", "ShowAlways" },
+          },
+          InGroups = {
+            name = L["In Groups"],
+            type = "toggle",
+            order = 20,
+            set = function(info, val)
+              if val then
+                db.threatWidget.ThreatPercentage.ShowAlways = false
+              end
+              SetValueWidget(info, val)
+            end,
+            arg = { "threatWidget", "ThreatPercentage", "ShowInGroups" },
+          },
+          WithPets = {
+            name = L["With Pet"],
+            type = "toggle",
+            order = 30,
+            set = function(info, val)
+              if val then
+                db.threatWidget.ThreatPercentage.ShowAlways = false
+              end
+              SetValueWidget(info, val)
+            end,
+            arg = { "threatWidget", "ThreatPercentage", "ShowWithPet" },
+          },
+        },
       },
-      CustomColorToggle = {
-        name = L["Custom"],
-        order = 80,
-        type = "toggle",
-        set = function(info, val) SetValueWidget(info, not val) end,
-        get = function(info, val) return not GetValue(info, val) end,
-        arg = { "threatWidget", "ThreatPercentage", "UseThreatColor" },
+      ValueType = {
+        name = L["Value Type"],
+        order = 20,
+        type = "select",
+        values = Addon.THREAT_VALUE_TYPE,
+        style = "radio",
+        desc = L["Show the player's threat percentage (scaled or raw) or threat delta to the second player on the threat table (percentage or threat value) against the enemy unit."],
+        arg = { "threatWidget", "ThreatPercentage", "Type" },
       },
-      CustomColor = {
-        name = L["Color"],
-        type = "color",
-        order = 90,
-        get = GetColor,
-        set = SetColorWidget,
-        hasAlpha = true,
-        arg = { "threatWidget", "ThreatPercentage", "CustomColor"},
-        disabled = function() return db.threatWidget.ThreatPercentage.UseThreatColor end
+      ValueFormat = {
+        name = L["Value Format"],
+        type = "group",
+        inline = true,
+        order = 30,
+        args = { 
+          SecondPlayersName = {
+            name = L["Second Player's Name"],
+            type = "toggle",
+            order = 10,
+            width = "double",
+            desc = L["In delta mode, show the name of the player who is second in the enemy unit's threat table."],
+            arg = { "threatWidget", "ThreatPercentage", "SecondPlayersName" },
+          },
+        },
+      },
+      Font = GetFontEntryDefault(L["Font"], 40, { "threatWidget", "ThreatPercentage" }),
+      Positioning = GetFontPositioningEntry(50, { "threatWidget", "ThreatPercentage" }),
+      Coloring = {
+        name = L["Coloring"],
+        order = 60,
+        type = "group",
+        inline = true,
+        args = {
+          UseThreatColorToggle = {
+            name = L["Use Threat Color"],
+            order = 70,
+            type = "toggle",
+            arg = { "threatWidget", "ThreatPercentage", "UseThreatColor" },
+          },
+          CustomColorToggle = {
+            name = L["Custom"],
+            order = 80,
+            type = "toggle",
+            set = function(info, val) SetValueWidget(info, not val) end,
+            get = function(info, val) return not GetValue(info, val) end,
+            arg = { "threatWidget", "ThreatPercentage", "UseThreatColor" },
+          },
+          CustomColor = {
+            name = L["Color"],
+            type = "color",
+            order = 90,
+            get = GetColor,
+            set = SetColorWidget,
+            hasAlpha = true,
+            arg = { "threatWidget", "ThreatPercentage", "CustomColor"},
+            disabled = function() return db.threatWidget.ThreatPercentage.UseThreatColor end,
+          },
+        },
       },
     },
   }
+
   return entry
 end
 
