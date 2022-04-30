@@ -75,7 +75,6 @@ end
 
 function Widget:GROUP_ROSTER_UPDATE()
   PlayerIsInGroup = IsInGroup()
-  print ("GROUP_ROSTER_UPDATE", PlayerIsInGroup)
 end
 
 ---------------------------------------------------------------------------------------------------
