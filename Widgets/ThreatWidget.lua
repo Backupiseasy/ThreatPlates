@@ -49,6 +49,11 @@ local REVERSE_THREAT_SITUATION = {
 local Settings, SettingsArt, ThreatColors, ThreatDetailsFunction
 
 ---------------------------------------------------------------------------------------------------
+-- Local variables
+---------------------------------------------------------------------------------------------------
+local PlayerIsInGroup = false
+
+---------------------------------------------------------------------------------------------------
 -- Event handling stuff
 ---------------------------------------------------------------------------------------------------
 
@@ -66,6 +71,10 @@ end
 
 function Widget:RAID_TARGET_UPDATE()
   self:UpdateAllFrames()
+end
+
+function Widget:GROUP_ROSTER_UPDATE()
+  PlayerIsInGroup = IsInGroup()
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -102,11 +111,13 @@ end
 function Widget:OnEnable()
   self:RegisterEvent("UNIT_THREAT_LIST_UPDATE")
   self:RegisterEvent("RAID_TARGET_UPDATE")
+  self:RegisterEvent("GROUP_ROSTER_UPDATE")
 end
 
 function Widget:OnDisable()
   self:UnregisterEvent("UNIT_THREAT_LIST_UPDATE")
   self:UnregisterEvent("RAID_TARGET_UPDATE")
+  self:UnregisterEvent("GROUP_ROSTER_UPDATE")
 end
 
 function Widget:EnabledForStyle(style, unit)
@@ -189,10 +200,8 @@ local function GetTopThreatUnitBesidesPlayer(unitid, threat_value_func)
 end
 
 local function GetTankThreatPercentage(unitid, db_threat_value)
-  if not IsInGroup() then return nil, nil end
-
   local is_tanking, status, scaled_percentage, _, _ = UnitDetailedThreatSituation("player", unitid)
-  if status == nil then return nil, nil end
+  if status == nil then return end
 
   local threat_value_text = ""
   local threat_value_delta = 0
@@ -220,10 +229,8 @@ local function GetTankThreatPercentage(unitid, db_threat_value)
 end
 
 local function GetTankThreatValue(unitid, db_threat_value)
-  if not IsInGroup() then return nil, nil end
-
   local is_tanking, status, scaled_percentage, _, threat_value = UnitDetailedThreatSituation("player", unitid)
-  if status == nil then return nil, nil end
+  if status == nil then return end
 
   local threat_value_text = ""
   local threat_value_delta = 0
@@ -261,7 +268,7 @@ local function GetThreatDelta(unitid, threat_value_func)
   local threat_value_text = ""
   local threat_value_delta = 0
 
-  if IsInGroup() then
+  if PlayerIsInGroup then
     -- If player is tanking, other unit will be the unit and its threat value that is second on the threat table
     -- If the player is not tanking, other unit will be the tanking unit and its threat value
     local other_unitid, other_threat_value, other_threat_unit_name = GetTopThreatUnitBesidesPlayer(unitid, threat_value_func)
@@ -294,30 +301,30 @@ local function GetThreatValueDelta(unitid, db_threat_value)
 end
 
 local function GetThreatPercentageDelta(unitid, db_threat_value)
-  if not IsInGroup() then return nil, nil end
-
   local threat_value_text, threat_value_delta = GetThreatDelta(unitid, GetUnitThreatPercentage)
   return threat_value_delta ~= nil, threat_value_text .. string_format("%.0f%%", threat_value_delta)
 end
 
+-- local function ShowThreatValue() 
+--   return IsInGroup() or UnitExists("pet")
+-- end
+
+-- local function HideThreatValue() 
+--   --return not IsInGroup() and not UnitExists("pet")
+--   print ("PetGuardianCounter", PetGuardianCounter)
+--   return not IsInGroup() and not UnitExists("pet") and PetGuardianCounter == 0
+-- end
+
 local THREAT_DETAILS_FUNTIONS = {
   SCALED_PERCENTAGE = function(unitid)
-    if not IsInGroup() then return nil, nil end
-
     local _, status, scaled_percentage, _, _ = UnitDetailedThreatSituation("player", unitid)
-    if status == nil then 
-      return nil, nil 
-    else
+    if status then 
       return status, string_format("%.0f%%", scaled_percentage)
     end
   end,
   RAW_PERCENTAGE = function(unitid)
-    if not IsInGroup() then return nil, nil end
-
     local _, status, _, raw_percentage, _ = UnitDetailedThreatSituation("player", unitid)
-    if status == nil then 
-      return nil, nil 
-    else
+    if status then 
       return status, string_format("%.0f%%", raw_percentage)
     end
   end,
@@ -373,7 +380,7 @@ function Widget:UpdateFrame(widget_frame, unit)
   end
 
   local db_threat_value = Settings.ThreatPercentage
-  if db_threat_value.Show and (not db_threat_value.OnlyInGroups or IsInGroup()) then
+  if db_threat_value.ShowAlways or (db_threat_value.ShowInGroups and PlayerIsInGroup) or (db_threat_value.ShowWithPet and UnitExists("pet")) then
     local status, percentage_text = ThreatDetailsFunction(unit.unitid, db_threat_value)
     if status ~= nil then
       widget_frame.Percentage:SetText(percentage_text)
