@@ -298,12 +298,16 @@ end
 
 local function GetThreatValueDelta(unitid, db_threat_value)
   local threat_value_text, threat_value_delta = GetThreatDelta(unitid, GetUnitThreatValue)
-  return threat_value_delta ~= nil, threat_value_text .. Addon.Truncate(threat_value_delta)
+  if threat_value_delta then
+    return threat_value_delta, threat_value_text .. Addon.Truncate(threat_value_delta)
+  end
 end
 
 local function GetThreatPercentageDelta(unitid, db_threat_value)
   local threat_value_text, threat_value_delta = GetThreatDelta(unitid, GetUnitThreatPercentage)
-  return threat_value_delta ~= nil, threat_value_text .. string_format("%.0f%%", threat_value_delta)
+  if threat_value_delta then
+    return threat_value_delta, threat_value_text .. string_format("%.0f%%", threat_value_delta)
+  end
 end
 
 -- local function ShowThreatValue() 
