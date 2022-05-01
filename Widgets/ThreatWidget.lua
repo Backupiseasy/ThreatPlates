@@ -105,7 +105,8 @@ function Widget:Create(tp_frame)
 end
 
 function Widget:IsEnabled()
-  return Addon.db.profile.threat.art.ON or Addon.db.profile.threatWidget.ThreatPercentage.Show
+  local db = Addon.db.profile.threatWidget.ThreatPercentage
+  return Addon.db.profile.threat.art.ON or db.ShowAlways or db.ShowInGroups or db.ShowWithPet
 end
 
 function Widget:OnEnable()
