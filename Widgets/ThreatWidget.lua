@@ -261,6 +261,7 @@ end
 
 local function GetThreatDelta(unitid, threat_value_func)
   local is_tanking, status, threat_value = threat_value_func("player", unitid)
+  if status == nil then return end
 
   local threat_value_text = ""
   local threat_value_delta = 0
