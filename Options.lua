@@ -6654,6 +6654,209 @@ local function CreateCastbarOptions()
   return entry
 end
 
+local function CreateNamesOptions()
+  local entry = {
+    name = L["Names"],
+    type = "group",
+    order = 65,
+    childGroups = "tab",
+    args = {
+      Appearance = {
+        name = L["Appearance"],
+        order = 10,
+        type = "group",
+        inline = false,
+        args = {
+          Enable = GetEnableEntryTheme(L["Show Name Text"], L["This option allows you to control whether a unit's name is hidden or shown on nameplates."], "name"),
+          Show = {
+            name = L["Show"],
+            order = 10,
+            type = "group",
+            inline = true,
+            args = {
+              Title = {
+                name = L["Title"],
+                order = 10,
+                type = "toggle",
+                arg = { "settings", "name", "ShowTitle" },
+              },
+              Realm = {
+                name = L["Realm"],
+                order = 20,
+                type = "toggle",
+                arg = { "settings", "name", "ShowRealm" },
+              },
+              -- PvPRank = {
+              --   name = L["PvP Rank"],
+              --   order = 30,
+              --   type = "toggle",
+              --   arg = { "settings", "name", "ShowPvPRank" },
+              --   hidden = function() return not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC end,
+              -- },
+            },
+          },
+          Boundaries = GetBoundariesEntry(20, "name"),
+        },
+      },
+      HealthbarView = {
+        name = L["Healthbar View"],
+        order = 20,
+        type = "group",
+        inline = false,
+        args = {
+          Font = GetFontEntryTheme(10, "name"),
+          Color = {
+            name = L["Colors"],
+            order = 20,
+            type = "group",
+            inline = true,
+            set = SetThemeValue,
+            args = {
+              FriendlyColor = {
+                name = L["Friendly Name Color"],
+                order = 10,
+                type = "select",
+                values = t.FRIENDLY_TEXT_COLOR,
+                arg = { "settings", "name", "FriendlyTextColorMode" }
+              },
+              FriendlyColorCustom = GetColorEntry(L["Custom Color"], 20, { "settings", "name", "FriendlyTextColor" }),
+              EnemyColor = {
+                name = L["Enemy Name Color"],
+                order = 30,
+                type = "select",
+                values = t.ENEMY_TEXT_COLOR,
+                arg = { "settings", "name", "EnemyTextColorMode" }
+              },
+              EnemyColorCustom = GetColorEntry(L["Custom Color"], 40, { "settings", "name", "EnemyTextColor" }),
+              Spacer1 = GetSpacerEntry(50),
+              EnableRaidMarks = {
+                name = L["Color by Target Mark"],
+                order = 60,
+                type = "toggle",
+                width = "full",
+                desc = L["Additionally color the name based on the target mark if the unit is marked."],
+                descStyle = "inline",
+                set = SetValue,
+                arg = { "settings", "name", "UseRaidMarkColoring" },
+              },
+            },
+          },
+          Placement = {
+            name = L["Placement"],
+            order = 30,
+            type = "group",
+            inline = true,
+            args = {
+              X = { name = L["X"], type = "range", order = 1, set = SetThemeValue, arg = { "settings", "name", "x" }, max = 120, min = -120, step = 1, isPercent = false, },
+              Y = { name = L["Y"], type = "range", order = 2, set = SetThemeValue, arg = { "settings", "name", "y" }, max = 120, min = -120, step = 1, isPercent = false, },
+              AlignH = { name = L["Horizontal Align"], type = "select", order = 4, values = t.AlignH, set = SetThemeValue, arg = { "settings", "name", "align" }, },
+              AlignV = { name = L["Vertical Align"], type = "select", order = 5, values = t.AlignV, set = SetThemeValue, arg = { "settings", "name", "vertical" }, },
+            },
+          },
+          Abbreviation = {
+            name = L["Abbreviation"],
+            order = 60,
+            type = "group",
+            inline = true,
+            args = {
+              NameAbbreviationForEnemyUnits = {
+                name = L["Enemy Units"],
+                order = 10,
+                type = "select",
+                values = t.NAME_ABBREVIATION,
+                arg = { "settings", "name", "AbbreviationForEnemyUnits" },
+              },
+              NameAbbreviationForFriendlyUnits = {
+                name = L["Friendly Units"],
+                order = 10,
+                type = "select",
+                values = t.NAME_ABBREVIATION,
+                arg = { "settings", "name", "AbbreviationForFriendlyUnits" },
+              },
+            },
+          },
+        },
+      },
+      HeadlineView = {
+        name = L["Headline View"],
+        order = 30,
+        type = "group",
+        inline = false,
+        args = {
+          Font = {
+            name = L["Font"],
+            type = "group",
+            inline = true,
+            order = 10,
+            args = {
+              Size = {
+                name = L["Size"],
+                order = 20,
+                type = "range",
+                set = SetThemeValue,
+                arg = { "HeadlineView", "name", "size" },
+                max = 36,
+                min = 6,
+                step = 1,
+                isPercent = false,
+              },
+            },
+          },
+          Color = {
+            name = L["Colors"],
+            order = 20,
+            type = "group",
+            inline = true,
+            args = {
+              FriendlyColor = {
+                name = L["Friendly Names Color"],
+                order = 10,
+                type = "select",
+                values = t.FRIENDLY_TEXT_COLOR,
+                arg = { "HeadlineView", "FriendlyTextColorMode" }
+              },
+              FriendlyColorCustom = GetColorEntry(L["Custom Color"], 20, { "HeadlineView", "FriendlyTextColor" }),
+              EnemyColor = {
+                name = L["Enemy Name Color"],
+                order = 30,
+                type = "select",
+                values = t.ENEMY_TEXT_COLOR,
+                arg = { "HeadlineView", "EnemyTextColorMode" }
+              },
+              EnemyColorCustom = GetColorEntry(L["Custom Color"], 40, { "HeadlineView", "EnemyTextColor" }),
+              Spacer1 = GetSpacerEntry(50),
+              EnableRaidMarks = {
+                name = L["Color by Target Mark"],
+                order = 60,
+                type = "toggle",
+                width = "full",
+                desc = L["Additionally color the name based on the target mark if the unit is marked."],
+                descStyle = "inline",
+                set = SetValue,
+                arg = { "HeadlineView", "UseRaidMarkColoring" },
+              },
+            },
+          },
+          Placement = {
+            name = L["Placement"],
+            order = 30,
+            type = "group",
+            inline = true,
+            args = {
+              X = { name = L["X"], type = "range", order = 1, set = SetThemeValue, arg = { "HeadlineView", "name", "x" }, max = 120, min = -120, step = 1, isPercent = false, },
+              Y = { name = L["Y"], type = "range", order = 2, set = SetThemeValue, arg = { "HeadlineView", "name", "y" }, max = 120, min = -120, step = 1, isPercent = false, },
+              AlignH = { name = L["Horizontal Align"], type = "select", order = 4, values = t.AlignH, set = SetThemeValue, arg = { "HeadlineView", "name", "align" }, },
+              AlignV = { name = L["Vertical Align"], type = "select", order = 5, values = t.AlignV, set = SetThemeValue, arg = { "HeadlineView", "name", "vertical" }, },
+            },
+          },
+        },
+      },
+    },
+  }
+
+  return entry
+end
+
 local function CreateWidgetOptions()
   local options = {
     name = L["Widgets"],
@@ -8819,168 +9022,7 @@ local function CreateOptionsTable()
                 },
               },
             },
-            Names = {
-              name = L["Names"],
-              type = "group",
-              order = 65,
-              args = {
-                HealthbarView = {
-                  name = L["Healthbar View"],
-                  order = 10,
-                  type = "group",
-                  inline = true,
-                  args = {
-                    Enable = GetEnableEntryTheme(L["Show Name Text"], L["This option allows you to control whether a unit's name is hidden or shown on nameplates."], "name"),
-                    Font = GetFontEntryTheme(10, "name"),
-                    Color = {
-                      name = L["Colors"],
-                      order = 20,
-                      type = "group",
-                      inline = true,
-                      set = SetThemeValue,
-                      args = {
-                        FriendlyColor = {
-                          name = L["Friendly Name Color"],
-                          order = 10,
-                          type = "select",
-                          values = t.FRIENDLY_TEXT_COLOR,
-                          arg = { "settings", "name", "FriendlyTextColorMode" }
-                        },
-                        FriendlyColorCustom = GetColorEntry(L["Custom Color"], 20, { "settings", "name", "FriendlyTextColor" }),
-                        EnemyColor = {
-                          name = L["Enemy Name Color"],
-                          order = 30,
-                          type = "select",
-                          values = t.ENEMY_TEXT_COLOR,
-                          arg = { "settings", "name", "EnemyTextColorMode" }
-                        },
-                        EnemyColorCustom = GetColorEntry(L["Custom Color"], 40, { "settings", "name", "EnemyTextColor" }),
-                        Spacer1 = GetSpacerEntry(50),
-                        EnableRaidMarks = {
-                          name = L["Color by Target Mark"],
-                          order = 60,
-                          type = "toggle",
-                          width = "full",
-                          desc = L["Additionally color the name based on the target mark if the unit is marked."],
-                          descStyle = "inline",
-                          set = SetValue,
-                          arg = { "settings", "name", "UseRaidMarkColoring" },
-                        },
-                      },
-                    },
-                    Placement = {
-                      name = L["Placement"],
-                      order = 30,
-                      type = "group",
-                      inline = true,
-                      args = {
-                        X = { name = L["X"], type = "range", order = 1, set = SetThemeValue, arg = { "settings", "name", "x" }, max = 120, min = -120, step = 1, isPercent = false, },
-                        Y = { name = L["Y"], type = "range", order = 2, set = SetThemeValue, arg = { "settings", "name", "y" }, max = 120, min = -120, step = 1, isPercent = false, },
-                        AlignH = { name = L["Horizontal Align"], type = "select", order = 4, values = t.AlignH, set = SetThemeValue, arg = { "settings", "name", "align" }, },
-                        AlignV = { name = L["Vertical Align"], type = "select", order = 5, values = t.AlignV, set = SetThemeValue, arg = { "settings", "name", "vertical" }, },
-                      },
-                    },
-                    Abbreviation = {
-                      name = L["Abbreviation"],
-                      order = 60,
-                      type = "group",
-                      inline = true,
-                      args = {
-                        NameAbbreviationForEnemyUnits = {
-                          name = L["Enemy Units"],
-                          order = 10,
-                          type = "select",
-                          values = t.NAME_ABBREVIATION,
-                          arg = { "settings", "name", "AbbreviationForEnemyUnits" },
-                        },
-                        NameAbbreviationForFriendlyUnits = {
-                          name = L["Friendly Units"],
-                          order = 10,
-                          type = "select",
-                          values = t.NAME_ABBREVIATION,
-                          arg = { "settings", "name", "AbbreviationForFriendlyUnits" },
-                        },
-                      },
-                    },
-                  },
-                },
-                HeadlineView = {
-                  name = L["Headline View"],
-                  order = 20,
-                  type = "group",
-                  inline = true,
-                  args = {
-                    Font = {
-                      name = L["Font"],
-                      type = "group",
-                      inline = true,
-                      order = 10,
-                      args = {
-                        Size = {
-                          name = L["Size"],
-                          order = 20,
-                          type = "range",
-                          set = SetThemeValue,
-                          arg = { "HeadlineView", "name", "size" },
-                          max = 36,
-                          min = 6,
-                          step = 1,
-                          isPercent = false,
-                        },
-                      },
-                    },
-                    Color = {
-                      name = L["Colors"],
-                      order = 20,
-                      type = "group",
-                      inline = true,
-                      args = {
-                        FriendlyColor = {
-                          name = L["Friendly Names Color"],
-                          order = 10,
-                          type = "select",
-                          values = t.FRIENDLY_TEXT_COLOR,
-                          arg = { "HeadlineView", "FriendlyTextColorMode" }
-                        },
-                        FriendlyColorCustom = GetColorEntry(L["Custom Color"], 20, { "HeadlineView", "FriendlyTextColor" }),
-                        EnemyColor = {
-                          name = L["Enemy Name Color"],
-                          order = 30,
-                          type = "select",
-                          values = t.ENEMY_TEXT_COLOR,
-                          arg = { "HeadlineView", "EnemyTextColorMode" }
-                        },
-                        EnemyColorCustom = GetColorEntry(L["Custom Color"], 40, { "HeadlineView", "EnemyTextColor" }),
-                        Spacer1 = GetSpacerEntry(50),
-                        EnableRaidMarks = {
-                          name = L["Color by Target Mark"],
-                          order = 60,
-                          type = "toggle",
-                          width = "full",
-                          desc = L["Additionally color the name based on the target mark if the unit is marked."],
-                          descStyle = "inline",
-                          set = SetValue,
-                          arg = { "HeadlineView", "UseRaidMarkColoring" },
-                        },
-                      },
-                    },
-                    Placement = {
-                      name = L["Placement"],
-                      order = 30,
-                      type = "group",
-                      inline = true,
-                      args = {
-                        X = { name = L["X"], type = "range", order = 1, set = SetThemeValue, arg = { "HeadlineView", "name", "x" }, max = 120, min = -120, step = 1, isPercent = false, },
-                        Y = { name = L["Y"], type = "range", order = 2, set = SetThemeValue, arg = { "HeadlineView", "name", "y" }, max = 120, min = -120, step = 1, isPercent = false, },
-                        AlignH = { name = L["Horizontal Align"], type = "select", order = 4, values = t.AlignH, set = SetThemeValue, arg = { "HeadlineView", "name", "align" }, },
-                        AlignV = { name = L["Vertical Align"], type = "select", order = 5, values = t.AlignV, set = SetThemeValue, arg = { "HeadlineView", "name", "vertical" }, },
-                      },
-                    },
-                  },
-                },
-                Boundaries = GetBoundariesEntry(30, "name"),
-              },
-            },
+            Names = CreateNamesOptions(),
             Statustext = {
               name = L["Status Text"],
               type = "group",

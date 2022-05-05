@@ -1705,6 +1705,8 @@ ThreatPlates.DEFAULT_SETTINGS = {
         y = 13,
         align = "CENTER",
         vertical = "CENTER",
+        ShowTitle = false,
+        ShowRealm = false,
         --
         EnemyTextColorMode = "CUSTOM",
         EnemyTextColor = RGB(255, 255, 255),

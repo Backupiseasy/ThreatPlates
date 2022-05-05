@@ -229,6 +229,28 @@ do
 end
 
 ---------------------------------------------------------------------------------------------------------------------
+-- Functions for setting unit attributes
+---------------------------------------------------------------------------------------------------------------------
+
+local function SetUnitAttributeName(unitid, unit_type)
+  local unit_name, realm = UnitName(unitid)
+
+  if unit_type == "PLAYER" then
+    local db = Addon.db.profile.settings.name
+
+    if db.ShowTitle then
+      unit_name = UnitPVPName(unitid)
+    end
+
+    if db.ShowRealm and realm then
+      unit_name = unit_name .. " - " .. realm
+    end
+  end
+
+  return unit_name
+end
+
+---------------------------------------------------------------------------------------------------------------------
 --  Nameplate Extension: Applies scripts, hooks, and adds additional frame variables and regions
 ---------------------------------------------------------------------------------------------------------------------
 do
@@ -405,7 +427,7 @@ do
 
     Addon:UpdateUnitIdentity(unit, unitid)
 
-    unit.name, _ = UnitName(unitid)
+    unit.name = SetUnitAttributeName(unitid, unit.type)
     unit.isCasting = false
     unit.IsInterrupted = false
     visual.castbar.FlashTime = 0  -- Set FlashTime to 0 so that the castbar is actually hidden (see statusbar OnHide hook function OnHideCastbar)
@@ -1106,7 +1128,7 @@ do
     -- Plate can be nil here, if unitid is party1, partypet4 or something like that
     if plate and plate.TPFrame.Active then
       UpdateReferences(plate)
-      unit.name, _ = UnitName(unitid)
+      unit.name = SetUnitAttributeName(unitid, unit.type)
 
       --Addon:UnitStyle_UnitType(extended, unit)
       local plate_style = Addon.UnitStyle_NameDependent(unit)
