@@ -286,6 +286,7 @@ local CROWD_CONTROL_SPELLS_RETAIL = {
   [204399] = LOC_STUN,          -- Stun aura from Earthfury (Honor)
   [196840] = PC_SNARE,          -- Frost Shock
   [204437] = LOC_STUN,          -- Lightning Lasso (Honor)
+  [305485] = LOC_STUN,          -- Lightning Lasso (Honor)
   -- [196834] = PC_SNARE,          -- Frostbrand - Not shown as ability is part of the rotation
   [197214] = LOC_INCAPACITATE,  -- Sundering
   -- [197385] = PC_SNARE,          -- Fury of Air - Not shown as too much uptime
