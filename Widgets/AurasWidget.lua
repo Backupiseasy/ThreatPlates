@@ -287,6 +287,7 @@ local CROWD_CONTROL_SPELLS_RETAIL = {
   [204399] = LOC_STUN,          -- Stun aura from Earthfury (Honor)
   [196840] = PC_SNARE,          -- Frost Shock
   [204437] = LOC_STUN,          -- Lightning Lasso (Honor)
+  [305485] = LOC_STUN,          -- Lightning Lasso (Honor)
   -- [196834] = PC_SNARE,          -- Frostbrand - Not shown as ability is part of the rotation
   [197214] = LOC_INCAPACITATE,  -- Sundering
   -- [197385] = PC_SNARE,          -- Fury of Air - Not shown as too much uptime
@@ -1560,6 +1561,7 @@ function Widget:UpdateAuraGridLayout(widget_frame, aura_type)
     aura_frame = aura_frame_list[i]
     if icon_mode then
       if aura_frame.Border then
+        aura_grid:UpdateAuraFramePosition(aura_frame_list, aura_grid_frame, aura_frame, i)
         aura_grid:UpdateAuraFrame(aura_frame)
       else
         aura_frame:Hide()
@@ -1567,6 +1569,7 @@ function Widget:UpdateAuraGridLayout(widget_frame, aura_type)
       end
     else
       if aura_frame.Statusbar then
+        aura_grid:UpdateAuraFramePosition(aura_frame_list, aura_grid_frame, aura_frame, i)
         aura_grid:UpdateAuraFrame(aura_frame)
       else
         aura_frame:Hide()
@@ -1881,6 +1884,18 @@ local function HideNonActiveAuras(self, aura_grid_frame, stop_highlight)
   end
 end
 
+local function UpdateAuraFramePosition(self, aura_frame_list, aura_grid_frame, aura_frame, no)
+  local align_layout = self.AlignLayout
+  aura_frame:ClearAllPoints()
+  if no == 1 then
+    aura_frame:SetPoint(align_layout[3], aura_grid_frame, self.AuraWidgetOffset * align_layout[5], (self.AuraWidgetOffset + self.RowSpacing) * align_layout[6])
+  elseif (no - 1) % self.Columns == 0 then
+    aura_frame:SetPoint(align_layout[3], aura_frame_list[no - self.Columns], align_layout[4], 0, self.RowSpacing * align_layout[6])
+  else
+    aura_frame:SetPoint(align_layout[1], aura_frame_list[no - 1], align_layout[2], self.ColumnSpacing * align_layout[5], 0)
+  end
+end
+
 local function GetAuraFrame(self, aura_grid_frame, no)
   local aura_frame_list = aura_grid_frame.AuraFrames
 
@@ -1889,16 +1904,7 @@ local function GetAuraFrame(self, aura_grid_frame, no)
     -- Should always be #aura_frame_list + 1
     aura_frame = self:CreateAuraFrame(aura_grid_frame)
 
-    local align_layout = self.AlignLayout
-    aura_frame:ClearAllPoints()
-    if no == 1 then
-      aura_frame:SetPoint(align_layout[3], aura_grid_frame, self.AuraWidgetOffset * align_layout[5], (self.AuraWidgetOffset + self.RowSpacing) * align_layout[6])
-    elseif (no - 1) % self.Columns == 0 then
-      aura_frame:SetPoint(align_layout[3], aura_frame_list[no - self.Columns], align_layout[4], 0, self.RowSpacing * align_layout[6])
-    else
-      aura_frame:SetPoint(align_layout[1], aura_frame_list[no - 1], align_layout[2], self.ColumnSpacing * align_layout[5], 0)
-    end
-
+    self:UpdateAuraFramePosition(aura_frame_list, aura_grid_frame, aura_frame, no)
     self:UpdateAuraFrame(aura_frame)
 
     aura_frame_list[no] = aura_frame
@@ -2473,6 +2479,7 @@ function Widget:UpdateSettingsIconMode(aura_type, filter)
 
   aura_grid.Create = CreateAuraGrid
   aura_grid.GetAuraFrame = GetAuraFrame
+  aura_grid.UpdateAuraFramePosition = UpdateAuraFramePosition
   aura_grid.HideNonActiveAuras = HideNonActiveAuras
 end
 
@@ -2530,6 +2537,7 @@ function Widget:UpdateSettingsBarMode(aura_type, filter)
 
   aura_grid.Create = CreateAuraGrid
   aura_grid.GetAuraFrame = GetAuraFrame
+  aura_grid.UpdateAuraFramePosition = UpdateAuraFramePosition
   aura_grid.HideNonActiveAuras = HideNonActiveAuras
 end
 
