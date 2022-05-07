@@ -54,6 +54,12 @@ local COMBAT_PROTECTED = {
   nameplateShowFriendlyNPCs = true,
   nameplateShowFriendlyPets = true,
   nameplateShowFriendlyTotems = true,
+  -- Name CVars
+  UnitNameFriendlyPlayerName = true,
+  UnitNameFriendlyPetName = true,
+  UnitNameFriendlyGuardianName = true,
+  UnitNameFriendlyTotemName = true,
+  UnitNameFriendlyMinionName = true,
 }
 
 local function SetConsoleVariable(cvar, value)

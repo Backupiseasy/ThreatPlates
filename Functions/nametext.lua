@@ -23,7 +23,7 @@ function Addon:SetNameText(unit)
  
   -- Full names in headline view
   local style = unit.style
-  if style == "NameOnly" or style == "NameOnly-Unique" then
+  if unit.type == "PLAYER" or style == "NameOnly" or style == "NameOnly-Unique" then
     return unit_name
   end
 

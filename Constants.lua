@@ -469,6 +469,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
       EnemyUnits = "NONE",
       -- SmallPlatesInInstances = false, -- Removed in 10.1.7
       HideFriendlyUnitsInInstances = false,
+      ShowFriendlyUnitsInInstances = false,
     },
     Scale = {
       IgnoreUIScale = true,
@@ -1465,6 +1466,21 @@ ThreatPlates.DEFAULT_SETTINGS = {
       HideBuffs = false,
       ShowResourceOnTarget = false,
     },
+    BlizzardSettings = {
+      Names = {
+        Enabled = false,
+        ShowPlayersInInstances = true,
+        Font = {
+          Typeface = Addon.DEFAULT_FONT,
+          Size = 10,
+          flags = "OUTLINE",
+          Shadow = true,
+          ShadowColor = RGB(0, 0, 0, 1),
+          ShadowHorizontalOffset = 1,
+          ShadowVerticalOffset = -1,
+        },
+      },
+    },
     totemSettings = GetDefaultTotemSettings(),
     uniqueSettings = {
       ["**"] = {
@@ -1689,6 +1705,8 @@ ThreatPlates.DEFAULT_SETTINGS = {
         y = 13,
         align = "CENTER",
         vertical = "CENTER",
+        ShowTitle = false,
+        ShowRealm = false,
         --
         EnemyTextColorMode = "CUSTOM",
         EnemyTextColor = RGB(255, 255, 255),

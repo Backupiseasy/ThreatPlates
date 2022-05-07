@@ -1,6 +1,5 @@
 # @project-version@ (@build-time@)
 
-* Added options to configure in detail when to show the threat value (e.g., when a pet is active) [Comment #6154, Issue #536]. 
-* Fixed a bug where players or non-totem player-controlled units were shown as totems if their name was the same as a player totem's name [Comment #6146].
-* Fixed a bug where changing the colum and row limits of aura areas only took effect after reloading the UI [Comment #6169].
-* Fixed a bug with Lightning Lasso from Shamans not being recognized as CC aura [Comment #6182, Issue #541].
+* Added a feature to change the name font of Blizzard nameplates and hide the healthbar (to only show unit names), e.g., while in instances.
+* Added an option to show title and realm in a player's name [Comment #3952, #1995, #4164, #6140, TPC#496, Issue #312, #432].
+* Integrated new UNIT_AURA processing optimizations to improve unit aura processing in encounters where many nameplates are on screen at once [Comment #6114]. 

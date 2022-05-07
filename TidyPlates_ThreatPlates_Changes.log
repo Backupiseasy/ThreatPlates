@@ -1,4 +1,11 @@
 ﻿------------------------------------------------------
+10.4.0 (2022-04-xx)
+------------------------------------------------------
+* Added a feature to change the name font of Blizzard nameplates and hide the healthbar (to only show unit names), e.g., while in instances.
+* Added an option to show title and realm in a player's name [Comment #3952, #1995, #4164, #6140, TPC#496, Issue #312, #432].
+* Integrated new UNIT_AURA processing optimizations to improve unit aura processing in encounters where many nameplates are on screen at once [Comment #6114]. 
+
+------------------------------------------------------
 10.3.6 (2022-05-xx)
 ------------------------------------------------------
 * Added options to configure in detail when to show the threat value (e.g., when a pet is active) [Comment #6154, Issue #536]. 
@@ -130,8 +137,8 @@
 ------------------------------------------------------
 10.2.1 (2021-05-25)
 ------------------------------------------------------
-* Fixed a bug with delayed health update in the TBC Classic Version because of a change in how health update events were processed [Comment TBC#742, #5992, Issue #490].
-* Fixed a bug with crowd-control auras being shown as debuff (e.g., with wrong size) [Comment #5589, TBC#744].
+* Fixed a bug with delayed health update in the TBC Classic Version because of a change in how health update events were processed [Comment TPC#742, #5992, Issue #490].
+* Fixed a bug with crowd-control auras being shown as debuff (e.g., with wrong size) [Comment #5589, TPC#744].
 
 ------------------------------------------------------
 10.2.0 (2021-05-17)
