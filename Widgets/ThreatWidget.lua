@@ -75,7 +75,6 @@ end
 
 function Widget:GROUP_ROSTER_UPDATE()
   PlayerIsInGroup = IsInGroup()
-  print ("GROUP_ROSTER_UPDATE", PlayerIsInGroup)
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -106,7 +105,8 @@ function Widget:Create(tp_frame)
 end
 
 function Widget:IsEnabled()
-  return Addon.db.profile.threat.art.ON or Addon.db.profile.threatWidget.ThreatPercentage.Show
+  local db = Addon.db.profile.threatWidget.ThreatPercentage
+  return Addon.db.profile.threat.art.ON or db.ShowAlways or db.ShowInGroups or db.ShowWithPet
 end
 
 function Widget:OnEnable()
@@ -265,7 +265,8 @@ end
 
 local function GetThreatDelta(unitid, threat_value_func)
   local is_tanking, status, threat_value = threat_value_func("player", unitid)
-
+  if status == nil then return end
+  
   local threat_value_text = ""
   local threat_value_delta = 0
 
@@ -298,12 +299,16 @@ end
 
 local function GetThreatValueDelta(unitid, db_threat_value)
   local threat_value_text, threat_value_delta = GetThreatDelta(unitid, GetUnitThreatValue)
-  return threat_value_delta ~= nil, threat_value_text .. Addon.Truncate(threat_value_delta)
+  if threat_value_delta then
+    return threat_value_delta, threat_value_text .. Addon.Truncate(threat_value_delta)
+  end
 end
 
 local function GetThreatPercentageDelta(unitid, db_threat_value)
   local threat_value_text, threat_value_delta = GetThreatDelta(unitid, GetUnitThreatPercentage)
-  return threat_value_delta ~= nil, threat_value_text .. string_format("%.0f%%", threat_value_delta)
+  if threat_value_delta then
+    return threat_value_delta, threat_value_text .. string_format("%.0f%%", threat_value_delta)
+  end
 end
 
 -- local function ShowThreatValue() 
