@@ -147,6 +147,8 @@ L["All on NPCs"] = "Todos los PNJs"
 L["Allow"] = "Permitir"
 L["Alpha"] = "Alfa"
 L["Alpha multiplier of nameplates for occluded units."] = "Multiplicador alfa de placas identificativas para unidades ocluidas."
+--[[Translation missing --]]
+L["Always"] = "Always"
 L["Always Show Nameplates"] = "Siempre mostrar placas identificativas"
 L["Always shows the full amount of absorbs on a unit. In overabsorb situations, the absorbs bar ist shifted to the left."] = "Siempre muestra la cantidad total de absorciones en una unidad. En situaciones de exceso de absorción, la barra de absorción se desplaza hacia la izquierda."
 L["Amount"] = "Cantidad"
@@ -297,6 +299,8 @@ L["Custom Friendly Status Text"] = "Texto de estado amigable personalizado"
 L["Custom Nameplates"] = "Placas Identificativas Personalizadas"
 L["Custom status text requires LibDogTag-3.0 to function."] = "El texto de estado personalizado requiere LibDogTag-3.0 para funcionar."
 L["Custom status text requires LibDogTag-Unit-3.0 to function."] = "El texto de estado personalizado requiere LibDogTag-Unit-3.0 para funcionar."
+--[[Translation missing --]]
+L["CVar \"%s\" has an invalid value: \"%s\". The value must be a number. Using the default value for this CVar instead."] = "CVar \"%s\" has an invalid value: \"%s\". The value must be a number. Using the default value for this CVar instead."
 --[[Translation missing --]]
 L["Cyclic anchoring of aura areas to each other is not possible."] = "Cyclic anchoring of aura areas to each other is not possible."
 L["Darnavan"] = "Darnavan"
@@ -543,6 +547,8 @@ L["In combat, always show all combo points no matter if they are on or off. Off 
 L["In combat, use coloring, transparency, and scaling based on threat level as configured in the threat system. Custom settings are only used out of combat."] = "En combate, use colores, transparencias y escalas basadas en el nivel de amenaza configurado en el sistema de amenazas. La configuración personalizada solo se usa fuera de combate."
 --[[Translation missing --]]
 L["In delta mode, show the name of the player who is second in the enemy unit's threat table."] = "In delta mode, show the name of the player who is second in the enemy unit's threat table."
+--[[Translation missing --]]
+L["In Groups"] = "In Groups"
 L["In Instances"] = "En Instancias"
 --[[Translation missing --]]
 L["Initials"] = "Initials"
@@ -1074,6 +1080,8 @@ L["Val'kyr Shadowguard"] = "Guardia de las Sombras Val'kyr"
 --[[Translation missing --]]
 L["Value"] = "Value"
 --[[Translation missing --]]
+L["Value Format"] = "Value Format"
+--[[Translation missing --]]
 L["Value Type"] = "Value Type"
 L["Venomous Snake"] = "Serpiente venenosa"
 L["Vertical Align"] = "Alinear Vertical"
@@ -1093,6 +1101,8 @@ L["Wide"] = "Ancho"
 L["Widgets"] = "Artilugio"
 L["Width"] = "Anchura"
 L["Windwalker Monk"] = "Monje viajero del viento"
+--[[Translation missing --]]
+L["With Pet"] = "With Pet"
 --[[Translation missing --]]
 L["Word Wrap"] = "Word Wrap"
 --[[Translation missing --]]

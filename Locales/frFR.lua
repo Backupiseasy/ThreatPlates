@@ -218,6 +218,8 @@ L["Alpha"] = "Alpha"
 --[[Translation missing --]]
 L["Alpha multiplier of nameplates for occluded units."] = "Alpha multiplier of nameplates for occluded units."
 --[[Translation missing --]]
+L["Always"] = "Always"
+--[[Translation missing --]]
 L["Always Show Nameplates"] = "Always Show Nameplates"
 --[[Translation missing --]]
 L["Always shows the full amount of absorbs on a unit. In overabsorb situations, the absorbs bar ist shifted to the left."] = "Always shows the full amount of absorbs on a unit. In overabsorb situations, the absorbs bar ist shifted to the left."
@@ -495,6 +497,8 @@ L["Custom Nameplates"] = "Custom Nameplates"
 L["Custom status text requires LibDogTag-3.0 to function."] = "Custom status text requires LibDogTag-3.0 to function."
 --[[Translation missing --]]
 L["Custom status text requires LibDogTag-Unit-3.0 to function."] = "Custom status text requires LibDogTag-Unit-3.0 to function."
+--[[Translation missing --]]
+L["CVar \"%s\" has an invalid value: \"%s\". The value must be a number. Using the default value for this CVar instead."] = "CVar \"%s\" has an invalid value: \"%s\". The value must be a number. Using the default value for this CVar instead."
 --[[Translation missing --]]
 L["Cyclic anchoring of aura areas to each other is not possible."] = "Cyclic anchoring of aura areas to each other is not possible."
 --[[Translation missing --]]
@@ -959,6 +963,8 @@ L["In combat, always show all combo points no matter if they are on or off. Off 
 L["In combat, use coloring, transparency, and scaling based on threat level as configured in the threat system. Custom settings are only used out of combat."] = "In combat, use coloring, transparency, and scaling based on threat level as configured in the threat system. Custom settings are only used out of combat."
 --[[Translation missing --]]
 L["In delta mode, show the name of the player who is second in the enemy unit's threat table."] = "In delta mode, show the name of the player who is second in the enemy unit's threat table."
+--[[Translation missing --]]
+L["In Groups"] = "In Groups"
 --[[Translation missing --]]
 L["In Instances"] = "In Instances"
 --[[Translation missing --]]
@@ -1940,6 +1946,8 @@ L["Val'kyr Shadowguard"] = "Val'kyr Shadowguard"
 --[[Translation missing --]]
 L["Value"] = "Value"
 --[[Translation missing --]]
+L["Value Format"] = "Value Format"
+--[[Translation missing --]]
 L["Value Type"] = "Value Type"
 --[[Translation missing --]]
 L["Venomous Snake"] = "Venomous Snake"
@@ -1977,6 +1985,8 @@ L["Widgets"] = "Widgets"
 L["Width"] = "Width"
 --[[Translation missing --]]
 L["Windwalker Monk"] = "Windwalker Monk"
+--[[Translation missing --]]
+L["With Pet"] = "With Pet"
 --[[Translation missing --]]
 L["Word Wrap"] = "Word Wrap"
 --[[Translation missing --]]
