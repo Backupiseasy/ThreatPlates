@@ -165,6 +165,8 @@ L["Alpha"] = "透明度"
 --[[Translation missing --]]
 L["Alpha multiplier of nameplates for occluded units."] = "Alpha multiplier of nameplates for occluded units."
 --[[Translation missing --]]
+L["Always"] = "Always"
+--[[Translation missing --]]
 L["Always Show Nameplates"] = "Always Show Nameplates"
 L["Always shows the full amount of absorbs on a unit. In overabsorb situations, the absorbs bar ist shifted to the left."] = "永远显示单位的吸收盾总量。在过度吸收的情况下，吸收条会向左移动。"
 --[[Translation missing --]]
@@ -356,6 +358,8 @@ L["Custom Nameplates"] = "自定义姓名版"
 L["Custom status text requires LibDogTag-3.0 to function."] = "Custom status text requires LibDogTag-3.0 to function."
 --[[Translation missing --]]
 L["Custom status text requires LibDogTag-Unit-3.0 to function."] = "Custom status text requires LibDogTag-Unit-3.0 to function."
+--[[Translation missing --]]
+L["CVar \"%s\" has an invalid value: \"%s\". The value must be a number. Using the default value for this CVar instead."] = "CVar \"%s\" has an invalid value: \"%s\". The value must be a number. Using the default value for this CVar instead."
 --[[Translation missing --]]
 L["Cyclic anchoring of aura areas to each other is not possible."] = "Cyclic anchoring of aura areas to each other is not possible."
 L["Darnavan"] = "达尔纳文"
@@ -666,6 +670,8 @@ L["In combat, always show all combo points no matter if they are on or off. Off 
 L["In combat, use coloring, transparency, and scaling based on threat level as configured in the threat system. Custom settings are only used out of combat."] = "战斗中使用仇恨值系统中的设定，依据仇恨程度变化颜色、透明度和缩放大小。只有在非战斗中才使用自定义的设定。"
 --[[Translation missing --]]
 L["In delta mode, show the name of the player who is second in the enemy unit's threat table."] = "In delta mode, show the name of the player who is second in the enemy unit's threat table."
+--[[Translation missing --]]
+L["In Groups"] = "In Groups"
 L["In Instances"] = "副本内"
 --[[Translation missing --]]
 L["Initials"] = "Initials"
@@ -1309,6 +1315,8 @@ L["Val'kyr Shadowguard"] = "瓦格里暗影戒卫者"
 --[[Translation missing --]]
 L["Value"] = "Value"
 --[[Translation missing --]]
+L["Value Format"] = "Value Format"
+--[[Translation missing --]]
 L["Value Type"] = "Value Type"
 L["Venomous Snake"] = "剧毒蛇"
 L["Vertical Align"] = "垂直定位"
@@ -1328,6 +1336,8 @@ L["Wide"] = "宽大"
 L["Widgets"] = "组件"
 L["Width"] = "宽度"
 L["Windwalker Monk"] = "踏风武僧"
+--[[Translation missing --]]
+L["With Pet"] = "With Pet"
 --[[Translation missing --]]
 L["Word Wrap"] = "Word Wrap"
 --[[Translation missing --]]
