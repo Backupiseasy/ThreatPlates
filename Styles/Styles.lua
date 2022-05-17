@@ -9,7 +9,7 @@ local ThreatPlates = Addon.ThreatPlates
 local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
 local UnitIsPlayer, UnitPlayerControlled, UnitIsUnit = UnitIsPlayer, UnitPlayerControlled, UnitIsUnit
 local UnitIsOtherPlayersPet = UnitIsOtherPlayersPet
-local UnitIsBattlePet = UnitIsBattlePet
+local UnitIsBattlePet, UnitCreatureType = UnitIsBattlePet, UnitCreatureType
 local UnitCanAttack = UnitCanAttack
 
 -- ThreatPlates APIs
