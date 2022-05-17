@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+10.3.7 (2022-05-08)
+------------------------------------------------------
+* Fixed a bug where totems were not recognized as totems for some localizations [Comment #6200].
+
+------------------------------------------------------
 10.3.6 (2022-05-08)
 ------------------------------------------------------
 * Added options to configure in detail when to show the threat value (e.g., when a pet is active) [Comment #6154, Issue #536]. 
