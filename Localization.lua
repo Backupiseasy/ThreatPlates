@@ -60,7 +60,7 @@ local TOTEM_CREATURE_TYPE = {
   zhTW = "圖騰",
 }
 
-Addon.TotemCreatureType = TOTEM_CREATURE_TYPE[client_locale2] or TOTEM_CREATURE_TYPE.enUS
+Addon.TotemCreatureType = TOTEM_CREATURE_TYPE[client_locale] or TOTEM_CREATURE_TYPE.enUS
 
 ---------------------------------------------------------------------------------------------------
 -- Determine correct number units: Western or East Asian Nations (CJK)

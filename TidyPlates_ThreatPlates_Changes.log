@@ -1,5 +1,11 @@
 ﻿------------------------------------------------------
-10.3.6 (2022-05-xx)
+10.3.7 (2022-05-08)
+------------------------------------------------------
+* Fixed a bug where totems were not recognized as totems for some localizations [Comment #6200].
+* Added Kul Tiran Racial Trait Haymaker to the Auras widget as CC aura [Issue #545].
+
+------------------------------------------------------
+10.3.6 (2022-05-08)
 ------------------------------------------------------
 * Added options to configure in detail when to show the threat value (e.g., when a pet is active) [Comment #6154, Issue #536]. 
 * Fixed a bug where players or non-totem player-controlled units were shown as totems if their name was the same as a player totem's name [Comment #6146].
