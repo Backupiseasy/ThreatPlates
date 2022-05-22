@@ -5,7 +5,8 @@
 ---------------------------------------------------------------------------------------------------
 local L = Addon.ThreatPlates.L
 
-local DEBUG = Addon.ThreatPlates.Meta("version") == "@project-version@"
+Addon.DEBUG = Addon.ThreatPlates.Meta("version") == "@project-version@"
+
 local function toggleDPS()
 	Addon:SetRole(false)
 	Addon.db.profile.threat.ON = true
@@ -284,7 +285,7 @@ function TidyPlatesThreat:ChatCommand(input)
 --		TidyPlatesThreat:ToggleNameplateModeNeutralUnits()
 --	elseif command == "toggle-view-enemy-units" then
 --		TidyPlatesThreat:ToggleNameplateModeEnemyUnits()
-	elseif DEBUG then
+	elseif Addon.DEBUG then
 		ChatCommandDebug(cmd_list)
 	else
 		Addon.Logging.Error(L["Unknown option: "] .. command)
