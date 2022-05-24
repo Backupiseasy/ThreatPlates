@@ -3,6 +3,7 @@
 ------------------------------------------------------
 * Added a feature to change the name font of Blizzard nameplates and hide the healthbar (to only show unit names), e.g., while in instances.
 * Added an option to show title and realm in a player's name [Comment #3952, #1995, #4164, #6140, TPC#496, Issue #312, #432].
+* Added an option to show target of target with or without enclosing brackets [Issue #543, IM].
 * Integrated new UNIT_AURA processing optimizations to improve unit aura processing in encounters where many nameplates are on screen at once [Comment #6114]. 
 
 ------------------------------------------------------
@@ -24,8 +25,8 @@
 ------------------------------------------------------
 * Fixed a Lua error when a numeric CVar has an invalid, i.e., non-numeric, value. In this case, the default value of the CVar will now be used to prevent the Lua error.
 * Updated TOC version for for TBC Classic Patch 2.5.4.
-
 ------------------------------------------------------
+
 10.3.3 (2022-03-12)
 ------------------------------------------------------
 * Fixed a bug with an outdated cast target being shown when a nameplate was re-used on a casting unit.

@@ -1610,6 +1610,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
           ShowOnlyInCombat = true,
           ShowOnlyForTarget = false,
           ShowNotMyself = true,
+          ShowBrackets = true,
           -- Layout
           Anchor = "RIGHT",
           InsideAnchor = false,

@@ -12,6 +12,7 @@ local ceil, string_format = ceil, string.format
 local GetSpellTexture = GetSpellTexture
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local InCombatLockdown = InCombatLockdown
+local UnitName, UnitIsUnit, UnitClass = UnitName, UnitIsUnit, UnitClass
 
 -- ThreatPlates APIs
 local BackdropTemplate = Addon.BackdropTemplate
@@ -180,9 +181,15 @@ local function ShowTargetUnit(self, unitid)
     if not SettingsTargetUnit.ShowNotMyself or not UnitIsUnit("player", target_of_target_unit) then
       local target_of_target_name = UnitName(target_of_target_unit)
       if target_of_target_name then
-        local _, class_name = UnitClass(target_of_target_unit)
-        target_of_target:SetText("|cffffffff[|r " .. TransliterateCyrillicLetters(target_of_target_name) .. " |cffffffff]|r")
+        target_of_target_name = TransliterateCyrillicLetters(target_of_target_name)
+        if SettingsTargetUnit.ShowBrackets then
+          target_of_target_name = "|cffffffff[|r " .. target_of_target_name .. " |cffffffff]|r" 
+        end
+        target_of_target:SetText(target_of_target_name)
+        
+        local _, class_name = UnitClass(target_of_target_unit)       
         target_of_target.ClassName = class_name
+        
         target_of_target:Show()
       else
         self:HideTargetUnit()

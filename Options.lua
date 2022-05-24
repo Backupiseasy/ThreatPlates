@@ -6228,8 +6228,8 @@ local function CreateHealthbarOptions()
   }
 
   entry.args.TargetUnitText.args.Coloring = {
-    name = L["Coloring"],
-    order = 30,
+    name = L["Appearance"],
+    order = 6,
     type = "group",
     inline = true,
     args = {
@@ -6242,11 +6242,16 @@ local function CreateHealthbarOptions()
         arg = { "settings", "healthbar", "TargetUnit", "CustomColor" },
       },
       ClassColor = {
-        name = L["Class Color for Players"],
+        name = L["Class Color"],
         order = 20,
         type = "toggle",
-        width = "double",
         arg = { "settings", "healthbar", "TargetUnit", "UseClassColor" },
+      },
+      Brackets = {
+        name = L["Brackets"],
+        order = 30,
+        type = "toggle",
+        arg = { "settings", "healthbar", "TargetUnit", "ShowBrackets" },
       },
     },
   }
