@@ -184,7 +184,7 @@ function Addon:GetThreatStyle(unit)
 end
 
 local function GetStyleForPlate(custom_style)
-  -- If a name trigger style is found with useStyle == false, that means that it's active, but only the icon will be shown.
+  -- If a style is found with useStyle == false, that means that it's active, but only the icon will be shown.
   if custom_style.useStyle then
     return (custom_style.showNameplate and "unique") or (custom_style.ShowHeadlineView and "NameOnly-Unique") or "etotem"
   end
@@ -198,8 +198,7 @@ function Addon.UnitStyle_NameDependent(unit)
   local db = Addon.db.profile
 
   local plate_style, custom_style, totem_settings
-
-  local name_custom_style = NameTriggers[unit.name]
+  local name_custom_style = NameTriggers[unit.name] or NameTriggers[unit.NPCID]
   if name_custom_style and name_custom_style.Enable.UnitReaction[unit.reaction] then
     custom_style = name_custom_style
     plate_style = GetStyleForPlate(custom_style)

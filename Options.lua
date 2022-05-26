@@ -366,7 +366,7 @@ end
 local TRIGGER_TYPE_TO_NAME_PREFIX = {
   Aura = L["Aura: "],
   Cast = L["Cast: "],
-  Name = "",
+  Name = L["Unit: "],
   Script = L["Script"],
 }
 
@@ -7240,15 +7240,20 @@ local function CustomPlateUpdateEntry(index)
 end
 
 local function CustomPlateCheckAndUpdateEntry(info, val, index)
+  local selected_plate = db.uniqueSettings[index]
+  local trigger_type = selected_plate.Trigger.Type
+
   local triggers = Addon.Split(val)
   -- Convert spell or aura IDs to numerical values, otherwise they won't be recognized
   for i, trigger in ipairs(triggers) do
-    triggers[i] = tonumber(trigger) or trigger
+    if  trigger_type == "Aura" or trigger_type == "Cast" then
+      triggers[i] = tonumber(trigger) or trigger
+    else
+      triggers[i] = trigger
+    end
   end
 
-  local selected_plate = db.uniqueSettings[index]
   -- Check if here is already another custom nameplate with the same trigger:
-  local trigger_type = selected_plate.Trigger.Type
   if CustomPlateCheckIfTriggerIsUniqueWithErrorMessage(trigger_type, triggers, selected_plate) then
     db.uniqueSettings[index].Trigger[trigger_type].Input = val
     db.uniqueSettings[index].Trigger[trigger_type].AsArray = triggers
@@ -7389,7 +7394,7 @@ CreateCustomNameplateEntry = function(index)
             name = L["Type"],
             type = "select",
             order = 10,
-            values = { Name = L["Name"], Aura = L["Aura"], Cast = L["Cast"], Script = (Addon.db.global.ScriptingIsEnabled and L["Script"]) or nil },
+            values = { Name = L["Unit"], Aura = L["Aura"], Cast = L["Cast"], Script = (Addon.db.global.ScriptingIsEnabled and L["Script"]) or nil },
             set = function(info, val)
               -- If the uses switches to a trigger that is already in use, the current custom nameplate
               -- is disabled (otherwise, if we would not switch to it, the user could not change it at all.
@@ -7405,19 +7410,19 @@ CreateCustomNameplateEntry = function(index)
             arg = { "uniqueSettings", index, "Trigger", "Type" },
           },
           Spacer1 = GetSpacerEntry(15),
-          -- Name Trigger
-          NameTrigger = {
-            name = L["Names"],
+          -- Unit Trigger
+          UnitTrigger = {
+            name = L["Unit (Names or NPC IDs)"],
             type = "input",
             order = 20,
-            width = 3,
-            desc = L["Apply these custom settings to the nameplate of a unit with a particular name. You can add multiple entries separated by a semicolon. You can use use * as wildcard character."],
+            width = "full",
+            desc = L["Apply these custom settings to the nameplate of a unit with a particular name or NPC ID. You can add multiple entries separated by a semicolon. You can use use * as wildcard character in names."],
             set = function(info, val)
               -- Only "*" and "." should be allowed, so check for other magic characters: ( ) . % + ? [ ^ $
               -- "." is allowed as there a units names with this character
               local position, _ = string.find(val, "[%(%)%%%+%?%[%]%^%$]")
               if position then
-                Addon.Logging.Error(L["Illegal character used in Name trigger at position: "] .. tostring(position))
+                Addon.Logging.Error(L["Illegal character used in Unit trigger at position: "] .. tostring(position))
               else
                 CustomPlateCheckAndUpdateEntry(info, val, index)
               end
@@ -7427,11 +7432,10 @@ CreateCustomNameplateEntry = function(index)
             end,
             hidden = function() return db.uniqueSettings[index].Trigger.Type ~= "Name" end,
           },
-          TargetButton = {
-            name = L["Use Target's Name"],
+          UseTargetName = {
+            name = L["Target's Name"],
             type = "execute",
             order = 30,
-            width = "single",
             func = function()
               if UnitExists("target") then
                 local target_unit = UnitName("target")
@@ -7439,6 +7443,28 @@ CreateCustomNameplateEntry = function(index)
                 local check_ok = CustomPlateCheckIfTriggerIsUniqueWithErrorMessage("Name", triggers, db.uniqueSettings[index])
                 if check_ok then
                   db.uniqueSettings[index].Trigger["Name"].Input = target_unit
+                  db.uniqueSettings[index].Trigger["Name"].AsArray = triggers
+                  CustomPlateUpdateEntry(index)
+                end
+              else
+                Addon.Logging.Warning(L["No target found."])
+              end
+            end,
+            hidden = function() return db.uniqueSettings[index].Trigger.Type ~= "Name" end,
+          },
+          UseTargetNPCID_Name = {
+            name = L["Target's NPC ID"],
+            type = "execute",
+            order = 31,
+            width = "single",
+            func = function()
+              if UnitExists("target") then
+                local guid = _G.UnitGUID("target")
+                local _, _, _, _, _, npc_id = strsplit("-", guid or "")
+                local triggers = { npc_id }
+                local check_ok = CustomPlateCheckIfTriggerIsUniqueWithErrorMessage("Name", triggers, db.uniqueSettings[index])
+                if check_ok then
+                  db.uniqueSettings[index].Trigger["Name"].Input = npc_id
                   db.uniqueSettings[index].Trigger["Name"].AsArray = triggers
                   CustomPlateUpdateEntry(index)
                 end
@@ -7842,7 +7868,7 @@ CreateCustomNameplateEntry = function(index)
               CustomPlateSetIcon(index)
             end,
             arg = { "uniqueSettings", index, "UseAutomaticIcon" },
-            desc = L["Find a suitable icon based on the current trigger. For Name trigger, the preview does not work. For multi-value triggers, the preview always is the icon of the first trigger entered."],
+            desc = L["Find a suitable icon based on the current trigger. For Unit triggers, the preview does not work. For multi-value triggers, the preview always is the icon of the first trigger entered."],
           },
           Spacer1 = GetSpacerEntry(3),
           Icon = {
@@ -10315,7 +10341,7 @@ function Addon.RestoreLegacyCustomNameplates()
 
   local index = 1
   for _, legacy_custom_plate in ipairs(legacy_custom_plates) do
-    -- Only need to check for double name trigger as legacy custom nameplates only have these kind of triggers
+    -- Only need to check for double unit (name) trigger as legacy custom nameplates only have these kind of triggers
     local trigger_value = legacy_custom_plate.Trigger.Name.Input
     local trigger_already_used = Addon.Cache.CustomPlateTriggers.Name[trigger_value]
 
