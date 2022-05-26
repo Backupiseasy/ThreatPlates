@@ -351,6 +351,7 @@ local CROWD_CONTROL_SPELLS_RETAIL = {
   [20549] = LOC_STUN,       -- War Stomp (Tauren)
   [260369] = PC_SNARE,      -- Arcane Pulse (Nightborne)
   [107079] = LOC_STUN,      -- Quaking Palm (Pandarian)
+  [287712] = LOC_STUN       -- Haymaker (Kul Tiran Racial)
 }
 
 local CROWD_CONTROL_SPELLS_TBC_CLASSIC = {
