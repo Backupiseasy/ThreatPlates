@@ -1,4 +1,4 @@
 # @project-version@ (@build-time@)
 
-* Fixed a bug where totems were not recognized as totems for some localizations [Comment #6200].
-* Added Kul Tiran Racial Trait Haymaker to the Auras widget as CC aura [Issue #545].
+* Fixed a bug with Threat Plates overwriting the Profiles page of other addons when adding the import/export section (thanks to WoWUIDev Discord!).
+* Updated TOC version for Patch 9.2.5.
