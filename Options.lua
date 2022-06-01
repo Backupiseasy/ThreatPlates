@@ -311,35 +311,39 @@ local function ShowImportFrame()
   ImportExportFrame:OpenImport(ImportHandler)
 end
 
-local function AddImportExportOptions(profileOptions)
-  profileOptions.args.exportimportdesc = {
-    order = 90,
-    type = "description",
-    name = "\n" .. L["Import and export profiles to share them with other players."],
-  }
+local function AddImportExportOptions(options_profiles)
+  if not options_profiles.plugins then
+		options_profiles.plugins = {}
+	end
 
-  profileOptions.args.exportprofile = {
-    order = 95,
-    type = "execute",
-    name = L["Export profile"],
-    desc = L["Export the current profile into a string that can be imported by other players."],
-    func = function()
-      local export_data = {
-        Version = t.Meta("version"),
-        ProfileName = Addon.db:GetCurrentProfile(),
-        Profile = Addon.db.profile
-      }
+  options_profiles.plugins[t.ADDON_NAME] = {
+    exportimportdesc = {
+      order = 90,
+      type = "description",
+      name = "\n" .. L["Import and export profiles to share them with other players."],
+    },
+    exportprofile = {
+      order = 95,
+      type = "execute",
+      name = L["Export profile"],
+      desc = L["Export the current profile into a string that can be imported by other players."],
+      func = function()
+        local export_data = {
+          Version = t.Meta("version"),
+          ProfileName = Addon.db:GetCurrentProfile(),
+          Profile = Addon.db.profile
+        }
 
-      ShowExportFrame(export_data)
-    end
-  }
-
-  profileOptions.args.importprofile = {
-    order = 100,
-    type = "execute",
-    name = L["Import profile"],
-    desc = L["Import a profile from another player from an import string."],
-    func = function() ShowImportFrame() end
+        ShowExportFrame(export_data)
+      end
+    },
+    importprofile = {
+      order = 100,
+      type = "execute",
+      name = L["Import profile"],
+      desc = L["Import a profile from another player from an import string."],
+      func = function() ShowImportFrame() end
+    },
   }
 end
 
