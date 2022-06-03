@@ -5366,7 +5366,7 @@ local function CreateBlizzardSettings()
                   ReloadUI()
                 end,
                 get = GetCVarBoolTPTP,
-                desc = L["Show only unit names and hide nameplate bars (requires /reload)."],
+                desc = L["Show only unit names and hide nameplate bars (requires /reload). Note that the clickable area of friendly nameplates will also be set to zero so that they don't interfere with enemy nameplates stacking (not in Classic or TBC Classic)."],
                 arg = "nameplateShowOnlyNames",            
               },
               DebuffsOnFriendly = {

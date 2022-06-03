@@ -9,7 +9,7 @@ local ThreatPlates = Addon.ThreatPlates
 local tostring, string_format = tostring, string.format
 
 -- WoW APIs
-local GetCVar, GetCVarDefault = GetCVar, GetCVarDefault
+local GetCVar, GetCVarDefault, GetCVarBool = GetCVar, GetCVarDefault, C_CVar.GetCVarBool
 
 -- ThreatPlates APIs
 local L = ThreatPlates.L
@@ -116,6 +116,10 @@ function CVars:GetAsNumber(cvar)
   end
 
  return numeric_value
+end
+
+function CVars:GetAsBool(cvar)
+  return GetCVarBool(cvar)
 end
 
 ---------------------------------------------------------------------------------------------------
