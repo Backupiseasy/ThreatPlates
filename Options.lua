@@ -9498,7 +9498,7 @@ local function CreateOptionsTable()
                       type = "select",
                       order = 10,
                       name = L["Icon Style"],
-                      values = { default = "Default", stddragon = "Blizzard Dragon", skullandcross = "Skull and Crossbones" },
+                      values = { default = "Default", stddragon = "Blizzard Dragon", skullandcross = "Skull and Crossbones", lion = "Lions", wolf = "Wolves", necro = "Necrolord", fae = "Night Fae", venthyr = "Venthyr", kyrian = "Kyrian", alliance = "Alliance", horde = "Horde" },
                       set = function(info, val)
                         SetThemeValue(info, val)
                         options.args.NameplateSettings.args.EliteIcon.args.Texture.args.PreviewRare.image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\EliteArtWidget\\" .. val
