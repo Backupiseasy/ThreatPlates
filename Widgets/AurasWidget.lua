@@ -956,6 +956,8 @@ if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC then
 
     return AuraFilterFunction(show_aura, spellfound, aura.CastByPlayer)
   end
+
+  ShouldSkipAuraUpdate = function() return false end
 else
   function Widget:FilterFriendlyDebuffsBySpell(db, aura, AuraFilterFunction)
     local show_aura = db.ShowAllFriendly or
