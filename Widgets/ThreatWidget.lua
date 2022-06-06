@@ -15,8 +15,7 @@ local tostring = tostring
 local string_format = string.format
 
 -- WoW APIs
-local UnitIsUnit, UnitDetailedThreatSituation, UnitName, UnitClass = UnitIsUnit, UnitDetailedThreatSituation, UnitName, UnitClass
-local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
+local UnitIsUnit, UnitDetailedThreatSituation, UnitName = UnitIsUnit, UnitDetailedThreatSituation, UnitName
 local GetRaidTargetIndex = GetRaidTargetIndex
 local IsInGroup, IsInRaid, GetNumGroupMembers, GetNumSubgroupMembers = IsInGroup, IsInRaid, GetNumGroupMembers, GetNumSubgroupMembers
 
@@ -46,7 +45,8 @@ local REVERSE_THREAT_SITUATION = {
 ---------------------------------------------------------------------------------------------------
 -- Cached configuration settings
 ---------------------------------------------------------------------------------------------------
-local Settings, SettingsArt, ThreatColors, ThreatDetailsFunction
+local Settings, SettingsArt
+local ThreatColors, ThreatDetailsFunction, ShowSecondPlayersName
 
 ---------------------------------------------------------------------------------------------------
 -- Local variables
