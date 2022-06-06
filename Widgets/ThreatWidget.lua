@@ -366,7 +366,7 @@ function Widget:UpdateThreatValue(widget_frame, unit)
   local db_threat_value = Settings.ThreatPercentage
 
   -- If threat_situation is nil, there is nothing to do
-  local threat_situation = GetThreatSituation(unit, style, db.toggle.OffTank)
+  local threat_situation = GetThreatSituation(unit, unit.style, db.toggle.OffTank)
 
   -- Threat value has to be updated after every UNIT_THREAT_LIST_UPDATE event, not only when threat_situation changes
   local show_threat_value = db_threat_value.ShowAlways or (db_threat_value.ShowInGroups and PlayerIsInGroup) or (db_threat_value.ShowWithPet and UnitExists("pet"))
