@@ -1,3 +1,6 @@
+---------------------------------------------------------------------------------------------------
+-- Module: Icons
+---------------------------------------------------------------------------------------------------
 local ADDON_NAME, Addon = ...
 
 ---------------------------------------------------------------------------------------------------
@@ -18,6 +21,11 @@ local _G =_G
 -- GLOBALS: 
 
 ---------------------------------------------------------------------------------------------------
+-- Module Setup
+---------------------------------------------------------------------------------------------------
+local IconsModule = Addon.Icons
+
+---------------------------------------------------------------------------------------------------
 -- Cached configuration settings
 ---------------------------------------------------------------------------------------------------
 local UseMasque, UseBorderlessIcons
@@ -31,7 +39,7 @@ local UseMasque, UseBorderlessIcons
 --   Addon.Widgets:UpdateSettings("UniqueIcon")
 -- end
 
-function Addon.RegisterMasqueGroup(widget, name)
+function IconsModule:RegisterMasqueGroup(widget, name)
   if UseMasque then
     local masque_group = Addon.LibMasque:Group(Addon.ThreatPlates.ADDON_NAME, name)
     masque_group:SetCallback(function() Addon.Widgets:UpdateSettings(widget.Name) end)
@@ -69,7 +77,7 @@ end
 --   end
 -- end
 
-function Addon.CreateIcon(widget, parent)
+function IconsModule:CreateIcon(widget, parent)
   local icon
   if UseMasque then
     icon = _G.CreateFrame("Button", nil, parent, "ActionButtonTemplate")
@@ -93,9 +101,7 @@ function Addon.CreateIcon(widget, parent)
   return icon
 end
 
-function Addon.UpdateMasqueSettings()
+function IconsModule:UpdateSettings()
   UseMasque = Addon.db.profile.Appearance.UseMasque and Addon.LibMasque
   UseBorderlessIcons = Addon.db.profile.Appearance.UseBorderlessIcons
-
-  print(UseMasque, UseBorderlessIcons)
 end

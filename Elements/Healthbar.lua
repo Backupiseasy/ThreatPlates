@@ -17,7 +17,7 @@ local ThreatPlates, Font = Addon.ThreatPlates, Addon.Font
 local PlatesByUnit = Addon.PlatesByUnit
 local SubscribeEvent, UnsubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Unsubscribe, Addon.EventService.Publish
 local BackdropTemplate = Addon.BackdropTemplate
-local TransliterateCyrillicLetters = Addon.Localization.TransliterateCyrillicLetters
+local Localization = Addon.Localization
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -233,7 +233,7 @@ local function ShowTargetUnit(healthbar, unitid)
         local target_of_target_name = UnitName(target_of_target_unit)
         if target_of_target_name then
           local _, class_name = UnitClass(target_of_target_unit)
-          target_of_target:SetText("|cffffffff[|r " .. TransliterateCyrillicLetters(target_of_target_name) .. " |cffffffff]|r")
+          target_of_target:SetText("|cffffffff[|r " .. Localization:TransliterateCyrillicLetters(target_of_target_name) .. " |cffffffff]|r")
           target_of_target.ClassName = class_name
           target_of_target:Show()
         else

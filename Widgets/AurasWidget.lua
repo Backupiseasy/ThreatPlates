@@ -29,7 +29,7 @@ local IsInInstance = IsInInstance
 local TidyPlatesThreat = TidyPlatesThreat
 local Animations = Addon.Animations
 local Font = Addon.Font
-local UnitStyle_AuraDependent = Addon.UnitStyle_AuraDependent
+local Style = Addon.Style
 local CUSTOM_GLOW_FUNCTIONS, CUSTOM_GLOW_WRAPPER_FUNCTIONS = Addon.CUSTOM_GLOW_FUNCTIONS, Addon.CUSTOM_GLOW_WRAPPER_FUNCTIONS
 local BackdropTemplate = Addon.BackdropTemplate
 local MODE_FOR_STYLE, ANCHOR_POINT_TEXT = Addon.MODE_FOR_STYLE, Addon.ANCHOR_POINT_TEXT
@@ -1111,8 +1111,8 @@ function Widget:UpdateUnitAuras(aura_grid_frame, unit, enabled_auras, enabled_cc
     -- CastByPlayer is also used by aura trigger custom styles (only my auras)
     aura.CastByPlayer = (aura.caster == "player" or aura.caster == "pet" or aura.caster == "vehicle")
     if Addon.ActiveAuraTriggers then
-      -- Do this to prevent calls to UnitStyle_AuraDependent after a aura trigger was found already
-      CustomStyleAuraTrigger = CustomStyleAuraTrigger or UnitStyle_AuraDependent(unit, aura.spellid, aura.name, aura.CastByPlayer)
+      -- Do this to prevent calls to ProcessAuraTriggers after a aura trigger was found already
+      CustomStyleAuraTrigger = CustomStyleAuraTrigger or Style:ProcessAuraTriggers(unit, aura.spellid, aura.name, aura.CastByPlayer)
     end
 
     -- Workaround or hack, currently, for making aura-triggered custom nameplates work even on nameplates that do
@@ -1398,7 +1398,7 @@ function Widget:UpdateIconGrid(widget_frame, unit)
   -- Set the style if a aura trigger for a custom nameplate was found or the aura trigger
   -- is no longer there
   if unit.CustomStyleAura or old_CustomStyleAura then
-    self:PublishEvent("CustomStyleUpdate", widget_frame:GetParent())
+    Style:Update(widget_frame:GetParent())
   end
 
   if widget_frame.HideAuras then

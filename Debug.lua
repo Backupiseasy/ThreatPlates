@@ -81,6 +81,9 @@ end
 function Debug:PrintUnit(unit, full_info)
   if not self.Enabled then return end
 
+  local plate = C_NamePlate.GetNamePlateForUnit(unit.unitid)
+  if not plate then return end
+
 	Addon.Logging.Debug("Unit:", unit.name)
 	Addon.Logging.Debug("-------------------------------------------------------------")
 	Addon.Logging.Debug("  Show UnitFrame =", plate.UnitFrame:IsShown())
@@ -99,15 +102,11 @@ function Debug:PrintUnit(unit, full_info)
     local r, g, b, a = UnitSelectionColor(unit.unitid, true)
     Addon.Logging.Debug("  SelectionColor: r =", ceil(r * 255), ", g =", ceil(g * 255), ", b =", ceil(b * 255), ", a =", ceil(a * 255))
 		Addon.Logging.Debug("  -- Threat ---------------------------------")
+		Addon.Logging.Debug("    Level = ", unit.ThreatLevel)
 		Addon.Logging.Debug("    UnitAffectingCombat = ", UnitAffectingCombat(unit.unitid))
-		Addon.Logging.Debug("    Addon:OnThreatTable = ", Addon:OnThreatTable(unit))
+		Addon.Logging.Debug("    OnThreatTable = ", Addon.Threat:OnThreatTable(unit))
 		Addon.Logging.Debug("    UnitThreatSituation = ", UnitThreatSituation("player", unit.unitid))
 		Addon.Logging.Debug("    Target Unit = ", UnitExists(unit.unitid .. "target"))
-		if unit.style == "unique" then
-			Addon.Logging.Debug("    GetThreatSituation(Unique) = ", Addon.GetThreatSituation(unit, unit.style, Addon.db.profile.threat.toggle.OffTank))
-		else
-			Addon.Logging.Debug("    GetThreatSituation = ", Addon.GetThreatSituation(unit, Addon:GetThreatStyle(unit), Addon.db.profile.threat.toggle.OffTank))
-		end
 		Addon.Logging.Debug("  -- Player Control ---------------------------------")
 		Addon.Logging.Debug("    UnitPlayerControlled =", UnitPlayerControlled(unit.unitid))
 		Addon.Logging.Debug("    Player is UnitIsOwnerOrControllerOfUnit =", UnitIsOwnerOrControllerOfUnit("player", unit.unitid))

@@ -13,6 +13,7 @@ local Widget = Addon.Widgets:NewWidget("ClassIcon")
 local UnitReaction = UnitReaction
 
 -- ThreatPlates APIs
+local Icons = Addon.Icons
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -30,7 +31,7 @@ local PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ClassIconWidg
 ---------------------------------------------------------------------------------------------------
 
 function Widget:OnEnable()
-  Addon.RegisterMasqueGroup(self, "Class Icon")
+  Icons:RegisterMasqueGroup(self, "Class Icon")
 end
 
 function Widget:Create(tp_frame)
@@ -41,7 +42,7 @@ function Widget:Create(tp_frame)
   -- Custom Code III
   --------------------------------------
   widget_frame:SetFrameLevel(tp_frame:GetFrameLevel() + 7)
-  widget_frame.Icon = Addon.CreateIcon(self, widget_frame)
+  widget_frame.Icon = Icons:CreateIcon(self, widget_frame)
   widget_frame.Icon:SetAllPoints()
   --------------------------------------
   -- End Custom Code

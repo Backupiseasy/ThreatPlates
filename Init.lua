@@ -82,10 +82,15 @@ end
 -- Caches to the reduce CPU load of expensive functions
 ---------------------------------------------------------------------------------------------------
 
-Addon.Animations = {}
-Addon.Scaling = {}
+-- Modules
+Addon.Threat = {}
+Addon.Style = {}
 Addon.Transparency = {}
+Addon.Scaling = {}
+Addon.Animations = {}
 Addon.Localization = {}
+Addon.Icons = {}
+
 Addon.Cache = {
 	Texts = CreateTextCache(),
 	TriggerWildcardTests = {},

@@ -1,3 +1,6 @@
+---------------------------------------------------------------------------------------------------
+-- Module: Scaling
+---------------------------------------------------------------------------------------------------
 local ADDON_NAME, Addon = ...
 
 ---------------------------------------------------------------------------------------------------
@@ -11,13 +14,15 @@ local pairs = pairs
 local UnitExists = UnitExists
 
 -- ThreatPlates APIs
-local ThreatPlates = Addon.ThreatPlates
 local L = Addon.L
-local Animations, Scaling = Addon.Animations, Addon.Scaling
-local GetThreatLevel = Addon.GetThreatLevel
 local PlatesByUnit = Addon.PlatesByUnit
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
-local Animations, Scaling, Transparency = Addon.Animations, Addon.Scaling, Addon.Transparency
+local Animations, Scaling, Transparency, Style = Addon.Animations, Addon.Scaling, Addon.Transparency, Addon.Style
+
+---------------------------------------------------------------------------------------------------
+-- Module Setup
+---------------------------------------------------------------------------------------------------
+local ScalingModule = Addon.Scaling
 
 ---------------------------------------------------------------------------------------------------
 -- Local variables
@@ -31,11 +36,6 @@ local Settings
 
 -- Cached CVARs
 local AnimateHideNameplate, CVAR_nameplateMinAlpha, CVAR_nameplateMinScale
-
----------------------------------------------------------------------------------------------------
--- Element code
----------------------------------------------------------------------------------------------------
-local Element = "Scale"
 
 local function ScaleSituational(unit)
 	local db = Addon.db.profile.nameplate
@@ -109,7 +109,7 @@ local function ScaleThreat(unit, style)
 		end
 	end
 
-	local scale = db[style].scale[GetThreatLevel(unit, style, db.toggle.OffTank)]
+	local scale = db[style].scale[unit.ThreatLevel]
 
 	if db.AdditiveScale then
 		scale = scale + ScaleGeneral(unit)
@@ -119,7 +119,7 @@ local function ScaleThreat(unit, style)
 end
 
 local function ScaleNormal(unit, non_combat_scale)
-	local style = Addon:GetThreatStyle(unit)
+	local style = Style:GetThreatStyle(unit)
 	if style == "normal" then
 		return non_combat_scale or ScaleGeneral(unit)
 	else -- dps, tank
@@ -200,14 +200,14 @@ local function ScalePlateWithoutAnimation(frame, scale)
 	frame:SetScale(scale)
 end
 
-function Scaling:Initialize(tp_frame)
+function ScalingModule:Initialize(tp_frame)
   tp_frame.HidingScale = nil
 
 	Animations:StopScale(tp_frame)
 	tp_frame:SetScale(Addon.UIScale * GetScale(tp_frame.unit))
 end
 
-function Scaling:HideNameplate(tp_frame)
+function ScalingModule:HideNameplate(tp_frame)
   if AnimateHideNameplate then
 		local scale = tp_frame.Parent:GetScale()
     if scale < CVAR_nameplateMinScale then
@@ -230,7 +230,7 @@ function Scaling:HideNameplate(tp_frame)
   end
 end
 
-function Scaling:UpdateSettings()
+function ScalingModule:UpdateSettings()
 	Settings = Addon.db.profile.Animations
 
 	if Settings.ScaleToDuration > 0 then
@@ -253,7 +253,7 @@ function Scaling:UpdateSettings()
   end
 end
 
-function Scaling:HidingNameplatesIsEnabled()
+function ScalingModule:HidingNameplatesIsEnabled()
 	return AnimateHideNameplate
 end
 
@@ -300,12 +300,12 @@ local function TargetLost(tp_frame)
   end
 end
 
-SubscribeEvent(Element, "MouseoverOnEnter", SituationalEvent)
-SubscribeEvent(Element, "MouseoverOnLeave", SituationalEvent)
-SubscribeEvent(Element, "CastingStarted", SituationalEvent)
-SubscribeEvent(Element, "CastingStopped", SituationalEvent)
-SubscribeEvent(Element, "TargetMarkerUpdate", SituationalEvent)
-SubscribeEvent(Element, "TargetGained", TargetGained)
-SubscribeEvent(Element, "TargetLost", TargetLost)
-SubscribeEvent(Element, "FactionUpdate", SituationalEvent)
-SubscribeEvent(Element, "ThreatUpdate", SituationalEvent)
+SubscribeEvent(ScalingModule, "MouseoverOnEnter", SituationalEvent)
+SubscribeEvent(ScalingModule, "MouseoverOnLeave", SituationalEvent)
+SubscribeEvent(ScalingModule, "CastingStarted", SituationalEvent)
+SubscribeEvent(ScalingModule, "CastingStopped", SituationalEvent)
+SubscribeEvent(ScalingModule, "TargetMarkerUpdate", SituationalEvent)
+SubscribeEvent(ScalingModule, "TargetGained", TargetGained)
+SubscribeEvent(ScalingModule, "TargetLost", TargetLost)
+SubscribeEvent(ScalingModule, "FactionUpdate", SituationalEvent)
+SubscribeEvent(ScalingModule, "ThreatUpdate", SituationalEvent)

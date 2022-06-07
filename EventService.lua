@@ -116,7 +116,7 @@ local INTERNAL_EVENTS = {
   -- Event: CustomStyleUpdate
   --   Fires when a nameplate should apply a custom style
   --   Event(frame)
-  CustomStyleUpdate = true
+  -- CustomStyleUpdate = true
 }
 
 ---------------------------------------------------------------------------------------------------

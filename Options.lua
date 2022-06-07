@@ -183,7 +183,7 @@ local WIDGET_INFO = {
   stealthWidget = { Name = "Stealth", UpdateSettings = false, },
   targetWidget = { Name = "TargetArt", UpdateSettings = true, UpdateAllSettings = true, PublishEvent = "SituationalColorUpdate" },
   FocusWidget = { Name = "Focus", UpdateSettings = true, UpdateAllSettings = true, PublishEvent = "SituationalColorUpdate" },
-  threat = { Name = "Threat", UpdateSettings = true, }, -- ThreatWidget
+  threat = { Name = "Threat", ForceUpdate = true, }, -- ThreatWidget and more
   totemWidget = { Name = "TotemIcon", UpdateSettings = false, },
   uniqueWidget = { Name = "UniqueIcon", UpdateSettings = true, },
   ExperienceWidget = { Name = "Experience", UpdateSettings = true, },
@@ -397,7 +397,7 @@ local SET_FUNCTIONS = {
 }
 
 local function SetValue(info, ...)
-  --print ("SetValue: Function =", info.type)
+  --print ("SetValue: Function =", "{ " .. table.concat(info.arg, ".") .. " }")
 
   -- For widgets: check if the widget if enabled or disabled. If so, call InitializeWidget additionally
   -- Also: Fix some bad configuration settings design by me:
@@ -416,10 +416,16 @@ local function SetValue(info, ...)
 
   -- Update the corresponding parts of Threat Plates based on the setting
   if widget_info then
-    --print ("SetValue: Enabling/Disabling Widget =>",widget_is_enabled, Addon.Widgets:IsEnabled(widget_info.Name))
+    --print ("SetValue: Enabling/Disabling Widget =>",widget_is_enabled, Addon.Widgets:IsEnabled(widget_info.Name))    
     if widget_is_enabled ~= Addon.Widgets:IsEnabled(widget_info.Name) then
       --print ("SetValue: Enabling/Disabling Widget =>", widget_info.Name)
       Addon.Widgets:InitializeWidget(widget_info.Name)
+      
+      -- If also core parts of the nameplate need to be udpated
+      if widget_info.ForceUpdate then
+        Addon:ForceUpdate()
+      end
+
       -- Required for some widgets that also update aspects of the healthbar (e.g., Quest, Social)
       if widget_info.PublishEvent then
         Addon:PublishToEachPlate(widget_info.PublishEvent)
@@ -427,8 +433,11 @@ local function SetValue(info, ...)
     elseif widget_info.UpdateSettings then
       --print ("SetValue: Widget =>", info[2])
       Addon.Widgets:UpdateSettings(widget_info.Name)
-      -- Some elements also use widget settings. In this case, update them
-      if widget_info.UpdateAllSettings then
+      if widget_info.ForceUpdate then
+        -- If also core parts of the nameplate need to be udpated
+        Addon:ForceUpdate()
+      elseif widget_info.UpdateAllSettings then
+        -- Some elements also use widget settings. In this case, update them
         Addon:UpdateSettings()
       end
       -- Required for some widgets that also update aspects of the healthbar (e.g., Quest, Social)
@@ -4976,7 +4985,7 @@ local function CreateColorsSettings()
           PlayerPvPOffSelfPvPOff = { 
             name = L["PvP Off"], 
             order = 90, 
-            type = "color", 
+            type = "color",
             arg = { "ColorByReaction", "FriendlyPlayer" }, 
             width = "double",
             desc = L["The (friendly or hostile) player is not flagged for PvP or the player is in a sanctuary."],
@@ -5626,7 +5635,7 @@ local function CreateHealthbarOptions()
             width = "double",
             set = function(info, val) SetValue(info, not val) end,
             get = function(info) return not GetValue(info) end,
-            arg = { "ShowThreatGlowOnAttackedUnitsOnly" },
+            arg = { "threat", "UseThreatTable" },
           },
           Header = { name = L["Colors"], type = "header", order = 10, },
           Low = {

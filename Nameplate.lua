@@ -13,13 +13,13 @@ local max, gsub, tonumber, math_abs = math.max, string.gsub, tonumber, math.abs
 local wipe, strsplit = wipe, strsplit
 local WorldFrame, UIParent, INTERRUPTED = WorldFrame, UIParent, INTERRUPTED
 local UnitName, UnitReaction, UnitClass = UnitName, UnitReaction, UnitClass
-local UnitEffectiveLevel, UnitThreatSituation = UnitEffectiveLevel, UnitThreatSituation
+local UnitEffectiveLevel = UnitEffectiveLevel
 local UnitChannelInfo, UnitPlayerControlled = UnitChannelInfo, UnitPlayerControlled
 local UnitIsUnit, UnitIsPlayer = UnitIsUnit, UnitIsPlayer
 local GetCreatureDifficultyColor, GetRaidTargetIndex = GetCreatureDifficultyColor, GetRaidTargetIndex
 local GetTime, GetCVar, CombatLogGetCurrentEventInfo = GetTime, GetCVar, CombatLogGetCurrentEventInfo
 local GetNamePlates, GetNamePlateForUnit = C_NamePlate.GetNamePlates, C_NamePlate.GetNamePlateForUnit
-local GetPlayerInfoByGUID, RAID_CLASS_COLORS = GetPlayerInfoByGUID, RAID_CLASS_COLORS
+local GetPlayerInfoByGUID = GetPlayerInfoByGUID
 local IsInInstance, InCombatLockdown = IsInInstance, InCombatLockdown
 local NamePlateDriverFrame, UnitNameplateShowsWidgetsOnly = NamePlateDriverFrame, UnitNameplateShowsWidgetsOnly
 local GetSpecializationInfo, GetSpecialization = GetSpecializationInfo, GetSpecialization
@@ -27,13 +27,14 @@ local GetSpecializationInfo, GetSpecialization = GetSpecializationInfo, GetSpeci
 -- ThreatPlates APIs
 local ThreatPlates = Addon.ThreatPlates
 local L = Addon.L
-local Widgets, Animations, Scaling, Transparency = Addon.Widgets, Addon.Animations, Addon.Scaling, Addon.Transparency
+local Widgets = Addon.Widgets
 local RegisterEvent, UnregisterEvent = Addon.EventService.RegisterEvent, Addon.EventService.UnregisterEvent
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
 local ElementsCreated, ElementsUnitAdded, ElementsUnitRemoved = Addon.Elements.Created, Addon.Elements.UnitAdded, Addon.Elements.UnitRemoved
 local ElementsUpdateStyle, ElementsUpdateSettings = Addon.Elements.UpdateStyle, Addon.Elements.UpdateSettings
+local Threat, Style, Localization = Addon.Threat, Addon.Style, Addon.Localization
+local Scaling, Transparency, Animations, Icons = Addon.Scaling, Addon.Transparency, Addon.Animations, Addon.Icons
 local BackdropTemplate = Addon.BackdropTemplate
-local TransliterateCyrillicLetters = Addon.Localization.TransliterateCyrillicLetters
 
 local GetNameForNameplate
 local UnitCastingInfo
@@ -45,7 +46,6 @@ local _G =_G
 
 -- Constants
 local CASTBAR_INTERRUPT_HOLD_TIME = Addon.CASTBAR_INTERRUPT_HOLD_TIME
-local THREAT_REFERENCE = Addon.THREAT_REFERENCE
 
 ---------------------------------------------------------------------------------------------------
 -- Local variables
@@ -168,7 +168,7 @@ local function UpdateUnitLevel(unit, unitid)
   unit.LevelColor = GetCreatureDifficultyColor(unit_level)
 end
 
-local function UpdateUnitReaction(unit, unitid)
+local function SetUnitAttributeReaction(unit, unitid)
   unit.red, unit.green, unit.blue = _G.UnitSelectionColor(unitid)
   unit.reaction = MAP_UNIT_REACTION[UnitReaction(unitid, "player")] or GetReactionByColor(unit.red, unit.green, unit.blue)
 
@@ -222,13 +222,8 @@ local function InitializeUnit(unit, unitid)
   unit.isTarget = UnitIsUnit("target", unitid)
   unit.IsFocus = UnitIsUnit("focus", unitid) -- required here for config changes which reset all plates without calling TARGET_CHANGED, MOUSEOVER, ...
   unit.isMouseover = UnitIsUnit("mouseover", unitid)
-
-  -- Threat and Combat => UNIT_THREAT_LIST_UPDATE
-  local threat_status = UnitThreatSituation("player", unitid)
-  unit.ThreatStatus = threat_status
-  unit.ThreatLevel = THREAT_REFERENCE[threat_status]
-  unit.InCombat = _G.UnitAffectingCombat(unitid)
-
+ 
+  Threat:InitializeUnitAttributeThreat(unit, unitid)
   -- Target Mark => RAID_TARGET_UPDATE
   unit.TargetMarker = RAID_ICON_LIST[GetRaidTargetIndex(unitid)]
 
@@ -236,7 +231,7 @@ local function InitializeUnit(unit, unitid)
   UpdateUnitLevel(unit, unitid)
 
   -- Reaction => UNIT_FACTION
-  UpdateUnitReaction(unit, unitid)
+  SetUnitAttributeReaction(unit, unitid)
 end
 
 ---------------------------------------------------------------------------------------------------------------------
@@ -271,9 +266,9 @@ local function OnStartCasting(tp_frame, unitid, channeled)
   unit.IsInterrupted = false
   unit.spellIsShielded = notInterruptible
 
-  local plate_style = Addon.ActiveCastTriggers and Addon.UnitStyle_CastDependent(unit, spellID, name)
+  local plate_style = Addon.ActiveCastTriggers and Style:ProcessCastTriggers(unit, spellID, name)
   if plate_style and plate_style ~= tp_frame.stylename then
-    PublishEvent("CustomStyleUpdate", tp_frame)
+    Style:Update(tp_frame)
     style = tp_frame.style
   end
 
@@ -291,7 +286,7 @@ local function OnStartCasting(tp_frame, unitid, channeled)
   -- There are situations when UnitName returns nil (OnHealthUpdate, hypothesis: health update when the unit died tiggers this, but then there is no target any more)
   if target_unit_name then
     local _, class_name = UnitClass(target_unit_name)
-    castbar.CastTarget:SetText(Addon.ColorByClass(class_name, TransliterateCyrillicLetters(target_unit_name)))
+    castbar.CastTarget:SetText(Addon.ColorByClass(class_name, Localization:TransliterateCyrillicLetters(target_unit_name)))
   else
     castbar.CastTarget:SetText(nil)
   end
@@ -439,7 +434,7 @@ local function OnShowNameplate(plate, unitid)
   PlatesByGUID[unit.guid] = plate
 
   -- Initialized nameplate style
-  Addon.InitializeStyle(tp_frame)
+  Style:Update(tp_frame)
   -- Initialize scale and transparency
   Transparency:Initialize(tp_frame)
   Scaling:Initialize(tp_frame)
@@ -543,13 +538,13 @@ end
 function Addon:UpdateSettings()
   --wipe(PlateOnUpdateQueue)
 
-  Addon.Localization:UpdateSettings()
-  Addon.UpdateMasqueSettings()
-  
-  ElementsUpdateSettings()
+  Localization:UpdateSettings()
+  Icons:UpdateSettings()
+  Threat:UpdateSettings()
   Transparency:UpdateSettings()
   Scaling:UpdateSettings()
   Animations:UpdateSettings()
+  ElementsUpdateSettings()
 
   local db = Addon.db.profile
 
@@ -760,6 +755,8 @@ function Addon:PLAYER_REGEN_ENABLED()
   if db.EnemyUnits ~= "NONE" then
     _G.SetCVar("nameplateShowEnemies", (db.EnemyUnits == "SHOW_COMBAT" and 0) or 1)
   end
+
+  Style:EnteringOrLeavingCombat()
 end
 
 -- Fires when the player enters combat status
@@ -775,6 +772,8 @@ function Addon:PLAYER_REGEN_DISABLED()
   if db.EnemyUnits ~= "NONE" then
     _G.SetCVar("nameplateShowEnemies", (db.EnemyUnits == "SHOW_COMBAT" and 1) or 0)
   end
+
+  Style:EnteringOrLeavingCombat()
 end
 
 function Addon:NAME_PLATE_CREATED(plate)
@@ -834,6 +833,7 @@ function Addon:UNIT_NAME_UPDATE(unitid)
   local tp_frame = PlatesByUnit[unitid]
   if tp_frame and tp_frame.Active then
     tp_frame.unit.name = UnitName(unitid)
+    Style:UpdateName(tp_frame)
   end
 end
 
@@ -911,29 +911,9 @@ end
 function Addon:UNIT_THREAT_LIST_UPDATE(unitid)
   -- Special unitids (target, personal nameplate) are skipped as they are not added to PlatesByUnit in NAME_PLATE_UNIT_ADDED
   local tp_frame = PlatesByUnit[unitid]
-
   if tp_frame and tp_frame.Active then
-    local threat_status = UnitThreatSituation("player", unitid)
-
-    local unit = tp_frame.unit
-    -- If threat_status is nil, unit is leaving combat
-    if threat_status == nil then
-      unit.ThreatStatus = nil
-    else --if threat_status ~= unit.ThreatStatus then
-      unit.ThreatStatus = threat_status
-      unit.ThreatLevel = THREAT_REFERENCE[threat_status]
-      unit.InCombat = _G.UnitAffectingCombat(unitid)
-    end
-
-    PublishEvent("ThreatUpdate", tp_frame, unit)
-
-    if threat_status == unit.ThreatStatus and UnitIsUnit("target", unitid) then
-      print ("Threat: No Update =>", threat_status, "=", unit.ThreatStatus)
-      print ("Threat: Level =>", unit.ThreatLevel)
-      print ("Threat: Offtanked =>", unit.IsOfftanked)
-      print ("Combat Color:", unit.CombatColor)
-     end 
-   end
+    Threat:ThreatUpdate(tp_frame)
+  end
 end
 
 -- Update all elements that depend on the unit's reaction towards the player
@@ -944,13 +924,15 @@ function Addon:UNIT_FACTION(unitid)
     return
   elseif unitid == "player" then
    for _, tp_frame in pairs(PlatesByUnit) do
-     UpdateUnitReaction(tp_frame.unit, unitid)
+     SetUnitAttributeReaction(tp_frame.unit, unitid)
+     Style:Update(tp_frame)
      PublishEvent("FationUpdate", tp_frame)
    end
   else
     local tp_frame = PlatesByUnit[unitid]
     if tp_frame and tp_frame.Active then
-      UpdateUnitReaction(tp_frame.unit, unitid)
+      SetUnitAttributeReaction(tp_frame.unit, unitid)
+      Style:Update(tp_frame)
       PublishEvent("FactionUpdate", tp_frame)
     end
   end
@@ -973,6 +955,8 @@ local function UNIT_SPELLCAST_START(unitid, ...)
   local tp_frame = PlatesByUnit[unitid]
   if tp_frame and tp_frame.Active then
     OnStartCasting(tp_frame, unitid, false)
+    -- Threat - Heuristic
+    Threat:ThreatUpdateHeuristic(tp_frame)
   end
 end
 
@@ -1000,9 +984,10 @@ local function UNIT_SPELLCAST_STOP(unitid, ...)
     castbar.IsChanneling = false
     castbar.IsCasting = false
 
+    Threat:ThreatUpdateHeuristic(tp_frame)
     if tp_frame.unit.CustomStyleCast then
       tp_frame.unit.CustomStyleCast = false
-      PublishEvent("CustomStyleUpdate", tp_frame)
+      Style:Update(tp_frame)
     end
 
     PublishEvent("CastingStopped", tp_frame)
@@ -1016,6 +1001,7 @@ local function UNIT_SPELLCAST_CHANNEL_START(unitid, ...)
   local tp_frame = PlatesByUnit[unitid]
   if tp_frame and tp_frame.Active then
     OnStartCasting(tp_frame, unitid, true)
+    Threat:ThreatUpdateHeuristic(tp_frame)
   end
 end
 
@@ -1037,7 +1023,7 @@ function Addon.UNIT_SPELLCAST_INTERRUPTED(event, unitid, castGUID, spellID, sour
       if castbar:IsShown() then
         sourceName = gsub(sourceName, "%-[^|]+", "") -- UnitName(sourceName) only works in groups
         local _, class_name = GetPlayerInfoByGUID(interrupterGUID)
-        visual.SpellText:SetText(INTERRUPTED .. " [" .. Addon.ColorByClass(class_name, TransliterateCyrillicLetters(sourceName)) .. "]")
+        visual.SpellText:SetText(INTERRUPTED .. " [" .. Addon.ColorByClass(class_name, Localization:TransliterateCyrillicLetters(sourceName)) .. "]")
 
         local _, max_val = castbar:GetMinMaxValues()
         castbar:SetValue(max_val)
@@ -1075,7 +1061,7 @@ function Addon:COMBAT_LOG_EVENT_UNFILTERED()
       if castbar:IsShown() then
         sourceName = gsub(sourceName, "%-[^|]+", "") -- UnitName(sourceName) only works in groups
         local _, class_name = GetPlayerInfoByGUID(sourceGUID)
-        visual.SpellText:SetText(INTERRUPTED .. " [" .. Addon.ColorByClass(class_name, TransliterateCyrillicLetters(sourceName)) .. "]")
+        visual.SpellText:SetText(INTERRUPTED .. " [" .. Addon.ColorByClass(class_name, Localization:TransliterateCyrillicLetters(sourceName)) .. "]")
 
         local _, max_val = castbar:GetMinMaxValues()
         castbar:SetValue(max_val)

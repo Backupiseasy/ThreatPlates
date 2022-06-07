@@ -14,11 +14,12 @@ local type = type
 local pairs = pairs
 
 -- WoW APIs
-local PlatesByUnit = Addon.PlatesByUnit
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
+local Style = Addon.Style
 
 -- ThreatPlates APIs
 local CUSTOM_GLOW_FUNCTIONS, CUSTOM_GLOW_WRAPPER_FUNCTIONS = Addon.CUSTOM_GLOW_FUNCTIONS, Addon.CUSTOM_GLOW_WRAPPER_FUNCTIONS
+local Icons = Addon.Icons
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -45,7 +46,7 @@ function Widget:Create(tp_frame)
   widget_frame.Highlight:SetFrameLevel(tp_frame:GetFrameLevel() + 15)
   widget_frame.HighlightStop = Addon.LibCustomGlow.PixelGlow_Stop
 
-  widget_frame.Icon = Addon.CreateIcon(self, widget_frame) 
+  widget_frame.Icon = Icons:CreateIcon(self, widget_frame) 
   widget_frame.Icon:SetAllPoints()
 
   widget_frame.HighlightBorder = widget_frame.Icon:GetParentFrame():CreateTexture(nil, "OVERLAY")
@@ -85,7 +86,7 @@ end
 
 function Widget:OnEnable()
   self:SubscribeEvent("UNIT_PORTRAIT_UPDATE")
-  Addon.RegisterMasqueGroup(self, "Custom Style")
+  Icons:RegisterMasqueGroup(self, "Custom Style")
 end
 
 -- function Widget:OnDisable()
@@ -213,7 +214,7 @@ function Widget:UpdateLayout(widget_frame)
   -- Update the style as custom nameplates might have been changed and some units no longer
   -- may be unique
   if widget_frame:GetParent().Active and widget_frame.Active then
-    Addon:SetStyle(widget_frame.unit)
+    Style:SetStyle(widget_frame.unit)
   end
 end
 

@@ -20,9 +20,7 @@ local GetRaidTargetIndex = GetRaidTargetIndex
 local IsInGroup, IsInRaid, GetNumGroupMembers, GetNumSubgroupMembers = IsInGroup, IsInRaid, GetNumGroupMembers, GetNumSubgroupMembers
 
 -- ThreatPlates APIs
-local GetThreatLevel = Addon.GetThreatLevel
-local Font = Addon.Font
-local TransliterateCyrillicLetters = Addon.TransliterateCyrillicLetters
+local Threat, Localiation, Font = Addon.Threat, Addon.Localization, Addon.Font
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -173,7 +171,7 @@ local function GetTopThreatUnitBesidesPlayer(unitid, threat_value_func)
 
   local top_threat_unit_name = ""
   if top_unitid and ShowSecondPlayersName then
-    top_threat_unit_name = TransliterateCyrillicLetters(UnitName(top_unitid)) .. ": "
+    top_threat_unit_name = Localiation:TransliterateCyrillicLetters(UnitName(top_unitid)) .. ": "
   end
 
   return top_unitid, top_threat_value, top_threat_unit_name
@@ -315,7 +313,7 @@ local THREAT_DETAILS_FUNTIONS = {
 function Widget:UpdateFrame(widget_frame, unit)
   local db = Addon.db.profile.threat
 
-  if not Addon:ShowThreatFeedback(unit) then
+  if not Threat:ShowFeedback(unit) then
     widget_frame:Hide()
     return
   end
@@ -330,7 +328,7 @@ function Widget:UpdateFrame(widget_frame, unit)
   widget_frame.Percentage:SetHeight(widget_frame:GetHeight())
 
   local style = Addon.GetPlayerRole()
-  local threat_level = GetThreatLevel(unit, style, db.toggle.OffTank)
+  local threat_level = unit.ThreatLevel
 
   -- Show threat art (textures)
   if SettingsArt.ON and not (GetRaidTargetIndex(unit.unitid) and db.marked.art) then
@@ -338,7 +336,6 @@ function Widget:UpdateFrame(widget_frame, unit)
       -- Tanking uses regular textures / swapped for dps / healing
       threat_level = REVERSE_THREAT_SITUATION[threat_level]
     end
-
     local texture = PATH .. db.art.theme.."\\".. threat_level
     if db.art.theme == "bar" then
       widget_frame.LeftTexture:SetTexture(texture)

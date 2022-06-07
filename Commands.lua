@@ -287,10 +287,6 @@ local function ChatCommandDebug(cmd_list)
 		--    print ("Use Heuristic in Instances:", Addon.db.profile.threat.UseHeuristicInInstances)
 
 		--print ("InCombat:", InCombatLockdown())
-
-		--Addon:ShowThreatFeedback(unit,true)
-		--Addon:GetThreatColor(unit, unit.style, Addon.db.profile.threat.UseThreatTable, true)
-		--Addon:SetThreatColor(unit, true)
 	elseif command == "version" then
 		--		local unique_unit = TP.CopyTable(Addon.db.profile.uniqueSettings[1])
 		--		unique_unit.UseAutomaticIcon = nil

@@ -17,6 +17,7 @@ local UnitIsConnected, UnitAffectingCombat = UnitIsConnected, UnitAffectingComba
 -- ThreatPlates APIs
 local RGB = Addon.RGB
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
+local Threat, Style = Addon.Threat, Addon.Style
 local BackdropTemplate = Addon.BackdropTemplate
 
 local _G =_G
@@ -36,9 +37,7 @@ local COLOR_TRANSPARENT = RGB(0, 0, 0, 0) -- opaque
 ---------------------------------------------------------------------------------------------------
 -- Local variables
 ---------------------------------------------------------------------------------------------------
-local ShowThreatGlow
 local Settings
-local ShowOnAttackedUnitsOnly, UseHeuristicInInstances
 local ThreatColorWOThreatSystem, TappedColor
 
 ---------------------------------------------------------------------------------------------------
@@ -46,11 +45,11 @@ local ThreatColorWOThreatSystem, TappedColor
 ---------------------------------------------------------------------------------------------------
 
 local function ShowThreatGlow(unit)
-  if ShowOnAttackedUnitsOnly then
-    if IsInInstance() and UseHeuristicInInstances then
+  if Threat.UseThreatTable then
+    if IsInInstance() and Threat.UseHeuristicInInstances then
       return _G.UnitAffectingCombat(unit.unitid)
     else
-      return Addon:OnThreatTable(unit)
+      return Threat:OnThreatTable(unit)
     end
   else
     return _G.UnitAffectingCombat(unit.unitid)
@@ -60,6 +59,7 @@ end
 ---------------------------------------------------------------------------------------------------
 -- Local threat functions
 ---------------------------------------------------------------------------------------------------
+
 local function GetThreatGlowColor(unit)
   local color
 
@@ -71,7 +71,7 @@ local function GetThreatGlowColor(unit)
     local unique_setting = unit.CustomPlateSettings
     if unique_setting and unique_setting.UseThreatGlow then
       -- set style to tank/dps or normal
-      style = Addon:GetThreatStyle(unit)
+      style = Style:GetThreatStyle(unit)
     end
 
     -- Split this up into two if-parts, otherweise there is an inconsistency between
@@ -79,10 +79,10 @@ local function GetThreatGlowColor(unit)
     -- is already in combat, but not yet on the mob's threat table for a sec or so.
     if Settings.ON and Settings.useHPColor then
       if style == "dps" or style == "tank" then
-        color = Addon:GetThreatColor(unit, style, ShowOnAttackedUnitsOnly) -- ShowThreatGlowOnAttackedUnitsOnly is ignored in WoW Classic
+        color = Addon:GetThreatColor(unit, style)
       end
     elseif InCombatLockdown() and (style == "normal" or style == "dps" or style == "tank") then
-      color = Addon:GetThreatColor(unit, style, ShowOnAttackedUnitsOnly)   -- ShowThreatGlowOnAttackedUnitsOnly is ignored in WoW Classic
+      color = Addon:GetThreatColor(unit, style)
     end
   end
 
@@ -129,7 +129,7 @@ function Element.UpdateStyle(tp_frame, style, plate_style)
   end
 
   local unit = tp_frame.unit
-  if unit.ThreatStatus then
+  if unit.ThreatLevel then
     threatglow:SetBackdropBorderColor(GetThreatGlowColor(unit))
     threatglow:Show()
   else
@@ -138,7 +138,7 @@ function Element.UpdateStyle(tp_frame, style, plate_style)
 end
 
 function Element.ThreatUpdate(tp_frame, unit)
-  if unit.ThreatStatus and tp_frame.style.threatborder.show then
+  if unit.ThreatLevel and tp_frame.style.threatborder.show then
     local threatglow = tp_frame.visual.ThreatGlow
     threatglow:SetBackdropBorderColor(GetThreatGlowColor(unit))
     threatglow:Show()
@@ -150,9 +150,6 @@ end
 function Element.UpdateSettings()
   local db = Addon.db.profile
   Settings = db.threat
-
-  ShowOnAttackedUnitsOnly = db.ShowThreatGlowOnAttackedUnitsOnly
-  UseHeuristicInInstances = db.UseHeuristicInInstances
 
   ThreatColorWOThreatSystem = db.settings.normal.threatcolor
   TappedColor = db.ColorByReaction.TappedUnit

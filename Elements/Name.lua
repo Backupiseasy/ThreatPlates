@@ -16,9 +16,8 @@ local string_len  = string.len
 -- ThreatPlates APIs
 local PlatesByUnit = Addon.PlatesByUnit
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
-local Font = Addon.Font
+local Localization, Font = Addon.Localization, Addon.Font
 local SplitByWhitespace = Addon.SplitByWhitespace
-local TransliterateCyrillicLetters = Addon.Localization.TransliterateCyrillicLetters
 local TextCache = Addon.Cache.Texts
 
 ---------------------------------------------------------------------------------------------------
@@ -54,7 +53,7 @@ end
 function Element.UnitAdded(tp_frame)
   local unit = tp_frame.unit
   
-  local unit_name = TransliterateCyrillicLetters(unit.name)
+  local unit_name = Localization:TransliterateCyrillicLetters(unit.name)
   
   -- Full names in headline view, otherwise
   if tp_frame.PlateStyle ~= "NameMode" then 

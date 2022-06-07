@@ -20,9 +20,8 @@ local GetGuildInfo = GetGuildInfo
 local PlatesByUnit = Addon.PlatesByUnit
 local SubscribeEvent, PublishEvent,  UnsubscribeEvent = Addon.EventService.Subscribe, Addon.EventService.Publish, Addon.EventService.Unsubscribe
 local RGB = Addon.RGB
-local Font = Addon.Font
+local Localization, Font = Addon.Localization, Addon.Font
 local L = Addon.L
-local TransliterateCyrillicLetters = Addon.Localization.TransliterateCyrillicLetters
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -236,7 +235,7 @@ local function TextRoleGuildLevel(unit)
     description, color = GetLevelDescription(unit)
   end
 
-  description = TransliterateCyrillicLetters(description)
+  description = Localization:TransliterateCyrillicLetters(description)
 
   return description, color
 end
@@ -251,7 +250,7 @@ local function TextRoleGuild(unit)
     color = GetGuildColor
   end
 
-  description = TransliterateCyrillicLetters(description)
+  description = Localization:TransliterateCyrillicLetters(description)
 
   return description, color
 end
@@ -264,7 +263,7 @@ local function TextNPCRole(unit)
     description, color = GetUnitSubtitle(unit)
   end
 
-  description = TransliterateCyrillicLetters(description)
+  description = Localization:TransliterateCyrillicLetters(description)
 
   return description, color
 end

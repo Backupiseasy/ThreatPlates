@@ -1,3 +1,6 @@
+---------------------------------------------------------------------------------------------------
+-- Module: Transparency
+---------------------------------------------------------------------------------------------------
 local ADDON_NAME, Addon = ...
 
 ---------------------------------------------------------------------------------------------------
@@ -12,14 +15,15 @@ local UnitExists = UnitExists
 local GetCVar = GetCVar
 
 -- ThreatPlates APIs
-local ThreatPlates = Addon.ThreatPlates
-local Animations = Addon.Animations
-local Transparency = Addon.Transparency
-local GetThreatLevel = Addon.GetThreatLevel
+local Animations, Style = Addon.Animations, Addon.Style
 local PlatesByUnit = Addon.PlatesByUnit
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
 local L = Addon.L
-local ThreatPlates = Addon.ThreatPlates
+
+---------------------------------------------------------------------------------------------------
+-- Module Setup
+---------------------------------------------------------------------------------------------------
+local TransparencyModule = Addon.Transparency
 
 ---------------------------------------------------------------------------------------------------
 -- Local variables
@@ -33,11 +37,6 @@ local Settings, FadingIsEnabled
 local SettingsOccludedAlpha, SettingsEnabledOccludedAlpha, FadeInOccludedUnitsIsEnabled, FadeOutOccludedUnitsIsEnabled
 -- Cached CVARs
 local CVAR_NameplateOccludedAlphaMult
-
----------------------------------------------------------------------------------------------------
--- Element code
----------------------------------------------------------------------------------------------------
-local Element = "Transparency"
 
 ---------------------------------------------------------------------------------------------------
 -- Functions handling transparency of nameplates
@@ -113,7 +112,7 @@ local function TransparencyThreat(unit, style)
 		end
 	end
 
-  local alpha = db[style].alpha[GetThreatLevel(unit, style, db.toggle.OffTank)]
+  local alpha = db[style].alpha[unit.ThreatLevel]
 
   if db.AdditiveAlpha then
     alpha = alpha + TransparencyGeneral(unit) - 1
@@ -123,7 +122,7 @@ local function TransparencyThreat(unit, style)
 end
 
 local function AlphaNormal(unit, non_combat_transparency)
-  local style = Addon:GetThreatStyle(unit)
+  local style = Style:GetThreatStyle(unit)
   if style == "normal" then
     return non_combat_transparency or TransparencyGeneral(unit)
   else -- dps, tank
@@ -291,7 +290,7 @@ local function SetOccludedTransparencyWithoutFadingOnUpdate(self, frame)
   end
 end
 
-function Transparency:Initialize(frame)
+function TransparencyModule:Initialize(frame)
   Animations:StopFade(frame)
   frame:SetAlpha(0)
 
@@ -302,10 +301,10 @@ function Transparency:Initialize(frame)
   -- Plate is not yet shown here and not yet occluded, so adjust the alpha with or without fading
   UpdatePlate_InitializeAlpha(frame, frame.unit)
   -- Also initialize occlusion here to avoid a short flicker of the nameplate if occlusion is enabled
-  SetOccludedTransparencyWithoutFadingOnUpdate(Transparency, frame)
+  SetOccludedTransparencyWithoutFadingOnUpdate(TransparencyModule, frame)
 end
 
-function Transparency:UpdateSettings()
+function TransparencyModule:UpdateSettings()
   Settings = Addon.db.profile
 
   CVAR_NameplateOccludedAlphaMult = tonumber(GetCVar("nameplateOccludedAlphaMult"))
@@ -316,11 +315,11 @@ function Transparency:UpdateSettings()
   if FadingIsEnabled then
     UpdatePlate_SetAlpha = UpdatePlate_SetAlphaWithFading
     --UpdatePlate_InitializeAlpha = UpdatePlate_InitializeAlphaWithFading
-    Transparency.SetOccludedTransparency = SetOccludedTransparencyWithFadingOnUpdate
+    TransparencyModule.SetOccludedTransparency = SetOccludedTransparencyWithFadingOnUpdate
   else
     UpdatePlate_SetAlpha = UpdatePlate_SetAlphaNoFading
     --UpdatePlate_InitializeAlpha = UpdatePlate_SetAlphaNoFading
-    Transparency.SetOccludedTransparency = SetOccludedTransparencyWithoutFadingOnUpdate
+    TransparencyModule.SetOccludedTransparency = SetOccludedTransparencyWithoutFadingOnUpdate
   end
 
   SettingsEnabledOccludedAlpha = Settings.nameplate.toggle.OccludedUnits
@@ -342,7 +341,7 @@ function Transparency:UpdateSettings()
   FadeOutOccludedUnitsIsEnabled = Settings.Animations.FadeOutOccludedUnits
 end
 
-function Transparency:OcclusionDetectionIsEnabled()
+function TransparencyModule:OcclusionDetectionIsEnabled()
 	return SettingsEnabledOccludedAlpha
 end
 
@@ -399,12 +398,12 @@ local function TargetLost(tp_frame)
   end
 end
 
-SubscribeEvent(Element, "MouseoverOnEnter", SituationalEvent)
-SubscribeEvent(Element, "MouseoverOnLeave", SituationalEvent)
-SubscribeEvent(Element, "CastingStarted", SituationalEvent)
-SubscribeEvent(Element, "CastingStopped", SituationalEvent)
-SubscribeEvent(Element, "TargetMarkerUpdate", SituationalEvent)
-SubscribeEvent(Element, "TargetGained", TargetGained)
-SubscribeEvent(Element, "TargetLost", TargetLost)
-SubscribeEvent(Element, "FactionUpdate", SituationalEvent)
-SubscribeEvent(Element, "ThreatUpdate", SituationalEvent)
+SubscribeEvent(TransparencyModule, "MouseoverOnEnter", SituationalEvent)
+SubscribeEvent(TransparencyModule, "MouseoverOnLeave", SituationalEvent)
+SubscribeEvent(TransparencyModule, "CastingStarted", SituationalEvent)
+SubscribeEvent(TransparencyModule, "CastingStopped", SituationalEvent)
+SubscribeEvent(TransparencyModule, "TargetMarkerUpdate", SituationalEvent)
+SubscribeEvent(TransparencyModule, "TargetGained", TargetGained)
+SubscribeEvent(TransparencyModule, "TargetLost", TargetLost)
+SubscribeEvent(TransparencyModule, "FactionUpdate", SituationalEvent)
+SubscribeEvent(TransparencyModule, "ThreatUpdate", SituationalEvent)

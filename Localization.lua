@@ -1,3 +1,6 @@
+---------------------------------------------------------------------------------------------------
+-- Module: Localization
+---------------------------------------------------------------------------------------------------
 local ADDON_NAME, Addon = ...
 
 ---------------------------------------------------------------------------------------------------
@@ -9,6 +12,11 @@ local format = format
 
 -- ThreatPlates APIs
 local TextCache = Addon.Cache.Texts
+
+---------------------------------------------------------------------------------------------------
+-- Module Setup
+---------------------------------------------------------------------------------------------------
+local LocalizationModule = Addon.Localization
 
 ---------------------------------------------------------------------------------------------------
 -- Default fonts by country
@@ -115,7 +123,7 @@ local TRANSLITERATE_CHARS = {
   ["я"] = "ya", ["  "] = " ",
 }
 
-function Addon.Localization.TransliterateCyrillicLetters(text)
+function LocalizationModule:TransliterateCyrillicLetters(text)
   if Addon.db.profile.Localization.TransliterateCyrillicLetters and text and text:len() > 1 then
     local cache_entry = TextCache[text]
 
@@ -137,7 +145,7 @@ end
 -- Update of settings
 ---------------------------------------------------------------------------------------------------
 
-function Addon.Localization:UpdateSettings()
+function LocalizationModule:UpdateSettings()
   Addon.Truncate = (Addon.db.profile.text.LocalizedUnitSymbol and TruncateEastAsian) or TruncateWestern
 
   -- Clear cache for texts as e.g., abbreviation mode might have changed

@@ -1,3 +1,6 @@
+---------------------------------------------------------------------------------------------------
+-- Module: Style
+---------------------------------------------------------------------------------------------------
 local ADDON_NAME, Addon = ...
 local ThreatPlates = Addon.ThreatPlates
 
@@ -10,17 +13,17 @@ local pairs = pairs
 
 -- WoW APIs
 local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
-local UnitIsPlayer, UnitPlayerControlled, UnitIsUnit = UnitIsPlayer, UnitPlayerControlled, UnitIsUnit
+local UnitPlayerControlled, UnitIsUnit = UnitPlayerControlled, UnitIsUnit
 local UnitIsOtherPlayersPet = UnitIsOtherPlayersPet
 local UnitIsBattlePet = UnitIsBattlePet
 local UnitCanAttack = UnitCanAttack
 local GetNamePlates, GetNamePlateForUnit = C_NamePlate.GetNamePlates, C_NamePlate.GetNamePlateForUnit
 
 -- ThreatPlates APIs
-local PlatesByUnit = Addon.PlatesByUnit
 local TOTEMS = Addon.TOTEMS
 local GetUnitVisibility = ThreatPlates.GetUnitVisibility
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
+local Threat = Addon.Threat
 local ActiveTheme = Addon.Theme
 local NameTriggers, AuraTriggers, CastTriggers = Addon.Cache.CustomPlateTriggers.Name, Addon.Cache.CustomPlateTriggers.Aura, Addon.Cache.CustomPlateTriggers.Cast
 local NameWildcardTriggers, TriggerWildcardTests = Addon.Cache.CustomPlateTriggers.NameWildcard, Addon.Cache.TriggerWildcardTests
@@ -32,9 +35,9 @@ local _G =_G
 -- GLOBALS: GetSpellInfo, UnitIsTapDenied
 
 ---------------------------------------------------------------------------------------------------
--- Element code
+-- Module Setup
 ---------------------------------------------------------------------------------------------------
-local Element = "Style"
+local StyleModule = Addon.Style
 
 ---------------------------------------------------------------------------------------------------
 -- Wrapper functions for WoW Classic
@@ -186,10 +189,10 @@ local function ShowUnit(unit)
 end
 
 -- Returns style based on threat (currently checks for in combat, should not do hat)
-function Addon:GetThreatStyle(unit)
+function StyleModule:GetThreatStyle(unit)
   -- style tank/dps only used for NPCs/non-player units
-  if Addon:ShowThreatFeedback(unit) then
-      return Addon.GetPlayerRole()
+  if Threat:ShowFeedback(unit) then
+    return Addon.GetPlayerRole()
   end
 
   return "normal"
@@ -206,7 +209,7 @@ end
 -- Check if a unit is a totem or a custom nameplates (e.g., after UNIT_NAME_UPDATE)
 -- Depends on:
 --   * unit.name
-function Addon.UnitStyle_NameDependent(unit)
+function StyleModule:ProcessNameTriggers(unit)
   local plate_style, custom_style, totem_settings
 
   local name_custom_style = NameTriggers[unit.name]
@@ -275,9 +278,7 @@ function Addon.UnitStyle_NameDependent(unit)
   return plate_style
 end
 
-local UnitStyle_NameDependent = Addon.UnitStyle_NameDependent
-
-function Addon.UnitStyle_AuraDependent(unit, aura_id, aura_name, aura_cast_by_player)
+function StyleModule:ProcessAuraTriggers(unit, aura_id, aura_name, aura_cast_by_player)
   local plate_style
 
   local unique_settings = AuraTriggers[aura_id] or AuraTriggers[aura_name]
@@ -302,7 +303,7 @@ function Addon.UnitStyle_AuraDependent(unit, aura_id, aura_name, aura_cast_by_pl
   return plate_style
 end
 
-function Addon.UnitStyle_CastDependent(unit, spell_id, spell_name)
+function StyleModule:ProcessCastTriggers(unit, spell_id, spell_name)
   local plate_style
 
   local unique_settings = CastTriggers[spell_id] or CastTriggers[spell_name] or NameTriggers["Test"]
@@ -321,7 +322,7 @@ function Addon.UnitStyle_CastDependent(unit, spell_id, spell_name)
   return plate_style
 end
 
-function Addon:SetStyle(unit)
+function StyleModule:SetStyle(unit)
   local show, hide_unit_type, headline_view = ShowUnit(unit)
 
   -- Nameplate is disabled in General - Visibility
@@ -338,7 +339,7 @@ function Addon:SetStyle(unit)
     style = unit.CustomStyleAura
     unit.CustomPlateSettings = unit.CustomPlateSettingsAura
   else
-  	style = UnitStyle_NameDependent(unit) or (headline_view and "NameOnly")
+  	style = self:ProcessNameTriggers(unit) or (headline_view and "NameOnly")
   end
 	  
   -- Dynamic enable checks for custom styles
@@ -365,7 +366,7 @@ function Addon:SetStyle(unit)
     return "empty", nil
   end
 
-  -- if not style and Addon:ShowThreatFeedback(unit) then
+  -- if not style and Addon:ShowFeedback(unit) then
   --   -- could call GetThreatStyle here, but that would at a tiny overhead
   --   -- style tank/dps only used for hostile (enemy, neutral) NPCs
   --   style = Addon.GetPlayerRole()
@@ -374,7 +375,7 @@ function Addon:SetStyle(unit)
   -- return style or "normal"
 
   -- style should never be false here (only nil or "totem", ...)
-  return style or Addon:GetThreatStyle(unit)
+  return style or self:GetThreatStyle(unit)
 end
 
 local NAMEPLATE_MODE_BY_THEME = {
@@ -389,11 +390,11 @@ local NAMEPLATE_MODE_BY_THEME = {
   ["NameOnly-Unique"] = "NameMode",
 }
 
-local function CheckNameplateStyle(tp_frame)
+function StyleModule:Update(tp_frame)
   local unit = tp_frame.unit
 
   local old_custom_style = unit.CustomPlateSettings
-  local stylename = Addon:SetStyle(unit)
+  local stylename = self:SetStyle(unit)
 
   if tp_frame.stylename ~= stylename then
     local style = ActiveTheme[stylename]
@@ -412,39 +413,26 @@ local function CheckNameplateStyle(tp_frame)
   end
 end
 
-local function UNIT_NAME_UPDATE(unitid)
-  local tp_frame = PlatesByUnit[unitid]
-  if tp_frame and tp_frame.Active then
-    local stylename = UnitStyle_NameDependent(tp_frame.unit)
+function StyleModule:UpdateName(tp_frame)
+  local stylename = self:ProcessNameTriggers(tp_frame.unit)
 
-    if stylename and tp_frame.stylename ~= stylename then
-      local style = ActiveTheme[stylename]
+  if stylename and tp_frame.stylename ~= stylename then
+    local style = ActiveTheme[stylename]
 
-      tp_frame.PlateStyle = NAMEPLATE_MODE_BY_THEME[stylename]
-      tp_frame.stylename = stylename
-      tp_frame.style = style
-      tp_frame.unit.style = stylename
+    tp_frame.PlateStyle = NAMEPLATE_MODE_BY_THEME[stylename]
+    tp_frame.stylename = stylename
+    tp_frame.style = style
+    tp_frame.unit.style = stylename
 
-      PublishEvent("StyleUpdate", tp_frame, style, stylename)
-    end
+    PublishEvent("StyleUpdate", tp_frame, style, stylename)
   end
 end
 
-local function EnteringOrLeavingCombat()
-  local frame
+function StyleModule:EnteringOrLeavingCombat()
   for _, plate in pairs(GetNamePlates()) do
     local frame = plate.TPFrame
     if frame and frame.Active then
-      CheckNameplateStyle(frame)
+      self:Update(frame)
     end
   end
 end
-
-Addon.InitializeStyle = CheckNameplateStyle
-
-SubscribeEvent(Element, "FactionUpdate", CheckNameplateStyle)
-SubscribeEvent(Element, "ThreatUpdate", CheckNameplateStyle)
-SubscribeEvent(Element, "CustomStyleUpdate", CheckNameplateStyle)
-SubscribeEvent(Element, "UNIT_NAME_UPDATE", UNIT_NAME_UPDATE)
-SubscribeEvent(Element, "PLAYER_REGEN_ENABLED", EnteringOrLeavingCombat)
-SubscribeEvent(Element, "PLAYER_REGEN_DISABLED", EnteringOrLeavingCombat)

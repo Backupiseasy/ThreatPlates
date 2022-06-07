@@ -11,17 +11,14 @@ local ADDON_NAME, Addon = ...
 local abs, floor, ceil, pairs = abs, floor, ceil, pairs
 
 -- WoW APIs
-local UnitReaction, UnitCanAttack, UnitIsPVP = UnitReaction, UnitCanAttack, UnitIsPVP
-local UnitIsPlayer, UnitPlayerControlled = UnitIsPlayer, UnitPlayerControlled
-local UnitThreatSituation, UnitIsUnit, UnitExists, UnitGroupRolesAssigned = UnitThreatSituation, UnitIsUnit, UnitExists, UnitGroupRolesAssigned
-local IsInInstance = IsInInstance
-local GetNamePlates, GetNamePlateForUnit = C_NamePlate.GetNamePlates, C_NamePlate.GetNamePlateForUnit
+local UnitCanAttack, UnitIsPVP, UnitPlayerControlled = UnitCanAttack, UnitIsPVP, UnitPlayerControlled
+local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
+
 -- WoW Classic APIs:
-local GetPartyAssignment = GetPartyAssignment
 
 -- ThreatPlates APIs
-local IsOffTankCreature = Addon.IsOffTankCreature
 local SubscribeEvent, PublishEvent,  UnsubscribeEvent = Addon.EventService.Subscribe, Addon.EventService.Publish, Addon.EventService.Unsubscribe
+local Threat = Addon.Threat
 local RGB_P = Addon.RGB_P
 
 local _G =_G
@@ -34,10 +31,6 @@ local _G =_G
 ---------------------------------------------------------------------------------------------------
 
 if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC then
-  UnitGroupRolesAssigned = function(target_unit)
-    return (GetPartyAssignment("MAINTANK", target_unit) and "TANK") or "NONE"
-  end
-
   -- Quest widget is not available in Classic
   ShowQuestUnit = function(...) return false end
 end
@@ -46,12 +39,6 @@ end
 -- Local variables
 ---------------------------------------------------------------------------------------------------
 local ColorByHealthIsEnabled = false
-
-local REACTION_REFERENCE = {
-  FRIENDLY = { NPC = "FriendlyNPC", PLAYER = "FriendlyPlayer", },
-  HOSTILE = {	NPC = "HostileNPC", PLAYER = "HostilePlayer", },
-  NEUTRAL = { NPC = "NeutralUnit", PLAYER = "NeutralUnit",	},
-}
 
 local TRANPARENT_COLOR = Addon.RGB(0, 0, 0, 0)
 
@@ -198,73 +185,28 @@ local NAME_COLOR_FUNCTIONS = {
 -- Functions to set color for healthbar, name, and status text
 ---------------------------------------------------------------------------------------------------
 
-local function UpdatePlateColorsOld(tp_frame)
-  local color
-
-  if tp_frame.style.healthbar.show then
-    local healthbar = tp_frame.visual.Healthbar
-
-    color = tp_frame:GetHealthbarColor()
-    healthbar:SetStatusBarColor(color.r, color.g, color.b, 1)
-
-    if not Settings.BackgroundUseForegroundColor then
-      color = Settings.BackgroundColor
-    end
-
-    healthbar.Background:SetVertexColor(color.r, color.g, color.b, 1 - Settings.BackgroundOpacity)
-  end
-
-  --    if fg_color == nil then
-  --      local unit = tp_frame.unit
-  --      print ("Unit:", unit.name)
-  --      print ("  Tapped:", unit.IsTapDenied)
-  --      print ("  Health-Color:", unit.HealthColor)
-  --      fg_color = RGB_P(255, 255, 255)
-  --    end
-
-  color = tp_frame:GetNameColor()
-
-  -- Only update the color and fire the event if there's actually a change in color
-  if SettingsName[tp_frame.PlateStyle].Enabled then
-    tp_frame.visual.NameText:SetTextColor(color.r, color.g, color.b)
-  end
-  PublishEvent("NameColorUpdate", tp_frame, color)
-end
-
 local function UpdatePlateColors(tp_frame)
-  local color, current_color
+  local color
 
   if tp_frame.style.healthbar.show then
     -- When a nameplate is initalized, colors (e.g., unit.ReactionColor) are not yet defined, so GetHealthbarColor
     -- returns nil
     color = tp_frame:GetHealthbarColor() or TRANPARENT_COLOR
-    current_color = tp_frame.CurrentHealthbarColor or TRANPARENT_COLOR
 
-    if color.r ~= current_color.r or color.g ~= current_color.g or color.b ~= current_color.b or color.a ~= current_color.a then
-      local healthbar = tp_frame.visual.Healthbar
-      healthbar:SetStatusBarColor(color.r, color.g, color.b, 1)
-      tp_frame.CurrentHealthbarColor = color
+    local healthbar = tp_frame.visual.Healthbar
+    healthbar:SetStatusBarColor(color.r, color.g, color.b, 1)
 
-      if not Settings.BackgroundUseForegroundColor then
-        color = Settings.BackgroundColor
-      end
-
-      healthbar.Background:SetVertexColor(color.r, color.g, color.b, 1 - Settings.BackgroundOpacity)
+    if not Settings.BackgroundUseForegroundColor then
+      color = Settings.BackgroundColor
     end
+    healthbar.Background:SetVertexColor(color.r, color.g, color.b, 1 - Settings.BackgroundOpacity)
   end
 
-  -- Only update the color and fire the event if there's actually a change in color
   color = tp_frame:GetNameColor() or TRANPARENT_COLOR
-  current_color = tp_frame.CurrentNameColor or TRANPARENT_COLOR
-
-  if color.r ~= current_color.r or color.g ~= current_color.g or color.b ~= current_color.b or color.a ~= current_color.a then
-    if SettingsName[tp_frame.PlateStyle].Enabled then
-      tp_frame.visual.NameText:SetTextColor(color.r, color.g, color.b)
-    end
-    PublishEvent("NameColorUpdate", tp_frame, color)
-
-    tp_frame.CurrentNameColor = color
+  if SettingsName[tp_frame.PlateStyle].Enabled then
+    tp_frame.visual.NameText:SetTextColor(color.r, color.g, color.b)
   end
+  PublishEvent("NameColorUpdate", tp_frame, color)
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -398,87 +340,12 @@ local function GetCustomStyleColor(unit)
   return color
 end
 
-local function GetThreatLevel(unit, style, enable_off_tank)
-  local threat_status = unit.ThreatStatus
-
-  local threat_level, other_player_has_aggro
-  if threat_status then
-    threat_level = unit.ThreatLevel
-    other_player_has_aggro = (threat_status < 2)
+function Addon:GetThreatColor(unit, style)
+  if unit.ThreatLevel then
+    return ThreatColor[style][unit.ThreatLevel]
   else
-    -- Should not be necessary here as GetThreatSituation is only called if either a threat table is available
-    -- or the heuristic is enabled
-    local target_unit = unit.unitid .. "target"
-    if UnitExists(target_unit) and not unit.isCasting then
-      if UnitIsUnit(target_unit, "player") or UnitIsUnit(target_unit, "vehicle") then
-        threat_level = "HIGH"
-      else
-        threat_level = "LOW"
-      end
-
-      unit.ThreatLevel = threat_level
-    else
-      threat_level = unit.ThreatLevel or "LOW"
-    end
-
-    other_player_has_aggro = (threat_level == "LOW")
+    return nil
   end
-
-  -- Reset "unit.IsOfftanked" if the player is tanking
-  if not other_player_has_aggro then
-    unit.IsOfftanked = false
-  elseif style == "tank" and enable_off_tank and other_player_has_aggro then
-    local target_unit = unit.unitid .. "target"
-
-    -- Player does not tank the unit, so check if it is off-tanked:
-    if UnitExists(target_unit) then
-      if UnitIsPlayer(target_unit) or UnitPlayerControlled(target_unit) then
-        local target_threat_situation = UnitThreatSituation(target_unit, unit.unitid) or 0
-        if target_threat_situation > 1 then
-          -- Target unit does tank unit, so check if target unit is a tank or an tank-like pet/guardian
-          if ("TANK" == UnitGroupRolesAssigned(target_unit) and not UnitIsUnit("player", target_unit)) or UnitIsUnit(target_unit, "pet") or IsOffTankCreature(target_unit) then
-            unit.IsOfftanked = true
-          else
-            -- Reset "unit.IsOfftanked"
-            -- Target unit does tank unit, but is not a tank or a tank-like pet/guardian
-            unit.IsOfftanked = false
-          end
-        end
-      end
-    end
-
-    -- Player does not tank the unit, but it might have been off-tanked before losing target.
-    -- If so, assume that it is still securely off-tanked
-    if unit.IsOfftanked then
-      threat_level = "OFFTANK"
-    end
-  end
-
-  return threat_level
-end
-
-function Addon:GetThreatColor(unit, style, use_threat_table)
-  local db = Addon.db.profile
-
-  local color, on_threat_table
-
-  if use_threat_table then
-    if IsInInstance() and db.threat.UseHeuristicInInstances then
-      -- Use threat detection heuristic in instance
-      on_threat_table = _G.UnitAffectingCombat(unit.unitid)
-    else
-      on_threat_table = Addon:OnThreatTable(unit)
-    end
-  else
-    -- Use threat detection heuristic
-    on_threat_table = _G.UnitAffectingCombat(unit.unitid)
-  end
-
-  if on_threat_table then
-    color = ThreatColor[style][GetThreatLevel(unit, style, db.threat.toggle.OffTank)]
-  end
-
-  return color
 end
 
 -- Threat System is OP, player is in combat, style is tank or dps
@@ -491,8 +358,8 @@ local function GetCombatColor(unit)
   end
 
   local color
-  if Addon:ShowThreatFeedback(unit) then
-    color = Addon:GetThreatColor(unit, Addon.GetPlayerRole(), SettingsBase.threat.UseThreatTable)
+  if Threat:ShowFeedback(unit) then
+    color = ThreatColor[unit.style][unit.ThreatLevel]
   end
 
   unit.CombatColor = color
@@ -625,8 +492,6 @@ end
 
 -- Called in processing event: NAME_PLATE_UNIT_ADDED
 function Element.UnitAdded(tp_frame)
-  --tp_frame.CurrentHealthbarColor = nil
-
   local unit = tp_frame.unit
 
   --GetSituationalColorHealthbar(unit, tp_frame.PlateStyle)
@@ -644,7 +509,6 @@ function Element.UnitAdded(tp_frame)
     GetColorByReaction(unit)
     GetColorByClass(unit, tp_frame.PlateStyle)
 --    print ("  Reaction:", Addon.Debug:ColorToString(unit.ReactionColor))
---    print ("    ->:", unit.reaction, unit.type, REACTION_REFERENCE[unit.reaction][unit.type])
 --    print ("  Class:", Addon.Debug:ColorToString(unit.ClassColor))
   end
 
@@ -831,5 +695,3 @@ function Element.UpdateSettings()
 
   --wipe(HealthColorCache)
 end
-
-Addon.GetThreatLevel = GetThreatLevel
