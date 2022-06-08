@@ -210,7 +210,7 @@ local function ShowQuestUnit(unit)
   return true
 end
 
-function Addon:ShowQuestUnit(unit)
+function Addon.ShowQuestUnit(unit)
   local db = Addon.db.profile.questWidget
   return db.ON and db.ModeHPBar and ShowQuestUnit(unit)
 end

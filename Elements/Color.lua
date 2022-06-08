@@ -26,6 +26,8 @@ local _G =_G
 -- List them here for Mikk's FindGlobals script
 -- GLOBALS: UnitAffectingCombat
 
+local ShowQuestUnit
+
 ---------------------------------------------------------------------------------------------------
 -- Wrapper functions for WoW Classic
 ---------------------------------------------------------------------------------------------------
@@ -440,6 +442,8 @@ local function GetSituationalColor(unit, plate_style)
     name_color = mode_settings.UseFocusColoring and SettingsBase.FocusWidget.HPBarColor
   end
 
+  ShowQuestUnit = ShowQuestUnit or Addon.ShowQuestUnit
+
   if not healthbar_color then
     local use_target_mark_color
     if unit.CustomPlateSettings then
@@ -452,7 +456,7 @@ local function GetSituationalColor(unit, plate_style)
       healthbar_color = SettingsBase.settings.raidicon.hpMarked[unit.TargetMarker]
     elseif unit.IsTapDenied then
       healthbar_color = ColorByReaction.TappedUnit
-    elseif Addon:ShowQuestUnit(unit) and Addon:IsPlayerQuestUnit(unit) then
+    elseif ShowQuestUnit(unit) and Addon:IsPlayerQuestUnit(unit) then
       healthbar_color = SettingsBase.questWidget.HPBarColor
     end
   end
