@@ -1188,6 +1188,23 @@ local function MigrateFixAurasCyclicAnchoring(_, profile)
   end
 end
 
+local function MigrateThreatValue(_, profile)
+  local default_profile = ThreatPlates.DEFAULT_SETTINGS.profile
+
+  if DatabaseEntryExists(profile, { "threatWidget", "ThreatPercentage" } ) then
+    profile.threatWidget.ThreatPercentage.ShowInGroups = GetValueOrDefault(profile.threatWidget.ThreatPercentage.OnlyInGroups, default_profile.threatWidget.ThreatPercentage.OnlyInGroups)
+    print (profile.threatWidget.ThreatPercentage.Show)
+    if profile.threatWidget.ThreatPercentage.Show == false then
+      profile.threatWidget.ThreatPercentage.ShowAlways = false -- is also the default value
+      profile.threatWidget.ThreatPercentage.ShowInGroups = false
+      profile.threatWidget.ThreatPercentage.ShowWithPet = false
+    end
+  end
+
+  DatabaseEntryDelete(profile, { "threatWidget", "ThreatPercentage", "Show" })
+  DatabaseEntryDelete(profile, { "threatWidget", "ThreatPercentage", "OnlyInGroups" })
+end
+
 ---------------------------------------------------------------------------------------------------
 -- Main migration function & settings
 ---------------------------------------------------------------------------------------------------
@@ -1233,6 +1250,9 @@ local MIGRATION_FUNCTIONS = {
   },
   ["10.3.1"] = {
     MigrateFixAurasCyclicAnchoring = { NoDefaultProfile = true , CleanupDatabase = true },
+  },
+  ["10.3.6"] = {
+    MigrateThreatValue = { NoDefaultProfile = true , CleanupDatabase = true },
   },
   -- MigrateDeprecatedSettingsEntries, -- TODO
 }
@@ -1286,6 +1306,9 @@ local ENTRIES_TO_DELETE = {
   ["10.3.0"] = {
     { "AuraWidget", "scale" }
   },
+  ["10.4.0"] = {
+    "ShowThreatGlowOnAttackedUnitsOnly",
+  }
 }
 
 local ENTRIES_TO_RENAME = {

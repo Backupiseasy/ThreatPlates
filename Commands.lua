@@ -5,7 +5,8 @@
 ---------------------------------------------------------------------------------------------------
 local L = Addon.L
 
-local DEBUG = Addon.Meta("version") == "@project-version@"
+Addon.DEBUG = Addon.Meta("version") == "@project-version@"
+
 local function toggleDPS()
   if Addon.db.profile.optionRoleDetectionAutomatic then
     Addon.Logging.Warning(L["|cff89F559Threat Plates|r: Role toggle not supported because automatic role detection is enabled."], true)
@@ -152,7 +153,7 @@ local function ChatCommandDebug(cmd_list)
 		for i, w in pairs(widgets) do
 			print (i, w)
 		end
-	elseif command == "combat" and DEBUG then
+	elseif command == "combat" and Addon.DEBUG then
 		--Addon.Logging.Info("|cff89F559Threat Plates|r: Event publishing overview:")
 		if not plate then return end
 
@@ -397,7 +398,7 @@ function TidyPlatesThreat:ChatCommand(input)
 --		TidyPlatesThreat:ToggleNameplateModeNeutralUnits()
 --	elseif command == "toggle-view-enemy-units" then
 --		TidyPlatesThreat:ToggleNameplateModeEnemyUnits()
-	elseif DEBUG then
+	elseif Addon.DEBUG then
 		ChatCommandDebug(cmd_list)
 	else
 		Addon.Logging.Error(L["Unknown option: "] .. command)

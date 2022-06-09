@@ -90,6 +90,7 @@ Addon.Scaling = {}
 Addon.Animations = {}
 Addon.Localization = {}
 Addon.Icons = {}
+Addon.Font = {}
 
 Addon.Cache = {
 	Texts = CreateTextCache(),

@@ -16,6 +16,7 @@ local GetCVar = GetCVar
 
 -- ThreatPlates APIs
 local Animations, Style = Addon.Animations, Addon.Style
+local CVars = Addon.CVars
 local PlatesByUnit = Addon.PlatesByUnit
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
 local L = Addon.L
@@ -307,7 +308,7 @@ end
 function TransparencyModule:UpdateSettings()
   Settings = Addon.db.profile
 
-  CVAR_NameplateOccludedAlphaMult = tonumber(GetCVar("nameplateOccludedAlphaMult"))
+  CVAR_NameplateOccludedAlphaMult = CVars:GetAsNumber("nameplateOccludedAlphaMult")
 
   FadingIsEnabled = Settings.Animations.FadeToDuration > 0
 
@@ -326,7 +327,7 @@ function TransparencyModule:UpdateSettings()
   SettingsOccludedAlpha = Settings.nameplate.alpha.OccludedUnits
 
   if SettingsEnabledOccludedAlpha then
-    if Addon.CVars.InvalidCVarsForOcclusionDetection() then
+    if CVars.InvalidCVarsForOcclusionDetection() then
       SettingsEnabledOccludedAlpha = false
       UpdatePlate_Transparency = UpdatePlate_SetAlpha
       Addon.Logging.Warning(L["Transparency for occluded units is being disabled as certain console variables (CVars) related to nameplate transparency are set in a way to prevent this feature from working."], true)

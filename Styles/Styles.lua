@@ -15,7 +15,7 @@ local pairs = pairs
 local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
 local UnitPlayerControlled, UnitIsUnit = UnitPlayerControlled, UnitIsUnit
 local UnitIsOtherPlayersPet = UnitIsOtherPlayersPet
-local UnitIsBattlePet = UnitIsBattlePet
+local UnitIsBattlePet, UnitCreatureType = UnitIsBattlePet, UnitCreatureType
 local UnitCanAttack = UnitCanAttack
 local GetNamePlates, GetNamePlateForUnit = C_NamePlate.GetNamePlates, C_NamePlate.GetNamePlateForUnit
 
@@ -199,7 +199,7 @@ function StyleModule:GetThreatStyle(unit)
 end
 
 local function GetStyleForPlate(custom_style)
-  -- If a name trigger style is found with useStyle == false, that means that it's active, but only the icon will be shown.
+  -- If a style is found with useStyle == false, that means that it's active, but only the icon will be shown.
   if custom_style.useStyle then
     return (custom_style.showNameplate and "unique") or (custom_style.ShowHeadlineView and "NameOnly-Unique") or "etotem"
   end
@@ -211,8 +211,7 @@ end
 --   * unit.name
 function StyleModule:ProcessNameTriggers(unit)
   local plate_style, custom_style, totem_settings
-
-  local name_custom_style = NameTriggers[unit.name]
+  local name_custom_style = NameTriggers[unit.name] or NameTriggers[unit.NPCID]
   if name_custom_style and name_custom_style.Enable.UnitReaction[unit.reaction] then
     custom_style = name_custom_style
     plate_style = GetStyleForPlate(custom_style)
@@ -252,8 +251,8 @@ function StyleModule:ProcessNameTriggers(unit)
     end
   end
 
-  if not plate_style then
-    -- Check for totem
+  if not plate_style and UnitCreatureType(unit.unitid) == Addon.TotemCreatureType then
+    -- Check for player totems and ignore NPC totems
     local totem_id = TOTEMS[unit.name]
     if totem_id then
       local db = Addon.db.profile.totemSettings

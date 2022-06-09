@@ -181,7 +181,7 @@ end
 --   - InCombat
 --   - ThreatLevel
 --   - IsOfftanked
-function ThreatModule:InitializeUnitAttributeThreat(unit, unitid)
+function ThreatModule:SetUnitAttributeThreat(unit, unitid)
   unit.InCombat = _G.UnitAffectingCombat(unitid)
 
   -- ThreatLevel is nil as nameplate/unit are initialized
@@ -189,6 +189,7 @@ function ThreatModule:InitializeUnitAttributeThreat(unit, unitid)
   local threat_status = UnitThreatSituation("player", unitid)
   if threat_status then
     unit.HasThreatTable = true
+    threat_level = THREAT_REFERENCE[threat_status]
     other_unit_is_tanking = (threat_status < 2)
   elseif unit.InCombat and (not self.UseThreatTable or (self.UseHeuristicInInstances and IsInInstance())) and InCombatLockdown() then
     local target_unit = unitid .. "target"
@@ -206,10 +207,7 @@ function ThreatModule:InitializeUnitAttributeThreat(unit, unitid)
     other_unit_is_tanking = (threat_level == "LOW")
   end
   
-  threat_level = CheckIfUnitIsOfftanked(unit, threat_level, other_unit_is_tanking)
-  if threat_level ~= unit.ThreatLevel then
-    unit.ThreatLevel = threat_level
-  end
+  unit.ThreatLevel = CheckIfUnitIsOfftanked(unit, threat_level, other_unit_is_tanking)
 end
 
 local function UpdateThreatLevel(tp_frame, unit, threat_level)

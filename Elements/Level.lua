@@ -15,7 +15,7 @@ local UnitEffectiveLevel, GetCreatureDifficultyColor = UnitEffectiveLevel, GetCr
 -- ThreatPlates APIs
 local PlatesByUnit = Addon.PlatesByUnit
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
-local SetFontJustify = Addon.Font.SetJustify
+local Font = Addon.Font
 
 ---------------------------------------------------------------------------------------------------
 -- Local variables
@@ -68,7 +68,7 @@ function Element.UpdateStyle(tp_frame, style, plate_style)
     return
   end
 
-  SetFontJustify(level_text, style.align, style.vertical)
+  Font:SetJustify(level_text, style.align, style.vertical)
 
   if style.shadow then
     level_text:SetShadowColor(0,0,0, 1)

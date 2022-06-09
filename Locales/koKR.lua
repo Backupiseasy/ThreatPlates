@@ -172,6 +172,8 @@ L["Allow"] = "Allow"
 L["Alpha"] = "투명도"
 --[[Translation missing --]]
 L["Alpha multiplier of nameplates for occluded units."] = "Alpha multiplier of nameplates for occluded units."
+--[[Translation missing --]]
+L["Always"] = "Always"
 L["Always Show Nameplates"] = "이름표 항상 표시"
 L["Always shows the full amount of absorbs on a unit. In overabsorb situations, the absorbs bar ist shifted to the left."] = "항상 흡수량의 최대치를 표시합니다. 최대치를 초과하는 흡수량은 왼쪽으로 성장하여 표시됩니다."
 --[[Translation missing --]]
@@ -350,6 +352,8 @@ L["Custom Nameplates"] = "사용자 설정 이름표"
 L["Custom status text requires LibDogTag-3.0 to function."] = "Custom status text requires LibDogTag-3.0 to function."
 --[[Translation missing --]]
 L["Custom status text requires LibDogTag-Unit-3.0 to function."] = "Custom status text requires LibDogTag-Unit-3.0 to function."
+--[[Translation missing --]]
+L["CVar \"%s\" has an invalid value: \"%s\". The value must be a number. Using the default value for this CVar instead."] = "CVar \"%s\" has an invalid value: \"%s\". The value must be a number. Using the default value for this CVar instead."
 --[[Translation missing --]]
 L["Cyclic anchoring of aura areas to each other is not possible."] = "Cyclic anchoring of aura areas to each other is not possible."
 L["Darnavan"] = "다르나반"
@@ -662,6 +666,8 @@ L["In combat, always show all combo points no matter if they are on or off. Off 
 L["In combat, use coloring, transparency, and scaling based on threat level as configured in the threat system. Custom settings are only used out of combat."] = "전투 중에 위협 수준 체제에서 구성된 위협 수준 단계에 따른 색상화, 투명도, 그리고 크기 비율 변경을 사용합니다. 사용자 설정은 비 전투 중에만 사용됩니다."
 --[[Translation missing --]]
 L["In delta mode, show the name of the player who is second in the enemy unit's threat table."] = "In delta mode, show the name of the player who is second in the enemy unit's threat table."
+--[[Translation missing --]]
+L["In Groups"] = "In Groups"
 --[[Translation missing --]]
 L["In Instances"] = "In Instances"
 --[[Translation missing --]]
@@ -1352,6 +1358,8 @@ L["Val'kyr Shadowguard"] = "발키르 어둠수호병"
 --[[Translation missing --]]
 L["Value"] = "Value"
 --[[Translation missing --]]
+L["Value Format"] = "Value Format"
+--[[Translation missing --]]
 L["Value Type"] = "Value Type"
 L["Venomous Snake"] = "독사"
 L["Vertical Align"] = "수직 정렬"
@@ -1372,6 +1380,8 @@ L["Wide"] = "넓게"
 L["Widgets"] = "장치"
 L["Width"] = "너비"
 L["Windwalker Monk"] = "풍운 수도사"
+--[[Translation missing --]]
+L["With Pet"] = "With Pet"
 --[[Translation missing --]]
 L["Word Wrap"] = "Word Wrap"
 --[[Translation missing --]]

@@ -5,10 +5,10 @@ local ADDON_NAME, Addon = ...
 ---------------------------------------------------------------------------------------------------
 
 -- Lua APIs
-local tostring = tostring
+local tostring, tonumber, string_format = tostring, tonumber, string.format
 
 -- WoW APIs
-local SetCVar, GetCVar, GetCVarDefault = C_CVar.SetCVar, C_CVar.GetCVar, C_CVar.GetCVarDefault
+local SetCVar, GetCVar, GetCVarDefault, GetCVarBool = C_CVar.SetCVar, C_CVar.GetCVar, C_CVar.GetCVarDefault, C_CVar.GetCVarBool
 local IsInInstance = IsInInstance
 local NamePlateDriverFrame = NamePlateDriverFrame
 
@@ -56,6 +56,12 @@ local COMBAT_PROTECTED = {
   nameplateShowFriendlyNPCs = true,
   nameplateShowFriendlyPets = true,
   nameplateShowFriendlyTotems = true,
+  -- Name CVars
+  UnitNameFriendlyPlayerName = true,
+  UnitNameFriendlyPetName = true,
+  UnitNameFriendlyGuardianName = true,
+  UnitNameFriendlyTotemName = true,
+  UnitNameFriendlyMinionName = true,
 }
 
 local MONITORED_CVARS = {
@@ -114,15 +120,21 @@ end
 --  end
 --end
 
---function CVars:GetAsNumber(cvar)
---  local value = tonumber(GetCVar(cvar))
---
---  if not value then
---    value = tonumber(GetCVarDefault(cvar))
---  end
---
---  return value
---end
+function CVars:GetAsNumber(cvar)
+  local value = GetCVar(cvar)
+  local numeric_value = tonumber(value)
+
+  if not numeric_value then
+    Addon.Logging.Warning(string_format(L["CVar \"%s\" has an invalid value: \"%s\". The value must be a number. Using the default value for this CVar instead."], cvar, value))
+    numeric_value = tonumber(GetCVarDefault(cvar))
+  end
+
+ return numeric_value
+end
+
+function CVars:GetAsBool(cvar)
+  return GetCVarBool(cvar)
+end
 
 ---------------------------------------------------------------------------------------------------
 -- Set CVars in a safe way when in combat
@@ -226,10 +238,10 @@ function CVars.RegisterCVarHook()
 end
 
 function CVars.InvalidCVarsForHidingNameplates()
-  local nameplateMinScale = tonumber(GetCVar("nameplateMinScale"))
-  local nameplateMaxScale = tonumber(GetCVar("nameplateMaxScale"))
-  local nameplateLargerScale = tonumber(GetCVar("nameplateLargerScale"))
-  local nameplateSelectedScale = tonumber(GetCVar("nameplateSelectedScale"))
+  local nameplateMinScale = CVars:GetAsNumber("nameplateMinScale")
+  local nameplateMaxScale = CVars:GetAsNumber("nameplateMaxScale")
+  local nameplateLargerScale = CVars:GetAsNumber("nameplateLargerScale")
+  local nameplateSelectedScale = CVars:GetAsNumber("nameplateSelectedScale")
 
   return nameplateMinScale >= nameplateMaxScale or nameplateMinScale >= nameplateLargerScale or nameplateMinScale >= nameplateSelectedScale
 end
@@ -242,16 +254,16 @@ function CVars.FixCVarsForHidingNameplates()
 end
 
 function CVars.InvalidCVarsForOcclusionDetection()
-  local nameplateMinAlpha = tonumber(GetCVar("nameplateMinAlpha"))
-  local nameplateMaxAlpha = tonumber(GetCVar("nameplateMaxAlpha"))
-  local nameplateOccludedAlphaMult = tonumber(GetCVar("nameplateOccludedAlphaMult"))
-  local nameplateSelectedAlpha = tonumber(GetCVar("nameplateSelectedAlpha"))
+  local nameplateMinAlpha = CVars:GetAsNumber("nameplateMinAlpha")
+  local nameplateMaxAlpha = CVars:GetAsNumber("nameplateMaxAlpha")
+  local nameplateOccludedAlphaMult = CVars:GetAsNumber("nameplateOccludedAlphaMult")
+  local nameplateSelectedAlpha = CVars:GetAsNumber("nameplateSelectedAlpha")
 
   local invalid = nameplateMinAlpha ~= 1 or nameplateMaxAlpha ~= 1 or nameplateOccludedAlphaMult > 0.9 or nameplateSelectedAlpha ~= 1
 
   -- Occlusion detection does not work when a target is selected in Classic, see https://github.com/Stanzilla/WoWUIBugs/issues/134
   if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC then
-    local nameplateNotSelectedAlpha = tonumber(GetCVar("nameplateNotSelectedAlpha"))
+    local nameplateNotSelectedAlpha = CVars:GetAsNumber("nameplateNotSelectedAlpha")
     return invalid or nameplateNotSelectedAlpha ~= 1
   end
 

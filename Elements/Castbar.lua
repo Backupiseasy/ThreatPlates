@@ -17,8 +17,7 @@ local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local UnitIsUnit = UnitIsUnit
 
 -- ThreatPlates APIs
-local ThreatPlates, Font = Addon.ThreatPlates, Addon.Font
-local SetFontJustify = Addon.Font.SetJustify
+local Font = Addon.Font
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
 local BackdropTemplate = Addon.BackdropTemplate
 
@@ -248,7 +247,7 @@ function Element.UpdateStyle(tp_frame, style)
   spell_text:SetFont(spell_text_style.typeface, spell_text_style.size, spell_text_style.flags)
 
   if spell_text_style.show then
-    SetFontJustify(spell_text, spell_text_style.align, spell_text_style.vertical)
+    Font:SetJustify(spell_text, spell_text_style.align, spell_text_style.vertical)
     if spell_text_style.shadow then
       spell_text:SetShadowColor(0,0,0, 1)
       spell_text:SetShadowOffset(1, -1)
@@ -271,7 +270,7 @@ function Element.UpdateStyle(tp_frame, style)
 
   cast_time:SetFont(spell_text_style.typeface, spell_text_style.size, spell_text_style.flags)
   if db.ShowCastTime then
-    SetFontJustify(cast_time, db.CastTimeText.Font.HorizontalAlignment, db.CastTimeText.Font.VerticalAlignment)
+    Font:SetJustify(cast_time, db.CastTimeText.Font.HorizontalAlignment, db.CastTimeText.Font.VerticalAlignment)
     if spell_text_style.shadow then
       cast_time:SetShadowColor(0,0,0, 1)
       cast_time:SetShadowOffset(1, -1)

@@ -1,4 +1,46 @@
 ﻿------------------------------------------------------
+10.4.0 (2022-04-xx)
+------------------------------------------------------
+* Added a feature to change the name font of Blizzard nameplates and hide the healthbar (to only show unit names), e.g., while in instances.
+* Added an option to show title and realm in a player's name [Comment #3952, #1995, #4164, #6140, TPC#496, Issue #312, #432].
+* Added an option to show target of target with or without enclosing brackets [Issue #543, IM].
+* Added an option to also use NPC IDs in unit (formerly name) triggers for custom styles [Comment #6207].
+* Added additional icons as indicator for elite and rare mobs [GH-330, IM] (thanks to lizardo221).
+* Integrated new UNIT_AURA processing optimizations to improve unit aura processing in encounters where many nameplates are on screen at once [Comment #6114]. 
+
+------------------------------------------------------
+10.3.8 (2022-06-01)
+------------------------------------------------------
+* Fixed a bug with Threat Plates overwriting the Profiles page of other addons when adding the import/export section (thanks to WoWUIDev Discord!).
+* Updated TOC version for Patch 9.2.5.
+
+------------------------------------------------------
+10.3.7 (2022-05-18)
+------------------------------------------------------
+* Fixed a bug where totems were not recognized as totems for some localizations [Comment #6200].
+* Added Kul Tiran Racial Trait Haymaker to the Auras widget as CC aura [Issue #545].
+
+------------------------------------------------------
+10.3.6 (2022-05-08)
+------------------------------------------------------
+* Added options to configure in detail when to show the threat value (e.g., when a pet is active) [Comment #6154, Issue #536]. 
+* Fixed a bug where players or non-totem player-controlled units were shown as totems if their name was the same as a player totem's name [Comment #6146].
+* Fixed a bug where changing the colum and row limits of aura areas only took effect after reloading the UI [Comment #6169].
+* Fixed a bug with Lightning Lasso from Shamans not being recognized as CC aura [Comment #6182, Issue #541].
+
+------------------------------------------------------
+10.3.5 (2022-04-22)
+------------------------------------------------------
+* Disabled some threat value types when not in a group as their value is constant in this case and does not provide any valuable information.
+* Updated TOC version for Classic Patch 1.14.3.
+
+------------------------------------------------------
+10.3.4 (2022-03-28)
+------------------------------------------------------
+* Fixed a Lua error when a numeric CVar has an invalid, i.e., non-numeric, value. In this case, the default value of the CVar will now be used to prevent the Lua error.
+* Updated TOC version for TBC Classic Patch 2.5.4.
+------------------------------------------------------
+
 10.3.3 (2022-03-12)
 ------------------------------------------------------
 * Fixed a bug with an outdated cast target being shown when a nameplate was re-used on a casting unit.
@@ -40,14 +82,14 @@
 ------------------------------------------------------
 10.2.13 (2021-11-01)
 ------------------------------------------------------
-* Updated TOC version for for Classic Patch 1.14.0.
+* Updated TOC version for Classic Patch 1.14.0.
 * Updated integrated libraries to Ace3 r1252 to fix a Lua error related to a change in the WoW Interface Options API [GH-309, GH-310].
 
 ------------------------------------------------------
 10.2.12 (2021-10-23)
 ------------------------------------------------------
 * Fixed a Lua error that occured sometimes when friendly pets/totems/guardians turn neutral, e.g. when losing or giving up control over them [Issue #511].
-* Updated TOC version for for TBC Classic Patch 2.5.2.
+* Updated TOC version for TBC Classic Patch 2.5.2.
 
 ------------------------------------------------------
 10.2.11 (2021-07-10)
@@ -110,8 +152,8 @@
 ------------------------------------------------------
 10.2.1 (2021-05-25)
 ------------------------------------------------------
-* Fixed a bug with delayed health update in the TBC Classic Version because of a change in how health update events were processed [Comment TBC#742, #5992, Issue #490].
-* Fixed a bug with crowd-control auras being shown as debuff (e.g., with wrong size) [Comment #5589, TBC#744].
+* Fixed a bug with delayed health update in the TBC Classic Version because of a change in how health update events were processed [Comment TPC#742, #5992, Issue #490].
+* Fixed a bug with crowd-control auras being shown as debuff (e.g., with wrong size) [Comment #5589, TPC#744].
 
 ------------------------------------------------------
 10.2.0 (2021-05-17)
@@ -147,7 +189,7 @@
 ------------------------------------------------------
 * Fixed a bug where stealth detection auras where not properly detected in Stealth widget [Comment #5464].
 * Libraries LibDogTag and LibDogTag-Unit must now be installed separately! They are no longer embedded into Threat Plates. Both addons are now only loaded when custom status text is actually used. This avoids a Lua error in LDT that occurred even when custom status text was not used [Issue #478, TPC#39, GitHub #267, Comment #5490].
-* Updated TOC version for for Patch 9.0.5.
+* Updated TOC version for Patch 9.0.5.
 
 ------------------------------------------------------
 10.1.4

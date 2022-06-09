@@ -1,5 +1,8 @@
 # @project-version@ (@build-time@)
 
-* Fixed a bug with an outdated cast target being shown when a nameplate was re-used on a casting unit.
-* Added an option to ignore PvP status when coloring player units by reaction. Also, PvP status is ignored for coloring in arenas and battlegrounds [Comment #5996, #6059, Issue #526, #525].
-* Updated Shaman totems - added Static Field Totem [Comment #6065].
+* Added a feature to change the name font of Blizzard nameplates and hide the healthbar (to only show unit names), e.g., while in instances.
+* Added an option to show title and realm in a player's name [Comment #3952, #1995, #4164, #6140, TPC#496, Issue #312, #432].
+* Added an option to show target of target with or without enclosing brackets [Issue #543, IM].
+* Added an option to also use NPC IDs in unit (formerly name) triggers for custom styles [Comment #6207].
+* Added additional icons as indicator for elite and rare mobs [GH-330, IM] (thanks to lizardo221).
+* Integrated new UNIT_AURA processing optimizations to improve unit aura processing in encounters where many nameplates are on screen at once [Comment #6114]. 

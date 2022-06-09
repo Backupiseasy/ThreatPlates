@@ -12,12 +12,12 @@ local max, gsub, tonumber, math_abs = math.max, string.gsub, tonumber, math.abs
 -- WoW APIs
 local wipe, strsplit = wipe, strsplit
 local WorldFrame, UIParent, INTERRUPTED = WorldFrame, UIParent, INTERRUPTED
-local UnitName, UnitReaction, UnitClass = UnitName, UnitReaction, UnitClass
+local UnitName, UnitReaction, UnitClass, UnitPVPName = UnitName, UnitReaction, UnitClass, UnitPVPName
 local UnitEffectiveLevel = UnitEffectiveLevel
 local UnitChannelInfo, UnitPlayerControlled = UnitChannelInfo, UnitPlayerControlled
 local UnitIsUnit, UnitIsPlayer = UnitIsUnit, UnitIsPlayer
 local GetCreatureDifficultyColor, GetRaidTargetIndex = GetCreatureDifficultyColor, GetRaidTargetIndex
-local GetTime, GetCVar, CombatLogGetCurrentEventInfo = GetTime, GetCVar, CombatLogGetCurrentEventInfo
+local GetTime, CombatLogGetCurrentEventInfo = GetTime, CombatLogGetCurrentEventInfo
 local GetNamePlates, GetNamePlateForUnit = C_NamePlate.GetNamePlates, C_NamePlate.GetNamePlateForUnit
 local GetPlayerInfoByGUID = GetPlayerInfoByGUID
 local IsInInstance, InCombatLockdown = IsInInstance, InCombatLockdown
@@ -28,12 +28,13 @@ local GetSpecializationInfo, GetSpecialization = GetSpecializationInfo, GetSpeci
 local ThreatPlates = Addon.ThreatPlates
 local L = Addon.L
 local Widgets = Addon.Widgets
+local CVars = Addon.CVars
 local RegisterEvent, UnregisterEvent = Addon.EventService.RegisterEvent, Addon.EventService.UnregisterEvent
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
 local ElementsCreated, ElementsUnitAdded, ElementsUnitRemoved = Addon.Elements.Created, Addon.Elements.UnitAdded, Addon.Elements.UnitRemoved
 local ElementsUpdateStyle, ElementsUpdateSettings = Addon.Elements.UpdateStyle, Addon.Elements.UpdateSettings
 local Threat, Style, Localization = Addon.Threat, Addon.Style, Addon.Localization
-local Scaling, Transparency, Animations, Icons = Addon.Scaling, Addon.Transparency, Addon.Animations, Addon.Icons
+local Scaling, Transparency, Animations, Icons, Font = Addon.Scaling, Addon.Transparency, Addon.Animations, Addon.Icons, Addon.Font
 local BackdropTemplate = Addon.BackdropTemplate
 
 local GetNameForNameplate
@@ -168,6 +169,29 @@ local function UpdateUnitLevel(unit, unitid)
   unit.LevelColor = GetCreatureDifficultyColor(unit_level)
 end
 
+---------------------------------------------------------------------------------------------------------------------
+-- Functions for setting unit attributes
+---------------------------------------------------------------------------------------------------------------------
+
+local function SetUnitAttributeName(unit, unitid)
+  -- Can be UNKNOWNOBJECT => UNIT_NAME_UPDATE
+  local unit_name, realm = UnitName(unitid)
+
+  if unit.type == "PLAYER" then
+    local db = Addon.db.profile.settings.name
+
+    if db.ShowTitle then
+      unit_name = UnitPVPName(unitid)
+    end
+
+    if db.ShowRealm and realm then
+      unit_name = unit_name .. " - " .. realm
+    end
+  end
+
+  unit.name = unit_name
+end
+
 local function SetUnitAttributeReaction(unit, unitid)
   unit.red, unit.green, unit.blue = _G.UnitSelectionColor(unitid)
   unit.reaction = MAP_UNIT_REACTION[UnitReaction(unitid, "player")] or GetReactionByColor(unit.red, unit.green, unit.blue)
@@ -178,6 +202,13 @@ local function SetUnitAttributeReaction(unit, unitid)
   end
 
   unit.IsTapDenied = _G.UnitIsTapDenied(unitid)
+end
+
+local function SetUnitAttributeHealth(unit, unitid)
+  -- Health and Absorbs => UNIT_HEALTH_FREQUENT, UNIT_MAXHEALTH & UNIT_ABSORB_AMOUNT_CHANGED
+  unit.health = _G.UnitHealth(unitid) or 0
+  unit.healthmax = _G.UnitHealthMax(unitid) or 1
+  -- unit.Absorbs = UnitGetTotalAbsorbs(unitid) or 0
 end
 
 local function InitializeUnit(unit, unitid)
@@ -205,13 +236,8 @@ local function InitializeUnit(unit, unitid)
     unit.NPCID = npc_id
   end
 
-  -- Can be UNKNOWNOBJECT => UNIT_NAME_UPDATE
-  unit.name = UnitName(unitid)
-
-  -- Health and Absorbs => UNIT_HEALTH_FREQUENT, UNIT_MAXHEALTH & UNIT_ABSORB_AMOUNT_CHANGED
-  unit.health = _G.UnitHealth(unitid) or 0
-  unit.healthmax = _G.UnitHealthMax(unitid) or 1
-  -- unit.Absorbs = UnitGetTotalAbsorbs(unitid) or 0
+  SetUnitAttributeName(unit, unitid)
+  SetUnitAttributeHealth(unit, unitid)
 
   -- Casting => UNIT_SPELLCAST_*
   -- Initialized in OnUpdateCastMidway in OnShowNameplate, but only when unit is currently casting
@@ -223,7 +249,7 @@ local function InitializeUnit(unit, unitid)
   unit.IsFocus = UnitIsUnit("focus", unitid) -- required here for config changes which reset all plates without calling TARGET_CHANGED, MOUSEOVER, ...
   unit.isMouseover = UnitIsUnit("mouseover", unitid)
  
-  Threat:InitializeUnitAttributeThreat(unit, unitid)
+  Threat:SetUnitAttributeThreat(unit, unitid)
   -- Target Mark => RAID_TARGET_UPDATE
   unit.TargetMarker = RAID_ICON_LIST[GetRaidTargetIndex(unitid)]
 
@@ -500,9 +526,9 @@ function Addon:ConfigClickableArea(toggle_show)
 
         local width, height = Addon.db.profile.settings.frame.width, Addon.db.profile.settings.frame.height
 
-        local min_scale = tonumber(GetCVar("nameplateMinScale"))
-        --local selected_scale = tonumber(GetCVar("nameplateSelectedScale"))
-        local global_scale = tonumber(GetCVar("nameplateGlobalScale"))
+        local min_scale = CVars:GetAsNumber("nameplateMinScale")
+        --local selected_scale = CVars:GetAsNumber("nameplateSelectedScale")
+        local global_scale = CVars:GetAsNumber("nameplateGlobalScale")
         local current_scale = global_scale * min_scale
 
         width = width * current_scale
@@ -539,6 +565,7 @@ function Addon:UpdateSettings()
   --wipe(PlateOnUpdateQueue)
 
   Localization:UpdateSettings()
+  Font:UpdateSettings()
   Icons:UpdateSettings()
   Threat:UpdateSettings()
   Transparency:UpdateSettings()
@@ -708,13 +735,39 @@ function Addon:PLAYER_ENTERING_WORLD(initialLogin, reloadingUI)
   Addon.IsInPvEInstance = isInstance and (instance_type == "party" or instance_type == "raid")
   Addon.IsInPvPInstance = isInstance and (instance_type == "arena" or instance_type == "pvp")
   
-  if Addon.IsInPvEInstance and db.HideFriendlyUnitsInInstances then
-    Addon.CVars:Set("nameplateShowFriends", 0)
-  else
-    -- reset to previous setting
-    Addon.CVars:RestoreFromProfile("nameplateShowFriends")
+  if db.ShowFriendlyUnitsInInstances then
+    if Addon.IsInPvEInstance then
+      CVars:Set("nameplateShowFriends", 1)
+    else
+      -- Restore the value from before entering the instance
+      CVars:RestoreFromProfile("nameplateShowFriends")
+    end
+  elseif db.HideFriendlyUnitsInInstances then
+    if Addon.IsInPvEInstance then  
+      CVars:Set("nameplateShowFriends", 0)
+    else
+      -- Restore the value from before entering the instance
+      CVars:RestoreFromProfile("nameplateShowFriends")
+    end
   end
 
+  if Addon.db.profile.BlizzardSettings.Names.ShowPlayersInInstances then
+    if Addon.IsInPvEInstance then  
+      CVars:Set("UnitNameFriendlyPlayerName", 1)
+      -- CVars:Set("UnitNameFriendlyPetName", 1)
+      -- CVars:Set("UnitNameFriendlyGuardianName", 1)
+      CVars:Set("UnitNameFriendlyTotemName", 1)
+      -- CVars:Set("UnitNameFriendlyMinionName", 1)
+    else
+      -- Restore the value from before entering the instance
+      CVars:RestoreFromProfile("UnitNameFriendlyPlayerName")
+      -- CVars:RestoreFromProfile("UnitNameFriendlyPetName")
+      -- CVars:RestoreFromProfile("UnitNameFriendlyGuardianName")
+      CVars:RestoreFromProfile("UnitNameFriendlyTotemName")
+      -- CVars:RestoreFromProfile("UnitNameFriendlyMinionName")
+    end  
+  end
+  
   -- Update custom styles for the current instance
   Addon.UpdateStylesForCurrentInstance()
 
@@ -725,6 +778,7 @@ function Addon:PLAYER_ENTERING_WORLD(initialLogin, reloadingUI)
   -- Adjust clickable area if we are in an instance. Otherwise the scaling of friendly nameplates' healthbars will
   -- be bugged
   Addon:SetBaseNamePlateSize()
+  Font:SetNamesFonts()
 end
 
 -- Fires when the player leaves combat status
@@ -832,7 +886,7 @@ function Addon:UNIT_NAME_UPDATE(unitid)
 
   local tp_frame = PlatesByUnit[unitid]
   if tp_frame and tp_frame.Active then
-    tp_frame.unit.name = UnitName(unitid)
+    SetUnitAttributeName(tp_frame.unit, unitid)
     Style:UpdateName(tp_frame)
   end
 end
@@ -889,10 +943,7 @@ local function UNIT_HEALTH(unitid)
 
   local tp_frame = PlatesByUnit[unitid]
   if tp_frame and tp_frame.Active then
-    local unit = tp_frame.unit
-
-    unit.health = _G.UnitHealth(unitid) or 0
-    unit.healthmax = _G.UnitHealthMax(unitid) or 1
+    SetUnitAttributeHealth(tp_frame.unit, unitid)  
   end
 end
 
@@ -901,10 +952,7 @@ function Addon:UNIT_MAXHEALTH(unitid)
 
   local tp_frame = PlatesByUnit[unitid]
   if tp_frame and tp_frame.Active then
-    local unit = tp_frame.unit
-
-    unit.health = _G.UnitHealth(unitid) or 0
-    unit.healthmax = _G.UnitHealthMax(unitid) or 1
+    SetUnitAttributeHealth(tp_frame.unit, unitid)  
   end
 end
 

@@ -56,7 +56,7 @@ function Element.UnitAdded(tp_frame)
   local unit_name = Localization:TransliterateCyrillicLetters(unit.name)
   
   -- Full names in headline view, otherwise
-  if tp_frame.PlateStyle ~= "NameMode" then 
+  if unit.type ~= "PLAYER" and tp_frame.PlateStyle ~= "NameMode" then 
     local db = ModeSettings[tp_frame.PlateStyle]
     local name_setting = (unit.reaction == "FRIENDLY" and db.AbbreviationForFriendlyUnits) or db.AbbreviationForEnemyUnits
     if name_setting ~= "FULL" then

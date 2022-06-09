@@ -18,6 +18,7 @@ local L = Addon.L
 local PlatesByUnit = Addon.PlatesByUnit
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
 local Animations, Scaling, Transparency, Style = Addon.Animations, Addon.Scaling, Addon.Transparency, Addon.Style
+local CVars = Addon.CVars
 
 ---------------------------------------------------------------------------------------------------
 -- Module Setup
@@ -240,13 +241,13 @@ function ScalingModule:UpdateSettings()
 	end
 
   if Settings.HidePlateDuration > 0 and (Settings.HidePlateFadeOut or Settings.HidePlateScaleDown) then
-    if Addon.CVars.InvalidCVarsForHidingNameplates() then
+    if CVars.InvalidCVarsForHidingNameplates() then
       AnimateHideNameplate = false
       Addon.Logging.Warning(L["Animations for hiding nameplates are being disabled as certain console variables (CVars) related to nameplate scaling are set in a way to prevent this feature from working."], true)
     else
       AnimateHideNameplate = true
-      CVAR_nameplateMinScale = tonumber(GetCVar("nameplateMinScale")) * tonumber(GetCVar("nameplateGlobalScale"))
-      CVAR_nameplateMinAlpha = tonumber(GetCVar("nameplateMinAlpha"))
+      CVAR_nameplateMinScale = CVars:GetAsNumber("nameplateMinScale") * CVars:GetAsNumber("nameplateGlobalScale")
+      CVAR_nameplateMinAlpha = CVars:GetAsNumber("nameplateMinAlpha")
     end
   else
     AnimateHideNameplate = false
