@@ -404,7 +404,7 @@ local SET_FUNCTIONS = {
 }
 
 local function SetValue(info, ...)
-  print ("SetValue: Function =", "{ " .. table.concat(info.arg, ".") .. " }")
+  #print ("SetValue: Function =", "{ " .. table.concat(info.arg, ".") .. " }")
 
   -- For widgets: check if the widget if enabled or disabled. If so, call InitializeWidget additionally
   -- Also: Fix some bad configuration settings design by me:
@@ -713,10 +713,10 @@ end
 -- Special getter/setter functions for font configuration
 ---------------------------------------------------------------------------------------------------
 
-local function GetFontFlags(settings, flag)
+local function GetFontFlags(info, flag)
   local db_font = db
-  for i = 1, #settings do
-    db_font = db_font[settings[i]]
+  for i = 1, #info.arg do
+    db_font = db_font[info.arg[i]]
   end
 
   if flag == "Thick" then
@@ -728,17 +728,18 @@ local function GetFontFlags(settings, flag)
   end
 end
 
-local function SetFontFlags(settings, flag, val)
+local function SetFontFlags(info, flag, val)
+
   if flag == "Thick" then
-    local outline = (val and "THICKOUTLINE") or (GetFontFlags(settings, "Outline") and "OUTLINE") or "NONE"
-    local mono = (GetFontFlags(settings, "Mono") and ", MONOCHROME") or ""
+    local outline = (val and "THICKOUTLINE") or (GetFontFlags(info, "Outline") and "OUTLINE") or "NONE"
+    local mono = (GetFontFlags(info, "Mono") and ", MONOCHROME") or ""
     return outline .. mono
   elseif flag == "Outline" then
-    local outline = (val and "OUTLINE") or (GetFontFlags(settings, "Thick") and "THICKOUTLINE") or "NONE"
-    local mono = (GetFontFlags(settings, "Mono") and ", MONOCHROME") or ""
+    local outline = (val and "OUTLINE") or (GetFontFlags(info, "Thick") and "THICKOUTLINE") or "NONE"
+    local mono = (GetFontFlags(info, "Mono") and ", MONOCHROME") or ""
     return outline .. mono
   else -- flag = "Mono"
-    local outline = (GetFontFlags(settings, "Thick") and "THICKOUTLINE") or (GetFontFlags(settings, "Outline") and "OUTLINE") or "NONE"
+    local outline = (GetFontFlags(info, "Thick") and "THICKOUTLINE") or (GetFontFlags(info, "Outline") and "OUTLINE") or "NONE"
     local mono = (val and ", MONOCHROME") or ""
     return outline .. mono
   end
@@ -1110,8 +1111,8 @@ local function GetFontEntryTheme(pos, widget_info, func_disabled)
         order = 40,
         type = "toggle",
         desc = L["Add black outline."],
-        set = function(info, val) SetValue(info, SetFontFlags({ "settings", widget_info, "flags" }, "Outline", val)) end,
-        get = function(info) return GetFontFlags({ "settings", widget_info, "flags" }, "Outline") end,
+        set = function(info, val) SetValue(info, SetFontFlags(info, "Outline", val)) end,
+        get = function(info) return GetFontFlags(info, "Outline") end,
         arg = { "settings", widget_info, "flags" },
       },
       Thick = {
@@ -1119,8 +1120,8 @@ local function GetFontEntryTheme(pos, widget_info, func_disabled)
         order = 41,
         type = "toggle",
         desc = L["Add thick black outline."],
-        set = function(info, val) SetValue(info, SetFontFlags({ "settings", widget_info, "flags" }, "Thick", val)) end,
-        get = function(info) return GetFontFlags({ "settings", widget_info, "flags" }, "Thick") end,
+        set = function(info, val) SetValue(info, SetFontFlags(info, "Thick", val)) end,
+        get = function(info) return GetFontFlags(info, "Thick") end,
         arg = { "settings", widget_info, "flags" },
       },
 
@@ -1129,8 +1130,8 @@ local function GetFontEntryTheme(pos, widget_info, func_disabled)
         order = 42,
         type = "toggle",
         desc = L["Render font without antialiasing."],
-        set = function(info, val) SetValue(info, SetFontFlags({ "settings", widget_info, "flags" }, "Mono", val)) end,
-        get = function(info) return GetFontFlags({ "settings", widget_info, "flags" }, "Mono") end,
+        set = function(info, val) SetValue(info, SetFontFlags(info, "Mono", val)) end,
+        get = function(info) return GetFontFlags(info, "Mono") end,
         arg = { "settings", widget_info, "flags" },
       },
       Shadow = {
@@ -1199,8 +1200,8 @@ local function GetFontEntryDefault(name, pos, widget_info)
         type = "toggle",
         desc = L["Add black outline."],
         width = "half",
-        set = function(info, val) SetValue(info, SetFontFlags(arg_flags, "Outline", val)) end,
-        get = function(info) return GetFontFlags(arg_flags, "Outline") end,
+        set = function(info, val) SetValue(info, SetFontFlags(info, "Outline", val)) end,
+        get = function(info) return GetFontFlags(info, "Outline") end,
         arg = arg_flags,
       },
       Thick = {
@@ -1209,8 +1210,8 @@ local function GetFontEntryDefault(name, pos, widget_info)
         type = "toggle",
         desc = L["Add thick black outline."],
         width = "half",
-        set = function(info, val) SetValue(info, SetFontFlags(arg_flags, "Thick", val)) end,
-        get = function(info) return GetFontFlags(arg_flags, "Thick") end,
+        set = function(info, val) SetValue(info, SetFontFlags(info, "Thick", val)) end,
+        get = function(info) return GetFontFlags(info, "Thick") end,
         arg = arg_flags,
       },
       Mono = {
@@ -1219,8 +1220,8 @@ local function GetFontEntryDefault(name, pos, widget_info)
         type = "toggle",
         desc = L["Render font without antialiasing."],
         width = "half",
-        set = function(info, val) SetValue(info, SetFontFlags(arg_flags, "Mono", val)) end,
-        get = function(info) return GetFontFlags(arg_flags, "Mono") end,
+        set = function(info, val) SetValue(info, SetFontFlags(info, "Mono", val)) end,
+        get = function(info) return GetFontFlags(info, "Mono") end,
         arg = arg_flags,
       },
       Shadow = {
@@ -1296,8 +1297,8 @@ local function GetFontEntryHandler(name, pos, widget_info, func_disabled, func_h
         type = "toggle",
         desc = L["Add black outline."],
         width = "half",
-        set = function(info, val) func_set(func_handler, info, SetFontFlags(F(widget_info, "flags"), "Outline", val)) end,
-        get = function(info) return GetFontFlags(F(widget_info, "flags"), "Outline") end,
+        set = function(info, val) func_set(func_handler, info, SetFontFlags(info, "Outline", val)) end,
+        get = function(info) return GetFontFlags(info, "Outline") end,
         arg = F(widget_info, "flags"),
       },
       Thick = {
@@ -1306,8 +1307,8 @@ local function GetFontEntryHandler(name, pos, widget_info, func_disabled, func_h
         type = "toggle",
         desc = L["Add thick black outline."],
         width = "half",
-        set = function(info, val) func_set(func_handler, info, SetFontFlags(F(widget_info, "flags"), "Thick", val)) end,
-        get = function(info) return GetFontFlags(F(widget_info, "flags"), "Thick") end,
+        set = function(info, val) func_set(func_handler, info, SetFontFlags(info, "Thick", val)) end,
+        get = function(info) return GetFontFlags(info, "Thick") end,
         arg = F(widget_info, "flags"),
       },
       Mono = {
@@ -1316,8 +1317,8 @@ local function GetFontEntryHandler(name, pos, widget_info, func_disabled, func_h
         type = "toggle",
         desc = L["Render font without antialiasing."],
         width = "half",
-        set = function(info, val) func_set(func_handler, info, SetFontFlags(F(widget_info, "flags"), "Mono", val)) end,
-        get = function(info) return GetFontFlags(F(widget_info, "flags"), "Mono") end,
+        set = function(info, val) func_set(func_handler, info, SetFontFlags(info, "Mono", val)) end,
+        get = function(info) return GetFontFlags(info, "Mono") end,
         arg = F(widget_info, "flags"),
       },
       Shadow = {
