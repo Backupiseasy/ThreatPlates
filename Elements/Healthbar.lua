@@ -14,7 +14,6 @@ local InCombatLockdown = InCombatLockdown
 
 -- ThreatPlates APIs
 local ThreatPlates, Font = Addon.ThreatPlates, Addon.Font
-local PlatesByUnit = Addon.PlatesByUnit
 local SubscribeEvent, UnsubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Unsubscribe, Addon.EventService.Publish
 local BackdropTemplate = Addon.BackdropTemplate
 local Localization = Addon.Localization
@@ -275,8 +274,8 @@ local function UNIT_TARGET(unitid)
   -- Skip special unit ids (which are updated with their nameplate unit id anyway) and personal nameplate
   if SettingsTargetUnitHide or unitid == "target" or UnitIsUnit("player", unitid) then return end
 
-  local tp_frame = PlatesByUnit[unitid]
-  if tp_frame and tp_frame.Active then
+  local tp_frame = Addon:GetThreatPlateForUnit(unitid)
+  if tp_frame then
     UpdateTargetUnit(tp_frame.visual.Healthbar, unitid)
   end
 end
@@ -455,8 +454,8 @@ end
 --end
 
 local function UnitMaxHealthUpdate(unitid)
-  local tp_frame = PlatesByUnit[unitid]
-  if tp_frame and tp_frame.Active then
+  local tp_frame = Addon:GetThreatPlateForUnit(unitid)
+  if tp_frame then
     local healthbar = tp_frame.visual.Healthbar
 
     if healthbar:IsShown() then
@@ -469,8 +468,8 @@ local function UnitMaxHealthUpdate(unitid)
 end
 
 local function UnitHealthbarUpdate(unitid)
-  local tp_frame = PlatesByUnit[unitid]
-  if tp_frame and tp_frame.Active then
+  local tp_frame = Addon:GetThreatPlateForUnit(unitid)
+  if tp_frame then
     local healthbar = tp_frame.visual.Healthbar
 
     if healthbar:IsShown() then

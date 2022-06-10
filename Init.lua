@@ -1,19 +1,6 @@
 local ADDON_NAME, Addon = ...
 
 ---------------------------------------------------------------------------------------------------
--- Define table that contains all addon-global variables and functions
----------------------------------------------------------------------------------------------------
-Addon.ThreatPlates = {}
-Addon.Debug = {}
-Addon.Theme = {}
-
-Addon.PlatesCreated = {}
-Addon.PlatesByUnit = {}
-Addon.PlatesByGUID = {}
-
-local ThreatPlates = Addon.ThreatPlates
-
----------------------------------------------------------------------------------------------------
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
 
@@ -21,19 +8,21 @@ local ThreatPlates = Addon.ThreatPlates
 local next, setmetatable, getmetatable, rawset = next, setmetatable, getmetatable, rawset
 local ipairs, type, insert = ipairs, type, table.insert
 local string, format = string, format
-local UnitClass = UnitClass
 
 -- ThreatPlates APIs
-Addon.IS_CLASSIC = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
-Addon.IS_TBC_CLASSIC = (WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC)
-Addon.IS_MAINLINE = (WOW_PROJECT_ID == WOW_PROJECT_MAINLINE)
 
 ---------------------------------------------------------------------------------------------------
 -- Libraries
 ---------------------------------------------------------------------------------------------------
 local LibStub = LibStub
 Addon.L = LibStub("AceLocale-3.0"):GetLocale("TidyPlatesThreat")
-local L = Addon.L
+
+---------------------------------------------------------------------------------------------------
+-- Define AceAddon TidyPlatesThreat
+---------------------------------------------------------------------------------------------------
+TidyPlatesThreat = LibStub("AceAddon-3.0"):NewAddon("TidyPlatesThreat", "AceConsole-3.0", "AceEvent-3.0")
+-- Global for DBM to differentiate between Threat Plates and Tidy Plates: Threat
+TidyPlatesThreatDBM = true
 
 Addon.BackdropTemplate = BackdropTemplateMixin and "BackdropTemplate"
 
@@ -52,15 +41,47 @@ Addon.BackdropTemplate = BackdropTemplateMixin and "BackdropTemplate"
 --end
 
 ---------------------------------------------------------------------------------------------------
--- Define AceAddon TidyPlatesThreat
+-- Central addon constants
 ---------------------------------------------------------------------------------------------------
-TidyPlatesThreat = LibStub("AceAddon-3.0"):NewAddon("TidyPlatesThreat", "AceConsole-3.0", "AceEvent-3.0")
--- Global for DBM to differentiate between Threat Plates and Tidy Plates: Threat
-TidyPlatesThreatDBM = true
 
 -- Returns if the currently active spec is tank (true) or dps/heal (false)
 Addon.PlayerClass = select(2, UnitClass("player"))
 Addon.PlayerName = select(1, UnitName("player"))
+
+Addon.IS_CLASSIC = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
+Addon.IS_TBC_CLASSIC = (WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC)
+Addon.IS_MAINLINE = (WOW_PROJECT_ID == WOW_PROJECT_MAINLINE)
+
+---------------------------------------------------------------------------------------------------
+-- Define table that contains all addon-global variables and functions
+---------------------------------------------------------------------------------------------------
+Addon.ThreatPlates = {}
+Addon.Debug = {}
+Addon.Theme = {}
+
+Addon.PlatesCreated = {}
+Addon.PlatesByUnit = {}
+Addon.PlatesByGUID = {}
+
+local ThreatPlates = Addon.ThreatPlates
+
+-- Modules
+Addon.Threat = {}
+Addon.Style = {}
+Addon.Transparency = {}
+Addon.Scaling = {}
+Addon.Animations = {}
+Addon.Localization = {}
+Addon.Icons = {}
+Addon.Font = {}
+-- Internal API
+Addon.Data = {}
+Addon.Logging = {}
+Addon.Debug = {}
+
+---------------------------------------------------------------------------------------------------
+-- Caches to the reduce CPU load of expensive functions
+---------------------------------------------------------------------------------------------------
 
 -- Cache (weak table) for memoizing expensive text functions (like abbreviation, tranliteration)
 local CacheCreateEntry = function(table, key)
@@ -78,20 +99,6 @@ local CreateTextCache = function()
 	return text_cache
 end
 
----------------------------------------------------------------------------------------------------
--- Caches to the reduce CPU load of expensive functions
----------------------------------------------------------------------------------------------------
-
--- Modules
-Addon.Threat = {}
-Addon.Style = {}
-Addon.Transparency = {}
-Addon.Scaling = {}
-Addon.Animations = {}
-Addon.Localization = {}
-Addon.Icons = {}
-Addon.Font = {}
-
 Addon.Cache = {
 	Texts = CreateTextCache(),
 	TriggerWildcardTests = {},
@@ -108,11 +115,6 @@ Addon.Cache = {
 		ForCurrentInstance = {},
 	}
 }
-
--- Internal API
-Addon.Data = {}
-Addon.Logging = {}
-Addon.Debug = {}
 
 ---------------------------------------------------------------------------------------------------
 -- Aura Highlighting

@@ -163,10 +163,26 @@ local function GetReactionByColor(red, green, blue)
   end
 end
 
-local function UpdateUnitLevel(unit, unitid)
-  local unit_level = UnitEffectiveLevel(unitid)
-  unit.level = unit_level
-  unit.LevelColor = GetCreatureDifficultyColor(unit_level)
+---------------------------------------------------------------------------------------------------------------------
+-- Functions for accessing nameplate frames
+---------------------------------------------------------------------------------------------------------------------
+
+function Addon:GetThreatPlateForUnit(unitid)
+-- if not unitid or unitid == "player" or UnitIsUnit("player", unitid) then return end
+-- local plate = GetNamePlateForUnit(unitid)
+
+-- Special unitids (target, personal nameplate) are skipped as they are not added to PlatesByUnit in NAME_PLATE_UNIT_ADDED
+local tp_frame = self.PlatesByUnit[unitid]
+if tp_frame and tp_frame.Active then
+  return tp_frame
+end
+end
+
+function Addon:GetThreatPlateForGUID(guid)
+local plate = self.PlatesByGUID[guid]
+if plate and plate.TPFrame.Active then
+  return plate.TPFrame
+end
 end
 
 ---------------------------------------------------------------------------------------------------------------------
@@ -193,6 +209,7 @@ local function SetUnitAttributeName(unit, unitid)
 end
 
 local function SetUnitAttributeReaction(unit, unitid)
+  -- Reaction => UNIT_FACTION
   unit.red, unit.green, unit.blue = _G.UnitSelectionColor(unitid)
   unit.reaction = MAP_UNIT_REACTION[UnitReaction(unitid, "player")] or GetReactionByColor(unit.red, unit.green, unit.blue)
 
@@ -202,6 +219,13 @@ local function SetUnitAttributeReaction(unit, unitid)
   end
 
   unit.IsTapDenied = _G.UnitIsTapDenied(unitid)
+end
+
+local function SetUnitAttributeLevel(unit, unitid)
+  -- Level => UNIT_LEVEL
+  local unit_level = UnitEffectiveLevel(unitid)
+  unit.level = unit_level
+  unit.LevelColor = GetCreatureDifficultyColor(unit_level)
 end
 
 local function SetUnitAttributeHealth(unit, unitid)
@@ -236,6 +260,8 @@ local function InitializeUnit(unit, unitid)
     unit.NPCID = npc_id
   end
 
+  SetUnitAttributeReaction(unit, unitid)
+  SetUnitAttributeLevel(unit, unitid)
   SetUnitAttributeName(unit, unitid)
   SetUnitAttributeHealth(unit, unitid)
 
@@ -249,15 +275,10 @@ local function InitializeUnit(unit, unitid)
   unit.IsFocus = UnitIsUnit("focus", unitid) -- required here for config changes which reset all plates without calling TARGET_CHANGED, MOUSEOVER, ...
   unit.isMouseover = UnitIsUnit("mouseover", unitid)
  
-  Threat:SetUnitAttributeThreat(unit, unitid)
   -- Target Mark => RAID_TARGET_UPDATE
   unit.TargetMarker = RAID_ICON_LIST[GetRaidTargetIndex(unitid)]
 
-  -- Level => UNIT_LEVEL
-  UpdateUnitLevel(unit, unitid)
-
-  -- Reaction => UNIT_FACTION
-  SetUnitAttributeReaction(unit, unitid)
+  Threat:SetUnitAttributeThreat(unit, unitid)
 end
 
 ---------------------------------------------------------------------------------------------------------------------
@@ -666,6 +687,27 @@ local function FrameOnShow(UnitFrame)
   else
     UnitFrame:SetShown(SettingsShowEnemyBlizzardNameplates)
   end
+
+  -- -- Don't show ThreatPlates for widget-only nameplates (since Shadowlands)
+  -- if UnitNameplateShowsWidgetsOnly(unitid) then 
+  --   return 
+  -- elseif UnitIsUnit(unitid, "player") then -- or: ns.PlayerNameplate == GetNamePlateForUnit(UnitFrame.unit)      
+  --   -- Skip the personal resource bar of the player character, don't unhook scripts as nameplates, even the personal
+  --   -- resource bar, get re-used
+  --   if SettingsHideBuffsOnPersonalNameplate then
+  --     UnitFrame.BuffFrame:Hide()
+  --   end
+  --   -- Just an else with the part below should work also
+  --   return
+  -- else
+  --   -- Hide ThreatPlates nameplates if Blizzard nameplates should be shown for friendly units
+  --   if UnitReaction(unitid, "player") > 4 then
+  --     UnitFrame:SetShown(SettingsShowFriendlyBlizzardNameplates)
+  --   else
+  --     UnitFrame:SetShown(SettingsShowEnemyBlizzardNameplates)
+  --   end
+  -- end
+  
 end
 
 -- Frame: self = plate
@@ -846,7 +888,8 @@ end
 
 -- Payload: { Name = "unitToken", Type = "string", Nilable = false },
 function Addon:NAME_PLATE_UNIT_ADDED(unitid)
-  -- Player's personal resource bar is currently not handled by Threat Plates
+  -- player and target work as unitid, but are the NAME_PLATE_UNIT_ADDED is fired for the actual nameplate id
+  -- The player's personal resource bar is currently not supported by Threat Plates.
   -- OnShowNameplate is not called on it, therefore plate.TPFrame.Active is nil
   if UnitIsUnit("player", unitid) or UnitNameplateShowsWidgetsOnly(unitid) then return end
 
@@ -882,10 +925,8 @@ function Addon:NAME_PLATE_UNIT_REMOVED(unitid)
 end
 
 function Addon:UNIT_NAME_UPDATE(unitid)
-  -- Special unitids (target, personal nameplate) are skipped as they are not added to PlatesByUnit in NAME_PLATE_UNIT_ADDED
-
-  local tp_frame = PlatesByUnit[unitid]
-  if tp_frame and tp_frame.Active then
+  local tp_frame = self:GetThreatPlateForUnit(unitid)
+  if tp_frame then
     SetUnitAttributeName(tp_frame.unit, unitid)
     Style:UpdateName(tp_frame)
   end
@@ -939,27 +980,22 @@ function Addon:RAID_TARGET_UPDATE()
 end
 
 local function UNIT_HEALTH(unitid)
-  -- Special unitids (target, personal nameplate) are skipped as they are not added to PlatesByUnit in NAME_PLATE_UNIT_ADDED
-
-  local tp_frame = PlatesByUnit[unitid]
-  if tp_frame and tp_frame.Active then
+  local tp_frame = Addon:GetThreatPlateForUnit(unitid)
+  if tp_frame then
     SetUnitAttributeHealth(tp_frame.unit, unitid)  
   end
 end
 
 function Addon:UNIT_MAXHEALTH(unitid)
-  -- Special unitids (target, personal nameplate) are skipped as they are not added to PlatesByUnit in NAME_PLATE_UNIT_ADDED
-
-  local tp_frame = PlatesByUnit[unitid]
-  if tp_frame and tp_frame.Active then
+  local tp_frame = self:GetThreatPlateForUnit(unitid)
+  if tp_frame then
     SetUnitAttributeHealth(tp_frame.unit, unitid)  
   end
 end
 
 function Addon:UNIT_THREAT_LIST_UPDATE(unitid)
-  -- Special unitids (target, personal nameplate) are skipped as they are not added to PlatesByUnit in NAME_PLATE_UNIT_ADDED
-  local tp_frame = PlatesByUnit[unitid]
-  if tp_frame and tp_frame.Active then
+local tp_frame = self:GetThreatPlateForUnit(unitid)
+  if tp_frame then
     Threat:ThreatUpdate(tp_frame)
   end
 end
@@ -977,8 +1013,8 @@ function Addon:UNIT_FACTION(unitid)
      PublishEvent("FationUpdate", tp_frame)
    end
   else
-    local tp_frame = PlatesByUnit[unitid]
-    if tp_frame and tp_frame.Active then
+    local tp_frame = self:GetThreatPlateForUnit(unitid)
+    if tp_frame then
       SetUnitAttributeReaction(tp_frame.unit, unitid)
       Style:Update(tp_frame)
       PublishEvent("FactionUpdate", tp_frame)
@@ -987,12 +1023,9 @@ function Addon:UNIT_FACTION(unitid)
 end
 
 function Addon:UNIT_LEVEL(unitid)
-  -- Special unitids (target, personal nameplate) are skipped as they are not added to PlatesByUnit in NAME_PLATE_UNIT_ADDED
-
-  -- Update just the unitid's plate
-  local tp_frame = PlatesByUnit[unitid]
-  if tp_frame and tp_frame.Active then
-    UpdateUnitLevel(tp_frame.unit, unitid)
+  local tp_frame = self:GetThreatPlateForUnit(unitid)
+  if tp_frame then
+    SetUnitAttributeLevel(tp_frame.unit, unitid)
   end
 end
 
@@ -1000,10 +1033,9 @@ local function UNIT_SPELLCAST_START(unitid, ...)
   -- Special unitids (target, personal nameplate) are skipped as they are not added to PlatesByUnit in NAME_PLATE_UNIT_ADDED
   if not ShowCastBars then return end
 
-  local tp_frame = PlatesByUnit[unitid]
-  if tp_frame and tp_frame.Active then
+  local tp_frame = Addon:GetThreatPlateForUnit(unitid)
+  if tp_frame then
     OnStartCasting(tp_frame, unitid, false)
-    -- Threat - Heuristic
     Threat:ThreatUpdateHeuristic(tp_frame)
   end
 end
@@ -1013,8 +1045,8 @@ local function UnitSpellcastMidway(unitid, ...)
   -- Special unitids (target, personal nameplate) are skipped as they are not added to PlatesByUnit in NAME_PLATE_UNIT_ADDED
   if not ShowCastBars then return end
 
-  local tp_frame = PlatesByUnit[unitid]
-  if tp_frame and tp_frame.Active then
+  local tp_frame = Addon:GetThreatPlateForUnit(unitid)
+  if tp_frame then
     OnUpdateCastMidway(tp_frame, unitid)
   end
 end
@@ -1024,8 +1056,8 @@ local function UNIT_SPELLCAST_STOP(unitid, ...)
   -- Special unitids (target, personal nameplate) are skipped as they are not added to PlatesByUnit in NAME_PLATE_UNIT_ADDED
   if not ShowCastBars then return end
 
-  local tp_frame = PlatesByUnit[unitid]
-  if tp_frame and tp_frame.Active then
+  local tp_frame = Addon:GetThreatPlateForUnit(unitid)
+  if tp_frame then
     tp_frame.unit.isCasting = false
 
     local castbar = tp_frame.visual.Castbar
@@ -1046,8 +1078,8 @@ local function UNIT_SPELLCAST_CHANNEL_START(unitid, ...)
   -- Special unitids (target, personal nameplate) are skipped as they are not added to PlatesByUnit in NAME_PLATE_UNIT_ADDED
   if not ShowCastBars then return end
 
-  local tp_frame = PlatesByUnit[unitid]
-  if tp_frame and tp_frame.Active then
+  local tp_frame = Addon:GetThreatPlateForUnit(unitid)
+  if tp_frame then
     OnStartCasting(tp_frame, unitid, true)
     Threat:ThreatUpdateHeuristic(tp_frame)
   end
@@ -1063,8 +1095,8 @@ function Addon.UNIT_SPELLCAST_INTERRUPTED(event, unitid, castGUID, spellID, sour
   -- Special unitids (target, personal nameplate) are skipped as they are not added to PlatesByUnit in NAME_PLATE_UNIT_ADDED
   if not ShowCastBars then return end
 
-  local tp_frame = PlatesByUnit[unitid]
-  if tp_frame and tp_frame.Active then
+  local tp_frame = Addon:GetThreatPlateForUnit(unitid)
+  if tp_frame then
     if sourceName then
       local visual = tp_frame.visual
       local castbar = visual.Castbar
@@ -1100,10 +1132,9 @@ function Addon:COMBAT_LOG_EVENT_UNFILTERED()
   local timeStamp, event, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags = CombatLogGetCurrentEventInfo()
 
   if event == "SPELL_INTERRUPT" then
-    local plate = PlatesByGUID[destGUID]
-
-    if plate and plate.TPFrame.Active then
-      local visual = plate.TPFrame.visual
+    local tp_frame = self:GetThreatPlateForGUID(destGUID)
+    if tp_frame then
+      local visual = tp_frame.visual
 
       local castbar = visual.Castbar
       if castbar:IsShown() then
@@ -1121,7 +1152,7 @@ function Addon:COMBAT_LOG_EVENT_UNFILTERED()
 
         -- I am assuming that OnStopCasting is called always when a cast is interrupted from
         -- _STOP events
-        plate.TPFrame.unit.IsInterrupted = true
+        tp_frame.unit.IsInterrupted = true
 
         -- Should not be necessary any longer ... as OnStopCasting is not hiding the castbar anymore
         castbar:Show()

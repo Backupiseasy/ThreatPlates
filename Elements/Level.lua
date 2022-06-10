@@ -13,7 +13,6 @@ local ADDON_NAME, Addon = ...
 local UnitEffectiveLevel, GetCreatureDifficultyColor = UnitEffectiveLevel, GetCreatureDifficultyColor
 
 -- ThreatPlates APIs
-local PlatesByUnit = Addon.PlatesByUnit
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
 local Font = Addon.Font
 
@@ -85,8 +84,8 @@ function Element.UpdateStyle(tp_frame, style, plate_style)
 end
 
 local function UNIT_LEVEL(unitid)
-  local tp_frame = PlatesByUnit[unitid]
-  if tp_frame and tp_frame.Active then
+  local tp_frame = Addon:GetThreatPlateForUnit(unitid)
+  if tp_frame then
     Element.UnitAdded(tp_frame)
   end
 end

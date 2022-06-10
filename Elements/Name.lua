@@ -14,7 +14,6 @@ local string_len  = string.len
 -- WoW APIs
 
 -- ThreatPlates APIs
-local PlatesByUnit = Addon.PlatesByUnit
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
 local Localization, Font = Addon.Localization, Addon.Font
 local SplitByWhitespace = Addon.SplitByWhitespace
@@ -131,8 +130,8 @@ function Element.UpdateSettings()
 end
 
 local function UNIT_NAME_UPDATE(unitid)
-  local tp_frame = PlatesByUnit[unitid]
-  if tp_frame and tp_frame.Active then
+  local tp_frame = Addon:GetThreatPlateForUnit(unitid)
+  if tp_frame then
     tp_frame.visual.NameText:SetText(tp_frame.unit.name)
   end
 end

@@ -2,7 +2,6 @@
 -- Boss Mod Widget
 ---------------------------------------------------------------------------------------------------
 local ADDON_NAME, Addon = ...
-local ThreatPlates = Addon.ThreatPlates
 
 local Widget = Addon.Widgets:NewWidget("BossMods")
 
@@ -205,9 +204,9 @@ local function BossMod_ShowNameplateAura(msg, is_guid, unit, aura_texture, durat
 
   -- Show frame is this is the first aura shown (no_auras == 0 in this case)
   if no_auras == 0 then
-    local plate = Addon.PlatesByGUID[guid]
-    if plate then
-      local widget_frame = plate.TPFrame.widgets["BossMods"]
+    local tp_frame = Addon:GetThreatPlateForGUID(guid)
+    if tp_frame then
+      local widget_frame = tp_frame.widgets["BossMods"]
       UpdateFrameWithAuras(widget_frame, GUIDAuraList[guid])
 
       widget_frame.LastUpdate = 0.5 -- to show the update immediately
@@ -229,9 +228,9 @@ local function BossMod_HideNameplateAura(msg, is_guid, unit, aura_texture)
       if unit_auras[i][1] == aura_texture then
         tremove(unit_auras, i)
 
-        local plate = Addon.PlatesByGUID[guid]
-        if plate then
-          UpdateFrameWithAuras(plate.TPFrame.widgets["BossMods"], unit_auras)
+        local tp_frame = Addon:GetThreatPlateForGUID(guid)
+        if tp_frame then
+          UpdateFrameWithAuras(tp_frame.widgets["BossMods"], unit_auras)
           --frame.LastUpdate = 0.5 -- to show the update immediately
         end
 

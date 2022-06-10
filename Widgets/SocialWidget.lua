@@ -30,7 +30,6 @@ local C_FriendList_ShowFriends, C_FriendList_GetNumOnlineFriends = C_FriendList.
 local C_FriendList_GetFriendInfo = C_FriendList.GetFriendInfo
 
 -- ThreatPlates APIs
-local PlatesByUnit = Addon.PlatesByUnit
 
 local PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\SocialWidget\\"
 local ICON_FRIEND = PATH .. "friendicon"
@@ -199,8 +198,8 @@ function Widget:BN_FRIEND_ACCOUNT_OFFLINE(friend_id, _)
 end
 
 function Widget:UNIT_NAME_UPDATE(unitid)
-  local tp_frame = PlatesByUnit[unitid]
-  if tp_frame and tp_frame.Active then
+  local tp_frame = Addon:GetThreatPlateForUnit(unitid)
+  if tp_frame then
     local widget_frame = tp_frame.widgets.Social
     if widget_frame.Active then
       local unit = tp_frame.unit

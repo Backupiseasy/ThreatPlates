@@ -17,7 +17,6 @@ local UNIT_LEVEL_TEMPLATE = UNIT_LEVEL_TEMPLATE
 local GetGuildInfo = GetGuildInfo
 
 -- ThreatPlates APIs
-local PlatesByUnit = Addon.PlatesByUnit
 local SubscribeEvent, PublishEvent,  UnsubscribeEvent = Addon.EventService.Subscribe, Addon.EventService.Publish, Addon.EventService.Unsubscribe
 local RGB = Addon.RGB
 local Localization, Font = Addon.Localization, Addon.Font
@@ -385,18 +384,18 @@ end
 
 -- Text and color may change
 local function StatusTextUpdateByUnit(unitid)
-  local frame = PlatesByUnit[unitid]
-  if frame and frame.Active and frame.PlateStyle ~= "None" then
-    SetStatusText(frame)
+  local tp_frame = Addon:GetThreatPlateForUnit(unitid)
+  if tp_frame and tp_frame.PlateStyle ~= "None" then
+    SetStatusText(tp_frame)
   end
 end
 
 local function HealthUpdate(unitid)
-  local frame = PlatesByUnit[unitid]
-  if frame and frame.Active and frame.PlateStyle ~= "None" then
-    local status_text_func = StatusTextFunc[frame.PlateStyle][frame.unit.reaction]
+  local tp_frame = Addon:GetThreatPlateForUnit(unitid)
+  if tp_frame and tp_frame.PlateStyle ~= "None" then
+    local status_text_func = StatusTextFunc[tp_frame.PlateStyle][tp_frame.unit.reaction]
     if status_text_func == TextHealthPercentColored or status_text_func == TextAll then
-      SetStatusText(frame)
+      SetStatusText(tp_frame)
     end
   end
 end

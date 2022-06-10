@@ -404,7 +404,7 @@ local SET_FUNCTIONS = {
 }
 
 local function SetValue(info, ...)
-  #print ("SetValue: Function =", "{ " .. table.concat(info.arg, ".") .. " }")
+  --print ("SetValue: Function =", "{ " .. table.concat(info.arg, ".") .. " }")
 
   -- For widgets: check if the widget if enabled or disabled. If so, call InitializeWidget additionally
   -- Also: Fix some bad configuration settings design by me:

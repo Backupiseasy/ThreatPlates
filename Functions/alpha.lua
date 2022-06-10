@@ -377,7 +377,7 @@ local function TargetGained(tp_frame)
   if db.toggle.NonTargetA then
     -- Update all non-target units
     for _, frame in pairs(PlatesByUnit) do
-      if not frame.unit.isTarget and frame.Active then
+      if frame.Active and not frame.unit.isTarget then
         SituationalEvent(frame)
       end
     end

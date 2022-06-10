@@ -277,7 +277,7 @@ local function TargetGained(tp_frame)
   if db.toggle.NonTargetS then
     -- Update all non-target units
     for _, frame in pairs(PlatesByUnit) do
-      if not frame.unit.isTarget and frame.Active then
+      if frame.Active and not frame.unit.isTarget then
 				ScalePlate(frame, ui_scale * GetScale(frame.unit))
       end
     end
@@ -295,7 +295,7 @@ local function TargetLost(tp_frame)
 
   -- Update all units as there is no target now (except the unit that lost the target as it was already updated above
   for _, frame in pairs(PlatesByUnit) do
-    if frame ~= tp_frame and frame.Active then
+    if frame.Active and frame ~= tp_frame then
 			ScalePlate(frame, ui_scale * GetScale(frame.unit))
     end
   end
