@@ -194,7 +194,7 @@ local function SetUnitAttributeName(unit, unitid)
   local unit_name, realm = UnitName(unitid)
 
   if unit.type == "PLAYER" then
-    local db = Addon.db.profile.settings.name
+    local db = Addon.db.profile.Name.HealthbarMode
 
     if db.ShowTitle then
       unit_name = UnitPVPName(unitid)

@@ -48,8 +48,8 @@ local PlayerIsInGroup = false
 -- Event handling stuff
 ---------------------------------------------------------------------------------------------------
 
-function Widget:ThreatUpdate(tp_frame)
-  local widget_frame = self:GetWidgetFrameForUnit(tp_frame.unit.unitid)
+function Widget:UNIT_THREAT_LIST_UPDATE(unitid)
+  local widget_frame = self:GetWidgetFrameForUnit(unitid)
   if widget_frame then
     self:UpdateThreatValue(widget_frame, widget_frame.unit)
   end
@@ -100,7 +100,7 @@ function Widget:IsEnabled()
 end
 
 function Widget:OnEnable()
-  self:SubscribeEvent("ThreatUpdate")
+  self:SubscribeEvent("UNIT_THREAT_LIST_UPDATE")
   self:SubscribeEvent("TargetMarkerUpdate")
   self:SubscribeEvent("GROUP_ROSTER_UPDATE")
 end
@@ -114,9 +114,7 @@ function Widget:EnabledForStyle(style, unit)
 end
 
 function Widget:OnUnitAdded(widget_frame, unit)
-  local db = Addon.db.profile.threat.art
-
-  if db.theme == "bar" then
+  if SettingsArt.theme == "bar" then
     widget_frame.LeftTexture:ClearAllPoints()
     widget_frame.LeftTexture:SetSize(265, 64)
     widget_frame.LeftTexture:SetPoint("CENTER", widget_frame:GetParent(), "CENTER")
@@ -319,8 +317,6 @@ local THREAT_DETAILS_FUNTIONS = {
 }
 
 function Widget:UpdateFrame(widget_frame, unit)
-  local db = Addon.db.profile.threat
-
   if not Threat:ShowFeedback(unit) then
     widget_frame:Hide()
     return
@@ -337,8 +333,8 @@ function Widget:UpdateFrame(widget_frame, unit)
   widget_frame.Percentage:SetHeight(widget_frame:GetHeight())
 
   -- Show threat art (textures)
-  if SettingsArt.ON and not (GetRaidTargetIndex(unit.unitid) and db.marked.art) then
-    if db.art.theme == "bar" then
+  if SettingsArt.ON and not (GetRaidTargetIndex(unit.unitid) and Settings.marked.art) then
+    if SettingsArt.theme == "bar" then
       widget_frame.LeftTexture:Show()
     else
       widget_frame.LeftTexture:Show()
@@ -348,19 +344,18 @@ function Widget:UpdateFrame(widget_frame, unit)
     widget_frame.LeftTexture:Hide()
     widget_frame.RightTexture:Hide()
   end
-  
+
   widget_frame.ThreatSituation = nil
   self:UpdateThreatValue(widget_frame, unit)
 end 
 
 function Widget:UpdateThreatValue(widget_frame, unit)
-  local db = Addon.db.profile.threat
-  local db_threat_value = Settings.ThreatPercentage
+  local db = Settings.ThreatPercentage
 
   -- Threat value has to be updated after every UNIT_THREAT_LIST_UPDATE event, not only when threat_situation changes
-  local show_threat_value = db_threat_value.ShowAlways or (db_threat_value.ShowInGroups and PlayerIsInGroup) or (db_threat_value.ShowWithPet and UnitExists("pet"))
+  local show_threat_value = db.ShowAlways or (db.ShowInGroups and PlayerIsInGroup) or (db.ShowWithPet and UnitExists("pet"))
   if show_threat_value then
-    local status, percentage_text = ThreatDetailsFunction(unit.unitid, db_threat_value)
+    local status, percentage_text = ThreatDetailsFunction(unit.unitid, db)
     if status then
       widget_frame.Percentage:SetText(percentage_text)
     else
@@ -382,12 +377,12 @@ function Widget:UpdateThreatValue(widget_frame, unit)
       local texture = PATH
       if style ~= "tank" then
         -- Tanking uses regular textures / swapped for dps / healing
-        texture = texture .. db.art.theme.."\\".. REVERSE_THREAT_SITUATION[threat_level]
+        texture = texture .. SettingsArt.theme.."\\".. REVERSE_THREAT_SITUATION[threat_level]
       else
-        texture = texture .. db.art.theme.."\\".. threat_level
+        texture = texture .. SettingsArt.theme.."\\".. threat_level
       end
-    local texture = PATH .. db.art.theme.."\\".. threat_level
-      if db.art.theme == "bar" then
+
+      if SettingsArt.theme == "bar" then
         widget_frame.LeftTexture:SetTexture(texture)
       else
         widget_frame.LeftTexture:SetTexture(texture)
