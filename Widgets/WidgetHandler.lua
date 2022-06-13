@@ -12,8 +12,14 @@ local pairs, next = pairs, next
 
 -- WoW APIs
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
+local UnitIsUnit = UnitIsUnit
 
 -- ThreatPlates APIs
+
+local _G = _G
+-- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
+-- List them here for Mikk's FindGlobals script
+-- GLOBALS: CreateFrame
 
 local WidgetHandler = {
   Widgets = {},
@@ -57,7 +63,7 @@ local function UnitEventHandler(self, event, ...)
   end
 end
 
-WidgetHandler.EventHandlerFrame = CreateFrame("Frame", nil, WorldFrame)
+WidgetHandler.EventHandlerFrame = _G.CreateFrame("Frame", nil, WorldFrame)
 WidgetHandler.EventHandlerFrame:SetScript("OnEvent", EventHandler)
 
 local function RegisterEvent(widget, event, func)
@@ -71,7 +77,7 @@ end
 
 local function RegisterUnitEvent(widget, event, unitid, func)
   if not widget.EventHandlerFrame then
-    widget.EventHandlerFrame = CreateFrame("Frame", nil, WorldFrame)
+    widget.EventHandlerFrame = _G.CreateFrame("Frame", nil, WorldFrame)
     widget.EventHandlerFrame.Widget = widget
     widget.EventHandlerFrame:SetScript("OnEvent", UnitEventHandler)
   end

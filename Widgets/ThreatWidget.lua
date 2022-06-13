@@ -15,8 +15,7 @@ local tostring = tostring
 local string_format = string.format
 
 -- WoW APIs
-local UnitIsUnit, UnitDetailedThreatSituation, UnitName, UnitClass = UnitIsUnit, UnitDetailedThreatSituation, UnitName, UnitClass
-local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
+local UnitIsUnit, UnitDetailedThreatSituation, UnitName = UnitIsUnit, UnitDetailedThreatSituation, UnitName
 local GetRaidTargetIndex = GetRaidTargetIndex
 local IsInGroup, IsInRaid, GetNumGroupMembers, GetNumSubgroupMembers = IsInGroup, IsInRaid, GetNumGroupMembers, GetNumSubgroupMembers
 
@@ -46,7 +45,8 @@ local REVERSE_THREAT_SITUATION = {
 ---------------------------------------------------------------------------------------------------
 -- Cached configuration settings
 ---------------------------------------------------------------------------------------------------
-local Settings, SettingsArt, ThreatColors, ThreatDetailsFunction
+local Settings, SettingsArt
+local ThreatColors, ThreatDetailsFunction, ShowSecondPlayersName
 
 ---------------------------------------------------------------------------------------------------
 -- Local variables
@@ -366,7 +366,7 @@ function Widget:UpdateThreatValue(widget_frame, unit)
   local db_threat_value = Settings.ThreatPercentage
 
   -- If threat_situation is nil, there is nothing to do
-  local threat_situation = GetThreatSituation(unit, style, db.toggle.OffTank)
+  local threat_situation = GetThreatSituation(unit, unit.style, db.toggle.OffTank)
 
   -- Threat value has to be updated after every UNIT_THREAT_LIST_UPDATE event, not only when threat_situation changes
   local show_threat_value = db_threat_value.ShowAlways or (db_threat_value.ShowInGroups and PlayerIsInGroup) or (db_threat_value.ShowWithPet and UnitExists("pet"))
