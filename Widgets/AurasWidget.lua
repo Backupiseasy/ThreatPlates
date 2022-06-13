@@ -345,13 +345,14 @@ local CROWD_CONTROL_SPELLS_RETAIL = {
   [123586] = PC_SNARE,      -- Flying Serpent Kick
 
   ---------------------------------------------------------------------------------------------------
-  -- Racial Traits
+  -- Racial Traits and other specia sources
   ---------------------------------------------------------------------------------------------------
   [255723] = LOC_STUN,      -- Bull Rush (Highmountain Tauren)
   [20549] = LOC_STUN,       -- War Stomp (Tauren)
   [260369] = PC_SNARE,      -- Arcane Pulse (Nightborne)
   [107079] = LOC_STUN,      -- Quaking Palm (Pandarian)
-  [287712] = LOC_STUN       -- Haymaker (Kul Tiran Racial)
+  [287712] = LOC_STUN,       -- Haymaker (Kul Tiran Racial)
+  [331866] = LOC_DISORIENT,  -- Agent of Chaos (Venthyr Soulbind Ability)
 }
 
 local CROWD_CONTROL_SPELLS_TBC_CLASSIC = {
@@ -596,6 +597,7 @@ local CROWD_CONTROL_SPELLS_TBC_CLASSIC = {
   [12798] = LOC_STUN,                      -- Revenge Stun - Triggered By: Improved Revenge
   [18498] = LOC_SLEEP,                     -- Shield Bash - Silenced - Triggered By: Improved Shield Bash
   [12323] = PC_SNARE,                      -- Piercing Howl
+
 
   ---------------------------------------------------------------------------------------------------
   -- Racial Traits
