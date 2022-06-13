@@ -426,12 +426,3 @@ function StyleModule:UpdateName(tp_frame)
     PublishEvent("StyleUpdate", tp_frame, style, stylename)
   end
 end
-
-function StyleModule:EnteringOrLeavingCombat()
-  for _, plate in pairs(GetNamePlates()) do
-    local frame = plate.TPFrame
-    if frame and frame.Active then
-      self:Update(frame)
-    end
-  end
-end

@@ -329,11 +329,16 @@ local function ChatCommandDebug(cmd_list)
 			end
 		end
 	elseif command == "test" then
-		print("34.345345345", Addon.Truncate(34.345345345))
-		print("-34.345345345", Addon.Truncate(-34.345345345))
-		print("-99", Addon.Truncate(-99))
-		print("9999.809986", Addon.Truncate(9999.809986))
-		print("-15554", Addon.Truncate(-15554))
+		for k, v in Addon:GetActiveThreatPlates() do
+			print(k, "=>", v, "/", v and v.Active or "nil")
+		end
+
+		-- local val, i
+    -- repeat
+    --   i, val = next(Addon.PlatesByUnit, i)
+		-- 	print (i, "=>", val, val.Active)
+    -- until not val
+
 	elseif command == "role" then
 		local spec_roles = Addon.db.char.spec
 		for i, is_tank in pairs(spec_roles) do

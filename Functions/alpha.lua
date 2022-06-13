@@ -376,9 +376,9 @@ local function TargetGained(tp_frame)
   local db = Addon.db.profile.nameplate
   if db.toggle.NonTargetA then
     -- Update all non-target units
-    for _, frame in pairs(PlatesByUnit) do
-      if frame.Active and not frame.unit.isTarget then
-        SituationalEvent(frame)
+    for _, active_tp_frame in Addon:GetActiveThreatPlates() do
+      if not active_tp_frame.unit.isTarget then
+        SituationalEvent(active_tp_frame)
       end
     end
   end
@@ -392,9 +392,9 @@ local function TargetLost(tp_frame)
   if UnitExists("target") then return end
 
   -- Update all units as there is no target now (except the unit that lost the target as it was already updated above
-  for _, frame in pairs(PlatesByUnit) do
-    if frame ~= tp_frame and frame.Active then
-      SituationalEvent(frame)
+  for _, active_tp_frame in Addon:GetActiveThreatPlates() do
+    if active_tp_frame ~= tp_frame then
+      SituationalEvent(active_tp_frame)
     end
   end
 end

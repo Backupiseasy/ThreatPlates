@@ -8,6 +8,7 @@ local ADDON_NAME, Addon = ...
 local _
 local type, select, pairs, tostring  = type, select, pairs, tostring 			    -- Local function copy
 local max, gsub, tonumber, math_abs = math.max, string.gsub, tonumber, math.abs
+local next = next
 
 -- WoW APIs
 local wipe, strsplit = wipe, strsplit
@@ -168,21 +169,49 @@ end
 ---------------------------------------------------------------------------------------------------------------------
 
 function Addon:GetThreatPlateForUnit(unitid)
--- if not unitid or unitid == "player" or UnitIsUnit("player", unitid) then return end
--- local plate = GetNamePlateForUnit(unitid)
+  -- if not unitid or unitid == "player" or UnitIsUnit("player", unitid) then return end
+  -- local plate = GetNamePlateForUnit(unitid)
 
--- Special unitids (target, personal nameplate) are skipped as they are not added to PlatesByUnit in NAME_PLATE_UNIT_ADDED
-local tp_frame = self.PlatesByUnit[unitid]
-if tp_frame and tp_frame.Active then
-  return tp_frame
-end
+  -- Special unitids (target, personal nameplate) are skipped as they are not added to PlatesByUnit in NAME_PLATE_UNIT_ADDED
+  local tp_frame = self.PlatesByUnit[unitid]
+  if tp_frame and tp_frame.Active then
+    return tp_frame
+  end
 end
 
 function Addon:GetThreatPlateForGUID(guid)
-local plate = self.PlatesByGUID[guid]
-if plate and plate.TPFrame.Active then
-  return plate.TPFrame
+  local plate = self.PlatesByGUID[guid]
+  if plate and plate.TPFrame.Active then
+    return plate.TPFrame
+  end
 end
+
+function Addon:GetActiveThreatPlates()
+  local function ActiveTPFrameIterator(t, unitid)
+    local tp_frame
+    repeat
+      unitid, tp_frame = next(t, unitid)
+      if tp_frame and tp_frame.Active then
+        return unitid, tp_frame
+      end
+    until not tp_frame 
+    return nil
+  end
+
+ return ActiveTPFrameIterator, self.PlatesByUnit, nil
+ 
+  -- local plates_by_unit = self.PlatesByUnit
+  -- return function()
+  --   local index
+  --   repeat
+  --     local unitid, tp_frame = next(plates_by_unit, index)
+  --     if tp_frame and tp_frame.Active then
+  --       index = unitid
+  --       return unitid, tp_frame
+  --     end
+  --   until not tp_frame
+  --   return nil
+  -- end
 end
 
 ---------------------------------------------------------------------------------------------------------------------
@@ -627,10 +656,9 @@ function Addon:UpdateAllPlates()
 end
 
 function Addon:PublishToEachPlate(event)
-  for _, frame in pairs(PlatesByUnit) do
-    if frame.Active then -- not necessary, but should prevent unnecessary updates to Blizzard default plates
-      PublishEvent(event, frame)
-    end
+  -- ? Check for Active not necessary, but should prevent unnecessary updates to Blizzard default plates
+  for _, tp_frame in Addon:GetActiveThreatPlates() do
+    PublishEvent(event, tp_frame)
   end
 end
 
@@ -823,6 +851,12 @@ function Addon:PLAYER_ENTERING_WORLD(initialLogin, reloadingUI)
   Font:SetNamesFonts()
 end
 
+local function UpdateStyleOfAllPlates()
+  for _, tp_frame in Addon:GetActiveThreatPlates() do
+    Style:Update(tp_frame)
+  end
+end
+
 -- Fires when the player leaves combat status
 -- Syncs addon settings with game settings in case changes weren't possible during startup, reload
 -- or profile reset because character was in combat.
@@ -852,7 +886,7 @@ function Addon:PLAYER_REGEN_ENABLED()
     _G.SetCVar("nameplateShowEnemies", (db.EnemyUnits == "SHOW_COMBAT" and 0) or 1)
   end
 
-  Style:EnteringOrLeavingCombat()
+  UpdateStyleOfAllPlates()
 end
 
 -- Fires when the player enters combat status
@@ -869,7 +903,7 @@ function Addon:PLAYER_REGEN_DISABLED()
     _G.SetCVar("nameplateShowEnemies", (db.EnemyUnits == "SHOW_COMBAT" and 1) or 0)
   end
 
-  Style:EnteringOrLeavingCombat()
+  UpdateStyleOfAllPlates()
 end
 
 function Addon:NAME_PLATE_CREATED(plate)
@@ -969,7 +1003,7 @@ local function PLAYER_FOCUS_CHANGED()
 end
 
 function Addon:RAID_TARGET_UPDATE()
-  for unitid, tp_frame in pairs(PlatesByUnit) do
+  for unitid, tp_frame in self:GetActiveThreatPlates() do
     local target_marker = RAID_ICON_LIST[GetRaidTargetIndex(unitid)]
     -- Only update plates that changed
     if target_marker ~= tp_frame.unit.TargetMarker then
@@ -1007,11 +1041,11 @@ function Addon:UNIT_FACTION(unitid)
   if unitid == "target" then
     return
   elseif unitid == "player" then
-   for _, tp_frame in pairs(PlatesByUnit) do
-     SetUnitAttributeReaction(tp_frame.unit, unitid)
-     Style:Update(tp_frame)
-     PublishEvent("FationUpdate", tp_frame)
-   end
+    for unitid_frame, tp_frame in self:GetActiveThreatPlates() do
+      SetUnitAttributeReaction(tp_frame.unit, unitid_frame)
+      Style:Update(tp_frame)
+      PublishEvent("FationUpdate", tp_frame)
+    end
   else
     local tp_frame = self:GetThreatPlateForUnit(unitid)
     if tp_frame then
