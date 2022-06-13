@@ -443,9 +443,7 @@ local CROWD_CONTROL_SPELLS_TBC_CLASSIC = {
     [6131] = PC_ROOT,                        -- Rank 3
     [10230] = PC_ROOT,                       -- Rank 4
     [27088] = PC_ROOT,                       -- Rank 5
-  [11071] = PC_ROOT,                       -- Frostbite
-    [12496] = PC_ROOT,                       -- Rank 2
-    [12497] = PC_ROOT,                       -- Rank 3
+  [12494] = PC_ROOT,                       -- Frostbite - Triggered by: Talent Frostbite (Rank 1, 2, 3)
   [12355] = LOC_STUN,                      -- Impact - Triggered By: Impact
   [28272] = LOC_POLYMORPH,                 -- Polymorph
   [118] = LOC_POLYMORPH,                   -- Polymorph
@@ -689,9 +687,7 @@ local CROWD_CONTROL_SPELLS_CLASSIC = {
     [865] = PC_ROOT,                         -- Rank 2
     [6131] = PC_ROOT,                        -- Rank 3
     [10230] = PC_ROOT,                       -- Rank 4
-  [11071] = PC_ROOT,                       -- Frostbite
-    [12496] = PC_ROOT,                       -- Rank 2
-    [12497] = PC_ROOT,                       -- Rank 3
+  [12494] = PC_ROOT,                       -- Frostbite - Triggered by: Talent Frostbite (Rank 1, 2, 3)
   [12355] = LOC_STUN,                      -- Impact - Triggered By: Impact
   [28272] = LOC_POLYMORPH,                 -- Polymorph
   [118] = LOC_POLYMORPH,                   -- Polymorph
@@ -1117,6 +1113,8 @@ function Widget:UpdateUnitAuras(aura_grid_frame, unit, enabled_auras, enabled_cc
     -- ShowPesonal: Debuffs  that are shown on Blizzards nameplate, no matter who casted them (and
     -- nameplateShowAll: Debuffs
     if not aura.name then break end
+
+    print(aura.name, "=>", aura.spellId, "  ---   ", self.CROWD_CONTROL_SPELLS[aura.spellId])
 
     -- CastByPlayer is also used by aura trigger custom styles (only my auras)
     aura.CastByPlayer = (aura.caster == "player" or aura.caster == "pet" or aura.caster == "vehicle")
