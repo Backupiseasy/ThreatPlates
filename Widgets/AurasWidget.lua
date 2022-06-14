@@ -1114,8 +1114,6 @@ function Widget:UpdateUnitAuras(aura_grid_frame, unit, enabled_auras, enabled_cc
     -- nameplateShowAll: Debuffs
     if not aura.name then break end
 
-    print(aura.name, "=>", aura.spellId, "  ---   ", self.CROWD_CONTROL_SPELLS[aura.spellId])
-
     -- CastByPlayer is also used by aura trigger custom styles (only my auras)
     aura.CastByPlayer = (aura.caster == "player" or aura.caster == "pet" or aura.caster == "vehicle")
     if Addon.ActiveAuraTriggers then
