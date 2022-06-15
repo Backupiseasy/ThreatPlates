@@ -70,9 +70,9 @@ Addon.Threat = {}
 Addon.Style = {}
 Addon.Transparency = {}
 Addon.Scaling = {}
-Addon.Animations = {}
+Addon.Animation = {}
 Addon.Localization = {}
-Addon.Icons = {}
+Addon.Icon = {}
 Addon.Font = {}
 -- Internal API
 Addon.Data = {}

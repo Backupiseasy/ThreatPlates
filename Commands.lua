@@ -301,8 +301,8 @@ local function ChatCommandDebug(cmd_list)
 		if not plate then return end
 		local unit = plate.TPFrame.unit
 
-		Addon.Animations:CreateShrink(plate.TPFrame)
-		Addon.Animations:Shrink(plate.TPFrame, 2, 5)
+		Addon.Animation:CreateShrink(plate.TPFrame)
+		Addon.Animation:Shrink(plate.TPFrame, 2, 5)
 	elseif command == "reaction" then
     local plate = C_NamePlate.GetNamePlateForUnit("target")
     if not plate then return end

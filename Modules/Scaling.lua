@@ -17,7 +17,7 @@ local UnitExists = UnitExists
 local L = Addon.L
 local PlatesByUnit = Addon.PlatesByUnit
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
-local Animations, Scaling, Transparency, Style = Addon.Animations, Addon.Scaling, Addon.Transparency, Addon.Style
+local Animation, Scaling, Transparency, Style = Addon.Animation, Addon.Scaling, Addon.Transparency, Addon.Style
 local CVars = Addon.CVars
 
 ---------------------------------------------------------------------------------------------------
@@ -194,7 +194,7 @@ local function GetScale(unit)
 end
 
 local function ScalePlateWithAnimation(frame, scale)
-	Animations:ScalePlate(frame, scale)
+	Animation:ScalePlate(frame, scale)
 end
 
 local function ScalePlateWithoutAnimation(frame, scale)
@@ -204,7 +204,7 @@ end
 function ScalingModule:Initialize(tp_frame)
   tp_frame.HidingScale = nil
 
-	Animations:StopScale(tp_frame)
+	Animation:StopScale(tp_frame)
 	tp_frame:SetScale(Addon.UIScale * GetScale(tp_frame.unit))
 end
 
@@ -213,7 +213,7 @@ function ScalingModule:HideNameplate(tp_frame)
 		local scale = tp_frame.Parent:GetScale()
     if scale < CVAR_nameplateMinScale then
       if not tp_frame.HidingScale then
-        Animations:HidePlate(tp_frame)
+        Animation:HidePlate(tp_frame)
         tp_frame.HidingScale = scale + 0.01
       end
 

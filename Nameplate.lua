@@ -35,7 +35,7 @@ local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventSe
 local ElementsCreated, ElementsUnitAdded, ElementsUnitRemoved = Addon.Elements.Created, Addon.Elements.UnitAdded, Addon.Elements.UnitRemoved
 local ElementsUpdateStyle, ElementsUpdateSettings = Addon.Elements.UpdateStyle, Addon.Elements.UpdateSettings
 local Threat, Style, Localization = Addon.Threat, Addon.Style, Addon.Localization
-local Scaling, Transparency, Animations, Icons, Font = Addon.Scaling, Addon.Transparency, Addon.Animations, Addon.Icons, Addon.Font
+local Scaling, Transparency, Animation, Icon, Font = Addon.Scaling, Addon.Transparency, Addon.Animation, Addon.Icon, Addon.Font
 local BackdropTemplate = Addon.BackdropTemplate
 
 local GetNameForNameplate
@@ -616,11 +616,11 @@ function Addon:UpdateSettings()
 
   Localization:UpdateSettings()
   Font:UpdateSettings()
-  Icons:UpdateSettings()
+  Icon:UpdateSettings()
   Threat:UpdateSettings()
   Transparency:UpdateSettings()
   Scaling:UpdateSettings()
-  Animations:UpdateSettings()
+  Animation:UpdateSettings()
   ElementsUpdateSettings()
 
   local db = Addon.db.profile

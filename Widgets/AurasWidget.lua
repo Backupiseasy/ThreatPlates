@@ -27,7 +27,7 @@ local IsInInstance = IsInInstance
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
-local Animations = Addon.Animations
+local Animation = Addon.Animation
 local Font = Addon.Font
 local Style = Addon.Style
 local CUSTOM_GLOW_FUNCTIONS, CUSTOM_GLOW_WRAPPER_FUNCTIONS = Addon.CUSTOM_GLOW_FUNCTIONS, Addon.CUSTOM_GLOW_WRAPPER_FUNCTIONS
@@ -2034,7 +2034,7 @@ local function UpdateAuraInformationIconMode(self, aura_frame) -- texture, durat
   end
 
   SetCooldown(aura_frame.Cooldown, duration, expiration)
-  Animations:StopFlash(aura_frame)
+  Animation:StopFlash(aura_frame)
 
   aura_frame:Show()
 end
@@ -2042,7 +2042,7 @@ end
 local function UpdateWidgetTimeIconMode(self, aura_frame, expiration, duration)
   if expiration == 0 then
     aura_frame.TimeLeft:SetText("")
-    Animations:StopFlash(aura_frame)
+    Animation:StopFlash(aura_frame)
   else
     local timeleft = expiration - GetTime()  
     if timeleft > 60 then
@@ -2053,7 +2053,7 @@ local function UpdateWidgetTimeIconMode(self, aura_frame, expiration, duration)
 
     local db_widget = self.db_widget
     if db_widget.FlashWhenExpiring and timeleft < db_widget.FlashTime then
-      Animations:Flash(aura_frame)
+      Animation:Flash(aura_frame)
     end
   end
 end
@@ -2225,7 +2225,7 @@ local function UpdateAuraInformationBarMode(self, aura_frame) -- texture, durati
   aura_frame.Statusbar:SetStatusBarColor(color.r, color.g, color.b, color.a or 1)
 
   SetCooldown(aura_frame.Cooldown, duration, expiration)
-  Animations:StopFlash(aura_frame)
+  Animation:StopFlash(aura_frame)
 
   aura_frame:Show()
 end
@@ -2234,11 +2234,11 @@ local function UpdateWidgetTimeBarMode(self, aura_frame, expiration, duration)
   if duration == 0 then
     aura_frame.TimeText:SetText("")
     aura_frame.Statusbar:SetValue(100)
-    Animations:StopFlash(aura_frame)
+    Animation:StopFlash(aura_frame)
   elseif expiration == 0 then
     aura_frame.TimeText:SetText("")
     aura_frame.Statusbar:SetValue(0)
-    Animations:StopFlash(aura_frame)
+    Animation:StopFlash(aura_frame)
   else
     local db = self.db_widget
 
@@ -2252,13 +2252,13 @@ local function UpdateWidgetTimeBarMode(self, aura_frame, expiration, duration)
       end
 
       if db.FlashWhenExpiring and timeleft < db.FlashTime then
-        Animations:Flash(aura_frame)
+        Animation:Flash(aura_frame)
       end
     else
       aura_frame.TimeText:SetText("")
 
       if db.FlashWhenExpiring and timeleft < db.FlashTime then
-        Animations:Flash(aura_frame)
+        Animation:Flash(aura_frame)
       end
     end
 
@@ -2269,10 +2269,10 @@ end
 local function UpdateWidgetTimeBarModeNoDuration(self, aura_frame, expiration, duration)
   if duration == 0 then
     aura_frame.Statusbar:SetValue(100)
-    Animations:StopFlash(aura_frame)
+    Animation:StopFlash(aura_frame)
   elseif expiration == 0 then
     aura_frame.Statusbar:SetValue(0)
-    Animations:StopFlash(aura_frame)
+    Animation:StopFlash(aura_frame)
   else
     local timeleft = expiration - GetTime()
     if timeleft > 60 then
@@ -2283,7 +2283,7 @@ local function UpdateWidgetTimeBarModeNoDuration(self, aura_frame, expiration, d
 
     local db = self.db_widget
     if db.FlashWhenExpiring and timeleft < db.FlashTime then
-      Animations:Flash(aura_frame)
+      Animation:Flash(aura_frame)
     end
 
     aura_frame.Statusbar:SetValue(timeleft * 100 / duration)

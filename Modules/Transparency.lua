@@ -15,9 +15,8 @@ local UnitExists = UnitExists
 local GetCVar = GetCVar
 
 -- ThreatPlates APIs
-local Animations, Style = Addon.Animations, Addon.Style
+local Animation, Style = Addon.Animation, Addon.Style
 local CVars = Addon.CVars
-local PlatesByUnit = Addon.PlatesByUnit
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
 local L = Addon.L
 
@@ -194,7 +193,7 @@ local function UpdatePlate_SetAlphaWithFading(tp_frame, unit)
   local target_alpha = GetTransparency(unit)
 
   if target_alpha ~= tp_frame.CurrentAlpha then
-    Animations:FadePlate(tp_frame, target_alpha)
+    Animation:FadePlate(tp_frame, target_alpha)
     tp_frame.CurrentAlpha = target_alpha
   end
 end
@@ -251,11 +250,11 @@ local function SetOccludedTransparencyWithFadingOnUpdate(self, frame)
 
   if target_alpha and target_alpha ~= frame.CurrentAlpha then
     if (frame.IsOccluded and not FadeOutOccludedUnitsIsEnabled) or (unit_was_occluded and not FadeInOccludedUnitsIsEnabled) then
-      Animations:StopFade(frame)
+      Animation:StopFade(frame)
       frame:SetAlpha(target_alpha)
       frame.IsShowing = false
     elseif frame.IsShowing then
-      Animations:StopFade(frame)
+      Animation:StopFade(frame)
       frame:SetAlpha(target_alpha)
 
       -- Disable showing only if plate is not occluded at least once
@@ -263,7 +262,7 @@ local function SetOccludedTransparencyWithFadingOnUpdate(self, frame)
         frame.IsShowing = false
       end
     else
-      Animations:FadePlate(frame, target_alpha)
+      Animation:FadePlate(frame, target_alpha)
       frame.IsShowing = false
     end
 
@@ -292,7 +291,7 @@ local function SetOccludedTransparencyWithoutFadingOnUpdate(self, frame)
 end
 
 function TransparencyModule:Initialize(frame)
-  Animations:StopFade(frame)
+  Animation:StopFade(frame)
   frame:SetAlpha(0)
 
   frame.CurrentAlpha = nil
@@ -360,7 +359,7 @@ local function SituationalEvent(tp_frame)
 
 	if target_alpha ~= tp_frame.CurrentAlpha then
     if FadingIsEnabled then
-      Animations:StopFade(tp_frame)
+      Animation:StopFade(tp_frame)
     end
 		tp_frame:SetAlpha(target_alpha)
 		tp_frame.CurrentAlpha = target_alpha

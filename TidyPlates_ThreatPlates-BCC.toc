@@ -27,7 +27,7 @@ ThreatPlates.xml
 
 Init.lua
 Debug.lua
-Localization.lua
+Modules\Localization.lua
 EventService.lua
 CVarsManager.lua
 Media.lua
@@ -42,5 +42,5 @@ Commands.lua
 Options.lua
 
 Styles\Styles.xml
-Functions\Functions.xml
+Modules\Modules.xml
 Widgets\Widgets.xml
