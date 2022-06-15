@@ -9,8 +9,6 @@ local tostring, tonumber, string_format = tostring, tonumber, string.format
 
 -- WoW APIs
 local SetCVar, GetCVar, GetCVarDefault, GetCVarBool = C_CVar.SetCVar, C_CVar.GetCVar, C_CVar.GetCVarDefault, C_CVar.GetCVarBool
-local IsInInstance = IsInInstance
-local NamePlateDriverFrame = NamePlateDriverFrame
 
 -- ThreatPlates APIs
 local ThreatPlates = Addon.ThreatPlates
@@ -65,7 +63,6 @@ local COMBAT_PROTECTED = {
 }
 
 local MONITORED_CVARS = {
-  NamePlateVerticalScale = true,
   nameplateMinScale = true,
   nameplateMaxScale = true,
   nameplateLargerScale = true,
@@ -183,20 +180,7 @@ end
 local function SetCVarHook(name, value, c)
   if not MONITORED_CVARS[name] then return end
 
-  -- Used as detection for switching between small and large nameplates
-  if name == "NamePlateVerticalScale" then
-    local db = Addon.db.profile.Automation
-    local isInstance, _ = IsInInstance()
-
-    if not NamePlateDriverFrame:IsUsingLargerNamePlateStyle() then
-      -- reset to previous setting
-      CVars:RestoreFromProfile("nameplateGlobalScale")
-    elseif db.SmallPlatesInInstances and isInstance then
-      CVars:Set("nameplateGlobalScale", 0.4)
-    end
-
-    Addon:CallbackWhenOoC(function() Addon:SetBaseNamePlateSize() end)
-  elseif name == "nameplateMinScale" or name == "nameplateMaxScale" or name == "nameplateLargerScale" or name == "nameplateSelectedScale" then
+  if name == "nameplateMinScale" or name == "nameplateMaxScale" or name == "nameplateLargerScale" or name == "nameplateSelectedScale" then
     -- Update Hiding Nameplates only if something changed
     local enabled = Addon.Scaling:HidingNameplatesIsEnabled()
     local invalid = CVars.InvalidCVarsForHidingNameplates()
