@@ -22,7 +22,7 @@ local UnitPower, UnitPowerMax, GetRuneCooldown, GetComboPoints = UnitPower, Unit
 local GetUnitChargedPowerPoints = GetUnitChargedPowerPoints
 local GetShapeshiftFormID = GetShapeshiftFormID
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
-local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
+local InCombatLockdown = InCombatLockdown
 
 -- ThreatPlates APIs
 local RGB = Addon.RGB

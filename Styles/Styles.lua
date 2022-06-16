@@ -12,12 +12,11 @@ local ThreatPlates = Addon.ThreatPlates
 local pairs = pairs
 
 -- WoW APIs
-local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
+local InCombatLockdown = InCombatLockdown
 local UnitPlayerControlled, UnitIsUnit = UnitPlayerControlled, UnitIsUnit
 local UnitIsOtherPlayersPet = UnitIsOtherPlayersPet
 local UnitIsBattlePet, UnitCreatureType = UnitIsBattlePet, UnitCreatureType
 local UnitCanAttack = UnitCanAttack
-local GetNamePlates, GetNamePlateForUnit = C_NamePlate.GetNamePlates, C_NamePlate.GetNamePlateForUnit
 
 -- ThreatPlates APIs
 local TOTEMS = Addon.TOTEMS
@@ -347,8 +346,7 @@ function StyleModule:SetStyle(unit)
   -- Array by instance ID and all enabled styles?
   local custom_style = unit.CustomPlateSettings
   if custom_style then
-    local _, instance_type = IsInInstance()
-    if INSTANCE_TYPES[instance_type] then
+    if Addon.IsInPvEInstance then
       if not CustomStylesForAllInstances[custom_style] and not CustomStylesForCurrentInstance[custom_style] then
       -- Without cache: if not custom_style.Enable.Instances or (custom_style.Enable.InstanceIDs.Enable and not CustomStylesForCurrentInstance[custom_style]) then
         style = nil

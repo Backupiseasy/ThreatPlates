@@ -784,6 +784,24 @@ end
 --function Addon:PLAYER_LOGOUT(...)
 --end
 
+local PVE_INSTANCE_TYPES = {
+  --none = false,
+  --pvp = false,
+  --arena = false,
+  party = true,
+  raid = true,
+  scenario = true,
+}
+
+local PVP_INSTANCE_TYPES = {
+  --none = false,
+  pvp = true,
+  arena = true,
+  --party = false,
+  --raid = false,
+  --scenario = false,
+}
+
 -- Fired when the player enters the world, reloads the UI, enters/leaves an instance or battleground, or respawns at a graveyard.
 -- Also fires any other time the player sees a loading screen
 function Addon:PLAYER_ENTERING_WORLD(initialLogin, reloadingUI)
@@ -799,12 +817,12 @@ function Addon:PLAYER_ENTERING_WORLD(initialLogin, reloadingUI)
 
   -- This code must be executed every time the player enters a instance (dungeon, raid, ...)
   db = Addon.db.profile.Automation
-  local isInstance, instance_type = IsInInstance()
-
-  --Addon.IsInInstance = isInstance
-  Addon.IsInPvEInstance = isInstance and (instance_type == "party" or instance_type == "raid")
-  Addon.IsInPvPInstance = isInstance and (instance_type == "arena" or instance_type == "pvp")
   
+  local is_in_instance, instance_type = IsInInstance()
+  Addon.IsInInstance = is_in_instance
+  Addon.IsInPvEInstance = PVE_INSTANCE_TYPES[instance_type]
+  Addon.IsInPvPInstance = PVP_INSTANCE_TYPES[instance_type]
+
   if db.ShowFriendlyUnitsInInstances then
     if Addon.IsInPvEInstance then
       CVars:Set("nameplateShowFriends", 1)
@@ -876,10 +894,9 @@ function Addon:PLAYER_REGEN_ENABLED()
   --  end
 
   local db = Addon.db.profile.Automation
-  local isInstance, _ = IsInInstance()
 
   -- Dont't use automation for friendly nameplates if in an instance and Hide Friendly Nameplates is enabled
-  if db.FriendlyUnits ~= "NONE" and not (isInstance and db.HideFriendlyUnitsInInstances) then
+  if db.FriendlyUnits ~= "NONE" and not (Addon.IsInInstance and db.HideFriendlyUnitsInInstances) then
     _G.SetCVar("nameplateShowFriends", (db.FriendlyUnits == "SHOW_COMBAT" and 0) or 1)
   end
   if db.EnemyUnits ~= "NONE" then
@@ -892,10 +909,9 @@ end
 -- Fires when the player enters combat status
 function Addon:PLAYER_REGEN_DISABLED()
   local db = Addon.db.profile.Automation
-  local isInstance, _ = IsInInstance()
 
   -- Dont't use automation for friendly nameplates if in an instance and Hide Friendly Nameplates is enabled
-  if db.FriendlyUnits ~= "NONE" and not (isInstance and db.HideFriendlyUnitsInInstances) then
+  if db.FriendlyUnits ~= "NONE" and not (Addon.IsInInstance and db.HideFriendlyUnitsInInstances) then
     _G.SetCVar("nameplateShowFriends", (db.FriendlyUnits == "SHOW_COMBAT" and 1) or 0)
   end
 

@@ -14,7 +14,6 @@ local tonumber, select, pairs = tonumber, select, pairs
 -- WoW APIs
 local SetNamePlateFriendlyClickThrough = C_NamePlate.SetNamePlateFriendlyClickThrough
 local SetNamePlateEnemyClickThrough = C_NamePlate.SetNamePlateEnemyClickThrough
-local IsInInstance = IsInInstance
 local IsAddOnLoaded = GetCVar, IsAddOnLoaded
 local C_NamePlate, Lerp =  C_NamePlate, Lerp
 local C_Timer_After = C_Timer.After

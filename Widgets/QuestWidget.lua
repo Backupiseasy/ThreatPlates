@@ -15,7 +15,7 @@ local string, tonumber, next, pairs, ipairs = string, tonumber, next, pairs, ipa
 
 -- WoW APIs
 local WorldFrame = WorldFrame
-local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
+local InCombatLockdown = InCombatLockdown
 local UnitName, UnitIsUnit, UnitDetailedThreatSituation = UnitName, UnitIsUnit, UnitDetailedThreatSituation
 local UnitExists = UnitExists
 local IsInRaid, IsInGroup, GetNumGroupMembers, GetNumSubgroupMembers = IsInRaid, IsInGroup, GetNumGroupMembers, GetNumSubgroupMembers
@@ -194,7 +194,7 @@ end
 local function ShowQuestUnit(unit)
   local db = Addon.db.profile.questWidget
 
-  if IsInInstance() and db.HideInInstance then
+  if Addon.IsInPvEInstance and db.HideInInstance then
     return false
   end
 

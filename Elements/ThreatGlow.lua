@@ -11,7 +11,7 @@ local ADDON_NAME, Addon = ...
 
 -- WoW APIs
 local CreateFrame = CreateFrame
-local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
+local InCombatLockdown = InCombatLockdown
 local UnitIsConnected, UnitAffectingCombat = UnitIsConnected, UnitAffectingCombat
 
 -- ThreatPlates APIs
@@ -46,7 +46,7 @@ local ThreatColorWOThreatSystem, TappedColor
 
 local function ShowThreatGlow(unit)
   if Threat.UseThreatTable then
-    if IsInInstance() and Threat.UseHeuristicInInstances then
+    if Addon.IsInPvEInstance and Threat.UseHeuristicInInstances then
       return _G.UnitAffectingCombat(unit.unitid)
     else
       return Threat:OnThreatTable(unit)

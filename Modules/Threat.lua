@@ -11,7 +11,7 @@ local ADDON_NAME, Addon = ...
 local strsplit, pairs = strsplit, pairs
 
 -- WoW APIs
-local IsInInstance, InCombatLockdown = IsInInstance, InCombatLockdown
+local InCombatLockdown = InCombatLockdown
 local UnitReaction, UnitThreatSituation = UnitReaction, UnitThreatSituation
 local UnitIsPlayer, UnitPlayerControlled = UnitIsPlayer, UnitPlayerControlled
 local UnitThreatSituation, UnitIsUnit, UnitExists, UnitGroupRolesAssigned = UnitThreatSituation, UnitIsUnit, UnitExists, UnitGroupRolesAssigned
@@ -126,8 +126,7 @@ function ThreatModule:ShowFeedback(unit)
     return false
   end
 
-  local isInstance, _ = IsInInstance()
-  if not isInstance and ShowInstancesOnly then
+  if not Addon.IsInPvEInstance and ShowInstancesOnly then
     return false
   end
 
@@ -191,7 +190,7 @@ function ThreatModule:SetUnitAttributeThreat(unit, unitid)
     unit.HasThreatTable = true
     threat_level = THREAT_REFERENCE[threat_status]
     other_unit_is_tanking = (threat_status < 2)
-  elseif unit.InCombat and (not self.UseThreatTable or (self.UseHeuristicInInstances and IsInInstance())) and InCombatLockdown() then
+  elseif unit.InCombat and (not self.UseThreatTable or (self.UseHeuristicInInstances and Addon.IsInPvEInstance)) and InCombatLockdown() then
     local target_unit = unitid .. "target"
     if UnitExists(target_unit) and not unit.isCasting then
       -- TODO: Should we also check for pets here? Tank pets?
@@ -239,7 +238,7 @@ function ThreatModule:ThreatUpdateHeuristic(tp_frame)
   -- Only assume that the unit is out of combat, when it is not on any unit's threat table
   if unit.HasThreatTable then
     return
-  elseif self.UseThreatTable or (self.UseHeuristicInInstances and not IsInInstance()) or not InCombatLockdown() then
+  elseif self.UseThreatTable or (self.UseHeuristicInInstances and not Addon.IsInPvEInstance) or not InCombatLockdown() then
     if unit.ThreatLevel then      
       UpdateThreatLevel(tp_frame, unit, nil)
     end

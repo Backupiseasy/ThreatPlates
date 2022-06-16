@@ -23,7 +23,6 @@ local DebuffTypeColor = DebuffTypeColor
 local UnitAuraWrapper, ShouldSkipAuraUpdate = UnitAura, AuraUtil.ShouldSkipAuraUpdate
 local UnitIsUnit, UnitReaction = UnitIsUnit, UnitReaction
 local GetNamePlates, GetNamePlateForUnit = C_NamePlate.GetNamePlates, C_NamePlate.GetNamePlateForUnit
-local IsInInstance = IsInInstance
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
@@ -829,7 +828,6 @@ end
 ---------------------------------------------------------------------------------------------------
 -- Global attributes
 ---------------------------------------------------------------------------------------------------
-local PLayerIsInInstance = false
 --local PLayerIsInCombat = false
 --local DispellableDebuffCache = {}
 
@@ -1030,7 +1028,7 @@ function Widget:FilterEnemyBuffsBySpell(db, aura, AuraFilterFunction, unit)
   if show_aura and (aura.duration <= 0) then
     show_aura =  db.ShowUnlimitedAlways or
       (db.ShowUnlimitedInCombat and unit.InCombat) or
-      (db.ShowUnlimitedInInstances and PLayerIsInInstance) or
+      (db.ShowUnlimitedInInstances and Addon.IsInInstance) or
       (db.ShowUnlimitedOnBosses and unit.IsBossOrRare)
     unit.HasUnlimitedAuras = true
   end
@@ -1859,10 +1857,6 @@ function Widget:PLAYER_REGEN_DISABLED()
   end
 end
 
-function Widget:PLAYER_ENTERING_WORLD()
-  PLayerIsInInstance = IsInInstance()
-end
-
 ---------------------------------------------------------------------------------------------------
 -- Auras Area
 ---------------------------------------------------------------------------------------------------
@@ -2340,7 +2334,6 @@ function Widget:OnEnable()
   self:SubscribeEvent("PLAYER_TARGET_CHANGED")
   self:SubscribeEvent("PLAYER_REGEN_ENABLED")
   self:SubscribeEvent("PLAYER_REGEN_DISABLED")
-  self:SubscribeEvent("PLAYER_ENTERING_WORLD")
   -- LOSS_OF_CONTROL_ADDED
   -- LOSS_OF_CONTROL_UPDATE
 

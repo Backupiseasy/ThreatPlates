@@ -531,7 +531,7 @@ function Addon.UpdateStylesForCurrentInstance()
   wipe(style_caches.ForCurrentInstance)
 
   -- Update custom styles for this instance
-  if IsInInstance() then
+  if Addon.IsInInstance then
     local _, _, _, _, _, _, _, instance_id = GetInstanceInfo()
     Addon.MergeIntoTable(style_caches.ForCurrentInstance, style_caches.PerInstance[tostring(instance_id)])
   end
@@ -675,8 +675,7 @@ local function SyncGameSettingsWorld(info, val)
     Addon.Logging.Error(L["We're unable to change this while in combat"])
   else
     SetValue(info, val)
-    local isInstance, instanceType = IsInInstance()
-    if isInstance then
+    if IsInInstance() then
       Addon:PLAYER_ENTERING_WORLD()
     end
   end
@@ -4771,7 +4770,7 @@ local function CreateBlizzardSettings()
                   "nameplateMotion", "nameplateMotionSpeed", "nameplateOverlapH", "nameplateOverlapV",
                   "nameplateMaxDistance", "nameplateTargetBehindMaxDistance",
                   "nameplateShowOnlyNames", 
-                      -- "nameplateGlobalScale" -- Reset it to 1, if it get's somehow corrupted
+                  -- "nameplateGlobalScale" -- Reset it to 1, if it get's somehow corrupted
                 }
                 if Addon.IS_CLASSIC then
                   cvars[#cvars + 1] = "clampTargetNameplateToScreen"
