@@ -81,15 +81,20 @@ end
 function Debug:PrintUnit(unit, full_info)
   if not self.Enabled then return end
 
-  local plate = C_NamePlate.GetNamePlateForUnit(unit.unitid)
-  if not plate then return end
+  local tp_frame = Addon:GetThreatPlateForTarget()
+  if not tp_frame then return end
+
+  local plate = tp_frame.Parent
 
 	Addon.Logging.Debug("Unit:", unit.name)
-	Addon.Logging.Debug("-------------------------------------------------------------")
-	Addon.Logging.Debug("  Show UnitFrame =", plate.UnitFrame:IsShown())
-	Addon.Logging.Debug("  Show TPFrame =", plate.TPFrame:IsShown())
-	Addon.Logging.Debug("  Active =", plate.TPFrame.Active)
-	Addon.Logging.Debug("-------------------------------------------------------------")
+	Addon.Logging.Debug("--- IDs -------------------------------------------------------")
+	Addon.Logging.Debug("      ID: =", unit.unitid)
+	Addon.Logging.Debug("      NPC ID: =", unit.NPCID)
+	Addon.Logging.Debug("--- Visibility-------------------------------------------------")
+	Addon.Logging.Debug("      UnitFrame =", plate.UnitFrame:IsShown())
+	Addon.Logging.Debug("      TPFrame =", plate.TPFrame:IsShown())
+	Addon.Logging.Debug("      Active =", tp_frame.Active)
+	Addon.Logging.Debug("---------------------------------------------------------------")
   for key, val in pairs(unit) do
     Addon.Logging.Debug(key .. ":", val)
   end

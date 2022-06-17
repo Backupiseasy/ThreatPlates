@@ -179,6 +179,13 @@ function Addon:GetThreatPlateForUnit(unitid)
   end
 end
 
+function Addon:GetThreatPlateForTarget()
+  local plate = GetNamePlateForUnit("target")
+  if plate and plate.TPFrame.Active then
+     return plate.TPFrame
+  end
+end
+
 function Addon:GetThreatPlateForGUID(guid)
   local plate = self.PlatesByGUID[guid]
   if plate and plate.TPFrame.Active then
@@ -869,8 +876,9 @@ function Addon:PLAYER_ENTERING_WORLD(initialLogin, reloadingUI)
   Font:SetNamesFonts()
 end
 
-local function UpdateStyleOfAllPlates()
-  for _, tp_frame in Addon:GetActiveThreatPlates() do
+local function UpdatePlateAfterCombatStatusChange()
+  for unitid, tp_frame in Addon:GetActiveThreatPlates() do
+    Threat:ThreatUpdate(tp_frame)
     Style:Update(tp_frame)
   end
 end
@@ -903,7 +911,7 @@ function Addon:PLAYER_REGEN_ENABLED()
     _G.SetCVar("nameplateShowEnemies", (db.EnemyUnits == "SHOW_COMBAT" and 0) or 1)
   end
 
-  UpdateStyleOfAllPlates()
+  UpdatePlateAfterCombatStatusChange()
 end
 
 -- Fires when the player enters combat status
@@ -919,7 +927,7 @@ function Addon:PLAYER_REGEN_DISABLED()
     _G.SetCVar("nameplateShowEnemies", (db.EnemyUnits == "SHOW_COMBAT" and 1) or 0)
   end
 
-  UpdateStyleOfAllPlates()
+  UpdatePlateAfterCombatStatusChange()
 end
 
 function Addon:NAME_PLATE_CREATED(plate)

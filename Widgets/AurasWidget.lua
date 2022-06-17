@@ -1826,36 +1826,18 @@ function Widget:PLAYER_REGEN_ENABLED()
   -- It seems that unitid here can be nil when using the healthstone while in combat
   -- assert (unit.unitid ~= nil, "Auras: PLAYER_REGEN_ENABLED - unitid =", unit.unitid)
 
-  for _, plate in pairs(GetNamePlates()) do
-    local frame = plate and plate.TPFrame
-    if frame and frame.Active then
-      local widget_frame = frame.widgets.Auras
-      local unit = frame.unit
-
-      if widget_frame.Active and unit.HasUnlimitedAuras then
-        unit.InCombat = _G.UnitAffectingCombat(unit.unitid)
+  for unitid, tp_frame in Addon:GetActiveThreatPlates() do
+    local widget_frame = self:GetWidgetFrameForUnit(unitid)
+    if widget_frame then 
+      local unit = tp_frame.unit
+      if unit.HasUnlimitedAuras then
         self:UpdateIconGrid(widget_frame, unit)
       end
     end
   end
 end
 
-function Widget:PLAYER_REGEN_DISABLED()
-  --PLayerIsInCombat = true
-
-  for _, plate in pairs(GetNamePlates()) do
-    local frame = plate and plate.TPFrame
-    if frame and frame.Active then
-      local widget_frame = frame.widgets.Auras
-      local unit = frame.unit
-
-      if widget_frame.Active and unit.HasUnlimitedAuras then
-        unit.InCombat = _G.UnitAffectingCombat(unit.unitid)
-        self:UpdateIconGrid(widget_frame, unit)
-      end
-    end
-  end
-end
+Widget.PLAYER_REGEN_DISABLED = Widget.PLAYER_REGEN_ENABLED
 
 ---------------------------------------------------------------------------------------------------
 -- Auras Area

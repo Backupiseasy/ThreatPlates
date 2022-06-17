@@ -130,13 +130,9 @@ local function ChatCommandDebug(cmd_list)
 	elseif command == "social" then
 		Addon.PrintFriendlist()
 	elseif command == "unit" then
-		local plate = C_NamePlate.GetNamePlateForUnit("target")
-		if not plate then return end
-		local unit = plate.TPFrame.unit
-
-		Addon.Debug:PrintUnit(unit, true)
-		local type, zero, server_id, instance_id, zone_uid, npc_id, spawn_uid = strsplit("-", unit.guid)
-		print ("GUID:", type, zero, server_id, instance_id, zone_uid, npc_id, spawn_uid)
+		local tp_frame = Addon:GetThreatPlateForTarget()
+		if not tp_frame then return end
+		Addon.Debug:PrintUnit(tp_frame.unit, true)
 	elseif command == "migrate" then
 		Addon.MigrateDatabase(cmd_list[2])
 
