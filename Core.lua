@@ -129,6 +129,12 @@ else
       C_NamePlate.SetNamePlateEnemySize(width, height)
     end
   end
+  
+  Addon:ConfigClickableArea(false)
+
+  -- For personal nameplate:
+  --local clampedZeroBasedScale = Saturate(zeroBasedScale)
+  --C_NamePlate_SetNamePlateSelfSize(baseWidth * horizontalScale * Lerp(1.1, 1.0, clampedZeroBasedScale), baseHeight)
 end
 
 ---------------------------------------------------------------------------------------------------
