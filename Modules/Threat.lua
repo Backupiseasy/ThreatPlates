@@ -11,7 +11,7 @@ local ADDON_NAME, Addon = ...
 local strsplit, pairs = strsplit, pairs
 
 -- WoW APIs
-local InCombatLockdown = InCombatLockdown
+local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
 local UnitReaction, UnitThreatSituation = UnitReaction, UnitThreatSituation
 local UnitIsPlayer, UnitPlayerControlled = UnitIsPlayer, UnitPlayerControlled
 local UnitThreatSituation, UnitIsUnit, UnitExists, UnitGroupRolesAssigned = UnitThreatSituation, UnitIsUnit, UnitExists, UnitGroupRolesAssigned
@@ -266,6 +266,38 @@ function ThreatModule:ThreatUpdateHeuristic(tp_frame)
   UpdateThreatLevel(tp_frame, unit, threat_level)
 end
 
+local function UpdateThreatHeuristic(unitTarget, event, flagText, amount, schoolMask)
+  local tp_frame = Addon:GetThreatPlateForUnit(unitTarget)
+  if tp_frame then
+    ThreatModule:ThreatUpdateHeuristic(tp_frame)
+  end
+end
+
+local function SubscribeThreatHeuristicEvents()
+  SubscribeEvent(ThreatModule, "UNIT_COMBAT", UpdateThreatHeuristic)
+  -- SubscribeEvent(ThreatModule, "UNIT_SPELLCAST_START", UpdateThreatHeuristic)
+  -- SubscribeEvent(ThreatModule, "UNIT_SPELLCAST_CHANNEL_START", UpdateThreatHeuristic)
+  -- SubscribeEvent(ThreatModule, "UNIT_SPELLCAST_STOP", UpdateThreatHeuristic)
+  -- SubscribeEvent(ThreatModule, "UNIT_SPELLCAST_CHANNEL_STOP", UpdateThreatHeuristic)
+end
+
+local function UnubscribeThreatHeuristicEvents()
+  UnsubscribeEvent(ThreatModule, "UNIT_COMBAT", UpdateThreatHeuristic)
+  -- UnsubscribeEvent(ThreatModule, "UNIT_SPELLCAST_START", UpdateThreatHeuristic)
+  -- UnsubscribeEvent(ThreatModule, "UNIT_SPELLCAST_CHANNEL_START", UpdateThreatHeuristic)
+  -- UnsubscribeEvent(ThreatModule, "UNIT_SPELLCAST_STOP", UpdateThreatHeuristic)
+  -- UnsubscribeEvent(ThreatModule, "UNIT_SPELLCAST_CHANNEL_STOP", UpdateThreatHeuristic)
+end
+
+local function RegisterEventsforThreatHeuristic()
+  --self.UseHeuristicInInstances is true as this function is only enabled in this case
+  if IsInInstance() then
+    SubscribeThreatHeuristicEvents()
+  else
+    UnubscribeThreatHeuristicEvents()
+  end
+end
+
 function ThreatModule:UpdateSettings()
   Settings = Addon.db.profile.threat
 
@@ -273,6 +305,17 @@ function ThreatModule:UpdateSettings()
   self.UseHeuristicInInstances = Settings.UseHeuristicInInstances
   ShowOffTank = Settings.toggle.OffTank
   ShowInstancesOnly = Settings.toggle.InstancesOnly
+
+  -- If heuristic is enabled in general (not self.UseThreatTable), then we don't need PLAYER_ENTERING_WORLD
+  if not self.UseThreatTable then
+    SubscribeThreatHeuristicEvents()
+    UnsubscribeEvent(ThreatModule, "PLAYER_ENTERING_WORLD", RegisterEventsforThreatHeuristic)
+  elseif self.UseHeuristicInInstances then
+    SubscribeEvent(ThreatModule, "PLAYER_ENTERING_WORLD", RegisterEventsforThreatHeuristic)
+  else
+    UnubscribeThreatHeuristicEvents()
+    UnsubscribeEvent(ThreatModule, "PLAYER_ENTERING_WORLD", RegisterEventsforThreatHeuristic)
+  end
 
   for style, settings in pairs(Addon.db.profile.settings) do
     if settings.threatcolor then -- there are several subentries unter settings. Only use style subsettings like unique, normal, dps, ...

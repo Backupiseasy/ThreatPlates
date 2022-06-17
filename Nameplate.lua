@@ -877,9 +877,8 @@ function Addon:PLAYER_ENTERING_WORLD(initialLogin, reloadingUI)
 end
 
 local function UpdatePlateAfterCombatStatusChange()
-  for unitid, tp_frame in Addon:GetActiveThreatPlates() do
-    Threat:ThreatUpdate(tp_frame)
-    Style:Update(tp_frame)
+  for _, tp_frame in Addon:GetActiveThreatPlates() do
+    Threat:ThreatUpdate(tp_frame) -- also does a style update and fires event ThreatUpdate
   end
 end
 
@@ -1094,7 +1093,6 @@ local function UNIT_SPELLCAST_START(unitid, ...)
   local tp_frame = Addon:GetThreatPlateForUnit(unitid)
   if tp_frame then
     OnStartCasting(tp_frame, unitid, false)
-    Threat:ThreatUpdateHeuristic(tp_frame)
   end
 end
 
@@ -1122,7 +1120,6 @@ local function UNIT_SPELLCAST_STOP(unitid, ...)
     castbar.IsChanneling = false
     castbar.IsCasting = false
 
-    Threat:ThreatUpdateHeuristic(tp_frame)
     if tp_frame.unit.CustomStyleCast then
       tp_frame.unit.CustomStyleCast = false
       Style:Update(tp_frame)
@@ -1139,7 +1136,6 @@ local function UNIT_SPELLCAST_CHANNEL_START(unitid, ...)
   local tp_frame = Addon:GetThreatPlateForUnit(unitid)
   if tp_frame then
     OnStartCasting(tp_frame, unitid, true)
-    Threat:ThreatUpdateHeuristic(tp_frame)
   end
 end
 
@@ -1253,7 +1249,7 @@ local ENABLED_EVENTS = {
   "UNIT_THREAT_LIST_UPDATE",
   "UNIT_FACTION",
   "UNIT_LEVEL",
-
+  
   --PLAYER_CONTROL_LOST = ..., -- Does not seem to be necessary
   --PLAYER_CONTROL_GAINED = ...,  -- Does not seem to be necessary
 
