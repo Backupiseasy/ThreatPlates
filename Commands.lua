@@ -5,7 +5,8 @@
 ---------------------------------------------------------------------------------------------------
 local L = Addon.ThreatPlates.L
 
-local DEBUG = Addon.ThreatPlates.Meta("version") == "@project-version@"
+Addon.DEBUG = Addon.ThreatPlates.Meta("version") == "@project-version@"
+
 local function toggleDPS()
 	Addon:SetRole(false)
 	Addon.db.profile.threat.ON = true
@@ -118,9 +119,7 @@ local function ChatCommandDebug(cmd_list)
 	elseif command == "cache" then
 		Addon.Debug.PrintCaches()
 	elseif command == "unit" then
-		local plate = C_NamePlate.GetNamePlateForUnit("target")
-		if not plate then return end
-		Addon.Debug.PrintUnit(plate.TPFrame.unit, true)
+		Addon.Debug.PrintUnit("target")
 		--elseif command == "migrate" then
 		--	Addon.TestMigration()
 		--	Addon.MigrateDatabase(TP.Meta("version"))
@@ -284,7 +283,7 @@ function TidyPlatesThreat:ChatCommand(input)
 --		TidyPlatesThreat:ToggleNameplateModeNeutralUnits()
 --	elseif command == "toggle-view-enemy-units" then
 --		TidyPlatesThreat:ToggleNameplateModeEnemyUnits()
-	elseif DEBUG then
+	elseif Addon.DEBUG then
 		ChatCommandDebug(cmd_list)
 	else
 		Addon.Logging.Error(L["Unknown option: "] .. command)

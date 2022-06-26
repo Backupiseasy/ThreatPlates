@@ -30,6 +30,7 @@ jobs:
         env:
           CF_API_KEY: ${{ secrets.CF_API_KEY }}
           GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
+          WAGO_API_TOKEN: ${{ secrets.WAGO_API_TOKEN }}
           #WOWI_API_TOKEN: ${{ secrets.WOWI_API_TOKEN }}
 
       - name: Create Classic Package
@@ -39,6 +40,7 @@ jobs:
         env:
           CF_API_KEY: ${{ secrets.CF_API_KEY }}
           GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
+          WAGO_API_TOKEN: ${{ secrets.WAGO_API_TOKEN }}
           #WOWI_API_TOKEN: ${{ secrets.WOWI_API_TOKEN }}
 
       - name: Create BCC Package
@@ -48,6 +50,7 @@ jobs:
         env:
           CF_API_KEY: ${{ secrets.CF_API_KEY }}
           GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
+          WAGO_API_TOKEN: ${{ secrets.WAGO_API_TOKEN }}
           #WOWI_API_TOKEN: ${{ secrets.WOWI_API_TOKEN }}
 
 #      - name: Send Status to Discord

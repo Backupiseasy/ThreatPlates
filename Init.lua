@@ -414,20 +414,19 @@ Addon.Debug.PrintTable = function(data)
   end
 end
 
-Addon.Debug.PrintUnit = function(unit, full_info)
-	local plate = C_NamePlate.GetNamePlateForUnit(unit.unitid)
+Addon.Debug.PrintUnit = function(unitid)
+	local plate = C_NamePlate.GetNamePlateForUnit(unitid)
+	if not plate then return end
 
-	Addon.Logging.Debug("Unit:", unit.name)
+	local tp_frame = plate.TPFrame
+	local unit = tp_frame.unit
+	Addon.Logging.Debug("Unit:", unit.name, "=>", unitid)
 	Addon.Logging.Debug("-------------------------------------------------------------")
 	Addon.Logging.Debug("  Show UnitFrame =", plate.UnitFrame:IsShown())
 	Addon.Logging.Debug("  Show TPFrame =", plate.TPFrame:IsShown())
 	Addon.Logging.Debug("  Active =", plate.TPFrame.Active)
 	Addon.Logging.Debug("-------------------------------------------------------------")
-	for key, val in pairs(unit) do
-		Addon.Logging.Debug(key .. ":", val)
-  end
-
-  if full_info and unit.unitid then
+  if tp_frame and unit and unit.unitid then
 		if not Addon.IS_TBC_CLASSIC and not Addon.IS_CLASSIC then
 			Addon.Logging.Debug("  UnitNameplateShowsWidgetsOnly = ", UnitNameplateShowsWidgetsOnly(unit.unitid))
 		end
@@ -458,8 +457,12 @@ Addon.Debug.PrintUnit = function(unit, full_info)
 
     --		Addon.Logging.Debug("  isFriend = ", TidyPlatesUtilityInternal.IsFriend(unit.name))
     --		Addon.Logging.Debug("  isGuildmate = ", TidyPlatesUtilityInternal.IsGuildmate(unit.name))
+
+		for key, val in pairs(unit) do
+			Addon.Logging.Debug(key .. ":", val)
+		end	
 	else
-    Addon.Logging.Debug("  <no unit id>")
+    Addon.Logging.Debug("  <No TPFrame>")
   end
 
   Addon.Logging.Debug("--------------------------------------------------------------")

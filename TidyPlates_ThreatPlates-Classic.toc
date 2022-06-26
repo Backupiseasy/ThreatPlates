@@ -15,6 +15,7 @@
 ## X-Website: https://wow.curseforge.com/projects/tidy-plates-threat-plates
 ## X-Curse-Project-ID: 21217
 ## X-WoWI-ID: 15749
+## X-Wago-ID: RqGZkkNd
 
 ## X-License: GNU General Public License
 ## X-Credits: danltiger (for Tidy Plates), Tosaido (for quest handling code from QuestMobs)

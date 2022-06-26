@@ -1,4 +1,16 @@
 ﻿------------------------------------------------------
+10.4.0 (2022-04-xx)
+------------------------------------------------------
+* Added a feature to change the name font of Blizzard nameplates and hide the healthbar (to only show unit names), e.g., while in instances.
+* Added an option to show title and realm in a player's name [Comment #3952, #1995, #4164, #6140, TPC#496, Issue #312, #432].
+* Added an option to show target of target with or without enclosing brackets [Issue #543, IM].
+* Added an option to also use NPC IDs in unit (formerly name) triggers for custom styles [Comment #6207].
+* Added additional icons as indicator for elite and rare mobs [GH-330, IM] (thanks to lizardo221).
+* Added Venthry Covenant Ability Agent of Chaos to the Auras widget as CC aura [Issue #548].
+* Fixed a bug where Frostbite was not classified as CC aura [Issue #547].
+* Integrated new UNIT_AURA processing optimizations to improve unit aura processing in encounters where many nameplates are on screen at once [Comment #6114]. 
+
+------------------------------------------------------
 10.3.8 (2022-06-01)
 ------------------------------------------------------
 * Fixed a bug with Threat Plates overwriting the Profiles page of other addons when adding the import/export section (thanks to WoWUIDev Discord!).
@@ -29,8 +41,8 @@
 ------------------------------------------------------
 * Fixed a Lua error when a numeric CVar has an invalid, i.e., non-numeric, value. In this case, the default value of the CVar will now be used to prevent the Lua error.
 * Updated TOC version for TBC Classic Patch 2.5.4.
-
 ------------------------------------------------------
+
 10.3.3 (2022-03-12)
 ------------------------------------------------------
 * Fixed a bug with an outdated cast target being shown when a nameplate was re-used on a casting unit.
@@ -142,8 +154,8 @@
 ------------------------------------------------------
 10.2.1 (2021-05-25)
 ------------------------------------------------------
-* Fixed a bug with delayed health update in the TBC Classic Version because of a change in how health update events were processed [Comment TBC#742, #5992, Issue #490].
-* Fixed a bug with crowd-control auras being shown as debuff (e.g., with wrong size) [Comment #5589, TBC#744].
+* Fixed a bug with delayed health update in the TBC Classic Version because of a change in how health update events were processed [Comment TPC#742, #5992, Issue #490].
+* Fixed a bug with crowd-control auras being shown as debuff (e.g., with wrong size) [Comment #5589, TPC#744].
 
 ------------------------------------------------------
 10.2.0 (2021-05-17)

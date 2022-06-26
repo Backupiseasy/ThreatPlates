@@ -21,6 +21,7 @@ local NamePlateDriverFrame = NamePlateDriverFrame
 local TidyPlatesThreat = TidyPlatesThreat
 local LibStub = LibStub
 local L = Addon.ThreatPlates.L
+local CVars = Addon.CVars
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -32,6 +33,109 @@ local _G =_G
 ---------------------------------------------------------------------------------------------------
 local task_queue_ooc = {}
 local LSMUpdateTimer
+
+---------------------------------------------------------------------------------------------------
+-- Functions different depending on WoW version
+---------------------------------------------------------------------------------------------------
+
+-- Copied from ElvUI:
+local function CalculateSynchedNameplateSize()
+  local db = Addon.db.profile.settings
+
+  local width = db.frame.width
+  local height = db.frame.height
+  if db.frame.SyncWithHealthbar then
+    -- this wont taint like NamePlateDriverFrame:SetBaseNamePlateSize
+
+    -- The default size of Threat Plates healthbars is based on large nameplates with these defaults:
+    --   NamePlateVerticalScale = 1.7
+    --   NamePlateVerticalScale = 1.4
+    local zeroBasedScale = 0.7  -- tonumber(GetCVar("NamePlateVerticalScale")) - 1.0
+    local horizontalScale = 1.4 -- tonumber(GetCVar("NamePlateVerticalScale"))
+
+    width = (db.healthbar.width - 10) * horizontalScale
+    height = (db.healthbar.height + 35) * Lerp(1.0, 1.25, zeroBasedScale)
+
+    db.frame.width = width
+    db.frame.height = height
+  end
+
+  return width, height
+end
+
+if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC then
+  Addon.SetBaseNamePlateSize = function(self)
+    local db = self.db.profile
+
+    -- Classic has the same nameplate size for friendly and enemy units, so either set both or non at all (= set it to default values)
+    if not db.ShowFriendlyBlizzardNameplates and not db.ShowEnemyBlizzardNameplates and not self.IsInPvEInstance then
+      local width, height = CalculateSynchedNameplateSize()
+      C_NamePlate.SetNamePlateFriendlySize(width, height)
+      C_NamePlate.SetNamePlateEnemySize(width, height)
+    else
+      -- Smaller nameplates are not available in Classic
+      C_NamePlate.SetNamePlateFriendlySize(128, 32)
+      C_NamePlate.SetNamePlateEnemySize(128, 32)
+    end
+  end
+else
+  local function SetNameplatesToDefaultSize()
+    if NamePlateDriverFrame:IsUsingLargerNamePlateStyle() then
+      C_NamePlate.SetNamePlateFriendlySize(154, 64)
+    else
+      C_NamePlate.SetNamePlateFriendlySize(110, 45)
+    end
+  end
+
+  Addon.SetBaseNamePlateSize = function(self)
+    local db = self.db.profile
+
+    local width, height
+    if CVars:GetAsBool("nameplateShowOnlyNames") then
+      -- The clickable area of friendly nameplates will be set to zero so that they don't interfere with enemy nameplates stacking (not in Classic or TBC Classic).
+      C_NamePlate.SetNamePlateFriendlySize(0.1, 0.1)    
+    elseif db.ShowFriendlyBlizzardNameplates or self.IsInPvEInstance then
+      SetNameplatesToDefaultSize()
+    else
+      width, height = CalculateSynchedNameplateSize()
+      C_NamePlate.SetNamePlateFriendlySize(width, height)
+    end
+    -- In dungeons or raids, friendly nameplates are always Blizzard nameplates.
+    -- if self.IsInPvEInstance then
+    --   if CVars:GetAsBool("nameplateShowOnlyNames") then
+    --     C_NamePlate.SetNamePlateFriendlySize(0.1, 0.1)
+    --   elseif NamePlateDriverFrame:IsUsingLargerNamePlateStyle() then
+    --     C_NamePlate.SetNamePlateFriendlySize(154, 64)
+    --   else
+    --     C_NamePlate.SetNamePlateFriendlySize(110, 45)
+    --   end
+    -- elseif db.ShowFriendlyBlizzardNameplates then
+    --   if NamePlateDriverFrame:IsUsingLargerNamePlateStyle() then
+    --     C_NamePlate.SetNamePlateFriendlySize(154, 64)
+    --   else
+    --     C_NamePlate.SetNamePlateFriendlySize(110, 45)
+    --   end
+    -- else
+    --   width, height = CalculateSynchedNameplateSize()
+    --   C_NamePlate.SetNamePlateFriendlySize(width, height)
+    -- end
+
+    if db.ShowEnemyBlizzardNameplates then
+      SetNameplatesToDefaultSize()
+    else
+      if not width then
+        width, height = CalculateSynchedNameplateSize()
+      end
+      C_NamePlate.SetNamePlateEnemySize(width, height)
+    end
+  end
+  
+  Addon:ConfigClickableArea(false)
+
+  -- For personal nameplate:
+  --local clampedZeroBasedScale = Saturate(zeroBasedScale)
+  --C_NamePlate_SetNamePlateSelfSize(baseWidth * horizontalScale * Lerp(1.1, 1.0, clampedZeroBasedScale), baseHeight)
+end
 
 ---------------------------------------------------------------------------------------------------
 -- Global configs and funtions
@@ -256,71 +360,6 @@ end
 ---------------------------------------------------------------------------------------------------
 -- AceAddon functions: do init tasks here, like loading the Saved Variables, or setting up slash commands.
 ---------------------------------------------------------------------------------------------------
--- Copied from ElvUI:
-function Addon:SetBaseNamePlateSize()
-  local db = Addon.db.profile.settings
-
-  local width = db.frame.width
-  local height = db.frame.height
-  if db.frame.SyncWithHealthbar then
-    -- this wont taint like NamePlateDriverFrame:SetBaseNamePlateSize
-
-    -- The default size of Threat Plates healthbars is based on large nameplates with these defaults:
-    --   NamePlateVerticalScale = 1.7
-    --   NamePlateVerticalScale = 1.4
-    local zeroBasedScale = 0.7  -- tonumber(GetCVar("NamePlateVerticalScale")) - 1.0
-    local horizontalScale = 1.4 -- tonumber(GetCVar("NamePlateVerticalScale"))
-
-    width = (db.healthbar.width - 10) * horizontalScale
-    height = (db.healthbar.height + 35) * Lerp(1.0, 1.25, zeroBasedScale)
-
-    db.frame.width = width
-    db.frame.height = height
-  end
-
-  -- Set to default values if Blizzard nameplates are enabled or in an instance (for friendly players)
-  local isInstance, instanceType = IsInInstance()
-  isInstance = isInstance and (instanceType == "party" or instanceType == "raid")
-
-  db = Addon.db.profile
-  if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC then
-    -- Classic has the same nameplate size for friendly and enemy units, so either set both or non at all (= set it to default values)
-    if not db.ShowFriendlyBlizzardNameplates and not db.ShowEnemyBlizzardNameplates and not isInstance then
-      C_NamePlate.SetNamePlateFriendlySize(width, height)
-      C_NamePlate.SetNamePlateEnemySize(width, height)
-    else
-      -- Smaller nameplates are not available in Classic
-      C_NamePlate.SetNamePlateFriendlySize(128, 32)
-      C_NamePlate.SetNamePlateEnemySize(128, 32)
-    end
-  else
-    if db.ShowFriendlyBlizzardNameplates or isInstance then
-      if NamePlateDriverFrame:IsUsingLargerNamePlateStyle() then
-        C_NamePlate.SetNamePlateFriendlySize(154, 64)
-      else
-        C_NamePlate.SetNamePlateFriendlySize(110, 45)
-      end
-    else
-      C_NamePlate.SetNamePlateFriendlySize(width, height)
-    end
-
-    if db.ShowEnemyBlizzardNameplates then
-      if NamePlateDriverFrame:IsUsingLargerNamePlateStyle() then
-        C_NamePlate.SetNamePlateEnemySize(154, 64)
-      else
-        C_NamePlate.SetNamePlateEnemySize(110, 45)
-      end
-    else
-      C_NamePlate.SetNamePlateEnemySize(width, height)
-    end
-  end
-
-  Addon:ConfigClickableArea(false)
-
-  -- For personal nameplate:
-  --local clampedZeroBasedScale = Saturate(zeroBasedScale)
-  --C_NamePlate_SetNamePlateSelfSize(baseWidth * horizontalScale * Lerp(1.1, 1.0, clampedZeroBasedScale), baseHeight)
-end
 
 -- The OnInitialize() method of your addon object is called by AceAddon when the addon is first loaded
 -- by the game client. It's a good time to do things like restore saved settings (see the info on
@@ -384,7 +423,7 @@ function TidyPlatesThreat:OnEnable()
   Addon:CheckForIncompatibleAddons()
 
   if not (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC) then
-    Addon.CVars:OverwriteBoolProtected("nameplateResourceOnTarget", Addon.db.profile.PersonalNameplate.ShowResourceOnTarget)
+    CVars:OverwriteBoolProtected("nameplateResourceOnTarget", Addon.db.profile.PersonalNameplate.ShowResourceOnTarget)
   end
 
   Addon.LoadOnDemandLibraries()
@@ -404,7 +443,7 @@ function TidyPlatesThreat:OnDisable()
   DisableEvents()
 
   -- Reset all CVars to its initial values
-  -- Addon.CVars:RestoreAllFromProfile()
+  -- CVars:RestoreAllFromProfile()
 end
 
 function Addon:CallbackWhenOoC(func, msg)
@@ -488,9 +527,9 @@ function TidyPlatesThreat:PLAYER_ENTERING_WORLD()
   local db = Addon.db.profile.questWidget
   if not (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC) then
     if db.ON or db.ShowInHeadlineView then
-      Addon.CVars:Set("showQuestTrackingTooltips", 1)
+      CVars:Set("showQuestTrackingTooltips", 1)
     else
-      Addon.CVars:RestoreFromProfile("showQuestTrackingTooltips")
+      CVars:RestoreFromProfile("showQuestTrackingTooltips")
     end
   end
 
@@ -501,11 +540,37 @@ function TidyPlatesThreat:PLAYER_ENTERING_WORLD()
   Addon.IsInPvEInstance = isInstance and (instance_type == "party" or instance_type == "raid")
   Addon.IsInPvPInstance = isInstance and (instance_type == "arena" or instance_type == "pvp")
 
-  if Addon.IsInPvEInstance and db.HideFriendlyUnitsInInstances then
-    Addon.CVars:Set("nameplateShowFriends", 0)
-  else
-    -- reset to previous setting
-    Addon.CVars:RestoreFromProfile("nameplateShowFriends")
+  if db.ShowFriendlyUnitsInInstances then
+    if Addon.IsInPvEInstance then
+      CVars:Set("nameplateShowFriends", 1)
+    else
+      -- Restore the value from before entering the instance
+      CVars:RestoreFromProfile("nameplateShowFriends")
+    end
+  elseif db.HideFriendlyUnitsInInstances then
+    if Addon.IsInPvEInstance then  
+      CVars:Set("nameplateShowFriends", 0)
+    else
+      -- Restore the value from before entering the instance
+      CVars:RestoreFromProfile("nameplateShowFriends")
+    end
+  end
+
+  if Addon.db.profile.BlizzardSettings.Names.ShowPlayersInInstances then
+    if Addon.IsInPvEInstance then  
+      CVars:Set("UnitNameFriendlyPlayerName", 1)
+      -- CVars:Set("UnitNameFriendlyPetName", 1)
+      -- CVars:Set("UnitNameFriendlyGuardianName", 1)
+      CVars:Set("UnitNameFriendlyTotemName", 1)
+      -- CVars:Set("UnitNameFriendlyMinionName", 1)
+    else
+      -- Restore the value from before entering the instance
+      CVars:RestoreFromProfile("UnitNameFriendlyPlayerName")
+      -- CVars:RestoreFromProfile("UnitNameFriendlyPetName")
+      -- CVars:RestoreFromProfile("UnitNameFriendlyGuardianName")
+      CVars:RestoreFromProfile("UnitNameFriendlyTotemName")
+      -- CVars:RestoreFromProfile("UnitNameFriendlyMinionName")
+    end  
   end
 
   -- Update custom styles for the current instance
@@ -514,6 +579,7 @@ function TidyPlatesThreat:PLAYER_ENTERING_WORLD()
   -- Adjust clickable area if we are in an instance. Otherwise the scaling of friendly nameplates' healthbars will
   -- be bugged
   Addon:SetBaseNamePlateSize()
+  Addon.Font:SetNamesFonts()
 end
 
 --function TidyPlatesThreat:PLAYER_LEAVING_WORLD()

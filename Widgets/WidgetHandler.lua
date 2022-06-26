@@ -11,8 +11,15 @@ local ADDON_NAME, Addon = ...
 local pairs, next = pairs, next
 
 -- WoW APIs
+local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
+local UnitIsUnit = UnitIsUnit
 
 -- ThreatPlates APIs
+
+local _G = _G
+-- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
+-- List them here for Mikk's FindGlobals script
+-- GLOBALS: CreateFrame
 
 local WidgetHandler = {
   Widgets = {},
@@ -56,7 +63,7 @@ local function UnitEventHandler(self, event, ...)
   end
 end
 
-WidgetHandler.EventHandlerFrame = CreateFrame("Frame", nil, WorldFrame)
+WidgetHandler.EventHandlerFrame = _G.CreateFrame("Frame", nil, WorldFrame)
 WidgetHandler.EventHandlerFrame:SetScript("OnEvent", EventHandler)
 
 local function RegisterEvent(widget, event, func)
@@ -70,7 +77,7 @@ end
 
 local function RegisterUnitEvent(widget, event, unitid, func)
   if not widget.EventHandlerFrame then
-    widget.EventHandlerFrame = CreateFrame("Frame", nil, WorldFrame)
+    widget.EventHandlerFrame = _G.CreateFrame("Frame", nil, WorldFrame)
     widget.EventHandlerFrame.Widget = widget
     widget.EventHandlerFrame:SetScript("OnEvent", UnitEventHandler)
   end
@@ -196,6 +203,32 @@ function WidgetHandler:NewWidget(widget_name)
     OnEnable = function(self) end, -- do nothing
     OnDisable = function(self)
       self:UnregisterAllEvents()
+    end,
+    GetThreatPlateForUnit = function(self, unitid)
+      if not unitid or unitid == "player" or UnitIsUnit("player", unitid) then return end
+
+      local plate = GetNamePlateForUnit(unitid)
+      if plate and plate.TPFrame.Active then
+        return plate.TPFrame
+      end
+    end,
+    GetWidgetFrameForUnit = function(self, unitid)
+      if not unitid or unitid == "player" or UnitIsUnit("player", unitid) then return end
+
+      local plate = GetNamePlateForUnit(unitid)
+      if plate and plate.TPFrame.Active then
+        local widget_frame = plate.TPFrame.widgets[self.Name]
+        if widget_frame.Active then
+          return widget_frame
+        end
+      end
+      -- local tp_frame = self:GetThreatPlateForUnit(unitid)
+      -- if tp_frame then
+      --   local widget_frame = tp_frame.widgets[self.Name]
+      --   if widget_frame.Active then
+      --     return widget_frame
+      --   end
+      -- end
     end,
   }
 
