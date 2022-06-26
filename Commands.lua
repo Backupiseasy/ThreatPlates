@@ -119,9 +119,7 @@ local function ChatCommandDebug(cmd_list)
 	elseif command == "cache" then
 		Addon.Debug.PrintCaches()
 	elseif command == "unit" then
-		local plate = C_NamePlate.GetNamePlateForUnit("target")
-		if not plate then return end
-		Addon.Debug.PrintUnit(plate.TPFrame.unit, true)
+		Addon.Debug.PrintUnit("target")
 		--elseif command == "migrate" then
 		--	Addon.TestMigration()
 		--	Addon.MigrateDatabase(TP.Meta("version"))
