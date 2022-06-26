@@ -9,6 +9,7 @@
 * Added Venthry Covenant Ability Agent of Chaos to the Auras widget as CC aura [Issue #548].
 * Fixed a bug where Frostbite was not classified as CC aura [Issue #547].
 * Integrated new UNIT_AURA processing optimizations to improve unit aura processing in encounters where many nameplates are on screen at once [Comment #6114]. 
+* Upgrade integrated libraries (Ace3 r1259).
 
 ------------------------------------------------------
 10.3.8 (2022-06-01)
