@@ -1927,7 +1927,7 @@ function Addon:ForceUpdate()
     TidyPlatesCore:RegisterEvent("UNIT_TARGET")
   end
 
-  SettingsShowOnlyNames = GetCVarBool("nameplateShowOnlyNames") and Addon.db.profile.BlizzardSettings.Names.Enabled and not (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC)
+  SettingsShowOnlyNames = CVars:GetAsBool("nameplateShowOnlyNames") and Addon.db.profile.BlizzardSettings.Names.Enabled and not (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC)
   
   for plate, unitid in pairs(self.PlatesVisible) do
     -- If Blizzard default plates are enabled (which means that these nameplates are not active), we need
