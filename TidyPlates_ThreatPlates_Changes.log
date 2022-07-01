@@ -1,5 +1,5 @@
 ﻿------------------------------------------------------
-10.4.0 (2022-04-xx)
+10.4.0 (2022-07-01)
 ------------------------------------------------------
 * Added a feature to change the name font of Blizzard nameplates and hide the healthbar (to only show unit names), e.g., while in instances.
 * Added an option to show title and realm in a player's name [Comment #3952, #1995, #4164, #6140, TPC#496, Issue #312, #432].
@@ -9,6 +9,7 @@
 * Added Venthry Covenant Ability Agent of Chaos to the Auras widget as CC aura [Issue #548].
 * Fixed a bug where Frostbite was not classified as CC aura [Issue #547].
 * Integrated new UNIT_AURA processing optimizations to improve unit aura processing in encounters where many nameplates are on screen at once [Comment #6114]. 
+* Upgrade integrated libraries (Ace3 r1259).
 
 ------------------------------------------------------
 10.3.8 (2022-06-01)

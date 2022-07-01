@@ -1,9 +1,9 @@
-name: Upload phrase keys for translation to CurseForge
+name: Upload phrase keys for translation to CurseForge with every beta release
 
 on:
-   push:
-     branches:
-       - master
+  push:
+    tags:
+      - "**-beta**"
 
 jobs:
   build:

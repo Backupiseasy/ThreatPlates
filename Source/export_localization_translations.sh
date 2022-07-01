@@ -5,8 +5,8 @@
 cf_token=
 
 # Load secrets
-if [ -f ".env" ]; then
-	. ".env"
+if [ -f ".release/.env" ]; then
+	. ".release/.env"
 fi
 
 [ -z "$cf_token" ] && cf_token=$CF_API_KEY

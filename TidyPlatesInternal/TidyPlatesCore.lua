@@ -25,7 +25,7 @@ local GetRaidTargetIndex = GetRaidTargetIndex
 local GetTime = GetTime
 local UnitChannelInfo  = UnitChannelInfo
 local UnitPlayerControlled = UnitPlayerControlled
-local GetCVar, Lerp, CombatLogGetCurrentEventInfo = GetCVar, Lerp, CombatLogGetCurrentEventInfo
+local GetCVarBool, CombatLogGetCurrentEventInfo = C_CVar.GetCVarBool, CombatLogGetCurrentEventInfo
 local GetPlayerInfoByGUID, RAID_CLASS_COLORS = GetPlayerInfoByGUID, RAID_CLASS_COLORS
 local UnitNameplateShowsWidgetsOnly = UnitNameplateShowsWidgetsOnly
 
@@ -138,6 +138,7 @@ local SettingsEnabledFading
 local SettingsOccludedAlpha, SettingsEnabledOccludedAlpha
 local SettingsShowEnemyBlizzardNameplates, SettingsShowFriendlyBlizzardNameplates, SettingsHideBuffsOnPersonalNameplate
 local SettingsTargetUnitHide, SettingsShowOnlyForTarget
+local SettingsShowOnlyNames
 
 -- External references to internal data
 Addon.PlatesCreated = PlatesCreated
@@ -1000,6 +1001,11 @@ do
       return
     end
 
+    if SettingsShowOnlyNames then
+      UnitFrame.ClassificationFrame:SetAlpha(0)
+      --UnitFrame.ClassificationFrame.classificationIndicator:SetAlpha(0)
+    end
+
     -- Hide ThreatPlates nameplates if Blizzard nameplates should be shown for friendly units
     if UnitReaction(unitid, "player") > 4 then
       UnitFrame:SetShown(SettingsShowFriendlyBlizzardNameplates)
@@ -1020,7 +1026,7 @@ do
       if not tp_frame.Active or UnitIsUnit(plate.UnitFrame.unit or "", "player") then
         return
       end
-
+     
       tp_frame:SetFrameLevel(plate:GetFrameLevel() * 10)
 
 --    for i = 1, #PlateOnUpdateQueue do
@@ -1921,6 +1927,8 @@ function Addon:ForceUpdate()
     TidyPlatesCore:RegisterEvent("UNIT_TARGET")
   end
 
+  SettingsShowOnlyNames = CVars:GetAsBool("nameplateShowOnlyNames") and Addon.db.profile.BlizzardSettings.Names.Enabled and not (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC)
+  
   for plate, unitid in pairs(self.PlatesVisible) do
     -- If Blizzard default plates are enabled (which means that these nameplates are not active), we need
     -- to check if they are enabled, so that Active is set correctly and plates are updated shown correctly.
