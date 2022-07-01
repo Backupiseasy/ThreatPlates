@@ -1,5 +1,5 @@
 ﻿------------------------------------------------------
-10.4.0 (2022-04-xx)
+10.4.0 (2022-07-01)
 ------------------------------------------------------
 * Added a feature to change the name font of Blizzard nameplates and hide the healthbar (to only show unit names), e.g., while in instances.
 * Added an option to show title and realm in a player's name [Comment #3952, #1995, #4164, #6140, TPC#496, Issue #312, #432].
