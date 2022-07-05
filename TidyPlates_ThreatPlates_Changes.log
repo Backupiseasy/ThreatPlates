@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+10.4.1 (2022-07-01)
+------------------------------------------------------
+* Changed default for "Players in Instances" (under Blizzard Settings - Names) to disabled so that player names no longer are shown automatically in instances [Comment #6271].
+
+------------------------------------------------------
 10.4.0 (2022-07-01)
 ------------------------------------------------------
 * Added a feature to change the name font of Blizzard nameplates and hide the healthbar (to only show unit names), e.g., while in instances.
