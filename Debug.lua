@@ -78,15 +78,13 @@ function Debug:PrintTable(data)
   end
 end
 
-function Debug:PrintUnit(unit, full_info)
-  if not self.Enabled then return end
+Addon.Debug.PrintUnit = function(unitid)
+	local plate = C_NamePlate.GetNamePlateForUnit(unitid)
+	if not plate then return end
 
-  local tp_frame = Addon:GetThreatPlateForTarget()
-  if not tp_frame then return end
-
-  local plate = tp_frame.Parent
-
-	Addon.Logging.Debug("Unit:", unit.name)
+	local tp_frame = plate.TPFrame
+	local unit = tp_frame.unit
+	Addon.Logging.Debug("Unit:", unit.name, "=>", unitid)
 	Addon.Logging.Debug("--- IDs -------------------------------------------------------")
 	Addon.Logging.Debug("      ID: =", unit.unitid)
 	Addon.Logging.Debug("      NPC ID: =", unit.NPCID)
@@ -95,11 +93,8 @@ function Debug:PrintUnit(unit, full_info)
 	Addon.Logging.Debug("      TPFrame =", plate.TPFrame:IsShown())
 	Addon.Logging.Debug("      Active =", tp_frame.Active)
 	Addon.Logging.Debug("---------------------------------------------------------------")
-  for key, val in pairs(unit) do
-    Addon.Logging.Debug(key .. ":", val)
-  end
 
-  if full_info and unit.unitid then
+  if tp_frame and unit and unit.unitid then
 		if not Addon.IS_TBC_CLASSIC and not Addon.IS_CLASSIC then
 			Addon.Logging.Debug("  UnitNameplateShowsWidgetsOnly = ", UnitNameplateShowsWidgetsOnly(unit.unitid))
 		end
@@ -123,8 +118,12 @@ function Debug:PrintUnit(unit, full_info)
 		Addon.Logging.Debug("  -- PvP ---------------------------------")
 		Addon.Logging.Debug("    PvP On =", UnitIsPVP(unit.unitid))
 		Addon.Logging.Debug("    PvP Sanctuary =", UnitIsPVPSanctuary(unit.unitid))
+
+    for key, val in pairs(unit) do
+      Addon.Logging.Debug(key .. ":", val)
+    end
   else
-    Addon.Logging.Debug("  <no unit id>")
+    Addon.Logging.Debug("  <No TPFrame>")
   end
 
   Addon.Logging.Debug("--------------------------------------------------------------")

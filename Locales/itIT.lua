@@ -237,6 +237,8 @@ L["Appearance"] = "Appearance"
 --[[Translation missing --]]
 L["Apply these custom settings to a nameplate when a particular spell is cast by the unit. You can add multiple entries separated by a semicolon"] = "Apply these custom settings to a nameplate when a particular spell is cast by the unit. You can add multiple entries separated by a semicolon"
 --[[Translation missing --]]
+L["Apply these custom settings to the nameplate of a unit with a particular name or NPC ID. You can add multiple entries separated by a semicolon. You can use use * as wildcard character in names."] = "Apply these custom settings to the nameplate of a unit with a particular name or NPC ID. You can add multiple entries separated by a semicolon. You can use use * as wildcard character in names."
+--[[Translation missing --]]
 L["Apply these custom settings to the nameplate of a unit with a particular name. You can add multiple entries separated by a semicolon. You can use use * as wildcard character."] = "Apply these custom settings to the nameplate of a unit with a particular name. You can add multiple entries separated by a semicolon. You can use use * as wildcard character."
 --[[Translation missing --]]
 L["Apply these custom settings to the nameplate when a particular aura is present on the unit. You can add multiple entries separated by a semicolon."] = "Apply these custom settings to the nameplate when a particular aura is present on the unit. You can add multiple entries separated by a semicolon."
@@ -353,6 +355,8 @@ L["Bottom-to-top"] = "Bottom-to-top"
 --[[Translation missing --]]
 L["Boundaries"] = "Boundaries"
 --[[Translation missing --]]
+L["Brackets"] = "Brackets"
+--[[Translation missing --]]
 L["Bubble"] = "Bubble"
 --[[Translation missing --]]
 L["Buff Color"] = "Buff Color"
@@ -420,6 +424,8 @@ L["Clamp Target Nameplate to Screen"] = "Clamp Target Nameplate to Screen"
 L["Clamps the target's nameplate to the edges of the screen, even if the target is off-screen."] = "Clamps the target's nameplate to the edges of the screen, even if the target is off-screen."
 --[[Translation missing --]]
 L["Class"] = "Class"
+--[[Translation missing --]]
+L["Class Color"] = "Class Color"
 --[[Translation missing --]]
 L["Class Color for Players"] = "Class Color for Players"
 --[[Translation missing --]]
@@ -511,6 +517,8 @@ L["Debuff Color"] = "Debuff Color"
 --[[Translation missing --]]
 L["Debuffs"] = "Debuffs"
 --[[Translation missing --]]
+L["Debuffs on Friendly"] = "Debuffs on Friendly"
+--[[Translation missing --]]
 L["Default"] = "Default"
 --[[Translation missing --]]
 L["Default Settings (All Profiles)"] = "Default Settings (All Profiles)"
@@ -578,6 +586,8 @@ L["Disease"] = "Disease"
 L["Dispel Type"] = "Dispel Type"
 --[[Translation missing --]]
 L["Dispellable"] = "Dispellable"
+--[[Translation missing --]]
+L["Display"] = "Display"
 --[[Translation missing --]]
 L["Display absorbs amount text."] = "Display absorbs amount text."
 --[[Translation missing --]]
@@ -736,6 +746,8 @@ L["Filter by Spell"] = "Filter by Spell"
 L["Filtered Auras"] = "Filtered Auras"
 --[[Translation missing --]]
 L["Find a suitable icon based on the current trigger. For Name trigger, the preview does not work. For multi-value triggers, the preview always is the icon of the first trigger entered."] = "Find a suitable icon based on the current trigger. For Name trigger, the preview does not work. For multi-value triggers, the preview always is the icon of the first trigger entered."
+--[[Translation missing --]]
+L["Find a suitable icon based on the current trigger. For Unit triggers, the preview does not work. For multi-value triggers, the preview always is the icon of the first trigger entered."] = "Find a suitable icon based on the current trigger. For Unit triggers, the preview does not work. For multi-value triggers, the preview always is the icon of the first trigger entered."
 --[[Translation missing --]]
 L["Five"] = "Five"
 --[[Translation missing --]]
@@ -941,6 +953,8 @@ L["Ignore UI Scale"] = "Ignore UI Scale"
 --[[Translation missing --]]
 L["Illegal character used in Name trigger at position: "] = "Illegal character used in Name trigger at position: "
 --[[Translation missing --]]
+L["Illegal character used in Unit trigger at position: "] = "Illegal character used in Unit trigger at position: "
+--[[Translation missing --]]
 L["Immortal Guardian"] = "Immortal Guardian"
 --[[Translation missing --]]
 L["Import a profile from another player from an import string."] = "Import a profile from another player from an import string."
@@ -1091,6 +1105,8 @@ L["Nameplate Mode for Friendly Units in Combat"] = "Nameplate Mode for Friendly 
 --[[Translation missing --]]
 L["Nameplate Style"] = "Nameplate Style"
 --[[Translation missing --]]
+L["Nameplates"] = "Nameplates"
+--[[Translation missing --]]
 L["Names"] = "Names"
 --[[Translation missing --]]
 L["Neutral"] = "Neutral"
@@ -1177,6 +1193,8 @@ L["Only in Instances"] = "Only in Instances"
 --[[Translation missing --]]
 L["Only Mine"] = "Only Mine"
 --[[Translation missing --]]
+L["Only Names"] = "Only Names"
+--[[Translation missing --]]
 L["Onyxian Whelp"] = "Onyxian Whelp"
 --[[Translation missing --]]
 L["Open Blizzard Settings"] = "Open Blizzard Settings"
@@ -1225,6 +1243,8 @@ L["Placement"] = "Placement"
 --[[Translation missing --]]
 L["Players"] = "Players"
 --[[Translation missing --]]
+L["Players in Instances"] = "Players in Instances"
+--[[Translation missing --]]
 L["Poison"] = "Poison"
 --[[Translation missing --]]
 L["Position"] = "Position"
@@ -1241,6 +1261,8 @@ L["Preview Rare Elite"] = "Preview Rare Elite"
 --[[Translation missing --]]
 L["PvP Off"] = "PvP Off"
 --[[Translation missing --]]
+L["PvP Rank"] = "PvP Rank"
+--[[Translation missing --]]
 L["Quest"] = "Quest"
 --[[Translation missing --]]
 L["Quest Progress"] = "Quest Progress"
@@ -1256,6 +1278,8 @@ L["Rares & Elites"] = "Rares & Elites"
 L["Raw Percentage"] = "Raw Percentage"
 --[[Translation missing --]]
 L["Reaction"] = "Reaction"
+--[[Translation missing --]]
+L["Realm"] = "Realm"
 --[[Translation missing --]]
 L["Reanimated Adherent"] = "Reanimated Adherent"
 --[[Translation missing --]]
@@ -1417,7 +1441,11 @@ L["Show Focus"] = "Show Focus"
 --[[Translation missing --]]
 L["Show For"] = "Show For"
 --[[Translation missing --]]
+L["Show Friendly Nameplates"] = "Show Friendly Nameplates"
+--[[Translation missing --]]
 L["Show Friendly Nameplates (SHIFT-V)"] = "Show Friendly Nameplates (SHIFT-V)"
+--[[Translation missing --]]
+L["Show friendly players' and totems' names in instances."] = "Show friendly players' and totems' names in instances."
 --[[Translation missing --]]
 L["Show Friendly Units"] = "Show Friendly Units"
 --[[Translation missing --]]
@@ -1445,6 +1473,10 @@ L["Show Neutral Units"] = "Show Neutral Units"
 --[[Translation missing --]]
 L["Show Number"] = "Show Number"
 --[[Translation missing --]]
+L["Show only unit names and hide healthbars (requires /reload). Note that the clickable area of friendly nameplates will also be set to zero so that they don't interfere with enemy nameplates stacking (not in Classic or TBC Classic)."] = "Show only unit names and hide healthbars (requires /reload). Note that the clickable area of friendly nameplates will also be set to zero so that they don't interfere with enemy nameplates stacking (not in Classic or TBC Classic)."
+--[[Translation missing --]]
+L["Show only unit names and hide nameplate bars (requires /reload). Note that the clickable area of friendly nameplates will also be set to zero so that they don't interfere with enemy nameplates stacking (not in Classic or TBC Classic)."] = "Show only unit names and hide nameplate bars (requires /reload). Note that the clickable area of friendly nameplates will also be set to zero so that they don't interfere with enemy nameplates stacking (not in Classic or TBC Classic)."
+--[[Translation missing --]]
 L["Show Orb"] = "Show Orb"
 --[[Translation missing --]]
 L["Show shadow with text."] = "Show shadow with text."
@@ -1456,6 +1488,8 @@ L["Show stack count on auras."] = "Show stack count on auras."
 L["Show Target"] = "Show Target"
 --[[Translation missing --]]
 L["Show the amount you need to loot or kill"] = "Show the amount you need to loot or kill"
+--[[Translation missing --]]
+L["Show the Blizzard default nameplates for friendly units in instances."] = "Show the Blizzard default nameplates for friendly units in instances."
 --[[Translation missing --]]
 L["Show the mouseover highlight on all units."] = "Show the mouseover highlight on all units."
 --[[Translation missing --]]
@@ -1623,6 +1657,10 @@ L["Target-based Scale"] = "Target-based Scale"
 --[[Translation missing --]]
 L["Target-based Transparency"] = "Target-based Transparency"
 --[[Translation missing --]]
+L["Target's Name"] = "Target's Name"
+--[[Translation missing --]]
+L["Target's NPC ID"] = "Target's NPC ID"
+--[[Translation missing --]]
 L["Text Boundaries"] = "Text Boundaries"
 --[[Translation missing --]]
 L["Text Height"] = "Text Height"
@@ -1636,6 +1674,8 @@ L["Texture"] = "Texture"
 L["Textures"] = "Textures"
 --[[Translation missing --]]
 L["The (friendly or hostile) player is not flagged for PvP or the player is in a sanctuary."] = "The (friendly or hostile) player is not flagged for PvP or the player is in a sanctuary."
+--[[Translation missing --]]
+L["The font for unit names can only be changed if nameplates and names are be enabled for these units. Names can be enabled in \"Game Menu - Interface - Names\"."] = "The font for unit names can only be changed if nameplates and names are be enabled for these units. Names can be enabled in \"Game Menu - Interface - Names\"."
 --[[Translation missing --]]
 L["The import string contains a profile from an different Threat Plates version. The profile will still be imported (and migrated as far as possible), but some settings from the imported profile might be lost."] = "The import string contains a profile from an different Threat Plates version. The profile will still be imported (and migrated as far as possible), but some settings from the imported profile might be lost."
 --[[Translation missing --]]
@@ -1801,6 +1841,8 @@ L["Time Left"] = "Time Left"
 --[[Translation missing --]]
 L["Time Text Offset"] = "Time Text Offset"
 --[[Translation missing --]]
+L["Title"] = "Title"
+--[[Translation missing --]]
 L["Toggle"] = "Toggle"
 --[[Translation missing --]]
 L["Toggle Enemy Headline View"] = "Toggle Enemy Headline View"
@@ -1861,9 +1903,15 @@ L["Unfriendly"] = "Unfriendly"
 --[[Translation missing --]]
 L["Uniform Color"] = "Uniform Color"
 --[[Translation missing --]]
+L["Unit"] = "Unit"
+--[[Translation missing --]]
+L["Unit (Names or NPC IDs)"] = "Unit (Names or NPC IDs)"
+--[[Translation missing --]]
 L["Unit Base Scale"] = "Unit Base Scale"
 --[[Translation missing --]]
 L["Unit Base Transparency"] = "Unit Base Transparency"
+--[[Translation missing --]]
+L["Unit: "] = "Unit: "
 --[[Translation missing --]]
 L["Unknown option: "] = "Unknown option: "
 --[[Translation missing --]]

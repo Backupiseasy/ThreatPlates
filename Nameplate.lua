@@ -64,6 +64,7 @@ local PlatesByGUID = Addon.PlatesByGUID
 -- Cached configuration settings (for performance reasons)
 ---------------------------------------------------------------------------------------------------
 local SettingsShowEnemyBlizzardNameplates, SettingsShowFriendlyBlizzardNameplates, SettingsHideBuffsOnPersonalNameplate
+local SettingsShowOnlyNames
 local ShowCastBars
 
 ---------------------------------------------------------------------------------------------------
@@ -635,6 +636,7 @@ function Addon:UpdateSettings()
   SettingsShowFriendlyBlizzardNameplates = db.ShowFriendlyBlizzardNameplates
   SettingsShowEnemyBlizzardNameplates = db.ShowEnemyBlizzardNameplates
   SettingsHideBuffsOnPersonalNameplate = db.PersonalNameplate.HideBuffs
+  SettingsShowOnlyNames = CVars:GetAsBool("nameplateShowOnlyNames") and Addon.db.profile.BlizzardSettings.Names.Enabled and not (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC)
 
   if db.settings.castnostop.ShowInterruptSource then
     RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
@@ -643,7 +645,7 @@ function Addon:UpdateSettings()
   end
 
   ShowCastBars = db.settings.castbar.show or db.settings.castbar.ShowInHeadlineView
-
+  
   if not (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC) then
     self:ACTIVE_TALENT_GROUP_CHANGED() -- to update the player's role
   end
@@ -714,6 +716,11 @@ local function FrameOnShow(UnitFrame)
     end
     -- Just an else with the part below should work also
     return
+  end
+
+  if SettingsShowOnlyNames then
+    UnitFrame.ClassificationFrame:SetAlpha(0)
+    --UnitFrame.ClassificationFrame.classificationIndicator:SetAlpha(0)
   end
 
   -- Hide ThreatPlates nameplates if Blizzard nameplates should be shown for friendly units

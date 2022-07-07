@@ -122,7 +122,7 @@ function CVars:GetAsNumber(cvar)
   local numeric_value = tonumber(value)
 
   if not numeric_value then
-    Addon.Logging.Warning(string_format(L["CVar \"%s\" has an invalid value: \"%s\". The value must be a number. Using the default value for this CVar instead."], cvar, value))
+    Addon.Logging.Warning(string_format(L["CVar %s has an invalid value: %s. The value must be a number. Using the default value for this CVar instead."], cvar, value))
     numeric_value = tonumber(GetCVarDefault(cvar))
   end
 

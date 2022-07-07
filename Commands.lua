@@ -130,9 +130,7 @@ local function ChatCommandDebug(cmd_list)
 	elseif command == "social" then
 		Addon.PrintFriendlist()
 	elseif command == "unit" then
-		local tp_frame = Addon:GetThreatPlateForTarget()
-		if not tp_frame then return end
-		Addon.Debug:PrintUnit(tp_frame.unit, true)
+		Addon.Debug.PrintUnit("target")
 	elseif command == "migrate" then
 		Addon.MigrateDatabase(cmd_list[2])
 

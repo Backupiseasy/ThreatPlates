@@ -342,13 +342,14 @@ local CROWD_CONTROL_SPELLS_RETAIL = {
   [123586] = PC_SNARE,      -- Flying Serpent Kick
 
   ---------------------------------------------------------------------------------------------------
-  -- Racial Traits
+  -- Racial Traits and other specia sources
   ---------------------------------------------------------------------------------------------------
   [255723] = LOC_STUN,      -- Bull Rush (Highmountain Tauren)
   [20549] = LOC_STUN,       -- War Stomp (Tauren)
   [260369] = PC_SNARE,      -- Arcane Pulse (Nightborne)
   [107079] = LOC_STUN,      -- Quaking Palm (Pandarian)
-  [287712] = LOC_STUN       -- Haymaker (Kul Tiran Racial)
+  [287712] = LOC_STUN,       -- Haymaker (Kul Tiran Racial)
+  [331866] = LOC_DISORIENT,  -- Agent of Chaos (Venthyr Soulbind Ability)
 }
 
 local CROWD_CONTROL_SPELLS_TBC_CLASSIC = {
@@ -439,9 +440,7 @@ local CROWD_CONTROL_SPELLS_TBC_CLASSIC = {
     [6131] = PC_ROOT,                        -- Rank 3
     [10230] = PC_ROOT,                       -- Rank 4
     [27088] = PC_ROOT,                       -- Rank 5
-  [11071] = PC_ROOT,                       -- Frostbite
-    [12496] = PC_ROOT,                       -- Rank 2
-    [12497] = PC_ROOT,                       -- Rank 3
+  [12494] = PC_ROOT,                       -- Frostbite - Triggered by: Talent Frostbite (Rank 1, 2, 3)
   [12355] = LOC_STUN,                      -- Impact - Triggered By: Impact
   [28272] = LOC_POLYMORPH,                 -- Polymorph
   [118] = LOC_POLYMORPH,                   -- Polymorph
@@ -594,6 +593,7 @@ local CROWD_CONTROL_SPELLS_TBC_CLASSIC = {
   [18498] = LOC_SLEEP,                     -- Shield Bash - Silenced - Triggered By: Improved Shield Bash
   [12323] = PC_SNARE,                      -- Piercing Howl
 
+
   ---------------------------------------------------------------------------------------------------
   -- Racial Traits
   ---------------------------------------------------------------------------------------------------
@@ -684,9 +684,7 @@ local CROWD_CONTROL_SPELLS_CLASSIC = {
     [865] = PC_ROOT,                         -- Rank 2
     [6131] = PC_ROOT,                        -- Rank 3
     [10230] = PC_ROOT,                       -- Rank 4
-  [11071] = PC_ROOT,                       -- Frostbite
-    [12496] = PC_ROOT,                       -- Rank 2
-    [12497] = PC_ROOT,                       -- Rank 3
+  [12494] = PC_ROOT,                       -- Frostbite - Triggered by: Talent Frostbite (Rank 1, 2, 3)
   [12355] = LOC_STUN,                      -- Impact - Triggered By: Impact
   [28272] = LOC_POLYMORPH,                 -- Polymorph
   [118] = LOC_POLYMORPH,                   -- Polymorph
