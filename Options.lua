@@ -39,11 +39,6 @@ local _G =_G
 -- List them here for Mikk's FindGlobals script
 -- GLOBALS: GetSpellInfo, SetCVar
 
--- Import some libraries
-local LibAceGUI = LibStub("AceGUI-3.0")
-local LibAceSerializer = LibStub:GetLibrary("AceSerializer-3.0")
-local LibDeflate = LibStub:GetLibrary("LibDeflate")
-
 local UNIT_TYPES = {
   {
     Faction = "Friendly", Disabled = "nameplateShowFriends",
@@ -198,6 +193,7 @@ local WIDGET_INFO = {
 local ImportExportFrame = nil
 
 local function CreateImportExportFrame()
+  local LibAceGUI = LibStub("AceGUI-3.0")
   local frame = LibAceGUI:Create("Frame")
   frame:SetTitle(L["Import/Export Profile"])
   frame:SetCallback("OnEscapePressed", function()
@@ -265,6 +261,7 @@ local function ImportStringData(encoded)
     return
   end
 
+  local LibDeflate = LibStub:GetLibrary("LibDeflate")
   local decoded = LibDeflate:DecodeForPrint(encoded)
   if not decoded then
     return
@@ -275,7 +272,7 @@ local function ImportStringData(encoded)
     return
   end
 
-  local success, deserialized = LibAceSerializer:Deserialize(decompressed)
+  local success, deserialized = LibStub:GetLibrary("AceSerializer-3.0"):Deserialize(decompressed)
 
   if not success then
     return
@@ -287,7 +284,8 @@ end
 local function ShowExportFrame(modeArg)
   ImportExportFrame = ImportExportFrame or CreateImportExportFrame()
 
-  local serialized = LibAceSerializer:Serialize(modeArg)
+  local LibDeflate = LibStub:GetLibrary("LibDeflate")
+  local serialized = LibStub:GetLibrary("AceSerializer-3.0"):Serialize(modeArg)
   local compressed = LibDeflate:CompressDeflate(serialized)
 
   ImportExportFrame:OpenExport(LibDeflate:EncodeForPrint(compressed))
@@ -7890,6 +7888,8 @@ CreateCustomNameplateEntry = function(index)
             width = "half",
             func = function(info)
               if not Addon.ScriptEditor then
+                local LibAceGUI = LibStub("AceGUI-3.0")
+
                 local frame = LibAceGUI:Create("Window")
                 frame:SetTitle(L["Threat Plates Script Editor"])
                 frame:SetCallback("OnClose", function(widget) frame:_Cancel() end)

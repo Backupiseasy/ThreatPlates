@@ -325,23 +325,17 @@ function TidyPlatesThreat:OnInitialize()
   Addon.LibSharedMedia = LibStub("LibSharedMedia-3.0")
   Addon.LibCustomGlow = LibStub("LibCustomGlow-1.0")
 
-  if Addon.IS_CLASSIC then
-    Addon.LibClassicDurations = LibStub("LibClassicDurations")
-
-    Addon.LibClassicCasterino = LibStub("LibClassicCasterino-ThreatPlates")
-    -- Register callsbacks for spellcasting library
-    Addon.LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_START", Addon.UNIT_SPELLCAST_START)
-    Addon.LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_DELAYED", Addon.UnitSpellcastMidway) -- only for player
-    Addon.LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_STOP", Addon.UNIT_SPELLCAST_STOP)
-    Addon.LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_FAILED", Addon.UNIT_SPELLCAST_STOP)
-    Addon.LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_INTERRUPTED", Addon.UNIT_SPELLCAST_INTERRUPTED)
-    Addon.LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_CHANNEL_START", Addon.UNIT_SPELLCAST_CHANNEL_START)
-    Addon.LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_CHANNEL_UPDATE", Addon.UnitSpellcastMidway) -- only for player
-    Addon.LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_CHANNEL_STOP", Addon.UNIT_SPELLCAST_CHANNEL_STOP)
-  end
+  local LibAceGUI = LibStub("AceGUI-3.0")
+  local LibAceSerializer = LibStub:GetLibrary("AceSerializer-3.0")
+  local LibDeflate = LibStub:GetLibrary("LibDeflate")
 
   Addon.LoadLibraryMasque() -- Masque support
-  Addon.LoadLibraryDogTag()
+  Addon.LoadLibraryDogTag() -- LibDogTag support
+
+  if Addon.IS_CLASSIC then
+    Addon.LibClassicDurations = LibStub("LibClassicDurations")
+    Addon.LibClassicCasterino = LibStub("LibClassicCasterino-ThreatPlates")
+  end
 
   local RegisterCallback = db.RegisterCallback
   RegisterCallback(Addon, 'OnProfileChanged', 'ProfChange')
@@ -377,6 +371,18 @@ function TidyPlatesThreat:OnEnable()
   -- Register this callback after ReloadTheme as media will be updated there anyway
   Addon.LibSharedMedia.RegisterCallback(Addon, "LibSharedMedia_SetGlobal", "MediaUpdate" )
   Addon.LibSharedMedia.RegisterCallback(Addon, "LibSharedMedia_Registered", "MediaUpdate" )
+  
+  -- Register callsbacks for spellcasting library
+  if Addon.IS_CLASSIC then
+    Addon.LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_START", Addon.UNIT_SPELLCAST_START)
+    Addon.LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_DELAYED", Addon.UnitSpellcastMidway) -- only for player
+    Addon.LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_STOP", Addon.UNIT_SPELLCAST_STOP)
+    Addon.LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_FAILED", Addon.UNIT_SPELLCAST_STOP)
+    Addon.LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_INTERRUPTED", Addon.UNIT_SPELLCAST_INTERRUPTED)
+    Addon.LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_CHANNEL_START", Addon.UNIT_SPELLCAST_CHANNEL_START)
+    Addon.LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_CHANNEL_UPDATE", Addon.UnitSpellcastMidway) -- only for player
+    Addon.LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_CHANNEL_STOP", Addon.UNIT_SPELLCAST_CHANNEL_STOP)
+  end
 
   -- Get updates for CVar changes (e.g, for large nameplates, nameplage scale and alpha)
   CVars.RegisterCVarHook()
