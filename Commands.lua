@@ -74,9 +74,9 @@ SlashCmdList["TPTPOVERLAP"] = TPTPOVERLAP
 
 local function TPTPVERBOSE()
 	if Addon.db.profile.verbose then
-		Addon.Logging.Info(L["-->>Threat Plates verbose is now |cffff0000OFF!|r<<-- shhh!!"])
+		Addon.Logging.Print(L["-->>Threat Plates verbose is now |cffff0000OFF!|r<<-- shhh!!"])
 	else
-		Addon.Logging.Info(L["-->>Threat Plates verbose is now |cff00ff00ON!|r<<--"])
+		Addon.Logging.Print(L["-->>Threat Plates verbose is now |cff00ff00ON!|r<<--"])
 	end
 	Addon.db.profile.verbose = not Addon.db.profile.verbose
 end
@@ -283,7 +283,7 @@ local function ChatCommandDebug(cmd_list)
 
 		--print ("InCombat:", InCombatLockdown())
 	elseif command == "version" then
-		--		local unique_unit = TP.CopyTable(Addon.db.profile.uniqueSettings[1])
+		--		local unique_unit = Addon.CopyTable(Addon.db.profile.uniqueSettings[1])
 		--		unique_unit.UseAutomaticIcon = nil
 		--		print (Addon.CheckTableStructure(TP.DEFAULT_SETTINGS.profile.uniqueSettings["**"], unique_unit))
 		print ("10.2.11 < 10.3.0:", Addon.CurrentVersionIsOlderThan("10.2.11", "10.3.0"))
@@ -323,16 +323,7 @@ local function ChatCommandDebug(cmd_list)
 			end
 		end
 	elseif command == "test" then
-		for k, v in Addon:GetActiveThreatPlates() do
-			print(k, "=>", v, "/", v and v.Active or "nil")
-		end
-
-		-- local val, i
-    -- repeat
-    --   i, val = next(Addon.PlatesByUnit, i)
-		-- 	print (i, "=>", val, val.Active)
-    -- until not val
-
+		Addon.Logging.Info("CHANNEL", "1", "2")
 	elseif command == "role" then
 		local spec_roles = Addon.db.char.spec
 		for i, is_tank in pairs(spec_roles) do

@@ -268,21 +268,21 @@ end
 
 local function LogMessage(channel, ...)
 	-- Meta("titleshort")
-	if channel == "DEBUG" and Addon.DEBUG then
+	if channel == "DEBUG" then
 		print("|cff89F559TP|r - |cff0000ff" .. channel .. "|r:", ...)
 	elseif channel == "ERROR" then
 		print("|cff89F559TP|r - |cffff0000" .. channel .. "|r:", ...)
 	elseif channel == "WARNING" then
 		print("|cff89F559TP|r - |cffff8000" .. channel .. "|r:", ...)
-	elseif channel then
-		print("|cff89F559TP|r:", channel .. ":", ...)
 	else
-		print("|cff89F559TP|r:", ...)
+		print("|cff89F559TP|r:", channel, ...)
 	end
 end
 
 Addon.Logging.Debug = function(...)
-	LogMessage("DEBUG", ...)
+	if Addon.DEBUG then
+		LogMessage("DEBUG", ...)
+	end
 end
 
 Addon.Logging.Error = function(...)
@@ -294,7 +294,7 @@ Addon.Logging.Warning = function(...)
 end
 
 Addon.Logging.Info = function(...)
-	if Addon.db.profile.verbose then
+	if Addon.db.profile.verbose or Addon.DEBUG then
 		LogMessage(...)
 	end
 end

@@ -6,14 +6,11 @@ local _, Addon = ...
 
 -- ThreatPlates APIs
 local Debug = Addon.Debug
-local ThreatPlates = Addon.ThreatPlates
 local Meta = Addon.Meta
 
 --------------------------------------------------------------------------------------------------
 -- Local variables
 ---------------------------------------------------------------------------------------------------
-
-Debug.Enabled = true
 
 --------------------------------------------------------------------------------------------------
 -- Debug tools
@@ -42,7 +39,7 @@ end
 
 -- Function from: https://coronalabs.com/blog/2014/09/02/tutorial-printing-table-contents/
 function Debug:PrintTable(data)
-  if not self.Enabled then return end
+  if not Addon.DEBUG then return end
 
   local print_r_cache = {}
 
@@ -131,7 +128,7 @@ end
 
 
 function Debug:PrintTarget(unit)
-  if not self.Enabled then return end
+  if not Addon.DEBUG then return end
 
   if unit.isTarget then
     self:PrintUnit(unit)

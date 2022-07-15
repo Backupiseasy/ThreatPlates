@@ -332,42 +332,40 @@ local function ShowImportFrame()
   ImportExportFrame:OpenImport(ImportHandler)
 end
 
-local function AddImportExportOptions(profileOptions)
-  local function AddImportExportOptions(options_profiles)
-    if not options_profiles.plugins then
-      options_profiles.plugins = {}
-    end
-  
-    options_profiles.plugins[ThreatPlates.ADDON_NAME] = {
-      exportimportdesc = {
-        order = 90,
-        type = "description",
-        name = "\n" .. L["Import and export profiles to share them with other players."],
-      },
-      exportprofile = {
-        order = 95,
-        type = "execute",
-        name = L["Export profile"],
-        desc = L["Export the current profile into a string that can be imported by other players."],
-        func = function()
-          local export_data = {
-            Version = t.Meta("version"),
-            ProfileName = Addon.db:GetCurrentProfile(),
-            Profile = Addon.db.profile
-          }
-  
-          ShowExportFrame(export_data)
-        end
-      },
-      importprofile = {
-        order = 100,
-        type = "execute",
-        name = L["Import profile"],
-        desc = L["Import a profile from another player from an import string."],
-        func = function() ShowImportFrame() end
-      },
-    }
+local function AddImportExportOptions(options_profiles)
+  if not options_profiles.plugins then
+    options_profiles.plugins = {}
   end
+  
+  options_profiles.plugins[ThreatPlates.ADDON_NAME] = {
+    exportimportdesc = {
+      order = 90,
+      type = "description",
+      name = "\n" .. L["Import and export profiles to share them with other players."],
+    },
+    exportprofile = {
+      order = 95,
+      type = "execute",
+      name = L["Export profile"],
+      desc = L["Export the current profile into a string that can be imported by other players."],
+      func = function()
+        local export_data = {
+          Version = Meta("version"),
+          ProfileName = Addon.db:GetCurrentProfile(),
+          Profile = Addon.db.profile
+        }
+
+        ShowExportFrame(export_data)
+      end
+    },
+    importprofile = {
+      order = 100,
+      type = "execute",
+      name = L["Import profile"],
+      desc = L["Import a profile from another player from an import string."],
+      func = function() ShowImportFrame() end
+    },
+  }
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -7766,7 +7764,7 @@ CreateCustomNameplateEntry = function(index)
             type = "select",
             values = function()
               local custom_style = db.uniqueSettings[index]
-              local script_functions = ThreatPlates.CopyTable(Addon.SCRIPT_FUNCTIONS[custom_style.Scripts.Type])
+              local script_functions = Addon.CopyTable(Addon.SCRIPT_FUNCTIONS[custom_style.Scripts.Type])
 
               for key, function_name in pairs(script_functions) do
                 local color = "ffffff"
@@ -10073,7 +10071,7 @@ function Addon.RestoreLegacyCustomNameplates()
   local legacy_custom_plates = {}
 
   for i, v in ipairs(Addon.LEGACY_CUSTOM_NAMEPLATES) do
-    legacy_custom_plates[i] = ThreatPlates.CopyTable(v)
+    legacy_custom_plates[i] = Addon.CopyTable(v)
     Addon.MergeDefaultsIntoTable(legacy_custom_plates[i], Addon.LEGACY_CUSTOM_NAMEPLATES["**"])
   end
 

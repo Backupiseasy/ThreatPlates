@@ -891,7 +891,7 @@ local function MigrationCustomPlatesV1(profile_name, profile)
 
     for index, unique_unit in pairs(custom_plates_to_keep) do
       -- As default values are now different, copy the deprecated slots default value
-      local deprecated_settings = ThreatPlates.CopyTable(Addon.LEGACY_CUSTOM_NAMEPLATES["**"])
+      local deprecated_settings = Addon.CopyTable(Addon.LEGACY_CUSTOM_NAMEPLATES["**"])
       Addon.MergeIntoTable(deprecated_settings, Addon.LEGACY_CUSTOM_NAMEPLATES[index])
 
       -- Name trigger is already migrated properly when loading 9.2.0 the very first time
@@ -1209,9 +1209,8 @@ end
 -- Main migration function & settings
 ---------------------------------------------------------------------------------------------------
 
----- Settings in the SavedVariables file that should be migrated and/or deleted
-local MIGRATION_FUNCTIONS = {
-  --  NamesColor = { MigrateNamesColor, },                        -- settings.name.color
+local MIGRATION_FUNCTIONS_BY_VERSION = {
+    --  NamesColor = { MigrateNamesColor, },                        -- settings.name.color
   --  CustomTextShow = { MigrateCustomTextShow, },                -- settings.customtext.show
   --  BlizzFadeA = { MigrationBlizzFadeA, },                      -- blizzFadeA.toggle and blizzFadeA.amount
   --  TargetScale = { MigrationTargetScale, "8.5.0" },            -- nameplate.scale.Target/NoTarget
@@ -1222,207 +1221,223 @@ local MIGRATION_FUNCTIONS = {
   --  Auras = { MigrationAurasSettings, "9.0.0" },                -- (changed in 9.0.0)
   --  AurasFix = { MigrationAurasSettingsFix },                   -- (changed in 9.0.4 and 9.0.9)
   ["1.4.0"] = {
-    MigrationCustomPlatesV3 = { Version = Addon.IS_CLASSIC },
-    MigrateSpelltextPosition = { MigrateSpelltextPosition, NoDefaultProfile = true, Version = Addon.IS_CLASSIC },
+    { Type = "Migrate", Name = "Custom Styles V3", Function = MigrateCustomStylesToV3, Version = Addon.IS_CLASSIC },
+    { Type = "Migrate", Name = "Spelltext Position", Function = MigrateSpelltextPosition, NoDefaultProfile = true, Version = Addon.IS_CLASSIC },
   },
-  ["9.1.0"] = {
-    MigrationForceFriendlyInCombat,
-  },
-  ["9.2.0"] = {
-    SpelltextPosition = (not Addon.IS_CLASSIC and { MigrateSpelltextPosition, NoDefaultProfile = true }) or nil,
-    FixTargetFocusTexture = { FixTargetFocusTexture, NoDefaultProfile = true },
-  },
-  ["9.2.2"] = {
-    MigrationCustomPlatesV3 = (not Addon.IS_CLASSIC and { MigrateCustomStylesToV3 }) or nil,
-  },
-  ["9.3.0"] = {
-    RenameFilterMode = { RenameFilterMode, NoDefaultProfile = true },
-  },
-  ["10.2.0"] = {
-    MigrationCustomPlatesV1 = { NoDefaultProfile = true},
-    MigrateCustomStyles = { NoDefaultProfile = true, CleanupDatabase = true },
-  },
-  ["10.2.1"] = {
-    DisableShowBlizzardAurasForClassic = { Version = (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC) },
-  },
-  ["10.3.0-beta2"] = {
-    MigrateAurasWidgetV2 = { NoDefaultProfile = true , CleanupDatabase = true },
-  },
-  ["10.3.1"] = {
-    MigrateFixAurasCyclicAnchoring = { NoDefaultProfile = true , CleanupDatabase = true },
-  },
-  ["10.3.6"] = {
-    MigrateThreatValue = { NoDefaultProfile = true , CleanupDatabase = true },
-  },
-  -- MigrateDeprecatedSettingsEntries, -- TODO
-}
-
-local ENTRIES_TO_DELETE = {
   ["8.5.0"] = {
-    { "alphaFeatures" },
-    { "alphaFeatureHeadlineView" },
-    { "alphaFeatureAuraWidget2" },
-    { "alphaFriendlyNameOnly" },
-    { "HeadlineView", "name", "width" },
-    { "HeadlineView", "name", "height" },
+    { Type = "Delete", Key = { "alphaFeatures" } },
+    { Type = "Delete", Key = { "alphaFeatureHeadlineView" } },
+    { Type = "Delete", Key = { "alphaFeatureAuraWidget2" } },
+    { Type = "Delete", Key = { "alphaFriendlyNameOnly" } },
+    { Type = "Delete", Key = { "HeadlineView", "name", "width" } },
+    { Type = "Delete", Key = { "HeadlineView", "name", "height" } },
   },
   ["8.5.1"] = {
-    { "HeadlineView", "blizzFading" },
-    { "HeadlineView", "blizzFadingAlpha"},
+    { Type = "Delete", Key = { "HeadlineView", "blizzFading" } },
+    { Type = "Delete", Key = { "HeadlineView", "blizzFadingAlpha"} },
   },
   ["8.7.0"] = {
-    { "debuffWidget" },
-    { "uniqueSettings", "list" },
-    { "OldSettings" },
+    { Type = "Delete", Key = { "debuffWidget" } },
+    { Type = "Delete", Key = { "uniqueSettings", "list" } },
+    { Type = "Delete", Key = { "OldSettings" } },
   },
   ["9.1.0"] = {
-    { "HeadlineView", "ON" },
-  },
-  ["9.2.0"] = {
-    { "ShowThreatGlowOffTank" }, -- never used
-    { "ColorByReaction", "DisconnectedUnit" },
-    { "tidyplatesFade" },
-    { "threat", "nonCombat" }, -- migrated in 9.1.3
-    { "healthColorChange" },
-    { "allowClass" },
-    { "friendlyClass" },
-    { "threat", "hideNonCombat" },
-    { "aHPbarColor", },
-    { "bHPbarColor", },
-    { "settings", "name", },
-    { "HeadlineView", "name", },
-    { "blizzFadeS", },
-    { "cache", },
-    { "cacheClass", },
-    { "customColor", },
-  },
-  ["9.4.0"] = {
-    { "cache" },
-  },
-  ["10.1.8"] = {
-    { "Automation", "SmallPlatesInInstances" },
-    { "CVarsBackup", "nameplateGlobalScale" },
-  },
-  ["10.3.0"] = {
-    { "AuraWidget", "scale" }
-  },
-  ["10.4.0"] = {
-    "ShowThreatGlowOnAttackedUnitsOnly",
-  }
-}
-
-local ENTRIES_TO_RENAME = {
-  ["9.1.0"] = {
-    { Deprecated = { "comboWidget", "ON" }, New = { "ComboPoints", "ON" }, },
-    { Deprecated = { "comboWidget", "ShowInHeadlineView" }, New = { "ComboPoints", "ShowInHeadlineView" }, },
-    { Deprecated = { "comboWidget", "scale" }, New = { "ComboPoints", "Scale" }, },
-    { Deprecated = { "comboWidget", "x" }, New = { "ComboPoints", "x" }, },
-    { Deprecated = { "comboWidget", "y" }, New = { "ComboPoints", "y" }, },
-    { Deprecated = { "comboWidget", "x_hv" }, New = { "ComboPoints", "x_hv" }, },
-    { Deprecated = { "comboWidget", "y_hv" }, New = { "ComboPoints", "y_hv" }, },
+    { Type = "Migrate", Name = "Force Friendly in Combat", Function = MigrationForceFriendlyInCombat } ,
+    { Type = "Rename", FromKey = { "comboWidget", "ON" }, ToKey = { "ComboPoints", "ON" }, },
+    { Type = "Rename", FromKey = { "comboWidget", "ShowInHeadlineView" }, ToKey = { "ComboPoints", "ShowInHeadlineView" }, },
+    { Type = "Rename", FromKey = { "comboWidget", "scale" }, ToKey = { "ComboPoints", "Scale" }, },
+    { Type = "Rename", FromKey = { "comboWidget", "x" }, ToKey = { "ComboPoints", "x" }, },
+    { Type = "Rename", FromKey = { "comboWidget", "y" }, ToKey = { "ComboPoints", "y" }, },
+    { Type = "Rename", FromKey = { "comboWidget", "x_hv" }, ToKey = { "ComboPoints", "x_hv" }, },
+    { Type = "Rename", FromKey = { "comboWidget", "y_hv" }, ToKey = { "ComboPoints", "y_hv" }, },
+    { Type = "Delete", Key = { "HeadlineView", "ON" } },
   },
   ["9.1.3"] = {
-    { Deprecated = { "threat", "nonCombat" }, New = { "threat", "UseThreatTable" }, },
+    { Type = "Rename", FromKey = { "threat", "nonCombat" }, ToKey = { "threat", "UseThreatTable" }, },
+  },
+  ["9.2.0"] = {
+    { Type = "Migrate", Name = "Spelltext Position", Function = MigrateSpelltextPosition, NoDefaultProfile = true, Version = not Addon.IS_CLASSIC},
+    { Type = "Migrate", Name = "Fix Focus Target Texture", Function = FixTargetFocusTexture, NoDefaultProfile = true },
+    { Type = "Delete", Key = { "ShowThreatGlowOffTank" } }, -- never used
+    { Type = "Delete", Key = { "ColorByReaction", "DisconnectedUnit" } },
+    { Type = "Delete", Key = { "tidyplatesFade" } },
+    { Type = "Delete", Key = { "threat", "nonCombat" } }, -- migrated in 9.1.3
+    { Type = "Delete", Key = { "healthColorChange" } },
+    { Type = "Delete", Key = { "allowClass" } },
+    { Type = "Delete", Key = { "friendlyClass" } },
+    { Type = "Delete", Key = { "threat", "hideNonCombat" } },
+    { Type = "Delete", Key = { "aHPbarColor", } },
+    { Type = "Delete", Key = { "bHPbarColor", } },
+    { Type = "Delete", Key = { "settings", "name", } },
+    { Type = "Delete", Key = { "HeadlineView", "name", } },
+    { Type = "Delete", Key = { "blizzFadeS", } },
+    { Type = "Delete", Key = { "cache", } },
+    { Type = "Delete", Key = { "cacheClass", } },
+    { Type = "Delete", Key = { "customColor", } },
+  },
+  ["9.2.2"] = {
+    { Type = "Migrate", Name = "Custom Styles V3", Function = MigrateCustomStylesToV3 , Version = not Addon.IS_CLASSIC },
+  },
+  ["9.3.0"] = {
+    { Type = "Migrate", Name = "Rename Filter Mode", Function = RenameFilterMode, NoDefaultProfile = true },
   },
   ["9.4.0"] = {
+    { Type = "Delete", Key = { "cache" } },
+  },
+  ["10.1.8"] = {
+    { Type = "Delete", Key = { "Automation", "SmallPlatesInInstances" } },
+    { Type = "Delete", Key = { "CVarsBackup", "nameplateGlobalScale" } },
+  },
+  ["10.2.0"] = {
+    { Type = "Migrate", Name = "Custom Styles V1", Function = MigrationCustomPlatesV1, NoDefaultProfile = true },
+    { Type = "Migrate", Name = "Custom Styles", Function = MigrateCustomStyles, NoDefaultProfile = true },
+  },
+  ["10.2.1"] = {
+    { Type = "Migrate", Name = "Disable Show Blizzard Auras", Function = DisableShowBlizzardAurasForClassic, Version = (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC) },
+  },
+  ["10.3.0-beta2"] = {
+    { Type = "Migrate", Name = "Auras Widget V2", Function = MigrateAurasWidgetV2, NoDefaultProfile = true },
+  },
+  ["10.3.0"] = {
+    { Type = "Delete", Key = { "AuraWidget", "scale" } },
+  },
+  ["10.3.1"] = {
+    { Type = "Migrate", Name = "Fix Cyclic Anchoring of Auras", Function = MigrateFixAurasCyclicAnchoring, NoDefaultProfile = true },
+  },
+  ["10.3.6"] = {
+    { Type = "Migrate", Name = "Threat Value", Function = MigrateThreatValue, NoDefaultProfile = true },
+  },
+  ["10.6.0"] = {
+    -- TODO: MigrateDeprecatedSettingsEntries
     -- Color settings for healthbar and name
-    { Deprecated = { "settings", "healthbar", "BackgroundUseForegroundColor" }, New = { "Healthbar", "BackgroundUseForegroundColor" }, },
-    { Deprecated = { "settings", "healthbar", "BackgroundOpacity" }, New = { "Healthbar", "BackgroundOpacity" }, },
-    { Deprecated = { "settings", "healthbar", "BackgroundColor" }, New = { "Healthbar", "BackgroundColor" }, },
-    { Deprecated = { "settings", "raidicon", "hpColor" }, New = { "Healthbar", "UseRaidMarkColoring" }, },
-    { Deprecated = { "settings", "name", "FriendlyTextColorMode" }, New = { "Name", "HealthbarMode", "FriendlyUnitMode" }, },
-    { Deprecated = { "settings", "name", "FriendlyTextColor" }, New = { "Name", "HealthbarMode", "FriendlyTextColor" }, },
-    { Deprecated = { "settings", "name", "EnemyTextColorMode" }, New = { "Name", "HealthbarMode", "EnemyUnitMode" }, },
-    { Deprecated = { "settings", "name", "EnemyTextColor" }, New = { "Name", "HealthbarMode", "EnemyTextColor" }, },
-    { Deprecated = { "settings", "name", "UseRaidMarkColoring" }, New = { "Name", "HealthbarMode", "UseRaidMarkColoring" }, },
-    { Deprecated = { "HeadlineView", "FriendlyTextColorMode" }, New = { "Name", "NameMode", "FriendlyUnitMode" }, },
-    { Deprecated = { "HeadlineView", "FriendlyTextColor" }, New = { "Name", "NameMode", "FriendlyTextColor" }, },
-    { Deprecated = { "HeadlineView", "EnemyTextColorMode" }, New = { "Name", "NameMode", "EnemyUnitMode" }, },
-    { Deprecated = { "HeadlineView", "EnemyTextColor" }, New = { "Name", "NameMode", "EnemyTextColor" }, },
-    { Deprecated = { "HeadlineView", "UseRaidMarkColoring" }, New = { "Name", "NameMode", "UseRaidMarkColoring" }, },
+    { Type = "Rename", FromKey = { "settings", "healthbar", "BackgroundUseForegroundColor" }, ToKey = { "Healthbar", "BackgroundUseForegroundColor" }, },
+    { Type = "Rename", FromKey = { "settings", "healthbar", "BackgroundOpacity" }, ToKey = { "Healthbar", "BackgroundOpacity" }, },
+    { Type = "Rename", FromKey = { "settings", "healthbar", "BackgroundColor" }, ToKey = { "Healthbar", "BackgroundColor" }, },
+    { Type = "Rename", FromKey =  { "settings", "raidicon", "hpColor" }, ToKey = { "Healthbar", "UseRaidMarkColoring" }, },
+    { Type = "Rename", FromKey =  { "settings", "name", "FriendlyTextColorMode" }, ToKey = { "Name", "HealthbarMode", "FriendlyUnitMode" }, },
+    { Type = "Rename", FromKey =  { "settings", "name", "FriendlyTextColor" }, ToKey = { "Name", "HealthbarMode", "FriendlyTextColor" }, },
+    { Type = "Rename", FromKey =  { "settings", "name", "EnemyTextColorMode" }, ToKey = { "Name", "HealthbarMode", "EnemyUnitMode" }, },
+    { Type = "Rename", FromKey =  { "settings", "name", "EnemyTextColor" }, ToKey = { "Name", "HealthbarMode", "EnemyTextColor" }, },
+    { Type = "Rename", FromKey =  { "settings", "name", "UseRaidMarkColoring" }, ToKey = { "Name", "HealthbarMode", "UseRaidMarkColoring" }, },
+    { Type = "Rename", FromKey =  { "HeadlineView", "FriendlyTextColorMode" }, ToKey = { "Name", "NameMode", "FriendlyUnitMode" }, },
+    { Type = "Rename", FromKey =  { "HeadlineView", "FriendlyTextColor" }, ToKey = { "Name", "NameMode", "FriendlyTextColor" }, },
+    { Type = "Rename", FromKey =  { "HeadlineView", "EnemyTextColorMode" }, ToKey = { "Name", "NameMode", "EnemyUnitMode" }, },
+    { Type = "Rename", FromKey =  { "HeadlineView", "EnemyTextColor" }, ToKey = { "Name", "NameMode", "EnemyTextColor" }, },
+    { Type = "Rename", FromKey =  { "HeadlineView", "UseRaidMarkColoring" }, ToKey = { "Name", "NameMode", "UseRaidMarkColoring" }, },
     -- Customtext is now Status Text
-    { Deprecated = { "settings", "customtext", "x" }, New = { "StatusText", "HealthbarMode", "HorizontalOffset" }, },
-    { Deprecated = { "settings", "customtext", "y" }, New = { "StatusText", "HealthbarMode", "VerticalOffset" }, },
-    { Deprecated = { "settings", "customtext", "typeface" }, New = { "StatusText", "HealthbarMode", "Font", "Typeface" }, },
-    { Deprecated = { "settings", "customtext", "size" }, New = { "StatusText", "HealthbarMode", "Font", "Size" }, },
-    { Deprecated = { "settings", "customtext", "width" }, New = { "StatusText", "HealthbarMode", "Font", "Width" }, },
-    { Deprecated = { "settings", "customtext", "height" }, New = { "StatusText", "HealthbarMode", "Font", "Height" }, },
-    { Deprecated = { "settings", "customtext", "align" }, New = { "StatusText", "HealthbarMode", "Font", "HorizontalAlignment" }, },
-    { Deprecated = { "settings", "customtext", "vertical" }, New = { "StatusText", "HealthbarMode", "Font", "VerticalAlignment" }, },
-    { Deprecated = { "settings", "customtext", "shadow" }, New = { "StatusText", "HealthbarMode", "Font", "Shadow" }, },
-    { Deprecated = { "settings", "customtext", "flags" }, New = { "StatusText", "HealthbarMode", "Font", "flags" }, },
-    { Deprecated = { "settings", "customtext", "FriendlySubtext" }, New = { "StatusText", "HealthbarMode", "FriendlySubtext" }, },
-    { Deprecated = { "settings", "customtext", "EnemySubtext" }, New = { "StatusText", "HealthbarMode", "EnemySubtext" }, },
-    { Deprecated = { "settings", "customtext", "SubtextColorUseHeadline" }, New = { "StatusText", "HealthbarMode", "SubtextColorUseHeadline" }, },
-    { Deprecated = { "settings", "customtext", "SubtextColorUseSpecific" }, New = { "StatusText", "HealthbarMode", "SubtextColorUseSpecific" }, },
-    { Deprecated = { "settings", "customtext", "SubtextColor" }, New = { "StatusText", "HealthbarMode", "SubtextColor" }, },
-    { Deprecated = { "HeadlineView", "customtext", "x" }, New = { "StatusText", "NameMode", "HorizontalOffset" }, },
-    { Deprecated = { "HeadlineView", "customtext", "y" }, New = { "StatusText", "NameMode", "VerticalOffset" }, },
-    { Deprecated = { "HeadlineView", "customtext", "size" }, New = { "StatusText", "NameMode", "Font", "Size" }, },
-    { Deprecated = { "HeadlineView", "customtext", "align" }, New = { "StatusText", "NameMode", "Font", "HorizontalAlignment" }, },
-    { Deprecated = { "HeadlineView", "customtext", "vertical" }, New = { "StatusText", "NameMode", "Font", "VerticalAlignment" }, },
+    { Type = "Rename", FromKey =  { "settings", "customtext", "x" }, ToKey = { "StatusText", "HealthbarMode", "HorizontalOffset" }, },
+    { Type = "Rename", FromKey =  { "settings", "customtext", "y" }, ToKey = { "StatusText", "HealthbarMode", "VerticalOffset" }, },
+    { Type = "Rename", FromKey =  { "settings", "customtext", "typeface" }, ToKey = { "StatusText", "HealthbarMode", "Font", "Typeface" }, },
+    { Type = "Rename", FromKey =  { "settings", "customtext", "size" }, ToKey = { "StatusText", "HealthbarMode", "Font", "Size" }, },
+    { Type = "Rename", FromKey =  { "settings", "customtext", "width" }, ToKey = { "StatusText", "HealthbarMode", "Font", "Width" }, },
+    { Type = "Rename", FromKey =  { "settings", "customtext", "height" }, ToKey = { "StatusText", "HealthbarMode", "Font", "Height" }, },
+    { Type = "Rename", FromKey =  { "settings", "customtext", "align" }, ToKey = { "StatusText", "HealthbarMode", "Font", "HorizontalAlignment" }, },
+    { Type = "Rename", FromKey =  { "settings", "customtext", "vertical" }, ToKey = { "StatusText", "HealthbarMode", "Font", "VerticalAlignment" }, },
+    { Type = "Rename", FromKey =  { "settings", "customtext", "shadow" }, ToKey = { "StatusText", "HealthbarMode", "Font", "Shadow" }, },
+    { Type = "Rename", FromKey =  { "settings", "customtext", "flags" }, ToKey = { "StatusText", "HealthbarMode", "Font", "flags" }, },
+    { Type = "Rename", FromKey =  { "settings", "customtext", "FriendlySubtext" }, ToKey = { "StatusText", "HealthbarMode", "FriendlySubtext" }, },
+    { Type = "Rename", FromKey =  { "settings", "customtext", "EnemySubtext" }, ToKey = { "StatusText", "HealthbarMode", "EnemySubtext" }, },
+    { Type = "Rename", FromKey =  { "settings", "customtext", "SubtextColorUseHeadline" }, ToKey = { "StatusText", "HealthbarMode", "SubtextColorUseHeadline" }, },
+    { Type = "Rename", FromKey =  { "settings", "customtext", "SubtextColorUseSpecific" }, ToKey = { "StatusText", "HealthbarMode", "SubtextColorUseSpecific" }, },
+    { Type = "Rename", FromKey =  { "settings", "customtext", "SubtextColor" }, ToKey = { "StatusText", "HealthbarMode", "SubtextColor" }, },
+    { Type = "Rename", FromKey =  { "HeadlineView", "customtext", "x" }, ToKey = { "StatusText", "NameMode", "HorizontalOffset" }, },
+    { Type = "Rename", FromKey =  { "HeadlineView", "customtext", "y" }, ToKey = { "StatusText", "NameMode", "VerticalOffset" }, },
+    { Type = "Rename", FromKey =  { "HeadlineView", "customtext", "size" }, ToKey = { "StatusText", "NameMode", "Font", "Size" }, },
+    { Type = "Rename", FromKey =  { "HeadlineView", "customtext", "align" }, ToKey = { "StatusText", "NameMode", "Font", "HorizontalAlignment" }, },
+    { Type = "Rename", FromKey =  { "HeadlineView", "customtext", "vertical" }, ToKey = { "StatusText", "NameMode", "Font", "VerticalAlignment" }, },
     -- Name settings for healthbar and headline view
-    { Deprecated = { "HeadlineView", "name", "size" }, New = { "Name", "NameMode", "Size" }, },
-    { Deprecated = { "HeadlineView", "name", "x" }, New = { "Name", "NameMode", "HorizontalOffset" }, },
-    { Deprecated = { "HeadlineView", "name", "y" }, New = { "Name", "NameMode", "VerticalOffset" }, },
-    { Deprecated = { "HeadlineView", "name", "align" }, New = { "Name", "NameMode", "Font", "HorizontalAlignment" }, },
-    { Deprecated = { "HeadlineView", "name", "vertical" }, New = { "Name", "NameMode", "Font", "VerticalAlignment" }, },
-    { Deprecated = { "settings", "name", "show" }, New = { "Name", "HealthbarMode", "Enabled" }, },
-    { Deprecated = { "settings", "name", "x" }, New = { "Name", "HealthbarMode", "HorizontalOffset" }, },
-    { Deprecated = { "settings", "name", "y" }, New = { "Name", "HealthbarMode", "VerticalOffset" }, },
-    { Deprecated = { "settings", "name", "typeface" }, New = { "Name", "HealthbarMode", "Font", "Typeface" }, },
-    { Deprecated = { "settings", "name", "size" }, New = { "Name", "HealthbarMode", "Font", "Size", }, },
-    { Deprecated = { "settings", "name", "shadow" }, New = { "Name", "HealthbarMode", "Font", "Shadow" }, },
-    { Deprecated = { "settings", "name", "flags" }, New = { "Name", "HealthbarMode", "Font", "flags" }, },
-    { Deprecated = { "settings", "name", "align" }, New = { "Name", "HealthbarMode", "Font", "HorizontalAlignment" }, },
-    { Deprecated = { "settings", "name", "vertical" }, New = { "Name", "HealthbarMode", "Font", "VerticalAlignment" }, },
-    { Deprecated = { "settings", "name", "width" }, New = { "Name", "HealthbarMode", "Font", "Width" }, },
-    { Deprecated = { "settings", "name", "height" }, New = { "Name", "HealthbarMode", "Font", "Height" }, },
-    { Deprecated = { "Transparency", "Fadeing" }, New = { "Animations", "EnableFading" }, },
+    { Type = "Rename", FromKey =  { "HeadlineView", "name", "size" }, ToKey = { "Name", "NameMode", "Size" }, },
+    { Type = "Rename", FromKey =  { "HeadlineView", "name", "x" }, ToKey = { "Name", "NameMode", "HorizontalOffset" }, },
+    { Type = "Rename", FromKey =  { "HeadlineView", "name", "y" }, ToKey = { "Name", "NameMode", "VerticalOffset" }, },
+    { Type = "Rename", FromKey =  { "HeadlineView", "name", "align" }, ToKey = { "Name", "NameMode", "Font", "HorizontalAlignment" }, },
+    { Type = "Rename", FromKey =  { "HeadlineView", "name", "vertical" }, ToKey = { "Name", "NameMode", "Font", "VerticalAlignment" }, },
+    { Type = "Rename", FromKey =  { "settings", "name", "show" }, ToKey = { "Name", "HealthbarMode", "Enabled" }, },
+    { Type = "Rename", FromKey =  { "settings", "name", "x" }, ToKey = { "Name", "HealthbarMode", "HorizontalOffset" }, },
+    { Type = "Rename", FromKey =  { "settings", "name", "y" }, ToKey = { "Name", "HealthbarMode", "VerticalOffset" }, },
+    { Type = "Rename", FromKey =  { "settings", "name", "typeface" }, ToKey = { "Name", "HealthbarMode", "Font", "Typeface" }, },
+    { Type = "Rename", FromKey =  { "settings", "name", "size" }, ToKey = { "Name", "HealthbarMode", "Font", "Size", }, },
+    { Type = "Rename", FromKey =  { "settings", "name", "shadow" }, ToKey = { "Name", "HealthbarMode", "Font", "Shadow" }, },
+    { Type = "Rename", FromKey =  { "settings", "name", "flags" }, ToKey = { "Name", "HealthbarMode", "Font", "flags" }, },
+    { Type = "Rename", FromKey =  { "settings", "name", "align" }, ToKey = { "Name", "HealthbarMode", "Font", "HorizontalAlignment" }, },
+    { Type = "Rename", FromKey =  { "settings", "name", "vertical" }, ToKey = { "Name", "HealthbarMode", "Font", "VerticalAlignment" }, },
+    { Type = "Rename", FromKey =  { "settings", "name", "width" }, ToKey = { "Name", "HealthbarMode", "Font", "Width" }, },
+    { Type = "Rename", FromKey =  { "settings", "name", "height" }, ToKey = { "Name", "HealthbarMode", "Font", "Height" }, },
+    { Type = "Rename", FromKey =  { "Transparency", "Fadeing" }, ToKey = { "Animations", "EnableFading" }, },
     -- Others
-    { Deprecated = { "HeadlineView", "ShowTargetHighlight" }, New = { "targetWidget", "ShowInHeadlineView" }, },
-    { Deprecated = { "HeadlineView", "ShowFocusHighlight" }, New = { "FocusWidget", "ShowInHeadlineView" }, },
-    { Deprecated = { "threatWidget", "ThreatPercentage" }, New = { "threat", "ThreatPercentage" }, },
+    { Type = "Rename", FromKey =  { "HeadlineView", "ShowTargetHighlight" }, ToKey = { "targetWidget", "ShowInHeadlineView" }, },
+    { Type = "Rename", FromKey =  { "HeadlineView", "ShowFocusHighlight" }, ToKey = { "FocusWidget", "ShowInHeadlineView" }, },
+    { Type = "Rename", FromKey =  { "threatWidget", "ThreatPercentage" }, ToKey = { "threat", "ThreatPercentage" }, },
+    { Type = "Delete", Key = { "ShowThreatGlowOnAttackedUnitsOnly" } },
   },
 }
 
-local function ExecuteMigrationFunctions(current_version)
-  local profile_table = Addon.db.profiles
+-- Sort TP versions for which migrations are available in ascending order, so that
+-- later on the are processed in the correct order, from oldest to newest
+local MIGRATION_VERSIONS_SORTED = {}
+for version, _ in pairs(MIGRATION_FUNCTIONS_BY_VERSION) do
+  MIGRATION_VERSIONS_SORTED[#MIGRATION_VERSIONS_SORTED + 1] = version
+end
+table.sort(MIGRATION_VERSIONS_SORTED, CurrentVersionIsOlderThan)
 
-  local cleanup_database_after_migration = false
-  local profile_table = Addon.db.profiles
+local function RenameEntriesInProfile(profile, migration_info)
+  local deprecated_key = migration_info.FromKey
+  local new_key = migration_info.ToKey
 
-  for max_version, entries in pairs(MIGRATION_FUNCTIONS) do
-    if CurrentVersionIsOlderThan(current_version, max_version) then
-      for _, migration_info in pairs(entries) do
-        local migration_function, no_default_profile, wow_version
+  local current_value = DatabaseEntryGetCurrentValue(profile, deprecated_key)
+  if current_value ~= nil then
+    Addon.Logging.Debug("Renaming", table.concat(deprecated_key, "."), "(", current_value, ") to", table.concat(new_key, "."))
 
-        if type(migration_info) == "table" then
-          no_default_profile = migration_info.NoDefaultProfile
-          migration_function = migration_info[1]
-          wow_version = migration_info.Version
-        else
-          migration_function = migration_info
-        end
+    -- Iterate to the new entry in the current profile
+    local value = profile
+    for index = 1, #new_key - 1 do
+      local key = new_key[index]
+      -- If value[key] does not exist, create an empty hash table
+      -- As the current entry is not the last one, it cannot be a leave, i.e., it must be a table
+      value[key] = value[key] or {}
+      value = value[key]
+    end
 
-        if wow_version == nil or wow_version == true then
-          local defaults
-          if no_default_profile then
-            defaults = Addon.CopyTable(Addon.db.defaults) -- Should move that before the for loop
+    -- We only iterate to the next-to-last entry, as we need to overwrite it:
+    value[new_key[#new_key]] = current_value
+    -- And delete the deprecated entry
+    DatabaseEntryDelete(profile, deprecated_key)
+  end
+end
+
+local function DeleteEntriesInProfile(profile, migration_info)
+  if DatabaseEntryExists(profile, migration_info.Key) then
+    Addon.Logging.Debug("Deleting", table.concat(migration_info.Key, "."))
+    DatabaseEntryDelete(profile, migration_info.Key)
+  end
+end
+
+local function MigrateProfile(profile, profile_name, profile_version)
+  local migration_to_perform = {}
+  for _, version in ipairs(MIGRATION_VERSIONS_SORTED) do
+    if CurrentVersionIsOlderThan(profile_version, version) then
+      migration_to_perform[#migration_to_perform + 1] = version
+    end
+  end
+
+  local defaults = Addon.CopyTable(Addon.db.defaults) -- Should move that before the for loop
+  for _, version in ipairs(migration_to_perform) do
+    Addon.Logging.Info(string.format(L["Profile %s: Migrating settings to version %s"], profile_name, version))
+    for _, migration_info in ipairs(MIGRATION_FUNCTIONS_BY_VERSION[version]) do
+
+      if migration_info.Type == "Migrate" then
+        
+        if migration_info.Version == nil or migration_info.Version == true then
+          Addon.Logging.Debug("Migrating", migration_info.Name)
+
+          if migration_info.NoDefaultProfile then
             Addon.db:RegisterDefaults({})
           end
 
-          -- iterate over all profiles and migrate values
-          --Addon.db.global.MigrationLog[key] = "Migration" .. (max_version and ( " because " .. current_version .. " < " .. max_version) or "")
-          for profile_name, profile in pairs(profile_table) do
-            migration_function(profile_name, profile)
-          end
+          migration_info.Function(profile_name, profile)
 
-          if no_default_profile then
+          if migration_info.NoDefaultProfile then
             Addon.db:RegisterDefaults(defaults)
           end
-
-          cleanup_database_after_migration = cleanup_database_after_migration or entry.CleanupDatabase
 
           -- Postprocessing, if necessary
           -- action = entry[3]
@@ -1430,77 +1445,28 @@ local function ExecuteMigrationFunctions(current_version)
           --   action()
           -- end
         end
-      end
-    end
-  end
-
-  -- Switch through all profiles to cleanup configuration (removing settings with default values from the file)
-  if cleanup_database_after_migration then
-    local current_profile = Addon.db:GetCurrentProfile()
-    for profile_name, profile in pairs(profile_table) do
-      Addon.db:SetProfile(profile_name)
-    end
-    Addon.db:SetProfile(current_profile)
-  end
-end
-
-local function RenameEntriesInProfile(profile, profile_version)
-  for max_version, entries in pairs(ENTRIES_TO_RENAME) do
-    if CurrentVersionIsOlderThan(profile_version, max_version) then
-      for i = 1, #entries do
-        local deprecated_entry = entries[i].Deprecated
-        local new_entry = entries[i].New
-
-        local current_value = DatabaseEntryGetCurrentValue(profile, deprecated_entry)
-        if current_value ~= nil then
-          --print ("    " .. profile_name ..":", table.concat(deprecated_entry, "."), "=>", table.concat(new_entry, "."), "=", current_value)
-
-          -- Iterate to the new entry in the current profile
-          local value = profile
-          for index = 1, #new_entry - 1 do
-            local key = new_entry[index]
-            -- If value[key] does not exist, create an empty hash table
-            -- As the current entry is not the last one, it cannot be a leave, i.e., it must be a table
-            value[key] = value[key] or {}
-            value = value[key]
-          end
-
-          -- We only iterate to the next-to-last entry, as we need to overwrite it:
-          value[new_entry[#new_entry]] = current_value
-          -- And delete the deprecated entry
-          DatabaseEntryDelete(profile, deprecated_entry)
-        end
-      end
-    end
-  end
-end
-
-local function DeleteEntriesInProfile(profile, profile_version)
-  for max_version, entries in pairs(ENTRIES_TO_DELETE) do
-    if CurrentVersionIsOlderThan(profile_version, max_version) then
-      -- iterate over all profiles and delete the old config entry
-      --Addon.db.global.MigrationLog[key] = "DELETED"
-      for i = 1, #entries do
-        if DatabaseEntryExists(profile, entries[i]) then
-          --print ("  " .. profile_name ..": Deleting", table.concat(entries[i], "."))
-          DatabaseEntryDelete(profile, entries[i])
-        end
+      elseif migration_info.Type == "Rename" then
+        RenameEntriesInProfile(profile, migration_info)
+      elseif migration_info.Type == "Delete" then
+        DeleteEntriesInProfile(profile, migration_info)
       end
     end
   end
 end
 
 function Addon.MigrateDatabase(current_version)
-  Addon.db.global.MigrationLog = nil
-
-  ExecuteMigrationFunctions(current_version)
-
-  local profile_table = Addon.db.profiles
-
-  for profile_name, profile in pairs(profile_table) do
-    RenameEntriesInProfile(profile, current_version)
-    DeleteEntriesInProfile(profile, current_version)
+  for profile_name, profile in pairs(Addon.db.profiles) do
+    MigrateProfile(profile, profile_name, current_version)
   end
+
+  -- Switch through all profiles to cleanup configuration (removing settings with default values from the file)
+  local current_profile_name = Addon.db:GetCurrentProfile()
+  for profile_name, _ in pairs(Addon.db.profiles) do
+    if profile_name ~= current_profile_name then
+      Addon.db:SetProfile(profile_name)
+    end
+  end
+  Addon.db:SetProfile(current_profile_name)
 end
 
 -- local function DeleteEntry(current_entry, default_entry, path)
@@ -1652,27 +1618,9 @@ Addon.ImportCustomStyle = function(imported_custom_style)
   return custom_style
 end
 
-local function MigrateProfile(profile, profile_name, profile_version)
-  for max_version, entries in pairs(MIGRATION_FUNCTIONS) do
-    if CurrentVersionIsOlderThan(profile_version, max_version) then
-      for key, migration_info in pairs(entries) do
-        local migration_function = (type(migration_info) == "table" and migration_info[1]) or migration_info
-        migration_function(profile_name, profile)
-
-        -- Postprocessing, if necessary
-        -- action = entry[3]
-        -- if action and type(action) == "function" then
-        --   action()
-        -- end
-      end
-    end
-  end
-
-  RenameEntriesInProfile(profile, profile_version)
-  DeleteEntriesInProfile(profile, profile_version)
-end
-
 Addon.ImportProfile = function(profile, profile_name, profile_version)
+  profile_version = "10.3.0"
+        
   -- Migrate the profile to the current version
   -- Using pcall here to catch errors in the migration code - should not happen, but still ...
   local migration_successful, return_value = pcall(MigrateProfile, profile, profile_name, profile_version)
