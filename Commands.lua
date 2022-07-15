@@ -8,23 +8,27 @@ local L = Addon.ThreatPlates.L
 Addon.DEBUG = Addon.ThreatPlates.Meta("version") == "@project-version@"
 
 local function toggleDPS()
-	Addon:SetRole(false)
-	Addon.db.profile.threat.ON = true
-	if Addon.db.profile.verbose then
+	if Addon.db.profile.optionRoleDetectionAutomatic then
+		Addon.Logging.Warning(L["Role toggle not supported because automatic role detection is enabled."])
+	else
+		Addon:SetRole(false)
+		Addon.db.profile.threat.ON = true
 		Addon.Logging.Info(L["-->>|cffff0000DPS Plates Enabled|r<<--"])
-		Addon.Logging.Info(L["|cff89F559Threat Plates|r: DPS switch detected, you are now in your |cffff0000dpsing / healing|r role."])
+		Addon.Logging.Info(L["DPS switch detected, you are now in your |cffff0000dpsing / healing|r role."])
+		Addon:ForceUpdate()
 	end
-	Addon:ForceUpdate()
 end
 
 local function toggleTANK()
-	Addon:SetRole(true)
-	Addon.db.profile.threat.ON = true
-	if Addon.db.profile.verbose then
+	if Addon.db.profile.optionRoleDetectionAutomatic then
+		Addon.Logging.Warning(L["Role toggle not supported because automatic role detection is enabled."])
+	else
+		Addon:SetRole(true)
+		Addon.db.profile.threat.ON = true
 		Addon.Logging.Info(L["-->>|cff00ff00Tank Plates Enabled|r<<--"])
-		Addon.Logging.Info(L["|cff89F559Threat Plates|r: Tank switch detected, you are now in your |cff00ff00tanking|r role."])
+		Addon.Logging.Info(L["Tank switch detected, you are now in your |cff00ff00tanking|r role."])
+		Addon:ForceUpdate()
 	end
-	Addon:ForceUpdate()
 end
 
 SLASH_TPTPDPS1 = "/tptpdps"
@@ -33,8 +37,8 @@ SLASH_TPTPTANK1 = "/tptptank"
 SlashCmdList["TPTPTANK"] = toggleTANK
 
 local function TPTPTOGGLE()
-	if (Addon.db.profile.optionRoleDetectionAutomatic and Addon.db.profile.verbose) then
-		Addon.Logging.Warning(L["|cff89F559Threat Plates|r: Role toggle not supported because automatic role detection is enabled."])
+	if Addon.db.profile.optionRoleDetectionAutomatic then
+		Addon.Logging.Warning(L["Role toggle not supported because automatic role detection is enabled."])
 	else
 		if Addon:PlayerRoleIsTank() then
 			toggleDPS()
@@ -70,9 +74,9 @@ SlashCmdList["TPTPOVERLAP"] = TPTPOVERLAP
 
 local function TPTPVERBOSE()
 	if Addon.db.profile.verbose then
-		Addon.Logging.Info(L["-->>Threat Plates verbose is now |cffff0000OFF!|r<<-- shhh!!"])
+		Addon.Logging.Print(L["-->>Threat Plates verbose is now |cffff0000OFF!|r<<-- shhh!!"])
 	else
-		Addon.Logging.Info(L["-->>Threat Plates verbose is now |cff00ff00ON!|r<<--"])
+		Addon.Logging.Print(L["-->>Threat Plates verbose is now |cff00ff00ON!|r<<--"])
 	end
 	Addon.db.profile.verbose = not Addon.db.profile.verbose
 end
