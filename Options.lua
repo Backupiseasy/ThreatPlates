@@ -27,7 +27,6 @@ local LibStub = LibStub
 local ThreatPlates = Addon.ThreatPlates
 local RGB_WITH_HEX = Addon.RGB_WITH_HEX
 local L = Addon.L
-local ConcatTables = Addon.ConcatTables
 local Meta = Addon.Meta
 local F = Addon.FlattenTable
 local CVars = Addon.CVars
@@ -1186,8 +1185,8 @@ local function GetFontEntryDefault(name, pos, widget_info)
         step = 1,
         isPercent = false,
       },
-      Transparency = AddIfSettingExists(GetTransparencyEntryDefault(30, Addon.ConcatTables(widget_info, { "Transparency" }) )),
-      Color = AddIfSettingExists(GetColorEntry(L["Color"], 40, Addon.ConcatTables(widget_info, { "Color" }))),
+      Transparency = AddIfSettingExists(GetTransparencyEntryDefault(30, F(widget_info, "Transparency"))),
+      Color = AddIfSettingExists(GetColorEntry(L["Color"], 40, F(widget_info, "Color"))),
       Spacer = GetSpacerEntry(100),
       Outline = {
         name = L["Outline"],
@@ -1376,14 +1375,14 @@ local function GetFontPositioningEntry(pos, widget_info)
         order = 10,
         name = L["Anchor"],
         values = Addon.ANCHOR_POINT,
-        arg = Addon.ConcatTables(widget_info, { "Anchor" }),
+        arg = F(widget_info, "Anchor"),
       }),
       InsideAnchor = AddIfSettingExists({
         type = "toggle",
         order = 20,
         name = L["Inside"],
         width = "half",
-        arg = Addon.ConcatTables(widget_info, { "InsideAnchor" }),
+        arg = F(widget_info, "InsideAnchor"),
       }),
       X = {
         type = "range",
@@ -1393,7 +1392,7 @@ local function GetFontPositioningEntry(pos, widget_info)
         min = -120,
         step = 1,
         isPercent = false,
-        arg = Addon.ConcatTables(widget_info, { "HorizontalOffset" }),
+        arg = F(widget_info, "HorizontalOffset"),
       },
       Y = {
         type = "range",
@@ -1403,7 +1402,7 @@ local function GetFontPositioningEntry(pos, widget_info)
         min = -120,
         step = 1,
         isPercent = false,
-        arg = Addon.ConcatTables(widget_info, { "VerticalOffset" }),
+        arg = F(widget_info, "VerticalOffset"),
       },
       -- Horizontal and vertical alignment are only used for positioning entries for texts
       AlignX = AddIfSettingExists({
@@ -1411,14 +1410,14 @@ local function GetFontPositioningEntry(pos, widget_info)
         order = 50,
         name = L["Horizontal Align"],
         values = ThreatPlates.AlignH,
-        arg = Addon.ConcatTables(widget_info, { "Font", "HorizontalAlignment" }),
+        arg = F(widget_info, "Font", "HorizontalAlignment"),
       }),
       AlignY = AddIfSettingExists({
         type = "select",
         order = 60,
         name = L["Vertical Align"],
         values = ThreatPlates.AlignV,
-        arg = Addon.ConcatTables(widget_info, { "Font", "VerticalAlignment" }),
+        arg = F(widget_info, "Font", "VerticalAlignment"),
       }),
     }
   }
@@ -1426,6 +1425,9 @@ local function GetFontPositioningEntry(pos, widget_info)
 end
 
 local function GetFramePositioningEntry(pos, widget_info)
+  local arg_healthbar_mode = F(widget_info, "HealthbarMode")
+  local arg_name_mode = F(widget_info, "NameMode")
+  
   local entry = {
     type = "group",
     order = pos,
@@ -1443,14 +1445,14 @@ local function GetFramePositioningEntry(pos, widget_info)
             order = 10,
             name = L["Anchor"],
             values = Addon.ANCHOR_POINT,
-            arg = Addon.ConcatTables(widget_info, { "HealthbarMode", "Anchor" }),
+            arg = F(arg_healthbar_mode, "Anchor"),
           },
           InsideAnchor = {
             type = "toggle",
             order = 20,
             name = L["Inside"],
             width = "half",
-            arg = Addon.ConcatTables(widget_info, { "HealthbarMode", "InsideAnchor" }),
+            arg = F(arg_healthbar_mode, "InsideAnchor"),
           },
           X = {
             type = "range",
@@ -1460,7 +1462,7 @@ local function GetFramePositioningEntry(pos, widget_info)
             min = -120,
             step = 1,
             isPercent = false,
-            arg = Addon.ConcatTables(widget_info, { "HealthbarMode", "HorizontalOffset" }),
+            arg = F(arg_healthbar_mode, "HorizontalOffset"),
           },
           Y = {
             type = "range",
@@ -1470,7 +1472,7 @@ local function GetFramePositioningEntry(pos, widget_info)
             min = -120,
             step = 1,
             isPercent = false,
-            arg = Addon.ConcatTables(widget_info, { "HealthbarMode", "VerticalOffset" }),
+            arg = F(arg_healthbar_mode, "VerticalOffset"),
           },
         },
       },
@@ -1479,21 +1481,21 @@ local function GetFramePositioningEntry(pos, widget_info)
         order = 20,
         name = L["Headline View"],
         inline = true,
-        arg = Addon.ConcatTables(widget_info, { "NameMode" }),
+        arg = arg_name_mode,
         args = {
           Anchor = {
             type = "select",
             order = 10,
             name = L["Anchor"],
             values = Addon.ANCHOR_POINT,
-            arg = Addon.ConcatTables(widget_info, { "NameMode", "Anchor" }),
+            arg = F(arg_name_mode, "Anchor" ),
           },
           InsideAnchor = {
             type = "toggle",
             order = 20,
             name = L["Inside"],
             width = "half",
-            arg = Addon.ConcatTables(widget_info, { "NameMode", "InsideAnchor" }),
+            arg = F(arg_name_mode, "InsideAnchor"),
           },
           X = {
             type = "range",
@@ -1503,7 +1505,7 @@ local function GetFramePositioningEntry(pos, widget_info)
             min = -120,
             step = 1,
             isPercent = false,
-            arg = Addon.ConcatTables(widget_info, { "NameMode", "HorizontalOffset" }),
+            arg = F(arg_name_mode, "HorizontalOffset"),
           },
           Y = {
             type = "range",
@@ -1513,7 +1515,7 @@ local function GetFramePositioningEntry(pos, widget_info)
             min = -120,
             step = 1,
             isPercent = false,
-            arg = Addon.ConcatTables(widget_info, { "NameMode", "VerticalOffset" }),
+            arg = F(arg_name_mode, "VerticalOffset"),
           },
         },
       }),
@@ -1534,7 +1536,7 @@ end
 --     Width = 345,
 --   } 
 local function GetTextEntry(name, pos, widget_info)
-  local arg_auto_sizing = Addon.ConcatTables(widget_info, { "AutoSizing" })
+  local arg_auto_sizing = F(widget_info, "AutoSizing")
 
   local entry = {
     type = "group",
@@ -1546,7 +1548,7 @@ local function GetTextEntry(name, pos, widget_info)
         name = L["Enable Text"],
         order = 1,
         type = "toggle",
-        arg = Addon.ConcatTables(widget_info, { "Show" }),
+        arg = F(widget_info, "Show"),
       },
       Spacer1 = GetSpacerEntry(2),
       Font = GetFontEntryDefault(L["Font"], 10, widget_info),
@@ -1556,7 +1558,7 @@ local function GetTextEntry(name, pos, widget_info)
         order = 21,
         type = "group",
         inline = true,
-        arg = Addon.ConcatTables(widget_info, { "AutoSizing" }),
+        arg = arg_auto_sizing, -- Set arg here as AddIfSettingExists evaluates it
         args = {
           Description = {
             type = "description",
@@ -1574,7 +1576,7 @@ local function GetTextEntry(name, pos, widget_info)
             type = "toggle",
             order = 20,
             name = L["Word Wrap"],
-            arg = Addon.ConcatTables(widget_info, { "WordWrap" }),
+            arg = F(widget_info, "WordWrap"),
             disabled = function() return GetValue({ arg = arg_auto_sizing }) end,
           },
           Width = { 
@@ -1582,7 +1584,7 @@ local function GetTextEntry(name, pos, widget_info)
             width = "double", 
             order = 30, 
             name = L["Width"], 
-            arg = Addon.ConcatTables(widget_info, { "Width" }),
+            arg = F(widget_info, "Width"),
             max = 250, 
             min = 20, 
             step = 1, 

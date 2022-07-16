@@ -351,7 +351,6 @@ local function GetScriptEnvironment(custom_style)
             -- HEX2RGB
             -- CopyTable
             -- MergeIntoTable
-            -- ConcatTables
             -- PrintTable
           --},
           --Debug = {}
