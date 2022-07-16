@@ -832,7 +832,7 @@ end
 ---------------------------------------------------------------------------------------------------
 -- Cached configuration settings
 ---------------------------------------------------------------------------------------------------
-local HideOmniCC, ShowDuration
+local HideOmniCC, SetNoCooldownCount, ShowDuration
 local AuraHighlightEnabled, AuraHighlightStart, AuraHighlightStop, AuraHighlightStopPrevious, AuraHighlightOffset
 local AuraHighlightColor = { 0, 0, 0, 0 }
 local EnabledForStyle = {}
@@ -1471,7 +1471,10 @@ local function CreateCooldown(parent)
   cooldown_frame:SetAllPoints(parent.Icon)
   cooldown_frame:SetReverse(true)
   cooldown_frame:SetHideCountdownNumbers(true)
-  cooldown_frame.noCooldownCount = HideOmniCC
+
+  if SetNoCooldownCount then
+    SetNoCooldownCount(cooldown_frame, HideOmniCC)
+  end
 
   return cooldown_frame
 end
@@ -1485,12 +1488,8 @@ local function UpdateCooldown(cooldown_frame, db)
     cooldown_frame:SetDrawSwipe(false)
   end
 
-  -- Fix for OmnniCC cooldown numbers being shown on auras
-  if cooldown_frame.noCooldownCount ~= HideOmniCC then
-    cooldown_frame.noCooldownCount = HideOmniCC
-    -- Force an update on OmniCC cooldowns
-    cooldown_frame:Hide()
-    cooldown_frame:Show()
+  if SetNoCooldownCount then
+    SetNoCooldownCount(cooldown_frame, HideOmniCC)
   end
 end
 
@@ -2568,7 +2567,9 @@ function Widget:UpdateSettings()
 
   self:ParseSpellFilters()
 
-  HideOmniCC = not self.db.ShowOmniCC
+  SetNoCooldownCount = OmniCC and OmniCC.Cooldown and OmniCC.Cooldown.SetNoCooldownCount
+  HideOmniCC = not self.db.ShowOmniCC  
+
   ShowDuration = self.db.ShowDuration and not self.db.ShowOmniCC
   --  -- Don't update any widget frame if the widget isn't enabled.
 --  if not self:IsEnabled() then return end
