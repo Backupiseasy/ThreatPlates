@@ -28,7 +28,7 @@ local _G =_G
 -- Global functions for accessing the configuration
 ---------------------------------------------------------------------------------------------------
 
-local function GetUnitVisibility(full_unit_type)
+Addon.GetUnitVisibility = function(full_unit_type)
   local unit_visibility = Addon.db.profile.Visibility[full_unit_type]
 
   -- assert (Addon.db.profile.Visibility[full_unit_type], "missing unit type: ".. full_unit_type)
@@ -41,7 +41,7 @@ local function GetUnitVisibility(full_unit_type)
   return show, unit_visibility.UseHeadlineView
 end
 
-local function SetNamePlateClickThrough(friendly, enemy)
+Addon.SetNamePlateClickThrough = function(friendly, enemy)
   local db = Addon.db.profile
   db.NamePlateFriendlyClickThrough = friendly
   db.NamePlateEnemyClickThrough = enemy
@@ -466,7 +466,7 @@ Addon.LEGACY_CUSTOM_NAMEPLATES = {
 -- Functions for migration of SavedVariables settings
 ---------------------------------------------------------------------------------------------------
 
-local function GetDefaultSettingsV1(defaults)
+Addon.GetDefaultSettingsV1 = function(defaults)
   local new_defaults = Addon.CopyTable(defaults)
 
   local db = new_defaults.profile
@@ -516,20 +516,20 @@ local function GetDefaultSettingsV1(defaults)
   return new_defaults
 end
 
-local function SwitchToDefaultSettingsV1()
+Addon.SwitchToDefaultSettingsV1 = function()
   local db = Addon.db
   local current_profile = db:GetCurrentProfile()
 
   db:SetProfile("_ThreatPlatesInternal")
 
-  local defaults = ThreatPlates.GetDefaultSettingsV1(ThreatPlates.DEFAULT_SETTINGS)
+  local defaults = Addon.GetDefaultSettingsV1(ThreatPlates.DEFAULT_SETTINGS)
   db:RegisterDefaults(defaults)
 
   db:SetProfile(current_profile)
   db:DeleteProfile("_ThreatPlatesInternal")
 end
 
-local function SwitchToCurrentDefaultSettings()
+Addon.SwitchToCurrentDefaultSettings = function()
   local db = Addon.db
   local current_profile = db:GetCurrentProfile()
 
@@ -1648,14 +1648,3 @@ Addon.ImportProfile = function(profile, profile_name, profile_version)
     end
   end
 end
-
------------------------------------------------------
--- External
------------------------------------------------------
-
-ThreatPlates.GetDefaultSettingsV1 = GetDefaultSettingsV1
-ThreatPlates.SwitchToCurrentDefaultSettings = SwitchToCurrentDefaultSettings
-ThreatPlates.SwitchToDefaultSettingsV1 = SwitchToDefaultSettingsV1
-
-ThreatPlates.GetUnitVisibility = GetUnitVisibility
-ThreatPlates.SetNamePlateClickThrough = SetNamePlateClickThrough

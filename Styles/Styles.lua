@@ -20,7 +20,7 @@ local UnitCanAttack = UnitCanAttack
 
 -- ThreatPlates APIs
 local TOTEMS = Addon.TOTEMS
-local GetUnitVisibility = ThreatPlates.GetUnitVisibility
+local GetUnitVisibility = Addon.GetUnitVisibility
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
 local Threat = Addon.Threat
 local ActiveTheme = Addon.Theme

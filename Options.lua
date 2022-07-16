@@ -4641,7 +4641,7 @@ local function CreateVisibilityTab()
             type = "toggle",
             width = "double",
             desc = L["Enable nameplate clickthrough for friendly units."],
-            set = function(info, val) ThreatPlates.SetNamePlateClickThrough(val, db.NamePlateEnemyClickThrough) end,
+            set = function(info, val) Addon.SetNamePlateClickThrough(val, db.NamePlateEnemyClickThrough) end,
             -- return in-game value for clickthrough as config values may be wrong because of in-combat restrictions when changing them
             get = function(info) return C_NamePlate.GetNamePlateFriendlyClickThrough() end,
             arg = { "NamePlateFriendlyClickThrough" },
@@ -4652,7 +4652,7 @@ local function CreateVisibilityTab()
             type = "toggle",
             width = "double",
             desc = L["Enable nameplate clickthrough for enemy units."],
-            set = function(info, val) ThreatPlates.SetNamePlateClickThrough(db.NamePlateFriendlyClickThrough, val) end,
+            set = function(info, val) Addon.SetNamePlateClickThrough(db.NamePlateFriendlyClickThrough, val) end,
             -- return in-game value for clickthrough as config values may be wrong because of in-combat restrictions when changing them
             get = function(info) return C_NamePlate.GetNamePlateEnemyClickThrough() end,
             arg = { "NamePlateEnemyClickThrough" },
@@ -5387,9 +5387,9 @@ local function CreateAppearanceTab()
             set = function(info, val)
               Addon.db.global.DefaultsVersion = val
               if val == "CLASSIC" then
-                ThreatPlates.SwitchToDefaultSettingsV1()
+                Addon.SwitchToDefaultSettingsV1()
               else -- val == "SMOOTH"
-                ThreatPlates.SwitchToCurrentDefaultSettings()
+                Addon.SwitchToCurrentDefaultSettings()
               end
               Addon:ReloadTheme()
             end,

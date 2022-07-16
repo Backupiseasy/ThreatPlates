@@ -314,7 +314,7 @@ function TidyPlatesThreat:OnInitialize()
   -- change back defaults old settings if wanted preserved it the user want's to switch back
   if ThreatPlatesDB and ThreatPlatesDB.global and ThreatPlatesDB.global.DefaultsVersion == "CLASSIC" then
     -- copy default settings, so that their original values are
-    defaults = ThreatPlates.GetDefaultSettingsV1(defaults)
+    defaults = Addon.GetDefaultSettingsV1(defaults)
   end
 
   local db = LibStub('AceDB-3.0'):New('ThreatPlatesDB', defaults, 'Default')
