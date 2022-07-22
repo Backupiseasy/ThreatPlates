@@ -15,8 +15,8 @@ local UnitCanAttack, UnitIsPVP, UnitPlayerControlled = UnitCanAttack, UnitIsPVP,
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 
 -- WoW Classic APIs:
-
 -- ThreatPlates APIs
+
 local SubscribeEvent, PublishEvent,  UnsubscribeEvent = Addon.EventService.Subscribe, Addon.EventService.Publish, Addon.EventService.Unsubscribe
 local Threat = Addon.Threat
 local RGB_P = Addon.RGB_P
@@ -26,7 +26,10 @@ local _G =_G
 -- List them here for Mikk's FindGlobals script
 -- GLOBALS: UnitAffectingCombat
 
-local ShowQuestUnit
+---------------------------------------------------------------------------------------------------
+-- Module Setup
+---------------------------------------------------------------------------------------------------
+local ColorModule = Addon.Color
 
 ---------------------------------------------------------------------------------------------------
 -- Wrapper functions for WoW Classic
@@ -41,6 +44,7 @@ end
 -- Local variables
 ---------------------------------------------------------------------------------------------------
 local ColorByHealthIsEnabled = false
+local ShowQuestUnit
 
 local TRANPARENT_COLOR = Addon.RGB(0, 0, 0, 0)
 
@@ -342,7 +346,7 @@ local function GetCustomStyleColor(unit)
   return color
 end
 
-function Addon:GetThreatColor(unit, style)
+function ColorModule:GetThreatColor(unit, style)
   if unit.ThreatLevel then
     return ThreatColor[style][unit.ThreatLevel]
   else
@@ -481,21 +485,13 @@ local function GetSituationalColor(unit, plate_style)
 end
 
 ---------------------------------------------------------------------------------------------------
--- Element code for Healthbar Color
+-- Core module code
 ---------------------------------------------------------------------------------------------------
-
-local Element = Addon.Elements.NewElement("Color")
-
----------------------------------------------------------------------------------------------------
--- Core element code
----------------------------------------------------------------------------------------------------
-
--- Called in processing event: NAME_PLATE_CREATED
-function Element.Created(tp_frame)
-end
 
 -- Called in processing event: NAME_PLATE_UNIT_ADDED
-function Element.UnitAdded(tp_frame)
+function ColorModule:Initialize(tp_frame)
+  if tp_frame.PlateStyle == "None" then return end
+  
   local unit = tp_frame.unit
 
   --GetSituationalColorHealthbar(unit, tp_frame.PlateStyle)
@@ -522,17 +518,11 @@ function Element.UnitAdded(tp_frame)
   --print ("Unit:", unit.name, "-> Updating Plate Colors:", Addon.Debug:ColorToString(tp_frame:GetHealthbarColor()))
 end
 
--- Called in processing event: NAME_PLATE_UNIT_REMOVED
---function Element.UnitRemoved(tp_frame)
---end
-
 -- Called in processing event: UpdateStyle in Nameplate.lua
-function Element.UpdateStyle(tp_frame, style, plate_style)
+function ColorModule:UpdateStyle(tp_frame, style)
+  if tp_frame.PlateStyle == "None" then return end
+  
   local unit = tp_frame.unit
-
-  if plate_style == "None" then
-    return
-  end
 
   --local color = (style == "unique") and GetCustomStyleColor(unit)
   local color = GetCustomStyleColor(unit)
@@ -611,7 +601,7 @@ local function ClassColorUpdate(tp_frame)
   end
 end
 
-function Element.UpdateSettings()
+function ColorModule:UpdateSettings()
   SettingsBase = Addon.db.profile
   Settings = SettingsBase.Healthbar
   SettingsName = SettingsBase.Name
@@ -659,9 +649,9 @@ function Element.UpdateSettings()
     not (Settings.FriendlyUnitMode == "HEALTH" and Settings.EnemyUnitMode == "HEALTH" and
       SettingsName.HealthbarMode.FriendlyUnitMode == "HEALTH" and SettingsName.HealthbarMode.EnemyUnitMode == "HEALTH" and
       SettingsName.NameMode.FriendlyUnitMode == "HEALTH" and SettingsName.NameMode.EnemyUnitMode == "HEALTH") then
-    SubscribeEvent(Element, "ThreatUpdate", CombatUpdate)
+    SubscribeEvent(ColorModule, "ThreatUpdate", CombatUpdate)
   else
-    UnsubscribeEvent(Element, "ThreatUpdate")
+    UnsubscribeEvent(ColorModule, "ThreatUpdate")
   end
 
   local SettingsStatusText = Addon.db.profile.StatusText
@@ -674,33 +664,33 @@ function Element.UpdateSettings()
     ColorByHealthIsEnabled = true
     
     if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC then
-      SubscribeEvent(Element, "UNIT_HEALTH_FREQUENT", UNIT_HEALTH)
+      SubscribeEvent(ColorModule, "UNIT_HEALTH_FREQUENT", UNIT_HEALTH)
     else
-      SubscribeEvent(Element, "UNIT_HEALTH", UNIT_HEALTH)
+      SubscribeEvent(ColorModule, "UNIT_HEALTH", UNIT_HEALTH)
     end
   else
     ColorByHealthIsEnabled = false
 
     if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC then
-      UnsubscribeEvent(Element, "UNIT_HEALTH_FREQUENT", UNIT_HEALTH)
+      UnsubscribeEvent(ColorModule, "UNIT_HEALTH_FREQUENT", UNIT_HEALTH)
     else
-      UnsubscribeEvent(Element, "UNIT_HEALTH", UNIT_HEALTH)
+      UnsubscribeEvent(ColorModule, "UNIT_HEALTH", UNIT_HEALTH)
     end
   end
 
-  SubscribeEvent(Element, "TargetGained", SituationalColorUpdate)
-  SubscribeEvent(Element, "TargetLost", SituationalColorUpdate)
-  SubscribeEvent(Element, "FocusGained", SituationalColorUpdate)
-  SubscribeEvent(Element, "FocusLost", SituationalColorUpdate)
-  SubscribeEvent(Element, "TargetMarkerUpdate", SituationalColorUpdate)
-  SubscribeEvent(Element, "FactionUpdate", FactionUpdate) -- Updates on faction information for units
-  SubscribeEvent(Element, "SituationalColorUpdate", SituationalColorUpdate) -- Updates on e.g., quest information or target status for units
-  SubscribeEvent(Element, "ClassColorUpdate", ClassColorUpdate) -- Updates on friend/guildmate information for units (part of class info currently)
+  SubscribeEvent(ColorModule, "TargetGained", SituationalColorUpdate)
+  SubscribeEvent(ColorModule, "TargetLost", SituationalColorUpdate)
+  SubscribeEvent(ColorModule, "FocusGained", SituationalColorUpdate)
+  SubscribeEvent(ColorModule, "FocusLost", SituationalColorUpdate)
+  SubscribeEvent(ColorModule, "TargetMarkerUpdate", SituationalColorUpdate)
+  SubscribeEvent(ColorModule, "FactionUpdate", FactionUpdate) -- Updates on faction information for units
+  SubscribeEvent(ColorModule, "SituationalColorUpdate", SituationalColorUpdate) -- Updates on e.g., quest information or target status for units
+  SubscribeEvent(ColorModule, "ClassColorUpdate", ClassColorUpdate) -- Updates on friend/guildmate information for units (part of class info currently)
 
   --wipe(HealthColorCache)
 end
 
-function Addon:SetCastbarColor(unit)
+function ColorModule:SetCastbarColor(unit)
 	if not unit.unitid then return end
 
 	local db = Addon.db.profile

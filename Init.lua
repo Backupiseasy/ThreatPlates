@@ -66,14 +66,15 @@ Addon.PlatesByGUID = {}
 local ThreatPlates = Addon.ThreatPlates
 
 -- Modules
+Addon.Font = {}
+Addon.Icon = {}
+Addon.Animation = {}
 Addon.Threat = {}
-Addon.Style = {}
+Addon.Color = {}
 Addon.Transparency = {}
 Addon.Scaling = {}
-Addon.Animation = {}
+Addon.Style = {}
 Addon.Localization = {}
-Addon.Icon = {}
-Addon.Font = {}
 -- Internal API
 Addon.Data = {}
 Addon.Logging = {}

@@ -14,7 +14,11 @@ local pairs, next, floor, abs = pairs, next, floor, abs
 local UIParent = UIParent
 
 -- ThreatPlates APIs
-local Animation = Addon.Animation
+
+---------------------------------------------------------------------------------------------------
+-- Module Setup
+---------------------------------------------------------------------------------------------------
+local AnimationModule = Addon.Animation
 
 ---------------------------------------------------------------------------------------------------
 -- Local variables
@@ -109,7 +113,7 @@ AnimationFrame:Hide()
 -- Animation Functions
 ---------------------------------------------------------------------------------------------------
 
-function Animation:CreateFlash(frame)
+function AnimationModule:CreateFlash(frame)
   frame.FlashAnimation = frame:CreateAnimationGroup("Flash")
   frame.FlashAnimation.FadeIn = frame.FlashAnimation:CreateAnimation("ALPHA", "FadeIn")
   frame.FlashAnimation.FadeIn:SetFromAlpha(0)
@@ -122,7 +126,7 @@ function Animation:CreateFlash(frame)
   frame.FlashAnimation.FadeOut:SetOrder(1)
 end
 
-function Animation:CreateFlashLoop(frame)
+function AnimationModule:CreateFlashLoop(frame)
   self:CreateFlash(frame)
 
   frame.FlashAnimation:SetScript("OnFinished", function(_, requested)
@@ -132,7 +136,7 @@ function Animation:CreateFlashLoop(frame)
   end)
 end
 
-function Animation:Flash(frame)
+function AnimationModule:Flash(frame)
   if not frame.FlashAnimation then
     self:CreateFlashLoop(frame)
   end
@@ -147,7 +151,7 @@ function Animation:Flash(frame)
   end
 end
 
-function Animation:StopFlash(frame)
+function AnimationModule:StopFlash(frame)
   local animation = frame.FlashAnimation
   if animation and animation.Playing then
     animation:Stop()
@@ -172,7 +176,7 @@ end
 --   AnimationFrame:Show()
 -- end
 
-function Animation:FadePlate(frame, target_alpha)
+function AnimationModule:FadePlate(frame, target_alpha)
   -- local current_alpha = frame:GetAlpha()
   -- This check is done before this function is called - maybe not ideal
   -- if floor(abs(current_alpha - target_alpha) * 100) < 1 then return end
@@ -190,14 +194,14 @@ function Animation:FadePlate(frame, target_alpha)
   AnimationFrame:Show()
 end
 
-function Animation:StopFade(frame)
+function AnimationModule:StopFade(frame)
   if frame.FadeAnimation then
   --frame:SetAlpha(frame.FadeAnimation.TargetAlpha)
     frame.FadeAnimation.Playing = nil
   end
 end
 
-function Animation:ScalePlate(frame, target_scale)
+function AnimationModule:ScalePlate(frame, target_scale)
   local current_scale = frame:GetScale()
   if floor(abs(current_scale - target_scale) * 100) < 1 then return end
 
@@ -215,7 +219,7 @@ function Animation:ScalePlate(frame, target_scale)
   AnimationFrame:Show()
 end
 
-function Animation:StopScale(frame)
+function AnimationModule:StopScale(frame)
   if frame.ScaleAnimation then
     --frame.SetScale(frame.ScaleAnimation.TargetScale)
     --SetPlateScale(frame, frame.ScaleAnimation.TargetScale)
@@ -223,7 +227,7 @@ function Animation:StopScale(frame)
   end
 end
 
-function Animation:HidePlate(frame)
+function AnimationModule:HidePlate(frame)
   local show_animation = false
 
   if Settings.HidePlateFadeOut then
@@ -259,7 +263,7 @@ function Animation:HidePlate(frame)
   end
 end
 
-function Animation:UpdateSettings()
+function AnimationModule:UpdateSettings()
   Settings = Addon.db.profile.Animations
 
   -- ShowPlateDuration = Settings.ShowPlateDuration

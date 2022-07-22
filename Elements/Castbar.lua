@@ -17,7 +17,7 @@ local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local UnitIsUnit = UnitIsUnit
 
 -- ThreatPlates APIs
-local Font = Addon.Font
+local Font, Color = Addon.Font, Addon.Color
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
 local BackdropTemplate = Addon.BackdropTemplate
 
@@ -235,7 +235,7 @@ function Element.UpdateStyle(tp_frame, style)
     border:SetBackdrop(INTERRUPT_BORDER_BACKDROP)
     border:SetBackdropBorderColor(1, 0, 0, 1)
 
-    castbar:SetAllColors(Addon:SetCastbarColor(unit))
+    castbar:SetAllColors(Color:SetCastbarColor(unit))
     castbar:Show()
   else
     castbar:Hide()
@@ -390,7 +390,7 @@ function Addon:ConfigCastbar()
         -- a castbar setting several times in a second (e.g., moving a position slider left/right several times).
         --        castbar.SetStatusBarBackdrop = function(self, backdrop_texture, edge_texture, edge_size, offset)
         --          SetStatusBarBackdropCastbar(self, backdrop_texture, edge_texture, edge_size, offset)
-        --          self:SetAllColors(Addon:SetCastbarColor(plate.TPFrame.unit))
+        --          self:SetAllColors(Color:SetCastbarColor(plate.TPFrame.unit))
         --        end
 
         castbar._Hide = castbar.Hide

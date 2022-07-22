@@ -34,7 +34,7 @@ local RegisterEvent, UnregisterEvent = Addon.EventService.RegisterEvent, Addon.E
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
 local ElementsCreated, ElementsUnitAdded, ElementsUnitRemoved = Addon.Elements.Created, Addon.Elements.UnitAdded, Addon.Elements.UnitRemoved
 local ElementsUpdateStyle, ElementsUpdateSettings = Addon.Elements.UpdateStyle, Addon.Elements.UpdateSettings
-local Threat, Style, Localization = Addon.Threat, Addon.Style, Addon.Localization
+local Threat, Style, Localization, Color = Addon.Threat, Addon.Style, Addon.Localization, Addon.Color
 local Scaling, Transparency, Animation, Icon, Font = Addon.Scaling, Addon.Transparency, Addon.Animation, Addon.Icon, Addon.Font
 local BackdropTemplate = Addon.BackdropTemplate
 
@@ -390,7 +390,7 @@ local function OnStartCasting(tp_frame, unitid, channeled)
   castbar.MaxValue = (endTime - startTime) / 1000
   castbar:SetMinMaxValues(0, castbar.MaxValue)
   castbar:SetValue(castbar.Value)
-  castbar:SetAllColors(Addon:SetCastbarColor(unit))
+  castbar:SetAllColors(Color:SetCastbarColor(unit))
   castbar:SetFormat(unit.spellIsShielded)
 
   -- Only publish this event once (OnStartCasting is called for re-freshing as well)
@@ -426,6 +426,7 @@ local function UpdateStyle(tp_frame, style, stylename)
   tp_frame:SetPoint(style.frame.anchor, tp_frame.Parent, style.frame.anchor, style.frame.x, style.frame.y)
   tp_frame:SetSize(style.healthbar.width, style.healthbar.height)
 
+  Color:UpdateStyle(tp_frame, style)
   ElementsUpdateStyle(tp_frame, style)
   Widgets:OnUnitAdded(tp_frame, tp_frame.unit)
 
@@ -522,6 +523,7 @@ local function OnShowNameplate(plate, unitid)
   -- Initialize scale and transparency
   Transparency:Initialize(tp_frame)
   Scaling:Initialize(tp_frame)
+  Color:Initialize(tp_frame)
   ElementsUnitAdded(tp_frame)
 
   UpdateNameplateStyle(plate, unitid)
@@ -629,6 +631,7 @@ function Addon:UpdateSettings()
   Transparency:UpdateSettings()
   Scaling:UpdateSettings()
   Animation:UpdateSettings()
+  Color:UpdateSettings()
   ElementsUpdateSettings()
 
   local db = Addon.db.profile

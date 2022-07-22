@@ -17,7 +17,7 @@ local UnitIsConnected, UnitAffectingCombat = UnitIsConnected, UnitAffectingComba
 -- ThreatPlates APIs
 local RGB = Addon.RGB
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
-local Threat, Style = Addon.Threat, Addon.Style
+local Threat, Style, Color = Addon.Threat, Addon.Style, Addon.Color
 local BackdropTemplate = Addon.BackdropTemplate
 
 local _G =_G
@@ -79,10 +79,10 @@ local function GetThreatGlowColor(unit)
     -- is already in combat, but not yet on the mob's threat table for a sec or so.
     if Settings.ON and Settings.useHPColor then
       if style == "dps" or style == "tank" then
-        color = Addon:GetThreatColor(unit, style)
+        color = Color:GetThreatColor(unit, style)
       end
     elseif InCombatLockdown() and (style == "normal" or style == "dps" or style == "tank") then
-      color = Addon:GetThreatColor(unit, style)
+      color = Color:GetThreatColor(unit, style)
     end
   end
 
