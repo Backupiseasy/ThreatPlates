@@ -646,6 +646,7 @@ function Addon:UpdateSettings()
 
   ShowCastBars = db.settings.castbar.show or db.settings.castbar.ShowInHeadlineView
   
+  -- ? Not sure if this is still necessary after moving registering events to Addon.lua - OnInitialize
   if not (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC) then
     self:ACTIVE_TALENT_GROUP_CHANGED() -- to update the player's role
   end
@@ -1338,13 +1339,16 @@ if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC then
   end
 else
   function Addon:ACTIVE_TALENT_GROUP_CHANGED()
-    local db = Addon.db
-    if db.profile.optionRoleDetectionAutomatic then
-      local role = select(5, GetSpecializationInfo(GetSpecialization()))
-      Addon.PlayerRole = (role == "TANK" and "tank") or "dps"
-    else
-      local role = db.char.spec[GetSpecialization()]
-      Addon.PlayerRole = (role == true and "tank") or "dps"
+    local player_specialization = GetSpecialization()
+    if player_specialization then
+      local db = Addon.db
+      if db.profile.optionRoleDetectionAutomatic then
+        local role = select(5, GetSpecializationInfo(player_specialization))
+        Addon.PlayerRole = (role == "TANK" and "tank") or "dps"
+      else
+        local role = db.char.spec[player_specialization]
+        Addon.PlayerRole = (role == true and "tank") or "dps"
+      end
     end
   end
   

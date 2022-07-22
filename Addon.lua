@@ -325,10 +325,6 @@ function TidyPlatesThreat:OnInitialize()
   Addon.LibSharedMedia = LibStub("LibSharedMedia-3.0")
   Addon.LibCustomGlow = LibStub("LibCustomGlow-1.0")
 
-  local LibAceGUI = LibStub("AceGUI-3.0")
-  local LibAceSerializer = LibStub:GetLibrary("AceSerializer-3.0")
-  local LibDeflate = LibStub:GetLibrary("LibDeflate")
-
   Addon.LoadLibraryMasque() -- Masque support
   Addon.LoadLibraryDogTag() -- LibDogTag support
 
@@ -341,31 +337,6 @@ function TidyPlatesThreat:OnInitialize()
   RegisterCallback(Addon, 'OnProfileChanged', 'ProfChange')
   RegisterCallback(Addon, 'OnProfileCopied', 'ProfChange')
   RegisterCallback(Addon, 'OnProfileReset', 'ProfChange')
-
-  -- Setup Interface panel options
-  local app_name = ThreatPlates.ADDON_NAME
-  local dialog_name = app_name .. " Dialog"
-  LibStub("AceConfig-3.0"):RegisterOptionsTable(dialog_name, ThreatPlates.GetInterfaceOptionsTable())
-  Addon.LibAceConfigDialog:AddToBlizOptions(dialog_name, ThreatPlates.ADDON_NAME)
-
-  -- Setup chat commands
-  self:RegisterChatCommand("tptp", "ChatCommand")
-end
-
--- The OnEnable() and OnDisable() methods of your addon object are called by AceAddon when your addon is
--- enabled/disabled by the user. Unlike OnInitialize(), this may occur multiple times without the entire
--- UI being reloaded.
--- AceAddon function: Do more initialization here, that really enables the use of your addon.
--- Register Events, Hook functions, Create Frames, Get information from the game that wasn't available in OnInitialize
-function TidyPlatesThreat:OnEnable()
-  Addon:CheckForFirstStartUp()
-  Addon:CheckForIncompatibleAddons()
-
-  if not (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC) then
-    CVars:OverwriteBoolProtected("nameplateResourceOnTarget", Addon.db.profile.PersonalNameplate.ShowResourceOnTarget)
-  end
-
-  Addon:ReloadTheme()
 
   -- Register callbacks at LSM, so that we can refresh everything if additional media is added after TP is loaded
   -- Register this callback after ReloadTheme as media will be updated there anyway
@@ -384,18 +355,47 @@ function TidyPlatesThreat:OnEnable()
     Addon.LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_CHANNEL_STOP", Addon.UNIT_SPELLCAST_CHANNEL_STOP)
   end
 
+  -- Setup Interface panel options
+  local app_name = ThreatPlates.ADDON_NAME
+  local dialog_name = app_name .. " Dialog"
+  LibStub("AceConfig-3.0"):RegisterOptionsTable(dialog_name, ThreatPlates.GetInterfaceOptionsTable())
+  Addon.LibAceConfigDialog:AddToBlizOptions(dialog_name, ThreatPlates.ADDON_NAME)
+
+  -- Setup chat commands
+  self:RegisterChatCommand("tptp", "ChatCommand")
+
+  Addon:CheckForFirstStartUp()
+  Addon:CheckForIncompatibleAddons()
+
+  -- Registering events here as otherwise PLAYER_LOGIN is not received
+  Addon:EnableEvents()
+
+  if not (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC) then
+    CVars:OverwriteBoolProtected("nameplateResourceOnTarget", Addon.db.profile.PersonalNameplate.ShowResourceOnTarget)
+  end
+
   -- Get updates for CVar changes (e.g, for large nameplates, nameplage scale and alpha)
   CVars.RegisterCVarHook()
-  Addon:EnableEvents()
+
+  Addon:ReloadTheme()
 end
+
+-- The OnEnable() and OnDisable() methods of your addon object are called by AceAddon when your addon is
+-- enabled/disabled by the user. Unlike OnInitialize(), this may occur multiple times without the entire
+-- UI being reloaded.
+-- AceAddon function: Do more initialization here, that really enables the use of your addon.
+-- Register Events, Hook functions, Create Frames, Get information from the game that wasn't available in OnInitialize
+-- function TidyPlatesThreat:OnEnable()
+--   --Addon:EnableEvents()
+-- end
 
 -- Called when the addon is disabled
-function TidyPlatesThreat:OnDisable()
-  -- DisableEvents()
-
-  -- Reset all CVars to its initial values
-  -- CVars:RestoreAllFromProfile()
-end
+-- function TidyPlatesThreat:OnDisable()
+--   -- Reset all CVars to its initial values
+--   -- CVars:RestoreAllFromProfile()
+  
+--   -- DisableEvents()
+-- end
 
 -----------------------------------------------------------------------------------
 -- Functions for keybindings
