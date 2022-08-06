@@ -1,6 +1,7 @@
 ﻿------------------------------------------------------
-10.4.1 (2022-07-05)
+10.4.2 (2022-07-xx)
 ------------------------------------------------------
+* Threat values will no longer be hidden for custom style nameplates.
 * Fixed some bugs with logging messages and verbose mode.
 * Updated localizations.
 
