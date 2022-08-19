@@ -29,8 +29,8 @@ local IsInInstance = IsInInstance
 local TidyPlatesThreat = TidyPlatesThreat
 local Animations = Addon.Animations
 local Font = Addon.Font
-local UpdateCustomStyleAfterAuraTrigger = Addon.UpdateCustomStyleAfterAuraTrigger
-local UnitStyle_AuraDependent = Addon.UnitStyle_AuraDependent
+local UnitStyle_AuraTrigger_Initialize, UnitStyle_AuraTrigger_UpdateStyle = Addon.UnitStyle_AuraTrigger_Initialize, Addon.UnitStyle_AuraTrigger_UpdateStyle
+local UnitStyle_AuraTrigger_CheckIfActive = Addon.UnitStyle_AuraTrigger_CheckIfActive
 local CUSTOM_GLOW_FUNCTIONS, CUSTOM_GLOW_WRAPPER_FUNCTIONS = Addon.CUSTOM_GLOW_FUNCTIONS, Addon.CUSTOM_GLOW_WRAPPER_FUNCTIONS
 local BackdropTemplate = Addon.BackdropTemplate
 local MODE_FOR_STYLE, ANCHOR_POINT_TEXT = Addon.MODE_FOR_STYLE, Addon.ANCHOR_POINT_TEXT
@@ -1063,7 +1063,6 @@ function Widget:UpdateUnitAuras(aura_grid_frame, unit, enabled_auras, enabled_cc
   local aura_grid = aura_grid_frame.AuraGrid
   --print (filter_mode, aura_grid.db.FilterMode)
 
-  local aura_frames = aura_grid_frame.AuraFrames
   -- If debuffs are disabled, but CCs are enabled, we should just hide debuffs, but still process all auras to be able to show CC debuffs
   if not (enabled_auras or enabled_cc) then 
     aura_grid_frame.ActiveAuras = 0
@@ -1095,9 +1094,8 @@ function Widget:UpdateUnitAuras(aura_grid_frame, unit, enabled_auras, enabled_cc
   local GetAuraPriority = self.PRIORITY_FUNCTIONS[sort_order]
 
   local aura_count = 1
-  local CustomStyleAuraTrigger = false
 
-  local _
+  local _  
   for i = 1, 40 do
     -- Auras are evaluated by an external function - pre-filtering before the icon grid is populated
     UnitAuraList[aura_count] = UnitAuraList[aura_count] or {}
@@ -1116,10 +1114,8 @@ function Widget:UpdateUnitAuras(aura_grid_frame, unit, enabled_auras, enabled_cc
 
     -- CastByPlayer is also used by aura trigger custom styles (only my auras)
     aura.CastByPlayer = (aura.caster == "player" or aura.caster == "pet" or aura.caster == "vehicle")
-    if Addon.ActiveAuraTriggers then
-      -- Do this to prevent calls to UnitStyle_AuraDependent after a aura trigger was found already
-      CustomStyleAuraTrigger = CustomStyleAuraTrigger or UnitStyle_AuraDependent(unit, aura.spellId, aura.name, aura.CastByPlayer)
-    end
+
+    UnitStyle_AuraTrigger_CheckIfActive(unit, aura.spellId, aura.name, aura.CastByPlayer)
 
     -- Cache dispellable debuffs for more efficient checks with the UNIT_AURA event
     --DispellableDebuffCache[aura.spellId] = aura.StealOrPurge
@@ -1378,8 +1374,8 @@ function Widget:UpdateIconGrid(widget_frame, unit)
     end
   end
 
-  local old_CustomStyleAura = unit.CustomStyleAura
-  unit.CustomStyleAura = false
+  UnitStyle_AuraTrigger_Initialize(unit)
+
   widget_frame.HideAuras = not EnabledForStyle[unit.style] or (db.ShowTargetOnly and not unit.isTarget)
 
   local enabled_cc
@@ -1403,11 +1399,7 @@ function Widget:UpdateIconGrid(widget_frame, unit)
     self:UpdateUnitAuras(widget_frame.Buffs, unit, db.Buffs.ShowEnemy, false, self.FilterEnemyBuffsBySpell, self.FilterEnemyCrowdControlBySpell, "HELPFUL", db.Buffs.FilterMode)
   end
 
-  -- Set the style if a aura trigger for a custom nameplate was found or the aura trigger
-  -- is no longer there
-  if unit.CustomStyleAura or old_CustomStyleAura then
-    UpdateCustomStyleAfterAuraTrigger(unit)
-  end
+  UnitStyle_AuraTrigger_UpdateStyle(unit)
 
   if widget_frame.HideAuras then
     widget_frame:Hide()

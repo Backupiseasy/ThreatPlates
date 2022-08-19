@@ -18,6 +18,7 @@ local GetUnitVisibility = ThreatPlates.GetUnitVisibility
 local NameTriggers, AuraTriggers, CastTriggers = Addon.Cache.CustomPlateTriggers.Name, Addon.Cache.CustomPlateTriggers.Aura, Addon.Cache.CustomPlateTriggers.Cast
 local NameWildcardTriggers, TriggerWildcardTests = Addon.Cache.CustomPlateTriggers.NameWildcard, Addon.Cache.TriggerWildcardTests
 local CustomStylesForAllInstances, CustomStylesForCurrentInstance = Addon.Cache.Styles.ForAllInstances, Addon.Cache.Styles.ForCurrentInstance
+local UpdateCustomStyleAfterAuraTrigger = Addon.UpdateCustomStyleAfterAuraTrigger
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -265,29 +266,38 @@ end
 
 local UnitStyle_NameDependent = Addon.UnitStyle_NameDependent
 
-function Addon.UnitStyle_AuraDependent(unit, aura_id, aura_name, aura_cast_by_player)
-  local plate_style
+function Addon.UnitStyle_AuraTrigger_Initialize(unit)
+  if Addon.ActiveAuraTriggers then
+    unit.PreviousCustomStyleAura = unit.CustomStyleAura
+    unit.CustomStyleAura = nil
+  end
+end
+
+function Addon.UnitStyle_AuraTrigger_UpdateStyle(unit)
+  -- Set the style if a aura trigger for a custom nameplate was found or the aura trigger
+  -- is no longer there
+  if Addon.ActiveAuraTriggers and (unit.CustomStyleAura or unit.PreviousCustomStyleAura) then 
+    UpdateCustomStyleAfterAuraTrigger(unit)
+  end
+end
+
+function Addon.UnitStyle_AuraTrigger_CheckIfActive(unit, aura_id, aura_name, aura_cast_by_player)
+  -- Do this to prevent overwrite the first aura trigger custom style found (which is the one being used)
+  if not Addon.ActiveAuraTriggers or unit.CustomStyleAura then return false end
 
   local unique_settings = AuraTriggers[aura_id] or AuraTriggers[aura_name]
+  -- Check if enabled for unit's faction and check for show only my auras
+  if unique_settings and unique_settings.useStyle and unique_settings.Enable.UnitReaction[unit.reaction] and (not unique_settings.Trigger.Aura.ShowOnlyMine or aura_cast_by_player) then
+    -- As this is called for every aura on a unit, never set it to false (overwriting a previous true value)
+    unit.CustomStyleAura = (unique_settings.showNameplate and "unique") or (unique_settings.ShowHeadlineView and "NameOnly-Unique") or "etotem"
+    unit.CustomPlateSettingsAura = unique_settings
 
-
-  if unique_settings and unique_settings.useStyle and 
-    unique_settings.Enable.UnitReaction[unit.reaction] and                 -- Check if enabled for unit's faction
-    (not unique_settings.Trigger.Aura.ShowOnlyMine or aura_cast_by_player) -- Check for show only my auras
-    then
-      plate_style = (unique_settings.showNameplate and "unique") or (unique_settings.ShowHeadlineView and "NameOnly-Unique") or "etotem"
-
-      -- As this is called for every aura on a unit, never set it to false (overwriting a previous true value)
-      if plate_style then
-        unit.CustomStyleAura = plate_style
-        unit.CustomPlateSettingsAura = unique_settings
-
-        local _, _, icon = _G.GetSpellInfo(aura_id)
-        unique_settings.AutomaticIcon = icon
-      end
+    local _, _, icon = _G.GetSpellInfo(aura_id)
+    unique_settings.AutomaticIcon = icon
+    return true
+  else
+    return false
   end
-
-  return plate_style
 end
 
 function Addon.UnitStyle_CastDependent(unit, spell_id, spell_name)
@@ -297,13 +307,11 @@ function Addon.UnitStyle_CastDependent(unit, spell_id, spell_name)
   if unique_settings and unique_settings.useStyle and unique_settings.Enable.UnitReaction[unit.reaction] then
     plate_style = (unique_settings.showNameplate and "unique") or (unique_settings.ShowHeadlineView and "NameOnly-Unique") or "etotem"
 
-    if plate_style then
-      unit.CustomStyleCast = plate_style
-      unit.CustomPlateSettingsCast = unique_settings
+    unit.CustomStyleCast = plate_style
+    unit.CustomPlateSettingsCast = unique_settings
 
-      local _, _, icon = _G.GetSpellInfo(spell_id)
-      unique_settings.AutomaticIcon = icon
-    end
+    local _, _, icon = _G.GetSpellInfo(spell_id)
+    unique_settings.AutomaticIcon = icon
   end
 
   return plate_style
