@@ -24,9 +24,9 @@ jobs:
         run: sed -i "s/@build-time@/`date +%Y-%m-%d`/" TidyPlates_ThreatPlates_Changes.log
 
       - name: Create Mainline Package
-        uses: BigWigsMods/packager@v1
+        uses: BigWigsMods/packager@v2
         with:
-          args: -e -l -n "ThreatPlates-{project-version}{classic}"
+          args: -e -l -n "ThreatPlates-{project-version}{classic}" -g retail
         env:
           CF_API_KEY: ${{ secrets.CF_API_KEY }}
           GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
@@ -34,7 +34,7 @@ jobs:
           #WOWI_API_TOKEN: ${{ secrets.WOWI_API_TOKEN }}
 
       - name: Create Classic Package
-        uses: BigWigsMods/packager@v1
+        uses: BigWigsMods/packager@v2
         with:
           args: -e -l -n "ThreatPlates-{project-version}{classic}" -g classic
         env:
@@ -44,7 +44,7 @@ jobs:
           #WOWI_API_TOKEN: ${{ secrets.WOWI_API_TOKEN }}
 
       - name: Create BCC Classic Package
-        uses: BigWigsMods/packager@v1
+        uses: BigWigsMods/packager@v2
         with:
           args: -e -l -n "ThreatPlates-{project-version}{classic}" -g bcc
         env:
@@ -54,7 +54,7 @@ jobs:
           #WOWI_API_TOKEN: ${{ secrets.WOWI_API_TOKEN }}
 
       - name: Create Wrath Classic Package
-        uses: BigWigsMods/packager@v1
+        uses: BigWigsMods/packager@v2
         with:
           args: -e -l -n "ThreatPlates-{project-version}{classic}" -g wrath
         env:

@@ -26,7 +26,7 @@ jobs:
       - name: Create Mainline Package
         uses: BigWigsMods/packager@v2
         with:
-          args: -e -l -n "ThreatPlates-{project-version}{classic}"
+          args: -e -l -n "ThreatPlates-{project-version}{classic}" -g retail
         env:
           #CF_API_KEY: ${{ secrets.CF_API_KEY }}
           GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
