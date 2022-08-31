@@ -18,9 +18,17 @@ local rawset = rawset
 local UnitClass = UnitClass
 
 -- ThreatPlates APIs
+
+
+---------------------------------------------------------------------------------------------------
+-- WoW Version Check
+---------------------------------------------------------------------------------------------------
 Addon.IS_CLASSIC = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
-Addon.IS_TBC_CLASSIC = (WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC)
+Addon.IS_TBC_CLASSIC = (GetClassicExpansionLevel and GetClassicExpansionLevel() == LE_EXPANSION_BURNING_CRUSADE)
+Addon.IS_WRATH_CLASSIC = (GetClassicExpansionLevel and GetClassicExpansionLevel() == LE_EXPANSION_WRATH_OF_THE_LICH_KING)
 Addon.IS_MAINLINE = (WOW_PROJECT_ID == WOW_PROJECT_MAINLINE)
+-- Addon.IS_TBC_CLASSIC = (WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC and LE_EXPANSION_LEVEL_CURRENT == LE_EXPANSION_BURNING_CRUSADE)
+-- Addon.IS_WRATH_CLASSIC = (WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC and LE_EXPANSION_LEVEL_CURRENT == LE_EXPANSION_WRATH_OF_THE_LICH_KING)
 
 ---------------------------------------------------------------------------------------------------
 -- Libraries
@@ -427,7 +435,7 @@ Addon.Debug.PrintUnit = function(unitid)
 	Addon.Logging.Debug("  Active =", plate.TPFrame.Active)
 	Addon.Logging.Debug("-------------------------------------------------------------")
   if tp_frame and unit and unit.unitid then
-		if not Addon.IS_TBC_CLASSIC and not Addon.IS_CLASSIC then
+		if not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC and not Addon.IS_WRATH_CLASSIC then
 			Addon.Logging.Debug("  UnitNameplateShowsWidgetsOnly = ", UnitNameplateShowsWidgetsOnly(unit.unitid))
 		end
     Addon.Logging.Debug("  Reaction = ", UnitReaction("player", unit.unitid))
@@ -448,7 +456,7 @@ Addon.Debug.PrintUnit = function(unitid)
 		Addon.Logging.Debug("    Player is UnitIsOwnerOrControllerOfUnit =", UnitIsOwnerOrControllerOfUnit("player", unit.unitid))
 		Addon.Logging.Debug("    Player Pet =", UnitIsUnit(unit.unitid, "pet"))
     Addon.Logging.Debug("    IsOtherPlayersPet =", UnitIsOtherPlayersPet(unit.unitid))
-		if not Addon.IS_TBC_CLASSIC and not Addon.IS_CLASSIC then
+		if not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC and not Addon.IS_WRATH_CLASSIC then
 			Addon.Logging.Debug("    IsBattlePet =", UnitIsBattlePet(unit.unitid))
 		end
 		Addon.Logging.Debug("  -- PvP ---------------------------------")

@@ -41,10 +41,19 @@ jobs:
           GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
           #WOWI_API_TOKEN: ${{ secrets.WOWI_API_TOKEN }}
 
-      - name: Create BCC Package
+      - name: Create BCC Classic Package
         uses: BigWigsMods/packager@v1
         with:
           args: -e -l -n "ThreatPlates-{project-version}{classic}" -g bcc
+        env:
+          #CF_API_KEY: ${{ secrets.CF_API_KEY }}
+          GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
+          #WOWI_API_TOKEN: ${{ secrets.WOWI_API_TOKEN }}
+
+      - name: Create Wrath Classic Package
+        uses: BigWigsMods/packager@v1
+        with:
+          args: -e -l -n "ThreatPlates-{project-version}{classic}" -g wrath
         env:
           #CF_API_KEY: ${{ secrets.CF_API_KEY }}
           GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}

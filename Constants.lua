@@ -177,13 +177,6 @@ ThreatPlates.SPEC_ROLES = {
   WARRIOR			= { false, false, true },
 }
 
---if not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC then
---  ThreatPlates.SPEC_ROLES.DEATHKNIGHT = { true, false, false }
---  ThreatPlates.SPEC_ROLES.DEMONHUNTER = { false, true }
---  ThreatPlates.SPEC_ROLES.DRUID 			= { false, false, true, false }
---  ThreatPlates.SPEC_ROLES.MONK 				= { true, false, false }
---end
-
 ThreatPlates.FontStyle = {
   NONE = L["None"],
   OUTLINE = L["Outline"],
@@ -294,6 +287,43 @@ local TOTEM_DATA_RETAIL = {
   --{ SpellID = 196932, ID = "N6", GroupColor = "4c9900"},		-- Voodoo Totem (removed in patch 8.0.1)
 }
 
+local TOTEM_DATA_WRATH_CLASSIC = {
+  -- Earth Totems
+  { SpellID = 8075,   ID = "E1", GroupColor = "8B4513", Ranks = 8, Icon ="spell_nature_earthbindtotem", },	 -- Strength of Earth Totem
+  { SpellID = 8071,   ID = "E2", GroupColor = "8B4513", Ranks = 10, Icon ="spell_nature_stoneskintotem" },	 -- Stoneskin Totem
+  { SpellID = 5730,   ID = "E3", GroupColor = "8B4513", Ranks = 10, Icon ="spell_nature_stoneclawtotem" },	 -- Stoneclaw Totem
+  { SpellID = 2484,    ID = "E4", GroupColor = "8B4513", Icon ="spell_nature_strengthofearthtotem02" },      -- Earthbind Totem
+  { SpellID = 8143,    ID = "E5", GroupColor = "8B4513", Icon ="spell_nature_tremortotem" },	               -- Tremor Totem
+  { SpellID = 2062,    ID = "E6", GroupColor = "8B4513", Icon ="spell_nature_earthelemental_totem" },	       -- Earth Elemental Totem
+
+  -- Fire Totems
+  { SpellID = 3599, ID = "F1", GroupColor = "ff8f8f", Ranks = 10, Icon ="spell_fire_searingtotem", }, 	    -- Searing Totem
+  { SpellID = 8181, ID = "F2", GroupColor = "ff8f8f", Ranks = 6, Icon ="spell_frostresistancetotem_01" },   -- Frost Resistance Totem
+  -- { SpellID = 1535, ID = "F3", GroupColor = "ff8f8f", Ranks = 7, Icon ="spell_fire_sealoffire" }, 	      -- Fire Nova Totem
+  { SpellID = 8190, ID = "F4", GroupColor = "ff8f8f", Ranks = 7, Icon ="spell_fire_selfdestruct" }, 	      -- Magma Totem
+  { SpellID = 8227, ID = "F5", GroupColor = "ff8f8f", Ranks = 8, Icon ="spell_nature_guardianward" }, 	    -- Flametongue Totem
+  { SpellID = 2894, ID = "F6", GroupColor = "ff8f8f", Icon ="spell_fire_elemental_totem" }, 	              -- Fire Elemental Totem
+  { SpellID = 30706, ID = "F7", GroupColor = "ff8f8f", Ranks = 4, Icon ="spell_fire_totemofwrath" }, 	      -- Totem of Wrath
+
+  -- Air Totems
+  -- { SpellID = 8835,  ID = "A1", GroupColor = "ffb31f", Ranks = 3, Icon ="spell_nature_invisibilitytotem" },	 -- Grace of Air Totem
+  { SpellID = 10595,  ID = "A2", GroupColor = "ffb31f", Ranks = 6, Icon ="spell_nature_natureresistancetotem" }, -- Nature Resistance Totem
+  -- { SpellID = 15107,  ID = "A3", GroupColor = "ffb31f", Ranks = 4, Icon ="spell_nature_earthbind" },		       -- Windwall Totem
+  { SpellID = 8512,  ID = "A4", GroupColor = "ffb31f", Ranks = 5, Icon ="spell_nature_windfury" },	           	 -- Windfury Totem
+  { SpellID = 8177,   ID = "A5", GroupColor = "ffb31f", Icon ="spell_nature_groundingtotem" },          		     -- Grounding Totem
+  { SpellID = 6495,   ID = "A6", GroupColor = "ffb31f", Icon ="spell_nature_removecurse" },		                   -- Sentry Totem
+  -- { SpellID = 25908,  ID = "A7", GroupColor = "ffb31f", Icon ="spell_nature_brilliance" },		                 -- Tranquil Air Totem
+  { SpellID = 3738,  ID = "A8", GroupColor = "ffb31f", Icon ="spell_nature_slowingtotem" },		                   -- Wrath of Air Totem
+
+  -- Water Totems
+  { SpellID = 5394,  ID = "W1", GroupColor = "b8d1ff", Ranks = 9, Icon ="inv_spear_04" },		              -- Healing Stream Totem
+  { SpellID = 5675,  ID = "W2", GroupColor = "b8d1ff", Ranks = 8, Icon ="spell_nature_manaregentotem" },	-- Mana Spring Totem
+  { SpellID = 8184,  ID = "W3", GroupColor = "b8d1ff", Ranks = 6, Icon ="spell_fireresistancetotem_01" },	-- Fire Resistance Totem
+  { SpellID = 16190,  ID = "W4", GroupColor = "b8d1ff", Icon ="spell_frost_summonwaterelemental" },		    -- Mana Tide Totem
+  { SpellID = 8170,   ID = "W5", GroupColor = "b8d1ff", Icon ="spell_nature_diseasecleansingtotem" },		  -- Cleansing Totem
+  -- { SpellID = 8166,   ID = "W6", GroupColor = "b8d1ff", Icon ="spell_nature_poisoncleansingtotem" },   -- Poison Cleansing Totem
+}
+
 local TOTEM_DATA_BC_CLASSIC = {
   -- Earth Totems
   { SpellID = 8075,   ID = "E1", GroupColor = "8B4513", Ranks = 6, Icon ="spell_nature_earthbindtotem", },	-- Strength of Earth Totem
@@ -364,8 +394,9 @@ local TOTEM_DATA_CLASSIC = {
   { SpellID = 8166,   ID = "W6", GroupColor = "b8d1ff", },        		  -- Poison Cleansing Totem
 }
 
-Addon.Data.Totems = (Addon.IS_CLASSIC and TOTEM_DATA_CLASSIC) or (Addon.IS_TBC_CLASSIC and TOTEM_DATA_BC_CLASSIC) or TOTEM_DATA_RETAIL
-local TOTEM_RANKS_CLASSIC = { " II", " III", " IV", " V", " VI", " VII", " VIII", " IX" }
+Addon.Data.Totems = (Addon.IS_CLASSIC and TOTEM_DATA_CLASSIC) or (Addon.IS_TBC_CLASSIC and TOTEM_DATA_BC_CLASSIC) or
+                    (Addon.IS_WRATH_CLASSIC and TOTEM_DATA_WRATH_CLASSIC) or TOTEM_DATA_RETAIL
+local TOTEM_RANKS_CLASSIC = { " II", " III", " IV", " V", " VI", " VII", " VIII", " IX", "X" }
 
 function Addon:InitializeTotemInformation()
   for _, totem_data in ipairs(Addon.Data.Totems) do
@@ -384,7 +415,7 @@ function Addon:InitializeTotemInformation()
       Addon.TOTEMS[name] = totem_data.ID
 
       -- Add totem ranks for WoW Classic
-      if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC then
+      if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
         for rank = 1, (totem_data.Ranks or 1) - 1  do
           Addon.TOTEMS[name .. TOTEM_RANKS_CLASSIC[rank]] = totem_data.ID
         end
@@ -1214,7 +1245,14 @@ ThreatPlates.DEFAULT_SETTINGS = {
       y_hv = -20,
       Specialization = "DRUID",
       ColorBySpec = {
-        DEATHKNIGHT = {
+        DEATHKNIGHT = Addon.IS_WRATH_CLASSIC and {
+          [1] = RGB(255, 0, 0),
+          [2] = RGB(255, 0, 0),
+          [3] = RGB(0, 167, 255),
+          [4] = RGB(0, 167, 255),
+          [5] = RGB(0, 255, 0),
+          [6] = RGB(0, 255, 0),
+        } or {
           [1] = RGB(255, 0, 255),
           [2] = RGB(255, 0, 255),
           [3] = RGB(255, 0, 255),

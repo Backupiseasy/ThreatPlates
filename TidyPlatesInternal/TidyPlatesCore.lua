@@ -97,6 +97,14 @@ elseif Addon.IS_TBC_CLASSIC then
 
   -- Not available in BC Classic, introduced in patch 9.0.1
   UnitNameplateShowsWidgetsOnly = function() return false end
+elseif Addon.IS_WRATH_CLASSIC then
+  GetNameForNameplate = function(plate) return plate:GetName() end
+  UnitEffectiveLevel = function(...) return _G.UnitLevel(...) end
+
+  UnitCastingInfo = _G.UnitCastingInfo
+
+  -- Not available in WotLK Classic, introduced in patch 9.0.1
+  UnitNameplateShowsWidgetsOnly = function() return false end
 else
   GetNameForNameplate = function(plate) return plate:GetName() end
 
@@ -1065,6 +1073,7 @@ do
 
   function CoreEvents:PLAYER_LOGIN()
     -- Fix for Blizzard default plates being shown at random times
+    -- Works for Mainline and Wrath Classic
     if NamePlateDriverFrame and NamePlateDriverFrame.AcquireUnitFrame then
       hooksecurefunc(NamePlateDriverFrame, "AcquireUnitFrame", NamePlateDriverFrame_AcquireUnitFrame)
     end
@@ -1582,7 +1591,7 @@ do
 
   -- Do this after events are registered, otherwise UNIT_AURA would be registered as a general event, not only as
   -- an unit event.
-  if (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC) and Addon.PlayerClass == "PALADIN" then
+  if (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC) and Addon.PlayerClass == "PALADIN" then
     CoreEvents.UNIT_AURA = UNIT_AURA
     TidyPlatesCore:RegisterUnitEvent("UNIT_AURA", "player")
     -- UNIT_AURA does not seem to be fired after login (even when buffs are active)
@@ -1927,7 +1936,7 @@ function Addon:ForceUpdate()
     TidyPlatesCore:RegisterEvent("UNIT_TARGET")
   end
 
-  SettingsShowOnlyNames = CVars:GetAsBool("nameplateShowOnlyNames") and Addon.db.profile.BlizzardSettings.Names.Enabled and not (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC)
+  SettingsShowOnlyNames = CVars:GetAsBool("nameplateShowOnlyNames") and Addon.db.profile.BlizzardSettings.Names.Enabled and not (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC)
   
   for plate, unitid in pairs(self.PlatesVisible) do
     -- If Blizzard default plates are enabled (which means that these nameplates are not active), we need

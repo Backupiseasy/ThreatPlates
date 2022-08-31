@@ -342,7 +342,7 @@ function Addon:UpdateConfigurationStatusText()
     Truncate = function(value) return value end
   end
 
-  if self.IS_CLASSIC or self.IS_TBC_CLASSIC then
+  if self.IS_CLASSIC or self.IS_TBC_CLASSIC or self.IS_WRATH_CLASSIC then
     ShowAbsorbs = false
   else
     ShowAbsorbs = Settings.AbsorbsAmount or Settings.AbsorbsPercentage
