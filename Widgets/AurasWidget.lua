@@ -309,6 +309,7 @@ local CROWD_CONTROL_SPELLS_RETAIL = {
   [213688] = LOC_STUN,        -- Fel Cleave aura from Call Fel Lord (Honor)
   [233582] = PC_SNARE,        -- Entrenched in Flame
   [5484] = LOC_FEAR,          -- Howl of Terror
+  [22703] = LOC_STUN,         -- Infernal Awakening
 
   ---------------------------------------------------------------------------------------------------
   -- Warrior
@@ -343,6 +344,7 @@ local CROWD_CONTROL_SPELLS_RETAIL = {
   [198909] = LOC_DISORIENT, -- Song of Chi-Ji (Blizzard)
   [116095] = PC_SNARE,      -- Disable
   [123586] = PC_SNARE,      -- Flying Serpent Kick
+  [324312] = PC_ROOT,       -- Clash
 
   ---------------------------------------------------------------------------------------------------
   -- Racial Traits and other specia sources
