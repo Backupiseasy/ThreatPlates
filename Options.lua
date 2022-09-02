@@ -4925,6 +4925,11 @@ local function CreateBlizzardSettings()
     end,
   }
 
+  func_handler.SetValueEnable = function(self, info, val)
+    func_handler.SetValue(self, info, val)
+    Addon:ForceUpdateFrameOnShow()
+  end
+
   local entry = {
     name = L["Blizzard Settings"],
     order = 140,
@@ -5424,6 +5429,7 @@ local function CreateBlizzardSettings()
     order = 2,
     type = "toggle",
     width = "full",
+    set = "SetValueEnable",
     arg = { "BlizzardSettings", "Names", "Enabled" },
   }
 
