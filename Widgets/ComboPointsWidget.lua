@@ -799,7 +799,7 @@ function Widget:UpdateSettings()
 
       self.Colors[current_cp] = self.Colors[current_cp] or {}
       if self.db.Style == "Blizzard" then
-        self.Colors[current_cp][cp_no] = RGB(255, 255, 255)
+        self.Colors[current_cp][cp_no] = DEATHKNIGHT_COLORS.Neutral
       elseif self.db.UseUniformColor then
         -- Could add to the if clause: and not (Addon.IS_WRATH_CLASSIC and PlayerClass == "DEATHKNIGHT") 
         self.Colors[current_cp][cp_no] = colors[current_cp]

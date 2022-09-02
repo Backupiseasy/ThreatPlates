@@ -1248,10 +1248,11 @@ ThreatPlates.DEFAULT_SETTINGS = {
         DEATHKNIGHT = Addon.IS_WRATH_CLASSIC and {
           [1] = RGB(255, 0, 0),
           [2] = RGB(255, 0, 0),
-          [3] = RGB(0, 167, 255),
-          [4] = RGB(0, 167, 255),
-          [5] = RGB(0, 255, 0),
-          [6] = RGB(0, 255, 0),
+          [3] = RGB(0, 255, 255),
+          [4] = RGB(0, 255, 255),
+          [5] = RGB(0, 127, 0),
+          [6] = RGB(0, 127, 0),
+          DeathRune = RGB(204, 25, 255),
         } or {
           [1] = RGB(255, 0, 255),
           [2] = RGB(255, 0, 255),
