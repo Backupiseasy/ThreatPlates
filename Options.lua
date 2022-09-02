@@ -2083,7 +2083,7 @@ local function CreateComboPointsWidgetOptions()
               Addon.Widgets:UpdateSettings(MAP_OPTION_TO_WIDGET[info[2]])
             end,
             hasAlpha = false,
-            hidden = function() return Addon.PlayerClass ~= "ROGUE" end
+            hidden = function() return db.ComboPoints.Specialization ~= "ROGUE" or (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC) end
           },
           ColorDeathrune = {
             name = L["Death Rune"],
