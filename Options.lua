@@ -4971,7 +4971,7 @@ local function CreateBlizzardSettings()
                   cvars[#cvars + 1] = "clampTargetNameplateToScreen"
                 end
                 
-                if not (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC) then            
+                if not Addon.WOW_USES_CLASSIC_NAMEPLATES then            
                   cvars[#cvars + 1] = "nameplateResourceOnTarget"
                 end
 
@@ -5108,7 +5108,7 @@ local function CreateBlizzardSettings()
             inline = true,
             set = SetValue,
             get = GetValue,
-            disabled = function() return (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC) and (db.ShowFriendlyBlizzardNameplates or db.ShowEnemyBlizzardNameplates) end,
+            disabled = function() return Addon.WOW_USES_CLASSIC_NAMEPLATES and (db.ShowFriendlyBlizzardNameplates or db.ShowEnemyBlizzardNameplates) end,
             args = {
               Description = {
                 type = "description",
@@ -5329,7 +5329,7 @@ local function CreateBlizzardSettings()
         order = 45,
         type = "group",
         inline = false,
-        hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC end,
+        hidden = function() return Addon.WOW_USES_CLASSIC_NAMEPLATES end,
         args = {
           HideBuffs = {
             type = "toggle",

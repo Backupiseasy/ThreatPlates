@@ -63,7 +63,7 @@ local function CalculateSynchedNameplateSize()
   return width, height
 end
 
-if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
+if Addon.WOW_USES_CLASSIC_NAMEPLATES then
   Addon.SetBaseNamePlateSize = function(self)
     local db = self.db.profile
 
@@ -422,7 +422,7 @@ function TidyPlatesThreat:OnEnable()
   Addon:CheckForFirstStartUp()
   Addon:CheckForIncompatibleAddons()
 
-  if not (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC) then
+  if not Addon.WOW_USES_CLASSIC_NAMEPLATES then
     CVars:OverwriteBoolProtected("nameplateResourceOnTarget", Addon.db.profile.PersonalNameplate.ShowResourceOnTarget)
   end
 

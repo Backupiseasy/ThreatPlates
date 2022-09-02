@@ -1908,7 +1908,7 @@ function Addon:ForceUpdate()
 
   SettingsShowFriendlyBlizzardNameplates = db.ShowFriendlyBlizzardNameplates
   SettingsShowEnemyBlizzardNameplates = db.ShowEnemyBlizzardNameplates
-  SettingsHideBuffsOnPersonalNameplate = db.PersonalNameplate.HideBuffs
+  SettingsHideBuffsOnPersonalNameplate = db.PersonalNameplate.HideBuffs  -- Check for Addon.WOW_USES_CLASSIC_NAMEPLATES not necessary as there is no player nameplate with classic nameplates
 
   if db.Transparency.Fading then
     UpdatePlate_SetAlpha = UpdatePlate_SetAlphaWithFading
@@ -1936,7 +1936,7 @@ function Addon:ForceUpdate()
     TidyPlatesCore:RegisterEvent("UNIT_TARGET")
   end
 
-  SettingsShowOnlyNames = CVars:GetAsBool("nameplateShowOnlyNames") and Addon.db.profile.BlizzardSettings.Names.Enabled and not (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC)
+  SettingsShowOnlyNames = CVars:GetAsBool("nameplateShowOnlyNames") and Addon.db.profile.BlizzardSettings.Names.Enabled and not Addon.WOW_USES_CLASSIC_NAMEPLATES
   
   for plate, unitid in pairs(self.PlatesVisible) do
     -- If Blizzard default plates are enabled (which means that these nameplates are not active), we need
