@@ -2085,6 +2085,21 @@ local function CreateComboPointsWidgetOptions()
             hasAlpha = false,
             hidden = function() return Addon.PlayerClass ~= "ROGUE" end
           },
+          ColorDeathrune = {
+            name = L["Death Rune"],
+            type = "color",
+            order = 180,
+            get = function(info)
+              local color = db.ComboPoints.ColorBySpec.DEATHKNIGHT.DeathRune or t.RGB(0, 0, 0)
+              return color.r, color.g, color.b
+            end,
+            set = function(info, r, g, b)
+              db.ComboPoints.ColorBySpec.DEATHKNIGHT.DeathRune = t.RGB(r * 255, g * 255, b * 255)
+              Addon.Widgets:UpdateSettings(MAP_OPTION_TO_WIDGET[info[2]])
+            end,
+            hasAlpha = false,
+            hidden = function() return db.ComboPoints.Specialization ~= "DEATHKNIGHT" or not Addon.IS_WRATH_CLASSIC end
+          },
         },
       },
       Layout = {
