@@ -1009,9 +1009,12 @@ do
       return
     end
 
-    if SettingsShowOnlyNames then
-      UnitFrame.ClassificationFrame:SetAlpha(0)
-      --UnitFrame.ClassificationFrame.classificationIndicator:SetAlpha(0)
+     if SettingsShowOnlyNames then
+      if Addon.WOW_USES_CLASSIC_NAMEPLATES then
+        UnitFrame.LevelFrame:SetAlpha(0)
+      else
+        UnitFrame.ClassificationFrame:SetAlpha(0)
+      end
     end
 
     -- Hide ThreatPlates nameplates if Blizzard nameplates should be shown for friendly units
@@ -1900,7 +1903,6 @@ function Addon:ForceUpdate()
   wipe(Addon.Cache.Texts)
   Addon:UpdateConfigurationLocalization()
   Addon:UpdateConfigurationStatusText()
-  Addon.Font:UpdateConfiguration()
 
   CVAR_NameplateOccludedAlphaMult = CVars:GetAsNumber("nameplateOccludedAlphaMult")
 
@@ -1936,7 +1938,7 @@ function Addon:ForceUpdate()
     TidyPlatesCore:RegisterEvent("UNIT_TARGET")
   end
 
-  SettingsShowOnlyNames = CVars:GetAsBool("nameplateShowOnlyNames") and Addon.db.profile.BlizzardSettings.Names.Enabled and not Addon.WOW_USES_CLASSIC_NAMEPLATES
+  SettingsShowOnlyNames = CVars:GetAsBool("nameplateShowOnlyNames") and Addon.db.profile.BlizzardSettings.Names.Enabled
   
   for plate, unitid in pairs(self.PlatesVisible) do
     -- If Blizzard default plates are enabled (which means that these nameplates are not active), we need
