@@ -12,14 +12,11 @@ local ADDON_NAME, Addon = ...
 -- WoW APIs
 local SystemFont_NamePlate, SystemFont_NamePlateFixed = SystemFont_NamePlate, SystemFont_NamePlateFixed
 local SystemFont_LargeNamePlate, SystemFont_LargeNamePlateFixed = SystemFont_LargeNamePlate, SystemFont_LargeNamePlateFixed
-local SystemFont_NamePlateLevel = SystemFont_NamePlateLevel
-local GetCVarBool = C_CVar.GetCVarBool
 
 -- ThreatPlates APIs
 local ANCHOR_POINT_TEXT = Addon.ANCHOR_POINT_TEXT
 
 -- Cached database settings
-local SettingsShowOnlyNames
 
 ---------------------------------------------------------------------------------------------------
 -- Module Setup
@@ -132,11 +129,6 @@ function FontModule:SetNamesFonts()
     UpdateSystemFont(SystemFont_NamePlateFixed, db)
     UpdateSystemFont(SystemFont_LargeNamePlate, db)
     UpdateSystemFont(SystemFont_LargeNamePlateFixed, db)
-
-    -- Hide level frame in Classic if Names font adjustmend and nameplateShowOnlyNames is enabled
-    if SettingsShowOnlyNames then
-      SystemFont_NamePlateLevel:SetTextColor(0, 0, 0, 0)
-    end
   end
 end
 
@@ -151,8 +143,5 @@ end
 -- Update of settings
 ---------------------------------------------------------------------------------------------------
 
-function FontModule:UpdateSettings()
-  if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC then
-    SettingsShowOnlyNames = GetCVarBool("nameplateShowOnlyNames") and Addon.db.profile.BlizzardSettings.Names.Enabled
-  end
-end
+-- function FontModule:UpdateSettings()
+-- end

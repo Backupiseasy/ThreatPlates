@@ -1,11 +1,9 @@
 # @project-version@ (@build-time@)
 
-* Added a feature to change the name font of Blizzard nameplates and hide the healthbar (to only show unit names), e.g., while in instances.
-* Added an option to show title and realm in a player's name [Comment #3952, #1995, #4164, #6140, TPC#496, Issue #312, #432].
-* Added an option to show target of target with or without enclosing brackets [Issue #543, IM].
-* Added an option to also use NPC IDs in unit (formerly name) triggers for custom styles [Comment #6207].
-* Added additional icons as indicator for elite and rare mobs [GH-330, IM] (thanks to lizardo221).
-* Added Venthry Covenant Ability Agent of Chaos to the Auras widget as CC aura [Issue #548].
-* Fixed a bug where Frostbite was not classified as CC aura [Issue #547].
-* Integrated new UNIT_AURA processing optimizations to improve unit aura processing in encounters where many nameplates are on screen at once [Comment #6114]. 
-* Upgrade integrated libraries (Ace3 r1259).
+* Added basic support for WoW Wrath of the Lich King Classic.
+* Added support for Death Knight's death runes in Wrath Classic.
+* Added Infernal Awakening (Destruction Warlock), Clash (Brewmaster Monk), and Deep Freeze (Frost Mage) to Auras widget as CC aura [Comment #6324, #6335].
+* Removed welcome back message that is shown after every login [Comment #6325].
+* Fixed a bug in Combo Points widget where Animacharge color selector was shown for all specializations/classes.
+* Fixed a bug in name font customization for Classic where a UI reload was necessary to level text and elite icon.
+* Upgrade integrated libraries (LibSharedMedia v9.2.7).

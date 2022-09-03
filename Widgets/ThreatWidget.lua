@@ -317,50 +317,40 @@ local THREAT_DETAILS_FUNTIONS = {
 }
 
 function Widget:UpdateFrame(widget_frame, unit)
-  if not Threat:ShowFeedback(unit) then
-    widget_frame:Hide()
-    return
-  end
-
-  -- unique_setting.useStyle is already checked when setting the style of the nameplate (to custom)
-  local unique_setting = unit.CustomPlateSettings
-  if unique_setting and not unique_setting.UseThreatColor then
-    widget_frame:Hide()
-    return
-  end
-
-  widget_frame:Show()
-  widget_frame.Percentage:SetHeight(widget_frame:GetHeight())
-
-  -- Show threat art (textures)
-  if SettingsArt.ON and not (GetRaidTargetIndex(unit.unitid) and Settings.marked.art) then
-    if SettingsArt.theme == "bar" then
+  if Threat:ShowFeedback(unit) then
+    -- Show threat art (textures)
+    -- unique_setting.useStyle is already checked when setting the style of the nameplate (to custom)
+    local unique_setting = unit.CustomPlateSettings
+    if (not unique_setting or unique_setting.UseThreatColor) and SettingsArt.ON and not (GetRaidTargetIndex(unit.unitid) and Settings.marked.art) then
       widget_frame.LeftTexture:Show()
+      widget_frame.RightTexture:SetShown(SettingsArt.theme ~= "bar")
     else
-      widget_frame.LeftTexture:Show()
-      widget_frame.RightTexture:Show()
+      widget_frame.LeftTexture:Hide()
+      widget_frame.RightTexture:Hide()
     end
-  else
-    widget_frame.LeftTexture:Hide()
-    widget_frame.RightTexture:Hide()
-  end
 
-  widget_frame.ThreatSituation = nil
-  self:UpdateThreatValue(widget_frame, unit)
+    widget_frame.ThreatSituation = nil
+    self:UpdateThreatValue(widget_frame, unit)
+
+    widget_frame:Show()
+  else
+    widget_frame:Hide()
+  end
 end 
 
 function Widget:UpdateThreatValue(widget_frame, unit)
   local db = Settings.ThreatPercentage
 
   -- Threat value has to be updated after every UNIT_THREAT_LIST_UPDATE event, not only when threat_situation changes
-  local show_threat_value = db.ShowAlways or (db.ShowInGroups and PlayerIsInGroup) or (db.ShowWithPet and UnitExists("pet"))
-  if show_threat_value then
+  if db.ShowAlways or (db.ShowInGroups and PlayerIsInGroup) or (db.ShowWithPet and UnitExists("pet")) then
     local status, percentage_text = ThreatDetailsFunction(unit.unitid, db)
     if status then
       widget_frame.Percentage:SetText(percentage_text)
     else
       widget_frame.Percentage:SetText(nil)
     end
+
+    widget_frame.Percentage:SetHeight(widget_frame:GetHeight())
     widget_frame.Percentage:Show()
   else
     widget_frame.Percentage:Hide()
@@ -373,23 +363,27 @@ function Widget:UpdateThreatValue(widget_frame, unit)
     
     -- As the widget is enabled, textures or percentages must be enabled.
     local style = Addon.GetPlayerRole()
+
     if widget_frame.LeftTexture:IsShown() then
-      local texture = PATH
-      if style ~= "tank" then
-        -- Tanking uses regular textures / swapped for dps / healing
-        texture = texture .. SettingsArt.theme.."\\".. REVERSE_THREAT_SITUATION[threat_level]
-      else
-        texture = texture .. SettingsArt.theme.."\\".. threat_level
-      end
+      local unique_setting = unit.CustomPlateSettings
+      if not unique_setting or unique_setting.UseThreatColor then           
+        local texture = PATH
+        if style ~= "tank" then
+          -- Tanking uses regular textures / swapped for dps / healing
+          texture = texture .. SettingsArt.theme.."\\".. REVERSE_THREAT_SITUATION[threat_level]
+        else
+          texture = texture .. SettingsArt.theme.."\\".. threat_level
+        end
 
-      if SettingsArt.theme == "bar" then
-        widget_frame.LeftTexture:SetTexture(texture)
-      else
-        widget_frame.LeftTexture:SetTexture(texture)
-        widget_frame.RightTexture:SetTexture(texture)
-      end
+        if SettingsArt.theme == "bar" then
+          widget_frame.LeftTexture:SetTexture(texture)
+        else
+          widget_frame.LeftTexture:SetTexture(texture)
+          widget_frame.RightTexture:SetTexture(texture)
+        end
+      end 
     end
-
+    
     if widget_frame.Percentage:IsShown() then
       local color
       if Settings.ThreatPercentage.UseThreatColor then

@@ -92,7 +92,7 @@ Addon.Debug.PrintUnit = function(unitid)
 	Addon.Logging.Debug("---------------------------------------------------------------")
 
   if tp_frame and unit and unit.unitid then
-		if not Addon.IS_TBC_CLASSIC and not Addon.IS_CLASSIC then
+		if not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC and not Addon.IS_WRATH_CLASSIC then
 			Addon.Logging.Debug("  UnitNameplateShowsWidgetsOnly = ", UnitNameplateShowsWidgetsOnly(unit.unitid))
 		end
     Addon.Logging.Debug("  Reaction = ", UnitReaction("player", unit.unitid))
@@ -109,7 +109,7 @@ Addon.Debug.PrintUnit = function(unitid)
 		Addon.Logging.Debug("    Player is UnitIsOwnerOrControllerOfUnit =", UnitIsOwnerOrControllerOfUnit("player", unit.unitid))
 		Addon.Logging.Debug("    Player Pet =", UnitIsUnit(unit.unitid, "pet"))
     Addon.Logging.Debug("    IsOtherPlayersPet =", UnitIsOtherPlayersPet(unit.unitid))
-		if not Addon.IS_TBC_CLASSIC and not Addon.IS_CLASSIC then
+		if not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC and not Addon.IS_WRATH_CLASSIC then
 			Addon.Logging.Debug("    IsBattlePet =", UnitIsBattlePet(unit.unitid))
 		end
 		Addon.Logging.Debug("  -- PvP ---------------------------------")

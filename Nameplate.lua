@@ -120,6 +120,14 @@ elseif Addon.IS_TBC_CLASSIC then
 
   -- Not available in BC Classic, introduced in patch 9.0.1
   UnitNameplateShowsWidgetsOnly = function() return false end
+elseif Addon.IS_WRATH_CLASSIC then
+  GetNameForNameplate = function(plate) return plate:GetName() end
+  UnitEffectiveLevel = function(...) return _G.UnitLevel(...) end
+
+  UnitCastingInfo = _G.UnitCastingInfo
+
+  -- Not available in WotLK Classic, introduced in patch 9.0.1
+  UnitNameplateShowsWidgetsOnly = function() return false end
 else
   GetNameForNameplate = function(plate) return plate:GetName() end
 
@@ -625,7 +633,7 @@ function Addon:UpdateSettings()
   --wipe(PlateOnUpdateQueue)
 
   Localization:UpdateSettings()
-  Font:UpdateSettings()
+  --Font:UpdateSettings()
   Icon:UpdateSettings()
   Threat:UpdateSettings()
   Transparency:UpdateSettings()
@@ -638,8 +646,8 @@ function Addon:UpdateSettings()
 
   SettingsShowFriendlyBlizzardNameplates = db.ShowFriendlyBlizzardNameplates
   SettingsShowEnemyBlizzardNameplates = db.ShowEnemyBlizzardNameplates
-  SettingsHideBuffsOnPersonalNameplate = db.PersonalNameplate.HideBuffs
-  SettingsShowOnlyNames = CVars:GetAsBool("nameplateShowOnlyNames") and Addon.db.profile.BlizzardSettings.Names.Enabled and not (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC)
+  SettingsHideBuffsOnPersonalNameplate = db.PersonalNameplate.HideBuffs -- Check for Addon.WOW_USES_CLASSIC_NAMEPLATES not necessary as there is no player nameplate with classic nameplates
+  SettingsShowOnlyNames = CVars:GetAsBool("nameplateShowOnlyNames") and Addon.db.profile.BlizzardSettings.Names.Enabled
 
   if db.settings.castnostop.ShowInterruptSource then
     RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
@@ -684,6 +692,21 @@ function Addon:ForceUpdateOnNameplate(plate)
   OnShowNameplate(plate, plate.TPFrame.unit.unitid)
 end
 
+local function ClassicBlizzardNameplatesSetAlpha(UnitFrame, alpha)
+  if Addon.WOW_USES_CLASSIC_NAMEPLATES then
+    UnitFrame.LevelFrame:SetAlpha(alpha)
+  else
+    UnitFrame.ClassificationFrame:SetAlpha(alpha)
+  end
+end
+
+function Addon:ForceUpdateFrameOnShow()
+  SettingsShowOnlyNames = CVars:GetAsBool("nameplateShowOnlyNames") and Addon.db.profile.BlizzardSettings.Names.Enabled
+  for plate, _ in pairs(Addon.PlatesVisible) do
+    ClassicBlizzardNameplatesSetAlpha(plate.UnitFrame, SettingsShowOnlyNames and 0 or 1)
+  end
+end
+
 --------------------------------------------------------------------------------------------------------------
 -- WoW Event Handling: helper functions
 --------------------------------------------------------------------------------------------------------------
@@ -723,8 +746,7 @@ local function FrameOnShow(UnitFrame)
   end
 
   if SettingsShowOnlyNames then
-    UnitFrame.ClassificationFrame:SetAlpha(0)
-    --UnitFrame.ClassificationFrame.classificationIndicator:SetAlpha(0)
+    ClassicBlizzardNameplatesSetAlpha(UnitFrame, 0)
   end
 
   -- Hide ThreatPlates nameplates if Blizzard nameplates should be shown for friendly units
@@ -794,6 +816,7 @@ end
 
 function Addon:PLAYER_LOGIN(...)
   -- Fix for Blizzard default plates being shown at random times
+  -- Works for Mainline and Wrath Classic
   if NamePlateDriverFrame and NamePlateDriverFrame.AcquireUnitFrame then
     hooksecurefunc(NamePlateDriverFrame, "AcquireUnitFrame", NamePlateDriverFrame_AcquireUnitFrame)
   end
@@ -824,7 +847,7 @@ local PVP_INSTANCE_TYPES = {
 -- Also fires any other time the player sees a loading screen
 function Addon:PLAYER_ENTERING_WORLD(initialLogin, reloadingUI)
   local db = Addon.db.profile.questWidget
-  if not (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC) then
+  if not (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC) then
     if db.ON or db.ShowInHeadlineView then
       self.CVars:Set("showQuestTrackingTooltips", 1)
       --_G.SetCVar("showQuestTrackingTooltips", 1)
@@ -1296,7 +1319,7 @@ local function UNIT_AURA(event, unitid)
 end
 
 -- For Classic and TBC Classic, player role must be determined based on standes:
-if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC then
+if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
   local GetShapeshiftFormID = GetShapeshiftFormID
   local BEAR_FORM, DIRE_BEAR_FORM = BEAR_FORM, 8
 

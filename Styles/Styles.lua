@@ -42,7 +42,7 @@ local StyleModule = Addon.Style
 -- Wrapper functions for WoW Classic
 ---------------------------------------------------------------------------------------------------
 
-if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC then
+if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
   UnitIsBattlePet = function(...) return false end
 end
 
@@ -276,29 +276,39 @@ function StyleModule:ProcessNameTriggers(unit)
   return plate_style
 end
 
-function StyleModule:ProcessAuraTriggers(unit, aura_id, aura_name, aura_cast_by_player)
-  local plate_style
+function StyleModule:AuraTriggerInitialize(unit)
+  if Addon.ActiveAuraTriggers then
+    unit.PreviousCustomStyleAura = unit.CustomStyleAura
+    unit.CustomStyleAura = nil
+  end
+end
+
+function StyleModule:AuraTriggerUpdateStyle(unit)
+  -- Set the style if a aura trigger for a custom nameplate was found or the aura trigger
+  -- is no longer there
+  if Addon.ActiveAuraTriggers and (unit.CustomStyleAura or unit.PreviousCustomStyleAura) then 
+    local tp_frame = Addon:GetThreatPlateForUnit(unit.unitid)
+    self:Update(tp_frame)
+  end
+end
+
+function StyleModule:AuraTriggerCheckIfActive(unit, aura_id, aura_name, aura_cast_by_player)
+  -- Do this to prevent overwrite the first aura trigger custom style found (which is the one being used)
+  if not Addon.ActiveAuraTriggers or unit.CustomStyleAura then return false end
 
   local unique_settings = AuraTriggers[aura_id] or AuraTriggers[aura_name]
+  -- Check if enabled for unit's faction and check for show only my auras
+  if unique_settings and unique_settings.useStyle and unique_settings.Enable.UnitReaction[unit.reaction] and (not unique_settings.Trigger.Aura.ShowOnlyMine or aura_cast_by_player) then
+    -- As this is called for every aura on a unit, never set it to false (overwriting a previous true value)
+    unit.CustomStyleAura = (unique_settings.showNameplate and "unique") or (unique_settings.ShowHeadlineView and "NameOnly-Unique") or "etotem"
+    unit.CustomPlateSettingsAura = unique_settings
 
-
-  if unique_settings and unique_settings.useStyle and 
-    unique_settings.Enable.UnitReaction[unit.reaction] and                 -- Check if enabled for unit's faction
-    (not unique_settings.Trigger.Aura.ShowOnlyMine or aura_cast_by_player) -- Check for show only my auras
-    then
-      plate_style = (unique_settings.showNameplate and "unique") or (unique_settings.ShowHeadlineView and "NameOnly-Unique") or "etotem"
-
-      -- As this is called for every aura on a unit, never set it to false (overwriting a previous true value)
-      if plate_style then
-        unit.CustomStyleAura = plate_style
-        unit.CustomPlateSettingsAura = unique_settings
-
-        local _, _, icon = _G.GetSpellInfo(aura_id)
-        unique_settings.AutomaticIcon = icon
-      end
+    local _, _, icon = _G.GetSpellInfo(aura_id)
+    unique_settings.AutomaticIcon = icon
+    return true
+  else
+    return false
   end
-
-  return plate_style
 end
 
 function StyleModule:ProcessCastTriggers(unit, spell_id, spell_name)
@@ -308,13 +318,11 @@ function StyleModule:ProcessCastTriggers(unit, spell_id, spell_name)
   if unique_settings and unique_settings.useStyle and unique_settings.Enable.UnitReaction[unit.reaction] then
     plate_style = (unique_settings.showNameplate and "unique") or (unique_settings.ShowHeadlineView and "NameOnly-Unique") or "etotem"
 
-    if plate_style then
-      unit.CustomStyleCast = plate_style
-      unit.CustomPlateSettingsCast = unique_settings
+    unit.CustomStyleCast = plate_style
+    unit.CustomPlateSettingsCast = unique_settings
 
-      local _, _, icon = _G.GetSpellInfo(spell_id)
-      unique_settings.AutomaticIcon = icon
-    end
+    local _, _, icon = _G.GetSpellInfo(spell_id)
+    unique_settings.AutomaticIcon = icon
   end
 
   return plate_style

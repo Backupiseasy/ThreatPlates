@@ -309,7 +309,7 @@ local function ChatCommandDebug(cmd_list)
     print("    UnitIsFriend = ", UnitIsFriend("target", "player"))
 		print("    UnitSelectionColor = ", UnitSelectionColor("target"))
 		print("    UnitIsPVP = ", UnitIsPVP("target"))
-		if not Addon.IS_TBC_CLASSIC and not Addon.IS_CLASSIC then
+		if not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC and not Addon.IS_WRATH_CLASSIC then
 			print("    UnitSelectionType = ", UnitSelectionType("target"))
 		end
 	elseif command == "valid" then
@@ -322,6 +322,18 @@ local function ChatCommandDebug(cmd_list)
 				end
 			end
 		end
+	elseif command == "wow-version" then
+		local wowVersionString, wowBuild, _, wowTOC = GetBuildInfo()
+
+		print("WOW_PROJECT_ID:", WOW_PROJECT_ID)
+		print("LE_EXPANSION_LEVEL_CURRENT:", LE_EXPANSION_LEVEL_CURRENT)
+		print("GetClassicExpansionLevel():", GetClassicExpansionLevel and GetClassicExpansionLevel() or nil)		
+		print("TOC Version:", wowTOC)		
+		print("Addon --------")		
+		print("    IS_CLASSIC:", Addon.IS_CLASSIC)		
+		print("    IS_TBC_CLASSIC:", Addon.IS_TBC_CLASSIC)		
+		print("    IS_WRATH_CLASSIC:", Addon.IS_WRATH_CLASSIC)		
+		print("    IS_MAINLINE:", Addon.IS_MAINLINE)
 	elseif command == "test" then
 		Addon.Logging.Info("CHANNEL", "1", "2")
 	elseif command == "role" then

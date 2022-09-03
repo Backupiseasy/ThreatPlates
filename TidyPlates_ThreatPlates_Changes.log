@@ -1,4 +1,28 @@
 ﻿------------------------------------------------------
+10.5.0 (2022-09-03)
+------------------------------------------------------
+* Added basic support for WoW Wrath of the Lich King Classic.
+* Added support for Death Knight's death runes in Wrath Classic.
+* Added Infernal Awakening (Destruction Warlock), Clash (Brewmaster Monk), and Deep Freeze (Frost Mage) to Auras widget as CC aura [Comment #6324, #6335].
+* Removed welcome back message that is shown after every login [Comment #6325].
+* Fixed a bug in Combo Points widget where Animacharge color selector was shown for all specializations/classes.
+* Fixed a bug in name font customization for Classic where a UI reload was necessary to level text and elite icon.
+* Upgrade integrated libraries (LibSharedMedia v9.2.7).
+
+------------------------------------------------------
+10.4.2 (2022-08-19)
+------------------------------------------------------
+* Threat values will no longer be hidden for custom style nameplates.
+* Fixed a Lua error with aura trigger for custom styles that could occur when the nameplate style was reset after a triggering aura expired.
+* Fixed some bugs with logging messages and verbose mode.
+* Updated localizations.
+
+------------------------------------------------------
+10.4.1 (2022-07-05)
+------------------------------------------------------
+* Changed default for "Players in Instances" (under Blizzard Settings - Names) to disabled so that player names no longer are shown automatically in instances [Comment #6271].
+
+------------------------------------------------------
 10.4.0 (2022-07-01)
 ------------------------------------------------------
 * Added a feature to change the name font of Blizzard nameplates and hide the healthbar (to only show unit names), e.g., while in instances.
@@ -73,7 +97,7 @@
 * Added an option to transliterate cyrillic letters in unit names and status texts [GH-300].
 * Added an option limit text length and/or wrap text for cast target and target of target names [Comment #5070, #4816], 
 * Added an option to show target of target only when it's not the player [Comment #4844].
-* Added an option to enable aura trigger for custom styles only for your own auras [Comment #4941, PM].
+* Added an option to enable Aura trigger for custom styles only for your own auras [Comment #4941, PM].
 * Fixed a bug where the chat command for enabling scripting was not working and as well as the error messsage for unknown commands was not properly shown.
 * Upgrade integrated libraries (LibClassicDurations v20210426, LibDualSpec v1.20).
 

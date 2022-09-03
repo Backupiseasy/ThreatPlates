@@ -416,7 +416,7 @@ function Element.UpdateSettings()
     Truncate = function(value) return value end
   end
 
-  if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC then
+  if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
     ShowAbsorbs = false
   else
     ShowAbsorbs = Settings.AbsorbsAmount or Settings.AbsorbsPercentage

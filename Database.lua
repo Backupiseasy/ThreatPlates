@@ -1293,7 +1293,7 @@ local MIGRATION_FUNCTIONS_BY_VERSION = {
     { Type = "Migrate", Name = "Custom Styles", Function = MigrateCustomStyles, NoDefaultProfile = true },
   },
   ["10.2.1"] = {
-    { Type = "Migrate", Name = "Disable Show Blizzard Auras", Function = DisableShowBlizzardAurasForClassic, Version = (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC) },
+    { Type = "Migrate", Name = "Disable Show Blizzard Auras", Function = DisableShowBlizzardAurasForClassic, Version = (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC) },
   },
   ["10.3.0-beta2"] = {
     { Type = "Migrate", Name = "Auras Widget V2", Function = MigrateAurasWidgetV2, NoDefaultProfile = true },

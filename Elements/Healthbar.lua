@@ -51,7 +51,7 @@ local Element = Addon.Elements.NewElement("Healthbar")
 ---------------------------------------------------------------------------------------------------
 local UpdateAbsorbs
 
-if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC then
+if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
   -- Absorbs are not supported in (TBC) Classic
   UpdateAbsorbs = function() end
 else
