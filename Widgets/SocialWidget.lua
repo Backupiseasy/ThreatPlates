@@ -53,7 +53,7 @@ local _G =_G
 local BNGetFriendInfo, BNGetFriendInfoByID = BNGetFriendInfo, BNGetFriendInfoByID -- For Classic
 local GetFriendAccountInfo, GetGameAccountInfoByID -- For Retail
 
-if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC then
+if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
   local AccountInfo = {
     gameAccountInfo = {}
   }
@@ -199,6 +199,10 @@ function Widget:UNIT_NAME_UPDATE(unitid)
     local widget_frame = plate.TPFrame.widgets.Social
     if widget_frame.Active then
       local unit = plate.TPFrame.unit
+
+      -- * Creating full unit name here (not using GetUnitName(unitid, true) as I don't know if 
+      -- * game_account_info.characterName .. "-" .. game_account_info.realmName would always be equal to
+      -- * GetUnitName for the same unitid
       local name, realm = UnitName(unitid)
       unit.fullname = GetFullName(name, realm)
 

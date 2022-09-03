@@ -5,25 +5,30 @@
 ---------------------------------------------------------------------------------------------------
 local L = Addon.ThreatPlates.L
 
-local DEBUG = Addon.ThreatPlates.Meta("version") == "@project-version@"
+Addon.DEBUG = Addon.ThreatPlates.Meta("version") == "@project-version@"
+
 local function toggleDPS()
-	Addon:SetRole(false)
-	Addon.db.profile.threat.ON = true
-	if Addon.db.profile.verbose then
+	if Addon.db.profile.optionRoleDetectionAutomatic then
+		Addon.Logging.Warning(L["Role toggle not supported because automatic role detection is enabled."])
+	else
+		Addon:SetRole(false)
+		Addon.db.profile.threat.ON = true
 		Addon.Logging.Info(L["-->>|cffff0000DPS Plates Enabled|r<<--"])
-		Addon.Logging.Info(L["|cff89F559Threat Plates|r: DPS switch detected, you are now in your |cffff0000dpsing / healing|r role."])
+		Addon.Logging.Info(L["DPS switch detected, you are now in your |cffff0000dpsing / healing|r role."])
+		Addon:ForceUpdate()
 	end
-	Addon:ForceUpdate()
 end
 
 local function toggleTANK()
-	Addon:SetRole(true)
-	Addon.db.profile.threat.ON = true
-	if Addon.db.profile.verbose then
+	if Addon.db.profile.optionRoleDetectionAutomatic then
+		Addon.Logging.Warning(L["Role toggle not supported because automatic role detection is enabled."])
+	else
+		Addon:SetRole(true)
+		Addon.db.profile.threat.ON = true
 		Addon.Logging.Info(L["-->>|cff00ff00Tank Plates Enabled|r<<--"])
-		Addon.Logging.Info(L["|cff89F559Threat Plates|r: Tank switch detected, you are now in your |cff00ff00tanking|r role."])
+		Addon.Logging.Info(L["Tank switch detected, you are now in your |cff00ff00tanking|r role."])
+		Addon:ForceUpdate()
 	end
-	Addon:ForceUpdate()
 end
 
 SLASH_TPTPDPS1 = "/tptpdps"
@@ -32,8 +37,8 @@ SLASH_TPTPTANK1 = "/tptptank"
 SlashCmdList["TPTPTANK"] = toggleTANK
 
 local function TPTPTOGGLE()
-	if (Addon.db.profile.optionRoleDetectionAutomatic and Addon.db.profile.verbose) then
-		Addon.Logging.Warning(L["|cff89F559Threat Plates|r: Role toggle not supported because automatic role detection is enabled."])
+	if Addon.db.profile.optionRoleDetectionAutomatic then
+		Addon.Logging.Warning(L["Role toggle not supported because automatic role detection is enabled."])
 	else
 		if Addon:PlayerRoleIsTank() then
 			toggleDPS()
@@ -69,9 +74,9 @@ SlashCmdList["TPTPOVERLAP"] = TPTPOVERLAP
 
 local function TPTPVERBOSE()
 	if Addon.db.profile.verbose then
-		Addon.Logging.Info(L["-->>Threat Plates verbose is now |cffff0000OFF!|r<<-- shhh!!"])
+		Addon.Logging.Print(L["-->>Threat Plates verbose is now |cffff0000OFF!|r<<-- shhh!!"])
 	else
-		Addon.Logging.Info(L["-->>Threat Plates verbose is now |cff00ff00ON!|r<<--"])
+		Addon.Logging.Print(L["-->>Threat Plates verbose is now |cff00ff00ON!|r<<--"])
 	end
 	Addon.db.profile.verbose = not Addon.db.profile.verbose
 end
@@ -118,9 +123,7 @@ local function ChatCommandDebug(cmd_list)
 	elseif command == "cache" then
 		Addon.Debug.PrintCaches()
 	elseif command == "unit" then
-		local plate = C_NamePlate.GetNamePlateForUnit("target")
-		if not plate then return end
-		Addon.Debug.PrintUnit(plate.TPFrame.unit, true)
+		Addon.Debug.PrintUnit("target")
 		--elseif command == "migrate" then
 		--	Addon.TestMigration()
 		--	Addon.MigrateDatabase(TP.Meta("version"))
@@ -217,7 +220,7 @@ local function ChatCommandDebug(cmd_list)
     print("    UnitIsFriend = ", UnitIsFriend("target", "player"))
 		print("    UnitSelectionColor = ", UnitSelectionColor("target"))
 		print("    UnitIsPVP = ", UnitIsPVP("target"))
-		if not Addon.IS_TBC_CLASSIC and not Addon.IS_CLASSIC then
+		if not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC and not Addon.IS_WRATH_CLASSIC then
 			print("    UnitSelectionType = ", UnitSelectionType("target"))
 		end
 		elseif command == "dbm1" then
@@ -234,12 +237,18 @@ local function ChatCommandDebug(cmd_list)
 				end
 			end
 		end
-	elseif command == "test" then
-		print("34.345345345", Addon.Truncate(34.345345345))
-		print("-34.345345345", Addon.Truncate(-34.345345345))
-		print("-99", Addon.Truncate(-99))
-		print("9999.809986", Addon.Truncate(9999.809986))
-		print("-15554", Addon.Truncate(-15554))
+	elseif command == "wow-version" then
+		local wowVersionString, wowBuild, _, wowTOC = GetBuildInfo()
+
+		print("WOW_PROJECT_ID:", WOW_PROJECT_ID)
+		print("LE_EXPANSION_LEVEL_CURRENT:", LE_EXPANSION_LEVEL_CURRENT)
+		print("GetClassicExpansionLevel():", GetClassicExpansionLevel and GetClassicExpansionLevel() or nil)		
+		print("TOC Version:", wowTOC)		
+		print("Addon --------")		
+		print("    IS_CLASSIC:", Addon.IS_CLASSIC)		
+		print("    IS_TBC_CLASSIC:", Addon.IS_TBC_CLASSIC)		
+		print("    IS_WRATH_CLASSIC:", Addon.IS_WRATH_CLASSIC)		
+		print("    IS_MAINLINE:", Addon.IS_MAINLINE)
 	else
 		Addon.Logging.Error(L["Unknown option: "] .. command)
 		PrintHelp()
@@ -284,7 +293,7 @@ function TidyPlatesThreat:ChatCommand(input)
 --		TidyPlatesThreat:ToggleNameplateModeNeutralUnits()
 --	elseif command == "toggle-view-enemy-units" then
 --		TidyPlatesThreat:ToggleNameplateModeEnemyUnits()
-	elseif DEBUG then
+	elseif Addon.DEBUG then
 		ChatCommandDebug(cmd_list)
 	else
 		Addon.Logging.Error(L["Unknown option: "] .. command)

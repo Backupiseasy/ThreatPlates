@@ -119,11 +119,29 @@ local TEXTURE_INFO = {
         [1] = { Atlas = "DK-Blood-Rune-Ready" },
         [2] = { Atlas = "DK-Frost-Rune-Ready" },
         [3] = { Atlas = "DK-Unholy-Rune-Ready" },
+        RuneType = {
+          [1] = "Interface\\PlayerFrame\\UI-PlayerFrame-Deathknight-Blood",
+          [2] = "Interface\\PlayerFrame\\UI-PlayerFrame-Deathknight-Blood",
+          [3] = "Interface\\PlayerFrame\\UI-PlayerFrame-Deathknight-Frost",
+          [4] = "Interface\\PlayerFrame\\UI-PlayerFrame-Deathknight-Frost",
+          [5] = "Interface\\PlayerFrame\\UI-PlayerFrame-Deathknight-Unholy",
+          [6] = "Interface\\PlayerFrame\\UI-PlayerFrame-Deathknight-Unholy",
+        },
       },
       TextureOff = {
         [1] = { Atlas = "DK-Blood-Rune-Ready", Desaturation = 1, Alpha = 0.9 },
         [2] = { Atlas = "DK-Frost-Rune-Ready", Desaturation = 1, Alpha = 0.9 },
         [3] = { Atlas = "DK-Unholy-Rune-Ready", Desaturation = 1, Alpha = 0.9 },
+        RuneType = {
+          [1] = "Interface\\PlayerFrame\\UI-PlayerFrame-Deathknight-Blood",
+          [2] = "Interface\\PlayerFrame\\UI-PlayerFrame-Deathknight-Blood",
+          [3] = "Interface\\PlayerFrame\\UI-PlayerFrame-Deathknight-Frost",
+          [4] = "Interface\\PlayerFrame\\UI-PlayerFrame-Deathknight-Frost",
+          [5] = "Interface\\PlayerFrame\\UI-PlayerFrame-Deathknight-Unholy",
+          [6] = "Interface\\PlayerFrame\\UI-PlayerFrame-Deathknight-Unholy",
+          Desaturation = 1, 
+          Alpha = 0.9,
+        },
       },
       IconWidth = 16,
       IconHeight = 16,
@@ -180,6 +198,7 @@ local DEATHKNIGHT_COLORS = {
   [1] = RGB(196, 30, 58),
   [2] = RGB(0, 102, 178),
   [3] = RGB(76, 204, 25),
+  Wrath = RGB(255, 255, 255),
 }
 
 Widget.TextureCoordinates = {}
@@ -198,12 +217,23 @@ local DeathKnightSpecColor, ShowRuneCooldown
 ---------------------------------------------------------------------------------------------------
 -- Combo Points Widget Functions
 ---------------------------------------------------------------------------------------------------
-
-if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC then
+if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
   -- This should not be necessary as in Classic only Rogues and Druids had combo points
-  if Addon.PlayerClass == "ROGUE" or Addon.PlayerClass == "DRUID" then
+  if PlayerClass == "ROGUE" or PlayerClass == "DRUID" then
     UnitPower = function(unitToken , powerType)
       return GetComboPoints("player", "target")
+    end
+  elseif PlayerClass == "DEATHKNIGHT" then
+    -- Deathknight is only available after Wrath, so no check for this version necessary
+    UnitPowerMax = function(unitToken , powerType)
+      return 6
+    end
+
+    -- Fix the wrong ordering of GetRuneCooldown (blood/unholy/frost) compared to UI display (blood/frost/unholy)
+    local GET_RUNE_COOLDOWN_MAPPING = { 1, 2, 5, 6, 3, 4}
+
+    GetRuneCooldown = function(rune_id)
+      return _G.GetRuneCooldown(GET_RUNE_COOLDOWN_MAPPING[rune_id])
     end
   end
 
@@ -269,6 +299,10 @@ function Widget:UpdateComboPoints(widget_frame)
   end
 end
 
+---------------------------------------------------------------------------------------------------
+-- Rogue Combo Points: Anima Charges (Shadowlands)
+---------------------------------------------------------------------------------------------------
+
 function Widget:UpdateComboPointsRogueAnimacharge(widget_frame)
   local points = UnitPower("player", self.PowerType) or 0
 
@@ -333,6 +367,86 @@ function Widget:UpdateComboPointsRogueAnimacharge(widget_frame)
   --cp_texture.MarkAsCharged = false
 end
 
+---------------------------------------------------------------------------------------------------
+-- Deathknight Runes
+---------------------------------------------------------------------------------------------------
+
+local function GetDeathKnightRuneStateMainline(rune_id)
+  return RuneCooldowns[rune_id], RuneCooldowns[rune_id] == 0 
+end
+
+local function GetDeathKnightRuneStateWrath(rune_id)
+  local start, duration, rune_ready = GetRuneCooldown(rune_id)
+  return floor(start + duration), rune_ready
+end
+
+local function UpdateDeathKnightRunes(widget_frame, is_rune_ready, ready_runes_no)
+  local current_time = floor(GetTime())
+
+  for rune_id = 1, 6 do
+    local cp_texture = widget_frame.ComboPoints[rune_id]
+    local cp_texture_off = widget_frame.ComboPointsOff[rune_id]
+
+    local rune_expiration, rune_read = is_rune_ready(rune_id)
+    if rune_read then
+      if Widget.db.Style ~= "Blizzard" then
+        local cp_color = Widget.Colors[ready_runes_no or rune_id][rune_id]
+        cp_texture:SetVertexColor(cp_color.r, cp_color.g, cp_color.b)
+      end
+      cp_texture:Show()
+      cp_texture_off:Hide()
+    
+      if ShowRuneCooldown then
+        cp_texture_off.Time:Hide()
+      end    
+    elseif Widget.db.ShowOffCPs then
+      cp_texture:Hide()
+      cp_texture_off:Show()
+    
+      if ShowRuneCooldown then
+        local rune_cd = cp_texture_off.Time
+        rune_cd.Expiration = rune_expiration
+        rune_cd:SetText(rune_cd.Expiration - current_time)
+        rune_cd:SetTextColor(DeathKnightSpecColor.r, DeathKnightSpecColor.g, DeathKnightSpecColor.b)
+    
+        rune_cd:Show()
+      end
+    elseif cp_texture:IsShown() or cp_texture_off:IsShown() then
+      cp_texture:Hide()
+      cp_texture_off:Hide()
+    
+      if ShowRuneCooldown then
+        cp_texture_off.Time:Hide()
+      end
+    end
+  end
+end
+
+function Widget:UpdateDeathKnightRunicPowerMainline(widget_frame)
+  local ready_runes_no = 0
+  for rune_id = 1, 6 do
+    local start, duration, rune_ready = GetRuneCooldown(rune_id)
+    if rune_ready then
+      ready_runes_no = ready_runes_no + 1
+      RuneCooldowns[rune_id] = 0
+    else
+      RuneCooldowns[rune_id] = floor(start + duration)
+    end
+  end
+
+  sort(RuneCooldowns)
+
+  UpdateDeathKnightRunes(widget_frame, GetDeathKnightRuneStateMainline, ready_runes_no)
+end
+
+function Widget:UpdateDeathKnightRunicPowerWrath(widget_frame)
+  UpdateDeathKnightRunes(widget_frame, GetDeathKnightRuneStateWrath, nil)
+end
+
+---------------------------------------------------------------------------------------------------
+-- 
+---------------------------------------------------------------------------------------------------
+
 local function OnUpdateWidget(widget_frame, elapsed)
   -- Update the number of seconds since the last update
   widget_frame.TimeSinceLastUpdate = widget_frame.TimeSinceLastUpdate + elapsed
@@ -351,67 +465,6 @@ local function OnUpdateWidget(widget_frame, elapsed)
         if cooldown <= 3 then
           cp_texture_off.Time:SetTextColor(1, 1, 0)
         end
-      end
-    end
-  end
-end
-
-function Widget:UpdateRunicPower(widget_frame)
-  local ready_runes_no = 0
-
-  local start, duration, rune_ready
-  for rune_id = 1, 6 do
-    start, duration, rune_ready = GetRuneCooldown(rune_id)
-    if rune_ready then
-      ready_runes_no = ready_runes_no + 1
-    else
-      RuneCooldowns[rune_id] = floor(start + duration)
-    end
-  end
-
-  --sort(RuneCooldowns, function(a, b) return a < b  end)
-  sort(RuneCooldowns)
-
-  local current_time = floor(GetTime())
-
-  local color, cp_texture, cp_texture_off, rune_cd, cp_color, expiration
-  for rune_id = 1, 6 do
-    color = self.Colors[ready_runes_no]
-    cp_texture = widget_frame.ComboPoints[rune_id]
-    cp_texture_off = widget_frame.ComboPointsOff[rune_id]
-
-    if rune_id <= ready_runes_no then
-      if self.db.Style ~= "Blizzard" then
-        cp_color = color[rune_id]
-        cp_texture:SetVertexColor(cp_color.r, cp_color.g, cp_color.b)
-      end
-      cp_texture:Show()
-      cp_texture_off:Hide()
-
-      if ShowRuneCooldown then
-        cp_texture_off.Time:Hide()
-      end
-    elseif self.db.ShowOffCPs then
-      cp_texture:Hide()
-      cp_texture_off:Show()
-
-      if ShowRuneCooldown then
-        rune_cd = cp_texture_off.Time
-
-        expiration = RuneCooldowns[rune_id]
-        rune_cd.Expiration = expiration
-
-        rune_cd:SetText(expiration - current_time)
-        rune_cd:SetTextColor(DeathKnightSpecColor.r, DeathKnightSpecColor.g, DeathKnightSpecColor.b)
-
-        rune_cd:Show()
-      end
-    elseif cp_texture:IsShown() or cp_texture_off:IsShown() then
-      cp_texture:Hide()
-      cp_texture_off:Hide()
-
-      if ShowRuneCooldown then
-        cp_texture_off.Time:Hide()
       end
     end
   end
@@ -501,7 +554,7 @@ function Widget:IsEnabled()
   local db = Addon.db.profile.ComboPoints
   local enabled = db.ON or db.ShowInHeadlineView
 
-  if enabled and not (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC) then
+  if enabled and not (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC) then
     -- Register ACTIVE_TALENT_GROUP_CHANGED here otherwise it won't be registered when an spec is active that does not have combo points.
     -- If you then switch to a spec with talent points, the widget won't be enabled.
     self:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
@@ -525,7 +578,7 @@ function Widget:OnEnable()
   self:RegisterEvent("PLAYER_TARGET_CHANGED")
   self:RegisterUnitEvent("UNIT_MAXPOWER", "player")
   
-  if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC then
+  if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
     self:RegisterUnitEvent("UNIT_POWER_FREQUENT", "player", EventHandler)
   else
     self:RegisterUnitEvent("UNIT_POWER_UPDATE", "player", EventHandler)
@@ -549,14 +602,14 @@ function Widget:OnDisable()
   self:UnregisterEvent("PLAYER_TARGET_CHANGED")
   self:UnregisterEvent("UNIT_MAXPOWER")
   
-  if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC then
+  if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
     self:UnregisterEvent("UNIT_POWER_FREQUENT")
   else
     self:UnregisterEvent("UNIT_POWER_UPDATE")
     self:UnregisterEvent("UNIT_DISPLAYPOWER")
     self:UnregisterEvent("UNIT_POWER_POINT_CHARGE")
   end
-
+  
   self:UnregisterEvent("UPDATE_SHAPESHIFT_FORM")
   if not (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC) then
     self:UnregisterEvent("RUNE_POWER_UPDATE")
@@ -630,7 +683,13 @@ end
 
 function Widget:UpdateTexture(texture, texture_path, cp_no)
   if self.db.Style == "Blizzard" then
-    if type(texture_path) == "table" then
+    if Addon.IS_WRATH_CLASSIC and PlayerClass == "DEATHKNIGHT" then
+      local texture_data = texture_path.RuneType
+      texture:SetTexture(texture_data[cp_no])
+      texture:SetAlpha(texture_data.Alpha or 1)
+      texture:SetVertexColor(1, 1, 1)
+      texture:SetDesaturated(texture_data.Desaturation) -- nil means no desaturation
+    elseif type(texture_path) == "table" then
       local texture_data = texture_path[ActiveSpec]
       texture:SetAtlas(texture_data.Atlas)
       texture:SetAlpha(texture_data.Alpha or 1)
@@ -702,13 +761,18 @@ function Widget:UpdateSettings()
   -- Update widget variables, only dependent from settings and static information (like player's class)
   local texture_info = TEXTURE_INFO[self.db.Style][PlayerClass] or TEXTURE_INFO[self.db.Style]
 
-  if not (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC) then
+  if not (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC) then
     ActiveSpec = _G.GetSpecialization()
   end
 
   if PlayerClass == "DEATHKNIGHT" then
-    self.UpdateUnitPower = self.UpdateRunicPower
-    DeathKnightSpecColor = DEATHKNIGHT_COLORS[ActiveSpec]
+    if Addon.IS_WRATH_CLASSIC then
+      self.UpdateUnitPower = self.UpdateDeathKnightRunicPowerWrath
+      DeathKnightSpecColor = DEATHKNIGHT_COLORS.Wrath
+    else
+      self.UpdateUnitPower = self.UpdateDeathKnightRunicPowerMainline
+      DeathKnightSpecColor = DEATHKNIGHT_COLORS[ActiveSpec]
+    end
     ShowRuneCooldown = self.db.RuneCooldown.Show
   elseif PlayerClass == "ROGUE" then
     -- Check for spell Echoing Reprimand: (IDs) 312954, 323547, 323560, 323558, 323559
@@ -735,8 +799,9 @@ function Widget:UpdateSettings()
 
       self.Colors[current_cp] = self.Colors[current_cp] or {}
       if self.db.Style == "Blizzard" then
-        self.Colors[current_cp][cp_no] = RGB(255, 255, 255)
+        self.Colors[current_cp][cp_no] = DEATHKNIGHT_COLORS.Neutral
       elseif self.db.UseUniformColor then
+        -- Could add to the if clause: and not (Addon.IS_WRATH_CLASSIC and PlayerClass == "DEATHKNIGHT") 
         self.Colors[current_cp][cp_no] = colors[current_cp]
       else
         self.Colors[current_cp][cp_no] = colors[cp_no]

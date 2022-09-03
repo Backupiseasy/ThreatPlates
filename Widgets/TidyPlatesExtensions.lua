@@ -249,7 +249,7 @@ local function UpdateExtensions(tp_frame, unitid, style)
   end
 end
 
-if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC then
+if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
   Addon.CreateExtensions = function() end
   Addon.UpdateExtensions = function() end
 else

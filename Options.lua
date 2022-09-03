@@ -311,35 +311,39 @@ local function ShowImportFrame()
   ImportExportFrame:OpenImport(ImportHandler)
 end
 
-local function AddImportExportOptions(profileOptions)
-  profileOptions.args.exportimportdesc = {
-    order = 90,
-    type = "description",
-    name = "\n" .. L["Import and export profiles to share them with other players."],
-  }
+local function AddImportExportOptions(options_profiles)
+  if not options_profiles.plugins then
+		options_profiles.plugins = {}
+	end
 
-  profileOptions.args.exportprofile = {
-    order = 95,
-    type = "execute",
-    name = L["Export profile"],
-    desc = L["Export the current profile into a string that can be imported by other players."],
-    func = function()
-      local export_data = {
-        Version = t.Meta("version"),
-        ProfileName = Addon.db:GetCurrentProfile(),
-        Profile = Addon.db.profile
-      }
+  options_profiles.plugins[t.ADDON_NAME] = {
+    exportimportdesc = {
+      order = 90,
+      type = "description",
+      name = "\n" .. L["Import and export profiles to share them with other players."],
+    },
+    exportprofile = {
+      order = 95,
+      type = "execute",
+      name = L["Export profile"],
+      desc = L["Export the current profile into a string that can be imported by other players."],
+      func = function()
+        local export_data = {
+          Version = t.Meta("version"),
+          ProfileName = Addon.db:GetCurrentProfile(),
+          Profile = Addon.db.profile
+        }
 
-      ShowExportFrame(export_data)
-    end
-  }
-
-  profileOptions.args.importprofile = {
-    order = 100,
-    type = "execute",
-    name = L["Import profile"],
-    desc = L["Import a profile from another player from an import string."],
-    func = function() ShowImportFrame() end
+        ShowExportFrame(export_data)
+      end
+    },
+    importprofile = {
+      order = 100,
+      type = "execute",
+      name = L["Import profile"],
+      desc = L["Import a profile from another player from an import string."],
+      func = function() ShowImportFrame() end
+    },
   }
 end
 
@@ -366,7 +370,7 @@ end
 local TRIGGER_TYPE_TO_NAME_PREFIX = {
   Aura = L["Aura: "],
   Cast = L["Cast: "],
-  Name = "",
+  Name = L["Unit: "],
   Script = L["Script"],
 }
 
@@ -793,7 +797,7 @@ function Addon:SetCVarsForOcclusionDetection()
   end
 
   -- Occlusion detection does not work when a target is selected in Classic, see https://github.com/Stanzilla/WoWUIBugs/issues/134
-  if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC then
+  if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
     local not_selected_alpha =  CVars:GetAsNumber("nameplateNotSelectedAlpha")
     if not not_selected_alpha or (not_selected_alpha < occluded_alpha_mult + 0.1) then
       not_selected_alpha = occluded_alpha_mult + 0.1
@@ -844,7 +848,7 @@ local function GetColorAlphaEntry(pos, setting, disabled_func)
     width = "half",
     arg = setting,
     get = GetColorAlpha,
-    set = SetColorAlpha,
+    set = "SetColorAlpha",
     hasAlpha = true,
     disabled = disabled_func
   }
@@ -1307,7 +1311,6 @@ local function GetFontEntryDefault(name, pos, widget_info, func_disabled)
         get = function(info) return GetFontFlags(Addon.ConcatTables(widget_info, { "flags" }), "Thick") end,
         arg = Addon.ConcatTables(widget_info, { "flags" }),
       },
-
       Mono = {
         name = L["Mono"],
         order = 103,
@@ -1336,6 +1339,131 @@ local function GetFontEntryDefault(name, pos, widget_info, func_disabled)
 
   if entry.args.Transparency then
     entry.args.Transparency.set = function(info, val) SetValueWidget(info, abs(val - 1)) end
+  end
+
+  return entry
+end
+
+-- Options are shown based on the following settings:
+--   Font = {
+--     Typeface = Addon.DEFAULT_SMALL_FONT,
+--     Size = 10,
+--     Transparency = 1,
+--     Color = RGB(255, 255, 255),
+--     flags = "OUTLINE",
+--     Shadow = true,
+--     ShadowColor = RGB(0, 0, 0, 1),
+--     ShadowHorizontalOffset = 1,
+--     ShadowVerticalOffset = -1,
+--     HorizontalAlignment = "CENTER",
+--     VerticalAlignment = "CENTER",
+--   },
+local function GetFontEntryHandler(name, pos, widget_info, func_disabled, func_handler)
+  widget_info = Addon.ConcatTables(widget_info, { "Font" } )
+  local func_set = func_handler.SetValue
+
+  local entry = {
+    type = "group",
+    order = pos,
+    name = name,
+    inline = true,
+    set = "SetValue",
+    disabled = func_disabled,
+    args = {
+      Font = {
+        name = L["Typeface"],
+        order = 10,
+        type = "select",
+        dialogControl = "LSM30_Font",
+        values = AceGUIWidgetLSMlists.font,
+        arg = Addon.ConcatTables(widget_info, { "Typeface" }),
+      },
+      Size = {
+        name = L["Font Size"],
+        order = 20,
+        type = "range",
+        arg = Addon.ConcatTables(widget_info, { "Size" }),
+        max = 36,
+        min = 6,
+        step = 1,
+        isPercent = false,
+      },
+      Transparency = AddIfSettingExists(GetTransparencyEntryDefault(30, Addon.ConcatTables(widget_info, { "Transparency" }) )),
+      Color = AddIfSettingExists(GetColorEntry(L["Color"], 40, Addon.ConcatTables(widget_info, { "Color" }))),
+      Spacer1 = GetSpacerEntry(100),
+      Outline = {
+        name = L["Outline"],
+        order = 101,
+        type = "toggle",
+        desc = L["Add black outline."],
+        width = "half",
+        set = function(info, val) func_set(func_handler, info, SetFontFlags(Addon.ConcatTables(widget_info, { "flags" }), "Outline", val)) end,
+        get = function(info) return GetFontFlags(Addon.ConcatTables(widget_info, { "flags" }), "Outline") end,
+        arg = Addon.ConcatTables(widget_info, { "flags" }),
+      },
+      Thick = {
+        name = L["Thick"],
+        order = 102,
+        type = "toggle",
+        desc = L["Add thick black outline."],
+        width = "half",
+        set = function(info, val) func_set(func_handler, info, SetFontFlags(Addon.ConcatTables(widget_info, { "flags" }), "Thick", val)) end,
+        get = function(info) return GetFontFlags(Addon.ConcatTables(widget_info, { "flags" }), "Thick") end,
+        arg = Addon.ConcatTables(widget_info, { "flags" }),
+      },
+      Mono = {
+        name = L["Mono"],
+        order = 103,
+        type = "toggle",
+        desc = L["Render font without antialiasing."],
+        width = "half",
+        set = function(info, val) func_set(func_handler, info, SetFontFlags(Addon.ConcatTables(widget_info, { "flags" }), "Mono", val)) end,
+        get = function(info) return GetFontFlags(Addon.ConcatTables(widget_info, { "flags" }), "Mono") end,
+        arg = Addon.ConcatTables(widget_info, { "flags" }),
+      },
+      Shadow = {
+        name = L["Shadow"],
+        order = 105,
+        type = "toggle",
+        desc = L["Show shadow with text."],
+        width = "half",
+        arg = Addon.ConcatTables(widget_info, { "Shadow" }),
+      },
+      ShadowColor = AddIfSettingExists(GetColorAlphaEntry(106, Addon.ConcatTables(widget_info, { "ShadowColor" }))),
+      ShadowXOffset = AddIfSettingExists({
+        type = "range",
+        order = 107,
+        name = L["Horizontal Offset"],
+        max = 15,
+        min = -15,
+        step = 1,
+        isPercent = false,
+        arg = Addon.ConcatTables(widget_info, { "ShadowHorizontalOffset" }),
+      }),
+      ShadowYOffset = AddIfSettingExists({
+        type = "range",
+        order = 108,
+        name = L["Vertical Offset"],
+        max = 15,
+        min = -15,
+        step = 1,
+        isPercent = false,
+        arg = Addon.ConcatTables(widget_info, { "ShadowVerticalOffset" }),
+      }),
+    },
+  }
+
+  if entry.args.Color then
+    entry.args.Color.set = "SetColor"
+    entry.args.Color.width = "half"
+  end
+
+  if entry.args.Transparency then
+    entry.args.Transparency.set = function(info, val) func_set(func_handler, info, abs(val - 1)) end
+  end
+
+  if entry.args.ShadowColor then
+    entry.args.Spacer2 = GetSpacerEntry(104)
   end
 
   return entry
@@ -1506,9 +1634,9 @@ end
 --     InsideAnchor = false,
 --     HorizontalOffset = 0,
 --     VerticalOffset = -2,
---     AutoSizeing
+--     AutoSizing = true,
+--     WordWrap
 --     Width = 345,
---     MaxLines = 4534,
 --   } 
 local function GetTextEntry(name, pos, widget_info)
   local arg_auto_sizing = Addon.ConcatTables(widget_info, { "AutoSizing" })
@@ -1841,8 +1969,8 @@ local function CreateComboPointsWidgetOptions()
               DEATHKNIGHT = ((not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC) and L["Death Knight"]) or nil,
               DRUID = L["Druid"],
               MAGE = L["Arcane Mage"],
-              MONK = ((not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC) and L["Windwalker Monk"]) or nil,
-              PALADIN = ((not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC) and L["Paladin"]) or nil,
+              MONK = ((not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC and not Addon.IS_WRATH_CLASSIC) and L["Windwalker Monk"]) or nil,
+              PALADIN = ((not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC and not Addon.IS_WRATH_CLASSIC) and L["Paladin"]) or nil,
               ROGUE = L["Rogue"],
               WARLOCK = L["Warlock"],
             },
@@ -1955,7 +2083,22 @@ local function CreateComboPointsWidgetOptions()
               Addon.Widgets:UpdateSettings(MAP_OPTION_TO_WIDGET[info[2]])
             end,
             hasAlpha = false,
-            hidden = function() return Addon.PlayerClass ~= "ROGUE" end
+            hidden = function() return db.ComboPoints.Specialization ~= "ROGUE" or (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC) end
+          },
+          ColorDeathrune = {
+            name = L["Death Rune"],
+            type = "color",
+            order = 180,
+            get = function(info)
+              local color = db.ComboPoints.ColorBySpec.DEATHKNIGHT.DeathRune or t.RGB(0, 0, 0)
+              return color.r, color.g, color.b
+            end,
+            set = function(info, r, g, b)
+              db.ComboPoints.ColorBySpec.DEATHKNIGHT.DeathRune = t.RGB(r * 255, g * 255, b * 255)
+              Addon.Widgets:UpdateSettings(MAP_OPTION_TO_WIDGET[info[2]])
+            end,
+            hasAlpha = false,
+            hidden = function() return db.ComboPoints.Specialization ~= "DEATHKNIGHT" or not Addon.IS_WRATH_CLASSIC end
           },
         },
       },
@@ -2205,7 +2348,7 @@ end
     name = L["Quest"],
     order = 100,
     type = "group",
-    hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC end,
+    hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC end,
     args = {
       Enable = GetEnableEntry(L["Enable Quest Widget"], L["This widget shows a quest icon above unit nameplates or colors the nameplate healthbar of units that are involved with any of your current quests."], "questWidget", true,
         function(info, val)
@@ -2465,7 +2608,7 @@ local function CreateExperienceWidgetOptions()
     type = "group",
     order = 54,
     childGroups = "tab",
-    hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC end,
+    hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC end,
     set = SetValueWidget,
     args = {
       Enable = GetEnableEntry(
@@ -4146,7 +4289,7 @@ local function CreateAurasWidgetOptions()
                     end,
                     arg = { "AuraWidget", "Debuffs", "ShowBlizzardForFriendly" },
                     disabled = function() return not db.AuraWidget.Debuffs.ShowFriendly end,
-                    hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC end
+                    hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC end
                   },
                   Dispellable = {
                     name = L["Dispellable"],
@@ -4292,7 +4435,7 @@ local function CreateAurasWidgetOptions()
                     end,
                     arg = { "AuraWidget", "Debuffs", "ShowBlizzardForEnemy" },
                     disabled = function() return not db.AuraWidget.Debuffs.ShowEnemy end,
-                    hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC end
+                    hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC end
                   },
                 },
               },
@@ -4390,7 +4533,7 @@ local function CreateAurasWidgetOptions()
                     end,
                     arg = { "AuraWidget", "CrowdControl", "ShowBlizzardForFriendly" },
                     disabled = function() return not db.AuraWidget.CrowdControl.ShowFriendly end,
-                    hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC end
+                    hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC end
                   },
                   Dispellable = {
                     name = L["Dispellable"],
@@ -4446,7 +4589,7 @@ local function CreateAurasWidgetOptions()
                     end,
                     arg = { "AuraWidget", "CrowdControl", "ShowAllEnemy" },
                     disabled = function() return not db.AuraWidget.CrowdControl.ShowEnemy end,
-                    hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC end
+                    hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC end
                   },
                   Blizzard = {
                     name = L["Blizzard"],
@@ -4460,7 +4603,7 @@ local function CreateAurasWidgetOptions()
                     end,
                     arg = { "AuraWidget", "CrowdControl", "ShowBlizzardForEnemy" },
                     disabled = function() return not db.AuraWidget.CrowdControl.ShowEnemy end,
-                    hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC end
+                    hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC end
                   },
                 },
               },
@@ -4763,11 +4906,36 @@ local function CreateBlizzardSettings()
   -- rmove /tptp command for stacking, not-stacking nameplates
   -- don'T allow to change all cvar related values in Combat, either by using the correct CVarTPTP function
   -- or by disabling the options in this case
+  local func_handler = {
+    SetValue = function(self, info, val)
+      SetValuePlain(info, val)    
+      if Addon.db.profile.BlizzardSettings.Names.Enabled then
+        Addon.Font:SetNamesFonts()
+      else
+        Addon.Font:ResetNamesFonts()
+      end
+    end,
+    SetColor = function(self, info, r, g, b) 
+      SetColor(info, r, g, b) 
+      Addon.Font:SetNamesFonts()
+    end,
+    SetColorAlpha = function(self, info, r, g, b, a) 
+      SetColorAlpha(info, r, g, b, a) 
+      Addon.Font:SetNamesFonts()
+    end,
+  }
+
+  func_handler.SetValueEnable = function(self, info, val)
+    func_handler.SetValue(self, info, val)
+    Addon:ForceUpdateFrameOnShow()
+  end
 
   local entry = {
     name = L["Blizzard Settings"],
     order = 140,
     type = "group",
+    childGroups = "tab",
+    handler = func_handler,
     set = SetCVarTPTP,
     get = GetCVarTPTP,
     -- diable while in Combat - überprüfen
@@ -4784,323 +4952,389 @@ local function CreateBlizzardSettings()
             type = "description",
             width = "full",
           },
-        },
-      },
-      Resolution = {
-        name = L["UI Scale"],
-        order = 5,
-        type = "group",
-        inline = true,
-        args = {
-          UIScale = {
-            name = L["UI Scale"],
+          Reset = {
+            name = L["Reset to Defaults"],
             order = 10,
-            type = "range",
-            min = 0.64,
-            max = 1,
-            step = 0.01,
-            disabled = function() return db.Scale.IgnoreUIScale or db.Scale.PixelPerfectUI end,
-            arg = "uiScale",
-          },
-          IgnoreUIScale = {
-            name = L["Ignore UI Scale"],
-            order = 20,
-            type = "toggle",
-            set = function(info, val)
-              SetValuePlain(info, val)
-              db.Scale.PixelPerfectUI = not val and db.Scale.PixelPerfectUI
-              Addon:UIScaleChanged()
-              Addon:ForceUpdate()
-            end,
-            get = GetValue,
-            arg = { "Scale", "IgnoreUIScale" },
-          },
-          PixelPerfectUI = {
-            name = L["Pixel-Perfect UI"],
-            order = 30,
-            type = "toggle",
-            set = function(info, val)
-              SetValuePlain(info, val)
-              db.Scale.IgnoreUIScale = not val and db.Scale.IgnoreUIScale
-              Addon:UIScaleChanged()
-              Addon:ForceUpdate()
-            end,
-            get = GetValue,
-            arg = { "Scale", "PixelPerfectUI" },
-          },
-        },
-      },
-      Clickarea = {
-        name = L["Clickable Area"],
-        order = 10,
-        type = "group",
-        inline = true,
-        set = SetValue,
-        get = GetValue,
-        disabled = function() return (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC) and (db.ShowFriendlyBlizzardNameplates or db.ShowEnemyBlizzardNameplates) end,
-        args = {
-          Description = {
-            type = "description",
-            order = 1,
-            name = L["Because of side effects with Blizzard nameplates, this function is disabled in instances or when Blizzard nameplates are used for friendly or neutral/enemy units (see General - Visibility)."],
-            hidden = function() return not Addon.IS_CLASSIC or not Addon.IS_TBC_CLASSIC or (not db.ShowFriendlyBlizzardNameplates and not db.ShowEnemyBlizzardNameplates) end,
-            width = "full",
-          },
-          ToggleSync = {
-            name = L["Healthbar Sync"],
-            order = 10,
-            type = "toggle",
-            desc = L["The size of the clickable area is always derived from the current size of the healthbar."],
-            set = function(info, val)
-              if InCombatLockdown() then
-                Addon.Logging.Error(L["We're unable to change this while in combat"])
-              else
-                SetValue(info, val)
-                Addon:SetBaseNamePlateSize()
-              end
-            end,
-            arg = { "settings", "frame", "SyncWithHealthbar"},
-          },
-          Width = {
-            name = L["Width"],
-            order = 20,
-            type = "range",
-            min = 1,
-            max = 500,
-            step = 1,
-            set = function(info, val)
-              if InCombatLockdown() then
-                Addon.Logging.Error(L["We're unable to change this while in combat"])
-              else
-                SetValue(info, val)
-                Addon:SetBaseNamePlateSize()
-              end
-            end,
-            disabled = function() return db.settings.frame.SyncWithHealthbar end,
-            arg = { "settings", "frame", "width" },
-          },
-          Height = {
-            name = L["Height"],
-            order = 30,
-            type = "range",
-            min = 1,
-            max = 100,
-            step = 1,
-            set = function(info, val)
-              if InCombatLockdown() then
-                Addon.Logging.Error(L["We're unable to change this while in combat"])
-              else
-                SetValue(info, val)
-                Addon:SetBaseNamePlateSize()
-              end
-            end,
-            disabled = function() return db.settings.frame.SyncWithHealthbar end,
-            arg = { "settings", "frame", "height"},
-          },
-          ShowArea = {
-            name = L["Configuration Mode"],
             type = "execute",
-            order = 40,
-            desc = "Toggle a background showing the area of the clicable area.",
+            width = "double",
             func = function()
-              Addon:ConfigClickableArea(true)
+              if InCombatLockdown() then
+                Addon.Logging.Error(L["We're unable to change this while in combat"])
+              else
+                local cvars = {
+                  "nameplateOtherTopInset", "nameplateOtherBottomInset", "nameplateLargeTopInset", "nameplateLargeBottomInset",
+                  "nameplateMotion", "nameplateMotionSpeed", "nameplateOverlapH", "nameplateOverlapV",
+                  "nameplateMaxDistance", "nameplateTargetBehindMaxDistance",
+                  "nameplateShowOnlyNames", 
+                  -- "nameplateGlobalScale" -- Reset it to 1, if it get's somehow corrupted
+                }
+                if Addon.IS_CLASSIC then
+                  cvars[#cvars + 1] = "clampTargetNameplateToScreen"
+                end
+
+                if Addon.IS_WRATH_CLASSIC then
+                  cvars[#cvars + 1] = "clampTargetNameplateToScreen"
+                end
+                
+                if not Addon.WOW_USES_CLASSIC_NAMEPLATES then            
+                  cvars[#cvars + 1] = "nameplateResourceOnTarget"
+                end
+
+                for k, v in pairs(cvars) do
+                  Addon.CVars:SetToDefault(v)
+                end
+                Addon:ForceUpdate()
+              end
             end,
-          }
+          },
+          OpenBlizzardSettings = {
+            name = L["Open Blizzard Settings"],
+            order = 20,
+            type = "execute",
+            width = "double",
+            func = function()
+              InterfaceOptionsFrame_OpenToCategory(_G["InterfaceOptionsNamesPanel"])
+              Addon.LibAceConfigDialog:Close("Threat Plates");
+            end,
+          },
         },
       },
-      Motion = {
-        name = L["Motion & Overlap"],
+      -- Reset = {
+      --   name = L["Reset"],
+      --   order = 10,
+      --   type = "group",
+      --   inline = true,
+      --   args = {
+      --     Reset = {
+      --       name = L["Reset to Defaults"],
+      --       order = 10,
+      --       type = "execute",
+      --       width = "double",
+      --       func = function()
+      --         if InCombatLockdown() then
+      --           Addon.Logging.Error(L["We're unable to change this while in combat"])
+      --         else
+      --           local cvars = {
+      --             "nameplateOtherTopInset", "nameplateOtherBottomInset", "nameplateLargeTopInset", "nameplateLargeBottomInset",
+      --             "nameplateMotion", "nameplateMotionSpeed", "nameplateOverlapH", "nameplateOverlapV",
+      --             "nameplateMaxDistance", "nameplateTargetBehindMaxDistance",
+      --             "nameplateShowOnlyNames", 
+      --             -- "nameplateGlobalScale" -- Reset it to 1, if it get's somehow corrupted
+      --           }
+      --           if Addon.IS_CLASSIC then
+      --             cvars[#cvars + 1] = "clampTargetNameplateToScreen"
+      --           end
+
+      --           if not (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC) then            
+      --             cvars[#cvars + 1] = "nameplateResourceOnTarget"
+      --           end
+
+      --           for k, v in pairs(cvars) do
+      --             Addon.CVars:SetToDefault(v)
+      --           end
+      --           Addon:ForceUpdate()
+      --         end
+      --       end,
+      --     },
+      --     OpenBlizzardSettings = {
+      --       name = L["Open Blizzard Settings"],
+      --       order = 20,
+      --       type = "execute",
+      --       width = "double",
+      --       func = function()
+      --         InterfaceOptionsFrame_OpenToCategory(_G["InterfaceOptionsNamesPanel"])
+      --         Addon.LibAceConfigDialog:Close("Threat Plates");
+      --       end,
+      --     },
+      --   },
+      -- },      
+      Display = {
+        name = L["Display"],
         order = 20,
         type = "group",
-        inline = true,
+        inline = false,
         args = {
-          Motion = {
-            name = L["Movement Model"],
-            order = 10,
-            type = "select",
-            desc = L["Defines the movement/collision model for nameplates."],
-            values = { Overlapping = L["Overlapping"], Stacking = L["Stacking"] },
-            set = function(info, value) SetCVarTPTP(info, (value == "Overlapping" and "0") or "1") end,
-            get = function(info) return (GetCVarBoolTPTP(info) and "Stacking") or "Overlapping" end,
-            arg = "nameplateMotion",
-          },
-          MotionSpeed = {
-            name = L["Motion Speed"],
-            order = 20,
-            type = "range",
-            min = 0,
-            max = 1,
-            step = 0.01,
-            desc = L["Controls the rate at which nameplate animates into their target locations [0.0-1.0]."],
-            arg = "nameplateMotionSpeed",
-          },
-          OverlapH = {
-            name = L["Horizontal Overlap"],
-            order = 30,
-            type = "range",
-            min = 0,
-            max = 1.5,
-            step = 0.01,
-            isPercent = true,
-            desc = L["Percentage amount for horizontal overlap of nameplates."],
-            arg = "nameplateOverlapH",
-          },
-          OverlapV = {
-            name = L["Vertical Overlap"],
-            order = 40,
-            type = "range",
-            min = 0,
-            max = 1.5,
-            step = 0.01,
-            isPercent = true,
-            desc = L["Percentage amount for vertical overlap of nameplates."],
-            arg = "nameplateOverlapV",
+          Resolution = {
+            name = L["UI Scale"],
+            order = 5,
+            type = "group",
+            inline = true,
+            args = {
+              UIScale = {
+                name = L["UI Scale"],
+                order = 10,
+                type = "range",
+                min = 0.64,
+                max = 1,
+                step = 0.01,
+                disabled = function() return db.Scale.IgnoreUIScale or db.Scale.PixelPerfectUI end,
+                arg = "uiScale",
+              },
+              IgnoreUIScale = {
+                name = L["Ignore UI Scale"],
+                order = 20,
+                type = "toggle",
+                set = function(info, val)
+                  SetValuePlain(info, val)
+                  db.Scale.PixelPerfectUI = not val and db.Scale.PixelPerfectUI
+                  Addon:UIScaleChanged()
+                  Addon:ForceUpdate()
+                end,
+                get = GetValue,
+                arg = { "Scale", "IgnoreUIScale" },
+              },
+              PixelPerfectUI = {
+                name = L["Pixel-Perfect UI"],
+                order = 30,
+                type = "toggle",
+                set = function(info, val)
+                  SetValuePlain(info, val)
+                  db.Scale.IgnoreUIScale = not val and db.Scale.IgnoreUIScale
+                  Addon:UIScaleChanged()
+                  Addon:ForceUpdate()
+                end,
+                get = GetValue,
+                arg = { "Scale", "PixelPerfectUI" },
+              },
+            },
           },
         },
       },
-      Distance = {
-        name = L["Distance"],
+      Nameplates = {
+        name = L["Nameplates"],
         order = 30,
         type = "group",
-        inline = true,
+        inline = false,
         args = {
-          MaxDistance = {
-            name = L["Max Distance"],
+          Clickarea = {
+            name = L["Clickable Area"],
             order = 10,
-            type = "range",
-            min = 0,
-            max = (Addon.IS_CLASSIC  and 20) or (Addon.IS_TBC_CLASSIC and 41) or 100,
-            step = 1,
-            width = "double",
-            desc = L["The max distance to show nameplates."],
-            arg = "nameplateMaxDistance",
+            type = "group",
+            inline = true,
+            set = SetValue,
+            get = GetValue,
+            disabled = function() return Addon.WOW_USES_CLASSIC_NAMEPLATES and (db.ShowFriendlyBlizzardNameplates or db.ShowEnemyBlizzardNameplates) end,
+            args = {
+              Description = {
+                type = "description",
+                order = 1,
+                name = L["Because of side effects with Blizzard nameplates, this function is disabled in instances or when Blizzard nameplates are used for friendly or neutral/enemy units (see General - Visibility)."],
+                hidden = function() return not (Addon.IS_CLASSIC and Addon.IS_TBC_CLASSIC and Addon.IS_WRATH_CLASSIC) or (not db.ShowFriendlyBlizzardNameplates and not db.ShowEnemyBlizzardNameplates) end,
+                width = "full",
+              },
+              ToggleSync = {
+                name = L["Healthbar Sync"],
+                order = 10,
+                type = "toggle",
+                desc = L["The size of the clickable area is always derived from the current size of the healthbar."],
+                set = function(info, val)
+                  if InCombatLockdown() then
+                    Addon.Logging.Error(L["We're unable to change this while in combat"])
+                  else
+                    SetValue(info, val)
+                    Addon:SetBaseNamePlateSize()
+                  end
+                end,
+                arg = { "settings", "frame", "SyncWithHealthbar"},
+              },
+              Width = {
+                name = L["Width"],
+                order = 20,
+                type = "range",
+                min = 1,
+                max = 500,
+                step = 1,
+                set = function(info, val)
+                  if InCombatLockdown() then
+                    Addon.Logging.Error(L["We're unable to change this while in combat"])
+                  else
+                    SetValue(info, val)
+                    Addon:SetBaseNamePlateSize()
+                  end
+                end,
+                disabled = function() return db.settings.frame.SyncWithHealthbar end,
+                arg = { "settings", "frame", "width" },
+              },
+              Height = {
+                name = L["Height"],
+                order = 30,
+                type = "range",
+                min = 1,
+                max = 100,
+                step = 1,
+                set = function(info, val)
+                  if InCombatLockdown() then
+                    Addon.Logging.Error(L["We're unable to change this while in combat"])
+                  else
+                    SetValue(info, val)
+                    Addon:SetBaseNamePlateSize()
+                  end
+                end,
+                disabled = function() return db.settings.frame.SyncWithHealthbar end,
+                arg = { "settings", "frame", "height"},
+              },
+              ShowArea = {
+                name = L["Configuration Mode"],
+                type = "execute",
+                order = 40,
+                desc = "Toggle a background showing the area of the clicable area.",
+                func = function()
+                  Addon:ConfigClickableArea(true)
+                end,
+              }
+            },
           },
-          MaxDistanceBehindCam = {
-            name = L["Max Distance Behind Camera"],
+          Motion = {
+            name = L["Motion & Overlap"],
             order = 20,
-            type = "range",
-            min = 0,
-            max = 100,
-            step = 1,
-            width = "double",
-            desc = L["The max distance to show the target nameplate when the target is behind the camera."],
-            arg = "nameplateTargetBehindMaxDistance",
+            type = "group",
+            inline = true,
+            args = {
+              Motion = {
+                name = L["Movement Model"],
+                order = 10,
+                type = "select",
+                desc = L["Defines the movement/collision model for nameplates."],
+                values = { Overlapping = L["Overlapping"], Stacking = L["Stacking"] },
+                set = function(info, value) SetCVarTPTP(info, (value == "Overlapping" and "0") or "1") end,
+                get = function(info) return (GetCVarBoolTPTP(info) and "Stacking") or "Overlapping" end,
+                arg = "nameplateMotion",
+              },
+              MotionSpeed = {
+                name = L["Motion Speed"],
+                order = 20,
+                type = "range",
+                min = 0,
+                max = 1,
+                step = 0.01,
+                desc = L["Controls the rate at which nameplate animates into their target locations [0.0-1.0]."],
+                arg = "nameplateMotionSpeed",
+              },
+              OverlapH = {
+                name = L["Horizontal Overlap"],
+                order = 30,
+                type = "range",
+                min = 0,
+                max = 1.5,
+                step = 0.01,
+                isPercent = true,
+                desc = L["Percentage amount for horizontal overlap of nameplates."],
+                arg = "nameplateOverlapH",
+              },
+              OverlapV = {
+                name = L["Vertical Overlap"],
+                order = 40,
+                type = "range",
+                min = 0,
+                max = 1.5,
+                step = 0.01,
+                isPercent = true,
+                desc = L["Percentage amount for vertical overlap of nameplates."],
+                arg = "nameplateOverlapV",
+              },
+            },
           },
-        },
-      },
-      Insets = {
-        name = L["Insets"],
-        order = 40,
-        type = "group",
-        inline = true,
-        args = {
-          OtherTopInset = {
-            name = L["Top Inset"],
-            order = 10,
-            type = "range",
-            min = -0.2,
-            max = 0.3,
-            step = 0.01,
-            isPercent = true,
-            desc = L["The inset from the top (in screen percent) that the non-self nameplates are clamped to."],
-            arg = "nameplateOtherTopInset",
-          },
-          OtherBottomInset = {
-            name = L["Bottom Inset"],
-            order = 20,
-            type = "range",
-            min = -0.2,
-            max = 0.3,
-            step = 0.01,
-            isPercent = true,
-            desc = L["The inset from the bottom (in screen percent) that the non-self nameplates are clamped to."],
-            arg = "nameplateOtherBottomInset",
-          },
-          LargeTopInset = {
-            name = L["Large Top Inset"],
+          Distance = {
+            name = L["Distance"],
             order = 30,
-            type = "range",
-            min = -0.2,
-            max = 0.3,
-            step = 0.01,
-            isPercent = true,
-            desc = L["The inset from the top (in screen percent) that large nameplates are clamped to."],
-            arg = "nameplateLargeTopInset",
+            type = "group",
+            inline = true,
+            args = {
+              MaxDistance = {
+                name = L["Max Distance"],
+                order = 10,
+                type = "range",
+                min = 0,
+                max = (Addon.IS_CLASSIC  and 20) or (Addon.IS_TBC_CLASSIC and 41) or (Addon.IS_WRATH_CLASSIC and 41) or 100,
+                step = 1,
+                width = "double",
+                desc = L["The max distance to show nameplates."],
+                arg = "nameplateMaxDistance",
+              },
+              MaxDistanceBehindCam = {
+                name = L["Max Distance Behind Camera"],
+                order = 20,
+                type = "range",
+                min = 0,
+                max = 100,
+                step = 1,
+                width = "double",
+                desc = L["The max distance to show the target nameplate when the target is behind the camera."],
+                arg = "nameplateTargetBehindMaxDistance",
+              },
+            },
           },
-          LargeBottomInset = {
-            name = L["Large Bottom Inset"],
+          Insets = {
+            name = L["Insets"],
             order = 40,
-            type = "range",
-            min = -0.2,
-            max = 0.3,
-            step = 0.01,
-            isPercent = true,
-            desc = L["The inset from the bottom (in screen percent) that large nameplates are clamped to."],
-            arg = "nameplateLargeBottomInset",
-          },
-          ClampTarget = {
-            name = L["Clamp Target Nameplate to Screen"],
-            order = 50,
-            type = "toggle",
-            width = "double",
-            set = SetCVarBoolTPTP,
-            get = GetCVarBoolTPTP,
-            desc = L["Clamps the target's nameplate to the edges of the screen, even if the target is off-screen."],
-            arg = "clampTargetNameplateToScreen",
-            hidden = function() return not Addon.IS_CLASSIC end,
+            type = "group",
+            inline = true,
+            args = {
+              OtherTopInset = {
+                name = L["Top Inset"],
+                order = 10,
+                type = "range",
+                min = -0.2,
+                max = 0.3,
+                step = 0.01,
+                isPercent = true,
+                desc = L["The inset from the top (in screen percent) that the non-self nameplates are clamped to."],
+                arg = "nameplateOtherTopInset",
+              },
+              OtherBottomInset = {
+                name = L["Bottom Inset"],
+                order = 20,
+                type = "range",
+                min = -0.2,
+                max = 0.3,
+                step = 0.01,
+                isPercent = true,
+                desc = L["The inset from the bottom (in screen percent) that the non-self nameplates are clamped to."],
+                arg = "nameplateOtherBottomInset",
+              },
+              LargeTopInset = {
+                name = L["Large Top Inset"],
+                order = 30,
+                type = "range",
+                min = -0.2,
+                max = 0.3,
+                step = 0.01,
+                isPercent = true,
+                desc = L["The inset from the top (in screen percent) that large nameplates are clamped to."],
+                arg = "nameplateLargeTopInset",
+              },
+              LargeBottomInset = {
+                name = L["Large Bottom Inset"],
+                order = 40,
+                type = "range",
+                min = -0.2,
+                max = 0.3,
+                step = 0.01,
+                isPercent = true,
+                desc = L["The inset from the bottom (in screen percent) that large nameplates are clamped to."],
+                arg = "nameplateLargeBottomInset",
+              },
+              ClampTarget = {
+                name = L["Clamp Target Nameplate to Screen"],
+                order = 50,
+                type = "toggle",
+                width = "double",
+                set = SetCVarBoolTPTP,
+                get = GetCVarBoolTPTP,
+                desc = L["Clamps the target's nameplate to the edges of the screen, even if the target is off-screen."],
+                arg = "clampTargetNameplateToScreen",
+                hidden = function() return not Addon.IS_CLASSIC end,
+              },
+            },
           },
         },
       },
---      Alpha = {
---        name = L["Alpha"],
---        order = 43,
---        type = "group",
---        inline = true,
---        args = {
---          OccludedUnits = {
---            name = L["Mult for Occluded Units"],
---            order = 10,
---            type = "range",
---            min = -10,
---            max = 10,
---            step = 0.01,
---            isPercent = false,
---            set = function(info, value) SetCVarTPTP(info, value); Addon:ForceUpdate() end,
---            desc = L["Alpha multiplier of nameplates for occluded units."],
---            arg = "nameplateOccludedAlphaMult",
---          },
---          MinAlpha = {
---            name = L["Min Alpha"],
---            order = 20,
---            type = "range",
---            min = 0,
---            max = 1,
---            step = 0.01,
---            isPercent = false,
---            set = function(info, value) SetCVarTPTP(info, value); Addon:ForceUpdate() end,
---            desc = L["The minimum alpha of nameplates."],
---            arg = "nameplateMinAlpha",
---          },
---          MaxAlpha = {
---            name = L["Max Alpha"],
---            order = 30,
---            type = "range",
---            min = 0,
---            max = 1,
---            step = 0.01,
---            isPercent = false,
---            set = function(info, value) SetCVarTPTP(info, value); Addon:ForceUpdate() end,
---            desc = L["The max alpha of nameplates."],
---            arg = "nameplateMaxAlpha",
---          },
---        },
---      },
       PersonalNameplate = {
         name = L["Personal Nameplate"],
         order = 45,
         type = "group",
-        inline = true,
-        hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC end,
+        inline = false,
+        hidden = function() return Addon.WOW_USES_CLASSIC_NAMEPLATES end,
         args = {
           HideBuffs = {
             type = "toggle",
@@ -5131,51 +5365,72 @@ local function CreateBlizzardSettings()
           },
         },
       },
-      Reset = {
-        name = L["Reset"],
-        order = 50,
+      Names = {
+        name = L["Names"],
+        order = 47,
         type = "group",
-        inline = true,
+        inline = false,
+        set = "SetValue",
+        get = GetValue,
         args = {
-          Reset = {
-            name = L["Reset to Defaults"],
+          Show = {
+            name = L["Show"],
             order = 10,
-            type = "execute",
-            width = "double",
-            func = function()
-              if InCombatLockdown() then
-                Addon.Logging.Error(L["We're unable to change this while in combat"])
-              else
-                local cvars = {
-                  "nameplateOtherTopInset", "nameplateOtherBottomInset", "nameplateLargeTopInset", "nameplateLargeBottomInset",
-                  "nameplateMotion", "nameplateMotionSpeed", "nameplateOverlapH", "nameplateOverlapV",
-                  "nameplateMaxDistance", "nameplateTargetBehindMaxDistance",
-                  -- "nameplateGlobalScale" -- Reset it to 1, if it get's somehow corrupted
-                }
-                if Addon.IS_CLASSIC then
-                  cvars[#cvars + 1] = "clampTargetNameplateToScreen"
-                end
-                for k, v in pairs(cvars) do
-                  Addon.CVars:SetToDefault(v)
-                end
-                Addon:ForceUpdate()
-              end
-            end,
+            type = "group",
+            inline = true,
+            set = "SetValue",
+            get = GetValue,
+            args = {
+              ShowOnlyNames = {
+                name = L["Only Names"],
+                order = 30,
+                type = "toggle",
+                set = function(info, val)
+                  SetCVarBoolTPTP(info, val)
+                  ReloadUI()
+                end,
+                get = GetCVarBoolTPTP,
+                desc = L["Show only unit names and hide healthbars (requires /reload). Note that the clickable area of friendly nameplates will also be set to zero so that they don't interfere with enemy nameplates stacking (not in Classic or TBC Classic)."],
+                arg = "nameplateShowOnlyNames",            
+              },
+              DebuffsOnFriendly = {
+                name = L["Debuffs on Friendly"],
+                order = 40,
+                type = "toggle",
+                set = SetCVarBoolTPTP,
+                get = GetCVarBoolTPTP,
+                arg = "nameplateShowDebuffsOnFriendly",            
+              },
+              OnlyInInstances = {
+                type = "toggle",
+                name = L["Players in Instances"],
+                order = 50,
+                desc = L["Show friendly players' and totems' names in instances."],
+                arg = { "BlizzardSettings", "Names", "ShowPlayersInInstances" },
+              },
+            },
           },
-          OpenBlizzardSettings = {
-            name = L["Open Blizzard Settings"],
-            order = 20,
-            type = "execute",
-            width = "double",
-            func = function()
-              InterfaceOptionsFrame_OpenToCategory(_G["InterfaceOptionsNamesPanel"])
-              Addon.LibAceConfigDialog:Close("Threat Plates");
-            end,
-          },
+          Font = GetFontEntryHandler(L["Font"], 20, { "BlizzardSettings", "Names" }, nil, func_handler)
         },
-      },
+      },   
     },
     --  ["ShowNamePlateLoseAggroFlash"] = "When enabled, if you are a tank role and lose aggro, the nameplate with briefly flash.",
+  }
+
+  entry.args.Names.args.Font.args.Notice = {
+    name = L["The font for unit names can only be changed if nameplates and names are be enabled for these units. Names can be enabled in \"Game Menu - Interface - Names\"."],
+    order = 1,
+    type = "description",
+    width = "full",
+  }
+
+  entry.args.Names.args.Font.args.Enable = {
+    name = L["Enable"],
+    order = 2,
+    type = "toggle",
+    width = "full",
+    set = "SetValueEnable",
+    arg = { "BlizzardSettings", "Names", "Enabled" },
   }
 
   return entry
@@ -5428,11 +5683,31 @@ local function CreateAutomationSettings()
         inline = true,
         set = SyncGameSettingsWorld,
         args = {
-          HideFriendlyInInstances = {
-            name = L["Hide Friendly Nameplates"],
-            order = 60,
+          ShowFriendlyInInstances = {
+            name = L["Show Friendly Nameplates"],
+            order = 10,
             type = "toggle",
             width = "double",
+            set = function(info, val)
+              if val then
+                Addon.db.profile.Automation.HideFriendlyUnitsInInstances = false
+              end
+              SyncGameSettingsWorld(info, val)
+            end,
+            desc = L["Show the Blizzard default nameplates for friendly units in instances."],
+            arg = { "Automation", "ShowFriendlyUnitsInInstances" },
+          },
+          HideFriendlyInInstances = {
+            name = L["Hide Friendly Nameplates"],
+            order = 20,
+            type = "toggle",
+            width = "double",
+            set = function(info, val)
+              if val then
+                Addon.db.profile.Automation.ShowFriendlyUnitsInInstances = false
+              end
+              SyncGameSettingsWorld(info, val)
+            end,
             desc = L["Hide the Blizzard default nameplates for friendly units in instances."],
             arg = { "Automation", "HideFriendlyUnitsInInstances" },
           },
@@ -5516,14 +5791,14 @@ local function CreateHealthbarOptions()
                 order = 29,
                 type = "toggle",
                 arg = { "settings", "healthbar", "ShowHealAbsorbs" },
-                hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC end,
+                hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC end,
               },
               ShowAbsorbs = {
                 name = L["Absorbs"],
                 order = 30,
                 type = "toggle",
                 arg = { "settings", "healthbar", "ShowAbsorbs" },
-                hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC end,
+                hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC end,
               },
               ShowMouseoverHighlight = {
                 type = "toggle",
@@ -5648,7 +5923,7 @@ local function CreateHealthbarOptions()
                 order = 90,
                 type = "group",
                 inline = true,
-                hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC end,
+                hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC end,
                 args = {
                   AbsorbColor = {
                     name = L["Color"],
@@ -5982,8 +6257,8 @@ local function CreateHealthbarOptions()
   }
 
   entry.args.TargetUnitText.args.Coloring = {
-    name = L["Coloring"],
-    order = 30,
+    name = L["Appearance"],
+    order = 6,
     type = "group",
     inline = true,
     args = {
@@ -5996,11 +6271,16 @@ local function CreateHealthbarOptions()
         arg = { "settings", "healthbar", "TargetUnit", "CustomColor" },
       },
       ClassColor = {
-        name = L["Class Color for Players"],
+        name = L["Class Color"],
         order = 20,
         type = "toggle",
-        width = "double",
         arg = { "settings", "healthbar", "TargetUnit", "UseClassColor" },
+      },
+      Brackets = {
+        name = L["Brackets"],
+        order = 30,
+        type = "toggle",
+        arg = { "settings", "healthbar", "TargetUnit", "ShowBrackets" },
       },
     },
   }
@@ -6408,6 +6688,209 @@ local function CreateCastbarOptions()
   return entry
 end
 
+local function CreateNamesOptions()
+  local entry = {
+    name = L["Names"],
+    type = "group",
+    order = 65,
+    childGroups = "tab",
+    args = {
+      Appearance = {
+        name = L["Appearance"],
+        order = 10,
+        type = "group",
+        inline = false,
+        args = {
+          Enable = GetEnableEntryTheme(L["Show Name Text"], L["This option allows you to control whether a unit's name is hidden or shown on nameplates."], "name"),
+          Show = {
+            name = L["Show"],
+            order = 10,
+            type = "group",
+            inline = true,
+            args = {
+              Title = {
+                name = L["Title"],
+                order = 10,
+                type = "toggle",
+                arg = { "settings", "name", "ShowTitle" },
+              },
+              Realm = {
+                name = L["Realm"],
+                order = 20,
+                type = "toggle",
+                arg = { "settings", "name", "ShowRealm" },
+              },
+              -- PvPRank = {
+              --   name = L["PvP Rank"],
+              --   order = 30,
+              --   type = "toggle",
+              --   arg = { "settings", "name", "ShowPvPRank" },
+              --   hidden = function() return not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC and not Addon.IS_WRATH_CLASSIC end,
+              -- },
+            },
+          },
+          Boundaries = GetBoundariesEntry(20, "name"),
+        },
+      },
+      HealthbarView = {
+        name = L["Healthbar View"],
+        order = 20,
+        type = "group",
+        inline = false,
+        args = {
+          Font = GetFontEntryTheme(10, "name"),
+          Color = {
+            name = L["Colors"],
+            order = 20,
+            type = "group",
+            inline = true,
+            set = SetThemeValue,
+            args = {
+              FriendlyColor = {
+                name = L["Friendly Name Color"],
+                order = 10,
+                type = "select",
+                values = t.FRIENDLY_TEXT_COLOR,
+                arg = { "settings", "name", "FriendlyTextColorMode" }
+              },
+              FriendlyColorCustom = GetColorEntry(L["Custom Color"], 20, { "settings", "name", "FriendlyTextColor" }),
+              EnemyColor = {
+                name = L["Enemy Name Color"],
+                order = 30,
+                type = "select",
+                values = t.ENEMY_TEXT_COLOR,
+                arg = { "settings", "name", "EnemyTextColorMode" }
+              },
+              EnemyColorCustom = GetColorEntry(L["Custom Color"], 40, { "settings", "name", "EnemyTextColor" }),
+              Spacer1 = GetSpacerEntry(50),
+              EnableRaidMarks = {
+                name = L["Color by Target Mark"],
+                order = 60,
+                type = "toggle",
+                width = "full",
+                desc = L["Additionally color the name based on the target mark if the unit is marked."],
+                descStyle = "inline",
+                set = SetValue,
+                arg = { "settings", "name", "UseRaidMarkColoring" },
+              },
+            },
+          },
+          Placement = {
+            name = L["Placement"],
+            order = 30,
+            type = "group",
+            inline = true,
+            args = {
+              X = { name = L["X"], type = "range", order = 1, set = SetThemeValue, arg = { "settings", "name", "x" }, max = 120, min = -120, step = 1, isPercent = false, },
+              Y = { name = L["Y"], type = "range", order = 2, set = SetThemeValue, arg = { "settings", "name", "y" }, max = 120, min = -120, step = 1, isPercent = false, },
+              AlignH = { name = L["Horizontal Align"], type = "select", order = 4, values = t.AlignH, set = SetThemeValue, arg = { "settings", "name", "align" }, },
+              AlignV = { name = L["Vertical Align"], type = "select", order = 5, values = t.AlignV, set = SetThemeValue, arg = { "settings", "name", "vertical" }, },
+            },
+          },
+          Abbreviation = {
+            name = L["Abbreviation"],
+            order = 60,
+            type = "group",
+            inline = true,
+            args = {
+              NameAbbreviationForEnemyUnits = {
+                name = L["Enemy Units"],
+                order = 10,
+                type = "select",
+                values = t.NAME_ABBREVIATION,
+                arg = { "settings", "name", "AbbreviationForEnemyUnits" },
+              },
+              NameAbbreviationForFriendlyUnits = {
+                name = L["Friendly Units"],
+                order = 10,
+                type = "select",
+                values = t.NAME_ABBREVIATION,
+                arg = { "settings", "name", "AbbreviationForFriendlyUnits" },
+              },
+            },
+          },
+        },
+      },
+      HeadlineView = {
+        name = L["Headline View"],
+        order = 30,
+        type = "group",
+        inline = false,
+        args = {
+          Font = {
+            name = L["Font"],
+            type = "group",
+            inline = true,
+            order = 10,
+            args = {
+              Size = {
+                name = L["Size"],
+                order = 20,
+                type = "range",
+                set = SetThemeValue,
+                arg = { "HeadlineView", "name", "size" },
+                max = 36,
+                min = 6,
+                step = 1,
+                isPercent = false,
+              },
+            },
+          },
+          Color = {
+            name = L["Colors"],
+            order = 20,
+            type = "group",
+            inline = true,
+            args = {
+              FriendlyColor = {
+                name = L["Friendly Names Color"],
+                order = 10,
+                type = "select",
+                values = t.FRIENDLY_TEXT_COLOR,
+                arg = { "HeadlineView", "FriendlyTextColorMode" }
+              },
+              FriendlyColorCustom = GetColorEntry(L["Custom Color"], 20, { "HeadlineView", "FriendlyTextColor" }),
+              EnemyColor = {
+                name = L["Enemy Name Color"],
+                order = 30,
+                type = "select",
+                values = t.ENEMY_TEXT_COLOR,
+                arg = { "HeadlineView", "EnemyTextColorMode" }
+              },
+              EnemyColorCustom = GetColorEntry(L["Custom Color"], 40, { "HeadlineView", "EnemyTextColor" }),
+              Spacer1 = GetSpacerEntry(50),
+              EnableRaidMarks = {
+                name = L["Color by Target Mark"],
+                order = 60,
+                type = "toggle",
+                width = "full",
+                desc = L["Additionally color the name based on the target mark if the unit is marked."],
+                descStyle = "inline",
+                set = SetValue,
+                arg = { "HeadlineView", "UseRaidMarkColoring" },
+              },
+            },
+          },
+          Placement = {
+            name = L["Placement"],
+            order = 30,
+            type = "group",
+            inline = true,
+            args = {
+              X = { name = L["X"], type = "range", order = 1, set = SetThemeValue, arg = { "HeadlineView", "name", "x" }, max = 120, min = -120, step = 1, isPercent = false, },
+              Y = { name = L["Y"], type = "range", order = 2, set = SetThemeValue, arg = { "HeadlineView", "name", "y" }, max = 120, min = -120, step = 1, isPercent = false, },
+              AlignH = { name = L["Horizontal Align"], type = "select", order = 4, values = t.AlignH, set = SetThemeValue, arg = { "HeadlineView", "name", "align" }, },
+              AlignV = { name = L["Vertical Align"], type = "select", order = 5, values = t.AlignV, set = SetThemeValue, arg = { "HeadlineView", "name", "vertical" }, },
+            },
+          },
+        },
+      },
+    },
+  }
+
+  return entry
+end
+
 local function CreateWidgetOptions()
   local options = {
     name = L["Widgets"],
@@ -6477,91 +6960,121 @@ local function CreateSpecRolesClassic()
 end
 
 local function CreateThreatPercentageOptions()
-  local entry = GetTextEntry(L["Value"], 60, { "threatWidget", "ThreatPercentage" })
-
-  entry.disabled = function() return not db.threat.ON end
-  entry.set = SetValueWidget
-
-  entry.args.ValueType = {
-    name = L["Value Type"],
-    order = 5,
-    type = "select",
-    values = Addon.THREAT_VALUE_TYPE,
-    style = "radio",
-    desc = L["Show the player's threat percentage (scaled or raw) or threat delta to the second player on the threat table (percentage or threat value) against the enemy unit."],
-    arg = { "threatWidget", "ThreatPercentage", "Type" },
-  }
-
-  entry.args.SecondPlayersName = {
-    name = L["Second Player"],
-    type = "toggle",
-    order = 6,
-    desc = L["In delta mode, show the name of the player who is second in the enemy unit's threat table."],
-    arg = { "threatWidget", "ThreatPercentage", "SecondPlayersName" },
-  }
-
-  entry.args.OnlyInGroups = {
-    name = L["Only in Groups"],
-    type = "toggle",
-    order = 7,
-    arg = { "threatWidget", "ThreatPercentage", "OnlyInGroups" },
-  }
-
-      --ScaledPercentage = {
-      --  name = L["Scaled Percentage"],
-      --  type = "toggle",
-      --  order = 10,
-      --  desc = L["Show the player's threat percentage against the enemy unit."],
-      --  arg = { "threatWidget", "ThreatPercentage", "ThreatPercentage" },
-      --},
-      --RawPercentage = {
-      --  name = L["Raw Percentage"],
-      --  type = "toggle",
-      --  order = 20,
-      --  desc = L["Show the player's threat percentage against the enemy unit relative to the threat of enemy unit's primary target."],
-      --  arg = { "threatWidget", "ThreatPercentage", "ThreatPercentage" },
-      --},
-      --DetailedPercentage = {
-      --  name = L["Detailed Percentage"],
-      --  type = "toggle",
-      --  order = 30,
-      --  desc = L["Show the player's total threat value on the enemy unit."],
-      --  arg = { "threatWidget", "ThreatPercentage", "ThreatPercentage" },
-      --},
-
-  entry.args.Coloring = {
-    name = L["Coloring"],
-    order = 30,
+  local entry = {
+    name = L["Value"],
     type = "group",
-    inline = true,
+    inline = false,
+    order = 60,
     set = SetValueWidget,
-    args = {
-      UseThreatColorToggle = {
-        name = L["Use Threat Color"],
-        order = 70,
-        type = "toggle",
-        arg = { "threatWidget", "ThreatPercentage", "UseThreatColor" },
+    disabled = function() return not db.threat.ON end,
+    args = { 
+      Show = {
+        name = L["Show"],
+        type = "group",
+        inline = true,
+        order = 10,
+        args = { 
+          Always = {
+            name = L["Always"],
+            type = "toggle",
+            order = 10,
+            set = function(info, val)
+              if val then
+                db.threatWidget.ThreatPercentage.ShowInGroups = false
+                db.threatWidget.ThreatPercentage.ShowWithPet = false
+              end
+              SetValueWidget(info, val)
+            end,
+            arg = { "threatWidget", "ThreatPercentage", "ShowAlways" },
+          },
+          InGroups = {
+            name = L["In Groups"],
+            type = "toggle",
+            order = 20,
+            set = function(info, val)
+              if val then
+                db.threatWidget.ThreatPercentage.ShowAlways = false
+              end
+              SetValueWidget(info, val)
+            end,
+            arg = { "threatWidget", "ThreatPercentage", "ShowInGroups" },
+          },
+          WithPets = {
+            name = L["With Pet"],
+            type = "toggle",
+            order = 30,
+            set = function(info, val)
+              if val then
+                db.threatWidget.ThreatPercentage.ShowAlways = false
+              end
+              SetValueWidget(info, val)
+            end,
+            arg = { "threatWidget", "ThreatPercentage", "ShowWithPet" },
+          },
+        },
       },
-      CustomColorToggle = {
-        name = L["Custom"],
-        order = 80,
-        type = "toggle",
-        set = function(info, val) SetValueWidget(info, not val) end,
-        get = function(info, val) return not GetValue(info, val) end,
-        arg = { "threatWidget", "ThreatPercentage", "UseThreatColor" },
+      ValueType = {
+        name = L["Value Type"],
+        order = 20,
+        type = "select",
+        values = Addon.THREAT_VALUE_TYPE,
+        style = "radio",
+        desc = L["Show the player's threat percentage (scaled or raw) or threat delta to the second player on the threat table (percentage or threat value) against the enemy unit."],
+        arg = { "threatWidget", "ThreatPercentage", "Type" },
       },
-      CustomColor = {
-        name = L["Color"],
-        type = "color",
-        order = 90,
-        get = GetColor,
-        set = SetColorWidget,
-        hasAlpha = true,
-        arg = { "threatWidget", "ThreatPercentage", "CustomColor"},
-        disabled = function() return db.threatWidget.ThreatPercentage.UseThreatColor end
+      ValueFormat = {
+        name = L["Value Format"],
+        type = "group",
+        inline = true,
+        order = 30,
+        args = { 
+          SecondPlayersName = {
+            name = L["Second Player's Name"],
+            type = "toggle",
+            order = 10,
+            width = "double",
+            desc = L["In delta mode, show the name of the player who is second in the enemy unit's threat table."],
+            arg = { "threatWidget", "ThreatPercentage", "SecondPlayersName" },
+          },
+        },
+      },
+      Font = GetFontEntryDefault(L["Font"], 40, { "threatWidget", "ThreatPercentage" }),
+      Positioning = GetFontPositioningEntry(50, { "threatWidget", "ThreatPercentage" }),
+      Coloring = {
+        name = L["Coloring"],
+        order = 60,
+        type = "group",
+        inline = true,
+        args = {
+          UseThreatColorToggle = {
+            name = L["Use Threat Color"],
+            order = 70,
+            type = "toggle",
+            arg = { "threatWidget", "ThreatPercentage", "UseThreatColor" },
+          },
+          CustomColorToggle = {
+            name = L["Custom"],
+            order = 80,
+            type = "toggle",
+            set = function(info, val) SetValueWidget(info, not val) end,
+            get = function(info, val) return not GetValue(info, val) end,
+            arg = { "threatWidget", "ThreatPercentage", "UseThreatColor" },
+          },
+          CustomColor = {
+            name = L["Color"],
+            type = "color",
+            order = 90,
+            get = GetColor,
+            set = SetColorWidget,
+            hasAlpha = true,
+            arg = { "threatWidget", "ThreatPercentage", "CustomColor"},
+            disabled = function() return db.threatWidget.ThreatPercentage.UseThreatColor end,
+          },
+        },
       },
     },
   }
+
   return entry
 end
 
@@ -6756,15 +7269,20 @@ local function CustomPlateUpdateEntry(index)
 end
 
 local function CustomPlateCheckAndUpdateEntry(info, val, index)
+  local selected_plate = db.uniqueSettings[index]
+  local trigger_type = selected_plate.Trigger.Type
+
   local triggers = Addon.Split(val)
   -- Convert spell or aura IDs to numerical values, otherwise they won't be recognized
   for i, trigger in ipairs(triggers) do
-    triggers[i] = tonumber(trigger) or trigger
+    if  trigger_type == "Aura" or trigger_type == "Cast" then
+      triggers[i] = tonumber(trigger) or trigger
+    else
+      triggers[i] = trigger
+    end
   end
 
-  local selected_plate = db.uniqueSettings[index]
   -- Check if here is already another custom nameplate with the same trigger:
-  local trigger_type = selected_plate.Trigger.Type
   if CustomPlateCheckIfTriggerIsUniqueWithErrorMessage(trigger_type, triggers, selected_plate) then
     db.uniqueSettings[index].Trigger[trigger_type].Input = val
     db.uniqueSettings[index].Trigger[trigger_type].AsArray = triggers
@@ -6905,7 +7423,7 @@ CreateCustomNameplateEntry = function(index)
             name = L["Type"],
             type = "select",
             order = 10,
-            values = { Name = L["Name"], Aura = L["Aura"], Cast = L["Cast"], Script = (Addon.db.global.ScriptingIsEnabled and L["Script"]) or nil },
+            values = { Name = L["Unit"], Aura = L["Aura"], Cast = L["Cast"], Script = (Addon.db.global.ScriptingIsEnabled and L["Script"]) or nil },
             set = function(info, val)
               -- If the uses switches to a trigger that is already in use, the current custom nameplate
               -- is disabled (otherwise, if we would not switch to it, the user could not change it at all.
@@ -6921,19 +7439,19 @@ CreateCustomNameplateEntry = function(index)
             arg = { "uniqueSettings", index, "Trigger", "Type" },
           },
           Spacer1 = GetSpacerEntry(15),
-          -- Name Trigger
-          NameTrigger = {
-            name = L["Names"],
+          -- Unit Trigger
+          UnitTrigger = {
+            name = L["Unit (Names or NPC IDs)"],
             type = "input",
             order = 20,
-            width = 3,
-            desc = L["Apply these custom settings to the nameplate of a unit with a particular name. You can add multiple entries separated by a semicolon. You can use use * as wildcard character."],
+            width = "full",
+            desc = L["Apply these custom settings to the nameplate of a unit with a particular name or NPC ID. You can add multiple entries separated by a semicolon. You can use use * as wildcard character in names."],
             set = function(info, val)
               -- Only "*" and "." should be allowed, so check for other magic characters: ( ) . % + ? [ ^ $
               -- "." is allowed as there a units names with this character
               local position, _ = string.find(val, "[%(%)%%%+%?%[%]%^%$]")
               if position then
-                Addon.Logging.Error(L["Illegal character used in Name trigger at position: "] .. tostring(position))
+                Addon.Logging.Error(L["Illegal character used in Unit trigger at position: "] .. tostring(position))
               else
                 CustomPlateCheckAndUpdateEntry(info, val, index)
               end
@@ -6943,11 +7461,10 @@ CreateCustomNameplateEntry = function(index)
             end,
             hidden = function() return db.uniqueSettings[index].Trigger.Type ~= "Name" end,
           },
-          TargetButton = {
-            name = L["Use Target's Name"],
+          UseTargetName = {
+            name = L["Target's Name"],
             type = "execute",
             order = 30,
-            width = "single",
             func = function()
               if UnitExists("target") then
                 local target_unit = UnitName("target")
@@ -6955,6 +7472,28 @@ CreateCustomNameplateEntry = function(index)
                 local check_ok = CustomPlateCheckIfTriggerIsUniqueWithErrorMessage("Name", triggers, db.uniqueSettings[index])
                 if check_ok then
                   db.uniqueSettings[index].Trigger["Name"].Input = target_unit
+                  db.uniqueSettings[index].Trigger["Name"].AsArray = triggers
+                  CustomPlateUpdateEntry(index)
+                end
+              else
+                Addon.Logging.Warning(L["No target found."])
+              end
+            end,
+            hidden = function() return db.uniqueSettings[index].Trigger.Type ~= "Name" end,
+          },
+          UseTargetNPCID_Name = {
+            name = L["Target's NPC ID"],
+            type = "execute",
+            order = 31,
+            width = "single",
+            func = function()
+              if UnitExists("target") then
+                local guid = _G.UnitGUID("target")
+                local _, _, _, _, _, npc_id = strsplit("-", guid or "")
+                local triggers = { npc_id }
+                local check_ok = CustomPlateCheckIfTriggerIsUniqueWithErrorMessage("Name", triggers, db.uniqueSettings[index])
+                if check_ok then
+                  db.uniqueSettings[index].Trigger["Name"].Input = npc_id
                   db.uniqueSettings[index].Trigger["Name"].AsArray = triggers
                   CustomPlateUpdateEntry(index)
                 end
@@ -7358,7 +7897,7 @@ CreateCustomNameplateEntry = function(index)
               CustomPlateSetIcon(index)
             end,
             arg = { "uniqueSettings", index, "UseAutomaticIcon" },
-            desc = L["Find a suitable icon based on the current trigger. For Name trigger, the preview does not work. For multi-value triggers, the preview always is the icon of the first trigger entered."],
+            desc = L["Find a suitable icon based on the current trigger. For Unit triggers, the preview does not work. For multi-value triggers, the preview always is the icon of the first trigger entered."],
           },
           Spacer1 = GetSpacerEntry(3),
           Icon = {
@@ -8081,12 +8620,16 @@ end
 
 -- Return the Options table
 local function CreateOptionsTable()
+  local func_handler = {
+    SetColorAlpha = function(self, info, r, g, b, a) SetColorAlpha(info, r, g, b, a) end,
+  }
+
   if not options then
     options = {
       name = GetAddOnMetadata("TidyPlates_ThreatPlates", "title"),
-      handler = TidyPlatesThreat,
       type = "group",
       childGroups = "tab",
+      handler = func_handler,
       get = GetValue,
       set = SetValue,
       args = {
@@ -8539,168 +9082,7 @@ local function CreateOptionsTable()
                 },
               },
             },
-            Names = {
-              name = L["Names"],
-              type = "group",
-              order = 65,
-              args = {
-                HealthbarView = {
-                  name = L["Healthbar View"],
-                  order = 10,
-                  type = "group",
-                  inline = true,
-                  args = {
-                    Enable = GetEnableEntryTheme(L["Show Name Text"], L["This option allows you to control whether a unit's name is hidden or shown on nameplates."], "name"),
-                    Font = GetFontEntryTheme(10, "name"),
-                    Color = {
-                      name = L["Colors"],
-                      order = 20,
-                      type = "group",
-                      inline = true,
-                      set = SetThemeValue,
-                      args = {
-                        FriendlyColor = {
-                          name = L["Friendly Name Color"],
-                          order = 10,
-                          type = "select",
-                          values = t.FRIENDLY_TEXT_COLOR,
-                          arg = { "settings", "name", "FriendlyTextColorMode" }
-                        },
-                        FriendlyColorCustom = GetColorEntry(L["Custom Color"], 20, { "settings", "name", "FriendlyTextColor" }),
-                        EnemyColor = {
-                          name = L["Enemy Name Color"],
-                          order = 30,
-                          type = "select",
-                          values = t.ENEMY_TEXT_COLOR,
-                          arg = { "settings", "name", "EnemyTextColorMode" }
-                        },
-                        EnemyColorCustom = GetColorEntry(L["Custom Color"], 40, { "settings", "name", "EnemyTextColor" }),
-                        Spacer1 = GetSpacerEntry(50),
-                        EnableRaidMarks = {
-                          name = L["Color by Target Mark"],
-                          order = 60,
-                          type = "toggle",
-                          width = "full",
-                          desc = L["Additionally color the name based on the target mark if the unit is marked."],
-                          descStyle = "inline",
-                          set = SetValue,
-                          arg = { "settings", "name", "UseRaidMarkColoring" },
-                        },
-                      },
-                    },
-                    Placement = {
-                      name = L["Placement"],
-                      order = 30,
-                      type = "group",
-                      inline = true,
-                      args = {
-                        X = { name = L["X"], type = "range", order = 1, set = SetThemeValue, arg = { "settings", "name", "x" }, max = 120, min = -120, step = 1, isPercent = false, },
-                        Y = { name = L["Y"], type = "range", order = 2, set = SetThemeValue, arg = { "settings", "name", "y" }, max = 120, min = -120, step = 1, isPercent = false, },
-                        AlignH = { name = L["Horizontal Align"], type = "select", order = 4, values = t.AlignH, set = SetThemeValue, arg = { "settings", "name", "align" }, },
-                        AlignV = { name = L["Vertical Align"], type = "select", order = 5, values = t.AlignV, set = SetThemeValue, arg = { "settings", "name", "vertical" }, },
-                      },
-                    },
-                    Abbreviation = {
-                      name = L["Abbreviation"],
-                      order = 60,
-                      type = "group",
-                      inline = true,
-                      args = {
-                        NameAbbreviationForEnemyUnits = {
-                          name = L["Enemy Units"],
-                          order = 10,
-                          type = "select",
-                          values = t.NAME_ABBREVIATION,
-                          arg = { "settings", "name", "AbbreviationForEnemyUnits" },
-                        },
-                        NameAbbreviationForFriendlyUnits = {
-                          name = L["Friendly Units"],
-                          order = 10,
-                          type = "select",
-                          values = t.NAME_ABBREVIATION,
-                          arg = { "settings", "name", "AbbreviationForFriendlyUnits" },
-                        },
-                      },
-                    },
-                  },
-                },
-                HeadlineView = {
-                  name = L["Headline View"],
-                  order = 20,
-                  type = "group",
-                  inline = true,
-                  args = {
-                    Font = {
-                      name = L["Font"],
-                      type = "group",
-                      inline = true,
-                      order = 10,
-                      args = {
-                        Size = {
-                          name = L["Size"],
-                          order = 20,
-                          type = "range",
-                          set = SetThemeValue,
-                          arg = { "HeadlineView", "name", "size" },
-                          max = 36,
-                          min = 6,
-                          step = 1,
-                          isPercent = false,
-                        },
-                      },
-                    },
-                    Color = {
-                      name = L["Colors"],
-                      order = 20,
-                      type = "group",
-                      inline = true,
-                      args = {
-                        FriendlyColor = {
-                          name = L["Friendly Names Color"],
-                          order = 10,
-                          type = "select",
-                          values = t.FRIENDLY_TEXT_COLOR,
-                          arg = { "HeadlineView", "FriendlyTextColorMode" }
-                        },
-                        FriendlyColorCustom = GetColorEntry(L["Custom Color"], 20, { "HeadlineView", "FriendlyTextColor" }),
-                        EnemyColor = {
-                          name = L["Enemy Name Color"],
-                          order = 30,
-                          type = "select",
-                          values = t.ENEMY_TEXT_COLOR,
-                          arg = { "HeadlineView", "EnemyTextColorMode" }
-                        },
-                        EnemyColorCustom = GetColorEntry(L["Custom Color"], 40, { "HeadlineView", "EnemyTextColor" }),
-                        Spacer1 = GetSpacerEntry(50),
-                        EnableRaidMarks = {
-                          name = L["Color by Target Mark"],
-                          order = 60,
-                          type = "toggle",
-                          width = "full",
-                          desc = L["Additionally color the name based on the target mark if the unit is marked."],
-                          descStyle = "inline",
-                          set = SetValue,
-                          arg = { "HeadlineView", "UseRaidMarkColoring" },
-                        },
-                      },
-                    },
-                    Placement = {
-                      name = L["Placement"],
-                      order = 30,
-                      type = "group",
-                      inline = true,
-                      args = {
-                        X = { name = L["X"], type = "range", order = 1, set = SetThemeValue, arg = { "HeadlineView", "name", "x" }, max = 120, min = -120, step = 1, isPercent = false, },
-                        Y = { name = L["Y"], type = "range", order = 2, set = SetThemeValue, arg = { "HeadlineView", "name", "y" }, max = 120, min = -120, step = 1, isPercent = false, },
-                        AlignH = { name = L["Horizontal Align"], type = "select", order = 4, values = t.AlignH, set = SetThemeValue, arg = { "HeadlineView", "name", "align" }, },
-                        AlignV = { name = L["Vertical Align"], type = "select", order = 5, values = t.AlignV, set = SetThemeValue, arg = { "HeadlineView", "name", "vertical" }, },
-                      },
-                    },
-                  },
-                },
-                Boundaries = GetBoundariesEntry(30, "name"),
-              },
-            },
+            Names = CreateNamesOptions(),
             Statustext = {
               name = L["Status Text"],
               type = "group",
@@ -9028,7 +9410,7 @@ local function CreateOptionsTable()
                       type = "group",
                       inline = true,
                       set = SetThemeValue,
-                      hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC end,
+                      hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC end,
                       args = {
                         EnableAmount = {
                           name = L["Amount"],
@@ -9141,7 +9523,7 @@ local function CreateOptionsTable()
                       type = "select",
                       order = 10,
                       name = L["Icon Style"],
-                      values = { default = "Default", stddragon = "Blizzard Dragon", skullandcross = "Skull and Crossbones" },
+                      values = { default = "Default", stddragon = "Blizzard Dragon", skullandcross = "Skull and Crossbones", lion = "Lions", wolf = "Wolves", necro = "Necrolord", fae = "Night Fae", venthyr = "Venthyr", kyrian = "Kyrian", alliance = "Alliance", horde = "Horde" },
                       set = function(info, val)
                         SetThemeValue(info, val)
                         options.args.NameplateSettings.args.EliteIcon.args.Texture.args.PreviewRare.image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\EliteArtWidget\\" .. val
@@ -9751,7 +10133,7 @@ local function CreateOptionsTable()
               desc = L["Set the roles your specs represent."],
               disabled = function() return not db.threat.ON end,
               order = 70,
-              args = ((Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC) and CreateSpecRolesClassic()) or CreateSpecRolesRetail(),
+              args = ((Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC) and CreateSpecRolesClassic()) or CreateSpecRolesRetail(),
             },
           },
         },
@@ -9866,7 +10248,7 @@ local function CreateOptionsTable()
   options.args.profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(Addon.db)
   options.args.profiles.order = 10000
 
-  if not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC then
+  if not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC and not Addon.IS_WRATH_CLASSIC then
     -- Add dual-spec support
     local LibDualSpec = LibStub("LibDualSpec-1.0", true)
     LibDualSpec:EnhanceDatabase(Addon.db, t.ADDON_NAME)
@@ -9925,7 +10307,7 @@ function Addon:ProfChange()
       base.ClassIconWidget.args.Textures.args["Prev" .. k_c].image = path .. "ClassIconWidget\\" .. db.classWidget.theme .. "\\" .. CLASS_SORT_ORDER[k_c]
     end
 
-    if not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC then
+    if not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
       base.QuestWidget.args.ModeIcon.args.Texture.args.Preview.image = path .. "QuestWidget\\" .. db.questWidget.IconTexture
     end
 
@@ -9988,7 +10370,7 @@ function Addon.RestoreLegacyCustomNameplates()
 
   local index = 1
   for _, legacy_custom_plate in ipairs(legacy_custom_plates) do
-    -- Only need to check for double name trigger as legacy custom nameplates only have these kind of triggers
+    -- Only need to check for double unit (name) trigger as legacy custom nameplates only have these kind of triggers
     local trigger_value = legacy_custom_plate.Trigger.Name.Input
     local trigger_already_used = Addon.Cache.CustomPlateTriggers.Name[trigger_value]
 

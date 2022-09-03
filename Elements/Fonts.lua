@@ -8,12 +8,37 @@ local ThreatPlates = Addon.ThreatPlates
 -- Lua APIs
 
 -- WoW APIs
+local SystemFont_NamePlate, SystemFont_NamePlateFixed = SystemFont_NamePlate, SystemFont_NamePlateFixed
+local SystemFont_LargeNamePlate, SystemFont_LargeNamePlateFixed = SystemFont_LargeNamePlate, SystemFont_LargeNamePlateFixed
 
 -- ThreatPlates APIs
 local ANCHOR_POINT_TEXT = Addon.ANCHOR_POINT_TEXT
 
+-- Cached database settings
+
 local Font = {}
 Addon.Font = Font
+
+---------------------------------------------------------------------------------------------------
+-- Backup system fonts for recovery if necessary
+---------------------------------------------------------------------------------------------------
+
+local function BackupSystemFont(font_instance)
+  local font_name, font_height, font_flags = font_instance:GetFont()
+
+  return {
+    Typeface = font_name,
+    Size = font_height,
+    flags = font_flags
+  }
+end
+
+Font.DefaultSystemFonts = {
+  NamePlate = BackupSystemFont(SystemFont_NamePlate),
+  NamePlateFixed = BackupSystemFont(SystemFont_NamePlateFixed),
+  LargeNamePlate = BackupSystemFont(SystemFont_LargeNamePlate),
+  LargeNamePlateFixed = BackupSystemFont(SystemFont_LargeNamePlateFixed),
+}
 
 ---------------------------------------------------------------------------------------------------
 -- Element code
@@ -67,3 +92,45 @@ function Font:UpdateTextSize(parent, font, db)
     font:SetNonSpaceWrap(true)
   end
 end
+
+---------------------------------------------------------------------------------------------------
+-- Configure system fonts
+---------------------------------------------------------------------------------------------------
+
+local function UpdateSystemFont(obj, db)
+  local font, height, flags = db.Typeface, db.Size, db.flags
+  obj:SetFont(Addon.LibSharedMedia:Fetch('font', font), height, flags)
+
+  if db.Shadow then
+    local color = db.ShadowColor
+    obj:SetShadowColor(color.r, color.g, color.b, color.a)
+    obj:SetShadowOffset(db.ShadowHorizontalOffset, db.ShadowVerticalOffset)
+  else
+    obj:SetShadowColor(0, 0, 0, 0)
+  end
+end
+
+function Font:SetNamesFonts()
+  local db = Addon.db.profile.BlizzardSettings.Names
+  if db.Enabled then
+    db = db.Font
+    UpdateSystemFont(SystemFont_NamePlate, db)
+    UpdateSystemFont(SystemFont_NamePlateFixed, db)
+    UpdateSystemFont(SystemFont_LargeNamePlate, db)
+    UpdateSystemFont(SystemFont_LargeNamePlateFixed, db)
+  end
+end
+
+function Font:ResetNamesFonts()
+  UpdateSystemFont(SystemFont_NamePlate, self.DefaultSystemFonts.NamePlate)
+  UpdateSystemFont(SystemFont_NamePlateFixed, self.DefaultSystemFonts.NamePlateFixed)
+  UpdateSystemFont(SystemFont_LargeNamePlate, self.DefaultSystemFonts.LargeNamePlate)
+  UpdateSystemFont(SystemFont_LargeNamePlateFixed, self.DefaultSystemFonts.LargeNamePlateFixed)
+end
+
+---------------------------------------------------------------------------------------------------
+-- Update of settings
+---------------------------------------------------------------------------------------------------
+
+-- function Font:UpdateConfiguration()
+-- end

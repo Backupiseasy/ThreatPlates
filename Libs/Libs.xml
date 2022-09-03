@@ -29,6 +29,9 @@
     <!--@version-bcc@-->
     <!--@end-version-bcc@-->
 
+    <!--@version-wrath@-->
+    <!--@end-version-wrath@-->
+
     <!--@version-classic@-->
     <Script file="LibClassicCasterino\LibClassicCasterino.lua"/>
     <Include file="LibClassicDurations\LibClassicDurations.xml"/>

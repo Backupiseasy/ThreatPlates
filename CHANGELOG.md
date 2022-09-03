@@ -1,4 +1,9 @@
 # @project-version@ (@build-time@)
 
-* Fixed a Lua error when a numeric CVar has an invalid, i.e., non-numeric, value. In this case, the default value of the CVar will now be used to prevent the Lua error.
-* Updated TOC version for for TBC Classic Patch 2.5.4.
+* Added basic support for WoW Wrath of the Lich King Classic.
+* Added support for Death Knight's death runes in Wrath Classic.
+* Added Infernal Awakening (Destruction Warlock), Clash (Brewmaster Monk), and Deep Freeze (Frost Mage) to Auras widget as CC aura [Comment #6324, #6335].
+* Removed welcome back message that is shown after every login [Comment #6325].
+* Fixed a bug in Combo Points widget where Animacharge color selector was shown for all specializations/classes.
+* Fixed a bug in name font customization for Classic where a UI reload was necessary to level text and elite icon.
+* Upgrade integrated libraries (LibSharedMedia v9.2.7).

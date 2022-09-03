@@ -18,9 +18,18 @@ local rawset = rawset
 local UnitClass = UnitClass
 
 -- ThreatPlates APIs
+
+
+---------------------------------------------------------------------------------------------------
+-- WoW Version Check
+---------------------------------------------------------------------------------------------------
 Addon.IS_CLASSIC = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
-Addon.IS_TBC_CLASSIC = (WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC)
+Addon.IS_TBC_CLASSIC = (GetClassicExpansionLevel and GetClassicExpansionLevel() == LE_EXPANSION_BURNING_CRUSADE)
+Addon.IS_WRATH_CLASSIC = (GetClassicExpansionLevel and GetClassicExpansionLevel() == LE_EXPANSION_WRATH_OF_THE_LICH_KING)
 Addon.IS_MAINLINE = (WOW_PROJECT_ID == WOW_PROJECT_MAINLINE)
+-- Addon.IS_TBC_CLASSIC = (WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC and LE_EXPANSION_LEVEL_CURRENT == LE_EXPANSION_BURNING_CRUSADE)
+-- Addon.IS_WRATH_CLASSIC = (WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC and LE_EXPANSION_LEVEL_CURRENT == LE_EXPANSION_WRATH_OF_THE_LICH_KING)
+Addon.WOW_USES_CLASSIC_NAMEPLATES = (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC)
 
 ---------------------------------------------------------------------------------------------------
 -- Libraries
@@ -341,21 +350,21 @@ end
 
 local function LogMessage(channel, ...)
 	-- Meta("titleshort")
-	if channel == "DEBUG" and Addon.DEBUG then
+	if channel == "DEBUG" then
 		print("|cff89F559TP|r - |cff0000ff" .. channel .. "|r:", ...)
 	elseif channel == "ERROR" then
 		print("|cff89F559TP|r - |cffff0000" .. channel .. "|r:", ...)
 	elseif channel == "WARNING" then
 		print("|cff89F559TP|r - |cffff8000" .. channel .. "|r:", ...)
-	elseif channel then
-		print("|cff89F559TP|r:", channel .. ":", ...)
 	else
-		print("|cff89F559TP|r:", ...)
+		print("|cff89F559TP|r:", channel, ...)
 	end
 end
 
 Addon.Logging.Debug = function(...)
-	LogMessage("DEBUG", ...)
+	if Addon.DEBUG then
+		LogMessage("DEBUG", ...)
+	end
 end
 
 Addon.Logging.Error = function(...)
@@ -367,7 +376,7 @@ Addon.Logging.Warning = function(...)
 end
 
 Addon.Logging.Info = function(...)
-	if Addon.db.profile.verbose then
+	if Addon.db.profile.verbose or Addon.DEBUG then
 		LogMessage(...)
 	end
 end
@@ -414,21 +423,20 @@ Addon.Debug.PrintTable = function(data)
   end
 end
 
-Addon.Debug.PrintUnit = function(unit, full_info)
-	local plate = C_NamePlate.GetNamePlateForUnit(unit.unitid)
+Addon.Debug.PrintUnit = function(unitid)
+	local plate = C_NamePlate.GetNamePlateForUnit(unitid)
+	if not plate then return end
 
-	Addon.Logging.Debug("Unit:", unit.name)
+	local tp_frame = plate.TPFrame
+	local unit = tp_frame.unit
+	Addon.Logging.Debug("Unit:", unit.name, "=>", unitid)
 	Addon.Logging.Debug("-------------------------------------------------------------")
 	Addon.Logging.Debug("  Show UnitFrame =", plate.UnitFrame:IsShown())
 	Addon.Logging.Debug("  Show TPFrame =", plate.TPFrame:IsShown())
 	Addon.Logging.Debug("  Active =", plate.TPFrame.Active)
 	Addon.Logging.Debug("-------------------------------------------------------------")
-	for key, val in pairs(unit) do
-		Addon.Logging.Debug(key .. ":", val)
-  end
-
-  if full_info and unit.unitid then
-		if not Addon.IS_TBC_CLASSIC and not Addon.IS_CLASSIC then
+  if tp_frame and unit and unit.unitid then
+		if not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC and not Addon.IS_WRATH_CLASSIC then
 			Addon.Logging.Debug("  UnitNameplateShowsWidgetsOnly = ", UnitNameplateShowsWidgetsOnly(unit.unitid))
 		end
     Addon.Logging.Debug("  Reaction = ", UnitReaction("player", unit.unitid))
@@ -449,7 +457,7 @@ Addon.Debug.PrintUnit = function(unit, full_info)
 		Addon.Logging.Debug("    Player is UnitIsOwnerOrControllerOfUnit =", UnitIsOwnerOrControllerOfUnit("player", unit.unitid))
 		Addon.Logging.Debug("    Player Pet =", UnitIsUnit(unit.unitid, "pet"))
     Addon.Logging.Debug("    IsOtherPlayersPet =", UnitIsOtherPlayersPet(unit.unitid))
-		if not Addon.IS_TBC_CLASSIC and not Addon.IS_CLASSIC then
+		if not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC and not Addon.IS_WRATH_CLASSIC then
 			Addon.Logging.Debug("    IsBattlePet =", UnitIsBattlePet(unit.unitid))
 		end
 		Addon.Logging.Debug("  -- PvP ---------------------------------")
@@ -458,8 +466,12 @@ Addon.Debug.PrintUnit = function(unit, full_info)
 
     --		Addon.Logging.Debug("  isFriend = ", TidyPlatesUtilityInternal.IsFriend(unit.name))
     --		Addon.Logging.Debug("  isGuildmate = ", TidyPlatesUtilityInternal.IsGuildmate(unit.name))
+
+		for key, val in pairs(unit) do
+			Addon.Logging.Debug(key .. ":", val)
+		end	
 	else
-    Addon.Logging.Debug("  <no unit id>")
+    Addon.Logging.Debug("  <No TPFrame>")
   end
 
   Addon.Logging.Debug("--------------------------------------------------------------")

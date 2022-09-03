@@ -41,6 +41,9 @@ if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC then
 
   -- Quest widget is not available in Classic
   ShowQuestUnit = function(...) return false end
+elseif Addon.IS_WRATH_CLASSIC then
+  -- Quest widget is not available in Classic
+  ShowQuestUnit = function(...) return false end
 end
 
 ---------------------------------------------------------------------------------------------------

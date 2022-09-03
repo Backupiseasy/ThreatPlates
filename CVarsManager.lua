@@ -9,7 +9,7 @@ local ThreatPlates = Addon.ThreatPlates
 local tostring, string_format = tostring, string.format
 
 -- WoW APIs
-local GetCVar, GetCVarDefault = GetCVar, GetCVarDefault
+local GetCVar, GetCVarDefault, GetCVarBool = GetCVar, GetCVarDefault, C_CVar.GetCVarBool
 
 -- ThreatPlates APIs
 local L = ThreatPlates.L
@@ -54,6 +54,12 @@ local COMBAT_PROTECTED = {
   nameplateShowFriendlyNPCs = true,
   nameplateShowFriendlyPets = true,
   nameplateShowFriendlyTotems = true,
+  -- Name CVars
+  UnitNameFriendlyPlayerName = true,
+  UnitNameFriendlyPetName = true,
+  UnitNameFriendlyGuardianName = true,
+  UnitNameFriendlyTotemName = true,
+  UnitNameFriendlyMinionName = true,
 }
 
 local function SetConsoleVariable(cvar, value)
@@ -105,11 +111,15 @@ function CVars:GetAsNumber(cvar)
   local numeric_value = tonumber(value)
 
   if not numeric_value then
-    Addon.Logging.Warning(string_format(L["CVar \"%s\" has an invalid value: \"%s\". The value must be a number. Using the default value for this CVar instead."], cvar, value))
+    Addon.Logging.Warning(string_format(L["CVar %s has an invalid value: %s. The value must be a number. Using the default value for this CVar instead."], cvar, value))
     numeric_value = tonumber(GetCVarDefault(cvar))
   end
 
  return numeric_value
+end
+
+function CVars:GetAsBool(cvar)
+  return GetCVarBool(cvar)
 end
 
 ---------------------------------------------------------------------------------------------------
