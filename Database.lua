@@ -44,7 +44,10 @@ if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
       return form_index == BEAR_FORM or form_index == DIRE_BEAR_FORM
     end,
     PALADIN = function()
-      return Addon.PlayerIsPaladinTank
+      return Addon.PlayerIsTank
+    end,
+    DEATHKNIGHT = function()
+      return Addon.PlayerIsTank
     end,
     DEFAULT = function()
       return false

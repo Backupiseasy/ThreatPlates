@@ -1524,20 +1524,23 @@ function CoreEvents:UNIT_FACTION(unitid)
 end
 
 -- Only registered for player unit
-local RIGHTEOUS_FURY_SPELL_IDs = { [20468] = true, [20469] = true, [20470] = true, [25780] = true }
+local TANK_AURA_SPELL_IDs = {
+  [20468] = true, [20469] = true, [20470] = true, [25780] = true, -- Paladin Righteous Fury
+  [48263] = true -- Deathknight Frost Presence
+}
 local function UNIT_AURA(event, unitid)
   local _, name, spellId
   for i = 1, 40 do
     name , _, _, _, _, _, _, _, _, spellId = _G.UnitBuff("player", i, "PLAYER")
     if not name then
       break
-    elseif RIGHTEOUS_FURY_SPELL_IDs[spellId] then
-      Addon.PlayerIsPaladinTank = true
+    elseif TANK_AURA_SPELL_IDs[spellId] then
+      Addon.PlayerIsTank = true
       return
     end
   end
 
-  Addon.PlayerIsPaladinTank = false
+  Addon.PlayerIsTank = false
 end
 
 --  function CoreEvents:UNIT_SPELLCAST_INTERRUPTED(unitid, lineid, spellid)
@@ -1597,7 +1600,7 @@ CoreEvents.UNIT_TARGET = UNIT_TARGET
 
 -- Do this after events are registered, otherwise UNIT_AURA would be registered as a general event, not only as
 -- an unit event.
-if (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC) and Addon.PlayerClass == "PALADIN" then
+if ((Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC) and Addon.PlayerClass == "PALADIN") or (Addon.IS_WRATH_CLASSIC and Addon.PlayerClass == "DEATHKNIGHT") then
   CoreEvents.UNIT_AURA = UNIT_AURA
   TidyPlatesCore:RegisterUnitEvent("UNIT_AURA", "player")
   -- UNIT_AURA does not seem to be fired after login (even when buffs are active)

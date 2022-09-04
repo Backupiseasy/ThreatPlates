@@ -437,6 +437,8 @@ L["Custom status text requires LibDogTag-Unit-3.0 to function."] = "Custom statu
 --[[Translation missing --]]
 L["CVar \"%s\" has an invalid value: \"%s\". The value must be a number. Using the default value for this CVar instead."] = "CVar \"%s\" has an invalid value: \"%s\". The value must be a number. Using the default value for this CVar instead."
 --[[Translation missing --]]
+L["CVar %s has an invalid value: %s. The value must be a number. Using the default value for this CVar instead."] = "CVar %s has an invalid value: %s. The value must be a number. Using the default value for this CVar instead."
+--[[Translation missing --]]
 L["Cyclic anchoring of aura areas to each other is not possible."] = "Cyclic anchoring of aura areas to each other is not possible."
 --[[Translation missing --]]
 L["Darnavan"] = "Darnavan"
@@ -444,6 +446,8 @@ L["Darnavan"] = "Darnavan"
 L["Death Knigh Rune Cooldown"] = "Death Knigh Rune Cooldown"
 --[[Translation missing --]]
 L["Death Knight"] = "Death Knight"
+--[[Translation missing --]]
+L["Death Rune"] = "Death Rune"
 --[[Translation missing --]]
 L["Debuff Color"] = "Debuff Color"
 --[[Translation missing --]]
@@ -538,6 +542,8 @@ L["Done"] = "Done"
 L["Don't Ask Again"] = "Don't Ask Again"
 --[[Translation missing --]]
 L["Down Arrow"] = "Down Arrow"
+--[[Translation missing --]]
+L["DPS switch detected, you are now in your |cffff0000dpsing / healing|r role."] = "DPS switch detected, you are now in your |cffff0000dpsing / healing|r role."
 L["DPS/Healing"] = "DPS/Cura"
 --[[Translation missing --]]
 L["Drudge Ghoul"] = "Drudge Ghoul"
@@ -1194,6 +1200,8 @@ L["Right"] = "Direita"
 L["Right-to-left"] = "Right-to-left"
 L["Rogue"] = "Ladino"
 --[[Translation missing --]]
+L["Role toggle not supported because automatic role detection is enabled."] = "Role toggle not supported because automatic role detection is enabled."
+--[[Translation missing --]]
 L["Roles"] = "Roles"
 --[[Translation missing --]]
 L["Row Limit"] = "Row Limit"
@@ -1479,6 +1487,8 @@ L["Syntax error in event script '%s' of custom style '%s': %s"] = "Syntax error 
 L["Tank"] = "Tank"
 --[[Translation missing --]]
 L["Tank Scaled Percentage"] = "Tank Scaled Percentage"
+--[[Translation missing --]]
+L["Tank switch detected, you are now in your |cff00ff00tanking|r role."] = "Tank switch detected, you are now in your |cff00ff00tanking|r role."
 --[[Translation missing --]]
 L["Tank Threat Value"] = "Tank Threat Value"
 --[[Translation missing --]]
