@@ -344,10 +344,14 @@ L["Custom status text requires LibDogTag-Unit-3.0 to function."] = "Custom statu
 --[[Translation missing --]]
 L["CVar \"%s\" has an invalid value: \"%s\". The value must be a number. Using the default value for this CVar instead."] = "CVar \"%s\" has an invalid value: \"%s\". The value must be a number. Using the default value for this CVar instead."
 --[[Translation missing --]]
+L["CVar %s has an invalid value: %s. The value must be a number. Using the default value for this CVar instead."] = "CVar %s has an invalid value: %s. The value must be a number. Using the default value for this CVar instead."
+--[[Translation missing --]]
 L["Cyclic anchoring of aura areas to each other is not possible."] = "Cyclic anchoring of aura areas to each other is not possible."
 L["Darnavan"] = "Darnavan"
 L["Death Knigh Rune Cooldown"] = "Рыцарь смерти перезарядка рун"
 L["Death Knight"] = "Рыцарь смерти"
+--[[Translation missing --]]
+L["Death Rune"] = "Death Rune"
 L["Debuff Color"] = "Цвет Дебаффа"
 L["Debuffs"] = "Дебаффы"
 --[[Translation missing --]]
@@ -433,6 +437,8 @@ L["Done"] = "Готово"
 L["Don't Ask Again"] = "Don't Ask Again"
 --[[Translation missing --]]
 L["Down Arrow"] = "Down Arrow"
+--[[Translation missing --]]
+L["DPS switch detected, you are now in your |cffff0000dpsing / healing|r role."] = "DPS switch detected, you are now in your |cffff0000dpsing / healing|r role."
 L["DPS/Healing"] = "Боец/Лекарь"
 L["Drudge Ghoul"] = "Вурдалак работник"
 L["Druid"] = "Друид"
@@ -950,6 +956,8 @@ L["Reverse the sort order (e.g., \"A to Z\" becomes \"Z to A\")."] = "Reverse th
 L["Right"] = "Права"
 L["Right-to-left"] = "Справа налево"
 L["Rogue"] = "Рога"
+--[[Translation missing --]]
+L["Role toggle not supported because automatic role detection is enabled."] = "Role toggle not supported because automatic role detection is enabled."
 L["Roles"] = "Роли"
 L["Row Limit"] = "Ограничение ряда"
 L["Same as Background"] = "Также как на заднем плане"
@@ -1195,6 +1203,8 @@ L["Syntax error in event script '%s' of custom style '%s': %s"] = "Syntax error 
 L["Tank"] = "Танк"
 --[[Translation missing --]]
 L["Tank Scaled Percentage"] = "Tank Scaled Percentage"
+--[[Translation missing --]]
+L["Tank switch detected, you are now in your |cff00ff00tanking|r role."] = "Tank switch detected, you are now in your |cff00ff00tanking|r role."
 --[[Translation missing --]]
 L["Tank Threat Value"] = "Tank Threat Value"
 --[[Translation missing --]]

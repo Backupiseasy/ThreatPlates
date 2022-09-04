@@ -361,11 +361,15 @@ L["Custom status text requires LibDogTag-Unit-3.0 to function."] = "Custom statu
 --[[Translation missing --]]
 L["CVar \"%s\" has an invalid value: \"%s\". The value must be a number. Using the default value for this CVar instead."] = "CVar \"%s\" has an invalid value: \"%s\". The value must be a number. Using the default value for this CVar instead."
 --[[Translation missing --]]
+L["CVar %s has an invalid value: %s. The value must be a number. Using the default value for this CVar instead."] = "CVar %s has an invalid value: %s. The value must be a number. Using the default value for this CVar instead."
+--[[Translation missing --]]
 L["Cyclic anchoring of aura areas to each other is not possible."] = "Cyclic anchoring of aura areas to each other is not possible."
 L["Darnavan"] = "다르나반"
 --[[Translation missing --]]
 L["Death Knigh Rune Cooldown"] = "Death Knigh Rune Cooldown"
 L["Death Knight"] = "죽음의 기사"
+--[[Translation missing --]]
+L["Death Rune"] = "Death Rune"
 L["Debuff Color"] = "약화 효과 색상"
 L["Debuffs"] = "약화 효과"
 --[[Translation missing --]]
@@ -441,6 +445,8 @@ L["Done"] = "Done"
 L["Don't Ask Again"] = "Don't Ask Again"
 --[[Translation missing --]]
 L["Down Arrow"] = "Down Arrow"
+--[[Translation missing --]]
+L["DPS switch detected, you are now in your |cffff0000dpsing / healing|r role."] = "DPS switch detected, you are now in your |cffff0000dpsing / healing|r role."
 L["DPS/Healing"] = "공격 전담/치유 전담"
 L["Drudge Ghoul"] = "노역꾼 구울"
 L["Druid"] = "드루이드"
@@ -908,6 +914,8 @@ L["Reverse the sort order (e.g., \"A to Z\" becomes \"Z to A\")."] = "정렬 순
 L["Right"] = "오른쪽"
 L["Right-to-left"] = "오른쪽에서 왼쪽으로"
 L["Rogue"] = "도적"
+--[[Translation missing --]]
+L["Role toggle not supported because automatic role detection is enabled."] = "Role toggle not supported because automatic role detection is enabled."
 L["Roles"] = "역할"
 L["Row Limit"] = "행 제한"
 L["Same as Background"] = "배경과 동일"
@@ -1141,6 +1149,8 @@ L["Syntax error in event script '%s' of custom style '%s': %s"] = "Syntax error 
 L["Tank"] = "방어 전담"
 --[[Translation missing --]]
 L["Tank Scaled Percentage"] = "Tank Scaled Percentage"
+--[[Translation missing --]]
+L["Tank switch detected, you are now in your |cff00ff00tanking|r role."] = "Tank switch detected, you are now in your |cff00ff00tanking|r role."
 --[[Translation missing --]]
 L["Tank Threat Value"] = "Tank Threat Value"
 --[[Translation missing --]]
