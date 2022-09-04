@@ -438,7 +438,7 @@ local function UpdateRuneStatusInactiveMainline(cp_texture, cp_texture_off, rune
   end
 end
 
-local function UpdateRunes(widget_frame)
+function Widget:UpdateRunes(widget_frame)
   local current_time = floor(GetTime())
 
   for rune_id = 1, 6 do
@@ -455,7 +455,7 @@ local function UpdateRunes(widget_frame)
       
       cp_texture:Show()
       cp_texture_off:Hide()
-    elseif Widget.db.ShowOffCPs then
+    elseif self.db.ShowOffCPs then
       UpdateRuneStatusInactive(cp_texture, cp_texture_off, rune_id, current_time, rune_expiration)
 
       cp_texture:Hide()
@@ -487,7 +487,7 @@ function Widget:UpdateRunesMainline(widget_frame)
 
   sort(RuneCooldowns)
 
-  UpdateRunes(widget_frame)
+  self:UpdateRunes(widget_frame)
 end
 
 -- function Widget:UpdateRunesWrath(widget_frame)
