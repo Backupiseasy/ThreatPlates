@@ -175,6 +175,7 @@ local CROWD_CONTROL_SPELLS_RETAIL = {
   [3355] = LOC_INCAPACITATE,    -- Freezing Trap (Blizzard)
   [24394] = LOC_STUN,           -- Intimidation (Blizzard)
   [117405] = PC_ROOT,           -- Binding Shot
+  [117526] = PC_ROOT,           -- Binding Shot (Root)
   [202914] = CC_SILENCE,        -- Spider Sting (Honor)
   [135299] = PC_SNARE,          -- Tar Trap (Honor)
   --[147362] = CC_SILENCE,        -- Counter Shot
@@ -1386,6 +1387,8 @@ function Widget:UpdateUnitAuras(aura_grid_frame, unit, enabled_auras, enabled_cc
     -- ShowPesonal: Debuffs  that are shown on Blizzards nameplate, no matter who casted them (and
     -- nameplateShowAll: Debuffs
     if not aura.name then break end
+
+    print(aura.name, aura.spellId)
 
     -- CastByPlayer is also used by aura trigger custom styles (only my auras)
     aura.CastByPlayer = (aura.caster == "player" or aura.caster == "pet" or aura.caster == "vehicle")
