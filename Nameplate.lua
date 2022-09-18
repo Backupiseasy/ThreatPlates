@@ -450,29 +450,28 @@ SubscribeEvent(Addon, "StyleUpdate", UpdateStyle)
 -- Create / Hide / Show Event Handlers
 ---------------------------------------------------------------------------------------------------------------------
 
-local function UpdateNameplateStyle(plate, unitid)
-  if UnitReaction(unitid, "player") > 4 then
+local function UpdateNameplateStyle(tp_frame, unit)
+  if unit.reaction == "FRIENDLY" then
+  --if UnitReaction(unit.unitid, "player") > 4 then
     if SettingsShowFriendlyBlizzardNameplates then
-      plate.UnitFrame:Show()
-      plate.TPFrame:Hide()
-      plate.TPFrame.Active = false
+      tp_frame.Parent.UnitFrame:Show()
+      tp_frame:Hide()
+      tp_frame.Active = false
     else
-      plate.UnitFrame:Hide()
-      plate.TPFrame:Show()
-      plate.TPFrame.Active = true
+      tp_frame.Parent.UnitFrame:Hide()
+      tp_frame:Show()
+      tp_frame.Active = true
     end
   elseif SettingsShowEnemyBlizzardNameplates then
-    plate.UnitFrame:Show()
-    plate.TPFrame:Hide()
-    plate.TPFrame.Active = false
+    tp_frame.Parent.UnitFrame:Show()
+    tp_frame:Hide()
+    tp_frame.Active = false
   else
-    plate.UnitFrame:Hide()
-    plate.TPFrame:Show()
-    plate.TPFrame.Active = true
+    tp_frame.Parent.UnitFrame:Hide()
+    tp_frame:Show()
+    tp_frame.Active = true
   end
 end
-
-Addon.UpdateNameplateStyle = UpdateNameplateStyle
 
 local	function OnNewNameplate(plate)
   -- Parent could be: WorldFrame, UIParent, plate
@@ -525,6 +524,8 @@ local function OnShowNameplate(plate, unitid)
   PlatesByUnit[unitid] = tp_frame
   PlatesByGUID[unit.guid] = plate
 
+  UpdateNameplateStyle(tp_frame, unit)
+
   -- Initialized nameplate style
   Style:Update(tp_frame)
   
@@ -534,8 +535,6 @@ local function OnShowNameplate(plate, unitid)
   Color:Initialize(tp_frame)
   ElementsUnitAdded(tp_frame)
 
-  UpdateNameplateStyle(plate, unitid)
-  
   -- Call this after the plate is shown as OnStartCasting checks if the plate is shown; if not, the castbar is hidden and
   -- nothing is updated
   OnUpdateCastMidway(tp_frame, unitid)
@@ -664,14 +663,9 @@ function Addon:UpdateSettings()
 end
 
 function Addon:UpdateAllPlates()
-  for unitid, tp_frame in pairs(PlatesByUnit) do
-    -- If Blizzard default plates are enabled (which means that these nameplates are not active), we need
-    -- to check if they are enabled, so that Active is set correctly and plates are updated shown correctly.
-    if not tp_frame.Active then
-      UpdateNameplateStyle(tp_frame.Parent, unitid)
-    end
     -- No need to update only active nameplates, as this is only done when settings are changed, so performance is
     -- not really an issue.
+  for unitid, tp_frame in pairs(PlatesByUnit) do
     OnShowNameplate(tp_frame.Parent, unitid)
   end
 end
@@ -1107,6 +1101,8 @@ function Addon:UNIT_FACTION(unitid)
     local tp_frame = self:GetThreatPlateForUnit(unitid)
     if tp_frame then
       SetUnitAttributeReaction(tp_frame.unit, unitid)
+      -- If Blizzard-style nameplates are used, we also need to check if TP plates are disabled/enabled now
+      UpdateNameplateStyle(tp_frame, tp_frame.unit)
       Style:Update(tp_frame)
       PublishEvent("FactionUpdate", tp_frame)
     end
