@@ -130,19 +130,20 @@ function Element.UpdateStyle(tp_frame, style, plate_style)
   if plate_style == "None" then
     healthbar.Highlight:Hide()
     healthbar.NameHighlight:Hide()
-    return
-  end
-
-  if style.healthbar.show then
+    -- Also set MouseoverHighlight, as it might be accessed in UPDATE_MOUSEOVER_UNIT
     healthbar.MouseoverHighlight = healthbar.Highlight
-    healthbar.NameHighlight:Hide()
   else
-    healthbar.MouseoverHighlight = healthbar.NameHighlight
-    healthbar.Highlight:Hide()
+    if style.healthbar.show then
+      healthbar.MouseoverHighlight = healthbar.Highlight
+      healthbar.NameHighlight:Hide()
+    else
+      healthbar.MouseoverHighlight = healthbar.NameHighlight
+      healthbar.Highlight:Hide()
+    end
+  
+    local unit = tp_frame.unit
+    healthbar.MouseoverHighlight:SetShown(unit.isMouseover and style.highlight.show and TargetHighlightEnabledForStyle[unit.style] and not unit.isTarget)  
   end
-
-  local unit = tp_frame.unit
-  healthbar.MouseoverHighlight:SetShown(unit.isMouseover and style.highlight.show and TargetHighlightEnabledForStyle[unit.style] and not unit.isTarget)
 end
 
 function Element.UpdateSettings()
