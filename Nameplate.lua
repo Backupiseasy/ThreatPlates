@@ -452,7 +452,6 @@ SubscribeEvent(Addon, "StyleUpdate", UpdateStyle)
 
 local function UpdateNameplateStyle(tp_frame, unit)
   if unit.reaction == "FRIENDLY" then
-  --if UnitReaction(unit.unitid, "player") > 4 then
     if SettingsShowFriendlyBlizzardNameplates then
       tp_frame.Parent.UnitFrame:Show()
       tp_frame:Hide()

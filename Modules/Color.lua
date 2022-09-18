@@ -32,6 +32,12 @@ local _G =_G
 local ColorModule = Addon.Color
 
 ---------------------------------------------------------------------------------------------------
+-- Local variables
+---------------------------------------------------------------------------------------------------
+local ColorByHealthIsEnabled = false
+local ShowQuestUnit
+
+---------------------------------------------------------------------------------------------------
 -- Wrapper functions for WoW Classic
 ---------------------------------------------------------------------------------------------------
 
@@ -41,10 +47,8 @@ if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
 end
 
 ---------------------------------------------------------------------------------------------------
--- Local variables
+-- Constants
 ---------------------------------------------------------------------------------------------------
-local ColorByHealthIsEnabled = false
-local ShowQuestUnit
 
 local TRANPARENT_COLOR = Addon.RGB(0, 0, 0, 0)
 
