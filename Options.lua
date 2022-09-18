@@ -8637,7 +8637,7 @@ local function CreateOptionsTable()
                       arg = { "nameplate", "toggle", "OccludedUnits" },
                       disabled = function() return CVars.InvalidCVarsForOcclusionDetection() end,
                     },
-                    OccludedUnitsAlpha = GetTransparencyEntryDefault(11, { "nameplate", "alpha", "OccludedUnits" }),
+                    OccludedUnitsAlpha = GetTransparencyEntryDefault(11, { "nameplate", "alpha", "OccludedUnits" }, function() return CVars.InvalidCVarsForOcclusionDetection() end),
                     ImportantNotice = {
                       name = L["|cffff0000IMPORTANT: Currently, this feature is disabled as certain console variables (CVars) related to nameplate transparency are set in a way to prevent this feature from working. Clicking the button below will fix this and reset these CVars to their default values. This might change the appearance (transparency) of default Blizzard nameplates.|r"],
                       order = 20 ,

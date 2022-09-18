@@ -243,7 +243,6 @@ function ScalingModule:UpdateSettings()
   if Settings.HidePlateDuration > 0 and (Settings.HidePlateFadeOut or Settings.HidePlateScaleDown) then
     if CVars.InvalidCVarsForHidingNameplates() then
       AnimateHideNameplate = false
-      Addon.Logging.Warning(L["Animations for hiding nameplates are being disabled as certain console variables (CVars) related to nameplate scaling are set in a way to prevent this feature from working."], true)
     else
       AnimateHideNameplate = true
       CVAR_nameplateMinScale = CVars:GetAsNumber("nameplateMinScale") * CVars:GetAsNumber("nameplateGlobalScale")
