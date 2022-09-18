@@ -11,13 +11,11 @@ local ADDON_NAME, Addon = ...
 
 -- WoW APIs
 local CreateFrame = CreateFrame
-local InCombatLockdown = InCombatLockdown
-local UnitIsConnected, UnitAffectingCombat = UnitIsConnected, UnitAffectingCombat
 
 -- ThreatPlates APIs
 local RGB = Addon.RGB
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
-local Threat, Style, Color = Addon.Threat, Addon.Style, Addon.Color
+local Color = Addon.Color
 local BackdropTemplate = Addon.BackdropTemplate
 
 local _G =_G
@@ -38,55 +36,24 @@ local COLOR_TRANSPARENT = RGB(0, 0, 0, 0) -- opaque
 -- Local variables
 ---------------------------------------------------------------------------------------------------
 local Settings
-local ThreatColorWOThreatSystem, TappedColor
-
----------------------------------------------------------------------------------------------------
--- Wrapper functions for WoW Classic
----------------------------------------------------------------------------------------------------
-
-local function ShowThreatGlow(unit)
-  if Threat.UseThreatTable then
-    if Addon.IsInPvEInstance and Threat.UseHeuristicInInstances then
-      return _G.UnitAffectingCombat(unit.unitid)
-    else
-      return Threat:OnThreatTable(unit)
-    end
-  else
-    return _G.UnitAffectingCombat(unit.unitid)
-  end
-end
+local TappedColor
 
 ---------------------------------------------------------------------------------------------------
 -- Local threat functions
 ---------------------------------------------------------------------------------------------------
 
+-- This function is only called if unit.ThreatLevel ~= nil meaning that the unit is in in combat with
+-- the player
 local function GetThreatGlowColor(unit)
-  local color
+  local color = COLOR_TRANSPARENT
 
-  if unit.IsTapDenied and ShowThreatGlow(unit) then
-    color = TappedColor
-  elseif unit.type == "NPC" and unit.reaction ~= "FRIENDLY" then
-    local style = unit.style
-
-    local unique_setting = unit.CustomPlateSettings
-    if unique_setting and unique_setting.UseThreatGlow then
-      -- set style to tank/dps or normal
-      style = Style:GetThreatStyle(unit)
-    end
-
-    -- Split this up into two if-parts, otherweise there is an inconsistency between
-    -- healthbar color and threat glow at the beginning of a combat when the player
-    -- is already in combat, but not yet on the mob's threat table for a sec or so.
-    if Settings.ON and Settings.useHPColor then
-      if style == "dps" or style == "tank" then
-        color = Color:GetThreatColor(unit, style)
-      end
-    elseif InCombatLockdown() and (style == "normal" or style == "dps" or style == "tank") then
-      color = Color:GetThreatColor(unit, style)
+  if unit.type == "NPC" and unit.reaction ~= "FRIENDLY" then    
+    if unit.IsTapDenied then
+      color = TappedColor
+    else
+      color = Color:GetThreatColor(unit)
     end
   end
-
-  color = color or COLOR_TRANSPARENT
 
   return color.r, color.g, color.b, color.a
 end
@@ -112,8 +79,22 @@ function Element.Created(tp_frame)
 end
 
 -- Called in processing event: NAME_PLATE_UNIT_ADDED
---function Element.UnitAdded(tp_frame)
---end
+-- PlateStyle is always ~= "None" here
+function Element.UnitAdded(tp_frame)
+  local unit = tp_frame.unit
+  if tp_frame.style.threatborder.show and unit.ThreatLevel then
+    local unique_setting = unit.CustomPlateSettings
+    if not unique_setting or unique_setting.UseThreatGlow then
+      local threatglow = tp_frame.visual.ThreatGlow
+      threatglow:SetBackdropBorderColor(GetThreatGlowColor(unit))
+      threatglow:Show()
+    else
+      tp_frame.visual.ThreatGlow:Hide()
+    end
+  else
+    tp_frame.visual.ThreatGlow:Hide()
+  end
+end
 
 -- Called in processing event: NAME_PLATE_UNIT_REMOVED
 --function Element.UnitRemoved(tp_frame)
@@ -121,27 +102,16 @@ end
 --end
 
 function Element.UpdateStyle(tp_frame, style, plate_style)
-  local threatglow = tp_frame.visual.ThreatGlow
-
-  if plate_style == "None" or not style.threatborder.show then
-    threatglow:Hide()
-    return
-  end
-
-  local unit = tp_frame.unit
-  if unit.ThreatLevel then
-    threatglow:SetBackdropBorderColor(GetThreatGlowColor(unit))
-    threatglow:Show()
+  if plate_style ~= "None" then
+    Element.UnitAdded(tp_frame)
   else
-    threatglow:Hide()
+    tp_frame.visual.ThreatGlow:Hide()
   end
 end
 
 function Element.ThreatUpdate(tp_frame, unit)
-  if unit.ThreatLevel and tp_frame.style.threatborder.show then
-    local threatglow = tp_frame.visual.ThreatGlow
-    threatglow:SetBackdropBorderColor(GetThreatGlowColor(unit))
-    threatglow:Show()
+  if tp_frame.PlateStyle ~= "None" then
+    Element.UnitAdded(tp_frame)
   else
     tp_frame.visual.ThreatGlow:Hide()
   end
@@ -151,8 +121,7 @@ function Element.UpdateSettings()
   local db = Addon.db.profile
   Settings = db.threat
 
-  ThreatColorWOThreatSystem = db.settings.normal.threatcolor
   TappedColor = db.ColorByReaction.TappedUnit
 
-  SubscribeEvent(Element, "ThreatUpdate", Element.ThreatUpdate)
+  SubscribeEvent(Element, "ThreatColorUpdate", Element.ThreatUpdate)
 end

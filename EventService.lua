@@ -117,6 +117,10 @@ local INTERNAL_EVENTS = {
   --   Fires when a nameplate should apply a custom style
   --   Event(frame)
   -- CustomStyleUpdate = true
+  -- Event: ThreatColorUpdate
+  --   Fired when the threat-based color of a unit must be re-evaluated
+  --   Event(frame)
+  ThreatColorUpdate = true
 }
 
 ---------------------------------------------------------------------------------------------------

@@ -150,12 +150,6 @@ local function Create(name)
       anchor = "CENTER", --db.raidicon.anchor,
       show = db.raidicon.ShowInHeadlineView,
     },
-
-    threatcolor = {
-      LOW = { r = 0, g = 0, b = 0, a = 0 },
-      MEDIUM = { r = 0, g = 0, b = 0, a = 0 },
-      HIGH = { r = 0, g = 0, b = 0, a = 0 },
-    }
   }
   return theme
 end

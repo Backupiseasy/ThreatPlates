@@ -144,27 +144,6 @@ local function Create(name)
     },
   }
 
-  local threat = db[name].threatcolor
-  theme.threatcolor = {
-    LOW = {
-      r = threat.LOW.r,
-      g = threat.LOW.g,
-      b = threat.LOW.b,
-      a = threat.LOW.a
-    },
-    MEDIUM = {
-      r = threat.MEDIUM.r,
-      g = threat.MEDIUM.g,
-      b = threat.MEDIUM.b,
-      a = threat.MEDIUM.a
-    },
-    HIGH = {
-      r = threat.HIGH.r,
-      g = threat.HIGH.g,
-      b = threat.HIGH.b,
-      a = threat.HIGH.a
-    },
-  }
   return theme
 end
 

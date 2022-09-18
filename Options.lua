@@ -5624,6 +5624,12 @@ local function CreateHealthbarOptions()
                 name = L["Elite Border"],
                 arg = { "settings", "elitehealthborder", "show" },
               },
+              ThreatGlow = {
+                type = "toggle",
+                order = 70,
+                name = L["Warning Glow"],
+                arg = { "settings", "threatborder", "show" },
+              },
             }
           },
           HealthBarGroup = {
@@ -5880,52 +5886,6 @@ local function CreateHealthbarOptions()
                 arg = { "ColorByHealth", "High" },
               },
             },
-          },
-        },
-      },
-      ThreatColors = {
-        name = L["Warning Glow for Threat"],
-        order = 40,
-        type = "group",
-        inline = false,
-        args = {
-          ThreatGlow = {
-            type = "toggle",
-            order = 1,
-            name = L["Enable"],
-            arg = { "settings", "threatborder", "show" },
-          },
-          OnlyAttackedUnits = {
-            type = "toggle",
-            order = 2,
-            name = L["Threat Detection Heuristic"],
-            desc = L["Use a heuristic instead of a mob's threat table to detect if you are in combat with a mob (see Threat System - General Settings for a more detailed explanation)."],
-            width = "double",
-            set = function(info, val) SetValue(info, not val) end,
-            get = function(info) return not GetValue(info) end,
-            arg = { "threat", "UseThreatTable" },
-          },
-          Header = { name = L["Colors"], type = "header", order = 10, },
-          Low = {
-            name = L["|cffffffffLow Threat|r"],
-            type = "color",
-            order = 20,
-            arg = { "settings", "normal", "threatcolor", "LOW" },
-            hasAlpha = true,
-          },
-          Med = {
-            name = L["|cffffff00Medium Threat|r"],
-            type = "color",
-            order = 30,
-            arg = { "settings", "normal", "threatcolor", "MEDIUM" },
-            hasAlpha = true,
-          },
-          High = {
-            name = L["|cffff0000High Threat|r"],
-            type = "color",
-            order = 40,
-            arg = { "settings", "normal", "threatcolor", "HIGH" },
-            hasAlpha = true,
           },
         },
       },
@@ -6803,7 +6763,6 @@ local function CreateThreatPercentageOptions()
     type = "group",
     inline = false,
     order = 60,
-    disabled = function() return not db.threat.ON end,
     args = { 
       Show = {
         name = L["Show"],
@@ -9374,17 +9333,10 @@ local function CreateOptionsTable()
           type = "group",
           order = 30,
           args = {
-            Enable = {
-              name = L["Enable Threat System"],
-              type = "toggle",
-              order = 1,
-              arg = { "threat", "ON" }
-            },
             GeneralSettings = {
               name = L["General Settings"],
               type = "group",
               order = 10,
-              disabled = function() return not db.threat.ON end,
               args = {
                 ByUnitType = {
                   name = L["Show For"],
@@ -9508,7 +9460,6 @@ local function CreateOptionsTable()
               name = L["Scale"],
               type = "group",
               desc = L["Set scale settings for different threat levels."],
-              disabled = function() return not db.threat.ON end,
               order = 20,
               args = {
                 Enable = {
@@ -9583,7 +9534,6 @@ local function CreateOptionsTable()
               name = L["Transparency"],
               type = "group",
               desc = L["Set transparency settings for different threat levels."],
-              disabled = function() return not db.threat.ON end,
               order = 30,
               args = {
                 Enable = {
@@ -9659,7 +9609,6 @@ local function CreateOptionsTable()
               type = "group",
               order = 40,
               desc = L["Set threat textures and their coloring options here."],
-              disabled = function() return not db.threat.ON end,
               args = {
                 ThreatArt = {
                   name = L["Enable Threat Textures"],
@@ -9771,7 +9720,6 @@ local function CreateOptionsTable()
               name = L["Coloring"],
               type = "group",
               order = 50,
-              disabled = function() return not db.threat.ON end,
               args = {
                 Toggles = {
                   name = L["Enable Threat Coloring of Healthbar"],
@@ -9867,7 +9815,6 @@ local function CreateOptionsTable()
               name = L["Roles"],
               type = "group",
               desc = L["Set the roles your specs represent."],
-              disabled = function() return not db.threat.ON end,
               order = 70,
               args = ((Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC) and CreateSpecRolesClassic()) or CreateSpecRolesRetail(),
             },

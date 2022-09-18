@@ -280,7 +280,7 @@ local function SetUnitAttributeHealth(unit, unitid)
   -- unit.Absorbs = UnitGetTotalAbsorbs(unitid) or 0
 end
 
-local function InitializeUnit(unit, unitid)
+local function SetUnitAttributes(unit, unitid)
   -- Unit data that does not change after nameplate creation
   unit.unitid = unitid
   unit.guid = _G.UnitGUID(unitid)
@@ -322,8 +322,6 @@ local function InitializeUnit(unit, unitid)
  
   -- Target Mark => RAID_TARGET_UPDATE
   unit.TargetMarker = RAID_ICON_LIST[GetRaidTargetIndex(unitid)]
-
-  Threat:SetUnitAttributeThreat(unit, unitid)
 end
 
 ---------------------------------------------------------------------------------------------------------------------
@@ -512,7 +510,8 @@ local function OnShowNameplate(plate, unitid)
 
   -- Initialize unit data for which there are no events when players enters world or that
   -- do not change over the nameplate lifetime
-  InitializeUnit(unit, unitid)
+  SetUnitAttributes(unit, unitid)
+  Threat:SetUnitAttribute(tp_frame)
 
   tp_frame.stylename = ""
   tp_frame.visual.Castbar.FlashTime = 0  -- Set FlashTime to 0 so that the castbar is actually hidden (see statusbar OnHide hook function OnHideCastbar)
@@ -528,14 +527,15 @@ local function OnShowNameplate(plate, unitid)
 
   -- Initialized nameplate style
   Style:Update(tp_frame)
-  -- Initialize scale and transparency
+  
+  -- The following modules use the unit style, so it must be initialized before Module:Initialize is called
   Transparency:Initialize(tp_frame)
   Scaling:Initialize(tp_frame)
   Color:Initialize(tp_frame)
   ElementsUnitAdded(tp_frame)
 
   UpdateNameplateStyle(plate, unitid)
-
+  
   -- Call this after the plate is shown as OnStartCasting checks if the plate is shown; if not, the castbar is hidden and
   -- nothing is updated
   OnUpdateCastMidway(tp_frame, unitid)
@@ -910,16 +910,12 @@ function Addon:PLAYER_ENTERING_WORLD(initialLogin, reloadingUI)
   Font:SetNamesFonts()
 end
 
-local function UpdatePlateAfterCombatStatusChange()
-  for _, tp_frame in Addon:GetActiveThreatPlates() do
-    Threat:ThreatUpdate(tp_frame) -- also does a style update and fires event ThreatUpdate
-  end
-end
-
 -- Fires when the player leaves combat status
 -- Syncs addon settings with game settings in case changes weren't possible during startup, reload
 -- or profile reset because character was in combat.
 function Addon:PLAYER_REGEN_ENABLED()
+  Addon.PlayerIsInCombat = false
+
   -- Execute functions which will fail when executed while in combat
   for i = #TaskQueueOoC, 1, -1 do -- add -1 so that an empty list does not result in a Lua error
     TaskQueueOoC[i]()
@@ -944,11 +940,14 @@ function Addon:PLAYER_REGEN_ENABLED()
     _G.SetCVar("nameplateShowEnemies", (db.EnemyUnits == "SHOW_COMBAT" and 0) or 1)
   end
 
-  UpdatePlateAfterCombatStatusChange()
+  -- Also does a style update and fires event ThreatUpdate
+  Threat:LeavingCombat()
 end
 
 -- Fires when the player enters combat status
 function Addon:PLAYER_REGEN_DISABLED()
+  Addon.PlayerIsInCombat = true
+
   local db = Addon.db.profile.Automation
 
   -- Dont't use automation for friendly nameplates if in an instance and Hide Friendly Nameplates is enabled
@@ -960,7 +959,8 @@ function Addon:PLAYER_REGEN_DISABLED()
     _G.SetCVar("nameplateShowEnemies", (db.EnemyUnits == "SHOW_COMBAT" and 1) or 0)
   end
 
-  UpdatePlateAfterCombatStatusChange()
+  -- Also does a style update and fires event ThreatUpdate
+  -- Threat:EnteringCombat()
 end
 
 function Addon:NAME_PLATE_CREATED(plate)
@@ -1085,7 +1085,7 @@ function Addon:UNIT_MAXHEALTH(unitid)
 end
 
 function Addon:UNIT_THREAT_LIST_UPDATE(unitid)
-local tp_frame = self:GetThreatPlateForUnit(unitid)
+  local tp_frame = self:GetThreatPlateForUnit(unitid)
   if tp_frame then
     Threat:ThreatUpdate(tp_frame)
   end

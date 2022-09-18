@@ -128,10 +128,16 @@ end
 
 
 function Debug:PrintTarget(unit)
-  if not Addon.DEBUG then return end
+  if Addon.DEBUG then 
+    if unit.isTarget then
+      self:PrintUnit(unit)
+    end
+  end
+end
 
-  if unit.isTarget then
-    self:PrintUnit(unit)
+function Debug:PrintUnitData(unit, text)
+  if Addon.DEBUG then
+    Addon.Logging.Debug((unit.name or "<nil>") .. ":", text)
   end
 end
 

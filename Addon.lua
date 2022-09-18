@@ -43,6 +43,8 @@ local LSMUpdateTimer
 
 Addon.PlayerClass = select(2, UnitClass("player"))
 Addon.PlayerName = select(1, UnitName("player"))
+Addon.PlayerIsInCombat = false
+-- Addon.PlayerRole -- accessed via function Addon.GetPlayerRole()
 
 ---------------------------------------------------------------------------------------------------
 -- Functions different depending on WoW version

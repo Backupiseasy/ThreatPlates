@@ -1205,6 +1205,24 @@ local function MigrateThreatValue(_, profile)
   DatabaseEntryDelete(profile, { "threatWidget", "ThreatPercentage", "OnlyInGroups" })
 end
 
+
+local function MigrationThreatSystemEnable(_, profile)
+  if DatabaseEntryExists(profile, { "threat", "ON" } and profile.threat.ON == false) then
+    -- If the database entry exists, it should always be false, but just to be sure
+    profile.threat.useScale = false
+    profile.threat.useAlpha = false
+    profile.threat.art = profile.threat.art or {}
+    profile.threat.art.ON = false
+    profile.threat.useHPColor = false
+    profile.threat.ThreatPercentage = profile.threat.ThreatPercentage or {}
+    profile.threat.ThreatPercentage.ShowAlways = false
+    profile.threat.ThreatPercentage.ShowInGroups = false
+    profile.threat.ThreatPercentage.ShowWithPet = false
+  end
+
+  DatabaseEntryDelete(profile, { "threat", "ON" })
+end
+
 ---------------------------------------------------------------------------------------------------
 -- Main migration function & settings
 ---------------------------------------------------------------------------------------------------
@@ -1368,6 +1386,10 @@ local MIGRATION_FUNCTIONS_BY_VERSION = {
     { Type = "Rename", FromKey =  { "HeadlineView", "ShowFocusHighlight" }, ToKey = { "FocusWidget", "ShowInHeadlineView" }, },
     { Type = "Rename", FromKey =  { "threatWidget", "ThreatPercentage" }, ToKey = { "threat", "ThreatPercentage" }, },
     { Type = "Delete", Key = { "ShowThreatGlowOnAttackedUnitsOnly" } },
+    { Type = "Delete", Key = { "settings", "unique" } },
+    { Type = "Delete", Key = { "settings", "totem" } },
+    { Type = "Delete", Key = { "settings", "normal" } },
+    { Type = "Migrate", Name = "Threat System - Enable", Function = MigrationThreatSystemEnable, NoDefaultProfile = true },
   },
 }
 
