@@ -821,6 +821,8 @@ function Widget:UpdateSettings()
   if PlayerClass == "ROGUE" then
     self.Colors.AnimaCharge = colors.Animacharge
   end
+
+  self:UpdateAllFramesAfterSettingsUpdate()
 end
 
 function Widget:UpdateAllFramesAfterSettingsUpdate()
