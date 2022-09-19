@@ -345,7 +345,7 @@ local CROWD_CONTROL_SPELLS_RETAIL = {
   [198909] = LOC_DISORIENT, -- Song of Chi-Ji (Blizzard)
   [116095] = PC_SNARE,      -- Disable
   [123586] = PC_SNARE,      -- Flying Serpent Kick
-  [324312] = PC_ROOT,       -- Clash
+  [324382] = PC_ROOT,       -- Clash
 
   ---------------------------------------------------------------------------------------------------
   -- Racial Traits and other specia sources
@@ -1387,8 +1387,6 @@ function Widget:UpdateUnitAuras(aura_grid_frame, unit, enabled_auras, enabled_cc
     -- ShowPesonal: Debuffs  that are shown on Blizzards nameplate, no matter who casted them (and
     -- nameplateShowAll: Debuffs
     if not aura.name then break end
-
-    print(aura.name, aura.spellId)
 
     -- CastByPlayer is also used by aura trigger custom styles (only my auras)
     aura.CastByPlayer = (aura.caster == "player" or aura.caster == "pet" or aura.caster == "vehicle")
