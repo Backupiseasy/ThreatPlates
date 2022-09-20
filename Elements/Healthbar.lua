@@ -220,74 +220,71 @@ local function HideTargetUnit(healthbar)
 end
 
 local function ShowTargetUnit(healthbar, unitid)
-  if SettingsTargetUnit.ShowOnlyInCombat and not InCombatLockdown() then
-    HideTargetUnit(healthbar)
-  else
-    local target_of_target = healthbar.TargetUnit
+  local target_of_target = healthbar.TargetUnit
 
-    -- If just the color should be updated, unitid will be nil
-    if unitid then
-      local target_of_target_unit = unitid .. "target"
-      if not SettingsTargetUnit.ShowNotMyself or not UnitIsUnit("player", target_of_target_unit) then
-        local target_of_target_name = UnitName(target_of_target_unit)
-        if target_of_target_name then
-          target_of_target_name = Localization:TransliterateCyrillicLetters(target_of_target_name)
-          if SettingsTargetUnit.ShowBrackets then
-            target_of_target_name = "|cffffffff[|r " .. target_of_target_name .. " |cffffffff]|r" 
-          end
-          target_of_target:SetText(target_of_target_name)
-
-          local _, class_name = UnitClass(target_of_target_unit)   
-          target_of_target.ClassName = class_name
-          
-          target_of_target:Show()
-        else
-          HideTargetUnit(healthbar)
+  -- If just the color should be updated, unitid will be nil
+  if unitid then
+    local target_of_target_unit = unitid .. "target"
+    if not SettingsTargetUnit.ShowNotMyself or not UnitIsUnit("player", target_of_target_unit) then
+      local target_of_target_name = UnitName(target_of_target_unit)
+      if target_of_target_name then
+        target_of_target_name = Localization:TransliterateCyrillicLetters(target_of_target_name)
+        if SettingsTargetUnit.ShowBrackets then
+          target_of_target_name = "|cffffffff[|r " .. target_of_target_name .. " |cffffffff]|r" 
         end
+        target_of_target:SetText(target_of_target_name)
+
+        local _, class_name = UnitClass(target_of_target_unit)   
+        target_of_target.ClassName = class_name
+        
+        target_of_target:Show()
       else
         HideTargetUnit(healthbar)
       end
+    else
+      HideTargetUnit(healthbar)
     end
- 
-    -- Update the color if the element is shown
-    if target_of_target:IsShown() then
-      local color
-      if SettingsTargetUnit.UseClassColor and target_of_target.ClassName then
-        color = Addon.db.profile.Colors.Classes[target_of_target.ClassName]
-      else
-        color = SettingsTargetUnit.CustomColor
-      end
-      target_of_target:SetTextColor(color.r, color.g, color.b)
+  end
+
+  -- Update the color if the element is shown
+  if target_of_target:IsShown() then
+    local color
+    if SettingsTargetUnit.UseClassColor and target_of_target.ClassName then
+      color = Addon.db.profile.Colors.Classes[target_of_target.ClassName]
+    else
+      color = SettingsTargetUnit.CustomColor
     end
+    target_of_target:SetTextColor(color.r, color.g, color.b)
   end
 end
 
 local function UpdateTargetUnit(healthbar, unitid)
-  if SettingsShowOnlyForTarget and not UnitIsUnit("target", unitid) then
+  if SettingsTargetUnitHide or (SettingsShowOnlyForTarget and not UnitIsUnit("target", unitid)) or (SettingsTargetUnit.ShowOnlyInCombat and not InCombatLockdown()) then
     HideTargetUnit(healthbar)
   else
     ShowTargetUnit(healthbar, unitid)
   end
 end
 
+-- The event triggering this function is only subscribed for when target unit is enabled
 local function UNIT_TARGET(unitid)
-  -- Skip special unit ids (which are updated with their nameplate unit id anyway) and personal nameplate
-  if SettingsTargetUnitHide or unitid == "target" or UnitIsUnit("player", unitid) then return end
-
   local tp_frame = Addon:GetThreatPlateForUnit(unitid)
   if tp_frame then
     UpdateTargetUnit(tp_frame.visual.Healthbar, unitid)
   end
 end
 
+-- The event triggering this function is only subscribed for when target unit is enabled
 local function UnitThreatUpdate(tp_frame, unit)
-  UNIT_TARGET(unit.unitid)
+  UpdateTargetUnit(tp_frame.visual.Healthbar, unit.unitid)
 end
 
+-- The event triggering this function is only subscribed for when target unit is enabled
 local function PlayerTargetGained(tp_frame)
   UpdateTargetUnit(tp_frame.visual.Healthbar, tp_frame.unit.unitid)
 end
 
+-- The event triggering this function is only subscribed for when target unit is enabled
 local function PlayerTargetLost(tp_frame)
   if SettingsShowOnlyForTarget then
     HideTargetUnit(tp_frame.visual.Healthbar)
@@ -497,13 +494,14 @@ function Element.UpdateSettings()
 
   if SettingsTargetUnit.Show then
     SubscribeEvent(Element, "UNIT_TARGET", UNIT_TARGET)
-    --SubscribeEvent(Element, "UNIT_THREAT_LIST_UPDATE", UnitThreatUpdate)
     SubscribeEvent(Element, "ThreatUpdate", UnitThreatUpdate)
     SubscribeEvent(Element, "TargetLost", PlayerTargetLost)
     SubscribeEvent(Element, "TargetGained", PlayerTargetGained)
   else
-    UnsubscribeEvent(Element, "UNIT_TARGET", UNIT_TARGET)
-    UnsubscribeEvent(Element, "ThreatUpdate", UnitThreatUpdate)
+    UnsubscribeEvent(Element, "UNIT_TARGET")
+    UnsubscribeEvent(Element, "ThreatUpdate")
+    UnsubscribeEvent(Element, "TargetLost")
+    UnsubscribeEvent(Element, "TargetGained")
   end
 end
 
