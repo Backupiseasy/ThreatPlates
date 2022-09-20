@@ -740,7 +740,9 @@ local function FrameOnShow(UnitFrame)
     end
   
     -- Hide ThreatPlates nameplates if Blizzard nameplates should be shown for friendly units
-    if UnitReaction(unitid, "player") > 4 then
+    -- Not sure if unit.reaction will always be correctly set here, so:
+    local unit_reaction = UnitReaction(unitid, "player") or 0
+    if unit_reaction > 4 then
       UnitFrame:SetShown(SettingsShowFriendlyBlizzardNameplates)
     else
       UnitFrame:SetShown(SettingsShowEnemyBlizzardNameplates)

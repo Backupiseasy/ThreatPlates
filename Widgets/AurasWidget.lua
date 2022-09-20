@@ -1651,7 +1651,7 @@ function Widget:UpdateIconGrid(widget_frame, unit)
   widget_frame.HideAuras = not EnabledForStyle[unit.style] or (db.ShowTargetOnly and not unit.isTarget)
 
   local enabled_cc
-  local unit_is_friendly = UnitReaction(unitid, "player") > 4
+  local unit_is_friendly = (UnitReaction(unitid, "player") or 0) > 4
   if unit_is_friendly then -- friendly or better
     enabled_cc = db.CrowdControl.ShowFriendly
 
@@ -2028,7 +2028,7 @@ local function UnitAuraEventHandler(widget_frame, event, unitid, ...)
     local unit = widget_frame:GetParent().unit
 	
     local db = Widget.db
-    local unit_is_friendly = UnitReaction(unit.unitid, "player") > 4
+    local unit_is_friendly = (UnitReaction(unitid, "player") or 0) > 4
     local enabled_buffs, enabled_debuffs, enabled_cc
     if unit_is_friendly then
       enabled_buffs = db.Buffs.ShowFriendly

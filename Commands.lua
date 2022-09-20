@@ -333,7 +333,7 @@ local function ChatCommandDebug(cmd_list)
 		print("    IS_WRATH_CLASSIC:", Addon.IS_WRATH_CLASSIC)		
 		print("    IS_MAINLINE:", Addon.IS_MAINLINE)
 	elseif command == "test" then
-		Addon.Logging.Info("CHANNEL", "1", "2")
+		print("")
 	elseif command == "threat" then
     local plate = C_NamePlate.GetNamePlateForUnit("target")
     if not plate then return end
@@ -347,7 +347,9 @@ local function ChatCommandDebug(cmd_list)
     Addon.Logging.Info("    Threat:ShowFeedback:", Addon.Threat:ShowFeedback(unit))
     Addon.Logging.Info("    Style:GetThreatStyle:", Addon.Style:GetThreatStyle(unit))
 		local color = Addon.Color:GetThreatColor(unit, Addon.Style:GetThreatStyle(unit))
-		Addon.Logging.Info("    Color:GetThreatColor:", color.r, color.g, color.b)
+		if color then
+			Addon.Logging.Info("    Color:GetThreatColor:", color.r, color.g, color.b)
+		end
 	elseif command == "role" then
 		local spec_roles = Addon.db.char.spec
 		for i, is_tank in pairs(spec_roles) do

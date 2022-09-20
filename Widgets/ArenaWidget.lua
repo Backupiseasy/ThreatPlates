@@ -13,7 +13,7 @@ local Widget = (Addon.IS_CLASSIC and {}) or Addon.Widgets:NewWidget("Arena")
 local pairs = pairs
 
 -- WoW APIs
-local GetNumArenaOpponents, UnitReaction = GetNumArenaOpponents, UnitReaction
+local GetNumArenaOpponents = GetNumArenaOpponents
 local IsInInstance, IsInBrawl = IsInInstance, C_PvP.IsInBrawl
 
 -- ThreatPlates APIs
@@ -105,7 +105,7 @@ end
 -- end
 
 function Widget:EnabledForStyle(style, unit)
-  return UnitReaction(unit.unitid, "player") < 4 and not (style == "NameOnly" or style == "NameOnly-Unique" or style == "etotem")
+  return unit.reaction == "HOSTILE" and not (style == "NameOnly" or style == "NameOnly-Unique" or style == "etotem")
 end
 
 function Widget:OnUnitAdded(widget_frame, unit)
