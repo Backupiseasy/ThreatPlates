@@ -728,47 +728,24 @@ local function FrameOnShow(UnitFrame)
   -- Don't show ThreatPlates for widget-only nameplates (since Shadowlands)
   if UnitNameplateShowsWidgetsOnly(unitid) then return end
 
-  -- Skip the personal resource bar of the player character, don't unhook scripts as nameplates, even the personal
-  -- resource bar, get re-used
   if UnitIsUnit(unitid, "player") then -- or: ns.PlayerNameplate == GetNamePlateForUnit(UnitFrame.unit)
+    -- Skip the personal resource bar of the player character, don't unhook scripts as nameplates, even the personal
+    -- resource bar, get re-used
     if SettingsHideBuffsOnPersonalNameplate then
       UnitFrame.BuffFrame:Hide()
     end
-    -- Just an else with the part below should work also
-    return
-  end
-
-  if SettingsShowOnlyNames then
-    ClassicBlizzardNameplatesSetAlpha(UnitFrame, 0)
-  end
-
-  -- Hide ThreatPlates nameplates if Blizzard nameplates should be shown for friendly units
-  if UnitReaction(unitid, "player") > 4 then
-    UnitFrame:SetShown(SettingsShowFriendlyBlizzardNameplates)
   else
-    UnitFrame:SetShown(SettingsShowEnemyBlizzardNameplates)
-  end
-
-  -- -- Don't show ThreatPlates for widget-only nameplates (since Shadowlands)
-  -- if UnitNameplateShowsWidgetsOnly(unitid) then 
-  --   return 
-  -- elseif UnitIsUnit(unitid, "player") then -- or: ns.PlayerNameplate == GetNamePlateForUnit(UnitFrame.unit)      
-  --   -- Skip the personal resource bar of the player character, don't unhook scripts as nameplates, even the personal
-  --   -- resource bar, get re-used
-  --   if SettingsHideBuffsOnPersonalNameplate then
-  --     UnitFrame.BuffFrame:Hide()
-  --   end
-  --   -- Just an else with the part below should work also
-  --   return
-  -- else
-  --   -- Hide ThreatPlates nameplates if Blizzard nameplates should be shown for friendly units
-  --   if UnitReaction(unitid, "player") > 4 then
-  --     UnitFrame:SetShown(SettingsShowFriendlyBlizzardNameplates)
-  --   else
-  --     UnitFrame:SetShown(SettingsShowEnemyBlizzardNameplates)
-  --   end
-  -- end
+    if SettingsShowOnlyNames then
+      ClassicBlizzardNameplatesSetAlpha(UnitFrame, 0)
+    end
   
+    -- Hide ThreatPlates nameplates if Blizzard nameplates should be shown for friendly units
+    if UnitReaction(unitid, "player") > 4 then
+      UnitFrame:SetShown(SettingsShowFriendlyBlizzardNameplates)
+    else
+      UnitFrame:SetShown(SettingsShowEnemyBlizzardNameplates)
+    end
+  end
 end
 
 -- Frame: self = plate
