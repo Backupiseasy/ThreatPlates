@@ -49,7 +49,7 @@ local ThreatModule = Addon.Threat
 -- Wrapper functions for WoW Classic
 ---------------------------------------------------------------------------------------------------
 
-if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC then
+if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
   UnitGroupRolesAssigned = function(target_unit)
     return (GetPartyAssignment("MAINTANK", target_unit) and "TANK") or "NONE"
   end

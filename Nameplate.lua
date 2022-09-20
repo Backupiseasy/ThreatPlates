@@ -1274,20 +1274,23 @@ local ENABLED_EVENTS = {
 }
 
 -- Only registered for player unit
-local RIGHTEOUS_FURY_SPELL_IDs = { [20468] = true, [20469] = true, [20470] = true, [25780] = true }
+local TANK_AURA_SPELL_IDs = {
+  [20468] = true, [20469] = true, [20470] = true, [25780] = true, -- Paladin Righteous Fury
+  [48263] = true -- Deathknight Frost Presence
+}
 local function UNIT_AURA(event, unitid)
   local _, name, spellId
   for i = 1, 40 do
     name , _, _, _, _, _, _, _, _, spellId = _G.UnitBuff("player", i, "PLAYER")
     if not name then
       break
-    elseif RIGHTEOUS_FURY_SPELL_IDs[spellId] then
-      Addon.PlayerIsPaladinTank = true
+    elseif TANK_AURA_SPELL_IDs[spellId] then
+      Addon.PlayerIsTank = true
       return
     end
   end
 
-  Addon.PlayerIsPaladinTank = false
+  Addon.PlayerIsTank = false
 end
 
 -- For Classic and TBC Classic, player role must be determined based on standes:
@@ -1305,7 +1308,10 @@ if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
       return form_index == BEAR_FORM or form_index == DIRE_BEAR_FORM
     end,
     PALADIN = function()
-      return Addon.PlayerIsPaladinTank
+      return Addon.PlayerIsTank
+    end,
+    DEATHKNIGHT = function()
+      return Addon.PlayerIsTank
     end,
     DEFAULT = function()
       return false
@@ -1329,7 +1335,9 @@ if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
 
   -- Do this after events are registered, otherwise UNIT_AURA would be registered as a general event, not only as
   -- an unit event.
-  if Addon.PlayerClass == "PALADIN" then
+  -- No need to check here for (Addon.IS_WRATH_CLASSIC and Addon.PlayerClass == "DEATHKNIGHT") as deathknights
+  -- are only available in Wrath Classic
+  if Addon.PlayerClass == "PALADIN" or Addon.PlayerClass == "DEATHKNIGHT" then
     Addon.UNIT_AURA = UNIT_AURA
     Addon.EventService.SubscribeUnitEvent(Addon, "UNIT_AURA", "player")
     -- UNIT_AURA does not seem to be fired after login (even when buffs are active)
