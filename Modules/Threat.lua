@@ -11,8 +11,8 @@ local ADDON_NAME, Addon = ...
 local strsplit, pairs = strsplit, pairs
 
 -- WoW APIs
-local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
-local UnitReaction, UnitThreatSituation = UnitReaction, UnitThreatSituation
+local IsInInstance = IsInInstance
+local UnitThreatSituation = UnitThreatSituation
 local UnitIsPlayer, UnitPlayerControlled = UnitIsPlayer, UnitPlayerControlled
 local UnitThreatSituation, UnitIsUnit, UnitExists, UnitGroupRolesAssigned = UnitThreatSituation, UnitIsUnit, UnitExists, UnitGroupRolesAssigned
 
@@ -22,7 +22,7 @@ local GetPartyAssignment = GetPartyAssignment
 -- ThreatPlates APIs
 local THREAT_REFERENCE = Addon.THREAT_REFERENCE
 local SubscribeEvent, PublishEvent,  UnsubscribeEvent = Addon.EventService.Subscribe, Addon.EventService.Publish, Addon.EventService.Unsubscribe
-local Style = Addon.Style
+local Style, Color = Addon.Style, Addon.Color
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -49,7 +49,7 @@ local ThreatModule = Addon.Threat
 -- Wrapper functions for WoW Classic
 ---------------------------------------------------------------------------------------------------
 
-if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC then
+if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
   UnitGroupRolesAssigned = function(target_unit)
     return (GetPartyAssignment("MAINTANK", target_unit) and "TANK") or "NONE"
   end
@@ -62,7 +62,6 @@ local CreatureCache = {}
 
 local Settings
 local ShowOffTank, ShowInstancesOnly
-local ThreatColor = {}
 
 ---------------------------------------------------------------------------------------------------
 -- Returns if the unit is tanked by another tank or pet (not by the player character,
@@ -97,7 +96,7 @@ end
 local function GetUnitClassification(unit)
   if unit.IsTapDenied then
     return "Tapped"
-  elseif UnitReaction(unit.unitid, "player") == 4 then
+  elseif unit.reaction == "NEUTRAL" then
     return "Neutral"
   end
 
@@ -121,8 +120,7 @@ end
 -- This function returns if threat feedback is enabled for the given unit. It does assume that
 -- player (and unit) are in combat. It does not check for that.
 function ThreatModule:ShowFeedback(unit)
-  --if not InCombatLockdown() or unit.type == "PLAYER" or UnitReaction(unit.unitid, "player") > 4 or not db.ON then
-  if not Settings.ON or unit.type == "PLAYER" or UnitReaction(unit.unitid, "player") > 4 then
+  if unit.type == "PLAYER" or unit.reaction == "FRIENDLY" then
     return false
   end
 
@@ -176,24 +174,24 @@ local function CheckIfUnitIsOfftanked(unit, threat_level, other_player_has_aggro
   return threat_level
 end
 
--- Sets the following attributes:
---   - InCombat
---   - ThreatLevel
---   - IsOfftanked
-function ThreatModule:SetUnitAttributeThreat(unit, unitid)
-  unit.InCombat = _G.UnitAffectingCombat(unitid)
+local function UpdateThreatStatus(unit)
+  unit.InCombat = _G.UnitAffectingCombat(unit.unitid)
 
-  -- ThreatLevel is nil as nameplate/unit are initialized
-  local threat_level, other_unit_is_tanking
-  local threat_status = UnitThreatSituation("player", unitid)
+  -- ? Does it make sense to also check for this here: UnitThreatSituation("pet", unit.unitid)?
+  local threat_status = UnitThreatSituation("player", unit.unitid)
   if threat_status then
     unit.HasThreatTable = true
-    threat_level = THREAT_REFERENCE[threat_status]
-    other_unit_is_tanking = (threat_status < 2)
-  elseif unit.InCombat and (not self.UseThreatTable or (self.UseHeuristicInInstances and Addon.IsInPvEInstance)) and InCombatLockdown() then
-    local target_unit = unitid .. "target"
+    return CheckIfUnitIsOfftanked(unit, THREAT_REFERENCE[threat_status], threat_status < 2)
+  end
+end
+  
+local function UpdateThreatStatusHeuristic(unit)
+  if unit.InCombat and Addon.PlayerIsInCombat and (not Addon.UseThreatTable or (Addon.UseHeuristicInInstances and Addon.IsInPvEInstance)) then
+    local threat_level
+    
+    local target_unit = unit.unitid .. "target"
     if UnitExists(target_unit) and not unit.isCasting then
-      -- TODO: Should we also check for pets here? Tank pets?
+      -- If the unit attacks a player's pet, this is not considered as the player having aggro, but the unit being off-tanked by the pet
       if UnitIsUnit(target_unit, "player") or UnitIsUnit(target_unit, "vehicle") then
         threat_level = "HIGH"
       else
@@ -203,70 +201,72 @@ function ThreatModule:SetUnitAttributeThreat(unit, unitid)
       threat_level = unit.ThreatLevel or "LOW"
     end
 
-    other_unit_is_tanking = (threat_level == "LOW")
+    return CheckIfUnitIsOfftanked(unit, threat_level, (threat_level == "LOW"))
   end
-  
-  unit.ThreatLevel = CheckIfUnitIsOfftanked(unit, threat_level, other_unit_is_tanking)
 end
 
 local function UpdateThreatLevel(tp_frame, unit, threat_level)
-  if not threat_level or threat_level ~= unit.ThreatLevel then
+  if threat_level == nil or threat_level ~= unit.ThreatLevel then
     unit.ThreatLevel = threat_level
     Style:Update(tp_frame)
     PublishEvent("ThreatUpdate", tp_frame, unit)
   end
 end
 
-function ThreatModule:ThreatUpdate(tp_frame)
+-- Component Attributes: Threat
+--   InCombat
+--   ThreatLevel
+--   IsOfftanked
+--   HasThreatTable
+function ThreatModule:SetUnitAttribute(tp_frame)
   local unit = tp_frame.unit
-  unit.InCombat = _G.UnitAffectingCombat(unit.unitid)
-
-  local threat_level
-  -- If threat status is nil, unit is leaving combat
-  local threat_status = UnitThreatSituation("player", unit.unitid)  
-  if threat_status then
-    unit.HasThreatTable = true
-    threat_level = CheckIfUnitIsOfftanked(unit, THREAT_REFERENCE[threat_status], threat_status < 2)
-  end
   
-  UpdateThreatLevel(tp_frame, unit, threat_level)
+  -- As the unit is initialized (everything is nil) here, if threat_level is not nil here, HasThreatTable is true, 
+  -- so no need to check it here
+  local threat_level = UpdateThreatStatus(unit) or UpdateThreatStatusHeuristic(unit)
+  -- Don't call UpdateThreatLevel here as we don't have to update style or fire a ThreatUpdate event here
+  unit.ThreatLevel = threat_level
+end
+
+-- threat_level is nil when UNIT_THREAT_LIST_UPDATE fires at the beginning or end of combat
+function ThreatModule:ThreatUpdate(tp_frame)
+  UpdateThreatLevel(tp_frame, tp_frame.unit, UpdateThreatStatus(tp_frame.unit))
 end
 
 -- Heuristic: Player has to be in combat for it to be used
 function ThreatModule:ThreatUpdateHeuristic(tp_frame)
   local unit = tp_frame.unit
+  
   -- Only assume that the unit is out of combat, when it is not on any unit's threat table
-  if unit.HasThreatTable then
-    return
-  elseif self.UseThreatTable or (self.UseHeuristicInInstances and not Addon.IsInPvEInstance) or not InCombatLockdown() then
-    if unit.ThreatLevel then      
-      UpdateThreatLevel(tp_frame, unit, nil)
-    end
-    return 
-  end
-
-  local threat_level
-  unit.InCombat = _G.UnitAffectingCombat(unit.unitid)
-  if unit.InCombat then
-    local target_unit = unit.unitid .. "target"
-    if UnitExists(target_unit) and not unit.isCasting then
-      -- TODO: Should we also check for pets here? Tank pets?
-      if UnitIsUnit(target_unit, "player") or UnitIsUnit(target_unit, "vehicle") then
-        threat_level = "HIGH"
-      else
-        threat_level = "LOW"
+  if not unit.HasThreatTable then
+    if self.UseThreatTable or (self.UseHeuristicInInstances and not Addon.IsInPvEInstance) or not InCombatLockdown() then
+      if unit.ThreatLevel then      
+        UpdateThreatLevel(tp_frame, unit, nil)
       end
     else
-      threat_level = unit.ThreatLevel or "LOW"
+      unit.InCombat = _G.UnitAffectingCombat(unit.unitid)
+      local threat_level = UpdateThreatStatusHeuristic(unit)
+      UpdateThreatLevel(tp_frame, unit, threat_level)
     end
-
-    threat_level = CheckIfUnitIsOfftanked(unit, threat_level, (threat_level == "LOW"))
   end
-  
-  UpdateThreatLevel(tp_frame, unit, threat_level)
 end
 
-local function UpdateThreatHeuristic(unitTarget, event, flagText, amount, schoolMask)
+-- function ThreatModule:EnteringCombat()
+--   for _, tp_frame in Addon:GetActiveThreatPlates() do
+--     local threat_level = UpdateThreatStatus(tp_frame.unit)
+--     UpdateThreatLevel(tp_frame, tp_frame.unit, threat_level)
+--   end
+-- end
+
+function ThreatModule:LeavingCombat()
+  for unitid, tp_frame in Addon:GetActiveThreatPlates() do
+    tp_frame.unit.InCombat = _G.UnitAffectingCombat(unitid)
+    -- No need to query threat, just set it to nil (as no longer in combat)
+    UpdateThreatLevel(tp_frame, tp_frame.unit, nil)
+  end
+end
+
+local function ProcessEventUpdateThreatHeuristic(unitTarget, event, flagText, amount, schoolMask)
   local tp_frame = Addon:GetThreatPlateForUnit(unitTarget)
   if tp_frame then
     ThreatModule:ThreatUpdateHeuristic(tp_frame)
@@ -274,19 +274,22 @@ local function UpdateThreatHeuristic(unitTarget, event, flagText, amount, school
 end
 
 local function SubscribeThreatHeuristicEvents()
-  SubscribeEvent(ThreatModule, "UNIT_COMBAT", UpdateThreatHeuristic)
-  -- SubscribeEvent(ThreatModule, "UNIT_SPELLCAST_START", UpdateThreatHeuristic)
-  -- SubscribeEvent(ThreatModule, "UNIT_SPELLCAST_CHANNEL_START", UpdateThreatHeuristic)
-  -- SubscribeEvent(ThreatModule, "UNIT_SPELLCAST_STOP", UpdateThreatHeuristic)
-  -- SubscribeEvent(ThreatModule, "UNIT_SPELLCAST_CHANNEL_STOP", UpdateThreatHeuristic)
+  SubscribeEvent(ThreatModule, "UNIT_COMBAT", ProcessEventUpdateThreatHeuristic)
+  
+  -- Currently, the cast functions in Nameplates.lua call ThreatModule:ThreatUpdateHeuristic directly. 
+  -- SubscribeEvent(ThreatModule, "UNIT_SPELLCAST_START", ProcessEventUpdateThreatHeuristic)
+  -- SubscribeEvent(ThreatModule, "UNIT_SPELLCAST_CHANNEL_START", ProcessEventUpdateThreatHeuristic)
+  -- SubscribeEvent(ThreatModule, "UNIT_SPELLCAST_STOP", ProcessEventUpdateThreatHeuristic)
+  -- SubscribeEvent(ThreatModule, "UNIT_SPELLCAST_CHANNEL_STOP", ProcessEventUpdateThreatHeuristic)
 end
 
 local function UnubscribeThreatHeuristicEvents()
-  UnsubscribeEvent(ThreatModule, "UNIT_COMBAT", UpdateThreatHeuristic)
-  -- UnsubscribeEvent(ThreatModule, "UNIT_SPELLCAST_START", UpdateThreatHeuristic)
-  -- UnsubscribeEvent(ThreatModule, "UNIT_SPELLCAST_CHANNEL_START", UpdateThreatHeuristic)
-  -- UnsubscribeEvent(ThreatModule, "UNIT_SPELLCAST_STOP", UpdateThreatHeuristic)
-  -- UnsubscribeEvent(ThreatModule, "UNIT_SPELLCAST_CHANNEL_STOP", UpdateThreatHeuristic)
+  UnsubscribeEvent(ThreatModule, "UNIT_COMBAT", ProcessEventUpdateThreatHeuristic)
+  
+  -- UnsubscribeEvent(ThreatModule, "UNIT_SPELLCAST_START", ProcessEventUpdateThreatHeuristic)
+  -- UnsubscribeEvent(ThreatModule, "UNIT_SPELLCAST_CHANNEL_START", ProcessEventUpdateThreatHeuristic)
+  -- UnsubscribeEvent(ThreatModule, "UNIT_SPELLCAST_STOP", ProcessEventUpdateThreatHeuristic)
+  -- UnsubscribeEvent(ThreatModule, "UNIT_SPELLCAST_CHANNEL_STOP", ProcessEventUpdateThreatHeuristic)
 end
 
 local function RegisterEventsforThreatHeuristic()
@@ -306,6 +309,8 @@ function ThreatModule:UpdateSettings()
   ShowOffTank = Settings.toggle.OffTank
   ShowInstancesOnly = Settings.toggle.InstancesOnly
 
+  -- SubscribeEvent(ThreatModule, "UNIT_THREAT_SITUATION_UPDATE", function(unitid) end)
+
   -- If heuristic is enabled in general (not self.UseThreatTable), then we don't need PLAYER_ENTERING_WORLD
   if not self.UseThreatTable then
     SubscribeThreatHeuristicEvents()
@@ -315,11 +320,5 @@ function ThreatModule:UpdateSettings()
   else
     UnubscribeThreatHeuristicEvents()
     UnsubscribeEvent(ThreatModule, "PLAYER_ENTERING_WORLD", RegisterEventsforThreatHeuristic)
-  end
-
-  for style, settings in pairs(Addon.db.profile.settings) do
-    if settings.threatcolor then -- there are several subentries unter settings. Only use style subsettings like unique, normal, dps, ...
-      ThreatColor[style] = settings.threatcolor
-    end
   end
 end

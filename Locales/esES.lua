@@ -308,10 +308,14 @@ L["Custom status text requires LibDogTag-Unit-3.0 to function."] = "El texto de 
 --[[Translation missing --]]
 L["CVar \"%s\" has an invalid value: \"%s\". The value must be a number. Using the default value for this CVar instead."] = "CVar \"%s\" has an invalid value: \"%s\". The value must be a number. Using the default value for this CVar instead."
 --[[Translation missing --]]
+L["CVar %s has an invalid value: %s. The value must be a number. Using the default value for this CVar instead."] = "CVar %s has an invalid value: %s. The value must be a number. Using the default value for this CVar instead."
+--[[Translation missing --]]
 L["Cyclic anchoring of aura areas to each other is not possible."] = "Cyclic anchoring of aura areas to each other is not possible."
 L["Darnavan"] = "Darnavan"
 L["Death Knigh Rune Cooldown"] = "Reutilización de runas de caballeros de la muerte"
 L["Death Knight"] = "Caballero de la muerte"
+--[[Translation missing --]]
+L["Death Rune"] = "Death Rune"
 L["Debuff Color"] = "Color de Debuff"
 L["Debuffs"] = "Debuffs"
 --[[Translation missing --]]
@@ -368,6 +372,8 @@ L["Do not sort auras."] = "No ordena auras"
 L["Done"] = "Hecho"
 L["Don't Ask Again"] = "No vuelvas a preguntar"
 L["Down Arrow"] = "Flecha hacia abajo"
+--[[Translation missing --]]
+L["DPS switch detected, you are now in your |cffff0000dpsing / healing|r role."] = "DPS switch detected, you are now in your |cffff0000dpsing / healing|r role."
 L["DPS/Healing"] = "DPS/Sanación"
 L["Drudge Ghoul"] = "Bracero necrófago"
 L["Druid"] = "Druida"
@@ -749,6 +755,8 @@ L["Reverse the sort order (e.g., \"A to Z\" becomes \"Z to A\")."] = "Invierta e
 L["Right"] = "Derecho"
 L["Right-to-left"] = "Derecho a Izquierdo"
 L["Rogue"] = "Pícaro"
+--[[Translation missing --]]
+L["Role toggle not supported because automatic role detection is enabled."] = "Role toggle not supported because automatic role detection is enabled."
 L["Roles"] = "Rol"
 L["Row Limit"] = "Límite de Fila"
 L["Same as Background"] = "Igual que el Fondo"
@@ -925,6 +933,8 @@ L["Syntax error in event script '%s' of custom style '%s': %s"] = "Error de sint
 L["Tank"] = "Tanque"
 --[[Translation missing --]]
 L["Tank Scaled Percentage"] = "Tank Scaled Percentage"
+--[[Translation missing --]]
+L["Tank switch detected, you are now in your |cff00ff00tanking|r role."] = "Tank switch detected, you are now in your |cff00ff00tanking|r role."
 --[[Translation missing --]]
 L["Tank Threat Value"] = "Tank Threat Value"
 L["Tapped"] = "Golpeado"

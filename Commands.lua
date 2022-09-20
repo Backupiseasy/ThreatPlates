@@ -12,7 +12,6 @@ local function toggleDPS()
     Addon.Logging.Warning(L["Role toggle not supported because automatic role detection is enabled."])
   else
     Addon.db.char.spec[GetSpecialization()] = false
-    Addon.db.profile.threat.ON = true
 		Addon.Logging.Info(L["|cffff0000DPS Plates Enabled|r"])
 		Addon.Logging.Info(L["DPS switch detected, you are now in your |cffff0000dpsing / healing|r role."])
     Addon:ForceUpdate()
@@ -24,7 +23,6 @@ local function toggleTANK()
     Addon.Logging.Warning(L["Role toggle not supported because automatic role detection is enabled."])
   else
     Addon.db.char.spec[GetSpecialization()] = true
-    Addon.db.profile.threat.ON = true
 		Addon.Logging.Info(L["cff00ff00Tank Plates Enabled|r"])
 		Addon.Logging.Info(L["Tank switch detected, you are now in your |cff00ff00tanking|r role."])
     Addon:ForceUpdate()
@@ -335,7 +333,23 @@ local function ChatCommandDebug(cmd_list)
 		print("    IS_WRATH_CLASSIC:", Addon.IS_WRATH_CLASSIC)		
 		print("    IS_MAINLINE:", Addon.IS_MAINLINE)
 	elseif command == "test" then
-		Addon.Logging.Info("CHANNEL", "1", "2")
+		print("")
+	elseif command == "threat" then
+    local plate = C_NamePlate.GetNamePlateForUnit("target")
+    if not plate then return end
+    local unit = plate.TPFrame.unit
+
+		Addon.Logging.Info("    Player:", UnitDetailedThreatSituation("player", unit.unitid))
+    Addon.Logging.Info("    Pet:", UnitDetailedThreatSituation("pet", unit.unitid))
+    Addon.Logging.Info("    Combat State:", _G.UnitAffectingCombat("player"), "-", _G.UnitAffectingCombat("pet"))
+    Addon.Logging.Info("    ThreatLevel:", unit.ThreatLevel)
+    Addon.Logging.Info("    InCombat:", unit.InCombat)
+    Addon.Logging.Info("    Threat:ShowFeedback:", Addon.Threat:ShowFeedback(unit))
+    Addon.Logging.Info("    Style:GetThreatStyle:", Addon.Style:GetThreatStyle(unit))
+		local color = Addon.Color:GetThreatColor(unit, Addon.Style:GetThreatStyle(unit))
+		if color then
+			Addon.Logging.Info("    Color:GetThreatColor:", color.r, color.g, color.b)
+		end
 	elseif command == "role" then
 		local spec_roles = Addon.db.char.spec
 		for i, is_tank in pairs(spec_roles) do

@@ -280,7 +280,7 @@ local function SetUnitAttributeHealth(unit, unitid)
   -- unit.Absorbs = UnitGetTotalAbsorbs(unitid) or 0
 end
 
-local function InitializeUnit(unit, unitid)
+local function SetUnitAttributes(unit, unitid)
   -- Unit data that does not change after nameplate creation
   unit.unitid = unitid
   unit.guid = _G.UnitGUID(unitid)
@@ -322,8 +322,6 @@ local function InitializeUnit(unit, unitid)
  
   -- Target Mark => RAID_TARGET_UPDATE
   unit.TargetMarker = RAID_ICON_LIST[GetRaidTargetIndex(unitid)]
-
-  Threat:SetUnitAttributeThreat(unit, unitid)
 end
 
 ---------------------------------------------------------------------------------------------------------------------
@@ -452,29 +450,27 @@ SubscribeEvent(Addon, "StyleUpdate", UpdateStyle)
 -- Create / Hide / Show Event Handlers
 ---------------------------------------------------------------------------------------------------------------------
 
-local function UpdateNameplateStyle(plate, unitid)
-  if UnitReaction(unitid, "player") > 4 then
+local function UpdateNameplateStyle(tp_frame, unit)
+  if unit.reaction == "FRIENDLY" then
     if SettingsShowFriendlyBlizzardNameplates then
-      plate.UnitFrame:Show()
-      plate.TPFrame:Hide()
-      plate.TPFrame.Active = false
+      tp_frame.Parent.UnitFrame:Show()
+      tp_frame:Hide()
+      tp_frame.Active = false
     else
-      plate.UnitFrame:Hide()
-      plate.TPFrame:Show()
-      plate.TPFrame.Active = true
+      tp_frame.Parent.UnitFrame:Hide()
+      tp_frame:Show()
+      tp_frame.Active = true
     end
   elseif SettingsShowEnemyBlizzardNameplates then
-    plate.UnitFrame:Show()
-    plate.TPFrame:Hide()
-    plate.TPFrame.Active = false
+    tp_frame.Parent.UnitFrame:Show()
+    tp_frame:Hide()
+    tp_frame.Active = false
   else
-    plate.UnitFrame:Hide()
-    plate.TPFrame:Show()
-    plate.TPFrame.Active = true
+    tp_frame.Parent.UnitFrame:Hide()
+    tp_frame:Show()
+    tp_frame.Active = true
   end
 end
-
-Addon.UpdateNameplateStyle = UpdateNameplateStyle
 
 local	function OnNewNameplate(plate)
   -- Parent could be: WorldFrame, UIParent, plate
@@ -512,7 +508,8 @@ local function OnShowNameplate(plate, unitid)
 
   -- Initialize unit data for which there are no events when players enters world or that
   -- do not change over the nameplate lifetime
-  InitializeUnit(unit, unitid)
+  SetUnitAttributes(unit, unitid)
+  Threat:SetUnitAttribute(tp_frame)
 
   tp_frame.stylename = ""
   tp_frame.visual.Castbar.FlashTime = 0  -- Set FlashTime to 0 so that the castbar is actually hidden (see statusbar OnHide hook function OnHideCastbar)
@@ -526,15 +523,16 @@ local function OnShowNameplate(plate, unitid)
   PlatesByUnit[unitid] = tp_frame
   PlatesByGUID[unit.guid] = plate
 
+  UpdateNameplateStyle(tp_frame, unit)
+
   -- Initialized nameplate style
   Style:Update(tp_frame)
-  -- Initialize scale and transparency
+  
+  -- The following modules use the unit style, so it must be initialized before Module:Initialize is called
   Transparency:Initialize(tp_frame)
   Scaling:Initialize(tp_frame)
   Color:Initialize(tp_frame)
   ElementsUnitAdded(tp_frame)
-
-  UpdateNameplateStyle(plate, unitid)
 
   -- Call this after the plate is shown as OnStartCasting checks if the plate is shown; if not, the castbar is hidden and
   -- nothing is updated
@@ -664,14 +662,9 @@ function Addon:UpdateSettings()
 end
 
 function Addon:UpdateAllPlates()
-  for unitid, tp_frame in pairs(PlatesByUnit) do
-    -- If Blizzard default plates are enabled (which means that these nameplates are not active), we need
-    -- to check if they are enabled, so that Active is set correctly and plates are updated shown correctly.
-    if not tp_frame.Active then
-      UpdateNameplateStyle(tp_frame.Parent, unitid)
-    end
     -- No need to update only active nameplates, as this is only done when settings are changed, so performance is
     -- not really an issue.
+  for unitid, tp_frame in pairs(PlatesByUnit) do
     OnShowNameplate(tp_frame.Parent, unitid)
   end
 end
@@ -735,47 +728,26 @@ local function FrameOnShow(UnitFrame)
   -- Don't show ThreatPlates for widget-only nameplates (since Shadowlands)
   if UnitNameplateShowsWidgetsOnly(unitid) then return end
 
-  -- Skip the personal resource bar of the player character, don't unhook scripts as nameplates, even the personal
-  -- resource bar, get re-used
   if UnitIsUnit(unitid, "player") then -- or: ns.PlayerNameplate == GetNamePlateForUnit(UnitFrame.unit)
+    -- Skip the personal resource bar of the player character, don't unhook scripts as nameplates, even the personal
+    -- resource bar, get re-used
     if SettingsHideBuffsOnPersonalNameplate then
       UnitFrame.BuffFrame:Hide()
     end
-    -- Just an else with the part below should work also
-    return
-  end
-
-  if SettingsShowOnlyNames then
-    ClassicBlizzardNameplatesSetAlpha(UnitFrame, 0)
-  end
-
-  -- Hide ThreatPlates nameplates if Blizzard nameplates should be shown for friendly units
-  if UnitReaction(unitid, "player") > 4 then
-    UnitFrame:SetShown(SettingsShowFriendlyBlizzardNameplates)
   else
-    UnitFrame:SetShown(SettingsShowEnemyBlizzardNameplates)
-  end
-
-  -- -- Don't show ThreatPlates for widget-only nameplates (since Shadowlands)
-  -- if UnitNameplateShowsWidgetsOnly(unitid) then 
-  --   return 
-  -- elseif UnitIsUnit(unitid, "player") then -- or: ns.PlayerNameplate == GetNamePlateForUnit(UnitFrame.unit)      
-  --   -- Skip the personal resource bar of the player character, don't unhook scripts as nameplates, even the personal
-  --   -- resource bar, get re-used
-  --   if SettingsHideBuffsOnPersonalNameplate then
-  --     UnitFrame.BuffFrame:Hide()
-  --   end
-  --   -- Just an else with the part below should work also
-  --   return
-  -- else
-  --   -- Hide ThreatPlates nameplates if Blizzard nameplates should be shown for friendly units
-  --   if UnitReaction(unitid, "player") > 4 then
-  --     UnitFrame:SetShown(SettingsShowFriendlyBlizzardNameplates)
-  --   else
-  --     UnitFrame:SetShown(SettingsShowEnemyBlizzardNameplates)
-  --   end
-  -- end
+    if SettingsShowOnlyNames then
+      ClassicBlizzardNameplatesSetAlpha(UnitFrame, 0)
+    end
   
+    -- Hide ThreatPlates nameplates if Blizzard nameplates should be shown for friendly units
+    -- Not sure if unit.reaction will always be correctly set here, so:
+    local unit_reaction = UnitReaction(unitid, "player") or 0
+    if unit_reaction > 4 then
+      UnitFrame:SetShown(SettingsShowFriendlyBlizzardNameplates)
+    else
+      UnitFrame:SetShown(SettingsShowEnemyBlizzardNameplates)
+    end
+  end
 end
 
 -- Frame: self = plate
@@ -910,16 +882,12 @@ function Addon:PLAYER_ENTERING_WORLD(initialLogin, reloadingUI)
   Font:SetNamesFonts()
 end
 
-local function UpdatePlateAfterCombatStatusChange()
-  for _, tp_frame in Addon:GetActiveThreatPlates() do
-    Threat:ThreatUpdate(tp_frame) -- also does a style update and fires event ThreatUpdate
-  end
-end
-
 -- Fires when the player leaves combat status
 -- Syncs addon settings with game settings in case changes weren't possible during startup, reload
 -- or profile reset because character was in combat.
 function Addon:PLAYER_REGEN_ENABLED()
+  Addon.PlayerIsInCombat = false
+
   -- Execute functions which will fail when executed while in combat
   for i = #TaskQueueOoC, 1, -1 do -- add -1 so that an empty list does not result in a Lua error
     TaskQueueOoC[i]()
@@ -944,11 +912,14 @@ function Addon:PLAYER_REGEN_ENABLED()
     _G.SetCVar("nameplateShowEnemies", (db.EnemyUnits == "SHOW_COMBAT" and 0) or 1)
   end
 
-  UpdatePlateAfterCombatStatusChange()
+  -- Also does a style update and fires event ThreatUpdate
+  Threat:LeavingCombat()
 end
 
 -- Fires when the player enters combat status
 function Addon:PLAYER_REGEN_DISABLED()
+  Addon.PlayerIsInCombat = true
+
   local db = Addon.db.profile.Automation
 
   -- Dont't use automation for friendly nameplates if in an instance and Hide Friendly Nameplates is enabled
@@ -960,7 +931,8 @@ function Addon:PLAYER_REGEN_DISABLED()
     _G.SetCVar("nameplateShowEnemies", (db.EnemyUnits == "SHOW_COMBAT" and 1) or 0)
   end
 
-  UpdatePlateAfterCombatStatusChange()
+  -- Also does a style update and fires event ThreatUpdate
+  -- Threat:EnteringCombat()
 end
 
 function Addon:NAME_PLATE_CREATED(plate)
@@ -1085,7 +1057,7 @@ function Addon:UNIT_MAXHEALTH(unitid)
 end
 
 function Addon:UNIT_THREAT_LIST_UPDATE(unitid)
-local tp_frame = self:GetThreatPlateForUnit(unitid)
+  local tp_frame = self:GetThreatPlateForUnit(unitid)
   if tp_frame then
     Threat:ThreatUpdate(tp_frame)
   end
@@ -1107,6 +1079,8 @@ function Addon:UNIT_FACTION(unitid)
     local tp_frame = self:GetThreatPlateForUnit(unitid)
     if tp_frame then
       SetUnitAttributeReaction(tp_frame.unit, unitid)
+      -- If Blizzard-style nameplates are used, we also need to check if TP plates are disabled/enabled now
+      UpdateNameplateStyle(tp_frame, tp_frame.unit)
       Style:Update(tp_frame)
       PublishEvent("FactionUpdate", tp_frame)
     end
@@ -1302,20 +1276,23 @@ local ENABLED_EVENTS = {
 }
 
 -- Only registered for player unit
-local RIGHTEOUS_FURY_SPELL_IDs = { [20468] = true, [20469] = true, [20470] = true, [25780] = true }
+local TANK_AURA_SPELL_IDs = {
+  [20468] = true, [20469] = true, [20470] = true, [25780] = true, -- Paladin Righteous Fury
+  [48263] = true -- Deathknight Frost Presence
+}
 local function UNIT_AURA(event, unitid)
   local _, name, spellId
   for i = 1, 40 do
     name , _, _, _, _, _, _, _, _, spellId = _G.UnitBuff("player", i, "PLAYER")
     if not name then
       break
-    elseif RIGHTEOUS_FURY_SPELL_IDs[spellId] then
-      Addon.PlayerIsPaladinTank = true
+    elseif TANK_AURA_SPELL_IDs[spellId] then
+      Addon.PlayerIsTank = true
       return
     end
   end
 
-  Addon.PlayerIsPaladinTank = false
+  Addon.PlayerIsTank = false
 end
 
 -- For Classic and TBC Classic, player role must be determined based on standes:
@@ -1333,7 +1310,10 @@ if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
       return form_index == BEAR_FORM or form_index == DIRE_BEAR_FORM
     end,
     PALADIN = function()
-      return Addon.PlayerIsPaladinTank
+      return Addon.PlayerIsTank
+    end,
+    DEATHKNIGHT = function()
+      return Addon.PlayerIsTank
     end,
     DEFAULT = function()
       return false
@@ -1357,7 +1337,9 @@ if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
 
   -- Do this after events are registered, otherwise UNIT_AURA would be registered as a general event, not only as
   -- an unit event.
-  if Addon.PlayerClass == "PALADIN" then
+  -- No need to check here for (Addon.IS_WRATH_CLASSIC and Addon.PlayerClass == "DEATHKNIGHT") as deathknights
+  -- are only available in Wrath Classic
+  if Addon.PlayerClass == "PALADIN" or Addon.PlayerClass == "DEATHKNIGHT" then
     Addon.UNIT_AURA = UNIT_AURA
     Addon.EventService.SubscribeUnitEvent(Addon, "UNIT_AURA", "player")
     -- UNIT_AURA does not seem to be fired after login (even when buffs are active)

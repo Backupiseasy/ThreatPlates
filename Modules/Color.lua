@@ -15,10 +15,10 @@ local UnitCanAttack, UnitIsPVP, UnitPlayerControlled = UnitCanAttack, UnitIsPVP,
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 
 -- WoW Classic APIs:
--- ThreatPlates APIs
 
+-- ThreatPlates APIs
 local SubscribeEvent, PublishEvent,  UnsubscribeEvent = Addon.EventService.Subscribe, Addon.EventService.Publish, Addon.EventService.Unsubscribe
-local Threat = Addon.Threat
+local Style = Addon.Style
 local RGB_P = Addon.RGB_P
 
 local _G =_G
@@ -32,6 +32,12 @@ local _G =_G
 local ColorModule = Addon.Color
 
 ---------------------------------------------------------------------------------------------------
+-- Local variables
+---------------------------------------------------------------------------------------------------
+local ColorByHealthIsEnabled = false
+local ShowQuestUnit
+
+---------------------------------------------------------------------------------------------------
 -- Wrapper functions for WoW Classic
 ---------------------------------------------------------------------------------------------------
 
@@ -41,10 +47,8 @@ if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
 end
 
 ---------------------------------------------------------------------------------------------------
--- Local variables
+-- Constants
 ---------------------------------------------------------------------------------------------------
-local ColorByHealthIsEnabled = false
-local ShowQuestUnit
 
 local TRANPARENT_COLOR = Addon.RGB(0, 0, 0, 0)
 
@@ -123,6 +127,11 @@ local NameModeSettings = {
 -- ThreatPlates Frame functions to return the current color for healthbar/name based on settings
 ---------------------------------------------------------------------------------------------------
 
+local function GetCustomStyleColor(unit)
+  local unique_setting = unit.CustomPlateSettings
+  return (unique_setting and unique_setting.UseThreatColor and unit.CombatColor) or unit.CustomColor
+end
+
 local function GetUnitColorByHealth(tp_frame)
   local unit = tp_frame.unit
   return unit.SituationalColor or unit.HealthColor
@@ -140,8 +149,7 @@ end
 
 local function GetUnitColorCustomPlate(tp_frame)
   local unit = tp_frame.unit
-
-  return unit.SituationalColor or unit.CombatColor or unit.CustomColor
+  return unit.SituationalColor or GetCustomStyleColor(unit)
 end
 
 local HEALTHBAR_COLOR_FUNCTIONS = {
@@ -176,7 +184,7 @@ local function GetUnitColorCustomPlateName(tp_frame)
   if tp_frame.PlateStyle == "HealthbarMode" then
     return NameColorFunctions.HealthbarMode[unit.reaction](tp_frame)
   else
-    return unit.SituationalNameColor or unit.CombatColor or unit.CustomColor
+    return unit.SituationalNameColor or GetCustomStyleColor(unit)
   end
 end
 
@@ -346,29 +354,21 @@ local function GetCustomStyleColor(unit)
   return color
 end
 
-function ColorModule:GetThreatColor(unit, style)
-  if unit.ThreatLevel then
-    return ThreatColor[style][unit.ThreatLevel]
-  else
-    return nil
-  end
+function ColorModule:GetThreatColor(unit)
+  return unit.CombatColor
 end
 
 -- Threat System is OP, player is in combat, style is tank or dps
-local function GetCombatColor(unit)
-  -- Threat System is should also be used for custom nameplate (in combat with thread system on)
-  local unique_setting = unit.CustomPlateSettings
-  if unique_setting and not unique_setting.UseThreatColor then
+local function SetCombatColor(unit)
+  -- For styles normal, totem, empty, no threat feedback i shown
+  -- Style custom is handled by the part below
+  local style = (unit.CustomPlateSettings and Style:GetThreatStyle(unit)) or unit.style
+
+  if style == "dps" or style == "tank" then
+    unit.CombatColor = ThreatColor[style][unit.ThreatLevel]
+  else
     unit.CombatColor = nil
-    return
   end
-
-  local color
-  if Threat:ShowFeedback(unit) then
-    color = ThreatColor[unit.style][unit.ThreatLevel]
-  end
-
-  unit.CombatColor = color
 end
 
 ---- Sitational Color - Order is: target, target marked, tapped, quest)
@@ -512,7 +512,7 @@ function ColorModule:Initialize(tp_frame)
 --    print ("  Class:", Addon.Debug:ColorToString(unit.ClassColor))
   end
 
-  GetCombatColor(unit)
+  SetCombatColor(unit)
 
   UpdatePlateColors(tp_frame)
   --print ("Unit:", unit.name, "-> Updating Plate Colors:", Addon.Debug:ColorToString(tp_frame:GetHealthbarColor()))
@@ -528,7 +528,7 @@ function ColorModule:UpdateStyle(tp_frame, style)
   local color = GetCustomStyleColor(unit)
 
   -- As combat color is set to nil when a custom style is used, it has to be re-evaluated here
-  GetCombatColor(tp_frame.unit)
+  SetCombatColor(tp_frame.unit)
 
   if color then
     tp_frame.GetHealthbarColor = GetUnitColorCustomPlate
@@ -554,10 +554,10 @@ end
 
 local function CombatUpdate(tp_frame)
   if tp_frame.PlateStyle ~= "None" then
-    GetCombatColor(tp_frame.unit)
+    SetCombatColor(tp_frame.unit)
     UpdatePlateColors(tp_frame)
 
-    --print ("Color - CombatUpdate:", tp_frame.unit.name .. "(" .. tp_frame.unit.unitid .. ") =>", tp_frame.unit.ThreatLevel)
+    PublishEvent("ThreatColorUpdate", tp_frame)
   end
 end
 
@@ -639,13 +639,14 @@ function ColorModule:UpdateSettings()
   NameModeSettings.NameMode.UseRaidMarkColoring = SettingsName.NameMode.UseRaidMarkColoring
 
   for style, settings in pairs(Addon.db.profile.settings) do
-    if settings.threatcolor then -- there are several subentries unter settings. Only use style subsettings like unique, normal, dps, ...
+    -- there are several subentries unter settings. Only use style subsettings like unique, normal, dps, ...
+    if settings.threatcolor then
       ThreatColor[style] = settings.threatcolor
     end
   end
 
   -- Subscribe/unsubscribe to events based on settings
-  if SettingsBase.threat.ON and SettingsBase.threat.useHPColor and
+  if SettingsBase.threat.useHPColor or SettingsBase.settings.threatborder.show  and
     not (Settings.FriendlyUnitMode == "HEALTH" and Settings.EnemyUnitMode == "HEALTH" and
       SettingsName.HealthbarMode.FriendlyUnitMode == "HEALTH" and SettingsName.HealthbarMode.EnemyUnitMode == "HEALTH" and
       SettingsName.NameMode.FriendlyUnitMode == "HEALTH" and SettingsName.NameMode.EnemyUnitMode == "HEALTH") then

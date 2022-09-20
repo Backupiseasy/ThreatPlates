@@ -1784,46 +1784,23 @@ ThreatPlates.DEFAULT_SETTINGS = {
         show = true,
       },
       -- Needed in themes (e.g., basicTheme) for creating
-      unique = {
-        threatcolor = {
-          LOW = RGB_P(0, 0, 0, 0),
-          MEDIUM = RGB_P(0, 0, 0, 0),
-          HIGH = RGB_P(0, 0, 0, 0),
-        },
-      },
-      totem = {
-        threatcolor = {
-          LOW = RGB_P(0, 0, 0, 0),
-          MEDIUM = RGB_P(0, 0, 0, 0),
-          HIGH = RGB_P(0, 0, 0, 0),
-        },
-      },
-      normal = {
-        threatcolor = {
-          LOW = RGB_P(1, 1, 1, 1),
-          MEDIUM = RGB_P(1, 1, 0, 1),
-          HIGH = RGB_P(1, 0, 0, 1),
-        },
-      },
       dps = {
         threatcolor = {
-          LOW = RGB_P(0, 1, 0, 1),
-          MEDIUM = RGB_P(1, 1, 0, 1),
-          HIGH = RGB_P(1, 0, 0, 1),
+          LOW = RGB(0, 255, 0, 1),
+          MEDIUM = RGB(255, 255, 0, 1),
+          HIGH = RGB(255, 0, 0, 1),
         },
       },
       tank = {
         threatcolor = {
-          LOW = RGB_P(1, 0, 0, 1),
-          MEDIUM = RGB_P(1, 1, 0, 1),
-          HIGH = RGB_P(0, 1, 0, 1),
+          LOW = RGB(255, 0, 0, 1),
+          MEDIUM = RGB(255, 255, 0, 1),
+          HIGH = RGB(0, 255, 0, 1),
           OFFTANK = RGB(15, 170, 200, 1),
         },
       },
     },
     threat = {
-      ON = true,
-      -- marked = false, -- not used at all, removed in 9.2.0
       UseThreatTable = true,
       UseHeuristicInInstances = false,
       useType = true,

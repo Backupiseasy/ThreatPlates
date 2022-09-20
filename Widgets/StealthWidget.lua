@@ -13,7 +13,7 @@ local Widget = (Addon.IS_CLASSIC and {}) or Addon.Widgets:NewWidget("Stealth")
 local strsplit = strsplit
 
 -- WoW APIs
-local UnitReaction, UnitIsPlayer, UnitBuff = UnitReaction, UnitIsPlayer, UnitBuff
+local UnitBuff = UnitBuff
 
 -- ThreatPlates APIs
 
@@ -129,7 +129,7 @@ function Widget:IsEnabled()
 end
 
 function Widget:EnabledForStyle(style, unit)
-  if UnitReaction(unit.unitid, "player") > 4 or unit.type == "PLAYER" then return false end
+  if unit.reaction == "FRIENDLY" or unit.type == "PLAYER" then return false end
 
   if (style == "NameOnly" or style == "NameOnly-Unique") then
     return Addon.db.profile.stealthWidget.ShowInHeadlineView

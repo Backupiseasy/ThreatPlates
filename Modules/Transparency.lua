@@ -329,7 +329,6 @@ function TransparencyModule:UpdateSettings()
     if CVars.InvalidCVarsForOcclusionDetection() then
       SettingsEnabledOccludedAlpha = false
       UpdatePlate_Transparency = UpdatePlate_SetAlpha
-      Addon.Logging.Warning(L["Transparency for occluded units is being disabled as certain console variables (CVars) related to nameplate transparency are set in a way to prevent this feature from working."], true)
     else
       UpdatePlate_Transparency = UpdatePlate_SetAlphaWithOcclusion
     end

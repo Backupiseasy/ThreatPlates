@@ -349,7 +349,7 @@ function Widget:UpdateSettings()
   UpdateTexture = UPDATE_TEXTURE_FUNCTIONS[Settings.theme]
   ShowBorder = (UpdateTexture == UpdateBorderTexture)
 
-  Widget:UpdateAllFramesAfterSettingsUpdate()
+  self:UpdateAllFramesAfterSettingsUpdate()
 end
 
 function Widget:UpdateAllFramesAfterSettingsUpdate()
@@ -485,7 +485,7 @@ function FocusWidget:UpdateSettings()
   FocusUpdateTexture = UPDATE_TEXTURE_FUNCTIONS[FocusSettings.theme]
   FocusShowBorder = (FocusUpdateTexture == UpdateBorderTexture)
 
-  FocusWidget:UpdateAllFramesAfterSettingsUpdate()
+  self:UpdateAllFramesAfterSettingsUpdate()
 end
 
 function FocusWidget:UpdateAllFramesAfterSettingsUpdate()
