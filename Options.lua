@@ -3930,7 +3930,7 @@ local function CreateAurasWidgetOptions()
                     set = function(info, val)
                       local db = db.AuraWidget.Buffs
                       db.ShowAllEnemy = not (db.ShowOnEnemyNPCs or db.ShowDispellable or val)
-                  SetValue(info, val)
+                      SetValue(info, val)
                     end,
                     arg = { "AuraWidget", "Buffs", "ShowMagic" },
                     disabled = function()
