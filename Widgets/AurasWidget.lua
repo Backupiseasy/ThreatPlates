@@ -65,9 +65,9 @@ Widget.ANCHOR_POINT_SETPOINT = Addon.ANCHOR_POINT_SETPOINT
 Widget.PRIORITY_FUNCTIONS = {
   None = function(aura) return 0 end,
   AtoZ = function(aura) return aura.name end,
-  TimeLeft = function(aura) return aura.expiration - GetTime() end,
+  TimeLeft = function(aura) return aura.expirationTime - GetTime() end,
   Duration = function(aura) return aura.duration end,
-  Creation = function(aura) return aura.expiration - aura.duration end,
+  Creation = function(aura) return aura.expirationTime - aura.duration end,
 }
 Widget.UnitAuraList = {}
 
@@ -1335,7 +1335,7 @@ local function ProcessAura(widget_frame, unit, aura)
   -- aura.StealOrPurge => aura.isStealable
   -- aura.texture => aura.icon
   -- aura.stacks => aura.applications
-
+  -- aura.expiration => aura.expirationTime
   -- Fehlt: 
   --   aura.debuffType
   
@@ -1447,7 +1447,7 @@ function Widget:UpdateUnitAuras(aura_grid_frame, unit, enabled_auras, enabled_cc
     -- * Using variable names from UNIT_AURA updatedAuraInfos here to avoid to much copying of variables
     -- TBC Classic, Retail:
     -- name, icon, count, debuffType, duration, expirationTime, source, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, castByPlayer, nameplateShowAll, timeMod, ...
-    aura.name, aura.icon, aura.applications, aura.debuffType, aura.duration, aura.expiration, aura.sourceUnit,
+    aura.name, aura.icon, aura.applications, aura.debuffType, aura.duration, aura.expirationTime, aura.sourceUnit,
       aura.isStealable, aura.nameplateShowPersonal, aura.spellId, aura.canApplyAura, aura.isBossAura, _, aura.nameplateShowAll =
       UnitAuraWrapper(unitid, i, effect)
     
@@ -1493,8 +1493,9 @@ function Widget:UpdateUnitAuras(aura_grid_frame, unit, enabled_auras, enabled_cc
         aura_count = aura_count + 1
       end
 
-      -- if show_aura ~= ProcessAura then
-      --   print("Compare:", aura.name, " = ", show_aura, "=> New:", ProcessAura(widget_frame, unit, aura))
+      -- local show_aura_new = ProcessAura(widget_frame, unit, aura)
+      -- if show_aura ~= show_aura_new then
+      --   print("Compare:", aura.name, " = ", show_aura, "=> New:", show_aura_new)
       -- end
     end
   end
@@ -1547,7 +1548,7 @@ function Widget:UpdateUnitAuras(aura_grid_frame, unit, enabled_auras, enabled_cc
     for index = index_start, index_end, index_step do
       local aura = UnitAuraList[index]
 
-      if aura.spellId and aura.expiration then
+      if aura.spellId and aura.expirationTime then
         if aura.CrowdControl then
           -- Don't show CCs beyond MaxAuras, sorting should be correct here
           if aura_count_cc < aura_grid_cc_max_auras then
@@ -1565,7 +1566,7 @@ function Widget:UpdateUnitAuras(aura_grid_frame, unit, enabled_auras, enabled_cc
           aura_frame.AuraName = aura.name
           aura_frame.AuraDuration = aura.duration
           aura_frame.AuraTexture = aura.icon
-          aura_frame.AuraExpiration = aura.expiration
+          aura_frame.AuraExpiration = aura.expirationTime
           aura_frame.AuraStacks = aura.applications
           aura_frame.AuraColor = aura.color
           aura_frame.AuraStealOrPurge = aura.isStealable
@@ -1972,8 +1973,10 @@ local function UnitAuraEventHandler(widget_frame, event, unitid, unit_aura_updat
       --   -- Add the aura from to aura grid and re-draw the aura grid (now with one aura more)
       --   for _, aura in ipairs(unit_aura_update_info.addedAuras) do
       --     Addon.Debug:PrintTable(aura)
-      --     widget_frame.UnitAuras[aura.auraInstanceID] = aura
-    
+      --     if ProcessAura(widget_frame, widget_frame.unit, aura) then
+      --       widget_frame.Widget:UpdateIconGrid(widget_frame, widget_frame.unit)
+      --       --widget_frame.UnitAuras[aura.auraInstanceID] = aura
+      --     end
       --     -- Perform any cleanup tasks for this aura here.
       --   end
       -- end
@@ -2856,7 +2859,7 @@ local DEMO_AURA_ICONS = {
 
 local function GenerateDemoAuras()
   for no = 1, 40 do
-    -- aura.name, aura.icon, aura.applications, aura.debuffType, aura.duration, aura.expiration, aura.sourceUnit,
+    -- aura.name, aura.icon, aura.applications, aura.debuffType, aura.duration, aura.expirationTime, aura.sourceUnit,
     -- aura.isStealable, aura.nameplateShowPersonal, aura.spellId, aura.canApplyAura, aura.isBossAura, _, aura.nameplateShowAll =
     local random_name = tostring(math.random(1, 40))
 
