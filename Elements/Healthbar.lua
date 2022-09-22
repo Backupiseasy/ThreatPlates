@@ -308,7 +308,7 @@ function Element.Created(tp_frame)
 
   healthbar.Background = healthbar:CreateTexture(nil, "ARTWORK")
 
-  if not (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC) then
+  if not (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC) then
     local absorbs = healthbar:CreateTexture(nil, "ARTWORK", nil, 2)
     absorbs.Overlay = healthbar:CreateTexture(nil, "ARTWORK", nil, 3)
     absorbs.Overlay:SetTexture("Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\Striped_Texture.tga", true, true)
@@ -408,7 +408,7 @@ function Element.UpdateStyle(tp_frame, style, plate_style)
   border:SetPoint("TOPLEFT", healthbar, "TOPLEFT", - offset, offset)
   border:SetPoint("BOTTOMRIGHT", healthbar, "BOTTOMRIGHT", offset, - offset)
 
-  if not (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC) then
+  if not (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC) then
     -- Absorbs
     healthbar.HealAbsorb:SetTexture(healthbar_style.texture, true, false)
 
@@ -507,7 +507,7 @@ end
 
 SubscribeEvent(Element, "UNIT_MAXHEALTH", UnitMaxHealthUpdate)
 
-if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC then
+if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
   SubscribeEvent(Element, "UNIT_HEALTH_FREQUENT", UnitHealthbarUpdate)
 else -- if Addon.IS_MAINLINE then
   SubscribeEvent(Element, "UNIT_HEALTH", UnitHealthbarUpdate)

@@ -131,7 +131,7 @@ elseif Addon.IS_WRATH_CLASSIC then
 else
   GetNameForNameplate = function(plate) return plate:GetName() end
 
-  UnitCastingInfo = function(...) return _G.UnitCastingInfo(...) end
+  UnitCastingInfo = _G.UnitCastingInfo
 end
 
 ---------------------------------------------------------------------------------------------------------------------
@@ -656,7 +656,7 @@ function Addon:UpdateSettings()
   ShowCastBars = db.settings.castbar.show or db.settings.castbar.ShowInHeadlineView
   
   -- ? Not sure if this is still necessary after moving registering events to Addon.lua - OnInitialize
-  if not (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC) then
+  if not (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC) then
     self:ACTIVE_TALENT_GROUP_CHANGED() -- to update the player's role
   end
 end
