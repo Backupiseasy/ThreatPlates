@@ -23,23 +23,24 @@
 Libs\Libs.xml
 Locales\Locales.xml
 
+ThreatPlates.xml
+
 Init.lua
-Localization.lua
+Debug.lua
+Modules\Localization.lua
+EventService.lua
 CVarsManager.lua
 Media.lua
 Constants.lua
 Elements\Elements.xml
-
 Widgets\WidgetHandler.lua
 
-# Integration of TidyPlates for standalone version
-TidyPlatesInternal\TidyPlates.xml
-
+Nameplate.lua
 Database.lua
-Core.lua
+Addon.lua
 Commands.lua
 Options.lua
 
 Styles\Styles.xml
-Functions\Functions.xml
+Modules\Modules.xml
 Widgets\Widgets.xml

@@ -354,8 +354,6 @@ Addon.MergeIntoTable = function(target, source)
 		if type(v) == "table" then
 			target[k] = target[k] or {}
 			Addon.MergeIntoTable(target[k], v)
-		if not Addon.IS_TBC_CLASSIC and not Addon.IS_CLASSIC then
-		end
 		else
 			target[k] = v
 		end

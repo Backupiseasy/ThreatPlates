@@ -208,7 +208,7 @@ end
 function Addon:CheckForFirstStartUp()
   local db = self.db.global
 
-  if not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC then
+  if not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC and not Addon.IS_WRATH_CLASSIC then
     local spec_roles = self.db.char.spec
     if #spec_roles ~= GetNumSpecializations() then
       for i = 1, GetNumSpecializations() do

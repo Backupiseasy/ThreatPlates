@@ -186,7 +186,7 @@ local function UpdateThreatStatus(unit)
 end
   
 local function UpdateThreatStatusHeuristic(unit)
-  if unit.InCombat and Addon.PlayerIsInCombat and (not Addon.UseThreatTable or (Addon.UseHeuristicInInstances and Addon.IsInPvEInstance)) then
+  if unit.InCombat and Addon.PlayerIsInCombat and (not ThreatModule.UseThreatTable or (ThreatModule.UseHeuristicInInstances and Addon.IsInPvEInstance)) then
     local threat_level
     
     local target_unit = unit.unitid .. "target"

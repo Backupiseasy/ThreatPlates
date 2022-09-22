@@ -664,7 +664,7 @@ function ColorModule:UpdateSettings()
     
     ColorByHealthIsEnabled = true
     
-    if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC then
+    if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
       SubscribeEvent(ColorModule, "UNIT_HEALTH_FREQUENT", UNIT_HEALTH)
     else
       SubscribeEvent(ColorModule, "UNIT_HEALTH", UNIT_HEALTH)
@@ -672,7 +672,7 @@ function ColorModule:UpdateSettings()
   else
     ColorByHealthIsEnabled = false
 
-    if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC then
+    if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
       UnsubscribeEvent(ColorModule, "UNIT_HEALTH_FREQUENT", UNIT_HEALTH)
     else
       UnsubscribeEvent(ColorModule, "UNIT_HEALTH", UNIT_HEALTH)

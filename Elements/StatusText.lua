@@ -452,7 +452,7 @@ function Element.UpdateSettings()
     SettingsStatusText.NameMode.FriendlySubtext == "HEALTH" or SettingsStatusText.NameMode.FriendlySubtext == "ALL" or
     SettingsStatusText.NameMode.EnemySubtext == "HEALTH" or SettingsStatusText.NameMode.EnemySubtext == "ALL" then
 
-    if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC then
+    if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
       SubscribeEvent(Element, "UNIT_HEALTH_FREQUENT", HealthUpdate)
     else
       SubscribeEvent(Element, "UNIT_HEALTH", HealthUpdate)
@@ -461,7 +461,7 @@ function Element.UpdateSettings()
 
     SubscribeEvent(Element, "UNIT_MAXHEALTH", HealthUpdate)
   else
-    if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC then
+    if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
       UnsubscribeEvent(Element, "UNIT_HEALTH_FREQUENT", HealthUpdate)
     else
       UnsubscribeEvent(Element, "UNIT_HEALTH", HealthUpdate)
