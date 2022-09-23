@@ -45,7 +45,7 @@ local TappedColor
 -- This function is only called if unit.ThreatLevel ~= nil meaning that the unit is in in combat with
 -- the player
 local function GetThreatGlowColor(unit)
-  local color = COLOR_TRANSPARENT
+  local color
 
   if unit.type == "NPC" and unit.reaction ~= "FRIENDLY" then    
     if unit.IsTapDenied then
@@ -54,6 +54,8 @@ local function GetThreatGlowColor(unit)
       color = Color:GetThreatColor(unit)
     end
   end
+
+  color = color or COLOR_TRANSPARENT
 
   return color.r, color.g, color.b, color.a
 end
