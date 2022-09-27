@@ -16,7 +16,7 @@ local string, tonumber, next, pairs, ipairs = string, tonumber, next, pairs, ipa
 -- WoW APIs
 local WorldFrame = WorldFrame
 local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
-local UnitName, UnitIsUnit, UnitDetailedThreatSituation = UnitName, UnitIsUnit, UnitDetailedThreatSituation
+local UnitName, UnitIsUnit = UnitName, UnitIsUnit
 local UnitExists = UnitExists
 local IsInRaid, IsInGroup, GetNumGroupMembers, GetNumSubgroupMembers = IsInRaid, IsInGroup, GetNumGroupMembers, GetNumSubgroupMembers
 local wipe = wipe
@@ -29,6 +29,7 @@ local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 
 -- ThreatPlates APIs
 local PlayerName = Addon.PlayerName
+local UnitDetailedThreatSituationWrapper = Addon.UnitDetailedThreatSituationWrapper
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -200,7 +201,7 @@ local function ShowQuestUnit(unit)
     if db.HideInCombat then
       return false
     elseif db.HideInCombatAttacked then
-      local _, threatStatus = UnitDetailedThreatSituation("player", unit.unitid)
+      local _, threatStatus = UnitDetailedThreatSituationWrapper("player", unit.unitid)
       return (threatStatus == nil)
     end
   end

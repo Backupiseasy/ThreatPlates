@@ -66,7 +66,7 @@ function Addon.IsOffTankCreature(unitid)
 end
 
 function Addon:OnThreatTable(unit)
-  --  local _, threatStatus = UnitDetailedThreatSituation("player", unit.unitid)
+  --  local _, threatStatus = Addon.UnitDetailedThreatSituationWrapper("player", unit.unitid)
   --  return threatStatus ~= nil
 
   -- nil means player is not on unit's threat table - more acurate, but slower reaction time than the above solution
