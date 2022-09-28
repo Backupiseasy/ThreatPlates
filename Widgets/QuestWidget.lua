@@ -38,7 +38,6 @@ local _G =_G
 
 local InCombat = false
 local TooltipFrame = CreateFrame("GameTooltip", "ThreatPlates_Tooltip", nil, "GameTooltipTemplate")
-local PlayerName = UnitName("player")
 local ICON_COLORS = {}
 local Font
 
