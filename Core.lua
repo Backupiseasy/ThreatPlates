@@ -100,25 +100,6 @@ else
       width, height = CalculateSynchedNameplateSize()
       C_NamePlate.SetNamePlateFriendlySize(width, height)
     end
-    -- In dungeons or raids, friendly nameplates are always Blizzard nameplates.
-    -- if self.IsInPvEInstance then
-    --   if CVars:GetAsBool("nameplateShowOnlyNames") then
-    --     C_NamePlate.SetNamePlateFriendlySize(0.1, 0.1)
-    --   elseif NamePlateDriverFrame:IsUsingLargerNamePlateStyle() then
-    --     C_NamePlate.SetNamePlateFriendlySize(154, 64)
-    --   else
-    --     C_NamePlate.SetNamePlateFriendlySize(110, 45)
-    --   end
-    -- elseif db.ShowFriendlyBlizzardNameplates then
-    --   if NamePlateDriverFrame:IsUsingLargerNamePlateStyle() then
-    --     C_NamePlate.SetNamePlateFriendlySize(154, 64)
-    --   else
-    --     C_NamePlate.SetNamePlateFriendlySize(110, 45)
-    --   end
-    -- else
-    --   width, height = CalculateSynchedNameplateSize()
-    --   C_NamePlate.SetNamePlateFriendlySize(width, height)
-    -- end
 
     if db.ShowEnemyBlizzardNameplates then
       SetNameplatesToDefaultSize()
