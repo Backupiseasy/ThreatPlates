@@ -175,6 +175,7 @@ local CROWD_CONTROL_SPELLS_RETAIL = {
   [3355] = LOC_INCAPACITATE,    -- Freezing Trap (Blizzard)
   [24394] = LOC_STUN,           -- Intimidation (Blizzard)
   [117405] = PC_ROOT,           -- Binding Shot
+  [117526] = PC_ROOT,           -- Binding Shot (Root)
   [202914] = CC_SILENCE,        -- Spider Sting (Honor)
   [135299] = PC_SNARE,          -- Tar Trap (Honor)
   --[147362] = CC_SILENCE,        -- Counter Shot
@@ -344,7 +345,7 @@ local CROWD_CONTROL_SPELLS_RETAIL = {
   [198909] = LOC_DISORIENT, -- Song of Chi-Ji (Blizzard)
   [116095] = PC_SNARE,      -- Disable
   [123586] = PC_SNARE,      -- Flying Serpent Kick
-  [324312] = PC_ROOT,       -- Clash
+  [324382] = PC_ROOT,       -- Clash
 
   ---------------------------------------------------------------------------------------------------
   -- Racial Traits and other specia sources

@@ -11,14 +11,14 @@ local ThreatPlates = Addon.ThreatPlates
 ---------------------------------------------------------------------------------------------------
 
 -- Lua APIs
-local string, format = string, format
+local string, floor = string, floor
 local rawset = rawset
 
 -- WoW APIs
 local UnitClass = UnitClass
 
 -- ThreatPlates APIs
-
+local UnitDetailedThreatSituation = UnitDetailedThreatSituation
 
 ---------------------------------------------------------------------------------------------------
 -- WoW Version Check
@@ -107,6 +107,24 @@ Addon.Cache = {
 Addon.Data = {}
 Addon.Logging = {}
 Addon.Debug = {}
+
+---------------------------------------------------------------------------------------------------
+-- Addon-wide wrapper functions for WoW Classic
+---------------------------------------------------------------------------------------------------
+
+if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
+  Addon.UnitDetailedThreatSituationWrapper = function(source, target)
+    local is_tanking, status, threatpct, rawthreatpct, threat_value = UnitDetailedThreatSituation(source, target)
+
+    if (threat_value) then
+      threat_value = floor(threat_value / 100)
+    end
+
+    return is_tanking, status, threatpct, rawthreatpct, threat_value
+  end
+else
+	Addon.UnitDetailedThreatSituationWrapper = UnitDetailedThreatSituation
+end
 
 ---------------------------------------------------------------------------------------------------
 -- Aura Highlighting
