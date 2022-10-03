@@ -618,6 +618,7 @@ local CROWD_CONTROL_SPELLS_WRATH_CLASSIC = {
   [12798] = LOC_STUN,                      -- Revenge Stun - Triggered By: Improved Revenge
   [18498] = LOC_SLEEP,                     -- Shield Bash - Silenced - Triggered By: Improved Shield Bash
   [12323] = PC_SNARE,                      -- Piercing Howl
+  [46968] = LOC_STUN,                      -- Shockwave
 
 
   ---------------------------------------------------------------------------------------------------
@@ -1387,6 +1388,8 @@ function Widget:UpdateUnitAuras(aura_grid_frame, unit, enabled_auras, enabled_cc
     -- ShowPesonal: Debuffs  that are shown on Blizzards nameplate, no matter who casted them (and
     -- nameplateShowAll: Debuffs
     if not aura.name then break end
+
+    -- Addon.Logging.Debug("Aura:", aura.name, "=> ID:", aura.spellId)
 
     -- CastByPlayer is also used by aura trigger custom styles (only my auras)
     aura.CastByPlayer = (aura.caster == "player" or aura.caster == "pet" or aura.caster == "vehicle")
