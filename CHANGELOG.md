@@ -1,5 +1,4 @@
 # @project-version@ (@build-time@)
 
-* Added the root effect of Binding Shot (Hunter) to Auras widget as CC aura [Comment #6416].
-* Fixed CC aura id for Clash (Brewmaster Monk) in Auras widget [Comment #6408].
-* Fixed a bug with threat values not being scaled correctly in TBC and Wrath Classic WoW [GH-346, Issue #521].
+* Added Shockwave (Warrior) to Auras widget as CC aura for Wrath Classic [Comment #6468].
+* Fixed a bug with configuration mode for clickable area where the the clickable area highlight showed an incorrect size [Issue #561].
