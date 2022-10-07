@@ -1707,13 +1707,6 @@ do
     SetObjectAnchor(extended, style.frame.anchor or "CENTER", nameplate, style.frame.x or 0, style.frame.y or 0)
     extended:SetSize(style.healthbar.width, style.healthbar.height)
 
---    if not extended.TestBackground then
---      extended.TestBackground = extended:CreateTexture(nil, "BACKGROUND")
---      extended.TestBackground:SetAllPoints(extended)
---      extended.TestBackground:SetTexture(Addon.LibSharedMedia:Fetch('statusbar', Addon.db.profile.AuraWidget.BackgroundTexture))
---      extended.TestBackground:SetVertexColor(0,0,0,0.5)
---    end
-
     -- Anchorgroup
 		for index = 1, #anchorgroup do
 			local objectname = anchorgroup[index]
@@ -1851,7 +1844,7 @@ function Addon:ConfigClickableArea(toggle_show)
         local extended = ConfigModePlate.TPFrame
 
         -- Draw background to show for clickable area
-        extended.Background = _G.CreateFrame("Frame", nil, extended, BackdropTemplate)
+        extended.Background = _G.CreateFrame("Frame", nil, ConfigModePlate, BackdropTemplate)
         extended.Background:SetBackdrop({
           bgFile = ThreatPlates.Art .. "TP_WhiteSquare.tga",
           edgeFile = ThreatPlates.Art .. "TP_WhiteSquare.tga",
@@ -1862,17 +1855,14 @@ function Addon:ConfigClickableArea(toggle_show)
         extended.Background:SetBackdropBorderColor(0, 0, 0, 0.8)
         extended.Background:SetPoint("CENTER", ConfigModePlate.UnitFrame, "CENTER")
 
-        local width, height = Addon.db.profile.settings.frame.width, Addon.db.profile.settings.frame.height
-
-        local min_scale = CVars:GetAsNumber("nameplateMinScale")
-        --local selected_scale = CVars:GetAsNumber("nameplateSelectedScale")
-        local global_scale = CVars:GetAsNumber("nameplateGlobalScale")
-        local current_scale = global_scale * min_scale
-
-        width = width * current_scale
-        height = height * current_scale
-
+        local width, height
+        if extended.unit.reaction == "FRIENDLY" then          
+          width, height = C_NamePlate.GetNamePlateFriendlySize()
+        else
+          width, height = C_NamePlate.GetNamePlateEnemySize()
+        end
         extended.Background:SetSize(width, height)
+
         extended.Background:Show()
 
         -- remove the config background if the nameplate is hidden to prevent it

@@ -77,6 +77,8 @@ if Addon.WOW_USES_CLASSIC_NAMEPLATES then
       C_NamePlate.SetNamePlateFriendlySize(128, 32)
       C_NamePlate.SetNamePlateEnemySize(128, 32)
     end
+
+    Addon:ConfigClickableArea(false)
   end
 else
   local function SetNameplatesToDefaultSize()
@@ -109,13 +111,13 @@ else
       end
       C_NamePlate.SetNamePlateEnemySize(width, height)
     end
-  end
   
-  Addon:ConfigClickableArea(false)
+    Addon:ConfigClickableArea(false)
 
-  -- For personal nameplate:
-  --local clampedZeroBasedScale = Saturate(zeroBasedScale)
-  --C_NamePlate_SetNamePlateSelfSize(baseWidth * horizontalScale * Lerp(1.1, 1.0, clampedZeroBasedScale), baseHeight)
+    -- For personal nameplate:
+    --local clampedZeroBasedScale = Saturate(zeroBasedScale)
+    --C_NamePlate_SetNamePlateSelfSize(baseWidth * horizontalScale * Lerp(1.1, 1.0, clampedZeroBasedScale), baseHeight)
+  end
 end
 
 ---------------------------------------------------------------------------------------------------

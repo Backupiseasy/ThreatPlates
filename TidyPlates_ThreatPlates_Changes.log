@@ -1,4 +1,10 @@
 ﻿------------------------------------------------------
+10.5.4 (2022-10-03)
+------------------------------------------------------
+* Added Shockwave (Warrior) to Auras widget as CC aura for Wrath Classic [Comment #6468].
+* Fixed a bug with configuration mode for clickable area where the the clickable area highlight showed an incorrect size [Issue #561].
+
+------------------------------------------------------
 10.5.3 (2022-10-01)
 ------------------------------------------------------
 * Added the root effect of Binding Shot (Hunter) to Auras widget as CC aura [Comment #6416].
