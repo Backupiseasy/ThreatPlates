@@ -1,3 +1,3 @@
 # @project-version@ (@build-time@)
 
-* Fixed a bug with totems of rank 10 not being recognized as totems [Comment #6491].
+* Updated Threat Plates for Dragonflight Pre-Patch and updated nameplate code due to changes to WoW API.

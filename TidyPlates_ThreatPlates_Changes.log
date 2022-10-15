@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+11.0.0-alpha1 - Release for Dragonflight Pre-Patch (2022-09-21)
+------------------------------------------------------
+* Updated Threat Plates for Dragonflight Pre-Patch and updated nameplate code due to changes to WoW API.
+
+------------------------------------------------------
 10.5.5 (2022-10-14)
 ------------------------------------------------------
 * Fixed a bug with totems of rank 10 not being recognized as totems [Comment #6491].

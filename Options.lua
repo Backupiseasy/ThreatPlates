@@ -8535,8 +8535,7 @@ local function CreateTotemOptions()
     i = i + 1
   end
 
-  -- properly no longer possible if 7.3.5+ GetSpellInfo changes go live
-  table.sort(totem_list, function(a, b) return a.SortKey  < b.SortKey end)
+  table.sort(totem_list, function(a, b) return a.Name  < b.Name end)
 
   for i, totem_info in ipairs(totem_list) do
     entry.args[totem_info.Name] = {
