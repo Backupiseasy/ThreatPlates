@@ -396,7 +396,7 @@ local TOTEM_DATA_CLASSIC = {
 
 Addon.Data.Totems = (Addon.IS_CLASSIC and TOTEM_DATA_CLASSIC) or (Addon.IS_TBC_CLASSIC and TOTEM_DATA_BC_CLASSIC) or
                     (Addon.IS_WRATH_CLASSIC and TOTEM_DATA_WRATH_CLASSIC) or TOTEM_DATA_RETAIL
-local TOTEM_RANKS_CLASSIC = { " II", " III", " IV", " V", " VI", " VII", " VIII", " IX", "X" }
+local TOTEM_RANKS_CLASSIC = { " II", " III", " IV", " V", " VI", " VII", " VIII", " IX", " X" }
 
 function Addon:InitializeTotemInformation()
   for _, totem_data in ipairs(Addon.Data.Totems) do

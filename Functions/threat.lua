@@ -46,8 +46,6 @@ local OFFTANK_PETS = {
   ["61056"] = true,  -- Primal Earth Elemental
 }
 
--- Black Ox Statue of monks is: Creature with id 61146
--- Treants of druids is: Creature with id 103822
 function Addon.IsOffTankCreature(unitid)
   local guid = _G.UnitGUID(unitid)
 
