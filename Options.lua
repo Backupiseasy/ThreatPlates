@@ -4993,7 +4993,7 @@ local function CreateBlizzardSettings()
             type = "execute",
             width = "double",
             func = function()
-              InterfaceOptionsFrame_OpenToCategory(_G["InterfaceOptionsNamesPanel"])
+              Settings.OpenToCategory(_G["InterfaceOptionsNamesPanel"])
               Addon.LibAceConfigDialog:Close("Threat Plates");
             end,
           },
