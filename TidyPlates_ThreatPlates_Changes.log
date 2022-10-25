@@ -1,7 +1,8 @@
 ﻿------------------------------------------------------
-11.0.0-alpha1 - Release for Dragonflight Pre-Patch (2022-09-21)
+11.0.0 - Release for Dragonflight Pre-Patch (2022-09-21)
 ------------------------------------------------------
 * Updated Threat Plates for Dragonflight Pre-Patch and updated nameplate code due to changes to WoW API.
+* Fixed a Lua error with threat textures that could occur in Classic when stance dancing as a tank [Issue #568].
 
 ------------------------------------------------------
 10.5.6 (2022-10-19)

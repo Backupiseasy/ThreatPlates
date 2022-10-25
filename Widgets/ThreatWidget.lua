@@ -355,7 +355,8 @@ function Widget:UpdateThreatValue(widget_frame, unit)
   local db_threat_value = Settings.ThreatPercentage
 
   -- If threat_situation is nil, there is nothing to do
-  local threat_situation = GetThreatSituation(unit, unit.style, db.toggle.OffTank)
+  local style = (Addon:PlayerRoleIsTank() and "tank") or "dps"
+  local threat_situation = GetThreatSituation(unit, style, db.toggle.OffTank)
 
   -- Threat value has to be updated after every UNIT_THREAT_LIST_UPDATE event, not only when threat_situation changes
   if db_threat_value.ShowAlways or (db_threat_value.ShowInGroups and PlayerIsInGroup) or (db_threat_value.ShowWithPet and UnitExists("pet")) then
@@ -377,8 +378,6 @@ function Widget:UpdateThreatValue(widget_frame, unit)
     widget_frame.ThreatSituation = threat_situation
 
     -- As the widget is enabled, textures or percentages must be enabled.
-    local style = (Addon:PlayerRoleIsTank() and "tank") or "dps"
-    
     if widget_frame.LeftTexture:IsShown() then
       local unique_setting = unit.CustomPlateSettings
       if not unique_setting or unique_setting.UseThreatColor then        
