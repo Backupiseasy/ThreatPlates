@@ -1,3 +1,4 @@
 # @project-version@ (@build-time@)
 
-* Added Rank 2 of Silenced effect of Counterspell (Mage) to Auras widget as CC aura for Wrath Classic [Comment #6416].
+* Updated Threat Plates for Dragonflight Pre-Patch and updated nameplate code due to changes to WoW API.
+* Fixed a Lua error with threat textures that could occur in Classic when stance dancing as a tank [Issue #568].

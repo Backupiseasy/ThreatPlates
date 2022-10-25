@@ -4993,7 +4993,11 @@ local function CreateBlizzardSettings()
             type = "execute",
             width = "double",
             func = function()
-              InterfaceOptionsFrame_OpenToCategory(_G["InterfaceOptionsNamesPanel"])
+              if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
+                InterfaceOptionsFrame_OpenToCategory(_G["InterfaceOptionsNamesPanel"])
+              else
+                Settings.OpenToCategory(_G["InterfaceOptionsNamesPanel"])
+              end
               Addon.LibAceConfigDialog:Close("Threat Plates");
             end,
           },
@@ -8535,8 +8539,7 @@ local function CreateTotemOptions()
     i = i + 1
   end
 
-  -- properly no longer possible if 7.3.5+ GetSpellInfo changes go live
-  table.sort(totem_list, function(a, b) return a.SortKey  < b.SortKey end)
+  table.sort(totem_list, function(a, b) return a.Name  < b.Name end)
 
   for i, totem_info in ipairs(totem_list) do
     entry.args[totem_info.Name] = {

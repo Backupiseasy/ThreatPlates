@@ -239,7 +239,7 @@ function Addon.UnitStyle_NameDependent(unit)
     end
   end
 
-  if not plate_style and UnitCreatureType(unit.unitid) == Addon.TotemCreatureType then
+  if not plate_style and UnitCreatureType(unit.unitid) == Addon.TotemCreatureType and UnitPlayerControlled(unit.unitid) then
     -- Check for player totems and ignore NPC totems
     local totem_id = TOTEMS[unit.name]
     if totem_id then
