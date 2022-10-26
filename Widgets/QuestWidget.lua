@@ -124,7 +124,7 @@ function IsQuestUnit(unit)
     local text = line:GetText()
     local text_r, text_g, text_b = line:GetTextColor()
 
-    if text_r > 0.99 and text_g > 0.82 and text_b == 0 then
+    if text_r > 0.99 and text_g > 0.8 and text_b == 0 then
       -- A line with this color is either the quest title or a player name (if on a group quest, but always after the quest title)
       if text == PlayerName then
         quest_progress_player = true
