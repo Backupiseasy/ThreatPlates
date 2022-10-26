@@ -2363,6 +2363,12 @@ function Widget:UpdateLayout(widget_frame)
   end
   widget_frame:SetFrameLevel(frame_level)
 
+  -- ClearAllPoints here as otherwise Lua errors might occur if the old anchoring and the new anchoring
+  -- are cyclic temporarily
+  widget_frame.Buffs:ClearAllPoints()
+  widget_frame.Debuffs:ClearAllPoints()
+  widget_frame.CrowdControl:ClearAllPoints()
+  
   self:UpdateAuraGridLayout(widget_frame, "Buffs")
   self:UpdateAuraGridLayout(widget_frame, "Debuffs")
   self:UpdateAuraGridLayout(widget_frame, "CrowdControl")
