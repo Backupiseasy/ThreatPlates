@@ -2070,10 +2070,25 @@ local function CreateComboPointsWidgetOptions()
             hasAlpha = false,
             disabled = function() return #db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization] < 6 end
           },
+          Color7CP = {
+            name = L["Seven"],
+            type = "color",
+            order = 170,
+            get = function(info)
+              local color = db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][7] or t.RGB(0, 0, 0)
+              return color.r, color.g, color.b
+            end,
+            set = function(info, r, g, b)
+              db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][7] = t.RGB(r * 255, g * 255, b * 255)
+              Addon.Widgets:UpdateSettings(MAP_OPTION_TO_WIDGET[info[2]])
+            end,
+            hasAlpha = false,
+            disabled = function() return #db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization] < 7 end
+          },
           ColorAnimacharge = {
             name = L["Animacharge"],
             type = "color",
-            order = 170,
+            order = 180,
             get = function(info)
               local color = db.ComboPoints.ColorBySpec.ROGUE.Animacharge or t.RGB(0, 0, 0)
               return color.r, color.g, color.b
@@ -2088,7 +2103,7 @@ local function CreateComboPointsWidgetOptions()
           ColorDeathrune = {
             name = L["Death Rune"],
             type = "color",
-            order = 180,
+            order = 190,
             get = function(info)
               local color = db.ComboPoints.ColorBySpec.DEATHKNIGHT.DeathRune or t.RGB(0, 0, 0)
               return color.r, color.g, color.b
