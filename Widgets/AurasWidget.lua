@@ -21,9 +21,9 @@ local tonumber = tonumber
 local BUFF_MAX_DISPLAY = BUFF_MAX_DISPLAY
 local GetFramerate = GetFramerate
 local DebuffTypeColor = DebuffTypeColor
-local UnitAuraWrapper, UnitAuraSlots = UnitAuraBySlot, UnitAuraSlots
+local UnitAuraBySlot, UnitAuraSlots = UnitAuraBySlot, UnitAuraSlots
 local GetAuraDataBySlot, GetAuraDataByAuraInstanceID = C_UnitAuras and C_UnitAuras.GetAuraDataBySlot, C_UnitAuras and C_UnitAuras.GetAuraDataByAuraInstanceID
-local UnitIsUnit, UnitReaction = UnitIsUnit, UnitReaction
+local UnitIsUnit = UnitIsUnit
 local GetNamePlates, GetNamePlateForUnit = C_NamePlate.GetNamePlates, C_NamePlate.GetNamePlateForUnit
 local IsInInstance = IsInInstance
 
@@ -1410,33 +1410,35 @@ end
 -- function AurasModule:RegisterEvents()
 -- end
 
+local UnitAuraWrapper
 local ProcessAllUnitAuras
 
-if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then  
-  UnitAuraWrapper = UnitAura -- will be overwritten for Classic
+local function ProcessAllUnitAurasClassic(unitid, effect)
+  local _
+  local unit_auras = {}
 
-  ProcessAllUnitAuras = function(unitid, effect)
-    local _
-    local unit_auras = {}
+  for i = 1, 40 do
+    local aura = {}
 
-    for i = 1, 40 do
-      local aura = {}
+    aura.name, aura.icon, aura.applications, aura.debuffType, aura.duration, aura.expirationTime, aura.sourceUnit,
+      aura.isStealable, aura.nameplateShowPersonal, aura.spellId, aura.canApplyAura, aura.isBossAura, _, aura.nameplateShowAll =
+      UnitAuraWrapper(unitid, i, effect)
 
-      aura.name, aura.icon, aura.applications, aura.debuffType, aura.duration, aura.expirationTime, aura.sourceUnit,
-        aura.isStealable, aura.nameplateShowPersonal, aura.spellId, aura.canApplyAura, aura.isBossAura, _, aura.nameplateShowAll =
-        UnitAuraWrapper(unitid, i, effect)
+    if aura.name then 
+      aura.auraInstanceID = i
 
-      if aura.name then 
-        aura.auraInstanceID = i
-
-        unit_auras[#unit_auras + 1] = aura
-      else
-        break
-      end
+      unit_auras[#unit_auras + 1] = aura
+    else
+      break
     end
-
-    return unit_auras
   end
+
+  return unit_auras
+end
+
+if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then  
+  UnitAuraWrapper = UnitAura -- will be overwritten for Classic (but not for TBC or Wrath Classic)
+  ProcessAllUnitAuras = ProcessAllUnitAurasClassic
 else
   ProcessAllUnitAuras = function(unitid, effect)
     local _
@@ -1453,7 +1455,7 @@ else
 
         aura.name, aura.icon, aura.applications, aura.debuffType, aura.duration, aura.expirationTime, aura.sourceUnit,
           aura.isStealable, aura.nameplateShowPersonal, aura.spellId, aura.canApplyAura, aura.isBossAura, _, aura.nameplateShowAll =
-          UnitAuraWrapper(unitid, slots[i])
+          UnitAuraBySlot(unitid, slots[i])
       
         local unit_aura_info = GetAuraDataBySlot(unitid, slots[i])   
         aura.auraInstanceID = unit_aura_info.auraInstanceID
@@ -1466,6 +1468,7 @@ else
     return unit_auras
   end
 end
+
 
 local function IgnoreAuraUpdateForUnit(widget_frame, unit)
   if Widget.db.ShowTargetOnly then
@@ -3170,7 +3173,7 @@ end
 ---------------------------------------------------------------------------------------------------
 
 local EnabledConfigMode = false
-local OldUnitAura
+local OldUnitAura, OldProcessAllUnitAuras
 local Timer
 
 local ConfigModeAuras = {
@@ -3250,7 +3253,9 @@ function Widget:ToggleConfigurationMode()
 
     GenerateDemoAuras()
     OldUnitAura = UnitAuraWrapper
+    OldProcessAllUnitAuras = ProcessAllUnitAuras
     UnitAuraWrapper = UnitAuraForConfigurationMode
+    ProcessAllUnitAuras = ProcessAllUnitAurasClassic
 
     Addon:ForceUpdate()
     Timer = C_Timer.NewTicker(0.5, TimerCallback)
@@ -3258,6 +3263,7 @@ function Widget:ToggleConfigurationMode()
     EnabledConfigMode = false
 
     UnitAuraWrapper = OldUnitAura
+    ProcessAllUnitAuras = OldProcessAllUnitAuras
     Timer:Cancel()
 
     Addon:ForceUpdate()
