@@ -1495,24 +1495,6 @@ local function AuraGridUpdateForUnitNotNecessary(widget_frame, unit)
   end
 end
 
-local function SetShownAuraGrids(widget_frame)
-  local show_buff_grid = widget_frame.Buffs.ActiveAuras > 0
-  local show_debuff_grid = widget_frame.Debuffs.ActiveAuras > 0
-  local show_cc_grid = widget_frame.CrowdControl.ActiveAuras > 0
-
-  if show_buff_grid or show_debuff_grid or show_cc_grid then
-    widget_frame.Buffs:SetShown(show_buff_grid)
-    widget_frame.Debuffs:SetShown(show_debuff_grid)
-    widget_frame.CrowdControl:SetShown(show_cc_grid)
-    
-    widget_frame:Show()
-  else
-    widget_frame:Hide()
-  end   
-
-  --widget_frame:SetShown(show_buff_grid or show_debuff_grid or show_cc_grid)
-end
-
 local AuraGridUpdate = {
   Buffs = false,
   Debuffs = false,
@@ -1538,12 +1520,12 @@ end
 local function UnitAuraEventHandler(widget_frame, event, unitid, unit_aura_update_info)
   local unit = widget_frame.unit
 
-  if IgnoreAuraUpdateForUnit(widget_frame, unit) then return end
-
   if widget_frame.Active then
     if unit_aura_update_info == nil or unit_aura_update_info.isFullUpdate then
       widget_frame.Widget:UpdateAuras(widget_frame, widget_frame.unit)
     else
+      if IgnoreAuraUpdateForUnit(widget_frame, unit) then return end
+
       -- Current implementation: updates a aura grid frame only if either a shown aura is removed or a new
       -- aura should be shown (considering filter settings)
       local aura_grid_update = AuraGridUpdate
@@ -1627,6 +1609,7 @@ local function UnitAuraEventHandler(widget_frame, event, unitid, unit_aura_updat
       if unit.reaction == "FRIENDLY" then -- friendly or better
         local buff_aura_grid = (db.SwitchAreaByReaction and widget_frame.Debuffs) or widget_frame.Buffs
         local debuff_aura_grid = (db.SwitchAreaByReaction and widget_frame.Buffs) or widget_frame.Debuffs        
+
         if update_buff_grid then
           Widget:UpdateUnitAuras(buff_aura_grid, unit, db.Buffs.ShowFriendly, false, Widget.FilterFriendlyBuffsBySpell, Widget.FilterFriendlyCrowdControlBySpell, "HELPFUL", db.Buffs.FilterMode)
         end
@@ -1687,7 +1670,12 @@ local function UnitAuraEventHandler(widget_frame, event, unitid, unit_aura_updat
         aura_grid_update.AuraFrames[i] = nil
       end
 
-      SetShownAuraGrids(widget_frame)
+      if widget_frame.Buffs.ActiveAuras > 0 or widget_frame.Debuffs.ActiveAuras > 0 or widget_frame.CrowdControl.ActiveAuras > 0 then
+        widget_frame.CrowdControl:SetShown(enabled_cc)
+        widget_frame:Show()
+      else
+        widget_frame:Hide()
+      end
     end
   end
 end
@@ -1945,8 +1933,12 @@ function Widget:UpdateUnitAuras(aura_grid_frame, unit, enabled_auras, enabled_cc
     aura_grid:HideNonActiveAuras(aura_grid_frame)
     aura_grid_frame:Hide()
     return
-  end
-  
+  end 
+
+  -- Show the aura grid (for debuffs) as it might be hidden when the nameplate was, e.g., used for friendly units where debuffs&CCs are disabled, 
+  -- and then is re-used for enemy units where these are enabled.
+  aura_grid_frame:Show()
+
   local db = self.db
   -- Optimization for auras sorting
 
@@ -2175,26 +2167,38 @@ function Widget:UpdateAurasGrids(widget_frame, unit)
 
   widget_frame.UnitAuras = {}
 
+  local enabled_cc
   if unit.reaction == "FRIENDLY"  then -- friendly or better
+    enabled_cc = db.CrowdControl.ShowFriendly
+    
     local buff_aura_grid = (db.SwitchAreaByReaction and widget_frame.Debuffs) or widget_frame.Buffs
-    local debuff_aura_grid = (db.SwitchAreaByReaction and widget_frame.Buffs) or widget_frame.Debuffs
-    self:UpdateUnitAuras(debuff_aura_grid, unit, db.Debuffs.ShowFriendly, db.CrowdControl.ShowFriendly, self.FilterFriendlyDebuffsBySpell, self.FilterFriendlyCrowdControlBySpell, "HARMFUL", db.Debuffs.FilterMode)
+    local debuff_aura_grid = (db.SwitchAreaByReaction and widget_frame.Buffs) or widget_frame.Debuffs        
+    
     self:UpdateUnitAuras(buff_aura_grid, unit, db.Buffs.ShowFriendly, false, self.FilterFriendlyBuffsBySpell, self.FilterFriendlyCrowdControlBySpell, "HELPFUL", db.Buffs.FilterMode)
+    self:UpdateUnitAuras(debuff_aura_grid, unit, db.Debuffs.ShowFriendly, enabled_cc, self.FilterFriendlyDebuffsBySpell, self.FilterFriendlyCrowdControlBySpell, "HARMFUL", db.Debuffs.FilterMode)
   else
-    self:UpdateUnitAuras(widget_frame.Debuffs, unit, db.Debuffs.ShowEnemy, db.CrowdControl.ShowEnemy, self.FilterEnemyDebuffsBySpell, self.FilterEnemyCrowdControlBySpell, "HARMFUL", db.Debuffs.FilterMode)
+    enabled_cc = db.CrowdControl.ShowEnemy
+    
     self:UpdateUnitAuras(widget_frame.Buffs, unit, db.Buffs.ShowEnemy, false, self.FilterEnemyBuffsBySpell, self.FilterEnemyCrowdControlBySpell, "HELPFUL", db.Buffs.FilterMode)
+    self:UpdateUnitAuras(widget_frame.Debuffs, unit, db.Debuffs.ShowEnemy, enabled_cc, self.FilterEnemyDebuffsBySpell, self.FilterEnemyCrowdControlBySpell, "HARMFUL", db.Debuffs.FilterMode)
   end
 
   if AuraGridUpdateForUnitNotNecessary(widget_frame, unit) then return end
 
-  if widget_frame.Buffs.ActiveAuras > 0 then
+  if widget_frame.Buffs.ActiveAuras > 0 or widget_frame.Debuffs.ActiveAuras > 0 or widget_frame.CrowdControl.ActiveAuras > 0 then
     self:UpdatePositionAuraGrid(widget_frame, "Buffs", unit.style)
-  end
-  if widget_frame.Debuffs.ActiveAuras > 0 then
     self:UpdatePositionAuraGrid(widget_frame, "Debuffs", unit.style)
-  end
-  if widget_frame.CrowdControl.ActiveAuras > 0 then
-    self:UpdatePositionAuraGrid(widget_frame, "CrowdControl", unit.style)
+
+    if enabled_cc then
+      self:UpdatePositionAuraGrid(widget_frame, "CrowdControl", unit.style)
+      widget_frame.CrowdControl:Show()
+    else
+      widget_frame.CrowdControl:Hide()
+    end
+
+    widget_frame:Show()
+  else
+    widget_frame:Hide()
   end
 
   -- if unit_is_friendly and db.SwitchScaleByReaction then
@@ -2227,8 +2231,6 @@ function Widget:UpdateAurasGrids(widget_frame, unit)
   -- else
   --   widget_frame.IsSwitchedByReaction = false
   -- end
-
-  SetShownAuraGrids(widget_frame)      
 end
 
 function Widget:UpdateAuras(widget_frame, unit)
@@ -2935,7 +2937,7 @@ function Widget:OnUnitAdded(widget_frame, unit)
 
   widget_frame:UnregisterAllEvents()
   widget_frame:RegisterUnitEvent("UNIT_AURA", unit.unitid)
-
+  
   self:UpdateAuras(widget_frame, unit)
 end
 
