@@ -161,7 +161,14 @@ local ALPHA_FUNCTIONS = {
 }
 
 function Addon:GetAlpha(unit)
-  return ALPHA_FUNCTIONS[unit.style](unit, unit.style)
+	local alpha = ALPHA_FUNCTIONS[unit.style](unit, unit.style)
+	if alpha < 0 then
+		alpha = 0
+	elseif alpha > 1 then
+		alpha = 1
+	end
+
+  return alpha
 end
 
 
