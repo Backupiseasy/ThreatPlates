@@ -130,7 +130,11 @@ local  function UpdateBorderTexture(db, widget_frame, texture_frame)
   texture_frame:SetPoint("BOTTOMRIGHT", widget_frame, "BOTTOMRIGHT", offset, - offset)
 
   texture_frame:SetBackdropBorderColor(db.r, db.g, db.b, db.a)
-  texture_frame:SetBackdropColor(db.r, db.g, db.b, db.a - 0.70) -- 80/255 => 1 - 0.69
+  local backdrop_alpha = db.a - 0.70 -- 80/255 => 1 - 0.69
+  if backdrop_alpha < 0 then
+    backdrop_alpha = 0
+  end
+  texture_frame:SetBackdropColor(db.r, db.g, db.b, backdrop_alpha)
 
   texture_frame.LeftTexture:Hide()
   texture_frame.RightTexture:Hide()
