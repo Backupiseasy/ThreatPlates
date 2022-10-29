@@ -393,6 +393,8 @@ local CROWD_CONTROL_SPELLS_WRATH_CLASSIC = {
     [26995] = PC_MODAGGRORANGE,              -- Rank 4
   [16922] = LOC_STUN,                      -- Starfire Stun - Triggered By: Improved Starfire
   [33786] = LOC_BANISH,                    -- Cyclone
+  [22570] = LOC_STUN,                     -- Maim
+    [49802] = LOC_STUN,                     -- Rank 2
 
 
   ---------------------------------------------------------------------------------------------------

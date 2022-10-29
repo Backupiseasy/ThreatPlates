@@ -1,4 +1,10 @@
 ﻿------------------------------------------------------
+11.0.4 (2022-09-x)
+------------------------------------------------------
+* Added Maim (Druid) to Auras widget as CC aura for Wrath Classic.
+
+
+------------------------------------------------------
 11.0.3 (2022-09-27)
 ------------------------------------------------------
 * Fixed a bug that occured when the target highlight color alpha was set below 0,7 as the Dragonflight API is more strict with valid transparency values [Issue #573].
