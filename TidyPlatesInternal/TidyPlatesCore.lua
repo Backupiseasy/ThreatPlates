@@ -1106,9 +1106,12 @@ end
 
 -- Payload: { Name = "unitToken", Type = "string", Nilable = false },
 function CoreEvents:NAME_PLATE_UNIT_ADDED(unitid)
-  -- Player's personal resource bar is currently not handled by Threat Plates
-  -- OnShowNameplate is not called on it, therefore plate.TPFrame.Active is nil
-  if UnitIsUnit("player", unitid) or UnitNameplateShowsWidgetsOnly(unitid) then return end
+  -- Player's personal nameplate:
+  --   This nameplate is currently not handled by Threat Plates - OnShowNameplate is not called on it, therefore plate.TPFrame.Active is nil
+  -- Nameplates for non-existing units:
+  --   There are some nameplates for units that do not exists, e.g. Ring of Transference in Oribos. For the time being, we don't show them.
+  --   Without not UnitExists(unitid) they would be shown as nameplates with health 0 and maybe cause Lua errors
+  if UnitIsUnit("player", unitid) or UnitNameplateShowsWidgetsOnly(unitid) or not UnitExists(unitid) then return end
 
   OnShowNameplate(GetNamePlateForUnit(unitid), unitid)
 end
