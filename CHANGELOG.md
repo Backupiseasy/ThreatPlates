@@ -1,3 +1,4 @@
 # @project-version@ (@build-time@)
 
-* Fixed a bug that occured when the target highlight color alpha was set below 0,7 as the Dragonflight API is more strict with valid transparency values [Issue #573].
+* Added Maim (Druid) to Auras widget as CC aura for Wrath Classic.
+* Fixed a Lua error when a nameplate was shown for a non-existing unit (e.g., Ring of Transference in Oribos) [Issue #575].

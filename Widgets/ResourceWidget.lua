@@ -15,7 +15,6 @@ local format = format
 local ceil = ceil
 
 -- WoW APIs
-local UnitReaction,UnitIsUnit = UnitReaction, UnitIsUnit
 local UnitPower, UnitPowerMax = UnitPower, UnitPowerMax
 local PowerBarColor = PowerBarColor
 local SPELL_POWER_MANA = SPELL_POWER_MANA
@@ -244,7 +243,7 @@ function Widget:OnTargetUnitAdded(tp_frame, unit)
 
   local show
   if unit.type == "PLAYER" then
-    show = (UnitReaction(unit.unitid, "player") > 4 and db.ShowFriendly) or db.ShowEnemyPlayer
+    show = (unit.reaction == "FRIENDLY" and db.ShowFriendly) or db.ShowEnemyPlayer
   else
     show = ((unit.isBoss or unit.isRare) and db.ShowEnemyBoss) or db.ShowEnemyNPC
   end

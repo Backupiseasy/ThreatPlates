@@ -10,7 +10,7 @@ local floor = floor
 local abs = abs
 
 -- WoW APIs
-local UnitIsConnected, UnitReaction, UnitCanAttack, UnitIsPVP = UnitIsConnected, UnitReaction, UnitCanAttack, UnitIsPVP
+local UnitIsConnected, UnitCanAttack, UnitIsPVP = UnitIsConnected, UnitCanAttack, UnitIsPVP
 local UnitIsPlayer, UnitPlayerControlled = UnitIsPlayer, UnitPlayerControlled
 local UnitThreatSituation, UnitIsUnit, UnitExists, UnitGroupRolesAssigned = UnitThreatSituation, UnitIsUnit, UnitExists, UnitGroupRolesAssigned
 local IsInInstance = IsInInstance
