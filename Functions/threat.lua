@@ -9,7 +9,6 @@ local string, strsplit = string, strsplit
 -- WoW APIs
 local UnitThreatSituation = UnitThreatSituation
 local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
-local UnitReaction  = UnitReaction
 
 -- ThreatPlates APIs
 
@@ -84,7 +83,7 @@ end
 local function GetUnitClassification(unit)
   if _G.UnitIsTapDenied(unit.unitid) then
     return "Tapped"
-  elseif UnitReaction(unit.unitid, "player") == 4 then
+  elseif unit.reaction == "NEUTRAL" then
     return "Neutral"
   end
 
@@ -94,7 +93,7 @@ end
 function Addon:ShowThreatFeedback(unit)
   local db = Addon.db.profile.threat
 
-  if not InCombatLockdown() or unit.type == "PLAYER" or UnitReaction(unit.unitid, "player") > 4 or not db.ON then
+  if not InCombatLockdown() or unit.type == "PLAYER" or unit.reaction == "FRIENDLY" or not db.ON then
     return false
   end
 

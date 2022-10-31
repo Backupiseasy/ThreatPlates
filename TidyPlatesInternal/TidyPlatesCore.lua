@@ -404,7 +404,7 @@ do
 	---------------------------------------------------------------------------------------------------------------------
 
   function Addon:UpdateNameplateStyle(plate, unitid)
-    if UnitReaction(unitid, "player") > 4 then
+    if unit.reaction == "FRIENDLY" then
       if SettingsShowFriendlyBlizzardNameplates then
         plate.UnitFrame:Show()
         plate.TPFrame:Hide()
@@ -1021,7 +1021,8 @@ local function FrameOnShow(UnitFrame)
   end
 
   -- Hide ThreatPlates nameplates if Blizzard nameplates should be shown for friendly units
-  if UnitReaction(unitid, "player") > 4 then
+  local unit_reaction = UnitReaction(unitid, "player") or 0
+  if unit_reaction > 4 then
     UnitFrame:SetShown(SettingsShowFriendlyBlizzardNameplates)
   else
     UnitFrame:SetShown(SettingsShowEnemyBlizzardNameplates)

@@ -10,7 +10,6 @@ local Widget = Addon.Widgets:NewWidget("ClassIcon")
 ---------------------------------------------------------------------------------------------------
 
 -- WoW APIs
-local UnitReaction = UnitReaction
 
 -- ThreatPlates APIs
 
@@ -80,8 +79,7 @@ function Widget:OnUnitAdded(widget_frame, unit)
 
   local db = Addon.db.profile
 
-  local unit_reaction = UnitReaction(unit.unitid, "player")
-  if (unit_reaction < 4 and db.HostileClassIcon) or (unit_reaction > 4 and db.friendlyClassIcon) then
+  if (unit.reaction == "HOSTILE" and db.HostileClassIcon) or (unit.reaction == "FRIENDLY" and db.friendlyClassIcon) then
     db = db.classWidget
 
     -- Updates based on settings / unit style
