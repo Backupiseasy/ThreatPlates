@@ -1,4 +1,3 @@
 # @project-version@ (@build-time@)
 
-* Added Maim (Druid) to Auras widget as CC aura for Wrath Classic.
-* Fixed a Lua error when a nameplate was shown for a non-existing unit (e.g., Ring of Transference in Oribos) [Issue #575].
+* Disabled optimized aura processing (introduced with 11.0.0) as auras were not shown reliably and aura frames were not anchored correctly sometimes (until these bugs are fixed).

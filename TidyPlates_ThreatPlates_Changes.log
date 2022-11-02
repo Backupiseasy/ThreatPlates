@@ -1,22 +1,27 @@
 ﻿------------------------------------------------------
-11.0.4 (2022-09-31)
+11.0.5 (2022-11-02)
+------------------------------------------------------
+* Disabled optimized aura processing (introduced with 11.0.0) as auras were not shown reliably and aura frames were not anchored correctly sometimes (until these bugs are fixed).
+
+------------------------------------------------------
+11.0.4 (2022-10-31)
 ------------------------------------------------------
 * Added Maim (Druid) to Auras widget as CC aura for Wrath Classic.
 * Fixed a Lua error when a nameplate was shown for a non-existing unit (e.g., Ring of Transference in Oribos) [Issue #575].
 
 ------------------------------------------------------
-11.0.3 (2022-09-27)
+11.0.3 (2022-10-27)
 ------------------------------------------------------
 * Fixed a bug that occured when the target highlight color alpha was set below 0,7 as the Dragonflight API is more strict with valid transparency values [Issue #573].
 
 ------------------------------------------------------
-11.0.2 (2022-09-27)
+11.0.2 (2022-10-27)
 ------------------------------------------------------
 * Fixed a bug that occurred when the target transparency for a nameplate was greater than 100% or less than 0% as the Dragonflight API is more strict with valid transparency values [Issue #571, Comment #6532, #6536].
 * Fixed a bug that occurred when a Rogue has seven combo points (after picking talents Deeper Stratagem and Devious Stratagem) [Comment #6529].
 
 ------------------------------------------------------
-11.0.1 (2022-09-26)
+11.0.1 (2022-10-26)
 ------------------------------------------------------
 * Fixed a bug with Auras widget where auras were not shown consistently when "Swap Area By Reaction" was enabled [Comment #6522].
 * Fixed a bug with quest indicators not being shown as the color of quest titles in tooltips was changed in Dragonflight [Comment #6523].
@@ -24,7 +29,7 @@
 * Fixed a Lua error with Auras widget when aura area anchoring was changed so that aura areas where temporarily anchored to each other in a cyclic way.
 
 ------------------------------------------------------
-11.0.0 - Release for Dragonflight Pre-Patch (2022-09-26)
+11.0.0 - Release for Dragonflight Pre-Patch (2022-10-26)
 ------------------------------------------------------
 * Updated Threat Plates for Dragonflight Pre-Patch and updated nameplate code due to changes to WoW API.
 * Fixed a Lua error with threat textures that could occur in Classic when stance dancing as a tank [Issue #568].
