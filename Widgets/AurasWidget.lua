@@ -1517,9 +1517,17 @@ local function FlagAuraGridForUpdate(aura_grid_update, is_crowdcontrol_aura, is_
   end
 end
 
+local function UnitAuraEventHandler(widget_frame, event, unitid, unit_aura_update_info)
+  local unit = widget_frame.unit
+
+  if widget_frame.Active then
+      widget_frame.Widget:UpdateAuras(widget_frame, widget_frame.unit)
+  end
+end
+
 -- Struct UnitAuraInfo: https://wowpedia.fandom.com/wiki/Struct_UnitAuraInfo
 --   dispelName is the UnitAura return value for the auraType ("" is enrage, nil/"none" for unspecified and "Disease", "Poison", "Curse", "Magic" for other types.	
-local function UnitAuraEventHandler(widget_frame, event, unitid, unit_aura_update_info)
+local function UnitAuraEventHandlerV2(widget_frame, event, unitid, unit_aura_update_info)
   local unit = widget_frame.unit
 
   if widget_frame.Active then
