@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+11.0.6 (2022-11-02)
+------------------------------------------------------
+* Fixed a bug with custom styles for nameplates where the nameplate style wasn't correctly reset after a trigger was no longer active (e.g., after the aura triggering the style expired).
+
+------------------------------------------------------
 11.0.5 (2022-11-02)
 ------------------------------------------------------
 * Disabled optimized aura processing (introduced with 11.0.0) as auras were not shown reliably and aura frames were not anchored correctly sometimes (until these bugs are fixed).

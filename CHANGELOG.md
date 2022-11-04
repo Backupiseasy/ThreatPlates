@@ -1,3 +1,3 @@
 # @project-version@ (@build-time@)
 
-* Disabled optimized aura processing (introduced with 11.0.0) as auras were not shown reliably and aura frames were not anchored correctly sometimes (until these bugs are fixed).
+* Fixed a bug with custom styles for nameplates where the nameplate style wasn't correctly reset after a trigger was no longer active (e.g., after the aura triggering the style expired).
