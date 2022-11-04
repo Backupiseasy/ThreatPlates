@@ -382,6 +382,17 @@ do
         unitchanged = true
         break -- one change is enough to update the unit
       end
+      -- Delete the key to not process it a second time in the loop following this one
+      unitcache[key] = nil
+    end
+
+    -- Also check keys removed from unit
+    for key, value in pairs(unitcache) do
+      if unit[key] ~= value then
+        unitchanged = true
+        break -- one change is enough to update the unit
+      end
+      unitcache[key] = nil
     end
 
     -- Update Style/Indicators
@@ -397,7 +408,7 @@ do
 
     -- Cache the old unit information
     UpdateUnitCache()
-	end
+  end
 
 	---------------------------------------------------------------------------------------------------------------------
 	-- Create / Hide / Show Event Handlers
