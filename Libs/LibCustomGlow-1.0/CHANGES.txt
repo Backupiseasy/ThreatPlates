@@ -1,5 +1,23 @@
 Changes since tag 1.0.3
 
+commit 357b94474886151e07572cc705c260c6c40302c3
+Author: Buds <matthieu.saintaubin@gmail.com>
+Date:   Wed Sep 7 18:19:38 2022 +0200
+
+    Fix Lua error in TexPoolResetter (#18)
+
+commit f15e6de03f59acff163c5d5f7d66fed5dbcbc897
+Author: Simpy <kodi03466@hotmail.com>
+Date:   Thu Feb 17 23:49:25 2022 -0500
+
+    fix AutoCastGlow on non-retail
+
+commit d0ac18a80d153399caf25bcc79278d6d6e83c78e
+Author: d87 <d87d87@gmail.com>
+Date:   Mon Aug 10 16:00:02 2020 +0700
+
+    Fix division by zero
+
 commit 62612955401de40bd23698302be9e1843e793b65
 Author: Infus <infus@squorn.de>
 Date:   Fri May 1 16:30:35 2020 +0200
