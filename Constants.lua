@@ -635,7 +635,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
 --      b = 1,
 --    },
     ColorByReaction = {
-      -- (Addon.IS_MAINLINE and RGB(128, 128, 255)) or 
+      -- Only tables for colors are allowed here, otherwise resetting these colors in the options will result in a Lua error
       FriendlyPlayer = RGB(0, 0, 255),           -- PlayerPvPOff, Mainline: purple, Classic: blue
       FriendlyNPC = RGB(0, 255, 0),              -- green
       HostileNPC = RGB(255, 0, 0),               -- red

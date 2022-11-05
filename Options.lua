@@ -5521,8 +5521,10 @@ local function CreateColorsSettings()
             order = 200,
             width = "full",
             func = function()
-              for name, _ in pairs(t.DEFAULT_SETTINGS.profile.ColorByReaction) do
-                db.ColorByReaction[name] = t.CopyTable(t.DEFAULT_SETTINGS.profile.ColorByReaction[name])
+              for name, color in pairs(t.DEFAULT_SETTINGS.profile.ColorByReaction) do
+                if type(color) == "table" then                
+                  db.ColorByReaction[name] = t.CopyTable(color)
+                end
               end
               Addon:ForceUpdate()
             end,
