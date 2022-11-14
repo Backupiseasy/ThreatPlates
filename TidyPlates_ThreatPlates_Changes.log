@@ -1,6 +1,8 @@
 ﻿------------------------------------------------------
-11.0.6 (2022-11-04)
+11.1.0 (2022-11-14)
 ------------------------------------------------------
+* Added support for new Evoker class. 
+* Updated class icons - added Evoker class, added new styles for all classes, and increased the resolution of class icons.
 * Fixed a Lua error in the options that occured when resetting reaction colors to default values.
 
 ------------------------------------------------------
@@ -11,6 +13,12 @@
 
 ------------------------------------------------------
 11.0.5 (2022-11-02)
+------------------------------------------------------
+* Added support for new Evoker class. 
+* Updated class icons - added Evoker class, added new styles for all classes, and increased the resolution of class icons.
+
+------------------------------------------------------
+11.0.4 (2022-09-x)
 ------------------------------------------------------
 * Disabled optimized aura processing (introduced with 11.0.0) as auras were not shown reliably and aura frames were not anchored correctly sometimes (until these bugs are fixed).
 

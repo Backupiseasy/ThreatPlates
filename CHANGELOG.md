@@ -1,3 +1,5 @@
 # @project-version@ (@build-time@)
 
+* Added support for new Evoker class. 
+* Updated class icons - added Evoker class, added new styles for all classes, and increased the resolution of class icons.
 * Fixed a Lua error in the options that occured when resetting reaction colors to default values.

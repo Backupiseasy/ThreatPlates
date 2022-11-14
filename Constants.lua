@@ -166,6 +166,7 @@ ThreatPlates.SPEC_ROLES = {
   DEATHKNIGHT = { true, false, false },
   DEMONHUNTER = { false, true },
   DRUID 			= { false, false, true, false },
+  EVOKER      = { false, false },
   HUNTER			= { false, false, false },
   MAGE				= { false, false, false },
   MONK 				= { true, false, false },
@@ -1290,6 +1291,14 @@ ThreatPlates.DEFAULT_SETTINGS = {
           [4] = RGB(255, 105, 0),
           [5] = RGB(255, 0, 0),
         },
+        EVOKER = {
+          [1] = RGB(66, 151, 216),
+          [2] = RGB(66, 151, 216),
+          [3] = RGB(66, 151, 216),
+          [4] = RGB(66, 151, 216),
+          [5] = RGB(66, 151, 216),
+          [6] = RGB(66, 151, 216),
+        },
         MAGE = {
           [1] = RGB(105, 204, 240),
           [2] = RGB(105, 204, 240),
@@ -1336,6 +1345,18 @@ ThreatPlates.DEFAULT_SETTINGS = {
         Font = {
           Typeface = Addon.DEFAULT_FONT,
           Size = 10,
+          flags = "OUTLINE",
+          Shadow = true,
+        },
+      },
+      EssenceCooldown = {
+        Show = true,
+        HorizontalOffset = 1,
+        VerticalOffset = 0,
+        Font = {
+          Typeface = Addon.DEFAULT_FONT,
+          Size = 10,
+          Color = RGB(66, 151, 216),
           flags = "OUTLINE",
           Shadow = true,
         },
