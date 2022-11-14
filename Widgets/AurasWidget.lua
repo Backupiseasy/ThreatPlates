@@ -1477,8 +1477,10 @@ else
           UnitAuraBySlot(unitid, slots[i])
       
         local unit_aura_info = GetAuraDataBySlot(unitid, slots[i])   
-        aura.auraInstanceID = unit_aura_info.auraInstanceID
-        aura.UnitAuraInfo = unit_aura_info
+        if unit_aura_info then
+          aura.auraInstanceID = unit_aura_info.auraInstanceID
+          aura.UnitAuraInfo = unit_aura_info
+        end
 
         unit_auras[#unit_auras + 1] = aura
       end
