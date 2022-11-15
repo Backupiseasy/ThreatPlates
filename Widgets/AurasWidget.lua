@@ -103,6 +103,7 @@ local PC_PUSHBACK = 55      -- Apply Aura: Disarm
 local PC_MODAGGRORANGE = 56 -- Apply Aura: Mod Aggro Range
 
 local CC_SILENCE = 101
+local CC_OTHER = 999
 
 local CROWD_CONTROL_SPELLS_RETAIL = {
   ---------------------------------------------------------------------------------------------------
@@ -161,6 +162,20 @@ local CROWD_CONTROL_SPELLS_RETAIL = {
   [198813] = PC_SNARE,             -- Vengeful Retreat
   [213405] = PC_SNARE,             -- Master of the Glaive (Talent)
   [211881] = LOC_STUN,             -- Fel Eruption (Talent, Blizzard)
+
+  ---------------------------------------------------------------------------------------------------
+  -- Evoker
+  ---------------------------------------------------------------------------------------------------
+  [358385] = PC_ROOT,             -- Landslide
+  [351338] = CC_SILENCE,          -- Quell
+  [372048] = CC_OTHER,            -- Oppressing Roar
+  [357210] = LOC_STUN,            -- Deep Breath
+  [370898] = PC_SNARE,            -- Permeating Chill Debuff
+  [360806] = LOC_SLEEP,           -- Sleep Walk
+  [383005] = LOC_CHARM,           -- Chrono Loop
+  [378441] = LOC_STUN,            -- Time Stop
+  [378441] = PC_SNARE,            -- Disintegrate
+
 
   ---------------------------------------------------------------------------------------------------
   -- Hunter
@@ -349,8 +364,10 @@ local CROWD_CONTROL_SPELLS_RETAIL = {
   [20549] = LOC_STUN,       -- War Stomp (Tauren)
   [260369] = PC_SNARE,      -- Arcane Pulse (Nightborne)
   [107079] = LOC_STUN,      -- Quaking Palm (Pandarian)
-  [287712] = LOC_STUN,       -- Haymaker (Kul Tiran Racial)
-  [331866] = LOC_DISORIENT,  -- Agent of Chaos (Venthyr Soulbind Ability)
+  [287712] = LOC_STUN,      -- Haymaker (Kul Tiran Racial)
+  [357214] = PC_SNARE,      -- Wing Buffet (Evoker)
+  [368970] = PC_SNARE,      -- Tail Swipe (Evoker)
+  [331866] = LOC_DISORIENT, -- Agent of Chaos (Venthyr Soulbind Ability)
 }
 
 local CROWD_CONTROL_SPELLS_WRATH_CLASSIC = {
@@ -1460,8 +1477,10 @@ else
           UnitAuraBySlot(unitid, slots[i])
       
         local unit_aura_info = GetAuraDataBySlot(unitid, slots[i])   
-        aura.auraInstanceID = unit_aura_info.auraInstanceID
-        aura.UnitAuraInfo = unit_aura_info
+        if unit_aura_info then
+          aura.auraInstanceID = unit_aura_info.auraInstanceID
+          aura.UnitAuraInfo = unit_aura_info
+        end
 
         unit_auras[#unit_auras + 1] = aura
       end

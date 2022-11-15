@@ -1,4 +1,6 @@
 # @project-version@ (@build-time@)
 
-* Fixed a bug with custom styles for nameplates where the nameplate style wasn't correctly reset after a trigger was no longer active (e.g., after the aura triggering the style expired).
-* Upgrade integrated libraries (LibSharedMedia v10.0.0, LibCustomGlow 1.0.3-4-g357b944) [Comment #6591].
+* Added support for new Evoker class. 
+* Updated class icons - added Evoker class, added new styles for all classes, and increased the resolution of class icons.
+* Fixed a Lua error in the options that occured when resetting reaction colors to default values.
+* Fixed a Lua error that occured when using Priest's Mindcontrol in PvP [GH-364, Issue #584, #586, #587].

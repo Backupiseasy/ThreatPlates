@@ -1859,6 +1859,7 @@ local function CreateComboPointsWidgetOptions()
   local options = {
     name = L["Combo Points"],
     type = "group",
+    childGroups = "tab",
     order = 50,
     set = SetValueWidget,
     args = {
@@ -1866,290 +1867,322 @@ local function CreateComboPointsWidgetOptions()
       Appearance = {
         name = L["Appearance"],
         type = "group",
-        order = 20,
-        inline = true,
+        order = 10,
+        inline = false,
         args = {
-          Style = {
-            name = L["Style"],
-            type = "select",
-            order = 10,
-            values = {
-              Squares = L["Squares"],
-              Orbs = L["Orbs"],
-              Blizzard = L["Blizzard"]
-            },
-            arg = { "ComboPoints", "Style" },
-          },
-          EmptyCPs = {
-            name = L["On & Off"],
+          Appearance = {
+            name = L["Format"],
+            type = "group",
             order = 20,
-            type = "toggle",
-            desc = L["In combat, always show all combo points no matter if they are on or off. Off combo points are shown greyed-out."],
-            arg = { "ComboPoints", "ShowOffCPs" },
-          },
-        },
-      },
---      Preview = {
---        name = L["Preview"],
---        type = "group",
---        order = 25,
---        inline = true,
---        args = {
---          PreviewOn = {
---            name = L["On Combo Point"],
---            order = 10,
---            type = "execute",
---            image = function()
---              local texture = CreateFrame("Frame"):CreateTexture()
---              local width, height
---              if db.ComboPoints.Style == "Squares" then
---                texture:SetTexture("Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ComboPointsWidget\\ComboPointDefaultOff")
---                width, height = 64, 32
---              elseif db.ComboPoints.Style == "Orbs" then
---                texture:SetTexture("Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ComboPointsWidget\\ComboPointOrbOff")
---                width, height = 32, 32
---              else
---                texture:SetAtlas("Warlock-EmptyShard")
---                width, height = 32, 32
---              end
---              local color = db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][1]
---              texture:SetVertexColor(color.r, color.g, color.b)
---              return texture:GetTexture(), width, height
---            end,
---            imageCoords = function()
---              if db.ComboPoints.Style == "Squares" then
---                return { 0, 62 / 128, 0, 34 / 64 }
---              elseif db.ComboPoints.Style == "Orbs" then
---                return { 2/64, 62/64, 2/64, 62/64 }
---              else
---                return { 0, 1, 0, 1 }
---              end
---            end,
---          },
---          PreviewOffCP = {
---            name = L["Off Combo Point"],
---            order = 20,
---            type = "execute",
---            image = function()
---              local texture = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ComboPointsWidget\\"
---              if db.ComboPoints.Style == "Squares" then
---                return texture .. "ComboPointDefaultOff", 64, 32
---              elseif db.ComboPoints.Style == "Orbs" then
---                  return texture .. "ComboPointOrbOff", 32, 32
---              else
---                local texture_frame = CreateFrame("Frame"):CreateTexture()
---                texture_frame:SetAtlas("Warlock-EmptyShard")
---                print(texture_frame:GetTexCoord())
---                return texture_frame:GetTexture()
---              end
---            end,
---            imageCoords = function()
---              if db.ComboPoints.Style == "Squares" then
---                return { 0, 62 / 128, 0, 34 / 64 }
---              elseif db.ComboPoints.Style == "Orbs" then
---                return { 2/64, 62/64, 2/64, 62/64 }
---              else
---                return { 0, 1, 0, 1 }
---              end
---            end,
---          },
---        },
---      },
-      Coloring = {
-        name = L["Coloring"],
-        type = "group",
-        order = 40,
-        inline = true,
-        args = {
-          ClassAndSpec = {
-            name = L["Specialization"],
-            type = "select",
-            order = 10,
-            values = {
-              DEATHKNIGHT = ((not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC) and L["Death Knight"]) or nil,
-              DRUID = L["Druid"],
-              MAGE = L["Arcane Mage"],
-              MONK = ((not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC and not Addon.IS_WRATH_CLASSIC) and L["Windwalker Monk"]) or nil,
-              PALADIN = ((not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC and not Addon.IS_WRATH_CLASSIC) and L["Paladin"]) or nil,
-              ROGUE = L["Rogue"],
-              WARLOCK = L["Warlock"],
+            inline = true,
+            args = {
+              Style = {
+                name = L["Style"],
+                type = "select",
+                order = 10,
+                values = {
+                  Squares = L["Squares"],
+                  Orbs = L["Orbs"],
+                  Blizzard = L["Blizzard"]
+                },
+                arg = { "ComboPoints", "Style" },
+              },
+              EmptyCPs = {
+                name = L["On & Off"],
+                order = 20,
+                type = "toggle",
+                desc = L["In combat, always show all combo points no matter if they are on or off. Off combo points are shown greyed-out."],
+                arg = { "ComboPoints", "ShowOffCPs" },
+              },
             },
-            arg = { "ComboPoints", "Specialization" },
           },
-          SameColor = {
-            name = L["Uniform Color"],
-            order = 20,
-            type = "toggle",
-            desc = L["Use the same color for all combo points shown."],
-            arg = { "ComboPoints", "UseUniformColor" },
+    --      Preview = {
+    --        name = L["Preview"],
+    --        type = "group",
+    --        order = 25,
+    --        inline = true,
+    --        args = {
+    --          PreviewOn = {
+    --            name = L["On Combo Point"],
+    --            order = 10,
+    --            type = "execute",
+    --            image = function()
+    --              local texture = CreateFrame("Frame"):CreateTexture()
+    --              local width, height
+    --              if db.ComboPoints.Style == "Squares" then
+    --                texture:SetTexture("Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ComboPointsWidget\\ComboPointDefaultOff")
+    --                width, height = 64, 32
+    --              elseif db.ComboPoints.Style == "Orbs" then
+    --                texture:SetTexture("Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ComboPointsWidget\\ComboPointOrbOff")
+    --                width, height = 32, 32
+    --              else
+    --                texture:SetAtlas("Warlock-EmptyShard")
+    --                width, height = 32, 32
+    --              end
+    --              local color = db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][1]
+    --              texture:SetVertexColor(color.r, color.g, color.b)
+    --              return texture:GetTexture(), width, height
+    --            end,
+    --            imageCoords = function()
+    --              if db.ComboPoints.Style == "Squares" then
+    --                return { 0, 62 / 128, 0, 34 / 64 }
+    --              elseif db.ComboPoints.Style == "Orbs" then
+    --                return { 2/64, 62/64, 2/64, 62/64 }
+    --              else
+    --                return { 0, 1, 0, 1 }
+    --              end
+    --            end,
+    --          },
+    --          PreviewOffCP = {
+    --            name = L["Off Combo Point"],
+    --            order = 20,
+    --            type = "execute",
+    --            image = function()
+    --              local texture = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ComboPointsWidget\\"
+    --              if db.ComboPoints.Style == "Squares" then
+    --                return texture .. "ComboPointDefaultOff", 64, 32
+    --              elseif db.ComboPoints.Style == "Orbs" then
+    --                  return texture .. "ComboPointOrbOff", 32, 32
+    --              else
+    --                local texture_frame = CreateFrame("Frame"):CreateTexture()
+    --                texture_frame:SetAtlas("Warlock-EmptyShard")
+    --                print(texture_frame:GetTexCoord())
+    --                return texture_frame:GetTexture()
+    --              end
+    --            end,
+    --            imageCoords = function()
+    --              if db.ComboPoints.Style == "Squares" then
+    --                return { 0, 62 / 128, 0, 34 / 64 }
+    --              elseif db.ComboPoints.Style == "Orbs" then
+    --                return { 2/64, 62/64, 2/64, 62/64 }
+    --              else
+    --                return { 0, 1, 0, 1 }
+    --              end
+    --            end,
+    --          },
+    --        },
+    --      },          
+          Coloring = {
+            name = L["Coloring"],
+            type = "group",
+            order = 40,
+            inline = true,
+            args = {
+              ClassAndSpec = {
+                name = L["Specialization"],
+                type = "select",
+                order = 10,
+                values = {
+                  DEATHKNIGHT = ((not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC) and L["Death Knight"]) or nil,
+                  DRUID = L["Druid"],
+                  EVOKER = ((not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC and not Addon.IS_WRATH_CLASSIC) and L["Evoker"]) or nil,
+                  MAGE = L["Arcane Mage"],
+                  MONK = ((not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC and not Addon.IS_WRATH_CLASSIC) and L["Windwalker Monk"]) or nil,
+                  PALADIN = ((not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC and not Addon.IS_WRATH_CLASSIC) and L["Paladin"]) or nil,
+                  ROGUE = L["Rogue"],
+                  WARLOCK = L["Warlock"],
+                },
+                arg = { "ComboPoints", "Specialization" },
+              },
+              SameColor = {
+                name = L["Uniform Color"],
+                order = 20,
+                type = "toggle",
+                desc = L["Use the same color for all combo points shown."],
+                arg = { "ComboPoints", "UseUniformColor" },
+              },
+              Spacer1 = GetSpacerEntry(100),
+              Color1CP = {
+                name = L["One"],
+                type = "color",
+                order = 110,
+                get = function(info)
+                  local color = db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][1]
+                  return color.r, color.g, color.b
+                end,
+                set = function(info, r, g, b)
+                  db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][1] = t.RGB(r * 255, g * 255, b * 255)
+                  Addon.Widgets:UpdateSettings(MAP_OPTION_TO_WIDGET[info[2]])
+                end,
+                hasAlpha = false,
+              },
+              Color2CP = {
+                name = L["Two"],
+                type = "color",
+                order = 120,
+                get = function(info)
+                  local color = db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][2]
+                  return color.r, color.g, color.b
+                end,
+                set = function(info, r, g, b)
+                  db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][2] = t.RGB(r * 255, g * 255, b * 255)
+                  Addon.Widgets:UpdateSettings(MAP_OPTION_TO_WIDGET[info[2]])
+                end,
+                hasAlpha = false,
+              },
+              Color3CP = {
+                name = L["Three"],
+                type = "color",
+                order = 130,
+                get = function(info)
+                  local color = db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][3]
+                  return color.r, color.g, color.b
+                end,
+                set = function(info, r, g, b)
+                  db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][3] = t.RGB(r * 255, g * 255, b * 255)
+                  Addon.Widgets:UpdateSettings(MAP_OPTION_TO_WIDGET[info[2]])
+                end,
+                hasAlpha = false,
+              },
+              Color4CP = {
+                name = L["Four"],
+                type = "color",
+                order = 140,
+                get = function(info)
+                  local color = db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][4]
+                  return color.r, color.g, color.b
+                end,
+                set = function(info, r, g, b)
+                  db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][4] = t.RGB(r * 255, g * 255, b * 255)
+                  Addon.Widgets:UpdateSettings(MAP_OPTION_TO_WIDGET[info[2]])
+                end,
+                hasAlpha = false,
+              },
+              Color5CP = {
+                name = L["Five"],
+                type = "color",
+                order = 150,
+                get = function(info)
+                  local color = db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][5] or t.RGB(0, 0, 0)
+                  return color.r, color.g, color.b
+                end,
+                set = function(info, r, g, b)
+                  db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][5] = t.RGB(r * 255, g * 255, b * 255)
+                  Addon.Widgets:UpdateSettings(MAP_OPTION_TO_WIDGET[info[2]])
+                end,
+                hasAlpha = false,
+                disabled = function() return #db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization] < 5 end
+              },
+              Color6CP = {
+                name = L["Six"],
+                type = "color",
+                order = 160,
+                get = function(info)
+                  local color = db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][6] or t.RGB(0, 0, 0)
+                  return color.r, color.g, color.b
+                end,
+                set = function(info, r, g, b)
+                  db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][6] = t.RGB(r * 255, g * 255, b * 255)
+                  Addon.Widgets:UpdateSettings(MAP_OPTION_TO_WIDGET[info[2]])
+                end,
+                hasAlpha = false,
+                disabled = function() return #db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization] < 6 end
+              },
+              Color7CP = {
+                name = L["Seven"],
+                type = "color",
+                order = 161,
+                get = function(info)
+                  local color = db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][7] or t.RGB(0, 0, 0)
+                  return color.r, color.g, color.b
+                end,
+                set = function(info, r, g, b)
+                  db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][7] = t.RGB(r * 255, g * 255, b * 255)
+                  Addon.Widgets:UpdateSettings(MAP_OPTION_TO_WIDGET[info[2]])
+                end,
+                hasAlpha = false,
+                disabled = function() return #db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization] < 7 end
+              },
+              ColorAnimacharge = {
+                name = L["Animacharge"],
+                type = "color",
+                order = 170,
+                get = function(info)
+                  local color = db.ComboPoints.ColorBySpec.ROGUE.Animacharge or t.RGB(0, 0, 0)
+                  return color.r, color.g, color.b
+                end,
+                set = function(info, r, g, b)
+                  db.ComboPoints.ColorBySpec.ROGUE.Animacharge = t.RGB(r * 255, g * 255, b * 255)
+                  Addon.Widgets:UpdateSettings(MAP_OPTION_TO_WIDGET[info[2]])
+                end,
+                hasAlpha = false,
+                hidden = function() return db.ComboPoints.Specialization ~= "ROGUE" or (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC) end
+              },
+              ColorDeathrune = {
+                name = L["Death Rune"],
+                type = "color",
+                order = 180,
+                get = function(info)
+                  local color = db.ComboPoints.ColorBySpec.DEATHKNIGHT.DeathRune or t.RGB(0, 0, 0)
+                  return color.r, color.g, color.b
+                end,
+                set = function(info, r, g, b)
+                  db.ComboPoints.ColorBySpec.DEATHKNIGHT.DeathRune = t.RGB(r * 255, g * 255, b * 255)
+                  Addon.Widgets:UpdateSettings(MAP_OPTION_TO_WIDGET[info[2]])
+                end,
+                hasAlpha = false,
+                hidden = function() return db.ComboPoints.Specialization ~= "DEATHKNIGHT" or not Addon.IS_WRATH_CLASSIC end
+              },
+            },
           },
-          Spacer1 = GetSpacerEntry(100),
-          Color1CP = {
-            name = L["One"],
-            type = "color",
-            order = 110,
-            get = function(info)
-              local color = db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][1]
-              return color.r, color.g, color.b
-            end,
-            set = function(info, r, g, b)
-              db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][1] = t.RGB(r * 255, g * 255, b * 255)
-              Addon.Widgets:UpdateSettings(MAP_OPTION_TO_WIDGET[info[2]])
-            end,
-            hasAlpha = false,
-          },
-          Color2CP = {
-            name = L["Two"],
-            type = "color",
-            order = 120,
-            get = function(info)
-              local color = db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][2]
-              return color.r, color.g, color.b
-            end,
-            set = function(info, r, g, b)
-              db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][2] = t.RGB(r * 255, g * 255, b * 255)
-              Addon.Widgets:UpdateSettings(MAP_OPTION_TO_WIDGET[info[2]])
-            end,
-            hasAlpha = false,
-          },
-          Color3CP = {
-            name = L["Three"],
-            type = "color",
-            order = 130,
-            get = function(info)
-              local color = db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][3]
-              return color.r, color.g, color.b
-            end,
-            set = function(info, r, g, b)
-              db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][3] = t.RGB(r * 255, g * 255, b * 255)
-              Addon.Widgets:UpdateSettings(MAP_OPTION_TO_WIDGET[info[2]])
-            end,
-            hasAlpha = false,
-          },
-          Color4CP = {
-            name = L["Four"],
-            type = "color",
-            order = 140,
-            get = function(info)
-              local color = db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][4]
-              return color.r, color.g, color.b
-            end,
-            set = function(info, r, g, b)
-              db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][4] = t.RGB(r * 255, g * 255, b * 255)
-              Addon.Widgets:UpdateSettings(MAP_OPTION_TO_WIDGET[info[2]])
-            end,
-            hasAlpha = false,
-          },
-          Color5CP = {
-            name = L["Five"],
-            type = "color",
-            order = 150,
-            get = function(info)
-              local color = db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][5] or t.RGB(0, 0, 0)
-              return color.r, color.g, color.b
-            end,
-            set = function(info, r, g, b)
-              db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][5] = t.RGB(r * 255, g * 255, b * 255)
-              Addon.Widgets:UpdateSettings(MAP_OPTION_TO_WIDGET[info[2]])
-            end,
-            hasAlpha = false,
-            disabled = function() return #db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization] < 5 end
-          },
-          Color6CP = {
-            name = L["Six"],
-            type = "color",
-            order = 160,
-            get = function(info)
-              local color = db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][6] or t.RGB(0, 0, 0)
-              return color.r, color.g, color.b
-            end,
-            set = function(info, r, g, b)
-              db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][6] = t.RGB(r * 255, g * 255, b * 255)
-              Addon.Widgets:UpdateSettings(MAP_OPTION_TO_WIDGET[info[2]])
-            end,
-            hasAlpha = false,
-            disabled = function() return #db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization] < 6 end
-          },
-          Color7CP = {
-            name = L["Seven"],
-            type = "color",
-            order = 161,
-            get = function(info)
-              local color = db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][7] or t.RGB(0, 0, 0)
-              return color.r, color.g, color.b
-            end,
-            set = function(info, r, g, b)
-              db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][7] = t.RGB(r * 255, g * 255, b * 255)
-              Addon.Widgets:UpdateSettings(MAP_OPTION_TO_WIDGET[info[2]])
-            end,
-            hasAlpha = false,
-            disabled = function() return #db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization] < 7 end
-          },
-          ColorAnimacharge = {
-            name = L["Animacharge"],
-            type = "color",
-            order = 170,
-            get = function(info)
-              local color = db.ComboPoints.ColorBySpec.ROGUE.Animacharge or t.RGB(0, 0, 0)
-              return color.r, color.g, color.b
-            end,
-            set = function(info, r, g, b)
-              db.ComboPoints.ColorBySpec.ROGUE.Animacharge = t.RGB(r * 255, g * 255, b * 255)
-              Addon.Widgets:UpdateSettings(MAP_OPTION_TO_WIDGET[info[2]])
-            end,
-            hasAlpha = false,
-            hidden = function() return db.ComboPoints.Specialization ~= "ROGUE" or (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC) end
-          },
-          ColorDeathrune = {
-            name = L["Death Rune"],
-            type = "color",
-            order = 180,
-            get = function(info)
-              local color = db.ComboPoints.ColorBySpec.DEATHKNIGHT.DeathRune or t.RGB(0, 0, 0)
-              return color.r, color.g, color.b
-            end,
-            set = function(info, r, g, b)
-              db.ComboPoints.ColorBySpec.DEATHKNIGHT.DeathRune = t.RGB(r * 255, g * 255, b * 255)
-              Addon.Widgets:UpdateSettings(MAP_OPTION_TO_WIDGET[info[2]])
-            end,
-            hasAlpha = false,
-            hidden = function() return db.ComboPoints.Specialization ~= "DEATHKNIGHT" or not Addon.IS_WRATH_CLASSIC end
+          Layout = {
+            name = L["Layout"],
+            order = 60,
+            type = "group",
+            inline = true,
+            args = {
+              SpacingX = {
+                name = L["Spacing"],
+                order = 10,
+                type = "range",
+                min = 0,
+                max = 100,
+                step = 1,
+                arg = { "ComboPoints", "HorizontalSpacing" },
+              },
+              Scale = GetScaleEntry(L["Scale"], 20, { "ComboPoints", "Scale" }),
+              Transparency = GetTransparencyEntryWidgetNew(30, { "ComboPoints", "Transparency" } ),
+              Placement = GetPlacementEntryWidget(40, "ComboPoints", true),
+            },
           },
         },
       },
-      Layout = {
-        name = L["Layout"],
-        order = 60,
+      Cooldowns = {
+        name = L["Cooldown"],
         type = "group",
-        inline = true,
+        order = 30,
+        inline = false,
         args = {
-          SpacingX = {
-            name = L["Spacing"],
-            order = 10,
-            type = "range",
-            min = 0,
-            max = 100,
-            step = 1,
-            arg = { "ComboPoints", "HorizontalSpacing" },
+          RuneCooldown= {
+            name = L["Death Knigh Rune Cooldown"],
+            order = 70,
+            type = "group",
+            inline = true,
+            args = {
+              Enable = {
+                name = L["Enable"],
+                order = 10,
+                type = "toggle",
+                arg = { "ComboPoints", "RuneCooldown", "Show" },
+              },
+              Font = GetFontEntryDefault(L["Font"], 20, { "ComboPoints", "RuneCooldown" } )
+            },
           },
-          Scale = GetScaleEntry(L["Scale"], 20, { "ComboPoints", "Scale" }),
-          Transparency = GetTransparencyEntryWidgetNew(30, { "ComboPoints", "Transparency" } ),
-          Placement = GetPlacementEntryWidget(40, "ComboPoints", true),
-        },
-      },
-      DKRuneCooldown= {
-        name = L["Death Knigh Rune Cooldown"],
-        order = 70,
-        type = "group",
-        inline = true,
-        args = {
-          Enable = {
-            name = L["Enable"],
-            order = 10,
-            type = "toggle",
-            arg = { "ComboPoints", "RuneCooldown", "Show" },
+          EssenceCooldown= {
+            name = L["Evoker Essence Cooldown"],
+            order = 80,
+            type = "group",
+            inline = true,
+            args = {
+              Enable = {
+                name = L["Enable"],
+                order = 10,
+                type = "toggle",
+                arg = { "ComboPoints", "EssenceCooldown", "Show" },
+              },
+              Font = GetFontEntryDefault(L["Font"], 20, { "ComboPoints", "EssenceCooldown" } )
+            },
           },
-          Font = GetFontEntryDefault(L["Font"], 20, { "ComboPoints", "RuneCooldown" } )
         },
       },
     },
@@ -5521,8 +5554,10 @@ local function CreateColorsSettings()
             order = 200,
             width = "full",
             func = function()
-              for name, _ in pairs(t.DEFAULT_SETTINGS.profile.ColorByReaction) do
-                db.ColorByReaction[name] = t.CopyTable(t.DEFAULT_SETTINGS.profile.ColorByReaction[name])
+              for name, color in pairs(t.DEFAULT_SETTINGS.profile.ColorByReaction) do
+                if type(color) == "table" then                
+                  db.ColorByReaction[name] = t.CopyTable(color)
+                end
               end
               Addon:ForceUpdate()
             end,
@@ -10198,42 +10233,160 @@ local function CreateOptionsTable()
               width = "full",
               name = "esMX: sugymaylis, Woopy"
             },
---						Translators4 = {
---							type = "description",
---							order = 7,
---							width = "full",
---							name = "frFR: Need Translator!!"
---						},
-            -- Translators5 = {
-            --   type = "description",
-            --   order = 8,
-            --   width = "full",
-            --   name = "koKR: yuk6196 (CurseForge)"
-            -- },
---						Translators6 = {
---							type = "description",
---							order = 9,
---							width = "full",
---							name = "ruRU: Need Translator!!"
---						},
---            Translators7 = {
---              type = "description",
---              order = 10,
---              width = "full",
---              name = "zhCN: y123ao6 (CurseForge)"
---            },
 						Translators8 = {
 							type = "description",
 							order = 11,
 							width = "full",
 							name = "zhTW: gaspy10 (CurseForge)"
 						},
+            ArtworktHeader = {
+              order = 40,
+              type = "header",
+              name = "Artwork",
+            },
+            Artwork1 = {
+              type = "description",
+              order = 41,
+              width = "full",
+              name = "Upscaled class icons: Simaia (Twitter: @keyboardturn)",
+            },
           },
+          --         About = {
+--           name = L["About"],
+--           type = "group",
+--           order = 80,
+--           args = {
+--             VersionHeader = {
+--               type = "description",
+--               name = "\n|cffffd200" .. L["Version"] .. "|r",
+--               order = 20,
+--             },
+--             AboutInfo = {
+--               type = "description",
+--               order = 10,
+--               width = "full",
+--               name = L["Clear and easy to use threat-reactive nameplates.\n\nCurrent version: "] .. GetAddOnMetadata("TidyPlates_ThreatPlates", "version") .. L["\n\n--\n\nBackupiseasy\n\n(Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)"],
+--             },
+--             AuthorHeader = {
+--               type = "description",
+--               name = "\n|cffffd200" .. L["Authors"] .. "|r",
+--               order = 20,
+--             },
+--             AuthorText= {
+--               type = "description",
+--               name = L["Threat Plates is currently maintained by Backup (CurseForge). It was originally written by Suicidal Katt (CurseForge)."],
+--               order = 21,
+--             },
+--             TranslatorHeader = {
+--               type = "description",
+--               name = "\n|cffffd200" .. L["Translators"] .. "|r",
+--               order = 30,
+--             },
+--             Translators1 = {
+--               type = "description",
+--               order = 31,
+--               width = "full",
+--               name = "deDE: Blacksalsify (original  author: Aideen@Perenolde/EU)"
+--             },
+--             Translators2 = {
+--               type = "description",
+--               order = 32,
+--               width = "full",
+--               name = "esES: sugymaylis, Woopy"
+--             },
+--             Translators3 = {
+--               type = "description",
+--               order = 33,
+--               width = "full",
+--               name = "esMX: sugymaylis, Woopy"
+--             },
+-- --						Translators4 = {
+-- --							type = "description",
+-- --							order = 7,
+-- --							width = "full",
+-- --							name = "frFR: Need Translator!!"
+-- --						},
+--             -- Translators5 = {
+--             --   type = "description",
+--             --   order = 8,
+--             --   width = "full",
+--             --   name = "koKR: yuk6196 (CurseForge)"
+--             -- },
+-- --						Translators6 = {
+-- --							type = "description",
+-- --							order = 9,
+-- --							width = "full",
+-- --							name = "ruRU: Need Translator!!"
+-- --						},
+-- --            Translators7 = {
+-- --              type = "description",
+-- --              order = 10,
+-- --              width = "full",
+-- --              name = "zhCN: y123ao6 (CurseForge)"
+-- --            },
+-- 						Translators8 = {
+-- 							type = "description",
+-- 							order = 34,
+-- 							width = "full",
+-- 							name = "zhTW: gaspy10 (CurseForge)"
+-- 						},
+--             ArtworkHeader = {
+--               type = "description",
+--               name = "\n|cffffd200" .. L["Artwork"] .. "|r",
+--               order = 40,
+--             },
+--             Media1 = {
+--               type = "description",
+--               order = 41,
+--               width = "full",
+--               name = "Upscaled class icons: Simaia (Twitter: @keyboardturn)",
+--             },
+--             faq = {
+--               name = L["FAQ"],
+--               desc = L["Frequently Asked Questions"],
+--               type = "group",
+--               order = 1000,
+--               inline = false,
+--               args = {
+--                 line3 = {
+--                   type = "description",
+--                   name = "|cffffd200" .. L["How do I change the Bartender4 Keybindings?"] .. "|r",
+--                   order = 3,
+--                 },
+--                 line4 = {
+--                   type = "description",
+--                   name = L["You can either click the KeyBound button in the options, or use the |cffffff78/kb|r chat command to open the keyBound control. Alternatively, you can also use the Blizzard Keybinding Interface."] .. "\n\n" .. L["Once open, simply hover the button you want to bind, and press the key you want to be bound to that button. The keyBound tooltip and on-screen status will inform you about already existing bindings to that button, and the success of your binding attempt."],
+--                   order = 4,
+--                 },                
+--                 line7 = {
+--                   type = "description",
+--                   name = "\n|cffffd200" .. L["I've found a bug! Where do I report it?"] .. "|r",
+--                   order = 7,
+--                 },
+--                 line8 = {
+--                   type = "description",
+--                   name = L["You can report bugs or give suggestions on the project page at |cffffff78https://www.wowace.com/projects/bartender4|r or on GitHub at |cffffff78https://github.com/Nevcairiel/Bartender4|r"],
+--                   order = 8,
+--                 },
+--                 line9 = {
+--                   type = "description",
+--                   name = "\n" .. L["Alternatively, you can also find us on the |cffffff78WoWUIDev Discord|r"] .. "\n",
+--                   order = 9,
+--                 },
+--                 line10 = {
+--                   type = "description",
+--                   name = L["When reporting a bug, make sure you include the |cffffff78steps on how to reproduce the bug|r, supply any |cffffff78error messages|r with stack traces if possible, give the |cffffff78revision number|r of Bartender4 the problem occured in and state whether you are using an |cffffff78English client or otherwise|r."],
+--                   order = 10,
+--                 },
+--               },
+--             },
         },
       },
     }
   end
-  local ClassOpts_OrderCount = 1
+  
+  local class_list = t.CopyTable(CLASS_SORT_ORDER)
+  sort(class_list)
   local ClassOpts = {
     Style = {
       name = "Style",
@@ -10242,22 +10395,29 @@ local function CreateOptionsTable()
       width = "full",
       set = function(info, val)
         SetValue(info, val)
-        for k_c, v_c in pairs(CLASS_SORT_ORDER) do
-          options.args.Widgets.args.ClassIconWidget.args.Textures.args["Prev" .. k_c].image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ClassIconWidget\\" .. db.classWidget.theme .. "\\" .. CLASS_SORT_ORDER[k_c]
+        for i, class in ipairs(class_list) do
+          options.args.Widgets.args.ClassIconWidget.args.Textures.args["Prev" .. i].image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ClassIconWidget\\" .. db.classWidget.theme .. "\\" .. class
         end
       end,
-      values = { default = "Default", transparent = "Transparent", crest = "Crest", clean = "Clean" },
+      values = { 
+        default = L["Default"], 
+        transparent = L["Transparent"], 
+        wowround = L["WoW Round"],
+        wowflat = L["WoW Flat"],
+        clean = L["Clean"],
+        cleanborder = L["Clean Border"],
+        crest = L["Crest"], 
+      },
       arg = { "classWidget", "theme" },
     },
   };
-  for k_c, v_c in pairs(CLASS_SORT_ORDER) do
-    ClassOpts["Prev" .. k_c] = {
-      name = CLASS_SORT_ORDER[k_c],
+  for i, class in ipairs(class_list) do
+    ClassOpts["Prev" .. i] = {
+      name = class,
       type = "execute",
-      order = ClassOpts_OrderCount,
-      image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ClassIconWidget\\" .. db.classWidget.theme .. "\\" .. CLASS_SORT_ORDER[k_c],
+      order = i,
+      image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ClassIconWidget\\" .. db.classWidget.theme .. "\\" .. class,
     }
-    ClassOpts_OrderCount = ClassOpts_OrderCount + 1
   end
   options.args.Widgets.args.ClassIconWidget.args.Textures.args = ClassOpts
 
@@ -10321,8 +10481,10 @@ function Addon:ProfChange()
 
     local base = options.args.Widgets.args
     base.TargetArtWidget.args.Texture.args.Preview.image = path .. "TargetArtWidget\\" .. db.targetWidget.theme;
-    for k_c, v_c in pairs(CLASS_SORT_ORDER) do
-      base.ClassIconWidget.args.Textures.args["Prev" .. k_c].image = path .. "ClassIconWidget\\" .. db.classWidget.theme .. "\\" .. CLASS_SORT_ORDER[k_c]
+    local class_list = t.CopyTable(CLASS_SORT_ORDER)
+    sort(class_list)
+    for i, class in ipairs(class_list) do
+      base.ClassIconWidget.args.Textures.args["Prev" .. i].image = path .. "ClassIconWidget\\" .. db.classWidget.theme .. "\\" .. class
     end
 
     if not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
