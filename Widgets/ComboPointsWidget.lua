@@ -1273,6 +1273,7 @@ function Widget:UpdateSettings()
   -- in this since last Reload UI)
   if self.WidgetFrame then
     self:UpdateLayout()
+    self.WidgetFrame.SilentUpdate = true
     self:PLAYER_TARGET_CHANGED()
   end
 end
