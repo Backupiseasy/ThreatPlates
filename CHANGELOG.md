@@ -1,4 +1,3 @@
 # @project-version@ (@build-time@)
 
-* Fixed a bug with Combo Points widget where the widget was hidden after opening the options dialog.
-* Added Crest class icon for Evoker.
+* Added Hex, Earthbind Totem, and Earthgrab Totem (Shaman) to Auras widget as CC aura for Wrath Classic.
