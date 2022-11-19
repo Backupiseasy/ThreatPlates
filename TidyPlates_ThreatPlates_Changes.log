@@ -2,6 +2,7 @@
 11.1.2 (2022-11-14)
 ------------------------------------------------------
 * Fixed a bug with tooltip scanning (e.g., for Quest widget) which resulted in the same line showing multiple times in the tooltip [GH-368].
+* Fixed a bug with Combo Points widget where Evoker essence was not being updated properly when not target was selected.
 * Updated tooltip code to new API introduced with Patch 10.0.2.
 
 ------------------------------------------------------

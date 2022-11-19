@@ -19,6 +19,7 @@ local GetTime = GetTime
 local UnitCanAttack = UnitCanAttack
 local UnitPower, UnitPowerMax, GetComboPoints, GetRuneCooldown, GetRuneType = UnitPower, UnitPowerMax, GetComboPoints, GetRuneCooldown, GetRuneType
 local GetUnitChargedPowerPoints, GetPowerRegenForPowerType = GetUnitChargedPowerPoints, GetPowerRegenForPowerType
+local GetSpellInfo = GetSpellInfo
 local GetShapeshiftFormID = GetShapeshiftFormID
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local InCombatLockdown = InCombatLockdown
@@ -311,7 +312,7 @@ end
 -- Rogue Combo Points: Anima Charges (Shadowlands)
 ---------------------------------------------------------------------------------------------------
 
-function Widget:UpdateComboPointsRogueAnimacharge(widget_frame)
+function Widget:UpdateComboPointsRogueWithAnimacharge(widget_frame)
   local points = UnitPower("player", self.PowerType) or 0
 
   if points == 0 and not InCombatLockdown() then
@@ -569,15 +570,14 @@ local function SetEssenceCooldownDuration(widget_frame, essence_no, essence_fram
     essence_frame_off.Expiration = (cooldown_duration - remaining_cooldown_duration) + current_time
 
     essence_frame_off.Time:SetText(string_format("%.1f", essence_frame_off.Expiration - current_time))
-    essence_frame_off.Time:Show()
   end
 
   return cooldown_duration
 end
 
-local function UpdateEssences(self, widget_frame)
+local function UpdateEssence(self, widget_frame)
   local active_essence_no = UnitPower("player", self.PowerType) or 0
-  if active_essence_no == widget_frame.LastActiveEssenceNo and not widget_frame.SilentUpdate then return end
+  if active_essence_no == widget_frame.LastActiveEssenceNo and not widget_frame.ForceUpdate then return end
 
   local color = self.Colors[active_essence_no]
   local show_cooldown = false
@@ -597,12 +597,12 @@ local function UpdateEssences(self, widget_frame)
       essence_frame_off:Show()
 
       if active_essence_no + 1 == essence_no then
-        -- If there was a silent update, we just have to update the ressource UI, but not the actual cooldown
+        -- If there was a silent update, we just have to update the resource UI, but not the actual cooldown
         if active_essence_no ~= widget_frame.LastActiveEssenceNo then
           SetEssenceCooldownDuration(widget_frame, essence_no, essence_frame_off)
-          widget_frame.SilentUpdate = false
         end
         show_cooldown = ShowCooldownDuration
+        essence_frame_off.Time:SetShown(show_cooldown)
       else
         essence_frame_off.Time:Hide()
       end
@@ -618,66 +618,10 @@ local function UpdateEssences(self, widget_frame)
   widget_frame.CooldownDuration:SetShown(show_cooldown)
   
   widget_frame.LastActiveEssenceNo = active_essence_no
-  
+  widget_frame.ForceUpdate = false
 end
 
 local EssenceFillingAnimationTime = 5.0
-
--- local function UpdateEssencesBlizzardSimple(self, widget_frame)
---   local active_essence_no = UnitPower("player", self.PowerType) or 0
---   --if active_essence_no == widget_frame.LastActiveEssenceNo and not widget_frame.SilentUpdate then return end
---   --widget_frame.SilentUpdate = false
-
---   local show_cooldown = false
-
---   for essence_no = 1, self.UnitPowerMax do
---     local essence_frame = widget_frame.ComboPoints[essence_no]
-
---     if essence_no <= active_essence_no then
---       essence_frame.EssenceFull:Show()
---       essence_frame.EssenceEmpty:Hide()
---       essence_frame.Time:Hide()
---     else
---       essence_frame.EssenceFull:Hide()
---       essence_frame.EssenceEmpty:Show()
---       essence_frame.Time:Hide()
-      
---       if essence_no == active_essence_no + 1 then
---         local pace, _ = GetPowerRegenForPowerType(self.PowerType)
---         if (pace == nil or pace == 0) then
---           pace = 0.2
---         end   
---         local cooldown_duration = 1 / pace
-        
---         local last_remaining = 0
---         if widget_frame.LastActiveEssenceNo and essence_no < widget_frame.LastActiveEssenceNo then
---           local last_essence_filling_frame = widget_frame.ComboPoints[widget_frame.LastActiveEssenceNo + 1]
---           if last_essence_filling_frame then
---             last_remaining = last_essence_filling_frame.Duration - last_essence_filling_frame.RemainingDuration
---             if last_remaining < 0 then
---               last_remaining = 0
---             end
---           end
---         end
-    
---         if ShowCooldownDuration then
---           essence_frame.Duration = cooldown_duration
---           essence_frame.RemainingDuration = cooldown_duration - last_remaining
-          
---           essence_frame.Time:SetText(string_format("%.1f", essence_frame.RemainingDuration))
---           essence_frame.Time:Show()
---           show_cooldown = true and ShowCooldownDuration
---         end
---       else
---         essence_frame.Time:Hide()
---       end
---     end
---   end
-
---   widget_frame.CooldownDuration:SetShown(show_cooldown)
-  
---   widget_frame.LastActiveEssenceNo = active_essence_no
--- end
 
     -- Essence Filling
     -- essence_frame.EssenceFilling:Hide();
@@ -697,9 +641,9 @@ local EssenceFillingAnimationTime = 5.0
 
     -- Essence Empty - Background
     -- essence_frame.EssenceEmpty:Hide();
-local function UpdateEssencesBlizzard(self, widget_frame)
+local function UpdateEssenceBlizzard(self, widget_frame)
   local active_essence_no = UnitPower("player", self.PowerType) or 0
-  if active_essence_no == widget_frame.LastActiveEssenceNo and not widget_frame.SilentUpdate then return end
+  if active_essence_no == widget_frame.LastActiveEssenceNo and not widget_frame.ForceUpdate then return end
 
   local show_cooldown = false
 
@@ -725,13 +669,12 @@ local function UpdateEssencesBlizzard(self, widget_frame)
     else
       essence_frame.EssenceFull:Hide()
       essence_frame.EssenceEmpty:Show()
-      essence_frame.Time:Hide()
+      --essence_frame.Time:Hide()
       
       if essence_no == active_essence_no + 1 then
-        -- If there was a silent update, we just have to update the ressource UI, but not the actual cooldown
+        -- If there was a silent update, we just have to update the resource UI, but not the actual cooldown
         if active_essence_no ~= widget_frame.LastActiveEssenceNo then
           local cooldown_duration = SetEssenceCooldownDuration(widget_frame, essence_no, essence_frame)
-          widget_frame.SilentUpdate = false
 
           if not essence_frame.EssenceFull:IsShown() then 
             local animation_speed_multiplier = EssenceFillingAnimationTime / cooldown_duration;
@@ -740,6 +683,7 @@ local function UpdateEssencesBlizzard(self, widget_frame)
           end
         end
         show_cooldown = ShowCooldownDuration
+        essence_frame.Time:SetShown(show_cooldown)
 
         if not essence_frame.EssenceFull:IsShown() then 
           -- local animation_speed_multiplier = EssenceFillingAnimationTime / cooldown_duration;
@@ -773,9 +717,10 @@ local function UpdateEssencesBlizzard(self, widget_frame)
   widget_frame.CooldownDuration:SetShown(show_cooldown)
   
   widget_frame.LastActiveEssenceNo = active_essence_no
+  widget_frame.ForceUpdate = false
 end
 
-local function UpdateEssencesBlizzardWhenHidden(self, widget_frame)
+local function UpdateEssenceBlizzardWhenHidden(self, widget_frame)
   local active_essence_no = UnitPower("player", self.PowerType) or 0
   if active_essence_no == widget_frame.LastActiveEssenceNo then return end
 
@@ -789,7 +734,7 @@ local function UpdateEssencesBlizzardWhenHidden(self, widget_frame)
   widget_frame.CooldownDuration:Hide()
 
   widget_frame.LastActiveEssenceNo = active_essence_no
-  widget_frame.SilentUpdate = true
+  widget_frame.ForceUpdate = true
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -807,21 +752,18 @@ local function EventHandler(event, unitid, power_type)
     local widget = Widget
     local widget_frame = widget.WidgetFrame
     if widget_frame:IsShown() then
-      widget:UpdateUnitPower(widget_frame)
+      widget:UpdateUnitResource(widget_frame)
     end
   end
 end
 
 local function EventHandlerEvoker(event, unitid, power_type)
-  if event == "UNIT_POWER_UPDATE" and not WATCH_POWER_TYPES[power_type] then return end
-  -- UNIT_POWER_FREQUENT is only registred for Evoker, so no need to check here
-  -- if event == "UNIT_POWER_FREQUENT" and not WATCH_POWER_TYPES[power_type] then return end
-  
+  -- Only UNIT_POWER_FREQUENT is registred for Evoker, so no need to check here anything
   local plate = GetNamePlateForUnit("target")
   if plate and Widget.WidgetFrame:IsShown() then -- not necessary, prerequisite for IsShown(): plate.TPFrame.Active and
-    Widget:UpdateUnitPower(Widget.WidgetFrame)
-  elseif PlayerClass == "EVOKER" then
-    UpdateEssencesBlizzardWhenHidden(Widget, Widget.WidgetFrame)
+    Widget:UpdateUnitResource(Widget.WidgetFrame)
+  else
+    UpdateEssenceBlizzardWhenHidden(Widget, Widget.WidgetFrame)
   end
 end
 
@@ -920,30 +862,28 @@ function Widget:OnEnable()
   self:RegisterEvent("PLAYER_TARGET_CHANGED")
   self:RegisterUnitEvent("UNIT_MAXPOWER", "player")
   
-  if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
-    self:RegisterUnitEvent("UNIT_POWER_FREQUENT", "player", EventHandler)
-  else
-    -- Also processing UNIT_POWER_FREQUENT seems to reduce some lags with essence updates that are 
+  if PlayerClass == "EVOKER" then
+    -- Using UNIT_POWER_FREQUENT seems to reduce some lags with essence updates that are 
     -- otherwise happening compared to Blizzard essences (Blizzard_ClassNameplateBar uses this also)
-    if PlayerClass == "EVOKER" then
-      self:RegisterUnitEvent("UNIT_POWER_FREQUENT", "player", EventHandlerEvoker)
-      self:RegisterUnitEvent("UNIT_DISPLAYPOWER", "player", EventHandlerEvoker)
-      self:RegisterUnitEvent("UNIT_POWER_POINT_CHARGE", "player", EventHandlerEvoker)
+    self:RegisterUnitEvent("UNIT_POWER_FREQUENT", "player", EventHandlerEvoker)
+  else
+    if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
+      self:RegisterUnitEvent("UNIT_POWER_FREQUENT", "player", EventHandler)
     else
       self:RegisterUnitEvent("UNIT_POWER_UPDATE", "player", EventHandler)
       self:RegisterUnitEvent("UNIT_DISPLAYPOWER", "player", EventHandler)
       self:RegisterUnitEvent("UNIT_POWER_POINT_CHARGE", "player", EventHandler)
     end
-  end
 
-  if PlayerClass == "DRUID" then
-    self:RegisterEvent("UPDATE_SHAPESHIFT_FORM")
-    self.ShowInShapeshiftForm = (GetShapeshiftFormID() == 1)
-  elseif PlayerClass == "DEATHKNIGHT" then
-    -- Never registered for Classic, as there is no Death Knight class
-    self:RegisterEvent("RUNE_POWER_UPDATE", EventHandler)
-    if Addon.IS_WRATH_CLASSIC then
-      self:RegisterEvent("RUNE_TYPE_UPDATE", EventHandler)
+    if PlayerClass == "DRUID" then
+      self:RegisterEvent("UPDATE_SHAPESHIFT_FORM")
+      self.ShowInShapeshiftForm = (GetShapeshiftFormID() == 1)
+    elseif PlayerClass == "DEATHKNIGHT" then
+      -- Never registered for Classic, as there is no Death Knight class
+      self:RegisterEvent("RUNE_POWER_UPDATE", EventHandler)
+      if Addon.IS_WRATH_CLASSIC then
+        self:RegisterEvent("RUNE_TYPE_UPDATE", EventHandler)
+      end
     end
   end
 
@@ -955,11 +895,9 @@ function Widget:OnDisable()
   self:UnregisterEvent("PLAYER_TARGET_CHANGED")
   self:UnregisterEvent("UNIT_MAXPOWER")
   
-  if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
-    self:UnregisterEvent("UNIT_POWER_FREQUENT")
-  else
+  self:UnregisterEvent("UNIT_POWER_FREQUENT")
+  if not (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC) then
     self:UnregisterEvent("UNIT_POWER_UPDATE")
-    self:UnregisterEvent("UNIT_POWER_FREQUENT")
     self:UnregisterEvent("UNIT_DISPLAYPOWER")
     self:UnregisterEvent("UNIT_POWER_POINT_CHARGE")
   end
@@ -1025,7 +963,7 @@ function Widget:OnTargetUnitAdded(tp_frame, unit)
       widget_frame:SetPoint("CENTER", tp_frame, "CENTER", db.x, db.y)
     end
 
-    self:UpdateUnitPower(widget_frame)
+    self:UpdateUnitResource(widget_frame)
 
     widget_frame:Show()
   else
@@ -1038,21 +976,21 @@ function Widget:OnTargetUnitRemoved()
   self.WidgetFrame:Hide()
 end
 
-local function UpdateTexturePosition(texture, ressource_index)
+local function UpdateTexturePosition(texture, resource_index)
   local scale = Widget.db.Scale
   local scaled_icon_width = scale * Widget.IconWidth
   local scaled_icon_height = scale * Widget.IconHeight
   local scaled_spacing = scale * Widget.db.HorizontalSpacing
 
   texture:SetSize(scaled_icon_width, scaled_icon_height)
-  texture:SetPoint("LEFT", Widget.WidgetFrame, "LEFT", (Widget.WidgetFrame:GetWidth() / Widget.UnitPowerMax) * (ressource_index-1) + (scaled_spacing / 2), 0)
+  texture:SetPoint("LEFT", Widget.WidgetFrame, "LEFT", (Widget.WidgetFrame:GetWidth() / Widget.UnitPowerMax) * (resource_index-1) + (scaled_spacing / 2), 0)
 end
 
-local function UpdateTexture(texture, texture_path, ressource_index)
+local function UpdateTexture(texture, texture_path, resource_index)
   if Widget.db.Style == "Blizzard" then
     if Addon.IS_WRATH_CLASSIC and PlayerClass == "DEATHKNIGHT" then
       local texture_data = texture_path.RuneType
-      texture:SetTexture(texture_data[ressource_index])
+      texture:SetTexture(texture_data[resource_index])
       texture:SetAlpha(texture_data.Alpha or 1)
       texture:SetVertexColor(1, 1, 1)
       texture:SetDesaturated(texture_data.Desaturation) -- nil means no desaturation
@@ -1070,52 +1008,52 @@ local function UpdateTexture(texture, texture_path, ressource_index)
   end
 
   texture:SetTexCoord(unpack(Widget.TexCoord)) -- obj:SetTexCoord(left,right,top,bottom)
-  UpdateTexturePosition(texture, ressource_index)
+  UpdateTexturePosition(texture, resource_index)
 end
 
-local function CreateRessourceTextureStandard(widget_frame, ressource_index)
+local function CreateResourceTextureStandard(widget_frame, resource_index)
   -- Create the texture if it does not exists or it is a frame (used for Blizzard essences) - if ComboPoints texture
   -- must be created, same is true for ComboPointsOff texture
-  local ressource_texture = widget_frame.ComboPoints[ressource_index]
-  local ressource_off_texture = widget_frame.ComboPointsOff[ressource_index]
+  local resource_texture = widget_frame.ComboPoints[resource_index]
+  local resource_off_texture = widget_frame.ComboPointsOff[resource_index]
   
-  if ressource_texture then
-    ressource_texture:Hide()
-    ressource_off_texture:Hide()
-    ressource_off_texture.Time:Hide()
-  end
-
-  if not ressource_texture or ressource_texture.CreateTexture then
-    ressource_texture = widget_frame:CreateTexture(nil, "ARTWORK", nil, 0)
-    ressource_off_texture = widget_frame:CreateTexture(nil, "ARTWORK", nil, 1)
-    ressource_off_texture.Time = widget_frame:CreateFontString(nil, "ARTWORK")
-
-    -- Copy current cooldown values from previous layout
-    if widget_frame.ComboPointsOff[ressource_index] then
-      ressource_off_texture.Duration = widget_frame.ComboPointsOff[ressource_index].Duration
-      ressource_off_texture.RemainingDuration = widget_frame.ComboPointsOff[ressource_index].RemainingDuration
+  if not resource_texture or resource_texture.CreateTexture then
+    if resource_texture then
+      resource_texture:Hide()
+      resource_off_texture:Hide()
+      resource_off_texture.Time:Hide()
     end
 
-    widget_frame.ComboPoints[ressource_index] = ressource_texture
-    widget_frame.ComboPointsOff[ressource_index] = ressource_off_texture
+    resource_texture = widget_frame:CreateTexture(nil, "ARTWORK", nil, 0)
+    resource_off_texture = widget_frame:CreateTexture(nil, "ARTWORK", nil, 1)
+    resource_off_texture.Time = widget_frame:CreateFontString(nil, "ARTWORK")
+
+    -- Copy current cooldown values from previous layout
+    if widget_frame.ComboPointsOff[resource_index] then
+      resource_off_texture.Duration = widget_frame.ComboPointsOff[resource_index].Duration
+      resource_off_texture.RemainingDuration = widget_frame.ComboPointsOff[resource_index].RemainingDuration
+    end
+
+    widget_frame.ComboPoints[resource_index] = resource_texture
+    widget_frame.ComboPointsOff[resource_index] = resource_off_texture
   end
 
-  UpdateTexture(ressource_texture, Widget.Texture, ressource_index)
-  UpdateTexture(ressource_off_texture, Widget.TextureOff, ressource_index)
+  UpdateTexture(resource_texture, Widget.Texture, resource_index)
+  UpdateTexture(resource_off_texture, Widget.TextureOff, resource_index)
 end
 
-local function CreateRessourceTextureEssence(widget_frame, ressource_index)
-  local essence_frame = widget_frame.ComboPoints[ressource_index]
-  local essence_frame_off = widget_frame.ComboPointsOff[ressource_index]
-
-  if essence_frame then
-    essence_frame:Hide()    
-    essence_frame_off:Hide()
-    essence_frame_off.Time:Hide()   
-  end
+local function CreateResourceTextureEssence(widget_frame, resource_index)
+  local essence_frame = widget_frame.ComboPoints[resource_index]
+  local essence_frame_off = widget_frame.ComboPointsOff[resource_index]
 
   if not essence_frame or not essence_frame.CreateTexture then
-    essence_frame = _G.CreateFrame("Button", "EvokerResource" .. tostring(ressource_index), widget_frame, "EssencePointButtonTemplate")
+    if essence_frame then
+      essence_frame:Hide()    
+      essence_frame_off:Hide()
+      essence_frame_off.Time:Hide()   
+    end
+  
+    essence_frame = _G.CreateFrame("Button", "EvokerResource" .. tostring(resource_index), widget_frame, "EssencePointButtonTemplate")
     essence_frame.Time = essence_frame.EssenceFilling:CreateFontString(nil, "OVERLAY")
     
     -- Copy current cooldown values from previous layout
@@ -1131,11 +1069,11 @@ local function CreateRessourceTextureEssence(widget_frame, ressource_index)
     essence_frame.EssenceDepleting.AnimInOrig = essence_frame.EssenceDepleting.AnimIn
     essence_frame.EssenceDepleting.AnimIn = { Play = function() end, Stop = function() end }
 
-    widget_frame.ComboPoints[ressource_index] = essence_frame
-    widget_frame.ComboPointsOff[ressource_index] = essence_frame
+    widget_frame.ComboPoints[resource_index] = essence_frame
+    widget_frame.ComboPointsOff[resource_index] = essence_frame
   end
 
-  UpdateTexturePosition(essence_frame, ressource_index)
+  UpdateTexturePosition(essence_frame, resource_index)
 end
 
 function Widget:UpdateLayout()
@@ -1163,35 +1101,20 @@ function Widget:UpdateLayout()
     widget_frame.CooldownDuration:SetScript("OnUpdate", nil)
   end
 
-  for ressource_index = 1, self.UnitPowerMax do    
+  for resource_index = 1, self.UnitPowerMax do    
     if PlayerClass == "EVOKER" and db.Style == "Blizzard" then
-      CreateRessourceTextureEssence(widget_frame, ressource_index)
+      CreateResourceTextureEssence(widget_frame, resource_index)
     else
-      CreateRessourceTextureStandard(widget_frame, ressource_index)
+      CreateResourceTextureStandard(widget_frame, resource_index)
     end
 
     if ShowCooldownDuration then
-      Font:UpdateText(widget_frame.ComboPoints[ressource_index],  widget_frame.ComboPointsOff[ressource_index].Time, SettingsCooldown)
+      Font:UpdateText(widget_frame.ComboPoints[resource_index],  widget_frame.ComboPointsOff[resource_index].Time, SettingsCooldown)
     end
   end
 end
 
--- Do this here, not in UpdateSettings as it does not change with settings, but only with player class and WoW version
-if PlayerClass == "DEATHKNIGHT" then
-  OnUpdateCooldownDuration = OnUpdateWidgetRune
 
-  if Addon.IS_WRATH_CLASSIC then
-    GetRuneStatus = GetRuneStateWrath
-    UpdateRuneStatusActive = UpdateRuneStatusActiveWrath
-    UpdateRuneStatusInactive = UpdateRuneStatusInactiveWrath
-  else
-    GetRuneStatus = GetRuneStateMainline
-    UpdateRuneStatusActive = UpdateRuneStatusActiveMainline
-    UpdateRuneStatusInactive = UpdateRuneStatusInactiveMainline
-  end
-elseif PlayerClass == "EVOKER" then
-  OnUpdateCooldownDuration = OnUpdateWidgetEssence
-end
 
 function Widget:UpdateSettings()
   self.db = Addon.db.profile.ComboPoints
@@ -1203,44 +1126,6 @@ function Widget:UpdateSettings()
 
   -- Update widget variables, only dependent from settings and static information (like player's class)
   local texture_info = TEXTURE_INFO[self.db.Style][PlayerClass] or TEXTURE_INFO[self.db.Style]
-
-  if not (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC) then
-    ActiveSpec = _G.GetSpecialization()
-  end
-
-  if PlayerClass == "DEATHKNIGHT" then
-    if Addon.IS_WRATH_CLASSIC then
-      self.UpdateUnitPower = self.UpdateRunes
-      DeathKnightSpecColor = self.Colors.Neutral
-    else
-      self.UpdateUnitPower = self.UpdateRunesMainline
-      DeathKnightSpecColor = DEATHKNIGHT_COLORS.BySpec[ActiveSpec]
-    end
-    SettingsCooldown = self.db.RuneCooldown
-    ShowCooldownDuration = SettingsCooldown.Show
-  elseif PlayerClass == "ROGUE" then
-    -- Check for spell Echoing Reprimand: (IDs) 312954, 323547, 323560, 323558, 323559
-    local name = GetSpellInfo(323560) -- Get localized name for Echoing Reprimand
-    if GetSpellInfo(name) then
-      self.UpdateUnitPower = self.UpdateComboPointsRogueAnimacharge
-    else
-      self.UpdateUnitPower = self.UpdateComboPoints
-    end
-  elseif PlayerClass == "EVOKER" then
-    if self.db.Style == "Blizzard" then
-      --self.UpdateUnitPower = UpdateEssencesBlizzardSimple
-      self.UpdateUnitPower = UpdateEssencesBlizzard
-      --self.UpdateUnitPower = UpdateEssencesBlizzardOriginal
-    else
-      self.UpdateUnitPower = UpdateEssences
-    end
-    SettingsCooldown = self.db.EssenceCooldown
-    ShowCooldownDuration = SettingsCooldown.Show
-  else
-    self.UpdateUnitPower = self.UpdateComboPoints
-  end
-  --print ("Echoing Reprimand:", self.UpdateUnitPower == self.UpdateComboPointsRogueAnimacharge)
-
   self.TexCoord = texture_info.TexCoord
   self.IconWidth = texture_info.IconWidth
   self.IconHeight = texture_info.IconHeight
@@ -1263,17 +1148,58 @@ function Widget:UpdateSettings()
     end
   end
 
-  if PlayerClass == "ROGUE" then
-    self.Colors.AnimaCharge = colors.Animacharge
-  elseif PlayerClass == "DEATHKNIGHT" then
+  if not (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC) then
+    ActiveSpec = _G.GetSpecialization()
+  end
+
+  -- Some of this could be configured outside of UpdateSettings, as it does not change based on settings, but for easier maintenance
+  -- I am configuring everything here
+  if PlayerClass == "DEATHKNIGHT" then
+    if Addon.IS_WRATH_CLASSIC then
+      GetRuneStatus = GetRuneStateWrath
+      UpdateRuneStatusActive = UpdateRuneStatusActiveWrath
+      UpdateRuneStatusInactive = UpdateRuneStatusInactiveWrath
+      self.UpdateUnitResource = self.UpdateRunes
+      DeathKnightSpecColor = self.Colors.Neutral
+    else
+      GetRuneStatus = GetRuneStateMainline
+      UpdateRuneStatusActive = UpdateRuneStatusActiveMainline
+      UpdateRuneStatusInactive = UpdateRuneStatusInactiveMainline
+      self.UpdateUnitResource = self.UpdateRunesMainline
+      DeathKnightSpecColor = DEATHKNIGHT_COLORS.BySpec[ActiveSpec]
+    end
+    SettingsCooldown = self.db.RuneCooldown
+    ShowCooldownDuration = SettingsCooldown.Show
+    OnUpdateCooldownDuration = OnUpdateWidgetRune
+
     self.Colors.DeathRune = colors.DeathRune
+  elseif PlayerClass == "EVOKER" then
+    if self.db.Style == "Blizzard" then
+      self.UpdateUnitResource = UpdateEssenceBlizzard
+    else
+      self.UpdateUnitResource = UpdateEssence
+    end
+    SettingsCooldown = self.db.EssenceCooldown
+    ShowCooldownDuration = SettingsCooldown.Show
+    OnUpdateCooldownDuration = OnUpdateWidgetEssence
+  elseif PlayerClass == "ROGUE" then
+    -- Check for spell Echoing Reprimand: (IDs) 312954, 323547, 323560, 323558, 323559
+    local name = GetSpellInfo(323560) -- Get localized name for Echoing Reprimand
+    if GetSpellInfo(name) then
+      self.UpdateUnitResource = self.UpdateComboPointsRogueWithAnimacharge
+    else
+      self.UpdateUnitResource = self.UpdateComboPoints
+    end
+
+    self.Colors.AnimaCharge = colors.Animacharge
+  else
+    self.UpdateUnitResource = self.UpdateComboPoints
   end
 
   -- Update the widget if it was already created (not true for immediately after Reload UI or if it was never enabled
   -- in this since last Reload UI)
   if self.WidgetFrame then
     self:UpdateLayout()
-    self.WidgetFrame.SilentUpdate = true
     self:PLAYER_TARGET_CHANGED()
   end
-end
+end 
