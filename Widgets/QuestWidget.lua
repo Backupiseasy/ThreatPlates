@@ -23,9 +23,9 @@ local wipe = wipe
 
 local RequestLoadQuestByID = C_QuestLog.RequestLoadQuestByID
 local GetQuestObjectives, GetQuestInfo = C_QuestLog.GetQuestObjectives, C_QuestLog.GetInfo
-local GetQuestIDForLogIndex, GetLogIndexForQuestID = C_QuestLog.GetQuestIDForLogIndex, C_QuestLog.GetLogIndexForQuestID
-local GetQuestLogTitle, GetNumQuestLogEntries = C_QuestLog.GetQuestLogTitle, C_QuestLog.GetNumQuestLogEntries
+local GetLogIndexForQuestID, GetNumQuestLogEntries = C_QuestLog.GetLogIndexForQuestID, C_QuestLog.GetNumQuestLogEntries
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
+local C_TooltipInfo_GetUnit, TooltipSurfaceArgs = C_TooltipInfo.GetUnit, TooltipUtil.SurfaceArgs
 
 -- ThreatPlates APIs
 local PlayerName = Addon.PlayerName
@@ -37,7 +37,6 @@ local _G =_G
 -- GLOBALS: CreateFrame
 
 local InCombat = false
-local TooltipFrame = CreateFrame("GameTooltip", "ThreatPlates_Tooltip", nil, "GameTooltipTemplate")
 local ICON_COLORS = {}
 local Font
 
@@ -114,15 +113,16 @@ function IsQuestUnit(unit)
   local quest_title
   local quest_progress_player = false
 
-  -- Read quest information from tooltip. Thanks to Kib: QuestMobs AddOn by Tosaido.
-  TooltipFrame:SetOwner(WorldFrame, "ANCHOR_NONE")
-  --TooltipFrame:SetUnit(unitid)
-  TooltipFrame:SetHyperlink("unit:" .. unit.guid)
+  local tooltip_data = C_TooltipInfo_GetUnit(unit.unitid)
+  TooltipSurfaceArgs(tooltip_data)
 
-  for i = 3, TooltipFrame:NumLines() do
-    local line = _G["ThreatPlates_TooltipTextLeft" .. i]
-    local text = line:GetText()
-    local text_r, text_g, text_b = line:GetTextColor()
+  for i = 3, #tooltip_data.lines do
+    local line = tooltip_data.lines[i]
+
+    TooltipSurfaceArgs(line)
+
+    local text = line.leftText
+    local text_r, text_g, text_b = line.leftColor.r, line.leftColor.g, line.leftColor.b
 
     if text_r > 0.99 and text_g > 0.8 and text_b == 0 then
       -- A line with this color is either the quest title or a player name (if on a group quest, but always after the quest title)
@@ -680,15 +680,14 @@ function Addon:PrintQuests(command)
     local quest_title
     local quest_progress_player = false
 
-    -- Read quest information from tooltip. Thanks to Kib: QuestMobs AddOn by Tosaido.
-    TooltipFrame:SetOwner(WorldFrame, "ANCHOR_NONE")
-    --TooltipFrame:SetUnit(unitid)
-    TooltipFrame:SetHyperlink("unit:" .. UnitGUID("target"))
+    local tooltip_data = C_TooltipInfo_GetUnit("target")
+    TooltipSurfaceArgs(tooltip_data)
 
-    for i = 3, TooltipFrame:NumLines() do
-      local line = _G["ThreatPlates_TooltipTextLeft" .. i]
-      local text = line:GetText()
-      local text_r, text_g, text_b = line:GetTextColor()
+    for i = 3, #tooltip_data.lines do
+      local line = tooltip_data.lines[i]
+
+      local text = line.leftText
+      local text_r, text_g, text_b = line.leftColor.r, line.leftColor.g, line.leftColor.b
 
       Addon.Logging.Debug("=== Line:", text)
       if text_r > 0.99 and text_g > 0.82 and text_b == 0 then

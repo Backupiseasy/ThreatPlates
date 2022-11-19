@@ -249,6 +249,25 @@ local function ChatCommandDebug(cmd_list)
 		print("    IS_TBC_CLASSIC:", Addon.IS_TBC_CLASSIC)		
 		print("    IS_WRATH_CLASSIC:", Addon.IS_WRATH_CLASSIC)		
 		print("    IS_MAINLINE:", Addon.IS_MAINLINE)
+	elseif command == "tooltip" then
+		local tooltipData = C_TooltipInfo.GetUnit("target")
+
+		TooltipUtil.SurfaceArgs(tooltipData)
+
+		for _, line in ipairs(tooltipData.lines) do
+				TooltipUtil.SurfaceArgs(line)
+		end
+
+		-- The above SurfaceArgs calls are required to assign values to the
+		-- 'type', 'guid', and 'leftText' fields seen below.
+
+		print("Tooltip Type: ", tooltipData.type)
+		print("Unit GUID: ", tooltipData.guid)
+		print("Unit Name: ", tooltipData.lines[1].leftText)
+		print("Unit Info: ", tooltipData.lines[2].leftText)
+		print("Unit Faction: ", tooltipData.lines[3].leftText)
+
+		DevTools_Dump({ tooltipData.lines[4] })
 	else
 		Addon.Logging.Error(L["Unknown option: "] .. command)
 		PrintHelp()
