@@ -1,5 +1,11 @@
 Changes since tag 1.0.3
 
+commit e685cd9babf607df8214d405dad59de878687b65
+Author: Benjamin Staneck <staneck@gmail.com>
+Date:   Fri Nov 11 02:24:50 2022 +0100
+
+    Create LICENSE.md
+
 commit 357b94474886151e07572cc705c260c6c40302c3
 Author: Buds <matthieu.saintaubin@gmail.com>
 Date:   Wed Sep 7 18:19:38 2022 +0200
