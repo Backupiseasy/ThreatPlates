@@ -1,7 +1,7 @@
 local L = LibStub("AceLocale-3.0"):NewLocale("TidyPlatesThreat", "ruRU", false)
 if not L then return end
 
-L["  /tptpdps       Toggles DPS/Healing threat plates"] = "/tptpdps переключение Урон/Лечение таблички с угрозами"
+L["  /tptpdps       Toggles DPS/Healing threat plates"] = "/tptpdps переключение Урон/Лечение "
 L["  /tptpol        Toggles nameplate overlapping"] = "/tptpol переключить nameplates наложением"
 --[[Translation missing --]]
 L["  /tptptank      Toggles Tank threat plates"] = "  /tptptank      Toggles Tank threat plates"
@@ -194,6 +194,8 @@ L["Arrow"] = "Стрелка"
 L["Arrow (Legacy)"] = "Arrow (Legacy)"
 L["Art Options"] = "Настройки артефакта"
 --[[Translation missing --]]
+L["Artwork"] = "Artwork"
+--[[Translation missing --]]
 L["Attempt to register script for unknown WoW event \"%s\""] = "Attempt to register script for unknown WoW event \"%s\""
 --[[Translation missing --]]
 L["Attempt to register script for unknown WoW event '%s'"] = "Attempt to register script for unknown WoW event '%s'"
@@ -203,6 +205,8 @@ L["Aura: "] = "Аура:"
 L["Auras"] = "Ауры"
 L["Auras (Name or ID)"] = "Ауры (Имя или ИД)"
 L["Auras, Healthbar"] = "Ауры, Плашка здоровья"
+--[[Translation missing --]]
+L["Authors"] = "Authors"
 --[[Translation missing --]]
 L["Auto Sizing"] = "Auto Sizing"
 --[[Translation missing --]]
@@ -297,6 +301,10 @@ L["Class Color"] = "Class Color"
 L["Class Color for Players"] = "Class Color for Players"
 L["Class Icon"] = "Значок класса"
 --[[Translation missing --]]
+L["Clean"] = "Clean"
+--[[Translation missing --]]
+L["Clean Border"] = "Clean Border"
+--[[Translation missing --]]
 L[ [=[Clear and easy to use threat-reactive nameplates.
 
 Current version: ]=] ] = [=[Clear and easy to use threat-reactive nameplates.
@@ -325,11 +333,15 @@ L["Combo Points"] = "Серия приёмов"
 L["Configuration Mode"] = "Режим настройки"
 --[[Translation missing --]]
 L["Controls the rate at which nameplate animates into their target locations [0.0-1.0]."] = "Controls the rate at which nameplate animates into their target locations [0.0-1.0]."
+--[[Translation missing --]]
+L["Cooldown"] = "Cooldown"
 L["Cooldown Spiral"] = "Спиралевидное отображение времени восстановления"
 L["Copy"] = "Копировать"
 L["Creation"] = "Создание"
 --[[Translation missing --]]
 L["Crescent"] = "Crescent"
+--[[Translation missing --]]
+L["Crest"] = "Crest"
 L["Crowd Control"] = "Групповой контроль"
 L["Curse"] = "Проклятие"
 L["Custom"] = "Настроить"
@@ -512,6 +524,10 @@ L["Event Name"] = "Event Name"
 L["Events with Script"] = "Events with Script"
 L["Everything"] = "Всё"
 --[[Translation missing --]]
+L["Evoker"] = "Evoker"
+--[[Translation missing --]]
+L["Evoker Essence Cooldown"] = "Evoker Essence Cooldown"
+--[[Translation missing --]]
 L["Exchange"] = "Exchange"
 --[[Translation missing --]]
 L["Experience"] = "Experience"
@@ -532,6 +548,8 @@ L["Fading"] = "Затухание"
 --[[Translation missing --]]
 L["Failed to migrate the imported profile to the current settings format because of an internal error. Please report this issue at the Threat Plates homepage at CurseForge: "] = "Failed to migrate the imported profile to the current settings format because of an internal error. Please report this issue at the Threat Plates homepage at CurseForge: "
 L["Fanged Pit Viper"] = "Fanged Pit Viper"
+--[[Translation missing --]]
+L["FAQ"] = "FAQ"
 --[[Translation missing --]]
 L["Filter"] = "Filter"
 L["Filter by Spell"] = "Фильтр по заклинанию"
@@ -557,6 +575,8 @@ L["Foreground Texture"] = "Текстура переднего плана"
 L["Format"] = "Формат"
 L["Four"] = "Четыри"
 L["Frame Order"] = "Порядок рамки"
+--[[Translation missing --]]
+L["Frequently Asked Questions"] = "Frequently Asked Questions"
 L["Friendly & Neutral Units"] = "Дружественные и нейтральные цели"
 L["Friendly Casting"] = "Дружественный каст"
 L["Friendly Name Color"] = "Дружественный цвет имени"
@@ -995,6 +1015,8 @@ L["Sets your role to DPS."] = "Sets your role to DPS."
 L["Sets your role to tanking."] = "Sets your role to tanking."
 L["Sets your spec "] = "Выбрать вашу специализацию"
 --[[Translation missing --]]
+L["Seven"] = "Seven"
+--[[Translation missing --]]
 L["Shadow"] = "Shadow"
 L["Shadow Fiend"] = "Shadow Fiend"
 L["Shadowy Apparition"] = "Теневой призрак"
@@ -1392,6 +1414,8 @@ L["Threat Detection"] = "Threat Detection"
 L["Threat Detection Heuristic"] = "Threat Detection Heuristic"
 L["Threat Glow"] = "Свечение угрозы"
 --[[Translation missing --]]
+L["Threat Plates is currently maintained by Backup (CurseForge). It was originally written by Suicidal Katt (CurseForge)."] = "Threat Plates is currently maintained by Backup (CurseForge). It was originally written by Suicidal Katt (CurseForge)."
+--[[Translation missing --]]
 L["Threat Plates Script Editor"] = "Threat Plates Script Editor"
 L["Threat System"] = "Система угрозы"
 L["Threat Table"] = "Таблица угроз"
@@ -1425,9 +1449,13 @@ L["Totem Scale"] = "Масштаб тотема"
 L["Totem Transparency"] = "Прозрачность тотема"
 L["Totems"] = "Тотемы"
 --[[Translation missing --]]
+L["Translators"] = "Translators"
+--[[Translation missing --]]
 L["Transliterate Cyrillic Letters"] = "Transliterate Cyrillic Letters"
 L["Transparency"] = "Прозрачность"
 L["Transparency & Scaling"] = "Прозрачность & Масштабирование "
+--[[Translation missing --]]
+L["Transparent"] = "Transparent"
 L["Treant"] = "Treant"
 --[[Translation missing --]]
 L["Trigger"] = "Trigger"
@@ -1541,6 +1569,8 @@ L["Value Format"] = "Value Format"
 --[[Translation missing --]]
 L["Value Type"] = "Value Type"
 L["Venomous Snake"] = "Venomous Snake"
+--[[Translation missing --]]
+L["Version"] = "Version"
 L["Vertical Align"] = "Вертикальное выравнивание"
 L["Vertical Alignment"] = "Вертикальное выравнивание"
 L["Vertical Offset"] = "Вертикальное смещение"
@@ -1564,6 +1594,10 @@ L["With Pet"] = "With Pet"
 L["Word Wrap"] = "Word Wrap"
 --[[Translation missing --]]
 L["World Boss"] = "World Boss"
+--[[Translation missing --]]
+L["WoW Flat"] = "WoW Flat"
+--[[Translation missing --]]
+L["WoW Round"] = "WoW Round"
 L["X"] = "X"
 L["Y"] = "Y"
 L["You can access the "] = "Вы можете получить доступ к"
