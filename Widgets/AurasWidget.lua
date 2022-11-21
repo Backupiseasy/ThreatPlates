@@ -572,6 +572,7 @@ local CROWD_CONTROL_SPELLS_WRATH_CLASSIC = {
   -- Shaman
   ---------------------------------------------------------------------------------------------------
 
+  [51514] = LOC_POLYMORPH,      -- Hex (Frog) (Blizzard)
   [8056] = PC_SNARE,                       -- Frost Shock
     [8058] = PC_SNARE,                       -- Rank 2
     [10472] = PC_SNARE,                      -- Rank 3
@@ -579,7 +580,9 @@ local CROWD_CONTROL_SPELLS_WRATH_CLASSIC = {
     [25464] = PC_SNARE,                      -- Rank 5
     [49235] = PC_SNARE,                      -- Rank 6
     [49236] = PC_SNARE,                      -- Rank 7
-
+  [3600] = PC_SNARE,            -- Earthbind Totem
+  [64695] = PC_ROOT,            -- Earthgrab Totem (Blizzard)
+  
 
   ---------------------------------------------------------------------------------------------------
   -- Warlock
@@ -829,14 +832,11 @@ local CROWD_CONTROL_SPELLS_TBC_CLASSIC = {
   -- Shaman
   ---------------------------------------------------------------------------------------------------
 
-  [51514] = LOC_POLYMORPH,      -- Hex (Frog) (Blizzard)
   [8056] = PC_SNARE,            -- Frost Shock
-    [8058] = PC_SNARE,            -- Rank 2
-    [10472] = PC_SNARE,           -- Rank 3
-    [10473] = PC_SNARE,           -- Rank 4
-    [25464] = PC_SNARE,           -- Rank 5
-  [3600] = PC_SNARE,            -- Earthbind Totem
-  [64695] = PC_ROOT,            -- Earthgrab Totem (Blizzard)
+  [8058] = PC_SNARE,              -- Rank 2
+  [10472] = PC_SNARE,             -- Rank 3
+  [10473] = PC_SNARE,             -- Rank 4
+  [25464] = PC_SNARE,             -- Rank 5
 
 
   ---------------------------------------------------------------------------------------------------
