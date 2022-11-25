@@ -11,10 +11,9 @@ local Widget = ((Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLAS
 ---------------------------------------------------------------------------------------------------
 
 -- Lua APIs
-local string, tonumber, next, pairs, ipairs = string, tonumber, next, pairs, ipairs
+local string, tonumber, pairs = string, tonumber, pairs
 
 -- WoW APIs
-local WorldFrame = WorldFrame
 local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
 local UnitName, UnitIsUnit = UnitName, UnitIsUnit
 local UnitExists = UnitExists
@@ -25,7 +24,7 @@ local RequestLoadQuestByID = C_QuestLog.RequestLoadQuestByID
 local GetQuestObjectives, GetQuestInfo = C_QuestLog.GetQuestObjectives, C_QuestLog.GetInfo
 local GetLogIndexForQuestID, GetNumQuestLogEntries = C_QuestLog.GetLogIndexForQuestID, C_QuestLog.GetNumQuestLogEntries
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
-local C_TooltipInfo_GetUnit, TooltipSurfaceArgs = C_TooltipInfo.GetUnit, TooltipUtil.SurfaceArgs
+local C_TooltipInfo_GetUnit, TooltipSurfaceArgs = C_TooltipInfo and C_TooltipInfo.GetUnit, TooltipUtil and TooltipUtil.SurfaceArgs
 
 -- ThreatPlates APIs
 local PlayerName = Addon.PlayerName

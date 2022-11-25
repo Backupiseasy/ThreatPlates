@@ -18,7 +18,7 @@ local UnitName = UnitName
 local UNIT_LEVEL_TEMPLATE = UNIT_LEVEL_TEMPLATE
 local GetGuildInfo = GetGuildInfo
 local UnitName = UnitName
-local C_TooltipInfo_GetUnit, TooltipSurfaceArgs = C_TooltipInfo.GetUnit, TooltipUtil.SurfaceArgs
+local C_TooltipInfo_GetUnit, TooltipSurfaceArgs = C_TooltipInfo and C_TooltipInfo.GetUnit, TooltipUtil and TooltipUtil.SurfaceArgs
 
 -- ThreatPlates APIs
 local RGB = ThreatPlates.RGB
@@ -41,6 +41,32 @@ local COLOR_ROLE = RGB(255, 255, 255, .7)
 local COLOR_GUILD = RGB(178, 178, 229, .7)
 
 local UnitSubtitles = {}
+
+if not Addon.IS_MAINLINE then
+  local ScannerName = "ThreatPlates_Tooltip_Subtext"
+  local TooltipScanner = CreateFrame( "GameTooltip", ScannerName , nil, "GameTooltipTemplate" ) -- Tooltip name cannot be nil
+  TooltipScanner:SetOwner( WorldFrame, "ANCHOR_NONE" )
+
+  local TooltipScannerData = {
+    lines = {
+      [1] = {},
+      [2] = {},
+    }
+  }
+
+  -- Compatibility functions for tooltips in WoW Classic
+  C_TooltipInfo_GetUnit = function(unitid)
+    TooltipScanner:ClearLines()
+		TooltipScanner:SetUnit(unitid)
+
+    TooltipScannerData.lines[1].leftText = _G[ScannerName.."TextLeft1"]:GetText()
+    TooltipScannerData.lines[2].leftText = _G[ScannerName.."TextLeft2"]:GetText()
+
+    return TooltipScannerData
+  end
+
+  TooltipSurfaceArgs = function() end
+end
 
 ---------------------------------------------------------------------------------------------------
 -- Cached configuration settings
