@@ -1131,7 +1131,7 @@ local PLayerIsInInstance = false
 ---------------------------------------------------------------------------------------------------
 -- Cached configuration settings
 ---------------------------------------------------------------------------------------------------
-local HideOmniCC, ShowDuration
+local HideOmniCC, ShowDuration, SortFunction
 local AuraHighlightEnabled, AuraHighlightStart, AuraHighlightStop, AuraHighlightStopPrevious, AuraHighlightOffset
 local AuraHighlightColor = { 0, 0, 0, 0 }
 local EnabledForStyle = {}
@@ -1382,45 +1382,68 @@ local function AuraSortFunctionZtoA(a, b)
   return a.priority > b.priority
 end
 
+-- For auras without duration duration and expirationTime are 0, so sorting by TimeLeft, Duration, and Creation
+-- does not work in that case. We will just sort by name for these auras
 local function AuraSortFunctionNumAscending(a, b)
   if a.duration == 0 then
-    return false
+    if b.duration == 0 then
+      return a.name < b.name
+    else
+      return false
+    end
   elseif b.duration == 0 then
-    return true
+    if a.duration == 0 then
+      return a.name < b.name
+    else
+      return true
+    end
+  else
+    return a.priority < b.priority
   end
-
-  return a.priority < b.priority
 end
 
 local function AuraSortFunctionNumDescending(a, b)
   if a.duration == 0 then
-    return true
+    if b.duration == 0 then
+      return a.name > b.name
+    else
+      return true
+    end
   elseif b.duration == 0 then
-    return false
+    if a.duration == 0 then
+      return a.name > b.name
+    else
+      return false
+    end
+  else
+    return a.priority > b.priority
   end
-
-  return a.priority > b.priority
 end
 
 local SORT_FUNCTIONS = {
-  Alphabetical = {
+  None = nil,
+  AtoZ = {
     Default = AuraSortFunctionAtoZ,
     Reverse = AuraSortFunctionZtoA,
   },
-  Numerical = {
+  TimeLeft = {
     Default = AuraSortFunctionNumAscending,
     Reverse = AuraSortFunctionNumDescending,
-  }
+  },
+  Duration = {
+    Default = AuraSortFunctionNumAscending,
+    Reverse = AuraSortFunctionNumDescending,
+  },
+  Creation = {
+    Default = AuraSortFunctionNumAscending,
+    Reverse = AuraSortFunctionNumDescending,
+  },
 }
 
 local function SortAurasByPriority(unit_auras)
-  local db = Widget.db
-  if #unit_auras == 0 or db.SortOrder == "None" then return end 
-
-  --sort(unit_auras, SORT_FUNCTIONS[db.SortOrder == "AtoZ" and "Alphabetical" or "Numerical"][db.SortReverse and "Reverse" or "Default"])
-  local sort_order = db.SortOrder == "AtoZ" and "Alphabetical" or "Numerical"
-  local sort_reverse = db.SortReverse and "Reverse" or "Default"
-  sort(unit_auras, SORT_FUNCTIONS[sort_order][sort_reverse])
+  if #unit_auras >= 0 and SortFunction then
+    sort(unit_auras, SortFunction)
+  end
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -3206,6 +3229,13 @@ function Widget:UpdateSettings()
   EnabledForStyle["unique"] = self.db.ON
   EnabledForStyle["etotem"] = false
   EnabledForStyle["empty"] = false
+
+  local sort_function = SORT_FUNCTIONS[self.db.SortOrder]
+  if sort_function then  
+    SortFunction = sort_function[self.db.SortReverse and "Reverse" or "Default"]
+  else
+    SortFunction = nil
+  end
 end
 
 ---------------------------------------------------------------------------------------------------
