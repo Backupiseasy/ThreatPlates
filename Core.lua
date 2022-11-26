@@ -287,16 +287,11 @@ function Addon:CheckForFirstStartUp()
     Addon.db.char.welcome = true
 
     if not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC and not Addon.IS_WRATH_CLASSIC then
-      local Welcome = L["|cff89f559Welcome to |r|cff89f559Threat Plates!\nThis is your first time using Threat Plates and you are a(n):\n|r|cff"]..t.HCC[Addon.PlayerClass]..Addon:SpecName().." "..UnitClass("player").."|r|cff89F559.|r\n"
-
       -- initialize roles for all available specs (level > 10) or set to default (dps/healing)
       for index=1, GetNumSpecializations() do
         local id, spec_name, description, icon, background, role = GetSpecializationInfo(index)
         Addon:SetRole(t.SPEC_ROLES[Addon.PlayerClass][index], index)
       end
-
-      Addon.Logging.Info(Welcome..L["|cff89f559You are currently in your "]..Addon:RoleText()..L["|cff89f559 role.|r"])
-      Addon.Logging.Info(L["|cff89f559Additional options can be found by typing |r'/tptp'|cff89F559.|r"])
     end
 
     local new_version = tostring(t.Meta("version"))

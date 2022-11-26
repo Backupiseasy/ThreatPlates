@@ -18,6 +18,7 @@ local UnitName = UnitName
 local UNIT_LEVEL_TEMPLATE = UNIT_LEVEL_TEMPLATE
 local GetGuildInfo = GetGuildInfo
 local UnitName = UnitName
+local C_TooltipInfo_GetUnit, TooltipSurfaceArgs = C_TooltipInfo and C_TooltipInfo.GetUnit, TooltipUtil and TooltipUtil.SurfaceArgs
 
 -- ThreatPlates APIs
 local RGB = ThreatPlates.RGB
@@ -40,9 +41,32 @@ local COLOR_ROLE = RGB(255, 255, 255, .7)
 local COLOR_GUILD = RGB(178, 178, 229, .7)
 
 local UnitSubtitles = {}
-local ScannerName = "ThreatPlates_Tooltip_Subtext"
-local TooltipScanner = CreateFrame( "GameTooltip", ScannerName , nil, "GameTooltipTemplate" ) -- Tooltip name cannot be nil
-TooltipScanner:SetOwner( WorldFrame, "ANCHOR_NONE" )
+
+if not Addon.IS_MAINLINE then
+  local ScannerName = "ThreatPlates_Tooltip_Subtext"
+  local TooltipScanner = CreateFrame( "GameTooltip", ScannerName , nil, "GameTooltipTemplate" ) -- Tooltip name cannot be nil
+  TooltipScanner:SetOwner( WorldFrame, "ANCHOR_NONE" )
+
+  local TooltipScannerData = {
+    lines = {
+      [1] = {},
+      [2] = {},
+    }
+  }
+
+  -- Compatibility functions for tooltips in WoW Classic
+  C_TooltipInfo_GetUnit = function(unitid)
+    TooltipScanner:ClearLines()
+		TooltipScanner:SetUnit(unitid)
+
+    TooltipScannerData.lines[1].leftText = _G[ScannerName.."TextLeft1"]:GetText()
+    TooltipScannerData.lines[2].leftText = _G[ScannerName.."TextLeft2"]:GetText()
+
+    return TooltipScannerData
+  end
+
+  TooltipSurfaceArgs = function() end
+end
 
 ---------------------------------------------------------------------------------------------------
 -- Cached configuration settings
@@ -57,40 +81,36 @@ local function GetUnitSubtitle(unit)
 
 	--local guid = UnitGUID(unit.unitid)
 	local name = unit.name
-	local subTitle = UnitSubtitles[name]
+	local subtitle = UnitSubtitles[name]
 
-	if not subTitle then
-		TooltipScanner:ClearLines()
-		TooltipScanner:SetUnit(unit.unitid)
+	if not subtitle then
+		local tooltip_data = C_TooltipInfo_GetUnit(unit.unitid)
+		TooltipSurfaceArgs(tooltip_data)
+    TooltipSurfaceArgs(tooltip_data.lines[1])
+    TooltipSurfaceArgs(tooltip_data.lines[2])
 
-		local TooltipTextLeft1 = _G[ScannerName.."TextLeft1"]
-		local TooltipTextLeft2 = _G[ScannerName.."TextLeft2"]
-		--local TooltipTextLeft3 = _G[ScannerName.."TextLeft3"]
-		--local TooltipTextLeft4 = _G[ScannerName.."TextLeft4"]
-
-		name = TooltipTextLeft1:GetText()
+    name = tooltip_data.lines[1].leftText
 
 		if name then name = gsub( gsub( (name), "|c........", "" ), "|r", "" ) else return end	-- Strip color escape sequences: "|c"
 		if name ~= UnitName(unit.unitid) then return end	-- Avoid caching information for the wrong unit
 
+		-- Tooltip Format Priority: Faction, Description, Level
+		local tooltip_subtitle = tooltip_data.lines[2].leftText or ""
 
-		-- Tooltip Format Priority:  Faction, Description, Level
-		local toolTipText = TooltipTextLeft2:GetText() or ""
-
-		if string.match(toolTipText, UNIT_LEVEL_TEMPLATE) then
-			subTitle = ""
+		if string.match(tooltip_subtitle, UNIT_LEVEL_TEMPLATE) then
+			subtitle = ""
 		else
-			subTitle = toolTipText
+			subtitle = tooltip_subtitle
 		end
-
-		UnitSubtitles[name] = subTitle
+    
+		UnitSubtitles[name] = subtitle
 	end
 
 	-- Maintaining a cache allows us to avoid the hit
-	if subTitle == "" then
+	if subtitle == "" then
 		return nil
 	else
-		return subTitle
+		return subtitle
 	end
 end
 

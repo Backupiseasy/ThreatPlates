@@ -206,6 +206,8 @@ L["Arrow"] = "Arrow"
 L["Arrow (Legacy)"] = "Arrow (Legacy)"
 L["Art Options"] = "艺术设置"
 --[[Translation missing --]]
+L["Artwork"] = "Artwork"
+--[[Translation missing --]]
 L["Attempt to register script for unknown WoW event \"%s\""] = "Attempt to register script for unknown WoW event \"%s\""
 --[[Translation missing --]]
 L["Attempt to register script for unknown WoW event '%s'"] = "Attempt to register script for unknown WoW event '%s'"
@@ -218,6 +220,8 @@ L["Auras"] = "光环"
 --[[Translation missing --]]
 L["Auras (Name or ID)"] = "Auras (Name or ID)"
 L["Auras, Healthbar"] = "光环，血条"
+--[[Translation missing --]]
+L["Authors"] = "Authors"
 --[[Translation missing --]]
 L["Auto Sizing"] = "Auto Sizing"
 --[[Translation missing --]]
@@ -319,6 +323,10 @@ L["Class Color"] = "Class Color"
 --[[Translation missing --]]
 L["Class Color for Players"] = "Class Color for Players"
 L["Class Icon"] = "职业图标"
+--[[Translation missing --]]
+L["Clean"] = "Clean"
+--[[Translation missing --]]
+L["Clean Border"] = "Clean Border"
 L[ [=[Clear and easy to use threat-reactive nameplates.
 
 Current version: ]=] ] = [=[简单好用又清楚，能与仇恨值互动的血条。
@@ -346,11 +354,15 @@ L["Combat"] = "战斗"
 L["Combo Points"] = "连击点"
 L["Configuration Mode"] = "设定模式"
 L["Controls the rate at which nameplate animates into their target locations [0.0-1.0]."] = "血条移动到最终位置的动画速度 [0.0-1.0]。"
+--[[Translation missing --]]
+L["Cooldown"] = "Cooldown"
 L["Cooldown Spiral"] = "冷却漩涡"
 L["Copy"] = "复制"
 L["Creation"] = "创建"
 --[[Translation missing --]]
 L["Crescent"] = "Crescent"
+--[[Translation missing --]]
+L["Crest"] = "Crest"
 L["Crowd Control"] = "控场"
 L["Curse"] = "诅咒"
 L["Custom"] = "自定义"
@@ -517,6 +529,10 @@ L["Event Name"] = "Event Name"
 L["Events with Script"] = "Events with Script"
 L["Everything"] = "全部"
 --[[Translation missing --]]
+L["Evoker"] = "Evoker"
+--[[Translation missing --]]
+L["Evoker Essence Cooldown"] = "Evoker Essence Cooldown"
+--[[Translation missing --]]
 L["Exchange"] = "Exchange"
 --[[Translation missing --]]
 L["Experience"] = "Experience"
@@ -539,6 +555,8 @@ L["Fading"] = "淡出"
 --[[Translation missing --]]
 L["Failed to migrate the imported profile to the current settings format because of an internal error. Please report this issue at the Threat Plates homepage at CurseForge: "] = "Failed to migrate the imported profile to the current settings format because of an internal error. Please report this issue at the Threat Plates homepage at CurseForge: "
 L["Fanged Pit Viper"] = "毒牙坑道蛇"
+--[[Translation missing --]]
+L["FAQ"] = "FAQ"
 --[[Translation missing --]]
 L["Filter"] = "Filter"
 L["Filter by Spell"] = "技能过滤"
@@ -564,6 +582,8 @@ L["Foreground Texture"] = "前景纹理"
 L["Format"] = "样式"
 L["Four"] = "四"
 L["Frame Order"] = "框架顺序"
+--[[Translation missing --]]
+L["Frequently Asked Questions"] = "Frequently Asked Questions"
 L["Friendly & Neutral Units"] = "友方 & 中立单位"
 L["Friendly Casting"] = "友方施法"
 L["Friendly Name Color"] = "友方名字颜色"
@@ -950,6 +970,8 @@ L["Sets your role to DPS."] = "Sets your role to DPS."
 --[[Translation missing --]]
 L["Sets your role to tanking."] = "Sets your role to tanking."
 L["Sets your spec "] = "设置你的天赋"
+--[[Translation missing --]]
+L["Seven"] = "Seven"
 L["Shadow"] = "阴影"
 L["Shadow Fiend"] = "暗影魔"
 L["Shadowy Apparition"] = "暗影幻灵"
@@ -1261,6 +1283,8 @@ L["Threat Detection"] = "Threat Detection"
 L["Threat Detection Heuristic"] = "Threat Detection Heuristic"
 L["Threat Glow"] = "仇恨值发光效果"
 --[[Translation missing --]]
+L["Threat Plates is currently maintained by Backup (CurseForge). It was originally written by Suicidal Katt (CurseForge)."] = "Threat Plates is currently maintained by Backup (CurseForge). It was originally written by Suicidal Katt (CurseForge)."
+--[[Translation missing --]]
 L["Threat Plates Script Editor"] = "Threat Plates Script Editor"
 L["Threat System"] = "仇恨系统"
 --[[Translation missing --]]
@@ -1292,9 +1316,13 @@ L["Totem Scale"] = "图腾缩放"
 L["Totem Transparency"] = "图腾透明度"
 L["Totems"] = "图腾"
 --[[Translation missing --]]
+L["Translators"] = "Translators"
+--[[Translation missing --]]
 L["Transliterate Cyrillic Letters"] = "Transliterate Cyrillic Letters"
 L["Transparency"] = "透明"
 L["Transparency & Scaling"] = "透明度 & 缩放大小"
+--[[Translation missing --]]
+L["Transparent"] = "Transparent"
 L["Treant"] = "树人"
 --[[Translation missing --]]
 L["Trigger"] = "Trigger"
@@ -1377,6 +1405,8 @@ L["Value Format"] = "Value Format"
 --[[Translation missing --]]
 L["Value Type"] = "Value Type"
 L["Venomous Snake"] = "剧毒蛇"
+--[[Translation missing --]]
+L["Version"] = "Version"
 L["Vertical Align"] = "垂直定位"
 L["Vertical Alignment"] = "垂直对齐"
 L["Vertical Offset"] = "垂直位置"
@@ -1400,6 +1430,10 @@ L["With Pet"] = "With Pet"
 L["Word Wrap"] = "Word Wrap"
 --[[Translation missing --]]
 L["World Boss"] = "World Boss"
+--[[Translation missing --]]
+L["WoW Flat"] = "WoW Flat"
+--[[Translation missing --]]
+L["WoW Round"] = "WoW Round"
 L["X"] = "X轴"
 L["Y"] = "Y轴"
 L["You can access the "] = "你可以进入"
