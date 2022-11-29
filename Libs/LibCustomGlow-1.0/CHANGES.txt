@@ -1,5 +1,17 @@
 Changes since tag 1.0.3
 
+commit d830e939610a899cbc2d809d07a04c4aee9b2bc5
+Author: Benjamin Staneck <staneck@gmail.com>
+Date:   Mon Nov 28 12:53:41 2022 +0100
+
+    Delete LICENSE.md
+
+commit 3b983444f80376002041f72b2c14849b769e174e
+Author: Benjamin Staneck <staneck@gmail.com>
+Date:   Mon Nov 28 12:48:48 2022 +0100
+
+    Create LICENSE
+
 commit e685cd9babf607df8214d405dad59de878687b65
 Author: Benjamin Staneck <staneck@gmail.com>
 Date:   Fri Nov 11 02:24:50 2022 +0100
