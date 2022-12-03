@@ -338,6 +338,7 @@ local CROWD_CONTROL_SPELLS_RETAIL = {
   -- [6343] = PC_SNARE,        -- Thunder Clap
   -- [199042] = LOC_STUN,      -- Thunderstruck (PvP, Blizzard) -- Removed as CC as its uptime is to high.
   [199085] = LOC_STUN,      -- Warpath (PvP, Blizzard)
+  [385954] = LOC_STUN,      -- Shield Charge
 
   ---------------------------------------------------------------------------------------------------
   -- Monk
