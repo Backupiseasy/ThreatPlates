@@ -546,7 +546,7 @@ local CROWD_CONTROL_SPELLS_WRATH_CLASSIC = {
     [9485] = LOC_INCAPACITATE,               -- Rank 2
     [10955] = LOC_INCAPACITATE,              -- Rank 3
   [15487] = LOC_SLEEP,                     -- Silence
-
+  [64044] = LOC_STUN,                      -- Psychic Horror
 
   ---------------------------------------------------------------------------------------------------
   -- Rogue
@@ -1474,6 +1474,7 @@ local function ProcessAllUnitAurasClassic(unitid, effect)
       aura.auraInstanceID = i
 
       unit_auras[#unit_auras + 1] = aura
+      --Addon.Logging.Debug("Aura:", aura.name, "=> ID:", aura.spellId)
     else
       break
     end
@@ -1503,13 +1504,14 @@ else
           aura.isStealable, aura.nameplateShowPersonal, aura.spellId, aura.canApplyAura, aura.isBossAura, _, aura.nameplateShowAll =
           UnitAuraBySlot(unitid, slots[i])
       
-        local unit_aura_info = GetAuraDataBySlot(unitid, slots[i])   
-        if unit_aura_info then
-          aura.auraInstanceID = unit_aura_info.auraInstanceID
-          aura.UnitAuraInfo = unit_aura_info
-        end
-
-        unit_auras[#unit_auras + 1] = aura
+          local unit_aura_info = GetAuraDataBySlot(unitid, slots[i])   
+          if unit_aura_info then
+            aura.auraInstanceID = unit_aura_info.auraInstanceID
+            aura.UnitAuraInfo = unit_aura_info
+          end
+          
+          unit_auras[#unit_auras + 1] = aura
+          --Addon.Logging.Debug("Aura:", aura.name, "=> ID:", aura.spellId)
       end
     until continuation_token == nil
 
