@@ -458,8 +458,9 @@ local CROWD_CONTROL_SPELLS_WRATH_CLASSIC = {
     [49011] = LOC_SLEEP,                     -- Rank 5
     [49012] = LOC_SLEEP,                     -- Rank 6
   [3355] = LOC_INCAPACITATE,               -- Freezing Trap Effect
-    [14308] = LOC_SLEEP,                     -- Rank 2
-    [14309] = LOC_SLEEP,                     -- Rank 3
+    [14308] = LOC_INCAPACITATE,              -- Rank 2
+    [14309] = LOC_INCAPACITATE,              -- Rank 3
+  [60210] = LOC_INCAPACITATE,              -- Freezing Arrow
 
   ---------------------------------------------------------------------------------------------------
   -- Mage
@@ -1474,7 +1475,7 @@ local function ProcessAllUnitAurasClassic(unitid, effect)
       aura.auraInstanceID = i
 
       unit_auras[#unit_auras + 1] = aura
-      --Addon.Logging.Debug("Aura:", aura.name, "=> ID:", aura.spellId)
+      Addon.Logging.Debug("Aura:", aura.name, "=> ID:", aura.spellId)
     else
       break
     end
