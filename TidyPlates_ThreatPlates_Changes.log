@@ -2,6 +2,7 @@
 11.1.5 (2022-11-29)
 ------------------------------------------------------
 * Added Psychic Horror (Priest) to Auras widget as CC aura for Wrath Classic.
+* Fixed a bug where the icon for Earthgrab Totem was not shown [Commen #6705].
 
 ------------------------------------------------------
 11.1.4 (2022-11-28)
