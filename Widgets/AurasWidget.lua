@@ -1475,7 +1475,7 @@ local function ProcessAllUnitAurasClassic(unitid, effect)
       aura.auraInstanceID = i
 
       unit_auras[#unit_auras + 1] = aura
-      Addon.Logging.Debug("Aura:", aura.name, "=> ID:", aura.spellId)
+      -- Addon.Logging.Debug("Aura:", aura.name, "=> ID:", aura.spellId)
     else
       break
     end
