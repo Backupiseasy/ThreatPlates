@@ -1,7 +1,7 @@
 ﻿------------------------------------------------------
-11.1.5 (2022-11-29)
+11.1.5 (2022-12-22)
 ------------------------------------------------------
-* Added Psychic Horror (Priest) to Auras widget as CC aura for Wrath Classic.
+* Added Psychic Horror (Priest) and Freezing Arrow (Hunter) to Auras widget as CC aura for Wrath Classic.
 * Fixed a bug where the icon for Earthgrab Totem was not shown [Commen #6705].
 
 ------------------------------------------------------
