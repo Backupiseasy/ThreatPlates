@@ -1,3 +1,4 @@
 # @project-version@ (@build-time@)
 
-* Fixed a Lua error with tooltip scanning for unit roles, levels or guilds that occured when there was no valid tooltip data [Issue #596].
+* Added Psychic Horror (Priest) and Freezing Arrow (Hunter) to Auras widget as CC aura for Wrath Classic.
+* Fixed a bug where the icon for Earthgrab Totem was not shown [Commen #6705].
