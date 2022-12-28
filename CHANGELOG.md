@@ -1,3 +1,3 @@
 # @project-version@ (@build-time@)
 
-* Removed a debug message from Auras widget [GH-372].
+* Fixed a bug with several Shaman totem icons not being shown on totem nameplates [Issue #601].
