@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+11.1.8 (2022-12-28)
+------------------------------------------------------
+* Added Freeze (Mage Water Elemental) to Auras widget as CC aura for Wrath Classic.
+
+------------------------------------------------------
 11.1.7 (2022-12-28)
 ------------------------------------------------------
 * Fixed a bug with several Shaman totem icons not being shown on totem nameplates [Issue #601].
