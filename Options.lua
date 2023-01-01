@@ -351,11 +351,6 @@ end
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
 
-local function GetSpellName(number)
-  local n = GetSpellInfo(number)
-  return n
-end
-
 function Addon.UpdateStylesForCurrentInstance()
   local style_caches = Addon.Cache.Styles
   wipe(style_caches.ForCurrentInstance)
@@ -517,37 +512,6 @@ local function SetValue(info, value)
   Addon:ForceUpdate()
 end
 
-local function SetSelectValue(info, value)
-  local select = info.values
-  SetValue(info, select[value])
-end
-
-local function GetSelectValue(info)
-  local value = GetValue(info)
-  local select = info.values
-  return select[value]
-end
-
-local function GetValueChar(info)
-  local DB = Addon.db.char
-  local value = DB
-  local keys = info.arg
-  for index = 1, #keys do
-    value = value[keys[index]]
-  end
-  return value
-end
-
-local function SetValueChar(info, value)
-  local DB = Addon.db.char
-  local keys = info.arg
-  for index = 1, #keys - 1 do
-    DB = DB[keys[index]]
-  end
-  DB[keys[#keys]] = value
-  Addon:ForceUpdate()
-end
-
 local function GetCVarTPTP(info)
   return tonumber(GetCVar(info.arg))
 end
@@ -563,6 +527,14 @@ local function SetCVarTPTP(info, value)
     SetCVar(info.arg, value)
     Addon:ForceUpdate()
   end
+end
+
+local function CVarsManagerSetBool(info, value)
+  if type(info) == "table" then
+    info = info.arg
+  end
+  Addon.CVars:SetBoolProtected(info, value)
+  --Addon:ForceUpdate()
 end
 
 local function SetCVarBoolTPTP(info, value)
@@ -818,6 +790,15 @@ local function GetDescriptionEntry(text)
     width = "full",
   }
 end
+
+local function GetHeaderEntry(text, pos)
+  return { 
+    type = "header", 
+    order = pos, 
+    name = text, 
+  }
+end
+
 
 local function GetSpacerEntry(pos)
   return {
@@ -2531,119 +2512,518 @@ end
 
 local function CreateTargetArtWidgetOptions()
   local options = {
-    name = L["Target Highlight"],
+    name = L["Target"],
     type = "group",
+    childGroups = "tab",
     order = 90,
+    set = SetValueWidget,
     args = {
-      Enable = GetEnableEntry(L["Enable Target Widget"], L["This widget highlights the nameplate of your current target by showing a border around the healthbar and by coloring the nameplate's healtbar and/or name with a custom color."], "targetWidget", false, function(info, val) SetValuePlain(info, val); Addon.Widgets:InitializeWidget("TargetArt") end),
-      Texture = {
-        name = L["Texture"],
+      Enable = {
+        name = L["Enable Target Highlight"],
+        order = 5,
+        type = "group",
+        inline = true,
+        set = function(info, val) SetValuePlain(info, val); Addon.Widgets:InitializeWidget("TargetArt") end,
+        args = {
+          Header = {
+            name = L["This widget highlights the nameplate of your current target by showing a border around the healthbar and by coloring the nameplate's healtbar and/or name with a custom color."],
+            order = 1,
+            type = "description",
+            width = "full",
+          },
+          Enable = {
+            name = L["Show in Healthbar View"],
+            order = 2,
+            type = "toggle",
+            width = "double",
+            arg = { "targetWidget", "ON" },
+          },
+          EnableHV = {
+            name = L["Show in Headline View"],
+            order = 3,
+            type = "toggle",
+            width = "double",
+            arg = { "HeadlineView", "ShowTargetHighlight" },
+          },
+        },
+      },
+      Indicator = {
+        name = L["Highlight"],
         order = 10,
         type = "group",
-        inline = true,
+        inline = false,
         args = {
-          Preview = {
-            name = L["Preview"],
+          Texture = {
+            name = L["Texture"],
             order = 10,
-            type = "execute",
-            image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\TargetArtWidget\\" .. db.targetWidget.theme,
-            imageWidth = 64,
-            imageHeight = 64,
+            type = "group",
+            inline = true,
+            args = {
+              Preview = {
+                name = L["Preview"],
+                order = 10,
+                type = "execute",
+                image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\TargetArtWidget\\" .. db.targetWidget.theme,
+                imageWidth = 64,
+                imageHeight = 64,
+              },
+              Select = {
+                name = L["Style"],
+                type = "select",
+                order = 20,
+                set = function(info, val)
+                  SetValueWidget(info, val)
+                  options.args.Widgets.args.TargetArtWidget.args.Indicator.args.Texture.args.Preview.image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\TargetArtWidget\\" .. db.targetWidget.theme;
+                end,
+                values = Addon.TARGET_TEXTURES,
+                arg = { "targetWidget", "theme" },
+              },
+              Color = {
+                name = L["Color"],
+                type = "color",
+                order = 30,
+                width = "half",
+                get = GetColorAlpha,
+                set = SetColorAlphaWidget,
+                hasAlpha = true,
+                arg = { "targetWidget" },
+              },
+            },
           },
-          Select = {
-            name = L["Style"],
-            type = "select",
+          Layout = {
+            name = L["Layout"],
+            order = 15,
+            type = "group",
+            inline = true,
+            args = {
+              Size = {
+                name = L["Size"],
+                order = 10,
+                type = "range",
+                max = 64,
+                min = 1,
+                step = 1,
+                isPercent = false,
+                arg = { "targetWidget", "Size" },
+              },
+              X = {
+                name = L["Horizontal Offset"],
+                order = 20,
+                type = "range",
+                max = 120,
+                min = -120,
+                step = 1,
+                isPercent = false,
+                arg = { "targetWidget", "HorizontalOffset" },
+              },
+              Y = {
+                name = L["Vertical Offset"],
+                order = 30,
+                type = "range",
+                max = 120,
+                min = -120,
+                step = 1,
+                isPercent = false,
+                arg = { "targetWidget", "VerticalOffset" },
+              },
+            },
+          },
+          TargetColor = {
+            name = L["Nameplate Color"],
             order = 20,
-            set = function(info, val)
-              SetValueWidget(info, val)
-              options.args.Widgets.args.TargetArtWidget.args.Texture.args.Preview.image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\TargetArtWidget\\" .. db.targetWidget.theme;
-            end,
-            values = Addon.TARGET_TEXTURES,
-            arg = { "targetWidget", "theme" },
-          },
-          Color = {
-            name = L["Color"],
-            type = "color",
-            order = 30,
-            width = "half",
-            get = GetColorAlpha,
-            set = SetColorAlphaWidget,
-            hasAlpha = true,
-            arg = { "targetWidget" },
+            type = "group",
+            inline = true,
+            args = {
+              TargetColor = {
+                name = L["Color"],
+                order = 10,
+                type = "color",
+                get = GetColor,
+                set = SetColor,
+                arg = {"targetWidget", "HPBarColor"},
+              },
+              EnableHealthbar = {
+                name = L["Healthbar"],
+                desc = L["Use a custom color for the healthbar of your current target."],
+                order = 20,
+                type = "toggle",
+                set = SetValue,
+                arg = {"targetWidget", "ModeHPBar"},
+              },
+              EnableName = {
+                name = L["Name"],
+                desc = L["Use a custom color for the name of your current target (in healthbar view and in headline view)."],
+                order = 30,
+                type = "toggle",
+                set = SetValue,
+                arg = {"targetWidget", "ModeNames"},
+              },
+            },
           },
         },
       },
-      Layout = {
-        name = L["Layout"],
-        order = 15,
-        type = "group",
-        inline = true,
-        args = {
-          Size = {
-            name = L["Size"],
-            order = 10,
-            type = "range",
-            max = 64,
-            min = 1,
-            step = 1,
-            isPercent = false,
-            set = SetValueWidget,
-            arg = { "targetWidget", "Size" },
-          },
-          X = {
-            name = L["Horizontal Offset"],
-            order = 20,
-            type = "range",
-            max = 120,
-            min = -120,
-            step = 1,
-            isPercent = false,
-            set = SetValueWidget,
-            arg = { "targetWidget", "HorizontalOffset" },
-          },
-          Y = {
-            name = L["Vertical Offset"],
-            order = 30,
-            type = "range",
-            max = 120,
-            min = -120,
-            step = 1,
-            isPercent = false,
-            set = SetValueWidget,
-            arg = { "targetWidget", "VerticalOffset" },
-          },
-        },
-      },
-      TargetColor = {
-        name = L["Nameplate Color"],
+      SoftTarget = {
+        name = L["Soft Target"],
         order = 20,
         type = "group",
-        inline = true,
+        inline = false,
         args = {
-          TargetColor = {
-            name = L["Color"],
-            order = 10,
-            type = "color",
-            get = GetColor,
-            set = SetColor,
-            arg = {"targetWidget", "HPBarColor"},
+          Note = GetDescriptionEntry(L["This settings changes CVars related to soft target and are not stored in the profile, but by WoW itself (character-specific settings)."]),
+          Enemy = {
+            name = L["Enemy"],
+            order = 5,
+            type = "group",
+            inline = true,
+            args = {
+              Enable = {
+                name = L["Enable"],
+                order = 10,
+                type = "toggle",
+                set = function(info, val)
+                  Addon.CVars:Set(info.arg, (val and "3") or "0")
+                end,
+                get = function(info)
+                  return Addon.CVars:GetAsNumber(info.arg) == Enum.SoftTargetEnableFlags.Any
+                end,
+                arg = "SoftTargetEnemy",
+              },
+              Highlight = {
+                name = L["Highlight"],
+                order = 20,
+                type = "toggle",
+                arg = { "targetWidget", "SoftTarget", "HighlightForEnemy" },
+              },
+              Color = {
+                name = L["Color"],
+                type = "color",
+                hasAlpha = true,
+                order = 30,
+                width = "half",
+                get = GetColorAlpha,
+                set = SetColorAlphaWidget,
+                arg = { "targetWidget", "SoftTarget", "HighlightColorForEnemy" },
+              },
+              TargetStyle = {
+                name = L["Target Style"],
+                desc = L["Use target scale and transparency settings also for soft enemy target."],
+                type = "toggle",
+                order = 40,
+                set = SetValue,
+                arg = { "targetWidget", "SoftTarget", "TargetStyleForEnemy" },
+              },
+              Nameplate = {
+                name = L["Nameplate"],
+                desc = L["Always show nameplates for soft enemy target."],
+                order = 50,
+                type = "toggle",
+                set = CVarsManagerSetBool,
+                get = GetCVarBoolTPTP,
+                arg = "SoftTargetNameplateEnemy",
+              },
+            },
           },
-          EnableHealthbar = {
-            name = L["Healthbar"],
-            desc = L["Use a custom color for the healthbar of your current target."],
-            order = 20,
-            type = "toggle",
-            arg = {"targetWidget", "ModeHPBar"},
+          Friend = {
+            name = L["Friend"],
+            order = 6,
+            type = "group",
+            inline = true,
+            args = {
+              Enable = {
+                name = L["Enable"],
+                order = 10,
+                type = "toggle",
+                set = function(info, val)
+                  Addon.CVars:Set(info.arg, (val and "3") or "0")
+                end,
+                get = function(info)
+                  return Addon.CVars:GetAsNumber(info.arg) == Enum.SoftTargetEnableFlags.Any
+                end,
+                arg = "SoftTargetFriend",
+              },
+              Highlight = {
+                name = L["Highlight"],
+                order = 20,
+                type = "toggle",
+                arg = { "targetWidget", "SoftTarget", "HighlightForFriend" },
+              },
+              Color = {
+                name = L["Color"],
+                type = "color",
+                hasAlpha = true,
+                order = 30,
+                width = "half",
+                get = GetColorAlpha,
+                set = SetColorAlphaWidget,
+                arg = { "targetWidget", "SoftTarget", "HighlightColorForFriend" },
+              },
+              TargetStyle = {
+                name = L["Target Style"],
+                desc = L["Use target scale and transparency settings also for soft friend target."],
+                type = "toggle",
+                order = 40,
+                set = SetValue,
+                arg = { "targetWidget", "SoftTarget", "TargetStyleForFriend" },
+              },
+              Nameplate = {
+                name = L["Nameplate"],
+                desc = L["Always show nameplates for soft friend target."],
+                order = 50,
+                type = "toggle",
+                set = CVarsManagerSetBool,
+                get = GetCVarBoolTPTP,
+                arg = "SoftTargetNameplateFriend",
+              },
+            },
           },
-          EnableName = {
-            name = L["Name"],
-            desc = L["Use a custom color for the name of your current target (in healthbar view and in headline view)."],
-            order = 30,
-            type = "toggle",
-            arg = {"targetWidget", "ModeNames"},
+          Interact = {
+            name = L["Interact"],
+            order = 7,
+            type = "group",
+            inline = true,
+            args = {
+              Enable = {
+                name = L["Enable"],
+                order = 10,
+                type = "toggle",
+                set = function(info, val)
+                  Addon.CVars:Set(info.arg, (val and "3") or "0")
+                end,
+                get = function(info)
+                  return Addon.CVars:GetAsNumber(info.arg) == Enum.SoftTargetEnableFlags.Any
+                end,
+                arg = "SoftTargetInteract",
+              },
+              Highlight = {
+                name = L["Highlight"],
+                order = 20,
+                type = "toggle",
+                arg = { "targetWidget", "SoftTarget", "HighlightForInteract" },
+              },
+              Color = {
+                name = L["Color"],
+                type = "color",
+                hasAlpha = true,                
+                order = 30,
+                width = "half",
+                get = GetColorAlpha,
+                set = SetColorAlphaWidget,
+                arg = { "targetWidget", "SoftTarget", "HighlightColorForInteract" },
+              },
+              TargetStyle = {
+                name = L["Target Style"],
+                desc = L["Use target scale and transparency settings also for soft interact target."],
+                type = "toggle",
+                order = 40,
+                set = SetValue,
+                arg = { "targetWidget", "SoftTarget", "TargetStyleForInteract" },
+              },
+              Nameplate = {
+                name = L["Nameplate"],
+                desc = L["Always show nameplates for soft interact target."],
+                order = 50,
+                type = "toggle",
+                set = CVarsManagerSetBool,
+                get = GetCVarBoolTPTP,
+                arg = "SoftTargetNameplateInteract",
+              },
+            },
+          },
+          General = {
+            name = L["Target Locking"],
+            order = 40,
+            type = "group",
+            inline = true,
+            args = {
+              -- SoftTargetForceSelect = {
+              --   name = L["Auto-set Target"],
+              --   desc = L["Auto-set target to match soft target."],
+              --   order = 10,
+              --   type = "select",
+              --   values = { "None", "Enemies", "Friends" },
+              --   set = function(info, val)                  
+              --     -- 1 = for enemies, 2 = for friends => 0 for no auto-set
+              --     Addon.CVars:Set(info.arg, (val ==  "Enemies" and "1") or (val == "Friends" and "2") or "0")
+              --   end,
+              --   get = function(info) 
+              --     local val = Addon.CVars:GetAsNumber(info.arg) 
+              --     print("Value:", (val == 1 and "Enemies") or (val == 2 and "Friends") or "None")
+              --     return (val == 1 and "Enemies") or (val == 2 and "Friends") or "None"
+              --   end,
+              --   arg = "SoftTargetForce",
+              -- },
+              SoftTargetForce = {
+                name = L["Auto-set target to match soft target"],
+                order = 10,
+                type = "group",
+                inline = true,
+                args = {
+                  None = {
+                    name = L["None"],
+                    order = 10,
+                    type = "toggle",
+                    set = function(info, val) Addon.CVars:Set(info.arg, 0) end,
+                    get = function(info) 
+                      local value = Addon.CVars:Get(info.arg)
+                      return value ~= "1" and value ~= "2"
+                    end,
+                    arg = "SoftTargetForce",
+                  },
+                  Enemies = {
+                    name = L["Enemies"],
+                    order = 20,
+                    type = "toggle",
+                    set = function(info, val) Addon.CVars:Set(info.arg, 1) end,
+                    get = function(info) return Addon.CVars:Get(info.arg) == "1" end,
+                    arg = "SoftTargetForce",
+                  },
+                  Friends = {
+                    name = L["Friends"],
+                    order = 30,
+                    type = "toggle",
+                    set = function(info, val) Addon.CVars:Set(info.arg, 2) end,
+                    get = function(info) return Addon.CVars:Get(info.arg) == "2" end,
+                    arg = "SoftTargetForce",
+                  },
+                },
+              },
+              SoftTargetMatchLocked = {
+                name = L["Match appropriate soft target to locked target."],
+                order = 20,
+                type = "group",
+                inline = true,
+                args = {
+                  None = {
+                    name = L["None"],
+                    order = 10,
+                    type = "toggle",
+                    set = function(info, val) Addon.CVars:Set(info.arg, 0) end,
+                    get = function(info) 
+                      local value = Addon.CVars:Get(info.arg)
+                      return value ~= "1" and value ~= "2"
+                    end,
+                    arg = "SoftTargetMatchLocked",
+                  },
+                  HardLocked = {
+                    name = L["Hard locked target only"],
+                    order = 20,
+                    type = "toggle",
+                    set = function(info, val) Addon.CVars:Set(info.arg, 1) end,
+                    get = function(info) return Addon.CVars:Get(info.arg) == "1" end,
+                    arg = "SoftTargetMatchLocked",
+                  },
+                  AttackTargets = {
+                    name = L["Targets you attack"],
+                    order = 30,
+                    type = "toggle",
+                    set = function(info, val) Addon.CVars:Set(info.arg, 2) end,
+                    get = function(info) return Addon.CVars:Get(info.arg) == "2" end,
+                    arg = "SoftTargetMatchLocked",
+                  },
+                },
+              },              
+              SoftTargetWithLocked = {
+                name = L["Allow soft target selection while player has a locked target."],
+                order = 30,
+                type = "group",
+                inline = true,
+                args = {
+                  None = {
+                    name = L["None"],
+                    order = 10,
+                    type = "toggle",
+                    set = function(info, val) Addon.CVars:Set(info.arg, 0) end,
+                    get = function(info) 
+                      local value = Addon.CVars:Get(info.arg)
+                      return value ~= "2"
+                    end,
+                    arg = "SoftTargetWithLocked",
+                  },
+                  AlwaysSoftTargeting = {
+                    name = L["Always do soft targeting"],
+                    order = 30,
+                    type = "toggle",
+                    set = function(info, val) Addon.CVars:Set(info.arg, 2) end,
+                    get = function(info) return Addon.CVars:Get(info.arg) == "2" end,
+                    arg = "SoftTargetWithLocked",
+                  },
+                },
+              },                
+            },
           },
         },
       },
+      Icon = {
+        name = L["Soft Target Icon"],
+        order = 30,
+        type = "group",
+        inline = false,
+        args = {
+          Visibility = {
+            name = L["Enable"],
+            order = 10,
+            type = "group",
+            inline = true,
+            set = function(info, val)
+              CVarsManagerSetBool(info, val)
+              Addon.Widgets:UpdateSettings("TargetArt")
+            end,
+            get = GetCVarBoolTPTP,
+            args = {
+              Note = GetDescriptionEntry(L["This settings changes CVars related to soft target and are not stored in the profile, but by WoW itself (character-specific settings)."]),
+              SoftTargetIconTarget = {
+                name = L["Target"],
+                order = 1,
+                type = "toggle",
+                set = SetValueWidget,
+                get = GetValue,
+                arg =  { "targetWidget", "SoftTarget", "Icon", "SoftTargetIconTarget" },
+              },
+              SoftTargetIconEnemy = {
+                name = L["Enemy"],
+                order = 2,
+                type = "toggle",
+                arg = "SoftTargetIconEnemy",
+              },
+              SoftTargetIconFriend = {
+                name = L["Friend"],
+                order = 3,
+                type = "toggle",
+                arg = "SoftTargetIconFriend",
+              },              
+              SoftTargetIconInteract = {
+                name = L["Interact"],
+                order = 4,
+                type = "toggle",
+                arg = "SoftTargetIconInteract",
+              },
+              SoftTargetIconGameObject = {
+                name = L["Game Object"],
+                order = 5,
+                type = "toggle",
+                desc = L["Show icon for soft interact game objects (interactable objects you cannot normally target)."],
+                arg = "SoftTargetIconGameObject",
+              },
+              SoftTargetLowPriorityIcons = {
+                name = L["Low Priority"],
+                order = 6,
+                type = "toggle",
+                desc = L["Show interact icons even when there is other visual indicators, such as quest or loot effects."],
+                arg = "SoftTargetLowPriorityIcons",
+              },   
+            },
+          },                       
+          Layout = {
+            name = L["Layout"],
+            order = 20,
+            type = "group",
+            inline = true,
+            args = {    
+              Size = GetSizeEntry(L["Size"], 10, { "targetWidget", "SoftTarget", "Icon", "Size" }),
+              Placement = GetFramePositioningEntry(20, { "targetWidget", "SoftTarget", "Icon" } ),
+            },
+          },
+        },
+      },      
     },
   }
 
@@ -2663,7 +3043,11 @@ local function CreateExperienceWidgetOptions()
         L["Enable Experience Widget"],
         L["This widget shows an experience bar for player followers."], "ExperienceWidget",
         true,
-        function(info, val) SetValuePlain(info, val); Addon.Widgets:InitializeWidget("Experience") end
+        function(info, val) 
+          SetValuePlain(info, val)
+          Addon.Widgets:InitializeWidget("Experience")
+          Addon:ForceUpdate() -- Update everything as default widgets might have to be shown/hidden
+        end
       ),
       Appearance = {
         name = L["Appearance"],
@@ -5009,28 +5393,7 @@ local function CreateBlizzardSettings()
               if InCombatLockdown() then
                 Addon.Logging.Error(L["We're unable to change this while in combat"])
               else
-                local cvars = {
-                  "nameplateOtherTopInset", "nameplateOtherBottomInset", "nameplateLargeTopInset", "nameplateLargeBottomInset",
-                  "nameplateMotion", "nameplateMotionSpeed", "nameplateOverlapH", "nameplateOverlapV",
-                  "nameplateMaxDistance", "nameplateTargetBehindMaxDistance",
-                  "nameplateShowOnlyNames", 
-                  -- "nameplateGlobalScale" -- Reset it to 1, if it get's somehow corrupted
-                }
-                if Addon.IS_CLASSIC then
-                  cvars[#cvars + 1] = "clampTargetNameplateToScreen"
-                end
-
-                if Addon.IS_WRATH_CLASSIC then
-                  cvars[#cvars + 1] = "clampTargetNameplateToScreen"
-                end
-                
-                if not Addon.WOW_USES_CLASSIC_NAMEPLATES then            
-                  cvars[#cvars + 1] = "nameplateResourceOnTarget"
-                end
-
-                for k, v in pairs(cvars) do
-                  Addon.CVars:SetToDefault(v)
-                end
+                CVars:ResetToDefaults()
                 Addon:ForceUpdate()
               end
             end,
@@ -5102,7 +5465,7 @@ local function CreateBlizzardSettings()
       -- },      
       Display = {
         name = L["Display"],
-        order = 20,
+        order = 10,
         type = "group",
         inline = false,
         args = {
@@ -5150,6 +5513,54 @@ local function CreateBlizzardSettings()
               },
             },
           },
+        },
+      },
+      Names = {
+        name = L["Names"],
+        order = 20,
+        type = "group",
+        inline = false,
+        set = "SetValue",
+        get = GetValue,
+        args = {
+          Show = {
+            name = L["Show"],
+            order = 10,
+            type = "group",
+            inline = true,
+            set = "SetValue",
+            get = GetValue,
+            args = {
+              ShowOnlyNames = {
+                name = L["Only Names"],
+                order = 30,
+                type = "toggle",
+                set = function(info, val)
+                  SetCVarBoolTPTP(info, val)
+                  ReloadUI()
+                end,
+                get = GetCVarBoolTPTP,
+                desc = L["Show only unit names and hide healthbars (requires /reload). Note that the clickable area of friendly nameplates will also be set to zero so that they don't interfere with enemy nameplates stacking (not in Classic or TBC Classic)."],
+                arg = "nameplateShowOnlyNames",            
+              },
+              DebuffsOnFriendly = {
+                name = L["Debuffs on Friendly"],
+                order = 40,
+                type = "toggle",
+                set = SetCVarBoolTPTP,
+                get = GetCVarBoolTPTP,
+                arg = "nameplateShowDebuffsOnFriendly",            
+              },
+              OnlyInInstances = {
+                type = "toggle",
+                name = L["Players in Instances"],
+                order = 50,
+                desc = L["Show friendly players' and totems' names in instances."],
+                arg = { "BlizzardSettings", "Names", "ShowPlayersInInstances" },
+              },
+            },
+          },
+          Font = GetFontEntryHandler(L["Font"], 20, { "BlizzardSettings", "Names" }, nil, func_handler)
         },
       },
       Nameplates = {
@@ -5381,9 +5792,62 @@ local function CreateBlizzardSettings()
           },
         },
       },
+      Widgets = {
+        name = L["Widgets"],
+        order = 40,
+        type = "group",
+        inline = false,
+        set = SetValue,
+        get = GetValue,
+        args = {
+          Scale = GetScaleEntry(L["Scale"], 10, { "BlizzardSettings", "Widgets", "Scale" }, nil, 0.3, 3.0),
+          Positioning = {
+            type = "group",
+            order = 20,
+            name = L["Positioning"],
+            inline = true,
+            args = {
+              Anchor = {
+                type = "select",
+                order = 10,
+                name = L["Position"],
+                values = Addon.ANCHOR_POINT,
+                arg = { "BlizzardSettings", "Widgets", "Anchor" }
+              },
+              InsideAnchor = {
+                type = "toggle",
+                order = 15,
+                name = L["Inside"],
+                width = "half",
+                arg = { "BlizzardSettings", "Widgets", "InsideAnchor" }
+              },
+              X = {
+                type = "range",
+                order = 20,
+                name = L["Horizontal Offset"],
+                max = 120,
+                min = -120,
+                step = 1,
+                isPercent = false,
+                arg = { "BlizzardSettings", "Widgets", "HorizontalOffset" },
+              },
+              Y = {
+                type = "range",
+                order = 30,
+                name = L["Vertical Offset"],
+                max = 120,
+                min = -120,
+                step = 1,
+                isPercent = false,
+                arg = { "BlizzardSettings", "Widgets", "VerticalOffset" },
+              },
+            },
+          },
+        },
+      },
       PersonalNameplate = {
         name = L["Personal Nameplate"],
-        order = 45,
+        order = 50,
         type = "group",
         inline = false,
         hidden = function() return Addon.WOW_USES_CLASSIC_NAMEPLATES end,
@@ -5417,55 +5881,7 @@ local function CreateBlizzardSettings()
           },
         },
       },
-      Names = {
-        name = L["Names"],
-        order = 47,
-        type = "group",
-        inline = false,
-        set = "SetValue",
-        get = GetValue,
-        args = {
-          Show = {
-            name = L["Show"],
-            order = 10,
-            type = "group",
-            inline = true,
-            set = "SetValue",
-            get = GetValue,
-            args = {
-              ShowOnlyNames = {
-                name = L["Only Names"],
-                order = 30,
-                type = "toggle",
-                set = function(info, val)
-                  SetCVarBoolTPTP(info, val)
-                  ReloadUI()
-                end,
-                get = GetCVarBoolTPTP,
-                desc = L["Show only unit names and hide healthbars (requires /reload). Note that the clickable area of friendly nameplates will also be set to zero so that they don't interfere with enemy nameplates stacking (not in Classic or TBC Classic)."],
-                arg = "nameplateShowOnlyNames",            
-              },
-              DebuffsOnFriendly = {
-                name = L["Debuffs on Friendly"],
-                order = 40,
-                type = "toggle",
-                set = SetCVarBoolTPTP,
-                get = GetCVarBoolTPTP,
-                arg = "nameplateShowDebuffsOnFriendly",            
-              },
-              OnlyInInstances = {
-                type = "toggle",
-                name = L["Players in Instances"],
-                order = 50,
-                desc = L["Show friendly players' and totems' names in instances."],
-                arg = { "BlizzardSettings", "Names", "ShowPlayersInInstances" },
-              },
-            },
-          },
-          Font = GetFontEntryHandler(L["Font"], 20, { "BlizzardSettings", "Names" }, nil, func_handler)
-        },
-      },   
-    },
+    },   
     --  ["ShowNamePlateLoseAggroFlash"] = "When enabled, if you are a tank role and lose aggro, the nameplate with briefly flash.",
   }
 
@@ -10480,7 +10896,7 @@ function Addon:ProfChange()
     options.args.NameplateSettings.args.EliteIcon.args.Texture.args.PreviewElite.image = path .. "EliteArtWidget\\" .. "rareelite-" .. db.settings.eliteicon.theme
 
     local base = options.args.Widgets.args
-    base.TargetArtWidget.args.Texture.args.Preview.image = path .. "TargetArtWidget\\" .. db.targetWidget.theme;
+    base.TargetArtWidget.args.Indicator.args.Texture.args.Preview.image = path .. "TargetArtWidget\\" .. db.targetWidget.theme;
     local class_list = t.CopyTable(CLASS_SORT_ORDER)
     sort(class_list)
     for i, class in ipairs(class_list) do

@@ -21,9 +21,9 @@ local tonumber = tonumber
 local BUFF_MAX_DISPLAY = BUFF_MAX_DISPLAY
 local GetFramerate = GetFramerate
 local DebuffTypeColor = DebuffTypeColor
+local UnitIsUnit = UnitIsUnit
 local UnitAuraBySlot, UnitAuraSlots = UnitAuraBySlot, UnitAuraSlots
 local GetAuraDataBySlot, GetAuraDataByAuraInstanceID = C_UnitAuras and C_UnitAuras.GetAuraDataBySlot, C_UnitAuras and C_UnitAuras.GetAuraDataByAuraInstanceID
-local UnitIsUnit = UnitIsUnit
 local GetNamePlates, GetNamePlateForUnit = C_NamePlate.GetNamePlates, C_NamePlate.GetNamePlateForUnit
 local IsInInstance = IsInInstance
 
@@ -35,7 +35,7 @@ local UnitStyle_AuraTrigger_Initialize, UnitStyle_AuraTrigger_UpdateStyle = Addo
 local UnitStyle_AuraTrigger_CheckIfActive = Addon.UnitStyle_AuraTrigger_CheckIfActive
 local CUSTOM_GLOW_FUNCTIONS, CUSTOM_GLOW_WRAPPER_FUNCTIONS = Addon.CUSTOM_GLOW_FUNCTIONS, Addon.CUSTOM_GLOW_WRAPPER_FUNCTIONS
 local BackdropTemplate = Addon.BackdropTemplate
-local MODE_FOR_STYLE, ANCHOR_POINT_TEXT = Addon.MODE_FOR_STYLE, Addon.ANCHOR_POINT_TEXT
+local MODE_FOR_STYLE, AnchorFrameTo = Addon.MODE_FOR_STYLE, Addon.AnchorFrameTo
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -1505,7 +1505,7 @@ else
         aura.name, aura.icon, aura.applications, aura.debuffType, aura.duration, aura.expirationTime, aura.sourceUnit,
           aura.isStealable, aura.nameplateShowPersonal, aura.spellId, aura.canApplyAura, aura.isBossAura, _, aura.nameplateShowAll =
           UnitAuraBySlot(unitid, slots[i])
-      
+
           local unit_aura_info = GetAuraDataBySlot(unitid, slots[i])   
           if unit_aura_info then
             aura.auraInstanceID = unit_aura_info.auraInstanceID
@@ -1513,7 +1513,7 @@ else
           end
           
           unit_auras[#unit_auras + 1] = aura
-          --Addon.Logging.Debug("Aura:", aura.name, "=> ID:", aura.spellId)
+          -- Addon.Logging.Debug("Aura:", aura.name, "=> ID:", aura.spellId)
       end
     until continuation_token == nil
 
@@ -1523,8 +1523,10 @@ end
 
 
 local function IgnoreAuraUpdateForUnit(widget_frame, unit)
+  -- ! "Target Only" only supports the direct target, not soft targets
+  local unit_is_target = UnitIsUnit("target", unit.unitid)
   if Widget.db.ShowTargetOnly then
-    if UnitIsUnit("target", unit.unitid) then
+    if unit_is_target then
       Widget.CurrentTarget = widget_frame
     elseif not Addon.ActiveAuraTriggers then
       -- Continue with aura scanning for non-target units if there are aura triggers that might change the nameplates style
@@ -1535,7 +1537,7 @@ local function IgnoreAuraUpdateForUnit(widget_frame, unit)
 
   UnitStyle_AuraTrigger_Initialize(unit)
 
-  widget_frame.HideAuras = not EnabledForStyle[unit.style] or (Widget.db.ShowTargetOnly and not unit.isTarget)  
+  widget_frame.HideAuras = not EnabledForStyle[unit.style] or (Widget.db.ShowTargetOnly and not unit_is_target)  
 end
 
 local function AuraGridUpdateForUnitNotNecessary(widget_frame, unit)
@@ -2175,18 +2177,6 @@ end
 --   aura_grid.RowSpacing + aura_grid.AuraWidgetOffset)
 -- end
 
-local function AnchorFrameForMode(db, frame, anchor_to)
-  frame:ClearAllPoints()
-
-  local anchor = db.Anchor or "CENTER"
-  if db.InsideAnchor == false then
-    local anchor_point_text = ANCHOR_POINT_TEXT[anchor]
-    frame:SetPoint(anchor_point_text[2], anchor_to, anchor_point_text[1], db.HorizontalOffset or 0, db.VerticalOffset or 0)
-  else -- db.InsideAnchor not defined in settings or true
-    frame:SetPoint(anchor, anchor_to, anchor, db.HorizontalOffset or 0, db.VerticalOffset or 0)
-  end
-end
-
 function Widget:UpdatePositionAuraGrid(widget_frame, aura_type, unit_style)
   local db = self.db
 
@@ -2205,7 +2195,7 @@ function Widget:UpdatePositionAuraGrid(widget_frame, aura_type, unit_style)
   local anchor_to_db = db_aura_grid.AnchorTo
   local anchor_to = (anchor_to_db == "Healthbar" and aura_grid_frame:GetParent()) or widget_frame[anchor_to_db]
 
-  AnchorFrameForMode(db_aura_grid[MODE_FOR_STYLE[unit_style]], aura_grid_frame, anchor_to)
+  AnchorFrameTo(db_aura_grid[MODE_FOR_STYLE[unit_style]], aura_grid_frame, anchor_to)
   if aura_grid.IconMode and auras_no > 0 then
     local x_offset = 0
     if db_aura_grid.CenterAuras then

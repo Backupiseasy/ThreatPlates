@@ -71,6 +71,7 @@ local MAP_UNIT_TYPE_TO_TP_TYPE = {
   NeutralMinus     = "Minus",
 }
 
+-- TODO: Move these into MAP_UNIT_TYPE_TO_TP_TYPE, that should work as well (and change right side to target type)
 local REMAP_UNSUPPORTED_UNIT_TYPES = {
   NeutralTotem     = "FriendlyTotem",    -- When players are mind-controled, their totems turn neutral it seems (at least in Classic): https://www.curseforge.com/wow/addons/tidy-plates-threat-plates/issues/506
   NeutralGuardian  = "FriendlyGuardian",
@@ -361,10 +362,14 @@ function Addon:SetStyle(unit)
     return "empty", nil
   end
 
-  if not style and Addon:ShowThreatFeedback(unit) then
-    -- could call GetThreatStyle here, but that would at a tiny overhead
-    -- style tank/dps only used for hostile (enemy, neutral) NPCs
-    style = (Addon:PlayerRoleIsTank() and "tank") or "dps"
+  if not style then
+    if not UnitExists(unit.unitid) then
+      style = "etotem"
+    elseif Addon:ShowThreatFeedback(unit) then
+      -- could call GetThreatStyle here, but that would at a tiny overhead
+      -- style tank/dps only used for hostile (enemy, neutral) NPCs
+      style = (Addon:PlayerRoleIsTank() and "tank") or "dps"
+    end
   end
 
   return style or "normal"

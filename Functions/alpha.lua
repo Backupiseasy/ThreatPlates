@@ -8,7 +8,6 @@ local ThreatPlates = Addon.ThreatPlates
 -- Lua APIs
 
 -- WoW APIs
-local UnitExists = UnitExists
 
 -- ThreatPlates APIs
 local GetThreatSituation = Addon.GetThreatSituation
@@ -23,7 +22,7 @@ local function TransparencySituational(unit)
 	-- Do checks for situational transparency settings:
 	if unit.isMarked and db.toggle.MarkedA then
 		return db.alpha.Marked
-	elseif unit.isMouseover and not unit.isTarget and db.toggle.MouseoverUnitAlpha then
+	elseif unit.isMouseover and not Addon.UnitIsTarget(unit.unitid) and db.toggle.MouseoverUnitAlpha then
 		return db.alpha.MouseoverUnit
 	elseif unit.isCasting then
 		local unit_friendly = (unit.reaction == "FRIENDLY")
@@ -39,7 +38,7 @@ end
 
 local function TransparencyGeneral(unit)
   -- Target always has priority
-  if not unit.isTarget then
+  if not Addon.UnitIsTarget(unit.unitid) then
     -- Do checks for situational transparency settings:
     local tranparency = TransparencySituational(unit)
     if tranparency then
@@ -51,10 +50,11 @@ local function TransparencyGeneral(unit)
 	local db = Addon.db.profile.nameplate
 
   local target_alpha
-	if UnitExists("target") then
-    if unit.isTarget and db.toggle.TargetA then
+	if Addon.TargetUnitExists() then
+		local unit_is_target = Addon.UnitIsTarget(unit.unitid)
+    if unit_is_target and db.toggle.TargetA then
       target_alpha = db.alpha.Target
-    elseif not unit.isTarget and db.toggle.NonTargetA then
+    elseif not unit_is_target and db.toggle.NonTargetA then
       target_alpha = db.alpha.NonTarget
     end
 	elseif db.toggle.NoTargetA then
@@ -170,5 +170,3 @@ function Addon:GetAlpha(unit)
 
   return alpha
 end
-
-

@@ -1,6 +1,14 @@
 ﻿------------------------------------------------------
+11.2.0 (2024-03-xx)
+------------------------------------------------------
+* Added support for automatic soft-targeting added with Dragonflight [Issue #608, Comment #6706].
+* Improved handling of nameplates for game objects (like herbs or portals) when soft-targeting is enabled.
+* Added support for nameplate widgets, e.g., arrival timers or progress bars for special units (see General - Blizzard Settings - Widgets) [GH-420, GH-506, Issue #392, Comment #6691, #6721, #6947, #7090].
+
+------------------------------------------------------
 11.1.8 (2022-12-28)
 ------------------------------------------------------
+* Added support for automatic soft-targeting added with Dragonflight [Issue #608, Comment #6706].
 * Added Freeze (Mage Water Elemental) to Auras widget as CC aura for Wrath Classic.
 
 ------------------------------------------------------

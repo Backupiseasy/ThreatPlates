@@ -124,9 +124,8 @@ local function ChatCommandDebug(cmd_list)
 		Addon.Debug.PrintCaches()
 	elseif command == "unit" then
 		Addon.Debug.PrintUnit("target")
-		--elseif command == "migrate" then
-		--	Addon.TestMigration()
-		--	Addon.MigrateDatabase(TP.Meta("version"))
+	elseif command == "unit-mouseover" then
+		Addon.Debug.PrintUnit("mouseover")
 	elseif command == "print-custom-styles" then
 		Addon.Debug.PrintTable(Addon.db.profile.uniqueSettings)
 		--Addon.MigrateDatabase(TP.Meta("version"))
@@ -268,6 +267,24 @@ local function ChatCommandDebug(cmd_list)
 		print("Unit Faction: ", tooltipData.lines[3].leftText)
 
 		DevTools_Dump({ tooltipData.lines[4] })
+	elseif command == "widgets" then
+		local plate = C_NamePlate.GetNamePlateForUnit("mouseover") or C_NamePlate.GetNamePlateForUnit("target")
+    if plate then 
+			local UnitFrame = plate.UnitFrame
+			local unitid = UnitFrame.unit
+
+			local unit_type, _, _, _, _, npc_id = strsplit("-", _G.UnitGUID(unitid) or "")
+
+			print("Unit:", unitid, "=>", unit_type)
+			print("  UnitNameplateShowsWidgetsOnly:", UnitNameplateShowsWidgetsOnly(unitid))
+			print("  SoftTargetFrame.Icon:", SetUnitCursorTexture(UnitFrame.SoftTargetFrame.Icon, plate.namePlateUnitToken))
+			print("  UnitFrame:")
+			print("    unitExists:", UnitFrame.unitExists)
+			print("  WidgetContainer:")
+			print("    #:", UnitFrame.WidgetContainer:GetNumWidgetsShowing())
+			print("    HasAnyWidgetsShowing:", UnitFrame.WidgetContainer:HasAnyWidgetsShowing())
+			print("  => Show:")
+		end
 	else
 		Addon.Logging.Error(L["Unknown option: "] .. command)
 		PrintHelp()

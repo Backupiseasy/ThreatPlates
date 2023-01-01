@@ -107,13 +107,14 @@ local QuestObjectiveParser = STANDARD_QUEST_OBJECTIVE_PARSER[GetLocale()] or QUE
 ---------------------------------------------------------------------------------------------------
 
 function IsQuestUnit(unit)
-  if not unit.unitid then return false, false, nil end
+  -- Tooltip data can be nil here as it seems - there was a bug with this when a player left a battleground
+  local tooltip_data = unit.unitid and C_TooltipInfo_GetUnit(unit.unitid)
+  if not tooltip_data then return false end
+
+  TooltipSurfaceArgs(tooltip_data)
 
   local quest_title
   local quest_progress_player = false
-
-  local tooltip_data = C_TooltipInfo_GetUnit(unit.unitid)
-  TooltipSurfaceArgs(tooltip_data)
 
   for i = 3, #tooltip_data.lines do
     local line = tooltip_data.lines[i]

@@ -15,7 +15,7 @@ local string, floor = string, floor
 local rawset = rawset
 
 -- WoW APIs
-local UnitClass = UnitClass
+local UnitIsUnit, UnitClass, UnitExists = UnitIsUnit, UnitClass, UnitExists
 
 -- ThreatPlates APIs
 local UnitDetailedThreatSituation = UnitDetailedThreatSituation
@@ -109,7 +109,7 @@ Addon.Logging = {}
 Addon.Debug = {}
 
 ---------------------------------------------------------------------------------------------------
--- Addon-wide wrapper functions for WoW Classic
+-- Addon-wide wrapper functions and constants for WoW Classic
 ---------------------------------------------------------------------------------------------------
 
 if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then

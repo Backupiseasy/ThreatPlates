@@ -16,7 +16,7 @@ local wipe, strsplit = wipe, strsplit
 local WorldFrame, UIParent, INTERRUPTED = WorldFrame, UIParent, INTERRUPTED
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local UnitName, UnitIsUnit, UnitReaction, UnitExists = UnitName, UnitIsUnit, UnitReaction, UnitExists
-local UnitIsPlayer = UnitIsPlayer
+local UnitIsPlayer, UnitPVPName = UnitIsPlayer, UnitPVPName
 local UnitClass = UnitClass
 local UnitEffectiveLevel = UnitEffectiveLevel
 local GetCreatureDifficultyColor = GetCreatureDifficultyColor
@@ -35,6 +35,7 @@ local Animations = Addon.Animations
 local CVars = Addon.CVars
 local BackdropTemplate = Addon.BackdropTemplate
 local TransliterateCyrillicLetters = Addon.TransliterateCyrillicLetters
+local AnchorFrameTo = Addon.AnchorFrameTo
 
 local GetNameForNameplate
 local UnitCastingInfo
@@ -132,7 +133,13 @@ local PLATE_FADE_IN_TIME = Addon.PLATE_FADE_IN_TIME
 local PlatesCreated, PlatesVisible, PlatesByUnit, PlatesByGUID = {}, {}, {}, {}
 local nameplate, extended, visual			    	-- Temp/Local References
 local unit, unitcache, style, stylename 	  -- Temp/Local References
-local LastTargetPlate, LastFocusPlate
+local LastTargetPlate = {
+  target = nil,
+  softfriend = nil,
+  softinteract = nil,
+  softenemy = nil
+}
+local LastFocusPlate
 local ShowCastBars = true
 local EMPTY_TEXTURE = "Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\Empty"
 local UpdateAll = false
@@ -147,6 +154,9 @@ local SettingsOccludedAlpha, SettingsEnabledOccludedAlpha
 local SettingsShowEnemyBlizzardNameplates, SettingsShowFriendlyBlizzardNameplates, SettingsHideBuffsOnPersonalNameplate
 local SettingsTargetUnitHide, SettingsShowOnlyForTarget
 local SettingsShowOnlyNames
+
+local TargetStyleForEnemy, TargetStyleForFriend, TargetStyleForInteract
+
 
 -- External references to internal data
 Addon.PlatesCreated = PlatesCreated
@@ -259,6 +269,48 @@ local function SetUnitAttributeName(unitid, unit_type)
   return unit_name
 end
 
+local function SetUnitAttributeTarget(unit)
+  local unitid = unit.unitid
+  unit.isTarget = UnitIsUnit("target", unitid) -- required here for config changes which reset all plates without calling TARGET_CHANGED, MOUSEOVER, ...
+  
+  unit.IsSoftEnemyTarget = UnitIsUnit("softenemy", unitid)
+  unit.IsSoftFriendTarget = UnitIsUnit("softfriend", unitid)
+  unit.IsSoftInteractTarget = UnitIsUnit("softinteract", unitid)
+
+  unit.IsSoftTarget = unit.isTarget or unit.IsSoftEnemyTarget or unit.IsSoftFriendTarget or unit.IsSoftInteractTarget
+  
+  --unit.IsSoftTarget = unit.isTarget or UnitIsUnit("softenemy", unitid) or UnitIsUnit("softfriend", unitid) or UnitIsUnit("softinteract", unitid)
+
+  unit.IsTarget = unit.isTarget or 
+    (TargetStyleForEnemy and unit.IsSoftEnemyTarget) or 
+    (TargetStyleForFriend and unit.IsSoftFriendTarget)	or 
+    (TargetStyleForInteract and unit.IsSoftInteractTarget)
+end
+
+---------------------------------------------------------------------------------------------------
+-- Soft Target Support
+---------------------------------------------------------------------------------------------------
+
+Addon.UNIT_ID_ENEMY_TARGET = "anyenemy"
+
+-- Addon.IsTargetUnit = function(unitid) 
+-- 	return UnitIsUnit("anyenemy", unitid) or UnitIsUnit("softfriend", unitid) or UnitIsUnit("softinteract", unitid)
+-- end
+
+local function SoftTargetExists()
+	return UnitExists("target") or 
+		(TargetStyleForEnemy and UnitExists("softenemy")) or 
+		(TargetStyleForFriend and UnitExists("softfriend")) or 
+		(TargetStyleForInteract and UnitExists("softinteract"))
+end
+
+local function UnitIsSoftTarget(unitid)
+	return UnitIsUnit("target", unitid) or 
+		(TargetStyleForEnemy and UnitIsUnit("softenemy", unitid)) or 
+		(TargetStyleForFriend and UnitIsUnit("softfriend", unitid))	or 
+		(TargetStyleForInteract and UnitIsUnit("softinteract", unitid))
+end
+
 ---------------------------------------------------------------------------------------------------------------------
 --  Nameplate Extension: Applies scripts, hooks, and adds additional frame variables and regions
 ---------------------------------------------------------------------------------------------------------------------
@@ -338,6 +390,38 @@ do
 end
 
 ---------------------------------------------------------------------------------------------------------------------
+-- Widget Container Handling
+---------------------------------------------------------------------------------------------------------------------
+
+local function WidgetContainerReset(plate) 
+  local widget_container = plate.TPFrame.WidgetContainer
+  if widget_container then
+    widget_container:SetParent(plate)
+    widget_container:SetIgnoreParentScale(false)
+    widget_container:ClearAllPoints()
+    widget_container:SetPoint("TOP", plate.castBar, "BOTTOM")
+  end
+end
+
+local function WidgetContainerAcquire(plate)
+  local tp_frame = plate.TPFrame
+  local widget_container = plate.UnitFrame.WidgetContainer
+  if widget_container and tp_frame.Active then
+    tp_frame.WidgetContainer = widget_container
+    widget_container:SetParent(tp_frame)
+    widget_container:SetIgnoreParentScale(true)
+    widget_container:SetScale(Addon.db.profile.BlizzardSettings.Widgets.Scale)
+    AnchorFrameTo(Addon.db.profile.BlizzardSettings.Widgets, widget_container, tp_frame)
+  end
+end
+
+local function WidgetContainerAnchor(tp_frame)
+  if tp_frame.WidgetContainer then
+    AnchorFrameTo(Addon.db.profile.BlizzardSettings.Widgets, tp_frame.WidgetContainer, tp_frame)
+  end
+end
+
+---------------------------------------------------------------------------------------------------------------------
 -- Nameplate Script Handlers
 ---------------------------------------------------------------------------------------------------------------------
 
@@ -357,18 +441,12 @@ do
       UpdateStyle()
 
       Addon.CreateExtensions(extended, unit.unitid, stylename)
-      Widgets:OnUnitAdded(extended, unit)
     else
       -- Update the unique icon widget and style may be the same, but a different trigger might be active, e.g.,
       -- if two aura triggers fired
       if (stylename == "unique" or stylename == "NameOnly-Unique") and unit.CustomPlateSettings ~= old_custom_style then
         Addon.UpdateCustomStyleIcon(extended, unit)
       end
-
---      local unique_icon_widget = Widgets.Widgets.UniqueIcon
---      if (stylename == "unique" or stylename == "NameOnly-Unique") and unit.CustomPlateSettings ~= old_custom_style and unique_icon_widget then
---        unique_icon_widget:OnUnitAdded(extended.widgets.UniqueIcon, unit)
---      end
     end
 	end
 
@@ -400,6 +478,8 @@ do
       CheckNameplateStyle()
       UpdateIndicator_Standard()
       UpdateIndicator_HealthBar()
+      
+      Widgets:OnUnitAdded(extended, unit)
     end
 
     -- Update Delegates
@@ -413,11 +493,11 @@ do
 	---------------------------------------------------------------------------------------------------------------------
 	-- Create / Hide / Show Event Handlers
 	---------------------------------------------------------------------------------------------------------------------
-
   function Addon:UpdateNameplateStyle(plate, unitid)
     if unit.reaction == "FRIENDLY" then
       if SettingsShowFriendlyBlizzardNameplates then
         plate.UnitFrame:Show()
+        WidgetContainerReset(plate)
         plate.TPFrame:Hide()
         plate.TPFrame.Active = false
       else
@@ -427,6 +507,7 @@ do
       end
     elseif SettingsShowEnemyBlizzardNameplates then
       plate.UnitFrame:Show()
+      WidgetContainerReset(plate)
       plate.TPFrame:Hide()
       plate.TPFrame.Active = false
     else
@@ -463,13 +544,14 @@ do
     PlatesByGUID[unit.guid] = plate
 
     Addon:UpdateUnitContext(unit, unitid)
-    Addon.UnitStyle_NameDependent(unit)
-    ProcessUnitChanges()
-
-		Addon.UpdateExtensions(extended, unit.unitid, stylename)
-
     Addon:UpdateNameplateStyle(plate, unitid)
 
+    Addon.UnitStyle_NameDependent(unit)
+    
+    WidgetContainerAcquire(plate)
+
+    ProcessUnitChanges()
+    Addon.UpdateExtensions(extended, unit.unitid, stylename)
     UNIT_TARGET("UNIT_TARGET", unitid) -- requires tp_frame.Active, which is set in UpdateNameplateStyle
 
     -- Call this after the plate is shown as OnStartCasting checks if the plate is shown; if not, the castbar is hidden and
@@ -597,8 +679,9 @@ end
 
 -- UpdateUnitContext: Updates Target/Mouseover
 function Addon:UpdateUnitContext(unit, unitid)
+  SetUnitAttributeTarget(unit, unitid)
+
   unit.isMouseover = UnitIsUnit("mouseover", unitid)
-  unit.isTarget = UnitIsUnit("target", unitid) -- required here for config changes which reset all plates without calling TARGET_CHANGED, MOUSEOVER, ...
   unit.IsFocus = UnitIsUnit("focus", unitid) -- required here for config changes which reset all plates without calling TARGET_CHANGED, MOUSEOVER, ...
 
   Addon:UpdateUnitCondition(unit, unitid)	-- This updates a bunch of properties
@@ -694,7 +777,7 @@ local function UpdatePlate_SetAlphaNoFading(tp_frame, unit)
 end
 
 local	function UpdatePlate_SetAlphaWithOcclusion(tp_frame, unit)
-  if not tp_frame:IsShown() or (tp_frame.IsOccluded and not unit.isTarget) then
+  if not tp_frame:IsShown() or (tp_frame.IsOccluded and not Addon.UnitIsTarget(unit.unitid)) then
     return
   end
 
@@ -798,7 +881,6 @@ do
       visual.raidicon:Hide()
     end
 	end
-
 
 	-- UpdateIndicator_EliteIcon: Updates the border overlay art and threat glow to Elite or Non-Elite art
 	function UpdateIndicator_EliteIcon()
@@ -1042,13 +1124,14 @@ end
 
 -- Frame: self = plate
 local function FrameOnUpdate(plate, elapsed)
+  local tp_frame = plate.TPFrame
+
   -- Update the number of seconds since the last update
   plate.TimeSinceLastUpdate = (plate.TimeSinceLastUpdate or 0) + elapsed
-
+  
   if plate.TimeSinceLastUpdate >= ON_UPDATE_INTERVAL then
     plate.TimeSinceLastUpdate = 0
 
-    local tp_frame = plate.TPFrame
     if not tp_frame.Active or UnitIsUnit(plate.UnitFrame.unit or "", "player") then
       return
     end
@@ -1063,6 +1146,8 @@ local function FrameOnUpdate(plate, elapsed)
       UpdatePlate_SetAlphaOnUpdate(tp_frame, tp_frame.unit)
     end
   end
+  
+  WidgetContainerAnchor(tp_frame)
 end
 
 -- Frame: self = plate
@@ -1119,12 +1204,22 @@ end
 function CoreEvents:NAME_PLATE_UNIT_ADDED(unitid)
   -- Player's personal nameplate:
   --   This nameplate is currently not handled by Threat Plates - OnShowNameplate is not called on it, therefore plate.TPFrame.Active is nil
-  -- Nameplates for non-existing units:
-  --   There are some nameplates for units that do not exists, e.g. Ring of Transference in Oribos. For the time being, we don't show them.
-  --   Without not UnitExists(unitid) they would be shown as nameplates with health 0 and maybe cause Lua errors
-  if UnitIsUnit("player", unitid) or UnitNameplateShowsWidgetsOnly(unitid) or not UnitExists(unitid) then return end
+  -- Nameplates for GameObjects:
+  --   There are some nameplates for GameObjects, e.g. Ring of Transference in Oribos. For the time being, we don't show them.
+  --   Current assumption: for units of type "GameObject", UnitExists always returns false
+  --   If TP would show them, the would show as nameplates with health 0 and maybe cause Lua errors
+  -- Nameplates with widgets:
+  --   If the nameplate only has widgets, don't create a Threat Plate for it and let WoW handle everything,
+  --   otherwise show a Threat Plate and additionally show the widget container
 
-  OnShowNameplate(GetNamePlateForUnit(unitid), unitid)
+  -- local unit_type, _, _, _, _, _ = strsplit("-", _G.UnitGUID(unitid) or "")
+  -- if unit_type == "GameObject" then
+  --   print("GameObject:", unitid, "=>", UnitExists(unitid))
+  -- end
+  
+  if not UnitIsUnit("player", unitid) and not UnitNameplateShowsWidgetsOnly(unitid) then
+    OnShowNameplate(GetNamePlateForUnit(unitid), unitid)    
+  end
 end
 
 function CoreEvents:NAME_PLATE_UNIT_REMOVED(unitid)
@@ -1142,6 +1237,8 @@ function CoreEvents:NAME_PLATE_UNIT_REMOVED(unitid)
 
   Widgets:OnUnitRemoved(frame, frame.unit)
 
+  WidgetContainerReset(plate)
+  
   wipe(frame.unit)
   wipe(frame.unitcache)
 
@@ -1180,43 +1277,58 @@ function CoreEvents:UNIT_NAME_UPDATE(unitid)
   end
 end
 
-function CoreEvents:PLAYER_TARGET_CHANGED()
-  -- Target Castbar Offset
-  local castbar, style, extended
-  if LastTargetPlate and LastTargetPlate.TPFrame.Active then
-    extended = LastTargetPlate.TPFrame
-    castbar = extended.visual.castbar
-    style = extended.style
-    castbar:ClearAllPoints()
-    castbar:SetPoint(style.castbar.anchor or "CENTER", extended, style.castbar.x or 0, style.castbar.y or 0)
+local function SetCastbarOffset(tp_frame, offset_x, offset_y)
+  local castbar = tp_frame.visual.castbar
+  local style = tp_frame.style.castbar
+  castbar:ClearAllPoints()
+  castbar:SetPoint(style.anchor or "CENTER", tp_frame, style.x + offset_x or 0, style.y + offset_y or 0)
+end
 
-    LastTargetPlate = nil
+local function PlayerTargetChanged(target_unitid)
+  -- Target Castbar Offset
+  local plate = LastTargetPlate[target_unitid]
+  if plate and plate.TPFrame.Active then
+    SetCastbarOffset(plate.TPFrame, 0, 0)
+
+    LastTargetPlate[target_unitid] = nil
 
     -- Update mouseover, if the mouse was hovering over the targeted unit
-    extended.unit.isTarget = false
-    if SettingsShowOnlyForTarget then
-      extended.visual.healthbar:HideTargetUnit()
+    local unit = plate.TPFrame.unit
+    SetUnitAttributeTarget(unit)
+    if SettingsShowOnlyForTarget and not Addon.UnitIsTarget(unit.unitid) then
+      plate.TPFrame.visual.healthbar:HideTargetUnit()
     end
     CoreEvents:UPDATE_MOUSEOVER_UNIT()
   end
 
-  local plate = GetNamePlateForUnit("target")
+  plate = GetNamePlateForUnit(target_unitid)
   --if plate and plate.TPFrame and plate.TPFrame.stylename ~= "" then
   if plate and plate.TPFrame.Active then
-    extended = plate.TPFrame
-    castbar = extended.visual.castbar
-    style = extended.style
-    castbar:ClearAllPoints()
-    local db = Addon.db.profile.settings.castbar
-    castbar:SetPoint(style.castbar.anchor or "CENTER", extended, style.castbar.x + db.x_target or 0, style.castbar.y + db.y_target or 0)
-
-    LastTargetPlate = plate
-
-    extended.unit.isTarget = true
-    UNIT_TARGET("UNIT_TARGET", extended.unit.unitid)
+    local unit = plate.TPFrame.unit
+    SetUnitAttributeTarget(unit)
+    UNIT_TARGET("UNIT_TARGET", unit.unitid)
   end
 
   SetUpdateAll()
+end
+
+-- If only target nameplates are shonw, only the event for loosing the (soft) target is fired, but no event
+-- for the new (soft) target is fired. The new target nameplate must be handled via NAME_PLATE_UNIT_ADDED.
+
+function CoreEvents:PLAYER_TARGET_CHANGED()
+  PlayerTargetChanged("target")
+end
+
+local function PLAYER_SOFT_FRIEND_CHANGED()
+  PlayerTargetChanged("softfriend")
+end
+
+local function PLAYER_SOFT_ENEMY_CHANGED()
+  PlayerTargetChanged("softenemy")
+end
+
+local function PLAYER_SOFT_INTERACT_CHANGED()
+  PlayerTargetChanged("softinteract")
 end
 
 UNIT_TARGET = function(event, unitid)
@@ -1225,9 +1337,19 @@ UNIT_TARGET = function(event, unitid)
 
   local plate = GetNamePlateForUnit(unitid)
   if plate and plate.TPFrame.Active then
+    local db = Addon.db.profile.settings.castbar
+    SetCastbarOffset(plate.TPFrame, db.x_target, db.y_target)
+
+    LastTargetPlate[target_unitid] = plate
+
+    --local unit = plate.TPFrame.unit
+    --SetUnitAttributeTarget(unit)
+
+    --
+
     local healthbar = plate.TPFrame.visual.healthbar
 
-    if SettingsShowOnlyForTarget and not UnitIsUnit("target", unitid) then
+    if SettingsShowOnlyForTarget and not Addon.UnitIsTarget(unitid) then
       healthbar:HideTargetUnit()
       return
     end
@@ -1528,10 +1650,12 @@ function CoreEvents:UNIT_FACTION(unitid)
   else
     -- Update just the unitid's plate
     local plate = GetNamePlateForUnit(unitid)
+    -- If Blizzard-style nameplates are used, we also need to check if TP plates are disabled/enabled now
+    -- This also needs to be done no matter if the plate is Active or not as units with
+    -- mindcontrolled
     if plate and plate.TPFrame.Active then
       UpdateReferences(plate)
       Addon:UpdateUnitCondition(unit, unitid)
-      -- If Blizzard-style nameplates are used, we also need to check if TP plates are disabled/enabled now
       Addon:UpdateNameplateStyle(plate, unitid)
       ProcessUnitChanges()
     end
@@ -1599,6 +1723,10 @@ else
     CoreEvents.UNIT_HEALTH_FREQUENT = UNIT_HEALTH
   end
 end
+
+CoreEvents.PLAYER_SOFT_FRIEND_CHANGED = PLAYER_SOFT_FRIEND_CHANGED
+CoreEvents.PLAYER_SOFT_ENEMY_CHANGED = PLAYER_SOFT_ENEMY_CHANGED
+CoreEvents.PLAYER_SOFT_INTERACT_CHANGED = PLAYER_SOFT_INTERACT_CHANGED    
 
 CoreEvents.UNIT_LEVEL = UnitConditionChanged
 --CoreEvents.UNIT_THREAT_SITUATION_UPDATE = UnitConditionChanged -- did not work anyway (no unitid)
@@ -1950,6 +2078,18 @@ function Addon:ForceUpdate()
 
   SettingsShowOnlyNames = CVars:GetAsBool("nameplateShowOnlyNames") and Addon.db.profile.BlizzardSettings.Names.Enabled
   
+  TargetStyleForEnemy = db.targetWidget.SoftTarget.TargetStyleForEnemy
+  TargetStyleForFriend = db.targetWidget.SoftTarget.TargetStyleForFriend
+  TargetStyleForInteract = db.targetWidget.SoftTarget.TargetStyleForInteract
+  
+  if TargetStyleForEnemy or TargetStyleForFriend or TargetStyleForInteract then
+    Addon.TargetUnitExists = SoftTargetExists
+    Addon.UnitIsTarget = UnitIsSoftTarget
+  else
+    Addon.TargetUnitExists = function() return UnitExists("target") end
+    Addon.UnitIsTarget = function(unitid) return UnitIsUnit("target", unitid) end
+  end
+
   for plate, unitid in pairs(self.PlatesVisible) do
     -- If Blizzard default plates are enabled (which means that these nameplates are not active), we need
     -- to check if they are enabled, so that Active is set correctly and plates are updated shown correctly.

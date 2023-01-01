@@ -24,10 +24,7 @@ local ART_PATH = ThreatPlates.Art
 ---------------------------------------------------------------------------------------------------
 -- Cached configuration settings
 ---------------------------------------------------------------------------------------------------
-local TargetHighlightEnabledForStyle = {
-  etotem = false,
-  empty = false
-}
+local TargetHighlightEnabledForStyle = {}
 
 ------------------------------------------------------------------------------------------------------
 -- Element code

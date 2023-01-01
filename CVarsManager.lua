@@ -24,6 +24,9 @@ Addon.CVars = {}
 local CVars = Addon.CVars
 
 local COMBAT_PROTECTED = {
+  -- Miscellaneous
+  uiScale = true,
+  -- Nameplate CVars
   nameplateLargeBottomInset = true,
   nameplateLargeTopInset = true,
   nameplateMaxAlpha = true,
@@ -40,7 +43,7 @@ local COMBAT_PROTECTED = {
   nameplateSelectedAlpha = true,
   nameplateNotSelectedAlpha = true,
   nameplateTargetBehindMaxDistance = true,
-  -- Nameplate CVars
+  -- Nameplate Visibility CVars
   nameplateShowAll = true,
   nameplateShowFriends = true,
   nameplateShowEnemies = true,
@@ -106,6 +109,10 @@ end
 --  end
 --end
 
+function CVars:Get(cvar)
+  return GetCVar(cvar)
+end
+
 function CVars:GetAsNumber(cvar)
   local value = GetCVar(cvar)
   local numeric_value = tonumber(value)
@@ -164,4 +171,36 @@ end
 
 function CVars:OverwriteBoolProtected(cvar, value)
   self:OverwriteProtected(cvar, (value and 1) or 0)
+end
+
+---------------------------------------------------------------------------------------------------
+-- 
+---------------------------------------------------------------------------------------------------
+
+-- From addon: AdvancedInterfaceOptions
+function CVars:CVarExists(cvar)
+	return not not select(2, pcall(function() return addon.GetCVarInfo(cvar) end))
+end
+
+local RESET_TO_DEFAULT = {
+  "nameplateOtherTopInset", "nameplateOtherBottomInset", "nameplateLargeTopInset", "nameplateLargeBottomInset",
+  "nameplateMotion", "nameplateMotionSpeed", "nameplateOverlapH", "nameplateOverlapV",
+  "nameplateMaxDistance", "nameplateTargetBehindMaxDistance",
+  "nameplateShowOnlyNames", 
+  "clampTargetNameplateToScreen",
+  "nameplateResourceOnTarget",
+  -- "nameplateGlobalScale" -- Reset it to 1, if it get's somehow corrupted
+  -- Soft Target
+  "SoftTargetEnemy", "SoftTargetNameplateEnemy", "SoftTargetIconEnemy",
+  "SoftTargetFriend", "SoftTargetNameplateFriend", "SoftTargetIconFriend",
+  "SoftTargetInteract", "SoftTargetNameplateInteract", "SoftTargetIconInteract",
+  "SoftTargetIconGameObject", "SoftTargetLowPriorityIcons",
+}
+
+function CVars:ResetToDefaults()
+  for k, v in pairs(RESET_TO_DEFAULT) do
+    if self:CVarExists(k) then
+      self:SetToDefault(v)
+    end
+  end
 end
