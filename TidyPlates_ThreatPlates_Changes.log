@@ -1,7 +1,11 @@
 ﻿------------------------------------------------------
-11.1.8 (2022-12-28)
+11.1.8 (2023-01-05)
 ------------------------------------------------------
 * Added Freeze (Mage Water Elemental) to Auras widget as CC aura for Wrath Classic.
+* Fixed a bug in Solo Shuffle where arena numbers were not shown correctly [Issue #581, #600, GH-370, Comment #6550, #6709, #6719, #6758].
+* Fixed a bug where empowered spell casts from Evoker where not shown on the nameplate castbar [Issue #606].
+* Fixed a bug with Deathknight runes showing wrong cooldown times that occured when the player died [GH-374].
+* Fixed Lua error that could occur when scanning an invalid tooltip, e.g., for quest information [Issue #609].
 
 ------------------------------------------------------
 11.1.7 (2022-12-28)
@@ -33,8 +37,8 @@
 ------------------------------------------------------
 11.1.2 (2022-11-26)
 ------------------------------------------------------
-* Added Hex, Earthbind Totem, and Earthgrab Totem (Shaman) to Auras widget as CC aura for Wrath Classic.
 * Fixed a Lua error that could occur when numeric aura sorting (e.g., by duration or time left) was enabled [Comment #6629, #Issue 591].
+* Added Hex, Earthbind Totem, and Earthgrab Totem (Shaman) to Auras widget as CC aura for Wrath Classic.
 * Fixed a bug with tooltip scanning (e.g., for Quest widget) which resulted in the same line showing multiple times in the tooltip [GH-368, Issue #593].
 * Fixed a bug with Combo Points widget where Evoker essence was not being updated properly when not target was selected.
 * Updated tooltip code to new API introduced with Patch 10.0.2.
