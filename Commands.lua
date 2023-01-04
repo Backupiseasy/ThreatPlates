@@ -120,18 +120,18 @@ local function ChatCommandDebug(cmd_list)
 		Addon.Logging.Print("|cff89F559Threat Plates|r: Searching settings:")
 		SearchDBForString(Addon.db.profile, "<Profile>", string.lower(cmd_list[2]))
 		SearchDBForString(Addon.db.global, "<Profile>", string.lower(cmd_list[2]))
-	elseif command == "cache" then
-		Addon.Debug.PrintCaches()
 	elseif command == "unit" then
 		Addon.Debug.PrintUnit("target")
-		--elseif command == "migrate" then
-		--	Addon.TestMigration()
-		--	Addon.MigrateDatabase(TP.Meta("version"))
-	elseif command == "print-custom-styles" then
-		Addon.Debug.PrintTable(Addon.db.profile.uniqueSettings)
-		--Addon.MigrateDatabase(TP.Meta("version"))
-	elseif command == "migrate" then
-		Addon.TestMigrateDatabase("MigrateFixAurasCyclicAnchoring")
+	elseif command == "cache" then
+		Addon.Debug.PrintCaches()
+	elseif command == "quest" then
+		Addon:PrintQuests(cmd_list[2])
+	elseif command == "social" then
+		Addon.PrintFriendlist()
+	elseif command == "custom-styles" then
+		for k, v in pairs(Addon.db.profile.uniqueSettings) do
+			Addon.Logging.Debug("Style:", k, "=>", v.Trigger.Type, " - ", v.Trigger[v.Trigger.Type].Input or "nil" )
+		end
 	elseif command == "guid" then
 		local plate = C_NamePlate.GetNamePlateForUnit("target")
 		if not plate then return end
@@ -139,135 +139,20 @@ local function ChatCommandDebug(cmd_list)
 		local guid = UnitGUID(plate.TPFrame.unit.unitid)
 		local _, _,  _, _, _, npc_id = strsplit("-", guid)
 
-		print(plate.TPFrame.unit.name, " => NPC-ID:", npc_id, "=>", guid)
-
-		local widgets = C_UIWidgetManager.GetAllWidgetsBySetID(C_UIWidgetManager.GetPowerBarWidgetSetID())
-		for i, w in pairs(widgets) do
-			print (i, w)
-		end
-	elseif command == "event" then
-		--Addon.Logging.Info("|cff89F559Threat Plates|r: Event publishing overview:")
-		--Addon:PrintEventService()
-	elseif command == "quest" then
-		Addon:PrintQuests(cmd_list[2])
-	elseif command == "social" then
-		Addon.PrintFriendlist()
-	elseif command == "custom-styles" then
-		for k, v in pairs(Addon.db.profile.uniqueSettings) do
-			print ("Style:", k, "=>", v.Trigger.Type, " - ", v.Trigger[v.Trigger.Type].Input or "nil" )
-		end
+		Addon.Logging.Debug(plate.TPFrame.unit.name, " => NPC-ID:", npc_id, "=>", guid)
+	-- elseif command == "event" then
+	-- 	Addon.Logging.Info("|cff89F559Threat Plates|r: Event publishing overview:")
+	-- 	Addon:PrintEventService()
 	elseif command == "cleanup-custom-styles" then
 		local input = Addon.db.profile.uniqueSettings
 		for i = #input, 1 , -1 do
 			local custom_style = input[i]
-			print (i, type(i), custom_style.Trigger.Type, custom_style.Trigger.Name.Input)
+			Addon.Logging.Debug(i, type(i), custom_style.Trigger.Type, custom_style.Trigger.Name.Input)
 			if custom_style.Trigger.Type == "Name" and custom_style.Trigger.Name.Input == "<Enter name here>" then
 				table.remove(input, i)
-				print ("Removing", i)
+				Addon.Logging.Debug("Removing", i)
 			end
 		end
-	elseif command == "import" then
-		local custom_style = {
-			Trigger = {
-				Type = "Name",
-				Name = {
-					Input = "Wurzebrumpf",
-					AsArray = { "fsadfsd" },
-				}
-			},
-			UseAutomaticIcon = false,
-			icon = false,
-			XYZ = true,
-			SpellID = 234234,
-		}
-		local imported_custom_style = Addon.ImportCustomStyle(custom_style)
-		Addon.Debug.PrintTable(imported_custom_style)
-
-	elseif command == "heuristic" then
-		local plate = C_NamePlate.GetNamePlateForUnit("target")
-		if not plate then return end
-		local unit = plate.TPFrame.unit
-
-		Addon.GetColorByThreat(unit, unit.style, true)
-
-		--print (unit.name, "- InCombatThreat =", unit.InCombatThreat)
-
-		--    print ("Use Threat Table:", Addon.db.profile.threat.UseThreatTable)
-		--    print ("Use Heuristic in Instances:", Addon.db.profile.threat.UseHeuristicInInstances)
-
-		--print ("InCombat:", InCombatLockdown())
-
-		--Addon:ShowThreatFeedback(unit,true)
-		--Addon:GetThreatColor(unit, unit.style, Addon.db.profile.threat.UseThreatTable, true)
-		--Addon:SetThreatColor(unit, true)
-	elseif command == "version" then
-		--		local unique_unit = TP.CopyTable(Addon.db.profile.uniqueSettings[1])
-		--		unique_unit.UseAutomaticIcon = nil
-		--		print (Addon.CheckTableStructure(TP.DEFAULT_SETTINGS.profile.uniqueSettings["**"], unique_unit))
-		print ("10.2.11 < 10.3.0:", Addon.CurrentVersionIsOlderThan("10.2.11", "10.3.0"))
-		print ("10.2.11 < 10.3.0-beta2:", Addon.CurrentVersionIsOlderThan("10.2.11", "10.3.0-beta2"))
-		print ("10.3.0-beta2 < 9.3.0:", Addon.CurrentVersionIsOlderThan("10.3.0-beta2", "10.3.0"))
-		print ("10.3.0-beta2 < 10.3.0-beta3:", Addon.CurrentVersionIsOlderThan("10.3.0-beta2", "10.3.0-beta3"))
-	elseif command == "reaction" then
-    local plate = C_NamePlate.GetNamePlateForUnit("target")
-    if not plate then return end
-    local unit = plate.TPFrame.unit
-
-		print("Name:", unit.name)
-		print("  Reaction:", unit.reaction)
-		print("    UnitReaction:", UnitReaction("target", "player"))
-    print("    UnitCanAttack = ", UnitCanAttack("target", "player"))
-    print("    UnitIsFriend = ", UnitIsFriend("target", "player"))
-		print("    UnitSelectionColor = ", UnitSelectionColor("target"))
-		print("    UnitIsPVP = ", UnitIsPVP("target"))
-		if not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC and not Addon.IS_WRATH_CLASSIC then
-			print("    UnitSelectionType = ", UnitSelectionType("target"))
-		end
-		elseif command == "dbm1" then
-		DBM.Nameplate:Show(true, UnitGUID("target"), 255824, nil, nil, nil, true, {0.5, 0, 0.55, 0.75})
-	elseif command == "dbm2" then
-		DBM.Nameplate:Hide(true, UnitGUID("target"), 255824, nil, nil, nil, true, {0.5, 0, 0.55, 0.75})
-	elseif command == "valid" then
-		print ("Plates Created:")
-		for plate, tp_frame in pairs(Addon.PlatesCreated) do
-			print (tp_frame.unit and tp_frame.unit.name or "<Undefined>", "=> Active:", tp_frame.Active, "- Shown:", tp_frame:IsShown(), tp_frame.visual.healthbar:IsShown(), tp_frame.visual.customtext:IsShown())
-			if not (tp_frame.unit and tp_frame.unit.name) then
-				if plate == C_NamePlate.GetNamePlateForUnit("player") then
-					print ("  =>Player")
-				end
-			end
-		end
-	elseif command == "wow-version" then
-		local wowVersionString, wowBuild, _, wowTOC = GetBuildInfo()
-
-		print("WOW_PROJECT_ID:", WOW_PROJECT_ID)
-		print("LE_EXPANSION_LEVEL_CURRENT:", LE_EXPANSION_LEVEL_CURRENT)
-		print("GetClassicExpansionLevel():", GetClassicExpansionLevel and GetClassicExpansionLevel() or nil)		
-		print("TOC Version:", wowTOC)		
-		print("Addon --------")		
-		print("    IS_CLASSIC:", Addon.IS_CLASSIC)		
-		print("    IS_TBC_CLASSIC:", Addon.IS_TBC_CLASSIC)		
-		print("    IS_WRATH_CLASSIC:", Addon.IS_WRATH_CLASSIC)		
-		print("    IS_MAINLINE:", Addon.IS_MAINLINE)
-	elseif command == "tooltip" then
-		local tooltipData = C_TooltipInfo.GetUnit("target")
-
-		TooltipUtil.SurfaceArgs(tooltipData)
-
-		for _, line in ipairs(tooltipData.lines) do
-				TooltipUtil.SurfaceArgs(line)
-		end
-
-		-- The above SurfaceArgs calls are required to assign values to the
-		-- 'type', 'guid', and 'leftText' fields seen below.
-
-		print("Tooltip Type: ", tooltipData.type)
-		print("Unit GUID: ", tooltipData.guid)
-		print("Unit Name: ", tooltipData.lines[1].leftText)
-		print("Unit Info: ", tooltipData.lines[2].leftText)
-		print("Unit Faction: ", tooltipData.lines[3].leftText)
-
-		DevTools_Dump({ tooltipData.lines[4] })
 	else
 		Addon.Logging.Error(L["Unknown option: "] .. command)
 		PrintHelp()
