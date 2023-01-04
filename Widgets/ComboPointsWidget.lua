@@ -397,10 +397,14 @@ local function OnUpdateWidgetRune(cooldown_frame, elapsed)
 
       if cp_texture_off:IsShown() then
         local cooldown = cp_texture_off.Time.Expiration - current_time
-        cp_texture_off.Time:SetText(cooldown)
-        if cooldown <= 3 then
-          local color = Widget.Colors.Expiring
-          cp_texture_off.Time:SetTextColor(color.r, color.g, color.b)
+        if cooldown < 0 then
+          cp_texture_off.Time.Time:SetText(nil)
+        else
+          cp_texture_off.Time:SetText(cooldown)
+          if cooldown <= 3 then
+            local color = Widget.Colors.Expiring
+            cp_texture_off.Time:SetTextColor(color.r, color.g, color.b)
+          end
         end
       end
     end
