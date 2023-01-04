@@ -10,24 +10,29 @@ local Widget = (Addon.IS_CLASSIC and {}) or Addon.Widgets:NewWidget("Arena")
 ---------------------------------------------------------------------------------------------------
 
 -- Lua APIs
-local pairs = pairs
 
 -- WoW APIs
-local GetNumArenaOpponents = GetNumArenaOpponents
-local IsInInstance, IsInBrawl = IsInInstance, C_PvP.IsInBrawl
+-- local GetNumArenaOpponents = GetNumArenaOpponents
+local IsInInstance = IsInInstance
+local IsInBrawl, IsSoloShuffle = C_PvP.IsInBrawl, C_PvP.IsSoloShuffle
 
 -- ThreatPlates APIs
 local Font = Addon.Font
-
-local PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ArenaWidget\\"
-local ICON_TEXTURE = PATH .. "BG"
-local InArena = false
-local ArenaID = {}
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
 -- List them here for Mikk's FindGlobals script
 -- GLOBALS: CreateFrame, UnitGUID
+
+---------------------------------------------------------------------------------------------------
+-- Constants and local variables
+---------------------------------------------------------------------------------------------------
+local PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ArenaWidget\\"
+local ICON_TEXTURE = PATH .. "BG"
+
+local InArena = false
+local PlayerGUIDToNumber = {}
+--local ArenaID = {}
 
 ---------------------------------------------------------------------------------------------------
 -- Cached configuration settings
@@ -38,28 +43,77 @@ local Settings
 -- Arena Widget Functions
 ---------------------------------------------------------------------------------------------------
 
-local function GetArenaOpponents()
-	for i = 1, GetNumArenaOpponents() do
-		local player_guid = _G.UnitGUID("arena" .. i)
-		local pet_guid = _G.UnitGUID("arenapet" .. i)
+local ArenaUnitIdToNumber = {}
+for i = 1, MAX_ARENA_ENEMIES do
+  ArenaUnitIdToNumber["arena" .. i] = i
+  ArenaUnitIdToNumber["arenapet" .. i] = i
+end
 
-    if player_guid and not ArenaID[player_guid] then
-      ArenaID[player_guid] = i
-		end
+-- local function GetArenaOpponents()
+-- 	for i = 1, GetNumArenaOpponents() do
+-- 		local player_guid = _G.UnitGUID("arena" .. i)
+-- 		local pet_guid = _G.UnitGUID("arenapet" .. i)
 
-		if pet_guid and not ArenaID[pet_guid] then
-			ArenaID[pet_guid] = i
-		end
-  end
+--     if player_guid and not ArenaID[player_guid] then
+--       ArenaID[player_guid] = i
+-- 		end
+
+-- 		if pet_guid and not ArenaID[pet_guid] then
+-- 			ArenaID[pet_guid] = i
+-- 		end
+--   end
+-- end
+
+local function GetUnitArenaNumber(guid)
+  return PlayerGUIDToNumber[guid]
+
+  -- If the arena id of this unit is aleady known, don't update the list. Otherweise check for new arena players/pets
+  -- GetArenaOpponents()
+  --return ArenaID[guid]
 end
 
 function Widget:PLAYER_ENTERING_WORLD()
   local _, instance_type = IsInInstance()
   if instance_type == "arena" and not IsInBrawl() then
     InArena = true
+
+    self:RegisterEvent("ARENA_OPPONENT_UPDATE")
+    --self:RegisterEvent("ARENA_PREP_OPPONENT_SPECIALIZATIONS")  -- for solo shuffle
   else
     InArena = false
-    ArenaID = {} -- Clear the table when we leave
+    PlayerGUIDToNumber = {}
+    --ArenaID = {} -- Clear the table when we leave
+    
+    self:UnregisterEvent("ARENA_OPPONENT_UPDATE")
+    --self:UnregisterEvent("ARENA_PREP_OPPONENT_SPECIALIZATIONS")  -- for solo shuffle
+  end
+end
+
+function Widget:PVP_MATCH_ACTIVE()
+  PlayerGUIDToNumber = {}
+end
+
+-- function Widget:ARENA_PREP_OPPONENT_SPECIALIZATIONS()
+--   --ArenaID = {} -- Clear the table when we leave
+--   PlayerGUIDToNumber = {}
+
+--   -- if C_PvP.IsSoloShuffle() then
+--   --   -- GetArenaOpponents()
+--   --   self:UpdateAllFrames()
+--   -- end
+-- end
+
+-- Parameters: unitToken, updateReason
+--   updateReason: seen, destroyed, unseen, cleared
+function Widget:ARENA_OPPONENT_UPDATE(unitid, update_reason)
+  if update_reason == "seen" then
+    local guid = _G.UnitGUID(unitid)
+    PlayerGUIDToNumber[guid] = ArenaUnitIdToNumber[unitid]
+    
+    local widget_frame = self:GetWidgetFrameForUnit(unitid)
+    if widget_frame then
+      self:OnUnitAdded(widget_frame, unitid)
+    end
   end
 end
 
@@ -96,8 +150,9 @@ end
 
 function Widget:OnEnable()
   self:RegisterEvent("PLAYER_ENTERING_WORLD")
-  --Widget:RegisterEvent("ARENA_PREP_OPPONENT_SPECIALIZATIONS")
-  --Widget:RegisterEvent("ARENA_OPPONENT_UPDATE")
+  if Addon.IS_MAINLINE then
+    self:RegisterEvent("PVP_MATCH_ACTIVE")
+  end
 end
 
 function Widget:EnabledForStyle(style, unit)
@@ -110,10 +165,7 @@ function Widget:OnUnitAdded(widget_frame, unit)
     return
   end
 
-  GetArenaOpponents()
-
-  local arena_no = ArenaID[unit.guid]
-
+  local arena_no = GetUnitArenaNumber(unit.guid)
   if not arena_no then
     widget_frame:Hide()
     return
@@ -138,6 +190,9 @@ function Widget:OnUnitAdded(widget_frame, unit)
 
   widget_frame:Show()
 end
+
+-- Used in ARENA_PREP_OPPONENT_SPECIALIZATIONS
+-- Widget.UpdateFrame = Widget.OnUnitAdded
 
 function Widget:UpdateLayout(widget_frame)
   -- Updates based on settings
