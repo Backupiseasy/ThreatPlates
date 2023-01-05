@@ -15,6 +15,7 @@ local Widget = (Addon.IS_CLASSIC and {}) or Addon.Widgets:NewWidget("Arena")
 -- local GetNumArenaOpponents = GetNumArenaOpponents
 local IsInInstance = IsInInstance
 local IsInBrawl, IsSoloShuffle = C_PvP.IsInBrawl, C_PvP.IsSoloShuffle
+local MAX_ARENA_ENEMIES = MAX_ARENA_ENEMIES or 5 -- MAX_ARENA_ENEMIES is not defined in Wrath Clasic
 
 -- ThreatPlates APIs
 local Font = Addon.Font
@@ -76,16 +77,10 @@ function Widget:PLAYER_ENTERING_WORLD()
   local _, instance_type = IsInInstance()
   if instance_type == "arena" and not IsInBrawl() then
     InArena = true
-
-    self:RegisterEvent("ARENA_OPPONENT_UPDATE")
-    --self:RegisterEvent("ARENA_PREP_OPPONENT_SPECIALIZATIONS")  -- for solo shuffle
   else
     InArena = false
     PlayerGUIDToNumber = {}
     --ArenaID = {} -- Clear the table when we leave
-    
-    self:UnregisterEvent("ARENA_OPPONENT_UPDATE")
-    --self:UnregisterEvent("ARENA_PREP_OPPONENT_SPECIALIZATIONS")  -- for solo shuffle
   end
 end
 
@@ -150,6 +145,9 @@ end
 
 function Widget:OnEnable()
   self:RegisterEvent("PLAYER_ENTERING_WORLD")
+  -- Arenas are available from TBC Classic on, but this widget is disabled in Classic anyway
+  self:RegisterEvent("ARENA_OPPONENT_UPDATE")
+  --self:RegisterEvent("ARENA_PREP_OPPONENT_SPECIALIZATIONS")  -- for solo shuffle
   if Addon.IS_MAINLINE then
     self:RegisterEvent("PVP_MATCH_ACTIVE")
   end
