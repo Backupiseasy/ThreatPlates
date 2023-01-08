@@ -514,6 +514,7 @@ local CROWD_CONTROL_SPELLS_WRATH_CLASSIC = {
   [31589] = PC_SNARE,                      -- Slow
   -- Frostbolt - not added as it has 100% uptime
   [44572] = LOC_STUN,                      -- Deep Freeze
+  [33395] = PC_ROOT,                       -- Freeze (Pet)
 
   ---------------------------------------------------------------------------------------------------
   -- Paladin
