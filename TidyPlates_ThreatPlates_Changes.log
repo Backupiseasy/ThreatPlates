@@ -1,5 +1,5 @@
 ﻿------------------------------------------------------
-11.1.8 (2023-01-05)
+11.1.8 (2023-01-08)
 ------------------------------------------------------
 * Added Freeze (Mage Water Elemental) to Auras widget as CC aura for Wrath Classic.
 * Fixed a bug in Solo Shuffle where arena numbers were not shown correctly [Issue #581, #600, GH-370, Comment #6550, #6709, #6719, #6758].
