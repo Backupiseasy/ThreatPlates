@@ -48,6 +48,8 @@ local ArenaUnitIdToNumber = {}
 for i = 1, MAX_ARENA_ENEMIES do
   ArenaUnitIdToNumber["arena" .. i] = i
   ArenaUnitIdToNumber["arenapet" .. i] = i
+  ArenaUnitIdToNumber["party" .. i] = i
+  ArenaUnitIdToNumber["partypet" .. i] = i
 end
 
 -- local function GetArenaOpponents()
@@ -112,6 +114,18 @@ function Widget:ARENA_OPPONENT_UPDATE(unitid, update_reason)
   end
 end
 
+function Widget:GROUP_ROSTER_UPDATE()
+  for i = 1, 5 do
+    local unitid = "party" .. i
+    local guid = _G.UnitGUID(unitid)
+    PlayerGUIDToNumber[guid] = ArenaUnitIdToNumber[unitid]
+    local widget_frame = self:GetWidgetFrameForUnit(unitid)
+    if widget_frame then
+      self:OnUnitAdded(widget_frame, unitid)
+    end
+  end
+end
+
 ---------------------------------------------------------------------------------------------------
 -- Widget functions for creation and update
 ---------------------------------------------------------------------------------------------------
@@ -148,13 +162,14 @@ function Widget:OnEnable()
   -- Arenas are available from TBC Classic on, but this widget is disabled in Classic anyway
   self:RegisterEvent("ARENA_OPPONENT_UPDATE")
   --self:RegisterEvent("ARENA_PREP_OPPONENT_SPECIALIZATIONS")  -- for solo shuffle
+  self:RegisterEvent("GROUP_ROSTER_UPDATE")
   if Addon.IS_MAINLINE then
     self:RegisterEvent("PVP_MATCH_ACTIVE")
   end
 end
 
 function Widget:EnabledForStyle(style, unit)
-  return unit.reaction == "HOSTILE" and not (style == "NameOnly" or style == "NameOnly-Unique" or style == "etotem")
+  return not (style == "NameOnly" or style == "NameOnly-Unique" or style == "etotem")
 end
 
 function Widget:OnUnitAdded(widget_frame, unit)
