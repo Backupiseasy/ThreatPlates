@@ -683,11 +683,11 @@ ThreatPlates.DEFAULT_SETTINGS = {
       ShowNumber = true,
       HideName = false,
       colors = {
-        [1] = RGB_P(1, 0, 0, 1),
-        [2] = RGB_P(1, 1, 0, 1),
-        [3] = RGB_P(0, 1, 0, 1),
-        [4] = RGB_P(0, 1, 1, 1),
-        [5] = RGB_P(0, 0, 1, 1),
+        [1] = RGB(255,   0,   0, 1),
+        [2] = RGB(255,   0,   0, 1),
+        [3] = RGB(255,   0,   0, 1),
+        [4] = RGB(255,   0,   0, 1),
+        [5] = RGB(255,   0,   0, 1),
       },
       numColors = {
         [1] = RGB_P(1, 1, 1, 1),
@@ -696,6 +696,25 @@ ThreatPlates.DEFAULT_SETTINGS = {
         [4] = RGB_P(1, 1, 1, 1),
         [5] = RGB_P(1, 1, 1, 1),
       },
+      Allies = {
+        ShowOrb = true,
+        ShowNumber = true,
+        HideName = false,
+        OrbColors = {
+          [1] = RGB(  0, 255,   0, 1),
+          [2] = RGB(  0, 255,   0, 1),
+          [3] = RGB(  0, 255,   0, 1),
+          [4] = RGB(  0, 255,   0, 1),
+          [5] = RGB(  0, 255,   0, 1),
+        },
+        NumberColors = {
+          [1] = RGB_P(1, 1, 1, 1),
+          [2] = RGB_P(1, 1, 1, 1),
+          [3] = RGB_P(1, 1, 1, 1),
+          [4] = RGB_P(1, 1, 1, 1),
+          [5] = RGB_P(1, 1, 1, 1),
+        },
+      },      
       NumberText = {
         Anchor = "CENTER",
         InsideAnchor = true,
