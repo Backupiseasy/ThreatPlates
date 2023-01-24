@@ -1973,14 +1973,17 @@ local function CreateComboPointsWidgetOptions()
                 type = "select",
                 order = 10,
                 values = {
-                  DEATHKNIGHT = ((not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC) and L["Death Knight"]) or nil,
+                  DEATHKNIGHT = (Addon.ClassicExpansionAtLeast(LE_EXPANSION_WRATH_OF_THE_LICH_KING) and L["Death Knight"]) or nil,
                   DRUID = L["Druid"],
-                  EVOKER = ((not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC and not Addon.IS_WRATH_CLASSIC) and L["Evoker"]) or nil,
-                  MAGE = L["Arcane Mage"],
-                  MONK = ((not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC and not Addon.IS_WRATH_CLASSIC) and L["Windwalker Monk"]) or nil,
-                  PALADIN = ((not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC and not Addon.IS_WRATH_CLASSIC) and L["Paladin"]) or nil,
+                  EVOKER = (Addon.ClassicExpansionAtLeast(LE_EXPANSION_DRAGONFLIGHT) and L["Evoker"]) or nil,
+                  -- Arcane Charge as a resource mechanic was introduced with Patch 7.0.3 (Legion)
+                  MAGE = (Addon.ClassicExpansionAtLeast(LE_EXPANSION_LEGION) and L["Arcane Mage"]) or nil,
+                  MONK = (Addon.ClassicExpansionAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA)  and L["Windwalker Monk"]) or nil,
+                  -- Holy Power was introduced with Patch 4.0.1 (Cataclysm)
+                  PALADIN = (Addon.ClassicExpansionAtLeast(LE_EXPANSION_CATACLYSM)  and L["Paladin"]) or nil,
                   ROGUE = L["Rogue"],
-                  WARLOCK = L["Warlock"],
+                  -- Soul Shard as a resource mechanic was introduced with Path 4.0.1 (Cataclysm)
+                  WARLOCK = (Addon.ClassicExpansionAtLeast(LE_EXPANSION_CATACLYSM)  and L["Warlock"]) or nil,
                 },
                 arg = { "ComboPoints", "Specialization" },
               },
@@ -2106,7 +2109,8 @@ local function CreateComboPointsWidgetOptions()
                   Addon.Widgets:UpdateSettings(MAP_OPTION_TO_WIDGET[info[2]])
                 end,
                 hasAlpha = false,
-                hidden = function() return db.ComboPoints.Specialization ~= "ROGUE" or (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC) end
+                -- Charged Combo Points were introduced with Battle for Azerorth  
+                hidden = function() return db.ComboPoints.Specialization ~= "ROGUE" or not Addon.ClassicExpansionAtLeast(LE_EXPANSION_BATTLE_FOR_AZEROTH) end
               },
               ColorDeathrune = {
                 name = L["Death Rune"],
@@ -2121,7 +2125,8 @@ local function CreateComboPointsWidgetOptions()
                   Addon.Widgets:UpdateSettings(MAP_OPTION_TO_WIDGET[info[2]])
                 end,
                 hasAlpha = false,
-                hidden = function() return db.ComboPoints.Specialization ~= "DEATHKNIGHT" or not Addon.IS_WRATH_CLASSIC end
+                -- Deathrunes were available from Wrath to WoD
+                hidden = function() return db.ComboPoints.Specialization ~= "DEATHKNIGHT" or Addon.ClassicExpansionAtLeast(LE_EXPANSION_LEGION) end
               },
             },
           },
@@ -2152,12 +2157,14 @@ local function CreateComboPointsWidgetOptions()
         type = "group",
         order = 30,
         inline = false,
+        hidden = function() return not Addon.ClassicExpansionAtLeast(LE_EXPANSION_WRATH_OF_THE_LICH_KING) end,
         args = {
           RuneCooldown= {
             name = L["Death Knigh Rune Cooldown"],
             order = 70,
             type = "group",
             inline = true,
+            hidden = function() return not Addon.ClassicExpansionAtLeast(LE_EXPANSION_WRATH_OF_THE_LICH_KING) end,
             args = {
               Enable = {
                 name = L["Enable"],
@@ -2173,6 +2180,7 @@ local function CreateComboPointsWidgetOptions()
             order = 80,
             type = "group",
             inline = true,
+            hidden = function() return not Addon.ClassicExpansionAtLeast(LE_EXPANSION_DRAGONFLIGHT) end,
             args = {
               Enable = {
                 name = L["Enable"],

@@ -2,7 +2,7 @@
 ## Interface-Retail: 100002
 ## Interface-Classic: 11403
 ## Interface-BCC: 20504
-## Interface-Wrath: 30400
+## Interface-Wrath: 30401
 
 ## Title: Threat Plates
 ## Version: @project-version@
