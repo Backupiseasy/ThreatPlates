@@ -1,8 +1,13 @@
 ﻿------------------------------------------------------
 11.1.9 (2023-01-10)
 ------------------------------------------------------
-* Fixed a Lua error in Combo Points widget for Deathknights that occured because of a typo [GH-379].
 * Fixed a bug in the option dialog where unavailable options where shown in Classic WoW.
+* Updated TOC version for Wrath Classic Patch 3.4.1.
+
+------------------------------------------------------
+11.1.9 (2023-01-10)
+------------------------------------------------------
+* Fixed a Lua error in Combo Points widget for Deathknights that occured because of a typo [GH-379].
 
 ------------------------------------------------------
 11.1.8 (2023-01-08)
