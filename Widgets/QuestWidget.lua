@@ -656,7 +656,7 @@ function Widget:UpdateSettings()
   Font = Addon.LibSharedMedia:Fetch('font', Addon.db.profile.questWidget.Font)
 end
 
-function Addon:PrintQuests(command)
+function Widget:PrintDebug(command)
   local quest_id = tonumber(command)
   if quest_id then
     local quest_log_index = GetLogIndexForQuestID(quest_id)
