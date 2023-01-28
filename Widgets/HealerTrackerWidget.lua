@@ -1,5 +1,5 @@
 -----------------------
--- Healer Tracker Widget --
+-- Healer Tracker Widget
 -----------------------
 local ADDON_NAME, Addon = ...
 
@@ -37,7 +37,6 @@ local _G =_G
 ---------------------------------------------------------------------------------------------------
 -- Constants
 ---------------------------------------------------------------------------------------------------
-local HEALER_CLASSES = {}
 local HEALER_SPECIALIZATION_ID = {
   [105] = "Restoration Druid",
   [264] = "Restoration Shaman",
@@ -49,20 +48,21 @@ local HEALER_SPECIALIZATION_ID = {
 }
 
 -- Store localized names for specializations for parsing the battleground score
+local HEALER_CLASSES = {}
 local HEALER_SPECS = {}
-for specialization_id, _ in pairs(HEALER_SPECIALIZATION_ID) do
-  local _, name, _, _, _, classFile, _ =  GetSpecializationInfoByID(specialization_id)
-  HEALER_CLASSES[classFile] = true
-  HEALER_SPECS[name] = true
+if Addon.IS_MAINLINE then
+  for specialization_id, _ in pairs(HEALER_SPECIALIZATION_ID) do
+    local _, name, _, _, _, classFile, _ =  GetSpecializationInfoByID(specialization_id)
+    HEALER_CLASSES[classFile] = true
+    HEALER_SPECS[name] = true
+  end
+else
+  HEALER_CLASSES.PRIEST = true
+  HEALER_CLASSES.DRUID = true
+  HEALER_CLASSES.SHAMAN = true
+  HEALER_CLASSES.PALADIN = true
 end
 
--- 1/27 21:31:23.122  SPELL_HEAL,Player-581-0A4A13A4,"Coc-Blackrock",0x548,0x0,Player-581-0A4A13A4,"Coc-Blackrock",0x548,0x0,227034,"Wächter der Natur",0x8,0000000000000000,0000000000000000,0,0,0,0,0,0,-1,0,0,0,0.00,0.00,2112,0.0000,0,1975,1975,1975,0,nil
--- 1/27 21:31:21.112  SPELL_AURA_APPLIED,Player-581-0A3B3FB4,"Seraphíné-Blackrock",0x518,0x0,Player-581-0A3B3FB4,"Seraphíné-Blackrock",0x518,0x0,377234,"Nervenkitzel der Lüfte",0x1,BUFF
--- 1/27 21:31:22.904  SPELL_CAST_START,Player-581-078C5248,"Chillahdh-Blackrock",0x518,0x0,0000000000000000,nil,0x80000000,0x80000000,374463,"Beständiger Nozdorit",0x1
--- 1/27 21:31:22.193  SPELL_CAST_SUCCESS,Player-581-0A683D32,"Mealon-Blackrock",0x518,0x0,0000000000000000,nil,0x80000000,0x80000000,222695,"Dalaranruhestein",0x1,0000000000000000,0000000000000000,0,0,0,0,0,0,-1,0,0,0,0.00,0.00,2112,0.0000,0
--- 1/27 21:38:14.963  SPELL_EMPOWER_START,Player-581-0A5E737F,"Rhythokk-Blackrock",0x511,0x0,Creature-0-4246-2444-720-196054-0000542C9B,"Sonnengürtelmoschushirsch",0x10a28,0x0,382411,"Ewigkeitswoge",0x50
--- 1/27 21:38:20.636  SPELL_EMPOWER_END,Player-581-0A5E737F,"Rhythokk-Blackrock",0x511,0x0,0000000000000000,nil,0x80000000,0x80000000,382266,"Feueratem",0x4,1
--- 1/27 21:31:26.585  SPELL_PERIODIC_HEAL,Player-581-0A66ED30,"Mortié-Blackrock",0x518,0x0,Player-581-0A66ED30,"Mortié-Blackrock",0x518,0x0,391891,"Adaptiver Schwarm",0x20,0000000000000000,0000000000000000,0,0,0,0,0,0,-1,0,0,0,0.00,0.00,2112,0.0000,0,6497,6497,6497,0,1
 local SPELL_EVENTS = {
   ["SPELL_HEAL"] = true,
   ["SPELL_AURA_APPLIED"] = true,
@@ -462,8 +462,11 @@ end
 function Widget:OnEnable()
   -- We could register/unregister this when entering/leaving the battlefield, but as it only fires when
   -- in a bg, that does not really matter
-  self:RegisterEvent("UPDATE_BATTLEFIELD_SCORE")
   self:RegisterEvent("PLAYER_ENTERING_WORLD")
+  if Addon.IS_MAINLINE then
+    -- We don't need to register this for Classic, as GetBattlefieldScore does not return talentSpec information
+    self:RegisterEvent("UPDATE_BATTLEFIELD_SCORE")
+  end
 end
 
 function Widget:EnabledForStyle(style, unit)
