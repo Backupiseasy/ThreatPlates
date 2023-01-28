@@ -389,6 +389,8 @@ function TidyPlatesThreat:OnInitialize()
 
   -- Setup chat commands
   self:RegisterChatCommand("tptp", "ChatCommand")
+
+  Addon.CVars:Initialize()
 end
 
 -- The OnEnable() and OnDisable() methods of your addon object are called by AceAddon when your addon is
@@ -499,9 +501,6 @@ end
 -- Fired when the player enters the world, reloads the UI, enters/leaves an instance or battleground, or respawns at a graveyard.
 -- Also fires any other time the player sees a loading screen
 function TidyPlatesThreat:PLAYER_ENTERING_WORLD()
-  -- Sync internal settings with Blizzard CVars
-  -- SetCVar("ShowClassColorInNameplate", 1)
-
   local db = Addon.db.profile.questWidget
   if not (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC) then
     if db.ON or db.ShowInHeadlineView then
@@ -578,14 +577,6 @@ function TidyPlatesThreat:PLAYER_REGEN_ENABLED()
     task_queue_ooc[i]()
     task_queue_ooc[i] = nil
   end
-
---  local db = Addon.db.profile.threat
---  -- Required for threat/aggro detection
---  if db.ON and (GetCVar("threatWarning") ~= 3) then
---    SetCVar("threatWarning", 3)
---  elseif not db.ON and (GetCVar("threatWarning") ~= 0) then
---    SetCVar("threatWarning", 0)
---  end
 
   local db = Addon.db.profile.Automation
   local isInstance, _ = IsInInstance()

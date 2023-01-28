@@ -62,6 +62,40 @@ local COMBAT_PROTECTED = {
   UnitNameFriendlyMinionName = true,
 }
 
+---------------------------------------------------------------------------------------------------
+-- Initialize CVars for Threat Plates
+---------------------------------------------------------------------------------------------------
+
+-- Set these CVars after login/reloading the UI
+function CVars:Initialize(cvar, value)
+  -- Fix for: Friendly Nameplates Name Only Mode in Raids and Dungeons for Patch 10.0.5
+  -- https://www.wowhead.com/de/news/update-solution-to-friendly-nameplates-name-only-mode-in-raids-and-dungeons-for-331178
+  -- /script C_CVar.RegisterCVar("nameplateShowOnlyNames")
+  -- Registering only has to be done once, but the value seems to be reset to 0 after every reload 
+  if C_CVar.GetCVar("nameplateShowOnlyNames") == nil then
+    C_CVar.RegisterCVar("nameplateShowOnlyNames")
+  end
+
+  -- ! The CVar nameplateShowOnlyNames is not persistently stored by WoW, so we have to restore its value
+  -- ! after every login/reloading the UI.
+  self:SetBoolProtected("nameplateShowOnlyNames", Addon.db.profile.BlizzardSettings.Names.ShowOnlyNames)
+
+  -- Sync internal settings with Blizzard CVars
+  -- SetCVar("ShowClassColorInNameplate", 1)
+
+  --  local db = Addon.db.profile.threat
+  --  -- Required for threat/aggro detection
+  --  if db.ON and (GetCVar("threatWarning") ~= 3) then
+  --    SetCVar("threatWarning", 3)
+  --  elseif not db.ON and (GetCVar("threatWarning") ~= 0) then
+  --    SetCVar("threatWarning", 0)
+  --  end
+end
+
+---------------------------------------------------------------------------------------------------
+-- 
+---------------------------------------------------------------------------------------------------
+
 local function SetConsoleVariable(cvar, value)
   -- Store in settings to be able to restore it later, but don't overwrite an existing value unless the current value
   -- is different from the backup value and the new value TP wants to set. In that case, the CVars was changed since
