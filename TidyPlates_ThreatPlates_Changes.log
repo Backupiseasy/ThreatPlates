@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+11.1.13 (2023-01-29)
+------------------------------------------------------
+* Fixed a bug were Threat Plates was shown as out-of-date because of wrong interface version used in TOC file for Retail [Comment #6858].
+
+------------------------------------------------------
 11.1.12 (2023-01-28)
 ------------------------------------------------------
 * Added a fix for friendly nameplates Name Only mode not working in raids and dungeons for Patch 10.0.5 [Comment #6840]. For the fix to be applied, you first have to enable Name Only mode in the options under General - Blizzard Settings - Names.
@@ -26,7 +31,7 @@
 * Fixed a bug in Solo Shuffle where arena numbers were not shown correctly [Issue #581, #600, GH-370, Comment #6550, #6709, #6719, #6758].
 * Fixed a bug where empowered spell casts from Evoker where not shown on the nameplate castbar [Issue #606].
 * Fixed a bug with Deathknight runes showing wrong cooldown times that occured when the player died [GH-374].
-* Fixed Lua error that could occur when scanning an invalid tooltip, e.g., for quest information [Issue #609].
+* Fixed a Lua error that could occur when scanning an invalid tooltip, e.g., for quest information [Issue #609].
 
 ------------------------------------------------------
 11.1.7 (2022-12-28)
