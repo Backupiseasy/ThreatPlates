@@ -564,9 +564,9 @@ ThreatPlates.DEFAULT_SETTINGS = {
       ForceFriendlyInCombat = "NONE",
       --
       EnemyTextColorMode = "CLASS",
-      EnemyTextColor = RGB(0, 255, 0),
+      EnemyTextColor = RGB(0, 255, 0, 1),
       FriendlyTextColorMode = "CLASS",
-      FriendlyTextColor = RGB(0, 255, 0),
+      FriendlyTextColor = RGB(0, 255, 0, 1),
       UseRaidMarkColoring = false,
       SubtextColorUseHeadline = false,
       SubtextColorUseSpecific = true,
@@ -1793,9 +1793,9 @@ ThreatPlates.DEFAULT_SETTINGS = {
         ShowRealm = false,
         --
         EnemyTextColorMode = "CUSTOM",
-        EnemyTextColor = RGB(255, 255, 255),
+        EnemyTextColor = RGB(255, 255, 255, 1),
         FriendlyTextColorMode = "CUSTOM",
-        FriendlyTextColor = RGB(255, 255, 255),
+        FriendlyTextColor = RGB(255, 255, 255, 1),
         UseRaidMarkColoring = false,
         AbbreviationForEnemyUnits = "FULL",
         AbbreviationForFriendlyUnits = "FULL",

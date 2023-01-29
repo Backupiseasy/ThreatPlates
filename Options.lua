@@ -6815,7 +6815,8 @@ local function CreateNamesOptions()
                 values = t.FRIENDLY_TEXT_COLOR,
                 arg = { "settings", "name", "FriendlyTextColorMode" }
               },
-              FriendlyColorCustom = GetColorEntry(L["Custom Color"], 20, { "settings", "name", "FriendlyTextColor" }),
+              FriendlyColorCustom = GetColorAlphaEntry(20, { "settings", "name", "FriendlyTextColor" },  
+                function() return Addon.db.profile.settings.name.FriendlyTextColorMode ~= "CUSTOM" end),
               EnemyColor = {
                 name = L["Enemy Name Color"],
                 order = 30,
@@ -6823,7 +6824,8 @@ local function CreateNamesOptions()
                 values = t.ENEMY_TEXT_COLOR,
                 arg = { "settings", "name", "EnemyTextColorMode" }
               },
-              EnemyColorCustom = GetColorEntry(L["Custom Color"], 40, { "settings", "name", "EnemyTextColor" }),
+              EnemyColorCustom = GetColorAlphaEntry(40, { "settings", "name", "EnemyTextColor" },  
+                function() return Addon.db.profile.settings.name.EnemyTextColorMode ~= "CUSTOM" end),
               Spacer1 = GetSpacerEntry(50),
               EnableRaidMarks = {
                 name = L["Color by Target Mark"],
@@ -6911,7 +6913,8 @@ local function CreateNamesOptions()
                 values = t.FRIENDLY_TEXT_COLOR,
                 arg = { "HeadlineView", "FriendlyTextColorMode" }
               },
-              FriendlyColorCustom = GetColorEntry(L["Custom Color"], 20, { "HeadlineView", "FriendlyTextColor" }),
+              FriendlyColorCustom = GetColorAlphaEntry(20, { "HeadlineView", "FriendlyTextColor" },  
+                function() return Addon.db.profile.HeadlineView.FriendlyTextColorMode ~= "CUSTOM" end),
               EnemyColor = {
                 name = L["Enemy Name Color"],
                 order = 30,
@@ -6919,7 +6922,8 @@ local function CreateNamesOptions()
                 values = t.ENEMY_TEXT_COLOR,
                 arg = { "HeadlineView", "EnemyTextColorMode" }
               },
-              EnemyColorCustom = GetColorEntry(L["Custom Color"], 40, { "HeadlineView", "EnemyTextColor" }),
+              EnemyColorCustom = GetColorAlphaEntry(40, { "HeadlineView", "EnemyTextColor" },
+                function() return Addon.db.profile.HeadlineView.EnemyTextColorMode ~= "CUSTOM" end),
               Spacer1 = GetSpacerEntry(50),
               EnableRaidMarks = {
                 name = L["Color by Target Mark"],

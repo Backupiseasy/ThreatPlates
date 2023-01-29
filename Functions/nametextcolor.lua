@@ -58,10 +58,10 @@ function Addon:SetNameColor(unit)
   elseif mode == "CUSTOM" then
     if unit_reaction == "FRIENDLY" then
       color = db_mode.FriendlyTextColor
-      return color.r, color.g, color.b
+      return color.r, color.g, color.b, color.a
     else
       color = db_mode.EnemyTextColor
-      return color.r, color.g, color.b
+      return color.r, color.g, color.b, color.a
     end
   elseif mode == "HEALTH" then
     local color =  GetColorByHealthDeficit(unit)
