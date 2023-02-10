@@ -1,8 +1,7 @@
-﻿
+﻿------------------------------------------------------
+11.1.14 (2023-02-10)
 ------------------------------------------------------
-11.1.14 (2023-01-28)
-------------------------------------------------------
-* Updated Healer Tracker widget to support Preservation Evoker [GH-379].
+* Updated Healer Tracker widget to support Preservation Evoker [GH-378].
 * Re-worked Healer Tracker widget to better identify healers by spells they use in Retail and Classic.
 
 ------------------------------------------------------
