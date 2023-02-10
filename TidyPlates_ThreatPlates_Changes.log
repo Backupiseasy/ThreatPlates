@@ -1,4 +1,10 @@
 ﻿------------------------------------------------------
+11.1.14 (2023-02-10)
+------------------------------------------------------
+* Updated Healer Tracker widget to support Preservation Evoker [GH-378].
+* Re-worked Healer Tracker widget to better identify healers by spells they use in Retail and Classic.
+
+------------------------------------------------------
 11.1.13 (2023-01-29)
 ------------------------------------------------------
 * Fixed a bug were Threat Plates was shown as out-of-date because of wrong interface version used in TOC file for Retail [Comment #6858].

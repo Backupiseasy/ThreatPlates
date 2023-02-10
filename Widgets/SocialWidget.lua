@@ -370,7 +370,7 @@ end
 --  end
 --end
 
-function Addon.PrintFriendlist()
+function Widget:PrintDebug()
   Addon.Logging.Debug("BNet Friends:")
   local _, BnetOnline = _G.BNGetNumFriends()
   for i = 1, BnetOnline do
