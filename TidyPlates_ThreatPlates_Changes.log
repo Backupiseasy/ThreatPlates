@@ -1,4 +1,10 @@
 ﻿------------------------------------------------------
+11.1.15 (2023-02-10)
+------------------------------------------------------
+* Enabled spec-based profiles for Wrath Classic [Comment #6903].
+* Upgrade integrated libraries (LibDualSpec v1.22.0).
+
+------------------------------------------------------
 11.1.14 (2023-02-10)
 ------------------------------------------------------
 * Updated Healer Tracker widget to support Preservation Evoker [GH-378].

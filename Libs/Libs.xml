@@ -30,6 +30,7 @@
     <!--@end-version-bcc@-->
 
     <!--@version-wrath@-->
+    <Include file="LibDualSpec-1.0\LibDualSpec-1.0.lua"/>
     <!--@end-version-wrath@-->
 
     <!--@version-classic@-->
