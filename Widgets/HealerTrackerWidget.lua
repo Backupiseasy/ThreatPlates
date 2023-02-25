@@ -346,7 +346,7 @@ end
 ---------------------------------------------------------------------------------------------------
 local HealerByName = {}
 local HealerByGUID = {}
-local IsBattleground
+--local IsBattleground
 local BattlefieldScoreDataRequestPending = false
 local DebugHealerInfoSource = {}
 
@@ -402,25 +402,25 @@ end
 
 --triggered when enter and leave instances
 function Widget:PLAYER_ENTERING_WORLD()
-  local _, instance_type = IsInInstance()
-  if instance_type == "pvp" then
-    IsBattleground = true
-    
-    HealerByName = {}
-    HealerByGUID = {}
+  HealerByName = {}
+  HealerByGUID = {}
 
-    self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-    -- if Addon.IS_MAINLINE then
-    --   self:RegisterEvent("INSPECT_READY")
-    -- end
-  else
-    IsBattleground = false
+  -- local _, instance_type = IsInInstance()
+  -- if instance_type == "pvp" then
+  --   --IsBattleground = true
     
-    self:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-    -- if Addon.IS_MAINLINE then
-    --   self:UnregisterEvent("INSPECT_READY")
-    -- end
-  end
+  --   self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+  --   -- if Addon.IS_MAINLINE then
+  --   --   self:RegisterEvent("INSPECT_READY")
+  --   -- end
+  -- else
+  --   --IsBattleground = false
+    
+  --   self:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+  --   -- if Addon.IS_MAINLINE then
+  --   --   self:UnregisterEvent("INSPECT_READY")
+  --   -- end
+  -- end
 end
 
 function Widget:COMBAT_LOG_EVENT_UNFILTERED(...)
@@ -463,6 +463,7 @@ function Widget:OnEnable()
   -- We could register/unregister this when entering/leaving the battlefield, but as it only fires when
   -- in a bg, that does not really matter
   self:RegisterEvent("PLAYER_ENTERING_WORLD")
+  self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
   if Addon.IS_MAINLINE then
     -- We don't need to register this for Classic, as GetBattlefieldScore does not return talentSpec information
     self:RegisterEvent("UPDATE_BATTLEFIELD_SCORE")
@@ -481,10 +482,10 @@ function Widget:EnabledForStyle(style, unit)
 end
 
 function Widget:OnUnitAdded(widget_frame, unit)
-  if not IsBattleground then
-    widget_frame:Hide()
-    return
-  end
+  -- if not IsBattleground then
+  --   widget_frame:Hide()
+  --   return
+  -- end
 
   -- HealerByGUID or HealerByName
   --    true:  Healer
