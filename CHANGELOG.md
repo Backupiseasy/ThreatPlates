@@ -1,4 +1,5 @@
 # @project-version@ (@build-time@)
 
-* Updated Healer Tracker widget to support Preservation Evoker [GH-378].
-* Re-worked Healer Tracker widget to better identify healers by spells they use in Retail and Classic.
+* Healer Tracker no longer is disabled in arenas and open-world [Issue #622].
+* Enabled spec-based profiles for Wrath Classic [Comment #6903].
+* Upgrade integrated libraries (LibDualSpec v1.22.0).
