@@ -281,9 +281,10 @@ function Addon.UnitStyle_AuraTrigger_UpdateStyle(unit)
   end
 end
 
+-- TODO Return value not used here
 function Addon.UnitStyle_AuraTrigger_CheckIfActive(unit, aura_id, aura_name, aura_cast_by_player)
   -- Do this to prevent overwrite the first aura trigger custom style found (which is the one being used)
-  if not Addon.ActiveAuraTriggers or unit.CustomStyleAura then return false end
+  if not Addon.ActiveAuraTriggers or unit.CustomStyleAura then return end
 
   local unique_settings = AuraTriggers[aura_id] or AuraTriggers[aura_name]
   -- Check if enabled for unit's faction and check for show only my auras
@@ -294,27 +295,41 @@ function Addon.UnitStyle_AuraTrigger_CheckIfActive(unit, aura_id, aura_name, aur
 
     local _, _, icon = _G.GetSpellInfo(aura_id)
     unique_settings.AutomaticIcon = icon
-    return true
-  else
-    return false
   end
 end
 
-function Addon.UnitStyle_CastDependent(unit, spell_id, spell_name)
-  local plate_style
+function Addon.UnitStyle_CastTrigger_CheckIfActive(unit, spell_id, spell_name)
+  -- Cast triggers cannot be overwritten (like aura triggers) as there can only be one cast active at a time
+  if not Addon.ActiveCastTriggers then return end
+
+  unit.PreviousCustomStyleCast = unit.CustomStyleCast
+  unit.CustomStyleCast = nil
 
   local unique_settings = CastTriggers[spell_id] or CastTriggers[spell_name]
   if unique_settings and unique_settings.useStyle and unique_settings.Enable.UnitReaction[unit.reaction] then
-    plate_style = (unique_settings.showNameplate and "unique") or (unique_settings.ShowHeadlineView and "NameOnly-Unique") or "etotem"
-
-    unit.CustomStyleCast = plate_style
+    unit.CustomStyleCast = (unique_settings.showNameplate and "unique") or (unique_settings.ShowHeadlineView and "NameOnly-Unique") or "etotem"
     unit.CustomPlateSettingsCast = unique_settings
 
     local _, _, icon = _G.GetSpellInfo(spell_id)
     unique_settings.AutomaticIcon = icon
   end
+end
 
-  return plate_style
+function Addon.UnitStyle_CastTrigger_UpdateStyle(unit)
+  -- Set the style if a cast trigger for a custom nameplate was found or the cast trigger
+  -- is no longer there
+  return  Addon.ActiveCastTriggers and (unit.CustomStyleCast or unit.PreviousCustomStyleCast)
+end
+
+function Addon.UnitStyle_CastTrigger_Reset(unit)
+  if Addon.ActiveCastTriggers then
+    local cast_trigger_was_active = unit.CustomStyleCast ~= nil
+    unit.PreviousCustomStyleCast = nil
+    unit.CustomStyleCast = nil
+    return cast_trigger_was_active
+  else
+    return false
+  end
 end
 
 function Addon:SetStyle(unit)

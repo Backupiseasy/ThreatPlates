@@ -8,8 +8,8 @@ local TidyPlatesCore = CreateFrame("Frame", nil, WorldFrame)
 
 -- Local References
 local _
-local max, gsub, tonumber = math.max, string.gsub, tonumber
-local select, pairs, tostring = select, pairs, tostring 			    -- Local function copy
+local gsub = string.gsub
+local select, pairs = select, pairs 			    -- Local function copy
 
 -- WoW APIs
 local wipe, strsplit = wipe, strsplit
@@ -25,8 +25,8 @@ local GetRaidTargetIndex = GetRaidTargetIndex
 local GetTime = GetTime
 local UnitChannelInfo  = UnitChannelInfo
 local UnitPlayerControlled = UnitPlayerControlled
-local GetCVarBool, CombatLogGetCurrentEventInfo = C_CVar.GetCVarBool, CombatLogGetCurrentEventInfo
-local GetPlayerInfoByGUID, RAID_CLASS_COLORS = GetPlayerInfoByGUID, RAID_CLASS_COLORS
+local CombatLogGetCurrentEventInfo = CombatLogGetCurrentEventInfo
+local GetPlayerInfoByGUID = GetPlayerInfoByGUID
 local UnitNameplateShowsWidgetsOnly = UnitNameplateShowsWidgetsOnly
 
 -- ThreatPlates APIs
@@ -875,7 +875,7 @@ do
       castbar:Hide()
       return
     end
-
+    
     local name, text, texture, startTime, endTime, isTradeSkill, notInterruptible, spellID, numStages
     if channeled then
       name, text, texture, startTime, endTime, isTradeSkill, notInterruptible, spellID, _, numStages = UnitChannelInfo(unitid)
@@ -888,10 +888,10 @@ do
       return
     end
 
-    local plate_style = Addon.ActiveCastTriggers and Addon.UnitStyle_CastDependent(unit, spellID, name)
+    Addon.UnitStyle_CastTrigger_CheckIfActive(unit, spellID, name)
 
     -- Abort here as casts can now switch nameplate styles (e.g,. from headline to healthbar view
-    if not (style.castbar.show or plate_style) then
+    if not style.castbar.show and not unit.CustomStyleCast then
       castbar:Hide()
       return
     end
@@ -901,14 +901,15 @@ do
     unit.spellIsShielded = notInterruptible
 		unit.spellInterruptible = not notInterruptible
 
-    --if plate_style and plate_style ~= extended.stylename then
-    if plate_style ~= extended.stylename then
+    -- Set the style if a cast trigger for a custom nameplate was found or the cast trigger
+    -- is no longer there
+    if Addon.UnitStyle_CastTrigger_UpdateStyle(unit) then 
       ProcessUnitChanges()
     else
       UpdateIndicator_CustomScaleText()
       UpdatePlate_Transparency(extended, unit)
     end
-
+    
     -- Custom nameplates might trigger cause of a cast, but still stay in a style that does not
     -- show the castbar
     if not style.castbar.show then
@@ -960,8 +961,7 @@ do
     castbar.IsChanneling = false
     unit.isCasting = false
 
-    if unit.CustomStyleCast then
-      unit.CustomStyleCast = false
+    if Addon.UnitStyle_CastTrigger_Reset(unit) then
       ProcessUnitChanges()
     else
       UpdateIndicator_CustomScale(extended, unit)

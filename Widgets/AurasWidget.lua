@@ -426,7 +426,7 @@ local CROWD_CONTROL_SPELLS_WRATH_CLASSIC = {
   --  [50043] = PC_SNARE,            -- Rank 3
   --[55741] = PC_SNARE,           -- Desecration - Triggered by Desecration Rank 1 - not shown because uptime to high
   --[68766] = PC_SNARE,           -- Desecration - Triggered by Desecration Rank 2 - not shown because uptime to high
-  [49203] = PC_ROOT,           -- Hungering Cold
+  [51209] = PC_ROOT,           -- Hungering Cold
 
 
   ---------------------------------------------------------------------------------------------------

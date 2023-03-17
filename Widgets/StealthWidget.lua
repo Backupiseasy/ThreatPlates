@@ -75,6 +75,8 @@ local DETECTION_UNITS = {
   ["162417"] = true, -- Anubisath Sentinel
   ["161571"] = true, -- Anubisath Sentinel
   ["159219"] = true, -- Umbral Seer
+  ["130025"] = true, -- Irontide Thug (Tol Dagor)
+  ["131444"] = true, -- Block Warden (Tol Dagor)
   -- Shadowlands
   ["165349"] = true, -- Animated Corpsehound
   ["164563"] = true, -- Vicious Gargon

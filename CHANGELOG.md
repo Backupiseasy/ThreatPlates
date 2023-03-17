@@ -1,5 +1,4 @@
 # @project-version@ (@build-time@)
 
-* Healer Tracker no longer is disabled in arenas and open-world [Issue #622].
-* Enabled spec-based profiles for Wrath Classic [Comment #6903].
-* Upgrade integrated libraries (LibDualSpec v1.22.0).
+* Fixed a Lua error with custom styles with Cast trigger  [Comment #6867].
+* Added Hungering Cold (Deathknight) to Auras widget as CC aura for Wrath Classic [Comment #6925].
