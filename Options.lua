@@ -6146,7 +6146,7 @@ local function CreateHealthbarOptions()
             inline = true,
             args = {
               Enable = {
-                name = L["Color Healthbar By Enemy Class"],
+                name = L["Enemy Units"],
                 order = 1,
                 type = "toggle",
                 descStyle = "inline",
@@ -6154,7 +6154,7 @@ local function CreateHealthbarOptions()
                 arg = { "allowClass" }
               },
               FriendlyClass = {
-                name = L["Color Healthbar By Friendly Class"],
+                name = L["Friendly Units"],
                 order = 2,
                 type = "toggle",
                 descStyle = "inline",
