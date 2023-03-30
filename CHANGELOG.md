@@ -1,3 +1,3 @@
 # @project-version@ (@build-time@)
 
-* Updated TOC version for Patch 10.0.7 for WoW Mainline.
+* Improved showing/hiding interaction between Threat Plates and WoW default nameplates (this might fix GH-402).

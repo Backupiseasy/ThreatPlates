@@ -274,7 +274,7 @@ function Addon:ReloadTheme()
   end
 
   for plate, unitid in pairs(Addon.PlatesVisible) do
-    Addon:UpdateNameplateStyle(plate, unitid)
+    Addon.SetNameplateVisibility(plate, unitid)
   end
 
   Addon:ForceUpdate()
