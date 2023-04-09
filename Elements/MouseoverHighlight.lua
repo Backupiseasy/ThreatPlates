@@ -34,12 +34,14 @@ local TargetHighlightEnabledForStyle = {
 ---------------------------------------------------------------------------------------------------
 
 local function OnUpdateHighlight(tp_frame)
-  --if not (UnitExists("mouseover") and UnitIsUnit("mouseover", tp_frame.unit.unitid)) then
-  if not UnitIsUnit("mouseover", tp_frame.unit.unitid) then
+  local unitid = tp_frame.unit.unitid
+
+  -- ! GH-443: OnUpdate sometimes is called with unit being empty (unitid == nil)
+  if not unitid or not UnitIsUnit("mouseover", unitid) then
     tp_frame.unit.isMouseover = false
     tp_frame.visual.Highlight:Hide()
 
-    Addon.PlatesByUnit[tp_frame.unit.unitid].UpdateMe = true
+    Addon.PlatesByUnit[unitid].UpdateMe = true
     -- More general solution, better would be to implement a callback and just update everything
     -- on the old mouseover nameplate that depends on mouseover
     --Addon:UpdateIndicatorScaleAndAlpha(tp_frame)
