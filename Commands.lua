@@ -121,7 +121,11 @@ local function ChatCommandDebug(cmd_list)
 		SearchDBForString(Addon.db.profile, "<Profile>", string.lower(cmd_list[2]))
 		SearchDBForString(Addon.db.global, "<Profile>", string.lower(cmd_list[2]))
 	elseif command == "unit" then
-		Addon.Debug.PrintUnit("target")
+		if UnitExists("target") then
+			Addon.Debug.PrintUnit("target")
+		else
+			Addon.Debug.PrintUnit("mouseover")
+		end
 	elseif command == "cache" then
 		Addon.Debug.PrintCaches()
 	elseif command == "debug" then

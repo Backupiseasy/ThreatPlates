@@ -219,6 +219,9 @@ local function UpdateUnitCache() for key, value in pairs(unit) do unitcache[key]
 ---------------------------------------------------------------------------------------------------------------------
 
 local function SetNameplateVisibility(plate, unitid)
+  -- ! Interactive objects do also have nameplates. We should not mess with the visibility the of these objects.
+  if not UnitExists(unitid) then return end
+
   local unit_reaction = UnitReaction(unitid, "player") or 0
   if unit_reaction > 4 then
     if SettingsShowFriendlyBlizzardNameplates then
@@ -1138,6 +1141,16 @@ function CoreEvents:NAME_PLATE_UNIT_ADDED(unitid)
 
   OnShowNameplate(GetNamePlateForUnit(unitid), unitid)
 end
+		
+-- function CoreEvents:FORBIDDEN_NAME_PLATE_UNIT_ADDED(unitBarId)
+--   print("FORBIDDEN_NAME_PLATE_UNIT_ADDED:", unitBarId)
+--   local unitID = unitBarId
+
+--   local plateFrame = C_NamePlate.GetNamePlateForUnit (unitID, true)
+--   if (plateFrame) then -- and plateFrame.template == "ForbiddenNamePlateUnitFrameTemplate"
+--     print("  => Found plateFrame")
+--   end
+-- end
 
 function CoreEvents:NAME_PLATE_UNIT_REMOVED(unitid)
   local plate = GetNamePlateForUnit(unitid)
