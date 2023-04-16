@@ -1,5 +1,5 @@
 ﻿------------------------------------------------------
-11.1.18 (2023-04-15)
+11.1.18 (2023-04-16)
 ------------------------------------------------------
 * Fixed a Lua error that occurred when the mouseover highlight was updated on a nameplate without a valid unit [GH-443].
 * Fixed a bug where one space was replaced with two spaces in names when transliteration of cyrillic letters was enabled [GH-444].
