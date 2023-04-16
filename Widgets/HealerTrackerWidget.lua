@@ -139,7 +139,6 @@ local HEALER_SPELLS_RETAIL = {
   ---------
   [61295] = "SHAMAN",  -- Riptide
   [77472] = "SHAMAN",  -- Healing Wave
-  [5394] = "SHAMAN", -- Healing Stream Totem
   [73920] = "SHAMAN",  -- Healing Rain
   --[383009] = "SHAMAN",  -- Stormkeeper
   --[52127] = "SHAMAN",  -- Water Shield
@@ -152,7 +151,7 @@ local HEALER_SPELLS_RETAIL = {
   --[207399] = "SHAMAN",  -- Ancestral Protection Totem
   --[375982] = "SHAMAN", -- Primordial Wave
   [207778] = "SHAMAN", -- Downpour
-  [382029] = "SHAMAN", -- Ever-Rising Tide
+  --[382029] = "SHAMAN", -- Ever-Rising Tide -- was only in Beta available
   --[114052] = "SHAMAN", -- Ascendance
   --[197995] = "SHAMAN", -- Wellspring
   --

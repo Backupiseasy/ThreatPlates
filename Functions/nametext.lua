@@ -7,7 +7,8 @@ local TidyPlatesThreat = TidyPlatesThreat
 
 -- Lua APIs
 local table_concat = table.concat
-local string_len  = string.len
+local string_sub  = string.sub
+local pairs = pairs
 
 -- ThreatPlates APIs
 local SplitByWhitespace = Addon.SplitByWhitespace
@@ -45,7 +46,7 @@ function Addon:SetNameText(unit)
           if i == count then
             initials[i] = p
           else
-            initials[i] = string.sub(p, 0, 1)
+            initials[i] = string_sub(p, 0, 1)
           end
         end
         abbreviated_name = table_concat(initials, ". ")
