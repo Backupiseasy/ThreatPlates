@@ -24,7 +24,7 @@ local RequestLoadQuestByID = C_QuestLog.RequestLoadQuestByID
 local GetQuestObjectives, GetQuestInfo = C_QuestLog.GetQuestObjectives, C_QuestLog.GetInfo
 local GetLogIndexForQuestID, GetNumQuestLogEntries = C_QuestLog.GetLogIndexForQuestID, C_QuestLog.GetNumQuestLogEntries
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
-local C_TooltipInfo_GetUnit, TooltipSurfaceArgs = C_TooltipInfo and C_TooltipInfo.GetUnit, TooltipUtil and TooltipUtil.SurfaceArgs
+local C_TooltipInfo_GetUnit = C_TooltipInfo and C_TooltipInfo.GetUnit
 
 -- ThreatPlates APIs
 local PlayerName = Addon.PlayerName
@@ -111,15 +111,11 @@ function IsQuestUnit(unit)
   local tooltip_data = unit.unitid and C_TooltipInfo_GetUnit(unit.unitid)
   if not tooltip_data then return false end
 
-  TooltipSurfaceArgs(tooltip_data)
-
   local quest_title
   local quest_progress_player = false
 
   for i = 3, #tooltip_data.lines do
     local line = tooltip_data.lines[i]
-
-    TooltipSurfaceArgs(line)
 
     local text = line.leftText
     local text_r, text_g, text_b = line.leftColor.r, line.leftColor.g, line.leftColor.b
@@ -681,8 +677,6 @@ function Widget:PrintDebug(command)
     local quest_progress_player = false
 
     local tooltip_data = C_TooltipInfo_GetUnit("target")
-    TooltipSurfaceArgs(tooltip_data)
-
     for i = 3, #tooltip_data.lines do
       local line = tooltip_data.lines[i]
 

@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+11.1.19 (2023-05-03)
+------------------------------------------------------
+* Updated TOC version and API for Patch 10.1 for WoW Mainline.
+
+------------------------------------------------------
 11.1.18 (2023-04-16)
 ------------------------------------------------------
 * Fixed a Lua error that occurred when the mouseover highlight was updated on a nameplate without a valid unit [GH-443].

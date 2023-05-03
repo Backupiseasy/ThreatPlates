@@ -18,7 +18,7 @@ local UnitName = UnitName
 local UNIT_LEVEL_TEMPLATE = UNIT_LEVEL_TEMPLATE
 local GetGuildInfo = GetGuildInfo
 local UnitName = UnitName
-local C_TooltipInfo_GetUnit, TooltipSurfaceArgs = C_TooltipInfo and C_TooltipInfo.GetUnit, TooltipUtil and TooltipUtil.SurfaceArgs
+local C_TooltipInfo_GetUnit = C_TooltipInfo and C_TooltipInfo.GetUnit
 
 -- ThreatPlates APIs
 local RGB = ThreatPlates.RGB
@@ -64,8 +64,6 @@ if not Addon.IS_MAINLINE then
 
     return TooltipScannerData
   end
-
-  TooltipSurfaceArgs = function() end
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -86,12 +84,7 @@ local function GetUnitSubtitle(unit)
 	if not subtitle then
 		local tooltip_data = C_TooltipInfo_GetUnit(unit.unitid)
     if tooltip_data then
-      TooltipSurfaceArgs(tooltip_data)
-      
       if #tooltip_data.lines >= 2 then 
-        TooltipSurfaceArgs(tooltip_data.lines[1])
-        TooltipSurfaceArgs(tooltip_data.lines[2])
-
         name = tooltip_data.lines[1].leftText
 
         if name then name = gsub( gsub( (name), "|c........", "" ), "|r", "" ) else return end	-- Strip color escape sequences: "|c"
