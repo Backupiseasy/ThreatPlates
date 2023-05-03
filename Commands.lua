@@ -121,13 +121,21 @@ local function ChatCommandDebug(cmd_list)
 		SearchDBForString(Addon.db.profile, "<Profile>", string.lower(cmd_list[2]))
 		SearchDBForString(Addon.db.global, "<Profile>", string.lower(cmd_list[2]))
 	elseif command == "unit" then
-		Addon.Debug.PrintUnit("target")
+		if UnitExists("target") then
+			Addon.Debug.PrintUnit("target")
+		else
+			Addon.Debug.PrintUnit("mouseover")
+		end
 	elseif command == "cache" then
 		Addon.Debug.PrintCaches()
-	elseif command == "quest" then
-		Addon:PrintQuests(cmd_list[2])
-	elseif command == "social" then
-		Addon.PrintFriendlist()
+	elseif command == "debug" then
+		local widget_name = cmd_list[2]
+		if widget_name then
+			local widget = Addon.Widgets.Widgets[widget_name]
+			if widget then 
+				widget:PrintDebug(cmd_list[3])
+			end
+		end
 	elseif command == "custom-styles" then
 		for k, v in pairs(Addon.db.profile.uniqueSettings) do
 			Addon.Logging.Debug("Style:", k, "=>", v.Trigger.Type, " - ", v.Trigger[v.Trigger.Type].Input or "nil" )

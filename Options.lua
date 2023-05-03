@@ -5446,6 +5446,7 @@ local function CreateBlizzardSettings()
                 order = 30,
                 type = "toggle",
                 set = function(info, val)
+                  Addon.db.profile.BlizzardSettings.Names.ShowOnlyNames = val
                   SetCVarBoolTPTP(info, val)
                   ReloadUI()
                 end,
@@ -6145,7 +6146,7 @@ local function CreateHealthbarOptions()
             inline = true,
             args = {
               Enable = {
-                name = L["Color Healthbar By Enemy Class"],
+                name = L["Enemy Units"],
                 order = 1,
                 type = "toggle",
                 descStyle = "inline",
@@ -6153,7 +6154,7 @@ local function CreateHealthbarOptions()
                 arg = { "allowClass" }
               },
               FriendlyClass = {
-                name = L["Color Healthbar By Friendly Class"],
+                name = L["Friendly Units"],
                 order = 2,
                 type = "toggle",
                 descStyle = "inline",
@@ -10353,45 +10354,7 @@ local function CreateOptionsTable()
 --               width = "full",
 --               name = "Upscaled class icons: Simaia (Twitter: @keyboardturn)",
 --             },
---             faq = {
---               name = L["FAQ"],
---               desc = L["Frequently Asked Questions"],
---               type = "group",
---               order = 1000,
---               inline = false,
---               args = {
---                 line3 = {
---                   type = "description",
---                   name = "|cffffd200" .. "How do I change the Bartender4 Keybindings?"] .. "|r",
---                   order = 3,
---                 },
---                 line4 = {
---                   type = "description",
---                   name = "You can either click the KeyBound button in the options, or use the |cffffff78/kb|r chat command to open the keyBound control. Alternatively, you can also use the Blizzard Keybinding Interface."] .. "\n\n" .. L["Once open, simply hover the button you want to bind, and press the key you want to be bound to that button. The keyBound tooltip and on-screen status will inform you about already existing bindings to that button, and the success of your binding attempt."],
---                   order = 4,
---                 },                
---                 line7 = {
---                   type = "description",
---                   name = "\n|cffffd200" .. "I've found a bug! Where do I report it?"] .. "|r",
---                   order = 7,
---                 },
---                 line8 = {
---                   type = "description",
---                   name = "You can report bugs or give suggestions on the project page at |cffffff78https://www.wowace.com/projects/bartender4|r or on GitHub at |cffffff78https://github.com/Nevcairiel/Bartender4|r"],
---                   order = 8,
---                 },
---                 line9 = {
---                   type = "description",
---                   name = "\n" .. "Alternatively, you can also find us on the |cffffff78WoWUIDev Discord|r"] .. "\n",
---                   order = 9,
---                 },
---                 line10 = {
---                   type = "description",
---                   name = "When reporting a bug, make sure you include the |cffffff78steps on how to reproduce the bug|r, supply any |cffffff78error messages|r with stack traces if possible, give the |cffffff78revision number|r of Bartender4 the problem occured in and state whether you are using an |cffffff78English client or otherwise|r."],
---                   order = 10,
---                 },
---               },
---             },
+
         },
       },
     }
@@ -10438,7 +10401,7 @@ local function CreateOptionsTable()
   options.args.profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(Addon.db)
   options.args.profiles.order = 10000
 
-  if not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC and not Addon.IS_WRATH_CLASSIC then
+  if not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC then
     -- Add dual-spec support
     local LibDualSpec = LibStub("LibDualSpec-1.0", true)
     LibDualSpec:EnhanceDatabase(Addon.db, t.ADDON_NAME)

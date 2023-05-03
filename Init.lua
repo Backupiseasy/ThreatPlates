@@ -459,51 +459,59 @@ Addon.Debug.PrintUnit = function(unitid)
 	local plate = C_NamePlate.GetNamePlateForUnit(unitid)
 	if not plate then return end
 
-	local tp_frame = plate.TPFrame
-	local unit = tp_frame.unit
-	Addon.Logging.Debug("Unit:", unit.name, "=>", unitid)
+	Addon.Logging.Debug("Unit:", UnitName(unitid), "=>", unitid)
 	Addon.Logging.Debug("-------------------------------------------------------------")
 	Addon.Logging.Debug("  Show UnitFrame =", plate.UnitFrame:IsShown())
 	Addon.Logging.Debug("  Show TPFrame =", plate.TPFrame:IsShown())
 	Addon.Logging.Debug("  Active =", plate.TPFrame.Active)
 	Addon.Logging.Debug("-------------------------------------------------------------")
-  if tp_frame and unit and unit.unitid then
+
+	if unitid then
+		local tp_frame = plate.TPFrame
+		local unit = tp_frame and tp_frame.unit
+
 		if not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC and not Addon.IS_WRATH_CLASSIC then
-			Addon.Logging.Debug("  UnitNameplateShowsWidgetsOnly = ", UnitNameplateShowsWidgetsOnly(unit.unitid))
+			Addon.Logging.Debug("  UnitNameplateShowsWidgetsOnly = ", UnitNameplateShowsWidgetsOnly(unitid))
 		end
-    Addon.Logging.Debug("  Reaction = ", UnitReaction("player", unit.unitid))
-    local r, g, b, a = UnitSelectionColor(unit.unitid, true)
+    Addon.Logging.Debug("  Reaction = ", UnitReaction("player", unitid))
+    local r, g, b, a = UnitSelectionColor(unitid, true)
     Addon.Logging.Debug("  SelectionColor: r =", ceil(r * 255), ", g =", ceil(g * 255), ", b =", ceil(b * 255), ", a =", ceil(a * 255))
 		Addon.Logging.Debug("  -- Threat ---------------------------------")
-		Addon.Logging.Debug("    UnitAffectingCombat = ", UnitAffectingCombat(unit.unitid))
-		Addon.Logging.Debug("    Addon:OnThreatTable = ", Addon:OnThreatTable(unit))
-		Addon.Logging.Debug("    UnitThreatSituation = ", UnitThreatSituation("player", unit.unitid))
-		Addon.Logging.Debug("    Target Unit = ", UnitExists(unit.unitid .. "target"))
-		if unit.style == "unique" then
-			Addon.Logging.Debug("    GetThreatSituation(Unique) = ", Addon.GetThreatSituation(unit, unit.style, Addon.db.profile.threat.toggle.OffTank))
-		else
-			Addon.Logging.Debug("    GetThreatSituation = ", Addon.GetThreatSituation(unit, Addon:GetThreatStyle(unit), Addon.db.profile.threat.toggle.OffTank))
+		Addon.Logging.Debug("    UnitAffectingCombat = ", UnitAffectingCombat(unitid))
+		if unit then
+			Addon.Logging.Debug("    Addon:OnThreatTable = ", Addon:OnThreatTable(unit))
+		end
+		Addon.Logging.Debug("    UnitThreatSituation = ", UnitThreatSituation("player", unitid))
+		Addon.Logging.Debug("    Target Unit = ", UnitExists(unitid .. "target"))
+		if unit then
+			if unit.style == "unique" then
+				Addon.Logging.Debug("    GetThreatSituation(Unique) = ", Addon.GetThreatSituation(unit, unit.style, Addon.db.profile.threat.toggle.OffTank))
+			else
+				Addon.Logging.Debug("    GetThreatSituation = ", Addon.GetThreatSituation(unit, Addon:GetThreatStyle(unit), Addon.db.profile.threat.toggle.OffTank))
+			end
 		end
 		Addon.Logging.Debug("  -- Player Control ---------------------------------")
-		Addon.Logging.Debug("    UnitPlayerControlled =", UnitPlayerControlled(unit.unitid))
-		Addon.Logging.Debug("    Player is UnitIsOwnerOrControllerOfUnit =", UnitIsOwnerOrControllerOfUnit("player", unit.unitid))
-		Addon.Logging.Debug("    Player Pet =", UnitIsUnit(unit.unitid, "pet"))
-    Addon.Logging.Debug("    IsOtherPlayersPet =", UnitIsOtherPlayersPet(unit.unitid))
+		Addon.Logging.Debug("    UnitPlayerControlled =", UnitPlayerControlled(unitid))
+		Addon.Logging.Debug("    Player is UnitIsOwnerOrControllerOfUnit =", UnitIsOwnerOrControllerOfUnit("player", unitid))
+		Addon.Logging.Debug("    Player Pet =", UnitIsUnit(unitid, "pet"))
+    Addon.Logging.Debug("    IsOtherPlayersPet =", UnitIsOtherPlayersPet(unitid))
 		if not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC and not Addon.IS_WRATH_CLASSIC then
-			Addon.Logging.Debug("    IsBattlePet =", UnitIsBattlePet(unit.unitid))
+			Addon.Logging.Debug("    IsBattlePet =", UnitIsBattlePet(unitid))
 		end
 		Addon.Logging.Debug("  -- PvP ---------------------------------")
-		Addon.Logging.Debug("    PvP On =", UnitIsPVP(unit.unitid))
-		Addon.Logging.Debug("    PvP Sanctuary =", UnitIsPVPSanctuary(unit.unitid))
+		Addon.Logging.Debug("    PvP On =", UnitIsPVP(unitid))
+		Addon.Logging.Debug("    PvP Sanctuary =", UnitIsPVPSanctuary(unitid))
 
     --		Addon.Logging.Debug("  isFriend = ", TidyPlatesUtilityInternal.IsFriend(unit.name))
     --		Addon.Logging.Debug("  isGuildmate = ", TidyPlatesUtilityInternal.IsGuildmate(unit.name))
 
-		for key, val in pairs(unit) do
-			Addon.Logging.Debug(key .. ":", val)
-		end	
-	else
-    Addon.Logging.Debug("  <No TPFrame>")
+		if unit then
+			for key, val in pairs(unit) do
+				Addon.Logging.Debug(key .. ":", val)
+			end	
+		else
+			Addon.Logging.Debug("  <No TPFrame>")
+		end
   end
 
   Addon.Logging.Debug("--------------------------------------------------------------")
