@@ -247,7 +247,7 @@ end
 ThreatPlates.Meta = function(value)
 	local meta
 	if strlower(value) == "titleshort" then
-		meta = "TP|cff89F559TP|r"
+		meta = "|cff89F559TP|r"
 	else
 		meta = GetAddOnMetadata("TidyPlates_ThreatPlates",value)
 	end
