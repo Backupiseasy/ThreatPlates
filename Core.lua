@@ -456,7 +456,7 @@ function Addon.MediaUpdate(addon_name, name, mediatype, key)
 end
 
 -----------------------------------------------------------------------------------
--- Functions for keybindings
+-- Functions for keybindings and addon compartment
 -----------------------------------------------------------------------------------
 
 function TidyPlatesThreat:ToggleNameplateModeFriendlyUnits()
@@ -492,6 +492,11 @@ function TidyPlatesThreat:ToggleNameplateModeEnemyUnits()
   db.Visibility.EnemyMinus.UseHeadlineView = not db.Visibility.EnemyMinus.UseHeadlineView
 
   Addon:ForceUpdate()
+end
+
+function TidyPlatesThreat_OnAddonCompartmentClick(addonName, buttonName)
+  -- addonName: TidyPlates_ThreatPlates (name of directory)
+  Addon:OpenOptions()
 end
 
 -----------------------------------------------------------------------------------

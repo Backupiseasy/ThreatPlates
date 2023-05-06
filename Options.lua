@@ -10425,10 +10425,13 @@ local function GetInterfaceOptionsTable()
       openoptions = {
         type = "execute",
         name = L["Open Options"],
-        image = PATH_ART .. "Logo",
+        --image = PATH_ART .. "LogoLegacy",
+        image = t.Meta("IconTexture"),
         width = "full",
-        imageWidth = 256,
-        imageHeight = 32,
+        -- imageWidth = 256,
+        -- imageHeight = 32,
+        imageWidth = 128,
+        imageHeight = 128,
         func = function()
           Addon:OpenOptions()
         end,

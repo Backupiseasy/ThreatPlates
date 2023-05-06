@@ -2,6 +2,8 @@
 11.2.0 (2023-01-25)
 ------------------------------------------------------
 * Custom color for Name text now also supports transparency [Comment #6829]. 
+* Updated the logo for Threat Plates which is now also shown as icon in the addon list.
+* Added support for the minimap addon compartment.
 
 ------------------------------------------------------
 11.1.19 (2023-05-03)
