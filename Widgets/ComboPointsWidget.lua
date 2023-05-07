@@ -1118,8 +1118,6 @@ function Widget:UpdateLayout()
   end
 end
 
-
-
 function Widget:UpdateSettings()
   self.db = Addon.db.profile.ComboPoints
 

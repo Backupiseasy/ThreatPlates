@@ -10,10 +10,12 @@ local Widget = (Addon.IS_CLASSIC and {}) or Addon.Widgets:NewWidget("Arena")
 ---------------------------------------------------------------------------------------------------
 
 -- Lua APIs
+local pairs = pairs
 
 -- WoW APIs
 -- local GetNumArenaOpponents = GetNumArenaOpponents
 local IsInInstance = IsInInstance
+local UnitExists = UnitExists
 local IsInBrawl, IsSoloShuffle = C_PvP.IsInBrawl, C_PvP.IsSoloShuffle
 local MAX_ARENA_ENEMIES = MAX_ARENA_ENEMIES or 5 -- MAX_ARENA_ENEMIES is not defined in Wrath Clasic
 
@@ -39,6 +41,10 @@ local PlayerGUIDToNumber = {}
 -- Cached configuration settings
 ---------------------------------------------------------------------------------------------------
 local Settings
+local SettingsByTeam = {
+  HOSTILE = {},  
+  FRIENDLY = {},
+}
 
 ---------------------------------------------------------------------------------------------------
 -- Arena Widget Functions
@@ -48,6 +54,8 @@ local ArenaUnitIdToNumber = {}
 for i = 1, MAX_ARENA_ENEMIES do
   ArenaUnitIdToNumber["arena" .. i] = i
   ArenaUnitIdToNumber["arenapet" .. i] = i
+  ArenaUnitIdToNumber["party" .. i] = i
+  ArenaUnitIdToNumber["partypet" .. i] = i
 end
 
 -- local function GetArenaOpponents()
@@ -77,10 +85,15 @@ function Widget:PLAYER_ENTERING_WORLD()
   local _, instance_type = IsInInstance()
   if instance_type == "arena" and not IsInBrawl() then
     InArena = true
+
+    -- Register GROUP_ROSTER_UPDATE here is it only should be used while in an arena, not in, e.g., a dungeon.
+    self:RegisterEvent("GROUP_ROSTER_UPDATE")
   else
     InArena = false
     PlayerGUIDToNumber = {}
     --ArenaID = {} -- Clear the table when we leave
+
+    self:UnregisterEvent("GROUP_ROSTER_UPDATE")
   end
 end
 
@@ -98,16 +111,32 @@ end
 --   -- end
 -- end
 
+function Widget:MapPlayerGUIDToNumber(unitid)
+  local guid = _G.UnitGUID(unitid)
+  PlayerGUIDToNumber[guid] = ArenaUnitIdToNumber[unitid]
+  local widget_frame = self:GetWidgetFrameForUnit(unitid)
+  if widget_frame then
+    self:OnUnitAdded(widget_frame, unitid)
+  end
+end
+
 -- Parameters: unitToken, updateReason
 --   updateReason: seen, destroyed, unseen, cleared
 function Widget:ARENA_OPPONENT_UPDATE(unitid, update_reason)
   if update_reason == "seen" then
-    local guid = _G.UnitGUID(unitid)
-    PlayerGUIDToNumber[guid] = ArenaUnitIdToNumber[unitid]
-    
-    local widget_frame = self:GetWidgetFrameForUnit(unitid)
-    if widget_frame then
-      self:OnUnitAdded(widget_frame, unitid)
+    self:MapPlayerGUIDToNumber(unitid)
+  end
+end
+
+function Widget:GROUP_ROSTER_UPDATE()
+  for i = 1, 5 do
+    local unitid = "party" .. i
+    if UnitExists(unitid) then
+      self:MapPlayerGUIDToNumber(unitid)
+    end
+    unitid = "partypet" .. i
+    if UnitExists(unitid) then
+      self:MapPlayerGUIDToNumber(unitid)
     end
   end
 end
@@ -147,14 +176,14 @@ function Widget:OnEnable()
   self:RegisterEvent("PLAYER_ENTERING_WORLD")
   -- Arenas are available from TBC Classic on, but this widget is disabled in Classic anyway
   self:RegisterEvent("ARENA_OPPONENT_UPDATE")
-  --self:RegisterEvent("ARENA_PREP_OPPONENT_SPECIALIZATIONS")  -- for solo shuffle
+  -- self:RegisterEvent("ARENA_PREP_OPPONENT_SPECIALIZATIONS")  -- for solo shuffle
   if Addon.IS_MAINLINE then
     self:RegisterEvent("PVP_MATCH_ACTIVE")
   end
 end
 
 function Widget:EnabledForStyle(style, unit)
-  return unit.reaction == "HOSTILE" and not (style == "NameOnly" or style == "NameOnly-Unique" or style == "etotem")
+  return unit.reaction ~= "NEUTRAL" and not (style == "NameOnly" or style == "NameOnly-Unique" or style == "etotem")
 end
 
 function Widget:OnUnitAdded(widget_frame, unit)
@@ -168,19 +197,29 @@ function Widget:OnUnitAdded(widget_frame, unit)
     widget_frame:Hide()
     return
   end
+  widget_frame.Random = arena_no
 
-  if Settings.ShowOrb then
-    local icon_color = Settings.colors[arena_no]
+  local settings = SettingsByTeam[unit.reaction]
+
+  if settings.ShowOrb then
+    local icon_color = settings.OrbColors[arena_no]
     widget_frame.Icon:SetVertexColor(icon_color.r, icon_color.g, icon_color.b, icon_color.a)
+    widget_frame.Icon:Show()
+  else
+    widget_frame.Icon:Hide()
   end
+  
 
-  if Settings.ShowNumber then
-    local number_color = Settings.numColors[arena_no]
+  if settings.ShowNumber then
+    local number_color = settings.NumberColors[arena_no]
     widget_frame.NumText:SetTextColor(number_color.r, number_color.g, number_color.b)
     widget_frame.NumText:SetText(arena_no)
+    widget_frame.NumText:Show()
+  else
+    widget_frame.NumText:Hide()
   end
 
-  if Settings.HideName then
+  if settings.HideName then
     widget_frame:GetParent().visual.name:Hide()
   elseif Addon.db.profile.settings.name.show then
     widget_frame:GetParent().visual.name:Show()
@@ -197,20 +236,28 @@ function Widget:UpdateLayout(widget_frame)
   widget_frame:SetPoint("CENTER", widget_frame:GetParent(), Settings.x, Settings.y)
   widget_frame:SetSize(Settings.scale, Settings.scale)
 
-  if Settings.ShowOrb then
-    widget_frame.Icon:Show()
-  else
-    widget_frame.Icon:Hide()
-  end
-
-  if Settings.ShowNumber then
-    Font:UpdateText(widget_frame, widget_frame.NumText, Settings.NumberText)
-    widget_frame.NumText:Show()
-  else
-    widget_frame.NumText:Hide()
-  end
+  Font:UpdateText(widget_frame, widget_frame.NumText, Settings.NumberText)
 end
 
 function Widget:UpdateSettings()
   Settings = Addon.db.profile.arenaWidget
+
+  SettingsByTeam.HOSTILE.ShowOrb = Settings.ShowOrb
+  SettingsByTeam.HOSTILE.ShowNumber = Settings.ShowNumber
+  SettingsByTeam.HOSTILE.HideName = Settings.HideName
+  SettingsByTeam.HOSTILE.OrbColors = Settings.colors
+  SettingsByTeam.HOSTILE.NumberColors = Settings.numColors
+  SettingsByTeam.FRIENDLY = Settings.Allies
+
+  -- If the widget is enabled when in an arena, PLAYER_ENTERING_WORLD was already fired, so we have to update
+  -- call it manually
+  self:PLAYER_ENTERING_WORLD()
+
+  for unitid, _ in pairs(ArenaUnitIdToNumber) do
+    if UnitExists(unitid) then
+      local guid = _G.UnitGUID(unitid)
+      -- The nameplate is updated after the settings update by WidgetHandler
+      PlayerGUIDToNumber[guid] = ArenaUnitIdToNumber[unitid]
+    end
+  end
 end
