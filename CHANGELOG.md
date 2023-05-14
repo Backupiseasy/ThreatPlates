@@ -1,3 +1,3 @@
 # @project-version@ (@build-time@)
 
-* Updated Threat Plates for Dragonflight Pre-Patch and updated nameplate code due to changes to WoW API.
+* Added Maim (Druid) to Auras widget as CC aura for Wrath Classic.

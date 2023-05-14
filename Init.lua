@@ -7,10 +7,10 @@ local ADDON_NAME, Addon = ...
 -- Lua APIs
 local next, setmetatable, getmetatable, rawset = next, setmetatable, getmetatable, rawset
 local ipairs, type, insert = ipairs, type, table.insert
-local string, format = string, format
+local string, floor = string, floor
 
 -- ThreatPlates APIs
-
+local UnitDetailedThreatSituation = UnitDetailedThreatSituation
 
 ---------------------------------------------------------------------------------------------------
 -- WoW Version Check
@@ -130,6 +130,24 @@ Addon.Cache = {
 }
 
 ---------------------------------------------------------------------------------------------------
+-- Addon-wide wrapper functions for WoW Classic
+---------------------------------------------------------------------------------------------------
+
+if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
+  Addon.UnitDetailedThreatSituationWrapper = function(source, target)
+    local is_tanking, status, threatpct, rawthreatpct, threat_value = UnitDetailedThreatSituation(source, target)
+
+    if (threat_value) then
+      threat_value = floor(threat_value / 100)
+    end
+
+    return is_tanking, status, threatpct, rawthreatpct, threat_value
+  end
+else
+	Addon.UnitDetailedThreatSituationWrapper = UnitDetailedThreatSituation
+end
+
+---------------------------------------------------------------------------------------------------
 -- Aura Highlighting
 ---------------------------------------------------------------------------------------------------
 local function Wrapper_ButtonGlow_Start(frame, color, framelevel)
@@ -159,6 +177,16 @@ Addon.CUSTOM_GLOW_WRAPPER_FUNCTIONS = {
 --------------------------------------------------------------------------------------------------
 -- General Functions
 ---------------------------------------------------------------------------------------------------
+
+Addon.Clamp = function(number, min_number, max_number)
+	if number <= min_number then
+		return min_number
+	elseif number >= max_number then
+		return max_number
+	else
+		return number
+	end
+end
 
 --------------------------------------------------------------------------------------------------
 -- Utils: Handling of colors

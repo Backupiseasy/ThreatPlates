@@ -13,7 +13,7 @@ local next = next
 -- WoW APIs
 local wipe, strsplit = wipe, strsplit
 local WorldFrame, UIParent, INTERRUPTED = WorldFrame, UIParent, INTERRUPTED
-local UnitName, UnitReaction, UnitClass, UnitPVPName = UnitName, UnitReaction, UnitClass, UnitPVPName
+local UnitExists, UnitName, UnitReaction, UnitClass, UnitPVPName = UnitExists, UnitName, UnitReaction, UnitClass, UnitPVPName
 local UnitEffectiveLevel = UnitEffectiveLevel
 local UnitChannelInfo, UnitPlayerControlled = UnitChannelInfo, UnitPlayerControlled
 local UnitIsUnit, UnitIsPlayer = UnitIsUnit, UnitIsPlayer
@@ -423,30 +423,6 @@ local function OnUpdateCastMidway(tp_frame, unitid)
 end
 
 ---------------------------------------------------------------------------------------------------------------------
---  Nameplate Styler: These functions parses the definition table for a nameplate's requested style.
----------------------------------------------------------------------------------------------------------------------
-
-local function UpdateStyle(tp_frame, style, stylename)
-  -- Frame
-  tp_frame:ClearAllPoints()
-  tp_frame:SetPoint(style.frame.anchor, tp_frame.Parent, style.frame.anchor, style.frame.x, style.frame.y)
-  tp_frame:SetSize(style.healthbar.width, style.healthbar.height)
-
-  Color:UpdateStyle(tp_frame, style)
-  ElementsUpdateStyle(tp_frame, style)
-  Widgets:OnUnitAdded(tp_frame, tp_frame.unit)
-
---  if not tp_frame.TestBackground then
---    tp_frame.TestBackground = tp_frame:CreateTexture(nil, "BACKGROUND")
---    tp_frame.TestBackground:SetAllPoints(tp_frame)
---    tp_frame.TestBackground:SetTexture(Addon.LibSharedMedia:Fetch('statusbar', Addon.db.profile.AuraWidget.BackgroundTexture))
---    tp_frame.TestBackground:SetVertexColor(0,0,0,0.5)
---  end
-end
-
-SubscribeEvent(Addon, "StyleUpdate", UpdateStyle)
-
----------------------------------------------------------------------------------------------------------------------
 -- Create / Hide / Show Event Handlers
 ---------------------------------------------------------------------------------------------------------------------
 
@@ -588,19 +564,15 @@ function Addon:ConfigClickableArea(toggle_show)
         tp_frame.Background:SetBackdropColor(0,0,0,.3)
         tp_frame.Background:SetBackdropBorderColor(0, 0, 0, 0.8)
         tp_frame.Background:SetPoint("CENTER", ConfigModePlate.UnitFrame, "CENTER")
-        tp_frame.Background:SetSize(Addon.db.profile.settings.frame.width, Addon.db.profile.settings.frame.height)
 
-        local width, height = Addon.db.profile.settings.frame.width, Addon.db.profile.settings.frame.height
+        local width, height
+        if ConfigModePlate.unit.reaction == "FRIENDLY" then          
+          width, height = C_NamePlate.GetNamePlateFriendlySize()
+        else
+          width, height = C_NamePlate.GetNamePlateEnemySize()
+        end
+        ConfigModePlate.Background:SetSize(width, height)
 
-        local min_scale = CVars:GetAsNumber("nameplateMinScale")
-        --local selected_scale = CVars:GetAsNumber("nameplateSelectedScale")
-        local global_scale = CVars:GetAsNumber("nameplateGlobalScale")
-        local current_scale = global_scale * min_scale
-
-        width = width * current_scale
-        height = height * current_scale
-
-        tp_frame.Background:SetSize(width, height)
         tp_frame.Background:Show()
 
         -- remove the config background if the nameplate is hidden to prevent it
@@ -951,10 +923,12 @@ end
 
 -- Payload: { Name = "unitToken", Type = "string", Nilable = false },
 function Addon:NAME_PLATE_UNIT_ADDED(unitid)
-  -- player and target work as unitid, but are the NAME_PLATE_UNIT_ADDED is fired for the actual nameplate id
-  -- The player's personal resource bar is currently not supported by Threat Plates.
-  -- OnShowNameplate is not called on it, therefore plate.TPFrame.Active is nil
-  if UnitIsUnit("player", unitid) or UnitNameplateShowsWidgetsOnly(unitid) then return end
+  -- Player's personal nameplate:
+  --   This nameplate is currently not handled by Threat Plates - OnShowNameplate is not called on it, therefore plate.TPFrame.Active is nil
+  -- Nameplates for non-existing units:
+  --   There are some nameplates for units that do not exists, e.g. Ring of Transference in Oribos. For the time being, we don't show them.
+  --   Without not UnitExists(unitid) they would be shown as nameplates with health 0 and maybe cause Lua errors
+  if UnitIsUnit("player", unitid) or UnitNameplateShowsWidgetsOnly(unitid) or not UnitExists(unitid) then return end
 
   OnShowNameplate(GetNamePlateForUnit(unitid), unitid)
 end

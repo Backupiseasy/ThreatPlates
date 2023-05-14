@@ -1993,6 +1993,21 @@ local function CreateComboPointsWidgetOptions()
             hasAlpha = false,
             disabled = function() return #db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization] < 6 end
           },
+          Color7CP = {
+            name = L["Seven"],
+            type = "color",
+            order = 161,
+            get = function(info)
+              local color = db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][7] or Addon.RGB(0, 0, 0)
+              return color.r, color.g, color.b
+            end,
+            set = function(info, r, g, b)
+              db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][7] = Addon.RGB(r * 255, g * 255, b * 255)
+              Addon.Widgets:UpdateSettings("ComboPoints")
+            end,
+            hasAlpha = false,
+            disabled = function() return #db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization] < 7 end
+          },
           ColorAnimacharge = {
             name = L["Animacharge"],
             type = "color",
@@ -4815,7 +4830,11 @@ local function CreateBlizzardSettings()
             type = "execute",
             width = "double",
             func = function()
-              InterfaceOptionsFrame_OpenToCategory(_G["InterfaceOptionsNamesPanel"])
+              if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
+                InterfaceOptionsFrame_OpenToCategory(_G["InterfaceOptionsNamesPanel"])
+              else
+                Settings.OpenToCategory(_G["InterfaceOptionsNamesPanel"])
+              end
               Addon.LibAceConfigDialog:Close("Threat Plates");
             end,
           },
@@ -8326,8 +8345,7 @@ local function CreateTotemOptions()
     i = i + 1
   end
 
-  -- properly no longer possible if 7.3.5+ GetSpellInfo changes go live
-  table.sort(totem_list, function(a, b) return a.SortKey  < b.SortKey end)
+  table.sort(totem_list, function(a, b) return a.Name  < b.Name end)
 
   for i, totem_info in ipairs(totem_list) do
     entry.args[totem_info.Name] = {

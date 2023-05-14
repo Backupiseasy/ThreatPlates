@@ -287,7 +287,7 @@ Addon.GetColorByHealthDeficit = function(unit)
 end
 
 local function GetColorByReaction(unit)
-  -- PvP coloring based on: https://wowpedia.fandom.com/wiki/PvP_flag
+    -- PvP coloring based on: https://wowpedia.fandom.com/wiki/PvP_flag
   -- Coloring for pets is the same as for the player controlling the pet
   local unit_type = (UnitPlayerControlled(unit.unitid) and "PLAYER") or unit.type
   -- * For players and their pets
@@ -537,6 +537,8 @@ function ColorModule:UpdateStyle(tp_frame, style)
     tp_frame.GetHealthbarColor = HealthbarColorFunctions[unit.reaction]
     tp_frame.GetNameColor = NameColorFunctions[tp_frame.PlateStyle][unit.reaction]
   end
+
+  self:Initialize(tp_frame)
 
   UpdatePlateColors(tp_frame)
 end

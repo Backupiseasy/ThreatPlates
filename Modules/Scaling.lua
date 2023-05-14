@@ -8,17 +8,15 @@ local ADDON_NAME, Addon = ...
 ---------------------------------------------------------------------------------------------------
 
 -- Lua APIs
-local pairs = pairs
 
 -- WoW APIs
 local UnitExists = UnitExists
 
 -- ThreatPlates APIs
-local L = Addon.L
-local PlatesByUnit = Addon.PlatesByUnit
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
 local Animation, Scaling, Transparency, Style = Addon.Animation, Addon.Scaling, Addon.Transparency, Addon.Style
 local CVars = Addon.CVars
+local MathClamp = Addon.Clamp
 
 ---------------------------------------------------------------------------------------------------
 -- Module Setup
@@ -186,11 +184,7 @@ local SCALE_FUNCTIONS = {
 local function GetScale(unit)
 	local scale = SCALE_FUNCTIONS[unit.style](unit, unit.style)
 	-- scale may be set to 0 in the options dialog
-	if scale < 0.3 then
-		return 0.3
-	end
-
-	return scale
+	return MathClamp(scale, 0.3, scale)
 end
 
 local function ScalePlateWithAnimation(frame, scale)

@@ -383,6 +383,21 @@ function StyleModule:SetStyle(unit)
   return style or self:GetThreatStyle(unit)
 end
 
+---------------------------------------------------------------------------------------------------------------------
+--  Nameplate Styler: These functions parses the definition table for a nameplate's requested style.
+---------------------------------------------------------------------------------------------------------------------
+
+local function UpdateNameplateStyle(tp_frame, style)
+  -- Frame
+  tp_frame:ClearAllPoints()
+  tp_frame:SetPoint(style.frame.anchor, tp_frame.Parent, style.frame.anchor, style.frame.x, style.frame.y)
+  tp_frame:SetSize(style.healthbar.width, style.healthbar.height)
+
+  Color:UpdateStyle(tp_frame, style)
+  ElementsUpdateStyle(tp_frame, style)
+  Widgets:OnUnitAdded(tp_frame, tp_frame.unit)
+end
+
 local NAMEPLATE_MODE_BY_THEME = {
   dps = "HealthbarMode",
   tank = "HealthbarMode",
@@ -401,6 +416,8 @@ function StyleModule:Update(tp_frame)
   local old_custom_style = unit.CustomPlateSettings
   local stylename = self:SetStyle(unit)
 
+  local update_style = false
+
   if tp_frame.stylename ~= stylename then
     local style = ActiveTheme[stylename]
 
@@ -409,12 +426,19 @@ function StyleModule:Update(tp_frame)
     tp_frame.style = style
     unit.style = stylename
 
-    PublishEvent("StyleUpdate", tp_frame, style, stylename)
+    UpdateNameplateStyle(tp_frame, style)
   elseif (stylename == "unique" or stylename == "NameOnly-Unique") and unit.CustomPlateSettings ~= old_custom_style then
-    -- Update the unique icon widget and style may be the same, but a different trigger might be active, e.g.,
-    -- if two aura triggers fired
-      Addon.UpdateCustomStyleIcon(tp_frame, unit)
-      PublishEvent("StyleUpdate", tp_frame, ActiveTheme[stylename], stylename)
+    UpdateNameplateStyle(tp_frame, ActiveTheme[stylename])
+  end
+
+  if update_style then
+    -- The following modules use the unit style, so it must be initialized before Module:Initialize is called
+    Transparency:Initialize(tp_frame)
+    Scaling:Initialize(tp_frame)
+    Color:Initialize(tp_frame)
+    ElementsUnitAdded(tp_frame)
+
+    UpdateNameplateStyle(tp_frame, style)
   end
 end
 
@@ -429,6 +453,6 @@ function StyleModule:UpdateName(tp_frame)
     tp_frame.style = style
     tp_frame.unit.style = stylename
 
-    PublishEvent("StyleUpdate", tp_frame, style, stylename)
+    UpdateNameplateStyle(tp_frame, style)
   end
 end

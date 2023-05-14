@@ -86,6 +86,10 @@ end
 
 function Widget:OnEnable()
   self:SubscribeEvent("UNIT_PORTRAIT_UPDATE")
+  -- Update the unique icon widget and style may be the same, but a different trigger might be active, e.g.,
+  -- if two aura triggers fired
+  self:SubscribeEvent("StyleUpdate")
+
   Icon:RegisterMasqueGroup(self, "Custom Style")
 end
 
@@ -198,7 +202,7 @@ function Widget:OnUnitAdded(widget_frame, unit)
   end
 end
 
-function Addon.UpdateCustomStyleIcon(tp_frame, unit)
+function Widget:StyleUpdate(tp_frame, unit)
   local widget_frame = tp_frame.widgets.UniqueIcon
   if widget_frame and widget_frame.Active then
     Widget:OnUnitAdded(widget_frame, unit)

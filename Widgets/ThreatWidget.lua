@@ -15,12 +15,14 @@ local tostring = tostring
 local string_format = string.format
 
 -- WoW APIs
-local UnitIsUnit, UnitDetailedThreatSituation, UnitName, UnitExists = UnitIsUnit, UnitDetailedThreatSituation, UnitName, UnitExists
+local UnitIsUnit, UnitName, UnitExists = UnitIsUnit, UnitName, UnitExists
 local GetRaidTargetIndex = GetRaidTargetIndex
 local IsInGroup, IsInRaid, GetNumGroupMembers, GetNumSubgroupMembers = IsInGroup, IsInRaid, GetNumGroupMembers, GetNumSubgroupMembers
 
 -- ThreatPlates APIs
-local Threat, Localiation, Font = Addon.Threat, Addon.Localization, Addon.Font
+local UnitDetailedThreatSituationWrapper = Addon.UnitDetailedThreatSituationWrapper
+local Font, Threat = Addon.Font, Addon.Threat
+local TransliterateCyrillicLetters = Addon.TransliterateCyrillicLetters
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -139,12 +141,12 @@ end
 ---------------------------------------------------------------------------------------------------
 
 local function GetUnitThreatValue(unitid, mob_unitid)
-  local is_tanking, status, scaled_percentage, _, threat_value = UnitDetailedThreatSituation(unitid, mob_unitid)
+  local is_tanking, status, scaled_percentage, _, threat_value =  UnitDetailedThreatSituationWrapper(unitid, mob_unitid)
   return is_tanking, status, threat_value
 end
 
 local function GetUnitThreatPercentage(unitid, mob_unitid)
-  local is_tanking, status, scaled_percentage, _, threat_value = UnitDetailedThreatSituation(unitid, mob_unitid)
+  local is_tanking, status, scaled_percentage, _, threat_value =  UnitDetailedThreatSituationWrapper(unitid, mob_unitid)
   return is_tanking, status, scaled_percentage
 end
 
@@ -187,7 +189,7 @@ local function GetTopThreatUnitBesidesPlayer(unitid, threat_value_func)
 end
 
 local function GetTankThreatPercentage(unitid, db_threat_value)
-  local is_tanking, status, scaled_percentage, _, _ = UnitDetailedThreatSituation("player", unitid)
+  local is_tanking, status, scaled_percentage, _, _ =  UnitDetailedThreatSituationWrapper("player", unitid)
   if status == nil then return end
 
   local threat_value_text = ""
@@ -216,7 +218,7 @@ local function GetTankThreatPercentage(unitid, db_threat_value)
 end
 
 local function GetTankThreatValue(unitid, db_threat_value)
-  local is_tanking, status, scaled_percentage, _, threat_value = UnitDetailedThreatSituation("player", unitid)
+  local is_tanking, status, scaled_percentage, _, threat_value =  UnitDetailedThreatSituationWrapper("player", unitid)
   if status == nil then return end
 
   local threat_value_text = ""
@@ -299,13 +301,13 @@ end
 
 local THREAT_DETAILS_FUNTIONS = {
   SCALED_PERCENTAGE = function(unitid)
-    local _, status, scaled_percentage, _, _ = UnitDetailedThreatSituation("player", unitid)
+    local _, status, scaled_percentage, _, _ =  UnitDetailedThreatSituationWrapper("player", unitid)
     if status then 
       return status, string_format("%.0f%%", scaled_percentage)
     end
   end,
   RAW_PERCENTAGE = function(unitid)
-    local _, status, _, raw_percentage, _ = UnitDetailedThreatSituation("player", unitid)
+    local _, status, _, raw_percentage, _ =  UnitDetailedThreatSituationWrapper("player", unitid)
     if status then 
       return status, string_format("%.0f%%", raw_percentage)
     end
@@ -329,7 +331,7 @@ function Widget:UpdateFrame(widget_frame, unit)
       widget_frame.RightTexture:Hide()
     end
 
-    widget_frame.ThreatSituation = nil
+    widget_frame.ThreatLevel = nil
     self:UpdateThreatValue(widget_frame, unit)
 
     widget_frame:Show()
@@ -340,6 +342,8 @@ end
 
 function Widget:UpdateThreatValue(widget_frame, unit)
   local db = Settings.ThreatPercentage
+
+  local style = Addon.GetPlayerRole()
 
   -- Threat value has to be updated after every UNIT_THREAT_LIST_UPDATE event, not only when threat_situation changes
   if db.ShowAlways or (db.ShowInGroups and PlayerIsInGroup) or (db.ShowWithPet and UnitExists("pet")) then
@@ -356,14 +360,12 @@ function Widget:UpdateThreatValue(widget_frame, unit)
     widget_frame.Percentage:Hide()
   end
 
-  -- If threat_situation is nil, there is nothing to do
+  -- Textures are shown/hidden in UpdateFrame
   local threat_level = unit.ThreatLevel
-  if threat_level and threat_level ~= widget_frame.ThreatSituation then
-    widget_frame.ThreatSituation = threat_level
-    
-    -- As the widget is enabled, textures or percentages must be enabled.
-    local style = Addon.GetPlayerRole()
+  if threat_level and threat_level ~= widget_frame.ThreatLevel then
+    widget_frame.ThreatLevel = threat_level
 
+    -- As the widget is enabled, textures or percentages must be enabled.
     if widget_frame.LeftTexture:IsShown() then
       local unique_setting = unit.CustomPlateSettings
       if not unique_setting or unique_setting.UseThreatColor then           

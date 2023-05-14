@@ -8,17 +8,15 @@ local ADDON_NAME, Addon = ...
 ---------------------------------------------------------------------------------------------------
 
 -- Lua APIs
-local pairs, tonumber = pairs, tonumber
 
 -- WoW APIs
 local UnitExists = UnitExists
-local GetCVar = GetCVar
 
 -- ThreatPlates APIs
 local Animation, Style = Addon.Animation, Addon.Style
 local CVars = Addon.CVars
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
-local L = Addon.L
+local MathClamp = Addon.Clamp
 
 ---------------------------------------------------------------------------------------------------
 -- Module Setup
@@ -186,7 +184,8 @@ local ALPHA_FUNCTIONS = {
 }
 
 local function GetTransparency(unit)
-  return ALPHA_FUNCTIONS[unit.style](unit, unit.style)
+  local alpha = ALPHA_FUNCTIONS[unit.style](unit, unit.style)
+  return MathClamp(alpha, 0, 1)
 end
 
 local function UpdatePlate_SetAlphaWithFading(tp_frame, unit)

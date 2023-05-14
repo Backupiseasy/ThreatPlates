@@ -19,6 +19,7 @@ local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 
 -- ThreatPlates APIs
 local BackdropTemplate = Addon.BackdropTemplate
+local MathClamp = Addon.Clamp
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -135,7 +136,9 @@ local  function UpdateBorderTexture(db, widget_frame, texture_frame)
   texture_frame:SetPoint("BOTTOMRIGHT", widget_frame, "BOTTOMRIGHT", offset, - offset)
 
   texture_frame:SetBackdropBorderColor(db.r, db.g, db.b, db.a)
-  texture_frame:SetBackdropColor(db.r, db.g, db.b, db.a - 0.70) -- 80/255 => 1 - 0.69
+  
+  local backdrop_alpha = MathClamp(db.a - 0.70, 0, 1)  -- 80/255 => 1 - 0.69
+  texture_frame:SetBackdropColor(db.r, db.g, db.b, backdrop_alpha)
 
   texture_frame.LeftTexture:Hide()
   texture_frame.RightTexture:Hide()

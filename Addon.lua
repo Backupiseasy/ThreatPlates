@@ -89,6 +89,8 @@ if Addon.WOW_USES_CLASSIC_NAMEPLATES then
       C_NamePlate.SetNamePlateFriendlySize(128, 32)
       C_NamePlate.SetNamePlateEnemySize(128, 32)
     end
+
+    Addon:ConfigClickableArea(false)
   end
 else
   local function SetNameplatesToDefaultSize()
@@ -112,25 +114,6 @@ else
       width, height = CalculateSynchedNameplateSize()
       C_NamePlate.SetNamePlateFriendlySize(width, height)
     end
-    -- In dungeons or raids, friendly nameplates are always Blizzard nameplates.
-    -- if self.IsInPvEInstance then
-    --   if CVars:GetAsBool("nameplateShowOnlyNames") then
-    --     C_NamePlate.SetNamePlateFriendlySize(0.1, 0.1)
-    --   elseif NamePlateDriverFrame:IsUsingLargerNamePlateStyle() then
-    --     C_NamePlate.SetNamePlateFriendlySize(154, 64)
-    --   else
-    --     C_NamePlate.SetNamePlateFriendlySize(110, 45)
-    --   end
-    -- elseif db.ShowFriendlyBlizzardNameplates then
-    --   if NamePlateDriverFrame:IsUsingLargerNamePlateStyle() then
-    --     C_NamePlate.SetNamePlateFriendlySize(154, 64)
-    --   else
-    --     C_NamePlate.SetNamePlateFriendlySize(110, 45)
-    --   end
-    -- else
-    --   width, height = CalculateSynchedNameplateSize()
-    --   C_NamePlate.SetNamePlateFriendlySize(width, height)
-    -- end
 
     if db.ShowEnemyBlizzardNameplates then
       SetNameplatesToDefaultSize()
@@ -140,13 +123,13 @@ else
       end
       C_NamePlate.SetNamePlateEnemySize(width, height)
     end
-  end
+    
+    Addon:ConfigClickableArea(false)
   
-  Addon:ConfigClickableArea(false)
-
-  -- For personal nameplate:
-  --local clampedZeroBasedScale = Saturate(zeroBasedScale)
-  --C_NamePlate_SetNamePlateSelfSize(baseWidth * horizontalScale * Lerp(1.1, 1.0, clampedZeroBasedScale), baseHeight)
+    -- For personal nameplate:
+    --local clampedZeroBasedScale = Saturate(zeroBasedScale)
+    --C_NamePlate_SetNamePlateSelfSize(baseWidth * horizontalScale * Lerp(1.1, 1.0, clampedZeroBasedScale), baseHeight)
+  end
 end
 
 ------------------

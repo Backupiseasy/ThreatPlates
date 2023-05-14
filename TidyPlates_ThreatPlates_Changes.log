@@ -1,13 +1,55 @@
 ﻿------------------------------------------------------
-11.0.0-alpha1 - Release for Dragonflight Pre-Patch (2022-09-21)
+11.0.4 (2022-09-x)
 ------------------------------------------------------
-* Updated Threat Plates for Dragonflight Pre-Patch and updated nameplate code due to changes to WoW API.
+* Added Maim (Druid) to Auras widget as CC aura for Wrath Classic.
 
 ------------------------------------------------------
-10.5.3 (2022-09-09)
+11.0.3 (2022-09-27)
+------------------------------------------------------
+* Fixed a bug that occured when the target highlight color alpha was set below 0,7 as the Dragonflight API is more strict with valid transparency values [Issue #573].
+
+------------------------------------------------------
+11.0.2 (2022-09-27)
+------------------------------------------------------
+* Fixed a bug that occurred when the target transparency for a nameplate was greater than 100% or less than 0% as the Dragonflight API is more strict with valid transparency values [Issue #571, Comment #6532, #6536].
+* Fixed a bug that occurred when a Rogue has seven combo points (after picking talents Deeper Stratagem and Devious Stratagem) [Comment #6529].
+
+------------------------------------------------------
+11.0.1 (2022-09-26)
+------------------------------------------------------
+* Fixed a bug with Auras widget where auras were not shown consistently when "Swap Area By Reaction" was enabled [Comment #6522].
+* Fixed a bug with quest indicators not being shown as the color of quest titles in tooltips was changed in Dragonflight [Comment #6523].
+* Fixed a bug with configuration mode for Auras widget not showing any demo auras.
+* Fixed a Lua error with Auras widget when aura area anchoring was changed so that aura areas where temporarily anchored to each other in a cyclic way.
+
+------------------------------------------------------
+11.0.0 - Release for Dragonflight Pre-Patch (2022-09-26)
+------------------------------------------------------
+* Updated Threat Plates for Dragonflight Pre-Patch and updated nameplate code due to changes to WoW API.
+* Fixed a Lua error with threat textures that could occur in Classic when stance dancing as a tank [Issue #568].
+
+------------------------------------------------------
+10.5.6 (2022-10-19)
+------------------------------------------------------
+* Added Rank 2 of Silenced effect of Counterspell (Mage) to Auras widget as CC aura for Wrath Classic [Comment #6416].
+
+------------------------------------------------------
+10.5.5 (2022-10-16)
+------------------------------------------------------
+* Fixed a bug with totems of rank 10 not being recognized as totems [Comment #6491].
+
+------------------------------------------------------
+10.5.4 (2022-10-07)
+------------------------------------------------------
+* Added Shockwave (Warrior) to Auras widget as CC aura for Wrath Classic [Comment #6468].
+* Fixed a bug with configuration mode for clickable area where the the clickable area highlight showed an incorrect size [Issue #561].
+
+------------------------------------------------------
+10.5.3 (2022-10-01)
 ------------------------------------------------------
 * Added the root effect of Binding Shot (Hunter) to Auras widget as CC aura [Comment #6416].
 * Fixed CC aura id for Clash (Brewmaster Monk) in Auras widget [Comment #6408].
+* Fixed a bug with threat values not being scaled correctly in TBC and Wrath Classic WoW [GH-346, Issue #521].
 
 ------------------------------------------------------
 10.5.2 (2022-09-09)
@@ -18,7 +60,7 @@
 10.5.1 (2022-09-04)
 ------------------------------------------------------
 * Added support for Death Knight tanks [GH-348] - thanks to dh-harald.
-* Fixed several bugs in Combo Points widget introduced when adding support for Death Knight's death runes for Wrath Classic [#6367, #6386].
+* Fixed several bugs in Combo Points widget introduced when adding support for Death Knight's death runes for Wrath Classic [Comment #6367, #6386].
 
 ------------------------------------------------------
 10.5.0 (2022-09-03)
