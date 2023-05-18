@@ -1,10 +1,15 @@
 ﻿------------------------------------------------------
-11.2.0 (2023-01-25)
+11.2.0 (2023-05-xx)
 ------------------------------------------------------
 * Custom color for Name text now also supports transparency [Comment #6829]. 
 * Updated the logo for Threat Plates which is now also shown as icon in the addon list.
 * Added support for the minimap addon compartment.
 * Added support for friendly units to Arena widget [GH-401, Issue #614, #262, Comment #6813].
+
+------------------------------------------------------
+11.1.20 (2023-05-18)
+------------------------------------------------------
+* Fixed a bug where nameplates were not shown correctly as Threat Plates or Blizzard default nameplates when the player or other units were mind-controlled by a Priest [GH-402, Issue #610, #597].
 
 ------------------------------------------------------
 11.1.19 (2023-05-03)
