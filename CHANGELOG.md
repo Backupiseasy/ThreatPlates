@@ -1,3 +1,3 @@
 # @project-version@ (@build-time@)
 
-* Updated TOC version and API for Patch 10.1 for WoW Mainline.
+* Fixed a bug where nameplates were not shown correctly as Threat Plates or Blizzard default nameplates when the player or other units were mind-controlled by a Priest [GH-402, Issue #610, #597].
