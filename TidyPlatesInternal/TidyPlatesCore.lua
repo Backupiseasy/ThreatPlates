@@ -1030,8 +1030,8 @@ local function FrameOnShow(UnitFrame)
     return
   end
 
+  -- Don't show ThreatPlates for widget-only nameplates (since Shadowlands)
   if UnitNameplateShowsWidgetsOnly(unitid) then
-    -- Don't show ThreatPlates for widget-only nameplates (since Shadowlands)
     return
   end
 
@@ -1177,7 +1177,7 @@ function CoreEvents:NAME_PLATE_UNIT_REMOVED(unitid)
   frame.stylename = nil
 
   -- Remove anything from the function queue
-  frame.UpdateMe = false
+  plate.UpdateMe = false
 end
 
 function CoreEvents:UNIT_NAME_UPDATE(unitid)
@@ -1554,8 +1554,8 @@ function CoreEvents:UNIT_FACTION(unitid)
     -- directly queries UnitReaction, we can do that before SetUpdateAll (which would call UpdateUnitCondition which 
     -- updates unit.reaction)
     -- Not sure if it would make sense to move this to SetUpdateAll
-    for plate, unitid in pairs(PlatesVisible) do
-      SetNameplateVisibility(plate, unitid)
+    for plate, plate_unitid in pairs(PlatesVisible) do
+      SetNameplateVisibility(plate, plate_unitid)
     end
     SetUpdateAll() -- Update all plates
   else

@@ -1,4 +1,10 @@
 ﻿------------------------------------------------------
+11.1.22 (2023-05-21)
+------------------------------------------------------
+* Added Axe Toss (Warlock) to Auras widget as CC aura [GH-456].
+* Fixed a Lua error related to nameplate visibility introduced with the bugfix for mind-control of Priests [GH-455].
+
+------------------------------------------------------
 11.1.21 (2023-05-19)
 ------------------------------------------------------
 * Fixed a Lua error that occurred in solo shuffle when a new round was started and pets were present in the arena [GH-454].
