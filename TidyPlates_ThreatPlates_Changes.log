@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+11.1.22 (2023-05-19)
+------------------------------------------------------
+* Added Axe Toss (Warlock) to Auras widget as CC aura [GH-456].
+
+------------------------------------------------------
 11.1.21 (2023-05-19)
 ------------------------------------------------------
 * Fixed a Lua error that occurred in solo shuffle when a new round was started and pets were present in the arena [GH-454].

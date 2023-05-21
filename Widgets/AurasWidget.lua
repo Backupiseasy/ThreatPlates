@@ -321,6 +321,7 @@ local CROWD_CONTROL_SPELLS_RETAIL = {
   [233582] = PC_SNARE,        -- Entrenched in Flame
   [5484] = LOC_FEAR,          -- Howl of Terror
   [22703] = LOC_STUN,         -- Infernal Awakening
+  [89766] = LOC_STUN,         -- Axe Toss
 
   ---------------------------------------------------------------------------------------------------
   -- Warrior
