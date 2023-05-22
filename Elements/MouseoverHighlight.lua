@@ -36,11 +36,14 @@ local TargetHighlightEnabledForStyle = {
 local function OnUpdateHighlight(tp_frame)
   local unitid = tp_frame.unit.unitid
 
-  -- ! GH-443: OnUpdate sometimes is called with unit being empty (unitid == nil)
-  if not unitid or not UnitIsUnit("mouseover", unitid) then
+  -- ! GH-443, GH-455: OnUpdate sometimes is called with unit being empty (unitid == nil)
+  -- Not sure if just a return (without hiding elements) would be enough.
+  if not unitid then
     tp_frame.unit.isMouseover = false
     tp_frame.visual.Highlight:Hide()
-
+  elseif not UnitIsUnit("mouseover", unitid) then
+    tp_frame.unit.isMouseover = false
+    tp_frame.visual.Highlight:Hide()
     Addon.PlatesByUnit[unitid].UpdateMe = true
     -- More general solution, better would be to implement a callback and just update everything
     -- on the old mouseover nameplate that depends on mouseover
