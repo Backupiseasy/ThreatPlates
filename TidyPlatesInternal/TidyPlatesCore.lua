@@ -217,36 +217,35 @@ local function UpdateUnitCache() for key, value in pairs(unit) do unitcache[key]
 -- Nameplate Detection & Update Loop
 ---------------------------------------------------------------------------------------------------------------------
 
+local function IgnoreUnitForThreatPlates(unitid)
+  return UnitIsUnit("player", unitid) or UnitNameplateShowsWidgetsOnly(unitid) or not UnitExists(unitid)
+end
+
+-- local function HideNameplate(plate)
+--   plate.UnitFrame:Hide()
+--   plate.TPFrame:Hide()
+--   plate.TPFrame.Active = false
+-- end
+
+local function ShowBlizzardNameplate(plate, show_blizzard_plate)
+  plate.UnitFrame:SetShown(show_blizzard_plate)
+  plate.TPFrame:SetShown(not show_blizzard_plate)
+  plate.TPFrame.Active = not show_blizzard_plate
+end
+
+-- This function should only be called for visible nameplates: PlatesVisible[plate] ~= nil
 local function SetNameplateVisibility(plate, unitid)
   -- ! Interactive objects do also have nameplates. We should not mess with the visibility the of these objects.
-  if not UnitExists(unitid) then return end
-
-  -- We cannot use unit.reaction here as it is not guaranteed that it's update whenever this function is called (see UNIT_FACTION).
+  -- if not PlatesVisible[plate] then return end
+  
+  -- We cannot use unit.reaction here as it is not guaranteed that it's update whenever this function 
+  -- is called (see UNIT_FACTION).  
   local unit_reaction = UnitReaction("player", unitid) or 0
   if unit_reaction > 4 then
-    if SettingsShowFriendlyBlizzardNameplates then
-      plate.UnitFrame:Show()
-      plate.TPFrame:Hide()
-      plate.TPFrame.Active = false
-    else
-      plate.UnitFrame:Hide()
-      plate.TPFrame:Show()
-      plate.TPFrame.Active = true
-    end
-  elseif SettingsShowEnemyBlizzardNameplates then
-    plate.UnitFrame:Show()
-    plate.TPFrame:Hide()
-    plate.TPFrame.Active = false
+    ShowBlizzardNameplate(plate, SettingsShowFriendlyBlizzardNameplates)
   else
-    plate.UnitFrame:Hide()
-    plate.TPFrame:Show()
-    plate.TPFrame.Active = true
+    ShowBlizzardNameplate(plate, SettingsShowEnemyBlizzardNameplates)
   end
-  
-  -- local show_tp_plate = (unit_reaction and not SettingsShowFriendlyBlizzardNameplates) or not SettingsShowEnemyBlizzardNameplates
-  -- plate.TPFrame.Active = show_tp_plate
-  -- plate.TPFrame:SetShown(show_tp_plate)
-  -- plate.UnitFrame:SetShown(not show_tp_plate)
 end
 
 Addon.SetNameplateVisibility = SetNameplateVisibility
@@ -1023,15 +1022,17 @@ end
 
 local function FrameOnShow(UnitFrame)
   local unitid = UnitFrame.unit
-
+  
   -- Hide nameplates that have not yet an unit added
-  if not unitid then
+  if not unitid then 
+    -- ? Not sure if Hide() is really needed here or if even TPFrame should also be hidden here ...
     UnitFrame:Hide()
     return
   end
 
-  -- Don't show ThreatPlates for widget-only nameplates (since Shadowlands)
-  if UnitNameplateShowsWidgetsOnly(unitid) then
+  -- Don't show ThreatPlates for ignored units (e.g., widget-only nameplates (since Shadowlands))
+  if IgnoreUnitForThreatPlates(unitid) then
+    UnitFrame:GetParent().TPFrame:Hide()
     return
   end
 
@@ -1052,7 +1053,12 @@ local function FrameOnShow(UnitFrame)
   end
 
   -- Hide ThreatPlates nameplates if Blizzard nameplates should be shown for friendly units
-  SetNameplateVisibility(UnitFrame:GetParent(), unitid)
+  local unit_reaction = UnitReaction("player", unitid) or 0
+  if unit_reaction > 4 then
+    UnitFrame:SetShown(SettingsShowFriendlyBlizzardNameplates)
+  else
+    UnitFrame:SetShown(SettingsShowEnemyBlizzardNameplates)
+  end
 end
 
 -- Frame: self = plate
@@ -1137,11 +1143,12 @@ function CoreEvents:NAME_PLATE_UNIT_ADDED(unitid)
   -- Nameplates for non-existing units:
   --   There are some nameplates for units that do not exists, e.g. Ring of Transference in Oribos. For the time being, we don't show them.
   --   Without not UnitExists(unitid) they would be shown as nameplates with health 0 and maybe cause Lua errors
-  if UnitIsUnit("player", unitid) or UnitNameplateShowsWidgetsOnly(unitid) or not UnitExists(unitid) then return end
-
-  OnShowNameplate(GetNamePlateForUnit(unitid), unitid)
+  
+  if not IgnoreUnitForThreatPlates(unitid) then
+    OnShowNameplate(GetNamePlateForUnit(unitid), unitid)
+  end
 end
-		
+
 -- function CoreEvents:FORBIDDEN_NAME_PLATE_UNIT_ADDED(unitBarId)
 --   print("FORBIDDEN_NAME_PLATE_UNIT_ADDED:", unitBarId)
 --   local unitID = unitBarId
