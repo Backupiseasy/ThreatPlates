@@ -1813,7 +1813,18 @@ do
     local db = Addon.db.profile.settings
 
     -- Healthbar
-		SetAnchorGroupObject(visual.healthbar, style.healthbar, extended)
+    local healthbarOpts = {
+      x = style.healthbar.x,
+      y = style.healthbar.y,
+      width = style.healthbar.width,
+      height = style.healthbar.height
+    }
+
+    if extended.unit.reaction == 'FRIENDLY' then
+      healthbarOpts.width = style.healthbar.widthFriendly
+      healthbarOpts.height = style.healthbar.heightFriendly
+    end
+    SetAnchorGroupObject(visual.healthbar, healthbarOpts, extended)
     visual.healthbar:UpdateLayout(db, style)
 
     -- Castbar
