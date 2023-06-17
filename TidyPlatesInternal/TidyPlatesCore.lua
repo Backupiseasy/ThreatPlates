@@ -1969,9 +1969,16 @@ function Addon:ConfigClickableArea(toggle_show)
       end
     end
   elseif ConfigModePlate then
-    local background = ConfigModePlate.TPFrame.Background
+    local extended = ConfigModePlate.TPFrame
+    local background = extended.Background
+    local width, height
+    if extended.unit.reaction == "FRIENDLY" then
+      width, height = C_NamePlate.GetNamePlateFriendlySize()
+    else
+      width, height = C_NamePlate.GetNamePlateEnemySize()
+    end
     background:SetPoint("CENTER", ConfigModePlate.UnitFrame, "CENTER")
-    background:SetSize(Addon.db.profile.settings.frame.width, Addon.db.profile.settings.frame.height)
+    background:SetSize(width, height)
   end
 end
 
