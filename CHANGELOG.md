@@ -1,3 +1,3 @@
 # @project-version@ (@build-time@)
 
-* Fixed a Lua error related to nameplate visibility introduced with the bugfix for mind-control of Priests [GH-455].
+* Fixed a Lua error that occured when guide/newcomer icons were shown after enabling the guide mentoring system [GH-457].

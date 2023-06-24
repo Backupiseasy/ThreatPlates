@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+11.1.22 (2023-06-20)
+------------------------------------------------------
+* Fixed a Lua error that occured when guide/newcomer icons were shown after enabling the guide mentoring system [GH-457].
+
+------------------------------------------------------
 11.1.22 (2023-05-21)
 ------------------------------------------------------
 * Added Axe Toss (Warlock) to Auras widget as CC aura [GH-456].

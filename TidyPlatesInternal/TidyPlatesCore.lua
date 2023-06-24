@@ -134,6 +134,8 @@ local RaidIconCoordinate = {
   ["SQUARE"] = { x = .25, y = 0.25},
   ["CROSS"] = { x = .5, y = 0.25},
   ["SKULL"] = { x = .75, y = 0.25},
+  ["GREEN_FLAG"] = { x = 0.5, y = 0.75 },
+  ["MURLOC"] = { x = 0.75, y = 0.75 },
 }
 
 local CASTBAR_INTERRUPT_HOLD_TIME = Addon.CASTBAR_INTERRUPT_HOLD_TIME
@@ -358,7 +360,7 @@ do
     visual.level = healthbar:CreateFontString(nil, "ARTWORK")
 		visual.level:SetFont("Fonts\\FRIZQT__.TTF", 11)
 
-		-- Cast Bar Frame - Highest Frame
+    		-- Cast Bar Frame - Highest Frame
 		visual.spellicon = castbar:CreateTexture(nil, "OVERLAY", nil, 7)
 		visual.spelltext = castbar:CreateFontString(nil, "ARTWORK")
 		visual.spelltext:SetFont("Fonts\\FRIZQT__.TTF", 11)
@@ -537,7 +539,15 @@ end
 ---------------------------------------------------------------------------------------------------------------------
 --  Unit Updates: Updates Unit Data, Requests indicator updates
 ---------------------------------------------------------------------------------------------------------------------
-local RaidIconList = { "STAR", "CIRCLE", "DIAMOND", "TRIANGLE", "MOON", "SQUARE", "CROSS", "SKULL" }
+local RaidIconList = { 
+  "STAR", "CIRCLE", "DIAMOND", "TRIANGLE", "MOON", "SQUARE", "CROSS", "SKULL", 
+  [15] = "GREEN_FLAG",
+  [16] = "MURLOC", 
+}
+
+local function ShouldShowMentorIcon(target_marker)
+  return target_marker == "MURLOC" or target_marker == "GREEN_FLAG"
+end
 
 local MAP_UNIT_REACTION = {
   [1] = "HOSTILE",
@@ -645,10 +655,10 @@ function Addon:UpdateUnitCondition(unit, unitid)
   unit.isInCombat = _G.UnitAffectingCombat(unitid)
 
   local raidIconIndex = GetRaidTargetIndex(unitid)
-
+  
   if raidIconIndex then
     unit.raidIcon = RaidIconList[raidIconIndex]
-    unit.isMarked = true
+    unit.isMarked = not ShouldShowMentorIcon(unit.raidIcon)
   else
     unit.isMarked = false
   end
@@ -804,9 +814,11 @@ do
     --      ThreatPlates.DEBUG("UpdateIndicator_RaidIcon: RaidIconCoordinate:", RaidIconCoordinate[unit.raidIcon])
     --    end
 
-    if unit.isMarked and style.raidicon.show then
+    if (unit.isMarked and style.raidicon.show) or ShouldShowMentorIcon(unit.raidIcon) then
       local iconCoord = RaidIconCoordinate[unit.raidIcon]
       if iconCoord then
+        -- ! Maybe use SetRaidTargetIconTexture(icon, index) - then we don't need SetTexCoord anymore
+        -- SetRaidTargetIconTexture(visual.raidicon, GetRaidTargetIndex(unit.unitid));
         visual.raidicon:Show()
         visual.raidicon:SetTexCoord(iconCoord.x, iconCoord.x + 0.25, iconCoord.y,  iconCoord.y + 0.25)
       else
@@ -1753,8 +1765,8 @@ do
   -- "spelltext",
 
 	local anchorgroup = {
-		"name",  "spelltext", "customtext", "level", "spellicon", "raidicon", "skullicon"
-    -- "threatborder", "castborder", "castnostop", "eliteicon", "target"
+		"name",  "spelltext", "customtext", "level", "spellicon", "skullicon"
+    -- "threatborder", "castborder", "castnostop", "eliteicon", "target", "raidicon" 
   }
 
 	local texturegroup = {
@@ -1822,13 +1834,11 @@ do
     visual.threatborder:SetShown(style.threatborder.show)
 
     -- Raid Icon Texture
-		if style.raidicon and style.raidicon.texture then
-			visual.raidicon:SetTexture(style.raidicon.texture)
-    end
+    SetAnchorGroupObject(visual.raidicon, style.raidicon, extended)
+    SetTextureGroupObject(visual.raidicon, style.raidicon)
+    --visual.raidicon:SetTexture(style.raidicon.texture)
     -- TOODO: does not really work with ForceUpdate() as isMarked is not set there (no call to UpdateUnitCondition)
-    if not unit.isMarked then
-      visual.raidicon:Hide()
-    end
+    visual.raidicon:SetShown((unit.isMarked and style.raidicon.show) or ShouldShowMentorIcon(unit.raidIcon))
 
     db = Addon.db.profile.settings.castbar
 
