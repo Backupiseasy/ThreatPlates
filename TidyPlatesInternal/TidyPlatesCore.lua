@@ -1130,6 +1130,10 @@ function CoreEvents:PLAYER_LOGIN()
   end
 end
 
+function CoreEvents:ARENA_OPPONENT_UPDATE()
+  Addon:SetBaseNamePlateSize()
+end
+
 function CoreEvents:PLAYER_ENTERING_WORLD()
   TidyPlatesCore:SetScript("OnUpdate", OnUpdate)
 end
