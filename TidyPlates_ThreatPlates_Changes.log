@@ -1,10 +1,15 @@
-------------------------------------------------------
+﻿------------------------------------------------------
 11.2.0 (2023-05-xx)
 ------------------------------------------------------
 * Custom color for Name text now also supports transparency [Comment #6829]. 
 * Updated the logo for Threat Plates which is now also shown as icon in the addon list.
 * Added support for the minimap addon compartment.
 * Added support for friendly units to Arena widget [GH-401, Issue #614, #262, Comment #6813].
+
+------------------------------------------------------
+11.1.23 (2023-06-24)
+------------------------------------------------------
+* Fixed a Lua error that occured when guide/newcomer icons were shown after enabling the guide mentoring system [GH-457].
 
 ------------------------------------------------------
 11.1.22 (2023-05-21)
