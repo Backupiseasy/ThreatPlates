@@ -1,4 +1,10 @@
 ﻿------------------------------------------------------
+11.1.24 (2023-06-24)
+------------------------------------------------------
+* Updated for Patch 10.1.5 for WoW Mainline.
+* Upgrade integrated libraries (Ace3 r1309).
+
+------------------------------------------------------
 11.1.23 (2023-06-24)
 ------------------------------------------------------
 * Fixed a Lua error that occured when guide/newcomer icons were shown after enabling the guide mentoring system [GH-457].
