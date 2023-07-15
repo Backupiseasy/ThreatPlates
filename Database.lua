@@ -1255,7 +1255,6 @@ local function MigrateThreatValue(_, profile)
 
   if DatabaseEntryExists(profile, { "threatWidget", "ThreatPercentage" } ) then
     profile.threatWidget.ThreatPercentage.ShowInGroups = GetValueOrDefault(profile.threatWidget.ThreatPercentage.OnlyInGroups, default_profile.threatWidget.ThreatPercentage.OnlyInGroups)
-    print (profile.threatWidget.ThreatPercentage.Show)
     if profile.threatWidget.ThreatPercentage.Show == false then
       profile.threatWidget.ThreatPercentage.ShowAlways = false -- is also the default value
       profile.threatWidget.ThreatPercentage.ShowInGroups = false
@@ -1265,6 +1264,49 @@ local function MigrateThreatValue(_, profile)
 
   DatabaseEntryDelete(profile, { "threatWidget", "ThreatPercentage", "Show" })
   DatabaseEntryDelete(profile, { "threatWidget", "ThreatPercentage", "OnlyInGroups" })
+end
+
+local function MigrateFontFlagsNONE(_, profile)
+  local function MigrateFontFlagsEntry(profile_to_migrate, keys)
+    if DatabaseEntryExists(profile_to_migrate, keys) then
+      for i, key in ipairs(keys) do
+        profile_to_migrate = profile_to_migrate[key]
+      end
+  
+      if profile_to_migrate.flags == "NONE" then
+        profile_to_migrate.flags = ""
+      end
+    end
+  end
+
+  MigrateFontFlagsEntry(profile, { "arenaWidget", "NumberText", "Font", })
+  MigrateFontFlagsEntry(profile, { "AuraWidget", "Debuffs", "ModeIcon", "Duration", "Font", })
+  MigrateFontFlagsEntry(profile, { "AuraWidget", "Debuffs", "ModeIcon", "StackCount", "Font", })
+  MigrateFontFlagsEntry(profile, { "AuraWidget", "Debuffs", "ModeBar", "Label", "Font", })
+  MigrateFontFlagsEntry(profile, { "AuraWidget", "Debuffs", "ModeBar", "Duration", "Font", })
+  MigrateFontFlagsEntry(profile, { "AuraWidget", "Debuffs", "ModeBar", "StackCount", "Font", })
+  MigrateFontFlagsEntry(profile, { "AuraWidget", "Buffs", "ModeIcon", "Duration", "Font", })
+  MigrateFontFlagsEntry(profile, { "AuraWidget", "Buffs", "ModeIcon", "StackCount", "Font", })
+  MigrateFontFlagsEntry(profile, { "AuraWidget", "Buffs", "ModeBar", "Label", "Font", })
+  MigrateFontFlagsEntry(profile, { "AuraWidget", "Buffs", "ModeBar", "Duration", "Font", })
+  MigrateFontFlagsEntry(profile, { "AuraWidget", "Buffs", "ModeBar", "StackCount", "Font", })
+  MigrateFontFlagsEntry(profile, { "AuraWidget", "CrowdControl", "ModeIcon", "Duration", "Font", })
+  MigrateFontFlagsEntry(profile, { "AuraWidget", "CrowdControl", "ModeIcon", "StackCount", "Font", })
+  MigrateFontFlagsEntry(profile, { "AuraWidget", "CrowdControl", "ModeBar", "Label", "Font", })
+  MigrateFontFlagsEntry(profile, { "AuraWidget", "CrowdControl", "ModeBar", "Duration", "Font", })
+  MigrateFontFlagsEntry(profile, { "AuraWidget", "CrowdControl", "ModeBar", "StackCount", "Font", })  
+  MigrateFontFlagsEntry(profile, { "threatWidget", "ThreatPercentage", "Font", })
+  MigrateFontFlagsEntry(profile, { "ComboPoints", "RuneCooldown", "Font", })
+  MigrateFontFlagsEntry(profile, { "ComboPoints", "EssenceCooldown", "Font", })
+  MigrateFontFlagsEntry(profile, { "ExperienceWidget", "RankText", "Font", })
+  MigrateFontFlagsEntry(profile, { "ExperienceWidget", "ExperienceText", "Font", })
+  MigrateFontFlagsEntry(profile, { "BlizzardSettings", "Names", "Font", })
+  MigrateFontFlagsEntry(profile, { "settings", "healthbar", "TargetUnit", "Font", })
+  MigrateFontFlagsEntry(profile, { "settings", "castbar", "CastTarget", "Font", })
+  MigrateFontFlagsEntry(profile, { "settings", "name", })
+  MigrateFontFlagsEntry(profile, { "settings", "level", })
+  MigrateFontFlagsEntry(profile, { "settings", "customtext", })
+  MigrateFontFlagsEntry(profile, { "settings", "spelltext", })
 end
 
 local TEST_FUNCTIONS = {
@@ -1332,6 +1374,7 @@ local DEPRECATED_SETTINGS = {
   { "AuraWidget", "scale" },  -- Removed in 10.3.0
   { MigrateFixAurasCyclicAnchoring, "10.3.1", NoDefaultProfile = true, CleanupDatabase = true },
   { MigrateThreatValue, "10.3.6", NoDefaultProfile = true, CleanupDatabase = true },
+  { MigrateFontFlagsNONE, "11.1.25", NoDefaultProfile = true, CleanupDatabase = true },
 }
 
 local function MigrateDatabase(current_version)
