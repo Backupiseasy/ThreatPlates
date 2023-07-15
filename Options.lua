@@ -693,15 +693,15 @@ end
 
 local function SetFontFlags(settings, flag, val)
   if flag == "Thick" then
-    local outline = (val and "THICKOUTLINE") or (GetFontFlags(settings, "Outline") and "OUTLINE") or "NONE"
+    local outline = (val and "THICKOUTLINE") or (GetFontFlags(settings, "Outline") and "OUTLINE") or ""
     local mono = (GetFontFlags(settings, "Mono") and ", MONOCHROME") or ""
     return outline .. mono
   elseif flag == "Outline" then
-    local outline = (val and "OUTLINE") or (GetFontFlags(settings, "Thick") and "THICKOUTLINE") or "NONE"
+    local outline = (val and "OUTLINE") or (GetFontFlags(settings, "Thick") and "THICKOUTLINE") or ""
     local mono = (GetFontFlags(settings, "Mono") and ", MONOCHROME") or ""
     return outline .. mono
   else -- flag = "Mono"
-    local outline = (GetFontFlags(settings, "Thick") and "THICKOUTLINE") or (GetFontFlags(settings, "Outline") and "OUTLINE") or "NONE"
+    local outline = (GetFontFlags(settings, "Thick") and "THICKOUTLINE") or (GetFontFlags(settings, "Outline") and "OUTLINE") or ""
     local mono = (val and ", MONOCHROME") or ""
     return outline .. mono
   end

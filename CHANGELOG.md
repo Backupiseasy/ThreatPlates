@@ -1,4 +1,3 @@
 # @project-version@ (@build-time@)
 
-* Updated for Patch 10.1.5 for WoW Mainline.
-* Upgrade integrated libraries (Ace3 r1309).
+* Fixed a Lua error that occurred when the font of the Blizzard nameplate's name was changed, but no flags (like Outline) were used [GH-464].

@@ -1,5 +1,10 @@
 ﻿------------------------------------------------------
-11.1.24 (2023-06-24)
+11.1.25 (2023-07-15)
+------------------------------------------------------
+* Fixed a Lua error that occurred when the font of the Blizzard nameplate's name was changed, but no flags (like Outline) were used [GH-464].
+
+------------------------------------------------------
+11.1.24 (2023-07-12)
 ------------------------------------------------------
 * Updated for Patch 10.1.5 for WoW Mainline.
 * Upgrade integrated libraries (Ace3 r1309).
