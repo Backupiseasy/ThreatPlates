@@ -26,6 +26,8 @@ local function Create(name)
       backdrop = EMPTY_TEXTURE,
       height = 10,
       width = 120,
+      heightFriendly = 10,
+      widthFriendly = 120,
       x = 0,
       y = 0,
       anchor = "CENTER",

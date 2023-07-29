@@ -39,7 +39,7 @@ local LSMUpdateTimer
 ---------------------------------------------------------------------------------------------------
 
 -- Copied from ElvUI:
-local function CalculateSynchedNameplateSize()
+local function CalculateSynchedNameplateSize(friendlyUnit)
   local db = Addon.db.profile.settings
 
   local width = db.frame.width
@@ -52,12 +52,16 @@ local function CalculateSynchedNameplateSize()
     --   NamePlateVerticalScale = 1.4
     local zeroBasedScale = 0.7  -- tonumber(GetCVar("NamePlateVerticalScale")) - 1.0
     local horizontalScale = 1.4 -- tonumber(GetCVar("NamePlateVerticalScale"))
+    local healthbarWidth = db.healthbar.width
+    local healthbarHeight = db.healthbar.height
 
-    width = (db.healthbar.width - 10) * horizontalScale
-    height = (db.healthbar.height + 35) * Lerp(1.0, 1.25, zeroBasedScale)
+    if friendlyUnit then
+      healthbarWidth = db.healthbar.widthFriendly
+      healthbarHeight = db.healthbar.heightFriendly
+    end
 
-    db.frame.width = width
-    db.frame.height = height
+    width = (healthbarWidth - 10) * horizontalScale
+    height = (healthbarHeight + 35) * Lerp(1.0, 1.25, zeroBasedScale)
   end
 
   return width, height
@@ -92,23 +96,20 @@ else
   Addon.SetBaseNamePlateSize = function(self)
     local db = self.db.profile
 
-    local width, height
     if CVars:GetAsBool("nameplateShowOnlyNames") then
       -- The clickable area of friendly nameplates will be set to zero so that they don't interfere with enemy nameplates stacking (not in Classic or TBC Classic).
       C_NamePlate.SetNamePlateFriendlySize(0.1, 0.1)    
     elseif db.ShowFriendlyBlizzardNameplates or self.IsInPvEInstance then
       SetNameplatesToDefaultSize()
     else
-      width, height = CalculateSynchedNameplateSize()
+      local width, height = CalculateSynchedNameplateSize(true)
       C_NamePlate.SetNamePlateFriendlySize(width, height)
     end
 
     if db.ShowEnemyBlizzardNameplates then
       SetNameplatesToDefaultSize()
     else
-      if not width then
-        width, height = CalculateSynchedNameplateSize()
-      end
+      local width, height = CalculateSynchedNameplateSize()
       C_NamePlate.SetNamePlateEnemySize(width, height)
     end
   

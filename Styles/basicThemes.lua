@@ -21,6 +21,8 @@ local function Create(name)
       backdrop = Addon.LibSharedMedia:Fetch('statusbar', db.healthbar.backdrop, true),
       width = db.healthbar.width,
       height = db.healthbar.height,
+      widthFriendly = db.healthbar.widthFriendly or db.healthbar.width,
+      heightFriendly = db.healthbar.heightFriendly or db.healthbar.height,
       x = 0,
       y = 0,
       anchor = "CENTER",
