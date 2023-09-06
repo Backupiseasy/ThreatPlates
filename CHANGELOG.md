@@ -1,5 +1,4 @@
 # @project-version@ (@build-time@)
 
-* Fixed a bug where status text did not show the NPC's role when colorblind accessibility features were enabled [GH-473].
-* Fixed a bug where aura tooltips were not shown correctly for all aura types in WoW (Wrath) Classic [GH-470].
-* Updated TOC version for Classic Patch 1.4.4.
+* Fixed a bug in solo shuffle where nameplate colors where not updated correctly when a new match started [GH-472].
+* Updated TOC version for Patch 10.1.7 for WoW Mainline.
