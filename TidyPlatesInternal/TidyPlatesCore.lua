@@ -256,22 +256,17 @@ Addon.SetNameplateVisibility = SetNameplateVisibility
 do
   -- OnUpdate; This function is run frequently, on every clock cycle
 	function OnUpdate(self, e)
-		-- Poll Loop
-    local plate, curChildren
-
-    for plate in pairs(PlatesVisible) do
+    for plate, _ in pairs(PlatesVisible) do
 			local UpdateMe = UpdateAll or plate.UpdateMe
-			local UpdateHealth = plate.UpdateHealth
 
 			-- Check for an Update Request
-			if UpdateMe or UpdateHealth then
+			if UpdateMe then
 				if not UpdateMe then
 					OnHealthUpdate(plate)
         else
           OnUpdateNameplate(plate)
 				end
 				plate.UpdateMe = false
-				plate.UpdateHealth = false
       end
 
 		-- This would be useful for alpha fades
@@ -1585,6 +1580,16 @@ function CoreEvents:UNIT_FACTION(unitid)
       if plate.TPFrame.Active then
         ProcessUnitChanges()
       end
+    end
+  end
+end
+
+function CoreEvents:ARENA_OPPONENT_UPDATE(unitid, update_reason)
+  if update_reason == "seen" and C_PvP.IsSoloShuffle() then
+    local plate = PlatesByUnit[unitid]
+    if plate then
+      plate.UpdateMe = true
+      --Addon:ForceUpdateOnNameplate(plate)
     end
   end
 end
