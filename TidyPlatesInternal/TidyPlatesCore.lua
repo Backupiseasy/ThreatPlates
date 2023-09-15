@@ -28,6 +28,7 @@ local UnitPlayerControlled = UnitPlayerControlled
 local CombatLogGetCurrentEventInfo = CombatLogGetCurrentEventInfo
 local GetPlayerInfoByGUID = GetPlayerInfoByGUID
 local UnitNameplateShowsWidgetsOnly = UnitNameplateShowsWidgetsOnly
+local IsSoloShuffle = C_PvP.IsSoloShuffle
 
 -- ThreatPlates APIs
 local Widgets = Addon.Widgets
@@ -76,7 +77,7 @@ if Addon.IS_CLASSIC then
     return text, text, texture, startTime, endTime, false, nil, false, spellID
   end
 
-  -- Not available in BC Classic, introduced in patch 9.0.1
+  -- Not available in Classic, introduced in patch 9.0.1
   UnitNameplateShowsWidgetsOnly = function() return false end
 elseif Addon.IS_TBC_CLASSIC then
   GetNameForNameplate = function(plate) return plate:GetName() end
@@ -97,6 +98,8 @@ elseif Addon.IS_TBC_CLASSIC then
 
   -- Not available in BC Classic, introduced in patch 9.0.1
   UnitNameplateShowsWidgetsOnly = function() return false end
+  -- Not available in BC Classic
+  IsSoloShuffle = function() return false end
 elseif Addon.IS_WRATH_CLASSIC then
   GetNameForNameplate = function(plate) return plate:GetName() end
   UnitEffectiveLevel = function(...) return _G.UnitLevel(...) end
@@ -105,6 +108,8 @@ elseif Addon.IS_WRATH_CLASSIC then
 
   -- Not available in WotLK Classic, introduced in patch 9.0.1
   UnitNameplateShowsWidgetsOnly = function() return false end
+  -- Not available in WotLK Classic
+  IsSoloShuffle = function() return false end
 else
   GetNameForNameplate = function(plate) return plate:GetName() end
 
@@ -1585,7 +1590,7 @@ function CoreEvents:UNIT_FACTION(unitid)
 end
 
 function CoreEvents:ARENA_OPPONENT_UPDATE(unitid, update_reason)
-  if update_reason == "seen" and C_PvP.IsSoloShuffle() then
+  if update_reason == "seen" and IsSoloShuffle() then
     local plate = PlatesByUnit[unitid]
     if plate then
       plate.UpdateMe = true

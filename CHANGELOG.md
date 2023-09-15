@@ -1,4 +1,3 @@
 # @project-version@ (@build-time@)
 
-* Fixed a bug in solo shuffle where nameplate colors where not updated correctly when a new match started [GH-472].
-* Updated TOC version for Patch 10.1.7 for WoW Mainline.
+* Fixed a Lua error in Wrath Classic that occurred when entering battlegrounds as an API function was used that is not available in Wrath Classic [GH-474].
