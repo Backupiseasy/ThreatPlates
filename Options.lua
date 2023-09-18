@@ -44,11 +44,11 @@ local PATH_ART = t.Art
 local UNIT_TYPES = {
   {
     Faction = "Friendly", Disabled = "nameplateShowFriends",
-    UnitTypes = { "Player", "NPC", "Totem", "Guardian", "Pet", "Minus"}
+    UnitTypes = { "Player", "NPC", "Minus", "Pet", "Guardian", "Totem", }
   },
   {
     Faction = "Enemy", Disabled = "nameplateShowEnemies",
-    UnitTypes = { "Player", "NPC", "Totem", "Guardian", "Pet", "Minus" }
+    UnitTypes = { "Player", "NPC", "Minus", "Pet", "Guardian", "Totem", }
   },
   {
     Faction = "Neutral", Disabled = "nameplateShowEnemies",
@@ -4838,13 +4838,12 @@ end
 
 local function CreateHeadlineViewShowEntry()
   local args = {}
-  local pos = 0
 
   for i, value in ipairs(UNIT_TYPES) do
     local faction = value.Faction
     args[faction .. "Units"] = {
       name = L[faction .. " Units"],
-      order = pos,
+      order = i * 10,
       type = "group",
       inline = true,
       args = {},
@@ -4853,20 +4852,56 @@ local function CreateHeadlineViewShowEntry()
     for i, unit_type in ipairs(value.UnitTypes) do
       args[faction .. "Units"].args["UnitType" .. faction .. unit_type] = {
         name = L[unit_type.."s"],
-        order = pos + i,
+        order = i * 10,
         type = "toggle",
         arg = { "Visibility", faction..unit_type, "UseHeadlineView" }
       }
     end
-
-    pos = pos + 10
   end
+
+  args.FriendlyUnits.args.MinionsHeader = {
+    name = L["Minions"],
+    type = "header", 
+    order = 35, 
+  }
+
+  args.FriendlyUnits.args.UnitTypeFriendlyMinions = {
+    name = L["All Minions"],
+    order = 36,
+    type = "toggle",
+    arg = { "Visibility", "FriendlyMinion", "UseHeadlineView" },
+    set = function(info, val)
+      Addon.db.profile.Visibility.FriendlyPet.UseHeadlineView = val
+      Addon.db.profile.Visibility.FriendlyGuardian.UseHeadlineView = val
+      Addon.db.profile.Visibility.FriendlyTotem.UseHeadlineView = val
+      SetValue(info, val)
+    end,
+  }
+
+  args.EnemyUnits.args.MinionsHeader = {
+    name = L["Minions"],
+    type = "header", 
+    order = 35, 
+  }
+
+  args.EnemyUnits.args.UnitTypeEnemyMinions = {
+    name = L["All Minions"],
+    order = 36,
+    type = "toggle",
+    arg = { "Visibility", "EnemyMinion", "UseHeadlineView" },
+    set = function(info, val)
+      Addon.db.profile.Visibility.EnemyPet.UseHeadlineView = val
+      Addon.db.profile.Visibility.EnemyGuardian.UseHeadlineView = val
+      Addon.db.profile.Visibility.EnemyTotem.UseHeadlineView = val
+      SetValue(info, val)
+    end,
+  }
 
   return args
 end
 
 local function CreateUnitGroupsVisibility(args, pos)
-  for i, value in ipairs(UNIT_TYPES) do
+  for _, value in ipairs(UNIT_TYPES) do
     local faction = value.Faction
     args[faction.."Units"] = {
       name = L["Show "..faction.." Units"],
@@ -4879,7 +4914,7 @@ local function CreateUnitGroupsVisibility(args, pos)
     for i, unit_type in ipairs(value.UnitTypes) do
       args[faction.."Units"].args["UnitType"..faction..unit_type] = {
         name = L[unit_type.."s"],
-        order = pos + i,
+        order = i * 10,
         type = "toggle",
         arg = faction..unit_type,
         get = GetUnitVisibilitySetting,
@@ -4889,6 +4924,36 @@ local function CreateUnitGroupsVisibility(args, pos)
 
     pos = pos + 10
   end
+
+  args.FriendlyUnits.args.MinionsHeader = {
+    name = L["Minions"],
+    type = "header", 
+    order = 35, 
+  }
+
+  args.FriendlyUnits.args.UnitTypeFriendlyMinions = {
+    name = L["All Minions"],
+    order = 36,
+    type = "toggle",
+    arg = "FriendlyMinion",
+    get = GetUnitVisibilitySetting,
+    set = SetUnitVisibilitySetting,
+  }
+
+  args.EnemyUnits.args.MinionsHeader = {
+    name = L["Minions"],
+    type = "header", 
+    order = 35, 
+  }
+
+  args.EnemyUnits.args.UnitTypeEnemyMinions = {
+    name = L["All Minions"],
+    order = 36,
+    type = "toggle",
+    arg = "EnemyMinion",
+    get = GetUnitVisibilitySetting,
+    set = SetUnitVisibilitySetting,
+  }
 end
 
 local function CreateVisibilitySettings()

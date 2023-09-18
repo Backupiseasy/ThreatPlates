@@ -78,10 +78,17 @@ local REMAP_UNSUPPORTED_UNIT_TYPES = {
 }
 
 local function GetUnitType(unit)
+  -- Minions are:
+  --   - totems: unit.TotemSettings
+  --   - guardians: unit is a player's pet
+  --   - pets: all other player controlled units
+  -- Not sure if there are other types of minions
   local unit_class
   -- not all combinations are possible in the game: Friendly Minus, Neutral Player/Totem/Pet
   if unit.type == "PLAYER" then
     unit_class = "Player"
+  elseif unit.classification == "minus" then
+    unit_class = "Minus"
   elseif unit.TotemSettings then
     unit_class = "Totem"
   elseif UnitIsOtherPlayersPet(unit.unitid) or UnitIsUnit(unit.unitid, "pet") then -- player pets are also considered guardians, so this check has priority
@@ -89,8 +96,6 @@ local function GetUnitType(unit)
     unit_class = "Pet"
   elseif UnitPlayerControlled(unit.unitid) then
     unit_class = "Guardian"
-  elseif unit.isMini then
-    unit_class = "Minus"
   else
     unit_class = "NPC"
   end

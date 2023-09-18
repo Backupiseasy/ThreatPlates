@@ -602,7 +602,6 @@ function Addon:UpdateUnitIdentity(unit, unitid)
   unit.classification = _G.UnitClassification(unitid)
   unit.isElite = EliteReference[unit.classification] or false
   unit.isRare = RareReference[unit.classification] or false
-  unit.isMini = unit.classification == "minus"
 
   unit.isBoss = UnitEffectiveLevel(unitid) == -1
   if unit.isBoss then
@@ -1158,6 +1157,11 @@ function CoreEvents:NAME_PLATE_UNIT_ADDED(unitid)
   
   if not IgnoreUnitForThreatPlates(unitid) then
     OnShowNameplate(GetNamePlateForUnit(unitid), unitid)
+
+    if UnitPlayerControlled(unitid) then
+      local unit = PlatesByUnit[unitid].TPFrame.unit
+      print(unit.name, "=>", unit.classification, " / Pet:", UnitIsUnit(unitid, "pet"), "=>", unit.TP_DetailedUnitType)
+    end
   end
 end
 

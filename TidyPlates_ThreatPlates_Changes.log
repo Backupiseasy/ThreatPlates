@@ -1,10 +1,11 @@
-------------------------------------------------------
+﻿------------------------------------------------------
 11.2.0 (2023-05-xx)
 ------------------------------------------------------
 * Custom color for Name text now also supports transparency [Comment #6829]. 
 * Updated the logo for Threat Plates which is now also shown as icon in the addon list.
 * Added support for the minimap addon compartment.
 * Added support for friendly units to Arena widget [GH-401, Issue #614, #262, Comment #6813].
+* Added separate options to enable nameplates and headline view for all minion types (totems, guardians, and pets together).
 
 ------------------------------------------------------
 11.1.25 (2023-07-15)
