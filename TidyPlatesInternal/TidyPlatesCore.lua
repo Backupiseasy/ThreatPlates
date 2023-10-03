@@ -79,6 +79,8 @@ if Addon.IS_CLASSIC then
 
   -- Not available in Classic, introduced in patch 9.0.1
   UnitNameplateShowsWidgetsOnly = function() return false end
+  -- Not available in Classic, but ARENA_OPPONENT_UPDATE is also triggered in BGs
+  IsSoloShuffle = function() return false end
 elseif Addon.IS_TBC_CLASSIC then
   GetNameForNameplate = function(plate) return plate:GetName() end
   UnitEffectiveLevel = function(...) return _G.UnitLevel(...) end
@@ -98,7 +100,7 @@ elseif Addon.IS_TBC_CLASSIC then
 
   -- Not available in BC Classic, introduced in patch 9.0.1
   UnitNameplateShowsWidgetsOnly = function() return false end
-  -- Not available in BC Classic
+  -- Not available in BC Classic, but ARENA_OPPONENT_UPDATE is also triggered in BGs
   IsSoloShuffle = function() return false end
 elseif Addon.IS_WRATH_CLASSIC then
   GetNameForNameplate = function(plate) return plate:GetName() end
@@ -108,7 +110,7 @@ elseif Addon.IS_WRATH_CLASSIC then
 
   -- Not available in WotLK Classic, introduced in patch 9.0.1
   UnitNameplateShowsWidgetsOnly = function() return false end
-  -- Not available in WotLK Classic
+  -- Not available in WotLK Classic, but ARENA_OPPONENT_UPDATE is also triggered in BGs
   IsSoloShuffle = function() return false end
 else
   GetNameForNameplate = function(plate) return plate:GetName() end
