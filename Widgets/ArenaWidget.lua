@@ -14,7 +14,7 @@ local Widget = (Addon.IS_CLASSIC and {}) or Addon.Widgets:NewWidget("Arena")
 -- WoW APIs
 -- local GetNumArenaOpponents = GetNumArenaOpponents
 local IsInInstance = IsInInstance
-local IsInBrawl, IsSoloShuffle = C_PvP.IsInBrawl, C_PvP.IsSoloShuffle
+local IsInBrawl = C_PvP.IsInBrawl
 local MAX_ARENA_ENEMIES = MAX_ARENA_ENEMIES or 5 -- MAX_ARENA_ENEMIES is not defined in Wrath Clasic
 
 -- ThreatPlates APIs
@@ -77,7 +77,16 @@ function Widget:PLAYER_ENTERING_WORLD()
   local _, instance_type = IsInInstance()
   if instance_type == "arena" and not IsInBrawl() then
     InArena = true
+  
+    -- Arenas are available from TBC Classic on. But ARENA_OPPONENT_UPDATE is also fired in BGs, 
+    -- at least in Classic, not sure if also in Wrath/TBC Classic, so it's only enabled when in an arena
+    if Addon.IsSoloShuffle() then
+      self:RegisterEvent("ARENA_OPPONENT_UPDATE")
+    end
+    --self:RegisterEvent("ARENA_PREP_OPPONENT_SPECIALIZATIONS")  -- for solo shuffle
   else
+    self:UnregisterEvent("ARENA_OPPONENT_UPDATE")
+
     InArena = false
     PlayerGUIDToNumber = {}
     --ArenaID = {} -- Clear the table when we leave
@@ -92,7 +101,7 @@ end
 --   --ArenaID = {} -- Clear the table when we leave
 --   PlayerGUIDToNumber = {}
 
---   -- if C_PvP.IsSoloShuffle() then
+--   -- if IsSoloShuffle() then
 --   --   -- GetArenaOpponents()
 --   --   self:UpdateAllFrames()
 --   -- end
@@ -101,10 +110,15 @@ end
 -- Parameters: unitToken, updateReason
 --   updateReason: seen, destroyed, unseen, cleared
 function Widget:ARENA_OPPONENT_UPDATE(unitid, update_reason)
-  if update_reason == "seen" then
-    local guid = _G.UnitGUID(unitid)
-    PlayerGUIDToNumber[guid] = ArenaUnitIdToNumber[unitid]
-    
+  -- Only registered when in solo shuffles
+  local guid = _G.UnitGUID(unitid)
+  if guid then
+    if update_reason == "seen" then
+      PlayerGUIDToNumber[guid] = ArenaUnitIdToNumber[unitid]
+    else
+      PlayerGUIDToNumber[guid] = nil
+    end
+
     local widget_frame = self:GetWidgetFrameForUnit(unitid)
     if widget_frame then
       self:OnUnitAdded(widget_frame, unitid)
@@ -145,12 +159,11 @@ end
 
 function Widget:OnEnable()
   self:RegisterEvent("PLAYER_ENTERING_WORLD")
-  -- Arenas are available from TBC Classic on, but this widget is disabled in Classic anyway
-  self:RegisterEvent("ARENA_OPPONENT_UPDATE")
-  --self:RegisterEvent("ARENA_PREP_OPPONENT_SPECIALIZATIONS")  -- for solo shuffle
   if Addon.IS_MAINLINE then
     self:RegisterEvent("PVP_MATCH_ACTIVE")
   end
+
+  self:PLAYER_ENTERING_WORLD()
 end
 
 function Widget:EnabledForStyle(style, unit)

@@ -1,3 +1,3 @@
 # @project-version@ (@build-time@)
 
-* Updated TOC version for Patch 10.2.0 for WoW Mainline.
+* Improved code for updating nameplates in arenas and battleground, e.g., after a new round in solo shuffles starts.
