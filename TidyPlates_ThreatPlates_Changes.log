@@ -1,7 +1,8 @@
 ﻿------------------------------------------------------
-11.1.31 (2023-xx-xx)
+11.1.31 (2023-11-26)
 ------------------------------------------------------
 * Improved code for updating nameplates in arenas and battleground, e.g., after a new round in solo shuffles starts.
+* Nameplates for interactable, but dead units now automatically switch to headline view (to hide the empty healthbar) [Comment #7100, GH-485].
 
 ------------------------------------------------------
 11.1.30 (2023-11-09)

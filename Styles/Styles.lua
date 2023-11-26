@@ -7,7 +7,7 @@ local ThreatPlates = Addon.ThreatPlates
 
 -- WoW APIs
 local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
-local UnitIsPlayer, UnitPlayerControlled, UnitIsUnit = UnitIsPlayer, UnitPlayerControlled, UnitIsUnit
+local UnitIsDead, UnitPlayerControlled, UnitIsUnit = UnitIsDead, UnitPlayerControlled, UnitIsUnit
 local UnitIsOtherPlayersPet = UnitIsOtherPlayersPet
 local UnitIsBattlePet, UnitCreatureType = UnitIsBattlePet, UnitCreatureType
 local UnitCanAttack = UnitCanAttack
@@ -337,7 +337,7 @@ function Addon:SetStyle(unit)
 
   -- Nameplate is disabled in General - Visibility
   if not show then
-    return "empty", nil
+    return "empty"
   end
 
   -- Check if custom nameplate should be used for the unit:
@@ -371,9 +371,17 @@ function Addon:SetStyle(unit)
     end
   end
 
+  -- TODO: Probably could merge these three if-s into one if-elseif-statement
+  
   -- Hidden nameplates might be shown if a custom style is defined for them (Visibility - Hide Nameplates)
   if hide_unit_type and style ~= "unique" and style ~= "NameOnly-Unique" then
-    return "empty", nil
+    return "empty"
+  end
+
+  if (UnitIsDead(unit.unitid) and UnitIsUnit("softinteract", unit.unitid)) or unit.SoftInteractTargetIsDead then
+    -- We use IsDead to prevent the nameplate switching to healthbar view again shortly before disapearing
+    unit.SoftInteractTargetIsDead = true
+    return (unit.CustomPlateSettings and "NameOnly-Unique") or "NameOnly"
   end
 
   if not style and Addon:ShowThreatFeedback(unit) then
