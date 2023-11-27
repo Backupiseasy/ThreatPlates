@@ -80,9 +80,7 @@ function Widget:PLAYER_ENTERING_WORLD()
   
     -- Arenas are available from TBC Classic on. But ARENA_OPPONENT_UPDATE is also fired in BGs, 
     -- at least in Classic, not sure if also in Wrath/TBC Classic, so it's only enabled when in an arena
-    if Addon.IsSoloShuffle() then
-      self:RegisterEvent("ARENA_OPPONENT_UPDATE")
-    end
+    self:RegisterEvent("ARENA_OPPONENT_UPDATE")
     --self:RegisterEvent("ARENA_PREP_OPPONENT_SPECIALIZATIONS")  -- for solo shuffle
   else
     self:UnregisterEvent("ARENA_OPPONENT_UPDATE")
