@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+11.1.33 (2023-12-01)
+------------------------------------------------------
+* Updated TOC version for Classic Patch 1.15.0.
+
+------------------------------------------------------
 11.1.32 (2023-11-27)
 ------------------------------------------------------
 * Fixed a bug with Arena widget where the arena number was not updated or shown at all after the last update [GH-486].
@@ -91,7 +96,7 @@
 ------------------------------------------------------
 11.1.16 (2023-03-17)
 ------------------------------------------------------
-* Fixed a Lua error with custom styles with Cast trigger  [Comment #6867].
+* Fixed a Lua error with custom styles with Cast trigger [Comment #6867].
 * Added Hungering Cold (Deathknight) to Auras widget as CC aura for Wrath Classic [Comment #6925].
 
 ------------------------------------------------------
@@ -440,7 +445,7 @@
 10.2.4 (2021-06-29)
 ------------------------------------------------------
 * Fixed a bug where health information on healthbar and status text was not updated immediately (only after targeting the unit) [GH-290, Comment #5581, #5588, #5648, #5651, IM]
-* Fixed a bug in  Classic and TPC Classic where combo points from the previous target where shown on the new target when switching targets [Comment #5688].
+* Fixed a bug in Classic and TPC Classic where combo points from the previous target where shown on the new target when switching targets [Comment #5688].
 * Added Freezing Trap Effect from Hunter's Freezing Trap to the Auras widget as CC aura [Comment #756, #5694].
 * Updated localizations (GH-291).
 
@@ -883,7 +888,7 @@
 * Optimized code for widgets that are only displayed on the target unit (Combo Points, Resource).
 * Changed default settings for Auras and Combo Points widget for better, non-overlapping positioning.
 * Changed default setting for castbar offset to no offset (0/0).
-* Monk's Black Ox Statue and Druid's Force of Nature Treants are now correctly recognized as off-tank [Issue #270, Comment #1318, #1420, E-Mail, PR #85]  - Thanks to dlwyatt for implementing.
+* Monk's Black Ox Statue and Druid's Force of Nature Treants are now correctly recognized as off-tank [Issue #270, Comment #1318, #1420, E-Mail, PR #85] - Thanks to dlwyatt for implementing.
 * Fixed a bug with nameplate layering where nameplates where shown above unit frames [Comment #1086, #1124, Issue #215].
 * Fixed a bug where changes to text alignment (e.g., for name or status text) were not applied until the text was changed.
 * Fixed a bug where Warning Glow for Threat Only ignored the setting "Only on Attacked Units" for tapped and disconnected units.
@@ -1074,7 +1079,7 @@
 ------------------------------------------------------
 8.7.2
 ------------------------------------------------------
-* Extended the combo points widget to show also soul shards for warlocks [Issue #158,  Comment #819].
+* Extended the combo points widget to show also soul shards for warlocks [Issue #158, Comment #819].
 * Fixed a bug with the icon for friends and guild members still being shown although disabled.
 * Again, fixed a bug with custom nameplates which were only loaded after the options dialog was opened [Comment #837].
 * Fixed a bug with threat textures not being shown when bar style was used.
@@ -1171,7 +1176,7 @@
 ------------------------------------------------------
 8.5.4 (works with TidyPlates 6.18.11)
 ------------------------------------------------------
-* Fixed a bug with layering of the target highlight (e.g.,  threat glow covered the target highlight) [Comment #568, email].
+* Fixed a bug with layering of the target highlight (e.g., threat glow covered the target highlight) [Comment #568, email].
 * Fixed a bug where changes to the placement of several icons were not applied until reloading the UI.
 * Fixed a bug in the options dialog where preview images where not updated after changing the active profile.
 * Changed defaults for Target and No Target scale again to more reasonable values.
@@ -1202,7 +1207,7 @@
 * Added a feature to display absorbs at the healthbar of nameplates [Comment #479].
 * Added an option to hide friendly nameplates while in combat (Nameplate Settings - Visibility - Hide Nameplates) [Comment #478].
 * Added an option to force headline view on friendly nameplates while in combat (Nameplate Settings - Headline View - Force View By Status) [email request].
-* Added new spells from Argus mobs to stealth widget ("Demonic Senses", "One With the Void", "Weapon Scope")  .
+* Added new spells from Argus mobs to stealth widget ("Demonic Senses", "One With the Void", "Weapon Scope").
 * Added an option to force headline view for non-attackable enemy units (hostile, neutral) [Ticket #132].
 * Added a (non-configurable) reaction color for unfriendly, non-attackable hostile units (orange/brown, used in the Argus introduction quests).
 * Fixed a bug in custom nameplates that resulted in a Lua error when using "Restore Defaults".
@@ -1267,7 +1272,7 @@
 * Added a new widget for showing the resource or power of target units (mana, rage, or alternate power for bosses) [Request from WowInterface].
 * Added an option to enable clickthrough for friendly and enemy nameplates [Comment #370, #375].
 * Added an option to change scaling and opacity (alpha) for casting, mouseover and target units [Comment #363].
-* Added option to show or hide mini (minor) mobs  (with own scale and opacity).
+* Added option to show or hide mini (minor) mobs (with own scale and opacity).
 * Added Earthbind totem which was added in patch 7.1 and fixed bug with Earthquake totem using incorrect spell ID. Also, totems in the options dialog are now sorted by type and name.
 * Added an option to hide the hatched overlay on the castbar for uninterruptable casts [Ticket #122, Comment #381].
 * Added an option to social widget to color the healthbar of friends' and guildmates' nameplates in a custom color.
@@ -1299,8 +1304,8 @@
 ------------------------------------------------------
 * Updated addon metadata to be compatible with patch 7.2.
 * Known issues:
-  * Switching between Threat Plates and other themes may require /reload for the new theme to work correctly
-  * Changing certain settings in the option dialog may require a /reload for the settings to fully take effect.
+ * Switching between Threat Plates and other themes may require /reload for the new theme to work correctly
+ * Changing certain settings in the option dialog may require a /reload for the settings to fully take effect.
 
 ------------------------------------------------------
 8.3.3 (works with TidyPlates 6.18.11)
@@ -1315,8 +1320,8 @@
 * Fixed a bug with in healthbar coloring of nameplates where class colors were used even if disabled in the options.
 * Added updated localizations for koKR (Korean) and zhCN (Simplified Chinese).
 * Known issues:
-  * Switching between Threat Plates and other themes may require /reload for the new theme to work correctly
-  * Changing certain settings in the option dialog may require a /reload for the settings to fully take effect.
+ * Switching between Threat Plates and other themes may require /reload for the new theme to work correctly
+ * Changing certain settings in the option dialog may require a /reload for the settings to fully take effect.
 
 ------------------------------------------------------
 8.3.1 (works with TidyPlates 6.18.11)
@@ -1327,8 +1332,8 @@
 * Enabled localizations for koKR (Korean) and zhCN (Simplified Chinese) - big thanks to yuk6196 and y123ao6 for their translations.
 * Changed default for verbose mode to disabled.
 * Known issues:
-  * Switching between Threat Plates and other themes may require /reload for the new theme to work correctly
-  * Changing certain settings in the option dialog may require a /reload for the settings to fully take effect.
+ * Switching between Threat Plates and other themes may require /reload for the new theme to work correctly
+ * Changing certain settings in the option dialog may require a /reload for the settings to fully take effect.
 
 ------------------------------------------------------
 8.3.0 (works with TidyPlates 6.18.11)
@@ -1346,8 +1351,8 @@
 * Fixed a bug in the options dialog where default settings for spec roles where incorrect for newly created profiles.
 * Fixed a memory leak which reduced frame rate heavily after changing certain options.
 * Known issues:
-  * Switching between Threat Plates and other themes may require /reload for the new theme to work correctly
-  * Changing certain settings in the option dialog may require a /reload for the settings to fully take effect.
+ * Switching between Threat Plates and other themes may require /reload for the new theme to work correctly
+ * Changing certain settings in the option dialog may require a /reload for the settings to fully take effect.
 
 ------------------------------------------------------
 8.2.5 (works with TidyPlates 6.18.11)
@@ -1359,7 +1364,7 @@
 * Added an option to disable quest widget only on attacked mobs.
 * Added another detection spell to stealth widget.
 * Known issues:
-  * Switching between Threat Plates and other themes may require /reload for the new theme to work correctly
+ * Switching between Threat Plates and other themes may require /reload for the new theme to work correctly
 
 ------------------------------------------------------
 8.2.4 (works with TidyPlates 6.18.10)
@@ -1367,7 +1372,7 @@
 * Fixed coloring of tapped units without custom colors enabled
 * Changed default colors for health bar custom colors from white to Blizzard defaults
 * Known issues:
-  * Switching between Threat Plates and other themes may require /reload for the new theme to work correctly
+ * Switching between Threat Plates and other themes may require /reload for the new theme to work correctly
 
 ------------------------------------------------------
 8.2.3 (works with TidyPlates 6.18.10)
@@ -1377,7 +1382,7 @@
 * Aura filtering now also possible by aura ID (add aura ID as you would add a spell name)
 * Fixed a bug with target nameplate not always being show on top
 * Known issues:
-  * Switching between Threat Plates and other themes may require /reload for the new theme to work correctly
+ * Switching between Threat Plates and other themes may require /reload for the new theme to work correctly
 
 ------------------------------------------------------
 8.2.2 (works with TidyPlates 6.18.9)
@@ -1385,7 +1390,7 @@
 * Fixed a Lua error in combo point widget
 * Disabled version check for TidyPlates version until working properly
 * Known issues:
-  * Switching between Threat Plates and other themes may require /reload for the new theme to work correctly
+ * Switching between Threat Plates and other themes may require /reload for the new theme to work correctly
 
 ------------------------------------------------------
 8.2.1 (works with TidyPlates 6.18.9)
@@ -1393,7 +1398,7 @@
 * Added a check if Threat Plates is compatible with the installed version of TidyPlates
 * Optimized widget handling
 * Known issues:
-  * Switching between Threat Plates and other themes may require /reload for the new theme to work correctly
+ * Switching between Threat Plates and other themes may require /reload for the new theme to work correctly
 
 ------------------------------------------------------
 8.2.0 (works with TidyPlates 6.18.8)
@@ -1405,7 +1410,7 @@
 * Fixed a bug in auras widget that prevented filtering based on aura type
 * Disabled Healer Tracker widget as it's currently not working at all
 * Known issues:
-  * Switching between Threat Plates and other themes may require /reload for the new theme to work correctly
+ * Switching between Threat Plates and other themes may require /reload for the new theme to work correctly
 
 ------------------------------------------------------
 8.1.4 (works with TidyPlates 6.18.6)
@@ -1438,9 +1443,9 @@
 ------------------------------------------------------
 * Updated addon for Legion (7.0.3): added the demonhunter class, updated several spells (e.g., shaman totems), updated dual spec options, and lots of bug fixes
 * Added a new feature: Headline View (Text-Only) as known from TidyPlates
-  - TidyPlatesHub must be enabled for this to work; configure it via TidyPlatesHub profiles
-  - Basic configuration options are available, see Nameplate Settings - Headline View (subtext settings are derived from nametext settings)
-  - All Threat Plate widgets are disabled (auras, combo points, ...) - doesn't make much sense enabling them in this mode
+ - TidyPlatesHub must be enabled for this to work; configure it via TidyPlatesHub profiles
+ - Basic configuration options are available, see Nameplate Settings - Headline View (subtext settings are derived from nametext settings)
+ - All Threat Plate widgets are disabled (auras, combo points, ...) - doesn't make much sense enabling them in this mode
 * Added a new feature to enable automatic role detection based on the currently active spec (see options, Threat System, Spec Roles)
 * Castbar border can now be set to Default or Thin (like healthbar border)
 * Improverd layering of Threat Plates widgets and target name plate (which is often overlapped by other plates)
@@ -1488,7 +1493,7 @@
 8.004-Alpha (works with TidyPlates 6.18.Beta20)
 ------------------------------------------------------
 * Implemented a new alpha feature (see About dialog): Headline View (Text-Only) as known from TidyPlates - TidyPlatesHub must be enabled for this to work; configure it via TidyPlatesHub profiles
-* Added four missing PVP totems (no totems should be missing now) and switched to  different colors for totem types (e.g.  PvP, Talents, ...)
+* Added four missing PVP totems (no totems should be missing now) and switched to different colors for totem types (e.g. PvP, Talents, ...)
 * Added transparent class icon for Demonhunter and special icons (red glowing border) for totem icons
 * Added an option to disable the cooldown spiral on auras (requires reload UI)
 * Castbar border can now be set to Default or Thin (like healthbar border)
@@ -1502,8 +1507,8 @@
 ------------------------------------------------------
 8.002-Alpha
 ------------------------------------------------------
-* Added demonhunter class  (icons, tank tag)
+* Added demonhunter class (icons, tank tag)
 * Updated shaman totem list (icons and IDs) and rogue spell Anticipation
 * Fixed HP bar colouring with NPCs (probably still buggy)
 * Adjusted dual spec to new model in Legion
-* Changed spec option dialog to show actual  spec names for configuration
+* Changed spec option dialog to show actual spec names for configuration
