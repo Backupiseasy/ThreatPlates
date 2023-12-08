@@ -1610,9 +1610,10 @@ function CoreEvents:UNIT_FACTION(unitid)
   end
 end
 
--- Only registered for player unit
+-- Only registered for player unit-
 local TANK_AURA_SPELL_IDs = {
   [20468] = true, [20469] = true, [20470] = true, [25780] = true, -- Paladin Righteous Fury
+  [407627] = true,  -- Paladin Righteous Fury, since Season of Discovery (Patch 1.15)
   [48263] = true -- Deathknight Frost Presence
 }
 local function UNIT_AURA(event, unitid)

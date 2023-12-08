@@ -1,3 +1,3 @@
 # @project-version@ (@build-time@)
 
-* Updated TOC version for Classic Patch 1.15.0.
+* Fixed a bug with tank role detection for Paladins in Patch 1.50 (Season of Discovery) as the aura Righteous Fury was not detected properly [Comment #7125].
