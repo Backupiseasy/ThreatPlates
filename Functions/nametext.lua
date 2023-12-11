@@ -1,5 +1,4 @@
 local ADDON_NAME, Addon = ...
-local TidyPlatesThreat = TidyPlatesThreat
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -7,7 +6,7 @@ local TidyPlatesThreat = TidyPlatesThreat
 
 -- Lua APIs
 local table_concat = table.concat
-local string_sub  = string.sub
+local string_sub  = Addon.SUBSTRING_FUNC
 local pairs = pairs
 
 -- ThreatPlates APIs
