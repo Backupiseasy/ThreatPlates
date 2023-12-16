@@ -1613,13 +1613,15 @@ end
 -- Only registered for player unit-
 local TANK_AURA_SPELL_IDs = {
   [20468] = true, [20469] = true, [20470] = true, [25780] = true, -- Paladin Righteous Fury
-  [407627] = true,  -- Paladin Righteous Fury, since Season of Discovery (Patch 1.15)
-  [48263] = true -- Deathknight Frost Presence
+  [48263] = true,   -- Deathknight Frost Presence
+  [407627] = true,  -- Paladin Righteous Fury (Season of Discovery)
+  [408680] = true,  -- Shaman Way of Earth (Season of Discovery)
+  [403789] = true,  -- Warlock Metamorphosis (Season of Discovery)
+  [400014] = true,  -- Rogue Just a Flesh Wound (Season of Discovery)
 }
 local function UNIT_AURA(event, unitid)
-  local _, name, spellId
   for i = 1, 40 do
-    name , _, _, _, _, _, _, _, _, spellId = _G.UnitBuff("player", i, "PLAYER")
+    local name , _, _, _, _, _, _, _, _, spellId = _G.UnitBuff("player", i, "PLAYER")
     if not name then
       break
     elseif TANK_AURA_SPELL_IDs[spellId] then
@@ -1697,7 +1699,15 @@ CoreEvents.UNIT_TARGET = UNIT_TARGET
 
 -- Do this after events are registered, otherwise UNIT_AURA would be registered as a general event, not only as
 -- an unit event.
-if ((Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC) and Addon.PlayerClass == "PALADIN") or (Addon.IS_WRATH_CLASSIC and Addon.PlayerClass == "DEATHKNIGHT") then
+local ENABLE_UNIT_AURA_FOR_CLASS = {
+  PALADIN = Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC,
+  DEATHKNIGHT = Addon.IS_WRATH_CLASSIC,
+  -- For Season of Discovery
+  SHAMAN = Addon.IS_CLASSIC_SOD,
+  WARLOCK = Addon.IS_CLASSIC_SOD,
+  ROGUE = Addon.IS_CLASSIC_SOD,
+}
+if ENABLE_UNIT_AURA_FOR_CLASS[Addon.PlayerClass] then
   CoreEvents.UNIT_AURA = UNIT_AURA
   TidyPlatesCore:RegisterUnitEvent("UNIT_AURA", "player")
   -- UNIT_AURA does not seem to be fired after login (even when buffs are active)

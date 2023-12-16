@@ -1,3 +1,3 @@
 # @project-version@ (@build-time@)
 
-* Fixed a bug with abbreviation for unit names where initiales where shown as empty squares when UTF-8 fonts were used [GH-489].
+* Added Shamans, Warlocks, and Rogues to automatic role detection based on active runes for WoW Classic Season of Discovery [Comment #7146].

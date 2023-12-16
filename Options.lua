@@ -6983,7 +6983,7 @@ local function CreateSpecRolesClassic()
   -- Create a list of specs for the player's class
   local result = {
     Automatic_Spec_Detection = {
-      name = L["Determine your role (tank/dps/healing) automatically based on current stance (Warrior) or form (Druid)."],
+      name = L["Determine your role (tank/dps/healing) automatically based on current stance, form, aura, presence, or rune."],
       type = "toggle",
       width = "full",
       order = 1,
