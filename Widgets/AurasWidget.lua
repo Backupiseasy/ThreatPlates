@@ -1508,6 +1508,13 @@ else
           aura.isStealable, aura.nameplateShowPersonal, aura.spellId, aura.canApplyAura, aura.isBossAura, _, aura.nameplateShowAll =
           UnitAuraBySlot(unitid, slots[i])
       
+          -- if not aura.duration then
+          --   print("Aura:", UnitAuraBySlot(unitid, slots[i]))
+          --   print("Duration:", aura.duration)
+          -- end
+          
+          aura.duration = aura.duration or 0
+
           local unit_aura_info = GetAuraDataBySlot(unitid, slots[i])   
           if unit_aura_info then
             aura.auraInstanceID = unit_aura_info.auraInstanceID
