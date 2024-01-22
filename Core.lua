@@ -359,7 +359,20 @@ function TidyPlatesThreat:OnInitialize()
   Addon.LibSharedMedia = LibStub("LibSharedMedia-3.0")
   Addon.LibCustomGlow = LibStub("LibCustomGlow-1.0")
 
-  if Addon.IS_CLASSIC then
+  if Addon.IS_CLASSIC_SOD then
+    Addon.LibClassicDurations = LibStub("LibClassicDurations")
+
+    Addon.LibClassicCasterino = LibStub("LibClassicCasterino-ThreatPlates")
+    -- Register callsbacks for spellcasting library
+    self:RegisterEvent("UNIT_SPELLCAST_START", Addon.UNIT_SPELLCAST_START)
+    self:RegisterEvent("UNIT_SPELLCAST_DELAYED", Addon.UnitSpellcastMidway) -- only for player
+    self:RegisterEvent("UNIT_SPELLCAST_STOP", Addon.UNIT_SPELLCAST_STOP)
+    self:RegisterEvent("UNIT_SPELLCAST_FAILED", Addon.UNIT_SPELLCAST_STOP)
+    self:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED", Addon.UNIT_SPELLCAST_INTERRUPTED)
+    Addon.LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_CHANNEL_START", Addon.UNIT_SPELLCAST_CHANNEL_START)
+    Addon.LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_CHANNEL_UPDATE", Addon.UnitSpellcastMidway) -- only for player
+    Addon.LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_CHANNEL_STOP", Addon.UNIT_SPELLCAST_CHANNEL_STOP)
+  elseif Addon.IS_CLASSIC then
     Addon.LibClassicDurations = LibStub("LibClassicDurations")
 
     Addon.LibClassicCasterino = LibStub("LibClassicCasterino-ThreatPlates")

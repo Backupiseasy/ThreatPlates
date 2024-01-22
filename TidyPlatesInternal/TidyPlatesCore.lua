@@ -16,7 +16,7 @@ local wipe, strsplit = wipe, strsplit
 local WorldFrame, UIParent, INTERRUPTED = WorldFrame, UIParent, INTERRUPTED
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local UnitName, UnitIsUnit, UnitReaction, UnitExists = UnitName, UnitIsUnit, UnitReaction, UnitExists
-local UnitIsPlayer = UnitIsPlayer
+local UnitIsPlayer, UnitIsDead = UnitIsPlayer, UnitIsDead
 local UnitClass = UnitClass
 local UnitEffectiveLevel = UnitEffectiveLevel
 local GetCreatureDifficultyColor = GetCreatureDifficultyColor
@@ -48,7 +48,7 @@ local _G =_G
 -- Wrapper functions for WoW Classic
 ---------------------------------------------------------------------------------------------------
 
-if Addon.IS_CLASSIC then
+if Addon.IS_CLASSIC_SOD then
   GetNameForNameplate = function(plate) return plate:GetName():gsub("NamePlate", "Plate") end
   UnitEffectiveLevel = function(...) return _G.UnitLevel(...) end
 
@@ -64,8 +64,15 @@ if Addon.IS_CLASSIC then
     return text, text, texture, startTime, endTime, false, false, spellID
   end
 
-  UnitCastingInfo = function(...)
-    local text, _, texture, startTime, endTime, _, _, _, spellID = Addon.LibClassicCasterino:UnitCastingInfo(...)
+  UnitCastingInfo = _G.UnitCastingInfo
+  -- Not available in BC Classic, introduced in patch 9.0.1
+  UnitNameplateShowsWidgetsOnly = function() return false end
+elseif Addon.IS_CLASSIC then
+  GetNameForNameplate = function(plate) return plate:GetName():gsub("NamePlate", "Plate") end
+  UnitEffectiveLevel = function(...) return _G.UnitLevel(...) end
+
+  UnitChannelInfo = function(...)
+    local text, _, texture, startTime, endTime, _, _, _, spellID = Addon.LibClassicCasterino:UnitChannelInfo(...)
 
     -- With LibClassicCasterino, startTime is nil sometimes which means that no casting information
     -- is available
@@ -73,10 +80,12 @@ if Addon.IS_CLASSIC then
       text = nil
     end
 
-    return text, text, texture, startTime, endTime, false, nil, false, spellID
+    return text, text, texture, startTime, endTime, false, false, spellID
   end
 
-  -- Not available in BC Classic, introduced in patch 9.0.1
+  UnitCastingInfo = _G.UnitCastingInfo
+
+  -- Not available in Classic, introduced in patch 9.0.1
   UnitNameplateShowsWidgetsOnly = function() return false end
 elseif Addon.IS_TBC_CLASSIC then
   GetNameForNameplate = function(plate) return plate:GetName() end
@@ -256,22 +265,17 @@ Addon.SetNameplateVisibility = SetNameplateVisibility
 do
   -- OnUpdate; This function is run frequently, on every clock cycle
 	function OnUpdate(self, e)
-		-- Poll Loop
-    local plate, curChildren
-
-    for plate in pairs(PlatesVisible) do
+    for plate, _ in pairs(PlatesVisible) do
 			local UpdateMe = UpdateAll or plate.UpdateMe
-			local UpdateHealth = plate.UpdateHealth
 
 			-- Check for an Update Request
-			if UpdateMe or UpdateHealth then
+			if UpdateMe then
 				if not UpdateMe then
 					OnHealthUpdate(plate)
         else
           OnUpdateNameplate(plate)
 				end
 				plate.UpdateMe = false
-				plate.UpdateHealth = false
       end
 
 		-- This would be useful for alpha fades
@@ -1116,6 +1120,17 @@ local function NamePlateDriverFrame_AcquireUnitFrame(_, plate)
   end
 end
 
+local function ARENA_OPPONENT_UPDATE(event, unitid, update_reason)
+  -- Event is only registered in solo shuffles, so no need to check here for that
+  if update_reason == "seen" then
+    local plate = PlatesByUnit[unitid]
+    if plate then
+      plate.UpdateMe = true
+      --Addon:ForceUpdateOnNameplate(plate)
+    end
+  end
+end
+
 function CoreEvents:PLAYER_LOGIN()
   -- Fix for Blizzard default plates being shown at random times
   -- Works for Mainline and Wrath Classic
@@ -1126,6 +1141,16 @@ end
 
 function CoreEvents:PLAYER_ENTERING_WORLD()
   TidyPlatesCore:SetScript("OnUpdate", OnUpdate)
+
+  -- ARENA_OPPONENT_UPDATE is also fired in BGs, at least in Classic, so it's only enabled when solo shuffles
+  -- are available (as it's currently only needed for these kind of arenas)
+  if Addon.IsSoloShuffle() then
+    CoreEvents.ARENA_OPPONENT_UPDATE = ARENA_OPPONENT_UPDATE
+    TidyPlatesCore:RegisterEvent("ARENA_OPPONENT_UPDATE")
+  else
+    TidyPlatesCore:UnregisterEvent("ARENA_OPPONENT_UPDATE")
+    CoreEvents.ARENA_OPPONENT_UPDATE = nil
+  end
 end
 
 function CoreEvents:NAME_PLATE_CREATED(plate)
@@ -1321,6 +1346,11 @@ local function UNIT_HEALTH(event, unitid)
     if tp_frame.Active or (tp_frame:IsShown() and (visual.healthbar:IsShown() or visual.customtext:IsShown())) then
       OnHealthUpdate(plate)
       Addon.UpdateExtensions(plate.TPFrame, unitid, plate.TPFrame.stylename)
+    end
+
+    -- If the unit is dead, update the style (and switch to headline view)
+    if UnitIsDead(unitid) then
+      plate.UpdateMe = true
     end
   end
 
@@ -1589,15 +1619,18 @@ function CoreEvents:UNIT_FACTION(unitid)
   end
 end
 
--- Only registered for player unit
+-- Only registered for player unit-
 local TANK_AURA_SPELL_IDs = {
   [20468] = true, [20469] = true, [20470] = true, [25780] = true, -- Paladin Righteous Fury
-  [48263] = true -- Deathknight Frost Presence
+  [48263] = true,   -- Deathknight Frost Presence
+  [407627] = true,  -- Paladin Righteous Fury (Season of Discovery)
+  [408680] = true,  -- Shaman Way of Earth (Season of Discovery)
+  [403789] = true,  -- Warlock Metamorphosis (Season of Discovery)
+  [400014] = true,  -- Rogue Just a Flesh Wound (Season of Discovery)
 }
 local function UNIT_AURA(event, unitid)
-  local _, name, spellId
   for i = 1, 40 do
-    name , _, _, _, _, _, _, _, _, spellId = _G.UnitBuff("player", i, "PLAYER")
+    local name , _, _, _, _, _, _, _, _, spellId = _G.UnitBuff("player", i, "PLAYER")
     if not name then
       break
     elseif TANK_AURA_SPELL_IDs[spellId] then
@@ -1675,7 +1708,15 @@ CoreEvents.UNIT_TARGET = UNIT_TARGET
 
 -- Do this after events are registered, otherwise UNIT_AURA would be registered as a general event, not only as
 -- an unit event.
-if ((Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC) and Addon.PlayerClass == "PALADIN") or (Addon.IS_WRATH_CLASSIC and Addon.PlayerClass == "DEATHKNIGHT") then
+local ENABLE_UNIT_AURA_FOR_CLASS = {
+  PALADIN = Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC,
+  DEATHKNIGHT = Addon.IS_WRATH_CLASSIC,
+  -- For Season of Discovery
+  SHAMAN = Addon.IS_CLASSIC_SOD,
+  WARLOCK = Addon.IS_CLASSIC_SOD,
+  ROGUE = Addon.IS_CLASSIC_SOD,
+}
+if ENABLE_UNIT_AURA_FOR_CLASS[Addon.PlayerClass] then
   CoreEvents.UNIT_AURA = UNIT_AURA
   TidyPlatesCore:RegisterUnitEvent("UNIT_AURA", "player")
   -- UNIT_AURA does not seem to be fired after login (even when buffs are active)
