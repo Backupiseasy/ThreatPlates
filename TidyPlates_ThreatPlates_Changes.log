@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+11.1.38 (2024-01-28)
+------------------------------------------------------
+* Aura for Polymorph (Duck, Mage), and Polymorph (Mawrat, Mage) are now correctly recognized as crowd-control auras [GH-499].
+
+------------------------------------------------------
 11.1.37 (2024-01-28)
 ------------------------------------------------------
 * Fixed a Lua error with Auras widget that occurred in arenas when auras had no duration time [GH-497].

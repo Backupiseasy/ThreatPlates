@@ -215,6 +215,9 @@ local CROWD_CONTROL_SPELLS_RETAIL = {
   [161355] = LOC_POLYMORPH, -- Polymorph (Penguin)
   [277787] = LOC_POLYMORPH, -- Polymorph (Direhorn)
   [277792] = LOC_POLYMORPH, -- Polymorph (Bumblebee)
+  [391622] = LOC_POLYMORPH, -- Polymorph (Duck)
+  [321395] = LOC_POLYMORPH, -- Polymorph (Mawrat)
+
   -- [2139] = CC_SILENCE,      -- Counterspell -- does not leave a debuff on target
   [122] = PC_ROOT,          -- Frost Nova (Blizzard)
   [82691] = LOC_STUN,       -- Ring of Frost (Talent, Blizzard)
@@ -1476,6 +1479,8 @@ local function ProcessAllUnitAurasClassic(unitid, effect)
 
     if aura.name then 
       aura.auraInstanceID = i
+
+      aura.duration = aura.duration or 0
 
       unit_auras[#unit_auras + 1] = aura
       -- Addon.Logging.Debug("Aura:", aura.name, "=> ID:", aura.spellId)
