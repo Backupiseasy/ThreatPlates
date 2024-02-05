@@ -32,9 +32,6 @@ externals:
   # Only for Mainline
   Libs/LibDualSpec-1.0: https://repos.wowace.com/wow/libdualspec-1-0
 
-  # Only for Classic
-  Libs/LibClassicDurations: https://repos.curseforge.com/wow/libclassicdurations
-
 embedded-libraries:
   # - LibClassicCasterino
   # - ForAllIndentsAndPurposes

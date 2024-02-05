@@ -1749,17 +1749,6 @@ local function UnitAuraEventHandlerV2(widget_frame, event, unitid, unit_aura_upd
   end
 end
 
--- For Classic: LibClassicDurations
-local function UnitBuffEventHandler(event, unitid)
-  local plate = GetNamePlateForUnit(unitid)
-  if plate and plate.TPFrame.Active then
-    local widget_frame = plate.TPFrame.widgets.Auras
-    if widget_frame.Active then
-      widget_frame.Widget:UpdateAuras(widget_frame, widget_frame:GetParent().unit)
-    end
-  end
-end
-
 -------------------------------------------------------------
 -- Widget Object Functions
 -------------------------------------------------------------
@@ -2969,22 +2958,10 @@ function Widget:OnEnable()
   self:RegisterEvent("PLAYER_ENTERING_WORLD")
   -- LOSS_OF_CONTROL_ADDED
   -- LOSS_OF_CONTROL_UPDATE
-
-  if Addon.IS_CLASSIC then
-    UnitAuraWrapper = Addon.LibClassicDurations.UnitAuraWithBuffs
-
-    -- Add duration handling from LibClassicDurations
-    Addon.LibClassicDurations:Register("ThreatPlates")
-    -- NOTE: Enemy buff tracking won't start until you register UNIT_BUFF
-    Addon.LibClassicDurations.RegisterCallback(TidyPlatesThreat, "UNIT_BUFF", UnitBuffEventHandler)
-  end
 end
 
 function Widget:OnDisable()
   self:UnregisterAllEvents()
-  if Addon.IS_CLASSIC then
-    Addon.LibClassicDurations.UnregisterCallback(TidyPlatesThreat, "UNIT_BUFF")
-  end
   for plate, _ in pairs(Addon.PlatesVisible) do
     plate.TPFrame.widgets.Auras:UnregisterAllEvents()
   end

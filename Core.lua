@@ -360,8 +360,6 @@ function TidyPlatesThreat:OnInitialize()
   Addon.LibCustomGlow = LibStub("LibCustomGlow-1.0")
 
   if Addon.IS_CLASSIC then
-    Addon.LibClassicDurations = LibStub("LibClassicDurations")
-
     Addon.LibClassicCasterino = LibStub("LibClassicCasterino-ThreatPlates")
     -- Register callsbacks for spellcasting library
     Addon.LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_START", Addon.UNIT_SPELLCAST_START)
