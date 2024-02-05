@@ -6,7 +6,7 @@ local ADDON_NAME, Addon = ...
 
 -- Lua APIs
 local table_concat = table.concat
-local string_sub  = Addon.SUBSTRING_FUNC
+local string_sub  = Addon.LibUTF8.utf8sub
 local pairs = pairs
 
 -- ThreatPlates APIs

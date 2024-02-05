@@ -16,36 +16,30 @@ local TextCache = Addon.Cache.Texts
 
 Addon.DEFAULT_FONT = "Cabin"
 Addon.DEFAULT_SMALL_FONT = "Arial Narrow"
-Addon.SUBSTRING_FUNC = string.sub
 
 local client_locale = GetLocale()
 local MAP_LOCALE_CONTENT = {
   koKR = { -- Korrean
     DefaultFont = "기본 글꼴",      -- "2002"
     DefaultSmallFont = "기본 글꼴", -- "2002"
-    SubstringFunc = string.utf8sub,
   },
   zhCN = { -- Simplified Chinese
     DefaultFont = "默认",      -- "AR ZhongkaiGBK Medium"
     DefaultSmallFont = "默认", -- "AR ZhongkaiGBK Medium"
-    SubstringFunc = string.utf8sub,
   },
   zhTW = { -- Traditional Chinese
     DefaultFont = "傷害數字",       -- "AR Kaiti Medium B5"
     DefaultSmallFont = "傷害數字",  -- "AR Kaiti Medium B5"
-    SubstringFunc = string.utf8sub,
   },
   ruRU = { -- Russian
     DefaultFont = "Friz Quadrata TT", -- "FrizQuadrataCTT"
     DefaultSmallFont = "Arial Narrow",
-    SubstringFunc = string.utf8sub,
   }
 }
 
 if MAP_LOCALE_CONTENT[client_locale] then
   Addon.DEFAULT_FONT = MAP_LOCALE_CONTENT[client_locale].DefaultFont
   Addon.DEFAULT_SMALL_FONT = MAP_LOCALE_CONTENT[client_locale].DefaultSmallFont
-  Addon.SUBSTRING_FUNC = MAP_LOCALE_CONTENT[client_locale].SubstringFunc
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -84,6 +78,7 @@ local TruncateWestern = function(value)
   end
 end
 
+-- TODO: NUMBER_ABBREVIATION_DATA - AbbreviateNumbers
 local MAP_LOCALE_TO_UNIT_SYMBOL = {
   koKR = { -- Korrean
     Unit_1K = "천",

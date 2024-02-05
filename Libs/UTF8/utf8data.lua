@@ -1,4 +1,8 @@
-﻿utf8_lc_uc = {
+﻿local ADDON_NAME, Addon = ...
+
+Addon.LibUTF8 = {}
+
+Addon.LibUTF8.utf8_lc_uc = {
 	["a"] = "A",
 	["b"] = "B",
 	["c"] = "C",

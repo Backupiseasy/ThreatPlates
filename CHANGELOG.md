@@ -1,4 +1,4 @@
 # @project-version@ (@build-time@)
 
-* Fixed a Lua error with Auras widget that occurred in arenas when auras had no duration time [GH-497].
-* Updated TOC version for Patch 10.2.5 for WoW Mainline.
+* Aura for Polymorph (Duck, Mage), and Polymorph (Mawrat, Mage) are now correctly recognized as crowd-control auras [GH-499].
+* Fixed a bug with abbreviation for unit names now for all localizations where initials where shown as empty squares when UTF-8 fonts were used.

@@ -2,6 +2,7 @@
 11.1.38 (2024-01-28)
 ------------------------------------------------------
 * Aura for Polymorph (Duck, Mage), and Polymorph (Mawrat, Mage) are now correctly recognized as crowd-control auras [GH-499].
+* Fixed a bug with abbreviation for unit names now for all localizations where initials where shown as empty squares when UTF-8 fonts were used.
 
 ------------------------------------------------------
 11.1.37 (2024-01-28)
@@ -17,7 +18,7 @@
 ------------------------------------------------------
 11.1.35 (2023-12-11)
 ------------------------------------------------------
-* Fixed a bug with abbreviation for unit names where initiales where shown as empty squares when UTF-8 fonts were used [GH-489].
+* Fixed a bug with abbreviation for unit names where initials where shown as empty squares when UTF-8 fonts were used [GH-489].
 
 ------------------------------------------------------
 11.1.34 (2023-12-08)

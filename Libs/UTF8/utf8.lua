@@ -1,3 +1,7 @@
+local ADDON_NAME, Addon = ...
+
+local utf8_lc_uc = Addon.LibUTF8.utf8_lc_uc
+
 -- $Id: utf8.lua 179 2009-04-03 18:10:03Z pasta $
 --
 -- Provides UTF-8 aware string functions implemented in pure lua:
@@ -148,9 +152,7 @@ local function utf8len(s)
 end
 
 -- install in the string library
-if not string.utf8len then
-	string.utf8len = utf8len
-end
+Addon.LibUTF8.utf8len = utf8len
 
 -- functions identically to string.sub except that i and j are UTF-8 characters
 -- instead of bytes
@@ -205,9 +207,7 @@ local function utf8sub(s, i, j)
 end
 
 -- install in the string library
-if not string.utf8sub then
-	string.utf8sub = utf8sub
-end
+Addon.LibUTF8.utf8sub = utf8sub
 
 -- replace UTF-8 characters based on a mapping table
 local function utf8replace(s, mapping)
@@ -242,9 +242,7 @@ local function utf8upper(s)
 end
 
 -- install in the string library
-if not string.utf8upper and utf8_lc_uc then
-	string.utf8upper = utf8upper
-end
+Addon.LibUTF8.utf8upper = utf8upper
 
 -- identical to string.lower except it knows about unicode simple case conversions
 local function utf8lower(s)
@@ -252,9 +250,7 @@ local function utf8lower(s)
 end
 
 -- install in the string library
-if not string.utf8lower and utf8_uc_lc then
-	string.utf8lower = utf8lower
-end
+Addon.LibUTF8.utf8lower = utf8lower
 
 -- identical to string.reverse except that it supports UTF-8
 local function utf8reverse(s)
@@ -287,6 +283,4 @@ local function utf8reverse(s)
 end
 
 -- install in the string library
-if not string.utf8reverse then
-	string.utf8reverse = utf8reverse
-end
+Addon.LibUTF8.utf8reverse = utf8reverse
