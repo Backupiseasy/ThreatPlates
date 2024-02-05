@@ -57,7 +57,7 @@ if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
       return Addon.PlayerIsTank
     end,
     ROGUE = function()
-      return Addon.PlayerIsTank
+      return Addon.PlayerIsTank -- Set in CoreEvents:RUNE_UPDATED() and CoreEvents:PLAYER_EQUIPMENT_CHANGED()
     end,
     DEFAULT = function()
       return false
