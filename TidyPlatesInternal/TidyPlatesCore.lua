@@ -64,17 +64,7 @@ if Addon.IS_CLASSIC then
     return text, text, texture, startTime, endTime, false, false, spellID
   end
 
-  UnitCastingInfo = function(...)
-    local text, _, texture, startTime, endTime, _, _, _, spellID = Addon.LibClassicCasterino:UnitCastingInfo(...)
-
-    -- With LibClassicCasterino, startTime is nil sometimes which means that no casting information
-    -- is available
-    if not startTime or not endTime then
-      text = nil
-    end
-
-    return text, text, texture, startTime, endTime, false, nil, false, spellID
-  end
+  UnitCastingInfo = _G.UnitCastingInfo
 
   -- Not available in Classic, introduced in patch 9.0.1
   UnitNameplateShowsWidgetsOnly = function() return false end
@@ -1641,9 +1631,20 @@ end
 --    if unitid == "target" or UnitIsUnit("player", unitid) or not ShowCastBars then return end
 --  end
 
+CoreEvents.UNIT_SPELLCAST_START = UNIT_SPELLCAST_START
+CoreEvents.UNIT_SPELLCAST_DELAYED = UnitSpellcastMidway
+CoreEvents.UNIT_SPELLCAST_STOP = UNIT_SPELLCAST_STOP
+
+-- UNIT_SPELLCAST_SUCCEEDED
+-- UNIT_SPELLCAST_FAILED
+-- UNIT_SPELLCAST_FAILED_QUIET
+-- UNIT_SPELLCAST_INTERRUPTED - handled by COMBAT_LOG_EVENT_UNFILTERED / SPELL_INTERRUPT as it's the only way to find out the interruptorom
+-- UNIT_SPELLCAST_SENT
+
 if Addon.IS_CLASSIC then
-  Addon.UNIT_SPELLCAST_START = UNIT_SPELLCAST_START
-  Addon.UNIT_SPELLCAST_STOP = UNIT_SPELLCAST_STOP
+  UNIT_SPELLCAST_SUCCEEDED = UNIT_SPELLCAST_STOP
+  UNIT_SPELLCAST_FAILED = UNIT_SPELLCAST_STOP
+
   Addon.UNIT_SPELLCAST_CHANNEL_START = UNIT_SPELLCAST_CHANNEL_START
   Addon.UNIT_SPELLCAST_CHANNEL_STOP = UNIT_SPELLCAST_CHANNEL_STOP
   Addon.UnitSpellcastMidway = UnitSpellcastMidway
@@ -1657,19 +1658,9 @@ if Addon.IS_CLASSIC then
   end  
 else
   -- The following events should not have worked before adjusting UnitSpellcastMidway
-  CoreEvents.UNIT_SPELLCAST_START = UNIT_SPELLCAST_START
-  CoreEvents.UNIT_SPELLCAST_DELAYED = UnitSpellcastMidway
-  CoreEvents.UNIT_SPELLCAST_STOP = UNIT_SPELLCAST_STOP
-
   CoreEvents.UNIT_SPELLCAST_CHANNEL_START = UNIT_SPELLCAST_CHANNEL_START
   CoreEvents.UNIT_SPELLCAST_CHANNEL_UPDATE = UnitSpellcastMidway
-  CoreEvents.UNIT_SPELLCAST_CHANNEL_STOP = UNIT_SPELLCAST_CHANNEL_STOP
-
-  -- UNIT_SPELLCAST_SUCCEEDED
-  -- UNIT_SPELLCAST_FAILED
-  -- UNIT_SPELLCAST_FAILED_QUIET
-  -- UNIT_SPELLCAST_INTERRUPTED - handled by COMBAT_LOG_EVENT_UNFILTERED / SPELL_INTERRUPT as it's the only way to find out the interruptorom
-  -- UNIT_SPELLCAST_SENT
+  CoreEvents.UNIT_SPELLCAST_CHANNEL_STOP = UNIT_SPELLCAST_CHANNEL_STOP 
 
   CoreEvents.PLAYER_FOCUS_CHANGED = PLAYER_FOCUS_CHANGED
 

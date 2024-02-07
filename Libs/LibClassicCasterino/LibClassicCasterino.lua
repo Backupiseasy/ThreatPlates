@@ -613,7 +613,7 @@ classChannelsByAura = {
     [18807] = 3,    -- Mind Flay
     [2096] = 60,    -- Mind Vision
     [10912] = 3,    -- Mind Control
-
+    
     -- WARLOCK
     [126] = 45,       -- Eye of Kilrogg
     [11700] = 5,    -- Drain Life
@@ -631,6 +631,8 @@ classChannelsByCast = {
 
     -- MAGE
     [25345] = 5,     -- Arcane Missiles
+    -- Priest
+    [402289] = 1,   -- Penance
 }
 
 
