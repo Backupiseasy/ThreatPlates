@@ -52,19 +52,84 @@ if Addon.IS_CLASSIC then
   GetNameForNameplate = function(plate) return plate:GetName():gsub("NamePlate", "Plate") end
   UnitEffectiveLevel = function(...) return _G.UnitLevel(...) end
 
-  UnitChannelInfo = function(...)
-    local text, _, texture, startTime, endTime, _, _, _, spellID = Addon.LibClassicCasterino:UnitChannelInfo(...)
-    
-    -- With LibClassicCasterino, startTime is nil sometimes which means that no casting information
-    -- is available
-    if not startTime or not endTime then
-      text = nil
+  local CHANNELED_SPELLS = {
+    -- MISC
+    [GetSpellInfo(746)] = 8000,      -- First Aid
+    [GetSpellInfo(13278)] = 4000,    -- Gnomish Death Ray
+    [GetSpellInfo(20577)] = 10000,   -- Cannibalize
+    [GetSpellInfo(10797)] = 6000,    -- Starshards
+    [GetSpellInfo(16430)] = 12000,   -- Soul Tap
+    [GetSpellInfo(24323)] = 8000,    -- Blood Siphon
+    [GetSpellInfo(27640)] = 3000,    -- Baron Rivendare's Soul Drain
+    [GetSpellInfo(7290)] = 10000,    -- Soul Siphon
+    [GetSpellInfo(24322)] = 8000,    -- Blood Siphon
+    [GetSpellInfo(27177)] = 10000,   -- Defile
+    [GetSpellInfo(27286)] = 1000,    -- Shadow Wrath (see issue #59)
+    [GetSpellInfo(433797)] = 7000,   -- Bladestorm
+
+    -- DRUID
+    [GetSpellInfo(17401)] = 10000,   -- Hurricane
+    [GetSpellInfo(740)] = 10000,     -- Tranquility
+    [GetSpellInfo(20687)] = 10000,   -- Starfall
+
+    -- HUNTER
+    [GetSpellInfo(6197)] = 60000,     -- Eagle Eye
+    [GetSpellInfo(1002)] = 60000,     -- Eyes of the Beast
+    [GetSpellInfo(1510)] = 6000,      -- Volley
+    [GetSpellInfo(136)] = 5000,       -- Mend Pet
+
+    -- MAGE
+    [GetSpellInfo(5143)] = 5000,      -- Arcane Missiles
+    [GetSpellInfo(7268)] = 3000,      -- Arcane Missile
+    [GetSpellInfo(10)] = 8000,        -- Blizzard
+    [GetSpellInfo(12051)] = 8000,     -- Evocation
+    [GetSpellInfo(401417)] = 3000,    -- Regeneration
+    [GetSpellInfo(412510)] = 3000,    -- Mass Regeneration
+
+    -- PRIEST
+    [GetSpellInfo(15407)] = 3000,     -- Mind Flay
+    [GetSpellInfo(2096)] = 60000,     -- Mind Vision
+    [GetSpellInfo(605)] = 3000,       -- Mind Control
+    [GetSpellInfo(402174)] = 2000,    -- Penance
+
+    -- WARLOCK
+    [GetSpellInfo(126)] = 45000,      -- Eye of Kilrogg
+    [GetSpellInfo(689)] = 5000,       -- Drain Life
+    [GetSpellInfo(5138)] = 5000,      -- Drain Mana
+    [GetSpellInfo(1120)] = 15000,     -- Drain Soul
+    [GetSpellInfo(5740)] = 8000,      -- Rain of Fire
+    [GetSpellInfo(1949)] = 15000,     -- Hellfire
+    [GetSpellInfo(755)] = 10000,      -- Health Funnel
+    [GetSpellInfo(17854)] = 10000,    -- Consume Shadows
+    [GetSpellInfo(6358)] = 15000,     -- Seduction Channel
+  }
+
+  -- Classic Era: name, text, texture, startTime, endTime, isTradeSkill, notInterruptible, spellID
+  UnitChannelInfo = function(unitid, channeled_spell_id)
+    local name, text, texture, startTime, endTime, isTradeSkill, notInterruptible, spellID = _G.UnitChannelInfo(unitid)
+
+    -- Classic Castbars: UnitChannelInfo is bugged for classic era, tmp fallback method
+    if not name and channeled_spell_id then 
+      name, _, texture = GetSpellInfo(channeled_spell_id)
+      local channel_cast_time = name and CHANNELED_SPELLS[name]
+      if not channel_cast_time then return end
+      spellID = channeled_spell_id
+      endTime = (GetTime() * 1000) + channel_cast_time
+      startTime = GetTime() * 1000
+
+      local spell_name, _, _, spell_casttime = GetSpellInfo(channeled_spell_id)
+      -- CHANNELED_SPELLS[name] = CHANNELED_SPELLS[name] or spell_casttime
+      print("=>", spell_name, ":", spell_casttime, " vs. ", channel_cast_time)
     end
 
-    return text, text, texture, startTime, endTime, false, false, spellID
+    return name, text, texture, startTime, endTime, isTradeSkill, notInterruptible, spellID
   end
 
-  UnitCastingInfo = _G.UnitCastingInfo
+  -- Classic Era: name, text, texture, startTime, endTime, isTradeSkill, castID, notInterruptible, spellID
+  UnitCastingInfo = function(...)
+    local name, text, texture, startTime, endTime, isTradeSkill, _, notInterruptible, spellID = _G.UnitCastingInfo(...)
+    return name, text, texture, startTime, endTime, isTradeSkill, nil, notInterruptible, spellID
+  end
 
   -- Not available in Classic, introduced in patch 9.0.1
   UnitNameplateShowsWidgetsOnly = function() return false end
@@ -869,7 +934,7 @@ do
 	end
 
 	-- OnShowCastbar
-	function OnStartCasting(plate, unitid, channeled)
+	function OnStartCasting(plate, unitid, channeled, event_spellid)
     UpdateReferences(plate)
 
     local castbar = extended.visual.castbar
@@ -880,7 +945,7 @@ do
     
     local name, text, texture, startTime, endTime, isTradeSkill, notInterruptible, spellID, numStages
     if channeled then
-      name, text, texture, startTime, endTime, isTradeSkill, notInterruptible, spellID, _, numStages = UnitChannelInfo(unitid)
+      name, text, texture, startTime, endTime, isTradeSkill, notInterruptible, spellID, _, numStages = UnitChannelInfo(unitid, event_spellid)
 		else
       name, text, texture, startTime, endTime, isTradeSkill, _, notInterruptible, spellID = UnitCastingInfo(unitid)
     end
@@ -1391,13 +1456,13 @@ function CoreEvents:PLAYER_REGEN_DISABLED()
   SetUpdateAll()
 end
 
-local function UNIT_SPELLCAST_START(event, unitid, ...)
+local function UNIT_SPELLCAST_START(event, unitid, _, spellid)
   -- Skip special unitids (they are updated via their nameplate unitid) and personal nameplate
   if IGNORED_UNITIDS[unitid] or UnitIsUnit("player", unitid) or not ShowCastBars then return end
 
   local plate = GetNamePlateForUnit(unitid)
   if plate and plate.TPFrame.Active then
-    OnStartCasting(plate, unitid, false)
+    OnStartCasting(plate, unitid, false, spellid)
   end
 end
 
@@ -1631,9 +1696,14 @@ end
 --    if unitid == "target" or UnitIsUnit("player", unitid) or not ShowCastBars then return end
 --  end
 
+-- The following events should not have worked before adjusting UnitSpellcastMidway
 CoreEvents.UNIT_SPELLCAST_START = UNIT_SPELLCAST_START
 CoreEvents.UNIT_SPELLCAST_DELAYED = UnitSpellcastMidway
 CoreEvents.UNIT_SPELLCAST_STOP = UNIT_SPELLCAST_STOP
+
+CoreEvents.UNIT_SPELLCAST_CHANNEL_START = UNIT_SPELLCAST_CHANNEL_START
+CoreEvents.UNIT_SPELLCAST_CHANNEL_UPDATE = UnitSpellcastMidway
+CoreEvents.UNIT_SPELLCAST_CHANNEL_STOP = UNIT_SPELLCAST_CHANNEL_STOP
 
 -- UNIT_SPELLCAST_SUCCEEDED
 -- UNIT_SPELLCAST_FAILED
@@ -1641,37 +1711,21 @@ CoreEvents.UNIT_SPELLCAST_STOP = UNIT_SPELLCAST_STOP
 -- UNIT_SPELLCAST_INTERRUPTED - handled by COMBAT_LOG_EVENT_UNFILTERED / SPELL_INTERRUPT as it's the only way to find out the interruptorom
 -- UNIT_SPELLCAST_SENT
 
+if Addon.IS_MAINLINE then
+  CoreEvents.UNIT_SPELLCAST_INTERRUPTIBLE = UnitSpellcastMidway
+  CoreEvents.UNIT_SPELLCAST_NOT_INTERRUPTIBLE = UnitSpellcastMidway
+
+  CoreEvents.UNIT_SPELLCAST_EMPOWER_START = UNIT_SPELLCAST_CHANNEL_START
+  CoreEvents.UNIT_SPELLCAST_EMPOWER_UPDATE = UnitSpellcastMidway
+  CoreEvents.UNIT_SPELLCAST_EMPOWER_STOP = UNIT_SPELLCAST_CHANNEL_STOP
+end
+
 if Addon.IS_CLASSIC then
-  UNIT_SPELLCAST_SUCCEEDED = UNIT_SPELLCAST_STOP
-  UNIT_SPELLCAST_FAILED = UNIT_SPELLCAST_STOP
-
-  Addon.UNIT_SPELLCAST_CHANNEL_START = UNIT_SPELLCAST_CHANNEL_START
-  Addon.UNIT_SPELLCAST_CHANNEL_STOP = UNIT_SPELLCAST_CHANNEL_STOP
-  Addon.UnitSpellcastMidway = UnitSpellcastMidway
-  CoreEvents.UNIT_HEALTH_FREQUENT = UNIT_HEALTH
-
-  if Addon.IS_CLASSIC_SOD and Addon.PlayerClass == "ROGUE" then
-    CoreEvents.RUNE_UPDATED = HandleEventRuneUpdate
-    CoreEvents.PLAYER_EQUIPMENT_CHANGED = HandleEventRuneUpdate
-    -- As these events don't fire after login, call them directly to initialize Addon.PlayerIsTank
-    HandleEventRuneUpdate()
-  end  
+   CoreEvents.UNIT_HEALTH_FREQUENT = UNIT_HEALTH
 else
-  -- The following events should not have worked before adjusting UnitSpellcastMidway
-  CoreEvents.UNIT_SPELLCAST_CHANNEL_START = UNIT_SPELLCAST_CHANNEL_START
-  CoreEvents.UNIT_SPELLCAST_CHANNEL_UPDATE = UnitSpellcastMidway
-  CoreEvents.UNIT_SPELLCAST_CHANNEL_STOP = UNIT_SPELLCAST_CHANNEL_STOP 
-
   CoreEvents.PLAYER_FOCUS_CHANGED = PLAYER_FOCUS_CHANGED
 
   if Addon.IS_MAINLINE then
-    CoreEvents.UNIT_SPELLCAST_INTERRUPTIBLE = UnitSpellcastMidway
-    CoreEvents.UNIT_SPELLCAST_NOT_INTERRUPTIBLE = UnitSpellcastMidway
-
-    CoreEvents.UNIT_SPELLCAST_EMPOWER_START = UNIT_SPELLCAST_CHANNEL_START
-    CoreEvents.UNIT_SPELLCAST_EMPOWER_UPDATE = UnitSpellcastMidway
-    CoreEvents.UNIT_SPELLCAST_EMPOWER_STOP = UNIT_SPELLCAST_CHANNEL_STOP
-
     CoreEvents.UNIT_ABSORB_AMOUNT_CHANGED = UNIT_ABSORB_AMOUNT_CHANGED
     CoreEvents.UNIT_HEAL_ABSORB_AMOUNT_CHANGED = UNIT_HEAL_ABSORB_AMOUNT_CHANGED
 

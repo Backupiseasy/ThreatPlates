@@ -359,14 +359,6 @@ function TidyPlatesThreat:OnInitialize()
   Addon.LibSharedMedia = LibStub("LibSharedMedia-3.0")
   Addon.LibCustomGlow = LibStub("LibCustomGlow-1.0")
 
-  if Addon.IS_CLASSIC then
-    Addon.LibClassicCasterino = LibStub("LibClassicCasterino-ThreatPlates")
-    -- Register callsbacks for spellcasting library
-    Addon.LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_CHANNEL_START", Addon.UNIT_SPELLCAST_CHANNEL_START)
-    Addon.LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_CHANNEL_UPDATE", Addon.UnitSpellcastMidway) -- only for player
-    Addon.LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_CHANNEL_STOP", Addon.UNIT_SPELLCAST_CHANNEL_STOP)
-  end
-
   Addon.LoadOnDemandLibraries()
 
   local RegisterCallback = db.RegisterCallback
