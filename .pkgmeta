@@ -33,7 +33,6 @@ externals:
   Libs/LibDualSpec-1.0: https://repos.wowace.com/wow/libdualspec-1-0
 
 embedded-libraries:
-  # - LibClassicCasterino
   # - ForAllIndentsAndPurposes
 
 enable-nolib-creation: no

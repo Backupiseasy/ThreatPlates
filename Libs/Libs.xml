@@ -35,6 +35,5 @@
     <!--@end-version-wrath@-->
 
     <!--@version-classic@-->
-    <Script file="LibClassicCasterino\LibClassicCasterino.lua"/>
     <!--@end-version-classic@-->
 </Ui>

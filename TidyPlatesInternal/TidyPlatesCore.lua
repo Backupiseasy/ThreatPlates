@@ -44,63 +44,6 @@ local _G =_G
 -- List them here for Mikk's FindGlobals script
 -- GLOBALS: CreateFrame, UnitAffectingCombat, UnitCastingInfo, UnitClassification, UnitGUID, UnitHealth, UnitHealthMax, UnitIsTapDenied, UnitLevel, UnitSelectionColor
 
----------------------------------------------------------------------------------------------------
--- Wrapper functions for WoW Classic
----------------------------------------------------------------------------------------------------
-
-if Addon.IS_CLASSIC then
-  GetNameForNameplate = function(plate) return plate:GetName():gsub("NamePlate", "Plate") end
-  UnitEffectiveLevel = function(...) return _G.UnitLevel(...) end
-
-  UnitChannelInfo = function(...)
-    local text, _, texture, startTime, endTime, _, _, _, spellID = Addon.LibClassicCasterino:UnitChannelInfo(...)
-    
-    -- With LibClassicCasterino, startTime is nil sometimes which means that no casting information
-    -- is available
-    if not startTime or not endTime then
-      text = nil
-    end
-
-    return text, text, texture, startTime, endTime, false, false, spellID
-  end
-
-  UnitCastingInfo = _G.UnitCastingInfo
-
-  -- Not available in Classic, introduced in patch 9.0.1
-  UnitNameplateShowsWidgetsOnly = function() return false end
-elseif Addon.IS_TBC_CLASSIC then
-  GetNameForNameplate = function(plate) return plate:GetName() end
-  UnitEffectiveLevel = function(...) return _G.UnitLevel(...) end
-
-  -- name, text, texture, startTime, endTime, isTradeSkill, notInterruptible, spellID
-  UnitChannelInfo = function(...)
-    local name, text, texture, startTime, endTime, isTradeSkill, spellID = _G.UnitChannelInfo(...)
-    return name, text, texture, startTime, endTime, isTradeSkill, false, spellID
-  end
-
-  -- name, text, texture, startTime, endTime, isTradeSkill, _, notInterruptible, spellID
-  UnitCastingInfo = function(...)
-    -- In BC Classic, UnitCastingInfo does not return notInterruptible
-    local name, text, texture, startTime, endTime, isTradeSkill, spellID = _G.UnitCastingInfo(...)
-    return name, text, texture, startTime, endTime, isTradeSkill, nil, false, spellID
-  end
-
-  -- Not available in BC Classic, introduced in patch 9.0.1
-  UnitNameplateShowsWidgetsOnly = function() return false end
-elseif Addon.IS_WRATH_CLASSIC then
-  GetNameForNameplate = function(plate) return plate:GetName() end
-  UnitEffectiveLevel = function(...) return _G.UnitLevel(...) end
-
-  UnitCastingInfo = _G.UnitCastingInfo
-
-  -- Not available in WotLK Classic, introduced in patch 9.0.1
-  UnitNameplateShowsWidgetsOnly = function() return false end
-else
-  GetNameForNameplate = function(plate) return plate:GetName() end
-
-  UnitCastingInfo = function(...) return _G.UnitCastingInfo(...) end
-end
-
 -- Constants
 
 local IGNORED_UNITIDS = {
@@ -160,6 +103,161 @@ Addon.PlatesByGUID = PlatesByGUID
 Addon.Theme = {}
 
 local activetheme = Addon.Theme
+
+---------------------------------------------------------------------------------------------------
+-- Wrapper functions for WoW Classic
+---------------------------------------------------------------------------------------------------
+
+if Addon.IS_CLASSIC then
+  GetNameForNameplate = function(plate) return plate:GetName():gsub("NamePlate", "Plate") end
+  UnitEffectiveLevel = function(...) return _G.UnitLevel(...) end
+
+  -- Fix for UnitChannelInfo not working on WoW Classic
+  -- Based on code from LibClassicCasterino and ClassicCastbars
+  local CHANNELED_SPELL_INFO_BY_ID = {
+    -- DRUID
+    [17401] = 10,  -- Hurricane
+    [740] = 10,    -- Tranquility
+
+    -- HUNTER
+    [6197] = 60,     -- Eagle Eye
+    [1002] = 60,     -- Eyes of the Beast
+    [136] = 5,       -- Mend Pet
+    [1515] = 20,     -- Tame Beast
+    [1510] = 6,      -- Volley
+
+    -- MAGE    
+    [5143] = 5,       -- Arcane Missiles
+    [7268] = 3,       -- Arcane Missiles
+    [10] = 8,         -- Blizzard
+    [12051] = 8,      -- Evocation
+    [401417] = 3,     -- Regeneration
+    [412510] = 3,     -- Mass Regeneration
+
+    -- PRIEST
+    [605] = 3,      -- Mind Control
+    [15407] = 3,    -- Mind Flay
+    [413259] = 5,   -- Mind Sear
+    [2096] = 60,    -- Mind Vision
+    -- [402174] = 1,   -- Penance
+    [402277] = 2,   -- Penance
+    [10797] = 6,    -- Starshards, Nightelf
+
+    -- SHAMAN
+
+    -- WARLOCK
+    [689] = 5,       -- Drain Life
+    [5138] = 5,      -- Drain Mana
+    [1120] = 15,     -- Drain Soul
+    [126] = 45,      -- Eye of Kilrogg
+    [755] = 10,      -- Health Funnel
+    [1949] = 15,     -- Hellfire
+    [437169] = 120,  -- Portal of Summoning
+    [5740] = 8,      -- Rain of Fire
+    -- Ritual of Doom, Level 60
+    [698] = 5,       -- Ritual of Summoning
+    [6358] = 15,    -- Seduction (Succubus)
+    [17854] = 10,   -- Consume Shadows (Voidwalker)
+
+    -- MISC
+    [13278] = 4,    -- Gnomish Death Ray
+    [20577] = 10,   -- Cannibalize
+    [746] = 6,      -- First Aid
+
+    -- NPCs
+    [16430] = 12,   -- Soul Tap - Thuzadin Necromancer
+    [24323] = 8,    -- Blood Siphon - Hakkar
+    [24322] = 8,    -- Blood Siphon - Hakkar
+
+    [7290] = 10,    -- Soul Siphon
+    [27640] = 3,    -- Baron Rivendare's Soul Drain
+    [27177] = 10,   -- Defile
+    [27286] = 1,    -- Shadow Wrath 
+    [20687] = 10,   -- Starfall
+    
+    [433797] = 7,    -- SoD: Bladestorm, Blademasters in Ashenvale
+    [404373] = 10,   -- SoD: Bubble Beam, Baron Aquanis in Baron Aquanis
+
+    -- SoD Patch 1.15.1
+    [432439] = 30,  -- Channel
+    [438714] = 10,  -- Furnace Surge
+    [434584] = 5,   -- Gnomeregan Smash
+    [436027] = 3,   -- Grubbis Mad!
+    [435450] = 15,  -- Rune Scrying
+    [434869] = 2,   -- Shadow Ritual of Sacrifice
+    [436818] = 9,   -- Sprocketfire Breath
+  }
+
+  -- Convert key ID to name to avoid handling all different spell ranks (which have the same name, but different IDs)
+  local CHANNELED_SPELL_INFO_BY_NAME = {}
+  for spell_id, channel_cast_time in pairs(CHANNELED_SPELL_INFO_BY_ID) do
+    CHANNELED_SPELL_INFO_BY_NAME[GetSpellInfo(spell_id)] = channel_cast_time
+  end
+
+  -- Classic Era: name, text, texture, startTime, endTime, isTradeSkill, notInterruptible, spellID
+  UnitChannelInfo = function(unitid, event_spellid)
+    local name, text, texture, startTime, endTime, isTradeSkill, notInterruptible, spellID, _ = _G.UnitChannelInfo(unitid)
+
+    if not event_spellid then
+      local plate = PlatesByUnit[unitid]
+      if plate then 
+        event_spellid = plate.TPFrame.unit.ChannelEventSpellID
+      end
+    end
+
+    if not name and event_spellid then 
+      name, _, texture = GetSpellInfo(event_spellid)
+
+      local channel_cast_time = name and CHANNELED_SPELL_INFO_BY_NAME[name]
+      if channel_cast_time then
+        endTime = (GetTime() + channel_cast_time) * 1000
+        startTime = GetTime() * 1000
+
+        unit.ChannelEventSpellID = event_spellid
+
+        return name, name, texture, startTime, endTime, isTradeSkill, notInterruptible, event_spellid
+      end
+    end
+
+    return name, text, texture, startTime, endTime, isTradeSkill, notInterruptible, spellID
+  end
+
+  UnitCastingInfo = _G.UnitCastingInfo
+
+  -- Not available in Classic, introduced in patch 9.0.1
+  UnitNameplateShowsWidgetsOnly = function() return false end
+elseif Addon.IS_TBC_CLASSIC then
+  GetNameForNameplate = function(plate) return plate:GetName() end
+  UnitEffectiveLevel = function(...) return _G.UnitLevel(...) end
+
+  -- name, text, texture, startTime, endTime, isTradeSkill, notInterruptible, spellID
+  UnitChannelInfo = function(...)
+    local name, text, texture, startTime, endTime, isTradeSkill, spellID = _G.UnitChannelInfo(...)
+    return name, text, texture, startTime, endTime, isTradeSkill, false, spellID
+  end
+
+  -- name, text, texture, startTime, endTime, isTradeSkill, _, notInterruptible, spellID
+  UnitCastingInfo = function(...)
+    -- In BC Classic, UnitCastingInfo does not return notInterruptible
+    local name, text, texture, startTime, endTime, isTradeSkill, spellID = _G.UnitCastingInfo(...)
+    return name, text, texture, startTime, endTime, isTradeSkill, nil, false, spellID
+  end
+
+  -- Not available in BC Classic, introduced in patch 9.0.1
+  UnitNameplateShowsWidgetsOnly = function() return false end
+elseif Addon.IS_WRATH_CLASSIC then
+  GetNameForNameplate = function(plate) return plate:GetName() end
+  UnitEffectiveLevel = function(...) return _G.UnitLevel(...) end
+
+  UnitCastingInfo = _G.UnitCastingInfo
+
+  -- Not available in WotLK Classic, introduced in patch 9.0.1
+  UnitNameplateShowsWidgetsOnly = function() return false end
+else
+  GetNameForNameplate = function(plate) return plate:GetName() end
+
+  UnitCastingInfo = function(...) return _G.UnitCastingInfo(...) end
+end
 
 ---------------------------------------------------------------------------------------------------------------------
 -- Core Function Declaration
@@ -480,7 +578,7 @@ do
     -- Call this after the plate is shown as OnStartCasting checks if the plate is shown; if not, the castbar is hidden and
     -- nothing is updated
     OnUpdateCastMidway(plate, unitid)
-  end
+ end
 
 	-- OnUpdateNameplate
 	function OnUpdateNameplate(plate)
@@ -869,7 +967,7 @@ do
 	end
 
 	-- OnShowCastbar
-	function OnStartCasting(plate, unitid, channeled)
+	function OnStartCasting(plate, unitid, channeled, event_spellid)
     UpdateReferences(plate)
 
     local castbar = extended.visual.castbar
@@ -880,7 +978,7 @@ do
     
     local name, text, texture, startTime, endTime, isTradeSkill, notInterruptible, spellID, numStages
     if channeled then
-      name, text, texture, startTime, endTime, isTradeSkill, notInterruptible, spellID, _, numStages = UnitChannelInfo(unitid)
+      name, text, texture, startTime, endTime, isTradeSkill, notInterruptible, spellID, _, numStages = UnitChannelInfo(unitid, event_spellid)
 		else
       name, text, texture, startTime, endTime, isTradeSkill, _, notInterruptible, spellID = UnitCastingInfo(unitid)
     end
@@ -954,8 +1052,8 @@ do
     castbar:Show()
 	end
 
-	-- OnHideCastbar
-	function OnStopCasting(plate)
+  -- OnHideCastbar
+  function OnStopCasting(plate)
     UpdateReferences(plate)
 
     local castbar = extended.visual.castbar
@@ -969,13 +1067,13 @@ do
       UpdateIndicator_CustomScale(extended, unit)
       UpdatePlate_Transparency(extended, unit)
     end
-	end
+  end    
+  
+  function OnUpdateCastMidway(plate, unitid)
+    if not ShowCastBars then return end
 
-	function OnUpdateCastMidway(plate, unitid)
-		if not ShowCastBars then return end
-
-		-- Check to see if there's a spell being cast
-		if UnitCastingInfo(unitid) then
+    -- Check to see if there's a spell being cast
+    if UnitCastingInfo(unitid) then
       OnStartCasting(plate, unitid, false)
     elseif UnitChannelInfo(unitid) then
       OnStartCasting(plate, unitid, true)
@@ -984,8 +1082,7 @@ do
       -- Not currently sure though, if that might work with the Hide() calls in OnStartCasting
       visual.castbar:Hide()
     end
-	end
-
+  end
 end -- End Indicator section
 
 --------------------------------------------------------------------------------------------------------------
@@ -1425,13 +1522,13 @@ local function UNIT_SPELLCAST_STOP(event, unitid, ...)
   end
 end
 
-local function UNIT_SPELLCAST_CHANNEL_START(event, unitid, ...)
+local function UNIT_SPELLCAST_CHANNEL_START(event, unitid, _, spellid)
   -- Skip special unitids (they are updated via their nameplate unitid) and personal nameplate
   if IGNORED_UNITIDS[unitid] or UnitIsUnit("player", unitid) or not ShowCastBars then return end
 
   local plate = GetNamePlateForUnit(unitid)
   if plate and plate.TPFrame.Active then
-    OnStartCasting(plate, unitid, true)
+    OnStartCasting(plate, unitid, true, spellid)
     --late.TPFrame.visual.castbar:Show()
   end
 end
@@ -1446,6 +1543,19 @@ local function UNIT_SPELLCAST_CHANNEL_STOP(event, unitid, ...)
   end
 end
 
+if Addon.IS_CLASSIC then
+  -- Different version for Classic as UnitChannelInfo does not work there and this needs a workaround (ChannelEventSpellID)
+  UNIT_SPELLCAST_CHANNEL_STOP = function(event, unitid, ...)
+    -- Skip special unitids (they are updated via their nameplate unitid) and personal nameplate
+    if IGNORED_UNITIDS[unitid] or UnitIsUnit("player", unitid) or not ShowCastBars then return end
+
+    local plate = GetNamePlateForUnit(unitid)
+    if plate and plate.TPFrame.Active then
+      plate.TPFrame.unit.ChannelEventSpellID = nil
+      OnStopCasting(plate)
+    end
+  end
+end
 
 function Addon.UNIT_SPELLCAST_INTERRUPTED(event, unitid, castGUID, spellID, sourceName, interrupterGUID)
   -- Skip special unitids (they are updated via their nameplate unitid) and personal nameplate
@@ -1631,9 +1741,14 @@ end
 --    if unitid == "target" or UnitIsUnit("player", unitid) or not ShowCastBars then return end
 --  end
 
+-- The following events should not have worked before adjusting UnitSpellcastMidway
 CoreEvents.UNIT_SPELLCAST_START = UNIT_SPELLCAST_START
 CoreEvents.UNIT_SPELLCAST_DELAYED = UnitSpellcastMidway
 CoreEvents.UNIT_SPELLCAST_STOP = UNIT_SPELLCAST_STOP
+
+CoreEvents.UNIT_SPELLCAST_CHANNEL_START = UNIT_SPELLCAST_CHANNEL_START
+CoreEvents.UNIT_SPELLCAST_CHANNEL_UPDATE = UNIT_SPELLCAST_CHANNEL_START
+CoreEvents.UNIT_SPELLCAST_CHANNEL_STOP = UNIT_SPELLCAST_CHANNEL_STOP
 
 -- UNIT_SPELLCAST_SUCCEEDED
 -- UNIT_SPELLCAST_FAILED
@@ -1641,37 +1756,21 @@ CoreEvents.UNIT_SPELLCAST_STOP = UNIT_SPELLCAST_STOP
 -- UNIT_SPELLCAST_INTERRUPTED - handled by COMBAT_LOG_EVENT_UNFILTERED / SPELL_INTERRUPT as it's the only way to find out the interruptorom
 -- UNIT_SPELLCAST_SENT
 
+if Addon.IS_MAINLINE then
+  CoreEvents.UNIT_SPELLCAST_INTERRUPTIBLE = UnitSpellcastMidway
+  CoreEvents.UNIT_SPELLCAST_NOT_INTERRUPTIBLE = UnitSpellcastMidway
+
+  CoreEvents.UNIT_SPELLCAST_EMPOWER_START = UNIT_SPELLCAST_CHANNEL_START
+  CoreEvents.UNIT_SPELLCAST_EMPOWER_UPDATE = UnitSpellcastMidway
+  CoreEvents.UNIT_SPELLCAST_EMPOWER_STOP = UNIT_SPELLCAST_CHANNEL_STOP
+end
+
 if Addon.IS_CLASSIC then
-  UNIT_SPELLCAST_SUCCEEDED = UNIT_SPELLCAST_STOP
-  UNIT_SPELLCAST_FAILED = UNIT_SPELLCAST_STOP
-
-  Addon.UNIT_SPELLCAST_CHANNEL_START = UNIT_SPELLCAST_CHANNEL_START
-  Addon.UNIT_SPELLCAST_CHANNEL_STOP = UNIT_SPELLCAST_CHANNEL_STOP
-  Addon.UnitSpellcastMidway = UnitSpellcastMidway
   CoreEvents.UNIT_HEALTH_FREQUENT = UNIT_HEALTH
-
-  if Addon.IS_CLASSIC_SOD and Addon.PlayerClass == "ROGUE" then
-    CoreEvents.RUNE_UPDATED = HandleEventRuneUpdate
-    CoreEvents.PLAYER_EQUIPMENT_CHANGED = HandleEventRuneUpdate
-    -- As these events don't fire after login, call them directly to initialize Addon.PlayerIsTank
-    HandleEventRuneUpdate()
-  end  
 else
-  -- The following events should not have worked before adjusting UnitSpellcastMidway
-  CoreEvents.UNIT_SPELLCAST_CHANNEL_START = UNIT_SPELLCAST_CHANNEL_START
-  CoreEvents.UNIT_SPELLCAST_CHANNEL_UPDATE = UnitSpellcastMidway
-  CoreEvents.UNIT_SPELLCAST_CHANNEL_STOP = UNIT_SPELLCAST_CHANNEL_STOP 
-
   CoreEvents.PLAYER_FOCUS_CHANGED = PLAYER_FOCUS_CHANGED
 
   if Addon.IS_MAINLINE then
-    CoreEvents.UNIT_SPELLCAST_INTERRUPTIBLE = UnitSpellcastMidway
-    CoreEvents.UNIT_SPELLCAST_NOT_INTERRUPTIBLE = UnitSpellcastMidway
-
-    CoreEvents.UNIT_SPELLCAST_EMPOWER_START = UNIT_SPELLCAST_CHANNEL_START
-    CoreEvents.UNIT_SPELLCAST_EMPOWER_UPDATE = UnitSpellcastMidway
-    CoreEvents.UNIT_SPELLCAST_EMPOWER_STOP = UNIT_SPELLCAST_CHANNEL_STOP
-
     CoreEvents.UNIT_ABSORB_AMOUNT_CHANGED = UNIT_ABSORB_AMOUNT_CHANGED
     CoreEvents.UNIT_HEAL_ABSORB_AMOUNT_CHANGED = UNIT_HEAL_ABSORB_AMOUNT_CHANGED
 
@@ -1969,7 +2068,7 @@ function Addon:ConfigClickableArea(toggle_show)
           width, height = C_NamePlate.GetNamePlateEnemySize()
         end
         extended.Background:SetSize(width, height)
-
+        
         extended.Background:Show()
 
         -- remove the config background if the nameplate is hidden to prevent it
