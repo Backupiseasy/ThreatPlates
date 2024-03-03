@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+11.1.39 (2024-03-03)
+------------------------------------------------------
+* Removed LibClassicCasterino as cast information is provided by the WoW API since WoW Classic Patch 1.15.0.
+
+------------------------------------------------------
 11.1.38 (2024-02-09)
 ------------------------------------------------------
 * Aura for Polymorph (Duck, Mage), and Polymorph (Mawrat, Mage) are now correctly recognized as crowd-control auras [GH-499].
@@ -6,7 +11,6 @@
 * Fixed a bug with tank role detection for Rogues - a wrong spell ID for Just a Flesh Wound was used [Comment #7166].
 * Fixed a bug with player castbars not being shown since since WoW Classic Patch 1.15.0 [GH-493, Comment #7194].
 * Removed LibClassicDurations as aura durations are provided by the WoW API since WoW Classic Patch 1.15.0 [GH-430].
-* Removed LibClassicCasterino as cast information is provided by the WoW API since WoW Classic Patch 1.15.0.
 * Updated TOC version for Classic Patch 1.15.1.
 
 ------------------------------------------------------
