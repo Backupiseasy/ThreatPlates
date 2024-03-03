@@ -357,9 +357,9 @@ function Addon:ConfigBossModsWidget()
   if not EnabledConfigMode then
     local guid = _G.UnitGUID("target")
     if guid then
-      BossMod_ShowNameplateAura("Configuration Mode", true, guid, GetSpellTexture(241600), nil, false, true, {1, 1, 0.5, 1})
-      BossMod_ShowNameplateAura("Configuration Mode", true, guid, GetSpellTexture(207327), 7, false, true, {0, 0, 1, 1})
-      BossMod_ShowNameplateAura("Configuration Mode", true, guid, GetSpellTexture(236513), 60)
+      BossMod_ShowNameplateAura("Configuration Mode", true, guid, GetSpellTexture(6603), nil, false, true, {1, 1, 0.5, 1})
+      BossMod_ShowNameplateAura("Configuration Mode", true, guid, GetSpellTexture(7620), 7, false, true, {0, 0, 1, 1})
+      BossMod_ShowNameplateAura("Configuration Mode", true, guid, GetSpellTexture(818), 60)
 
       EnabledConfigMode = true
     else
