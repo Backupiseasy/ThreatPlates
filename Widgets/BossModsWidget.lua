@@ -206,12 +206,14 @@ local function BossMod_ShowNameplateAura(msg, is_guid, unit, aura_texture, durat
   -- Show frame is this is the first aura shown (no_auras == 0 in this case)
   if no_auras == 0 then
     local plate = Addon.PlatesByGUID[guid]
-    if plate then
-      local widget_frame = plate.TPFrame.widgets["BossMods"]
-      UpdateFrameWithAuras(widget_frame, GUIDAuraList[guid])
+    if plate and plate.TPFrame.Active then
+      local widget_frame = plate.TPFrame.widgets.BossMods
+      if widget_frame and widget_frame.Active then
+        UpdateFrameWithAuras(widget_frame, GUIDAuraList[guid])
 
-      widget_frame.LastUpdate = 0.5 -- to show the update immediately
-      widget_frame:Show()
+        widget_frame.LastUpdate = 0.5 -- to show the update immediately
+        widget_frame:Show()
+      end
     end
   end
 end
@@ -355,8 +357,9 @@ end
 local EnabledConfigMode = false
 function Addon:ConfigBossModsWidget()
   if not EnabledConfigMode then
-    local guid = _G.UnitGUID("target")
-    if guid then
+    local tp_frame = Widget:GetThreatPlateForUnit("target")
+    if tp_frame then
+      local guid = _G.UnitGUID("target")
       BossMod_ShowNameplateAura("Configuration Mode", true, guid, GetSpellTexture(6603), nil, false, true, {1, 1, 0.5, 1})
       BossMod_ShowNameplateAura("Configuration Mode", true, guid, GetSpellTexture(7620), 7, false, true, {0, 0, 1, 1})
       BossMod_ShowNameplateAura("Configuration Mode", true, guid, GetSpellTexture(818), 60)
