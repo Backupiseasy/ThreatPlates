@@ -19,6 +19,7 @@ local GetTime = GetTime
 local tremove = tremove
 
 -- ThreatPlates APIs
+local L = Addon.ThreatPlates.L
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -366,7 +367,7 @@ function Addon:ConfigBossModsWidget()
 
       EnabledConfigMode = true
     else
-      Addon.Logging.Warning("Please select a target unit to enable configuration mode.")
+      Addon.Logging.Warning(L["Please select a target unit with a nameplate to enable configuration mode."])
     end
   else
     BossMod_DisableHostileNameplates()
