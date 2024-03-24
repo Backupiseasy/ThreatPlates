@@ -20,6 +20,7 @@ local GetPartyAssignment = GetPartyAssignment
 -- ThreatPlates APIs
 local IsOffTankCreature = Addon.IsOffTankCreature
 local TOTEMS = Addon.TOTEMS
+local IGNORED_STYLES = Addon.IGNORED_STYLES_WITH_NAMEMODE
 local RGB, RGB_P = ThreatPlates.RGB, ThreatPlates.RGB_P
 local IsFriend
 local IsGuildmate
@@ -286,9 +287,9 @@ end
 function Addon:SetHealthbarColor(unit)
   local style = unit.style
 
+  if IGNORED_STYLES[style] then return end
+  
   local unique_setting = unit.CustomPlateSettings
-
-  if style == "NameOnly" or style == "NameOnly-Unique" or style == "empty" or style == "etotem" then return end
 
   ShowQuestUnit = ShowQuestUnit or ThreatPlates.ShowQuestUnit
   IsFriend = IsFriend or ThreatPlates.IsFriend

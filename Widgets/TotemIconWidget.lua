@@ -52,7 +52,7 @@ end
 --end
 
 function Widget:EnabledForStyle(style, unit)
-	return (style == "totem" or style == "etotem")
+	return (style == "totem" or style == "etotem") and unit.TP_DetailedUnitType == "Totem"
 end
 
 function Widget:OnUnitAdded(widget_frame, unit)

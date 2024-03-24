@@ -143,6 +143,22 @@ Addon.MODE_FOR_STYLE = {
   unique = "HealthbarMode",
   NameOnly = "NameMode",
   ["NameOnly-Unique"] = "NameMode",
+  -- ! Although most elements are not shown in empty style, some configuration updates do not work
+  -- ! when there are not settings for the currently active style
+  etotem = "HealthbarMode",
+  empty = "HealthbarMode",
+}
+
+Addon.IGNORED_STYLES = {
+  etotem = true,
+  empty = true,
+}
+
+Addon.IGNORED_STYLES_WITH_NAMEMODE = {
+  NameOnly = true,
+  ["NameOnly-Unique"] = true,
+  etotem = true,
+  empty = true,
 }
 
 ----------------------------------------------------------------------------------------------------
@@ -1213,6 +1229,32 @@ ThreatPlates.DEFAULT_SETTINGS = {
       Size = 32,
       HorizontalOffset = 8,
       VerticalOffset = 0,
+      SoftTarget = {
+        HighlightForEnemy = true,
+        TargetStyleForEnemy = true,
+        HighlightColorForEnemy = RGB(255,0,0, 1),
+        HighlightForFriend = true,
+        HighlightColorForFriend = RGB(0,255,0, 1),
+        HighlightForInteract = true,
+        HighlightColorForInteract = RGB(255, 128, 0, 1),
+        Icon = {
+          SoftTargetIconTarget = false,
+          Size = 19,
+          -- Positioning
+          HealthbarMode = {
+            Anchor = "BOTTOM",
+            InsideAnchor = false,
+            HorizontalOffset = 0,
+            VerticalOffset = -10,
+          },
+          NameMode = {
+            Anchor = "BOTTOM",
+            InsideAnchor = false,
+            HorizontalOffset = 0,
+            VerticalOffset = -10,
+          },
+        },
+        },
     },
     FocusWidget = {
       ON = true,
@@ -1576,6 +1618,13 @@ ThreatPlates.DEFAULT_SETTINGS = {
           ShadowVerticalOffset = -1,
         },
       },
+      Widgets ={
+        Scale = 1,
+        Anchor = "BOTTOM",
+        InsideAnchor = false,
+        HorizontalOffset = 0,
+        VerticalOffset = -6,
+      }
     },
     totemSettings = GetDefaultTotemSettings(),
     uniqueSettings = {

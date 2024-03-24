@@ -18,6 +18,7 @@ local UnitPlayerControlled, UnitIsOwnerOrControllerOfUnit = UnitPlayerControlled
 
 -- ThreatPlates APIs
 local ANCHOR_POINT_TEXT = Addon.ANCHOR_POINT_TEXT
+local IGNORED_STYLES = Addon.IGNORED_STYLES
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -30,10 +31,7 @@ local MapUIWidgetToExperienceWidget = {}
 -- Cached configuration settings
 ---------------------------------------------------------------------------------------------------
 local Settings
-local EnabledForStyle = {
-  etotem = false,
-  empty = false
-}
+local EnabledForStyle = {}
 
 ---------------------------------------------------------------------------------------------------
 -- Widget Functions
@@ -68,6 +66,11 @@ local NPC_ID_TO_WIDGET_ID = {
 
   -- Shadowlands
 }
+
+local NPCsWithExperienceWidget = {}
+for npc_id, _ in pairs(NPC_ID_TO_WIDGET_ID) do
+  NPCsWithExperienceWidget[npc_id] = true
+end
 
 local MAX_NPC_XP_RANK = 30
 
@@ -109,6 +112,17 @@ end
 
 function Widget:OnDisable()
   self:UnregisterEvent("UPDATE_UI_WIDGET")
+  self:UpdateAllFrames()
+end
+
+function Widget:UpdateFrame(widget_frame,  unit)
+  -- Show nameplate widget for this unit, if Experience widget was shown before it was disabled
+  if not self:IsEnabled() then
+    local widget_container = widget_frame:GetParent().WidgetContainer
+    if widget_container then
+      widget_container:SetShown(NPCsWithExperienceWidget[unit.NPCID] ~= nil)
+    end  
+  end
 end
 
 function Widget:EnabledForStyle(style, unit)
@@ -125,6 +139,13 @@ function Widget:Create(tp_frame)
   return widget_frame
 end
 
+local function NameplateWidgetOnShow(widget_container)
+  if Widget:IsEnabled() then
+    local unit = widget_container:GetParent().unit
+    widget_container:SetShown(NPCsWithExperienceWidget[unit.NPCID] == nil)
+  end
+end
+
 function Widget:OnUnitAdded(widget_frame, unit)
   local widget_id = NPC_ID_TO_WIDGET_ID[unit.NPCID]
   if not widget_id or not EnabledForStyle[unit.style] or (UnitPlayerControlled(unit.unitid) and not UnitIsOwnerOrControllerOfUnit("player", unit.unitid)) then
@@ -132,6 +153,17 @@ function Widget:OnUnitAdded(widget_frame, unit)
     return
   end
 
+  -- When the widget (container) is supported by the Experience widget, we should hide the Blizzard widget
+  local widget_container = widget_frame:GetParent().WidgetContainer
+  if widget_container then
+    if not widget_container.ThreatPlatesOnShowHook then
+      widget_container.ThreatPlatesOnShowHook = true
+      widget_container:HookScript("OnShow", NameplateWidgetOnShow)
+    end
+    -- Hide widget here if Experience widget is enabled (and unit is targeted)
+    NameplateWidgetOnShow(widget_container)
+  end
+  
   -- Store mapping for event updates (when exp changes)
   MapUIWidgetToExperienceWidget[widget_id] = widget_frame
   local current_xp, max_xp, rank = GetNPCExperience(widget_id)

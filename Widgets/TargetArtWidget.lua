@@ -11,11 +11,18 @@ local Widget = Addon.Widgets:NewTargetWidget("TargetArt")
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
 
+-- Lua APIs
+local pairs = pairs
+
 -- WoW APIs
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
+local SetUnitCursorTexture = SetUnitCursorTexture
+local UnitIsUnit = UnitIsUnit
 
 -- ThreatPlates APIs
 local BackdropTemplate = Addon.BackdropTemplate
+local MODE_FOR_STYLE, AnchorFrameTo = Addon.MODE_FOR_STYLE, Addon.AnchorFrameTo
+local CVars = Addon.CVars
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -91,16 +98,38 @@ local FRAME_LEVEL_BY_TEXTURE = {
 -- Cached configuration settings
 ---------------------------------------------------------------------------------------------------
 local Settings, FocusSettings
-local SettingsHV, FocusSettingsHV
-local WidgetFrame
+local TargetHighlightFrames = {
+  target = nil,
+  softfriend = nil,
+  softinteract = nil,
+  softenemy = nil
+}
+local SoftTargetSettings = {
+  target = {},
+  softfriend = {},
+  softinteract = {},
+  softenemy = {},
+  GameObject = {}
+}
 local UpdateTexture, ShowBorder, NameModeOffsetX, NameModeOffsetY
 
+local SettingsHV, FocusSettingsHV
 local FocusWidgetFrame
 local FocusUpdateTexture, FocusShowBorder, FocusNameModeOffsetX, FocusNameModeOffsetY
 
 ---------------------------------------------------------------------------------------------------
 -- Common functions for target and focus widget
 ---------------------------------------------------------------------------------------------------
+
+local function GetHighlightColor(widget_frame)
+  -- TargetUnitID is not yet set when the widget is created
+  if widget_frame.TargetUnitID then 
+    local color = SoftTargetSettings[widget_frame.TargetUnitID].Color
+    return color.r, color.g, color.b, color.a
+  else
+    return 1, 1, 1, 1 
+  end
+end
 
 local  function UpdateBorderTexture(db, widget_frame, texture_frame)
   local backdrop = BACKDROP[db.theme]
@@ -129,12 +158,13 @@ local  function UpdateBorderTexture(db, widget_frame, texture_frame)
   texture_frame:SetPoint("TOPLEFT", widget_frame, "TOPLEFT", - offset, offset)
   texture_frame:SetPoint("BOTTOMRIGHT", widget_frame, "BOTTOMRIGHT", offset, - offset)
 
-  texture_frame:SetBackdropBorderColor(db.r, db.g, db.b, db.a)
-  local backdrop_alpha = db.a - 0.70 -- 80/255 => 1 - 0.69
+  local r, g, b, a = GetHighlightColor(widget_frame)
+  texture_frame:SetBackdropBorderColor(r, g, b, a)
+  local backdrop_alpha = a - 0.70 -- 80/255 => 1 - 0.69
   if backdrop_alpha < 0 then
     backdrop_alpha = 0
   end
-  texture_frame:SetBackdropColor(db.r, db.g, db.b, backdrop_alpha)
+  texture_frame:SetBackdropColor(r, g, b, backdrop_alpha)
 
   texture_frame.LeftTexture:Hide()
   texture_frame.RightTexture:Hide()
@@ -143,16 +173,17 @@ end
 local function UpdateSideTexture(db, widget_frame, texture_frame)
   local left_texture, right_texture = texture_frame.LeftTexture, texture_frame.RightTexture
 
+  local r, g, b, a = GetHighlightColor(widget_frame)
   left_texture:SetTexture(ART_PATH .. db.theme)
   left_texture:SetTexCoord(0, 1, 0, 1)
-  left_texture:SetVertexColor(db.r, db.g, db.b, db.a)
+  left_texture:SetVertexColor(r, g, b, a)
   left_texture:SetSize(db.Size, db.Size)
   left_texture:ClearAllPoints()
   left_texture:SetPoint("RIGHT", widget_frame, "LEFT", db.HorizontalOffset, db.VerticalOffset)
 
   right_texture:SetTexture(ART_PATH .. db.theme)
   right_texture:SetTexCoord(1, 0, 0, 1)
-  right_texture:SetVertexColor(db.r, db.g, db.b, db.a)
+  right_texture:SetVertexColor(r, g, b, a)
   right_texture:SetSize(db.Size, db.Size)
   right_texture:ClearAllPoints()
   right_texture:SetPoint("LEFT", widget_frame, "RIGHT", -db.HorizontalOffset, db.VerticalOffset)
@@ -167,7 +198,7 @@ local function UpdateCenterTexture(db, widget_frame, texture_frame)
 
   left_texture:SetTexture(ART_PATH .. db.theme)
   left_texture:SetTexCoord(0, 1, 0, 1)
-  left_texture:SetVertexColor(db.r, db.g, db.b, db.a)
+  left_texture:SetVertexColor(GetHighlightColor(widget_frame))
   left_texture:SetSize(db.Size, db.Size)
   left_texture:ClearAllPoints()
   left_texture:SetPoint("CENTER", widget_frame, "CENTER", db.HorizontalOffset, db.VerticalOffset)
@@ -182,7 +213,7 @@ local function UpdateOverlayTexture(db, widget_frame, texture_frame)
 
   left_texture:SetTexture("Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\TargetArtWidget\\" .. db.theme)
   left_texture:SetTexCoord(0, 1, 0.4375, 0.5625)
-  left_texture:SetVertexColor(db.r, db.g, db.b, db.a)
+  left_texture:SetVertexColor(GetHighlightColor(widget_frame))
   left_texture:ClearAllPoints()
   left_texture:SetAllPoints(widget_frame)
 
@@ -223,28 +254,88 @@ end
 -- Event handling
 ---------------------------------------------------------------------------------------------------
 
-function Widget:PLAYER_TARGET_CHANGED()
-  local plate = GetNamePlateForUnit("target")
+local function OnSoftTargetIconUpdate(widget_frame, target_unitid, unit)
+  local soft_target_icon = widget_frame.SoftTargetIcon
+  if SoftTargetSettings[target_unitid].Enabled then 
+    -- widget_frame.unit is not defined here always, so it's only safe to use tp_frame's unit
+    local unit_curser_texture =  SetUnitCursorTexture(soft_target_icon, unit.unitid, nil, true)
+    if not unit_curser_texture then
+      soft_target_icon:SetTexture(136243)
+    end
+    soft_target_icon:SetDesaturated(false)
+    soft_target_icon:SetIgnoreParentAlpha(true)
 
-  local tp_frame = plate and plate.TPFrame
-  if tp_frame and tp_frame.Active then
-    self:OnTargetUnitAdded(tp_frame, tp_frame.unit)
+
+    AnchorFrameTo(Settings.SoftTarget.Icon[MODE_FOR_STYLE[unit.style]] or Settings.SoftTarget.Icon.HealthbarMode, soft_target_icon, widget_frame)
+    
+    local size = Settings.SoftTarget.Icon.Size
+    soft_target_icon:SetSize(size, size)
+    soft_target_icon:Show()   
   else
-    WidgetFrame:Hide()
-    WidgetFrame:SetParent(nil)
+    soft_target_icon:Hide()   
   end
+end
+
+local function PlayerTargetChanged(target_unitid)
+  local widget_frame = TargetHighlightFrames[target_unitid]
+  
+  -- ! Don't overwrite the target with a style if it's becoming a soft target as well
+  local tp_frame = Widget:GetThreatPlateForUnit(target_unitid)
+  if tp_frame and (not UnitIsUnit("target", tp_frame.unit.unitid) or target_unitid == "target") then
+    local unit = tp_frame.unit
+    if Widget:EnabledForStyle(unit.style, unit) then
+      local healthbar = tp_frame.visual.healthbar
+      widget_frame:SetParent(tp_frame)
+      widget_frame:SetFrameLevel(healthbar:GetFrameLevel() + FRAME_LEVEL_BY_TEXTURE[Settings.theme])
+      widget_frame:ClearAllPoints()
+      widget_frame:SetAllPoints(healthbar)
+    
+      Widget:UpdateTargetUnitHighlight(widget_frame, target_unitid, unit)
+      OnSoftTargetIconUpdate(widget_frame, target_unitid, unit)
+
+      widget_frame:Show()
+    else
+      widget_frame:Hide()
+      widget_frame:SetParent(nil)
+    end
+  else
+    widget_frame:Hide()
+    widget_frame:SetParent(nil)
+  end
+end
+
+function Widget:PLAYER_TARGET_CHANGED()
+  PlayerTargetChanged("target")  
+end
+
+function Widget:PLAYER_SOFT_ENEMY_CHANGED()
+  PlayerTargetChanged("softenemy")
+end
+
+function Widget:PLAYER_SOFT_FRIEND_CHANGED()
+  PlayerTargetChanged("softfriend")
+end
+
+function Widget:PLAYER_SOFT_INTERACT_CHANGED(oldTarget, newTarget)
+  PlayerTargetChanged("softinteract")
 end
 
 ---------------------------------------------------------------------------------------------------
 -- Widget functions for creation and update
 ---------------------------------------------------------------------------------------------------
 
-function Widget:Create()
-  if not WidgetFrame then
+local function UpdateTargetHighlightFrame(widget_frame)
+  UpdateTexture(Settings, widget_frame, widget_frame.HealthbarMode)
+  widget_frame.NameModeTexture:SetSize(128, 32 * GetHeadlineViewHeight(SettingsHV) / 18)
+  widget_frame.NameModeTexture:SetPoint("CENTER", widget_frame, "CENTER", NameModeOffsetX, NameModeOffsetY)
+end
+
+local function CreateTargetHighlightFrame(target_unitid)
+  if not TargetHighlightFrames[target_unitid] then
     local widget_frame = _G.CreateFrame("Frame", nil)
     widget_frame:Hide()
 
-    WidgetFrame = widget_frame
+    widget_frame.TargetUnitID = target_unitid
 
     local healthbar_mode_frame = _G.CreateFrame("Frame", nil, widget_frame, BackdropTemplate)
     healthbar_mode_frame:SetFrameLevel(widget_frame:GetFrameLevel())
@@ -255,10 +346,29 @@ function Widget:Create()
     widget_frame.NameModeTexture = widget_frame:CreateTexture(nil, "BACKGROUND", nil, 0)
     widget_frame.NameModeTexture:SetTexture(ThreatPlates.Art .. "Target")
 
-    self:UpdateLayout()
-  end
+    local soft_target_icon = widget_frame:CreateTexture("$parentIcon", "OVERLAY")
+    --soft_interact_icon:SetParent(widget_frame)
+    soft_target_icon:SetTexture(136243)
+    -- soft_interact_icon:AddMaskTexture(soft_target_icon_frame.Mask)
+    soft_target_icon:Hide()
 
-  self:PLAYER_TARGET_CHANGED()
+    -- soft_target_icon_frame.Mask:SetAllPoints(soft_interact_icon)
+    -- soft_target_icon_frame:Hide()     
+
+    -- widget_frame.SoftTargetIconFrame = soft_target_icon_frame
+    widget_frame.SoftTargetIcon = soft_target_icon
+
+    UpdateTargetHighlightFrame(widget_frame)
+    
+    TargetHighlightFrames[target_unitid] = widget_frame
+  end
+end
+
+function Widget:Create()
+  CreateTargetHighlightFrame("target")
+  CreateTargetHighlightFrame("softfriend")
+  CreateTargetHighlightFrame("softinteract")
+  CreateTargetHighlightFrame("softenemy")
 end
 
 function Widget:IsEnabled()
@@ -268,68 +378,77 @@ end
 
 function Widget:OnEnable()
   self:RegisterEvent("PLAYER_TARGET_CHANGED")
+  self:RegisterEvent("PLAYER_SOFT_FRIEND_CHANGED")
+  self:RegisterEvent("PLAYER_SOFT_ENEMY_CHANGED")
+  self:RegisterEvent("PLAYER_SOFT_INTERACT_CHANGED")
 end
 
 function Widget:EnabledForStyle(style, unit)
   if (style == "NameOnly" or style == "NameOnly-Unique") then
     return SettingsHV.ShowTargetHighlight
-  elseif style ~= "etotem" then
+  else
     return Settings.ON
   end
+end
 
-  return false
+function Widget:UpdateTargetUnitHighlight(widget_frame, target_unitid, unit)
+  local healthbar_mode_frame = widget_frame.HealthbarMode
+  if not SoftTargetSettings[target_unitid].Highlight or unit.style == "etotem" then 
+    healthbar_mode_frame.LeftTexture:Hide()
+    healthbar_mode_frame.RightTexture:Hide()
+    healthbar_mode_frame:Hide()
+
+    widget_frame.NameModeTexture:Hide()
+  elseif unit.style == "NameOnly" or unit.style == "NameOnly-Unique" then
+    healthbar_mode_frame.LeftTexture:Hide()
+    healthbar_mode_frame.RightTexture:Hide()
+    healthbar_mode_frame:Hide()
+
+    widget_frame.NameModeTexture:Show()
+  else
+    if ShowBorder then
+      healthbar_mode_frame:Show()
+      healthbar_mode_frame.LeftTexture:Hide()
+      healthbar_mode_frame.RightTexture:Hide()
+    else
+      healthbar_mode_frame:Hide()
+      healthbar_mode_frame.LeftTexture:Show()
+      healthbar_mode_frame.RightTexture:SetShown(UpdateTexture == UpdateSideTexture)
+    end
+
+    widget_frame.NameModeTexture:Hide()
+  end
 end
 
 function Widget:OnTargetUnitAdded(tp_frame, unit)
-  local widget_frame = WidgetFrame
+  -- For now, we must initialize all targets here as this is not only called when the target
+  -- changes, but also wenn initially initializing the unit or when there is a style update
 
-  if self:EnabledForStyle(unit.style, unit) then
-    local healthbar = tp_frame.visual.healthbar
-    widget_frame:SetParent(tp_frame)
-    widget_frame:SetFrameLevel(healthbar:GetFrameLevel() + FRAME_LEVEL_BY_TEXTURE[Settings.theme])
-    widget_frame:ClearAllPoints()
-    widget_frame:SetAllPoints(healthbar)
-
-    local healthbar_mode_frame = widget_frame.HealthbarMode
-    if unit.style == "NameOnly" or unit.style == "NameOnly-Unique" then
-      healthbar_mode_frame.LeftTexture:Hide()
-      healthbar_mode_frame.RightTexture:Hide()
-      healthbar_mode_frame:Hide()
-
-      --local db = Settings
-      --widget_frame.NameModeTexture:SetVertexColor(db.r, db.g, db.b, db.a)
-      widget_frame.NameModeTexture:Show()
-    else
-      if ShowBorder then
-        healthbar_mode_frame:Show()
-        healthbar_mode_frame.LeftTexture:Hide()
-        healthbar_mode_frame.RightTexture:Hide()
-      else
-        healthbar_mode_frame:Hide()
-        healthbar_mode_frame.LeftTexture:Show()
-        healthbar_mode_frame.RightTexture:SetShown(UpdateTexture == UpdateSideTexture)
-      end
-
-      widget_frame.NameModeTexture:Hide()
-    end
-
-    widget_frame:Show()
+  -- This unit is only called when the current unit is also the current target
+  -- After login/reload, SOFT_TARGET events are fired, but GetNamePlateForUnit does not yet return a Nameplate
+  -- for these unitids ...
+  if unit.isTarget then    
+    PlayerTargetChanged("target")
+  elseif unit.IsSoftInteractTarget then
+    PlayerTargetChanged("softinteract")
+  elseif unit.IsSoftEnemyTarget then        
+    PlayerTargetChanged("softenemy")
+  elseif unit.IsSoftFriendTarget then    
+    PlayerTargetChanged("softfriend")
   else
-    widget_frame:Hide()
-    widget_frame:SetParent(nil)
+    self:OnTargetUnitRemoved()
   end
 end
 
 function Widget:OnTargetUnitRemoved()
-  WidgetFrame:Hide()
-end
-
-function Widget:UpdateLayout()
-  local widget_frame = WidgetFrame
-
-  UpdateTexture(Settings, widget_frame, widget_frame.HealthbarMode)
-  widget_frame.NameModeTexture:SetSize(128, 32 * GetHeadlineViewHeight(SettingsHV) / 18)
-  widget_frame.NameModeTexture:SetPoint("CENTER", widget_frame, "CENTER", NameModeOffsetX, NameModeOffsetY)
+  TargetHighlightFrames.target:Hide()
+  TargetHighlightFrames.target:SetParent(nil)
+  TargetHighlightFrames.softfriend:Hide()
+  TargetHighlightFrames.softfriend:SetParent(nil)
+  TargetHighlightFrames.softenemy:Hide()
+  TargetHighlightFrames.softenemy:SetParent(nil)
+  TargetHighlightFrames.softinteract:Hide()
+  TargetHighlightFrames.softinteract:SetParent(nil)
 end
 
 function Widget:UpdateSettings()
@@ -345,11 +464,29 @@ function Widget:UpdateSettings()
   -- Update mouseover settings as they depend on target highlight being shown or not
   Addon.Element_Mouseover_UpdateSettings()
 
+  SoftTargetSettings.target.Enabled = Settings.SoftTarget.Icon.SoftTargetIconTarget
+  SoftTargetSettings.softenemy.Enabled = CVars:GetAsBool("SoftTargetIconEnemy")
+  SoftTargetSettings.softfriend.Enabled = CVars:GetAsBool("SoftTargetIconFriend")
+  SoftTargetSettings.softinteract.Enabled = CVars:GetAsBool("SoftTargetIconInteract")
+  SoftTargetSettings.GameObject.Enabled = CVars:GetAsBool("SoftTargetIconGameObject")
+
+  SoftTargetSettings.target.Highlight = Settings.ON
+  SoftTargetSettings.softenemy.Highlight = Settings.SoftTarget.HighlightForEnemy
+  SoftTargetSettings.softfriend.Highlight = Settings.SoftTarget.HighlightForFriend
+  SoftTargetSettings.softinteract.Highlight = Settings.SoftTarget.HighlightForInteract
+
+  SoftTargetSettings.target.Color = Settings
+  SoftTargetSettings.softenemy.Color = Settings.SoftTarget.HighlightColorForEnemy
+  SoftTargetSettings.softfriend.Color = Settings.SoftTarget.HighlightColorForFriend
+  SoftTargetSettings.softinteract.Color = Settings.SoftTarget.HighlightColorForInteract
+
   -- Update the widget if it was already created (not true for immediately after Reload UI or if it was never enabled
   -- in this since last Reload UI)
-  if WidgetFrame then
-    self:UpdateLayout()
-    self:PLAYER_TARGET_CHANGED()
+  for target_unitid, widget_frame in pairs(TargetHighlightFrames) do
+    if widget_frame and widget_frame:GetParent() then
+      UpdateTargetHighlightFrame(widget_frame)
+      PlayerTargetChanged(target_unitid)
+    end
   end
 end
 

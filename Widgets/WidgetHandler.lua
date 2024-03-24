@@ -37,10 +37,6 @@ Addon.Widgets = WidgetHandler
 local function EventHandler(self, event, ...)
   local widgets = WidgetHandler.RegisteredEventsByWidget[event]
 
---  if string.find(event, "QUEST") then
---    print(event, "=>", ...)
---  end
-
   if widgets then
     for widget, func in pairs(widgets) do
       if func == true then
@@ -364,7 +360,7 @@ end
 function WidgetHandler:OnUnitAdded(tp_frame, unit)
   local plate_widgets = tp_frame.widgets
 
-  if unit.isTarget then
+  if unit.IsSoftTarget then
     for _, widget in pairs(self.EnabledTargetWidgets) do
       widget:OnTargetUnitAdded(tp_frame, unit)
     end
@@ -406,7 +402,7 @@ function WidgetHandler:OnUnitRemoved(tp_frame, unit)
   --    end
   --  end
 
-  if unit.isTarget then
+  if unit.IsSoftTarget then
     for _, widget in pairs(self.EnabledTargetWidgets) do
       widget:OnTargetUnitRemoved()
     end
@@ -478,7 +474,7 @@ end
 
 -- Currently only working for target-only widgets
 --function Addon:WidgetsModeChanged(tp_frame, unit)
---  if unit.isTarget then
+--  if unit.IsSoftTarget then
 --    for _, widget in pairs(EnabledTargetWidgets) do
 --      widget:OnModeChange(tp_frame, unit)
 --    end

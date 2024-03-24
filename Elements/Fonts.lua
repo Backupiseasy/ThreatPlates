@@ -41,6 +41,24 @@ Font.DefaultSystemFonts = {
 }
 
 ---------------------------------------------------------------------------------------------------
+-- UI utility functions
+---------------------------------------------------------------------------------------------------
+
+function Addon.AnchorFrameTo(db, frame, parent_frame)
+  frame:ClearAllPoints()
+
+  local anchor = db.Anchor or "CENTER"
+  if db.InsideAnchor == false then
+    local anchor_point_text = ANCHOR_POINT_TEXT[anchor]
+    frame:SetPoint(anchor_point_text[2], parent_frame, anchor_point_text[1], db.HorizontalOffset or 0, db.VerticalOffset or 0)
+  else -- db.InsideAnchor not defined in settings or true
+    frame:SetPoint(anchor, parent_frame, anchor, db.HorizontalOffset or 0, db.VerticalOffset or 0)
+  end
+end
+
+local AnchorFrameTo = Addon.AnchorFrameTo
+
+---------------------------------------------------------------------------------------------------
 -- Element code
 ---------------------------------------------------------------------------------------------------
 
@@ -69,16 +87,7 @@ end
 
 function Font:UpdateText(parent, font, db)
   self:UpdateTextFont(font, db.Font)
-
-  local anchor = db.Anchor or "CENTER"
-
-  font:ClearAllPoints()
-  if db.InsideAnchor == false then
-    local anchor_point_text = ANCHOR_POINT_TEXT[anchor]
-    font:SetPoint(anchor_point_text[2], parent, anchor_point_text[1], db.HorizontalOffset or 0, db.VerticalOffset or 0)
-  else -- db.InsideAnchor not defined in settings or true
-    font:SetPoint(anchor, parent, anchor, db.HorizontalOffset or 0, db.VerticalOffset or 0)
-  end
+  AnchorFrameTo(db, font, parent)
 end
 
 function Font:UpdateTextSize(parent, font, db)

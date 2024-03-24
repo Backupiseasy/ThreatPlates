@@ -227,7 +227,7 @@ if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
   -- This should not be necessary as in Classic only Rogues and Druids had combo points
   if PlayerClass == "ROGUE" or PlayerClass == "DRUID" then
     UnitPower = function(unitToken , powerType)
-      return GetComboPoints("player", "target")
+      return GetComboPoints("player", "anyenemy")
     end
   elseif PlayerClass == "DEATHKNIGHT" then
     -- Deathknight is only available after Wrath, so no check for this version necessary
@@ -751,7 +751,7 @@ local function EventHandler(event, unitid, power_type)
   -- UNIT_POWER_FREQUENT is only registred for Evoker, so no need to check here
   -- if event == "UNIT_POWER_FREQUENT" and not WATCH_POWER_TYPES[power_type] then return end
   
-  local plate = GetNamePlateForUnit("target")
+  local plate = GetNamePlateForUnit("anyenemy")
   if plate then -- not necessary, prerequisite for IsShown(): plate.TPFrame.Active and
     local widget = Widget
     local widget_frame = widget.WidgetFrame
@@ -763,7 +763,7 @@ end
 
 local function EventHandlerEvoker(event, unitid, power_type)
   -- Only UNIT_POWER_FREQUENT is registred for Evoker, so no need to check here anything
-  local plate = GetNamePlateForUnit("target")
+  local plate = GetNamePlateForUnit("anyenemy")
   if plate and Widget.WidgetFrame:IsShown() then -- not necessary, prerequisite for IsShown(): plate.TPFrame.Active and
     Widget:UpdateUnitResource(Widget.WidgetFrame)
   else
@@ -804,16 +804,16 @@ function Widget:UNIT_MAXPOWER(unitid, power_type)
 end
 
 function Widget:PLAYER_TARGET_CHANGED()
-  local plate = GetNamePlateForUnit("target")
-
-  local tp_frame = plate and plate.TPFrame
-  if tp_frame and tp_frame.Active then
+  local tp_frame = self:GetThreatPlateForUnit("anyenemy")
+  if tp_frame then
     self:OnTargetUnitAdded(tp_frame, tp_frame.unit)
   else
     self.WidgetFrame:Hide()
     self.WidgetFrame:SetParent(nil)
   end
 end
+
+Widget.PLAYER_SOFT_ENEMY_CHANGED = Widget.PLAYER_TARGET_CHANGED
 
 function Widget:PLAYER_ENTERING_WORLD()
   -- From KuiNameplates: Update icons after zoning to workaround UnitPowerMax returning 0 when
@@ -864,8 +864,10 @@ end
 function Widget:OnEnable()
   self:RegisterEvent("PLAYER_ENTERING_WORLD")
   self:RegisterEvent("PLAYER_TARGET_CHANGED")
+  self:RegisterEvent("PLAYER_SOFT_ENEMY_CHANGED")
   self:RegisterUnitEvent("UNIT_MAXPOWER", "player")
   
+
   if PlayerClass == "EVOKER" then
     -- Using UNIT_POWER_FREQUENT seems to reduce some lags with essence updates that are 
     -- otherwise happening compared to Blizzard essences (Blizzard_ClassNameplateBar uses this also)
@@ -897,7 +899,9 @@ end
 function Widget:OnDisable()
   self:UnregisterEvent("PLAYER_ENTERING_WORLD")
   self:UnregisterEvent("PLAYER_TARGET_CHANGED")
+  self:UnregisterEvent("PLAYER_SOFT_ENEMY_CHANGED")
   self:UnregisterEvent("UNIT_MAXPOWER")
+
   
   self:UnregisterEvent("UNIT_POWER_FREQUENT")
   if not (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC) then
@@ -920,7 +924,7 @@ end
 
 function Widget:EnabledForStyle(style, unit)
   -- Unit can get attackable at some point in time (e.g., after a roleplay sequence
-  -- if not UnitCanAttack("player", "target") then return false end
+  -- if not UnitCanAttack("player", "anyenemy") then return false end
 
   if (style == "NameOnly" or style == "NameOnly-Unique") then
     return self.db.ShowInHeadlineView and self.ShowInShapeshiftForm -- a little bit of a hack, logically would be better checked in OnTargetUnitAdded
@@ -954,7 +958,9 @@ end
 function Widget:OnTargetUnitAdded(tp_frame, unit)
   local widget_frame = self.WidgetFrame
 
-  if UnitCanAttack("player", "target") and self:EnabledForStyle(unit.style, unit) then
+  -- unit.isTarget or unit.IsSoftEnemytarget: should not be necessary here,
+  -- as soft interact (unless enemies) and friend targets cannot be attacked
+  if UnitCanAttack("player", unit.unitid) and self:EnabledForStyle(unit.style, unit) then
     widget_frame:SetParent(tp_frame)
     widget_frame:SetFrameLevel(tp_frame:GetFrameLevel() + 7)
 
