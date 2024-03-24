@@ -19,6 +19,7 @@
     <Include file="AceGUI-3.0-SharedMediaWidgets\widget.xml"/>
     <Include file="LibCustomGlow-1.0\LibCustomGlow-1.0.xml"/>
     <Script file="LibDeflate\LibDeflate.lua"/>
+    <Include file="UTF8\UTF8.xml"/>
 
     <Script file="ForAllIndentsAndPurposes\indent.lua"/>
 
@@ -34,7 +35,5 @@
     <!--@end-version-wrath@-->
 
     <!--@version-classic@-->
-    <Script file="LibClassicCasterino\LibClassicCasterino.lua"/>
-    <Include file="LibClassicDurations\LibClassicDurations.xml"/>
     <!--@end-version-classic@-->
 </Ui>

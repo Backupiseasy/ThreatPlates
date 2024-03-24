@@ -33,6 +33,8 @@ local _G =_G
 -- List them here for Mikk's FindGlobals script
 -- GLOBALS: UnitClassification, UnitGetTotalAbsorbs
 
+local LineNoOfNPCRole
+
 ---------------------------------------------------------------------------------------------------
 -- Functions for subtext from TidyPlates
 ---------------------------------------------------------------------------------------------------
@@ -51,6 +53,7 @@ if not Addon.IS_MAINLINE then
     lines = {
       [1] = {},
       [2] = {},
+      [3] = {},
     }
   }
 
@@ -59,9 +62,10 @@ if not Addon.IS_MAINLINE then
     TooltipScanner:ClearLines()
 		TooltipScanner:SetUnit(unitid)
 
-    TooltipScannerData.lines[1].leftText = _G[ScannerName.."TextLeft1"]:GetText()
-    TooltipScannerData.lines[2].leftText = _G[ScannerName.."TextLeft2"]:GetText()
-
+    TooltipScannerData.lines[1].leftText = _G[ScannerName .. "TextLeft1"]:GetText()
+    TooltipScannerData.lines[2].leftText = _G[ScannerName .. "TextLeft2"]:GetText()
+    TooltipScannerData.lines[3].leftText = _G[ScannerName .. "TextLeft3"]:GetText()
+    
     return TooltipScannerData
   end
 end
@@ -84,15 +88,16 @@ local function GetUnitSubtitle(unit)
 	if not subtitle then
 		local tooltip_data = C_TooltipInfo_GetUnit(unit.unitid)
     if tooltip_data then
-      if #tooltip_data.lines >= 2 then 
+      -- If colorbind mode is enabled, additional information (reputation) is shown in the tooltip
+      -- before the NPC information (line 3 instead of line 2)
+      if #tooltip_data.lines >= LineNoOfNPCRole then 
         name = tooltip_data.lines[1].leftText
 
         if name then name = gsub( gsub( (name), "|c........", "" ), "|r", "" ) else return end	-- Strip color escape sequences: "|c"
         if name ~= UnitName(unit.unitid) then return end	-- Avoid caching information for the wrong unit
 
         -- Tooltip Format Priority: Faction, Description, Level
-        local tooltip_subtitle = tooltip_data.lines[2].leftText or ""
-
+        local tooltip_subtitle = tooltip_data.lines[LineNoOfNPCRole].leftText or ""
         if string.match(tooltip_subtitle, UNIT_LEVEL_TEMPLATE) then
           subtitle = ""
         else
@@ -367,5 +372,6 @@ function Addon:UpdateConfigurationStatusText()
   end
 
   ShowHealth = Settings.amount or Settings.percent
-end
 
+  LineNoOfNPCRole = (Addon.CVars:GetAsBool("colorblindMode") and 3) or 2
+end

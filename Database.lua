@@ -49,6 +49,16 @@ if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
     DEATHKNIGHT = function()
       return Addon.PlayerIsTank
     end,
+    -- Tanks in WoW Classic Season of Discovery:
+    SHAMAN = function()
+      return Addon.PlayerIsTank
+    end,
+    WARLOCK = function()
+      return Addon.PlayerIsTank
+    end,
+    ROGUE = function()
+      return Addon.PlayerIsTank -- Set in CoreEvents:RUNE_UPDATED() and CoreEvents:PLAYER_EQUIPMENT_CHANGED()
+    end,
     DEFAULT = function()
       return false
     end,
