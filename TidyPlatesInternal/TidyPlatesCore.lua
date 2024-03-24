@@ -312,18 +312,44 @@ end
 local function UpdateUnitCache() for key, value in pairs(unit) do unitcache[key] = value end end
 
 ---------------------------------------------------------------------------------------------------------------------
--- Nameplate Detection & Update Loop
+-- Widget Container Handling
+---------------------------------------------------------------------------------------------------------------------
+
+local function WidgetContainerReset(plate) 
+  local widget_container = plate.TPFrame.WidgetContainer
+  if widget_container then
+    widget_container:SetParent(plate)
+    widget_container:SetIgnoreParentScale(false)
+    widget_container:ClearAllPoints()
+    widget_container:SetPoint("TOP", plate.castBar, "BOTTOM")
+  end
+end
+
+local function WidgetContainerAcquire(plate)
+  local tp_frame = plate.TPFrame
+  local widget_container = plate.UnitFrame.WidgetContainer
+  if widget_container and tp_frame.Active then
+    tp_frame.WidgetContainer = widget_container
+    widget_container:SetParent(tp_frame)
+    widget_container:SetIgnoreParentScale(true)
+    widget_container:SetScale(Addon.db.profile.BlizzardSettings.Widgets.Scale)
+    AnchorFrameTo(Addon.db.profile.BlizzardSettings.Widgets, widget_container, tp_frame)
+  end
+end
+
+local function WidgetContainerAnchor(tp_frame)
+  if tp_frame.WidgetContainer then
+    AnchorFrameTo(Addon.db.profile.BlizzardSettings.Widgets, tp_frame.WidgetContainer, tp_frame)
+  end
+end
+
+---------------------------------------------------------------------------------------------------------------------
+-- Nameplate Visibility & Update Loop
 ---------------------------------------------------------------------------------------------------------------------
 
 local function IgnoreUnitForThreatPlates(unitid)
   return UnitIsUnit("player", unitid) or UnitNameplateShowsWidgetsOnly(unitid)
 end
-
--- local function HideNameplate(plate)
---   plate.UnitFrame:Hide()
---   plate.TPFrame:Hide()
---   plate.TPFrame.Active = false
--- end
 
 local function ShowBlizzardNameplate(plate, show_blizzard_plate)
   if show_blizzard_plate then
@@ -514,38 +540,6 @@ do
     extended.stylename = ""
     extended.unit = {}
     extended.unitcache = {}
-  end
-end
-
----------------------------------------------------------------------------------------------------------------------
--- Widget Container Handling
----------------------------------------------------------------------------------------------------------------------
-
-local function WidgetContainerReset(plate) 
-  local widget_container = plate.TPFrame.WidgetContainer
-  if widget_container then
-    widget_container:SetParent(plate)
-    widget_container:SetIgnoreParentScale(false)
-    widget_container:ClearAllPoints()
-    widget_container:SetPoint("TOP", plate.castBar, "BOTTOM")
-  end
-end
-
-local function WidgetContainerAcquire(plate)
-  local tp_frame = plate.TPFrame
-  local widget_container = plate.UnitFrame.WidgetContainer
-  if widget_container and tp_frame.Active then
-    tp_frame.WidgetContainer = widget_container
-    widget_container:SetParent(tp_frame)
-    widget_container:SetIgnoreParentScale(true)
-    widget_container:SetScale(Addon.db.profile.BlizzardSettings.Widgets.Scale)
-    AnchorFrameTo(Addon.db.profile.BlizzardSettings.Widgets, widget_container, tp_frame)
-  end
-end
-
-local function WidgetContainerAnchor(tp_frame)
-  if tp_frame.WidgetContainer then
-    AnchorFrameTo(Addon.db.profile.BlizzardSettings.Widgets, tp_frame.WidgetContainer, tp_frame)
   end
 end
 
