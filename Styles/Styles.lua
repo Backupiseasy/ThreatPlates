@@ -125,7 +125,7 @@ local function ShowUnit(unit)
   local show, headline_view = GetUnitType(unit)
 
   -- If a unit is targeted, show the nameplate if possible.
-  show = show or unit.isTarget
+  show = show or unit.IsSoftTarget
 
   if not show then return false, false, headline_view end
 
@@ -145,7 +145,7 @@ local function ShowUnit(unit)
     hide_unit_type = true
   end
 
-  if hide_unit_type and not unit.isTarget then
+  if hide_unit_type and not unit.IsSoftTarget then
     return show, hide_unit_type, headline_view
   end
 
@@ -163,7 +163,7 @@ local function ShowUnit(unit)
 --  end
 
   db = db_base.HeadlineView
-  if db.ForceHealthbarOnTarget and unit.isTarget then
+  if db.ForceHealthbarOnTarget and unit.IsSoftTarget then
     headline_view = false
   elseif db.ForceOutOfCombat and not InCombatLockdown() then
     headline_view = true

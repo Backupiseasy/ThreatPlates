@@ -438,13 +438,6 @@ local function SetUnitAttributeTarget(unit)
   unit.IsSoftInteractTarget = UnitIsUnit("softinteract", unitid)
 
   unit.IsSoftTarget = unit.isTarget or unit.IsSoftEnemyTarget or unit.IsSoftFriendTarget or unit.IsSoftInteractTarget
-  
-  --unit.IsSoftTarget = unit.isTarget or UnitIsUnit("softenemy", unitid) or UnitIsUnit("softfriend", unitid) or UnitIsUnit("softinteract", unitid)
-
-  unit.IsTarget = unit.isTarget or 
-    (TargetStyleForEnemy and unit.IsSoftEnemyTarget) or 
-    (TargetStyleForFriend and unit.IsSoftFriendTarget)	or 
-    (TargetStyleForInteract and unit.IsSoftInteractTarget)
 end
 
 ---------------------------------------------------------------------------------------------------
