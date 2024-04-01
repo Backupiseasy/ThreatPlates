@@ -166,7 +166,7 @@ local CROWD_CONTROL_SPELLS_RETAIL = {
   ---------------------------------------------------------------------------------------------------
   -- Evoker
   ---------------------------------------------------------------------------------------------------
-  [358385] = PC_ROOT,             -- Landslide
+  [355689] = PC_ROOT,             -- Landslide
   [351338] = CC_SILENCE,          -- Quell
   [372048] = CC_OTHER,            -- Oppressing Roar
   [357210] = LOC_STUN,            -- Deep Breath
@@ -1522,7 +1522,7 @@ else
           end
           
           unit_auras[#unit_auras + 1] = aura
-          --Addon.Logging.Debug("Aura:", aura.name, "=> ID:", aura.spellId)
+          -- Addon.Logging.Debug("Aura:", aura.name, "=> ID:", aura.spellId)
       end
     until continuation_token == nil
 

@@ -1,3 +1,3 @@
 # @project-version@ (@build-time@)
 
-* Updated TOC version for Patch 10.2.6 for WoW Mainline.
+* Fixed wrong spell ID for Landslide (Evoker) so that it is shown as CC aura [Comment #7238].
