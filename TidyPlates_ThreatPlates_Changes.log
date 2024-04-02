@@ -11,6 +11,11 @@
 * Updated the logo for Threat Plates which is now also shown as icon in the addon list.
 
 ------------------------------------------------------
+11.1.42 (2024-04-01)
+------------------------------------------------------
+* Fixed wrong aura ID for Landslide (Evoker) so that it is shown as CC aura [Comment #7238].
+
+------------------------------------------------------
 11.1.41 (2024-03-22)
 ------------------------------------------------------
 * Updated TOC version for Patch 10.2.6 for WoW Mainline.
