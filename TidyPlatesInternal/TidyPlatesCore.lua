@@ -1434,6 +1434,11 @@ local function PlayerTargetChanged(target_unitid)
   plate = GetNamePlateForUnit(target_unitid)
   --if plate and plate.TPFrame and plate.TPFrame.stylename ~= "" then
   if plate and plate.TPFrame.Active then
+    local db = Addon.db.profile.settings.castbar
+    SetCastbarOffset(plate.TPFrame, db.x_target, db.y_target)
+
+    LastTargetPlate[target_unitid] = plate
+
     local unit = plate.TPFrame.unit
     SetUnitAttributeTarget(unit)
     UNIT_TARGET("UNIT_TARGET", unit.unitid)
@@ -1467,11 +1472,6 @@ UNIT_TARGET = function(event, unitid)
 
   local plate = GetNamePlateForUnit(unitid)
   if plate and plate.TPFrame.Active then
-    local db = Addon.db.profile.settings.castbar
-    SetCastbarOffset(plate.TPFrame, db.x_target, db.y_target)
-
-    LastTargetPlate[target_unitid] = plate
-
     local healthbar = plate.TPFrame.visual.healthbar
     if SettingsShowOnlyForTarget and not Addon.UnitIsTarget(unitid) then
       healthbar:HideTargetUnit()
