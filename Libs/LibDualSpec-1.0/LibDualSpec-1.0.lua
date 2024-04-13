@@ -1,6 +1,6 @@
 --[[
 LibDualSpec-1.0 - Adds dual spec support to individual AceDB-3.0 databases
-Copyright (C) 2009-2022 Adirelle
+Copyright (C) 2009-2024 Adirelle
 
 All rights reserved.
 
@@ -32,7 +32,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --]]
 
 -- Don't load unless we are Retail or Wrath Classic
-if WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE and WOW_PROJECT_ID ~= WOW_PROJECT_WRATH_CLASSIC then return end
+if WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE and WOW_PROJECT_ID ~= WOW_PROJECT_WRATH_CLASSIC and (WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC or C_Seasons.GetActiveSeason() ~= 2) then return end
 
 local MAJOR, MINOR = "LibDualSpec-1.0", 22
 assert(LibStub, MAJOR.." requires LibStub")

@@ -1,12 +1,18 @@
-tag 323d87a4ac3ccb3905419dee687950c593e3355a v1.20
+tag 89c62b583ab7a6fdcf29fe6c653569d210323c8c v1.22.3
 Author:	Kyle Buller <bullerk@gmail.com>
-Date:	Thu May 20 14:03:55 2021 -0500
+Date:	Wed Apr 3 04:48:27 2024 -0500
 
-Tagging as v1.20
+Tagging as v1.22.3
 
-commit feb0755dd9f2cede644321164d36a042f951cc7b
+commit df092db78365307e3930fabf298058d9d4d7a968
 Author: Kyle Buller <bullerk@gmail.com>
-Date:   Tue Apr 13 17:35:00 2021 -0500
+Date:   Wed Apr 3 04:36:13 2024 -0500
 
-    Update load guard
+    Update load guard for Classic SoD
+
+commit 239cbe17f793502f4e01108d0c5f7b65e31daeb4
+Author: Kyle Buller <bullerk@gmail.com>
+Date:   Wed Apr 3 04:35:11 2024 -0500
+
+    Update TOC for 10.2.6 and 3.4.3
 

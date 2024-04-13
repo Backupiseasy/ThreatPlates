@@ -1,4 +1,10 @@
 ﻿------------------------------------------------------
+11.1.43 (2024-04-13)
+------------------------------------------------------
+* Fixed an bug with LibDualSpec being loaded twice in WoW Remix: Mists of Pandaria.
+* Upgrade integrated libraries (LibDualSpec v1.22.3).
+
+------------------------------------------------------
 11.1.42 (2024-04-01)
 ------------------------------------------------------
 * Fixed wrong aura ID for Landslide (Evoker) so that it is shown as CC aura [Comment #7238].
