@@ -28,6 +28,7 @@
     <!--@end-version-retail@-->
 
     <!--@version-bcc@-->
+    <!--@end-version-bcc@-->
 
     <!--@version-wrath@-->
     <Script file="LibDualSpec-1.0\LibDualSpec-1.0.lua"/>
