@@ -20,7 +20,7 @@ local CLASS_SORT_ORDER, LOCALIZED_CLASS_NAMES_MALE = CLASS_SORT_ORDER, LOCALIZED
 local InCombatLockdown, IsInInstance, GetInstanceInfo = InCombatLockdown, IsInInstance, GetInstanceInfo
 local GetCVar, GetCVarBool, GetCVarDefault = GetCVar, GetCVarBool, GetCVarDefault
 local UnitsExists, UnitName = UnitsExists, UnitName
-local GameTooltip = GameTooltip
+local GameTooltip = ListItemTooltip
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
@@ -35,9 +35,9 @@ local _G =_G
 -- GLOBALS: GetSpellInfo, SetCVar
 
 -- Import some libraries
-local LibAceGUI = LibStub("AceGUI-3.0")
-local LibAceSerializer = LibStub:GetLibrary("AceSerializer-3.0")
-local LibDeflate = LibStub:GetLibrary("LibDeflate")
+local LibAceGUI = Addon.LibAceGUI
+local LibAceSerializer = Addon.LibAceSerializer
+local LibDeflate = Addon.LibDeflate
 
 local PATH_ART = t.Art
 
@@ -464,6 +464,7 @@ function Addon:InitializeCustomNameplates()
   Addon.UpdateStylesForCurrentInstance()
 end
 
+-- Update all Threat Plates components that depend on custom styles
 local function UpdateSpecial() -- Need to add a way to update options table.
   Addon:InitializeCustomNameplates()
   -- Update widgets as well as at least some of them use custom nameplate settings
@@ -471,7 +472,7 @@ local function UpdateSpecial() -- Need to add a way to update options table.
   Addon:ForceUpdate()
 end
 
-Addon.UpdateCustomStyles = UpdateSpecial
+Addon.ProcessCustomStyleUpdate = UpdateSpecial
 
 local function GetValue(info)
   local DB = Addon.db.profile
@@ -482,6 +483,8 @@ local function GetValue(info)
   end
   return value
 end
+
+Addon.GetValue = GetValue
 
 local function AddIfSettingExists(entry)
   local value = Addon.db.profile
@@ -507,10 +510,14 @@ local function SetValuePlain(info, value)
   DB[keys[#keys]] = value
 end
 
+Addon.SetValuePlain = SetValuePlain
+
 local function SetValue(info, value)
   SetValuePlain(info, value)
   Addon:ForceUpdate()
 end
+
+Addon.SetValue = SetValue
 
 local function GetCVarTPTP(info)
   return tonumber(GetCVar(info.arg))
@@ -581,6 +588,8 @@ local function GetColor(info)
   return value.r, value.g, value.b
 end
 
+Addon.GetColor = GetColor
+
 local function SetColor(info, r, g, b)
   local DB = Addon.db.profile
   local keys = info.arg
@@ -590,6 +599,8 @@ local function SetColor(info, r, g, b)
   DB[keys[#keys]].r, DB[keys[#keys]].g, DB[keys[#keys]].b = r, g, b
   Addon:ForceUpdate()
 end
+
+Addon.SetColor = SetColor
 
 local function GetColorAlpha(info)
   local DB = Addon.db.profile
@@ -715,6 +726,8 @@ local function SetValueWidget(info, val)
   end
 end
 
+Addon.SetValueWidget = SetValueWidget
+
 local function SetColorWidget(info, r, g, b, a)
   local DB = Addon.db.profile
   local keys = info.arg
@@ -746,6 +759,15 @@ local function SetColorAlphaWidget(info, r, g, b, a)
     Addon:ForceUpdate()
   end
 end
+
+Addon.AceConfigOptionsCallbackHandler = {
+  SetValue = SetValue,
+  SetValuePlain = SetValuePain,
+  SetValueWidget = SetValueWidget,
+  SetColor = SetColor,
+  GetValue = GetValue,
+  GetColor = GetColor,
+}
 
 ---------------------------------------------------------------------------------------------------
 -- Functions to create the options dialog
@@ -808,6 +830,8 @@ local function GetSpacerEntry(pos)
     width = "full",
   }
 end
+
+Addon.GetSpacerEntry = GetSpacerEntry
 
 local function GetColorEntry(entry_name, pos, setting)
   return {
@@ -966,6 +990,8 @@ local function GetScaleEntryDefault(pos, setting, func_disabled)
   return GetScaleEntry(L["Scale"], pos, setting, func_disabled)
 end
 
+Addon.GetScaleEntryDefault = GetScaleEntryDefault
+
 local function GetScaleEntryOffset(pos, setting, func_disabled)
   return GetScaleEntry(L["Scale"], pos, setting, func_disabled, -1.7, 2.0)
 end
@@ -1018,6 +1044,8 @@ end
 local function GetTransparencyEntryDefault(pos, setting, func_disabled)
   return GetTransparencyEntry(L["Transparency"], pos, setting, func_disabled)
 end
+
+Addon.GetTransparencyEntryDefault = GetTransparencyEntryDefault
 
 local function GetTransparencyEntryWidget(pos, setting, func_disabled)
   return GetTransparencyEntry(L["Transparency"], pos, { setting, "alpha" }, func_disabled)
@@ -7847,7 +7875,7 @@ end
 
 local function CustomPlateGetSlotName(index)
   local name = "#" .. index .. ". " .. Addon.CustomPlateGetHeaderName(index)
-  if db.uniqueSettings[index].Enable.Never then
+  if Addon.db.profile.uniqueSettings[index].Enable.Never then
     name = "|cffA0A0A0" .. name .. "|r"
   end
   return name
@@ -7856,6 +7884,7 @@ end
 local function CustomPlateGetIcon(index)
   local _, icon
 
+  local db = Addon.db.profile
   if db.uniqueSettings[index].UseAutomaticIcon then
     icon = db.uniqueSettings[index].icon
   else
@@ -7979,7 +8008,7 @@ local function CustomPlateUpdateEntry(index)
 end
 
 local function CustomPlateCheckAndUpdateEntry(info, val, index)
-  local selected_plate = db.uniqueSettings[index]
+  local selected_plate = Addon.db.uniqueSettings[index]
   local trigger_type = selected_plate.Trigger.Type
 
   local triggers = Addon.Split(val)
@@ -8000,7 +8029,7 @@ local function CustomPlateCheckAndUpdateEntry(info, val, index)
   end
 end
 
-local function CustomPlateGetExampleForEventScript(custom_style, event)
+function Addon.CustomPlateGetExampleForEventScript(custom_style, event)
   local script_function
   if event == "WoWEvent" then
     script_function = custom_style.Scripts.Code.Events[custom_style.Scripts.Event]
@@ -8016,6 +8045,8 @@ local function CustomPlateGetExampleForEventScript(custom_style, event)
   return script_function
 end
 
+local CustomPlateGetExampleForEventScript = Addon.CustomPlateGetExampleForEventScript
+
 local function UpdateCustomNameplateSlots(...)
   local entry = options.args.Custom.args
   if ... then
@@ -8029,6 +8060,8 @@ local function UpdateCustomNameplateSlots(...)
 end
 
 CreateCustomNameplateEntry = function(index)
+  local db = Addon.db.profile
+
   local entry = {
     name = function() return CustomPlateGetSlotName(index) end,
     type = "group",
@@ -8776,7 +8809,7 @@ CreateCustomNameplateEntry = function(index)
               Addon.Widgets:UpdateSettings("Script")
             end,
             get = function(info)
-              return CustomPlateGetExampleForEventScript(db.uniqueSettings[index], db.uniqueSettings[index].Scripts.Function)
+              return Addon.CustomPlateGetExampleForEventScript(db.uniqueSettings[index], db.uniqueSettings[index].Scripts.Function)
             end,
           },
           Extend = {
@@ -11177,7 +11210,7 @@ function Addon.RestoreLegacyCustomNameplates()
 
     if trigger_already_used == nil or trigger_already_used.Enable.Never then
       local error_msg = L["Adding legacy custom nameplate for %s ..."]:gsub("%%s", trigger_value)
-      Addon.Logging.Error(error_msg)
+      Addon.Logging.Info(error_msg)
 
       table.insert(custom_plates, max_slot_no + index, legacy_custom_plate)
       index = index + 1

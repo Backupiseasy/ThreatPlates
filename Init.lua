@@ -381,6 +381,31 @@ Addon.SplitByWhitespace = function(split_string)
 	return parts, #parts
 end
 
+-- keep_function:
+-- Return true to keep the value, or false to discard it.
+-- function(t, i, j)
+--   local v = t[i]
+--   return (v == 'a' or v == 'b' or v == 'f' or v == 'h')
+-- end)
+Addon.RemoveFromArrawy = function(array, keep_function)
+	local j, number_of_elements = 1, #array
+
+	for i = 1, number_of_elements do
+		if keep_function(array, i, j) then
+			-- Move i's kept value to j's position, if it's not already there.
+			if i ~= j then
+				array[j] = array[i]
+				array[i] = nil
+			end
+			j = j + 1; -- Increment position of where we'll place the next kept value.
+		else
+			array[i] = nil
+		end
+	end
+
+	return array
+end
+
 --------------------------------------------------------------------------------------------------
 -- Logging Functions
 ---------------------------------------------------------------------------------------------------

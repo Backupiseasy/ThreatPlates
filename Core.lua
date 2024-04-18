@@ -354,10 +354,14 @@ function TidyPlatesThreat:OnInitialize()
   local db = LibStub('AceDB-3.0'):New('ThreatPlatesDB', defaults, 'Default')
   Addon.db = db
 
+  Addon.LibAceGUI = LibStub("AceGUI-3.0")
+  Addon.LibAceConfig = LibStub("AceConfig-3.0")
   Addon.LibAceConfigDialog = LibStub("AceConfigDialog-3.0")
   Addon.LibAceConfigRegistry = LibStub("AceConfigRegistry-3.0")
   Addon.LibSharedMedia = LibStub("LibSharedMedia-3.0")
   Addon.LibCustomGlow = LibStub("LibCustomGlow-1.0")
+  Addon.LibAceSerializer = LibStub:GetLibrary("AceSerializer-3.0")
+  Addon.LibDeflate = LibStub:GetLibrary("LibDeflate")
 
   Addon.LoadOnDemandLibraries()
 

@@ -159,6 +159,8 @@ local function ChatCommandDebug(cmd_list)
 				Addon.Logging.Debug("Removing", i)
 			end
 		end
+	elseif command == "custom-styles-dialog" then
+		Addon.CustomStylesDialog:ShowDialog()
 	else
 		Addon.Logging.Error(L["Unknown option: "] .. command)
 		PrintHelp()
@@ -195,7 +197,7 @@ function TidyPlatesThreat:ChatCommand(input)
 		else
 			Addon.Logging.Info(L["Scriping for custom styles for nameplates is now |cffff0000disabled!|r."])
 		end
-		Addon.UpdateCustomStyles()
+		Addon.ProcessCustomStyleUpdate()
 		TidyPlatesThreat:ConfigTableChanged()
 --	elseif command == "toggle-view-friendly-units" then
 --		TidyPlatesThreat:ToggleNameplateModeFriendlyUnits()

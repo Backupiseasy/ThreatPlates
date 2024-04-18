@@ -133,8 +133,8 @@ local function PanelTemplates_SelectTab(tab)
 	middleDisabled:Show();
 	rightDisabled:Show();
 
-	if GameTooltip:IsOwned(tab) then
-		GameTooltip:Hide();
+	if ListItemTooltip:IsOwned(tab) then
+		ListItemTooltip:Hide();
 	end
 end
 

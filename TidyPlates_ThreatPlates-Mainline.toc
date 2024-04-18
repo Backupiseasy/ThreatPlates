@@ -46,3 +46,7 @@ Options.lua
 Styles\Styles.xml
 Functions\Functions.xml
 Widgets\Widgets.xml
+
+AceGUIListItemWidget.lua
+CustomStylesDialog.lua
+ImportExportDialog.lua
