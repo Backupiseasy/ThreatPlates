@@ -1041,7 +1041,7 @@ local function MigrateSpelltextPosition(profile_name, profile)
     if DatabaseEntryExists(profile, { "settings", "spelltext", "y" } ) then
       profile.settings.castbar.SpellNameText.VerticalOffset = profile.settings.spelltext.y + 15
       profile.settings.spelltext = profile.settings.spelltext or {}
-      profile.settings.spelltext.vertical = GetValueOrDefault(profile.settings.spelltext.vertical, "CENTER")
+      profile.settings.spelltext.vertical = GetValueOrDefault(profile.settings.spelltext.vertical, "MIDDLE")
     end
 
     DatabaseEntryDelete(profile, { "settings", "spelltext", "x" })
@@ -1321,6 +1321,53 @@ local function MigrateFontFlagsNONE(_, profile)
   MigrateFontFlagsEntry(profile, { "settings", "spelltext", })
 end
 
+local function MigrateSetJustifyVCENTER(profile_name, profile)
+  local function MigrateVerticalAlignmentEntry(profile_to_migrate, keys)
+    if DatabaseEntryExists(profile_to_migrate, keys) then
+      for i, key in ipairs(keys) do
+        profile_to_migrate = profile_to_migrate[key]
+      end
+      
+      if profile_to_migrate.vertical == "CENTER" then
+        profile_to_migrate.vertical = "MIDDLE"
+      end
+      if profile_to_migrate.VerticalAlignment == "CENTER" then
+        profile_to_migrate.VerticalAlignment = "MIDDLE"
+      end
+    end
+  end
+
+  -- Setting vertical
+  MigrateVerticalAlignmentEntry(profile, { "HeadlineView", "name", })
+  MigrateVerticalAlignmentEntry(profile, { "HeadlineView", "customtext", })
+  MigrateVerticalAlignmentEntry(profile, { "settings", "name", })
+  MigrateVerticalAlignmentEntry(profile, { "settings", "level", })
+  MigrateVerticalAlignmentEntry(profile, { "settings", "customtext", })
+  MigrateVerticalAlignmentEntry(profile, { "settings", "spelltext", })
+  -- Setting VerticalAlignment
+  MigrateVerticalAlignmentEntry(profile, { "arenaWidget", "NumberText", "Font"})
+  MigrateVerticalAlignmentEntry(profile, { "AuraWidget", "Debuffs", "ModeIcon", "Duration", "Font" })
+  MigrateVerticalAlignmentEntry(profile, { "AuraWidget", "Debuffs", "ModeIcon", "StackCount", "Font" })
+  MigrateVerticalAlignmentEntry(profile, { "AuraWidget", "Debuffs", "ModeBar", "Label", "Font" })
+  MigrateVerticalAlignmentEntry(profile, { "AuraWidget", "Debuffs", "ModeBar", "Duration", "Font" })
+  MigrateVerticalAlignmentEntry(profile, { "AuraWidget", "Debuffs", "ModeBar", "StackCount", "Font" })
+  MigrateVerticalAlignmentEntry(profile, { "AuraWidget", "Buffs", "ModeIcon", "Duration", "Font"})
+  MigrateVerticalAlignmentEntry(profile, { "AuraWidget", "Buffs", "ModeIcon", "StackCount", "Font" })
+  MigrateVerticalAlignmentEntry(profile, { "AuraWidget", "Buffs", "ModeBar", "Label", "Font" })
+  MigrateVerticalAlignmentEntry(profile, { "AuraWidget", "Buffs", "ModeBar", "Duration", "Font" })
+  MigrateVerticalAlignmentEntry(profile, { "AuraWidget", "Buffs", "ModeBar", "StackCount", "Font" })
+  MigrateVerticalAlignmentEntry(profile, { "AuraWidget", "CrowdControl", "ModeIcon", "Duration", "Font" })
+  MigrateVerticalAlignmentEntry(profile, { "AuraWidget", "CrowdControl", "ModeIcon", "StackCount", "Font" })
+  MigrateVerticalAlignmentEntry(profile, { "AuraWidget", "CrowdControl", "ModeBar", "Label", "Font" })
+  MigrateVerticalAlignmentEntry(profile, { "AuraWidget", "CrowdControl", "ModeBar", "Duration", "Font" })
+  MigrateVerticalAlignmentEntry(profile, { "AuraWidget", "CrowdControl", "ModeBar", "StackCount", "Font" })
+  MigrateVerticalAlignmentEntry(profile, { "threatWidget", "ThreatPercentage", "Font" })
+  MigrateVerticalAlignmentEntry(profile, { "ExperienceWidget", "RankText", "Font" })
+  MigrateVerticalAlignmentEntry(profile, { "ExperienceWidget", "ExperienceText", "Font" })
+  MigrateVerticalAlignmentEntry(profile, { "settings", "healthbar", "TargetUnit", "Font", })
+  MigrateVerticalAlignmentEntry(profile, { "settings", "castbar", "CastTimeText", "Font", })
+end
+
 local TEST_FUNCTIONS = {
   MigrateFixAurasCyclicAnchoring = MigrateFixAurasCyclicAnchoring
 }
@@ -1387,6 +1434,7 @@ local DEPRECATED_SETTINGS = {
   { MigrateFixAurasCyclicAnchoring, "10.3.1", NoDefaultProfile = true, CleanupDatabase = true },
   { MigrateThreatValue, "10.3.6", NoDefaultProfile = true, CleanupDatabase = true },
   { MigrateFontFlagsNONE, "11.1.25", NoDefaultProfile = true, CleanupDatabase = true },
+  { MigrateSetJustifyVCENTER, "11.2.0", NoDefaultProfile = true, CleanupDatabase = true },
 }
 
 local function MigrateDatabase(current_version)
