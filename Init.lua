@@ -40,7 +40,7 @@ Addon.ExpansionIsClassicAndAtLeast = function(expansion_id)
 	-- Method exists, so this is a Classic WoW version, but as the expansion id is unknown, the expansion is 
 	-- an older one, so we have to return false
 	if expansion_id then
-		return GetClassicExpansionLevel() > expansion_id
+		return GetClassicExpansionLevel() >= expansion_id
 	else
 		return false
 	end
