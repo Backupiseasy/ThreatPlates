@@ -27,23 +27,28 @@ Addon.IS_CLASSIC = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
 Addon.IS_CLASSIC_SOD = (Addon.IS_CLASSIC and (select(4, GetBuildInfo()) >= 11500))
 Addon.IS_TBC_CLASSIC = (GetClassicExpansionLevel and GetClassicExpansionLevel() == LE_EXPANSION_BURNING_CRUSADE)
 Addon.IS_WRATH_CLASSIC = (GetClassicExpansionLevel and GetClassicExpansionLevel() == LE_EXPANSION_WRATH_OF_THE_LICH_KING)
+Addon.IS_CATA_CLASSIC = (GetClassicExpansionLevel and GetClassicExpansionLevel() == LE_EXPANSION_CATACLYSM)
 Addon.IS_MAINLINE = (WOW_PROJECT_ID == WOW_PROJECT_MAINLINE)
 -- Addon.IS_TBC_CLASSIC = (WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC and LE_EXPANSION_LEVEL_CURRENT == LE_EXPANSION_BURNING_CRUSADE)
 -- Addon.IS_WRATH_CLASSIC = (WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC and LE_EXPANSION_LEVEL_CURRENT == LE_EXPANSION_WRATH_OF_THE_LICH_KING)
-Addon.WOW_USES_CLASSIC_NAMEPLATES = (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC)
+Addon.WOW_USES_CLASSIC_NAMEPLATES = (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC or Addon.IS_CATA_CLASSIC)
+-- ? Addon.WOW_FEATURE_ABSORBS
 
-Addon.ClassicExpansionAtLeast = function(expansion_id)
-	if not ClassicExpansionAtLeast then
-		-- Method does not exist which means that this is the most recent / highest WoW version (Mainline) 
-		-- so we have to return true
-		return true
-	elseif not expansion_id then
-		-- Method exists, so this is a Classic WoW version, but as the expansion id is unknown, the expansion is 
-		-- an older one, so we have to return false
-		return false
+Addon.ExpansionIsClassicAndAtLeast = function(expansion_id)
+	-- Method does not exist which means that this is the most recent / highest WoW version (Mainline) 
+	-- so we have to return true
+	-- Method exists, so this is a Classic WoW version, but as the expansion id is unknown, the expansion is 
+	-- an older one, so we have to return false
+	if expansion_id then
+		return GetClassicExpansionLevel() > expansion_id
 	else
-		return ClassicExpansionAtLeast(expansion_id)
+		return false
 	end
+end
+
+-- For Mainline, this always returns true. 
+Addon.ExpansionIsAtLeast = function(expansion_id)
+	return Addon.IS_MAINLINE or Addon.ExpansionIsClassicAndAtLeast(expansion_id)
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -127,7 +132,12 @@ Addon.Debug = {}
 -- Addon-wide wrapper functions and constants for WoW Classic
 ---------------------------------------------------------------------------------------------------
 
-if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
+-- UnitDetailedThreatSituation: WotLK - Patch 3.0.2 (2008-10-14): Added
+-- C_PvP.IsSoloShuffle: Shadowlands - Patch 9.2.0 (2022-02-22): Added.
+if Addon.IS_MAINLINE then
+	Addon.UnitDetailedThreatSituationWrapper = UnitDetailedThreatSituation
+	Addon.IsSoloShuffle = C_PvP.IsSoloShuffle
+else
   Addon.UnitDetailedThreatSituationWrapper = function(source, target)
     local is_tanking, status, threatpct, rawthreatpct, threat_value = UnitDetailedThreatSituation(source, target)
 
@@ -140,9 +150,6 @@ if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
 
 	-- Not available in Classic
 	Addon.IsSoloShuffle = function() return false end
-else
-	Addon.UnitDetailedThreatSituationWrapper = UnitDetailedThreatSituation
-	Addon.IsSoloShuffle = C_PvP.IsSoloShuffle
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -475,7 +482,7 @@ Addon.Debug.PrintUnit = function(unitid)
 		local tp_frame = plate.TPFrame
 		local unit = tp_frame and tp_frame.unit
 
-		if not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC and not Addon.IS_WRATH_CLASSIC then
+		if Addon.IS_MAINLINE then
 			Addon.Logging.Debug("  UnitNameplateShowsWidgetsOnly = ", UnitNameplateShowsWidgetsOnly(unitid))
 		end
     Addon.Logging.Debug("  Reaction = ", UnitReaction("player", unitid))
@@ -500,7 +507,7 @@ Addon.Debug.PrintUnit = function(unitid)
 		Addon.Logging.Debug("    Player is UnitIsOwnerOrControllerOfUnit =", UnitIsOwnerOrControllerOfUnit("player", unitid))
 		Addon.Logging.Debug("    Player Pet =", UnitIsUnit(unitid, "pet"))
     Addon.Logging.Debug("    IsOtherPlayersPet =", UnitIsOtherPlayersPet(unitid))
-		if not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC and not Addon.IS_WRATH_CLASSIC then
+		if Addon.IS_MAINLINE then
 			Addon.Logging.Debug("    IsBattlePet =", UnitIsBattlePet(unitid))
 		end
 		Addon.Logging.Debug("  -- PvP ---------------------------------")

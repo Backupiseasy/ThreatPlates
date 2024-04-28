@@ -35,11 +35,8 @@ local _G =_G
 -- Wrapper functions for WoW Classic
 ---------------------------------------------------------------------------------------------------
 
-if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
-  UnitGroupRolesAssigned = function(target_unit)
-    return (GetPartyAssignment("MAINTANK", target_unit) and "TANK") or "NONE"
-  end
-
+-- Quest tooltips: not sure since when available
+if not Addon.IS_MAINLINE then -- 
   -- Quest widget is not available in Classic
   ShowQuestUnit = function(...) return false end
 end

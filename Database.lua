@@ -30,7 +30,29 @@ local _G =_G
 -- Global functions for accessing the configuration
 ---------------------------------------------------------------------------------------------------
 
-if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
+-- GetSpecialization: Mists - Patch 5.0.4 (2012-08-28): Replaced GetPrimaryTalentTree.
+if Addon.IS_MAINLINE then
+  local PLAYER_ROLE_BY_SPEC = ThreatPlates.SPEC_ROLES[Addon.PlayerClass]
+
+  function Addon:PlayerRoleIsTank()
+    local db = Addon.db
+    if db.profile.optionRoleDetectionAutomatic then
+      return PLAYER_ROLE_BY_SPEC[_G.GetSpecialization()] or false
+    else
+      return db.char.spec[_G.GetSpecialization()]
+    end
+  end
+
+  -- Sets the role of the index spec or the active spec to tank (value = true) or dps/healing
+  function Addon:SetRole(value,index)
+    if index then
+      Addon.db.char.spec[index] = value
+    else
+      Addon.db.char.spec[_G.GetSpecialization()] = value
+    end
+  end
+else
+  -- GetShapeshiftFormID: not sure when removed
   local GetShapeshiftFormID = GetShapeshiftFormID
   local BEAR_FORM, DIRE_BEAR_FORM = BEAR_FORM, 8
 
@@ -78,26 +100,6 @@ if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
   -- Sets the role of the index spec or the active spec to tank (value = true) or dps/healing
   function Addon:SetRole(value)
     Addon.db.char.spec[1] = value
-  end
-else
-  local PLAYER_ROLE_BY_SPEC = ThreatPlates.SPEC_ROLES[Addon.PlayerClass]
-
-  function Addon:PlayerRoleIsTank()
-    local db = Addon.db
-    if db.profile.optionRoleDetectionAutomatic then
-      return PLAYER_ROLE_BY_SPEC[_G.GetSpecialization()] or false
-    else
-      return db.char.spec[_G.GetSpecialization()]
-    end
-  end
-
-  -- Sets the role of the index spec or the active spec to tank (value = true) or dps/healing
-  function Addon:SetRole(value,index)
-    if index then
-      Addon.db.char.spec[index] = value
-    else
-      Addon.db.char.spec[_G.GetSpecialization()] = value
-    end
   end
 end
 
@@ -1016,7 +1018,7 @@ local function MigrateCustomStylesToV3(profile_name, profile)
 
         -- Set automatic icon detection for all existing custom nameplates to false
         unique_unit.UseAutomaticIcon = false
-        unique_unit.icon = GetValueOrDefault(unique_unit.icon, (Addon.IS_CLASSIC and "Spell_nature_spiritwolf.blp") or "spell_shadow_shadowfiend.blp")
+        unique_unit.icon = GetValueOrDefault(unique_unit.icon, "spell_shadow_shadowfiend.blp")
       end
     end
   end
@@ -1379,7 +1381,7 @@ local DEPRECATED_SETTINGS = {
   { "CVarsBackup", "nameplateGlobalScale" },  -- Removed in 10.1.8
   { MigrationCustomPlatesV1, NoDefaultProfile = true, "10.2.0"},
   { MigrateCustomStyles, NoDefaultProfile = true, "10.2.0", CleanupDatabase = true },
-  { DisableShowBlizzardAurasForClassic, "10.2.1", Version = (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC) },
+  { DisableShowBlizzardAurasForClassic, "10.2.1", Version = Addon.WOW_USES_CLASSIC_NAMEPLATES },
   { MigrateAurasWidgetV2, "10.3.0-beta2", NoDefaultProfile = true , CleanupDatabase = true },
   { "AuraWidget", "scale" },  -- Removed in 10.3.0
   { MigrateFixAurasCyclicAnchoring, "10.3.1", NoDefaultProfile = true, CleanupDatabase = true },

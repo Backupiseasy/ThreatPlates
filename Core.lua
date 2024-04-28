@@ -286,7 +286,8 @@ function Addon:CheckForFirstStartUp()
   if not Addon.db.char.welcome then
     Addon.db.char.welcome = true
 
-    if not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC and not Addon.IS_WRATH_CLASSIC then
+    -- GetNumSpecializations: Mists - Patch 5.0.4 (2012-08-28): Replaced GetNumTalentTabs.
+    if Addon.IS_MAINLINE then
       -- initialize roles for all available specs (level > 10) or set to default (dps/healing)
       for index=1, GetNumSpecializations() do
         local id, spec_name, description, icon, background, role = GetSpecializationInfo(index)
@@ -494,7 +495,8 @@ end
 -- Also fires any other time the player sees a loading screen
 function TidyPlatesThreat:PLAYER_ENTERING_WORLD()
   local db = Addon.db.profile.questWidget
-  if not (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC) then
+  -- showQuestTrackingTooltips: not sure when introduced
+  if Addon.IS_MAINLINE then
     if db.ON or db.ShowInHeadlineView then
       CVars:Set("showQuestTrackingTooltips", 1)
     else

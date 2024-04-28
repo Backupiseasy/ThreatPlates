@@ -1,9 +1,4 @@
-## Interface: 100206
-## Interface-Retail: 100206
-## Interface-Vanilla: 11501
-## Interface-TBC: 20504
-## Interface-Wrath: 30402
-## Interface-Cata: 40400
+## Interface: 40400
 
 ## Title: Threat Plates
 ## Version: @project-version@
@@ -18,26 +13,8 @@
 ## IconTexture: Interface\Addons\TidyPlates_ThreatPlates\Artwork\Logo.tga
 
 ## RequiredDeps:
-#@version-retail@
 ## OptionalDeps: Ace3, AceGUI-3.0-SharedMediaWidgets, LibSharedMedia-3.0, LibCustomGlow-1.0, LibDeflate, LibDualSpec-1.0
 ## X-Embeds: Ace3, AceGUI-3.0-SharedMediaWidgets, LibSharedMedia-3.0, LibCustomGlow-1.0, LibDeflate, LibDualSpec-1.0
-#@end-version-retail@
-#@version-classic@
-## OptionalDeps: Ace3, AceGUI-3.0-SharedMediaWidgets, LibSharedMedia-3.0, LibCustomGlow-1.0, LibDeflate
-## X-Embeds: Ace3, AceGUI-3.0-SharedMediaWidgets, LibSharedMedia-3.0, LibCustomGlow-1.0, LibDeflate
-#@end-version-classic@
-#@version-bcc@
-## OptionalDeps: Ace3, AceGUI-3.0-SharedMediaWidgets, LibSharedMedia-3.0, LibCustomGlow-1.0, LibDeflate
-## X-Embeds: Ace3, AceGUI-3.0-SharedMediaWidgets, LibSharedMedia-3.0, LibCustomGlow-1.0, LibDeflate
-#@end-version-bcc@
-#@version-wrath@
-## OptionalDeps: Ace3, AceGUI-3.0-SharedMediaWidgets, LibSharedMedia-3.0, LibCustomGlow-1.0, LibDeflate, LibDualSpec-1.0
-## X-Embeds: Ace3, AceGUI-3.0-SharedMediaWidgets, LibSharedMedia-3.0, LibCustomGlow-1.0, LibDeflate, LibDualSpec-1.0
-#@end-version-wrath@
-#@version-cata@
-## OptionalDeps: Ace3, AceGUI-3.0-SharedMediaWidgets, LibSharedMedia-3.0, LibCustomGlow-1.0, LibDeflate, LibDualSpec-1.0
-## X-Embeds: Ace3, AceGUI-3.0-SharedMediaWidgets, LibSharedMedia-3.0, LibCustomGlow-1.0, LibDeflate, LibDualSpec-1.0
-#@end-version-cata@
 ## X-Website: https://wow.curseforge.com/projects/tidy-plates-threat-plates
 ## X-Curse-Project-ID: 21217
 ## X-WoWI-ID: 15749

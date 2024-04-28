@@ -24,15 +24,19 @@
     <Script file="ForAllIndentsAndPurposes\indent.lua"/>
 
     <!--@version-retail@-->
-    <Include file="LibDualSpec-1.0\LibDualSpec-1.0.lua"/>
+    <Script file="LibDualSpec-1.0\LibDualSpec-1.0.lua"/>
     <!--@end-version-retail@-->
 
     <!--@version-bcc@-->
     <!--@end-version-bcc@-->
 
     <!--@version-wrath@-->
-    <Include file="LibDualSpec-1.0\LibDualSpec-1.0.lua"/>
+    <Script file="LibDualSpec-1.0\LibDualSpec-1.0.lua"/>
     <!--@end-version-wrath@-->
+
+    <!--@version-cata@-->
+    <Script file="LibDualSpec-1.0\LibDualSpec-1.0.lua"/>
+    <!--@end-version-cata@-->
 
     <!--@version-classic@-->
     <!--@end-version-classic@-->

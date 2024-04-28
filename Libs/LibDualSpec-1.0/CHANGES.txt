@@ -1,12 +1,26 @@
-tag 323d87a4ac3ccb3905419dee687950c593e3355a v1.20
+tag f11e6ebf3f6eb236164a0b7e3b6188a019279ef3 v1.22.4
 Author:	Kyle Buller <bullerk@gmail.com>
-Date:	Thu May 20 14:03:55 2021 -0500
+Date:	Sat Apr 20 23:48:40 2024 -0500
 
-Tagging as v1.20
+Tagging as v1.22.4
 
-commit feb0755dd9f2cede644321164d36a042f951cc7b
+commit e51f033a6b2e154c2a2da226661ce3d561800022
 Author: Kyle Buller <bullerk@gmail.com>
-Date:   Tue Apr 13 17:35:00 2021 -0500
+Date:   Sat Apr 20 22:08:25 2024 -0500
 
-    Update load guard
+    Add support for Cataclysm Classic
+    
+    Resolves #4
+
+commit b06bd4beaa9595192c743a4c31b91e3995345e10
+Author: Kyle Buller <bullerk@gmail.com>
+Date:   Tue Apr 9 20:20:58 2024 -0500
+
+    Simplify load guard
+
+commit ba5bbb0eaef10064e70dd14459122e594aa2b56a
+Author: Kyle Buller <bullerk@gmail.com>
+Date:   Tue Apr 9 20:17:37 2024 -0500
+
+    Minor tweaks
 

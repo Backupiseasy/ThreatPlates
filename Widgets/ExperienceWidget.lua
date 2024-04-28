@@ -1,7 +1,7 @@
 local ADDON_NAME, Addon = ...
 local ThreatPlates = Addon.ThreatPlates
 
-local Widget = (Addon.IS_CLASSIC and {}) or Addon.Widgets:NewWidget("Experience")
+local Widget = (not Addon.IS_MAINLINE and {}) or Addon.Widgets:NewWidget("Experience")
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants

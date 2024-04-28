@@ -364,11 +364,12 @@ function Addon:UpdateConfigurationStatusText()
   else
     Truncate = function(value) return value end
   end
-
-  if self.IS_CLASSIC or self.IS_TBC_CLASSIC or self.IS_WRATH_CLASSIC then
-    ShowAbsorbs = false
-  else
+  
+  -- Absorbs: Mists - Added
+  if Addon.IS_MAINLINE then
     ShowAbsorbs = Settings.AbsorbsAmount or Settings.AbsorbsPercentage
+  else
+    ShowAbsorbs = false
   end
 
   ShowHealth = Settings.amount or Settings.percent

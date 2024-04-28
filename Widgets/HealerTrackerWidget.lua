@@ -50,6 +50,8 @@ local HEALER_SPECIALIZATION_ID = {
 -- Store localized names for specializations for parsing the battleground score
 local HEALER_CLASSES = {}
 local HEALER_SPECS = {}
+
+-- GetSpecializationInfoByID: Warlords of Draenor Patch 6.2.0 (2015-06-23): Added GetSpecializationInfoForSpecID()
 if Addon.IS_MAINLINE then
   for specialization_id, _ in pairs(HEALER_SPECIALIZATION_ID) do
     local _, name, _, _, _, classFile, _ =  GetSpecializationInfoByID(specialization_id)
@@ -74,6 +76,149 @@ local SPELL_EVENTS = {
 }
 
 local HEALER_SPELLS_RETAIL = {
+  -- Holy Priest
+  ----------
+  [2060] = "PRIEST",     -- Heal
+  [14914] = "PRIEST",    -- Holy Fire
+  --
+  --[2050] = "PRIEST",     -- Holy Word: Serenity
+  [596] = "PRIEST",      -- Prayer of Healing
+  --[47788] = "PRIEST",    -- Guardian Spirit
+  --[88625] = "PRIEST",    -- Holy Word: Chastise
+  --[34861] = "PRIEST",    -- Holy Word: Sanctify
+  [204883] = "PRIEST",   -- Circle of Healing
+  --[372616] = "PRIEST",   -- Empyreal Blaze
+  --[64843] = "PRIEST",    -- Divine Hymn
+  --[64901] = "PRIEST",    -- Symbol of Hope
+  --[200183] = "PRIEST",   -- Apotheosis
+  --[265202] = "PRIEST",   -- Holy Word: Salvation
+  --[372835] = "PRIEST",   -- Lightwell
+  --
+  --[197268] = "PRIEST",   -- Ray of Hope
+  [289666] = "PRIEST",   -- Greater Heal
+  --[328530] = "PRIEST",   -- Divine Ascension
+  --[213610] = "PRIEST",   -- Holy Ward
+  --[197268] = "PRIEST",   -- Ray of Hope
+
+
+  -- Discipline Priest
+  ----------
+  [47540] = "PRIEST",  -- Penance
+  --
+  [194509] = "PRIEST", -- Power Word: Radiance
+  --[33206] = "PRIEST", -- Pain Suppression
+  [214621] = "PRIEST", -- Schism
+  [129250] = "PRIEST", -- Power Word: Solace
+  --[62618] = "PRIEST", -- Power Word: Barrier
+  [204197] = "PRIEST", -- Purge of the Wicked
+  --[47536] = "PRIEST",  -- Rapture
+  [314867] = "PRIEST",  -- Shadow Covenant
+  --[373178] = "PRIEST",  -- Light's Wrath
+  --[123040] = "PRIEST",  -- Mindbender
+  --
+  --[197871] = "PRIEST",   -- Dark Archangel
+  --[197862] = "PRIEST",   -- Archangel
+
+  -- Druid (The affinity traits on the other specs makes this difficult)
+  ---------
+  [33763] = "DRUID", -- Lifebloom
+  --[17116] = "DRUID", -- Nature's Swiftness
+  [102351] = "DRUID", -- Cnenarion Ward
+  [33763] = "DRUID", -- Nourish
+  [81262] = "DRUID", -- Efflorescence
+  --[740] = "DRUID", -- Tranquility
+  --[102342] = "DRUID", -- Ironbark
+  --[203651] = "DRUID", -- Overgrowth
+  --[33891] = "DRUID", -- Incarnation: Tree of Life
+  --[391528] = "DRUID", -- Convoke the Spirits
+  [391888] = "DRUID", -- Adaptive Swarm -- Shared with Feral
+  --[197721] = "DRUID", -- Flourish
+  [392160] = "DRUID", -- Invigorate
+  --
+
+
+  -- Shaman
+  ---------
+  [61295] = "SHAMAN",  -- Riptide
+  [77472] = "SHAMAN",  -- Healing Wave
+  [73920] = "SHAMAN",  -- Healing Rain
+  --[383009] = "SHAMAN",  -- Stormkeeper
+  --[52127] = "SHAMAN",  -- Water Shield
+  --[98008] = "SHAMAN", -- Spirit Link Totem
+  --[157153] = "SHAMAN", -- Cloudburst Totem
+  --[108280] = "SHAMAN",  -- Healing Tide Totem
+  --[16190] = "SHAMAN", -- Mana Tide Totem
+  [73685] = "SHAMAN",  -- Unleash Life
+  --[198838] = "SHAMAN",  -- Earthen Wall Totem
+  --[207399] = "SHAMAN",  -- Ancestral Protection Totem
+  --[375982] = "SHAMAN", -- Primordial Wave
+  [207778] = "SHAMAN", -- Downpour
+  --[382029] = "SHAMAN", -- Ever-Rising Tide -- was only in Beta available
+  --[114052] = "SHAMAN", -- Ascendance
+  --[197995] = "SHAMAN", -- Wellspring
+  --
+
+  -- Paladin
+  ----------
+  [275773] = "PALADIN", -- Judgment
+  --
+  [20473] = "PALADIN", -- Holy Shock
+  [82326] = "PALADIN", -- Holy Light
+  [85222] = "PALADIN", -- Light of Dawn
+  [223306] = "PALADIN", -- Bestow Faith
+  --[31821] = "PALADIN", -- Aura Mastery
+  [214202] = "PALADIN", -- Rule of Law
+  [210294] = "PALADIN", -- Divine Favor
+  --[114158] = "PALADIN", -- Light's Hammer
+  [114165] = "PALADIN", -- Holy Prism
+  --[183998] = "PALADIN", -- Licht des Märtyrers ??? Holy or all Paladins
+  --[304971] = "PALADIN", -- Divine Toll  ??? Holy or all Paladins
+  --[216331] = "PALADIN", -- Avenging Crusader
+  --[384376] = "PALADIN", -- Avenging Wrath ??? Holy or all Paladins
+  [148039] = "PALADIN", -- Barrier of Faith
+  --[388007] = "PALADIN", -- Blessing of Summer
+
+
+  -- Monk
+  ---------
+  [124682] = "MONK", -- Envelopping Mist
+  [191837] = "MONK", -- Essence Font
+  [115151] = "MONK", -- Renewing Mist
+  --[116849] = "MONK", -- Life Cocoon
+  [116680] = "MONK", -- Thunder Focus Tea
+  --[115310] = "MONK", -- Revival
+  --[388615] = "MONK", -- Restoral
+  --[198898] = "MONK", -- Song of Chi-Ji
+  [124081] = "MONK", -- Zen Pulse
+  --[122281] = "MONK", -- Healing Elixir
+  --[325197] = "MONK", -- Invoke Chi-Ji, the Red Crane
+  --[322118] = "MONK", -- Invoke Yu'lon, the Jade Serpent
+  --[196725] = "MONK", -- Refreshing Jade Wind
+  --[197908] = "MONK", -- Mana Tea
+  --[388193] = "MONK", -- Faeline Stomp
+  --[386276] = "MONK", -- Bonedust Brew
+  --
+  [209584] = "MONK", -- Zen Focus Tea
+  [205234] = "MONK", -- Healing Sphere
+
+
+  -- Evoker - Preservation
+  ---------
+  [364343] = "EVOKER", -- Echo
+  [382614] = "EVOKER", -- Dream Breath
+  [366155] = "EVOKER", -- Reversion
+  --[366155] = "EVOKER", -- Rewind
+  [382731] = "EVOKER", -- Spiritbloom
+  --[357170] = "EVOKER", -- Time Dilation
+  --[370960] = "EVOKER", -- Emerald Communion
+  [373861] = "EVOKER", -- Temporal Anomaly  
+  --[359816] = "EVOKER", -- Dream Flight
+  --[370537] = "EVOKER", -- Stasis  
+  --
+  --[377509] = "EVOKER", -- Dream Projection
+}
+
+local HEALER_CATA_RETAIL = {
   -- Holy Priest
   ----------
   [2060] = "PRIEST",     -- Heal
@@ -336,6 +481,8 @@ elseif Addon.IS_TBC_CLASSIC then
   HEALER_SPELLS = HEALER_SPELLS_CLASSIC
 elseif Addon.IS_WRATH_CLASSIC then
   HEALER_SPELLS = HEALER_SPELLS_CLASSIC
+elseif Addon.IS_CATA_CLASSIC then
+  HEALER_SPELLS = HEALER_CATA_RETAIL
 else
   HEALER_SPELLS = HEALER_SPELLS_RETAIL
 end

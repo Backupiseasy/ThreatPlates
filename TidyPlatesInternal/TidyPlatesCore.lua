@@ -118,7 +118,6 @@ local activetheme = Addon.Theme
 
 if Addon.IS_CLASSIC then
   GetNameForNameplate = function(plate) return plate:GetName():gsub("NamePlate", "Plate") end
-  UnitEffectiveLevel = function(...) return _G.UnitLevel(...) end
 
   -- Fix for UnitChannelInfo not working on WoW Classic
   -- Based on code from LibClassicCasterino and ClassicCastbars
@@ -232,11 +231,10 @@ if Addon.IS_CLASSIC then
 
   UnitCastingInfo = _G.UnitCastingInfo
 
-  -- Not available in Classic, introduced in patch 9.0.1
+  -- UnitNameplateShowsWidgetsOnly: SL - Patch 9.0.1 (2020-10-13): Added.
   UnitNameplateShowsWidgetsOnly = function() return false end
 elseif Addon.IS_TBC_CLASSIC then
   GetNameForNameplate = function(plate) return plate:GetName() end
-  UnitEffectiveLevel = function(...) return _G.UnitLevel(...) end
 
   -- name, text, texture, startTime, endTime, isTradeSkill, notInterruptible, spellID
   UnitChannelInfo = function(...)
@@ -251,20 +249,16 @@ elseif Addon.IS_TBC_CLASSIC then
     return name, text, texture, startTime, endTime, isTradeSkill, nil, false, spellID
   end
 
-  -- Not available in BC Classic, introduced in patch 9.0.1
+  -- UnitNameplateShowsWidgetsOnly: SL - Patch 9.0.1 (2020-10-13): Added.
   UnitNameplateShowsWidgetsOnly = function() return false end
-elseif Addon.IS_WRATH_CLASSIC then
+elseif Addon.IS_WRATH_CLASSIC or Addon.IS_CATA_CLASSIC then
   GetNameForNameplate = function(plate) return plate:GetName() end
-  UnitEffectiveLevel = function(...) return _G.UnitLevel(...) end
-
   UnitCastingInfo = _G.UnitCastingInfo
-
-  -- Not available in WotLK Classic, introduced in patch 9.0.1
+  -- UnitNameplateShowsWidgetsOnly: SL - Patch 9.0.1 (2020-10-13): Added.
   UnitNameplateShowsWidgetsOnly = function() return false end
 else
   GetNameForNameplate = function(plate) return plate:GetName() end
-
-  UnitCastingInfo = function(...) return _G.UnitCastingInfo(...) end
+  UnitCastingInfo = _G.UnitCastingInfo
 end
 
 ---------------------------------------------------------------------------------------------------------------------
@@ -1286,7 +1280,7 @@ end
 
 function CoreEvents:PLAYER_LOGIN()
   -- Fix for Blizzard default plates being shown at random times
-  -- Works for Mainline and Wrath Classic
+  -- Works now in all WoW versions
   if NamePlateDriverFrame and NamePlateDriverFrame.AcquireUnitFrame then
     hooksecurefunc(NamePlateDriverFrame, "AcquireUnitFrame", NamePlateDriverFrame_AcquireUnitFrame)
   end
@@ -1310,9 +1304,9 @@ function CoreEvents:NAME_PLATE_CREATED(plate)
   OnNewNameplate(plate)
 
   -- NamePlateDriverFrame.AcquireUnitFrame is not used in Classic
-  if (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC) and plate.UnitFrame then
-    NamePlateDriverFrame_AcquireUnitFrame(nil, plate)
-  end
+  -- if (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC) and plate.UnitFrame then
+  --   NamePlateDriverFrame_AcquireUnitFrame(nil, plate)
+  -- end
 
   plate:HookScript('OnHide', FrameOnHide)
   plate:HookScript('OnUpdate', FrameOnUpdate)
@@ -1870,24 +1864,25 @@ if Addon.IS_MAINLINE then
   CoreEvents.UNIT_SPELLCAST_EMPOWER_STOP = UNIT_SPELLCAST_CHANNEL_STOP
 end
 
-if Addon.IS_CLASSIC then
-  CoreEvents.UNIT_HEALTH_FREQUENT = UNIT_HEALTH
+-- UNIT_HEALTH, UNIT_HEALTH_FREQUENT: 
+--   Shadowlands Patch 9.0.1 (2020-10-13): Removed. Replaced by UNIT HEALTH which is no longer aggressively throttled.
+--   Cataclysm Patch 4.0.6 (2011-02-08): Added.
+if Addon.IS_MAINLINE then
+  CoreEvents.UNIT_HEALTH = UNIT_HEALTH
+
+  -- Absorbs should have been added with Mists
+  CoreEvents.UNIT_ABSORB_AMOUNT_CHANGED = UNIT_ABSORB_AMOUNT_CHANGED
+  CoreEvents.UNIT_HEAL_ABSORB_AMOUNT_CHANGED = UNIT_HEAL_ABSORB_AMOUNT_CHANGED
+
+  -- CoreEvents.PLAYER_SOFT_FRIEND_CHANGED = PLAYER_SOFT_FRIEND_CHANGED
+  -- CoreEvents.PLAYER_SOFT_ENEMY_CHANGED = PLAYER_SOFT_ENEMY_CHANGED
+  -- CoreEvents.PLAYER_SOFT_INTERACT_CHANGED = PLAYER_SOFT_INTERACT_CHANGED
 else
+  CoreEvents.UNIT_HEALTH_FREQUENT = UNIT_HEALTH
+end
+
+if Addon.ExpansionIsAtLeast(LE_EXPANSION_BURNING_CRUSADE) then
   CoreEvents.PLAYER_FOCUS_CHANGED = PLAYER_FOCUS_CHANGED
-
-  if Addon.IS_MAINLINE then
-    CoreEvents.UNIT_ABSORB_AMOUNT_CHANGED = UNIT_ABSORB_AMOUNT_CHANGED
-    CoreEvents.UNIT_HEAL_ABSORB_AMOUNT_CHANGED = UNIT_HEAL_ABSORB_AMOUNT_CHANGED
-
-    -- CoreEvents.PLAYER_SOFT_FRIEND_CHANGED = PLAYER_SOFT_FRIEND_CHANGED
-    -- CoreEvents.PLAYER_SOFT_ENEMY_CHANGED = PLAYER_SOFT_ENEMY_CHANGED
-    -- CoreEvents.PLAYER_SOFT_INTERACT_CHANGED = PLAYER_SOFT_INTERACT_CHANGED
-
-    -- UNIT_HEALTH_FREQUENT no longer supported in Retail since 9.0.1
-    CoreEvents.UNIT_HEALTH = UNIT_HEALTH
-  else
-    CoreEvents.UNIT_HEALTH_FREQUENT = UNIT_HEALTH
-  end
 end
 
 CoreEvents.PLAYER_SOFT_FRIEND_CHANGED = PLAYER_SOFT_FRIEND_CHANGED
@@ -1910,8 +1905,8 @@ CoreEvents.UNIT_TARGET = UNIT_TARGET
 -- Do this after events are registered, otherwise UNIT_AURA would be registered as a general event, not only as
 -- an unit event.
 local ENABLE_UNIT_AURA_FOR_CLASS = {
-  PALADIN = Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC,
-  DEATHKNIGHT = Addon.IS_WRATH_CLASSIC,
+  PALADIN = true,
+  DEATHKNIGHT = Addon.IS_WRATH_CLASSIC or Addon.IS_CATA_CLASSIC,
   -- For Season of Discovery
   SHAMAN = Addon.IS_CLASSIC_SOD,
   WARLOCK = Addon.IS_CLASSIC_SOD,

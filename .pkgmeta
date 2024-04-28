@@ -56,8 +56,9 @@ ignore:
   - README.md
   - TidyPlates_ThreatPlates.iml
   - TidyPlates_ThreatPlates-Mainline.toc
-  - TidyPlates_ThreatPlates-Classic.toc
-  - TidyPlates_ThreatPlates-BCC.toc
+  - TidyPlates_ThreatPlates-Vanilla.toc
+  - TidyPlates_ThreatPlates-TBC.toc
   - TidyPlates_ThreatPlates-Wrath.toc
+  - TidyPlates_ThreatPlates-Cata.toc
 
 move-folders:

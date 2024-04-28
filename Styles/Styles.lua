@@ -29,7 +29,8 @@ local _G =_G
 -- Wrapper functions for WoW Classic
 ---------------------------------------------------------------------------------------------------
 
-if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
+-- UnitIsBattlePet: Mists - Patch 5.1.0 (2012-11-27): Added.
+if not Addon.ExpansionIsAtLeast() then -- Mists
   UnitIsBattlePet = function(...) return false end
 end
 
