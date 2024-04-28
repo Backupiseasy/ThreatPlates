@@ -218,147 +218,82 @@ local HEALER_SPELLS_RETAIL = {
   --[377509] = "EVOKER", -- Dream Projection
 }
 
-local HEALER_CATA_RETAIL = {
+local HEALER_SPELLS_CATA = {
   -- Holy Priest
   ----------
-  [2060] = "PRIEST",     -- Heal
-  [14914] = "PRIEST",    -- Holy Fire
+  -- Key Abilities: Renew, Flash Heal, Prayer of Healing, Greater Heal, Lightwell
+  [47788] = "PRIEST",  -- Guardian Spirit
+  [34861] = "PRIEST",  -- Circle of Healing
+  [14751] = "PRIEST",  -- Chakra
+  [88625] = "PRIEST",  -- Holy Word: Chastise
+  [88684] = "PRIEST",  -- Holy Word: Serenity
+  [88685] = "PRIEST",  -- Holy Word: Sanctuary
+  [724] = "PRIEST",    -- Lightwell
+  [19236] = "PRIEST",  -- Desperate Prayer
+  [101062] = "PRIEST", -- Flash Heal with Surge of Light proc
   --
-  --[2050] = "PRIEST",     -- Holy Word: Serenity
-  [596] = "PRIEST",      -- Prayer of Healing
-  --[47788] = "PRIEST",    -- Guardian Spirit
-  --[88625] = "PRIEST",    -- Holy Word: Chastise
-  --[34861] = "PRIEST",    -- Holy Word: Sanctify
-  [204883] = "PRIEST",   -- Circle of Healing
-  --[372616] = "PRIEST",   -- Empyreal Blaze
-  --[64843] = "PRIEST",    -- Divine Hymn
-  --[64901] = "PRIEST",    -- Symbol of Hope
-  --[200183] = "PRIEST",   -- Apotheosis
-  --[265202] = "PRIEST",   -- Holy Word: Salvation
-  --[372835] = "PRIEST",   -- Lightwell
-  --
-  --[197268] = "PRIEST",   -- Ray of Hope
-  [289666] = "PRIEST",   -- Greater Heal
-  --[328530] = "PRIEST",   -- Divine Ascension
-  --[213610] = "PRIEST",   -- Holy Ward
-  --[197268] = "PRIEST",   -- Ray of Hope
+  --[139] = "PRIEST",  -- Renew
+  --[2061] = "PRIEST", -- Flash Heal
+  --[596] = "PRIEST",  -- Prayer of Healing
+  --[2060] = "PRIEST", -- Greater Heal
 
 
-  -- Discipline Priest
+  -- Dicipline Priest
   ----------
-  [47540] = "PRIEST",  -- Penance
+  -- Key Abilities: Power Word: Shield, Power Word: Fortitude, Inner Fire, Mana Burn, Power Infusion
+  -- [47540] = "PRIEST", -- Penance
+  [62618] = "PRIEST", -- Power Word: Barrier
+  [33206] = "PRIEST", -- Pain Suppression
+  [73413] = "PRIEST", -- Inner Will
+  [10060] = "PRIEST", -- Power Infusion
+  [87151] = "PRIEST", -- Archangel
   --
-  [194509] = "PRIEST", -- Power Word: Radiance
-  --[33206] = "PRIEST", -- Pain Suppression
-  [214621] = "PRIEST", -- Schism
-  [129250] = "PRIEST", -- Power Word: Solace
-  --[62618] = "PRIEST", -- Power Word: Barrier
-  [204197] = "PRIEST", -- Purge of the Wicked
-  --[47536] = "PRIEST",  -- Rapture
-  [314867] = "PRIEST",  -- Shadow Covenant
-  --[373178] = "PRIEST",  -- Light's Wrath
-  --[123040] = "PRIEST",  -- Mindbender
-  --
-  --[197871] = "PRIEST",   -- Dark Archangel
-  --[197862] = "PRIEST",   -- Archangel
+  --[47750] = "PRIEST", -- Penance
+  --[17] = "PRIEST",   -- Power Word: Shield
+  --[588] = "PRIEST",  -- Inner Fire
+  --[8129] = "PRIEST", -- Mana Burn
 
-  -- Druid (The affinity traits on the other specs makes this difficult)
+  -- Druid
   ---------
-  [33763] = "DRUID", -- Lifebloom
-  --[17116] = "DRUID", -- Nature's Swiftness
-  [102351] = "DRUID", -- Cnenarion Ward
-  [33763] = "DRUID", -- Nourish
-  [81262] = "DRUID", -- Efflorescence
-  --[740] = "DRUID", -- Tranquility
-  --[102342] = "DRUID", -- Ironbark
-  --[203651] = "DRUID", -- Overgrowth
-  --[33891] = "DRUID", -- Incarnation: Tree of Life
-  --[391528] = "DRUID", -- Convoke the Spirits
-  [391888] = "DRUID", -- Adaptive Swarm -- Shared with Feral
-  --[197721] = "DRUID", -- Flourish
-  [392160] = "DRUID", -- Invigorate
+  -- Key Abilities: Regrowth, Rejuvenation, Healting Touch, Rebirth, Tranquility
+  [17116] = "DRUID", -- Nature's Swiftness
+  [48438] = "DRUID", -- Wild Growth
+  [33891] = "DRUID", -- Tree of Life (Aura)
   --
-
+  --[18562] = "DRUID", -- Swiftmend
+  --[8936] = "DRUID",  -- Regrowth
+  --[774] = "DRUID",   -- Rejuvenation
+  --[5185] = "DRUID",  -- Healing Touch
+  --[20484] = "DRUID", -- Rebirth
+  --[740] = "DRUID",   -- Tranquility
 
   -- Shaman
   ---------
-  [61295] = "SHAMAN",  -- Riptide
-  [77472] = "SHAMAN",  -- Healing Wave
-  [73920] = "SHAMAN",  -- Healing Rain
-  --[383009] = "SHAMAN",  -- Stormkeeper
-  --[52127] = "SHAMAN",  -- Water Shield
-  --[98008] = "SHAMAN", -- Spirit Link Totem
-  --[157153] = "SHAMAN", -- Cloudburst Totem
-  --[108280] = "SHAMAN",  -- Healing Tide Totem
-  --[16190] = "SHAMAN", -- Mana Tide Totem
-  [73685] = "SHAMAN",  -- Unleash Life
-  --[198838] = "SHAMAN",  -- Earthen Wall Totem
-  --[207399] = "SHAMAN",  -- Ancestral Protection Totem
-  --[375982] = "SHAMAN", -- Primordial Wave
-  [207778] = "SHAMAN", -- Downpour
-  --[382029] = "SHAMAN", -- Ever-Rising Tide -- was only in Beta available
-  --[114052] = "SHAMAN", -- Ascendance
-  --[197995] = "SHAMAN", -- Wellspring
-  --
+  -- Key Abilities: Healing Wave, Lesser Healing Wave, Chain Heal, Mana Tide Totem
+  [16188] = "SHAMAN", -- Nature's Swiftness
+  [16190] = "SHAMAN", -- Mana Tide Totem
+  [98008] = "SHAMAN", -- Spirit Link Totem
+  [61295] = "SHAMAN", -- Riptide
+  -- 
+  --[974] = "SHAMAN",   -- Earth Shield
+  --[51886] = "SHAMAN", -- Cleanse Spirit
+  --[55198] = "SHAMAN", -- Tidal Force
+  --[331] = "SHAMAN",  -- Healing Wave
+  --[8004] = "SHAMAN", -- Healing Surge
 
   -- Paladin
   ----------
-  [275773] = "PALADIN", -- Judgment
-  --
-  [20473] = "PALADIN", -- Holy Shock
-  [82326] = "PALADIN", -- Holy Light
+  -- Key Abilities: Holy Light, Flash of Light, Seal of Light, Lay on Hands, Holy Shock
   [85222] = "PALADIN", -- Light of Dawn
-  [223306] = "PALADIN", -- Bestow Faith
-  --[31821] = "PALADIN", -- Aura Mastery
-  [214202] = "PALADIN", -- Rule of Law
-  [210294] = "PALADIN", -- Divine Favor
-  --[114158] = "PALADIN", -- Light's Hammer
-  [114165] = "PALADIN", -- Holy Prism
-  --[183998] = "PALADIN", -- Licht des Märtyrers ??? Holy or all Paladins
-  --[304971] = "PALADIN", -- Divine Toll  ??? Holy or all Paladins
-  --[216331] = "PALADIN", -- Avenging Crusader
-  --[384376] = "PALADIN", -- Avenging Wrath ??? Holy or all Paladins
-  [148039] = "PALADIN", -- Barrier of Faith
-  --[388007] = "PALADIN", -- Blessing of Summer
-
-
-  -- Monk
-  ---------
-  [124682] = "MONK", -- Envelopping Mist
-  [191837] = "MONK", -- Essence Font
-  [115151] = "MONK", -- Renewing Mist
-  --[116849] = "MONK", -- Life Cocoon
-  [116680] = "MONK", -- Thunder Focus Tea
-  --[115310] = "MONK", -- Revival
-  --[388615] = "MONK", -- Restoral
-  --[198898] = "MONK", -- Song of Chi-Ji
-  [124081] = "MONK", -- Zen Pulse
-  --[122281] = "MONK", -- Healing Elixir
-  --[325197] = "MONK", -- Invoke Chi-Ji, the Red Crane
-  --[322118] = "MONK", -- Invoke Yu'lon, the Jade Serpent
-  --[196725] = "MONK", -- Refreshing Jade Wind
-  --[197908] = "MONK", -- Mana Tea
-  --[388193] = "MONK", -- Faeline Stomp
-  --[386276] = "MONK", -- Bonedust Brew
+  [31821] = "PALADIN", -- Aura Mastery
+  [53563] = "PALADIN", -- Beacon of Light
+  [20216] = "PALADIN", -- Divine Favor
   --
-  [209584] = "MONK", -- Zen Focus Tea
-  [205234] = "MONK", -- Healing Sphere
-
-
-  -- Evoker - Preservation
-  ---------
-  [364343] = "EVOKER", -- Echo
-  [382614] = "EVOKER", -- Dream Breath
-  [366155] = "EVOKER", -- Reversion
-  --[366155] = "EVOKER", -- Rewind
-  [382731] = "EVOKER", -- Spiritbloom
-  --[357170] = "EVOKER", -- Time Dilation
-  --[370960] = "EVOKER", -- Emerald Communion
-  [373861] = "EVOKER", -- Temporal Anomaly  
-  --[359816] = "EVOKER", -- Dream Flight
-  --[370537] = "EVOKER", -- Stasis  
-  --
-  --[377509] = "EVOKER", -- Dream Projection
+  --[31842] = "PALADIN", -- Divine Favor
+  --[20473] = "PALADIN", -- Holy Shock
+  --[82326] = "PALADIN", -- Divine Light
+  --[19750] = "PALADIN", -- Flash of Light
+  --[20165] = "PALADIN", -- Seal of Light
 }
 
 local HEALER_SPELLS_CLASSIC = {
@@ -482,7 +417,7 @@ elseif Addon.IS_TBC_CLASSIC then
 elseif Addon.IS_WRATH_CLASSIC then
   HEALER_SPELLS = HEALER_SPELLS_CLASSIC
 elseif Addon.IS_CATA_CLASSIC then
-  HEALER_SPELLS = HEALER_CATA_RETAIL
+  HEALER_SPELLS = HEALER_SPELLS_CATA
 else
   HEALER_SPELLS = HEALER_SPELLS_RETAIL
 end
