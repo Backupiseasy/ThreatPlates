@@ -100,7 +100,7 @@ Addon.ANCHOR_POINT_TEXT = {
 }
 
 ThreatPlates.AlignH = {LEFT = L["Left"], CENTER = L["Center"], RIGHT = L["Right"]}
-ThreatPlates.AlignV = {BOTTOM = L["Bottom"], CENTER = L["Center"], TOP = L["Top"]}
+ThreatPlates.AlignV = {BOTTOM = L["Bottom"], MIDDLE = L["Middle"], TOP = L["Top"]}
 
 ThreatPlates.AUTOMATION = {
   NONE = "No Automation",
