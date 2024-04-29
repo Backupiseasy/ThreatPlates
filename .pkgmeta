@@ -23,7 +23,6 @@ externals:
   Libs/AceSerializer-3.0: https://repos.wowace.com/wow/ace3/trunk/AceSerializer-3.0
   Libs/AceGUI-3.0-SharedMediaWidgets: https://repos.curseforge.com/wow/ace-gui-3-0-shared-media-widgets/trunk/AceGUI-3.0-SharedMediaWidgets
 
-
   Libs/LibCustomGlow-1.0: https://github.com/Stanzilla/LibCustomGlow
   Libs/LibDeflate:
     url: https://github.com/SafeteeWoW/LibDeflate
@@ -34,6 +33,7 @@ externals:
 
 embedded-libraries:
   # - ForAllIndentsAndPurposes
+  # - UTF8
 
 enable-nolib-creation: no
 
