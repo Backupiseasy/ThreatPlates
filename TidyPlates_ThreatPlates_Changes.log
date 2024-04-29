@@ -10,7 +10,7 @@
 * Improved handling of nameplates for game objects (like herbs or portals) when soft-targeting is enabled [GH-431].
 * Custom color for Name text now also supports transparency [Comment #6829]. 
 * Updated the logo for Threat Plates which is now also shown as icon in the addon list.
-* Upgrade integrated libraries (Ace3 r1328-alpha, LibDualSpec v1.22.4).
+* Upgrade integrated libraries (Ace3 r1328-alpha, LibDualSpec v1.22.4, LibCustomGlow v1.0.3-1-g6261295-alpha, CallbackHandler v1.0.9).
 
 ------------------------------------------------------
 11.1.42 (2024-04-01)
