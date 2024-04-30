@@ -10,7 +10,7 @@ local ipairs = ipairs
 -- WoW APIs
 
 -- ThreatPlates APIs
-local Font = Addon.Font
+local FontUpdateText = Addon.Font.UpdateText
 local BackdropTemplate = Addon.BackdropTemplate
 local MODE_FOR_STYLE, ANCHOR_POINT_TEXT = Addon.MODE_FOR_STYLE, Addon.ANCHOR_POINT_TEXT
 
@@ -87,7 +87,7 @@ local function UpdateSettings(self, db)
   for _, text_area in ipairs(self.TextAreas) do
     self[text_area]:SetSize(db.Width, db.Height)
     if db[text_area].Show then
-      Font:UpdateText(self, self[text_area], db[text_area])
+      FontUpdateText(self, self[text_area], db[text_area])
       self[text_area]:Show()
     else
       self[text_area]:Hide()

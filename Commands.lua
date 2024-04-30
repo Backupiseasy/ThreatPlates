@@ -1,4 +1,4 @@
-﻿local ADDON_NAME, Addon = ...
+local ADDON_NAME, Addon = ...
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -118,20 +118,26 @@ local function ChatCommandDebug(cmd_list)
 		Addon.Logging.Print("|cff89F559Threat Plates|r: Searching settings:")
 		SearchDBForString(Addon.db.profile, "<Profile>", string.lower(cmd_list[2]))
 		SearchDBForString(Addon.db.global, "<Profile>", string.lower(cmd_list[2]))
+	elseif command == "unit" then
+		if UnitExists("target") then
+			Addon.Debug.PrintUnit("target")
+		else
+			Addon.Debug.PrintUnit("mouseover")
+		end
 	elseif command == "cache" then
 		Addon.Debug.PrintCaches()
-	elseif command == "event" then
-		Addon.Logging.Print("|cff89F559Threat Plates|r: Event publishing overview:", true)
-		Addon:PrintEventService()
-	elseif command == "quest" then
-		Addon:PrintQuests(cmd_list[2])
-	elseif command == "social" then
-		Addon.PrintFriendlist()
-	elseif command == "unit" then
-		Addon.Debug.PrintUnit("target")
-	elseif command == "migrate" then
-		Addon.MigrateDatabase(cmd_list[2])
-
+	elseif command == "debug" then
+		local widget_name = cmd_list[2]
+		if widget_name then
+			local widget = Addon.Widgets.Widgets[widget_name]
+			if widget then 
+				widget:PrintDebug(cmd_list[3])
+			end
+		end
+	elseif command == "custom-styles" then
+		for k, v in pairs(Addon.db.profile.uniqueSettings) do
+			Addon.Logging.Debug("Style:", k, "=>", v.Trigger.Type, " - ", v.Trigger[v.Trigger.Type].Input or "nil" )
+		end
 	elseif command == "guid" then
 		local plate = C_NamePlate.GetNamePlateForUnit("target")
 		if not plate then return end
@@ -139,11 +145,19 @@ local function ChatCommandDebug(cmd_list)
 		local guid = UnitGUID(plate.TPFrame.unit.unitid)
 		local _, _,  _, _, _, npc_id = strsplit("-", guid)
 
-		print(plate.TPFrame.unit.name, " => NPC-ID:", npc_id, "=>", guid)
-
-		local widgets = C_UIWidgetManager.GetAllWidgetsBySetID(C_UIWidgetManager.GetPowerBarWidgetSetID())
-		for i, w in pairs(widgets) do
-			print (i, w)
+		Addon.Logging.Debug(plate.TPFrame.unit.name, " => NPC-ID:", npc_id, "=>", guid)
+	-- elseif command == "event" then
+	-- 	Addon.Logging.Info("|cff89F559Threat Plates|r: Event publishing overview:")
+	-- 	Addon:PrintEventService()
+	elseif command == "cleanup-custom-styles" then
+		local input = Addon.db.profile.uniqueSettings
+		for i = #input, 1 , -1 do
+			local custom_style = input[i]
+			Addon.Logging.Debug(i, type(i), custom_style.Trigger.Type, custom_style.Trigger.Name.Input)
+			if custom_style.Trigger.Type == "Name" and custom_style.Trigger.Name.Input == "<Enter name here>" then
+				table.remove(input, i)
+				Addon.Logging.Debug("Removing", i)
+			end
 		end
 	elseif command == "combat" and Addon.DEBUG then
 		--Addon.Logging.Info("|cff89F559Threat Plates|r: Event publishing overview:")
@@ -288,13 +302,6 @@ local function ChatCommandDebug(cmd_list)
 		print ("10.2.11 < 10.3.0-beta2:", Addon.CurrentVersionIsOlderThan("10.2.11", "10.3.0-beta2"))
 		print ("10.3.0-beta2 < 9.3.0:", Addon.CurrentVersionIsOlderThan("10.3.0-beta2", "10.3.0"))
 		print ("10.3.0-beta2 < 10.3.0-beta3:", Addon.CurrentVersionIsOlderThan("10.3.0-beta2", "10.3.0-beta3"))
-	elseif command == "anim" then
-		local plate = C_NamePlate.GetNamePlateForUnit("mouseover")
-		if not plate then return end
-		local unit = plate.TPFrame.unit
-
-		Addon.Animation:CreateShrink(plate.TPFrame)
-		Addon.Animation:Shrink(plate.TPFrame, 2, 5)
 	elseif command == "reaction" then
     local plate = C_NamePlate.GetNamePlateForUnit("target")
     if not plate then return end
@@ -344,11 +351,11 @@ local function ChatCommandDebug(cmd_list)
     Addon.Logging.Info("    Combat State:", _G.UnitAffectingCombat("player"), "-", _G.UnitAffectingCombat("pet"))
     Addon.Logging.Info("    ThreatLevel:", unit.ThreatLevel)
     Addon.Logging.Info("    InCombat:", unit.InCombat)
-    Addon.Logging.Info("    Threat:ShowFeedback:", Addon.Threat:ShowFeedback(unit))
+    Addon.Logging.Info("    Threat.ShowFeedback:", Addon.Threat.ShowFeedback(unit))
     Addon.Logging.Info("    Style:GetThreatStyle:", Addon.Style:GetThreatStyle(unit))
-		local color = Addon.Color:GetThreatColor(unit, Addon.Style:GetThreatStyle(unit))
+		local color = Addon.Color.GetThreatColor(unit, Addon.Style:GetThreatStyle(unit))
 		if color then
-			Addon.Logging.Info("    Color:GetThreatColor:", color.r, color.g, color.b)
+			Addon.Logging.Info("    GetThreatColor:", color.r, color.g, color.b)
 		end
 	elseif command == "role" then
 		local spec_roles = Addon.db.char.spec

@@ -28,9 +28,9 @@ local GetNamePlates, GetNamePlateForUnit = C_NamePlate.GetNamePlates, C_NamePlat
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
-local Animation = Addon.Animation
-local Font = Addon.Font
-local Style = Addon.Style
+local AnimationStopFlash, AnimationFlash = Addon.Animation.StopFlash, Addon.Animation.Flash
+local FontUpdateText = Addon.Font.UpdateText
+local AuraTriggerInitialize, AuraTriggerUpdateStyle, AuraTriggerCheckIfActive = Addon.Style.AuraTriggerInitialize, Addon.Style.AuraTriggerUpdateStyle, Addon.Style.AuraTriggerCheckIfActive
 local CUSTOM_GLOW_FUNCTIONS, CUSTOM_GLOW_WRAPPER_FUNCTIONS = Addon.CUSTOM_GLOW_FUNCTIONS, Addon.CUSTOM_GLOW_WRAPPER_FUNCTIONS
 local BackdropTemplate = Addon.BackdropTemplate
 local MODE_FOR_STYLE, ANCHOR_POINT_TEXT = Addon.MODE_FOR_STYLE, Addon.ANCHOR_POINT_TEXT
@@ -100,6 +100,7 @@ local PC_PUSHBACK = 55      -- Apply Aura: Disarm
 local PC_MODAGGRORANGE = 56 -- Apply Aura: Mod Aggro Range
 
 local CC_SILENCE = 101
+local CC_OTHER = 999
 
 local CROWD_CONTROL_SPELLS_RETAIL = {
   ---------------------------------------------------------------------------------------------------
@@ -158,6 +159,20 @@ local CROWD_CONTROL_SPELLS_RETAIL = {
   [198813] = PC_SNARE,             -- Vengeful Retreat
   [213405] = PC_SNARE,             -- Master of the Glaive (Talent)
   [211881] = LOC_STUN,             -- Fel Eruption (Talent, Blizzard)
+
+  ---------------------------------------------------------------------------------------------------
+  -- Evoker
+  ---------------------------------------------------------------------------------------------------
+  [358385] = PC_ROOT,             -- Landslide
+  [351338] = CC_SILENCE,          -- Quell
+  [372048] = CC_OTHER,            -- Oppressing Roar
+  [357210] = LOC_STUN,            -- Deep Breath
+  [370898] = PC_SNARE,            -- Permeating Chill Debuff
+  [360806] = LOC_SLEEP,           -- Sleep Walk
+  [383005] = LOC_CHARM,           -- Chrono Loop
+  [378441] = LOC_STUN,            -- Time Stop
+  [378441] = PC_SNARE,            -- Disintegrate
+
 
   ---------------------------------------------------------------------------------------------------
   -- Hunter
@@ -320,6 +335,7 @@ local CROWD_CONTROL_SPELLS_RETAIL = {
   -- [6343] = PC_SNARE,        -- Thunder Clap
   -- [199042] = LOC_STUN,      -- Thunderstruck (PvP, Blizzard) -- Removed as CC as its uptime is to high.
   [199085] = LOC_STUN,      -- Warpath (PvP, Blizzard)
+  [385954] = LOC_STUN,      -- Shield Charge
 
   ---------------------------------------------------------------------------------------------------
   -- Monk
@@ -346,8 +362,10 @@ local CROWD_CONTROL_SPELLS_RETAIL = {
   [20549] = LOC_STUN,       -- War Stomp (Tauren)
   [260369] = PC_SNARE,      -- Arcane Pulse (Nightborne)
   [107079] = LOC_STUN,      -- Quaking Palm (Pandarian)
-  [287712] = LOC_STUN,       -- Haymaker (Kul Tiran Racial)
-  [331866] = LOC_DISORIENT,  -- Agent of Chaos (Venthyr Soulbind Ability)
+  [287712] = LOC_STUN,      -- Haymaker (Kul Tiran Racial)
+  [357214] = PC_SNARE,      -- Wing Buffet (Evoker)
+  [368970] = PC_SNARE,      -- Tail Swipe (Evoker)
+  [331866] = LOC_DISORIENT, -- Agent of Chaos (Venthyr Soulbind Ability)
 }
 
 local CROWD_CONTROL_SPELLS_WRATH_CLASSIC = {
@@ -405,7 +423,7 @@ local CROWD_CONTROL_SPELLS_WRATH_CLASSIC = {
   --  [50043] = PC_SNARE,            -- Rank 3
   --[55741] = PC_SNARE,           -- Desecration - Triggered by Desecration Rank 1 - not shown because uptime to high
   --[68766] = PC_SNARE,           -- Desecration - Triggered by Desecration Rank 2 - not shown because uptime to high
-  [49203] = PC_ROOT,           -- Hungering Cold
+  [51209] = PC_ROOT,           -- Hungering Cold
 
 
   ---------------------------------------------------------------------------------------------------
@@ -437,8 +455,9 @@ local CROWD_CONTROL_SPELLS_WRATH_CLASSIC = {
     [49011] = LOC_SLEEP,                     -- Rank 5
     [49012] = LOC_SLEEP,                     -- Rank 6
   [3355] = LOC_INCAPACITATE,               -- Freezing Trap Effect
-    [14308] = LOC_SLEEP,                     -- Rank 2
-    [14309] = LOC_SLEEP,                     -- Rank 3
+    [14308] = LOC_INCAPACITATE,              -- Rank 2
+    [14309] = LOC_INCAPACITATE,              -- Rank 3
+  [60210] = LOC_INCAPACITATE,              -- Freezing Arrow
 
   ---------------------------------------------------------------------------------------------------
   -- Mage
@@ -492,6 +511,7 @@ local CROWD_CONTROL_SPELLS_WRATH_CLASSIC = {
   [31589] = PC_SNARE,                      -- Slow
   -- Frostbolt - not added as it has 100% uptime
   [44572] = LOC_STUN,                      -- Deep Freeze
+  [33395] = PC_ROOT,                       -- Freeze (Pet)
 
   ---------------------------------------------------------------------------------------------------
   -- Paladin
@@ -525,7 +545,7 @@ local CROWD_CONTROL_SPELLS_WRATH_CLASSIC = {
     [9485] = LOC_INCAPACITATE,               -- Rank 2
     [10955] = LOC_INCAPACITATE,              -- Rank 3
   [15487] = LOC_SLEEP,                     -- Silence
-
+  [64044] = LOC_STUN,                      -- Psychic Horror
 
   ---------------------------------------------------------------------------------------------------
   -- Rogue
@@ -552,6 +572,7 @@ local CROWD_CONTROL_SPELLS_WRATH_CLASSIC = {
   -- Shaman
   ---------------------------------------------------------------------------------------------------
 
+  [51514] = LOC_POLYMORPH,      -- Hex (Frog) (Blizzard)
   [8056] = PC_SNARE,                       -- Frost Shock
     [8058] = PC_SNARE,                       -- Rank 2
     [10472] = PC_SNARE,                      -- Rank 3
@@ -559,7 +580,9 @@ local CROWD_CONTROL_SPELLS_WRATH_CLASSIC = {
     [25464] = PC_SNARE,                      -- Rank 5
     [49235] = PC_SNARE,                      -- Rank 6
     [49236] = PC_SNARE,                      -- Rank 7
-
+  [3600] = PC_SNARE,            -- Earthbind Totem
+  [64695] = PC_ROOT,            -- Earthgrab Totem (Blizzard)
+  
 
   ---------------------------------------------------------------------------------------------------
   -- Warlock
@@ -809,11 +832,11 @@ local CROWD_CONTROL_SPELLS_TBC_CLASSIC = {
   -- Shaman
   ---------------------------------------------------------------------------------------------------
 
-  [8056] = PC_SNARE,                       -- Frost Shock
-    [8058] = PC_SNARE,                       -- Rank 2
-    [10472] = PC_SNARE,                      -- Rank 3
-    [10473] = PC_SNARE,                      -- Rank 4
-    [25464] = PC_SNARE,                      -- Rank 5
+  [8056] = PC_SNARE,            -- Frost Shock
+  [8058] = PC_SNARE,              -- Rank 2
+  [10472] = PC_SNARE,             -- Rank 3
+  [10473] = PC_SNARE,             -- Rank 4
+  [25464] = PC_SNARE,             -- Rank 5
 
 
   ---------------------------------------------------------------------------------------------------
@@ -1107,7 +1130,7 @@ end
 ---------------------------------------------------------------------------------------------------
 -- Cached configuration settings
 ---------------------------------------------------------------------------------------------------
-local HideOmniCC, SetNoCooldownCount, ShowDuration
+local HideOmniCC, SetNoCooldownCount, ShowDuration, SortFunction
 local AuraHighlightEnabled, AuraHighlightStart, AuraHighlightStop, AuraHighlightStopPrevious, AuraHighlightOffset
 local AuraHighlightColor = { 0, 0, 0, 0 }
 local EnabledForStyle = {}
@@ -1358,45 +1381,68 @@ local function AuraSortFunctionZtoA(a, b)
   return a.priority > b.priority
 end
 
+-- For auras without duration duration and expirationTime are 0, so sorting by TimeLeft, Duration, and Creation
+-- does not work in that case. We will just sort by name for these auras
 local function AuraSortFunctionNumAscending(a, b)
   if a.duration == 0 then
-    return false
+    if b.duration == 0 then
+      return a.name < b.name
+    else
+      return false
+    end
   elseif b.duration == 0 then
-    return true
+    if a.duration == 0 then
+      return a.name < b.name
+    else
+      return true
+    end
+  else
+    return a.priority < b.priority
   end
-
-  return a.priority < b.priority
 end
 
 local function AuraSortFunctionNumDescending(a, b)
   if a.duration == 0 then
-    return true
+    if b.duration == 0 then
+      return a.name > b.name
+    else
+      return true
+    end
   elseif b.duration == 0 then
-    return false
+    if a.duration == 0 then
+      return a.name > b.name
+    else
+      return false
+    end
+  else
+    return a.priority > b.priority
   end
-
-  return a.priority > b.priority
 end
 
 local SORT_FUNCTIONS = {
-  Alphabetical = {
+  None = nil,
+  AtoZ = {
     Default = AuraSortFunctionAtoZ,
     Reverse = AuraSortFunctionZtoA,
   },
-  Numerical = {
+  TimeLeft = {
     Default = AuraSortFunctionNumAscending,
     Reverse = AuraSortFunctionNumDescending,
-  }
+  },
+  Duration = {
+    Default = AuraSortFunctionNumAscending,
+    Reverse = AuraSortFunctionNumDescending,
+  },
+  Creation = {
+    Default = AuraSortFunctionNumAscending,
+    Reverse = AuraSortFunctionNumDescending,
+  },
 }
 
 local function SortAurasByPriority(unit_auras)
-  local db = Widget.db
-  if #unit_auras == 0 or db.SortOrder == "None" then return end 
-
-  --sort(unit_auras, SORT_FUNCTIONS[db.SortOrder == "AtoZ" and "Alphabetical" or "Numerical"][db.SortReverse and "Reverse" or "Default"])
-  local sort_order = db.SortOrder == "AtoZ" and "Alphabetical" or "Numerical"
-  local sort_reverse = db.SortReverse and "Reverse" or "Default"
-  sort(unit_auras, SORT_FUNCTIONS[sort_order][sort_reverse])
+  if #unit_auras >= 0 and SortFunction then
+    sort(unit_auras, SortFunction)
+  end
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -1426,6 +1472,7 @@ local function ProcessAllUnitAurasClassic(unitid, effect)
       aura.auraInstanceID = i
 
       unit_auras[#unit_auras + 1] = aura
+      -- Addon.Logging.Debug("Aura:", aura.name, "=> ID:", aura.spellId)
     else
       break
     end
@@ -1455,18 +1502,20 @@ else
           aura.isStealable, aura.nameplateShowPersonal, aura.spellId, aura.canApplyAura, aura.isBossAura, _, aura.nameplateShowAll =
           UnitAuraBySlot(unitid, slots[i])
       
-        local unit_aura_info = GetAuraDataBySlot(unitid, slots[i])   
-        aura.auraInstanceID = unit_aura_info.auraInstanceID
-        aura.UnitAuraInfo = unit_aura_info
-
-        unit_auras[#unit_auras + 1] = aura
+          local unit_aura_info = GetAuraDataBySlot(unitid, slots[i])   
+          if unit_aura_info then
+            aura.auraInstanceID = unit_aura_info.auraInstanceID
+            aura.UnitAuraInfo = unit_aura_info
+          end
+          
+          unit_auras[#unit_auras + 1] = aura
+          --Addon.Logging.Debug("Aura:", aura.name, "=> ID:", aura.spellId)
       end
     until continuation_token == nil
 
     return unit_auras
   end
 end
-
 
 local function IgnoreAuraUpdateForUnit(widget_frame, unit)
   if Widget.db.ShowTargetOnly then
@@ -1479,13 +1528,13 @@ local function IgnoreAuraUpdateForUnit(widget_frame, unit)
     end
   end
 
-  Style:AuraTriggerInitialize(unit)
+  AuraTriggerInitialize(unit)
 
   widget_frame.HideAuras = not EnabledForStyle[unit.style] or (Widget.db.ShowTargetOnly and not unit.isTarget)  
 end
 
 local function AuraGridUpdateForUnitNotNecessary(widget_frame, unit)
-  Style:AuraTriggerUpdateStyle(unit)
+  AuraTriggerUpdateStyle(unit)
 
   if widget_frame.HideAuras then
     widget_frame:Hide()
@@ -1844,7 +1893,6 @@ end
 -- function Widget:HandleAura(widget_frame, unit, slot, effect, enabled_auras, enabled_cc, SpellFilter, SpellFilterCC, filter_mode)
 --   local db = self.db
 --   local db_auras = (effect == "HARMFUL" and db.Debuffs) or db.Buffs
-
 --   local unitid = unit.unitid
 --   local UnitAuraList = {}
 
@@ -1960,7 +2008,7 @@ function Widget:UpdateUnitAuras(aura_grid_frame, unit, enabled_auras, enabled_cc
     -- Cache dispellable debuffs for more efficient checks with the UNIT_AURA event
     --DispellableDebuffCache[aura.spellId] = aura.isStealable
 
-    Style:AuraTriggerCheckIfActive(unit, aura.spellId, aura.name, aura.CastByPlayer)
+    AuraTriggerCheckIfActive(unit, aura.spellId, aura.name, aura.CastByPlayer)
     
     -- Workaround or hack, currently, for making aura-triggered custom nameplates work even on nameplates that do
     -- not show auras currently without a big overhead
@@ -2540,8 +2588,8 @@ local function UpdateAuraFrameIconMode(self, frame)
     frame.Highlight:SetSize(frame:GetWidth() + AuraHighlightOffset, frame:GetHeight() + AuraHighlightOffset)
   end
 
-  Font:UpdateText(frame, frame.TimeLeft, db.Duration)
-  Font:UpdateText(frame, frame.Stacks, db.StackCount)
+  FontUpdateText(frame, frame.TimeLeft, db.Duration)
+  FontUpdateText(frame, frame.Stacks, db.StackCount)
 end
 
 local function UpdateAuraInformationIconMode(self, aura_frame) -- texture, duration, expiration, stacks, color, name)
@@ -2578,7 +2626,7 @@ local function UpdateAuraInformationIconMode(self, aura_frame) -- texture, durat
   end
 
   SetCooldown(aura_frame.Cooldown, duration, expiration)
-  Animation:StopFlash(aura_frame)
+  AnimationStopFlash(aura_frame)
 
   aura_frame:Show()
 end
@@ -2586,7 +2634,7 @@ end
 local function UpdateWidgetTimeIconMode(self, aura_frame, expiration, duration)
   if expiration == 0 then
     aura_frame.TimeLeft:SetText("")
-    Animation:StopFlash(aura_frame)
+    AnimationStopFlash(aura_frame)
   else
     local timeleft = expiration - GetTime()  
     if timeleft > 60 then
@@ -2597,7 +2645,7 @@ local function UpdateWidgetTimeIconMode(self, aura_frame, expiration, duration)
 
     local db_widget = self.db_widget
     if db_widget.FlashWhenExpiring and timeleft < db_widget.FlashTime then
-      Animation:Flash(aura_frame)
+      AnimationFlash(aura_frame)
     end
   end
 end
@@ -2687,7 +2735,7 @@ local function UpdateAuraFrameBarMode(self, frame)
       frame.Statusbar:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 0, 0)
     end
 
-    Font:UpdateText(frame.Icon, frame.Stacks, db.StackCount)
+    FontUpdateText(frame.Icon, frame.Stacks, db.StackCount)
 
     frame.Icon:SetTexCoord(0, 1, 0, 1)
     frame.Icon:SetSize(db.BarHeight, db.BarHeight)
@@ -2697,8 +2745,8 @@ local function UpdateAuraFrameBarMode(self, frame)
     frame.Icon:Hide()
   end
 
-  Font:UpdateText(frame.Statusbar, frame.LabelText, db.Label)
-  Font:UpdateText(frame.Statusbar, frame.TimeText, db.Duration)
+  FontUpdateText(frame.Statusbar, frame.LabelText, db.Label)
+  FontUpdateText(frame.Statusbar, frame.TimeText, db.Duration)
 
   AuraHighlightStopPrevious(frame.Highlight)
   if AuraHighlightEnabled then
@@ -2769,7 +2817,7 @@ local function UpdateAuraInformationBarMode(self, aura_frame) -- texture, durati
   aura_frame.Statusbar:SetStatusBarColor(color.r, color.g, color.b, color.a or 1)
 
   SetCooldown(aura_frame.Cooldown, duration, expiration)
-  Animation:StopFlash(aura_frame)
+  AnimationStopFlash(aura_frame)
 
   aura_frame:Show()
 end
@@ -2778,11 +2826,11 @@ local function UpdateWidgetTimeBarMode(self, aura_frame, expiration, duration)
   if duration == 0 then
     aura_frame.TimeText:SetText("")
     aura_frame.Statusbar:SetValue(100)
-    Animation:StopFlash(aura_frame)
+    AnimationStopFlash(aura_frame)
   elseif expiration == 0 then
     aura_frame.TimeText:SetText("")
     aura_frame.Statusbar:SetValue(0)
-    Animation:StopFlash(aura_frame)
+    AnimationStopFlash(aura_frame)
   else
     local db = self.db_widget
 
@@ -2796,13 +2844,13 @@ local function UpdateWidgetTimeBarMode(self, aura_frame, expiration, duration)
       end
 
       if db.FlashWhenExpiring and timeleft < db.FlashTime then
-        Animation:Flash(aura_frame)
+        AnimationFlash(aura_frame)
       end
     else
       aura_frame.TimeText:SetText("")
 
       if db.FlashWhenExpiring and timeleft < db.FlashTime then
-        Animation:Flash(aura_frame)
+        AnimationFlash(aura_frame)
       end
     end
 
@@ -2924,7 +2972,7 @@ end
 function Widget:OnUnitAdded(widget_frame, unit)
   local db = self.db
 
-  -- if db.SwitchScaleByReaction and UnitReaction(unit.unitid, "player") > 4 then
+  -- if db.SwitchScaleByReaction and UnitReaction("player", unit.unitid) > 4 then
   --   print ("Scale: Buffs =", self.SwitchScaleBuffsFactor, "- Debuffs =", self.SwitchScaleDebuffsFactor)
   --   widget_frame.Buffs:SetScale(self.SwitchScaleBuffsFactor)
   --   widget_frame.Debuffs:SetScale(self.SwitchScaleDebuffsFactor)
@@ -3169,6 +3217,13 @@ function Widget:UpdateSettings()
   EnabledForStyle["unique"] = self.db.ON
   EnabledForStyle["etotem"] = false
   EnabledForStyle["empty"] = false
+
+  local sort_function = SORT_FUNCTIONS[self.db.SortOrder]
+  if sort_function then  
+    SortFunction = sort_function[self.db.SortReverse and "Reverse" or "Default"]
+  else
+    SortFunction = nil
+  end
 end
 
 ---------------------------------------------------------------------------------------------------

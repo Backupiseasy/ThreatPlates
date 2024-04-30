@@ -335,7 +335,7 @@ local function AddImportExportOptions(options_profiles)
   if not options_profiles.plugins then
     options_profiles.plugins = {}
   end
-  
+
   options_profiles.plugins[ThreatPlates.ADDON_NAME] = {
     exportimportdesc = {
       order = 90,
@@ -418,11 +418,11 @@ local function SetValue(info, ...)
 
   -- Update the corresponding parts of Threat Plates based on the setting
   if widget_info then
-    --print ("SetValue: Enabling/Disabling Widget =>",widget_is_enabled, Addon.Widgets:IsEnabled(widget_info.Name))    
+    --print ("SetValue: Enabling/Disabling Widget =>",widget_is_enabled, Addon.Widgets:IsEnabled(widget_info.Name))
     if widget_is_enabled ~= Addon.Widgets:IsEnabled(widget_info.Name) then
       --print ("SetValue: Enabling/Disabling Widget =>", widget_info.Name)
       Addon.Widgets:InitializeWidget(widget_info.Name)
-      
+
       -- If also core parts of the nameplate need to be udpated
       if widget_info.ForceUpdate then
         Addon:ForceUpdate()
@@ -725,15 +725,15 @@ end
 local function SetFontFlags(info, flag, val)
 
   if flag == "Thick" then
-    local outline = (val and "THICKOUTLINE") or (GetFontFlags(info, "Outline") and "OUTLINE") or "NONE"
+    local outline = (val and "THICKOUTLINE") or (GetFontFlags(info, "Outline") and "OUTLINE") or ""
     local mono = (GetFontFlags(info, "Mono") and ", MONOCHROME") or ""
     return outline .. mono
   elseif flag == "Outline" then
-    local outline = (val and "OUTLINE") or (GetFontFlags(info, "Thick") and "THICKOUTLINE") or "NONE"
+    local outline = (val and "OUTLINE") or (GetFontFlags(info, "Thick") and "THICKOUTLINE") or ""
     local mono = (GetFontFlags(info, "Mono") and ", MONOCHROME") or ""
     return outline .. mono
   else -- flag = "Mono"
-    local outline = (GetFontFlags(info, "Thick") and "THICKOUTLINE") or (GetFontFlags(info, "Outline") and "OUTLINE") or "NONE"
+    local outline = (GetFontFlags(info, "Thick") and "THICKOUTLINE") or (GetFontFlags(info, "Outline") and "OUTLINE") or ""
     local mono = (val and ", MONOCHROME") or ""
     return outline .. mono
   end
@@ -767,7 +767,7 @@ local function GetColorEntry(entry_name, pos, setting)
     order = pos,
     type = "color",
     arg = setting,
-    hasAlpha = false,
+    hasAlpha = false
   }
 end
 
@@ -1427,7 +1427,7 @@ end
 local function GetFramePositioningEntry(pos, widget_info)
   local arg_healthbar_mode = F(widget_info, "HealthbarMode")
   local arg_name_mode = F(widget_info, "NameMode")
-  
+
   local entry = {
     type = "group",
     order = pos,
@@ -1534,7 +1534,7 @@ end
 --     AutoSizing = true,
 --     WordWrap
 --     Width = 345,
---   } 
+--   }
 local function GetTextEntry(name, pos, widget_info)
   local arg_auto_sizing = F(widget_info, "AutoSizing")
 
@@ -1579,15 +1579,15 @@ local function GetTextEntry(name, pos, widget_info)
             arg = F(widget_info, "WordWrap"),
             disabled = function() return GetValue({ arg = arg_auto_sizing }) end,
           },
-          Width = { 
-            type = "range", 
-            width = "double", 
-            order = 30, 
-            name = L["Width"], 
+          Width = {
+            type = "range",
+            width = "double",
+            order = 30,
+            name = L["Width"],
             arg = F(widget_info, "Width"),
-            max = 250, 
-            min = 20, 
-            step = 1, 
+            max = 250,
+            min = 20,
+            step = 1,
             isPercent = false,
             disabled = function() return GetValue({ arg = arg_auto_sizing }) end,
           },
@@ -1783,294 +1783,336 @@ local function CreateComboPointsWidgetOptions()
   local options = {
     name = L["Combo Points"],
     type = "group",
+    childGroups = "tab",
     order = 50,
     args = {
       Enable = GetEnableEntry(L["Enable Combo Points Widget"], L["This widget shows your combo points on your target nameplate."], "ComboPoints", true),
       Appearance = {
         name = L["Appearance"],
         type = "group",
-        order = 20,
-        inline = true,
+        order = 10,
+        inline = false,
         args = {
-          Style = {
-            name = L["Style"],
-            type = "select",
-            order = 10,
-            values = {
-              Squares = L["Squares"],
-              Orbs = L["Orbs"],
-              Blizzard = L["Blizzard"]
-            },
-            arg = { "ComboPoints", "Style" },
-          },
-          EmptyCPs = {
-            name = L["On & Off"],
+          Appearance = {
+            name = L["Format"],
+            type = "group",
             order = 20,
-            type = "toggle",
-            desc = L["In combat, always show all combo points no matter if they are on or off. Off combo points are shown greyed-out."],
-            arg = { "ComboPoints", "ShowOffCPs" },
-          },
-        },
-      },
---      Preview = {
---        name = L["Preview"],
---        type = "group",
---        order = 25,
---        inline = true,
---        args = {
---          PreviewOn = {
---            name = L["On Combo Point"],
---            order = 10,
---            type = "execute",
---            image = function()
---              local texture = CreateFrame("Frame"):CreateTexture()
---              local width, height
---              if db.ComboPoints.Style == "Squares" then
---                texture:SetTexture("Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ComboPointsWidget\\ComboPointDefaultOff")
---                width, height = 64, 32
---              elseif db.ComboPoints.Style == "Orbs" then
---                texture:SetTexture("Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ComboPointsWidget\\ComboPointOrbOff")
---                width, height = 32, 32
---              else
---                texture:SetAtlas("Warlock-EmptyShard")
---                width, height = 32, 32
---              end
---              local color = db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][1]
---              texture:SetVertexColor(color.r, color.g, color.b)
---              return texture:GetTexture(), width, height
---            end,
---            imageCoords = function()
---              if db.ComboPoints.Style == "Squares" then
---                return { 0, 62 / 128, 0, 34 / 64 }
---              elseif db.ComboPoints.Style == "Orbs" then
---                return { 2/64, 62/64, 2/64, 62/64 }
---              else
---                return { 0, 1, 0, 1 }
---              end
---            end,
---          },
---          PreviewOffCP = {
---            name = L["Off Combo Point"],
---            order = 20,
---            type = "execute",
---            image = function()
---              local texture = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ComboPointsWidget\\"
---              if db.ComboPoints.Style == "Squares" then
---                return texture .. "ComboPointDefaultOff", 64, 32
---              elseif db.ComboPoints.Style == "Orbs" then
---                  return texture .. "ComboPointOrbOff", 32, 32
---              else
---                local texture_frame = CreateFrame("Frame"):CreateTexture()
---                texture_frame:SetAtlas("Warlock-EmptyShard")
---                print(texture_frame:GetTexCoord())
---                return texture_frame:GetTexture()
---              end
---            end,
---            imageCoords = function()
---              if db.ComboPoints.Style == "Squares" then
---                return { 0, 62 / 128, 0, 34 / 64 }
---              elseif db.ComboPoints.Style == "Orbs" then
---                return { 2/64, 62/64, 2/64, 62/64 }
---              else
---                return { 0, 1, 0, 1 }
---              end
---            end,
---          },
---        },
---      },
-      Coloring = {
-        name = L["Coloring"],
-        type = "group",
-        order = 40,
-        inline = true,
-        args = {
-          ClassAndSpec = {
-            name = L["Specialization"],
-            type = "select",
-            order = 10,
-            values = {
-              DEATHKNIGHT = ((not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC) and L["Death Knight"]) or nil,
-              DRUID = L["Druid"],
-              MAGE = L["Arcane Mage"],
-              MONK = ((not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC and not Addon.IS_WRATH_CLASSIC) and L["Windwalker Monk"]) or nil,
-              PALADIN = ((not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC and not Addon.IS_WRATH_CLASSIC) and L["Paladin"]) or nil,
-              ROGUE = L["Rogue"],
-              WARLOCK = L["Warlock"],
+            inline = true,
+            args = {
+              Style = {
+                name = L["Style"],
+                type = "select",
+                order = 10,
+                values = {
+                  Squares = L["Squares"],
+                  Orbs = L["Orbs"],
+                  Blizzard = L["Blizzard"]
+                },
+                arg = { "ComboPoints", "Style" },
+              },
+              EmptyCPs = {
+                name = L["On & Off"],
+                order = 20,
+                type = "toggle",
+                desc = L["In combat, always show all combo points no matter if they are on or off. Off combo points are shown greyed-out."],
+                arg = { "ComboPoints", "ShowOffCPs" },
+              },
             },
-            arg = { "ComboPoints", "Specialization" },
           },
-          SameColor = {
-            name = L["Uniform Color"],
-            order = 20,
-            type = "toggle",
-            desc = L["Use the same color for all combo points shown."],
-            arg = { "ComboPoints", "UseUniformColor" },
+    --      Preview = {
+    --        name = L["Preview"],
+    --        type = "group",
+    --        order = 25,
+    --        inline = true,
+    --        args = {
+    --          PreviewOn = {
+    --            name = L["On Combo Point"],
+    --            order = 10,
+    --            type = "execute",
+    --            image = function()
+    --              local texture = CreateFrame("Frame"):CreateTexture()
+    --              local width, height
+    --              if db.ComboPoints.Style == "Squares" then
+    --                texture:SetTexture("Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ComboPointsWidget\\ComboPointDefaultOff")
+    --                width, height = 64, 32
+    --              elseif db.ComboPoints.Style == "Orbs" then
+    --                texture:SetTexture("Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ComboPointsWidget\\ComboPointOrbOff")
+    --                width, height = 32, 32
+    --              else
+    --                texture:SetAtlas("Warlock-EmptyShard")
+    --                width, height = 32, 32
+    --              end
+    --              local color = db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][1]
+    --              texture:SetVertexColor(color.r, color.g, color.b)
+    --              return texture:GetTexture(), width, height
+    --            end,
+    --            imageCoords = function()
+    --              if db.ComboPoints.Style == "Squares" then
+    --                return { 0, 62 / 128, 0, 34 / 64 }
+    --              elseif db.ComboPoints.Style == "Orbs" then
+    --                return { 2/64, 62/64, 2/64, 62/64 }
+    --              else
+    --                return { 0, 1, 0, 1 }
+    --              end
+    --            end,
+    --          },
+    --          PreviewOffCP = {
+    --            name = L["Off Combo Point"],
+    --            order = 20,
+    --            type = "execute",
+    --            image = function()
+    --              local texture = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ComboPointsWidget\\"
+    --              if db.ComboPoints.Style == "Squares" then
+    --                return texture .. "ComboPointDefaultOff", 64, 32
+    --              elseif db.ComboPoints.Style == "Orbs" then
+    --                  return texture .. "ComboPointOrbOff", 32, 32
+    --              else
+    --                local texture_frame = CreateFrame("Frame"):CreateTexture()
+    --                texture_frame:SetAtlas("Warlock-EmptyShard")
+    --                print(texture_frame:GetTexCoord())
+    --                return texture_frame:GetTexture()
+    --              end
+    --            end,
+    --            imageCoords = function()
+    --              if db.ComboPoints.Style == "Squares" then
+    --                return { 0, 62 / 128, 0, 34 / 64 }
+    --              elseif db.ComboPoints.Style == "Orbs" then
+    --                return { 2/64, 62/64, 2/64, 62/64 }
+    --              else
+    --                return { 0, 1, 0, 1 }
+    --              end
+    --            end,
+    --          },
+    --        },
+    --      },
+          Coloring = {
+            name = L["Coloring"],
+            type = "group",
+            order = 40,
+            inline = true,
+            args = {
+              ClassAndSpec = {
+                name = L["Specialization"],
+                type = "select",
+                order = 10,
+                values = {
+                  DEATHKNIGHT = (Addon.ClassicExpansionAtLeast(LE_EXPANSION_WRATH_OF_THE_LICH_KING) and L["Death Knight"]) or nil,
+                  DRUID = L["Druid"],
+                  EVOKER = (Addon.ClassicExpansionAtLeast(LE_EXPANSION_DRAGONFLIGHT) and L["Evoker"]) or nil,
+                  -- Arcane Charge as a resource mechanic was introduced with Patch 7.0.3 (Legion)
+                  MAGE = (Addon.ClassicExpansionAtLeast(LE_EXPANSION_LEGION) and L["Arcane Mage"]) or nil,
+                  MONK = (Addon.ClassicExpansionAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA)  and L["Windwalker Monk"]) or nil,
+                  -- Holy Power was introduced with Patch 4.0.1 (Cataclysm)
+                  PALADIN = (Addon.ClassicExpansionAtLeast(LE_EXPANSION_CATACLYSM)  and L["Paladin"]) or nil,
+                  ROGUE = L["Rogue"],
+                  -- Soul Shard as a resource mechanic was introduced with Path 4.0.1 (Cataclysm)
+                  WARLOCK = (Addon.ClassicExpansionAtLeast(LE_EXPANSION_CATACLYSM)  and L["Warlock"]) or nil,
+                },
+                arg = { "ComboPoints", "Specialization" },
+              },
+              SameColor = {
+                name = L["Uniform Color"],
+                order = 20,
+                type = "toggle",
+                desc = L["Use the same color for all combo points shown."],
+                arg = { "ComboPoints", "UseUniformColor" },
+              },
+              Spacer1 = GetSpacerEntry(100),
+              Color1CP = {
+                name = L["One"],
+                type = "color",
+                order = 110,
+                get = function(info)
+                  local color = db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][1]
+                  return color.r, color.g, color.b
+                end,
+                set = function(info, r, g, b)
+                  db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][1] = Addon.RGB(r * 255, g * 255, b * 255)
+                  Addon.Widgets:UpdateSettings("ComboPoints")
+                end,
+                hasAlpha = false,
+              },
+              Color2CP = {
+                name = L["Two"],
+                type = "color",
+                order = 120,
+                get = function(info)
+                  local color = db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][2]
+                  return color.r, color.g, color.b
+                end,
+                set = function(info, r, g, b)
+                  db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][2] = Addon.RGB(r * 255, g * 255, b * 255)
+                  Addon.Widgets:UpdateSettings("ComboPoints")
+                end,
+                hasAlpha = false,
+              },
+              Color3CP = {
+                name = L["Three"],
+                type = "color",
+                order = 130,
+                get = function(info)
+                  local color = db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][3]
+                  return color.r, color.g, color.b
+                end,
+                set = function(info, r, g, b)
+                  db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][3] = Addon.RGB(r * 255, g * 255, b * 255)
+                  Addon.Widgets:UpdateSettings("ComboPoints")
+                end,
+                hasAlpha = false,
+              },
+              Color4CP = {
+                name = L["Four"],
+                type = "color",
+                order = 140,
+                get = function(info)
+                  local color = db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][4]
+                  return color.r, color.g, color.b
+                end,
+                set = function(info, r, g, b)
+                  db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][4] = Addon.RGB(r * 255, g * 255, b * 255)
+                  Addon.Widgets:UpdateSettings("ComboPoints")
+                end,
+                hasAlpha = false,
+              },
+              Color5CP = {
+                name = L["Five"],
+                type = "color",
+                order = 150,
+                get = function(info)
+                  local color = db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][5] or Addon.RGB(0, 0, 0)
+                  return color.r, color.g, color.b
+                end,
+                set = function(info, r, g, b)
+                  db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][5] = Addon.RGB(r * 255, g * 255, b * 255)
+                  Addon.Widgets:UpdateSettings("ComboPoints")
+                end,
+                hasAlpha = false,
+                disabled = function() return #db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization] < 5 end
+              },
+              Color6CP = {
+                name = L["Six"],
+                type = "color",
+                order = 160,
+                get = function(info)
+                  local color = db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][6] or Addon.RGB(0, 0, 0)
+                  return color.r, color.g, color.b
+                end,
+                set = function(info, r, g, b)
+                  db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][6] = Addon.RGB(r * 255, g * 255, b * 255)
+                  Addon.Widgets:UpdateSettings("ComboPoints")
+                end,
+                hasAlpha = false,
+                disabled = function() return #db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization] < 6 end
+              },
+              Color7CP = {
+                name = L["Seven"],
+                type = "color",
+                order = 161,
+                get = function(info)
+                  local color = db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][7] or Addon.RGB(0, 0, 0)
+                  return color.r, color.g, color.b
+                end,
+                set = function(info, r, g, b)
+                  db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][7] = Addon.RGB(r * 255, g * 255, b * 255)
+                  Addon.Widgets:UpdateSettings("ComboPoints")
+                end,
+                hasAlpha = false,
+                disabled = function() return #db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization] < 7 end
+              },
+              ColorAnimacharge = {
+                name = L["Animacharge"],
+                type = "color",
+                order = 170,
+                get = function(info)
+                  local color = db.ComboPoints.ColorBySpec.ROGUE.Animacharge or ThreatPlates.RGB(0, 0, 0)
+                  return color.r, color.g, color.b
+                end,
+                set = function(info, r, g, b)
+                  db.ComboPoints.ColorBySpec.ROGUE.Animacharge = ThreatPlates.RGB(r * 255, g * 255, b * 255)
+                  Addon.Widgets:UpdateSettings("ComboPoints")
+                end,
+                hasAlpha = false,
+                -- Charged Combo Points were introduced with Battle for Azeroth
+                hidden = function() return db.ComboPoints.Specialization ~= "ROGUE" or not Addon.ClassicExpansionAtLeast(LE_EXPANSION_BATTLE_FOR_AZEROTH) end
+              },
+              ColorDeathrune = {
+                name = L["Death Rune"],
+                type = "color",
+                order = 180,
+                get = function(info)
+                  local color = db.ComboPoints.ColorBySpec.DEATHKNIGHT.DeathRune or ThreatPlates.RGB(0, 0, 0)
+                  return color.r, color.g, color.b
+                end,
+                set = function(info, r, g, b)
+                  db.ComboPoints.ColorBySpec.DEATHKNIGHT.DeathRune = ThreatPlates.RGB(r * 255, g * 255, b * 255)
+                  Addon.Widgets:UpdateSettings("ComboPoints")
+                end,
+                hasAlpha = false,
+                -- Deathrunes were available from Wrath to WoD
+                hidden = function() return db.ComboPoints.Specialization ~= "DEATHKNIGHT" or Addon.ClassicExpansionAtLeast(LE_EXPANSION_LEGION) end
+              },
+            },
           },
-          Spacer1 = GetSpacerEntry(100),
-          Color1CP = {
-            name = L["One"],
-            type = "color",
-            order = 110,
-            get = function(info)
-              local color = db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][1]
-              return color.r, color.g, color.b
-            end,
-            set = function(info, r, g, b)
-              db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][1] = Addon.RGB(r * 255, g * 255, b * 255)
-              Addon.Widgets:UpdateSettings("ComboPoints")
-            end,
-            hasAlpha = false,
-          },
-          Color2CP = {
-            name = L["Two"],
-            type = "color",
-            order = 120,
-            get = function(info)
-              local color = db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][2]
-              return color.r, color.g, color.b
-            end,
-            set = function(info, r, g, b)
-              db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][2] = Addon.RGB(r * 255, g * 255, b * 255)
-              Addon.Widgets:UpdateSettings("ComboPoints")
-            end,
-            hasAlpha = false,
-          },
-          Color3CP = {
-            name = L["Three"],
-            type = "color",
-            order = 130,
-            get = function(info)
-              local color = db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][3]
-              return color.r, color.g, color.b
-            end,
-            set = function(info, r, g, b)
-              db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][3] = Addon.RGB(r * 255, g * 255, b * 255)
-              Addon.Widgets:UpdateSettings("ComboPoints")
-            end,
-            hasAlpha = false,
-          },
-          Color4CP = {
-            name = L["Four"],
-            type = "color",
-            order = 140,
-            get = function(info)
-              local color = db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][4]
-              return color.r, color.g, color.b
-            end,
-            set = function(info, r, g, b)
-              db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][4] = Addon.RGB(r * 255, g * 255, b * 255)
-              Addon.Widgets:UpdateSettings("ComboPoints")
-            end,
-            hasAlpha = false,
-          },
-          Color5CP = {
-            name = L["Five"],
-            type = "color",
-            order = 150,
-            get = function(info)
-              local color = db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][5] or Addon.RGB(0, 0, 0)
-              return color.r, color.g, color.b
-            end,
-            set = function(info, r, g, b)
-              db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][5] = Addon.RGB(r * 255, g * 255, b * 255)
-              Addon.Widgets:UpdateSettings("ComboPoints")
-            end,
-            hasAlpha = false,
-            disabled = function() return #db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization] < 5 end
-          },
-          Color6CP = {
-            name = L["Six"],
-            type = "color",
-            order = 160,
-            get = function(info)
-              local color = db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][6] or Addon.RGB(0, 0, 0)
-              return color.r, color.g, color.b
-            end,
-            set = function(info, r, g, b)
-              db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][6] = Addon.RGB(r * 255, g * 255, b * 255)
-              Addon.Widgets:UpdateSettings("ComboPoints")
-            end,
-            hasAlpha = false,
-            disabled = function() return #db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization] < 6 end
-          },
-          Color7CP = {
-            name = L["Seven"],
-            type = "color",
-            order = 161,
-            get = function(info)
-              local color = db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][7] or Addon.RGB(0, 0, 0)
-              return color.r, color.g, color.b
-            end,
-            set = function(info, r, g, b)
-              db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][7] = Addon.RGB(r * 255, g * 255, b * 255)
-              Addon.Widgets:UpdateSettings("ComboPoints")
-            end,
-            hasAlpha = false,
-            disabled = function() return #db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization] < 7 end
-          },
-          ColorAnimacharge = {
-            name = L["Animacharge"],
-            type = "color",
-            order = 170,
-            get = function(info)
-              local color = db.ComboPoints.ColorBySpec.ROGUE.Animacharge or ThreatPlates.RGB(0, 0, 0)
-              return color.r, color.g, color.b
-            end,
-            set = function(info, r, g, b)
-              db.ComboPoints.ColorBySpec.ROGUE.Animacharge = ThreatPlates.RGB(r * 255, g * 255, b * 255)
-              Addon.Widgets:UpdateSettings("ComboPoints")
-            end,
-            hasAlpha = false,
-            hidden = function() return db.ComboPoints.Specialization ~= "ROGUE" or (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC) end
-          },
-          ColorDeathrune = {
-            name = L["Death Rune"],
-            type = "color",
-            order = 180,
-            get = function(info)
-              local color = db.ComboPoints.ColorBySpec.DEATHKNIGHT.DeathRune or ThreatPlates.RGB(0, 0, 0)
-              return color.r, color.g, color.b
-            end,
-            set = function(info, r, g, b)
-              db.ComboPoints.ColorBySpec.DEATHKNIGHT.DeathRune = ThreatPlates.RGB(r * 255, g * 255, b * 255)
-              Addon.Widgets:UpdateSettings("ComboPoints")
-            end,
-            hasAlpha = false,
-            hidden = function() return db.ComboPoints.Specialization ~= "DEATHKNIGHT" or not Addon.IS_WRATH_CLASSIC end
+          Layout = {
+            name = L["Layout"],
+            order = 60,
+            type = "group",
+            inline = true,
+            args = {
+              SpacingX = {
+                name = L["Spacing"],
+                order = 10,
+                type = "range",
+                min = 0,
+                max = 100,
+                step = 1,
+                arg = { "ComboPoints", "HorizontalSpacing" },
+              },
+              Scale = GetScaleEntry(L["Scale"], 20, { "ComboPoints", "Scale" }),
+              Transparency = GetTransparencyEntryWidgetNew(30, { "ComboPoints", "Transparency" } ),
+              Placement = GetPlacementEntryWidget(40, "ComboPoints", true),
+            },
           },
         },
       },
-      Layout = {
-        name = L["Layout"],
-        order = 60,
+      Cooldowns = {
+        name = L["Cooldown"],
         type = "group",
-        inline = true,
+        order = 30,
+        inline = false,
+        hidden = function() return not Addon.ClassicExpansionAtLeast(LE_EXPANSION_WRATH_OF_THE_LICH_KING) end,
         args = {
-          SpacingX = {
-            name = L["Spacing"],
-            order = 10,
-            type = "range",
-            min = 0,
-            max = 100,
-            step = 1,
-            arg = { "ComboPoints", "HorizontalSpacing" },
+          RuneCooldown= {
+            name = L["Death Knigh Rune Cooldown"],
+            order = 70,
+            type = "group",
+            inline = true,
+            hidden = function() return not Addon.ClassicExpansionAtLeast(LE_EXPANSION_WRATH_OF_THE_LICH_KING) end,
+            args = {
+              Enable = {
+                name = L["Enable"],
+                order = 10,
+                type = "toggle",
+                arg = { "ComboPoints", "RuneCooldown", "Show" },
+              },
+              Font = GetFontEntryDefault(L["Font"], 20, { "ComboPoints", "RuneCooldown" } )
+            },
           },
-          Scale = GetScaleEntry(L["Scale"], 20, { "ComboPoints", "Scale" }),
-          Transparency = GetTransparencyEntryWidgetNew(30, { "ComboPoints", "Transparency" } ),
-          Placement = GetPlacementEntryWidget(40, "ComboPoints", true),
-        },
-      },
-      DKRuneCooldown= {
-        name = L["Death Knigh Rune Cooldown"],
-        order = 70,
-        type = "group",
-        inline = true,
-        args = {
-          Enable = {
-            name = L["Enable"],
-            order = 10,
-            type = "toggle",
-            arg = { "ComboPoints", "RuneCooldown", "Show" },
+          EssenceCooldown= {
+            name = L["Evoker Essence Cooldown"],
+            order = 80,
+            type = "group",
+            inline = true,
+            hidden = function() return not Addon.ClassicExpansionAtLeast(LE_EXPANSION_DRAGONFLIGHT) end,
+            args = {
+              Enable = {
+                name = L["Enable"],
+                order = 10,
+                type = "toggle",
+                arg = { "ComboPoints", "EssenceCooldown", "Show" },
+              },
+              Font = GetFontEntryDefault(L["Font"], 20, { "ComboPoints", "EssenceCooldown" } )
+            },
           },
           Font = GetFontEntryDefault(L["Font"], 20, { "ComboPoints", "RuneCooldown" })
         },
@@ -2086,190 +2128,350 @@ local function CreateArenaWidgetOptions()
     name = L["Arena"],
     type = "group",
     order = 10,
+    childGroups = "tab",
     hidden = function() return Addon.IS_CLASSIC end,
     args = {
       Enable = GetEnableEntry(L["Enable Arena Widget"], L["This widget shows various icons (orbs and numbers) on enemy nameplates in arenas for easier differentiation."], "arenaWidget", false),
-      Orbs = {
-        name = L["Arena Orb"],
+      Layout = {
+        name = L["Layout"],
         type = "group",
-        inline = true,
+        inline = false,
         order = 10,
         args = {
-          EnableOrbs = {
-            name = L["Show Orb"],
+          Orb = {
+            name = L["Arena Orb"],
+            type = "group",
+            inline = true,
             order = 10,
-            type = "toggle",
-            arg = { "arenaWidget", "ShowOrb" } ,
+            args = {
+              Size = GetSizeEntryDefault(10, "arenaWidget" ),
+              OrbPlacement = GetPlacementEntryWidget(20, "arenaWidget", false),
+            },
           },
-          Size = GetSizeEntryDefault(20, "arenaWidget" ),
-          Colors = {
-            name = L["Colors"],
+          Number = {
+            name = L["Arena Number"],
             type = "group",
             inline = true,
             order = 30,
             --                  disabled = function() return not db.arenaWidget.ON end,
             args = {
-              Arena1 = {
-                name = L["Arena 1"],
-                type = "color",
-                order = 1,
-                hasAlpha = true,
-                arg = { "arenaWidget", "colors", 1 },
-              },
-              Arena2 = {
-                name = L["Arena 2"],
-                type = "color",
-                order = 2,
-                hasAlpha = true,
-                arg = { "arenaWidget", "colors", 2 },
-              },
-              Arena3 = {
-                name = L["Arena 3"],
-                type = "color",
-                order = 3,
-                hasAlpha = true,
-                arg = { "arenaWidget", "colors", 3 },
-              },
-              Arena4 = {
-                name = L["Arena 4"],
-                type = "color",
-                order = 4,
-                hasAlpha = true,
-                arg = { "arenaWidget", "colors", 4 },
-              },
-              Arena5 = {
-                name = L["Arena 5"],
-                type = "color",
-                order = 5,
-                hasAlpha = true,
-                arg = { "arenaWidget", "colors", 5 },
+              Font = GetFontEntryDefault(L["Font"], 30, { "arenaWidget", "NumberText" }),
+              Positioning = {
+                type = "group",
+                order = 35,
+                name = L["Placement"],
+                inline = true,
+                args = {
+                  Anchor = {
+                    type = "select",
+                    order = 10,
+                    name = L["Position"],
+                    values = Addon.ANCHOR_POINT,
+                    arg = { "arenaWidget", "NumberText", "Anchor" }
+                  },
+                  InsideAnchor = {
+                    type = "toggle",
+                    order = 15,
+                    name = L["Inside"],
+                    width = "half",
+                    arg = { "arenaWidget", "NumberText", "InsideAnchor" }
+                  },
+                  X = {
+                    type = "range",
+                    order = 20,
+                    name = L["Horizontal Offset"],
+                    max = 120,
+                    min = -120,
+                    step = 1,
+                    isPercent = false,
+                    arg = { "arenaWidget", "NumberText", "HorizontalOffset" },
+                  },
+                  Y = {
+                    type = "range",
+                    order = 30,
+                    name = L["Vertical Offset"],
+                    max = 120,
+                    min = -120,
+                    step = 1,
+                    isPercent = false,
+                    arg = { "arenaWidget", "NumberText", "VerticalOffset" },
+                  },
+                  AlignX = {
+                    type = "select",
+                    order = 40,
+                    name = L["Horizontal Align"],
+                    values = ThreatPlates.AlignH,
+                    arg = { "arenaWidget", "NumberText", "Font", "HorizontalAlignment" },
+                  },
+                  AlignY = {
+                    type = "select",
+                    order = 50,
+                    name = L["Vertical Align"],
+                    values = ThreatPlates.AlignV,
+                    arg = { "arenaWidget", "NumberText", "Font", "VerticalAlignment" },
+                  },
+                },
               },
             },
           },
         },
       },
-      Numbers = {
-        name = L["Arena Number"],
+      Allies  = {
+        name = L["Allies"],
         type = "group",
-        inline = true,
+        inline = false,
         order = 20,
         args = {
-          EnableNumbers = {
-            name = L["Show Number"],
-            order = 10,
-            type = "toggle",
-            arg = {"arenaWidget", "ShowNumber"},
-          },
-          HideUnitName = {
-            name = L["Hide Name"],
-            order = 20,
-            type = "toggle",
-            arg = {"arenaWidget", "HideName"},
-          },
-          Font = GetFontEntryDefault(L["Font"], 30, { "arenaWidget", "NumberText" }),
-          Positioning = {
+          Orbs = {
+            name = L["Arena Orb"],
             type = "group",
-            order = 35,
-            name = L["Placement"],
             inline = true,
+            order = 10,
             args = {
-              Anchor = {
-                type = "select",
+              EnableOrbs = {
+                name = L["Show Orb"],
                 order = 10,
-                name = L["Position"],
-                values = Addon.ANCHOR_POINT,
-                arg = { "arenaWidget", "NumberText", "Anchor" }
-              },
-              InsideAnchor = {
                 type = "toggle",
-                order = 15,
-                name = L["Inside"],
-                width = "half",
-                arg = { "arenaWidget", "NumberText", "InsideAnchor" }
+                arg = { "arenaWidget", "Allies", "ShowOrb" } ,
               },
-              X = {
-                type = "range",
-                order = 20,
-                name = L["Horizontal Offset"],
-                max = 120,
-                min = -120,
-                step = 1,
-                isPercent = false,
-                arg = { "arenaWidget", "NumberText", "HorizontalOffset" },
-              },
-              Y = {
-                type = "range",
+              Colors = {
+                name = L["Colors"],
+                type = "group",
+                inline = true,
                 order = 30,
-                name = L["Vertical Offset"],
-                max = 120,
-                min = -120,
-                step = 1,
-                isPercent = false,
-                arg = { "arenaWidget", "NumberText", "VerticalOffset" },
-              },
-              AlignX = {
-                type = "select",
-                order = 40,
-                name = L["Horizontal Align"],
-                values = ThreatPlates.AlignH,
-                arg = { "arenaWidget", "NumberText", "Font", "HorizontalAlignment" },
-              },
-              AlignY = {
-                type = "select",
-                order = 50,
-                name = L["Vertical Align"],
-                values = ThreatPlates.AlignV,
-                arg = { "arenaWidget", "NumberText", "Font", "VerticalAlignment" },
+                args = {
+                  Party1 = {
+                    name = L["Member 1"],
+                    type = "color",
+                    order = 11,
+                    hasAlpha = true,
+                    arg = { "arenaWidget", "Allies", "OrbColors", 1 },
+                  },
+                  Party2 = {
+                    name = L["Member 2"],
+                    type = "color",
+                    order = 12,
+                    hasAlpha = true,
+                    arg = { "arenaWidget", "Allies", "OrbColors", 2 },
+                  },
+                  Party3 = {
+                    name = L["Member 3"],
+                    type = "color",
+                    order = 13,
+                    hasAlpha = true,
+                    arg = { "arenaWidget", "Allies", "OrbColors", 3 },
+                  },
+                  Party4 = {
+                    name = L["Member 4"],
+                    type = "color",
+                    order = 14,
+                    hasAlpha = true,
+                    arg = { "arenaWidget", "Allies", "OrbColors", 4 },
+                  },
+                  Party5 = {
+                    name = L["Member 5"],
+                    type = "color",
+                    order = 15,
+                    hasAlpha = true,
+                    arg = { "arenaWidget", "Allies", "OrbColors", 5 },
+                  },
+                },
               },
             },
           },
-          numColors = {
-            name = L["Colors"],
+          Numbers = {
+            name = L["Arena Number"],
             type = "group",
             inline = true,
-            order = 40,
-            --                  disabled = function() return not db.arenaWidget.ON end,
+            order = 20,
             args = {
-              Arena1 = {
-                name = L["Arena 1"],
-                type = "color",
-                order = 1,
-                hasAlpha = true,
-                arg = { "arenaWidget", "numColors", 1 },
+              EnableNumbers = {
+                name = L["Show Number"],
+                order = 10,
+                type = "toggle",
+                arg = {"arenaWidget", "Allies", "ShowNumber"},
               },
-              Arena2 = {
-                name = L["Arena 2"],
-                type = "color",
-                order = 2,
-                hasAlpha = true,
-                arg = { "arenaWidget", "numColors", 2 },
+              HideUnitName = {
+                name = L["Hide Name"],
+                order = 20,
+                type = "toggle",
+                arg = {"arenaWidget", "Allies", "HideName"},
               },
-              Arena3 = {
-                name = L["Arena 3"],
-                type = "color",
-                order = 3,
-                hasAlpha = true,
-                arg = { "arenaWidget", "numColors", 3 },
-              },
-              Arena4 = {
-                name = L["Arena 4"],
-                type = "color",
-                order = 4,
-                hasAlpha = true,
-                arg = { "arenaWidget", "numColors", 4 },
-              },
-              Arena5 = {
-                name = L["Arena 5"],
-                type = "color",
-                order = 5,
-                hasAlpha = true,
-                arg = { "arenaWidget", "numColors", 5 },
+              Colors = {
+                name = L["Colors"],
+                type = "group",
+                inline = true,
+                order = 40,
+                args = {
+                  Arena1 = {
+                    name = L["Member 1"],
+                    type = "color",
+                    order = 1,
+                    hasAlpha = true,
+                    arg = { "arenaWidget", "Allies", "NumberColors", 1 },
+                  },
+                  Arena2 = {
+                    name = L["Member 2"],
+                    type = "color",
+                    order = 2,
+                    hasAlpha = true,
+                    arg = { "arenaWidget", "Allies", "NumberColors", 2 },
+                  },
+                  Arena3 = {
+                    name = L["Member 3"],
+                    type = "color",
+                    order = 3,
+                    hasAlpha = true,
+                    arg = { "arenaWidget", "Allies", "NumberColors", 3 },
+                  },
+                  Arena4 = {
+                    name = L["Member 4"],
+                    type = "color",
+                    order = 4,
+                    hasAlpha = true,
+                    arg = { "arenaWidget", "Allies", "NumberColors", 4 },
+                  },
+                  Arena5 = {
+                    name = L["Member 5"],
+                    type = "color",
+                    order = 5,
+                    hasAlpha = true,
+                    arg = { "arenaWidget", "Allies", "NumberColors", 5 },
+                  },
+                },
               },
             },
           },
         },
       },
-      Placement = GetPlacementEntryWidget(60, "arenaWidget", false),
+      Opponents = {
+        name = L["Opponents"],
+        type = "group",
+        inline = false,
+        order = 30,
+        args = {
+          Orbs = {
+            name = L["Arena Orb"],
+            type = "group",
+            inline = true,
+            order = 10,
+            args = {
+              EnableOrbs = {
+                name = L["Show Orb"],
+                order = 10,
+                type = "toggle",
+                arg = { "arenaWidget", "ShowOrb" } ,
+              },
+              Colors = {
+                name = L["Colors"],
+                type = "group",
+                inline = true,
+                order = 30,
+                args = {
+                  Arena1 = {
+                    name = L["Member 1"],
+                    type = "color",
+                    order = 1,
+                    hasAlpha = true,
+                    arg = { "arenaWidget", "colors", 1 },
+                  },
+                  Arena2 = {
+                    name = L["Member 2"],
+                    type = "color",
+                    order = 2,
+                    hasAlpha = true,
+                    arg = { "arenaWidget", "colors", 2 },
+                  },
+                  Arena3 = {
+                    name = L["Member 3"],
+                    type = "color",
+                    order = 3,
+                    hasAlpha = true,
+                    arg = { "arenaWidget", "colors", 3 },
+                  },
+                  Arena4 = {
+                    name = L["Member 4"],
+                    type = "color",
+                    order = 4,
+                    hasAlpha = true,
+                    arg = { "arenaWidget", "colors", 4 },
+                  },
+                  Arena5 = {
+                    name = L["Member 5"],
+                    type = "color",
+                    order = 5,
+                    hasAlpha = true,
+                    arg = { "arenaWidget", "colors", 5 },
+                  },
+                },
+              },
+            },
+          },
+          Numbers = {
+            name = L["Arena Number"],
+            type = "group",
+            inline = true,
+            order = 20,
+            args = {
+              EnableNumbers = {
+                name = L["Show Number"],
+                order = 10,
+                type = "toggle",
+                arg = {"arenaWidget", "ShowNumber"},
+              },
+              HideUnitName = {
+                name = L["Hide Name"],
+                order = 20,
+                type = "toggle",
+                arg = {"arenaWidget", "HideName"},
+              },
+              Colors = {
+                name = L["Colors"],
+                type = "group",
+                inline = true,
+                order = 40,
+                args = {
+                  Arena1 = {
+                    name = L["Member 1"],
+                    type = "color",
+                    order = 1,
+                    hasAlpha = true,
+                    arg = { "arenaWidget", "numColors", 1 },
+                  },
+                  Arena2 = {
+                    name = L["Member 2"],
+                    type = "color",
+                    order = 2,
+                    hasAlpha = true,
+                    arg = { "arenaWidget", "numColors", 2 },
+                  },
+                  Arena3 = {
+                    name = L["Member 3"],
+                    type = "color",
+                    order = 3,
+                    hasAlpha = true,
+                    arg = { "arenaWidget", "numColors", 3 },
+                  },
+                  Arena4 = {
+                    name = L["Member 4"],
+                    type = "color",
+                    order = 4,
+                    hasAlpha = true,
+                    arg = { "arenaWidget", "numColors", 4 },
+                  },
+                  Arena5 = {
+                    name = L["Member 5"],
+                    type = "color",
+                    order = 5,
+                    hasAlpha = true,
+                    arg = { "arenaWidget", "numColors", 5 },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     },
   }
 
@@ -3481,8 +3683,6 @@ local function CreateAuraAreaBarModeOptions(pos, widget_info)
             type = "color",
             order = 90,
             hasAlpha = true,
-            get = GetColorAlpha,
-            set = SetColorAlphaWidget,
             arg = {"AuraWidget", widget_info, "ModeBar", "BackgroundColor"},
           },
         },
@@ -3709,7 +3909,7 @@ local function CreateAurasWidgetOptions()
                 arg = { "AuraWidget", "FrameOrder" },
               },
               Spacer1 = GetSpacerEntry(15),
-              -- Reverse = {               
+              -- Reverse = {
               --   type = "toggle",
               --   order = 20,
               --   name = L["Swap Scale By Reaction"],
@@ -4699,13 +4899,13 @@ end
 local function CreateLocalizationSettings()
   local entry = {
     name = L["Localization"],
-    order = 135, 
+    order = 135,
     type = "group",
     inline = false,
     args = {
       Texts = {
         name = L["Texts"],
-        order = 10, 
+        order = 10,
         type = "group",
         inline = true,
         args = {
@@ -4720,11 +4920,11 @@ local function CreateLocalizationSettings()
       },
       Numbers = {
         name = L["Numbers"],
-        order = 20, 
+        order = 20,
         type = "group",
         inline = true,
         args = {
-          MetricUnitSymbols = {    
+          MetricUnitSymbols = {
             name = L["Metric Unit Symbols"],
             type = "toggle",
             order = 10,
@@ -4747,20 +4947,20 @@ local function CreateBlizzardSettings()
   -- or by disabling the options in this case
   local func_handler = {
     SetValue = function(self, info, val)
-      SetValue(info, val)    
+      SetValue(info, val)
       if Addon.db.profile.BlizzardSettings.Names.Enabled then
-        Addon.Font:SetNamesFonts()
+        Addon.Font.SetNamesFonts()
       else
-        Addon.Font:ResetNamesFonts()
+        Addon.Font.ResetNamesFonts()
       end
     end,
-    SetColor = function(self, info, r, g, b) 
-      SetValue(info, r, g, b) 
-      Addon.Font:SetNamesFonts()
+    SetColor = function(self, info, r, g, b)
+      SetValue(info, r, g, b)
+      Addon.Font.SetNamesFonts()
     end,
-    SetColorAlpha = function(self, info, r, g, b, a) 
-      SetValue(info, r, g, b, a) 
-      Addon.Font:SetNamesFonts()
+    SetColorAlpha = function(self, info, r, g, b, a)
+      SetValue(info, r, g, b, a)
+      Addon.Font.SetNamesFonts()
     end,
   }
 
@@ -4802,7 +5002,7 @@ local function CreateBlizzardSettings()
                   "nameplateOtherTopInset", "nameplateOtherBottomInset", "nameplateLargeTopInset", "nameplateLargeBottomInset",
                   "nameplateMotion", "nameplateMotionSpeed", "nameplateOverlapH", "nameplateOverlapV",
                   "nameplateMaxDistance", "nameplateTargetBehindMaxDistance",
-                  "nameplateShowOnlyNames", 
+                  "nameplateShowOnlyNames",
                   -- "nameplateGlobalScale" -- Reset it to 1, if it get's somehow corrupted
                 }
                 if Addon.IS_CLASSIC then
@@ -4812,8 +5012,8 @@ local function CreateBlizzardSettings()
                 if Addon.IS_WRATH_CLASSIC then
                   cvars[#cvars + 1] = "clampTargetNameplateToScreen"
                 end
-                
-                if not Addon.WOW_USES_CLASSIC_NAMEPLATES then            
+
+                if not Addon.WOW_USES_CLASSIC_NAMEPLATES then
                   cvars[#cvars + 1] = "nameplateResourceOnTarget"
                 end
 
@@ -5136,6 +5336,7 @@ local function CreateBlizzardSettings()
                 plate.UnitFrame.BuffFrame:SetShown(not val)
               end
             end,
+            get = GetValue,
             arg = { "PersonalNameplate", "HideBuffs"},
           },
           -- ? Why don't I just change the CVar here, why storing the setting internally? It's set on login, different
@@ -5150,6 +5351,7 @@ local function CreateBlizzardSettings()
               SetValueGeneral(info, val)
               CVars:OverwriteBoolProtected("nameplateResourceOnTarget", val)
             end,
+            get = GetValue,
             arg = { "PersonalNameplate", "ShowResourceOnTarget"},
           },
         },
@@ -5174,12 +5376,13 @@ local function CreateBlizzardSettings()
                 order = 30,
                 type = "toggle",
                 set = function(info, val)
+                  Addon.db.profile.BlizzardSettings.Names.ShowOnlyNames = val
                   SetValueCVarBool(info, val)
                   ReloadUI()
                 end,
                 get = GetValueCVarBool,
                 desc = L["Show only unit names and hide healthbars (requires /reload). Note that the clickable area of friendly nameplates will also be set to zero so that they don't interfere with enemy nameplates stacking (not in Classic or TBC Classic)."],
-                arg = "nameplateShowOnlyNames",            
+                arg = "nameplateShowOnlyNames",
               },
               DebuffsOnFriendly = {
                 name = L["Debuffs on Friendly"],
@@ -5187,7 +5390,7 @@ local function CreateBlizzardSettings()
                 type = "toggle",
                 set = SetValueCVarBool,
                 get = GetValueCVarBool,
-                arg = "nameplateShowDebuffsOnFriendly",            
+                arg = "nameplateShowDebuffsOnFriendly",
               },
               OnlyInInstances = {
                 type = "toggle",
@@ -5199,7 +5402,7 @@ local function CreateBlizzardSettings()
             },
           },
           Font = GetFontEntryHandler(L["Font"], 20, { "BlizzardSettings", "Names" }, nil, func_handler)
-        },      
+        },
       },
     },
     --  ["ShowNamePlateLoseAggroFlash"] = "When enabled, if you are a tank role and lose aggro, the nameplate with briefly flash.",
@@ -5245,41 +5448,41 @@ local function CreateColorsSettings()
           Spacer1 = GetSpacerEntry(65),
           TappedUnitColor = { name = L["Tapped"], order = 70, type = "color", arg = { "ColorByReaction", "TappedUnit" }, },
           DisconnectedUnitColor = { name = L["Disconnected"], order = 80, type = "color", arg = { "ColorByReaction", "DisconnectedUnit" }, },
-          HeaderPvP = { 
-            name = L["Players"], 
+          HeaderPvP = {
+            name = L["Players"],
             type = "header",
             order = 85,
           },
-          PlayerPvPOffSelfPvPOff = { 
-            name = L["PvP Off"], 
-            order = 90, 
+          PlayerPvPOffSelfPvPOff = {
+            name = L["PvP Off"],
+            order = 90,
             type = "color",
-            arg = { "ColorByReaction", "FriendlyPlayer" }, 
+            arg = { "ColorByReaction", "FriendlyPlayer" },
             width = "double",
             desc = L["The (friendly or hostile) player is not flagged for PvP or the player is in a sanctuary."],
           },
-          FriendlyOn = { 
-            name = L["Friendly PvP On"], 
-            order = 100, 
-            type = "color", 
+          FriendlyOn = {
+            name = L["Friendly PvP On"],
+            order = 100,
+            type = "color",
             width = "double",
-            arg = { "ColorByReaction", "FriendlyPlayerPvPOn" }, 
+            arg = { "ColorByReaction", "FriendlyPlayerPvPOn" },
             desc = L["The player is friendly to you, and flagged for PvP."],
           },
-          HostileOnSelfOff = { 
-            name = L["Hostile PvP On - Self Off"], 
-            order = 110, 
-            type = "color", 
+          HostileOnSelfOff = {
+            name = L["Hostile PvP On - Self Off"],
+            order = 110,
+            type = "color",
             width = "double",
-            arg = { "ColorByReaction", "HostilePlayerPvPOnSelfPvPOff" }, 
+            arg = { "ColorByReaction", "HostilePlayerPvPOnSelfPvPOff" },
             desc = L["The player is hostile, and flagged for PvP, but you are not."],
           },
           HostileOnSelfOn = {
-            name = L["Hostile PvP On - Self On"], 
-            order = 120, 
-            type = "color", 
+            name = L["Hostile PvP On - Self On"],
+            order = 120,
+            type = "color",
             width = "double",
-            arg = { "ColorByReaction", "HostilePlayer" }, 
+            arg = { "ColorByReaction", "HostilePlayer" },
             desc = L["Both you and the other player are flagged for PvP."],          },
          Spacer3 = GetSpacerEntry(195),
           Reset = {
@@ -5288,8 +5491,10 @@ local function CreateColorsSettings()
             order = 200,
             width = "full",
             func = function()
-              for name, _ in pairs(ThreatPlates.DEFAULT_SETTINGS.profile.ColorByReaction) do
-                db.ColorByReaction[name] = Addon.CopyTable(ThreatPlates.DEFAULT_SETTINGS.profile.ColorByReaction[name])
+              for name, color in pairs(ThreatPlates.DEFAULT_SETTINGS.profile.ColorByReaction) do
+                if type(color) == "table" then
+                  db.ColorByReaction[name] = Addon.CopyTable(color)
+                end
               end
               Addon:ForceUpdate()
             end,
@@ -5453,7 +5658,7 @@ local function CreateAppearanceTab()
             arg = { "Appearance", "UseBorderlessIcons" }
           },
           Masque = {
-            name = function() 
+            name = function()
               if Addon.LibMasque then
                 return L["Masque"]
               else
@@ -5461,7 +5666,7 @@ local function CreateAppearanceTab()
               end
             end,
             type = "toggle",
-            order = 30,         
+            order = 30,
             set = function(info, val)
               Addon.db.profile.Appearance.UseMasque = val
               ReloadUI()
@@ -5469,7 +5674,7 @@ local function CreateAppearanceTab()
             desc = L["If enabled, icons are skinned with Masque (requires UI reload)."],
             arg = { "Appearance", "UseMasque" },
             disabled = function() return not Addon.LibMasque end,
-          },         
+          },
         },
       },
     },
@@ -5549,7 +5754,7 @@ local function CreateAutomationSettings()
             end,
             desc = L["Show the Blizzard default nameplates for friendly units in instances."],
             arg = { "Automation", "ShowFriendlyUnitsInInstances" },
-          },          
+          },
           HideFriendlyInInstances = {
             name = L["Hide Friendly Nameplates"],
             order = 20,
@@ -5560,7 +5765,7 @@ local function CreateAutomationSettings()
                 Addon.db.profile.Automation.ShowFriendlyUnitsInInstances = false
               end
               SyncGameSettingsWorld(info, val)
-            end,            
+            end,
             desc = L["Hide the Blizzard default nameplates for friendly units in instances."],
             arg = { "Automation", "HideFriendlyUnitsInInstances" },
           },
@@ -5962,7 +6167,7 @@ local function CreateHealthbarOptions()
         order = 30,
         type = "toggle",
         arg = { "settings", "healthbar", "TargetUnit", "ShowBrackets" },
-      },      
+      },
     },
   }
 
@@ -6481,7 +6686,7 @@ local function CreateAnimationsOptions()
             width = "full",
             desc = L["This will reset all console variables (CVars) required for hiding nameplates to work to their default values."],
             func = function()
-              Addon:CallbackWhenOoC(function() 
+              Addon:CallbackWhenOoC(function()
                 CVars.FixCVarsForHidingNameplates()
                 Addon.Scaling:UpdateSettings()
                 --Addon:ForceUpdate()
@@ -6555,7 +6760,7 @@ local function CreateNameOptions()
           },
           Boundaries = GetBoundariesEntryDefault(10, { "Name", "HealthbarMode", "Font" }),
         },
-      },      
+      },
       HealthbarView = {
         name = L["Healthbar View"],
         order = 20,
@@ -6596,7 +6801,8 @@ local function CreateNameOptions()
                 values = ThreatPlates.FRIENDLY_NAME_COLOR,
                 arg = { "Name", "HealthbarMode", "FriendlyUnitMode" }
               },
-              FriendlyColorCustom = GetColorEntry(L["Custom Color"], 20, { "Name", "HealthbarMode", "FriendlyTextColor" }),
+              FriendlyColorCustom = GetColorAlphaEntry(20, { "Name", "HealthbarMode", "FriendlyTextColor" },
+                function() return Addon.db.profile.Name.HealthbarMode.FriendlyTextColorMode ~= "CUSTOM" end),
               EnemyColor = {
                 name = L["Enemy Name Color"],
                 order = 30,
@@ -6604,7 +6810,8 @@ local function CreateNameOptions()
                 values = ThreatPlates.ENEMY_NAME_COLOR,
                 arg = { "Name", "HealthbarMode", "EnemyUnitMode" }
               },
-              EnemyColorCustom = GetColorEntry(L["Custom Color"], 40, { "Name", "HealthbarMode", "EnemyTextColor" }),
+              EnemyColorCustom = GetColorAlphaEntry(40, { "Name", "HealthbarMode", "EnemyTextColor" }, 
+                function() return Addon.db.profile.Name.HealthbarMode.EnemyTextColorMode ~= "CUSTOM" end),
               Spacer1 = GetSpacerEntry(50),
               EnableRaidMarks = {
                 name = L["Additionally color the name based on the target mark if the unit is marked."],
@@ -6661,7 +6868,8 @@ local function CreateNameOptions()
                 values = ThreatPlates.FRIENDLY_NAME_COLOR,
                 arg = { "Name", "NameMode", "FriendlyUnitMode" }
               },
-              FriendlyColorCustom = GetColorEntry(L["Custom Color"], 20, {  "Name", "NameMode", "FriendlyTextColor" }),
+              FriendlyColorCustom = GetColorAlphaEntry(20, {  "Name", "NameMode", "FriendlyTextColor" },
+                function() return Addon.db.profile.Name.NameMode.FriendlyTextColorMode ~= "CUSTOM" end),
               EnemyColor = {
                 name = L["Enemy Name Color"],
                 order = 30,
@@ -6669,7 +6877,8 @@ local function CreateNameOptions()
                 values = ThreatPlates.ENEMY_NAME_COLOR,
                 arg = { "Name", "NameMode", "EnemyUnitMode" }
               },
-              EnemyColorCustom = GetColorEntry(L["Custom Color"], 40, { "Name", "NameMode", "EnemyTextColor" }),
+              EnemyColorCustom = GetColorAlphaEntry(40, { "Name", "NameMode", "EnemyTextColor" },
+                function() return Addon.db.profile.Name.NameMode.EnemyTextColorMode ~= "CUSTOM" end),
               Spacer1 = GetSpacerEntry(50),
               EnableRaidMarks = {
                 name = L["Additionally color the name based on the target mark if the unit is marked."],
@@ -6782,13 +6991,13 @@ local function CreateThreatPercentageOptions()
     type = "group",
     inline = false,
     order = 60,
-    args = { 
+    args = {
       Show = {
         name = L["Show"],
         type = "group",
         inline = true,
         order = 10,
-        args = { 
+        args = {
           Always = {
             name = L["Always"],
             type = "toggle",
@@ -6842,7 +7051,7 @@ local function CreateThreatPercentageOptions()
         type = "group",
         inline = true,
         order = 30,
-        args = { 
+        args = {
           SecondPlayersName = {
             name = L["Second Player's Name"],
             type = "toggle",
@@ -7712,7 +7921,7 @@ CreateCustomNameplateEntry = function(index)
             type = "toggle",
             order = 40,
             arg = { "uniqueSettings", index, "ShowHighlightBorder" }
-          },         
+          },
           Spacer1 = GetSpacerEntry(40),
           Icon = {
             name = L["Preview"],
@@ -8155,7 +8364,7 @@ CreateCustomNameplatesGroup = function()
               order = 10,
               type = "toggle",
               arg = { "uniqueWidget", "ON" }
-            },  
+            },
             Size = GetSizeEntryDefault(10, "uniqueWidget"),
             Placement = GetPlacementEntryWidget(20, "uniqueWidget", true),
           },
@@ -8669,15 +8878,15 @@ local function CreateOptionsTable()
                       order = 30,
                       width = "full",
                       desc = L["This will reset all console variables (CVars) required for transparency for occluded units to work to their default values."],
-                      func = function() 
-                        Addon:CallbackWhenOoC(function() 
+                      func = function()
+                        Addon:CallbackWhenOoC(function()
                           CVars.FixCVarsForOcclusionDetection()
                           Addon.Transparency:UpdateSettings()
                           --Addon:ForceUpdate()
                         end, L["Unable to change CVars for transparency for occluded units while in combat."])
                       end,
                       hidden = function() return not CVars.InvalidCVarsForOcclusionDetection() end,
-                    },                    
+                    },
                   },
                 },
                 NameplateAlpha = {
@@ -8834,7 +9043,7 @@ local function CreateOptionsTable()
               },
             },
             Animations = CreateAnimationsOptions(),
-            Names = CreateNameOptions(),            
+            Names = CreateNameOptions(),
             Statustext = {
               name = L["Status Text"],
               type = "group",
@@ -9063,7 +9272,7 @@ local function CreateOptionsTable()
                   },
                 },
                 TextFormat = {
-                  name = L["General"],
+                  name = L["Format"],
                   order = 30,
                   type = "group",
                   inline = false,
@@ -9162,7 +9371,7 @@ local function CreateOptionsTable()
                   },
                 },
                 Layout = {
-                  name = L["General"],
+                  name = L["Layout"],
                   order = 40,
                   type = "group",
                   inline = false,
@@ -9881,42 +10090,86 @@ local function CreateOptionsTable()
               width = "full",
               name = "esMX: sugymaylis, Woopy"
             },
---						Translators4 = {
---							type = "description",
---							order = 7,
---							width = "full",
---							name = "frFR: Need Translator!!"
---						},
-            -- Translators5 = {
-            --   type = "description",
-            --   order = 8,
-            --   width = "full",
-            --   name = "koKR: yuk6196 (CurseForge)"
-            -- },
---						Translators6 = {
---							type = "description",
---							order = 9,
---							width = "full",
---							name = "ruRU: Need Translator!!"
---						},
---            Translators7 = {
---              type = "description",
---              order = 10,
---              width = "full",
---              name = "zhCN: y123ao6 (CurseForge)"
---            },
 						Translators8 = {
 							type = "description",
 							order = 11,
 							width = "full",
 							name = "zhTW: gaspy10 (CurseForge)"
 						},
+            ArtworktHeader = {
+              order = 40,
+              type = "header",
+              name = "Artwork",
+            },
+            Artwork1 = {
+              type = "description",
+              order = 41,
+              width = "full",
+              name = "Upscaled class icons: Simaia (Twitter: @keyboardturn)",
+            },
           },
+          --         About = {
+          --           name = L["About"],
+          --           type = "group",
+          --           order = 80,
+          --           args = {
+          --             VersionHeader = {
+          --               type = "description",
+          --               name = "\n|cffffd200" .. L["Version"] .. "|r",
+          --               order = 20,
+          --             },
+          --             AboutInfo = {
+          --               type = "description",
+          --               order = 10,
+          --               width = "full",
+          --               name = L["Clear and easy to use threat-reactive nameplates.\n\nCurrent version: "] .. GetAddOnMetadata("TidyPlates_ThreatPlates", "version") .. L["\n\n--\n\nBackupiseasy\n\n(Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)"],
+          --             },
+          --             AuthorHeader = {
+          --               type = "description",
+          --               name = "\n|cffffd200" .. L["Authors"] .. "|r",
+          --               order = 20,
+          --             },
+          --             AuthorText= {
+          --               type = "description",
+          --               name = L["Threat Plates is currently maintained by Backup (CurseForge). It was originally written by Suicidal Katt (CurseForge)."],
+          --               order = 21,
+          --             },
+          --             TranslatorHeader = {
+          --               type = "description",
+          --               name = "\n|cffffd200" .. L["Translators"] .. "|r",
+          --               order = 30,
+          --             },
+          --             Translators1 = {
+          --               type = "description",
+          --               order = 31,
+          --               width = "full",
+          --               name = "deDE: Blacksalsify (original  author: Aideen@Perenolde/EU)"
+          --             },
+          --             Translators2 = {
+          --               type = "description",
+          --               order = 32,
+          --               width = "full",
+          --               name = "esES: sugymaylis, Woopy"
+          --             },
+          --             Translators3 = {
+          --               type = "description",
+          --               order = 33,
+          --               width = "full",
+          --               name = "esMX: sugymaylis, Woopy"
+          --             },
+          -- 						Translators8 = {
+          -- 							type = "description",
+          -- 							order = 34,
+          -- 							width = "full",
+          -- 							name = "zhTW: gaspy10 (CurseForge)"
+          -- 						},
         },
       },
     }
   end
-  local ClassOpts_OrderCount = 1
+
+  local class_list = Addon.CopyTable(CLASS_SORT_ORDER)
+  sort(class_list)
   local ClassOpts = {
     Style = {
       name = "Style",
@@ -9925,22 +10178,29 @@ local function CreateOptionsTable()
       width = "full",
       set = function(info, val)
         SetValue(info, val)
-        for k_c, v_c in pairs(CLASS_SORT_ORDER) do
-          options.args.Widgets.args.ClassIconWidget.args.Textures.args["Prev" .. k_c].image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ClassIconWidget\\" .. db.classWidget.theme .. "\\" .. CLASS_SORT_ORDER[k_c]
+        for i, class in ipairs(class_list) do
+          options.args.Widgets.args.ClassIconWidget.args.Textures.args["Prev" .. i].image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ClassIconWidget\\" .. db.classWidget.theme .. "\\" .. class
         end
       end,
-      values = { default = "Default", transparent = "Transparent", crest = "Crest", clean = "Clean" },
+      values = {
+        default = L["Default"],
+        transparent = L["Transparent"],
+        wowround = L["WoW Round"],
+        wowflat = L["WoW Flat"],
+        clean = L["Clean"],
+        cleanborder = L["Clean Border"],
+        crest = L["Crest"],
+      },
       arg = { "classWidget", "theme" },
     },
   };
-  for k_c, v_c in pairs(CLASS_SORT_ORDER) do
-    ClassOpts["Prev" .. k_c] = {
-      name = CLASS_SORT_ORDER[k_c],
+  for i, class in ipairs(class_list) do
+    ClassOpts["Prev" .. i] = {
+      name = class,
       type = "execute",
-      order = ClassOpts_OrderCount,
-      image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ClassIconWidget\\" .. db.classWidget.theme .. "\\" .. CLASS_SORT_ORDER[k_c],
+      order = i,
+      image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ClassIconWidget\\" .. db.classWidget.theme .. "\\" .. class,
     }
-    ClassOpts_OrderCount = ClassOpts_OrderCount + 1
   end
   options.args.Widgets.args.ClassIconWidget.args.Textures.args = ClassOpts
 
@@ -9948,7 +10208,7 @@ local function CreateOptionsTable()
   options.args.profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(Addon.db)
   options.args.profiles.order = 10000
 
-  if not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC and not Addon.IS_WRATH_CLASSIC then
+  if not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC then
     -- Add dual-spec support
     local LibDualSpec = LibStub("LibDualSpec-1.0", true)
     LibDualSpec:EnhanceDatabase(Addon.db, ThreatPlates.ADDON_NAME)
@@ -9972,10 +10232,13 @@ local function GetInterfaceOptionsTable()
       openoptions = {
         type = "execute",
         name = L["Open Options"],
-        image = PATH_ART .. "Logo",
+        --image = PATH_ART .. "LogoLegacy",
+        image = Meta("IconTexture"),
         width = "full",
-        imageWidth = 256,
-        imageHeight = 32,
+        -- imageWidth = 256,
+        -- imageHeight = 32,
+        imageWidth = 128,
+        imageHeight = 128,
         func = function()
           Addon:OpenOptions()
         end,
@@ -10003,8 +10266,10 @@ function Addon:ProfChange()
 
     local base = options.args.Widgets.args
     base.TargetArtWidget.args.Texture.args.Preview.image = path .. "TargetArtWidget\\" .. db.targetWidget.theme
-    for k_c, v_c in pairs(CLASS_SORT_ORDER) do
-      base.ClassIconWidget.args.Textures.args["Prev" .. k_c].image = path .. "ClassIconWidget\\" .. db.classWidget.theme .. "\\" .. CLASS_SORT_ORDER[k_c]
+    local class_list = Addon.CopyTable(CLASS_SORT_ORDER)
+    sort(class_list)
+    for i, class in ipairs(class_list) do
+      base.ClassIconWidget.args.Textures.args["Prev" .. i].image = path .. "ClassIconWidget\\" .. db.classWidget.theme .. "\\" .. class
     end
 
     if not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then

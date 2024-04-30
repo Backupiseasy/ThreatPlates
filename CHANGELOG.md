@@ -1,3 +1,3 @@
 # @project-version@ (@build-time@)
 
-* Added Maim (Druid) to Auras widget as CC aura for Wrath Classic.
+* Custom color for Name text now also supports transparency [Comment #6829]. 

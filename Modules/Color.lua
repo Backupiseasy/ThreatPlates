@@ -218,7 +218,7 @@ local function UpdatePlateColors(tp_frame)
 
   color = tp_frame:GetNameColor() or TRANPARENT_COLOR
   if SettingsName[tp_frame.PlateStyle].Enabled then
-    tp_frame.visual.NameText:SetTextColor(color.r, color.g, color.b)
+    tp_frame.visual.NameText:SetTextColor(color.r, color.g, color.b, color.a)
   end
   PublishEvent("NameColorUpdate", tp_frame, color)
 end
@@ -354,7 +354,7 @@ local function GetCustomStyleColor(unit)
   return color
 end
 
-function ColorModule:GetThreatColor(unit)
+function ColorModule.GetThreatColor(unit)
   return unit.CombatColor
 end
 
@@ -383,13 +383,13 @@ end
 --  else
 --    local use_target_mark_color
 --    if unit.CustomPlateSettings then
---      use_target_mark_color = unit.TargetMarker and unit.CustomPlateSettings.allowMarked
+--      use_target_mark_color = unit.TargetMarkerIcon and unit.CustomPlateSettings.allowMarked
 --    else
---      use_target_mark_color = unit.TargetMarker and Settings.UseRaidMarkColoring
+--      use_target_mark_color = unit.TargetMarkerIcon and Settings.UseRaidMarkColoring
 --    end
 --
 --    if use_target_mark_color then
---      color = SettingsBase.settings.raidicon.hpMarked[unit.TargetMarker]
+--      color = SettingsBase.settings.raidicon.hpMarked[unit.TargetMarkerIcon]
 --    elseif unit.IsTapDenied then
 --      color = ColorByReaction.TappedUnit
 --    elseif Addon:ShowQuestUnit(unit) and Addon:IsPlayerQuestUnit(unit) then
@@ -414,13 +414,13 @@ end
 --  else
 --    local use_target_mark_color
 --    if unit.CustomPlateSettings then
---      use_target_mark_color = unit.TargetMarker and unit.CustomPlateSettings.allowMarked
+--      use_target_mark_color = unit.TargetMarkerIcon and unit.CustomPlateSettings.allowMarked
 --    else
---      use_target_mark_color = unit.TargetMarker and mode_settings.UseRaidMarkColoring
+--      use_target_mark_color = unit.TargetMarkerIcon and mode_settings.UseRaidMarkColoring
 --    end
 --
 --    if use_target_mark_color then
---      color = SettingsBase.settings.raidicon.hpMarked[unit.TargetMarker]
+--      color = SettingsBase.settings.raidicon.hpMarked[unit.TargetMarkerIcon]
 --    elseif unit.IsTapDenied and tp_frame.PlateStyle == "NameMode" then
 --      color = ColorByReaction.TappedUnit
 --    end
@@ -451,13 +451,13 @@ local function GetSituationalColor(unit, plate_style)
   if not healthbar_color then
     local use_target_mark_color
     if unit.CustomPlateSettings then
-      use_target_mark_color = unit.TargetMarker and unit.CustomPlateSettings.allowMarked
+      use_target_mark_color = unit.TargetMarkerIcon and unit.CustomPlateSettings.allowMarked
     else
-      use_target_mark_color = unit.TargetMarker and Settings.UseRaidMarkColoring
+      use_target_mark_color = unit.TargetMarkerIcon and Settings.UseRaidMarkColoring
     end
 
     if use_target_mark_color then
-      healthbar_color = SettingsBase.settings.raidicon.hpMarked[unit.TargetMarker]
+      healthbar_color = SettingsBase.settings.raidicon.hpMarked[unit.TargetMarkerIcon]
     elseif unit.IsTapDenied then
       healthbar_color = ColorByReaction.TappedUnit
     elseif ShowQuestUnit(unit) and Addon:IsPlayerQuestUnit(unit) then
@@ -468,13 +468,13 @@ local function GetSituationalColor(unit, plate_style)
   if not name_color then
     local use_target_mark_color
     if unit.CustomPlateSettings then
-      use_target_mark_color = unit.TargetMarker and unit.CustomPlateSettings.allowMarked
+      use_target_mark_color = unit.TargetMarkerIcon and unit.CustomPlateSettings.allowMarked
     else
-      use_target_mark_color = unit.TargetMarker and mode_settings.UseRaidMarkColoring
+      use_target_mark_color = unit.TargetMarkerIcon and mode_settings.UseRaidMarkColoring
     end
 
     if use_target_mark_color then
-      name_color = SettingsBase.settings.raidicon.hpMarked[unit.TargetMarker]
+      name_color = SettingsBase.settings.raidicon.hpMarked[unit.TargetMarkerIcon]
     elseif unit.IsTapDenied and plate_style == "NameMode" then
       name_color = ColorByReaction.TappedUnit
     end
@@ -489,7 +489,7 @@ end
 ---------------------------------------------------------------------------------------------------
 
 -- Called in processing event: NAME_PLATE_UNIT_ADDED
-function ColorModule:Initialize(tp_frame)
+function ColorModule.PlateUnitAdded(tp_frame)
   if tp_frame.PlateStyle == "None" then return end
   
   local unit = tp_frame.unit
@@ -516,31 +516,6 @@ function ColorModule:Initialize(tp_frame)
 
   UpdatePlateColors(tp_frame)
   --print ("Unit:", unit.name, "-> Updating Plate Colors:", Addon.Debug:ColorToString(tp_frame:GetHealthbarColor()))
-end
-
--- Called in processing event: UpdateStyle in Nameplate.lua
-function ColorModule:UpdateStyle(tp_frame, style)
-  if tp_frame.PlateStyle == "None" then return end
-  
-  local unit = tp_frame.unit
-
-  --local color = (style == "unique") and GetCustomStyleColor(unit)
-  local color = GetCustomStyleColor(unit)
-
-  -- As combat color is set to nil when a custom style is used, it has to be re-evaluated here
-  SetCombatColor(tp_frame.unit)
-
-  if color then
-    tp_frame.GetHealthbarColor = GetUnitColorCustomPlate
-    tp_frame.GetNameColor = GetUnitColorCustomPlateName
-  else
-    tp_frame.GetHealthbarColor = HealthbarColorFunctions[unit.reaction]
-    tp_frame.GetNameColor = NameColorFunctions[tp_frame.PlateStyle][unit.reaction]
-  end
-
-  self:Initialize(tp_frame)
-
-  UpdatePlateColors(tp_frame)
 end
 
 local function UNIT_HEALTH(unitid)
@@ -603,7 +578,7 @@ local function ClassColorUpdate(tp_frame)
   end
 end
 
-function ColorModule:UpdateSettings()
+function ColorModule.UpdateSettings()
   SettingsBase = Addon.db.profile
   Settings = SettingsBase.Healthbar
   SettingsName = SettingsBase.Name
@@ -693,7 +668,7 @@ function ColorModule:UpdateSettings()
   --wipe(HealthColorCache)
 end
 
-function ColorModule:SetCastbarColor(unit)
+function ColorModule.SetCastbarColor(unit)
 	if not unit.unitid then return end
 
 	local db = Addon.db.profile

@@ -24,12 +24,12 @@ L[ [=[
 
 Backupiseasy
 
-(Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=] ] = [=[
-
---
-
-Backupiseasy
-
+(Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=] ] = [=[
+
+--
+
+Backupiseasy
+
 (Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=]
 L[ [=[
 
@@ -39,40 +39,40 @@ Feel free to email me at |cff00ff00threatplates@gmail.com|r
 
 Blacksalsify
 
-(Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=] ] = [=[
-
-隨時歡迎 Email 給我 |cff00ff00threatplates@gmail.com|r
-
---
-
-Blacksalsify
-
+(Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=] ] = [=[
+
+隨時歡迎 Email 給我 |cff00ff00threatplates@gmail.com|r
+
+--
+
+Blacksalsify
+
 (原作者: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=]
-L[ [=[
-
---
-
-Backupiseasy
-
-(Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=] ] = [=[
--- 
-
-Backupiseasy 
+L[ [=[
+
+--
+
+Backupiseasy
+
+(Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=] ] = [=[
+-- 
+
+Backupiseasy 
 (原作者: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=]
-L[ [=[
-
-Feel free to email me at |cff00ff00threatplates@gmail.com|r
-
---
-
-Blacksalsify
-
-(Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=] ] = [=[
-隨時歡迎 Email 給我 |cff00ff00threatplates@gmail.com|r 
-
--- 
-
-Blacksalsify 
+L[ [=[
+
+Feel free to email me at |cff00ff00threatplates@gmail.com|r
+
+--
+
+Blacksalsify
+
+(Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=] ] = [=[
+隨時歡迎 Email 給我 |cff00ff00threatplates@gmail.com|r 
+
+-- 
+
+Blacksalsify 
 (原作者: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=]
 L["%s already anchored to %s"] = "%s 已經對齊到 %s"
 L["%s already anchored to %s."] = "%s 已經對齊到 %s。"
@@ -93,22 +93,22 @@ L["|cff89F559Threat Plates|r: Tank switch detected, you are now in your |cff00ff
 L["|cff89F559Threat Plates|r: Unknown profile: "] = "|cff89F559威力血條|r: 未知的設定檔: "
 L[ [=[|cff89f559Welcome to |r|cff89f559Threat Plates!
 This is your first time using Threat Plates and you are a(n):
-|r|cff]=] ] = [=[|cff89f559歡迎使用 |r|cff89f559Threat Plates 威力血條!
-這是第一次使用威力血條，你是：
+|r|cff]=] ] = [=[|cff89f559歡迎使用 |r|cff89f559Threat Plates 威力血條!
+這是第一次使用威力血條，你是：
 |r|cff]=]
-L[ [=[|cff89f559Welcome to |r|cff89f559Threat Plates!
-This is your first time using Threat Plates and you are a(n):
-|r|cff]=] ] = [=[|cff89f559歡迎使用威力血條 |r|cff89f559Threat Plates!
-這是第一次使用威力血條，你是:
+L[ [=[|cff89f559Welcome to |r|cff89f559Threat Plates!
+This is your first time using Threat Plates and you are a(n):
+|r|cff]=] ] = [=[|cff89f559歡迎使用威力血條 |r|cff89f559Threat Plates!
+這是第一次使用威力血條，你是:
 |r|cff]=]
 L["|cff89f559You are currently in your "] = "|cff89f559你目前是 "
 L[ [=[|cffFF0000DELETE CUSTOM NAMEPLATE|r
-Are you sure you want to delete the selected custom nameplate?]=] ] = [=[|cffFF0000刪除自訂血條|r
-
+Are you sure you want to delete the selected custom nameplate?]=] ] = [=[|cffFF0000刪除自訂血條|r
+
 是否確定要刪除選擇的自訂血條?]=]
-L[ [=[|cffFF0000DELETE CUSTOM NAMEPLATE|r
-Are you sure you want to delete the selected custom nameplate?]=] ] = [=[|cffFF0000刪除自訂血條|r
-
+L[ [=[|cffFF0000DELETE CUSTOM NAMEPLATE|r
+Are you sure you want to delete the selected custom nameplate?]=] ] = [=[|cffFF0000刪除自訂血條|r
+
 是否確定要刪除選擇的自訂血條?]=]
 L["|cffff0000DPS/Healing|r"] = "|cffff0000DPS/治療|r"
 L["|cffff0000dpsing / healing|r"] = "|cffff0000輸出 / 治療|r"
@@ -177,6 +177,7 @@ L["Army of the Dead Ghoul"] = "食屍鬼大軍"
 L["Arrow"] = "箭頭"
 L["Arrow (Legacy)"] = "箭頭 (傳統)"
 L["Art Options"] = "美術圖案選項"
+L["Artwork"] = "美術圖案"
 L["Attempt to register script for unknown WoW event \"%s\""] = "嘗試替未知的魔獸事件 \"%s\" 註冊程式碼"
 L["Attempt to register script for unknown WoW event '%s'"] = "嘗試替未知的魔獸事件 '%s' 登錄腳本程式碼"
 L["Aura"] = "光環"
@@ -185,6 +186,7 @@ L["Aura: "] = "光環: "
 L["Auras"] = "光環"
 L["Auras (Name or ID)"] = "光環 (名稱或 ID)"
 L["Auras, Healthbar"] = "光環, 血條"
+L["Authors"] = "作者"
 L["Auto Sizing"] = "自動調整大小"
 L["Auto-Cast"] = "自動施放"
 L["Automatic Icon"] = "自動圖示"
@@ -260,13 +262,15 @@ L["Class"] = "職業"
 L["Class Color"] = "Class Color"
 L["Class Color for Players"] = "玩家的職業顏色"
 L["Class Icon"] = "職業圖示"
+L["Clean"] = "簡約"
+L["Clean Border"] = "簡約邊框"
 L[ [=[Clear and easy to use threat-reactive nameplates.
 
 Current version: ]=] ] = "簡單好用又清楚，能與仇恨值互動的血條。"
-L[ [=[Clear and easy to use threat-reactive nameplates.
-
-Current version: ]=] ] = [=[簡單好用又清楚，能反應出仇恨值變化的血條。
-
+L[ [=[Clear and easy to use threat-reactive nameplates.
+
+Current version: ]=] ] = [=[簡單好用又清楚，能反應出仇恨值變化的血條。
+
 目前版本: ]=]
 L["Clickable Area"] = "可點擊區域"
 L["Color"] = "顏色"
@@ -286,10 +290,12 @@ L["Combat"] = "戰鬥"
 L["Combo Points"] = "連擊點數"
 L["Configuration Mode"] = "設定模式"
 L["Controls the rate at which nameplate animates into their target locations [0.0-1.0]."] = "血條移動到最終位置的動畫速度 [0.0-1.0]。"
+L["Cooldown"] = "冷卻"
 L["Cooldown Spiral"] = "倒數轉圈動畫"
 L["Copy"] = "複製"
 L["Creation"] = "獲得順序"
 L["Crescent"] = "新月"
+L["Crest"] = "奢華"
 L["Crowd Control"] = "控場"
 L["Curse"] = "詛咒"
 L["Custom"] = "自訂"
@@ -305,8 +311,7 @@ L["Cyclic anchoring of aura areas to each other is not possible."] = "光環區�
 L["Darnavan"] = "達納凡"
 L["Death Knigh Rune Cooldown"] = "死亡騎士符文冷卻"
 L["Death Knight"] = "死亡騎士"
---[[Translation missing --]]
-L["Death Rune"] = "Death Rune"
+L["Death Rune"] = "死亡符文"
 L["Debuff Color"] = "減益顏色"
 L["Debuffs"] = "減益"
 --[[Translation missing --]]
@@ -320,19 +325,19 @@ L[ [=[Define a custom status text using LibDogTag markup language.
 
 Type /dogtag for tag info.
 
-Remember to press ENTER after filling out this box or it will not save.]=] ] = [=[自訂狀態文字使用 LibDogTag 標記語言。
-
-請輸入 /dogtag 查看可使用的文字標籤資訊。
-
+Remember to press ENTER after filling out this box or it will not save.]=] ] = [=[自訂狀態文字使用 LibDogTag 標記語言。
+
+請輸入 /dogtag 查看可使用的文字標籤資訊。
+
 輸入完成後請記得按 ENTER 鍵，否則不會儲存。]=]
-L[ [=[Define a custom status text using LibDogTag markup language.
-
-Type /dogtag for tag info.
-
-Remember to press ENTER after filling out this box or it will not save.]=] ] = [=[使用 LibDogTag 標記語言來自訂狀態文字。
-
-輸入 /dogtag 查看可使用的文字標籤資訊。
-
+L[ [=[Define a custom status text using LibDogTag markup language.
+
+Type /dogtag for tag info.
+
+Remember to press ENTER after filling out this box or it will not save.]=] ] = [=[使用 LibDogTag 標記語言來自訂狀態文字。
+
+輸入 /dogtag 查看可使用的文字標籤資訊。
+
 在文字欄位中輸入完成後請記得按 ENTER 鍵，否則不會儲存。]=]
 L["Define a custom transparency for this nameplate and overwrite any other transparency settings."] = "自訂這個血條的透明度，並且取代其他所有透明度的設定。"
 L["Define base alpha settings for various unit types. Only one of these settings is applied to a unit at the same time, i.e., they are mutually exclusive."] = "設定多種單位類型的基礎透明度。一次只會套用一種設定到單位，也就是說，它們不會同時套用。"
@@ -420,6 +425,8 @@ L["Error in event script '%s' of custom style '%s': %s"] = "事件程式碼 '%s'
 L["Event Name"] = "事件名稱"
 L["Events with Script"] = "包含程式碼的事件"
 L["Everything"] = "全部"
+L["Evoker"] = "喚能師"
+L["Evoker Essence Cooldown"] = "喚能師精華冷卻"
 L["Exchange"] = "交換"
 L["Experience"] = "經驗值"
 L["Experience Text"] = "經驗值文字"
@@ -433,6 +440,7 @@ L["Faction Icon"] = "陣營圖示"
 L["Fading"] = "淡出"
 L["Failed to migrate the imported profile to the current settings format because of an internal error. Please report this issue at the Threat Plates homepage at CurseForge: "] = "因為內部的錯誤，無法將匯入的設定檔轉移成目前的設定格式，請到 CurseForge 網站的 Threat Plates 插件頁面回報此問題。"
 L["Fanged Pit Viper"] = "尖牙深淵毒蛇"
+L["FAQ"] = "FAQ"
 L["Filter"] = "過濾方式"
 L["Filter by Spell"] = "過濾法術"
 L["Filtered Auras"] = "要過濾的光環"
@@ -453,6 +461,7 @@ L["Foreground Texture"] = "前景材質"
 L["Format"] = "樣式"
 L["Four"] = "四"
 L["Frame Order"] = "框架順序"
+L["Frequently Asked Questions"] = "常見問題"
 L["Friendly & Neutral Units"] = "友方 & 中立單位"
 L["Friendly Casting"] = "友方施法"
 L["Friendly Name Color"] = "友方名字顏色"
@@ -749,6 +758,7 @@ L["Set transparency settings for different threat levels."] = "替不同的仇�
 L["Sets your role to DPS."] = "將你的角色設定為傷害輸出。"
 L["Sets your role to tanking."] = "將你的角色設定為坦克。"
 L["Sets your spec "] = "設定專精"
+L["Seven"] = "七"
 L["Shadow"] = "陰影"
 L["Shadow Fiend"] = "暗影惡魔"
 L["Shadowy Apparition"] = "暗影幻靈"
@@ -994,6 +1004,7 @@ L["This will toggle the auras widget to show the cooldown spiral on auras."] = "
 L["Threat Detection"] = "仇恨偵測"
 L["Threat Detection Heuristic"] = "啟發式仇恨偵測"
 L["Threat Glow"] = "仇恨值發光效果"
+L["Threat Plates is currently maintained by Backup (CurseForge). It was originally written by Suicidal Katt (CurseForge)."] = "Threat Plates 威力血條目前是由 Backup (CurseForge) 更新維護，最原始的作者是 Suicidal Katt (CurseForge)。"
 L["Threat Plates Script Editor"] = "威力血條程式碼編輯器"
 L["Threat System"] = "仇恨值系統"
 L["Threat Table"] = "仇恨值表"
@@ -1018,9 +1029,11 @@ L["Top-to-bottom"] = "由上到下"
 L["Totem Scale"] = "圖騰縮放大小"
 L["Totem Transparency"] = "圖騰透明度"
 L["Totems"] = "圖騰"
+L["Translators"] = "翻譯"
 L["Transliterate Cyrillic Letters"] = "音譯西里爾字母"
 L["Transparency"] = "透明"
 L["Transparency & Scaling"] = "透明度 & 縮放大小"
+L["Transparent"] = "透明"
 L["Treant"] = "樹人"
 L["Trigger"] = "觸發條件"
 L["Two"] = "二"
@@ -1084,6 +1097,7 @@ L["Value"] = "數值"
 L["Value Format"] = "數值格式"
 L["Value Type"] = "數值類型"
 L["Venomous Snake"] = "毒蛇"
+L["Version"] = "版本"
 L["Vertical Align"] = "垂直對齊"
 L["Vertical Alignment"] = "垂直對齊"
 L["Vertical Offset"] = "垂直位置"
@@ -1104,6 +1118,8 @@ L["Windwalker Monk"] = "御風武僧"
 L["With Pet"] = "有寵物時"
 L["Word Wrap"] = "文字換行"
 L["World Boss"] = "世界王"
+L["WoW Flat"] = "魔獸平面"
+L["WoW Round"] = "魔獸圓角"
 L["X"] = "水平"
 L["Y"] = "垂直"
 L["You can access the "] = "要使用 "

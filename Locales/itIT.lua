@@ -269,6 +269,8 @@ L["Arrow (Legacy)"] = "Arrow (Legacy)"
 --[[Translation missing --]]
 L["Art Options"] = "Art Options"
 --[[Translation missing --]]
+L["Artwork"] = "Artwork"
+--[[Translation missing --]]
 L["Attempt to register script for unknown WoW event \"%s\""] = "Attempt to register script for unknown WoW event \"%s\""
 --[[Translation missing --]]
 L["Attempt to register script for unknown WoW event '%s'"] = "Attempt to register script for unknown WoW event '%s'"
@@ -284,6 +286,8 @@ L["Auras"] = "Auras"
 L["Auras (Name or ID)"] = "Auras (Name or ID)"
 --[[Translation missing --]]
 L["Auras, Healthbar"] = "Auras, Healthbar"
+--[[Translation missing --]]
+L["Authors"] = "Authors"
 --[[Translation missing --]]
 L["Auto Sizing"] = "Auto Sizing"
 --[[Translation missing --]]
@@ -431,6 +435,10 @@ L["Class Color for Players"] = "Class Color for Players"
 --[[Translation missing --]]
 L["Class Icon"] = "Class Icon"
 --[[Translation missing --]]
+L["Clean"] = "Clean"
+--[[Translation missing --]]
+L["Clean Border"] = "Clean Border"
+--[[Translation missing --]]
 L[ [=[Clear and easy to use threat-reactive nameplates.
 
 Current version: ]=] ] = [=[Clear and easy to use threat-reactive nameplates.
@@ -477,6 +485,8 @@ L["Configuration Mode"] = "Configuration Mode"
 --[[Translation missing --]]
 L["Controls the rate at which nameplate animates into their target locations [0.0-1.0]."] = "Controls the rate at which nameplate animates into their target locations [0.0-1.0]."
 --[[Translation missing --]]
+L["Cooldown"] = "Cooldown"
+--[[Translation missing --]]
 L["Cooldown Spiral"] = "Cooldown Spiral"
 --[[Translation missing --]]
 L["Copy"] = "Copy"
@@ -484,6 +494,8 @@ L["Copy"] = "Copy"
 L["Creation"] = "Creation"
 --[[Translation missing --]]
 L["Crescent"] = "Crescent"
+--[[Translation missing --]]
+L["Crest"] = "Crest"
 --[[Translation missing --]]
 L["Crowd Control"] = "Crowd Control"
 --[[Translation missing --]]
@@ -719,6 +731,10 @@ L["Events with Script"] = "Events with Script"
 --[[Translation missing --]]
 L["Everything"] = "Everything"
 --[[Translation missing --]]
+L["Evoker"] = "Evoker"
+--[[Translation missing --]]
+L["Evoker Essence Cooldown"] = "Evoker Essence Cooldown"
+--[[Translation missing --]]
 L["Exchange"] = "Exchange"
 --[[Translation missing --]]
 L["Experience"] = "Experience"
@@ -744,6 +760,8 @@ L["Fading"] = "Fading"
 L["Failed to migrate the imported profile to the current settings format because of an internal error. Please report this issue at the Threat Plates homepage at CurseForge: "] = "Failed to migrate the imported profile to the current settings format because of an internal error. Please report this issue at the Threat Plates homepage at CurseForge: "
 --[[Translation missing --]]
 L["Fanged Pit Viper"] = "Fanged Pit Viper"
+--[[Translation missing --]]
+L["FAQ"] = "FAQ"
 --[[Translation missing --]]
 L["Filter"] = "Filter"
 --[[Translation missing --]]
@@ -782,6 +800,8 @@ L["Format"] = "Format"
 L["Four"] = "Four"
 --[[Translation missing --]]
 L["Frame Order"] = "Frame Order"
+--[[Translation missing --]]
+L["Frequently Asked Questions"] = "Frequently Asked Questions"
 --[[Translation missing --]]
 L["Friendly & Neutral Units"] = "Friendly & Neutral Units"
 --[[Translation missing --]]
@@ -1363,6 +1383,8 @@ L["Sets your role to tanking."] = "Sets your role to tanking."
 --[[Translation missing --]]
 L["Sets your spec "] = "Sets your spec "
 --[[Translation missing --]]
+L["Seven"] = "Seven"
+--[[Translation missing --]]
 L["Shadow"] = "Shadow"
 --[[Translation missing --]]
 L["Shadow Fiend"] = "Shadow Fiend"
@@ -1837,6 +1859,8 @@ L["Threat Detection Heuristic"] = "Threat Detection Heuristic"
 --[[Translation missing --]]
 L["Threat Glow"] = "Threat Glow"
 --[[Translation missing --]]
+L["Threat Plates is currently maintained by Backup (CurseForge). It was originally written by Suicidal Katt (CurseForge)."] = "Threat Plates is currently maintained by Backup (CurseForge). It was originally written by Suicidal Katt (CurseForge)."
+--[[Translation missing --]]
 L["Threat Plates Script Editor"] = "Threat Plates Script Editor"
 --[[Translation missing --]]
 L["Threat System"] = "Threat System"
@@ -1883,11 +1907,15 @@ L["Totem Transparency"] = "Totem Transparency"
 --[[Translation missing --]]
 L["Totems"] = "Totems"
 --[[Translation missing --]]
+L["Translators"] = "Translators"
+--[[Translation missing --]]
 L["Transliterate Cyrillic Letters"] = "Transliterate Cyrillic Letters"
 --[[Translation missing --]]
 L["Transparency"] = "Transparency"
 --[[Translation missing --]]
 L["Transparency & Scaling"] = "Transparency & Scaling"
+--[[Translation missing --]]
+L["Transparent"] = "Transparent"
 --[[Translation missing --]]
 L["Treant"] = "Treant"
 --[[Translation missing --]]
@@ -2009,6 +2037,8 @@ L["Value Type"] = "Value Type"
 --[[Translation missing --]]
 L["Venomous Snake"] = "Venomous Snake"
 --[[Translation missing --]]
+L["Version"] = "Version"
+--[[Translation missing --]]
 L["Vertical Align"] = "Vertical Align"
 --[[Translation missing --]]
 L["Vertical Alignment"] = "Vertical Alignment"
@@ -2048,6 +2078,10 @@ L["With Pet"] = "With Pet"
 L["Word Wrap"] = "Word Wrap"
 --[[Translation missing --]]
 L["World Boss"] = "World Boss"
+--[[Translation missing --]]
+L["WoW Flat"] = "WoW Flat"
+--[[Translation missing --]]
+L["WoW Round"] = "WoW Round"
 --[[Translation missing --]]
 L["X"] = "X"
 --[[Translation missing --]]

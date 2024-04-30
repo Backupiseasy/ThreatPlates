@@ -28,18 +28,18 @@ local Element = Addon.Elements.NewElement("SpellIcon")
 ---------------------------------------------------------------------------------------------------
 
 -- Called in processing event: NAME_PLATE_CREATED
-function Element.Created(tp_frame)
+function Element.Create(tp_frame)
   local spell_icon = tp_frame.visual.Castbar:CreateTexture(nil, "OVERLAY", nil, 7)
 
   tp_frame.visual.SpellIcon = spell_icon
 end
 
 -- Called in processing event: NAME_PLATE_UNIT_ADDED
---function Element.UnitAdded(tp_frame)
+--function Element.PlateUnitAdded(tp_frame)
 --end
 
 -- Called in processing event: NAME_PLATE_UNIT_REMOVED
---function Element.UnitRemoved(tp_frame)
+--function Element.PlateUnitRemoved(tp_frame)
 --end
 
 ---- Called in processing event: UpdateStyle in Nameplate.lua

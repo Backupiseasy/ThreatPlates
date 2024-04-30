@@ -1193,7 +1193,6 @@ local function MigrateThreatValue(_, profile)
 
   if DatabaseEntryExists(profile, { "threatWidget", "ThreatPercentage" } ) then
     profile.threatWidget.ThreatPercentage.ShowInGroups = GetValueOrDefault(profile.threatWidget.ThreatPercentage.OnlyInGroups, default_profile.threatWidget.ThreatPercentage.OnlyInGroups)
-    print (profile.threatWidget.ThreatPercentage.Show)
     if profile.threatWidget.ThreatPercentage.Show == false then
       profile.threatWidget.ThreatPercentage.ShowAlways = false -- is also the default value
       profile.threatWidget.ThreatPercentage.ShowInGroups = false
@@ -1221,6 +1220,49 @@ local function MigrationThreatSystemEnable(_, profile)
   end
 
   DatabaseEntryDelete(profile, { "threat", "ON" })
+end
+
+local function MigrateFontFlagsNONE(_, profile)
+  local function MigrateFontFlagsEntry(profile_to_migrate, keys)
+    if DatabaseEntryExists(profile_to_migrate, keys) then
+      for i, key in ipairs(keys) do
+        profile_to_migrate = profile_to_migrate[key]
+      end
+  
+      if profile_to_migrate.flags == "NONE" then
+        profile_to_migrate.flags = ""
+      end
+    end
+  end
+
+  MigrateFontFlagsEntry(profile, { "arenaWidget", "NumberText", "Font", })
+  MigrateFontFlagsEntry(profile, { "AuraWidget", "Debuffs", "ModeIcon", "Duration", "Font", })
+  MigrateFontFlagsEntry(profile, { "AuraWidget", "Debuffs", "ModeIcon", "StackCount", "Font", })
+  MigrateFontFlagsEntry(profile, { "AuraWidget", "Debuffs", "ModeBar", "Label", "Font", })
+  MigrateFontFlagsEntry(profile, { "AuraWidget", "Debuffs", "ModeBar", "Duration", "Font", })
+  MigrateFontFlagsEntry(profile, { "AuraWidget", "Debuffs", "ModeBar", "StackCount", "Font", })
+  MigrateFontFlagsEntry(profile, { "AuraWidget", "Buffs", "ModeIcon", "Duration", "Font", })
+  MigrateFontFlagsEntry(profile, { "AuraWidget", "Buffs", "ModeIcon", "StackCount", "Font", })
+  MigrateFontFlagsEntry(profile, { "AuraWidget", "Buffs", "ModeBar", "Label", "Font", })
+  MigrateFontFlagsEntry(profile, { "AuraWidget", "Buffs", "ModeBar", "Duration", "Font", })
+  MigrateFontFlagsEntry(profile, { "AuraWidget", "Buffs", "ModeBar", "StackCount", "Font", })
+  MigrateFontFlagsEntry(profile, { "AuraWidget", "CrowdControl", "ModeIcon", "Duration", "Font", })
+  MigrateFontFlagsEntry(profile, { "AuraWidget", "CrowdControl", "ModeIcon", "StackCount", "Font", })
+  MigrateFontFlagsEntry(profile, { "AuraWidget", "CrowdControl", "ModeBar", "Label", "Font", })
+  MigrateFontFlagsEntry(profile, { "AuraWidget", "CrowdControl", "ModeBar", "Duration", "Font", })
+  MigrateFontFlagsEntry(profile, { "AuraWidget", "CrowdControl", "ModeBar", "StackCount", "Font", })  
+  MigrateFontFlagsEntry(profile, { "threatWidget", "ThreatPercentage", "Font", })
+  MigrateFontFlagsEntry(profile, { "ComboPoints", "RuneCooldown", "Font", })
+  MigrateFontFlagsEntry(profile, { "ComboPoints", "EssenceCooldown", "Font", })
+  MigrateFontFlagsEntry(profile, { "ExperienceWidget", "RankText", "Font", })
+  MigrateFontFlagsEntry(profile, { "ExperienceWidget", "ExperienceText", "Font", })
+  MigrateFontFlagsEntry(profile, { "BlizzardSettings", "Names", "Font", })
+  MigrateFontFlagsEntry(profile, { "settings", "healthbar", "TargetUnit", "Font", })
+  MigrateFontFlagsEntry(profile, { "settings", "castbar", "CastTarget", "Font", })
+  MigrateFontFlagsEntry(profile, { "settings", "name", })
+  MigrateFontFlagsEntry(profile, { "settings", "level", })
+  MigrateFontFlagsEntry(profile, { "settings", "customtext", })
+  MigrateFontFlagsEntry(profile, { "settings", "spelltext", })
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -1390,6 +1432,9 @@ local MIGRATION_FUNCTIONS_BY_VERSION = {
     { Type = "Delete", Key = { "settings", "totem" } },
     { Type = "Delete", Key = { "settings", "normal" } },
     { Type = "Migrate", Name = "Threat System - Enable", Function = MigrationThreatSystemEnable, NoDefaultProfile = true },
+  },
+  ["11.1.25"] = {
+    { Type = "Migrate", Name = "Font Flag NONE", Function = MigrateFontFlagsNONE, NoDefaultProfile = true },
   },
 }
 

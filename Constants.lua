@@ -520,9 +520,9 @@ ThreatPlates.DEFAULT_SETTINGS = {
       HealthbarMode = {
         Enabled = true,
         FriendlyUnitMode = "CUSTOM",
-        FriendlyTextColor = RGB(255, 255, 255),
+        FriendlyTextColor = RGB(255, 255, 255, 1),
         EnemyUnitMode = "CUSTOM",
-        EnemyTextColor = RGB(255, 255, 255),
+        EnemyTextColor = RGB(255, 255, 255, 1),
         UseRaidMarkColoring = false,
         AbbreviationForEnemyUnits = "FULL",
         AbbreviationForFriendlyUnits = "FULL",
@@ -547,9 +547,9 @@ ThreatPlates.DEFAULT_SETTINGS = {
       NameMode = {
         Enabled = true, -- Must be true as name must always be shown in Headline View - no config option for it
         FriendlyUnitMode = "CLASS",
-        FriendlyTextColor = RGB(0, 255, 0),
+        FriendlyTextColor = RGB(0, 255, 0, 1),
         EnemyUnitMode = "CLASS",
-        EnemyTextColor = RGB(0, 255, 0),
+        EnemyTextColor = RGB(0, 255, 0, 1),
         UseRaidMarkColoring = false,
         -- Font anchoring and format
         -- Anchor = "CENTER",
@@ -659,7 +659,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
     },
     castbarColorInterrupted = RGB(255, 0, 255, 1),
     ColorByReaction = {
-      -- (Addon.IS_MAINLINE and RGB(128, 128, 255)) or 
+      -- Only tables for colors are allowed here, otherwise resetting these colors in the options will result in a Lua error
       FriendlyPlayer = RGB(0, 0, 255),           -- PlayerPvPOff, Mainline: purple, Classic: blue
       FriendlyNPC = RGB(0, 255, 0),              -- green
       HostileNPC = RGB(255, 0, 0),               -- red
@@ -710,11 +710,11 @@ ThreatPlates.DEFAULT_SETTINGS = {
       ShowNumber = true,
       HideName = false,
       colors = {
-        [1] = RGB_P(1, 0, 0, 1),
-        [2] = RGB_P(1, 1, 0, 1),
-        [3] = RGB_P(0, 1, 0, 1),
-        [4] = RGB_P(0, 1, 1, 1),
-        [5] = RGB_P(0, 0, 1, 1),
+        [1] = RGB(255,   0,   0, 1),
+        [2] = RGB(255,   0,   0, 1),
+        [3] = RGB(255,   0,   0, 1),
+        [4] = RGB(255,   0,   0, 1),
+        [5] = RGB(255,   0,   0, 1),
       },
       numColors = {
         [1] = RGB_P(1, 1, 1, 1),
@@ -723,6 +723,25 @@ ThreatPlates.DEFAULT_SETTINGS = {
         [4] = RGB_P(1, 1, 1, 1),
         [5] = RGB_P(1, 1, 1, 1),
       },
+      Allies = {
+        ShowOrb = true,
+        ShowNumber = true,
+        HideName = false,
+        OrbColors = {
+          [1] = RGB(  0, 255,   0, 1),
+          [2] = RGB(  0, 255,   0, 1),
+          [3] = RGB(  0, 255,   0, 1),
+          [4] = RGB(  0, 255,   0, 1),
+          [5] = RGB(  0, 255,   0, 1),
+        },
+        NumberColors = {
+          [1] = RGB_P(1, 1, 1, 1),
+          [2] = RGB_P(1, 1, 1, 1),
+          [3] = RGB_P(1, 1, 1, 1),
+          [4] = RGB_P(1, 1, 1, 1),
+          [5] = RGB_P(1, 1, 1, 1),
+        },
+      },      
       NumberText = {
         Anchor = "CENTER",
         InsideAnchor = true,
@@ -1281,6 +1300,14 @@ ThreatPlates.DEFAULT_SETTINGS = {
           [4] = RGB(255, 105, 0),
           [5] = RGB(255, 0, 0),
         },
+        EVOKER = {
+          [1] = RGB(66, 151, 216),
+          [2] = RGB(66, 151, 216),
+          [3] = RGB(66, 151, 216),
+          [4] = RGB(66, 151, 216),
+          [5] = RGB(66, 151, 216),
+          [6] = RGB(66, 151, 216),
+        },
         MAGE = {
           [1] = RGB(105, 204, 240),
           [2] = RGB(105, 204, 240),
@@ -1327,6 +1354,18 @@ ThreatPlates.DEFAULT_SETTINGS = {
         Font = {
           Typeface = Addon.DEFAULT_FONT,
           Size = 10,
+          flags = "OUTLINE",
+          Shadow = true,
+        },
+      },
+      EssenceCooldown = {
+        Show = true,
+        HorizontalOffset = 1,
+        VerticalOffset = 0,
+        Font = {
+          Typeface = Addon.DEFAULT_FONT,
+          Size = 10,
+          Color = RGB(66, 151, 216),
           flags = "OUTLINE",
           Shadow = true,
         },
@@ -1502,6 +1541,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
     },
     BlizzardSettings = {
       Names = {
+        ShowOnlyNames = false,
         Enabled = false,
         ShowPlayersInInstances = false,
         Font = {

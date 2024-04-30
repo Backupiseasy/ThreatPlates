@@ -15,11 +15,11 @@ local pairs = pairs
 
 -- WoW APIs
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
-local Style = Addon.Style
+local SetStyle = Addon.Style.SetStyle
 
 -- ThreatPlates APIs
 local CUSTOM_GLOW_FUNCTIONS, CUSTOM_GLOW_WRAPPER_FUNCTIONS = Addon.CUSTOM_GLOW_FUNCTIONS, Addon.CUSTOM_GLOW_WRAPPER_FUNCTIONS
-local Icon = Addon.Icon
+local RegisterMasqueGroup, IconCreateIcon = Addon.Icon.RegisterMasqueGroup, Addon.Icon.CreateIcon
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -46,7 +46,7 @@ function Widget:Create(tp_frame)
   widget_frame.Highlight:SetFrameLevel(tp_frame:GetFrameLevel() + 15)
   widget_frame.HighlightStop = Addon.LibCustomGlow.PixelGlow_Stop
 
-  widget_frame.Icon = Icon:CreateIcon(self, widget_frame) 
+  widget_frame.Icon = IconCreateIcon(self, widget_frame) 
   widget_frame.Icon:SetAllPoints()
 
   widget_frame.HighlightBorder = widget_frame.Icon:GetParentFrame():CreateTexture(nil, "OVERLAY")
@@ -90,7 +90,7 @@ function Widget:OnEnable()
   -- if two aura triggers fired
   self:SubscribeEvent("StyleUpdate")
 
-  Icon:RegisterMasqueGroup(self, "Custom Style")
+  RegisterMasqueGroup(self, "Custom Style")
 end
 
 -- function Widget:OnDisable()
@@ -217,8 +217,10 @@ function Widget:UpdateLayout(widget_frame)
 
   -- Update the style as custom nameplates might have been changed and some units no longer
   -- may be unique
+  -- TODO: This should not be done this way. It would be better to handle
+  -- TODO: a custom nameplate update in Nameplate.lua by re-styling all nameplates
   if widget_frame:GetParent().Active and widget_frame.Active then
-    Style:SetStyle(widget_frame.unit)
+    SetStyle(widget_frame.unit)
   end
 end
 

@@ -19,10 +19,16 @@ local UnitIsBattlePet, UnitCreatureType = UnitIsBattlePet, UnitCreatureType
 local UnitCanAttack = UnitCanAttack
 
 -- ThreatPlates APIs
+local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
+local ElementsPlateCreated, ElementsPlateUnitAdded, ElementsPlateUnitRemoved = Addon.Elements.PlateCreated, Addon.Elements.PlateUnitAdded, Addon.Elements.PlateUnitRemoved
+local ElementsUpdateStyle, ElementsUpdateSettings = Addon.Elements.UpdateStyle, Addon.Elements.UpdateSettings
 local TOTEMS = Addon.TOTEMS
 local GetUnitVisibility = Addon.GetUnitVisibility
-local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
-local Threat = Addon.Threat
+local Widgets = Addon.Widgets
+local TransparencyPlateUnitAdded = Addon.Transparency.PlateUnitAdded
+local ScalingPlateUnitAdded = Addon.Scaling.PlateUnitAdded
+local ThreatShowFeedback = Addon.Threat.ShowFeedback
+local ColorPlateUnitAdded = Addon.Color.PlateUnitAdded
 local ActiveTheme = Addon.Theme
 local NameTriggers, AuraTriggers, CastTriggers = Addon.Cache.CustomPlateTriggers.Name, Addon.Cache.CustomPlateTriggers.Aura, Addon.Cache.CustomPlateTriggers.Cast
 local NameWildcardTriggers, TriggerWildcardTests = Addon.Cache.CustomPlateTriggers.NameWildcard, Addon.Cache.TriggerWildcardTests
@@ -188,9 +194,9 @@ local function ShowUnit(unit)
 end
 
 -- Returns style based on threat (currently checks for in combat, should not do hat)
-function StyleModule:GetThreatStyle(unit)
+function StyleModule.GetThreatStyle(unit)
   -- style tank/dps only used for NPCs/non-player units
-  if Threat:ShowFeedback(unit) then
+  if ThreatShowFeedback(unit) then
     return Addon.GetPlayerRole()
   end
 
@@ -208,7 +214,7 @@ end
 -- Check if a unit is a totem or a custom nameplates (e.g., after UNIT_NAME_UPDATE)
 -- Depends on:
 --   * unit.name
-function StyleModule:ProcessNameTriggers(unit)
+function StyleModule.ProcessNameTriggers(unit)
   local plate_style, custom_style, totem_settings
   local name_custom_style = NameTriggers[unit.name] or NameTriggers[unit.NPCID]
   if name_custom_style and name_custom_style.Enable.UnitReaction[unit.reaction] then
@@ -276,14 +282,14 @@ function StyleModule:ProcessNameTriggers(unit)
   return plate_style
 end
 
-function StyleModule:AuraTriggerInitialize(unit)
+function StyleModule.AuraTriggerInitialize(unit)
   if Addon.ActiveAuraTriggers then
     unit.PreviousCustomStyleAura = unit.CustomStyleAura
     unit.CustomStyleAura = nil
   end
 end
 
-function StyleModule:AuraTriggerUpdateStyle(unit)
+function StyleModule.AuraTriggerUpdateStyle(unit)
   -- Set the style if a aura trigger for a custom nameplate was found or the aura trigger
   -- is no longer there
   if Addon.ActiveAuraTriggers and (unit.CustomStyleAura or unit.PreviousCustomStyleAura) then 
@@ -292,9 +298,9 @@ function StyleModule:AuraTriggerUpdateStyle(unit)
   end
 end
 
-function StyleModule:AuraTriggerCheckIfActive(unit, aura_id, aura_name, aura_cast_by_player)
+function StyleModule.AuraTriggerCheckIfActive(unit, aura_id, aura_name, aura_cast_by_player)
   -- Do this to prevent overwrite the first aura trigger custom style found (which is the one being used)
-  if not Addon.ActiveAuraTriggers or unit.CustomStyleAura then return false end
+  if not Addon.ActiveAuraTriggers or unit.CustomStyleAura then return end
 
   local unique_settings = AuraTriggers[aura_id] or AuraTriggers[aura_name]
   -- Check if enabled for unit's faction and check for show only my auras
@@ -305,30 +311,44 @@ function StyleModule:AuraTriggerCheckIfActive(unit, aura_id, aura_name, aura_cas
 
     local _, _, icon = _G.GetSpellInfo(aura_id)
     unique_settings.AutomaticIcon = icon
-    return true
-  else
-    return false
   end
 end
 
-function StyleModule:ProcessCastTriggers(unit, spell_id, spell_name)
-  local plate_style
+function StyleModule.CastTriggerCheckIfActive(unit, spell_id, spell_name)
+  -- Cast triggers cannot be overwritten (like aura triggers) as there can only be one cast active at a time
+  if not Addon.ActiveCastTriggers then return end
+
+  unit.PreviousCustomStyleCast = unit.CustomStyleCast
+  unit.CustomStyleCast = nil
 
   local unique_settings = CastTriggers[spell_id] or CastTriggers[spell_name] or NameTriggers["Test"]
   if unique_settings and unique_settings.useStyle and unique_settings.Enable.UnitReaction[unit.reaction] then
-    plate_style = (unique_settings.showNameplate and "unique") or (unique_settings.ShowHeadlineView and "NameOnly-Unique") or "etotem"
-
-    unit.CustomStyleCast = plate_style
+    unit.CustomStyleCast = (unique_settings.showNameplate and "unique") or (unique_settings.ShowHeadlineView and "NameOnly-Unique") or "etotem"
     unit.CustomPlateSettingsCast = unique_settings
 
     local _, _, icon = _G.GetSpellInfo(spell_id)
     unique_settings.AutomaticIcon = icon
   end
-
-  return plate_style
 end
 
-function StyleModule:SetStyle(unit)
+function StyleModule.CastTriggerUpdateStyle(unit)
+  -- Set the style if a cast trigger for a custom nameplate was found or the cast trigger
+  -- is no longer there
+  return Addon.ActiveCastTriggers and (unit.CustomStyleCast or unit.PreviousCustomStyleCast)
+end
+
+function StyleModule.CastTriggerReset(unit)
+  if Addon.ActiveCastTriggers then
+    local cast_trigger_was_active = unit.CustomStyleCast ~= nil
+    unit.PreviousCustomStyleCast = nil
+    unit.CustomStyleCast = nil
+    return cast_trigger_was_active
+  else
+    return false
+  end
+end
+
+function StyleModule.SetStyle(unit)
   local show, hide_unit_type, headline_view = ShowUnit(unit)
 
   -- Nameplate is disabled in General - Visibility
@@ -387,17 +407,6 @@ end
 --  Nameplate Styler: These functions parses the definition table for a nameplate's requested style.
 ---------------------------------------------------------------------------------------------------------------------
 
-local function UpdateNameplateStyle(tp_frame, style)
-  -- Frame
-  tp_frame:ClearAllPoints()
-  tp_frame:SetPoint(style.frame.anchor, tp_frame.Parent, style.frame.anchor, style.frame.x, style.frame.y)
-  tp_frame:SetSize(style.healthbar.width, style.healthbar.height)
-
-  Color:UpdateStyle(tp_frame, style)
-  ElementsUpdateStyle(tp_frame, style)
-  Widgets:OnUnitAdded(tp_frame, tp_frame.unit)
-end
-
 local NAMEPLATE_MODE_BY_THEME = {
   dps = "HealthbarMode",
   tank = "HealthbarMode",
@@ -410,49 +419,56 @@ local NAMEPLATE_MODE_BY_THEME = {
   ["NameOnly-Unique"] = "NameMode",
 }
 
-function StyleModule:Update(tp_frame)
+local function UpdateNameplateStyle(tp_frame, style)
+  -- Frame
+  tp_frame:ClearAllPoints()
+  tp_frame:SetPoint(style.frame.anchor, tp_frame.Parent, style.frame.anchor, style.frame.x, style.frame.y)
+  tp_frame:SetSize(style.healthbar.width, style.healthbar.height)
+
+  -- The following modules use the unit style, so it must be initialized before Module:PlateUnitAdded is called
+  ColorPlateUnitAdded(tp_frame)
+  TransparencyPlateUnitAdded(tp_frame)
+  ScalingPlateUnitAdded(tp_frame)
+
+  ElementsUpdateStyle(tp_frame, style)
+  Widgets:OnUnitAdded(tp_frame, tp_frame.unit)
+end
+
+local function SetNameplateStyle(tp_frame, stylename)
+  local unit = tp_frame.unit
+
+  local style = ActiveTheme[stylename]
+
+  tp_frame.PlateStyle = NAMEPLATE_MODE_BY_THEME[stylename]
+  tp_frame.stylename = stylename
+  tp_frame.style = style
+  unit.style = stylename
+
+  UpdateNameplateStyle(tp_frame, style)
+end
+
+function StyleModule.PlateUnitAdded(tp_frame)
+  -- Update with old_custom_style == nil and tp_frame.stylename == nil
+  SetNameplateStyle(tp_frame, self:SetStyle(tp_frame.unit))
+end
+
+function StyleModule.Update(tp_frame)
   local unit = tp_frame.unit
 
   local old_custom_style = unit.CustomPlateSettings
-  local stylename = self:SetStyle(unit)
-
-  local update_style = false
+  local stylename = StyleModule.SetStyle(unit)
 
   if tp_frame.stylename ~= stylename then
-    local style = ActiveTheme[stylename]
-
-    tp_frame.PlateStyle = NAMEPLATE_MODE_BY_THEME[stylename]
-    tp_frame.stylename = stylename
-    tp_frame.style = style
-    unit.style = stylename
-
-    UpdateNameplateStyle(tp_frame, style)
+    SetNameplateStyle(tp_frame, stylename)
   elseif (stylename == "unique" or stylename == "NameOnly-Unique") and unit.CustomPlateSettings ~= old_custom_style then
     UpdateNameplateStyle(tp_frame, ActiveTheme[stylename])
   end
-
-  if update_style then
-    -- The following modules use the unit style, so it must be initialized before Module:Initialize is called
-    Transparency:Initialize(tp_frame)
-    Scaling:Initialize(tp_frame)
-    Color:Initialize(tp_frame)
-    ElementsUnitAdded(tp_frame)
-
-    UpdateNameplateStyle(tp_frame, style)
-  end
 end
 
-function StyleModule:UpdateName(tp_frame)
+function StyleModule.UpdateName(tp_frame)
   local stylename = self:ProcessNameTriggers(tp_frame.unit)
 
   if stylename and tp_frame.stylename ~= stylename then
-    local style = ActiveTheme[stylename]
-
-    tp_frame.PlateStyle = NAMEPLATE_MODE_BY_THEME[stylename]
-    tp_frame.stylename = stylename
-    tp_frame.style = style
-    tp_frame.unit.style = stylename
-
-    UpdateNameplateStyle(tp_frame, style)
+    SetNameplateStyle(tp_frame, stylename)
   end
 end

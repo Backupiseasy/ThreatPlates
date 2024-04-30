@@ -17,7 +17,8 @@ local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local UnitIsUnit = UnitIsUnit
 
 -- ThreatPlates APIs
-local Font, Color = Addon.Font, Addon.Color
+local SetCastbarColor = Addon.Color.SetCastbarColor
+local FontSetJustify, FontUpdateText, FontUpdateTextSize = Addon.Font.SetJustify, Addon.Font.UpdateText, Addon.Font.UpdateTextSize
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
 local BackdropTemplate = Addon.BackdropTemplate
 
@@ -123,7 +124,7 @@ end
 ---------------------------------------------------------------------------------------------------
 
 -- Called in processing event: NAME_PLATE_CREATED
-function Element.Created(tp_frame)
+function Element.Create(tp_frame)
   local castbar = CreateFrame("StatusBar", nil, tp_frame)
   castbar:Hide()
 
@@ -180,11 +181,12 @@ function Element.Created(tp_frame)
 end
 
 -- Called in processing event: NAME_PLATE_UNIT_ADDED
---function Element.UnitAdded(tp_frame)
---end
+function Element.PlateUnitAdded(tp_frame)
+  tp_frame.visual.Castbar.FlashTime = 0  -- Set FlashTime to 0 so that the castbar is actually hidden (see statusbar OnHide hook function)
+end
 
 -- Called in processing event: NAME_PLATE_UNIT_REMOVED
---function Element.UnitRemoved(tp_frame)
+--function Element.PlateUnitRemoved(tp_frame)
 --end
 
 -- Called in processing event: UpdateStyle in Nameplate.lua
@@ -235,7 +237,7 @@ function Element.UpdateStyle(tp_frame, style)
     border:SetBackdrop(INTERRUPT_BORDER_BACKDROP)
     border:SetBackdropBorderColor(1, 0, 0, 1)
 
-    castbar:SetAllColors(Color:SetCastbarColor(unit))
+    castbar:SetAllColors(SetCastbarColor(unit))
     castbar:Show()
   else
     castbar:Hide()
@@ -247,7 +249,7 @@ function Element.UpdateStyle(tp_frame, style)
   spell_text:SetFont(spell_text_style.typeface, spell_text_style.size, spell_text_style.flags)
 
   if spell_text_style.show then
-    Font:SetJustify(spell_text, spell_text_style.align, spell_text_style.vertical)
+    FontSetJustify(spell_text, spell_text_style.align, spell_text_style.vertical)
     if spell_text_style.shadow then
       spell_text:SetShadowColor(0,0,0, 1)
       spell_text:SetShadowOffset(1, -1)
@@ -270,7 +272,7 @@ function Element.UpdateStyle(tp_frame, style)
 
   cast_time:SetFont(spell_text_style.typeface, spell_text_style.size, spell_text_style.flags)
   if db.ShowCastTime then
-    Font:SetJustify(cast_time, db.CastTimeText.Font.HorizontalAlignment, db.CastTimeText.Font.VerticalAlignment)
+    FontSetJustify(cast_time, db.CastTimeText.Font.HorizontalAlignment, db.CastTimeText.Font.VerticalAlignment)
     if spell_text_style.shadow then
       cast_time:SetShadowColor(0,0,0, 1)
       cast_time:SetShadowOffset(1, -1)
@@ -287,8 +289,8 @@ function Element.UpdateStyle(tp_frame, style)
     cast_time:Hide()
   end
 
-  Font:UpdateText(castbar, castbar.CastTarget, db.CastTarget)
-  Font:UpdateTextSize(castbar, castbar.CastTarget, db.CastTarget)
+  FontUpdateText(castbar, castbar.CastTarget, db.CastTarget)
+  FontUpdateTextSize(castbar, castbar.CastTarget, db.CastTarget)
 
   castbar.CastTarget:SetShown(db.CastTarget.Show)
 

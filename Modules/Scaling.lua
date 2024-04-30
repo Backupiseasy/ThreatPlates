@@ -14,7 +14,10 @@ local UnitExists = UnitExists
 
 -- ThreatPlates APIs
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
-local Animation, Scaling, Transparency, Style = Addon.Animation, Addon.Scaling, Addon.Transparency, Addon.Style
+local Style = Addon.Style
+local TransparencyPlateUnitAdded = Addon.Transparency.PlateUnitAdded
+local ScalingPlateUnitAdded = Addon.Scaling.PlateUnitAdded
+local AnimationScalePlate, AnimationStopScale, AnimationHidePlate = Addon.Animation.ScalePlate, Addon.Animation.StopScale, Addon.Animation.HidePlate
 local CVars = Addon.CVars
 local MathClamp = Addon.Clamp
 
@@ -40,7 +43,7 @@ local function ScaleSituational(unit)
 	local db = Addon.db.profile.nameplate
 
 	-- Do checks for situational scale settings:
-	if unit.TargetMarker and db.toggle.MarkedS then
+	if unit.TargetMarkerIcon and db.toggle.MarkedS then
 		return db.scale.Marked
 	elseif unit.isMouseover and not unit.isTarget and db.toggle.MouseoverUnitScale then
 		return db.scale.MouseoverUnit
@@ -188,26 +191,26 @@ local function GetScale(unit)
 end
 
 local function ScalePlateWithAnimation(frame, scale)
-	Animation:ScalePlate(frame, scale)
+	AnimationScalePlate(frame, scale)
 end
 
 local function ScalePlateWithoutAnimation(frame, scale)
 	frame:SetScale(scale)
 end
 
-function ScalingModule:Initialize(tp_frame)
+function ScalingModule.PlateUnitAdded(tp_frame)
   tp_frame.HidingScale = nil
 
-	Animation:StopScale(tp_frame)
+	AnimationStopScale(tp_frame)
 	tp_frame:SetScale(Addon.UIScale * GetScale(tp_frame.unit))
 end
 
-function ScalingModule:HideNameplate(tp_frame)
+function ScalingModule.HideNameplate(tp_frame)
   if AnimateHideNameplate then
 		local scale = tp_frame.Parent:GetScale()
     if scale < CVAR_nameplateMinScale then
       if not tp_frame.HidingScale then
-        Animation:HidePlate(tp_frame)
+        AnimationHidePlate(tp_frame)
         tp_frame.HidingScale = scale + 0.01
       end
 
@@ -215,8 +218,8 @@ function ScalingModule:HideNameplate(tp_frame)
         tp_frame.HidingScale = scale
       elseif tp_frame.HidingScale ~= -1 then
         -- Scale down stoppted and reversed - plate is no longer hiding
-        Transparency:Initialize(tp_frame)
-        Scaling:Initialize(tp_frame)
+        TransparencyPlateUnitAdded(tp_frame)
+        ScalingPlateUnitAdded(tp_frame)
         tp_frame.HidingScale = -1
       end
     else -- scale >= CVAR_nameplateMinScale
@@ -225,7 +228,7 @@ function ScalingModule:HideNameplate(tp_frame)
   end
 end
 
-function ScalingModule:UpdateSettings()
+function ScalingModule.UpdateSettings()
 	Settings = Addon.db.profile.Animations
 
 	if Settings.ScaleToDuration > 0 then
@@ -247,7 +250,7 @@ function ScalingModule:UpdateSettings()
   end
 end
 
-function ScalingModule:HidingNameplatesIsEnabled()
+function ScalingModule.HidingNameplatesIsEnabled()
 	return AnimateHideNameplate
 end
 

@@ -14,7 +14,7 @@ local UnitEffectiveLevel, GetCreatureDifficultyColor = UnitEffectiveLevel, GetCr
 
 -- ThreatPlates APIs
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
-local Font = Addon.Font
+local FontSetJustify = Addon.Font.SetJustify
 
 ---------------------------------------------------------------------------------------------------
 -- Local variables
@@ -27,7 +27,7 @@ local Font = Addon.Font
 local Element = Addon.Elements.NewElement("Level")
 
 -- Called in processing event: NAME_PLATE_CREATED
-function Element.Created(tp_frame)
+function Element.Create(tp_frame)
   -- Level text is not shown in headline view, so anchoring it to the healthbar is ok
   local level_text = tp_frame.visual.Healthbar:CreateFontString(nil, "ARTWORK")
 
@@ -35,7 +35,7 @@ function Element.Created(tp_frame)
 end
 
 -- Called in processing event: NAME_PLATE_UNIT_ADDED
-function Element.UnitAdded(tp_frame)
+function Element.PlateUnitAdded(tp_frame)
   local level_text = tp_frame.visual.LevelText
   local unit = tp_frame.unit
 
@@ -51,7 +51,7 @@ function Element.UnitAdded(tp_frame)
 end
 
 -- Called in processing event: NAME_PLATE_UNIT_REMOVED
---function Element.UnitRemoved(tp_frame)
+--function Element.PlateUnitRemoved(tp_frame)
 --  tp_frame.visual.ThreatGlow:Hide() -- done in UpdateStyle
 --end
 
@@ -67,7 +67,7 @@ function Element.UpdateStyle(tp_frame, style, plate_style)
     return
   end
 
-  Font:SetJustify(level_text, style.align, style.vertical)
+  FontSetJustify(level_text, style.align, style.vertical)
 
   if style.shadow then
     level_text:SetShadowColor(0,0,0, 1)
@@ -86,7 +86,7 @@ end
 local function UNIT_LEVEL(unitid)
   local tp_frame = Addon:GetThreatPlateForUnit(unitid)
   if tp_frame then
-    Element.UnitAdded(tp_frame)
+    Element.PlateUnitAdded(tp_frame)
   end
 end
 

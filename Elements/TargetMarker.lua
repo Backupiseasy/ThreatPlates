@@ -10,13 +10,11 @@ local ADDON_NAME, Addon = ...
 -- Lua APIs
 
 -- WoW APIs
-local GetRaidTargetIndex = GetRaidTargetIndex
 
 -- ThreatPlates APIs
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
 
 -- Raid Icon Reference
-local RAID_ICON_LIST = { "STAR", "CIRCLE", "DIAMOND", "TRIANGLE", "MOON", "SQUARE", "CROSS", "SKULL" }
 local RAID_ICON_COORDINATE = {
   ["STAR"] = { x = 0, y =0 },
   ["CIRCLE"] = { x = 0.25, y = 0 },
@@ -26,6 +24,8 @@ local RAID_ICON_COORDINATE = {
   ["SQUARE"] = { x = .25, y = 0.25},
   ["CROSS"] = { x = .5, y = 0.25},
   ["SKULL"] = { x = .75, y = 0.25},
+  ["GREEN_FLAG"] = { x = 0.5, y = 0.75 },
+  ["MURLOC"] = { x = 0.75, y = 0.75 },
 }
 
 ---------------------------------------------------------------------------------------------------
@@ -44,9 +44,11 @@ function Element.TargetMarkerUpdate(tp_frame)
   -- Bug https://wow.curseforge.com/projects/tidy-plates-threat-plates/issues/304 should be fixed with this
   -- as unit.TargetMarker should only have valid values (1-8)
   local target_marker = tp_frame.visual.TargetMarker
-  if unit.TargetMarker and style.raidicon.show then
-    local icon_coord = RAID_ICON_COORDINATE[unit.TargetMarker]
-
+  local icon = (style.raidicon.show and unit.TargetMarkerIcon) or unit.MentorIcon
+  if icon then
+    local icon_coord = RAID_ICON_COORDINATE[icon]
+    -- ! Maybe use SetRaidTargetIconTexture(icon, index) - then we don't need SetTexCoord anymore
+    -- SetRaidTargetIconTexture(visual.raidicon, GetRaidTargetIndex(unit.unitid));
     target_marker:SetTexCoord(icon_coord.x, icon_coord.x + 0.25, icon_coord.y,  icon_coord.y + 0.25)
     target_marker:Show()
   else
@@ -55,17 +57,17 @@ function Element.TargetMarkerUpdate(tp_frame)
 end
 
 -- Called in processing event: NAME_PLATE_CREATED
-function Element.Created(tp_frame)
+function Element.Create(tp_frame)
   local target_marker = tp_frame.visual.textframe:CreateTexture(nil, "OVERLAY", nil, 7)
   target_marker:SetTexture("Interface\\TargetingFrame\\UI-RaidTargetingIcons")
   tp_frame.visual.TargetMarker = target_marker
 end
 
 -- Called in processing event: NAME_PLATE_UNIT_ADDED
-Element.UnitAdded = Element.TargetMarkerUpdate
+Element.PlateUnitAdded = Element.TargetMarkerUpdate
 
 -- Called in processing event: NAME_PLATE_UNIT_REMOVED
---function Element.UnitRemoved(tp_frame)
+--function Element.PlateUnitRemoved(tp_frame)
 --  tp_frame.visual.ThreatGlow:Hide() -- done in UpdateStyle
 --end
 

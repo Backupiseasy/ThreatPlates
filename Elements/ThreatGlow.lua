@@ -15,7 +15,7 @@ local CreateFrame = CreateFrame
 -- ThreatPlates APIs
 local RGB = Addon.RGB
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
-local Color = Addon.Color
+local GetThreatColor = Addon.Color.GetThreatColor
 local BackdropTemplate = Addon.BackdropTemplate
 
 local _G =_G
@@ -51,7 +51,7 @@ local function GetThreatGlowColor(unit)
     if unit.IsTapDenied then
       color = TappedColor
     else
-      color = Color:GetThreatColor(unit)
+      color = GetThreatColor(unit)
     end
   end
 
@@ -67,7 +67,7 @@ end
 local Element = Addon.Elements.NewElement("ThreatGlow")
 
 -- Called in processing event: NAME_PLATE_CREATED
-function Element.Created(tp_frame)
+function Element.Create(tp_frame)
   local element_frame = CreateFrame("Frame", nil, tp_frame, BackdropTemplate)
   element_frame:SetFrameLevel(tp_frame:GetFrameLevel())
 
@@ -82,7 +82,7 @@ end
 
 -- Called in processing event: NAME_PLATE_UNIT_ADDED
 -- PlateStyle is always ~= "None" here
-function Element.UnitAdded(tp_frame)
+function Element.PlateUnitAdded(tp_frame)
   local unit = tp_frame.unit
   if tp_frame.style.threatborder.show and unit.ThreatLevel then
     local unique_setting = unit.CustomPlateSettings
@@ -99,13 +99,13 @@ function Element.UnitAdded(tp_frame)
 end
 
 -- Called in processing event: NAME_PLATE_UNIT_REMOVED
---function Element.UnitRemoved(tp_frame)
+--function Element.PlateUnitRemoved(tp_frame)
 --  tp_frame.visual.ThreatGlow:Hide() -- done in UpdateStyle
 --end
 
 function Element.UpdateStyle(tp_frame, style, plate_style)
   if plate_style ~= "None" then
-    Element.UnitAdded(tp_frame)
+    Element.PlateUnitAdded(tp_frame)
   else
     tp_frame.visual.ThreatGlow:Hide()
   end
@@ -113,7 +113,7 @@ end
 
 function Element.ThreatUpdate(tp_frame, unit)
   if tp_frame.PlateStyle ~= "None" then
-    Element.UnitAdded(tp_frame)
+    Element.PlateUnitAdded(tp_frame)
   else
     tp_frame.visual.ThreatGlow:Hide()
   end

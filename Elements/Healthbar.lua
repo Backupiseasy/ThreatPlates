@@ -13,10 +13,11 @@ local UnitGetTotalHealAbsorbs = UnitGetTotalHealAbsorbs
 local InCombatLockdown = InCombatLockdown
 
 -- ThreatPlates APIs
-local ThreatPlates, Font = Addon.ThreatPlates, Addon.Font
+local ThreatPlates= Addon.ThreatPlates
+local FontUpdateText, FontUpdateTextSize = Addon.Font.UpdateText, Addon.Font.UpdateTextSize
 local SubscribeEvent, UnsubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Unsubscribe, Addon.EventService.Publish
 local BackdropTemplate = Addon.BackdropTemplate
-local Localization = Addon.Localization
+local TransliterateCyrillicLetters = Addon.Localization.TransliterateCyrillicLetters
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -228,7 +229,8 @@ local function ShowTargetUnit(healthbar, unitid)
     if not SettingsTargetUnit.ShowNotMyself or not UnitIsUnit("player", target_of_target_unit) then
       local target_of_target_name = UnitName(target_of_target_unit)
       if target_of_target_name then
-        target_of_target_name = Localization:TransliterateCyrillicLetters(target_of_target_name)
+        target_of_target_name = 
+        TransliterateCyrillicLetters(target_of_target_name)
         if SettingsTargetUnit.ShowBrackets then
           target_of_target_name = "|cffffffff[|r " .. target_of_target_name .. " |cffffffff]|r" 
         end
@@ -295,7 +297,7 @@ end
 ---------------------------------------------------------------------------------------------------
 
 -- Called in processing event: NAME_PLATE_CREATED
-function Element.Created(tp_frame)
+function Element.Create(tp_frame)
   local healthbar = _G.CreateFrame("StatusBar", nil, tp_frame)
   healthbar:SetFrameLevel(tp_frame:GetFrameLevel() + 5)
   --healthbar:Hide()
@@ -359,7 +361,7 @@ function Element.Created(tp_frame)
 end
 
 -- Called in processing event: NAME_PLATE_UNIT_ADDED
-function Element.UnitAdded(tp_frame)
+function Element.PlateUnitAdded(tp_frame)
   local healthbar = tp_frame.visual.Healthbar
   local unit = tp_frame.unit
 
@@ -378,7 +380,7 @@ function Element.UnitAdded(tp_frame)
 end
 
 -- Called in processing event: NAME_PLATE_UNIT_REMOVED
---function Element.UnitRemoved(tp_frame)
+--function Element.PlateUnitRemoved(tp_frame)
 --end
 
 -- Called in processing event: UpdateStyle in Nameplate.lua
@@ -427,8 +429,8 @@ function Element.UpdateStyle(tp_frame, style, plate_style)
   end
 
   local db_target_unit = Settings.TargetUnit
-  Font:UpdateText(healthbar, healthbar.TargetUnit, db_target_unit)
-  Font:UpdateTextSize(healthbar, healthbar.TargetUnit, db_target_unit)
+  FontUpdateText(healthbar, healthbar.TargetUnit, db_target_unit)
+  FontUpdateTextSize(healthbar, healthbar.TargetUnit, db_target_unit)
   healthbar.TargetUnit:SetShown(healthbar.TargetUnit:GetText() ~= nil and db_target_unit.Show)
 
   local frame_level
