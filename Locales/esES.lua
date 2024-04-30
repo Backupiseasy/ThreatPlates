@@ -177,6 +177,8 @@ L["Arrow"] = "Flecha"
 L["Arrow (Legacy)"] = "Flecha (legado)"
 L["Art Options"] = "Opciones de Arte"
 --[[Translation missing --]]
+L["Artwork"] = "Artwork"
+--[[Translation missing --]]
 L["Attempt to register script for unknown WoW event \"%s\""] = "Attempt to register script for unknown WoW event \"%s\""
 L["Attempt to register script for unknown WoW event '%s'"] = "Intentar registrar el script para el evento desconocido de WoW '%s'"
 L["Aura"] = "Aura"
@@ -185,6 +187,8 @@ L["Aura: "] = "Aura:"
 L["Auras"] = "Auras"
 L["Auras (Name or ID)"] = "Auras (Nombre o ID)"
 L["Auras, Healthbar"] = "Auras, Barra de Salud"
+--[[Translation missing --]]
+L["Authors"] = "Authors"
 --[[Translation missing --]]
 L["Auto Sizing"] = "Auto Sizing"
 L["Auto-Cast"] = "Autolanzarse"
@@ -264,6 +268,10 @@ L["Class"] = "Clase"
 L["Class Color"] = "Class Color"
 L["Class Color for Players"] = "Color de clase para jugadores"
 L["Class Icon"] = "Icono de Clase"
+--[[Translation missing --]]
+L["Clean"] = "Clean"
+--[[Translation missing --]]
+L["Clean Border"] = "Clean Border"
 L[ [=[Clear and easy to use threat-reactive nameplates.
 
 Current version: ]=] ] = [=[Placas identificativas claras y fáciles de usar que responden a amenazas.
@@ -292,10 +300,14 @@ L["Combat"] = "Combate"
 L["Combo Points"] = "Puntos de Combate"
 L["Configuration Mode"] = "Modo de Configuración"
 L["Controls the rate at which nameplate animates into their target locations [0.0-1.0]."] = "Controla la velocidad a la que se anima la placa identificativa en sus ubicaciones de destino [0.0-1.0]."
+--[[Translation missing --]]
+L["Cooldown"] = "Cooldown"
 L["Cooldown Spiral"] = "Espiral de Reutilización"
 L["Copy"] = "Copiar"
 L["Creation"] = "Creación"
 L["Crescent"] = "Creciente"
+--[[Translation missing --]]
+L["Crest"] = "Crest"
 L["Crowd Control"] = "Control de Masas"
 L["Curse"] = "Maldición"
 L["Custom"] = "Personalizado"
@@ -425,6 +437,10 @@ L["Error in event script '%s' of custom style '%s': %s"] = "Error en el script d
 L["Event Name"] = "Nombre de evento"
 L["Events with Script"] = "Eventos con scripts"
 L["Everything"] = "Todos"
+--[[Translation missing --]]
+L["Evoker"] = "Evoker"
+--[[Translation missing --]]
+L["Evoker Essence Cooldown"] = "Evoker Essence Cooldown"
 L["Exchange"] = "Intercambiar"
 L["Experience"] = "Experiencia"
 L["Experience Text"] = "Texto de experiencia"
@@ -438,6 +454,8 @@ L["Faction Icon"] = "Icono de Facción"
 L["Fading"] = "Desvanecimiento"
 L["Failed to migrate the imported profile to the current settings format because of an internal error. Please report this issue at the Threat Plates homepage at CurseForge: "] = "No se pudo migrar el perfil importado al formato de configuración actual debido a un error interno. Informe este problema en la página de inicio de Threat Plates en CurseForge:"
 L["Fanged Pit Viper"] = "Víbora de foso con colmillos"
+--[[Translation missing --]]
+L["FAQ"] = "FAQ"
 --[[Translation missing --]]
 L["Filter"] = "Filter"
 L["Filter by Spell"] = "Filtrar por Hechizo"
@@ -459,6 +477,8 @@ L["Foreground Texture"] = "Textura del Primer Plano"
 L["Format"] = "Formatear"
 L["Four"] = "Cuatro"
 L["Frame Order"] = "Orden de Marcos"
+--[[Translation missing --]]
+L["Frequently Asked Questions"] = "Frequently Asked Questions"
 L["Friendly & Neutral Units"] = "Unidades Aliadas y Neutrales"
 L["Friendly Casting"] = "Lanzamiento de Aliado"
 L["Friendly Name Color"] = "Color de Nombre de Aliado"
@@ -784,6 +804,8 @@ L["Set transparency settings for different threat levels."] = "Establece configu
 L["Sets your role to DPS."] = "Define tu rol a DPS/Sanación."
 L["Sets your role to tanking."] = "Define tu rol a tanque."
 L["Sets your spec "] = "Establece tu especialización "
+--[[Translation missing --]]
+L["Seven"] = "Seven"
 L["Shadow"] = "Sombras"
 L["Shadow Fiend"] = "Maligno de las Sombras"
 L["Shadowy Apparition"] = "Aparición sombría"
@@ -1046,6 +1068,8 @@ L["This will toggle the auras widget to show the cooldown spiral on auras."] = "
 L["Threat Detection"] = "Detección de Amenaza"
 L["Threat Detection Heuristic"] = "Heurística de detección de amenaza"
 L["Threat Glow"] = "Brillo de Amenaza"
+--[[Translation missing --]]
+L["Threat Plates is currently maintained by Backup (CurseForge). It was originally written by Suicidal Katt (CurseForge)."] = "Threat Plates is currently maintained by Backup (CurseForge). It was originally written by Suicidal Katt (CurseForge)."
 L["Threat Plates Script Editor"] = "Editor de scripts de Threat Plates"
 L["Threat System"] = "Sistema de Amenaza"
 L["Threat Table"] = "Tabla de Amenaza"
@@ -1073,9 +1097,13 @@ L["Totem Scale"] = "Escala de Tótem"
 L["Totem Transparency"] = "Transparencia de Tótem"
 L["Totems"] = "Tótem"
 --[[Translation missing --]]
+L["Translators"] = "Translators"
+--[[Translation missing --]]
 L["Transliterate Cyrillic Letters"] = "Transliterate Cyrillic Letters"
 L["Transparency"] = "Transparencia"
 L["Transparency & Scaling"] = "Transparencia y Escala"
+--[[Translation missing --]]
+L["Transparent"] = "Transparent"
 L["Treant"] = "Antárbol"
 L["Trigger"] = "Activador"
 L["Two"] = "Dos"
@@ -1142,6 +1170,8 @@ L["Value Format"] = "Value Format"
 --[[Translation missing --]]
 L["Value Type"] = "Value Type"
 L["Venomous Snake"] = "Serpiente venenosa"
+--[[Translation missing --]]
+L["Version"] = "Version"
 L["Vertical Align"] = "Alinear Vertical"
 L["Vertical Alignment"] = "Alineamiento Vertical"
 L["Vertical Offset"] = "Compensación Vertical"
@@ -1165,6 +1195,10 @@ L["With Pet"] = "With Pet"
 L["Word Wrap"] = "Word Wrap"
 --[[Translation missing --]]
 L["World Boss"] = "World Boss"
+--[[Translation missing --]]
+L["WoW Flat"] = "WoW Flat"
+--[[Translation missing --]]
+L["WoW Round"] = "WoW Round"
 L["X"] = "X"
 L["Y"] = "Y"
 L["You can access the "] = "Puedes acceder las "

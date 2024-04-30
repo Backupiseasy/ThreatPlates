@@ -140,17 +140,20 @@ local TRANSLITERATE_CHARS = {
   ["п"] = "p", ["Р"] = "R", ["р"] = "r", ["С"] = "S", ["с"] = "s", ["Т"] = "T", ["т"] = "t", ["У"] = "U", ["у"] = "u", ["Ф"] = "F", ["ф"] = "f",
   ["Х"] = "Kh", ["х"] = "kh", ["Ц"] = "Ts", ["ц"] = "ts", ["Ч"] = "Ch", ["ч"] = "ch", ["Ш"] = "Sh", ["ш"] = "sh", ["Щ"] = "Shch",	["щ"] = "shch",
   ["Ъ"] = "", ["ъ"] = "", ["Ы"] = "Y", ["ы"] = "y", ["Ь"] = "", ["ь"] = "", ["Э"] = "E", ["э"] = "e", ["Ю"] = "Yu", ["ю"] = "yu", ["Я"] = "Ya",
-  ["я"] = "ya", ["  "] = " ",
+  ["я"] = "ya", -- ["  "] = " ", -- Does not work, see comment below
 }
 
-function LocalizationModule:TransliterateCyrillicLetters(text)
+function LocalizationModule.TransliterateCyrillicLetters(text)
   if Addon.db.profile.Localization.TransliterateCyrillicLetters and text and text:len() > 1 then
     local cache_entry = TextCache[text]
-
+    
     local transliterated_text = cache_entry.Transliteration
     if not transliterated_text then
-      transliterated_text = text:gsub(' ', '  ')  -- Deals with spaces so that sub can work with cyrillic guild names that have spaces
-      transliterated_text = transliterated_text:gsub("..", TRANSLITERATE_CHARS) -- '..' pattern matches a single cyrillic letter, or double space from above which gets replaced by single space
+      -- ! It seems to me that when using an array as 3rd argument, strings with uneven lenght are not processed correctly, depending on where the 
+      -- ! double space is. If the double space starts at an even position, "  " is not replaced with " " correctly using a table as 3rd argument.
+      transliterated_text = text:gsub(" ", "  ")  -- Deals with spaces so that sub can work with cyrillic guild names that have spaces
+      transliterated_text = transliterated_text:gsub("..", TRANSLITERATE_CHARS)
+      transliterated_text = transliterated_text:gsub("  ", " ")  -- double space from above which gets replaced by single space
 
       cache_entry.Transliteration = transliterated_text
     end
@@ -165,7 +168,7 @@ end
 -- Update of settings
 ---------------------------------------------------------------------------------------------------
 
-function LocalizationModule:UpdateSettings()
+function LocalizationModule.UpdateSettings()
   Addon.Truncate = (Addon.db.profile.text.LocalizedUnitSymbol and TruncateEastAsian) or TruncateWestern
 
   -- Clear cache for texts as e.g., abbreviation mode might have changed

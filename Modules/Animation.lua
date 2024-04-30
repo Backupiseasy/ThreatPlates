@@ -113,7 +113,7 @@ AnimationFrame:Hide()
 -- Animation Functions
 ---------------------------------------------------------------------------------------------------
 
-function AnimationModule:CreateFlash(frame)
+function AnimationModule.CreateFlash(frame)
   frame.FlashAnimation = frame:CreateAnimationGroup("Flash")
   frame.FlashAnimation.FadeIn = frame.FlashAnimation:CreateAnimation("ALPHA", "FadeIn")
   frame.FlashAnimation.FadeIn:SetFromAlpha(0)
@@ -126,7 +126,7 @@ function AnimationModule:CreateFlash(frame)
   frame.FlashAnimation.FadeOut:SetOrder(1)
 end
 
-function AnimationModule:CreateFlashLoop(frame)
+function AnimationModule.CreateFlashLoop(frame)
   self:CreateFlash(frame)
 
   frame.FlashAnimation:SetScript("OnFinished", function(_, requested)
@@ -136,7 +136,7 @@ function AnimationModule:CreateFlashLoop(frame)
   end)
 end
 
-function AnimationModule:Flash(frame)
+function AnimationModule.Flash(frame)
   if not frame.FlashAnimation then
     self:CreateFlashLoop(frame)
   end
@@ -151,7 +151,7 @@ function AnimationModule:Flash(frame)
   end
 end
 
-function AnimationModule:StopFlash(frame)
+function AnimationModule.StopFlash(frame)
   local animation = frame.FlashAnimation
   if animation and animation.Playing then
     animation:Stop()
@@ -176,7 +176,7 @@ end
 --   AnimationFrame:Show()
 -- end
 
-function AnimationModule:FadePlate(frame, target_alpha)
+function AnimationModule.FadePlate(frame, target_alpha)
   -- local current_alpha = frame:GetAlpha()
   -- This check is done before this function is called - maybe not ideal
   -- if floor(abs(current_alpha - target_alpha) * 100) < 1 then return end
@@ -194,14 +194,14 @@ function AnimationModule:FadePlate(frame, target_alpha)
   AnimationFrame:Show()
 end
 
-function AnimationModule:StopFade(frame)
+function AnimationModule.StopFade(frame)
   if frame.FadeAnimation then
   --frame:SetAlpha(frame.FadeAnimation.TargetAlpha)
     frame.FadeAnimation.Playing = nil
   end
 end
 
-function AnimationModule:ScalePlate(frame, target_scale)
+function AnimationModule.ScalePlate(frame, target_scale)
   local current_scale = frame:GetScale()
   if floor(abs(current_scale - target_scale) * 100) < 1 then return end
 
@@ -219,7 +219,7 @@ function AnimationModule:ScalePlate(frame, target_scale)
   AnimationFrame:Show()
 end
 
-function AnimationModule:StopScale(frame)
+function AnimationModule.StopScale(frame)
   if frame.ScaleAnimation then
     --frame.SetScale(frame.ScaleAnimation.TargetScale)
     --SetPlateScale(frame, frame.ScaleAnimation.TargetScale)
@@ -227,7 +227,7 @@ function AnimationModule:StopScale(frame)
   end
 end
 
-function AnimationModule:HidePlate(frame)
+function AnimationModule.HidePlate(frame)
   local show_animation = false
 
   if Settings.HidePlateFadeOut then
@@ -263,7 +263,7 @@ function AnimationModule:HidePlate(frame)
   end
 end
 
-function AnimationModule:UpdateSettings()
+function AnimationModule.UpdateSettings()
   Settings = Addon.db.profile.Animations
 
   -- ShowPlateDuration = Settings.ShowPlateDuration

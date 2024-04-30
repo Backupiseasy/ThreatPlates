@@ -13,7 +13,8 @@ local ADDON_NAME, Addon = ...
 local UnitExists = UnitExists
 
 -- ThreatPlates APIs
-local Animation, Style = Addon.Animation, Addon.Style
+local Style = Addon.Style
+local AnimationFadePlate, AnimationStopFade = Addon.Animation.FadePlate, Addon.Animation.StopFade
 local CVars = Addon.CVars
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
 local MathClamp = Addon.Clamp
@@ -44,7 +45,7 @@ local function TransparencySituational(unit)
 	local db = Addon.db.profile.nameplate
 
 	-- Do checks for situational transparency settings:
-	if unit.TargetMarker and db.toggle.MarkedA then
+	if unit.TargetMarkerIcon and db.toggle.MarkedA then
 		return db.alpha.Marked
 	elseif unit.isMouseover and not unit.isTarget and db.toggle.MouseoverUnitAlpha then
 		return db.alpha.MouseoverUnit
@@ -192,7 +193,7 @@ local function UpdatePlate_SetAlphaWithFading(tp_frame, unit)
   local target_alpha = GetTransparency(unit)
 
   if target_alpha ~= tp_frame.CurrentAlpha then
-    Animation:FadePlate(tp_frame, target_alpha)
+    AnimationFadePlate(tp_frame, target_alpha)
     tp_frame.CurrentAlpha = target_alpha
   end
 end
@@ -249,11 +250,11 @@ local function SetOccludedTransparencyWithFadingOnUpdate(self, frame)
 
   if target_alpha and target_alpha ~= frame.CurrentAlpha then
     if (frame.IsOccluded and not FadeOutOccludedUnitsIsEnabled) or (unit_was_occluded and not FadeInOccludedUnitsIsEnabled) then
-      Animation:StopFade(frame)
+      AnimationStopFade(frame)
       frame:SetAlpha(target_alpha)
       frame.IsShowing = false
     elseif frame.IsShowing then
-      Animation:StopFade(frame)
+      AnimationStopFade(frame)
       frame:SetAlpha(target_alpha)
 
       -- Disable showing only if plate is not occluded at least once
@@ -261,7 +262,7 @@ local function SetOccludedTransparencyWithFadingOnUpdate(self, frame)
         frame.IsShowing = false
       end
     else
-      Animation:FadePlate(frame, target_alpha)
+      AnimationFadePlate(frame, target_alpha)
       frame.IsShowing = false
     end
 
@@ -289,8 +290,8 @@ local function SetOccludedTransparencyWithoutFadingOnUpdate(self, frame)
   end
 end
 
-function TransparencyModule:Initialize(frame)
-  Animation:StopFade(frame)
+function TransparencyModule.PlateUnitAdded(frame)
+  AnimationStopFade(frame)
   frame:SetAlpha(0)
 
   frame.CurrentAlpha = nil
@@ -303,7 +304,7 @@ function TransparencyModule:Initialize(frame)
   SetOccludedTransparencyWithoutFadingOnUpdate(TransparencyModule, frame)
 end
 
-function TransparencyModule:UpdateSettings()
+function TransparencyModule.UpdateSettings()
   Settings = Addon.db.profile
 
   CVAR_NameplateOccludedAlphaMult = CVars:GetAsNumber("nameplateOccludedAlphaMult")
@@ -339,7 +340,7 @@ function TransparencyModule:UpdateSettings()
   FadeOutOccludedUnitsIsEnabled = Settings.Animations.FadeOutOccludedUnits
 end
 
-function TransparencyModule:OcclusionDetectionIsEnabled()
+function TransparencyModule.OcclusionDetectionIsEnabled()
 	return SettingsEnabledOccludedAlpha
 end
 
@@ -357,7 +358,7 @@ local function SituationalEvent(tp_frame)
 
 	if target_alpha ~= tp_frame.CurrentAlpha then
     if FadingIsEnabled then
-      Animation:StopFade(tp_frame)
+      AnimationStopFade(tp_frame)
     end
 		tp_frame:SetAlpha(target_alpha)
 		tp_frame.CurrentAlpha = target_alpha

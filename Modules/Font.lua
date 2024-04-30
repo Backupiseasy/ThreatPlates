@@ -37,7 +37,7 @@ local function BackupSystemFont(font_instance)
   }
 end
 
-FontModule.DefaultSystemFonts = {
+local DefaultSystemFonts = {
   NamePlate = BackupSystemFont(SystemFont_NamePlate),
   NamePlateFixed = BackupSystemFont(SystemFont_NamePlateFixed),
   LargeNamePlate = BackupSystemFont(SystemFont_LargeNamePlate),
@@ -48,7 +48,7 @@ FontModule.DefaultSystemFonts = {
 -- Module code
 ---------------------------------------------------------------------------------------------------
 
-function FontModule:SetJustify(font_string, horz, vert)
+function FontModule.SetJustify(font_string, horz, vert)
   local align_horz, align_vert = font_string:GetJustifyH(), font_string:GetJustifyV()
   if align_horz ~= horz or align_vert ~= vert then
     font_string:SetJustifyH(horz)
@@ -61,7 +61,7 @@ function FontModule:SetJustify(font_string, horz, vert)
   end
 end
 
-function FontModule:UpdateTextFont(font, db)
+local function UpdateTextFont(font, db)
   font:SetFont(Addon.LibSharedMedia:Fetch('font', db.Typeface), db.Size, db.flags)
 
   if db.Shadow then
@@ -75,11 +75,11 @@ function FontModule:UpdateTextFont(font, db)
     font:SetTextColor(db.Color.r, db.Color.g, db.Color.b, db.Transparency or 1)
   end
 
-  self:SetJustify(font, db.HorizontalAlignment or "CENTER", db.VerticalAlignment or "CENTER")
+  FontModule.SetJustify(font, db.HorizontalAlignment or "CENTER", db.VerticalAlignment or "CENTER")
 end
 
-function FontModule:UpdateText(parent, font, db)
-  self:UpdateTextFont(font, db.Font)
+function FontModule.UpdateText(parent, font, db)
+  UpdateTextFont(font, db.Font)
 
   local anchor = db.Anchor or "CENTER"
 
@@ -92,7 +92,7 @@ function FontModule:UpdateText(parent, font, db)
   end
 end
 
-function FontModule:UpdateTextSize(parent, font, db)
+function FontModule.UpdateTextSize(parent, font, db)
   local width, height = parent:GetSize()
   if db.AutoSizing == nil or db.AutoSizing then
     font:SetSize(width, height)
@@ -121,7 +121,7 @@ local function UpdateSystemFont(obj, db)
   end
 end
 
-function FontModule:SetNamesFonts()
+function FontModule.SetNamesFonts()
   local db = Addon.db.profile.BlizzardSettings.Names
   if db.Enabled then
     db = db.Font
@@ -132,11 +132,11 @@ function FontModule:SetNamesFonts()
   end
 end
 
-function FontModule:ResetNamesFonts()
-  UpdateSystemFont(SystemFont_NamePlate, self.DefaultSystemFonts.NamePlate)
-  UpdateSystemFont(SystemFont_NamePlateFixed, self.DefaultSystemFonts.NamePlateFixed)
-  UpdateSystemFont(SystemFont_LargeNamePlate, self.DefaultSystemFonts.LargeNamePlate)
-  UpdateSystemFont(SystemFont_LargeNamePlateFixed, self.DefaultSystemFonts.LargeNamePlateFixed)
+function FontModule.ResetNamesFonts()
+  UpdateSystemFont(SystemFont_NamePlate, DefaultSystemFonts.NamePlate)
+  UpdateSystemFont(SystemFont_NamePlateFixed, DefaultSystemFonts.NamePlateFixed)
+  UpdateSystemFont(SystemFont_LargeNamePlate, DefaultSystemFonts.LargeNamePlate)
+  UpdateSystemFont(SystemFont_LargeNamePlateFixed, DefaultSystemFonts.LargeNamePlateFixed)
 end
 
 ---------------------------------------------------------------------------------------------------

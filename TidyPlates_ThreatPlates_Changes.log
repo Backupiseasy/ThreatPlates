@@ -1,21 +1,171 @@
-﻿------------------------------------------------------
-11.0.4 (2022-09-x)
 ------------------------------------------------------
-* Added Maim (Druid) to Auras widget as CC aura for Wrath Classic.
+11.2.0 (2023-01-25)
+------------------------------------------------------
+* Custom color for Name text now also supports transparency [Comment #6829]. 
+* Updated the logo for Threat Plates which is now also shown as icon in the addon list.
+* Added support for the minimap addon compartment.
+* Added support for friendly units to Arena widget [GH-401, Issue #614, #262, Comment #6813].
 
 ------------------------------------------------------
-11.0.3 (2022-09-27)
+11.1.19 (2023-05-03)
+------------------------------------------------------
+* Updated TOC version and API for Patch 10.1 for WoW Mainline.
+
+------------------------------------------------------
+11.1.18 (2023-04-16)
+------------------------------------------------------
+* Fixed a Lua error that occurred when the mouseover highlight was updated on a nameplate without a valid unit [GH-443].
+* Fixed a bug where one space was replaced with two spaces in names when transliteration of cyrillic letters was enabled [GH-444].
+* Fixed a bug with HealerTracker where all Shaman specializations where shown as healer [Comment #6951].
+* Improved showing/hiding interaction between Threat Plates and WoW default nameplates [this might fix GH-402].
+
+------------------------------------------------------
+11.1.17 (2023-03-22)
+------------------------------------------------------
+* Updated TOC version for Patch 10.0.7 for WoW Mainline.
+
+------------------------------------------------------
+11.1.16 (2023-03-17)
+------------------------------------------------------
+* Fixed a Lua error with custom styles with Cast trigger  [Comment #6867].
+* Added Hungering Cold (Deathknight) to Auras widget as CC aura for Wrath Classic [Comment #6925].
+
+------------------------------------------------------
+11.1.15 (2023-02-26)
+------------------------------------------------------
+* Healer Tracker no longer is disabled in arenas and open-world [Issue #622].
+* Enabled spec-based profiles for Wrath Classic [Comment #6903].
+* Upgrade integrated libraries (LibDualSpec v1.22.0).
+
+------------------------------------------------------
+11.1.14 (2023-02-10)
+------------------------------------------------------
+* Updated Healer Tracker widget to support Preservation Evoker [GH-378].
+* Re-worked Healer Tracker widget to better identify healers by spells they use in Retail and Classic.
+
+------------------------------------------------------
+11.1.13 (2023-01-29)
+------------------------------------------------------
+* Fixed a bug were Threat Plates was shown as out-of-date because of wrong interface version used in TOC file for Retail [Comment #6858].
+
+------------------------------------------------------
+11.1.12 (2023-01-28)
+------------------------------------------------------
+* Added a fix for friendly nameplates Name Only mode not working in raids and dungeons for Patch 10.0.5 [Comment #6840]. For the fix to be applied, you first have to enable Name Only mode in the options under General - Blizzard Settings - Names.
+
+------------------------------------------------------
+11.1.11 (2023-01-25)
+------------------------------------------------------
+* Updated TOC version for WoW Patch 10.0.5.
+
+------------------------------------------------------
+11.1.10 (2023-01-24)
+------------------------------------------------------
+* Fixed a bug in the option dialog where unavailable options where shown in Classic WoW.
+* Updated TOC version for Wrath Classic Patch 3.4.1.
+
+------------------------------------------------------
+11.1.9 (2023-01-10)
+------------------------------------------------------
+* Fixed a Lua error in Combo Points widget for Deathknights that occured because of a typo [GH-379].
+
+------------------------------------------------------
+11.1.8 (2023-01-08)
+------------------------------------------------------
+* Added Freeze (Mage Water Elemental) to Auras widget as CC aura for Wrath Classic.
+* Fixed a bug in Solo Shuffle where arena numbers were not shown correctly [Issue #581, #600, GH-370, Comment #6550, #6709, #6719, #6758].
+* Fixed a bug where empowered spell casts from Evoker where not shown on the nameplate castbar [Issue #606].
+* Fixed a bug with Deathknight runes showing wrong cooldown times that occured when the player died [GH-374].
+* Fixed a Lua error that could occur when scanning an invalid tooltip, e.g., for quest information [Issue #609].
+
+------------------------------------------------------
+11.1.7 (2022-12-28)
+------------------------------------------------------
+* Fixed a bug with several Shaman totem icons not being shown on totem nameplates [Issue #601].
+
+------------------------------------------------------
+11.1.6 (2022-12-22)
+------------------------------------------------------
+* Removed a debug message from Auras widget [GH-372].
+
+------------------------------------------------------
+11.1.5 (2022-12-22)
+------------------------------------------------------
+* Added Psychic Horror (Priest) and Freezing Arrow (Hunter) to Auras widget as CC aura for Wrath Classic.
+* Fixed a bug where the icon for Earthgrab Totem was not shown [Commen #6705].
+
+------------------------------------------------------
+11.1.4 (2022-11-28)
+------------------------------------------------------
+* Added Shield Charge (Warrior) to Auras widget as CC aura.
+* Upgrade integrated libraries (LibCustomGlow v1.0.3-7-gd830e93).
+
+------------------------------------------------------
+11.1.3 (2022-11-28)
+------------------------------------------------------
+* Fixed a Lua error with tooltip scanning for unit roles, levels or guilds that occured when there was no valid tooltip data [Issue #596].
+
+------------------------------------------------------
+11.1.2 (2022-11-26)
+------------------------------------------------------
+* Fixed a Lua error that could occur when numeric aura sorting (e.g., by duration or time left) was enabled [Comment #6629, #Issue 591].
+* Added Hex, Earthbind Totem, and Earthgrab Totem (Shaman) to Auras widget as CC aura for Wrath Classic.
+* Fixed a bug with tooltip scanning (e.g., for Quest widget) which resulted in the same line showing multiple times in the tooltip [GH-368, Issue #593].
+* Fixed a bug with Combo Points widget where Evoker essence was not being updated properly when not target was selected.
+* Updated tooltip code to new API introduced with Patch 10.0.2.
+* Removed Threat Plates welcome message at login [Comment #6655].
+* Upgrade integrated libraries (LibSharedMedia v10.0.1, Ace3 vr1297-alpha, LibCustomGlow v1.0.3-5-ge685cd9-alpha).
+
+------------------------------------------------------
+11.1.1 (2022-11-16)
+------------------------------------------------------
+* Fixed a bug with Combo Points widget where the widget was hidden after opening the options dialog.
+* Added Crest class icon for Evoker.
+
+------------------------------------------------------
+11.1.0 (2022-11-14)
+------------------------------------------------------
+* Added support for new Evoker class. 
+* Updated class icons - added Evoker class, added new styles for all classes, and increased the resolution of class icons.
+* Fixed a Lua error in the options that occured when resetting reaction colors to default values.
+* Fixed a Lua error that occured when using Priest's Mindcontrol in PvP [GH-364, Issue #584, #586, #587].
+
+------------------------------------------------------
+11.0.6 (2022-11-04)
+------------------------------------------------------
+* Fixed a bug with custom styles for nameplates where the nameplate style wasn't correctly reset after a trigger was no longer active (e.g., after the aura triggering the style expired).
+* Upgrade integrated libraries (LibSharedMedia v10.0.0, LibCustomGlow 1.0.3-4-g357b944) [Comment #6591].
+
+------------------------------------------------------
+11.0.5 (2022-11-02)
+------------------------------------------------------
+* Added support for new Evoker class. 
+* Updated class icons - added Evoker class, added new styles for all classes, and increased the resolution of class icons.
+
+------------------------------------------------------
+11.0.4 (2022-09-x)
+------------------------------------------------------
+* Disabled optimized aura processing (introduced with 11.0.0) as auras were not shown reliably and aura frames were not anchored correctly sometimes (until these bugs are fixed).
+
+------------------------------------------------------
+11.0.4 (2022-10-31)
+------------------------------------------------------
+* Added Maim (Druid) to Auras widget as CC aura for Wrath Classic.
+* Fixed a Lua error when a nameplate was shown for a non-existing unit (e.g., Ring of Transference in Oribos) [Issue #575].
+
+------------------------------------------------------
+11.0.3 (2022-10-27)
 ------------------------------------------------------
 * Fixed a bug that occured when the target highlight color alpha was set below 0,7 as the Dragonflight API is more strict with valid transparency values [Issue #573].
 
 ------------------------------------------------------
-11.0.2 (2022-09-27)
+11.0.2 (2022-10-27)
 ------------------------------------------------------
 * Fixed a bug that occurred when the target transparency for a nameplate was greater than 100% or less than 0% as the Dragonflight API is more strict with valid transparency values [Issue #571, Comment #6532, #6536].
 * Fixed a bug that occurred when a Rogue has seven combo points (after picking talents Deeper Stratagem and Devious Stratagem) [Comment #6529].
 
 ------------------------------------------------------
-11.0.1 (2022-09-26)
+11.0.1 (2022-10-26)
 ------------------------------------------------------
 * Fixed a bug with Auras widget where auras were not shown consistently when "Swap Area By Reaction" was enabled [Comment #6522].
 * Fixed a bug with quest indicators not being shown as the color of quest titles in tooltips was changed in Dragonflight [Comment #6523].
@@ -23,7 +173,7 @@
 * Fixed a Lua error with Auras widget when aura area anchoring was changed so that aura areas where temporarily anchored to each other in a cyclic way.
 
 ------------------------------------------------------
-11.0.0 - Release for Dragonflight Pre-Patch (2022-09-26)
+11.0.0 - Release for Dragonflight Pre-Patch (2022-10-26)
 ------------------------------------------------------
 * Updated Threat Plates for Dragonflight Pre-Patch and updated nameplate code due to changes to WoW API.
 * Fixed a Lua error with threat textures that could occur in Classic when stance dancing as a tank [Issue #568].

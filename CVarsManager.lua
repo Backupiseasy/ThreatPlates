@@ -62,6 +62,40 @@ local COMBAT_PROTECTED = {
   UnitNameFriendlyMinionName = true,
 }
 
+---------------------------------------------------------------------------------------------------
+-- Initialize CVars for Threat Plates
+---------------------------------------------------------------------------------------------------
+
+-- Set these CVars after login/reloading the UI
+function CVars:Initialize(cvar, value)
+  -- Fix for: Friendly Nameplates Name Only Mode in Raids and Dungeons for Patch 10.0.5
+  -- https://www.wowhead.com/de/news/update-solution-to-friendly-nameplates-name-only-mode-in-raids-and-dungeons-for-331178
+  -- /script C_CVar.RegisterCVar("nameplateShowOnlyNames")
+  -- Registering only has to be done once, but the value seems to be reset to 0 after every reload 
+  if C_CVar.GetCVar("nameplateShowOnlyNames") == nil then
+    C_CVar.RegisterCVar("nameplateShowOnlyNames")
+  end
+
+  -- ! The CVar nameplateShowOnlyNames is not persistently stored by WoW, so we have to restore its value
+  -- ! after every login/reloading the UI.
+  self:SetBoolProtected("nameplateShowOnlyNames", Addon.db.profile.BlizzardSettings.Names.ShowOnlyNames)
+
+  -- Sync internal settings with Blizzard CVars
+  -- SetCVar("ShowClassColorInNameplate", 1)
+
+  --  local db = Addon.db.profile.threat
+  --  -- Required for threat/aggro detection
+  --  if db.ON and (GetCVar("threatWarning") ~= 3) then
+  --    SetCVar("threatWarning", 3)
+  --  elseif not db.ON and (GetCVar("threatWarning") ~= 0) then
+  --    SetCVar("threatWarning", 0)
+  --  end
+end
+
+---------------------------------------------------------------------------------------------------
+-- 
+---------------------------------------------------------------------------------------------------
+
 local MONITORED_CVARS = {
   nameplateMinScale = true,
   nameplateMaxScale = true,
@@ -182,7 +216,7 @@ local function SetCVarHook(name, value, c)
 
   if name == "nameplateMinScale" or name == "nameplateMaxScale" or name == "nameplateLargerScale" or name == "nameplateSelectedScale" then
     -- Update Hiding Nameplates only if something changed
-    local enabled = Addon.Scaling:HidingNameplatesIsEnabled()
+    local enabled = Addon.Scaling.HidingNameplatesIsEnabled()
     local invalid = CVars.InvalidCVarsForHidingNameplates()
     if (enabled and invalid) or (not enabled and not invalid) then
       Addon.Scaling:UpdateSettings()
@@ -191,7 +225,7 @@ local function SetCVarHook(name, value, c)
       Addon.Logging.Warning(L["Animations for hiding nameplates are being disabled as certain console variables (CVars) related to nameplate scaling are set in a way to prevent this feature from working."])
     end
   elseif name == "nameplateMinAlpha" or name == "nameplateMaxAlpha" or name == "nameplateOccludedAlphaMult" or name == "nameplateSelectedAlpha" then
-    local enabled = Addon.Transparency:OcclusionDetectionIsEnabled()
+    local enabled = Addon.Transparency.OcclusionDetectionIsEnabled()
     local invalid = CVars.InvalidCVarsForOcclusionDetection()
     -- Update Hiding Nameplates only if something changed
     if (enabled and invalid) or (not enabled and not invalid) then

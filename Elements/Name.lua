@@ -9,13 +9,14 @@ local ADDON_NAME, Addon = ...
 
 -- Lua APIs
 local table_concat = table.concat
-local string_len  = string.len
+local string_sub  = string.sub
 
 -- WoW APIs
 
 -- ThreatPlates APIs
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
-local Localization, Font = Addon.Localization, Addon.Font
+local FontUpdateText = Addon.Font.UpdateText
+local TransliterateCyrillicLetters = Addon.Localization.TransliterateCyrillicLetters
 local SplitByWhitespace = Addon.SplitByWhitespace
 local TextCache = Addon.Cache.Texts
 
@@ -39,7 +40,7 @@ local Element = Addon.Elements.NewElement("Name")
 ---------------------------------------------------------------------------------------------------
 
 -- Called in processing event: NAME_PLATE_CREATED
-function Element.Created(tp_frame)
+function Element.Create(tp_frame)
   local name_text = tp_frame.visual.textframe:CreateFontString(nil, "ARTWORK")
   -- At least font must be set as otherwise it results in a Lua error when UnitAdded with SetText is called
   name_text:SetFont("Fonts\\FRIZQT__.TTF", 11)
@@ -49,10 +50,10 @@ function Element.Created(tp_frame)
 end
 
 -- Called in processing event: NAME_PLATE_UNIT_ADDED
-function Element.UnitAdded(tp_frame)
+function Element.PlateUnitAdded(tp_frame)
   local unit = tp_frame.unit
   
-  local unit_name = Localization:TransliterateCyrillicLetters(unit.name)
+  local unit_name = TransliterateCyrillicLetters(unit.name)
   
   -- Full names in headline view, otherwise
   if unit.type ~= "PLAYER" and tp_frame.PlateStyle ~= "NameMode" then 
@@ -71,7 +72,7 @@ function Element.UnitAdded(tp_frame)
             if i == count then
               initials[i] = p
             else
-              initials[i] = string.sub(p, 0, 1)
+              initials[i] = string_sub(p, 0, 1)
             end
           end
           abbreviated_name = table_concat(initials, ". ")
@@ -90,7 +91,7 @@ function Element.UnitAdded(tp_frame)
 end
 
 -- Called in processing event: NAME_PLATE_UNIT_REMOVED
---function Element.UnitRemoved(tp_frame)
+--function Element.PlateUnitRemoved(tp_frame)
 --end
 
 ---- Called in processing event: UpdateStyle in Nameplate.lua
@@ -104,7 +105,7 @@ function Element.UpdateStyle(tp_frame, style, plate_style)
   end
 
   name_text:SetSize(db.Font.Width, db.Font.Height)
-  Font:UpdateText(tp_frame, name_text, db)
+  FontUpdateText(tp_frame, name_text, db)
 
   name_text:Show()
 end

@@ -39,7 +39,7 @@ local UseMasque, UseBorderlessIcons
 --   Addon.Widgets:UpdateSettings("UniqueIcon")
 -- end
 
-function IconModule:RegisterMasqueGroup(widget, name)
+function IconModule.RegisterMasqueGroup(widget, name)
   if UseMasque then
     local masque_group = Addon.LibMasque:Group(Addon.ThreatPlates.ADDON_NAME, name)
     masque_group:SetCallback(function() Addon.Widgets:UpdateSettings(widget.Name) end)
@@ -77,7 +77,8 @@ end
 --   end
 -- end
 
-function IconModule:CreateIcon(widget, parent)
+-- * Icon is an potentical candidate for converting it to a class, I guess
+function IconModule.CreateIcon(widget, parent)
   local icon
   if UseMasque then
     icon = _G.CreateFrame("Button", nil, parent, "ActionButtonTemplate")
@@ -85,7 +86,7 @@ function IconModule:CreateIcon(widget, parent)
     
     icon.icon = icon:CreateTexture(nil, "BACKGROUND")
     icon.icon:SetAllPoints()
-   
+
     local masque_group = masque_groups[widget]
     icon.MasqueGroup = masque_group
     masque_group:AddButton(icon)
@@ -101,7 +102,7 @@ function IconModule:CreateIcon(widget, parent)
   return icon
 end
 
-function IconModule:UpdateSettings()
+function IconModule.UpdateSettings()
   UseMasque = Addon.db.profile.Appearance.UseMasque and Addon.LibMasque
   UseBorderlessIcons = Addon.db.profile.Appearance.UseBorderlessIcons
 end

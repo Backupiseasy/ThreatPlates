@@ -21,7 +21,8 @@ local IsInGroup, IsInRaid, GetNumGroupMembers, GetNumSubgroupMembers = IsInGroup
 
 -- ThreatPlates APIs
 local UnitDetailedThreatSituationWrapper = Addon.UnitDetailedThreatSituationWrapper
-local Font, Threat = Addon.Font, Addon.Threat
+local FontUpdateText = Addon.Font.UpdateText
+local ThreatShowFeedback = Addon.Threat.ShowFeedback
 local TransliterateCyrillicLetters = Addon.TransliterateCyrillicLetters
 
 local _G =_G
@@ -182,7 +183,7 @@ local function GetTopThreatUnitBesidesPlayer(unitid, threat_value_func)
 
   local top_threat_unit_name = ""
   if top_unitid and ShowSecondPlayersName then
-    top_threat_unit_name = Localiation:TransliterateCyrillicLetters(UnitName(top_unitid)) .. ": "
+    top_threat_unit_name = TransliterateCyrillicLetters(UnitName(top_unitid)) .. ": "
   end
 
   return top_unitid, top_threat_value, top_threat_unit_name
@@ -319,7 +320,7 @@ local THREAT_DETAILS_FUNTIONS = {
 }
 
 function Widget:UpdateFrame(widget_frame, unit)
-  if Threat:ShowFeedback(unit) then
+  if ThreatShowFeedback(unit) then
     -- Show threat art (textures)
     -- unique_setting.useStyle is already checked when setting the style of the nameplate (to custom)
     local unique_setting = unit.CustomPlateSettings
@@ -402,7 +403,7 @@ function Widget:UpdateLayout(widget_frame)
   -- widget_frame:ClearAllPoints()
   widget_frame:SetAllPoints(widget_frame:GetParent())
 
-  Font:UpdateText(widget_frame, widget_frame.Percentage, Settings.ThreatPercentage)
+  FontUpdateText(widget_frame, widget_frame.Percentage, Settings.ThreatPercentage)
 end
 
 function Widget:UpdateSettings()

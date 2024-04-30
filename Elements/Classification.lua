@@ -44,7 +44,7 @@ local Element = Addon.Elements.NewElement("Classification")
 ---------------------------------------------------------------------------------------------------
 
 -- Called in processing event: NAME_PLATE_CREATED
-function Element.Created(tp_frame)
+function Element.Create(tp_frame)
   local healthbar = tp_frame.visual.Healthbar
 
   local skull_icon = healthbar:CreateTexture(nil, "OVERLAY", nil, 2)
@@ -61,7 +61,7 @@ function Element.Created(tp_frame)
 end
 
 -- Called in processing event: NAME_PLATE_UNIT_ADDED
-function Element.UnitAdded(tp_frame)
+function Element.PlateUnitAdded(tp_frame)
   local unit, visual = tp_frame.unit, tp_frame.visual
 
   if unit.isRare then
@@ -79,7 +79,7 @@ function Element.UnitAdded(tp_frame)
 end
 
 -- Called in processing event: NAME_PLATE_UNIT_REMOVED
---function Element.UnitRemoved(tp_frame)
+--function Element.PlateUnitRemoved(tp_frame)
 --end
 
 ---- Called in processing event: UpdateStyle in Nameplate.lua

@@ -105,19 +105,9 @@ end
 -- Threat helper functions for the addon
 ---------------------------------------------------------------------------------------------------
 
-function ThreatModule:OnThreatTable(unit)
-  --  local _, threatStatus = Addon.UnitDetailedThreatSituationWrapper("player", unit.unitid)
-  --  return threatStatus ~= nil
-
-  -- nil means player is not on unit's threat table - more acurate, but slower reaction time than the above solution
-  -- return UnitThreatSituation("player", unit.unitid) ~= nil
-
-  return unit.ThreatLevel ~= nil
-end
-
 -- This function returns if threat feedback is enabled for the given unit. It does assume that
 -- player (and unit) are in combat. It does not check for that.
-function ThreatModule:ShowFeedback(unit)
+function ThreatModule.ShowFeedback(unit)
   if unit.type == "PLAYER" or unit.reaction == "FRIENDLY" then
     return false
   end
@@ -216,7 +206,7 @@ end
 --   ThreatLevel
 --   IsOfftanked
 --   HasThreatTable
-function ThreatModule:SetUnitAttribute(tp_frame)
+function ThreatModule.SetUnitAttribute(tp_frame)
   local unit = tp_frame.unit
   
   -- As the unit is initialized (everything is nil) here, if threat_level is not nil here, HasThreatTable is true, 
@@ -227,12 +217,12 @@ function ThreatModule:SetUnitAttribute(tp_frame)
 end
 
 -- threat_level is nil when UNIT_THREAT_LIST_UPDATE fires at the beginning or end of combat
-function ThreatModule:ThreatUpdate(tp_frame)
+function ThreatModule.Update(tp_frame)
   UpdateThreatLevel(tp_frame, tp_frame.unit, UpdateThreatStatus(tp_frame.unit))
 end
 
 -- Heuristic: Player has to be in combat for it to be used
-function ThreatModule:ThreatUpdateHeuristic(tp_frame)
+local function UpdateHeuristic(tp_frame)
   local unit = tp_frame.unit
   
   -- Only assume that the unit is out of combat, when it is not on any unit's threat table
@@ -249,14 +239,14 @@ function ThreatModule:ThreatUpdateHeuristic(tp_frame)
   end
 end
 
--- function ThreatModule:EnteringCombat()
+-- function ThreatModule.EnteringCombat()
 --   for _, tp_frame in Addon:GetActiveThreatPlates() do
 --     local threat_level = UpdateThreatStatus(tp_frame.unit)
 --     UpdateThreatLevel(tp_frame, tp_frame.unit, threat_level)
 --   end
 -- end
 
-function ThreatModule:LeavingCombat()
+function ThreatModule.LeavingCombat()
   for unitid, tp_frame in Addon:GetActiveThreatPlates() do
     tp_frame.unit.InCombat = _G.UnitAffectingCombat(unitid)
     -- No need to query threat, just set it to nil (as no longer in combat)
@@ -267,7 +257,7 @@ end
 local function ProcessEventUpdateThreatHeuristic(unitTarget, event, flagText, amount, schoolMask)
   local tp_frame = Addon:GetThreatPlateForUnit(unitTarget)
   if tp_frame then
-    ThreatModule:ThreatUpdateHeuristic(tp_frame)
+    UpdateHeuristic(tp_frame)
   end
 end
 
@@ -299,7 +289,7 @@ local function RegisterEventsforThreatHeuristic()
   end
 end
 
-function ThreatModule:UpdateSettings()
+function ThreatModule.UpdateSettings()
   Settings = Addon.db.profile.threat
 
   self.UseThreatTable = Settings.UseThreatTable

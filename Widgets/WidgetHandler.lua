@@ -356,11 +356,13 @@ function WidgetHandler:DisableWidget(widget_name)
 end
 
 function WidgetHandler:OnPlateCreated(tp_frame)
-  local plate_widgets = tp_frame.widgets
+  local plate_widgets = {}
 
   for widget_name, widget in pairs(self.EnabledWidgets) do
     plate_widgets[widget_name] = widget:Create(tp_frame)
   end
+
+  tp_frame.widgets = plate_widgets
 end
 
 -- TODO: Seperate UnitAdded from UpdateSettings/UpdateConfiguration (unit independent stuff)

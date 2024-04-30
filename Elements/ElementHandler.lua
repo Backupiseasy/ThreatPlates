@@ -8,7 +8,6 @@ local ADDON_NAME, Addon = ...
 ---------------------------------------------------------------------------------------------------
 
 -- Lua APIs
-local ipairs = ipairs
 
 -- WoW APIs
 
@@ -41,43 +40,37 @@ function ElementHandler.GetElement(name)
   return Elements[name]
 end
 
-function ElementHandler.Created(frame)
+function ElementHandler.PlateCreated(frame)
   for i = 1, #ElementsPriority do
-    ElementsPriority[i].Created(frame)
+    ElementsPriority[i].PlateCreated(frame)
   end
 end
 
-function ElementHandler.UnitAdded(frame)
-  local element
-
+function ElementHandler.PlateUnitAdded(frame)
   if frame.PlateStyle == "None" then return end
 
   for i = 1, #ElementsPriority do
-    element = ElementsPriority[i]
-    if element.UnitAdded then
-      element.UnitAdded(frame)
+    local element = ElementsPriority[i]
+    if element.PlateUnitAdded then
+      element.PlateUnitAdded(frame)
     end
   end
 end
 
-function ElementHandler.UnitRemoved(frame)
-  local element
-
+function ElementHandler.PlateUnitRemoved(frame)
   if frame.PlateStyle == "None" then return end
 
   for i = 1, #ElementsPriority do
-    element = ElementsPriority[i]
-    if element.UnitRemoved then
-      element.UnitRemoved(frame)
+    local element = ElementsPriority[i]
+    if element.PlateUnitRemoved then
+      element.PlateUnitRemoved(frame)
     end
   end
 end
 
 function ElementHandler.UpdateStyle(frame, style)
-  local element
-
   for i = 1, #ElementsPriority do
-    element = ElementsPriority[i]
+    local element = ElementsPriority[i]
     if element.UpdateStyle then
       element.UpdateStyle(frame, style, frame.PlateStyle)
     end
@@ -85,10 +78,8 @@ function ElementHandler.UpdateStyle(frame, style)
 end
 
 function ElementHandler.UpdateSettings()
-  local element
-
   for i = 1, #ElementsPriority do
-    element = ElementsPriority[i]
+    local element = ElementsPriority[i]
     if element.UpdateSettings then
       element.UpdateSettings()
     end

@@ -13,13 +13,15 @@ local gsub, ceil, string = gsub, ceil, string
 -- WoW APIs
 local UnitIsPlayer, UnitPlayerControlled, UnitExists = UnitIsPlayer, UnitPlayerControlled, UnitExists
 local UnitName = UnitName
+local C_TooltipInfo_GetUnit = C_TooltipInfo and C_TooltipInfo.GetUnit
 local UNIT_LEVEL_TEMPLATE = UNIT_LEVEL_TEMPLATE
 local GetGuildInfo = GetGuildInfo
 
 -- ThreatPlates APIs
 local SubscribeEvent, PublishEvent,  UnsubscribeEvent = Addon.EventService.Subscribe, Addon.EventService.Publish, Addon.EventService.Unsubscribe
 local RGB = Addon.RGB
-local Localization, Font = Addon.Localization, Addon.Font
+local FontUpdateText = Addon.Font.UpdateText
+local TransliterateCyrillicLetters = Addon.Localization.TransliterateCyrillicLetters
 local L = Addon.L
 
 local _G =_G
@@ -33,12 +35,32 @@ local COLOR_GUILD = RGB(178, 178, 229, .7)
 ---------------------------------------------------------------------------------------------------
 -- Local variables
 ---------------------------------------------------------------------------------------------------
-local UnitSubtitles = {}
 local Truncate
+local UnitSubtitles = {}
 
-local ScannerName = "ThreatPlates_Tooltip_Subtext"
-local TooltipScanner = CreateFrame( "GameTooltip", ScannerName , nil, "GameTooltipTemplate" ) -- Tooltip name cannot be nil
-TooltipScanner:SetOwner(WorldFrame, "ANCHOR_NONE")
+if not Addon.IS_MAINLINE then
+  local ScannerName = "ThreatPlates_Tooltip_Subtext"
+  local TooltipScanner = CreateFrame( "GameTooltip", ScannerName , nil, "GameTooltipTemplate" ) -- Tooltip name cannot be nil
+  TooltipScanner:SetOwner( WorldFrame, "ANCHOR_NONE" )
+
+  local TooltipScannerData = {
+    lines = {
+      [1] = {},
+      [2] = {},
+    }
+  }
+
+  -- Compatibility functions for tooltips in WoW Classic
+  C_TooltipInfo_GetUnit = function(unitid)
+    TooltipScanner:ClearLines()
+		TooltipScanner:SetUnit(unitid)
+
+    TooltipScannerData.lines[1].leftText = _G[ScannerName.."TextLeft1"]:GetText()
+    TooltipScannerData.lines[2].leftText = _G[ScannerName.."TextLeft2"]:GetText()
+
+    return TooltipScannerData
+  end
+end
 
 ---------------------------------------------------------------------------------------------------
 -- Cached configuration settings
@@ -78,42 +100,39 @@ local function GetUnitSubtitle(unit)
   --if inInstance or (not UnitExists(unitid)) then return end
   if UnitIsPlayer(unit.unitid) or UnitPlayerControlled(unit.unitid) or not UnitExists(unit.unitid) then return end
 
-  --local guid = UnitGUID(unit.unitid)
-  local name = unit.name
-  local subTitle = UnitSubtitles[name]
+	--local guid = UnitGUID(unit.unitid)
+	local name = unit.name
+	local subtitle = UnitSubtitles[name]
 
-  if not subTitle then
-    TooltipScanner:ClearLines()
-    TooltipScanner:SetUnit(unit.unitid)
+	if not subtitle then
+		local tooltip_data = C_TooltipInfo_GetUnit(unit.unitid)
+    if tooltip_data then
+      if #tooltip_data.lines >= 2 then 
+        name = tooltip_data.lines[1].leftText
 
-    local TooltipTextLeft1 = _G[ScannerName.."TextLeft1"]
-    local TooltipTextLeft2 = _G[ScannerName.."TextLeft2"]
-    --local TooltipTextLeft3 = _G[ScannerName.."TextLeft3"]
-    --local TooltipTextLeft4 = _G[ScannerName.."TextLeft4"]
+        if name then name = gsub( gsub( (name), "|c........", "" ), "|r", "" ) else return end	-- Strip color escape sequences: "|c"
+        if name ~= UnitName(unit.unitid) then return end	-- Avoid caching information for the wrong unit
 
-    name = TooltipTextLeft1:GetText()
+        -- Tooltip Format Priority: Faction, Description, Level
+        local tooltip_subtitle = tooltip_data.lines[2].leftText or ""
 
-    if name then name = gsub( gsub( (name), "|c........", "" ), "|r", "" ) else return end	-- Strip color escape sequences: "|c"
-    if name ~= UnitName(unit.unitid) then return end	-- Avoid caching information for the wrong unit
-
-    -- Tooltip Format Priority:  Faction, Description, Level
-    local toolTipText = TooltipTextLeft2:GetText() or ""
-
-    if string.match(toolTipText, UNIT_LEVEL_TEMPLATE) then
-      subTitle = ""
-    else
-      subTitle = toolTipText
+        if string.match(tooltip_subtitle, UNIT_LEVEL_TEMPLATE) then
+          subtitle = ""
+        else
+          subtitle = tooltip_subtitle
+        end
+        
+        UnitSubtitles[name] = subtitle
+      end
     end
+	end
 
-    UnitSubtitles[name] = subTitle
-  end
-
-  -- Maintaining a cache allows us to avoid the hit
-  if subTitle == "" then
-    return nil, GetRoleColor
-  else
-    return subTitle, GetRoleColor
-  end
+	-- Maintaining a cache allows us to avoid the hit
+	if subtitle == "" then
+		return nil
+	else
+		return subtitle
+	end
 end
 
 -- Level
@@ -234,7 +253,7 @@ local function TextRoleGuildLevel(unit)
     description, color = GetLevelDescription(unit)
   end
 
-  description = Localization:TransliterateCyrillicLetters(description)
+  description = TransliterateCyrillicLetters(description)
 
   return description, color
 end
@@ -249,7 +268,7 @@ local function TextRoleGuild(unit)
     color = GetGuildColor
   end
 
-  description = Localization:TransliterateCyrillicLetters(description)
+  description = TransliterateCyrillicLetters(description)
 
   return description, color
 end
@@ -262,7 +281,7 @@ local function TextNPCRole(unit)
     description, color = GetUnitSubtitle(unit)
   end
 
-  description = Localization:TransliterateCyrillicLetters(description)
+  description = TransliterateCyrillicLetters(description)
 
   return description, color
 end
@@ -304,7 +323,7 @@ local Element = Addon.Elements.NewElement("StatusText")
 ---------------------------------------------------------------------------------------------------
 
 -- Called in processing event: NAME_PLATE_CREATED
-function Element.Created(tp_frame)
+function Element.Create(tp_frame)
   local status_text = tp_frame.visual.textframe:CreateFontString(nil, "ARTWORK")
   -- At least font must be set as otherwise it results in a Lua error when UnitAdded with SetText is called
   status_text:SetFont("Fonts\\FRIZQT__.TTF", 11)
@@ -356,13 +375,13 @@ local function StyleUpdate(tp_frame, style, stylename)
 end
 
 -- Called in processing event: NAME_PLATE_UNIT_ADDED
-function Element.UnitAdded(tp_frame)
+function Element.PlateUnitAdded(tp_frame)
   SetStatusText(tp_frame)
   StyleUpdate(tp_frame, tp_frame.style, tp_frame.stylename)
 end
 
 -- Called in processing event: NAME_PLATE_UNIT_REMOVED
---function Element.UnitRemoved(tp_frame)
+--function Element.PlateUnitRemoved(tp_frame)
 --end
 
 ---- Called in processing event: UpdateStyle in Nameplate.lua
@@ -377,7 +396,7 @@ function Element.UpdateStyle(tp_frame, style, plate_style)
   local db = ModeSettings[tp_frame.PlateStyle]
 
   status_text:SetSize(db.Font.Width, db.Font.Height)
-  Font:UpdateText(tp_frame, status_text, db)
+  FontUpdateText(tp_frame, status_text, db)
 
   status_text:Show()
 end

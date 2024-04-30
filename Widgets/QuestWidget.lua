@@ -11,22 +11,20 @@ local Widget = ((Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLAS
 ---------------------------------------------------------------------------------------------------
 
 -- Lua APIs
-local string, tonumber, next, pairs, ipairs = string, tonumber, next, pairs, ipairs
+local string, tonumber, pairs = string, tonumber, pairs
 
 -- WoW APIs
-local WorldFrame = WorldFrame
-local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
-local UnitName, UnitIsUnit = UnitName, UnitIsUnit
-local UnitExists = UnitExists
+local InCombatLockdown = InCombatLockdown
+local UnitName, UnitExists = UnitName, UnitExists
 local IsInRaid, IsInGroup, GetNumGroupMembers, GetNumSubgroupMembers = IsInRaid, IsInGroup, GetNumGroupMembers, GetNumSubgroupMembers
 local wipe = wipe
 
 local RequestLoadQuestByID = C_QuestLog.RequestLoadQuestByID
 local GetQuestObjectives, GetQuestInfo = C_QuestLog.GetQuestObjectives, C_QuestLog.GetInfo
-local GetQuestIDForLogIndex, GetLogIndexForQuestID = C_QuestLog.GetQuestIDForLogIndex, C_QuestLog.GetLogIndexForQuestID
-local GetQuestLogTitle, GetNumQuestLogEntries = C_QuestLog.GetQuestLogTitle, C_QuestLog.GetNumQuestLogEntries
+local GetLogIndexForQuestID, GetNumQuestLogEntries = C_QuestLog.GetLogIndexForQuestID, C_QuestLog.GetNumQuestLogEntries
+local C_TooltipInfo_GetUnit = C_TooltipInfo and C_TooltipInfo.GetUnit
 
-local GetNamePlates, GetNamePlateForUnit = C_NamePlate.GetNamePlates, C_NamePlate.GetNamePlateForUnit
+local GetNamePlates = C_NamePlate.GetNamePlates
 
 -- ThreatPlates APIs
 local PlayerName = Addon.PlayerName
@@ -38,7 +36,6 @@ local _G =_G
 -- GLOBALS: CreateFrame
 
 local InCombat = false
-local TooltipFrame = CreateFrame("GameTooltip", "ThreatPlates_Tooltip", nil, "GameTooltipTemplate")
 local ICON_COLORS = {}
 local Font
 
@@ -112,20 +109,18 @@ local QuestObjectiveParser = STANDARD_QUEST_OBJECTIVE_PARSER[GetLocale()] or QUE
 ---------------------------------------------------------------------------------------------------
 
 function IsQuestUnit(unit)
-  if not unit.unitid then return false, false, nil end
+  -- Tooltip data can be nil here as it seems - there was a bug with this when a player left a battleground
+  local tooltip_data = unit.unitid and C_TooltipInfo_GetUnit(unit.unitid)
+  if not tooltip_data then return false end
 
   local quest_title
   local quest_progress_player = false
 
-  -- Read quest information from tooltip. Thanks to Kib: QuestMobs AddOn by Tosaido.
-  TooltipFrame:SetOwner(WorldFrame, "ANCHOR_NONE")
-  --TooltipFrame:SetUnit(unitid)
-  TooltipFrame:SetHyperlink("unit:" .. unit.guid)
+  for i = 3, #tooltip_data.lines do
+    local line = tooltip_data.lines[i]
 
-  for i = 3, TooltipFrame:NumLines() do
-    local line = _G["ThreatPlates_TooltipTextLeft" .. i]
-    local text = line:GetText()
-    local text_r, text_g, text_b = line:GetTextColor()
+    local text = line.leftText
+    local text_r, text_g, text_b = line.leftColor.r, line.leftColor.g, line.leftColor.b
 
     if text_r > 0.99 and text_g > 0.8 and text_b == 0 then
       -- A line with this color is either the quest title or a player name (if on a group quest, but always after the quest title)
@@ -687,7 +682,13 @@ local function tablelength(T)
   return count
 end
 
-function Addon:PrintQuests(command)
+-- Load settings from the configuration which are shared across all aura widgets
+-- used (for each widget) in UpdateWidgetConfig
+function Widget:UpdateSettings()
+  Font = Addon.LibSharedMedia:Fetch('font', Addon.db.profile.questWidget.Font)
+end
+
+function Widget:PrintDebug(command)
   local quest_id = tonumber(command)
   if quest_id then
     local quest_log_index = GetLogIndexForQuestID(quest_id)
@@ -711,15 +712,12 @@ function Addon:PrintQuests(command)
     local quest_title
     local quest_progress_player = false
 
-    -- Read quest information from tooltip. Thanks to Kib: QuestMobs AddOn by Tosaido.
-    TooltipFrame:SetOwner(WorldFrame, "ANCHOR_NONE")
-    --TooltipFrame:SetUnit(unitid)
-    TooltipFrame:SetHyperlink("unit:" .. UnitGUID("target"))
+    local tooltip_data = C_TooltipInfo_GetUnit("target")
+    for i = 3, #tooltip_data.lines do
+      local line = tooltip_data.lines[i]
 
-    for i = 3, TooltipFrame:NumLines() do
-      local line = _G["ThreatPlates_TooltipTextLeft" .. i]
-      local text = line:GetText()
-      local text_r, text_g, text_b = line:GetTextColor()
+      local text = line.leftText
+      local text_r, text_g, text_b = line.leftColor.r, line.leftColor.g, line.leftColor.b
 
       Addon.Logging.Debug("=== Line:", text)
       if text_r > 0.99 and text_g > 0.82 and text_b == 0 then
