@@ -1272,19 +1272,19 @@ ThreatPlates.DEFAULT_SETTINGS = {
         HighlightColorForInteract = RGB(255, 128, 0, 1),
         Icon = {
           SoftTargetIconTarget = false,
-          Size = 19,
+          Size = 22,
           -- Positioning
           HealthbarMode = {
-            Anchor = "BOTTOM",
+            Anchor = "TOP",
             InsideAnchor = false,
             HorizontalOffset = 0,
-            VerticalOffset = -10,
+            VerticalOffset = -14,
           },
           NameMode = {
-            Anchor = "BOTTOM",
+            Anchor = "TOP",
             InsideAnchor = false,
             HorizontalOffset = 0,
-            VerticalOffset = -10,
+            VerticalOffset = 8,
           },
         },
         },

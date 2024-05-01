@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+11.2.2 (2024-05-01)
+------------------------------------------------------
+* Adjusted default settings for soft target icon so that it is shown above the nameplate.
+
+------------------------------------------------------
 11.2.1 (2024-05-01)
 ------------------------------------------------------
 * Fixed a Lua error that occured when a custom nameplate with Cast trigger was applied [GH-514].
