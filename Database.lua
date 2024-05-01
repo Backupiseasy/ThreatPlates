@@ -1366,6 +1366,7 @@ local function MigrateSetJustifyVCENTER(profile_name, profile)
   MigrateVerticalAlignmentEntry(profile, { "ExperienceWidget", "ExperienceText", "Font" })
   MigrateVerticalAlignmentEntry(profile, { "settings", "healthbar", "TargetUnit", "Font", })
   MigrateVerticalAlignmentEntry(profile, { "settings", "castbar", "CastTimeText", "Font", })
+  MigrateVerticalAlignmentEntry(profile, { "settings", "castbar", "CastTarget", "Font", })
 end
 
 local TEST_FUNCTIONS = {

@@ -1,3 +1,4 @@
 # @project-version@ (@build-time@)
 
-* Fixed a Lua error that occured when a custom nameplate with Cast trigger was applied [GH-514].
+* Adjusted default settings for soft target icon so that it is shown above the nameplate.
+* Fixed a bug where the vertical alignment for the cast target text was not migrated properly [Comment #7266].
