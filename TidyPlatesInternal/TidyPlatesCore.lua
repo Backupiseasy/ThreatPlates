@@ -550,6 +550,7 @@ do
       UpdateStyle()
 
       Addon.CreateExtensions(extended, unit.unitid, stylename)
+      Widgets:OnUnitAdded(extended, unit)
     else
       -- Update the unique icon widget and style may be the same, but a different trigger might be active, e.g.,
       -- if two aura triggers fired
@@ -587,8 +588,6 @@ do
       CheckNameplateStyle()
       UpdateIndicator_Standard()
       UpdateIndicator_HealthBar()
-      
-      Widgets:OnUnitAdded(extended, unit)
     end
 
     -- Update Delegates
