@@ -1,4 +1,4 @@
 # @project-version@ (@build-time@)
 
-* Adjusted default settings for soft target icon so that it is shown above the nameplate.
-* Fixed a bug where the vertical alignment for the cast target text was not migrated properly [Comment #7266].
+* Fixed a Lua error in Combo Points widget on Deathknights as the Rune API from Classic was used on Mainline [Comment #7270].
+* Fixed a bug in Target Art widget where the highlight texture was shown behind the healthbar when Stripes style was selected [Comment #7269].
