@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+11.2.3 (2024-05-02)
+------------------------------------------------------
+* Fixed a Lua error in Combo Points widget on Deathknights as the Rune API from Classic was used on Mainline [Comment #7270].
+
+------------------------------------------------------
 11.2.2 (2024-05-01)
 ------------------------------------------------------
 * Adjusted default settings for soft target icon so that it is shown above the nameplate.
@@ -660,7 +665,7 @@
 ------------------------------------------------------
 10.0.4
 ------------------------------------------------------
-* Fixed a bug Combo Points widget where Death Knight runes where not shown in the correct color when style Blizzard was used [Comment #4894, #4954, PM, Issue #440].
+* Fixed a bug in Combo Points widget where Death Knight runes where not shown in the correct color when style Blizzard was used [Comment #4894, #4954, PM, Issue #440].
 * Fixed a bug with threat percentage text where the alignment was incorrect when a nameplate was initially shown [Comment #4983].
 * Fixed a bug with Social widget where Battle.net Friends were not correctly recognized in Classic WoW.
 * Upgrade integrated libraries (LibCustomGlow v1.0.3-1-g6261295-alpha) [Comment #4873].
