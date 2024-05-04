@@ -288,6 +288,7 @@ local function PlayerTargetChanged(target_unitid)
       local healthbar = tp_frame.visual.healthbar
       widget_frame:SetParent(tp_frame)
       widget_frame:SetFrameLevel(healthbar:GetFrameLevel() + FRAME_LEVEL_BY_TEXTURE[Settings.theme])
+      --widget_frame.HealthbarMode:SetFrameLevel(widget_frame:GetFrameLevel())
       widget_frame:ClearAllPoints()
       widget_frame:SetAllPoints(healthbar)
     
@@ -516,13 +517,14 @@ function FocusWidget:Create()
     
     widget_frame.TargetUnitID = "focus"
     
+    -- Focus highlight textures should be shown behind target highlight textures
     local healthbar_mode_frame = _G.CreateFrame("Frame", nil, widget_frame, BackdropTemplate)
     healthbar_mode_frame:SetFrameLevel(widget_frame:GetFrameLevel())
-    healthbar_mode_frame.LeftTexture = widget_frame:CreateTexture(nil, "ARTWORK", nil, 7)
-    healthbar_mode_frame.RightTexture = widget_frame:CreateTexture(nil, "ARTWORK", nil, 0)
+    healthbar_mode_frame.LeftTexture = widget_frame:CreateTexture(nil, "ARTWORK", nil, 6)
+    healthbar_mode_frame.RightTexture = widget_frame:CreateTexture(nil, "ARTWORK", nil, -1)
     widget_frame.HealthbarMode = healthbar_mode_frame
 
-    widget_frame.NameModeTexture = widget_frame:CreateTexture(nil, "BACKGROUND", nil, 0)
+    widget_frame.NameModeTexture = widget_frame:CreateTexture(nil, "BACKGROUND", nil, -1)
     widget_frame.NameModeTexture:SetTexture(ThreatPlates.Art .. "Target")
 
     self:UpdateLayout()
@@ -557,6 +559,7 @@ function FocusWidget:OnFocusUnitAdded(tp_frame, unit)
     local healthbar = tp_frame.visual.healthbar
     widget_frame:SetParent(tp_frame)
     widget_frame:SetFrameLevel(healthbar:GetFrameLevel() + FRAME_LEVEL_BY_TEXTURE[FocusSettings.theme])
+    --widget_frame.HealthbarMode:SetFrameLevel(widget_frame:GetFrameLevel())
     widget_frame:ClearAllPoints()
     widget_frame:SetAllPoints(healthbar)
 
