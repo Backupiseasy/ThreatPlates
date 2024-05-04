@@ -1335,9 +1335,9 @@ function CoreEvents:NAME_PLATE_CREATED(plate)
   OnNewNameplate(plate)
 
   -- NamePlateDriverFrame.AcquireUnitFrame is not used in Classic
-  -- if (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC) and plate.UnitFrame then
-  --   NamePlateDriverFrame_AcquireUnitFrame(nil, plate)
-  -- end
+  if not Addon.IS_MAINLINE and plate.UnitFrame then
+    NamePlateDriverFrame_AcquireUnitFrame(nil, plate)
+  end
 
   plate:HookScript('OnHide', FrameOnHide)
   plate:HookScript('OnUpdate', FrameOnUpdate)

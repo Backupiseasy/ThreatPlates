@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+11.2.6 (2024-05-04)
+------------------------------------------------------
+* Fixed a bug that resulted in Blizzard nameplates and Threat Plates being shown at the same time and overlapping each other [GH-516].
+
+------------------------------------------------------
 11.2.5 (2024-05-04)
 ------------------------------------------------------
 * Fixed a bug with Focus widget that caused the highlight color to not be applied [Comment #7280].
