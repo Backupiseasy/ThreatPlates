@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+11.2.4 (2024-05-03)
+------------------------------------------------------
+* Fixed an incompatibility with BigDebuffs where BigDebuffs' icons where not shown (because of a side-effect with other addons). You also need to update BigDebuffs for the bugfix to take effect. [Comment #7274].
+
+------------------------------------------------------
 11.2.3 (2024-05-02)
 ------------------------------------------------------
 * Fixed a Lua error in Combo Points widget on Deathknights as the Rune API from Classic was used on Mainline [Comment #7270].
