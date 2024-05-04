@@ -109,7 +109,8 @@ local SoftTargetSettings = {
   softfriend = {},
   softinteract = {},
   softenemy = {},
-  GameObject = {}
+  GameObject = {},
+  focus = {}
 }
 local UpdateTexture, ShowBorder, NameModeOffsetX, NameModeOffsetY
 
@@ -512,7 +513,9 @@ function FocusWidget:Create()
     widget_frame:Hide()
 
     FocusWidgetFrame = widget_frame
-
+    
+    widget_frame.TargetUnitID = "focus"
+    
     local healthbar_mode_frame = _G.CreateFrame("Frame", nil, widget_frame, BackdropTemplate)
     healthbar_mode_frame:SetFrameLevel(widget_frame:GetFrameLevel())
     healthbar_mode_frame.LeftTexture = widget_frame:CreateTexture(nil, "ARTWORK", nil, 7)
@@ -608,6 +611,8 @@ function FocusWidget:UpdateSettings()
 
   FocusUpdateTexture = UPDATE_TEXTURE_FUNCTIONS[FocusSettings.theme]
   FocusShowBorder = (FocusUpdateTexture == UpdateBorderTexture)
+
+  SoftTargetSettings.focus.Color = FocusSettings
 
   -- Update the widget if it was already created (not true for immediately after Reload UI or if it was never enabled
   -- in this since last Reload UI)

@@ -3436,7 +3436,7 @@ end
 
 local function CreateFocusWidgetOptions()
   local options = {
-    name = L["Focus Highlight"],
+    name = L["Focus"],
     type = "group",
     order = 55,
     hidden = function() return Addon.IS_CLASSIC end,
