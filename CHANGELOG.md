@@ -1,3 +1,4 @@
 # @project-version@ (@build-time@)
 
-* Fixed an incompatibility with BigDebuffs where BigDebuffs' icons where not shown (because of a side-effect with other addons). You also need to update BigDebuffs for the bugfix to take effect. [Comment #7274].
+* Fixed a bug with Focus widget that caused the highlight color to not be applied [Comment #7280].
+* Improved layering of target and focus highlight to that target highlight covers focus highlight when shown on the same unit.
