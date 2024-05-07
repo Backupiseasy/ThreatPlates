@@ -5768,6 +5768,7 @@ local function CreateBlizzardSettings()
                 order = 30,
                 type = "toggle",
                 set = function(info, val)
+                  Addon.db.profile.BlizzardSettings.Names.ShowOnlyNames = val
                   SetCVarBoolTPTP(info, val)
                   ReloadUI()
                 end,

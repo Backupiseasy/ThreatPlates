@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+11.2.7 (2024-05-07)
+------------------------------------------------------
+* Fixed a bug that resulted in setting ShowOnlyNammes not being saved after reloading the UI or logging out [GH-517].
+
+------------------------------------------------------
 11.2.6 (2024-05-04)
 ------------------------------------------------------
 * Fixed a bug that resulted in Blizzard nameplates and Threat Plates being shown at the same time and overlapping each other [GH-516].
