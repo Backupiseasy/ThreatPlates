@@ -37,6 +37,11 @@ local _G =_G
 
 -- Quest tooltips: not sure since when available
 if not Addon.IS_MAINLINE then -- 
+  -- UnitGroupRolesAssigned does still not seem to work in Classic
+  UnitGroupRolesAssigned = function(target_unit)
+    return (GetPartyAssignment("MAINTANK", target_unit) and "TANK") or "NONE"
+  end
+
   -- Quest widget is not available in Classic
   ShowQuestUnit = function(...) return false end
 end
