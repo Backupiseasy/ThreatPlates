@@ -78,7 +78,7 @@ local function CreateAuraTexture(frame, index)
   local time = frame:CreateFontString(nil, "OVERLAY") -- Duration Text
 
   time:SetJustifyH("CENTER")
-  time:SetJustifyV("CENTER")
+  time:SetJustifyV("MIDDLE")
   time:SetShadowOffset(1, -1)
   aura.Time = time
 
