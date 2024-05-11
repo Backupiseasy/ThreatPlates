@@ -2834,12 +2834,12 @@ local function CreateTargetArtWidgetOptions()
         },
       },
       SoftTarget = {
-        name = L["Soft Target"],
+        name = L["Action Target"],
         order = 20,
         type = "group",
         inline = false,
         args = {
-          Note = GetDescriptionEntry(L["This settings changes CVars related to soft target and are not stored in the profile, but by WoW itself (character-specific settings)."]),
+          Note = GetDescriptionEntry(L["This settings changes CVars related to action targeting and are not stored in the profile, but by WoW itself (character-specific settings)."]),
           Enemy = {
             name = L["Enemy"],
             order = 5,
@@ -3005,25 +3005,8 @@ local function CreateTargetArtWidgetOptions()
             type = "group",
             inline = true,
             args = {
-              -- SoftTargetForceSelect = {
-              --   name = L["Auto-set Target"],
-              --   desc = L["Auto-set target to match soft target."],
-              --   order = 10,
-              --   type = "select",
-              --   values = { "None", "Enemies", "Friends" },
-              --   set = function(info, val)                  
-              --     -- 1 = for enemies, 2 = for friends => 0 for no auto-set
-              --     Addon.CVars:Set(info.arg, (val ==  "Enemies" and "1") or (val == "Friends" and "2") or "0")
-              --   end,
-              --   get = function(info) 
-              --     local val = Addon.CVars:GetAsNumber(info.arg) 
-              --     print("Value:", (val == 1 and "Enemies") or (val == 2 and "Friends") or "None")
-              --     return (val == 1 and "Enemies") or (val == 2 and "Friends") or "None"
-              --   end,
-              --   arg = "SoftTargetForce",
-              -- },
               SoftTargetForce = {
-                name = L["Auto-set target to match soft target"],
+                name = L["Auto-set target to match action target"],
                 order = 10,
                 type = "group",
                 inline = true,
@@ -3058,13 +3041,13 @@ local function CreateTargetArtWidgetOptions()
                 },
               },
               SoftTargetMatchLocked = {
-                name = L["Match appropriate soft target to locked target."],
+                name = L["Match appropriate action target to locked target."],
                 order = 20,
                 type = "group",
                 inline = true,
                 args = {
                   None = {
-                    name = L["None"],
+                    name = L["No matching"],
                     order = 10,
                     type = "toggle",
                     set = function(info, val) Addon.CVars:Set(info.arg, 0) end,
@@ -3093,7 +3076,7 @@ local function CreateTargetArtWidgetOptions()
                 },
               },              
               SoftTargetWithLocked = {
-                name = L["Allow soft target selection while player has a locked target."],
+                name = L["Allow action target selection while player has a locked target."],
                 order = 30,
                 type = "group",
                 inline = true,
@@ -3110,7 +3093,7 @@ local function CreateTargetArtWidgetOptions()
                     arg = "SoftTargetWithLocked",
                   },
                   AlwaysSoftTargeting = {
-                    name = L["Always do soft targeting"],
+                    name = L["Always do action targeting"],
                     order = 30,
                     type = "toggle",
                     set = function(info, val) Addon.CVars:Set(info.arg, 2) end,
@@ -3124,7 +3107,7 @@ local function CreateTargetArtWidgetOptions()
         },
       },
       Icon = {
-        name = L["Soft Target Icon"],
+        name = L["Interact Icon"],
         order = 30,
         type = "group",
         inline = false,
@@ -3140,7 +3123,7 @@ local function CreateTargetArtWidgetOptions()
             end,
             get = GetCVarBoolTPTP,
             args = {
-              Note = GetDescriptionEntry(L["This settings changes CVars related to soft target and are not stored in the profile, but by WoW itself (character-specific settings)."]),
+              Note = GetDescriptionEntry(L["This settings changes CVars related to action targeting and are not stored in the profile, but by WoW itself (character-specific settings)."]),
               SoftTargetIconTarget = {
                 name = L["Target"],
                 order = 1,

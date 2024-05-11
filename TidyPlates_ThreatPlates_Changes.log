@@ -1,7 +1,8 @@
-------------------------------------------------------
+﻿------------------------------------------------------
 11.2.9 (2024-05-17)
 ------------------------------------------------------
 * Fixed a bug with the calculation of the clickable area of Threat Plates. Now, the clickable area of Threat Plates and Blizzard nameplates is the same if their healthbar size is the same. This also ensures that the stacking and overlapping behaviour is the same for Threat Plates and Blizzard nameplates [GH-465, GH-495].
+* Updated localizations.
 
 ------------------------------------------------------
 11.2.8 (2024-05-10)
@@ -41,7 +42,7 @@
 ------------------------------------------------------
 11.2.2 (2024-05-01)
 ------------------------------------------------------
-* Adjusted default settings for soft target icon so that it is shown above the nameplate.
+* Adjusted default settings for interact icon so that it is shown above the nameplate.
 * Fixed a bug where the vertical alignment for the cast target text was not migrated properly [Comment #7266].
 
 ------------------------------------------------------

@@ -464,7 +464,7 @@ local function SetUnitAttributeTarget(unit)
 end
 
 ---------------------------------------------------------------------------------------------------
--- Soft Target Support
+-- Action Target Support
 ---------------------------------------------------------------------------------------------------
 
 local function SoftTargetExists()

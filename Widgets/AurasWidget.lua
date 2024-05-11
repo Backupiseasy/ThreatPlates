@@ -1711,7 +1711,7 @@ end
 
 
 local function IgnoreAuraUpdateForUnit(widget_frame, unit)
-  -- ! "Target Only" only supports the direct target, not soft targets
+  -- ! "Target Only" only supports the direct target, not action targets
   local unit_is_target = UnitIsUnit("target", unit.unitid)
   if Widget.db.ShowTargetOnly then
     if unit_is_target then

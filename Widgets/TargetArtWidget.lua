@@ -280,7 +280,7 @@ end
 local function PlayerTargetChanged(target_unitid)
   local widget_frame = TargetHighlightFrames[target_unitid]
   
-  -- ! Don't overwrite the target with a style if it's becoming a soft target as well
+  -- ! Don't overwrite the target with a style if it's becoming a action target as well
   local tp_frame = Widget:GetThreatPlateForUnit(target_unitid)
   if tp_frame and (not UnitIsUnit("target", tp_frame.unit.unitid) or target_unitid == "target") then
     local unit = tp_frame.unit

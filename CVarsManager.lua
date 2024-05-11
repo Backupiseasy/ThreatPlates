@@ -224,7 +224,7 @@ local RESET_TO_DEFAULT = {
   "clampTargetNameplateToScreen",
   "nameplateResourceOnTarget",
   -- "nameplateGlobalScale" -- Reset it to 1, if it get's somehow corrupted
-  -- Soft Target
+  -- Action Target
   "SoftTargetEnemy", "SoftTargetNameplateEnemy", "SoftTargetIconEnemy",
   "SoftTargetFriend", "SoftTargetNameplateFriend", "SoftTargetIconFriend",
   "SoftTargetInteract", "SoftTargetNameplateInteract", "SoftTargetIconInteract",
