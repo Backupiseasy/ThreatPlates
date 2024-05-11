@@ -1,6 +1,3 @@
 # @project-version@ (@build-time@)
 
-* Fixed a bug with Boss Mods widget that occurred because a deprecated value for vertical alignment of text was used [Comment #7295].
-* Fixed a bug with off-tank detection in Cata Classic that occurred because the wrong API for raid roles was used. 
-* Updated TOC version for Patch 10.2.7 for WoW Mainline.
-* Upgrade integrated libraries (Ace3 Release-r1341).
+* Fixed a bug with the calculation of the clickable area of Threat Plates. Now, the clickable area of Threat Plates and Blizzard nameplates is the same if their healthbar size is the same. This also ensures that the stacking and overlapping behaviour is the same for Threat Plates and Blizzard nameplates [GH-465, GH-495].

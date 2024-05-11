@@ -158,7 +158,7 @@ local function ChatCommandDebug(cmd_list)
 				table.remove(input, i)
 				Addon.Logging.Debug("Removing", i)
 			end
-		end
+		end			
 	else
 		Addon.Logging.Error(L["Unknown option: "] .. command)
 		PrintHelp()
@@ -203,6 +203,25 @@ function TidyPlatesThreat:ChatCommand(input)
 --		TidyPlatesThreat:ToggleNameplateModeNeutralUnits()
 --	elseif command == "toggle-view-enemy-units" then
 --		TidyPlatesThreat:ToggleNameplateModeEnemyUnits()
+	elseif command == "clickable-area" then
+		for unitid, plate in pairs(C_NamePlate.GetNamePlates()) do				
+			if not plate._TPBackground then				
+				plate._TPBackground = _G.CreateFrame("Frame", nil, plate, Addon.BackdropTemplate)
+				plate._TPBackground:SetBackdrop({
+					bgFile = Addon.ThreatPlates.Art .. "TP_WhiteSquare.tga",
+					edgeFile = Addon.ThreatPlates.Art .. "TP_WhiteSquare.tga",
+					edgeSize = 2,
+					insets = { left = 0, right = 0, top = 0, bottom = 0 },
+				})
+				plate._TPBackground:SetBackdropColor(0,0,0,.3)
+				plate._TPBackground:SetBackdropBorderColor(0, 0, 0, 0.8)
+			end
+				
+			plate._TPBackground:ClearAllPoints()
+			plate._TPBackground:SetParent(plate)
+			plate._TPBackground:SetAllPoints(plate.UnitFrame)
+			plate._TPBackground:Show()
+		end	
 	elseif Addon.DEBUG then
 		ChatCommandDebug(cmd_list)
 	else

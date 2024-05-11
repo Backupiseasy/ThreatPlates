@@ -1,4 +1,9 @@
-﻿------------------------------------------------------
+------------------------------------------------------
+11.2.9 (2024-05-17)
+------------------------------------------------------
+* Fixed a bug with the calculation of the clickable area of Threat Plates. Now, the clickable area of Threat Plates and Blizzard nameplates is the same if their healthbar size is the same. This also ensures that the stacking and overlapping behaviour is the same for Threat Plates and Blizzard nameplates [GH-465, GH-495].
+
+------------------------------------------------------
 11.2.8 (2024-05-10)
 ------------------------------------------------------
 * Fixed a bug with Boss Mods widget that occurred because a deprecated value for vertical alignment of text was used [Comment #7295].
