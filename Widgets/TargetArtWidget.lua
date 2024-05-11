@@ -485,8 +485,8 @@ function Widget:UpdateSettings()
   -- Update the widget if it was already created (not true for immediately after Reload UI or if it was never enabled
   -- in this since last Reload UI)
   for target_unitid, widget_frame in pairs(TargetHighlightFrames) do
-    if widget_frame and widget_frame:GetParent() then
-      UpdateTargetHighlightFrame(widget_frame)
+    UpdateTargetHighlightFrame(widget_frame)
+    if widget_frame:GetParent() then
       PlayerTargetChanged(target_unitid)
     end
   end

@@ -2,6 +2,7 @@
 11.2.9 (2024-05-17)
 ------------------------------------------------------
 * Fixed a bug with the calculation of the clickable area of Threat Plates. Now, the clickable area of Threat Plates and Blizzard nameplates is the same if their healthbar size is the same. This also ensures that the stacking and overlapping behaviour is the same for Threat Plates and Blizzard nameplates [GH-465, GH-495].
+* Fixed a bug with target highlight that occurred when the highlight style was changed with no active target, resulting in the highlight texture not being updated [GH-515].
 * Updated localizations.
 
 ------------------------------------------------------
