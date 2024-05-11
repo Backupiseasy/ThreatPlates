@@ -38,32 +38,20 @@ local LSMUpdateTimer
 -- Functions different depending on WoW version
 ---------------------------------------------------------------------------------------------------
 
--- Copied from ElvUI:
-local function CalculateSynchedNameplateSize()
-  local db = Addon.db.profile.settings
-
-  local width = db.frame.width
-  local height = db.frame.height
-  if db.frame.SyncWithHealthbar then
-    -- this wont taint like NamePlateDriverFrame:SetBaseNamePlateSize
-
-    -- The default size of Threat Plates healthbars is based on large nameplates with these defaults:
-    --   NamePlateVerticalScale = 1.7
-    --   NamePlateVerticalScale = 1.4
-    local zeroBasedScale = 0.7  -- tonumber(GetCVar("NamePlateVerticalScale")) - 1.0
-    local horizontalScale = 1.4 -- tonumber(GetCVar("NamePlateVerticalScale"))
-
-    width = (db.healthbar.width - 10) * horizontalScale
-    height = (db.healthbar.height + 35) * Lerp(1.0, 1.25, zeroBasedScale)
-
-    db.frame.width = width
-    db.frame.height = height
+if Addon.WOW_USES_CLASSIC_NAMEPLATES then
+  local function CalculateSynchedNameplateSize()
+    local db = Addon.db.profile.settings
+  
+    local width = db.healthbar.width
+    local height = db.healthbar.height
+    if db.frame.SyncWithHealthbar then
+      db.frame.width = width + 6
+      db.frame.height = height + 22
+    end
+  
+    return db.frame.width, db.frame.height
   end
 
-  return width, height
-end
-
-if Addon.WOW_USES_CLASSIC_NAMEPLATES then
   Addon.SetBaseNamePlateSize = function(self)
     local db = self.db.profile
 
@@ -81,6 +69,19 @@ if Addon.WOW_USES_CLASSIC_NAMEPLATES then
     Addon:ConfigClickableArea(false)
   end
 else
+  local function CalculateSynchedNameplateSize()
+    local db = Addon.db.profile.settings
+  
+    if db.frame.SyncWithHealthbar then
+      -- This functions were interpolated from ratio of the clickable area and the Blizzard nameplate healthbar
+      -- for various sizes
+      db.frame.width = db.healthbar.width + 24.5
+      db.frame.height = (db.healthbar.height + 11.4507) / 0.347764  
+    end
+  
+    return db.frame.width, db.frame.height
+  end
+    
   local function SetNameplatesToDefaultSize()
     if NamePlateDriverFrame:IsUsingLargerNamePlateStyle() then
       C_NamePlate.SetNamePlateFriendlySize(154, 64)
