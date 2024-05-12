@@ -22,7 +22,7 @@ local BUFF_MAX_DISPLAY = BUFF_MAX_DISPLAY
 local GetFramerate = GetFramerate
 local DebuffTypeColor = DebuffTypeColor
 local UnitIsUnit = UnitIsUnit
-local UnitAuraBySlot, UnitAuraSlots = UnitAuraBySlot, UnitAuraSlots
+local UnitAuraSlots = UnitAuraSlots
 local GetAuraDataBySlot, GetAuraDataByAuraInstanceID = C_UnitAuras and C_UnitAuras.GetAuraDataBySlot, C_UnitAuras and C_UnitAuras.GetAuraDataByAuraInstanceID
 local GetNamePlates, GetNamePlateForUnit = C_NamePlate.GetNamePlates, C_NamePlate.GetNamePlateForUnit
 local IsInInstance = IsInInstance
@@ -1367,8 +1367,8 @@ end
 function Widget:GetColorForAura(aura)
 	local db = self.db
 
-  if aura.debuffType and db.ShowAuraType then
-    return DebuffTypeColor[aura.debuffType]
+  if aura.dispelName and db.ShowAuraType then
+    return DebuffTypeColor[aura.dispelName]
   elseif aura.effect == "HARMFUL" then
     return db.DefaultDebuffColor
   else
@@ -1425,7 +1425,7 @@ if Addon.IS_MAINLINE then
                       (db.ShowBlizzardForFriendly and (aura.nameplateShowAll or (aura.nameplateShowPersonal and aura.CastByPlayer))) or
                       (db.ShowDispellable and aura.isStealable) or
                       (db.ShowBoss and aura.isBossAura) or
-                      (aura.debuffType and db.FilterByType[self.AURA_TYPE[aura.debuffType]])
+                      (aura.dispelName and db.FilterByType[self.AURA_TYPE[aura.dispelName]])
 
     local spellfound = self.AuraFilterDebuffs[aura.name] or self.AuraFilterDebuffs[aura.spellId]
 
@@ -1468,7 +1468,7 @@ else
       -- (db.ShowBlizzardForFriendly and (aura.nameplateShowAll or (aura.nameplateShowPersonal and aura.CastByPlayer))) or
       (db.ShowDispellable and aura.isStealable) or
       (db.ShowBoss and aura.isBossAura) or
-      (aura.debuffType and db.FilterByType[self.AURA_TYPE[aura.debuffType]])
+      (aura.dispelName and db.FilterByType[self.AURA_TYPE[aura.dispelName]])
 
     local spellfound = self.AuraFilterDebuffs[aura.name] or self.AuraFilterDebuffs[aura.spellId]
 
@@ -1524,7 +1524,7 @@ function Widget:FilterEnemyBuffsBySpell(db, aura, AuraFilterFunction, unit)
     show_aura = false
   else
     show_aura = db.ShowAllEnemy or (db.ShowOnEnemyNPCs and unit.type == "NPC") or (db.ShowDispellable and aura.isStealable) or
-      (aura.debuffType == "Magic" and db.ShowMagic)
+      (aura.dispelName == "Magic" and db.ShowMagic)
   end
 
   --  local show_aura = db.ShowAllEnemy or (db.ShowOnEnemyNPCs and unit.type == "NPC") or (db.ShowDispellable and aura.isStealable)
@@ -1641,6 +1641,7 @@ end
 local UnitAuraWrapper
 local ProcessAllUnitAuras
 
+-- Defined here as it's used for configuration mode even in Mainline
 local function ProcessAllUnitAurasClassic(unitid, effect)
   local _
   local unit_auras = {}
@@ -1648,7 +1649,7 @@ local function ProcessAllUnitAurasClassic(unitid, effect)
   for i = 1, 40 do
     local aura = {}
 
-    aura.name, aura.icon, aura.applications, aura.debuffType, aura.duration, aura.expirationTime, aura.sourceUnit,
+    aura.name, aura.icon, aura.applications, aura.dispelName, aura.duration, aura.expirationTime, aura.sourceUnit,
       aura.isStealable, aura.nameplateShowPersonal, aura.spellId, aura.canApplyAura, aura.isBossAura, _, aura.nameplateShowAll =
       UnitAuraWrapper(unitid, i, effect)
 
@@ -1676,31 +1677,28 @@ if Addon.IS_MAINLINE then
     local _
     local unit_auras = {}
 
+    local aura_max_display = (effect == "HARMFUL" and DEBUFF_MAX_DISPLAY) or BUFF_MAX_DISPLAY
+
+    -- AuraUtil.ForEachAura(unitid, effect, BUFF_MAX_DISPLAY, function(unit_aura_info)
+    --   unit_aura_info.duration = unit_aura_info.duration or 0
+    --   unit_auras[#unit_auras + 1] = unit_aura_info
+    --   -- Addon.Logging.Debug("Aura:", aura.name, "=> ID:", aura.spellId)
+    -- end, true)
+
+    -- AuraUtil.ForEachAura:
     local continuation_token
     repeat
-      -- continuationToken is the first return value of UnitAuraSltos
+      -- continuationToken is the first return value of UnitAuraSlots
       local slots = { UnitAuraSlots(unitid, effect, BUFF_MAX_DISPLAY, continuation_token) }
       continuation_token = slots[1]
 
       for i = 2, #slots do
-        local aura = {}
-
-        aura.name, aura.icon, aura.applications, aura.debuffType, aura.duration, aura.expirationTime, aura.sourceUnit,
-          aura.isStealable, aura.nameplateShowPersonal, aura.spellId, aura.canApplyAura, aura.isBossAura, _, aura.nameplateShowAll =
-          UnitAuraBySlot(unitid, slots[i])
-      
-          aura.duration = aura.duration or 0
-
-          local unit_aura_info = GetAuraDataBySlot(unitid, slots[i])   
-          if unit_aura_info then
-            aura.auraInstanceID = unit_aura_info.auraInstanceID
-            aura.UnitAuraInfo = unit_aura_info
-          end
-          
-          unit_auras[#unit_auras + 1] = aura
-          -- Addon.Logging.Debug("Aura:", aura.name, "=> ID:", aura.spellId)
+        local unit_aura_info = GetAuraDataBySlot(unitid, slots[i])  
+        unit_aura_info.duration = unit_aura_info.duration or 0
+        unit_auras[#unit_auras + 1] = unit_aura_info
+        -- Addon.Logging.Debug("Aura:", aura.name, "=> ID:", aura.spellId)
       end
-    until continuation_token == nil
+    until continuationToken == nil
 
     return unit_auras
   end
@@ -1943,7 +1941,7 @@ end
 --   -- aura.stacks => aura.applications
 --   -- aura.expiration => aura.expirationTime
 --   -- Fehlt: 
---   --   aura.debuffType
+--   --   aura.dispelName
   
 --   -- Neu:
 --   --   aura.isRaid
@@ -2098,8 +2096,8 @@ end
 
 --   -- * Using variable names from UNIT_AURA updatedAuraInfos here to avoid to much copying of variables
 --   -- TBC Classic, Retail:
---   -- name, icon, count, debuffType, duration, expirationTime, source, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, castByPlayer, nameplateShowAll, timeMod, ...
---   aura.name, aura.icon, aura.applications, aura.debuffType, aura.duration, aura.expirationTime, aura.sourceUnit,
+--   -- name, icon, count, dispelName, duration, expirationTime, source, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, castByPlayer, nameplateShowAll, timeMod, ...
+--   aura.name, aura.icon, aura.applications, aura.dispelName, aura.duration, aura.expirationTime, aura.sourceUnit,
 --     aura.isStealable, aura.nameplateShowPersonal, aura.spellId, aura.canApplyAura, aura.isBossAura, _, aura.nameplateShowAll =
 --     UnitAuraWrapper(unitid, slot)
   
@@ -3419,7 +3417,7 @@ local DEMO_AURA_ICONS = {
 
 local function GenerateDemoAuras()
   for no = 1, 40 do
-    -- aura.name, aura.icon, aura.applications, aura.debuffType, aura.duration, aura.expirationTime, aura.sourceUnit,
+    -- aura.name, aura.icon, aura.applications, aura.dispelName, aura.duration, aura.expirationTime, aura.sourceUnit,
     -- aura.isStealable, aura.nameplateShowPersonal, aura.spellId, aura.canApplyAura, aura.isBossAura, _, aura.nameplateShowAll =
     local random_name = tostring(math.random(1, 40))
 
