@@ -774,10 +774,11 @@ local function EventHandlerEvoker(event, unitid, power_type)
   end
 end
 
--- Arguments of ACTIVE_TALENT_GROUP_CHANGED (curr, prev) always seemt to be 1, 1
+-- Arguments of ACTIVE_TALENT_GROUP_CHANGED (curr, prev) always seem to be 1, 1
 function Widget:ACTIVE_TALENT_GROUP_CHANGED(...)
   -- ACTIVE_TALENT_GROUP_CHANGED fires twice, so prevent that InitializeWidget is called twice (does not hurt,
   -- but is not necesary either
+  -- GetSpecialization: Mists - Patch 5.0.4 (2012-08-28): Replaced GetPrimaryTalentTree.
   local current_spec = _G.GetSpecialization()
   if ActiveSpec ~= current_spec then
     -- Player switched to a spec that has combo points
@@ -846,7 +847,10 @@ function Widget:IsEnabled()
   local enabled = db.ON or db.ShowInHeadlineView
 
   -- ACTIVE_TALENT_GROUP_CHANGED: WotLK - Patch 3.2.0 (2009-08-04): Added.
-  if enabled and Addon.ExpansionIsAtLeast(LE_EXPANSION_WRATH_OF_THE_LICH_KING) then
+  -- Other possibility for Classic: PLAYER_TALENT_UPDATE, CHARACTER_POINTS_CHANGED
+  -- No need to use it for Classic, as GetSpecialization is not available there and CPs don't change between first 
+  -- and second spec.
+  if enabled and Addon.IS_MAINLINE then
     -- Register ACTIVE_TALENT_GROUP_CHANGED here otherwise it won't be registered when an spec is active that does not have combo points.
     -- If you then switch to a spec with talent points, the widget won't be enabled.
     self:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
