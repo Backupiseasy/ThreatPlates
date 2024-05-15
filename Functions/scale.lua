@@ -38,7 +38,7 @@ end
 
 local function ScaleGeneral(unit)
 	-- Target always has priority
-	if not Addon.UnitIsTarget("target", unit.unitid) then
+	if not Addon.UnitIsTarget(unit.unitid) then
 		-- Do checks for situational scale settings:
 		local scale = ScaleSituational(unit)
 		if scale then
