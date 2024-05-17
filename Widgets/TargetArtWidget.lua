@@ -16,7 +16,7 @@ local pairs = pairs
 
 -- WoW APIs
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
-local SetUnitCursorTexture = SetUnitCursorTexture
+local SetUnitCursorTexture, PixelUtil_SetPoint = SetUnitCursorTexture, PixelUtil.SetPoint
 local UnitIsUnit = UnitIsUnit
 
 -- ThreatPlates APIs
@@ -258,21 +258,24 @@ end
 local function OnSoftTargetIconUpdate(widget_frame, target_unitid, unit)
   local soft_target_icon = widget_frame.SoftTargetIcon
   if SoftTargetSettings[target_unitid].Enabled then 
+    local size = Settings.SoftTarget.Icon.Size
+    widget_frame.SoftTargetIconFrame:SetSize(size, size)
+    soft_target_icon:SetDesaturated(false)
+    soft_target_icon:SetIgnoreParentAlpha(true)
+    soft_target_icon:SetSize(size, size)
+
     -- widget_frame.unit is not defined here always, so it's only safe to use tp_frame's unit
     local unit_curser_texture =  SetUnitCursorTexture(soft_target_icon, unit.unitid, nil, true)
     if not unit_curser_texture then
       soft_target_icon:SetTexture(136243)
     end
-    soft_target_icon:SetDesaturated(false)
-    soft_target_icon:SetIgnoreParentAlpha(true)
-
-
+    
     AnchorFrameTo(Settings.SoftTarget.Icon[MODE_FOR_STYLE[unit.style]] or Settings.SoftTarget.Icon.HealthbarMode, soft_target_icon, widget_frame)
     
-    local size = Settings.SoftTarget.Icon.Size
-    soft_target_icon:SetSize(size, size)
+    widget_frame.SoftTargetIconFrame:Show()
     soft_target_icon:Show()   
   else
+    widget_frame.SoftTargetIconFrame:Hide()
     soft_target_icon:Hide()   
   end
 end
@@ -348,16 +351,28 @@ local function CreateTargetHighlightFrame(target_unitid)
     widget_frame.NameModeTexture = widget_frame:CreateTexture(nil, "BACKGROUND", nil, 0)
     widget_frame.NameModeTexture:SetTexture(ThreatPlates.Art .. "Target")
 
-    local soft_target_icon = widget_frame:CreateTexture("$parentIcon", "OVERLAY")
-    --soft_interact_icon:SetParent(widget_frame)
+    -- Create soft target / interact icon
+    local soft_target_icon_frame = _G.CreateFrame("Frame",nil, widget_frame, BackdropTemplate)
+    local soft_target_icon = soft_target_icon_frame:CreateTexture("$parentIcon", "OVERLAY")
+    soft_target_icon:SetParent(widget_frame)
     soft_target_icon:SetTexture(136243)
-    -- soft_interact_icon:AddMaskTexture(soft_target_icon_frame.Mask)
-    soft_target_icon:Hide()
+    soft_target_icon:Show()
+    
+    soft_target_icon_frame:SetFrameLevel(widget_frame:GetFrameLevel())
+    soft_target_icon_frame.Mask = soft_target_icon_frame:CreateMaskTexture(nil, "OVERLAY", nil, 1)
+    soft_target_icon_frame.Mask:Show()
+    soft_target_icon_frame.Mask:SetAtlas("CircleMaskScalable", true)
 
-    -- soft_target_icon_frame.Mask:SetAllPoints(soft_interact_icon)
-    -- soft_target_icon_frame:Hide()     
+    soft_target_icon:AddMaskTexture(soft_target_icon_frame.Mask)
 
-    -- widget_frame.SoftTargetIconFrame = soft_target_icon_frame
+    soft_target_icon_frame.Mask:ClearAllPoints()
+    PixelUtil_SetPoint(soft_target_icon_frame.Mask, "CENTER", soft_target_icon_frame, "CENTER", 0, 0)
+    soft_target_icon_frame.Mask:SetAllPoints(soft_target_icon)
+    soft_target_icon_frame:Hide()     
+
+    --soft_target_icon_frame.Mask:SetTexCoord(0.3, 0, 0, 0)
+
+    widget_frame.SoftTargetIconFrame = soft_target_icon_frame
     widget_frame.SoftTargetIcon = soft_target_icon
 
     UpdateTargetHighlightFrame(widget_frame)
