@@ -1689,14 +1689,18 @@ if Addon.IS_MAINLINE then
     local continuation_token
     repeat
       -- continuationToken is the first return value of UnitAuraSlots
-      local slots = { UnitAuraSlots(unitid, effect, BUFF_MAX_DISPLAY, continuation_token) }
+      local slots = { UnitAuraSlots(unitid, effect, aura_max_display, continuation_token) }
       continuation_token = slots[1]
 
       for i = 2, #slots do
         local unit_aura_info = GetAuraDataBySlot(unitid, slots[i])  
-        unit_aura_info.duration = unit_aura_info.duration or 0
-        unit_auras[#unit_auras + 1] = unit_aura_info
-        -- Addon.Logging.Debug("Aura:", aura.name, "=> ID:", aura.spellId)
+        -- Without this check, there will be a Lua error when a priest mindcontrolls another player as 
+        -- unit_aura_info is nil here in this case
+        if unit_aura_info then
+          unit_aura_info.duration = unit_aura_info.duration or 0
+          unit_auras[#unit_auras + 1] = unit_aura_info
+          -- Addon.Logging.Debug("Aura:", unit_aura_info.name, "=> ID:", unit_aura_info.spellId)
+        end
       end
     until continuationToken == nil
 
