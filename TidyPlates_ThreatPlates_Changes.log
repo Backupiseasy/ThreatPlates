@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+11.2.12 (2024-05-19)
+------------------------------------------------------
+* Fixed a Lua error that could occur in rare cases when leveling up.
+
+------------------------------------------------------
 11.2.11 (2024-05-17)
 ------------------------------------------------------
 * Fixed a Lua error with Auras widget the occurred when a Priest uses Mindcontrol on another player [GH-520].

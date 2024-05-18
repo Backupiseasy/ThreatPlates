@@ -589,6 +589,12 @@ do
       if (stylename == "unique" or stylename == "NameOnly-Unique") and unit.CustomPlateSettings ~= old_custom_style then
         Addon.UpdateCustomStyleIcon(extended, unit)
       end
+
+      -- Update all widgets to fix an issue with soft-target. Don't do this while an Cast custom style is updated
+      -- as this results in a stack overflow
+      -- if UpdateAll then
+      --   Widgets:OnUnitAdded(extended, unit)
+      -- end
     end
 	end
 
@@ -685,19 +691,23 @@ do
 
 	-- OnHealthUpdate
 	function OnHealthUpdate(plate)
+    -- When UNIT_LEVEL fires (level-up), it seems that sometimes the unitid's nameplate is not yet 
+    -- know (in PlatesVisible)
 		local unitid = PlatesVisible[plate]
-    UpdateReferences(plate)
+    if unitid then
+      UpdateReferences(plate)
 
-    Addon:UpdateUnitCondition(unit, unitid)
-    ProcessUnitChanges()
-    OnUpdateCastMidway(nameplate, unit.unitid)
+      Addon:UpdateUnitCondition(unit, unitid)
+      ProcessUnitChanges()
+      OnUpdateCastMidway(nameplate, unit.unitid)
 
-    -- Fix a bug where the overlay for non-interruptible casts was shown even for interruptible casts when entering combat while the unit was already casting
-    --    if unit.isCasting and visual.castbar:IsShown()then
-    --      visual.castbar:SetShownInterruptOverlay(unit.spellIsShielded)
-    --    end
+      -- Fix a bug where the overlay for non-interruptible casts was shown even for interruptible casts when entering combat while the unit was already casting
+      --    if unit.isCasting and visual.castbar:IsShown()then
+      --      visual.castbar:SetShownInterruptOverlay(unit.spellIsShielded)
+      --    end
 
-    --UpdateIndicator_HealthBar()		-- Just to be on the safe side
+      --UpdateIndicator_HealthBar()		-- Just to be on the safe side
+    end
   end
 
   -- OnResetNameplate
