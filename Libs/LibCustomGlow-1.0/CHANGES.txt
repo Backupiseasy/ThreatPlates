@@ -1,5 +1,11 @@
 Changes since tag 1.0.3
 
+commit 5bc2b61a4342f1423fe45868987ea3716530e2fa
+Author: enderneko <enderneko-dev@outlook.com>
+Date:   Wed May 29 14:25:42 2024 +0800
+
+    Fix ProcGlow animation order
+
 commit 4cb491a9105aba01e97b8d2b7f2b258130c58437
 Author: Buds <mrbouyou@gmail.com>
 Date:   Sat Apr 13 02:55:42 2024 +0200
