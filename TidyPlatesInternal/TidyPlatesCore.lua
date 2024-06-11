@@ -28,6 +28,7 @@ local UnitPlayerControlled = UnitPlayerControlled
 local CombatLogGetCurrentEventInfo = CombatLogGetCurrentEventInfo
 local GetPlayerInfoByGUID = GetPlayerInfoByGUID
 local UnitNameplateShowsWidgetsOnly = UnitNameplateShowsWidgetsOnly
+local GetSpellInfo = C_Spell and C_Spell.GetSpellInfo or _G.GetSpellInfo
 
 -- ThreatPlates APIs
 local Widgets = Addon.Widgets
@@ -111,6 +112,30 @@ Addon.PlatesByGUID = PlatesByGUID
 Addon.Theme = {}
 
 local activetheme = Addon.Theme
+
+-- Fix from Plater: hopefully just a temp workaround until plateFrame.UnitFrame is no longer combat protected 
+-- by inheriting from downstream HealthBarContainer...
+local function HideBlizzardNameplateFixForTWW(UnitFrame)
+  if UnitFrame:IsProtected() then
+    UnitFrame:ClearAllPoints()
+    UnitFrame:SetParent(nil)
+    for _, f in pairs(UnitFrame:GetChildren() or {}) do
+      if type(f) == "table" and f.IsProtected then
+        local p, ep = f:IsProtected()
+        if ep then
+          f:ClearAllPoints()
+          f:SetParent(nil)
+        end
+      end
+    end
+    if not UnitFrame:IsProtected() then
+      UnitFrame:Hide()
+    end
+  else
+    UnitFrame:Hide()
+  end
+end
+
 
 ---------------------------------------------------------------------------------------------------
 -- Wrapper functions for WoW Classic
@@ -352,7 +377,8 @@ local function ShowBlizzardNameplate(plate, show_blizzard_plate)
     plate.TPFrame:Hide()
     plate.TPFrame.Active = false
   else
-    plate.UnitFrame:Hide()
+    --plate.UnitFrame:Hide()
+    HideBlizzardNameplateFixForTWW(plate.UnitFrame)
     plate.TPFrame:Show()
     plate.TPFrame.Active = true
   end
@@ -1185,7 +1211,8 @@ do
   end
 end -- End Indicator section
 
---------------------------------------------------------------------------------------------------------------
+--
+------------------------------------------------------------------------------------------------------------
 -- WoW Event Handlers: sends event-driven changes to the appropriate gather/update handler.
 --------------------------------------------------------------------------------------------------------------
 
@@ -1221,7 +1248,8 @@ local function FrameOnShow(UnitFrame)
   -- Hide nameplates that have not yet an unit added
   if not unitid then 
     -- ? Not sure if Hide() is really needed here or if even TPFrame should also be hidden here ...
-    UnitFrame:Hide()
+    -- UnitFrame:Hide()
+    HideBlizzardNameplateFixForTWW(plate.UnitFrame)
     return
   end
 
@@ -1249,11 +1277,18 @@ local function FrameOnShow(UnitFrame)
 
   -- Hide ThreatPlates nameplates if Blizzard nameplates should be shown for friendly units
   local unit_reaction = UnitReaction("player", unitid) or 0
-  if unit_reaction > 4 then
-    UnitFrame:SetShown(SettingsShowFriendlyBlizzardNameplates)
+  local show_blizzard_nameplate = (unit_reaction > 4 and SettingsShowFriendlyBlizzardNameplates) or SettingsShowEnemyBlizzardNameplates
+  if show_blizzard_nameplate then
+    UnitFrame:Show()
   else
-    UnitFrame:SetShown(SettingsShowEnemyBlizzardNameplates)
+    HideBlizzardNameplateFixForTWW(UnitFrame)
   end
+
+  -- if unit_reaction > 4 then
+  --   UnitFrame:SetShown(SettingsShowFriendlyBlizzardNameplates)
+  -- else
+  --   UnitFrame:SetShown(SettingsShowEnemyBlizzardNameplates)
+  -- end
 end
 
 -- Frame: self = plate

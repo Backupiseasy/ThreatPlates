@@ -11,6 +11,7 @@ local ThreatPlates = Addon.ThreatPlates
 
 -- WoW APIs
 local RAID_CLASS_COLORS, CLASS_SORT_ORDER = RAID_CLASS_COLORS, CLASS_SORT_ORDER
+local GetSpellInfo = C_Spell and C_Spell.GetSpellInfo or _G.GetSpellInfo
 
 local L = ThreatPlates.L
 local RGB, RGB_P, RGB_WITH_HEX = ThreatPlates.RGB, ThreatPlates.RGB_P, ThreatPlates.RGB_WITH_HEX
@@ -464,8 +465,10 @@ local TOTEM_RANKS_CLASSIC = { " II", " III", " IV", " V", " VI", " VII", " VIII"
 
 function Addon:InitializeTotemInformation()
   for _, totem_data in ipairs(Addon.Data.Totems) do
-    local name = GetSpellInfo(totem_data.SpellID)
-    if name then
+    local spell_info = GetSpellInfo(totem_data.SpellID)
+    if spell_info and spell_info.name then
+      local name = spell_info.name
+
       totem_data.Name = name
       totem_data.Color = RGB(HEX2RGB(totem_data.GroupColor))
       totem_data.Style = "normal"

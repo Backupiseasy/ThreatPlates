@@ -1,4 +1,9 @@
-﻿------------------------------------------------------
+------------------------------------------------------
+12.0.0 - Release for The War Within Pre-Patch (2024-06-08)
+------------------------------------------------------
+* Updated Threat Plates for The War Within Pre-Patch [GH-524].
+
+------------------------------------------------------
 11.2.12 (2024-06-06)
 ------------------------------------------------------
 * Fixed a Lua error with Auras widget that occurred when switching icon styles because an invalid default value was used for vertical alignment of duration and stack text [Comment #7324, #7325].

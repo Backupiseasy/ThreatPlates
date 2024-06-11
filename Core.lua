@@ -12,7 +12,7 @@ local tonumber, pairs = tonumber, pairs
 local SetNamePlateFriendlyClickThrough = C_NamePlate.SetNamePlateFriendlyClickThrough
 local SetNamePlateEnemyClickThrough = C_NamePlate.SetNamePlateEnemyClickThrough
 local UnitName, IsInInstance, InCombatLockdown = UnitName, IsInInstance, InCombatLockdown
-local GetCVar, IsAddOnLoaded = GetCVar, IsAddOnLoaded
+local GetCVar, IsAddOnLoaded = GetCVar, C_AddOns.IsAddOnLoaded
 local C_NamePlate, Lerp =  C_NamePlate, Lerp
 local C_Timer_After = C_Timer.After
 local NamePlateDriverFrame = NamePlateDriverFrame
@@ -359,7 +359,19 @@ function TidyPlatesThreat:OnInitialize()
   Addon.LibAceConfigDialog = LibStub("AceConfigDialog-3.0")
   Addon.LibAceConfigRegistry = LibStub("AceConfigRegistry-3.0")
   Addon.LibSharedMedia = LibStub("LibSharedMedia-3.0")
-  Addon.LibCustomGlow = LibStub("LibCustomGlow-1.0")
+  if Addon.IS_TWW then
+    Addon.LibCustomGlow = {
+      ButtonGlow_Start = function() end,
+      PixelGlow_Start = function() end,
+      AutoCastGlow_Start = function() end,
+      ButtonGlow_Stop = function() end,
+      PixelGlow_Stop = function() end,
+      AutoCastGlow_Stop = function() end,
+      ButtonGlow_Stop = function() end,
+    }
+  else
+    Addon.LibCustomGlow = LibStub("LibCustomGlow-1.0")
+  end
 
   Addon.LoadOnDemandLibraries()
 

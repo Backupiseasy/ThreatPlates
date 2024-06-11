@@ -22,7 +22,7 @@ local BUFF_MAX_DISPLAY = BUFF_MAX_DISPLAY
 local GetFramerate = GetFramerate
 local DebuffTypeColor = DebuffTypeColor
 local UnitIsUnit = UnitIsUnit
-local UnitAuraSlots = UnitAuraSlots
+local GetAuraSlots = C_UnitAuras and C_UnitAuras.GetAuraSlots
 local GetAuraDataBySlot, GetAuraDataByAuraInstanceID = C_UnitAuras and C_UnitAuras.GetAuraDataBySlot, C_UnitAuras and C_UnitAuras.GetAuraDataByAuraInstanceID
 local GetNamePlates, GetNamePlateForUnit = C_NamePlate.GetNamePlates, C_NamePlate.GetNamePlateForUnit
 local IsInInstance = IsInInstance
@@ -1689,7 +1689,7 @@ if Addon.IS_MAINLINE then
     local continuation_token
     repeat
       -- continuationToken is the first return value of UnitAuraSlots
-      local slots = { UnitAuraSlots(unitid, effect, aura_max_display, continuation_token) }
+      local slots = { GetAuraSlots(unitid, effect, aura_max_display, continuation_token) }
       continuation_token = slots[1]
 
       for i = 2, #slots do

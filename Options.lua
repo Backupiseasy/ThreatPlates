@@ -21,6 +21,7 @@ local InCombatLockdown, IsInInstance, GetInstanceInfo = InCombatLockdown, IsInIn
 local GetCVar, GetCVarBool, GetCVarDefault = GetCVar, GetCVarBool, GetCVarDefault
 local UnitsExists, UnitName = UnitsExists, UnitName
 local GameTooltip = GameTooltip
+local GetSpellInfo = C_Spell and C_Spell.GetSpellInfo or _G.GetSpellInfo
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
@@ -7842,12 +7843,12 @@ local function CustomPlateGetIcon(index)
   else
     local spell_id = db.uniqueSettings[index].SpellID
     if spell_id then
-      _, _, icon = GetSpellInfo(spell_id)
+      icon = GetSpellInfo(spell_id).iconID
     else
       icon = db.uniqueSettings[index].icon
       if type(icon) == "string" and not icon:find("\\") and not icon:sub(-4) == ".blp" then
         -- Maybe a spell name
-        _, _, icon = GetSpellInfo(icon)
+        icon = GetSpellInfo(spell_id).iconID
       end
     end
   end
@@ -7864,7 +7865,7 @@ local function CustomPlateSetIcon(index, icon_location)
 
   local custom_plate = db.uniqueSettings[index]
   if custom_plate.UseAutomaticIcon then
-    _, _, icon = GetSpellInfo(custom_plate.Trigger[custom_plate.Trigger.Type].AsArray[1])
+    icon = GetSpellInfo(custom_plate.Trigger[custom_plate.Trigger.Type].AsArray[1]).iconID
   elseif not icon_location then
     icon = custom_plate.icon
   else
@@ -7873,7 +7874,7 @@ local function CustomPlateSetIcon(index, icon_location)
 
     local spell_id = tonumber(icon_location)
     if spell_id then -- no string, so val should be a spell ID
-      _, _, icon = GetSpellInfo(spell_id)
+      icon = GetSpellInfo(spell_id).iconID
       if icon then
         custom_plate.SpellID = spell_id
       else
@@ -7882,7 +7883,7 @@ local function CustomPlateSetIcon(index, icon_location)
       end
     else
       icon_location = tostring(icon_location)
-      _, _, icon = GetSpellInfo(icon_location)
+      icon = GetSpellInfo(icon_location).iconID
       if icon then
         custom_plate.SpellName = icon_location
       end
@@ -9316,7 +9317,7 @@ local function CreateOptionsTable()
 
   if not options then
     options = {
-      name = GetAddOnMetadata("TidyPlates_ThreatPlates", "title"),
+      name = C_AddOns.GetAddOnMetadata("TidyPlates_ThreatPlates", "title"),
       type = "group",
       childGroups = "tab",
       handler = func_handler,
@@ -10845,7 +10846,7 @@ local function CreateOptionsTable()
               type = "description",
               order = 2,
               width = "full",
-              name = L["Clear and easy to use threat-reactive nameplates.\n\nCurrent version: "] .. GetAddOnMetadata("TidyPlates_ThreatPlates", "version") .. L["\n\n--\n\nBackupiseasy\n\n(Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)"],
+              name = L["Clear and easy to use threat-reactive nameplates.\n\nCurrent version: "] .. C_AddOns.GetAddOnMetadata("TidyPlates_ThreatPlates", "version") .. L["\n\n--\n\nBackupiseasy\n\n(Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)"],
             },
             Header1 = {
               order = 3,
@@ -10902,7 +10903,7 @@ local function CreateOptionsTable()
 --               type = "description",
 --               order = 10,
 --               width = "full",
---               name = L["Clear and easy to use threat-reactive nameplates.\n\nCurrent version: "] .. GetAddOnMetadata("TidyPlates_ThreatPlates", "version") .. L["\n\n--\n\nBackupiseasy\n\n(Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)"],
+--               name = L["Clear and easy to use threat-reactive nameplates.\n\nCurrent version: "] .. C_AddOns.GetAddOnMetadata("TidyPlates_ThreatPlates", "version") .. L["\n\n--\n\nBackupiseasy\n\n(Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)"],
 --             },
 --             AuthorHeader = {
 --               type = "description",
