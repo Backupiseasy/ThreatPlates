@@ -75,7 +75,7 @@ local AURA_STYLE = {
           flags = "OUTLINE",
           Shadow = true,
           HorizontalAlignment = "RIGHT",
-          VerticalAlignment = "CENTER",
+          VerticalAlignment = "MIDDLE",
         }
       },
       StackCount = {
@@ -91,7 +91,7 @@ local AURA_STYLE = {
           flags = "OUTLINE",
           Shadow = true,
           HorizontalAlignment = "RIGHT",
-          VerticalAlignment = "CENTER",
+          VerticalAlignment = "MIDDLE",
         }
       },
     },
@@ -126,7 +126,7 @@ local AURA_STYLE = {
           flags = "THICKOUTLINE",
           Shadow = true,
           HorizontalAlignment = "RIGHT",
-          VerticalAlignment = "CENTER",
+          VerticalAlignment = "MIDDLE",
         }
       },
       StackCount = {
@@ -142,7 +142,7 @@ local AURA_STYLE = {
           flags = "OUTLINE",
           Shadow = true,
           HorizontalAlignment = "RIGHT",
-          VerticalAlignment = "CENTER",
+          VerticalAlignment = "MIDDLE",
         }
       },
     },
@@ -1239,7 +1239,7 @@ end
 --     flags = "OUTLINE",
 --     Shadow = true,
 --     HorizontalAlignment = "CENTER",
---     VerticalAlignment = "CENTER",
+--     VerticalAlignment = "MIDDLE",
 --   },
 local function GetFontEntryDefault(name, pos, widget_info, func_disabled)
   widget_info = Addon.ConcatTables(widget_info, { "Font" } )
@@ -1337,7 +1337,7 @@ end
 --     ShadowHorizontalOffset = 1,
 --     ShadowVerticalOffset = -1,
 --     HorizontalAlignment = "CENTER",
---     VerticalAlignment = "CENTER",
+--     VerticalAlignment = "MIDDLE",
 --   },
 local function GetFontEntryHandler(name, pos, widget_info, func_disabled, func_handler)
   widget_info = Addon.ConcatTables(widget_info, { "Font" } )

@@ -370,8 +370,6 @@ local function CreateTargetHighlightFrame(target_unitid)
     soft_target_icon_frame.Mask:SetAllPoints(soft_target_icon)
     soft_target_icon_frame:Hide()     
 
-    --soft_target_icon_frame.Mask:SetTexCoord(0.3, 0, 0, 0)
-
     widget_frame.SoftTargetIconFrame = soft_target_icon_frame
     widget_frame.SoftTargetIcon = soft_target_icon
 

@@ -1,5 +1,19 @@
 Changes since tag 1.0.3
 
+commit 78aa5cd180ae4162e9e4eeba8b1d59e2d8fec1d9
+Author: Buds <mrbouyou@gmail.com>
+Date:   Thu May 30 13:24:36 2024 +0200
+
+    Replace ObjectPoolBaseMixin with a minimal implementation of pools
+    
+    TWW build 54935 stopped exposing ObjectPoolBaseMixin
+
+commit 5bc2b61a4342f1423fe45868987ea3716530e2fa
+Author: enderneko <enderneko-dev@outlook.com>
+Date:   Wed May 29 14:25:42 2024 +0800
+
+    Fix ProcGlow animation order
+
 commit 4cb491a9105aba01e97b8d2b7f2b258130c58437
 Author: Buds <mrbouyou@gmail.com>
 Date:   Sat Apr 13 02:55:42 2024 +0200

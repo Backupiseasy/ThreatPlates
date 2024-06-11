@@ -846,6 +846,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
           HorizontalOffset = 0,
           VerticalOffset = 2,
         },
+        -- Also update debuff settings for square/wide in AURA_STYLE Options.lua
         ModeIcon = {
           Style = "square",
           IconWidth = 16.5,
@@ -1121,6 +1122,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
           HorizontalOffset = 10,
           VerticalOffset = 0,
         },
+        -- Also update debuff settings for square/wide in AURA_STYLE Options.lua
         ModeIcon = {
           Style = "square",
           IconWidth = 32,
