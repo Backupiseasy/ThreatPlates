@@ -17,7 +17,7 @@
     <Include file="AceComm-3.0\AceComm-3.0.xml"/>
     <Include file="AceSerializer-3.0\AceSerializer-3.0.xml"/>
     <Include file="AceGUI-3.0-SharedMediaWidgets\widget.xml"/>
-    <!-- <Include file="LibCustomGlow-1.0\LibCustomGlow-1.0.xml"/> -->
+    <Include file="LibCustomGlow-1.0\LibCustomGlow-1.0.xml"/>
     <Script file="LibDeflate\LibDeflate.lua"/>
     <Include file="UTF8\UTF8.xml"/>
 

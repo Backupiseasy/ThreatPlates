@@ -359,19 +359,7 @@ function TidyPlatesThreat:OnInitialize()
   Addon.LibAceConfigDialog = LibStub("AceConfigDialog-3.0")
   Addon.LibAceConfigRegistry = LibStub("AceConfigRegistry-3.0")
   Addon.LibSharedMedia = LibStub("LibSharedMedia-3.0")
-  if Addon.IS_TWW then
-    Addon.LibCustomGlow = {
-      ButtonGlow_Start = function() end,
-      PixelGlow_Start = function() end,
-      AutoCastGlow_Start = function() end,
-      ButtonGlow_Stop = function() end,
-      PixelGlow_Stop = function() end,
-      AutoCastGlow_Stop = function() end,
-      ButtonGlow_Stop = function() end,
-    }
-  else
-    Addon.LibCustomGlow = LibStub("LibCustomGlow-1.0")
-  end
+  Addon.LibCustomGlow = LibStub("LibCustomGlow-1.0")
 
   Addon.LoadOnDemandLibraries()
 
