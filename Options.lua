@@ -7865,7 +7865,10 @@ local function CustomPlateSetIcon(index, icon_location)
 
   local custom_plate = db.uniqueSettings[index]
   if custom_plate.UseAutomaticIcon then
-    icon = GetSpellInfo(custom_plate.Trigger[custom_plate.Trigger.Type].AsArray[1]).iconID
+    local spell_info = GetSpellInfo(custom_plate.Trigger[custom_plate.Trigger.Type].AsArray[1])
+    if spell_info then
+      icon = spell_info.iconID
+    end
   elseif not icon_location then
     icon = custom_plate.icon
   else
@@ -7874,8 +7877,9 @@ local function CustomPlateSetIcon(index, icon_location)
 
     local spell_id = tonumber(icon_location)
     if spell_id then -- no string, so val should be a spell ID
-      icon = GetSpellInfo(spell_id).iconID
-      if icon then
+      local spell_info = GetSpellInfo(spell_id)
+      if spell_info then
+        icon = spell_info.iconID
         custom_plate.SpellID = spell_id
       else
         icon = spell_id -- Set icon to spell_id == icon_location, so that the value gets stored
@@ -7883,8 +7887,9 @@ local function CustomPlateSetIcon(index, icon_location)
       end
     else
       icon_location = tostring(icon_location)
-      icon = GetSpellInfo(icon_location).iconID
-      if icon then
+      local spell_info = GetSpellInfo(spell_id)
+      if spell_info then
+        icon = spell_info.iconID
         custom_plate.SpellName = icon_location
       end
       icon = icon or icon_location
