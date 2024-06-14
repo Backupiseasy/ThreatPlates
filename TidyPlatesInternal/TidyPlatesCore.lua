@@ -119,15 +119,13 @@ local function HideBlizzardNameplateFixForTWW(UnitFrame)
   if UnitFrame:IsProtected() then
     UnitFrame:ClearAllPoints()
     UnitFrame:SetParent(nil)
-    for _, f in pairs(UnitFrame:GetChildren() or {}) do
-      if type(f) == "table" and f.IsProtected then
-        local p, ep = f:IsProtected()
-        if ep then
-          f:ClearAllPoints()
-          f:SetParent(nil)
-        end
-      end
+
+    if UnitFrame.HealthBarsContainer then
+      -- UnitFrame.HealthBarsContainerOrigParent = UnitFrame.HealthBarsContainer:GetParent() or UnitFrame.HealthBarsContainerOrigParent
+      UnitFrame.HealthBarsContainer:ClearAllPoints()
+      UnitFrame.HealthBarsContainer:SetParent(nil)
     end
+
     if not UnitFrame:IsProtected() then
       UnitFrame:Hide()
     end
