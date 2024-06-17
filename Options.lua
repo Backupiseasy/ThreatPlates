@@ -21,7 +21,7 @@ local InCombatLockdown, IsInInstance, GetInstanceInfo = InCombatLockdown, IsInIn
 local GetCVar, GetCVarBool, GetCVarDefault = GetCVar, GetCVarBool, GetCVarDefault
 local UnitsExists, UnitName = UnitsExists, UnitName
 local GameTooltip = GameTooltip
-local GetSpellInfo = C_Spell and C_Spell.GetSpellInfo or _G.GetSpellInfo
+local GetSpellInfo = Addon.GetSpellInfo
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
@@ -33,7 +33,7 @@ local CVars = Addon.CVars
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
 -- List them here for Mikk's FindGlobals script
--- GLOBALS: GetSpellInfo, SetCVar
+-- GLOBALS: SetCVar
 
 -- Import some libraries
 local LibAceGUI = LibStub("AceGUI-3.0")

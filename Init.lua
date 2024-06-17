@@ -138,6 +138,24 @@ Addon.Debug = {}
 if Addon.IS_MAINLINE then
 	Addon.UnitDetailedThreatSituationWrapper = UnitDetailedThreatSituation
 	Addon.IsSoloShuffle = C_PvP.IsSoloShuffle
+	
+	Addon.GetSpellInfo = function(...) 
+		--local name, rank, icon, castTime, minRange, maxRange, spellID, originalIcon = _G.GetSpellInfo()
+		local name, _, icon = _G.GetSpellInfo()
+		return {
+			name = name,
+			iconID = icon 
+			-- castTime = castTime,
+			-- minRange = castTime,
+			-- maxRange = maxRange,
+			-- spellID = spellID,
+			-- originalIconID = originalIcon,
+		}
+	end
+elseif Addon.IS_TWW then
+	Addon.UnitDetailedThreatSituationWrapper = UnitDetailedThreatSituation
+	Addon.IsSoloShuffle = C_PvP.IsSoloShuffle
+	Addon.GetSpellInfo = C_Spell.GetSpellInfo 
 else
   Addon.UnitDetailedThreatSituationWrapper = function(source, target)
     local is_tanking, status, threatpct, rawthreatpct, threat_value = UnitDetailedThreatSituation(source, target)
@@ -151,6 +169,20 @@ else
 
 	-- Not available in Classic
 	Addon.IsSoloShuffle = function() return false end
+
+	Addon.GetSpellInfo = function(...) 
+		--local name, rank, icon, castTime, minRange, maxRange, spellID, originalIcon = _G.GetSpellInfo()
+		local name, _, icon = _G.GetSpellInfo()
+		return {
+			name = name,
+			iconID = icon 
+			-- castTime = castTime,
+			-- minRange = castTime,
+			-- maxRange = maxRange,
+			-- spellID = spellID,
+			-- originalIconID = originalIcon,
+		}
+	end
 end
 
 ---------------------------------------------------------------------------------------------------

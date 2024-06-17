@@ -28,7 +28,7 @@ local UnitPlayerControlled = UnitPlayerControlled
 local CombatLogGetCurrentEventInfo = CombatLogGetCurrentEventInfo
 local GetPlayerInfoByGUID = GetPlayerInfoByGUID
 local UnitNameplateShowsWidgetsOnly = UnitNameplateShowsWidgetsOnly
-local GetSpellInfo = C_Spell and C_Spell.GetSpellInfo or _G.GetSpellInfo
+local GetSpellInfo = Addon.GetSpellInfo
 
 -- ThreatPlates APIs
 local Widgets = Addon.Widgets
@@ -221,7 +221,7 @@ if Addon.IS_CLASSIC then
   -- Convert key ID to name to avoid handling all different spell ranks (which have the same name, but different IDs)
   local CHANNELED_SPELL_INFO_BY_NAME = {}
   for spell_id, channel_cast_time in pairs(CHANNELED_SPELL_INFO_BY_ID) do
-    CHANNELED_SPELL_INFO_BY_NAME[GetSpellInfo(spell_id)] = channel_cast_time
+    CHANNELED_SPELL_INFO_BY_NAME[_G.GetSpellInfo(spell_id)] = channel_cast_time
   end
 
   -- Classic Era: name, text, texture, startTime, endTime, isTradeSkill, notInterruptible, spellID
@@ -236,7 +236,7 @@ if Addon.IS_CLASSIC then
     end
 
     if not name and event_spellid then 
-      name, _, texture = GetSpellInfo(event_spellid)
+      name, _, texture = _G.GetSpellInfo(event_spellid)
 
       local channel_cast_time = name and CHANNELED_SPELL_INFO_BY_NAME[name]
       if channel_cast_time then

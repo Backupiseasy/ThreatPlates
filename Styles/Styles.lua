@@ -11,7 +11,7 @@ local UnitIsDead, UnitPlayerControlled, UnitIsUnit = UnitIsDead, UnitPlayerContr
 local UnitIsOtherPlayersPet = UnitIsOtherPlayersPet
 local UnitIsBattlePet, UnitCreatureType = UnitIsBattlePet, UnitCreatureType
 local UnitCanAttack = UnitCanAttack
-local GetSpellInfo = C_Spell and C_Spell.GetSpellInfo or _G.GetSpellInfo
+local GetSpellInfo = Addon.GetSpellInfo
 
 -- ThreatPlates APIs
 local TOTEMS = Addon.TOTEMS
@@ -24,7 +24,7 @@ local UpdateCustomStyleAfterAuraTrigger = Addon.UpdateCustomStyleAfterAuraTrigge
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
 -- List them here for Mikk's FindGlobals script
--- GLOBALS: GetSpellInfo, UnitIsTapDenied
+-- GLOBALS: UnitIsTapDenied
 
 ---------------------------------------------------------------------------------------------------
 -- Wrapper functions for WoW Classic

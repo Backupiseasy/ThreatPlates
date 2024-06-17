@@ -11,7 +11,7 @@ local ThreatPlates = Addon.ThreatPlates
 
 -- WoW APIs
 local RAID_CLASS_COLORS, CLASS_SORT_ORDER = RAID_CLASS_COLORS, CLASS_SORT_ORDER
-local GetSpellInfo = C_Spell and C_Spell.GetSpellInfo or _G.GetSpellInfo
+local GetSpellInfo = Addon.GetSpellInfo
 
 local L = ThreatPlates.L
 local RGB, RGB_P, RGB_WITH_HEX = ThreatPlates.RGB, ThreatPlates.RGB_P, ThreatPlates.RGB_WITH_HEX
