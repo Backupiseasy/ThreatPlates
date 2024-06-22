@@ -135,7 +135,11 @@ Addon.Debug = {}
 
 -- UnitDetailedThreatSituation: WotLK - Patch 3.0.2 (2008-10-14): Added
 -- C_PvP.IsSoloShuffle: Shadowlands - Patch 9.2.0 (2022-02-22): Added.
-if Addon.IS_MAINLINE then
+if Addon.IS_TWW then
+	Addon.UnitDetailedThreatSituationWrapper = UnitDetailedThreatSituation
+	Addon.IsSoloShuffle = C_PvP.IsSoloShuffle
+	Addon.GetSpellInfo = C_Spell.GetSpellInfo 
+elseif Addon.IS_MAINLINE then
 	Addon.UnitDetailedThreatSituationWrapper = UnitDetailedThreatSituation
 	Addon.IsSoloShuffle = C_PvP.IsSoloShuffle
 	
@@ -152,10 +156,6 @@ if Addon.IS_MAINLINE then
 			-- originalIconID = originalIcon,
 		}
 	end
-elseif Addon.IS_TWW then
-	Addon.UnitDetailedThreatSituationWrapper = UnitDetailedThreatSituation
-	Addon.IsSoloShuffle = C_PvP.IsSoloShuffle
-	Addon.GetSpellInfo = C_Spell.GetSpellInfo 
 else
   Addon.UnitDetailedThreatSituationWrapper = function(source, target)
     local is_tanking, status, threatpct, rawthreatpct, threat_value = UnitDetailedThreatSituation(source, target)
