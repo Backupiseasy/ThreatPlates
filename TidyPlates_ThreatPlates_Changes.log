@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+11.2.13 (2024-06-29)
+------------------------------------------------------
+* Added a delay when updating several CVars for soft targeting as they no longer can be changed in combat [Comment #7346].
+
+------------------------------------------------------
 11.2.12 (2024-06-06)
 ------------------------------------------------------
 * Fixed a Lua error with Auras widget that occurred when switching icon styles because an invalid default value was used for vertical alignment of duration and stack text [Comment #7324, #7325].

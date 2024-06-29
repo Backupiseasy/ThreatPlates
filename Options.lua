@@ -2851,7 +2851,7 @@ local function CreateTargetArtWidgetOptions()
                 order = 10,
                 type = "toggle",
                 set = function(info, val)
-                  Addon.CVars:Set(info.arg, (val and "3") or "0")
+                  Addon.CVars:SetProtected(info.arg, (val and "3") or "0")
                 end,
                 get = function(info)
                   return Addon.CVars:GetAsNumber(info.arg) == Enum.SoftTargetEnableFlags.Any
@@ -2957,7 +2957,7 @@ local function CreateTargetArtWidgetOptions()
                 order = 10,
                 type = "toggle",
                 set = function(info, val)
-                  Addon.CVars:Set(info.arg, (val and "3") or "0")
+                  Addon.CVars:SetProtected(info.arg, (val and "3") or "0")
                 end,
                 get = function(info)
                   return Addon.CVars:GetAsNumber(info.arg) == Enum.SoftTargetEnableFlags.Any
@@ -3015,7 +3015,7 @@ local function CreateTargetArtWidgetOptions()
                     name = L["None"],
                     order = 10,
                     type = "toggle",
-                    set = function(info, val) Addon.CVars:Set(info.arg, 0) end,
+                    set = function(info, val) Addon.CVars:SetProtected(info.arg, 0) end,
                     get = function(info) 
                       local value = Addon.CVars:Get(info.arg)
                       return value ~= "1" and value ~= "2"
