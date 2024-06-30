@@ -57,10 +57,19 @@ local COMBAT_PROTECTED = {
   nameplateShowFriendlyNPCs = true,
   nameplateShowFriendlyPets = true,
   nameplateShowFriendlyTotems = true,
+  nameplateShowOnlyNames = true,
   -- Soft Target CVars
-  SoftTargetEnemy = true,
   SoftTargetForce = true,
+  SoftTargetEnemy = true,
+  SoftTargetNameplateEnemy = true,
+  SoftTargetIconEnemy = true,
+  SoftTargetNameplateFriend = true,
+  SoftTargetIconFriend = true,
   SoftTargetInteract = true,
+  SoftTargetNameplateInteract = true,
+  SoftTargetIconInteract = true,
+  SoftTargetIconGameObject = true,
+  SoftTargetLowPriorityIcons = true,
   -- Name CVars
   UnitNameFriendlyPlayerName = true,
   UnitNameFriendlyPetName = true,
@@ -85,7 +94,7 @@ function CVars:Initialize(cvar, value)
 
   -- ! The CVar nameplateShowOnlyNames is not persistently stored by WoW, so we have to restore its value
   -- ! after every login/reloading the UI.
-  self:SetBoolProtected("nameplateShowOnlyNames", Addon.db.profile.BlizzardSettings.Names.ShowOnlyNames)
+  self:SetBool("nameplateShowOnlyNames", Addon.db.profile.BlizzardSettings.Names.ShowOnlyNames)
 
   -- Sync internal settings with Blizzard CVars
   -- SetCVar("ShowClassColorInNameplate", 1)
@@ -121,12 +130,43 @@ local function SetConsoleVariable(cvar, value)
 end
 
 function CVars:Set(cvar, value)
-  SetConsoleVariable(cvar, value)
+  if COMBAT_PROTECTED[cvar] then
+    Addon:CallbackWhenOoC(function()
+      SetConsoleVariable(cvar, value)
+    end, L["Unable to change the following console variable while in combat: "] .. cvar .. ". ")
+  else
+    SetConsoleVariable(cvar, value)
+  end
+end
+
+function CVars:SetBool(cvar, value)
+  self:Set(cvar, (value and 1) or 0)
 end
 
 function CVars:SetToDefault(cvar)
-  _G.SetCVar(cvar, GetCVarDefault(cvar))
-  Addon.db.profile.CVarsBackup[cvar] = nil
+  if COMBAT_PROTECTED[cvar] then
+    Addon:CallbackWhenOoC(function()
+      _G.SetCVar(cvar, GetCVarDefault())
+      Addon.db.profile.CVarsBackup[cvar] = nil
+    end, L["Unable to change the following console variable while in combat: "] .. cvar .. ". ")
+  else
+    _G.SetCVar(cvar, GetCVarDefault())
+    Addon.db.profile.CVarsBackup[cvar] = nil
+  end
+end
+
+function CVars:Overwrite(cvar, value)
+  if COMBAT_PROTECTED[cvar] then
+    Addon:CallbackWhenOoC(function()
+      _G.SetCVar(cvar, value)
+    end, L["Unable to change the following console variable while in combat: "] .. cvar .. ". ")
+  else
+    _G.SetCVar(cvar, value)
+  end
+end
+
+function CVars:OverwriteBool(cvar, value)
+  self:Overwrite(cvar, (value and 1) or 0)
 end
 
 function CVars:RestoreFromProfile(cvar)
@@ -165,50 +205,6 @@ end
 
 function CVars:GetAsBool(cvar)
   return GetCVarBool(cvar)
-end
-
----------------------------------------------------------------------------------------------------
--- Set CVars in a safe way when in combat
----------------------------------------------------------------------------------------------------
-
-function CVars:SetProtected(cvar, value)
-  if COMBAT_PROTECTED[cvar] then
-    Addon:CallbackWhenOoC(function()
-      SetConsoleVariable(cvar, value)
-    end, L["Unable to change the following console variable while in combat: "] .. cvar .. ". ")
-  else
-    SetConsoleVariable(cvar, value)
-  end
-end
-
-function CVars:SetBoolProtected(cvar, value)
-  self:SetProtected(cvar, (value and 1) or 0)
-end
-
-function CVars:SetToDefaultProtected(cvar)
-  if COMBAT_PROTECTED[cvar] then
-    Addon:CallbackWhenOoC(function()
-      _G.SetCVar(cvar, GetCVarDefault())
-      Addon.db.profile.CVarsBackup[cvar] = nil
-    end, L["Unable to change the following console variable while in combat: "] .. cvar .. ". ")
-  else
-    _G.SetCVar(cvar, GetCVarDefault())
-    Addon.db.profile.CVarsBackup[cvar] = nil
-  end
-end
-
-function CVars:OverwriteProtected(cvar, value)
-  if COMBAT_PROTECTED[cvar] then
-    Addon:CallbackWhenOoC(function()
-      _G.SetCVar(cvar, value)
-    end, L["Unable to change the following console variable while in combat: "] .. cvar .. ". ")
-  else
-    _G.SetCVar(cvar, value)
-  end
-end
-
-function CVars:OverwriteBoolProtected(cvar, value)
-  self:OverwriteProtected(cvar, (value and 1) or 0)
 end
 
 ---------------------------------------------------------------------------------------------------

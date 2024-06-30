@@ -534,7 +534,7 @@ local function CVarsManagerSetBool(info, value)
   if type(info) == "table" then
     info = info.arg
   end
-  Addon.CVars:SetBoolProtected(info, value)
+  Addon.CVars:SetBool(info, value)
   --Addon:ForceUpdate()
 end
 
@@ -2852,7 +2852,7 @@ local function CreateTargetArtWidgetOptions()
                 order = 10,
                 type = "toggle",
                 set = function(info, val)
-                  Addon.CVars:SetProtected(info.arg, (val and "3") or "0")
+                  Addon.CVars:Set(info.arg, (val and "3") or "0")
                 end,
                 get = function(info)
                   return Addon.CVars:GetAsNumber(info.arg) == Enum.SoftTargetEnableFlags.Any
@@ -2958,7 +2958,7 @@ local function CreateTargetArtWidgetOptions()
                 order = 10,
                 type = "toggle",
                 set = function(info, val)
-                  Addon.CVars:SetProtected(info.arg, (val and "3") or "0")
+                  Addon.CVars:Set(info.arg, (val and "3") or "0")
                 end,
                 get = function(info)
                   return Addon.CVars:GetAsNumber(info.arg) == Enum.SoftTargetEnableFlags.Any
@@ -3016,7 +3016,7 @@ local function CreateTargetArtWidgetOptions()
                     name = L["None"],
                     order = 10,
                     type = "toggle",
-                    set = function(info, val) Addon.CVars:SetProtected(info.arg, 0) end,
+                    set = function(info, val) Addon.CVars:Set(info.arg, 0) end,
                     get = function(info) 
                       local value = Addon.CVars:Get(info.arg)
                       return value ~= "1" and value ~= "2"
@@ -5391,8 +5391,8 @@ local function CreateVisibilitySettings()
             type = "toggle",
             width = "full",
             set = function(info, value)
-              Addon.CVars:OverwriteProtected("nameplateShowFriends", (value and 1) or 0)
-              Addon.CVars:OverwriteProtected("nameplateShowEnemies", (value and 1) or 0)
+              Addon.CVars:Overwrite("nameplateShowFriends", (value and 1) or 0)
+              Addon.CVars:Overwrite("nameplateShowEnemies", (value and 1) or 0)
             end,
             get = function(info)
               return GetCVarBool("nameplateShowFriends") and GetCVarBool("nameplateShowEnemies")
@@ -6092,7 +6092,7 @@ local function CreateBlizzardSettings()
             width = "double",
             set = function(info, val)
               SetValuePlain(info, val)
-              Addon.CVars:OverwriteBoolProtected("nameplateResourceOnTarget", val)
+              Addon.CVars:OverwriteBool("nameplateResourceOnTarget", val)
             end,
             get = GetValue,
             arg = { "PersonalNameplate", "ShowResourceOnTarget"},

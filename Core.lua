@@ -390,7 +390,7 @@ function TidyPlatesThreat:OnEnable()
   Addon:CheckForIncompatibleAddons()
 
   if not Addon.WOW_USES_CLASSIC_NAMEPLATES then
-    CVars:OverwriteBoolProtected("nameplateResourceOnTarget", Addon.db.profile.PersonalNameplate.ShowResourceOnTarget)
+    CVars:OverwriteBool("nameplateResourceOnTarget", Addon.db.profile.PersonalNameplate.ShowResourceOnTarget)
   end
 
   Addon.LoadOnDemandLibraries()
