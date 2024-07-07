@@ -172,7 +172,7 @@ else
 
 	Addon.GetSpellInfo = function(...) 
 		--local name, rank, icon, castTime, minRange, maxRange, spellID, originalIcon = _G.GetSpellInfo()
-		local name, _, icon = _G.GetSpellInfo()
+		local name, _, icon = _G.GetSpellInfo(...)
 		return {
 			name = name,
 			iconID = icon 
