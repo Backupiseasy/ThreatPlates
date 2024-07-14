@@ -3,3 +3,4 @@
 .env
 .vscode/
 workspace.code-workspace
+*.code-workspace

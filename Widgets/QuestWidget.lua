@@ -4,7 +4,7 @@
 local ADDON_NAME, Addon = ...
 local ThreatPlates = Addon.ThreatPlates
 
-local Widget = ((Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC) and {}) or Addon.Widgets:NewWidget("Quest")
+local Widget = (not Addon.IS_MAINLINE and {}) or Addon.Widgets:NewWidget("Quest")
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants

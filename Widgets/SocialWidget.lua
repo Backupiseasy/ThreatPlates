@@ -53,7 +53,10 @@ local _G =_G
 local BNGetFriendInfo, BNGetFriendInfoByID = BNGetFriendInfo, BNGetFriendInfoByID -- For Classic
 local GetFriendAccountInfo, GetGameAccountInfoByID -- For Retail
 
-if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
+-- GetFriendAccountInfo and GetAccountInfoByID: BfA - Patch 8.2.5 (2019-09-24): Changed to C_BattleNet.GetFriendAccountInfo() and C_BattleNet.GetAccountInfoByID().
+if Addon.IS_MAINLINE then
+  GetFriendAccountInfo, GetGameAccountInfoByID = C_BattleNet.GetFriendAccountInfo, C_BattleNet.GetGameAccountInfoByID
+else
   local AccountInfo = {
     gameAccountInfo = {}
   }
@@ -91,8 +94,6 @@ if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
 
     return AccountInfo.gameAccountInfo
   end
-else
-  GetFriendAccountInfo, GetGameAccountInfoByID = C_BattleNet.GetFriendAccountInfo, C_BattleNet.GetGameAccountInfoByID
 end
 
 ---------------------------------------------------------------------------------------------------

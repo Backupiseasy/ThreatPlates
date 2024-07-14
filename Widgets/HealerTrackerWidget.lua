@@ -50,6 +50,8 @@ local HEALER_SPECIALIZATION_ID = {
 -- Store localized names for specializations for parsing the battleground score
 local HEALER_CLASSES = {}
 local HEALER_SPECS = {}
+
+-- GetSpecializationInfoByID: Warlords of Draenor Patch 6.2.0 (2015-06-23): Added GetSpecializationInfoForSpecID()
 if Addon.IS_MAINLINE then
   for specialization_id, _ in pairs(HEALER_SPECIALIZATION_ID) do
     local _, name, _, _, _, classFile, _ =  GetSpecializationInfoByID(specialization_id)
@@ -216,6 +218,84 @@ local HEALER_SPELLS_RETAIL = {
   --[377509] = "EVOKER", -- Dream Projection
 }
 
+local HEALER_SPELLS_CATA = {
+  -- Holy Priest
+  ----------
+  -- Key Abilities: Renew, Flash Heal, Prayer of Healing, Greater Heal, Lightwell
+  [47788] = "PRIEST",  -- Guardian Spirit
+  [34861] = "PRIEST",  -- Circle of Healing
+  [14751] = "PRIEST",  -- Chakra
+  [88625] = "PRIEST",  -- Holy Word: Chastise
+  [88684] = "PRIEST",  -- Holy Word: Serenity
+  [88685] = "PRIEST",  -- Holy Word: Sanctuary
+  [724] = "PRIEST",    -- Lightwell
+  [19236] = "PRIEST",  -- Desperate Prayer
+  [101062] = "PRIEST", -- Flash Heal with Surge of Light proc
+  --
+  --[139] = "PRIEST",  -- Renew
+  --[2061] = "PRIEST", -- Flash Heal
+  --[596] = "PRIEST",  -- Prayer of Healing
+  --[2060] = "PRIEST", -- Greater Heal
+
+
+  -- Dicipline Priest
+  ----------
+  -- Key Abilities: Power Word: Shield, Power Word: Fortitude, Inner Fire, Mana Burn, Power Infusion
+  -- [47540] = "PRIEST", -- Penance
+  [62618] = "PRIEST", -- Power Word: Barrier
+  [33206] = "PRIEST", -- Pain Suppression
+  [73413] = "PRIEST", -- Inner Will
+  [10060] = "PRIEST", -- Power Infusion
+  [87151] = "PRIEST", -- Archangel
+  --
+  --[47750] = "PRIEST", -- Penance
+  --[17] = "PRIEST",   -- Power Word: Shield
+  --[588] = "PRIEST",  -- Inner Fire
+  --[8129] = "PRIEST", -- Mana Burn
+
+  -- Druid
+  ---------
+  -- Key Abilities: Regrowth, Rejuvenation, Healting Touch, Rebirth, Tranquility
+  [17116] = "DRUID", -- Nature's Swiftness
+  [48438] = "DRUID", -- Wild Growth
+  [33891] = "DRUID", -- Tree of Life (Aura)
+  --
+  --[18562] = "DRUID", -- Swiftmend
+  --[8936] = "DRUID",  -- Regrowth
+  --[774] = "DRUID",   -- Rejuvenation
+  --[5185] = "DRUID",  -- Healing Touch
+  --[20484] = "DRUID", -- Rebirth
+  --[740] = "DRUID",   -- Tranquility
+
+  -- Shaman
+  ---------
+  -- Key Abilities: Healing Wave, Lesser Healing Wave, Chain Heal, Mana Tide Totem
+  [16188] = "SHAMAN", -- Nature's Swiftness
+  [16190] = "SHAMAN", -- Mana Tide Totem
+  [98008] = "SHAMAN", -- Spirit Link Totem
+  [61295] = "SHAMAN", -- Riptide
+  -- 
+  --[974] = "SHAMAN",   -- Earth Shield
+  --[51886] = "SHAMAN", -- Cleanse Spirit
+  --[55198] = "SHAMAN", -- Tidal Force
+  --[331] = "SHAMAN",  -- Healing Wave
+  --[8004] = "SHAMAN", -- Healing Surge
+
+  -- Paladin
+  ----------
+  -- Key Abilities: Holy Light, Flash of Light, Seal of Light, Lay on Hands, Holy Shock
+  [85222] = "PALADIN", -- Light of Dawn
+  [31821] = "PALADIN", -- Aura Mastery
+  [53563] = "PALADIN", -- Beacon of Light
+  [20216] = "PALADIN", -- Divine Favor
+  --
+  --[31842] = "PALADIN", -- Divine Favor
+  --[20473] = "PALADIN", -- Holy Shock
+  --[82326] = "PALADIN", -- Divine Light
+  --[19750] = "PALADIN", -- Flash of Light
+  --[20165] = "PALADIN", -- Seal of Light
+}
+
 local HEALER_SPELLS_CLASSIC = {
   -- Holy Priest
   ----------
@@ -336,6 +416,8 @@ elseif Addon.IS_TBC_CLASSIC then
   HEALER_SPELLS = HEALER_SPELLS_CLASSIC
 elseif Addon.IS_WRATH_CLASSIC then
   HEALER_SPELLS = HEALER_SPELLS_CLASSIC
+elseif Addon.IS_CATA_CLASSIC then
+  HEALER_SPELLS = HEALER_SPELLS_CATA
 else
   HEALER_SPELLS = HEALER_SPELLS_RETAIL
 end

@@ -38,36 +38,27 @@ local LSMUpdateTimer
 -- Functions different depending on WoW version
 ---------------------------------------------------------------------------------------------------
 
--- Copied from ElvUI:
-local function CalculateSynchedNameplateSize(friendlyUnit)
-  local db = Addon.db.profile.settings
-
-  local width = db.frame.width
-  local height = db.frame.height
-  if db.frame.SyncWithHealthbar then
-    -- this wont taint like NamePlateDriverFrame:SetBaseNamePlateSize
-
-    -- The default size of Threat Plates healthbars is based on large nameplates with these defaults:
-    --   NamePlateVerticalScale = 1.7
-    --   NamePlateVerticalScale = 1.4
-    local zeroBasedScale = 0.7  -- tonumber(GetCVar("NamePlateVerticalScale")) - 1.0
-    local horizontalScale = 1.4 -- tonumber(GetCVar("NamePlateVerticalScale"))
-    local healthbarWidth = db.healthbar.width
-    local healthbarHeight = db.healthbar.height
-
+if Addon.WOW_USES_CLASSIC_NAMEPLATES then
+  local function CalculateSynchedNameplateSize(friendlyUnit)
+    local db = Addon.db.profile.settings
+  
+    local width, height
     if friendlyUnit then
-      healthbarWidth = db.healthbar.widthFriendly
-      healthbarHeight = db.healthbar.heightFriendly
+      width = db.healthbar.widthFriendly
+      height = db.healthbar.heightFriendly
+    else
+      width = db.healthbar.width
+      height = db.healthbar.height
     end
-
-    width = (healthbarWidth - 10) * horizontalScale
-    height = (healthbarHeight + 35) * Lerp(1.0, 1.25, zeroBasedScale)
+        
+    if db.frame.SyncWithHealthbar then
+      db.frame.width = width + 6
+      db.frame.height = height + 22
+    end
+  
+    return db.frame.width, db.frame.height
   end
 
-  return width, height
-end
-
-if Addon.WOW_USES_CLASSIC_NAMEPLATES then
   Addon.SetBaseNamePlateSize = function(self)
     local db = self.db.profile
 
@@ -85,6 +76,19 @@ if Addon.WOW_USES_CLASSIC_NAMEPLATES then
     Addon:ConfigClickableArea(false)
   end
 else
+  local function CalculateSynchedNameplateSize()
+    local db = Addon.db.profile.settings
+  
+    if db.frame.SyncWithHealthbar then
+      -- This functions were interpolated from ratio of the clickable area and the Blizzard nameplate healthbar
+      -- for various sizes
+      db.frame.width = db.healthbar.width + 24.5
+      db.frame.height = (db.healthbar.height + 11.4507) / 0.347764  
+    end
+  
+    return db.frame.width, db.frame.height
+  end
+    
   local function SetNameplatesToDefaultSize()
     if NamePlateDriverFrame:IsUsingLargerNamePlateStyle() then
       C_NamePlate.SetNamePlateFriendlySize(154, 64)
@@ -287,7 +291,8 @@ function Addon:CheckForFirstStartUp()
   if not Addon.db.char.welcome then
     Addon.db.char.welcome = true
 
-    if not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC and not Addon.IS_WRATH_CLASSIC then
+    -- GetNumSpecializations: Mists - Patch 5.0.4 (2012-08-28): Replaced GetNumTalentTabs.
+    if Addon.IS_MAINLINE then
       -- initialize roles for all available specs (level > 10) or set to default (dps/healing)
       for index=1, GetNumSpecializations() do
         local id, spec_name, description, icon, background, role = GetSpecializationInfo(index)
@@ -359,21 +364,6 @@ function TidyPlatesThreat:OnInitialize()
   Addon.LibAceConfigRegistry = LibStub("AceConfigRegistry-3.0")
   Addon.LibSharedMedia = LibStub("LibSharedMedia-3.0")
   Addon.LibCustomGlow = LibStub("LibCustomGlow-1.0")
-
-  if Addon.IS_CLASSIC then
-    Addon.LibClassicDurations = LibStub("LibClassicDurations")
-
-    Addon.LibClassicCasterino = LibStub("LibClassicCasterino-ThreatPlates")
-    -- Register callsbacks for spellcasting library
-    Addon.LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_START", Addon.UNIT_SPELLCAST_START)
-    Addon.LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_DELAYED", Addon.UnitSpellcastMidway) -- only for player
-    Addon.LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_STOP", Addon.UNIT_SPELLCAST_STOP)
-    Addon.LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_FAILED", Addon.UNIT_SPELLCAST_STOP)
-    Addon.LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_INTERRUPTED", Addon.UNIT_SPELLCAST_INTERRUPTED)
-    Addon.LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_CHANNEL_START", Addon.UNIT_SPELLCAST_CHANNEL_START)
-    Addon.LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_CHANNEL_UPDATE", Addon.UnitSpellcastMidway) -- only for player
-    Addon.LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_CHANNEL_STOP", Addon.UNIT_SPELLCAST_CHANNEL_STOP)
-  end
 
   Addon.LoadOnDemandLibraries()
 
@@ -465,9 +455,10 @@ function TidyPlatesThreat:ToggleNameplateModeFriendlyUnits()
 
   db.Visibility.FriendlyPlayer.UseHeadlineView = not db.Visibility.FriendlyPlayer.UseHeadlineView
   db.Visibility.FriendlyNPC.UseHeadlineView = not db.Visibility.FriendlyNPC.UseHeadlineView
-  db.Visibility.FriendlyTotem.UseHeadlineView = not db.Visibility.FriendlyTotem.UseHeadlineView
-  db.Visibility.FriendlyGuardian.UseHeadlineView = not db.Visibility.FriendlyGuardian.UseHeadlineView
+  -- db.Visibility.FriendlyMinion.UseHeadlineView = not db.Visibility.FriendlyTotem.UseHeadlineView
   db.Visibility.FriendlyPet.UseHeadlineView = not db.Visibility.FriendlyPet.UseHeadlineView
+  db.Visibility.FriendlyGuardian.UseHeadlineView = not db.Visibility.FriendlyGuardian.UseHeadlineView
+  db.Visibility.FriendlyTotem.UseHeadlineView = not db.Visibility.FriendlyTotem.UseHeadlineView
   db.Visibility.FriendlyMinus.UseHeadlineView = not db.Visibility.FriendlyMinus.UseHeadlineView
 
   Addon:ForceUpdate()
@@ -487,9 +478,10 @@ function TidyPlatesThreat:ToggleNameplateModeEnemyUnits()
 
   db.Visibility.EnemyPlayer.UseHeadlineView = not db.Visibility.EnemyPlayer.UseHeadlineView
   db.Visibility.EnemyNPC.UseHeadlineView = not db.Visibility.EnemyNPC.UseHeadlineView
-  db.Visibility.EnemyTotem.UseHeadlineView = not db.Visibility.EnemyTotem.UseHeadlineView
-  db.Visibility.EnemyGuardian.UseHeadlineView = not db.Visibility.EnemyGuardian.UseHeadlineView
+  -- db.Visibility.EnemyMinion.UseHeadlineView = not db.Visibility.EnemyPet.UseHeadlineView
   db.Visibility.EnemyPet.UseHeadlineView = not db.Visibility.EnemyPet.UseHeadlineView
+  db.Visibility.EnemyGuardian.UseHeadlineView = not db.Visibility.EnemyGuardian.UseHeadlineView
+  db.Visibility.EnemyTotem.UseHeadlineView = not db.Visibility.EnemyTotem.UseHeadlineView
   db.Visibility.EnemyMinus.UseHeadlineView = not db.Visibility.EnemyMinus.UseHeadlineView
 
   Addon:ForceUpdate()
@@ -508,7 +500,8 @@ end
 -- Also fires any other time the player sees a loading screen
 function TidyPlatesThreat:PLAYER_ENTERING_WORLD()
   local db = Addon.db.profile.questWidget
-  if not (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC) then
+  -- showQuestTrackingTooltips: not sure when introduced
+  if Addon.IS_MAINLINE then
     if db.ON or db.ShowInHeadlineView then
       CVars:Set("showQuestTrackingTooltips", 1)
     else

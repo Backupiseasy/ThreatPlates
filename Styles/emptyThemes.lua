@@ -206,7 +206,7 @@ end
 
 local themeList = {
 	"empty",
-	"etotem",
+	"etotem", -- Now, used for nameplates with certain widgets, but no healthbar and name
 }
 
 do

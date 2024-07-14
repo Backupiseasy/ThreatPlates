@@ -210,9 +210,15 @@ L["Alignment"] = "Alignment"
 --[[Translation missing --]]
 L["All"] = "All"
 --[[Translation missing --]]
+L["All Minions"] = "All Minions"
+--[[Translation missing --]]
 L["All on NPCs"] = "All on NPCs"
 --[[Translation missing --]]
+L["Allies"] = "Allies"
+--[[Translation missing --]]
 L["Allow"] = "Allow"
+--[[Translation missing --]]
+L["Allow soft target selection while player has a locked target."] = "Allow soft target selection while player has a locked target."
 --[[Translation missing --]]
 L["Alpha"] = "Alpha"
 --[[Translation missing --]]
@@ -220,7 +226,15 @@ L["Alpha multiplier of nameplates for occluded units."] = "Alpha multiplier of n
 --[[Translation missing --]]
 L["Always"] = "Always"
 --[[Translation missing --]]
+L["Always do soft targeting"] = "Always do soft targeting"
+--[[Translation missing --]]
 L["Always Show Nameplates"] = "Always Show Nameplates"
+--[[Translation missing --]]
+L["Always show nameplates for soft enemy target."] = "Always show nameplates for soft enemy target."
+--[[Translation missing --]]
+L["Always show nameplates for soft friend target."] = "Always show nameplates for soft friend target."
+--[[Translation missing --]]
+L["Always show nameplates for soft interact target."] = "Always show nameplates for soft interact target."
 --[[Translation missing --]]
 L["Always shows the full amount of absorbs on a unit. In overabsorb situations, the absorbs bar ist shifted to the left."] = "Always shows the full amount of absorbs on a unit. In overabsorb situations, the absorbs bar ist shifted to the left."
 --[[Translation missing --]]
@@ -297,6 +311,12 @@ L["Auto-Cast"] = "Auto-Cast"
 L["Automatic Icon"] = "Automatic Icon"
 --[[Translation missing --]]
 L["Automation"] = "Automation"
+--[[Translation missing --]]
+L["Auto-set Target"] = "Auto-set Target"
+--[[Translation missing --]]
+L["Auto-set target to match soft target"] = "Auto-set target to match soft target"
+--[[Translation missing --]]
+L["Auto-set target to match soft target."] = "Auto-set target to match soft target."
 --[[Translation missing --]]
 L["Background"] = "Background"
 --[[Translation missing --]]
@@ -584,6 +604,8 @@ L["Determine your role (tank/dps/healing) automatically based on current spec."]
 --[[Translation missing --]]
 L["Determine your role (tank/dps/healing) automatically based on current stance (Warrior) or form (Druid)."] = "Determine your role (tank/dps/healing) automatically based on current stance (Warrior) or form (Druid)."
 --[[Translation missing --]]
+L["Determine your role (tank/dps/healing) automatically based on current stance, form, aura, presence, or rune."] = "Determine your role (tank/dps/healing) automatically based on current stance, form, aura, presence, or rune."
+--[[Translation missing --]]
 L["Disable"] = "Disable"
 --[[Translation missing --]]
 L["Disable threat scale for target marked, mouseover or casting units."] = "Disable threat scale for target marked, mouseover or casting units."
@@ -686,6 +708,8 @@ L["Enable Social Widget"] = "Enable Social Widget"
 --[[Translation missing --]]
 L["Enable Stealth Widget"] = "Enable Stealth Widget"
 --[[Translation missing --]]
+L["Enable Target Highlight"] = "Enable Target Highlight"
+--[[Translation missing --]]
 L["Enable Target Widget"] = "Enable Target Widget"
 --[[Translation missing --]]
 L["Enable Text"] = "Enable Text"
@@ -709,6 +733,10 @@ L["Enable Threat System"] = "Enable Threat System"
 L["Enable Threat Textures"] = "Enable Threat Textures"
 --[[Translation missing --]]
 L["Enable Threat Transparency"] = "Enable Threat Transparency"
+--[[Translation missing --]]
+L["Enemies"] = "Enemies"
+--[[Translation missing --]]
+L["Enemy"] = "Enemy"
 --[[Translation missing --]]
 L["Enemy Casting"] = "Enemy Casting"
 --[[Translation missing --]]
@@ -780,6 +808,8 @@ L["Flash Time"] = "Flash Time"
 --[[Translation missing --]]
 L["Flash When Expiring"] = "Flash When Expiring"
 --[[Translation missing --]]
+L["Focus"] = "Focus"
+--[[Translation missing --]]
 L["Focus Highlight"] = "Focus Highlight"
 --[[Translation missing --]]
 L["Focus Only"] = "Focus Only"
@@ -804,6 +834,8 @@ L["Frame Order"] = "Frame Order"
 --[[Translation missing --]]
 L["Frequently Asked Questions"] = "Frequently Asked Questions"
 --[[Translation missing --]]
+L["Friend"] = "Friend"
+--[[Translation missing --]]
 L["Friendly & Neutral Units"] = "Friendly & Neutral Units"
 --[[Translation missing --]]
 L["Friendly Casting"] = "Friendly Casting"
@@ -824,6 +856,8 @@ L["Friendly Units"] = "Friendly Units"
 --[[Translation missing --]]
 L["Friendly Units in Combat"] = "Friendly Units in Combat"
 --[[Translation missing --]]
+L["Friends"] = "Friends"
+--[[Translation missing --]]
 L["Friends & Guild Members"] = "Friends & Guild Members"
 --[[Translation missing --]]
 L["Full Absorbs"] = "Full Absorbs"
@@ -833,6 +867,8 @@ L["Full Health"] = "Full Health"
 L["Full Name"] = "Full Name"
 --[[Translation missing --]]
 L["Function"] = "Function"
+--[[Translation missing --]]
+L["Game Object"] = "Game Object"
 --[[Translation missing --]]
 L["Gas Cloud"] = "Gas Cloud"
 --[[Translation missing --]]
@@ -853,6 +889,8 @@ L["Glow Frame"] = "Glow Frame"
 L["Glow Type"] = "Glow Type"
 --[[Translation missing --]]
 L["Guardians"] = "Guardians"
+--[[Translation missing --]]
+L["Hard locked target only"] = "Hard locked target only"
 --[[Translation missing --]]
 L["Headline View"] = "Headline View"
 --[[Translation missing --]]
@@ -1022,6 +1060,8 @@ L["Instance IDs"] = "Instance IDs"
 --[[Translation missing --]]
 L["Instances"] = "Instances"
 --[[Translation missing --]]
+L["Interact"] = "Interact"
+--[[Translation missing --]]
 L["Interrupt Overlay"] = "Interrupt Overlay"
 --[[Translation missing --]]
 L["Interrupt Shield"] = "Interrupt Shield"
@@ -1070,11 +1110,15 @@ L["Localization"] = "Localization"
 --[[Translation missing --]]
 L["Look and Feel"] = "Look and Feel"
 --[[Translation missing --]]
+L["Low Priority"] = "Low Priority"
+--[[Translation missing --]]
 L["Low Threat"] = "Low Threat"
 --[[Translation missing --]]
 L["Magic"] = "Magic"
 --[[Translation missing --]]
 L["Marked Immortal Guardian"] = "Marked Immortal Guardian"
+--[[Translation missing --]]
+L["Match appropriate soft target to locked target."] = "Match appropriate soft target to locked target."
 --[[Translation missing --]]
 L["Max Alpha"] = "Max Alpha"
 --[[Translation missing --]]
@@ -1088,11 +1132,25 @@ L["Max Health"] = "Max Health"
 --[[Translation missing --]]
 L["Medium Threat"] = "Medium Threat"
 --[[Translation missing --]]
+L["Member 1"] = "Member 1"
+--[[Translation missing --]]
+L["Member 2"] = "Member 2"
+--[[Translation missing --]]
+L["Member 3"] = "Member 3"
+--[[Translation missing --]]
+L["Member 4"] = "Member 4"
+--[[Translation missing --]]
+L["Member 5"] = "Member 5"
+--[[Translation missing --]]
 L["Metric Unit Symbols"] = "Metric Unit Symbols"
+--[[Translation missing --]]
+L["Middle"] = "Middle"
 --[[Translation missing --]]
 L["Min Alpha"] = "Min Alpha"
 --[[Translation missing --]]
 L["Mine"] = "Mine"
+--[[Translation missing --]]
+L["Minions"] = "Minions"
 --[[Translation missing --]]
 L["Minions & By Status"] = "Minions & By Status"
 --[[Translation missing --]]
@@ -1121,6 +1179,8 @@ L["Muddy Crawfish"] = "Muddy Crawfish"
 L["Mult for Occluded Units"] = "Mult for Occluded Units"
 --[[Translation missing --]]
 L["Name"] = "Name"
+--[[Translation missing --]]
+L["Nameplate"] = "Nameplate"
 --[[Translation missing --]]
 L["Nameplate Clickthrough"] = "Nameplate Clickthrough"
 --[[Translation missing --]]
@@ -1228,6 +1288,8 @@ L["Open Blizzard Settings"] = "Open Blizzard Settings"
 --[[Translation missing --]]
 L["Open Options"] = "Open Options"
 --[[Translation missing --]]
+L["Opponents"] = "Opponents"
+--[[Translation missing --]]
 L["options:"] = "options:"
 --[[Translation missing --]]
 L["Orbs"] = "Orbs"
@@ -1271,6 +1333,8 @@ L["Placement"] = "Placement"
 L["Players"] = "Players"
 --[[Translation missing --]]
 L["Players in Instances"] = "Players in Instances"
+--[[Translation missing --]]
+L["Please select a target unit with a nameplate to enable configuration mode."] = "Please select a target unit with a nameplate to enable configuration mode."
 --[[Translation missing --]]
 L["Poison"] = "Poison"
 --[[Translation missing --]]
@@ -1484,11 +1548,15 @@ L["Show Health Text"] = "Show Health Text"
 --[[Translation missing --]]
 L["Show Icon for Rares & Elites"] = "Show Icon for Rares & Elites"
 --[[Translation missing --]]
+L["Show icon for soft interact game objects (interactable objects you cannot normally target)."] = "Show icon for soft interact game objects (interactable objects you cannot normally target)."
+--[[Translation missing --]]
 L["Show Icon to the Left"] = "Show Icon to the Left"
 --[[Translation missing --]]
 L["Show in Headline View"] = "Show in Headline View"
 --[[Translation missing --]]
 L["Show in Healthbar View"] = "Show in Healthbar View"
+--[[Translation missing --]]
+L["Show interact icons even when there is other visual indicators, such as quest or loot effects."] = "Show interact icons even when there is other visual indicators, such as quest or loot effects."
 --[[Translation missing --]]
 L["Show Level Text"] = "Show Level Text"
 --[[Translation missing --]]
@@ -1573,6 +1641,10 @@ L["Skull"] = "Skull"
 L["Skull Icon"] = "Skull Icon"
 --[[Translation missing --]]
 L["Social"] = "Social"
+--[[Translation missing --]]
+L["Soft Target"] = "Soft Target"
+--[[Translation missing --]]
+L["Soft Target Icon"] = "Soft Target Icon"
 --[[Translation missing --]]
 L["Sort A-Z"] = "Sort A-Z"
 --[[Translation missing --]]
@@ -1672,6 +1744,8 @@ L["Target Highlight"] = "Target Highlight"
 --[[Translation missing --]]
 L["Target Hightlight"] = "Target Hightlight"
 --[[Translation missing --]]
+L["Target Locking"] = "Target Locking"
+--[[Translation missing --]]
 L["Target Marked"] = "Target Marked"
 --[[Translation missing --]]
 L["Target Marked Units"] = "Target Marked Units"
@@ -1686,6 +1760,8 @@ L["Target Offset Y"] = "Target Offset Y"
 --[[Translation missing --]]
 L["Target Only"] = "Target Only"
 --[[Translation missing --]]
+L["Target Style"] = "Target Style"
+--[[Translation missing --]]
 L["Target-based Scale"] = "Target-based Scale"
 --[[Translation missing --]]
 L["Target-based Transparency"] = "Target-based Transparency"
@@ -1693,6 +1769,8 @@ L["Target-based Transparency"] = "Target-based Transparency"
 L["Target's Name"] = "Target's Name"
 --[[Translation missing --]]
 L["Target's NPC ID"] = "Target's NPC ID"
+--[[Translation missing --]]
+L["Targets you attack"] = "Targets you attack"
 --[[Translation missing --]]
 L["Text Boundaries"] = "Text Boundaries"
 --[[Translation missing --]]
@@ -1811,6 +1889,8 @@ L["This option allows you to control whether threat affects the transparency of 
 L["This setting will disable threat scale for target marked, mouseover or casting units and instead use the general scale settings."] = "This setting will disable threat scale for target marked, mouseover or casting units and instead use the general scale settings."
 --[[Translation missing --]]
 L["This setting will disable threat transparency for target marked, mouseover or casting units and instead use the general transparency settings."] = "This setting will disable threat transparency for target marked, mouseover or casting units and instead use the general transparency settings."
+--[[Translation missing --]]
+L["This settings changes CVars related to soft target and are not stored in the profile, but by WoW itself (character-specific settings)."] = "This settings changes CVars related to soft target and are not stored in the profile, but by WoW itself (character-specific settings)."
 --[[Translation missing --]]
 L["This widget highlights the nameplate of your current focus target by showing a border around the healthbar and by coloring the nameplate's healtbar and/or name with a custom color."] = "This widget highlights the nameplate of your current focus target by showing a border around the healthbar and by coloring the nameplate's healtbar and/or name with a custom color."
 --[[Translation missing --]]
@@ -1993,6 +2073,12 @@ L["Use Blizzard default nameplates for friendly nameplates and disable ThreatPla
 L["Use Blizzard default nameplates for neutral and enemy nameplates and disable ThreatPlates for these units."] = "Use Blizzard default nameplates for neutral and enemy nameplates and disable ThreatPlates for these units."
 --[[Translation missing --]]
 L["Use scale settings of Healthbar View also for Headline View."] = "Use scale settings of Healthbar View also for Headline View."
+--[[Translation missing --]]
+L["Use target scale and transparency settings also for soft enemy target."] = "Use target scale and transparency settings also for soft enemy target."
+--[[Translation missing --]]
+L["Use target scale and transparency settings also for soft friend target."] = "Use target scale and transparency settings also for soft friend target."
+--[[Translation missing --]]
+L["Use target scale and transparency settings also for soft interact target."] = "Use target scale and transparency settings also for soft interact target."
 --[[Translation missing --]]
 L["Use target-based scale as absolute scale and ignore unit base scale."] = "Use target-based scale as absolute scale and ignore unit base scale."
 --[[Translation missing --]]

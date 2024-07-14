@@ -39,7 +39,7 @@ do_export() {
   echo -n "Exporting $lang ..."
   result=$( curl -sS -0 -X GET -w "%{http_code}" -o "$output_file" \
     -H "X-Api-Token: $CF_API_KEY" \
-    "https://www.curseforge.com/api/projects/21217/localization/export?lang=$lang&export-type=TableAdditions"
+    "https://legacy.curseforge.com/api/projects/21217/localization/export?lang=$lang&export-type=TableAdditions"
   ) || exit 1
   case $result in
     200) echo "done." ;;

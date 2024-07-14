@@ -530,7 +530,7 @@ function Widget:OnUnitAdded(widget_frame, unit)
   InitializeNonScriptTriggerScripts(widget_frame, unit)
   ProcessEvent("OnUnitAdded", widget_frame, unit)
 
-  if unit.isTarget then
+  if unit.IsSoftTarget then
     ProcessEvent("OnTargetUnitAdded", widget_frame, unit)
   end
 
@@ -545,7 +545,7 @@ end
 function Widget:OnUnitRemoved(widget_frame, unit)
   ProcessEvent("OnUnitRemoved", widget_frame, unit)
 
-  if unit.isTarget then
+  if unit.IsSoftTarget then
     ProcessEvent("OnTargetUnitRemoved", widget_frame, unit)
   end
 

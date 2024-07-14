@@ -44,11 +44,11 @@ local PATH_ART = t.Art
 local UNIT_TYPES = {
   {
     Faction = "Friendly", Disabled = "nameplateShowFriends",
-    UnitTypes = { "Player", "NPC", "Totem", "Guardian", "Pet", "Minus"}
+    UnitTypes = { "Player", "NPC", "Minus", "Pet", "Guardian", "Totem", }
   },
   {
     Faction = "Enemy", Disabled = "nameplateShowEnemies",
-    UnitTypes = { "Player", "NPC", "Totem", "Guardian", "Pet", "Minus" }
+    UnitTypes = { "Player", "NPC", "Minus", "Pet", "Guardian", "Totem", }
   },
   {
     Faction = "Neutral", Disabled = "nameplateShowEnemies",
@@ -75,7 +75,7 @@ local AURA_STYLE = {
           flags = "OUTLINE",
           Shadow = true,
           HorizontalAlignment = "RIGHT",
-          VerticalAlignment = "CENTER",
+          VerticalAlignment = "MIDDLE",
         }
       },
       StackCount = {
@@ -91,7 +91,7 @@ local AURA_STYLE = {
           flags = "OUTLINE",
           Shadow = true,
           HorizontalAlignment = "RIGHT",
-          VerticalAlignment = "CENTER",
+          VerticalAlignment = "MIDDLE",
         }
       },
     },
@@ -126,7 +126,7 @@ local AURA_STYLE = {
           flags = "THICKOUTLINE",
           Shadow = true,
           HorizontalAlignment = "RIGHT",
-          VerticalAlignment = "CENTER",
+          VerticalAlignment = "MIDDLE",
         }
       },
       StackCount = {
@@ -142,7 +142,7 @@ local AURA_STYLE = {
           flags = "OUTLINE",
           Shadow = true,
           HorizontalAlignment = "RIGHT",
-          VerticalAlignment = "CENTER",
+          VerticalAlignment = "MIDDLE",
         }
       },
     },
@@ -529,6 +529,14 @@ local function SetCVarTPTP(info, value)
   end
 end
 
+local function CVarsManagerSetBool(info, value)
+  if type(info) == "table" then
+    info = info.arg
+  end
+  Addon.CVars:SetBoolProtected(info, value)
+  --Addon:ForceUpdate()
+end
+
 local function SetCVarBoolTPTP(info, value)
   if InCombatLockdown() then
     Addon.Logging.Error(L["We're unable to change this while in combat"])
@@ -761,7 +769,7 @@ function Addon:SetCVarsForOcclusionDetection()
   end
 
   -- Occlusion detection does not work when a target is selected in Classic, see https://github.com/Stanzilla/WoWUIBugs/issues/134
-  if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
+  if not Addon.IS_MAINLINE then
     local not_selected_alpha =  CVars:GetAsNumber("nameplateNotSelectedAlpha")
     if not not_selected_alpha or (not_selected_alpha < occluded_alpha_mult + 0.1) then
       not_selected_alpha = occluded_alpha_mult + 0.1
@@ -782,6 +790,15 @@ local function GetDescriptionEntry(text)
     width = "full",
   }
 end
+
+local function GetHeaderEntry(text, pos)
+  return { 
+    type = "header", 
+    order = pos, 
+    name = text, 
+  }
+end
+
 
 local function GetSpacerEntry(pos)
   return {
@@ -1222,7 +1239,7 @@ end
 --     flags = "OUTLINE",
 --     Shadow = true,
 --     HorizontalAlignment = "CENTER",
---     VerticalAlignment = "CENTER",
+--     VerticalAlignment = "MIDDLE",
 --   },
 local function GetFontEntryDefault(name, pos, widget_info, func_disabled)
   widget_info = Addon.ConcatTables(widget_info, { "Font" } )
@@ -1320,7 +1337,7 @@ end
 --     ShadowHorizontalOffset = 1,
 --     ShadowVerticalOffset = -1,
 --     HorizontalAlignment = "CENTER",
---     VerticalAlignment = "CENTER",
+--     VerticalAlignment = "MIDDLE",
 --   },
 local function GetFontEntryHandler(name, pos, widget_info, func_disabled, func_handler)
   widget_info = Addon.ConcatTables(widget_info, { "Font" } )
@@ -1937,17 +1954,17 @@ local function CreateComboPointsWidgetOptions()
                 type = "select",
                 order = 10,
                 values = {
-                  DEATHKNIGHT = (Addon.ClassicExpansionAtLeast(LE_EXPANSION_WRATH_OF_THE_LICH_KING) and L["Death Knight"]) or nil,
+                  DEATHKNIGHT = (Addon.ExpansionIsAtLeast(LE_EXPANSION_WRATH_OF_THE_LICH_KING) and L["Death Knight"]) or nil,
                   DRUID = L["Druid"],
-                  EVOKER = (Addon.ClassicExpansionAtLeast(LE_EXPANSION_DRAGONFLIGHT) and L["Evoker"]) or nil,
+                  EVOKER = (Addon.ExpansionIsAtLeast(LE_EXPANSION_DRAGONFLIGHT) and L["Evoker"]) or nil,
                   -- Arcane Charge as a resource mechanic was introduced with Patch 7.0.3 (Legion)
-                  MAGE = (Addon.ClassicExpansionAtLeast(LE_EXPANSION_LEGION) and L["Arcane Mage"]) or nil,
-                  MONK = (Addon.ClassicExpansionAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA)  and L["Windwalker Monk"]) or nil,
+                  MAGE = (Addon.ExpansionIsAtLeast(LE_EXPANSION_LEGION) and L["Arcane Mage"]) or nil,
+                  MONK = (Addon.ExpansionIsAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA)  and L["Windwalker Monk"]) or nil,
                   -- Holy Power was introduced with Patch 4.0.1 (Cataclysm)
-                  PALADIN = (Addon.ClassicExpansionAtLeast(LE_EXPANSION_CATACLYSM)  and L["Paladin"]) or nil,
+                  PALADIN = (Addon.ExpansionIsAtLeast(LE_EXPANSION_CATACLYSM)  and L["Paladin"]) or nil,
                   ROGUE = L["Rogue"],
                   -- Soul Shard as a resource mechanic was introduced with Path 4.0.1 (Cataclysm)
-                  WARLOCK = (Addon.ClassicExpansionAtLeast(LE_EXPANSION_CATACLYSM)  and L["Warlock"]) or nil,
+                  WARLOCK = (Addon.ExpansionIsAtLeast(LE_EXPANSION_CATACLYSM)  and L["Warlock"]) or nil,
                 },
                 arg = { "ComboPoints", "Specialization" },
               },
@@ -2074,7 +2091,7 @@ local function CreateComboPointsWidgetOptions()
                 end,
                 hasAlpha = false,
                 -- Charged Combo Points were introduced with Battle for Azerorth  
-                hidden = function() return db.ComboPoints.Specialization ~= "ROGUE" or not Addon.ClassicExpansionAtLeast(LE_EXPANSION_BATTLE_FOR_AZEROTH) end
+                hidden = function() return db.ComboPoints.Specialization ~= "ROGUE" or not Addon.ExpansionIsAtLeast(LE_EXPANSION_BATTLE_FOR_AZEROTH) end
               },
               ColorDeathrune = {
                 name = L["Death Rune"],
@@ -2090,7 +2107,7 @@ local function CreateComboPointsWidgetOptions()
                 end,
                 hasAlpha = false,
                 -- Deathrunes were available from Wrath to WoD
-                hidden = function() return db.ComboPoints.Specialization ~= "DEATHKNIGHT" or Addon.ClassicExpansionAtLeast(LE_EXPANSION_LEGION) end
+                hidden = function() return db.ComboPoints.Specialization ~= "DEATHKNIGHT" or Addon.ExpansionIsAtLeast(LE_EXPANSION_LEGION) end
               },
             },
           },
@@ -2121,14 +2138,14 @@ local function CreateComboPointsWidgetOptions()
         type = "group",
         order = 30,
         inline = false,
-        hidden = function() return not Addon.ClassicExpansionAtLeast(LE_EXPANSION_WRATH_OF_THE_LICH_KING) end,
+        hidden = function() return not Addon.ExpansionIsAtLeast(LE_EXPANSION_WRATH_OF_THE_LICH_KING) end,
         args = {
           RuneCooldown= {
             name = L["Death Knigh Rune Cooldown"],
             order = 70,
             type = "group",
             inline = true,
-            hidden = function() return not Addon.ClassicExpansionAtLeast(LE_EXPANSION_WRATH_OF_THE_LICH_KING) end,
+            hidden = function() return not Addon.ExpansionIsAtLeast(LE_EXPANSION_WRATH_OF_THE_LICH_KING) end,
             args = {
               Enable = {
                 name = L["Enable"],
@@ -2144,7 +2161,7 @@ local function CreateComboPointsWidgetOptions()
             order = 80,
             type = "group",
             inline = true,
-            hidden = function() return not Addon.ClassicExpansionAtLeast(LE_EXPANSION_DRAGONFLIGHT) end,
+            hidden = function() return not Addon.ExpansionIsAtLeast(LE_EXPANSION_DRAGONFLIGHT) end,
             args = {
               Enable = {
                 name = L["Enable"],
@@ -2531,7 +2548,7 @@ end
     name = L["Quest"],
     order = 100,
     type = "group",
-    hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC end,
+    hidden = function() return not Addon.IS_MAINLINE end,
     args = {
       Enable = GetEnableEntry(L["Enable Quest Widget"], L["This widget shows a quest icon above unit nameplates or colors the nameplate healthbar of units that are involved with any of your current quests."], "questWidget", true,
         function(info, val)
@@ -2666,119 +2683,501 @@ end
 
 local function CreateTargetArtWidgetOptions()
   local options = {
-    name = L["Target Highlight"],
+    name = L["Target"],
     type = "group",
+    childGroups = "tab",
     order = 90,
+    set = SetValueWidget,
     args = {
-      Enable = GetEnableEntry(L["Enable Target Widget"], L["This widget highlights the nameplate of your current target by showing a border around the healthbar and by coloring the nameplate's healtbar and/or name with a custom color."], "targetWidget", false, function(info, val) SetValuePlain(info, val); Addon.Widgets:InitializeWidget("TargetArt") end),
-      Texture = {
-        name = L["Texture"],
+      Enable = {
+        name = L["Enable Target Highlight"],
+        order = 5,
+        type = "group",
+        inline = true,
+        set = function(info, val) SetValuePlain(info, val); Addon.Widgets:InitializeWidget("TargetArt") end,
+        args = {
+          Header = {
+            name = L["This widget highlights the nameplate of your current target by showing a border around the healthbar and by coloring the nameplate's healtbar and/or name with a custom color."],
+            order = 1,
+            type = "description",
+            width = "full",
+          },
+          Enable = {
+            name = L["Show in Healthbar View"],
+            order = 2,
+            type = "toggle",
+            width = "double",
+            arg = { "targetWidget", "ON" },
+          },
+          EnableHV = {
+            name = L["Show in Headline View"],
+            order = 3,
+            type = "toggle",
+            width = "double",
+            arg = { "HeadlineView", "ShowTargetHighlight" },
+          },
+        },
+      },
+      Indicator = {
+        name = L["Highlight"],
         order = 10,
         type = "group",
-        inline = true,
+        inline = false,
         args = {
-          Preview = {
-            name = L["Preview"],
+          Texture = {
+            name = L["Texture"],
             order = 10,
-            type = "execute",
-            image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\TargetArtWidget\\" .. db.targetWidget.theme,
-            imageWidth = 64,
-            imageHeight = 64,
+            type = "group",
+            inline = true,
+            args = {
+              Preview = {
+                name = L["Preview"],
+                order = 10,
+                type = "execute",
+                image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\TargetArtWidget\\" .. db.targetWidget.theme,
+                imageWidth = 64,
+                imageHeight = 64,
+              },
+              Select = {
+                name = L["Style"],
+                type = "select",
+                order = 20,
+                set = function(info, val)
+                  SetValueWidget(info, val)
+                  options.args.Widgets.args.TargetArtWidget.args.Indicator.args.Texture.args.Preview.image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\TargetArtWidget\\" .. db.targetWidget.theme;
+                end,
+                values = Addon.TARGET_TEXTURES,
+                arg = { "targetWidget", "theme" },
+              },
+              Color = {
+                name = L["Color"],
+                type = "color",
+                order = 30,
+                width = "half",
+                get = GetColorAlpha,
+                set = SetColorAlphaWidget,
+                hasAlpha = true,
+                arg = { "targetWidget" },
+              },
+            },
           },
-          Select = {
-            name = L["Style"],
-            type = "select",
+          Layout = {
+            name = L["Layout"],
+            order = 15,
+            type = "group",
+            inline = true,
+            args = {
+              Size = {
+                name = L["Size"],
+                order = 10,
+                type = "range",
+                max = 64,
+                min = 1,
+                step = 1,
+                isPercent = false,
+                arg = { "targetWidget", "Size" },
+              },
+              X = {
+                name = L["Horizontal Offset"],
+                order = 20,
+                type = "range",
+                max = 120,
+                min = -120,
+                step = 1,
+                isPercent = false,
+                arg = { "targetWidget", "HorizontalOffset" },
+              },
+              Y = {
+                name = L["Vertical Offset"],
+                order = 30,
+                type = "range",
+                max = 120,
+                min = -120,
+                step = 1,
+                isPercent = false,
+                arg = { "targetWidget", "VerticalOffset" },
+              },
+            },
+          },
+          TargetColor = {
+            name = L["Nameplate Color"],
             order = 20,
-            set = function(info, val)
-              SetValueWidget(info, val)
-              options.args.Widgets.args.TargetArtWidget.args.Texture.args.Preview.image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\TargetArtWidget\\" .. db.targetWidget.theme;
-            end,
-            values = Addon.TARGET_TEXTURES,
-            arg = { "targetWidget", "theme" },
-          },
-          Color = {
-            name = L["Color"],
-            type = "color",
-            order = 30,
-            width = "half",
-            get = GetColorAlpha,
-            set = SetColorAlphaWidget,
-            hasAlpha = true,
-            arg = { "targetWidget" },
+            type = "group",
+            inline = true,
+            args = {
+              TargetColor = {
+                name = L["Color"],
+                order = 10,
+                type = "color",
+                get = GetColor,
+                set = SetColor,
+                arg = {"targetWidget", "HPBarColor"},
+              },
+              EnableHealthbar = {
+                name = L["Healthbar"],
+                desc = L["Use a custom color for the healthbar of your current target."],
+                order = 20,
+                type = "toggle",
+                set = SetValue,
+                arg = {"targetWidget", "ModeHPBar"},
+              },
+              EnableName = {
+                name = L["Name"],
+                desc = L["Use a custom color for the name of your current target (in healthbar view and in headline view)."],
+                order = 30,
+                type = "toggle",
+                set = SetValue,
+                arg = {"targetWidget", "ModeNames"},
+              },
+            },
           },
         },
       },
-      Layout = {
-        name = L["Layout"],
-        order = 15,
-        type = "group",
-        inline = true,
-        args = {
-          Size = {
-            name = L["Size"],
-            order = 10,
-            type = "range",
-            max = 64,
-            min = 1,
-            step = 1,
-            isPercent = false,
-            set = SetValueWidget,
-            arg = { "targetWidget", "Size" },
-          },
-          X = {
-            name = L["Horizontal Offset"],
-            order = 20,
-            type = "range",
-            max = 120,
-            min = -120,
-            step = 1,
-            isPercent = false,
-            set = SetValueWidget,
-            arg = { "targetWidget", "HorizontalOffset" },
-          },
-          Y = {
-            name = L["Vertical Offset"],
-            order = 30,
-            type = "range",
-            max = 120,
-            min = -120,
-            step = 1,
-            isPercent = false,
-            set = SetValueWidget,
-            arg = { "targetWidget", "VerticalOffset" },
-          },
-        },
-      },
-      TargetColor = {
-        name = L["Nameplate Color"],
+      SoftTarget = {
+        name = L["Action Target"],
         order = 20,
         type = "group",
-        inline = true,
+        inline = false,
         args = {
-          TargetColor = {
-            name = L["Color"],
-            order = 10,
-            type = "color",
-            get = GetColor,
-            set = SetColor,
-            arg = {"targetWidget", "HPBarColor"},
+          Note = GetDescriptionEntry(L["This settings changes CVars related to action targeting and are not stored in the profile, but by WoW itself (character-specific settings)."]),
+          Enemy = {
+            name = L["Enemy"],
+            order = 5,
+            type = "group",
+            inline = true,
+            args = {
+              Enable = {
+                name = L["Enable"],
+                order = 10,
+                type = "toggle",
+                set = function(info, val)
+                  Addon.CVars:SetProtected(info.arg, (val and "3") or "0")
+                end,
+                get = function(info)
+                  return Addon.CVars:GetAsNumber(info.arg) == Enum.SoftTargetEnableFlags.Any
+                end,
+                arg = "SoftTargetEnemy",
+              },
+              Highlight = {
+                name = L["Highlight"],
+                order = 20,
+                type = "toggle",
+                arg = { "targetWidget", "SoftTarget", "HighlightForEnemy" },
+              },
+              Color = {
+                name = L["Color"],
+                type = "color",
+                hasAlpha = true,
+                order = 30,
+                width = "half",
+                get = GetColorAlpha,
+                set = SetColorAlphaWidget,
+                arg = { "targetWidget", "SoftTarget", "HighlightColorForEnemy" },
+              },
+              TargetStyle = {
+                name = L["Target Style"],
+                desc = L["Use target scale and transparency settings also for soft enemy target."],
+                type = "toggle",
+                order = 40,
+                set = SetValue,
+                arg = { "targetWidget", "SoftTarget", "TargetStyleForEnemy" },
+              },
+              Nameplate = {
+                name = L["Nameplate"],
+                desc = L["Always show nameplates for soft enemy target."],
+                order = 50,
+                type = "toggle",
+                set = CVarsManagerSetBool,
+                get = GetCVarBoolTPTP,
+                arg = "SoftTargetNameplateEnemy",
+              },
+            },
           },
-          EnableHealthbar = {
-            name = L["Healthbar"],
-            desc = L["Use a custom color for the healthbar of your current target."],
-            order = 20,
-            type = "toggle",
-            arg = {"targetWidget", "ModeHPBar"},
+          Friend = {
+            name = L["Friend"],
+            order = 6,
+            type = "group",
+            inline = true,
+            args = {
+              Enable = {
+                name = L["Enable"],
+                order = 10,
+                type = "toggle",
+                set = function(info, val)
+                  Addon.CVars:Set(info.arg, (val and "3") or "0")
+                end,
+                get = function(info)
+                  return Addon.CVars:GetAsNumber(info.arg) == Enum.SoftTargetEnableFlags.Any
+                end,
+                arg = "SoftTargetFriend",
+              },
+              Highlight = {
+                name = L["Highlight"],
+                order = 20,
+                type = "toggle",
+                arg = { "targetWidget", "SoftTarget", "HighlightForFriend" },
+              },
+              Color = {
+                name = L["Color"],
+                type = "color",
+                hasAlpha = true,
+                order = 30,
+                width = "half",
+                get = GetColorAlpha,
+                set = SetColorAlphaWidget,
+                arg = { "targetWidget", "SoftTarget", "HighlightColorForFriend" },
+              },
+              TargetStyle = {
+                name = L["Target Style"],
+                desc = L["Use target scale and transparency settings also for soft friend target."],
+                type = "toggle",
+                order = 40,
+                set = SetValue,
+                arg = { "targetWidget", "SoftTarget", "TargetStyleForFriend" },
+              },
+              Nameplate = {
+                name = L["Nameplate"],
+                desc = L["Always show nameplates for soft friend target."],
+                order = 50,
+                type = "toggle",
+                set = CVarsManagerSetBool,
+                get = GetCVarBoolTPTP,
+                arg = "SoftTargetNameplateFriend",
+              },
+            },
           },
-          EnableName = {
-            name = L["Name"],
-            desc = L["Use a custom color for the name of your current target (in healthbar view and in headline view)."],
-            order = 30,
-            type = "toggle",
-            arg = {"targetWidget", "ModeNames"},
+          Interact = {
+            name = L["Interact"],
+            order = 7,
+            type = "group",
+            inline = true,
+            args = {
+              Enable = {
+                name = L["Enable"],
+                order = 10,
+                type = "toggle",
+                set = function(info, val)
+                  Addon.CVars:SetProtected(info.arg, (val and "3") or "0")
+                end,
+                get = function(info)
+                  return Addon.CVars:GetAsNumber(info.arg) == Enum.SoftTargetEnableFlags.Any
+                end,
+                arg = "SoftTargetInteract",
+              },
+              Highlight = {
+                name = L["Highlight"],
+                order = 20,
+                type = "toggle",
+                arg = { "targetWidget", "SoftTarget", "HighlightForInteract" },
+              },
+              Color = {
+                name = L["Color"],
+                type = "color",
+                hasAlpha = true,                
+                order = 30,
+                width = "half",
+                get = GetColorAlpha,
+                set = SetColorAlphaWidget,
+                arg = { "targetWidget", "SoftTarget", "HighlightColorForInteract" },
+              },
+              TargetStyle = {
+                name = L["Target Style"],
+                desc = L["Use target scale and transparency settings also for soft interact target."],
+                type = "toggle",
+                order = 40,
+                set = SetValue,
+                arg = { "targetWidget", "SoftTarget", "TargetStyleForInteract" },
+              },
+              Nameplate = {
+                name = L["Nameplate"],
+                desc = L["Always show nameplates for soft interact target."],
+                order = 50,
+                type = "toggle",
+                set = CVarsManagerSetBool,
+                get = GetCVarBoolTPTP,
+                arg = "SoftTargetNameplateInteract",
+              },
+            },
+          },
+          General = {
+            name = L["Target Locking"],
+            order = 40,
+            type = "group",
+            inline = true,
+            args = {
+              SoftTargetForce = {
+                name = L["Auto-set target to match action target"],
+                order = 10,
+                type = "group",
+                inline = true,
+                args = {
+                  None = {
+                    name = L["None"],
+                    order = 10,
+                    type = "toggle",
+                    set = function(info, val) Addon.CVars:SetProtected(info.arg, 0) end,
+                    get = function(info) 
+                      local value = Addon.CVars:Get(info.arg)
+                      return value ~= "1" and value ~= "2"
+                    end,
+                    arg = "SoftTargetForce",
+                  },
+                  Enemies = {
+                    name = L["Enemies"],
+                    order = 20,
+                    type = "toggle",
+                    set = function(info, val) Addon.CVars:Set(info.arg, 1) end,
+                    get = function(info) return Addon.CVars:Get(info.arg) == "1" end,
+                    arg = "SoftTargetForce",
+                  },
+                  Friends = {
+                    name = L["Friends"],
+                    order = 30,
+                    type = "toggle",
+                    set = function(info, val) Addon.CVars:Set(info.arg, 2) end,
+                    get = function(info) return Addon.CVars:Get(info.arg) == "2" end,
+                    arg = "SoftTargetForce",
+                  },
+                },
+              },
+              SoftTargetMatchLocked = {
+                name = L["Match appropriate action target to locked target."],
+                order = 20,
+                type = "group",
+                inline = true,
+                args = {
+                  None = {
+                    name = L["No matching"],
+                    order = 10,
+                    type = "toggle",
+                    set = function(info, val) Addon.CVars:Set(info.arg, 0) end,
+                    get = function(info) 
+                      local value = Addon.CVars:Get(info.arg)
+                      return value ~= "1" and value ~= "2"
+                    end,
+                    arg = "SoftTargetMatchLocked",
+                  },
+                  HardLocked = {
+                    name = L["Hard locked target only"],
+                    order = 20,
+                    type = "toggle",
+                    set = function(info, val) Addon.CVars:Set(info.arg, 1) end,
+                    get = function(info) return Addon.CVars:Get(info.arg) == "1" end,
+                    arg = "SoftTargetMatchLocked",
+                  },
+                  AttackTargets = {
+                    name = L["Targets you attack"],
+                    order = 30,
+                    type = "toggle",
+                    set = function(info, val) Addon.CVars:Set(info.arg, 2) end,
+                    get = function(info) return Addon.CVars:Get(info.arg) == "2" end,
+                    arg = "SoftTargetMatchLocked",
+                  },
+                },
+              },              
+              SoftTargetWithLocked = {
+                name = L["Allow action target selection while player has a locked target."],
+                order = 30,
+                type = "group",
+                inline = true,
+                args = {
+                  None = {
+                    name = L["None"],
+                    order = 10,
+                    type = "toggle",
+                    set = function(info, val) Addon.CVars:Set(info.arg, 0) end,
+                    get = function(info) 
+                      local value = Addon.CVars:Get(info.arg)
+                      return value ~= "2"
+                    end,
+                    arg = "SoftTargetWithLocked",
+                  },
+                  AlwaysSoftTargeting = {
+                    name = L["Always do action targeting"],
+                    order = 30,
+                    type = "toggle",
+                    set = function(info, val) Addon.CVars:Set(info.arg, 2) end,
+                    get = function(info) return Addon.CVars:Get(info.arg) == "2" end,
+                    arg = "SoftTargetWithLocked",
+                  },
+                },
+              },                
+            },
           },
         },
       },
+      Icon = {
+        name = L["Interact Icon"],
+        order = 30,
+        type = "group",
+        inline = false,
+        args = {
+          Visibility = {
+            name = L["Enable"],
+            order = 10,
+            type = "group",
+            inline = true,
+            set = function(info, val)
+              CVarsManagerSetBool(info, val)
+              Addon.Widgets:UpdateSettings("TargetArt")
+            end,
+            get = GetCVarBoolTPTP,
+            args = {
+              Note = GetDescriptionEntry(L["This settings changes CVars related to action targeting and are not stored in the profile, but by WoW itself (character-specific settings)."]),
+              SoftTargetIconTarget = {
+                name = L["Target"],
+                order = 1,
+                type = "toggle",
+                set = SetValueWidget,
+                get = GetValue,
+                arg =  { "targetWidget", "SoftTarget", "Icon", "SoftTargetIconTarget" },
+              },
+              SoftTargetIconEnemy = {
+                name = L["Enemy"],
+                order = 2,
+                type = "toggle",
+                arg = "SoftTargetIconEnemy",
+              },
+              SoftTargetIconFriend = {
+                name = L["Friend"],
+                order = 3,
+                type = "toggle",
+                arg = "SoftTargetIconFriend",
+              },              
+              SoftTargetIconInteract = {
+                name = L["Interact"],
+                order = 4,
+                type = "toggle",
+                arg = "SoftTargetIconInteract",
+              },
+              SoftTargetIconGameObject = {
+                name = L["Game Object"],
+                order = 5,
+                type = "toggle",
+                desc = L["Show icon for soft interact game objects (interactable objects you cannot normally target)."],
+                arg = "SoftTargetIconGameObject",
+              },
+              SoftTargetLowPriorityIcons = {
+                name = L["Low Priority"],
+                order = 6,
+                type = "toggle",
+                desc = L["Show interact icons even when there is other visual indicators, such as quest or loot effects."],
+                arg = "SoftTargetLowPriorityIcons",
+              },   
+            },
+          },                       
+          Layout = {
+            name = L["Layout"],
+            order = 20,
+            type = "group",
+            inline = true,
+            args = {    
+              Size = GetSizeEntry(L["Size"], 10, { "targetWidget", "SoftTarget", "Icon", "Size" }),
+              Placement = GetFramePositioningEntry(20, { "targetWidget", "SoftTarget", "Icon" } ),
+            },
+          },
+        },
+      },      
     },
   }
 
@@ -2791,14 +3190,18 @@ local function CreateExperienceWidgetOptions()
     type = "group",
     order = 54,
     childGroups = "tab",
-    hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC end,
+    hidden = function() return not Addon.IS_MAINLINE end,
     set = SetValueWidget,
     args = {
       Enable = GetEnableEntry(
         L["Enable Experience Widget"],
         L["This widget shows an experience bar for player followers."], "ExperienceWidget",
         true,
-        function(info, val) SetValuePlain(info, val); Addon.Widgets:InitializeWidget("Experience") end
+        function(info, val) 
+          SetValuePlain(info, val)
+          Addon.Widgets:InitializeWidget("Experience")
+          Addon:ForceUpdate() -- Update everything as default widgets might have to be shown/hidden
+        end
       ),
       Appearance = {
         name = L["Appearance"],
@@ -3016,7 +3419,7 @@ end
 
 local function CreateFocusWidgetOptions()
   local options = {
-    name = L["Focus Highlight"],
+    name = L["Focus"],
     type = "group",
     order = 55,
     hidden = function() return Addon.IS_CLASSIC end,
@@ -4472,7 +4875,7 @@ local function CreateAurasWidgetOptions()
                     end,
                     arg = { "AuraWidget", "Debuffs", "ShowBlizzardForFriendly" },
                     disabled = function() return not db.AuraWidget.Debuffs.ShowFriendly end,
-                    hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC end
+                    hidden = function() return not Addon.IS_MAINLINE end
                   },
                   Dispellable = {
                     name = L["Dispellable"],
@@ -4618,7 +5021,7 @@ local function CreateAurasWidgetOptions()
                     end,
                     arg = { "AuraWidget", "Debuffs", "ShowBlizzardForEnemy" },
                     disabled = function() return not db.AuraWidget.Debuffs.ShowEnemy end,
-                    hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC end
+                    hidden = function() return not Addon.IS_MAINLINE end
                   },
                 },
               },
@@ -4716,7 +5119,7 @@ local function CreateAurasWidgetOptions()
                     end,
                     arg = { "AuraWidget", "CrowdControl", "ShowBlizzardForFriendly" },
                     disabled = function() return not db.AuraWidget.CrowdControl.ShowFriendly end,
-                    hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC end
+                    hidden = function() return not Addon.IS_MAINLINE end
                   },
                   Dispellable = {
                     name = L["Dispellable"],
@@ -4772,7 +5175,7 @@ local function CreateAurasWidgetOptions()
                     end,
                     arg = { "AuraWidget", "CrowdControl", "ShowAllEnemy" },
                     disabled = function() return not db.AuraWidget.CrowdControl.ShowEnemy end,
-                    hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC end
+                    hidden = function() return not Addon.IS_MAINLINE end
                   },
                   Blizzard = {
                     name = L["Blizzard"],
@@ -4786,7 +5189,7 @@ local function CreateAurasWidgetOptions()
                     end,
                     arg = { "AuraWidget", "CrowdControl", "ShowBlizzardForEnemy" },
                     disabled = function() return not db.AuraWidget.CrowdControl.ShowEnemy end,
-                    hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC end
+                    hidden = function() return not Addon.IS_MAINLINE end
                   },
                 },
               },
@@ -4838,13 +5241,12 @@ end
 
 local function CreateHeadlineViewShowEntry()
   local args = {}
-  local pos = 0
 
   for i, value in ipairs(UNIT_TYPES) do
     local faction = value.Faction
     args[faction .. "Units"] = {
       name = L[faction .. " Units"],
-      order = pos,
+      order = i * 10,
       type = "group",
       inline = true,
       args = {},
@@ -4853,20 +5255,56 @@ local function CreateHeadlineViewShowEntry()
     for i, unit_type in ipairs(value.UnitTypes) do
       args[faction .. "Units"].args["UnitType" .. faction .. unit_type] = {
         name = L[unit_type.."s"],
-        order = pos + i,
+        order = i * 10,
         type = "toggle",
         arg = { "Visibility", faction..unit_type, "UseHeadlineView" }
       }
     end
-
-    pos = pos + 10
   end
+
+  args.FriendlyUnits.args.MinionsHeader = {
+    name = L["Minions"],
+    type = "header", 
+    order = 35, 
+  }
+
+  args.FriendlyUnits.args.UnitTypeFriendlyMinions = {
+    name = L["All Minions"],
+    order = 36,
+    type = "toggle",
+    arg = { "Visibility", "FriendlyMinion", "UseHeadlineView" },
+    set = function(info, val)
+      Addon.db.profile.Visibility.FriendlyPet.UseHeadlineView = val
+      Addon.db.profile.Visibility.FriendlyGuardian.UseHeadlineView = val
+      Addon.db.profile.Visibility.FriendlyTotem.UseHeadlineView = val
+      SetValue(info, val)
+    end,
+  }
+
+  args.EnemyUnits.args.MinionsHeader = {
+    name = L["Minions"],
+    type = "header", 
+    order = 35, 
+  }
+
+  args.EnemyUnits.args.UnitTypeEnemyMinions = {
+    name = L["All Minions"],
+    order = 36,
+    type = "toggle",
+    arg = { "Visibility", "EnemyMinion", "UseHeadlineView" },
+    set = function(info, val)
+      Addon.db.profile.Visibility.EnemyPet.UseHeadlineView = val
+      Addon.db.profile.Visibility.EnemyGuardian.UseHeadlineView = val
+      Addon.db.profile.Visibility.EnemyTotem.UseHeadlineView = val
+      SetValue(info, val)
+    end,
+  }
 
   return args
 end
 
 local function CreateUnitGroupsVisibility(args, pos)
-  for i, value in ipairs(UNIT_TYPES) do
+  for _, value in ipairs(UNIT_TYPES) do
     local faction = value.Faction
     args[faction.."Units"] = {
       name = L["Show "..faction.." Units"],
@@ -4879,7 +5317,7 @@ local function CreateUnitGroupsVisibility(args, pos)
     for i, unit_type in ipairs(value.UnitTypes) do
       args[faction.."Units"].args["UnitType"..faction..unit_type] = {
         name = L[unit_type.."s"],
-        order = pos + i,
+        order = i * 10,
         type = "toggle",
         arg = faction..unit_type,
         get = GetUnitVisibilitySetting,
@@ -4889,6 +5327,36 @@ local function CreateUnitGroupsVisibility(args, pos)
 
     pos = pos + 10
   end
+
+  args.FriendlyUnits.args.MinionsHeader = {
+    name = L["Minions"],
+    type = "header", 
+    order = 35, 
+  }
+
+  args.FriendlyUnits.args.UnitTypeFriendlyMinions = {
+    name = L["All Minions"],
+    order = 36,
+    type = "toggle",
+    arg = "FriendlyMinion",
+    get = GetUnitVisibilitySetting,
+    set = SetUnitVisibilitySetting,
+  }
+
+  args.EnemyUnits.args.MinionsHeader = {
+    name = L["Minions"],
+    type = "header", 
+    order = 35, 
+  }
+
+  args.EnemyUnits.args.UnitTypeEnemyMinions = {
+    name = L["All Minions"],
+    order = 36,
+    type = "toggle",
+    arg = "EnemyMinion",
+    get = GetUnitVisibilitySetting,
+    set = SetUnitVisibilitySetting,
+  }
 end
 
 local function CreateVisibilitySettings()
@@ -5144,28 +5612,7 @@ local function CreateBlizzardSettings()
               if InCombatLockdown() then
                 Addon.Logging.Error(L["We're unable to change this while in combat"])
               else
-                local cvars = {
-                  "nameplateOtherTopInset", "nameplateOtherBottomInset", "nameplateLargeTopInset", "nameplateLargeBottomInset",
-                  "nameplateMotion", "nameplateMotionSpeed", "nameplateOverlapH", "nameplateOverlapV",
-                  "nameplateMaxDistance", "nameplateTargetBehindMaxDistance",
-                  "nameplateShowOnlyNames", 
-                  -- "nameplateGlobalScale" -- Reset it to 1, if it get's somehow corrupted
-                }
-                if Addon.IS_CLASSIC then
-                  cvars[#cvars + 1] = "clampTargetNameplateToScreen"
-                end
-
-                if Addon.IS_WRATH_CLASSIC then
-                  cvars[#cvars + 1] = "clampTargetNameplateToScreen"
-                end
-                
-                if not Addon.WOW_USES_CLASSIC_NAMEPLATES then            
-                  cvars[#cvars + 1] = "nameplateResourceOnTarget"
-                end
-
-                for k, v in pairs(cvars) do
-                  Addon.CVars:SetToDefault(v)
-                end
+                CVars:ResetToDefaults()
                 Addon:ForceUpdate()
               end
             end,
@@ -5176,12 +5623,8 @@ local function CreateBlizzardSettings()
             type = "execute",
             width = "double",
             func = function()
-              if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
-                InterfaceOptionsFrame_OpenToCategory(_G["InterfaceOptionsNamesPanel"])
-              else
-                Settings.OpenToCategory(_G["InterfaceOptionsNamesPanel"])
-              end
-              Addon.LibAceConfigDialog:Close("Threat Plates");
+              Settings.OpenToCategory(_G["SettingsPanel"])
+              Addon.LibAceConfigDialog:Close("Threat Plates")
             end,
           },
         },
@@ -5237,7 +5680,7 @@ local function CreateBlizzardSettings()
       -- },      
       Display = {
         name = L["Display"],
-        order = 20,
+        order = 10,
         type = "group",
         inline = false,
         args = {
@@ -5287,6 +5730,55 @@ local function CreateBlizzardSettings()
           },
         },
       },
+      Names = {
+        name = L["Names"],
+        order = 20,
+        type = "group",
+        inline = false,
+        set = "SetValue",
+        get = GetValue,
+        args = {
+          Show = {
+            name = L["Show"],
+            order = 10,
+            type = "group",
+            inline = true,
+            set = "SetValue",
+            get = GetValue,
+            args = {
+              ShowOnlyNames = {
+                name = L["Only Names"],
+                order = 30,
+                type = "toggle",
+                set = function(info, val)
+                  Addon.db.profile.BlizzardSettings.Names.ShowOnlyNames = val
+                  SetCVarBoolTPTP(info, val)
+                  ReloadUI()
+                end,
+                get = GetCVarBoolTPTP,
+                desc = L["Show only unit names and hide healthbars (requires /reload). Note that the clickable area of friendly nameplates will also be set to zero so that they don't interfere with enemy nameplates stacking (not in Classic or TBC Classic)."],
+                arg = "nameplateShowOnlyNames",            
+              },
+              DebuffsOnFriendly = {
+                name = L["Debuffs on Friendly"],
+                order = 40,
+                type = "toggle",
+                set = SetCVarBoolTPTP,
+                get = GetCVarBoolTPTP,
+                arg = "nameplateShowDebuffsOnFriendly",            
+              },
+              OnlyInInstances = {
+                type = "toggle",
+                name = L["Players in Instances"],
+                order = 50,
+                desc = L["Show friendly players' and totems' names in instances."],
+                arg = { "BlizzardSettings", "Names", "ShowPlayersInInstances" },
+              },
+            },
+          },
+          Font = GetFontEntryHandler(L["Font"], 20, { "BlizzardSettings", "Names" }, nil, func_handler)
+        },
+      },
       Nameplates = {
         name = L["Nameplates"],
         order = 30,
@@ -5306,7 +5798,7 @@ local function CreateBlizzardSettings()
                 type = "description",
                 order = 1,
                 name = L["Because of side effects with Blizzard nameplates, this function is disabled in instances or when Blizzard nameplates are used for friendly or neutral/enemy units (see General - Visibility)."],
-                hidden = function() return not (Addon.IS_CLASSIC and Addon.IS_TBC_CLASSIC and Addon.IS_WRATH_CLASSIC) or (not db.ShowFriendlyBlizzardNameplates and not db.ShowEnemyBlizzardNameplates) end,
+                hidden = function() return not Addon.WOW_USES_CLASSIC_NAMEPLATES or (not db.ShowFriendlyBlizzardNameplates and not db.ShowEnemyBlizzardNameplates) end,
                 width = "full",
               },
               ToggleSync = {
@@ -5432,7 +5924,7 @@ local function CreateBlizzardSettings()
                 order = 10,
                 type = "range",
                 min = 0,
-                max = (Addon.IS_CLASSIC  and 20) or (Addon.IS_TBC_CLASSIC and 41) or (Addon.IS_WRATH_CLASSIC and 41) or 100,
+                max = (Addon.IS_CLASSIC  and 20) or (Addon.IS_TBC_CLASSIC and 41) or (Addon.IS_WRATH_CLASSIC and 41) or (Addon.IS_CATA_CLASSIC and 41) or 100,
                 step = 1,
                 width = "double",
                 desc = L["The max distance to show nameplates."],
@@ -5510,7 +6002,61 @@ local function CreateBlizzardSettings()
                 get = GetCVarBoolTPTP,
                 desc = L["Clamps the target's nameplate to the edges of the screen, even if the target is off-screen."],
                 arg = "clampTargetNameplateToScreen",
-                hidden = function() return not Addon.IS_CLASSIC end,
+                hidden = function() return Addon.IS_MAINLINE end,
+              },
+            },
+          },
+        },
+      },
+      Widgets = {
+        name = L["Widgets"],
+        order = 40,
+        type = "group",
+        inline = false,
+        set = SetValue,
+        get = GetValue,
+        hidden = function() return not Addon.IS_MAINLINE end,
+        args = {
+          Scale = GetScaleEntry(L["Scale"], 10, { "BlizzardSettings", "Widgets", "Scale" }, nil, 0.3, 3.0),
+          Positioning = {
+            type = "group",
+            order = 20,
+            name = L["Positioning"],
+            inline = true,
+            args = {
+              Anchor = {
+                type = "select",
+                order = 10,
+                name = L["Position"],
+                values = Addon.ANCHOR_POINT,
+                arg = { "BlizzardSettings", "Widgets", "Anchor" }
+              },
+              InsideAnchor = {
+                type = "toggle",
+                order = 15,
+                name = L["Inside"],
+                width = "half",
+                arg = { "BlizzardSettings", "Widgets", "InsideAnchor" }
+              },
+              X = {
+                type = "range",
+                order = 20,
+                name = L["Horizontal Offset"],
+                max = 120,
+                min = -120,
+                step = 1,
+                isPercent = false,
+                arg = { "BlizzardSettings", "Widgets", "HorizontalOffset" },
+              },
+              Y = {
+                type = "range",
+                order = 30,
+                name = L["Vertical Offset"],
+                max = 120,
+                min = -120,
+                step = 1,
+                isPercent = false,
+                arg = { "BlizzardSettings", "Widgets", "VerticalOffset" },
               },
             },
           },
@@ -5518,7 +6064,7 @@ local function CreateBlizzardSettings()
       },
       PersonalNameplate = {
         name = L["Personal Nameplate"],
-        order = 45,
+        order = 50,
         type = "group",
         inline = false,
         hidden = function() return Addon.WOW_USES_CLASSIC_NAMEPLATES end,
@@ -5552,56 +6098,7 @@ local function CreateBlizzardSettings()
           },
         },
       },
-      Names = {
-        name = L["Names"],
-        order = 47,
-        type = "group",
-        inline = false,
-        set = "SetValue",
-        get = GetValue,
-        args = {
-          Show = {
-            name = L["Show"],
-            order = 10,
-            type = "group",
-            inline = true,
-            set = "SetValue",
-            get = GetValue,
-            args = {
-              ShowOnlyNames = {
-                name = L["Only Names"],
-                order = 30,
-                type = "toggle",
-                set = function(info, val)
-                  Addon.db.profile.BlizzardSettings.Names.ShowOnlyNames = val
-                  SetCVarBoolTPTP(info, val)
-                  ReloadUI()
-                end,
-                get = GetCVarBoolTPTP,
-                desc = L["Show only unit names and hide healthbars (requires /reload). Note that the clickable area of friendly nameplates will also be set to zero so that they don't interfere with enemy nameplates stacking (not in Classic or TBC Classic)."],
-                arg = "nameplateShowOnlyNames",            
-              },
-              DebuffsOnFriendly = {
-                name = L["Debuffs on Friendly"],
-                order = 40,
-                type = "toggle",
-                set = SetCVarBoolTPTP,
-                get = GetCVarBoolTPTP,
-                arg = "nameplateShowDebuffsOnFriendly",            
-              },
-              OnlyInInstances = {
-                type = "toggle",
-                name = L["Players in Instances"],
-                order = 50,
-                desc = L["Show friendly players' and totems' names in instances."],
-                arg = { "BlizzardSettings", "Names", "ShowPlayersInInstances" },
-              },
-            },
-          },
-          Font = GetFontEntryHandler(L["Font"], 20, { "BlizzardSettings", "Names" }, nil, func_handler)
-        },
-      },   
-    },
+    },   
     --  ["ShowNamePlateLoseAggroFlash"] = "When enabled, if you are a tank role and lose aggro, the nameplate with briefly flash.",
   }
 
@@ -5981,14 +6478,14 @@ local function CreateHealthbarOptions()
                 order = 29,
                 type = "toggle",
                 arg = { "settings", "healthbar", "ShowHealAbsorbs" },
-                hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC end,
+                hidden = function() return not Addon.IS_MAINLINE end, -- Absorbs were added with Mists
               },
               ShowAbsorbs = {
                 name = L["Absorbs"],
                 order = 30,
                 type = "toggle",
                 arg = { "settings", "healthbar", "ShowAbsorbs" },
-                hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC end,
+                hidden = function() return not Addon.IS_MAINLINE end, -- Absorbs were added with Mists
               },
               ShowMouseoverHighlight = {
                 type = "toggle",
@@ -6142,7 +6639,7 @@ local function CreateHealthbarOptions()
                 order = 90,
                 type = "group",
                 inline = true,
-                hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC end,
+                hidden = function() return not Addon.IS_MAINLINE end, -- Absorbs were added with Mists
                 args = {
                   AbsorbColor = {
                     name = L["Color"],
@@ -6944,7 +7441,7 @@ local function CreateNamesOptions()
               --   order = 30,
               --   type = "toggle",
               --   arg = { "settings", "name", "ShowPvPRank" },
-              --   hidden = function() return not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC and not Addon.IS_WRATH_CLASSIC end,
+              --   hidden = function() return Addon.IS_MAINLINE end,
               -- },
             },
           },
@@ -7143,7 +7640,7 @@ local function CreateSpecRolesClassic()
   -- Create a list of specs for the player's class
   local result = {
     Automatic_Spec_Detection = {
-      name = L["Determine your role (tank/dps/healing) automatically based on current stance (Warrior) or form (Druid)."],
+      name = L["Determine your role (tank/dps/healing) automatically based on current stance, form, aura, presence, or rune."],
       type = "toggle",
       width = "full",
       order = 1,
@@ -9632,7 +10129,7 @@ local function CreateOptionsTable()
                       type = "group",
                       inline = true,
                       set = SetThemeValue,
-                      hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC end,
+                      hidden = function() return not Addon.IS_MAINLINE end, -- Absorbs were added with Mists
                       args = {
                         EnableAmount = {
                           name = L["Amount"],
@@ -10355,7 +10852,7 @@ local function CreateOptionsTable()
               desc = L["Set the roles your specs represent."],
               disabled = function() return not db.threat.ON end,
               order = 70,
-              args = ((Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC) and CreateSpecRolesClassic()) or CreateSpecRolesRetail(),
+              args = (Addon.IS_MAINLINE and CreateSpecRolesRetail()) or CreateSpecRolesClassic(),
             },
           },
         },
@@ -10557,7 +11054,7 @@ local function CreateOptionsTable()
   options.args.profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(Addon.db)
   options.args.profiles.order = 10000
 
-  if not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC then
+  if Addon.ExpansionIsAtLeast(LE_EXPANSION_WRATH_OF_THE_LICH_KING) then
     -- Add dual-spec support
     local LibDualSpec = LibStub("LibDualSpec-1.0", true)
     LibDualSpec:EnhanceDatabase(Addon.db, t.ADDON_NAME)
@@ -10614,14 +11111,14 @@ function Addon:ProfChange()
     options.args.NameplateSettings.args.EliteIcon.args.Texture.args.PreviewElite.image = path .. "EliteArtWidget\\" .. "rareelite-" .. db.settings.eliteicon.theme
 
     local base = options.args.Widgets.args
-    base.TargetArtWidget.args.Texture.args.Preview.image = path .. "TargetArtWidget\\" .. db.targetWidget.theme;
+    base.TargetArtWidget.args.Indicator.args.Texture.args.Preview.image = path .. "TargetArtWidget\\" .. db.targetWidget.theme;
     local class_list = t.CopyTable(CLASS_SORT_ORDER)
     sort(class_list)
     for i, class in ipairs(class_list) do
       base.ClassIconWidget.args.Textures.args["Prev" .. i].image = path .. "ClassIconWidget\\" .. db.classWidget.theme .. "\\" .. class
     end
 
-    if not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
+    if Addon.IS_MAINLINE then
       base.QuestWidget.args.ModeIcon.args.Texture.args.Preview.image = path .. "QuestWidget\\" .. db.questWidget.IconTexture
     end
 
@@ -10664,7 +11161,7 @@ function TidyPlatesThreat:ConfigTableChanged(event, app_name)
 end
 
 function Addon:OpenOptions()
-  HideUIPanel(InterfaceOptionsFrame)
+  HideUIPanel(SettingsPanel)
   HideUIPanel(GameMenuFrame)
 
   RegisterOptionsTable()

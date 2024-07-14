@@ -11,6 +11,7 @@ local ThreatPlates = Addon.ThreatPlates
 local UnitGetTotalHealAbsorbs = UnitGetTotalHealAbsorbs
 
 -- ThreatPlates APIs
+local IGNORED_STYLES = Addon.IGNORED_STYLES_WITH_NAMEMODE
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -22,13 +23,6 @@ local _G =_G
 ---------------------------------------------------------------------------------------------------
 
 local ENABLE_ABSORB = false
-
-local IGNORED_STYLES = {
-  NameOnly = true,
-  ["NameOnly-Unique"] = true,
-  etotem = true,
-  empty= true,
-}
 
 local function CreateExtensions(tp_frame)
   local visual = tp_frame.visual
@@ -249,10 +243,12 @@ local function UpdateExtensions(tp_frame, unitid, style)
   end
 end
 
-if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
-  Addon.CreateExtensions = function() end
-  Addon.UpdateExtensions = function() end
-else
+-- UnitGetTotalAbsorbs: Mists - Patch 5.2.0 (2013-03-05): Added.
+-- UnitGetTotalHealAbsorbs: Mists - Patch 5.4.0 (2013-09-10): Added.
+if Addon.IS_MAINLINE then
   Addon.CreateExtensions = CreateExtensions
   Addon.UpdateExtensions = UpdateExtensions
+else
+  Addon.CreateExtensions = function() end
+  Addon.UpdateExtensions = function() end
 end
