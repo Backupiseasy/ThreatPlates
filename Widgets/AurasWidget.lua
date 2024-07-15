@@ -422,6 +422,7 @@ local CROWD_CONTROL_SPELLS_CATA_CLASSIC = {
   [19386] = LOC_SLEEP,                     -- Wyvern Sting
   [3355] = LOC_INCAPACITATE,               -- Freezing Trap Effect
   [13810] = PC_SNARE,                      -- Ice Trap
+  [90337] = LOC_DISORIENT,                 -- Bad Manner (Monkey pet "stun")
 
 
   ---------------------------------------------------------------------------------------------------
