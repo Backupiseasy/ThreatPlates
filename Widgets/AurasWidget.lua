@@ -1807,9 +1807,9 @@ if Addon.IS_MAINLINE then
         if unit_aura_info then
           unit_aura_info.duration = unit_aura_info.duration or 0
           unit_auras[#unit_auras + 1] = unit_aura_info
-          if unit_aura_info.sourceUnit == "player" then
-            Addon.Logging.Debug("Aura:", unit_aura_info.name, "=> ID:", unit_aura_info.spellId)
-          end
+          -- if unit_aura_info.sourceUnit == "player" then
+          --   Addon.Logging.Debug("Aura:", unit_aura_info.name, "=> ID:", unit_aura_info.spellId)
+          -- end
         end
       end
     until continuationToken == nil
