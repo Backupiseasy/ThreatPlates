@@ -1350,6 +1350,9 @@ local function ARENA_OPPONENT_UPDATE(event, unitid, update_reason)
       --Addon:ForceUpdateOnNameplate(plate)
     end
   end
+
+  -- Not sure if needed after the addition for enemy/friendly health bar sizes
+  -- Addon:SetBaseNamePlateSize()
 end
 
 function CoreEvents:PLAYER_LOGIN()
@@ -1358,10 +1361,6 @@ function CoreEvents:PLAYER_LOGIN()
   if NamePlateDriverFrame and NamePlateDriverFrame.AcquireUnitFrame then
     hooksecurefunc(NamePlateDriverFrame, "AcquireUnitFrame", NamePlateDriverFrame_AcquireUnitFrame)
   end
-end
-
-function CoreEvents:ARENA_OPPONENT_UPDATE()
-  Addon:SetBaseNamePlateSize()
 end
 
 function CoreEvents:PLAYER_ENTERING_WORLD()
