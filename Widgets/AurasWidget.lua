@@ -530,7 +530,7 @@ local CROWD_CONTROL_SPELLS_CATA_CLASSIC = {
   [3355] = LOC_INCAPACITATE,               -- Freezing Trap Effect
   [13810] = PC_SNARE,                      -- Ice Trap
   [34490] = CC_SILENCE,                    -- Silencing Shot
-
+  [90337] = LOC_DISORIENT,                 -- Bad Manner (Monkey pet "stun")
 
   ---------------------------------------------------------------------------------------------------
   -- Mage
