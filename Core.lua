@@ -39,11 +39,18 @@ local LSMUpdateTimer
 ---------------------------------------------------------------------------------------------------
 
 if Addon.WOW_USES_CLASSIC_NAMEPLATES then
-  local function CalculateSynchedNameplateSize()
+  local function CalculateSynchedNameplateSize(friendlyUnit)
     local db = Addon.db.profile.settings
   
-    local width = db.healthbar.width
-    local height = db.healthbar.height
+    local width, height
+    if friendlyUnit then
+      width = db.healthbar.widthFriendly
+      height = db.healthbar.heightFriendly
+    else
+      width = db.healthbar.width
+      height = db.healthbar.height
+    end
+        
     if db.frame.SyncWithHealthbar then
       db.frame.width = width + 6
       db.frame.height = height + 22
@@ -93,23 +100,20 @@ else
   Addon.SetBaseNamePlateSize = function(self)
     local db = self.db.profile
 
-    local width, height
     if CVars:GetAsBool("nameplateShowOnlyNames") then
       -- The clickable area of friendly nameplates will be set to zero so that they don't interfere with enemy nameplates stacking (not in Classic or TBC Classic).
       C_NamePlate.SetNamePlateFriendlySize(0.1, 0.1)    
     elseif db.ShowFriendlyBlizzardNameplates or self.IsInPvEInstance then
       SetNameplatesToDefaultSize()
     else
-      width, height = CalculateSynchedNameplateSize()
+      local width, height = CalculateSynchedNameplateSize(true)
       C_NamePlate.SetNamePlateFriendlySize(width, height)
     end
 
     if db.ShowEnemyBlizzardNameplates then
       SetNameplatesToDefaultSize()
     else
-      if not width then
-        width, height = CalculateSynchedNameplateSize()
-      end
+      local width, height = CalculateSynchedNameplateSize()
       C_NamePlate.SetNamePlateEnemySize(width, height)
     end
   

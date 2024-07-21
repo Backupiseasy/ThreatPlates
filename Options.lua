@@ -6510,6 +6510,35 @@ local function CreateHealthbarOptions()
               },
             }
           },
+          FriendlyUnitsFormat = {
+            name = L["Friendly Units"],
+            order = 30,
+            type = "group",
+            inline = true,
+            set = SetThemeValue,
+            args = {
+              Width = GetRangeEntry(L["Bar Width"], 10, { "settings", "healthbar", "widthFriendly" }, 5, 500,
+                function(info, val)
+                  if InCombatLockdown() then
+                    Addon.Logging.Error(L["We're unable to change this while in combat"])
+                  else
+                    SetThemeValue(info, val)
+                    Addon:SetBaseNamePlateSize()
+                  end
+                end),
+              Height = GetRangeEntry(L["Bar Height"], 20, {"settings", "healthbar", "heightFriendly" }, 1, 100,
+                function(info, val)
+                  if InCombatLockdown() then
+                    Addon.Logging.Error(L["We're unable to change this while in combat"])
+                  else
+                    SetThemeValue(info, val)
+                    Addon:SetBaseNamePlateSize()
+                    -- Update Target Art widget because of border adjustments for small healthbar heights
+                    Addon.Widgets:UpdateSettings("TargetArt")
+                  end
+                end),
+            }
+          },
           HealthBarGroup = {
             name = L["Textures"],
             type = "group",
