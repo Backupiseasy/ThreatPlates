@@ -45,11 +45,15 @@ if Addon.WOW_USES_CLASSIC_NAMEPLATES then
     local width = db.healthbar.width
     local height = db.healthbar.height
     if db.frame.SyncWithHealthbar then
-      db.frame.width = width + 6
-      db.frame.height = height + 22
+      width = width + 6
+      height = height + 22
     end
+
+    -- Update values in settings, so that the options dialog (clickable area) shows the correct values
+    db.frame.width = width
+    db.frame.height = height
   
-    return db.frame.width, db.frame.height
+    return width, height
   end
 
   Addon.SetBaseNamePlateSize = function(self)
@@ -68,48 +72,59 @@ if Addon.WOW_USES_CLASSIC_NAMEPLATES then
 
     Addon:ConfigClickableArea(false)
   end
-else
-  local function CalculateSynchedNameplateSize()
+else 
+  local function CalculateSynchedNameplateSize(width_key, height_key)
     local db = Addon.db.profile.settings
-  
     if db.frame.SyncWithHealthbar then
       -- This functions were interpolated from ratio of the clickable area and the Blizzard nameplate healthbar
       -- for various sizes
-      db.frame.width = db.healthbar.width + 24.5
-      db.frame.height = (db.healthbar.height + 11.4507) / 0.347764  
+      width = db.healthbar[width_key] + 24.5
+      height = (db.healthbar[height_key] + 11.4507) / 0.347764  
+    else
+      width = db.frame[width_key]
+      height = db.frame[height_key]
     end
   
-    return db.frame.width, db.frame.height
+    -- Update values in settings, so that the options dialog (clickable area) shows the correct values
+    db.frame[width_key] = width
+    db.frame[height_key] = height
+
+    return width, height
   end
-    
-  local function SetNameplatesToDefaultSize()
+
+  local function CalculateSynchedNameplateSizeForEnemy()
+    return CalculateSynchedNameplateSize("width", "height")
+  end
+
+  local function CalculateSynchedNameplateSizeForFriend()
+    return CalculateSynchedNameplateSize("widthFriend", "heightFriend")
+  end
+
+  local function SetNameplatesToDefaultSize(nameplate_size_func)
     if NamePlateDriverFrame:IsUsingLargerNamePlateStyle() then
-      C_NamePlate.SetNamePlateFriendlySize(154, 64)
+      nameplate_size_func(154, 64)
     else
-      C_NamePlate.SetNamePlateFriendlySize(110, 45)
+      nameplate_size_func(110, 45)
     end
   end
 
   Addon.SetBaseNamePlateSize = function(self)
     local db = self.db.profile
 
-    local width, height
     if CVars:GetAsBool("nameplateShowOnlyNames") then
       -- The clickable area of friendly nameplates will be set to zero so that they don't interfere with enemy nameplates stacking (not in Classic or TBC Classic).
       C_NamePlate.SetNamePlateFriendlySize(0.1, 0.1)    
     elseif db.ShowFriendlyBlizzardNameplates or self.IsInPvEInstance then
-      SetNameplatesToDefaultSize()
+      SetNameplatesToDefaultSize(C_NamePlate.SetNamePlateFriendlySize)
     else
-      width, height = CalculateSynchedNameplateSize()
+      local width, height = CalculateSynchedNameplateSizeForFriend()
       C_NamePlate.SetNamePlateFriendlySize(width, height)
     end
 
     if db.ShowEnemyBlizzardNameplates then
-      SetNameplatesToDefaultSize()
+      SetNameplatesToDefaultSize(C_NamePlate.SetNamePlateEnemySize)
     else
-      if not width then
-        width, height = CalculateSynchedNameplateSize()
-      end
+      local width, height = CalculateSynchedNameplateSizeForEnemy()
       C_NamePlate.SetNamePlateEnemySize(width, height)
     end
   

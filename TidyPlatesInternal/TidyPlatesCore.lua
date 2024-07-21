@@ -1360,6 +1360,10 @@ function CoreEvents:PLAYER_LOGIN()
   end
 end
 
+function CoreEvents:ARENA_OPPONENT_UPDATE()
+  Addon:SetBaseNamePlateSize()
+end
+
 function CoreEvents:PLAYER_ENTERING_WORLD()
   TidyPlatesCore:SetScript("OnUpdate", OnUpdate)
 
@@ -2089,9 +2093,11 @@ do
 	function UpdateStyle()
 		local index
 
+    local healthbar_style = (extended.unit.reaction == "FRIENDLY" and style.healthbarFriendly) or style.healthbar
+
     -- Frame
     SetObjectAnchor(extended, style.frame.anchor or "CENTER", nameplate, style.frame.x or 0, style.frame.y or 0)
-    extended:SetSize(style.healthbar.width, style.healthbar.height)
+    extended:SetSize(healthbar_style.width, healthbar_style.height)
 
     -- Anchorgroup
 		for index = 1, #anchorgroup do
@@ -2117,7 +2123,7 @@ do
     local db = Addon.db.profile.settings
 
     -- Healthbar
-		SetAnchorGroupObject(visual.healthbar, style.healthbar, extended)
+    SetAnchorGroupObject(visual.healthbar, healthbar_style, extended)
     visual.healthbar:UpdateLayout(db, style)
 
     -- Castbar
@@ -2264,7 +2270,7 @@ function Addon:ConfigClickableArea(toggle_show)
   elseif ConfigModePlate then
     local background = ConfigModePlate.TPFrame.Background
     background:SetPoint("CENTER", ConfigModePlate.UnitFrame, "CENTER")
-    background:SetSize(Addon.db.profile.settings.frame.width, Addon.db.profile.settings.frame.height)
+    background:SetSize(ConfigModePlate.TPFrame:GetWidth(), ConfigModePlate.TPFrame:GetHeight())
   end
 end
 
