@@ -2093,9 +2093,11 @@ do
 	function UpdateStyle()
 		local index
 
+    local healthbar_style = (extended.unit.reaction == "FRIENDLY" and style.healthbarFriendly) or style.healthbar
+
     -- Frame
     SetObjectAnchor(extended, style.frame.anchor or "CENTER", nameplate, style.frame.x or 0, style.frame.y or 0)
-    extended:SetSize(style.healthbar.width, style.healthbar.height)
+    extended:SetSize(healthbar_style.width, healthbar_style.height)
 
     -- Anchorgroup
 		for index = 1, #anchorgroup do
@@ -2121,18 +2123,7 @@ do
     local db = Addon.db.profile.settings
 
     -- Healthbar
-    local healthbarOpts = {
-      x = style.healthbar.x,
-      y = style.healthbar.y,
-      width = style.healthbar.width,
-      height = style.healthbar.height
-    }
-
-    if extended.unit.reaction == 'FRIENDLY' then
-      healthbarOpts.width = style.healthbar.widthFriendly
-      healthbarOpts.height = style.healthbar.heightFriendly
-    end
-    SetAnchorGroupObject(visual.healthbar, healthbarOpts, extended)
+    SetAnchorGroupObject(visual.healthbar, healthbar_style, extended)
     visual.healthbar:UpdateLayout(db, style)
 
     -- Castbar
@@ -2277,16 +2268,9 @@ function Addon:ConfigClickableArea(toggle_show)
       end
     end
   elseif ConfigModePlate then
-    local extended = ConfigModePlate.TPFrame
-    local background = extended.Background
-    local width, height
-    if extended.unit.reaction == "FRIENDLY" then
-      width, height = C_NamePlate.GetNamePlateFriendlySize()
-    else
-      width, height = C_NamePlate.GetNamePlateEnemySize()
-    end
+    local background = ConfigModePlate.TPFrame.Background
     background:SetPoint("CENTER", ConfigModePlate.UnitFrame, "CENTER")
-    background:SetSize(width, height)
+    background:SetSize(ConfigModePlate.TPFrame:GetWidth(), ConfigModePlate.TPFrame:GetHeight())
   end
 end
 

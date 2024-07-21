@@ -1798,6 +1798,8 @@ ThreatPlates.DEFAULT_SETTINGS = {
         y = 0,
         width = 110,
         height = 45,
+        widthFriend = 110,
+        heightFriend = 45,        
         SyncWithHealthbar = true,
       },
       highlight = {
@@ -1821,6 +1823,8 @@ ThreatPlates.DEFAULT_SETTINGS = {
       healthbar = {
         width = 120,
         height = 10,
+        widthFriend = 120,
+        heightFriend = 10,
         texture = "Smooth", -- old default: "ThreatPlatesBar",
         backdrop = "Smooth", -- old default: "ThreatPlatesEmpty",
         BackgroundUseForegroundColor = false,

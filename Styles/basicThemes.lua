@@ -9,8 +9,6 @@ local function Create(name)
   local theme = {
 
     frame = {
-      width = db.frame.width,
-      height = db.frame.height,
       x = db.frame.x,
       y = db.frame.y,
       anchor = "CENTER",
@@ -21,12 +19,18 @@ local function Create(name)
       backdrop = Addon.LibSharedMedia:Fetch('statusbar', db.healthbar.backdrop, true),
       width = db.healthbar.width,
       height = db.healthbar.height,
-      widthFriendly = db.healthbar.widthFriendly or db.healthbar.width,
-      heightFriendly = db.healthbar.heightFriendly or db.healthbar.height,
       x = 0,
       y = 0,
       anchor = "CENTER",
       show = true,
+    },
+
+    healthbarFriendly = {
+      width = db.healthbar.widthFriend,
+      height = db.healthbar.heightFriend,
+      x = 0,
+      y = 0,
+      anchor = "CENTER",
     },
 
     healthborder = {

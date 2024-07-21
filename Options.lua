@@ -906,7 +906,7 @@ local function GetEnableEntryTheme(entry_name, description, widget_info)
   return entry
 end
 
-local function GetRangeEntry(name, pos, setting, min, max, set_func)
+local function GetRangeEntry(name, pos, setting, min, max, set_func, hidden_func)
   local entry = {
     name = name,
     order = pos,
@@ -915,7 +915,8 @@ local function GetRangeEntry(name, pos, setting, min, max, set_func)
     softMin = min,
     softMax = max,
     set = set_func,
-    arg = setting,
+    hidden = hidden_func,
+    arg = setting,    
   }
   return entry
 end
@@ -5806,6 +5807,7 @@ local function CreateBlizzardSettings()
                 name = L["Healthbar Sync"],
                 order = 10,
                 type = "toggle",
+                width = "double",
                 desc = L["The size of the clickable area is always derived from the current size of the healthbar."],
                 set = function(info, val)
                   if InCombatLockdown() then
@@ -5817,8 +5819,18 @@ local function CreateBlizzardSettings()
                 end,
                 arg = { "settings", "frame", "SyncWithHealthbar"},
               },
-              Width = {
-                name = L["Width"],
+              ShowArea = {
+                name = L["Configuration Mode"],
+                type = "execute",
+                order = 15,
+                desc = "Toggle a background showing the area of the clicable area.",
+                func = function()
+                  Addon:ConfigClickableArea(true)
+                end,
+              },
+              Spacer1 = GetSpacerEntry(18),
+              EnemyWidth = {
+                name = (Addon.WOW_USES_CLASSIC_NAMEPLATES and L["Width"]) or L["Enemy Width"],
                 order = 20,
                 type = "range",
                 min = 1,
@@ -5835,9 +5847,9 @@ local function CreateBlizzardSettings()
                 disabled = function() return db.settings.frame.SyncWithHealthbar end,
                 arg = { "settings", "frame", "width" },
               },
-              Height = {
-                name = L["Height"],
-                order = 30,
+              EnemyHeight = {
+                name = (Addon.WOW_USES_CLASSIC_NAMEPLATES and L["Height"]) or L["Enemy Height"],
+                order = 25,
                 type = "range",
                 min = 1,
                 max = 100,
@@ -5853,15 +5865,44 @@ local function CreateBlizzardSettings()
                 disabled = function() return db.settings.frame.SyncWithHealthbar end,
                 arg = { "settings", "frame", "height"},
               },
-              ShowArea = {
-                name = L["Configuration Mode"],
-                type = "execute",
-                order = 40,
-                desc = "Toggle a background showing the area of the clicable area.",
-                func = function()
-                  Addon:ConfigClickableArea(true)
+              FriendWidth = {
+                name = L["Friend Width"],
+                order = 30,
+                type = "range",
+                min = 1,
+                max = 500,
+                step = 1,
+                set = function(info, val)
+                  if InCombatLockdown() then
+                    Addon.Logging.Error(L["We're unable to change this while in combat"])
+                  else
+                    SetValue(info, val)
+                    Addon:SetBaseNamePlateSize()
+                  end
                 end,
-              }
+                disabled = function() return db.settings.frame.SyncWithHealthbar end,
+                arg = { "settings", "frame", "widthFriend" },
+                hidden = function() return Addon.WOW_USES_CLASSIC_NAMEPLATES end,
+              },
+              FriendHeight = {
+                name = L["Friend Height"],
+                order = 35,
+                type = "range",
+                min = 1,
+                max = 100,
+                step = 1,
+                set = function(info, val)
+                  if InCombatLockdown() then
+                    Addon.Logging.Error(L["We're unable to change this while in combat"])
+                  else
+                    SetValue(info, val)
+                    Addon:SetBaseNamePlateSize()
+                  end
+                end,
+                disabled = function() return db.settings.frame.SyncWithHealthbar end,
+                arg = { "settings", "frame", "heightFriend"},
+                hidden = function() return Addon.WOW_USES_CLASSIC_NAMEPLATES end,
+              },              
             },
           },
           Motion = {
@@ -6453,16 +6494,9 @@ local function CreateHealthbarOptions()
             inline = true,
             set = SetThemeValue,
             args = {
-              Width = GetRangeEntry(L["Bar Width"], 10, { "settings", "healthbar", "width" }, 5, 500,
-                function(info, val)
-                  if InCombatLockdown() then
-                    Addon.Logging.Error(L["We're unable to change this while in combat"])
-                  else
-                    SetThemeValue(info, val)
-                    Addon:SetBaseNamePlateSize()
-                  end
-                end),
-              Height = GetRangeEntry(L["Bar Height"], 20, {"settings", "healthbar", "height" }, 1, 100,
+              WidthEnemy = GetRangeEntry(
+                (Addon.WOW_USES_CLASSIC_NAMEPLATES and L["Bar Width"]) or L["Enemy Bar Width"], 
+                10, { "settings", "healthbar", "width" }, 5, 500,
                 function(info, val)
                   if InCombatLockdown() then
                     Addon.Logging.Error(L["We're unable to change this while in combat"])
@@ -6473,6 +6507,43 @@ local function CreateHealthbarOptions()
                     Addon.Widgets:UpdateSettings("TargetArt")
                   end
                 end),
+              HeightEnemy = GetRangeEntry(
+                (Addon.WOW_USES_CLASSIC_NAMEPLATES and L["Bar Height"]) or L["Enemy Bar Height"], 
+                11, {"settings", "healthbar", "height" }, 1, 100,
+                function(info, val)
+                  if InCombatLockdown() then
+                    Addon.Logging.Error(L["We're unable to change this while in combat"])
+                  else
+                    SetThemeValue(info, val)
+                    Addon:SetBaseNamePlateSize()
+                    -- Update Target Art widget because of border adjustments for small healthbar heights
+                    Addon.Widgets:UpdateSettings("TargetArt")
+                  end
+                end),
+              WidthFriendly = GetRangeEntry(L["Friend Bar Width"], 12, { "settings", "healthbar", "widthFriend" }, 5, 500,
+                function(info, val)
+                  if InCombatLockdown() then
+                    Addon.Logging.Error(L["We're unable to change this while in combat"])
+                  else
+                    SetThemeValue(info, val)
+                    Addon:SetBaseNamePlateSize()
+                    -- Update Target Art widget because of border adjustments for small healthbar heights
+                    Addon.Widgets:UpdateSettings("TargetArt")
+                  end
+                end,
+                function() return Addon.WOW_USES_CLASSIC_NAMEPLATES end),
+              HeightFriendly = GetRangeEntry(L["Friend Bar Height"], 13, {"settings", "healthbar", "heightFriend" }, 1, 100,
+                function(info, val)
+                  if InCombatLockdown() then
+                    Addon.Logging.Error(L["We're unable to change this while in combat"])
+                  else
+                    SetThemeValue(info, val)
+                    Addon:SetBaseNamePlateSize()
+                    -- Update Target Art widget because of border adjustments for small healthbar heights
+                    Addon.Widgets:UpdateSettings("TargetArt")
+                  end
+                end,                
+                function() return Addon.WOW_USES_CLASSIC_NAMEPLATES end),
               Spacer1 = GetSpacerEntry(25),
               ShowHealAbsorbs = {
                 name = L["Heal Absorbs"],
@@ -6508,35 +6579,6 @@ local function CreateHealthbarOptions()
                 name = L["Elite Border"],
                 arg = { "settings", "elitehealthborder", "show" },
               },
-            }
-          },
-          FriendlyUnitsFormat = {
-            name = L["Friendly Units"],
-            order = 30,
-            type = "group",
-            inline = true,
-            set = SetThemeValue,
-            args = {
-              Width = GetRangeEntry(L["Bar Width"], 10, { "settings", "healthbar", "widthFriendly" }, 5, 500,
-                function(info, val)
-                  if InCombatLockdown() then
-                    Addon.Logging.Error(L["We're unable to change this while in combat"])
-                  else
-                    SetThemeValue(info, val)
-                    Addon:SetBaseNamePlateSize()
-                  end
-                end),
-              Height = GetRangeEntry(L["Bar Height"], 20, {"settings", "healthbar", "heightFriendly" }, 1, 100,
-                function(info, val)
-                  if InCombatLockdown() then
-                    Addon.Logging.Error(L["We're unable to change this while in combat"])
-                  else
-                    SetThemeValue(info, val)
-                    Addon:SetBaseNamePlateSize()
-                    -- Update Target Art widget because of border adjustments for small healthbar heights
-                    Addon.Widgets:UpdateSettings("TargetArt")
-                  end
-                end),
             }
           },
           HealthBarGroup = {
