@@ -1,26 +1,12 @@
-tag f11e6ebf3f6eb236164a0b7e3b6188a019279ef3 v1.22.4
+tag 83f5d1251166a2bf44a782acbc10ed0a01420131 v1.24.0
 Author:	Kyle Buller <bullerk@gmail.com>
-Date:	Sat Apr 20 23:48:40 2024 -0500
+Date:	Wed Jul 10 02:16:07 2024 -0500
 
-Tagging as v1.22.4
+Tagging as v1.24.0
 
-commit e51f033a6b2e154c2a2da226661ce3d561800022
+commit e0da0f71030bc52fd07cdaf56543c139fdc09276
 Author: Kyle Buller <bullerk@gmail.com>
-Date:   Sat Apr 20 22:08:25 2024 -0500
+Date:   Wed Jul 10 01:46:35 2024 -0500
 
-    Add support for Cataclysm Classic
-    
-    Resolves #4
-
-commit b06bd4beaa9595192c743a4c31b91e3995345e10
-Author: Kyle Buller <bullerk@gmail.com>
-Date:   Tue Apr 9 20:20:58 2024 -0500
-
-    Simplify load guard
-
-commit ba5bbb0eaef10064e70dd14459122e594aa2b56a
-Author: Kyle Buller <bullerk@gmail.com>
-Date:   Tue Apr 9 20:17:37 2024 -0500
-
-    Minor tweaks
+    Add support for Wrath Classic (China)
 
