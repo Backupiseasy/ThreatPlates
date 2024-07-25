@@ -1,5 +1,5 @@
 # @project-version@ (@build-time@)
 
-* Updated Threat Plates for The War Within pre-patch [GH-524, GH-525].
-* Added Bad Manner (Hunter, Pet) as a CC aura to the Auras widget [GH-531].
-* Added an option to change friendly and enemy healthbar sizes independently from each other (Retail Wow) [GH-459].
+* Fixed a bug that prevented combo points from being displayed on rogues in WoW Classic [comment #7369, GH-535].
+* Fixed a bug that prevented the size of the healthbar from being changed in WoW Classic [comment #7375].
+* Updated TOC version for Classic Patch 1.15.3.
