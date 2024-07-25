@@ -26,8 +26,8 @@ local function Create(name)
     },
 
     healthbarFriendly = {
-      width = db.healthbar.widthFriend,
-      height = db.healthbar.heightFriend,
+      width = (Addon.IS_MAINLINE and db.healthbar.widthFriend) or db.healthbar.width,
+      height = (Addon.IS_MAINLINE and db.healthbar.heightFriend) or db.healthbar.height,
       x = 0,
       y = 0,
       anchor = "CENTER",
