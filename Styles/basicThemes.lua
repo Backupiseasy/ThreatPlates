@@ -26,8 +26,8 @@ local function Create(name)
     },
 
     healthbarFriendly = {
-      width = (Addon.IS_MAINLINE and db.healthbar.widthFriend) or db.healthbar.width,
-      height = (Addon.IS_MAINLINE and db.healthbar.heightFriend) or db.healthbar.height,
+      width = (Addon.WOW_USES_CLASSIC_NAMEPLATES and db.healthbar.width) or db.healthbar.widthFriend,
+      height = (Addon.WOW_USES_CLASSIC_NAMEPLATES and db.healthbar.height) or db.healthbar.heightFriend,
       x = 0,
       y = 0,
       anchor = "CENTER",
