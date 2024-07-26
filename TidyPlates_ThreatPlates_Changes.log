@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+12.0.2 (2024-07-25)
+------------------------------------------------------
+* Removed a fix for hiding Blizzard nameplates that was added as a workaround when nameplate unit frames were protected from combat in TWW Beta.
+
+------------------------------------------------------
 12.0.1 (2024-07-25)
 ------------------------------------------------------
 * Fixed a bug that prevented combo points from being displayed on rogues in WoW Classic [comment #7369, GH-535].

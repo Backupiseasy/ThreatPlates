@@ -113,28 +113,6 @@ Addon.Theme = {}
 
 local activetheme = Addon.Theme
 
--- Fix from Plater: hopefully just a temp workaround until plateFrame.UnitFrame is no longer combat protected 
--- by inheriting from downstream HealthBarContainer...
-local function HideBlizzardNameplateFixForTWW(UnitFrame)
-  if UnitFrame:IsProtected() then
-    UnitFrame:ClearAllPoints()
-    UnitFrame:SetParent(nil)
-
-    if UnitFrame.HealthBarsContainer then
-      -- UnitFrame.HealthBarsContainerOrigParent = UnitFrame.HealthBarsContainer:GetParent() or UnitFrame.HealthBarsContainerOrigParent
-      UnitFrame.HealthBarsContainer:ClearAllPoints()
-      UnitFrame.HealthBarsContainer:SetParent(nil)
-    end
-
-    if not UnitFrame:IsProtected() then
-      UnitFrame:Hide()
-    end
-  else
-    UnitFrame:Hide()
-  end
-end
-
-
 ---------------------------------------------------------------------------------------------------
 -- Wrapper functions for WoW Classic
 ---------------------------------------------------------------------------------------------------
@@ -375,8 +353,7 @@ local function ShowBlizzardNameplate(plate, show_blizzard_plate)
     plate.TPFrame:Hide()
     plate.TPFrame.Active = false
   else
-    --plate.UnitFrame:Hide()
-    HideBlizzardNameplateFixForTWW(plate.UnitFrame)
+    plate.UnitFrame:Hide()
     plate.TPFrame:Show()
     plate.TPFrame.Active = true
   end
@@ -1246,8 +1223,7 @@ local function FrameOnShow(UnitFrame)
   -- Hide nameplates that have not yet an unit added
   if not unitid then 
     -- ? Not sure if Hide() is really needed here or if even TPFrame should also be hidden here ...
-    -- UnitFrame:Hide()
-    HideBlizzardNameplateFixForTWW(plate.UnitFrame)
+    UnitFrame:Hide()
     return
   end
 
@@ -1275,18 +1251,11 @@ local function FrameOnShow(UnitFrame)
 
   -- Hide ThreatPlates nameplates if Blizzard nameplates should be shown for friendly units
   local unit_reaction = UnitReaction("player", unitid) or 0
-  local show_blizzard_nameplate = (unit_reaction > 4 and SettingsShowFriendlyBlizzardNameplates) or SettingsShowEnemyBlizzardNameplates
-  if show_blizzard_nameplate then
-    UnitFrame:Show()
+  if unit_reaction > 4 then
+    UnitFrame:SetShown(SettingsShowFriendlyBlizzardNameplates)
   else
-    HideBlizzardNameplateFixForTWW(UnitFrame)
+    UnitFrame:SetShown(SettingsShowEnemyBlizzardNameplates)
   end
-
-  -- if unit_reaction > 4 then
-  --   UnitFrame:SetShown(SettingsShowFriendlyBlizzardNameplates)
-  -- else
-  --   UnitFrame:SetShown(SettingsShowEnemyBlizzardNameplates)
-  -- end
 end
 
 -- Frame: self = plate
