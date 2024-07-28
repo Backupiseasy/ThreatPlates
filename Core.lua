@@ -75,14 +75,14 @@ if Addon.WOW_USES_CLASSIC_NAMEPLATES then
 else 
   local function CalculateSynchedNameplateSize(width_key, height_key)
     local db = Addon.db.profile.settings
+    local width = db.frame[width_key]
+    local height = db.frame[height_key]
+
     if db.frame.SyncWithHealthbar then
       -- This functions were interpolated from ratio of the clickable area and the Blizzard nameplate healthbar
       -- for various sizes
       width = db.healthbar[width_key] + 24.5
       height = (db.healthbar[height_key] + 11.4507) / 0.347764  
-    else
-      width = db.frame[width_key]
-      height = db.frame[height_key]
     end
   
     -- Update values in settings, so that the options dialog (clickable area) shows the correct values
