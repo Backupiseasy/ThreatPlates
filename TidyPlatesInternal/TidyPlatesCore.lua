@@ -1882,6 +1882,13 @@ local function HandleEventRuneUpdate(event)
   Addon.PlayerIsTank = IsSpellKnown(400014, false) -- Just a Flesh Wound (Season of Discovery)
 end
 
+if Addon.IS_CLASSIC_SOD and Addon.PlayerClass == "ROGUE" then
+  CoreEvents.RUNE_UPDATED = HandleEventRuneUpdate
+  CoreEvents.PLAYER_EQUIPMENT_CHANGED = HandleEventRuneUpdate
+  -- As these events don't fire after login, call them directly to initialize Addon.PlayerIsTank
+  HandleEventRuneUpdate()
+end
+
 --  function CoreEvents:UNIT_SPELLCAST_INTERRUPTED(unitid, lineid, spellid)
 --    if unitid == "target" or UnitIsUnit("player", unitid) or not ShowCastBars then return end
 --  end

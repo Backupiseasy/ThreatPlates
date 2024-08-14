@@ -14,6 +14,7 @@ local pairs = pairs
 
 -- WoW APIs
 -- local GetNumArenaOpponents = GetNumArenaOpponents
+local UnitExists = UnitExists
 local IsInInstance = IsInInstance
 local IsInBrawl = C_PvP.IsInBrawl
 local MAX_ARENA_ENEMIES = MAX_ARENA_ENEMIES or 5 -- MAX_ARENA_ENEMIES is not defined in Wrath Clasic
