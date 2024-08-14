@@ -29,7 +29,6 @@ Addon.IS_TBC_CLASSIC = (GetClassicExpansionLevel and GetClassicExpansionLevel() 
 Addon.IS_WRATH_CLASSIC = (GetClassicExpansionLevel and GetClassicExpansionLevel() == LE_EXPANSION_WRATH_OF_THE_LICH_KING)
 Addon.IS_CATA_CLASSIC = (GetClassicExpansionLevel and GetClassicExpansionLevel() == LE_EXPANSION_CATACLYSM)
 Addon.IS_MAINLINE = (WOW_PROJECT_ID == WOW_PROJECT_MAINLINE)
-Addon.IS_TWW = (GetClassicExpansionLevel and GetClassicExpansionLevel() == 10)
 -- Addon.IS_TBC_CLASSIC = (WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC and LE_EXPANSION_LEVEL_CURRENT == LE_EXPANSION_BURNING_CRUSADE)
 -- Addon.IS_WRATH_CLASSIC = (WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC and LE_EXPANSION_LEVEL_CURRENT == LE_EXPANSION_WRATH_OF_THE_LICH_KING)
 Addon.WOW_USES_CLASSIC_NAMEPLATES = (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC or Addon.IS_CATA_CLASSIC)
@@ -135,27 +134,10 @@ Addon.Debug = {}
 
 -- UnitDetailedThreatSituation: WotLK - Patch 3.0.2 (2008-10-14): Added
 -- C_PvP.IsSoloShuffle: Shadowlands - Patch 9.2.0 (2022-02-22): Added.
-if Addon.IS_TWW then
+if Addon.IS_MAINLINE then
 	Addon.UnitDetailedThreatSituationWrapper = UnitDetailedThreatSituation
 	Addon.IsSoloShuffle = C_PvP.IsSoloShuffle
 	Addon.GetSpellInfo = C_Spell.GetSpellInfo 
-elseif Addon.IS_MAINLINE then
-	Addon.UnitDetailedThreatSituationWrapper = UnitDetailedThreatSituation
-	Addon.IsSoloShuffle = C_PvP.IsSoloShuffle
-	
-	Addon.GetSpellInfo = function(...) 
-		--local name, rank, icon, castTime, minRange, maxRange, spellID, originalIcon = _G.GetSpellInfo()
-		local name, _, icon = _G.GetSpellInfo(...)
-		return {
-			name = name,
-			iconID = icon 
-			-- castTime = castTime,
-			-- minRange = castTime,
-			-- maxRange = maxRange,
-			-- spellID = spellID,
-			-- originalIconID = originalIcon,
-		}
-	end
 else
   Addon.UnitDetailedThreatSituationWrapper = function(source, target)
     local is_tanking, status, threatpct, rawthreatpct, threat_value = UnitDetailedThreatSituation(source, target)
