@@ -1,3 +1,3 @@
 # @project-version@ (@build-time@)
 
-* Fixed a Lua bug that occurred because tank detection for WoW Classic was enabled for Paladins on WoW Mainline [GH-543].
+* Fixed a Lua bug in Stealth widget due to API changes in Path 11.0.2 [GH-544].

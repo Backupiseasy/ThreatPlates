@@ -13,7 +13,6 @@ local Widget = (Addon.IS_CLASSIC and {}) or Addon.Widgets:NewWidget("Stealth")
 local strsplit = strsplit
 
 -- WoW APIs
-local UnitBuff = UnitBuff
 
 -- ThreatPlates APIs
 
@@ -53,6 +52,8 @@ local DETECTION_AURAS = {
   [230368] = true, -- Detector
   [248705] = true, -- Detector
   [311928] = true, -- Sight Beyond Sight
+  --
+  -- [1459] = true, -- TEST AURA
 }
 
 local DETECTION_UNITS = {
@@ -131,7 +132,7 @@ function Widget:IsEnabled()
 end
 
 function Widget:EnabledForStyle(style, unit)
-  if unit.reaction == "FRIENDLY" or unit.type == "PLAYER" then return false end
+  --if unit.reaction == "FRIENDLY" or unit.type == "PLAYER" then return false end
 
   if (style == "NameOnly" or style == "NameOnly-Unique") then
     return Addon.db.profile.stealthWidget.ShowInHeadlineView
@@ -141,22 +142,22 @@ function Widget:EnabledForStyle(style, unit)
 end
 
 function Widget:OnUnitAdded(widget_frame, unit)
-  local name, spell_id, _
-
+  local stealth_unit_found
   if DETECTION_UNITS[unit.NPCID] then
-    name = unit.NPCID
+    stealth_unit_found = unit.NPCID
   else
-    local DETECTION_AURAS, UnitBuff = DETECTION_AURAS, UnitBuff
-    local unitid = unit.unitid
-    for i = 1, 40 do
-      name, _, _, _, _, _, _, _, _, spell_id = UnitBuff(unitid, i)
-      if not name or DETECTION_AURAS[spell_id] then
+    for i = 1, BUFF_MAX_DISPLAY do
+      local aura_info = C_UnitAuras.GetBuffDataByIndex(unit.unitid, i)
+      if not aura_info then        
+        break
+      elseif DETECTION_AURAS[aura_info.spellId] then
+        stealth_unit_found = aura_info.name
         break
       end
     end
   end
 
-  if not name then
+  if not stealth_unit_found then
     widget_frame:Hide() -- not necessary as this does never change after a unit was added
     return
   end
