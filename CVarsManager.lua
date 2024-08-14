@@ -146,11 +146,11 @@ end
 function CVars:SetToDefault(cvar)
   if COMBAT_PROTECTED[cvar] then
     Addon:CallbackWhenOoC(function()
-      _G.SetCVar(cvar, GetCVarDefault())
+      _G.SetCVar(cvar, GetCVarDefault(cvar))
       Addon.db.profile.CVarsBackup[cvar] = nil
     end, L["Unable to change the following console variable while in combat: "] .. cvar .. ". ")
   else
-    _G.SetCVar(cvar, GetCVarDefault())
+    _G.SetCVar(cvar, GetCVarDefault(cvar))
     Addon.db.profile.CVarsBackup[cvar] = nil
   end
 end
