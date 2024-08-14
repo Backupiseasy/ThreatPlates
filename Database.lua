@@ -1435,7 +1435,7 @@ local DEPRECATED_SETTINGS = {
   { MigrateFixAurasCyclicAnchoring, "10.3.1", NoDefaultProfile = true, CleanupDatabase = true },
   { MigrateThreatValue, "10.3.6", NoDefaultProfile = true, CleanupDatabase = true },
   { MigrateFontFlagsNONE, "11.1.25", NoDefaultProfile = true, CleanupDatabase = true },
-  { MigrateSetJustifyVCENTER, NoDefaultProfile = true, CleanupDatabase = true }, -- "11.2.0", 
+  { MigrateSetJustifyVCENTER,  "12.0.4", NoDefaultProfile = true, CleanupDatabase = true },
 }
 
 local function MigrateDatabase(current_version)
