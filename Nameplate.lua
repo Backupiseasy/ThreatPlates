@@ -1714,7 +1714,7 @@ else
   -- No need to check here for (Addon.IS_WRATH_CLASSIC and Addon.PlayerClass == "DEATHKNIGHT") as deathknights
   -- are only available in Wrath Classic
   local ENABLE_UNIT_AURA_FOR_CLASS = {
-    PALADIN = true,
+    PALADIN = Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC or Addon.IS_CATA_CLASSIC,
     DEATHKNIGHT = Addon.IS_WRATH_CLASSIC or Addon.IS_CATA_CLASSIC,
     -- For Season of Discovery
     SHAMAN = Addon.IS_CLASSIC_SOD,

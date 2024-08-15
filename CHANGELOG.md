@@ -1,3 +1,3 @@
 # @project-version@ (@build-time@)
 
-* Fixed a bug caused by incorrectly defined internal variables that affected other addons (e.g. the size of WeakAuras icons) [GH-538, comment #7371].
+* Fixed a Lua bug in Stealth widget due to API changes in Path 11.0.2 [GH-544].
