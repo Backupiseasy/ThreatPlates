@@ -1,3 +1,4 @@
 # @project-version@ (@build-time@)
 
-* Fixed a Lua bug with configuration mode for castbars and BossMods widget due to API changes in Path 11.0.2 [GH-314].
+* Fixed Lua errors caused by bugfixes for API changes in WoW Mainline Patch 11.0.2 not working in WoW Classic.
+* Fixed a error bug when loading LibDogTag for custom status text due to API changes in Patch 11.0.2 [GH-549].
