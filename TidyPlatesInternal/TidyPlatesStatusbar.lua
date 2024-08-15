@@ -9,7 +9,7 @@ local ThreatPlates = Addon.ThreatPlates
 local ceil, string_format = ceil, string.format
 
 -- WoW APIs
-local GetSpellTexture = GetSpellTexture
+local GetSpellTexture = C_Spell.GetSpellTexture
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local InCombatLockdown = InCombatLockdown
 local UnitName, UnitIsUnit, UnitClass = UnitName, UnitIsUnit, UnitClass

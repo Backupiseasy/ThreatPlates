@@ -14,7 +14,7 @@ local Widget = Addon.Widgets:NewWidget("BossMods")
 local floor = math.floor
 
 -- WoW APIs
-local GetSpellTexture = GetSpellTexture
+local GetSpellTexture = C_Spell.GetSpellTexture
 local GetTime = GetTime
 local tremove = tremove
 

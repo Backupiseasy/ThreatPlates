@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+12.0.7 (2024-07-15)
+------------------------------------------------------
+* Fixed a Lua bug with configuration mode for castbars and BossMods widget due to API changes in Path 11.0.2 [GH-314].
+
+------------------------------------------------------
 12.0.6 (2024-07-14)
 ------------------------------------------------------
 * Fixed a Lua bug in Stealth widget due to API changes in Path 11.0.2 [GH-544].
