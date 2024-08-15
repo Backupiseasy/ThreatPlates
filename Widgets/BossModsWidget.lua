@@ -14,7 +14,7 @@ local Widget = Addon.Widgets:NewWidget("BossMods")
 local floor = math.floor
 
 -- WoW APIs
-local GetSpellTexture = C_Spell.GetSpellTexture
+local GetSpellTexture = C_Spell and C_Spell.GetSpellTexture or _G.GetSpellTexture -- Retail now uses C_Spell.GetSpellTexture
 local GetTime = GetTime
 local tremove = tremove
 
